@@ -60,19 +60,20 @@
 | 构建 | 11.2s 通过；`chunk-ui ↔ chunk-world` **循环依赖告警**；`vendor-three` 631KB | 分块需在 W-B1 一并修 |
 | 存档 | v5，带显式迁移链 `SaveMigrations` | 新增字段须走 v6 迁移 |
 
-**复测（2026-09-23，W-A1 与 W-A2 切片1/2/3 落地后；口径与上表一致 —— `find src -name "*.js"`）**
+**复测（2026-09-23，W-A2 切片1/2/3 与 W-A1 计时主体 + 切片4 落地后；口径与上表一致 —— `find src -name "*.js"`）**
 
 | 指标 | 基线 | 现值 | 说明 |
 |------|------|------|------|
-| 源码规模 | 181 文件 / 23,883 行 | 185 文件 / **24,567 行** | +4 个模块：W-A1 的 `engine/Scheduler.js`、`engine/Observable.js`，W-A2 的 `world/ZoneIdentity.js`、`content/franchises.js`；切片3 的 +42 行全在既有文件里（id 校验与自检），未新增模块 |
+| 源码规模 | 181 文件 / 23,883 行 | 185 文件 / **24,598 行** | +4 个模块：W-A1 的 `engine/Scheduler.js`、`engine/Observable.js`，W-A2 的 `world/ZoneIdentity.js`、`content/franchises.js`；切片3 的 +42 行全在既有文件里（id 校验与自检），切片4 的 +31 行同理（条目表与门禁注释），都未新增模块 |
 | 游戏逻辑 `setTimeout` | 28 处 | **0 处**。`src/` 内实际调用只剩 `AudioManager` 的 4 处 `setTimeout` + 2 处 `setInterval` | 那 6 处属音序器，归 B38 / W-C7；见 §9 的 W-A1 条目 |
+| 特效自建 rAF 循环 | 4 条（`ExecutionEffects` 3 + `WeatherSystem` 1），且步长写死 `0.016` | **0 条**。`src/` 内 `requestAnimationFrame` 调用点只剩白名单 4 处：主循环 1 + CSS 过渡的"下一次绘制" 3，每处带 `rAF-EXCEPTION` 标记 | 修 B43；名单与实际命中在 `tests/timing-boundary.test.js` 里**双向对齐**（新增未登记的红，登记了却不再用的也红） |
 | 中文显示名逻辑判定 | 57 处 / 15 文件 | **0 处** | 修 B35、B36；由 `tests/content-boundary.test.js` 的静态门禁兜住（新站点直接变红，**不留存量白名单**） |
 | 区域 id 字面量比较 | — | **0 处**（`zoneId === 'space'` 这类写法在 `src/` 内已无匹配） | 切片2 把效果层与天气层换成 `ZONE_IDS` 符号；`WeatherSystem` 的 `ZONE_PRESETS` 键也改成 `[ZONE_IDS.X]` |
 | 全局事件 | 157 监听 / 139 派发 | 155 / 137，事件名**仍是裸字符串**，`removeEventListener` 全仓仅 3 处 | 每帧数值事件已改走 `Observable`；名字总线与注销是 W-A1 的尾巴（B44） |
 | POI 稳定 id | 14 处位面 POI 走 `` `${zoneId}-${label}` `` 回退 | **58 / 58 条登记表记录带合法 kebab-case id，全表唯一**（真世界 `WorldManager.build()` + 四层致敬增强器跑完后的实测口径） | 修 B45；`tests/poi-identity.test.js` 在 node 里构建真世界做全量断言，浏览器端复核同得 58 条、0 非法、0 重复 |
-| 测试 | 266 例 / 20 文件 | **370 例 / 27 文件**，全绿 | 新增 7 个文件：`timing-boundary` `engine-scheduler` `engine-observable` `zone-identity` `franchise-identity` `fast-travel` `poi-identity` |
+| 测试 | 266 例 / 20 文件 | **382 例 / 28 文件**，全绿 | 新增 8 个文件：`timing-boundary` `engine-scheduler` `engine-observable` `zone-identity` `franchise-identity` `fast-travel` `poi-identity` `effect-timing` |
 | Lint | 0 error / 12 warning | 0 error / 10 warning | 现存的 10 条全是 `no-unused-vars`（死代码与未用导入），文件集合与上批一致。两条差值没有逐条追认 —— 基线只记了总数 |
-| 构建 | 11.2s 通过 + 1 条跨块环告警 | 通过，告警集合未增（仍是 `chunk-ui ↔ chunk-world`） | 本批两次计时 3.48s / 2.15s（上两批同口径 6.96s / 2.95s）—— 波动来自机器负载，只记观测值不解读；分块仍归 W-B1 |
+| 构建 | 11.2s 通过 + 1 条跨块环告警 | 通过，告警集合未增（仍是 `chunk-ui ↔ chunk-world`） | 本批三次计时 3.48s / 2.15s / 3.57s（上两批同口径 6.96s / 2.95s）—— 波动来自机器负载，只记观测值不解读；分块仍归 W-B1 |
 
 
 ### 1.2 玩家能感知的短板（这是"难玩"的真正来源）
@@ -123,7 +124,7 @@
 
 ### 1.4 缺陷台账
 
-**已修复**：B1–B34 全部关闭（明细见 `OVERHAUL_PLAN.md` §1.4 与 §9 变更记录）；B35、B36、B39、B41、B42、B45 于 W-A1 / W-A2 两个工作包内依次关闭（下表；B36 的最后一类站点在 W-A2 切片2，提交 `b4a8416`；B45 在切片3，提交 `16edb9e`）。
+**已修复**：B1–B34 全部关闭（明细见 `OVERHAUL_PLAN.md` §1.4 与 §9 变更记录）；B35、B36、B39、B41、B42、B43、B45 于 W-A1 / W-A2 两个工作包内依次关闭（下表；B36 的最后一类站点在 W-A2 切片2，提交 `b4a8416`；B45 在切片3，提交 `16edb9e`；B43 在 W-A1 切片4，提交 `def9f8d`）。
 
 **待修**：
 
@@ -132,7 +133,6 @@
 | B37 | `vite.config.js` manualChunks | `chunk-ui → chunk-world → chunk-ui` 循环依赖告警（既成事实，未造成运行时问题，但阻断后续分块优化） | W-B1 |
 | B38 | `AudioManager` 4 处 `setTimeout` + 2 处 `setInterval` | 音序与音乐计时挂墙钟：暂停/后台标签页里音乐照走，`timeScale` 也不影响它 | W-C7 |
 | B40 | `PerformanceManager.shouldUpdateEnemy` | 远处敌人"冻结"但仍可见（B14 未闭环） | W-C2 |
-| B43 | `effects/ExecutionEffects.js`（3 条循环）、`world/WeatherSystem.js:172` | 特效自己 `requestAnimationFrame` 递归，且把 dt **写死成 0.016**：144Hz 下一片碎片只活约 0.15 秒（设计值 0.35），30Hz 下拖到 0.7 秒；hitstop 期间它们照速跑。§2.3 的"帧率无关性"对这几条一律不成立 | W-A1 后续切片 |
 | B44 | `src/` 全局 | 155 处 `window.addEventListener` + 137 处 `dispatchEvent(new CustomEvent(...))`，事件名全是裸字符串、无集中登记（规范第 4 条要求的 `src/engine/events.js` **至今不存在**），且全仓只有 3 处 `removeEventListener` —— 监听器基本没有注销路径 | W-A1 后续切片 |
 
 **本批关闭**：
@@ -144,6 +144,7 @@
 | B39 | `ui/` 6 处 | 面板动画/提示用 `setTimeout` 挂墙钟，hitstop 期间提示照常跳 | 全仓游戏逻辑 `setTimeout` 归零，改走 `engine/Scheduler.js` 的 `after/wait/clear(tag)`（21 处调用点、11 个文件）。`src/ui/` 现在 `setTimeout` 为 **0**；`Dialog.js` / `ExecutionSkipBurst.js` / `CombatCameraDirector.js` 各留一次 rAF —— 那是为 CSS 过渡制造"下一次绘制"，属规范第 2 条明示的例外，代码里写明理由 |
 | B41 | `CombatController.update()`、`SpellSystem.emitMana()` | 每帧派发一条 `'stamina-changed'` / 法力事件（60fps 下每秒 60 条相同内容的 CustomEvent），HUD、教程、辅助系统在同一帧被反复唤醒 | 新增 `engine/Observable.js`：值真的变化才广播一次，`quantize` 让"精力按 0.5 一档、血量按 1 一档"的去重有意义；`HUD` 走 `subscribe()` 拿退订函数存进 `_offs`。`emits / writes` 两个计数器就是"到底通知了几次"的可断言证据（`tests/engine-observable.test.js` 15 例） |
 | B42 | `ui/ContextualTutorial.js` 的 `zone-changed` 监听 | 两条区域提示**完全不看进的是哪个区**，只按章节门控：第四章后随便踏进任何一个位面，都会弹出"破碎时线：重力与视野在此不稳定" | 加 `zoneId === ZONE_IDS.VOID / ABYSS` 门槛，标题取 `ZONE_NAMES[id]`（显示名只有一份）。代价如实记录：见 §9「玩家必须真的重新进入该区才看得到」 |
+| B43 | `effects/ExecutionEffects.js`（3 条循环）、`world/WeatherSystem.js`（雨滴涟漪） | 四处特效**自己 `requestAnimationFrame` 递归**，并把每帧时长写死成 `0.016` —— 寿命于是按**帧数**而不是按秒走：144Hz 下一片血雾碎片约 0.15 秒就没了（设计值 0.35~0.6 秒），30Hz 下拖到 0.7 秒；更要紧的是暂停与 hitstop 期间它们照常跑完，而那 0.3 秒正是"这一刀很重"的读数窗口。§2.3 的"帧率无关性"对这几条一律不成立 | 三条循环与涟漪改由主循环 `update(dt)` 推进（dt 已被 `timeScale` 与 hitstop 缩过），条目到期就地 `geometry/material.dispose()`；旧"每帧 0.12 弧度""每帧 ×1.08"这类常数换算成按秒的角速度 / 按秒的放大率，60fps 下数值与修前一致。门禁分两层：`tests/effect-timing.test.js` 10 例断言**同一寿命**（144Hz 与 30Hz 之差 < 一帧）、`dt=0` 时一秒不推进、网格与 dispose 一一对应、以及主循环确实调用；`tests/timing-boundary.test.js` 把 rAF 白名单钉成 4 处（主循环 + 三处 CSS 绘制间隔），每处必须带 `rAF-EXCEPTION` 标记，且名单与实际命中**双向对齐**。变异验证：把 `onTick(dt)` 换成 `onTick(0.016)` → 3 例变红；在名单外的文件里新增一处 rAF → 白名单门禁报出文件名 |
 | B45 | `world/zones/BaseZone.js`（`addPOI`） | POI 未显式给 id 时回退成 `` `${this.id}-${label}` ``，**把显示名嵌进了稳定身份**：改一句调查文案，该 POI 的 id 就变，按 id 认领它的下游（任务 `interact` 匹配、`poi-interact` 监听、marker 的 `userData.poiId`、今后进存档的发现进度）静默断链 —— 运行期不报错，只是"点了没反应"。14 处位面 `addPOI` 调用无一传 `options.id`，全走这条回退。按登记时的口径如实记录：修复前**无玩家可见故障**（碎片进度由 `onInteract` 派发的显式 `discovery` id 驱动，`discovered` 未进存档），这是契约隐患，不是已发生损坏 | 回退删除，改成与 `addRestPoint` 同一条契约：**缺 id / 非 kebab-case / 同区重复 id 在世界构建期直接抛错给开发者看**；14 处位面调用与 42 处致敬层登记补齐显式 id（最终 56 条位面 POI + 2 条 hub 记录 = 58）；规则是"凡 `onInteract` 派发 `discovery` 的 POI，其 id 必须等于那个发现 id"，由测试逐条遍历全表钉住，唯一例外 `fantasy-ring-echo` 走测试里那张必须显式登记的别名表。`WorldManager.assertPoiIdentity()` 在 `build()` 与 `attachPopCultureZones()` 各跑一次，把**合并后的全量表**（含两处不走 `addPOI` 的 hub 记录）收口 —— 同一段逻辑两个调用点，不是两道会各自漂移的门。证据：`tests/poi-identity.test.js` 14 例在 node 里跑完真世界后断言整张表（含"把全部 label 换成乱码，id 与交互结果一模一样"这条正面证据）；变异验证 —— 贴回 `options.id ?? \`${this.id}-${label}\`` 并关掉 kebab 校验后，缺 id 与非法 id 两例变红 |
 
 
@@ -193,7 +194,7 @@
 
 | 编号 | 工作包 | 规模 | 依赖 | 状态 |
 |------|--------|------|------|------|
-| W-A1 | 计时与事件收口（游戏逻辑 `setTimeout` → 主循环 dt；每帧事件改变化派发） | M | — | 🔶 计时与每帧事件已收口；剩 B43 自建 rAF、B44 事件名总线 |
+| W-A1 | 计时与事件收口（游戏逻辑 `setTimeout` → 主循环 dt；每帧事件改变化派发） | M | — | 🔶 `setTimeout` 与特效自建 rAF 都已归零（B39 / B41 / B43）；仅剩 B44 —— 事件名仍是裸字符串、无 `engine/events.js` 总线、监听器基本不注销 |
 | W-A2 | 区域身份接口化（`Zone.id`、消 57 处中文匹配、修 B35） | M | — | ✅ 切片1/2/3 完成（B35 / B36 / B42 / B45 关闭）；W-A2 收口，唯一尾巴是 `RestDialogue.js` 的第四份营火名（归 W-B4） |
 | W-A3 | 世界空间 UI billboard 化（敌人血条 / 锁定标记 / 预警圈） | S | — | ⬜ |
 | W-A4 | 战斗取消关系与输入缓冲（连段可取消、翻滚打断、0.15s 输入队列） | M | W-A1 | ⬜ |
@@ -335,7 +336,7 @@ Phase D（系统与质量）
 
 | 编号 | 工作包 | 状态 | 完成日期 | 提交 | 备注 |
 |------|--------|------|----------|------|------|
-| W-A1 | 计时与事件收口 | 🔶 计时主体完成 | 2026-09-23 | `95c0533` + 收尾 `4f1adc6` | 游戏逻辑 `setTimeout` 28 → 0（`Scheduler`，21 处调用点 / 11 文件）；每帧 `stamina/mana` 事件改 `Observable`（B41）。**尾巴**：B43 特效自建 rAF（硬编码 dt）、B44 事件名裸字符串与注销（`engine/events.js` 仍未建） |
+| W-A1 | 计时与事件收口 | 🔶 计时全部收口（B39/B41/B43） | 2026-09-23 | `95c0533` + 收尾 `4f1adc6` + 切片4 `def9f8d` | 游戏逻辑 `setTimeout` 28 → 0（`Scheduler`，21 处调用点 / 11 文件）；每帧 `stamina/mana` 事件改 `Observable`（B41）；切片4 把 4 条特效自建 rAF（`ExecutionEffects` ×3 + `WeatherSystem` 涟漪）改主循环 dt，并把计时门禁扩到 `requestAnimationFrame`（白名单 4 处 + `rAF-EXCEPTION` 标记双向对齐，B43 关闭）。**尾巴只剩 B44**：事件名裸字符串与注销（`engine/events.js` 仍未建） |
 | W-A2 | 区域身份接口化 | ✅ 切片1/2/3 完成 | 2026-09-23 | 切片1 `c4e859a`；切片2 `b4a8416`；切片3 `16edb9e`（收尾见 `4f1adc6` 与本批 docs 回填） | 切片1：`world/ZoneIdentity.js` + `content/franchises.js`，B35 伪对象、B36 的 57 处中文匹配、B42 区域提示门控关闭，`src/` 内中文显示名逻辑判定归零并上静态门禁。切片2：快速旅行目的地与面板"在此"改按 id 认领、`addRestPoint` 缺/重 id 构建期抛错、营火名表与任务区名的第二真源删除、效果层与天气层换成 `ZONE_IDS` 符号；`tests/fast-travel.test.js` 17 例（含变异验证）。切片3：`addPOI` 的 id 回退删除 —— 缺 / 非法 / 重复 id 在世界构建期抛错，56 条位面 POI 与 2 条 hub 记录（共 **58** 条）全部带 kebab-case id，`WorldManager.assertPoiIdentity()` 在 `build()` 与 `attachPopCultureZones()` 收口；`tests/poi-identity.test.js` 14 例在 node 里跑真世界断言整张表（B45 关闭）。**遗留（不属于本包）**：`RestDialogue.js` 的营火标题仍是各写一份的文案（'世界之锚营火' vs 营火实际名 '世界之锚休息点'、'魔法遗境营火' vs 区名 '霍格沃兹遗境'）—— 那是对话树的显示文案，归 W-B4 统一，不在本包偷改 |
 | W-A3 | 世界空间 UI billboard 化 | ⬜ | | | |
 | W-A4 | 战斗取消关系与输入缓冲 | ⬜ | | | |
@@ -384,7 +385,7 @@ Phase D（系统与质量）
   - **交付**：`engine/Scheduler.js`（`after/wait/cancel/clear(tag)`，按 rawDt 推进，一抛错不连累同帧其他任务但异常照抛）替换掉 21 处调用点、11 个文件；`clear(tag)` 是给"面板关了、系统 dispose 了、副本换了"这三条撤销路径准备的，B19 那一类"回调打到失效对象上"从机制上没了落脚处。`engine/Observable.js`（`quantize` 跨档才广播、`emits/writes` 两个计数器、`subscribe` 返回退订）接管战斗与法力两侧 8 枚观测量，`HUD` 存 `_offs` 并在 `dispose()` 成对退订。门禁 `tests/timing-boundary.test.js` 4 例：剥掉注释与字符串后扫 `src/**`，除 `audio/` 外不许出现 `setTimeout/setInterval`，并反向钉住"调度器自己无定时器、无 DOM"与"主循环确实用 rawDt 推它"。该提交时点：299 例 / 23 文件全绿。
   - **回填本片时抓出的一处代码与注释不一致**：`Scheduler.wait()` 写着"暂停时不推进"，而 `Game.update()` 里 `scheduler.update(rawDt)` 就排在 `canPlay` 那道暂停门控**之前** —— 真实语义是"后台标签页里 rAF 停摆所以不推进，游戏内暂停则照常到期"（UI 与演出量的是真实观看时间）。注释已改正，并给门禁补第 5 例把"推进点在 `canPlay` 之前"钉住：反着挪一行不会让任何功能测试变红，症状只是"打开背包时提示全冻住"。
   - **放弃了什么**：① 没给 `Scheduler` 做"按 `timeScale` 缩放"的第二条时间轴 —— 一把尺子两种用途一定会含糊，最后定死"调度器只吃 rawDt（演出与 UI 节奏不该被时停拉长），玩法自身的计时留在各系统自己的 dt 积分里"（`CombatController.schedule` 是这一类的既有落点）。② **原计划放在 W-A1 里的"事件名常量化总线"（规范第 4 条）没做**：`src/engine/events.js` 至今不存在，292 处裸字符串要连着补注销路径一起改，硬塞进这一片会把一件已经能验证的事（计时）拖成一件不能验证的事。这笔账登记为 B44，不再含糊地算作"W-A1 已完成"。③ `AudioManager` 的 6 处墙钟（4 `setTimeout` + 2 `setInterval`）保留：音序本质是给 Web Audio 调度时间，与世界的缩放无关，门禁给它开了显式例外并要求写明理由（B38 / W-C7）。④ 三处为 CSS 过渡制造"下一次绘制"的 `requestAnimationFrame`（`Dialog` / `ExecutionSkipBurst` / `CombatCameraDirector`）保留 —— 用 `after(0)` 会和赋值同帧，过渡根本不发生。
-  - **留了什么尾巴**：**B43** —— `ExecutionEffects`（3 条循环）与 `WeatherSystem._spawnSplash` 仍自己 `requestAnimationFrame` 递归，并把 dt 写死 `0.016`：144Hz 下一片碎片只活约 0.15 秒（设计值 0.35），30Hz 下拖到 0.7 秒，hitstop 期间照速跑。**这条当时被漏掉了**，因为门禁的正则只扫 `setTimeout|setInterval`，自建 rAF 是它的盲区；B44 见上。⑤ 本片的看板与 ADR 是**事后回填**的（提交在前、文档在后），这正是要写进 §0.3 DoD 的原因：记录落后于代码的这段时间里，任何人读 §8 都会得到"W-A1 未开始"的错误结论。
+  - **留了什么尾巴**：**B43** —— `ExecutionEffects`（3 条循环）与 `WeatherSystem._spawnSplash` 仍自己 `requestAnimationFrame` 递归，并把 dt 写死 `0.016`：144Hz 下一片碎片只活约 0.15 秒（设计值 0.35），30Hz 下拖到 0.7 秒，hitstop 期间照速跑。**这条当时被漏掉了**，因为门禁的正则只扫 `setTimeout|setInterval`，自建 rAF 是它的盲区（B43 已于同日的 W-A1 切片4 关闭，提交 `def9f8d`，见本节末尾那条 —— 原文保留是因为"当时为什么会漏"本身就是这条记录的内容）；B44 见上。⑤ 本片的看板与 ADR 是**事后回填**的（提交在前、文档在后），这正是要写进 §0.3 DoD 的原因：记录落后于代码的这段时间里，任何人读 §8 都会得到"W-A1 未开始"的错误结论。
   - **仓库起点说明**：`95c0533` 同时是仓库重建点。执行 W-A1 时用 `git stash` 做基线对比，该命令把整个 `.git` 移入回收站且对象库不可恢复，21 条提交丢失（工作区文件完好）。现仓库的历史以 `docs/` 为准，且本项目**禁用 `git stash`**（基线对比走只读的 `git diff <ref> -- <path>` 或临时副本）。
 
 - **2026-09-23 W-A2 切片1：区域身份接口化（修 B35 / B36 / B42）** —— 提交 `c4e859a`
@@ -413,3 +414,11 @@ Phase D（系统与质量）
   - **浏览器实读（`localhost:5178`，真实 `window.__game`，视口 0×0 不渲染但代码路径为真）**：`pointsOfInterest` 共 **58** 条，非法 id `[]`、重复 id `[]`，前 8 个为 `hub-anchor / fantasy-ring / fantasy-ruins / fantasy-tower / fantasy-boss-gate / magic-castle / magic-forest / magic-boss-gate`，`homage-*` 41 条；场景里 **56** 个 marker 带 `userData.poiId`，其中空值 / 非法值 **0** 个；控制台只剩已知的 0×0 视口 WebGL 帧缓冲告警（本批两次读数 97 与 106 条，随刷新次数变化），JS 错误 0 条。
   - **一处计数更正（留在记录里）**：提交信息 `16edb9e` 写的是"55 个 POI 全部显式带 id"。55 是我按 `homage-*` 前缀统计致敬层时得到的**调用点数**（14 位面 + 41 `homage-*`），不是登记表真值：位面上还有第 56 条 `fantasy-ring-echo`，hub 层另有 `hub-anchor` 与 `hub-poster-wall` 两条**不走 `addPOI`** 的直接 push（后者正是最终自检存在的理由）。以 **58** 为准，上表与测试口径都已按 58 记。
   - **放弃了什么**：① `fantasy-ring-echo` 与 `fantasy-ring` 的地物重复没删 —— 那是 W-B2（Wave 叠加导致的内容重复）的靶子，本切片只管身份不管内容。② 没把 POI 表挪进数据注册表：`addPOI` 的签名与调用点就是内容层，W-B1 的数据驱动改造会一并处理，现在改属于提前设计。③ `discovered` 仍不进存档 —— 加字段要走 v6 迁移，不在本切片夹带。④ `RestDialogue.js` 的第四份营火名（W-A2 尾巴）仍在，归 W-B4。
+
+- **2026-09-23 W-A1 切片4：处决特效与雨滴涟漪改主循环 dt（修 B43）** —— 提交 `def9f8d`
+  - **为什么**：`setTimeout` 归零之后，"绕过主循环的时间"还剩另一条路 —— 自己 `requestAnimationFrame` 递归。`ExecutionEffects` 的三条循环与 `WeatherSystem` 的涟漪都是这么写的，而且把每帧时长**写死成 `0.016`**。合起来的后果是寿命按**帧数**而不是按秒走：144Hz 的机器上一片血雾碎片约 0.15 秒就消失（设计值 0.35~0.6 秒），30Hz 下拖到 0.7 秒；更要紧的是暂停与 hitstop 期间它们照常跑完 —— 而 hitstop 那 0.1~0.2 秒正是"这一刀很重"的读数窗口，特效本该和它一起停。规范第 3 条禁的就是这个，B43 是它在存量代码里的最后一处。
+  - **交付**：三条循环与涟漪改由 `update(dt)` 推进（dt 已被 `timeScale` 与 hitstop 缩过），条目到期就地 `geometry/material.dispose()` —— 创建者是 `burst()` / `_spawnSplash()`，销毁者是同一个 `update()` 通道，不留"只创建没回收"的路径。旧常数逐个换算：碎片"每帧转 0.12 / 0.08 弧度"变成角速度 `0.12×60 / 0.08×60 弧度每秒`，涟漪"每帧 ×1.08"变成 `1.08^60 每秒` 再按 dt 取幂 —— **60fps 下数值与修前完全一致**，改的只是"跟什么挂钩"。涟漪的推进放在粒子的早退之前，否则粒子缺位时网格会挂在场景里。
+  - **门禁与防假绿**：新增 `tests/effect-timing.test.js` 10 例 + `tests/timing-boundary.test.js` 扩 2 例（全套 **382 例 / 28 文件**全绿；lint 0 error / 10 warning，文件集合与上批一致；构建通过）。行为面钉三件事：**144Hz 与 30Hz 跑出的寿命之差小于一帧**、`dt=0` 时一秒都不推进、网格与 `dispose` 一一对应且跑完 `group.children` 归零。防"改得很漂亮但没人调用"，另有一条源码断言 `Game.update()` 里确实出现 `this.executionFx.update(dt)`（与 `scheduler.update(rawDt)` 同一类风险，同一类钉法）。静态面把 rAF 收成 4 处白名单（主循环 + 三处 CSS"下一次绘制"），每处必须带 `rAF-EXCEPTION` 标记，且**名单与实际命中双向对齐**：新增未登记的红，登记了却不再用的也红。变异验证两组：把 `onTick(dt)` 换成 `onTick(0.016)` → 3 例变红（帧率一致性 / dt=0 冻结 / 冲击环数值）；在名单外的文件里塞一处 rAF → 白名单门禁直接报出文件名。
+  - **行为增量（玩家会看到的差别）**：① 144Hz 玩家第一次看到设计时长的处决特效（碎片从约 0.15 秒回到 0.35~0.6 秒，涟漪从约 0.07 秒回到 0.25 秒）；30Hz 玩家不再看到拖到 0.7 秒的残影。② hitstop / 慢动作期间，冲击环与碎片**一起变慢** —— 这是手感层面真正的改动，过去那一圈环是自说自话地按墙钟跑完的。③ 后台标签页里 rAF 停摆，特效因此停在原地而不是"切回来时发现已经演完了"。④ 未改的语义如实记录：`executionFx.update(dt)` 与 `combatFeedback` / `damageNumbers` 同层，在 `canPlay` 门控**之外**，所以打开对话框时特效仍会走完 —— 与修前一致，改它属于"暂停时世界要不要冻住"那个更大的决定，不在本片偷改。
+  - **浏览器读数的限制（写清楚，别冒充成跑过真实帧）**：本次用的 in-app 浏览器视口 0×0 且处于隐藏态，rAF 停摆 —— `game.time.rawDt` 在 600ms 等待后仍是 `0`、`elapsed` 仍是 `0`，也就是说**主循环一帧都没走**。所以浏览器侧只做了"手推 `update(dt)`"的读数：`burst(..., 'execution')` 出 18 条条目、按 1/60 步进 32 帧（0.533 秒）排空、`group.children` 归 0；`'bossKill'` 出 30 条。真实帧下的表现由测试里的 dt 断言与接线断言承担，不写成"浏览器已验证"。
+  - **放弃了什么**：① 没给 `ExecutionEffects` 上对象池 —— 一次 bossKill 30 个网格，每条寿命 ≤0.6 秒，池化属于 M4 的"特效池与资源生命周期"整包（W-C 段），单独立在这里会让本片从"改计时"变成"改分配"。② 没动 `AudioManager` 的 4 处 `setTimeout` + 2 处 `setInterval`（B38 / W-C7）：那是给 Web Audio 调度时间，量得就不是世界时间。③ `WeatherSystem` 里雪花摆动仍读 `performance.now()` 作相位源 —— 它是装饰性相位，不参与寿命与物理，改它要给天气加一个累加时间字段，收益不及"多一处状态要管"。这条留在记录里，若后续做天气重做一并处理。
