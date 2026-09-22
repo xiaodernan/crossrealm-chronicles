@@ -60,17 +60,18 @@
 | 构建 | 11.2s 通过；`chunk-ui ↔ chunk-world` **循环依赖告警**；`vendor-three` 631KB | 分块需在 W-B1 一并修 |
 | 存档 | v5，带显式迁移链 `SaveMigrations` | 新增字段须走 v6 迁移 |
 
-**复测（2026-09-23，W-A1 与 W-A2 切片1 落地后；口径与上表一致 —— `find src -name "*.js"`）**
+**复测（2026-09-23，W-A1 与 W-A2 切片1、切片2 落地后；口径与上表一致 —— `find src -name "*.js"`）**
 
 | 指标 | 基线 | 现值 | 说明 |
 |------|------|------|------|
-| 源码规模 | 181 文件 / 23,883 行 | 185 文件 / **24,489 行** | +4 个模块：W-A1 的 `engine/Scheduler.js`、`engine/Observable.js`，W-A2 的 `world/ZoneIdentity.js`、`content/franchises.js` |
+| 源码规模 | 181 文件 / 23,883 行 | 185 文件 / **24,525 行** | +4 个模块：W-A1 的 `engine/Scheduler.js`、`engine/Observable.js`，W-A2 的 `world/ZoneIdentity.js`、`content/franchises.js` |
 | 游戏逻辑 `setTimeout` | 28 处 | **0 处**。`src/` 内实际调用只剩 `AudioManager` 的 4 处 `setTimeout` + 2 处 `setInterval` | 那 6 处属音序器，归 B38 / W-C7；见 §9 的 W-A1 条目 |
 | 中文显示名逻辑判定 | 57 处 / 15 文件 | **0 处** | 修 B35、B36；由 `tests/content-boundary.test.js` 的静态门禁兜住（新站点直接变红，**不留存量白名单**） |
+| 区域 id 字面量比较 | — | **0 处**（`zoneId === 'space'` 这类写法在 `src/` 内已无匹配） | 切片2 把效果层与天气层换成 `ZONE_IDS` 符号；`WeatherSystem` 的 `ZONE_PRESETS` 键也改成 `[ZONE_IDS.X]` |
 | 全局事件 | 157 监听 / 139 派发 | 155 / 137，事件名**仍是裸字符串**，`removeEventListener` 全仓仅 3 处 | 每帧数值事件已改走 `Observable`；名字总线与注销是 W-A1 的尾巴（B44） |
-| 测试 | 266 例 / 20 文件 | **339 例 / 25 文件**，全绿 | 新增 5 个文件：`timing-boundary` `engine-scheduler` `engine-observable` `zone-identity` `franchise-identity` |
-| Lint | 0 error / 12 warning | 0 error / 10 warning | 现存的 10 条全是 `no-unused-vars`（死代码与未用导入）。两条差值没有逐条追认 —— 基线只记了总数 |
-| 构建 | 11.2s 通过 + 1 条跨块环告警 | 2.95s 通过，告警集合未增（仍是 `chunk-ui ↔ chunk-world`） | 分块仍归 W-B1 |
+| 测试 | 266 例 / 20 文件 | **356 例 / 26 文件**，全绿 | 新增 6 个文件：`timing-boundary` `engine-scheduler` `engine-observable` `zone-identity` `franchise-identity` `fast-travel` |
+| Lint | 0 error / 12 warning | 0 error / 10 warning | 现存的 10 条全是 `no-unused-vars`（死代码与未用导入），文件集合与上批一致。两条差值没有逐条追认 —— 基线只记了总数 |
+| 构建 | 11.2s 通过 + 1 条跨块环告警 | 通过，告警集合未增（仍是 `chunk-ui ↔ chunk-world`） | 本次计时 6.96s（上一批同口径 2.95s）—— 波动来自机器负载，只记观测值不解读；分块仍归 W-B1 |
 
 
 ### 1.2 玩家能感知的短板（这是"难玩"的真正来源）
@@ -121,7 +122,7 @@
 
 ### 1.4 缺陷台账
 
-**已修复**：B1–B34 全部关闭（明细见 `OVERHAUL_PLAN.md` §1.4 与 §9 变更记录）；B35、B36、B39、B41、B42 于本批关闭（下表）。
+**已修复**：B1–B34 全部关闭（明细见 `OVERHAUL_PLAN.md` §1.4 与 §9 变更记录）；B35、B36、B39、B41、B42 于 W-A1 / W-A2 两批关闭（下表；B36 的最后一类站点在 W-A2 切片2，提交 `b4a8416`）。
 
 **待修**：
 
@@ -132,13 +133,14 @@
 | B40 | `PerformanceManager.shouldUpdateEnemy` | 远处敌人"冻结"但仍可见（B14 未闭环） | W-C2 |
 | B43 | `effects/ExecutionEffects.js`（3 条循环）、`world/WeatherSystem.js:172` | 特效自己 `requestAnimationFrame` 递归，且把 dt **写死成 0.016**：144Hz 下一片碎片只活约 0.15 秒（设计值 0.35），30Hz 下拖到 0.7 秒；hitstop 期间它们照速跑。§2.3 的"帧率无关性"对这几条一律不成立 | W-A1 后续切片 |
 | B44 | `src/` 全局 | 155 处 `window.addEventListener` + 137 处 `dispatchEvent(new CustomEvent(...))`，事件名全是裸字符串、无集中登记（规范第 4 条要求的 `src/engine/events.js` **至今不存在**），且全仓只有 3 处 `removeEventListener` —— 监听器基本没有注销路径 | W-A1 后续切片 |
+| B45 | `world/zones/BaseZone.js:73`（`addPOI`） | POI 未显式给 id 时回退成 `` `${this.id}-${label}` `` —— **把显示名嵌进了 id**。改一句调查文案，该 POI 的 id 就变，任何以 POI id 为键的下游（任务 `interact` 匹配、`poi-interact` 监听、地图与日志标记）会静默断链。5 个位面共 **14 处 `this.addPOI()` 调用，无一传 `options.id`**，全部走这条回退。如实记录：**目前尚无玩家可见故障** —— 碎片进度实际由 `onInteract` 里派发的 `discovery` 显式 id（`fantasy-ring` 等）驱动，主线锚点 `hub-anchor` 也是显式 id，`discovered` 标记未进存档。这是契约隐患，不是已发生损坏 | W-A2 切片3 / W-B1 |
 
 **本批关闭**：
 
 | 编号 | 位置 | 症状 | 修法与证据 |
 |------|------|------|-----------|
 | B35 | `WorldManager.applyHubAtmosphere()` | 枢纽塞的是临时伪造对象 `{ info: { name: '交汇枢纽' } }`，枢纽内按 `zone.id / radius / colliders` 取用一律拿到 `undefined` | 改为冻结的共享描述 `HUB_ZONE`（走廊同 `CORRIDOR_ZONE`，此前是 `null`）。`tests/zone-identity.test.js` 钉住"二者都冻结、写它会抛错" |
-| B36 | 57 处 / 15 文件 | 区域与母题身份靠中文显示名 `includes()` / `===` 匹配，改一行文案整段静默失效 | 新增 `world/ZoneIdentity.js`（`ZONE_IDS` + `zoneIdAt/resolveZone/zoneDescriptor`）与 `content/franchises.js`（`FRANCHISE` + `franchiseLabel`）；判定改走 `id / type / targetId / franchise`；`tests/content-boundary.test.js` 做**硬零**静态门禁（扫描集自证覆盖当前源码树，无白名单） |
+| B36 | 57 处 / 15 文件 | 区域与母题身份靠中文显示名 `includes()` / `===` 匹配，改一行文案整段静默失效 | 新增 `world/ZoneIdentity.js`（`ZONE_IDS` + `zoneIdAt/resolveZone/zoneDescriptor`）与 `content/franchises.js`（`FRANCHISE` + `franchiseLabel`）；判定改走 `id / type / targetId / franchise`；`tests/content-boundary.test.js` 做**硬零**静态门禁（扫描集自证覆盖当前源码树，无白名单）。切片2 收掉最后一类：快速旅行按显示名认目的地、面板"在此"按名字比、营火名与区名各抄一份 —— 现在 `addRestPoint` 缺 id / 重 id **在构建期抛错**，`tests/fast-travel.test.js` 17 例里有 5 例是"把旧写法贴回去就变红"的变异验证（贴回 `d.name === id` 与 `id = id ?? name` 后实测 5 红、2 红） |
 | B39 | `ui/` 6 处 | 面板动画/提示用 `setTimeout` 挂墙钟，hitstop 期间提示照常跳 | 全仓游戏逻辑 `setTimeout` 归零，改走 `engine/Scheduler.js` 的 `after/wait/clear(tag)`（21 处调用点、11 个文件）。`src/ui/` 现在 `setTimeout` 为 **0**；`Dialog.js` / `ExecutionSkipBurst.js` / `CombatCameraDirector.js` 各留一次 rAF —— 那是为 CSS 过渡制造"下一次绘制"，属规范第 2 条明示的例外，代码里写明理由 |
 | B41 | `CombatController.update()`、`SpellSystem.emitMana()` | 每帧派发一条 `'stamina-changed'` / 法力事件（60fps 下每秒 60 条相同内容的 CustomEvent），HUD、教程、辅助系统在同一帧被反复唤醒 | 新增 `engine/Observable.js`：值真的变化才广播一次，`quantize` 让"精力按 0.5 一档、血量按 1 一档"的去重有意义；`HUD` 走 `subscribe()` 拿退订函数存进 `_offs`。`emits / writes` 两个计数器就是"到底通知了几次"的可断言证据（`tests/engine-observable.test.js` 15 例） |
 | B42 | `ui/ContextualTutorial.js` 的 `zone-changed` 监听 | 两条区域提示**完全不看进的是哪个区**，只按章节门控：第四章后随便踏进任何一个位面，都会弹出"破碎时线：重力与视野在此不稳定" | 加 `zoneId === ZONE_IDS.VOID / ABYSS` 门槛，标题取 `ZONE_NAMES[id]`（显示名只有一份）。代价如实记录：见 §9「玩家必须真的重新进入该区才看得到」 |
@@ -191,7 +193,7 @@
 | 编号 | 工作包 | 规模 | 依赖 | 状态 |
 |------|--------|------|------|------|
 | W-A1 | 计时与事件收口（游戏逻辑 `setTimeout` → 主循环 dt；每帧事件改变化派发） | M | — | 🔶 计时与每帧事件已收口；剩 B43 自建 rAF、B44 事件名总线 |
-| W-A2 | 区域身份接口化（`Zone.id`、消 57 处中文匹配、修 B35） | M | — | 🔶 切片1 完成（B35/B36/B42 关闭）；剩快速旅行与 POI 按 id |
+| W-A2 | 区域身份接口化（`Zone.id`、消 57 处中文匹配、修 B35） | M | — | 🔶 切片1、2 完成（B35/B36/B42 关闭）；剩 B45（POI 自动 id 仍嵌显示名） |
 | W-A3 | 世界空间 UI billboard 化（敌人血条 / 锁定标记 / 预警圈） | S | — | ⬜ |
 | W-A4 | 战斗取消关系与输入缓冲（连段可取消、翻滚打断、0.15s 输入队列） | M | W-A1 | ⬜ |
 | W-A5 | 镜头混合栈 + 锁定手感（阻尼、越肩、过场平滑交接） | L | W-A1 | ⬜ |
@@ -333,7 +335,7 @@ Phase D（系统与质量）
 | 编号 | 工作包 | 状态 | 完成日期 | 提交 | 备注 |
 |------|--------|------|----------|------|------|
 | W-A1 | 计时与事件收口 | 🔶 计时主体完成 | 2026-09-23 | `95c0533` + 收尾 `4f1adc6` | 游戏逻辑 `setTimeout` 28 → 0（`Scheduler`，21 处调用点 / 11 文件）；每帧 `stamina/mana` 事件改 `Observable`（B41）。**尾巴**：B43 特效自建 rAF（硬编码 dt）、B44 事件名裸字符串与注销（`engine/events.js` 仍未建） |
-| W-A2 | 区域身份接口化 | 🔶 切片1 完成 | 2026-09-23 | `c4e859a`（收尾 `4f1adc6`） | `world/ZoneIdentity.js` + `content/franchises.js`：B35 伪对象、B36 的 57 处中文匹配、B42 区域提示门控全部关闭；`src/` 内中文显示名逻辑判定归零并上静态门禁。**尾巴**：快速旅行仍按营火显示名认领、`BaseZone` 的 POI 仍缺 id、路点文案与 `ZONE_NAMES` 有漂移 |
+| W-A2 | 区域身份接口化 | 🔶 切片1、2 完成 | 2026-09-23 | 切片1 `c4e859a`；切片2 `b4a8416`（收尾见 `4f1adc6`） | 切片1：`world/ZoneIdentity.js` + `content/franchises.js`，B35 伪对象、B36 的 57 处中文匹配、B42 区域提示门控关闭，`src/` 内中文显示名逻辑判定归零并上静态门禁。切片2：快速旅行目的地与面板"在此"改按 id 认领、`addRestPoint` 缺/重 id 构建期抛错、营火名表与任务区名的第二真源删除、效果层与天气层换成 `ZONE_IDS` 符号；`tests/fast-travel.test.js` 17 例（含变异验证）。**尾巴**：B45（POI 自动 id 仍嵌显示名）、`RestDialogue.js` 的营火标题仍是各写一份的文案（'世界之锚营火' vs 营火实际名 '世界之锚休息点'、'魔法遗境营火' vs 区名 '霍格沃兹遗境'）—— 那是对话树的显示文案，归 W-B4 统一，不在本切片偷改 |
 | W-A3 | 世界空间 UI billboard 化 | ⬜ | | | |
 | W-A4 | 战斗取消关系与输入缓冲 | ⬜ | | | |
 | W-A5 | 镜头混合栈 + 锁定手感 | ⬜ | | | |
@@ -392,3 +394,12 @@ Phase D（系统与质量）
   - **放弃了什么**：① **原计划的 lint 规则不做**。社区没有"中文字面量参与相等判定"这类规则，自研 ESLint 插件的成本远高于一条 vitest 静态用例，而且 lint 只看单文件 —— 它看不出 `zoneName === '混沌边境'` 与 `ZONE_NAMES` 之间的关系，静态扫描却能同时覆盖匹配类（`includes/indexOf/startsWith/…`）与相等类（`=== / !== / case`）。§6 规范第 6 条已就地改指这条门禁。② 顺手加过一个 `FRANCHISE_FILTERS` 导出，发现没有任何读方，删掉了 —— 图鉴筛选的 `all` 哨兵留在 `FRANCHISE_LABELS` 里并注明它不是母题。③ `PopCultureHomageRegistryWave3` 的 `TRIAD_FRANCHISE_META` 整块无人引用，删除而不是"留着以后可能用"。
   - **一次自我更正（必须留在记录里）**：门禁调试阶段我曾把"vitest 报出的命中行号在磁盘上点不开"归因为**扫描到过期快照**，并把这句写进了测试注释。那是错的归因 —— 真因是我在读自己后续批量编辑**之前**的 vitest 输出，同时第一版 `NAME_COMPARE` 的反向引用写坏了。已把注释改成正确的防假绿理由。留着这条更正的理由：本项目多次出现"绿色但什么都没拦住"的风险，**记录必须与真实做过的事一致**，写一条没验证过的归因比不写更糟。
   - **留了什么尾巴（切片2 的清单）**：① `FastTravelSystem.travel(name)` 仍按显示名查目的地，`getDestinations()` 把 id 直接丢了，`RestPointManager` 的 `id: id ?? name` 也会回落成显示名 —— 改一行营火文案就能让快速旅行面板点不出目的地。② `QuestSystem` 的 `QUEST_WAYPOINTS` / `TARGET_WAYPOINTS` label 与 `ZONE_NAMES` 已经漂移（前者写 '魔法遗境'，后者是 '霍格沃兹遗境'），文案仍有两份真源。③ 效果层（`WorldEffects` / `WeatherSystem`）判定用的是 id **字面量**（`zoneId === 'space'`），逻辑正确但没有符号名，改 id 时不会变红。④ `src/content/` 目前只有 `tuning.js` 与本片的 `franchises.js`，W-B1 的注册表与构建期 schema 校验尚未起步。
+
+- **2026-09-23 W-A2 切片2：快速旅行与营火身份收口（B36 收尾）** —— 提交 `b4a8416`
+  - **为什么**：切片1 把"用中文名做判定"清零了，但**"同一个事实写两份"**还剩三处，而且已经能查到实物病例：营火显示名有两张表（`RestPointManager` 写 '世界之锚休息点'，`CampfireMemorySystem` 的 `REST_NAMES` 写 '世界之锚营火'，`magic` 那格写的是早已废弃的 '魔法遗境营火'，而区名实为 '霍格沃兹遗境'）。更糟的是旅行链路整条按名字走：`travel(name)` 用 `d.name === name` 找目的地，`getDestinations()` 把 id 丢掉只留名字，面板的"在此"是 `d.name === fromName`，`addRestPoint` 的 `id: id ?? name` 还会把显示名当 id 兜底。合起来的后果是**两座同名营火会一起变灰、点哪座都跳第一座；改一句文案面板就点不出目的地** —— 而这两种都不会报错。
+  - **交付**：`RestPointManager` 变成 id 契约的守门人 —— 缺 id 或重复 id **在世界构建期直接抛错**（静默兜底正是这个缺陷的成因，不再留第二份），新增 `ids()` / `nameOf(id)`（查不到返回 `null`，兜底文案由调用方决定，不许拿 id 冒充名字），默认营火表由 `ZONE_IDS` + `ZONE_NAMES` 生成；`FastTravelSystem` 的 `travel(id)` / `destinationsForPanel(currentId)` 全按 id 走，`FastTravelPanel` 渲染 `data-id` 并按 `here` 禁用；`CampfireMemorySystem` 的重复名表删除（含 `CAMPFIRE_REST_NAMES` 导出）；`QuestSystem` 指向位面的路点 label 改取 `ZONE_NAMES`；`WorldEffects.setZone()` 与 `WeatherSystem` 的 `ZONE_PRESETS` 换成 `ZONE_IDS` 符号（后者用计算键 `[ZONE_IDS.X]`）。
+  - **门禁与防假绿**：`tests/fast-travel.test.js` 17 例（全仓 356 例 / 26 文件全绿；lint 0 error / 10 warning，文件集合与上批一致；构建通过）。三条关键用例**做过变异验证**，不是"恰好能跑"：把 `travel` 与 `here` 贴回按名字比 —— 5 例变红；把 id 契约贴回 `id = id ?? name` 并关掉重复抛错 —— 2 例变红。正面证据是那条"显示名全换成乱码后旅行结果不变"，以及"同名两座各自精确跳"。改完复扫：`src/` 内区域 id 字面量比较 **0 处**，`.name ===` 只剩注释里的一处引用。
+  - **行为增量（玩家会看到的差别，浏览器实读见下）**：① 快速旅行面板里"在此"只灰脚下那座，同名另一座恢复可点（此前一起灰）。② 营火显示名与所在位面的区名一致了：魔法区的营火从 '魔法遗境营火' 变成 **'霍格沃兹遗境营火'**（面板行、`[E] 休息 / 升级 — …` 提示同步跟上）；营火记忆图鉴里作为说话人的营火名，也从那张已被删掉的旧表（'世界之锚营火'）变成世界里真实的那一个（'世界之锚休息点'）。③ 营火记忆图鉴的筛选项改成"实际存在的营火"，不再是一张写死的表。④ 开发者侧：营火 id 缺失/重复现在会在启动时抛错，而不是跳错地方。⑤ `WorldEffects` / `WeatherSystem` 的符号化**无可感知变化** —— 字面量与 `ZONE_IDS` 的值本来就相同，这一条买的是"改 id 时会变红"，不是修复。⑥ **任务路点那处漂移其实不产生玩家可见变化**（写这段时我先以为是"第二碎片的指引文字改对了"，读码后不成立）：`getQuestWaypoint()` 对 `discovery` 任务优先取 `TARGET_WAYPOINTS[q.targetId]`，而 'magic-castle' / 'space-tesseract' / 'void-rift' 都在里面，所以 `QUEST_WAYPOINTS` 那三条改掉的 label 走不到；本表唯一可达的改动项是 `soldiers`（kills 任务），它的值前后都是 '灰白森林'。留着这条更正的理由：删掉第二真源仍然有意义（那三份拷贝以后不会再各自漂），但**收益是结构性的，不是玩家看得见的修复**，记录里不能把前者写成后者。
+  - **浏览器实读（`localhost:5178`，真实 `game`，视口 0×0 不渲染但代码路径为真）**：`restPoints.ids()` → `hub / fantasy / magic / space / void / abyss`，其中魔法区那座营火的名字确为 '霍格沃兹遗境营火'；`fastTravelPanel.show('magic')` 后 DOM 里 6 个 `.ft-btn` 只有 `data-id="magic"` 那一个 `disabled === true`；`travel('void')` 把玩家从 `(0, 999)` 放到 `(0, 5.10, 210)`（y 来自真实地形采样，不是 0），血量 35 → 118（= `maxHp`）；`travel('no-such-fire')` 返回 `false` 且不动玩家；把 6 座营火的显示名全部改成 `===garbled===` 后 `travel('fantasy')` 仍精确落到 `(-200, 0)`；`addRestPoint(..., 'hub')` 抛出 '营火 id hub 重复'，`addRestPoint(...)` 缺 id 抛出 '营火「x」缺少 id'。
+  - **放弃了什么**：① `RestDialogue.js` 的营火标题（'世界之锚营火'、'魔法遗境营火'…）没跟着改。那是对话树的**显示文案**、按 rest id 取用（不参与判定），但它确实是第四份营火名字 —— 一并改属于"对话节点图统一"，硬塞进本片会让 W-B4 少一块它本该解决的证据。登记为 W-A2 尾巴，明写在这里而不是悄悄修掉。② `chaos-core` 等指向具体物件的路点保留自名，它们不是区域文案的第二真源。③ 没给 `destinationsForPanel` 加"未解锁则为空"的门控：解锁判定在 `tryOpen` 一处即够，两处门控迟早漂移。
+  - **新登记的缺陷**：**B45** —— `BaseZone.addPOI` 未显式给 id 时回退成 `` `${this.id}-${label}` ``，把显示名嵌进了 id（5 个位面 14 处调用全部走这条回退）。实测**尚无玩家可见故障**（碎片进度由 `onInteract` 派发的显式 `discovery` id 驱动，`hub-anchor` 也是显式 id，`discovered` 未进存档），所以它是契约隐患而非已发生损坏；归属 W-A2 切片3 / W-B1。
