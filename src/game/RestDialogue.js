@@ -1,5 +1,6 @@
 import { REST_NPC_DEFS } from '../world/RestNpcManager.js';
 import { REST_DIALOGUE_EVENTS } from '../engine/events.js';
+import { emit } from '../engine/EventBus.js';
 import { mergeRestDialogueNodes } from './RestDialogueExtras.js';
 import { mergeRestDialogueWave2 } from './RestDialogueExtras2.js';
 import { mergeRestDialoguePopCulture } from './RestDialoguePopCulture.js';
@@ -242,7 +243,7 @@ export class RestDialogue {
   }
 
   _emit(phase, restId, nodeId, node) {
-    /* 事件名从登记表取（修 B44）：原来这里拼 `rest-dialogue-${phase}`，
+    /* 事件名从登记表取（修 B44）：原来这里按 `phase` 拼字符串，
      * phase 写错就是一条没人监听也没人报错的 CustomEvent，扫描工具还看不见它。 */
     const type = Object.hasOwn(REST_DIALOGUE_EVENTS, phase) ? REST_DIALOGUE_EVENTS[phase] : null;
     if (!type) {
@@ -250,17 +251,15 @@ export class RestDialogue {
     }
     const def = REST_NPC_DEFS[restId];
     const preview = typeof node?.text === 'string' ? node.text.replace(/\*\*/g, '').split('\n')[0] : '';
-    window.dispatchEvent(new CustomEvent(type, {
-      detail: {
-        restId,
-        nodeId,
-        speaker: node?.speaker ?? def?.name,
-        speakerId: restId,
-        mood: node?.mood ?? 'calm',
-        accent: def?.accent ?? '#c9a962',
-        linePreview: preview,
-      },
-    }));
+    emit(type, {
+      restId,
+      nodeId,
+      speaker: node?.speaker ?? def?.name,
+      speakerId: restId,
+      mood: node?.mood ?? 'calm',
+      accent: def?.accent ?? '#c9a962',
+      linePreview: preview,
+    });
   }
 
   _showNode(tree, nodeId) {

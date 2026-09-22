@@ -3,6 +3,7 @@ import { WINDING_ROUTES } from '../world/TerrainHeight.js';
 import { JOURNAL_CATEGORIES, DISCOVERABLE_TOTAL } from '../game/StoryJournal.js';
 import { mergeJournalCategories } from './JournalTabRegistry.js';
 import { scheduler } from '../engine/Scheduler.js';
+import { on, offAll } from '../engine/EventBus.js';
 
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 
@@ -10,6 +11,8 @@ import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 const ZONE_BANNER_TAG = 'hud-zone-banner';
 /** 连击终结闪光的分组 */
 const FINISHER_TAG = 'hud-finisher-flash';
+/** 本类全部监听的所有权标识：dispose() 按它一次性注销（B44 剩余半区） */
+const EVENT_TAG = 'ui/HUD';
 
 export class HUD {
   constructor(game) {
@@ -129,7 +132,7 @@ export class HUD {
   }
 
   setupListeners() {
-    window.addEventListener('zone-changed', (e) => {
+    on('zone-changed', (e) => {
       const z = e.detail.zone;
       document.getElementById('zone-name').textContent = z.name;
       this._zoneSubtitle = z.subtitle;
@@ -138,29 +141,29 @@ export class HUD {
       this._renderZoneSubtitle();
       this.updateZonePanel(z);
       if (!e.detail.initial) this.showZoneBanner(z.name, z.subtitle);
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('discovery', (e) => {
+    on('discovery', (e) => {
       this.updateDiscoveryCount();
       this.game.dialog.toast(`新发现：${e.detail.title}`);
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('journal-updated', () => {
+    on('journal-updated', () => {
       this.updateDiscoveryCount();
       if (this.journalOpen) this.updateJournal();
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('journal-entry', (e) => {
+    on('journal-entry', (e) => {
       if (e.detail.category === 'fragment') {
         this.game.dialog.toast(`📜 叙事碎片：${e.detail.title}`, 3500);
       }
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('stats-changed', (e) => {
+    on('stats-changed', (e) => {
       document.getElementById('souls-display').textContent = `魂 ${e.detail.souls} · Lv.${e.detail.level}`;
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('quest-updated', (e) => {
+    on('quest-updated', (e) => {
       this.quest = e.detail;
       const q = e.detail.current;
       document.getElementById('chapter-display').textContent = `Chapter ${e.detail.chapter ?? 1}`;
@@ -171,18 +174,18 @@ export class HUD {
         document.getElementById('quest-title').textContent = '无尽探索';
         document.getElementById('quest-progress').textContent = '自由探索整个世界';
       }
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('player-damaged', (e) => {
+    on('player-damaged', (e) => {
       this.playerHp = e.detail.hp;
       this.playerMaxHp = e.detail.maxHp;
       document.getElementById('hp-bar').style.width = `${(this.playerHp / this.playerMaxHp) * 100}%`;
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('player-healed', (e) => {
+    on('player-healed', (e) => {
       this.playerHp = e.detail.hp;
       document.getElementById('hp-bar').style.width = '100%';
-    });
+    }, EVENT_TAG);
 
     /* 精力 / 连击 / 处决提示改走观测量（B41）：以前每帧一条 CustomEvent，
      * 现在只在量化档位真的挪动时被叫醒一次。 */
@@ -208,68 +211,68 @@ export class HUD {
       this._offs.push(spells.vitals.transform.subscribe(() => this._renderMana(spells)));
     }
 
-    window.addEventListener('enemy-defeated', () => {
+    on('enemy-defeated', () => {
       this.killCount = (this.killCount || 0) + 1;
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('combo-finisher', () => {
+    on('combo-finisher', () => {
       document.body.classList.add('finisher-flash');
       scheduler.clear(FINISHER_TAG);
       scheduler.after(0.42, () => document.body.classList.remove('finisher-flash'), FINISHER_TAG);
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('realm-bleed', (e) => {
+    on('realm-bleed', (e) => {
       this._setSubtitleOverlay('bleed', `⟡ 位面渗漏 · ${e.detail.zone}`);
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('boss-start', () => {
+    on('boss-start', () => {
       this.bossVisible = true;
       this.bossBarWrap.classList.remove('hidden');
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('boss-health', (e) => {
+    on('boss-health', (e) => {
       if (!this.bossVisible) return;
       const { hp, maxHp, phase, name } = e.detail;
       document.getElementById('boss-name').textContent = name;
       document.getElementById('boss-hp-bar').style.width = `${(hp / maxHp) * 100}%`;
       document.getElementById('boss-phase').textContent = ['', '阶段 I', '阶段 II', '阶段 III'][phase] || '阶段 I';
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('boss-defeated', () => {
+    on('boss-defeated', () => {
       this.bossVisible = false;
       this.bossBarWrap.classList.add('hidden');
       // Boss 死在时停里就不会再派发 time-stop-end（update 直接早退），这条是唯一的收口路径
       this._clearSubtitleOverlay('timeStop');
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('weapon-changed', (e) => {
+    on('weapon-changed', (e) => {
       const el = document.getElementById('weapon-display');
       if (el) el.textContent = (e.detail.weapon === 'staff' ? '✦ ' : '⚔ ') + e.detail.name;
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('skill-points-changed', (e) => {
+    on('skill-points-changed', (e) => {
       const el = document.getElementById('skill-points-display');
       if (el) el.textContent = `技能点 ${e.detail.points ?? 0}`;
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('dungeon-enter', (e) => {
+    on('dungeon-enter', (e) => {
       if (e.detail.rerun) this.game.dialog.toast('深渊再探 — 新随机布局已生成');
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('time-stop-start', () => {
+    on('time-stop-start', () => {
       this._setSubtitleOverlay('timeStop', '⏳ 时停中 — 蓄力法术可打断');
-    });
+    }, EVENT_TAG);
 
     /* 修 B44：VoidBoss 到期与被打断两处都派发 time-stop-end，而修前全仓无人监听 ——
      * 「⏳ 时停中」一旦写上就一直占着区副标题，直到下次换区才被顶掉。 */
-    window.addEventListener('time-stop-end', () => {
+    on('time-stop-end', () => {
       this._clearSubtitleOverlay('timeStop');
-    });
+    }, EVENT_TAG);
 
-    window.addEventListener('camera-mode-changed', (e) => {
+    on('camera-mode-changed', (e) => {
       const el = document.getElementById('camera-mode-display');
       if (el) el.textContent = e.detail.mode === 'first' ? '第一人称' : '第三人称';
-    });
+    }, EVENT_TAG);
   }
 
   /** 区副标题的唯一写入口：覆盖层优先于区域权威文本，撤掉后自动落回去 */
@@ -312,10 +315,13 @@ export class HUD {
     }
   }
 
-  /** 系统销毁：观测量订阅必须成对退订（全局事件那种"无一处注销"不在这里重演） */
+  /** 系统销毁：三本账一起结 —— 观测量退订、事件监听注销、未到期的调度任务撤销 */
   dispose() {
     for (const off of this._offs ?? []) off();
     this._offs = [];
+    offAll(EVENT_TAG);
+    scheduler.clear(ZONE_BANNER_TAG);
+    scheduler.clear(FINISHER_TAG);
   }
 
   showZoneBanner(name, subtitle) {

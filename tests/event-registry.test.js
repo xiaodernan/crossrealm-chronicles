@@ -25,6 +25,8 @@ import { installWindowShim } from './helpers/enemyHarness.js';
 const SRC = join(process.cwd(), 'src');
 /** 登记表自身：它的字面量不算"代码里的引用"，否则每条都存在 = 门禁失效 */
 const SELF = 'engine/events.js';
+/** 总线实现自身：`on(name, handler, tag)` 的形参不是事件名，扫描要绕开它 */
+const BUS_SELF = 'engine/EventBus.js';
 
 /** 浏览器原生事件名：不是游戏事件，允许直接挂在 addEventListener 上 */
 const DOM_EVENT_NAMES = new Set([
@@ -74,31 +76,53 @@ function readBalanced(code, start) {
 }
 
 const dispatchSites = new Map(); // name -> [{ file, hasDetail }]
-const dynamicDispatches = []; // 事件名不是字面量的位点
+const dynamicDispatches = []; // 事件名不是字面量的位点（`emit(变量, ...)` 与 `new CustomEvent(变量)`）
 const templateDispatches = []; // 用模板字符串拼事件名的位点：一个都不许有
 const listenerSites = new Map(); // name -> Set<file>
 
+/** name -> [{ file, hasDetail }] */
+function recordDispatch(name, file, hasDetail) {
+  if (!dispatchSites.has(name)) dispatchSites.set(name, []);
+  dispatchSites.get(name).push({ file, hasDetail });
+}
+
+/** name -> Set<file> */
+function recordListener(name, file) {
+  if (!listenerSites.has(name)) listenerSites.set(name, new Set());
+  listenerSites.get(name).add(file);
+}
+
 for (const abs of walk(SRC)) {
   const rel = relative(SRC, abs).replace(/\\/g, '/');
+  if (rel === SELF || rel === BUS_SELF) continue; // 登记表与总线实现里的字面量是"契约文本"，不是使用点
   const code = stripComments(readFileSync(abs, 'utf8'));
+  /* 派发与监听各有两种写法：存量是裸 `new CustomEvent` / `window.addEventListener`，
+   * 切片6 起新代码走 `emit()` / `on()`。扫描器两种都要认 —— 只认前者的话，
+   * 迁移得越干净、门禁瞎得越彻底（登记表会以为这些名字再也没人生产/消费）。 */
   for (const m of code.matchAll(/new\s+CustomEvent\(\s*/g)) {
     const open = code.indexOf('(', m.index + m[0].length - 1);
     const call = readBalanced(code, open);
     const literal = call?.match(/^\(\s*['"]([^'"]+)['"]/);
     if (literal) {
-      const name = literal[1];
-      if (!dispatchSites.has(name)) dispatchSites.set(name, []);
-      dispatchSites.get(name).push({ file: rel, hasDetail: /\bdetail\s*:/.test(call) });
+      recordDispatch(literal[1], rel, /\bdetail\s*:/.test(call));
     } else {
       if (call?.startsWith('(`')) templateDispatches.push(rel);
       dynamicDispatches.push({ file: rel, expr: call?.slice(1, 60).trim() ?? '(unbalanced)' });
     }
   }
+  for (const m of code.matchAll(/(?:^|[^\w.])emit\(\s*(['"])([^'"]+)\1\s*(,?)/g)) {
+    recordDispatch(m[2], rel, m[3] === ',');
+  }
+  for (const m of code.matchAll(/(?:^|[^\w.])emit\(\s*(?!['"`])([^,()]{1,40})/g)) {
+    dynamicDispatches.push({ file: rel, expr: m[1].trim() });
+  }
   for (const m of code.matchAll(/(?:add|remove)EventListener\(\s*['"]([^'"]+)['"]/g)) {
     if (rel === SELF) continue;
-    const name = m[1];
-    if (!listenerSites.has(name)) listenerSites.set(name, new Set());
-    listenerSites.get(name).add(rel);
+    recordListener(m[1], rel);
+  }
+  for (const m of code.matchAll(/(?:^|[^\w.])o(?:nce|n)\(\s*(['"])([^'"]+)\1/g)) {
+    if (rel === BUS_SELF) continue;
+    recordListener(m[2], rel);
   }
 }
 
@@ -206,7 +230,8 @@ describe('B44 抓到的三条病例（回归钉）', () => {
 
   it('时停结束有人把区副标题还回去', () => {
     const hud = read('ui/HUD.js');
-    expect(hud).toMatch(/addEventListener\('time-stop-end'/);
+    // HUD 是第一个整体迁到总线的监听方（切片6）：`on(...)` 而不是裸 addEventListener
+    expect(hud).toMatch(/\bon\('time-stop-end'/);
     // 覆盖层要能撤，且只有开它的那一路能撤
     expect(hud).toMatch(/_clearSubtitleOverlay\('timeStop'\)/);
     expect(hud).toMatch(/_setSubtitleOverlay\('timeStop'/);

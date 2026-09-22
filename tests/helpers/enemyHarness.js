@@ -18,6 +18,9 @@ export function installWindowShim() {
       if (!handlers.has(type)) handlers.set(type, new Set());
       handlers.get(type).add(fn);
     },
+    removeEventListener(type, fn) {
+      handlers.get(type)?.delete(fn);
+    },
     dispatchEvent(event) {
       handlers.get(event.type)?.forEach((fn) => fn(event));
       return true;
