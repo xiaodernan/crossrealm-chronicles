@@ -60,20 +60,21 @@
 | 构建 | 11.2s 通过；`chunk-ui ↔ chunk-world` **循环依赖告警**；`vendor-three` 631KB | 分块需在 W-B1 一并修 |
 | 存档 | v5，带显式迁移链 `SaveMigrations` | 新增字段须走 v6 迁移 |
 
-**复测（2026-09-23，W-A2 切片1/2/3 与 W-A1 计时主体 + 切片4 落地后；口径与上表一致 —— `find src -name "*.js"`）**
+**复测（2026-09-23，W-A2 切片1/2/3 与 W-A1 计时主体 + 切片4 + 切片5 落地后；口径与上表一致 —— `find src -name "*.js"`）**
 
 | 指标 | 基线 | 现值 | 说明 |
 |------|------|------|------|
-| 源码规模 | 181 文件 / 23,883 行 | 185 文件 / **24,598 行** | +4 个模块：W-A1 的 `engine/Scheduler.js`、`engine/Observable.js`，W-A2 的 `world/ZoneIdentity.js`、`content/franchises.js`；切片3 的 +42 行全在既有文件里（id 校验与自检），切片4 的 +31 行同理（条目表与门禁注释），都未新增模块 |
+| 源码规模 | 181 文件 / 23,883 行 | 186 文件 / **25,001 行**（+403：`engine/events.js` 357 行 + 四个既有文件的 46 行） | +5 个模块：W-A1 的 `engine/Scheduler.js`、`engine/Observable.js`、`engine/events.js`，W-A2 的 `world/ZoneIdentity.js`、`content/franchises.js`；切片3 的 +42 行全在既有文件里（id 校验与自检），切片4 的 +31 行同理（条目表与门禁注释），都未新增模块 |
 | 游戏逻辑 `setTimeout` | 28 处 | **0 处**。`src/` 内实际调用只剩 `AudioManager` 的 4 处 `setTimeout` + 2 处 `setInterval` | 那 6 处属音序器，归 B38 / W-C7；见 §9 的 W-A1 条目 |
 | 特效自建 rAF 循环 | 4 条（`ExecutionEffects` 3 + `WeatherSystem` 1），且步长写死 `0.016` | **0 条**。`src/` 内 `requestAnimationFrame` 调用点只剩白名单 4 处：主循环 1 + CSS 过渡的"下一次绘制" 3，每处带 `rAF-EXCEPTION` 标记 | 修 B43；名单与实际命中在 `tests/timing-boundary.test.js` 里**双向对齐**（新增未登记的红，登记了却不再用的也红） |
 | 中文显示名逻辑判定 | 57 处 / 15 文件 | **0 处** | 修 B35、B36；由 `tests/content-boundary.test.js` 的静态门禁兜住（新站点直接变红，**不留存量白名单**） |
 | 区域 id 字面量比较 | — | **0 处**（`zoneId === 'space'` 这类写法在 `src/` 内已无匹配） | 切片2 把效果层与天气层换成 `ZONE_IDS` 符号；`WeatherSystem` 的 `ZONE_PRESETS` 键也改成 `[ZONE_IDS.X]` |
-| 全局事件 | 157 监听 / 139 派发 | 155 / 137，事件名**仍是裸字符串**，`removeEventListener` 全仓仅 3 处 | 每帧数值事件已改走 `Observable`；名字总线与注销是 W-A1 的尾巴（B44） |
+| 全局事件 | 157 监听 / 139 派发 | 监听位点 **156**（`window.addEventListener`，其中 **151** 处监听的是登记过的游戏事件）、派发位点 **137**（136 处写的是字面名、1 处从登记表取）；`removeEventListener` 全仓仍只有 3 处，且**这 3 处针对的都是 DOM 事件 —— 游戏事件的注销位点为 0** | 每帧数值事件已改走 `Observable`；**名字这一半本轮关闭**（见下一行），注销那一半留给切片6。口径提醒：基线的 157/139 只记了总数、没写清怎么数，本轮两个数各自标了口径（是否计入 DOM 事件），别拿它们做差 |
+| 事件名登记 | 0 条登记，名字全靠手抄 | `src/engine/events.js` **71 条**：每条带用途、负载形状，16 条无监听者的逐个写明理由。对账：字面派发名 69 ∪ 监听名 55 = **71**，与登记数正好相等 —— 即 **0 个**未登记名字、**0 个**死条目；多出的 2 个是营火对话的派生名（监听方写死名字、派发方按阶段查表）。模板字符串拼事件名的位点 **0 处** | 修 B44 命名半区；由 `tests/event-registry.test.js` 12 例静态扫描钉住，8 个变异全部变红（见 §1.4 B44 行与 §9 本条 ADR） |
 | POI 稳定 id | 14 处位面 POI 走 `` `${zoneId}-${label}` `` 回退 | **58 / 58 条登记表记录带合法 kebab-case id，全表唯一**（真世界 `WorldManager.build()` + 四层致敬增强器跑完后的实测口径） | 修 B45；`tests/poi-identity.test.js` 在 node 里构建真世界做全量断言，浏览器端复核同得 58 条、0 非法、0 重复 |
-| 测试 | 266 例 / 20 文件 | **382 例 / 28 文件**，全绿 | 新增 8 个文件：`timing-boundary` `engine-scheduler` `engine-observable` `zone-identity` `franchise-identity` `fast-travel` `poi-identity` `effect-timing` |
-| Lint | 0 error / 12 warning | 0 error / 10 warning | 现存的 10 条全是 `no-unused-vars`（死代码与未用导入），文件集合与上批一致。两条差值没有逐条追认 —— 基线只记了总数 |
-| 构建 | 11.2s 通过 + 1 条跨块环告警 | 通过，告警集合未增（仍是 `chunk-ui ↔ chunk-world`） | 本批三次计时 3.48s / 2.15s / 3.57s（上两批同口径 6.96s / 2.95s）—— 波动来自机器负载，只记观测值不解读；分块仍归 W-B1 |
+| 测试 | 266 例 / 20 文件 | **394 例 / 29 文件**，全绿 | 新增 9 个文件：`timing-boundary` `engine-scheduler` `engine-observable` `zone-identity` `franchise-identity` `fast-travel` `poi-identity` `effect-timing` `event-registry`（本片 +12 例） |
+| Lint | 0 error / 12 warning | 0 error / 10 warning | 现存的 10 条全是 `no-unused-vars`（死代码与未用导入），文件集合与上批一致。两条差值没有逐条追认 —— 基线只记了总数。切片5 新增的两个文件（登记表 + 门禁）不给告警清单添条目 |
+| 构建 | 11.2s 通过 + 1 条跨块环告警 | 通过，告警集合未增（仍是 `chunk-ui ↔ chunk-world`） | 本批四次计时 3.48s / 2.15s / 3.57s / 7.98s（上两批同口径 6.96s / 2.95s）—— 波动来自机器负载，只记观测值不解读；分块仍归 W-B1 |
 
 
 ### 1.2 玩家能感知的短板（这是"难玩"的真正来源）
@@ -124,7 +125,7 @@
 
 ### 1.4 缺陷台账
 
-**已修复**：B1–B34 全部关闭（明细见 `OVERHAUL_PLAN.md` §1.4 与 §9 变更记录）；B35、B36、B39、B41、B42、B43、B45 于 W-A1 / W-A2 两个工作包内依次关闭（下表；B36 的最后一类站点在 W-A2 切片2，提交 `b4a8416`；B45 在切片3，提交 `16edb9e`；B43 在 W-A1 切片4，提交 `def9f8d`）。
+**已修复**：B1–B34 全部关闭（明细见 `OVERHAUL_PLAN.md` §1.4 与 §9 变更记录）；B35、B36、B39、B41、B42、B43、B45 于 W-A1 / W-A2 两个工作包内依次关闭（下表；B36 的最后一类站点在 W-A2 切片2，提交 `b4a8416`；B45 在切片3，提交 `16edb9e`；B43 在 W-A1 切片4，提交 `def9f8d`）。B44 **只关掉命名那一半**（W-A1 切片5，提交 `bf93a4c`），注销那一半仍挂在待修表里 —— 一条缺陷拆成两批修，就不要整个写成"已关闭"。
 
 **待修**：
 
@@ -133,7 +134,7 @@
 | B37 | `vite.config.js` manualChunks | `chunk-ui → chunk-world → chunk-ui` 循环依赖告警（既成事实，未造成运行时问题，但阻断后续分块优化） | W-B1 |
 | B38 | `AudioManager` 4 处 `setTimeout` + 2 处 `setInterval` | 音序与音乐计时挂墙钟：暂停/后台标签页里音乐照走，`timeScale` 也不影响它 | W-C7 |
 | B40 | `PerformanceManager.shouldUpdateEnemy` | 远处敌人"冻结"但仍可见（B14 未闭环） | W-C2 |
-| B44 | `src/` 全局 | 155 处 `window.addEventListener` + 137 处 `dispatchEvent(new CustomEvent(...))`，事件名全是裸字符串、无集中登记（规范第 4 条要求的 `src/engine/events.js` **至今不存在**），且全仓只有 3 处 `removeEventListener` —— 监听器基本没有注销路径 | W-A1 后续切片 |
+| B44（剩余：注销） | `src/` 全局 | 名字已经收进 `engine/events.js` 并由门禁钉住（切片5），但**监听仍然是一处一次 `window.addEventListener`**：151 个游戏事件监听位点对应 **0 个**游戏事件的 `removeEventListener`（全仓那 3 处注销的都是 DOM 事件）。系统随 `Game` 重建而重建时（换区、重开存档、副本进出），旧实例的监听者还挂在 `window` 上 —— 既漏监听器，也让"同一个事件被 N 个已死实例响应"成为可能 | W-A1 切片6（总线 `on()/emit()/offAll(tag)` + 各系统 `dispose()` 调用） |
 
 **本批关闭**：
 
@@ -146,6 +147,7 @@
 | B42 | `ui/ContextualTutorial.js` 的 `zone-changed` 监听 | 两条区域提示**完全不看进的是哪个区**，只按章节门控：第四章后随便踏进任何一个位面，都会弹出"破碎时线：重力与视野在此不稳定" | 加 `zoneId === ZONE_IDS.VOID / ABYSS` 门槛，标题取 `ZONE_NAMES[id]`（显示名只有一份）。代价如实记录：见 §9「玩家必须真的重新进入该区才看得到」 |
 | B43 | `effects/ExecutionEffects.js`（3 条循环）、`world/WeatherSystem.js`（雨滴涟漪） | 四处特效**自己 `requestAnimationFrame` 递归**，并把每帧时长写死成 `0.016` —— 寿命于是按**帧数**而不是按秒走：144Hz 下一片血雾碎片约 0.15 秒就没了（设计值 0.35~0.6 秒），30Hz 下拖到 0.7 秒；更要紧的是暂停与 hitstop 期间它们照常跑完，而那 0.3 秒正是"这一刀很重"的读数窗口。§2.3 的"帧率无关性"对这几条一律不成立 | 三条循环与涟漪改由主循环 `update(dt)` 推进（dt 已被 `timeScale` 与 hitstop 缩过），条目到期就地 `geometry/material.dispose()`；旧"每帧 0.12 弧度""每帧 ×1.08"这类常数换算成按秒的角速度 / 按秒的放大率，60fps 下数值与修前一致。门禁分两层：`tests/effect-timing.test.js` 10 例断言**同一寿命**（144Hz 与 30Hz 之差 < 一帧）、`dt=0` 时一秒不推进、网格与 dispose 一一对应、以及主循环确实调用；`tests/timing-boundary.test.js` 把 rAF 白名单钉成 4 处（主循环 + 三处 CSS 绘制间隔），每处必须带 `rAF-EXCEPTION` 标记，且名单与实际命中**双向对齐**。变异验证：把 `onTick(dt)` 换成 `onTick(0.016)` → 3 例变红；在名单外的文件里新增一处 rAF → 白名单门禁报出文件名 |
 | B45 | `world/zones/BaseZone.js`（`addPOI`） | POI 未显式给 id 时回退成 `` `${this.id}-${label}` ``，**把显示名嵌进了稳定身份**：改一句调查文案，该 POI 的 id 就变，按 id 认领它的下游（任务 `interact` 匹配、`poi-interact` 监听、marker 的 `userData.poiId`、今后进存档的发现进度）静默断链 —— 运行期不报错，只是"点了没反应"。14 处位面 `addPOI` 调用无一传 `options.id`，全走这条回退。按登记时的口径如实记录：修复前**无玩家可见故障**（碎片进度由 `onInteract` 派发的显式 `discovery` id 驱动，`discovered` 未进存档），这是契约隐患，不是已发生损坏 | 回退删除，改成与 `addRestPoint` 同一条契约：**缺 id / 非 kebab-case / 同区重复 id 在世界构建期直接抛错给开发者看**；14 处位面调用与 42 处致敬层登记补齐显式 id（最终 56 条位面 POI + 2 条 hub 记录 = 58）；规则是"凡 `onInteract` 派发 `discovery` 的 POI，其 id 必须等于那个发现 id"，由测试逐条遍历全表钉住，唯一例外 `fantasy-ring-echo` 走测试里那张必须显式登记的别名表。`WorldManager.assertPoiIdentity()` 在 `build()` 与 `attachPopCultureZones()` 各跑一次，把**合并后的全量表**（含两处不走 `addPOI` 的 hub 记录）收口 —— 同一段逻辑两个调用点，不是两道会各自漂移的门。证据：`tests/poi-identity.test.js` 14 例在 node 里跑完真世界后断言整张表（含"把全部 label 换成乱码，id 与交互结果一模一样"这条正面证据）；变异验证 —— 贴回 `options.id ?? \`${this.id}-${label}\`` 并关掉 kebab 校验后，缺 id 与非法 id 两例变红 |
+| B44（命名半区） | `src/` 全局 71 个事件名 | 派发与监听是**两次独立的手抄**，抄错不报错、只是下游永远醒不过来。动手前抓到的三条活病例：① `CgGallerySystem` 监听 `dungeon-room-clear`，派发方发的是 `dungeon-room-cleared` → 「副本清房」这张 CG **从此不可能解锁**；② `VoidBoss` 两处派发 `time-stop-end`，全仓无人监听 → HUD 的「⏳ 时停中」写上区副标题后**再也不会落回去**（要等下次换区才被顶掉）；③ `dungeon-enter` 从不带 `rerun`，HUD 却按它弹「深渊再探」→ 那条提示**永远不出现**。三条的共同点是：运行期零异常，只有"内容没了" | 新增 `src/engine/events.js`：71 条登记（每条 `desc` + `payload` 形状，16 条无监听者的**逐条写明为什么没人听也不影响表现**），营火对话的派生名收进 `REST_DIALOGUE_EVENTS`，`RestDialogue._emit` 改为**查表取名**并对非法阶段直接抛错。门禁 `tests/event-registry.test.js` 12 例：未登记名字硬零、登记表无死条目、`payload: null` ⇔「没人带 detail」双向对齐、hook ⇔ 无监听者双向对齐、登记表与条目双双冻结、**模板字符串拼事件名 0 处**、三条病例各钉一条回归。变异验证 8 项全部变红（CG 监听名退回 / 删一条在用登记 / 加一条不存在登记 / 带负载谎称 null / 无负载谎称有 / 有人监听却挂 hook / 对话退回模板字符串 / 撤掉 `time-stop-end` 监听）。浏览器端（`vite preview` :4181，构建产物）实测：派发 `dungeon-room-cleared` 当场得到 `cg-unlocked bonus:dungeon-clear@dungeon`（修前该位点无人响应）；`time-stop-start` → 副标题为「⏳ 时停中…」，`time-stop-end` → **落回区权威副标题**，而先 `realm-bleed` 后 `time-stop-end` 时渗漏文本保留（覆盖层带来源，谁开的谁关）；fresh 页面派发不带 `rerun` 的 `dungeon-enter` 无提示、带 `rerun: true` 的弹出「深渊再探」。副标题三个写者（区切换 / 位面渗漏 / 时停）改为经 HUD 的唯一写入口 `_renderZoneSubtitle()`，覆盖层优先、撤掉后自动落回 |
 
 
 ---
@@ -181,7 +183,7 @@
 | 内容量 | 12+ 种敌人（各 ≥3 招）、6 个 Boss（各 3 真实阶段 + 场地机制）、15+ 支线、3–5 小时通关 |
 | 战斗深度 | 装备 + 词缀 + 稀有度、3 条技能树（各 ≥10 节点）、难度 3 档 |
 | 视听 | ≥ 20 个真实骨骼动画、区域 BGM + 分层环境音 + 全动作音效；材质含 normal/roughness |
-| 架构 | 子系统 ≤ 40；事件名收敛到 1 个可注销类型化总线；**0 处中文显示名匹配**（后半已于 2026-09-23 达成并由静态门禁兜住） |
+| 架构 | 子系统 ≤ 40；事件名收敛到 1 个可注销类型化总线（**名字侧已达成**：71 条全部登记在 `engine/events.js`，0 个未登记名、0 个死条目，2026-09-23 切片5；**可注销侧未做**，见 B44 剩余）；**0 处中文显示名匹配**（2026-09-23 达成并由静态门禁兜住） |
 | 可访问性 | 键位重映射、字幕、色盲友好 HUD、纯键盘可达全部 UI |
 
 ---
@@ -194,7 +196,7 @@
 
 | 编号 | 工作包 | 规模 | 依赖 | 状态 |
 |------|--------|------|------|------|
-| W-A1 | 计时与事件收口（游戏逻辑 `setTimeout` → 主循环 dt；每帧事件改变化派发） | M | — | 🔶 `setTimeout` 与特效自建 rAF 都已归零（B39 / B41 / B43）；仅剩 B44 —— 事件名仍是裸字符串、无 `engine/events.js` 总线、监听器基本不注销 |
+| W-A1 | 计时与事件收口（游戏逻辑 `setTimeout` → 主循环 dt；每帧事件改变化派发） | M | — | 🔶 `setTimeout` 与特效自建 rAF 都已归零（B39 / B41 / B43）；事件名的集中登记与静态门禁已落地（B44 命名半区，切片5）；**只剩监听器注销**（总线的 `on()/emit()/offAll`，切片6） |
 | W-A2 | 区域身份接口化（`Zone.id`、消 57 处中文匹配、修 B35） | M | — | ✅ 切片1/2/3 完成（B35 / B36 / B42 / B45 关闭）；W-A2 收口，唯一尾巴是 `RestDialogue.js` 的第四份营火名（归 W-B4） |
 | W-A3 | 世界空间 UI billboard 化（敌人血条 / 锁定标记 / 预警圈） | S | — | ⬜ |
 | W-A4 | 战斗取消关系与输入缓冲（连段可取消、翻滚打断、0.15s 输入队列） | M | W-A1 | ⬜ |
@@ -305,7 +307,7 @@ Phase D（系统与质量）
 1. 新代码一律 ESM + JSDoc；`engine/` 目录开 `// @ts-check` 渐进约束（不做全量 TS 迁移）。
 2. **游戏逻辑禁用 `setTimeout` / `setInterval`**，统一走 `engine/Time.js` 的 dt（音频音序与 CSS 过渡除外，且须注明理由）。
 3. 任何 `new THREE.*Geometry/Material` 必须来自共享库或池；实体 `dispose()` 与 `remove()` 成对出现。
-4. 事件名常量化在 `src/engine/events.js`，禁止裸字符串；监听器必须在系统 `dispose()` 中注销。
+4. 事件名常量化在 `src/engine/events.js`，禁止裸字符串；监听器必须在系统 `dispose()` 中注销。**前半已落地并由门禁兜住**（W-A1 切片5：71 条登记 + `tests/event-registry.test.js` 的硬零断言，模板串拼事件名同样禁止）；**后半未做** —— 游戏事件监听 151 处 / 注销 0 处，归 B44 剩余与切片6。
 5. 内容（数值、文案、布局）不写在逻辑文件里。
 6. **中文显示名只用于 UI 文本，逻辑判断一律用 `id`**。已由 `tests/content-boundary.test.js` 兜住（静态扫描 + 硬零断言，不留存量白名单；W-A2 切片1 落地时原计划的 lint 规则改走这条，理由见 §9）。
 7. 三条硬性约束（承自 M0，仍然有效）：
@@ -336,7 +338,7 @@ Phase D（系统与质量）
 
 | 编号 | 工作包 | 状态 | 完成日期 | 提交 | 备注 |
 |------|--------|------|----------|------|------|
-| W-A1 | 计时与事件收口 | 🔶 计时全部收口（B39/B41/B43） | 2026-09-23 | `95c0533` + 收尾 `4f1adc6` + 切片4 `def9f8d` | 游戏逻辑 `setTimeout` 28 → 0（`Scheduler`，21 处调用点 / 11 文件）；每帧 `stamina/mana` 事件改 `Observable`（B41）；切片4 把 4 条特效自建 rAF（`ExecutionEffects` ×3 + `WeatherSystem` 涟漪）改主循环 dt，并把计时门禁扩到 `requestAnimationFrame`（白名单 4 处 + `rAF-EXCEPTION` 标记双向对齐，B43 关闭）。**尾巴只剩 B44**：事件名裸字符串与注销（`engine/events.js` 仍未建） |
+| W-A1 | 计时与事件收口 | 🔶 计时收口 + 事件名收口（B39/B41/B43/B44 命名半区） | 2026-09-23 | `95c0533` + 收尾 `4f1adc6` + 切片4 `def9f8d` + 切片5 `bf93a4c` | 游戏逻辑 `setTimeout` 28 → 0（`Scheduler`，21 处调用点 / 11 文件）；每帧 `stamina/mana` 事件改 `Observable`（B41）；切片4 把 4 条特效自建 rAF（`ExecutionEffects` ×3 + `WeatherSystem` 涟漪）改主循环 dt，并把计时门禁扩到 `requestAnimationFrame`（白名单 4 处 + `rAF-EXCEPTION` 标记双向对齐，B43 关闭）。切片5：`engine/events.js` 建立，71 个事件名全部登记（用途 + 负载形状 + 16 条无监听者理由），静态门禁 `tests/event-registry.test.js` 12 例把"抄错名字"变成构建期红；顺带修掉三条因此静默失踪的内容（CG `bonus:dungeon-clear`、时停副标题、深渊再探提示），三条都在浏览器里复读过。**尾巴只剩监听器注销**：151 个游戏事件监听位点、0 个注销位点，总线 `on()/emit()/offAll(tag)` 与各系统 `dispose()` 归切片6 |
 | W-A2 | 区域身份接口化 | ✅ 切片1/2/3 完成 | 2026-09-23 | 切片1 `c4e859a`；切片2 `b4a8416`；切片3 `16edb9e`（收尾见 `4f1adc6` 与本批 docs 回填） | 切片1：`world/ZoneIdentity.js` + `content/franchises.js`，B35 伪对象、B36 的 57 处中文匹配、B42 区域提示门控关闭，`src/` 内中文显示名逻辑判定归零并上静态门禁。切片2：快速旅行目的地与面板"在此"改按 id 认领、`addRestPoint` 缺/重 id 构建期抛错、营火名表与任务区名的第二真源删除、效果层与天气层换成 `ZONE_IDS` 符号；`tests/fast-travel.test.js` 17 例（含变异验证）。切片3：`addPOI` 的 id 回退删除 —— 缺 / 非法 / 重复 id 在世界构建期抛错，56 条位面 POI 与 2 条 hub 记录（共 **58** 条）全部带 kebab-case id，`WorldManager.assertPoiIdentity()` 在 `build()` 与 `attachPopCultureZones()` 收口；`tests/poi-identity.test.js` 14 例在 node 里跑真世界断言整张表（B45 关闭）。**遗留（不属于本包）**：`RestDialogue.js` 的营火标题仍是各写一份的文案（'世界之锚营火' vs 营火实际名 '世界之锚休息点'、'魔法遗境营火' vs 区名 '霍格沃兹遗境'）—— 那是对话树的显示文案，归 W-B4 统一，不在本包偷改 |
 | W-A3 | 世界空间 UI billboard 化 | ⬜ | | | |
 | W-A4 | 战斗取消关系与输入缓冲 | ⬜ | | | |
@@ -422,3 +424,13 @@ Phase D（系统与质量）
   - **行为增量（玩家会看到的差别）**：① 144Hz 玩家第一次看到设计时长的处决特效（碎片从约 0.15 秒回到 0.35~0.6 秒，涟漪从约 0.07 秒回到 0.25 秒）；30Hz 玩家不再看到拖到 0.7 秒的残影。② hitstop / 慢动作期间，冲击环与碎片**一起变慢** —— 这是手感层面真正的改动，过去那一圈环是自说自话地按墙钟跑完的。③ 后台标签页里 rAF 停摆，特效因此停在原地而不是"切回来时发现已经演完了"。④ 未改的语义如实记录：`executionFx.update(dt)` 与 `combatFeedback` / `damageNumbers` 同层，在 `canPlay` 门控**之外**，所以打开对话框时特效仍会走完 —— 与修前一致，改它属于"暂停时世界要不要冻住"那个更大的决定，不在本片偷改。
   - **浏览器读数的限制（写清楚，别冒充成跑过真实帧）**：本次用的 in-app 浏览器视口 0×0 且处于隐藏态，rAF 停摆 —— `game.time.rawDt` 在 600ms 等待后仍是 `0`、`elapsed` 仍是 `0`，也就是说**主循环一帧都没走**。所以浏览器侧只做了"手推 `update(dt)`"的读数：`burst(..., 'execution')` 出 18 条条目、按 1/60 步进 32 帧（0.533 秒）排空、`group.children` 归 0；`'bossKill'` 出 30 条。真实帧下的表现由测试里的 dt 断言与接线断言承担，不写成"浏览器已验证"。
   - **放弃了什么**：① 没给 `ExecutionEffects` 上对象池 —— 一次 bossKill 30 个网格，每条寿命 ≤0.6 秒，池化属于 M4 的"特效池与资源生命周期"整包（W-C 段），单独立在这里会让本片从"改计时"变成"改分配"。② 没动 `AudioManager` 的 4 处 `setTimeout` + 2 处 `setInterval`（B38 / W-C7）：那是给 Web Audio 调度时间，量得就不是世界时间。③ `WeatherSystem` 里雪花摆动仍读 `performance.now()` 作相位源 —— 它是装饰性相位，不参与寿命与物理，改它要给天气加一个累加时间字段，收益不及"多一处状态要管"。这条留在记录里，若后续做天气重做一并处理。
+
+- **2026-09-23 W-A1 切片5：事件名登记表与静态门禁（修 B44 命名半区）** —— 提交 `bf93a4c`
+  - **为什么**：`new CustomEvent('a')` 与 `addEventListener('b')` 是**两次独立的手抄**，中间没有任何东西把它们对上 —— 抄错不会报错，只会让下游永远醒不过来。这不是理论风险，动手前扫出来的三条实物病例（`dungeon-room-clear` vs `dungeon-room-cleared` 让一张 CG 永久锁死、`time-stop-end` 无人监听让 HUD 副标题永久挂在「⏳ 时停中」、`dungeon-enter` 从不带 `rerun` 让「深渊再探」提示永不出现）没有一条会在控制台留下痕迹。同一个形状和 B36（中文显示名判定）、B45（POI id 回退）是**同一类病灶**：稳定身份靠人肉复制，于是它一定会漂移。规范第 4 条要求的"既定事件"要有单一出处，到这里还欠着。
+  - **交付**：新增 `src/engine/events.js`（357 行）—— 71 个事件名按域分组登记，每条带 `desc`（这条是谁发给谁用的）与 `payload`（`detail` 顶层形状，`null` 表示纯信号），16 条**在仓库内确实没有监听者**的挂 `hook` 并逐条写明"为什么没人听也不影响表现"（例：`game-saved` 的提示与失败上报由 `SaveSystem` 自己做完，这条只是给外部（云存档 / 统计）留的出口，仓库内没有监听点）。`Object.freeze` 只冻一层，所以条目本身也逐条冻 —— 否则"改登记"还能从 `payload` 溜过去。营火对话的派生名收进 `REST_DIALOGUE_EVENTS`，`RestDialogue._emit()` 改为**查表取名**，未知阶段直接抛错（原来那句按 `phase` 拼接的模板串，写错就是一个静默失踪的 CustomEvent，扫描工具还看不见它）。派发侧补齐 `dungeon-enter` 的 `rerun` 字段。HUD 的区副标题有了唯一写入口 `_renderZoneSubtitle()`，三个写者（区切换 / 位面渗漏 / 时停）里后两者变成**带来源的覆盖层**，`_clearSubtitleOverlay(source)` 只允许开它的那一路关它 —— 所以"时停结束"不会把渗漏提示一起撤掉，而换区作为权威重写会把覆盖层作废。
+  - **门禁与防假绿**：`tests/event-registry.test.js` 12 例，剥掉注释与字符串后扫 `src/**`，断言：代码里出现的每个自定义事件名都已登记（**硬零**，抄错当场变红）、登记表里没有死条目、`payload: null` ⇔「没有任何派发位点带 `detail`」**双向**对齐、`hook` ⇔「无监听者」双向对齐（且理由必须写满 12 字，防"占位式理由"）、登记表与条目冻结、动态事件名只允许 `REST_DIALOGUE_EVENTS` 一个来源、**模板字符串拼事件名的位点为 0**、三条病例各钉一条回归。扫描器**不认登记表自身**（`SELF = 'engine/events.js'`），否则每条登记都自证在场，门禁当场失效。该提交时点：**394 例 / 29 文件**全绿，lint 0 error / 10 warning（两个新文件不添告警），构建通过。
+  - **变异验证 8 项，以及一次"绿色骗人"**：CG 监听名退回 / 从登记表删一条仍在用的 / 加一条代码里不存在的 / 带负载的登记谎称 `payload: null` / 无负载的谎称有 / 有人监听却挂 `hook` / 对话退回模板字符串 / 撤掉 `time-stop-end` 监听 —— 最终全部变红。但这个结论是**第二次**才拿到的：第一版跑法用 python 抓 vitest 输出里的 `Tests N failed`，而 vitest 会在 `Tests` 与数字之间插 ANSI 转义，正则永不命中，于是**8 项全部误报 GREEN**，其中包括第 5 项（它当时确实是真的漏了）。改法是把转义序列先剥掉再匹配，重跑得 7 红 1 绿，那 1 绿是真的：`dynamicDispatches` 那条只比对"哪个文件里有动态名"，模板串形态仍然算"同一个文件的动态位点"，所以门禁没咬住 —— 于是补了"模板位点必须为 0 + 那份代码必须仍是查表"两条断言，重跑第 5 项转红。**教训与本文件 §0.3 同源：验证工具自己坏了的时候，它会报告一切正常。**另记一笔同因的事故：收尾时用 `python step.py -1` 想"还原全部"，而 `-1` 在 python 里是合法的**倒序索引**，于是还原后立刻又施加了一次变异；靠 `||` 短路侥幸没扩大影响，事后逐文件 grep 核对才确认工作区干净。本项目禁用 `git stash`，变异副本一律走临时目录。
+  - **行为增量（玩家会看到的差别）**：① 图鉴里的「副本清房」这张 CG **第一次可能解锁**（修前那个监听名没人派发，属于纯失踪内容）。② 时停结束后区副标题落回区域本名，不再长期显示「⏳ 时停中 — 蓄力法术可打断」；Boss 死在时停里也有一条收口路径（那种情况下不会再派发 `time-stop-end`，所以 `boss-defeated` 里显式撤覆盖层）。③ 二周目进副本会弹「深渊再探 — 新随机布局已生成」，修前这条提示从未出现过。④ 对开发者：任何新代码抄错事件名，`npm test` 直接红，而不是等某个下游静默失效。
+  - **浏览器实测（构建产物 `vite preview` :4181，与上面的测试口径互补）**：三条病例逐个在页面里复核过 —— 派发 `dungeon-room-cleared` 当场收到 `cg-unlocked`，`detail.id = 'bonus:dungeon-clear'`、`source = 'dungeon'`；`time-stop-start` 后 `#zone-subtitle` 为「⏳ 时停中…」，`time-stop-end` 后落回派发的那条区副标题，而先 `realm-bleed` 再 `time-stop-end` 时渗漏文本**保留**（来源门控生效）；fresh 页面上派发不带 `rerun` 的 `dungeon-enter` 无提示、带 `rerun: true` 的弹出「深渊再探」（第一次测时两条连着发，第二条被第一条 toast 的 2.6 秒存续期盖住，成了假阳性 —— reload 后分开测才作数）。控制台无异常，只剩该环境固有的 WebGL 零尺寸帧缓冲告警。
+  - **放弃了什么**：① **不做 `detail` 键级精确校验**。登记里写的是"所有派发位点的并集"，消费侧一律按可选读；想把"读了没登记的键"也钉成静态断言，得靠自己手搓一份解析去判断"这处 `e.detail.xxx` 走的是哪条派发"，实测会产生假阳性 —— 一条假阳性的门禁比没有门禁更糟（它会教人忽略它）。键级校验等切片6 的 `emit()` 有了运行期咽喉之后再做。② **不在本片动监听器注销**。151 个游戏事件监听位点 vs **0** 个游戏事件注销位点（全仓 3 处 `removeEventListener` 都是 DOM 事件）是个更大的结构性欠账，它要的是 `on()/emit()/offAll(tag)` 总线加各系统 `dispose()` 的逐处接线，跟"名字登记"是两件事；合起来做会把一件已能验证的事拖成一件不能验证的事（与切片1 放弃 lint 规则同一条判断）。③ `ui/QuestAssistant.js` 直接派发 `enemy-defeated` / `dungeon-cleared` / `combat-hit` / `npc-talk` 等**玩法事件**：那是"任务助手"这个玩家可见捷径的既定设计（自动通关时替玩家补事件），不改它，只在登记里如实写明这条事件的第二个生产者。④ 没有给 `GAME_EVENTS` 生成 TS 类型或枚举包装 —— 项目无 TS，登记表的约束力来自门禁而不是类型。
+  - **留了什么尾巴（切片6 的清单）**：① 监听器注销与总线（`on()/emit()/offAll(tag)`），以及"系统重建后旧实例还在响应事件"这类双份响应的显式验证；② `payload` 键级的运行期校验（在 `emit()` 里断言，开发期抛错）；③ HUD 那三十来处 `window.addEventListener` 目前没有退订路径，`dispose()` 只退订了 `Observable`（`_offs`）—— 切片6 要把它统一成同一套登记 + 退订；④ `dungeon-room-clear` 这类错误名字在旧记录与注释里还可能出现，登记表是唯一的现在时。
