@@ -321,8 +321,10 @@ export class QuestAssistant {
     if (!q) return;
     const wp = this.game.quests.getQuestWaypoint();
 
-    if (q.type === 'interact' && wp?.label?.includes('世界之锚')) {
-      window.dispatchEvent(new CustomEvent('poi-interact', { detail: { id: q.targetId ?? 'hub-anchor' } }));
+    if (q.type === 'interact' && q.targetId) {
+      // 修 B36：以前靠路点 label 里有没有「世界之锚」来决定要不要代发交互事件，
+      // 现在与下面的 discovery 分支同构 —— 只认任务自己的 `targetId`。
+      window.dispatchEvent(new CustomEvent('poi-interact', { detail: { id: q.targetId } }));
     } else if (q.type === 'discovery' && q.targetId) {
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: q.targetId, title: q.title, text: q.desc } }));
     } else if (q.type === 'hits') {

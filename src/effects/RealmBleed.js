@@ -19,22 +19,12 @@ export class RealmBleed {
 
     window.addEventListener('zone-changed', (e) => {
       if (e.detail.initial) return;
-      const name = e.detail.zone?.name ?? '';
-      const key = this.zoneKey(name);
+      // 修 B36：渗漏色按 id 取，认不出的 id（走廊、未来的新区）走中性 'wild'
+      const key = ZONE_TINT[e.detail.zoneId] ? e.detail.zoneId : 'wild';
       if (key === this.lastKey) return;
       this.lastKey = key;
-      this.pulse(key, name);
+      this.pulse(key, e.detail.zone?.name ?? '');
     });
-  }
-
-  zoneKey(name) {
-    if (name.includes('森林') || name.includes('灰白')) return 'fantasy';
-    if (name.includes('魔法') || name.includes('霍格')) return 'magic';
-    if (name.includes('米勒') || name.includes('星际')) return 'space';
-    if (name.includes('时线') || name.includes('破碎')) return 'void';
-    if (name.includes('混沌') || name.includes('边境')) return 'abyss';
-    if (name.includes('枢纽') || name.includes('锚')) return 'hub';
-    return 'wild';
   }
 
   pulse(key, zoneName) {

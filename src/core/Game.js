@@ -109,6 +109,7 @@ import { attachPopCultureZones } from '../world/PopCultureZoneEnhancer.js';
 import { attachPopCultureCgRenderer } from '../ui/DialogCGRendererPopCulture.js';
 import { attachPopCultureSideQuests } from '../game/SideQuestPopCulture.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
+import { ZONE_IDS } from '../world/ZoneIdentity.js';
 export class Game {
   constructor(container) {
     this.clock = new THREE.Clock();
@@ -319,13 +320,8 @@ export class Game {
     });
     window.addEventListener('spell-toast', (e) => this.dialog.toast(e.detail.message));
     window.addEventListener('zone-changed', (e) => {
-      const name = e.detail.zone?.name ?? '';
-      let zone = 'hub';
-      if (name.includes('森林') || name.includes('灰白')) zone = 'fantasy';
-      else if (name.includes('魔法') || name.includes('霍格')) zone = 'magic';
-      else if (name.includes('米勒') || name.includes('星际')) zone = 'space';
-      else if (name.includes('时线') || name.includes('破碎')) zone = 'void';
-      else if (name.includes('混沌') || name.includes('边境')) zone = 'abyss';
+      // 区域 id 由世界层给出（修 B36：这里以前是一串 `name.includes('米勒')` 式的中文匹配）
+      const zone = e.detail.zoneId;
       this.worldEffects.setZone(zone, this.player.position);
       this.weather.setZone(zone);
       this.worldAmbient?.setZone(zone);
@@ -350,18 +346,8 @@ export class Game {
     });
     window.addEventListener('game-audio-mode', (e) => {
       const mode = e.detail.mode;
-      if (mode === 'zone') {
-        const name = this.world.currentZone?.info?.name ?? '';
-        let zone = 'hub';
-        if (name.includes('森林') || name.includes('灰白')) zone = 'fantasy';
-        else if (name.includes('魔法') || name.includes('霍格')) zone = 'magic';
-        else if (name.includes('米勒') || name.includes('星际')) zone = 'space';
-        else if (name.includes('时线') || name.includes('破碎')) zone = 'void';
-        else if (name.includes('混沌') || name.includes('边境')) zone = 'abyss';
-        this.audio.setMode('zone', zone);
-      } else {
-        this.audio.setMode(mode);
-      }
+      if (mode === 'zone') this.audio.setMode('zone', this.world.zoneId);
+      else this.audio.setMode(mode);
     });
     window.addEventListener('game-audio-sfx', (e) => {
       const fn = e.detail.sfx;
@@ -572,11 +558,9 @@ export class Game {
     this.restCampfireAmbient?.update(dt, this.player.position);
     this.restPointEnhancer?.update(dt, this.player.position);
     this.soulWisps.update(dt, this.player.position);
-    const zn = this.world.currentZone?.info?.name ?? '';
-    const inVoid = zn.includes('时线') || zn.includes('破碎');
-    const inAbyss = zn.includes('混沌') || zn.includes('边境');
-    this.voidEcho.update(dt, this.player.position, this.player.yaw, inVoid);
-    this.chaosLightning.update(dt, this.player.position, inAbyss);
+    const zoneId = this.world.zoneId;
+    this.voidEcho.update(dt, this.player.position, this.player.yaw, zoneId === ZONE_IDS.VOID);
+    this.chaosLightning.update(dt, this.player.position, zoneId === ZONE_IDS.ABYSS);
     this.restPoints.update(dt);
     this.npcs.update(dt);
     this.hud.update(dt);
@@ -598,9 +582,9 @@ export class Game {
 
   updateBloom() {
     const base = this.settings.get('bloomStrength');
-    const z = this.world.currentZone?.info?.name ?? '';
-    if (z.includes('魔法') || z.includes('霍格')) this.bloomPass.strength = base + 0.2;
-    else if (z.includes('米勒')) this.bloomPass.strength = base + 0.1;
+    const zoneId = this.world.zoneId;
+    if (zoneId === ZONE_IDS.MAGIC) this.bloomPass.strength = base + 0.2;
+    else if (zoneId === ZONE_IDS.SPACE) this.bloomPass.strength = base + 0.1;
     else this.bloomPass.strength = base;
   }
 

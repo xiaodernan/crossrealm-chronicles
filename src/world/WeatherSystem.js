@@ -88,16 +88,16 @@ export class WeatherSystem {
     }
   }
 
-  setZone(zoneName) {
-    const preset = ZONE_PRESETS[zoneName] ?? ZONE_PRESETS.hub;
-    if (preset.kind === this.preset?.kind && zoneName === this.zone) return;
-    this.zone = zoneName;
+  setZone(zoneId) {
+    const preset = ZONE_PRESETS[zoneId] ?? ZONE_PRESETS.hub;
+    if (preset.kind === this.preset?.kind && zoneId === this.zone) return;
+    this.zone = zoneId;
     this.preset = preset;
     this._buildParticles(preset);
 
     const fog = this.scene.fog;
     if (fog?.isFogExp2) {
-      const base = zoneName === 'space' ? 0.0028 : zoneName === 'abyss' ? 0.0045 : 0.0038;
+      const base = zoneId === 'space' ? 0.0028 : zoneId === 'abyss' ? 0.0045 : 0.0038;
       fog.density = base + (preset.fogBoost ?? 0);
     }
   }

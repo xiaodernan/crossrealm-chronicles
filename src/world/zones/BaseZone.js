@@ -10,6 +10,12 @@ export class BaseZone {
     scene.add(this.group);
 
     this.info = config.info;
+    /**
+     * 区域的稳定身份（`world/ZoneIdentity.js`）。id 缺失是接线错误而不是可容忍的
+     * 疏漏：所有按 id 找区、判分支的代码会静默落到 UNKNOWN，所以在这里当场喊出来。
+     */
+    this.id = this.info?.id ?? null;
+    if (!this.id) console.warn(`[zone] ${this.constructor.name} 没有 info.id —— 逻辑将无法按区域分支（修 B36）`);
     this.fogColor = config.fogColor ?? 0x888888;
     this.fogDensity = config.fogDensity ?? 0.008;
     this.skyColor = config.skyColor ?? 0x87a8c4;
@@ -62,7 +68,9 @@ export class BaseZone {
     const ly = position.y ?? this.sampleHeight(lx, lz);
 
     const poi = {
-      id: `${this.info.name}-${label}`,
+      // 原先用 `${info.name}-${label}`，把显示名嵌进了 id。这里改用区域 id 前缀；
+      // 任务与发现系统认的是各自显式 targetId（如 'fantasy-ring'），不依赖这个回退值。
+      id: options.id ?? `${this.id}-${label}`,
       position: new THREE.Vector3(this.center.x + lx, ly, this.center.z + lz),
       label,
       onInteract,

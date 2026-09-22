@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { ZONE_IDS } from '../world/ZoneIdentity.js';
 
 /** 区域氛围粒子 + 营火光晕增强 */
 export class AmbientScenePass {
@@ -49,14 +50,18 @@ export class AmbientScenePass {
   }
 
   setupZoneListener() {
+    // 修 B36：`includes('魔法')` 这条分支此前**从未命中** —— 魔法区叫「霍格沃兹遗境」，
+    // 名字里没有"魔法"两个字，紫色尘光只在旧存档的"魔法遗境"名下才可能出现。
+    // 换成 id 之后它第一次真的生效。认不出的 id（走廊）走中性色。
+    const dustColor = {
+      [ZONE_IDS.MAGIC]: 0xccaaee,
+      [ZONE_IDS.SPACE]: 0x88aacc,
+      [ZONE_IDS.VOID]: 0xc9a962,
+      [ZONE_IDS.ABYSS]: 0xff6688,
+      [ZONE_IDS.FANTASY]: 0xaaccaa,
+    };
     window.addEventListener('zone-changed', (e) => {
-      const name = e.detail.zone?.name ?? '';
-      if (name.includes('魔法')) this.dust.material.color.setHex(0xccaaee);
-      else if (name.includes('米勒') || name.includes('星际')) this.dust.material.color.setHex(0x88aacc);
-      else if (name.includes('时线')) this.dust.material.color.setHex(0xc9a962);
-      else if (name.includes('混沌')) this.dust.material.color.setHex(0xff6688);
-      else if (name.includes('森林')) this.dust.material.color.setHex(0xaaccaa);
-      else this.dust.material.color.setHex(0xc9d8e8);
+      this.dust.material.color.setHex(dustColor[e.detail.zoneId] ?? 0xc9d8e8);
     });
   }
 

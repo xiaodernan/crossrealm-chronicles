@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
+import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
 
 /** 星际穿越风格 — 冰云行星、引力透镜、五维书架彩蛋 */
 export class SpaceZone extends BaseZone {
@@ -11,7 +12,8 @@ export class SpaceZone extends BaseZone {
       skyColor: 0x050810,
       mapColor: '#2a4a6a',
       info: {
-        name: '米勒荒原',
+        id: ZONE_IDS.SPACE,
+        name: ZONE_NAMES[ZONE_IDS.SPACE],
         subtitle: '星际位面 · 星际穿越',
         description:
           '引力异常扭曲的荒原。巨大的黑洞透镜悬于天际，冰云在地表流动。传说五维空间的书架藏于此处，记录着所有位面的命运。',

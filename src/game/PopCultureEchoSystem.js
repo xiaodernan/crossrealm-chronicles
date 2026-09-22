@@ -1,4 +1,5 @@
 import { POP_CULTURE_ECHOES } from './PopCultureHomageRegistry.js';
+import { franchiseLabel } from '../content/franchises.js';
 
 /** 次元回声解锁 — 发现 POI / 致敬点时写入 */
 export class PopCultureEchoSystem {
@@ -27,7 +28,7 @@ export class PopCultureEchoSystem {
       this.game.storyJournal?.add?.({
         id: echo.id,
         category: 'fragment',
-        title: `[${echo.franchise}] ${echo.title}`,
+        title: `[${franchiseLabel(echo.franchise)}] ${echo.title}`,
         text: echo.desc,
         chapter: this.game.quests?.chapter ?? 1,
       });

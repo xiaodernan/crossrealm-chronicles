@@ -13,15 +13,10 @@ export class ZoneTransitionFX {
 
   setupListeners() {
     window.addEventListener('zone-changed', (e) => {
-      const name = e.detail.zone?.name ?? '';
-      let zone = 'hub';
-      if (name.includes('森林') || name.includes('灰白')) zone = 'fantasy';
-      else if (name.includes('魔法') || name.includes('霍格')) zone = 'magic';
-      else if (name.includes('米勒') || name.includes('星际')) zone = 'space';
-      else if (name.includes('时线') || name.includes('破碎')) zone = 'void';
-      else if (name.includes('混沌') || name.includes('边境')) zone = 'abyss';
+      // 分支取 id（修 B36），显示名只当文案用
+      const zone = e.detail.zoneId;
       if (zone === this.lastZone) return;
-      this.play(zone, name);
+      this.play(zone, e.detail.zone?.name ?? '');
       this.lastZone = zone;
     });
   }

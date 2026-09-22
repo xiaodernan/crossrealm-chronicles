@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
+import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
 
 /** 第四主题：破碎时线 — 指环王 + 星际穿越时间主题融合 */
 export class VoidZone extends BaseZone {
@@ -11,7 +12,8 @@ export class VoidZone extends BaseZone {
       skyColor: 0x121018,
       mapColor: '#8a7a50',
       info: {
-        name: '破碎时线',
+        id: ZONE_IDS.VOID,
+        name: ZONE_NAMES[ZONE_IDS.VOID],
         subtitle: '第四位面 · 时间裂隙',
         description:
           '世界之锚飞升后才会显现的隐藏位面。金色时环悬浮于虚空，过去与未来在此重叠。时线执政官守护着「第四枚碎片」。',

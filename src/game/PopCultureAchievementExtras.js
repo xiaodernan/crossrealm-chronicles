@@ -1,4 +1,5 @@
-/** 次元回声相关成就 */
+/** 次元回声相关成就 —— 母题分组只认 `src/content/franchises.js` 里的 id（修 B36） */
+import { FRANCHISE } from '../content/franchises.js';
 
 export const ACHIEVEMENTS_POP_CULTURE = [
 
@@ -22,7 +23,24 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-wave4', title: '四系同频', desc: 'Wave4 四系列全共鸣', check: (s) => (s.echoCyber ?? 0) >= 3 && (s.echoSamurai ?? 0) >= 3 && (s.echoCosmic ?? 0) >= 3 && (s.echoStarport ?? 0) >= 3 },
 ];
 
-
+/**
+ * 成就统计按母题 id 分桶。
+ *
+ * 写成「一张表 + 一次循环」而不是十二行 `filter`：门限值由 `tests/pop-culture-content.test.js`
+ * 拿目录实际条数核对，母题改名只会动 `franchises.js` 一处。
+ */
+export const ECHO_FRANCHISE_BUCKETS = [
+  ['echoWizard', FRANCHISE.WIZARD],
+  ['echoSpace', FRANCHISE.INTERSTELLAR],
+  ['echoUpside', FRANCHISE.UPSIDE],
+  ['echoWestern', FRANCHISE.BORDER],
+  ['echoGangster', FRANCHISE.FAMILY],
+  ['echoSciFi', FRANCHISE.DEEPSPACE],
+  ['echoCyber', FRANCHISE.CYBER],
+  ['echoSamurai', FRANCHISE.SAMURAI],
+  ['echoCosmic', FRANCHISE.COSMIC],
+  ['echoStarport', FRANCHISE.STARPORT],
+];
 
 export function attachPopCultureAchievements(ach) {
 
@@ -36,27 +54,14 @@ export function attachPopCultureAchievements(ach) {
 
     ach.stats.echoPercent = stats.percent;
 
-    const entries = sys.getEntries('all');
+    const unlocked = sys.getEntries('all').filter((e) => sys.unlocked.has(e.id));
 
-    const unlocked = entries.filter((e) => sys.unlocked.has(e.id));
-
-    ach.stats.echoWizard = unlocked.filter((e) => e.franchise === '魔法学院').length;
-
-    ach.stats.echoSpace = unlocked.filter((e) => e.franchise === '星际穿越').length;
-
-    ach.stats.echoUpside = unlocked.filter((e) => e.franchise === '逆相界').length;
-    ach.stats.echoWestern = unlocked.filter((e) => e.franchise === '边境往事').length;
-    ach.stats.echoGangster = unlocked.filter((e) => e.franchise === '幽冥帮派').length;
-    ach.stats.echoSciFi = unlocked.filter((e) => e.franchise === '深空纪元').length;
-    ach.stats.echoCyber = unlocked.filter((e) => e.franchise === '赛博霓虹').length;
-    ach.stats.echoSamurai = unlocked.filter((e) => e.franchise === '武士残响').length;
-    ach.stats.echoCosmic = unlocked.filter((e) => e.franchise === '旧日低语').length;
-    ach.stats.echoStarport = unlocked.filter((e) => e.franchise === '星港商路').length;
+    for (const [key, franchise] of ECHO_FRANCHISE_BUCKETS) {
+      ach.stats[key] = unlocked.filter((e) => e.franchise === franchise).length;
+    }
 
     ach.checkAll();
 
   });
 
 }
-
-

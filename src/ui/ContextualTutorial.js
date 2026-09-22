@@ -1,4 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
+import { ZONE_IDS, ZONE_NAMES } from '../world/ZoneIdentity.js';
 
 const STORAGE_KEY = 'crossrealm_contextual_tips';
 /** 队列推进的计时分组 */
@@ -96,18 +97,22 @@ export class ContextualTutorial {
     window.addEventListener('zone-changed', (e) => {
       if (e.detail.initial) return;
       const ch = this.game.quests.chapter;
-      if (ch >= 4 && !this.seen.has('void-zone-tip')) {
+      const zoneId = e.detail.zoneId;
+      // 修 B42：这两条提示此前**完全没看进的是哪个区**，只按章节门控 ——
+      // 第四章后随便走进一个区，就会弹出"破碎时线：重力与视野在此不稳定"。
+      // 现在按区域 id 触发，标题取 `ZONE_NAMES`（显示名只有一份）
+      if (zoneId === ZONE_IDS.VOID && ch >= 4 && !this.seen.has('void-zone-tip')) {
         this.trigger(
           'void-zone-tip',
-          '破碎时线',
+          ZONE_NAMES[ZONE_IDS.VOID],
           '重力与视野在此不稳定。蓄力法术 [按住 1-4] 可打断 Boss 节奏。',
           2500
         );
       }
-      if (ch >= 5 && !this.seen.has('chaos-zone-tip')) {
+      if (zoneId === ZONE_IDS.ABYSS && ch >= 5 && !this.seen.has('chaos-zone-tip')) {
         this.trigger(
           'chaos-zone-tip',
-          '混沌边境',
+          ZONE_NAMES[ZONE_IDS.ABYSS],
           '闪电会随机劈落。击败裂隙领主后，可重复挑战地下城「深渊再探」。',
           2500
         );

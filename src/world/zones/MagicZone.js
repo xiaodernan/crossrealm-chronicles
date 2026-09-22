@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
+import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
 
 /** 哈利波特风格 — 悬浮城堡、魔法光柱、禁林 */
 export class MagicZone extends BaseZone {
@@ -11,7 +12,8 @@ export class MagicZone extends BaseZone {
       skyColor: 0x1a1530,
       mapColor: '#5a3a8a',
       info: {
-        name: '霍格沃兹遗境',
+        id: ZONE_IDS.MAGIC,
+        name: ZONE_NAMES[ZONE_IDS.MAGIC],
         subtitle: '魔法位面 · 哈利波特',
         description:
           '悬浮在夜空的魔法学院残影。移动的楼梯、漂浮的蜡烛、禁林深处的独角兽低语。此处时空法则与其他位面不同。',

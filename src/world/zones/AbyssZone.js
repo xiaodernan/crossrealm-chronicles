@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
+import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
 
 /** 第五主题：混沌边境 — 三界交汇后的不稳定位面 */
 export class AbyssZone extends BaseZone {
@@ -11,7 +12,8 @@ export class AbyssZone extends BaseZone {
       skyColor: 0x120810,
       mapColor: '#6a2040',
       info: {
-        name: '混沌边境',
+        id: ZONE_IDS.ABYSS,
+        name: ZONE_NAMES[ZONE_IDS.ABYSS],
         subtitle: '第五位面 · 诸界裂隙',
         description:
           '四枚碎片重铸后，位面边缘仍不断泄漏混沌能量。熔岩与寒冰并存，是穿越者试炼武器技能树的终极之地。',

@@ -2,16 +2,19 @@ import * as THREE from 'three';
 import { attachPopCultureZonesWave2 } from './PopCultureZoneEnhancerWave2.js';
 import { attachPopCultureZonesWave3 } from './PopCultureZoneEnhancerWave3.js';
 import { attachPopCultureZonesWave4 } from './PopCultureZoneEnhancerWave4.js';
+import { ZONE_IDS, findZoneById } from './ZoneIdentity.js';
 
 /** 各位面追加致敬 POI / 装饰 — 不修改 Zone 源文件 */
 export function attachPopCultureZones(game) {
   const world = game.world;
   if (!world?.zones) return;
 
-  const magic = world.zones.find((z) => z.info?.name?.includes('霍格') || z.info?.subtitle?.includes('哈利'));
-  const space = world.zones.find((z) => z.info?.name?.includes('米勒'));
-  const voidZ = world.zones.find((z) => z.info?.name?.includes('时线'));
-  const fantasy = world.zones.find((z) => z.info?.subtitle?.includes('指环'));
+  // 修 B36：这里曾用 `name.includes('霍格') || subtitle.includes('哈利')` 找区 ——
+  // 一整片致敬 POI 的存在取决于两句字幕文案有没有被改过
+  const magic = findZoneById(world.zones, ZONE_IDS.MAGIC);
+  const space = findZoneById(world.zones, ZONE_IDS.SPACE);
+  const voidZ = findZoneById(world.zones, ZONE_IDS.VOID);
+  const fantasy = findZoneById(world.zones, ZONE_IDS.FANTASY);
 
   if (magic) attachMagicHomage(magic, world, game);
   if (space) attachSpaceHomage(space, world, game);

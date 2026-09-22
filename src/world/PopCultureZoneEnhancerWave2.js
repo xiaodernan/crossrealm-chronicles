@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { ZONE_IDS, findZoneById } from './ZoneIdentity.js';
 
 
 
@@ -12,11 +13,11 @@ export function attachPopCultureZonesWave2(game) {
 
 
 
-  const magic = world.zones.find((z) => z.info?.name?.includes('霍格') || z.info?.subtitle?.includes('哈利'));
+  const magic = findZoneById(world.zones, ZONE_IDS.MAGIC);
 
-  const space = world.zones.find((z) => z.info?.name?.includes('米勒'));
+  const space = findZoneById(world.zones, ZONE_IDS.SPACE);
 
-  const voidZ = world.zones.find((z) => z.info?.name?.includes('时线'));
+  const voidZ = findZoneById(world.zones, ZONE_IDS.VOID);
 
 
 

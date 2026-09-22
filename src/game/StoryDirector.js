@@ -44,7 +44,6 @@ export class StoryDirector {
     window.addEventListener('zone-changed', (e) => {
       if (e.detail.initial) return;
       const zone = e.detail.zone;
-      const zoneKey = zone?.id ?? zone?.name;
       const hooks = {
         hub: '交汇枢纽 — 位面中心。每一次跨区域旅行，锚点都会记录你的足迹。',
         fantasy: '灰白森林弥漫着旧战争的气息。石环与塔楼是 Ch1 碎片的所在。',
@@ -53,7 +52,9 @@ export class StoryDirector {
         void: '时线裂隙与五维碑文在此交汇。Ch4 的真结局隐藏于此。',
         abyss: 'Ch5 终局之地。裂隙领主的竞技场是最后的审判。',
       };
-      const id = zone?.id ?? 'unknown';
+      // 修 B35：去重 key 此前取 `zone?.id ?? 'unknown'`，而枢纽与走廊是伪造对象、
+      // 没有 id —— 于是两者的日志永久落在同一个 'unknown' 上，只有一条进得了日志
+      const id = e.detail.zoneId;
       if (this.shownZones.has(id)) return;
       this.shownZones.add(id);
       const journal = hooks[id];

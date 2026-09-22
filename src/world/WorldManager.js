@@ -8,6 +8,7 @@ import { WorldTerrain } from './WorldTerrain.js';
 import { sampleGlobalHeight, sampleGlobalHeightSmooth, sampleGroundNormal } from './TerrainHeight.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { CollisionWorld } from '../engine/Collision.js';
+import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from './ZoneIdentity.js';
 
 /** 地形网格 520×620，可通行边界留 10 单位余量 */
 export const WORLD_BOUNDS = { minX: -250, maxX: 250, minZ: -300, maxZ: 300 };
@@ -18,9 +19,23 @@ export class WorldManager {
     this.dialog = dialog;
     this.zones = [];
     this.pointsOfInterest = [];
+    /**
+     * 当前区域：一定是带 `id` 的区域对象（五个位面之一，或 `HUB_ZONE` / `CORRIDOR_ZONE`）。
+     * 外部只该问 `zoneId` 与 `zoneInfo`，不要伸手进这个字段改它。
+     */
     this.currentZone = null;
     this.hubPOIs = [];
     this.bounds = WORLD_BOUNDS;
+  }
+
+  /** 当前区域的稳定 id（修 B36：逻辑判据不再是中文显示名） */
+  get zoneId() {
+    return this.currentZone?.id ?? ZONE_IDS.UNKNOWN;
+  }
+
+  /** 当前区域的显示文案（UI 专用；`name` 与 `subtitle` 允许随时改字） */
+  get zoneInfo() {
+    return this.currentZone?.info ?? null;
   }
 
   build() {
@@ -118,13 +133,13 @@ export class WorldManager {
       hub.add(sign);
     }
 
-    hub.position.set(0, this.getGroundHeight(0, 55), 55);
+    hub.position.set(HUB_ZONE.center.x, this.getGroundHeight(HUB_ZONE.center.x, HUB_ZONE.center.z), HUB_ZONE.center.z);
     this.scene.add(hub);
 
-    const anchorY = this.getGroundHeight(0, 55);
+    const anchorY = this.getGroundHeight(HUB_ZONE.center.x, HUB_ZONE.center.z);
     this.hubPOIs.push({
       id: 'hub-anchor',
-      position: new THREE.Vector3(0, anchorY, 55),
+      position: new THREE.Vector3(HUB_ZONE.center.x, anchorY, HUB_ZONE.center.z),
       label: '触摸世界之锚',
       discovered: false,
       type: 'main',
@@ -151,7 +166,7 @@ export class WorldManager {
       }
     }
     // 世界之锚石柱
-    world.addCylinder({ x: 0, z: 55, r: 1.9, base: -1, top: 12 });
+    world.addCylinder({ x: HUB_ZONE.center.x, z: HUB_ZONE.center.z, r: 1.9, base: -1, top: 12 });
     // 边界墙：贴在地形网格内侧，避免走出虚空
     const T = 40;
     const b = WORLD_BOUNDS;
@@ -182,59 +197,46 @@ export class WorldManager {
       this.hubCore.rotation.y += dt * 0.6;
       this.hubCore.rotation.x += dt * 0.2;
     }
+    for (const zone of this.zones) zone.update(dt);
 
-    let bestZone = null;
-    let bestDist = Infinity;
-
-    for (const zone of this.zones) {
-      zone.update(dt);
-      const d = zone.distanceToCenter(playerPos.x, playerPos.z);
-      if (d < zone.radius && d < bestDist) {
-        bestDist = d;
-        bestZone = zone;
-      }
-    }
-
-    const hubDist = Math.sqrt(playerPos.x ** 2 + (playerPos.z - 55) ** 2);
-    if (hubDist < 50) {
-      if (this.currentZone?.info?.name !== '交汇枢纽') {
-        this.applyHubAtmosphere();
-      }
-    } else if (bestZone && bestZone !== this.currentZone) {
-      this.applyZoneAtmosphere(bestZone);
-    } else if (!bestZone && this.currentZone?.info?.name !== '交汇枢纽') {
-      // 区际走廊：不属于任何位面，回到中性大气，避免上一个区域的雾色粘连
-      this.applyZoneAtmosphere(null);
-    }
+    // 归属由几何反推（`zoneIdAt`：枢纽优先 → 最近区 → 走廊），不再各处手写一遍距离比较
+    const id = zoneIdAt(playerPos, this.zones);
+    const zone = resolveZone(this.zones, id);
+    if (!zone || zone === this.currentZone) return;
+    if (id === ZONE_IDS.HUB) this.applyHubAtmosphere();
+    else this.applyZoneAtmosphere(zone);
   }
 
   applyHubAtmosphere(initial = false) {
-    this.currentZone = { info: { name: '交汇枢纽', subtitle: '位面中心', description: '三条古径通向不同的位面碎片。世界之锚在此闪烁，等待被修复。' } };
+    // 修 B35：这里以前塞的是临时伪造对象 `{ info: { name: '交汇枢纽' } }`，
+    // 于是枢纽内任何按 `zone.id / radius / colliders` 取用的代码都静默拿到 undefined
+    this.currentZone = HUB_ZONE;
     const fog = this.scene.fog;
     if (fog) {
       fog.color.setHex(0x7a92aa);
       fog.density = 0.0042;
     }
-    window.dispatchEvent(new CustomEvent('zone-changed', { detail: { zone: this.currentZone.info, initial } }));
+    window.dispatchEvent(new CustomEvent('zone-changed', {
+      detail: { zone: HUB_ZONE.info, zoneId: HUB_ZONE.id, initial },
+    }));
   }
 
   applyZoneAtmosphere(zone, initial = false) {
-    if (!zone) {
-      this.currentZone = null;
-      const fog = this.scene.fog;
+    const fog = this.scene.fog;
+    if (!zone || zone === CORRIDOR_ZONE) {
+      // 区际走廊：不属于任何位面，回到中性大气，避免上一个区域的雾色粘连。
+      // 它同样是一份真描述对象（带 id），而不是 null —— 读方要能问出"我在哪"
+      this.currentZone = CORRIDOR_ZONE;
       if (fog) {
         fog.color.setHex(0x7a8ea6);
         fog.density = 0.004;
       }
-      window.dispatchEvent(
-        new CustomEvent('zone-changed', {
-          detail: { zone: { name: '区际走廊', subtitle: '位面之间', description: '碎片之间的空旷走廊，风声代替区域的主题。' }, initial },
-        })
-      );
+      window.dispatchEvent(new CustomEvent('zone-changed', {
+        detail: { zone: CORRIDOR_ZONE.info, zoneId: CORRIDOR_ZONE.id, initial },
+      }));
       return;
     }
     this.currentZone = zone;
-    const fog = this.scene.fog;
     if (fog) {
       fog.color.setHex(zone.fogColor);
       fog.density = zone.fogDensity * 0.85;
@@ -242,7 +244,7 @@ export class WorldManager {
 
     window.dispatchEvent(
       new CustomEvent('zone-changed', {
-        detail: { zone: zone.info, initial },
+        detail: { zone: zone.info, zoneId: zone.id ?? ZONE_IDS.UNKNOWN, initial },
       })
     );
   }
@@ -264,16 +266,22 @@ export class WorldManager {
   }
 
   getZoneMapData() {
-    const data = [
-      { center: { x: 0, z: 55 }, radius: 45, color: '#888866', name: '交汇枢纽' },
+    return [
+      {
+        id: HUB_ZONE.id,
+        center: HUB_ZONE.center,
+        radius: HUB_ZONE.mapRadius,
+        color: HUB_ZONE.mapColor,
+        name: HUB_ZONE.info.name,
+      },
       ...this.zones.map((z) => ({
+        id: z.id ?? ZONE_IDS.UNKNOWN,
         center: z.center,
         radius: z.radius,
         color: z.mapColor,
         name: z.info.name,
       })),
     ];
-    return data;
   }
 
   setDungeonManager(dungeonManager) {

@@ -7,6 +7,7 @@ import { createPlayerFSM } from './PlayerFSM.js';
 import { shake } from '../engine/Shake.js';
 import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE } from '../engine/CameraRig.js';
 import { CAMERA_FOV, CAMERA_OCCLUSION } from '../content/tuning.js';
+import { ZONE_IDS } from '../world/ZoneIdentity.js';
 
 
 
@@ -827,9 +828,11 @@ export class PlayerController {
 
   _isVoidZone() {
 
-    const n = this.world.currentZone?.info?.name ?? '';
+    // 修 B36：重力反转此前靠中文区域名匹配（`name.includes('时线')`），
 
-    return n.includes('时线') || n.includes('破碎');
+    // 改一行字幕就能让整个时线位面的玩法消失。现在问世界层要 id。
+
+    return this.world.zoneId === ZONE_IDS.VOID;
 
   }
 

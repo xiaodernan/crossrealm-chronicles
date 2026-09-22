@@ -160,25 +160,25 @@ export class WorldEffects {
     this.group.add(this.chaosEmbers);
   }
 
-  setZone(zoneName, center) {
-    this.fireflies.visible = zoneName === 'fantasy' || zoneName === 'hub';
-    this.magicOrbs.visible = zoneName === 'magic';
-    this.starField.visible = zoneName === 'space';
-    this.aurora.visible = zoneName === 'space' || zoneName === 'fantasy' || zoneName === 'void';
-    this.chaosEmbers.visible = zoneName === 'abyss';
+  setZone(zoneId, center) {
+    this.fireflies.visible = zoneId === 'fantasy' || zoneId === 'hub';
+    this.magicOrbs.visible = zoneId === 'magic';
+    this.starField.visible = zoneId === 'space';
+    this.aurora.visible = zoneId === 'space' || zoneId === 'fantasy' || zoneId === 'void';
+    this.chaosEmbers.visible = zoneId === 'abyss';
 
     if (center) {
       this.group.position.set(center.x, 0, center.z);
     }
 
     this.clearZoneLights();
-    if (zoneName === 'magic') {
+    if (zoneId === 'magic') {
       this.addZoneLight(0x6644cc, 0.4, 80);
-    } else if (zoneName === 'space') {
+    } else if (zoneId === 'space') {
       this.addZoneLight(0x2244aa, 0.3, 100);
-    } else if (zoneName === 'fantasy') {
+    } else if (zoneId === 'fantasy') {
       this.addZoneLight(0x88aa66, 0.25, 90);
-    } else if (zoneName === 'abyss') {
+    } else if (zoneId === 'abyss') {
       this.addZoneLight(0xff2244, 0.3, 95);
     }
   }

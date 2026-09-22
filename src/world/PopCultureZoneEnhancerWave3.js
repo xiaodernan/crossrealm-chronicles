@@ -1,13 +1,15 @@
 import * as THREE from 'three';
+import { ZONE_IDS, findZoneById } from './ZoneIdentity.js';
 
 /** Wave3 POI — 西部 / 黑帮 / 深空科幻 */
 export function attachPopCultureZonesWave3(game) {
   const world = game.world;
   if (!world?.zones) return;
 
-  const fantasy = world.zones.find((z) => z.info?.subtitle?.includes('指环'));
-  const abyss = world.zones.find((z) => z.info?.name?.includes('混沌'));
-  const space = world.zones.find((z) => z.info?.name?.includes('米勒'));
+  // 修 B36：按 id 取区（见 PopCultureZoneEnhancer 的同款注释）
+  const fantasy = findZoneById(world.zones, ZONE_IDS.FANTASY);
+  const abyss = findZoneById(world.zones, ZONE_IDS.ABYSS);
+  const space = findZoneById(world.zones, ZONE_IDS.SPACE);
 
   if (fantasy) attachWesternHomage(fantasy, world, game);
   if (abyss) attachGangsterHomage(abyss, world, game);

@@ -1,4 +1,4 @@
-import { FRANCHISE_LABELS } from '../game/PopCultureHomageRegistry.js';
+import { FRANCHISE_LABELS, franchiseLabel } from '../content/franchises.js';
 
 /** [J] 次元回声 Tab — HP / 星际 / 怪奇等致敬图鉴 */
 export class PopCultureJournalTab {
@@ -17,7 +17,7 @@ export class PopCultureJournalTab {
     const cards = sys.getEntries(this.filter).map((e) => {
       const ok = sys.unlocked.has(e.id);
       return `<div class="pc-card${ok ? '' : ' pc-locked'}">
-        <span class="pc-franchise">${e.franchise}</span>
+        <span class="pc-franchise">${franchiseLabel(e.franchise)}</span>
         <div class="pc-title">${ok ? e.title : '???'}</div>
         <div class="pc-desc">${ok ? e.desc : '探索各位面 POI、营火对话与致敬点'}</div>
       </div>`;

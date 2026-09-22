@@ -1,4 +1,6 @@
 /** 逆相界视觉 — 破碎时线红色孢子 overlay（怪奇物语气质） */
+import { ZONE_IDS } from '../world/ZoneIdentity.js';
+
 export class UpsideDownVisualPass {
   constructor(game) {
     this.game = game;
@@ -12,8 +14,8 @@ export class UpsideDownVisualPass {
   }
 
   onZone(e) {
-    const name = e.detail.zone?.name ?? '';
-    if (name.includes('时线') || name.includes('破碎')) this.enable();
+    // 修 B36：逆相界只属于破碎时线，判据取 id 而不是"名字里有没有'破碎'两个字"
+    if (e.detail?.zoneId === ZONE_IDS.VOID) this.enable();
     else this.disable();
   }
 

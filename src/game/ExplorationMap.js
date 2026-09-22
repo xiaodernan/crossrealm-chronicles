@@ -84,13 +84,9 @@ export class ExplorationMap {
   update(playerPos) {
     if (this.game.dungeons?.active) return;
     this.revealAt(playerPos.x, playerPos.z, 24);
-    const zone = this.game.world.currentZone?.info?.name ?? '';
-    if (zone.includes('枢纽')) this.revealZone('hub');
-    else if (zone.includes('森林') || zone.includes('灰白')) this.revealZone('fantasy');
-    else if (zone.includes('魔法') || zone.includes('霍格')) this.revealZone('magic');
-    else if (zone.includes('米勒') || zone.includes('星际')) this.revealZone('space');
-    else if (zone.includes('时线') || zone.includes('破碎')) this.revealZone('void');
-    else if (zone.includes('混沌') || zone.includes('边境')) this.revealZone('abyss');
+    // 修 B36：开雾直接问世界层要区域 id（原先是六条中文显示名 `includes`，
+    // 而 `revealZone` 本来就按 id 取中心点 —— 中间那次"名字→id"的翻译完全多余）
+    this.revealZone(this.game.world.zoneId);
   }
 
   setupListeners() {

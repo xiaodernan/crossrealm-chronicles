@@ -140,9 +140,12 @@ export class QuestSystem {
     });
 
     window.addEventListener('enemy-defeated', (e) => {
-      const t = e.detail.type === 'boss' ? e.detail.bossId : e.detail.type;
-      if (e.detail.name?.includes('虚空')) this.stats.kills.elite = (this.stats.kills.elite || 0) + 1;
-      else if (e.detail.type !== 'boss') this.stats.kills[e.detail.type] = (this.stats.kills[e.detail.type] || 0) + 1;
+      // 修 B36：击杀归类看 `type`，不看显示名。此前用「名字里含『虚空』」判定精英，
+      // 于是 Boss 召出的「虚空仆从」（type=soldier）全被记成了 elite ——
+      // 精英任务白送，而「影之试炼」要的两名 soldier 永远数不满。
+      if (e.detail.type !== 'boss') {
+        this.stats.kills[e.detail.type] = (this.stats.kills[e.detail.type] || 0) + 1;
+      }
       if (e.detail.bossId === 'shadow-warden') this.stats.bossDefeated = true;
       if (e.detail.bossId === 'archmagus') this.stats.boss2Defeated = true;
       if (e.detail.bossId === 'singularity-herald') this.stats.boss3Defeated = true;

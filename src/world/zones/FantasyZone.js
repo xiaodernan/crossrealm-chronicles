@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
+import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
 
 /** 指环王风格 — 古老森林、灰白山峰、 ruins 遗迹 */
 export class FantasyZone extends BaseZone {
@@ -11,7 +12,8 @@ export class FantasyZone extends BaseZone {
       skyColor: 0x6a7a88,
       mapColor: '#3d5c3a',
       info: {
-        name: '灰白森林',
+        id: ZONE_IDS.FANTASY,
+        name: ZONE_NAMES[ZONE_IDS.FANTASY],
         subtitle: '中洲遗境 · 指环王',
         description:
           '古老的精灵森林覆盖着灰白山脉的缓坡。倒塌的石柱诉说着失落文明的传说。传说世界之锚的碎片沉眠于「至尊石环」之下。',
