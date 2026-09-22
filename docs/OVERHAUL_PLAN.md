@@ -68,8 +68,8 @@
 | B9 | `SpellSystem.js:95,137` | 弹体步长硬编码 | ✅ 已修（M2：弹体/领域改由主循环 dt 驱动，删掉自建 `requestAnimationFrame` 递归；`ProjectileManager` 同步复用向量） |
 | B10 | `Boss.js:220` | 每帧派发 `boss-health` | ✅ 已修（M2：`hp|phase` 签名变化才派发） |
 | B11 | `Game.js:358`+`:380` | `boss-phase` 监听器注册两次，音效双份 | ✅ 已修（M2：删 `Game.js` 的重复音效监听；迷宫 Boss 的阶段音效由 `BossPhaseDirector` 单点发出，`DungeonBoss` 不再自己发一遍） |
-| B12 | `WorldManager.js:155-174` | 区域按最近中心判定 | 需 `d < zone.radius`，否则 hub |
-| B13 | `WorldManager.js:178` | hub 返回伪造对象，鸭子类型崩溃 | 统一 Zone 接口 |
+| B12 | `WorldManager.js:155-174` | 区域按最近中心判定 | ✅ 已修（W-A2 切片1：归属统一走 `world/ZoneIdentity.js` 的 `zoneIdAt` —— 枢纽优先 → **半径内**的最近中心 → 都不在则是走廊；那段手写距离比较从 `WorldManager.update()` 删掉，`tests/zone-identity.test.js` 钉住"区半径覆盖到锚点仍算枢纽""重叠区取最近中心""边界外是走廊而不是 null"） |
+| B13 | `WorldManager.js:178` | hub 返回伪造对象，鸭子类型崩溃 | ✅ 已修（W-A2 切片1：枢纽与走廊改为冻结的共享描述 `HUB_ZONE / CORRIDOR_ZONE`，带 `id / info / radius / mapRadius`；`WorldManager` 交出 `zoneId` 与 `zoneInfo` 两枚只读量。用例断言二者 `Object.isFrozen` 且写它会抛错 —— 谁都不能就地改全局唯一的枢纽） |
 | B14 | `PerformanceManager.js:19-20` | 85–120m 敌人被"冻结"但仍可见 | 改为隐藏 + 逻辑降频 |
 | B15 | `PlayerStats.js:71-78` | 升级时 maxHp 提高但当前 hp 不补 | 升级补差额 |
 | B16 | `Game.js:434` | F12 被 preventDefault，打不开 devtools | 移除对该键拦截 |
@@ -100,7 +100,7 @@
 |---|------|-----------|------|-------------|
 | R1 | 副本切换场景遗留 GPU 缓冲未释放 | M2（释放路径）+ M4（池化与断言） | ✅ M2 释放路径已修 | `DungeonManager.disposeSubtree()` + `Enemy/Boss.dispose()`；`resetDungeon` 于退出与死亡两条路径调用；实测 3 轮进出场景节点回到基线 3194。M4 继续做对象池与 `renderer.info` 零增长门禁 |
 | R2 | 存档 v5（带显式迁移）与性能 HUD | M2 收尾 | ✅ 已完成 | `crossrealm_save_v5` + `SaveMigrations`（v1→v5 全链，迁移后立即按 v5 schema 校验）；`engine/PerfHUD.js`（F3 开关，监控 fps、draw call、几何体/纹理/着色器/场景节点的历史最低点净增长）。实测：v4 档在浏览器里升到 v5 并落盘，故意写坏的 v5 被隔离到 `:corrupt` 后回落到 v4 重新迁移；枢纽基线 几何体 ≈1880、着色器 27–28、场景节点 ≈3190、存活敌人 16（纹理 26–42 随视野内材质上传浮动）——M4 以此为起点做池化，判据是"相对历史最低点的净增长"回落为 0 |
-| R3 | 区际走廊区域归属错乱与 hub 伪对象 | M7 | ⬜ 待做 | 修 B12、B13；`Game.js` 里仍有按中文区域名匹配音频模式的分支（`name.includes('时线')` 等），改为 `zone.id` |
+| R3 | 区际走廊区域归属错乱与 hub 伪对象 | M7 | ✅ 已完成（W-A2 切片1，2026-09-23） | 修 B12、B13：`world/ZoneIdentity.js` 交出 `zoneIdAt / resolveZone`，枢纽与走廊都是带 id 的冻结描述；`Game.js` 那串 `name.includes('米勒') / includes('时线')` 的音频与天气分支整段删除，改听 `zone-changed` 事件的 `detail.zoneId`（`src/` 内中文显示名逻辑判定现为 **0 处**，由 `tests/content-boundary.test.js` 硬零门禁兜住）。落点：`WorldManager.applyHubAtmosphere/applyZoneAtmosphere`、`Game.js:322` 的监听器 |
 
 **开工顺序约束（需求方指定）**：M1 起**先崩溃与性能，再内容**。本看板 R1 属性能、R2 属性能与稳定性、R3 属内容，故 R1 → R2 → M3/M4 → R3。
 
@@ -423,14 +423,39 @@ M0 ─→ M1 ─→ M2 ─→ M3 ─→ M4 ─┬─→ M5 ─→ M6
 | M4 特效池与生命周期 | ⬜ | | | |
 | M5 渲染与美术 | ⬜ | | | |
 | M6 音频 | ⬜ | | | |
-| M7 数据驱动内容 | ⬜ | | | |
+| M7 数据驱动内容 | 🔶 走廊与枢纽归属已收口 | 2026-09-23 | 见 W-A2 切片1 | 需求看板 R3 完成（B12 / B13）；数据层 `content/` 注册表与 Wave/Extras 消灭仍在 `MASTER_PLAN.md` 的 W-B1 / W-B2 |
 | M8 UI/UX | ⬜ | | | |
 | M9 质量工程与发布 | ⬜ | | | |
+
+### v2 Phase A（排期权威已移交 `MASTER_PLAN.md`，此处只留本文口径的落地证据）
+
+| 工作包 | 状态 | 完成日期 | 提交 | 备注 |
+|--------|------|----------|------|------|
+| W-A1 计时与事件收口 | 🔶 计时主体完成 | 2026-09-22 | `95c0533`（= 仓库重建点）+ 注释与推进点更正 `4f1adc6` | 游戏逻辑 `setTimeout` 28 → 0（`engine/Scheduler.js`，21 处调用点 / 11 文件）；每帧 `stamina/mana` 事件改 `engine/Observable.js`（B41）；`tests/timing-boundary.test.js` 兜住（回填时 4 例 → 5 例）。尾巴登记为 B43（特效自建 rAF 且 dt 写死 0.016）与 B44（事件名裸字符串、无注销），见 `MASTER_PLAN.md` §1.4 |
+| W-A2 切片1 区域身份接口化 | ✅ 切片完成 | 2026-09-23 | `c4e859a` | 新增 `world/ZoneIdentity.js` + `content/franchises.js`；修 B35 / B36 / B42 与本文 B12 / B13；`src/` 内中文显示名逻辑判定 57 处 → 0，静态门禁不留白名单。全套 339 例 / 25 文件、lint 0 error / 10 warning、build 绿 |
 
 ---
 
 ## 变更记录
 
+- 2026-09-23 **W-A2 切片1：区域身份接口化（修 B35 / B36 / B42，并闭环本文 B12 / B13 与需求看板 R3）**（提交 `c4e859a`）：
+  - 撞出来的不是风格问题，是**内容静默消失**。三处病例：① `QuestSystem` 用「名字里含『虚空』」判定精英击杀，于是 Boss 召出的「虚空仆从」（`type` 实为 `soldier`）全记成 elite —— 精英任务白送，主线「影之试炼」要的那两名 soldier 永远数不满，玩家卡在第二章而屏幕上没有任何报错。② `RealmBleed.zoneKey()` 是六条 `includes('森林' / '魔法' / '米勒' / '时线' / '混沌' / '枢纽')` 的链，任何一条措辞与区域文案对不上，那一区的渗漏色就永久不再出现。③ `ContextualTutorial` 的两条区域提示（B42）**根本没看进的是哪个区**，只按章节门控 —— 第四章后随便踏进一个位面都会弹"破碎时线：重力与视野在此不稳定"。这三类写法的共同点是：坏掉的时候不抛异常，只是内容不再出现，比崩溃难查一个数量级。
+  - 真源：新增 `world/ZoneIdentity.js`（`ZONE_IDS / ZONE_ORDER / ZONE_NAMES` + 冻结的 `HUB_ZONE / CORRIDOR_ZONE` + `zoneIdAt / findZoneById / resolveZone / zoneDescriptor / isRealZone`）与 `content/franchises.js`（`FRANCHISE` 12 枚母题 id、`FRANCHISE_LABELS`、`franchiseLabel`）。`radius`（大气归属）与 `mapRadius`（小地图画的那一圈）拆成两个命名，因为它们本来就不是同一个数 —— 地图圈故意画小，悄悄复用会画错。
+  - 归属：`WorldManager.update()` 里那段手写距离比较删除，改问 `zoneIdAt(playerPos, zones)`（枢纽优先 → **半径内**的最近中心 → 都不在就是走廊），闭环本文 B12；`applyHubAtmosphere()` 不再现造 `{ info: { name: '交汇枢纽' } }`，直接指向 `HUB_ZONE`，闭环 B13 / B35。`WorldManager` 对外交出 `zoneId` 与 `zoneInfo` 两枚只读量 —— 读方不必再伸手进 `currentZone.info.name` 猜。`zone-changed` 负载多带一个 `zoneId`，`Game.js:322` 那串按中文匹配音频/天气/特效的分支整段删除（R3 完成）。
+  - 判定面其余改造：击杀归类看 `e.detail.type`；任务交互路点看 `q.targetId`（此前看路点 label 里有没有"世界之锚"四个字）；49 条致敬回声的 `franchise` 字段从中文改成 `FRANCHISE.X`；`AchievementSystem` 的十个 `echo*` 分桶由 `ECHO_FRANCHISE_BUCKETS` 表驱动（此前每桶一条 `filter(e => e.franchise === '中文')`）；台词选池 `barkKeyForZone(zoneId, rng)` 把随机数**收进参数**，否则 `space` 与 `space_scifi` 的分流根本测不到。
+  - 门禁与防假绿：`tests/content-boundary.test.js` 5 例 —— **硬零断言、不留存量白名单**（任何新中文判定直接变红），扫描的是剥掉注释与字符串之后的代码，且用逐行状态机保持行号与磁盘一一对应（字符串里的 `//` 不算注释，报出来的位置必须点得开）。三处专门防"绿色但什么都没拦住"：① 用例先把本轮新建的两个模块探针式断言在扫描集里、并断文件总数下界；② 把全部区域显示名换成乱码后重跑归属与雾色路径，要求事件序列一模一样；③ 击杀归类那组做过"把旧写法贴回去"的验证，贴回去后 2 例与内容边界门禁同时变红。行为面另有 `tests/zone-identity.test.js` 28 例、`tests/franchise-identity.test.js` 7 例（含"每个分桶母题都有一个成就正好在全解锁那一刻达成"这类数据自证，以及把 `FRANCHISE_LABELS` 全换成乱码后成就统计必须一模一样）。
+  - 行为增量（玩家会看到的差别，如实列）：走廊不再是 `null` → "位面 → 走廊"那一步的转场特效此前被当成 `hub` 去重（不响），现在会响；音频在走廊拿到 `ZONE_DRONES` 里没有的 `corridor`，落回 `wild` 底噪（修前落回 `hub`）；天气与 `WorldEffects` 在走廊仍走 hub 预设 / 全关，与修前一致；精英击杀统计不再包含「虚空仆从」，士兵统计开始包含它 —— 「影之试炼」第一次可完成；魔法区的紫色尘粒与法球在浏览器实读时第一次出现（修前那条分支从没比中对过）；两条区域教程提示改严：必须真的重新进入该区才看得到。
+  - 一次自我更正：调试门禁时我把"vitest 报出的命中行号在磁盘上点不开"归因成**扫描到过期快照**，并写进了测试注释。归因是错的 —— 真因是我在读自己后续批量编辑**之前**的输出，同时第一版 `NAME_COMPARE` 的反向引用写坏了。注释已就地改成正确的防假绿理由。留这条更正的理由：本项目最怕的正是"门禁一路绿灯却什么都没拦"，而记录里写一条没验证过的归因，会让下一个人照着错前提排查。
+  - 刻意不做（切片2 的清单）：`FastTravelSystem.travel(name)` 仍按显示名查目的地、`getDestinations()` 把 id 丢了、`RestPointManager` 的 `id: id ?? name` 会回落成显示名；`QUEST_WAYPOINTS` 的 label 与 `ZONE_NAMES` 已漂移（前者 '魔法遗境'、后者 '霍格沃兹遗境'，文案仍有两份真源）；效果层用 id 字面量（`zoneId === 'space'`）而非 `ZONE_IDS` 符号，逻辑对但改 id 时不会变红；`src/content/` 仍只有 `tuning.js` 与本片的 `franchises.js`，W-B1 的注册表与构建期 schema 校验未起步。原计划的 **lint 规则不做**：社区无"中文字面量参与相等判定"这类规则，自研插件比一条静态用例贵，而 lint 只看单文件、看不出 `zoneName === '混沌边境'` 与 `ZONE_NAMES` 的跨文件关系 —— §6 规范第 6 条改指这条门禁。
+  - 门禁读数：`npx vitest run` 339 例 / 25 文件全绿（W-A1 时点 299 / 23）；`npm run lint` 0 error / 10 warning（全是 `no-unused-vars` 存量，两条差值未逐条追认）；`npm run build` 2.95s 通过，告警集合未增（仍是既成的 `chunk-ui ↔ chunk-world`）。浏览器实读（`npx vite --port 5178`，真实构建 + 真实 `game`）：走动穿枢纽 → 灰白森林 → 走廊 → 魔法时 `world.zoneId` 依次给出 `hub / fantasy / corridor / magic` 且每次穿越只有一条事件；小地图数据每项带 id；雾色随区切换；图鉴面板 49 张卡、13 个筛选按钮按 id 认领。
+- 2026-09-23 **W-A1：计时与每帧事件收口（`engine/Scheduler.js` + `engine/Observable.js`，修 B39 / B41）**（提交 `95c0533`；**本条为事后回填**，看板与 ADR 落后于代码正是要写进 DoD 的那类欠账）：
+  - 为什么先做它：三条硬性约束之一是"新增游戏逻辑计时不得用 `setTimeout` / 自建 rAF，必须走主循环 dt 统一时间缩放"，而当时存量是 **28 处** `setTimeout` 分布在 10 个系统里。病灶的另一面是 B41 —— `CombatController.update()` 每帧派发一条 `'stamina-changed'`（60fps 下每秒 60 条内容相同的 CustomEvent），那不是事件，是披着事件外衣的状态轮询。落到玩家身上的症状：hitstop 把世界按住了，Boss 阶段横幅、教程气泡、面板提示却照常跳。
+  - 交付：`Scheduler` 用 **rawDt** 推进（演出与 UI 节奏不该被战斗时停拉长），`after / wait / cancel / clear(tag)`；`clear(tag)` 专门给"面板关闭 / 系统 dispose / 换副本"三条撤销路径，B19 那一类"回调打到已失效对象"从机制上失去落脚处。回调隔离与 `setTimeout` 同语义（一个抛错不连累同帧其他任务），但异常原样抛出、绝不吞。共替换 21 处调用点、11 个文件。`Observable` 接管 `CombatController.vitals`（stamina 量化 0.5 / hp 量化 1 / combo / parryable）与 `SpellSystem.vitals`（mana 1 / charging / chargePct 0.02 / transform 0.1），`emits / writes` 两枚计数器让"到底通知了几次"成为可断言的量；`HUD` 改为 `subscribe` 并把退订函数存进 `_offs`，`dispose()` 成对退订。
+  - 例外只留两类，且都在代码里写明理由：① `src/audio/**` 的音序（4 处 `setTimeout` + 2 处 `setInterval`，是给 Web Audio 调度时间的领域问题，与世界的缩放无关）；② 为 CSS 过渡制造"下一次绘制"的单次 `requestAnimationFrame`（`Dialog` / `ExecutionSkipBurst` / `CombatCameraDirector`）—— 换成 `after(0)` 会与赋值同帧，过渡根本不发生。
+  - 门禁：`tests/timing-boundary.test.js` 4 例（剥掉注释与字符串后扫 `src/**`，除 `audio/` 外不得出现 `setTimeout|setInterval`；反向钉住调度器自身无定时器无 DOM；钉住主循环确实 `scheduler.update(rawDt)`）。`tests/engine-scheduler.test.js` 14 例、`tests/engine-observable.test.js` 15 例。该提交时点全套 299 例 / 23 文件全绿，lint 0 error / 12 warning，build 绿。
+  - 一处更正（回填本条时抓出来的，代码与注释已改）：`Scheduler.wait()` 的注释写着"暂停时不推进，因此不会在暂停中偷偷跑完"。这与实际接线**不符** —— `Game.update()` 里 `scheduler.update(rawDt)` 就写在最前面，而 `canPlay` 那道暂停门控只挡玩法子系统，所以游戏内打开暂停菜单时调度器照常推进。真实语义是：**后台标签页**里 rAF 停摆 → 不推进；**游戏内暂停** → 照常到期（UI 与演出类延时量的本来就是真实观看时间）。注释已改成这个说法，并补第 5 例把"推进点在 `canPlay` 之前"钉住 —— 反过来挪一行不会有功能测试变红，症状只是"打开背包时提示全冻住"，正是最难查的那类。（这条更正单独提交为 `4f1adc6`，因为它属 W-A1 的收尾而非 W-A2。）
+  - 放弃了什么：不给 `Scheduler` 做"按 `timeScale` 缩放"的第二条时间轴（一把尺子两种用途必然含糊；玩法计时留在各系统自己的 dt 积分里，`CombatController.schedule` 是既有落点）；**原计划属于本包的"事件名常量化总线"没做** —— `src/engine/events.js` 至今不存在，292 处裸字符串要连着注销纪律一起改，硬塞进来会把一件已能验证的事拖成一件不能验证的事。这笔账登记为 B44，不再含糊地算作"W-A1 已完成"。
+  - 残留（如实）：**B43** —— `ExecutionEffects`（环 / 碎片 / 竖劈三条循环）与 `WeatherSystem._spawnSplash` 仍自建 `requestAnimationFrame` 递归并把 dt 写死 `0.016`，于是 144Hz 下一片碎片只活约 0.15 秒（设计值 0.35）、30Hz 下拖到 0.7 秒，hitstop 期间照速跑。这条当时被漏掉，因为门禁的正则只扫 `setTimeout|setInterval`，**自建 rAF 是它的盲区** —— 补 B43 时应顺手把该正则扩到 `requestAnimationFrame` 并给三处 CSS 过渡例外建白名单（例外要写明理由，与音频那两条同一条纪律）。另：`Scheduler` 的推进取 rawDt 而非缩放 dt，意味着"暂停时调度器是否仍推进"取决于主循环是否仍跑帧 —— 暂停面板打开时 `Game.update` 仍走帧，故 UI 节奏照常，这一条在 W-A5（镜头混合栈与暂停态）之前不许改口径。
 - 2026-09-22 **M3 第二切片：镜头对实体求交（修 B3）+ 覆盖量形状合同（修 B34）**：
   - 这片是在给相机加遮挡时撞出来的。原计划只做 B3（镜头穿墙），但为了让实读有意义必须先让相机算得出数 —— 一跑真实页面就发现 `camera.position` 是 NaN，而**这不是 0×0 视口的锅**：`RestSceneDirector.getCameraOverrides()` 未激活时返回 `{lockOrbit, orbit, fovAdd}`，读方无条件取 `.pull`，于是 `5.2 - undefined = NaN` 污染整条第三人称轨道。第七/八/九片的验收都把这道 NaN 记成视口限制，属于错误归因，已在原条目就地标注更正。协议没有形状合同 + 测试全都 `restScene: null`（走字段齐全的兜底常量）—— 两个条件合起来让一个"主相机每帧坏掉"的缺陷在 243 例全绿的环境里隐身。
   - 遮挡分两条路径，因为它们该做的动作根本相反：地形是**抬高**（山坡不该把力臂缩短，缩到一米出头就看不见角色走路了），实体是**缩短**（墙抬不过去）。实体这条先 8 格前向 march 找第一格被挡，再在最后一格安全与第一格被挡之间夹 4 刀二分 —— 只退回整格会让镜头停在一米开外，玩家贴墙时像被远远拽走；接触点定到厘米级后再留 `wallMargin` 余量，不让近裁剪面啃进几何。落点在 `_pullInFromSolids()`，注视点/抖动/落笔在 `_resolveThirdPersonLook()`，`updateCamera` 仍是玩家相机唯一一处每帧被调的入口。
