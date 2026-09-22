@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>跨界纪元 — Crossrealm Chronicles</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="loading">
+      <div class="loading-inner">
+        <h1>跨界纪元</h1>
+        <p>位面正在汇聚…</p>
+        <div class="bar"><div class="bar-fill"></div></div>
+      </div>
+    </div>
+    <div id="hud"></div>
+    <div id="minimap-wrap">
+        <div class="minimap-title">地图 · M 切换 · 地下城内显示迷宫</div>
+      <canvas id="minimap"></canvas>
+    </div>
+    <div id="zone-panel" class="hidden"></div>
+    <div id="journal-panel" class="hidden"></div>
+    <div id="zone-banner" class="hidden"></div>
+    <div id="interaction-prompt" class="hidden"></div>
+    <div id="game-guide" class="game-guide">
+      <div class="guide-head panel-drag-handle">⋮⋮ 现在该做什么 · 可拖动</div>
+      <div id="guide-title" class="guide-title">加载中…</div>
+      <div id="guide-step" class="guide-step">请稍候</div>
+      <div id="guide-hint" class="guide-hint"></div>
+      <div class="guide-btns">
+        <button type="button" id="guide-sync">同步任务</button>
+        <button type="button" id="guide-autoplay">自动通关 N</button>
+      </div>
+    </div>
+    <button type="button" id="autoplay-fab" title="自动通关 (N)">⚡ 自动通关</button>
+    <div id="toast-container"></div>
+    <div id="upgrade-panel" class="hidden">
+      <div class="upgrade-box">
+        <h2 id="upgrade-rest-name">营火</h2>
+        <p class="upgrade-meta">位面之魂 <strong id="upgrade-souls">0</strong> · 升级需 <strong id="upgrade-cost">0</strong> · Lv.<strong id="upgrade-level">1</strong> · 技能点 <strong id="skill-points-display">0</strong></p>
+        <div class="upgrade-tabs">
+          <button type="button" id="tab-stats">属性</button>
+          <button type="button" id="tab-skills">武器技能</button>
+          <button type="button" id="tab-lore">剧情技能</button>
+        </div>
+        <div id="upgrade-stats-section">
+        <div class="upgrade-stats">
+          <div><span>生命上限</span><strong id="stat-hp-preview">118</strong></div>
+          <div><span>精力上限</span><strong id="stat-st-preview">108</strong></div>
+        </div>
+        <div class="upgrade-btns">
+          <button data-stat="vigor">活力 <span id="stat-vigor">1</span></button>
+          <button data-stat="endurance">耐力 <span id="stat-endurance">1</span></button>
+          <button data-stat="strength">力量 <span id="stat-strength">1</span></button>
+          <button data-stat="arcane">奥术 <span id="stat-arcane">1</span></button>
+          <button data-stat="mind">心智 <span id="stat-mind">0</span></button>
+        </div>
+        <p class="upgrade-hint">升级后完全恢复 · P 存档 · L 读档</p>
+        </div>
+        <div id="upgrade-skills-section" class="hidden">
+          <h3 class="skill-branch-title">剑系</h3>
+          <div id="sword-skills" class="skill-list"></div>
+          <h3 class="skill-branch-title">杖系</h3>
+          <div id="staff-skills" class="skill-list"></div>
+        </div>
+        <div id="upgrade-lore-section" class="hidden">
+          <div id="upgrade-lore-body" class="upgrade-lore-body"></div>
+        </div>
+        <button id="upgrade-close">继续探索</button>
+      </div>
+    </div>
+    <div id="pause-menu" class="overlay-panel hidden">
+      <div class="panel-box">
+        <h2>暂停</h2>
+        <button id="pause-resume">继续游戏</button>
+        <button id="pause-save">保存进度</button>
+        <button id="pause-export">导出 JSON</button>
+        <button id="pause-import">导入 JSON</button>
+        <input id="pause-import-file" type="file" accept=".json,application/json" class="hidden" />
+        <button id="pause-settings">设置</button>
+        <button id="pause-manual">说明书 (H)</button>
+        <p class="hint">Esc 关闭 · P/L 快捷存读 · H/F12 说明书 · F3 性能 HUD · 存档 v5（旧档自动迁移）</p>
+      </div>
+    </div>
+    <div id="settings-panel" class="overlay-panel hidden">
+      <div class="panel-box settings-box">
+        <h2>设置</h2>
+        <label>主音量 <input id="set-master-vol" type="range" min="0" max="1" step="0.05" /></label>
+        <label>音效 <input id="set-sfx-vol" type="range" min="0" max="1" step="0.05" /></label>
+        <label>Bloom <input id="set-bloom" type="range" min="0" max="1" step="0.05" /></label>
+        <label>渲染精度 <input id="set-pixel" type="range" min="0.5" max="2" step="0.25" /></label>
+        <label>敌人更新距离 <input id="set-lod" type="range" min="40" max="150" step="5" /></label>
+        <label><input id="set-shadows" type="checkbox" /> 阴影</label>
+        <button id="settings-close">关闭</button>
+      </div>
+    </div>
+    <div id="fast-travel-panel" class="overlay-panel hidden">
+      <div class="panel-box">
+        <h2>快速旅行</h2>
+        <div id="fast-travel-list"></div>
+        <button id="fast-travel-close">取消</button>
+      </div>
+    </div>
+    <div id="dialog-overlay" class="hidden">
+      <div class="dialog-box">
+        <h2 id="dialog-title"></h2>
+        <div id="dialog-speaker" class="dialog-speaker hidden"></div>
+        <div id="dialog-cg" class="dialog-cg hidden">
+          <img id="dialog-cg-img" alt="" />
+        </div>
+        <p id="dialog-text"></p>
+        <div id="dialog-choices" class="dialog-choices hidden"></div>
+        <button id="dialog-close">继续探索</button>
+      </div>
+    </div>
+    <div id="world-map-panel" class="overlay-panel hidden">
+      <div class="world-map-box">
+        <div class="world-map-header">
+          <h2>位面全图 · 迷雾探索</h2>
+          <button type="button" id="world-map-close">关闭 (G)</button>
+        </div>
+        <canvas id="world-map-canvas"></canvas>
+        <div id="world-map-legend" class="world-map-legend"></div>
+      </div>
+    </div>
+    <div id="help-manual" class="overlay-panel hidden">
+      <div class="panel-box help-box">
+        <div class="help-header">
+          <h2>跨界纪元 · 说明书</h2>
+          <button type="button" id="help-close">关闭 (Esc)</button>
+        </div>
+        <div class="help-layout">
+          <nav id="help-nav" class="help-nav"></nav>
+          <div id="help-body" class="help-content"></div>
+        </div>
+      </div>
+    </div>
+    <div id="start-screen" class="hidden">
+      <div class="start-inner">
+        <h2>跨界纪元</h2>
+        <p>点击开始 · 锁定鼠标 · WASD 移动<br/>Esc 暂停 · H 说明书 · J 日志 · F3 助手 · F4 足球</p>
+        <button type="button" id="start-btn">点击进入游戏</button>
+        <p class="start-url">请使用 http://localhost:5173 访问（需先运行 npm run dev）</p>
+        <p id="boot-error" class="hidden"></p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

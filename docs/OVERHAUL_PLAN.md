@@ -1,0 +1,532 @@
+# 跨界纪元 · 重构与增强总计划
+
+> 版本：v1.0 （2026-09-21 制定）
+> 适用范围：`src/` 下的 Three.js 网页版游戏（唯一开发目标）
+> 本文是长期开发的**唯一权威计划**。每完成一个里程碑，更新第 10 节的进度表并提交。
+
+---
+
+## 0. 范围决策（已与需求方确认）
+
+| 决策 | 内容 |
+|------|------|
+| 引擎 | **只做 Three.js 网页版**。`unreal/`、`godot/` 移出项目，不再作为并行路线 |
+| 简历联动内容 | `src/game/devstack/`、`src/game/football/`、`resume-projects/`、`creative/`、`resume-stack` 链接 **从游戏中彻底剥离** |
+| 优先级 | **先做手感（战斗 / 移动 / 镜头 = 3C）**，再铺内容，最后堆视听规模 |
+| 版本控制 | 已 `git init` 并建立基线提交 `83a8b0c`，逐里程碑提交 |
+
+剥离物移动到 `D:\3a大作-archive\`（项目外，不删除），游戏代码内的剥离通过 git 历史回滚。
+
+---
+
+## 1. 现状诊断（附证据）
+
+**规模**：182 个 JS 文件 / 21,998 行 / ~95 个子系统在 `Game` 构造函数里 new 出来（`src/core/Game.js:161-290`）。构建能通过（`npm run build` ≈ 3s）。
+
+### 1.1 致命问题（直接导致"难玩"）
+
+| # | 问题 | 证据 |
+|---|------|------|
+| A | **没有碰撞层**。玩家只做高度图 Y 吸附，可以穿过树、墙、柱子、悬崖，出界后飘在虚空上 | `PlayerController.js:418-456`、`TerrainHeight.js:64-73`、`WorldTerrain.js:68-69` |
+| B | **翻滚无效**。`tryRoll` 写入速度后被移动输入直接覆盖 | `CombatController.js:173-175` vs `PlayerController.js:332-334` |
+| C | **打击判定 = 2D 距离 + 点积扇形**，无 hitbox/hurtbox，无动画事件驱动，挥空后整段窗口仍能命中 | `CombatController.js:258-292` |
+| D | **帧率相关的错误时序**：法术弹体硬编码 `t += 0.016`，144Hz 下速度是 60Hz 的 2.4 倍 | `SpellSystem.js:94-101`、`:135-138` |
+| E | **弹反用 setTimeout 恢复伤害**，二次弹反互相覆盖，且绕过属性/武器加成 | `CombatController.js:155-158` |
+| F | **命中特效全部泄漏**：每次挥砍/战技/法术新建 Geometry+Material，`setTimeout` 移除但不 dispose；敌人红圈每次前摇造 3 个网格。全项目只有 16 处 `dispose()` | `CombatController.js:345-354`、`Enemy.js:183-216`、`SpellSystem.js:84-89` |
+| G | **敌人 AI 是 if 链**，5 个状态无状态机、无分离转向、追击无视地形；全游戏 4 种敌人共用同一套单招式 | `Enemy.js:231-296`、`EnemyManager.js:102-116` |
+
+### 1.2 架构问题（导致"改不动"）
+
+- 全局事件总线是**唯一架构**：181 处 `dispatchEvent(new CustomEvent)`、176 处 `window.addEventListener`、75 个事件名，**无一处注销**，无命名空间。
+- `game` 反向引用 705 处 —— 任何系统能触达任何系统，无法单测。
+- **区域身份靠中文字符串匹配**，重复 ≥5 处；11 个文件用 `info.name.includes('米勒')` 这类判断找区域 → 改显示名即静默丢失内容。
+- `WorldManager.update` 用**最近中心**判定所在区域，不校验半径 → 场地中央区域归属错乱（`WorldManager.js:155-174`）。
+- 存档是单体 v4 裸对象，30+ 字段手工 `toJSON`，`load()` 吞掉所有异常（`SaveSystem.js:167`）→ 旧档静默失败。
+- **零测试**（`tests/` 只有一个 JSON fixture）。
+- `Wave2/Wave3/Wave4/Extras/Extras2` + `attach-*` 叠加模式：**50 个文件 / 4,219 行**（占代码 19%），同一功能最多叠 7 层（RestDialogue）。
+
+### 1.3 内容与视听问题
+
+- 可玩空间约 700×700 单位，区域间是空白地形；NPC 3 个、宝箱 8 个、地下城是 4×6 格随机迷宫，房间只差配色。
+- 任务：`QuestSystem.js` 一个 36 条硬编码线性数组，两套近乎重复的 `switch`（`:230-379`），**零分支**。
+- 真实美术资产：**1 个 GLB（Soldier 占位）+ 6 张贴图**；音频：**全部 Web Audio 合成，无一个音频素材**；无配音。
+- 渲染：只有 UnrealBloomPass；`antialias:true` 被 EffectComposer 废掉；一张 4096² 阴影图覆盖 280×280 区域；两处系统抢着写太阳位置（`Game.js:629-633` 与 `PerformanceManager.js:23-30`）；0 个 `InstancedMesh`；血条是不面向相机的平面。
+- 掉落系统只有一个八面体给灵魂，**没有装备/词缀/稀有度**；技能树 8 个点。
+
+### 1.4 已确认的正确性 Bug 清单（M1/M2 内修完）
+
+| 编号 | 位置 | 症状 | 修法 |
+|------|------|------|------|
+| B1 | `PlayerController.js:332` | 翻滚位移被移动输入清零 | ✅ 已修（M1：起翻锁定冲量、翻滚期间忽略移动覆盖） |
+| B2 | `PlayerController.js:408-414` | 按住空格自动连跳 | ✅ 已修（M1：按键边沿 + 0.12s 缓冲 + 0.1s 土狼时间） |
+| B3 | `PlayerController.js`（第三人称轨道） | 镜头只对地面高度采样，穿进所有建筑：墙、柱、树干、房檐一概挡不住它，玩家靠墙一站，画面就是「从墙里长出来的半个模型」；实体在碰撞世界里明明有 `base/top`，只是没人拿它问过镜头 | ✅ 已修（M3 第二切片：新增 `CollisionWorld.blocksPoint()` 做点查询，第三人称按「地形抬高 / 实体缩短」两条路径分别求交，march 之后再夹四刀把接触点定到厘米级） |
+| B4 | `CombatController.js:158` | 弹反 setTimeout 竞态 | ✅ 已修（M2：处决伤害改为出手时定格的判定参数，不再临时改基线也不需还原计时器） |
+| B5 | `CombatController.js:259-292` | 挥空窗口内后到的敌人仍被命中 | ✅ 已修（M2：`MoveTable` 定格命中帧，跨过该时刻的那一帧只判一次；`combat.test.js` 覆盖） |
+| B6 | `CombatController.js:222-238` | 战技在释放当帧结算伤害 | ✅ 已修（M2：战技/终结技统一走 `processHitWindow` 的 `skill` 命中帧） |
+| B7 | `CombatController.js:357` | hitstop 只减速战斗计时器，敌人照常动 | ✅ 已修（M2：`Game.update()` 用 `TimeController` 缩放主循环 dt，全局减速；并修掉 `hitstop()` 默认 `now=0` 导致停顿从不生效的隐患） |
+| B8 | `Enemy.js:231-234` | 硬直结束后状态不回 idle | ✅ 已修（M2：Enemy 与 Boss 硬直结束显式回 idle 并重置 `stateTimer`） |
+| B9 | `SpellSystem.js:95,137` | 弹体步长硬编码 | ✅ 已修（M2：弹体/领域改由主循环 dt 驱动，删掉自建 `requestAnimationFrame` 递归；`ProjectileManager` 同步复用向量） |
+| B10 | `Boss.js:220` | 每帧派发 `boss-health` | ✅ 已修（M2：`hp|phase` 签名变化才派发） |
+| B11 | `Game.js:358`+`:380` | `boss-phase` 监听器注册两次，音效双份 | ✅ 已修（M2：删 `Game.js` 的重复音效监听；迷宫 Boss 的阶段音效由 `BossPhaseDirector` 单点发出，`DungeonBoss` 不再自己发一遍） |
+| B12 | `WorldManager.js:155-174` | 区域按最近中心判定 | 需 `d < zone.radius`，否则 hub |
+| B13 | `WorldManager.js:178` | hub 返回伪造对象，鸭子类型崩溃 | 统一 Zone 接口 |
+| B14 | `PerformanceManager.js:19-20` | 85–120m 敌人被"冻结"但仍可见 | 改为隐藏 + 逻辑降频 |
+| B15 | `PlayerStats.js:71-78` | 升级时 maxHp 提高但当前 hp 不补 | 升级补差额 |
+| B16 | `Game.js:434` | F12 被 preventDefault，打不开 devtools | 移除对该键拦截 |
+| B17 | `main.js:54-59` + `PlayerController.js:113` | 固定 1800ms 启动延迟，模型未 await 就进战斗 | await 资源后开场 |
+| B18 | `SaveSystem.js:131-134` | 读旧档 `data.quests.*` 未判空并被静默 catch | ✅ 已修（M2：整条 catch 拆除——坏 JSON 隔离到 `<key>:corrupt` 并提示，版本过高只提示不改写，校验不过直接拒绝加载并列出问题；旧档必须经 `SaveMigrations` 显式升档） |
+| B19 | `Enemy.js:137` | 受光闪 setTimeout 在死亡/重生后触达已失效材质 | ✅ 已修（M2：`hitFlash` 计时字段 + 缓存 `bodyMesh`，按 dt 衰减） |
+| B20 | `CombatController.js:345` 等 | 特效不 dispose（GPU 泄漏） | 🔶 部分修（M2：挥砍弧/战技/终结圈、敌我预警圈、法术弹体与领域、弹道全部有明确 dispose；命中火花/环/伤害数字已在第七切片定容池化、共享几何，挥砍弧直接删掉不再每击新建 geometry+material；剩余特效与 `renderer.info` 零增长门禁在 M4） |
+| B21 | `Boss.js:96` | `takeDamage` 未回传是否致死，Boss 处决/掉落判定永不触发 | ✅ 已修（M2：`return super.takeDamage(...)`） |
+| B22 | `DungeonManager.js:177`、`:292` | 副本重刷/离开时敌人只 `visible=false`、布局只 `group.remove()`，几何与材质从不释放 → 反复进出迷宫 GPU 缓冲单调增长 | ✅ 已修（M2：`Enemy/Boss.dispose()` + `disposeSubtree()`，退出与放弃都走同一条释放路径；实测连续 3 轮进出场景节点稳定回到 3194） |
+| B23 | `DungeonManager.enter()` | 在迷宫内死亡会传回世界之锚，但 `active` 仍挂着 → 玩家在世界里却失去世界碰撞 | ✅ 已修（M2：监听 `player-respawn` 事件退出并释放，不反向读战斗系统字段） |
+| B24 | `CombatController.tryRiposte` | 弹反把 `lightDamage` 硬写成 22 且永不还原，属性成长被静默抹掉 | ✅ 已修（M2：见 B4，伤害写进本次判定参数） |
+| B25 | `SpellSystem.castBolt` | 弹道方向自己按 yaw 拼成 `(-sin yaw, -cos yaw)`，与全仓库正方向 `(sin yaw, cos yaw)` 正好相反 → 法术朝玩家身后飞，正面命中靠敌人自己走过来 | ✅ 已修（M2：改为走 `player.getCombatForwardXZ()`，锁定目标优先；实测同一发弹体在 12 米外由 0 伤害变 43 伤害） |
+| B26 | `Enemy.updateMeshY` | 无人机网格悬浮 2.5 米，整具机体抬到近战打击带（轻击 0.8–2.2）之上 → 悬浮单位对近战近乎免疫，且没有任何反馈说明为什么打不着 | ✅ 已修（M2：悬停高度收进 `BODY_PLANS.drone.hover = 0.9` 并与帧表打击带一起调；新增"snap 传 0 仍必须真实重叠"的回归用例） |
+| B27 | `Enemy.update` | 敌人位移是"朝玩家方向走 `speed * dt`"的一条 if/else 链：不查碰撞体（整群穿树穿墙）、不查彼此（八只精确叠成一个模型，看起来只有一只）、不查视线（隔一堵墙照样扑过来）、丢视野立刻罢手（绕一根柱子就脱战）、且八只同时起手（闪避变成不可能） | ✅ 已修（M2 第五切片：`ai/EnemyFSM` + `ai/Perception` 视距/遮挡/记忆/归位 + `ai/Separation` 互相推开 + `ai/Squad` 围攻名额 ≤2；敌人位移统一经 `CollisionWorld.moveCircle`） |
+| B28 | `Enemy.update`、`AI.windup` | 全体敌人只有一招：硬编码"前摇 0.75 秒 → 以 `attackRange + 0.8` 米圆形判定挥一下"，没有招式形状（锥形/突进/连段/远程/范围），兵/精英/构装体/无人机的差别只剩数值大小；远程单位也因此被迫跑到脸上才打，预警更没有可读性 | ✅ 已修（M2 第六切片：`combat/EnemyMoves.js` 纯逻辑 + `content/tuning.js` 的 `ENEMY_MOVES`（横扫/突刺/重劈/崩地/三连刺/虚能弹/俯冲）与 `ENEMY_MOVE_SETS`（5 类实战敌人各 ≥3 招）；一招一份时序与判定形状，预警按招分级（圈长到真实落点、颜色区分、慢重招才有头顶警示），远程招交给 `ProjectileManager`；站位取"同时可出的招最多"的边界而非最远招的边缘） |
+| B29 | `PlayerController.js`、`CombatController.js`、`DamageNumbers.js`、`CombatFeedback.js` | 打击反馈层四处各自为政：震屏按帧 `×0.78` 衰减（144fps 下 1 秒衰减到 1/1000，30fps 下还能剩一半，同一记重击在两种帧率下是两种手感）且随机数每帧自取（抖动会"打摆"而不是"发颤"），相机偏移的写入点有两处（第一人称与第三人称各自往最终位置再加一次随机量）；每击 `dispatchEvent('screen-shake')` + 每次命中新建一个 `RingGeometry` 与材质、每个飘字新建一个 DOM 节点 → 一场大战几百次分配集中在掉帧的那几帧 | ✅ 已修（M2 第七切片：`engine/Shake.js` 单一所有者（trauma 模型 + 按秒衰减 + 确定性多正弦），挥砍弧并入 `CombatFeedback` 的两个定容池，飘字池化；新增逐敌击退冲量，火花与击退共用同一个命中方向） |
+| B30 | `CombatController.takeDamage`、`Enemy.landStrike` | 玩家是这场战斗里唯一"没有身体"的目标：受击方只有平面圆距判定，`takeDamage(amount, element)` 接不到部位 —— 跳起来、站上高台都照样被横扫扫中，竖直方向的闪避与地形落差对玩家完全不存在；同时全体敌人都是"站着挨打"，玩家的招式除了部位倍率之外没有第二种解法，压不上去也躲不开 | ✅ 已修（M2 第八切片：玩家侧建 `createHurtbox('player')` 与 `hurtBaseY()/facingYaw()` 只读接口，敌人招式按 `band` 选段并把部位乘进结算；新增敌人「格挡」防御招与 `GUARD` 正面减免（伤害 30%、架势 55%、不吃击退、可绕后与侧击、整段占住围攻名额），减免作为结算流水线最后一步与部位/背刺复合） |
+| B31 | `CombatCameraDirector.js`、`PlayerController.js` | 处决镜头不看"死的是谁"：注视点写成 `目标 y + 1.25 米`、轨道半径/高度写成 preset 定值，1.87 米的无人机与 3.85 米的 Boss 拿到同一份构图（打 Boss 时镜头埋进它肚子里）；而第一人称整段不读演出镜头 —— 按出处决时只剩黑边、慢动作与飘字，画面仍然朝着鼠标指的方向；`getCameraOverrides()` 每帧新建返回对象 + `orbit` 子对象 + 三个 `THREE.Vector3`，玩家相机每帧再 `pos.clone()` 一次 | ✅ 已修（M2 第九切片：击杀事件随负载交出 `stature/base` 两枚只读量，`EXECUTION_CAMERA` 按体型折算注视高度与轨道半径/高度（带上下限），第一人称按同一档 blend 借视线（眼睛不搬，搬"看哪里"）并共用 `CAMERA_FOV` 单一基准，覆盖量协议改为常驻单份对象） |
+| B32 | `EnemyManager.js` | 敌人只增不减：整份管理器没有一条"彻底移除并释放"的路径 —— 世界原生敌人靠重生复用，副本敌人靠退出时批量 `dispose`，除此之外的敌人一旦 `respawn: false` 就永远留在 `enemies` 数组里（网格只是 `visible=false`，几何与材质仍占着 GPU）。这直接堵死了"敌人能变出别的敌人"这类招式：谁生成谁负责释放，没有出口就等于不许生成 | ✅ 已修（M2 第十切片：`EnemyManager.despawn()`（交名额 → 摘出数组 → `dispose()`）+ `clearSummons()`，召唤物的三条消散路径（被打死 / 召唤者死 / 寿命到）全走这一条；副本 `resetDungeon` 先清召唤物） |
+
+| B33 | `PlayerController.js`、`CombatCameraDirector.js`、`CombatCameraDirectorExtensions.js`、`CinematicManager.js`、`SpectatorCamera.js`、`Game.onResize` | 相机没有所有者：五处直接写 `camera.*`。位置与注视点每帧由玩家写，FOV 由演出导演每帧写、结束时再"恢复基准"，过场期间 `CinematicManager` 绕过玩家相机直接搬机位，`onResize` 又改一次宽高比 —— 一帧内两次 `updateProjectionMatrix()` 是白算，而"恢复基准"是一种**自觉义务**：跳过、面板抢占、暂停中演出刚好结束、任何一条退出路径漏一笔，那个 -11° 就永久留在屏幕上（玩家只会觉得视野莫名变宽）。基准 FOV 的 `78 / 62` 还散在四处字面量里 | ✅ 已修（M3 第一切片：新增 `engine/CameraRig.js` 作为唯一写入者；FOV 改为**按帧申领**一层偏移 + 主循环末尾统一 `commitFov()`，"记得恢复"这件事从所有退出路径上消失；过场与观看模式相机同走 `setView`，`CAMERA_FOV` 只被 rig 读） |
+
+| B34 | `RestSceneDirector.getCameraOverrides()` | 覆盖量协议没有形状合同：营火导演在**未激活**时只返回 `{lockOrbit, orbit, fovAdd}` 三个键，而读方无条件取 `.pull` → `dist - undefined = NaN` → 主相机的位置与注视点整帧 NaN，枢纽里的第三人称每帧都是坏的。本条之前一直被误记为「自动化视口 0×0 导致 NaN」（见第七/八/九切片验收里的更正注），直到 M3 第二切片实读才查出真因；所有既有用例都把 `restScene` 写成 `null` 而走字段齐全的兜底常量，所以它在测试里完全隐形 | ✅ 已修（M3 第二切片：`CAMERA_OVERRIDES_NONE` 成为协议里唯一那份空表并 `Object.freeze`；新增 `tests/camera-contract.test.js` 8 例，全部拿**真实导演类**验形状、并把真实玩家相机接上跑帧断言各分量有限） |
+
+### 1.5 需求看板（需求方直接提出，优先级高于本文其余排期）
+
+| # | 需求 | 归属里程碑 | 状态 | 证据 / 落点 |
+|---|------|-----------|------|-------------|
+| R1 | 副本切换场景遗留 GPU 缓冲未释放 | M2（释放路径）+ M4（池化与断言） | ✅ M2 释放路径已修 | `DungeonManager.disposeSubtree()` + `Enemy/Boss.dispose()`；`resetDungeon` 于退出与死亡两条路径调用；实测 3 轮进出场景节点回到基线 3194。M4 继续做对象池与 `renderer.info` 零增长门禁 |
+| R2 | 存档 v5（带显式迁移）与性能 HUD | M2 收尾 | ✅ 已完成 | `crossrealm_save_v5` + `SaveMigrations`（v1→v5 全链，迁移后立即按 v5 schema 校验）；`engine/PerfHUD.js`（F3 开关，监控 fps、draw call、几何体/纹理/着色器/场景节点的历史最低点净增长）。实测：v4 档在浏览器里升到 v5 并落盘，故意写坏的 v5 被隔离到 `:corrupt` 后回落到 v4 重新迁移；枢纽基线 几何体 ≈1880、着色器 27–28、场景节点 ≈3190、存活敌人 16（纹理 26–42 随视野内材质上传浮动）——M4 以此为起点做池化，判据是"相对历史最低点的净增长"回落为 0 |
+| R3 | 区际走廊区域归属错乱与 hub 伪对象 | M7 | ⬜ 待做 | 修 B12、B13；`Game.js` 里仍有按中文区域名匹配音频模式的分支（`name.includes('时线')` 等），改为 `zone.id` |
+
+**开工顺序约束（需求方指定）**：M1 起**先崩溃与性能，再内容**。本看板 R1 属性能、R2 属性能与稳定性、R3 属内容，故 R1 → R2 → M3/M4 → R3。
+
+---
+
+## 2. 目标与验收标准
+
+### 2.1 设计支柱（所有取舍以此为准）
+
+1. **手感优先**：任何一次攻击、翻滚、锁定，必须"打得准、停得住、看得清"。
+2. **可读的敌人**：招式有前摇/预警/收招，玩家能用时机反制，而非数值硬扛。
+3. **数据驱动内容**：新增一个敌人/任务/区域只改数据，不改代码。
+4. **帧预算是硬约束**：宁可少一个特效，不可少 10 fps。
+5. **可回滚**：每个里程碑一次提交 + 一条验收脚本。
+
+### 2.2 量化验收指标（终局）
+
+| 维度 | 目标 |
+|------|------|
+| 性能 | 1080p / 中端独显 ≥ 60fps（1% low ≥ 45）；draw call < 400；单帧 JS < 6ms |
+| 稳定性 | 连续游玩 30 分钟，`renderer.info` 的 geometries/textures/programs 不增长；无未捕获异常 |
+| 帧率无关性 | 30 / 60 / 144Hz 下，伤害、弹道、判定结果一致（单测 + 无头对比） |
+| 内容量 | 12+ 种敌人（各 ≥3 招式）、6 个 Boss（各 3 真实阶段）、15+ 支线、3–5 小时通关时长 |
+| 战斗深度 | 装备 + 词缀 + 3 条技能树（各 ≥10 节点）、难度 3 档 |
+| 视听 | ≥ 20 个真实骨骼动画、区域 BGM + 分层环境音 + 全动作音效；材质含 normal/roughness |
+| 架构 | 子系统 ≤ 40 个；事件名收敛到 1 个类型化总线并可注销；0 处中文显示名匹配；`npm run lint/test/build` 全绿 |
+| 可访问性 | 键位重映射、字幕、色盲友好 HUD、纯键盘可达全部 UI |
+
+---
+
+## 3. 目标架构
+
+```
+src/
+  engine/        与玩法无关的地基
+    EventBus.js       类型化、可注销、带 payload 校验
+    Time.js           dt 上限 / timeScale / hitstop / 固定步长累加器
+    Timer.js          替代全部 setTimeout 游戏逻辑
+    ObjectPool.js     网格/材质/特效/实体池
+    Collision.js      Capsule / Cylinder / Box + 空间哈希
+    StateMachine.js   通用 FSM（玩家、敌人、Boss、镜头、UI 都用它）
+    Assets.js         加载 + 缓存 + dispose 策略
+    PerfHUD.js        renderer.info / 帧时间 / 预算告警
+  gameplay/
+    player/      PlayerController(拆分) + PlayerFSM + Movement + CameraRig
+    combat/      MoveTable(数据) + Hitbox + Hurtbox + Resolution + Feedback
+    ai/          EnemyFSM + Behaviour(感知/决策/出招/走位) + Squad(aggro 名额)
+    entities/    Enemy(数据驱动) + Boss 阶段脚本 + Spawner
+  world/         Zone(带 id) + Collider 注册 + 手编布局 JSON + DungeonRoomKit
+  content/       纯数据：enemies.js bosses.js quests.js dialogue.js items.js
+                 skills.js zones.js lore.js tuning.js
+  ui/            OverlayStack + 各面板（订阅 EventBus，不反向引用 game）
+  core/Game.js   只做装配与主循环，目标 < 150 行
+```
+
+**依赖规则**：`engine` ← `gameplay`/`world` ← `core`；`ui` 与 `content` 处于边缘，不得被 `engine` 依赖。系统之间只经 EventBus 或显式接口通信，**禁止 `game.x.y.z` 链式访问**（用 eslint `no-restricted-properties` 逐步收口）。
+
+---
+
+## 4. 里程碑计划
+
+> 顺序即依赖顺序。每个里程碑都以"能玩、能构建、能回滚"收尾。
+
+### M0 — 工程地基与剥离 【已完成，见第 10 节】
+- [x] `git init -b main` + 基线提交
+- [x] `.gitignore` 排除 `resume-stack`（外部符号链接）、缓存目录
+- [x] 剥离非游戏内容：
+  - [x] 删除 `src/game/devstack/`（10 文件）、`src/game/football/`（2）、`src/ui/DevStackJournalTab.js`、`src/ui/FootballPanelDirector.js`、`src/world/DevStackZoneEnhancer.js`
+  - [x] 清理 `Game.js` 的导入、装配、F2/F3/F4 键位挂载点
+  - [x] 存档与成就：去掉 `echo*`、devstack 解锁键
+  - 🔶 `godot/`、`unreal/`、`Launch-Godot.bat`、`scripts/*godot*`、`scripts/*ue5*`、`docs/GODOT_MIGRATION.md`、`docs/UE5_MIGRATION.md`、`docs/UE5_INSTALL.md` 已移出到 `D:\3a大作-archive\`；**`resume-projects/`、`creative/`、`start-resume-stack.bat`、`docs/ENGINE_ROADMAP.md` 仍留在项目内，待需求方确认后移出**（`dist/` 为构建产物，保留并被忽略）
+  - 🔶 M2 第二切片补漏：`public/godot/index.html`（指向已归档导出的死链）删除；暂停菜单、说明书、通关文案、片尾字幕里的 Godot/UE5 宣传文字改为本机说明。仍待确认：`docs/MIXAMO_PIPELINE.md`、`scripts/blender_mixamo_to_glb.py` 里的 Godot 路径段落
+- [x] 工具链：ESLint（flat config，含 `no-restricted-syntax` 约束）、Vitest、`npm run lint/test`
+- [x] 冒烟脚本：`npm run build` 入门禁；🔶 无头加载页脚本未建（随 M9 E2E 一并补）
+- **验收**：`npm run lint && npm run test && npm run build` 全绿；`Game.js` 不再含 devstack/football 残留字符串。
+
+### M1 — 移动与碰撞（3C 第一步）
+- [x] `engine/Collision.js`：Capsule/Cylinder/Box 描述体 + 均匀网格空间哈希（build 时由 Zone 注册，含 `solid` / `platform` / `ghost` 三类）
+- [x] 玩家胶囊推进：水平 push-out、台阶上行（`stepUp 0.65`）、`platform` 顶部支撑（桥、楼梯、浮空台）
+- [x] 世界边界软阻挡（隐形墙推回 + 定向提示），出界不可达
+- [x] `PlayerFSM`：idle/walk/sprint/airborne/roll/attack/lock 七态，移动输入按状态过滤（修 B1、B2）
+  - B1、B2 的行为在 M1 修复（翻滚期间锁定冲量、不被移动输入覆盖；跳跃改按键边沿）；`update()` 内的 if/else 与 `combatBusy` 门控已在 **M2 第三切片**迁到 `engine/StateMachine.js`，`cast/interact/dead` 按需再补
+- [x] 输入层：按键边沿、跳跃缓冲（0.12s）、土狼时间（0.1s）；输入缓冲攻击留到 M2
+- [x] `engine/Time.js`：`dt` 上限 + `timeScale`，`engine/Timer.js` 取代游戏内 `setTimeout`
+  - 原语与单测已就绪（`TimeController` 固定步长/hitstop）；接线点在 `Game.update()` 的 `rawDt`，已随 M2 首批切片接入
+- [x] 坡度：地形为高度场吸附（`sampleGlobalHeightSmooth`），不存在滑落模型，坡度上限暂不适用；斜面贴地由 `walkY` 吸附保证
+- **验收（2026-09-22 实测）**：
+  - 撞不进树/墙/悬崖 — 从枢纽向四方向各连续推进 900 帧，313 个碰撞体、约 23 万次穿透断言，0 例真实穿透（唯一计数命中的是可站立的低矮石块顶面）
+  - 翻滚位移稳定 — M1 实测 60fps 5.07 单位 / 30fps 4.80 / 144fps 5.11（修复前 60fps 仅约 2.6 且方向被输入覆盖）；当时剩余 ±3% 来自翻滚时长的整帧量化，已由 M2 第三切片的 `PlayerFSM` 按时间积分消除（三种帧率下位移都精确 = 16 × 0.32 = 5.12，见 `tests/player-fsm.test.js`）
+  - 单帧碰撞 < 0.3ms — 实测枢纽处 0.0021ms/帧（moveCircle + supportAt）；900 障碍密林单测 < 0.3ms
+  - 边界：向东贴到 x=249.55（内墙面 250 − 半径 0.45）并触发一次方向提示，600 帧内不重复
+  - 跳跃：边沿触发、apex 2.0、土狼时间内可跳、超出土狼时间不可跳（浏览器内注入帧循环实测）
+  - `npm run lint`（0 error）/ `npm run test`（33 passed）/ `npm run build` 全绿
+
+### M2 — 战斗系统重做（本项目最重要的一步）
+- [x] `MoveTable`（数据）：`src/combat/MoveTable.js` 先行落地**时序与判定形状**（`at/duration/range/cone/anim/heavy/moveScale/speed/iframes` + 新增垂直打击带 `band` + 锁定容错），攻击入口与状态机共用一张表。数值部分已在第四切片独立成 `content/tuning.js`（伤害/架势/体力/连击倍率/防御/抗性/暴击/部位/体型）；剩 取消关系、动画 clip 与命中音效的接线仍在 `CombatController` 调用点 → 待本里程碑后续切片继续收表
+- [x] 动画事件驱动的 active 窗口（修 B5）：单次定格判定，`MoveTable.at` 那一帧结算，窗口内后到的敌人不补判。分部位 hitbox 已随第四切片落地；多段命中（一招多个判定帧）留到敌人招式切片
+- [x] `Hurtbox`：敌人分部位受击盒（`src/combat/Hurtbox.js`），竖直分段 + 取重叠最多的那段，3D 相交而非 2D 投影。垂直判定一通，就暴露出两个原先前置问题：法术弹体方向反了（修 B25）、无人机悬浮高度把整机抬到近战打击带之上（修 B26）。**玩家侧已在第八切片补上**：`CombatController` 持有 `createHurtbox('player')` 与 `hurtBaseY()/facingYaw()` 只读接口，敌人招式按 `band` 选段、部位倍率乘进 incoming 伤害 —— 跳跃与地形落差从此对玩家有效（修 B30）
+- [x] 统一结算 `Resolution`（`src/combat/Resolution.js`）：数值集中在 `content/tuning.js`（部位倍率/体型方案/防御曲线/元素抗性/暴击/破防/背刺/格挡/招式基线/体力回复），近战、法术、敌人打玩家三条路径共用同一条纯函数管线：部位 → 背刺 → 防御 → 抗性 → 暴击 → 破防架势 →（最后）正面格挡减免
+- [x] hitstop 走全局 `timeScale`（修 B7）；弹反/战技计时改 Timer（修 B4、B6）：`Game.update()` 取 `TimeController.rawDt × timeScale × 镜头缩放`，`CombatController.schedule(seconds, action, ...resources)` 用 dt 倒计时并释放资源，`animateWeapon` 的自建 rAF 一并删掉
+- [x] 承接 M1 遗留：`Game.update()` 接入 `TimeController`（dt 上限 / 固定步长 / timeScale）；翻滚时长与冲量收进 `MoveTable.roll`，玩家侧新增 `applyDash(yaw, speed)` 接口替代外部直接写速度分量
+  - [x] `PlayerFSM`（用 `engine/StateMachine.js` 承载 locomotion + 战斗态，替换 `update()` 内 if/else 与 `combatBusy`）：`engine/StateMachine.js` 不再是死代码，`PlayerController.update()` 只保留积分/碰撞/贴地/重力，位移意图全部出自状态机；跨系统读取改走接口（`combat.isBusy()/canSpend()/getMoveScale()/getLockTarget()`、`player.applyDash()`）
+  - [x] 翻滚位移 ±3% 整帧量化：状态机按 `_dashRemaining` 逐帧结算 `min(dt, 剩余)`，末帧折算速度，使总位移精确 = 速度 × 时长
+- [x] `ProjectileManager` 统一弹体（修 B9），帧率无关：法术弹体/领域已从 `requestAnimationFrame` 递归搬进主循环，弹道与敌方法球补齐 `dispose()`
+- [x] `ai/`：`EnemyFSM` + 感知（视距/遮挡/仇恨）+ 分离转向 + Squad aggro 名额（同时进攻数 ≤2/3）。新增 `src/ai/Perception.js`（`Sense`：视距 + `CollisionWorld.blocked` 遮挡 + `memory` 秒记忆 + 离出生点过远归位，归位是一次性承诺不在边界来回抖）、`src/ai/Separation.js`（按身份黄金角散开，完全重合的两只不会同进同退；玩家身体也参与分离，写的是 `AI.playerRadius` 而非读玩家内部字段）、`src/ai/Squad.js`（租约式名额：续期、超时回收、死亡/硬直/归位立即交还，Boss 不占坑）、`src/ai/EnemyFSM.js`（idle/return/pursue/orbit/windup/strike/recover/stagger；`windup/strike/recover` 是承诺态，其余每帧重判）。敌人位移统一经 `CollisionWorld.moveCircle`，前摇时长/打击容错/硬直全部读 `AI`（修 B27）
+  - 已知未覆盖：副本与迷宫未登记碰撞体，其中敌人仍走自由积分路径；`Boss/MagicBoss/SpaceBoss/VoidBoss/ChaosBoss` 保留各自的招式脚本，不占围攻名额
+- [x] 每类敌人 ≥3 招（近战横扫、突进、格挡、远程、召唤），前摇颜色/形状分级：`combat/EnemyMoves.js`（招式解析/落点/资格/选招/命中几何的纯逻辑）+ `content/tuning.js` 的 `ENEMY_MOVES`（横扫·突刺·重劈·崩地·三连刺·虚能弹·俯冲·格挡·召唤，各自一份 `windup/strike/recover/reach/cone/damage/cooldown/weight`，可选 `combo/comboWindup/travel/backoff/aoe/ranged/band/guard/summon/telegraph`）与 `ENEMY_MOVE_SETS`（soldier/elite/golem/drone/boss 各 ≥3 招，dummy 空表）；选招用按身份播种的加权随机（同一只可重放、同一群不雷同），前摇分级见验收块。修 B28。**第八切片补上「格挡」**（士兵与精英各 4 招），**第十切片补上「召唤」**（精英 5 招，含 `SUMMON` 的名额/归属/消散三本账）—— 招式原型（横扫·突进·重击·范围·连段·远程·俯冲·格挡·召唤）到此齐了
+- [x] Boss 阶段脚本修复部分：B10（`boss-health` 变化才派发）、B11（阶段音效双份）、B21（致死回传）
+  - [ ] HP 阈值 + 时间轴 + 场地机制（红圈、弹幕、引力、时停）仍属内容工作量，未随本切片完成
+- [x] 反馈（第八切片）：玩家侧补齐受击方契约，敌人近战按 `band` 选段并乘部位倍率（跳起来、站高台从此有竖直意义，容差按体型档位取：玩家 0.35 米、悬浮单位 0.9 米）；敌人新增「格挡」防御招与 `GUARD` 正面减免（伤害 30%、架势 55%、不吃击退、可绕后与侧击、整段占住围攻名额、破防立刻丢盾）。修 B30
+- [x] 反馈（第七切片）：屏幕震动收进 `engine/Shake.js` 唯一所有者（trauma 模型、按秒衰减、确定性多正弦、第一/第三人称一份权重表），命中火花/环与伤害飘字定容池化，敌人吃击退冲量且与火花共用同一个命中方向。修 B29、并收掉 B20 的"每击新建 RingGeometry + 材质"
+- [x] 处决镜头（第九切片）：击杀事件把"死的是谁、多大一只"交给镜头（`Enemy.statureHeight()` + `hurtBaseY()` 两枚只读量随 `combat-execution` 负载走），`EXECUTION_CAMERA` 按体型折算注视高度与轨道半径/高度（带上下限，泰坦不会把镜头送到对岸），第一人称按同一档 blend 借视线并共用 `CAMERA_FOV` 单一基准，覆盖量协议改为常驻单份对象。修 B31
+  - 更正：本条原先记作"没有专属机位"，读码后不成立 —— `CombatCameraDirector` 早有 finisher/riposte/execution/bossKill 四套 preset 与绕轨机位，真实缺口是上面那三处（取景不看体型、第一人称不读机位、每帧分配）
+- [ ] 手柄支持（Gamepad）+ 重映射基础
+- [x] 需求看板 R2：存档 v5 + `engine/PerfHUD.js`（同时收掉 B18）。`SaveMigrations.js` 登记 v1→v5 全链，读档只接受当前版本，旧键迁移后保留一份以便回滚；HUD 用主循环 dt 计帧、按 250ms 节流写 DOM，泄漏判据是"相对历史最低点的净增长"
+- **验收（首批切片，2026-09-22）**：
+  - `tests/combat.test.js` 12 例：命中帧前不出伤害、跨过 `MoveTable.at` 的那一帧结算一次、窗口内后到的敌人不补判、144/60/30fps 下同一记轻击命中次数与伤害一致、战技全向命中且延后结算、三段连击终结有自己的一次判定、弹反不永久改写伤害基线、`schedule()` 按 dt 到期并释放资源、hitstop 走全局缩放且到期自动恢复、翻滚取帧表冲量、法术弹体命中/超时/领域三种路径都从场景移除并各释放一次几何与材质
+  - 浏览器内连续 3 轮「进入迷宫 → 刷 8 个房间敌人（含守钥者）→ 放弃退出」：场景节点 3194 → 进入时约 3669 → 退出后回到 **3194**，敌人表回到 21，副本 group 子节点 0，`dungeons.active` 为 null（修 B22 前每轮净增约 475 个节点且永不归还）
+  - `npm run lint`（0 error / 13 warning）/ `npm run test`（45 passed）/ `npm run build` 全绿
+  - 说明：自动化浏览器视口 0×0 会节流 `requestAnimationFrame`，实时帧内验证 hitstop 与命中帧不可靠，故这两项以固定步长单测为准；场景节点计数不依赖渲染，可实测
+- **验收（第二切片：存档 v5 与性能 HUD，2026-09-22）**：
+  - `tests/save-migrations.test.js` 13 例：v4→v5 迁移后立刻按 v5 schema 校验通过、缺失朝向角补初始值而已有值原样保留、派生字段 `skillsUnlocked` 被剔除并在 v5 校验中反向拒绝、无版本历史档从 v1 起跳共 4 跳、迁移幂等（v5 再跑一次零改动）、高于本构建的版本抛错且不改写数据、漏登记某一跳时报错而非静默跳过；`ingest` 三条失败路径（坏 JSON 隔离、版本过高只提示、校验不过不进应用阶段）
+  - `tests/engine-perfhud.test.js` 5 例：默认隐藏且不建 DOM、250ms 节流、隐藏时仍计帧、泄漏净增长基线不随回落清零、`gauge()` 链式注册
+  - 浏览器实测：种一份 v4 档 → 刷新后 `crossrealm_save_v5` 落盘（朝向 3.1416/俯仰 0.38 补齐、`skillsUnlocked` 由 9 改为按实际解锁数 1、`settings` 必填）→ 手动按 KeyP 存出的档已是 v5；再把 v5 写成半截 JSON → 刷新后隔离为 `crossrealm_save_v5:corrupt` 并回落到仍存在的 v4 重新迁移，游戏未卡在半初始化状态
+  - F3 HUD 实读（枢纽）：`几何体 ≈1880 / 着色器 27–28 / 场景节点 ≈3190 / 存活敌人 16`，纹理 26–42 随视野内材质上传浮动——这组数即 M4 池化的基线
+  - 镜头轨道角往返：鼠标转动后 yaw=2.342 / pitch=0.278 入档，把运行时 yaw 归零再读档，两项都精确复原（v4 之前读档必然弹回 π/0.38）
+  - `npm run lint`（0 error / 13 warning）/ `npm run test`（66 passed，其中本切片新增 18 例）/ `npm run build` 全绿
+- **验收（第三切片：PlayerFSM 接管位移，2026-09-22）**：
+  - `tests/player-fsm.test.js` 15 例：六档优先级判定（翻滚冲量 > 出手 > 离地 > 冲刺 > 行走 > 锁定 > idle）、体力不足退回 walk、翻滚与出手封锁跳跃/交互、空中仍放行土狼跳、翻滚总位移 = 速度 × 时长在 144/60/30fps 下都精确一致、翻滚沿镜头前方、途中按 W 不改写冲量、结算完不留幽灵滑行、冲刺倍率、`moveScale` 降速、法术与时停倍率仍生效、锁定转向、停止输入衰减到 0
+  - 结构变化：`PlayerController.update()` 从 120 行的 if/else 位移链缩到一次 `fsm.resolve(ctx) + fsm.update(dt, ctx)`；`combat.state === 'roll'`、`combat.stamina > 12`、`lockTarget.alive` 这三处跨系统读内部字段全部换成接口调用，`moveScale` 从写死的 0.25/0.4 收进 `MoveTable`
+  - 浏览器内以固定步长驱动真实循环（自动化视口 0×0 无法截图，故用脚本注入帧）：步行速度 15.000、冲刺 27.750（= 15 × 1.85）、翻滚在 1/30、1/60、1/144 三种步长下位移都停在同一堵墙（2.65），说明积分与帧率无关
+  - `npm run lint`（0 error / 13 warning）/ `npm run test`（81 passed，本切片新增 15 例并同步 `tests/combat.test.js` 的 `applyDash` 契约桩）/ `npm run build` 全绿
+- **验收（第四切片：分部位 Hurtbox 与统一结算，2026-09-22）**：
+  - `tests/combat-resolution.test.js` 19 例：体型表按 scale 拉伸分段、重叠最多的一段被打中（中段躯干/上段头/横扫躯干）、Boss 头在 3 米以上故重击只到躯干、悬浮单位 snap 内擦到 snap 外落空、世界高差折进局部区间（站高台打不到脚下人）、无人机悬停高度在 snap=0 下四条打击带仍真实重叠（B26 回归）、防御曲线 `def=K` 恰好 50% 且不超过 cap、部位倍率与防御复合、元素抗性正负与双向 clamp、暴击按敌我 side 分开且不永久改写基线、`isBehind` 四个朝向、破防期架势加成、最低 1 点伤害、真实管线轻击=躯干/重击=头、背刺不改基线、法术与近战共用同一结算
+  - `tests/combat.test.js` 新增 1 例：弹体沿玩家的战斗正方向飞（双替身：`yaw=0` 但 `getCombatForwardXZ()=(0,0,1)`，前方敌人被打中、身后敌人不被打中）——锁住 B25
+  - 结构变化：数值全部搬进 `src/content/tuning.js`（`PARTS/BODY_PLANS/HURTBOX/MITIGATION/ENEMY_RESIST/CRIT/POSTURE/BACKSTAB/PLAYER_MOVES/COMBO/STAMINA_REGEN/ENEMY_DEFENSE/PLAYER_DEFENSE`），判定形状留在 `MoveTable`（新增 `band` 与 `SPELL_BANDS`）；`CombatController`、`SpellSystem` 的近战与法术命中都收成一次 `resolveHit(...)` 调用，`Enemy` 只暴露 `hurtBaseY()/facingYaw()/getDefense()/getResist()/isStaggered()/isParriable()/forceStagger()`，`Boss/ProjectileManager/Enemy` 对玩家的读访问统一走 `combat.isInvulnerable()`。`Enemy.takeDamage` 里的 `staggerTimer>0 → ×1.5` 与 `CombatController` 里散落的 22/48/55/95/70 等硬编码数字消失
+  - 浏览器实读（视口 0×0，故用固定步长注入帧驱动真实 `CombatController`）：同一位置打木桩 轻击 48（躯干）/ 重击 154（头，部位倍率 1.6 与高段位一致）/ 战技 67 / 背刺处决 302；同一记轻击沿防御阶梯递减 soldier 22 → golem 17 → boss 16；弹体在 12 米处 43 伤害（修 B25 前同一发为 0，实测弹体从 z=57 飞到 z=76.6 而目标在 z=45）；打无人机 轻击 43（该次带会心）、重击 57（修 B26 前悬浮 2.5 米时轻击落空，只有靠 snap 才勉强擦到）
+  - `npm run lint`（0 error / 13 warning）/ `npm run test`（101 passed，本切片新增 20 例）/ `npm run build` 全绿
+- **验收（第五切片：敌人 AI —— 感知、围攻名额、分离与状态机，2026-09-22）**：
+  - `tests/enemy-ai.test.js` 17 例：隔一堵墙看不见因而不追、看得见才追击、丢失视野仍追 `memory` 秒（绕柱子不脱战）、被打到立刻仇恨无需看见、离出生点过远归位且不在边界来回抖；八只贴脸时同时起手数不超过名额、名额随冷却/硬直/死亡轮转（每只都轮到过、玩家吃到的伤害次数与招式次数一一对应）、持有者死亡或被打断立刻交还、失联被租约超时回收而活跃持有者续期不被踢、重叠出生的两只反向散开、敌人不钻进玩家身体、**外圈等待的敌人不塌进玩家怀里**（本切片回归用例）；前摇结束那一帧才落地伤害、前摇是承诺态（玩家躲开也照挥完、但超容差打空）、硬直期间不再进攻、弹反窗口按前摇时长比例放开（0.4 秒短前摇旧实现根本弹不了）
+  - 结构变化：`Enemy.update()` 从"字符串状态 + 定值计时"的 if/else 链改为一次 `fsm.resolve(ctx) + fsm.update(dt, ctx)`，位移积分只在 `_advance()` 一处发生；行为参数集中在 `content/tuning.js` 的 `AI`（视距记忆/归位/分离/手性/前摇/收招/冷却/名额与租约超时），spawn config 可逐只覆盖；`Enemy` 与 `EnemyManager` 之间只传 `ctx`（目标位置、玩家替身、邻居、当前碰撞世界），碰撞世界每帧重取而不缓存（`WorldManager.buildCollision()` 会换对象）；`src/ai/**` 纳入 ESLint 严格档（0 warning），并随 `chunk-combat` 打包
+  - 本切片自查发现并当场修掉两处：`orbit` 的径向速度符号写反（外圈等待变成"一路撞进玩家怀里"，实测敌我距离 0.002 米、敌敌距离 0.005 米），修正后同一用例 1.9 米/0.58 米；分离推力 5.5 米/秒下两只同向蹭行仍会压到 0.50 米互穿模型，扫参 5.5/7/8/10 → 最小间距 0.50/0.67/0.72/0.78，取 7（峰值速度未升高，再大只是把推挤变抖）
+  - 浏览器实读（视口 0×0 无法截图，故注入固定步长驱动真实 `EnemyManager.update`）：枢纽原生 21 只敌人 15 秒 —— 同时起手数峰值 2 = 名额上限、越界 0 帧、**碰撞体穿透 0**（用 `unpenetrate()` 反查位移差）、状态覆盖 idle/pursue/orbit/windup/strike/recover/return（确有敌人归位）；另在玩家周围 3.2 米贴脸放 8 只兵跑 20 秒 —— 围攻越界 0、重叠帧数 0（阈值取半径和的 55%）、最小敌敌距离 0.52 米、最小敌我距离 0.76 米、20 秒内玩家承受 260 伤害且全程只有 2 只在起手（修 B27 前：八只同点重叠、同时起手、穿树）
+  - 残留（诚实记录）：0.76 米小于两具身体相切的 0.9 米，即高度拥挤下仍会轻微擦身（分离是软推力，被三方夹住时会让步）；副本/迷宫未登记碰撞体，其中敌人走自由积分；Boss 家族仍是各自的字符串状态脚本，未接入 `EnemyFSM`
+  - `npm run lint`（0 error / 13 warning）/ `npm run test`（118 passed，本切片新增 17 例）/ `npm run build` 全绿
+- **验收（第六切片：敌人招式表与前摇分级，2026-09-22）**：
+  - `tests/enemy-moves.test.js` 18 例：每类实战敌人 ≥3 招且字段齐全（多加一个没人读的数字会被挡住）、按 `type` 装载 + `moves` 整表覆盖 + 内联招式缺省字段落在默认招上、选招随机数按身份播种（同种子重放同一串招）、同一群敌人不整齐出同一招、每招落点各算各的（横扫 3.0 / 突刺 3.5 / 崩地按自己的圈 / 弹体按自己射程）、站住位取"可出招最多"的边界、围攻整程里短射程的招也真的会出；锥形招在命中帧按朝向重判（正面命中、背后打空）、远程招交出弹体而不在命中帧直接扣血且贴脸（`minDist` 之下）宁可不用、没有弹体管理器时不报错也不绕过弹体扣血；前摇与命中段扎住脚跟（同一股推力推开旁观者却不动起手者）、突进招在命中段真的前冲而普通招原地挥完、连段一次占坑多段命中（首段完整预警 + 后续段压缩 + 整段只交一次冷却）、连段被弹反就断在这里不欠半段账、收招清零当前招；只有长前摇的招才有头顶警示、预警圈长到本招真实落点且颜色按招式区分、够不着的距离不抢名额（近战兵在 8 米只会追）
+  - 结构变化：新增 `src/combat/EnemyMoves.js`（纯逻辑：招式表解析、落点/资格 predicate、加权选招、站位与威胁距离计算、命中几何），`content/tuning.js` 新增 `ENEMY_MOVES`（横扫/突刺/重劈/崩地/三连刺/虚能弹/俯冲 7 招）与 `ENEMY_MOVE_SETS`（soldier/elite/golem/drone/boss 各 ≥3 招，dummy 空表）；`Enemy` 的定值 `windup/strike/recover/cooldown/strikeRangeBonus` 从 `AI` 移除，改为一招一份（`parryRatio/telegraphMarkWindup/aimFollowRate/recoverBackoff` 留在 `AI`）；`EnemyFSM` 的 `windup` 进入时才选招并 `showTelegraph()`，`strike` 按本招 `travel` 决定是否前冲、按 `combo` 决定是否接下一段，`recover` 按本招 `backoff` 后撤；`landStrike()` 走 `moveHits()` 同一枚距离/朝向规则，远程招把命中交给 `ctx.projectiles.spawn(...)`（弹体由 `EnemyManager` 传入的同一个 `ProjectileManager` 更新，命中仍走 `playerRef.combat.takeDamage`）；预警三件套按本招分级：地面圈长到真实落点、颜色取 `telegraph.color`、头顶旋转警示只给 `windup ≥ AI.telegraphMarkWindup` 的慢重招
+  - 本切片自查发现并当场修掉四处：① `comboLeft` 不随一轮进攻结束清零 → 第二刀起被当成"上一招的后续段"，既沿用旧招容差而空挥又把前摇压短，补 `Enemy.endMove()`（收招、被弹反、死亡三条路径都清）；② 长前摇期间分离推力把起手者挤偏导致"玩家站着不动反而躲掉"，改为 `windup/strike` 两态硬扎根（`k=0`，不是缩放系数——0.4 倍仍不够且会把敌敌间距压破 0.45 米下限）；③ 锥形招在抢名额时按 `aimDot` 把关 + 前摇期间以 `aimFollowRate`（远低于追击的 8）慢速修正，站着不动不会白躲、横移仍能溜出弧面；④ **招式表落地却几乎只出一招**：追击停在"最远那一招刚好够得着"的边缘（`threatRange`），于是只有最长的那招可用（实测 8 只 15 秒 19 次突刺、1 次横扫，其余招式一次没出）；改为追击与站位都收进新的 `holdRangeOf()`——取"同时可出的招最多"的那个边界（一样多时站得远些），并把无人机的 `俯冲` 射程抬进弹体招的中段带，让远程单位既不必贴脸也不必顶放风筝。修后同一规模实跑五种招式全部上场
+  - 浏览器实读（视口 0×0 无法截图，注入固定步长驱动真实 `EnemyManager.update` + `ProjectileManager.update`）：在玩家周围 5–9 米放 5 兵 + 2 无人机 + 1 构装体跑 15 秒 —— 招式分布 横扫 9 / 突刺 1 / 俯冲 3 / 虚能弹 1（此前一次同规模运行为 横扫 6 / 突刺 7 / 重劈 3 / 俯冲 5 / 虚能弹 3，即五种招式全部上场），近战落点集中在 2.81–2.90 米、无人机俯冲与弹体都在 5.42–5.50 米，命中帧全部落在本招落点内（越界 0）；`holdRange` 实读 soldier/golem 2.90、drone 5.50，`threatRange` 3.5/3.6/13；探针把玩家血量按进入前的原值复原，8 只测试敌人以 `dispose()` + 数组截断清理后世界仍为 21 只、弹体残留 0
+  - 修 B28（本切片落地时实测暴露的站位问题已并入上一条④）
+  - 残留（诚实记录）：「格挡」与「召唤」两类招式未入表（需要玩家侧受击盒与友方单位归属，随下一项做）；Boss 家族仍跑各自的招式脚本、不占围攻名额，`ENEMY_MOVE_SETS.boss` 只是 `Enemy` 基类的兜底数据；`travel: 'lunge'` 的前冲不查前方是否撞墙（`moveCircle` 会挡，但冲量不折返，视觉上会蹭墙）
+  - `npm run lint`（0 error / 13 warning）/ `npm run test`（136 passed，本切片新增 18 例 + `tests/enemy-ai.test.js` 的时序用例钉住 `moves: ['sweep']`）/ `npm run build` 全绿
+  - 测试脚手架：`tests/helpers/enemyHarness.js` 抽出 `installWindowShim/makeWorld/makeScene/makePlayerRef/makeProjectileStub/makeManager/v/run/until/NEVER_LEAVES/spawn/encircle/duel`，两个敌人用例文件共用同一套世界与生成参数（`until()` 取代"猜秒数"，推进到目标状态为止）
+- **验收（第七切片：打击反馈层，2026-09-22）**：
+  - `tests/hit-feedback.test.js` 38 例：
+    - 震屏 —— 多次请求累积进同一个 trauma 且封顶、无请求时严格为空、0/负数被忽略、**余震时长在 30/60/120/240Hz 下完全一致**（并留下对照断言：旧实现的按帧 `×0.78` 在 30Hz 与 240Hz 之间相差三个数量级）、峰值不越界、同轨迹可重放、`applyTo` 让 look-at 只部分跟随、第一/第三人称取各自幅度档、`muted` 只拒新请求且保留余震、`reset()` 一次清空、模块导出的是共享单例
+    - 飘字池 —— 建池时一次性造满、50 次请求仍只有池容量那么多节点且不排队（复用最旧那条）、存活数与守恒式 `active + free === cap`、到期只是隐藏而非摘出场景、生命时长按秒在 30/240Hz 一致、`dispose()` 清空场景
+    - 火花/环池 —— 124 个元素只共享 2 份几何且恒定、超容量时存活数不破守恒、元素活满寿命后回到**同类**池（环不会被当成火花复用）、命中方向让火花平均速度明显带符号而落空时不塌成一条线、`reset()`、`dispose()` 数得清释放次数
+    - 击退 —— 同一记冲量把敌人推开后自己停下、**30/60/120/240Hz 总位移一致**、重/轻、硬直/常态、起手扎根、体型折算、与 AI 的 `setWish` 共存、死亡与重生清空、0/负数/已死目标为 no-op
+    - 同源 —— 一次挥砍在受击敌身上只登记一次击退且方向是"远离玩家"的水平单位向量、重击推得更远且火花平均速度同向、同一次命中的震屏强度大于零
+  - `tests/shake-camera.test.js` 4 例：`PlayerController` 不再自带 `shakeOffset` 也没有 `applyShake`（相机只有 `Shake` 一个抖动写入者）、有请求时相机偏离静止位而幅度受 `SHAKE.meters.third` 约束、两种镜头模式都读到同一个偏移、trauma 归零后相机回到无抖动轨道
+  - 结构变化：新增 `src/engine/Shake.js`（91 行）+ `content/tuning.js` 的 `SHAKE`/`HIT`；`screen-shake` 事件链整条拆除（`src/` 内 11 处派发 + `Game.js` 监听器与三行 `applyShake` 清零，改为 8 个文件里的 11 处 `addShake()` 调用直接压 trauma）；`PlayerController` 的 `shakeOffset` 与两处"往最终位置加随机量"合并为 `shake.applyTo(pos, lookAt)` 两处调用（第一/第三人称共用一份实现）；`spawnSlash()` 连同每击的 `RingGeometry`+`MeshBasicMaterial`+`Mesh` 分配删除；`DamageNumbers` 从"每击一个 DOM 节点"改为定容 26 条 CSS2D 飘字；`CombatFeedback` 改为 110 火花 + 14 环共享 2 份几何；`Enemy` 新增 `applyKnockback()/clearKnockback()` 与 `knock`/`mass`，冲量在唯一的位移写入点 `_advance()` 里按秒指数衰减；新增 `hitDirection()` 作为火花与击退的共同方向来源
+  - 浏览器实读（视口 0×0 不渲染，故注入固定步长驱动真实循环；相机位移量在该视口为 NaN，改由上面的 node 用例钉住。**更正（M3 第二切片）**：那句 NaN 归因错了 —— 真因是覆盖量协议缺字段导致的计算 NaN（B34），与视口无关；修好后同一视口里 `camera.position` 完全有限）：约 2000 次命中后 `.damage-number` DOM 节点恒为 **26**、反馈元素恒为 **124**（峰值在用 105）、`renderer.info.memory.geometries` **126 → 126 零增长**；士兵被真实推开 **5.25–11.1 米**；`'screen-shake'` 事件监听计数 **0**；`shake.applyTo` 实读位置偏移模 0.0584、视线偏移模 0.9996、`strength 0.9533`、`player.shake === game.shake`
+  - 残留（诚实记录）：玩家受击仍是纯数值 + 镜头缩放脉冲，没有击退（刻意不做，见变更记录）；反馈层还剩两处 `setTimeout` —— `effects/ChaosLightning.js:48` 的闪电补帧与 `effects/ExecutionSkipBurst.js:14` 的跳过特效定时摘 class，同属 M4 的"计时全走主循环"；`BossPhaseDirector`/`CombatCameraDirector` 传进 `addShake()` 的强度仍是各自配置里的旧数值（过场 preset 0.09–0.16、Boss 阶段取 `cfg.shake`），未与 `SHAKE.ref` 同档校准
+  - 门禁：`npm run test` 178 passed / 14 files（本切片新增 42 例）、`npm run lint` 0 error / 12 warning（`DamageNumbers` 的未用 `THREE` import 随重写消失，13 → 12）、`npm run build` 绿（`engine/` 刻意不进 manualChunks，避免 `chunk-combat → chunk-ui → chunk-combat` 的新跨块环；已有的 `chunk-ui ↔ chunk-world` 环是既成事实，未触碰）
+- **验收（第八切片：玩家受击盒 + 敌人「格挡」，2026-09-22）**：
+  - 结构变化：玩家侧补齐受击方契约（`CombatController` 构造期 `createHurtbox('player')`，新增只读 `hurtBaseY()/facingYaw()`，`takeDamage(amount, element, part)` 把部位送进结算）；敌人命中玩家的落地判定由"平面距离 + 直接扣血"改为 `pickPart()` 选段后按部位倍率结算；`Resolution` 新增 `isGuarded()` 与 `guard` 入参，减免作为**最后一步**（部位/背刺先复合，盾不抹掉它们），`hitSuffix` 加「格挡」；`content/tuning.js` 新增 `ENEMY_MOVES.guard`、`GUARD` 与 `BODY_PLANS.player`（`snap: 0.35`）；`Enemy.isGuarding()` 与 `landStrike()` 的防御招分支；`EnemyFSM.strike` 在防御段续着预警圈；`EnemyMoves.isAttackMove()` 把防御招排除在站位/追击判定之外；`Hurtbox.createHurtbox()` 返回值新增按体型的 `snap`，`pickPart` 的容差改为"目标说了算"
+  - `tests/player-hurtbox.test.js` 14 例：
+    - 玩家分部位 —— 低段横扫扫中腿 / 中段突刺打躯干 / 高段重劈砸头；抬到跳跃顶点（2.0 米）后低段招从脚下掠过（这一刀仍挥完、只是不掉血）而重劈改为砸中下盘；落差 5 米时近战一刀落空；同一记横扫同一高度下士兵（snap 0.9）擦得到、玩家（snap 0.35）已经躲开；玩家与敌人共用同一张部位表且 incoming 伤害按同一套倍率
+    - 「格挡」—— 举盾只算命中段（前摇与收招各留惩罚窗口），整段防御期间一次血不掉且始终占着围攻名额，被打进硬直立刻丢盾；正面弧内挡得住而背后/正侧面/与出手者重合都挡不住；减免只乘一次且与部位倍率复合（盾后打头仍更疼）；飘字写作「格挡弱点会心」
+    - 招式表竖直维度 —— 每一招近战形态都给出打击带、对站立的玩家都落得下，且低到能跳过去的与高到跳了没用的两类都存在（全低或全高都等于没有这个维度）；只有士兵与精英带格挡
+  - 回归修正（两处真实缺陷，均在写用例/实测时自查发现）：① 防御招最初 `reach: 0`，落点只有 2.2 米而士兵实测停在 2.9 米 —— 浏览器内"3 只兵 20 秒"与"1 只兵 20 秒"两轮围攻里 `格挡` 出现 **0 次**（三种攻击招全都出现过），即整条链路是只存在于表格上的死数据；改为 `reach: 0.9` 后同一场景 4 只兵 30 秒里起手约 4 次（364 帧命中段，约占全队时间 5%）。② 防御招参与"站位取可出招最多的边界"的打分，会把士兵的 `holdRange` 从 2.9 拉到 2.2（为了一面盾放弃覆盖面），故站位与追击只看会打人的招，而围攻名额仍认它（举盾同样要占坑）
+  - 浏览器实读（视口 0×0 不渲染，注入固定步长驱动真实循环；枢纽原生敌人 21 只、玩家基准 3.07 米）：玩家受击盒三段 `head 1.62–2.20 / torso 0.72–1.62 / legs 0.00–0.72`、`snap 0.35`、`hurtBaseY() = 玩家 y`；周围 3 只兵 20 秒内打进 **16** 次，部位分布 head 9 / torso 3 / legs 4。同一只只带横扫的兵、同一枚固定步长，只改玩家相对敌人脚下的高度：**−1.5 米 → 6 次全部砸头（累计 96）、齐平 → 6 次全部扫下盘（48）、+2 米（跳跃顶点）→ 0 次、−4 米 → 0 次** —— 换段与落空都由竖直分段自己决定，这正是修 B30 前不可能出现的行为（旧写法只看平面距离，四个高度都会得到同样的 6 次全额伤害）。防御侧：只带格挡招的士兵 182 帧处于举盾态且 **0 次**打到玩家；同一记重击打在举盾兵身上 16 点、打在另一只不举盾的同类兵身上 87 点（架势 18 / 38）—— 两次命中的受击段不同，故这一对比只证"盾真的改变结果"，`0.3 / 0.55` 的精确比值由用例钉住
+  - 残留（诚实记录）：玩家的"格挡"仍不存在（玩家只有弹反与无敌帧，防御是敌人专属），敌人侧的**弹体**与 Boss 家族的砸击仍未取部位（`ProjectileManager.js:60`、`Boss.js:159/:212`、`ChaosBoss.js:55` 还是单参 `takeDamage(damage)`，落点没有竖直维度）；敌人打玩家的路径没有击退（第七切片刻意不做）；「召唤」招与 Boss 场地机制仍未落地
+  - 门禁：`npm run test` 193 passed / 15 files（本切片新增 15 例：`player-hurtbox` 14 + 盾上反馈同源 1）、`npm run lint` 0 error / 12 warning（与上一切片持平，无新增）、`npm run build` 绿
+- **验收（第九切片：处决镜头按体型取景 + 第一人称接入，2026-09-22）**：
+  - 先更正一处记录：本条在需求看板里原先写的是"处决/终结技的运镜与定格仍由通用 preset 承担，没有专属机位"。读码后不成立 —— `CombatCameraDirector` 早就有 finisher/riposte/execution/bossKill 四套 preset 与绕轨机位（时长、时间缩放、黑边、label、输入锁、震屏一应俱全）。真实缺口是三处，本切片逐条修掉并记为 B31
+  - 取景：`Enemy.statureHeight()`（受击盒最高段上沿离网格原点多高）与 `hurtBaseY()` 随 `combat-execution` 负载交出，`content/tuning.js` 新增 `EXECUTION_CAMERA`（`ref/minScale/maxScale/lookRatio/centerBias/radiusFollow/heightFollow/fallbackStature`）；注视点从写死的 `目标 y + 1.25` 改为 `网格原点 + 身高 × 0.62`（胸口），环绕半径与高度按同一档折算并带上下限。连击终结与弹反没有事件负载，`play()` 当场问锁定目标本人这两个接口；没身高可问（旧式派发）退回旧构图而不是 NaN 或贴脸
+  - 第一人称：`_updateFirstPersonCamera` 此前整段不读演出镜头，处决时只剩黑边与慢动作、画面仍朝鼠标方向。现在按 director 给的同一档 `gaze` 借视线（眼睛不搬位置，只搬"看哪里"——搬走就等于硬切成旁观镜头），`gaze` 与 `lockOrbit` 共用同一条 0.12 门槛，不出现"第三人称已绕轨、第一人称还看着别处"；FOV 基准从四处 `78 : 62` 字面量收进 `CAMERA_FOV` 单一来源（`PlayerController`、导演 `update/skip` 都读它）
+  - 分配：`getCameraOverrides()` 旧实现每帧新建返回对象 + `orbit` 子对象 + 三个 `THREE.Vector3`（其中两个是 `clone()/add()`），玩家相机另有 `pos.clone()`。现在覆盖量协议是一份常驻对象与常驻取景点，未接管时把 `orbit.position/lookAt` 置空以保留读取方的 `?.` 短路；用例钉住"连续 30 帧拿到的是同一个对象、同一对向量，但坐标仍在推进"
+  - `tests/execution-camera.test.js` 21 例：胸口注视点随身高线性上升且 Boss 明显更高、大个子拉得开小个子收得近且折算不越上下限、悬浮单位注视点跟着网格原点上去、基准档等于 preset 原样、无身高时退回旧构图、无事件无锁定目标时机位取玩家正前方且可用、锁定目标走只读接口、`Enemy.statureHeight()` 真实体型分档（无人机不含 hover，避免与 `hurtBaseY` 重复计一次高度）、注视点仍向玩家胸口回拉一档（不把镜头彻底交给目标）、第一人称五例（不接管时看自己朝向、目标在身后时视线被拉过去、FOV 对两种模式都压、演出结束交还、Esc 跳过走同一条释放路径、导演不自己搬相机）、覆盖量四例、击杀事件端到端两例（真实 `EnemyManager` + 真实 `CombatController` 一记轻击打死 → 事件带出 `stature 2.2`/Boss 更大，取景真的吃到它）
+  - 浏览器实读（视口 0×0 不渲染，注入固定步长驱动真实 `CombatCameraDirector` 与真实 `PlayerController`，玩家基准 3.07 米）：同一份 `execution` preset 下四种身体 —— 士兵档（身高 2.2 米，正是 `EXECUTION_CAMERA.ref`）胸口 4.432、回拉后的注视点 4.403、轨道半径 **4.6 = preset 原样**（人形单位构图与修前一致，这是刻意的）；Boss 档（3.85 米）胸口 5.455、注视点 5.242、半径 **6.67**（同一 preset 被拉开放大 45%）；走 `bossKill` 时半径 7.83（其基准本就 5.4）；无人机档（1.87 米 + 悬浮 0.9 米）胸口 5.128、半径 **4.186**（收近，机体不会小到看不见）；连续帧取到的覆盖量对象是同一个引用；第一人称把被处决者放在正后方 5 米时，接管前视线与"指向目标"的夹角余弦 **-0.996**，接管后依次 **0.987 → 1.000 → 1.000 → 0.985**（转过头去看被处决者，再随包络松开），FOV 从 78 压到 **67**，`skip()` 后回到 **78** 且视线回到 -0.996（交还玩家）
+  - 残留（诚实记录）：导演仍在 `update/skip` 里直接写 `camera.fov`，与 `PlayerController` 里的 FOV 写入是两处（同一个数、同一个来源，但"相机唯一所有者"要等 M3 的 `CameraRig` 收口）；`blocksInputUntil` 仍按 `performance.now()` 挂墙钟而非主循环 dt；`play()` 里翻闪白透明度用了一次 `requestAnimationFrame`，`ExecutionSkipBurst`/`CombatCinematicSkip._maybeHint` 仍有 `setTimeout`（同属 M4"计时全走主循环"）；`CombatCameraDirectorExtensions.js` 仍以外挂方式给导演补 `skip()`；玩家相机的第三人称路径每帧仍有 `new THREE.Vector3` 若干（M4 的零分配清单）
+  - 门禁：`npm run test` 214 passed / 16 files（本切片新增 21 例）、`npm run lint` 0 error / 12 warning（持平）、`npm run build` 绿（既有的 `chunk-ui ↔ chunk-world` 环未变，未新增跨块环）
+- **验收（第十切片：敌人「召唤」与召唤物的生命周期，2026-09-22）**：
+  - 补齐招式原型（横扫/突刺/重劈/崩地/三连刺/远程/俯冲/格挡/**召唤**），但这一条的难点不在招式而在账本 —— 让敌人能变出敌人，就必须同时回答"能变多少、归谁、谁来释放"。释放路径此前根本不存在（见 B32），所以本切片的第一块砖是 `EnemyManager.despawn()`：交还围攻名额 → 从 `enemies` 摘出 → `dispose()` 几何与材质。世界原生敌人仍走重生路径不经过它，副本敌人在 `resetDungeon` 里批量走它，召唤物的三条消散路径全部走它
+  - 数据：`ENEMY_MOVES.summon`（前摇 1.4 秒是全场最长的一档 —— 念咒必须看得见、也来不及假装看不见；`damage: 0`、没有 `band`、`reach: 0.9` 与格挡同理落在站位距离之内）+ `ENEMY_MOVE_SETS.elite` 加一枚；`SUMMON = { ringRadius 3.2, perOwner 2, total 8, life 26, hp 55, posture 30, damage 9, speed 5.2, name 虚空仆从 }`。三道闸缺一不可：没有 `perOwner` 一只召唤者能站着铺满场地，没有 `total` 四只召唤者就能把帧预算花光，没有 `life` 放出来没人杀的仆从会永久占场与占围攻名额
+  - 接线：`Enemy` 拿到的是管理器注入的一条窄能力（`ctx.summon(owner, spec)`，与 `ctx.projectiles` 同一个位置），只说"按这份规格放仆从"，出生点、名额、归属与生命周期全在管理器定；`_summon` 只排队，`_drainSummons` 在 `for (const enemy of this.enemies)` 循环**之后**才真正 `spawn` —— 在迭代途中改数组会让后半群敌人当帧不更新。选招侧：`moveUsable` 读管理器每帧盖下来的 `enemy.summonQuota`，没名额时这招**直接从可选池消失**，不会出现"抢了围攻名额唱一段空咒"（那等于预警说谎）；`isAttackMove` 同时排除防御与召唤，站位与追击只看会打人的招
+  - 归属与消散：仆从持 `summoner` 引用，`_reapSummons` 每帧走三条 —— 被打死的就地释放、召唤者一死跟着消散（玩家不必逐个追杀，这条规则也写进 `SUMMON` 的注释）、寿命到点自己散；后两条不调 `die()`，因此不记进击杀数也不掉魂魄（`loot` 侧另加 `!enemy.isSummon` 一道闸，"让召唤者无限刷再逐个收割"不该是一条致富路线）。`DungeonManager.resetDungeon` 先 `clearSummons()`：召唤物不在 `dungeon.enemies` 里（它们是战斗中由管理器生成的），不清就会跟着玩家回枢纽变成隐形占场的敌人
+  - `tests/enemy-summon.test.js` 16 例：数据自证（最长前摇、不伤人、无 `band`、只有精英会召唤）·不参与站位打分（加进招式表前后 `holdRange`/`threatRange` 一模一样）·没名额时 `moveUsable` 拒绝而落点之外同样拒绝·一次施放交出 `count` 只且归属/`respawn:false`/立即仇恨/落在环上不重叠·两只仆从彼此不叠·单主不超 `perOwner`（跑 9000 帧）·全场不超 `total`（6 只召唤者一起念咒，跑 6000 帧）·召唤者死亡当场消散并数得清场景移除次数·寿命到点自行消散且 `alive` 仍为真（消散不是击杀）·仆从不掉魂魄而原生敌人掉（对照组）·生成时机（出现的那一刻数组只在循环外增长、无重复登记）·`clearSummons` 与待生成队列作废·念咒者照样占一个围攻名额·被打进硬直就断在这里不欠半只仆从
+  - 浏览器实读（真实 `EnemyManager`，玩家周围放 3 只只带召唤招的精英）：20 秒内共放出 **6** 只「虚空仆从」，同时存活峰值 6，单主分别 **2 / 2 / 2**（恰为 `perOwner`，之后 `summonQuota` 全为 0），`enemies` 净增 6；仆从读数 `{hp 55, damage 9, respawn false, sense.alerted true, summonTtl 剩 7.5 秒}`；杀死其中一只召唤者 → 它那 **2** 只当场消散、另外 4 只留下，且 `enemies` 里查不到；`clearSummons()` 后 `_summons.size` 与数组内 `isSummon` 双双归零；整场 `loot.spawnDrop` 调用 **0** 次
+  - 残留（诚实记录）：仆从的出生点只做"环上黄金角散开"，没有查询碰撞体，贴墙念咒时可能落在墙里（下一帧的 `moveCircle` 与分离会把它挤出来，但会看到一次穿模）；仆从仍会派发 `enemy-defeated`，因此 `CombatSessionStats` 的击杀数与成就计数会把"被杀死的召唤物"算进去（自然消散不算）；Boss 家族仍跑自己的招式脚本，`summon` 对它们只是基类兜底数据；`PerformanceManager.shouldUpdateEnemy` 会跳过远处的召唤者，因此偏远营地的铺场速度取决于帧预算而不是设计
+  - 门禁：`npm run test` 230 passed / 17 files（本切片新增 16 例）、`npm run lint` 0 error / 12 warning（持平）、`npm run build` 绿（跨块环仍是既成的 `chunk-ui ↔ chunk-world`）
+
+### M3 — 镜头
+- [x] `CameraRig` 成为**相机唯一所有者**（M3 第一切片）：新增 `src/engine/CameraRig.js`，全仓库只剩它一处写 `camera.position / lookAt / fov / aspect`。玩家相机的两种模式都改为 `rig.setView(...)`；演出与营火不再各自 `camera.fov = 基准 + 自己的量`，而是**按帧申领**一层偏移（`requestFov(id, delta)`），主循环末尾 `rig.commitFov()` 落一笔 —— 于是"恢复基准"这个义务从每个退出路径（结束、跳过、面板抢占、异常）上彻底拿掉了：这帧没人申领，偏移自己就消失。过场（`CinematicManager`）与观看模式相机（`SpectatorCamera`，仍是未接线的孤儿路径）也改走同一个入口。修 B33
+  - 已顺带收掉两条别处登记的残留：第九切片留下的"导演与玩家相机两处写 FOV"、以及 `CAMERA_FOV` 在四处被当字面量重写的问题（现在只有 rig 读它）
+  - **未做**：混合栈的优先级与权重（现在只有一层 `camera-override` + 各层相加，过场靠 `cinematicActive` 早退互斥，不是通用 blend）；`player-fsm` / `shake-camera` 用例仍然直接观察 `camera.*`，等 M3 后续切片改读 rig（第二切片已补 `tests/camera-contract.test.js` 用真实导演验形状）
+- [ ] 遮挡求交对碰撞体（修 B3）、锁定重定位 + 速度阻尼、轻微越肩偏移、瞄准磁吸、翻滚/受击镜头、区域 FOV
+- [ ] 镜头混合栈（gameplay / lockon / cinematic / photo 优先级 + 权重），杜绝一帧内被两处写入 —— 第一切片已把"两处写入"收掉，这一条剩下的部分是**多来源之间的权重与过渡**（含进出过场不跳变）
+- **验收**：无穿墙、锁定不抽搐、过场进出无跳变、第三人称始终能看到角色。
+- **验收（M3 第一切片：相机唯一所有者，2026-09-22）**：
+  - 结构变化：新增 `src/engine/CameraRig.js`（约 140 行，`src/engine/` 不在 manualChunks 表内 → 落进 index 被各块共享，不会新造跨块环，与 `engine/Shake.js` 同一个理由）。接入点：`PlayerController` 构造期持有（`this.rig = new CameraRig(camera)`），第一/第三人称的落笔改 `rig.setView(...)`，视角切换改 `rig.setBaseFov(...)`；`CombatCameraDirector.update` 的两处 FOV 写入与 `CombatCameraDirectorExtensions.skip` 的"恢复基准"全部换成 `requestFov / revokeFov`；`CinematicManager` 的过场搬机位改 `rig.setView`（顺带把它每帧新建的向量收进两个复用字段）；`SpectatorCamera` 的构造参数从 camera 改为 rig（它仍是无人构造的孤儿路径，登记为后续项）；`Game.onResize` 改 `rig.setAspect`，`Game.update` 末尾加一次 `rig.commitFov()`
+  - 关键约定（写进模块头注释，也写进用例）：**FOV 增量按帧申领，不留"记得恢复"的义务**。`requestFov(id, delta)` 只对本帧有效，`commitFov()` 结算给下一帧；没人申领就是基准。同名层以最后一次申领为准（战斗演出与玩家相机取的是同一个量，用同一个 id `FOV_LAYER_OVERRIDE`，不会叠成两倍）；不同层才相加。`revokeFov(id)` 给"不等下一帧"的退出路径（跳过、进副本）当场复原；`reset()` 在传送/重生时交出相机
+  - `tests/engine-camera-rig.test.js` 13 例：没人申领时严格停在基准、**申领只在一帧内有效**（下一帧无人再申领 → 偏移自己消失，这一条就是"退出路径漏了会永久残留"的反面）、同层连续申领不叠两倍、不同层才相加且 0 增量不占层名、**一帧最多重算一次投影矩阵**（数值没变时一次都不重算）、切视角只换基准不抹偏移、`lastFovChange` 说得出是谁进出、`revokeFov` 当场收层且下一帧不复活、跳过之后仍能正常压上新偏移、`reset` 一次交还相机、`setView` 只读入参（复用临时向量是安全的）与 `lookPoint` 回读、`setAspect` 幂等
+  - 回归改写：`tests/execution-camera.test.js` 里与 FOV 有关的 4 例改为按真实帧序（`d.update → p.updateCamera → rig.commitFov`）观察，并新增断言 `rig.fovLayers === 0`（演出后不残留层）与"演进的那一帧里导演没有搬相机"；视角切换改走真实 `toggleCameraMode()` 而不是手改 `cameraMode`（后者会绕过基准换档，正是这种"测试自己抄近路"会让协议失去意义）
+  - 浏览器实读（真实主循环 `game.update()`，非手工步进）：待接入状态下 180 帧 FOV 漂移 **0**、`fovLayers` 0；`play('execution')` 后 FOV 序列 **62 → 51 → 51.45 → 56.04 → 62**（压窄再回基准，`fovAfterShot = 62`、`layersAfterShot = 0`）；`play('bossKill')` 跑到 0.32 秒时 FOV 已在 49 一档，中途 `skip()` 后**同一帧内**回到 62；`requestFov` 后不 `commitFov` 时相机 FOV 纹丝不动（62），落到 `commitFov` 才写（一帧一笔）；V 键路径 `toggleCameraMode` 两次得到 78 / 62，`rig.lastFovChange()` 报 `{born:['camera-override'], gone:[]}`；Boss 过场经 rig 搬机位后 `lookPoint()` 各分量有限、控制台无 error
+  - 残留（诚实记录）：**混合栈还没做** —— 现在只有"一层 override + 各层相加"，过场靠 `cinematicActive` 早退互斥而非权重过渡，进出过场仍是一帧交接（M3 第三切片）；第三人称的遮挡当时仍只对地形射线（B3，已由 M3 第二切片修掉）；`SpectatorCamera` / `DemoRunner` 整条观看模式路径从未被构造，属死代码，登记到 M9 质量工程；`PhotoModeDirector` 不写相机也不被 update 调用，同样待 M3 接线
+  - 门禁：`npm run test` 243 passed / 18 files（本切片新增 13 例）、`npm run lint` 0 error / 12 warning（持平）、`npm run build` 绿（跨块环仍是既成的 `chunk-ui ↔ chunk-world`，`engine/` 未映射所以不新增）
+- **验收（M3 第二切片：镜头对实体求交 + 覆盖量形状合同，2026-09-22）**：
+  - 修 B3（遮挡求交对碰撞体）：第三人称的机位探测拆成两条**互不代理**的路径。地形那条保留原写法（走一格查一格，被吃掉就退回上一格并把机位**抬到坡面之上**）—— 山坡该让镜头升高而不是缩短力臂，收了力臂就看不清角色在做什么；实体这条是新的：墙抬不过去，只能收。收的时候先做 8 格前向 march 找"第一格被挡"，再在最后一格安全与第一格被挡之间夹 4 刀二分，把接触点从 0.65 米一级定到厘米级 —— 只退回整格会让镜头停在一米开外，玩家贴墙时表现为"镜头被远远拽走"。落点再留 `wallMargin` 余量，不让近裁剪面啃进几何体
+  - 顺带修掉一处自己踩出来的坑：力臂下限 `minPull` 原本取 0.3（=1.56 米），浏览器实读发现柱子近表面在 1.5 米处 —— 这个"保底"比接触点还远，等于把镜头**停在障碍物里面**。下限只管"别钻进玩家身体"，不该管墙，改成 0.3 → 0.12 后实读机位到轴心 1.51 米 > 半径 1.1 米（在面外），力臂 1.09 米且撤掉障碍后立刻回到 5.2 米（无滞回）
+  - 修 B34（更严重的发现）：营火导演未激活时返回 `{lockOrbit, orbit, fovAdd}`，读方无条件取 `.pull` → `dist = Math.max(3.5, 5.2 - undefined) = NaN` → 主相机每帧 NaN。此前第七/八/九三片的验收都把这道 NaN 记成"自动化视口 0×0 所致"，**归因错了**（本文件已在第七切片那条就地标注更正）。真因是协议没有形状合同：`CAMERA_OVERRIDES_NONE` 成为唯一那份"空表"并 `Object.freeze`，两个导演与玩家相机都从它出发
+  - 为什么既有测试全绿而线上是坏的：`tests/shake-camera.test.js` 与 `tests/execution-camera.test.js` 的 game 替身把 `restScene` 写成 `null`，走的正是字段齐全的行内兜底 —— 替身替掉了唯一会出问题的那个对象。新增 `tests/camera-contract.test.js` 8 例**不许 stub**：直接实例化真实 `RestSceneDirector` / `CombatCameraDirector`，未激活与激活两种状态都按读方真正取的键清单一一断言，并把真实玩家相机接上真实营火导演跑 120 帧断言 `camera.position` 各分量有限
+  - 逐段查询的陷阱（写进 `Collision.js` 注释并被用例钉住）：`blocked()` 按 1.5 米一格采段内点，**短于一拍的线段一个采样都不取**（恒为"没挡住"），而镜头每步只有 0.65 米 —— 拿它做逐段查询会让遮挡静默失效（比没有遮挡更糟，因为它一直给出"安全"的假象）。新增 `blocksPoint(x, z, y, pad)` 做点查询；`blocked()` 维持现状（AI 视线两端距离远大于一步），但它对 0.6 米厚薄墙会整步跨过这一点已由用例记录在案，改动必须是明知故改
+  - 参数进 `content/tuning.js` 的 `CAMERA_OCCLUSION`：`terrainSteps 6 / steps 8 / refine 4 / pointPad 0.22 / wallMargin 0.26 / groundLift 1.35 / blockClearance 1.25 / minPull 0.12 / retractRate 34 / extendRate 16`。收回快、伸出慢的非对称阻尼是这套手感的核心：贴墙必须立刻让位，离墙不许一弹一弹地展开，两个速率都按秒算因此与帧率无关（用例验 30/60/144 Hz 收到同一个点）
+  - `tests/camera-occlusion.test.js` 15 例：无障碍时停在期望力臂、墙/柱/旋转薄盒都挡得住、矮墙（顶低于机位）不挡、高架横梁只在它的高度区间内挡、地形力臂不被山坡吃掉、收回与伸出的帧数对比、两方向都收敛、帧率无关、`blocksPoint` 与 `blocked` 的语义差别、pad 让镜头停在面前而非贴面、无碰撞世界（副本路径）退回原行为
+  - 门禁：`npm run test` 266 passed / 20 files（本切片新增 15 + 8 = 23 例）、`npm run lint` 0 error / 12 warning（持平）、`npm run build` 绿
+
+### M4 — 特效对象池与资源生命周期
+- [ ] `Assets.js` 材质/几何共享库（一次性建库，全局复用）；`ObjectPool.js` 用于挥砍弧、火花、红圈、伤害数字、弹体、飘字
+- [ ] `dispose()` 规则集中；`PerfHUD` 断言 GPU 对象数稳定
+- [ ] 移除每帧派发的事件洪水（`stamina-changed`/`mana-changed`/`boss-health` 改为变化派发 + 批量刷新 HUD）
+- **验收**：脚本化战斗 5 分钟后 `renderer.info` 三项零增长；事件数/帧 < 20。
+
+### M5 — 渲染与美术
+- [ ] `InstancedMesh` 改造：树、石、草、火把、弹体；LOD 两档 + 距离剔除（替换 `PerformanceManager` 的冻结逻辑，修 B14）
+- [ ] 阴影：单一所有者 + 跟随玩家的紧致投影框，按画质档 1024/2048/4096（修两处抢写）
+- [ ] 后处理链：Composer 开启 MSAA samples、SSAO、景深、色彩分级 LUT、区域雾/高度雾
+- [ ] 材质：为地面/岩壁/木材/金属/布料配 normal + roughness（程序生成后**离线烘焙成图集**，运行期只采样）
+- [ ] 真模型：接入 CC0 GLB（角色/敌人/建筑 kit），跑通 Mixamo → GLB 动画管线，替换 Soldier 占位
+- [ ] HP 条等世界空间 UI 改为 billboard（`Enemy.js:68-81`）
+- **验收**：中端机 1080p 稳定 60fps；draw call < 400；前后对比截图存入 `docs/screenshots/`。
+
+### M6 — 音频
+- [ ] 音频总线：分层混音、侧链闪避、3D 衰减、区域 reverb 送出
+- [ ] 素材：CC0 音效包（挥砍/命中/受击/脚步/环境/UI）+ 分区域 BGM（含 Boss 战与阶段切换）；无授权素材时先做高质量合成层并标记 TODO
+- [ ] 事件化：玩法只发 `sfx:play(id)`，不关心实现
+- **验收**：玩家每个动作、每个 UI 交互、每个环境都有声音反馈；无一处静音占位。
+
+### M7 — 数据驱动内容层（消灭 Wave/Extras 叠加）
+- [ ] `content/` 注册表 + 构建期 schema 校验；`zone.id` 取代中文名匹配（修 11 个文件的 `includes()`）
+- [ ] 合并：`PopCulture*` / `Wave2-4` / `Extras` 系列 50 文件 → 归并进 `content/`，保留可用创意，删除 `attach-*` 机制
+- [ ] `ObjectiveEngine` 替换 36 步硬编码：目标/条件/标志/分支/失败/重访，任务日志 + 地图标记 + 引导
+- [ ] 对话：单一节点图（条件、变量、跳转、CG、分支选项），7 个 RestDialogue 文件合并为一份数据
+- [ ] **开发期关卡编辑器**（dev mode）：视口内放置/移动/缩放/设碰撞盒 → 导出 `content/zones/*.json`，热重载 —— 这是内容量产的关键工具
+- [ ] 地下城：房间模板库（kit）+ 连接规则 + 遭遇表，替换纯迷宫；差异化的房间（宝藏/谜题/精英/事件）
+- [ ] 内容扩充：区域 5→7（含内部空间与竖向日程）、敌人 4→12、Boss 重做 6 个、支线池 15+、装备/词缀/稀有度掉落、技能树 3×10+、难度 3 档 + 敌人成长曲线
+- **验收**：新增 1 个敌人 + 1 条支线全程只改数据；通关 3–5 小时；`attach-*` 文件数为 0。
+
+### M8 — UI / UX / 系统
+- [ ] `OverlayStack`：模态栈、焦点管理、Esc/手柄返回一致、指针锁自动释放
+- [ ] HUD 重设计（状态可读、层级清晰）、Boss 血条、架势条、目标提示
+- [ ] `ui/` 面板订阅 EventBus，去掉 `game` 反向引用
+- [ ] i18n：文案抽入 `content/strings.zh.js` / `strings.en.js`，禁止代码内硬编码中文
+- [ ] 设置：画质预设、键位重映射、辅助功能（字幕、色盲、镜头敏感度、伤害数字开关）、自动存档 + 多存档槽
+- **验收**：纯键盘/纯手柄能完成核心流程；文案零硬编码；所有面板行为一致。
+
+### M9 — 质量工程与发布
+- [ ] 测试：单测（伤害/FSM/碰撞/存档迁移/任务 gating/内容 schema）+ 无头 E2E（自动通关 Chapter 1）+ 性能回归门禁
+- [ ] CI：GitHub Actions（lint/test/build/preview），失败即阻断
+- [ ] 发布：产物分包与预加载、首屏 < 2MB、运行期错误上报、版本化存档迁移链
+- [ ] 文档：架构说明、内容创作指南、数值表说明、CHANGELOG、路线图更新
+- **验收**：CI 全绿；发布 checklist 走完；旧存档可迁移。
+
+---
+
+## 5. 实施顺序与依赖
+
+```
+M0 ─→ M1 ─→ M2 ─→ M3 ─→ M4 ─┬─→ M5 ─→ M6
+                             └─→ M7 ─→ M8 ─→ M9
+```
+- M1→M2→M3→M4 **必须串行**（碰撞是战斗与镜头的前提，特效池是渲染的前提）。
+- M5 与 M7 可在 M4 后并行；若只做一条线，**M7 优先**（内容 > 画质，因为画质受资产限制，而内容能立刻改善体验）。
+- M6/M8/M9 依赖 M7 的数据结构定型，避免返工。
+
+## 6. 工程规范
+
+1. 新代码一律使用 ESM + JSDoc 类型注释；核心 `engine/` 目录开 `// @ts-check` 渐进约束（不做全量 TS 迁移）。
+2. 游戏逻辑禁用 `setTimeout/setInterval`，统一走 `Timer`（动画/HTML 过渡除外）。
+3. 任何 `new THREE.*Geometry/Material` 必须来自共享库或池；实体 `dispose()` 与 `remove()` 成对出现。
+4. 事件名常量化在 `src/engine/events.js`，禁止裸字符串；监听器必须在系统 `dispose()` 中注销。
+5. 内容（数值、文案、布局）不写在逻辑文件里。
+6. 提交信息：`<type>(<scope>): <中文摘要>`，一个里程碑一个提交；每阶段结束在 `npm run build` 通过后提交。
+7. 中文显示名只用于 UI 文本，逻辑判断一律用 `id`。
+
+## 7. 风险与对策
+
+| 风险 | 对策 |
+|------|------|
+| 22k 行无测试，重构易破功能 | 先建冒烟与单测，再动刀；每阶段可回滚到上一提交 |
+| 存档格式变更导致旧档失效 | 版本化迁移函数 + `tests/` fixture 快照，禁止静默 catch |
+| 真美术/音频素材需要外部下载 | 优先做程序化替代并保留接口，素材到位后替换；素材来源须可商用 |
+| 关卡编辑器投入大 | 只做 dev-only 最小可用版（放置/碰撞/导出），不做通用工具 |
+| 战线再次膨胀（本项目的前车之鉴） | 严格按里程碑验收，未完成不开新线；新增玩法需求一律排入 M7+ |
+
+## 8. 长期开发节奏
+
+每个里程碑按同一循环推进：**建分支 → 实施 → 加测试 → 构建通过 → 提交 → 更新本文第 10 节 → 记录一条决策日志（ADR）**。每次会话开始时先读本文 + 进度表 + `git log --oneline -10`，确保上下文连续。
+
+## 9. 剥离清单（M0 待执行，逐条勾选）
+
+- 代码：`src/game/devstack/*`、`src/game/football/*`、`src/ui/DevStackJournalTab.js`、`src/ui/FootballPanelDirector.js`、`src/world/DevStackZoneEnhancer.js`
+- 装配点：`src/core/Game.js` 导入 `:99-119`、构造 `:165-170`、`:253-271`、键位 `:456-459`
+- 关联：`AchievementSystem` 的 `echo*` 统计、`JournalTabRegistry` 注册项、`SaveSystem`/`SaveValidator` 键、`PopCulture*` 中的成就与日志页
+- 目录（移到 `D:\3a大作-archive\`）：`godot/`、`unreal/`、`resume-projects/`、`creative/`、`dist/`、`Launch-Godot.bat`、`start-resume-stack.bat`、`scripts/` 中 godot/ue5/resume 相关
+- 文档：`docs/GODOT_MIGRATION.md`、`docs/UE5_MIGRATION.md`、`docs/UE5_INSTALL.md`、`docs/ENGINE_ROADMAP.md` 归档；`README.md` 重写为单引擎说明
+
+## 10. 进度表
+
+| 里程碑 | 状态 | 完成日期 | 提交 | 备注 |
+|--------|------|----------|------|------|
+| 基线快照 | ✅ | 2026-09-21 | `83a8b0c` | 342 文件入库，排除外部符号链接 |
+| M0 地基与剥离 | ✅ | 2026-09-21 | `6f82b22` | 剥离简历联动内容与引擎产物；ESLint/Vitest/build 三门禁；修 B16 B17 + 一处 `const` 重赋值崩溃 |
+| M1 移动与碰撞 | ✅ | 2026-09-22 | `d1f37c2` | 碰撞世界贯通五区（313 障碍）+ 玩家位移/支撑/台阶/边界；修 B1 B2；翻滚与跳跃帧率无关。`PlayerFSM` 与 `TimeController` 接线并入 M2 |
+| M2 战斗重做 | 🔶 十片切片完成 | 2026-09-22 | `ddf6c6c` + `edd7604` + `c7eeea5` + `ed46587` + `6250b82` + `7d81e60` + `c3787a6` + `b1fb5b4` + `855259c` + `3f0f8eb` + `a31f249` | 统一时间源接线 + 全局 hitstop（B7）、出手定格判定（B5/B6）、MoveTable 时序数据化、计时去 setTimeout（B4）、Enemy/Boss 状态与特效生命周期（B8/B10/B19/B20/B21）、副本 GPU 泄漏（R1/B22）、迷宫内死亡卡状态（B23）、存档 v5 迁移链 + PerfHUD（R2/B18）、`PlayerFSM` 接管位移与战斗态（消掉翻滚 ±3% 量化）、敌人分部位 Hurtbox + 统一结算 Resolution + 数值集中 `content/tuning.js`（B25/B26）、`ai/` 敌人感知 + 围攻名额 + 分离 + `EnemyFSM`（B27）、`combat/EnemyMoves.js` 敌人招式表（9 招 × 5 类，前摇分级/连段/突进/远程/范围/防御/召唤，修 B28）、打击反馈层：`engine/Shake.js` 唯一震屏所有者 + 拆掉 `screen-shake` 事件链、火花/环/飘字定容池化、逐敌击退冲量（修 B29、收掉 B20 的每击新建几何）、玩家侧分部位受击盒 + 敌人「格挡」正面减免（修 B30）、处决镜头按被处决者体型取景 + 第一人称接入演出镜头 + 覆盖量协议零分配（修 B31）、敌人「召唤」招与召唤物生命周期（名额/归属/释放三本账，修 B32）。待做：Boss 场地机制、手柄（两条内容项按需求方"先崩溃与性能、再内容"的顺序排到 M3 之后回收） |
+| M3 镜头 | 🔶 第二切片完成 | 2026-09-22 | `c91cda2` + `eb131a5` | `engine/CameraRig.js` 成为相机唯一写入者：位置/注视点走 `setView`，FOV 改为按帧申领 + 主循环末尾 `commitFov()`，过场与观看模式同走 rig，`78 / 62` 收进 `CAMERA_FOV` 单一来源（修 B33，并消掉第九切片登记的"两处写 FOV"残留）；第三人称遮挡对实体求交 + 收回快/伸出慢的非对称阻尼（修 B3），覆盖量形状合同与 `blocksPoint()` 点查询（修 B34，并更正第七/八/九片把主相机 NaN 误记为视口限制）。待做：混合栈的优先级与权重、锁定重定位与越肩、过场进出的平滑交接 |
+| M4 特效池与生命周期 | ⬜ | | | |
+| M5 渲染与美术 | ⬜ | | | |
+| M6 音频 | ⬜ | | | |
+| M7 数据驱动内容 | ⬜ | | | |
+| M8 UI/UX | ⬜ | | | |
+| M9 质量工程与发布 | ⬜ | | | |
+
+---
+
+## 变更记录
+
+- 2026-09-22 **M3 第二切片：镜头对实体求交（修 B3）+ 覆盖量形状合同（修 B34）**：
+  - 这片是在给相机加遮挡时撞出来的。原计划只做 B3（镜头穿墙），但为了让实读有意义必须先让相机算得出数 —— 一跑真实页面就发现 `camera.position` 是 NaN，而**这不是 0×0 视口的锅**：`RestSceneDirector.getCameraOverrides()` 未激活时返回 `{lockOrbit, orbit, fovAdd}`，读方无条件取 `.pull`，于是 `5.2 - undefined = NaN` 污染整条第三人称轨道。第七/八/九片的验收都把这道 NaN 记成视口限制，属于错误归因，已在原条目就地标注更正。协议没有形状合同 + 测试全都 `restScene: null`（走字段齐全的兜底常量）—— 两个条件合起来让一个"主相机每帧坏掉"的缺陷在 243 例全绿的环境里隐身。
+  - 遮挡分两条路径，因为它们该做的动作根本相反：地形是**抬高**（山坡不该把力臂缩短，缩到一米出头就看不见角色走路了），实体是**缩短**（墙抬不过去）。实体这条先 8 格前向 march 找第一格被挡，再在最后一格安全与第一格被挡之间夹 4 刀二分 —— 只退回整格会让镜头停在一米开外，玩家贴墙时像被远远拽走；接触点定到厘米级后再留 `wallMargin` 余量，不让近裁剪面啃进几何。落点在 `_pullInFromSolids()`，注视点/抖动/落笔在 `_resolveThirdPersonLook()`，`updateCamera` 仍是玩家相机唯一一处每帧被调的入口。
+  - 一处自查修正（实读抓到的自己的 bug）：力臂下限 `minPull` 取了 0.3（=1.56 米），浏览器里一根近表面在 1.5 米的柱子把它触发，于是"保底位"落在**柱子内部**。这条下限的语义只是"别钻进玩家身体"，不该管障碍物，改成 0.12；改后同一场景机位到轴心 1.51 米（> 半径 1.1 米，在面外），撤掉柱子立刻回到 5.2 米满力臂、无滞回。教训：夹出来的下限要按"它究竟在防谁"取值，抄一个好看的 0.3 就会咬人。
+  - 另一处自查修正（回归）：第一版把两条遮挡合成一条 march，结果把地形那一趟的**抬高**丢了 —— 实读力臂从 5.2 米掉到 1.56 米（贴脸），这是玩家天天看的东西，不能为了少几行代码牺牲。拆开之后地形行为与 M1 一致。
+  - 逐段查询的坑（写进 `Collision.js` 注释 + 用例钉住）：`blocked()` 按 1.5 米一格采段内点，且**不含端点**，所以短于一拍的线段一个采样都不取，恒返回"没挡住"。镜头每步只有 0.65 米，拿它做逐段查询会让遮挡静默失效 —— 比没有遮挡更糟，因为它一路给出"安全"的假象。新增 `blocksPoint(x, z, y, pad)`；`blocked()` 维持现状（AI 视线两端距离远大于一步），但它会整步跨过 0.6 米厚的薄墙这一点已被用例记录在案，将来要改必须是明知故改。
+  - 协议与合同：`CAMERA_OVERRIDES_NONE`（`Object.freeze`）成为"这一帧没人接管镜头"的唯一那份表，玩家相机与两个导演都从它出发；新增 `tests/camera-contract.test.js` 8 例**禁止 stub**，直接实例化真实 `RestSceneDirector` / `CombatCameraDirector`，在激活与未激活两种状态下按读方真正取的键清单逐一断言，再把真实玩家相机接上真实营火导演跑 120 帧断言各分量有限。用例还钉住"营火那层 FOV 由玩家相机按帧申领，撤掉后 `fovLayers` 归零"。
+  - 手感参数全部进 `content/tuning.js` 的 `CAMERA_OCCLUSION`：`terrainSteps 6 / steps 8 / refine 4 / pointPad 0.22 / wallMargin 0.26 / groundLift 1.35 / blockClearance 1.25 / minPull 0.12 / retractRate 34 / extendRate 16`。收回快、伸出慢的非对称阻尼是这套手感的核心（贴墙必须立刻让位，离墙不许一弹一弹地展开），两个速率都按秒算，因此与帧率无关。
+  - 测试与实读：`tests/camera-occlusion.test.js` 15 例 + `tests/camera-contract.test.js` 8 例；全套 266 例 / 20 文件通过，lint 0 error / 12 warning 持平，build 绿。浏览器实读（真实枢纽 + 真实碰撞世界，312 个障碍）：找一个地形平坦的朝向后 `open 5.2 → 放一根 r=1.1 的柱子在身后 2.6 米 → 1.09 → 撤掉 → 5.2`，机位到轴心 1.51 米（在柱面之外），`camera.position` 各分量有限。
+  - 未做（继续 M3）：多来源的优先级与权重混合栈；锁定重定位的阻尼与越肩偏移；瞄准磁吸；翻滚/受击镜头；区域 FOV；`PhotoModeDirector` 与观看模式路径接线；过场进出的平滑交接（现在是一帧交接）。
+- 2026-09-22 **M3 第一切片：`CameraRig` 成为相机唯一所有者（修 B33）**（M2 尚余两条内容项未做，见本条末尾"顺序调整"）：
+  - 为什么先做它：第九、十两片把镜头与敌人补齐之后，记录里残留的两处"相机没有主人"（演出导演与玩家相机各写一次 FOV、过场直接搬机位）已经从架构洁癖变成会咬人的东西 —— 只要有一条退出路径忘了恢复，玩家看到的就是一个永久变宽的视野。而需求方定的顺序是"先崩溃与性能，再内容"，M2 剩下的两条（Boss 场地机制、手柄）都是内容，所以先切到 M3。
+  - 收口前的事实：五处在写 `camera.*`（玩家相机两处落笔、导演每帧写 FOV、skip 恢复基准、过场搬机位、`onResize` 改宽高比），基准 `78 / 62` 以字面量散在四处，`SpectatorCamera` 另有一条自己的写入路径。后果是一帧内可能重算两次投影，且"恢复基准"是一种**自觉义务**：每条退出路径都得记得，忘一次就永久残留。
+  - 协议：新增 `engine/CameraRig.js`（放在 `src/engine/` 与 `Shake.js` 同一个理由 —— 该目录不在 manualChunks 表内，落进 index 被各块共享，不会新造跨块环）。位置与注视点走 `setView`（全仓库唯一落笔处）；**FOV 按帧申领** —— 想偏移的系统每帧 `requestFov(id, delta)`，主循环末尾 `commitFov()` 结算落笔，这帧没人申领偏移就自己消失。关键是"不再存在恢复动作"：跳过、面板抢占、暂停中演出结束、异常退出，都不需要任何一处 finally。同名层以最后一次申领为准（战斗演出与玩家相机取的是同一个量、用同一个 id `FOV_LAYER_OVERRIDE`，不会叠成两倍），不同层才相加；`revokeFov` 给不等下一帧的场合当场复原，`reset` 给传送/重生/换副本交出相机。基准 FOV 只在 `CAMERA_FOV` 一处，切视角调 `setBaseFov` 而不再顺手 `updateProjectionMatrix`。
+  - 顺手消掉的浪费：`commitFov` 只在数值真的变了时重算投影矩阵；`CinematicManager` 每帧两个 `new THREE.Vector3` 换成复用字段（它的过场机位同时改走 `setView`）。
+  - 自查三处：① 第一版把 rig 写成 push/pop 栈，`setBaseFov` 之后一次 `commit` 会把别人正在生效的层一起结算掉 —— 栈模型里没有"帧"这个概念；改成 `_asking / _granted` 双 Map 后基准与偏移互不抹除，用例把这条钉住。② 我在两处测试里手改 `cameraMode = 'first'` 来切视角，绕过了真实切换里的基准换档，于是断言测的是一个根本不存在的状态；改成走 `toggleCameraMode()`。③ build 抓到一处真实错误：`CombatCameraDirectorExtensions` 引的层名在改写后没有再导出，**测试因为整条链都写着可选链而没报错、只有打包炸了** —— 可选链会把"接错线"藏到运行时，跨模块常量必须走构建期能查到的 import。
+  - 测试与实读：新增 `tests/engine-camera-rig.test.js` 13 例（申领只在一帧内有效、同层不叠两倍、一帧最多一次投影重算、`revokeFov` 不复活、`reset` 交还、`setView` 只读入参、`setAspect` 幂等、`lastFovChange` 说得清是谁进出）；`tests/execution-camera.test.js` 4 例改按真实帧序（`d.update → p.updateCamera → rig.commitFov`）并加断言 `fovLayers === 0`。浏览器内跑真实 `game.update()`：待接入 180 帧 FOV 漂移 0；`execution` 期间 62 → 51 → 回 62 且层数归 0；`bossKill` 跑到中途 `skip()` 后同一帧回到 62；`requestFov` 后不 commit 时相机 FOV 纹丝不动。全套 243 例 / 18 文件通过，lint 0 error / 12 warning 持平，build 绿。
+  - 未做（M3 后续切片）：多来源的**优先级与权重**（现在只有一层 override + 各层相加，过场靠 `cinematicActive` 早退互斥，进出过场是一帧交接）；第三人称遮挡对碰撞体（B3）；`PhotoModeDirector` 与 `SpectatorCamera`/`DemoRunner` 两条路径尚未接线（后者是死代码，登记到 M9）。
+  - 顺序调整（如实记录）：M2 的「Boss 场地机制」与「手柄 + 重映射」两条**未做**就切到 M3，依据是需求方的顺序约束"先崩溃与性能，再内容"，以及第九/十两片登记的相机残留必须先收口。M2 状态仍是 🔶，进度表里已注明这两条待回收。
+- 2026-09-22 **M2 第十切片：敌人「召唤」与召唤物的生命周期（修 B32）**：
+  - 这一条真正的工程量不在"再加一招"，而在它逼出来的三本账。此前 `EnemyManager` 没有任何"彻底移除一个敌人"的路径：世界原生敌人靠重生复用，副本敌人靠退出时批量 `dispose`，其余 `respawn: false` 的敌人一旦死亡就永远留在 `enemies` 数组里（网格只是 `visible=false`，几何与材质继续占着 GPU）。没有这条出口，"敌人能变出别的敌人"这类招式就不该做 —— 所以第一步是 `EnemyManager.despawn(enemy)`（交还围攻名额 → 摘出数组 → `dispose()`）与 `clearSummons()`。记为 B32
+  - 数据：`ENEMY_MOVES.summon`（`windup 1.4 / strike 0.25 / recover 0.7 / reach 0.9 / damage 0 / cooldown 11 / weight 1`，`summon: { type:'soldier', count:2 }`，专属青绿预警）进 `ENEMY_MOVE_SETS.elite`（精英 5 招）。`SUMMON = { ringRadius 3.2, perOwner 2, total 8, life 26, hp 55, posture 30, damage 9, speed 5.2, name 虚空仆从 }`：`perOwner` 防一只召唤者铺满场地，`total` 防一群召唤者花光帧预算，`life` 防"放出来没人杀"的敌人永久占场。前摇取全场最长 —— 念咒这件事必须当着玩家说清楚
+  - 边界：`Enemy` 不碰 `enemies` 数组。管理器在复用的 AI 上下文里挂一条窄能力 `ctx.summon(owner, spec)`（与 `ctx.projectiles` 同一个位置、同一种纪律），敌人只交出意图；`_summon` 校验归属与名额后**排队**，`_drainSummons` 在 `for (const enemy of this.enemies)` 循环之外才真正生成（在迭代途中 `push` 会让后半群敌人当帧不更新，也会让"谁创建了谁"变成糊账）。名额是全局资源，所以由管理器每帧把"你还剩几个坑"盖成 `enemy.summonQuota`，`moveUsable` 据此让「召唤」在没名额时**从可选池里消失** —— 抢到围攻名额却唱一段空咒等于预警说谎。`isAttackMove` 一并排除防御与召唤两类的伤害位（站位与追击不该被一面盾或一次召唤拉着走）
+  - 归属与消散：仆从拿着 `summoner` 引用，`_reapSummons(dt)` 每帧走三条路 —— 被打死的就地释放、召唤者一死跟着消散（玩家不必逐个追杀，规则写进表注释）、寿命到点自己散。后两条**不调** `die()`：自然消散不该记进击杀数，`loot` 侧再加一道 `!enemy.isSummon`，"让召唤者无限刷、再逐个收割魂魄"不该是一条致富路线。`DungeonManager.resetDungeon` 开头先 `clearSummons()`：召唤物由管理器在战斗中生成、不在 `dungeon.enemies` 的名下，不 purge 就会跟着玩家回枢纽变成隐形占场的敌人
+  - 自查一处：`summon` 加进表后，两条"每招都要有 `band`"的数据用例立刻变红 —— 防御招上一切片立的规矩（不伤人的招不该有竖直打击带）当时只写了 `guard` 一个例外，现在推广成"弹体 / 防御 / 召唤三类都不许有没人读的 `band`，且后两类 `damage` 必须为 0"。用例的严格性是故意的：宁可改测试，不许留一个没人读的数字
+  - 测试与实读：新增 `tests/enemy-summon.test.js` 16 例（数据自证、不参与站位打分、名额闸与落点闸、召唤落地与归属、彼此不重叠、`perOwner` 跑 9000 帧、`total` 用 6 只召唤者跑 6000 帧、召唤者死亡消散并数得清场景移除、寿命到点消散且 `alive` 仍为真、仆从不掉魂而原生敌人掉的对照组、生成时机不在迭代中改数组、`clearSummons` 与队列作废、念咒者占一个围攻名额、硬直打断不欠半只仆从）。浏览器内真实管理器 + 玩家周围 3 只召唤者跑 20 秒：放出 6 只、单主 2/2/2 恰好封顶、`summonQuota` 随后为 0、仆从读数 `{hp 55, damage 9, respawn false, alerted true}`，杀死一只召唤者后它那 2 只当场消散且不再在 `enemies` 里，`clearSummons()` 后两本账双清零，`loot.spawnDrop` 全程 0 次。全套 230 例 / 17 文件通过，lint 0 error / 12 warning 持平，build 绿
+  - 刻意不做：仆从的"归属伤害/可策反"（仆从就是普通敌人，只是生命周期不同），以及召唤的读条特效（青绿预警圈 + 头顶警示已经足够可读）；给 `PerformanceManager` 的远处剔除加例外（偏远营地铺场慢是帧预算的正确结果，不是缺陷）
+- 2026-09-22 **M2 第九切片：处决镜头按体型取景 + 第一人称接入（修 B31）**：
+  - 先更正自己：这条需求在看板上原本写的是"处决/终结技的运镜与定格仍由 `CombatCameraDirector` 的通用 preset 承担，**没有专属机位**"。动手前读了一遍代码，这句话不成立 —— 导演里有 finisher/riposte/execution/bossKill 四套 preset，绕轨、时间缩放、黑边、label、输入锁、震屏、音效、处决特效全都接了。把"没做"改成"做的方向不对"，才是要修的东西。
+  - 取景：真正的缺陷是镜头不认识"死的是谁"。注视点写成 `目标 y + 1.25 米`、轨道半径与高度直接取 preset 定值，于是 1.87 米的无人机与 3.85 米的 Boss 拿到一模一样的构图：打 Boss 时镜头埋进它肚子里，打小个子时又远到看不清是谁死了。改法是让**被处决者自己报身高** —— `Enemy.statureHeight()`（受击盒最高段上沿离网格原点多高）与已有的 `hurtBaseY()` 一起随 `combat-execution` 负载交出，`play()` 按 `EXECUTION_CAMERA` 折算：注视点 `base + 身高 × lookRatio`（胸口），环绕中心按 `centerBias` 偏向被处决者，半径与高度按 `1 + (k-1) × follow` 放大，`k` 是身高对 `ref` 的比值并夹在 `minScale/maxScale` 之间（蚂蚁不贴脸、泰坦不飞到对岸）。连击终结与弹反本来没有事件负载，改为当场问锁定目标本人这两个接口；问不到（旧式派发、无锁定）时退回 `fallbackStature`，与修前构图一致而不是 NaN。悬浮单位另算：身高不含 `hover`，基准由 `hurtBaseY()` 给，避免同一截高度被计两次。
+  - 第一人称：`_updateFirstPersonCamera` 整段没读演出镜头，于是第一人称按处决只剩黑边、慢动作与飘字，画面仍然朝着鼠标指的方向 —— 同一件事在两种镜头模式下有一种是哑的。补法要守住"相机只有一个写入者"：眼睛不该搬走（那等于硬切成旁观镜头），能借的只有"看哪里"，于是按导演给出的 `gaze` 档把注视方向插向被处决者的胸口。`gaze` 与 `lockOrbit` 共用同一条 0.12 门槛（否则会出现第三人称已绕轨而第一人称还看着别处），且不超过 `orbit.blend` 本身（演出不该把玩家视线整段锁死）。FOV 侧顺带把 `? 78 : 62` 的四处字面量收进 `content/tuning.js` 的 `CAMERA_FOV`：`PlayerController` 两处、导演 `update`/`skip` 各一处，同一个数只写一遍。
+  - 分配：`getCameraOverrides()` 每帧新建返回对象 + `orbit` 子对象 + 两个 `new THREE.Vector3`/`clone()`（旧实现是三个），玩家相机第一人称还有一次 `pos.clone()`。这些都在"每帧被读一次"的路径上，正好砸在掉帧的那几帧。改为常驻 `_ov` 与常驻取景点，未接管时把 `orbit.position/lookAt` 置 null 以保留读取方的 `?.` 短路；契约同时写明"调用方只能当场读完，不得留下引用"。
+  - 自查一处：测试脚手架第一版把 `game.player` 忘了赋给导演的 game，导致 `play()` 里读 `player.position` 抛错；另外取景断言一开始拿的是"回拉之后的 `orbit.lookAt.y`"，而那个值本就含 18% 的玩家胸口回拉，误当成胸口值 —— 改为断导演自己的 `_lookY`，并把"回拉一档、不把镜头彻底交给目标"单独写成一条用例。
+  - 测试与实读：新增 `tests/execution-camera.test.js` 21 例（取景分档/上下限/悬浮/兜底/锁定目标/只读身高、第一人称五例含"导演不自己搬相机"、覆盖量协议四例、真实 `EnemyManager` + 真实 `CombatController` 一记轻击致死的端到端事件两例）。浏览器内以固定步长驱动真实导演与真实 `PlayerController`：同一份 `execution` preset 下，士兵档（2.2 米，正是 `EXECUTION_CAMERA.ref`）胸口 4.432、半径 4.6 = preset 原样（人形单位的构图这次不该变，这是刻意选的基准档），Boss 档（3.85 米）胸口 5.455、半径 6.67，无人机档（1.87 米 + 悬浮 0.9 米）胸口 5.128、半径 4.186；连续帧拿到的覆盖量是同一个对象引用；第一人称把被处决者放在正后方 5 米时视线夹角余弦从 **-0.996 拉到 +1.000**（中途 0.987 → 1.000 → 1.000 → 0.985 随包络松开），FOV 78 → 67，`skip()` 后 FOV 回 78、视线回 -0.996。全套 214 例 / 16 文件通过，lint 0 error / 12 warning 持平，build 绿（跨块环仍是既成的 `chunk-ui ↔ chunk-world`，未新增）。
+  - 刻意不做：不在本切片动相机所有权（M3 的 `CameraRig` 一次收口，包括"导演也写一次 `camera.fov`"这处重复写入）；不把 `blocksInputUntil` 的墙钟改成主循环 dt（与输入锁、跳过提示同属 M4 的计时改造）；不动 `CombatCameraDirectorExtensions.js` 的外挂 `skip()` 形态（M3 一起并回主体）。
+- 2026-09-22 **M2 第八切片：玩家分部位受击盒 + 敌人「格挡」（修 B30）**：
+  - 玩家侧：`CombatController` 在构造期持有 `createHurtbox('player')`，并交出 `hurtBaseY()`（就是玩家脚下世界高度）与 `facingYaw()` 两枚只读接口，`takeDamage(amount, element, part)` 多接一个受击分段。敌人命中玩家的落地判定从"平面距离够着就扣血"改为 `pickPart(ref.combat, this.hurtBaseY(), move.band)` —— 选不出段就是这一刀落空，选出来则按该段倍率乘进结算。这一改动让"跳跃/高台/落差"第一次进入玩家的受击模型：低段招（横扫 `[0.05,1.05]`、崩地 `[0.0,0.9]`、三连刺、俯冲）在顶点 2 米处从脚下掠过而落空，过头招（重劈 `[1.1,2.7]`）与擦边的突刺仍砸在下盘上，玩家不会变成"跳一下就无敌"。
+  - 容差按目标档位取：`HURTBOX.snap` 保持 0.9 米是给悬浮单位兜底的（无人机不含这条就真的对近战免疫），但同一档容差套在玩家身上会让"擦边"永远擦到 —— `BODY_PLANS.player.snap = 0.35`，`createHurtbox()` 随体型返回 `snap`，`pickPart()` 的容差改成目标说了算（显式传 `0` 仍是"不许擦边"，第六切片那条无人机回归用例不动）。
+  - 敌人「格挡」：`ENEMY_MOVES.guard` 是**第一枚防御招**（`guard: true`、`damage: 0`、命中段 1.5 秒），`soldier` 与 `elite` 各补到 4 招；`Enemy.isGuarding()` 只在 `fsm.current === 'strike'` 且本招带 `guard` 时为真（前摇与收招都是惩罚窗口），`landStrike` 对防御招直接不落地，`EnemyFSM.strike.enter` 替它把预警圈续上（蓝圈不收起，玩家才看得清现在砍上去是白费）。减免表 `GUARD = { mult: 0.3, posture: 0.55, arc: 0.1, spark: 0xa8d8ff }`：`Resolution.isGuarded()` 与 `isBehind()` 用同一套朝向约定（比较「目标朝向」与「目标指向出手者」），出手方向落在正面弧内才算挡住，背后/正侧面/与出手者重合一律照全额。
+  - 结算顺序：格挡减免作为流水线的**最后一步**（部位 → 背刺 → 防御 → 抗性 → 暴击 → 破防架势 → 格挡），这样"盾后打头仍然更疼"，减免不与部位倍率互相吞掉；`resolveHit` 回传 `guard`/`blocked`，`hitSuffix` 在数字前写「格挡」。反馈侧同步变档：挡住的一下不吃击退（举盾的代价就是站在原地挨，推开它反而把防御变成好事）、火花取钢色 `GUARD.spark`、hitstop 从 0.055/0.075 秒压到 0.03 秒、音效走 `blockClink`。近战与法术两条出手路径共用这套判定（`SpellSystem._applyHit` 的方向取弹体发射点，不是玩家坐标）。
+  - 自查修正两处：① 防御招最初写 `reach: 0`，浏览器内两轮围攻（3 只与 1 只兵，各 20 秒）里 `格挡` **一次都没出现**——它只在 2.2 米内可选，而士兵按 `holdRangeOf` 停在 2.9 米，整条链路是只存在于表格上的死数据；改为 `reach: 0.9` 后同一场景 4 只兵 30 秒起手约 4 次。② 防御招一旦参与"站位取同时可出的招最多的边界"打分，会把 `holdRange` 从 2.9 拉到 2.2（为了一面盾放弃覆盖面更宽的落点），故新增 `EnemyMoves.isAttackMove()`：站位与追击只看会打人的招，而围攻名额 `hasUsableMove` 仍认它（举盾同样要占一个坑，否则只带盾的敌人永远等不到自己那一轮）。
+  - 测试：新增 `tests/player-hurtbox.test.js` 14 例（三段命中/跳顶点换段/5 米落差全落空/同一记横扫下士兵擦到而玩家躲开/格挡生命周期与正面弧/减免只乘一次且与部位复合/飘字/占名额/招式表竖直维度），`tests/hit-feedback.test.js` +1 例（同招同部位同暴击种子下只差一面盾：伤害更低、不吃击退、整池火花都是钢色），脚手架 `makePlayerRef()` 换成带真受击盒的受击方契约（替身缺 `hurtbox/hurtBaseY` 会让"敌人打不到玩家"静默通过），`enemy-moves` 的数据完整性用例补"`band` 该有不有"的分支（弹体与防御招不许留没人读的 `band`，防御招 `damage` 必须为 0），`enemy-ai` 的围攻账按攻击/防御分记。全套 193 例 / 15 文件通过，lint 0 error / 12 warning（与上一切片持平），build 绿。
+  - 刻意不做：玩家自己的防御动作（玩家只有弹反与无敌帧，再加一层格挡会把弹反的存在价值抹掉）、弹体与 AoE 对玩家的选段（敌人的 `shot/slam` 走自身圈判定，没有 `band`）、玩家受击击退（第七切片刻意不做，理由仍成立）。
+- 2026-09-22 **M2 第七切片：打击反馈层（`engine/Shake.js` + 定容特效池 + 击退）**：
+  - 震屏：新增 `src/engine/Shake.js`（模块级单例 `shake` + `addShake()`）。旧实现把强度存成"每帧 `×0.78` 的随机量"，`Math.random()` 每帧自取，于是同一记重击在 144fps 下 1 秒内衰减到千分之一、30fps 下还剩一半，且抖动是"打摆"而不是"发颤"。改为 trauma 模型：请求强度按 `SHAKE.ref` 归一后累加并封顶，按秒线性衰减，偏移由**积分相位**驱动的多正弦产生（同轨迹可重放，不再每帧掷骰子），幅度/竖直/纵深/视线跟随权重全部按第一/第三人称分档（`SHAKE.meters`、`SHAKE.lookWeight`）。`PlayerController` 的 `shakeOffset`、`applyShake()` 以及"两处相机各自加一次随机量"一并删除，改为一处 `shake.applyTo(pos, lookAt)`；切换镜头模式调 `setProfile()`，传送调 `reset()`（瞬移不该带残余抖动）。
+  - 事件洪流：`'screen-shake'` 的 CustomEvent 链整条拆除——`src/` 内 11 处派发 + `Game.js` 监听器 + `applyShake` 归零，改为 13 处 `addShake()` 直接压 trauma。附带收益：`window.dispatchEvent` 在 node 测试环境里不再必需，且自动战斗（`autoPlayMode`）可以用 `shake.muted` 一处静音（旧的 DOM 监听做不到）。
+  - 池化：`DamageNumbers` 从"每次命中新建一个 DOM 节点、 setTimeout 删除"改为定容 26 条 CSS2D 飘字（构造期一次建满、到期只是 `visible=false`，池满复用最旧那条）；`CombatFeedback` 改为 110 个火花 + 14 个扩张环**共享 2 份几何**，环没有速度、火花不该按半径长大，所以超容量时只在同类里偷；`CombatController.spawnSlash()` 连同每击的 `RingGeometry`+`MeshBasicMaterial`+`Mesh` 分配直接删掉（命中已经有火花与环，那一层弧光是纯粹浪费）。`Game.js` 的 PerfHUD 增挂 `火花` 读数，泄漏判据仍是"相对历史最低点的净增长"。
+  - 击退：`Enemy` 新增 `applyKnockback(dirX, dirZ, speed)` / `clearKnockback()` 与 `knock`、`mass` 字段，冲量作为**外部速度**在与 AI 完全相同的那个唯一位移写入点 `_advance()` 里按秒指数衰减，并保留 AI 的 `setWish` 通道不与之互斥。倍率按部位/权重集中在 `HIT`：`staggerScale 1.7`（打进硬直才推得动大家伙）、`heavyScale 1.6`、`critScale 1.25`、`rootedScale 0.3`（目标在前摇/命中段仍给三成位移，否则重击砸在起手敌人身上像打在墙上）、`massDivisor 1.15` 按体型折算、`decay 11/s`。方向与火花同源：新增 `combat/Resolution.js` 的 `hitDirection(from, to, out)` 返回水平单位向量（写入调用方传入的临时对象，命中热路径零分配），玩家近战、法术弹体与范围都取它；引力法术把 `dir` 反向，"坍缩"真的把东西往里吸。
+  - 自查修正三处：① 击退在 30Hz 下比 240Hz 多跑约 16% —— 因为衰减取了"本帧衰减速"而非区间均值，改用精确指数均值 `km = (1 - e^{-λdt})/(λdt)` 后四档帧率总位移一致；② 特效池满时 `_take()` 走了 `_retire()`，被偷的元素既回到池里又留在活动表（124 个元素数出 125/126），且环可能被当成火花返回而读到 `undefined.vel` → 拆成 `_steal(wantVel)` + `_drop()`（只是摘出活动表）与 `_retire()`（摘出并归还同类池），用例补守恒式 `active + free === cap`；③ 伤害数字用 `toFixed(3)` 写透明度，同一档透明度会连着写几帧无用的 DOM 样式。
+  - 刻意不做：玩家侧击退。敌人打玩家已经有 hitstop、镜头脉冲与受击闪白，再加位移会把"被围住就永远走不开"变成新的手感问题；等 M2 的玩家受击盒与「格挡」一起做。
+  - 测试与实读：新增 `tests/hit-feedback.test.js` 38 例（震屏/飘字池/火花池/命中方向/击退/一次命中三处反馈同源）、新增 `tests/shake-camera.test.js` 4 例（钉住"相机只有一个抖动写入者"——0×0 视口里 `camera.position` 是 NaN，量不出真实位移，这条只能在 node 侧闭住）；全套 178 例通过。浏览器内以固定步长注入约 2000 次命中：`.damage-number` 节点恒 26、反馈元素恒 124（峰值在用 105）、`renderer.info.memory.geometries` 126→126 零增长、士兵被真实推开 5.25–11.1 米、`'screen-shake'` 监听计数 0、`shake.applyTo` 输出 `[posLen 0.0584, lookLen 0.9996]` 且 `player.shake === game.shake`。
+  - 残留：`SpellSystem` 的施法前摇、`CombatController.schedule()`、`EnemyManager` 的超时回收三处 `setTimeout` 仍在（M4 的"计时全走主循环"）；`BossPhaseDirector`/`CombatCameraDirector` 传入 `addShake()` 的强度还是各自配置里的旧数值，未与 `SHAKE.ref` 同档校准。
+  - 新增文件放在 `src/engine/` 而非 `src/effects/`：build 的 manualChunks 未映射 `src/engine/`，`Shake.js` 会落进 index 被各块共享引用，不会新造 `chunk-combat → chunk-ui → chunk-combat` 的跨块环；既有的 `chunk-ui ↔ chunk-world` 环是上阶段实跑 build 才发现的，本次未触碰。
+- 2026-09-22 **M2 第六切片：敌人招式表与前摇分级（`combat/EnemyMoves.js` + `ENEMY_MOVES`）**：
+  - 招式：`content/tuning.js` 新增 `ENEMY_MOVES`（横扫·突刺·重劈·崩地·三连刺·虚能弹·俯冲）与 `ENEMY_MOVE_SETS`（soldier/elite/golem/drone/boss 各 ≥3 招，训练木桩空表，未知 type 走 `default`）。一招一份 `windup/strike/recover/reach/cone/damage/cooldown/weight`，可选 `combo/comboWindup`（连段）、`travel:'lunge'/travelSpeed`（命中段前冲）、`backoff`（后撤远近）、`aoe`（只看自身圈）、`ranged`（交给弹体）、`telegraph.color`（预警配色）。`AI` 里的定值 `windup/strike/recover/cooldown/strikeRangeBonus` 随之删除，只留跨招通用的 `parryRatio/telegraphMarkWindup/aimFollowRate/recoverBackoff`；`Boss` 家族仍跑自己的招式脚本。修 B28。
+  - 逻辑：新增 `combat/EnemyMoves.js` 纯函数——招式表解析（给 id 复用全局表、给内联对象则逐字段覆盖在默认招上）、`moveRange/moveUsable/moveHits`（距离、`minDist`、锥形三项一套规则，抢名额与选招共用同一枚 predicate，不会"抢到坑却选不出招"）、`pickMove`（按 `weight` 加权，随机数只在起手那一帧取一次）、`seededRng`（mulberry32，按 `aiSeed` 播种：同一只敌人可重放、同一群不雷同）。
+  - 状态机：`windup.enter` 才 `beginMove()` 选招并 `showTelegraph()`；`windup.update` 以 `aimFollowRate` 慢速修正朝向（站着不动不会白躲，横移仍能溜出弧面）；`strike` 按本招 `travel` 决定是否前冲、按 `comboLeft` 决定接段还是交冷却；`recover` 按本招 `backoff` 后撤；`landStrike` 走 `moveHits` 同一枚距离/朝向规则，远程招把命中交给 `ctx.projectiles.spawn(...)`（复用 `Game.js` 传入的同一个 `ProjectileManager`，命中仍走 `playerRef.combat.takeDamage`）。
+  - 预警分级：地面圈长到本招真实落点（`teleRadius()`：范围招画 `aoe`、近战画 `attackRange+reach`、远程只给自己一圈起手提示），颜色取 `telegraph.color`，脉动频率随前摇变短而变急；头顶旋转警示只给 `windup ≥ AI.telegraphMarkWindup`（0.6 秒）的慢重招——玩家靠"有没有第三个标记"分辨该弹还是该跑。弹反窗口 `isParriable()` 改为按本招前摇折算（`windup × 0.55`），不再比较调用方传进来的定值。
+  - 自查修正四处：① `comboLeft` 不随一轮进攻结束清零，第二刀起被当成"上一招的后续段"（沿用旧招容差而空挥、前摇还被压短），补 `Enemy.endMove()` 并在收招/被弹反/死亡三条路径调用；② 长前摇期间分离推力把起手者挤偏，"玩家站着不动反而躲掉"，改为 `windup/strike` 两态硬扎根（`k=0`；0.4 倍缩放既不够又会把敌敌间距压破 0.45 米下限）；③ 锥形招把朝向门槛同时加进抢名额与前摇慢修正；④ **招式表落地了却几乎只出一招**：追击停在最远招刚好够得着的边缘，实测 8 只敌人 15 秒打出 19 次突刺、1 次横扫，其余招式一次没出——`holdRangeOf()` 改为取"同时可出的招最多"的边界（一样多时站远些），无人机的 `俯冲` 射程抬进弹体招的中段带（`reach` 1.6→3.3）使远程单位既不贴脸也不顶放风筝；修后同一规模实跑五种招式全部上场。
+  - 测试与实读：新增 `tests/enemy-moves.test.js` 18 例，全套 136 例通过；`tests/enemy-ai.test.js` 的时序用例钉住 `moves: ['sweep']`（选招本身另有用例，避免加权随机把某一帧的差别变成噪声），并把两套用例共用的脚手架抽成 `tests/helpers/enemyHarness.js`（含 `until()`：推进到目标状态为止，取代"猜秒数"）。浏览器内注入固定步长驱动真实 `EnemyManager.update` + `ProjectileManager.update`（视口 0×0 无法截图）：5 兵 + 2 无人机 + 1 构装体在 5–9 米跑 15 秒，近战落点集中 2.81–2.90 米、无人机俯冲与弹体都在 5.42–5.50 米，命中帧越界 0，`holdRange` 实读 soldier/golem 2.90、drone 5.50；探针结束后按原值复原玩家血量、`dispose()` 清掉 8 只测试敌人（世界回到 21 只、弹体残留 0）。`npm run lint`（0 error / 13 warning）、`npm run build` 全绿。
+  - 残留：「格挡」与「召唤」两类招式未入表（格挡要与玩家侧受击盒/出招方向一起改，召唤要有归属的友方单位），单列工作量不用假数据凑数；`travel:'lunge'` 的前冲撞到墙不折返（`moveCircle` 会挡住，视觉上蹭墙）；Boss 家族未接入 `EnemyFSM` 与招式表。
+- 2026-09-22 **M2 第五切片：敌人 AI（`EnemyFSM` + 感知 + 分离 + 围攻名额）**：
+  - 感知：新增 `ai/Perception.js` 的 `Sense`。旧实现只看平面距离，隔一堵墙照样扑过来，丢视野又立刻罢手（绕一根柱子就脱战，是"怪很傻"的主要来源）。现在要 `aggroRange` 内**且视线不被遮挡**（`CollisionWorld.blocked`，眼睛高度读 `AI.eyeHeight`）才算看见；看见过之后仍追 `memory` 秒；被打到立刻仇恨、不需要看见；离出生点超过 `aggroRange × leashScale` 才放弃追击并归位。归位写成一次性承诺（`sense.returning`），不在 leash 边界来回抖。
+  - 围攻：新增 `ai/Squad.js` 的租约式名额（默认 2 个）。抢不到名额的敌人进 `orbit` 态绕外圈等待，不再八只同时起手把闪避变成不可能。名额会续期、`slotTimeout` 秒失联强制回收、死亡/硬直/归位立刻交还，Boss 不占坑（保留自己的招式脚本）。
+  - 分离：新增 `ai/Separation.js`。旧位移是"朝玩家走 `speed*dt`"，一群怪精确叠成一坨、还会直接钻进玩家模型。现在敌人之间、敌人与玩家身体之间按"挤得越深推得越狠"互相推开，完全重合的两只用身份黄金角散开（不会同进同退），玩家身体也参与分离（用 `AI.playerRadius` 造替身，不把玩家对象交给 AI 乱读）。
+  - 状态机：新增 `ai/EnemyFSM.js`，`idle/return/pursue/orbit/windup/strike/recover/stagger`。与 `PlayerFSM` 同一分工——**状态只写意图（`setWish`）**，积分、碰撞、分离、贴地仍集中在 `Enemy._advance()` 一处；每帧 `resolve()` 重判避免卡死（旧 B8 的成因），但 `windup/strike/recover` 是承诺态，前摇一旦开始必须走完，否则预警成了假动作。前摇时长、打击容差、硬直时长、冷却全部取 `content/tuning.js` 的 `AI`，可按 spawn config 逐只覆盖；转向是 `1 - exp(-rate·dt)` 的指数逼近，与帧率无关。弹反窗口从写死的 0.4 秒改为按前摇比例（`windup × 0.55`）开放，0.4 秒短前摇的敌人因此重新可弹。
+  - 边界：`Enemy` 与 `EnemyManager` 之间只传 `ctx`（目标、玩家替身、邻居、碰撞世界），碰撞世界每帧重取不缓存（`WorldManager.buildCollision()` 会换对象）；`src/ai/**` 纳入 ESLint 严格档（0 warning）并随 `chunk-combat` 打包。新增计时全部走主循环 `dt`，无 `setTimeout`、无自建 rAF。
+  - 自查修正两处：`orbit` 径向速度符号写反，外圈等待变成撞进玩家怀里（实测敌我 0.002 米、敌敌 0.005 米），修正后为 1.9 米 / 0.58 米，并补一条 600 帧的"不许塌进玩家怀里"回归用例（把符号改回去该用例必红）；分离推力 5.5 米/秒下同向蹭行仍压到 0.50 米互穿模型，扫参 5.5/7/8/10 → 最小间距 0.50/0.67/0.72/0.78，取 7。
+  - 测试与实读：新增 `tests/enemy-ai.test.js` 17 例，全套 118 例通过；浏览器内注入固定步长驱动真实 `EnemyManager.update`（自动化视口 0×0 无法截图）——枢纽 21 只敌人 15 秒：同时起手峰值 2、越界 0 帧、碰撞体穿透 0、状态覆盖含 `return`；周围 3.2 米贴脸 8 只兵 20 秒：重叠 0 帧、最小敌敌 0.52 米、玩家承受 260 伤害且全程只有 2 只在起手。`npm run lint`（0 error / 13 warning）、`npm run build` 全绿。
+  - 残留：副本与迷宫未登记碰撞体，其中敌人走自由积分；高度拥挤时仍会轻微擦身（分离是软推力，被三方夹住会让步）；Boss 家族未接入 `EnemyFSM`；每类敌人 ≥3 招与玩家受击盒留待下一切片。
+- 2026-09-22 **M2 第四切片：分部位 `Hurtbox` 与统一结算 `Resolution`**：
+  - 判定：新增 `combat/Hurtbox.js` —— 目标 = 若干条以网格原点（脚底）为基准的竖直分段（头/躯干/下盘），出手 = 一条相对出手者脚底的垂直打击带（`MoveTable.band`），落差经 `hurtBaseY()` 折进局部区间后**取重叠最多的那段**；完全无重叠时，间隙 ≤ `HURTBOX.snap`（0.9 米）算擦到最近段，更远才是空挥。近战/法术原先只有 2D 圆+锥投影，高度完全不参与判定（站在崖顶打崖底、挥刀砍过头顶目标都照样掉血）。
+  - 结算：新增 `combat/Resolution.js`，一条纯函数管线 部位倍率 → 背刺 → 防御曲线 `1-def/(def+K)`（`def=K` 时 50%，cap 0.75）→ 元素抗性（clamp 到 [-0.5, 0.9]，负值表示脆弱）→ 暴击 → 破防期架势 ×1.5；`CombatController.processHitWindow`、`SpellSystem._applyHit`、`CombatController.takeDamage`（敌人打玩家）三条路径共用它，同一目标被近战与法术命中会得到同一套数字。
+  - 数值：新增 `content/tuning.js` 承载部位/体型方案/容差/防御/抗性/暴击/破防/背刺/玩家招式基线/连击倍率/体力回复/敌人防御；`MoveTable` 只管时序与判定形状并新增 `band` 与 `SPELL_BANDS`。`CombatController` 构造期从表取值（保留 `lightDamage` 等字段供 HUD 与测试读取），`Enemy` 携带 `defense/resist/hurtbox`，`Enemy.takeDamage` 退化为纯记账（原先藏在这里的 `staggerTimer>0 → ×1.5` 上移到结算）。
+  - 顺带修掉两个真实缺陷：B25 `SpellSystem.castBolt` 用 `(-sin yaw, -cos yaw)` 拼弹道方向，与全仓库正方向相反，法术往身后飞（改为 `player.getCombatForwardXZ()`，锁定目标优先；实测 12 米处 0 → 43 伤害）；B26 无人机网格悬浮 2.5 米，整具机体在轻击带之上导致近战近乎打不到悬浮单位（悬停高度收进 `BODY_PLANS.drone.hover = 0.9`，与打击带同表可调）。
+  - 解耦：`Boss.js`（两处）、`ProjectileManager.js`、`Enemy.js` 对玩家的 `combat.invincible` 内部字段读取，全部换成 `combat.isInvulnerable()`；受击方对外只暴露 `hurtBaseY/facingYaw/getDefense/getResist/isStaggered/isParriable/forceStagger` 七个只读接口，`CombatController` 不再猜 `stateTimer`。
+  - 测试：新增 `tests/combat-resolution.test.js` 19 例（分段与体型、重叠最多段、snap 边界、悬浮单位 snap=0 仍需真实重叠、世界高差、防御曲线与 cap、抗性正负与 clamp、暴击分敌我且不污染基线、背刺四朝向、破防架势加成、最低 1 点、真实管线轻击=躯干/重击=头、法术与近战同源）+ `tests/combat.test.js` 弹道方向回归 1 例；共 101 例通过，lint 0 error，build 通过。
+  - 延后：玩家侧分部位受击盒（要等敌人各自有打击带）、多段命中帧、`Hurtbox` 的水平胶囊化（当前仍是圆+锥的水平判定）、处决与震屏的数值。
+- 2026-09-22 **M2 第三切片：`PlayerFSM` 接管位移与战斗态**：
+  - 结构：新增 `player/PlayerFSM.js`，用 `engine/StateMachine.js`（此前是无人使用的死代码）承载 roll/attack/airborne/sprint/walk/lock/idle 七态与优先级；`PlayerController.update()` 里那段以 `combatBusy` 为中心的 if/else 位移链删除，换成一次 `fsm.resolve(ctx) + fsm.update(dt, ctx)`，位移意图与状态规则集中一处，积分/碰撞/贴地/重力仍在 `PlayerController`。
+  - 原语：玩家侧新增 `moveHorizontal/decayHorizontal/faceCameraYaw/faceDirection/faceTarget/setAnimState/readMoveDir/speedMultiplier` 八个动作原语，状态机只调它们；`applyDash(yaw, speed, duration)` 把翻滚时长从战斗帧表带进来，末帧按 `min(dt, 剩余)` 折算速度，使总位移精确 = 速度 × 时长（修 M1 遗留的 ±3% 整帧量化），并统一为镜头前方 `(sin yaw, cos yaw)`。
+  - 解耦：删除对 `combat.state`、`combat.stamina`、`combat.lockTarget.alive` 的内部字段读取，改走 `isBusy()/canSpend(n)/getMoveScale()/getLockTarget()`；`moveScale` 从硬编码 0.25/0.4 收进 `MoveTable`（light .4 / heavy .25 / skill .4 / roll 0）；镜头与 `getCombatForwardXZ()` 也改用 `getLockTarget()`。
+  - 动作授权：状态用 `allowJump/allowInteract` 声明是否放行，跳跃与交互改为 `fsm.allows(...)`；空中状态显式不封跳，保住土狼时间窗内的补丁跳（迁移时最容易静默丢掉的手感）。
+  - 测试：新增 `tests/player-fsm.test.js` 15 例（优先级表、体力门控、动作封锁、三档帧率位移一致、冲量不被输入覆盖、锁定转向、衰减归零），并把 `tests/combat.test.js` 的 `applyDash` 桩同步成 `(yaw, speed, duration)` 契约；共 81 例通过，lint 0 error，build 通过。
+- 2026-09-22 **M2 首批切片完成（先崩溃与性能）**：
+  - 时间：`TimeController` 接管主循环 dt，`hitstop(realSeconds, scale, now)` 的 `now` 默认值缺陷修复（原先恒为 0，命中停顿从不生效）；战斗全部计时改走 dt，删除 `SpellSystem` 两处自建 `requestAnimationFrame` 递归与 `setTimeout` 清理，新增 `CombatController.schedule(seconds, action, ...resources)`。
+  - 判定：新增 `combat/MoveTable.js`（`at/duration/range/cone/anim/heavy/speed/iframes` 数据表）；`processHitWindow()` 改为**定格单帧结算** + `attackHitDone` 去重，修 B4（挥空迟到补判）、B5（动画事件窗口缺失）、B6（起手帧即造成伤害）、B7（timeScale 无关）。战技/终结技不再即时改攻击力，只登记一次结算。弹反不再原地修改 `lightDamage/heavyDamage`（修 B8）。
+  - 资源：`Enemy.dispose()` / `Boss.dispose()` / `DungeonManager` 的 `disposeSubtree()` 成对释放几何与材质；`SpellSystem` `_recycleBolt/_recycleAoe`、`ProjectileManager._recycle` 回收即释放；副本进入/离开/死亡三条路径统一走 `resetDungeon`（需求看板 R1、修 B22）。实测连续三局副本：场景节点 3194 → 3669 → 3194，敌人 21 → 32 → 21，迷宫 group 子节点归零。
+  - 解耦：`player-respawn` 事件驱动 `DungeonManager.abandonRun()`；补给箱只调 `combat.restore({hp,stamina})`；翻滚只调 `player.applyDash(yaw, speed, duration)`（第三切片补齐 duration 参数）；删除 `Game.js` 与 `DungeonBoss` 重复的 Boss 阶段音频派发（修 B11）。
+  - 测试：新增 `tests/combat.test.js` 12 例（起手帧不结算、迟到不补判、144/60/30 三档伤害序列一致、战技全向、弹反不污染基线、`schedule` 到期即释放、全局 hitstop、弹体 dispose），共 45 例通过；lint 0 error；build 通过（`chunk-ui ↔ chunk-world` 循环分块告警登记到 M7）。
+  - 延后：`PlayerFSM`、`Hurtbox` 分部位、`content/tuning.js` 伤害集中、`ai/` 敌人状态机仍在 M2 后续切片。
+- 2026-09-22 **M2 第二切片：存档 v5 与性能 HUD（需求看板 R2）**：
+  - 存档：新增 `game/SaveMigrations.js`，v1→v5 每一跳显式登记；`crossrealm_save_v4` 只读、迁移成功后落 `crossrealm_save_v5` 并保留旧键（可回滚旧构建）。v5 的实质变更是 `player.yaw/pitch` 入档（读档不再把镜头弹回初始轨道角，`teleport()` 增加 `yaw/pitch` 选项）、剔除派生字段 `quests.stats.skillsUnlocked`、`spells`/`settings` 从"`??` 兜底"升级为必填。
+  - 失败处理（修 B18）：`SaveSystem.load` 的整体 `catch {}` 拆除；坏 JSON 转移到 `<key>:corrupt` 保留原文并提示，版本高于本构建只提示且绝不改写，校验不过拒绝进入应用阶段，`save()` 先校验后落盘（结构不合法的档不再覆盖好档）。存档问题从此有文案、有现场，不再静默返回 false。
+  - 性能：新增 `engine/PerfHUD.js`，F3 开关；fps/帧耗时/峰值帧/draw call/三角面/几何体/纹理/着色器/场景节点/JS 堆，泄漏判据为"相对历史最低点的净增长"并超容差标红；计帧走主循环 dt 且按 250ms 节流写 DOM（HUD 自身不引入第二时间源与逐帧布局抖动）。外部计数经 `gauge(label, getter)` 注册，配套新增 `EnemyManager.getAliveEnemies()`（已有）、`ProjectileManager.count()`、`SpellSystem.count()`、`DamageNumbers.activeCount()` 四个观察者接口，HUD 不翻任何系统内部字段。
+  - 测试：`tests/save-migrations.test.js` 13 例 + `tests/engine-perfhud.test.js` 5 例 + `save_v5_fixture.json`；`SaveValidator` 版本断言随 v5 更新，共 66 例通过；lint 0 error；build 通过。浏览器实测迁移与坏档隔离（数据见第 4 节 M2 验收·第二切片）。
+  - 顺带清掉 M0 残留的双引擎宣传：删除 `public/godot/index.html`（iframe 指向已归档的导出产物，线上是死链），说明书 'Godot 对照版' 页换成「性能 HUD 与存档」，暂停菜单提示、Chapter 5 通关文案、片尾字幕不再提 Godot/UE5。
+- 2026-09-22 **M1 完成（移动与碰撞）**：新增 `engine/Collision.js`（圆 vs 圆柱/盒、空间哈希、子步防隧穿、`supportAt` 站立顶面、`unpenetrate` 脱困）；五个区域与枢纽共 313 个障碍在世界构建期登记；玩家位移改走碰撞推进 + 台阶支撑，新增 `teleport()` 统一重生/快速旅行/读档落点（修世界之锚石柱把重生点埋在自己内部的问题）；修 B1（翻滚被移动输入覆盖）、B2（按住空格连跳），阻尼改 `pow(k, dt*60)` 归一化；隐形边界墙 + 方向提示。新增 3 例碰撞单测（含 900 障碍 < 0.3ms/帧性能断言），共 33 例通过。实测数据见第 4 节 M1 验收。`PlayerFSM` 与 `TimeController` 接线延后到 M2，已登记于 M2 清单。
+- 2026-09-22 **M0 完成**：剥离工程栈/足球子系统（15 文件）与引擎产物归档；建立 ESLint + Vitest（11 例，含内容边界回归门禁）；修复 B16 B17 与 `ExecutionEffects` 的 `const` 重赋值崩溃；README 重写为单引擎说明。`resume-projects/`、`creative/` 暂留项目内，待确认是否移出。

@@ -1,0 +1,107 @@
+import * as THREE from 'three';
+import { Boss } from './Boss.js';
+
+/** 第三 Boss：引力化身 — 星际位面 */
+export class SpaceBoss extends Boss {
+  constructor(scene, world, config) {
+    super(scene, world, {
+      ...config,
+      hp: 900,
+      posture: 130,
+      damage: 20,
+      speed: 5,
+      name: '引力化身·奇点领主',
+    });
+    this.bossId = config.bossId ?? 'singularity-herald';
+    this.projectiles = config.projectiles;
+    this.pullCooldown = 0;
+    this.orbitAngle = 0;
+    this.shootCooldown = 0;
+  }
+
+  createMesh() {
+    const group = new THREE.Group();
+
+    const core = new THREE.Mesh(
+      new THREE.SphereGeometry(1.2, 24, 24),
+      new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0x110022, emissiveIntensity: 0.8 })
+    );
+    core.position.y = 2.5;
+    core.name = 'body';
+    group.add(core);
+
+    const disk = new THREE.Mesh(
+      new THREE.TorusGeometry(2.2, 0.25, 8, 48),
+      new THREE.MeshStandardMaterial({
+        color: 0xff6622,
+        emissive: 0xff4400,
+        emissiveIntensity: 0.8,
+        transparent: true,
+        opacity: 0.85,
+      })
+    );
+    disk.rotation.x = Math.PI / 2;
+    disk.position.y = 2.5;
+    disk.name = 'disk';
+    group.add(disk);
+
+    const hpFill = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.36, 0.14),
+      new THREE.MeshBasicMaterial({ color: 0x4488ff })
+    );
+    hpFill.position.set(0, 4.8, 0.01);
+    hpFill.name = 'hpBar';
+    group.add(hpFill);
+
+    return group;
+  }
+
+  update(dt, playerPos, playerRef) {
+    if (!this.alive) return;
+
+    const disk = this.mesh.getObjectByName('disk');
+    const core = this.mesh.getObjectByName('body');
+    if (disk) disk.rotation.z += dt * (1 + this.phase * 0.5);
+    if (core) core.rotation.y += dt * 0.8;
+
+    this.orbitAngle += dt;
+    this.mesh.position.y = this.world.getGroundHeight(this.position.x, this.position.z) + Math.sin(this.orbitAngle * 2) * 0.5;
+
+    this.pullCooldown = Math.max(0, this.pullCooldown - dt);
+
+    if (this.phase >= 2 && this.pullCooldown <= 0 && this.distanceTo(playerPos) < 30) {
+      this.pullCooldown = 3.5;
+      if (playerRef) {
+        const dx = this.position.x - playerPos.x;
+        const dz = this.position.z - playerPos.z;
+        const len = Math.sqrt(dx * dx + dz * dz) || 1;
+        playerRef.velocity.x += (dx / len) * 6;
+        playerRef.velocity.z += (dz / len) * 6;
+      }
+    }
+
+    if (this.phase >= 3 && this.shootCooldown <= 0) {
+      this.shootCooldown = 0.8;
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2 + this.orbitAngle;
+        const tx = this.position.x + Math.cos(a) * 15;
+        const tz = this.position.z + Math.sin(a) * 15;
+        this.projectiles?.spawn(
+          this.position.clone(),
+          new THREE.Vector3(tx, 0, tz),
+          14,
+          8,
+          0x4488ff
+        );
+      }
+    } else {
+      this.shootCooldown = Math.max(0, (this.shootCooldown ?? 0) - dt);
+    }
+
+    if (this.phase >= 2 && Math.random() < dt * 0.08) {
+      this.startSlamTelegraph();
+    }
+
+    super.update(dt, playerPos, playerRef);
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "crossrealm-chronicles",
+  "version": "0.1.0",
+  "description": "3A开放世界跨界探索原型 - 指环王×哈利波特×星际穿越",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src tests",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "download:model": "powershell -ExecutionPolicy Bypass -File scripts/download-player-model.ps1",
+    "import:mixamo": "powershell -ExecutionPolicy Bypass -File scripts/import-mixamo.ps1",
+    "import:mixamo:open": "powershell -ExecutionPolicy Bypass -File scripts/import-mixamo.ps1 -OpenInbox",
+    "import:rest-npcs": "powershell -ExecutionPolicy Bypass -File scripts/import-rest-npcs.ps1",
+    "import:rest-npcs:open": "powershell -ExecutionPolicy Bypass -File scripts/import-rest-npcs.ps1 -OpenInbox",
+    "import:rest-gestures": "powershell -ExecutionPolicy Bypass -File scripts/import-rest-gestures.ps1",
+    "import:rest-gestures:open": "powershell -ExecutionPolicy Bypass -File scripts/import-rest-gestures.ps1 -OpenInbox",
+    "validate:save": "node scripts/validate-save-parity.mjs"
+  },
+  "dependencies": {
+    "three": "^0.172.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "globals": "^17.12.0",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.9"
+  }
+}

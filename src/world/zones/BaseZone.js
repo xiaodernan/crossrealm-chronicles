@@ -1,0 +1,160 @@
+import * as THREE from 'three';
+
+export class BaseZone {
+  constructor(scene, center, config) {
+    this.scene = scene;
+    this.center = center;
+    this.radius = config.radius ?? 120;
+    this.group = new THREE.Group();
+    this.group.position.set(center.x, 0, center.z);
+    scene.add(this.group);
+
+    this.info = config.info;
+    this.fogColor = config.fogColor ?? 0x888888;
+    this.fogDensity = config.fogDensity ?? 0.008;
+    this.skyColor = config.skyColor ?? 0x87a8c4;
+    this.mapColor = config.mapColor ?? '#4488aa';
+    this.poiMarkers = [];
+    this.pois = [];
+    /** 本地坐标碰撞体，build 结束后由 WorldManager 平移到世界坐标 */
+    this.colliders = [];
+  }
+
+  /** 登记一个本地坐标障碍；kind: solid | platform | ghost */
+  addCollider(collider) {
+    this.colliders.push(collider);
+    return collider;
+  }
+
+  addCylinderCollider(x, z, r, top, { base = 0, kind = 'solid' } = {}) {
+    return this.addCollider({ shape: 'cyl', x, z, r, base, top, kind });
+  }
+
+  addBoxCollider(x, z, hx, hz, top, { base = 0, rot = 0, kind = 'solid' } = {}) {
+    return this.addCollider({ shape: 'box', x, z, hx, hz, base, top, rot, kind });
+  }
+
+  distanceToCenter(x, z) {
+    const dx = x - this.center.x;
+    const dz = z - this.center.z;
+    return Math.sqrt(dx * dx + dz * dz);
+  }
+
+  inZone(x, z) {
+    return this.distanceToCenter(x, z) < this.radius;
+  }
+
+  getHeightAt(worldX, worldZ) {
+    if (!this.inZone(worldX, worldZ)) return -Infinity;
+
+    const lx = worldX - this.center.x;
+    const lz = worldZ - this.center.z;
+    return this.sampleHeight(lx, lz);
+  }
+
+  sampleHeight(_lx, _lz) {
+    return 0;
+  }
+
+  addPOI(position, label, onInteract, options = {}) {
+    const lx = position.x;
+    const lz = position.z;
+    const ly = position.y ?? this.sampleHeight(lx, lz);
+
+    const poi = {
+      id: `${this.info.name}-${label}`,
+      position: new THREE.Vector3(this.center.x + lx, ly, this.center.z + lz),
+      label,
+      onInteract,
+      discovered: false,
+      type: options.type ?? 'lore',
+    };
+    this.pois.push(poi);
+
+    const marker = this.createPOIMarker(lx, ly, lz, options.color ?? 0xc9a962);
+    marker.userData.poiId = poi.id;
+    this.group.add(marker);
+    this.poiMarkers.push({ marker, poi });
+
+    return poi;
+  }
+
+  createPOIMarker(x, y, z, color) {
+    const group = new THREE.Group();
+
+    const beam = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.2, 3, 8),
+      new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.35,
+      })
+    );
+    beam.position.y = 1.5;
+    group.add(beam);
+
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(0.6, 0.04, 8, 24),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.7 })
+    );
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = 0.15;
+    group.add(ring);
+
+    group.position.set(x, y, z);
+    return group;
+  }
+
+  getPointsOfInterest() {
+    return this.pois;
+  }
+
+  update(dt) {
+    const t = performance.now() * 0.002;
+    for (const { marker } of this.poiMarkers) {
+      marker.position.y = marker.userData.baseY ?? marker.position.y;
+      if (marker.userData.baseY === undefined) marker.userData.baseY = marker.position.y;
+      marker.position.y = marker.userData.baseY + Math.sin(t + marker.position.x) * 0.08;
+      marker.rotation.y += dt * 0.4;
+    }
+  }
+
+  createTree(x, z, scale = 1) {
+    const group = new THREE.Group();
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.15 * scale, 0.25 * scale, 2 * scale, 8),
+      new THREE.MeshStandardMaterial({ color: 0x4a3020, roughness: 0.95 })
+    );
+    trunk.position.y = 1 * scale;
+    trunk.castShadow = true;
+    group.add(trunk);
+
+    const foliage = new THREE.Mesh(
+      new THREE.ConeGeometry(1.2 * scale, 3 * scale, 8),
+      new THREE.MeshStandardMaterial({ color: 0x2a5a30, roughness: 0.85 })
+    );
+    foliage.position.y = 3 * scale;
+    foliage.castShadow = true;
+    group.add(foliage);
+
+    const groundY = this.sampleHeight(x, z);
+    group.position.set(x, groundY, z);
+    if (scale >= 0.6) {
+      this.addCylinderCollider(x, z, Math.max(0.3, 0.42 * scale), groundY + 3 * scale, { base: groundY - 0.5 });
+    }
+    return group;
+  }
+
+  createRock(x, z, size = 1) {
+    const rock = new THREE.Mesh(
+      new THREE.DodecahedronGeometry(size, 0),
+      new THREE.MeshStandardMaterial({ color: 0x5a5a58, roughness: 0.95, flatShading: true })
+    );
+    rock.position.set(x, this.sampleHeight(x, z) + size * 0.4, z);
+    rock.rotation.set(Math.random(), Math.random(), Math.random());
+    rock.scale.set(1, 0.7 + Math.random() * 0.5, 1);
+    rock.castShadow = true;
+    if (size >= 0.8) this.addCylinderCollider(x, z, size * 0.8, rock.position.y + size * 1.1, { base: rock.position.y - size });
+    return rock;
+  }
+}

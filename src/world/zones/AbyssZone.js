@@ -1,0 +1,109 @@
+import * as THREE from 'three';
+import { BaseZone } from './BaseZone.js';
+
+/** 第五主题：混沌边境 — 三界交汇后的不稳定位面 */
+export class AbyssZone extends BaseZone {
+  constructor(scene, center, dialog) {
+    super(scene, center, {
+      radius: 135,
+      fogColor: 0x1a0a18,
+      fogDensity: 0.014,
+      skyColor: 0x120810,
+      mapColor: '#6a2040',
+      info: {
+        name: '混沌边境',
+        subtitle: '第五位面 · 诸界裂隙',
+        description:
+          '四枚碎片重铸后，位面边缘仍不断泄漏混沌能量。熔岩与寒冰并存，是穿越者试炼武器技能树的终极之地。',
+      },
+    });
+    this.dialog = dialog;
+    this.buildTerrain();
+    this.buildChaosRifts();
+    this.buildLandmarks();
+    this.buildOuterWilds();
+  }
+
+  sampleHeight(lx, lz) {
+    const dist = Math.sqrt(lx * lx + lz * lz) / this.radius;
+    const chaos = Math.sin(lx * 0.07) * Math.cos(lz * 0.06) * 2.5;
+    const edgeFade = 1 - Math.pow(dist, 2);
+    return Math.max(0, chaos * edgeFade);
+  }
+
+  buildTerrain() {
+    // 地面由 WorldTerrain 统一绘制
+  }
+
+  buildChaosRifts() {
+    const riftMat = new THREE.MeshStandardMaterial({
+      color: 0xff2244,
+      emissive: 0x880022,
+      emissiveIntensity: 0.9,
+      transparent: true,
+      opacity: 0.7,
+    });
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      const r = 25 + (i % 3) * 12;
+      const h = 6 + Math.random() * 4;
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.5, h, 5), riftMat);
+      const lx = Math.cos(a) * r;
+      const lz = Math.sin(a) * r;
+      pillar.position.set(lx, 3, lz);
+      this.group.add(pillar);
+      this.addCylinderCollider(lx, lz, 0.55, this.sampleHeight(lx, lz) + h * 0.5 + 3, { base: this.sampleHeight(lx, lz) - 0.5 });
+    }
+    const core = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(2, 0),
+      new THREE.MeshStandardMaterial({ color: 0xff4488, emissive: 0xff0044, emissiveIntensity: 1, wireframe: true })
+    );
+    core.position.set(0, 5, 0);
+    core.name = 'chaosCore';
+    this.group.add(core);
+  }
+
+  buildLandmarks() {
+    this.addPOI(
+      { x: 0, y: 0, z: 62 },
+      '混沌裂隙竞技场',
+      () => {
+        this.dialog.show('混沌裂隙竞技场', 'Chapter 5 解锁后，踏入红圈将唤醒「混沌裂隙领主」。\n\n坐标：X≈-200, Z≈285 · 建议先解锁 3 个武器技能。');
+      },
+      { color: 0xff2244 }
+    );
+    this.addPOI(
+      { x: -20, y: 0, z: 10 },
+      '触碰混沌之核',
+      () => {
+        window.dispatchEvent(new CustomEvent('discovery', {
+          detail: { id: 'chaos-core', title: '混沌之核', text: '第五位面的不稳定能量源。' },
+        }));
+        this.dialog.show('混沌之核', '此处可感悟武器技能——在营火用「技能点」解锁剑/杖流派。\n\n完成 Chapter 4 后，边境会完全显现。');
+      },
+      { color: 0xff2244 }
+    );
+  }
+
+  buildOuterWilds() {
+    const mat = new THREE.MeshStandardMaterial({ color: 0x3a1828, roughness: 0.95 });
+    for (let i = 0; i < 24; i++) {
+      const lx = (Math.random() - 0.5) * this.radius * 1.6;
+      const lz = (Math.random() - 0.5) * this.radius * 1.6;
+      const rock = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1.5), mat);
+      rock.position.set(lx, this.sampleHeight(lx, lz) + 1, lz);
+      rock.rotation.y = Math.random() * Math.PI;
+      this.group.add(rock);
+      this.addBoxCollider(lx, lz, 0.75, 0.75, this.sampleHeight(lx, lz) + 2, { base: this.sampleHeight(lx, lz) - 0.5, rot: rock.rotation.y });
+    }
+  }
+
+  update(dt) {
+    super.update(dt);
+    const core = this.group.getObjectByName('chaosCore');
+    if (core) {
+      core.rotation.x += dt * 0.5;
+      core.rotation.y += dt * 0.8;
+    }
+  }
+}

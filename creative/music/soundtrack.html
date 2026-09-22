@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>跨界纪事 OST · Web Audio 预览</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(160deg, #0a0818 0%, #1a1028 40%, #081018 100%);
+      color: #c9a962;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.8rem; letter-spacing: 0.15em; margin-bottom: 0.25rem; }
+    .sub { color: #888; font-size: 0.85rem; margin-bottom: 2rem; }
+    .cover {
+      width: min(320px, 90vw);
+      border-radius: 8px;
+      box-shadow: 0 8px 40px rgba(201,169,98,0.2);
+      margin-bottom: 2rem;
+    }
+    .tracks { display: grid; gap: 12px; max-width: 640px; }
+    .track {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(201,169,98,0.25);
+      border-radius: 8px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .track:hover { border-color: rgba(201,169,98,0.55); background: rgba(201,169,98,0.06); }
+    .track.playing { border-color: #c9a962; background: rgba(201,169,98,0.12); }
+    .num { width: 28px; color: #666; font-size: 0.8rem; }
+    .name { flex: 1; font-weight: 600; }
+    .meta { font-size: 0.72rem; color: #666; }
+    .stop {
+      margin-top: 2rem;
+      padding: 10px 24px;
+      background: transparent;
+      border: 1px solid rgba(201,169,98,0.5);
+      color: #c9a962;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .stop:hover { background: rgba(201,169,98,0.1); }
+    .viz { height: 4px; background: #222; border-radius: 2px; margin-top: 2rem; max-width: 640px; overflow: hidden; }
+    .viz-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #c9a962, #8866cc); transition: width 0.1s; }
+  </style>
+</head>
+<body>
+  <h1>跨界纪事 OST</h1>
+  <p class="sub">Crossrealm Chronicles · Web Audio 六首预览 · 点击播放</p>
+  <img class="cover" src="../posters/poster-ost-album-4k.png" alt="OST 封面" />
+  <div class="tracks" id="tracks"></div>
+  <button class="stop" id="stop">■ 停止全部</button>
+  <div class="viz"><div class="viz-bar" id="viz"></div></div>
+
+  <script>
+    const TRACKS = [
+      { id: 'anchor', num: '01', name: 'Anchor Pulse（锚脉）', meta: 'D min · 72 BPM', play: playAnchor },
+      { id: 'campfire', num: '06', name: 'Campfire Ember（营火余温）', meta: '钢琴泛音 · 56 BPM', play: playCampfire },
+      { id: '1983', num: '13', name: '1983 Loop（一九八三循环）', meta: '逆相界 · 120 BPM', play: play1983 },
+      { id: 'upside', num: '14', name: 'Upside Spores（逆相孢子）', meta: '全音阶 · 88 BPM', play: playUpside },
+      { id: 'full', num: '23', name: 'Full Resonance（全频共鸣）', meta: '49 echo layers', play: playFull },
+      { id: 'infinity', num: '24', name: 'Infinity Walker（无尽行者）', meta: '字幕 roll · 60 BPM', play: playInfinity },
+    ];
+
+    let ctx, master, currentNodes = [], currentId = null, raf;
+
+    function init() {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      master = ctx.createGain();
+      master.gain.value = 0.35;
+      master.connect(ctx.destination);
+    }
+
+    function stopAll() {
+      currentNodes.forEach(n => { try { n.stop?.(); n.disconnect?.(); } catch (_) {} });
+      currentNodes = [];
+      if (raf) cancelAnimationFrame(raf);
+      document.getElementById('viz').style.width = '0%';
+      document.querySelectorAll('.track').forEach(t => t.classList.remove('playing'));
+      currentId = null;
+    }
+
+    function tone(freq, type, start, dur, vol = 0.15, dest = master) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(vol, start + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      o.connect(g); g.connect(dest);
+      o.start(start); o.stop(start + dur + 0.1);
+      currentNodes.push(o, g);
+      return o;
+    }
+
+    function playAnchor() {
+      const t0 = ctx.currentTime;
+      const notes = [293.66, 220, 174.61, 146.83];
+      notes.forEach((f, i) => tone(f, 'sine', t0 + i * 0.6, 1.2, 0.12));
+      setIntervalLoop(t0, 4.8);
+    }
+
+    function playCampfire() {
+      const t0 = ctx.currentTime;
+      [523.25, 659.25, 783.99].forEach((f, i) => {
+        tone(f, 'triangle', t0 + i * 1.1, 2.5, 0.06);
+        tone(f * 2, 'sine', t0 + i * 1.1 + 0.3, 1.8, 0.03);
+      });
+      setIntervalLoop(t0, 5);
+    }
+
+    function play1983() {
+      const t0 = ctx.currentTime;
+      for (let i = 0; i < 16; i++) {
+        tone(110 + (i % 4) * 55, 'sawtooth', t0 + i * 0.25, 0.15, 0.04);
+      }
+      tone(55, 'square', t0, 4, 0.08);
+      setIntervalLoop(t0, 4);
+    }
+
+    function playUpside() {
+      const t0 = ctx.currentTime;
+      const cluster = [277.18, 311.13, 369.99, 415.30];
+      cluster.forEach((f, i) => tone(f, 'sawtooth', t0 + i * 0.15, 3, 0.05));
+      for (let i = 0; i < 20; i++) {
+        tone(800 + Math.random() * 400, 'sine', t0 + Math.random() * 3, 0.08, 0.02);
+      }
+      setIntervalLoop(t0, 4);
+    }
+
+    function playFull() {
+      const t0 = ctx.currentTime;
+      const freqs = [146.83, 174.61, 220, 261.63, 293.66, 329.63, 349.23, 392, 440, 493.88];
+      freqs.forEach((f, i) => tone(f, i % 2 ? 'triangle' : 'sine', t0 + i * 0.08, 0.6, 0.05));
+      tone(73.42, 'sine', t0, 6, 0.1);
+      setIntervalLoop(t0, 6);
+    }
+
+    function playInfinity() {
+      const t0 = ctx.currentTime;
+      [146.83, 174.61, 220, 261.63].forEach((f, i) => tone(f, 'sine', t0 + i * 1.5, 3, 0.1 - i * 0.015));
+      setIntervalLoop(t0, 8);
+    }
+
+    function setIntervalLoop(t0, dur) {
+      let start = performance.now();
+      function anim() {
+        if (currentId === null) return;
+        const p = ((performance.now() - start) % (dur * 1000)) / (dur * 1000) * 100;
+        document.getElementById('viz').style.width = p + '%';
+        raf = requestAnimationFrame(anim);
+      }
+      raf = requestAnimationFrame(anim);
+    }
+
+    const container = document.getElementById('tracks');
+    TRACKS.forEach(tr => {
+      const el = document.createElement('div');
+      el.className = 'track';
+      el.innerHTML = `<span class="num">${tr.num}</span><span class="name">${tr.name}</span><span class="meta">${tr.meta}</span>`;
+      el.onclick = async () => {
+        if (!ctx) init();
+        if (ctx.state === 'suspended') await ctx.resume();
+        stopAll();
+        currentId = tr.id;
+        el.classList.add('playing');
+        tr.play();
+      };
+      container.appendChild(el);
+    });
+
+    document.getElementById('stop').onclick = stopAll;
+  </script>
+</body>
+</html>

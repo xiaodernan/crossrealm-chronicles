@@ -1,0 +1,152 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { REST_NPC_MODELS } from '../assets/RestNpcManifest.js';
+
+const _loader = new GLTFLoader();
+
+/** 单个营火 NPC — Mixamo GLB + 程序化兜底 + idle/talk 动画 */
+export class RestNpcModel {
+  constructor(restId, visualDef) {
+    this.restId = restId;
+    this.visualDef = visualDef;
+    this.config = REST_NPC_MODELS[restId] ?? REST_NPC_MODELS.hub;
+    this.group = new THREE.Group();
+    this.modelRoot = null;
+    this.mixer = null;
+    this.actions = {};
+    this.currentAction = null;
+    this.loaded = false;
+    this.useGlb = false;
+    this.fallbackMeshes = [];
+    this.talkPulse = 0;
+  }
+
+  buildFallback() {
+    const def = this.visualDef;
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: def.body,
+      roughness: 0.72,
+      metalness: 0.12,
+      transparent: !!def.transparent,
+      opacity: def.transparent ? 0.78 : 1,
+    });
+    const bodyH = def.height;
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, bodyH, 8, 14), bodyMat);
+    body.name = 'body';
+    body.castShadow = true;
+    body.position.y = def.idle === 'sit' || this.config.sit ? 0.72 : 1.15;
+    this.group.add(body);
+    this.fallbackMeshes.push(body);
+
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), bodyMat.clone());
+    head.name = 'head';
+    head.position.y = body.position.y + bodyH * 0.55 + 0.18;
+    this.group.add(head);
+    this.fallbackMeshes.push(head);
+
+    if (def.helmet || this.config.helmet) {
+      const helm = new THREE.Mesh(
+        new THREE.SphereGeometry(0.26, 10, 8, 0, Math.PI * 2, 0, Math.PI * 0.55),
+        new THREE.MeshStandardMaterial({ color: 0xccddee, roughness: 0.35, metalness: 0.55 })
+      );
+      helm.position.copy(head.position);
+      helm.position.y += 0.04;
+      this.group.add(helm);
+    }
+
+    const cloak = new THREE.Mesh(
+      new THREE.ConeGeometry(0.55, 0.9, 8),
+      new THREE.MeshStandardMaterial({
+        color: def.cloak,
+        roughness: 0.85,
+        emissive: def.emissive,
+        emissiveIntensity: 0.35,
+        transparent: !!def.transparent,
+        opacity: def.transparent ? 0.65 : 1,
+        side: THREE.DoubleSide,
+      })
+    );
+    cloak.rotation.x = Math.PI;
+    cloak.position.y = body.position.y + 0.15;
+    cloak.name = 'cloak';
+    this.group.add(cloak);
+    this.fallbackMeshes.push(cloak);
+
+    this.modelRoot = this.group;
+    return { body, head, cloak };
+  }
+
+  async loadGlb() {
+    for (const url of this.config.glb) {
+      try {
+        const gltf = await _loader.loadAsync(url);
+        const model = gltf.scene.clone(true);
+        model.scale.setScalar(this.config.scale);
+        model.rotation.y = this.config.rotY ?? Math.PI;
+        model.traverse((c) => {
+          if (c.isMesh) {
+            c.castShadow = true;
+            c.receiveShadow = true;
+            if (this.config.ghost) {
+              c.material = c.material.clone();
+              c.material.transparent = true;
+              c.material.opacity = 0.72;
+            }
+          }
+        });
+        const box = new THREE.Box3().setFromObject(model);
+        model.position.y -= box.min.y;
+        this.fallbackMeshes.forEach((m) => { m.visible = false; });
+        this.group.add(model);
+        this.modelRoot = model;
+        this.mixer = new THREE.AnimationMixer(model);
+        for (const clip of gltf.animations) {
+          this.actions[clip.name] = this.mixer.clipAction(clip);
+          const low = clip.name.toLowerCase();
+          if (low.includes('idle') || low.includes('sit')) this.actions.idle = this.actions[clip.name];
+        }
+        this._playLoop(this._pickAnim(this.config.idleAnim) ?? Object.keys(this.actions)[0]);
+        this.useGlb = true;
+        this.loaded = true;
+        console.info('[RestNpcModel]', this.restId, 'GLB', url);
+        return true;
+      } catch { /* try next */ }
+    }
+    return false;
+  }
+
+  _pickAnim(candidates) {
+    for (const c of candidates ?? []) {
+      if (this.actions[c]) return c;
+      const hit = Object.keys(this.actions).find((k) => k.toLowerCase() === String(c).toLowerCase());
+      if (hit) return hit;
+      const partial = Object.keys(this.actions).find((k) => k.toLowerCase().includes(String(c).toLowerCase()));
+      if (partial) return partial;
+    }
+    return null;
+  }
+
+  _playLoop(name, fade = 0.2) {
+    const action = name ? this.actions[name] : null;
+    if (!action) return;
+    if (this.currentAction && this.currentAction !== action) this.currentAction.fadeOut(fade);
+    action.reset().setLoop(THREE.LoopRepeat, Infinity).fadeIn(fade).play();
+    this.currentAction = action;
+  }
+
+  playTalk(active) {
+    if (!this.useGlb) return;
+    this.talkPulse = active ? 1 : 0;
+    const talk = this._pickAnim(this.config.talkAnim);
+    if (talk && active) this._playLoop(talk, 0.15);
+    else if (!active) this._playLoop(this._pickAnim(this.config.idleAnim), 0.2);
+  }
+
+  update(dt) {
+    this.mixer?.update(dt);
+    this.talkPulse = Math.max(0, this.talkPulse - dt * 0.5);
+    if (!this.useGlb && this.fallbackMeshes[1]) {
+      this.fallbackMeshes[1].position.y += Math.sin(performance.now() * 0.008) * 0.0008 * (1 + this.talkPulse);
+    }
+  }
+}

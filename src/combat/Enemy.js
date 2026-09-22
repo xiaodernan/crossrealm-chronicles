@@ -1,0 +1,633 @@
+import * as THREE from 'three';
+import { createHurtbox, pickPart } from './Hurtbox.js';
+import { AI, BODY_PLANS, ENEMY_DEFENSE, ENEMY_RESIST, HIT, SUMMON } from '../content/tuning.js';
+import {
+  holdRangeOf, moveHits, moveRange, pickMove, resolveMoveSet, seededRng, threatRangeOf,
+} from './EnemyMoves.js';
+import { Sense } from '../ai/Perception.js';
+import { createEnemyFSM, tryClaimStrikeSlot } from '../ai/EnemyFSM.js';
+import { separationPush } from '../ai/Separation.js';
+
+/** 分离推力在两个身体完全重合时需要一个稳定的"每人一个方向"，用出生顺序做身份差 */
+let aiSeq = 0;
+
+export class Enemy {
+  constructor(scene, world, config) {
+    this.scene = scene;
+    this.world = world;
+    this.aiSeed = ++aiSeq;
+    this.name = config.name ?? '敌人';
+    this.type = config.type ?? 'soldier';
+    this.position = new THREE.Vector3(config.x, 0, config.z);
+    this.maxHp = config.hp ?? 100;
+    this.hp = this.maxHp;
+    this.maxPosture = config.posture ?? 60;
+    this.posture = 0;
+    this.damage = config.damage ?? 12;
+    this.speed = config.speed ?? 5;
+    this.aggroRange = config.aggroRange ?? 18;
+    this.attackRange = config.attackRange ?? 2.2;
+    this.canAttack = config.canAttack ?? true;
+    this.respawn = config.respawn ?? true;
+    this.respawnTime = config.respawnTime ?? 8;
+    this.deathTimer = 0;
+    this.state = 'idle';
+    this.stateTimer = 0;
+    this.attackCooldown = 0;
+    this.staggerTimer = 0;
+    this.hitFlash = 0;
+    this.bodyMesh = null;
+    this.spawnPoint = this.position.clone();
+    this.alive = true;
+    this.isBoss = config.type === 'boss';
+
+    /** 受击方对外只暴露这几个只读量，结算由 combat/Resolution.js 统一算（M2） */
+    this.defense = config.defense ?? ENEMY_DEFENSE[this.type] ?? 0;
+    this.resist = config.resist ?? ENEMY_RESIST[this.type] ?? {};
+    this.hurtbox = createHurtbox(this.type, config.hurtScale ?? 1);
+    /** 网格原点离地高度：体型表给出（悬浮单位），它和打击带必须一起调 */
+    this.hover = config.hover ?? BODY_PLANS[this.type]?.hover ?? 0;
+    /** 分离与碰撞用的身体半径 */
+    this.radius = config.radius ?? BODY_PLANS[this.type]?.radius ?? 0.45;
+    /** AI 行为参数：默认全表，spawn config 可按只覆盖（同一类敌人也能有特例） */
+    this.ai = { ...AI, ...(config.ai ?? {}) };
+    /** 招式表：整类默认取自 `ENEMY_MOVE_SETS`，spawn config 的 `moves` 可给 id 或内联招式 */
+    this.moves = resolveMoveSet(this.type, config.moves);
+    /** 所有招式里最远的落点：追击要跑到这里才停（远程单位不再一路贴脸） */
+    this.threatRange = threatRangeOf(this);
+    /** 没抢到进攻名额时想站住的距离 */
+    this.holdRange = holdRangeOf(this);
+    /** 选招随机数按身份播种：同一只敌人每次运行顺序一致，同一群又不会整齐出同一招 */
+    this.moveRng = seededRng(this.aiSeed * 7919 + 13);
+    /** 当前招式与剩余连段数；`windupNow` 是本段前摇（连段后续段被压缩） */
+    this.activeMove = null;
+    this.comboLeft = 0;
+    this.windupNow = 0;
+    this.squad = config.squad ?? null;
+    this.sense = new Sense(this);
+    /** 绕行手性：由出生点定死，同一群敌人不会全往同一边绕 */
+    this.orbitSide = (Math.round((this.spawnPoint.x + this.spawnPoint.z) / 3) % 2) ? 1 : -1;
+    /** 本帧位移意图，由状态机写入，`_advance()` 统一积分 */
+    this.wish = { x: 0, z: 0 };
+    /** 外部冲量（击退）：由结算侧 `applyKnockback()` 请求，与 AI 意图分开积分、按秒衰减 */
+    this.knock = { x: 0, z: 0 };
+    /** 质量：体型 scale 越大越推不动（Boss 与小兵吃到同样的重击不该跑一样远） */
+    this.mass = config.mass ?? BODY_PLANS[this.type]?.scale ?? 1;
+
+    /* ---- 召唤：归属、配额与生命周期。三件事都由 EnemyManager 统一记账 ----
+     * `summonQuota` 是管理器每帧盖下来的"你现在还能放出几只"（名额是全局资源，
+     * 敌人自己无权决定）；仆从则拿着 `summoner` 的引用，召唤者一死就跟着消散。 */
+    this.isSummon = config.isSummon === true;
+    this.summoner = config.summoner ?? null;
+    this.summonTtl = this.isSummon ? (config.summonTtl ?? SUMMON.life) : 0;
+    this.summonQuota = 0;
+
+    this.fsm = createEnemyFSM(this);
+
+    this.mesh = this.createMesh(config);
+    this.mesh.userData.enemy = this;
+    this.updateMeshY();
+    scene.add(this.mesh);
+
+    this.lockMarker = this.createLockMarker();
+    this.mesh.add(this.lockMarker);
+    this.updateHpBar();
+  }
+
+  /** 受击盒的世界基准：网格原点已含地形高差与悬浮高度 */
+  hurtBaseY() {
+    return this.mesh.position.y;
+  }
+
+  /** 朝向（与本仓库一致：atan2(dx, dz)），背刺判定用 */
+  facingYaw() {
+    return this.mesh.rotation.y;
+  }
+
+  /**
+   * 取景用：受击盒最高段的上沿离**网格原点**多高。
+   * 处决镜头需要这个数，否则会拿"人类身高"去框所有目标 —— Boss 3.85 米与
+   * 无人机 1.87 米得到一模一样的构图。悬浮单位不含 `hover`：那是基准的事，
+   * 由 `hurtBaseY()` 一起交出，镜头自己相加。
+   */
+  statureHeight() {
+    return this.hurtbox.segments.reduce((top, seg) => Math.max(top, seg.y1), 0);
+  }
+
+  getDefense() {
+    return this.defense;
+  }
+
+  getResist(element) {
+    return this.resist?.[element] ?? 0;
+  }
+
+  isStaggered() {
+    return this.staggerTimer > 0;
+  }
+
+  /** 弹反窗口：已起手且进入本招前摇的后半段。窗口按**这一招**的前摇算，
+   *  定值写法会让短前摇的快招根本弹不了（0.4 秒的突刺永远在窗口外结束） */
+  isParriable() {
+    return this.canAttack && this.state === 'windup'
+      && this.stateTimer > this.windupNow * this.ai.parryRatio;
+  }
+
+  /** 正面格挡是否举着：只在防御招的命中段成立。
+   *  硬直/死亡/收招都自动落空（`fsm.current` 已经离开 strike），不需要额外记账 */
+  isGuarding() {
+    return this.alive && this.fsm.current === 'strike' && this.activeMove?.guard === true;
+  }
+
+  /** 外部强制硬直（弹反成功）：架势条清零、交出进攻名额并立刻进入 stagger */
+  forceStagger(seconds) {
+    this.staggerTimer = seconds;
+    this.posture = 0;
+    this.fsm.change('stagger');
+    this.state = 'stagger';
+    this.stateTimer = 0;
+    this.clearTelegraph();
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 状态机的动作原语：状态只调这些，不直接碰 position / mesh / 碰撞
+   * ------------------------------------------------------------------ */
+
+  separationRadius() {
+    return this.radius;
+  }
+
+  separationSeed() {
+    return this.aiSeed;
+  }
+
+  /** 本帧朝向的单位向量（与全仓库正方向一致：`(sin yaw, cos yaw)`） */
+  facingDir() {
+    const yaw = this.mesh.rotation.y;
+    return { x: Math.sin(yaw), z: Math.cos(yaw) };
+  }
+
+  /** 朝向与"指向目标"的夹角余弦：招式锥形判定用 */
+  facingDotTo(pos) {
+    const dx = pos.x - this.position.x;
+    const dz = pos.z - this.position.z;
+    const len = Math.hypot(dx, dz) || 1;
+    const f = this.facingDir();
+    return (f.x * dx + f.z * dz) / len;
+  }
+
+  /** 面向"感知到的目标"的贴合度：抢名额与选招共用，没有目标时视为完全没面向 */
+  aimDot() {
+    return this.sense.target ? this.facingDotTo(this.sense.target) : -2;
+  }
+
+  /**
+   * 起手：连段的首段选招并起完整前摇，后续段沿用同一招但压到 `comboWindup`。
+   * 只在进入 windup 那一帧调用（随机数在这里取，资格判定不含随机）。
+   */
+  beginMove() {
+    const first = !this.activeMove || this.comboLeft <= 0;
+    if (first) {
+      this.activeMove = pickMove(this, this.sense.dist, this.aimDot(), this.moveRng);
+      this.comboLeft = this.activeMove ? (this.activeMove.combo ?? 1) : 0;
+    } else {
+      this.comboLeft -= 1;
+    }
+    const m = this.activeMove;
+    this.windupNow = m ? (first ? m.windup : (m.comboWindup ?? m.windup)) : 0;
+    return m;
+  }
+
+  /** 承诺段时长：没有招式就立刻走完（目标中途消失时的自愈路径） */
+  strikeDur() { return this.activeMove?.strike ?? 0; }
+
+  recoverDur() { return this.activeMove?.recover ?? 0; }
+
+  /**
+   * 一次进攻序列结束（走完收招、或被打断、或死亡）：连段计数与当前招式一起清零。
+   * 不清零的话下一轮起手会被当成"上一招的后续段"，既沿用旧招的距离容差而空挥，
+   * 又把前摇压成 comboWindup，等于所有敌人的第二招都变成更快更长的第一招。
+   */
+  endMove() {
+    this.activeMove = null;
+    this.comboLeft = 0;
+    this.windupNow = 0;
+  }
+
+  /** 预警圈该画多大：范围招画真实危险半径，远程只给自己一圈起手提示 */
+  teleRadius() {
+    const m = this.activeMove;
+    if (!m) return 1.05;
+    if (m.aoe) return m.aoe;
+    if (m.ranged) return this.attackRange;
+    return moveRange(this, m);
+  }
+
+  /** 本帧位移意图（米/秒），由状态写入、`_advance()` 积分 */
+  setWish(vx, vz) {
+    this.wish.x = vx;
+    this.wish.z = vz;
+  }
+
+  /**
+   * 请求一次击退：`dirX/dirZ` 是"攻击者指向目标"的水平单位向量，`speed` 是初速（米/秒）。
+   *
+   * 与 `setWish` 的区别是这里给的是**外力**：AI 下一秒想往哪走照旧，冲量单独按秒衰减，
+   * 所以打退一步不会被"想靠近"的意图立刻吞掉，也不会把状态机改成击退态。
+   * 硬直中的敌人吃全额（这正是把大家伙打进硬直的意义），起手/命中段只吃一小部分 ——
+   * 预警已经当众说出口，完全钉住就没有重击的位移反馈，全额推开又会让预警圈说谎。
+   */
+  applyKnockback(dirX, dirZ, speed = HIT.speed) {
+    if (!this.alive || !(speed > 0)) return 0;
+    const rooted = this.fsm.current === 'windup' || this.fsm.current === 'strike';
+    const s = speed
+      * (rooted ? HIT.rootedScale : 1)
+      * (this.isStaggered() ? HIT.staggerScale : 1)
+      / Math.max(0.2, 1 + (this.mass - 1) * HIT.massDivisor);
+    this.knock.x += dirX * s;
+    this.knock.z += dirZ * s;
+    return s;
+  }
+
+  clearKnockback() {
+    this.knock.x = 0;
+    this.knock.z = 0;
+  }
+
+  facePoint(pos, dt, rate = 8) {
+    const want = Math.atan2(pos.x - this.position.x, pos.z - this.position.z);
+    let d = want - this.mesh.rotation.y;
+    while (d > Math.PI) d -= Math.PI * 2;
+    while (d < -Math.PI) d += Math.PI * 2;
+    // 与帧率无关的指数逼近：dt 越大补得越多，但不会一步拧过去
+    this.mesh.rotation.y += d * (1 - Math.exp(-rate * dt));
+  }
+
+  faceSpin(dt) {
+    this.mesh.rotation.y += dt * 0.3;
+  }
+
+  wobble(t, freq, amp) {
+    this.mesh.rotation.z = Math.sin(t * freq) * amp;
+  }
+
+  upright() {
+    this.mesh.rotation.z = 0;
+  }
+
+  /** 预警的脉动（纯表现）：圈长到本招真实落点，脉动频率随前摇变短而变急 */
+  pulseTelegraph(t, dt) {
+    const parts = this.teleParts;
+    if (!parts) return;
+    const { ring, inner, warn } = parts;
+    const p = this.windupNow > 0 ? Math.min(1, t / this.windupNow) : 1;
+    const urgency = 8 + 10 * (1 - Math.min(1, this.windupNow / 1.2));
+    const scale = (0.4 + 0.6 * p) * this.teleRadius() / 1.05;
+    ring.material.opacity = 0.45 + Math.sin(t * urgency) * 0.3;
+    ring.scale.setScalar(scale);
+    inner.material.opacity = 0.6 + Math.sin(t * (urgency + 6)) * 0.4;
+    inner.scale.setScalar(scale);
+    if (warn.visible) {
+      warn.rotation.y += dt * 6;
+      warn.position.y = 2.55 + Math.sin(t * 18) * 0.08;
+    }
+  }
+
+  /** 前摇结束那一帧落地：伤害与距离都按**这一招**算，玩家侧只走公开接口 */
+  landStrike(ctx) {
+    const ref = ctx.playerRef;
+    const move = this.activeMove;
+    if (!ref || !move) return false;
+    // 防御招的"命中段"是举着盾的那段时间：不打人，减免由 Resolution 在玩家出手那一侧算
+    if (move.guard) return false;
+    /* 召唤招：敌人只说"按这份规格放仆从"，出生点、名额、归属与生命周期全归管理器。
+     * 直接在这里往 enemies 里塞东西会在迭代途中改数组，也会让"谁创建了谁"变成一笔糊账 */
+    if (move.summon) return ctx.summon ? ctx.summon(this, move.summon) === true : false;
+    const damage = Math.round(this.damage * (move.damage ?? 1));
+    if (move.ranged) {
+      // 远程：命中段改为交出一枚弹体，弹体在玩家侧走同一条 takeDamage 结算
+      const p = ctx.projectiles;
+      if (!p) return false;
+      p.spawn(this.position, ctx.target, damage, move.ranged.speed, move.ranged.color);
+      return true;
+    }
+    const dist = this.distanceTo(ctx.target);
+    if (!moveHits(this, move, dist, this.facingDotTo(ctx.target))) return false;
+    if (ref.combat.isInvulnerable()) return false;
+    // 竖直方向也要相交：横扫低段该被跳掉、重劈高段跳不掉、玩家站高台时近战全部落空
+    const part = pickPart(ref.combat, this.hurtBaseY(), move.band);
+    if (!part) return false;
+    ref.combat.takeDamage(damage, null, part);
+    return true;
+  }
+
+  /** 意图 → 分离 → 限速 → 碰撞积分，一帧只在这里写一次位置 */
+  _advance(dt, ctx) {
+    const push = separationPush(this, ctx.neighbors, this.ai);
+    // 预警与命中段扎住脚跟：不受同伴推挤。起手时"这一招能够到哪"是当着玩家说出口的，
+    // 中途被挤开 0.7 米就会必然打空（玩家站着不动反而躲掉了），预警圈就成了假话。
+    // 后撤段（recover）不冻结，让打完的人顺势退出去、把坑让给排队的同伴。
+    const rooted = this.fsm.current === 'windup' || this.fsm.current === 'strike';
+    const k = rooted ? 0 : 1;
+    // 击退冲量按秒指数衰减。这一帧用的是"衰减曲线在本帧上的平均值"而不是起始值，
+    // 于是 30 Hz 与 240 Hz 累计走出的总位移相同（起始值积分会让慢帧率多走一成以上）
+    const kx = this.knock.x;
+    const kz = this.knock.z;
+    const kd = Math.exp(-HIT.decay * dt);
+    const km = dt > 0 ? (1 - kd) / (HIT.decay * dt) : 0;
+    this.knock.x *= kd;
+    this.knock.z *= kd;
+    if (Math.abs(this.knock.x) < 1e-3) this.knock.x = 0;
+    if (Math.abs(this.knock.z) < 1e-3) this.knock.z = 0;
+    let vx = this.wish.x + (push?.x ?? 0) * k + kx * km;
+    let vz = this.wish.z + (push?.z ?? 0) * k + kz * km;
+    const max = this.speed * 1.6;
+    const s = Math.hypot(vx, vz);
+    if (s > max) {
+      vx *= max / s;
+      vz *= max / s;
+    }
+    if (s < 1e-5) return;
+    const c = ctx.collision;
+    if (!c) {
+      this.position.x += vx * dt;
+      this.position.z += vz * dt;
+      return;
+    }
+    const footY = this.world.getGroundHeight(this.position.x, this.position.z);
+    const moved = c.moveCircle(this.position.x, this.position.z, this.radius, vx * dt, vz * dt, footY);
+    this.position.x = moved.x;
+    this.position.z = moved.z;
+  }
+
+  createMesh(config) {
+    const group = new THREE.Group();
+    const color = config.color ?? 0x553333;
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0.25 });
+
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 1.0, 8, 16), mat);
+    body.position.y = 1.2;
+    body.castShadow = true;
+    body.name = 'body';
+    group.add(body);
+
+    if (config.type === 'golem') {
+      const core = new THREE.Mesh(
+        new THREE.OctahedronGeometry(0.35, 0),
+        new THREE.MeshStandardMaterial({ color: 0xaa66ff, emissive: 0x442266, emissiveIntensity: 0.6 })
+      );
+      core.position.y = 2.2;
+      group.add(core);
+    } else if (config.type === 'drone') {
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.08, 0.3), mat);
+      wing.position.y = 2.0;
+      group.add(wing);
+    } else if (config.type !== 'boss') {
+      const helm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.5), mat);
+      helm.position.y = 2.15;
+      group.add(helm);
+    }
+
+    const hpBg = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.2, 0.12),
+      new THREE.MeshBasicMaterial({ color: 0x222222 })
+    );
+    hpBg.position.y = 2.8;
+    group.add(hpBg);
+
+    const hpFill = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.18, 0.1),
+      new THREE.MeshBasicMaterial({ color: 0xcc3333 })
+    );
+    hpFill.position.set(0, 2.8, 0.01);
+    hpFill.name = 'hpBar';
+    group.add(hpFill);
+
+    return group;
+  }
+
+  createLockMarker() {
+    const group = new THREE.Group();
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.65, 0.85, 4),
+      new THREE.MeshBasicMaterial({ color: 0xffcc44, transparent: true, opacity: 0.95, side: THREE.DoubleSide })
+    );
+    ring.rotation.x = -Math.PI / 2;
+    group.add(ring);
+    const diamond = new THREE.Mesh(
+      new THREE.ConeGeometry(0.18, 0.45, 4),
+      new THREE.MeshBasicMaterial({ color: 0xffee88, transparent: true, opacity: 0.9 })
+    );
+    diamond.position.y = 0.55;
+    group.add(diamond);
+    group.position.y = 2.8;
+    group.visible = false;
+    group.name = 'lockMarker';
+    return group;
+  }
+
+  updateMeshY() {
+    const groundY = this.world.getGroundHeight(this.position.x, this.position.z);
+    this.mesh.position.set(this.position.x, groundY + this.hover, this.position.z);
+  }
+
+  setLocked(locked) {
+    const marker = this.mesh.getObjectByName('lockMarker');
+    if (marker) marker.visible = locked && this.alive;
+  }
+
+  updateHpBar() {
+    const bar = this.mesh.getObjectByName('hpBar');
+    if (!bar) return;
+    const ratio = Math.max(0, this.hp / this.maxHp);
+    bar.scale.x = ratio;
+    bar.position.x = -(1.18 * (1 - ratio)) / 2;
+  }
+
+  /** 记账：伤害与架势都已在 Resolution 里算好，这里只落实与广播。 */
+  takeDamage(amount, postureDamage = 0) {
+    if (!this.alive) return false;
+    // 挨打就是仇恨：背后一刀或隔墙被法术蹭到，都不该继续散步
+    this.sense.noteHostile();
+
+    this.hp = Math.max(0, this.hp - amount);
+    this.posture = Math.min(this.maxPosture, this.posture + postureDamage);
+    this.updateHpBar();
+
+    const body = this.bodyMesh ??= this.mesh.getObjectByName('body');
+    if (body?.material?.emissive) {
+      body.material.emissive.setHex(0xff0000);
+      body.material.emissiveIntensity = 0.6;
+      // 受光闪按主循环 dt 衰减：setTimeout 会在死亡/重生后触达已失效材质（B19）
+      this.hitFlash = 0.08;
+    }
+
+    window.dispatchEvent(new CustomEvent('combat-hit', { detail: { damage: amount, target: this.name } }));
+
+    if (this.posture >= this.maxPosture) {
+      this.forceStagger(this.ai.stagger);
+    }
+
+    if (this.hp <= 0) {
+      this.die();
+      return true;
+    }
+    return false;
+  }
+
+  die() {
+    this.alive = false;
+    this.state = 'dead';
+    this.mesh.visible = false;
+    this.clearTelegraph();
+    this.setWish(0, 0);
+    // 倒地不该继续滑行：冲量与连段一样，不跨生命保留
+    this.clearKnockback();
+    // 死亡必须交出进攻名额，否则一个占位者能让整群敌人永远不再起手
+    this.squad?.release(this);
+    // 连段不跨生命：重生后的第一招要重新选，不能接着打完前世的一半
+    this.endMove();
+    this.deathTimer = this.respawnTime;
+    window.dispatchEvent(new CustomEvent('enemy-defeated', {
+      detail: { name: this.name, type: this.type, bossId: this.bossId },
+    }));
+  }
+
+  respawnEnemy() {
+    this.hp = this.maxHp;
+    this.posture = 0;
+    this.alive = true;
+    this.state = 'idle';
+    this.stateTimer = 0;
+    this._lootDropped = false;
+    this.position.copy(this.spawnPoint);
+    this.sense.clear();
+    this.setWish(0, 0);
+    this.clearKnockback();
+    this.upright();
+    this.fsm.change('idle');
+    this.mesh.visible = true;
+    this.updateMeshY();
+    this.updateHpBar();
+  }
+
+  distanceTo(pos) {
+    return Math.sqrt((pos.x - this.position.x) ** 2 + (pos.z - this.position.z) ** 2);
+  }
+
+  /** 预警三件套按需创建一次并常驻，用 visible 切换。
+   *  旧实现每次出手 new 三组几何 + 材质、清除时只 remove 不 dispose，
+   *  一只敌人一轮攻击就漏 6 个 GPU 对象（B20 的主要来源）。 */
+  showTelegraph() {
+    const group = this._ensureTelegraph();
+    group.visible = true;
+    const { ring, inner, warn } = this.teleParts;
+    const move = this.activeMove;
+    const color = move?.telegraph?.color ?? 0xff2222;
+    ring.material.color.setHex(color);
+    inner.material.color.setHex(color);
+    // 分级：慢重招才有头顶的旋转警示，快招只有地面圈 —— 玩家靠"有没有第三个标记"分辨该弹还是该跑
+    warn.visible = this.windupNow >= this.ai.telegraphMarkWindup;
+    ring.material.opacity = 0.85;
+    ring.scale.setScalar(0.4 * this.teleRadius() / 1.05);
+    inner.material.opacity = 0.9;
+    inner.scale.setScalar(ring.scale.x);
+    warn.rotation.y = 0;
+    warn.position.y = 2.55;
+  }
+
+  _ensureTelegraph() {
+    if (this.telegraph) return this.telegraph;
+    const group = new THREE.Group();
+    group.name = 'telegraph';
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.15, 1.05, 16),
+      new THREE.MeshBasicMaterial({ color: 0xff2222, transparent: true, opacity: 0.85, side: THREE.DoubleSide })
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.06;
+    ring.name = 'teleRing';
+    group.add(ring);
+    const inner = new THREE.Mesh(
+      new THREE.RingGeometry(0.05, 0.35, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffff44, transparent: true, opacity: 0.9, side: THREE.DoubleSide })
+    );
+    inner.rotation.x = -Math.PI / 2;
+    inner.position.y = 0.08;
+    inner.name = 'teleInner';
+    group.add(inner);
+    const warn = new THREE.Mesh(
+      new THREE.ConeGeometry(0.12, 0.35, 3),
+      new THREE.MeshBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.95 })
+    );
+    warn.position.y = 2.6;
+    warn.name = 'teleWarn';
+    group.add(warn);
+    group.visible = false;
+    this.mesh.add(group);
+    this.telegraph = group;
+    this.teleParts = { ring, inner, warn };
+    return group;
+  }
+
+  clearTelegraph() {
+    if (this.telegraph) this.telegraph.visible = false;
+  }
+
+  /** 释放本敌人生成的全部 GPU 资源 */
+  dispose() {
+    this.scene.remove(this.mesh);
+    this.mesh.traverse((o) => {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) o.material.dispose();
+    });
+    this.telegraph = null;
+    this.teleParts = null;
+  }
+
+  /**
+   * 一帧：计时衰减 → 感知 → 状态判定 → 状态推进 → 位移积分 → 贴地。
+   *
+   * `ctx` 由 `EnemyManager` 每帧复用同一份：`{ target, playerRef, neighbors, collision }`。
+   * Boss 系（含四个阶段 Boss）仍走各自的阶段脚本，本方法只接管普通敌人。
+   */
+  update(dt, playerPos, playerRef, ctx) {
+    if (!this.alive) {
+      if (this.respawn) {
+        this.deathTimer -= dt;
+        if (this.deathTimer <= 0) this.respawnEnemy();
+      }
+      return;
+    }
+
+    this.attackCooldown = Math.max(0, this.attackCooldown - dt);
+    this.staggerTimer = Math.max(0, this.staggerTimer - dt);
+    this._decayHitFlash(dt);
+
+    ctx.target = playerPos;
+    ctx.playerRef = playerRef;
+    this.sense.update(dt, playerPos, ctx.collision);
+    ctx.canStrike = tryClaimStrikeSlot(this, this.squad);
+
+    // 意图每帧重新决定：状态没写就代表"这一帧不动"，不会残留上一态的冲量
+    this.wish.x = 0;
+    this.wish.z = 0;
+    this.fsm.resolve(ctx);
+    this.fsm.update(dt, ctx);
+    this.state = this.fsm.current;
+    this.stateTimer = this.fsm.time;
+
+    this._advance(dt, ctx);
+    this.updateMeshY();
+  }
+
+  /** 受光闪：按 dt 衰减，死亡/重生都不会留下悬空的材质写入（B19） */
+  _decayHitFlash(dt) {
+    if (this.hitFlash <= 0) return;
+    this.hitFlash = Math.max(0, this.hitFlash - dt);
+    const body = this.bodyMesh;
+    if (body?.material?.emissive) {
+      body.material.emissiveIntensity = this.hitFlash > 0 ? 0.6 : 0;
+    }
+  }
+}
