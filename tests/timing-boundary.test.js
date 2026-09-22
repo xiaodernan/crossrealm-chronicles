@@ -81,4 +81,18 @@ describe('游戏逻辑计时门禁（B39）', () => {
     // 必须是 rawDt（本帧真实时长），不是被 timeScale 缩过的 dt
     expect(line).toMatch(/scheduler\.update\(rawDt\)/);
   });
+
+  /*
+   * 落点顺序也是语义的一部分：`scheduler.update(rawDt)` 在 `canPlay` 那道暂停门控
+   * **之前**，所以游戏内暂停时 UI 与演出的延时照常到期（它们量的是真实观看时间），
+   * 而"不偷偷跑完"靠的是后台标签页里 rAF 停摆。这条规矩若被反着挪一行，
+   * 症状是"打开背包时任务提示全部冻结"—— 没人会为此写功能测试，所以在这里钉住。
+   */
+  it('调度器的推进点在暂停门控之前（UI 节奏量的是真实时间）', () => {
+    const lines = readFileSync(join(SRC, 'core/Game.js'), 'utf8').split('\n');
+    const sched = lines.findIndex((l) => l.includes('scheduler.update('));
+    const gate = lines.findIndex((l, i) => i > sched && l.includes('const canPlay'));
+    expect(sched).toBeGreaterThanOrEqual(0);
+    expect(gate).toBeGreaterThan(sched);
+  });
 });

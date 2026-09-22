@@ -38,7 +38,9 @@ export class Scheduler {
 
   /**
    * Promise 版延时，取代 `new Promise(r => setTimeout(r, ms))`。
-   * 不脱离主循环：暂停时不推进，因此不会在暂停中"偷偷跑完"。
+   * 不脱离主循环：后台标签页里 rAF 停摆，任务因此**不会在看不见的地方偷偷跑完**。
+   * 注意与"游戏内暂停"区分：暂停菜单只挡玩法子系统，`Game.update()` 仍在跑帧，
+   * 所以 UI 与演出类的延时照常到期（它们量的是真实观看时间，不是世界时间）。
    * @param {number} seconds
    * @param {string} [tag]
    * @returns {Promise<void>}
