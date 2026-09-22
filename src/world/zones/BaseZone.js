@@ -62,15 +62,31 @@ export class BaseZone {
     return 0;
   }
 
+  /**
+   * 登记一个兴趣点。
+   *
+   * @param {{x:number,y?:number,z:number}} position 区域本地坐标
+   * @param {string} label 交互提示文案 —— **只用于显示**
+   * @param {() => void} onInteract
+   * @param {{id?: string, type?: string, color?: number}} options 必须显式给 `id`
+   */
   addPOI(position, label, onInteract, options = {}) {
+    // 修 B45：id 曾经回退成 `${this.id}-${label}`，把显示名嵌进了稳定身份 ——
+    // 改一句调查文案，这个 POI 的 id 就变，所有按 id 认领的下游静默断链。
+    // 与 `RestPointManager.addRestPoint` 同一条契约：要么给真 id，要么在世界构建期炸给开发者看。
+    const id = options.id;
+    if (!id) throw new Error(`BaseZone.addPOI: 区域 ${this.id} 的 POI「${label}」缺少 id`);
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) {
+      throw new Error(`BaseZone.addPOI: POI id「${id}」不符合 kebab-case（id 是稳定身份，不能带显示名或大写）`);
+    }
+    if (this.pois.some((p) => p.id === id)) throw new Error(`BaseZone.addPOI: 区域 ${this.id} 的 POI id ${id} 重复`);
+
     const lx = position.x;
     const lz = position.z;
     const ly = position.y ?? this.sampleHeight(lx, lz);
 
     const poi = {
-      // 原先用 `${info.name}-${label}`，把显示名嵌进了 id。这里改用区域 id 前缀；
-      // 任务与发现系统认的是各自显式 targetId（如 'fantasy-ring'），不依赖这个回退值。
-      id: options.id ?? `${this.id}-${label}`,
+      id,
       position: new THREE.Vector3(this.center.x + lx, ly, this.center.z + lz),
       label,
       onInteract,

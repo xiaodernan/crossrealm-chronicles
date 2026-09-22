@@ -72,7 +72,7 @@ export class AbyssZone extends BaseZone {
       () => {
         this.dialog.show('混沌裂隙竞技场', 'Chapter 5 解锁后，踏入红圈将唤醒「混沌裂隙领主」。\n\n坐标：X≈-200, Z≈285 · 建议先解锁 3 个武器技能。');
       },
-      { color: 0xff2244 }
+      { id: 'abyss-boss-gate', color: 0xff2244 }
     );
     this.addPOI(
       { x: -20, y: 0, z: 10 },
@@ -83,7 +83,7 @@ export class AbyssZone extends BaseZone {
         }));
         this.dialog.show('混沌之核', '此处可感悟武器技能——在营火用「技能点」解锁剑/杖流派。\n\n完成 Chapter 4 后，边境会完全显现。');
       },
-      { color: 0xff2244 }
+      { id: 'chaos-core', color: 0xff2244 }
     );
   }
 

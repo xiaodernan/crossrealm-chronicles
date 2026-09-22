@@ -61,7 +61,7 @@ function attachCyber(zone, world, game) {
 
     game.wave4VisualFx?.flash?.('cyber');
 
-  }, { color: 0xff22aa });
+  }, { id: 'homage-neon-alley', color: 0xff22aa });
 
   registerPoi(world, zone, { x: 50, y: 2, z: -20 }, '铬合金诊所', () => {
 
@@ -69,7 +69,7 @@ function attachCyber(zone, world, game) {
 
     fireEcho(game, 'echo:chrome-clinic');
 
-  }, { color: 0x44ffcc });
+  }, { id: 'homage-chrome-clinic', color: 0x44ffcc });
 
   registerPoi(world, zone, { x: -10, y: 5, z: 60 }, '巨企尖塔投影', () => {
 
@@ -77,7 +77,7 @@ function attachCyber(zone, world, game) {
 
     fireEcho(game, 'echo:corp-spire');
 
-  }, { color: 0xff4488 });
+  }, { id: 'homage-corp-spire', color: 0xff4488 });
 
 }
 
@@ -107,7 +107,7 @@ function attachSamurai(zone, world, game) {
 
     game.wave4VisualFx?.flash?.('samurai');
 
-  }, { color: 0xcc3322 });
+  }, { id: 'homage-torii-gate', color: 0xcc3322 });
 
   registerPoi(world, zone, { x: 25, y: 0, z: -55 }, '道场废墟', () => {
 
@@ -115,7 +115,7 @@ function attachSamurai(zone, world, game) {
 
     fireEcho(game, 'echo:dojo-ruins');
 
-  }, { color: 0x886644 });
+  }, { id: 'homage-dojo-ruins', color: 0x886644 });
 
   registerPoi(world, zone, { x: -65, y: 0, z: -15 }, '樱落刃冢', () => {
 
@@ -123,7 +123,7 @@ function attachSamurai(zone, world, game) {
 
     fireEcho(game, 'echo:sakura-blade');
 
-  }, { color: 0xffaacd });
+  }, { id: 'homage-sakura-blade', color: 0xffaacd });
 
 }
 
@@ -139,7 +139,7 @@ function attachCosmic(zone, world, game) {
 
     game.wave4VisualFx?.flash?.('cosmic');
 
-  }, { color: 0x224433 });
+  }, { id: 'homage-tentacle-obelisk', color: 0x224433 });
 
   registerPoi(world, zone, { x: -55, y: 0, z: 15 }, '疯癫抄写室', () => {
 
@@ -147,7 +147,7 @@ function attachCosmic(zone, world, game) {
 
     fireEcho(game, 'echo:mad-scribe');
 
-  }, { color: 0x445544 });
+  }, { id: 'homage-mad-scribe', color: 0x445544 });
 
   registerPoi(world, zone, { x: 15, y: 0, z: 65 }, '螺旋深井', () => {
 
@@ -155,7 +155,7 @@ function attachCosmic(zone, world, game) {
 
     fireEcho(game, 'echo:spiral-well');
 
-  }, { color: 0x112211 });
+  }, { id: 'homage-spiral-well', color: 0x112211 });
 
 }
 
@@ -171,7 +171,7 @@ function attachStarport(zone, world, game) {
 
     game.wave4VisualFx?.flash?.('starport');
 
-  }, { color: 0xffaa44 });
+  }, { id: 'homage-star-cantina', color: 0xffaa44 });
 
   registerPoi(world, zone, { x: 75, y: 0, z: 20 }, '走私码头', () => {
 
@@ -179,7 +179,7 @@ function attachStarport(zone, world, game) {
 
     fireEcho(game, 'echo:smuggler-dock');
 
-  }, { color: 0x889944 });
+  }, { id: 'homage-smuggler-dock', color: 0x889944 });
 
   registerPoi(world, zone, { x: -15, y: 2, z: -75 }, '全息星图室', () => {
 
@@ -187,7 +187,7 @@ function attachStarport(zone, world, game) {
 
     fireEcho(game, 'echo:holo-chart');
 
-  }, { color: 0x66ccff });
+  }, { id: 'homage-holo-chart', color: 0x66ccff });
 
 }
 

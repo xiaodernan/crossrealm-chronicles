@@ -134,7 +134,7 @@ export class FantasyZone extends BaseZone {
         '你发现了一枚古老的铭文：「One Realm to bind them all...」石环微微发热——这是第一枚位面碎片的回响。'
       );
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-ring', title: '至尊石环', text: '第一枚位面碎片的回响。' } }));
-    }, { color: 0xc9a030 });
+    }, { id: 'fantasy-ring', color: 0xc9a030 });
 
     this.addPOI({ x: -20, y: 0, z: -15 }, '探索精灵遗迹', () => {
       this.dialog.show(
@@ -142,7 +142,7 @@ export class FantasyZone extends BaseZone {
         '残破的壁画描绘着跨位面旅行的场景。精灵们曾在此记录诸界交汇的坐标——其中一条路径指向星空深处。'
       );
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-ruins', title: '精灵遗迹', text: '壁画记录了跨位面坐标。' } }));
-    }, { color: 0x88aa88 });
+    }, { id: 'fantasy-ruins', color: 0x88aa88 });
   }
 
   buildRiver() {
@@ -184,7 +184,7 @@ export class FantasyZone extends BaseZone {
     this.addPOI({ x: 60, y: 0, z: -50 }, '攀登守望塔', () => {
       this.dialog.show('灰白守望塔', '从塔顶望去，三条位面之路清晰可见。北方是魔法遗境的紫色光柱，东方是米勒荒原的引力透镜。');
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-tower', title: '灰白守望塔', text: '可俯瞰三界交汇。' } }));
-    }, { color: 0xff6622 });
+    }, { id: 'fantasy-tower', color: 0xff6622 });
   }
 
   buildElvenBridge() {
@@ -226,7 +226,7 @@ export class FantasyZone extends BaseZone {
 
     this.addPOI({ x: -55, y: 0, z: -35 }, '进入 Boss 竞技场', () => {
       this.dialog.show('影界竞技场', '踏入此门，影界守护者将苏醒。确保已掌握：\n· 观察敌人脚下红圈，0.75 秒后攻击落地\n· Ctrl 闪避可躲开\n· 重击快速打满架势条造成硬直');
-    }, { color: 0xff2244 });
+    }, { id: 'fantasy-boss-gate', color: 0xff2244 });
   }
 
   buildOuterWilds() {

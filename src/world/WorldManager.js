@@ -65,9 +65,33 @@ export class WorldManager {
       ...voidZone.getPointsOfInterest(),
       ...abyss.getPointsOfInterest(),
     ];
+    this.assertPoiIdentity();
 
     this.currentZone = null;
     this.applyHubAtmosphere(true);
+  }
+
+  /**
+   * POI 身份自检（修 B45）。
+   *
+   * `BaseZone.addPOI` 已经要求每个 POI 显式带 kebab-case id，但它只看得到本区；
+   * 位面之间撞 id、或致敬层绕过 addPOI 直接 push，都要在这里兜住。
+   * 由 `build()` 与 `attachPopCultureZones()` 各调用一次 —— 两个"内容已完整"的点，
+   * 同一段逻辑，不是两道会各自漂移的门。
+   */
+  assertPoiIdentity() {
+    const seen = new Map();
+    for (const poi of this.pointsOfInterest) {
+      if (!poi.id) throw new Error(`WorldManager: POI「${poi.label}」没有 id，任务与日志将无法按 id 认领它`);
+      if (!/^[a-z0-9][a-z0-9-]*$/.test(poi.id)) {
+        throw new Error(`WorldManager: POI id「${poi.id}」不符合 kebab-case —— id 是稳定身份，不得由显示名拼出`);
+      }
+      if (seen.has(poi.id)) {
+        throw new Error(`WorldManager: POI id ${poi.id} 重复（「${seen.get(poi.id).label}」与「${poi.label}」），交互会打到另一个对象上`);
+      }
+      seen.set(poi.id, poi);
+    }
+    return seen.size;
   }
 
   buildHubLandmarks() {

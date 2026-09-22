@@ -61,7 +61,7 @@ function attachMagicWave2(zone, world, game) {
 
     fireEcho(game, 'echo:nine-platform');
 
-  }, { color: 0xcc8844 });
+  }, { id: 'homage-nine-platform', color: 0xcc8844 });
 
 
 
@@ -73,7 +73,7 @@ function attachMagicWave2(zone, world, game) {
 
     fireEcho(game, 'echo:patronus-lake');
 
-  }, { color: 0x88ccff });
+  }, { id: 'homage-patronus-lake', color: 0x88ccff });
 
 
 
@@ -85,7 +85,7 @@ function attachMagicWave2(zone, world, game) {
 
     fireEcho(game, 'echo:triwizard-cup');
 
-  }, { color: 0xffaa22 });
+  }, { id: 'homage-triwizard-cup', color: 0xffaa22 });
 
 }
 
@@ -101,7 +101,7 @@ function attachSpaceWave2(zone, world, game) {
 
     fireEcho(game, 'echo:brand-beacon');
 
-  }, { color: 0xaaccff });
+  }, { id: 'homage-brand-beacon', color: 0xaaccff });
 
 
 
@@ -113,7 +113,7 @@ function attachSpaceWave2(zone, world, game) {
 
     fireEcho(game, 'echo:wormhole-arch');
 
-  }, { color: 0x4466ff });
+  }, { id: 'homage-wormhole-arch', color: 0x4466ff });
 
 
 
@@ -125,7 +125,7 @@ function attachSpaceWave2(zone, world, game) {
 
     fireEcho(game, 'echo:love-signal');
 
-  }, { color: 0xffccaa });
+  }, { id: 'homage-love-signal', color: 0xffccaa });
 
 }
 
@@ -141,7 +141,7 @@ function attachVoidWave2(zone, world, game) {
 
     fireEcho(game, 'echo:bike-trail');
 
-  }, { color: 0xffee44 });
+  }, { id: 'homage-bike-trail', color: 0xffee44 });
 
 
 
@@ -153,7 +153,7 @@ function attachVoidWave2(zone, world, game) {
 
     fireEcho(game, 'echo:arcade');
 
-  }, { color: 0x44ffaa });
+  }, { id: 'homage-arcade', color: 0x44ffaa });
 
 
 
@@ -167,7 +167,7 @@ function attachVoidWave2(zone, world, game) {
 
     game.upsideDownFx?.enable?.();
 
-  }, { color: 0xaa2244 });
+  }, { id: 'homage-vecna-clock', color: 0xaa2244 });
 
 
 
@@ -179,7 +179,7 @@ function attachVoidWave2(zone, world, game) {
 
     fireEcho(game, 'echo:underground-lab');
 
-  }, { color: 0x668899 });
+  }, { id: 'homage-underground-lab', color: 0x668899 });
 
 }
 

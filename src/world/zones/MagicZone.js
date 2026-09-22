@@ -58,7 +58,7 @@ export class MagicZone extends BaseZone {
 
     this.addPOI({ x: 0, y: 8, z: -25 }, '进入奥术竞技场', () => {
       this.dialog.show('奥术竞技场', '大奥术师·萨尔林 awaits。他的法球会追踪你——闪避，或用法术位面斩 (R) 清理。');
-    }, { color: 0xaa44ff });
+    }, { id: 'magic-boss-gate', color: 0xaa44ff });
   }
 
   sampleHeight(lx, lz) {
@@ -157,7 +157,7 @@ export class MagicZone extends BaseZone {
         '魔法屏障闪烁…「只有被选中的穿越者才能踏入。」城堡内部的时间似乎静止了——第二枚位面碎片就藏在移动楼梯的顶端。'
       );
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'magic-castle', title: '悬浮城堡', text: '第二枚位面碎片藏于楼梯顶端。' } }));
-    }, { color: 0xaa66ff });
+    }, { id: 'magic-castle', color: 0xaa66ff });
 
     this.addPOI({ x: 55, y: 0, z: 30 }, '禁林深处的低语', () => {
       this.dialog.show(
@@ -165,7 +165,7 @@ export class MagicZone extends BaseZone {
         '独角兽的幻影一闪而过，留下一枚闪烁的羽毛。羽毛上的符文与霍格沃兹创始人的封印如出一辙——魔法与诸界本是一体。'
       );
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'magic-forest', title: '禁林低语', text: '独角兽留下了位面线索。' } }));
-    }, { color: 0x44aa66 });
+    }, { id: 'magic-forest', color: 0x44aa66 });
   }
 
   buildQuidditchRing() {

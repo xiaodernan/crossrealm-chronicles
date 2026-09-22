@@ -98,7 +98,7 @@ export class VoidZone extends BaseZone {
           detail: { id: 'void-rift', title: '时线裂隙', text: '隐藏的第四碎片。' },
         }));
       },
-      { color: 0xc9a962 }
+      { id: 'void-rift', color: 0xc9a962 }
     );
 
     this.addPOI(
@@ -109,7 +109,7 @@ export class VoidZone extends BaseZone {
           detail: { id: 'void-tablet', title: '五维碑文', text: '「Love is the one thing that transcends time and space.」' },
         }));
       },
-      { color: 0x6688aa }
+      { id: 'void-tablet', color: 0x6688aa }
     );
   }
 
