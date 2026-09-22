@@ -13,16 +13,26 @@ export class FastTravelSystem {
 
   getDestinations() {
     const pts = this.game.restPoints.points;
-    return pts.map((p) => ({ name: p.name, x: p.position.x, z: p.position.z }));
+    return pts.map((p) => ({ id: p.id, name: p.name, x: p.position.x, z: p.position.z }));
   }
 
-  travel(name) {
-    const dest = this.getDestinations().find((d) => d.name === name);
+  /**
+   * 面板用的视图模型。
+   *
+   * "你正站在哪座营火"由 id 判定（修 B36 的最后一处：此前是 `d.name === fromName`，
+   * 于是两座同名营火会一起变灰，而改一行文案就让"在此"标记消失）。
+   */
+  destinationsForPanel(currentId = null) {
+    return this.getDestinations().map((d) => ({ ...d, here: d.id === currentId }));
+  }
+
+  travel(id) {
+    const dest = this.getDestinations().find((d) => d.id === id);
     if (!dest) return false;
     const y = this.game.world.getGroundHeight(dest.x, dest.z);
     this.game.player.teleport(dest.x, y + 0.1, dest.z);
     this.game.player.combat.restHeal();
-    this.game.dialog.toast(`快速旅行：${name}`);
+    this.game.dialog.toast(`快速旅行：${dest.name}`);
     return true;
   }
 
@@ -34,7 +44,7 @@ export class FastTravelSystem {
       this.game.dialog.toast('靠近营火才能快速旅行');
       return false;
     }
-    this.game.fastTravelPanel?.show(rest.name);
+    this.game.fastTravelPanel?.show(rest.id);
     return true;
   }
 }

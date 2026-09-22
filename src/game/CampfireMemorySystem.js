@@ -1,13 +1,4 @@
 /** 营火记忆 — 记录每次休息与对话节点 */
-const REST_NAMES = {
-  hub: '世界之锚营火',
-  fantasy: '灰白森林营火',
-  magic: '魔法遗境营火',
-  space: '米勒荒原营火',
-  void: '破碎时线营火',
-  abyss: '混沌边境营火',
-};
-
 export class CampfireMemorySystem {
   constructor(game) {
     this.game = game;
@@ -32,7 +23,7 @@ export class CampfireMemorySystem {
         key,
         restId,
         nodeId,
-        speaker: speaker ?? REST_NAMES[restId],
+        speaker: speaker ?? this.game.restPoints?.nameOf(restId) ?? '位面营火',
         preview: linePreview ?? '',
         chapter: this.game.quests?.chapter ?? 1,
         time: Date.now(),
@@ -75,5 +66,3 @@ export class CampfireMemorySystem {
     this.nodeMemories = data.nodeMemories ?? [];
   }
 }
-
-export { REST_NAMES as CAMPFIRE_REST_NAMES };

@@ -1,5 +1,3 @@
-import { CAMPFIRE_REST_NAMES } from '../game/CampfireMemorySystem.js';
-
 /** [J] 营火记忆 Tab */
 export class CampfireMemoryJournalTab {
   constructor(game) {
@@ -11,17 +9,21 @@ export class CampfireMemoryJournalTab {
     const mem = this.game.campfireMemory;
     if (!mem) return;
     const stats = mem.getStats();
-    const zones = ['all', ...Object.keys(CAMPFIRE_REST_NAMES)];
+    // 营火的名字只有一份真源（`RestPointManager`），这里不再抄一张表 ——
+    // 抄来的那份已经和实际营火漂移过（'世界之锚营火' vs '世界之锚休息点'）
+    const restPoints = this.game.restPoints;
+    const nameOf = (id) => restPoints?.nameOf(id) ?? id;
+    const zones = ['all', ...(restPoints?.ids() ?? Object.keys(mem.restCount))];
     const filterBtns = zones.map((z) =>
-      `<button type="button" class="cf-filter-btn${this.filter === z ? ' active' : ''}" data-z="${z}">${z === 'all' ? '全部' : CAMPFIRE_REST_NAMES[z] ?? z}</button>`
+      `<button type="button" class="cf-filter-btn${this.filter === z ? ' active' : ''}" data-z="${z}">${z === 'all' ? '全部' : nameOf(z)}</button>`
     ).join('');
 
     const rests = Object.entries(mem.restCount).map(([id, n]) =>
-      `<div class="cf-stat-row"><span>${CAMPFIRE_REST_NAMES[id] ?? id}</span><span>${n} 次</span></div>`
+      `<div class="cf-stat-row"><span>${nameOf(id)}</span><span>${n} 次</span></div>`
     ).join('') || '<p class="cf-empty">尚未在任何营火休息</p>';
 
     const nodes = mem.getMemories(this.filter).slice(0, 24).map((m) =>
-      `<li class="cf-node"><span class="cf-node-meta">Ch${m.chapter} · ${CAMPFIRE_REST_NAMES[m.restId] ?? m.restId}</span>
+      `<li class="cf-node"><span class="cf-node-meta">Ch${m.chapter} · ${nameOf(m.restId)}</span>
        <strong>${m.speaker} · ${m.nodeId}</strong>
        <span>${m.preview || '…'}</span></li>`
     ).join('');

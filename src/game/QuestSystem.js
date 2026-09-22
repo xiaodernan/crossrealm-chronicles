@@ -1,3 +1,5 @@
+import { ZONE_IDS, ZONE_NAMES } from '../world/ZoneIdentity.js';
+
 export const QUESTS = [
   { id: 'anchor', title: '觉醒：世界之锚', desc: '触摸枢纽中心的世界之锚。', type: 'interact', targetId: 'hub-anchor' },
   { id: 'training', title: '战斗训练', desc: '训练木人命中 8 次。', type: 'hits', target: 8 },
@@ -37,16 +39,22 @@ export const QUESTS = [
   { id: 'infinity', title: '无尽行者', desc: '完成混沌试炼后触摸世界之锚。', type: 'interact', targetId: 'hub-anchor', requireInfinity: true },
 ];
 
-/** 任务导航目标 — 小地图金色标记 + 屏幕指引 */
+/**
+ * 任务导航目标 — 小地图金色标记 + 屏幕指引。
+ *
+ * 凡是指向**整个位面**的路点，label 一律取 `ZONE_NAMES`：此前这里另抄了一份区名，
+ * 于是文案漂移成"提示让你去『魔法遗境』，站进去招牌却写着『霍格沃兹遗境』"。
+ * 指向具体物件（石环、木人、Boss、地下城入口）的仍写自己的名字，那不是区域文案的第二真源。
+ */
 const QUEST_WAYPOINTS = {
   anchor: { x: 0, z: 55, label: '世界之锚' },
   training: { x: 12, z: 52, label: '训练木人' },
-  soldiers: { x: -200, z: 0, label: '灰白森林' },
+  soldiers: { x: -200, z: 0, label: ZONE_NAMES[ZONE_IDS.FANTASY] },
   'fantasy-frag': { x: -200, z: -30, label: '至尊石环' },
   boss: { x: -250, z: -35, label: '影界守护者' },
-  'magic-frag': { x: 0, z: -180, label: '魔法遗境' },
+  'magic-frag': { x: 0, z: -180, label: ZONE_NAMES[ZONE_IDS.MAGIC] },
   golem: { x: 20, z: -210, label: '构装体' },
-  'space-frag': { x: 200, z: 80, label: '米勒荒原' },
+  'space-frag': { x: 200, z: 80, label: ZONE_NAMES[ZONE_IDS.SPACE] },
   finale: { x: 0, z: 55, label: '世界之锚' },
   chests: { x: -190, z: 25, label: '宝箱/地下城' },
   'talk-wanderer': { x: -8, z: 45, label: '位面流浪者' },
@@ -61,7 +69,7 @@ const QUEST_WAYPOINTS = {
   boss3: { x: 235, z: 155, label: '奇点领主' },
   mind: { x: 0, z: 55, label: '营火升级' },
   ascension: { x: 0, z: 55, label: '世界之锚' },
-  'void-rift': { x: 0, z: 220, label: '破碎时线' },
+  'void-rift': { x: 0, z: 220, label: ZONE_NAMES[ZONE_IDS.VOID] },
   'charge-spell': { x: 12, z: 52, label: '训练木人' },
   'void-boss': { x: 0, z: 235, label: '时线执政官' },
   'void-tablet': { x: 0, z: 225, label: '五维碑文' },

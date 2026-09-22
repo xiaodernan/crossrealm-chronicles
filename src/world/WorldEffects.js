@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { ZONE_IDS } from './ZoneIdentity.js';
 
 /** 区域天空、粒子、氛围光 */
 export class WorldEffects {
@@ -161,24 +162,25 @@ export class WorldEffects {
   }
 
   setZone(zoneId, center) {
-    this.fireflies.visible = zoneId === 'fantasy' || zoneId === 'hub';
-    this.magicOrbs.visible = zoneId === 'magic';
-    this.starField.visible = zoneId === 'space';
-    this.aurora.visible = zoneId === 'space' || zoneId === 'fantasy' || zoneId === 'void';
-    this.chaosEmbers.visible = zoneId === 'abyss';
+    // 用 `ZONE_IDS` 符号而不是字面量：id 若改名，这里必须编译期就跟着变（字面量只会静默不再匹配）
+    this.fireflies.visible = zoneId === ZONE_IDS.FANTASY || zoneId === ZONE_IDS.HUB;
+    this.magicOrbs.visible = zoneId === ZONE_IDS.MAGIC;
+    this.starField.visible = zoneId === ZONE_IDS.SPACE;
+    this.aurora.visible = zoneId === ZONE_IDS.SPACE || zoneId === ZONE_IDS.FANTASY || zoneId === ZONE_IDS.VOID;
+    this.chaosEmbers.visible = zoneId === ZONE_IDS.ABYSS;
 
     if (center) {
       this.group.position.set(center.x, 0, center.z);
     }
 
     this.clearZoneLights();
-    if (zoneId === 'magic') {
+    if (zoneId === ZONE_IDS.MAGIC) {
       this.addZoneLight(0x6644cc, 0.4, 80);
-    } else if (zoneId === 'space') {
+    } else if (zoneId === ZONE_IDS.SPACE) {
       this.addZoneLight(0x2244aa, 0.3, 100);
-    } else if (zoneId === 'fantasy') {
+    } else if (zoneId === ZONE_IDS.FANTASY) {
       this.addZoneLight(0x88aa66, 0.25, 90);
-    } else if (zoneId === 'abyss') {
+    } else if (zoneId === ZONE_IDS.ABYSS) {
       this.addZoneLight(0xff2244, 0.3, 95);
     }
   }

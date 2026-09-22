@@ -1,21 +1,22 @@
 import * as THREE from 'three';
+import { ZONE_IDS } from './ZoneIdentity.js';
 
 /** 区域天气 — 雨 / 雪 / 灰烬 / 奥术 drizzle，跟随玩家 */
 const ZONE_PRESETS = {
-  hub: { kind: 'mist', count: 420, color: 0xaabbcc, speed: 6, wind: 0.4, fogBoost: 0.0004 },
-  fantasy: { kind: 'rain', count: 900, color: 0x8899aa, speed: 28, wind: 1.2, fogBoost: 0.0008 },
-  magic: { kind: 'arcane', count: 650, color: 0xaa66ff, speed: 16, wind: 0.6, fogBoost: 0.0006 },
-  space: { kind: 'snow', count: 750, color: 0xccddee, speed: 5, wind: 0.35, fogBoost: 0.0003 },
-  void: { kind: 'ash', count: 580, color: 0x998877, speed: 8, wind: 0.5, fogBoost: 0.0007 },
-  abyss: { kind: 'ember', count: 520, color: 0xff4422, speed: 12, wind: 0.8, fogBoost: 0.0005 },
+  [ZONE_IDS.HUB]: { kind: 'mist', count: 420, color: 0xaabbcc, speed: 6, wind: 0.4, fogBoost: 0.0004 },
+  [ZONE_IDS.FANTASY]: { kind: 'rain', count: 900, color: 0x8899aa, speed: 28, wind: 1.2, fogBoost: 0.0008 },
+  [ZONE_IDS.MAGIC]: { kind: 'arcane', count: 650, color: 0xaa66ff, speed: 16, wind: 0.6, fogBoost: 0.0006 },
+  [ZONE_IDS.SPACE]: { kind: 'snow', count: 750, color: 0xccddee, speed: 5, wind: 0.35, fogBoost: 0.0003 },
+  [ZONE_IDS.VOID]: { kind: 'ash', count: 580, color: 0x998877, speed: 8, wind: 0.5, fogBoost: 0.0007 },
+  [ZONE_IDS.ABYSS]: { kind: 'ember', count: 520, color: 0xff4422, speed: 12, wind: 0.8, fogBoost: 0.0005 },
 };
 
 export class WeatherSystem {
   constructor(scene, world) {
     this.scene = scene;
     this.world = world;
-    this.zone = 'hub';
-    this.preset = ZONE_PRESETS.hub;
+    this.zone = ZONE_IDS.HUB;
+    this.preset = ZONE_PRESETS[ZONE_IDS.HUB];
     this.group = new THREE.Group();
     scene.add(this.group);
 
@@ -89,7 +90,7 @@ export class WeatherSystem {
   }
 
   setZone(zoneId) {
-    const preset = ZONE_PRESETS[zoneId] ?? ZONE_PRESETS.hub;
+    const preset = ZONE_PRESETS[zoneId] ?? ZONE_PRESETS[ZONE_IDS.HUB];
     if (preset.kind === this.preset?.kind && zoneId === this.zone) return;
     this.zone = zoneId;
     this.preset = preset;
@@ -97,7 +98,7 @@ export class WeatherSystem {
 
     const fog = this.scene.fog;
     if (fog?.isFogExp2) {
-      const base = zoneId === 'space' ? 0.0028 : zoneId === 'abyss' ? 0.0045 : 0.0038;
+      const base = zoneId === ZONE_IDS.SPACE ? 0.0028 : zoneId === ZONE_IDS.ABYSS ? 0.0045 : 0.0038;
       fog.density = base + (preset.fogBoost ?? 0);
     }
   }
