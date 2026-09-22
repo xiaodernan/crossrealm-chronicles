@@ -116,6 +116,7 @@ export class Dialog {
     el.className = 'toast';
     el.textContent = message;
     this.toastContainer.appendChild(el);
+    // rAF-EXCEPTION：给 CSS 过渡制造一次绘制间隔，量的是浏览器的一次绘制，不是游戏时间
     requestAnimationFrame(() => el.classList.add('show'));
 
     // 走主循环（B39）：暂停/后台时不推进，恢复后继续走完，不会一次性堆出满屏 toast

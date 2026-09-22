@@ -195,6 +195,7 @@ export class CombatCameraDirector {
 
     this.flash.classList.remove('hidden');
     this.flash.style.opacity = kind === 'bossKill' ? '0.55' : '0.38';
+    // rAF-EXCEPTION：闪光层的淡出需要一次绘制间隔（CSS 过渡），不参与世界时间缩放
     requestAnimationFrame(() => { this.flash.style.opacity = '0'; });
 
     if (preset.label) {

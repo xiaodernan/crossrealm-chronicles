@@ -14,7 +14,7 @@ export class ExecutionSkipBurst {
   burst() {
     this.el.classList.remove('hidden');
     this.el.style.opacity = '0.7';
-    /* 这里必须留一次 rAF：目的是制造一个绘制间隔，让浏览器看到 0.7 这个起始值，
+    /* rAF-EXCEPTION：这里必须留一次 rAF —— 目的是制造一个绘制间隔，让浏览器看到 0.7 这个起始值，
      * 否则赋值与过渡同帧，淡出根本不会发生。这不是游戏逻辑计时，是 B39 的例外情形。 */
     requestAnimationFrame(() => {
       this.el.style.opacity = '0';

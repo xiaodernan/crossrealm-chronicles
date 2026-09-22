@@ -546,6 +546,8 @@ export class Game {
     this.shake.update(dt);
     this.damageNumbers.update(dt);
     this.combatFeedback.update(dt);
+    // 处决特效跟着 dt 走：hitstop 期间那一圈冲击环必须一起变慢（修 B43）
+    this.executionFx.update(dt);
     this.world.update(dt, this.player.position);
     this.explorationMap?.update(this.player.position);
     this.ambientPass?.update(dt, this.player.position);
@@ -617,6 +619,8 @@ export class Game {
   }
 
   run() {
+    // rAF-EXCEPTION：全仓唯一的时间源。所有游戏逻辑计时都必须从这里派生的 dt 走，
+    // 别处再开一条 rAF 就是在私造时间轴（B43 的成因）。
     const loop = () => { requestAnimationFrame(loop); this.update(); this.render(); };
     loop();
   }

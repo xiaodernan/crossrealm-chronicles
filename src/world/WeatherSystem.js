@@ -11,6 +11,12 @@ const ZONE_PRESETS = {
   [ZONE_IDS.ABYSS]: { kind: 'ember', count: 520, color: 0xff4422, speed: 12, wind: 0.8, fogBoost: 0.0005 },
 };
 
+/**
+ * 涟漪每秒的放大倍率。旧写法是"每帧 ×1.08"，那是 60fps 下的经验值；
+ * 这里换算成按秒的量，`_updateSplashes` 再按 dt 取幂，放大速度与帧率脱钩。
+ */
+const SPLASH_GROWTH_PER_SEC = 1.08 ** 60;
+
 export class WeatherSystem {
   constructor(scene, world) {
     this.scene = scene;
@@ -24,6 +30,8 @@ export class WeatherSystem {
     this.velocities = null;
     this.splashGroup = new THREE.Group();
     this.group.add(this.splashGroup);
+    /** 雨滴落点涟漪：与粒子同一条 dt 时间轴，由 `update()` 推进（修 B43） */
+    this.splashes = [];
 
     this._follow = new THREE.Vector3();
     this._box = { x: 55, y: 32, z: 55 };
@@ -104,6 +112,8 @@ export class WeatherSystem {
   }
 
   update(dt, playerPos) {
+    // 涟漪独立于粒子推进：粒子缺位时它也得把寿命走完，否则网格会挂在场景里
+    this._updateSplashes(dt);
     if (!this.particles || !this.velocities) return;
 
     this._follow.lerp(playerPos, dt * 2.5);
@@ -159,25 +169,29 @@ export class WeatherSystem {
     ring.rotation.x = -Math.PI / 2;
     ring.position.set(x, gy + 0.05, z);
     this.splashGroup.add(ring);
-    let life = 0.25;
-    const tick = () => {
-      life -= 0.016;
-      ring.material.opacity = life * 2;
-      ring.scale.multiplyScalar(1.08);
-      if (life <= 0) {
-        this.splashGroup.remove(ring);
-        ring.geometry.dispose();
-        ring.material.dispose();
-        return;
+    this.splashes.push({ ring, life: 0.25 });
+    // 与修前同一个上限，但回收要同时离开两个容器 —— 只删网格会留下幽灵条目
+    if (this.splashes.length > 40) this._retireSplash(0);
+  }
+
+  _retireSplash(i) {
+    const [s] = this.splashes.splice(i, 1);
+    this.splashGroup.remove(s.ring);
+    s.ring.geometry.dispose();
+    s.ring.material.dispose();
+  }
+
+  /** 涟漪寿命按秒走（修 B43：过去是自建 rAF + 每帧 0.016，144Hz 下只活约 0.07 秒） */
+  _updateSplashes(dt) {
+    for (let i = this.splashes.length - 1; i >= 0; i -= 1) {
+      const s = this.splashes[i];
+      s.life -= dt;
+      if (s.life <= 0) {
+        this._retireSplash(i);
+        continue;
       }
-      requestAnimationFrame(tick);
-    };
-    tick();
-    if (this.splashGroup.children.length > 40) {
-      const old = this.splashGroup.children[0];
-      this.splashGroup.remove(old);
-      old.geometry?.dispose();
-      old.material?.dispose();
+      s.ring.material.opacity = s.life * 2;
+      s.ring.scale.multiplyScalar(SPLASH_GROWTH_PER_SEC ** dt);
     }
   }
 }
