@@ -34,6 +34,10 @@ export class HUD {
     this.bossVisible = false;
     /** 观测量退订函数（dispose 时必须调用） */
     this._offs = [];
+    /* 区副标题只有一个 DOM 槽位、三个写者（区切换 / 位面渗漏 / 时停）。
+     * 权威文本与覆盖层分开存，覆盖层带来源 —— 谁开的谁才关得掉（修 B44）。 */
+    this._zoneSubtitle = '';
+    this._subtitleOverlay = null;
 
     this.buildHUD();
     this.setupListeners();
@@ -128,7 +132,10 @@ export class HUD {
     window.addEventListener('zone-changed', (e) => {
       const z = e.detail.zone;
       document.getElementById('zone-name').textContent = z.name;
-      document.getElementById('zone-subtitle').textContent = z.subtitle;
+      this._zoneSubtitle = z.subtitle;
+      // 换区是一次权威的重写：任何覆盖层（渗漏提示、时停）到此作废
+      this._subtitleOverlay = null;
+      this._renderZoneSubtitle();
       this.updateZonePanel(z);
       if (!e.detail.initial) this.showZoneBanner(z.name, z.subtitle);
     });
@@ -212,8 +219,7 @@ export class HUD {
     });
 
     window.addEventListener('realm-bleed', (e) => {
-      const sub = document.getElementById('zone-subtitle');
-      if (sub) sub.textContent = `⟡ 位面渗漏 · ${e.detail.zone}`;
+      this._setSubtitleOverlay('bleed', `⟡ 位面渗漏 · ${e.detail.zone}`);
     });
 
     window.addEventListener('boss-start', () => {
@@ -232,6 +238,8 @@ export class HUD {
     window.addEventListener('boss-defeated', () => {
       this.bossVisible = false;
       this.bossBarWrap.classList.add('hidden');
+      // Boss 死在时停里就不会再派发 time-stop-end（update 直接早退），这条是唯一的收口路径
+      this._clearSubtitleOverlay('timeStop');
     });
 
     window.addEventListener('weapon-changed', (e) => {
@@ -249,13 +257,37 @@ export class HUD {
     });
 
     window.addEventListener('time-stop-start', () => {
-      document.getElementById('zone-subtitle').textContent = '⏳ 时停中 — 蓄力法术可打断';
+      this._setSubtitleOverlay('timeStop', '⏳ 时停中 — 蓄力法术可打断');
+    });
+
+    /* 修 B44：VoidBoss 到期与被打断两处都派发 time-stop-end，而修前全仓无人监听 ——
+     * 「⏳ 时停中」一旦写上就一直占着区副标题，直到下次换区才被顶掉。 */
+    window.addEventListener('time-stop-end', () => {
+      this._clearSubtitleOverlay('timeStop');
     });
 
     window.addEventListener('camera-mode-changed', (e) => {
       const el = document.getElementById('camera-mode-display');
       if (el) el.textContent = e.detail.mode === 'first' ? '第一人称' : '第三人称';
     });
+  }
+
+  /** 区副标题的唯一写入口：覆盖层优先于区域权威文本，撤掉后自动落回去 */
+  _renderZoneSubtitle() {
+    const el = document.getElementById('zone-subtitle');
+    if (el) el.textContent = this._subtitleOverlay?.text ?? this._zoneSubtitle;
+  }
+
+  _setSubtitleOverlay(source, text) {
+    this._subtitleOverlay = { source, text };
+    this._renderZoneSubtitle();
+  }
+
+  /** 只有开覆盖层的那一路才能关它：渗漏提示不会被时停结束误撤 */
+  _clearSubtitleOverlay(source) {
+    if (this._subtitleOverlay?.source !== source) return;
+    this._subtitleOverlay = null;
+    this._renderZoneSubtitle();
   }
 
   /** 法力 / 蓄力 / 化身的渲染：读观测量当前值，由订阅触发（B41） */

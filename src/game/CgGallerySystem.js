@@ -44,7 +44,7 @@ export class CgGallerySystem {
       const cg = map[e.detail?.bossId];
       if (cg) this.unlock(cg, 'boss');
     });
-    window.addEventListener('dungeon-room-clear', () => this.unlock('bonus:dungeon-clear', 'dungeon'));
+    window.addEventListener('dungeon-room-cleared', () => this.unlock('bonus:dungeon-clear', 'dungeon'));
     window.addEventListener('chapter-changed', (e) => {
       if ((e.detail?.chapter ?? 1) >= 1) this.unlock('bonus:world-anchor', 'quest');
     });

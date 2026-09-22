@@ -1,4 +1,5 @@
 import { REST_NPC_DEFS } from '../world/RestNpcManager.js';
+import { REST_DIALOGUE_EVENTS } from '../engine/events.js';
 import { mergeRestDialogueNodes } from './RestDialogueExtras.js';
 import { mergeRestDialogueWave2 } from './RestDialogueExtras2.js';
 import { mergeRestDialoguePopCulture } from './RestDialoguePopCulture.js';
@@ -241,9 +242,15 @@ export class RestDialogue {
   }
 
   _emit(phase, restId, nodeId, node) {
+    /* 事件名从登记表取（修 B44）：原来这里拼 `rest-dialogue-${phase}`，
+     * phase 写错就是一条没人监听也没人报错的 CustomEvent，扫描工具还看不见它。 */
+    const type = Object.hasOwn(REST_DIALOGUE_EVENTS, phase) ? REST_DIALOGUE_EVENTS[phase] : null;
+    if (!type) {
+      throw new Error(`RestDialogue._emit: 未知对话阶段「${phase}」，可选：${Object.keys(REST_DIALOGUE_EVENTS).join(' / ')}`);
+    }
     const def = REST_NPC_DEFS[restId];
     const preview = typeof node?.text === 'string' ? node.text.replace(/\*\*/g, '').split('\n')[0] : '';
-    window.dispatchEvent(new CustomEvent(`rest-dialogue-${phase}`, {
+    window.dispatchEvent(new CustomEvent(type, {
       detail: {
         restId,
         nodeId,
