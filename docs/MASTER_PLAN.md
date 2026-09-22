@@ -60,18 +60,19 @@
 | 构建 | 11.2s 通过；`chunk-ui ↔ chunk-world` **循环依赖告警**；`vendor-three` 631KB | 分块需在 W-B1 一并修 |
 | 存档 | v5，带显式迁移链 `SaveMigrations` | 新增字段须走 v6 迁移 |
 
-**复测（2026-09-23，W-A1 与 W-A2 切片1、切片2 落地后；口径与上表一致 —— `find src -name "*.js"`）**
+**复测（2026-09-23，W-A1 与 W-A2 切片1/2/3 落地后；口径与上表一致 —— `find src -name "*.js"`）**
 
 | 指标 | 基线 | 现值 | 说明 |
 |------|------|------|------|
-| 源码规模 | 181 文件 / 23,883 行 | 185 文件 / **24,525 行** | +4 个模块：W-A1 的 `engine/Scheduler.js`、`engine/Observable.js`，W-A2 的 `world/ZoneIdentity.js`、`content/franchises.js` |
+| 源码规模 | 181 文件 / 23,883 行 | 185 文件 / **24,567 行** | +4 个模块：W-A1 的 `engine/Scheduler.js`、`engine/Observable.js`，W-A2 的 `world/ZoneIdentity.js`、`content/franchises.js`；切片3 的 +42 行全在既有文件里（id 校验与自检），未新增模块 |
 | 游戏逻辑 `setTimeout` | 28 处 | **0 处**。`src/` 内实际调用只剩 `AudioManager` 的 4 处 `setTimeout` + 2 处 `setInterval` | 那 6 处属音序器，归 B38 / W-C7；见 §9 的 W-A1 条目 |
 | 中文显示名逻辑判定 | 57 处 / 15 文件 | **0 处** | 修 B35、B36；由 `tests/content-boundary.test.js` 的静态门禁兜住（新站点直接变红，**不留存量白名单**） |
 | 区域 id 字面量比较 | — | **0 处**（`zoneId === 'space'` 这类写法在 `src/` 内已无匹配） | 切片2 把效果层与天气层换成 `ZONE_IDS` 符号；`WeatherSystem` 的 `ZONE_PRESETS` 键也改成 `[ZONE_IDS.X]` |
 | 全局事件 | 157 监听 / 139 派发 | 155 / 137，事件名**仍是裸字符串**，`removeEventListener` 全仓仅 3 处 | 每帧数值事件已改走 `Observable`；名字总线与注销是 W-A1 的尾巴（B44） |
-| 测试 | 266 例 / 20 文件 | **356 例 / 26 文件**，全绿 | 新增 6 个文件：`timing-boundary` `engine-scheduler` `engine-observable` `zone-identity` `franchise-identity` `fast-travel` |
+| POI 稳定 id | 14 处位面 POI 走 `` `${zoneId}-${label}` `` 回退 | **58 / 58 条登记表记录带合法 kebab-case id，全表唯一**（真世界 `WorldManager.build()` + 四层致敬增强器跑完后的实测口径） | 修 B45；`tests/poi-identity.test.js` 在 node 里构建真世界做全量断言，浏览器端复核同得 58 条、0 非法、0 重复 |
+| 测试 | 266 例 / 20 文件 | **370 例 / 27 文件**，全绿 | 新增 7 个文件：`timing-boundary` `engine-scheduler` `engine-observable` `zone-identity` `franchise-identity` `fast-travel` `poi-identity` |
 | Lint | 0 error / 12 warning | 0 error / 10 warning | 现存的 10 条全是 `no-unused-vars`（死代码与未用导入），文件集合与上批一致。两条差值没有逐条追认 —— 基线只记了总数 |
-| 构建 | 11.2s 通过 + 1 条跨块环告警 | 通过，告警集合未增（仍是 `chunk-ui ↔ chunk-world`） | 本次计时 6.96s（上一批同口径 2.95s）—— 波动来自机器负载，只记观测值不解读；分块仍归 W-B1 |
+| 构建 | 11.2s 通过 + 1 条跨块环告警 | 通过，告警集合未增（仍是 `chunk-ui ↔ chunk-world`） | 本批两次计时 3.48s / 2.15s（上两批同口径 6.96s / 2.95s）—— 波动来自机器负载，只记观测值不解读；分块仍归 W-B1 |
 
 
 ### 1.2 玩家能感知的短板（这是"难玩"的真正来源）
@@ -122,7 +123,7 @@
 
 ### 1.4 缺陷台账
 
-**已修复**：B1–B34 全部关闭（明细见 `OVERHAUL_PLAN.md` §1.4 与 §9 变更记录）；B35、B36、B39、B41、B42 于 W-A1 / W-A2 两批关闭（下表；B36 的最后一类站点在 W-A2 切片2，提交 `b4a8416`）。
+**已修复**：B1–B34 全部关闭（明细见 `OVERHAUL_PLAN.md` §1.4 与 §9 变更记录）；B35、B36、B39、B41、B42、B45 于 W-A1 / W-A2 两个工作包内依次关闭（下表；B36 的最后一类站点在 W-A2 切片2，提交 `b4a8416`；B45 在切片3，提交 `16edb9e`）。
 
 **待修**：
 
@@ -133,7 +134,6 @@
 | B40 | `PerformanceManager.shouldUpdateEnemy` | 远处敌人"冻结"但仍可见（B14 未闭环） | W-C2 |
 | B43 | `effects/ExecutionEffects.js`（3 条循环）、`world/WeatherSystem.js:172` | 特效自己 `requestAnimationFrame` 递归，且把 dt **写死成 0.016**：144Hz 下一片碎片只活约 0.15 秒（设计值 0.35），30Hz 下拖到 0.7 秒；hitstop 期间它们照速跑。§2.3 的"帧率无关性"对这几条一律不成立 | W-A1 后续切片 |
 | B44 | `src/` 全局 | 155 处 `window.addEventListener` + 137 处 `dispatchEvent(new CustomEvent(...))`，事件名全是裸字符串、无集中登记（规范第 4 条要求的 `src/engine/events.js` **至今不存在**），且全仓只有 3 处 `removeEventListener` —— 监听器基本没有注销路径 | W-A1 后续切片 |
-| B45 | `world/zones/BaseZone.js:73`（`addPOI`） | POI 未显式给 id 时回退成 `` `${this.id}-${label}` `` —— **把显示名嵌进了 id**。改一句调查文案，该 POI 的 id 就变，任何以 POI id 为键的下游（任务 `interact` 匹配、`poi-interact` 监听、地图与日志标记）会静默断链。5 个位面共 **14 处 `this.addPOI()` 调用，无一传 `options.id`**，全部走这条回退。如实记录：**目前尚无玩家可见故障** —— 碎片进度实际由 `onInteract` 里派发的 `discovery` 显式 id（`fantasy-ring` 等）驱动，主线锚点 `hub-anchor` 也是显式 id，`discovered` 标记未进存档。这是契约隐患，不是已发生损坏 | W-A2 切片3 / W-B1 |
 
 **本批关闭**：
 
@@ -144,6 +144,7 @@
 | B39 | `ui/` 6 处 | 面板动画/提示用 `setTimeout` 挂墙钟，hitstop 期间提示照常跳 | 全仓游戏逻辑 `setTimeout` 归零，改走 `engine/Scheduler.js` 的 `after/wait/clear(tag)`（21 处调用点、11 个文件）。`src/ui/` 现在 `setTimeout` 为 **0**；`Dialog.js` / `ExecutionSkipBurst.js` / `CombatCameraDirector.js` 各留一次 rAF —— 那是为 CSS 过渡制造"下一次绘制"，属规范第 2 条明示的例外，代码里写明理由 |
 | B41 | `CombatController.update()`、`SpellSystem.emitMana()` | 每帧派发一条 `'stamina-changed'` / 法力事件（60fps 下每秒 60 条相同内容的 CustomEvent），HUD、教程、辅助系统在同一帧被反复唤醒 | 新增 `engine/Observable.js`：值真的变化才广播一次，`quantize` 让"精力按 0.5 一档、血量按 1 一档"的去重有意义；`HUD` 走 `subscribe()` 拿退订函数存进 `_offs`。`emits / writes` 两个计数器就是"到底通知了几次"的可断言证据（`tests/engine-observable.test.js` 15 例） |
 | B42 | `ui/ContextualTutorial.js` 的 `zone-changed` 监听 | 两条区域提示**完全不看进的是哪个区**，只按章节门控：第四章后随便踏进任何一个位面，都会弹出"破碎时线：重力与视野在此不稳定" | 加 `zoneId === ZONE_IDS.VOID / ABYSS` 门槛，标题取 `ZONE_NAMES[id]`（显示名只有一份）。代价如实记录：见 §9「玩家必须真的重新进入该区才看得到」 |
+| B45 | `world/zones/BaseZone.js`（`addPOI`） | POI 未显式给 id 时回退成 `` `${this.id}-${label}` ``，**把显示名嵌进了稳定身份**：改一句调查文案，该 POI 的 id 就变，按 id 认领它的下游（任务 `interact` 匹配、`poi-interact` 监听、marker 的 `userData.poiId`、今后进存档的发现进度）静默断链 —— 运行期不报错，只是"点了没反应"。14 处位面 `addPOI` 调用无一传 `options.id`，全走这条回退。按登记时的口径如实记录：修复前**无玩家可见故障**（碎片进度由 `onInteract` 派发的显式 `discovery` id 驱动，`discovered` 未进存档），这是契约隐患，不是已发生损坏 | 回退删除，改成与 `addRestPoint` 同一条契约：**缺 id / 非 kebab-case / 同区重复 id 在世界构建期直接抛错给开发者看**；14 处位面调用与 42 处致敬层登记补齐显式 id（最终 56 条位面 POI + 2 条 hub 记录 = 58）；规则是"凡 `onInteract` 派发 `discovery` 的 POI，其 id 必须等于那个发现 id"，由测试逐条遍历全表钉住，唯一例外 `fantasy-ring-echo` 走测试里那张必须显式登记的别名表。`WorldManager.assertPoiIdentity()` 在 `build()` 与 `attachPopCultureZones()` 各跑一次，把**合并后的全量表**（含两处不走 `addPOI` 的 hub 记录）收口 —— 同一段逻辑两个调用点，不是两道会各自漂移的门。证据：`tests/poi-identity.test.js` 14 例在 node 里跑完真世界后断言整张表（含"把全部 label 换成乱码，id 与交互结果一模一样"这条正面证据）；变异验证 —— 贴回 `options.id ?? \`${this.id}-${label}\`` 并关掉 kebab 校验后，缺 id 与非法 id 两例变红 |
 
 
 ---
@@ -193,7 +194,7 @@
 | 编号 | 工作包 | 规模 | 依赖 | 状态 |
 |------|--------|------|------|------|
 | W-A1 | 计时与事件收口（游戏逻辑 `setTimeout` → 主循环 dt；每帧事件改变化派发） | M | — | 🔶 计时与每帧事件已收口；剩 B43 自建 rAF、B44 事件名总线 |
-| W-A2 | 区域身份接口化（`Zone.id`、消 57 处中文匹配、修 B35） | M | — | 🔶 切片1、2 完成（B35/B36/B42 关闭）；剩 B45（POI 自动 id 仍嵌显示名） |
+| W-A2 | 区域身份接口化（`Zone.id`、消 57 处中文匹配、修 B35） | M | — | ✅ 切片1/2/3 完成（B35 / B36 / B42 / B45 关闭）；W-A2 收口，唯一尾巴是 `RestDialogue.js` 的第四份营火名（归 W-B4） |
 | W-A3 | 世界空间 UI billboard 化（敌人血条 / 锁定标记 / 预警圈） | S | — | ⬜ |
 | W-A4 | 战斗取消关系与输入缓冲（连段可取消、翻滚打断、0.15s 输入队列） | M | W-A1 | ⬜ |
 | W-A5 | 镜头混合栈 + 锁定手感（阻尼、越肩、过场平滑交接） | L | W-A1 | ⬜ |
@@ -335,7 +336,7 @@ Phase D（系统与质量）
 | 编号 | 工作包 | 状态 | 完成日期 | 提交 | 备注 |
 |------|--------|------|----------|------|------|
 | W-A1 | 计时与事件收口 | 🔶 计时主体完成 | 2026-09-23 | `95c0533` + 收尾 `4f1adc6` | 游戏逻辑 `setTimeout` 28 → 0（`Scheduler`，21 处调用点 / 11 文件）；每帧 `stamina/mana` 事件改 `Observable`（B41）。**尾巴**：B43 特效自建 rAF（硬编码 dt）、B44 事件名裸字符串与注销（`engine/events.js` 仍未建） |
-| W-A2 | 区域身份接口化 | 🔶 切片1、2 完成 | 2026-09-23 | 切片1 `c4e859a`；切片2 `b4a8416`（收尾见 `4f1adc6`） | 切片1：`world/ZoneIdentity.js` + `content/franchises.js`，B35 伪对象、B36 的 57 处中文匹配、B42 区域提示门控关闭，`src/` 内中文显示名逻辑判定归零并上静态门禁。切片2：快速旅行目的地与面板"在此"改按 id 认领、`addRestPoint` 缺/重 id 构建期抛错、营火名表与任务区名的第二真源删除、效果层与天气层换成 `ZONE_IDS` 符号；`tests/fast-travel.test.js` 17 例（含变异验证）。**尾巴**：B45（POI 自动 id 仍嵌显示名）、`RestDialogue.js` 的营火标题仍是各写一份的文案（'世界之锚营火' vs 营火实际名 '世界之锚休息点'、'魔法遗境营火' vs 区名 '霍格沃兹遗境'）—— 那是对话树的显示文案，归 W-B4 统一，不在本切片偷改 |
+| W-A2 | 区域身份接口化 | ✅ 切片1/2/3 完成 | 2026-09-23 | 切片1 `c4e859a`；切片2 `b4a8416`；切片3 `16edb9e`（收尾见 `4f1adc6` 与本批 docs 回填） | 切片1：`world/ZoneIdentity.js` + `content/franchises.js`，B35 伪对象、B36 的 57 处中文匹配、B42 区域提示门控关闭，`src/` 内中文显示名逻辑判定归零并上静态门禁。切片2：快速旅行目的地与面板"在此"改按 id 认领、`addRestPoint` 缺/重 id 构建期抛错、营火名表与任务区名的第二真源删除、效果层与天气层换成 `ZONE_IDS` 符号；`tests/fast-travel.test.js` 17 例（含变异验证）。切片3：`addPOI` 的 id 回退删除 —— 缺 / 非法 / 重复 id 在世界构建期抛错，56 条位面 POI 与 2 条 hub 记录（共 **58** 条）全部带 kebab-case id，`WorldManager.assertPoiIdentity()` 在 `build()` 与 `attachPopCultureZones()` 收口；`tests/poi-identity.test.js` 14 例在 node 里跑真世界断言整张表（B45 关闭）。**遗留（不属于本包）**：`RestDialogue.js` 的营火标题仍是各写一份的文案（'世界之锚营火' vs 营火实际名 '世界之锚休息点'、'魔法遗境营火' vs 区名 '霍格沃兹遗境'）—— 那是对话树的显示文案，归 W-B4 统一，不在本包偷改 |
 | W-A3 | 世界空间 UI billboard 化 | ⬜ | | | |
 | W-A4 | 战斗取消关系与输入缓冲 | ⬜ | | | |
 | W-A5 | 镜头混合栈 + 锁定手感 | ⬜ | | | |
@@ -403,3 +404,12 @@ Phase D（系统与质量）
   - **浏览器实读（`localhost:5178`，真实 `game`，视口 0×0 不渲染但代码路径为真）**：`restPoints.ids()` → `hub / fantasy / magic / space / void / abyss`，其中魔法区那座营火的名字确为 '霍格沃兹遗境营火'；`fastTravelPanel.show('magic')` 后 DOM 里 6 个 `.ft-btn` 只有 `data-id="magic"` 那一个 `disabled === true`；`travel('void')` 把玩家从 `(0, 999)` 放到 `(0, 5.10, 210)`（y 来自真实地形采样，不是 0），血量 35 → 118（= `maxHp`）；`travel('no-such-fire')` 返回 `false` 且不动玩家；把 6 座营火的显示名全部改成 `===garbled===` 后 `travel('fantasy')` 仍精确落到 `(-200, 0)`；`addRestPoint(..., 'hub')` 抛出 '营火 id hub 重复'，`addRestPoint(...)` 缺 id 抛出 '营火「x」缺少 id'。
   - **放弃了什么**：① `RestDialogue.js` 的营火标题（'世界之锚营火'、'魔法遗境营火'…）没跟着改。那是对话树的**显示文案**、按 rest id 取用（不参与判定），但它确实是第四份营火名字 —— 一并改属于"对话节点图统一"，硬塞进本片会让 W-B4 少一块它本该解决的证据。登记为 W-A2 尾巴，明写在这里而不是悄悄修掉。② `chaos-core` 等指向具体物件的路点保留自名，它们不是区域文案的第二真源。③ 没给 `destinationsForPanel` 加"未解锁则为空"的门控：解锁判定在 `tryOpen` 一处即够，两处门控迟早漂移。
   - **新登记的缺陷**：**B45** —— `BaseZone.addPOI` 未显式给 id 时回退成 `` `${this.id}-${label}` ``，把显示名嵌进了 id（5 个位面 14 处调用全部走这条回退）。实测**尚无玩家可见故障**（碎片进度由 `onInteract` 派发的显式 `discovery` id 驱动，`hub-anchor` 也是显式 id，`discovered` 未进存档），所以它是契约隐患而非已发生损坏；归属 W-A2 切片3 / W-B1。
+
+- **2026-09-23 W-A2 切片3：POI 稳定 id 契约（修 B45）** —— 提交 `16edb9e`
+  - **为什么**：`addPOI` 在没传 `options.id` 时回退成 `` `${this.id}-${label}` ``，等于**把显示名写进了稳定身份**。修复前那 14 处位面 POI 的 id 实测长这样：`fantasy-调查至尊石环`、`abyss-触碰混沌之核` —— 中文串进了 id。而 `onInteract` 里人肉派发的 `discovery` id 是另一套（`fantasy-ring`、`chaos-core`）：**同一个地物在表里有两个互不相干的字符串身份**。为什么没坏：按 POI id 认领的下游只有 `poi-interact` 事件（`PlayerController` 把 `nearbyPoint.id` 派发出去、`QuestAssistant` 按 `q.targetId` 模拟点击），而主线 interact 任务的 `targetId` 五处全是 `hub-anchor` —— 那是唯一一处**显式给了 id** 的调用，恰好躲过回退。也就是说：谁把任何一个位面地物写成任务目标，那一刻起任务就永远完成不了，且不报错。碎片进度走的是 `discovery` 事件，所以修前修后都不受影响（见"行为增量"）。
+  - **交付**：回退删除，`addPOI` 换成与 `RestPointManager.addRestPoint` 同一条契约 —— **缺 id / 非 kebab-case / 同区重复 id 三件事都在世界构建期抛错给开发者看**（静默兜底本身就是这个缺陷的成因）。14 处位面调用与 42 处致敬层登记补齐显式 id，规则是"凡 `onInteract` 派发 `discovery` 的，POI id 必须等于那个发现 id"（这条由测试逐条遍历整张表钉住，不是逐处口头承诺）；唯一不同名的 `fantasy-ring-echo`（致敬层在至尊石环旁立的第二块碑）不悄悄豁免，走测试里那张 `DISCOVERY_ALIASES` 表 —— 加别名必须写进表，且表本身有一条用例断言"指向的 POI 还在登记那个发现"，防止豁免名单变成僵尸。`WorldManager.assertPoiIdentity()` 在 `build()` 与 `attachPopCultureZones()` 各调一次：后者是**最后写入 `pointsOfInterest` 的一方**，所以合并后的全量表必须在那里再收一次口 —— 同一段逻辑两个调用点，不是两道会各自漂移的门。
+  - **门禁与防假绿**：`tests/poi-identity.test.js` 14 例（全仓 **370 例 / 27 文件**全绿；lint 0 error / 10 warning，文件集合与上批一致；构建通过，本批计时 3.48s）。区域本身能在 node 里无浏览器构建（`new WorldManager(scene, dialog).build()` + 四层致敬增强器 ≈ 0.5s，只有 THREE 材质告警），所以这里跑的是**真世界的整张表**而不是手写夹具 —— 逐个调用点补 id 是最容易漏一半的活。正面证据两条：把全表 label 换成乱码后 id 序列与交互派发结果一模一样；`discovery` 型 POI 的 id 必须等于它派发的发现 id（别名除外）。变异验证：贴回 `options.id ?? \`${this.id}-${label}\`` 并关掉 kebab 校验后，"缺 id 当场抛错"与"非法 id 被拦"两例变红；绕过 `addPOI` 直接往表里塞（重复 / 裸对象 / 中文名 id）三例由 `assertPoiIdentity` 拦住。
+  - **行为增量**：**对玩家无可感知变化** —— 这一点必须写明白，别把契约修复记成 bug 修复。B45 登记时就注明了"尚无玩家可见故障"，切片3 兑现的是那个判断：碎片进度此前按 `discovery` 事件走，现在照旧。真正的收益在开发者侧：改任何一条 POI 文案不再可能悄悄改掉它的 id（构建期即抛），以及 `discovered` 标记进存档（W-B1 / 存档 v6）之前，按 id 寻址的前提已经成立。
+  - **浏览器实读（`localhost:5178`，真实 `window.__game`，视口 0×0 不渲染但代码路径为真）**：`pointsOfInterest` 共 **58** 条，非法 id `[]`、重复 id `[]`，前 8 个为 `hub-anchor / fantasy-ring / fantasy-ruins / fantasy-tower / fantasy-boss-gate / magic-castle / magic-forest / magic-boss-gate`，`homage-*` 41 条；场景里 **56** 个 marker 带 `userData.poiId`，其中空值 / 非法值 **0** 个；控制台只剩已知的 0×0 视口 WebGL 帧缓冲告警（本批两次读数 97 与 106 条，随刷新次数变化），JS 错误 0 条。
+  - **一处计数更正（留在记录里）**：提交信息 `16edb9e` 写的是"55 个 POI 全部显式带 id"。55 是我按 `homage-*` 前缀统计致敬层时得到的**调用点数**（14 位面 + 41 `homage-*`），不是登记表真值：位面上还有第 56 条 `fantasy-ring-echo`，hub 层另有 `hub-anchor` 与 `hub-poster-wall` 两条**不走 `addPOI`** 的直接 push（后者正是最终自检存在的理由）。以 **58** 为准，上表与测试口径都已按 58 记。
+  - **放弃了什么**：① `fantasy-ring-echo` 与 `fantasy-ring` 的地物重复没删 —— 那是 W-B2（Wave 叠加导致的内容重复）的靶子，本切片只管身份不管内容。② 没把 POI 表挪进数据注册表：`addPOI` 的签名与调用点就是内容层，W-B1 的数据驱动改造会一并处理，现在改属于提前设计。③ `discovered` 仍不进存档 —— 加字段要走 v6 迁移，不在本切片夹带。④ `RestDialogue.js` 的第四份营火名（W-A2 尾巴）仍在，归 W-B4。
