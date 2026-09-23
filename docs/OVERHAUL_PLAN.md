@@ -301,7 +301,7 @@ src/
   - 已顺带收掉两条别处登记的残留：第九切片留下的"导演与玩家相机两处写 FOV"、以及 `CAMERA_FOV` 在四处被当字面量重写的问题（现在只有 rig 读它）
   - **未做**：混合栈的优先级与权重（现在只有一层 `camera-override` + 各层相加，过场靠 `cinematicActive` 早退互斥，不是通用 blend）；`player-fsm` / `shake-camera` 用例仍然直接观察 `camera.*`，等 M3 后续切片改读 rig（第二切片已补 `tests/camera-contract.test.js` 用真实导演验形状）
 - [ ] 遮挡求交对碰撞体（修 B3）、锁定重定位 + 速度阻尼、轻微越肩偏移、瞄准磁吸、翻滚/受击镜头、区域 FOV
-  - 进度：遮挡求交对实体 ✅（M3 第二切片）；锁定重定位阻尼 ✅（W-A5 切片2 `e162c20`：`_advanceYaw` 未锁定直赋 / 锁定按秒指数逼近走最短弧，命中走 `getCombatForwardXZ` 不削准头）；越肩偏移 ✅ 已存在（`shoulderOffset`，锁定侧 `0.35`/idle `0.175`），左右换边暂缓；余：瞄准磁吸、翻滚/受击镜头、区域 FOV
+  - 进度：遮挡求交对实体 ✅（M3 第二切片）；锁定重定位阻尼 ✅（W-A5 切片2 `e162c20`：`_advanceYaw` 未锁定直赋 / 锁定按秒指数逼近走最短弧，命中走 `getCombatForwardXZ` 不削准头）；非锁定瞄准磁吸 ✅（W-A5 切片3 `0433777`：`pickAimAssistTarget` 纯宽容，侧前方"最对准星的那一个"补判，锁定/全向不参与，`AIM_ASSIST` 可调）；越肩偏移 ✅ 已存在（`shoulderOffset`，锁定侧 `0.35`/idle `0.175`），左右换边暂缓；余：翻滚/受击镜头、区域 FOV
 - [ ] 镜头混合栈（gameplay / lockon / cinematic / photo 优先级 + 权重），杜绝一帧内被两处写入 —— 第一切片已把"两处写入"收掉；W-A5 切片1（`5575801`）把"**进出过场不跳变**"用**所有权交接补间**（`CameraRig.setView(...,{owner,transition})` + 末尾 `commitView(rawDt)`）做掉了，过场 `end()` 不再需要恢复相机。剩下的**只是**多来源**同时混音**的优先级与权重（现实里过场/观看与玩家是 `cinematicActive` 早退保证的互斥独占，故尚未做加权叠加）
 - **验收**：无穿墙、锁定不抽搐、过场进出无跳变、第三人称始终能看到角色。
 - **验收（M3 第一切片：相机唯一所有者，2026-09-22）**：
@@ -420,7 +420,7 @@ M0 ─→ M1 ─→ M2 ─→ M3 ─→ M4 ─┬─→ M5 ─→ M6
 | M0 地基与剥离 | ✅ | 2026-09-21 | `6f82b22` | 剥离简历联动内容与引擎产物；ESLint/Vitest/build 三门禁；修 B16 B17 + 一处 `const` 重赋值崩溃 |
 | M1 移动与碰撞 | ✅ | 2026-09-22 | `d1f37c2` | 碰撞世界贯通五区（313 障碍）+ 玩家位移/支撑/台阶/边界；修 B1 B2；翻滚与跳跃帧率无关。`PlayerFSM` 与 `TimeController` 接线并入 M2 |
 | M2 战斗重做 | 🔶 十片切片完成 | 2026-09-22 | `ddf6c6c` + `edd7604` + `c7eeea5` + `ed46587` + `6250b82` + `7d81e60` + `c3787a6` + `b1fb5b4` + `855259c` + `3f0f8eb` + `a31f249` | 统一时间源接线 + 全局 hitstop（B7）、出手定格判定（B5/B6）、MoveTable 时序数据化、计时去 setTimeout（B4）、Enemy/Boss 状态与特效生命周期（B8/B10/B19/B20/B21）、副本 GPU 泄漏（R1/B22）、迷宫内死亡卡状态（B23）、存档 v5 迁移链 + PerfHUD（R2/B18）、`PlayerFSM` 接管位移与战斗态（消掉翻滚 ±3% 量化）、敌人分部位 Hurtbox + 统一结算 Resolution + 数值集中 `content/tuning.js`（B25/B26）、`ai/` 敌人感知 + 围攻名额 + 分离 + `EnemyFSM`（B27）、`combat/EnemyMoves.js` 敌人招式表（9 招 × 5 类，前摇分级/连段/突进/远程/范围/防御/召唤，修 B28）、打击反馈层：`engine/Shake.js` 唯一震屏所有者 + 拆掉 `screen-shake` 事件链、火花/环/飘字定容池化、逐敌击退冲量（修 B29、收掉 B20 的每击新建几何）、玩家侧分部位受击盒 + 敌人「格挡」正面减免（修 B30）、处决镜头按被处决者体型取景 + 第一人称接入演出镜头 + 覆盖量协议零分配（修 B31）、敌人「召唤」招与召唤物生命周期（名额/归属/释放三本账，修 B32）。待做：Boss 场地机制、手柄（两条内容项按需求方"先崩溃与性能、再内容"的顺序排到 M3 之后回收） |
-| M3 镜头 | 🔶 第三/四切片完成（W-A5 切片1+2） | 2026-09-22 → 2026-09-24 | `c91cda2` + `eb131a5` + `5575801` + `e162c20` | `engine/CameraRig.js` 成为相机唯一写入者：位置/注视点走 `setView`，FOV 改为按帧申领 + 主循环末尾 `commitFov()`，过场与观看模式同走 rig，`78 / 62` 收进 `CAMERA_FOV` 单一来源（修 B33）；第三人称遮挡对实体求交 + 收回快/伸出慢的非对称阻尼（修 B3），覆盖量形状合同与 `blocksPoint()` 点查询（修 B34）；**W-A5 切片1**：`setView` 引入所有权交接补间（`{owner,transition}` + 末尾 `commitView(rawDt)`），进出过场/观看不再一帧硬切、过场 `end()` 不再需恢复相机（修 A4 硬切半区）；**W-A5 切片2**：锁定重定位落朝向收进 `_advanceYaw`（未锁定直赋、锁定按秒指数逼近走最短弧），锁定身后敌人不再一帧甩 180°、命中另走目标真实位置不削准头（修 A4 锁定无阻尼半区），锁定力臂裸数收进 `LOCK_ON_CAMERA`。待做：瞄准磁吸、区域 FOV、`PhotoModeDirector`/观看路径接线 |
+| M3 镜头 | 🔶 W-A5 切片1+2+3 完成（A4 三半区全消） | 2026-09-22 → 2026-09-24 | `c91cda2` + `eb131a5` + `5575801` + `e162c20` + `0433777` | `engine/CameraRig.js` 成为相机唯一写入者：位置/注视点走 `setView`，FOV 改为按帧申领 + 主循环末尾 `commitFov()`，过场与观看模式同走 rig，`78 / 62` 收进 `CAMERA_FOV` 单一来源（修 B33）；第三人称遮挡对实体求交 + 收回快/伸出慢的非对称阻尼（修 B3），覆盖量形状合同与 `blocksPoint()` 点查询（修 B34）；**W-A5 切片1**：`setView` 引入所有权交接补间（`{owner,transition}` + 末尾 `commitView(rawDt)`），进出过场/观看不再一帧硬切、过场 `end()` 不再需恢复相机（修 A4 硬切半区）；**W-A5 切片2**：锁定重定位落朝向收进 `_advanceYaw`（未锁定直赋、锁定按秒指数逼近走最短弧），锁定身后敌人不再一帧甩 180°、命中另走目标真实位置不削准头（修 A4 锁定无阻尼半区），锁定力臂裸数收进 `LOCK_ON_CAMERA`；**W-A5 切片3**：非锁定挥砍瞄准磁吸 `pickAimAssistTarget`（对刚出锥、落宽容带的"最对准星那一个"纯宽容补判，锁定/全向不参与、竖直 band 与背刺格挡不动），`AIM_ASSIST` 单源可调（修 A4 磁吸半区 → A4 全消）。待做：区域 FOV、`PhotoModeDirector`/观看路径接线、越肩左右换边（暂缓） |
 | M4 特效池与生命周期 | 🔶 切片1+2 完成（相机 + 移动输入热路径零分配） | 2026-09-24 | `69a3f1a` + `ab55c2d` | **切片1**：第三人称相机热路径每帧不再 `new THREE.Vector3` —— `_resolveThirdPersonLook` 改复用槽 `_camTmpLook/_camTmpLookB`、`getForwardXZ/getRightXZ` 加可选 out 参数、第三人称 `addScaledVector` 传 `_camTmpRight`。**切片2**：移动输入热路径 `readMoveDir` 每帧也不再 new —— 复用槽 `_moveTmpDir/_moveTmpFwd/_moveTmpRight`、加 out 参数（同帧内消费，安全）。`tests/camera-alloc.test.js` 静态门禁（五个热路径方法体禁 `new THREE.*` 与无参 `getXZ()`）+ 行为/别名回归。全套 **506 例 / 35 文件**、lint 0 error / 10 warning、build 绿。玩家侧无可见变化，纯分配收口。**待做**：`getCombatForwardXZ` out 化、`renderer.info` 三角/几何零增长运行期看门狗（PerfHUD 侧）、特效对象池整包（`ExecutionEffects`/`LootSystem`，W-C）；"计时全走主循环"残账经复查基本已清（`CombatController.schedule` 实为 dt 版 `_timed`；`SpellSystem`/`EnemyManager` 已无 `setTimeout`，只剩 `ExecutionSkipBurst.js:19` 一处 rAF） |
 | M5 渲染与美术 | ⬜ | | | |
 | M6 音频 | ⬜ | | | |
@@ -444,6 +444,14 @@ M0 ─→ M1 ─→ M2 ─→ M3 ─→ M4 ─┬─→ M5 ─→ M6
 ---
 
 ## 变更记录
+
+- 2026-09-24 **W-A5 切片3：非锁定态挥砍瞄准磁吸（关闭 §1.2 短板 A4 最后一半区"磁吸"）**（提交 `0433777`）：
+  - 病灶：未锁定平A 的命中按 `getCombatForwardXZ()` + 水平锥（`MoveTable.cone`）筛目标，点积差几度的侧前方目标整个落空（本作基础锥已宽到半角 ~83°，但"贴脸垂直方向那一个"仍溜走），玩家觉得"明明对着他砍却空了"。这是 A4 记的最后一档"磁吸"。
+  - 交付：新增纯函数 `pickAimAssistTarget(origin,forward,enemies,{range,swingMinDot,assistMinDot})` —— 在 `range` 内、落在宽容带 `[assistMinDot, swingMinDot)` 的目标里取**最对准星的唯一一个**。`processHitWindow` 仅当非锁定/非全向/开关开启时按 `extraDeg` 放宽本次锥求 `assistMinDot`、选出 `magnet`，命中循环锥判定加 `&& enemy !== magnet` 一处放行。**纯宽容不变式**：只多纳入一个目标、绝不移除原有命中；竖直 `pickPart`、`isBehind`/`isGuarded` 均按真实位置，磁吸只碰水平锥。锁定走自己的宽 `LOCKED_CONE` 且不启用磁吸，全向招本就全周。`AIM_ASSIST={enabled:true,extraDeg:10}` 收进 `content/tuning.js` 单源。
+  - 门禁：`tests/aim-assist.test.js` **12 例**（8 纯函数宽容带数学：锥内不收/带内收/超外沿不收/超 range 不收/两个只取最对准星/dist=0 不产 NaN/死亡跳过/空列表；4 落地：开关联动证明增量、锁定不启用、单目标补判）。全套 **518 例 / 36 文件**（上批 506 + 12）、lint 0 error / 10 warning 持平、build 绿。变异核对：去掉 `&& enemy !== magnet` 或去掉锁定门 → 相应用例转红。
+  - 行为增量：不锁定混战时靠近准心的侧前目标更常被带到，减少空刀挫败；因基础锥已宽，效果是"补边缘一个"而非自动锁敌，不会把平A变全周 AoE，纯增益。
+  - 放弃了什么：① 没做**转向磁吸**（出手把 `yaw` 吸附到最近目标）—— 会与切片2 锁定阻尼、鼠标手感打架，"吸多少度"更主观，暂缓；② 没让磁吸补多个（等价变相加宽 AoE，破坏"纯宽容且不多扫一片"的克制）；③ 没动弹体瞄准（`SpellSystem` 另有 aim 契约，正交）。
+  - **至此 §1.2 短板 A（前 10 分钟）四项 A1–A4 全部关闭。**
 
 - 2026-09-24 **M4 测试夹具收口：消除 `ProgressEvent is not defined` 未处理 rejection**（提交 `937290d`）：
   - 病灶：three 的 `FileLoader` 在 node 里用 `fetch` + `response.body.getReader()` 流式读纹理/GLB，每读一块 `new ProgressEvent('progress', {loaded,total})`（`three.core.js:26954`）。node 无 `ProgressEvent` 全局 → 那条 reader promise 在测试环境拆除后抛 `ReferenceError`，落成间歇 1~3 条未处理 rejection，把 vitest 收尾行从纯绿污染成 `Errors 1 error`。多条变更记录以"登记备查、归 M4 夹具收口"挂账。
