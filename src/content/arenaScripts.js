@@ -20,6 +20,7 @@ export const ARENA_MOVES = {
   slam: 'bossSlam',
   barrage: 'barrage',
   well: 'gravityWell',
+  freeze: 'chronoField',
 };
 
 /**
@@ -58,6 +59,11 @@ export const BOSS_ARENA_SCRIPTS = {
   ],
   'void-chronarch': [
     { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35 },
+    // 时停域：第三阶段起 14 秒一片，开在玩家此刻脚下。它自己那记**无场**的时停
+    // （`VoidBoss.timeStopActive`，22 米内 4 秒一循环）留在那儿不动 —— 切片3 就说过
+    // 非危险区的自走技归 W-B1 那张统一施法表，本切片只把"有场的那一份"补上。
+    // 两条同时在身上时 `applyTimeScale` 取最小值：站在场里吃更狠的 0.3，不站吃 0.35。
+    { move: 'freeze', phase: 3, trigger: 'opportunity', cooldown: 14, range: 17 },
   ],
   'chaos-overlord': [
     { move: 'slam', phase: 2, trigger: 'melee', chance: 0.3 },

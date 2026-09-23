@@ -256,7 +256,7 @@ describe('引力化身开井（脚本表接线）', () => {
 
   it('井的形状与伤害读真表：duration/tick/pull 一路传进危险区', () => {
     const s = stage();
-    s.boss.startGravityWell(s.player, cast);
+    s.boss.startDomain(s.player, cast);
     const [it] = wells(s.m.hazards);
     expect(it).toBeTruthy();
     expect(it.radius).toBe(gravityWell.radius);
@@ -360,7 +360,7 @@ describe('引力化身开井（脚本表接线）', () => {
     const lone = new SpaceBoss(makeScene(), makeWorld(), { x: 0, z: 0 });
     expect(lone.hazards).toBe(null);
     expect(() => lone.update(1 / 64, v(10, 0), makePlayerRef())).not.toThrow();
-    expect(lone.startGravityWell(v(10, 0), cast)).toBe(false);
+    expect(lone.startDomain(v(10, 0), cast)).toBe(false);
   });
 });
 

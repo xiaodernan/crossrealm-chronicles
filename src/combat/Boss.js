@@ -193,8 +193,8 @@ export class Boss extends Enemy {
   /** 放出一招场地招。返回 false = 没放成（没有危险区系统 / 已有一圈在走），冷却也不该重置 */
   castArenaMove(entry, playerPos) {
     if (entry.move === 'barrage') return this.startBarrage(playerPos, entry);
-    if (entry.move === 'well') return this.startGravityWell(playerPos, entry);
-    return this.startSlamTelegraph();
+    if (entry.move === 'slam') return this.startSlamTelegraph();
+    return this.startDomain(playerPos, entry);
   }
 
   /**
@@ -259,12 +259,14 @@ export class Boss extends Enemy {
   }
 
   /**
-   * 引力井：在玩家**此刻**脚下开一口会持续存在的圈。前摇那 1.4 秒走出去很容易，
-   * 难的是走出去之后别再回来 —— 井每 `tick` 秒结算一段，而且每段之前先把人往圆心拽一把
-   * （`GroundHazards._sustain`）。和弹幕同一套"买的是你还站在原地没有"，
-   * 只是把"连吃五枚"换成"站着别动"。
+   * 有长度的场：在玩家**此刻**脚下开一片会持续存在的圈 —— 引力井与时停域共用这一份接线，
+   * 区别只在 `GROUND_HAZARD` 那一档里填了什么（井有 `tick/damage/pull`，时停域 `damage: 0` 而带 `slow`）。
+   * 再要第三、四种域时只需加一档数值，不必再进一次 `Boss`。
+   *
+   * 前摇那一秒多走出去很容易，难的是走出去之后别再回来：井每段拽你一把，
+   * 时停域则把你钉在原地，让砸地和弹幕来收这份迟缓。
    */
-  startGravityWell(playerPos, entry) {
+  startDomain(playerPos, entry) {
     if (!this.hazards || !playerPos) return false;
     const spec = this.arenaSpec(entry);
     const at = this.clampIntoArena(playerPos.x, playerPos.z, spec.radius);
@@ -278,6 +280,7 @@ export class Boss extends Enemy {
       duration: spec.duration,
       tick: spec.tick,
       pull: spec.pull,
+      slow: spec.slow,
       owner: this,
     });
     return true;

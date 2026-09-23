@@ -480,6 +480,19 @@ export const GROUND_HAZARD = {
     radius: 5.5, telegraph: 1.4, damage: 6, color: 0x4488ff,
     tick: 0.6, duration: 3, pull: 8,
   },
+  /**
+   * 时停域（B5 第四档）：**不掉血，改时标**。`damage: 0` 是这一档的定义而不是"忘了填" ——
+   * 它买的是"你在这块地上跑不动"，把这份迟缓兑成血的是砸地/弹幕/井那三档。
+   * 躲法与井同一条（走出 6 米立刻还你速度），代价不同：井收血，这里收机动。
+   *
+   * `slow 0.3` 比时线执政官那记**无场**的时停（`timeSlow 0.35`）更狠一档：
+   * 有场的惩罚必须比没场的更看得见，两条同时在身上时吃更强的那份（`applyTimeScale` 取最小值）。
+   * 颜色与它本体的金色发光同族（`0xc9a962`），跟井的蓝、弹幕的紫分开。
+   */
+  chronoField: {
+    radius: 6, telegraph: 1.1, damage: 0, color: 0xc9a962,
+    tick: 0, duration: 3.6, slow: 0.3,
+  },
   /** 起手时圈只画到最终半径的这个占比，随前摇线性涨满 */
   growFrom: 0.25,
   /** 落下后余像的淡出时长：纯表现，期间不再判伤害 */
@@ -488,6 +501,17 @@ export const GROUND_HAZARD = {
   yOffset: 0.15,
   opacity: { warn: 0.5, pulse: 0.18, burst: 0.72 },
 };
+
+/**
+ * 时标"绳子"的长度（秒）—— 凡是要往玩家身上挂减速的东西（时停域、时线执政官那记无场时停），
+ * 都是**每帧续一次绳**，续不上就在这这么短的时间里自己到期。
+ *
+ * 为什么要有这么一条：旧写法是直接写 `playerRef.timeSlow = 1` 来还原，而写者往往只有
+ * "自然到期"那一条还原路径（`VoidBoss` 的打断与死亡两条都漏了，玩家被永久留在 0.35）。
+ * 续绳模型里最坏的失败是"多慢 0.12 秒"。0.12 ≈ 60Hz 下七帧：够跨过偶发掉帧，
+ * 又不至于"走出圈还多慢一截"。**它不是任何一招的时长**，别拿它当冷却调。
+ */
+export const TIME_SCALE_LEASH = 0.12;
 
 export const ENEMY_MOVE_SETS = {
   soldier: ['sweep', 'thrust', 'cleave', 'guard'],

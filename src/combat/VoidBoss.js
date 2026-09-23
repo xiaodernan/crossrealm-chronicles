@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import { Boss } from './Boss.js';
 import { addShake } from '../engine/Shake.js';
+import { TIME_SCALE_LEASH } from '../content/tuning.js';
+
+/** 时标账本里这一格的署名：一个来源一个 key，与场地时停域各记各的账 */
+const TIME_STOP_KEY = 'void-chronarch:time-stop';
 
 /** Chapter 4 隐藏 Boss — 时线执政官 */
 export class VoidBoss extends Boss {
@@ -57,10 +61,12 @@ export class VoidBoss extends Boss {
 
     if (this.timeStopActive) {
       this.timeStopTimer -= dt;
-      if (playerRef) playerRef.timeSlow = 0.35;
+      // 续绳，不直接写 `playerRef.timeSlow`：旧写法只有"自然到期"这一条还原路径 ——
+      // 被蓄力法术打断（下面的 `takeDamage`）和被打死（`update` 开头早退）两条都把玩家
+      // 永久留在 0.35 里出不来。现在断供最多慢 `TIME_SCALE_LEASH` 秒，不需要谁来还账。
+      if (playerRef) playerRef.applyTimeScale(TIME_STOP_KEY, 0.35, TIME_SCALE_LEASH);
       if (this.timeStopTimer <= 0) {
         this.timeStopActive = false;
-        if (playerRef) playerRef.timeSlow = 1;
         window.dispatchEvent(new CustomEvent('time-stop-end'));
       }
       this.mesh.rotation.y += dt * 2;

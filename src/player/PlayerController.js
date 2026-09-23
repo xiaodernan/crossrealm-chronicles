@@ -127,7 +127,15 @@ export class PlayerController {
 
     this.walkCycle = 0;
 
+    /**
+     * 时标：所有"让玩家变慢"的来源都走 `applyTimeScale()`，这个字段是账本算出来的缓存，
+     * 别处不要直接写（旧写法 `playerRef.timeSlow = 1` 只有自然到期那一条还原路径，
+     * 被打断、被打死两条都会把玩家永远留在 0.35 —— 见 `VoidBoss`）。
+     */
     this.timeSlow = 1;
+
+    /** 时标账本 `key → { scale, left }`；null = 当前没有任何来源在改时标（不为一个用不上的 Map 分配） */
+    this._timeScales = null;
 
 
     /** 移动与碰撞参数（M1）：脚部圆半径、可迈上台阶、土狼时间与跳跃缓冲 */
@@ -331,6 +339,52 @@ export class PlayerController {
     this._dashRemaining = Math.max(this._dashRemaining, duration ?? 0);
   }
 
+  /**
+   * 借一格时标：`key` 是"谁在拖慢我"（一个来源一个 key，互不覆盖），`leash` 是
+   * **这一笔的寿命**而非招式的时长 —— 想持续就每帧再要一次，不想持续就不来。
+   *
+   * 为什么是"续绳"而不是"申请 + 注销"：写者总会漏掉注销（`VoidBoss` 漏了两条路径），
+   * 而续绳模型里最坏的失败是"多慢 0.2 秒"，不是"永远慢着"。同时它也不需要谁持有
+   * 撤账的把手 —— 打断了时停只要不再续绳就行。
+   */
+  applyTimeScale(key, scale, leash) {
+    const ledger = this._timeScales ?? (this._timeScales = new Map());
+    const e = ledger.get(key);
+    if (e) {
+      if (scale < e.scale) e.scale = scale;
+      if (leash > e.left) e.left = leash;
+    } else {
+      ledger.set(key, { scale, left: leash });
+    }
+    this._syncTimeSlow();
+  }
+
+  /** 立刻还账（走出时停域那一帧就该跑起来，不等绳子自己烂掉） */
+  releaseTimeScale(key) {
+    if (!this._timeScales?.delete(key)) return;
+    this._syncTimeSlow();
+  }
+
+  /** 每帧按游戏 `dt` 收绳：绳子烧完的那一格自动出账。账本空着时这是一句判空。 */
+  updateTimeScales(dt) {
+    const ledger = this._timeScales;
+    if (!ledger) return;
+    for (const [key, e] of ledger) {
+      e.left -= dt;
+      if (e.left <= 0) ledger.delete(key);
+    }
+    this._syncTimeSlow();
+  }
+
+  /** effective = 最狠的那一格（同时被两种时标拖住，玩家吃更强的那份减速） */
+  _syncTimeSlow() {
+    let s = 1;
+    if (this._timeScales) {
+      for (const e of this._timeScales.values()) if (e.scale < s) s = e.scale;
+    }
+    this.timeSlow = s;
+  }
+
   /** 速度倍率：法术、时停等外部效果统一从这里乘进去，状态机不必各自认识它们 */
   speedMultiplier() {
     return (this.game.spells?.speedMult ?? 1) * (this.timeSlow ?? 1);
@@ -456,7 +510,8 @@ export class PlayerController {
 
     const autoPlay = this.game.autoPlayMode && this.game.playerAutoPlay?.active;
 
-
+    // 时标账本先收绳，状态机这一帧才用得上正确的速度倍率
+    this.updateTimeScales(dt);
 
     this.combat?.update(dt, keys);
 

@@ -24,6 +24,8 @@ export const makePlayer = ({ stamina = 100, moveScale = 1, busy = false, lock = 
     jumpForce: 10,
     grounded: true,
     timeSlow: 1,
+    // 时标账本（切片5）：构造器里才建，原型宿主须同款字段（null = 当前没有来源在改时标）
+    _timeScales: null,
     walkCycle: 0,
     interactCooldown: 0,
     shake,
