@@ -91,6 +91,11 @@ export class PlayerController {
     /** 第三人称的期望机位：遮挡求交要在原值上反复插值，不能就地改 `desired` */
     this._camTmp5 = new THREE.Vector3();
 
+    /** 相机热路径零分配（M4 切片1）：每帧跑 60~144 次，不能再随手 new Vector3 */
+    this._camTmpRight = new THREE.Vector3();
+    this._camTmpLook = new THREE.Vector3();
+    this._camTmpLookB = new THREE.Vector3();
+
 
 
     this.currentCameraPos = new THREE.Vector3();
@@ -226,8 +231,8 @@ export class PlayerController {
 
 
 
-  getForwardXZ() {
-    return new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+  getForwardXZ(out = new THREE.Vector3()) {
+    return out.set(Math.sin(this.yaw), 0, Math.cos(this.yaw));
   }
 
   /** 攻击判定朝向 — 锁定目标 / 角色朝向 / 镜头朝向 */
@@ -251,9 +256,9 @@ export class PlayerController {
 
 
 
-  getRightXZ() {
+  getRightXZ(out = new THREE.Vector3()) {
 
-    return new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
+    return out.set(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
 
   }
 
@@ -864,7 +869,7 @@ export class PlayerController {
 
     const pos = this._camTmp.set(this.position.x, eyeY, this.position.z);
 
-    pos.addScaledVector(this.getRightXZ(), 0.12);
+    pos.addScaledVector(this.getRightXZ(this._camTmpRight), 0.12);
 
 
 
@@ -939,7 +944,7 @@ export class PlayerController {
     );
 
     const shoulder = lockTarget ? this.shoulderOffset : this.shoulderOffset * 0.5;
-    desired.addScaledVector(this.getRightXZ(), shoulder);
+    desired.addScaledVector(this.getRightXZ(this._camTmpRight), shoulder);
 
     if (camDir.lockOrbit && camDir.orbit?.position) {
       const blend = camDir.orbit.blend ?? 1;
@@ -1009,14 +1014,14 @@ export class PlayerController {
   /** 注视点、抖动与落笔 */
   _resolveThirdPersonLook(pivot, desired, camDir, lockTarget, dt) {
 
-    const lookAt = new THREE.Vector3(pivot.x, pivot.y + 0.12, pivot.z);
+    const lookAt = this._camTmpLook.set(pivot.x, pivot.y + 0.12, pivot.z);
     if (camDir.lockOrbit && camDir.orbit?.lookAt) {
       lookAt.lerp(camDir.orbit.lookAt, camDir.orbit.blend ?? 0.85);
     } else if (lockTarget) {
       const t = lockTarget.position;
-      lookAt.lerp(new THREE.Vector3(t.x, t.y + 1.35, t.z), 0.38);
+      lookAt.lerp(this._camTmpLookB.set(t.x, t.y + 1.35, t.z), 0.38);
     } else if (camDir.focus) {
-      lookAt.lerp(new THREE.Vector3(camDir.focus.x, camDir.focus.y + 1.2, camDir.focus.z), camDir.lookBias);
+      lookAt.lerp(this._camTmpLookB.set(camDir.focus.x, camDir.focus.y + 1.2, camDir.focus.z), camDir.lookBias);
     }
 
     this.shake.applyTo(desired, lookAt);
