@@ -434,6 +434,28 @@ export const CAMERA_OCCLUSION = {
  * Boss 家族目前仍跑自己的招式脚本，这一行只是 `Enemy` 基类的兜底数据。
  * 只有持盾的两类（士兵/精英）会格挡：构装体靠装甲、无人机没有手、Boss 有自己的脚本。
  */
+/**
+ * 场地红圈（B5 第一档）—— 施法者画完圈就可以离场，伤害照旧在原地落下。
+ *
+ * 与招式表里的 `slam`（崩地）不是一回事：那一招的危险圈长在敌人脚下，敌人被打断圈就跟着没了；
+ * 红圈一旦画出口就独立存在，玩家要么在 `telegraph` 内走出去，要么被它逼开走位。
+ * 后续场地机制（弹幕落点 / 引力井 / 时停域）都从这套生命周期长出来，所以数值先集中在这里。
+ *
+ * `radius` 同时是**伤害半径**与**预警圈最终长到的半径**：写成两个数迟早对不上，
+ * 而圈说谎的代价是玩家没法用眼睛读招 —— 旧实现正是这么坏的（判定 4.5 米，圈却在前摇里
+ * 一路从 4 米涨到 18 米）。
+ */
+export const GROUND_HAZARD = {
+  bossSlam: { radius: 4.5, telegraph: 1.2, damage: 35, color: 0xff2200, recover: 2.5 },
+  /** 起手时圈只画到最终半径的这个占比，随前摇线性涨满 */
+  growFrom: 0.25,
+  /** 落下后余像的淡出时长：纯表现，期间不再判伤害 */
+  linger: 0.3,
+  /** 圈贴地抬高量：与地形同高会被 Z-fighting 吞掉 */
+  yOffset: 0.15,
+  opacity: { warn: 0.5, pulse: 0.18, burst: 0.72 },
+};
+
 export const ENEMY_MOVE_SETS = {
   soldier: ['sweep', 'thrust', 'cleave', 'guard'],
   elite: ['sweep', 'flurry', 'cleave', 'guard', 'summon'],

@@ -41,7 +41,15 @@ export const makeWorld = (colliders = []) => {
   return { getGroundHeight: () => 0, collision: cw };
 };
 
-export const makeScene = () => ({ add() {}, remove() {} });
+/**
+ * 场景替身。
+ *
+ * 用真的 `THREE.Scene` 而不是 `{ add(){}, remove(){} }`：`EnemyManager` 现在会往场景里
+ * 挂一个危险区组（`GroundHazards`），组的加入/摘除走的是场景图变换，桩件的 `add` 收到
+ * 参数也只是吞掉。真 Scene 在没有渲染器时就是纯记账，比维护一套"看起来能用"的假接口
+ * 少一处桩件与现实的偏差。
+ */
+export const makeScene = () => new THREE.Scene();
 
 /**
  * 玩家替身：敌人只通过 combat 的公开接口碰它。

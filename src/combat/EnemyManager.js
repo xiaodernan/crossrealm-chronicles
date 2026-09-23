@@ -4,6 +4,7 @@ import { SquadController } from '../ai/Squad.js';
 import { bodyOf } from '../ai/Separation.js';
 import { AI, SUMMON } from '../content/tuning.js';
 import { Boss } from './Boss.js';
+import { GroundHazards } from './GroundHazards.js';
 import { MagicBoss } from './MagicBoss.js';
 import { SpaceBoss } from './SpaceBoss.js';
 import { VoidBoss } from './VoidBoss.js';
@@ -17,6 +18,11 @@ export class EnemyManager {
     this.enemies = [];
     /** 围攻名额：整张地图的敌人共用一个仲裁器（Boss 不占名额） */
     this.squad = new SquadController();
+    /**
+     * 场地红圈：危险区不属于任何一只敌人，归管理器统一推进。
+     * 与 `projectiles` 同一处理由 —— 远程招交出弹体、砸地招交出圈，二者都要活得比施法者久。
+     */
+    this.hazards = new GroundHazards(scene, world);
     /** 每帧复用同一份 AI 上下文，避免为每只敌人分配对象 */
     this._aiCtx = {
       target: null,
@@ -164,7 +170,7 @@ export class EnemyManager {
   }
 
   spawnBoss(config) {
-    const boss = new Boss(this.scene, this.world, config);
+    const boss = new Boss(this.scene, this.world, { ...config, hazards: this.hazards });
     this.boss = boss;
     this.enemies.push(boss);
     return boss;
@@ -178,7 +184,9 @@ export class EnemyManager {
   }
 
   spawnSpaceBoss(config) {
-    const boss = new SpaceBoss(this.scene, this.world, { ...config, projectiles: this.projectiles });
+    const boss = new SpaceBoss(this.scene, this.world, {
+      ...config, projectiles: this.projectiles, hazards: this.hazards,
+    });
     this.boss3 = boss;
     this.enemies.push(boss);
     return boss;
@@ -192,7 +200,9 @@ export class EnemyManager {
   }
 
   spawnChaosBoss(config) {
-    const boss = new ChaosBoss(this.scene, this.world, config);
+    const boss = new ChaosBoss(this.scene, this.world, {
+      ...config, hazards: this.hazards,
+    });
     this.chaosBoss = boss;
     this.enemies.push(boss);
     return boss;
@@ -350,6 +360,8 @@ export class EnemyManager {
 
     this._drainSummons();
     this._reapSummons(dt);
+    // 危险区排在敌人之后推进：本帧刚交出的圈同样从 0 起表，之后与施法者再无关系
+    this.hazards.update(dt, playerPos, playerRef);
   }
 
   getAliveEnemies() {

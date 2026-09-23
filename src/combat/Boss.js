@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Enemy } from './Enemy.js';
+import { GROUND_HAZARD } from '../content/tuning.js';
 
 /** 影界守护者 — 首个 Boss，三阶段 */
 export class Boss extends Enemy {
@@ -22,7 +23,10 @@ export class Boss extends Enemy {
     this.arenaCenter = config.arenaCenter ?? this.position.clone();
     this.arenaRadius = config.arenaRadius ?? 22;
     this.enraged = false;
-    this.slamTelegraph = null;
+    /** 危险区系统由 `EnemyManager` 在生成 Boss 时交出（与远程招的 `projectiles` 同一条路） */
+    this.hazards = config.hazards ?? null;
+    /** 本场砸地许诺出去的那个圈；`done` 之前 Boss 一直站在 slam 态 */
+    this.slamHazard = null;
     this.phaseTriggered = { p2: false, p3: false };
   }
 
@@ -109,58 +113,52 @@ export class Boss extends Enemy {
     this.state = 'dead';
     this.setBodyVisible(false);
     this.clearTelegraph();
-    this._hideSlamRing();
+    // 还没落下的圈跟着主人一起撤：死后还从坟里砸玩家一下，是最难解释的一种伤害
+    this.hazards?.cancelFor(this);
+    this.slamHazard = null;
     window.dispatchEvent(new CustomEvent('enemy-defeated', {
       detail: { name: this.name, type: 'boss', bossId: this.bossId },
     }));
     window.dispatchEvent(new CustomEvent('boss-defeated', { detail: { bossId: this.bossId } }));
   }
 
+  /**
+   * 起手砸地：把红圈交给场地危险区系统，本体只说"这一招我许诺出去了"。
+   *
+   * 返回 false 表示没能起手（已经有一圈在走 / 没有危险区系统 —— 例如用例直接 `new Boss`）。
+   * 后者必须让调用方退回普通起手，而不是把 Boss 钉死在一个永远落地的 slam 态。
+   */
   startSlamTelegraph() {
-    if (this.slamTelegraph) return;
-    let ring = this._slamRing;
-    if (!ring) {
-      ring = new THREE.Mesh(
-        new THREE.RingGeometry(0.5, 4, 32),
-        new THREE.MeshBasicMaterial({ color: 0xff2200, transparent: true, opacity: 0.55, side: THREE.DoubleSide })
-      );
-      ring.rotation.x = -Math.PI / 2;
-      this._slamRing = ring;
-    }
-    ring.position.set(this.position.x, this.world.getGroundHeight(this.position.x, this.position.z) + 0.15, this.position.z);
-    ring.scale.set(1, 1, 1);
-    ring.visible = true;
-    this.scene.add(ring);
-    this.slamTelegraph = { mesh: ring, timer: 1.2, damage: 35 };
+    if (this.slamHazard || !this.hazards) return false;
+    const spec = GROUND_HAZARD.bossSlam;
+    this.slamHazard = this.hazards.spawn({
+      x: this.position.x,
+      z: this.position.z,
+      radius: spec.radius,
+      telegraph: spec.telegraph,
+      damage: spec.damage,
+      color: spec.color,
+      owner: this,
+    });
     this.state = 'slam';
     this.stateTimer = 0;
+    return true;
   }
 
-  updateSlam(dt, playerPos, playerRef) {
-    if (!this.slamTelegraph) return;
-    this.slamTelegraph.timer -= dt;
-    const s = 1 + (1.2 - this.slamTelegraph.timer) * 3;
-    this.slamTelegraph.mesh.scale.set(s, s, s);
-    this.slamTelegraph.mesh.material.opacity = 0.3 + Math.sin(this.stateTimer * 15) * 0.2;
-
-    if (this.slamTelegraph.timer <= 0) {
-      const dist = this.distanceTo(playerPos);
-      if (dist < 4.5 && playerRef && !playerRef.combat.isInvulnerable()) {
-        playerRef.combat.takeDamage(this.slamTelegraph.damage);
-      }
-      this._hideSlamRing();
+  /**
+   * slam 态的唯一退出条件：圈落地了。伤害、半径、时机都在危险区那一侧结算，
+   * 这里不复制一份判定 —— 两处时钟迟早会漂，漂了的症状是"圈已经散了人还在挨打"。
+   * 也不写网格高度：悬停型 Boss（引力化身）在这一段自己管浮沉。
+   */
+  updateSlam() {
+    const h = this.slamHazard;
+    if (h?.done) {
+      this.slamHazard = null;
       this.state = 'idle';
-      this.attackCooldown = 2.5;
+      this.attackCooldown = GROUND_HAZARD.bossSlam.recover;
+    } else if (!h) {
+      this.state = 'idle';
     }
-  }
-
-  /** 落 slam 圈常驻复用，退出时只摘出场景，不销毁 */
-  _hideSlamRing() {
-    const mesh = this.slamTelegraph?.mesh ?? this._slamRing;
-    if (!mesh) return;
-    mesh.visible = false;
-    this.scene.remove(mesh);
-    this.slamTelegraph = null;
   }
 
   update(dt, playerPos, playerRef) {
@@ -168,7 +166,7 @@ export class Boss extends Enemy {
 
     if (this.state === 'slam') {
       this.stateTimer += dt;
-      this.updateSlam(dt, playerPos, playerRef);
+      this.updateSlam();
       return;
     }
 
@@ -223,9 +221,8 @@ export class Boss extends Enemy {
       this.position.z += (dz / len) * this.speed * dt;
       this.mesh.rotation.y = Math.atan2(dx, dz);
     } else if (this.attackCooldown <= 0) {
-      if (this.phase >= 2 && Math.random() < 0.35) {
-        this.startSlamTelegraph();
-      } else {
+      const slam = this.phase >= 2 && Math.random() < 0.35 && this.startSlamTelegraph();
+      if (!slam) {
         this.state = 'windup';
         this.stateTimer = 0;
         this.showTelegraph();
@@ -254,16 +251,5 @@ export class Boss extends Enemy {
 
   clearTelegraph() {
     if (this.telegraphRing) this.telegraphRing.visible = false;
-  }
-
-  dispose() {
-    super.dispose();
-    if (this._slamRing) {
-      this.scene.remove(this._slamRing);
-      this._slamRing.geometry.dispose();
-      this._slamRing.material.dispose();
-      this._slamRing = null;
-    }
-    this.slamTelegraph = null;
   }
 }

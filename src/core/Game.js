@@ -283,6 +283,7 @@ export class Game {
       .gauge('存活敌人', () => this.enemyManager.getAliveEnemies().length)
       .gauge('敌方弹体', () => this.projectiles.count())
       .gauge('法术效果', () => this.spells.count())
+      .gauge('地面危险区', () => this.enemyManager.hazards.count())
       .gauge('飘字', () => this.damageNumbers.activeCount())
       .gauge('火花', () => this.combatFeedback.activeCount());
 
