@@ -9,7 +9,7 @@
  * 所以用例的重点是"按了几帧、第几帧为真"，而不是"读得到值"。
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   GAMEPAD_BINDINGS, PAD_ACTIONS, PAD_BUTTON, assertKeybinds,
@@ -340,11 +340,20 @@ describe('接线：桥真的挂在主循环上，且是全仓唯一读手柄的�
   });
 
   it('`getGamepads` 只出现在桥里：别处再开一条读手柄的路就是第二个输入真源', () => {
-    const src = gameSrc();
-    expect(src).not.toMatch(/getGamepads/);
-    const bridge = readFileSync(join(__dirname, '../src/engine/GamepadInput.js'), 'utf8')
-      .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
-    expect(bridge.match(/getGamepads/g).length).toBeGreaterThan(0);
+    const bridge = readFileSync(join(__dirname, '../src/engine/GamepadInput.js'), 'utf8');
+    expect(bridge).toMatch(/getGamepads/);
+    const offenders = [];
+    const walk = (dir) => {
+      for (const ent of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, ent.name);
+        if (ent.isDirectory()) { walk(p); continue; }
+        if (!p.endsWith('.js') || p === join(__dirname, '..', 'src', 'engine', 'GamepadInput.js')) continue;
+        const src = readFileSync(p, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
+        if (src.includes('getGamepads')) offenders.push(p);
+      }
+    };
+    walk(join(__dirname, '..', 'src'));
+    expect(offenders).toEqual([]);
   });
 
   it('端到端：推杆 → 桥 → 真 `PlayerController` 真的走动', () => {
