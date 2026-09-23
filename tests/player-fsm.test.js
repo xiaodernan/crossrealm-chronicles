@@ -36,6 +36,10 @@ const makePlayer = ({ stamina = 100, moveScale = 1, busy = false, lock = null } 
     _coyoteTimer: 0,
     _dashVelocity: new THREE.Vector3(),
     _dashRemaining: 0,
+    // readMoveDir 的复用槽（M4 切片2）：构造器里才建，原型宿主须手工补齐同款字段
+    _moveTmpDir: new THREE.Vector3(),
+    _moveTmpFwd: new THREE.Vector3(),
+    _moveTmpRight: new THREE.Vector3(),
     game: {
       cinematicActive: false,
       paused: false,

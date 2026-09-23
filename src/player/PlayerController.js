@@ -96,6 +96,11 @@ export class PlayerController {
     this._camTmpLook = new THREE.Vector3();
     this._camTmpLookB = new THREE.Vector3();
 
+    /** 移动输入热路径零分配（M4 切片2）：readMoveDir 每帧一次，方向 + 两条基向量都走复用槽 */
+    this._moveTmpDir = new THREE.Vector3();
+    this._moveTmpFwd = new THREE.Vector3();
+    this._moveTmpRight = new THREE.Vector3();
+
 
 
     this.currentCameraPos = new THREE.Vector3();
@@ -394,15 +399,17 @@ export class PlayerController {
     this.characterModel.setMovementState(moving, sprinting);
   }
 
-  /** 输入 → 期望移动方向（自动演示模式沿用自己的当前速度方向） */
-  readMoveDir(keys, autoPlay) {
-    const dir = new THREE.Vector3();
+  /** 输入 → 期望移动方向（自动演示模式沿用自己的当前速度方向）
+   *  默认写进复用槽 `_moveTmpDir`：调用方（`update` 里的 `ctx.moveDir`）只在本帧内消费，
+   *  下一帧开头 `dir.set(0, 0, 0)` 归零即可安全复用。传自定义 out 时不碰这枚槽。 */
+  readMoveDir(keys, autoPlay, out = this._moveTmpDir) {
+    const dir = out.set(0, 0, 0);
     if (autoPlay) {
       if (this.velocity.lengthSq() > 0.5) dir.set(this.velocity.x, 0, this.velocity.z).normalize();
       return dir;
     }
-    const forward = this.getForwardXZ();
-    const right = this.getRightXZ();
+    const forward = this.getForwardXZ(this._moveTmpFwd);
+    const right = this.getRightXZ(this._moveTmpRight);
     if (keys['KeyW']) dir.add(forward);
     if (keys['KeyS']) dir.sub(forward);
     if (keys['KeyD']) dir.sub(right);

@@ -1,14 +1,16 @@
 /**
- * M4 切片1 —— 玩家相机热路径零分配。
+ * M4 切片1 + 切片2 —— 玩家热路径零分配（相机 + 移动输入）。
  *
  * 登记在册的欠账（OVERHAUL_PLAN M3 残留 / M4 零分配清单）：第三人称与第一人称相机每帧被调
  * 60~144 次，过去 `_resolveThirdPersonLook` 每帧 `new THREE.Vector3` 三处、`getRightXZ()`
- * 又各造一枚 —— 短命对象堆满 young-gen，低端机上是持续的 GC 抖动。这里把它们收进复用 temp。
+ * 又各造一枚 —— 短命对象堆满 young-gen，低端机上是持续的 GC 抖动（切片1）。`readMoveDir`
+ * 同样每帧在 `update` 里跑一次，过去 `new Vector3` + 两条 `getXZ()` 默认分配（切片2）。
+ * 这里把它们都收进复用 temp。
  *
  * 与 `new THREE.` 相比，更难防的是"以后有人图省事又塞一个 new 回热路径"，所以主门禁是一道
- * **静态扫描**：相机四个方法的函数体里不许出现 `new THREE.*`，也不许出现不带 out 参数的
+ * **静态扫描**：五个热路径方法的函数体里不许出现 `new THREE.*`，也不许出现不带 out 参数的
  * `getRightXZ()/getForwardXZ()`（那等于每次调用又新造一枚）。运行期用例则验复用没算错（三种
- * 朝向分支机位/注视点仍有限且落对），以及 `out` 参数确实是写进去、不是返回新对象。
+ * 朝向分支机位/注视点仍有限且落对、四向移动方向归一正确），以及 `out` 参数确实是写进去、不是返回新对象。
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import * as THREE from 'three';
@@ -38,8 +40,8 @@ beforeAll(() => {
   globalThis.requestAnimationFrame = () => 0;
 });
 
-describe('相机热路径静态零分配门禁', () => {
-  const HOT = ['_updateFirstPersonCamera', '_updateThirdPersonCamera', '_resolveThirdPersonLook', '_pullInFromSolids'];
+describe('热路径静态零分配门禁（相机 + 移动输入）', () => {
+  const HOT = ['_updateFirstPersonCamera', '_updateThirdPersonCamera', '_resolveThirdPersonLook', '_pullInFromSolids', 'readMoveDir'];
   for (const name of HOT) {
     it(`${name} 里不再 new 任何 THREE 对象`, () => {
       const hits = [...methodBody(name).matchAll(/new\s+THREE\.\w+/g)].map((x) => x[0]);
@@ -131,5 +133,57 @@ describe('复用 temp 没把三条朝向分支算错（别名回归护栏）', (
     expect(finite(look)).toBe(true);
     expect(look.x).toBeLessThan(-1);   // 被拉向 focus 的 -X 侧
     expect(look.z).toBeLessThan(-1);
+  });
+});
+
+describe('readMoveDir 复用槽（切片2）：写进去、四向算对、缺省不串槽', () => {
+  const mk = () => {
+    const camera = new THREE.PerspectiveCamera(CAMERA_FOV.third, 1.6, 0.1, 100);
+    const game = { paused: false, cinematicActive: false, autoPlayMode: false, combatCamera: null, restScene: null };
+    const p = new PlayerController({ add() {}, remove() {} }, camera, makeWorld(), game);
+    p.teleport(0, 0, 0); p.yaw = 0; p.pitch = 0;
+    return p;
+  };
+  const arr = (v) => [v.x, v.y, v.z];
+
+  it('传 out 时写进传入向量并返回它（不碰默认槽）', () => {
+    const p = mk();
+    const out = new THREE.Vector3(99, 99, 99);
+    const r = p.readMoveDir({ KeyW: true }, false, out);
+    expect(r).toBe(out);
+    expect(out.z).toBeCloseTo(1);   // yaw=0 时 forward 是 +Z
+    expect(out.y).toBeCloseTo(0);   // 传入槽的脏 y 被 set(0,0,0) 归零
+  });
+
+  it('缺省两次调用复用同一枚槽，且每次开头归零（不累积上帧残值）', () => {
+    const p = mk();
+    const a = p.readMoveDir({ KeyW: true }, false);
+    const b = p.readMoveDir({ KeyS: true }, false);
+    expect(a).toBe(b);
+    // 若没在开头 set(0,0,0)，第二次的 KeyS 会叠加上一帧的 +Z 而抵消成 0
+    expect(b.z).toBeCloseTo(-1);
+  });
+
+  it('四向与组合：单键归一、W+D 走对角仍单位长', () => {
+    const p = mk();
+    expect(p.readMoveDir({ KeyW: true }, false).z).toBeCloseTo(1);
+    expect(p.readMoveDir({ KeyS: true }, false).z).toBeCloseTo(-1);
+    expect(p.readMoveDir({ KeyD: true }, false).x).toBeCloseTo(-1); // yaw=0 时 right 是 +X，D 取 -right
+    expect(p.readMoveDir({ KeyA: true }, false).x).toBeCloseTo(1);
+    const diag = p.readMoveDir({ KeyW: true, KeyD: true }, false);
+    expect(Math.hypot(diag.x, diag.z)).toBeCloseTo(1);
+  });
+
+  it('无按键 → 零向量（moving 判据靠 lengthSq 归 0）', () => {
+    const p = mk();
+    expect(p.readMoveDir({}, false).lengthSq()).toBeCloseTo(0);
+  });
+
+  it('autoPlay 沿用当前速度方向；速度过小时给零向量', () => {
+    const p = mk();
+    p.velocity.set(0, 0, 5);
+    expect(arr(p.readMoveDir({}, true))).toEqual([0, 0, 1]);
+    p.velocity.set(0.1, 0, 0.1);   // lengthSq < 0.5
+    expect(p.readMoveDir({}, true).lengthSq()).toBeCloseTo(0);
   });
 });
