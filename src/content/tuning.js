@@ -447,6 +447,18 @@ export const CAMERA_OCCLUSION = {
  */
 export const GROUND_HAZARD = {
   bossSlam: { radius: 4.5, telegraph: 1.2, damage: 35, color: 0xff2200, recover: 2.5 },
+  /**
+   * 落点圈阵列（弹幕档，大奥术师在用）：一次铺 `count` 枚，第 i 枚的前摇是
+   * `telegraph + i * stagger`、离心 `spread * sqrt((i+0.5)/count)` —— 由内向外依次落地。
+   * 数值口径：`spread` 5 / `radius` 3 时，原地不动会吃到内圈那两枚，起手就跑能在第一枚
+   * 落下前脱出整片（一枚圈只值 20 点，站住连吃才是疼的地方）。
+   * `cooldown` 是这一档自己的节奏，与砸地的收招冷却无关：两招各自决定"多久铺一次场"。
+   * `range` 是"离玩家多远才肯铺场" —— 圈心定在玩家脚下，隔半场铺过去就是白送一次演出。
+   */
+  barrage: {
+    count: 5, radius: 3, damage: 20, color: 0xcc44ff,
+    telegraph: 1.5, stagger: 0.35, spread: 5, cooldown: 7, range: 24,
+  },
   /** 起手时圈只画到最终半径的这个占比，随前摇线性涨满 */
   growFrom: 0.25,
   /** 落下后余像的淡出时长：纯表现，期间不再判伤害 */

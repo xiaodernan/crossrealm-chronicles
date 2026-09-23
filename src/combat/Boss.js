@@ -123,6 +123,22 @@ export class Boss extends Enemy {
   }
 
   /**
+   * 把场地落点夹回竞技场内，四周留出 `margin` 米边距（危险区传自己的半径）。
+   * 圈不该画到墙外：玩家贴边躲雨时，场外的圈既打不着他、也不该铺出来 ——
+   * 那等于用一片"永远走不进去也躲不开"的假预告糊满场地。
+   */
+  clampIntoArena(x, z, margin = 0) {
+    const c = this.arenaCenter;
+    const limit = Math.max(0, this.arenaRadius - margin);
+    const dx = x - c.x;
+    const dz = z - c.z;
+    const d = Math.sqrt(dx * dx + dz * dz);
+    if (d <= limit || d === 0) return { x, z };
+    const k = limit / d;
+    return { x: c.x + dx * k, z: c.z + dz * k };
+  }
+
+  /**
    * 起手砸地：把红圈交给场地危险区系统，本体只说"这一招我许诺出去了"。
    *
    * 返回 false 表示没能起手（已经有一圈在走 / 没有危险区系统 —— 例如用例直接 `new Boss`）。

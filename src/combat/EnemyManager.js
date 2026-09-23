@@ -177,7 +177,9 @@ export class EnemyManager {
   }
 
   spawnMagicBoss(config) {
-    const boss = new MagicBoss(this.scene, this.world, { ...config, projectiles: this.projectiles });
+    const boss = new MagicBoss(this.scene, this.world, {
+      ...config, projectiles: this.projectiles, hazards: this.hazards,
+    });
     this.boss2 = boss;
     this.enemies.push(boss);
     return boss;

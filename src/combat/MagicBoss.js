@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { Boss } from './Boss.js';
+import { barrageLayout } from './BarragePattern.js';
+import { GROUND_HAZARD } from '../content/tuning.js';
 
 /** 第二 Boss：大奥术师 — 魔法位面 */
 export class MagicBoss extends Boss {
@@ -15,6 +17,8 @@ export class MagicBoss extends Boss {
     this.bossId = config.bossId ?? 'archmagus';
     this.projectiles = config.projectiles;
     this.shootCooldown = 0;
+    /** 落点圈阵列自己的节奏（`GROUND_HAZARD.barrage.cooldown`），与单发弹体互不抢冷却 */
+    this.barrageCooldown = 0;
   }
 
   createMesh() {
@@ -82,6 +86,34 @@ export class MagicBoss extends Boss {
       this.shootCooldown = this.phase >= 3 ? 1.2 : 2.0;
     }
 
+    this.barrageCooldown = Math.max(0, this.barrageCooldown - dt);
+    const barrage = GROUND_HAZARD.barrage;
+    if (this.hazards && this.phase >= 2 && this.barrageCooldown <= 0
+      && this.distanceTo(playerPos) < barrage.range) {
+      this.startBarrage(playerPos);
+    }
+
     super.update(dt, playerPos, playerRef);
+  }
+
+  /**
+   * 落点圈阵列：以玩家**此刻**的位置为心，铺一片由内向外错时落下的紫圈。
+   * 铺完就不再关心玩家往哪跑 —— 这一招买的是"你还站在原地没有"，逼的是持续移动。
+   */
+  startBarrage(playerPos) {
+    const spec = GROUND_HAZARD.barrage;
+    for (const p of barrageLayout(playerPos.x, playerPos.z, spec)) {
+      const at = this.clampIntoArena(p.x, p.z, spec.radius);
+      this.hazards.spawn({
+        x: at.x,
+        z: at.z,
+        radius: spec.radius,
+        telegraph: p.telegraph,
+        damage: spec.damage,
+        color: spec.color,
+        owner: this,
+      });
+    }
+    this.barrageCooldown = spec.cooldown;
   }
 }
