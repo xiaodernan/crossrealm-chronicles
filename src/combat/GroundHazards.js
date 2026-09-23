@@ -35,6 +35,9 @@ export class GroundHazards {
    * `x`、`z` 是圆心，`owner` 是"谁许诺的"—— 施法者倒地时由 `cancelFor` 撤掉还没落下的圈，
    * 免得玩家被一个已经死掉的 Boss 从坟里打一下。
    *
+   * 给了 `duration` 就是**域**而不是**一击**：落地那一拍照常结算，之后 `duration` 秒内
+   * 每 `tick` 秒对圈内的玩家再结算一次，并按 `pull` 把玩家往圆心拽（引力井那一档）。
+   *
    * 返回的就是内部那一项：调用方拿它判 `done`（这一招落地了），不需要另一套句柄记账。
    */
   spawn(spec) {
@@ -49,11 +52,23 @@ export class GroundHazards {
       telegraph: spec.telegraph,
       damage: spec.damage,
       owner: spec.owner ?? null,
+      /** 域的持续时长；0 / undefined = 落地一击定音 */
+      duration: spec.duration ?? 0,
+      /** 域内每段结算的间隔（秒） */
+      tick: spec.tick ?? 0,
+      /** 每秒施加给玩家的向心冲量（米/秒²）；0 = 不拽人 */
+      pull: spec.pull ?? 0,
+      tickT: 0,
       t: 0,
       done: false,
+      /** 域正在持续（只有给了 `duration` 的会进这一段） */
+      active: false,
       cancelled: false,
       disc,
     };
+    if (item.duration > 0 && !(item.tick > 0)) {
+      throw new Error('持续型危险区必须有正的 tick，否则按段结算无从谈起');
+    }
     this._items.push(item);
     return item;
   }
@@ -83,11 +98,53 @@ export class GroundHazards {
         if (p < 1) continue;
         this._land(it, playerPos, playerRef);
         it.t = 0;
+        it.tickT = 0;
+        // `_land` 已把这一招标成落地：一击定音的到此转入余像，给了 `duration` 的再持续一段
+        if (it.duration > 0) it.active = true;
+        continue;
+      }
+      if (it.active) {
+        this._sustain(it, dt, playerPos, playerRef);
+        if (it.t >= it.duration) {
+          it.active = false;
+          it.t = 0;
+        }
         continue;
       }
       const q = Math.min(1, it.t / GROUND_HAZARD.linger);
       it.disc.material.opacity = GROUND_HAZARD.opacity.burst * (1 - q);
       if (q >= 1) this._release(i);
+    }
+  }
+
+  /**
+   * 持续段：每 `tick` 秒对圈内的玩家结算一次，并按 `pull` 把人往圆心拽。
+   *
+   * 段与段之间用 `while` 补齐，所以 30Hz 与 144Hz 在一秒里挨的段数一样（B39 那条纪律）。
+   * 拉力不看无敌帧：无敌帧是"这一下不算"，不是"这一下别把我拖进去" —— 拖进去之后
+   * 下一段照样落在身上，这才是"站进引力井里"该有的代价。
+   */
+  _sustain(it, dt, playerPos, playerRef) {
+    const { warn, burst } = GROUND_HAZARD.opacity;
+    it.disc.scale.setScalar(it.radius);
+    it.disc.material.opacity = warn + (0.5 + 0.5 * Math.sin(it.t * PULSE)) * (burst - warn);
+    if (!playerPos || !playerRef) return;
+    const dx = it.x - playerPos.x;
+    const dz = it.z - playerPos.z;
+    const d2 = dx * dx + dz * dz;
+    if (d2 > it.radius * it.radius) return;
+    const d = Math.sqrt(d2);
+    const vel = playerRef.velocity;
+    // 圆心一米内不再加速：那里已经算被吸住了，继续推只会让它在原点上抖
+    if (vel && it.pull && d > 0.4) {
+      const k = (it.pull * dt) / d;
+      vel.x += dx * k;
+      vel.z += dz * k;
+    }
+    it.tickT += dt;
+    while (it.tickT >= it.tick) {
+      it.tickT -= it.tick;
+      if (!playerRef.combat.isInvulnerable()) playerRef.combat.takeDamage(it.damage);
     }
   }
 
@@ -103,14 +160,25 @@ export class GroundHazards {
     it.disc.material.opacity = GROUND_HAZARD.opacity.burst;
   }
 
-  /** 撤掉某位施法者**还没落下**的圈（它死了 / 这场仗结束了）：已经落下的不撤，余像该看完 */
+  /**
+   * 撤掉某位施法者**还没落下**的圈（它死了 / 这场仗结束了）：已经落下的不撤，余像该看完。
+   *
+   * 域（`active`）是唯一的例外：它还在按段扣血，而"还在扣血"依附的是施法者活着这件事 ——
+   * 井塌了就是塌了，玩家不该被一个已死的引力井继续拖着挨段。已经落下的那一拍仍算数。
+   */
   cancelFor(owner) {
     for (let i = this._items.length - 1; i >= 0; i--) {
       const it = this._items[i];
-      if (it.owner !== owner || it.done) continue;
-      it.cancelled = true;
-      it.done = true;
-      this._release(i);
+      if (it.owner !== owner) continue;
+      if (!it.done) {
+        it.cancelled = true;
+        it.done = true;
+        this._release(i);
+      } else if (it.active) {
+        it.cancelled = true;
+        it.active = false;
+        it.t = 0;
+      }
     }
   }
 

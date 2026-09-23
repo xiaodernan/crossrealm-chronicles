@@ -192,7 +192,9 @@ export class Boss extends Enemy {
 
   /** 放出一招场地招。返回 false = 没放成（没有危险区系统 / 已有一圈在走），冷却也不该重置 */
   castArenaMove(entry, playerPos) {
-    return entry.move === 'barrage' ? this.startBarrage(playerPos, entry) : this.startSlamTelegraph();
+    if (entry.move === 'barrage') return this.startBarrage(playerPos, entry);
+    if (entry.move === 'well') return this.startGravityWell(playerPos, entry);
+    return this.startSlamTelegraph();
   }
 
   /**
@@ -253,6 +255,31 @@ export class Boss extends Enemy {
         owner: this,
       });
     }
+    return true;
+  }
+
+  /**
+   * 引力井：在玩家**此刻**脚下开一口会持续存在的圈。前摇那 1.4 秒走出去很容易，
+   * 难的是走出去之后别再回来 —— 井每 `tick` 秒结算一段，而且每段之前先把人往圆心拽一把
+   * （`GroundHazards._sustain`）。和弹幕同一套"买的是你还站在原地没有"，
+   * 只是把"连吃五枚"换成"站着别动"。
+   */
+  startGravityWell(playerPos, entry) {
+    if (!this.hazards || !playerPos) return false;
+    const spec = this.arenaSpec(entry);
+    const at = this.clampIntoArena(playerPos.x, playerPos.z, spec.radius);
+    this.hazards.spawn({
+      x: at.x,
+      z: at.z,
+      radius: spec.radius,
+      telegraph: spec.telegraph,
+      damage: spec.damage,
+      color: entry.tint ?? spec.color,
+      duration: spec.duration,
+      tick: spec.tick,
+      pull: spec.pull,
+      owner: this,
+    });
     return true;
   }
 

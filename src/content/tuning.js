@@ -463,6 +463,23 @@ export const GROUND_HAZARD = {
     count: 5, radius: 3, damage: 20, color: 0xcc44ff,
     telegraph: 1.5, stagger: 0.35, spread: 5,
   },
+  /**
+   * 引力井（持续型危险区）：落地一击定音之后**还在地上待 `duration` 秒** ——
+   * 每 `tick` 秒对圈内补一段 `damage`，同时按 `pull`（米/秒²）把人往圆心加速。
+   * 数值口径：`damage 6 × (1 次落地 + 3/0.6=5 段) = 36`，与一次砸地同量级，
+   * 差别在于这 36 点是摊在 3 秒里 —— 站着不动必死，但代价是"走出 5.5 米"，
+   * 而不是"看准一瞬间躲开"。
+   *
+   * `pull` 买的是**"停下"**，不是"跑不动"（实测：站着不动约 0.55 米/秒漂向井心）。
+   * 拉力写在 `playerRef.velocity` 上，与 `SpaceBoss` 那记一次性拖拽（同一份速度上 `+= 6`）
+   * 同一条通道；而玩家有输入时状态机是**整条改写**水平速度的（`PlayerController.moveHorizontal`），
+   * 所以按住方向它就抹掉了这一帧的拉力。要改成"连跑都被拖着"得走玩家的受击位移通道，
+   * 那是另一档题（见 MASTER_PLAN 的变更记录）。
+   */
+  gravityWell: {
+    radius: 5.5, telegraph: 1.4, damage: 6, color: 0x4488ff,
+    tick: 0.6, duration: 3, pull: 8,
+  },
   /** 起手时圈只画到最终半径的这个占比，随前摇线性涨满 */
   growFrom: 0.25,
   /** 落下后余像的淡出时长：纯表现，期间不再判伤害 */

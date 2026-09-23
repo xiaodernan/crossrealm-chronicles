@@ -19,6 +19,7 @@ import { GROUND_HAZARD } from './tuning.js';
 export const ARENA_MOVES = {
   slam: 'bossSlam',
   barrage: 'barrage',
+  well: 'gravityWell',
 };
 
 /**
@@ -50,6 +51,10 @@ export const BOSS_ARENA_SCRIPTS = {
   'singularity-herald': [
     { move: 'slam', phase: 2, trigger: 'timed', rate: 0.08 },
     { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 9, range: 22, tint: 0x4488ff },
+    // 引力井是它的招牌：第三阶段起 12 秒一口，井口就开在你此刻站的地方。
+    // `range` 刻意比弹幕（22 米）近一档：跨阶段那一帧两条 opportunity 都会当帧起念，
+    // 15 米内是"贴脸连吃两口井"，稍远些只落弹幕 —— 玩家退开的位置决定挨哪一份。
+    { move: 'well', phase: 3, trigger: 'opportunity', cooldown: 12, range: 15 },
   ],
   'void-chronarch': [
     { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35 },
