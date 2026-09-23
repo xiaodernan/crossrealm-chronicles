@@ -9,3 +9,4 @@ public/godot-export/
 .vite/
 resume-stack
 .tmp-*/
+vite.config.js.timestamp-*.mjs
