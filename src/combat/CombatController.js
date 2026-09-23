@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { MOVES, LOCKED_CONE } from './MoveTable.js';
 import { hitDirection, hitSuffix, isBehind, isGuarded, resolveHit } from './Resolution.js';
 import { createHurtbox, pickPart } from './Hurtbox.js';
-import { COMBO, GUARD, HIT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN } from '../content/tuning.js';
+import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN } from '../content/tuning.js';
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
 
@@ -46,6 +46,12 @@ export class CombatController {
     this.invincibleTimer = 0;
     this.attackHitDone = false;
     this.mouseDown = { left: false, right: false };
+    /* 输入缓冲（W-A4）：只记最近一次按下 + 它的剩余存活时间 */
+    this._input = { action: null, ttl: 0 };
+    /** 上一帧的按键状态，用于按下沿检测（按住不放不该每帧触发） */
+    this._prevKeys = {};
+    /** 本轮按键是否已经抬过盾：弹反的表现只播一次，逻辑可以逐帧重试 */
+    this._parrySwing = false;
     /** 本次出手的定格判定参数，null 表示当前无待判定攻击 */
     this._strike = null;
     this.comboCount = 0;
@@ -194,6 +200,7 @@ export class CombatController {
     this.stateTimer = 0;
     this._strike = null;
     this.comboCount = 0;
+    this.clearInputBuffer();
     this.dialog.toast('穿越者倒下了…在世界之锚处重生');
     window.dispatchEvent(new CustomEvent('player-respawn', { detail: {} }));
     this.publishVitals();
@@ -230,6 +237,95 @@ export class CombatController {
     return 1 + steps * (COMBO.step + (this.skillMods?.combo ?? 0) * COMBO.skillStep);
   }
 
+  /* ------------------------------------------------------------------ *
+   * 输入缓冲与取消关系（W-A4）
+   * ------------------------------------------------------------------ */
+
+  /**
+   * 记下一次按键意图，等当前招式开放取消窗口时兑现（见 `content/tuning.js` 的 `INPUT`）。
+   * 只保留**最近一次**：连点两下不该排队成两次攻击。
+   *
+   * @param {'light'|'heavy'|'roll'|'parry'|'skill'} action
+   */
+  bufferAction(action) {
+    /* 弹反的"举盾"表现放在按下那一刻，而不是判定成功那一刻：
+     * 逻辑要逐帧重试（提前量正是输入缓冲存在的意义），表现只该播一次 ——
+     * 否则一次按键会在缓冲期内反复抬手。冷却中不重复播，避免刚弹完又抬手。 */
+    if (action === 'parry' && !this._parrySwing && this.parryCooldown <= 0) {
+      this._parrySwing = true;
+      this.player.characterModel?.playBlock?.();
+      this.audio?.blockClink?.();
+    }
+    this._input.action = action;
+    this._input.ttl = INPUT.buffer;
+  }
+
+  /** 丢弃缓冲（重生 / 读档 / 演出接管时用） */
+  clearInputBuffer() {
+    this._input.action = null;
+    this._input.ttl = 0;
+    this._parrySwing = false;
+  }
+
+  /**
+   * 此刻能否从当前招式转进 `action`。
+   *
+   * 不在招式中（idle / combo）一律允许；在招式中则要求本招声明了 `cancel`
+   * 且 `stateTimer` 已越过 `from`、`into` 含该动作。
+   * 取消窗口一律晚于命中帧（`from >= at`），所以取消**永远不会吞掉已经登记的那一刀**。
+   *
+   * @param {string} action
+   */
+  canStart(action) {
+    if (this.state === 'idle' || this.state === 'combo') return true;
+    const cancel = MOVES[this.state]?.cancel;
+    if (!cancel) return false;
+    if (this.stateTimer < cancel.from) return false;
+    return cancel.into.includes(action);
+  }
+
+  /** 按名字派发一次出手尝试；缓冲消费与外部直接调用共用同一张表 */
+  tryAction(action) {
+    switch (action) {
+      case 'light': return this.tryLightAttack();
+      case 'heavy': return this.tryHeavyAttack();
+      case 'roll': return this.tryRoll();
+      case 'parry': return this.tryParry();
+      case 'skill': return this.tryWeaponArt();
+      default: return false;
+    }
+  }
+
+  /**
+   * 按下沿检测：只在"这一帧按下"时返回 true。
+   * 浏览器对按住不放的键会持续重发 `keydown`，所以 `keys[code]` 一直为真 ——
+   * 直接用它当触发条件会让"按住 Ctrl"变成每帧一次翻滚请求。
+   */
+  _pressed(keys, code) {
+    const down = !!keys[code];
+    const was = !!this._prevKeys[code];
+    this._prevKeys[code] = down;
+    return down && !was;
+  }
+
+  /** 缓冲衰减 + 兑现：每帧在状态推进之后调用，因此本帧刚开放的取消窗口当帧就能用上 */
+  _consumeInput(dt) {
+    const buf = this._input;
+    if (buf.ttl > 0) {
+      buf.ttl = Math.max(0, buf.ttl - dt);
+      if (buf.ttl <= 0) {
+        buf.action = null;
+        // 缓冲过期，本轮的"举盾"表现也该收掉，下一次按下重新抬手
+        this._parrySwing = false;
+      }
+    }
+    if (!buf.action) return;
+    if (this.tryAction(buf.action)) {
+      buf.action = null;
+      buf.ttl = 0;
+    }
+  }
+
   /** 出手瞬间按帧表登记本次判定：判定只在跨过 move.at 的那一帧执行一次，
    *  窗口内后到的敌人不再被补判（B5），战技与终结技也不再于释放当帧结算（B6）。 */
   _setStrike(move, { dmg, posture, color, tint, range = move.range, band = move.band, element = null, suffix = '' }) {
@@ -241,7 +337,7 @@ export class CombatController {
   }
 
   tryLightAttack() {
-    if ((this.state !== 'idle' && this.state !== 'combo') || this.stamina < this.lightStamina) return false;
+    if (!this.canStart('light') || this.stamina < this.lightStamina) return false;
     this.stamina -= this.lightStamina;
     this.state = 'light';
     this.stateTimer = 0;
@@ -261,7 +357,7 @@ export class CombatController {
 
   tryHeavyAttack() {
     if (this.riposteWindow > 0) return this.tryRiposte();
-    if ((this.state !== 'idle' && this.state !== 'combo') || this.stamina < this.heavyStamina) return false;
+    if (!this.canStart('heavy') || this.stamina < this.heavyStamina) return false;
     this.stamina -= this.heavyStamina;
     this.state = 'heavy';
     this.stateTimer = 0;
@@ -300,8 +396,11 @@ export class CombatController {
 
   tryRoll() {
     if (this.rollCooldownTimer > 0) return false;
-    if ((this.state !== 'idle' && this.state !== 'combo') || this.stamina < this.rollStamina) return false;
+    if (!this.canStart('roll') || this.stamina < this.rollStamina) return false;
     this.stamina -= this.rollStamina;
+    // 翻滚本身不登记判定；把上一招残留的 `_strike` 摘掉，避免它在翻滚中途突然结算
+    this._strike = null;
+    this.attackHitDone = true;
     this.state = 'roll';
     this.stateTimer = 0;
     this.invincible = true;
@@ -315,10 +414,7 @@ export class CombatController {
 
   tryParry() {
     if (this.parryCooldown > 0 || this.stamina < this.parryStamina) return false;
-    if (this.state !== 'idle' && this.state !== 'combo') return false;
-
-    this.player.characterModel?.playBlock?.();
-    this.audio?.blockClink?.();
+    if (!this.canStart('parry')) return false;
 
     for (const enemy of this.enemies.getAliveEnemies()) {
       if (enemy.distanceTo(this.player.position) > 3.5) continue;
@@ -343,7 +439,7 @@ export class CombatController {
 
   tryWeaponArt() {
     if (this.skillCooldown > 0 || this.stamina < this.skillStamina) return false;
-    if (this.state !== 'idle' && this.state !== 'combo') return false;
+    if (!this.canStart('skill')) return false;
     this.stamina -= this.skillStamina;
     this.skillCooldown = 4;
     this.state = 'skill';
@@ -552,15 +648,16 @@ export class CombatController {
         this.toggleLock();
       }
     }
-    if (keys['KeyF']) { keys['KeyF'] = false; this.tryParry(); }
-    if (keys['KeyR']) { keys['KeyR'] = false; this.tryWeaponArt(); }
-    if (keys['ControlLeft'] || keys['ControlRight']) {
-      if (this.state === 'idle' || this.state === 'combo') {
-        keys['ControlLeft'] = false;
-        keys['ControlRight'] = false;
-        this.tryRoll();
-      }
-    }
+    /* 输入一律先进缓冲（W-A4）：按下沿触发，长按不连发；能否兑现由 `canStart` 决定。
+     * 不再用"清掉 keys[...] 冒充边沿"的写法 —— 浏览器对按住不放的键会持续重发 keydown，
+     * 那个写法在按住 Ctrl 时会退化成每帧一次翻滚请求。
+     * 左右 Ctrl 必须**分别求值**：`||` 短路会让右边那个的 `_prevKeys` 不被更新，
+     * 于是按住右 Ctrl 反而退化成每帧触发。 */
+    const rollLeft = this._pressed(keys, 'ControlLeft');
+    const rollRight = this._pressed(keys, 'ControlRight');
+    if (this._pressed(keys, 'KeyF')) this.bufferAction('parry');
+    if (this._pressed(keys, 'KeyR')) this.bufferAction('skill');
+    if (rollLeft || rollRight) this.bufferAction('roll');
 
     this.stateTimer += dt;
 
@@ -579,10 +676,12 @@ export class CombatController {
       }
     }
 
-    if (this.state === 'idle' || this.state === 'combo') {
-      if (this.mouseDown.left) { this.mouseDown.left = false; this.tryLightAttack(); }
-      if (this.mouseDown.right) { this.mouseDown.right = false; this.tryHeavyAttack(); }
-    }
+    // 鼠标键：Game 侧只负责置位，这里转成缓冲意图
+    if (this.mouseDown.left) { this.mouseDown.left = false; this.bufferAction('light'); }
+    if (this.mouseDown.right) { this.mouseDown.right = false; this.bufferAction('heavy'); }
+
+    /* 放在状态推进之后：本帧刚开放的取消窗口当帧就能用上，玩家感觉不到那一帧的延迟 */
+    this._consumeInput(dt);
   }
 
   isBusy() {
