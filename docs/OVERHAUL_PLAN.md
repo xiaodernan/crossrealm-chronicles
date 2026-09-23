@@ -445,6 +445,12 @@ M0 ─→ M1 ─→ M2 ─→ M3 ─→ M4 ─┬─→ M5 ─→ M6
 
 ## 变更记录
 
+- 2026-09-24 **M4 测试夹具收口：消除 `ProgressEvent is not defined` 未处理 rejection**（提交 `937290d`）：
+  - 病灶：three 的 `FileLoader` 在 node 里用 `fetch` + `response.body.getReader()` 流式读纹理/GLB，每读一块 `new ProgressEvent('progress', {loaded,total})`（`three.core.js:26954`）。node 无 `ProgressEvent` 全局 → 那条 reader promise 在测试环境拆除后抛 `ReferenceError`，落成间歇 1~3 条未处理 rejection，把 vitest 收尾行从纯绿污染成 `Errors 1 error`。多条变更记录以"登记备查、归 M4 夹具收口"挂账。
+  - 交付：新增全局 vitest 夹具 `tests/setup.js`（`vite.config.js` 的 `test.setupFiles`）—— 仅在 `globalThis.ProgressEvent` 缺失时补一枚携带 `loaded/total` 的最小构造体；测试无人挂 `onProgress`，事件造出即弃，故不实现任何真实事件语义。
+  - 验证：连跑 **6 次 0 复现**、`Errors` 行消失；全套 **506 例 / 35 文件**、lint 0 error / 10 warning、build 绿（`test` 块被 `vite build` 忽略）。
+  - 放弃了什么：不去给触发加载的用例逐个 `await`/取消 reader（那要改生产加载路径或给每个建世界的用例加 teardown 钩子，面大且脆），而是在夹具层一次性补全局 —— 这是一条纯 node 环境缺全局的缺口，不是被测代码的 bug。
+
 - 2026-09-24 **M4 切片2：移动输入热路径零分配（收掉切片1 留的 `readMoveDir` 尾巴）**（提交 `ab55c2d`）：
   - 病灶：`PlayerController.update` 每帧调 `readMoveDir` 一次，函数体 `new THREE.Vector3()` 造返回值 + `getForwardXZ()`/`getRightXZ()` 无参各造一枚 —— 与切片1 相机同类的一秒 60~144 帧短命对象。切片1 显式把它记为"输入层、单列后续"的尾巴。
   - 交付：构造期加三枚复用槽 `_moveTmpDir/_moveTmpFwd/_moveTmpRight`；`readMoveDir(keys, autoPlay, out = this._moveTmpDir)` 开头 `set(0,0,0)` 归零再累加，两条基向量取复用槽。复用安全性前提：返回值只写进 `ctx.moveDir`、本帧内被 `fsm`→`moveHorizontal` 读 `.x/.z` 消费、不跨帧持有（唯一调用点已核）。
@@ -465,7 +471,7 @@ M0 ─→ M1 ─→ M2 ─→ M3 ─→ M4 ─┬─→ M5 ─→ M6
   - 交付：新增 `src/engine/EventBus.js` —— `on(name,handler,tag)` / `emit(name,detail)` / `offAll(tag)` / `listenerCount()`。**底层仍是 window CustomEvent**（迁移单监听不动派发方、不动回调签名）。两道咽喉：`name` 必须登记过否则 `on()/emit()` **当场抛错**（抄错名从"静默失踪"升级成"启动就炸"，是登记表的运行期咽喉）；`tag` 是所有权标识（约定 `"域/类名"`），`offAll(tag)` 一次结清该实例全部监听，同 `(name,handler)` 同 tag 重复注册与 DOM 一样吞掉第二次、账本跟着吞。样板落在最重两处：`ui/HUD.js` 20 处裸监听整体迁成 `on(...,'ui/HUD')`，`dispose()` 从"只退订观测量"扩成三本账（`_offs` + `offAll(EVENT_TAG)` + `scheduler.clear` 两条 banner/finisher）；`game/RestDialogue.js._emit` 改走 `emit(type,detail)`，成为总线派发第一个真实使用方（`payload:null ⇔ 不带 detail` 的运行期校验挂这）。
   - 门禁：新增 `tests/event-bus.test.js` **15 例**（8 行为：on/emit 同一个 CustomEvent / 未登记名抛错 / 纯信号带 detail 抛错 / offAll 整体注销且幂等 / 退订函数单摘 / 同 handler 去重不虚报 / 参数校验 / 无 window emit 返回 false；3 静态门禁：裸 `window` 游戏事件监听逐文件台账 `toEqual` 整张快照**只许收缩**、用 `on()` 必配 `offAll()`、`on()` 一律带 tag 不许落 `UNGROUPED`）。`tests/event-registry.test.js` 扫描器扩认 `emit()/on()` 新写法并排除总线/登记表自身 —— 只认旧写法的话迁移越干净门禁越瞎。全套 **409 例 / 30 文件**、lint 0 error / 10 warning（三个新文件不添告警）、build 绿。
   - 行为增量：玩家侧无可感知变化（基础设施 / 契约修复）；对开发者是抄错名当场炸、HUD 若重建不再累积第二份监听。
-  - 放弃了什么（如实记录）：① 不做 `detail` 键级 schema 校验（登记里 `payload` 多是散文，硬当 schema 只产假阳性，`emit` 只校验"标纯信号却带 detail"这一条）；② 不换传输层，等 151 处全迁完再谈；③ 不建细粒度 `off()`（`on()` 已返回退订函数、`offAll` 覆盖 dispose）；④ **不强行迁 131 处存量裸监听**，也不收编 137 处存量 `dispatchEvent` —— 那是逐系统接线的独立大活，归 W-B，由本切片的只许收缩台账钉住不许反弹。另记：全套跑测偶发 1~3 条 `ProgressEvent is not defined` 未处理 rejection，经复查在**不含本切片改动的 HEAD** 上同样复现（three.js 纹理加载器 fetch 分块时构造它、node 无此全局），属既有测试定时抖动、非本切片引入，登记归 M4 夹具收口。
+  - 放弃了什么（如实记录）：① 不做 `detail` 键级 schema 校验（登记里 `payload` 多是散文，硬当 schema 只产假阳性，`emit` 只校验"标纯信号却带 detail"这一条）；② 不换传输层，等 151 处全迁完再谈；③ 不建细粒度 `off()`（`on()` 已返回退订函数、`offAll` 覆盖 dispose）；④ **不强行迁 131 处存量裸监听**，也不收编 137 处存量 `dispatchEvent` —— 那是逐系统接线的独立大活，归 W-B，由本切片的只许收缩台账钉住不许反弹。另记：全套跑测偶发 1~3 条 `ProgressEvent is not defined` 未处理 rejection，经复查在**不含本切片改动的 HEAD** 上同样复现（three.js 纹理加载器 fetch 分块时构造它、node 无此全局），属既有测试定时抖动、非本切片引入，登记归 M4 夹具收口。 —— ✅ **已收口（M4 夹具 `937290d`）**：`tests/setup.js` 全局补最小 `ProgressEvent`，连跑 6 次 0 复现。
 - 2026-09-23 **W-A1 切片5：事件名登记表与静态门禁（关闭 B44 的命名半区）**（提交 `bf93a4c`）：
   - 病灶：`new CustomEvent('a')` 与 `addEventListener('b')` 是两次独立的手抄，中间没有任何东西把它们对上，抄错不报错、只是下游永远醒不过来。与本文 1.4 节那批"静默失效"同类，只是这次飘走的是**内容**：动手前扫到三条实物病例 —— ① `CgGallerySystem` 监听 `dungeon-room-clear`，派发方发的是 `dungeon-room-cleared`，于是「副本清房」这张 CG 从此不可能解锁；② `VoidBoss` 两处派发 `time-stop-end` 而全仓无人监听，HUD 的「⏳ 时停中」写上区副标题后再也不会落回（要等下次换区才被顶掉）；③ `dungeon-enter` 从不带 `rerun`，HUD 却按它弹「深渊再探」，那条提示永远不出现。三条在控制台都留不下任何痕迹。
   - 交付：新增 `src/engine/events.js`（357 行 / 71 条登记，按域分组，每条 `desc` + `payload` 形状；16 条仓库内确实无监听者的挂 `hook` 并逐条写明理由）。`Object.freeze` 只冻一层，条目也逐条冻。营火对话的派生名收进 `REST_DIALOGUE_EVENTS`，`RestDialogue._emit()` 改查表取名、未知阶段直接抛错。HUD 区副标题改出唯一写入口 `_renderZoneSubtitle()`：渗漏与时停成为**带来源的覆盖层**，`_clearSubtitleOverlay(source)` 只允许开它的那一路关它，换区作为权威重写作废覆盖层；`boss-defeated` 里补一条收口（Boss 死在时停里就不会再派发 `time-stop-end`）。派发侧补齐 `dungeon-enter` 的 `rerun`。
