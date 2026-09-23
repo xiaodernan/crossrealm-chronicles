@@ -22,6 +22,15 @@ export class HotkeyRouter {
     this._down = new Array(table.length).fill(false);
   }
 
+  /**
+   * 换一张表（重映射之后）。边沿状态跟着表走 —— 留着旧的定长数组，
+   * 换表后的第一次按下会被当成"已经按着了"，那一格键就此失灵。
+   */
+  useTable(table) {
+    this.entries = table;
+    this._down = new Array(table.length).fill(false);
+  }
+
   /** @returns {boolean} 调用方应当对这个键 `preventDefault()`（挡住浏览器默认行为） */
   onKeydown(code) {
     if (this.isBlocked(code)) return false;

@@ -1398,6 +1398,15 @@ body.finisher-flash::after {
 
 .settings-box input[type="range"] { width: 100%; margin-top: 4px; }
 
+.keybind-list { max-height: 42vh; overflow-y: auto; text-align: left; }
+.keybind-row {
+  display: flex; align-items: center; gap: 8px;
+  margin: 6px 0; font-size: 0.8rem; color: #aaa;
+}
+.keybind-row .keybind-name { flex: 1; }
+.keybind-row button { min-width: 5.5rem; }
+.keybind-hint { font-size: 0.72rem; color: #c9a962; }
+
 .ft-btn { text-align: left; }
 
 #weapon-display { color: #c9a962; font-size: 0.85rem; }
