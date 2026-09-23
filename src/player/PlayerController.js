@@ -6,7 +6,7 @@ import { createPlayerFSM } from './PlayerFSM.js';
 
 import { shake } from '../engine/Shake.js';
 import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE } from '../engine/CameraRig.js';
-import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND, LOCK_ON_CAMERA } from '../content/tuning.js';
+import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND, LOCK_ON_CAMERA, PLAYER_KNOCK } from '../content/tuning.js';
 import { ZONE_IDS } from '../world/ZoneIdentity.js';
 
 
@@ -136,6 +136,15 @@ export class PlayerController {
 
     /** 时标账本 `key → { scale, left }`；null = 当前没有任何来源在改时标（不为一个用不上的 Map 分配） */
     this._timeScales = null;
+
+    /**
+     * 外部冲量账（被拽、被推）：别处不要写 `velocity`，走 `applyKnockback()`。
+     * 与玩家的位移意图**分开积分**，所以"按住方向键"抹不掉它，两条通道也不会互相喂 —— 见 `PLAYER_KNOCK`。
+     */
+    this.knock = { x: 0, z: 0 };
+
+    /** `_stepKnock()` 的复用槽：本帧的外力速度，热路径不分配（M4） */
+    this._knockStep = { x: 0, z: 0 };
 
 
     /** 移动与碰撞参数（M1）：脚部圆半径、可迈上台阶、土狼时间与跳跃缓冲 */
@@ -319,6 +328,9 @@ export class PlayerController {
   teleport(x, y, z, { keepVelocity = false, yaw, pitch } = {}) {
     this.position.set(x, y, z);
     if (!keepVelocity) this.velocity.set(0, 0, 0);
+    // 外力账**无条件**清：`keepVelocity` 保的是玩家自己的动量，而拽他的那口井在上一张地图 ——
+    // 落点上再留一笔隐形的手，等于传送出去还往回漂
+    this.clearKnockback();
     if (Number.isFinite(yaw)) { this.yaw = yaw; this.targetYaw = yaw; }
     if (Number.isFinite(pitch)) {
       this.pitch = THREE.MathUtils.clamp(pitch, -0.12, 0.62);
@@ -383,6 +395,78 @@ export class PlayerController {
       for (const e of this._timeScales.values()) if (e.scale < s) s = e.scale;
     }
     this.timeSlow = s;
+  }
+
+  /**
+   * 外力进玩家：`(dirX, dirZ)` 归一后乘 `speed` 记进冲量账，本帧不许立刻改变位置。
+   *
+   * 为什么不给一条 `velocity +=` 的捷径：状态机在有输入时是**整条改写**水平速度的
+   * （`moveHorizontal`），写进 `velocity` 的外力下一帧就没了 —— 引力井从前症状是
+   * "按住方向键等于没有引力"。记在另一本账上，玩家的意图与外力的偏移各自衰减、相加后才积分。
+   * 返回实际记下的速度（`0` = 这一下没进账），调用方要拿它决定要不要出戏。
+   */
+  applyKnockback(dirX, dirZ, speed) {
+    if (!(speed > 0)) return 0;
+    const len = Math.hypot(dirX, dirZ);
+    if (len <= 0) return 0;
+    let kx = this.knock.x + (dirX / len) * speed;
+    let kz = this.knock.z + (dirZ / len) * speed;
+    // 封顶：两口井叠一记撞击不该把玩家弹射出去，方向保留、只缩长度
+    const m = Math.hypot(kx, kz);
+    if (m > PLAYER_KNOCK.maxSpeed) {
+      const s = PLAYER_KNOCK.maxSpeed / m;
+      kx *= s;
+      kz *= s;
+    }
+    this.knock.x = kx;
+    this.knock.z = kz;
+    return speed;
+  }
+
+  /**
+   * 持续力场（引力井那一类）：`accel` 是米/秒²，本帧记进账的增量是它**在这一帧上的积分**。
+   *
+   * 为什么单列一条：脉冲按"每帧加 `a·dt`"记账的话，稳态速度会变成
+   * `a·dt / (1 - e^(-λdt))` —— 60Hz 下比设计值高 8.9%、128Hz 下高 4.4%，帧率换了手感就换了
+   * （B39 禁的正是这个）。按积分记则稳态速度精确等于 `accel / decay`，与帧长无关。
+   */
+  applySustainedForce(dirX, dirZ, accel, dt) {
+    if (!(accel > 0) || !(dt > 0)) return 0;
+    const lambda = PLAYER_KNOCK.decay;
+    return this.applyKnockback(dirX, dirZ, (accel * (1 - Math.exp(-lambda * dt))) / lambda);
+  }
+
+  /** 传送/重生：账本跟着 `velocity` 一起清 —— 人已经不在那块地上了，拽他的场也不在了 */
+  clearKnockback() {
+    this.knock.x = 0;
+    this.knock.z = 0;
+  }
+
+  /**
+   * 结算本帧的外力速度，并把账按秒衰减。与 `Enemy._advance` 同一套曲线平均：
+   * 用的是"衰减曲线在本帧上的平均值"而不是起始值，所以 30Hz 与 240Hz 累计位移相同（B39）。
+   *
+   * 返回的是**本帧要叠进位移的速度**（复用槽，别存下来）。为什么不直接加进 `velocity`：
+   * 那条通道自己也在被状态机衰减（无输入时 `decayHorizontal`），两笔一起积分等于把同一个
+   * 拉力喂两遍 —— 稳态速度会随帧率翻倍。
+   */
+  _stepKnock(dt) {
+    const out = this._knockStep;
+    const kx = this.knock.x;
+    const kz = this.knock.z;
+    if (kx === 0 && kz === 0) {
+      out.x = 0;
+      out.z = 0;
+      return out;
+    }
+    const lambda = PLAYER_KNOCK.decay;
+    const kd = Math.exp(-lambda * dt);
+    const km = dt > 0 ? (1 - kd) / (lambda * dt) : 0;
+    out.x = kx * km;
+    out.z = kz * km;
+    this.knock.x = Math.abs(kx * kd) < 1e-3 ? 0 : kx * kd;
+    this.knock.z = Math.abs(kz * kd) < 1e-3 ? 0 : kz * kd;
+    return out;
   }
 
   /** 速度倍率：法术、时停等外部效果统一从这里乘进去，状态机不必各自认识它们 */
@@ -602,6 +686,11 @@ export class PlayerController {
 
     const r = this.colliderRadius;
 
+    // 外力与本帧速度相加后才进积分：玩家的意图这一帧已经由状态机写完（locomotion 是整条
+    // 改写水平速度的），两条通道各衰减各的，谁也不喂谁 —— 见 `_stepKnock`
+    const kv = this._stepKnock(dt);
+    const ivx = this.velocity.x + kv.x;
+    const ivz = this.velocity.z + kv.z;
 
 
     if (collision) {
@@ -614,9 +703,9 @@ export class PlayerController {
 
         r,
 
-        this.velocity.x * dt,
+        ivx * dt,
 
-        this.velocity.z * dt,
+        ivz * dt,
 
         footY
 
@@ -628,9 +717,9 @@ export class PlayerController {
 
     } else {
 
-      this.position.x += this.velocity.x * dt;
+      this.position.x += ivx * dt;
 
-      this.position.z += this.velocity.z * dt;
+      this.position.z += ivz * dt;
 
     }
 

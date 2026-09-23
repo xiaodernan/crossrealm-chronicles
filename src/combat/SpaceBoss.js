@@ -72,9 +72,8 @@ export class SpaceBoss extends Boss {
       if (playerRef) {
         const dx = this.position.x - playerPos.x;
         const dz = this.position.z - playerPos.z;
-        const len = Math.sqrt(dx * dx + dz * dz) || 1;
-        playerRef.velocity.x += (dx / len) * 6;
-        playerRef.velocity.z += (dz / len) * 6;
+        // 一记 6 米/秒的外部冲量：走玩家的冲量账，所以它按秒衰减、也不吃按键的整条改写
+        playerRef.applyKnockback(dx, dz, 6);
       }
     }
 

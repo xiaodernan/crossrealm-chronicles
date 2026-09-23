@@ -5,8 +5,9 @@
  * 需要证明的是四件事：
  * 1. **段数只由经过的秒数决定**：30Hz 与 144Hz 在一口井里挨的段数必须一样（B39 的纪律），
  *    而且一帧跨过多段时要一次补齐 —— 卡帧不该等于免单。
- * 2. **拉力写在玩家自己的速度上**：与 `SpaceBoss` 那记一次性拖拽同一条通道，
- *    所以无敌帧吞得掉伤害段、吞不掉位移（"这一下不算" ≠ "这一下别把我拖进去"）。
+ * 2. **拉力走玩家的冲量账**：与 `SpaceBoss` 那记一次性拖拽同一条通道（`applyKnockback`），
+ *    所以无敌帧吞得掉伤害段、吞不掉位移（"这一下不算" ≠ "这一下别把我拖进去"），
+ *    而按住方向键同样抹不掉它 —— 切片6 之前恰恰抹得掉。
  * 3. **域跟着主人塌**：井还在 tick 时主人倒地，剩下的段数一笔勾销；
  *    已经落下的那一拍与余像照旧算数（切片1 的"不撤销已经许诺出去的伤害"仍然成立）。
  * 4. **散场回到池子里**：域比一击多活几秒，正是最容易漏网格的那几种生命周期。
@@ -51,7 +52,6 @@ function dig(spec = {}) {
   const item = m.hazards.spawn({ ...UNIT, ...spec, owner });
   const player = v(spec.px ?? 3, spec.pz ?? 0);
   const ref = makePlayerRef();
-  ref.velocity = { x: 0, z: 0 };
   return { m, hz: m.hazards, item, player, ref, owner };
 }
 
@@ -175,30 +175,41 @@ describe('持续型危险区的生命周期', () => {
 });
 
 describe('引力井的拉力', () => {
-  it('往圆心拽：玩家在 +x 侧，速度就往 -x 走', () => {
+  it('往圆心拽：玩家在 +x 侧，冲量就朝 -x 记', () => {
     const d = dig({ px: 3 });
     land(d);
     run(d, 0.2);
-    expect(d.ref.velocity.x).toBeLessThan(0);
+    expect(d.ref.tugs.length).toBeGreaterThan(0);
+    expect(d.ref.tugs.at(-1).dx).toBeLessThan(0);
   });
 
   it('圆心附近收手：离中心不到 0.4 米不再加速，免得在原点上抖', () => {
     const d = dig({ px: 0.2 });
     land(d);
     run(d, 1.2);
-    expect(d.ref.velocity.x).toBe(0);
+    expect(d.ref.tugs).toEqual([]);
     expect(ticks(d)).toBeGreaterThan(1);              // 拉力免了，段数不免：那里正是井心
   });
 
-  it('拉力是"每帧一点"，不是"一次性冲量"：帧长减半则单次增量也减半', () => {
+  it('拉力是"每帧一点"，不是"一次性冲量"：交出去的是加速度与本帧长度', () => {
     const a = dig();
     land(a);
     a.hz.update(1 / 64, a.player, a.ref);
-    const per64 = a.ref.velocity.x;
     const b = dig();
     land(b);
     b.hz.update(1 / 128, b.player, b.ref);
-    expect(b.ref.velocity.x).toBeCloseTo(per64 / 2, 12);
+    expect(a.ref.tugs.at(-1).accel).toBe(UNIT.pull);
+    expect(b.ref.tugs.at(-1).accel).toBe(UNIT.pull);          // 表的数值与帧长无关
+    expect(b.ref.tugs.at(-1).dt).toBeCloseTo(a.ref.tugs.at(-1).dt / 2, 12);
+  });
+
+  it('一秒里的请求总长 = pull：它是米/秒²，不是"每秒来一记 6 米/秒"', () => {
+    const d = dig();
+    land(d);
+    run(d, 1, 1 / 64);
+    const sum = d.ref.tugs.reduce((acc, t) => acc + t.accel * t.dt, 0);
+    expect(sum).toBeCloseTo(UNIT.pull, 6);
+    expect(d.ref.tugs.length).toBe(64);
   });
 
   it('无敌帧吞得掉段数，吞不掉位移：翻滚躲不掉被拖回井心', () => {
@@ -207,7 +218,7 @@ describe('引力井的拉力', () => {
     d.ref.invulnerable = true;
     run(d, 1.2);
     expect(ticks(d)).toBe(1);                  // 之后的段一段都进不来
-    expect(d.ref.velocity.x).toBeLessThan(0);
+    expect(d.ref.tugs.length).toBeGreaterThan(0);
   });
 
   it('圈外既不结算也不拽人', () => {
@@ -215,16 +226,22 @@ describe('引力井的拉力', () => {
     land(d);
     run(d, 1);
     expect(ticks(d)).toBe(0);
-    expect(d.ref.velocity.x).toBe(0);
-    expect(d.ref.velocity.z).toBe(0);
+    expect(d.ref.tugs).toEqual([]);
   });
 
   it('pull 为 0 的域只烧血不拖人：持续型危险区不必然带引力', () => {
     const d = dig({ pull: 0 });
     land(d);
     run(d, 1.2);
-    expect(d.ref.velocity.x).toBe(0);
+    expect(d.ref.tugs).toEqual([]);
     expect(ticks(d)).toBe(1 + 1 / UNIT.tick);
+  });
+
+  it('拉力只经 `applyKnockback` 出门：不许再直接改玩家的 velocity', () => {
+    const src = readFileSync(join(__dirname, '../src/combat/GroundHazards.js'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
+    expect(src).not.toMatch(/velocity\s*\./);
+    expect(src).toMatch(/playerRef\.applySustainedForce\(/);
   });
 
   it('没有玩家参照时整段跳过：域自己走完钟，不报错也不结算', () => {
@@ -459,10 +476,29 @@ describe('井与真实位移（PlayerController 全程参与）', () => {
     expect(p.hits).toEqual([UNIT.damage]);        // 只剩落地那一拍
   });
 
-  it('拉力写的是真 Vector3 的 x 分量：不是给替身塞了一个字段', () => {
+  it('拉力抹不掉：同一份按键，这一帧的位移仍然被拽短，而账本不被清零', () => {
     const { m, p } = digAt(4);
-    const before = p.velocity.x;
-    m.hazards.update(dt, p.position, p);
-    expect(p.velocity.x).toBeLessThan(before);    // 圆心在原点 = 往 -x 走
+    p.update(dt, { KeyW: true });                  // 先让 locomotion 把速度整条写成 +15
+    m.hazards.update(dt, p.position, p);           // 井记下一笔朝心（-x）的冲量
+    expect(p.knock.x).toBeLessThan(0);
+    const x0 = p.position.x;
+    p.update(dt, { KeyW: true });
+    expect(p.velocity.x).toBeGreaterThan(14);      // 玩家确实全速在跑：外力没污染他的速度账
+    expect(p.position.x - x0).toBeLessThan(p.velocity.x * dt);   // 但位移被拽走了一截
+    expect(p.knock.x).toBeLessThan(0);             // 井还在拽（切片6 之前这里已经归零了）
+  });
+
+  it('漂向井心的距离与帧率无关：64Hz 与 128Hz 一秒里走的位移相同（B39）', () => {
+    const a = digAt(4);
+    step(a.m, a.p, 1, {});
+    const b = digAt(4);
+    for (let i = 0; i < Math.round(1 / (1 / 128)); i++) {
+      b.p.update(1 / 128, {});
+      b.m.hazards.update(1 / 128, b.p.position, b.p);
+    }
+    // 剩下的那点差异是起步那一小段的采样方式（64Hz 每帧走的是上一帧的余额），不是模型的
+    // 帧率依赖 —— 把持续力按"每帧加 a·dt"记账就会露出真帧率依赖，见 player-knockback 那条
+    // 稳态断言（变异验证里也叫它红过一次）
+    expect(Math.abs(4 - b.p.position.x)).toBeCloseTo(Math.abs(4 - a.p.position.x), 1);
   });
 });

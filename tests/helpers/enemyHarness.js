@@ -70,6 +70,25 @@ export const makePlayerRef = () => {
     getResist: () => 0,
     isStaggered: () => false,
   };
+  /**
+   * 外部冲量的流水（W-A6 切片6）：拽人的东西走 `applyKnockback`，不再裸写 `velocity`。
+   * 这里只**记账**（归一方向 + 请求的速度），衰减与积分归玩家真实代码管，
+   * 用例要验的是"危险区许了什么"，不是"账本怎么烧"。
+   */
+  ref.tugs = [];
+  ref.applyKnockback = (dx, dz, speed) => {
+    const len = Math.hypot(dx, dz);
+    if (!(speed > 0) || len <= 0) return 0;
+    ref.tugs.push({ dx: dx / len, dz: dz / len, speed });
+    return speed;
+  };
+  /** 持续力场的入口：记的是"每秒加多少速度 + 这一帧多长"，怎么积分归玩家真代码管 */
+  ref.applySustainedForce = (dx, dz, accel, dt) => {
+    const len = Math.hypot(dx, dz);
+    if (!(accel > 0) || !(dt > 0) || len <= 0) return 0;
+    ref.tugs.push({ dx: dx / len, dz: dz / len, accel, dt });
+    return accel * dt;
+  };
   return ref;
 };
 

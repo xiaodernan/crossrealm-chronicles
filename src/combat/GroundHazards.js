@@ -166,13 +166,11 @@ export class GroundHazards {
       return;
     }
     const d = Math.sqrt(d2);
-    const vel = playerRef.velocity;
-    // 圆心一米内不再加速：那里已经算被吸住了，继续推只会让它在原点上抖
-    if (vel && it.pull && d > 0.4) {
-      const k = (it.pull * dt) / d;
-      vel.x += dx * k;
-      vel.z += dz * k;
-    }
+    // 圆心一米内不再加速：那里已经算被吸住了，继续推只会让它在原点上抖。
+    // 走玩家的冲量账而不是写 `velocity`：写速度的话，玩家按住方向键的每一帧
+    // 都会被状态机整条改写回来，"挣脱引力井"就退化成"按住方向键"（W-A6 切片6）。
+    // 用 `applySustainedForce` 而不是 `applyKnockback`：拉力是加速度，稳态速度必须与帧率无关
+    if (it.pull && d > 0.4) playerRef.applySustainedForce(dx, dz, it.pull, dt);
     if (it.slow) this._hold(it, playerRef);
     if (!it.tick) return;
     it.tickT += dt;

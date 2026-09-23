@@ -470,11 +470,11 @@ export const GROUND_HAZARD = {
    * 差别在于这 36 点是摊在 3 秒里 —— 站着不动必死，但代价是"走出 5.5 米"，
    * 而不是"看准一瞬间躲开"。
    *
-   * `pull` 买的是**"停下"**，不是"跑不动"（实测：站着不动约 0.55 米/秒漂向井心）。
-   * 拉力写在 `playerRef.velocity` 上，与 `SpaceBoss` 那记一次性拖拽（同一份速度上 `+= 6`）
-   * 同一条通道；而玩家有输入时状态机是**整条改写**水平速度的（`PlayerController.moveHorizontal`），
-   * 所以按住方向它就抹掉了这一帧的拉力。要改成"连跑都被拖着"得走玩家的受击位移通道，
-   * 那是另一档题（见 MASTER_PLAN 的变更记录）。
+   * `pull` 买的是**"停下"**，不是"跑不动"：走玩家的**外部冲量账**（`applySustainedForce`），
+   * 稳态速度 = `pull / PLAYER_KNOCK.decay` ≈ 0.73 米/秒（实测：站住一秒被拖约 0.66 米；
+   * 按住背离方向仍能以约 14.3 米/秒退出，一秒少走 0.7 米）。
+   * 切片4 之前它是直接加在 `playerRef.velocity` 上的，而状态机在有输入时整条改写水平速度，
+   * 所以"按住方向键"每一帧都把拉力抹干净 —— 那口井只对撒手站着的人生效。
    */
   gravityWell: {
     radius: 5.5, telegraph: 1.4, damage: 6, color: 0x4488ff,
@@ -512,6 +512,24 @@ export const GROUND_HAZARD = {
  * 又不至于"走出圈还多慢一截"。**它不是任何一招的时长**，别拿它当冷却调。
  */
 export const TIME_SCALE_LEASH = 0.12;
+
+/**
+ * 玩家侧的**外部冲量账**（被拽、被推）—— 与 `Enemy.knock` 同一套模型，但归玩家自己所有。
+ *
+ * 为什么要单独一本账：状态机在有输入时是**整条改写**水平速度的
+ * （`PlayerController.moveHorizontal` 里 `velocity = dir * speed`），所以任何直接写进
+ * `velocity` 的外力都会在下一帧被玩家的按键抹掉 —— 引力井的真实症状就是"按住方向键等于没有引力"。
+ * 外力记在另一本账上：玩家的意图与外力的偏移各自衰减、相加之后再积分。
+ *
+ * - `decay`：偏移速度的指数衰减率（每秒）。取 `HIT.decay` 同档（11），这样"我把敌人推一下"
+ *   与"场把我拽一下"在两边衰减得一样快。连续拉力（`pull` 是米/秒²）的稳态速度 = `pull / decay`：
+ *   引力井的 `pull 8` 稳在约 0.73 米/秒，而玩家移速 15 —— 有感、但不夺走控制权。
+ * - `maxSpeed`：这本账的封顶（米/秒）。多来源叠加（两口井 + 一记撞击）不许把玩家弹射出去。
+ */
+export const PLAYER_KNOCK = {
+  decay: 11,
+  maxSpeed: 14,
+};
 
 export const ENEMY_MOVE_SETS = {
   soldier: ['sweep', 'thrust', 'cleave', 'guard'],
