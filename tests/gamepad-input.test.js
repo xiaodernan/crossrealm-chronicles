@@ -11,11 +11,14 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import * as THREE from 'three';
 import {
-  GAMEPAD_BINDINGS, PAD_ACTIONS, PAD_BUTTON, assertKeybinds,
+  GAMEPAD_BINDINGS, PAD_ACTIONS, PAD_BUTTON, PAD, assertKeybinds,
 } from '../src/content/keybinds.js';
+import { CAMERA_FOV } from '../src/content/tuning.js';
+import { PlayerController } from '../src/player/PlayerController.js';
 import { GamepadInput } from '../src/engine/GamepadInput.js';
-import { installWindowShim } from './helpers/enemyHarness.js';
+import { installWindowShim, makeWorld } from './helpers/enemyHarness.js';
 import { makePlayer, runFrames } from './helpers/playerHarness.js';
 
 /** 真机 `navigator.getGamepads()` 返回的形状（标准映射、16 键 4 轴） */
@@ -40,6 +43,7 @@ const analog = (pad, name, value) => {
 };
 
 const stick = (pad, x, y) => { pad.axes[0] = x; pad.axes[1] = y; };
+const lookStick = (pad, x, y) => { pad.axes[2] = x; pad.axes[3] = y; };
 
 const realNavigator = globalThis.navigator;
 const setPads = (...pads) => {
@@ -376,5 +380,101 @@ describe('接线：桥真的挂在主循环上，且是全仓唯一读手柄的�
     expect(glide).toBeLessThan(1.5);                 // 满速松手仍有一小段滑步（既有手感，不归本片）
     runFrames(p, 0.2, 1 / 64, r.keys);
     expect(p.position.z - before - glide).toBeLessThan(glide / 3);   // 但它在收敛，不是"松手还一直漂"
+  });
+});
+
+describe('右摇杆镜头：模拟量，不冒充按键', () => {
+  const full = PAD.lookPixelsPerSecond;
+  const mkPlayer = () => {
+    const camera = new THREE.PerspectiveCamera(CAMERA_FOV.third, 1.6, 0.1, 100);
+    const game = { paused: false, cinematicActive: false, autoPlayMode: false, combatCamera: null, restScene: null };
+    const p = new PlayerController({ add() {}, remove() {} }, camera, makeWorld(), game);
+    p.teleport(0, 0, 0);
+    return p;
+  };
+
+  it('满推一格就是满舵速率，而 `keys` 一个字节都不写（镜头不该冒充按键）', () => {
+    const pad0 = makePad();
+    const r = rig(pad0);
+    lookStick(pad0, 1, 0);
+    r.pad.poll();
+    expect(r.pad.look.x).toBeCloseTo(full, 6);
+    expect(r.pad.look.y).toBe(0);
+    expect(r.keys).toEqual({});
+  });
+
+  it('死区之内算没碰：0.1 的漂移不该让镜头自己转', () => {
+    const pad0 = makePad();
+    const r = rig(pad0);
+    lookStick(pad0, 0.1, -0.05);
+    r.pad.poll();
+    expect(r.pad.look.x).toBe(0);
+    expect(r.pad.look.y).toBe(0);
+  });
+
+  it('模拟量：推一半是半速（死区重映射回 0~1，不是"一出死区就满舵"）', () => {
+    const pad0 = makePad();
+    const r = rig(pad0);
+    lookStick(pad0, 0.5, 0);
+    r.pad.poll();
+    expect(r.pad.look.x).toBeCloseTo(((0.5 - PAD.lookDeadzone) / (1 - PAD.lookDeadzone)) * full, 6);
+    expect(r.pad.look.x).toBeGreaterThan(0);
+    expect(r.pad.look.x).toBeLessThan(full);
+  });
+
+  it('对角推保持方向：合成向量的模长就是那一档的舵量', () => {
+    const pad0 = makePad();
+    const r = rig(pad0);
+    lookStick(pad0, 0.6, -0.8);            // 模长正好 1.0 → 满舵
+    r.pad.poll();
+    expect(Math.hypot(r.pad.look.x, r.pad.look.y)).toBeCloseTo(full, 6);
+    expect(r.pad.look.x / -r.pad.look.y).toBeCloseTo(0.6 / 0.8, 6);
+  });
+
+  it('左杆走路、右杆看：两件事互不串门', () => {
+    const pad0 = makePad();
+    const r = rig(pad0);
+    stick(pad0, 0, -1);
+    lookStick(pad0, 1, 0);
+    r.pad.poll();
+    expect(r.keys.KeyW).toBe(true);
+    expect(r.pad.look.x).toBeCloseTo(full, 6);
+    expect(r.pad.look.y).toBe(0);          // 左杆的推量没漏进右杆
+    lookStick(pad0, 0, 0);
+    r.pad.poll();
+    expect(r.pad.look.x).toBe(0);
+    expect(r.keys.KeyW).toBe(true);        // 反过来也一样
+  });
+
+  it('拔手那一帧舵量归零（不清镜头就会一直转下去）', () => {
+    const pad0 = makePad();
+    const r = rig(pad0);
+    lookStick(pad0, 0, 1);
+    r.frames(2);
+    expect(r.pad.look.y).toBeGreaterThan(0);
+    pad0.connected = false;
+    r.pad.poll();
+    expect(r.pad.look.y).toBe(0);
+  });
+
+  it('接到真玩家：满舵一秒转过的弧度 = 舵量 × `cameraSensitivity`，且与帧率无关', () => {
+    const turn = (h) => {
+      const p = mkPlayer();
+      const yaw0 = p.yaw;
+      for (let i = 0; i < Math.round(1 / h); i++) p.addCameraInput(full * h, 0);
+      return { turned: yaw0 - p.yaw, k: p.cameraSensitivity };
+    };
+    const slow = turn(1 / 64);
+    expect(slow.turned).toBeCloseTo(full * slow.k, 6);
+    expect(turn(1 / 128).turned).toBeCloseTo(slow.turned, 10);
+  });
+
+  it('静态门禁：鼠标与手柄共用同一个镜头守卫（改守卫不许只改一半）', () => {
+    const src = readFileSync(join(__dirname, '../src/core/Game.js'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
+    expect(src.match(/cameraInputAllowed\(/g)).toHaveLength(3);   // 定义 1 + 鼠标 1 + 手柄 1
+    expect(src).toMatch(/cameraInputAllowed\(true\)/);             // 鼠标要指针锁
+    expect(src).toMatch(/cameraInputAllowed\(false\)/);            // 手柄没有指针锁这回事
+    expect(src).toMatch(/addCameraInput\(padLook\.x \* rawDt/);    // 手柄与鼠标同为"玩家的物理输入"，吃墙钟
   });
 });

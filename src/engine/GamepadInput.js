@@ -51,6 +51,11 @@ export class GamepadInput {
     /** 记住手柄插在第几号口：换口或多只手柄时不该中途换目标 */
     this._padIndex = -1;
     this.active = false;
+    /**
+     * 本帧的镜头输入，单位"相当于每秒推多少鼠标点"（时间倍率由调用方乘，见 `Game.update`）。
+     * 复用槽，热路径不分配。
+     */
+    this.look = { x: 0, y: 0 };
   }
 
   /** @returns {boolean} 这一帧是否读到了手柄 */
@@ -63,16 +68,39 @@ export class GamepadInput {
     this.active = true;
     const buttons = pad.buttons ?? [];
     const axes = pad.axes ?? [];
+    this._pollLook(axes);
     for (let i = 0; i < this._slots.length; i++) {
       const s = this._slots[i];
       let on = s.button >= 0 && _pressed(buttons[s.button], s.down);
       if (!on && s.dirName !== null) on = _stickHeld(axes, s) || _pressed(buttons[s.dpad], s.down);
       const fire = s.mode === 'level' ? on : (on && !s.down);
       s.down = on;
+      // 脉冲只有一帧宽：主循环里 `poll()` 排在 `player.update` 之前，所以这一帧必然被
+      // `CombatController` 读到（读走后它自己会缓冲 0.18 秒的动作意图），桥不越权替它留着
       if (fire) this._grab(s);
       else if (s.claimed) this._release(s);
     }
     return true;
+  }
+
+  /**
+   * 右摇杆 → 镜头速率：径向死区之内算没碰；出死区按**模拟量**给出（推一半转半速），
+   * 并把死区那一段重映射回 0~1，免得"离开死区的一瞬间就已经是满舵"。
+   */
+  _pollLook(axes) {
+    const lx = axes[PAD.lookAxes[0]] ?? 0;
+    const ly = axes[PAD.lookAxes[1]] ?? 0;
+    const mag = Math.hypot(lx, ly);
+    const out = this.look;
+    if (mag <= PAD.lookDeadzone) {
+      out.x = 0;
+      out.y = 0;
+      return out;
+    }
+    const scale = ((mag - PAD.lookDeadzone) / (1 - PAD.lookDeadzone)) * PAD.lookPixelsPerSecond;
+    out.x = (lx / mag) * scale;
+    out.y = (ly / mag) * scale;
+    return out;
   }
 
   /** 拔手 / 主动停用：把置过的键全部还回去 */
@@ -82,6 +110,8 @@ export class GamepadInput {
       if (s.claimed) this._release(s);
       s.down = false;
     }
+    this.look.x = 0;
+    this.look.y = 0;
     this.active = false;
   }
 

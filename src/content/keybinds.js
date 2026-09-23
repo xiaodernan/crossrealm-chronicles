@@ -24,6 +24,17 @@ export const PAD = {
   pressThreshold: 0.5,
   /** 迟滞下沿：按下后要退到这以下才算松开，免得扳机停在门限上反复触发 */
   releaseThreshold: 0.35,
+  /**
+   * 右摇杆 → 镜头。与移动那条**不是一回事**：镜头要的是模拟量（推一点转一点），
+   * 所以它不走八向量、也不冒充 `keys`，而是交给 `PlayerController.addCameraInput`。
+   *
+   * `lookPixelsPerSecond` 的单位是"每秒相当于推多少鼠标点"，因为 `addCameraInput` 吃的就是点：
+   * 满推 1300 点/秒 × `cameraSensitivity 0.002` ≈ 2.6 弧度/秒 ≈ 150°/秒 —— 既跟得上转身，
+   * 也不至于满舵一秒就晕。死区比移动小一档：镜头对漂移比走路更显眼。
+   */
+  lookAxes: [2, 3],
+  lookDeadzone: 0.15,
+  lookPixelsPerSecond: 1300,
 };
 
 /**

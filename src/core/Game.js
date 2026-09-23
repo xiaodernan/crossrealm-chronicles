@@ -396,6 +396,19 @@ export class Game {
     this.scene.add(this.sun);
   }
 
+  /**
+   * 镜头输入能不能进：自动演示与输入锁定期不让动镜头。
+   *
+   * `forPointer` 只对鼠标成立 —— 手柄没有"指针锁"这回事，用它要求指针锁就等于
+   * "玩家必须先点一下画面才能转镜头"。两条路共用这一个判据，免得改守卫时只改了一半。
+   */
+  cameraInputAllowed(forPointer) {
+    if (this.autoPlayMode) return false;
+    if (this.combatInputLock?.blocksCamera?.()) return false;
+    if (this.dialog.open || this.upgrade.open) return false;
+    return forPointer ? this.pointerLocked : true;
+  }
+
   setupInput() {
     const canvas = this.renderer.domElement;
 
@@ -471,11 +484,8 @@ export class Game {
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (this.autoPlayMode) return;
-      if (this.combatInputLock?.blocksCamera?.()) return;
-      if (this.pointerLocked && !this.dialog.open && !this.upgrade.open) {
-        this.player.addCameraInput(e.movementX, e.movementY);
-      }
+      if (!this.cameraInputAllowed(true)) return;
+      this.player.addCameraInput(e.movementX, e.movementY);
     });
 
     document.getElementById('autoplay-fab')?.addEventListener('click', () => {
@@ -511,6 +521,12 @@ export class Game {
     // 手柄每帧轮询一次（B39 同一条纪律：输入状态是"这一帧的样子"，不是事件瞬间的样子）。
     // 它把按钮/摇杆合成进 `this.keys` 的同一形状，所以键盘路径与所有消费者不必认识手柄。
     this.padInput?.poll();
+    // 右摇杆镜头走 `rawDt`：它与鼠标同属"玩家的物理输入"，命中停顿不该把手也冻住
+    // （鼠标事件本来就不经时间倍率）。守卫与鼠标共用 `cameraInputAllowed`，只是不要求指针锁。
+    const padLook = this.padInput?.look;
+    if (padLook && (padLook.x !== 0 || padLook.y !== 0) && this.cameraInputAllowed(false)) {
+      this.player.addCameraInput(padLook.x * rawDt, padLook.y * rawDt);
+    }
     this.combatStyle?.update(dt);
     this.combatStyleOverlay?.update(dt);
     this.zoneTransitionFx?.update(dt);
