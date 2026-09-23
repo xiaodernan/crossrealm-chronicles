@@ -23,4 +23,9 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 600,
   },
+  test: {
+    // 全局夹具：给 node 补一枚最小 ProgressEvent，消掉 three 纹理流式加载器在用例结束后
+    // 抛出的未处理 rejection（详见 tests/setup.js 头注）。见 M4 测试夹具账。
+    setupFiles: './tests/setup.js',
+  },
 });
