@@ -12,10 +12,11 @@ export class PerformanceManager {
     const dz = enemy.position.z - playerPos.z;
     const distSq = dx * dx + dz * dz;
     if (distSq > this.enemySleepDistance ** 2) {
-      enemy.mesh.visible = false;
+      // 走统一出口：血条 / 锁定标记挂在场景根上，单写 mesh.visible 会把它们留在空中（W-A3）
+      enemy.setBodyVisible(false);
       return false;
     }
-    enemy.mesh.visible = true;
+    enemy.setBodyVisible(true);
     if (distSq > this.enemyLodDistance ** 2) return false;
     return true;
   }

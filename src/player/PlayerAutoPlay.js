@@ -152,7 +152,7 @@ export class PlayerAutoPlay {
     boss.hp = boss.maxHp;
     boss.posture = 0;
     boss.phase = 1;
-    boss.mesh.visible = true;
+    boss.setBodyVisible(true);
     boss.updateHpBar?.();
     arena.group.visible = true;
     arena.activated = true;

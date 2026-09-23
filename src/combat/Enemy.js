@@ -7,6 +7,7 @@ import {
 import { Sense } from '../ai/Perception.js';
 import { createEnemyFSM, tryClaimStrikeSlot } from '../ai/EnemyFSM.js';
 import { separationPush } from '../ai/Separation.js';
+import { Billboard } from '../effects/Billboard.js';
 
 /** 分离推力在两个身体完全重合时需要一个稳定的"每人一个方向"，用出生顺序做身份差 */
 let aiSeq = 0;
@@ -89,9 +90,60 @@ export class Enemy {
     this.updateMeshY();
     scene.add(this.mesh);
 
-    this.lockMarker = this.createLockMarker();
-    this.mesh.add(this.lockMarker);
+    /* 世界空间 UI 一律挂场景根，不挂在 `mesh` 上（W-A3）：
+     * `mesh.rotation` 同时承担"朝向移动方向"与"悬浮摆动"，挂上去的血条会
+     * 跟着转成一条线、跟着歪成斜的。见 `effects/Billboard.js` 的说明。 */
+    this.hpBar = this._buildHpBar(scene);
+    this.lockMarker = this._buildLockMarker(scene);
     this.updateHpBar();
+    this.setLocked(false);
+  }
+
+  /** 血条的尺寸 / 配色 / 离地高度：子类按各自体型覆盖 */
+  hpBarSpec() {
+    return { width: 1.2, height: 0.12, color: 0xcc3333, bg: 0x222222, offsetY: 2.8 };
+  }
+
+  _buildHpBar(scene) {
+    const spec = this.hpBarSpec();
+    const bar = new Billboard(scene, { name: 'hpBar', offsetY: spec.offsetY });
+    if (spec.bg != null) {
+      const bg = new THREE.Mesh(
+        new THREE.PlaneGeometry(spec.width, spec.height),
+        new THREE.MeshBasicMaterial({ color: spec.bg })
+      );
+      bar.add(bg);
+    }
+    const fill = new THREE.Mesh(
+      new THREE.PlaneGeometry(spec.width * (spec.fillScale ?? 0.983), spec.height * 0.83),
+      new THREE.MeshBasicMaterial({ color: spec.color })
+    );
+    // 稍稍前移，避免与底板 z-fighting（底板缺失时这点偏移无副作用）
+    fill.position.z = 0.01;
+    fill.name = 'hpFill';
+    bar.add(fill);
+    bar.setVisible(true);
+    return bar;
+  }
+
+  /** 锁定标记：地面环 + 头顶菱形。环仍是平的（只绕 Y 转，不受影响） */
+  _buildLockMarker(scene) {
+    const marker = new Billboard(scene, { name: 'lockMarker', offsetY: this.hpBarSpec().offsetY });
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.65, 0.85, 4),
+      new THREE.MeshBasicMaterial({ color: 0xffcc44, transparent: true, opacity: 0.95, side: THREE.DoubleSide })
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = -this.hpBarSpec().offsetY + 0.05;
+    marker.add(ring);
+    const diamond = new THREE.Mesh(
+      new THREE.ConeGeometry(0.18, 0.45, 4),
+      new THREE.MeshBasicMaterial({ color: 0xffee88, transparent: true, opacity: 0.9 })
+    );
+    diamond.position.y = 0.55;
+    marker.add(diamond);
+    marker.setVisible(false);
+    return marker;
   }
 
   /** 受击盒的世界基准：网格原点已含地形高差与悬浮高度 */
@@ -388,41 +440,6 @@ export class Enemy {
       group.add(helm);
     }
 
-    const hpBg = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.2, 0.12),
-      new THREE.MeshBasicMaterial({ color: 0x222222 })
-    );
-    hpBg.position.y = 2.8;
-    group.add(hpBg);
-
-    const hpFill = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.18, 0.1),
-      new THREE.MeshBasicMaterial({ color: 0xcc3333 })
-    );
-    hpFill.position.set(0, 2.8, 0.01);
-    hpFill.name = 'hpBar';
-    group.add(hpFill);
-
-    return group;
-  }
-
-  createLockMarker() {
-    const group = new THREE.Group();
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(0.65, 0.85, 4),
-      new THREE.MeshBasicMaterial({ color: 0xffcc44, transparent: true, opacity: 0.95, side: THREE.DoubleSide })
-    );
-    ring.rotation.x = -Math.PI / 2;
-    group.add(ring);
-    const diamond = new THREE.Mesh(
-      new THREE.ConeGeometry(0.18, 0.45, 4),
-      new THREE.MeshBasicMaterial({ color: 0xffee88, transparent: true, opacity: 0.9 })
-    );
-    diamond.position.y = 0.55;
-    group.add(diamond);
-    group.position.y = 2.8;
-    group.visible = false;
-    group.name = 'lockMarker';
     return group;
   }
 
@@ -432,16 +449,56 @@ export class Enemy {
   }
 
   setLocked(locked) {
-    const marker = this.mesh.getObjectByName('lockMarker');
-    if (marker) marker.visible = locked && this.alive;
+    this.lockMarker?.setVisible(!!locked && this.alive && this.mesh.visible);
+  }
+
+  /**
+   * 身体可见性的唯一出口（W-A3）。
+   *
+   * 血条与锁定标记挂在**场景根**上，不再随 `mesh.visible` 一起消失 —— 所以
+   * "把身体藏起来"这件事必须走这里，否则会出现"敌人已经剔除/已死，血条还挂在天上"。
+   * 距离剔除（`PerformanceManager`）与死亡都改调本方法，不再各写一次 `mesh.visible`。
+   */
+  setBodyVisible(visible) {
+    this.mesh.visible = visible;
+    if (!visible) {
+      this.hpBar?.setVisible(false);
+      this.lockMarker?.setVisible(false);
+    }
   }
 
   updateHpBar() {
-    const bar = this.mesh.getObjectByName('hpBar');
-    if (!bar) return;
+    const spec = this.hpBarSpec();
+    const fill = this.hpBar?.object3D.getObjectByName('hpFill');
+    if (!fill) return;
     const ratio = Math.max(0, this.hp / this.maxHp);
-    bar.scale.x = ratio;
-    bar.position.x = -(1.18 * (1 - ratio)) / 2;
+    const fullWidth = spec.width * (spec.fillScale ?? 0.983);
+    fill.scale.x = ratio;
+    // 左对齐收缩：宽度减半后要往左挪半个"消失的宽度"，否则血条从中间缩
+    fill.position.x = -(fullWidth * (1 - ratio)) / 2;
+  }
+
+  /**
+   * 世界空间 UI 的每帧跟随（W-A3）。位置跟着锚点走，朝向跟着相机走 ——
+   * 两者都不经过 `mesh` 的旋转，所以敌人转身、悬浮摆动都不会再影响它们。
+   *
+   * @param {{x:number,y:number,z:number} | null} camPos
+   */
+  updateWorldUi(camPos) {
+    const anchor = this.mesh.position;
+    // `mesh.visible` 也参与判断：距离剔除把身体藏了之后，血条不该还挂在天上
+    const showHp = this.alive && this.mesh.visible && this.hp < this.maxHp;
+    this.hpBar?.follow(anchor);
+    this.hpBar?.setVisible(showHp);
+    this.hpBar?.faceCamera(camPos);
+    if (this.lockMarker) {
+      this.lockMarker.follow(anchor);
+      this.lockMarker.faceCamera(camPos);
+    }
+    // 预警圈不参与公告板：地面圈就该平躺在地上，头顶警示靠自转（pulseTelegraph）
+    if (this.telegraph) {
+      this.telegraph.position.set(anchor.x, anchor.y, anchor.z);
+    }
   }
 
   /** 记账：伤害与架势都已在 Resolution 里算好，这里只落实与广播。 */
@@ -478,7 +535,8 @@ export class Enemy {
   die() {
     this.alive = false;
     this.state = 'dead';
-    this.mesh.visible = false;
+    // 身体、血条、锁定标记一起收掉（血条挂在场景根上，不随 mesh 一起消失）
+    this.setBodyVisible(false);
     this.clearTelegraph();
     this.setWish(0, 0);
     // 倒地不该继续滑行：冲量与连段一样，不跨生命保留
@@ -506,9 +564,11 @@ export class Enemy {
     this.clearKnockback();
     this.upright();
     this.fsm.change('idle');
-    this.mesh.visible = true;
+    this.setBodyVisible(true);
     this.updateMeshY();
     this.updateHpBar();
+    this.updateWorldUi(null);
+    this.setLocked(false);
   }
 
   distanceTo(pos) {
@@ -564,7 +624,8 @@ export class Enemy {
     warn.name = 'teleWarn';
     group.add(warn);
     group.visible = false;
-    this.mesh.add(group);
+    // 同样挂场景根（W-A3）：挂在 `mesh` 上时，悬浮单位的 wobble 会把地面圈一起扳歪
+    this.scene.add(group);
     this.telegraph = group;
     this.teleParts = { ring, inner, warn };
     return group;
@@ -581,6 +642,18 @@ export class Enemy {
       if (o.geometry) o.geometry.dispose();
       if (o.material) o.material.dispose();
     });
+    // 世界空间 UI 不在 `mesh` 子树里，必须单独摘（否则血条会留在场景里）
+    this.hpBar?.dispose();
+    this.hpBar = null;
+    this.lockMarker?.dispose();
+    this.lockMarker = null;
+    if (this.telegraph) {
+      this.scene.remove(this.telegraph);
+      this.telegraph.traverse((o) => {
+        o.geometry?.dispose();
+        o.material?.dispose();
+      });
+    }
     this.telegraph = null;
     this.teleParts = null;
   }
@@ -619,6 +692,7 @@ export class Enemy {
 
     this._advance(dt, ctx);
     this.updateMeshY();
+    this.updateWorldUi(ctx.camera);
   }
 
   /** 受光闪：按 dt 衰减，死亡/重生都不会留下悬空的材质写入（B19） */

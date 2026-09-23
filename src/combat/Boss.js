@@ -58,22 +58,12 @@ export class Boss extends Enemy {
     blade.name = 'blade';
     group.add(blade);
 
-    const hpBg = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.4, 0.18),
-      new THREE.MeshBasicMaterial({ color: 0x111111 })
-    );
-    hpBg.position.y = 4.5;
-    group.add(hpBg);
-
-    const hpFill = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.36, 0.14),
-      new THREE.MeshBasicMaterial({ color: 0xaa2222 })
-    );
-    hpFill.position.set(0, 4.5, 0.01);
-    hpFill.name = 'hpBar';
-    group.add(hpFill);
-
     return group;
+  }
+
+  /** Boss 体型大一圈：血条更宽、离地更高（W-A3 之后由 `_buildHpBar` 统一创建） */
+  hpBarSpec() {
+    return { width: 2.4, height: 0.18, color: 0xaa2222, bg: 0x111111, offsetY: 4.5 };
   }
 
   takeDamage(amount, postureDamage = 0) {
@@ -117,7 +107,7 @@ export class Boss extends Enemy {
     if (!this.alive) return;
     this.alive = false;
     this.state = 'dead';
-    this.mesh.visible = false;
+    this.setBodyVisible(false);
     this.clearTelegraph();
     this._hideSlamRing();
     window.dispatchEvent(new CustomEvent('enemy-defeated', {

@@ -31,6 +31,11 @@ export class EnemyManager {
        * 里塞东西会在迭代途中改数组，也让"谁创建了谁"变成一笔糊账。
        */
       summon: (owner, spec) => this._summon(owner, spec),
+      /**
+       * 相机：世界空间 UI（血条 / 锁定标记）要按它对齐朝向（W-A3）。
+       * 每帧从 `game.camera` 重取，不在构造期缓存 —— 与 `collision` 同一条纪律。
+       */
+      camera: null,
     };
     /** 活着的仆从与其召唤者：名额、消散与生命周期都要靠这两本账 */
     this._summons = new Set();
@@ -270,7 +275,7 @@ export class EnemyManager {
   deactivateBoss(boss) {
     if (!boss) return;
     boss.alive = false;
-    boss.mesh.visible = false;
+    boss.setBodyVisible(false);
   }
 
   activateBoss(boss, arena, playerPos, game) {
@@ -287,7 +292,7 @@ export class EnemyManager {
     boss.phase = 1;
     boss.phaseTriggered = { p2: false, p3: false };
     boss.posture = 0;
-    boss.mesh.visible = true;
+    boss.setBodyVisible(true);
     boss.updateHpBar?.();
     arena.group.visible = true;
     window.dispatchEvent(new CustomEvent('boss-start', {
@@ -318,6 +323,8 @@ export class EnemyManager {
     ctx.playerRef = playerRef;
     // 碰撞世界会随区域重建换对象，每帧取当前值，不在构造期缓存
     ctx.collision = this.world?.collision ?? null;
+    // 相机同理：观看模式/过场会换相机，每帧重取（W-A3 世界空间 UI 的朝向依据）
+    ctx.camera = game?.camera ?? null;
     const neighbors = this._neighbors ??= [];
     neighbors.length = 0;
     for (const e of this.enemies) if (e.alive) neighbors.push(e);

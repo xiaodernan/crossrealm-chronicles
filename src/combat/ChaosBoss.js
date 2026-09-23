@@ -34,15 +34,12 @@ export class ChaosBoss extends Boss {
     spikes.position.y = 3.5;
     group.add(spikes);
 
-    const hpFill = new THREE.Mesh(
-      new THREE.PlaneGeometry(2.36, 0.14),
-      new THREE.MeshBasicMaterial({ color: 0xff2244 })
-    );
-    hpFill.position.set(0, 4.6, 0.01);
-    hpFill.name = 'hpBar';
-    group.add(hpFill);
-
     return group;
+  }
+
+  /** 无底板、纯色填充（W-A3 之后由 `_buildHpBar` 统一创建） */
+  hpBarSpec() {
+    return { width: 2.4, height: 0.17, color: 0xff2244, bg: null, offsetY: 4.6 };
   }
 
   update(dt, playerPos, playerRef) {

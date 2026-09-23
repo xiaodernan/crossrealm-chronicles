@@ -8,3 +8,4 @@ godot/.godot/
 public/godot-export/
 .vite/
 resume-stack
+.tmp-*/
