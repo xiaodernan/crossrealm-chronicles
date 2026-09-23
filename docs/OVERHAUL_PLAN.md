@@ -183,7 +183,7 @@ src/
 - [x] 世界边界软阻挡（隐形墙推回 + 定向提示），出界不可达
 - [x] `PlayerFSM`：idle/walk/sprint/airborne/roll/attack/lock 七态，移动输入按状态过滤（修 B1、B2）
   - B1、B2 的行为在 M1 修复（翻滚期间锁定冲量、不被移动输入覆盖；跳跃改按键边沿）；`update()` 内的 if/else 与 `combatBusy` 门控已在 **M2 第三切片**迁到 `engine/StateMachine.js`，`cast/interact/dead` 按需再补
-- [x] 输入层：按键边沿、跳跃缓冲（0.12s）、土狼时间（0.1s）；输入缓冲攻击留到 M2
+- [x] 输入层：按键边沿、跳跃缓冲（0.12s）、土狼时间（0.1s）；输入缓冲攻击**已落地**（W-A4 `c2eff50`：`INPUT.buffer=0.18s` 缓冲 + `_pressed()` 按下沿检测，顺带修掉"清 keys 冒充边沿"导致长按 Ctrl 每帧请求翻滚的 bug）
 - [x] `engine/Time.js`：`dt` 上限 + `timeScale`，`engine/Timer.js` 取代游戏内 `setTimeout`
   - 原语与单测已就绪（`TimeController` 固定步长/hitstop）；接线点在 `Game.update()` 的 `rawDt`，已随 M2 首批切片接入
 - [x] 坡度：地形为高度场吸附（`sampleGlobalHeightSmooth`），不存在滑落模型，坡度上限暂不适用；斜面贴地由 `walkY` 吸附保证
