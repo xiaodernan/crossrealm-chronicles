@@ -6,7 +6,7 @@ import { createPlayerFSM } from './PlayerFSM.js';
 
 import { shake } from '../engine/Shake.js';
 import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE } from '../engine/CameraRig.js';
-import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND } from '../content/tuning.js';
+import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND, LOCK_ON_CAMERA } from '../content/tuning.js';
 import { ZONE_IDS } from '../world/ZoneIdentity.js';
 
 
@@ -360,6 +360,28 @@ export class PlayerController {
     );
   }
 
+  /**
+   * 每帧把 `targetYaw/targetPitch` 落到实际朝向上。
+   *
+   * 未锁定时是直赋（鼠标手感不能被 rig 侧再抹一层）。锁定时改成**按秒指数逼近**：
+   * `CombatController` 每帧把 `targetYaw` 硬写成"指向锁定目标"，若也直赋，锁定一个身后的
+   * 敌人就等于镜头一帧甩 180°（短板 A4 的"锁定无阻尼"）。走最短弧（`atan2(sin,cos)` 把差值
+   * 折回 [-π,π]），且速率按秒算 → 与帧率无关。命中朝向另走 `getCombatForwardXZ()`（读目标
+   * 位置，与本 yaw 无关），所以这里只缓观感、不削准头。
+   */
+  _advanceYaw(dt) {
+    if (this.combat?.getLockTarget?.()) {
+      const d = Math.atan2(
+        Math.sin(this.targetYaw - this.yaw),
+        Math.cos(this.targetYaw - this.yaw)
+      );
+      this.yaw += d * (1 - Math.exp(-LOCK_ON_CAMERA.yawRate * dt));
+    } else {
+      this.yaw = this.targetYaw;
+    }
+    this.pitch = this.targetPitch;
+  }
+
   setAnimState(moving, sprinting) {
     if (this._animMoving === moving && this._animSprinting === sprinting) return;
     this._animMoving = moving;
@@ -432,9 +454,7 @@ export class PlayerController {
 
 
 
-    this.yaw = this.targetYaw;
-    this.pitch = this.targetPitch;
-
+    this._advanceYaw(dt);
 
 
     // 位移意图整帧交给状态机：它只写 velocity 的水平分量与朝向，
@@ -904,7 +924,7 @@ export class PlayerController {
     const camDir = combatCam.lockOrbit ? combatCam : restCam;
     const lockTarget = this.combat?.getLockTarget?.();
     let dist = lockTarget
-      ? THREE.MathUtils.lerp(this.cameraDistance, 5.4, 0.4)
+      ? THREE.MathUtils.lerp(this.cameraDistance, LOCK_ON_CAMERA.distance, LOCK_ON_CAMERA.distanceBlend)
       : this.cameraDistance;
     dist = Math.max(this.minCameraDistance, dist - camDir.pull);
 

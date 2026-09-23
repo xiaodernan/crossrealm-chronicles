@@ -370,6 +370,19 @@ export const CAMERA_FOV = { first: 78, third: 62 };
 export const CAMERA_BLEND = { enter: 0.45, exit: 0.5 };
 
 /**
+ * 锁定（lock-on）时的第三人称镜头参数 —— W-A5 切片2。
+ *
+ * `yawRate`：镜头绕到"背对目标那一侧"的追踪速率（1/秒，按秒算 → 帧率无关）。锁定瞬间
+ * 战斗系统会把 `player.targetYaw` 直接写成"指向目标的方向"；若像过去那样 `yaw = targetYaw`
+ * 硬赋值，锁定一个身后的敌人 = 画面一帧甩 180°，玩家当场失去方向感。这里改成指数逼近，
+ * 让镜头"转过去"而不是"跳过去"。命中朝向另走 `getCombatForwardXZ()`（读目标位置，与镜头
+ * yaw 无关），所以阻尼只影响观感、不削准头 —— 这是这条改动成立的关键前提。
+ * `distance / distanceBlend`：锁定时把力臂收到这一档（魂系越肩贴近），`0~1` 是在
+ * `cameraDistance` 与该目标值之间的插值权重。
+ */
+export const LOCK_ON_CAMERA = { yawRate: 14, distance: 5.4, distanceBlend: 0.4 };
+
+/**
  * 第三人称遮挡求交的参数 —— 镜头该在什么时候"贴不住"玩家背后。
  *
  * `steps`：从支点向期望机位均分几段做前向探测。前向（而不是二分）是因为地形的
