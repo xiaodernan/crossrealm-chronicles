@@ -2,15 +2,49 @@ import * as THREE from 'three';
 import { MOVES, LOCKED_CONE } from './MoveTable.js';
 import { hitDirection, hitSuffix, isBehind, isGuarded, resolveHit } from './Resolution.js';
 import { createHurtbox, pickPart } from './Hurtbox.js';
-import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN } from '../content/tuning.js';
+import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN, AIM_ASSIST } from '../content/tuning.js';
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
 
 const COMBO_WINDOW = 0.55;
 /** 判定循环复用的临时向量，避免每次出手为每个目标新建对象 */
 const _toEnemy = new THREE.Vector3();
+/** 磁吸候选打分复用的临时向量 */
+const _assistV = new THREE.Vector3();
 /** 命中方向复用体：火花、击退、震屏共用同一句"往哪打的" */
 const _hitDir = { x: 0, z: 0 };
+
+/**
+ * 找出这一刀该"磁吸"补判的那个目标（W-A5 切片3）。
+ *
+ * 目标须落在**宽容带** `[assistMinDot, swingMinDot)` 内：`assistMinDot < swingMinDot`（点积越小
+ * 角越偏），所以这一带就是"刚出挥砍锥、但还在放宽 `extraDeg` 度后的磁吸角内"。取其中**最对准星**
+ * （dot 最大 = 离准心最近）的唯一一个，只补这一个。纯函数、只读，返回敌人引用或 null。
+ * 已在挥砍锥内（dot >= swingMinDot）的目标由主循环正常结算，不归磁吸管。
+ *
+ * @param {THREE.Vector3} origin        出手点
+ * @param {THREE.Vector3} forward       本次攻击朝向（已归一，水平）
+ * @param {object[]}      enemies       存活敌人
+ * @param {number}        range         判定半径
+ * @param {number}        swingMinDot   挥砍锥点积阈值
+ * @param {number}        assistMinDot  磁吸外沿点积阈值（比 swingMinDot 小 = 更宽的锥）
+ */
+export function pickAimAssistTarget(origin, forward, enemies, { range, swingMinDot, assistMinDot }) {
+  let best = null;
+  let bestDot = -Infinity;
+  for (const e of enemies) {
+    if (!e.alive) continue;
+    _assistV.set(e.position.x - origin.x, 0, e.position.z - origin.z);
+    const dist = _assistV.length();
+    if (dist === 0 || dist > range) continue;
+    _assistV.multiplyScalar(1 / dist);
+    const dot = forward.dot(_assistV);
+    // 已在挥砍锥内的目标由主循环正常结算，磁吸只管"刚差一点"的那个
+    if (dot >= swingMinDot || dot < assistMinDot) continue;
+    if (dot > bestDot) { bestDot = dot; best = e; }
+  }
+  return best;
+}
 
 export class CombatController {
   constructor(player, enemyManager, dialog, damageNumbers, audio, stats) {
@@ -496,6 +530,16 @@ export class CombatController {
     const origin = s.omni ? this.player.position : this.getAttackOrigin();
     const forward = this.player.getCombatForwardXZ();
     const minDot = s.omni ? s.cone : (this.lockTarget?.alive ? LOCKED_CONE : s.cone);
+    // 磁吸：仅非锁定、非全向、且开关开启时，把一个"刚出差点在宽容带内"的目标补进命中集合。
+    // 宽容带 = 把本次挥砍锥再放宽 AIM_ASSIST.extraDeg 度；锁定/全向各自已够，不参与。
+    let magnet = null;
+    if (AIM_ASSIST.enabled && !s.omni && !this.lockTarget?.alive && minDot > -1) {
+      const assistHalf = Math.acos(THREE.MathUtils.clamp(minDot, -1, 1)) + (AIM_ASSIST.extraDeg * Math.PI) / 180;
+      const assistMinDot = Math.cos(Math.min(assistHalf, Math.PI));
+      magnet = pickAimAssistTarget(origin, forward, this.enemies.getAliveEnemies(), {
+        range: s.range, swingMinDot: minDot, assistMinDot,
+      });
+    }
     let hitAny = false;
 
     for (const enemy of this.enemies.getAliveEnemies()) {
@@ -503,7 +547,7 @@ export class CombatController {
       _toEnemy.y = 0;
       if (_toEnemy.length() > s.range) continue;
       _toEnemy.normalize();
-      if (forward.dot(_toEnemy) < minDot) continue;
+      if (forward.dot(_toEnemy) < minDot && enemy !== magnet) continue;
       // 垂直方向同样要相交，不再把 3D 判定压成 2D 投影：打不到就是 no-hit
       const part = pickPart(enemy, this.player.position.y, s.band);
       if (!part) continue;
