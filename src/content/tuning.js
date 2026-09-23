@@ -448,16 +448,20 @@ export const CAMERA_OCCLUSION = {
 export const GROUND_HAZARD = {
   bossSlam: { radius: 4.5, telegraph: 1.2, damage: 35, color: 0xff2200, recover: 2.5 },
   /**
-   * 落点圈阵列（弹幕档，大奥术师在用）：一次铺 `count` 枚，第 i 枚的前摇是
+   * 落点圈阵列（弹幕档）的**形状**：一次铺 `count` 枚，第 i 枚的前摇是
    * `telegraph + i * stagger`、离心 `spread * sqrt((i+0.5)/count)` —— 由内向外依次落地。
    * 数值口径：`spread` 5 / `radius` 3 时，原地不动会吃到内圈那两枚，起手就跑能在第一枚
    * 落下前脱出整片（一枚圈只值 20 点，站住连吃才是疼的地方）。
-   * `cooldown` 是这一档自己的节奏，与砸地的收招冷却无关：两招各自决定"多久铺一次场"。
-   * `range` 是"离玩家多远才肯铺场" —— 圈心定在玩家脚下，隔半场铺过去就是白送一次演出。
+   *
+   * **"谁在什么时候铺、多久一次、离多远才肯铺"不在这里** —— 那是 `content/arenaScripts.js`
+   * 的脚本表（每个 Boss 不同：奥术师 7 秒 24 米、引力化身 9 秒 22 米）。分成两份的界线是
+   * "改了它所有调用方都该跟着变"的留在这份（圈多大、掉多少血），逐 Boss 不同的走那张表。
+   * `bossSlam.recover` 是例外：它是这一招收招动作本身的一部分（Boss 打完要站那儿多久），
+   * 不是"多久愿意打一次"，所以留在形状档里。
    */
   barrage: {
     count: 5, radius: 3, damage: 20, color: 0xcc44ff,
-    telegraph: 1.5, stagger: 0.35, spread: 5, cooldown: 7, range: 24,
+    telegraph: 1.5, stagger: 0.35, spread: 5,
   },
   /** 起手时圈只画到最终半径的这个占比，随前摇线性涨满 */
   growFrom: 0.25,

@@ -238,6 +238,8 @@ export class DungeonManager {
         hp: 480 + dungeon.layout.rooms.length * 25,
         dungeonId: dungeon.def.id,
         bossId: `dungeon-${dungeon.def.id}`,
+        // 危险区跟着管理器走：副本 Boss 的 id 不在脚本表里，按 `default` 脚本打近战位砸地
+        hazards: this.enemyManager.hazards,
       });
       boss.setDialogToast((msg) => this.dialog.toast(msg));
       list.push(boss);

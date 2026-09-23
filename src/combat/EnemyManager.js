@@ -195,7 +195,9 @@ export class EnemyManager {
   }
 
   spawnVoidBoss(config) {
-    const boss = new VoidBoss(this.scene, this.world, config);
+    const boss = new VoidBoss(this.scene, this.world, {
+      ...config, hazards: this.hazards,
+    });
     this.voidBoss = boss;
     this.enemies.push(boss);
     return boss;

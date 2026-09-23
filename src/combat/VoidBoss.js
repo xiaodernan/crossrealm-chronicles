@@ -12,8 +12,9 @@ export class VoidBoss extends Boss {
       damage: 19,
       speed: 4.8,
       name: '时线执政官',
+      // id 走 config：`Boss` 构造期就要按它查场地脚本
+      bossId: config.bossId ?? 'void-chronarch',
     });
-    this.bossId = config.bossId ?? 'void-chronarch';
     this.timeStopCooldown = 0;
     this.timeStopActive = false;
     this.timeStopTimer = 0;

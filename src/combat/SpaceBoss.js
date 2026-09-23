@@ -11,8 +11,9 @@ export class SpaceBoss extends Boss {
       damage: 20,
       speed: 5,
       name: '引力化身·奇点领主',
+      // id 走 config：`Boss` 构造期就要按它查场地脚本，晚一步赋默认值会查到别人的表
+      bossId: config.bossId ?? 'singularity-herald',
     });
-    this.bossId = config.bossId ?? 'singularity-herald';
     this.projectiles = config.projectiles;
     this.pullCooldown = 0;
     this.orbitAngle = 0;
@@ -93,10 +94,6 @@ export class SpaceBoss extends Boss {
       }
     } else {
       this.shootCooldown = Math.max(0, (this.shootCooldown ?? 0) - dt);
-    }
-
-    if (this.phase >= 2 && Math.random() < dt * 0.08) {
-      this.startSlamTelegraph();
     }
 
     super.update(dt, playerPos, playerRef);

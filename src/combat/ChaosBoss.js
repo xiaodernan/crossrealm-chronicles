@@ -12,8 +12,9 @@ export class ChaosBoss extends Boss {
       damage: 21,
       speed: 5.2,
       name: '混沌裂隙领主',
+      // id 走 config：`Boss` 构造期就要按它查场地脚本
+      bossId: config.bossId ?? 'chaos-overlord',
     });
-    this.bossId = config.bossId ?? 'chaos-overlord';
     this.chaosPulse = 0;
   }
 
@@ -52,10 +53,6 @@ export class ChaosBoss extends Boss {
         playerRef.combat.takeDamage(12);
         addShake(0.12);
       }
-    }
-
-    if (this.phase >= 3 && Math.random() < dt * 0.06) {
-      this.startSlamTelegraph();
     }
 
     super.update(dt, playerPos, playerRef);

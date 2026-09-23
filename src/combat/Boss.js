@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { Enemy } from './Enemy.js';
 import { GROUND_HAZARD } from '../content/tuning.js';
+import { ARENA_MOVES, arenaScriptFor } from '../content/arenaScripts.js';
+import { barrageLayout } from './BarragePattern.js';
 
 /** 影界守护者 — 首个 Boss，三阶段 */
 export class Boss extends Enemy {
@@ -27,6 +29,12 @@ export class Boss extends Enemy {
     this.hazards = config.hazards ?? null;
     /** 本场砸地许诺出去的那个圈；`done` 之前 Boss 一直站在 slam 态 */
     this.slamHazard = null;
+    /**
+     * 场地脚本按 `bossId` 取（`content/arenaScripts.js`，加载期整表校验过）。
+     * `_arenaCd` 与条目同序、构造期一次分配：热路径只读写，不再建对象。
+     */
+    this.arenaScript = arenaScriptFor(this.bossId);
+    this._arenaCd = this.arenaScript.map(() => 0);
     this.phaseTriggered = { p2: false, p3: false };
   }
 
@@ -177,8 +185,82 @@ export class Boss extends Enemy {
     }
   }
 
+  /** 这条脚本条目对应的数值档（形状/伤害/颜色都在 `GROUND_HAZARD` 那一份里） */
+  arenaSpec(entry) {
+    return GROUND_HAZARD[ARENA_MOVES[entry.move]];
+  }
+
+  /** 放出一招场地招。返回 false = 没放成（没有危险区系统 / 已有一圈在走），冷却也不该重置 */
+  castArenaMove(entry, playerPos) {
+    return entry.move === 'barrage' ? this.startBarrage(playerPos, entry) : this.startSlamTelegraph();
+  }
+
+  /**
+   * 计时型与机会型场地招：每帧按脚本表推进，**与 Boss 自己处在什么状态无关**。
+   *
+   * 排在 `update` 的 slam 早退之前 —— 砸地的那 1.2 秒里，别的地方的圈照样该落、
+   * 冷却照样该走。旧实现把这条写在四个子类的 `super.update` 之前，语义一样，只是各抄一遍。
+   */
+  updateArenaCasts(dt, playerPos) {
+    if (!this.hazards) return;
+    const script = this.arenaScript;
+    for (let i = 0; i < script.length; i++) {
+      const e = script[i];
+      if (e.trigger === 'melee' || this.phase < e.phase) continue;
+      if (e.trigger === 'timed') {
+        // `rate * dt`：期望次数按秒算，帧率换了概率跟着换，144Hz 不会比 30Hz 多挨几圈
+        if (Math.random() < e.rate * dt) this.castArenaMove(e, playerPos);
+        continue;
+      }
+      this._arenaCd[i] = Math.max(0, this._arenaCd[i] - dt);
+      if (this._arenaCd[i] > 0 || this.distanceTo(playerPos) >= e.range) continue;
+      if (this.castArenaMove(e, playerPos)) this._arenaCd[i] = e.cooldown;
+    }
+  }
+
+  /**
+   * 近战位上的场地招：脚本里 `trigger:'melee'` 的条目来抢这一次挥击。
+   * 抢到了就不进 windup —— 玩家读到的前摇是"圈在脚下铺开"，不是一刀。
+   */
+  tryArenaMelee() {
+    const script = this.arenaScript;
+    for (let i = 0; i < script.length; i++) {
+      const e = script[i];
+      if (e.trigger !== 'melee' || this.phase < e.phase) continue;
+      if (Math.random() < e.chance && this.castArenaMove(e, this.position)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * 落点圈阵列：以玩家**此刻**的位置为心，铺一片由内向外错时落下的圈。
+   * 铺完就不再关心玩家往哪跑 —— 这一招买的是"你还站在原地没有"，逼的是持续移动。
+   *
+   * `entry.tint` 让不同 Boss 用同一份圈几何、各自的配色（引力和混沌不该都掉进奥术紫里）。
+   */
+  startBarrage(playerPos, entry) {
+    if (!this.hazards) return false;
+    const spec = GROUND_HAZARD[ARENA_MOVES.barrage];
+    for (const p of barrageLayout(playerPos.x, playerPos.z, spec)) {
+      const at = this.clampIntoArena(p.x, p.z, spec.radius);
+      this.hazards.spawn({
+        x: at.x,
+        z: at.z,
+        radius: spec.radius,
+        telegraph: p.telegraph,
+        damage: spec.damage,
+        color: entry?.tint ?? spec.color,
+        owner: this,
+      });
+    }
+    return true;
+  }
+
   update(dt, playerPos, playerRef) {
     if (!this.alive) return;
+
+    // 场地招排在 slam 早退之前：砸地的那 1.2 秒里，别处的圈照样该落下
+    this.updateArenaCasts(dt, playerPos);
 
     if (this.state === 'slam') {
       this.stateTimer += dt;
@@ -237,8 +319,7 @@ export class Boss extends Enemy {
       this.position.z += (dz / len) * this.speed * dt;
       this.mesh.rotation.y = Math.atan2(dx, dz);
     } else if (this.attackCooldown <= 0) {
-      const slam = this.phase >= 2 && Math.random() < 0.35 && this.startSlamTelegraph();
-      if (!slam) {
+      if (!this.tryArenaMelee()) {
         this.state = 'windup';
         this.stateTimer = 0;
         this.showTelegraph();

@@ -17,11 +17,14 @@ import { join } from 'node:path';
 import { barrageLayout } from '../src/combat/BarragePattern.js';
 import { MagicBoss } from '../src/combat/MagicBoss.js';
 import { GROUND_HAZARD } from '../src/content/tuning.js';
+import { BOSS_ARENA_SCRIPTS } from '../src/content/arenaScripts.js';
 import {
   installWindowShim, makeWorld, makeScene, makePlayerRef, makeManager, v, until,
 } from './helpers/enemyHarness.js';
 
 const { barrage } = GROUND_HAZARD;
+/** 弹幕"什么时候放"住在脚本表里（切片3）；本文件测的是铺出来的东西 */
+const cast = BOSS_ARENA_SCRIPTS.archmagus.find((e) => e.move === 'barrage');
 const realRandom = Math.random;
 
 /** 整片阵列收场所需的时间：最后一枚的前摇 + 余像 */
@@ -47,7 +50,7 @@ afterAll(() => {
  */
 function stage(over = {}) {
   const m = makeManager();
-  const boss = m.spawnMagicBoss({ bossId: 'test-archmagus', x: 0, z: 0, respawn: false, ...over.config });
+  const boss = m.spawnMagicBoss({ bossId: 'archmagus', x: 0, z: 0, respawn: false, ...over.config });
   boss.phase = over.phase ?? 2;
   boss.speed = 0;
   return { m, boss, player: over.player ?? v(10, 0), ref: makePlayerRef() };
@@ -106,10 +109,9 @@ describe('落点圈布局（纯几何）', () => {
 
 describe('大奥术师弹幕接线', () => {
   it('二阶段近身才铺场，一次正好 count 枚', () => {
-    const { m, boss, player, ref } = stage();
+    const { m, player, ref } = stage();
     m.update(1 / 60, player, ref, null, null);
     expect(m.hazards.count()).toBe(barrage.count);
-    expect(boss.barrageCooldown).toBeCloseTo(barrage.cooldown, 6);
   });
 
   it('一阶段不铺场', () => {
@@ -118,8 +120,8 @@ describe('大奥术师弹幕接线', () => {
     expect(m.hazards.count()).toBe(0);
   });
 
-  it('离得太远不白演：超出 range 时不铺场', () => {
-    const { m, player, ref } = stage({ player: v(barrage.range + 20, 0) });
+  it('离得太远不白演：超出脚本给的 range 时不铺场', () => {
+    const { m, player, ref } = stage({ player: v(cast.range + 20, 0) });
     tick(m, 0.5, player, ref);
     expect(m.hazards.count()).toBe(0);
   });
@@ -128,7 +130,7 @@ describe('大奥术师弹幕接线', () => {
     const { m, player, ref } = stage();
     tick(m, SETTLE, player, ref);
     expect(m.hazards.count()).toBe(0);              // 第一波已全部收场
-    tick(m, barrage.cooldown - SETTLE - 0.4, player, ref);
+    tick(m, cast.cooldown - SETTLE - 0.4, player, ref);
     expect(m.hazards.count()).toBe(0);              // 冷却还没到期
     tick(m, 0.6, player, ref);
     expect(m.hazards.count()).toBe(barrage.count);  // 到期后重新铺场
@@ -199,7 +201,7 @@ describe('大奥术师弹幕接线', () => {
     expect(boss.attackCooldown).toBeGreaterThan(0);
     // 弹幕也不看 Boss 的脸色：它由危险区系统自己的钟推进
     expect(until(m, SETTLE, 1 / 60, player, ref, () => barrageHits(ref).length > 0)).toBe(true);
-    expect(boss.barrageCooldown).toBeGreaterThan(0);
+    expect(m.hazards.count()).toBeLessThan(barrage.count * 2);   // 冷却没到期，不铺第二波
   });
 
   it('没有危险区系统时不铺场也不报错', () => {
@@ -207,6 +209,6 @@ describe('大奥术师弹幕接线', () => {
     lone.phase = 3;
     expect(lone.hazards).toBe(null);
     expect(() => lone.update(1 / 60, v(10, 0), makePlayerRef())).not.toThrow();
-    expect(lone.barrageCooldown).toBe(0);
+    expect(lone.startBarrage(v(10, 0), cast)).toBe(false);
   });
 });
