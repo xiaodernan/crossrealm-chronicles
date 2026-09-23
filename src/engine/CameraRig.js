@@ -8,6 +8,9 @@ import { CAMERA_FOV } from '../content/tuning.js';
  */
 export const FOV_LAYER_OVERRIDE = 'camera-override';
 
+/** 没声明 owner 的机位写入归到这里：稳定、不会与任何具名所有者发生交接 */
+export const DEFAULT_VIEW_OWNER = 'default';
+
 /**
  * 镜头覆盖量协议的"空表" —— 谁没在接管镜头就返回这一份。
  *
@@ -52,6 +55,15 @@ export class CameraRig {
     this._lastChange = null;
     this._look = new THREE.Vector3();
     this._pos = new THREE.Vector3();
+    /* —— 变换混合栈（W-A5 切片1）——
+     * `_pos/_look` 是本帧**目标**机位（当前所有者想要的），
+     * `_appliedPos/_appliedLook` 是**此刻真正在屏幕上**的那一笔（交接补间的起点读它）。
+     * `_viewOwner` 是这一帧认领变换的所有者；`_blend` 非空表示正处在一次交接补间里。 */
+    this._appliedPos = new THREE.Vector3().copy(camera.position);
+    this._appliedLook = new THREE.Vector3();
+    this._tmpLook = new THREE.Vector3();
+    this._viewOwner = null;
+    this._blend = null;
   }
 
   /** 基准 FOV（第一 / 第三人称切换、初始化）。各层增量留在账上，不被这次切换抹掉 */
@@ -118,18 +130,83 @@ export class CameraRig {
   /**
    * 唯一的机位写入点。两个入参都只读：内部先克隆再落笔，
    * 调用方可以照旧复用临时向量，而不必担心被 rig 反改。
+   *
+   * **所有权交接补间（W-A5 切片1）**：`opts.owner` 认领这一帧的变换。所有者不变时
+   * 直接落笔（调用方自己已经做了阻尼，rig 不再叠第二层 —— 第三人称轨道、观看模式都自平滑）；
+   * 所有者**变更**的那一帧（玩家 ↔ 过场 ↔ 观看）从当前画面缓动到新目标，`opts.transition`
+   * 是这段交接的秒数。这样"进出过场是一帧硬切"（短板 A4）就没了落脚处，而且**没有一处需要
+   * 记得收尾**：过场 `end()` 什么都不用做，下一帧玩家重新认领时 rig 自己把镜头补回去。
+   *
+   * @param {THREE.Vector3} position
+   * @param {THREE.Vector3} lookAt
+   * @param {{ owner?: string, transition?: number, snap?: boolean }} [opts]
    */
-  setView(position, lookAt) {
+  setView(position, lookAt, opts = {}) {
     this._pos.copy(position);
     this._look.copy(lookAt);
+
+    const owner = opts.owner ?? DEFAULT_VIEW_OWNER;
+    if (this._viewOwner === null) {
+      // 首次认领：没有"上一位所有者"可交接，直接落位（也避免从初始 0 注视点起补间）
+      this._viewOwner = owner;
+      this._apply();
+      return this;
+    }
+    if (owner !== this._viewOwner) {
+      // 真正的交接：从当前画面缓动到新目标；snap 或没给 transition 就仍是一帧落位
+      const dur = opts.snap ? 0 : (opts.transition ?? 0);
+      this._blend = dur > 0
+        ? { fromPos: this._appliedPos.clone(), fromLook: this._appliedLook.clone(), t: 0, dur }
+        : null;
+      this._viewOwner = owner;
+    }
+
+    // 补间进行中：本帧不直接落笔，交给 commitView 用最新目标推进（目标每帧在动，补间追随它）
+    if (!this._blend) this._apply();
+    return this;
+  }
+
+  /** 把当前目标 `_pos/_look` 立刻落到相机上（非补间路径的唯一出口） */
+  _apply() {
     this.camera.position.copy(this._pos);
     this.camera.lookAt(this._look);
+    this._appliedPos.copy(this._pos);
+    this._appliedLook.copy(this._look);
+  }
+
+  /**
+   * 主循环末尾随 `commitFov()` 一起调用：推进一次进行中的交接补间。
+   * 用的是 rawDt —— 过场进出是演出，不该被 hitstop / 慢动作拉长（与 `Scheduler` 同一口径）。
+   * @param {number} dt
+   */
+  commitView(dt) {
+    if (!this._blend) return this;
+    const b = this._blend;
+    b.t += dt;
+    const k = Math.min(1, b.t / b.dur);
+    const e = k * k * (3 - 2 * k);   // smoothstep：两头慢，中段快，起止不突兀
+    this.camera.position.copy(b.fromPos).lerp(this._pos, e);
+    this._tmpLook.copy(b.fromLook).lerp(this._look, e);
+    this.camera.lookAt(this._tmpLook);
+    this._appliedPos.copy(this.camera.position);
+    this._appliedLook.copy(this._tmpLook);
+    if (k >= 1) this._blend = null;
     return this;
+  }
+
+  /** 当前认领变换的所有者（诊断 / 门禁读它，别去猜谁在写相机） */
+  get viewOwner() {
+    return this._viewOwner;
+  }
+
+  /** 是否正处在一次交接补间里 */
+  get blending() {
+    return this._blend !== null;
   }
 
   /** 上一次落笔的注视点（镜头混合与过场进出拿它当起点） */
   lookPoint(out = new THREE.Vector3()) {
-    return out.copy(this._look);
+    return out.copy(this._appliedLook);
   }
 
   /** 窗口尺寸变化：宽高比是相机唯一的"布局"输入 */
@@ -150,6 +227,9 @@ export class CameraRig {
     this._appliedFov = null;
     this._lastChange = null;
     this.baseFov = fov;
+    // 交出相机：正在进行或待发生的交接一并作废，下一次 setView 从新所有权重新起算（不补间）
+    this._blend = null;
+    this._viewOwner = null;
     return this.commitFov();
   }
 }

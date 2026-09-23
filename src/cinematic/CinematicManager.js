@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CAMERA_BLEND } from '../content/tuning.js';
 
 const BOSS_CINEMATICS = {
   'shadow-warden': {
@@ -69,7 +70,6 @@ export class CinematicManager {
     /** 过场机位的两个复用向量（rig 只读不写回，复用是安全的） */
     this._cinePos = new THREE.Vector3();
     this._cineLook = new THREE.Vector3();
-    this.savedCamera = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
     this.orbitAngle = 0;
     this.phase = 'intro';
     this.seen = new Set();
@@ -106,9 +106,6 @@ export class CinematicManager {
     this.game.cinematicActive = true;
     document.exitPointerLock?.();
 
-    this.savedCamera.pos.copy(this.game.camera.position);
-    this.savedCamera.look.copy(this.game.player.currentLookTarget);
-
     document.getElementById('cine-title').textContent = cfg.title;
     document.getElementById('cine-subtitle').textContent = cfg.subtitle;
     document.getElementById('cine-title').style.color = cfg.color;
@@ -126,7 +123,10 @@ export class CinematicManager {
     const dist = 14 + Math.sin(this.orbitAngle * 0.5) * 2;
     const height = 5 + Math.sin(this.orbitAngle) * 1.5;
     /* 过场也走同一台 rig：以前这里直接搬 game.camera，玩家相机的平滑与 FOV 栈全然不知情，
-     * 进出过场的那一两帧因此是"两处写入"的现场 */
+     * 进出过场的那一两帧因此是"两处写入"的现场。
+     * 认领 owner='cinematic'：进入的那一帧（owner 从 player 翻过来）rig 自动从当前画面补间到
+     * 绕轨机位；过场期间 owner 不变，每帧直接落笔跟随。end() 什么都不用做——玩家下一帧重新
+     * 认领时 rig 会自己补回来（短板 A4 的硬切就是这么消掉的）。 */
     this.game.player.rig
       .setView(
         this._cinePos.set(
@@ -134,7 +134,8 @@ export class CinematicManager {
           boss.y + height,
           boss.z + Math.cos(this.orbitAngle) * dist
         ),
-        this._cineLook.set(boss.x, boss.y + 2.5, boss.z)
+        this._cineLook.set(boss.x, boss.y + 2.5, boss.z),
+        { owner: 'cinematic', transition: CAMERA_BLEND.enter }
       );
 
     if (this.phase === 'title' && this.timer > 2.2) {

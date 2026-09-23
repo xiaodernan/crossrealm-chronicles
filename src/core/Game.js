@@ -574,8 +574,11 @@ export class Game {
       this.bossApproach?.update(dt, this.player.position);
     }
     /* 相机所有者的收尾：FOV 增量按帧申领，这一笔落下之后本帧的申领就清零 ——
-     * 没有任何系统需要"记得恢复基准"（M3：相机唯一写入者） */
+     * 没有任何系统需要"记得恢复基准"（M3：相机唯一写入者）。
+     * commitView 用 rawDt 推进一次"所有权交接补间"（进出过场/观看模式的软接，W-A5 切片1，短板 A4）：
+     * 走过场和 UI 节奏同一口径，hitstop / 慢动作不该把一次镜头交接拉长。 */
     this.player.rig.commitFov();
+    this.player.rig.commitView(rawDt);
     this.updateDayNight(dt);
     this.updateSunFollow();
     this.updateBloom();

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CAMERA_BLEND } from '../content/tuning.js';
 
 /**
  * 观看模式相机 — 法环式越肩跟随，固定俯角，无需鼠标。
@@ -48,6 +49,7 @@ export class SpectatorCamera {
     const smooth = 1 - Math.exp(-8 * dt);
     this.smoothPos.lerp(desired, smooth);
     this.smoothLook.lerp(lookAt, smooth);
-    this.rig.setView(this.smoothPos, this.smoothLook);
+    this.rig.setView(this.smoothPos, this.smoothLook,
+      { owner: 'spectator', transition: CAMERA_BLEND.enter });
   }
 }

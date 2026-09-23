@@ -6,7 +6,7 @@ import { createPlayerFSM } from './PlayerFSM.js';
 
 import { shake } from '../engine/Shake.js';
 import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE } from '../engine/CameraRig.js';
-import { CAMERA_FOV, CAMERA_OCCLUSION } from '../content/tuning.js';
+import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND } from '../content/tuning.js';
 import { ZONE_IDS } from '../world/ZoneIdentity.js';
 
 
@@ -889,7 +889,8 @@ export class PlayerController {
 
     this.currentLookTarget.lerp(target, smooth);
 
-    this.rig.setView(this.currentCameraPos, this.currentLookTarget);
+    this.rig.setView(this.currentCameraPos, this.currentLookTarget,
+      { owner: 'player', transition: CAMERA_BLEND.exit });
 
   }
 
@@ -1012,7 +1013,8 @@ export class PlayerController {
     this.currentCameraPos.lerp(desired, smooth);
     this.currentLookTarget.lerp(lookAt, smooth);
     if (camDir.fovAdd) this.rig.requestFov(FOV_LAYER_OVERRIDE, camDir.fovAdd);
-    this.rig.setView(this.currentCameraPos, this.currentLookTarget);
+    this.rig.setView(this.currentCameraPos, this.currentLookTarget,
+      { owner: 'player', transition: CAMERA_BLEND.exit });
   }
 
 
