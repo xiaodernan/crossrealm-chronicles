@@ -110,6 +110,7 @@ import { attachPopCultureCgRenderer } from '../ui/DialogCGRendererPopCulture.js'
 import { attachPopCultureSideQuests } from '../game/SideQuestPopCulture.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
 import { ZONE_IDS } from '../world/ZoneIdentity.js';
+import { GamepadInput } from '../engine/GamepadInput.js';
 export class Game {
   constructor(container) {
     this.clock = new THREE.Clock();
@@ -398,6 +399,12 @@ export class Game {
   setupInput() {
     const canvas = this.renderer.domElement;
 
+    /** 手柄桥：没有手柄时 `poll()` 只做一次枚举，`keys` 与键盘路径逐字不变 */
+    this.padInput = new GamepadInput({
+      keys: this.keys,
+      mouseDown: this.player.combat.mouseDown,
+    });
+
     window.addEventListener('keydown', (e) => {
       this.keys[e.code] = true;
       if (this.upgrade.open || this.dialog.open) return;
@@ -501,6 +508,9 @@ export class Game {
     this.combatCamera.update(rawDt);
     this.combatInputLock.update(rawDt);
     const dt = rawDt * this.time.timeScale * this.combatCamera.getTimeScale();
+    // 手柄每帧轮询一次（B39 同一条纪律：输入状态是"这一帧的样子"，不是事件瞬间的样子）。
+    // 它把按钮/摇杆合成进 `this.keys` 的同一形状，所以键盘路径与所有消费者不必认识手柄。
+    this.padInput?.poll();
     this.combatStyle?.update(dt);
     this.combatStyleOverlay?.update(dt);
     this.zoneTransitionFx?.update(dt);
