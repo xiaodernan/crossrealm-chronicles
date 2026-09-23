@@ -111,6 +111,8 @@ import { attachPopCultureSideQuests } from '../game/SideQuestPopCulture.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
 import { ZONE_IDS } from '../world/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
+import { UI_HOTKEYS } from '../content/hotkeys.js';
+import { HotkeyRouter, escapeRoute } from '../ui/HotkeyRouter.js';
 export class Game {
   constructor(container) {
     this.clock = new THREE.Clock();
@@ -409,6 +411,65 @@ export class Game {
     return forPointer ? this.pointerLocked : true;
   }
 
+  /**
+   * UI 热键放不放行：面板接管期间不让（世界地图例外 —— 它的 G / Escape / Tab 本来就是图上的操作）。
+   * 判据与改前逐条等价，只是现在被 `HotkeyRouter` 在两个时刻各问一次。
+   */
+  hotkeyBlocked(code) {
+    if (this.upgrade.open || this.dialog.open) return true;
+    if (this.pauseMenu.open || this.settingsPanel.open || this.fastTravelPanel.open || this.helpManual.open) return true;
+    if (this.worldMapPanel?.open && code !== 'KeyG' && code !== 'Escape' && code !== 'Tab') return true;
+    return false;
+  }
+
+  /** 一个动作一格：动作名来自 `content/hotkeys.js`，键盘与手柄派发的是同一个这里 */
+  runHotkey(action) {
+    switch (action) {
+      case 'help': return this.helpManual.toggle();
+      case 'minimap': return this.hud.toggleMinimap();
+      case 'worldMap': return this.worldMapPanel?.toggle();
+      case 'cameraMode': return this.player.toggleCameraMode();
+      case 'zonePanel':
+        // Tab 在地图上开著时是"换选中的标记"，在野外才是"翻区域面板"
+        if (this.worldMapPanel?.open) {
+          this.mapMarkers.cycleActive();
+          return this.worldMapPanel.draw();
+        }
+        return this.hud.toggleZonePanel();
+      case 'questTracker': return this.questAssistant.toggle();
+      case 'autoPlay': return this.questAssistant.startAutoPlay();
+      case 'journal': return this.hud.toggleJournal();
+      case 'photoMode': return this.photoMode?.toggle();
+      case 'perfHud': return this.perfHud?.toggle();
+      case 'sessionStats': return this.sessionStats?.toggle();
+      case 'save': return SaveSystem.save(this);
+      case 'load': return SaveSystem.load(this);
+      case 'settings': return this.settingsPanel.show();
+      case 'escape': return this.runEscape();
+      default: return false;
+    }
+  }
+
+  /** Escape 那七层级联的顺序就是产品决策，本体抽在 `escapeRoute` 里以便逐条测 */
+  runEscape() {
+    switch (escapeRoute({
+      endCreditsSkippable: !!this.endCredits?.trySkip?.(),
+      combatCinematicSkippable: !!this.combatCinematicSkip?.canSkip?.(),
+      worldMapOpen: !!this.worldMapPanel?.open,
+      autoPlayActive: !!this.playerAutoPlay?.active,
+      helpOpen: !!this.helpManual.open,
+      cinematicActive: !!this.cinematicActive,
+    })) {
+      case 'endCredits': return true;                 // `trySkip()` 已经吃掉这一下
+      case 'combatCinematic': return true;            // 同上：`canSkip()` 副作用是跳过
+      case 'worldMap': return this.worldMapPanel.hide();
+      case 'autoPlay': return this.playerAutoPlay.stop(false);
+      case 'help': return this.helpManual.hide();
+      case 'cinematic': return this.cinematics.skip();
+      default: return this.pauseMenu.toggle();
+    }
+  }
+
   setupInput() {
     const canvas = this.renderer.domElement;
 
@@ -418,49 +479,20 @@ export class Game {
       mouseDown: this.player.combat.mouseDown,
     });
 
+    /**
+     * UI 热键派发（W-A7 切片3）：从"keydown 分支"改成"表 + 边沿轮询"，
+     * 于是键盘与手柄走同一条路（手柄的 Start 绑到 `Escape` 就能开暂停菜单）。
+     */
+    this.hotkeys = new HotkeyRouter({
+      table: UI_HOTKEYS,
+      isBlocked: (code) => this.hotkeyBlocked(code),
+      onAction: (action) => this.runHotkey(action),
+    });
+
     window.addEventListener('keydown', (e) => {
       this.keys[e.code] = true;
-      if (this.upgrade.open || this.dialog.open) return;
-      if (this.pauseMenu.open || this.settingsPanel.open || this.fastTravelPanel.open || this.helpManual.open) return;
-      if (this.worldMapPanel?.open && e.code !== 'KeyG' && e.code !== 'Escape' && e.code !== 'Tab') return;
-
-      if (e.code === 'KeyH') {
-        e.preventDefault();
-        this.helpManual.toggle();
-        return;
-      }
-
-      if (e.code === 'KeyM') this.hud.toggleMinimap();
-      if (e.code === 'KeyG') this.worldMapPanel?.toggle();
-      if (e.code === 'KeyV') this.player.toggleCameraMode();
-      if (e.code === 'Tab' && this.worldMapPanel?.open) {
-        e.preventDefault();
-        this.mapMarkers.cycleActive();
-        this.worldMapPanel.draw();
-        return;
-      }
-      if (e.code === 'Tab') { e.preventDefault(); this.hud.toggleZonePanel(); }
-      if (e.code === 'KeyU') this.questAssistant.toggle();
-      if (e.code === 'KeyN') {
-        e.preventDefault();
-        this.questAssistant.startAutoPlay();
-      }
-      if (e.code === 'KeyJ') this.hud.toggleJournal();
-      if (e.code === 'F2') { e.preventDefault(); this.photoMode?.toggle(); }
-      if (e.code === 'F3') { e.preventDefault(); this.perfHud?.toggle(); }
-      if (e.code === 'Backquote') { e.preventDefault(); this.sessionStats?.toggle(); }
-      if (e.code === 'KeyP') SaveSystem.save(this);
-      if (e.code === 'KeyL') SaveSystem.load(this);
-      if (e.code === 'Escape') {
-        if (this.endCredits?.trySkip?.()) return;
-        if (this.combatCinematicSkip?.canSkip?.()) return;
-        if (this.worldMapPanel?.open) { this.worldMapPanel.hide(); return; }
-        if (this.playerAutoPlay?.active) { this.playerAutoPlay.stop(false); return; }
-        if (this.helpManual.open) { this.helpManual.hide(); return; }
-        if (this.cinematicActive) this.cinematics.skip();
-        else this.pauseMenu.toggle();
-      }
-      if (e.code === 'F10') this.settingsPanel.show();
+      // 事件这一刻只做"要不要挡浏览器默认行为"；动作派发交给 `hotkeys.poll()`（见 `ui/HotkeyRouter.js`）
+      if (this.hotkeys.onKeydown(e.code)) e.preventDefault();
     });
     window.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
 
@@ -527,6 +559,8 @@ export class Game {
     if (padLook && (padLook.x !== 0 || padLook.y !== 0) && this.cameraInputAllowed(false)) {
       this.player.addCameraInput(padLook.x * rawDt, padLook.y * rawDt);
     }
+    // UI 热键每帧派发一次：键盘与手柄共用同一个出口（暂停菜单从此不必"只有键盘能开"）
+    this.hotkeys.poll(this.keys);
     this.combatStyle?.update(dt);
     this.combatStyleOverlay?.update(dt);
     this.zoneTransitionFx?.update(dt);

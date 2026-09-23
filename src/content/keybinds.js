@@ -52,7 +52,7 @@ export const PAD_BUTTON = {
 export const PAD_ACTIONS = [
   'moveUp', 'moveDown', 'moveLeft', 'moveRight',
   'sprint', 'jump', 'roll', 'parry', 'weaponArt', 'lockOn',
-  'attackLight', 'attackHeavy', 'spellOne', 'swapWeapon',
+  'attackLight', 'attackHeavy', 'spellOne', 'swapWeapon', 'pauseMenu',
 ];
 
 /**
@@ -80,6 +80,9 @@ export const GAMEPAD_BINDINGS = {
   attackHeavy: { action: 'attackHeavy', mode: 'edge', button: 'rightTrigger', mouse: 'right' },
   spellOne: { action: 'spellOne', mode: 'edge', button: 'leftTrigger', code: 'Digit1' },
   swapWeapon: { action: 'swapWeapon', mode: 'edge', button: 'select', code: 'KeyX' },
+  // UI 热键从 W-A7 切片3 起是可轮询的（`HotkeyRouter`），所以 Start 能冒充 `Escape`；
+  // 在那之前这么做只会静默无效 —— 因为暂停菜单是 `keydown` 监听器开的，没人读 `keys.Escape`
+  pauseMenu: { action: 'pauseMenu', mode: 'edge', button: 'start', code: 'Escape' },
 };
 
 /** 十字键在标准映射里的方向 → 按钮序号（移动动作的 `dir` 用它顺带带上十字键） */

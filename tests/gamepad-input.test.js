@@ -16,6 +16,7 @@ import {
   GAMEPAD_BINDINGS, PAD_ACTIONS, PAD_BUTTON, PAD, assertKeybinds,
 } from '../src/content/keybinds.js';
 import { CAMERA_FOV } from '../src/content/tuning.js';
+import { UI_HOTKEYS } from '../src/content/hotkeys.js';
 import { PlayerController } from '../src/player/PlayerController.js';
 import { GamepadInput } from '../src/engine/GamepadInput.js';
 import { installWindowShim, makeWorld } from './helpers/enemyHarness.js';
@@ -120,12 +121,21 @@ describe('绑定表：错表要在接上手柄之前红', () => {
     expect(() => assertKeybinds(badAction)).toThrow(/PAD_ACTIONS/);
   });
 
-  it('表里不许出现只由 `keydown` 事件消费的 UI 热键：绑了也不会响', () => {
-    // 这条是给自己立的界碑：`Escape` / `Tab` / `KeyM` 那一类走事件监听器，
-    // 桥写 `keys['Escape']` 没有任何人会读。要支持它们得先把热键改成可轮询的形状（W-A7 后续切片）。
-    const eventOnly = ['Escape', 'Tab', 'KeyM', 'KeyH', 'KeyG', 'KeyV', 'KeyJ', 'KeyU', 'KeyN', 'F2', 'F3', 'F10', 'Backquote'];
-    const codes = Object.values(GAMEPAD_BINDINGS).map((e) => e.code).filter(Boolean);
-    expect(codes.filter((c) => eventOnly.includes(c))).toEqual([]);
+  it('手柄能开暂停菜单：`start` 冒充 `Escape`，而这码从切片3 起真的有人轮询', () => {
+    // 切片1 立这条时是"表里不许出现只被 keydown 事件消费的码"（绑了也不会响）。
+    // UI 热键改成边沿轮询之后，`Escape` 变成了合法出口 —— 这条用例改为钉住那件事。
+    const escape = Object.values(GAMEPAD_BINDINGS).find((e) => e.code === 'Escape');
+    expect(escape).toBeTruthy();
+    expect(UI_HOTKEYS.some((e) => e.code === 'Escape' && e.action === 'escape')).toBe(true);
+    const pad0 = makePad();
+    const r = rig(pad0);
+    const seen = [];
+    press(pad0, 'start');
+    for (let i = 0; i < 4; i++) {
+      r.pad.poll();
+      seen.push(!!r.keys.Escape);
+    }
+    expect(seen).toEqual([true, false, false, false]);   // 按住不该反复开关菜单
   });
 });
 
