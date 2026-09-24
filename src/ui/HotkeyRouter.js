@@ -1,3 +1,5 @@
+import { isMapPassThrough } from '../content/hotkeys.js';
+
 /**
  * UI 热键派发（W-A7 切片3）。
  *
@@ -53,6 +55,20 @@ export class HotkeyRouter {
       this.onAction(e.action);
     }
   }
+}
+
+/**
+ * UI 热键的阻塞判据（纯函数）：面板现状 + 物理码进，`true` = 拦下。
+ *
+ * 判据本体与切片3 逐条等价；切片7 只动了一处 —— 世界地图那个例外的名单从生效表问
+ * （`isMapPassThrough`），不再抄出厂的 `G`/`Escape`/`Tab`。搬出 `Game` 的方法体也是
+ * 为了它能被真测：此前全仓对这条判据零测试，而它决定"面板开着时哪些键还能穿透"。
+ */
+export function hotkeyBlockedBy(panels, code) {
+  if (panels.upgrade || panels.dialog) return true;
+  if (panels.pauseMenu || panels.settingsPanel || panels.fastTravel || panels.helpManual) return true;
+  if (panels.worldMap && !isMapPassThrough(code)) return true;
+  return false;
 }
 
 /**

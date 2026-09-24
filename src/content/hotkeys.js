@@ -110,6 +110,22 @@ export function hotkeyCodeFor(action) {
   return e?.code ?? null;
 }
 
+/**
+ * 世界地图开着时仍然放行的三个动作：开图的那个键、关图的那个键、区域面板的开关。
+ * 这里列的是**动作**不是键码 —— 玩家把"世界地图"改到 `C` 之后，例外就该跟着搬到 `C`，
+ * 而不是继续给出厂的 `G` 放行（那等于改绑之后地图开着时按 `G` 还会穿透）。
+ */
+export const MAP_PASSTHROUGH_ACTIONS = ['worldMap', 'escape', 'zonePanel'];
+
+/** 这个物理码是不是当前生效表里"地图例外"那三个动作之一 */
+export function isMapPassThrough(code) {
+  for (const action of MAP_PASSTHROUGH_ACTIONS) {
+    const bound = hotkeyCodeFor(action);
+    if (bound !== null && bound === code) return true;
+  }
+  return false;
+}
+
 /** 动作名要有中文名：缺一行，设置面板上就是一格空白 */
 export function assertHotkeyLabels(labels = UI_HOTKEY_LABELS, table = UI_HOTKEYS) {
   for (const e of table) {

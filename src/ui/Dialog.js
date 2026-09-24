@@ -1,4 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
+import { hotkeyCodeFor } from '../content/hotkeys.js';
 
 /** toast 计时分组：toast 是最频繁的 UI 反馈，统一走主循环 dt（B39） */
 const TOAST_TAG = 'dialog-toast';
@@ -20,7 +21,8 @@ export class Dialog {
 
     document.getElementById('dialog-close').addEventListener('click', () => this.hide());
     window.addEventListener('keydown', (e) => {
-      if (e.code === 'Escape' && this.open) this.hide();
+      // 关对话的键是 `escape` 那个动作，不是出厂的 Escape 字面量（切片7：行为侧也问表）
+      if (this.open && e.code === hotkeyCodeFor('escape')) this.hide();
     });
   }
 

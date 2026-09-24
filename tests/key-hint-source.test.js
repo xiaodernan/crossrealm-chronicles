@@ -160,7 +160,6 @@ const LEDGER = {
   'game/LoreFragments.js': 2,
   'game/WorldAmbientCatalog.js': 2,
   'cinematic/CinematicManager.js': 1,
-  'core/Game.js': 1,
   'game/PopCultureHomageRegistry.js': 1,
   'game/QuestSystem.js': 1,
   'game/SideQuestRegistry.js': 1,

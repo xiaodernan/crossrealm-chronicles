@@ -116,7 +116,7 @@ import {
   GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
   setKeybindTable,
 } from '../content/keybinds.js';
-import { HotkeyRouter, escapeRoute } from '../ui/HotkeyRouter.js';
+import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
 export class Game {
   constructor(container) {
     this.clock = new THREE.Clock();
@@ -416,14 +416,19 @@ export class Game {
   }
 
   /**
-   * UI 热键放不放行：面板接管期间不让（世界地图例外 —— 它的 G / Escape / Tab 本来就是图上的操作）。
-   * 判据与改前逐条等价，只是现在被 `HotkeyRouter` 在两个时刻各问一次。
+   * UI 热键放不放行：判据本体在 `hotkeyBlockedBy`（纯函数，可测），这里只把自己
+   * 各面板的现状喂进去。世界地图那条例外的键名归生效表说（切片7，B50）。
    */
   hotkeyBlocked(code) {
-    if (this.upgrade.open || this.dialog.open) return true;
-    if (this.pauseMenu.open || this.settingsPanel.open || this.fastTravelPanel.open || this.helpManual.open) return true;
-    if (this.worldMapPanel?.open && code !== 'KeyG' && code !== 'Escape' && code !== 'Tab') return true;
-    return false;
+    return hotkeyBlockedBy({
+      upgrade: this.upgrade.open,
+      dialog: this.dialog.open,
+      pauseMenu: this.pauseMenu.open,
+      settingsPanel: this.settingsPanel.open,
+      fastTravel: this.fastTravelPanel.open,
+      helpManual: this.helpManual.open,
+      worldMap: !!this.worldMapPanel?.open,
+    }, code);
   }
 
   /**
