@@ -75,6 +75,12 @@ export class GamepadInput {
      * 复用槽，热路径不分配。
      */
     this.look = { x: 0, y: 0 };
+    /**
+     * 本帧左摇杆的**模拟量**（切片8）：`{x, y, mag}`，x 向右、y 向前、`mag` 是死区重映射
+     * 之后的 0~1 模长（所以 `mag` 就是"想走多快"，`x/mag, y/mag` 是方向）。
+     * 与 `look` 同为复用槽：`readMoveDir` 每帧读一次，绝不在热路径上新建对象。
+     */
+    this.move = { x: 0, y: 0, mag: 0 };
   }
 
   /** @returns {boolean} 这一帧是否读到了手柄 */
@@ -88,6 +94,7 @@ export class GamepadInput {
     const buttons = pad.buttons ?? [];
     const axes = pad.axes ?? [];
     this._pollLook(axes);
+    this._pollMove(axes);
     for (let i = 0; i < this._slots.length; i++) {
       const s = this._slots[i];
       let on = s.button >= 0 && _pressed(buttons[s.button], s.down);
@@ -104,21 +111,48 @@ export class GamepadInput {
 
   /**
    * 右摇杆 → 镜头速率：径向死区之内算没碰；出死区按**模拟量**给出（推一半转半速），
-   * 并把死区那一段重映射回 0~1，免得"离开死区的一瞬间就已经是满舵"。
+   * 并把死区到量程那一段重映射回 0~1，免得"离开死区的一瞬间就已经是满舵"，
+   * 也免得"推到行程尽头才勉强算满舵"（`analogRange`）。再走一次响应曲线（`lookCurve`）
+   * 把中低段压下来 —— 准星微调不该一推就过头。
    */
   _pollLook(axes) {
     const lx = axes[PAD.lookAxes[0]] ?? 0;
     const ly = axes[PAD.lookAxes[1]] ?? 0;
     const mag = Math.hypot(lx, ly);
+    const t = _analogMagnitude(mag, PAD.lookDeadzone);
     const out = this.look;
-    if (mag <= PAD.lookDeadzone) {
+    if (t <= 0) {
       out.x = 0;
       out.y = 0;
       return out;
     }
-    const scale = ((mag - PAD.lookDeadzone) / (1 - PAD.lookDeadzone)) * PAD.lookPixelsPerSecond;
+    // 方向取原始轴值（曲线只改快慢，不改朝哪儿）
+    const scale = (t ** PAD.lookCurve) * PAD.lookPixelsPerSecond;
     out.x = (lx / mag) * scale;
     out.y = (ly / mag) * scale;
+    return out;
+  }
+
+  /**
+   * 左摇杆 → 模拟量移动（切片8）。与八向码**并存**：码管"往哪儿、算不算被按下"
+   * （十字键与键盘都只有满速一档的语义），`move` 管"推了多少"。
+   * 消费方（`readMoveDir`）只在 `mag > 0` 时才用它，所以十字键那一推不会被清零成慢速。
+   */
+  _pollMove(axes) {
+    const lx = axes[PAD.moveAxes[0]] ?? 0;
+    const ly = axes[PAD.moveAxes[1]] ?? 0;
+    const mag = Math.hypot(lx, ly);
+    const out = this.move;
+    const t = _analogMagnitude(mag, PAD.deadzone);
+    out.mag = t;
+    // 手柄的 y 轴向下为正，"前"是 -y：这里就把符号翻掉，消费方不必知道手柄的坐标系
+    if (t <= 0) {
+      out.x = 0;
+      out.y = 0;
+      return out;
+    }
+    out.x = (lx / mag) * t;
+    out.y = (-ly / mag) * t;
     return out;
   }
 
@@ -131,6 +165,9 @@ export class GamepadInput {
     }
     this.look.x = 0;
     this.look.y = 0;
+    this.move.x = 0;
+    this.move.y = 0;
+    this.move.mag = 0;
     this.active = false;
   }
 
@@ -165,6 +202,17 @@ export class GamepadInput {
     this._padIndex = -1;
     return null;
   }
+}
+
+/**
+ * 摇杆模长 → 0~1 的有效行程：死区以内算 0，死区到 `analogRange` 之间线性铺开，量程之外
+ * 夹住。两端都要收口：不夹上限则"推到 1.0"会超出满速，不铺下限则刚离开死区那一格会是
+ * 一串 0 速的抖动。
+ */
+function _analogMagnitude(mag, deadzone) {
+  const range = PAD.analogRange;
+  if (!(mag > deadzone) || !(range > deadzone)) return 0;
+  return Math.min(1, (mag - deadzone) / (range - deadzone));
 }
 
 /** 扳机既报 `pressed` 又报模拟量：按下用 `pressThreshold`，松开用更低一档做迟滞 */

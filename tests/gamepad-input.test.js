@@ -498,12 +498,15 @@ describe('右摇杆镜头：模拟量，不冒充按键', () => {
     expect(r.pad.look.y).toBe(0);
   });
 
-  it('模拟量：推一半是半速（死区重映射回 0~1，不是"一出死区就满舵"）', () => {
+  it('模拟量：推一半是半速（死区到量程重映射回 0~1，不是"一出死区就满舵"）', () => {
     const pad0 = makePad();
     const r = rig(pad0);
     lookStick(pad0, 0.5, 0);
     r.pad.poll();
-    expect(r.pad.look.x).toBeCloseTo(((0.5 - PAD.lookDeadzone) / (1 - PAD.lookDeadzone)) * full, 6);
+    // 切片8 起这一段还要过 `PAD.analogRange`（外圈量程）与 `PAD.lookCurve`（响应曲线），
+    // 断言写成同一条公式而不是抄一个数：曲线值另有专测（analog-input.test.js）
+    const t = (0.5 - PAD.lookDeadzone) / (PAD.analogRange - PAD.lookDeadzone);
+    expect(r.pad.look.x).toBeCloseTo(t ** PAD.lookCurve * full, 6);
     expect(r.pad.look.x).toBeGreaterThan(0);
     expect(r.pad.look.x).toBeLessThan(full);
   });

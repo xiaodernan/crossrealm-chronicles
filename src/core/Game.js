@@ -652,7 +652,13 @@ export class Game {
       this.spells.bonusMana = sk.mana ?? 0;
       this.spells.chargeBonus = sk.charge ?? 0;
       this.spells.transformBonus = sk.transform ?? 0;
-      this.player.update(dt, this.autoPlayMode ? {} : this.keys);
+      // 左摇杆的模拟量与 `keys` 同帧喂进去（`padInput.poll()` 在本帧更早处已算好 `move` 那枚复用槽）；
+      // 没有手柄时 `move.mag` 为 0，走八向码的满速路径，键盘手感逐字不变
+      this.player.update(
+        dt,
+        this.autoPlayMode ? {} : this.keys,
+        this.autoPlayMode ? null : this.padInput?.move ?? null,
+      );
       this.spells.update(dt, this.keys);
       this.fastTravel.tryOpen(this.keys);
       this.enemyManager.update(dt, this.player.position, this.player, this.loot, this);

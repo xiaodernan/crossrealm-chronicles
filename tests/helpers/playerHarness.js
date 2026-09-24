@@ -78,9 +78,9 @@ export const makePlayer = ({ stamina = 100, moveScale = 1, busy = false, lock = 
   return p;
 };
 
-/** 固定步长推进主循环 */
-export const runFrames = (p, seconds, dt, keys = {}) => {
+/** 固定步长推进主循环（`analog` 是左摇杆模拟量槽，形状同 `GamepadInput.move`；不给就是键盘路径） */
+export const runFrames = (p, seconds, dt, keys = {}, analog = null) => {
   const start = p.position.clone();
-  for (let t = 0; t < seconds - 1e-9; t += dt) p.update(dt, keys);
+  for (let t = 0; t < seconds - 1e-9; t += dt) p.update(dt, keys, analog);
   return p.position.clone().sub(start);
 };

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { anyDown, codeFor } from '../content/keybinds.js';
+import { anyDown, codeFor, PAD } from '../content/keybinds.js';
 import { keyText } from '../content/keyHints.js';
 
 import { CharacterModel } from './CharacterModel.js';
@@ -543,7 +543,7 @@ export class PlayerController {
   /** 输入 → 期望移动方向（自动演示模式沿用自己的当前速度方向）
    *  默认写进复用槽 `_moveTmpDir`：调用方（`update` 里的 `ctx.moveDir`）只在本帧内消费，
    *  下一帧开头 `dir.set(0, 0, 0)` 归零即可安全复用。传自定义 out 时不碰这枚槽。 */
-  readMoveDir(keys, autoPlay, out = this._moveTmpDir) {
+  readMoveDir(keys, autoPlay, out = this._moveTmpDir, analog = null) {
     const dir = out.set(0, 0, 0);
     if (autoPlay) {
       if (this.velocity.lengthSq() > 0.5) dir.set(this.velocity.x, 0, this.velocity.z).normalize();
@@ -551,6 +551,13 @@ export class PlayerController {
     }
     const forward = this.getForwardXZ(this._moveTmpFwd);
     const right = this.getRightXZ(this._moveTmpRight);
+    if (analog && analog.mag > 0) {
+      // 左摇杆（切片8）：方向按摇杆、快慢按**幅度**，所以这条路径刻意不归一化 ——
+      // 下游是 `velocity = dir × speed`，`dir` 的长度天然就是速度倍率（半推半速）。
+      // 八向码在这里不参与：十字键与键盘的 `move.mag` 为 0，走下面那条满速路径。
+      dir.addScaledVector(forward, analog.y).addScaledVector(right, analog.x);
+      return dir;
+    }
     if (keys[codeFor('moveUp')]) dir.add(forward);
     if (keys[codeFor('moveDown')]) dir.sub(forward);
     if (keys[codeFor('moveRight')]) dir.sub(right);
@@ -588,7 +595,12 @@ export class PlayerController {
 
 
 
-  update(dt, keys) {
+  /**
+   * @param {object} keys 键盘形状（含手柄桥合成的那一份）
+   * @param {object} [analog] 左摇杆模拟量 `{x, y, mag}`（`GamepadInput.move` 的复用槽）；
+   *        给 `null`/`undefined` 就是"没有手柄"，走八向码的满速路径
+   */
+  update(dt, keys, analog = null) {
 
     if (this.game.cinematicActive || this.game.paused) {
       this.mesh.position.copy(this.position);
@@ -614,8 +626,8 @@ export class PlayerController {
     // 位移意图整帧交给状态机：它只写 velocity 的水平分量与朝向，
     // 积分、碰撞、贴地、重力仍在本方法后半段统一做，避免两处同时写位移
     const ctx = {
-      moveDir: this.readMoveDir(keys, autoPlay),
-      sprintHeld: !!anyDown(keys, 'sprint'),
+      moveDir: this.readMoveDir(keys, autoPlay, undefined, analog),
+      sprintHeld: !!anyDown(keys, 'sprint') || !!(analog && analog.mag >= PAD.moveSprintThreshold),
     };
     ctx.moving = ctx.moveDir.lengthSq() > 0;
     this.fsm.resolve(ctx);
