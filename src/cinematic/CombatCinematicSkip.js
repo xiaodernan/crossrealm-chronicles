@@ -1,4 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
+import { keyText } from '../content/keyHints.js';
 
 /** 首次提示的计时分组（与演出时长无关，只负责"演出进行中才提示"） */
 const HINT_TAG = 'combat-skip-hint';
@@ -48,7 +49,7 @@ export class CombatCinematicSkip {
     this._hintShown = true;
     scheduler.after(0.4, () => {
       if (this.canSkip()) {
-        this.game.dialog?.toast?.('按 Esc 可跳过战斗演出', 3200);
+        this.game.dialog?.toast?.(keyText('按 {escape} 可跳过战斗演出'), 3200);
       }
     }, HINT_TAG);
   }

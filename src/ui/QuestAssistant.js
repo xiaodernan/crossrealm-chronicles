@@ -1,4 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
+import { refreshKeyText } from '../content/keyHints.js';
 
 /** 自动通关/带路整条流程的计时分组，用户中途取消时整体撤销 */
 const AUTOPILOT_TAG = 'quest-autopilot';
@@ -27,7 +28,7 @@ export class QuestAssistant {
         <strong>位面助手</strong>
         <button type="button" id="qa-close">×</button>
       </div>
-      <p id="qa-status" class="qa-status">按 U 打开助手</p>
+      <p id="qa-status" class="qa-status" data-ktext="按 {questTracker} 打开助手"></p>
       <p id="qa-hint" class="qa-hint"></p>
       <div class="qa-btns">
         <button type="button" id="qa-autoplay" class="qa-primary">自动通关（你的角色）</button>
@@ -36,7 +37,7 @@ export class QuestAssistant {
         <button type="button" id="qa-tp">传送到 Boss/目标</button>
         <button type="button" id="qa-quick">瞬间验收</button>
       </div>
-      <p class="qa-note">左下角「⚡自动通关」或按 N · 角色亲自跑图 · Boss 会现身 · Esc 停止</p>
+      <p class="qa-note" data-ktext="左下角「⚡自动通关」或按 {autoPlay} · 角色亲自跑图 · Boss 会现身 · {escape} 停止"></p>
     `;
     document.body.appendChild(this._panel);
     this._statusEl = this._panel.querySelector('#qa-status');
@@ -56,6 +57,8 @@ export class QuestAssistant {
 
   show() {
     this.panelOpen = true;
+    // 面板只在构造时建一次 DOM：每次显示前按生效表重算一遍键名（切片6）
+    refreshKeyText(this._panel);
     this._panel?.classList.remove('hidden');
     this.refresh();
   }

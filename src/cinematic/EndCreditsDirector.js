@@ -1,3 +1,5 @@
+import { refreshKeyText } from '../content/keyHints.js';
+
 /** 通关滚动字幕 */
 const CREDITS = [
   '跨界纪元 · Crossrealm Chronicles',
@@ -19,7 +21,7 @@ export class EndCreditsDirector {
     this.el = document.createElement('div');
     this.el.id = 'end-credits';
     this.el.className = 'end-credits hidden';
-    this.el.innerHTML = '<div class="end-credits-scroll"></div><button type="button" class="end-credits-skip">Esc 跳过</button>';
+    this.el.innerHTML = '<div class="end-credits-scroll"></div><button type="button" class="end-credits-skip" data-ktext="{escape} 跳过"></button>';
     document.body.appendChild(this.el);
     this.active = false;
     this.el.querySelector('.end-credits-skip').addEventListener('click', () => this.hide());
@@ -32,6 +34,8 @@ export class EndCreditsDirector {
     const scroll = this.el.querySelector('.end-credits-scroll');
     scroll.innerHTML = CREDITS.map((l) => `<p>${l}</p>`).join('');
     this.el.classList.remove('hidden');
+    // DOM 建一次、演出可能很久之后才放：键名到播放这一刻才问生效表
+    refreshKeyText(this.el);
     this.game.dialog?.toast('Chapter 5 完成 — 滚动字幕', 3000);
   }
 

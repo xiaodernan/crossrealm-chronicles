@@ -111,7 +111,7 @@ import { attachPopCultureSideQuests } from '../game/SideQuestPopCulture.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
 import { ZONE_IDS } from '../world/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
-import { UI_HOTKEYS } from '../content/hotkeys.js';
+import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
 import {
   GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
   setKeybindTable,
@@ -451,8 +451,11 @@ export class Game {
     this.hotkeyTable = hotkeyTable;
     this.keybindTable = keyTable;
     this.hotkeys?.useTable(hotkeyTable);
+    // 提示文案（HUD / 交互条 / 教程）问的是模块级生效表，与消费者同一条路（切片6）
+    setHotkeyTable(hotkeyTable);
     // 游戏键生效表是模块级的：消费者（玩家 / 战斗 / 法术 / 武器 / 旅行）直接问 `codeFor`
     setKeybindTable(keyTable);
+    this.hud?.refreshKeyHints?.();
   }
 
   /**

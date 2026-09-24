@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { anyDown, codeFor } from '../content/keybinds.js';
+import { keyText } from '../content/keyHints.js';
 
 import { CharacterModel } from './CharacterModel.js';
 
@@ -246,7 +247,8 @@ export class PlayerController {
     this.currentCameraPos.set(0, 0, 0);
     // 震屏的幅度与注视点权重按视角切换，切换处只在这里声明一次
     this.shake.setProfile(this.cameraMode);
-    this.game.dialog?.toast(this.cameraMode === 'first' ? '第一人称视角 (V 切换)' : '第三人称越肩 (V 切换)');
+    const swap = keyText('({cameraMode} 切换)');
+    this.game.dialog?.toast(this.cameraMode === 'first' ? `第一人称视角 ${swap}` : `第三人称越肩 ${swap}`);
 
     window.dispatchEvent(new CustomEvent('camera-mode-changed', { detail: { mode: this.cameraMode } }));
 
@@ -942,22 +944,23 @@ export class PlayerController {
 
     const dungeon = !this.game.dungeons?.active ? this.game.dungeons?.getEntranceNear(this.position, 5) : null;
 
-
+    // 键名走生效表（切片6）：模板是字面量，所以每帧只是查一次缓存，不重新拼字符串
+    const interact = keyText('[{interact}]');
 
     if (this.game.dungeons?.active) {
       const hint = this.game.dungeons.getExplorationHint();
       const lore = this.game.dungeons.getNearbyLore?.(this.position);
       prompt.classList.remove('hidden');
       if (lore) {
-        prompt.textContent = `[E] 阅读 — ${lore.title}`;
+        prompt.textContent = `${interact} 阅读 — ${lore.title}`;
       } else if (hint?.bossAlive) {
-        prompt.textContent = `[E] 击败守钥者后离开 · Boss 二阶段留意`;
+        prompt.textContent = `${interact} 击败守钥者后离开 · Boss 二阶段留意`;
       } else if (hint?.enemies > 0) {
-        prompt.textContent = `[E] 出口离开 · 本房 ${hint.enemies} 敌 · 清空后门开`;
+        prompt.textContent = `${interact} 出口离开 · 本房 ${hint.enemies} 敌 · 清空后门开`;
       } else if (hint?.isExit) {
-        prompt.textContent = `[E] 离开 ${hint.name}`;
+        prompt.textContent = `${interact} 离开 ${hint.name}`;
       } else {
-        prompt.textContent = `探索 ${hint?.visited}/${hint?.total} 房 · 找出口环 · [E] 出口处离开`;
+        prompt.textContent = `探索 ${hint?.visited}/${hint?.total} 房 · 找出口环 · ${interact} 出口处离开`;
       }
     } else if (rest) {
 
@@ -966,32 +969,32 @@ export class PlayerController {
       const rn = this.game.restNpcs?.getByRestId?.(rest.id);
 
       prompt.textContent = rn
-        ? `[E] 与 ${rn.name} 交谈 · 休息 — ${rest.name}`
-        : `[E] 休息 / 升级 — ${rest.name}`;
+        ? `${interact} 与 ${rn.name} 交谈 · 休息 — ${rest.name}`
+        : `${interact} 休息 / 升级 — ${rest.name}`;
 
     } else if (npc) {
 
       prompt.classList.remove('hidden');
 
-      prompt.textContent = `[E] 对话 — ${npc.name}`;
+      prompt.textContent = `${interact} 对话 — ${npc.name}`;
 
     } else if (chest) {
 
       prompt.classList.remove('hidden');
 
-      prompt.textContent = `[E] 开启宝箱`;
+      prompt.textContent = `${interact} 开启宝箱`;
 
     } else if (dungeon) {
 
       prompt.classList.remove('hidden');
 
-      prompt.textContent = `[E] 进入 — ${dungeon.def.name}`;
+      prompt.textContent = `${interact} 进入 — ${dungeon.def.name}`;
 
     } else if (this.nearbyPoint) {
 
       prompt.classList.remove('hidden');
 
-      prompt.textContent = `[E] ${this.nearbyPoint.label}`;
+      prompt.textContent = `${interact} ${this.nearbyPoint.label}`;
 
     } else {
 

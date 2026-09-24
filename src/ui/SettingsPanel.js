@@ -1,30 +1,6 @@
 import { UI_HOTKEYS, UI_HOTKEY_LABELS } from '../content/hotkeys.js';
 import { KEY_BINDINGS, KEY_ACTION_LABELS, buildBindingTables } from '../content/keybinds.js';
-
-/** 只绑鼠标的动作在面板上的字样（轻击 / 重击出厂走的是鼠标） */
-const MOUSE_LABELS = { left: '鼠标左键', right: '鼠标右键' };
-
-/** `KeyboardEvent.code` → 面板上给人看的字样。没列到的原样显示（`Numpad5` 之类） */
-const KEY_LABELS = {
-  Escape: 'Esc',
-  Tab: 'Tab',
-  Space: '空格',
-  Backquote: '`',
-  ControlLeft: '左 Ctrl',
-  ControlRight: '右 Ctrl',
-  ShiftLeft: '左 Shift',
-  ShiftRight: '右 Shift',
-  ArrowUp: '↑',
-  ArrowDown: '↓',
-  ArrowLeft: '←',
-  ArrowRight: '→',
-};
-
-function keyLabel(code) {
-  if (KEY_LABELS[code]) return KEY_LABELS[code];
-  const m = /^(?:Key|Digit)([A-Z0-9])$/.exec(code);
-  return m ? m[1] : code;
-}
+import { keyLabel, MOUSE_LABELS } from '../content/keyLabels.js';
 
 export class SettingsPanel {
   constructor(game) {

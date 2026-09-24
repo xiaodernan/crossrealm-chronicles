@@ -79,6 +79,37 @@ export function hotkeyCodes(table) {
   return Object.fromEntries(table.map((e) => [e.action, e.code]));
 }
 
+/**
+ * **生效表**的模块级镜像（W-A7 切片6）。
+ *
+ * 游戏键那半边在 `keybinds.js` 里早就有这一份（`ACTIVE`），热键这半边一直缺 ——
+ * 于是 HUD 与提示条想知道"日志现在按什么键"只能读出厂表。补上镜像之后，
+ * 两张表的读法一致：写只有一个点（`Game.rebuildHotkeys()`），读谁都可以。
+ */
+let ACTIVE_HOTKEYS = UI_HOTKEYS;
+let HOTKEY_EPOCH = 0;
+
+export function setHotkeyTable(table) {
+  ACTIVE_HOTKEYS = Array.isArray(table) ? table : UI_HOTKEYS;
+  HOTKEY_EPOCH++;
+  return ACTIVE_HOTKEYS;
+}
+
+export function activeHotkeyTable() {
+  return ACTIVE_HOTKEYS;
+}
+
+/** 生效表换过的次数：只读的消费方（提示文案缓存）拿它判"我手里这份是不是旧的" */
+export function hotkeyEpoch() {
+  return HOTKEY_EPOCH;
+}
+
+/** 热键动作当前绑的键码；表里没这个动作返回 null（提示文案要的就是这个区分） */
+export function hotkeyCodeFor(action) {
+  const e = ACTIVE_HOTKEYS.find((x) => x.action === action);
+  return e?.code ?? null;
+}
+
 /** 动作名要有中文名：缺一行，设置面板上就是一格空白 */
 export function assertHotkeyLabels(labels = UI_HOTKEY_LABELS, table = UI_HOTKEYS) {
   for (const e of table) {

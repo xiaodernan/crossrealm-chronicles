@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { MOVES, LOCKED_CONE } from './MoveTable.js';
 import { hitDirection, hitSuffix, isBehind, isGuarded, resolveHit } from './Resolution.js';
 import { createHurtbox, pickPart } from './Hurtbox.js';
+import { keyText } from '../content/keyHints.js';
 import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN, AIM_ASSIST } from '../content/tuning.js';
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
@@ -172,7 +173,7 @@ export class CombatController {
     if (target) {
       this.lockTarget = target;
       this.enemies.setLockTarget(target);
-      this.dialog.toast(`锁定：${target.name}（Q 切换）`);
+      this.dialog.toast(`锁定：${target.name}${keyText('（{lockOn} 切换）')}`);
     } else {
       this.dialog.toast('附近没有可锁定目标');
     }

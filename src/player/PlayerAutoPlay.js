@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { keyText, refreshKeyText } from '../content/keyHints.js';
 
 /** 自动通关 — 操控玩家角色跑图，Boss 步骤会强制现身后再推进任务 */
 export class PlayerAutoPlay {
@@ -26,7 +27,7 @@ export class PlayerAutoPlay {
       <div class="autoplay-badge">⚡ 自动通关 — 请看你的角色移动</div>
       <div id="autoplay-status" class="autoplay-status">准备…</div>
       <div class="autoplay-bar-wrap"><div id="autoplay-bar" class="autoplay-bar"></div></div>
-      <div class="autoplay-hint">Esc 停止 · N 也可开启</div>
+      <div class="autoplay-hint" data-ktext="{escape} 停止 · {autoPlay} 也可开启"></div>
     `;
     document.body.appendChild(this.overlay);
     this.statusEl = this.overlay.querySelector('#autoplay-status');
@@ -56,9 +57,13 @@ export class PlayerAutoPlay {
     p.mesh.visible = true;
     p.velocity.set(0, 0, 0);
 
-    this.overlay?.classList.remove('hidden');
+    if (this.overlay) {
+      this.overlay.classList.remove('hidden');
+      // 覆盖层 DOM 只在构造时建一次：每次开场按生效表重算键名（切片6）
+      refreshKeyText(this.overlay);
+    }
     this._updateBar();
-    this.game.dialog.toast('自动通关开始 — 你的角色将跑图并遭遇全部 Boss · Esc 停止');
+    this.game.dialog.toast(keyText('自动通关开始 — 你的角色将跑图并遭遇全部 Boss · {escape} 停止'));
     return true;
   }
 

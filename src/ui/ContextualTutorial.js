@@ -1,4 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
+import { keyText } from '../content/keyHints.js';
 import { ZONE_IDS, ZONE_NAMES } from '../world/ZoneIdentity.js';
 
 const STORAGE_KEY = 'crossrealm_contextual_tips';
@@ -35,7 +36,8 @@ export class ContextualTutorial {
     this.busy = true;
     const { title, text } = this.queue.shift();
     scheduler.after(initialDelay / 1000, () => {
-      this.game.dialog.show(title, text);
+      // 触发时只存模板，播出时才展开：一条提示可能排队几秒，期间玩家已经改过键位
+      this.game.dialog.show(title, keyText(text));
       const onClose = () => {
         document.getElementById('dialog-close')?.removeEventListener('click', onClose);
         scheduler.after(0.3, () => this._drain(400), TIP_TAG);
@@ -49,7 +51,7 @@ export class ContextualTutorial {
       this.trigger(
         'first-dungeon',
         '迷宫探索',
-        `${e.detail.name} — ${e.detail.rooms} 个房间、${e.detail.doors} 扇门。\n\n清剿房间敌人后门会打开；发光石碑按 [E] 阅读叙事；最远的大圆房有守钥者 Boss。`,
+        `${e.detail.name} — ${e.detail.rooms} 个房间、${e.detail.doors} 扇门。\n\n清剿房间敌人后门会打开；发光石碑按 [{interact}] 阅读叙事；最远的大圆房有守钥者 Boss。`,
         1200
       );
     });
@@ -60,8 +62,8 @@ export class ContextualTutorial {
         isDungeon ? 'first-dungeon-boss' : 'first-open-boss',
         isDungeon ? '迷宫守钥者' : `Boss 战 — ${e.detail.name}`,
         isDungeon
-          ? '守钥者会在约 45% 生命进入二阶段：更快、更狠。\n\nQ 锁定 · F 在红光最后一瞬弹反 · Ctrl 翻滚穿招。'
-          : '观察敌人脚下红圈：扩大时按 F 弹反，或 Ctrl 翻滚。\n\n架势条满会踉跄 — 右键可处决。',
+          ? '守钥者会在约 45% 生命进入二阶段：更快、更狠。\n\n{lockOn} 锁定 · {parry} 在红光最后一瞬弹反 · {roll} 翻滚穿招。'
+          : '观察敌人脚下红圈：扩大时按 {parry} 弹反，或 {roll} 翻滚。\n\n架势条满会踉跄 — {attackHeavy} 可处决。',
         800
       );
     });
@@ -70,7 +72,7 @@ export class ContextualTutorial {
       this.trigger(
         'first-parry',
         '完美弹反',
-        '敌人进入长时间硬直 — 立刻右键重击处决，伤害大幅提升。',
+        '敌人进入长时间硬直 — 立刻 {attackHeavy} 重击处决，伤害大幅提升。',
         200
       );
     });
@@ -89,7 +91,7 @@ export class ContextualTutorial {
       this.trigger(
         'first-lore-fragment',
         '叙事碎片',
-        '碎片已记入探索日志 [J]。收集足够碎片，你会拼凑出位面崩裂的真相。',
+        '碎片已记入探索日志 [{journal}]。收集足够碎片，你会拼凑出位面崩裂的真相。',
         600
       );
     });
@@ -105,7 +107,7 @@ export class ContextualTutorial {
         this.trigger(
           'void-zone-tip',
           ZONE_NAMES[ZONE_IDS.VOID],
-          '重力与视野在此不稳定。蓄力法术 [按住 1-4] 可打断 Boss 节奏。',
+          '重力与视野在此不稳定。蓄力法术 [按住 {spell1}~{spell4}] 可打断 Boss 节奏。',
           2500
         );
       }

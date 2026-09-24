@@ -4,6 +4,7 @@ import { JOURNAL_CATEGORIES, DISCOVERABLE_TOTAL } from '../game/StoryJournal.js'
 import { mergeJournalCategories } from './JournalTabRegistry.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { on, offAll } from '../engine/EventBus.js';
+import { refreshKeyText } from '../content/keyHints.js';
 
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 
@@ -66,7 +67,7 @@ export class HUD {
         </div>
       </div>
       <div id="quest-panel" class="quest-panel">
-        <div class="quest-label">当前任务 · ★目标 · 💀Boss · U助手</div>
+        <div class="quest-label" data-ktext="当前任务 · ★目标 · 💀Boss · {questTracker} 助手"></div>
         <div class="quest-title" id="quest-title">觉醒：世界之锚</div>
         <div class="quest-progress" id="quest-progress">触摸世界之锚</div>
         <div class="quest-guide" id="quest-guide">▶ 北 · 5m · 世界之锚</div>
@@ -83,41 +84,41 @@ export class HUD {
         <div class="bar-row lock-row hidden" id="lock-row"><span>架势</span><div class="bar-track"><div class="bar-fill po" id="posture-bar" style="width:0%"></div></div></div>
       </div>
       <div id="spell-bar" class="spell-bar">
-        <div class="spell-slot" data-slot="1"><span class="key">1</span>真火</div>
-        <div class="spell-slot" data-slot="2"><span class="key">2</span>玄冰</div>
-        <div class="spell-slot" data-slot="3"><span class="key">3</span>引力</div>
-        <div class="spell-slot" data-slot="4"><span class="key">4</span>化身</div>
+        <div class="spell-slot" data-slot="1"><span class="key" data-keys="spell1"></span>真火</div>
+        <div class="spell-slot" data-slot="2"><span class="key" data-keys="spell2"></span>玄冰</div>
+        <div class="spell-slot" data-slot="3"><span class="key" data-keys="spell3"></span>引力</div>
+        <div class="spell-slot" data-slot="4"><span class="key" data-keys="spell4"></span>化身</div>
       </div>
       <div id="charge-wrap" class="charge-wrap hidden"><div id="charge-indicator" class="charge-fill"></div></div>
       <div id="lock-target" class="lock-target hidden"></div>
       <div id="quest-arrow" class="quest-arrow hidden">▶</div>
       <div class="crosshair"></div>
       <div id="controls-teach" class="controls-teach">
-        <div class="controls-teach-title panel-drag-handle">⋮⋮ 操作 · H 完整说明 · 可拖动</div>
+        <div class="controls-teach-title panel-drag-handle">⋮⋮ 操作 · <span data-keys="help"></span> 完整说明 · 可拖动</div>
         <div class="ctrl-grid">
-          <div class="ctrl-item"><kbd>WASD</kbd><span>移动</span></div>
-          <div class="ctrl-item"><kbd>Shift</kbd><span>冲刺</span></div>
-          <div class="ctrl-item"><kbd>左键</kbd><span>轻击</span></div>
-          <div class="ctrl-item"><kbd>右键</kbd><span>重击</span></div>
-          <div class="ctrl-item"><kbd>F</kbd><span>弹反</span></div>
-          <div class="ctrl-item"><kbd>Ctrl</kbd><span>闪避</span></div>
-          <div class="ctrl-item"><kbd>Q</kbd><span>锁定</span></div>
-          <div class="ctrl-item"><kbd>1-4</kbd><span>法术</span></div>
-          <div class="ctrl-item"><kbd>E</kbd><span>交互</span></div>
-          <div class="ctrl-item"><kbd>J</kbd><span>日志/CG</span></div>
-          <div class="ctrl-item"><kbd>F2</kbd><span>拍照</span></div>
-          <div class="ctrl-item"><kbd>~</kbd><span>本局统计</span></div>
-          <div class="ctrl-item"><kbd>U</kbd><span>助手</span></div>
-          <div class="ctrl-item"><kbd>V</kbd><span>视角</span></div>
-          <div class="ctrl-item"><kbd>M</kbd><span>小地图</span></div>
-          <div class="ctrl-item"><kbd>G</kbd><span>全图/路点</span></div>
-          <div class="ctrl-item"><kbd>P/L</kbd><span>存读</span></div>
+          <div class="ctrl-item"><kbd data-keys="moveUp moveLeft moveDown moveRight"></kbd><span>移动</span></div>
+          <div class="ctrl-item"><kbd data-keys="sprint"></kbd><span>冲刺</span></div>
+          <div class="ctrl-item"><kbd data-keys="attackLight"></kbd><span>轻击</span></div>
+          <div class="ctrl-item"><kbd data-keys="attackHeavy"></kbd><span>重击</span></div>
+          <div class="ctrl-item"><kbd data-keys="parry"></kbd><span>弹反</span></div>
+          <div class="ctrl-item"><kbd data-keys="roll"></kbd><span>闪避</span></div>
+          <div class="ctrl-item"><kbd data-keys="lockOn"></kbd><span>锁定</span></div>
+          <div class="ctrl-item"><kbd data-keys="spell1 spell2 spell3 spell4"></kbd><span>法术</span></div>
+          <div class="ctrl-item"><kbd data-keys="interact"></kbd><span>交互</span></div>
+          <div class="ctrl-item"><kbd data-keys="journal"></kbd><span>日志/CG</span></div>
+          <div class="ctrl-item"><kbd data-keys="photoMode"></kbd><span>拍照</span></div>
+          <div class="ctrl-item"><kbd data-keys="sessionStats"></kbd><span>本局统计</span></div>
+          <div class="ctrl-item"><kbd data-keys="questTracker"></kbd><span>助手</span></div>
+          <div class="ctrl-item"><kbd data-keys="cameraMode"></kbd><span>视角</span></div>
+          <div class="ctrl-item"><kbd data-keys="minimap"></kbd><span>小地图</span></div>
+          <div class="ctrl-item"><kbd data-keys="worldMap"></kbd><span>全图/路点</span></div>
+          <div class="ctrl-item"><kbd data-keys="save load"></kbd><span>存读</span></div>
         </div>
       </div>
       <div class="hud-bottom">
-        <div class="controls-hint hidden">
-          左键连击 · 右键重击/处决 · F 弹反 · R 位面斩 · Q 锁定 · Ctrl 闪避<br>
-          1–4 法术 · X 切换剑/杖 · T 营火快速旅行 · H 说明书 · Esc 暂停
+        <div class="controls-hint hidden" id="controls-hint">
+          <div data-ktext="{attackLight} 连击 · {attackHeavy} 重击 / 处决 · {parry} 弹反 · {skill} 位面斩 · {lockOn} 锁定 · {roll} 闪避"></div>
+          <div data-ktext="{spell1}~{spell4} 法术 · {swapWeapon} 切换剑 / 杖 · {fastTravel} 营火快速旅行 · {help} 说明书 · {escape} 暂停"></div>
         </div>
         <div class="compass" id="compass">N</div>
       </div>
@@ -129,6 +130,20 @@ export class HUD {
       handle: '.controls-teach-title',
     });
     attachCollapsible(document.getElementById('controls-teach'), { storageKey: 'controls-teach' });
+    this.refreshKeyHints();
+  }
+
+  /**
+   * 把所有带键名的界面重算一遍（W-A7 切片6）。
+   *
+   * 构造时跑一次，之后每次 `Game.rebuildHotkeys()` 再跑一次 —— 玩家改绑之后，
+   * HUD 上那些"该按什么键"跟着一起改口。声明方式见 `refreshKeyText`。
+   *
+   * 走的是整份文档而不是 `#hud`：小地图标题、暂停菜单、区域面板、起始屏这些都声明在
+   * `index.html` 里、却挂在 `#hud` 外面 —— 只扫容器的话，它们改绑后仍然说出厂键。
+   */
+  refreshKeyHints() {
+    refreshKeyText(document);
   }
 
   setupListeners() {
@@ -436,8 +451,10 @@ export class HUD {
       <h2>${zone.name}</h2>
       <p style="color:#888;margin-bottom:12px">${zone.subtitle}</p>
       <p>${zone.description}</p>
-      <p style="margin-top:16px;font-size:0.8rem;color:#666">按 Tab 关闭</p>
+      <p style="margin-top:16px;font-size:0.8rem;color:#666" data-ktext="按 {zonePanel} 关闭"></p>
     `;
+    // innerHTML 每次都重写整块，所以写入这一刻自己展开一次（改绑那条路走 refreshKeyHints）
+    refreshKeyText(this.zonePanel);
   }
 
   update(_dt) {

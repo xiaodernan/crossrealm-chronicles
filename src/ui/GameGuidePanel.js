@@ -1,4 +1,5 @@
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
+import { keyText } from '../content/keyHints.js';
 
 /** 常驻游戏指引 — 告诉玩家现在该干什么 */
 export class GameGuidePanel {
@@ -28,7 +29,7 @@ export class GameGuidePanel {
     if (ap) {
       if (this.titleEl) this.titleEl.textContent = '⚡ 自动通关进行中';
       if (this.stepEl) this.stepEl.textContent = this.game.playerAutoPlay.statusEl?.textContent ?? '你的角色正在跑图…';
-      if (this.hintEl) this.hintEl.textContent = 'Esc 停止 · 请看屏幕中央的角色移动';
+      if (this.hintEl) this.hintEl.textContent = keyText('{escape} 停止 · 请看屏幕中央的角色移动');
       return;
     }
     const dg = this.game.dungeons?.getExplorationHint?.();
@@ -40,14 +41,14 @@ export class GameGuidePanel {
           ? '⚔ 迷宫守钥者 — 击败后出口环才可用'
           : dg.enemies > 0
           ? `⚔ 当前房 ${dg.enemies} 个敌人 — 清空后门会开`
-          : dg.isExit ? '▶ 守钥者已倒 — 出口环 [E] 离开' : '▶ 穿门探索 · 留意发光石碑 [E] 读叙事';
+          : dg.isExit ? keyText('▶ 守钥者已倒 — 出口环 [{interact}] 离开') : keyText('▶ 穿门探索 · 留意发光石碑 [{interact}] 读叙事');
       }
       return;
     }
     if (!q) {
       if (this.titleEl) this.titleEl.textContent = '🎉 主线已完成';
-      if (this.stepEl) this.stepEl.textContent = '自由探索五区 · 小地图 M 看 Boss 💀';
-      if (this.hintEl) this.hintEl.textContent = '按 N 可重跑自动通关';
+      if (this.stepEl) this.stepEl.textContent = keyText('自由探索五区 · 小地图 {minimap} 看 Boss 💀');
+      if (this.hintEl) this.hintEl.textContent = keyText('按 {autoPlay} 可重跑自动通关');
       return;
     }
     if (this.titleEl) this.titleEl.textContent = `Ch${this.game.quests.chapter} · ${q.title}`;

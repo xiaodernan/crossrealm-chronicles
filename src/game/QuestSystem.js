@@ -1,4 +1,5 @@
 import { ZONE_IDS, ZONE_NAMES } from '../world/ZoneIdentity.js';
+import { keyText } from '../content/keyHints.js';
 
 export const QUESTS = [
   { id: 'anchor', title: '觉醒：世界之锚', desc: '触摸枢纽中心的世界之锚。', type: 'interact', targetId: 'hub-anchor' },
@@ -493,7 +494,7 @@ export class QuestSystem {
 
   getAssistantHint() {
     const q = this.current;
-    if (!q) return '全部通关。按 U 打开助手可重跑全流程演示。';
+    if (!q) return keyText('全部通关。按 {questTracker} 打开助手可重跑全流程演示。');
     const wp = this.getQuestWaypoint();
     if (wp?.hint) return wp.hint;
     if (q.type === 'interact' && this.stats.discoveries.has(q.targetId)) {

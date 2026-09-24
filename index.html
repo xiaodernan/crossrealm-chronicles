@@ -16,7 +16,7 @@
     </div>
     <div id="hud"></div>
     <div id="minimap-wrap">
-        <div class="minimap-title">地图 · M 切换 · 地下城内显示迷宫</div>
+        <div class="minimap-title">地图 · <span data-keys="minimap"></span> 切换 · 地下城内显示迷宫</div>
       <canvas id="minimap"></canvas>
     </div>
     <div id="zone-panel" class="hidden"></div>
@@ -30,10 +30,10 @@
       <div id="guide-hint" class="guide-hint"></div>
       <div class="guide-btns">
         <button type="button" id="guide-sync">同步任务</button>
-        <button type="button" id="guide-autoplay">自动通关 N</button>
+        <button type="button" id="guide-autoplay">自动通关 <span data-keys="autoPlay"></span></button>
       </div>
     </div>
-    <button type="button" id="autoplay-fab" title="自动通关 (N)">⚡ 自动通关</button>
+    <button type="button" id="autoplay-fab" title="自动通关">⚡ 自动通关</button>
     <div id="toast-container"></div>
     <div id="upgrade-panel" class="hidden">
       <div class="upgrade-box">
@@ -56,7 +56,7 @@
           <button data-stat="arcane">奥术 <span id="stat-arcane">1</span></button>
           <button data-stat="mind">心智 <span id="stat-mind">0</span></button>
         </div>
-        <p class="upgrade-hint">升级后完全恢复 · P 存档 · L 读档</p>
+        <p class="upgrade-hint">升级后完全恢复 · <span data-keys="save"></span> 存档 · <span data-keys="load"></span> 读档</p>
         </div>
         <div id="upgrade-skills-section" class="hidden">
           <h3 class="skill-branch-title">剑系</h3>
@@ -79,8 +79,8 @@
         <button id="pause-import">导入 JSON</button>
         <input id="pause-import-file" type="file" accept=".json,application/json" class="hidden" />
         <button id="pause-settings">设置</button>
-        <button id="pause-manual">说明书 (H)</button>
-        <p class="hint">Esc 关闭 · P/L 快捷存读 · H/F12 说明书 · F3 性能 HUD · 存档 v5（旧档自动迁移）</p>
+        <button id="pause-manual">说明书 (<span data-keys="help"></span>)</button>
+        <p class="hint"><span data-keys="escape"></span> 关闭 · <span data-keys="save load"></span> 快捷存读 · <span data-keys="help"></span> 说明书 · <span data-keys="perfHud"></span> 性能面板 · 存档 v5（旧档自动迁移）</p>
       </div>
     </div>
     <div id="settings-panel" class="overlay-panel hidden">
@@ -120,7 +120,7 @@
       <div class="world-map-box">
         <div class="world-map-header">
           <h2>位面全图 · 迷雾探索</h2>
-          <button type="button" id="world-map-close">关闭 (G)</button>
+          <button type="button" id="world-map-close">关闭 (<span data-keys="worldMap"></span>)</button>
         </div>
         <canvas id="world-map-canvas"></canvas>
         <div id="world-map-legend" class="world-map-legend"></div>
@@ -130,7 +130,7 @@
       <div class="panel-box help-box">
         <div class="help-header">
           <h2>跨界纪元 · 说明书</h2>
-          <button type="button" id="help-close">关闭 (Esc)</button>
+          <button type="button" id="help-close">关闭 (<span data-keys="escape"></span>)</button>
         </div>
         <div class="help-layout">
           <nav id="help-nav" class="help-nav"></nav>
@@ -141,7 +141,7 @@
     <div id="start-screen" class="hidden">
       <div class="start-inner">
         <h2>跨界纪元</h2>
-        <p>点击开始 · 锁定鼠标 · WASD 移动<br/>Esc 暂停 · H 说明书 · J 日志 · F3 助手 · F4 足球</p>
+        <p>点击开始 · 锁定鼠标 · <span data-keys="moveUp moveLeft moveDown moveRight"></span> 移动<br /><span data-keys="escape"></span> 暂停 · <span data-keys="help"></span> 说明书 · <span data-keys="journal"></span> 日志 · <span data-keys="perfHud"></span> 性能面板 · <span data-keys="autoPlay"></span> 自动通关</p>
         <button type="button" id="start-btn">点击进入游戏</button>
         <p class="start-url">请使用 http://localhost:5173 访问（需先运行 npm run dev）</p>
         <p id="boot-error" class="hidden"></p>

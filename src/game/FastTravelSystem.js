@@ -1,4 +1,5 @@
 import { codeFor } from '../content/keybinds.js';
+import { keyText } from '../content/keyHints.js';
 
 /** 营火快速旅行 — Chapter 2 解锁，休息界面或 `fastTravel` 键（`content/keybinds.js`） */
 export class FastTravelSystem {
@@ -10,7 +11,7 @@ export class FastTravelSystem {
   unlock() {
     if (this.unlocked) return;
     this.unlocked = true;
-    this.game.dialog.toast('快速旅行已解锁 — 在营火按 T');
+    this.game.dialog.toast(keyText('快速旅行已解锁 — 在营火按 {fastTravel}'));
   }
 
   getDestinations() {

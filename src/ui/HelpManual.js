@@ -1,4 +1,4 @@
-/** 游戏内说明书 — H / F12 打开，Esc 关闭 */
+/** 游戏内说明书 — 由 UI 热键表的 `help` 动作打开（F12 是浏览器控制台，不是这里的键） */
 import { mergeHelpSections } from './HelpManualExtras.js';
 
 const SECTIONS = mergeHelpSections([

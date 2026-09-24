@@ -1,4 +1,6 @@
-/** 拍照模式 — F2 隐藏 HUD 截屏 */
+import { keyText } from '../content/keyHints.js';
+
+/** 拍照模式 — 隐藏 HUD 截屏（退出键名在每次显示时现问生效表） */
 export class PhotoModeDirector {
   constructor(game) {
     this.game = game;
@@ -6,7 +8,6 @@ export class PhotoModeDirector {
     this.el = document.createElement('div');
     this.el.id = 'photo-mode-hint';
     this.el.className = 'photo-mode-hint hidden';
-    this.el.textContent = '拍照模式 · F2 退出 · 滚轮缩放';
     document.body.appendChild(this.el);
   }
 
@@ -15,6 +16,7 @@ export class PhotoModeDirector {
     const hud = document.getElementById('hud');
     const journal = document.getElementById('journal-panel');
     const dialog = document.getElementById('dialog-overlay');
+    this.el.textContent = keyText('拍照模式 · {photoMode} 退出 · 滚轮缩放');
     if (this.active) {
       hud?.classList.add('photo-hidden');
       journal?.classList.add('photo-hidden');

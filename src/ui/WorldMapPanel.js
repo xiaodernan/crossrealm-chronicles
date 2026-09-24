@@ -1,4 +1,5 @@
 import { MAP_BOSSES } from '../game/QuestSystem.js';
+import { keyText } from '../content/keyHints.js';
 import { WINDING_ROUTES } from '../world/TerrainHeight.js';
 
 /** 全屏世界地图 + 迷雾 */
@@ -53,7 +54,7 @@ export class WorldMapPanel {
 
   show() {
     if (this.game.dungeons?.active) {
-      this.game.dialog.toast('迷宫内请用小地图 (M) 查看房间');
+      this.game.dialog.toast(keyText('迷宫内请用小地图 ({minimap}) 查看房间'));
       return;
     }
     this.open = true;
@@ -80,7 +81,7 @@ export class WorldMapPanel {
       <div class="wm-legend-row"><span class="dot rest"></span>营火</div>
       <div class="wm-legend-row"><span class="dot quest"></span>任务目标 ▲</div>
       <div class="wm-legend-row"><span class="dot marker"></span>自定义路点 ◆</div>
-      <div class="wm-hint">G 关闭 · 点击放置路点 · Shift+点击移除 · Tab 切换导航路点</div>
+      <div class="wm-hint">${keyText('{worldMap} 关闭 · 点击放置路点 · Shift+点击移除 · {zonePanel} 切换导航路点')}</div>
     `;
   }
 

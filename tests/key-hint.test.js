@@ -1,0 +1,209 @@
+/**
+ * 显示这一侧的唯一真源（W-A7 切片6）。
+ *
+ * 切片5 让"哪个动作按哪枚键"只剩一张生效表，但那说的是**输入**。玩家看得见的话
+ * 是另一半：HUD 写 `F`、教程写"F 弹反"、交互条写 `[E]` —— 把弹反改绑到 Y 之后，
+ * 输入按新键走，屏幕上却同时留着一整片旧键名，界面从此说谎。
+ *
+ * 所以这一片要盯的是：键名**只能问**，不能抄。抄回来的字符串可以当场比对，
+ * 也可以被下一段改掉生效表 —— 只有"现问"的那一处会跟着改口。
+ */
+import { describe, it, expect, beforeAll, afterEach } from 'vitest';
+import { KEY_ACTIONS, buildBindingTables, factoryKeybindings, setKeybindTable } from '../src/content/keybinds.js';
+import { UI_ACTIONS, UI_HOTKEYS, setHotkeyTable } from '../src/content/hotkeys.js';
+import { KEY_LABELS, MOUSE_LABELS, keyLabel, mouseLabel } from '../src/content/keyLabels.js';
+import { keyHint, keyText, keyTextCacheSize, refreshKeyText } from '../src/content/keyHints.js';
+import { scheduler } from '../src/engine/Scheduler.js';
+import { Tutorial } from '../src/ui/Tutorial.js';
+import { ContextualTutorial } from '../src/ui/ContextualTutorial.js';
+import { DeathHintDirector } from '../src/game/DeathHintDirector.js';
+
+// 只给"播出时展开"那三条用：这三个类各自登记一个事件/读一次本地存储
+beforeAll(() => {
+  globalThis.window = { addEventListener() {}, dispatchEvent: () => true };
+  globalThis.CustomEvent = class {
+    constructor(type, init) { this.type = type; this.detail = init?.detail; }
+  };
+  globalThis.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
+  // 对话框关闭按钮：情境教程播出后会往它上面挂续播回调
+  globalThis.document = { getElementById: () => null };
+});
+
+// 生效表是模块级全局：泄漏会让后面的用例莫名其妙地红
+afterEach(() => {
+  setKeybindTable(factoryKeybindings());
+  setHotkeyTable(UI_HOTKEYS.map((e) => ({ ...e })));
+});
+
+describe('键码 → 显示名', () => {
+  it('字母与数字键去掉 `Key`/`Digit` 前缀', () => {
+    expect(keyLabel('KeyF')).toBe('F');
+    expect(keyLabel('Digit3')).toBe('3');
+  });
+
+  it('修饰键与功能键说人话（不是 `ControlLeft`）', () => {
+    expect(keyLabel('Escape')).toBe('Esc');
+    expect(keyLabel('Space')).toBe('空格');
+    expect(keyLabel('ControlRight')).toBe('右 Ctrl');
+    expect(keyLabel('ArrowUp')).toBe('↑');
+  });
+
+  it('没登记过的键码原样显示 —— 空白比难读更糟', () => {
+    expect(keyLabel('Numpad5')).toBe('Numpad5');
+  });
+
+  it('鼠标出口有名字（轻击/重击出厂就绑在鼠标上）', () => {
+    expect(mouseLabel('left')).toBe('鼠标左键');
+    expect(mouseLabel('right')).toBe('鼠标右键');
+    expect(Object.keys(MOUSE_LABELS)).toEqual(['left', 'right']);
+  });
+
+  it('`KEY_LABELS` 里的键码都是合法 `code` 形状（写错的键码永远不会命中）', () => {
+    for (const code of Object.keys(KEY_LABELS)) expect(code).toMatch(/^[A-Za-z][A-Za-z0-9]*$/);
+  });
+});
+
+describe('keyHint：动作名 → 当前该按什么', () => {
+  it('游戏键动作问游戏键表', () => {
+    expect(keyHint('parry')).toBe('F');
+    expect(keyHint('interact')).toBe('E');
+  });
+
+  it('UI 热键动作问热键表 —— 它不在 `KEY_BINDINGS` 里', () => {
+    expect(keyHint('journal')).toBe('J');
+    expect(keyHint('escape')).toBe('Esc');
+    expect(KEY_ACTIONS).not.toContain('journal');
+  });
+
+  it('只绑鼠标的动作给鼠标字样', () => {
+    expect(keyHint('attackLight')).toBe('鼠标左键');
+  });
+
+  it('两张表都不认识的动作返回 null（由 `keyText` 决定要不要抛）', () => {
+    expect(keyHint('summonDragon')).toBe(null);
+  });
+});
+
+describe('keyText：文案里的键名占位', () => {
+  it('只替换 `{动作}`，其余一个字都不动', () => {
+    expect(keyText('{parry} 弹反，{journal} 看日志')).toBe('F 弹反，J 看日志');
+    expect(keyText('没有键名的句子')).toBe('没有键名的句子');
+  });
+
+  it('四枚移动键连着写就是 WASD（出厂布局）', () => {
+    expect(keyText('{moveUp}{moveLeft}{moveDown}{moveRight}')).toBe('WASD');
+  });
+
+  it('数字范围写法各占一枚动作', () => {
+    expect(keyText('[按住 {spell1}~{spell4}]')).toBe('[按住 1~4]');
+  });
+
+  it('占位写错字当场红 —— 不能让玩家看见 `{pray}`', () => {
+    expect(() => keyText('按 {pray} 祈祷')).toThrow(/不是任何已登记的动作/);
+    expect(() => keyText('按 {PARRY} 弹反')).toThrow(/不是任何已登记的动作/);
+  });
+
+  it('改绑游戏键之后，同一句文案跟着改口（缓存按轮次作废）', () => {
+    expect(keyText('{parry} 弹反')).toBe('F 弹反');
+    const { keyTable } = buildBindingTables({ parry: 'KeyY' }, UI_HOTKEYS);
+    setKeybindTable(keyTable);
+    expect(keyText('{parry} 弹反')).toBe('Y 弹反');
+  });
+
+  it('改绑 UI 热键同样作废旧缓存（两张表各有各的轮次）', () => {
+    expect(keyText('按 {journal} 打开日志')).toBe('按 J 打开日志');
+    const { hotkeyTable } = buildBindingTables({ journal: 'KeyB' }, UI_HOTKEYS);
+    setHotkeyTable(hotkeyTable);
+    expect(keyText('按 {journal} 打开日志')).toBe('按 B 打开日志');
+  });
+
+  it('动态模板再多也不会把缓存撑爆（有上界）', () => {
+    for (let i = 0; i < 400; i++) keyText(`迷宫 ${i} 房 · 按 {interact} 离开`);
+    expect(keyTextCacheSize()).toBeLessThanOrEqual(128);
+    expect(keyText('按 {interact} 离开')).toBe('按 E 离开');
+  });
+});
+
+describe('refreshKeyText：整片容器按生效表重算', () => {
+  /** 没有 jsdom，所以喂一个只认这两种选择器的假根节点 */
+  const fakeRoot = (nodes) => ({
+    querySelectorAll: (sel) => nodes.filter((n) => n.sel === sel),
+  });
+
+  it('`data-keys` 是键位格子：多枚键以 ` / ` 相连', () => {
+    const cell = { sel: '[data-keys]', dataset: { keys: 'spell1 spell2 spell3' }, textContent: '' };
+    refreshKeyText(fakeRoot([cell]));
+    expect(cell.textContent).toBe('1 / 2 / 3');
+  });
+
+  it('`data-ktext` 是整句文案：`{动作}` 就地展开', () => {
+    const line = { sel: '[data-ktext]', dataset: { ktext: '左下角或按 {autoPlay}' }, textContent: '' };
+    refreshKeyText(fakeRoot([line]));
+    expect(line.textContent).toBe('左下角或按 N');
+  });
+
+  it('重算之后改过绑定的界面会显示新键（构造期拼好的 DOM 不会冻在出厂键上）', () => {
+    const cell = { sel: '[data-keys]', dataset: { keys: 'parry' }, textContent: '' };
+    refreshKeyText(fakeRoot([cell]));
+    expect(cell.textContent).toBe('F');
+    setKeybindTable(buildBindingTables({ parry: 'KeyY' }, UI_HOTKEYS).keyTable);
+    refreshKeyText(fakeRoot([cell]));
+    expect(cell.textContent).toBe('Y');
+  });
+
+  it('两种声明混在一个容器里也各自处理', () => {
+    const a = { sel: '[data-keys]', dataset: { keys: 'save load' }, textContent: '' };
+    const b = { sel: '[data-ktext]', dataset: { ktext: '{escape} 停止' }, textContent: '' };
+    refreshKeyText(fakeRoot([a, b]));
+    expect([a.textContent, b.textContent]).toEqual(['P / L', 'Esc 停止']);
+  });
+
+  it('空容器什么都不做（不炸）', () => {
+    expect(() => refreshKeyText(fakeRoot([]))).not.toThrow();
+  });
+});
+
+describe('存模板、播的时候才展开（建得早的界面不会冻在出厂键上）', () => {
+  /** 三个类各自只要一个能收文案的对话框：`toast` 与 `show` 都往同一个袋子里放 */
+  const fakeDialog = (bag) => ({
+    toast: (text) => bag.push(text),
+    show: (_title, text) => bag.push(text),
+  });
+
+  it('教程第一步播出时按当时的生效表展开，而不是构造时那一份', () => {
+    const toasts = [];
+    new Tutorial(fakeDialog(toasts));
+    setKeybindTable(buildBindingTables({ moveUp: 'KeyZ' }, UI_HOTKEYS).keyTable);
+    for (let i = 0; i < 60 && !toasts.length; i++) scheduler.update(0.1);
+    expect(toasts[0]).toBe('欢迎来到《跨界纪元》。点击画面锁定鼠标，ZASD 移动。');
+    scheduler.clear('tutorial-intro');
+  });
+
+  it('倒下提示在复活那一刻展开（HINTS 是模块级常量，展开晚了才不会说谎）', () => {
+    const toasts = [];
+    const d = new DeathHintDirector({ dialog: fakeDialog(toasts), quests: { chapter: 1 } });
+    setKeybindTable(buildBindingTables({ interact: 'KeyY' }, UI_HOTKEYS).keyTable);
+    d.onRespawn();
+    expect(toasts[0]).toBe('提示 · 营火 Y 可回满生命；J 日志有 Boss 攻略与流派说明。');
+  });
+
+  it('情境教程排队期间改绑，播出时跟到新键', () => {
+    const shown = [];
+    const c = new ContextualTutorial({ dialog: fakeDialog(shown) });
+    c.trigger('probe', '标题', '按 {interact} 交互');
+    setKeybindTable(buildBindingTables({ interact: 'KeyY' }, UI_HOTKEYS).keyTable);
+    scheduler.update(0.5);
+    expect(shown).toEqual(['按 Y 交互']);
+    scheduler.clear('contextual-tip');
+  });
+});
+
+describe('动作覆盖：两张表的动作名都能被 `keyHint` 问出来', () => {
+  it('`KEY_ACTIONS` 全部有显示名（重映射界面列得出来的，文案里就该问得到）', () => {
+    for (const action of KEY_ACTIONS) expect(keyHint(action), action).toBeTruthy();
+  });
+
+  it('`UI_ACTIONS` 全部有显示名', () => {
+    for (const action of UI_ACTIONS) expect(keyHint(action), action).toBeTruthy();
+  });
+});

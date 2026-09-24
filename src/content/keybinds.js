@@ -269,6 +269,7 @@ export function assertKeybindings(table = KEY_BINDINGS) {
 
 /** 当前生效的键位表。`setKeybindTable` 是唯一写入口（与 `HotkeyRouter.useTable` 同一分工） */
 let ACTIVE = assertKeybindings({ ...Object.fromEntries(Object.entries(KEY_BINDINGS).map(([k, v]) => [k, { ...v }])) });
+let KEY_EPOCH = 0;
 
 /**
  * 换一张生效表（重映射后由 `Game` 调用）。传空回落出厂。
@@ -276,7 +277,13 @@ let ACTIVE = assertKeybindings({ ...Object.fromEntries(Object.entries(KEY_BINDIN
  */
 export function setKeybindTable(table) {
   ACTIVE = table ?? KEY_BINDINGS;
+  KEY_EPOCH++;
   return ACTIVE;
+}
+
+/** 生效表换过的次数：消费方（提示文案的缓存）判"手里这份是不是旧的"用 */
+export function keybindEpoch() {
+  return KEY_EPOCH;
 }
 
 /** 动作的键盘出口；该动作只绑了鼠标时返回 `null` */
