@@ -12,6 +12,12 @@ const DEFAULTS = {
   showFps: true,
   /** 玩家的键位重映射 `动作名 → KeyboardEvent.code`；空表 = 用 `content/hotkeys.js` 的出厂绑定 */
   keybinds: {},
+  /**
+   * 手柄按钮重映射 `手柄动作名 → 按钮名`（切片9）。与 `keybinds` 分两格存：
+   * 那里的值是键码（`KeyW`）、这里的值是按钮名（`a`），而 `a` 也过键码那把正则 ——
+   * 混在一格里就再也分不清"把跳跃改成 A 键"还是"改成 A 按钮"。
+   */
+  gamepadBinds: {},
 };
 
 /**
@@ -35,6 +41,7 @@ export class SettingsManager {
     this.data = { ...DEFAULTS, ...loaded };
     // 对象型默认值不能与 `DEFAULTS` 共用同一个引用：否则就地改一次就把出厂设定改了
     this.data.keybinds = { ...DEFAULTS.keybinds, ...(loaded.keybinds ?? {}) };
+    this.data.gamepadBinds = { ...DEFAULTS.gamepadBinds, ...(loaded.gamepadBinds ?? {}) };
   }
 
   load() {

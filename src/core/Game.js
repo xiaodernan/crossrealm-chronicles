@@ -114,7 +114,7 @@ import { GamepadInput } from '../engine/GamepadInput.js';
 import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
 import {
   GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
-  setKeybindTable,
+  factoryGamepadBindings, setKeybindTable,
 } from '../content/keybinds.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
 export class Game {
@@ -432,7 +432,7 @@ export class Game {
   }
 
   /**
-   * 生效中的输入表 = 出厂表 + 玩家重映射，**UI 热键与游戏键两张表同一份覆盖数据**（W-A7 切片5）。
+   * 生效中的输入表 = 出厂表 + 玩家重映射，**UI 热键、游戏键、手柄按钮三张表同一次重建**（W-A7 切片5 / 切片9）。
    *
    * 存储里只有一格 `settings.keybinds`，玩家不必知道哪个动作归哪张表；
    * 叠表、分流与跨表撞键校验都在 `buildBindingTables` 一处做完。设置面板预览这次改动时
@@ -443,19 +443,26 @@ export class Game {
    */
   rebuildHotkeys() {
     const overrides = this.settings.get('keybinds') ?? {};
+    const padOverrides = this.settings.get('gamepadBinds') ?? {};
     let hotkeyTable;
     let keyTable;
+    let padTable;
     try {
-      ({ hotkeyTable, keyTable } = buildBindingTables(overrides, UI_HOTKEYS));
+      ({ hotkeyTable, keyTable, padTable } = buildBindingTables(overrides, UI_HOTKEYS, padOverrides));
     } catch {
       hotkeyTable = UI_HOTKEYS.map((e) => ({ ...e }));
       keyTable = factoryKeybindings();
+      padTable = factoryGamepadBindings();
       this.settings.data.keybinds = {};
+      this.settings.data.gamepadBinds = {};
       this.dialog?.toast('键位配置无效，已恢复默认键位');
     }
     this.hotkeyTable = hotkeyTable;
     this.keybindTable = keyTable;
+    this.padTable = padTable;
     this.hotkeys?.useTable(hotkeyTable);
+    // 手柄桥换一张表（切片9）：按钮在按下那一刻才解析出口，所以换表不用重建桥、也不动借键账本
+    this.padInput?.useBindings(padTable);
     // 提示文案（HUD / 交互条 / 教程）问的是模块级生效表，与消费者同一条路（切片6）
     setHotkeyTable(hotkeyTable);
     // 游戏键生效表是模块级的：消费者（玩家 / 战斗 / 法术 / 武器 / 旅行）直接问 `codeFor`

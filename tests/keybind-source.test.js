@@ -400,7 +400,8 @@ describe('静态门禁：消费者里不许再有第二份键位', () => {
   it('面板与游戏走同一条校验、同一批动作名（"战斗键位可重映射"要在界面上也成立）', () => {
     const src = readFileSync(join(SRC, 'ui/SettingsPanel.js'), 'utf8');
     // 面板预览必须走合并校验：只校验热键那半张表就能写出跨表抢键
-    expect(src).toMatch(/buildBindingTables\(overrides, UI_HOTKEYS\)/);
+    // （第三参 `this._padOverrides()`：手柄那半张表的现状也要一起判，见切片9）
+    expect(src).toMatch(/buildBindingTables\(overrides, UI_HOTKEYS, this\._padOverrides\(\)\)/);
     expect(src).not.toMatch(/applyHotkeyOverrides\(/);
     // 游戏键也要列出来给人改，否则这一片只是源码层面的自娱自乐
     expect(src).toMatch(/keybindTable/);

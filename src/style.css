@@ -1405,6 +1405,10 @@ body.finisher-flash::after {
 }
 .keybind-row .keybind-name { flex: 1; }
 .keybind-row button { min-width: 5.5rem; }
+/* 手柄那一列（切片9）：可改绑的是按钮，走摇杆/没有入口的是说明文字，宽度对齐成一列 */
+.keybind-row .keybind-pad { min-width: 5.5rem; text-align: center; font-size: 0.76rem; }
+.keybind-row span.keybind-pad { color: #7d7d88; }
+.keybind-head { color: #8a7a55; font-size: 0.7rem; letter-spacing: .06em; margin: 2px 0 6px; }
 .keybind-hint { font-size: 0.72rem; color: #c9a962; }
 .keybind-group { margin: 12px 0 4px; font-size: 0.78rem; color: #8a7a55; letter-spacing: .06em; }
 

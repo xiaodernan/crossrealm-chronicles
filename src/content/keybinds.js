@@ -88,6 +88,19 @@ export const PAD_BUTTON = {
   dpadUp: 12, dpadDown: 13, dpadLeft: 14, dpadRight: 15,
 };
 
+/**
+ * 序号 → 按钮名（捕获口用它把"刚按下的是第几号"说回名字）。
+ * 从 `PAD_BUTTON` 派生，不另抄一份 —— 两张表各写一遍正是切片5 消灭的那个病根。
+ */
+export const PAD_BUTTON_BY_INDEX = (() => {
+  const list = new Array(Math.max(...Object.values(PAD_BUTTON)) + 1).fill(null);
+  for (const [name, index] of Object.entries(PAD_BUTTON)) list[index] = name;
+  return list;
+})();
+
+/** 标准映射里的按钮格数（`pad.buttons` 只扫这一段，多出来的格子不认） */
+export const PAD_BUTTON_COUNT = Object.keys(PAD_BUTTON).length;
+
 /** 逻辑动作名：UI 提示与重映射界面拿它当标识，不用 `code` 也不用序号 */
 export const PAD_ACTIONS = [
   'moveUp', 'moveDown', 'moveLeft', 'moveRight',
@@ -181,8 +194,8 @@ const DPAD_BUTTON = {
 
 const MODES = ['level', 'edge'];
 
-/** 左摇杆推动要影响的四个动作（其余动作不许声明 `axes`） */
-const STICK_ACTIONS = ['moveUp', 'moveDown', 'moveLeft', 'moveRight'];
+/** 左摇杆推动要影响的四个动作（其余动作不许声明 `axes`；切片9 的改绑界面按这条拒绝单键覆盖） */
+export const STICK_ACTIONS = ['moveUp', 'moveDown', 'moveLeft', 'moveRight'];
 
 /**
  * `KeyboardEvent.code` 的合法形状（`KeyA` / `Digit1` / `F5` / `Backquote` / `Numpad0`…）。
@@ -199,6 +212,21 @@ function fail(at, why) {
  * 而不是玩家插上手柄、按了一下发现"没反应"却不知道为什么）。
  */
 export function assertKeybinds(table = GAMEPAD_BINDINGS) {
+  /**
+   * 一枚物理按钮只许一个动作认领（切片9 起的必修项）。
+   *
+   * 单格形状合法不等于整表合法：出厂表恰好 16 格里 11 按钮互不重复，所以这条以前
+   * 没人踩过；而手柄侧改绑界面一旦出现，"把跳跃与翻滚都绑到 A"就能通过全部单格校验，
+   * 按一次 A 却办两件事（B47 在手柄轴上的重演，记为 **B51**）。
+   * 摇杆方向算不算认领？算 —— 移动那四格顺带绑了十字键，所以十字键也是被占用的资源。
+   */
+  const owner = new Map();
+  const claimPad = (index, who, what) => {
+    if (index === undefined) return;
+    const prev = owner.get(index);
+    if (prev) fail(who, `的${what}已被动作 "${prev}" 认领：按一次办两件事`);
+    owner.set(index, who);
+  };
   for (const [name, e] of Object.entries(table)) {
     if (name !== e.action) fail(name, '的键名与 `action` 字段不一致');
     if (!PAD_ACTIONS.includes(e.action)) fail(name, '未登记于 PAD_ACTIONS');
@@ -224,6 +252,8 @@ export function assertKeybinds(table = GAMEPAD_BINDINGS) {
     } else if (e.button === undefined || e.axes !== undefined || e.dir !== undefined) {
       fail(name, '必须且只能声明一个 `button` 来源');
     }
+    if (e.button !== undefined) claimPad(PAD_BUTTON[e.button], name, `按钮 ${e.button}`);
+    if (e.dir !== undefined) claimPad(DPAD_BUTTON[e.dir], name, `十字键 ${e.dir}`);
   }
   return table;
 }
@@ -388,6 +418,40 @@ export function factoryKeybindings() {
   return Object.fromEntries(Object.entries(KEY_BINDINGS).map(([k, v]) => [k, { ...v }]));
 }
 
+/** 出厂手柄表的浅拷贝（同上：复位与回落都要一份新的，不能把常量本身交出去） */
+export function factoryGamepadBindings() {
+  return Object.fromEntries(Object.entries(GAMEPAD_BINDINGS).map(([k, v]) => [k, { ...v }]));
+}
+
+/**
+ * 出厂手柄表 + 玩家的按钮覆盖 → 生效手柄表（切片9）。
+ *
+ * 覆盖包的形状是 `动作名 → 按钮名`（`{ jump: 'circle' }` 这种），按钮名必须是
+ * `PAD_BUTTON` 里登记过的 —— 这不是吹毛求疵，而是这一格的值会被拼进设置面板的 DOM。
+ * 键盘那边靠 `CODE_PATTERN` 正则拦注入，这边更严：**只许枚举值**，所以玩家输入的
+ * 字符串永远进不了界面，界面上显示的只有标签表里那十来个固定字样。
+ *
+ * 移动那四格（`STICK_ACTIONS`）直接拒绝：它们要的是"摇杆方向 + 十字键"两个入口，
+ * 改成单按钮等于把十字键或摇杆扔掉 —— 那是减法，不是改绑。
+ */
+export function resolveGamepadBindings(base = GAMEPAD_BINDINGS, overrides = {}) {
+  const out = {};
+  for (const [name, e] of Object.entries(base)) out[name] = { ...e };
+  for (const [name, button] of Object.entries(overrides ?? {})) {
+    const target = out[name];
+    if (!target) throw new Error(`未知的手柄动作 "${name}"：表里没有这一格`);
+    if (typeof button !== 'string' || !(button in PAD_BUTTON)) {
+      throw new Error(`动作 "${name}" 的手柄按键不合法：${JSON.stringify(button)}`);
+    }
+    if (STICK_ACTIONS.includes(name)) {
+      throw new Error(`动作 "${name}" 是左摇杆 + 十字键，不能改绑成单个按钮`);
+    }
+    target.button = button;
+  }
+  assertKeybinds(out);
+  return out;
+}
+
 /**
  * 跨表撞键校验。两张表各自内部不撞还不够：同一把物理键被一个 UI 热键和一个游戏键
  * 同时认领时，按下会办两件事，而**两张表各自看都合法**。
@@ -412,22 +476,29 @@ export function assertCodesDisjoint(hotkeyTable, keyTable = ACTIVE) {
 }
 
 /**
- * 一份覆盖包 → 两张生效表，唯一校验入口。
+ * 一份覆盖包 → 三张生效表，唯一校验入口。
  *
  * `Game.rebuildHotkeys`（加载与改配置）与设置面板的"这次改动能不能要"必须走同一条判断：
  * 面板放过而游戏拒绝，玩家就是点完确定才被告知失败；反过来则面板能写出坏配置。
  * 任一格不合法都当场抛，由调用方决定回落还是提示。
  *
- * @param {Record<string, string>} overrides 动作名 → 键码（两张表混在一起，玩家不需要分清）
+ * 手柄覆盖包走**独立的一格存储**（`settings.gamepadBinds`），不能塞进 `keybinds` 那个包：
+ * 那里的值是键码（`KeyW`），这里的值是按钮名（`a`），而 `a` 恰好也是合法的键码形状 ——
+ * 混在一格里，`partitionOverrides` 分不清"把 jump 改成 a 键"还是"把 jump 改成 A 按钮"。
+ * 校验仍然只有这一个入口：三张表一次建齐，谁都不许单独预览。
+ *
+ * @param {Record<string, string>} overrides 动作名 → 键码（两张键盘表混在一起，玩家不需要分清）
  * @param {Array<{code: string, action: string}>} uiTable 生效中的 UI 热键出厂表
+ * @param {Record<string, string>} [padOverrides] 手柄动作名 → 按钮名
  */
-export function buildBindingTables(overrides = {}, uiTable = UI_HOTKEYS) {
+export function buildBindingTables(overrides = {}, uiTable = UI_HOTKEYS, padOverrides = {}) {
   const { hotkeys, keys, stray } = partitionOverrides(overrides, uiTable.map((e) => e.action));
   if (stray.length) throw new Error(`未知的键位动作：${stray.join(', ')} —— 两张表都不认识`);
   const hotkeyTable = applyHotkeyOverrides(uiTable, hotkeys);
   const keyTable = resolveKeybindings(KEY_BINDINGS, keys);
+  const padTable = resolveGamepadBindings(GAMEPAD_BINDINGS, padOverrides);
   assertCodesDisjoint(hotkeyTable, keyTable);
-  return { hotkeyTable, keyTable };
+  return { hotkeyTable, keyTable, padTable };
 }
 
 assertKeybinds();

@@ -20,7 +20,10 @@
  * 而 `_release` 用的是**当初真正置过的那一格**（`s.claimedCode`），
  * 所以"按住时改绑"不会漏放一个键 —— 漏放就是玩家永远朝前走。
  */
-import { GAMEPAD_BINDINGS, PAD, bindingFor, padButtonIndex, padDpadIndex } from '../content/keybinds.js';
+import {
+  GAMEPAD_BINDINGS, PAD, PAD_BUTTON_BY_INDEX, PAD_BUTTON_COUNT,
+  bindingFor, padButtonIndex, padDpadIndex,
+} from '../content/keybinds.js';
 
 /**
  * 缺省解析器：只认游戏键。声明了 `hotkey` 的格子（暂停菜单冒充 UI 热键）
@@ -51,22 +54,18 @@ export class GamepadInput {
     this.mouseDown = target.mouseDown ?? null;
     this.getPads = getPads ?? (() => (navigator.getGamepads ? navigator.getGamepads() : []));
     this._resolve = resolve ?? defaultResolve;
-    /** 展开成一条一格：轮询时不再查表名、也不在热路径分配对象 */
-    this._slots = Object.values(bindings).map((e) => ({
-      action: e.action,
-      hotkey: e.hotkey ?? null,
-      mode: e.mode,
-      button: e.button === undefined ? -1 : padButtonIndex(e.button),
-      axisX: e.axes ? e.axes[0] : -1,
-      axisY: e.axes ? e.axes[1] : -1,
-      dirName: e.dir ?? null,
-      dpad: e.dir === undefined ? -1 : padDpadIndex(e.dir),
-      down: false,
-      claimed: false,
-      /** 当初真正置过的那一格：改绑之后仍要能原样放回去 */
-      claimedCode: null,
-      claimedMouse: null,
-    }));
+    /** 格子形状只在一处推导（`useBindings`）—— 构造与改绑走同一条，抄两份就是第二真源 */
+    this._slots = [];
+    this.useBindings(bindings);
+    /**
+     * 改绑捕获态（切片9）：`_capture` 是"找到之后交给谁"，`_captureBtn` 是已按下、
+     * 正等松手的那一格按钮序号。分两帧的原因是**报出按钮名的那一刻它还被按着** ——
+     * 若按下就报，面板改完表之后下一帧会把这同一个按下当成新动作触发一次（改绑跳到
+     * `start` 的那一格会立刻开一次暂停菜单）。等松手再报，就没有这一次幽灵输入。
+     */
+    this._capture = null;
+    this._captureBtn = -1;
+    this._capPrev = new Array(PAD_BUTTON_COUNT).fill(false);
     /** 记住手柄插在第几号口：换口或多只手柄时不该中途换目标 */
     this._padIndex = -1;
     this.active = false;
@@ -83,6 +82,96 @@ export class GamepadInput {
     this.move = { x: 0, y: 0, mag: 0 };
   }
 
+  /**
+   * 换一张绑定表（切片9：玩家在面板里改了手柄键位、或按了"恢复默认"）。
+   *
+   * 按**动作名**认领旧格子的边沿与借键账本：按住期间改绑不该漏放键（`claimedCode` 记的是
+   * 当初真正置过的那一格），也不该在换表后的第一帧凭空补发一次"刚按下"。
+   * 被这次改表删掉的格子（换表结构而不是换按钮）仍然把借走的键还回去 —— 漏还就是"永远朝前走"那一类。
+   */
+  useBindings(bindings = GAMEPAD_BINDINGS) {
+    const prev = new Map(this._slots.map((s) => [s.action, s]));
+    /** 展开成一条一格：轮询时不再查表名、也不在热路径分配对象 */
+    this._slots = Object.values(bindings).map((e) => {
+      const slot = {
+        action: e.action,
+        hotkey: e.hotkey ?? null,
+        mode: e.mode,
+        button: e.button === undefined ? -1 : padButtonIndex(e.button),
+        axisX: e.axes ? e.axes[0] : -1,
+        axisY: e.axes ? e.axes[1] : -1,
+        dirName: e.dir ?? null,
+        dpad: e.dir === undefined ? -1 : padDpadIndex(e.dir),
+        down: false,
+        claimed: false,
+        /** 当初真正置过的那一格：改绑之后仍要能原样放回去 */
+        claimedCode: null,
+        claimedMouse: null,
+      };
+      const old = prev.get(e.action);
+      if (old) {
+        slot.down = old.down;
+        slot.claimed = old.claimed;
+        slot.claimedCode = old.claimedCode;
+        slot.claimedMouse = old.claimedMouse;
+        prev.delete(e.action);
+      }
+      return slot;
+    });
+    for (const stale of prev.values()) this._release(stale);
+    return this;
+  }
+
+  /**
+   * 开始捕获"下一次按下并松开的手柄键"（面板进入等待态时调用）。一次性：报出一个按钮名就自动解除。
+   *
+   * 进入之前先把桥借走的键全还回去：捕获期间不派发任何动作，若玩家正按着 LB 点进等待态，
+   * 那一格就会永远停在"按着"状态（切片1 立的规矩是"只还自己借走的那一格"，这里是它的另一面）。
+   */
+  startCapture(onFound) {
+    this._capture = typeof onFound === 'function' ? onFound : null;
+    this._captureBtn = -1;
+    this._capPrev.fill(false);
+    if (this._capture) this.releaseAll();
+    return this;
+  }
+
+  /** 取消捕获（面板关闭、或玩家再点一次那一行） */
+  stopCapture() {
+    this._capture = null;
+    this._captureBtn = -1;
+    return this;
+  }
+
+  /** 是否正在等玩家按手柄（面板用它决定还要不要摘监听） */
+  get capturing() {
+    return this._capture !== null;
+  }
+
+  /** @returns {string|null} 这一帧捕获完成时的按钮名；还在等就 null */
+  _captureFrame(buttons) {
+    for (let i = 0; i < this._capPrev.length; i++) {
+      const on = _pressed(buttons[i], this._capPrev[i]);
+      // 只认**第一个**按下的格子：玩家手快连按两枚时，报第二枚会让界面显示的与他按的不是同一键
+      if (!on && this._capPrev[i] && this._captureBtn === i) {
+        this._capPrev[i] = false;
+        return PAD_BUTTON_BY_INDEX[i] ?? null;
+      }
+      this._capPrev[i] = on;
+      if (on && this._captureBtn < 0 && PAD_BUTTON_BY_INDEX[i]) this._captureBtn = i;
+    }
+    return null;
+  }
+
+  /** 捕获结束那一刻按当前物理状态补边沿账：还按着的不算"刚按下"，松手才算下一次 */
+  _primeEdges(buttons) {
+    for (let i = 0; i < this._slots.length; i++) {
+      const s = this._slots[i];
+      if (s.button >= 0) s.down = _pressed(buttons[s.button], true);
+      else if (s.dpad >= 0) s.down = _pressed(buttons[s.dpad], true);
+    }
+  }
+
   /** @returns {boolean} 这一帧是否读到了手柄 */
   poll() {
     const pad = this._pickPad();
@@ -93,6 +182,18 @@ export class GamepadInput {
     this.active = true;
     const buttons = pad.buttons ?? [];
     const axes = pad.axes ?? [];
+    // 捕获期：这一帧只用于"看玩家按了哪一枚"，不派发任何动作、也不更新摇杆复用槽
+    // （面板里改绑时手是放在摇杆上的，让它顺手把镜头转半圈是 bug 不是手感）
+    if (this._capture) {
+      const found = this._captureFrame(buttons);
+      if (!found) return true;
+      const done = this._capture;
+      this._capture = null;
+      this._captureBtn = -1;
+      done(found);                 // 面板在这一步写设置 → 重建三张表 → `useBindings`
+      this._primeEdges(buttons);   // 之后：仍按着的格子记成"已按下"，不许补发一次动作
+      return true;
+    }
     this._pollLook(axes);
     this._pollMove(axes);
     for (let i = 0; i < this._slots.length; i++) {
