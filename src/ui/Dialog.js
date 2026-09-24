@@ -1,5 +1,4 @@
 import { scheduler } from '../engine/Scheduler.js';
-import { hotkeyCodeFor } from '../content/hotkeys.js';
 
 /** toast 计时分组：toast 是最频繁的 UI 反馈，统一走主循环 dt（B39） */
 const TOAST_TAG = 'dialog-toast';
@@ -20,10 +19,8 @@ export class Dialog {
     this.cgRenderer = null;
 
     document.getElementById('dialog-close').addEventListener('click', () => this.hide());
-    window.addEventListener('keydown', (e) => {
-      // 关对话的键是 `escape` 那个动作，不是出厂的 Escape 字面量（切片7：行为侧也问表）
-      if (this.open && e.code === hotkeyCodeFor('escape')) this.hide();
-    });
+    // 关对话的键不在这里挂监听（B52）：那一下归 `Game.runEscape()` 的级联，
+    // 它按 `OVERLAY_LAYERS` 决定"这 Escape 归谁"，键盘与手柄 Start 走同一条路。
   }
 
   setCgRenderer(renderer) {

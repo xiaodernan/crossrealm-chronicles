@@ -21,10 +21,12 @@ import {
   MAP_PASSTHROUGH_ACTIONS,
 } from '../src/content/hotkeys.js';
 import { HotkeyRouter, hotkeyBlockedBy } from '../src/ui/HotkeyRouter.js';
+import { OVERLAY_LAYERS } from '../src/ui/OverlayStack.js';
 import { keyText } from '../src/content/keyHints.js';
 import { keyLabel } from '../src/content/keyLabels.js';
 import { Dialog } from '../src/ui/Dialog.js';
 import { CombatCinematicSkip } from '../src/cinematic/CombatCinematicSkip.js';
+import { Game } from '../src/core/Game.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -53,16 +55,22 @@ const factoryCodes = () => ({
 
 const remap = (overrides) => setHotkeyTable(applyHotkeyOverrides(UI_HOTKEYS, overrides));
 
-const panels = (over = {}) => ({
-  upgrade: false,
-  dialog: false,
-  pauseMenu: false,
-  settingsPanel: false,
-  fastTravel: false,
-  helpManual: false,
-  worldMap: false,
-  ...over,
-});
+/** 状态字段名与 `ui/OverlayStack.js` 的 `state` 逐字对齐（切片10；对齐由 overlay-stack 的门禁钉住） */
+const panels = (over = {}) => {
+  const base = {
+    worldMapOpen: false,
+    autoPlayActive: false,
+    helpOpen: false,
+    cinematicActive: false,
+    settingsOpen: false,
+    fastTravelOpen: false,
+    pauseMenuOpen: false,
+    dialogOpen: false,
+    upgradeOpen: false,
+  };
+  for (const k of Object.keys(over)) expect(base, `状态名 "${k}" 不在层表里`).toHaveProperty(k);
+  return { ...base, ...over };
+};
 
 /* ------------------------------------------------------------------ 桩 */
 
@@ -118,17 +126,6 @@ function installDom() {
   };
 }
 
-/** 一个"正在播演出"的假 Game：只给 `canSkip()` 与 `skip()` 真正读到的字段 */
-const cinematicsGame = () => ({
-  combatCamera: { active: true, blocksInputUntil: 0, skip() { this.skips = (this.skips ?? 0) + 1; } },
-  combatInputLock: { locked: false, release() {} },
-  dialog: { open: false, toast() {} },
-  pauseMenu: { open: false },
-  upgrade: { open: false },
-  player: { timeSlow: 0.2 },
-  executionSkipFx: { burst() {} },
-});
-
 /* -------------------------------------------------- 地图放行名单问表 */
 
 describe('世界地图开着时放行谁：名单从生效表现问（B50）', () => {
@@ -136,7 +133,7 @@ describe('世界地图开着时放行谁：名单从生效表现问（B50）', (
 
   it('出厂表：例外只有 worldMap / escape / zonePanel 那三个当前码', () => {
     const { worldMap, escape, zonePanel } = factoryCodes();
-    const open = panels({ worldMap: true });
+    const open = panels({ worldMapOpen: true });
     expect(hotkeyBlockedBy(open, worldMap)).toBe(false);
     expect(hotkeyBlockedBy(open, escape)).toBe(false);
     expect(hotkeyBlockedBy(open, zonePanel)).toBe(false);
@@ -147,7 +144,7 @@ describe('世界地图开着时放行谁：名单从生效表现问（B50）', (
 
   it('改绑之后例外跟着搬：新码放行，出厂那三个反而被拦', () => {
     remap({ worldMap: 'KeyC', zonePanel: 'KeyY', escape: 'KeyZ' });
-    const open = panels({ worldMap: true });
+    const open = panels({ worldMapOpen: true });
     expect([hotkeyCodeFor('worldMap'), hotkeyCodeFor('escape'), hotkeyCodeFor('zonePanel')])
       .toEqual(['KeyC', 'KeyZ', 'KeyY']);
     expect(hotkeyBlockedBy(open, 'KeyC')).toBe(false);
@@ -163,7 +160,7 @@ describe('世界地图开着时放行谁：名单从生效表现问（B50）', (
     const { worldMap, escape, zonePanel } = factoryCodes();
     remap({ worldMap: 'KeyC' });
     setHotkeyTable(UI_HOTKEYS);
-    const open = panels({ worldMap: true });
+    const open = panels({ worldMapOpen: true });
     expect(hotkeyBlockedBy(open, worldMap)).toBe(false);
     expect(hotkeyBlockedBy(open, escape)).toBe(false);
     expect(hotkeyBlockedBy(open, zonePanel)).toBe(false);
@@ -173,21 +170,46 @@ describe('世界地图开着时放行谁：名单从生效表现问（B50）', (
   it('只搬动其中一个动作时，另两个例外留在原地', () => {
     const { escape, zonePanel } = factoryCodes();
     remap({ worldMap: 'KeyC' });
-    const open = panels({ worldMap: true });
+    const open = panels({ worldMapOpen: true });
     expect(hotkeyBlockedBy(open, 'KeyC')).toBe(false);
     expect(hotkeyBlockedBy(open, escape)).toBe(false);
     expect(hotkeyBlockedBy(open, zonePanel)).toBe(false);
     expect(hotkeyBlockedBy(open, 'KeyG')).toBe(true);
   });
 
-  it('其余六个模态面板开着时一切放行都不给（含那条例外码）', () => {
-    const keys = ['upgrade', 'dialog', 'pauseMenu', 'settingsPanel', 'fastTravel', 'helpManual'];
-    for (const name of keys) {
-      const open = panels({ [name]: true, worldMap: true });
+  it('硬模态（升级）开着时连返回键也不给 —— 它是表里唯一不吃级联的一层', () => {
+    for (const name of ['upgradeOpen']) {
+      const open = panels({ [name]: true, worldMapOpen: true });
       for (const code of Object.values(factoryCodes())) {
         expect(hotkeyBlockedBy(open, code), `${name} + ${code}`).toBe(true);
       }
     }
+    // 对话在切片10 之后不再是硬模态：它的返回键要放行给级联（B52）
+    const dialog = panels({ dialogOpen: true });
+    expect(hotkeyBlockedBy(dialog, hotkeyCodeFor('escape'))).toBe(false);
+  });
+
+  it('有返回层的模态：只放行返回键本身，其余一概拦住（B46 的修法）', () => {
+    const { worldMap, zonePanel } = factoryCodes();
+    for (const name of ['pauseMenuOpen', 'settingsOpen', 'fastTravelOpen', 'helpOpen']) {
+      const open = panels({ [name]: true });
+      expect(hotkeyBlockedBy(open, hotkeyCodeFor('escape')), `${name} 的返回键`).toBe(false);
+      for (const code of ['KeyH', 'KeyG', 'Tab', 'Digit1', 'F2']) {
+        expect(hotkeyBlockedBy(open, code), `${name} + ${code}`).toBe(true);
+      }
+    }
+    // 地图那份放行名单不许从模态底下钻出去：模态 + 地图时仍按模态算
+    const both = panels({ pauseMenuOpen: true, worldMapOpen: true });
+    expect(hotkeyBlockedBy(both, worldMap)).toBe(true);
+    expect(hotkeyBlockedBy(both, zonePanel)).toBe(true);
+    expect(hotkeyBlockedBy(both, hotkeyCodeFor('escape'))).toBe(false);
+  });
+
+  it('改绑之后返回键的放行跟着搬：新码放行，出厂 `Escape` 反而被拦', () => {
+    remap({ escape: 'KeyZ' });
+    const open = panels({ pauseMenuOpen: true });
+    expect(hotkeyBlockedBy(open, 'KeyZ')).toBe(false);
+    expect(hotkeyBlockedBy(open, 'Escape')).toBe(true);
   });
 
   it('面板全关：谁都不拦', () => {
@@ -214,7 +236,7 @@ describe('世界地图开着时放行谁：名单从生效表现问（B50）', (
     const calls = [];
     const router = new HotkeyRouter({
       table,
-      isBlocked: (code) => hotkeyBlockedBy(panels({ worldMap: true }), code),
+      isBlocked: (code) => hotkeyBlockedBy(panels({ worldMapOpen: true }), code),
       onAction: (a) => calls.push(a),
     });
     const keys = {};
@@ -227,7 +249,35 @@ describe('世界地图开着时放行谁：名单从生效表现问（B50）', (
 
 /* -------------------------------------------------- 对话框与战斗演出 */
 
-describe('关对话与跳演出：那一下也问表', () => {
+/**
+ * 只给 `overlayState()` 与 `runEscape()` 真读到的字段，形状与生产一致：
+ * 被测的是**生产的那两个方法**（`Game.prototype.*` 借给一个假 this），不是测试里重抄的 switch。
+ */
+const escapeGame = () => {
+  const calls = [];
+  const g = {
+    worldMapPanel: { open: false, hide() { calls.push('worldMap'); this.open = false; return true; } },
+    playerAutoPlay: { active: false, stop() { calls.push('autoPlay'); return true; } },
+    helpManual: { open: false, hide() { calls.push('help'); this.open = false; return true; } },
+    cinematicActive: false,
+    cinematics: { skip() { calls.push('cinematic'); return true; } },
+    settingsPanel: { open: false, hide() { calls.push('settings'); this.open = false; return true; } },
+    fastTravelPanel: { open: false, hide() { calls.push('fastTravel'); return true; } },
+    pauseMenu: { open: false, toggle() { calls.push('pauseMenu'); this.open = !this.open; return true; } },
+    dialog: { open: false, hide() { calls.push('dialog'); this.open = false; }, toast() {} },
+    upgrade: { open: false },
+    endCredits: {
+      active: false,
+      trySkip() { if (!this.active) return false; calls.push('endCredits'); this.active = false; return true; },
+    },
+    combatCinematicSkip: { on: false, canSkip() { return this.on; }, skip() { calls.push('combatCinematic'); } },
+  };
+  g.overlayState = () => Game.prototype.overlayState.call(g);
+  g.runEscape = () => Game.prototype.runEscape.call(g);
+  return { g, calls };
+};
+
+describe('关对话与跳演出：同一下按键只有一个消费者（B52）', () => {
   let dom;
 
   beforeEach(() => { dom = installDom(); });
@@ -237,73 +287,104 @@ describe('关对话与跳演出：那一下也问表', () => {
     delete globalThis.document;
   });
 
-  it('出厂表：`Escape` 关掉开着的对话，并且真的走 `hide()`', () => {
+  it('对话不挂了：按 Escape 这一刻没人动它（从前是它自己关，然后派发口再拿同一下开菜单）', () => {
     const dialog = new Dialog();
-    dialog.open = true;
-    dom.press('Escape');
-    expect(dialog.open).toBe(false);
-    expect(dom.dispatched).toContain('dialog-overlay-hidden');
-  });
-
-  it('改绑 `escape` → `KeyZ` 之后：`Escape` 不再关对话，`KeyZ` 关', () => {
-    const dialog = new Dialog();
-    remap({ escape: 'KeyZ' });
     dialog.open = true;
     dom.press('Escape');
     expect(dialog.open).toBe(true);
     expect(dom.dispatched).not.toContain('dialog-overlay-hidden');
-    dom.press('KeyZ');
-    expect(dialog.open).toBe(false);
   });
 
-  it('对话没开着时按对的键什么都不做（不派发隐藏事件、不抛）', () => {
+  it('但 `hide()` 这条路一点没变：级联调用它照样收干净', () => {
     const dialog = new Dialog();
-    expect(() => dom.press('Escape')).not.toThrow();
+    dialog.open = true;
+    dialog.hide();
     expect(dialog.open).toBe(false);
-    expect(dom.dispatched).toEqual([]);
+    expect(dom.dispatched).toContain('dialog-overlay-hidden');
   });
 
-  it('战斗演出：可跳过时按生效的 `escape` 码跳一次', () => {
-    const game = cinematicsGame();
-    const skipper = new CombatCinematicSkip(game);
+  it('战斗演出不挂了：按下不跳，级联那一下才跳', () => {
+    const { g } = escapeGame();
+    g.combatCamera = { active: true };           // 真对象的判据源，不用假 `on` 旗
+    const skipper = new CombatCinematicSkip(g);
+    g.combatCinematicSkip = skipper;
     expect(skipper.canSkip()).toBe(true);
     dom.press('Escape');
-    expect(skipper.skipped).toBe(1);
+    expect(skipper.skipped).toBe(0);
+    expect(dom.dispatched).not.toContain('combat-cinematic-skipped');
+    g.runEscape();
+    expect(skipper.skipped).toBe(1);             // 由 runEscape 那一格动手
     expect(dom.dispatched).toContain('combat-cinematic-skipped');
   });
 
-  it('改绑之后：出厂 `Escape` 不跳，新码跳', () => {
-    const game = cinematicsGame();
-    const skipper = new CombatCinematicSkip(game);
+  it('空场：兜底那格开菜单（一次只动一格）', () => {
+    const { g, calls } = escapeGame();
+    expect(g.runEscape()).toBe(true);
+    expect(calls).toEqual(['pauseMenu']);
+  });
+
+  it('对话开着：只关对话，菜单不跟着弹（浏览器读数 R4 抓到的那个重影）', () => {
+    const { g, calls } = escapeGame();
+    g.dialog.open = true;
+    g.runEscape();
+    expect(calls).toEqual(['dialog']);
+    expect(g.dialog.open).toBe(false);
+    expect(g.pauseMenu.open).toBe(false);
+    g.runEscape();                               // 下一次按键才轮到开菜单
+    expect(calls).toEqual(['dialog', 'pauseMenu']);
+  });
+
+  it('对话压着地图：先还对话的自由（层表说对话在地图之上）', () => {
+    const { g, calls } = escapeGame();
+    g.dialog.open = true;
+    g.worldMapPanel.open = true;
+    g.runEscape();
+    expect(calls).toEqual(['dialog']);
+    expect(g.worldMapPanel.open).toBe(true);
+  });
+
+  it('演出可跳过时菜单也开着：先关菜单，演出留给下一次（守卫从手写名单搬进层序）', () => {
+    const { g, calls } = escapeGame();
+    g.combatCinematicSkip.on = true;
+    g.pauseMenu.open = true;
+    g.runEscape();
+    expect(calls).toEqual(['pauseMenu']);
+    g.runEscape();
+    expect(calls).toEqual(['pauseMenu', 'combatCinematic']);
+  });
+
+  it('过场动画开着：这一下归 `cinematics.skip()`（它排在小地图与菜单之前）', () => {
+    const { g, calls } = escapeGame();
+    g.cinematicActive = true;
+    g.runEscape();
+    expect(calls).toEqual(['cinematic']);
+  });
+
+  it('片尾字幕开着：`trySkip()` 自己吃掉这一下，级联不再往下走', () => {
+    const { g, calls } = escapeGame();
+    g.endCredits.active = true;
+    g.settingsPanel.open = true;                 // 就算设置也开着，字幕在最顶上
+    g.runEscape();
+    expect(calls).toEqual(['endCredits']);
+    expect(g.settingsPanel.open).toBe(true);
+  });
+
+  it('升级面板是硬模态：返回键根本派发不出来，级联不会被牵连', () => {
+    const calls = [];
+    const router = new HotkeyRouter({
+      table: UI_HOTKEYS,
+      isBlocked: (code) => hotkeyBlockedBy(panels({ upgradeOpen: true, dialogOpen: false }), code),
+      onAction: (a) => calls.push(a),
+    });
+    router.poll({ Escape: true, KeyH: true });
+    expect(calls).toEqual([]);
+  });
+
+  it('改绑之后放行跟着搬：新码能穿过对话那一层，出厂 `Escape` 反而被挡', () => {
     remap({ escape: 'KeyZ' });
-    dom.press('Escape');
-    expect(skipper.skipped).toBe(0);
-    dom.press('KeyZ');
-    expect(skipper.skipped).toBe(1);
-  });
-
-  it('没在播演出时按键不跳（判据仍然是 `canSkip()`）', () => {
-    const game = cinematicsGame();
-    game.combatCamera.active = false;
-    const skipper = new CombatCinematicSkip(game);
-    dom.press('Escape');
-    expect(skipper.skipped).toBe(0);
-  });
-
-  it('对话框开着时演出那条不抢这一下（否则对话还没关就先跳演出）', () => {
-    const game = cinematicsGame();
-    game.dialog.open = true;
-    const skipper = new CombatCinematicSkip(game);
-    dom.press('Escape');
-    expect(skipper.skipped).toBe(0);
-  });
-
-  it('跳过那一下同时吃掉事件：不挡浏览器默认行为的话 Escape 会退全屏，不 `stopPropagation` 的话下一帧路由再跳一次', () => {
-    const game = cinematicsGame();
-    new CombatCinematicSkip(game);
-    const ev = dom.press('Escape');
-    expect(ev.prevented).toBe(true);
-    expect(ev.stopped).toBe(true);
+    const open = panels({ dialogOpen: true });
+    expect(hotkeyBlockedBy(open, 'KeyZ')).toBe(false);
+    expect(hotkeyBlockedBy(open, 'Escape')).toBe(true);
   });
 });
 
@@ -325,37 +406,57 @@ describe('静态门禁：行为侧不许再抄物理键码', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('这条扫描咬得住：把对话框那行改回死键名立刻红（防空跑门禁）', () => {
-    const original = sourceOf('ui/Dialog.js');
+  it('这条扫描咬得住：往层表里塞一处死键名比较立刻红（防空跑门禁）', () => {
+    const original = sourceOf('ui/OverlayStack.js');
     const reverted = original
-      .replace(/e\.code === hotkeyCodeFor\('escape'\)/, "e.code === 'Escape'");
+      .replace("code !== hotkeyCodeFor('escape')", "code !== 'Escape'");
     expect(reverted, '替换没命中：那一行的写法变了，请把这条自证一起改').not.toBe(original);
     expect(CODE_COMPARE.test(original)).toBe(false);
     expect(CODE_COMPARE.test(reverted)).toBe(true);
   });
 
-  it('`Game.hotkeyBlocked` 只喂面板现状，判据本体在纯函数里', () => {
+  it('`Game.hotkeyBlocked` 只喂模态现状，判据本体在纯函数里', () => {
     const game = sourceOf('core/Game.js');
     const body = game.match(/hotkeyBlocked\(code\)\s*\{[\s\S]*?\n {2}\}/);
     expect(body, '找不到 hotkeyBlocked 的方法体').toBeTruthy();
-    expect(body[0]).toContain('return hotkeyBlockedBy({');
+    expect(body[0]).toContain('hotkeyBlockedBy(this.overlayState()');
     expect(body[0]).not.toMatch(CODE_LITERAL);
-    // 七个现状一个都不许漏喂：漏一个 = 那个面板从此拦不住热键
+  });
+
+  it('`Game.overlayState` 是唯一的现状生产者：九个字段一个都不许漏喂', () => {
+    const game = sourceOf('core/Game.js');
+    const body = game.match(/overlayState\(\)\s*\{[\s\S]*?\n {2}\}/);
+    expect(body, '找不到 overlayState 的方法体').toBeTruthy();
+    // 漏喂一个 = 那个面板从此拦不住热键，也从此不进 Escape 级联
     for (const [key, field] of Object.entries({
-      upgrade: 'this.upgrade.open',
-      dialog: 'this.dialog.open',
-      pauseMenu: 'this.pauseMenu.open',
-      settingsPanel: 'this.settingsPanel.open',
-      fastTravel: 'this.fastTravelPanel.open',
-      helpManual: 'this.helpManual.open',
-      worldMap: '!!this.worldMapPanel?.open',
+      worldMapOpen: '!!this.worldMapPanel?.open',
+      autoPlayActive: '!!this.playerAutoPlay?.active',
+      helpOpen: '!!this.helpManual.open',
+      cinematicActive: '!!this.cinematicActive',
+      settingsOpen: 'this.settingsPanel.open',
+      fastTravelOpen: 'this.fastTravelPanel.open',
+      pauseMenuOpen: 'this.pauseMenu.open',
+      dialogOpen: 'this.dialog.open',
+      upgradeOpen: 'this.upgrade.open',
     })) expect(body[0], `少喂 ${key}`).toContain(`${key}: ${field}`);
   });
 
-  it('迁移点点名：这三处都在现问生效表', () => {
-    expect(sourceOf('ui/Dialog.js')).toContain("hotkeyCodeFor('escape')");
-    expect(sourceOf('cinematic/CombatCinematicSkip.js')).toContain("hotkeyCodeFor('escape')");
-    expect(sourceOf('ui/HotkeyRouter.js')).toContain('!isMapPassThrough(code)');
+  it('本文件的 `panels()` 词表 = 层表的 `state` 列（两边各长一套名字就是 B46 的另一种活法）', () => {
+    const inTable = OVERLAY_LAYERS.map((l) => l.state).filter((s) => !s.endsWith('Skippable')).sort();
+    expect(Object.keys(panels()).sort()).toEqual(inTable);
+  });
+
+  it('迁移点收口：返回键的码从此只在层表里问一次，那两个消费者不再自己挂监听', () => {
+    // 切片7 时它们是 `hotkeyCodeFor('escape')` + 自己的 keydown；切片10（B52）把监听撤了，
+    // 判据搬进层表。留着任何一处 = 同一下按键两个消费者。
+    for (const name of ['ui/Dialog.js', 'cinematic/CombatCinematicSkip.js']) {
+      const src = sourceOf(name);
+      expect(src, `${name} 又自己认领返回键了`).not.toContain('hotkeyCodeFor');
+      expect(src, `${name} 又挂了 keydown`).not.toMatch(/addEventListener\('keydown'/);
+    }
+    const asking = FILES.filter(({ source }) => /hotkeyCodeFor\('escape'\)/.test(source)).map(({ name }) => name);
+    expect(asking, '问生效表的地方不止一处').toEqual(['ui/OverlayStack.js']);
+    expect(sourceOf('ui/OverlayStack.js')).toContain('!isMapPassThrough(code)');
   });
 
   it('显示与判定同一把键：`keyText` 里写出来的键名就是放行判据认的那个码', () => {
@@ -363,7 +464,7 @@ describe('静态门禁：行为侧不许再抄物理键码', () => {
       remap(overrides);
       const sentence = keyText('按 {escape} 可跳过战斗演出');
       expect(sentence).toContain(keyLabel(hotkeyCodeFor('escape')));
-      expect(hotkeyBlockedBy(panels({ worldMap: true }), hotkeyCodeFor('escape'))).toBe(false);
+      expect(hotkeyBlockedBy(panels({ worldMapOpen: true }), hotkeyCodeFor('escape'))).toBe(false);
     }
   });
 });

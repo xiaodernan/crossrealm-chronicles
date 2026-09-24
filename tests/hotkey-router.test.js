@@ -14,6 +14,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { UI_HOTKEYS, UI_ACTIONS, assertHotkeys } from '../src/content/hotkeys.js';
 import { HotkeyRouter, escapeRoute } from '../src/ui/HotkeyRouter.js';
+import { OVERLAY_LAYERS } from '../src/ui/OverlayStack.js';
 
 function mk(blocked = () => false) {
   const calls = [];
@@ -127,37 +128,40 @@ describe('派发语义：边沿、阻塞、表外键', () => {
   });
 });
 
-describe('Escape 那七层级联：顺序就是产品决策', () => {
-  const NONE = {
-    endCreditsSkippable: false, combatCinematicSkippable: false, worldMapOpen: false,
-    autoPlayActive: false, helpOpen: false, cinematicActive: false,
+describe('Escape 级联：顺序由 `OVERLAY_LAYERS` 说，这里验转发没走样', () => {
+  /**
+   * 这里**故意不再抄一遍层序**（切片10 之前这份 `order` 清单就是级联的第二份真源，
+   * 补一层要改两个文件）。顺序与归属由 `tests/overlay-stack.test.js` 签字，
+   * 这一片只验 `escapeRoute` 是 `topBackLayer` 的薄转发：逐层单独为真 → 各自认领。
+   */
+  const stateOf = (over = {}) => {
+    const base = {};
+    for (const l of OVERLAY_LAYERS) base[l.state] = false;
+    return { ...base, ...over };
   };
 
-  it('什么都没开着 → 暂停菜单', () => {
-    expect(escapeRoute({ ...NONE })).toBe('pauseMenu');
+  it('什么都没开着 → 暂停菜单（这不是"关掉"，是"打开它"）', () => {
+    expect(escapeRoute(stateOf())).toBe('pauseMenu');
   });
 
-  it('每一层单独为真时各归其主', () => {
-    expect(escapeRoute({ ...NONE, endCreditsSkippable: true })).toBe('endCredits');
-    expect(escapeRoute({ ...NONE, combatCinematicSkippable: true })).toBe('combatCinematic');
-    expect(escapeRoute({ ...NONE, worldMapOpen: true })).toBe('worldMap');
-    expect(escapeRoute({ ...NONE, autoPlayActive: true })).toBe('autoPlay');
-    expect(escapeRoute({ ...NONE, helpOpen: true })).toBe('help');
-    expect(escapeRoute({ ...NONE, cinematicActive: true })).toBe('cinematic');
+  it('每一层单独为真时各归其主，硬模态那一层除外（它不吃返回键）', () => {
+    for (const l of OVERLAY_LAYERS) {
+      expect(escapeRoute(stateOf({ [l.state]: true })), l.layer)
+        .toBe(l.back ? l.layer : 'pauseMenu');
+    }
   });
 
-  it('多层同时为真时按优先级逐层吃掉（整条阶梯一次验完）', () => {
-    const order = ['endCredits', 'combatCinematic', 'worldMap', 'autoPlay', 'help', 'cinematic', 'pauseMenu'];
-    const flags = ['endCreditsSkippable', 'combatCinematicSkippable', 'worldMapOpen', 'autoPlayActive', 'helpOpen', 'cinematicActive'];
-    const state = {};
-    for (const f of flags) state[f] = true;
-    order.forEach((who, i) => {
-      expect(escapeRoute(state)).toBe(who);
-      if (flags[i]) state[flags[i]] = false;         // 让这一层不吃，才轮到下一层
-    });
+  it('全部同时为真时按表序逐层吃掉：转发没有另起一套优先级', () => {
+    const back = OVERLAY_LAYERS.filter((l) => l.back);
+    const state = stateOf(Object.fromEntries(back.map((l) => [l.state, true])));
+    for (const l of back) {
+      expect(escapeRoute(state)).toBe(l.layer);
+      state[l.state] = false;                        // 让这一层不吃，才轮到下一层
+    }
+    expect(escapeRoute(state)).toBe('pauseMenu');    // 剥到底还是"打开菜单"
   });
 
   it('地图上开着自动演示：先关地图（它挡在最前面），而不是先停演示', () => {
-    expect(escapeRoute({ ...NONE, worldMapOpen: true, autoPlayActive: true })).toBe('worldMap');
+    expect(escapeRoute(stateOf({ worldMapOpen: true, autoPlayActive: true }))).toBe('worldMap');
   });
 });

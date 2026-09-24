@@ -416,19 +416,34 @@ export class Game {
   }
 
   /**
-   * UI 热键放不放行：判据本体在 `hotkeyBlockedBy`（纯函数，可测），这里只把自己
-   * 各面板的现状喂进去。世界地图那条例外的键名归生效表说（切片7，B50）。
+   * 模态现状的**唯一**生产者（切片10）。
+   *
+   * 字段名就是 `ui/OverlayStack.js` 里登记的 `state` 名 —— 阻塞判据与 Escape 级联吃的是
+   * 同一份，所以"哪个面板开着"这件事只在这里问一次。有一条静态门禁逐字段比对两边。
+   */
+  overlayState() {
+    return {
+      worldMapOpen: !!this.worldMapPanel?.open,
+      autoPlayActive: !!this.playerAutoPlay?.active,
+      helpOpen: !!this.helpManual.open,
+      cinematicActive: !!this.cinematicActive,
+      settingsOpen: this.settingsPanel.open,
+      fastTravelOpen: this.fastTravelPanel.open,
+      pauseMenuOpen: this.pauseMenu.open,
+      dialogOpen: this.dialog.open,
+      upgradeOpen: this.upgrade.open,
+    };
+  }
+
+  /**
+   * UI 热键放不放行：判据本体在 `hotkeyBlockedBy`（纯函数，可测），这里只把模态现状喂进去。
+   *
+   * 切片10 起这条判据认识"返回键"：有返回层的模态开着时，其余热键照挡，但 Escape（改绑后
+   * 是玩家那个新码）放行给级联决定关哪一层 —— 以前它连 Escape 一起挡，暂停菜单只能点"继续"（B46）。
+   * 世界地图那条例外的键名归生效表说（切片7，B50）。
    */
   hotkeyBlocked(code) {
-    return hotkeyBlockedBy({
-      upgrade: this.upgrade.open,
-      dialog: this.dialog.open,
-      pauseMenu: this.pauseMenu.open,
-      settingsPanel: this.settingsPanel.open,
-      fastTravel: this.fastTravelPanel.open,
-      helpManual: this.helpManual.open,
-      worldMap: !!this.worldMapPanel?.open,
-    }, code);
+    return hotkeyBlockedBy(this.overlayState(), code);
   }
 
   /**
@@ -511,23 +526,25 @@ export class Game {
     }
   }
 
-  /** Escape 那七层级联的顺序就是产品决策，本体抽在 `escapeRoute` 里以便逐条测 */
+  /** Escape 那条级联的顺序就是产品决策，本体收在 `OVERLAY_LAYERS`（切片3 抽纯、切片10 成表） */
   runEscape() {
     switch (escapeRoute({
+      ...this.overlayState(),
+      // 这两位不在 `overlayState()` 里：`trySkip()` 带副作用（吃掉这一层），`canSkip()` 是纯问句
       endCreditsSkippable: !!this.endCredits?.trySkip?.(),
       combatCinematicSkippable: !!this.combatCinematicSkip?.canSkip?.(),
-      worldMapOpen: !!this.worldMapPanel?.open,
-      autoPlayActive: !!this.playerAutoPlay?.active,
-      helpOpen: !!this.helpManual.open,
-      cinematicActive: !!this.cinematicActive,
     })) {
       case 'endCredits': return true;                 // `trySkip()` 已经吃掉这一下
-      case 'combatCinematic': return true;            // 同上：`canSkip()` 副作用是跳过
+      case 'dialog': this.dialog.hide(); return true;  // 对话自己不再挂 keydown（B52）
+      case 'combatCinematic': this.combatCinematicSkip?.skip?.(); return true;   // 同上：跳过只在这里发生
       case 'worldMap': return this.worldMapPanel.hide();
       case 'autoPlay': return this.playerAutoPlay.stop(false);
       case 'help': return this.helpManual.hide();
       case 'cinematic': return this.cinematics.skip();
-      default: return this.pauseMenu.toggle();
+      case 'settings': return this.settingsPanel.hide();
+      case 'fastTravel': return this.fastTravelPanel.hide();
+      case 'pauseMenu': return this.pauseMenu.toggle();
+      default: return false;
     }
   }
 

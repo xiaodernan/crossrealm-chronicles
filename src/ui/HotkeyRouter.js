@@ -1,4 +1,4 @@
-import { isMapPassThrough } from '../content/hotkeys.js';
+import { topBackLayer, overlayBlocksHotkeys } from './OverlayStack.js';
 
 /**
  * UI 热键派发（W-A7 切片3）。
@@ -60,28 +60,19 @@ export class HotkeyRouter {
 /**
  * UI 热键的阻塞判据（纯函数）：面板现状 + 物理码进，`true` = 拦下。
  *
- * 判据本体与切片3 逐条等价；切片7 只动了一处 —— 世界地图那个例外的名单从生效表问
- * （`isMapPassThrough`），不再抄出厂的 `G`/`Escape`/`Tab`。搬出 `Game` 的方法体也是
- * 为了它能被真测：此前全仓对这条判据零测试，而它决定"面板开着时哪些键还能穿透"。
+ * 判据本体在 `ui/OverlayStack.js` 那张层表里（切片10 / 修 B46）—— 这里只留一个转发，
+ * 因为"挡哪些键"与"返回键归谁"必须是同一份清单：以前它长在两个函数里各抄一份，
+ * 于是面板开着时连 Escape 一起挡，暂停菜单再也关不掉。
  */
-export function hotkeyBlockedBy(panels, code) {
-  if (panels.upgrade || panels.dialog) return true;
-  if (panels.pauseMenu || panels.settingsPanel || panels.fastTravel || panels.helpManual) return true;
-  if (panels.worldMap && !isMapPassThrough(code)) return true;
-  return false;
+export function hotkeyBlockedBy(state, code) {
+  return overlayBlocksHotkeys(state, code);
 }
 
 /**
- * Escape 那条级联（谁吃掉这一下）。抽成纯函数是因为它有**七层顺序**，
- * 而顺序本身就是产品决策：过场里该先跳过演出，而不是先弹暂停菜单。
- * 改前这段顺序埋在 `keydown` 分支里，一行测试都没有。
+ * Escape 那条级联（谁吃掉这一下）。顺序本体在 `OVERLAY_LAYERS`（切片10），
+ * 这里只留旧名字与那句"顺序本身就是产品决策"的说明：过场里该先跳过演出，而不是先弹暂停菜单。
+ * 改前这段顺序埋在 `keydown` 分支里，一行测试都没有；切片3 抽成纯函数，切片10 收进表。
  */
-export function escapeRoute(s) {
-  if (s.endCreditsSkippable) return 'endCredits';
-  if (s.combatCinematicSkippable) return 'combatCinematic';
-  if (s.worldMapOpen) return 'worldMap';
-  if (s.autoPlayActive) return 'autoPlay';
-  if (s.helpOpen) return 'help';
-  if (s.cinematicActive) return 'cinematic';
-  return 'pauseMenu';
+export function escapeRoute(state) {
+  return topBackLayer(state);
 }

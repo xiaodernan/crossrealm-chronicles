@@ -1,6 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { keyText } from '../content/keyHints.js';
-import { hotkeyCodeFor } from '../content/hotkeys.js';
 
 /** 首次提示的计时分组（与演出时长无关，只负责"演出进行中才提示"） */
 const HINT_TAG = 'combat-skip-hint';
@@ -15,17 +14,9 @@ export class CombatCinematicSkip {
   }
 
   _bind() {
-    window.addEventListener('keydown', (e) => {
-      // 跳过演出的键问生效表（切片7）：改绑 `escape` 之后出厂的 Escape 不再管这件事
-      if (e.code !== hotkeyCodeFor('escape')) return;
-      if (!this.canSkip()) return;
-      if (this.game.dialog?.open || this.game.pauseMenu?.open || this.game.upgrade?.open) return;
-      if (this.game.cinematicActive || this.game.cinematics?.active) return;
-      e.preventDefault();
-      e.stopPropagation();
-      this.skip();
-    }, true);
-
+    // 跳过演出不再自己听 keydown（切片10 / 修 B52）：那一下归层表的 combatCinematic 层，
+    // 由 `Game.runEscape()` 动手。原来那三行"见对话/菜单/升级/过场就让路"的守卫，
+    // 现在就是 `OVERLAY_LAYERS` 里的顺序 —— 手写名单少一处，"事件里跳完、派发口再拿同一下开菜单"的重影也少一处。
     window.addEventListener('combo-finisher', () => this._maybeHint());
     window.addEventListener('combat-execution', () => this._maybeHint());
   }
