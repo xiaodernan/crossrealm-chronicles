@@ -111,7 +111,11 @@ import { attachPopCultureSideQuests } from '../game/SideQuestPopCulture.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
 import { ZONE_IDS } from '../world/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
-import { UI_HOTKEYS, applyHotkeyOverrides } from '../content/hotkeys.js';
+import { UI_HOTKEYS } from '../content/hotkeys.js';
+import {
+  GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
+  setKeybindTable,
+} from '../content/keybinds.js';
 import { HotkeyRouter, escapeRoute } from '../ui/HotkeyRouter.js';
 export class Game {
   constructor(container) {
@@ -423,20 +427,45 @@ export class Game {
   }
 
   /**
-   * 生效中的热键表 = 出厂表 + 玩家重映射。存储里是玩家可控的数据，
-   * 坏了不能连游戏一起起不来：校验不过就清掉覆盖、恢复出厂，并当场告诉玩家发生了什么。
+   * 生效中的输入表 = 出厂表 + 玩家重映射，**UI 热键与游戏键两张表同一份覆盖数据**（W-A7 切片5）。
+   *
+   * 存储里只有一格 `settings.keybinds`，玩家不必知道哪个动作归哪张表；
+   * 叠表、分流与跨表撞键校验都在 `buildBindingTables` 一处做完。设置面板预览这次改动时
+   * 调的是同一个函数 —— 面板放过而游戏拒绝，玩家就是点完才被告知失败。
+   *
+   * 存储里是玩家可控的数据，坏了不能连游戏一起起不来：校验不过就清掉覆盖、恢复出厂，
+   * 并当场告诉玩家发生了什么。
    */
   rebuildHotkeys() {
-    let table;
+    const overrides = this.settings.get('keybinds') ?? {};
+    let hotkeyTable;
+    let keyTable;
     try {
-      table = applyHotkeyOverrides(UI_HOTKEYS, this.settings.get('keybinds') ?? {});
+      ({ hotkeyTable, keyTable } = buildBindingTables(overrides, UI_HOTKEYS));
     } catch {
-      table = UI_HOTKEYS.map((e) => ({ ...e }));
+      hotkeyTable = UI_HOTKEYS.map((e) => ({ ...e }));
+      keyTable = factoryKeybindings();
       this.settings.data.keybinds = {};
       this.dialog?.toast('键位配置无效，已恢复默认键位');
     }
-    this.hotkeyTable = table;
-    this.hotkeys?.useTable(table);
+    this.hotkeyTable = hotkeyTable;
+    this.keybindTable = keyTable;
+    this.hotkeys?.useTable(hotkeyTable);
+    // 游戏键生效表是模块级的：消费者（玩家 / 战斗 / 法术 / 武器 / 旅行）直接问 `codeFor`
+    setKeybindTable(keyTable);
+  }
+
+  /**
+   * 手柄按下时该冒充哪个键（W-A7 切片5）。桥不认识热键表，所以由这里注入：
+   * 声明了 `hotkey` 的格子去问当前生效的热键表（返回键改绑之后手柄的 Start 跟着走），
+   * 其余问游戏键生效表。
+   */
+  resolvePadBinding(slot) {
+    if (slot.hotkey) {
+      const code = this.hotkeyTable?.find((e) => e.action === slot.hotkey)?.code;
+      return code ? { code } : null;
+    }
+    return bindingFor(slot.action);
   }
 
   /** 一个动作一格：动作名来自 `content/hotkeys.js`，键盘与手柄派发的是同一个这里 */
@@ -491,10 +520,13 @@ export class Game {
     const canvas = this.renderer.domElement;
 
     /** 手柄桥：没有手柄时 `poll()` 只做一次枚举，`keys` 与键盘路径逐字不变 */
-    this.padInput = new GamepadInput({
-      keys: this.keys,
-      mouseDown: this.player.combat.mouseDown,
-    });
+    this.padInput = new GamepadInput(
+      { keys: this.keys, mouseDown: this.player.combat.mouseDown },
+      GAMEPAD_BINDINGS,
+      null,
+      // 出口在按下那一刻才解析（切片5）：改绑立刻生效，不必重建桥
+      (slot) => this.resolvePadBinding(slot),
+    );
 
     /**
      * UI 热键派发（W-A7 切片3）：从"keydown 分支"改成"表 + 边沿轮询"，

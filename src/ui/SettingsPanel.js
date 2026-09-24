@@ -1,4 +1,8 @@
-import { UI_HOTKEYS, UI_HOTKEY_LABELS, applyHotkeyOverrides } from '../content/hotkeys.js';
+import { UI_HOTKEYS, UI_HOTKEY_LABELS } from '../content/hotkeys.js';
+import { KEY_BINDINGS, KEY_ACTION_LABELS, buildBindingTables } from '../content/keybinds.js';
+
+/** 只绑鼠标的动作在面板上的字样（轻击 / 重击出厂走的是鼠标） */
+const MOUSE_LABELS = { left: '鼠标左键', right: '鼠标右键' };
 
 /** `KeyboardEvent.code` → 面板上给人看的字样。没列到的原样显示（`Numpad5` 之类） */
 const KEY_LABELS = {
@@ -87,7 +91,8 @@ export class SettingsPanel {
     if (!action) return;
     const overrides = { ...(this.game.settings.get('keybinds') ?? {}), [action]: e.code };
     try {
-      applyHotkeyOverrides(UI_HOTKEYS, overrides);
+      // 与 Game.rebuildHotkeys 同一条校验：面板放过的组合必须恰好是游戏会接受的
+      buildBindingTables(overrides, UI_HOTKEYS);
     } catch {
       this.game.dialog?.toast(`该键位无效或已被别的动作占用：${keyLabel(e.code)}`);
       return this.refreshKeybinds();
@@ -138,14 +143,29 @@ export class SettingsPanel {
     const host = document.getElementById('set-keybinds');
     if (!host) return;
     const table = this.game.hotkeyTable ?? UI_HOTKEYS;
-    const rows = table.map((e) => {
-      const label = UI_HOTKEY_LABELS[e.action] ?? e.action;
-      const hint = this.capturing === e.action ? '按下要绑定的键（再点一次取消）' : '';
-      return `<div class="keybind-row"><span class="keybind-name">${label}</span>`
-        + `<button type="button" data-keybind="${e.action}">${keyLabel(e.code)}</button>`
-        + `<span class="keybind-hint">${hint}</span></div>`;
-    });
+    const keys = this.game.keybindTable ?? KEY_BINDINGS;
+    const rows = table.map((e) => this.keybindRow(e.action, UI_HOTKEY_LABELS[e.action] ?? e.action, e));
+    rows.push('<h4 class="keybind-group">移动与战斗</h4>');
+    for (const [action, binding] of Object.entries(keys)) {
+      rows.push(this.keybindRow(action, KEY_ACTION_LABELS[action] ?? action, binding));
+    }
     rows.push('<button type="button" id="keybind-reset">恢复默认键位</button>');
     host.innerHTML = rows.join('');
+  }
+
+  /**
+   * 一行键位。两张表都走这里（切片5 之后游戏键也能改了）：
+   * 只绑了鼠标的那格显示"鼠标左/右键"，把它改绑成键盘键之后鼠标那一侧自动失效 ——
+   * 出口只有一个真源，不存在"两个键都在办这件事"。
+   * 别名（右 Ctrl / 右 Shift）是同一条动作的等价入口，写在提示里而不是多一列按钮。
+   */
+  keybindRow(action, label, binding) {
+    const shown = this.capturing === action
+      ? '按下要绑定的键（再点一次取消）'
+      : (binding.aliases ?? []).map((c) => keyLabel(c)).join(' / ');
+    const out = binding.code ?? MOUSE_LABELS[binding.mouse] ?? '未绑定';
+    return `<div class="keybind-row"><span class="keybind-name">${label}</span>`
+      + `<button type="button" data-keybind="${action}">${keyLabel(out)}</button>`
+      + `<span class="keybind-hint">${shown}</span></div>`;
   }
 }

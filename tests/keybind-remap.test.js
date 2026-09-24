@@ -19,6 +19,7 @@ import {
 import { HotkeyRouter } from '../src/ui/HotkeyRouter.js';
 import { SettingsPanel } from '../src/ui/SettingsPanel.js';
 import { SettingsManager, migrateLegacySettings } from '../src/core/SettingsManager.js';
+import { KEY_ACTIONS, buildBindingTables } from '../src/content/keybinds.js';
 
 const KEY = 'crossrealm_settings';
 
@@ -143,19 +144,64 @@ describe('设置存储：v1 扁平 → v2 带版本', () => {
 });
 
 describe('面板：等键的监听只在等的时候存在', () => {
-  function mount(overrides = {}) {
+  function mount(overrides = {}, host = null) {
     const dom = withDom();
+    // 传宿主时只换掉 `document`：面板其余 DOM 绑定仍走"没有这个节点"分支
+    if (host) {
+      globalThis.document = { getElementById: (id) => (id === 'set-keybinds' ? host : null) };
+    }
     const settings = new SettingsManager();
     settings.set('keybinds', overrides);
     const toast = [];
-    const game = { settings, hotkeyTable: null, dialog: { toast: (m) => toast.push(m) }, rebuilds: 0 };
+    const game = {
+      settings, hotkeyTable: null, keybindTable: null, rebuilds: 0,
+      dialog: { toast: (m) => toast.push(m) },
+    };
     game.rebuildHotkeys = () => {
-      game.hotkeyTable = applyHotkeyOverrides(UI_HOTKEYS, game.settings.get('keybinds'));
+      // 与 `Game.rebuildHotkeys` 同一入口：一份覆盖包 → 两张生效表
+      const built = buildBindingTables(game.settings.get('keybinds'), UI_HOTKEYS);
+      game.hotkeyTable = built.hotkeyTable;
+      game.keybindTable = built.keyTable;
       game.rebuilds++;
     };
     game.rebuildHotkeys();
     return { dom, panel: new SettingsPanel(game), game, toast };
   }
+
+  /** 只记录写进 `innerHTML` 的字样，不解析 DOM：面板的行内容就是它的可观察行为 */
+  const fakeHost = () => ({ innerHTML: '', addEventListener() {} });
+
+  it('面板把战斗键位也列出来：两张表的动作都在，出厂出口写得很清楚', () => {
+    const host = fakeHost();
+    const { panel } = mount({}, host);
+    panel.refresh();
+    for (const action of ['parry', 'roll', 'spell4', 'attackLight', 'interact', 'fastTravel']) {
+      expect(host.innerHTML, `面板少了 ${action} 这一行`).toContain(`data-keybind="${action}"`);
+    }
+    expect((host.innerHTML.match(/data-keybind="/g) ?? [])).toHaveLength(UI_HOTKEYS.length + KEY_ACTIONS.length);
+    expect(host.innerHTML).toContain('弹反');
+    expect(host.innerHTML).toContain('鼠标左键');      // 轻击出厂走鼠标，界面上要说清楚
+    expect(host.innerHTML).toContain('左 Ctrl');
+    expect(host.innerHTML).toContain('右 Ctrl');      // 等价键在提示里，不占第二列按钮
+  });
+
+  it('改绑战斗键之后面板那一行立刻显示新键（读的是生效表，不是出厂常量）', () => {
+    const host = fakeHost();
+    const { panel, game } = mount({ parry: 'KeyY' }, host);
+    panel.refresh();
+    expect(host.innerHTML).toMatch(/data-keybind="parry">Y</);
+    expect(game.keybindTable.parry.code).toBe('KeyY');
+  });
+
+  it('跨表抢键在面板这一侧同样挡住：把"日志"改绑到弹反占用的 F 键', () => {
+    // 单看热键表这一改动完全合法（F 没被任何热键占用）—— 跨表校验就是为了这一刻
+    const { panel, game, toast } = mount();
+    panel.setCapturing('journal');
+    panel.captureKey({ code: 'KeyF', preventDefault() {}, stopPropagation() {} });
+    expect(game.settings.get('keybinds')).toEqual({});
+    expect(game.rebuilds).toBe(1);
+    expect(toast).toHaveLength(1);
+  });
 
   it('开始等待按键挂一次监听，取消时摘掉（面板开合不留僵尸）', () => {
     const { panel, dom } = mount();
@@ -225,9 +271,12 @@ describe('换表与接线', () => {
   it('静态门禁：`Game` 喂给路由的是叠过玩家键位的表，且改完设置会换表', () => {
     const src = readFileSync(join(__dirname, '../src/core/Game.js'), 'utf8')
       .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
-    expect(src).toMatch(/this\.hotkeys\?\.useTable\(table\)/);
+    expect(src).toMatch(/this\.hotkeys\?\.useTable\(hotkeyTable\)/);
     expect(src).toMatch(/this\.rebuildHotkeys\(\)/);
-    expect(src).toMatch(/applyHotkeyOverrides\(UI_HOTKEYS, this\.settings\.get\(.keybinds.\)/);
+    // 切片5：叠表、分流与跨表撞键校验收进 `buildBindingTables` 一处，面板预览走同一个入口
+    expect(src).toMatch(/buildBindingTables\(overrides, UI_HOTKEYS\)/);
+    // 游戏键生效表是模块级的，消费者问 `codeFor`，所以重建时必须换表
+    expect(src).toMatch(/setKeybindTable\(keyTable\)/);
     // 键位配置坏了不许把游戏带走：回落出厂表 + 清覆盖 + 说一句话
     expect(src).toMatch(/catch \{[\s\S]*?UI_HOTKEYS\.map[\s\S]*?keybinds = \{\}/);
   });

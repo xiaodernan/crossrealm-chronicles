@@ -1,6 +1,7 @@
 import * as THREE from 'three';
+import { codeFor } from '../content/keybinds.js';
 
-/** 双武器：剑（近战）/ 杖（法术增幅）— 键 X 切换 */
+/** 双武器：剑（近战）/ 杖（法术增幅）— 键位见 `content/keybinds.js` 的 `swapWeapon` */
 export const WEAPONS = {
   sword: {
     id: 'sword',
@@ -80,8 +81,8 @@ export class WeaponSystem {
 
   update(dt, keys) {
     this.cooldown = Math.max(0, this.cooldown - dt);
-    if (keys['KeyX']) {
-      keys['KeyX'] = false;
+    if (keys[codeFor('swapWeapon')]) {
+      keys[codeFor('swapWeapon')] = false;
       this.toggle();
     }
     const orb = this.player.mesh.getObjectByName('staffOrb');

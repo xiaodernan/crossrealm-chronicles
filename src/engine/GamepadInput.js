@@ -12,8 +12,21 @@
  * 2. **`edge` 动作只在按下那一帧给 true**：一批老消费者是"读完把键清成 false"的写法
  *    （`KeyQ` / `KeyX` / `Digit4` / `KeyE`），给电平就会按住连发。
  * 3. **拔手必须还键**：热拔插那一帧不清，玩家就会永远朝前走 —— 比"没反应"糟得多。
+ *
+ * ## 出口在按下那一刻才解析（W-A7 切片5）
+ *
+ * 表里不再抄键码，`_grab` 当场问注入的解析器（`Game` 给的是"游戏键 → `codeFor`，
+ * 热键冒充 → 当前生效的热键表"）。两个后果都是想要的：改绑立刻生效、不必重建桥；
+ * 而 `_release` 用的是**当初真正置过的那一格**（`s.claimedCode`），
+ * 所以"按住时改绑"不会漏放一个键 —— 漏放就是玩家永远朝前走。
  */
-import { GAMEPAD_BINDINGS, PAD, padButtonIndex, padDpadIndex } from '../content/keybinds.js';
+import { GAMEPAD_BINDINGS, PAD, bindingFor, padButtonIndex, padDpadIndex } from '../content/keybinds.js';
+
+/**
+ * 缺省解析器：只认游戏键。声明了 `hotkey` 的格子（暂停菜单冒充 UI 热键）
+ * 需要调用方注入解析器 —— 桥不认识热键表，也不该认识。
+ */
+const defaultResolve = (slot) => (slot.hotkey ? null : bindingFor(slot.action));
 
 /**
  * 摇杆八向量化：octant i 亮起的两个方向。
@@ -30,16 +43,19 @@ export class GamepadInput {
    * @param {{ keys: object, mouseDown?: object }} target 现有输入出口（`Game.keys` 等）
    * @param {object} bindings 动作表（用例给子集就行，不必碰全局）
    * @param {()=>any[]} [getPads] 手柄来源，缺省读 `navigator.getGamepads()`
+   * @param {(slot: {action: string, hotkey: string|null}) => ({code?: string, mouse?: string}|null)} [resolve]
+   *        出口解析器；缺省只认游戏键（`bindingFor`）
    */
-  constructor(target, bindings = GAMEPAD_BINDINGS, getPads = null) {
+  constructor(target, bindings = GAMEPAD_BINDINGS, getPads = null, resolve = null) {
     this.keys = target.keys;
     this.mouseDown = target.mouseDown ?? null;
     this.getPads = getPads ?? (() => (navigator.getGamepads ? navigator.getGamepads() : []));
+    this._resolve = resolve ?? defaultResolve;
     /** 展开成一条一格：轮询时不再查表名、也不在热路径分配对象 */
     this._slots = Object.values(bindings).map((e) => ({
+      action: e.action,
+      hotkey: e.hotkey ?? null,
       mode: e.mode,
-      code: e.code ?? null,
-      mouse: e.mouse ?? null,
       button: e.button === undefined ? -1 : padButtonIndex(e.button),
       axisX: e.axes ? e.axes[0] : -1,
       axisY: e.axes ? e.axes[1] : -1,
@@ -47,6 +63,9 @@ export class GamepadInput {
       dpad: e.dir === undefined ? -1 : padDpadIndex(e.dir),
       down: false,
       claimed: false,
+      /** 当初真正置过的那一格：改绑之后仍要能原样放回去 */
+      claimedCode: null,
+      claimedMouse: null,
     }));
     /** 记住手柄插在第几号口：换口或多只手柄时不该中途换目标 */
     this._padIndex = -1;
@@ -116,14 +135,20 @@ export class GamepadInput {
   }
 
   _grab(s) {
-    if (s.code) this.keys[s.code] = true;
-    else if (this.mouseDown) this.mouseDown[s.mouse] = true;
+    const b = this._resolve(s);
+    s.claimedCode = b?.code ?? null;
+    s.claimedMouse = b?.mouse ?? null;
+    if (s.claimedCode) this.keys[s.claimedCode] = true;
+    else if (s.claimedMouse && this.mouseDown) this.mouseDown[s.claimedMouse] = true;
     s.claimed = true;
   }
 
   _release(s) {
-    if (s.code) { if (this.keys[s.code]) this.keys[s.code] = false; }
-    else if (this.mouseDown) this.mouseDown[s.mouse] = false;
+    // 用当初置过的那一格，而不是"现在解析出来的" —— 按住期间改绑不该漏放一个键
+    if (s.claimedCode) { if (this.keys[s.claimedCode]) this.keys[s.claimedCode] = false; }
+    else if (s.claimedMouse && this.mouseDown) this.mouseDown[s.claimedMouse] = false;
+    s.claimedCode = null;
+    s.claimedMouse = null;
     s.claimed = false;
   }
 

@@ -5,8 +5,14 @@ import { createHurtbox, pickPart } from './Hurtbox.js';
 import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN, AIM_ASSIST } from '../content/tuning.js';
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
+import { anyDown, codeFor, codesFor, mouseFor } from '../content/keybinds.js';
 
 const COMBO_WINDOW = 0.55;
+/**
+ * `mouseDown` 锁存对象的设备名。它描述的是"这个对象有哪几格"（设备层），
+ * 不是"哪个动作绑哪把键"（那只在 `content/keybinds.js` 的 `KEY_BINDINGS` 一处）。
+ */
+const MOUSE_LATCHES = ['left', 'right'];
 /** 判定循环复用的临时向量，避免每次出手为每个目标新建对象 */
 const _toEnemy = new THREE.Vector3();
 /** 磁吸候选打分复用的临时向量 */
@@ -340,6 +346,21 @@ export class CombatController {
     const was = !!this._prevKeys[code];
     this._prevKeys[code] = down;
     return down && !was;
+  }
+
+  /**
+   * 按动作名做按下沿检测（出口由 `codesFor` 给，含左右 Ctrl 这类等价键）。
+   *
+   * **不许短路**：`a || b` 会让右边那个的 `_prevKeys` 不被更新，于是按住右 Ctrl
+   * 反而退化成每帧触发一次（W-A4 踩过同一个坑）。所以两个都要求值，再取或。
+   */
+  _pressedAny(keys, action) {
+    const codes = codesFor(action);
+    let hit = false;
+    for (let i = 0; i < codes.length; i++) {
+      if (this._pressed(keys, codes[i])) hit = true;
+    }
+    return hit;
   }
 
   /** 缓冲衰减 + 兑现：每帧在状态推进之后调用，因此本帧刚开放的取消窗口当帧就能用上 */
@@ -681,11 +702,11 @@ export class CombatController {
       this.player.targetYaw = this.player.faceYawFromDirection(dx, dz);
     }
 
-    if (keys['KeyQ']) {
-      keys['KeyQ'] = false;
-      if (keys['ShiftLeft'] || keys['ShiftRight']) {
-        keys['ShiftLeft'] = false;
-        keys['ShiftRight'] = false;
+    const lockCode = codeFor('lockOn');
+    if (keys[lockCode]) {
+      keys[lockCode] = false;
+      if (anyDown(keys, 'sprint')) {
+        for (const c of codesFor('sprint')) keys[c] = false;
         this.clearLock();
         this.dialog.toast('已解除锁定');
       } else {
@@ -697,11 +718,9 @@ export class CombatController {
      * 那个写法在按住 Ctrl 时会退化成每帧一次翻滚请求。
      * 左右 Ctrl 必须**分别求值**：`||` 短路会让右边那个的 `_prevKeys` 不被更新，
      * 于是按住右 Ctrl 反而退化成每帧触发。 */
-    const rollLeft = this._pressed(keys, 'ControlLeft');
-    const rollRight = this._pressed(keys, 'ControlRight');
-    if (this._pressed(keys, 'KeyF')) this.bufferAction('parry');
-    if (this._pressed(keys, 'KeyR')) this.bufferAction('skill');
-    if (rollLeft || rollRight) this.bufferAction('roll');
+    if (this._pressedAny(keys, 'parry')) this.bufferAction('parry');
+    if (this._pressedAny(keys, 'skill')) this.bufferAction('skill');
+    if (this._pressedAny(keys, 'roll')) this.bufferAction('roll');
 
     this.stateTimer += dt;
 
@@ -720,9 +739,22 @@ export class CombatController {
       }
     }
 
-    // 鼠标键：Game 侧只负责置位，这里转成缓冲意图
-    if (this.mouseDown.left) { this.mouseDown.left = false; this.bufferAction('light'); }
-    if (this.mouseDown.right) { this.mouseDown.right = false; this.bufferAction('heavy'); }
+    /* 攻击出口（W-A7 切片5）：问表，不问物理键。默认是鼠标左/右键，玩家改成键盘键
+     * 之后鼠标那一半自动消失（`mouseFor` 返回 null）。两边都要求值再取或 ——
+     * 短路会让 `_pressedAny` 的边沿账本漏更新，按住就退化成每帧一次。 */
+    const keyLight = this._pressedAny(keys, 'attackLight');
+    const keyHeavy = this._pressedAny(keys, 'attackHeavy');
+    const mouseLight = mouseFor('attackLight');
+    const mouseHeavy = mouseFor('attackHeavy');
+    const clickedLight = !!mouseLight && this.mouseDown[mouseLight];
+    const clickedHeavy = !!mouseHeavy && this.mouseDown[mouseHeavy];
+    /* 两把物理鼠标键**无条件清**，不只清被认领的那把：动作改绑到键盘之后，
+     * 左键点击若没人认领就会一直挂着，等玩家把动作绑回鼠标时凭空补一刀。
+     * 清的是"锁存对象自己的设备名表"（与构造器里那对字段同源），不是"哪个动作绑哪把键" ——
+     * 后者只在 `KEY_BINDINGS` 一处。数组是模块级的：这段每帧都跑，不留分配。 */
+    for (const device of MOUSE_LATCHES) this.mouseDown[device] = false;
+    if (keyLight || clickedLight) this.bufferAction('light');
+    if (keyHeavy || clickedHeavy) this.bufferAction('heavy');
 
     /* 放在状态推进之后：本帧刚开放的取消窗口当帧就能用上，玩家感觉不到那一帧的延迟 */
     this._consumeInput(dt);

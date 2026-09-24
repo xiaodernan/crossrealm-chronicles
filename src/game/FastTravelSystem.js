@@ -1,4 +1,6 @@
-/** 营火快速旅行 — Chapter 2 解锁，休息界面或 T 键 */
+import { codeFor } from '../content/keybinds.js';
+
+/** 营火快速旅行 — Chapter 2 解锁，休息界面或 `fastTravel` 键（`content/keybinds.js`） */
 export class FastTravelSystem {
   constructor(game) {
     this.game = game;
@@ -37,8 +39,8 @@ export class FastTravelSystem {
   }
 
   tryOpen(keys) {
-    if (!this.unlocked || !keys['KeyT']) return false;
-    keys['KeyT'] = false;
+    if (!this.unlocked || !keys[codeFor('fastTravel')]) return false;
+    keys[codeFor('fastTravel')] = false;
     const rest = this.game.restPoints.getNearest(this.game.player.position, 5);
     if (!rest) {
       this.game.dialog.toast('靠近营火才能快速旅行');

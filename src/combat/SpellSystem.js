@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { codeFor } from '../content/keybinds.js';
 import { SPELL_BANDS } from './MoveTable.js';
 import { pickPart } from './Hurtbox.js';
 import { hitDirection, hitSuffix, isGuarded, resolveHit } from './Resolution.js';
@@ -290,7 +291,7 @@ export class SpellSystem {
     }
 
     for (const k of [1, 2, 3]) {
-      const down = keys[`Digit${k}`];
+      const down = keys[codeFor(`spell${k}`)];
       if (down && !this.keyWasDown[k]) {
         this.chargeSlot = k;
         this.chargeTime = 0;
@@ -308,11 +309,11 @@ export class SpellSystem {
       this.keyWasDown[k] = down;
     }
 
-    if (keys['Digit4'] && !this.keyWasDown[4]) {
+    if (keys[codeFor('spell4')] && !this.keyWasDown[4]) {
       this.cast(4, false);
-      keys['Digit4'] = false;
+      keys[codeFor('spell4')] = false;
     }
-    this.keyWasDown[4] = keys['Digit4'];
+    this.keyWasDown[4] = keys[codeFor('spell4')];
 
     if (this.transformTimer > 0) {
       this.transformTimer -= dt;

@@ -1406,6 +1406,7 @@ body.finisher-flash::after {
 .keybind-row .keybind-name { flex: 1; }
 .keybind-row button { min-width: 5.5rem; }
 .keybind-hint { font-size: 0.72rem; color: #c9a962; }
+.keybind-group { margin: 12px 0 4px; font-size: 0.78rem; color: #8a7a55; letter-spacing: .06em; }
 
 .ft-btn { text-align: left; }
 

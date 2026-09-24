@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { anyDown, codeFor } from '../content/keybinds.js';
 
 import { CharacterModel } from './CharacterModel.js';
 
@@ -548,10 +549,10 @@ export class PlayerController {
     }
     const forward = this.getForwardXZ(this._moveTmpFwd);
     const right = this.getRightXZ(this._moveTmpRight);
-    if (keys['KeyW']) dir.add(forward);
-    if (keys['KeyS']) dir.sub(forward);
-    if (keys['KeyD']) dir.sub(right);
-    if (keys['KeyA']) dir.add(right);
+    if (keys[codeFor('moveUp')]) dir.add(forward);
+    if (keys[codeFor('moveDown')]) dir.sub(forward);
+    if (keys[codeFor('moveRight')]) dir.sub(right);
+    if (keys[codeFor('moveLeft')]) dir.add(right);
     if (dir.lengthSq() > 0) dir.normalize();
     return dir;
   }
@@ -612,7 +613,7 @@ export class PlayerController {
     // 积分、碰撞、贴地、重力仍在本方法后半段统一做，避免两处同时写位移
     const ctx = {
       moveDir: this.readMoveDir(keys, autoPlay),
-      sprintHeld: !!keys['ShiftLeft'],
+      sprintHeld: !!anyDown(keys, 'sprint'),
     };
     ctx.moving = ctx.moveDir.lengthSq() > 0;
     this.fsm.resolve(ctx);
@@ -646,7 +647,7 @@ export class PlayerController {
 
 
 
-    const spaceDown = !!keys['Space'];
+    const spaceDown = !!keys[codeFor('jump')];
 
     if (spaceDown && !this._jumpWasDown) this._jumpBuffer = this.jumpBufferTime;
 
@@ -793,7 +794,7 @@ export class PlayerController {
 
     const prompt = document.getElementById('interaction-prompt');
 
-    if (!keys['KeyE'] || this.interactCooldown > 0) {
+    if (!keys[codeFor('interact')] || this.interactCooldown > 0) {
 
       this.updatePrompt(prompt);
 
@@ -807,7 +808,7 @@ export class PlayerController {
 
     if (rest) {
 
-      keys['KeyE'] = false;
+      keys[codeFor('interact')] = false;
 
       this.interactCooldown = 0.8;
 
@@ -825,7 +826,7 @@ export class PlayerController {
 
     if (npc) {
 
-      keys['KeyE'] = false;
+      keys[codeFor('interact')] = false;
 
       this.interactCooldown = 0.6;
 
@@ -843,7 +844,7 @@ export class PlayerController {
 
     if (chest) {
 
-      keys['KeyE'] = false;
+      keys[codeFor('interact')] = false;
 
       this.interactCooldown = 0.6;
 
@@ -863,7 +864,7 @@ export class PlayerController {
 
       if (this.game.dungeons.tryReadLore(this.position)) {
 
-        keys['KeyE'] = false;
+        keys[codeFor('interact')] = false;
 
         this.interactCooldown = 0.6;
 
@@ -875,7 +876,7 @@ export class PlayerController {
 
       if (this.game.dungeons.tryExit(this.position)) {
 
-        keys['KeyE'] = false;
+        keys[codeFor('interact')] = false;
 
         this.interactCooldown = 0.8;
 
@@ -891,7 +892,7 @@ export class PlayerController {
 
       if (dungeon) {
 
-        keys['KeyE'] = false;
+        keys[codeFor('interact')] = false;
 
         this.interactCooldown = 0.8;
 
@@ -911,7 +912,7 @@ export class PlayerController {
 
     if (this.nearbyPoint) {
 
-      keys['KeyE'] = false;
+      keys[codeFor('interact')] = false;
 
       this.interactCooldown = 0.6;
 

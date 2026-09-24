@@ -8,12 +8,13 @@
  * 3. **拔手必须还键**：热拔那一帧不清，玩家会永远朝前走。
  * 所以用例的重点是"按了几帧、第几帧为真"，而不是"读得到值"。
  */
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import * as THREE from 'three';
 import {
-  GAMEPAD_BINDINGS, PAD_ACTIONS, PAD_BUTTON, PAD, assertKeybinds,
+  GAMEPAD_BINDINGS, KEY_BINDINGS, PAD_ACTIONS, PAD_BUTTON, PAD,
+  assertKeybinds, bindingFor, factoryKeybindings, resolveKeybindings, setKeybindTable,
 } from '../src/content/keybinds.js';
 import { CAMERA_FOV } from '../src/content/tuning.js';
 import { UI_HOTKEYS } from '../src/content/hotkeys.js';
@@ -65,11 +66,23 @@ afterAll(() => {
 });
 
 /** 桥 + 输入出口：`keys` 与 `mouseDown` 就是 `Game.keys` / `CombatController.mouseDown` 的形状 */
+/**
+ * 与 `Game.resolvePadBinding` 同一分工：热键冒充问热键表，游戏键问生效键位表。
+ * 用例必须自己注入 —— 桥刻意不认识热键表（否则它就要 import 半个 UI 层）。
+ */
+const resolveSlot = (slot) => {
+  if (slot.hotkey) {
+    const code = UI_HOTKEYS.find((e) => e.action === slot.hotkey)?.code;
+    return code ? { code } : null;
+  }
+  return bindingFor(slot.action);
+};
+
 function rig(...pads) {
   setPads(...pads);
   const keys = {};
   const mouseDown = { left: false, right: false };
-  const pad = new GamepadInput({ keys, mouseDown });
+  const pad = new GamepadInput({ keys, mouseDown }, GAMEPAD_BINDINGS, null, resolveSlot);
   return { keys, mouseDown, pad, frames: (n) => { for (let i = 0; i < n; i++) pad.poll(); } };
 }
 
@@ -88,19 +101,31 @@ describe('绑定表：错表要在接上手柄之前红', () => {
     expect(() => assertKeybinds(bad)).toThrow(/mode/);
   });
 
-  it('code 与 mouse 必须二选一：两个都不给、或都给，都是错表', () => {
-    const none = structuredClone(GAMEPAD_BINDINGS);
-    delete none.jump.code;
-    expect(() => assertKeybinds(none)).toThrow(/code 或 mouse/);
-    const both = structuredClone(GAMEPAD_BINDINGS);
-    both.jump.mouse = 'left';
-    expect(() => assertKeybinds(both)).toThrow(/code 或 mouse/);
+  it('手柄表不许自己声明出口 —— 出口只有 `KEY_BINDINGS` 一个真源（切片5）', () => {
+    const withCode = structuredClone(GAMEPAD_BINDINGS);
+    withCode.jump.code = 'Space';
+    expect(() => assertKeybinds(withCode)).toThrow(/不许自己声明/);
+    const withMouse = structuredClone(GAMEPAD_BINDINGS);
+    withMouse.attackLight.mouse = 'left';
+    expect(() => assertKeybinds(withMouse)).toThrow(/不许自己声明/);
   });
 
-  it('两个动作抢同一个出口 = 一次按下办两件事，加载期就红', () => {
-    const clash = structuredClone(GAMEPAD_BINDINGS);
-    clash.roll.code = 'Space';
-    expect(() => assertKeybinds(clash)).toThrow(/抢同一个出口/);
+  it('同一格不许既是游戏键又冒充热键：那样说不清该问哪张表', () => {
+    const bad = structuredClone(GAMEPAD_BINDINGS);
+    bad.parry.hotkey = 'escape';
+    expect(() => assertKeybinds(bad)).toThrow(/同时是游戏键与热键冒充/);
+  });
+
+  it('两个动作抢同一个键 = 一次按下办两件事，加载期就红（键盘侧）', () => {
+    expect(() => resolveKeybindings(KEY_BINDINGS, { parry: 'KeyR' })).toThrow(/已被前面的动作占用/);
+    expect(() => resolveKeybindings(KEY_BINDINGS, { parry: 'KeyX' })).toThrow(/已被前面的动作占用/);
+  });
+
+  it('未知动作与非法键名在应用那一刻就抛，而不是等到按下才发现', () => {
+    expect(() => resolveKeybindings(KEY_BINDINGS, { guildRaid: 'KeyK' })).toThrow(/未知的游戏键位动作/);
+    expect(() => resolveKeybindings(KEY_BINDINGS, { parry: 'Key-F' })).toThrow(/键位不合法/);
+    expect(() => resolveKeybindings(KEY_BINDINGS, { parry: '1Key' })).toThrow(/键位不合法/);
+    expect(() => resolveKeybindings(KEY_BINDINGS, { parry: '<img onerror=1>' })).toThrow(/键位不合法/);
   });
 
   it('移动动作必须有摇杆轴与方向；给按钮反而是错（十字键由方向顺带带上）', () => {
@@ -124,9 +149,11 @@ describe('绑定表：错表要在接上手柄之前红', () => {
   it('手柄能开暂停菜单：`start` 冒充 `Escape`，而这码从切片3 起真的有人轮询', () => {
     // 切片1 立这条时是"表里不许出现只被 keydown 事件消费的码"（绑了也不会响）。
     // UI 热键改成边沿轮询之后，`Escape` 变成了合法出口 —— 这条用例改为钉住那件事。
-    const escape = Object.values(GAMEPAD_BINDINGS).find((e) => e.code === 'Escape');
-    expect(escape).toBeTruthy();
-    expect(UI_HOTKEYS.some((e) => e.code === 'Escape' && e.action === 'escape')).toBe(true);
+    // 切片5：这一格不再抄键码，而是声明它冒充的热键动作 —— 玩家把返回键改绑之后手柄跟着走
+    const entry = GAMEPAD_BINDINGS.pauseMenu;
+    expect(entry.hotkey).toBe('escape');
+    expect(entry.code).toBeUndefined();
+    expect(UI_HOTKEYS.some((e) => e.action === 'escape')).toBe(true);
     const pad0 = makePad();
     const r = rig(pad0);
     const seen = [];
@@ -284,9 +311,13 @@ describe('轮询桥：电平与按下沿分得清', () => {
     const pad0 = makePad();
     setPads(pad0);
     const keys = {};
-    const pad = new GamepadInput({ keys }, {
-      hold: { action: 'hold', mode: 'level', button: 'leftTrigger', code: 'ShiftLeft' },
-    });
+    // 自定义表要配自定义解析器：桥不再从表里读出口，出口由解析器给
+    const pad = new GamepadInput(
+      { keys },
+      { hold: { action: 'hold', mode: 'level', button: 'leftTrigger' } },
+      null,
+      () => ({ code: 'ShiftLeft' }),
+    );
     analog(pad0, 'leftTrigger', 0.6);
     pad.poll();
     expect(keys.ShiftLeft).toBe(true);
@@ -343,13 +374,58 @@ describe('轮询桥：热插拔不许留残键', () => {
   });
 });
 
+describe('改绑之后手柄跟着走（出口在按下那一刻才解析）', () => {
+  afterEach(() => setKeybindTable(factoryKeybindings()));
+
+  it('松手放的是当初置过的那一格：按住期间改绑不许漏放，漏放就是永远朝前走', () => {
+    const pad0 = makePad();
+    const r = rig(pad0);
+    stick(pad0, 0, -0.9);                      // 推左摇杆向前 → 置 `KeyW`
+    r.pad.poll();
+    expect(r.keys.KeyW).toBe(true);
+
+    setKeybindTable(resolveKeybindings(KEY_BINDINGS, { moveUp: 'KeyZ' }));
+    stick(pad0, 0, 0);                         // 中途把"前进"改绑到 Z，然后松手
+    r.pad.poll();
+
+    expect(r.keys.KeyW, '改绑后松手漏放了旧键：玩家会一直向前走').toBe(false);
+    expect(r.keys.KeyZ).toBeFalsy();           // 也不该去清一格从没置过的键
+  });
+
+  it('改绑之后新手柄按下用的是新出口', () => {
+    setKeybindTable(resolveKeybindings(KEY_BINDINGS, { jump: 'KeyZ' }));
+    const pad0 = makePad();
+    const r = rig(pad0);
+    press(pad0, 'a');
+    r.pad.poll();
+    expect(r.keys.KeyZ).toBe(true);
+    expect(r.keys.Space).toBeFalsy();
+  });
+
+  it('热键冒充那一格跟着热键表走：返回键改绑之后 Start 不会还按着 Escape', () => {
+    const pad0 = makePad();
+    const r = rig(pad0);
+    // 用一张"返回键改绑到 F1"的热键表解析（`Game.resolvePadBinding` 就是这么注入的）
+    const remapped = UI_HOTKEYS.map((e) => (e.action === 'escape' ? { ...e, code: 'F1' } : e));
+    const pad = new GamepadInput({ keys: r.keys, mouseDown: r.mouseDown },
+      GAMEPAD_BINDINGS, () => [pad0],
+      (slot) => (slot.hotkey ? { code: remapped.find((e) => e.action === slot.hotkey).code } : bindingFor(slot.action)));
+    press(pad0, 'start');
+    pad.poll();
+    expect(r.keys.F1).toBe(true);
+    expect(r.keys.Escape).toBeFalsy();
+  });
+});
+
 describe('接线：桥真的挂在主循环上，且是全仓唯一读手柄的地方', () => {
   const gameSrc = () => readFileSync(join(__dirname, '../src/core/Game.js'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
 
   it('`setupInput` 构造桥，`update` 每帧轮询一次', () => {
     const src = gameSrc();
-    expect(src).toMatch(/new GamepadInput\(\{[\s\S]*?keys: this\.keys/);
+    expect(src).toMatch(/new GamepadInput\(\s*\{[\s\S]*?keys: this\.keys/);
+    // 出口解析器必须注入：否则 pauseMenu 那一格没人能解析（桥不认识热键表）
+    expect(src).toMatch(/resolvePadBinding/);
     expect(src.match(/this\.padInput\?\.poll\(\)/g)).toHaveLength(1);
   });
 
