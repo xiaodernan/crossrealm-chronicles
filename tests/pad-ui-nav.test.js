@@ -22,7 +22,7 @@ import { GamepadInput } from '../src/engine/GamepadInput.js';
 import { Game } from '../src/core/Game.js';
 import { moveFocusWithin, focusFirstItem, activateFocused } from '../src/ui/FocusNav.js';
 import { HotkeyRouter } from '../src/ui/HotkeyRouter.js';
-import { fakeDoc, fakePanel } from './helpers/fakePanelDom.js';
+import { fakeDoc, fakeItem, fakePanel } from './helpers/fakePanelDom.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -71,7 +71,10 @@ afterAll(() => {
     Object.defineProperty(globalThis, 'navigator', { configurable: true, value: realNavigator });
   }
 });
-afterEach(() => setHotkeyTable(UI_HOTKEYS));
+afterEach(() => {
+  setHotkeyTable(UI_HOTKEYS);
+  delete globalThis.document;                 // 调值那条路用的是默认文档（`adjustFocused` 的缺省参）
+});
 
 /** 与 `Game.resolvePadBinding` 同一分工：热键冒充问生效热键表，游戏键问生效键位表 */
 const resolve = (slot) => (slot.hotkey
@@ -197,6 +200,36 @@ describe('装载界面表之后：十字键走格、B 返回、A 只报边沿不
     expect(keys.ArrowUp).toBeFalsy();
   });
 
+  it('十字键左右 → 冒充 ← →（切片16：调值与 ↑↓ 同一个出口），松手立刻归零', () => {
+    for (const [button, code] of [['dpadLeft', 'ArrowLeft'], ['dpadRight', 'ArrowRight']]) {
+      const { bridge, keys, pad } = mkBridge(UI_GAMEPAD_BINDINGS);
+      press(pad, button, true);
+      bridge.poll();
+      expect(keys[code], button).toBe(true);
+      press(pad, button, false);
+      bridge.poll();
+      expect(keys[code], button).toBe(false);
+    }
+    // 手柄那两格不写信号槽：`navLeft`/`navRight` 是"冒充某一格键"的格子名，
+    // 真正的信号槽（`UI_PAD_SIGNALS`）仍然只有 B 那一个 —— 见上面那条名单门禁
+    expect(Object.keys(UI_GAMEPAD_BINDINGS).sort())
+      .toEqual(['back', 'menu', 'confirm', 'navUp', 'navDown', 'navLeft', 'navRight'].sort());
+    expect(UI_PAD_SIGNALS).toEqual(['confirm']);
+  });
+
+  it('改绑 ← 之后手柄的十字键左跟着搬：调值出口同样只有热键表这一个真源', () => {
+    setHotkeyTable(applyHotkeyOverrides(UI_HOTKEYS, { uiLeft: 'KeyZ' }));
+    const table = applyHotkeyOverrides(UI_HOTKEYS, { uiLeft: 'KeyZ' });
+    const { bridge, keys, pad } = mkBridge(UI_GAMEPAD_BINDINGS);
+    bridge._resolve = (slot) => (slot.hotkey
+      ? { code: table.find((e) => e.action === slot.hotkey)?.code ?? null }
+      : bindingFor(slot.action));
+    press(pad, 'dpadLeft', true);
+    bridge.poll();
+    expect(keys.KeyZ).toBe(true);
+    expect(keys.ArrowLeft).toBeFalsy();
+  });
+
   it('进界面那一刻把战斗侧借走的键还掉：不会"不退菜单就永远朝前走"', () => {
     const keys = {};
     const pad = makePad();
@@ -305,6 +338,54 @@ describe('一条路走到底：十字键经同一个派发口移焦，A 激活�
     expect(activateFocused(doc)).toBe(true);
     expect(menu.items[1].clicks).toBe(1);
     expect(fired, 'A 也被登记成了一条热键 = 第二个激活消费者').toEqual(['uiDown']);
+  });
+
+  it('同一根路推滑杆：十字键左 → 冒充 ← → 同一个派发口 → 值真的动一档（切片16）', () => {
+    // 这条钉的是"手柄没有键盘事件"那句话本身：原生滑杆听的是 `keydown`，
+    // 没有下面这条派发链，十字键左对滑杆就是零效果
+    const doc = fakeDoc();
+    const el = fakeItem('set-vol', {
+      tag: 'input', type: 'range', min: 0, max: 1, step: 0.1, value: 0.6,
+    });
+    const panel = fakePanel([el], doc, 'settings-panel');
+    doc.hosts['settings-panel'] = panel.host;
+    globalThis.document = doc;
+    el.focus();
+    const pad = makePad();
+    setPads(pad);
+    const keys = {};
+    const bridge = new GamepadInput({ keys }, UI_GAMEPAD_BINDINGS, undefined, resolve);
+    const fired = [];
+    const router = new HotkeyRouter({
+      table: UI_HOTKEYS,
+      isBlocked: () => false,
+      onAction: (action) => {
+        fired.push(action);
+        return Game.prototype.runHotkey.call({ runEscape: () => false }, action);
+      },
+    });
+    press(pad, 'dpadLeft', true);
+    bridge.poll();
+    router.poll(keys);
+    expect(fired).toEqual(['uiLeft']);
+    expect(el.value).toBe('0.5');
+    // 按住不连发：边沿派发一帧一次
+    router.poll(keys);
+    expect(el.value).toBe('0.5');
+    press(pad, 'dpadLeft', false);
+    bridge.poll();
+    router.poll(keys);
+    press(pad, 'dpadLeft', true);
+    bridge.poll();
+    router.poll(keys);
+    expect(el.value).toBe('0.4');
+    // 右一下回去：同一格按钮在"上下文"里换了主人，出口仍是热键表那一个
+    press(pad, 'dpadLeft', false);
+    press(pad, 'dpadRight', true);
+    bridge.poll();
+    router.poll(keys);
+    expect(fired).toEqual(['uiLeft', 'uiLeft', 'uiRight']);
+    expect(el.value).toBe('0.5');
   });
 });
 

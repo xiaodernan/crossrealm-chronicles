@@ -118,7 +118,7 @@ import {
 } from '../content/keybinds.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
 import { topNavLayer } from '../ui/OverlayStack.js';
-import { moveFocusWithin, activateFocused } from '../ui/FocusNav.js';
+import { moveFocusWithin, activateFocused, adjustFocused } from '../ui/FocusNav.js';
 export class Game {
   constructor(container) {
     this.clock = new THREE.Clock();
@@ -549,6 +549,11 @@ export class Game {
       // 面板内移焦（切片11）：↑↓ 只在开着的面板里走路，野外按了什么都不做
       case 'uiUp': return this.movePanelFocus(-1);
       case 'uiDown': return this.movePanelFocus(1);
+      // 面板内调值（切片16）：← → 推焦点那一格的数值。这里刻意**不问层表** ——
+      // 该问的是"焦点在哪一格"，那是唯一事实；层表回答的是"走焦走进哪个面板"（`movePanelFocus`）。
+      // 手柄走的也是这一句：十字键左右在桥里冒充 ← →，于是两条输入只有一个消费者。
+      case 'uiLeft': return adjustFocused(-1);
+      case 'uiRight': return adjustFocused(1);
       default: return false;
     }
   }

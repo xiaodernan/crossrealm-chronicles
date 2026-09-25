@@ -226,19 +226,22 @@ export const GAMEPAD_BINDINGS = {
  * 这张表与游戏表整表互换，走的是切片9 那条 `useBindings`（按动作名结转边沿与借键账本，
  * 所以进 UI 态那一刻，战斗侧借走的键会被原样还掉 —— 不退菜单就永远朝前走那一类）。
  *
- * 前三格复用切片5 那条 `hotkey` 机制：出口是**当前生效的热键表**给的键码，
- * 于是"把 ↑↓ 改绑到别的键"之后手柄也跟着搬，不必在这里再记一遍。
- * 第四格 `confirm` 特殊：它不冒充任何键盘键（浏览器已经用原生 Enter 处理激活，
+ * 前六格复用切片5 那条 `hotkey` 机制：出口是**当前生效的热键表**给的键码，
+ * 于是"把 ↑↓ 改绑到别的键"之后手柄也跟着搬，不必在这里再记一遍（← → 那两格是切片16 加的，
+ * 走的是同一条：十字键左/右冒充 ← / →，于是"调值"这件事键盘与手柄是同一个派发口）。
+ * 最后一格 `confirm` 特殊：它不冒充任何键盘键（浏览器已经用原生 Enter 处理激活，
  * 我们再冒充一次就是 B52），而是让桥报一个边沿，由 `Game` 交给 `FocusNav.activateFocused`。
  */
 /** 界面态里"报边沿而不冒充键盘"的信号名（桥的 `ui` 复用槽就是按这张名单建的格子） */
 export const UI_PAD_SIGNALS = ['confirm'];
 
-export const UI_PAD_ACTIONS = ['navUp', 'navDown', 'back', 'menu', ...UI_PAD_SIGNALS];
+export const UI_PAD_ACTIONS = ['navUp', 'navDown', 'navLeft', 'navRight', 'back', 'menu', ...UI_PAD_SIGNALS];
 
 export const UI_GAMEPAD_BINDINGS = {
   navUp: { action: 'navUp', mode: 'edge', button: 'dpadUp', hotkey: 'uiUp' },
   navDown: { action: 'navDown', mode: 'edge', button: 'dpadDown', hotkey: 'uiDown' },
+  navLeft: { action: 'navLeft', mode: 'edge', button: 'dpadLeft', hotkey: 'uiLeft' },
+  navRight: { action: 'navRight', mode: 'edge', button: 'dpadRight', hotkey: 'uiRight' },
   // 返回与开合菜单在界面里是同一件事（都走 `escape` 那条级联），但保留两格是因为
   // 玩家手里的习惯不一样：有人按 B，有人按 Start —— 一枚按钮一个主人，这里仍然成立。
   back: { action: 'back', mode: 'edge', button: 'b', hotkey: 'escape' },

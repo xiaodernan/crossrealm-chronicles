@@ -55,7 +55,17 @@ export function fakeItem(id, spec = {}) {
   };
   if (spec.type) el.type = spec.type;
   if (spec.disabled) el.disabled = true;
+  // 滑杆那几个属性照浏览器给成**字符串**（`el.value` 在真 DOM 里也是字符串），
+  // 于是 `adjustFocused` 的浮点抹平是"从字符串读出来、再写回字符串"这条真路径（切片16）
+  for (const attr of ['min', 'max', 'step', 'value']) {
+    if (spec[attr] !== undefined) el[attr] = String(spec[attr]);
+  }
   el.addEventListener = (type, fn) => { (el.listeners[type] ??= []).push(fn); };
+  /** 造事件也要走同一批监听（`adjustFocused` 发的 `input` 就是这条）：只记不发 = 桩替被测方作弊 */
+  el.dispatchEvent = (evt) => {
+    (el.listeners[evt.type] ?? []).forEach((fn) => fn({ ...evt, target: el }));
+    return true;
+  };
   // 「玩家点了这一格」= 记一次点击 + 走挂在这格上的 click 监听（浏览器里本来就是同时发生的两件事）
   el.click = () => {
     if (el.disabled) return;                 // 禁用格点了没反应：浏览器不触发 click，我们也不假触发

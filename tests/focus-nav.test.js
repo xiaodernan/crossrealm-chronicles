@@ -8,6 +8,10 @@
  *    面板各自 `focus()` 一次 = "现在选中的是谁"有两套账（切片10 的 B46 同形）。
  * 3. **激活不留第二个消费者**：Enter / 空格 归浏览器（原生 `focus()` 之后按钮本来就吃这两个键），
  *    所以这一片**不登记** `uiConfirm`。登记了就是 B52 复发：同一下按键、两次 click。
+ *
+ * 切片16 补第四条：**调值只有一条通路** —— ← → 登记成 `uiLeft`/`uiRight` 并 `preventDefault`，
+ * 于是原生滑杆步进与我们的步进不会同时发生（同时发生 = 按一下走两档）。前提写成门禁：
+ * 收焦点的面板里不许出现需要方向键移动光标的文本控件。
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -16,7 +20,7 @@ import {
   UI_HOTKEYS, UI_NAV_ACTIONS, UI_ACTIONS, hotkeyCodeFor, applyHotkeyOverrides, setHotkeyTable,
 } from '../src/content/hotkeys.js';
 import {
-  navItems, stepFocusIndex, nextFocusedItem, moveFocusWithin, focusFirstItem,
+  navItems, stepFocusIndex, nextFocusedItem, moveFocusWithin, focusFirstItem, adjustFocused,
 } from '../src/ui/FocusNav.js';
 import { OVERLAY_LAYERS, topNavLayer } from '../src/ui/OverlayStack.js';
 import { HotkeyRouter, hotkeyBlockedBy } from '../src/ui/HotkeyRouter.js';
@@ -196,6 +200,88 @@ describe('moveFocusWithin / focusFirstItem：只在这里动 `focus()`', () => {
   });
 });
 
+/* ------------------------------------- 左右两下：推焦点那一格的数值（切片16） */
+
+describe('adjustFocused：走格问清单，这一段只问"焦点在哪一格"', () => {
+  /** 一根滑杆 + 一份 `input` 账：写入方（`SettingsPanel.bindControls`）听的就是这个事件 */
+  const slider = (doc, spec = {}) => {
+    const el = fakeItem('vol', {
+      tag: 'input', type: 'range', min: 0, max: 1, step: 0.05, value: 0.5, ...spec,
+    });
+    const seen = [];
+    el.addEventListener('input', () => seen.push(el.value));
+    fakePanel([el], doc);                    // 挂进面板 = `el.doc` 就位，`focus()` 才认文档那一份焦点账
+    return { el, seen };
+  };
+
+  it('推一档：值动一格、`input` 恰好发一次（不发它 = 值动了而设置没动）', () => {
+    const doc = fakeDoc();
+    const { el, seen } = slider(doc);
+    el.focus();
+    expect(adjustFocused(1, doc)).toBe(true);
+    expect(el.value).toBe('0.55');
+    expect(seen).toEqual(['0.55']);
+    expect(adjustFocused(-1, doc)).toBe(true);
+    expect(el.value).toBe('0.5');
+    expect(seen).toEqual(['0.55', '0.5']);
+  });
+
+  it('到头不越界：min / max 两侧夹住，已经在头上时这一下不被接住', () => {
+    const doc = fakeDoc();
+    const { el, seen } = slider(doc, { value: 0 });
+    el.focus();
+    expect(adjustFocused(-1, doc), 'min 上还往下走').toBe(false);
+    expect(el.value).toBe('0');
+    expect(seen).toEqual([]);
+    expect(adjustFocused(1, doc)).toBe(true);
+    el.value = '1';
+    expect(adjustFocused(1, doc), 'max 上还往上走').toBe(false);
+    expect(el.value).toBe('1');
+    expect(seen).toEqual(['0.05']);
+    // 靠近头但没到头（0.95 的下一档就是 1）：仍然走得动，不许"差一格就当到头"
+    el.value = '0.95';
+    expect(adjustFocused(1, doc)).toBe(true);
+    expect(el.value).toBe('1');
+  });
+
+  it('浮点尾巴抹掉：1.6 − 0.1 得到 1.5（那串 1.5000000000000002 会被存进盘里给玩家看）', () => {
+    const doc = fakeDoc();
+    const { el } = slider(doc, { min: 0.6, max: 3, step: 0.1, value: 1.6 });
+    el.focus();
+    expect(adjustFocused(-1, doc)).toBe(true);
+    expect(el.value).toBe('1.5');
+    expect(adjustFocused(1, doc)).toBe(true);
+    expect(el.value).toBe('1.6');
+  });
+
+  it('焦点不在滑杆上（按钮 / body / 没有 document）：不接这一下', () => {
+    const doc = fakeDoc();
+    const panel = fakePanel(['close-btn'], doc);
+    panel.items[0].focus();
+    expect(adjustFocused(1, doc)).toBe(false);
+    expect(adjustFocused(1, fakeDoc())).toBe(false);       // 焦点还在 body 上
+    expect(adjustFocused(1, undefined)).toBe(false);       // node / 单元调用
+  });
+
+  it('禁用的滑杆不吃（浏览器本来也不会给它焦点，这里同样不许我们代劳）', () => {
+    const doc = fakeDoc();
+    const { el } = slider(doc, { disabled: true });
+    doc.setActive(el);
+    expect(adjustFocused(1, doc)).toBe(false);
+    expect(el.value).toBe('0.5');
+  });
+
+  it('脏 step（空 / 0 / 字符串）按缺省 1 档走，不把 NaN 写进值里', () => {
+    const doc = fakeDoc();
+    for (const step of ['', 0, 'abc']) {
+      const { el } = slider(doc, { min: 0, max: 10, step, value: 1 });
+      el.focus();
+      expect(adjustFocused(1, doc), `step=${JSON.stringify(step)}`).toBe(true);
+      expect(el.value).toBe('2');
+    }
+  });
+});
+
 /* -------------------------------------- 层表 + 现状 → 焦点落进哪个面板 */
 
 /** 只给 `overlayState()` 真读到的那些字段，形状与生产一致（被测的是 `Game.prototype` 那几个方法） */
@@ -281,6 +367,62 @@ describe('Game.movePanelFocus：收焦点的面板由层表说', () => {
     expect(menu.active()).toBe('save');
     router.poll({ ArrowDown: true });                // 同一下按住不再来一次
     expect(menu.active()).toBe('save');
+  });
+});
+
+/* ------------------------------------ 键盘这条 ←：经同一个派发口推焦点那一格 */
+
+describe('Game.runHotkey 的 uiLeft / uiRight：键盘这条路也要走得通（切片16）', () => {
+  afterEach(() => {
+    delete globalThis.document;
+    setHotkeyTable(UI_HOTKEYS);
+  });
+
+  const mountSlider = (g, spec) => {
+    const doc = fakeDoc();
+    const el = fakeItem('set-deadzone', {
+      tag: 'input', type: 'range', min: 0, max: 0.4, step: 0.02, value: 0.2, ...spec,
+    });
+    const panel = fakePanel([el], doc, 'settings-panel');
+    doc.hosts['settings-panel'] = panel.host;
+    globalThis.document = doc;
+    el.focus();
+    return { doc, el, panel };
+  };
+
+  it('设置开着、焦点在滑杆上：按 ← 推一档，且按住不连发', () => {
+    const g = navGame();
+    g.settingsPanel.open = true;
+    const { el } = mountSlider(g);
+    const fired = [];
+    const router = new HotkeyRouter({
+      table: UI_HOTKEYS,
+      isBlocked: (code) => hotkeyBlockedBy(g.overlayState(), code),
+      onAction: (action) => {
+        fired.push(action);
+        return Game.prototype.runHotkey.call({ ...g, runEscape: () => false }, action);
+      },
+    });
+    // 接管的证据：这一枚在面板开着时**不被拦**（层表放行移焦与调值），且挡下浏览器默认行为 ——
+    // 不挡的话原生滑杆步进与我们各走一次，玩家按一下会走两档
+    expect(router.onKeydown('ArrowLeft')).toBe(true);
+    expect(hotkeyBlockedBy(g.overlayState(), 'ArrowLeft')).toBe(false);
+    router.poll({ ArrowLeft: true });
+    expect(fired).toEqual(['uiLeft']);
+    expect(el.value).toBe('0.18');
+    router.poll({ ArrowLeft: true });
+    expect(el.value, '按住不连发').toBe('0.18');
+    router.poll({ ArrowLeft: false });
+    router.poll({ ArrowLeft: true });
+    expect(el.value).toBe('0.16');
+  });
+
+  it('野外（没有面板收焦点）：这一下没人接，返回 false 也不抛', () => {
+    const g = navGame();
+    globalThis.document = fakeDoc();
+    const run = (a) => Game.prototype.runHotkey.call({ ...g, runEscape: () => false }, a);
+    expect(run('uiLeft')).toBe(false);
+    expect(run('uiRight')).toBe(false);
   });
 });
 
@@ -440,39 +582,66 @@ describe('静态门禁：焦点只有一个出口，激活只有浏览器一个�
     expect(sourceOf('ui/WorldMapPanel.js')).not.toContain('focusFirstItem(');
   });
 
-  it('导航动作在 `runHotkey` 里全部落到 `movePanelFocus`，且没有多余的导航 case', () => {
+  it('导航动作在 `runHotkey` 里全部有出口：↑↓ 走格、← → 调值，方向不许反也不许多一条', () => {
     const body = sourceOf('core/Game.js').match(/runHotkey\(action\)\s*\{[\s\S]*?\n {2}\}/);
     expect(body, '找不到 runHotkey 的函数体').toBeTruthy();
     const toNav = [...body[0].matchAll(/case '([a-zA-Z]+)':\s*return this\.movePanelFocus\((-?\d)\);/g)];
-    expect(toNav.map((m) => m[1]).sort()).toEqual([...UI_NAV_ACTIONS].sort());
+    const toAdjust = [...body[0].matchAll(/case '([a-zA-Z]+)':\s*return adjustFocused\((-?\d)\);/g)];
+    expect(toNav.map((m) => m[1]).sort()).toEqual(['uiDown', 'uiUp']);
     expect(toNav.map((m) => m[2])).toEqual(['-1', '1']);        // 上 = -1、下 = +1，方向不许反
+    expect(toAdjust.map((m) => m[1]).sort()).toEqual(['uiLeft', 'uiRight']);
+    expect(toAdjust.map((m) => m[2])).toEqual(['-1', '1']);      // ← = -1、→ = +1，同样不许反
+    // 四个动作一个不多一个不少：漏一个 = 那枚键在面板里是死的，多一个 = 有人绕过这两条出口
+    expect([...toNav, ...toAdjust].map((m) => m[1]).sort()).toEqual([...UI_NAV_ACTIONS].sort());
     for (const a of UI_NAV_ACTIONS) expect(UI_ACTIONS, `${a} 不在热键表里`).toContain(a);
   });
 
-  it('↑↓ 之外不设导航键，也不设"确认"热键：← → 与 Enter / 空格 全部留给浏览器原生', () => {
-    expect(UI_NAV_ACTIONS).toEqual(['uiUp', 'uiDown']);
-    const second = UI_ACTIONS.filter((a) => /confirm|activate|uiLeft|uiRight|navLeft|navRight/i.test(a));
-    expect(second, '登记了第二条激活/横向通路：与浏览器原生抢同一下按键（B52）').toEqual([]);
+  it('导航只有这四个动作，仍然不设"确认"热键：Enter / 空格 归浏览器原生（B52）', () => {
+    expect(UI_NAV_ACTIONS).toEqual(['uiUp', 'uiDown', 'uiLeft', 'uiRight']);
+    const second = UI_ACTIONS.filter((a) => /confirm|activate/i.test(a));
+    expect(second, '登记了第二条激活通路：与浏览器原生抢同一下按键（B52）').toEqual([]);
+    // `navLeft` / `navRight` 是**手柄那张表**里的格子名，不是热键动作名 —— 两套名字混用就是第二真源
+    expect(UI_ACTIONS.some((a) => /nav[A-Z]/.test(a)), '手柄动作名混进了热键表').toBe(false);
   });
 
-  it('导航路径不许自己造事件、不许抄物理键码；点按钮只许出现在 `activateFocused` 一处', () => {
+  it('← → 归我们派发的前提：收焦点的面板里不许出现要靠方向键移动光标的文本控件', () => {
+    // `preventDefault: true` 把原生滑杆步进一并挡下（不挡就是按一下走两档），代价是方向键不再归浏览器。
+    // 今天这是安全的：面板里只有按钮 / 滑杆 / 复选框。哪天有人往面板里塞一个文本框，
+    // 光标就再也移不动 —— 那时该改的是这条接管，而不是偷偷给文本框开例外。
+    const TEXT_WIDGET = /<textarea\b|type\s*[:=]\s*['"](?:text|search|number|email|url|password)['"]/i;
+    const shell = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+    const shellHit = shell.match(new RegExp(TEXT_WIDGET.source, 'gi')) ?? [];
+    expect(shellHit, '壳页里出现了文本控件，方向键接管会吃掉它的光标移动').toEqual([]);
+    const offenders = FILES
+      .filter(({ source }) => TEXT_WIDGET.test(source))
+      .map(({ name }) => name);
+    expect(offenders, '源码里动态造了文本控件').toEqual([]);
+  });
+
+  it('导航路径只许造一个事件：`input` 那一次在 `adjustFocused` 里，点按钮只许在 `activateFocused` 里', () => {
     const src = sourceOf('ui/FocusNav.js');
-    expect(src).not.toMatch(/dispatchEvent/);
+    // 切片16：滑杆的写入方听的是 `input`，手柄没有键盘事件，只能由这里代发一次。
+    // 与 `.click(` 同一条待遇 —— 只许这一处，多一处就是第二个"我们替浏览器做事"的出口。
+    const adjust = src.match(/export function adjustFocused[\s\S]*?\n\}/);
+    expect(adjust, '找不到 adjustFocused 的函数体').toBeTruthy();
+    expect((src.match(/dispatchEvent\(/g) || []).length, '第二处在造事件').toBe(1);
+    expect(adjust[0], '调值不发 `input` = 值动了而设置没动').toContain('dispatchEvent(');
     expect(src).not.toMatch(/'(?:Arrow[A-Za-z]+|Enter|Escape|Key[A-Z])'/);
     // 切片14：手柄的 A 没有"按下聚焦元素"这条原生通路，所以由这里代点一下。
-    // 仍然只许一处 —— 多点一处就是第二条激活路径，而键盘那条一个字都没动（原生 Enter 管它）。
     const fn = src.match(/export function activateFocused[\s\S]*?\n\}/);
     expect(fn, '找不到 activateFocused 的函数体').toBeTruthy();
     expect(fn[0]).toContain('.click(');
     expect((src.match(/\.click\(/g) || []).length, '第二处在点按钮').toBe(1);
   });
 
-  it('移焦键改绑之后仍然放行：层表问的是动作，不是出厂那两枚箭头', () => {
-    setHotkeyTable(applyHotkeyOverrides(UI_HOTKEYS, { uiUp: 'KeyI', uiDown: 'KeyK' }));
+  it('移焦键与调值键改绑之后仍然放行：层表问的是动作，不是出厂那几枚箭头', () => {
+    setHotkeyTable(applyHotkeyOverrides(UI_HOTKEYS, { uiUp: 'KeyI', uiDown: 'KeyK', uiLeft: 'KeyZ' }));
     expect(hotkeyCodeFor('uiUp')).toBe('KeyI');
     const open = { settingsOpen: true };
     for (const l of OVERLAY_LAYERS) if (!(l.state in open)) open[l.state] = false;
     expect(hotkeyBlockedBy(open, 'KeyI')).toBe(false);
+    expect(hotkeyBlockedBy(open, 'KeyZ')).toBe(false);
     expect(hotkeyBlockedBy(open, 'ArrowUp')).toBe(true);
+    expect(hotkeyBlockedBy(open, 'ArrowLeft')).toBe(true);     // 改绑之后出厂 ← 反而被自己的面板拦下
   });
 });

@@ -27,6 +27,11 @@ export const UI_HOTKEYS = [
   // 面板内移焦（切片11）：↑↓ 在开着的面板里走，Enter / 空格 交给浏览器原生激活
   { code: 'ArrowUp', action: 'uiUp', preventDefault: true },
   { code: 'ArrowDown', action: 'uiDown', preventDefault: true },
+  // 面板内调值（切片16）：← → 推焦点那一格的数值（今天能推的只有滑杆）。
+  // `preventDefault: true` 是**接管**的声明：原生滑杆步进与我们的步进若同时发生，
+  // 玩家按一下会走两档。于是这条通路只有一个消费者 —— 键盘与手柄（十字键冒充 ← →）走同一条。
+  { code: 'ArrowLeft', action: 'uiLeft', preventDefault: true },
+  { code: 'ArrowRight', action: 'uiRight', preventDefault: true },
 ];
 
 export const UI_ACTIONS = UI_HOTKEYS.map((e) => e.action);
@@ -50,6 +55,8 @@ export const UI_HOTKEY_LABELS = {
   settings: '设置',
   uiUp: '面板焦点上移',
   uiDown: '面板焦点下移',
+  uiLeft: '面板数值调小',
+  uiRight: '面板数值调大',
 };
 
 /**
@@ -132,11 +139,14 @@ export function isMapPassThrough(code) {
 }
 
 /**
- * 面板内导航的那两个动作（切片11）。与 `MAP_PASSTHROUGH_ACTIONS` 同一条理由列**动作**不列键码：
- * 层表放行的是"移焦这件事"，玩家把 ↑ 改到 `I` 之后该放行的就是 `I` —— 抄 `'ArrowUp'`
- * 等于给改绑留一个"面板里方向键没了"的坑。
+ * 面板内导航的那四个动作（切片11 的 ↑↓ + 切片16 的 ← →）。与 `MAP_PASSTHROUGH_ACTIONS`
+ * 同一条理由列**动作**不列键码：层表放行的是"移焦与调值这件事"，玩家把 ← 改到 `I` 之后
+ * 该放行的就是 `I` —— 抄 `'ArrowLeft'` 等于给改绑留一个"面板里调不了值"的坑。
+ *
+ * 四个动作分成两对，出口各不相同，但都从这一份清单派发：↑↓ 问 `movePanelFocus`（走格），
+ * ← → 问 `FocusNav.adjustFocused`（推焦点那一格的数值）。层表只认清单，不关心走的是哪一对。
  */
-export const UI_NAV_ACTIONS = ['uiUp', 'uiDown'];
+export const UI_NAV_ACTIONS = ['uiUp', 'uiDown', 'uiLeft', 'uiRight'];
 
 /** 这枚码是不是当前生效表里的"面板内导航"键（模态层据此决定让不让移焦穿过去） */
 export function isNavCode(code) {

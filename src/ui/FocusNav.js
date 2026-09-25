@@ -126,3 +126,60 @@ export function activateFocused(doc = globalThis.document) {
   el.click();
   return true;
 }
+
+/** 小数位数只从 `step` 的字面上数（`0.02` → 2、`5` → 0），用来把浮点尾巴抹掉 */
+function stepDecimals(stepText) {
+  const dot = stepText.indexOf('.');
+  return dot < 0 ? 0 : Math.min(10, stepText.length - dot - 1);
+}
+
+/**
+ * 左右两下：把**焦点那一格**的数值推一档（切片16）。
+ *
+ * 分工与上面三段一样窄 —— 走格问清单（`navItems`），激活问浏览器（`activateFocused`），
+ * 这一段只问 `document.activeElement`："焦点现在在哪一格"本来就是唯一事实，
+ * 不必再问层表（层表回答的是"走焦该走进哪个面板"，两件事）。
+ *
+ * 今天能推的只有 `<input type="range">`：其余控件返回 `false`（这一下没人接住）。
+ * 刻意**不做**"左右移焦"：今天没有一扇面板有横向排布（键位行的两列在 DOM 里本来就是
+ * 相邻两格，↑↓ 已经走得到），凭空造一条横向路径就是死代码 —— 等真有网格再登记。
+ *
+ * 三条必须自己写、不能交给浏览器的理由：
+ * 1. **手柄没有键盘事件**：十字键冒充的那一格状态（`keys` 里的 `ArrowLeft`，注意是状态名不是码值字面量）
+ *    只是一格布尔，原生滑杆的步进听的是 `keydown`，永远等不到它 —— 这一段就是切片16 存在的理由；
+ * 2. **到头不许越界**：`min`/`max` 两侧夹住，夹到头返回 `false`（而不是把值推出去再被浏览器弹回）；
+ * 3. **派完要发 `input`**：滑杆的写入方（`SettingsPanel.bindControls`）听的是 `input`，
+ *    不发它就等于"值动了但设置没动"。这是全仓唯一一处为焦点导航造事件的地方，
+ *    与 `activateFocused` 代点那一下同一条待遇：只许这一处，门禁盯着。
+ *
+ * @returns {boolean} true = 这一下真的推了一档
+ */
+export function adjustFocused(delta, doc = globalThis.document) {
+  const el = doc?.activeElement;
+  if (!el || el.disabled || el.type !== 'range') return false;
+  // 三个属性各自按 HTML 的缺省值补（range 是 min=0 / max=100 / step=1），脏字面量一律不进算式
+  const num = (raw, dflt) => {
+    const t = String(raw ?? '').trim();
+    if (t === '') return dflt;
+    const n = Number(t);
+    return Number.isFinite(n) ? n : dflt;
+  };
+  const stepText = String(el.step ?? '').trim();
+  const s0 = num(stepText, 1);
+  const s = s0 > 0 ? s0 : 1;                 // step="0" / 脏字面量：浏览器同样回落到缺省 1 档
+  const loN = num(el.min, 0);
+  const hiN = num(el.max, 100);
+  const cur = num(el.value, NaN);
+  if (!Number.isFinite(cur) || !(hiN > loN)) return false;
+  // 按"第几档"算而不是 `cur + delta*s`：后者会在 1.6-0.1 上留下 1.5000000000000002，
+  // 那串尾巴会被 `settings.set` 存进盘里、摆到滑杆上给玩家看。
+  // 档位取四舍五入：玩家用鼠标拖出的 0.52 也在某一档附近，按下该走的是那一档的下一步。
+  const at = Math.round((cur - loN) / s);
+  const last = Math.round((hiN - loN) / s);
+  const ticks = Math.min(last, Math.max(0, at + delta));
+  const value = Number((loN + ticks * s).toFixed(stepDecimals(stepText)));
+  if (value === cur) return false;                       // 已经在头上了：这一下没被接住
+  el.value = String(value);
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  return true;
+}

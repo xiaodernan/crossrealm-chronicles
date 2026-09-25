@@ -22,7 +22,7 @@ import { parkFocus, restoreParkedFocus } from '../src/ui/FocusNav.js';
 import {
   OVERLAY_LAYERS, topBackLayer, topNavLayer, overlayBlocksHotkeys, OVERLAY_LAYER_BY_STATE,
 } from '../src/ui/OverlayStack.js';
-import { hotkeyCodeFor, UI_HOTKEYS } from '../src/content/hotkeys.js';
+import { hotkeyCodeFor, UI_HOTKEYS, UI_NAV_ACTIONS } from '../src/content/hotkeys.js';
 import { fakeDoc, fakePanel, fakeItem, fakeBox } from './helpers/fakePanelDom.js';
 import { PauseMenu } from '../src/ui/PauseMenu.js';
 import { SettingsPanel } from '../src/ui/SettingsPanel.js';
@@ -213,10 +213,11 @@ describe('两层同时开着：级联与焦点仍然只由那张表回答', () =
     expect(topNavLayer(state({ pauseMenuOpen: true })).layer).toBe('pauseMenu');
   });
 
-  it('真栈不许放宽放行名单：菜单 + 设置同时开着时，除返回与移焦键一概拦住', () => {
+  it('真栈不许放宽放行名单：菜单 + 设置同时开着时，除返回与移焦/调值键一概拦住', () => {
     const both = state({ settingsOpen: true, pauseMenuOpen: true });
     for (const e of UI_HOTKEYS) {
-      const pass = e.action === 'escape' || e.action === 'uiUp' || e.action === 'uiDown';
+      // 放行名单问的是**动作**不是键码：改绑之后 ← 换成别的键照样放行、照样被拦（切片16 加 ← → 一并进这份名单）
+      const pass = e.action === 'escape' || UI_NAV_ACTIONS.includes(e.action);
       expect(overlayBlocksHotkeys(both, e.code), `${e.action} (${e.code})`).toBe(!pass);
     }
     expect(overlayBlocksHotkeys(both, hotkeyCodeFor('escape'))).toBe(false);
