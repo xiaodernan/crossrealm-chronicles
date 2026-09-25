@@ -117,6 +117,8 @@ import {
   factoryGamepadBindings, setKeybindTable,
 } from '../content/keybinds.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
+import { topNavLayer } from '../ui/OverlayStack.js';
+import { moveFocusWithin } from '../ui/FocusNav.js';
 export class Game {
   constructor(container) {
     this.clock = new THREE.Clock();
@@ -522,8 +524,21 @@ export class Game {
       case 'load': return SaveSystem.load(this);
       case 'settings': return this.settingsPanel.show();
       case 'escape': return this.runEscape();
+      // 面板内移焦（切片11）：↑↓ 只在开着的面板里走路，野外按了什么都不做
+      case 'uiUp': return this.movePanelFocus(-1);
+      case 'uiDown': return this.movePanelFocus(1);
       default: return false;
     }
+  }
+
+  /**
+   * 移焦该落进哪个面板：`nav` 那一格说（切片11）。层表与 Escape 级联吃同一份现状，
+   * 所以"这一下返回关掉的面板"与"↑↓ 走进来的面板"是同一个 —— 清单与算式在 `ui/FocusNav.js`。
+   */
+  movePanelFocus(delta) {
+    const layer = topNavLayer(this.overlayState());
+    if (!layer) return false;
+    return moveFocusWithin(document.getElementById(layer.nav), delta);
   }
 
   /** Escape 那条级联的顺序就是产品决策，本体收在 `OVERLAY_LAYERS`（切片3 抽纯、切片10 成表） */

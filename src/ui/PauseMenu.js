@@ -1,4 +1,5 @@
 import { SaveSystem } from '../game/SaveSystem.js';
+import { focusFirstItem } from './FocusNav.js';
 
 export class PauseMenu {
   constructor(game) {
@@ -31,6 +32,8 @@ export class PauseMenu {
     this.game.paused = true;
     this.panel?.classList.remove('hidden');
     document.exitPointerLock?.();
+    // 一开面板就有"现在选中的是谁"：↑↓ 走出得来，Enter 立刻按得响（切片11）
+    focusFirstItem(this.panel);
   }
 
   hide() {

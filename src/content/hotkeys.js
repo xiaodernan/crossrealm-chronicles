@@ -24,6 +24,9 @@ export const UI_HOTKEYS = [
   { code: 'KeyL', action: 'load' },
   { code: 'Escape', action: 'escape' },
   { code: 'F10', action: 'settings' },
+  // 面板内移焦（切片11）：↑↓ 在开着的面板里走，Enter / 空格 交给浏览器原生激活
+  { code: 'ArrowUp', action: 'uiUp', preventDefault: true },
+  { code: 'ArrowDown', action: 'uiDown', preventDefault: true },
 ];
 
 export const UI_ACTIONS = UI_HOTKEYS.map((e) => e.action);
@@ -45,6 +48,8 @@ export const UI_HOTKEY_LABELS = {
   load: '读取',
   escape: '返回 / 暂停',
   settings: '设置',
+  uiUp: '面板焦点上移',
+  uiDown: '面板焦点下移',
 };
 
 /**
@@ -120,6 +125,22 @@ export const MAP_PASSTHROUGH_ACTIONS = ['worldMap', 'escape', 'zonePanel'];
 /** 这个物理码是不是当前生效表里"地图例外"那三个动作之一 */
 export function isMapPassThrough(code) {
   for (const action of MAP_PASSTHROUGH_ACTIONS) {
+    const bound = hotkeyCodeFor(action);
+    if (bound !== null && bound === code) return true;
+  }
+  return false;
+}
+
+/**
+ * 面板内导航的那两个动作（切片11）。与 `MAP_PASSTHROUGH_ACTIONS` 同一条理由列**动作**不列键码：
+ * 层表放行的是"移焦这件事"，玩家把 ↑ 改到 `I` 之后该放行的就是 `I` —— 抄 `'ArrowUp'`
+ * 等于给改绑留一个"面板里方向键没了"的坑。
+ */
+export const UI_NAV_ACTIONS = ['uiUp', 'uiDown'];
+
+/** 这枚码是不是当前生效表里的"面板内导航"键（模态层据此决定让不让移焦穿过去） */
+export function isNavCode(code) {
+  for (const action of UI_NAV_ACTIONS) {
     const bound = hotkeyCodeFor(action);
     if (bound !== null && bound === code) return true;
   }

@@ -1388,6 +1388,19 @@ body.finisher-flash::after {
 
 .panel-box button:hover { border-color: #c9a962; }
 
+/*
+ * 面板内移焦（切片11）：↑↓ 走到的那一格必须有肉眼看得见的差别，
+ * 否则"焦点在哪"这件事只存在于数据结构里、玩家看不见。
+ * 用 `:focus` 而不是 `:focus-visible`：落焦是我们代码做的（见 FocusNav），
+ * 浏览器的"上一次交互是鼠标还是键盘"判断在这种场合会把焦点环吃掉。
+ */
+.panel-box button:focus,
+.settings-box input:focus {
+  outline: 2px solid #c9a962;
+  outline-offset: 2px;
+  border-color: #c9a962;
+}
+
 .settings-box label {
   display: block;
   text-align: left;

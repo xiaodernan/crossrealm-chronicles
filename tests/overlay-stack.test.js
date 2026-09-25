@@ -16,12 +16,13 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { UI_HOTKEYS, hotkeyCodeFor, applyHotkeyOverrides, setHotkeyTable, isMapPassThrough } from '../src/content/hotkeys.js';
+import { UI_HOTKEYS, UI_NAV_ACTIONS, hotkeyCodeFor, applyHotkeyOverrides, setHotkeyTable, isMapPassThrough, isNavCode } from '../src/content/hotkeys.js';
 import {
   OVERLAY_LAYERS,
   OVERLAY_LAYER_BY_STATE,
   assertOverlayLayers,
   topBackLayer,
+  topNavLayer,
   overlayBlocksHotkeys,
 } from '../src/ui/OverlayStack.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../src/ui/HotkeyRouter.js';
@@ -91,20 +92,20 @@ describe('一张表：层序、字段名与 blocks 的取值域', () => {
     expect(BACK).toEqual(LAYER_NAMES.filter((n) => !HARD.includes(n)));
   });
 
-  it('每一行逐字钉死：back / blocks 的改动必须由人在这里签字（表不许自己给自己发通行证）', () => {
+  it('每一行逐字钉死：back / blocks / nav 的改动必须由人在这里签字（表不许自己给自己发通行证）', () => {
     // 上面那些"按列循环"的用例读的就是这张表本身，改表内容它们会跟着变 —— 所以逐行快照是唯一能咬住内容漂移的地方
-    expect(OVERLAY_LAYERS.map((l) => `${l.layer}|${l.state}|${l.back ? 'back' : 'hard'}|${l.blocks}`)).toEqual([
-      'endCredits|endCreditsSkippable|back|false',
-      'dialog|dialogOpen|back|true',
-      'worldMap|worldMapOpen|back|map',
-      'autoPlay|autoPlayActive|back|false',
-      'help|helpOpen|back|true',
-      'cinematic|cinematicActive|back|false',
-      'settings|settingsOpen|back|true',
-      'fastTravel|fastTravelOpen|back|true',
-      'pauseMenu|pauseMenuOpen|back|true',
-      'combatCinematic|combatCinematicSkippable|back|false',
-      'upgrade|upgradeOpen|hard|true',
+    expect(OVERLAY_LAYERS.map((l) => `${l.layer}|${l.state}|${l.back ? 'back' : 'hard'}|${l.blocks}|${l.nav ?? '-'}`)).toEqual([
+      'endCredits|endCreditsSkippable|back|false|-',
+      'dialog|dialogOpen|back|true|-',
+      'worldMap|worldMapOpen|back|map|-',
+      'autoPlay|autoPlayActive|back|false|-',
+      'help|helpOpen|back|true|-',
+      'cinematic|cinematicActive|back|false|-',
+      'settings|settingsOpen|back|true|settings-panel',
+      'fastTravel|fastTravelOpen|back|true|-',
+      'pauseMenu|pauseMenuOpen|back|true|pause-menu',
+      'combatCinematic|combatCinematicSkippable|back|false|-',
+      'upgrade|upgradeOpen|hard|true|-',
     ]);
   });
 
@@ -165,6 +166,42 @@ describe('topBackLayer：这一下返回归哪一层', () => {
   it('切片10 新增的两层（设置 / 快速旅行）真的在级联里，且排在暂停菜单之前', () => {
     expect(topBackLayer(state({ [stateKey('settings')]: true, [stateKey('pauseMenu')]: true }))).toBe('settings');
     expect(topBackLayer(state({ [stateKey('fastTravel')]: true, [stateKey('pauseMenu')]: true }))).toBe('fastTravel');
+  });
+});
+
+/* -------------------------------------------------- 焦点归哪一层 */
+
+describe('topNavLayer：↑↓ 走进哪个面板（切片11，与返回键同一张表）', () => {
+  const NAV = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.layer);
+
+  it('登记的层就是"焦点进得去"的那几层：菜单与设置', () => {
+    expect(NAV).toEqual(['settings', 'pauseMenu']);
+  });
+
+  it('野外（全关）没有面板收焦点：↑↓ 落空是正确答案，不是漏判', () => {
+    expect(topNavLayer(state())).toBe(null);
+    for (const l of OVERLAY_LAYERS.filter((x) => !x.nav)) {
+      expect(topNavLayer(state({ [l.state]: true })), l.layer).toBe(null);
+    }
+  });
+
+  it('两个收焦点的层同时开着：表里靠前那个接住，且与 `topBackLayer` 说的是同一个面板', () => {
+    const both = state({ settingsOpen: true, pauseMenuOpen: true });
+    expect(topNavLayer(both).layer).toBe('settings');
+    expect(topBackLayer(both)).toBe(topNavLayer(both).layer);
+  });
+
+  it('不收返回键的层不许认领焦点：那样那一格焦点永远走不进去（↑↓ 被硬模态挡在外面）', () => {
+    expect(() => assertOverlayLayers([
+      { layer: 'hard', state: 'x', blocks: true, back: false, nav: 'some-host' },
+    ])).toThrow(/不吃返回键/);
+    expect(() => assertOverlayLayers([
+      { layer: 'a', state: 'x', blocks: false, back: true, nav: 'same-host' },
+      { layer: 'b', state: 'y', blocks: false, back: true, nav: 'same-host' },
+    ])).toThrow(/被两层认领/);
+    expect(() => assertOverlayLayers([
+      { layer: 'a', state: 'x', blocks: false, back: true, nav: '' },
+    ])).toThrow(/DOM id/);
   });
 });
 
@@ -229,6 +266,24 @@ describe('overlayBlocksHotkeys：有返回层的模态只放行返回键本身',
     expect(overlayBlocksHotkeys(open, 'Escape')).toBe(true);
   });
 
+  it('移焦键与返回键同等待遇：有返回层的模态放行它，硬模态不放（切片11）', () => {
+    for (const l of OVERLAY_LAYERS) {
+      const open = state({ [l.state]: true });
+      const passed = UI_NAV_ACTIONS.map((a) => hotkeyCodeFor(a)).filter((c) => !overlayBlocksHotkeys(open, c));
+      // 全表只有世界地图那一层 `blocks: false`，其余挡键的层里不吃返回键的只有升级面板
+      expect(passed, l.layer).toEqual(l.blocks === true && !l.back ? [] : UI_NAV_ACTIONS.map((a) => hotkeyCodeFor(a)));
+    }
+  });
+
+  it('改绑之后移焦键跟着搬：新码放行、出厂的 ↑↓ 反而被拦（层表不许抄物理键）', () => {
+    setHotkeyTable(applyHotkeyOverrides(UI_HOTKEYS, { uiUp: 'KeyI', uiDown: 'KeyK' }));
+    const open = state({ pauseMenuOpen: true });
+    expect(isNavCode('KeyI')).toBe(true);
+    expect(isNavCode('ArrowUp')).toBe(false);
+    expect(overlayBlocksHotkeys(open, 'KeyI')).toBe(false);
+    expect(overlayBlocksHotkeys(open, 'ArrowUp')).toBe(true);
+  });
+
   it('只有世界地图一层时，那份名单仍与 `isMapPassThrough` 同一个口径', () => {
     const open = state({ worldMapOpen: true });
     for (const code of ['KeyG', 'Escape', 'Tab', 'KeyH']) {
@@ -258,12 +313,20 @@ describe('端到端：暂停菜单开着时按返回键真的有人吃（B46 的
     expect(calls).toEqual(['escape']);
   });
 
-  it('菜单开着：热键表里的其余键一律不派发（放行只给返回键这一格）', () => {
+  it('菜单开着：除返回键与移焦键以外一律不派发（放行只给那两格）', () => {
     const { router, calls } = mk({ pauseMenuOpen: true });
     const keys = {};
-    for (const e of UI_HOTKEYS) if (e.action !== 'escape') keys[e.code] = true;
+    for (const e of UI_HOTKEYS) {
+      if (e.action !== 'escape' && !UI_NAV_ACTIONS.includes(e.action)) keys[e.code] = true;
+    }
     router.poll(keys);
     expect(calls).toEqual([]);
+  });
+
+  it('菜单开着：↑↓ 派发得出来（否则面板里只能鼠标点，切片11 要的就是这一格）', () => {
+    const { router, calls } = mk({ pauseMenuOpen: true });
+    router.poll({ ArrowUp: true, ArrowDown: true });
+    expect(calls).toEqual(['uiUp', 'uiDown']);
   });
 
   it('对话开着：返回键放行给级联（它自己不再听 keydown，见 B52 那条静态门禁）', () => {

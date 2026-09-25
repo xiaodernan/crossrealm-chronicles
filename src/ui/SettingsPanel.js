@@ -1,6 +1,7 @@
 import { UI_HOTKEYS, UI_HOTKEY_LABELS } from '../content/hotkeys.js';
 import { GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, buildBindingTables } from '../content/keybinds.js';
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
+import { focusFirstItem } from './FocusNav.js';
 
 export class SettingsPanel {
   constructor(game) {
@@ -145,6 +146,8 @@ export class SettingsPanel {
     this.panel?.classList.remove('hidden');
     document.exitPointerLock?.();
     this.refresh();
+    // 先 refresh 再落焦：键位那几十格是 `refreshKeybinds()` 现拼的，早一步清单还是旧的
+    focusFirstItem(this.panel);
   }
 
   hide() {

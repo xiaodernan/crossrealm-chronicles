@@ -391,12 +391,13 @@ describe('关对话与跳演出：同一下按键只有一个消费者（B52）'
 /* -------------------------------------------------------- 静态门禁 */
 
 /** 键码形状的字符串字面量：`'KeyG'` / `'Escape'` / `'Tab'` / `'Digit1'` / `'F2'` … */
-const CODE_LITERAL = /'(?:Key[A-Z]|Digit[0-9]|F[0-9]{1,2}|Escape|Tab|Space|Shift(?:Left|Right)|Control(?:Left|Right)|Backquote|Numpad[0-9A-Za-z]*)'/;
+const CODE_LITERAL = /'(?:Key[A-Z]|Digit[0-9]|F[0-9]{1,2}|Escape|Tab|Space|Enter|Arrow[A-Za-z]+|Shift(?:Left|Right)|Control(?:Left|Right)|Backquote|Numpad[0-9A-Za-z]*)'/;
 /**
  * 把物理键码当判据的两写法：`e.code === 'Escape'` 与 `code !== 'KeyG'`
  * （后者是 `hotkeyBlocked(code)` 原来的样子 —— 参数名不带 `e.` 前缀，所以正则一起收）。
+ * `Arrow*` / `Enter` 从切片11 起也算：面板内导航认的同样是键码，抄死箭头 = 改绑之后那半失灵。
  */
-const CODE_COMPARE = /\bcode\s*[!=]==\s*'(?:Key[A-Z]|Digit[0-9]|F[0-9]{1,2}|Escape|Tab|Space|Backquote|[A-Za-z]+(?:Left|Right))'/;
+const CODE_COMPARE = /\bcode\s*[!=]==\s*'(?:Key[A-Z]|Digit[0-9]|F[0-9]{1,2}|Escape|Tab|Space|Enter|Arrow[A-Za-z]+|Backquote|[A-Za-z]+(?:Left|Right))'/;
 
 describe('静态门禁：行为侧不许再抄物理键码', () => {
   it('全仓没有一处把键码字面量拿来比较 `.code`（改一处就是第二个键位真源）', () => {
@@ -408,11 +409,17 @@ describe('静态门禁：行为侧不许再抄物理键码', () => {
 
   it('这条扫描咬得住：往层表里塞一处死键名比较立刻红（防空跑门禁）', () => {
     const original = sourceOf('ui/OverlayStack.js');
-    const reverted = original
-      .replace("code !== hotkeyCodeFor('escape')", "code !== 'Escape'");
-    expect(reverted, '替换没命中：那一行的写法变了，请把这条自证一起改').not.toBe(original);
+    // 返回键与移焦键两处：抄死任何一枚都是"改绑之后那半失灵"（切片7 的 B50、切片11 的 ↑）
+    const smuggled = [
+      ["code !== hotkeyCodeFor('escape')", "code !== 'Escape'"],
+      ['&& !isNavCode(code)', "&& code !== 'ArrowUp'"],
+    ];
+    for (const [from, to] of smuggled) {
+      const reverted = original.replace(from, to);
+      expect(reverted, `锚点没命中：${from} 这一处的写法变了`).not.toBe(original);
+      expect(CODE_COMPARE.test(reverted), `${to} 没被抓到`).toBe(true);
+    }
     expect(CODE_COMPARE.test(original)).toBe(false);
-    expect(CODE_COMPARE.test(reverted)).toBe(true);
   });
 
   it('`Game.hotkeyBlocked` 只喂模态现状，判据本体在纯函数里', () => {
