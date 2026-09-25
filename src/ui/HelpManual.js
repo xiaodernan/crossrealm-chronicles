@@ -1,5 +1,6 @@
 /** 游戏内说明书 — 由 UI 热键表的 `help` 动作打开（F12 是浏览器控制台，不是这里的键） */
 import { mergeHelpSections } from './HelpManualExtras.js';
+import { parkFocus, restoreParkedFocus } from './FocusNav.js';
 
 const SECTIONS = mergeHelpSections([
   {
@@ -131,7 +132,8 @@ export class HelpManual {
       this.showSection(btn.dataset.section);
     });
     document.getElementById('pause-manual')?.addEventListener('click', () => {
-      this.game.pauseMenu.hide();
+      // 与暂停菜单进设置同一条路（切片12）：下层让位但不关，退回来才落得回原来那一格
+      parkFocus(this.game.pauseMenu.panel);
       this.show();
     });
   }
@@ -169,5 +171,7 @@ export class HelpManual {
   hide() {
     this.open = false;
     this.panel?.classList.add('hidden');
+    // 先摘掉自己再还焦点：压在下面那一层此刻才重新可见（`style.css` 那条压暗让位规则）
+    restoreParkedFocus();
   }
 }

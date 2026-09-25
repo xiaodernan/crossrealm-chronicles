@@ -1401,6 +1401,17 @@ body.finisher-flash::after {
   border-color: #c9a962;
 }
 
+/*
+ * 真栈让位（切片12）：上层面板压着暂停菜单时，下面那一层不再重复铺一层压暗。
+ * 用 `opacity` 与 `pointer-events` 而不是 `visibility` 或 `display` ——
+ * 退回来时焦点要落回下层那一格，而隐藏起来的元素是聚焦不上的。
+ */
+body:has(#settings-panel:not(.hidden)) #pause-menu,
+body:has(#help-manual:not(.hidden)) #pause-menu {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .settings-box label {
   display: block;
   text-align: left;

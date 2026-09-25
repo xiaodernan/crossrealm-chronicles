@@ -9,6 +9,10 @@
  * - `stepFocusIndex`：**从这一格走一格到哪**（纯算式：首格、末格、环绕）。
  * - `moveFocusWithin`：把前两段的结论落到 DOM 上（只在这里调 `focus()`）。
  *
+ * 切片12 又加了一段同样窄的账：`parkFocus` / `restoreParkedFocus` 是**唯一**记录"焦点原来在哪"
+ * 的地方（一格账，读完即清）—— 上层面板压着下层、关掉之后要落回当初那一格，
+ * 但那份记忆如果散到各个面板的私有字段里，"现在选中谁"就又有了两个答案。
+ *
  * 至于"**哪个面板**收焦点"，不在这里 —— 那是 `ui/OverlayStack.js` 的 `nav` 那一格（切片10 的同一张表）。
  *
  * ## 为什么激活不做一个热键
@@ -75,4 +79,36 @@ export function focusFirstItem(host, doc = globalThis.document) {
   if (items.includes(doc?.activeElement)) return true;
   items[0].focus();
   return true;
+}
+
+/**
+ * 焦点被上层面板借走之前，把"这一格是清单里的第几格"记下来（切片12 / W-D1 真栈第一格）。
+ *
+ * **只有一格账，而且只在这里**：`parkFocus` 覆盖前一次，`restoreParkedFocus` 读完即清。
+ * 为什么不由各个面板自己存一个 index —— 那样"现在选中哪一格"就又有了第二个记处
+ * （面板的私有字段 + 浏览器的 `activeElement`），而切片11 立的规矩是全仓只有这个文件认识焦点。
+ */
+let parked = null;
+
+/** 记下当前焦点在这份清单里的位置；焦点不在清单里（或宿主没有 id）就不记，返回那个下标 */
+export function parkFocus(host, doc = globalThis.document) {
+  const index = navItems(host).indexOf(doc?.activeElement);
+  parked = index >= 0 && host?.id ? { hostId: host.id, index } : null;
+  return index;
+}
+
+/**
+ * 上层关掉之后把焦点还给记下的那一格。`true` = **浏览器真的把它给了那一格**，
+ * 而不是"我们调用过 `focus()`"：下层可能被别的路径关掉了（那时焦点只能留在原地）。
+ * 没有账（从野外直接开上层面板）一律 false —— 不许凭空造出一条来路。
+ */
+export function restoreParkedFocus(doc = globalThis.document) {
+  const rec = parked;
+  parked = null;                    // 读一次就清：一次来路只够退一次
+  if (!rec) return false;
+  const items = navItems(doc?.getElementById?.(rec.hostId));
+  if (!items.length) return false;
+  const target = items[Math.min(Math.max(rec.index, 0), items.length - 1)];
+  target.focus();
+  return doc?.activeElement === target;
 }

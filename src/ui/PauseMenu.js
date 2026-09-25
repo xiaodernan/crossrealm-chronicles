@@ -1,5 +1,5 @@
 import { SaveSystem } from '../game/SaveSystem.js';
-import { focusFirstItem } from './FocusNav.js';
+import { focusFirstItem, parkFocus } from './FocusNav.js';
 
 export class PauseMenu {
   constructor(game) {
@@ -17,7 +17,9 @@ export class PauseMenu {
       fileInput.value = '';
     });
     document.getElementById('pause-settings')?.addEventListener('click', () => {
-      this.hide();
+      // 真栈（切片12）：下层不关，只让位。`hide()` 会连 `paused` 一起撤掉 ——
+      // "暂停"从此要有两个真源（那格布尔 + 各面板 `.open` 的合取），而玩家退回来时站不回原来那一格
+      parkFocus(this.panel);
       this.game.settingsPanel.show();
     });
   }

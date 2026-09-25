@@ -21,6 +21,7 @@ import {
 import { OVERLAY_LAYERS, topNavLayer } from '../src/ui/OverlayStack.js';
 import { HotkeyRouter, hotkeyBlockedBy } from '../src/ui/HotkeyRouter.js';
 import { Game } from '../src/core/Game.js';
+import { fakeDoc, fakePanel } from './helpers/fakePanelDom.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -43,75 +44,8 @@ const sourceOf = (name) => {
 
 /* ------------------------------------------------------ 假 DOM：一格清单 */
 
-/**
- * 假 document：**焦点现状只有一份**（与浏览器一致），所以两个面板共用它 ——
- * 各面板自己记"我这一格里谁被选中"正是这一片要防的第二件事，测试桩不能先犯。
- * `getElementById` 让被测的 `Game.movePanelFocus` 走的是它生产的那条取宿主的路。
- */
-function fakeDoc(hosts = {}) {
-  let activeEl = null;
-  const doc = {
-    hosts,
-    get activeElement() { return activeEl; },
-    getElementById: (id) => doc.hosts[id] ?? null,
-    setActive: (el) => { activeEl = el; },
-  };
-  return doc;
-}
-
-/**
- * 假 DOM 的 `querySelectorAll`：**必须真按选择器筛**。
- * 以前这个桩是"把整串选择器记下、然后返回全部格子"，于是"排除禁用格"这类判据在测试里是空话 ——
- * 变异验证 N7（把 `button:not([disabled])` 改成 `button`）全绿，就是这么漏出去的。
- * 这里只实现 `NAV_SELECTOR` 用到的那几种条件（标签名、`:not([属性])`、`:not(.类)`），
- * 但形状与浏览器一致：不在清单里的格子，玩家就是走不到。
- */
-function matchesGroup(el, group) {
-  const tag = /^[a-z]+/.exec(group)?.[0];
-  if (tag && el.tag !== tag) return false;
-  for (const m of group.matchAll(/:not\(([^)]+)\)/g)) {
-    const cond = m[1].trim();
-    const attr = /^\[([a-zA-Z]+)(?:=(\w+))?\]$/.exec(cond);
-    if (attr) {
-      const [, name, value] = attr;
-      if (value === undefined ? Boolean(el[name]) : String(el[name]) === value) return false;
-    } else if (cond.startsWith('.') && el.classList.contains(cond.slice(1))) return false;
-  }
-  return true;
-}
-
-/**
- * 一个面板宿主：`ids` 里每项可以是 id 字符串，或 `{ id, tag, type, disabled, hidden }`。
- * 每格记住"被落焦过几次"，`querySelectorAll` 记录"被问了哪个选择器"。
- */
-function fakePanel(ids, doc) {
-  const items = ids.map((raw) => {
-    const spec = typeof raw === 'string' ? { id: raw } : raw;
-    const el = {
-      id: spec.id,
-      tag: spec.tag ?? 'button',
-      focusCount: 0,
-      classList: { contains: (c) => (spec.hidden ? c === 'hidden' : c !== 'hidden') },
-    };
-    if (spec.type) el.type = spec.type;
-    if (spec.disabled) el.disabled = true;
-    el.focus = () => { doc.setActive(el); el.focusCount += 1; };
-    return el;
-  });
-  const host = {
-    selectorAsked: null,
-    querySelectorAll(sel) {
-      this.selectorAsked = sel;
-      const matched = items.filter((el) => String(sel).split(',').some((g) => matchesGroup(el, g.trim())));
-      // 浏览器返回的是 **NodeList**：能按下标取、有 `length`，但没有 `indexOf` / `map` / `filter` / `sort`。
-      // 桩要是直接给数组，"navItems 到底有没有拷一份出来"这件事就成了空判据（变异 N6 第一版全绿的原因）。
-      const list = { length: matched.length, item: (i) => matched[i] ?? null };
-      matched.forEach((el, i) => { list[i] = el; });
-      return list;
-    },
-  };
-  return { host, items, active: () => doc.activeElement?.id ?? null };
-}
+// 桩本体在 `tests/helpers/fakePanelDom.js`（与 `modal-trail` 那片共用一份）：
+// 一份桩、两片用，改桩时两边一起红 —— 各写一份就是切片11 变异验证抓到的那种漂移。
 
 /* ------------------------------------------------------------ 纯算式 */
 

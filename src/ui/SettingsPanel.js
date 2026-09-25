@@ -1,7 +1,7 @@
 import { UI_HOTKEYS, UI_HOTKEY_LABELS } from '../content/hotkeys.js';
 import { GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, buildBindingTables } from '../content/keybinds.js';
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
-import { focusFirstItem } from './FocusNav.js';
+import { focusFirstItem, restoreParkedFocus } from './FocusNav.js';
 
 export class SettingsPanel {
   constructor(game) {
@@ -155,6 +155,9 @@ export class SettingsPanel {
     this.setCapturing(null);
     this.setPadCapturing(null);   // 桥那边还留着捕获回调的话，下一次按手柄会被静默吃掉
     this.panel?.classList.add('hidden');
+    // 从暂停菜单进来时菜单只是让位（切片12）：这里退回去，焦点落回当初选中那一格。
+    // 从野外直接进来（`F10`）没有来路，那一格账是空的，焦点就留在原地不动。
+    restoreParkedFocus();
   }
 
   refresh() {
