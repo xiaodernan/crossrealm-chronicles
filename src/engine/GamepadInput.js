@@ -22,7 +22,7 @@
  */
 import {
   GAMEPAD_BINDINGS, PAD, PAD_BUTTON_BY_INDEX, PAD_BUTTON_COUNT,
-  bindingFor, padButtonIndex, padDpadIndex,
+  bindingFor, padButtonIndex, padDpadIndex, padTuning,
 } from '../content/keybinds.js';
 
 /**
@@ -91,6 +91,23 @@ export class GamepadInput {
      * `FocusNav.activateFocused` 去点那一下。
      */
     Object.assign(this.ui, { confirm: false });
+    /**
+     * 手感三根旋钮（切片15）：出厂值取自 `content/keybinds.js` 里的 `PAD`，
+     * 玩家档只由 `setTuning()` 推进来（唯一写点，见 `SettingsManager.applyToGame`）。
+     *
+     * 这是一只复用对象：`Object.assign` 就地改、从不换引用 —— 读它的三处都在每帧热路径上。
+     */
+    this.tuning = padTuning();
+  }
+
+  /**
+   * 换上玩家的手档（切片15）。清洗在 `padTuning` 里做：越界 / `NaN` / 字符串逐项回落出厂，
+   * 而 `PAD` 那个出厂对象本身一动不动 —— 就地改它等于把全仓的默认手感改了，
+   * "恢复默认"从此回不来（切片4 给键位挡过同一件事，这里是同一课）。
+   */
+  setTuning(raw = {}) {
+    Object.assign(this.tuning, padTuning(raw));
+    return this;
   }
 
   /**
@@ -216,7 +233,9 @@ export class GamepadInput {
     for (let i = 0; i < this._slots.length; i++) {
       const s = this._slots[i];
       let on = s.button >= 0 && _pressed(buttons[s.button], s.down);
-      if (!on && s.dirName !== null) on = _stickHeld(axes, s) || _pressed(buttons[s.dpad], s.down);
+      // 八向量化与模拟量共用**同一个**死区（同一帧、同一份手档）：两条路一人一个死区，
+      // 就会出现"方向码亮着、`mag` 却是 0"这种自相矛盾的一帧
+      if (!on && s.dirName !== null) on = _stickHeld(axes, s, this.tuning.deadzone) || _pressed(buttons[s.dpad], s.down);
       const fire = s.mode === 'level' ? on : (on && !s.down);
       s.down = on;
       // 脉冲只有一帧宽：主循环里 `poll()` 排在 `player.update` 之前，所以这一帧必然被
@@ -239,7 +258,7 @@ export class GamepadInput {
     const lx = axes[PAD.lookAxes[0]] ?? 0;
     const ly = axes[PAD.lookAxes[1]] ?? 0;
     const mag = Math.hypot(lx, ly);
-    const t = _analogMagnitude(mag, PAD.lookDeadzone);
+    const t = _analogMagnitude(mag, PAD.lookDeadzone, this.tuning.analogRange);
     const out = this.look;
     if (t <= 0) {
       out.x = 0;
@@ -247,7 +266,7 @@ export class GamepadInput {
       return out;
     }
     // 方向取原始轴值（曲线只改快慢，不改朝哪儿）
-    const scale = (t ** PAD.lookCurve) * PAD.lookPixelsPerSecond;
+    const scale = (t ** this.tuning.lookCurve) * PAD.lookPixelsPerSecond;
     out.x = (lx / mag) * scale;
     out.y = (ly / mag) * scale;
     return out;
@@ -263,7 +282,7 @@ export class GamepadInput {
     const ly = axes[PAD.moveAxes[1]] ?? 0;
     const mag = Math.hypot(lx, ly);
     const out = this.move;
-    const t = _analogMagnitude(mag, PAD.deadzone);
+    const t = _analogMagnitude(mag, this.tuning.deadzone, this.tuning.analogRange);
     out.mag = t;
     // 手柄的 y 轴向下为正，"前"是 -y：这里就把符号翻掉，消费方不必知道手柄的坐标系
     if (t <= 0) {
@@ -330,8 +349,7 @@ export class GamepadInput {
  * 夹住。两端都要收口：不夹上限则"推到 1.0"会超出满速，不铺下限则刚离开死区那一格会是
  * 一串 0 速的抖动。
  */
-function _analogMagnitude(mag, deadzone) {
-  const range = PAD.analogRange;
+function _analogMagnitude(mag, deadzone, range = PAD.analogRange) {
   if (!(mag > deadzone) || !(range > deadzone)) return 0;
   return Math.min(1, (mag - deadzone) / (range - deadzone));
 }
@@ -344,10 +362,10 @@ function _pressed(btn, wasDown) {
 }
 
 /** 摇杆：先在径向死区之外，再看这一格管的方向落在八向量的哪一格里 */
-function _stickHeld(axes, s) {
+function _stickHeld(axes, s, deadzone = PAD.deadzone) {
   const lx = axes[s.axisX] ?? 0;
   const ly = axes[s.axisY] ?? 0;
-  if (Math.hypot(lx, ly) < PAD.deadzone) return false;
+  if (Math.hypot(lx, ly) < deadzone) return false;
   const n = Math.round(Math.atan2(-ly, lx) / OCTANT);
   const i = ((n % 8) + 8) % 8;
   return s.dirName === OCTANT_PRIMARY[i] || (s.dirName !== null && s.dirName === OCTANT_SECOND[i]);

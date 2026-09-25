@@ -596,6 +596,10 @@ export class Game {
       // 出口在按下那一刻才解析（切片5）：改绑立刻生效，不必重建桥
       (slot) => this.resolvePadBinding(slot),
     );
+    // 桥是最后建起来的消费者，而玩家的**手感档**要落在它身上（切片15）——
+    // 上面那次 `applyToGame`（构造早期）那时还没有桥。写手档的路径仍然只有一条：
+    // `SettingsManager.applyToGame`，这里只是把同一件事在桥就位后再走一次
+    this.settings.applyToGame(this);
 
     /**
      * UI 热键派发（W-A7 切片3）：从"keydown 分支"改成"表 + 边沿轮询"，

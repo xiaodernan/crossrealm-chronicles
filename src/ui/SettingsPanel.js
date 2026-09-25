@@ -1,6 +1,7 @@
 import { UI_HOTKEYS, UI_HOTKEY_LABELS } from '../content/hotkeys.js';
 import { GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, buildBindingTables } from '../content/keybinds.js';
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
+import { PAD_TUNING, padTuning } from '../content/keybinds.js';
 import { focusFirstItem, restoreParkedFocus } from './FocusNav.js';
 
 export class SettingsPanel {
@@ -34,6 +35,23 @@ export class SettingsPanel {
     bind('set-bloom', 'bloomStrength', Number);
     bind('set-pixel', 'pixelRatio', Number);
     bind('set-lod', 'enemyLodDistance', Number);
+    // 手感三根旋钮（切片15）。滑杆的 min/max/step 由 `PAD_TUNING` 灌进来、不写在壳页里：
+    // "滑到头的那个值"与"桥认的那个值"必须是同一份，否则玩家拖到底会被当成脏数据悄悄回落
+    const knob = (id, key) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const spec = PAD_TUNING[key];
+      el.min = String(spec.min);
+      el.max = String(spec.max);
+      el.step = String(spec.step);
+      el.addEventListener('input', () => {
+        s.set('padTuning', padTuning({ ...s.get('padTuning'), [key]: Number(el.value) }));
+        s.applyToGame(this.game);
+      });
+    };
+    knob('set-deadzone', 'deadzone');
+    knob('set-analog-range', 'analogRange');
+    knob('set-look-curve', 'lookCurve');
     const sh = document.getElementById('set-shadows');
     sh?.addEventListener('change', () => {
       s.set('shadows', sh.checked);
@@ -168,6 +186,10 @@ export class SettingsPanel {
     set('set-bloom', d.bloomStrength);
     set('set-pixel', d.pixelRatio);
     set('set-lod', d.enemyLodDistance);
+    const t = padTuning(d.padTuning);      // 回显的也是清洗过的值：脏档会显示成出厂那一格
+    set('set-deadzone', t.deadzone);
+    set('set-analog-range', t.analogRange);
+    set('set-look-curve', t.lookCurve);
     const sh = document.getElementById('set-shadows');
     if (sh) sh.checked = d.shadows;
     this.refreshKeybinds();

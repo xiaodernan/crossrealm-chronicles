@@ -78,6 +78,36 @@ export const PAD = {
 };
 
 /**
+ * 玩家可以调的那三根手感旋钮（切片15）：**范围与出厂值都只写在这里**。
+ *
+ * 为什么不各写各的：`deadzone` 同时管着八向量化与模拟量两条路，`analogRange` 与它一起
+ * 决定同一条重映射式，`lookCurve` 又只作用于镜头 —— 一旦"设置面板上的 min/max"与
+ * "桥认的范围"是两份，就会出现"滑杆拖到头、桥却把那个值当脏数据回落出厂"那种玩家看不懂的现象。
+ */
+export const PAD_TUNING = {
+  /** 摇杆径向死区：0 就是"完全不留漂移余量"（允许，但会自己承担抖动的后果） */
+  deadzone: { min: 0, max: 0.4, step: 0.02 },
+  /** 外圈量程：低于 0.6 就等于把半程当满舵，手感会疯掉，所以下限给得很高 */
+  analogRange: { min: 0.6, max: 1, step: 0.02 },
+  /** 镜头响应曲线：0.6 = 低段极灵敏，3 = 中低段几乎不动 */
+  lookCurve: { min: 0.6, max: 3, step: 0.1 },
+};
+
+/**
+ * 出厂 + 玩家档 → 桥用的那一组值。存储里是玩家可控的数据：
+ * 越界 / `NaN` / 字符串一律**逐项**回落出厂（不是整包作废 —— 玩家只把曲线拖坏不该连死区也没了），
+ * 且不回写 `PAD` 本身：改了出厂对象就等于把全仓的默认值改了，"恢复默认"再也回不来。
+ */
+export function padTuning(raw = {}) {
+  const out = {};
+  for (const [key, spec] of Object.entries(PAD_TUNING)) {
+    const v = Number(raw?.[key]);
+    out[key] = Number.isFinite(v) && v >= spec.min && v <= spec.max ? v : PAD[key];
+  }
+  return out;
+}
+
+/**
  * 标准映射（`pad.mapping === 'standard'`）下的按钮序号，Chrome/Firefox 一致。
  * 表里写名字而不是数字，是为了让"这一格绑到哪个物理键"在读表时就成立。
  */

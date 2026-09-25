@@ -1,3 +1,5 @@
+import { padTuning } from '../content/keybinds.js';
+
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
 const VERSION = 2;
@@ -18,6 +20,13 @@ const DEFAULTS = {
    * 混在一格里就再也分不清"把跳跃改成 A 键"还是"改成 A 按钮"。
    */
   gamepadBinds: {},
+  /**
+   * 手柄手感三根旋钮（切片15）：`{ deadzone, analogRange, lookCurve }`。
+   *
+   * 默认值不在这里抄一遍 —— `padTuning()` 取的就是 `content/keybinds.js` 里那份 `PAD`，
+   * 因为"滑杆的范围"与"桥认的范围"必须是同一条算式（两处分头写就会滑到头却被当成脏数据回落）。
+   */
+  padTuning: padTuning(),
 };
 
 /**
@@ -42,6 +51,8 @@ export class SettingsManager {
     // 对象型默认值不能与 `DEFAULTS` 共用同一个引用：否则就地改一次就把出厂设定改了
     this.data.keybinds = { ...DEFAULTS.keybinds, ...(loaded.keybinds ?? {}) };
     this.data.gamepadBinds = { ...DEFAULTS.gamepadBinds, ...(loaded.gamepadBinds ?? {}) };
+    // 同上：这三根旋钮也是一格对象，不能与出厂共用引用（就地改一次就把出厂手感改了）
+    this.data.padTuning = { ...DEFAULTS.padTuning, ...(loaded.padTuning ?? {}) };
   }
 
   load() {
@@ -77,5 +88,8 @@ export class SettingsManager {
       game.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.get('pixelRatio')));
     }
     if (game.performance) game.performance.enemyLodDistance = this.get('enemyLodDistance');
+    // 手感旋钮推给桥（切片15）：`setTuning` 内部再走一次 `padTuning` 清洗 ——
+    // 存储是玩家可写的，越界或 NaN 一律逐项回落出厂，不把脏值乘进每帧的舵量里
+    game.padInput?.setTuning(this.get('padTuning'));
   }
 }
