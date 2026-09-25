@@ -10,3 +10,4 @@ public/godot-export/
 resume-stack
 .tmp-*
 vite.config.js.timestamp-*.mjs
+.workbuddy-ai/
