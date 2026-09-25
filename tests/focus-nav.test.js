@@ -21,7 +21,9 @@ import {
 import { OVERLAY_LAYERS, topNavLayer } from '../src/ui/OverlayStack.js';
 import { HotkeyRouter, hotkeyBlockedBy } from '../src/ui/HotkeyRouter.js';
 import { Game } from '../src/core/Game.js';
-import { fakeDoc, fakePanel } from './helpers/fakePanelDom.js';
+import { FastTravelPanel } from '../src/ui/FastTravelPanel.js';
+import { HelpManual } from '../src/ui/HelpManual.js';
+import { fakeDoc, fakePanel, fakeItem, fakeBox } from './helpers/fakePanelDom.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -282,6 +284,113 @@ describe('Game.movePanelFocus：收焦点的面板由层表说', () => {
   });
 });
 
+/* ---------------------------------------------------- 面板侧：认领之后真的落焦 */
+
+describe('现拼的清单必须先拼再落焦（快速旅行与说明书）', () => {
+  const ORIGINAL_DOC = globalThis.document;
+
+  const mountDoc = (registry) => {
+    globalThis.document = {
+      getElementById: (id) => registry[id] ?? null,
+      exitPointerLock: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
+  };
+  const unmount = () => { globalThis.document = ORIGINAL_DOC; };
+
+  it('快速旅行：站着的那座营火是 `disabled`，所以第一下落在你真正能去的地方', () => {
+    const doc = fakeDoc();
+    const dests = [
+      { id: 'ashen', here: true },
+      { id: 'forest' },
+      { id: 'void' },
+    ].map((d) => {
+      const el = fakeItem(`ft-${d.id}`, { disabled: d.here });
+      el.dataset = { id: d.id };
+      return el;
+    });
+    const cancel = fakeItem('fast-travel-close');
+    const listItems = [...dests, cancel];
+    // 生产里这些格子是 `list.innerHTML = …` 现拼出来的，再被 `list.querySelectorAll('.ft-btn')` 取回；
+    // 桩给的是同一批对象，所以"面板清单"与"列表"指的是同一件事，不是两份账
+    const list = { innerHTML: '', querySelectorAll: () => listItems.slice(0, dests.length) };
+    const panel = fakePanel(listItems, doc, 'fast-travel-panel');
+    const registry = {
+      'fast-travel-panel': panel.host,
+      'fast-travel-list': list,
+      'fast-travel-close': cancel,
+    };
+    for (const el of dests) registry[el.id] = el;
+    mountDoc(registry);
+    try {
+      const travelled = [];
+      const game = { fastTravel: { destinationsForPanel: () => dests.map((d) => ({ id: d.id, name: d.id, here: d.disabled })), travel: (id) => travelled.push(id) } };
+      const panelUnderTest = new FastTravelPanel(game);
+      panelUnderTest.show('ft-here');
+      expect(doc.activeElement).toBe(dests[1]);                 // 跳过"此地"那一格
+      dests[2].click();                                         // 走到第二处并按回车（原生 click）
+      expect(travelled).toEqual(['void']);                      // 交给 `travel` 的是营火 id，不是显示名
+    } finally {
+      unmount();
+    }
+  });
+
+  it('说明书：show() 落焦，而清单第一格是"关闭"（DOM 顺序说了算，不另排一套）', () => {
+    const doc = fakeDoc();
+    const close = fakeItem('help-close');
+    const navButtons = [fakeItem('sec-1'), fakeItem('sec-2')];
+    const panel = fakePanel([close, ...navButtons], doc, 'help-manual');
+    [close, ...navButtons].forEach((el) => { el.doc = doc; });
+    const nav = fakeBox('help-nav');
+    nav.querySelectorAll = () => navButtons;
+    const registry = {
+      'help-manual': panel.host,
+      'help-nav': nav,
+      'help-body': fakeBox('help-body'),
+      'help-close': close,
+      'pause-manual': fakeItem('pause-manual'),
+    };
+    mountDoc(registry);
+    try {
+      const game = { pauseMenu: { panel: null } };
+      const manual = new HelpManual(game);
+      manual.show();
+      expect(doc.activeElement).toBe(close);
+      // 章节按钮也在清单里：↑ 一次就该走到它们
+      expect(navItems(panel.host).map((el) => el.id)).toEqual(['help-close', 'sec-1', 'sec-2']);
+    } finally {
+      unmount();
+    }
+  });
+
+  it('列表那一格不在（营火数据没喂进来 / DOM 缺块）也要有落点：取消按钮就是那一格', () => {
+    const doc = fakeDoc();
+    const cancel = fakeItem('fast-travel-close');
+    const panel = fakePanel([cancel], doc, 'fast-travel-panel');
+    const registry = { 'fast-travel-panel': panel.host, 'fast-travel-close': cancel };
+    mountDoc(registry);
+    try {
+      const game = { fastTravel: { destinationsForPanel: () => { throw new Error('列表宿主都不该被读'); } } };
+      const panelUnderTest = new FastTravelPanel(game);
+      expect(() => panelUnderTest.show(null)).not.toThrow();
+      expect(doc.activeElement).toBe(cancel);                   // 早退路径不能把玩家留在没有落点的面板里
+    } finally {
+      unmount();
+    }
+  });
+
+  it('静态：`FastTravelPanel.show()` 里落焦必须排在 `list.innerHTML` 之后（早一步拼的还是上一座营火的格子）', () => {
+    const body = sourceOf('ui/FastTravelPanel.js').match(/\n {2}show\([^)]*\)\s*\{[\s\S]*?\n {2}\}/);
+    expect(body, '找不到 FastTravelPanel.show 的方法体').toBeTruthy();
+    const built = body[0].indexOf('list.innerHTML');
+    const focus = body[0].indexOf('focusFirstItem(');
+    expect(built).toBeGreaterThanOrEqual(0);
+    expect(focus, '开面板时没落焦').toBeGreaterThanOrEqual(0);
+    expect(focus, '落焦跑在重绘之前：清单是上一轮的').toBeGreaterThan(built);
+  });
+});
+
 /* -------------------------------------------------------- 静态门禁 */
 
 describe('静态门禁：焦点只有一个出口，激活只有浏览器一个消费者', () => {
@@ -310,7 +419,8 @@ describe('静态门禁：焦点只有一个出口，激活只有浏览器一个�
       const claimants = FILES.filter(({ source }) => source.includes(`getElementById('${l.nav}')`));
       expect(claimants, `没有面板认领宿主 "${l.nav}"（层表 ${l.layer} 那一格是死的）`).toHaveLength(1);
       // 认领者还得真的会开：`show()` 是落焦的时机，而且它必须真的落（不落 = 玩家开完面板第一眼没有落点）
-      const body = claimants[0].source.match(/\n {2}show\(\)\s*\{[\s\S]*?\n {2}\}/);
+      // 带参数的 `show(currentId)` 也算：这一片要钉的是"开面板那一刻落焦"，不是"show 必须无参"
+      const body = claimants[0].source.match(/\n {2}show\([^)]*\)\s*\{[\s\S]*?\n {2}\}/);
       expect(body, `${claimants[0].name} 没有 show() 方法体`).toBeTruthy();
       expect(body[0], `${claimants[0].name} 开面板时没落焦`).toContain('focusFirstItem(');
     }
@@ -321,6 +431,13 @@ describe('静态门禁：焦点只有一个出口，激活只有浏览器一个�
     expect(body, '找不到 SettingsPanel.show 的方法体').toBeTruthy();
     expect(body[0].indexOf('this.refresh();')).toBeGreaterThanOrEqual(0);
     expect(body[0].indexOf('this.refresh();'), '落焦跑在重绘之前：清单是上一轮的').toBeLessThan(body[0].indexOf('focusFirstItem('));
+  });
+
+  it('地图那一层刻意没认领：`WorldMapPanel` 里不许出现落焦调用（要改必须先给层表加一格）', () => {
+    // 读数 Q6：地图面板里可停的格子只有一个"关闭"，认领它只是给自己加一个假落点；
+    // 地图真正缺的是平移/缩放的键盘入口，那是另一件事（要新登记动作，不是新落一个焦点）
+    expect(OVERLAY_LAYERS.find((l) => l.layer === 'worldMap').nav, '层表已经认领了地图，这条要跟着改').toBeFalsy();
+    expect(sourceOf('ui/WorldMapPanel.js')).not.toContain('focusFirstItem(');
   });
 
   it('导航动作在 `runHotkey` 里全部落到 `movePanelFocus`，且没有多余的导航 case', () => {

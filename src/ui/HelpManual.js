@@ -1,6 +1,6 @@
 /** 游戏内说明书 — 由 UI 热键表的 `help` 动作打开（F12 是浏览器控制台，不是这里的键） */
 import { mergeHelpSections } from './HelpManualExtras.js';
-import { parkFocus, restoreParkedFocus } from './FocusNav.js';
+import { focusFirstItem, parkFocus, restoreParkedFocus } from './FocusNav.js';
 
 const SECTIONS = mergeHelpSections([
   {
@@ -166,6 +166,8 @@ export class HelpManual {
     this.showSection(this.activeSection);
     this.panel?.classList.remove('hidden');
     document.exitPointerLock?.();
+    // 第一格是"关闭"，↓ 才进章节列表 —— 清单顺序就是 DOM 顺序，这里不另排一套
+    focusFirstItem(this.panel);
   }
 
   hide() {

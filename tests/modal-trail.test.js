@@ -439,9 +439,9 @@ describe('静态门禁：来路只有一处写、一处读，旧写法一贴回�
     expect(sourceOf('ui/HelpManual.js')).toContain('parkFocus(this.game.pauseMenu.panel);');
   });
 
-  it('park 只吃层表认识的那两个宿主 id：新面板要进来必须先登记 `nav`（不许多一份名单）', () => {
+  it('park 只吃层表登记过的宿主：新面板要进来必须先登记 `nav`（不许多一份名单）', () => {
     const hosts = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.nav).sort();
-    expect(hosts).toEqual(['pause-menu', 'settings-panel']);
+    expect(hosts).toEqual(['fast-travel-panel', 'help-manual', 'pause-menu', 'settings-panel']);
     // 让位那两处写的必须是层表里登记过的宿主，而不是现场再抄一个 DOM id
     for (const name of ['ui/PauseMenu.js', 'ui/HelpManual.js']) {
       const parkLine = sourceOf(name).match(/parkFocus\(([^)]*)\);/);

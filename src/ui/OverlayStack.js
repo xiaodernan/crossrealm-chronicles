@@ -29,10 +29,10 @@ export const OVERLAY_LAYERS = [
   { layer: 'dialog', state: 'dialogOpen', back: true, blocks: true },
   { layer: 'worldMap', state: 'worldMapOpen', back: true, blocks: 'map' },
   { layer: 'autoPlay', state: 'autoPlayActive', back: true, blocks: false },
-  { layer: 'help', state: 'helpOpen', back: true, blocks: true },
+  { layer: 'help', state: 'helpOpen', back: true, blocks: true, nav: 'help-manual' },
   { layer: 'cinematic', state: 'cinematicActive', back: true, blocks: false },
   { layer: 'settings', state: 'settingsOpen', back: true, blocks: true, nav: 'settings-panel' },
-  { layer: 'fastTravel', state: 'fastTravelOpen', back: true, blocks: true },
+  { layer: 'fastTravel', state: 'fastTravelOpen', back: true, blocks: true, nav: 'fast-travel-panel' },
   { layer: 'pauseMenu', state: 'pauseMenuOpen', back: true, blocks: true, nav: 'pause-menu' },
   /**
    * 战斗演出的跳过排在所有吃返回键的模态之后（B52 的另一半：它自己那条 keydown 也撤了）。

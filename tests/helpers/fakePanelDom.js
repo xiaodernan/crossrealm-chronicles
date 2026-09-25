@@ -46,8 +46,10 @@ export function fakeItem(id, spec = {}) {
     tag: spec.tag ?? 'button',
     focusCount: 0,
     listeners: {},
+    dataset: { ...(spec.dataset ?? {}) },
     classList: {
       contains: (c) => (spec.hidden ? c === 'hidden' : c !== 'hidden'),
+      toggle: () => {},
     },
   };
   if (spec.type) el.type = spec.type;
@@ -98,8 +100,11 @@ export function fakeDoc(hosts = {}) {
  */
 export function fakePanel(entries, doc, id = 'panel-host') {
   const items = entries.map((raw) => {
-    const spec = typeof raw === 'string' ? { id: raw } : raw;
-    const el = fakeItem(spec.id, spec);
+    // `raw` 已经是造好的格子（有 `focus`）就直接用：同一格常常要同时出现在面板清单与某个子容器里，
+    // 造两份就等于测试自己先犯了"一个东西有两个身份"
+    const el = typeof raw === 'object' && typeof raw.focus === 'function'
+      ? raw
+      : fakeItem(typeof raw === 'string' ? raw : raw.id, raw);
     el.doc = doc;
     return el;
   });

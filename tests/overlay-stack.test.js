@@ -99,10 +99,10 @@ describe('一张表：层序、字段名与 blocks 的取值域', () => {
       'dialog|dialogOpen|back|true|-',
       'worldMap|worldMapOpen|back|map|-',
       'autoPlay|autoPlayActive|back|false|-',
-      'help|helpOpen|back|true|-',
+      'help|helpOpen|back|true|help-manual',
       'cinematic|cinematicActive|back|false|-',
       'settings|settingsOpen|back|true|settings-panel',
-      'fastTravel|fastTravelOpen|back|true|-',
+      'fastTravel|fastTravelOpen|back|true|fast-travel-panel',
       'pauseMenu|pauseMenuOpen|back|true|pause-menu',
       'combatCinematic|combatCinematicSkippable|back|false|-',
       'upgrade|upgradeOpen|hard|true|-',
@@ -174,8 +174,23 @@ describe('topBackLayer：这一下返回归哪一层', () => {
 describe('topNavLayer：↑↓ 走进哪个面板（切片11，与返回键同一张表）', () => {
   const NAV = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.layer);
 
-  it('登记的层就是"焦点进得去"的那几层：菜单与设置', () => {
-    expect(NAV).toEqual(['settings', 'pauseMenu']);
+  it('登记的层就是"焦点进得去"的那几层：说明书 / 设置 / 快速旅行 / 暂停菜单', () => {
+    expect(NAV).toEqual(['help', 'settings', 'fastTravel', 'pauseMenu']);
+  });
+
+  it('世界地图刻意不在名单里：那一格里只有"关闭"一格可停，认领它是给自己加一个假落点', () => {
+    // 地图真正缺的是平移/缩放的键盘入口（那是要新登记动作的事），不是"焦点落在关闭按钮上"
+    expect(NAV).not.toContain('worldMap');
+    expect(topNavLayer(state({ worldMapOpen: true }))).toBe(null);
+  });
+
+  it('说明书与快速旅行各自压着菜单时：接焦点的与吃返回键的是同一个面板', () => {
+    for (const upper of ['help', 'fastTravel']) {
+      const row = OVERLAY_LAYERS.find((l) => l.layer === upper);
+      const both = state({ [row.state]: true, pauseMenuOpen: true });
+      expect(topBackLayer(both), upper).toBe(upper);
+      expect(topNavLayer(both).layer, upper).toBe(topBackLayer(both));
+    }
   });
 
   it('野外（全关）没有面板收焦点：↑↓ 落空是正确答案，不是漏判', () => {
@@ -394,6 +409,14 @@ describe('静态门禁：表、生产者与消费者必须指同一件事', () =
     for (const name of LAYER_NAMES) expect(src, `HotkeyRouter 里出现了层名 ${name}`).not.toContain(name);
     expect(src).toContain('overlayBlocksHotkeys(state, code)');
     expect(src).toContain('topBackLayer(state)');
+  });
+
+  it('层表源码里 `nav:` 的宿主 id 互不重复（重复会让加载期就抛，测试只剩收集期崩 —— 所以这里另给一条断言）', () => {
+    const hosts = [...sourceOf('ui/OverlayStack.js').matchAll(/\bnav: '([^']+)'/g)].map((m) => m[1]);
+    expect(hosts.length, '一条 `nav` 都没扫到：写法变了，请把这条一起改').toBeGreaterThan(0);
+    expect(new Set(hosts).size, `宿主被两层认领：${hosts.join(' / ')}`).toBe(hosts.length);
+    // 扫出来的这一份与表里的内容必须一致（扫描器自己不许漂）
+    expect(hosts.sort()).toEqual(OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.nav).sort());
   });
 
   it('状态字段名只出现在生产者与表两处（别处手抄一份就是 B46 复发）', () => {
