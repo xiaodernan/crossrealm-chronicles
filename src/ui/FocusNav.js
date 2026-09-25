@@ -112,3 +112,17 @@ export function restoreParkedFocus(doc = globalThis.document) {
   target.focus();
   return doc?.activeElement === target;
 }
+
+/**
+ * 激活"现在聚焦的那一格"（切片14：手柄的 A）。
+ *
+ * 这不是"第二个 Enter 消费者"：键盘那条路一个字都没改（原生 Enter 本来就激活聚焦元素，
+ * 我们从来没有为它登记过热键），而手柄不产生键盘事件 —— 所以 A 是这一下的唯一消费者。
+ * 之所以由这里代做而不交给浏览器，是因为手柄没有"按下聚焦元素"这条原生通路。
+ */
+export function activateFocused(doc = globalThis.document) {
+  const el = doc?.activeElement;
+  if (!el || el === doc.body || typeof el.click !== 'function' || el.disabled) return false;
+  el.click();
+  return true;
+}

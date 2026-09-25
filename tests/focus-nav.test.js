@@ -455,10 +455,16 @@ describe('静态门禁：焦点只有一个出口，激活只有浏览器一个�
     expect(second, '登记了第二条激活/横向通路：与浏览器原生抢同一下按键（B52）').toEqual([]);
   });
 
-  it('导航路径不许自己点按钮，也不许抄物理键码（清单生产者只交清单）', () => {
+  it('导航路径不许自己造事件、不许抄物理键码；点按钮只许出现在 `activateFocused` 一处', () => {
     const src = sourceOf('ui/FocusNav.js');
-    expect(src).not.toMatch(/\.click\(|dispatchEvent/);
+    expect(src).not.toMatch(/dispatchEvent/);
     expect(src).not.toMatch(/'(?:Arrow[A-Za-z]+|Enter|Escape|Key[A-Z])'/);
+    // 切片14：手柄的 A 没有"按下聚焦元素"这条原生通路，所以由这里代点一下。
+    // 仍然只许一处 —— 多点一处就是第二条激活路径，而键盘那条一个字都没动（原生 Enter 管它）。
+    const fn = src.match(/export function activateFocused[\s\S]*?\n\}/);
+    expect(fn, '找不到 activateFocused 的函数体').toBeTruthy();
+    expect(fn[0]).toContain('.click(');
+    expect((src.match(/\.click\(/g) || []).length, '第二处在点按钮').toBe(1);
   });
 
   it('移焦键改绑之后仍然放行：层表问的是动作，不是出厂那两枚箭头', () => {

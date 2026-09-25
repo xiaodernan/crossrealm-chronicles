@@ -47,6 +47,7 @@ export function fakeItem(id, spec = {}) {
     focusCount: 0,
     listeners: {},
     dataset: { ...(spec.dataset ?? {}) },
+    clicks: 0,
     classList: {
       contains: (c) => (spec.hidden ? c === 'hidden' : c !== 'hidden'),
       toggle: () => {},
@@ -55,7 +56,12 @@ export function fakeItem(id, spec = {}) {
   if (spec.type) el.type = spec.type;
   if (spec.disabled) el.disabled = true;
   el.addEventListener = (type, fn) => { (el.listeners[type] ??= []).push(fn); };
-  el.click = () => (el.listeners.click ?? []).forEach((fn) => fn({ target: el }));
+  // 「玩家点了这一格」= 记一次点击 + 走挂在这格上的 click 监听（浏览器里本来就是同时发生的两件事）
+  el.click = () => {
+    if (el.disabled) return;                 // 禁用格点了没反应：浏览器不触发 click，我们也不假触发
+    el.clicks += 1;
+    (el.listeners.click ?? []).forEach((fn) => fn({ target: el }));
+  };
   el.focus = () => {
     if (spec.acceptsFocus === false) return;
     el.doc?.setActive(el);

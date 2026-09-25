@@ -715,7 +715,9 @@ describe('显示与静态门禁', () => {
 
   it('`Game` 那边三张表一起重建，手柄桥拿的是叠过覆盖的那张', () => {
     const src = read('core/Game.js');
-    expect(src).toMatch(/this\.padInput\?\.useBindings\(padTable\)/);
+    // 切片14 起换表只有一条路：改绑也走它，否则"在面板里改了绑"会把战斗表装回去（A 又变成跳）
+    expect(src).toMatch(/this\.applyPadBindings\(\);/);
+    expect((src.match(/useBindings\(/g) || []).length).toBe(1);
     expect(src).toMatch(/padTable = factoryGamepadBindings\(\)/);
     expect(src).toMatch(/this\.settings\.data\.gamepadBinds = \{\}/);
   });

@@ -56,6 +56,8 @@ export class GamepadInput {
     this._resolve = resolve ?? defaultResolve;
     /** 格子形状只在一处推导（`useBindings`）—— 构造与改绑走同一条，抄两份就是第二真源 */
     this._slots = [];
+    /** 界面态边沿的复用槽（切片14）：必须先于 `useBindings` 存在，换表要清它 */
+    this.ui = {};
     this.useBindings(bindings);
     /**
      * 改绑捕获态（切片9）：`_capture` 是"找到之后交给谁"，`_captureBtn` 是已按下、
@@ -80,6 +82,15 @@ export class GamepadInput {
      * 与 `look` 同为复用槽：`readMoveDir` 每帧读一次，绝不在热路径上新建对象。
      */
     this.move = { x: 0, y: 0, mag: 0 };
+    /**
+     * 界面态那几格的边沿（切片14）：与 `look` / `move` 同为复用槽，热路径不分配。
+     *
+     * 为什么不把它们也合成成 `keys` 里的某个键码：`confirm` 在热键表里没有对应格 ——
+     * 浏览器已经用原生 Enter 处理"激活聚焦的那一格"，我们再冒充一次就是"同一下按键两个消费者"
+     * （切片10 抓到的 B52）。所以这条只报"这一帧 A 被按下了"，由 `Game` 交给
+     * `FocusNav.activateFocused` 去点那一下。
+     */
+    Object.assign(this.ui, { confirm: false });
   }
 
   /**
@@ -96,6 +107,8 @@ export class GamepadInput {
       const slot = {
         action: e.action,
         hotkey: e.hotkey ?? null,
+        /** 界面态那一格报边沿而不写键（切片14）；信号名就是动作名，见 `UI_PAD_SIGNALS` */
+        ui: e.ui === true,
         mode: e.mode,
         button: e.button === undefined ? -1 : padButtonIndex(e.button),
         axisX: e.axes ? e.axes[0] : -1,
@@ -119,6 +132,8 @@ export class GamepadInput {
       return slot;
     });
     for (const stale of prev.values()) this._release(stale);
+    // 界面那几格的边沿也一起清：换表之后那次按下已经不属于任何一张表，留着它就会被下一帧消费到
+    for (const k of Object.keys(this.ui)) this.ui[k] = false;
     return this;
   }
 
@@ -182,6 +197,8 @@ export class GamepadInput {
     this.active = true;
     const buttons = pad.buttons ?? [];
     const axes = pad.axes ?? [];
+    // 边沿只有一帧宽：与 `look` / `move` 一样在帧首归零，消费方（`Game.update`）在本帧内读
+    this.ui.confirm = false;
     // 捕获期：这一帧只用于"看玩家按了哪一枚"，不派发任何动作、也不更新摇杆复用槽
     // （面板里改绑时手是放在摇杆上的，让它顺手把镜头转半圈是 bug 不是手感）
     if (this._capture) {
@@ -204,8 +221,10 @@ export class GamepadInput {
       s.down = on;
       // 脉冲只有一帧宽：主循环里 `poll()` 排在 `player.update` 之前，所以这一帧必然被
       // `CombatController` 读到（读走后它自己会缓冲 0.18 秒的动作意图），桥不越权替它留着
-      if (fire) this._grab(s);
-      else if (s.claimed) this._release(s);
+      if (!fire) { if (s.claimed) this._release(s); continue; }
+      // 界面那几格只报边沿：它们既不占 `keys`、也不参与"只还自己借走的那一格"那本账
+      if (s.ui) this.ui[s.action] = true;
+      else this._grab(s);
     }
     return true;
   }
@@ -269,6 +288,7 @@ export class GamepadInput {
     this.move.x = 0;
     this.move.y = 0;
     this.move.mag = 0;
+    this.ui.confirm = false;
     this.active = false;
   }
 

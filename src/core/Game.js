@@ -113,12 +113,12 @@ import { ZONE_IDS } from '../world/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
 import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
 import {
-  GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
+  GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
   factoryGamepadBindings, setKeybindTable,
 } from '../content/keybinds.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
 import { topNavLayer } from '../ui/OverlayStack.js';
-import { moveFocusWithin } from '../ui/FocusNav.js';
+import { moveFocusWithin, activateFocused } from '../ui/FocusNav.js';
 export class Game {
   constructor(container) {
     this.clock = new THREE.Clock();
@@ -129,6 +129,8 @@ export class Game {
     this.timeOfDay = 0.35;
     this.container = container;
     this.paused = false;
+    /** 手柄此刻归界面还是归战斗（切片14）；只在帧首比对一次，换表才走 `applyPadBindings` */
+    this._padUi = false;
     this.cinematicActive = false;
     this.spectatorMode = false;
     this.autoPlayMode = false;
@@ -479,12 +481,32 @@ export class Game {
     this.padTable = padTable;
     this.hotkeys?.useTable(hotkeyTable);
     // 手柄桥换一张表（切片9）：按钮在按下那一刻才解析出口，所以换表不用重建桥、也不动借键账本
-    this.padInput?.useBindings(padTable);
+    this.applyPadBindings();
     // 提示文案（HUD / 交互条 / 教程）问的是模块级生效表，与消费者同一条路（切片6）
     setHotkeyTable(hotkeyTable);
     // 游戏键生效表是模块级的：消费者（玩家 / 战斗 / 法术 / 武器 / 旅行）直接问 `codeFor`
     setKeybindTable(keyTable);
     this.hud?.refreshKeyHints?.();
+  }
+
+  /**
+   * 此刻手柄归谁（切片14）：层表说"有一个收焦点的面板开着"，那一批按钮就归界面。
+   *
+   * 判据只在这里算一次。以前想过给每格按钮加一列"面板里改成干什么"，那只是把同一个判断
+   * 抄到十几格里 —— 而"面板开着"这件事的真源本来就是层表，两处各判一次就会有对不齐的一帧。
+   */
+  padUiMode() {
+    return !!topNavLayer(this.overlayState());
+  }
+
+  /**
+   * 换手柄表只走这一条路：改绑（`rebuildHotkeys`）与上下文切换（`update`）都到这里来。
+   *
+   * 两处各自 `useBindings` 就是第二个写点 —— 那会漏掉一条：改完绑还在面板里，
+   * 于是游戏表被装回去、A 又从"确认"变回"跳跃"。
+   */
+  applyPadBindings() {
+    this.padInput?.useBindings(this.padUiMode() ? UI_GAMEPAD_BINDINGS : this.padTable);
   }
 
   /**
@@ -649,7 +671,18 @@ export class Game {
     const dt = rawDt * this.time.timeScale * this.combatCamera.getTimeScale();
     // 手柄每帧轮询一次（B39 同一条纪律：输入状态是"这一帧的样子"，不是事件瞬间的样子）。
     // 它把按钮/摇杆合成进 `this.keys` 的同一形状，所以键盘路径与所有消费者不必认识手柄。
+    // 表在帧首切（切片14）：这一帧的按下要用这一帧该归的那张表，晚一帧就是"按 B 先跳了一下"。
+    const padUi = this.padUiMode();
+    if (padUi !== this._padUi) {
+      this._padUi = padUi;
+      // 换表走的是切片9 那条结转：按动作名接边沿与借键账本，所以进界面那一刻
+      // 战斗侧借走的键会被原样还掉 —— 不退菜单就永远朝前走，那一类事故就是这么挡住的
+      this.applyPadBindings();
+    }
     this.padInput?.poll();
+    // 界面里 A 那一下：桥只报了个边沿（它不冒充键盘，否则就是第二个 Enter 消费者），
+    // 激活仍然交回浏览器 —— 点的是"当前聚焦的那一格"
+    if (this.padInput?.ui.confirm) activateFocused(document);
     // 右摇杆镜头走 `rawDt`：它与鼠标同属"玩家的物理输入"，命中停顿不该把手也冻住
     // （鼠标事件本来就不经时间倍率）。守卫与鼠标共用 `cameraInputAllowed`，只是不要求指针锁。
     const padLook = this.padInput?.look;

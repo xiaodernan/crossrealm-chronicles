@@ -186,6 +186,36 @@ export const GAMEPAD_BINDINGS = {
   pauseMenu: { action: 'pauseMenu', mode: 'edge', button: 'start', hotkey: 'escape' },
 };
 
+/**
+ * **UI 态**的手柄表（切片14）：面板开着时，同一批物理按钮归界面而不是归战斗。
+ *
+ * 为什么要有第二张表而不是给每个动作加一个"面板里改成干什么"的字段：一枚按钮在两个
+ * 上下文里各有一个主人，这是**事实**；把它塞进一张表就得给每格加一列上下文，
+ * 而"现在算哪个上下文"仍然要在别处判 —— 那才是第二个真源。现在判据只有一处
+ * （`Game.padUiMode()`：层表说"有一个收焦点的面板开着"），换的两样东西是同一件事：
+ * 这张表与游戏表整表互换，走的是切片9 那条 `useBindings`（按动作名结转边沿与借键账本，
+ * 所以进 UI 态那一刻，战斗侧借走的键会被原样还掉 —— 不退菜单就永远朝前走那一类）。
+ *
+ * 前三格复用切片5 那条 `hotkey` 机制：出口是**当前生效的热键表**给的键码，
+ * 于是"把 ↑↓ 改绑到别的键"之后手柄也跟着搬，不必在这里再记一遍。
+ * 第四格 `confirm` 特殊：它不冒充任何键盘键（浏览器已经用原生 Enter 处理激活，
+ * 我们再冒充一次就是 B52），而是让桥报一个边沿，由 `Game` 交给 `FocusNav.activateFocused`。
+ */
+/** 界面态里"报边沿而不冒充键盘"的信号名（桥的 `ui` 复用槽就是按这张名单建的格子） */
+export const UI_PAD_SIGNALS = ['confirm'];
+
+export const UI_PAD_ACTIONS = ['navUp', 'navDown', 'back', 'menu', ...UI_PAD_SIGNALS];
+
+export const UI_GAMEPAD_BINDINGS = {
+  navUp: { action: 'navUp', mode: 'edge', button: 'dpadUp', hotkey: 'uiUp' },
+  navDown: { action: 'navDown', mode: 'edge', button: 'dpadDown', hotkey: 'uiDown' },
+  // 返回与开合菜单在界面里是同一件事（都走 `escape` 那条级联），但保留两格是因为
+  // 玩家手里的习惯不一样：有人按 B，有人按 Start —— 一枚按钮一个主人，这里仍然成立。
+  back: { action: 'back', mode: 'edge', button: 'b', hotkey: 'escape' },
+  menu: { action: 'menu', mode: 'edge', button: 'start', hotkey: 'escape' },
+  confirm: { action: 'confirm', mode: 'edge', button: 'a', ui: true },
+};
+
 /** 十字键在标准映射里的方向 → 按钮序号（移动动作的 `dir` 用它顺带带上十字键） */
 const DPAD_BUTTON = {
   up: PAD_BUTTON.dpadUp, down: PAD_BUTTON.dpadDown,
@@ -210,8 +240,15 @@ function fail(at, why) {
 /**
  * 整表校验，加载期跑一次（与 `assertArenaScript` 同一条纪律：错表要在**接上手柄之前**就红，
  * 而不是玩家插上手柄、按了一下发现"没反应"却不知道为什么）。
+ *
+ * 两张表共用这一把尺子（切片14）：差别只有"认得哪些动作名""哪些动作是摇杆 + 十字键"
+ * 与"允不允许 `ui` 那种报边沿的格子"。规则本身一条都不分叉 ——
+ * 尤其"一枚物理按钮只许一个动作认领"是**表内**规则：上下文之间允许重叠
+ * （战斗里 A 是跳，界面里 A 是确认），因为同一帧只有一张表在被轮询（切换判据只有一处，
+ * 见 `Game.padUiMode()`），所以"按一次办两件事"在这两张表上都成立不了。
  */
-export function assertKeybinds(table = GAMEPAD_BINDINGS) {
+export function assertKeybinds(table = GAMEPAD_BINDINGS,
+  { actions = PAD_ACTIONS, stickActions = STICK_ACTIONS, allowSignal = false } = {}) {
   /**
    * 一枚物理按钮只许一个动作认领（切片9 起的必修项）。
    *
@@ -229,20 +266,27 @@ export function assertKeybinds(table = GAMEPAD_BINDINGS) {
   };
   for (const [name, e] of Object.entries(table)) {
     if (name !== e.action) fail(name, '的键名与 `action` 字段不一致');
-    if (!PAD_ACTIONS.includes(e.action)) fail(name, '未登记于 PAD_ACTIONS');
+    if (!actions.includes(e.action)) fail(name, '未登记于这张表的动作名单（游戏表 PAD_ACTIONS / 界面表 UI_PAD_ACTIONS）');
     if (!MODES.includes(e.mode)) fail(name, '的 mode 必须是 level / edge');
     // 出口的唯一真源是 `KEY_BINDINGS`（或 `hotkey` 指向的热键表），手柄表自己不许再抄一份
     if (e.code !== undefined || e.mouse !== undefined) {
       fail(name, '不许自己声明 code / mouse —— 出口只有 KEY_BINDINGS 一个真源');
     }
-    if (e.hotkey !== undefined) {
+    if (e.ui === true) {
+      // 界面态那一格既不冒充键盘键、也不写 `keys`：它只报一个边沿（见 `GamepadInput.ui`）。
+      // 为什么不走 `hotkey`：`confirm` 在热键表里没有对应格 —— 浏览器已经用原生 Enter 处理激活，
+      // 我们再登记一条就是"同一下按键两个消费者"（B52），所以这条路故意给它留着边沿而不是键。
+      if (!allowSignal) fail(name, '不许声明 ui 边沿：只有界面态那张表有这种格子');
+      if (e.hotkey !== undefined) fail(name, '报边沿的格子不该再冒充某个热键，出口就有两个说法了');
+      if (!UI_PAD_SIGNALS.includes(e.action)) fail(name, '的信号名未登记于 UI_PAD_SIGNALS（桥的复用槽不认这个名字）');
+    } else if (e.hotkey !== undefined) {
       if (typeof e.hotkey !== 'string' || !e.hotkey) fail(name, '的 hotkey 必须是非空动作名');
       if (KEY_ACTIONS.includes(e.action)) fail(name, '同时是游戏键与热键冒充，说不清该问谁');
     } else if (!KEY_ACTIONS.includes(e.action)) {
       fail(name, '既不在 KEY_ACTIONS 里，也没声明 hotkey —— 桥不知道该冒充哪个键');
     }
     if (e.button !== undefined && !(e.button in PAD_BUTTON)) fail(name, `的按钮 "${e.button}" 未登记`);
-    if (STICK_ACTIONS.includes(e.action)) {
+    if (stickActions.includes(e.action)) {
       if (e.button !== undefined) fail(name, '是移动动作，不该绑按钮（要的是摇杆 + 十字键）');
       if (!Array.isArray(e.axes) || e.axes.length !== 2
         || !e.axes.every((a) => Number.isInteger(a) && a >= 0)) {
@@ -256,6 +300,14 @@ export function assertKeybinds(table = GAMEPAD_BINDINGS) {
     if (e.dir !== undefined) claimPad(DPAD_BUTTON[e.dir], name, `十字键 ${e.dir}`);
   }
   return table;
+}
+
+/**
+ * 界面态那张表的校验：同一把尺子，只是动作名单换成 `UI_PAD_ACTIONS`，
+ * 并且允许 `ui` 那种报边沿的格子（左摇杆那四格在这张表里不存在 —— 界面要的是"按一下走一格"）。
+ */
+export function assertUiPadBindings(table = UI_GAMEPAD_BINDINGS) {
+  return assertKeybinds(table, { actions: UI_PAD_ACTIONS, stickActions: [], allowSignal: true });
 }
 
 /** 按钮名 → 序号（给轮询层用，避免各处自己查 `PAD_BUTTON`） */
@@ -502,6 +554,6 @@ export function buildBindingTables(overrides = {}, uiTable = UI_HOTKEYS, padOver
 }
 
 assertKeybinds();
-assertKeybindings();
+assertUiPadBindings();
 assertKeyActionLabels();
 assertCodesDisjoint(UI_HOTKEYS, ACTIVE);   // 出厂两张表必须互不抢占，否则加载即红
