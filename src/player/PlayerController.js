@@ -9,7 +9,7 @@ import { createPlayerFSM } from './PlayerFSM.js';
 import { shake } from '../engine/Shake.js';
 import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE } from '../engine/CameraRig.js';
 import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND, LOCK_ON_CAMERA, PLAYER_KNOCK } from '../content/tuning.js';
-import { ZONE_IDS } from '../world/ZoneIdentity.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
 
 

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
-import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 
 /** 指环王风格 — 古老森林、灰白山峰、 ruins 遗迹 */
 export class FantasyZone extends BaseZone {

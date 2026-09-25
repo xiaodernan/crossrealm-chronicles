@@ -1,4 +1,4 @@
-import { ZONE_IDS, ZONE_NAMES } from '../world/ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { keyText } from '../content/keyHints.js';
 
 export const QUESTS = [

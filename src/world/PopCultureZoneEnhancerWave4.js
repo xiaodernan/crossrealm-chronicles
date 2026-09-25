@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ZONE_IDS, findZoneById } from './ZoneIdentity.js';
+import { ZONE_IDS, findZoneById } from '../content/ZoneIdentity.js';
 
 
 

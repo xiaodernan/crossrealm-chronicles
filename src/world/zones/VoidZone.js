@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
-import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 
 /** 第四主题：破碎时线 — 指环王 + 星际穿越时间主题融合 */
 export class VoidZone extends BaseZone {

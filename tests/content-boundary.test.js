@@ -96,7 +96,7 @@ describe('内容边界', () => {
    * 这里确认两个本轮新建的模块真在扫描集里，文件总数也还对得上。
    */
   it('扫描集覆盖当前源码树', () => {
-    for (const probe of ['world/ZoneIdentity.js', 'content/franchises.js']) {
+    for (const probe of ['content/ZoneIdentity.js', 'content/franchises.js']) {
       expect(existsSync(join(SRC, probe)), `磁盘上缺少 ${probe}`).toBe(true);
       expect(FILES.some((f) => relative(SRC, f).replaceAll('\\', '/') === probe), `扫描集里没有 ${probe}`).toBe(true);
     }

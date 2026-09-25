@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ZONE_IDS, findZoneById } from './ZoneIdentity.js';
+import { ZONE_IDS, findZoneById } from '../content/ZoneIdentity.js';
 
 /** Wave3 POI — 西部 / 黑帮 / 深空科幻 */
 export function attachPopCultureZonesWave3(game) {

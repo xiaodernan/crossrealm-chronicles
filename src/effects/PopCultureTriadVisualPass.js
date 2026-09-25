@@ -1,5 +1,5 @@
 /** 三巨头视觉 Pass — 西部尘雾 / 黑帮 noir / 深空扫描线 */
-import { ZONE_IDS } from '../world/ZoneIdentity.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
 export class PopCultureTriadVisualPass {
   constructor(game) {

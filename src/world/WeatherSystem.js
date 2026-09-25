@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ZONE_IDS } from './ZoneIdentity.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
 /** 区域天气 — 雨 / 雪 / 灰烬 / 奥术 drizzle，跟随玩家 */
 const ZONE_PRESETS = {

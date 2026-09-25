@@ -1,29 +1,7 @@
-import { mergeDialogueCg } from './DialogCGRendererExtras.js';
+import { REST_DIALOGUE_CG } from '../content/dialogueCgPresets.js';
 
 /** 营火对话 CG — 节点 id → 场景预设（程序绘制 + 可选图片） */
-export const REST_DIALOGUE_CG = mergeDialogueCg({
-  'hub:start': { scene: 'anchor_fire', caption: '三界交汇 · 余温' },
-  'hub:origin': { scene: 'anchor_fire', caption: '位面摩擦之火' },
-  'hub:quest': { scene: 'quest_scroll', caption: '当前使命' },
-  'hub:walker': { scene: 'walker_silhouette', caption: '位面行者' },
-  'fantasy:start': { scene: 'forest_camp', caption: '灰白森林营火' },
-  'fantasy:deep': { scene: 'forest_map', caption: '遗城与 Boss 环' },
-  'fantasy:tip': { scene: 'combat_tutorial', caption: '弹反与终结' },
-  'fantasy:boss1': { scene: 'boss_shadow', caption: '影界守护者', mood: 'warn' },
-  'magic:start': { scene: 'magic_castle', caption: '魔法遗境倒影' },
-  'magic:spell': { scene: 'spell_orbs', caption: '奥术牵制' },
-  'magic:boss2': { scene: 'boss_mage', caption: '大奥术师', mood: 'warn' },
-  'space:start': { scene: 'space_endurance', caption: 'Endurance 应急火' },
-  'space:well': { scene: 'gravity_well', caption: '米勒引力井', mood: 'warn' },
-  'space:boss3': { scene: 'boss_singularity', caption: '奇点领主' },
-  'void:start': { scene: 'void_time', caption: '折叠时线' },
-  'void:stop': { scene: 'time_stop', caption: '时停对策', mood: 'warn' },
-  'void:hidden': { scene: 'hidden_boss', caption: '隐藏试炼' },
-  'void:exec': { scene: 'execution_art', caption: '处决瞬间' },
-  'abyss:start': { scene: 'chaos_border', caption: '混沌边境', mood: 'warn' },
-  'abyss:end': { scene: 'final_gate', caption: '终焉试炼' },
-  'abyss:boss5': { scene: 'boss_chaos', caption: '裂隙领主', mood: 'warn' },
-});
+
 
 /** 程序 CG 绘制 — Canvas 2D 场景插画 */
 export class DialogCGRenderer {

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { sampleGlobalHeight, WINDING_ROUTES } from './TerrainHeight.js';
+import { sampleGlobalHeight } from './TerrainHeight.js';
+import { WINDING_ROUTES } from '../content/windingRoutes.js';
 
 /** sculpt 主地形 + 贴合地面的蜿蜒古径（贴图 + 法线） */
 export class WorldTerrain {

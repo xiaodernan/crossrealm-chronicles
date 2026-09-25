@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   ZONE_IDS, ZONE_ORDER, ZONE_NAMES, HUB_ZONE, CORRIDOR_ZONE,
   zoneIdOf, zoneIdAt, findZoneById, resolveZone, zoneDescriptor, isRealZone,
-} from '../src/world/ZoneIdentity.js';
+} from '../src/content/ZoneIdentity.js';
 import { WorldManager } from '../src/world/WorldManager.js';
 import { barkKeyForZone, COMBAT_BARKS_POP } from '../src/game/PopCultureCombatBarks.js';
 import { QuestSystem, QUESTS } from '../src/game/QuestSystem.js';

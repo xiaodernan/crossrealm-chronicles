@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { WINDING_ROUTES } from './TerrainHeight.js';
+import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 export class WorldDecorations {
   constructor(scene, world) {

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ZONE_IDS } from './ZoneIdentity.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
 /** 区域天空、粒子、氛围光 */
 export class WorldEffects {

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ZONE_IDS, ZONE_NAMES } from './ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 
 export class RestPointManager {
   constructor(scene, world) {

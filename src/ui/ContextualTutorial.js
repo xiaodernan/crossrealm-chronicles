@@ -1,6 +1,6 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { keyText } from '../content/keyHints.js';
-import { ZONE_IDS, ZONE_NAMES } from '../world/ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 
 const STORAGE_KEY = 'crossrealm_contextual_tips';
 /** 队列推进的计时分组 */

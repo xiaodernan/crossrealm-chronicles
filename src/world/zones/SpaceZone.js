@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
-import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 
 /** 星际穿越风格 — 冰云行星、引力透镜、五维书架彩蛋 */
 export class SpaceZone extends BaseZone {

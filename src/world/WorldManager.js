@@ -8,7 +8,7 @@ import { WorldTerrain } from './WorldTerrain.js';
 import { sampleGlobalHeight, sampleGlobalHeightSmooth, sampleGroundNormal } from './TerrainHeight.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { CollisionWorld } from '../engine/Collision.js';
-import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from './ZoneIdentity.js';
+import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from '../content/ZoneIdentity.js';
 
 /** 地形网格 520×620，可通行边界留 10 单位余量 */
 export const WORLD_BOUNDS = { minX: -250, maxX: 250, minZ: -300, maxZ: 300 };

@@ -1,5 +1,5 @@
 /** 逆相界视觉 — 破碎时线红色孢子 overlay（怪奇物语气质） */
-import { ZONE_IDS } from '../world/ZoneIdentity.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
 export class UpsideDownVisualPass {
   constructor(game) {

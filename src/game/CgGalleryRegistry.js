@@ -1,5 +1,5 @@
-import { REST_DIALOGUE_CG } from '../ui/DialogCGRenderer.js';
-import { REST_NPC_DEFS } from '../world/RestNpcManager.js';
+import { REST_DIALOGUE_CG } from '../content/dialogueCgPresets.js';
+import { REST_NPC_DEFS } from '../content/restNpcDefs.js';
 import { CG_GALLERY_BONUS_EXTRA } from './CgGalleryRegistryExtras.js';
 
 /** CG 画廊完整目录 — 营火对话 + Boss 击破 + 隐藏 */

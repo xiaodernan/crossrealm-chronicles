@@ -1,4 +1,4 @@
-import { REST_NPC_DEFS } from '../world/RestNpcManager.js';
+import { REST_NPC_DEFS } from '../content/restNpcDefs.js';
 import { REST_DIALOGUE_EVENTS } from '../engine/events.js';
 import { emit } from '../engine/EventBus.js';
 import { mergeRestDialogueNodes } from './RestDialogueExtras.js';

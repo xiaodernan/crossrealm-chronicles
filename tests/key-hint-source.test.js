@@ -164,12 +164,15 @@ const LEDGER = {
   'game/QuestSystem.js': 1,
   'game/SideQuestRegistry.js': 1,
   'game/StoryDirector.js': 1,
-  'ui/DialogCGRendererExtras.js': 1,
   'world/zones/FantasyZone.js': 1,
   'world/zones/VoidZone.js': 1,
   'main.js': 1,
   'style.css': 1,
   'ui/WorldMapPanel.js': 1,
+  // W-B1 切片1：CG 预设表从 ui/ 搬进 content/，字幕里那句 'Esc 跳过' 跟着搬了过来。
+  // 它是**画在 canvas 上的文本**，吃不到 `data-keys` 那套（那是 DOM 的），
+  // 所以本切片只如实记账；随 W-B1 的文案数据化一起改成问 `keyHint('escape')`。
+  'content/dialogueCgPresets.js': 1,
 };
 
 const LIT = /`(?:\\.|[^`\\])*`|'(?:\\.|[^'\n])*'|"(?:\\.|[^"\n])*"/g;

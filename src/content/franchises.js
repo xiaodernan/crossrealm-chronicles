@@ -1,5 +1,5 @@
 /**
- * 次元回声的「母题」（franchise）身份表 —— 与 `src/world/ZoneIdentity.js` 同一个套路（修 B36）。
+ * 次元回声的「母题」（franchise）身份表 —— 与 `src/content/ZoneIdentity.js` 同一个套路（修 B36）。
  *
  * 目录条目里的 `franchise` 字段以前直接写中文母题名，成就与支线再拿
  * `e.franchise === '魔法学院'` 做判定：改一行文案，十条成就和四条支线就会静默失效。

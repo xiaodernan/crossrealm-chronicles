@@ -1,5 +1,5 @@
 /** 战斗/探索随机 bark — 致敬向（不占用主 UI） */
-import { ZONE_IDS } from '../world/ZoneIdentity.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
 export const COMBAT_BARKS_POP = {
   magic: [

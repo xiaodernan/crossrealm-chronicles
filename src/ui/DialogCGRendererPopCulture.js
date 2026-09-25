@@ -1,32 +1,10 @@
-/** CG preset 扩写 + 程序绘制扩展 */
+/** 致敬层 CG 的**程序绘制**（W-B1 切片1）。
+ *
+ *  预设表 `REST_DIALOGUE_CG_POP` 已搬到 `content/dialogueCgPresets.js`：
+ *  它与绘制混住时，`game/CgGalleryRegistry.js` 要枚举全部 CG 就得 import 本文件，
+ *  于是形成 `chunk-core → chunk-ui` 回边（B37）。数据与绘制分家之后这里只管画。
+ */
 import { attachWave4CgPainters } from './DialogCGRendererPopCultureWave4.js';
-
-export const REST_DIALOGUE_CG_POP = {
-  'magic:wizard': { scene: 'wizard_school', caption: '咒术学院' },
-  'magic:broom': { scene: 'broom_ring', caption: '飞天环赛' },
-  'space:interstellar': { scene: 'murphy_shelf', caption: '星际方程' },
-  'space:stay': { scene: 'murphy_shelf', caption: 'Stay' },
-  'void:upside': { scene: 'upside_down', caption: '逆相界' },
-  'void:radio': { scene: 'radio_tower', caption: '旧镇广播' },
-  'fantasy:lotr': { scene: 'one_ring', caption: '至尊石环' },
-  'hub:echoes': { scene: 'poster_wall', caption: '次元回声' },
-  'magic:nine': { scene: 'nine_platform', caption: '九分站台' },
-  'magic:patronus': { scene: 'patronus_lake', caption: '护念湖镜' },
-  'space:wormhole': { scene: 'wormhole_arch', caption: '虫洞拱门' },
-  'void:arcade': { scene: 'arcade_cab', caption: '街机厅' },
-  'void:vecna': { scene: 'vecna_clock', caption: '裂相钟塔' },
-  'fantasy:western': { scene: 'western_saloon', caption: '边境往事' },
-  'fantasy:duel': { scene: 'duel_noon', caption: '正午决斗' },
-  'abyss:gangster': { scene: 'noir_speakeasy', caption: '幽冥帮派' },
-  'space:scifi': { scene: 'scifi_dome', caption: '深空纪元' },
-  'space:jump': { scene: 'jump_gate', caption: '跃迁门' },
-  'hub:triad': { scene: 'triad_poster', caption: '三巨头' },
-  'magic:cyber': { scene: 'cyber_alley', caption: '赛博霓虹' },
-  'fantasy:samurai': { scene: 'samurai_torii', caption: '武士残响' },
-  'void:cosmic': { scene: 'cosmic_obelisk', caption: '旧日低语' },
-  'space:starport': { scene: 'starport_cantina', caption: '星港商路' },
-  'hub:wave4': { scene: 'wave4_grid', caption: 'Wave4 四系' },
-};
 
 export function attachPopCultureCgRenderer(renderer) {
   const extraPainters = {

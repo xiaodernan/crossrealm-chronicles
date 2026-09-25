@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ZONE_IDS } from '../world/ZoneIdentity.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
 /** 区域氛围粒子 + 营火光晕增强 */
 export class AmbientScenePass {

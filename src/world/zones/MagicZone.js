@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
-import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 
 /** 哈利波特风格 — 悬浮城堡、魔法光柱、禁林 */
 export class MagicZone extends BaseZone {

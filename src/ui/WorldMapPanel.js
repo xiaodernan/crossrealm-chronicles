@@ -1,6 +1,6 @@
 import { MAP_BOSSES } from '../game/QuestSystem.js';
 import { keyText } from '../content/keyHints.js';
-import { WINDING_ROUTES } from '../world/TerrainHeight.js';
+import { WINDING_ROUTES } from '../content/windingRoutes.js';
 
 /** 全屏世界地图 + 迷雾 */
 export class WorldMapPanel {

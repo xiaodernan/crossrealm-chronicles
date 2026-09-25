@@ -1,5 +1,5 @@
 import { MAP_BOSSES } from '../game/QuestSystem.js';
-import { WINDING_ROUTES } from '../world/TerrainHeight.js';
+import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { JOURNAL_CATEGORIES, DISCOVERABLE_TOTAL } from '../game/StoryJournal.js';
 import { mergeJournalCategories } from './JournalTabRegistry.js';
 import { scheduler } from '../engine/Scheduler.js';

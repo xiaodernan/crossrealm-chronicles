@@ -1,83 +1,9 @@
 import * as THREE from 'three';
 import { RestNpcModel } from './RestNpcModel.js';
+import { REST_NPC_DEFS } from '../content/restNpcDefs.js';
 
 /** 营火常驻 NPC — Mixamo 模型 + RestDialogue 联动高亮 */
-export const REST_NPC_DEFS = {
-  hub: {
-    name: '锚火看守',
-    title: '看守 · 余温',
-    body: 0x5a5048,
-    cloak: 0xc9a962,
-    emissive: 0x664422,
-    accent: '#c9a962',
-    height: 1.05,
-    offset: [1.35, 0, 0.6],
-    idle: 'stand',
-    barks: ['火不会灭，只要锚还在。', '三个位面的风，在这里交汇。', '休息前先听听风声。'],
-  },
-  fantasy: {
-    name: '精灵斥候',
-    title: '斥候 · 灰林',
-    body: 0x3a5a40,
-    cloak: 0x2a4030,
-    emissive: 0x224422,
-    accent: '#66aa77',
-    height: 0.95,
-    offset: [-1.1, 0, 0.45],
-    idle: 'sit',
-    barks: ['森林记得每一场战争。', 'Boss 红圈别贪刀。', '连击终结能清小怪。'],
-  },
-  magic: {
-    name: '奥术旅者',
-    title: '旅者 · 遗境',
-    body: 0x4a3868,
-    cloak: 0x8866cc,
-    emissive: 0x5533aa,
-    accent: '#aa88ff',
-    height: 1.0,
-    offset: [0.9, 0, -0.7],
-    idle: 'float',
-    barks: ['火焰里倒映着未发生的灾难。', '蓄力法术是对 Boss 的礼貌。', '禁书在迷宫深处。'],
-  },
-  space: {
-    name: '宇航员回声',
-    title: '回声 · Endurance',
-    body: 0x8899aa,
-    cloak: 0x667788,
-    emissive: 0x334455,
-    accent: '#88ccff',
-    height: 1.0,
-    offset: [-0.8, 0, 0.9],
-    idle: 'stand',
-    helmet: true,
-    barks: ['时间在这里是圆的。', '引力井会把你拉向中心。', '奇点领主有三阶段。'],
-  },
-  void: {
-    name: '时线残影',
-    title: '残影 · 折叠',
-    body: 0x6a6050,
-    cloak: 0x998866,
-    emissive: 0xaa8844,
-    accent: '#ddbb66',
-    height: 1.08,
-    offset: [0.7, 0, 0.5],
-    idle: 'ghost',
-    transparent: true,
-    barks: ['有时火焰会倒着烧。', '时停可以用蓄力打断。', '隐藏 Boss 在北侧。'],
-  },
-  abyss: {
-    name: '裂隙引路人',
-    title: '引路 · 边境',
-    body: 0x3a2028,
-    cloak: 0x661122,
-    emissive: 0xff2244,
-    accent: '#ff4466',
-    height: 1.12,
-    offset: [-0.95, 0, -0.4],
-    idle: 'stand',
-    barks: ['门越多，界越薄。', '混沌脉冲别贴身。', 'Ch5 后可重进迷宫。'],
-  },
-};
+
 
 export class RestNpcManager {
   constructor(scene, world, restPoints, game) {

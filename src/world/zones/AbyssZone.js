@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
-import { ZONE_IDS, ZONE_NAMES } from '../ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 
 /** 第五主题：混沌边境 — 三界交汇后的不稳定位面 */
 export class AbyssZone extends BaseZone {

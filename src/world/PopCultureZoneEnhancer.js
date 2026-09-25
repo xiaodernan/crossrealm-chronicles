@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { attachPopCultureZonesWave2 } from './PopCultureZoneEnhancerWave2.js';
 import { attachPopCultureZonesWave3 } from './PopCultureZoneEnhancerWave3.js';
 import { attachPopCultureZonesWave4 } from './PopCultureZoneEnhancerWave4.js';
-import { ZONE_IDS, findZoneById } from './ZoneIdentity.js';
+import { ZONE_IDS, findZoneById } from '../content/ZoneIdentity.js';
 
 /** 各位面追加致敬 POI / 装饰 — 不修改 Zone 源文件 */
 export function attachPopCultureZones(game) {

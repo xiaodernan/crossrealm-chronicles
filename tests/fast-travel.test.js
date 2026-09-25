@@ -14,7 +14,7 @@ import * as THREE from 'three';
 import { RestPointManager } from '../src/world/RestPointManager.js';
 import { FastTravelSystem } from '../src/game/FastTravelSystem.js';
 import { FastTravelPanel } from '../src/ui/FastTravelPanel.js';
-import { ZONE_IDS, ZONE_NAMES } from '../src/world/ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES } from '../src/content/ZoneIdentity.js';
 
 const makeWorld = (height = 0) => ({ getGroundHeight: () => height });
 

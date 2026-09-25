@@ -109,7 +109,7 @@ import { attachPopCultureZones } from '../world/PopCultureZoneEnhancer.js';
 import { attachPopCultureCgRenderer } from '../ui/DialogCGRendererPopCulture.js';
 import { attachPopCultureSideQuests } from '../game/SideQuestPopCulture.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
-import { ZONE_IDS } from '../world/ZoneIdentity.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
 import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
 import {
