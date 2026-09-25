@@ -18,6 +18,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   GAMEPAD_BINDINGS, KEY_BINDINGS, PAD_ACTIONS, PAD_BUTTON, PAD_BUTTON_BY_INDEX, PAD_BUTTON_COUNT,
+  UI_GAMEPAD_BINDINGS,
   assertKeybinds, buildBindingTables, factoryGamepadBindings,
   resolveGamepadBindings,
 } from '../src/content/keybinds.js';
@@ -484,7 +485,75 @@ describe('设置面板：多出来的那一列', () => {
     expect((host.innerHTML.match(/data-padbind="/g) ?? [])).toHaveLength(11);
     expect(host.innerHTML).toContain('左摇杆 ↑ + 十字键 ↑');
     expect(host.innerHTML).not.toContain('data-padbind="moveUp"');
-    expect((host.innerHTML.match(/keybind-pad-none/g) ?? [])).toHaveLength(UI_HOTKEYS.length + Object.keys(KEY_BINDINGS).length - 15);
+    // `—` 的格子数**从两表推导**（切片20）：以前这里抄的是一个数，多加一格摇杆格就得回来改它，
+    // 而"忘了改"表现为断言静默放宽 —— 该红的时候还是绿的
+    const rowActions = [...UI_HOTKEYS.map((e) => e.action), ...Object.keys(KEY_BINDINGS)];
+    const claimed = new Set([...Object.values(GAMEPAD_BINDINGS), ...Object.values(UI_GAMEPAD_BINDINGS)]
+      .map((e) => e.hotkey ?? e.action));
+    const none = rowActions.filter((a) => !claimed.has(a));
+    expect((host.innerHTML.match(/keybind-pad-none/g) ?? [])).toHaveLength(none.length);
+    // 那一格**看得见**的是破折号：只留一个空 span 与"这一行手柄上没有"分不清（自动门禁扫不到，
+    // 因为 class 还在 —— 计数会照样绿，所以这条单独数那个字符）
+    expect((host.innerHTML.match(/keybind-pad-none">—<\/span>/g) ?? [])).toHaveLength(none.length);
+    for (const action of none) {
+      const row = host.innerHTML.split('<div class="keybind-row">').find((r) => new RegExp(`data-keybind="${action}"`).test(r));
+      expect(row, `${action} 手柄上没有人，就该写着 —`).toContain('keybind-pad-none">—');
+    }
+  });
+
+  it('界面表那四格从此有人显示（以前推得动而看板写 `—`，正是 B47 那一族的形状）', () => {
+    const { host, panel } = mount();
+    panel.refresh();
+    for (const [action, arrow] of [['uiUp', '↑'], ['uiDown', '↓'], ['uiLeft', '←'], ['uiRight', '→']]) {
+      const cell = new RegExp(`data-keybind="${action}"`);
+      expect(host.innerHTML, `焦点行 ${action} 不见了`).toMatch(cell);
+      // 那一行的手柄列是"界面 + 摇杆标签"，而且仍然不给可点按钮（界面键位改绑是另一片）
+      // 箭头写**字面量**而不是再算一遍 `padStickLabel`：标签算式坏了，两边一起变就是永不报警
+      const row = host.innerHTML.split('<div class="keybind-row">').find((r) => cell.test(r));
+      expect(row, `${action} 那行的手柄列没显示界面表`).toContain(`界面 左摇杆 ${arrow} + 十字键 ${arrow}`);
+      expect(row).not.toContain(`data-padbind="${action}"`);
+    }
+  });
+
+  it('一行两个上下文时两样都显示：`escape` 那行既有可点的 Start，也有界面里的 B / Start', () => {
+    const { host, panel } = mount();
+    panel.refresh();
+    const row = host.innerHTML.split('<div class="keybind-row">').find((r) => /data-keybind="escape"/.test(r));
+    expect(row).toContain('data-padbind="escape"');                 // 战斗表：可改绑
+    expect(row).toContain('界面 B / Start');                         // 界面表：说明（B 返回、Start 开合）
+    // 合成一格而不是多一列：多出来的第五个元素会把行尾的提示挤走，各行还互不对齐。
+    // 这里钉的是**整格的形状**：外层一个 combo，里面一个按钮 + 一行说明，别的全都不许多
+    expect(row).toMatch(/<span class="keybind-pad keybind-pad-combo"><button[^>]*data-padbind="escape">Start<\/button><span class="keybind-pad keybind-pad-part">界面 B \/ Start<\/span><\/span>/);
+    expect((row.match(/<button/g) ?? [])).toHaveLength(2);          // 键盘那一格 + 手柄那一格，不再多一个
+  });
+
+  it('每一行的手柄那一格都**站在列上**（切片20：真浏览器读数抓到界面那一格没带列类名）', () => {
+    const { host, panel } = mount();
+    panel.refresh();
+    // 表头那一行不带 `data-keybind` 也不走 `padCell`，切分后落在第 0 段里，正好不要它
+    const rows = host.innerHTML.split('<div class="keybind-row">').slice(1);
+    expect(rows.length).toBeGreaterThan(20);
+    for (const row of rows) {
+      const action = row.match(/data-keybind="([^"]+)"/)?.[1] ?? '(无)';
+      // 键盘那一格之后紧跟的那个元素才叫"手柄那一列"：列宽与居中挂在 `keybind-pad` 上。
+      // 界面那一格头一版只给了 `keybind-pad-part`，于是在真 DOM 里那四行**压根没有手柄格**
+      // （查询 `.keybind-pad` 查不到）—— 全仓没有任何单测读样式表，这条只能钉类名。
+      expect(row, `${action} 那行的手柄格不在列上`)
+        .toMatch(/<\/button>(<span class="keybind-pad |<button type="button" class="keybind-pad")/);
+    }
+    const upRow = rows.find((r) => /data-keybind="uiUp"/.test(r));
+    expect(upRow).toContain('<span class="keybind-pad keybind-pad-part">界面 ');
+  });
+
+  it('显示的是**生效**的界面表而不是常量：换一张表那一行跟着改口', () => {
+    const { host, panel, game } = mount();
+    // 这一格不在任何名单上，只看表 —— 面板若还按"移动那四格"的老名单显示，这条就红
+    game.uiPadTable = { navUp: { action: 'navUp', mode: 'level', axes: [0, 1], dir: 'up', cardinal: true, hotkey: 'journal' } };
+    panel.refresh();
+    const row = host.innerHTML.split('<div class="keybind-row">').find((r) => /data-keybind="journal"/.test(r));
+    expect(row).toContain('界面 左摇杆 ↑ + 十字键 ↑');
+    const upRow = host.innerHTML.split('<div class="keybind-row">').find((r) => /data-keybind="uiUp"/.test(r));
+    expect(upRow).toContain('keybind-pad-none');                   // 表里没这一格了 → 老老实实写 `—`
   });
 
   it('格子显示的是生效表而不是常量：叠了覆盖之后那一格立刻改口', () => {
@@ -702,6 +771,17 @@ describe('显示与静态门禁', () => {
     expect(src).toMatch(/import \{ keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS \} from '..\/content\/keyLabels\.js'/);
     // 按钮序号/名字只能问表与标签，面板不许自己 import 进来拼字样
     expect(src).not.toMatch(/import[^;]*\bPAD_BUTTON\b[^;]*from/);
+  });
+
+  it('手柄那一列问的是**两张表**（切片20）：显示不抄标签、也不按动作名列名单', () => {
+    const src = read('ui/SettingsPanel.js');
+    expect(src).toMatch(/this\.game\.padTable \?\? GAMEPAD_BINDINGS/);
+    expect(src).toMatch(/this\.game\.uiPadTable \?\? UI_GAMEPAD_BINDINGS/);
+    // 标签的第二份算式（扫**字符串常量**而不是扫散文：注释里提一句"十字键"是说明，抄进引号里就是第二真源。
+    // 不跨行 —— 跨行的话两句注释之间的引号就能拼出一个假阳性，第一版就是这么红的）
+    expect(src).not.toMatch(/['"`][^'"`\n]*(左摇杆|十字键)/);
+    // 显示谁由表决定：这里出现动作名名单 = 以后加一格摇杆格要回来改面板，忘了就是那一格又是 `—`
+    expect(src).not.toMatch(/'uiUp'|'uiDown'|'uiLeft'|'uiRight'/);
   });
 
   it('捕获在派发之前：等键的那一帧不更新摇杆、也不点亮任何动作格', () => {

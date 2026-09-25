@@ -1432,6 +1432,14 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 /* 手柄那一列（切片9）：可改绑的是按钮，走摇杆/没有入口的是说明文字，宽度对齐成一列 */
 .keybind-row .keybind-pad { min-width: 5.5rem; text-align: center; font-size: 0.76rem; }
 .keybind-row span.keybind-pad { color: #7d7d88; }
+/* 一行同时有"战斗中"与"界面里"的入口（切片20 的 `escape` 那行）：合成一格，
+   不新增第五列 —— 多一列会把行尾的提示挤走，各行还互不对齐 */
+.keybind-pad-combo { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+/* "界面 …"那一格：字号比战斗那一格小一档、颜色走说明那一档。
+   它同时带着 `keybind-pad`（列宽与居中），所以在行里单独出现时仍然站在手柄那一列上；
+   只有嵌进合并格时才撤掉列宽 —— 那已经是列内部了，再撑一次就是给整行加宽。 */
+.keybind-row .keybind-pad-part { font-size: 0.7rem; color: #7d7d88; }
+.keybind-row .keybind-pad-combo .keybind-pad-part { min-width: 0; }
 .keybind-head { color: #8a7a55; font-size: 0.7rem; letter-spacing: .06em; margin: 2px 0 6px; }
 .keybind-hint { font-size: 0.72rem; color: #c9a962; }
 .keybind-group { margin: 12px 0 4px; font-size: 0.78rem; color: #8a7a55; letter-spacing: .06em; }

@@ -1,5 +1,5 @@
 import { UI_HOTKEYS, UI_HOTKEY_LABELS } from '../content/hotkeys.js';
-import { GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, buildBindingTables } from '../content/keybinds.js';
+import { GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, UI_GAMEPAD_BINDINGS, buildBindingTables } from '../content/keybinds.js';
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
 import { focusFirstItem, restoreParkedFocus } from './FocusNav.js';
@@ -214,8 +214,13 @@ export class SettingsPanel {
     const keys = this.game.keybindTable ?? KEY_BINDINGS;
     // 手柄表按"这一行问哪个动作"索引：`pauseMenu` 那格冒充的是热键 `escape`，所以
     // 匹配键是 `hotkey ?? action` —— 否则暂停菜单那一行的手柄列会是空的（第三真源的老路）
-    const pads = Object.values(this.game.padTable ?? GAMEPAD_BINDINGS);
-    const padFor = (rowAction) => pads.find((e) => (e.hotkey ?? e.action) === rowAction) ?? null;
+    const combat = Object.values(this.game.padTable ?? GAMEPAD_BINDINGS).map((e) => ({ ...e, ui: false }));
+    // 界面态那张表也要问（切片20）：以前只查战斗表，于是"面板焦点上移"那四行写着 `—`，
+    // 而玩家推摇杆、按十字键都真的在走格 —— 显示与行为各说各话正是 B47 那一族。
+    // 两表的条目都**不抄标签**：字样一律现算（`padButtonLabel` / `padStickLabel`）。
+    const ui = Object.values(this.game.uiPadTable ?? UI_GAMEPAD_BINDINGS).map((e) => ({ ...e, ui: true }));
+    const pads = [...combat, ...ui];
+    const padFor = (rowAction) => pads.filter((e) => (e.hotkey ?? e.action) === rowAction);
     const rows = table.map((e) => this.keybindRow(e.action, UI_HOTKEY_LABELS[e.action] ?? e.action, e, padFor(e.action)));
     rows.push('<h4 class="keybind-group">移动与战斗</h4>');
     for (const [action, binding] of Object.entries(keys)) {
@@ -233,7 +238,7 @@ export class SettingsPanel {
    * 出口只有一个真源，不存在"两个键都在办这件事"。
    * 别名（右 Ctrl / 右 Shift）是同一条动作的等价入口，写在提示里而不是多一列按钮。
    */
-  keybindRow(action, label, binding, padEntry) {
+  keybindRow(action, label, binding, padEntries) {
     const shown = this.capturing === action
       ? '按下要绑定的键（再点一次取消）'
       : this.capturingPad === action
@@ -242,21 +247,48 @@ export class SettingsPanel {
     const out = binding.code ?? MOUSE_LABELS[binding.mouse] ?? '未绑定';
     return `<div class="keybind-row"><span class="keybind-name">${label}</span>`
       + `<button type="button" data-keybind="${action}">${keyLabel(out)}</button>`
-      + this.padCell(action, padEntry)
+      + this.padCell(action, padEntries)
       + `<span class="keybind-hint">${shown}</span></div>`;
   }
 
   /**
-   * 一行的手柄那一格。三种状态：这条动作手柄上没有（`—`）、走摇杆（写死的说明，不给按钮），
-   * 或者可改绑（按钮上显示当前按钮名）。
+   * 一行的手柄那一格。切片20 起**一行可以有两个上下文**的入口：战斗里 Start 开菜单，
+   * 界面里 B 返回、Start 开菜单 —— 这是事实，不是冲突（同一帧只有一张表在被轮询，
+   * 判据在 `Game.padUiMode()` 那一处）。四种样子：
+   * - 两张表都不认领这一行 → `—`；
+   * - 战斗表里是按钮 → 可点的按钮（改了立刻换表）；是摇杆 → 写死的说明（摇杆格改绑要换的是
+   *   "axis 对"，与单键覆盖不是一个形状，所以不给入口）；
+   * - 界面表里的条目 → **一律是说明**（`UI_GAMEPAD_BINDINGS` 今天出厂即生效、不可改绑），
+   *   前面带"界面"两个字，免得玩家以为点一下就能把面板里的键也改掉。
+   *   这一格也带着列类名 `keybind-pad`：切片20 头一版只给了 `keybind-pad-part`，于是"界面"那一格
+   *   独自在行里时**不在手柄那一列上**（列宽与居中都没有，真浏览器读数里那四行的手柄格是查无此格）。
+   *   合成一格时在列内部由 CSS 撤掉那个列宽，不给行加宽。
+   * 两种都有时合成一格（外层 `keybind-pad-combo`）：让第五列把行尾的提示挤走是新的对不齐。
    * 按钮名过的是 `PAD_BUTTON` 枚举校验，所以这里拼进 DOM 的字样全部来自标签表 ——
    * 键盘那一侧要过正则才敢拼，这一侧连拼玩家输入的机会都没有。
    */
-  padCell(action, entry) {
-    if (!entry) return '<span class="keybind-pad keybind-pad-none">—</span>';
-    if (entry.button === undefined) {
-      return `<span class="keybind-pad keybind-pad-fixed">${padStickLabel(entry.dir)}</span>`;
+  padCell(action, entries) {
+    const list = entries ?? [];
+    if (!list.length) return '<span class="keybind-pad keybind-pad-none">—</span>';
+    const parts = list.filter((e) => !e.ui).map((e) => this.padChip(action, e));
+    const ui = list.filter((e) => e.ui);
+    if (ui.length) {
+      parts.push(`<span class="keybind-pad keybind-pad-part">界面 ${ui.map((e) => this.padChipLabel(e)).join(' / ')}</span>`);
     }
-    return `<button type="button" class="keybind-pad" data-padbind="${action}">${padButtonLabel(entry.button)}</button>`;
+    if (parts.length === 1) return parts[0];
+    return `<span class="keybind-pad keybind-pad-combo">${parts.join('')}</span>`;
+  }
+
+  /** 战斗表那一格：按钮可点，摇杆只是说明 */
+  padChip(action, entry) {
+    if (entry.button !== undefined) {
+      return `<button type="button" class="keybind-pad" data-padbind="${action}">${padButtonLabel(entry.button)}</button>`;
+    }
+    return `<span class="keybind-pad keybind-pad-fixed">${this.padChipLabel(entry)}</span>`;
+  }
+
+  /** 条目 → 字样：摇杆格问 `padStickLabel`、按钮格问 `padButtonLabel`，面板里一份算式都不抄 */
+  padChipLabel(entry) {
+    return entry.button === undefined ? padStickLabel(entry.dir) : padButtonLabel(entry.button);
   }
 }
