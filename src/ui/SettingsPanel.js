@@ -57,6 +57,13 @@ export class SettingsPanel {
       s.set('shadows', sh.checked);
       s.applyToGame(this.game);
     });
+    /* 震动（切片17）：走的还是"写设置 → `applyToGame`"那一条，面板自己不碰马达 ——
+     * 否则"这一格开关到底管着谁"就有两个答案，而关掉的开关漏出一次震动是最难查的那种bug */
+    const vib = document.getElementById('set-vibration');
+    vib?.addEventListener('change', () => {
+      s.set('vibration', vib.checked);
+      s.applyToGame(this.game);
+    });
   }
 
   /**
@@ -192,6 +199,11 @@ export class SettingsPanel {
     set('set-look-curve', t.lookCurve);
     const sh = document.getElementById('set-shadows');
     if (sh) sh.checked = d.shadows;
+    /* 震动那一格问的是 `settings.get()`，与 `applyToGame` 用的是同一个判据（同一个取值口）：
+     * 若这里改成看 `d.vibration === true`，那么一格存成 `null` 时会出现"框没勾、手柄还在震" ——
+     * 显示与行为分家正是 B47 那一族的入口。 */
+    const vib = document.getElementById('set-vibration');
+    if (vib) vib.checked = this.game.settings.get('vibration') === true;
     this.refreshKeybinds();
   }
 

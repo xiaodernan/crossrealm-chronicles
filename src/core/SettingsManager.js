@@ -27,6 +27,11 @@ const DEFAULTS = {
    * 因为"滑杆的范围"与"桥认的范围"必须是同一条算式（两处分头写就会滑到头却被当成脏数据回落）。
    */
   padTuning: padTuning(),
+  /**
+   * 手柄震动（切片17）：只挡"要不要给马达下令"这一格，相机抖不抖仍然照旧 ——
+   * 打击反馈有两路输出，玩家只想关其中一路（例如有人在夜里玩）。
+   */
+  vibration: true,
 };
 
 /**
@@ -91,5 +96,8 @@ export class SettingsManager {
     // 手感旋钮推给桥（切片15）：`setTuning` 内部再走一次 `padTuning` 清洗 ——
     // 存储是玩家可写的，越界或 NaN 一律逐项回落出厂，不把脏值乘进每帧的舵量里
     game.padInput?.setTuning(this.get('padTuning'));
+    // 震动开关推给反馈层（切片17）：只认"真的勾上"——存储是玩家可写的，
+    // 一个 `"1"` 或 `1` 都该当成关，而不是由这里替玩家猜他要震
+    if (game.rumble) game.rumble.enabled = this.get('vibration') === true;
   }
 }

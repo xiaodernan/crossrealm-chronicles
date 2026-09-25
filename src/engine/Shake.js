@@ -24,6 +24,21 @@ export class Shake {
     this.offset = new THREE.Vector3();
     /** 自动演示与截图路径不需要抖动，由主循环每帧声明 */
     this.muted = false;
+    /**
+     * 同一次请求的第二个消费者（手柄震动），由 `core/Game.js` 在桥建好之后登记一次。
+     * 没登记就是只有相机抖 —— 键盘玩家与不支持震动的设备走的都是这条路，不需要额外的开关。
+     */
+    this.impactSink = null;
+  }
+
+  /**
+   * 登记影响反馈的第二消费者。只有一处调用点（`Game.setupInput`），
+   * 所以"马达吃的是哪个强度"这件事没有第二个真源：它吃的就是 `add()` 的那个 `intensity`。
+   * @param {(intensity: number) => void} [sink]
+   */
+  setImpactSink(sink) {
+    this.impactSink = typeof sink === 'function' ? sink : null;
+    return this;
   }
 
   /** 相机视角切换时声明一次：决定峰值位移与注视点跟随权重 */
@@ -35,6 +50,8 @@ export class Shake {
   add(intensity) {
     if (this.muted || !(intensity > 0)) return this;
     this.trauma = Math.min(1, this.trauma + intensity / this.cfg.ref);
+    // 相机先记账，马达后听：`muted` 那道闸对两者同源（自动演示要出干净的截图，也不该震手柄）
+    this.impactSink?.(intensity);
     return this;
   }
 

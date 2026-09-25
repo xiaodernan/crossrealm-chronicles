@@ -41,6 +41,15 @@ const OCTANT_PRIMARY = ['right', 'right', 'up', 'up', 'left', 'left', 'down', 'd
 const OCTANT_SECOND = [null, 'up', null, 'left', null, 'down', null, 'right'];
 const OCTANT = Math.PI / 4;
 
+/**
+ * 马达时长的上限（切片17）。档位表里的最长一档是 170 毫秒，这里给的是一次事故性的脏值
+ * 也不该把玩家的手震到半秒以上 —— 上限留在桥这一侧，因为它防的是"命令落到设备上"那一步，
+ * 与"多重算哪一档"（`content/tuning.js` 的 `RUMBLE`）不是同一件事，也不必修改档位就能绕开。
+ */
+const VIBRATE_MS_MAX = 250;
+
+const clamp = (v, lo, hi) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo);
+
 export class GamepadInput {
   /**
    * @param {{ keys: object, mouseDown?: object }} target 现有输入出口（`Game.keys` 等）
@@ -108,6 +117,38 @@ export class GamepadInput {
   setTuning(raw = {}) {
     Object.assign(this.tuning, padTuning(raw));
     return this;
+  }
+
+  /**
+   * 震动：桥的**第四类出口**（切片17）。前三类是把按钮合成成 `keys`、把摇杆写成 `look`/`move`、
+   * 把界面那几格报成 `ui` 边沿 —— 它们都是"输入进来"，这一条是"反馈出去"。
+   *
+   * 为什么出口在桥里而不是别处直接摸 `navigator.getGamepads()`：切片1 立的规矩是
+   * **全仓只有一处读手柄清单**（`_pickPad`），震动也不例外 —— 否则"当前用哪只手柄"就有两个答案，
+   * 多只手柄插着时轻的那只可能被震。
+   *
+   * 降级是常态不是异常：多数网页手柄没有致动器（`vibrationActuator` 不存在）、
+   * 少数有但不支持 `dual-rumble` 形状、拔掉的那一刻 `playEffect` 会 reject。
+   * 三条都只返回 `false`，不抛也不留未处理的 Promise 拒绝（那会让整个测试文件变红）。
+   */
+  vibrate(pulse) {
+    const actuator = this._pickPad()?.vibrationActuator;
+    if (!actuator || typeof actuator.playEffect !== 'function') return false;
+    const { strong, weak, ms } = pulse ?? {};
+    try {
+      const r = actuator.playEffect('dual-rumble', {
+        startDelay: 0,
+        duration: clamp(ms, 1, VIBRATE_MS_MAX),
+        // 幅度夹在 0~1：这是浏览器 API 的包络，越界值它自己也不会报错，只会震得莫名其妙
+        strongMagnitude: clamp(strong, 0, 1),
+        weakMagnitude: clamp(weak, 0, 1),
+      });
+      // 中途拔手是设备的事：接住拒绝，别让它变成无人处理的 rejection
+      if (r && typeof r.catch === 'function') r.catch(() => {});
+    } catch {
+      return false;
+    }
+    return true;
   }
 
   /**

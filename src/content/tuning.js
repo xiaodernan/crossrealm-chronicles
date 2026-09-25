@@ -127,6 +127,28 @@ export const SHAKE = {
 };
 
 /**
+ * 手柄震动 —— "这一次打击多重"折算到两个马达（`engine/Rumble.js` 是唯一消费者）。
+ *
+ * 为什么另开一张表而不是复用 `SHAKE`：相机抖的是位移、马达抖的是幅度与时长，
+ * 两者的量纲本来就不同；但**请求入口只有一个** —— 各系统照旧调 `addShake(intensity)`，
+ * 同一条强度顺路喂给震动。若让每个调用点各写一份 `strongRumble` 数字，"这次算重击还是轻击"
+ * 就又长成两处（B36 那一族：同一条算式抄两处），而这里想钉的正是"打击感只有一个决定"。
+ *
+ * - `bands`：从小到大第一档落点（`intensity <= at` 取那一档），`at: null` 是兜底最后一档
+ *   —— 单调不许回头：轻的一下比响的那下还猛，就是玩家读不出发生了什么
+ * - 档内三格就是浏览器 `playEffect('dual-rumble', …)` 的 `strongMagnitude / weakMagnitude / duration`
+ *   （强马达掌根、弱马达扳机指；只有 dual-rumble 这一种形状是跨平台事实标准）
+ */
+export const RUMBLE = {
+  bands: [
+    { at: 0.05, strong: 0.15, weak: 0.08, ms: 55 },
+    { at: 0.10, strong: 0.32, weak: 0.18, ms: 85 },
+    { at: 0.18, strong: 0.55, weak: 0.35, ms: 120 },
+    { at: null, strong: 0.85, weak: 0.62, ms: 170 },
+  ],
+};
+
+/**
  * 击退与命中火花 —— 玩家打出去的一下到底把目标推开多远。
  *
  * 旧行为是"只有动画和掉血，目标钉在原地"：重击与轻击在位移上毫无区别，

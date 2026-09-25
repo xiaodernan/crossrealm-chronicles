@@ -111,6 +111,7 @@ import { attachPopCultureSideQuests } from '../game/SideQuestPopCulture.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
+import { Rumble } from '../engine/Rumble.js';
 import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
 import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
@@ -601,6 +602,11 @@ export class Game {
       // 出口在按下那一刻才解析（切片5）：改绑立刻生效，不必重建桥
       (slot) => this.resolvePadBinding(slot),
     );
+    /* 震动（切片17）：挂在桥建好之后 —— 它是桥的第四类出口，请求方仍然只有 `addShake()` 那一处。
+     * `Shake.add` 把同一条 `intensity` 顺路交给这里，所以"这一击多重"没有第二个真源；
+     * 没插手柄（或那只没有致动器）时 `vibrate` 返回 false，`Rumble` 就安静地不下令。 */
+    this.rumble = new Rumble((pulse) => this.padInput.vibrate(pulse));
+    this.shake.setImpactSink((intensity) => this.rumble.request(intensity));
     // 桥是最后建起来的消费者，而玩家的**手感档**要落在它身上（切片15）——
     // 上面那次 `applyToGame`（构造早期）那时还没有桥。写手档的路径仍然只有一条：
     // `SettingsManager.applyToGame`，这里只是把同一件事在桥就位后再走一次
@@ -750,6 +756,9 @@ export class Game {
     // 自动演示要出干净的截图：静帧时不接收新请求，但已起的抖按 dt 走完
     this.shake.muted = this.autoPlayMode;
     this.shake.update(dt);
+    /* 震动按 `rawDt` 结账（切片17）：马达是物理设备，命中停顿/慢动作把那 120 毫秒拉成半秒
+     * 不是手感，是把手掌震麻。`muted` 已经在 `Shake.add` 那道闸上把自动演示一起挡掉了 */
+    this.rumble.update(rawDt);
     this.damageNumbers.update(dt);
     this.combatFeedback.update(dt);
     // 处决特效跟着 dt 走：hitstop 期间那一圈冲击环必须一起变慢（修 B43）

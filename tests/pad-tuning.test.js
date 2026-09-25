@@ -333,8 +333,10 @@ describe('静态门禁：一处范围、一处写入口、桥只读自己的手�
     const game = sourceOf('core/Game.js');
     const made = game.indexOf('this.padInput = new GamepadInput(');
     expect(made).toBeGreaterThanOrEqual(0);
-    // 位置要贴着桥的构造：往后翻整个文件去找"某一次 applyToGame"不叫证明桥拿到了手档
-    const window = game.slice(made, made + 700);
+    // 位置要贴着桥的构造：往后翻整个文件去找"某一次 applyToGame"不叫证明桥拿到了手档。
+    // 窗口 700 → 1200 是因为切片17 的震动登记（`new Rumble` + `setImpactSink`）插在中间 ——
+    // 贴着桥是这条门禁的本意，中间多一段初始化不算破约；但**再远就不行了**，所以仍然有上限
+    const window = game.slice(made, made + 1200);
     expect(window, '桥建好之后没人把设置推给它（手档会在开机时丢掉）')
       .toContain('this.settings.applyToGame(this);');
   });
