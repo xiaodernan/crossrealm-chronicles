@@ -369,7 +369,8 @@ describe('一条路走到底：十字键经同一个派发口移焦，A 激活�
     router.poll(keys);
     expect(fired).toEqual(['uiLeft']);
     expect(el.value).toBe('0.5');
-    // 按住不连发：边沿派发一帧一次
+    // 切片18 之后这条仍然成立，但理由换了：不连发不是因为格子是边沿（那四格现在是 level），
+    // 而是因为这里**没给 `dt`** —— 连发要有时钟，`poll(keys)` 只派发边沿
     router.poll(keys);
     expect(el.value).toBe('0.5');
     press(pad, 'dpadLeft', false);

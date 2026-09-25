@@ -704,8 +704,10 @@ export class Game {
     if (padLook && (padLook.x !== 0 || padLook.y !== 0) && this.cameraInputAllowed(false)) {
       this.player.addCameraInput(padLook.x * rawDt, padLook.y * rawDt);
     }
-    // UI 热键每帧派发一次：键盘与手柄共用同一个出口（暂停菜单从此不必"只有键盘能开"）
-    this.hotkeys.poll(this.keys);
+    // UI 热键每帧派发一次：键盘与手柄共用同一个出口（暂停菜单从此不必"只有键盘能开"）。
+    // `rawDt` 是给自动重复用的（切片18）：走焦/调值按住要连着走，而节奏按秒算不按帧算，
+    // 且与右摇杆同一道理 —— 命中停顿冻住的是世界，不该冻住玩家的手。
+    this.hotkeys.poll(this.keys, rawDt);
     this.combatStyle?.update(dt);
     this.combatStyleOverlay?.update(dt);
     this.zoneTransitionFx?.update(dt);

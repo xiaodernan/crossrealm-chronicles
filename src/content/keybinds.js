@@ -238,10 +238,15 @@ export const UI_PAD_SIGNALS = ['confirm'];
 export const UI_PAD_ACTIONS = ['navUp', 'navDown', 'navLeft', 'navRight', 'back', 'menu', ...UI_PAD_SIGNALS];
 
 export const UI_GAMEPAD_BINDINGS = {
-  navUp: { action: 'navUp', mode: 'edge', button: 'dpadUp', hotkey: 'uiUp' },
-  navDown: { action: 'navDown', mode: 'edge', button: 'dpadDown', hotkey: 'uiDown' },
-  navLeft: { action: 'navLeft', mode: 'edge', button: 'dpadLeft', hotkey: 'uiLeft' },
-  navRight: { action: 'navRight', mode: 'edge', button: 'dpadRight', hotkey: 'uiRight' },
+  /* 走焦与调值那四格是 **level**（切片18）：按住十字键要把借来的那一格键一直留在 `keys` 里，
+   * 派发方（`HotkeyRouter`）才知道"还按着"，才谈得上自动重复。
+   * 电平本身不等于连发 —— 许不许连发、多快，全在 `hotkeys.js` 的 `UI_NAV_ACTIONS` 与
+   * `tuning.js` 的 `NAV_REPEAT` 那一处说；桥只负责"按着就把键留着"。
+   * 下面 B / Start / A 三格仍是 edge：返回与确认按一次就够，按住连发是把面板开开关关。 */
+  navUp: { action: 'navUp', mode: 'level', button: 'dpadUp', hotkey: 'uiUp' },
+  navDown: { action: 'navDown', mode: 'level', button: 'dpadDown', hotkey: 'uiDown' },
+  navLeft: { action: 'navLeft', mode: 'level', button: 'dpadLeft', hotkey: 'uiLeft' },
+  navRight: { action: 'navRight', mode: 'level', button: 'dpadRight', hotkey: 'uiRight' },
   // 返回与开合菜单在界面里是同一件事（都走 `escape` 那条级联），但保留两格是因为
   // 玩家手里的习惯不一样：有人按 B，有人按 Start —— 一枚按钮一个主人，这里仍然成立。
   back: { action: 'back', mode: 'edge', button: 'b', hotkey: 'escape' },
@@ -312,6 +317,9 @@ export function assertKeybinds(table = GAMEPAD_BINDINGS,
       if (!allowSignal) fail(name, '不许声明 ui 边沿：只有界面态那张表有这种格子');
       if (e.hotkey !== undefined) fail(name, '报边沿的格子不该再冒充某个热键，出口就有两个说法了');
       if (!UI_PAD_SIGNALS.includes(e.action)) fail(name, '的信号名未登记于 UI_PAD_SIGNALS（桥的复用槽不认这个名字）');
+      // 信号槽是"这一帧发生过一次"的电平，不是"正按着"：写成 level 就是每帧都点亮，
+      // 按住 A 会把焦点那一格反复激活（连点同一个按钮），而它没有任何一份节奏可以拦。
+      if (e.mode !== 'edge') fail(name, '报边沿的格子必须是 edge：电平会让确认每帧都点亮');
     } else if (e.hotkey !== undefined) {
       if (typeof e.hotkey !== 'string' || !e.hotkey) fail(name, '的 hotkey 必须是非空动作名');
       if (KEY_ACTIONS.includes(e.action)) fail(name, '同时是游戏键与热键冒充，说不清该问谁');
@@ -337,7 +345,8 @@ export function assertKeybinds(table = GAMEPAD_BINDINGS,
 
 /**
  * 界面态那张表的校验：同一把尺子，只是动作名单换成 `UI_PAD_ACTIONS`，
- * 并且允许 `ui` 那种报边沿的格子（左摇杆那四格在这张表里不存在 —— 界面要的是"按一下走一格"）。
+ * 并且允许 `ui` 那种报边沿的格子（左摇杆那四格在这张表里不存在 —— 界面要的是"往哪边走"，
+ * 走焦那四格用十字键就够，而且它们是 level：按住要能连着走，见上面 `UI_GAMEPAD_BINDINGS`）。
  */
 export function assertUiPadBindings(table = UI_GAMEPAD_BINDINGS) {
   return assertKeybinds(table, { actions: UI_PAD_ACTIONS, stickActions: [], allowSignal: true });

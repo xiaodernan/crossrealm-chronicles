@@ -145,6 +145,10 @@ export function isMapPassThrough(code) {
  *
  * 四个动作分成两对，出口各不相同，但都从这一份清单派发：↑↓ 问 `movePanelFocus`（走格），
  * ← → 问 `FocusNav.adjustFocused`（推焦点那一格的数值）。层表只认清单，不关心走的是哪一对。
+ *
+ * 同一份清单在切片18 又多答一个问题：**按住要连发的就是这四格**（`HotkeyRouter` 拿它当名单，
+ * 节奏在 `tuning.js` 的 `NAV_REPEAT`）。这里列**动作**不列键码的第二条理由也就是它：
+ * 名单只该有一份，否则"改了绑定的键盘能连发、手柄不能"这类分裂迟早回来。
  */
 export const UI_NAV_ACTIONS = ['uiUp', 'uiDown', 'uiLeft', 'uiRight'];
 
