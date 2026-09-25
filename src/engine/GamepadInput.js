@@ -19,6 +19,13 @@
  * 热键冒充 → 当前生效的热键表"）。两个后果都是想要的：改绑立刻生效、不必重建桥；
  * 而 `_release` 用的是**当初真正置过的那一格**（`s.claimedCode`），
  * 所以"按住时改绑"不会漏放一个键 —— 漏放就是玩家永远朝前走。
+ *
+ * ## 一根摇杆只有一个主人（W-A7 切片19）
+ *
+ * 界面里"推摇杆走格"与"按十字键走格"是**同一格**（`axes` + `dir`，十字键由 `dir` 顺带带上，
+ * 与移动那四格同一条机制）。分成两格就有两本 `claimedCode` 账抢同一把 ↑：先松手的那一格会把
+ * 另一格还按着的键抹掉，表现是"摇杆推着推着自己停了"。桥在这条路上只写电平（按住就为真、
+ * 回中立刻为假），推久了要不要连着走、多快走一格，仍然只在 `HotkeyRouter` 那一处说。
  */
 import {
   GAMEPAD_BINDINGS, PAD, PAD_BUTTON_BY_INDEX, PAD_BUTTON_COUNT,
@@ -173,6 +180,8 @@ export class GamepadInput {
         axisY: e.axes ? e.axes[1] : -1,
         dirName: e.dir ?? null,
         dpad: e.dir === undefined ? -1 : padDpadIndex(e.dir),
+        /** 走焦那几格：一次推斜只亮一格（移动那四格相反，45° 就是要斜着走） */
+        cardinal: e.cardinal === true,
         down: false,
         claimed: false,
         /** 当初真正置过的那一格：改绑之后仍要能原样放回去 */
@@ -276,7 +285,15 @@ export class GamepadInput {
       let on = s.button >= 0 && _pressed(buttons[s.button], s.down);
       // 八向量化与模拟量共用**同一个**死区（同一帧、同一份手档）：两条路一人一个死区，
       // 就会出现"方向码亮着、`mag` 却是 0"这种自相矛盾的一帧
-      if (!on && s.dirName !== null) on = _stickHeld(axes, s, this.tuning.deadzone) || _pressed(buttons[s.dpad], s.down);
+      if (!on && s.dirName !== null) {
+        const dz = this.tuning.deadzone;
+        // 走焦那几格多吃一档回中迟滞（切片19）：摇杆停在死区边上抖一抖会把派发方那本连发账
+        // 清零（节奏在 `HotkeyRouter`，桥一份都不许有），玩家看到的就是"焦点怎么老走不动"
+        const stick = s.cardinal
+          ? _stickCardinal(axes, s, dz, dz * PAD.navStickReleaseFactor, s.down)
+          : _stickHeld(axes, s, dz);
+        on = stick || _pressed(buttons[s.dpad], s.down);
+      }
       const fire = s.mode === 'level' ? on : (on && !s.down);
       s.down = on;
       // 脉冲只有一帧宽：主循环里 `poll()` 排在 `player.update` 之前，所以这一帧必然被
@@ -410,4 +427,24 @@ function _stickHeld(axes, s, deadzone = PAD.deadzone) {
   const n = Math.round(Math.atan2(-ly, lx) / OCTANT);
   const i = ((n % 8) + 8) % 8;
   return s.dirName === OCTANT_PRIMARY[i] || (s.dirName !== null && s.dirName === OCTANT_SECOND[i]);
+}
+
+/**
+ * 走焦那几格的方向判定（切片19）：**一次推斜只亮一格**。
+ *
+ * 与上面 `_stickHeld` 的三点差别各有理由：
+ * 1. 取**主轴**（`|lx|` 与 `|ly|` 谁大听谁的），不像八向量那样让斜方向点亮两格 —— 界面里
+ *    斜推会同时办掉"移一行"和"调这行的值"，而后者是玩家没打算要的副作用；
+ * 2. 两轴恰好相等时算**竖的**：走格比调值常用，而且这条规则要能写进用例、不能靠浮点运气；
+ * 3. 进入与松开门限分开（迟滞），理由见 `PAD.navStickReleaseFactor`。比较用**严格大于**：
+ *    死区允许拧到 0（`PAD_TUNING` 的下限），那时完全回中的摇杆不该被当成"一直推着"。
+ */
+function _stickCardinal(axes, s, engage, release, wasDown) {
+  const lx = axes[s.axisX] ?? 0;
+  const ly = axes[s.axisY] ?? 0;
+  if (!(Math.hypot(lx, ly) > (wasDown ? release : engage))) return false;
+  const dir = Math.abs(lx) > Math.abs(ly)
+    ? (lx > 0 ? 'right' : 'left')
+    : (ly > 0 ? 'down' : 'up');      // 手柄的 y 轴向下为正，与 `_pollMove` 那个符号约定同源
+  return s.dirName === dir;
 }

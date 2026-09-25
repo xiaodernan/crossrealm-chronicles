@@ -70,6 +70,18 @@ export const PAD = {
   /** 重映射模长到 0.9 才算"想跑"：留出最后一点行程，免得擦到量程边就误触发冲刺 */
   moveSprintThreshold: 0.9,
   /**
+   * 走焦那几格（`cardinal`）的**回中迟滞系数**（切片19）：推出 `deadzone` 才点亮，
+   * 要退到 `deadzone × 0.6` 以下才算松手。
+   *
+   * 为什么是系数而不是又一个绝对数值：扳机那对门限（`pressThreshold` / `releaseThreshold`）
+   * 吃的是 0~1 的绝对刻度，摇杆这一档吃的却是**玩家自己拧的** `deadzone`（可到 0）——
+   * 给一个固定下沿，在低死区档会高于进入门限，迟滞就反过来变成"一点亮就松不开"。
+   * 为什么这条链要有迟滞：切片18 已经证明松手会把连发账清零（`HotkeyRouter` 里那一笔 `_held = 0`），
+   * 摇杆停在死区边上抖一抖，玩家看到的就是"每抖一下重新等 0.42 秒" —— 焦点原地不动，
+   * 而"没反应"比"慢半拍"难查得多。
+   */
+  navStickReleaseFactor: 0.6,
+  /**
    * 右摇杆响应曲线：舵量 = `t ** lookCurve`。1.6 意味着半推只有约 33% 舵量（线性是 50%），
    * 中低段更细腻（微调准星不会一推就过头），满推端点与线性一致。
    * 移动**不吃这条曲线**：走路的"半推"要的就是半速，弯了它会变成"轻推不动、再推突然窜出去"。
@@ -242,11 +254,16 @@ export const UI_GAMEPAD_BINDINGS = {
    * 派发方（`HotkeyRouter`）才知道"还按着"，才谈得上自动重复。
    * 电平本身不等于连发 —— 许不许连发、多快，全在 `hotkeys.js` 的 `UI_NAV_ACTIONS` 与
    * `tuning.js` 的 `NAV_REPEAT` 那一处说；桥只负责"按着就把键留着"。
+   * 切片19 起这四格**同时**收左摇杆（`axes` + `dir`，十字键由 `dir` 自动带上，与移动那四格同一条机制）：
+   * 玩家推住摇杆与按住十字键要得到同一份电平，所以它们必须是**同一格**而不是两格 —— 两格就是
+   * 同一个借来的键两个主人，松手时谁都不知道自己该不该还（切片1 的 `claimedCode` 那本账会记乱）。
+   * `cardinal` 是这四格与移动那四格唯一的判据差别：移动推到 45° 想斜着走（八向量为它而设），
+   * 走焦推到 45° 只想走一格 —— 一次亮两格会把"移一行"和"调这行的值"同时办掉。
    * 下面 B / Start / A 三格仍是 edge：返回与确认按一次就够，按住连发是把面板开开关关。 */
-  navUp: { action: 'navUp', mode: 'level', button: 'dpadUp', hotkey: 'uiUp' },
-  navDown: { action: 'navDown', mode: 'level', button: 'dpadDown', hotkey: 'uiDown' },
-  navLeft: { action: 'navLeft', mode: 'level', button: 'dpadLeft', hotkey: 'uiLeft' },
-  navRight: { action: 'navRight', mode: 'level', button: 'dpadRight', hotkey: 'uiRight' },
+  navUp: { action: 'navUp', mode: 'level', axes: [0, 1], dir: 'up', cardinal: true, hotkey: 'uiUp' },
+  navDown: { action: 'navDown', mode: 'level', axes: [0, 1], dir: 'down', cardinal: true, hotkey: 'uiDown' },
+  navLeft: { action: 'navLeft', mode: 'level', axes: [0, 1], dir: 'left', cardinal: true, hotkey: 'uiLeft' },
+  navRight: { action: 'navRight', mode: 'level', axes: [0, 1], dir: 'right', cardinal: true, hotkey: 'uiRight' },
   // 返回与开合菜单在界面里是同一件事（都走 `escape` 那条级联），但保留两格是因为
   // 玩家手里的习惯不一样：有人按 B，有人按 Start —— 一枚按钮一个主人，这里仍然成立。
   back: { action: 'back', mode: 'edge', button: 'b', hotkey: 'escape' },
@@ -262,9 +279,6 @@ const DPAD_BUTTON = {
 
 const MODES = ['level', 'edge'];
 
-/** 左摇杆推动要影响的四个动作（其余动作不许声明 `axes`；切片9 的改绑界面按这条拒绝单键覆盖） */
-export const STICK_ACTIONS = ['moveUp', 'moveDown', 'moveLeft', 'moveRight'];
-
 /**
  * `KeyboardEvent.code` 的合法形状（`KeyA` / `Digit1` / `F5` / `Backquote` / `Numpad0`…）。
  * 与 `hotkeys.js` 同一把尺子：过了这条正则就没有别处需要再 escape 一次。
@@ -279,14 +293,17 @@ function fail(at, why) {
  * 整表校验，加载期跑一次（与 `assertArenaScript` 同一条纪律：错表要在**接上手柄之前**就红，
  * 而不是玩家插上手柄、按了一下发现"没反应"却不知道为什么）。
  *
- * 两张表共用这一把尺子（切片14）：差别只有"认得哪些动作名""哪些动作是摇杆 + 十字键"
- * 与"允不允许 `ui` 那种报边沿的格子"。规则本身一条都不分叉 ——
+ * 两张表共用这一把尺子（切片14）：差别只有"认得哪些动作名"与"允不允许 `ui` 那种报边沿的格子"。
+ * 走的是摇杆还是按钮**不查动作名名单**，只看那一格自己声明了 `axes` 还是 `button`（切片19）——
+ * 从前这里抄了一份 `STICK_ACTIONS`，多加一格摇杆就得同步一次名单，漏一次就是那一格的形状没人校验，
+ * 而"形状没被校验"这件事不会报错，只会在玩家推杆时表现为"没反应"。
+ * 规则本身一条都不分叉 ——
  * 尤其"一枚物理按钮只许一个动作认领"是**表内**规则：上下文之间允许重叠
  * （战斗里 A 是跳，界面里 A 是确认），因为同一帧只有一张表在被轮询（切换判据只有一处，
  * 见 `Game.padUiMode()`），所以"按一次办两件事"在这两张表上都成立不了。
  */
 export function assertKeybinds(table = GAMEPAD_BINDINGS,
-  { actions = PAD_ACTIONS, stickActions = STICK_ACTIONS, allowSignal = false } = {}) {
+  { actions = PAD_ACTIONS, allowSignal = false } = {}) {
   /**
    * 一枚物理按钮只许一个动作认领（切片9 起的必修项）。
    *
@@ -327,15 +344,22 @@ export function assertKeybinds(table = GAMEPAD_BINDINGS,
       fail(name, '既不在 KEY_ACTIONS 里，也没声明 hotkey —— 桥不知道该冒充哪个键');
     }
     if (e.button !== undefined && !(e.button in PAD_BUTTON)) fail(name, `的按钮 "${e.button}" 未登记`);
-    if (stickActions.includes(e.action)) {
-      if (e.button !== undefined) fail(name, '是移动动作，不该绑按钮（要的是摇杆 + 十字键）');
+    /* 摇杆格子还是按钮格子，看**这一格自己声明了什么**（切片19 起这是唯一的判据）。
+     * 以前这里查一份外部名单（`STICK_ACTIONS`），只有游戏表用得上；界面表今天也有了摇杆格
+     * （走焦那四格），名单就得再抄一份 —— 而"哪些格子是摇杆"这件事表本身就知道。 */
+    if (e.axes !== undefined) {
+      if (e.button !== undefined) fail(name, '是摇杆 + 十字键动作，不该绑按钮（十字键由 `dir` 自动带上）');
       if (!Array.isArray(e.axes) || e.axes.length !== 2
         || !e.axes.every((a) => Number.isInteger(a) && a >= 0)) {
         fail(name, '的 axes 必须是两个非负整数下标');
       }
       if (!DPAD_BUTTON[e.dir]) fail(name, '的 dir 必须是 up / down / left / right');
-    } else if (e.button === undefined || e.axes !== undefined || e.dir !== undefined) {
-      fail(name, '必须且只能声明一个 `button` 来源');
+      // 判定形状只许摇杆格有：按钮格子没有"两个入口"，带这个字段就是忘了自己在改哪张表
+      if (e.cardinal !== undefined && e.cardinal !== true) fail(name, '的 cardinal 只许是 true');
+    } else {
+      if (e.cardinal === true) fail(name, '是按钮格子，`cardinal` 只对摇杆方向有意义');
+      if (e.dir !== undefined) fail(name, '的 `dir` 只在摇杆格子里有意义（没有 axes，方向无处可查）');
+      if (e.button === undefined) fail(name, '必须声明一个 `button` 来源');
     }
     if (e.button !== undefined) claimPad(PAD_BUTTON[e.button], name, `按钮 ${e.button}`);
     if (e.dir !== undefined) claimPad(DPAD_BUTTON[e.dir], name, `十字键 ${e.dir}`);
@@ -345,11 +369,12 @@ export function assertKeybinds(table = GAMEPAD_BINDINGS,
 
 /**
  * 界面态那张表的校验：同一把尺子，只是动作名单换成 `UI_PAD_ACTIONS`，
- * 并且允许 `ui` 那种报边沿的格子（左摇杆那四格在这张表里不存在 —— 界面要的是"往哪边走"，
- * 走焦那四格用十字键就够，而且它们是 level：按住要能连着走，见上面 `UI_GAMEPAD_BINDINGS`）。
+ * 并且允许 `ui` 那种报边沿的格子。切片19 起这张表里也有了摇杆格（走焦那四格：摇杆与十字键
+ * 两路都要能走，而且是 level —— 按住要连着走，见上面 `UI_GAMEPAD_BINDINGS`），
+ * 所以"哪些格子是摇杆格"完全由表里的 `axes` 说话，这张表不必再给一份名单。
  */
 export function assertUiPadBindings(table = UI_GAMEPAD_BINDINGS) {
-  return assertKeybinds(table, { actions: UI_PAD_ACTIONS, stickActions: [], allowSignal: true });
+  return assertKeybinds(table, { actions: UI_PAD_ACTIONS, allowSignal: true });
 }
 
 /** 按钮名 → 序号（给轮询层用，避免各处自己查 `PAD_BUTTON`） */
@@ -525,8 +550,10 @@ export function factoryGamepadBindings() {
  * 键盘那边靠 `CODE_PATTERN` 正则拦注入，这边更严：**只许枚举值**，所以玩家输入的
  * 字符串永远进不了界面，界面上显示的只有标签表里那十来个固定字样。
  *
- * 移动那四格（`STICK_ACTIONS`）直接拒绝：它们要的是"摇杆方向 + 十字键"两个入口，
- * 改成单按钮等于把十字键或摇杆扔掉 —— 那是减法，不是改绑。
+ * 凡是**声明了 `axes`** 的格子直接拒绝（切片19 起判据看这一格自己有什么）：它们要的是
+ * "摇杆方向 + 十字键"两个入口，改成单按钮等于把其中一个扔掉 —— 那是减法，不是改绑。
+ * 以前这里查一份手抄的名单（`STICK_ACTIONS`，只有移动那四格），界面表今天也有了摇杆格
+ * （走焦那四格），名单就得再抄一遍；而"哪些格子是摇杆格"这件事表本身就知道。
  */
 export function resolveGamepadBindings(base = GAMEPAD_BINDINGS, overrides = {}) {
   const out = {};
@@ -537,7 +564,7 @@ export function resolveGamepadBindings(base = GAMEPAD_BINDINGS, overrides = {}) 
     if (typeof button !== 'string' || !(button in PAD_BUTTON)) {
       throw new Error(`动作 "${name}" 的手柄按键不合法：${JSON.stringify(button)}`);
     }
-    if (STICK_ACTIONS.includes(name)) {
+    if (target.axes !== undefined) {
       throw new Error(`动作 "${name}" 是左摇杆 + 十字键，不能改绑成单个按钮`);
     }
     target.button = button;

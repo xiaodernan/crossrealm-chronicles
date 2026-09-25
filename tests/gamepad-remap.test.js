@@ -18,7 +18,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   GAMEPAD_BINDINGS, KEY_BINDINGS, PAD_ACTIONS, PAD_BUTTON, PAD_BUTTON_BY_INDEX, PAD_BUTTON_COUNT,
-  STICK_ACTIONS, assertKeybinds, buildBindingTables, factoryGamepadBindings,
+  assertKeybinds, buildBindingTables, factoryGamepadBindings,
   resolveGamepadBindings,
 } from '../src/content/keybinds.js';
 import { UI_HOTKEYS } from '../src/content/hotkeys.js';
@@ -726,6 +726,8 @@ describe('显示与静态门禁', () => {
     expect(() => assertKeybinds(GAMEPAD_BINDINGS)).not.toThrow();
     expect(() => buildBindingTables({}, UI_HOTKEYS, {})).not.toThrow();
     expect(Object.keys(factoryGamepadBindings()).sort()).toEqual([...PAD_ACTIONS].sort());
-    expect(STICK_ACTIONS).toEqual(['moveUp', 'moveDown', 'moveLeft', 'moveRight']);
+    // 摇杆格由**格子自己声明的 `axes`** 说了算（切片19：以前这里查一份手抄名单）
+    expect(Object.keys(GAMEPAD_BINDINGS).filter((n) => GAMEPAD_BINDINGS[n].axes !== undefined))
+      .toEqual(['moveUp', 'moveDown', 'moveLeft', 'moveRight']);
   });
 });
