@@ -20,7 +20,8 @@ import {
   GAMEPAD_BINDINGS, KEY_BINDINGS, PAD_ACTIONS, PAD_BUTTON, PAD_BUTTON_BY_INDEX, PAD_BUTTON_COUNT,
   UI_GAMEPAD_BINDINGS,
   assertKeybinds, assertPadOnlyLabels, assertUiPadBindings, assertPadScopesDisjoint,
-  buildBindingTables, factoryGamepadBindings, padOnlyPadActions, padScopeOf, resolveGamepadBindings,
+  buildBindingTables, factoryGamepadBindings, padCellClaims, padOnlyPadActions, padScopeOf,
+  resolveGamepadBindings,
 } from '../src/content/keybinds.js';
 import { UI_HOTKEYS } from '../src/content/hotkeys.js';
 import { PAD_BUTTON_LABELS, padButtonLabel, padStickLabel } from '../src/content/keyLabels.js';
@@ -126,25 +127,31 @@ describe('手柄覆盖表：一枚按钮只许一个动作认领', () => {
     expect(() => resolveGamepadBindings(GAMEPAD_BINDINGS, { jump: 'dpadLeft' })).toThrow(/dpadLeft已被动作 "moveLeft" 认领/);
   });
 
-  it('换到一枚空着的键仍然可以（认领校验不是"什么都别改"）', () => {
-    const t = resolveGamepadBindings(GAMEPAD_BINDINGS, { parry: 'rightStick' });
+  it('满认领的表上合法的单次写入是**交换**：认两格互相让位（校验不是"什么都别改"）', () => {
+    // 切片31 之前这一条用的是"右摇杆按下没人认领"，所以写一格就够；现在 16 枚全占，
+    // 一格让位必须有一格接位 —— 下面那组"捕获 = 交换"就是把这条写进界面里。
+    const t = resolveGamepadBindings(GAMEPAD_BINDINGS, { parry: 'rightStick', interact: 'x' });
     expect(() => assertKeybinds(t)).not.toThrow();
     expect(t.parry.button).toBe('rightStick');
+    expect(t.interact.button).toBe('x');
   });
 
-  it('出厂表本身 16 格里被认领的那 15 枚互不重复（新校验上线即绿的底）', () => {
+  it('出厂表 16 格把 16 枚按钮**认领满**且互不重复（切片31 之后一枚空槽都不剩）', () => {
     const claimed = [];
     for (const e of Object.values(GAMEPAD_BINDINGS)) {
-      if (e.button !== undefined) claimed.push(PAD_BUTTON[e.button]);
-      if (e.dir !== undefined) claimed.push(PAD_BUTTON[`dpad${e.dir[0].toUpperCase()}${e.dir.slice(1)}`]);
+      for (const [index] of padCellClaims(e)) claimed.push(index);
     }
     expect(claimed).toHaveLength(PAD_ACTIONS.length);
     expect(new Set(claimed).size).toBe(claimed.length);
+    // 满认领不是排版巧合，是这一片改绑语义的前提：没有空槽，"捕获一枚空着的键"就无处可捕获
+    expect(new Set(claimed).size, '一枚空槽都不剩 → 捕获必须走交换').toBe(PAD_BUTTON_COUNT);
   });
 
   it('`buildBindingTables` 第三参一起建三张表：手柄改坏同样整体抛', () => {
-    const { padTable, keyTable, hotkeyTable } = buildBindingTables({ parry: 'KeyY' }, UI_HOTKEYS, { jump: 'rightStick' });
+    const { padTable, keyTable, hotkeyTable } = buildBindingTables(
+      { parry: 'KeyY' }, UI_HOTKEYS, { jump: 'rightStick', interact: 'a' });
     expect(padTable.jump.button).toBe('rightStick');
+    expect(padTable.interact.button).toBe('a');
     expect(keyTable.parry.code).toBe('KeyY');
     expect(hotkeyTable).toHaveLength(UI_HOTKEYS.length);
     expect(() => buildBindingTables({}, UI_HOTKEYS, { jump: 'b' })).toThrow(/按钮 b已被动作 "jump" 认领/);
@@ -183,7 +190,8 @@ describe('桥换表：按住期间改绑不丢键、不补发', () => {
     press(pad, 'leftBumper');              // 锁定：KeyQ
     b.poll();
     expect(b.keys.KeyQ).toBe(true);
-    b.useBindings(resolveGamepadBindings(GAMEPAD_BINDINGS, { lockOn: 'rightStick', parry: 'leftBumper' }));
+    b.useBindings(resolveGamepadBindings(GAMEPAD_BINDINGS,
+      { lockOn: 'rightStick', parry: 'leftBumper', interact: 'x' }));
     b.poll();                             // 新按钮（右摇杆按下）没被按着 → 放还当初借走的那一格
     expect(b.keys.KeyQ).toBe(false);
   });
@@ -209,7 +217,7 @@ describe('桥换表：按住期间改绑不丢键、不补发', () => {
     b.poll();
     expect(b.keys.ShiftLeft).toBe(true);
     b.keys.ShiftLeft = false;
-    b.useBindings(resolveGamepadBindings(GAMEPAD_BINDINGS, { parry: 'rightStick' }));
+    b.useBindings(resolveGamepadBindings(GAMEPAD_BINDINGS, { parry: 'rightStick', interact: 'x' }));
     b.poll();
     expect(b.keys.ShiftLeft).toBe(true);   // 还按着 → 这一帧照样是"冲刺按着"
   });
@@ -594,10 +602,12 @@ describe('设置面板：多出来的那一列', () => {
   });
 
   it('格子显示的是生效表而不是常量：叠了覆盖之后那一格立刻改口', () => {
-    const { host, panel } = mount({}, { jump: 'rightStick' });
+    const { host, panel } = mount({}, { jump: 'rightStick', interact: 'a' });
     panel.refresh();
     expect(host.innerHTML).toMatch(/data-padbind="jump">右摇杆按下</);
     expect(host.innerHTML).not.toMatch(/data-padbind="jump">A</);
+    // 交换伙伴也照实显示：那一行说"A"就等于把玩家刚做的那次让位藏起来（B47 那一族）
+    expect(host.innerHTML).toMatch(/data-padbind="interact">A</);
   });
 
   it('点一行进入等待态：桥开始捕获，同时退出键盘等待态', () => {
@@ -616,16 +626,19 @@ describe('设置面板：多出来的那一列', () => {
   it('走完一次捕获：写进 `gamepadBinds`、重建三张表、桥换表、等待态归零', () => {
     const pad = makePad();
     setPads(pad);
-    const { host, panel, game, padInput } = mount();
+    const { host, panel, game, padInput, toast } = mount();
     panel.refresh();
     host.click(padBtn('jump'));
     press(pad, 'rightStick');
     padInput.poll();
     press(pad, 'rightStick', false);
     padInput.poll();
-    expect(game.settings.get('gamepadBinds')).toEqual({ jump: 'rightStick' });
+    // 右摇杆按下归交互（切片31）：这一枚按下去是**交换**，两格一起写进覆盖包
+    expect(game.settings.get('gamepadBinds')).toEqual({ jump: 'rightStick', interact: 'a' });
+    expect(toast.join('\n'), '交换必须说得出，不能静悄悄把交互搬走').toMatch(/交换/);
     expect(game.rebuilds).toBe(2);
     expect(game.padTable.jump.button).toBe('rightStick');
+    expect(game.padTable.interact.button).toBe('a');
     expect(panel.capturingPad).toBe(null);
     expect(host.innerHTML).toMatch(/data-padbind="jump">右摇杆按下</);
   });
@@ -646,8 +659,9 @@ describe('设置面板：多出来的那一列', () => {
     padInput.poll();
     press(pad, 'rightStick', false);
     padInput.poll();
-    expect(toast, '一枚没人认领的右摇杆按下，不该被判成"无效或已被占用"').toHaveLength(0);
-    expect(game.settings.get('gamepadBinds')).toEqual({ pauseMenu: 'rightStick' });
+    expect(toast.join('\n'), '按下被占用的按钮不该再被判成"无效或已被占用"，而是交换').toMatch(/交换/);
+    expect(/无效|占用/.test(toast.join(''))).toBe(false);
+    expect(game.settings.get('gamepadBinds')).toEqual({ pauseMenu: 'rightStick', interact: 'start' });
     expect(game.settings.get('gamepadUiBinds'), '点的是战斗那一格，界面那格一个键都不该动').toEqual({});
     expect(game.padTable.pauseMenu.button).toBe('rightStick');
     expect(host.innerHTML).toMatch(/data-padbind="pauseMenu">右摇杆按下</);
@@ -734,20 +748,107 @@ describe('设置面板：多出来的那一列', () => {
       .toThrow(/不能改绑成单个按钮/);
   });
 
-  it('撞键的捕获不写盘：给一句 toast，那一格保持原样', () => {
+  it('换不成仍然拒：前主人是摇杆格，让它改绑单键就是那场减法', () => {
     const pad = makePad();
     setPads(pad);
     const { panel, game, padInput, toast } = mount();
     panel.setPadCapturing('jump');
-    press(pad, 'x');                       // X 出厂是弹反的
+    press(pad, 'dpadUp');                    // 十字键 ↑ 由 `moveUp` 顺带认领
     padInput.poll();
-    press(pad, 'x', false);
+    press(pad, 'dpadUp', false);
     padInput.poll();
     expect(game.settings.get('gamepadBinds')).toEqual({});
     expect(game.rebuilds).toBe(1);
     expect(toast).toHaveLength(1);
     expect(/占用|无效/.test(toast[0])).toBe(true);
+    // 前缀"无效或已被别的动作占用"是死文案，光判它等于没判：拒的那一句必须点得出**这枚现在归谁**
+    expect(toast[0], '只说"改不动"，玩家不知道是哪一格挡着路').toMatch(/前进/);
     expect(panel.capturingPad).toBe(null);
+  });
+
+  /* 切片31 给 `interact` 认领了右摇杆按下，出厂战斗表从此是 **16 格对 16 枚按钮，一枚不剩**。
+   * 于是"捕获一枚空着的按钮"这条唯一的合法写入路径在战斗表上消失了 —— 按什么都回一句
+   * "已被占用"，手柄改绑整片成为摆设（上面那 10 条用例原来全靠右摇杆那一枚空槽当夹具，
+   * 这也是它们在同一轮里同时红的原因：不是用例写坏了，是生产把那枚槽用掉了）。
+   * 这里把语义改成**交换**：前主人搬进捕获动作原来那枚按钮。
+   * 为什么不是"抢过来"（前主人失去按钮）：一个没有按钮的动作正是这一串切片一直在修的病
+   * （B60/B61 —— 那条路从来没被定义），改绑界面不该成为制造这种病的工具。
+   * 交换的两头在同一张表里，所以"一枚按钮一个主人"与"每格都有出口"两条同时成立。 */
+  describe('捕获一枚已被占用的按钮 = 交换（战斗表 16 枚认领满，没有空槽）', () => {
+    it('捕获 X（弹反出厂那枚）给跳跃：写两格覆盖，jump 拿 X、parry 拿 A', () => {
+      const pad = makePad();
+      setPads(pad);
+      const { panel, game, padInput, toast } = mount();
+      panel.setPadCapturing('jump');
+      press(pad, 'x');
+      padInput.poll();
+      press(pad, 'x', false);
+      padInput.poll();
+      expect(game.settings.get('gamepadBinds')).toEqual({ jump: 'x', parry: 'a' });
+      expect(game.padTable.jump.button).toBe('x');
+      expect(game.padTable.parry.button).toBe('a');
+      expect(toast.join('\n'), '交换要说出口，不能静悄悄把弹反搬走').toMatch(/交换/);
+      // 同理：那句里必须真写得出"谁搬去了哪里"，否则 /交换/ 只是一句模板
+      expect(toast[0]).toMatch(/X 归跳跃/);
+      expect(toast[0]).toMatch(/A 归弹反/);
+      expect(/占用|无效/.test(toast.join(''))).toBe(false);
+      expect(() => assertKeybinds(game.padTable)).not.toThrow();
+    });
+
+    it('交换之后每格仍有出口：改绑不许当场造出"按不动的动作"', () => {
+      const { panel, game } = mount();
+      panel.setPadCapturing('attackLight');            // 轻击出厂在 RB
+      panel.capturePadButton('leftTrigger');           // LT 归蓄力法术（切片30 那格）
+      const homeless = Object.entries(game.padTable)
+        .filter(([, e]) => e.button === undefined && e.axes === undefined)
+        .map(([name]) => name);
+      expect(homeless, '交换把某格挤成了没有出口 —— 那正是 B61 的反向制造').toEqual([]);
+      expect(game.padTable.attackLight.button).toBe('leftTrigger');
+      expect(game.padTable.spell1.button).toBe('rightBumper');
+    });
+
+    it('前主人拿的是捕获动作**原来那枚**，而且主人问的是生效表不是出厂表', () => {
+      // 先把 jump↔parry 换好，再把翻滚换到 X 上：此时 X 的主人是 jump（不是 parry），
+      // 而 jump 现在的按钮是 x，翻滚原来的按钮是 b。查错表就会写出冲突的第三格。
+      const { panel, game } = mount({}, { jump: 'x', parry: 'a' });
+      panel.setPadCapturing('roll');
+      panel.capturePadButton('x');
+      expect(game.settings.get('gamepadBinds')).toEqual({ jump: 'b', parry: 'a', roll: 'x' });
+      expect(game.padTable.roll.button).toBe('x');
+      expect(game.padTable.jump.button).toBe('b');
+      expect(() => assertKeybinds(game.padTable)).not.toThrow();
+    });
+
+    it('捕获自己已经占着的那枚 = 原样不动，也不硬塞一个交换伙伴', () => {
+      const { panel, game, toast } = mount();
+      panel.setPadCapturing('jump');
+      panel.capturePadButton('a');                       // A 出厂就是跳跃
+      expect(game.settings.get('gamepadBinds')).toEqual({ jump: 'a' });
+      expect(toast.join('')).not.toMatch(/交换/);
+      expect(game.padTable.parry.button).toBe('x');      // 别人一格都不该被带着动
+    });
+
+    it('交换只动同一只覆盖包：界面表里换 A/B，战斗那格一个键都不写', () => {
+      const { panel, game, toast } = mount();
+      panel.setPadCapturing('confirm');                  // 界面里 A = 确认
+      panel.capturePadButton('b');                       // B 在界面表里是"返回"
+      expect(game.settings.get('gamepadUiBinds')).toEqual({ confirm: 'b', back: 'a' });
+      expect(game.settings.get('gamepadBinds'), '跨包写键 = 两格覆盖包互相踩').toEqual({});
+      expect(game.uiPadTable.confirm.button).toBe('b');
+      expect(game.padTable.attackLight.button, '战斗表里的 RB 与界面无关').toBe('rightBumper');
+      expect(toast.join('\n')).toMatch(/交换/);
+    });
+
+    it('面板那一行立刻改口：两行都显示新按钮（显示与行为分家正是 B47 那一族）', () => {
+      const { host, panel, game } = mount();
+      panel.refresh();
+      panel.setPadCapturing('jump');
+      panel.capturePadButton('x');
+      panel.refresh();
+      expect(host.innerHTML).toMatch(/data-padbind="jump">X</);
+      expect(host.innerHTML).toMatch(/data-padbind="parry">A</);
+      expect(game.padTable.parry.button).toBe('a');
+    });
   });
 
   it('改绑之后旧按钮真的不再触发：按下 A 不再跳', () => {
@@ -760,9 +861,11 @@ describe('设置面板：多出来的那一列', () => {
     press(pad, 'rightStick', false);
     padInput.poll();
     expect(game.padTable.jump.button).toBe('rightStick');
+    expect(game.padTable.interact.button).toBe('a');    // 让位的伙伴也在生效表里，不是只写在覆盖包
     press(pad, 'a');
     padInput.poll();
     expect(padInput.keys.Space).toBeFalsy();      // 出厂那枚 A 从此不再跳跃
+    expect(padInput.keys[KEY_BINDINGS.interact.code]).toBe(true);   // 现在是交互在借这一格
     press(pad, 'a', false);
     press(pad, 'rightStick');
     padInput.poll();
@@ -791,7 +894,7 @@ describe('设置面板：多出来的那一列', () => {
   });
 
   it('恢复默认键位把三格覆盖一起清掉（少清一格就是半复位）', () => {
-    const { host, game } = mount({ parry: 'KeyY' }, { jump: 'rightStick' }, { back: 'rightStick' });
+    const { host, game } = mount({ parry: 'KeyY' }, { jump: 'rightStick', interact: 'a' }, { back: 'rightStick' });
     host.click(resetBtn());
     expect(game.settings.get('keybinds')).toEqual({});
     expect(game.settings.get('gamepadBinds')).toEqual({});
@@ -808,7 +911,7 @@ describe('设置面板：多出来的那一列', () => {
     panel.setPadCapturing('parry');
     panel.capturePadButton('rightStick');
     expect(game.settings.get('keybinds')).toEqual({ parry: 'KeyY' });
-    expect(game.settings.get('gamepadBinds')).toEqual({ parry: 'rightStick' });
+    expect(game.settings.get('gamepadBinds')).toEqual({ parry: 'rightStick', interact: 'x' });
     panel.captureKey({ code: 'KeyB', preventDefault() {}, stopPropagation() {} });   // 没在等键盘 → 静默返回
     expect(game.settings.get('keybinds')).toEqual({ parry: 'KeyY' });
   });

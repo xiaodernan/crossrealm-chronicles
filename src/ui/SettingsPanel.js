@@ -1,7 +1,7 @@
 import { UI_HOTKEYS, UI_HOTKEY_LABELS } from '../content/hotkeys.js';
 import {
   GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, PAD_ONLY_ACTION_LABELS, UI_GAMEPAD_BINDINGS,
-  buildBindingTables, padOnlyPadActions, padScopeOf,
+  buildBindingTables, padButtonOwner, padCellButtonName, padOnlyPadActions, padScopeOf,
 } from '../content/keybinds.js';
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
@@ -18,6 +18,13 @@ const CAMEL_EDGE = /[A-Z]/g;
  * 所以 id 只有一个来源，测试也照着它反查壳页（双向：表里有的必须画得出、画出来的必须在表里）。
  */
 export const padKnobId = (key) => `set-${key.replace(CAMEL_EDGE, (m) => `-${m.toLowerCase()}`)}`;
+
+/**
+ * 动作的人话名：键盘侧标签表优先，只有手柄有的那格（`confirm`）查"手柄专属"那张，
+ * 两张都没有就老实退回动作名。toast 里点名"谁和谁换了"用的就是这个名字 ——
+ * 给玩家看 `parry` 不等于给玩家看事实（B47 那一族：显示与行为分家）。
+ */
+const actionLabel = (action) => KEY_ACTION_LABELS[action] ?? PAD_ONLY_ACTION_LABELS[action] ?? action;
 
 export class SettingsPanel {
   constructor(game) {
@@ -150,6 +157,13 @@ export class SettingsPanel {
    * `action` 是**条目自己的动作名**（切片23）：面板给的那格写的就是它，所以这里能直接问
    * `padScopeOf` 该落进哪一格覆盖包。以前写的是"行的动作名"，于是 `pauseMenu` 那一格
    * 落成 `{escape: ...}` —— 两张表都不认识 `escape`，玩家点那颗 Start 必然只得到"无效"（B54）。
+   *
+   * **按下已被占用的按钮 = 交换**（切片31）。出厂战斗表 16 格把 16 枚按钮认领满，
+   * 一枚空槽都不剩：只许"改到没人要的按钮"等于手柄改绑整片按不动（每一次捕获都回一句占用）。
+   * 交换把前主人搬进捕获动作原来那枚按钮，两条不变式同时守住：一枚按钮一个主人（B51），
+   * 每个动作仍有出口（B61 —— "没有按钮的动作"就是"这条路从来没被定义"）。
+   * 为什么不是"抢过来"（前主人失去按钮）：那正是这一片要消灭的形状。
+   * 换不成仍然拒：前主人是摇杆格（移动那四格）时让它改绑单键是场减法，校验会抛，照旧只 toast。
    */
   capturePadButton(name) {
     const action = this.capturingPad;
@@ -157,17 +171,35 @@ export class SettingsPanel {
     if (!action) return;
     const ui = padScopeOf(action) === 'ui';
     const key = ui ? 'gamepadUiBinds' : 'gamepadBinds';
+    const table = (ui ? this.game.uiPadTable : this.game.padTable)
+      ?? (ui ? UI_GAMEPAD_BINDINGS : GAMEPAD_BINDINGS);
     const overrides = { ...(ui ? this._uiPadOverrides() : this._padOverrides()), [action]: name };
+    const owner = padButtonOwner(table, name);
+    // 主人就是自己 = 把这一格按回它原来那枚，不该顺手把别人也搬一次
+    const partner = owner && owner !== action ? owner : null;
+    // 前主人拿的是**捕获动作现在**占着的那枚（不是它自己的旧值 —— 它的旧值就是 `name`，
+    // 那样写等于两格都指向同一枚按钮，校验会把整包拒掉）
+    const mine = padCellButtonName(table, action);
+    if (partner) overrides[partner] = mine;
+    const keyboard = this.game.settings.get('keybinds') ?? {};
     try {
-      buildBindingTables(this.game.settings.get('keybinds') ?? {}, UI_HOTKEYS,
+      buildBindingTables(keyboard, UI_HOTKEYS,
         ui ? this._padOverrides() : overrides,
         ui ? overrides : this._uiPadOverrides());
     } catch {
-      this.game.dialog?.toast(`该手柄按键无效或已被别的动作占用：${padButtonLabel(name)}`);
+      // 换不成（前主人是摇杆格那种）就一格都不写：半个交换比不换更难查
+      const why = owner
+        ? `${padButtonLabel(name)} 归${actionLabel(owner)}，而那一格的出口挂在摇杆上，让不出这一枚按钮`
+        : `${padButtonLabel(name)} 不是这张表认得的按钮`;
+      this.game.dialog?.toast(`该手柄按键无效或已被别的动作占用：${why}`);
       return this.refreshKeybinds();
     }
     this.game.settings.set(key, overrides);
     this.game.rebuildHotkeys();
+    if (partner) {
+      this.game.dialog?.toast(`已与"${actionLabel(partner)}"交换：${padButtonLabel(name)} 归${actionLabel(action)}，`
+        + `${padButtonLabel(mine)} 归${actionLabel(partner)}`);
+    }
     this.refreshKeybinds();
   }
 

@@ -188,12 +188,13 @@ export const PAD_BUTTON_COUNT = Object.keys(PAD_BUTTON).length;
 export const PAD_ACTIONS = [
   'moveUp', 'moveDown', 'moveLeft', 'moveRight',
   'sprint', 'jump', 'roll', 'parry', 'skill', 'lockOn',
-  'attackLight', 'attackHeavy', 'spell1', 'swapWeapon', 'pauseMenu',
+  'attackLight', 'attackHeavy', 'spell1', 'swapWeapon', 'interact', 'pauseMenu',
 ];
 
 /**
  * 游戏逻辑动作名（键盘侧）。与 `PAD_ACTIONS` 有重叠但不相等 ——
- * 手柄只绑了法术 1，键盘有 1~4；手柄没有"交互/快速旅行"，键盘有。
+ * 手柄只绑了法术 1（切片30 之前那一格还按错过档，见文件头的规矩），键盘有 1~4；
+ * 交互两侧都有（切片31 补的手柄格认领右摇杆按下），快速旅行只有键盘有、手柄侧走世界地图那格。
  * 两者共用同一批动作名，所以一次重映射同时改到键盘与手柄。
  *
  * 动作名与 `MoveTable` 的**招式名**、输入缓冲的**动作名**是同一套字
@@ -266,6 +267,13 @@ export const GAMEPAD_BINDINGS = {
   // 蓄力法术判的是"按住了多久"，不是"按过没有"：这一格必须是 level（见文件头那条规矩）
   spell1: { action: 'spell1', mode: 'level', button: 'leftTrigger' },
   swapWeapon: { action: 'swapWeapon', mode: 'edge', button: 'select' },
+  // 切片31：`interact` 过去只有键盘出口（出厂 `KeyE`），纯手柄玩家走到营火 / NPC / 世界之锚
+  // 面前没有任何一条路能触发它。认领空着的**右摇杆按下**（冲刺是左摇杆按下，两枚不打架；
+  // 界面表那侧也没人用这一枚，见 `tests/pad-interact.test.js` 的"一个主人"那条）。
+  // 这一格是 `edge` 而不是 `level`，按的是文件头那条规矩：消费者
+  // （`PlayerController.handleInteractions`）读完就把键清成 false 再进 0.8 秒冷却，
+  // 判的是"按过没有" —— 给电平就变成"按住营火每帧重开一次对话"，W-A4 那一类。
+  interact: { action: 'interact', mode: 'edge', button: 'rightStick' },
   // 暂停菜单归 UI 热键表（`escape`），那一格可重映射，所以这里只写逻辑动作名
   pauseMenu: { action: 'pauseMenu', mode: 'edge', button: 'start', hotkey: 'escape' },
 };
@@ -446,8 +454,7 @@ export function assertKeybinds(table = GAMEPAD_BINDINGS,
       if (e.dir !== undefined) fail(name, '的 `dir` 只在摇杆格子里有意义（没有 axes，方向无处可查）');
       if (e.button === undefined) fail(name, '必须声明一个 `button` 来源');
     }
-    if (e.button !== undefined) claimPad(PAD_BUTTON[e.button], name, `按钮 ${e.button}`);
-    if (e.dir !== undefined) claimPad(DPAD_BUTTON[e.dir], name, `十字键 ${e.dir}`);
+    for (const [index, what] of padCellClaims(e)) claimPad(index, name, what);
   }
   return table;
 }
@@ -465,6 +472,42 @@ export function assertUiPadBindings(table = UI_GAMEPAD_BINDINGS) {
 /** 按钮名 → 序号（给轮询层用，避免各处自己查 `PAD_BUTTON`） */
 export function padButtonIndex(name) {
   return PAD_BUTTON[name];
+}
+
+/**
+ * 这一格认领了哪一枚物理按钮：`[[序号, 人话名]]`。
+ *
+ * 摇杆格（`axes` + `dir`）由方向**顺带**带上十字键那一枚，所以它也算认领了一枚按钮 ——
+ * 这件事只有这一处算式。校验层与设置面板的"交换"必须用同一把尺子量"这枚按钮有没有主人"，
+ * 各写一遍就会有一处漏掉十字键，而漏掉的表现不是报错，是"按一次办两件事"重新出现（B51）。
+ */
+export function padCellClaims(e) {
+  if (e.button !== undefined) return [[PAD_BUTTON[e.button], `按钮 ${e.button}`]];
+  if (e.dir !== undefined) return [[DPAD_BUTTON[e.dir], `十字键 ${e.dir}`]];
+  return [];
+}
+
+/**
+ * 一枚按钮在这张表里归谁（含摇杆格顺带认领的十字键）；没人认领返回 null。
+ *
+ * 传进来的必须是**生效表**而不是出厂表：玩家已经改过绑之后，出厂那枚按钮的主人早就换了，
+ * 拿出厂表去问就会把交换伙伴写错一格（覆盖包叠上去正好撞键，而校验会把整包拒掉 ——
+ * 表现是"我明明按了这枚，怎么改不上"）。
+ */
+export function padButtonOwner(table, button) {
+  const index = PAD_BUTTON[button];
+  for (const [name, e] of Object.entries(table)) {
+    for (const [i] of padCellClaims(e)) if (i === index) return name;
+  }
+  return null;
+}
+
+/** 这一格现在占着哪枚按钮（名字，不是序号）；摇杆格报它顺带认领的十字键。没占任何按钮返回 null */
+export function padCellButtonName(table, action) {
+  const e = table[action];
+  if (!e) return null;
+  const claims = padCellClaims(e);
+  return claims.length ? PAD_BUTTON_BY_INDEX[claims[0][0]] : null;
 }
 
 export function padDpadIndex(direction) {
