@@ -41,10 +41,15 @@ export const OVERLAY_LAYERS = [
    */
   { layer: 'combatCinematic', state: 'combatCinematicSkippable', back: true, blocks: false },
   /**
-   * 唯一的硬模态：升级面板没有返回路径（只能点"继续探索"），所以它连返回键一起挡。
-   * 给它一条返回层是 W-D1 后面的事，这一片先把"别在升级面板后面弹出菜单"钉住。
+   * 升级面板（营火）。切片10 那一版把它写成唯一的硬模态：没有返回路径，只能点"继续探索"。
+   *
+   * 切片24 改口的理由不是"想要一个快捷键"，而是**纯手柄玩家进不去也退不出**：这一层既不
+   * `back`（级联不吃它），又没有 `nav`（↑↓ 走不进那九格），而 A 那一下要"当前有聚焦元素"
+   * 才点得动 —— 真浏览器读数里 Escape / ↑↓ / Tab / 手柄 B / 手柄 A / Start 六条路全都不改变
+   * 任何东西，只有鼠标能解。今天它是一层**吃得掉、走得进**的普通模态：返回键关掉它，
+   * ↑↓ 走进那九格，A 交给浏览器激活焦点那一格（与其他面板同一条路）。
    */
-  { layer: 'upgrade', state: 'upgradeOpen', back: false, blocks: true },
+  { layer: 'upgrade', state: 'upgradeOpen', back: true, blocks: true, nav: 'upgrade-panel' },
 ];
 
 const BY_STATE = new Map(OVERLAY_LAYERS.map((l) => [l.state, l]));

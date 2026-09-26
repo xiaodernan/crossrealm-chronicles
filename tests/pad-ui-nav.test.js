@@ -23,6 +23,8 @@ import { Game } from '../src/core/Game.js';
 import { moveFocusWithin, focusFirstItem, activateFocused } from '../src/ui/FocusNav.js';
 import { HotkeyRouter } from '../src/ui/HotkeyRouter.js';
 import { fakeDoc, fakeItem, fakePanel } from './helpers/fakePanelDom.js';
+// 界面态的名单从层表现取（切片24）：测试里再抄一份"哪几层收焦点"就是第二份真源
+import { OVERLAY_LAYERS } from '../src/ui/OverlayStack.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -429,13 +431,17 @@ describe('Game：上下文判定与换表都只有一条路', () => {
     return g;
   };
 
-  it('暂停菜单 / 设置 / 说明书 / 快速旅行开着 = 界面态；地图与对话不算', () => {
+  it('收焦点的那五层开着 = 界面态；地图 / 对话 / 自动演示不算', () => {
     const probe = (over) => Game.prototype.padUiMode.call(gameWith(over));
-    for (const k of ['pauseMenuOpen', 'settingsOpen', 'helpOpen', 'fastTravelOpen']) {
+    // 判据是"有没有一层收了焦点"（`topNavLayer`），名单从层表现取 —— 测试里不抄第二份
+    const navs = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.state);
+    expect(navs.sort()).toEqual(['fastTravelOpen', 'helpOpen', 'pauseMenuOpen', 'settingsOpen', 'upgradeOpen'].sort());
+    for (const k of navs) {
       expect(probe({ [k]: true }), k).toBe(true);
     }
-    for (const k of ['worldMapOpen', 'dialogOpen', 'autoPlayActive', 'upgradeOpen']) {
-      expect(probe({ [k]: true }), k).toBe(false);   // 那些面板今天不收焦点 → 手柄也仍归战斗
+    // 升级面板今天在里面（切片24 / B55）：它收焦点，所以那九格手柄走得到
+    for (const k of ['worldMapOpen', 'dialogOpen', 'autoPlayActive']) {
+      expect(probe({ [k]: true }), k).toBe(false);   // 那些面板今天不收焦点 → 手柄仍归战斗
     }
     expect(probe({})).toBe(false);
   });

@@ -1,4 +1,5 @@
 import { WEAPON_SKILLS } from '../game/WeaponSkillTree.js';
+import { focusFirstItem } from './FocusNav.js';
 
 export class UpgradePanel {
   constructor(game) {
@@ -21,6 +22,9 @@ export class UpgradePanel {
     document.exitPointerLock?.();
     this.game.weaponSkills?.tryNarrativeUnlocks?.(this.game);
     this.refresh(restName);
+    // 落焦第一格（切片24 / B55）：这一层今天登记了 `nav`，↑↓ 与手柄十字键走进来要有落点；
+    // A 那一下仍然问浏览器（`activateFocused` 点当前聚焦那一格），这里不再另开第二个激活口
+    focusFirstItem(this.panel);
   }
 
   hide() {

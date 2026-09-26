@@ -599,6 +599,8 @@ export class Game {
       case 'cinematic': return this.cinematics.skip();
       case 'settings': return this.settingsPanel.hide();
       case 'fastTravel': return this.fastTravelPanel.hide();
+      // 升级面板（切片24）：以前这一层不吃返回键，纯手柄玩家在营火升级完就退不出去
+      case 'upgrade': this.upgrade.hide(); return true;
       case 'pauseMenu': return this.pauseMenu.toggle();
       default: return false;
     }

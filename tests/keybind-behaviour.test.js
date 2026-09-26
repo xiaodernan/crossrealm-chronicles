@@ -177,13 +177,13 @@ describe('世界地图开着时放行谁：名单从生效表现问（B50）', (
     expect(hotkeyBlockedBy(open, 'KeyG')).toBe(true);
   });
 
-  it('硬模态（升级）开着时连返回键也不给 —— 它是表里唯一不吃级联的一层', () => {
-    for (const name of ['upgradeOpen']) {
-      const open = panels({ [name]: true, worldMapOpen: true });
-      for (const code of Object.values(factoryCodes())) {
-        expect(hotkeyBlockedBy(open, code), `${name} + ${code}`).toBe(true);
-      }
-    }
+  it('今天表里没有"连返回键都不给"的一层：升级面板也把返回键让给级联（切片24 / B55）', () => {
+    // 切片10 那一版它是硬模态，纯手柄玩家在营火升级完退不出去（六条输入路全不变，改前读数在档）。
+    // 今天它与设置 / 说明书同档：放行返回键与走焦键，其余照挡 —— "挡谁"仍然只有一处判据
+    const open = panels({ upgradeOpen: true, worldMapOpen: true });
+    expect(hotkeyBlockedBy(open, hotkeyCodeFor('escape')), '返回键要交给级联，由层序决定吃它的是谁').toBe(false);
+    expect(hotkeyBlockedBy(open, 'KeyG')).toBe(true);
+    expect(hotkeyBlockedBy(open, 'Tab')).toBe(true);
     // 对话在切片10 之后不再是硬模态：它的返回键要放行给级联（B52）
     const dialog = panels({ dialogOpen: true });
     expect(hotkeyBlockedBy(dialog, hotkeyCodeFor('escape'))).toBe(false);
@@ -191,7 +191,7 @@ describe('世界地图开着时放行谁：名单从生效表现问（B50）', (
 
   it('有返回层的模态：只放行返回键本身，其余一概拦住（B46 的修法）', () => {
     const { worldMap, zonePanel } = factoryCodes();
-    for (const name of ['pauseMenuOpen', 'settingsOpen', 'fastTravelOpen', 'helpOpen']) {
+    for (const name of ['pauseMenuOpen', 'settingsOpen', 'fastTravelOpen', 'helpOpen', 'upgradeOpen']) {
       const open = panels({ [name]: true });
       expect(hotkeyBlockedBy(open, hotkeyCodeFor('escape')), `${name} 的返回键`).toBe(false);
       for (const code of ['KeyH', 'KeyG', 'Tab', 'Digit1', 'F2']) {
@@ -369,7 +369,7 @@ describe('关对话与跳演出：同一下按键只有一个消费者（B52）'
     expect(g.settingsPanel.open).toBe(true);
   });
 
-  it('升级面板是硬模态：返回键根本派发不出来，级联不会被牵连', () => {
+  it('升级面板开着：返回键派发得出来（吃它的是级联，不是路由），其余热键仍然挡着', () => {
     const calls = [];
     const router = new HotkeyRouter({
       table: UI_HOTKEYS,
@@ -377,7 +377,8 @@ describe('关对话与跳演出：同一下按键只有一个消费者（B52）'
       onAction: (a) => calls.push(a),
     });
     router.poll({ Escape: true, KeyH: true });
-    expect(calls).toEqual([]);
+    // 只有 `escape` 穿过：谁吃掉这一下由层表回答（`Game.runEscape`），路由不管
+    expect(calls).toEqual(['escape']);
   });
 
   it('改绑之后放行跟着搬：新码能穿过对话那一层，出厂 `Escape` 反而被挡', () => {

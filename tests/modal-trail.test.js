@@ -233,10 +233,16 @@ describe('两层同时开着：级联与焦点仍然只由那张表回答', () =
     }
   });
 
-  it('升级面板单独开着时仍然连返回都不给：它没有退回的地方，让位机制不许给它加一条', () => {
+  it('升级面板今天是有返回层的一层（切片24 / B55）：别的热键照挡，返回键与移焦键放行', () => {
+    // 切片10 那一版它是硬模态：连 Escape 都不给 —— 而这一层又不收焦点，于是纯手柄玩家
+    // 在营火升级完**六条路都退不出去**（改前读数：Escape / ↑↓ / Tab / 手柄 B / A / Start 全不变）。
+    // 今天与设置/说明书同档：只放行返回键与走焦/调值那几条，其余仍然挡着
     const open = state({ upgradeOpen: true });
-    for (const code of ['KeyG', 'F10', hotkeyCodeFor('escape'), 'ArrowDown']) {
+    for (const code of ['KeyG', 'F10']) {
       expect(overlayBlocksHotkeys(open, code), code).toBe(true);
+    }
+    for (const code of [hotkeyCodeFor('escape'), 'ArrowDown', 'ArrowUp']) {
+      expect(overlayBlocksHotkeys(open, code), code).toBe(false);
     }
   });
 
@@ -442,7 +448,8 @@ describe('静态门禁：来路只有一处写、一处读，旧写法一贴回�
 
   it('park 只吃层表登记过的宿主：新面板要进来必须先登记 `nav`（不许多一份名单）', () => {
     const hosts = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.nav).sort();
-    expect(hosts).toEqual(['fast-travel-panel', 'help-manual', 'pause-menu', 'settings-panel']);
+    // 升级面板那九格（页签 + 五项属性 + 继续探索）今天也有宿主（切片24 / B55）
+    expect(hosts).toEqual(['fast-travel-panel', 'help-manual', 'pause-menu', 'settings-panel', 'upgrade-panel']);
     // 让位那两处写的必须是层表里登记过的宿主，而不是现场再抄一个 DOM id
     for (const name of ['ui/PauseMenu.js', 'ui/HelpManual.js']) {
       const parkLine = sourceOf(name).match(/parkFocus\(([^)]*)\);/);
@@ -535,6 +542,27 @@ describe('`Game.runEscape` 走真级联：让位之后返回键仍然归上层',
     const { game, calls } = mkGame({ help: true, pauseMenu: true });
     game.runEscape();
     expect(calls).toEqual(['help']);
+  });
+
+  it('升级面板开着：这一下返回键真的把它关掉（切片24 / B55）', () => {
+    // 以前这一行是 `back:false`，级联压根没有 `upgrade` 这一档 —— 于是纯手柄玩家在营火
+    // 升级完退不出去（真浏览器读数：Escape / ↑↓ / Tab / 手柄 B / A / Start 六条路全不变）
+    const { game, calls } = mkGame({ upgrade: true });
+    game.runEscape();
+    expect(calls, '级联里没有 `upgrade` 那一档时，这一下什么都没发生（面板还开着）').toEqual(['upgrade']);
+  });
+
+  it('升级面板 + 说明书同时开着：只关上层，下层原样（层序在表里，不在这段 switch 里抄）', () => {
+    const { game, calls } = mkGame({ upgrade: true, help: true });
+    game.runEscape();
+    expect(calls).toEqual(['help']);
+  });
+
+  it('级联里 `upgrade` 那一档只关升级面板，不许顺手撤菜单', () => {
+    const body = sourceOf('core/Game.js').match(/runEscape\(\)\s*\{[\s\S]*?\n {2}\}/);
+    expect(body[0]).toMatch(/case 'upgrade': this\.upgrade\.hide\(\); return true;/);
+    expect(body[0].slice(body[0].indexOf("case 'upgrade'"), body[0].indexOf("case 'pauseMenu'")))
+      .not.toMatch(/pauseMenu|settingsPanel|helpManual/);
   });
 
   it('只剩菜单开着：这一下才轮到关菜单', () => {

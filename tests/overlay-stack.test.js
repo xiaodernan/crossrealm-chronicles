@@ -86,9 +86,12 @@ describe('一张表：层序、字段名与 blocks 的取值域', () => {
     ])).toThrow(/名字重复/);
   });
 
-  it("走放行名单的只有世界地图那一层；不吃返回键的只剩升级面板", () => {
+  it("走放行名单的只有世界地图那一层；切片24 之后**没有不吃返回键的一层**", () => {
     expect(OVERLAY_LAYERS.filter((l) => l.blocks === 'map').map((l) => l.layer)).toEqual(['worldMap']);
-    expect(HARD).toEqual(['upgrade']);
+    // 切片10 那一版把升级面板留成唯一硬模态（只能鼠标点"继续探索"）—— 真浏览器读数里
+    // Escape / ↑↓ / Tab / 手柄 B / A / Start 六条路全都不改变任何东西，纯手柄玩家退不出去（B55）。
+    // 今天它是普通模态：`HARD` 该是空表，哪天有人再加一行 `back:false`，这里会红得很有说服力
+    expect(HARD, '又出现了一层不吃返回键的面板：那必须是"鼠标之外真的没有路"才行').toEqual([]);
     expect(BACK).toEqual(LAYER_NAMES.filter((n) => !HARD.includes(n)));
   });
 
@@ -105,7 +108,7 @@ describe('一张表：层序、字段名与 blocks 的取值域', () => {
       'fastTravel|fastTravelOpen|back|true|fast-travel-panel',
       'pauseMenu|pauseMenuOpen|back|true|pause-menu',
       'combatCinematic|combatCinematicSkippable|back|false|-',
-      'upgrade|upgradeOpen|hard|true|-',
+      'upgrade|upgradeOpen|back|true|upgrade-panel',   // 切片24：从硬模态改成吃得掉、走得进的一层（B55）
     ]);
   });
 
@@ -174,8 +177,9 @@ describe('topBackLayer：这一下返回归哪一层', () => {
 describe('topNavLayer：↑↓ 走进哪个面板（切片11，与返回键同一张表）', () => {
   const NAV = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.layer);
 
-  it('登记的层就是"焦点进得去"的那几层：说明书 / 设置 / 快速旅行 / 暂停菜单', () => {
-    expect(NAV).toEqual(['help', 'settings', 'fastTravel', 'pauseMenu']);
+  it('登记的层就是"焦点进得去"的那几层：说明书 / 设置 / 快速旅行 / 暂停菜单 / 升级面板', () => {
+    // 升级面板那九格（三张页签 + 五项属性 + 继续探索）一直在那里，只是没人认领（切片24 / B55）
+    expect(NAV).toEqual(['help', 'settings', 'fastTravel', 'pauseMenu', 'upgrade']);
   });
 
   it('世界地图刻意不在名单里：那一格里只有"关闭"一格可停，认领它是给自己加一个假落点', () => {
@@ -253,11 +257,14 @@ describe('overlayBlocksHotkeys：有返回层的模态只放行返回键本身',
     }
   });
 
-  it('硬模态优先：升级面板 + 地图同时开着时，地图那份放行名单与返回键一概不给', () => {
+  it('升级面板今天是有返回层的一层（切片24 / B55）：别的 UI 热键照挡，返回键交给级联', () => {
     const open = state({ upgradeOpen: true, worldMapOpen: true });
-    for (const code of ['KeyG', 'Tab', hotkeyCodeFor('escape')]) {
-      expect(overlayBlocksHotkeys(open, code), code).toBe(true);
-    }
+    expect(overlayBlocksHotkeys(open, 'KeyG')).toBe(true);
+    expect(overlayBlocksHotkeys(open, 'Tab')).toBe(true);
+    // 返回键不再被挡。级联按层序吃：地图排在前面，所以这一下先还地图的自由，升级面板留到下一次
+    expect(overlayBlocksHotkeys(open, hotkeyCodeFor('escape'))).toBe(false);
+    expect(topBackLayer(open)).toBe('worldMap');
+    expect(topBackLayer(state({ upgradeOpen: true })), '单开升级面板时，这一下该由它吃掉').toBe('upgrade');
   });
 
   it('对话不是硬模态：它 + 地图时按有返回层的模态算（B52 之后它归级联管）', () => {
