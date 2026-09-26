@@ -19,8 +19,8 @@ import { join } from 'node:path';
 import {
   GAMEPAD_BINDINGS, KEY_BINDINGS, PAD_ACTIONS, PAD_BUTTON, PAD_BUTTON_BY_INDEX, PAD_BUTTON_COUNT,
   UI_GAMEPAD_BINDINGS,
-  assertKeybinds, assertUiPadBindings, assertPadScopesDisjoint, buildBindingTables,
-  factoryGamepadBindings, padScopeOf, resolveGamepadBindings,
+  assertKeybinds, assertPadOnlyLabels, assertUiPadBindings, assertPadScopesDisjoint,
+  buildBindingTables, factoryGamepadBindings, padOnlyPadActions, padScopeOf, resolveGamepadBindings,
 } from '../src/content/keybinds.js';
 import { UI_HOTKEYS } from '../src/content/hotkeys.js';
 import { PAD_BUTTON_LABELS, padButtonLabel, padStickLabel } from '../src/content/keyLabels.js';
@@ -487,16 +487,17 @@ describe('设置面板：多出来的那一列', () => {
     const rowActions = [...UI_HOTKEYS.map((e) => e.action), ...Object.keys(KEY_BINDINGS)];
     const entries = [...Object.values(GAMEPAD_BINDINGS).map((e) => ({ ...e, ui: false })),
       ...Object.values(UI_GAMEPAD_BINDINGS).map((e) => ({ ...e, ui: true }))];
-    const onRow = (e) => rowActions.includes(e.hotkey ?? e.action);
-    const want = entries.filter((e) => e.button !== undefined && onRow(e)).map((e) => e.action).sort();
+    const want = entries.filter((e) => e.button !== undefined).map((e) => e.action).sort();
     const got = [...host.innerHTML.matchAll(/data-padbind="([^"]+)"/g)].map((m) => m[1]).sort();
     expect(got, '可点的那一格与两张表的按钮格不是一份名单（少了 = 玩家改不到，多了 = 点了必失败）').toEqual(want);
     expect(got, '同一个动作名出现两次：两张表共用了名字，`padScopeOf` 就不唯一了').toHaveLength(new Set(got).size);
-    // 面板的行是按"键盘侧的动作名"排的，所以**只有手柄有、键盘没有**的那一格今天摆不下
-    // （`confirm` 走的是桥自己的边沿出口，热键表与游戏键表里都没有这个名字）。
-    // 这不是把入口塞进别的行的理由 —— 那正好是"一格的键有两个说法"（B54 的形状）。名单钉住它
-    const homeless = entries.filter((e) => e.button !== undefined && !onRow(e)).map((e) => e.action);
-    expect(homeless, '这些界面按钮格在面板里没有行：补的是"行"，不是把入口挂到邻近那一格上').toEqual(['confirm']);
+    // 切片23 钉的是"`confirm` 在面板里根本没有行"，切片25 把那一行补上了 —— 名单该清空。
+    // 这条留在原地不是为了怀旧：以后再加一格"只有手柄有、键盘侧没有"的按钮格而忘了给行，这里会红
+    expect(padOnlyPadActions(), '键盘侧没有行、又没被"手柄专属"那一组接住的动作').toEqual(['confirm']);
+    const homeless = entries.filter((e) => e.button !== undefined
+      && !rowActions.includes(e.hotkey ?? e.action) && !padOnlyPadActions().includes(e.action))
+      .map((e) => e.action);
+    expect(homeless, '这些按钮格在面板里既没有键盘行、也没进"手柄专属"那一组').toEqual([]);
     expect(host.innerHTML).toContain('左摇杆 ↑ + 十字键 ↑');
     for (const stick of ['moveUp', 'moveDown', 'moveLeft', 'moveRight', 'navUp', 'navDown', 'navLeft', 'navRight']) {
       expect(host.innerHTML, `${stick} 是摇杆格，不给单按钮入口`).not.toContain(`data-padbind="${stick}"`);
@@ -557,8 +558,10 @@ describe('设置面板：多出来的那一列', () => {
       // 键盘那一格之后紧跟的那个元素才叫"手柄那一列"：列宽与居中挂在 `keybind-pad` 上。
       // 界面那一格头一版只给了 `keybind-pad-part`，于是在真 DOM 里那四行**压根没有手柄格**
       // （查询 `.keybind-pad` 查不到）—— 全仓没有任何单测读样式表，这条只能钉类名。
+      // 键盘那一格今天有两种样子：有键盘出口的是按钮，只有手柄有的（切片25）是 `—`。
+      // 紧跟其后的那个元素才叫"手柄那一列"，两种都得站上去
       expect(row, `${action} 那行的手柄格不在列上`)
-        .toMatch(/<\/button>(<span class="keybind-pad |<button type="button" class="keybind-pad")/);
+        .toMatch(/(<\/button>|<button class="keybind-key-none" disabled>—<\/button>)(<span class="keybind-pad[ ]|<button type="button" class="keybind-pad[ "])/);
     }
     const upRow = rows.find((r) => /data-keybind="uiUp"/.test(r));
     expect(upRow).toContain('<span class="keybind-pad keybind-pad-part">界面 ');
@@ -635,6 +638,45 @@ describe('设置面板：多出来的那一列', () => {
     expect(host.innerHTML).toMatch(/data-padbind="pauseMenu">右摇杆按下</);
   });
 
+  it('切片25：只有手柄有的那一格有行，而它的键盘格**不是按钮**', () => {
+    // 这一格不冒充任何键盘键（B52 的纪律），所以给它一个键盘按钮就是 B54 的镜像：
+    // 点它 → `keybinds.confirm` → `partitionOverrides` 两张表都不认识 → 玩家按什么都是"无效"
+    const { host, panel } = mount();
+    panel.refresh();
+    const row = host.innerHTML.split('<div class="keybind-row">').find((r) => r.includes('data-padbind="confirm"'));
+    expect(row, '那一格在面板里根本没有行（玩家看不见 A 在界面里干什么）').toBeTruthy();
+    expect(row).toContain('界面确认（A）');
+    expect(row).not.toMatch(/data-keybind="confirm"/);
+    expect(row).toContain('<button type="button" class="keybind-key-none" disabled>');
+    // 用**禁用按钮**而不是 `<span>` 是真浏览器读数逼出来的：那一列的宽度挂在按钮上，
+    // span 只有 13px 会把同行手柄格撑到 294px（其它行 88px）—— 列从此不对齐
+    expect(row).toMatch(/激活交给浏览器原生/);
+    expect(() => buildBindingTables({ confirm: 'KeyZ' }, UI_HOTKEYS, {}, {})).toThrow(/未知的键位动作/);
+  });
+
+  it('切片25：手柄专属名单两头都查 —— 少一行是一格空白，多一行是两处起名', () => {
+    expect(() => assertPadOnlyLabels()).not.toThrow();
+    expect(() => assertPadOnlyLabels({}, ['confirm'])).toThrow(/没有显示名/);
+    expect(() => assertPadOnlyLabels({ confirm: '界面确认（A）', ghost: '幽灵格' }, ['confirm']))
+      .toThrow(/其实在键盘侧有行/);
+    // 名单从表推：以后加一格"只有手柄有"的动作，这里会先红，而不是面板上静悄悄少一行
+    expect(padOnlyPadActions()).toEqual(['confirm']);
+    const kb = readFileSync(join(process.cwd(), 'src/content/keybinds.js'), 'utf8');
+    expect(kb, '加载期没跑这条自检：坏名单要在这里红，不是等面板画出一格空白').toMatch(/^assertPadOnlyLabels\(\);$/m);
+  });
+
+  it('切片25：那一格是真入口 —— 改"界面确认"落到第三格，战斗那格覆盖包不被碰', () => {
+    const { host, panel, game, toast } = mount();
+    panel.refresh();
+    host.click(padBtn('confirm'));
+    expect(panel.capturingPad).toBe('confirm');
+    panel.capturePadButton('leftStick');
+    expect(toast).toHaveLength(0);
+    expect(game.settings.get('gamepadUiBinds')).toEqual({ confirm: 'leftStick' });
+    expect(game.settings.get('gamepadBinds'), '战斗那格覆盖包不该被碰').toEqual({});
+    expect(game.uiPadTable.confirm.button).toBe('leftStick');
+    expect(host.innerHTML).toContain('data-padbind="confirm">界面 左摇杆按下<');
+  });
   it('界面那一格是真入口：改"返回"落到第三格，而战斗那格与同一行的"界面 Start"原样', () => {
     const { host, panel, game, toast } = mount();
     panel.refresh();

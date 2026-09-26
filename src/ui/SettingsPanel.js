@@ -1,7 +1,7 @@
 import { UI_HOTKEYS, UI_HOTKEY_LABELS } from '../content/hotkeys.js';
 import {
-  GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, UI_GAMEPAD_BINDINGS,
-  buildBindingTables, padScopeOf,
+  GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, PAD_ONLY_ACTION_LABELS, UI_GAMEPAD_BINDINGS,
+  buildBindingTables, padOnlyPadActions, padScopeOf,
 } from '../content/keybinds.js';
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
@@ -254,6 +254,16 @@ export class SettingsPanel {
     for (const [action, binding] of Object.entries(keys)) {
       rows.push(this.keybindRow(action, KEY_ACTION_LABELS[action] ?? action, binding, padFor(action)));
     }
+    /* 只有手柄有的那几格（切片25）：`confirm` 不冒充任何键盘键，所以它既不在热键表也不在游戏键表里，
+     * 过去在清单上根本没有位置 —— 玩家的 A 在界面里干什么，看板上是查无此格。名单从表推
+     * （`padOnlyPadActions` 与它自己那条自检同一条判据），这里一份都不抄。 */
+    const only = padOnlyPadActions();
+    if (only.length) {
+      rows.push('<h4 class="keybind-group">界面（手柄专属）</h4>');
+      for (const action of only) {
+        rows.push(this.keybindRow(action, PAD_ONLY_ACTION_LABELS[action], null, padFor(action)));
+      }
+    }
     rows.push('<button type="button" id="keybind-reset">恢复默认键位</button>');
     host.innerHTML = `<div class="keybind-row keybind-head"><span class="keybind-name">动作</span>`
       + '<span class="keybind-pad">键盘 / 鼠标</span><span class="keybind-pad">手柄</span>'
@@ -265,6 +275,10 @@ export class SettingsPanel {
    * 只绑了鼠标的那格显示"鼠标左/右键"，把它改绑成键盘键之后鼠标那一侧自动失效 ——
    * 出口只有一个真源，不存在"两个键都在办这件事"。
    * 别名（右 Ctrl / 右 Shift）是同一条动作的等价入口，写在提示里而不是多一列按钮。
+   *
+   * `binding` 给 `null` 是切片25 新增的那一型：**这一格只有手柄有**（`confirm` 不冒充任何键盘
+   * 键，B52 的纪律）。键盘那一格于是老老实实写 `—` 而**不给按钮** —— 给了就是 B54 的键盘侧镜像：
+   * 点它 → `keybinds.confirm` → `partitionOverrides` 认不出来 → 玩家按什么都只得到"无效"。
    */
   keybindRow(action, label, binding, padEntries) {
     // "在等哪一枚"问的是**条目**的动作名（切片23）：一行可能挂着战斗与界面两条，
@@ -274,10 +288,18 @@ export class SettingsPanel {
       ? '按下要绑定的键（再点一次取消）'
       : waitingPad
         ? '按下要绑定的手柄键，松手即绑定（再点一次取消）'
-        : (binding.aliases ?? []).map((c) => keyLabel(c)).join(' / ');
-    const out = binding.code ?? MOUSE_LABELS[binding.mouse] ?? '未绑定';
+        : binding
+          ? (binding.aliases ?? []).map((c) => keyLabel(c)).join(' / ')
+          : '激活交给浏览器原生 Enter / 空格（这一格不冒充键盘键）';
+    const keyCell = binding
+      ? `<button type="button" data-keybind="${action}">${keyLabel(binding.code ?? MOUSE_LABELS[binding.mouse] ?? '未绑定')}</button>`
+      // 禁用格而不是一个 `<span>`：这一列的宽度挂在按钮上（真浏览器读数里普通行的键盘格是 398px，
+      // 而 span 只有 13px —— 手柄那一列会被撑到 294px，整行从此不与其它行对齐）。
+      // `disabled` 又同时满足了另外两件事：`navItems` 的 `:not([disabled])` 不会把焦点交给它，
+      // 而它也点不动 —— 不会写成 `keybinds.confirm` 那种表里不认识的名字（B54）
+      : `<button type="button" class="keybind-key-none" disabled>—</button>`;
     return `<div class="keybind-row"><span class="keybind-name">${label}</span>`
-      + `<button type="button" data-keybind="${action}">${keyLabel(out)}</button>`
+      + keyCell
       + this.padCell(action, padEntries)
       + `<span class="keybind-hint">${shown}</span></div>`;
   }

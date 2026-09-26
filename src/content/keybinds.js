@@ -31,7 +31,7 @@
  *   "读完就把键清成 false"的老写法，若给电平，按住 LB 会变成每帧切换一次锁定 ——
  *   正是 W-A4 修掉的"按住 Ctrl 每帧请求一次翻滚"那一类）。
  */
-import { UI_HOTKEYS, applyHotkeyOverrides } from './hotkeys.js';
+import { UI_HOTKEYS, UI_ACTIONS, applyHotkeyOverrides } from './hotkeys.js';
 
 /** 摇杆与扳机的取值口径（全是归一后的 0~1） */
 export const PAD = {
@@ -310,6 +310,45 @@ export const UI_GAMEPAD_BINDINGS = {
   menu: { action: 'menu', mode: 'edge', button: 'start', hotkey: 'escape' },
   confirm: { action: 'confirm', mode: 'edge', button: 'a', ui: true },
 };
+
+/**
+ * **只有手柄有、两张键盘表里都没有对应行**的那几格动作的显示名（切片25）。
+ *
+ * 为什么不干脆给它补一条热键：`confirm` 按切片14 的纪律刻意不冒充任何键盘键 —— 浏览器已经用
+ * 原生 Enter 激活聚焦的那一格，我们再登记一条就是"同一下按键两个消费者"（B52）。没有键盘动作名
+ * 可挂，设置面板就没有那一行，于是玩家看得见"界面 B / 界面 Start"，唯独看不见"界面 A = 确认"
+ * （切片23 的尾巴）。这张小表只登记"没有别处可问"的那几格，名单由 `padOnlyPadActions` 从表推 ——
+ * 少一行是一格空白，多一行就是同一个动作在两处起名（B47 那一族），`assertPadOnlyLabels` 两头都查。
+ */
+export const PAD_ONLY_ACTION_LABELS = { confirm: '界面确认（A）' };
+
+/**
+ * 两张手柄表里"键盘侧没有行"的动作名（切片25）：行的匹配键取 `hotkey ?? action`，
+ * 与设置面板 `refreshKeybinds` 那处用的是同一条算式 —— 判据只写一次，谁都不许另抄一份名单。
+ */
+export function padOnlyPadActions({
+  combat = GAMEPAD_BINDINGS, ui = UI_GAMEPAD_BINDINGS,
+  keyboardRows = [...UI_ACTIONS, ...KEY_ACTIONS],
+} = {}) {
+  const seen = new Set(keyboardRows);
+  const out = [];
+  for (const e of [...Object.values(combat), ...Object.values(ui)]) {
+    if (!seen.has(e.hotkey ?? e.action)) out.push(e.action);
+  }
+  return out;
+}
+
+/** 上面那张小表的自检：名单必须与"键盘侧没有行的手柄动作"逐字相同，且每一格都有中文名 */
+export function assertPadOnlyLabels(labels = PAD_ONLY_ACTION_LABELS, only = padOnlyPadActions()) {
+  for (const action of only) {
+    if (!labels[action]) throw new Error(`手柄专属动作 "${action}" 没有显示名：面板那一格会是空白`);
+  }
+  const extra = Object.keys(labels).filter((a) => !only.includes(a));
+  if (extra.length) {
+    throw new Error(`显示名里有动作 ${extra.join(', ')} 其实在键盘侧有行：同一个动作会在两处起名`);
+  }
+  return true;
+}
 
 /** 十字键在标准映射里的方向 → 按钮序号（移动动作的 `dir` 用它顺带带上十字键） */
 const DPAD_BUTTON = {
@@ -696,5 +735,6 @@ export function buildBindingTables(overrides = {}, uiTable = UI_HOTKEYS, padOver
 assertKeybinds();
 assertUiPadBindings();
 assertPadScopesDisjoint();
+assertPadOnlyLabels();
 assertKeyActionLabels();
 assertCodesDisjoint(UI_HOTKEYS, ACTIVE);   // 出厂两张表必须互不抢占，否则加载即红

@@ -172,6 +172,19 @@ describe('装载界面表之后：十字键走格、B 返回、A 只报边沿不
     }
   });
 
+  it('切片25："界面确认"改绑之后报边沿的是新那一枚，出厂那枚 A 从此不报（仍然只报边沿、不写键）', () => {
+    const table = resolveGamepadBindings(UI_GAMEPAD_BINDINGS, { confirm: 'leftStick' }, { assert: assertUiPadBindings });
+    const { bridge, keys, pad } = mkBridge(table);
+    press(pad, 'a');
+    bridge.poll();
+    expect(bridge.ui.confirm, '出厂那枚 A 已经不是这一格的主人了').toBe(false);
+    press(pad, 'leftStick');
+    bridge.poll();
+    expect(bridge.ui.confirm, '新那一枚该报一次边沿').toBe(true);
+    expect(Object.values(keys).some(Boolean), '这一格永远不冒充键盘键（B52 的纪律不因改绑而破）').toBe(false);
+    bridge.poll();
+    expect(bridge.ui.confirm, '边沿只有一帧宽，按住不连发').toBe(false);
+  });
   it('界面表也能改绑（切片23）：把"返回"挪走之后，出厂那枚 B 不再返回、新那一枚才返回', () => {
     // 这一条要钉的是"生效表进桥"这半：面板写的是 `settings.gamepadUiBinds`，桥装的必须是
     // **叠过那一份**的表 —— 装常量就是"改了设定要重启才生效"那一族（B47 换了轴）
