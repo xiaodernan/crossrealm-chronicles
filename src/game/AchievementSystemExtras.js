@@ -1,4 +1,3 @@
-import { ALL_ACHIEVEMENTS_EXTRA } from '../content/achievements.js';
 import { attachPopCultureAchievements } from './PopCultureAchievementExtras.js';
 
 /** 成就扩写监听 — 挂到 AchievementSystem */
@@ -35,5 +34,3 @@ export function attachAchievementExtras(ach) {
   });
 
 }
-
-export { ALL_ACHIEVEMENTS_EXTRA };

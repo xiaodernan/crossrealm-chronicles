@@ -715,8 +715,10 @@ describe('搬完不许回头', () => {
    */
   const movedNames = [
     'ECHOES', 'ZONE_EVENTS_POP', 'LORE_FRAGMENTS_POP', 'NPC_LINES_POP', 'REST_DIALOGUES',
-    'ACHIEVEMENTS_EXTRA', 'ACHIEVEMENTS_POP_CULTURE', 'ECHO_FRANCHISE_BUCKETS',
-    'CG_GALLERY_BONUS_EXTRA', 'SIDE_QUESTS_POP', 'HELP_SECTIONS_EXTRA',
+    'ACHIEVEMENTS_EXTRA', 'ACHIEVEMENTS_POP_CULTURE', 'ALL_ACHIEVEMENTS_EXTRA',
+    'ECHO_FRANCHISE_BUCKETS', 'CG_GALLERY_BONUS_EXTRA', 'SIDE_QUESTS_POP', 'HELP_SECTIONS_EXTRA',
+    // HEAD 的旧名：目录搬走之后这个名字就不该再被声明或转口（它曾经是"两份真源"的入口）
+    'POP_CULTURE_ECHOES',
   ];
   const isSecondSource = (code, name) => new RegExp(
     `export\\s+(?:const|let|var)\\s+${name}\\b|export\\s*\\{[^}]*\\b${name}\\b`,
