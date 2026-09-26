@@ -321,7 +321,7 @@ describe('轮询桥：电平与按下沿分得清', () => {
     analog(pad0, 'leftTrigger', 0.6);
     pad.poll();
     expect(keys.ShiftLeft).toBe(true);
-    analog(pad0, 'leftTrigger', 0.42);       // 已低于 pressThreshold、仍高于 releaseThreshold
+    analog(pad0, 'leftTrigger', 0.42);       // 已低于 pressThreshold(0.5)、仍高于 0.5×0.7 = 0.35 那条迟滞线
     pad.poll();
     expect(keys.ShiftLeft).toBe(true);
     analog(pad0, 'leftTrigger', 0.2);

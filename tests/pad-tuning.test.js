@@ -90,6 +90,16 @@ describe('padTuning：出厂 + 玩家档 → 桥用的那一组值', () => {
     }
   });
 
+  it('扳机那一格的下界不许是 0：门槛 0 时"碰都没碰"也算按下，而且永远松不开', () => {
+    // 范围是这张表**唯一**说得上话的地方：清洗只按范围救档，所以"下界写错"这种脏表
+    // 不会有人报错 —— `value >= 0` 恒真，扳机那一格就从旋钮变成了卡死的开关。
+    // 迟滞救不了它：`0 × factor` 还是 0。所以这一格的下界必须钉在 0 之上
+    const spec = PAD_TUNING.pressThreshold;
+    expect(spec.min, '触发深度允许拧到 0 = 桥每帧都当玩家按着扳机').toBeGreaterThan(0);
+    expect(padTuning({ pressThreshold: 0 }).pressThreshold, '0 这一档出界，清洗该落回出厂值')
+      .toBe(PAD.pressThreshold);
+  });
+
   it('合法值原样通过（含两端边界）：每一格都各自验一次', () => {
     expect(padTuning({ deadzone: 0.4, analogRange: 0.6, lookCurve: 3 }))
       .toEqual({ ...factoryTuning(), deadzone: 0.4, analogRange: 0.6, lookCurve: 3 });
@@ -132,6 +142,25 @@ const mkBridge = (tuning = null) => {
   const bridge = new GamepadInput({ keys: {} }, GAMEPAD_BINDINGS, () => [pad]);
   if (tuning) bridge.setTuning(tuning);
   return { bridge, pad };
+};
+
+/**
+ * 一枚只看扳机的桥：`leftTrigger`（LT，物理 6）绑一个电平动作，出口给死一个键码，
+ * 于是"这一推算不算按下了"就读 `keys.ShiftLeft` —— 扳机在标准映射里既当轴又当键，
+ * 用例别去猜桥内部那格，读它对外的唯一出口。
+ */
+const mkTriggerBridge = (tuning) => {
+  const pad = makePad();
+  const keys = {};
+  const bridge = new GamepadInput(
+    { keys },
+    { hold: { action: 'hold', mode: 'level', button: 'leftTrigger' } },
+    () => [pad],
+    () => ({ code: 'ShiftLeft' }),
+  );
+  bridge.setTuning(tuning);
+  const lt = (value) => { pad.buttons[6].value = value; pad.buttons[6].pressed = value >= 1; };
+  return { bridge, keys, lt };
 };
 
 describe('GamepadInput：两根杆都只认这一份手档', () => {
@@ -247,6 +276,119 @@ describe('GamepadInput：两根杆都只认这一份手档', () => {
     bridge.poll();
     expect(bridge.move.mag).toBeCloseTo(0.9028, 4);
     expect(bridge.move.sprint, '拿原始模长比门槛，这一推就会翻成"没到"').toBe(true);
+  });
+
+  it('扳机触发深度一格就管扳机：同一 0.6 那一推在两个档下分别是"按下了"和"没按"', () => {
+    for (const [press, want] of [[0.5, true], [0.6, true], [0.65, false], [0.9, false], [0.2, true]]) {
+      const { bridge, keys, lt } = mkTriggerBridge({ pressThreshold: press });
+      lt(0.6);
+      bridge.poll();
+      expect(!!keys.ShiftLeft, `门槛 ${press}、扳机 0.6`).toBe(want);
+    }
+    // 端点算"按下"（`>=` 不是 `>`）：门槛拧到多深，推到多深就该算按下
+    const edge = mkTriggerBridge({ pressThreshold: 0.8 });
+    edge.lt(0.8);
+    edge.bridge.poll();
+    expect(edge.keys.ShiftLeft).toBe(true);
+  });
+
+  it('出厂这一对算出来与切片22 之前手写的 0.35 逐字相等（默认手感一点没变）', () => {
+    // 迟滞写成系数之后，"出厂档下等于什么"就是一条要钉住的等式 —— 不然改了系数没人知道
+    expect(PAD.pressThreshold * PAD.triggerReleaseFactor).toBe(0.35);
+  });
+
+  it('迟滞是**这一格的**系数：门槛 0.9 时退到 0.65 仍算按着、0.6 才放（固定下沿会在低门限档反过来）', () => {
+    const { bridge, keys, lt } = mkTriggerBridge({ pressThreshold: 0.9 });
+    lt(0.95);
+    bridge.poll();
+    expect(keys.ShiftLeft).toBe(true);
+    lt(0.65);                                          // 0.9×0.7=0.63 之上：还在迟滞带里
+    bridge.poll();
+    expect(keys.ShiftLeft, '停在迟滞带里不该反复触发').toBe(true);
+    lt(0.6);                                           // 退到线下才算松
+    bridge.poll();
+    expect(keys.ShiftLeft).toBe(false);
+    // 反手验一次"为什么不能写绝对下沿"：门限拧到 0.2 时，绝对 0.35 会**高于**进入门限，
+    // 一碰就再也松不开。系数那一档下 0.2×0.7=0.14，0.2 还按着、0.1 才放
+    const soft = mkTriggerBridge({ pressThreshold: 0.2 });
+    soft.lt(0.2);
+    soft.bridge.poll();
+    expect(soft.keys.ShiftLeft).toBe(true);
+    soft.lt(0.15);
+    soft.bridge.poll();
+    expect(soft.keys.ShiftLeft, '固定下沿 0.35 会让这一档变成"一碰就松不开"').toBe(true);
+    soft.lt(0.1);
+    soft.bridge.poll();
+    expect(soft.keys.ShiftLeft).toBe(false);
+  });
+
+  it('数字按钮（只有 `pressed` 没有模拟量）在最深那一档也算按下：门槛别把手柄变成哑巴', () => {
+    const { bridge, keys, lt } = mkTriggerBridge({ pressThreshold: 1 });
+    lt(1);                                              // 数字键的形状：`pressed` 为真，桥合成 value 1
+    bridge.poll();
+    expect(keys.ShiftLeft, '门槛 1.0 = 按到底才算，数字键按到底就是 1').toBe(true);
+    lt(0);
+    bridge.poll();
+    expect(keys.ShiftLeft).toBe(false);
+  });
+
+  it('捕获那一路也问同一格手档：门槛拧深之后"半按扳机"不该被当成玩家按下了这一枚', () => {
+    const pad = makePad();
+    const found = [];
+    const bridge = new GamepadInput(
+      { keys: {} },
+      { hold: { action: 'hold', mode: 'level', button: 'leftTrigger' } },
+      () => [pad],
+      () => ({ code: 'ShiftLeft' }),
+    );
+    bridge.setTuning({ pressThreshold: 0.9 });
+    bridge.startCapture((name) => found.push(name));
+    pad.buttons[6].value = 0.6;                         // 半按：这一档下不该算按下
+    bridge.poll();
+    pad.buttons[6].value = 0;                           // 松手：捕获看的是"按下并松手"那一下
+    bridge.poll();
+    expect(found, '半按不该被捕获').toEqual([]);
+    pad.buttons[6].value = 0.95;                        // 够深的那一下
+    bridge.poll();
+    pad.buttons[6].value = 0;
+    bridge.poll();
+    expect(found).toEqual(['leftTrigger']);
+  });
+
+  it('捕获结束那一腿也用扳机自己的迟滞线：退到 0.9×0.7 以下才算松手（借摇杆那一格差一截）', () => {
+    // 变异台抓到的洞（T6）：把 `PAD.triggerReleaseFactor` 手滑成 `PAD.navStickReleaseFactor`，
+    // 上面那条"按下/松手"的用例照样全绿 —— 因为它一路退到 0，两条线谁都不影响结论。
+    // 所以要停在**两条线之间**那一格：0.9×0.7=0.63 与 0.9×0.6=0.54
+    const pad = makePad();
+    const found = [];
+    const bridge = new GamepadInput(
+      { keys: {} },
+      { hold: { action: 'hold', mode: 'level', button: 'leftTrigger' } },
+      () => [pad],
+      () => ({ code: 'ShiftLeft' }),
+    );
+    bridge.setTuning({ pressThreshold: 0.9 });
+    bridge.startCapture((name) => found.push(name));
+    pad.buttons[6].value = 0.95;
+    bridge.poll();                                        // 按下：捕获开始等松手
+    pad.buttons[6].value = 0.68;                          // 还在迟滞带里（> 0.63）：不该提前结束
+    bridge.poll();
+    expect(found).toEqual([]);
+    pad.buttons[6].value = 0.58;                          // 退到线下：这一下才算松完
+    bridge.poll();
+    expect(found, '借了摇杆那一格（×0.6 → 0.54）会把这一下当成"还没松手"，改键界面就此卡住')
+      .toEqual(['leftTrigger']);
+  });
+
+  it('扳机深度拧到最浅也不与走路那两档串门：只改扳机，`mag` 与 `sprint` 一个字不动', () => {
+    const push = 0.7;                                   // 越过出厂死区的一推
+    const a = mkBridge();
+    a.pad.axes[0] = push;
+    a.bridge.poll();
+    const b = mkBridge({ pressThreshold: 1 });
+    b.pad.axes[0] = push;
+    b.bridge.poll();
+    expect(b.bridge.move).toEqual(a.bridge.move);
   });
 
   it('拔手之后 `sprint` 跟着清：留着就是"松手还在跑"（与 `mag` 同一本账）', () => {
@@ -469,6 +611,31 @@ describe('静态门禁：一处范围、一处写入口、桥只读自己的手�
     }
     // `_analogMagnitude` 不许再留出厂默认参数：那是在手档之外藏的第二个值，漏传一格不会报错
     expect(bridge).toMatch(/function _analogMagnitude\(mag, deadzone, range\)/);
+  });
+
+  it('扳机那两档只有一条判据：`_pressed(` 每个调用点都喂满四个参数', () => {
+    // 切片21 那条"helper 不许自带出厂值"的规矩搬到扳机上：这里少喂一个参数不会报错 ——
+    // `undefined` 参与比较只会永远为假，表现是"扳机按不动"，而按不动的排查方向是手柄，不是桥
+    const bridge = sourceOf('engine/GamepadInput.js');
+    const calls = [...bridge.matchAll(/_pressed\(([^)]*)\)/g)];
+    expect(calls.length, '桥里一个 `_pressed` 调用点也没有').toBeGreaterThanOrEqual(4);
+    for (const m of calls) {
+      const args = m[1].split(',').map((a) => a.trim()).filter((a) => a !== '');
+      expect(args, `_pressed(${m[1]}) 的参数不足四个`).toHaveLength(4);
+    }
+    // 迟滞确实是"这一格的系数倍"，不是又一个绝对值：式子只许长这样
+    expect(bridge).toContain('press * factor');
+    expect(bridge, '松开那一格又写回绝对值了：门限拧低时它会高于进入门限').not.toMatch(/wasDown \? 0\./);
+    // 定义里不许留默认参数：那等于在调用方之外藏第二个值，漏喂时不会报错，只会悄悄用默认那档
+    expect(bridge, '_pressed 的定义里不许有带默认值的参数').toMatch(/function _pressed\(btn, wasDown, press, factor\) \{/);
+  });
+
+  it('`releaseThreshold` 那一格真的没了：出厂表里没有它，`src/` 里也没人读它', () => {
+    // 一个已经删掉的字段留在表里 = 面板与行为会各自指着不同的"那一格"（B47 那一族）。
+    // 表里没定义 + 源码没人读，两头一起钉，才不许它悄悄回来当第二个真源
+    expect(PAD.releaseThreshold, '出厂表里还留着 `releaseThreshold`：迟滞现在是 `pressThreshold` 的系数').toBeUndefined();
+    const readers = FILES.filter((f) => /PAD\.releaseThreshold\b/.test(f.source)).map((f) => f.name);
+    expect(readers, '这些地方还在读一个已经不存在的字段（读到的永远是 undefined）').toEqual([]);
   });
 
   it('一格旋钮只有一个名字：面板不抄滑杆名单，id 从键名推', () => {

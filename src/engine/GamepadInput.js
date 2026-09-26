@@ -237,8 +237,11 @@ export class GamepadInput {
 
   /** @returns {string|null} 这一帧捕获完成时的按钮名；还在等就 null */
   _captureFrame(buttons) {
+    // 捕获那一路也问手档（切片22）：门槛拧深之后"半按扳机"不该算成玩家按下了这一枚
+    const press = this.tuning.pressThreshold;
+    const factor = PAD.triggerReleaseFactor;
     for (let i = 0; i < this._capPrev.length; i++) {
-      const on = _pressed(buttons[i], this._capPrev[i]);
+      const on = _pressed(buttons[i], this._capPrev[i], press, factor);
       // 只认**第一个**按下的格子：玩家手快连按两枚时，报第二枚会让界面显示的与他按的不是同一键
       if (!on && this._capPrev[i] && this._captureBtn === i) {
         this._capPrev[i] = false;
@@ -252,10 +255,12 @@ export class GamepadInput {
 
   /** 捕获结束那一刻按当前物理状态补边沿账：还按着的不算"刚按下"，松手才算下一次 */
   _primeEdges(buttons) {
+    const press = this.tuning.pressThreshold;
+    const factor = PAD.triggerReleaseFactor;
     for (let i = 0; i < this._slots.length; i++) {
       const s = this._slots[i];
-      if (s.button >= 0) s.down = _pressed(buttons[s.button], true);
-      else if (s.dpad >= 0) s.down = _pressed(buttons[s.dpad], true);
+      if (s.button >= 0) s.down = _pressed(buttons[s.button], true, press, factor);
+      else if (s.dpad >= 0) s.down = _pressed(buttons[s.dpad], true, press, factor);
     }
   }
 
@@ -285,9 +290,12 @@ export class GamepadInput {
     }
     this._pollLook(axes);
     this._pollMove(axes);
+    // 扳机那对门限（切片22）：进入吃玩家自己拧的那一格，松开退到它的系数倍
+    const press = this.tuning.pressThreshold;
+    const factor = PAD.triggerReleaseFactor;
     for (let i = 0; i < this._slots.length; i++) {
       const s = this._slots[i];
-      let on = s.button >= 0 && _pressed(buttons[s.button], s.down);
+      let on = s.button >= 0 && _pressed(buttons[s.button], s.down, press, factor);
       // 八向量化与模拟量共用**同一个**死区（同一帧、同一份手档）：两条路一人一个死区，
       // 就会出现"方向码亮着、`mag` 却是 0"这种自相矛盾的一帧
       if (!on && s.dirName !== null) {
@@ -297,7 +305,7 @@ export class GamepadInput {
         const stick = s.cardinal
           ? _stickCardinal(axes, s, dz, dz * PAD.navStickReleaseFactor, s.down)
           : _stickHeld(axes, s, dz);
-        on = stick || _pressed(buttons[s.dpad], s.down);
+        on = stick || _pressed(buttons[s.dpad], s.down, press, factor);
       }
       const fire = s.mode === 'level' ? on : (on && !s.down);
       s.down = on;
@@ -424,11 +432,17 @@ function _analogMagnitude(mag, deadzone, range) {
   return Math.min(1, (mag - deadzone) / (range - deadzone));
 }
 
-/** 扳机既报 `pressed` 又报模拟量：按下用 `pressThreshold`，松开用更低一档做迟滞 */
-function _pressed(btn, wasDown) {
+/**
+ * 扳机既报 `pressed` 又报模拟量：按下用玩家那一格触发深度，松开退到它的 `factor` 倍做迟滞。
+ *
+ * 两个数**全部由调用方喂**（切片22，与切片21 同一条规矩）：这里若自己读出厂表里的触发深度，
+ * 玩家拖了滑杆而扳机仍按出厂那一格触发，就是"看板与行为各说各话"那一族；`factor` 是出厂的
+ * **关系**（不是旋钮），所以留在 `PAD` 里，但同样由调用方递进来，函数自己不认常量。
+ */
+function _pressed(btn, wasDown, press, factor) {
   if (!btn) return false;
   const value = btn.pressed ? 1 : (typeof btn.value === 'number' ? btn.value : 0);
-  return value >= (wasDown ? PAD.releaseThreshold : PAD.pressThreshold);
+  return value >= (wasDown ? press * factor : press);
 }
 
 /** 摇杆：先在径向死区之外（那个死区由调用方把手档递进来），再看这一格管的方向落在八向量的哪一格里 */

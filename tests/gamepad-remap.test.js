@@ -356,8 +356,8 @@ describe('捕获：按下并松手才算一次改绑', () => {
     t.pressed = true;
     t.value = 0.8;
     b.poll();
-    t.pressed = true;
-    t.value = 0.4;                         // > releaseThreshold(0.35)：仍算按着
+    t.pressed = false;
+    t.value = 0.4;                         // > 0.5×0.7 = 0.35 那条迟滞线：仍算按着（走的是模拟量，不是 `pressed`）
     b.poll();
     expect(found).toEqual([]);
     t.pressed = false;
