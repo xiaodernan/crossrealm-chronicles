@@ -452,9 +452,10 @@ export class Game {
   }
 
   /**
-   * 生效中的输入表 = 出厂表 + 玩家重映射，**UI 热键、游戏键、手柄按钮三张表同一次重建**（W-A7 切片5 / 切片9）。
+   * 生效中的输入表 = 出厂表 + 玩家重映射，**UI 热键、游戏键、战斗手柄、界面手柄四张表同一次重建**
+   * （W-A7 切片5 / 切片9 / 切片23）。
    *
-   * 存储里只有一格 `settings.keybinds`，玩家不必知道哪个动作归哪张表；
+   * 存储里只有三格覆盖包（`keybinds` / `gamepadBinds` / `gamepadUiBinds`），玩家不必知道哪个动作归哪张表；
    * 叠表、分流与跨表撞键校验都在 `buildBindingTables` 一处做完。设置面板预览这次改动时
    * 调的是同一个函数 —— 面板放过而游戏拒绝，玩家就是点完才被告知失败。
    *
@@ -464,22 +465,31 @@ export class Game {
   rebuildHotkeys() {
     const overrides = this.settings.get('keybinds') ?? {};
     const padOverrides = this.settings.get('gamepadBinds') ?? {};
+    const uiPadOverrides = this.settings.get('gamepadUiBinds') ?? {};
     let hotkeyTable;
     let keyTable;
     let padTable;
+    let uiPadTable;
     try {
-      ({ hotkeyTable, keyTable, padTable } = buildBindingTables(overrides, UI_HOTKEYS, padOverrides));
+      ({ hotkeyTable, keyTable, padTable, uiPadTable } = buildBindingTables(
+        overrides, UI_HOTKEYS, padOverrides, uiPadOverrides,
+      ));
     } catch {
       hotkeyTable = UI_HOTKEYS.map((e) => ({ ...e }));
       keyTable = factoryKeybindings();
       padTable = factoryGamepadBindings();
+      uiPadTable = factoryGamepadBindings(UI_GAMEPAD_BINDINGS);
       this.settings.data.keybinds = {};
       this.settings.data.gamepadBinds = {};
+      this.settings.data.gamepadUiBinds = {};
       this.dialog?.toast('键位配置无效，已恢复默认键位');
     }
     this.hotkeyTable = hotkeyTable;
     this.keybindTable = keyTable;
     this.padTable = padTable;
+    // 界面态那张表也在这里生效（切片23）：与战斗表同一批建、同一次回落，面板预览走的
+    // 是同一个 `buildBindingTables`，所以"面板放过而游戏拒绝"在这两格上都不会出现
+    this.uiPadTable = uiPadTable;
     this.hotkeys?.useTable(hotkeyTable);
     // 手柄桥换一张表（切片9）：按钮在按下那一刻才解析出口，所以换表不用重建桥、也不动借键账本
     this.applyPadBindings();
@@ -505,9 +515,12 @@ export class Game {
    *
    * 两处各自 `useBindings` 就是第二个写点 —— 那会漏掉一条：改完绑还在面板里，
    * 于是游戏表被装回去、A 又从"确认"变回"跳跃"。
+   *
+   * 界面态装的是**生效**那张（`uiPadTable`，切片23），不是出厂常量：`?? UI_GAMEPAD_BINDINGS`
+   * 只兜住"表还没建起来"的启动早期（`setupInput` 之前就有面板开过一次的路径）。
    */
   applyPadBindings() {
-    this.padInput?.useBindings(this.padUiMode() ? UI_GAMEPAD_BINDINGS : this.padTable);
+    this.padInput?.useBindings(this.padUiMode() ? (this.uiPadTable ?? UI_GAMEPAD_BINDINGS) : this.padTable);
   }
 
   /**

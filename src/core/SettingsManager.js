@@ -21,6 +21,15 @@ const DEFAULTS = {
    */
   gamepadBinds: {},
   /**
+   * **界面态**那张手柄表的重映射（切片23）：`界面动作名 → 按钮名`。
+   *
+   * 与上面那格分两格存，理由是同一族：两张表的值都是按钮名，靠值分不开，只能靠动作名，
+   * 而"这个动作名归哪张表"的答案由 `padScopeOf()` 问表拿（两张表的名单互不相交，加载期钉住）。
+   * 合成一格的代价是每次叠表都要先分流一次，而分流错了不会报错 —— 它表现为"面板里改的是
+   * 界面那一格，动的却是战斗表"（B47 那一族换了轴）。
+   */
+  gamepadUiBinds: {},
+  /**
    * 手柄手感旋钮（切片15 起三根，切片21 再加三根）：`padTuning()` 认识哪几格，这里就存哪几格。
    *
    * 默认值不在这里抄一遍 —— `padTuning()` 取的就是 `content/keybinds.js` 里那份 `PAD`，
@@ -58,6 +67,8 @@ export class SettingsManager {
     // 对象型默认值不能与 `DEFAULTS` 共用同一个引用：否则就地改一次就把出厂设定改了
     this.data.keybinds = { ...DEFAULTS.keybinds, ...(loaded.keybinds ?? {}) };
     this.data.gamepadBinds = { ...DEFAULTS.gamepadBinds, ...(loaded.gamepadBinds ?? {}) };
+    // 界面态那格同理：三格对象型默认值都不许与 `DEFAULTS` 共用引用
+    this.data.gamepadUiBinds = { ...DEFAULTS.gamepadUiBinds, ...(loaded.gamepadUiBinds ?? {}) };
     // 同上：这三根旋钮也是一格对象，不能与出厂共用引用（就地改一次就把出厂手感改了）
     this.data.padTuning = { ...DEFAULTS.padTuning, ...(loaded.padTuning ?? {}) };
   }

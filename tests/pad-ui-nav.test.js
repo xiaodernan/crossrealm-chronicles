@@ -15,7 +15,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, UI_PAD_ACTIONS, UI_PAD_SIGNALS, PAD_BUTTON,
-  assertKeybinds, assertUiPadBindings, bindingFor,
+  assertKeybinds, assertUiPadBindings, bindingFor, resolveGamepadBindings,
 } from '../src/content/keybinds.js';
 import { UI_HOTKEYS, applyHotkeyOverrides, setHotkeyTable } from '../src/content/hotkeys.js';
 import { GamepadInput } from '../src/engine/GamepadInput.js';
@@ -168,6 +168,27 @@ describe('装载界面表之后：十字键走格、B 返回、A 只报边沿不
       bridge.poll();
       expect(keys.Escape, button).toBe(true);
     }
+  });
+
+  it('界面表也能改绑（切片23）：把"返回"挪走之后，出厂那枚 B 不再返回、新那一枚才返回', () => {
+    // 这一条要钉的是"生效表进桥"这半：面板写的是 `settings.gamepadUiBinds`，桥装的必须是
+    // **叠过那一份**的表 —— 装常量就是"改了设定要重启才生效"那一族（B47 换了轴）
+    const table = resolveGamepadBindings(UI_GAMEPAD_BINDINGS, { back: 'rightStick' }, { assert: assertUiPadBindings });
+    const { bridge, keys, pad } = mkBridge(table);
+    press(pad, 'b');
+    bridge.poll();
+    expect(keys.Escape, '出厂那枚 B 已经不是这一格的主人了').toBeFalsy();
+    press(pad, 'b', false);
+    bridge.poll();
+    press(pad, 'rightStick');
+    bridge.poll();
+    expect(keys.Escape, '新那一枚该冒充热键表给的 Escape').toBe(true);
+    press(pad, 'rightStick', false);
+    bridge.poll();
+    expect(keys.Escape, 'edge 格子只亮一帧').toBeFalsy();
+    press(pad, 'start');
+    bridge.poll();
+    expect(keys.Escape, '同一张表里的"界面 Start"不该被顺带改掉').toBe(true);
   });
 
   it('A 不写任何键，只把 `ui.confirm` 点亮一帧（按住不连发）', () => {
@@ -434,6 +455,27 @@ describe('Game：上下文判定与换表都只有一条路', () => {
     expect(body[0]).toContain('UI_GAMEPAD_BINDINGS');
     expect(body[0]).toContain('this.padTable');
     expect((game.match(/applyPadBindings\(\);/g) || []).length, '换表的调用点').toBe(2);
+  });
+
+  it('界面态换的是**生效**那张界面表（切片23）：改过"返回"之后不必重启，出厂那枚 B 就不再返回', () => {
+    // 只看 `applyPadBindings` 的源码会漏掉一件事：它挑对了表名、却喂了常量。
+    // 所以这里走真方法 + 真桥：装表之后按新那枚才关得掉，按出厂那枚什么都不该发生
+    const { bridge, keys, pad } = mkBridge(GAMEPAD_BINDINGS);
+    const g = gameWith({ settingsOpen: true });
+    g.padUiMode = Game.prototype.padUiMode;
+    g.padInput = bridge;
+    g.padTable = GAMEPAD_BINDINGS;
+    g.uiPadTable = resolveGamepadBindings(UI_GAMEPAD_BINDINGS, { back: 'rightStick' }, { assert: assertUiPadBindings });
+    Game.prototype.applyPadBindings.call(g);
+    expect(bridge._slots.find((s) => s.action === 'back').button).toBe(PAD_BUTTON.rightStick);
+    press(pad, 'b');
+    bridge.poll();
+    expect(keys.Escape, '出厂那枚 B 已经不是这一格的主人了').toBeFalsy();
+    press(pad, 'b', false);
+    bridge.poll();
+    press(pad, 'rightStick');
+    bridge.poll();
+    expect(keys.Escape, '改绑之后动的是桥在用那张表').toBe(true);
   });
 
   it('A 那一下只有一个消费者：`activateFocused` 在 Game 里被调用一次，热键表里也没有 confirm 动作', () => {

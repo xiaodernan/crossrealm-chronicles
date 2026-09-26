@@ -274,8 +274,12 @@ describe('换表与接线', () => {
     expect(src).toMatch(/this\.hotkeys\?\.useTable\(hotkeyTable\)/);
     expect(src).toMatch(/this\.rebuildHotkeys\(\)/);
     // 切片5：叠表、分流与跨表撞键校验收进 `buildBindingTables` 一处，面板预览走同一个入口
-    // 切片9：第三参是手柄覆盖包 —— 少喂一角就等于"面板预览的表"与"游戏生效的表"又不是一回事
-    expect(src).toMatch(/buildBindingTables\(overrides, UI_HOTKEYS, padOverrides\)/);
+    // 切片9：第三参是战斗手柄覆盖包；切片23：第四参是界面那一份 —— 少喂一格就等于
+    // "面板预览的那张表"与"游戏生效的那张表"又不是一回事（B47 那一族）
+    expect(src).toMatch(/buildBindingTables\(\s*overrides, UI_HOTKEYS, padOverrides, uiPadOverrides,\s*\)/);
+    expect(src).toMatch(/this\.uiPadTable = uiPadTable/);
+    // 界面态换的是**生效**那张，不是出厂常量
+    expect(src).toMatch(/this\.uiPadTable \?\? UI_GAMEPAD_BINDINGS/);
     // 游戏键生效表是模块级的，消费者问 `codeFor`，所以重建时必须换表
     expect(src).toMatch(/setKeybindTable\(keyTable\)/);
     // 键位配置坏了不许把游戏带走：回落出厂表 + 清覆盖 + 说一句话

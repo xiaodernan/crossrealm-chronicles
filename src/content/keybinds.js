@@ -274,6 +274,10 @@ export const GAMEPAD_BINDINGS = {
  * 这张表与游戏表整表互换，走的是切片9 那条 `useBindings`（按动作名结转边沿与借键账本，
  * 所以进 UI 态那一刻，战斗侧借走的键会被原样还掉 —— 不退菜单就永远朝前走那一类）。
  *
+ * 切片23 起这张表也能改绑（覆盖包 `settings.gamepadUiBinds`，校验按这张表的名单走
+ * `assertUiPadBindings`）。仍然是"一张表一个上下文"而不是"一格两种上下文"：能改的只有
+ * 按钮格那三格，走焦那四格带着 `axes`，改绑要换的是"axis 对 + 方向"，与单按钮覆盖不是一个形状。
+ *
  * 前六格复用切片5 那条 `hotkey` 机制：出口是**当前生效的热键表**给的键码，
  * 于是"把 ↑↓ 改绑到别的键"之后手柄也跟着搬，不必在这里再记一遍（← → 那两格是切片16 加的，
  * 走的是同一条：十字键左/右冒充 ← / →，于是"调值"这件事键盘与手柄是同一个派发口）。
@@ -574,8 +578,8 @@ export function factoryKeybindings() {
 }
 
 /** 出厂手柄表的浅拷贝（同上：复位与回落都要一份新的，不能把常量本身交出去） */
-export function factoryGamepadBindings() {
-  return Object.fromEntries(Object.entries(GAMEPAD_BINDINGS).map(([k, v]) => [k, { ...v }]));
+export function factoryGamepadBindings(base = GAMEPAD_BINDINGS) {
+  return Object.fromEntries(Object.entries(base).map(([k, v]) => [k, { ...v }]));
 }
 
 /**
@@ -590,8 +594,12 @@ export function factoryGamepadBindings() {
  * "摇杆方向 + 十字键"两个入口，改成单按钮等于把其中一个扔掉 —— 那是减法，不是改绑。
  * 以前这里查一份手抄的名单（`STICK_ACTIONS`，只有移动那四格），界面表今天也有了摇杆格
  * （走焦那四格），名单就得再抄一遍；而"哪些格子是摇杆格"这件事表本身就知道。
+ *
+ * 尺子由调用方给（切片23）：界面表那份的差别只有两处 —— 动作名单是 `UI_PAD_ACTIONS`、
+ * 允许 `confirm` 那种只报边沿的格子。在这里 `import` 界面表自己那份校验会绕成递归
+ * （`assertUiPadBindings` 就是 `assertKeybinds` 的一个调用），所以形状是"注入"而不是"内查"。
  */
-export function resolveGamepadBindings(base = GAMEPAD_BINDINGS, overrides = {}) {
+export function resolveGamepadBindings(base = GAMEPAD_BINDINGS, overrides = {}, { assert = assertKeybinds } = {}) {
   const out = {};
   for (const [name, e] of Object.entries(base)) out[name] = { ...e };
   for (const [name, button] of Object.entries(overrides ?? {})) {
@@ -605,8 +613,30 @@ export function resolveGamepadBindings(base = GAMEPAD_BINDINGS, overrides = {}) 
     }
     target.button = button;
   }
-  assertKeybinds(out);
+  assert(out);
   return out;
+}
+
+/**
+ * 一枚手柄动作归哪张表（切片23）：界面表认识的名字归 `settings.gamepadUiBinds`，
+ * 其余归 `settings.gamepadBinds`。
+ *
+ * 为什么由表回答而不是由 DOM 上再挂一个 `ui:` 前缀：那一格的键就有两个说法（行说什么、
+ * 前缀说什么），而两者会分家 —— 正是 B47 那一族。**动作名互不相交**由下面那条加载期断言
+ * 钉住，所以"问哪张表"永远只有一个答案；哪天两张表真的共用了动作名，加载期就先红，
+ * 而不是玩家在面板里改了一格、另一格跟着莫名动起来。
+ */
+export function padScopeOf(action) {
+  return Object.prototype.hasOwnProperty.call(UI_GAMEPAD_BINDINGS, action) ? 'ui' : 'combat';
+}
+
+/** 两张手柄表的动作名必须互不相交（`padScopeOf` 唯一答案的前提，也是"两格覆盖包"不打架的前提） */
+export function assertPadScopesDisjoint(combat = GAMEPAD_BINDINGS, ui = UI_GAMEPAD_BINDINGS) {
+  const both = Object.keys(combat).filter((name) => name in ui);
+  if (both.length) {
+    throw new Error(`两张手柄表共用了动作名 ${both.join(', ')}：改绑那一格时说不清改的是哪张表`);
+  }
+  return true;
 }
 
 /**
@@ -642,23 +672,29 @@ export function assertCodesDisjoint(hotkeyTable, keyTable = ACTIVE) {
  * 手柄覆盖包走**独立的一格存储**（`settings.gamepadBinds`），不能塞进 `keybinds` 那个包：
  * 那里的值是键码（`KeyW`），这里的值是按钮名（`a`），而 `a` 恰好也是合法的键码形状 ——
  * 混在一格里，`partitionOverrides` 分不清"把 jump 改成 a 键"还是"把 jump 改成 A 按钮"。
- * 校验仍然只有这一个入口：三张表一次建齐，谁都不许单独预览。
+ * 界面态那张表又是第三格（`settings.gamepadUiBinds`，切片23）：同一个理由成立，只是分家的
+ * 两边都是按钮名，靠值分不开 —— 靠的是**动作名**（`padScopeOf` 问表），而两张表的名单互不相交
+ * （`assertPadScopesDisjoint`，加载期钉住）。
+ * 校验仍然只有这一个入口：四张表一次建齐，谁都不许单独预览。
  *
  * @param {Record<string, string>} overrides 动作名 → 键码（两张键盘表混在一起，玩家不需要分清）
  * @param {Array<{code: string, action: string}>} uiTable 生效中的 UI 热键出厂表
- * @param {Record<string, string>} [padOverrides] 手柄动作名 → 按钮名
+ * @param {Record<string, string>} [padOverrides] 战斗态手柄动作名 → 按钮名
+ * @param {Record<string, string>} [uiPadOverrides] 界面态手柄动作名 → 按钮名
  */
-export function buildBindingTables(overrides = {}, uiTable = UI_HOTKEYS, padOverrides = {}) {
+export function buildBindingTables(overrides = {}, uiTable = UI_HOTKEYS, padOverrides = {}, uiPadOverrides = {}) {
   const { hotkeys, keys, stray } = partitionOverrides(overrides, uiTable.map((e) => e.action));
   if (stray.length) throw new Error(`未知的键位动作：${stray.join(', ')} —— 两张表都不认识`);
   const hotkeyTable = applyHotkeyOverrides(uiTable, hotkeys);
   const keyTable = resolveKeybindings(KEY_BINDINGS, keys);
   const padTable = resolveGamepadBindings(GAMEPAD_BINDINGS, padOverrides);
+  const uiPadTable = resolveGamepadBindings(UI_GAMEPAD_BINDINGS, uiPadOverrides, { assert: assertUiPadBindings });
   assertCodesDisjoint(hotkeyTable, keyTable);
-  return { hotkeyTable, keyTable, padTable };
+  return { hotkeyTable, keyTable, padTable, uiPadTable };
 }
 
 assertKeybinds();
 assertUiPadBindings();
+assertPadScopesDisjoint();
 assertKeyActionLabels();
 assertCodesDisjoint(UI_HOTKEYS, ACTIVE);   // 出厂两张表必须互不抢占，否则加载即红

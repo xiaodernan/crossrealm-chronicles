@@ -1,5 +1,8 @@
 import { UI_HOTKEYS, UI_HOTKEY_LABELS } from '../content/hotkeys.js';
-import { GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, UI_GAMEPAD_BINDINGS, buildBindingTables } from '../content/keybinds.js';
+import {
+  GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, UI_GAMEPAD_BINDINGS,
+  buildBindingTables, padScopeOf,
+} from '../content/keybinds.js';
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
 import { focusFirstItem, restoreParkedFocus } from './FocusNav.js';
@@ -91,9 +94,11 @@ export class SettingsPanel {
       if (btn.id === 'keybind-reset') {
         this.setCapturing(null);
         this.setPadCapturing(null);
-        // 两格覆盖包一起清：只清键盘那半的话，"恢复默认键位"之后手柄仍是改过的
+        // 三格覆盖包一起清：只清键盘那半的话，"恢复默认键位"之后手柄仍是改过的；
+        // 少清界面那格同理 —— 玩家按"恢复默认"期待的是回到出厂，不是"两张表里的一张"
         this.game.settings.set('keybinds', {});
         this.game.settings.set('gamepadBinds', {});
+        this.game.settings.set('gamepadUiBinds', {});
         this.game.rebuildHotkeys();
         return this.refreshKeybinds();
       }
@@ -117,7 +122,7 @@ export class SettingsPanel {
     const overrides = { ...(this.game.settings.get('keybinds') ?? {}), [action]: e.code };
     try {
       // 与 Game.rebuildHotkeys 同一条校验：面板放过的组合必须恰好是游戏会接受的
-      buildBindingTables(overrides, UI_HOTKEYS, this._padOverrides());
+      buildBindingTables(overrides, UI_HOTKEYS, this._padOverrides(), this._uiPadOverrides());
     } catch {
       this.game.dialog?.toast(`该键位无效或已被别的动作占用：${keyLabel(e.code)}`);
       return this.refreshKeybinds();
@@ -131,24 +136,37 @@ export class SettingsPanel {
     return this.game.settings.get('gamepadBinds') ?? {};
   }
 
+  /** 界面态那张表的覆盖包（切片23）：与战斗那格分两格存，理由见 `SettingsManager` */
+  _uiPadOverrides() {
+    return this.game.settings.get('gamepadUiBinds') ?? {};
+  }
+
   /**
    * 手柄捕获的落点：桥在"按下并松手"那一帧把按钮名交上来。
    *
    * 与键盘那条同一纪律 —— 先校验再写盘，校验不过只 toast 一句、表原样不动，
    * 于是"面板放过的组合"与"游戏接受的组合"永远是同一批（切片5 的 B47 就是这么来的）。
+   *
+   * `action` 是**条目自己的动作名**（切片23）：面板给的那格写的就是它，所以这里能直接问
+   * `padScopeOf` 该落进哪一格覆盖包。以前写的是"行的动作名"，于是 `pauseMenu` 那一格
+   * 落成 `{escape: ...}` —— 两张表都不认识 `escape`，玩家点那颗 Start 必然只得到"无效"（B54）。
    */
   capturePadButton(name) {
     const action = this.capturingPad;
     this.setPadCapturing(null);
     if (!action) return;
-    const overrides = { ...this._padOverrides(), [action]: name };
+    const ui = padScopeOf(action) === 'ui';
+    const key = ui ? 'gamepadUiBinds' : 'gamepadBinds';
+    const overrides = { ...(ui ? this._uiPadOverrides() : this._padOverrides()), [action]: name };
     try {
-      buildBindingTables(this.game.settings.get('keybinds') ?? {}, UI_HOTKEYS, overrides);
+      buildBindingTables(this.game.settings.get('keybinds') ?? {}, UI_HOTKEYS,
+        ui ? this._padOverrides() : overrides,
+        ui ? overrides : this._uiPadOverrides());
     } catch {
       this.game.dialog?.toast(`该手柄按键无效或已被别的动作占用：${padButtonLabel(name)}`);
       return this.refreshKeybinds();
     }
-    this.game.settings.set('gamepadBinds', overrides);
+    this.game.settings.set(key, overrides);
     this.game.rebuildHotkeys();
     this.refreshKeybinds();
   }
@@ -249,9 +267,12 @@ export class SettingsPanel {
    * 别名（右 Ctrl / 右 Shift）是同一条动作的等价入口，写在提示里而不是多一列按钮。
    */
   keybindRow(action, label, binding, padEntries) {
+    // "在等哪一枚"问的是**条目**的动作名（切片23）：一行可能挂着战斗与界面两条，
+    // 提示只在该条目被点的那一格亮起 —— 比"整行都亮"少一桩误会（玩家会以为按了算两格）
+    const waitingPad = (padEntries ?? []).some((e) => e.action === this.capturingPad);
     const shown = this.capturing === action
       ? '按下要绑定的键（再点一次取消）'
-      : this.capturingPad === action
+      : waitingPad
         ? '按下要绑定的手柄键，松手即绑定（再点一次取消）'
         : (binding.aliases ?? []).map((c) => keyLabel(c)).join(' / ');
     const out = binding.code ?? MOUSE_LABELS[binding.mouse] ?? '未绑定';
@@ -266,11 +287,9 @@ export class SettingsPanel {
    * 界面里 B 返回、Start 开菜单 —— 这是事实，不是冲突（同一帧只有一张表在被轮询，
    * 判据在 `Game.padUiMode()` 那一处）。四种样子：
    * - 两张表都不认领这一行 → `—`；
-   * - 战斗表里是按钮 → 可点的按钮（改了立刻换表）；是摇杆 → 写死的说明（摇杆格改绑要换的是
-   *   "axis 对"，与单键覆盖不是一个形状，所以不给入口）；
-   * - 界面表里的条目 → **一律是说明**（`UI_GAMEPAD_BINDINGS` 今天出厂即生效、不可改绑），
-   *   前面带"界面"两个字，免得玩家以为点一下就能把面板里的键也改掉。
-   *   这一格也带着列类名 `keybind-pad`：切片20 头一版只给了 `keybind-pad-part`，于是"界面"那一格
+   * - **按钮格**（两张表都一样）→ 可点的入口，字样是这一枚按钮的标签，界面那一格带"界面"两个字；
+   * - **摇杆格**（两张表都一样）→ 写死的说明：改绑要换的是"axis 对 + 方向"，与单键覆盖不是一个形状；
+   * - 说明格也带着列类名 `keybind-pad`：切片20 头一版只给了 `keybind-pad-part`，于是"界面"那一格
    *   独自在行里时**不在手柄那一列上**（列宽与居中都没有，真浏览器读数里那四行的手柄格是查无此格）。
    *   合成一格时在列内部由 CSS 撤掉那个列宽，不给行加宽。
    * 两种都有时合成一格（外层 `keybind-pad-combo`）：让第五列把行尾的提示挤走是新的对不齐。
@@ -278,23 +297,25 @@ export class SettingsPanel {
    * 键盘那一侧要过正则才敢拼，这一侧连拼玩家输入的机会都没有。
    */
   padCell(action, entries) {
-    const list = entries ?? [];
-    if (!list.length) return '<span class="keybind-pad keybind-pad-none">—</span>';
-    const parts = list.filter((e) => !e.ui).map((e) => this.padChip(action, e));
-    const ui = list.filter((e) => e.ui);
-    if (ui.length) {
-      parts.push(`<span class="keybind-pad keybind-pad-part">界面 ${ui.map((e) => this.padChipLabel(e)).join(' / ')}</span>`);
-    }
+    const parts = (entries ?? []).map((e) => this.padChip(e));
+    if (!parts.length) return '<span class="keybind-pad keybind-pad-none">—</span>';
     if (parts.length === 1) return parts[0];
     return `<span class="keybind-pad keybind-pad-combo">${parts.join('')}</span>`;
   }
 
-  /** 战斗表那一格：按钮可点，摇杆只是说明 */
-  padChip(action, entry) {
+  /**
+   * 一条手柄条目 → 一格。**键是条目自己的动作名**（切片23，修 B54）：以前这里拼的是
+   * "行的动作名"，而 `pauseMenu` 那一格冒充的热键叫 `escape` —— 于是点它之后写进覆盖包的是
+   * `{escape: ...}`，两张表都不认识这个名字，玩家按任何一枚键都只得到"该手柄按键无效"。
+   * 一行里可能同时有战斗与界面两条（`escape` 那行今天三条），它们的动作名互不相同。
+   */
+  padChip(entry) {
+    const label = `${entry.ui ? '界面 ' : ''}${this.padChipLabel(entry)}`;
+    const part = entry.ui ? ' keybind-pad-part' : '';
     if (entry.button !== undefined) {
-      return `<button type="button" class="keybind-pad" data-padbind="${action}">${padButtonLabel(entry.button)}</button>`;
+      return `<button type="button" class="keybind-pad${part}" data-padbind="${entry.action}">${label}</button>`;
     }
-    return `<span class="keybind-pad keybind-pad-fixed">${this.padChipLabel(entry)}</span>`;
+    return `<span class="keybind-pad keybind-pad-${entry.ui ? 'part' : 'fixed'}">${label}</span>`;
   }
 
   /** 条目 → 字样：摇杆格问 `padStickLabel`、按钮格问 `padButtonLabel`，面板里一份算式都不抄 */
