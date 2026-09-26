@@ -558,13 +558,17 @@ describe('静态门禁：焦点只有一个出口，激活只有浏览器一个�
     const withNav = OVERLAY_LAYERS.filter((x) => x.nav);
     expect(withNav.length, '一层都不认领焦点：这一片就是空跑').toBeGreaterThan(0);
     for (const l of withNav) {
-      const claimants = FILES.filter(({ source }) => source.includes(`getElementById('${l.nav}')`));
+      // 归属问的是"谁把焦点带进这一格"，不是"谁查过这个 id"：拍照导演也会去藏 #journal-panel，
+      // 但那不是认领 —— 把查过 id 的都算成主人，等于禁止任何面板被别处复用（切片27 的日志抽屉就这么撞的）
+      const claimants = FILES.filter(({ source }) => source.includes(`getElementById('${l.nav}')`)
+        && source.includes('focusFirstItem('));
       expect(claimants, `没有面板认领宿主 "${l.nav}"（层表 ${l.layer} 那一格是死的）`).toHaveLength(1);
-      // 认领者还得真的会开：`show()` 是落焦的时机，而且它必须真的落（不落 = 玩家开完面板第一眼没有落点）
-      // 带参数的 `show(currentId)` 也算：这一片要钉的是"开面板那一刻落焦"，不是"show 必须无参"
-      const body = claimants[0].source.match(/\n {2}show\([^)]*\)\s*\{[\s\S]*?\n {2}\}/);
-      expect(body, `${claimants[0].name} 没有 show() 方法体`).toBeTruthy();
-      expect(body[0], `${claimants[0].name} 开面板时没落焦`).toContain('focusFirstItem(');
+      // 认领者还得真的会在"打开那一刻"落焦：方法名各家不同（show / setJournal），落焦必须在里面
+      const owner = claimants[0].source;
+      const bodies = [...owner.matchAll(/\n {2}(?:show|open|setJournal|toggle)[A-Za-z]*\([^)]*\)\s*\{[\s\S]*?\n {2}\}/g)].map((m) => m[0]);
+      expect(bodies.length, `${claimants[0].name} 找不到开面板的方法体`).toBeGreaterThan(0);
+      expect(bodies.some((b) => b.includes('focusFirstItem(')),
+        `${claimants[0].name} 开面板时没落焦（玩家开完第一眼没有落点）`).toBe(true);
     }
   });
 

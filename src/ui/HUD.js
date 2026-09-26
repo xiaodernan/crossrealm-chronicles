@@ -5,6 +5,7 @@ import { mergeJournalCategories } from './JournalTabRegistry.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { refreshKeyText } from '../content/keyHints.js';
+import { focusFirstItem, parkFocus, restoreParkedFocus } from './FocusNav.js';
 
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 
@@ -45,6 +46,7 @@ export class HUD {
 
     this.buildHUD();
     this.setupListeners();
+    this.bindJournalEntry();
   }
 
   buildHUD() {
@@ -355,10 +357,43 @@ export class HUD {
     this.minimapWrap.classList.toggle('hidden', !this.minimapVisible);
   }
 
+  /**
+   * 暂停菜单里的"日志"那一格（切片27 / 修 B57）：手柄玩家今天没有别的入口能开日志
+   * （两张手柄表里都没有 `journal` 这一格，而 `KeyJ` 对纯手柄玩家不存在）。
+   *
+   * 与"设置 / 说明书"那两处同一条形状：下层不关，只 `parkFocus` 让位，回来时站回原来那一格。
+   */
+  bindJournalEntry() {
+    document.getElementById('pause-journal')?.addEventListener('click', () => {
+      parkFocus(this.game.pauseMenu?.panel);
+      this.setJournal(true);
+    });
+  }
+
+  /**
+   * 日志抽屉的开合只有一个写点（切片27）。
+   *
+   * 为什么不是到处 `this.journalOpen = !this.journalOpen`：这一格今天进了层表（`overlayState()`
+   * 里的 `journalOpen`），于是"它开着吗"有了消费者 —— 级联关它的时候**不能**再走 toggle
+   * （按一次 Escape 变成"再开一次"就是 B57 读数里那个"关不掉"的形状）。
+   */
+  setJournal(open) {
+    const want = open === true;
+    if (want === this.journalOpen) return want;
+    this.journalOpen = want;
+    this.journalPanel?.classList?.toggle('hidden', !want);
+    if (want) {
+      this.updateJournal();
+      // 落焦第一格：走焦（↑↓ / 手柄十字键）从外面进来要有落点，与其它面板同一条 `focusFirstItem`
+      focusFirstItem(this.journalPanel);
+    } else {
+      restoreParkedFocus();   // 从暂停菜单里点开的，退回去时站回原来那一格（切片12）
+    }
+    return want;
+  }
+
   toggleJournal() {
-    this.journalOpen = !this.journalOpen;
-    this.journalPanel.classList.toggle('hidden', !this.journalOpen);
-    this.updateJournal();
+    return this.setJournal(!this.journalOpen);
   }
 
   toggleZonePanel() {

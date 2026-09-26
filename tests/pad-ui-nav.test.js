@@ -434,6 +434,7 @@ describe('Game：上下文判定与换表都只有一条路', () => {
     helpOpen: ['helpManual', 'open'], settingsOpen: ['settingsPanel', 'open'],
     fastTravelOpen: ['fastTravelPanel', 'open'], pauseMenuOpen: ['pauseMenu', 'open'],
     dialogOpen: ['dialog', 'open'], upgradeOpen: ['upgrade', 'open'],
+    journalOpen: ['hud', 'journalOpen'],   // 切片27：日志抽屉今天也是收焦点的一层
   };
   const gameWith = (over) => {
     const g = { overlayState: Game.prototype.overlayState, cinematicActive: false };
@@ -448,7 +449,8 @@ describe('Game：上下文判定与换表都只有一条路', () => {
     const probe = (over) => Game.prototype.padUiMode.call(gameWith(over));
     // 判据是"有没有一层收了焦点"（`topNavLayer`），名单从层表现取 —— 测试里不抄第二份
     const navs = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.state);
-    expect(navs.sort()).toEqual(['fastTravelOpen', 'helpOpen', 'pauseMenuOpen', 'settingsOpen', 'upgradeOpen'].sort());
+    expect(navs.sort()).toEqual(['fastTravelOpen', 'helpOpen', 'journalOpen',
+      'pauseMenuOpen', 'settingsOpen', 'upgradeOpen'].sort());
     for (const k of navs) {
       expect(probe({ [k]: true }), k).toBe(true);
     }

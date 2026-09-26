@@ -42,7 +42,7 @@ const sourceOf = (name) => {
   return found.source;
 };
 
-const LAYER_NAMES = ['endCredits', 'dialog', 'worldMap', 'autoPlay', 'help', 'cinematic',
+const LAYER_NAMES = ['endCredits', 'dialog', 'worldMap', 'autoPlay', 'help', 'journal', 'cinematic',
   'settings', 'fastTravel', 'pauseMenu', 'combatCinematic', 'upgrade'];
 
 /** 状态进、状态出：字段名全部现问表；写错一个状态名立刻红（测试里的字面量也因此被钉住） */
@@ -55,7 +55,7 @@ const state = (over = {}) => {
   return { ...base, ...over };
 };
 
-/** 表里"吃返回键"的层与"不吃"的层（切片10 之后只剩升级面板一个硬模态：它没有返回路径） */
+/** 表里"吃返回键"的层与"不吃"的层（切片24 之后没有不吃返回键的一层，`HARD` 该是空表） */
 const BACK = OVERLAY_LAYERS.filter((l) => l.back).map((l) => l.layer);
 const HARD = OVERLAY_LAYERS.filter((l) => !l.back).map((l) => l.layer);
 
@@ -103,6 +103,8 @@ describe('一张表：层序、字段名与 blocks 的取值域', () => {
       'worldMap|worldMapOpen|back|map|-',
       'autoPlay|autoPlayActive|back|false|-',
       'help|helpOpen|back|true|help-manual',
+      // 日志抽屉今天是一层（切片27 / B57）：以前它只归 HUD 记，级联与走焦都不知道它开着
+      'journal|journalOpen|back|true|journal-panel',
       'cinematic|cinematicActive|back|false|-',
       'settings|settingsOpen|back|true|settings-panel',
       'fastTravel|fastTravelOpen|back|true|fast-travel-panel',
@@ -110,6 +112,39 @@ describe('一张表：层序、字段名与 blocks 的取值域', () => {
       'combatCinematic|combatCinematicSkippable|back|false|-',
       'upgrade|upgradeOpen|back|true|upgrade-panel',   // 切片24：从硬模态改成吃得掉、走得进的一层（B55）
     ]);
+  });
+
+  it('日志压着菜单：吃返回键与接焦点的都是日志（切片27 / 修 B57）', () => {
+    const both = state({ journalOpen: true, pauseMenuOpen: true });
+    expect(topBackLayer(both)).toBe('journal');
+    expect(topNavLayer(both).layer, '走焦与返回必须吃同一张表').toBe('journal');
+    // 改前读数里最扎眼的一条：抽屉开着按 KeyH 还能再压一本说明书进来。今天它是一层模态
+    expect(hotkeyBlockedBy(both, 'KeyH'), '开着日志不该再让别的 UI 热键穿过去').toBe(true);
+    expect(hotkeyBlockedBy(both, hotkeyCodeFor('escape')), '返回键要放行给级联').toBe(false);
+  });
+
+  it('每一个挡键层都在 `canPlay` 里被问到（切片27：日志抽屉就是漏掉的那一个）', () => {
+    const src = sourceOf('core/Game.js');
+    const line = src.slice(src.indexOf('const canPlay ='), src.indexOf('const playing ='));
+    expect(line.length, '找不到 canPlay 那一段：写法变了，请把这张对照表一起改').toBeGreaterThan(20);
+    // 层表说"这一层挡 UI 热键"，玩法那一侧就必须同样认得它 —— 两边各长一套就是 B46 的另一种活法：
+    // 层表以为挡住了，玩家却还在被摇杆推着走（真浏览器读数 K3 正是这样）
+    const ASKED = {
+      dialog: 'this.dialog.open',
+      help: 'this.helpManual.open',
+      settings: 'this.settingsPanel.open',
+      fastTravel: 'this.fastTravelPanel.open',
+      pauseMenu: 'this.paused',
+      upgrade: 'this.upgrade.open',
+      journal: 'this.hud?.journalOpen',
+    };
+    expect(Object.keys(ASKED).sort(), '挡键层的名单与层表对不上（加一层就得在这里说清它挡不挡玩法）')
+      .toEqual(OVERLAY_LAYERS.filter((l) => l.blocks === true).map((l) => l.layer).sort());
+    for (const [layer, needle] of Object.entries(ASKED)) {   // 键集合上面已与层表逐字对过
+      expect(line, `${layer} 挡 UI 热键却不挡玩法：一根输入两个消费者`).toContain('!' + needle);
+    }
+    // 世界地图那一层走的是 `'map'` 放行名单，但它同样停玩法：这里一并钉住，免得只改一半
+    expect(line).toContain('!this.worldMapPanel?.open');
   });
 
   it('对话压在地图之前、演出压在菜单之后（这两处顺序都是签字过的产品决策）', () => {
@@ -177,9 +212,9 @@ describe('topBackLayer：这一下返回归哪一层', () => {
 describe('topNavLayer：↑↓ 走进哪个面板（切片11，与返回键同一张表）', () => {
   const NAV = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.layer);
 
-  it('登记的层就是"焦点进得去"的那几层：说明书 / 设置 / 快速旅行 / 暂停菜单 / 升级面板', () => {
-    // 升级面板那九格（三张页签 + 五项属性 + 继续探索）一直在那里，只是没人认领（切片24 / B55）
-    expect(NAV).toEqual(['help', 'settings', 'fastTravel', 'pauseMenu', 'upgrade']);
+  it('登记的层就是"焦点进得去"的那几层：说明书 / 日志 / 设置 / 快速旅行 / 暂停菜单 / 升级面板', () => {
+    // 升级面板那九格（切片24 / B55）与日志抽屉那八格（切片27 / B57）今天都有宿主
+    expect(NAV).toEqual(['help', 'journal', 'settings', 'fastTravel', 'pauseMenu', 'upgrade']);
   });
 
   it('世界地图刻意不在名单里：那一格里只有"关闭"一格可停，认领它是给自己加一个假落点', () => {

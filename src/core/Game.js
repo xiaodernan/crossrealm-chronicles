@@ -437,6 +437,8 @@ export class Game {
       pauseMenuOpen: this.pauseMenu.open,
       dialogOpen: this.dialog.open,
       upgradeOpen: this.upgrade.open,
+      // 日志抽屉今天也算一层（切片27 / 修 B57）：以前它只归 HUD 自己记，级联与走焦都不知道它开着
+      journalOpen: !!this.hud?.journalOpen,
     };
   }
 
@@ -601,6 +603,9 @@ export class Game {
       case 'fastTravel': return this.fastTravelPanel.hide();
       // 升级面板（切片24）：以前这一层不吃返回键，纯手柄玩家在营火升级完就退不出去
       case 'upgrade': this.upgrade.hide(); return true;
+      // 日志抽屉（切片27 / 修 B57）：走 `setJournal(false)` 而不是 `toggleJournal()` ——
+      // 级联关它的时候再 toggle 一次就是"按一下变成再开一次"，那正是改前读数的"关不掉"
+      case 'journal': this.hud.setJournal(false); return true;
       case 'pauseMenu': return this.pauseMenu.toggle();
       default: return false;
     }
@@ -737,6 +742,10 @@ export class Game {
     const canPlay = !this.dialog.open && !this.upgrade.open && !this.cinematicActive
       && !this.paused && !this.settingsPanel.open && !this.fastTravelPanel.open && !this.helpManual.open
       && !this.worldMapPanel?.open
+      // 日志抽屉（切片27 / 修 B57）：它进了层表之后才发现这里少问一格 —— 摇杆在界面态里既推着
+      // 那一格的走焦、又还在推玩家走路（真浏览器读数 K3：开着日志 `mag` 0.972、速度 26.98 m/s）。
+      // 一根输入两个消费者，与 B52 同族；这里按既有形状补上"这一层开着就不玩"
+      && !this.hud?.journalOpen
       && !inputLocked
       && !this.autoPlayMode;
 

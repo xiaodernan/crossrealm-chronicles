@@ -337,23 +337,48 @@ describe('菜单 → 上层面板：下层让位但不关，退回来落回原�
 /* ------------------------------------------------------------ 静态门禁 */
 
 describe('静态门禁：来路只有一处写、一处读，旧写法一贴回来就红', () => {
+  // 比较前先按文件名排：`callSites` 走的是目录遍历顺序，那不是契约（切片27 加了 HUD 之后就露出来了）
+  // 按码位排而不是 localeCompare：后者会把 ui/HUD.js 排到 ui/HelpManual.js 后面（区域规则的锅），
+  // 而这份名单要的只是确定性，不是字典序
+  const byName = (xs) => [...xs].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
   const callSites = (needle) => FILES
     .filter((f) => !f.name.endsWith('FocusNav.js'))
     .map((f) => ({ name: f.name, n: (f.source.match(needle) || []).length }))
     .filter(({ n }) => n > 0);
 
-  it('`parkFocus(` 只有两处调用：菜单进设置、菜单进说明书', () => {
-    expect(callSites(/parkFocus\(/g)).toEqual([
+  it('`parkFocus(` 只有三处调用：菜单进设置、菜单进说明书、菜单进日志（切片27）', () => {
+    expect(byName(callSites(/parkFocus\(/g))).toEqual([
+      { name: 'ui/HUD.js', n: 1 },
       { name: 'ui/HelpManual.js', n: 1 },
       { name: 'ui/PauseMenu.js', n: 1 },
     ]);
   });
 
   it('`restoreParkedFocus()` 只在"上层关掉"那一刻调用', () => {
-    expect(callSites(/restoreParkedFocus\(/g)).toEqual([
+    expect(byName(callSites(/restoreParkedFocus\(/g))).toEqual([
+      // 日志抽屉关掉时也走这一条（切片27）：从暂停菜单点进去的，退回来要站回原来那一格
+      { name: 'ui/HUD.js', n: 1 },
       { name: 'ui/HelpManual.js', n: 1 },
       { name: 'ui/SettingsPanel.js', n: 1 },
     ]);
+  });
+
+  it('日志那一格的状态只有一个写点：`HUD.setJournal`（切片27）', () => {
+    // 先剥注释：解释这条规矩的注释里就带着旧写法，不剥就是自己抓自己
+    const src = sourceOf('ui/HUD.js').replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    // 级联关它、按钮开它，走的都必须是同一个 setter —— 到处 `this.journalOpen = !...` 就是
+    // "按一下 Escape 变成再开一次"的那个形状（改前读数里 Escape 关不掉日志）
+    expect((src.match(/this\.journalOpen\s*=/g) ?? []), '开合之外的第二处写').toHaveLength(2);
+    // 那两处：构造里的出厂 false + setter 里唯一一次改写
+    expect(src).toMatch(/setJournal\(open\) \{/);
+    expect(src).toMatch(/return this\.setJournal\(!this\.journalOpen\);/);
+    // 暂停菜单那一格只 park + 开上层，不许把菜单自己关掉（B53 那条规矩对新入口同样成立）
+    const handler = src.match(/getElementById\('pause-journal'\)[\s\S]*?\}\);/);
+    expect(handler, '找不到"日志"那一格的处理器').toBeTruthy();
+    expect(handler[0]).toContain('parkFocus(');
+    expect(handler[0]).not.toMatch(/hide\(/);
+    // 返回键那一档走 setter，不走 toggle
+    expect(sourceOf('core/Game.js')).toMatch(/case 'journal': this\.hud\.setJournal\(false\); return true;/);
   });
 
   it('下层让位不许写回 `hide()`：菜单与说明书两处都不许再关自己（B53 复发）', () => {
@@ -449,7 +474,8 @@ describe('静态门禁：来路只有一处写、一处读，旧写法一贴回�
   it('park 只吃层表登记过的宿主：新面板要进来必须先登记 `nav`（不许多一份名单）', () => {
     const hosts = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.nav).sort();
     // 升级面板那九格（页签 + 五项属性 + 继续探索）今天也有宿主（切片24 / B55）
-    expect(hosts).toEqual(['fast-travel-panel', 'help-manual', 'pause-menu', 'settings-panel', 'upgrade-panel']);
+    expect(hosts).toEqual(['fast-travel-panel', 'help-manual', 'journal-panel',
+      'pause-menu', 'settings-panel', 'upgrade-panel']);
     // 让位那两处写的必须是层表里登记过的宿主，而不是现场再抄一个 DOM id
     for (const name of ['ui/PauseMenu.js', 'ui/HelpManual.js']) {
       const parkLine = sourceOf(name).match(/parkFocus\(([^)]*)\);/);
@@ -522,6 +548,7 @@ describe('`Game.runEscape` 走真级联：让位之后返回键仍然归上层',
         pauseMenu: { ...panel('pauseMenu', open.pauseMenu), toggle: () => calls.push('pauseMenu.toggle') },
         dialog: panel('dialog', open.dialog),
         upgrade: panel('upgrade', open.upgrade),
+        hud: { journalOpen: !!open.journal, setJournal: (v) => calls.push('journal:' + v) },
         cinematics: { skip: () => calls.push('cinematic') },
         endCredits: null,
         combatCinematicSkip: null,
@@ -563,6 +590,19 @@ describe('`Game.runEscape` 走真级联：让位之后返回键仍然归上层',
     expect(body[0]).toMatch(/case 'upgrade': this\.upgrade\.hide\(\); return true;/);
     expect(body[0].slice(body[0].indexOf("case 'upgrade'"), body[0].indexOf("case 'pauseMenu'")))
       .not.toMatch(/pauseMenu|settingsPanel|helpManual/);
+  });
+
+  it('日志开着：这一下返回键关的是日志，而不是把菜单弹出来（切片27 / B57）', () => {
+    const { game, calls } = mkGame({ journal: true });
+    expect(game.overlayState().journalOpen, '`journalOpen` 没进现状：层表那一格是死的').toBe(true);
+    game.runEscape();
+    expect(calls).toEqual(['journal:false']);
+  });
+
+  it('日志压着菜单：只关日志，菜单一下都不许被顺手撤掉', () => {
+    const { game, calls } = mkGame({ journal: true, pauseMenu: true });
+    game.runEscape();
+    expect(calls).toEqual(['journal:false']);
   });
 
   it('只剩菜单开着：这一下才轮到关菜单', () => {

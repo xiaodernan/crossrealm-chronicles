@@ -67,6 +67,7 @@ const panels = (over = {}) => {
     pauseMenuOpen: false,
     dialogOpen: false,
     upgradeOpen: false,
+  journalOpen: false,
   };
   for (const k of Object.keys(over)) expect(base, `状态名 "${k}" 不在层表里`).toHaveProperty(k);
   return { ...base, ...over };

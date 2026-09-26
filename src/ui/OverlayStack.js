@@ -30,6 +30,13 @@ export const OVERLAY_LAYERS = [
   { layer: 'worldMap', state: 'worldMapOpen', back: true, blocks: 'map' },
   { layer: 'autoPlay', state: 'autoPlayActive', back: true, blocks: false },
   { layer: 'help', state: 'helpOpen', back: true, blocks: true, nav: 'help-manual' },
+  /**
+   * 日志抽屉（切片27 / 修 **B57**）。它过去只归 `HUD` 自己记一格布尔：`overlayState()` 里没有它，
+   * 于是级联不知道要关它（按 Escape 反而把暂停菜单弹出来，抽屉还开着）、走焦也不认它（面板里
+   * 明明有八格可点，↑↓ 一步都进不去），而两张手柄表里没有任何一格能打开它 —— 手柄玩家连开都开不了。
+   * 现在它与说明书同档：吃返回键、挡别的 UI 热键、认领 `#journal-panel` 那一格的焦点。
+   */
+  { layer: 'journal', state: 'journalOpen', back: true, blocks: true, nav: 'journal-panel' },
   { layer: 'cinematic', state: 'cinematicActive', back: true, blocks: false },
   { layer: 'settings', state: 'settingsOpen', back: true, blocks: true, nav: 'settings-panel' },
   { layer: 'fastTravel', state: 'fastTravelOpen', back: true, blocks: true, nav: 'fast-travel-panel' },
