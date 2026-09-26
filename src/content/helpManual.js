@@ -1,4 +1,9 @@
-/** 说明书扩写章节 */
+/**
+ * 说明书扩写章节数据表（W-B2：消灭 Wave/Extras 叠加）。
+ *
+ * 原 HELP_SECTIONS_EXTRA 从 HelpManualExtras.js 迁移而来。
+ */
+
 export const HELP_SECTIONS_EXTRA = [
   {
     id: 'journal-tabs',
@@ -48,7 +53,3 @@ Wave3 三巨头母题：
 Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低语（时线）· 星港商路（荒原）`,
   },
 ];
-
-export function mergeHelpSections(base) {
-  return [...base, ...HELP_SECTIONS_EXTRA];
-}

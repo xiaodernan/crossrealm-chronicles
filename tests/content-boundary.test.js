@@ -15,6 +15,7 @@
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, basename, relative } from 'node:path';
+import { ZONE_NAMES } from '../src/content/ZoneIdentity.js';
 
 /** 回归门禁：简历联动子系统（工程栈 / 足球面板）不得再进入游戏代码 */
 const FORBIDDEN = [
@@ -143,9 +144,14 @@ describe('内容边界', () => {
    *
    * 目录里 49 条回声，`zone` 必须是 ZONE_IDS 的值、`franchise` 必须写 `FRANCHISE.*`
    * 常量；写成中文字面量的那一刻起，图鉴筛选与成就分桶就开始漏。
+   *
+   * W-B2 切片3：目录本体从 `game/PopCultureHomageRegistry*.js`（四层）搬进
+   * `content/echoes.js`（一张表），扫描范围跟着换 —— 门禁认的是**那张表**，不是那批文件名。
+   * 区域 id 那一组直接从 `ZoneIdentity.js` 取，不再在本文件里抄第二份清单。
    */
-  const echoFiles = FILES.filter((f) => /PopCultureHomageRegistry/.test(basename(f)));
-  const ZONE_FIELDS = new Set(['hub', 'fantasy', 'magic', 'space', 'void', 'abyss', 'corridor']);
+  const echoFiles = FILES.filter((f) => /(^|\/)echoes\.js$/.test(relative(SRC, f).replaceAll('\\', '/')));
+  // 区域 id 的清单从真源取，不再在本文件里抄第二份（`ZONE_NAMES` 的键就是那批 id）
+  const ZONE_FIELDS = new Set(Object.keys(ZONE_NAMES));
 
   it('回声目录的每条 zone 都是区域 id、每条 franchise 都是常量引用', () => {
     const offenders = [];

@@ -1,5 +1,5 @@
 import { mergeZoneEvents } from './WorldAmbientCatalog.js';
-import { mergePopCultureAmbient } from './WorldAmbientPopCulture.js';
+import { mergePopCultureAmbient } from '../content/ambientLore.js';
 
 /** 探索时随机氛围事件 — 区域台词 / 小惊喜 */
 const _BASE_ZONE_EVENTS = {

@@ -151,16 +151,12 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
  */
 const LEDGER = {
   'ui/HelpManual.js': 23,
-  'ui/HelpManualExtras.js': 8,
-  'game/RestDialogueExtras.js': 8,
-  'game/RestDialogue.js': 4,
-  'game/RestDialogueExtras2.js': 4,
+  'game/RestDialogue.js': 1,
   'game/LoreCodexRegistry.js': 3,
   'player/DemoRunner.js': 3,
   'game/LoreFragments.js': 2,
   'game/WorldAmbientCatalog.js': 2,
   'cinematic/CinematicManager.js': 1,
-  'game/PopCultureHomageRegistry.js': 1,
   'game/QuestSystem.js': 1,
   'game/SideQuestRegistry.js': 1,
   'game/StoryDirector.js': 1,
@@ -173,6 +169,13 @@ const LEDGER = {
   // 它是**画在 canvas 上的文本**，吃不到 `data-keys` 那套（那是 DOM 的），
   // 所以本切片只如实记账；随 W-B1 的文案数据化一起改成问 `keyHint('escape')`。
   'content/dialogueCgPresets.js': 1,
+  // W-B2 切片3：文案搬进 content/ 之后，账本跟着换名字，**总数一处没变**（76 → 76，逐文件实测）。
+  // 这四行不是新增的债：15 条来自原来的 game/RestDialogue{,Extras,Extras2}.js（4+8+4−自己留下的 1），
+  // 8 条来自 ui/HelpManualExtras.js，1 条来自 game/PopCultureHomageRegistry.js。
+  // 真正的还债是把它们改成 `{escape}` 这类动作名 —— 那是文案数据化的下一步，不是这一片。
+  'content/restDialogues.js': 15,
+  'content/helpManual.js': 8,
+  'content/echoes.js': 1,
 };
 
 const LIT = /`(?:\\.|[^`\\])*`|'(?:\\.|[^'\n])*'|"(?:\\.|[^"\n])*"/g;

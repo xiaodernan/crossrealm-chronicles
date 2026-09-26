@@ -1,6 +1,6 @@
 import { REST_DIALOGUE_CG } from '../content/dialogueCgPresets.js';
 import { REST_NPC_DEFS } from '../content/restNpcDefs.js';
-import { CG_GALLERY_BONUS_EXTRA } from './CgGalleryRegistryExtras.js';
+import { CG_GALLERY_BONUS_EXTRA } from '../content/cgGallery.js';
 
 /** CG 画廊完整目录 — 营火对话 + Boss 击破 + 隐藏 */
 export const CG_GALLERY_CATALOG = [

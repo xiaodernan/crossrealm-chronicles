@@ -1,4 +1,4 @@
-import { POP_CULTURE_ECHOES } from './PopCultureHomageRegistry.js';
+import { ECHOES } from '../content/echoes.js';
 import { franchiseLabel } from '../content/franchises.js';
 
 /** 次元回声解锁 — 发现 POI / 致敬点时写入 */
@@ -21,7 +21,7 @@ export class PopCultureEchoSystem {
   }
 
   tryUnlock(triggerKey) {
-    for (const echo of POP_CULTURE_ECHOES) {
+    for (const echo of ECHOES) {
       if (echo.trigger !== triggerKey || this.unlocked.has(echo.id)) continue;
       this.unlocked.add(echo.id);
       this.game.dialog?.toast(`📡 次元回声：${echo.title}`, 3400);
@@ -41,11 +41,11 @@ export class PopCultureEchoSystem {
   }
 
   getEntries(franchise = 'all') {
-    return POP_CULTURE_ECHOES.filter((e) => franchise === 'all' || e.franchise === franchise);
+    return ECHOES.filter((e) => franchise === 'all' || e.franchise === franchise);
   }
 
   getStats() {
-    const total = POP_CULTURE_ECHOES.length;
+    const total = ECHOES.length;
     return { unlocked: this.unlocked.size, total, percent: total ? Math.round((this.unlocked.size / total) * 100) : 0 };
   }
 

@@ -1,5 +1,5 @@
 /** 迷宫叙事碎片 — 场景叙事 / 碎片化文本 / 章节导语 */
-import { LORE_FRAGMENTS_POP, mergeNpcChapterLines } from './LoreFragmentsPopCulture.js';
+import { LORE_FRAGMENTS_POP, mergeNpcChapterLines } from '../content/ambientLore.js';
 
 export const LORE_FRAGMENTS = [
 

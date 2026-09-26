@@ -8,26 +8,25 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { FRANCHISE, FRANCHISE_LABELS, franchiseLabel } from '../src/content/franchises.js';
-import { POP_CULTURE_ECHOES } from '../src/game/PopCultureHomageRegistry.js';
-import {
-  ACHIEVEMENTS_POP_CULTURE, ECHO_FRANCHISE_BUCKETS, attachPopCultureAchievements,
-} from '../src/game/PopCultureAchievementExtras.js';
+import { ECHOES } from '../src/content/echoes.js';
+import { ACHIEVEMENTS_POP_CULTURE, ECHO_FRANCHISE_BUCKETS } from '../src/content/achievements.js';
+import { attachPopCultureAchievements } from '../src/game/PopCultureAchievementExtras.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
-const countOf = (franchise) => POP_CULTURE_ECHOES.filter((e) => e.franchise === franchise).length;
+const countOf = (franchise) => ECHOES.filter((e) => e.franchise === franchise).length;
 
 /** 只给 `attach` 用到的那几个接口：它读 sys.unlocked / sys.getStats / sys.getEntries */
 const makeAch = (unlockedIds) => {
   const sys = {
     unlocked: new Set(unlockedIds),
-    getStats: () => ({ unlocked: unlockedIds.length, total: POP_CULTURE_ECHOES.length, percent: 100 }),
-    getEntries: () => POP_CULTURE_ECHOES,
+    getStats: () => ({ unlocked: unlockedIds.length, total: ECHOES.length, percent: 100 }),
+    getEntries: () => ECHOES,
   };
   return { game: { popCulture: sys }, stats: {}, checks: 0, checkAll() { this.checks += 1; } };
 };
 
 const collect = () => {
-  const ach = makeAch(POP_CULTURE_ECHOES.map((e) => e.id));
+  const ach = makeAch(ECHOES.map((e) => e.id));
   attachPopCultureAchievements(ach);
   window.dispatchEvent(new CustomEvent('pop-culture-unlocked'));
   return ach;
@@ -36,13 +35,13 @@ const collect = () => {
 describe('母题身份表', () => {
   it('每条回声的母题都是 FRANCHISE 里的 id，显示名既不缺失也不等于 id', () => {
     const ids = Object.values(FRANCHISE);
-    const bad = POP_CULTURE_ECHOES.filter((e) =>
+    const bad = ECHOES.filter((e) =>
       !ids.includes(e.franchise) || !FRANCHISE_LABELS[e.franchise] || FRANCHISE_LABELS[e.franchise] === e.franchise);
     expect(bad.map((e) => `${e.id}:${e.franchise}`)).toEqual([]);
   });
 
   it('母题表里每个 id 目录中都有货（不留空桶）', () => {
-    const used = new Set(POP_CULTURE_ECHOES.map((e) => e.franchise));
+    const used = new Set(ECHOES.map((e) => e.franchise));
     expect(Object.values(FRANCHISE).filter((f) => !used.has(f))).toEqual([]);
   });
 
@@ -78,7 +77,7 @@ describe('解锁全部回声后的分桶统计', () => {
       expect(ach.stats[key], `${key} 应等于 ${franchise} 的条数`).toBe(countOf(franchise));
     }
     expect(Object.values(FRANCHISE).reduce((s, f) => s + countOf(f), 0))
-      .toBe(POP_CULTURE_ECHOES.length);
+      .toBe(ECHOES.length);
   });
 
   it('把母题显示名换成乱码后，统计一字不差（改名只会改文案，不会改内容）', () => {

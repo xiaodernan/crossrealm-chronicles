@@ -30,6 +30,14 @@ import { BOSS_ARENA_SCRIPTS, ARENA_MOVES, ARENA_TRIGGERS } from './arenaScripts.
 import { ZONE_IDS, ZONE_NAMES } from './ZoneIdentity.js';
 import { REST_NPC_DEFS } from './restNpcDefs.js';
 import { BOSS_DEFEAT_LINES, BOSS_PHASE_LINES, DUNGEON_BOSS_LINES } from './bossDialogue.js';
+import { ECHOES } from './echoes.js';
+import { ZONE_EVENTS_POP, LORE_FRAGMENTS_POP, NPC_LINES_POP } from './ambientLore.js';
+import { REST_DIALOGUES } from './restDialogues.js';
+import { ACHIEVEMENTS_EXTRA, ACHIEVEMENTS_POP_CULTURE } from './achievements.js';
+import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
+import { SIDE_QUESTS_POP } from './sideQuests.js';
+import { HELP_SECTIONS_EXTRA } from './helpManual.js';
+import { FRANCHISE } from './franchises.js';
 
 /** `id` 字段的形状：小写字母开头，kebab-case。与 POI / 区域 id 同一把尺子 */
 export const ID_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
@@ -60,6 +68,9 @@ const TYPES = {
     return [];
   },
   string: (v, spec, path) => {
+    // `nullable` 是给"文本由运行时现填"的那几格留的口子（营火 hub/quest 就是 text: null）。
+    // 不给这个口子，人们会把 null 改成空串 —— 而空串在界面是一块空白，比 null 更难查。
+    if (v === null && spec.nullable) return [];
     if (typeof v !== 'string') return [`${path}: 期望字符串，实际 ${typeName(v)}`];
     if (v === '') return [`${path}: 不许是空串`];
     return [];
@@ -107,6 +118,27 @@ const TYPES = {
   record: (v, spec, path) => (v && typeof v === 'object' && !Array.isArray(v)
     ? []
     : [`${path}: 期望对象，实际 ${typeName(v)}`]),
+  /**
+   * 对象，键是 id、每个值按同一份字段表校验（W-B2：营火那棵树的 `节点 id → 节点`）。
+   *
+   * 与 `index` 形状的区别只在**层级**：`index` 是"一张表"，`map` 是"表里某个字段又是一张表"。
+   * 没有它，这类嵌套只能退化成 `record` —— 于是节点内部再怎么写错都没人管。
+   * 键的形状用 `keySet: false` 放宽（如 NPC 台词按章节号做键，那是数字不是 kebab id）。
+   */
+  map: (v, spec, path, ctx) => {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return [`${path}: 期望对象，实际 ${typeName(v)}`];
+    const inner = TYPES[spec.of?.t];
+    if (!inner) return [`${path}: 未知的字段类型 "${spec.of?.t}"（registry 写错了）`];
+    const out = [];
+    for (const [key, value] of Object.entries(v)) {
+      if (spec.keySet !== false && !ID_PATTERN.test(key)) {
+        out.push(`${path} 的键 "${key}": 期望 kebab-case id`);
+      }
+      if (spec.keyRef) out.push(...TYPES.ref(key, spec.keyRef, `${path} 的键 "${key}"`, ctx));
+      out.push(...inner(value, spec.of, `${path}.${key}`, ctx));
+    }
+    return out;
+  },
 };
 
 /** 一行字段：`spec` 是 `{ 字段名: { t, ... } }`；缺字段只在 `required !== false` 时算错 */
@@ -247,19 +279,185 @@ export const CONTENT_TABLES = [
       },
     },
   },
+  {
+    kind: 'echoes',
+    note: '次元回声目录（W-B2：合并 Wave1-4）：id ↔ franchise/zone/title/desc/trigger',
+    shape: 'rows',
+    table: ECHOES,
+    row: {
+      id: { t: 'id' },
+      // 母题用 enum 而不是 ref：`FRANCHISE` 是「常量名 → id」，ref 收到的是常量名（大写），
+      // 而条目里存的是 id（小写）—— 拿常量名那张表去查会整表红。区域反过来正好：
+      // `ZONE_NAMES` 的键就是区域 id，所以那里能用 ref
+      franchise: { t: 'enum', of: Object.values(FRANCHISE) },
+      zone: { t: 'ref', of: 'zones' },
+      title: { t: 'string' },
+      desc: { t: 'string' },
+      trigger: { t: 'string' },
+    },
+  },
+  {
+    kind: 'ambientZoneEvents',
+    note: '区域氛围事件（W-B2）：区域 id → [{ text, weight }] —— 键打错就是一个区域的低语永远不出现',
+    shape: 'index',
+    table: ZONE_EVENTS_POP,
+    keyRef: { of: 'zones' },
+    value: {
+      t: 'rows',
+      of: {
+        text: { t: 'string' },
+        weight: { t: 'number', min: 0, max: 1 },
+      },
+    },
+  },
+  {
+    kind: 'loreFragments',
+    note: 'Lore 碎片（W-B2）：章节门控的叙事碎片',
+    shape: 'rows',
+    table: LORE_FRAGMENTS_POP,
+    row: {
+      id: { t: 'id' },
+      title: { t: 'string' },
+      text: { t: 'string' },
+      chapter: { t: 'int', min: 1, max: 5 },
+    },
+  },
+  {
+    kind: 'npcLines',
+    note: 'NPC 章节台词（W-B2）：npcId → { chapterNum: [lines...] }',
+    shape: 'index',
+    table: NPC_LINES_POP,
+    value: { t: 'record' },
+  },
+  {
+    kind: 'restDialogues',
+    note: '营火分支对话树（W-B2 整棵外移）：区域 id → { title, nodes: { 节点 id → 节点 } }',
+    shape: 'index',
+    table: REST_DIALOGUES,
+    keyRef: { of: 'zones' },
+    value: {
+      t: 'row',
+      of: {
+        title: { t: 'string' },
+        nodes: {
+          t: 'map',
+          of: {
+            t: 'row',
+            of: {
+              speaker: { t: 'string' },
+              // hub 的 quest 那一格文本由运行时按当前任务现填，所以允许 null ——
+              // 但不许空串：空串在界面上是一块空白，null 至少说明"这一格是有意留的"
+              text: { t: 'string', nullable: true },
+              mood: { t: 'enum', of: ['calm', 'warn'], required: false },
+              minChapter: { t: 'int', min: 1, max: 5, required: false },
+              journal: {
+                t: 'row',
+                required: false,
+                of: { id: { t: 'id' }, title: { t: 'string' }, text: { t: 'string' } },
+              },
+              choices: {
+                t: 'rows',
+                minLength: 1,
+                of: {
+                  label: { t: 'string' },
+                  // 落点与动作的"只能二选一"由 `invariant` 管（那是跨字段的事，字段表说不了）
+                  next: { t: 'id', required: false },
+                  action: { t: 'enum', of: ['rest'], required: false },
+                  minChapter: { t: 'int', min: 1, max: 5, required: false },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    invariant: checkRestDialogueTree,
+  },
+  {
+    kind: 'achievementsExtra',
+    note: '额外成就（W-B2：原 AchievementExtras）',
+    shape: 'rows',
+    table: ACHIEVEMENTS_EXTRA,
+    row: {
+      id: { t: 'id' },
+      title: { t: 'string' },
+      desc: { t: 'string' },
+      // check 是运行时函数，不参与静态校验
+    },
+  },
+  {
+    kind: 'achievementsPopCulture',
+    note: '次元回声成就（W-B2：原 PopCultureAchievementExtras）',
+    shape: 'rows',
+    table: ACHIEVEMENTS_POP_CULTURE,
+    row: {
+      id: { t: 'id' },
+      title: { t: 'string' },
+      desc: { t: 'string' },
+      // check 是运行时函数，不参与静态校验
+    },
+  },
+  {
+    kind: 'cgGalleryBonusExtra',
+    note: 'CG 画廊 bonus 扩写（W-B2：原 CgGalleryRegistryExtras）',
+    shape: 'rows',
+    table: CG_GALLERY_BONUS_EXTRA,
+    row: {
+      id: { t: 'string' },
+      scene: { t: 'string' },
+      caption: { t: 'string' },
+      mood: { t: 'string' },
+      zone: { t: 'id' },
+      speaker: { t: 'string' },
+      accent: { t: 'string' },
+      unlock: { t: 'string' },
+      sort: { t: 'int', min: 0 },
+    },
+  },
+  {
+    kind: 'sideQuestsPop',
+    note: '致敬向支线任务（W-B2：原 SideQuestPopCulture）',
+    shape: 'rows',
+    table: SIDE_QUESTS_POP,
+    row: {
+      id: { t: 'id' },
+      title: { t: 'string' },
+      desc: { t: 'string' },
+      // check 是运行时函数，不参与静态校验
+      reward: { t: 'int', min: 0 },
+      journal: { t: 'string' },
+    },
+  },
+  {
+    kind: 'helpSectionsExtra',
+    note: '说明书扩写章节（W-B2：原 HelpManualExtras）',
+    shape: 'rows',
+    table: HELP_SECTIONS_EXTRA,
+    row: {
+      id: { t: 'id' },
+      title: { t: 'string' },
+      body: { t: 'string' },
+    },
+  },
 ];
 
 /* ------------------------------------------------------------------ *
  * 校验入口
  * ------------------------------------------------------------------ */
 
-/** 先扫一遍所有 `rows` 形状的表，把 id 收成 `kind → Set`，供 `ref` 用 */
+/** 先扫一遍所有表，把 id 收成 `kind → Set`，供 `ref` 用 */
 function collectIds(tables) {
   const ids = new Map();
   for (const t of tables) {
-    if (t.shape !== 'rows') continue;
-    const key = t.idKey ?? 'id';
-    ids.set(t.kind, new Set((Array.isArray(t.table) ? t.table : []).map((r) => r?.[key])));
+    if (t.shape === 'rows') {
+      const key = t.idKey ?? 'id';
+      ids.set(t.kind, new Set((Array.isArray(t.table) ? t.table : []).map((r) => r?.[key])));
+    } else if (t.shape === 'index') {
+      // `index` 形状的表，它的**键**本身就是那批 id（`zones` 的键就是区域 id）。
+      // 不收这一份，`{ t: 'ref', of: 'zones' }` 就没地方可查，人们只能退回 `t: 'id'` ——
+      // 那等于"看着像 id 就行"，`zone: 'magicc'` 一路绿到运行时才安静地什么都不做
+      ids.set(t.kind, new Set(Object.keys(t.table ?? {})));
+    }
   }
   return ids;
 }
@@ -269,6 +467,18 @@ function collectIds(tables) {
  * 一次跑完能看到"这张表一共有几处坏"，而不是改一处跑一次。
  */
 export function checkTable(entry, ctx) {
+  const out = shapeErrors(entry, ctx);
+  // 有的不变式不是"某个字段长什么形状"，而是"这棵树自己连不连得起来"
+  // （营火那棵树里 `next` 必须落在**同一区域**的某个节点上）。声明式词汇表到这里就到底了：
+  // 为一条表再造第十种类型只会让九种类型都变得可疑，所以给条目留一个函数槽位，
+  // 并且只允许"形状表达不了的整表关系"用它。
+  if (entry.invariant && entry.table && typeof entry.table === 'object') {
+    out.push(...entry.invariant(entry.table, ctx));
+  }
+  return out;
+}
+
+function shapeErrors(entry, ctx) {
   const { kind, shape, table } = entry;
   const out = [];
   if (!table || typeof table !== 'object') return [`${kind}: 表本身不存在或不是对象`];
@@ -312,6 +522,52 @@ export function checkTable(entry, ctx) {
 export function checkContent(tables = CONTENT_TABLES) {
   const ctx = { ids: collectIds(tables) };
   return tables.flatMap((entry) => checkTable(entry, ctx));
+}
+
+/**
+ * 营火树的结构不变式（`invariant` 槽位目前唯一的使用者）。
+ *
+ * 为什么形状校验拦不住它：`RestDialogue._showNode` 开头是 `if (!node) return` ——
+ * 写错的 `next` 不报错、不提示，玩家点下那一格只看到对话窗自己关掉。
+ * "静默的死选择"正是内容表最典型的坏法，也是眼睛最难发现的那种。
+ *
+ * 三条：
+ * 1. `next` 必须落在**同一棵树的同一区域**里（区域之间不互跳：树按营火取）；
+ * 2. 每一格选择要么 `next` 要么 `action`，有且只有一个（运行时先认 action，
+ *    两个都给等于 next 白写；两个都不给就是"点了只关窗"那条兜底路径）；
+ * 3. 除 `start` 外不许有孤儿节点 —— 没有选择通向它的节点，玩家永远看不到。
+ */
+export function checkRestDialogueTree(table) {
+  const out = [];
+  for (const [zone, tree] of Object.entries(table ?? {})) {
+    const nodes = tree?.nodes ?? {};
+    const ids = new Set(Object.keys(nodes));
+    const referenced = new Set();
+    for (const [nodeId, node] of Object.entries(nodes)) {
+      const choices = node?.choices;
+      if (!Array.isArray(choices)) {
+        out.push(`restDialogues 营火 ${zone}/${nodeId}: choices 不是数组`);
+        continue;
+      }
+      choices.forEach((c, i) => {
+        const path = `restDialogues 营火 ${zone}/${nodeId}.choices[${i}]`;
+        const has = Boolean(c?.next);
+        const act = Boolean(c?.action);
+        if (!has && !act) out.push(`${path}: 既没有 next 也没有 action —— 点它只会关掉对话框`);
+        if (has && act) out.push(`${path}: next 与 action 同时给了，运行时只认 action，next 是白写的`);
+        if (has && !ids.has(c.next)) {
+          out.push(`${path}: next 指向 "${c.next}"，但 ${zone} 这棵树里没有这个节点（可用：${[...ids].sort().join(' / ')}）`);
+        }
+        if (has) referenced.add(c.next);
+      });
+    }
+    for (const id of ids) {
+      if (id !== 'start' && !referenced.has(id)) {
+        out.push(`restDialogues 营火 ${zone}/${id}: 没有任何选择通向它，玩家看不到这一节点`);
+      }
+    }
+  }
+  return out;
 }
 
 /**

@@ -1,6 +1,9 @@
 /** 游戏内说明书 — 由 UI 热键表的 `help` 动作打开（F12 是浏览器控制台，不是这里的键） */
-import { mergeHelpSections } from './HelpManualExtras.js';
+import { HELP_SECTIONS_EXTRA } from '../content/helpManual.js';
 import { focusFirstItem, parkFocus, restoreParkedFocus } from './FocusNav.js';
+
+/** 扩写章节追加在主目录之后（W-B2：章节本体在 content/helpManual.js） */
+const mergeHelpSections = (base) => [...base, ...HELP_SECTIONS_EXTRA];
 
 const SECTIONS = mergeHelpSections([
   {

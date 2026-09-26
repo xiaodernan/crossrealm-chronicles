@@ -19,15 +19,17 @@
  *    而**写错的地方多半不在表里，在使用处**。
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, resolve, dirname, sep } from 'node:path';
 import {
-  CONTENT_TABLES, checkContent, checkTable, checkFields, contentSummary, ID_PATTERN,
+  CONTENT_TABLES, checkContent, checkTable, checkFields, checkRestDialogueTree,
+  contentSummary, ID_PATTERN,
 } from '../src/content/registry.js';
 import {
   BOSS_ROSTER, BOSS_IDS, DUNGEON_BOSS_PREFIX, bossById, isKnownBossId, chapterGateFor,
 } from '../src/content/bossRoster.js';
 import { ZONE_IDS, ZONE_NAMES } from '../src/content/ZoneIdentity.js';
+import { REST_DIALOGUES } from '../src/content/restDialogues.js';
 
 const ROOT = process.cwd();
 const SRC = join(ROOT, 'src');
@@ -421,5 +423,327 @@ describe('`content/` 自洽：这一层谁也不依赖', () => {
     expect(escapesContent('three', fake)).toBe(false);
     expect(escapesContent('./lazy.js', fake)).toBe(false);
     expect(escapesContent('../game/Foo.js', fake)).toBe(true);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * 六、W-B2 给引擎加的三件新词汇：`map` / `invariant` / `index` 键可被 ref
+ *
+ * 这三件都是**被真实表逼出来的**，不是先写好的通用能力：
+ * - `map`：营火那棵树的 `节点 id → 节点` 是"字段本身又是一张表"，退化成 `record`
+ *   就等于节点内部怎么写错都没人管；
+ * - `invariant`：`next` 指向哪个节点不是字段形状问题，是整棵树的连通问题；
+ * - `index` 键进 `collectIds`：`zone: { t: 'ref', of: 'zones' }` 原先没地方可查，
+ *   只能退回 `t: 'id'`（"看着像 id 就行"），`zone: 'magicc'` 会一路绿到运行时。
+ *
+ * 所以这一节每条都配**正反两面**：坏表要红，好表不许红。
+ * ------------------------------------------------------------------ */
+
+describe('`map` 类型：表里某个字段本身又是一张表', () => {
+  const ctx = { ids: new Map([['zones', new Set(['hub', 'magic'])]]) };
+  const nodeOf = { name: { t: 'string' } };
+  const mapSpec = (extra = {}) => ({ t: 'map', of: { t: 'row', of: nodeOf }, ...extra });
+  /** 套在 `index` 形状的 value 上（真表就是这么用的） */
+  const wrapped = (mapValue, spec) => checkTable(
+    { kind: 'demo', shape: 'index', table: { hub: mapValue }, value: spec }, ctx,
+  );
+
+  it('好 map：键是 kebab id、值合字段表 —— 一处都不报', () => {
+    expect(wrapped({ 'n-1': { name: '甲' }, 'n-2': { name: '乙' } }, mapSpec())).toEqual([]);
+  });
+
+  it('键不是 kebab-case 要红；`keySet: false` 才放宽（NPC 台词按章节号做键那种）', () => {
+    const errs = wrapped({ 'Bad Key': { name: '甲' } }, mapSpec());
+    expect(errs).toHaveLength(1);
+    expect(errs[0]).toMatch(/demo\["hub"\] 的键 "Bad Key": 期望 kebab-case id/);
+    expect(wrapped({ 2: { name: '甲' } }, mapSpec({ keySet: false }))).toEqual([]);
+  });
+
+  it('值里的字段错带**完整路径**：一眼跳到哪个节点的哪一格', () => {
+    const errs = wrapped({ 'n-1': { name: 7 } }, mapSpec());
+    expect(errs).toEqual([expect.stringContaining('demo["hub"].n-1.name: 期望字符串')]);
+  });
+
+  it('键也能 ref（`keyRef`）：不存在的 id 当键要红', () => {
+    const errs = checkFields(
+      { m: { hub: { name: '甲' }, ghost: { name: '乙' } } },
+      { m: mapSpec({ keyRef: { of: 'zones' } }) },
+      'p', ctx,
+    );
+    expect(errs).toHaveLength(1);
+    expect(errs[0]).toMatch(/p\.m 的键 "ghost": "ghost" 不在 zones 里/);
+  });
+
+  it('map 的字段类型写错，报的是"registry 自己写错了"（不许静默通过）', () => {
+    expect(wrapped({ 'n-1': 1 }, { t: 'map', of: { t: 'nope' } }).join(''))
+      .toMatch(/未知的字段类型 "nope"（registry 写错了）/);
+  });
+
+  it('值不是对象（数组 / null）要红，不许当成空 map 放过', () => {
+    expect(wrapped([], mapSpec()).join('')).toMatch(/demo\["hub"\]: 期望对象，实际 数组/);
+    expect(wrapped(null, mapSpec()).join('')).toMatch(/demo\["hub"\]: 期望对象，实际 null/);
+  });
+
+  it('`nullable` 只放行标了它的那一格：没标的字段给 null 一样红', () => {
+    // 口子存在的理由：营火 hub 的 quest 那一格文本由运行时按当前任务现填
+    expect(REST_DIALOGUES.hub.nodes.quest.text).toBe(null);
+    // 同一份数据换到没标 nullable 的字段上就必须红（否则"文本永远缺失"是查不出来的）
+    expect(checkFields({ name: null }, nodeOf, 'p', ctx))
+      .toEqual(['p.name: 期望字符串，实际 null']);
+    expect(checkFields({ name: '' }, nodeOf, 'p', ctx)).toEqual(['p.name: 不许是空串']);
+  });
+});
+
+describe('营火树的 `invariant`：形状表达不了的"这棵树连不连得起来"', () => {
+  /** 一棵合法小树：start → b → 回 start，另有一格 `action: rest` */
+  const legal = {
+    start: { speaker: '甲', text: '……', choices: [{ label: '去', next: 'b' }, { label: '歇', action: 'rest' }] },
+    b: { speaker: '甲', text: '……', choices: [{ label: '回', next: 'start' }] },
+  };
+
+  it('控制组：合法树零错误（少了这条，下面五条只是"什么都报"）', () => {
+    expect(checkRestDialogueTree({ hub: { title: 't', nodes: legal } })).toEqual([]);
+  });
+
+  it('死 `next`：本树没有这一节点（运行时是 `if (!node) return`，玩家只看见窗口自己关掉）', () => {
+    const errs = checkRestDialogueTree({
+      hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: 'x', next: 'b' }] } } },
+    });
+    expect(errs).toHaveLength(1);
+    expect(errs[0]).toMatch(/next 指向 "b"，但 hub 这棵树里没有这个节点/);
+  });
+
+  it('跨区互跳也算死 `next`：树按营火取，别的区有这一节点不算', () => {
+    const errs = checkRestDialogueTree({
+      hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: 'x', next: 'magic-node' }] } } },
+      magic: {
+        title: 't',
+        nodes: {
+          start: { speaker: '乙', text: '乙', choices: [{ label: '歇', action: 'rest' }] },
+          'magic-node': { speaker: '乙', text: '乙', choices: [{ label: '歇', action: 'rest' }] },
+        },
+      },
+    });
+    // hub 里指不到 magic-node；顺带 magic 那一格成了孤儿（没有选择通向它）
+    expect(errs.join('\n')).toMatch(/hub\/start\.choices\[0\]: next 指向 "magic-node"/);
+    expect(errs.join('\n')).toMatch(/magic\/magic-node: 没有任何选择通向它/);
+  });
+
+  it('孤儿节点：写了，但没有任何选择通向它 → 玩家永远看不到', () => {
+    const rest = [{ label: '歇', action: 'rest' }];
+    const errs = checkRestDialogueTree({
+      hub: {
+        title: 't',
+        nodes: {
+          start: { speaker: '甲', text: '甲', choices: rest },
+          'deep-cut': { speaker: '甲', text: '甲', choices: rest },
+        },
+      },
+    });
+    expect(errs).toEqual([expect.stringContaining('hub/deep-cut: 没有任何选择通向它')]);
+  });
+
+  it('一格选择既没 `next` 也没 `action`：点它只有关窗（`_pick` 的兜底路径）', () => {
+    const errs = checkRestDialogueTree({
+      hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: '随便' }] } } },
+    });
+    expect(errs.join('\n')).toMatch(/既没有 next 也没有 action/);
+  });
+
+  it('`next` 与 `action` 同时给：运行时先认 action，next 是白写的 → 要红', () => {
+    const errs = checkRestDialogueTree({
+      hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: 'x', next: 'start', action: 'rest' }] } } },
+    });
+    expect(errs.join('\n')).toMatch(/next 与 action 同时给了/);
+  });
+
+  it('`choices` 不是数组：直接报，不钻进去', () => {
+    const errs = checkRestDialogueTree({
+      hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: { a: 1 } } } },
+    });
+    expect(errs).toEqual([expect.stringContaining('hub/start: choices 不是数组')]);
+  });
+
+  it('invariant 真的挂在 `checkTable` 上，而且形状层看不见这类错（它挣到了这个槽位）', () => {
+    const entry = CONTENT_TABLES.find((t) => t.kind === 'restDialogues');
+    const bad = {
+      ...entry,
+      table: {
+        hub: {
+          title: 'x',
+          nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: 'l', next: 'ghost-node' }] } },
+        },
+      },
+    };
+    const errs = checkTable(bad, { ids: new Map([['zones', new Set(['hub'])]]) });
+    expect(errs.join('\n')).toMatch(/next 指向 "ghost-node"/);
+    // `ghost-node` 是合法 kebab id，字段表逐格全过 —— 剩下的错只可能来自 invariant
+    expect(errs.filter((e) => !/没有这个节点/.test(e))).toEqual([]);
+  });
+
+  it('门禁自证：把**真空表**里一处 next 的目标节点删掉，`checkContent` 必须红', () => {
+    let removed = null;
+    const tables = CONTENT_TABLES.map((t) => {
+      if (t.kind !== 'restDialogues') return t;
+      const clone = structuredClone(t.table);
+      for (const [zone, tree] of Object.entries(clone)) {
+        const withNext = Object.values(tree.nodes)
+          .flatMap((n) => n.choices ?? [])
+          .find((c) => c.next && c.next !== 'start');
+        if (withNext) {
+          delete clone[zone].nodes[withNext.next];
+          removed = `${zone}/${withNext.next}`;
+          return { ...t, table: clone };
+        }
+      }
+      return t;
+    });
+    // 先证这刀真的砍得下去（砍不动的话，下面的红只是白捡）
+    expect(removed, '营火树里找不到一处可删的 next 目标 —— 表形状变了，这条要跟着改').toBeTruthy();
+    expect(checkContent(tables).join('\n')).toMatch(new RegExp(`next 指向 "${removed.split('/')[1]}"`));
+  });
+});
+
+describe('`ref` 能查 `index` 形状的表：收的是键，不是行里的 id 字段', () => {
+  const zones = { kind: 'zones', shape: 'index', table: { hub: 'A', magic: 'B' }, value: { t: 'string' } };
+  const things = (rows) => ({
+    kind: 'things',
+    shape: 'rows',
+    table: rows,
+    row: { id: { t: 'id' }, zone: { t: 'ref', of: 'zones' } },
+  });
+
+  it('好引用零错误，坏引用一条不多报（可用值列出来，省一次翻表）', () => {
+    expect(checkContent([zones, things([{ id: 'a-1', zone: 'hub' }])])).toEqual([]);
+    const errs = checkContent([zones, things([{ id: 'a-1', zone: 'magicc' }])]);
+    expect(errs).toEqual([
+      expect.stringContaining('"magicc" 不在 zones 里（可用：hub / magic）'),
+    ]);
+  });
+
+  it('门禁自证：把真回声目录某条的 `zone` 打错一个字母，加载期就红', () => {
+    const tables = CONTENT_TABLES.map((t) => (t.kind === 'echoes'
+      ? { ...t, table: [...t.table, { ...t.table[0], id: 'probe-typo-zone', zone: 'magicc' }] }
+      : t));
+    const errs = checkContent(tables);
+    expect(errs.filter((e) => /magicc/.test(e))).toHaveLength(1);
+    expect(errs[0]).toMatch(/echoes\[49\]\.zone/);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * 七、内容普查：搬表不许掉行
+ *
+ * W-B2 把十三张表从 `game/**` + `ui/**` 搬进 `content/`，而 HEAD 那边是
+ * `merge*Wave4(merge*Wave3(merge(base)))` 的**四层合并链**。链式合并最怕的一件事是
+ * "搬的时候只搬了 base"：症状不是崩溃，是图鉴少三条、营火少一段 —— 静态扫描全绿。
+ * 这些数字是从 HEAD 逐条深比对之后实测钉下来的（`.tmp-wb2/audit2.mjs`），不是估的。
+ * ------------------------------------------------------------------ */
+
+describe('W-B2 内容普查：条数钉死', () => {
+  it('每张表的条数 = 与 HEAD 深比对那天实测的数', () => {
+    expect(contentSummary()).toMatchObject({
+      echoes: 49,
+      ambientZoneEvents: 6,
+      loreFragments: 18,
+      npcLines: 3,
+      restDialogues: 6,
+      achievementsExtra: 7,
+      achievementsPopCulture: 14,
+      cgGalleryBonusExtra: 5,
+      sideQuestsPop: 14,
+      helpSectionsExtra: 3,
+    });
+  });
+
+  it('营火树：6 个营火 / 77 个节点 / 178 格选择（节点与选择藏在 map 里，`contentSummary` 数不到）', () => {
+    let nodes = 0;
+    let choices = 0;
+    for (const tree of Object.values(REST_DIALOGUES)) {
+      const list = Object.values(tree.nodes);
+      nodes += list.length;
+      choices += list.reduce((n, node) => n + (node.choices?.length ?? 0), 0);
+    }
+    expect({ zones: Object.keys(REST_DIALOGUES).length, nodes, choices })
+      .toEqual({ zones: 6, nodes: 77, choices: 178 });
+  });
+
+  it('六大区域各有营火树，且每棵树都真的能被 `RestDialogue` 取到（键就是营火 id）', () => {
+    for (const zone of ['hub', 'fantasy', 'magic', 'space', 'void', 'abyss']) {
+      expect(REST_DIALOGUES[zone], `${zone} 没有营火对话树`).toBeTruthy();
+      expect(Object.keys(REST_DIALOGUES[zone].nodes)).toContain('start');
+    }
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * 八、不得回头：删掉的"增量数据文件"不能再生回来，搬过来的表不能有两份
+ * ------------------------------------------------------------------ */
+
+describe('搬完不许回头', () => {
+  /** W-B2 切片3 删除的文件（四层合并链 + 各自的 Extra/Extras 增量档） */
+  const DELETED = [
+    'src/game/AchievementExtras.js',
+    'src/game/CgGalleryRegistryExtras.js',
+    'src/game/LoreFragmentsPopCulture.js',
+    'src/game/PopCultureHomageRegistry.js',
+    'src/game/PopCultureHomageRegistryWave2.js',
+    'src/game/PopCultureHomageRegistryWave3.js',
+    'src/game/PopCultureHomageRegistryWave4.js',
+    'src/game/RestDialogueExtras.js',
+    'src/game/RestDialogueExtras2.js',
+    'src/game/RestDialoguePopCulture.js',
+    'src/game/RestDialoguePopCultureWave2.js',
+    'src/game/RestDialoguePopCultureWave3.js',
+    'src/game/RestDialoguePopCultureWave4.js',
+    'src/game/WorldAmbientPopCulture.js',
+    'src/game/WorldAmbientPopCultureWave3.js',
+    'src/game/WorldAmbientPopCultureWave4.js',
+    'src/ui/HelpManualExtras.js',
+  ];
+
+  it('那批增量数据文件今天确实不在磁盘上（再生回来就是第二份真源）', () => {
+    const back = DELETED.filter((rel) => existsSync(join(ROOT, rel)));
+    expect(back, `这些已被合并的文件又出现了：\n${back.join('\n')}`).toEqual([]);
+    expect(DELETED.length).toBe(17);
+  });
+
+  /**
+   * 判据只有一份：扫描与自证共用它。
+   * 「声明」和「转口」都算第二份 —— 转口不改数据，但它让"这张表的真源在哪"
+   * 重新变成两个答案（`game/RestDialogue.js` 切片3 收尾时就挂着这么一句）。
+   */
+  const movedNames = [
+    'ECHOES', 'ZONE_EVENTS_POP', 'LORE_FRAGMENTS_POP', 'NPC_LINES_POP', 'REST_DIALOGUES',
+    'ACHIEVEMENTS_EXTRA', 'ACHIEVEMENTS_POP_CULTURE', 'ECHO_FRANCHISE_BUCKETS',
+    'CG_GALLERY_BONUS_EXTRA', 'SIDE_QUESTS_POP', 'HELP_SECTIONS_EXTRA',
+  ];
+  const isSecondSource = (code, name) => new RegExp(
+    `export\\s+(?:const|let|var)\\s+${name}\\b|export\\s*\\{[^}]*\\b${name}\\b`,
+  ).test(code);
+
+  it('`content/` 之外没有任何一处再声明或转口这些表', () => {
+    const dupes = [];
+    for (const file of walk(SRC)) {
+      const rel = file.slice(SRC.length + 1).replace(/\\/g, '/');
+      if (rel.startsWith('content/')) continue;
+      const code = stripComments(readFileSync(file, 'utf8'));
+      for (const name of movedNames) {
+        if (isSecondSource(code, name)) dupes.push(`  ${rel}: ${name}`);
+      }
+    }
+    expect(dupes, `一张表只能有一份真源：\n${dupes.join('\n')}`).toEqual([]);
+  });
+
+  it('门禁自证：转口一句 `export { REST_DIALOGUES }` 必须被同一个判据抓出来', () => {
+    const shim = "import { REST_DIALOGUES } from '../content/restDialogues.js';\nexport { REST_DIALOGUES };";
+    expect(isSecondSource(stripComments(shim), 'REST_DIALOGUES')).toBe(true);
+    // 反面：只是**用**它（import 后在类里取值）不许误伤 —— 真源在 content/，消费者在 game/
+    expect(isSecondSource(
+      stripComments("import { REST_DIALOGUES } from '../content/restDialogues.js';\nconst t = REST_DIALOGUES.hub;"),
+      'REST_DIALOGUES',
+    )).toBe(false);
+    // 名字前缀重叠也不误伤：`ALL_ACHIEVEMENTS_EXTRA` 不是 `ACHIEVEMENTS_EXTRA`
+    expect(isSecondSource('export const ALL_ACHIEVEMENTS_EXTRA = [];', 'ACHIEVEMENTS_EXTRA')).toBe(false);
   });
 });

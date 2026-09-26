@@ -1,4 +1,7 @@
-import { mergeAchievements } from './AchievementExtras.js';
+import { ALL_ACHIEVEMENTS_EXTRA } from '../content/achievements.js';
+
+/** 扩写成就追加在主表之后（W-B2：条目本体在 content/achievements.js） */
+const mergeAchievements = (base) => [...base, ...ALL_ACHIEVEMENTS_EXTRA];
 
 export const ACHIEVEMENTS = mergeAchievements([
   { id: 'first-blood', title: '初阵', desc: '首次击杀敌人', check: (s) => s.kills >= 1 },

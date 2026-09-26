@@ -1,4 +1,4 @@
-import { ACHIEVEMENTS_EXTRA } from './AchievementExtras.js';
+import { ALL_ACHIEVEMENTS_EXTRA } from '../content/achievements.js';
 import { attachPopCultureAchievements } from './PopCultureAchievementExtras.js';
 
 /** 成就扩写监听 — 挂到 AchievementSystem */
@@ -34,11 +34,6 @@ export function attachAchievementExtras(ach) {
     }
   });
 
-  for (const a of ACHIEVEMENTS_EXTRA) {
-    if (!ach.constructor.ACHIEVEMENTS?.includes?.(a)) {
-      // merged at module load in AchievementSystem
-    }
-  }
 }
 
-export { ACHIEVEMENTS_EXTRA };
+export { ALL_ACHIEVEMENTS_EXTRA };
