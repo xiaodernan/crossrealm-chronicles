@@ -503,6 +503,8 @@ export class Game {
     // 游戏键生效表是模块级的：消费者（玩家 / 战斗 / 法术 / 武器 / 旅行）直接问 `codeFor`
     setKeybindTable(keyTable);
     this.hud?.refreshKeyHints?.();
+    // 说明书正文里也是 `{动作}` 占位（W-B2 切片4）：它开着的时候改绑，正文得跟着改口
+    this.helpManual?.refreshKeyHints?.();
   }
 
   /**

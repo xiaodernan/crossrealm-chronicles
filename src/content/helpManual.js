@@ -7,8 +7,8 @@
 export const HELP_SECTIONS_EXTRA = [
   {
     id: 'journal-tabs',
-    title: '日志 Tab',
-    body: `[J] 打开跨界日志，除任务/碎片/Boss 外还有：
+    title: '日志页签',
+    body: `[{journal}] 打开跨界日志，除任务/碎片/Boss 外还有：
 
 · CG画廊 — 营火与战斗插画，点击放大
 · 成就 — 弹反、连击、Boss、探索
@@ -18,16 +18,16 @@ export const HELP_SECTIONS_EXTRA = [
 · 流派 — 剑/杖技能树预览
 · 支线 — 可选目标，自动奖魂火
 
-Tab 按钮上显示已解锁数量。`,
+页签按钮上显示已解锁数量。`,
   },
   {
     id: 'meta-systems',
     title: '进阶系统',
     body: `战斗风格 — 弹反/终结/处决/Boss 累积评级 C~SS
-Boss 再战 — 击败后在信标按 E 召唤，+5 魂火
+Boss 再战 — 击败后在信标按 {interact} 召唤，+5 魂火
 连杀魂火 — 4.5 秒内连续击杀 ≥3 额外魂火
-F2 拍照 — 隐藏 HUD 截屏
-Esc — 处决慢镜头可跳过；通关字幕也可跳过
+{photoMode} 拍照 — 隐藏 HUD 截屏
+{escape} — 处决慢镜头可跳过；通关字幕也可跳过
 区域切换 — 全屏过渡动画 + 区域名`,
   },
   {
@@ -40,7 +40,7 @@ Esc — 处决慢镜头可跳过；通关字幕也可跳过
 破碎时线 — 逆相界：广播塔、裂口、霓虹、裂隙猎犬
 枢纽东侧 — 位面海报墙
 
-J → 次元回声 Tab · 按 E 调查地图光柱 POI
+{journal} → 次元回声页签 · 按 {interact} 调查地图光柱 POI
 
 Wave2：九分站台、护念湖、三强赛台、虫洞、曼恩信标、街机厅、裂相钟塔等
 

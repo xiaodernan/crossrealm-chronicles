@@ -47,7 +47,7 @@ export const REST_DIALOGUES = {
       },
       souls: {
         speaker: "锚火看守",
-        text: "「魂火在营火升级属性，也在「剧情技能」Tab 解锁叙事技。别攒太多 — Boss 不会等你。」",
+        text: "「魂火在营火升级属性，也在「剧情技能」页签解锁叙事技。别攒太多 — Boss 不会等你。」",
         journal: { id: "rest-hub-souls", title: "营火·魂火", text: "魂火用于升级与剧情技能。" },
         choices: [
           { label: "休息", action: "rest" },
@@ -90,8 +90,8 @@ export const REST_DIALOGUES = {
       rematch: {
         speaker: "锚火看守",
         mood: "warn",
-        text: "「击败过的 Boss 可在信标处 **再战** — 按 E 召唤。再战不会推进主线，但会补魂火与 CG。」",
-        journal: { id: "rest-hub-rematch", title: "营火·Boss再战", text: "已击败 Boss 的信标可 E 再战。" },
+        text: "「击败过的 Boss 可在信标处 **再战** — 按 {interact} 召唤。再战不会推进主线，但会补魂火与 CG。」",
+        journal: { id: "rest-hub-rematch", title: "营火·Boss再战", text: "已击败 Boss 的信标可 {interact} 再战。" },
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -100,7 +100,7 @@ export const REST_DIALOGUES = {
       },
       dungeon: {
         speaker: "锚火看守",
-        text: "「五座地下城散落各位面 — 日志 [J] 的 **地下城** Tab 会记你的清空记录。」",
+        text: "「五座地下城散落各位面 — 日志 [{journal}] 的 **地下城** 页签会记你的清空记录。」",
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -109,7 +109,7 @@ export const REST_DIALOGUES = {
       side: {
         speaker: "锚火看守",
         text: "「除了主线，还有 **支线** — 魂火萤、风格试炼、CG 收集。完成自动奖魂火。」",
-        journal: { id: "rest-hub-side", title: "营火·支线", text: "J 键支线 Tab 查看可选目标。" },
+        journal: { id: "rest-hub-side", title: "营火·支线", text: "{journal} 键支线页签查看可选目标。" },
         choices: [
           { label: "休息", action: "rest" },
         ],
@@ -306,8 +306,8 @@ J → 次元回声 按系列筛选。」`,
       },
       codex: {
         speaker: "奥术旅者",
-        text: "「禁书残页散在迷宫 — 集齐会在日志 **秘典** Tab 显示位面 lore。」",
-        journal: { id: "rest-magic-codex", title: "营火·秘典", text: "J 键秘典 Tab 收录位面 lore。" },
+        text: "「禁书残页散在迷宫 — 集齐会在日志 **秘典** 页签显示位面 lore。」",
+        journal: { id: "rest-magic-codex", title: "营火·秘典", text: "{journal} 键秘典页签收录位面 lore。" },
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -315,7 +315,7 @@ J → 次元回声 按系列筛选。」`,
       },
       skills: {
         speaker: "奥术旅者",
-        text: "「日志 [J] 的 **流派** Tab 可预览剑/杖技能树 — 营火升级面板里加点。」",
+        text: "「日志 [{journal}] 的 **流派** 页签可预览剑/杖技能树 — 营火升级面板里加点。」",
         choices: [
           { label: "休息", action: "rest" },
         ],
@@ -410,7 +410,7 @@ J → 次元回声 按系列筛选。」`,
       },
       photo: {
         speaker: "宇航员回声",
-        text: "「荒原的引力透镜很适合拍照 — **F2** 隐藏 UI 截屏。Boss 击破慢镜头时按 Esc 可跳过。」",
+        text: "「荒原的引力透镜很适合拍照 — **{photoMode}** 隐藏 UI 截屏。Boss 击破慢镜头时按 {escape} 可跳过。」",
         choices: [
           { label: "休息", action: "rest" },
         ],
@@ -508,7 +508,7 @@ J → 次元回声 按系列筛选。」`,
           { label: "时停怎么破？", next: "stop" },
           { label: "隐藏 Boss？", next: "hidden" },
           { label: "处决技巧？", next: "exec" },
-          { label: "Esc 跳过演出？", next: "skip" },
+          { label: "{escape} 跳过演出？", next: "skip" },
           { label: "营火记忆？", next: "memory" },
           { label: "死了怎么办？", next: "death" },
           { label: "逆相界？", next: "upside" },
@@ -546,7 +546,7 @@ J → 次元回声 按系列筛选。」`,
       },
       skip: {
         speaker: "时线残影",
-        text: "「处决与终结慢镜头中按 **Esc** 可跳过 — 第一次会提示。别在教程关急着跳。」",
+        text: "「处决与终结慢镜头中按 **{escape}** 可跳过 — 第一次会提示。别在教程关急着跳。」",
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -649,14 +649,14 @@ J → 次元回声 按系列筛选。」`,
       },
       end: {
         speaker: "裂隙引路人",
-        text: "「裂隙领主三阶段 — 混沌脉冲会灼烧近身。武器技能树在营火「剧情技能」Tab 查看。」",
+        text: "「裂隙领主三阶段 — 混沌脉冲会灼烧近身。武器技能树在营火「剧情技能」页签查看。」",
         choices: [
           { label: "休息", action: "rest" },
         ],
       },
       rerun: {
         speaker: "裂隙引路人",
-        text: "「Ch5 后可重复挑战地下城 — 随机迷宫布局。全图 G 键，自定义路点 Shift+点击。」",
+        text: "「Ch5 后可重复挑战地下城 — 随机迷宫布局。全图 {worldMap} 键，自定义路点 Shift+点击。」",
         choices: [
           { label: "休息", action: "rest" },
         ],
@@ -671,7 +671,7 @@ J → 次元回声 按系列筛选。」`,
       },
       achieve: {
         speaker: "裂隙引路人",
-        text: "「日志 [J] 的 **成就** Tab 追踪弹反、连击、Boss — 全收集有魂火奖励。」",
+        text: "「日志 [{journal}] 的 **成就** 页签追踪弹反、连击、Boss — 全收集有魂火奖励。」",
         choices: [
           { label: "休息", action: "rest" },
         ],
@@ -679,7 +679,7 @@ J → 次元回声 按系列筛选。」`,
       legend: {
         speaker: "裂隙引路人",
         mood: "warn",
-        text: "「终局之后仍可再战混沌领主 — 信标 E 召唤。这是证明你仍是位面行者的最后仪式。」",
+        text: "「终局之后仍可再战混沌领主 — 信标 {interact} 召唤。这是证明你仍是位面行者的最后仪式。」",
         journal: { id: "rest-abyss-legend", title: "营火·终局仪式", text: "Ch5 后可在信标再战混沌领主。" },
         choices: [
           { label: "休息", action: "rest" },
@@ -688,7 +688,7 @@ J → 次元回声 按系列筛选。」`,
       },
       credits: {
         speaker: "裂隙引路人",
-        text: "「Ch5 通关后有 **滚动字幕** — 可按 Esc 跳过。你的旅程会被记录。」",
+        text: "「Ch5 通关后有 **滚动字幕** — 可按 {escape} 跳过。你的旅程会被记录。」",
         choices: [
           { label: "休息", action: "rest" },
         ],

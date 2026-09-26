@@ -15,6 +15,10 @@ import { join } from 'node:path';
 import { KEY_ACTIONS, KEY_BINDINGS } from '../src/content/keybinds.js';
 import { UI_ACTIONS, UI_HOTKEYS } from '../src/content/hotkeys.js';
 import { keyLabel, mouseLabel } from '../src/content/keyLabels.js';
+import { keyText } from '../src/content/keyHints.js';
+// 内容表本体（W-B2 切片4 起，它们的成段文案里带 `{动作}` 占位）
+import { REST_DIALOGUES } from '../src/content/restDialogues.js';
+import { HELP_SECTIONS_EXTRA } from '../src/content/helpManual.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -97,9 +101,12 @@ describe('声明了占位的界面必须有人刷它', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('换生效表的那一处同时喂给三消费者：热键镜像、游戏键表、HUD 重算', () => {
+  it('换生效表的那一处同时喂给四消费者：热键镜像、游戏键表、HUD 重算、说明书重算', () => {
     const game = FILES.find((f) => f.name === 'core/Game.js').source;
-    for (const call of ['setHotkeyTable(hotkeyTable)', 'setKeybindTable(keyTable)', 'refreshKeyHints?.()']) {
+    for (const call of [
+      'setHotkeyTable(hotkeyTable)', 'setKeybindTable(keyTable)',
+      'hud?.refreshKeyHints?.()', 'helpManual?.refreshKeyHints?.()',
+    ]) {
       expect(game, `改绑之后没人 ${call}`).toContain(call);
     }
   });
@@ -127,6 +134,10 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     'cinematic/CombatCinematicSkip.js': ["keyText('按 {escape} 可跳过战斗演出')"],
     'game/QuestSystem.js': ['keyText('],
     'ui/SettingsPanel.js': ["from '../content/keyLabels.js'"],
+    // W-B2 切片4：成段的内容文案也走同一条链 —— 但**每一个显示出口**都要过，
+    // 漏一处就是把字面的 `{parry}` 摆到玩家面前（说明书有正文与章节清单两处）
+    'ui/HelpManual.js': ['keyText(sec.body)', 'keyText(s.title)', 'refreshKeyHints()'],
+    'game/RestDialogue.js': ['keyText(node.text)', 'keyText(c.label)', 'keyText(tree.title)'],
   };
 
   it('每一处都还在原地问表', () => {
@@ -144,14 +155,61 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
 });
 
 /**
+ * 内容表里的 `{动作}` 占位：拿真表跑真展开（W-B2 切片4）。
+ *
+ * 上面几条扫的是**源码里的字符串**，而营火对话与说明书的文案住在数据表里 ——
+ * `text: "按 {escap} 跳过"` 这种写错一个字母的占位源码扫不出来（它不写在 `keyText('…')` 里），
+ * 运行期的后果却是"玩家走到那一格，对话框直接抛"。所以这里改成导入真表、走真函数：
+ * 每一条字符串都过一遍 `keyText`，错名当场红，展开之后一个花括号都不许留。
+ */
+describe('内容表的 `{动作}` 占位：真表跑真展开', () => {
+  const stringsOf = (node, out = []) => {
+    if (typeof node === 'string') out.push(node);
+    else if (Array.isArray(node)) node.forEach((v) => stringsOf(v, out));
+    else if (node && typeof node === 'object') Object.values(node).forEach((v) => stringsOf(v, out));
+    return out;
+  };
+  const TABLES = { restDialogues: REST_DIALOGUES, helpSectionsExtra: HELP_SECTIONS_EXTRA };
+  const STRINGS = Object.entries(TABLES).flatMap(([table, node]) => stringsOf(node).map((s) => `${table}: ${s}`));
+
+  it('扫描真跑得起来：带占位的文案够多（少一条就是 walker 或表坏了）', () => {
+    const withToken = STRINGS.filter((s) => /\{[A-Za-z][A-Za-z0-9]*\}/.test(s));
+    expect(withToken.length).toBeGreaterThanOrEqual(14);
+  });
+
+  it('每个占位都是登记过的动作，展开后不留花括号', () => {
+    const bad = [];
+    for (const labeled of STRINGS) {
+      const s = labeled.slice(labeled.indexOf(': ') + 2);
+      let out;
+      try {
+        out = keyText(s);
+      } catch (e) {
+        bad.push(`${s} -> ${e.message}`);
+        continue;
+      }
+      if (/\{[A-Za-z]/.test(out)) bad.push(`${s} -> 展开后还剩花括号：${out}`);
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it('反向控制：占位写错一个字母会抛，不是静默把 `{escap}` 显示给玩家', () => {
+    // 上面那条能过可能是因为 `keyText` 根本不认花括号 —— 这里钉住"它确实会拦"
+    expect(() => keyText('按 {escap} 跳过演出')).toThrow(/不是任何已登记的动作/);
+  });
+});
+
+/**
  * 只许变小的账本：这些地方仍把键名写死在内容里。
  * 它们大多是**成段的内容文案**（说明书、营火对话、世界低语、区域介绍），
  * 一次性塞进本片会把"界面改成问表"和"内容数据化"两件事搅在一起 ——
  * 后者是 W-B1 的闸门。数量口径见 `key-prose` 正则，动它就要连同这里一起改。
  */
 const LEDGER = {
-  'ui/HelpManual.js': 23,
-  'game/RestDialogue.js': 1,
+  // `WASD 移动`：四个动作连写成一-cluster，`keyHint` 只答"某一个动作按哪枚键"，
+  // 占位化会把它写成 `W 移动`（少三枚键）或 `{moveUp}{moveLeft}{moveDown}{moveRight}`（一串没人读的字符）。
+  // 这条留到"移动方式能整组改绑"再说，今天它是**四键连写的老写法**（同 `index.html` 门禁里那条）。
+  'ui/HelpManual.js': 1,
   'game/LoreCodexRegistry.js': 3,
   'player/DemoRunner.js': 3,
   'game/LoreFragments.js': 2,
@@ -164,17 +222,20 @@ const LEDGER = {
   'world/zones/VoidZone.js': 1,
   'main.js': 1,
   'style.css': 1,
+  // `自定义路点 Shift+点击`：这里说的是浏览器原生 `e.shiftKey`（`ui/WorldMapPanel.js` 读的就是它），
+  // **不是任何一张表里的动作**。占位化它会显示成改绑后的那枚键，而行为仍然只认 Shift —— 那是假话。
+  // 真要还这笔债，得先给"修饰键"登记成可改绑的动作，那是输入侧的事，不是文案侧的。
   'ui/WorldMapPanel.js': 1,
   // W-B1 切片1：CG 预设表从 ui/ 搬进 content/，字幕里那句 'Esc 跳过' 跟着搬了过来。
   // 它是**画在 canvas 上的文本**，吃不到 `data-keys` 那套（那是 DOM 的），
   // 所以本切片只如实记账；随 W-B1 的文案数据化一起改成问 `keyHint('escape')`。
   'content/dialogueCgPresets.js': 1,
-  // W-B2 切片3：文案搬进 content/ 之后，账本跟着换名字，**总数一处没变**（76 → 76，逐文件实测）。
-  // 这四行不是新增的债：15 条来自原来的 game/RestDialogue{,Extras,Extras2}.js（4+8+4−自己留下的 1），
-  // 8 条来自 ui/HelpManualExtras.js，1 条来自 game/PopCultureHomageRegistry.js。
-  // 真正的还债是把它们改成 `{escape}` 这类动作名 —— 那是文案数据化的下一步，不是这一片。
-  'content/restDialogues.js': 15,
-  'content/helpManual.js': 8,
+  // W-B2 切片3：文案搬进 content/ 之后，账本跟着换名字，**总数一处没变**（68 → 68，逐文件实测）。
+  // W-B2 切片4：说明书（23 + 8）、营火对话（15 + 自己那条 1）改成 `{动作}` 占位 + 渲染处 `keyText`，
+  // 45 笔一起清掉，68 → 23。这里剩下的两条与各线界面那两条同因：
+  // `自定义路点 Shift+点击`（浏览器原生 shiftKey，见上）与 `Ctrl 翻滚`（回声文案是致敬里的动作比喻，
+  // 它落在图鉴那一格，改绑后要不要跟着改口是图鉴渲染的事，见 §留尾巴）。
+  'content/restDialogues.js': 1,
   'content/echoes.js': 1,
 };
 

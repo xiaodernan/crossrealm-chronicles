@@ -4,6 +4,7 @@ import { emit } from '../engine/EventBus.js';
 // 对话树本体在 `content/restDialogues.js`（W-B2）：本文件只管运行时，不再存文案，
 // 也不再把它转口一遍 —— 转口会让"这张表的真源在哪"重新变成两个答案。
 import { REST_DIALOGUES } from '../content/restDialogues.js';
+import { keyText } from '../content/keyHints.js';
 
 function highlightKeywords(text) {
   if (!text) return '';
@@ -39,7 +40,9 @@ export class RestDialogue {
       throw new Error(`RestDialogue._emit: 未知对话阶段「${phase}」，可选：${Object.keys(REST_DIALOGUE_EVENTS).join(' / ')}`);
     }
     const def = REST_NPC_DEFS[restId];
-    const preview = typeof node?.text === 'string' ? node.text.replace(/\*\*/g, '').split('\n')[0] : '';
+    // 台词里的 `{动作}` 在**离开这张表之前**展开：下游（NPC 气泡、营火记忆）拿到的是给人看的那一份，
+    // 它们不认识占位 —— 传一句 `{escape}` 过去就是让玩家在气泡里看见花括号。
+    const preview = typeof node?.text === 'string' ? keyText(node.text).replace(/\*\*/g, '').split('\n')[0] : '';
     emit(type, {
       restId,
       nodeId,
@@ -62,12 +65,14 @@ export class RestDialogue {
       return;
     }
 
-    let text = node.text;
+    // 台词与选项都是 `{动作}` 占位（W-B2 切片4）—— 出这张表的那一刻展开一次，
+    // 让下游（对话框、气泡、营火记忆、日志）拿到的都是给人看的那一份。
+    let text = node.text ? keyText(node.text) : node.text;
     if (nodeId === 'quest' && tree === REST_DIALOGUES.hub) {
       const q = this.game.quests;
       text = q.current
         ? `当前：${q.current.title}\n${q.getProgressText()}\n\n${q.getAssistantHint()}`
-        : '主线已完成 — 自由探索，或按 N 自动通关。';
+        : keyText('主线已完成 — 自由探索，或按 {autoPlay} 自动通关。');
     }
 
     const def = REST_NPC_DEFS[this.activeRest?.id];
@@ -75,14 +80,14 @@ export class RestDialogue {
 
     const choices = filteredChoices.map((c, i) => ({
       id: String(i),
-      label: c.label,
+      label: keyText(c.label),
       onPick: () => this._pick(tree, c, nodeId),
     }));
 
     this._emit('node', this.activeRest.id, nodeId, node);
     this.nodeVisited.add(`${this.activeRest.id}:${nodeId}`);
 
-    this.game.dialog.showChoices(tree.title, highlightKeywords(text), choices, {
+    this.game.dialog.showChoices(keyText(tree.title), highlightKeywords(text), choices, {
       speaker: node.speaker ?? def?.name,
       speakerTitle: def?.title,
       accent: def?.accent ?? '#c9a962',
@@ -94,6 +99,8 @@ export class RestDialogue {
     if (node.journal) {
       this.game.storyJournal?.add({
         ...node.journal,
+        title: keyText(node.journal.title),
+        text: keyText(node.journal.text),
         category: 'campfire',
         chapter,
       });
