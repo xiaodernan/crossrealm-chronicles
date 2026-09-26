@@ -5,7 +5,7 @@ import { mergeJournalCategories } from './JournalTabRegistry.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { refreshKeyText } from '../content/keyHints.js';
-import { focusFirstItem, parkFocus, restoreParkedFocus } from './FocusNav.js';
+import { focusFirstItem, parkFocus, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 
@@ -408,7 +408,15 @@ export class HUD {
     document.getElementById('discovery-count').textContent = `日志 ${n} · 碎片 ${fr}/8 · 地图 ${pct}%`;
   }
 
+  /**
+   * 日志抽屉的重绘走 `preserveFocus`（切片28 / 修 B58）：整块 `innerHTML` 一换，旧按钮全销毁，
+   * 浏览器把焦点丢回 `body` —— 改前读数里换一个页签就得从清单头重新走一遍（键盘侧甚至整个走不动）。
+   */
   updateJournal() {
+    preserveFocus(this.journalPanel, () => this.renderJournal());
+  }
+
+  renderJournal() {
     if (this.journalTab === 'cg') {
       this.game.cgJournalTab.render(this.journalPanel);
       return;

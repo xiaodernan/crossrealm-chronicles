@@ -20,7 +20,7 @@ import {
   UI_HOTKEYS, UI_NAV_ACTIONS, UI_ACTIONS, hotkeyCodeFor, applyHotkeyOverrides, setHotkeyTable,
 } from '../src/content/hotkeys.js';
 import {
-  navItems, stepFocusIndex, nextFocusedItem, moveFocusWithin, focusFirstItem, adjustFocused,
+  navItems, stepFocusIndex, nextFocusedItem, moveFocusWithin, focusFirstItem, adjustFocused, preserveFocus,
 } from '../src/ui/FocusNav.js';
 import { OVERLAY_LAYERS, topNavLayer } from '../src/ui/OverlayStack.js';
 import { HotkeyRouter, hotkeyBlockedBy } from '../src/ui/HotkeyRouter.js';
@@ -201,6 +201,72 @@ describe('moveFocusWithin / focusFirstItem：只在这里动 `focus()`', () => {
 });
 
 /* ------------------------------------- 左右两下：推焦点那一格的数值（切片16） */
+
+describe('preserveFocus：重绘换掉整批节点之后，玩家还站在原来那一格（切片28 / 修 B58）', () => {
+  /** 重绘 = 同一份清单里换一批新对象（浏览器里旧节点被销毁，新的同位置新身份） */
+  const redraw = (panel, doc, ids) => {
+    panel.items.length = 0;
+    panel.items.push(...ids.map((id) => { const el = fakeItem(id); el.doc = doc; return el; }));
+  };
+
+  it('焦点在清单里：重绘之后回到同一格，且拿到的是**新节点**', () => {
+    const doc = fakeDoc({});
+    const panel = fakePanel(['a', 'b', 'c'], doc);
+    const 旧格 = panel.items[1];
+    旧格.focus();
+    expect(doc.activeElement.id).toBe('b');
+    const 回到 = preserveFocus(panel.host, () => redraw(panel, doc, ['a', 'b', 'c']), doc);
+    expect(回到, '返回值要问浏览器真的给了谁').toBe(true);
+    expect(doc.activeElement?.id).toBe('b');
+    expect(doc.activeElement).not.toBe(旧格);            // 拿到的必须是重绘后的那一个新节点
+    expect(doc.activeElement).toBe(panel.items[1]);
+  });
+
+  it('清单变短了：钳到最后一格，而不是掉回 `body`', () => {
+    const doc = fakeDoc({});
+    const panel = fakePanel(['a', 'b', 'c'], doc);
+    panel.items[2].focus();
+    preserveFocus(panel.host, () => redraw(panel, doc, ['a']), doc);
+    expect(doc.activeElement?.id).toBe('a');
+  });
+
+  it("焦点本来不在这一格里：不借重绘之名抢走玩家的焦点（也不碰 `body`）", () => {
+    const doc = fakeDoc({});
+    const panel = fakePanel(['a', 'b'], doc);
+    const 外面 = fakeItem('别处的按钮');
+    外面.doc = doc;
+    外面.focus();
+    expect(preserveFocus(panel.host, () => redraw(panel, doc, ['a', 'b']), doc)).toBe(false);
+    expect(doc.activeElement?.id).toBe('别处的按钮');
+  });
+
+  it('重绘后清单空了：返回 false 而不抛（画一半的极端形状）', () => {
+    const doc = fakeDoc({});
+    const panel = fakePanel(['a'], doc);
+    const 旧格 = panel.items[0];
+    旧格.focus();
+    expect(preserveFocus(panel.host, () => redraw(panel, doc, []), doc)).toBe(false);
+    expect(doc.activeElement).toBe(旧格);                // 没地方可放：不乱抢焦点，也不假装成功
+  });
+
+  it('反面对照：不套这一层，重绘确实把焦点丢回 `body`（证明这条不是在演空戏）', () => {
+    const doc = fakeDoc({});
+    const panel = fakePanel(['a', 'b'], doc);
+    panel.items[1].focus();
+    redraw(panel, doc, ['a', 'b']);
+    // 浏览器销毁节点后焦点归 `body`：这份桩用同一条形状表示 —— 原对象已不在清单里
+    expect(panel.items.indexOf(doc.activeElement)).toBe(-1);
+  });
+
+  it('两个重绘点都真的走了它：日志抽屉与键位清单（漏一处就是那一处仍会掉焦点）', () => {
+    const hud = sourceOf('ui/HUD.js');
+    expect(hud).toMatch(/preserveFocus\(this\.journalPanel, \(\) => this\.renderJournal\(\)\)/);
+    const panel = sourceOf('ui/SettingsPanel.js');
+    expect(panel).toMatch(/preserveFocus\(host, \(\) => \{/);
+    // 重绘本体仍然只有一个地方（`renderJournal`），护焦点那层不许自己也去画一遍
+    expect((hud.match(/journalPanel\.innerHTML =/g) ?? [])).toHaveLength(1);
+  });
+});
 
 describe('adjustFocused：走格问清单，这一段只问"焦点在哪一格"', () => {
   /** 一根滑杆 + 一份 `input` 账：写入方（`SettingsPanel.bindControls`）听的就是这个事件 */

@@ -5,7 +5,7 @@ import {
 } from '../content/keybinds.js';
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
-import { focusFirstItem, restoreParkedFocus } from './FocusNav.js';
+import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
 const CAMEL_EDGE = /[A-Z]/g;
@@ -265,9 +265,13 @@ export class SettingsPanel {
       }
     }
     rows.push('<button type="button" id="keybind-reset">恢复默认键位</button>');
-    host.innerHTML = `<div class="keybind-row keybind-head"><span class="keybind-name">动作</span>`
-      + '<span class="keybind-pad">键盘 / 鼠标</span><span class="keybind-pad">手柄</span>'
-      + '<span class="keybind-hint">等价键</span></div>' + rows.join('');
+    // 重绘整张清单会销毁玩家正停着的那一格（切片28 / B58 的同一个形状）：
+    // 点一颗手柄入口进入等待态、捕获回来之后清单就换了一批节点 —— 没有这一步，焦点掉回 `body`
+    preserveFocus(host, () => {
+      host.innerHTML = `<div class="keybind-row keybind-head"><span class="keybind-name">动作</span>`
+        + '<span class="keybind-pad">键盘 / 鼠标</span><span class="keybind-pad">手柄</span>'
+        + '<span class="keybind-hint">等价键</span></div>' + rows.join('');
+    });
   }
 
   /**

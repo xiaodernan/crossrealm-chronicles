@@ -114,6 +114,29 @@ export function restoreParkedFocus(doc = globalThis.document) {
 }
 
 /**
+ * 重绘之前记下"玩家此刻停在哪一格"，画完把他放回同一格（切片28 / 修 B58）。
+ *
+ * 为什么需要它：一块面板用 `innerHTML = ...` 重画，旧节点全部销毁，浏览器把焦点丢回 `body` ——
+ * 改前读数里日志抽屉换一个页签就"从哪儿来的回到哪儿去"（↑ 又从头走，甚至整个走不动），
+ * 玩家每按一次确认都要重新走一遍清单。这与 B44/B47 不同族，是**重绘与焦点各管各的**。
+ *
+ * 三条规矩：① 焦点本来不在这个宿主里 → 什么都不做（不许借重绘之名抢走玩家的焦点）；
+ * ② 画完之后清单短了 → 落在最后一格（钳位，不是掉回 `body`）；
+ * ③ 返回值问 `document.activeElement` 而不是"我们调没调 `focus()`"（与 `restoreParkedFocus` 同一条纪律）。
+ */
+export function preserveFocus(host, rerender, doc = globalThis.document) {
+  const before = navItems(host);
+  const index = before.indexOf(doc?.activeElement);
+  rerender();
+  if (index < 0) return false;
+  const after = navItems(host);
+  if (!after.length) return false;
+  const target = after[Math.min(index, after.length - 1)];
+  target.focus();
+  return doc?.activeElement === target;
+}
+
+/**
  * 激活"现在聚焦的那一格"（切片14：手柄的 A）。
  *
  * 这不是"第二个 Enter 消费者"：键盘那条路一个字都没改（原生 Enter 本来就激活聚焦元素，
