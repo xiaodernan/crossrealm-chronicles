@@ -26,10 +26,15 @@
  *
  * ## `mode` 不是装饰，是这条链上唯一的安全阀
  *
- * - `level` —— 按住即真（移动、冲刺：要的就是"一直按着就一直生效"）；
- * - `edge` —— 只在按下那一帧给 true（锁定、翻滚、施法：这些消费者里有一部分是
+ * - `level` —— 按住即真（移动、冲刺、面板走焦：要的就是"一直按着就一直生效"）；
+ * - `edge` —— 只在按下那一帧给 true（锁定、翻滚、攻击：这些消费者里有一部分是
  *   "读完就把键清成 false"的老写法，若给电平，按住 LB 会变成每帧切换一次锁定 ——
  *   正是 W-A4 修掉的"按住 Ctrl 每帧请求一次翻滚"那一类）。
+ *
+ * 选哪一个**不问动作叫什么，问消费者的判据长什么样**：判"按过没有"的吃 `edge`，
+ * 判"按了多久"的吃 `level`。`spell1` 是这条规矩的现眼例子 —— 它的消费者 `SpellSystem`
+ * 自己记 `keyWasDown`、按住期间累计 `chargeTime`（蓄力那一档的判据是半秒多），
+ * 给它 `edge` 等于每帧都告诉它"刚按下、已松手"，蓄力永远只有一帧的 dt（切片30）。
  */
 import { UI_HOTKEYS, UI_ACTIONS, applyHotkeyOverrides } from './hotkeys.js';
 
@@ -258,7 +263,8 @@ export const GAMEPAD_BINDINGS = {
   lockOn: { action: 'lockOn', mode: 'edge', button: 'leftBumper' },
   attackLight: { action: 'attackLight', mode: 'edge', button: 'rightBumper' },
   attackHeavy: { action: 'attackHeavy', mode: 'edge', button: 'rightTrigger' },
-  spell1: { action: 'spell1', mode: 'edge', button: 'leftTrigger' },
+  // 蓄力法术判的是"按住了多久"，不是"按过没有"：这一格必须是 level（见文件头那条规矩）
+  spell1: { action: 'spell1', mode: 'level', button: 'leftTrigger' },
   swapWeapon: { action: 'swapWeapon', mode: 'edge', button: 'select' },
   // 暂停菜单归 UI 热键表（`escape`），那一格可重映射，所以这里只写逻辑动作名
   pauseMenu: { action: 'pauseMenu', mode: 'edge', button: 'start', hotkey: 'escape' },
