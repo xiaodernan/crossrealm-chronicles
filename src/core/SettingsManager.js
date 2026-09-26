@@ -21,10 +21,12 @@ const DEFAULTS = {
    */
   gamepadBinds: {},
   /**
-   * 手柄手感三根旋钮（切片15）：`{ deadzone, analogRange, lookCurve }`。
+   * 手柄手感旋钮（切片15 起三根，切片21 再加三根）：`padTuning()` 认识哪几格，这里就存哪几格。
    *
    * 默认值不在这里抄一遍 —— `padTuning()` 取的就是 `content/keybinds.js` 里那份 `PAD`，
    * 因为"滑杆的范围"与"桥认的范围"必须是同一条算式（两处分头写就会滑到头却被当成脏数据回落）。
+   * 加一格也不需要动这里：`data.padTuning` 是 `{...出厂, ...存档}` 浅合并，老档里缺的那几格
+   * 自然落到出厂值（见 `tests/pad-tuning.test.js` 的"老档缺新格"一例）。
    */
   padTuning: padTuning(),
   /**

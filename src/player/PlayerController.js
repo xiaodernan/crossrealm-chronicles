@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { anyDown, codeFor, PAD } from '../content/keybinds.js';
+import { anyDown, codeFor } from '../content/keybinds.js';
 import { keyText } from '../content/keyHints.js';
 
 import { CharacterModel } from './CharacterModel.js';
@@ -597,7 +597,7 @@ export class PlayerController {
 
   /**
    * @param {object} keys 键盘形状（含手柄桥合成的那一份）
-   * @param {object} [analog] 左摇杆模拟量 `{x, y, mag}`（`GamepadInput.move` 的复用槽）；
+   * @param {object} [analog] 左摇杆模拟量 `{x, y, mag, sprint}`（`GamepadInput.move` 的复用槽）；
    *        给 `null`/`undefined` 就是"没有手柄"，走八向码的满速路径
    */
   update(dt, keys, analog = null) {
@@ -627,7 +627,8 @@ export class PlayerController {
     // 积分、碰撞、贴地、重力仍在本方法后半段统一做，避免两处同时写位移
     const ctx = {
       moveDir: this.readMoveDir(keys, autoPlay, undefined, analog),
-      sprintHeld: !!anyDown(keys, 'sprint') || !!(analog && analog.mag >= PAD.moveSprintThreshold),
+      // "够不够跑"由桥判（切片21）：门槛吃的是玩家自己拧的那一格手档，而手档只有桥拿着
+      sprintHeld: !!anyDown(keys, 'sprint') || !!analog?.sprint,
     };
     ctx.moving = ctx.moveDir.lengthSq() > 0;
     this.fsm.resolve(ctx);

@@ -93,11 +93,16 @@ export class GamepadInput {
      */
     this.look = { x: 0, y: 0 };
     /**
-     * 本帧左摇杆的**模拟量**（切片8）：`{x, y, mag}`，x 向右、y 向前、`mag` 是死区重映射
+     * 本帧左摇杆的**模拟量**（切片8）：`{x, y, mag, sprint}`，x 向右、y 向前、`mag` 是死区重映射
      * 之后的 0~1 模长（所以 `mag` 就是"想走多快"，`x/mag, y/mag` 是方向）。
      * 与 `look` 同为复用槽：`readMoveDir` 每帧读一次，绝不在热路径上新建对象。
+     *
+     * `sprint`（切片21）是"这一推够不够跑"：判定住在桥里而不是消费方，因为**门槛吃的是玩家自己
+     * 拧的那一格手档**，而手档只有桥拿着 —— 让 `PlayerController` 去比出厂那格 `moveSprintThreshold`
+     * 就是"滑杆拖了、行为读常量"那一族（B47）。刻度是**重映射之后**的行程（与 `mag` 同一条），
+     * 门槛最低 0.3，所以静止与死区里那一推永远算不出"想跑"。
      */
-    this.move = { x: 0, y: 0, mag: 0 };
+    this.move = { x: 0, y: 0, mag: 0, sprint: false };
     /**
      * 界面态那几格的边沿（切片14）：与 `look` / `move` 同为复用槽，热路径不分配。
      *
@@ -108,10 +113,10 @@ export class GamepadInput {
      */
     Object.assign(this.ui, { confirm: false });
     /**
-     * 手感三根旋钮（切片15）：出厂值取自 `content/keybinds.js` 里的 `PAD`，
+     * 手感旋钮（切片15 起三根，切片21 再加三根）：出厂值取自 `content/keybinds.js` 里的 `PAD`，
      * 玩家档只由 `setTuning()` 推进来（唯一写点，见 `SettingsManager.applyToGame`）。
      *
-     * 这是一只复用对象：`Object.assign` 就地改、从不换引用 —— 读它的三处都在每帧热路径上。
+     * 这是一只复用对象：`Object.assign` 就地改、从不换引用 —— 读它的每一处都在每帧热路径上。
      */
     this.tuning = padTuning();
   }
@@ -316,7 +321,7 @@ export class GamepadInput {
     const lx = axes[PAD.lookAxes[0]] ?? 0;
     const ly = axes[PAD.lookAxes[1]] ?? 0;
     const mag = Math.hypot(lx, ly);
-    const t = _analogMagnitude(mag, PAD.lookDeadzone, this.tuning.analogRange);
+    const t = _analogMagnitude(mag, this.tuning.lookDeadzone, this.tuning.analogRange);
     const out = this.look;
     if (t <= 0) {
       out.x = 0;
@@ -324,7 +329,7 @@ export class GamepadInput {
       return out;
     }
     // 方向取原始轴值（曲线只改快慢，不改朝哪儿）
-    const scale = (t ** this.tuning.lookCurve) * PAD.lookPixelsPerSecond;
+    const scale = (t ** this.tuning.lookCurve) * this.tuning.lookPixelsPerSecond;
     out.x = (lx / mag) * scale;
     out.y = (ly / mag) * scale;
     return out;
@@ -342,6 +347,9 @@ export class GamepadInput {
     const out = this.move;
     const t = _analogMagnitude(mag, this.tuning.deadzone, this.tuning.analogRange);
     out.mag = t;
+    // "这一推够不够跑"（切片21）：门槛是玩家自己拧的那一格，所以判定长在桥里。
+    // 不另加 `t > 0` 的挡箭牌 —— 门槛的下沿是 0.3，静止与死区里那一推天然到不了（不可达的分支没人测得到）
+    out.sprint = t >= this.tuning.moveSprintThreshold;
     // 手柄的 y 轴向下为正，"前"是 -y：这里就把符号翻掉，消费方不必知道手柄的坐标系
     if (t <= 0) {
       out.x = 0;
@@ -365,6 +373,7 @@ export class GamepadInput {
     this.move.x = 0;
     this.move.y = 0;
     this.move.mag = 0;
+    this.move.sprint = false;
     this.ui.confirm = false;
     this.active = false;
   }
@@ -406,8 +415,11 @@ export class GamepadInput {
  * 摇杆模长 → 0~1 的有效行程：死区以内算 0，死区到 `analogRange` 之间线性铺开，量程之外
  * 夹住。两端都要收口：不夹上限则"推到 1.0"会超出满速，不铺下限则刚离开死区那一格会是
  * 一串 0 速的抖动。
+ *
+ * 三个数**全部由调用方喂**（切片21）：这里若留一个"量程 = 出厂值"的默认参数，等于在手档之外
+ * 藏了第二个值 —— 漏传一格不会报错，只会"那一根滑杆白拖"。
  */
-function _analogMagnitude(mag, deadzone, range = PAD.analogRange) {
+function _analogMagnitude(mag, deadzone, range) {
   if (!(mag > deadzone) || !(range > deadzone)) return 0;
   return Math.min(1, (mag - deadzone) / (range - deadzone));
 }
@@ -419,8 +431,8 @@ function _pressed(btn, wasDown) {
   return value >= (wasDown ? PAD.releaseThreshold : PAD.pressThreshold);
 }
 
-/** 摇杆：先在径向死区之外，再看这一格管的方向落在八向量的哪一格里 */
-function _stickHeld(axes, s, deadzone = PAD.deadzone) {
+/** 摇杆：先在径向死区之外（那个死区由调用方把手档递进来），再看这一格管的方向落在八向量的哪一格里 */
+function _stickHeld(axes, s, deadzone) {
   const lx = axes[s.axisX] ?? 0;
   const ly = axes[s.axisY] ?? 0;
   if (Math.hypot(lx, ly) < deadzone) return false;

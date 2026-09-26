@@ -245,7 +245,19 @@ describe('右摇杆 → 响应曲线：中低段细得下来，端点不撒谎',
 });
 
 describe('玩家吃到幅度：半推半速是可测的位移比', () => {
-  const analogAt = (mag) => ({ x: 0, y: mag, mag });
+  /**
+   * 造一枚**从真桥里拿**的模拟量槽：参数是"重映射之后"的模长（用例一贯用这个刻度），
+   * 反解 `moveT` 得到该推多少行程。为什么不手写 `{x, y, mag, sprint}`：切片21 起
+   * "够不够跑"是桥判的，桩里自己抄一条 `mag >= 门槛` 就成了第二个真源 —— 生产的形状变了，
+   * 这些用例不会红，只会安静地把生产没有的字段喂给玩家。
+   */
+  const analogAt = (mag) => {
+    const pad = makePad();
+    const r = rig(pad);
+    pushMove(pad, MOVE_DZ + mag * (RANGE - MOVE_DZ), 90);
+    r.poll();
+    return r.pad.move;
+  };
 
   it('满推的方向与键盘同一条：半推不改变朝哪儿', () => {
     const p = makePlayer();
@@ -263,8 +275,8 @@ describe('玩家吃到幅度：半推半速是可测的位移比', () => {
     const dt = 1 / 120;
     // 两档都压在冲刺阈值之下：否则比较里混进了疾走倍率，比出来的就不是"幅度"了
     const hi = PAD.moveSprintThreshold - 0.05;
-    const fast = runFrames(makePlayer(), 0.5, dt, {}, { x: 0, y: hi, mag: hi });
-    const half = runFrames(makePlayer(), 0.5, dt, {}, { x: 0, y: hi / 2, mag: hi / 2 });
+    const fast = runFrames(makePlayer(), 0.5, dt, {}, analogAt(hi));
+    const half = runFrames(makePlayer(), 0.5, dt, {}, analogAt(hi / 2));
     expect(fast.length()).toBeGreaterThan(1);
     expect(half.length()).toBeCloseTo(fast.length() * 0.5, 6);
   });
@@ -302,7 +314,7 @@ describe('玩家吃到幅度：半推半速是可测的位移比', () => {
     const p = makePlayer();
     const dt = 1 / 120;
     const keysUp = { [bindingFor('moveUp').code]: true };
-    const dist = runFrames(p, 0.5, dt, keysUp, { x: 0, y: 0, mag: 0 });
+    const dist = runFrames(p, 0.5, dt, keysUp, analogAt(0));   // 杆在正中：桥给的槽（`sprint` 也是假的）
     expect(dist.length()).toBeCloseTo(p.moveSpeed * 0.5, 1);
   });
 

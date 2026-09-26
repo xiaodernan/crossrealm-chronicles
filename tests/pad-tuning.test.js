@@ -1,13 +1,18 @@
 /**
- * 手柄手感的三根滑杆（W-A7 切片15：死区 / 外圈量程 / 镜头响应曲线）。
+ * 手柄手感的滑杆（W-A7 切片15 的三根：死区 / 外圈量程 / 镜头响应曲线；切片21 再加三根：
+ * 镜头死区 / 镜头转速 / 冲刺触发深度）。
  *
- * 这一片的风险是三件事，各自要有一层用例：
+ * 这一片的风险是四件事，各自要有一层用例：
  * 1. **一份范围**：滑杆能拖到的值与桥肯认的值必须是同一份（`PAD_TUNING`），否则玩家拖到
  *    头会发现"明明动了却什么都没变"（值被当脏数据悄悄回落）；
  * 2. **一处写入口**：手档进桥只有 `SettingsManager.applyToGame` 一条路，桥自己只读
  *    `this.tuning`；出厂对象 `PAD` 一动不动（就地改它等于改了全仓默认，"恢复默认"回不来）；
  * 3. **坏档逐项回落**：存储是玩家可写的，把 `lookCurve` 写成 `"abc"` 不该把死区与量程一起废掉，
- *    更不该把 `NaN` 乘进每帧的舵量里。
+ *    更不该把 `NaN` 乘进每帧的舵量里；
+ * 4. **一格旋钮只有一个名字**（切片21）：表里的键名、桥读的字段名、壳页那根的 id 是同一件事的
+ *    三面 —— 名单一旦在面板里手抄一遍，加一格就会漏抄，而漏抄的表现不是报错，是"那一格永远拖不动"。
+ *    所以 id 从键名**推**（`padKnobId`），壳页与表互查（双向），出厂值还必须正落在滑杆的格子上
+ *    （`type=range` 会把值吸到 `min + n×step`，不在格子上的出厂值就是"显示 0.14 而存着 0.15"）。
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -17,10 +22,13 @@ import {
 } from '../src/content/keybinds.js';
 import { GamepadInput } from '../src/engine/GamepadInput.js';
 import { SettingsManager } from '../src/core/SettingsManager.js';
-import { SettingsPanel } from '../src/ui/SettingsPanel.js';
+import { SettingsPanel, padKnobId } from '../src/ui/SettingsPanel.js';
 import { makePlayer, runFrames } from './helpers/playerHarness.js';
 
 const SRC = join(process.cwd(), 'src');
+
+/** 表里每一格的出厂值：`padTuning()` 该给的就是这一份（用例不抄数字，抄了就得跟着加格改） */
+const factoryTuning = () => Object.fromEntries(Object.keys(PAD_TUNING).map((k) => [k, PAD[k]]));
 
 const walk = (dir) => readdirSync(dir).flatMap((n) => {
   const full = join(dir, n);
@@ -50,16 +58,47 @@ afterEach(() => {
 
 describe('padTuning：出厂 + 玩家档 → 桥用的那一组值', () => {
   it('什么都不给就是出厂值，而且值取自 `PAD`（不另抄一份数字）', () => {
-    expect(padTuning()).toEqual({
-      deadzone: PAD.deadzone, analogRange: PAD.analogRange, lookCurve: PAD.lookCurve,
-    });
+    expect(padTuning()).toEqual(factoryTuning());
     expect(Object.keys(padTuning()).sort()).toEqual(Object.keys(PAD_TUNING).sort());
   });
 
-  it('合法值原样通过（含两端边界）', () => {
+  it('表里每一格都在 `PAD` 里有同名出厂值（键名打错的表现不是报错，是那一格永远是 undefined）', () => {
+    for (const [key, spec] of Object.entries(PAD_TUNING)) {
+      expect(PAD[key], `PAD.${key} 不在了`).toBeTypeOf('number');
+      for (const bound of ['min', 'max']) {
+        expect(spec[bound], `${key}.${bound} 不是数`).toBeTypeOf('number');
+      }
+      expect(spec.min, key).toBeLessThan(spec.max);
+      expect(spec.step, key).toBeGreaterThan(0);
+    }
+  });
+
+  it('出厂值落在自己的范围内，而且**正落在滑杆的格子上**（`type=range` 会把值吸到 min+n×step）', () => {
+    for (const [key, spec] of Object.entries(PAD_TUNING)) {
+      const def = PAD[key];
+      expect(def, `${key} 出厂值出界了（出厂即脏档）`).toBeGreaterThanOrEqual(spec.min);
+      expect(def, `${key} 出厂值出界了`).toBeLessThanOrEqual(spec.max);
+      // 不在格子上：滑杆显示的是被吸过的那一格，而存储里是出厂值 —— 回显与行为分家（B47 一族）
+      const n = (def - spec.min) / spec.step;
+      expect(Math.abs(n - Math.round(n)), `${key} 出厂值 ${def} 不在 step ${spec.step} 的格子上`)
+        .toBeLessThan(1e-9);
+      // 两端也必须在格子上：否则"拖到头"写回来的值与滑杆显示的不是同一个数
+      for (const bound of ['min', 'max']) {
+        const k = (spec[bound] - spec.min) / spec.step;
+        expect(Math.abs(k - Math.round(k)), `${key}.${bound} 不在格子上`).toBeLessThan(1e-9);
+      }
+    }
+  });
+
+  it('合法值原样通过（含两端边界）：每一格都各自验一次', () => {
     expect(padTuning({ deadzone: 0.4, analogRange: 0.6, lookCurve: 3 }))
-      .toEqual({ deadzone: 0.4, analogRange: 0.6, lookCurve: 3 });
+      .toEqual({ ...factoryTuning(), deadzone: 0.4, analogRange: 0.6, lookCurve: 3 });
     expect(padTuning({ deadzone: 0 }).deadzone).toBe(0);   // 0 是允许档（不留漂移余量）
+    for (const [key, spec] of Object.entries(PAD_TUNING)) {
+      for (const v of [spec.min, spec.max, PAD[key]]) {
+        expect(padTuning({ [key]: v })[key], `${key} 的 ${v} 被当脏数据了`).toBe(v);
+      }
+    }
   });
 
   it('坏值逐项回落出厂：只有一格脏，其余两格仍然是玩家要的', () => {
@@ -136,6 +175,93 @@ describe('GamepadInput：两根杆都只认这一份手档', () => {
     expect(curved.look.x).toBeCloseTo(PAD.lookPixelsPerSecond, 6);
   });
 
+  it('镜头那一档死区**只管镜头**：同一推量下走路照走、镜头不转（两格各拧各的）', () => {
+    const { bridge, pad } = mkBridge({ lookDeadzone: 0.3 });
+    pad.axes[0] = 0.3;                                  // 左杆：走路（出厂死区 0.2 → 该有速度）
+    pad.axes[2] = 0.3;                                  // 右杆：镜头（新手档 0.3 → 正好还没出死区）
+    bridge.poll();
+    expect(bridge.move.mag).toBeGreaterThan(0);
+    expect(bridge.look.x).toBe(0);
+    expect(bridge.look.y).toBe(0);
+    // 反手验一次：把镜头死区调回出厂，同一推量就该转了（否则"没转"可能是别的原因）
+    const back = mkBridge({ lookDeadzone: PAD.lookDeadzone });
+    back.pad.axes[2] = 0.3;
+    back.bridge.poll();
+    expect(Math.hypot(back.bridge.look.x, back.bridge.look.y)).toBeGreaterThan(0);
+  });
+
+  it('镜头转速一格就管转速：满推的点数跟着滑杆走，出厂那格仍然是 `PAD.lookPixelsPerSecond`', () => {
+    for (const v of [400, 2600, PAD.lookPixelsPerSecond]) {
+      const { bridge, pad } = mkBridge({ lookPixelsPerSecond: v, lookCurve: 1 });
+      pad.axes[2] = 1;
+      bridge.poll();
+      expect(bridge.look.x, `满推 ${v}`).toBeCloseTo(v, 6);
+    }
+    // 方向与大小分家：转速改了，朝哪儿不该改（曲线也只改快慢）。镜头那条**不翻 y 符号** ——
+    // 翻符号的是移动（"前"是 -y），别把两条杆当成同一件事
+    const a = mkBridge({ lookPixelsPerSecond: 2600 });
+    a.pad.axes[3] = -1;                                 // 右杆 y 轴向下为正 → 推上
+    a.bridge.poll();
+    expect(a.bridge.look.x).toBe(0);
+    expect(a.bridge.look.y).toBeCloseTo(-2600, 6);
+  });
+
+  it('冲刺触发深度：同一推量在两个档下分别是"跑"和"走"（判定长在桥的 `move.sprint`）', () => {
+    const push = 0.6;                                   // 重映射后 t=(0.6-0.2)/(0.92-0.2)≈0.588
+    const soft = mkBridge({ moveSprintThreshold: 0.5 });
+    soft.pad.axes[1] = -push;
+    soft.bridge.poll();
+    const stiff = mkBridge({ moveSprintThreshold: 0.9 });
+    stiff.pad.axes[1] = -push;
+    stiff.bridge.poll();
+    expect(soft.bridge.move.mag).toBeCloseTo(stiff.bridge.move.mag, 9);   // 走路速度不该被这格改了
+    expect(soft.bridge.move.sprint).toBe(true);
+    expect(stiff.bridge.move.sprint).toBe(false);
+  });
+
+  it('静止与死区里都不许凭空"想跑"：每一档门槛下 `mag` 为 0 时 `sprint` 必为假', () => {
+    for (const threshold of [0.3, 0.5, 0.9, 1]) {
+      const { bridge, pad } = mkBridge({ moveSprintThreshold: threshold });
+      pad.axes[1] = -0.1;                               // 出厂死区 0.2 之下：这一推等于没推
+      bridge.poll();
+      expect(bridge.move.mag, String(threshold)).toBe(0);
+      expect(bridge.move.sprint, `门槛 ${threshold} 下静止算想跑`).toBe(false);
+    }
+  });
+
+  it('门槛是**闭**区间：推到量程尽头那一档（重映射后正好 1）在门槛 1 下就算想跑', () => {
+    const { bridge, pad } = mkBridge({ moveSprintThreshold: 1 });
+    pad.axes[1] = -PAD.analogRange;                    // 两个操作数与桥里那条式子完全相同 → `t` 恰为 1
+    bridge.poll();
+    expect(bridge.move.mag).toBe(1);
+    expect(bridge.move.sprint, '写成严格大于就是"永远差一格"').toBe(true);
+    const near = mkBridge({ moveSprintThreshold: 1 });
+    near.pad.axes[1] = -PAD.analogRange * 0.99;
+    near.bridge.poll();
+    expect(near.bridge.move.sprint).toBe(false);
+  });
+
+  it('吃的是**重映射之后**的行程：物理上差一点到底（0.85）已经算满推（切片8 那块余量的账）', () => {
+    const { bridge, pad } = mkBridge({});              // 出厂：门槛 0.9、外圈量程 0.92
+    pad.axes[1] = -0.85;
+    bridge.poll();
+    expect(bridge.move.mag).toBeCloseTo(0.9028, 4);
+    expect(bridge.move.sprint, '拿原始模长比门槛，这一推就会翻成"没到"').toBe(true);
+  });
+
+  it('拔手之后 `sprint` 跟着清：留着就是"松手还在跑"（与 `mag` 同一本账）', () => {
+    const pad = makePad();
+    const bridge = new GamepadInput({ keys: {} }, GAMEPAD_BINDINGS, () => [pad]);
+    pad.axes[1] = -1;
+    bridge.poll();
+    expect(bridge.move.sprint).toBe(true);
+    pad.connected = false;                              // 直接拔掉：走 `releaseAll` 那一条
+    bridge.poll();
+    expect(bridge.active).toBe(false);
+    expect(bridge.move.sprint).toBe(false);
+    expect(bridge.move.mag).toBe(0);
+  });
+
   it('手档是一只复用对象：反复换档不换引用，也不在每帧新建', () => {
     const { bridge } = mkBridge();
     const before = bridge.tuning;
@@ -177,8 +303,17 @@ describe('设置那一格：范围只有一个真源、写进桥只有一条路'
   it('出厂档直接取自 `PAD`：DEFAULTS 里没有第二份数字', () => {
     install();
     const s = new SettingsManager();
+    expect(s.get('padTuning')).toEqual(factoryTuning());
+  });
+
+  it('老档缺新格（切片21 加出来的三格）：缺的那几格落到出厂值，玩家拧过的原样保留', () => {
+    const store = install();
+    store.set('crossrealm_settings', JSON.stringify({
+      version: 2, values: { padTuning: { deadzone: 0.06, analogRange: 0.66, lookCurve: 2.2 } },
+    }));
+    const s = new SettingsManager();
     expect(s.get('padTuning')).toEqual({
-      deadzone: PAD.deadzone, analogRange: PAD.analogRange, lookCurve: PAD.lookCurve,
+      ...factoryTuning(), deadzone: 0.06, analogRange: 0.66, lookCurve: 2.2,
     });
   });
 
@@ -195,7 +330,7 @@ describe('设置那一格：范围只有一个真源、写进桥只有一条路'
     s.set('padTuning', { deadzone: 0.3, analogRange: 0.85, lookCurve: 2 });
     const seen = [];
     s.applyToGame({ padInput: { setTuning: (raw) => seen.push({ ...padTuning(raw) }) } });
-    expect(seen).toEqual([{ deadzone: 0.3, analogRange: 0.85, lookCurve: 2 }]);
+    expect(seen).toEqual([{ ...factoryTuning(), deadzone: 0.3, analogRange: 0.85, lookCurve: 2 }]);
   });
 
   it('桥不在（早期启动 / 没插手柄）也不炸', () => {
@@ -216,7 +351,9 @@ describe('设置那一格：范围只有一个真源、写进桥只有一条路'
       addEventListener(type, fn) { (this.listeners[type] ??= []).push(fn); },
       fire(type) { (this.listeners[type] ?? []).forEach((fn) => fn({ target: this })); },
     });
-    const knobs = { 'set-deadzone': el('set-deadzone'), 'set-analog-range': el('set-analog-range'), 'set-look-curve': el('set-look-curve') };
+    // 滑杆名单从表推（与面板同一个 `padKnobId`）：这里若手抄，加一格就得回来补一次
+    const knobs = Object.fromEntries(Object.keys(PAD_TUNING)
+      .map((k) => [padKnobId(k), el(padKnobId(k))]));
     const doc = {
       getElementById: (id) => knobs[id] ?? null,
       addEventListener: () => {}, removeEventListener: () => {},
@@ -279,9 +416,7 @@ describe('设置那一格：范围只有一个真源、写进桥只有一条路'
       void panel;
       slider.value = '0.05';
       slider.fire('input');
-      expect(game.settings.get('padTuning')).toEqual({
-        deadzone: 0.05, analogRange: PAD.analogRange, lookCurve: PAD.lookCurve,
-      });
+      expect(game.settings.get('padTuning')).toEqual({ ...factoryTuning(), deadzone: 0.05 });
     } finally {
       globalThis.document = realDoc;
       globalThis.window = realWindow;
@@ -292,12 +427,20 @@ describe('设置那一格：范围只有一个真源、写进桥只有一条路'
 /* ------------------------------------------------------- 静态门禁 */
 
 describe('静态门禁：一处范围、一处写入口、桥只读自己的手档', () => {
-  it('滑杆的范围只写在 `PAD_TUNING`：壳页里那三行不许带 min/max/step', () => {
+  it('滑杆的范围只写在 `PAD_TUNING`：壳页里那些"旋钮格"不许带 min/max/step，而且与表**双向**对上', () => {
     const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
-    for (const id of ['set-deadzone', 'set-analog-range', 'set-look-curve']) {
+    const free = [];                                   // 没写范围的滑杆 = 由表灌范围的那一格
+    for (const m of html.matchAll(/<input id="([^"]+)" type="range"([^>]*?)\/>/g)) {
+      if (!/\b(min|max|step)=/.test(m[2])) free.push(m[1]);
+    }
+    const fromTable = Object.keys(PAD_TUNING).map(padKnobId);
+    expect([...free].sort(), '壳页与 `PAD_TUNING` 不再是同一份名单（漏一格 = 拖不动，多一格 = 没人认）')
+      .toEqual([...fromTable].sort());
+    // 每一格都真的有一行 `<label>名称 <input .../></label>`：没有名字的滑杆玩家不知道它管什么
+    for (const id of fromTable) {
       const line = html.split('\n').find((l) => l.includes(`id="${id}"`));
       expect(line, `${id} 不在了`).toBeTruthy();
-      expect(line, '范围被抄进壳页：与 `PAD_TUNING` 就是两份').not.toMatch(/\b(min|max|step)=/);
+      expect(line, `${id} 那一行没有中文名`).toMatch(/<label>[^<]+<input/);
     }
   });
 
@@ -309,23 +452,34 @@ describe('静态门禁：一处范围、一处写入口、桥只读自己的手�
     expect((bridge.match(/padTuning\(/g) || []).length, '清洗至少要走一次（默认 + 换档）').toBeGreaterThanOrEqual(2);
   });
 
-  it('桥里不许再直接读那三个出厂常量（热路径绕过手档 = 滑杆白拖）', () => {
-    const bridge = sourceOf('engine/GamepadInput.js');
-    for (const key of ['deadzone', 'analogRange', 'lookCurve']) {
-      const direct = [...bridge.matchAll(new RegExp(`PAD\\.${key}`, 'g'))]
-        // 参数默认值（`deadzone = PAD.deadzone`）留着：单元调用与桥内默认仍要有一个值
-        .filter((m) => !/[,(]\s*deadzone = |range = PAD\.|, s, deadzone = /.test(bridge.slice(Math.max(0, m.index - 24), m.index + 24)));
-      expect(direct.map((m) => bridge.slice(m.index, m.index + 24)), `桥里直接读了 PAD.${key}`).toEqual([]);
-      expect(bridge).toContain(`this.tuning.${key}`);
+  it('旋钮的读取点只问手档：`PAD.<旋钮名>` 在 `src/` 里只许出现在出厂表自己那一格', () => {
+    // 这一条是切片21 的重点。热路径绕过手档 = 玩家滑杆白拖，而"白拖"不会报错：
+    // 表现是"我明明调了，手感没变"（B47 那一族：显示与行为各说各话）。
+    for (const key of Object.keys(PAD_TUNING)) {
+      const re = new RegExp(`PAD\\.${key}\\b`);
+      const readers = FILES.filter((f) => f.name !== 'content/keybinds.js' && re.test(f.source)).map((f) => f.name);
+      expect(readers, `这些地方还在读出厂值 PAD.${key}（手档改了它们不跟）`).toEqual([]);
     }
   });
 
-  it(`\`PAD_TUNING\` 的每一格都有滑杆接着（登记了却没人画 = 玩家调不到）`, () => {
-    const panel = sourceOf('ui/SettingsPanel.js');
+  it('桥里每一格旋钮都真的读了自己的手档字段（"没读常量"不等于"读了手档"）', () => {
+    const bridge = sourceOf('engine/GamepadInput.js');
     for (const key of Object.keys(PAD_TUNING)) {
-      expect(panel, `滑杆没接 ${key}`).toContain(`knob('set-`);
-      expect(panel.match(new RegExp(`knob\\('set-[a-z-]+', '${key}'\\)`)), key).toBeTruthy();
+      expect(bridge, `桥里没有 this.tuning.${key}`).toContain(`this.tuning.${key}`);
     }
+    // `_analogMagnitude` 不许再留出厂默认参数：那是在手档之外藏的第二个值，漏传一格不会报错
+    expect(bridge).toMatch(/function _analogMagnitude\(mag, deadzone, range\)/);
+  });
+
+  it('一格旋钮只有一个名字：面板不抄滑杆名单，id 从键名推', () => {
+    const panel = sourceOf('ui/SettingsPanel.js');
+    expect(panel, '面板里手抄了一格滑杆 id：加旋钮时会漏抄，而漏抄的表现是"拖不动"不是报错')
+      .not.toMatch(/knob\('set-/);
+    expect(panel, '面板没按 `PAD_TUNING` 画滑杆').toContain('for (const key of Object.keys(PAD_TUNING)) knob(key);');
+    expect(panel, '回显没按 `PAD_TUNING` 走').toContain('for (const key of Object.keys(PAD_TUNING)) set(padKnobId(key), t[key]);');
+    // 切片15 那三根的 id 一个字没改：玩家档、壳页、说明书都指着它们
+    expect(['deadzone', 'analogRange', 'lookCurve'].map(padKnobId))
+      .toEqual(['set-deadzone', 'set-analog-range', 'set-look-curve']);
   });
 
   it('桥是最后建起来的消费者：手档必须在它建好之后再走一次 applyToGame', () => {
@@ -381,6 +535,16 @@ describe('真玩家身上：同一舵量，改档前后走得不一样的就是�
     const got = walked({});
     expect(got.mag).toBeCloseTo(1, 6);
     expect(Math.abs(got.z)).toBeGreaterThan(20);
+  });
+
+  it('冲刺触发深度拧松一档：同一推量从"走"变成"跑"（滑杆改的是位移，不只是数字）', () => {
+    const push = 0.65;                        // 重映射后 ≈0.606：出厂门槛 0.9 之下 → 走
+    const strict = walked({}, push);
+    const loose = walked({ moveSprintThreshold: 0.5 }, push);
+    expect(strict.mag).toBeGreaterThan(0);
+    expect(strict.mag).toBeCloseTo(loose.mag, 9);        // 走路那一档不该被这格碰
+    // 疾走倍率 1.85：留一半余量（起步那几帧还在加速）
+    expect(Math.abs(loose.z)).toBeGreaterThan(Math.abs(strict.z) * 1.4);
   });
 
   it('死区抬高一档之后，同一推量走得更慢；而满推仍然满速（下沿变了，端点没变）', () => {

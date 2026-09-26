@@ -4,6 +4,18 @@ import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../conten
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
 import { focusFirstItem, restoreParkedFocus } from './FocusNav.js';
 
+/** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
+const CAMEL_EDGE = /[A-Z]/g;
+
+/**
+ * 一根手感旋钮在壳页里的那一格叫什么：id 从 `PAD_TUNING` 的**键名**推出来（连字符写法）。
+ *
+ * 为什么不留一张 `key → id` 的手抄表：那张表与旋钮表是两份，加一格旋钮就得同步两处，
+ * 而漏掉的那一处不会报错 —— 面板照开，只是那一格永远拖不动（`knob()` 找不到元素就安静返回）。
+ * 所以 id 只有一个来源，测试也照着它反查壳页（双向：表里有的必须画得出、画出来的必须在表里）。
+ */
+export const padKnobId = (key) => `set-${key.replace(CAMEL_EDGE, (m) => `-${m.toLowerCase()}`)}`;
+
 export class SettingsPanel {
   constructor(game) {
     this.game = game;
@@ -35,10 +47,12 @@ export class SettingsPanel {
     bind('set-bloom', 'bloomStrength', Number);
     bind('set-pixel', 'pixelRatio', Number);
     bind('set-lod', 'enemyLodDistance', Number);
-    // 手感三根旋钮（切片15）。滑杆的 min/max/step 由 `PAD_TUNING` 灌进来、不写在壳页里：
-    // "滑到头的那个值"与"桥认的那个值"必须是同一份，否则玩家拖到底会被当成脏数据悄悄回落
-    const knob = (id, key) => {
-      const el = document.getElementById(id);
+    // 手感旋钮（切片15 起三根，切片21 再加三根）。滑杆的 min/max/step 由 `PAD_TUNING` 灌进来、
+    // 名单也从那里现推：
+    // 1. "滑到头的那个值"与"桥认的那个值"必须是同一份，否则玩家拖到底会被当成脏数据悄悄回落；
+    // 2. "这一格画没画"也不能由面板抄一份名单 —— 抄了就会漏抄，漏抄的表现不是报错而是拖不动。
+    const knob = (key) => {
+      const el = document.getElementById(padKnobId(key));
       if (!el) return;
       const spec = PAD_TUNING[key];
       el.min = String(spec.min);
@@ -49,9 +63,7 @@ export class SettingsPanel {
         s.applyToGame(this.game);
       });
     };
-    knob('set-deadzone', 'deadzone');
-    knob('set-analog-range', 'analogRange');
-    knob('set-look-curve', 'lookCurve');
+    for (const key of Object.keys(PAD_TUNING)) knob(key);
     const sh = document.getElementById('set-shadows');
     sh?.addEventListener('change', () => {
       s.set('shadows', sh.checked);
@@ -194,9 +206,7 @@ export class SettingsPanel {
     set('set-pixel', d.pixelRatio);
     set('set-lod', d.enemyLodDistance);
     const t = padTuning(d.padTuning);      // 回显的也是清洗过的值：脏档会显示成出厂那一格
-    set('set-deadzone', t.deadzone);
-    set('set-analog-range', t.analogRange);
-    set('set-look-curve', t.lookCurve);
+    for (const key of Object.keys(PAD_TUNING)) set(padKnobId(key), t[key]);
     const sh = document.getElementById('set-shadows');
     if (sh) sh.checked = d.shadows;
     /* 震动那一格问的是 `settings.get()`，与 `applyToGame` 用的是同一个判据（同一个取值口）：
