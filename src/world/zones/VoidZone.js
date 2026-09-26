@@ -92,7 +92,7 @@ export class VoidZone extends BaseZone {
       () => {
         this.dialog.show(
           '时线裂隙',
-          '第四枚位面碎片在时环中心闪烁。完成 Chapter 3 飞升后，时线执政官才会完全苏醒。\n\n蓄力法术（长按 1/2/3）可打断其「时停」攻击。'
+          '第四枚位面碎片在时环中心闪烁。完成 Chapter 3 飞升后，时线执政官才会完全苏醒。\n\n蓄力法术（长按 {spell1}/{spell2}/{spell3}）可打断其「时停」攻击。'
         );
         window.dispatchEvent(new CustomEvent('discovery', {
           detail: { id: 'void-rift', title: '时线裂隙', text: '隐藏的第四碎片。' },

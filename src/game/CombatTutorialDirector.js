@@ -1,3 +1,5 @@
+import { refreshKeyText } from '../content/keyHints.js';
+
 /** 首次战斗演出提示 + 处决输入锁定协调 */
 export class CombatTutorialDirector {
   constructor(game) {
@@ -53,8 +55,13 @@ export class CombatInputLock {
     if (!this._hint) {
       this._hint = document.createElement('div');
       this._hint.className = 'combat-input-lock hidden';
-      this._hint.textContent = '演出中…';
+      // 跳过那一枚键写在**声明**里而不是 CSS 的 `content` 上（W-B2 切片5）：伪元素吃不到
+      // `data-ktext`，玩家改了返回键，CSS 里那句仍会说他该按 Esc。
+      this._hint.innerHTML = '<span>演出中…</span><span class="combat-input-lock-skip" data-ktext=" · {escape} 跳过"></span>';
       document.body.appendChild(this._hint);
+      // 这一条是**演出开始那一刻**才进 DOM 的，赶在 `HUD.refreshKeyHints()` 之后，
+      // 所以建好就展开一次；之后每次改绑由整份 document 的扫描接住
+      refreshKeyText(this._hint);
     }
     this._hint.classList.remove('hidden');
   }

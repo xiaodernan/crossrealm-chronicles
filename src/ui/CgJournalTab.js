@@ -1,4 +1,5 @@
 import { CG_ZONE_LABELS } from '../game/CgGallerySystem.js';
+import { refreshKeyText } from '../content/keyHints.js';
 
 /** [J] 日志 — CG 画廊 Tab 渲染 */
 export class CgJournalTab {
@@ -76,7 +77,7 @@ export class CgJournalTab {
     ).join('');
 
     panelEl.innerHTML = `
-      <h2>CG 画廊 · J 关闭</h2>
+      <h2 data-ktext="CG 画廊 · {journal} 关闭"></h2>
       <p class="cg-stats">已解锁 ${stats.unlocked} / ${stats.total}（${stats.percent}%）· 收藏 ${stats.favorites}</p>
       <div class="cg-zone-filter">${zones}</div>
       <div class="cg-grid">${grid || '<p class="cg-empty">此区域暂无已解锁 CG — 去营火对话或击败 Boss</p>'}</div>
@@ -85,6 +86,7 @@ export class CgJournalTab {
       <button type="button" class="journal-back-btn" id="journal-back-all">← 返回日志</button>
     `;
 
+    refreshKeyText(panelEl);
     panelEl.querySelectorAll('.cg-zone-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         this.filterZone = btn.dataset.zone;

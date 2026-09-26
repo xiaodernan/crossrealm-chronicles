@@ -5,6 +5,7 @@
  *  于是形成 `chunk-core → chunk-ui` 回边（B37）。数据与绘制分家之后这里只管画。
  */
 import { attachWave4CgPainters } from './DialogCGRendererPopCultureWave4.js';
+import { keyText } from '../content/keyHints.js';
 
 export function attachPopCultureCgRenderer(renderer) {
   const extraPainters = {
@@ -34,6 +35,7 @@ export function attachPopCultureCgRenderer(renderer) {
     const preset = this.getPreset(restId, nodeId);
     if (extraPainters[preset.scene]) {
       const key = `${restId}:${nodeId}:${accent}:${mood}:${preset.scene}`;
+      this._syncKeyStamp();
       if (this.cache.has(key)) return this.cache.get(key);
       const ctx = this.ctx;
       const w = this.canvas.width;
@@ -48,7 +50,7 @@ export function attachPopCultureCgRenderer(renderer) {
       ctx.fillRect(0, h - 52, w, 52);
       ctx.fillStyle = accent;
       ctx.font = '600 22px "Segoe UI","Microsoft YaHei",sans-serif';
-      ctx.fillText(preset.caption ?? '', 24, h - 18);
+      ctx.fillText(keyText(preset.caption ?? ''), 24, h - 18);
       const url = this.canvas.toDataURL('image/jpeg', 0.88);
       this.cache.set(key, url);
       return url;

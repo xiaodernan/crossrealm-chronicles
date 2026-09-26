@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { refreshKeyText } from '../content/keyHints.js';
 
 /** 演示行者 — 金色小人，自动跑完全流程，镜头跟随观看（由 update 驱动，不依赖 async 等待） */
 export class DemoRunner {
@@ -74,9 +75,12 @@ export class DemoRunner {
     this.overlay.innerHTML = `
       <div class="spectator-badge">🎬 观看小人通关</div>
       <div id="spectator-status" class="spectator-status">准备中…</div>
-      <div class="spectator-hint">Esc 退出观看 · 镜头自动跟随，无需转鼠标</div>
+      <div class="spectator-hint" data-ktext="{escape} 退出观看 · 镜头自动跟随，无需转鼠标"></div>
     `;
     document.body.appendChild(this.overlay);
+    // 这块遮罩是**开始观看那一刻**才进 DOM 的，赶在 `HUD.refreshKeyHints()` 之后 ——
+    // 所以写入这一刻自己展开一次；改绑那一条路仍然由整份 document 的扫描负责。
+    refreshKeyText(this.overlay);
     this.statusEl = this.overlay.querySelector('#spectator-status');
   }
 
@@ -113,7 +117,7 @@ export class DemoRunner {
     }
     this._followLight.visible = true;
 
-    this.game.dialog.toast('观看模式已开始 — 金色小人将跑完全流程 · Esc 退出');
+    this.game.dialog.toast('观看模式已开始 — 金色小人将跑完全流程 · {escape} 退出');
     return true;
   }
 
@@ -133,7 +137,7 @@ export class DemoRunner {
       this.game.player.fpWeaponGroup.visible = true;
     }
     if (this.game.questAssistant) this.game.questAssistant.demoRunning = false;
-    this.game.dialog.toast(completed ? '小人已跑完全流程通关！按 U 可自己继续探索' : '已退出观看模式');
+    this.game.dialog.toast(completed ? '小人已跑完全流程通关！按 {questTracker} 可自己继续探索' : '已退出观看模式');
   }
 
   _beginStep() {

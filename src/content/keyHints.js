@@ -35,8 +35,19 @@ const CACHE = new Map();
 const CACHE_MAX = 128;
 const TOKEN = /\{([a-zA-Z][a-zA-Z0-9]*)\}/g;
 
+/**
+ * 生效表今天的"轮次"戳（W-B2 切片5）。
+ *
+ * 给**自己造缓存**的消费方用：画布上的 CG 图是一张 dataURL，缓存键里没有键名，
+ * 改绑之后它会把旧键名的那张图一直交出来。把这一戳并进键、或者戳一变就清缓存，
+ * 都不必让每个消费方去 import 两个 epoch 再自己拼字符串（那正是"两处各算一次"的写法）。
+ */
+export function keyStamp() {
+  return `${keybindEpoch()}:${hotkeyEpoch()}`;
+}
+
 export function keyText(template) {
-  const stamp = `${keybindEpoch()}:${hotkeyEpoch()}`;
+  const stamp = keyStamp();
   const hit = CACHE.get(template);
   if (hit && hit.stamp === stamp) return hit.text;
   const text = String(template).replace(TOKEN, (whole, action) => {

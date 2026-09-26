@@ -79,7 +79,7 @@ export class StoryDirector {
       if (room?.isBossArena) {
         this.game.dialog.show(
           '守钥者已倒',
-          '出口环亮起。你听见枢纽深处传来一声叹息——像是某个位面终于松了一口气。\n\n[E] 离开迷宫，继续主线。'
+          '出口环亮起。你听见枢纽深处传来一声叹息——像是某个位面终于松了一口气。\n\n[{interact}] 离开迷宫，继续主线。'
         );
       }
     });

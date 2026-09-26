@@ -72,8 +72,8 @@ export const REST_DIALOGUES = {
       },
       gallery: {
         speaker: "锚火看守",
-        text: "「日志 [J] 里新增了 **CG画廊** — 营火分支与 Boss 击破都会留下插画。收藏 ★ 后可在灯箱放大。」",
-        journal: { id: "rest-hub-gallery", title: "营火·CG画廊", text: "J 键日志可查看已解锁 CG。" },
+        text: "「日志 [{journal}] 里新增了 **CG画廊** — 营火分支与 Boss 击破都会留下插画。收藏 ★ 后可在灯箱放大。」",
+        journal: { id: "rest-hub-gallery", title: "营火·CG画廊", text: "{journal} 键日志可查看已解锁 CG。" },
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -118,7 +118,7 @@ export const REST_DIALOGUES = {
         speaker: "锚火看守",
         text: `「枢纽东侧有 **位面海报墙** — 六张褪色海报。
 
-J 键 → **次元回声** 记录你共鸣过的致敬点。」`,
+{journal} 键 → **次元回声** 记录你共鸣过的致敬点。」`,
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -140,7 +140,7 @@ J → 次元回声 按系列筛选。」`,
       },
       wave4: {
         speaker: "锚火看守",
-        text: "「四系回声：赛博霓虹·武士残响·旧日低语·星港商路 — J 键筛选。」",
+        text: "「四系回声：赛博霓虹·武士残响·旧日低语·星港商路 — {journal} 键筛选。」",
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -171,7 +171,7 @@ J → 次元回声 按系列筛选。」`,
       },
       deep: {
         speaker: "精灵斥候",
-        text: "「至尊石环在西，Boss 红圈在东。地下城入口在北侧遗城 — 地图 G 键看紫点。」",
+        text: "「至尊石环在西，Boss 红圈在东。地下城入口在北侧遗城 — 地图 {worldMap} 键看紫点。」",
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -180,7 +180,7 @@ J → 次元回声 按系列筛选。」`,
       tip: {
         speaker: "精灵斥候",
         mood: "warn",
-        text: "「Q 锁定，第三段连击有**终结技** — 镜头会慢下来。敌人红圈最后一瞬 **F 弹反**，比硬扛聪明。」",
+        text: "「{lockOn} 锁定，第三段连击有**终结技** — 镜头会慢下来。敌人红圈最后一瞬 **{parry} 弹反**，比硬扛聪明。」",
         choices: [
           { label: "试试就休息", action: "rest" },
         ],
@@ -205,7 +205,7 @@ J → 次元回声 按系列筛选。」`,
       },
       journal: {
         speaker: "精灵斥候",
-        text: "「营火对话会进日志 [J] 的 **营火** 分类。碎片在迷宫石碑 — 别漏读。」",
+        text: "「营火对话会进日志 [{journal}] 的 **营火** 分类。碎片在迷宫石碑 — 别漏读。」",
         choices: [
           { label: "休息", action: "rest" },
         ],
@@ -235,7 +235,7 @@ J → 次元回声 按系列筛选。」`,
           { label: "返回", next: "start" },
         ],
       },
-      duel: { speaker: "精灵斥候", text: "「正午决斗圈在西侧 — 倒影永远比你快半拍。F 弹反比拔枪快。」", choices: [
+      duel: { speaker: "精灵斥候", text: "「正午决斗圈在西侧 — 倒影永远比你快半拍。{parry} 弹反比拔枪快。」", choices: [
   { label: "休息", action: "rest" },
 ] },
       rails: { speaker: "精灵斥候", text: "「幽灵铁道向东延伸 — 汽笛在雾里，火车从不到站。」", choices: [
@@ -243,7 +243,7 @@ J → 次元回声 按系列筛选。」`,
 ] },
       samurai: {
         speaker: "精灵斥候",
-        text: "「武士残响 — 鸟居、道场、樱落刃冢。最后一式用 F 弹反接。」",
+        text: "「武士残响 — 鸟居、道场、樱落刃冢。最后一式用 {parry} 弹反接。」",
         journal: { id: "rest-fantasy-samurai", title: "营火·武士残响", text: "灰白森林武士道母题。" },
         choices: [
           { label: "休息", action: "rest" },
@@ -283,7 +283,7 @@ J → 次元回声 按系列筛选。」`,
       },
       lib: {
         speaker: "奥术旅者",
-        text: "「向南偏东，地图紫点。迷宫里读石碑 — 碎片会进日志 [J]。」",
+        text: "「向南偏东，地图紫点。迷宫里读石碑 — 碎片会进日志 [{journal}]。」",
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -418,7 +418,7 @@ J → 次元回声 按系列筛选。」`,
       rematch: {
         speaker: "宇航员回声",
         mood: "warn",
-        text: "「奇点领主信标在东 — 击败后可 E 再战练轨道弹幕。再战 +15 魂火。」",
+        text: "「奇点领主信标在东 — 击败后可 {interact} 再战练轨道弹幕。再战 +15 魂火。」",
         choices: [
           { label: "休息", action: "rest" },
         ],
@@ -554,7 +554,7 @@ J → 次元回声 按系列筛选。」`,
       },
       memory: {
         speaker: "时线残影",
-        text: "「每次在营火选「休息」都会写入 **营火记忆** — J 键可回顾你睡过哪些火。」",
+        text: "「每次在营火选「休息」都会写入 **营火记忆** — {journal} 键可回顾你睡过哪些火。」",
         choices: [
           { label: "休息", action: "rest" },
         ],
@@ -664,7 +664,7 @@ J → 次元回声 按系列筛选。」`,
       boss5: {
         speaker: "裂隙引路人",
         mood: "warn",
-        text: "「终焉试炼。X 切换剑/杖，技能树加成拉满。击破瞬间 — 全屏慢镜头与 letterbox。」",
+        text: "「终焉试炼。{swapWeapon} 切换剑/杖，技能树加成拉满。击破瞬间 — 全屏慢镜头与 letterbox。」",
         choices: [
           { label: "休息", action: "rest" },
         ],

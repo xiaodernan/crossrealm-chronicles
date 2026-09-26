@@ -5,14 +5,14 @@ const BOSS_CINEMATICS = {
   'shadow-warden': {
     title: '影界守护者',
     subtitle: '灰白森林 · 位面试炼 I',
-    lines: '「踏入此域者，将承受影界之审判！」\n\n观察脚下红圈 · F 弹反 · R 位面斩',
+    lines: '「踏入此域者，将承受影界之审判！」\n\n观察脚下红圈 · {parry} 弹反 · {skill} 位面斩',
     color: '#aa2222',
     duration: 5.5,
   },
   archmagus: {
     title: '大奥术师·萨尔林',
     subtitle: '魔法遗境 · 位面试炼 II',
-    lines: '「奥术的本质，是吞噬一切位面的光。」\n\n躲避紫色法球 · 靠近弹反 · 1–4 法术牵制',
+    lines: '「奥术的本质，是吞噬一切位面的光。」\n\n躲避紫色法球 · 靠近弹反 · {spell1}–{spell4} 法术牵制',
     color: '#8844ff',
     duration: 6,
   },
@@ -33,14 +33,14 @@ const BOSS_CINEMATICS = {
   'chaos-overlord': {
     title: '混沌裂隙领主',
     subtitle: '混沌边境 · 终焉试炼',
-    lines: '「四界归一，裂隙仍存——唯有斩裂混沌本身。」\n\n三阶段混沌脉冲 · 武器技能树加成 · X 切换剑/杖',
+    lines: '「四界归一，裂隙仍存——唯有斩裂混沌本身。」\n\n三阶段混沌脉冲 · 武器技能树加成 · {swapWeapon} 切换剑/杖',
     color: '#ff2244',
     duration: 6,
   },
   'dungeon-ruin-crypt': {
     title: '遗城守墓者',
     subtitle: '灰白遗城 · 迷宫守钥者',
-    lines: '「我只保管门，不询问来者去向。」\n\n45% 血二阶段 · Q 锁定 · 清空后可 [E] 离开',
+    lines: '「我只保管门，不询问来者去向。」\n\n45% 血二阶段 · {lockOn} 锁定 · 清空后可 [{interact}] 离开',
     color: '#889977',
     duration: 4.5,
   },

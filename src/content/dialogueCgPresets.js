@@ -46,7 +46,7 @@ export const REST_DIALOGUE_CG_EXTRA = {
   'magic:codex': { scene: 'spell_orbs', caption: '秘典之门' },
   'space:photo': { scene: 'space_endurance', caption: '荒原留影' },
   'space:rematch': { scene: 'boss_singularity', caption: '奇点再战' },
-  'void:skip': { scene: 'execution_art', caption: 'Esc 跳过' },
+  'void:skip': { scene: 'execution_art', caption: '{escape} 跳过' },
   'void:memory': { scene: 'void_time', caption: '营火记忆' },
   'abyss:achieve': { scene: 'final_gate', caption: '成就墙' },
   'abyss:legend': { scene: 'boss_chaos', caption: '终局仪式', mood: 'warn' },

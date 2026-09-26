@@ -32,7 +32,7 @@ export const ECHOES = [
   { id: 'echo-radio-tower', franchise: FRANCHISE.UPSIDE, zone: 'void', title: '旧镇广播塔', desc: '1983 年的电台仍在循环播放 — 你听见的是另一个维度的 SOS。', trigger: 'echo:radio-tower' },
   { id: 'echo-rift-hound', franchise: FRANCHISE.UPSIDE, zone: 'void', title: '裂隙猎犬足迹', desc: '爪印通向没有星星的方向。别在夜里单独追。', trigger: 'echo:rift-hound' },
   { id: 'echo-neon-mall', franchise: FRANCHISE.UPSIDE, zone: 'void', title: '霓虹商场残影', desc: '粉色与青色霓虹在雾中闪烁 — 像从未关门的 80 年代。', trigger: 'echo:neon-mall' },
-  { id: 'echo-flip-gravity', franchise: FRANCHISE.UPSIDE, zone: 'void', title: '翻转重力带', desc: '一步踏错，天花板变成地板。Ctrl 翻滚救不了方向感。', trigger: 'discovery:void-rift' },
+  { id: 'echo-flip-gravity', franchise: FRANCHISE.UPSIDE, zone: 'void', title: '翻转重力带', desc: '一步踏错，天花板变成地板。{roll} 翻滚救不了方向感。', trigger: 'discovery:void-rift' },
 
   // ── 指环王（已有，补回声）──
   { id: 'echo-one-ring', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: '至尊石环', desc: 'One Realm to bind them all… 戒指已碎，石环仍在。', trigger: 'discovery:fantasy-ring' },

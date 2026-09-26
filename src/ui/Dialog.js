@@ -1,4 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
+import { keyText } from '../content/keyHints.js';
 
 /** toast 计时分组：toast 是最频繁的 UI 反馈，统一走主循环 dt（B39） */
 const TOAST_TAG = 'dialog-toast';
@@ -27,9 +28,18 @@ export class Dialog {
     this.cgRenderer = renderer;
   }
 
+  /**
+   * 正文在这里过一遍 `keyText`（`show` / `showChoices` / `toast` 是同一处口径，W-B2 切片5）。
+   *
+   * 为什么放在这一处而不是每一个调用方：内容表里的 `{动作}` 占位要有人展开，而调用方有二十几处
+   * （区域介绍、迷宫进入、过场字幕、氛围低语、任务提示…）。逐处包一遍就是"每一处都可能忘"——
+   * 忘了的表现不是报错，是玩家看到一句字面的"按 {interact} 离开"。
+   * 已经自己展开过的调用方（`game/RestDialogue.js`：它的文本还要进日志与事件，必须先落定稿）
+   * 再过来也无妨：展开后的串里没有占位，`keyText` 命中的是同一条缓存的空操作。
+   */
   show(title, text) {
-    this.titleEl.textContent = title;
-    this.textEl.textContent = text;
+    this.titleEl.textContent = keyText(title);
+    this.textEl.textContent = keyText(text);
     this._hideCg();
     if (this.speakerEl) this.speakerEl.classList.add('hidden');
     if (this.choicesEl) {
@@ -43,7 +53,7 @@ export class Dialog {
 
   showChoices(title, text, choices, meta = {}) {
     this._meta = meta;
-    this.titleEl.textContent = title;
+    this.titleEl.textContent = keyText(title);
     if (this.speakerEl) {
       if (meta.speaker) {
         this.speakerEl.classList.remove('hidden');
@@ -53,7 +63,7 @@ export class Dialog {
         this.speakerEl.classList.add('hidden');
       }
     }
-    this.textEl.innerHTML = text ?? '';
+    this.textEl.innerHTML = keyText(text ?? '');
     this.overlay.dataset.restId = meta.restId ?? '';
     this.overlay.classList.toggle('dialog-mood-warn', meta.mood === 'warn');
     this._showCg(meta.restId, meta.nodeId, meta.accent, meta.mood);
@@ -63,7 +73,7 @@ export class Dialog {
     }
     this.choicesEl.classList.remove('hidden');
     this.choicesEl.innerHTML = choices.map((c, i) =>
-      `<button type="button" class="dialog-choice" data-idx="${i}">${c.label}</button>`
+      `<button type="button" class="dialog-choice" data-idx="${i}">${keyText(c.label)}</button>`
     ).join('');
     this._choiceHandler = choices;
     this.choicesEl.querySelectorAll('.dialog-choice').forEach((btn) => {
@@ -113,7 +123,7 @@ export class Dialog {
   toast(message, duration = 2800) {
     const el = document.createElement('div');
     el.className = 'toast';
-    el.textContent = message;
+    el.textContent = keyText(message);
     this.toastContainer.appendChild(el);
     // rAF-EXCEPTION：给 CSS 过渡制造一次绘制间隔，量的是浏览器的一次绘制，不是游戏时间
     requestAnimationFrame(() => el.classList.add('show'));

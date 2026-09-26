@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { NPC_CHAPTER_LINES } from '../game/LoreFragments.js';
+import { keyText } from '../content/keyHints.js';
 
 const NPC_DATA = [
   {
@@ -89,7 +90,9 @@ export class NPCManager {
     const chapterLines = NPC_CHAPTER_LINES[npc.id]?.[chapter] ?? NPC_CHAPTER_LINES[npc.id]?.[1];
     const pool = chapterLines ?? npc.lines;
     const idx = this.lineIndex[npc.id] % pool.length;
-    const line = pool[idx];
+    // 台词里的 `{动作}` 在**离开这一格之前**展开（W-B2 切片5）：同一句话接下来有三个去处 ——
+    // 对话框、日志条目、`npc-talk` 事件。日志存的是定稿，改绑之后回头翻不该看到字面占位。
+    const line = keyText(pool[idx]);
     this.dialog.show(npc.name, line);
     this.lineIndex[npc.id]++;
     window.dispatchEvent(new CustomEvent('npc-talk', { detail: { id: npc.id, line, chapter } }));

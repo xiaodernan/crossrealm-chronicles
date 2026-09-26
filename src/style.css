@@ -1911,7 +1911,10 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .cg-lightbox-close { position: absolute; top: -36px; right: 0; background: none; border: none; color: #fff; font-size: 1.8rem; cursor: pointer; }
 .exec-skip-burst { position: fixed; inset: 0; z-index: 848; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 55%); transition: opacity 0.28s ease; }
 .exec-skip-burst.hidden { display: none; }
-.combat-input-lock::after { content: ' · Esc 跳过'; opacity: 0.65; font-size: 0.75em; letter-spacing: 0.08em; }
+/* 演出锁定条上"跳过那一枚键"的样式（W-B2 切片5）：以前这条规则是 `content: ' · ' + 出厂键名`，
+ * 键名写在 CSS 里 —— 伪元素吃不到 `data-ktext`（那是 DOM 的声明），改绑之后它照样说出厂键。
+ * 现在样式留在 CSS，字样由 `CombatTutorialDirector` 的那个 `<span data-ktext>` 现问生效表。 */
+.combat-input-lock-skip { opacity: 0.65; font-size: 0.75em; letter-spacing: 0.08em; }
 
 .ach-stats, .codex-stats, .cf-stats { font-size: 0.82rem; color: #888; margin-bottom: 10px; }
 .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; max-height: 44vh; overflow-y: auto; }

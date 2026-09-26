@@ -57,7 +57,7 @@ export class MagicZone extends BaseZone {
     this.group.add(gate);
 
     this.addPOI({ x: 0, y: 8, z: -25 }, '进入奥术竞技场', () => {
-      this.dialog.show('奥术竞技场', '大奥术师·萨尔林 awaits。他的法球会追踪你——闪避，或用法术位面斩 (R) 清理。');
+      this.dialog.show('奥术竞技场', '大奥术师·萨尔林 awaits。他的法球会追踪你——闪避，或用法术位面斩 ({skill}) 清理。');
     }, { id: 'magic-boss-gate', color: 0xaa44ff });
   }
 

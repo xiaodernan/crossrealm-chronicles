@@ -1,5 +1,6 @@
 import { WEAPON_SKILLS } from '../game/WeaponSkillTree.js';
 import { STORY_SKILL_META } from '../game/StoryWeaponSkills.js';
+import { refreshKeyText } from '../content/keyHints.js';
 
 /** [J] 流派 Tab — 剑/杖技能树一览 */
 export class WeaponSkillJournalTab {
@@ -28,11 +29,13 @@ export class WeaponSkillJournalTab {
     };
 
     panelEl.innerHTML = `
-      <h2>流派技能 · J 关闭</h2>
+      <h2 data-ktext="流派技能 · {journal} 关闭"></h2>
       <p class="sk-stats">可用技能点 ${points} · 已解锁 ${unlocked.size} · 营火升级面板可加点</p>
       ${renderBranch('sword', '⚔ 位面长剑')}
       ${renderBranch('staff', '✦ 奥术法杖')}
-      <p class="hint">剧情节点会自动解锁叙事技 · X 切换剑/杖影响加成</p>
+      <p class="hint" data-ktext="剧情节点会自动解锁叙事技 · {swapWeapon} 切换剑/杖影响加成"></p>
     `;
+
+    refreshKeyText(panelEl);
   }
 }

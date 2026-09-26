@@ -17,6 +17,21 @@ const FINISHER_TAG = 'hud-finisher-flash';
 /** 本类全部监听的所有权标识：dispose() 按它一次性注销（B44 剩余半区） */
 const EVENT_TAG = 'ui/HUD';
 
+/**
+ * 日志抽屉里的"子页签"：这些格子不套清单模板，而是把整块 `#journal-panel` 换成自己的界面
+ * （页签条也就一起没了）。列在这里 = 统一由 `ensureBackToList()` 保证回得去。
+ */
+const JOURNAL_SUB_TABS = {
+  cg: (game, panel) => game.cgJournalTab.render(panel),
+  achievements: (game, panel) => game.achievementsJournalTab.render(panel),
+  codex: (game, panel) => game.loreCodexTab.render(panel),
+  memory: (game, panel) => game.campfireMemoryTab.render(panel),
+  dungeons: (game, panel) => game.dungeonJournalTab.render(panel),
+  skills: (game, panel) => game.weaponSkillJournalTab.render(panel),
+  side: (game, panel) => game.sideQuestJournalTab.render(panel),
+  echoes: (game, panel) => game.popCultureTab.render(panel),
+};
+
 export class HUD {
   constructor(game) {
     this.game = game;
@@ -431,36 +446,10 @@ export class HUD {
   }
 
   renderJournal() {
-    if (this.journalTab === 'cg') {
-      this.game.cgJournalTab.render(this.journalPanel);
-      return;
-    }
-    if (this.journalTab === 'achievements') {
-      this.game.achievementsJournalTab.render(this.journalPanel);
-      return;
-    }
-    if (this.journalTab === 'codex') {
-      this.game.loreCodexTab.render(this.journalPanel);
-      return;
-    }
-    if (this.journalTab === 'memory') {
-      this.game.campfireMemoryTab.render(this.journalPanel);
-      return;
-    }
-    if (this.journalTab === 'dungeons') {
-      this.game.dungeonJournalTab.render(this.journalPanel);
-      return;
-    }
-    if (this.journalTab === 'skills') {
-      this.game.weaponSkillJournalTab.render(this.journalPanel);
-      return;
-    }
-    if (this.journalTab === 'side') {
-      this.game.sideQuestJournalTab.render(this.journalPanel);
-      return;
-    }
-    if (this.journalTab === 'echoes') {
-      this.game.popCultureTab.render(this.journalPanel);
+    const sub = JOURNAL_SUB_TABS[this.journalTab];
+    if (sub) {
+      sub(this.game, this.journalPanel);
+      this.ensureBackToList();
       return;
     }
     const j = this.game.storyJournal;
@@ -488,18 +477,43 @@ export class HUD {
       `<li><span class="journal-cat">${cats[d.category] ?? d.category}</span><strong>${d.title}</strong><span>${d.text}</span></li>`
     ).join('');
     this.journalPanel.innerHTML = `
-      <h2>跨界日志 · J 关闭</h2>
+      <h2 data-ktext="跨界日志 · {journal} 关闭"></h2>
       <div class="journal-tabs">${tabs}</div>
       ${questHtml}
       <ul class="journal-list">${items || '<li class="empty">此类别暂无记录 — 探索世界、读石碑、对话 NPC</li>'}</ul>
       <p class="hint">已记录 ${j.entries.length} 条 · 全游戏可发现约 ${DISCOVERABLE_TOTAL}+ 处</p>
     `;
+    refreshKeyText(this.journalPanel);
     this.journalPanel.querySelectorAll('.journal-tab').forEach((btn) => {
       btn.addEventListener('click', () => {
         this.journalTab = btn.dataset.tab;
         this.updateJournal();
       });
     });
+  }
+
+  /**
+   * 子页签一定要留一格"回得去清单"（W-B2 切片5 的真浏览器读数抓到的洞）。
+   *
+   * 为什么写在这里而不是每个子面板里：子面板各写各的整块 `innerHTML`，页签条是被换掉的那一块 ——
+   * 读数里八格里只有 CG 与营火记忆自带返回按钮，玩家点进"位面秘典"之后关抽屉再开，
+   * 仍停在秘典这一格（`journalTab` 记的就是它），于是**永远回不到清单**：六格皆然。
+   * "靠每个子面板记得写一颗"正是要防的写法（漏一处静悄悄），所以由渲染出口统一补。
+   */
+  ensureBackToList() {
+    const panel = this.journalPanel;
+    if (!panel || panel.querySelector('.journal-back-btn')) return;
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.className = 'journal-back-btn';
+    back.textContent = '← 返回日志清单';
+    back.addEventListener('click', () => {
+      this.journalTab = 'all';
+      this.updateJournal();
+    });
+    const h2 = panel.querySelector('h2');
+    if (h2) h2.after(back);
+    else panel.prepend(back);
   }
 
   updateZonePanel(zone) {

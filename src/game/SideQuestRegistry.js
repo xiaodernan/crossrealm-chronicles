@@ -43,7 +43,7 @@ export const SIDE_QUESTS = [
   {
     id: 'side-photo',
     title: '荒原留影',
-    desc: '使用 F2 拍照模式',
+    desc: '使用 {photoMode} 拍照模式',
     check: (g) => g.achievements?.stats?.photoMode === true,
     reward: 5,
     journal: '米勒透镜下的留影，连引力都变慢。',

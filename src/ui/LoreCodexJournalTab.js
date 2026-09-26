@@ -1,4 +1,5 @@
 import { CODEX_ZONE_LABELS } from '../game/LoreCodexRegistry.js';
+import { keyText, refreshKeyText } from '../content/keyHints.js';
 
 /** [J] 秘典 Tab */
 export class LoreCodexJournalTab {
@@ -18,17 +19,18 @@ export class LoreCodexJournalTab {
       const ok = codex.unlocked.has(e.id);
       return `<div class="codex-card${ok ? '' : ' codex-locked'}">
         <div class="codex-title">${ok ? e.title : '???'}</div>
-        <div class="codex-text">${ok ? e.text : '继续探索、对话营火、击败 Boss 以解锁'}</div>
+        <div class="codex-text">${ok ? keyText(e.text) : '继续探索、对话营火、击败 Boss 以解锁'}</div>
       </div>`;
     }).join('');
 
     panelEl.innerHTML = `
-      <h2>位面秘典 · J 关闭</h2>
+      <h2 data-ktext="位面秘典 · {journal} 关闭"></h2>
       <p class="codex-stats">已收录 ${stats.unlocked} / ${stats.total}（${stats.percent}%）</p>
       <div class="codex-zone-filter">${zones}</div>
       <div class="codex-grid">${entries}</div>
     `;
 
+    refreshKeyText(panelEl);
     panelEl.querySelectorAll('.codex-zone-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         this.filter = btn.dataset.z;

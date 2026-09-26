@@ -1,4 +1,5 @@
 import { ACHIEVEMENTS } from '../game/AchievementSystem.js';
+import { refreshKeyText } from '../content/keyHints.js';
 
 /** [J] 成就墙 Tab */
 export class AchievementsJournalTab {
@@ -25,11 +26,13 @@ export class AchievementsJournalTab {
     }).join('');
 
     panelEl.innerHTML = `
-      <h2>成就墙 · J 关闭</h2>
+      <h2 data-ktext="成就墙 · {journal} 关闭"></h2>
       <p class="ach-stats">已解锁 ${done} / ${total}（${pct}%）</p>
       <div class="ach-grid">${cards}</div>
       <p class="hint">弹反、连击终结、Boss 击破、探索发现都会推进成就</p>
     `;
+
+    refreshKeyText(panelEl);
   }
 
   _hint(a, stats) {

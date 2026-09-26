@@ -225,7 +225,7 @@ export class FantasyZone extends BaseZone {
     this.addBoxCollider(-51, -35, 0.75, 0.75, gy + 6, { base: gy - 0.5 });
 
     this.addPOI({ x: -55, y: 0, z: -35 }, '进入 Boss 竞技场', () => {
-      this.dialog.show('影界竞技场', '踏入此门，影界守护者将苏醒。确保已掌握：\n· 观察敌人脚下红圈，0.75 秒后攻击落地\n· Ctrl 闪避可躲开\n· 重击快速打满架势条造成硬直');
+      this.dialog.show('影界竞技场', '踏入此门，影界守护者将苏醒。确保已掌握：\n· 观察敌人脚下红圈，0.75 秒后攻击落地\n· {roll} 闪避可躲开\n· 重击快速打满架势条造成硬直');
     }, { id: 'fantasy-boss-gate', color: 0xff2244 });
   }
 

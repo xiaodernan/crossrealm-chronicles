@@ -70,7 +70,7 @@ export const LORE_FRAGMENTS_POP = [
   { id: "lore-speakeasy", title: "禁酒窖收据", text: "「关税不是金币，是魂火 — 幽冥帮派管界与界之间的缝。」", chapter: 5 },
   { id: "lore-ai-core", title: "AI 核心日志", text: "「任务未完成。目标：位面行者。优先级：高于跃迁。」", chapter: 3 },
   { id: "lore-jump-gate", title: "跃迁门手册", text: "「三门同相。错相者循环第一秒 — 比米勒沙漏更残酷。」", chapter: 3 },
-  { id: "lore-duel", title: "决斗圈 chalk", text: "「正午太阳不动，直到有人拔剑 — 或 F 弹反。」", chapter: 1 },
+  { id: "lore-duel", title: "决斗圈 chalk", text: "「正午太阳不动，直到有人拔剑 — 或 {parry} 弹反。」", chapter: 1 },
   { id: "lore-neon", title: "霓虹收据", text: "「义眼 99% 真实 — 1% 是广告。」", chapter: 2 },
   { id: "lore-torii", title: "鸟居残铭", text: "「门后不是神域 — 是决斗。」", chapter: 1 },
   { id: "lore-obelisk", title: "方尖碑拓片", text: "「铭文是角度 — 不是字。」", chapter: 4 },

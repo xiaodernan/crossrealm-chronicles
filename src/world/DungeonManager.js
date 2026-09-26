@@ -344,7 +344,7 @@ export class DungeonManager {
     const enterLine = DUNGEON_ENTER_LINES[dungeon.def.id];
     this.dialog.show(
       dungeon.def.name,
-      `${enterLine ? enterLine + '\n\n' : ''}迷宫 ${dungeon.layout.gridW}×${dungeon.layout.gridH} · ${roomCount} 个房间 · ${doorCount} 扇门。\n清剿房间敌人后门会打开；发光石碑 [E] 读叙事；最远圆房有守钥者。`
+      `${enterLine ? enterLine + '\n\n' : ''}迷宫 ${dungeon.layout.gridW}×${dungeon.layout.gridH} · ${roomCount} 个房间 · ${doorCount} 扇门。\n清剿房间敌人后门会打开；发光石碑 [{interact}] 读叙事；最远圆房有守钥者。`
     );
     window.dispatchEvent(new CustomEvent('dungeon-enter', {
       // rerun 是 HUD「深渊再探」提示的判据；修前这里从不带，那条提示永远不弹（B44）

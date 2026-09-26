@@ -19,6 +19,17 @@ import { keyText } from '../src/content/keyHints.js';
 // 内容表本体（W-B2 切片4 起，它们的成段文案里带 `{动作}` 占位）
 import { REST_DIALOGUES } from '../src/content/restDialogues.js';
 import { HELP_SECTIONS_EXTRA } from '../src/content/helpManual.js';
+// 切片5 新迁的成段文案：占位住在数据里，源码扫不到，只能导入真表跑真展开
+import { LORE_FRAGMENTS_POP, NPC_LINES_POP, ZONE_EVENTS_POP } from '../src/content/ambientLore.js';
+import { ECHOES } from '../src/content/echoes.js';
+import { REST_DIALOGUE_CG, REST_DIALOGUE_CG_EXTRA, REST_DIALOGUE_CG_POP } from '../src/content/dialogueCgPresets.js';
+import { LORE_CODEX } from '../src/game/LoreCodexRegistry.js';
+import {
+  BOSS_LORE, CHAPTER_INTROS, DUNGEON_ENTER_LINES, LORE_FRAGMENTS, NPC_CHAPTER_LINES, ZONE_STORY_HOOKS,
+} from '../src/game/LoreFragments.js';
+import { SIDE_QUESTS } from '../src/game/SideQuestRegistry.js';
+import { ZONE_EVENTS_EXTRA } from '../src/game/WorldAmbientCatalog.js';
+import { QUESTS } from '../src/game/QuestSystem.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -132,12 +143,28 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     'combat/CombatController.js': ["keyText('（{lockOn} 切换）')"],
     'game/FastTravelSystem.js': ["keyText('快速旅行已解锁 — 在营火按 {fastTravel}')"],
     'cinematic/CombatCinematicSkip.js': ["keyText('按 {escape} 可跳过战斗演出')"],
-    'game/QuestSystem.js': ['keyText('],
     'ui/SettingsPanel.js': ["from '../content/keyLabels.js'"],
     // W-B2 切片4：成段的内容文案也走同一条链 —— 但**每一个显示出口**都要过，
     // 漏一处就是把字面的 `{parry}` 摆到玩家面前（说明书有正文与章节清单两处）
     'ui/HelpManual.js': ['keyText(sec.body)', 'keyText(s.title)', 'refreshKeyHints()'],
     'game/RestDialogue.js': ['keyText(node.text)', 'keyText(c.label)', 'keyText(tree.title)'],
+    // W-B2 切片5：剩下的都是"文案离开自己模块之前必须落定稿"的出口 ——
+    // 对话框（20+ 调用方共用这一处）、日志卡片（快照存进去就再也不回头展开）、
+    // 画布（图片有缓存，改绑不缓存就是旧键名）、CSS `content`（DOM 声明够不到，只能换成节点）
+    'ui/Dialog.js': ['keyText(title)', 'keyText(text)', 'keyText(c.label)', 'keyText(message)'],
+    'world/NPCManager.js': ['keyText(pool[idx])'],
+    'game/QuestSystem.js': ['keyText(q.desc)'],
+    'ui/LoreCodexJournalTab.js': ['keyText(e.text)', 'refreshKeyText(panelEl)'],
+    'ui/PopCultureJournalTab.js': ['keyText(e.desc)', 'refreshKeyText(panelEl)'],
+    'ui/SideQuestJournalTab.js': ['keyText(q.desc)', 'refreshKeyText(panelEl)'],
+    'ui/AchievementsJournalTab.js': ['refreshKeyText(panelEl)'],
+    'ui/CampfireMemoryJournalTab.js': ['refreshKeyText(panelEl)'],
+    'ui/CgJournalTab.js': ['refreshKeyText(panelEl)'],
+    'ui/WeaponSkillJournalTab.js': ['refreshKeyText(panelEl)'],
+    'player/DemoRunner.js': ['refreshKeyText(this.overlay)'],
+    'game/CombatTutorialDirector.js': ['refreshKeyText(this._hint)'],
+    'ui/DialogCGRenderer.js': ['_syncKeyStamp()', 'keyText(preset.caption', "keyText('{parry} 弹反')"],
+    'ui/DialogCGRendererPopCulture.js': ['this._syncKeyStamp()', 'keyText(preset.caption'],
   };
 
   it('每一处都还在原地问表', () => {
@@ -151,6 +178,26 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
       for (const call of calls) if (!source.includes(call)) missing.push(`${name}: 少了 ${call}`);
     }
     expect(missing).toEqual([]);
+  });
+
+  /**
+   * 同一条调用形状在一个文件里出现两次时，上面的 `includes` 只看得见"有没有"，看不见"少了一处" ——
+   * 变异探针 M5（把 `getProgressText` 的 `default:` 分支退回 `q.desc`）当场 0 例红就是证据。
+   * 所以这类"一条链上的并列分支"要点名次数。
+   */
+  const COUNTED = {
+    'game/QuestSystem.js': [['keyText(q.desc)', 2]],
+  };
+  it('并列分支按次数点名：少一处问表也是红', () => {
+    const wrong = [];
+    for (const [name, pairs] of Object.entries(COUNTED)) {
+      const source = FILES.find((f) => f.name === name)?.source ?? '';
+      for (const [shape, n] of pairs) {
+        const got = source.split(shape).length - 1;
+        if (got !== n) wrong.push(`${name}: ${shape} 应有 ${n} 处，实际 ${got} 处`);
+      }
+    }
+    expect(wrong).toEqual([]);
   });
 });
 
@@ -169,12 +216,30 @@ describe('内容表的 `{动作}` 占位：真表跑真展开', () => {
     else if (node && typeof node === 'object') Object.values(node).forEach((v) => stringsOf(v, out));
     return out;
   };
-  const TABLES = { restDialogues: REST_DIALOGUES, helpSectionsExtra: HELP_SECTIONS_EXTRA };
+  const TABLES = {
+    restDialogues: REST_DIALOGUES,
+    helpSectionsExtra: HELP_SECTIONS_EXTRA,
+    loreCodex: LORE_CODEX,
+    sideQuests: SIDE_QUESTS,
+    echoes: ECHOES,
+    quests: QUESTS,
+    npcChapterLines: NPC_CHAPTER_LINES,
+    bossLore: BOSS_LORE,
+    chapterIntros: CHAPTER_INTROS,
+    dungeonEnterLines: DUNGEON_ENTER_LINES,
+    loreFragments: LORE_FRAGMENTS,
+    zoneStoryHooks: ZONE_STORY_HOOKS,
+    zoneEventsExtra: ZONE_EVENTS_EXTRA,
+    zoneEventsPop: ZONE_EVENTS_POP,
+    npcLinesPop: NPC_LINES_POP,
+    loreFragmentsPop: LORE_FRAGMENTS_POP,
+    dialogueCg: [REST_DIALOGUE_CG, REST_DIALOGUE_CG_EXTRA, REST_DIALOGUE_CG_POP],
+  };
   const STRINGS = Object.entries(TABLES).flatMap(([table, node]) => stringsOf(node).map((s) => `${table}: ${s}`));
 
   it('扫描真跑得起来：带占位的文案够多（少一条就是 walker 或表坏了）', () => {
     const withToken = STRINGS.filter((s) => /\{[A-Za-z][A-Za-z0-9]*\}/.test(s));
-    expect(withToken.length).toBeGreaterThanOrEqual(14);
+    expect(withToken.length).toBeGreaterThanOrEqual(46);
   });
 
   it('每个占位都是登记过的动作，展开后不留花括号', () => {
@@ -210,33 +275,18 @@ const LEDGER = {
   // 占位化会把它写成 `W 移动`（少三枚键）或 `{moveUp}{moveLeft}{moveDown}{moveRight}`（一串没人读的字符）。
   // 这条留到"移动方式能整组改绑"再说，今天它是**四键连写的老写法**（同 `index.html` 门禁里那条）。
   'ui/HelpManual.js': 1,
-  'game/LoreCodexRegistry.js': 3,
-  'player/DemoRunner.js': 3,
-  'game/LoreFragments.js': 2,
-  'game/WorldAmbientCatalog.js': 2,
-  'cinematic/CinematicManager.js': 1,
-  'game/QuestSystem.js': 1,
-  'game/SideQuestRegistry.js': 1,
-  'game/StoryDirector.js': 1,
-  'world/zones/FantasyZone.js': 1,
-  'world/zones/VoidZone.js': 1,
+  // `请按 F12 查看控制台详情`：开机失败那一条错误里指的是**浏览器**的开发者工具，
+  // 不是任何一张表里的动作 —— 它没有可改绑的入口，也就没有"改绑之后说谎"这件事。
   'main.js': 1,
-  'style.css': 1,
   // `自定义路点 Shift+点击`：这里说的是浏览器原生 `e.shiftKey`（`ui/WorldMapPanel.js` 读的就是它），
   // **不是任何一张表里的动作**。占位化它会显示成改绑后的那枚键，而行为仍然只认 Shift —— 那是假话。
   // 真要还这笔债，得先给"修饰键"登记成可改绑的动作，那是输入侧的事，不是文案侧的。
   'ui/WorldMapPanel.js': 1,
-  // W-B1 切片1：CG 预设表从 ui/ 搬进 content/，字幕里那句 'Esc 跳过' 跟着搬了过来。
-  // 它是**画在 canvas 上的文本**，吃不到 `data-keys` 那套（那是 DOM 的），
-  // 所以本切片只如实记账；随 W-B1 的文案数据化一起改成问 `keyHint('escape')`。
-  'content/dialogueCgPresets.js': 1,
-  // W-B2 切片3：文案搬进 content/ 之后，账本跟着换名字，**总数一处没变**（68 → 68，逐文件实测）。
-  // W-B2 切片4：说明书（23 + 8）、营火对话（15 + 自己那条 1）改成 `{动作}` 占位 + 渲染处 `keyText`，
-  // 45 笔一起清掉，68 → 23。这里剩下的两条与各线界面那两条同因：
-  // `自定义路点 Shift+点击`（浏览器原生 shiftKey，见上）与 `Ctrl 翻滚`（回声文案是致敬里的动作比喻，
-  // 它落在图鉴那一格，改绑后要不要跟着改口是图鉴渲染的事 —— 记在 W-B2 切片5 那份出口名单里）。
+  // W-B2 切片3：文案搬进 content/ 之后账本跟着换名字，总数一处没变（68 → 68，逐文件实测）；
+  // 切片4 把说明书与营火对话的 45 笔改成 `{动作}` 占位（68 → 23）；
+  // 切片5 清完剩下的内容键名，并把"界面上每一句键名都问表"那条更严的尺子立成门禁（见下面 `LABEL_PROSE`）。
+  // 这里只剩一条：营火里那句 `自定义路点 Shift+点击` 与上面 `ui/WorldMapPanel.js` 说的是同一件事。
   'content/restDialogues.js': 1,
-  'content/echoes.js': 1,
 };
 
 const LIT = /`(?:\\.|[^`\\])*`|'(?:\\.|[^'\n])*'|"(?:\\.|[^"\n])*"/g;
@@ -274,6 +324,90 @@ describe('还写死键名的地方：逐文件记账，只许变小', () => {
       .filter(([name, n]) => (byName.get(name) ?? 0) !== n)
       .map(([name, n]) => `${name}: 记的 ${n}，实际 ${byName.get(name) ?? 0}`);
     expect(stale).toEqual([]);
+  });
+});
+
+/**
+ * 第二把尺子：不问"字样像不像键名"，直接问"两张表现在显示给人看的那些字样，
+ * 有没有出现在操作说明的句式里"（W-B2 切片5）。
+ *
+ * 上面那把 `KEY_PROSE` 是按**形状**猜的（`按 X`、`Esc|Tab|Ctrl` 那批写死的名字、`X - 说明`），
+ * 所以 `日志 [J] 里`、`击败后可 E 再战`、`J 键筛选`、`按住 1–4 蓄力` 这些它一条都不报 ——
+ * 而它们和 `按 E` 是同一句谎话。这一把把尺子换成"两张表现在会说出口的键名"本身，
+ * 于是新增一枚键位（比如给界面加一个 `.`）不用改正则，谎话自动进网。
+ *
+ * 判据仍然只在"操作说明"的四个位置上：`按/按住/长按 + 字样`、`可/后/前/再 + 字样`、
+ * `[字样]`、`字样 + (关闭|跳过|切换|弹反|…)`。少了这个句式条件，`Endurance 号`、`Chapter 3`、
+ * `toFixed(2)` 全会被牵连 —— 门禁一误报，人们就会把它关掉。
+ */
+describe('界面上说出的键名只能从两张表来（字样尺子）', () => {
+  const SKIP = new Set([
+    'content/keybinds.js', 'content/hotkeys.js', 'content/keyLabels.js', 'content/keyHints.js',
+  ]);
+  /** 反引号在热键表里确实是一格，但它同时是 JS 模板串的边界字符：拿它当字样会在每个模板字面量上误报 */
+  const NOT_AS_LABEL = new Set(['`']);
+  /** 单枚数字只在"按/长按"那一句式里认：`(2)` 是 `.toFixed(2)ms` 不是"按 (2)" */
+  const DIGITS = new Set(['1', '2', '3', '4']);
+
+  const FACTORY = [
+    ...Object.values(KEY_BINDINGS).map((b) => (b.code ? keyLabel(b.code) : mouseLabel(b.mouse))),
+    ...Object.values(KEY_BINDINGS).flatMap((b) => (b.aliases ?? []).map(keyLabel)),
+    ...UI_HOTKEYS.map((e) => keyLabel(e.code)),
+  ].filter((l) => l && !NOT_AS_LABEL.has(l));
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const byLen = [...FACTORY].sort((a, b) => b.length - a.length).map(esc).join('|');
+  const wordy = [...FACTORY].filter((l) => !DIGITS.has(l)).sort((a, b) => b.length - a.length).map(esc).join('|');
+  const PATTERNS = [
+    new RegExp(`(?:按|按住|长按)\\s*[\\[【(]?\\s*(?:${byLen})(?![0-9A-Za-z])`, 'g'),
+    new RegExp(`(?:可|后|前|再)\\s*[\\[【(]?\\s*(?:${byLen})(?![0-9A-Za-z])`, 'g'),
+    new RegExp(`[\\[【(]\\s*(?:${wordy})\\s*[\\]】)]`, 'g'),
+    new RegExp(`(?:${byLen})(?![0-9A-Za-z])\\s*(?:关闭|离开|跳出|跳过|打开|退出|解除|切换|弹反|翻滚|锁定|闪避|拍照|蓄力|键|可)`, 'g'),
+  ];
+
+  const labelHits = (source) => {
+    const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+    const out = [];
+    for (const lit of code.matchAll(LIT)) {
+      // 占位 `{journal}` 展开出来的字样是**问表得来的**，不算抄：先把占位挖掉再找
+      const probe = lit[0].replace(/\{[A-Za-z][A-Za-z0-9]*\}/g, '＿');
+      for (const re of PATTERNS) for (const m of probe.matchAll(re)) out.push(m[0]);
+    }
+    return out;
+  };
+  const scanned = () => FILES.filter(({ name }) => !SKIP.has(name));
+
+  it('一个都不许：内容文案里的键名全是 `{动作}` 占位', () => {
+    const offenders = scanned()
+      .flatMap(({ name, source }) => labelHits(source).map((hit) => `${name}: ${hit}`));
+    expect(offenders).toEqual([]);
+  });
+
+  it('这条扫描咬得住：把一处字样改回死键名立刻红', () => {
+    // 防的是"空跑门禁"（正则一坏就永远通过）—— 用真文件里的一格占位反向改回去验
+    const codex = FILES.find((f) => f.name === 'game/LoreCodexRegistry.js').source;
+    expect(labelHits(codex)).toEqual([]);
+    const reverted = codex.replace('{escape} 可跳过演出', 'Esc 可跳过演出');
+    expect(reverted).not.toEqual(codex);
+    expect(labelHits(reverted)).toContain('Esc 可');
+  });
+
+  it('尺子不缺齿：两张表里每一枚键名都真的进了正则', () => {
+    // FACTORY 是照表拼出来的，拼错一个变量名就会静悄悄少一枚 —— 所以逐枚回查字样段本身。
+    const all = new Set();
+    for (const b of Object.values(KEY_BINDINGS)) {
+      const label = b.code ? keyLabel(b.code) : mouseLabel(b.mouse);
+      if (label) all.add(label);
+      for (const a of b.aliases ?? []) all.add(keyLabel(a));
+    }
+    for (const e of UI_HOTKEYS) all.add(keyLabel(e.code));
+    // 唯一的故意省略是反引号（模板串边界字符）：除它以外逐枚回查字样段本身。
+    const missing = [...all].filter((l) => !NOT_AS_LABEL.has(l)
+      && ![byLen, wordy].some((alt) => alt.includes(esc(l))));
+    expect(missing).toEqual([]);
+    expect([...all].filter((l) => NOT_AS_LABEL.has(l))).toEqual(['`']);
+    expect(all.size).toBeGreaterThan(20);
+    // 反向：表里没有的名字不该被当成抄来的键名（否则 `F9` 这类字面量会到处误报）
+    expect(byLen).not.toContain(esc('F9'));
   });
 });
 

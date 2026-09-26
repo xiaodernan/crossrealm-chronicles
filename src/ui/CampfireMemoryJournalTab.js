@@ -1,3 +1,5 @@
+import { refreshKeyText } from '../content/keyHints.js';
+
 /** [J] 营火记忆 Tab */
 export class CampfireMemoryJournalTab {
   constructor(game) {
@@ -29,7 +31,7 @@ export class CampfireMemoryJournalTab {
     ).join('');
 
     panelEl.innerHTML = `
-      <h2>营火记忆 · J 关闭</h2>
+      <h2 data-ktext="营火记忆 · {journal} 关闭"></h2>
       <p class="cf-stats">共休息 ${stats.total} 次 · ${stats.zones} 处营火 · 对话节点 ${stats.nodeCount} 条</p>
       <div class="cf-section"><h3>休息次数</h3>${rests}</div>
       <div class="cf-filter">${filterBtns}</div>
@@ -37,6 +39,7 @@ export class CampfireMemoryJournalTab {
       <button type="button" class="journal-back-btn" data-tab="campfire">← 返回营火日志</button>
     `;
 
+    refreshKeyText(panelEl);
     panelEl.querySelectorAll('.cf-filter-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         this.filter = btn.dataset.z;

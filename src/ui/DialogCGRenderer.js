@@ -1,4 +1,5 @@
 import { REST_DIALOGUE_CG } from '../content/dialogueCgPresets.js';
+import { keyText, keyStamp } from '../content/keyHints.js';
 
 /** 营火对话 CG — 节点 id → 场景预设（程序绘制 + 可选图片） */
 
@@ -21,8 +22,25 @@ export class DialogCGRenderer {
     return REST_DIALOGUE_CG[this.getKey(restId, nodeId)] ?? REST_DIALOGUE_CG[`${restId}:start`] ?? { scene: 'anchor_fire', caption: '' };
   }
 
+  /**
+   * 键名轮次一变就丢掉全部缓存图（W-B2 切片5）。
+   *
+   * 图上写着的键名（`{escape} 跳过`、战斗教学那两格）是**画进像素里的**：缓存键里没有键名，
+   * 改绑之后只让 `keyText` 改口，界面上看到的就是"表已经换了、图里还写着 Esc" ——
+   * 而那一句玩家在 DOM 里读不到，改绑测试也抓不到。两条绘制路径（本文件与致敬层那一条）都先过这里。
+   */
+  _syncKeyStamp() {
+    const stamp = keyStamp();
+    if (stamp !== this._keyStamp) {
+      this.cache.clear();
+      this._keyStamp = stamp;
+    }
+    return stamp;
+  }
+
   render(restId, nodeId, accent = '#c9a962', mood = 'calm') {
     const key = `${restId}:${nodeId}:${accent}:${mood}`;
+    this._syncKeyStamp();
     if (this.cache.has(key)) return this.cache.get(key);
 
     const preset = this.getPreset(restId, nodeId);
@@ -68,7 +86,7 @@ export class DialogCGRenderer {
     ctx.fillRect(0, h - 52, w, 52);
     ctx.fillStyle = accent;
     ctx.font = '600 22px "Segoe UI","Microsoft YaHei",sans-serif';
-    ctx.fillText(preset.caption ?? '', 24, h - 18);
+    ctx.fillText(keyText(preset.caption ?? ''), 24, h - 18);
 
     const url = this.canvas.toDataURL('image/jpeg', 0.88);
     this.cache.set(key, url);
@@ -244,8 +262,8 @@ export class DialogCGRenderer {
     this._paintForestCamp(ctx, w, h, accent);
     ctx.fillStyle = '#ffdd88';
     ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('F 弹反', w * 0.12, h * 0.35);
-    ctx.fillText('Q 锁定', w * 0.62, h * 0.35);
+    ctx.fillText(keyText('{parry} 弹反'), w * 0.12, h * 0.35);
+    ctx.fillText(keyText('{lockOn} 锁定'), w * 0.62, h * 0.35);
   }
 
   _paintQuestScroll(ctx, w, h, accent) {

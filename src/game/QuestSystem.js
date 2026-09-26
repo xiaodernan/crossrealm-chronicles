@@ -19,7 +19,7 @@ export const QUESTS = [
   { id: 'level', title: '穿越者之路', desc: '将等级提升至 5。', type: 'level', target: 5 },
   { id: 'epilogue', title: '无尽位面', desc: '与宇航员回声对话，开启无尽探索。', type: 'npc', targetId: 'astronaut-echo' },
   // Chapter 3
-  { id: 'learn-spell', title: '奥术入门', desc: '施放任意法术 8 次（键 1–4）。', type: 'spells', target: 8 },
+  { id: 'learn-spell', title: '奥术入门', desc: '施放任意法术 8 次（{spell1}–{spell4}）。', type: 'spells', target: 8 },
   { id: 'crypt', title: '灰白遗城', desc: '清空森林地下城。', type: 'dungeon', dungeonId: 'ruin-crypt' },
   { id: 'library', title: '禁书图书馆', desc: '清空魔法地下城。', type: 'dungeon', dungeonId: 'forbidden-library' },
   { id: 'rift', title: '五维裂隙', desc: '清空星际地下城。', type: 'dungeon', dungeonId: 'five-dim-rift' },
@@ -28,7 +28,7 @@ export const QUESTS = [
   { id: 'ascension', title: '位面飞升', desc: '完成三界试炼后再次触摸世界之锚。', type: 'interact', targetId: 'hub-anchor', requireAscension: true },
   // Chapter 4
   { id: 'void-rift', title: '时线裂隙', desc: '调查破碎时线的裂隙。', type: 'discovery', targetId: 'void-rift' },
-  { id: 'charge-spell', title: '蓄力奥术', desc: '施放 5 次蓄力法术（长按 1/2/3）。', type: 'charged', target: 5 },
+  { id: 'charge-spell', title: '蓄力奥术', desc: '施放 5 次蓄力法术（长按 {spell1}/{spell2}/{spell3}）。', type: 'charged', target: 5 },
   { id: 'void-boss', title: '时线执政官', desc: '击败破碎时线隐藏 Boss。', type: 'voidboss', bossId: 'void-chronarch' },
   { id: 'void-tablet', title: '五维碑文', desc: '阅读时线位面的碑文。', type: 'discovery', targetId: 'void-tablet' },
   { id: 'true-end', title: '真·位面行者', desc: '集齐四枚碎片后触摸世界之锚。', type: 'interact', targetId: 'hub-anchor', requireTrueEnd: true },
@@ -452,8 +452,8 @@ export class QuestSystem {
         if (this.stats.discoveries.has(q.targetId) && !q.requireAllFragments && !q.requireAscension && !q.requireTrueEnd && !q.requireInfinity) {
           return '已完成触摸 — 若未跳转请点右下角「同步任务」';
         }
-        return q.desc;
-      default: return q.desc;
+        return keyText(q.desc);
+      default: return keyText(q.desc);
     }
   }
 
