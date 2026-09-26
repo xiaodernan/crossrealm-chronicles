@@ -3,7 +3,7 @@ import {
   BOSS_DEFEAT_LINES,
   DUNGEON_BOSS_LINES,
   getDungeonBossId,
-} from '../game/BossDialogue.js';
+} from '../content/bossDialogue.js';
 import { addShake } from '../engine/Shake.js';
 import { scheduler } from '../engine/Scheduler.js';
 

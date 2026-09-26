@@ -42,6 +42,21 @@ async function boot() {
     return;
   }
 
+  /* 内容表校验（W-B1 切片2）：`content/registry.js` 在模块顶层跑 `assertContent()`，
+   * 所以"能不能进这个模块"就是"表过不过"。刻意用**动态 import** 而不是文件顶上那句
+   * 静态 import —— 静态 import 的求值发生在 `main.js` 正文之前，错表那条 Error 只会
+   * 成为控制台里一条 uncaught，页面什么都不显示（真机读数 S1 量到的正是这个：
+   * 加载遮罩永远转圈、`#boot-error` 空着、等到 30 秒超时）。放进 try 之后同一条 Error
+   * 落到 `showBootError`：错表仍然在 `new Game()` 之前红，而且红得看得见。 */
+  try {
+    await import('./content/registry.js');
+  } catch (e) {
+    console.error(e);
+    // 直接用它自己那句话（`assertContent` 已经把路径与全部错列好了），前缀反而会重复一遍
+    showBootError(String(e?.message ?? e));
+    return;
+  }
+
   let game;
   try {
     game = new Game(document.body);

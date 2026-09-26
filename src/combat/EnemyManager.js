@@ -9,6 +9,7 @@ import { MagicBoss } from './MagicBoss.js';
 import { SpaceBoss } from './SpaceBoss.js';
 import { VoidBoss } from './VoidBoss.js';
 import { ChaosBoss } from './ChaosBoss.js';
+import { chapterGateFor } from '../content/bossRoster.js';
 
 export class EnemyManager {
   constructor(scene, world, projectiles) {
@@ -294,8 +295,10 @@ export class EnemyManager {
 
   activateBoss(boss, arena, playerPos, game) {
     if (!boss || boss.alive || arena.activated) return;
-    if (boss.bossId === 'void-chronarch' && (game?.quests?.chapter ?? 1) < 4) return;
-    if (boss.bossId === 'chaos-overlord' && (game?.quests?.chapter ?? 1) < 5) return;
+    /* 章节门槛读名册（W-B1 切片2）：修前是两句手写的 bossId 比较，
+     * 加第三只带门槛的 Boss 就得在这里再抄一句，而抄错了不报错 —— 只是"它永远不开战"。
+     * 名册里没有的 id（副本 Boss、将来工具生成的野生 Boss）一律放行。 */
+    if ((game?.quests?.chapter ?? 1) < chapterGateFor(boss.bossId)) return;
     const c = arena.center;
     const dist = Math.sqrt((playerPos.x - c.x) ** 2 + (playerPos.z - c.z) ** 2);
     if (dist > arena.radius) return;

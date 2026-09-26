@@ -1,3 +1,5 @@
+import { DUNGEON_BOSS_PREFIX } from './bossRoster.js';
+
 /** Boss 专属台词 — 开场 / 阶段 / 击败 / 地牢守钥者 */
 export const BOSS_PHASE_LINES = {
   'shadow-warden': {
@@ -63,6 +65,13 @@ export const DUNGEON_BOSS_LINES = {
   },
 };
 
+/**
+ * 副本 id → bossId。
+ *
+ * 前缀不在这里写第二份：它由 `content/bossRoster.js` 的 `DUNGEON_BOSS_PREFIX` 给出，
+ * 而名册那边同时用同一个常量做"认不认得这个 id"的判断 —— 一处改、两处跟着走。
+ * 修前这里是独立的一份 `` `dungeon-${id}` ``，与 `DungeonManager` 里拼的那份各写一遍。
+ */
 export function getDungeonBossId(dungeonId) {
-  return `dungeon-${dungeonId}`;
+  return `${DUNGEON_BOSS_PREFIX}${dungeonId}`;
 }
