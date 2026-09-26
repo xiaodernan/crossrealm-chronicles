@@ -578,6 +578,21 @@ describe('设置面板：多出来的那一列', () => {
     expect(upRow).toContain('keybind-pad-none');                   // 表里没这一格了 → 老老实实写 `—`
   });
 
+  it('样式门禁：键位表四列是**一份轨道**，不是每格一个最小宽度（切片26）\n    —— 样式在 node 环境读不到，这条只能钉声明，实际对齐看真浏览器读数', () => {
+    const css = readFileSync(join(process.cwd(), 'src/style.css'), 'utf8');
+    const row = css.slice(css.indexOf('.keybind-row {'), css.indexOf('.keybind-row .keybind-name'));
+    expect(row, '键位行退回 flex 就回到「每行按内容分宽度」（读数里 88 / 142 / 220 / 294px 四种）')
+      .toMatch(/display:\s*grid/);
+    expect(row).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) 7\.5rem 7\.5rem minmax\(0, 1\.1fr\)/);
+    expect(row).not.toMatch(/display:\s*flex/);
+    // 面板通用按钮是 `width:100%` 的整行形状，不重设就会把定宽列撑破
+    const btn = css.slice(css.indexOf('.keybind-row button'), css.indexOf('.keybind-row .keybind-hint'));
+    expect(btn).toMatch(/width:\s*auto/);
+    expect(btn).toMatch(/min-width:\s*0/);
+    // 旧写法一贴回来就红：那一列的宽度曾经只靠 min-width 约定，谁都能被内容撑开
+    expect(css).not.toMatch(/\.keybind-row \.keybind-pad \{ min-width: 5\.5rem/);
+  });
+
   it('格子显示的是生效表而不是常量：叠了覆盖之后那一格立刻改口', () => {
     const { host, panel } = mount({}, { jump: 'rightStick' });
     panel.refresh();

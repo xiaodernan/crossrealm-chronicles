@@ -1423,14 +1423,23 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .settings-box input[type="range"] { width: 100%; margin-top: 4px; }
 
 .keybind-list { max-height: 42vh; overflow-y: auto; text-align: left; }
+/* 键位表四列：一份轨道钉死（切片26）。
+ * 以前是 flex + "每格至少 5.5rem"，但 `.panel-box button` 给按钮的是 `width:100%` ——
+ * flex 之下每一行按内容分剩余空间，于是"手柄那一列"实测有 88 / 142 / 220 / 294px 四种宽度
+ * （真浏览器读数），列边界各行各走各的；键盘那一格更是拉到 398~473px。
+ * 轨道走 grid：名字与提示各占一份弹性，键盘 / 手柄两列定宽。 */
 .keybind-row {
-  display: flex; align-items: center; gap: 8px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 7.5rem 7.5rem minmax(0, 1.1fr);
+  align-items: center; gap: 8px;
   margin: 6px 0; font-size: 0.8rem; color: #aaa;
 }
-.keybind-row .keybind-name { flex: 1; }
-.keybind-row button { min-width: 5.5rem; }
-/* 手柄那一列（切片9）：可改绑的是按钮，走摇杆/没有入口的是说明文字，宽度对齐成一列 */
-.keybind-row .keybind-pad { min-width: 5.5rem; text-align: center; font-size: 0.76rem; }
+.keybind-row .keybind-name { min-width: 0; }
+/* 面板通用按钮是"整行一块"的形状（`display:block; width:100%; padding:12px`），
+ * 放进表格里会把定宽列撑破 —— 这里按列重设，`.keybind-row` 比 `.panel-box button` 晚定义，同权取后 */
+.keybind-row button { display: inline-block; width: auto; min-width: 0; margin: 0; padding: 6px 8px; }
+.keybind-row .keybind-hint { min-width: 0; }
+/* 手柄那一列（切片9）：可改绑的是按钮，走摇杆/没有入口的是说明文字 */
+.keybind-row .keybind-pad { text-align: center; font-size: 0.76rem; min-width: 0; }
 .keybind-row span.keybind-pad { color: #7d7d88; }
 /* 一行同时有"战斗中"与"界面里"的入口（切片20 的 `escape` 那行）：合成一格，
    不新增第五列 —— 多一列会把行尾的提示挤走，各行还互不对齐 */
