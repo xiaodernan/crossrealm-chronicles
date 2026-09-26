@@ -6,6 +6,7 @@ import { scheduler } from '../engine/Scheduler.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { refreshKeyText } from '../content/keyHints.js';
 import { focusFirstItem, parkFocus, preserveFocus, restoreParkedFocus } from './FocusNav.js';
+import { inputDeviceLabel } from '../engine/InputDevice.js';
 
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 
@@ -66,6 +67,7 @@ export class HUD {
           <div id="weapon-display">⚔ 位面长剑</div>
           <div id="fps-display">— FPS</div>
           <div id="camera-mode-display">第三人称</div>
+          <div id="input-device-display">—</div>
         </div>
       </div>
       <div id="quest-panel" class="quest-panel">
@@ -400,6 +402,18 @@ export class HUD {
     this.zonePanel.classList.toggle('hidden');
   }
 
+  /**
+   * 输入侧指示（切片29）：文案只问 `inputDeviceLabel`，状态只问 `game.inputDevice.current()` ——
+   * HUD 自己不判"哪一侧"，也不每帧重写一次文本（那是 DOM 写入，帧率热路径上不做）。
+   */
+  updateInputDevice() {
+    const kind = this.game.inputDevice?.current() ?? null;
+    if (kind === this._inputDeviceShown) return;
+    this._inputDeviceShown = kind;
+    const el = document.getElementById('input-device-display');
+    if (el) el.textContent = kind ? inputDeviceLabel(kind) : '—';
+  }
+
   updateDiscoveryCount() {
     const j = this.game.storyJournal;
     const n = j?.entries?.length ?? 0;
@@ -501,6 +515,7 @@ export class HUD {
   }
 
   update(_dt) {
+    this.updateInputDevice();
     const p = this.game.player.position;
     document.getElementById('coord-display').textContent = `X: ${p.x.toFixed(0)} · Z: ${p.z.toFixed(0)}`;
     document.getElementById('stamina-bar').style.width = `${this.stamina}%`;

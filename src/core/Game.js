@@ -118,6 +118,7 @@ import {
   factoryGamepadBindings, setKeybindTable,
 } from '../content/keybinds.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
+import { InputDevice } from '../engine/InputDevice.js';
 import { topNavLayer } from '../ui/OverlayStack.js';
 import { moveFocusWithin, activateFocused, adjustFocused } from '../ui/FocusNav.js';
 export class Game {
@@ -126,6 +127,8 @@ export class Game {
     /** 主循环唯一时间来源：dt 上限、timeScale（hitstop/慢动作）、固定步长累加器 */
     this.time = new TimeController();
     this.keys = {};
+    /** 最近一次被按动的是哪一侧输入（切片29）：判断只在 `InputDevice` 里，谁都不另记一份 */
+    this.inputDevice = new InputDevice();
     this.pointerLocked = false;
     this.timeOfDay = 0.35;
     this.container = container;
@@ -645,6 +648,7 @@ export class Game {
 
     window.addEventListener('keydown', (e) => {
       this.keys[e.code] = true;
+      this.inputDevice.note('keyboard');   // 顺手记一侧：不新增监听器（那会有第二个"这一下算谁"）
       // 事件这一刻只做"要不要挡浏览器默认行为"；动作派发交给 `hotkeys.poll()`（见 `ui/HotkeyRouter.js`）
       if (this.hotkeys.onKeydown(e.code)) e.preventDefault();
     });
@@ -659,6 +663,9 @@ export class Game {
 
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     canvas.addEventListener('mousedown', (e) => {
+      // 指示记在守卫之前：这一下玩家用的确实是鼠标，哪怕游戏因为没锁指针而不收它 ——
+      // 放在守卫之后就变成"只有打出去的那一下才算"，玩家点第一下求锁定时指示器不动
+      this.inputDevice.note('mouse');
       if (this.autoPlayMode || !this.pointerLocked || this.dialog.open || this.upgrade.open) return;
       if (this.combatInputLock?.blocksInput?.()) return;
       if (e.button === 0) this.player.combat.mouseDown.left = true;
@@ -715,6 +722,8 @@ export class Game {
       this.applyPadBindings();
     }
     this.padInput?.poll();
+    // 手柄只在**被按动**那一帧才算这一侧在用（桥在同一趟轮询里算好的 `touched`）
+    if (this.padInput?.touched) this.inputDevice.note('gamepad');
     // 界面里 A 那一下：桥只报了个边沿（它不冒充键盘，否则就是第二个 Enter 消费者），
     // 激活仍然交回浏览器 —— 点的是"当前聚焦的那一格"
     if (this.padInput?.ui.confirm) activateFocused(document);

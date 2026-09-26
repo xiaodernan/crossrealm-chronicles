@@ -88,6 +88,12 @@ export class GamepadInput {
     this._padIndex = -1;
     this.active = false;
     /**
+     * 最近一次轮询里手柄**有没有被按动**（切片29）。与 `active`（"插着"）不是一回事：
+     * 插着不动、玩家在用键盘走路时，这里必须是假 —— 指示器要是把"在场"读成"在用"，
+     * 玩家看到的就是一个永远跟着手柄跑的假答案。
+     */
+    this.touched = false;
+    /**
      * 本帧的镜头输入，单位"相当于每秒推多少鼠标点"（时间倍率由调用方乘，见 `Game.update`）。
      * 复用槽，热路径不分配。
      */
@@ -248,6 +254,7 @@ export class GamepadInput {
         return PAD_BUTTON_BY_INDEX[i] ?? null;
       }
       this._capPrev[i] = on;
+      if (on) this.touched = true;      // 等捕获的这几帧，玩家确实在按手柄
       if (on && this._captureBtn < 0 && PAD_BUTTON_BY_INDEX[i]) this._captureBtn = i;
     }
     return null;
@@ -272,6 +279,10 @@ export class GamepadInput {
       return false;
     }
     this.active = true;
+    // 这一帧手柄**被按动过**没有（切片29：给"现在用的是哪套输入"用）。与 `move` / `look` 同为
+    // 复用槽：判断顺手做在这一趟轮询里，别处不再第二遍翻 `navigator.getGamepads()`。
+    // "插着"不等于"在用"：手柄在场而玩家用键盘走路时，这里必须保持 false。
+    this.touched = false;
     const buttons = pad.buttons ?? [];
     const axes = pad.axes ?? [];
     // 边沿只有一帧宽：与 `look` / `move` 一样在帧首归零，消费方（`Game.update`）在本帧内读
@@ -290,6 +301,8 @@ export class GamepadInput {
     }
     this._pollLook(axes);
     this._pollMove(axes);
+    // 摇杆离开死区 / 镜头被推着走：手柄这一帧参与了
+    if (this.move.mag > 0 || this.look.x !== 0 || this.look.y !== 0) this.touched = true;
     // 扳机那对门限（切片22）：进入吃玩家自己拧的那一格，松开退到它的系数倍
     const press = this.tuning.pressThreshold;
     const factor = PAD.triggerReleaseFactor;
@@ -309,6 +322,7 @@ export class GamepadInput {
       }
       const fire = s.mode === 'level' ? on : (on && !s.down);
       s.down = on;
+      if (on) this.touched = true;
       // 脉冲只有一帧宽：主循环里 `poll()` 排在 `player.update` 之前，所以这一帧必然被
       // `CombatController` 读到（读走后它自己会缓冲 0.18 秒的动作意图），桥不越权替它留着
       if (!fire) { if (s.claimed) this._release(s); continue; }
