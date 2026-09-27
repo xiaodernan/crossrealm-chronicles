@@ -103,6 +103,13 @@ describe('gearScore：一件装备"多重"只有一条算式', () => {
     expect(gearScore(null)).toBe(0);
   });
 
+  it('点数是加起来的，不是数条目的：一条给 2 点的词缀要算 2', () => {
+    // 全 1 的配方量不出这条 —— "数条目"与"数点数"在每条都只给 1 点时逐字同形（变异探针 M3 就这么绿过去的）
+    const piece = charm('ash-charm', 'epic', ['archmagistone']);      // 基表 1 + 大贤者石 arcane 2 + mind 1
+    expect(gearMods(piece)).toEqual({ vigor: 1, arcane: 2, mind: 1 });
+    expect(gearScore(piece), '数条目的话这里是 2').toBe(4);
+  });
+
   it('词缀越多越重：同一件基表，档位高就是点数多', () => {
     const plain = gearScore(charm('ember-charm', 'common'));
     const dressed = gearScore(charm('ember-charm', 'epic', ['twin-fang', 'bulwark-oath', 'arcane-lens']));
@@ -210,6 +217,18 @@ describe('LootSystem：该不掉由表说，掉哪一件由注入的 rng 说', (
     expect(seen).toEqual([]);
     // 坏的那一件在生成时就没进去：颜色查不到稀有度会当场抛，而不是等到玩家去捡
     expect(loot.drops).toHaveLength(0);
+  });
+
+  it('四档逐一对上：地上那一团光的颜色就是表里那一枚，而不是"装备掉落一律青色"', () => {
+    // 文本门禁查不住这件事（手抄一枚青色之后，`GEAR_RARITY_DISPLAY` 还在 import 里）——
+    // 只有逐档真造一次掉落物才量得出（变异探针 M11 就是从那道缝里绿过去的）
+    for (const rarity of GEAR_RARITY) {
+      const loot = new LootSystem(fakeScene(), { addSouls() {} }, null, { rng: () => 0 });
+      const drop = loot.spawnGear({ x: 0, y: 0, z: 0 }, charm('ash-charm', rarity.id, []));
+      expect(drop, `${rarity.id} 那一档没生成掉落物`).toBeTruthy();
+      expect(drop.mesh.material.color.getHex(), `${rarity.id} 的颜色不是表上那一枚`)
+        .toBe(GEAR_RARITY_DISPLAY[rarity.id].tint);
+    }
   });
 
   it('没掷中掉率时那一格还是纯灵魂、颜色还是改前那枚青色（`normal` 档 rng 给 0.9 > 0.15）', () => {
