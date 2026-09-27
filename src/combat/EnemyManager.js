@@ -364,8 +364,9 @@ export class EnemyManager {
         // 档位只问一次：魂魄数与"掉不掉装备"都读这同一个 `kind`（两条各判一遍迟早一个说精英一个说普通）
         const kind = enemy.isBoss ? 'boss' : enemy.type === 'golem' ? 'golem' : enemy.type === 'elite' ? 'elite' : 'normal';
         const souls = kind === 'boss' ? 500 : kind === 'golem' ? 80 : kind === 'elite' ? 120 : 25;
-        // 掉哪一件按"它死在哪儿"查（`zoneIdAt` 是按位置反推区域的唯一一处，这里只是调用它）
-        loot?.spawnKill(enemy.position, souls, kind, zoneIdAt(enemy.position, game?.world?.zones));
+        // 掉哪一件按"它死在哪儿"查（`zoneIdAt` 是按位置反推区域的唯一一处，这里只是调用它）；
+        // `bossId` 同理由这里给（切片5 固定掉落只认世界 Boss 的登记，野生/副本 Boss 交 null）
+        loot?.spawnKill(enemy.position, souls, kind, zoneIdAt(enemy.position, game?.world?.zones), enemy.bossId ?? null);
       }
     }
 

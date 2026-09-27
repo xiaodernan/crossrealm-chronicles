@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GEAR_RARITY_DISPLAY, dropChance, isGearInstance, rollGear } from '../content/gear.js';
+import { GEAR_RARITY_DISPLAY, dropChance, isGearInstance, rollBossGear, rollGear } from '../content/gear.js';
 
 /**
  * 掉落：地上那一件东西，从"谁生成"到"谁捡走"只有这一个 owner。
@@ -51,9 +51,18 @@ export class LootSystem {
    * 一次击杀该交什么。档位名（`boss` / `elite` / `golem` / `normal` / `dummy`）与区域 id 都由
    * 敌人那边给 —— "这一档掉不掉"与"这一片掉得出什么"两张表都在 `content/gear.js`，
    * 这一处只是把它们串起来（掉落层自己不查、不抄）。
+   *
+   * `bossId` 同理由敌人那边给（第五参，切片5）。只在 `kind === 'boss'` 时查固定掉落表：
+   * 普通怪的击杀不带 bossId，就算带了也不该白掉一件 Boss 奖励；未登记的 bossId 交回 `null`
+   * 并照常走池子 —— "没有固定件"是合法结果，不是错误。
    */
-  spawnKill(pos, souls, kind, zoneId) {
+  spawnKill(pos, souls, kind, zoneId, bossId = null) {
     const out = [this._spawn(pos, { souls, gear: null })];
+    // 固定件**不掷骰**：表上承诺了就必掉（掷骰要掷的只有词缀，那在 `rollBossGear` 里）
+    if (kind === 'boss') {
+      const fixed = this.spawnGear(pos, rollBossGear(this.rng, bossId));
+      if (fixed) out.push(fixed);
+    }
     // `dropChance` 给 1 时那一掷必然命中，给 0 时必然不命中：兜底不靠这里再判一次
     if (this.rng() < dropChance(kind)) {
       const gear = this.spawnGear(pos, rollGear(this.rng, zoneId));

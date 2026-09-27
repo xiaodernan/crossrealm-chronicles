@@ -38,9 +38,11 @@ import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
 import { SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { FRANCHISE } from './franchises.js';
+import { OBJECTIVES } from './objectives.js';
 import {
   GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES, GEAR_SLOT_NAMES,
-  GEAR_DROP, GEAR_NAMES, GEAR_RARITY_DISPLAY, GEAR_POOLS, GEAR_POOL_DEFAULT, GEAR_BAG, rarityRank,
+  GEAR_DROP, GEAR_NAMES, GEAR_RARITY_DISPLAY, GEAR_POOLS, GEAR_POOL_DEFAULT, GEAR_BAG,
+  GEAR_BOSS_DROPS, rarityRank,
 } from './gear.js';
 
 /**
@@ -552,6 +554,22 @@ export const CONTENT_TABLES = [
     invariant: checkGearPools,
   },
   {
+    kind: 'gearBossDrops',
+    note: '每只世界 Boss 必掉哪一件（W-B5 切片5）：键 `keyRef` 到名册（`dungeon-` 前缀的副本 Boss '
+      + '不要求登记），值两格都是 `ref`（打错 base 或档位开机红，而不是"那只 Boss 静默少掉一件"）',
+    shape: 'index',
+    table: GEAR_BOSS_DROPS,
+    keyRef: { of: 'bosses' },
+    value: {
+      t: 'row',
+      of: {
+        base: { t: 'ref', of: 'gearBases' },
+        rarity: { t: 'ref', of: 'gearRarity' },
+      },
+    },
+    invariant: checkGearBossDrops,
+  },
+  {
     kind: 'gearSlotNames',
     note: '槽位的中文名（W-B5 切片4）：与 `GEAR_SLOTS` **双向**对上（少一格 = 界面上那一行是空的，多一格 = 那个名字永远不出现）',
     shape: 'index',
@@ -566,6 +584,40 @@ export const CONTENT_TABLES = [
     shape: 'index',
     table: GEAR_BAG,
     value: { t: 'int', min: 1, max: 100 },
+  },
+  {
+    kind: 'objectives',
+    note: '主线/任务目标（W-B3：ObjectiveEngine 数据驱动层）—— 分支、条件、标志、失败、重访',
+    shape: 'rows',
+    table: OBJECTIVES,
+    row: {
+      id: { t: 'id' },
+      title: { t: 'string' },
+      desc: { t: 'string' },
+      type: { t: 'string' },
+      targetId: { t: 'id', required: false },
+      target: { t: 'int', min: 1, required: false },
+      enemyType: { t: 'string', required: false },
+      bossId: { t: 'id', required: false },
+      dungeonId: { t: 'id', required: false },
+      chapter: { t: 'int', min: 1, max: 5, required: false },
+      condition: { t: 'string', required: false },
+      flags: { t: 'record', required: false },
+      requires: { t: 'record', required: false },
+      failsOn: { t: 'string', required: false },
+      failMessage: { t: 'string', required: false },
+      onFail: { t: 'enum', of: ['reset', 'restart', 'branch'], required: false },
+      branchTo: { t: 'id', required: false },
+      branchCondition: { t: 'string', required: false },
+      revisit: { t: 'bool', required: false },
+      reward: { t: 'int', min: 0, required: false },
+      journal: { t: 'string', required: false },
+      waypoint: {
+        t: 'row',
+        required: false,
+        of: { x: { t: 'int' }, z: { t: 'int' }, label: { t: 'string' } },
+      },
+    },
   },
 ];
 
@@ -781,6 +833,14 @@ export function checkGearRarity(table) {
  * 少写一格的表现是提示里出现 `ash-charm`（玩家看得懂中文看不懂 slug），多写一格的表现是
  * 那条名字永远不会出现 —— 两种都不报错，正是 `ref` 那一族换了方向的样子。
  */
+/**
+ * 槽位名与 `GEAR_SLOTS` **双向**对上（W-B5 切片4）。
+ *
+ * 为什么这里用 invariant 而不是 `ref`：`ref` 问的是"另一张已注册表里的 id"，而槽位今天没有
+ * 自己的表（`GEAR_SLOTS` 是一行数组，没有 `id` 字段可查）。双向名单是同一件事在没有表时的写法：
+ * 少一格 = 界面上那一行空白，多一格 = 那个名字永远不会出现。
+ */
+// gearSlotNames invariant must be defined before CONTENT_TABLES uses it
 export function checkGearNames(table, ctx) {
   const out = [];
   const known = new Set([
@@ -817,6 +877,31 @@ export function checkGearPools(table, ctx) {
   }
   for (const id of ctx.ids.get('gearBases') ?? []) {
     if (!reachable.has(id)) out.push(`gearPools: "${id}" 不在任何一个池里 —— 这件装备永远掉不出`);
+  }
+  return out;
+}
+
+/**
+ * 固定掉落的整表规则（W-B5 切片5），两件事字段词汇说不了：
+ *
+ * 1. **名册里每只世界 Boss 都得登记一件**：新加一只 Boss 而忘了写，表现是它照常掉，
+ *    只是永远少那一件承诺过的奖励 —— 不报错、没有提示，玩家也不知道自己少了什么。
+ *    副本 Boss 不在这份名单里（`dungeon-<副本 id>` 是动态前缀，数量随副本表长），
+ *    它的键合法性由 `keyRef` 的 `allowPrefix` 走名册那一侧的口径。
+ * 2. **档位下限 rare**：Boss 掉一件凡品等于让玩家白跑一趟，而这一格是数据不是算式，
+ *    没有任何运行时路径会拦住"以后有人把它改成 common"。
+ */
+export function checkGearBossDrops(table, ctx) {
+  const out = [];
+  const drops = table ?? {};
+  for (const id of ctx.ids.get('bosses') ?? []) {
+    if (!drops[id]) out.push(`gearBossDrops: 名册里的 "${id}" 没有登记固定掉落 —— 它永远少一件承诺过的奖励`);
+  }
+  for (const id of Object.keys(drops)) {
+    const rarity = drops[id]?.rarity;
+    if (rarityRank(rarity) < rarityRank('rare')) {
+      out.push(`gearBossDrops: "${id}" 的档位是 ${String(rarity)}（至少要 rare —— Boss 掉凡品等于让玩家白跑一趟）`);
+    }
   }
   return out;
 }

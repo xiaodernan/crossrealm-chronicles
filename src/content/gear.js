@@ -119,15 +119,11 @@ const weightedPick = (rows, rng, allowed) => {
 };
 
 /**
- * 抽一件装备。返回的是**实例数据**（可以原样进存档），不是 THREE 网格也不是运行时对象。
- *
- * 词缀**不重复**：同一枚词缀在一次 roll 里出现两遍等于同一件装备给自己加了两遍同一条属性，
- * 而"装备看起来只有一条词缀说明"—— 显示与账本分家（B47 那一族）。
+ * 抽稀有度那一档该挂的词缀：条数由稀有度给，同一枚在一次 roll 里不许出现两次。
+ * `rollGear`（池里抽）与 `rollBossGear`（固定掉落）共用这一处 —— 抄一份就等于两种装备
+ * 各有一套"词缀怎么抽"的规矩，改一条而另一条不动不报错（B36 那一族）。
  */
-export function rollGear(rng = Math.random, zoneId = 'default') {
-  const rarity = weightedPick(GEAR_RARITY, rng);
-  const entry = weightedPick(poolForZone(zoneId), rng, (e) => e.weight > 0);
-  const base = BASES[entry.base];
+function rollAffixes(rng, rarity) {
   const wanted = rarity.affixes;
   const picked = [];
   const taken = new Set();
@@ -138,7 +134,20 @@ export function rollGear(rng = Math.random, zoneId = 'default') {
     picked.push(affix.id);
     taken.add(affix.id);
   }
-  return { base: base.id, rarity: rarity.id, affixes: picked };
+  return picked;
+}
+
+/**
+ * 抽一件装备。返回的是**实例数据**（可以原样进存档），不是 THREE 网格也不是运行时对象。
+ *
+ * 词缀**不重复**：同一枚词缀在一次 roll 里出现两遍等于同一件装备给自己加了两遍同一条属性，
+ * 而"装备看起来只有一条词缀说明"—— 显示与账本分家（B47 那一族）。
+ */
+export function rollGear(rng = Math.random, zoneId = 'default') {
+  const rarity = weightedPick(GEAR_RARITY, rng);
+  const entry = weightedPick(poolForZone(zoneId), rng, (e) => e.weight > 0);
+  const base = BASES[entry.base];
+  return { base: base.id, rarity: rarity.id, affixes: rollAffixes(rng, rarity) };
 }
 
 /** 这一件装备等于哪些属性点（基表 + 词缀一起加）。**全仓只有这一处**把实例换算成点数 */
@@ -246,6 +255,45 @@ export const poolForZone = (zoneId) => GEAR_POOLS[zoneId] ?? GEAR_POOLS[GEAR_POO
 
 export const dropChance = (kind) => GEAR_DROP.byKind[kind] ?? GEAR_DROP.byKind.none;
 export const soulValue = (rarityId) => GEAR_DROP.soulValue[rarityId] ?? 0;
+
+/**
+ * 每只世界 Boss 必掉的那一件（W-B5 切片5）。键是 `bossId` —— 名册之外的键由注册表
+ * `keyRef` 到 `bosses` 在开机拦住，所以这里不必也不该再去 import 一份花名册（数据只认识
+ * 自己的表，谁合法由注册表回答）。
+ *
+ * 两条规矩写在表的旁边而不是散在判断里：
+ * 1. **必掉**：固定件不掷骰。它是表上的承诺，掷骰就是把"这只 Boss 必掉那一件"改成"多半会掉"；
+ *    掉落层只在 `kind === 'boss'` 时查这张表，且查不到就照常走池子（副本 Boss 今天没有固定件）。
+ * 2. **档位从 rare 起**：Boss 掉一件凡品等于让玩家白跑一趟 —— 这根下限由注册表的
+ *    `checkGearBossDrops` 盯着，而不是靠"大家记得别改坏"。
+ *
+ * 取的基表是各区域池的头一件（fantasy→灰烬、magic→笔痕、space→环纹、void→誓约、abyss→战纹），
+ * 于是"这里的 Boss 掉这里的东西"与玩家在那一片打出来的装备对得上。
+ */
+export const GEAR_BOSS_DROPS = {
+  'shadow-warden': { base: 'ash-charm', rarity: 'rare' },
+  archmagus: { base: 'quill-sigil', rarity: 'rare' },
+  'singularity-herald': { base: 'ring-sigil', rarity: 'epic' },
+  'void-chronarch': { base: 'oath-charm', rarity: 'epic' },
+  'chaos-overlord': { base: 'war-sigil', rarity: 'epic' },
+};
+
+/** 这只 Boss 的固定掉落规格。没登记的（副本 Boss、野生 Boss）返回 `null` —— 与"掉一件空的"不是一回事 */
+export const bossDropFor = (bossId) => GEAR_BOSS_DROPS[bossId] ?? null;
+
+/**
+ * 按登记规格造那一件。**不掷档位也不掷底座**（两格都写在表上），只掷词缀 —— 同一只 Boss
+ * 每次掉的底座与档位一样、词缀各不相同。未登记或表被写坏时返回 `null`：宁可没有固定件，
+ * 也不造一个过不了 `isGearInstance` 的坏实例（坏实例进包会连累整包的读档判断）。
+ */
+export function rollBossGear(rng = Math.random, bossId = null) {
+  const spec = bossDropFor(bossId);
+  if (!spec) return null;
+  const base = BASES[spec.base];
+  const rarity = RARITY[spec.rarity];
+  if (!base || !rarity) return null;
+  return { base: base.id, rarity: rarity.id, affixes: rollAffixes(rng, rarity) };
+}
 
 /**
  * 背包容量（W-B5 切片4）。写成**显式一格**而不是"数组多长算多长"：包满时必须有一条说得出来的
