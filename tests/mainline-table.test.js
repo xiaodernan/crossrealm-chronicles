@@ -7,6 +7,10 @@ import {
 } from '../src/content/objectives.js';
 import { checkObjectiveTable, checkTable, CONTENT_TABLES } from '../src/content/registry.js';
 import { MAP_BOSSES, QuestSystem } from '../src/game/QuestSystem.js';
+import { AchievementSystem } from '../src/game/AchievementSystem.js';
+import { attachAchievementExtras } from '../src/game/AchievementSystemExtras.js';
+import { ALL_ACHIEVEMENTS_EXTRA } from '../src/content/achievements.js';
+import { SIDE_QUESTS } from '../src/game/SideQuestRegistry.js';
 import { BossApproachDirector } from '../src/world/BossApproachDirector.js';
 import { BossRematchDirector } from '../src/world/BossRematchDirector.js';
 
@@ -314,6 +318,48 @@ describe('④ 派生出来的 MAP_BOSSES 喂得动它的六个消费者', () => 
     d.update(99, { x: b.x, z: b.z });
     expect(box.toasts).toHaveLength(1);
     expect([...d.seen]).toEqual([b.bossId]);
+  });
+
+  /**
+   * B62 的第三层后果：`bossId` 那一格缺失时，再战从不开火，于是那个计数器全仓唯一来源
+   * （`boss-rematch-started`）从来没有派发过 —— 一条成就和一条支线**看起来存在、实际永远不可达**。
+   *
+   * 这里不写死事件名，也不自己造计数：计数只能从导演的真实派发里长出来，
+   * 消费者由"判据源码里读 `rematches`"扫出来。于是三样东西同时被钉住：
+   * 派发方与监听方的名字还得是同一个、计数器确实被喂、表上那些判据确实翻面。
+   */
+  it('再战真能计数：导演派发 → 成就监听 → 成就与支线各自翻面', () => {
+    const consumers = (rows) => rows.filter((r) => String(r.check).includes('rematches'));
+    const achRows = consumers(ALL_ACHIEVEMENTS_EXTRA);
+    const sideRows = consumers(SIDE_QUESTS);
+    // 先钉"这条链有消费者"：判据改读别的字段时这里先红，不让下面的断言空转成"0 个都通过"
+    expect(achRows.map((r) => r.id)).toEqual(['rematch-3']);
+    expect(sideRows.map((r) => r.id)).toEqual(['side-rematch']);
+
+    const ach = new AchievementSystem({ toast() {} });
+    attachAchievementExtras(ach);
+    // 开机态：一条都没解锁 —— 否则"翻面"这个词没有意义
+    for (const r of achRows) expect(r.check(ach.stats), `${r.id} 出厂就该为假`).toBe(false);
+    for (const r of sideRows) expect(r.check({ achievements: ach }), `${r.id} 出厂就该为假`).toBe(false);
+
+    const spawns = { toasts: [], entries: [], enemies: [] };
+    for (const name of ['spawnBoss', 'spawnMagicBoss', 'spawnSpaceBoss', 'spawnVoidBoss', 'spawnChaosBoss']) {
+      spawns[name] = () => {};
+    }
+    const h = host(spawns);
+    const d = new BossRematchDirector(h);
+    for (const b of MAP_BOSSES) {
+      d.defeated.add(b.bossId);
+      h.keys.KeyE = false;
+      d.update(12, { x: -99999, z: -99999 });   // 远处把 12 秒冷却走完
+      h.keys.KeyE = true;
+      d.update(0.016, { x: b.x, z: b.z });      // 在自己的信标上按 E
+    }
+
+    expect(ach.stats.rematches, `导演开了 ${MAP_BOSSES.length} 次火，成就计数却是 ${ach.stats.rematches} —— 派发方与监听方的事件名不再是同一个`)
+      .toBe(MAP_BOSSES.length);
+    for (const r of achRows) expect(ach.unlocked.has(r.id), `${r.id} 该随真实计数解锁`).toBe(true);
+    for (const r of sideRows) expect(r.check({ achievements: ach }), `${r.id} 该随真实计数达成`).toBe(true);
   });
 });
 
