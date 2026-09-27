@@ -29,7 +29,7 @@
  */
 import {
   GAMEPAD_BINDINGS, PAD, PAD_BUTTON_BY_INDEX, PAD_BUTTON_COUNT,
-  bindingFor, padButtonIndex, padDpadIndex, padTuning,
+  bindingFor, padButtonIndex, padDpadIndex, padPressDepth, padTuning,
 } from '../content/keybinds.js';
 
 /**
@@ -243,11 +243,11 @@ export class GamepadInput {
 
   /** @returns {string|null} 这一帧捕获完成时的按钮名；还在等就 null */
   _captureFrame(buttons) {
-    // 捕获那一路也问手档（切片22）：门槛拧深之后"半按扳机"不该算成玩家按下了这一枚
-    const press = this.tuning.pressThreshold;
+    // 捕获那一路也问手档（切片22）：门槛拧深之后"半按扳机"不该算成玩家按下了这一枚。
+    // 切片32 起问的是**这一枚**的深度：RT 拧浅不该让深档的 LT 在半按时被抓成一次改键。
     const factor = PAD.triggerReleaseFactor;
     for (let i = 0; i < this._capPrev.length; i++) {
-      const on = _pressed(buttons[i], this._capPrev[i], press, factor);
+      const on = _pressed(buttons[i], this._capPrev[i], padPressDepth(this.tuning, i), factor);
       // 只认**第一个**按下的格子：玩家手快连按两枚时，报第二枚会让界面显示的与他按的不是同一键
       if (!on && this._capPrev[i] && this._captureBtn === i) {
         this._capPrev[i] = false;
@@ -262,12 +262,12 @@ export class GamepadInput {
 
   /** 捕获结束那一刻按当前物理状态补边沿账：还按着的不算"刚按下"，松手才算下一次 */
   _primeEdges(buttons) {
-    const press = this.tuning.pressThreshold;
     const factor = PAD.triggerReleaseFactor;
     for (let i = 0; i < this._slots.length; i++) {
       const s = this._slots[i];
-      if (s.button >= 0) s.down = _pressed(buttons[s.button], true, press, factor);
-      else if (s.dpad >= 0) s.down = _pressed(buttons[s.dpad], true, press, factor);
+      const btn = s.button >= 0 ? s.button : s.dpad;      // 一格只有一个物理按钮，两枚扳机各问各的档
+      if (btn < 0) continue;
+      s.down = _pressed(buttons[btn], true, padPressDepth(this.tuning, btn), factor);
     }
   }
 
@@ -303,12 +303,13 @@ export class GamepadInput {
     this._pollMove(axes);
     // 摇杆离开死区 / 镜头被推着走：手柄这一帧参与了
     if (this.move.mag > 0 || this.look.x !== 0 || this.look.y !== 0) this.touched = true;
-    // 扳机那对门限（切片22）：进入吃玩家自己拧的那一格，松开退到它的系数倍
-    const press = this.tuning.pressThreshold;
+    // 扳机那对门限（切片22 / 32）：进入吃**这一枚按钮自己**那一档深度（LT 与 RT 两格），
+    // 松开退到它的系数倍。数字键与十字键由 `padPressDepth` 落到出厂常数，不跟着扳机拧。
     const factor = PAD.triggerReleaseFactor;
     for (let i = 0; i < this._slots.length; i++) {
       const s = this._slots[i];
-      let on = s.button >= 0 && _pressed(buttons[s.button], s.down, press, factor);
+      let on = s.button >= 0
+        && _pressed(buttons[s.button], s.down, padPressDepth(this.tuning, s.button), factor);
       // 八向量化与模拟量共用**同一个**死区（同一帧、同一份手档）：两条路一人一个死区，
       // 就会出现"方向码亮着、`mag` 却是 0"这种自相矛盾的一帧
       if (!on && s.dirName !== null) {
@@ -318,7 +319,8 @@ export class GamepadInput {
         const stick = s.cardinal
           ? _stickCardinal(axes, s, dz, dz * PAD.navStickReleaseFactor, s.down)
           : _stickHeld(axes, s, dz);
-        on = stick || _pressed(buttons[s.dpad], s.down, press, factor);
+        on = stick
+          || _pressed(buttons[s.dpad], s.down, padPressDepth(this.tuning, s.dpad), factor);
       }
       const fire = s.mode === 'level' ? on : (on && !s.down);
       s.down = on;
@@ -447,7 +449,8 @@ function _analogMagnitude(mag, deadzone, range) {
 }
 
 /**
- * 扳机既报 `pressed` 又报模拟量：按下用玩家那一格触发深度，松开退到它的 `factor` 倍做迟滞。
+ * 扳机既报 `pressed` 又报模拟量：按下用**这一枚按钮自己**那一档深度（调用方经 `padPressDepth` 问），
+ * 松开退到它的 `factor` 倍做迟滞。
  *
  * 两个数**全部由调用方喂**（切片22，与切片21 同一条规矩）：这里若自己读出厂表里的触发深度，
  * 玩家拖了滑杆而扳机仍按出厂那一格触发，就是"看板与行为各说各话"那一族；`factor` 是出厂的

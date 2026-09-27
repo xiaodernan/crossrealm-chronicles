@@ -1,6 +1,6 @@
 /**
  * 手柄手感的滑杆（W-A7 切片15 的三根：死区 / 外圈量程 / 镜头响应曲线；切片21 再加三根：
- * 镜头死区 / 镜头转速 / 冲刺触发深度）。
+ * 镜头死区 / 镜头转速 / 冲刺触发深度；切片22 补扳机那一根，切片32 把它拆成 LT / RT 两根）。
  *
  * 这一片的风险是四件事，各自要有一层用例：
  * 1. **一份范围**：滑杆能拖到的值与桥肯认的值必须是同一份（`PAD_TUNING`），否则玩家拖到
@@ -18,7 +18,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  PAD, PAD_TUNING, padTuning, GAMEPAD_BINDINGS,
+  PAD, PAD_TUNING, padTuning, GAMEPAD_BINDINGS, codeFor,
 } from '../src/content/keybinds.js';
 import { GamepadInput } from '../src/engine/GamepadInput.js';
 import { SettingsManager } from '../src/core/SettingsManager.js';
@@ -46,6 +46,37 @@ const sourceOf = (name) => {
   expect(found, `${name} 不在了`).toBeTruthy();
   return found.source;
 };
+
+/**
+ * 取源码里每一处 `fn(...)` 的**顶层**实参（函数定义本身跳过）。
+ *
+ * 为什么不是一句 `matchAll(/fn\(([^)]*)\)/)`：切片32 之后调用长这样 ——
+ * `_pressed(buttons[i], prev, padPressDepth(this.tuning, i), factor)`。`[^)]*` 会停在
+ * `padPressDepth(this.tuning, i` 那个括号上，于是"参数个数"这条门禁数到 4 个**逗号切出来的碎片**
+ * 照样绿：真的少喂一个参数它看不见。数参数就得正确配对括号，否则这条门禁是假的。
+ */
+function callArgs(src, fn) {
+  const out = [];
+  for (let i = src.indexOf(`${fn}(`); i >= 0; i = src.indexOf(`${fn}(`, i + 1)) {
+    if (src.slice(Math.max(0, i - 12), i).includes('function')) continue;
+    let end = -1;
+    for (let j = i + fn.length, depth = 0; j < src.length; j++) {
+      if (src[j] === '(') depth++;
+      else if (src[j] === ')' && --depth === 0) { end = j; break; }
+    }
+    expect(end, `${fn}(...) 有一处括号没闭合，静态门禁读不了`).toBeGreaterThan(i);
+    const parts = [];
+    let depth = 0, cur = '';
+    for (const c of src.slice(i + fn.length + 1, end)) {
+      if ('([{'.includes(c)) depth++;
+      if (')]}'.includes(c)) depth--;
+      if (c === ',' && depth === 0) { parts.push(cur.trim()); cur = ''; } else cur += c;
+    }
+    if (cur.trim()) parts.push(cur.trim());
+    out.push(parts);
+  }
+  return out;
+}
 
 const FACTORY = { ...PAD };
 
@@ -90,14 +121,61 @@ describe('padTuning：出厂 + 玩家档 → 桥用的那一组值', () => {
     }
   });
 
-  it('扳机那一格的下界不许是 0：门槛 0 时"碰都没碰"也算按下，而且永远松不开', () => {
+  it('扳机那两格的下界不许是 0：门槛 0 时"碰都没碰"也算按下，而且永远松不开', () => {
     // 范围是这张表**唯一**说得上话的地方：清洗只按范围救档，所以"下界写错"这种脏表
     // 不会有人报错 —— `value >= 0` 恒真，扳机那一格就从旋钮变成了卡死的开关。
-    // 迟滞救不了它：`0 × factor` 还是 0。所以这一格的下界必须钉在 0 之上
-    const spec = PAD_TUNING.pressThreshold;
-    expect(spec.min, '触发深度允许拧到 0 = 桥每帧都当玩家按着扳机').toBeGreaterThan(0);
-    expect(padTuning({ pressThreshold: 0 }).pressThreshold, '0 这一档出界，清洗该落回出厂值')
-      .toBe(PAD.pressThreshold);
+    // 迟滞救不了它：`0 × factor` 还是 0。所以每一枚扳机的下界都得钉在 0 之上
+    for (const key of ['leftTriggerDepth', 'rightTriggerDepth']) {
+      const spec = PAD_TUNING[key];
+      expect(spec, `${key} 不在表里：LT 与 RT 各有各的深度是切片32 的立论`).toBeTruthy();
+      expect(spec.min, `${key}.min 是 0 = 桥每帧都当玩家按着这一枚扳机`).toBeGreaterThan(0);
+      expect(padTuning({ [key]: 0 })[key], '0 这一档出界，清洗该落回出厂值').toBe(PAD[key]);
+    }
+  });
+
+  it('扳机那两档的**量程两端仍然必须是合法档**：0.2 一碰就走、1 推到底才算', () => {
+    // 这一条不查表查什么，查的是"老档里的值今天还算不算"：清洗只按范围救档，把上限从 1 收窄
+    // 到 0.4 不会报错，但玩家存储里那一档 `0.7`（钝到只有推到底才起手）当场变成脏值，下一次
+    // 开机就被刷回出厂 0.5 —— 玩家什么都没做，手感自己变了（探针里"改一个数字而全套仍绿"的那条）。
+    // 两端都得钉住：下界 0 由上一条管，这里管"整根扳机行程还够不够得着"
+    for (const key of ['leftTriggerDepth', 'rightTriggerDepth']) {
+      const spec = PAD_TUNING[key];
+      expect(spec.min, `${key}.min：0.2 是切片22 定下的"一碰就走"那一档`).toBe(0.2);
+      expect(spec.max, `${key}.max：收到 1 以下就没有"非推到底不算"这一档了`).toBe(1);
+      expect(spec.step, `${key}.step：0.05 是面板上的档位间距`).toBe(0.05);
+      for (const v of [0.2, 0.35, 0.5, 0.7, 1]) {
+        expect(padTuning({ [key]: v })[key], `${key} 的 ${v} 这一档不再合法 = 老档被改写`)
+          .toBe(v);
+      }
+    }
+  });
+
+  it('老档里那一根 `pressThreshold` 拆给两枚扳机：玩家调过的手感不该在拆分那天早上被抹掉', () => {
+    // 存储是玩家可写的、也是**跨版本**的：切片32 之前只有一根扳机深度，拧过的档同时管着两根
+    // 手指。拆成两格之后若只认新键，那一档就静静躺在存储里没人读，而两格回出厂 0.5 ——
+    // 玩家看到的是"我调细的扳机今天早上一夜之间变钝了"（与 B47 同一族：写的账与读的账分家）
+    expect(padTuning({ pressThreshold: 0.3 }))
+      .toEqual({ ...factoryTuning(), leftTriggerDepth: 0.3, rightTriggerDepth: 0.3 });
+    // 已经拧过的新一格赢，另一格仍从老档接位（玩家只拖了 LT，RT 该保持他原来那一档）
+    expect(padTuning({ pressThreshold: 0.3, leftTriggerDepth: 0.8 }))
+      .toEqual({ ...factoryTuning(), leftTriggerDepth: 0.8, rightTriggerDepth: 0.3 });
+  });
+
+  it('老档出界或是脏值：两枚扳机各回出厂，不把脏值搬进新家', () => {
+    for (const bad of [0, 1.5, -3, 'abc', null, NaN]) {
+      const got = padTuning({ pressThreshold: bad });
+      expect(got.leftTriggerDepth, String(bad)).toBe(PAD.leftTriggerDepth);
+      expect(got.rightTriggerDepth, String(bad)).toBe(PAD.rightTriggerDepth);
+    }
+  });
+
+  it('`pressThreshold` 不再是一格旋钮：一根拖了什么都不改的滑杆就是说谎', () => {
+    // 留着它的后果不是"多一格无害"，是面板照旧画一根、桥已经不读 —— 玩家拖它会有反馈
+    // （写进存储）而行为一个字不变，正是切片21 那条"滑杆真的改行为"要防的东西。
+    // 但 `PAD.pressThreshold` 要留着：那十四枚数字键仍需一个唯一入口深度（见 `padPressDepth`）
+    expect(PAD_TUNING.pressThreshold, '表里还留着它 = 第二根扳机滑杆').toBeUndefined();
+    expect('pressThreshold' in padTuning(), '清洗结果里还留着它 = 第二个扳机真源').toBe(false);
+    expect(PAD.pressThreshold, '数字键那一档的深度没了：`_pressed` 会拿到 undefined').toBeTypeOf('number');
   });
 
   it('合法值原样通过（含两端边界）：每一格都各自验一次', () => {
@@ -278,27 +356,22 @@ describe('GamepadInput：两根杆都只认这一份手档', () => {
     expect(bridge.move.sprint, '拿原始模长比门槛，这一推就会翻成"没到"').toBe(true);
   });
 
-  it('扳机触发深度一格就管扳机：同一 0.6 那一推在两个档下分别是"按下了"和"没按"', () => {
+  it('一枚扳机一档深度：同一 0.6 那一推在两个档下分别是"按下了"和"没按"', () => {
     for (const [press, want] of [[0.5, true], [0.6, true], [0.65, false], [0.9, false], [0.2, true]]) {
-      const { bridge, keys, lt } = mkTriggerBridge({ pressThreshold: press });
+      const { bridge, keys, lt } = mkTriggerBridge({ leftTriggerDepth: press });
       lt(0.6);
       bridge.poll();
       expect(!!keys.ShiftLeft, `门槛 ${press}、扳机 0.6`).toBe(want);
     }
     // 端点算"按下"（`>=` 不是 `>`）：门槛拧到多深，推到多深就该算按下
-    const edge = mkTriggerBridge({ pressThreshold: 0.8 });
+    const edge = mkTriggerBridge({ leftTriggerDepth: 0.8 });
     edge.lt(0.8);
     edge.bridge.poll();
     expect(edge.keys.ShiftLeft).toBe(true);
   });
 
-  it('出厂这一对算出来与切片22 之前手写的 0.35 逐字相等（默认手感一点没变）', () => {
-    // 迟滞写成系数之后，"出厂档下等于什么"就是一条要钉住的等式 —— 不然改了系数没人知道
-    expect(PAD.pressThreshold * PAD.triggerReleaseFactor).toBe(0.35);
-  });
-
   it('迟滞是**这一格的**系数：门槛 0.9 时退到 0.65 仍算按着、0.6 才放（固定下沿会在低门限档反过来）', () => {
-    const { bridge, keys, lt } = mkTriggerBridge({ pressThreshold: 0.9 });
+    const { bridge, keys, lt } = mkTriggerBridge({ leftTriggerDepth: 0.9 });
     lt(0.95);
     bridge.poll();
     expect(keys.ShiftLeft).toBe(true);
@@ -310,7 +383,7 @@ describe('GamepadInput：两根杆都只认这一份手档', () => {
     expect(keys.ShiftLeft).toBe(false);
     // 反手验一次"为什么不能写绝对下沿"：门限拧到 0.2 时，绝对 0.35 会**高于**进入门限，
     // 一碰就再也松不开。系数那一档下 0.2×0.7=0.14，0.2 还按着、0.1 才放
-    const soft = mkTriggerBridge({ pressThreshold: 0.2 });
+    const soft = mkTriggerBridge({ leftTriggerDepth: 0.2 });
     soft.lt(0.2);
     soft.bridge.poll();
     expect(soft.keys.ShiftLeft).toBe(true);
@@ -323,7 +396,7 @@ describe('GamepadInput：两根杆都只认这一份手档', () => {
   });
 
   it('数字按钮（只有 `pressed` 没有模拟量）在最深那一档也算按下：门槛别把手柄变成哑巴', () => {
-    const { bridge, keys, lt } = mkTriggerBridge({ pressThreshold: 1 });
+    const { bridge, keys, lt } = mkTriggerBridge({ leftTriggerDepth: 1 });
     lt(1);                                              // 数字键的形状：`pressed` 为真，桥合成 value 1
     bridge.poll();
     expect(keys.ShiftLeft, '门槛 1.0 = 按到底才算，数字键按到底就是 1').toBe(true);
@@ -341,7 +414,7 @@ describe('GamepadInput：两根杆都只认这一份手档', () => {
       () => [pad],
       () => ({ code: 'ShiftLeft' }),
     );
-    bridge.setTuning({ pressThreshold: 0.9 });
+    bridge.setTuning({ leftTriggerDepth: 0.9 });
     bridge.startCapture((name) => found.push(name));
     pad.buttons[6].value = 0.6;                         // 半按：这一档下不该算按下
     bridge.poll();
@@ -367,7 +440,7 @@ describe('GamepadInput：两根杆都只认这一份手档', () => {
       () => [pad],
       () => ({ code: 'ShiftLeft' }),
     );
-    bridge.setTuning({ pressThreshold: 0.9 });
+    bridge.setTuning({ leftTriggerDepth: 0.9 });
     bridge.startCapture((name) => found.push(name));
     pad.buttons[6].value = 0.95;
     bridge.poll();                                        // 按下：捕获开始等松手
@@ -380,15 +453,147 @@ describe('GamepadInput：两根杆都只认这一份手档', () => {
       .toEqual(['leftTrigger']);
   });
 
-  it('扳机深度拧到最浅也不与走路那两档串门：只改扳机，`mag` 与 `sprint` 一个字不动', () => {
+  it('扳机那两档拧到任一头都不与走路串门：只改扳机，`mag` 与 `sprint` 一个字不动', () => {
     const push = 0.7;                                   // 越过出厂死区的一推
     const a = mkBridge();
     a.pad.axes[0] = push;
     a.bridge.poll();
-    const b = mkBridge({ pressThreshold: 1 });
-    b.pad.axes[0] = push;
-    b.bridge.poll();
-    expect(b.bridge.move).toEqual(a.bridge.move);
+    // 两头各来一次、两枚扳机各来一次：这四份档都不该碰到移动那条重映射式
+    for (const tuning of [{ leftTriggerDepth: 0.2 }, { leftTriggerDepth: 1 },
+      { rightTriggerDepth: 0.2 }, { rightTriggerDepth: 1 }]) {
+      const b = mkBridge(tuning);
+      b.pad.axes[0] = push;
+      b.bridge.poll();
+      expect(b.bridge.move, JSON.stringify(tuning)).toEqual(a.bridge.move);
+    }
+  });
+
+  /* ---------------- 两根扳机两个数（W-A7 切片32）----------------
+   * 现场：`pressThreshold` 一格同时管着 LT 与 RT，可这两枚干的不是同一件事 ——
+   * RT 是重击（`edge`，玩家要的是"一碰就走"），LT 是蓄力法术（`level`，切片30 之后它真的有
+   * 消费者，而且那一推的**深度**决定蓄力起不起手，切片30 的 P6 读数量过）。一根旋钮逼着玩家
+   * 在两样手感之间取一个折中：拧浅了走路时手指压着扳机就起手蓄力，拧深了重击按不动。
+   * 所以这一片的中心不是"多一根滑杆"，是**一枚物理按钮一个主人**在手档这一侧的对应物。 */
+
+  /**
+   * 真表上的两枚扳机：LT=`spell1`（level，出口 `Digit1`）、RT=`attackHeavy`（edge，出口是**鼠标右键**）。
+   * 用真表而不是手搓两格：这一片要证的正是"哪一档管哪一枚"，手搓会把这件事写死在夹具里 ——
+   * 出厂表以后把扳机挪去别的动作，夹具不会红，而玩家会看到"我拧的滑杆管的是别人"。
+   */
+  function mkTriggers(tuning) {
+    const pad = makePad();
+    const keys = {};
+    const mouseDown = { left: false, right: false };
+    const bridge = new GamepadInput({ keys, mouseDown }, GAMEPAD_BINDINGS, () => [pad]);
+    bridge.setTuning(tuning);
+    const hold = (i, v) => { pad.buttons[i].value = v; pad.buttons[i].pressed = v >= 1; };
+    // 每次 poll 之前把键盘侧那两格清掉：`_grab` 借的格子上面的用例读的就是"这一帧亮没亮"
+    const step = () => {
+      delete keys[codeFor('spell1')];
+      mouseDown.right = false;
+      bridge.poll();
+      return { spell: !!keys[codeFor('spell1')], heavy: mouseDown.right === true };
+    };
+    return { pad, keys, mouseDown, bridge, lt: (v) => hold(6, v), rt: (v) => hold(7, v), step };
+  }
+
+  /** 两枚扳机都当 `level` 用：迟滞要观察"还按着没有"，`edge` 只给一帧，读不出线在哪 */
+  function mkTwoLevelTriggers(tuning) {
+    const pad = makePad();
+    const keys = {};
+    const bridge = new GamepadInput({ keys }, {
+      ltHold: { action: 'ltHold', mode: 'level', button: 'leftTrigger' },
+      rtHold: { action: 'rtHold', mode: 'level', button: 'rightTrigger' },
+    }, () => [pad], (slot) => ({ code: slot.action === 'ltHold' ? 'KeyT' : 'KeyR' }));
+    bridge.setTuning(tuning);
+    const hold = (i, v) => { pad.buttons[i].value = v; pad.buttons[i].pressed = v >= 1; };
+    return {
+      keys, bridge,
+      lt: (v) => hold(6, v), rt: (v) => hold(7, v),
+      step: () => { bridge.poll(); return { lt: !!keys.KeyT, rt: !!keys.KeyR }; },
+    };
+  }
+
+  describe('两根扳机两个数（切片32：重击与蓄力法术要的不是同一种按法）', () => {
+    it('出厂两格相等，而且算出来的迟滞仍然是切片22 那一对 0.5 / 0.35（没拧过的玩家手感一字不变）', () => {
+      expect(PAD.leftTriggerDepth, '拆格不该顺手改默认手感').toBe(0.5);
+      expect(PAD.rightTriggerDepth).toBe(0.5);
+      expect(PAD.leftTriggerDepth * PAD.triggerReleaseFactor).toBe(0.35);
+      expect(PAD.rightTriggerDepth * PAD.triggerReleaseFactor).toBe(0.35);
+    });
+
+    it('RT 拧浅、LT 拧深：同一 0.35 那一推只出重击，蓄力法术不起手', () => {
+      const r = mkTriggers({ rightTriggerDepth: 0.3, leftTriggerDepth: 0.7 });
+      r.rt(0.35);
+      r.lt(0.35);
+      expect(r.step(), 'RT 在 0.3 档下 0.35 该出手').toEqual({ spell: false, heavy: true });
+      r.rt(0);
+      r.lt(0.75);
+      expect(r.step(), 'LT 在 0.7 档下要推到 0.75 才算按住').toEqual({ spell: true, heavy: false });
+    });
+
+    it('反手一对：同一份档反过来拧，0.35 那一推就变成"蓄力起手、重击没按"', () => {
+      // 上面那条若把两枚按钮的档接反（LT 读成 RT 的那格），只有一条断言会红 —— 这条把方向钉死
+      const r = mkTriggers({ rightTriggerDepth: 0.7, leftTriggerDepth: 0.3 });
+      r.rt(0.35);
+      r.lt(0.35);
+      expect(r.step()).toEqual({ spell: true, heavy: false });
+    });
+
+    it('迟滞各跟各的档：同一处回落只松开拧浅的那枚，另一枚还在按着', () => {
+      const r = mkTwoLevelTriggers({ leftTriggerDepth: 0.9, rightTriggerDepth: 0.4 });
+      r.lt(0.95); r.rt(0.95);
+      expect(r.step()).toEqual({ lt: true, rt: true });
+      r.lt(0.65); r.rt(0.65);                          // 两枚都退到 0.65
+      expect(r.step(), '0.65 在 LT 的 0.9×0.7=0.63 之上、也在 RT 的 0.4×0.7=0.28 之上')
+        .toEqual({ lt: true, rt: true });
+      r.lt(0.6); r.rt(0.3);
+      expect(r.step(), '只有 LT 退到自己的线以下：RT 的下沿是 0.28，还远着呢')
+        .toEqual({ lt: false, rt: true });
+      r.rt(0.2);
+      expect(r.step(), 'RT 退到 0.28 以下才算松').toEqual({ lt: false, rt: false });
+    });
+
+    it('捕获那一路也按各自那枚的深度：同一 0.4 在浅档被抓到、在深档不算按下', () => {
+      const pad = makePad();
+      const found = [];
+      const bridge = new GamepadInput({ keys: {} }, {
+        ltHold: { action: 'ltHold', mode: 'level', button: 'leftTrigger' },
+        rtHold: { action: 'rtHold', mode: 'edge', button: 'rightTrigger' },
+      }, () => [pad], () => null);
+      bridge.setTuning({ leftTriggerDepth: 0.9, rightTriggerDepth: 0.3 });
+      bridge.startCapture((name) => found.push(name));
+      // 0.4 这一推是**挑过的**：在 RT 自己那档 0.3 之上、在出厂那档 0.5 之下 —— 拿 0.5 来推就
+      // 分不出"读的是这一枚的深度"还是"读的是全局那一档"（变异探针 M3 就这么绿过去的）
+      pad.buttons[7].value = 0.4;                      // RT 浅档：0.4 够深
+      bridge.poll();
+      pad.buttons[7].value = 0;
+      bridge.poll();
+      expect(found, 'RT 那一枚在自己的档上算按下，该被抓到').toEqual(['rightTrigger']);
+      bridge.startCapture((name) => found.push(name));
+      pad.buttons[6].value = 0.4;                      // LT 深档：同一推量不算碰过
+      bridge.poll();
+      pad.buttons[6].value = 0;
+      bridge.poll();
+      expect(found, '半按深档的 LT 不该被捕获成一次改键').toEqual(['rightTrigger']);
+    });
+
+    it('数字键不吃扳机那两格：两枚扳机都拧到底，A 键照样跳', () => {
+      // 拆格的代价如果落在数字键上，表现是"扳机拧深之后手柄变成哑巴"—— 那是比没旋钮糟得多
+      const r = mkTriggers({ leftTriggerDepth: 1, rightTriggerDepth: 1 });
+      const a = r.pad.buttons[0];
+      a.pressed = true; a.value = 1;
+      r.bridge.poll();
+      expect(r.keys[codeFor('jump')], 'A 是数字键：它的"深度"不是玩家那两格').toBe(true);
+    });
+
+    it('桥读的是"这一枚按钮的深度"，不是全局那一格', () => {
+      const bridge = sourceOf('engine/GamepadInput.js');
+      expect(bridge, '桥里还在读 `tuning.pressThreshold`：LT/RT 拆格之后它会变成 undefined，'
+        + '而 `undefined` 参与比较只会永远为假 —— 表现是扳机按不动').not.toMatch(/tuning\.pressThreshold/);
+      expect(bridge, '`_pressed` 的门限参数不再问 `padPressDepth`：哪一枚吃哪一档又要各写一遍')
+        .toMatch(/_pressed\([^)]*padPressDepth\(this\.tuning,/);
+    });
   });
 
   it('拔手之后 `sprint` 跟着清：留着就是"松手还在跑"（与 `mag` 同一本账）', () => {
@@ -457,6 +662,35 @@ describe('设置那一格：范围只有一个真源、写进桥只有一条路'
     expect(s.get('padTuning')).toEqual({
       ...factoryTuning(), deadzone: 0.06, analogRange: 0.66, lookCurve: 2.2,
     });
+  });
+
+  it('切片32 之前的老档（只有一根 `pressThreshold`）：桥读到的两枚扳机都是那一档', () => {
+    // 走的是**真路径**：存储 → `SettingsManager` → `applyToGame` → 桥。救档那条规矩住在
+    // `padTuning` 里，而面板回显与推给桥用的是同一个清洗口，所以这里对了两头就都对了
+    const store = install();
+    store.set('crossrealm_settings', JSON.stringify({
+      version: 2, values: { padTuning: { deadzone: 0.1, pressThreshold: 0.25 } },
+    }));
+    const seen = [];
+    new SettingsManager().applyToGame({
+      padInput: { setTuning: (raw) => seen.push({ ...padTuning(raw) }) },
+    });
+    expect(seen[0], '老档那根扳机深度没拆给两枚扳机').toEqual({
+      ...factoryTuning(), deadzone: 0.1, leftTriggerDepth: 0.25, rightTriggerDepth: 0.25,
+    });
+  });
+
+  it('老键在**开机那一步**就没有了：留在包里它就是第二根扳机旋钮', () => {
+    // 浅合并会先把"没拧过"抹成出厂值，再靠 `padTuning` 认出老档就来不及了 —— 所以清洗挂在读档。
+    // 这一条钉的是那个顺序：读档之后 `pressThreshold` 必须已经不在了，而它那一档已经在两枚新格里
+    const store = install();
+    store.set('crossrealm_settings', JSON.stringify({
+      version: 2, values: { padTuning: { pressThreshold: 0.25, deadzone: 'abc' } },
+    }));
+    const bag = new SettingsManager().get('padTuning');
+    expect('pressThreshold' in bag, '老键还在：下一次 `save()` 会把它原样写回磁盘').toBe(false);
+    expect(bag.leftTriggerDepth).toBe(0.25);
+    expect(bag.deadzone, '脏值也在读档时回落，不把 "abc" 留在包里等下一次救').toBe(PAD.deadzone);
   });
 
   it('读档浅拷贝：就地改一次 `data.padTuning` 不许污染出厂默认（切片4 同一课）', () => {
@@ -606,22 +840,35 @@ describe('静态门禁：一处范围、一处写入口、桥只读自己的手�
 
   it('桥里每一格旋钮都真的读了自己的手档字段（"没读常量"不等于"读了手档"）', () => {
     const bridge = sourceOf('engine/GamepadInput.js');
+    const keybinds = sourceOf('content/keybinds.js');
+    /* 扳机那两格是**唯一**经 `padPressDepth` 读的：桥按按钮序号扫一遍，"哪一枚吃哪一档"若写在桥里
+     * 就是三个调用点各分叉一次。除此之外的每一格仍要桥自己 `this.tuning.<key>` 直读 ——
+     * 名单写死在这里，以后加一格想走"间接读"这条后门，得先在这里挂号，不能悄悄走。 */
+    const viaDepthResolver = ['leftTriggerDepth', 'rightTriggerDepth'];
     for (const key of Object.keys(PAD_TUNING)) {
+      if (viaDepthResolver.includes(key)) {
+        expect(keybinds, `${key} 没被 padPressDepth 读：拆格白拆了`).toMatch(new RegExp(`tuning\\.${key}\\b`));
+        expect(bridge, '桥没把整份手档交给 `padPressDepth`：它读的还是别的那一格')
+          .toContain('padPressDepth(this.tuning, ');
+        continue;
+      }
       expect(bridge, `桥里没有 this.tuning.${key}`).toContain(`this.tuning.${key}`);
     }
     // `_analogMagnitude` 不许再留出厂默认参数：那是在手档之外藏的第二个值，漏传一格不会报错
     expect(bridge).toMatch(/function _analogMagnitude\(mag, deadzone, range\)/);
   });
 
-  it('扳机那两档只有一条判据：`_pressed(` 每个调用点都喂满四个参数', () => {
+  it('扳机那两档只有一条判据：`_pressed(` 每个调用点喂满四个参数，第三参数问 `padPressDepth`', () => {
     // 切片21 那条"helper 不许自带出厂值"的规矩搬到扳机上：这里少喂一个参数不会报错 ——
     // `undefined` 参与比较只会永远为假，表现是"扳机按不动"，而按不动的排查方向是手柄，不是桥
     const bridge = sourceOf('engine/GamepadInput.js');
-    const calls = [...bridge.matchAll(/_pressed\(([^)]*)\)/g)];
+    const calls = callArgs(bridge, '_pressed');
     expect(calls.length, '桥里一个 `_pressed` 调用点也没有').toBeGreaterThanOrEqual(4);
-    for (const m of calls) {
-      const args = m[1].split(',').map((a) => a.trim()).filter((a) => a !== '');
-      expect(args, `_pressed(${m[1]}) 的参数不足四个`).toHaveLength(4);
+    for (const args of calls) {
+      expect(args, `_pressed(${args.join(', ')}) 的参数不足四个`).toHaveLength(4);
+      // 深度必须是"这一枚按钮的深度"：又是全局那一格的话，LT / RT 重新变成一个旋钮
+      expect(args[2], `_pressed 第三参数不是 padPressDepth(...)：${args[2]}`)
+        .toMatch(/^padPressDepth\(this\.tuning, .+\)$/);
     }
     // 迟滞确实是"这一格的系数倍"，不是又一个绝对值：式子只许长这样
     expect(bridge).toContain('press * factor');
@@ -633,7 +880,7 @@ describe('静态门禁：一处范围、一处写入口、桥只读自己的手�
   it('`releaseThreshold` 那一格真的没了：出厂表里没有它，`src/` 里也没人读它', () => {
     // 一个已经删掉的字段留在表里 = 面板与行为会各自指着不同的"那一格"（B47 那一族）。
     // 表里没定义 + 源码没人读，两头一起钉，才不许它悄悄回来当第二个真源
-    expect(PAD.releaseThreshold, '出厂表里还留着 `releaseThreshold`：迟滞现在是 `pressThreshold` 的系数').toBeUndefined();
+    expect(PAD.releaseThreshold, '出厂表里还留着 `releaseThreshold`：迟滞现在是扳机那两档的系数').toBeUndefined();
     const readers = FILES.filter((f) => /PAD\.releaseThreshold\b/.test(f.source)).map((f) => f.name);
     expect(readers, '这些地方还在读一个已经不存在的字段（读到的永远是 undefined）').toEqual([]);
   });

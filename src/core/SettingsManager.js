@@ -34,8 +34,8 @@ const DEFAULTS = {
    *
    * 默认值不在这里抄一遍 —— `padTuning()` 取的就是 `content/keybinds.js` 里那份 `PAD`，
    * 因为"滑杆的范围"与"桥认的范围"必须是同一条算式（两处分头写就会滑到头却被当成脏数据回落）。
-   * 加一格也不需要动这里：`data.padTuning` 是 `{...出厂, ...存档}` 浅合并，老档里缺的那几格
-   * 自然落到出厂值（见 `tests/pad-tuning.test.js` 的"老档缺新格"一例）。
+   * 加一格也不需要动这里：读档那一步走的就是 `padTuning(存档)`，缺的那几格由它落到出厂值
+   * （见 `tests/pad-tuning.test.js` 的"老档缺新格"一例）。
    */
   padTuning: padTuning(),
   /**
@@ -69,8 +69,13 @@ export class SettingsManager {
     this.data.gamepadBinds = { ...DEFAULTS.gamepadBinds, ...(loaded.gamepadBinds ?? {}) };
     // 界面态那格同理：三格对象型默认值都不许与 `DEFAULTS` 共用引用
     this.data.gamepadUiBinds = { ...DEFAULTS.gamepadUiBinds, ...(loaded.gamepadUiBinds ?? {}) };
-    // 同上：这三根旋钮也是一格对象，不能与出厂共用引用（就地改一次就把出厂手感改了）
-    this.data.padTuning = { ...DEFAULTS.padTuning, ...(loaded.padTuning ?? {}) };
+    // 同上：这几根旋钮也是一格对象，不能与出厂共用引用（就地改一次就把出厂手感改了）。
+    // 但这一格读档时**清洗一次**，不走 `{...出厂, ...存档}` 那种浅合并：合并会把"玩家没拧过这一格"
+    // 这件事抹掉，而切片32 把扳机旋钮拆成 LT / RT 两根之后，老档里只有那一个数 —— 先合并成
+    // "两枚新格都已经是出厂值"，`padTuning` 就再也认不出该不该拿老数垫它们（表现：玩家调过的
+    // 灵敏扳机在拆分那天早上悄悄变回钝的）。清洗同时还会丢掉存储里没人认领的键，与
+    // `migrateLegacySettings` 是同一条纪律。
+    this.data.padTuning = padTuning(loaded.padTuning);
   }
 
   load() {

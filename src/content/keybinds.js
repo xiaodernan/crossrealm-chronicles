@@ -45,18 +45,36 @@ export const PAD = {
    *  不再另设单轴门限：那会让"想纯向前却斜着走"变成常态。 */
   deadzone: 0.2,
   /**
-   * 扳机（LT/RT 在标准映射里既当轴又当键）按下的门限。**出厂值玩家可拧**（见 `PAD_TUNING`），
-   * 桥认的是 `this.tuning.pressThreshold`。
+   * **数字按钮**那一档深度（切片32 起扳机不再读它）：十四枚数字键只有 `pressed` 没有模拟量，
+   * 桥给它们合成的值是 0 或 1，所以这里留一个唯一的入口常数即可。
+   *
+   * 为什么不删：`_pressed` 的门限参数每格都要有值，删了就是 `undefined` 参与比较 ——
+   * 永远为假，表现是"扳机按不动"。也不许它再冒充扳机那两格：那正是切片32 拆开的东西。
    */
   pressThreshold: 0.5,
   /**
-   * 松开迟滞的**系数**（切片22）：按下去之后要退到 `pressThreshold × 0.7` 以下才算松手，
+   * 左扳机（LT）的按下深度：**出厂值玩家可拧**（见 `PAD_TUNING`），桥认的是 `padPressDepth()`。
+   *
+   * 为什么一根旋钮要拆成两根（切片32）：这两枚物理按钮干的不是同一件事 —— RT 是重击（`edge`，
+   * 玩家要的是"一碰就走"），LT 是蓄力法术（`level`，切片30 之后它真的有消费者，而且那一推的
+   * **深度**决定蓄力起不起手，切片30 的 P6 量过）。共用一格时玩家必须在两种手感之间取折中：
+   * 拧浅了走路时手指压着扳机就起手蓄力，拧深了重击按不动。拆格之后仍然是一处判据（`padPressDepth`），
+   * 只是那"一处"现在按按钮分叉。
+   */
+  leftTriggerDepth: 0.5,
+  /** 右扳机（RT）的按下深度，同上。出厂与 LT 相等：没拧过的玩家手感一字没变 */
+  rightTriggerDepth: 0.5,
+  /**
+   * 松开迟滞的**系数**（切片22）：按下去之后要退到 `深度 × 0.7` 以下才算松手，
    * 免得扳机停在门限上反复触发。
    *
    * 为什么是系数而不是第二格绝对值：触发深度现在是玩家自己拧的（0.2~1）。给一个固定的松开
    * 下沿，在"拧到 0.2"那一档下下沿会**高于**进入门限 —— 迟滞反过来变成"一碰就再也松不开"。
    * 写成系数，两档之间的关系恒定。出厂这一对算出来 0.5 × 0.7 = 0.35，与切片22 之前那个手写的
    * `releaseThreshold` 逐字相等（所以默认手感一点没变）。
+   *
+   * 切片32 拆出两枚扳机之后它**仍然只有一份**：迟滞吃的是"各自那档的系数倍"，LT 拧深不会把
+   * RT 的松开线一起拖高（各跟各的档，`tests/pad-tuning.test.js` 里那条回落用例钉着这件事）。
    */
   triggerReleaseFactor: 0.7,
   /**
@@ -90,8 +108,9 @@ export const PAD = {
    * 走焦那几格（`cardinal`）的**回中迟滞系数**（切片19）：推出 `deadzone` 才点亮，
    * 要退到 `deadzone × 0.6` 以下才算松手。
    *
-   * 为什么是系数而不是又一个绝对数值：扳机那一格（`pressThreshold`，切片22 起可拧）吃的是
-   * 0~1 的绝对刻度，它的迟滞仍然写成系数；摇杆这一档吃的却是**玩家自己拧的** `deadzone`（可到 0）——
+   * 为什么是系数而不是又一个绝对数值：扳机那两格（`leftTriggerDepth` / `rightTriggerDepth`，
+   * 切片22 起可拧）吃的是 0~1 的绝对刻度，它们的迟滞仍然写成系数；摇杆这一档吃的却是**玩家自己拧的**
+   * `deadzone`（可到 0）——
    * 给一个固定下沿，在低死区档会高于进入门限，迟滞就反过来变成"一点亮就松不开"。
    * 为什么这条链要有迟滞：切片18 已经证明松手会把连发账清零（`HotkeyRouter` 里那一笔 `_held = 0`），
    * 摇杆停在死区边上抖一抖，玩家看到的就是"每抖一下重新等 0.42 秒" —— 焦点原地不动，
@@ -107,7 +126,8 @@ export const PAD = {
 };
 
 /**
- * 玩家可以拧的那几根手感旋钮（切片15 起三根，切片21 再加三根，切片22 补上扳机那一根）：**范围与出厂值都只写在这里**。
+ * 玩家可以拧的那几根手感旋钮（切片15 起三根，切片21 再加三根，切片22 补上扳机那一根，
+ * 切片32 把扳机那一根拆成 LT / RT 两根）：**范围与出厂值都只写在这里**。
  *
  * 为什么不各写各的：`deadzone` 同时管着八向量化与模拟量两条路，`analogRange` 与它一起
  * 决定同一条重映射式，`lookCurve` 又只作用于镜头 —— 一旦"设置面板上的 min/max"与
@@ -140,10 +160,17 @@ export const PAD_TUNING = {
    */
   moveSprintThreshold: { min: 0.3, max: 1, step: 0.05 },
   /**
-   * 扳机按下的深度（LT/RT 的模拟量到多少算"按下了"）：0.2 = 一碰就走，1 = 非推到底不算。
+   * 左扳机（LT）按下的深度（模拟量到多少算"按下了"）：0.2 = 一碰就走，1 = 非推到底不算。
    * 松开的迟滞**不另设一格** —— 它是这一格的系数（`PAD.triggerReleaseFactor`），理由写在那里。
+   *
+   * 切片32 把原来那一格 `pressThreshold` 拆成 LT / RT 两格（同一枚旋钮逼着"一碰就走的轻击"和
+   * "深度决定蓄力起不起手"两种手感取折中）。老档里那一个数由 `padTuning()` 垫给两枚新格，
+   * 所以**已存的手感不会被这次拆分抹掉**，而 `pressThreshold` 本身不再是一格旋钮 ——
+   * 面板上多一根拖了什么都不改的滑杆就是说谎。
    */
-  pressThreshold: { min: 0.2, max: 1, step: 0.05 },
+  leftTriggerDepth: { min: 0.2, max: 1, step: 0.05 },
+  /** 右扳机（RT）按下的深度，同上。出厂与 LT 相等 */
+  rightTriggerDepth: { min: 0.2, max: 1, step: 0.05 },
 };
 
 /**
@@ -151,13 +178,41 @@ export const PAD_TUNING = {
  * 越界 / `NaN` / 字符串一律**逐项**回落出厂（不是整包作废 —— 玩家只把曲线拖坏不该连死区也没了），
  * 且不回写 `PAD` 本身：改了出厂对象就等于把全仓的默认值改了，"恢复默认"再也回不来。
  */
+function _usable(key, v) {
+  const spec = PAD_TUNING[key];
+  const n = Number(v);
+  return Number.isFinite(n) && n >= spec.min && n <= spec.max ? n : null;
+}
+
 export function padTuning(raw = {}) {
   const out = {};
-  for (const [key, spec] of Object.entries(PAD_TUNING)) {
-    const v = Number(raw?.[key]);
-    out[key] = Number.isFinite(v) && v >= spec.min && v <= spec.max ? v : PAD[key];
+  for (const key of Object.keys(PAD_TUNING)) {
+    out[key] = _usable(key, raw?.[key]) ?? PAD[key];
+  }
+  /* 切片32：扳机从一格拆成两根。老档里只有 `pressThreshold` 一个数，拆不出来就两枚都回出厂的话，
+   * 表现是"我明明把扳机调灵敏了，拆分那天早上重击又按不动了" —— 拿那一格垫两枚新格。
+   * 前提是它自己仍然合法：脏值 / 越界不配搬进新家（下面这些值两枚扳机各自回出厂）。
+   * 玩家明确拧过新格（哪怕只拧了一枚）时新格赢：这里是**迁移**，不是第二份优先级。 */
+  const legacy = _usable('leftTriggerDepth', raw?.pressThreshold);
+  if (legacy !== null) {
+    for (const key of ['leftTriggerDepth', 'rightTriggerDepth']) {
+      if (_usable(key, raw?.[key]) === null) out[key] = legacy;
+    }
   }
   return out;
+}
+
+/**
+ * 一枚按钮吃哪一档深度（切片32）：桥的三个 `_pressed` 调用点都问这里，判据只有一处。
+ *
+ * 为什么参数是整份手档而不是"这两格自己传进来"：桥拿到的是按钮**序号**（数字键与扳机走同一段
+ * 扫描），让调用方各写一遍 `index === 6 ? lt : index === 7 ? rt : …` 就是把手档搬到桥里再分叉一次。
+ * 序号而非按钮名：`_captureFrame` 扫的就是序号那一数组，这里不用为它反查名字。
+ */
+export function padPressDepth(tuning, index) {
+  if (index === PAD_BUTTON.leftTrigger) return tuning.leftTriggerDepth;
+  if (index === PAD_BUTTON.rightTrigger) return tuning.rightTriggerDepth;
+  return PAD.pressThreshold;
 }
 
 /**
