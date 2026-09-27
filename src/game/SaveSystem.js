@@ -1,5 +1,6 @@
 import { SaveValidator } from './SaveValidator.js';
 import { CURRENT_VERSION, SAVE_KEYS, migrate, SaveVersionError } from './SaveMigrations.js';
+import { statsFromJSON, statsToJSON } from '../content/objectives.js';
 
 /** 当前写入键；其余历史键只读，迁移成功后保留 */
 const KEY = SAVE_KEYS[0].key;
@@ -57,22 +58,9 @@ export class SaveSystem {
         index: game.quests.questIndex,
         completed: game.quests.completed,
         chapter: game.quests.chapter,
-        stats: {
-          hits: game.quests.stats.hits,
-          kills: game.quests.stats.kills,
-          discoveries: [...game.quests.stats.discoveries],
-          bossDefeated: game.quests.stats.bossDefeated,
-          boss2Defeated: game.quests.stats.boss2Defeated ?? false,
-          boss3Defeated: game.quests.stats.boss3Defeated ?? false,
-          voidBossDefeated: game.quests.stats.voidBossDefeated ?? false,
-          chaosBossDefeated: game.quests.stats.chaosBossDefeated ?? false,
-          dungeonRerun: game.quests.stats.dungeonRerun ?? false,
-          spellCasts: game.quests.stats.spellCasts ?? 0,
-          chargedCasts: game.quests.stats.chargedCasts ?? 0,
-          dungeonsCleared: [...(game.quests.stats.dungeonsCleared ?? [])],
-          npcTalked: [...game.quests.stats.npcTalked],
-          chestsOpened: game.quests.stats.chestsOpened,
-        },
+        // 账本形状由 `content/objectives.js` 推（W-B3 切片2）：这里以前逐格手抄十四行，
+        // 于是判据读一格、存档抄一格，漏抄的那格读档后回到初始值 —— 不报错，只是那一步要重做
+        stats: statsToJSON(game.quests.stats),
       },
     };
   }
@@ -140,15 +128,10 @@ export class SaveSystem {
     game.quests.questIndex = data.quests.index;
     game.quests.completed = data.quests.completed;
     game.quests.chapter = data.quests.chapter ?? (data.quests.index > 8 ? 2 : 1);
-    Object.assign(game.quests.stats, data.quests.stats);
-    if (typeof game.quests.stats.kills !== 'object' || game.quests.stats.kills === null) {
-      game.quests.stats.kills = {};
-    }
-    game.quests.stats.discoveries = new Set(data.quests.stats.discoveries);
-    game.quests.stats.npcTalked = new Set(data.quests.stats.npcTalked ?? []);
-    game.quests.stats.dungeonsCleared = new Set(data.quests.stats.dungeonsCleared ?? []);
-    game.quests.stats.chaosBossDefeated = data.quests.stats.chaosBossDefeated ?? false;
-    game.quests.stats.dungeonRerun = data.quests.stats.dungeonRerun ?? false;
+    // 账本的形状、Set 的复原、读数不取磁盘那份 —— 全在 `content/objectives.js`（W-B3 切片2）。
+    // 以前这里手抄了一遍形状：三个 Set 各一行、`kills` 的类型兜底、两个 bool 的缺省值，
+    // 而判据读的是 `emptyStats()` 那一格 —— 两边各写各的，少抄的那格只是"回到初始值"，不报错
+    game.quests.stats = statsFromJSON(data.quests.stats);
     // v5 起战技数不入档：它是 weaponSkills 的派生值，读档后以真实解锁集合为准
     game.quests.stats.skillsUnlocked = game.weaponSkills?.unlocked?.size ?? 0;
     game.quests.syncProgress();

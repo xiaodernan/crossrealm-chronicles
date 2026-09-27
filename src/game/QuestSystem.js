@@ -1,5 +1,9 @@
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { keyText } from '../content/keyHints.js';
+import {
+  BOSS_STAT_KEYS, STAT_EVENTS, applyStatEvent, conditionHolds,
+  emptyStats, interactGateCondition, objectiveDone,
+} from '../content/objectives.js';
 
 export const QUESTS = [
   { id: 'anchor', title: '觉醒：世界之锚', desc: '触摸枢纽中心的世界之锚。', type: 'interact', targetId: 'hub-anchor' },
@@ -110,29 +114,32 @@ export const MAP_BOSSES = [
 ];
 
 const FRAGMENT_IDS = ['fantasy-ring', 'magic-castle', 'space-tesseract'];
-const VOID_FRAG_IDS = ['fantasy-ring', 'magic-castle', 'space-tesseract', 'void-rift'];
+
+/**
+ * Boss 那一族的界面话术，按 `bossId` 认领。
+ *
+ * 为什么不再按类型名（`boss` / `boss2` / …）各写一遍"读哪个计数器"：那是把
+ * `BOSS_STAT_KEYS` 那份名册抄进显示层，而新表把所有 Boss 都写成 `type: 'boss'` + `bossId`，
+ * 抄本会当场读错格子（在役表今天侥幸不错，只因为类型名里也编了号）。
+ * 顺序与 `MAP_BOSSES` 的对应由 `BOSS_ORDER` 说出，并由用例逐格钉住。
+ */
+const BOSS_DISPLAY = {
+  'shadow-warden': { progress: '进入灰白森林 Boss 红圈 (X≈-250 Z≈-35)', waypoint: '影界守护者 Boss 区' },
+  'archmagus': { progress: '魔法 Boss 红圈 (X≈5 Z≈-220)', waypoint: '大奥术师 Boss 区' },
+  'singularity-herald': { progress: '星际 Boss 红圈 (X≈235 Z≈155)', waypoint: '奇点领主 Boss 区' },
+  'void-chronarch': { progress: '时线 Boss 红圈 (Z≈235 · Ch4+)', waypoint: '时线执政官 Boss 区' },
+  'chaos-overlord': { progress: '混沌 Boss 红圈 (X≈-200 Z≈285 · Ch5+)', waypoint: '混沌领主 Boss 区' },
+};
+
+const BOSS_ORDER = Object.keys(BOSS_STAT_KEYS);
 
 export class QuestSystem {
   constructor(dialog) {
     this.dialog = dialog;
     this.questIndex = 0;
-    this.stats = {
-      hits: 0,
-      kills: {},
-      discoveries: new Set(),
-      bossDefeated: false,
-      boss2Defeated: false,
-      boss3Defeated: false,
-      voidBossDefeated: false,
-      chaosBossDefeated: false,
-      dungeonRerun: false,
-      npcTalked: new Set(),
-      chestsOpened: 0,
-      spellCasts: 0,
-      chargedCasts: 0,
-      dungeonsCleared: new Set(),
-      skillsUnlocked: 0,
-    };
+    // 账本的形状与"哪个事件改哪一格"都在 `content/objectives.js`（W-B3 切片2）：
+    // 这里以前自己抄一份，于是 `ObjectiveEngine` 那份少读两个键也没人发现
+    this.stats = emptyStats();
     this.completed = false;
     this.chapter = 1;
     this.setupListeners();
@@ -142,90 +149,36 @@ export class QuestSystem {
 
   get current() { return QUESTS[this.questIndex] ?? null; }
 
+  /**
+   * 监听器只做两件事：把事件记到账上（记账表在 `content/objectives.js`，全仓一份），
+   * 然后问一句「当前这一步完成了没有」。
+   *
+   * 为什么不再逐事件自己写计数：那九段与 `ObjectiveEngine` 的十一段是同一条算式的两份抄本，
+   * 而 `poi-interact` 那一段把"记账 / 推进 / 门控"混在一起写了五遍同一句 `id === q.targetId`。
+   */
   setupListeners() {
-    window.addEventListener('discovery', (e) => {
-      this.stats.discoveries.add(e.detail.id);
-      this.checkProgress();
-    });
+    for (const name of Object.keys(STAT_EVENTS)) {
+      window.addEventListener(name, (e) => {
+        applyStatEvent(this.stats, name, e.detail);
+        if (name === 'poi-interact') this._onInteract(e.detail);
+        this.checkProgress();
+      });
+    }
+  }
 
-    window.addEventListener('enemy-defeated', (e) => {
-      // 修 B36：击杀归类看 `type`，不看显示名。此前用「名字里含『虚空』」判定精英，
-      // 于是 Boss 召出的「虚空仆从」（type=soldier）全被记成了 elite ——
-      // 精英任务白送，而「影之试炼」要的两名 soldier 永远数不满。
-      if (e.detail.type !== 'boss') {
-        this.stats.kills[e.detail.type] = (this.stats.kills[e.detail.type] || 0) + 1;
-      }
-      if (e.detail.bossId === 'shadow-warden') this.stats.bossDefeated = true;
-      if (e.detail.bossId === 'archmagus') this.stats.boss2Defeated = true;
-      if (e.detail.bossId === 'singularity-herald') this.stats.boss3Defeated = true;
-      if (e.detail.bossId === 'void-chronarch') this.stats.voidBossDefeated = true;
-      if (e.detail.bossId === 'chaos-overlord') this.stats.chaosBossDefeated = true;
-      this.checkProgress();
-    });
-
-    window.addEventListener('spell-cast', (e) => {
-      this.stats.spellCasts++;
-      if (e.detail.charged) this.stats.chargedCasts++;
-      this.checkProgress();
-    });
-
-    window.addEventListener('dungeon-cleared', (e) => {
-      if (this.stats.dungeonsCleared.has(e.detail.id)) {
-        this.stats.dungeonRerun = true;
-      }
-      this.stats.dungeonsCleared.add(e.detail.id);
-      this.checkProgress();
-    });
-
-    window.addEventListener('weapon-skill-unlocked', () => {
-      this.stats.skillsUnlocked++;
-      this.checkProgress();
-    });
-
-    window.addEventListener('combat-hit', () => { this.stats.hits++; this.checkProgress(); });
-
-    window.addEventListener('poi-interact', (e) => {
-      if (e.detail.id) this.stats.discoveries.add(e.detail.id);
-      const q = this.current;
-      const id = e.detail.id;
-      if (q?.type === 'interact' && id === q.targetId
-        && !q.requireAllFragments && !q.requireAscension && !q.requireTrueEnd && !q.requireInfinity) {
-        this.advance();
-        return;
-      }
-      if (q?.type === 'interact' && q.requireAllFragments && id === q.targetId) {
-        if (['fantasy-ring', 'magic-castle', 'space-tesseract'].every((id) => this.stats.discoveries.has(id))) this.advance();
-        return;
-      }
-      if (q?.type === 'interact' && q.requireAscension && e.detail.id === q.targetId) {
-        if (this.canAscend()) this.advance();
-        return;
-      }
-      if (q?.type === 'interact' && q.requireTrueEnd && e.detail.id === q.targetId) {
-        if (this.canTrueEnd()) this.advance();
-        return;
-      }
-      if (q?.type === 'interact' && q.requireInfinity && e.detail.id === q.targetId) {
-        if (this.canInfinity()) this.advance();
-        return;
-      }
-      this.checkProgress();
-    });
-
-    window.addEventListener('chest-opened', () => {
-      this.stats.chestsOpened++;
-      this.checkProgress();
-    });
-
-    window.addEventListener('npc-talk', (e) => {
-      this.stats.npcTalked.add(e.detail.id);
-      this.checkProgress();
-    });
-
-    window.addEventListener('stats-changed', (e) => {
-      if (this.current?.type === 'level' && e.detail.level >= this.current.target) this.advance();
-      if (this.current?.type === 'mind' && (e.detail.mind ?? 0) >= this.current.target) this.advance();
-    });
+  /**
+   * 带门控的那几格「摸一下锚点」：条件没齐时摸了不算完成（判据对它们一律返回 false），
+   * 条件齐了才由这一下交互推进。不门控的 interact 交给 `objectiveDone`，所以这里先返回。
+   *
+   * 「条件齐了没有」本身也只有一处算式（`content/objectives.js` 的 `CONDITIONS`）：
+   * 这里以前自己写 `canAscend` / `canTrueEnd` / `canInfinity` 三个方法，与表里那三份
+   * 是同一条话的两种写法，并且差了一格（表里的 `checkAllDungeons` 少算第三只 Boss）。
+   */
+  _onInteract(detail) {
+    const q = this.current;
+    if (!q || q.type !== 'interact' || detail?.id !== q.targetId) return;
+    const gate = interactGateCondition(q);
+    if (gate && conditionHolds(gate, this.stats)) this.advance();
   }
 
   /** 若已完成当前步但未推进（读档/重复交互），自动跳到正确任务 */
@@ -239,31 +192,9 @@ export class QuestSystem {
     return advanced;
   }
 
+  /** 「这一步完成了没有」只有一处定义（`content/objectives.js` 的 `objectiveDone`），这里只把账本递过去 */
   isQuestObjectiveDone(q) {
-    if (!q) return false;
-    switch (q.type) {
-      case 'interact':
-        if (q.requireAllFragments || q.requireAscension || q.requireTrueEnd || q.requireInfinity) return false;
-        return this.stats.discoveries.has(q.targetId);
-      case 'hits': return this.stats.hits >= q.target;
-      case 'kills': return (this.stats.kills[q.enemyType] || 0) >= q.target;
-      case 'discovery': return this.stats.discoveries.has(q.targetId);
-      case 'boss': return this.stats.bossDefeated;
-      case 'boss2': return this.stats.boss2Defeated;
-      case 'boss3': return this.stats.boss3Defeated;
-      case 'spells': return this.stats.spellCasts >= q.target;
-      case 'dungeon': return this.stats.dungeonsCleared.has(q.dungeonId);
-      case 'mind': return false;
-      case 'charged': return this.stats.chargedCasts >= q.target;
-      case 'voidboss': return this.stats.voidBossDefeated;
-      case 'skills-unlocked': return this.stats.skillsUnlocked >= q.target;
-      case 'chaosboss': return this.stats.chaosBossDefeated;
-      case 'dungeon-rerun': return this.stats.dungeonRerun;
-      case 'chests': return this.stats.chestsOpened >= q.target;
-      case 'npc': return this.stats.npcTalked.has(q.targetId);
-      case 'level': return false;
-      default: return false;
-    }
+    return objectiveDone(q, this.stats);
   }
 
   _firstMissing(ids) {
@@ -305,89 +236,9 @@ export class QuestSystem {
     return TARGET_WAYPOINTS[q.targetId] ? { ...TARGET_WAYPOINTS[q.targetId] } : QUEST_WAYPOINTS[q.id] ? { ...QUEST_WAYPOINTS[q.id] } : null;
   }
 
-  canAscend() {
-    return this.stats.boss3Defeated
-      && ['ruin-crypt', 'forbidden-library', 'five-dim-rift'].every((id) => this.stats.dungeonsCleared.has(id));
-  }
-
-  canTrueEnd() {
-    return this.stats.voidBossDefeated
-      && ['fantasy-ring', 'magic-castle', 'space-tesseract', 'void-rift'].every((id) => this.stats.discoveries.has(id));
-  }
-
-  canInfinity() {
-    return this.stats.chaosBossDefeated && this.stats.skillsUnlocked >= 3;
-  }
-
   checkProgress() {
     if (this.completed) return;
-    const q = this.current;
-    if (!q) return;
-
-    let done = false;
-    switch (q.type) {
-      case 'interact':
-        if (q.requireAllFragments || q.requireAscension || q.requireTrueEnd || q.requireInfinity) {
-          done = false;
-        } else {
-          done = this.stats.discoveries.has(q.targetId);
-        }
-        break;
-      case 'hits':
-        done = this.stats.hits >= q.target;
-        break;
-      case 'kills':
-        done = (this.stats.kills[q.enemyType] || 0) >= q.target;
-        break;
-      case 'discovery':
-        done = this.stats.discoveries.has(q.targetId);
-        break;
-      case 'boss':
-        done = this.stats.bossDefeated;
-        break;
-      case 'boss2':
-        done = this.stats.boss2Defeated;
-        break;
-      case 'boss3':
-        done = this.stats.boss3Defeated;
-        break;
-      case 'spells':
-        done = this.stats.spellCasts >= q.target;
-        break;
-      case 'dungeon':
-        done = this.stats.dungeonsCleared.has(q.dungeonId);
-        break;
-      case 'mind':
-        done = false;
-        break;
-      case 'charged':
-        done = this.stats.chargedCasts >= q.target;
-        break;
-      case 'voidboss':
-        done = this.stats.voidBossDefeated;
-        break;
-      case 'skills-unlocked':
-        done = this.stats.skillsUnlocked >= q.target;
-        break;
-      case 'chaosboss':
-        done = this.stats.chaosBossDefeated;
-        break;
-      case 'dungeon-rerun':
-        done = this.stats.dungeonRerun;
-        break;
-      case 'chests':
-        done = this.stats.chestsOpened >= q.target;
-        break;
-      case 'npc':
-        done = this.stats.npcTalked.has(q.targetId);
-        break;
-      case 'level':
-        done = false;
-        break;
-      default:
-        break;
-    }
-    if (done) this.advance();
+    if (this.current && this.isQuestObjectiveDone(this.current)) this.advance();
   }
 
   advance() {
@@ -433,27 +284,27 @@ export class QuestSystem {
     switch (q.type) {
       case 'hits': return `${Math.min(this.stats.hits, q.target)} / ${q.target} 命中`;
       case 'kills': return `${Math.min(this.stats.kills[q.enemyType] || 0, q.target)} / ${q.target}`;
-      case 'boss': return this.stats.bossDefeated ? '完成' : '进入灰白森林 Boss 红圈 (X≈-250 Z≈-35)';
-      case 'boss2': return this.stats.boss2Defeated ? '完成' : '魔法 Boss 红圈 (X≈5 Z≈-220)';
-      case 'boss3': return this.stats.boss3Defeated ? '完成' : '星际 Boss 红圈 (X≈235 Z≈155)';
       case 'spells': return `${Math.min(this.stats.spellCasts, q.target)} / ${q.target} 次施法`;
       case 'dungeon': return this.stats.dungeonsCleared.has(q.dungeonId) ? '完成' : '寻找地下城入口（紫环）';
-      case 'mind': return '营火升级「心智」至 2';
+      case 'mind': return `营火升级「心智」至 ${q.target}`;
       case 'charged': return `${Math.min(this.stats.chargedCasts, q.target)} / ${q.target} 蓄力施法`;
-      case 'voidboss': return this.stats.voidBossDefeated ? '完成' : '时线 Boss 红圈 (Z≈235 · Ch4+)';
       case 'skills-unlocked': return `${Math.min(this.stats.skillsUnlocked, q.target)} / ${q.target} 技能`;
-      case 'chaosboss': return this.stats.chaosBossDefeated ? '完成' : '混沌 Boss 红圈 (X≈-200 Z≈285 · Ch5+)';
       case 'dungeon-rerun': return this.stats.dungeonRerun ? '完成' : '再次进入地下城（Chapter 5 后）';
       case 'chests': return `${this.stats.chestsOpened} / ${q.target} 宝箱`;
       case 'npc': return this.stats.npcTalked.has(q.targetId) ? '完成' : '寻找 NPC（绿点）';
-      case 'level': return '在营火休息升级至 Lv.5';
+      case 'level': return `在营火休息升级至 Lv.${q.target}`;
       case 'discovery': return this.stats.discoveries.has(q.targetId) ? '已完成' : `寻找 ${TARGET_WAYPOINTS[q.targetId]?.label ?? '标记点'}`;
       case 'interact':
-        if (this.stats.discoveries.has(q.targetId) && !q.requireAllFragments && !q.requireAscension && !q.requireTrueEnd && !q.requireInfinity) {
+        // 门控那一格不许显示"已完成触摸"：摸过锚点不等于这一步过了（判据同一条口径）
+        if (this.stats.discoveries.has(q.targetId) && !interactGateCondition(q)) {
           return '已完成触摸 — 若未跳转请点右下角「同步任务」';
         }
         return keyText(q.desc);
-      default: return keyText(q.desc);
+      default: {
+        const bossKey = BOSS_STAT_KEYS[q.bossId];
+        if (bossKey) return this.stats[bossKey] ? '完成' : BOSS_DISPLAY[q.bossId].progress;
+        return keyText(q.desc);
+      }
     }
   }
 
@@ -474,11 +325,10 @@ export class QuestSystem {
       return TARGET_WAYPOINTS[q.targetId] ? { ...TARGET_WAYPOINTS[q.targetId] } : QUEST_WAYPOINTS[q.id] ? { ...QUEST_WAYPOINTS[q.id] } : null;
     }
 
-    if (q.type === 'boss' && !this.stats.bossDefeated) return { ...MAP_BOSSES[0], label: '影界守护者 Boss 区' };
-    if (q.type === 'boss2' && !this.stats.boss2Defeated) return { ...MAP_BOSSES[1], label: '大奥术师 Boss 区' };
-    if (q.type === 'boss3' && !this.stats.boss3Defeated) return { ...MAP_BOSSES[2], label: '奇点领主 Boss 区' };
-    if (q.type === 'voidboss' && !this.stats.voidBossDefeated) return { ...MAP_BOSSES[3], label: '时线执政官 Boss 区' };
-    if (q.type === 'chaosboss' && !this.stats.chaosBossDefeated) return { ...MAP_BOSSES[4], label: '混沌领主 Boss 区' };
+    const bossKey = BOSS_STAT_KEYS[q.bossId];
+    if (bossKey && !this.stats[bossKey]) {
+      return { ...MAP_BOSSES[BOSS_ORDER.indexOf(q.bossId)], label: BOSS_DISPLAY[q.bossId].waypoint };
+    }
 
     if (q.type === 'dungeon' && !this.stats.dungeonsCleared.has(q.dungeonId)) {
       return DUNGEON_WAYPOINTS[q.dungeonId] ? { ...DUNGEON_WAYPOINTS[q.dungeonId] } : null;
@@ -500,7 +350,7 @@ export class QuestSystem {
     if (q.type === 'interact' && this.stats.discoveries.has(q.targetId)) {
       return '本步已完成，点击助手「同步任务进度」';
     }
-    if (q.type === 'boss' || q.type === 'boss2' || q.type === 'boss3' || q.type === 'voidboss' || q.type === 'chaosboss') {
+    if (BOSS_STAT_KEYS[q.bossId]) {
       return `走进地图骷髅标记的红圈激活 Boss · ${this.getProgressText()}`;
     }
     return this.getProgressText();

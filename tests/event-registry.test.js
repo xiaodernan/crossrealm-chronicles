@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { GAME_EVENTS, REST_DIALOGUE_EVENTS } from '../src/engine/events.js';
+import { STAT_EVENTS } from '../src/content/objectives.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
 /**
@@ -92,10 +93,19 @@ function recordListener(name, file) {
   listenerSites.get(name).add(file);
 }
 
+/**
+ * 表驱动的监听位点（W-B3 切片2）：`QuestSystem.setupListeners` 与 `ObjectiveEngine.setupListeners`
+ * 遍历 `STAT_EVENTS` 的键去挂监听，字面量事件名因此不在源码里。
+ * 扫描必须认这张表，否则那十条会被读成"没人听"，登记表里的 `hook` 就成了假话。
+ * 认的是**那句循环本身**（哪个文件里出现 `Object.keys(STAT_EVENTS)`），不是把十条名字再抄一遍。
+ */
+const tableDrivenListeners = [];
+
 for (const abs of walk(SRC)) {
   const rel = relative(SRC, abs).replace(/\\/g, '/');
   if (rel === SELF || rel === BUS_SELF) continue; // 登记表与总线实现里的字面量是"契约文本"，不是使用点
   const code = stripComments(readFileSync(abs, 'utf8'));
+  if (/Object\.keys\(\s*STAT_EVENTS\s*\)/.test(code)) tableDrivenListeners.push(rel);
   /* 派发与监听各有两种写法：存量是裸 `new CustomEvent` / `window.addEventListener`，
    * 切片6 起新代码走 `emit()` / `on()`。扫描器两种都要认 —— 只认前者的话，
    * 迁移得越干净、门禁瞎得越彻底（登记表会以为这些名字再也没人生产/消费）。 */
@@ -127,6 +137,9 @@ for (const abs of walk(SRC)) {
 }
 
 const registered = Object.keys(GAME_EVENTS);
+for (const rel of tableDrivenListeners) {
+  for (const name of Object.keys(STAT_EVENTS)) recordListener(name, `${rel}（遍历 STAT_EVENTS）`);
+}
 const gameDispatchNames = [...dispatchSites.keys()].filter((n) => !DOM_EVENT_NAMES.has(n));
 const gameListenNames = [...listenerSites.keys()].filter((n) => !DOM_EVENT_NAMES.has(n));
 const derivedNames = Object.values(REST_DIALOGUE_EVENTS);

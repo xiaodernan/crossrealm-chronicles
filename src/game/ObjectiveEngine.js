@@ -8,10 +8,21 @@
  * - 标志：完成时设置 flags
  * - 失败：failsOn + failMessage + onFail（reset/restart/branch）
  * - 重访：revisit: true 允许完成后再次触发
- * - 章节门控：chapter 字段
+ * - 章节门控：完成 `chapter-gate` 那一格时把章节推到它标的那一档
  * - 事件总线集成：进度、完成、失败、分支、章节变更
+ *
+ * **现状（W-B3 切片2 实测）**：本类还没有消费者 —— 在役主线是 `game/QuestSystem.js`
+ * （`core/Game.js` 装配它）。这里之所以把三本账接成同一份而不是继续自己抄一遍：
+ * 判据（`objectiveDone`）、记账（`STAT_EVENTS`）、名册（`BOSS_STAT_KEYS`）都来自
+ * `content/objectives.js`，切片3 把 sequencer 换过来时不需要再对一次行为。
+ * 接线之前，本文件只由 `tests/objective-engine.test.js` 供着，别把它当成在跑的那套。
  */
-import { OBJECTIVES, CONDITIONS, FAIL_CONDITIONS } from '../content/objectives.js';
+import {
+  BOSS_STAT_KEYS, OBJECTIVES, CONDITIONS, FAIL_CONDITIONS,
+  STAT_EVENTS, applyStatEvent, conditionHolds, emptyStats,
+  interactGateCondition, objectiveDone, statsFromJSON, statsToJSON,
+} from '../content/objectives.js';
+import { keyText } from '../content/keyHints.js';
 import { emit, on, offAll } from '../engine/EventBus.js';
 
 const EVENT_TAG = 'game/ObjectiveEngine';
@@ -81,12 +92,13 @@ export class ObjectiveInstance {
     return fn(state);
   }
 
-  /** 推进进度（返回是否完成） */
+  /** 推进进度（返回是否完成）。delta 不许把已有进度倒回去：同一事件重放或账本已越过目标时，
+   *  宁可这一步不动，也不让一个已完成的读数退回 3/5 */
   advance(delta = 1) {
     if (this.status === OBJECTIVE_STATUS.DONE && !this.def.revisit) return false;
     if (this.status === OBJECTIVE_STATUS.FAILED) return false;
 
-    this.progress += delta;
+    if (delta > 0) this.progress += delta;
     const target = this.def.target ?? 1;
     if (this.progress >= target) {
       this.complete();
@@ -116,7 +128,7 @@ export class ObjectiveInstance {
 
     // 发射事件
     emit('objective-complete', { objective: this.def, instance: this }, EVENT_TAG);
-    this.engine.checkChapterTransition();
+    this.engine.onObjectiveCompleted(this.def);
   }
 
   /** 失败目标 */
@@ -154,53 +166,47 @@ export class ObjectiveInstance {
     emit('objective-restart', { objective: this.def, instance: this }, EVENT_TAG);
   }
 
-  /** 获取进度文本 */
+  /** 进度文本。这里只**读**账本做显示，判据仍然是 `objectiveDone` 那一份 */
   getProgressText(state) {
     const q = this.def;
     if (!q) return '';
+    const stats = state.stats ?? {};
 
     switch (q.type) {
       case 'hits':
-        return `${Math.min(state.stats.hits || 0, q.target)} / ${q.target} 命中`;
+        return `${Math.min(stats.hits || 0, q.target)} / ${q.target} 命中`;
       case 'kills':
-        return `${Math.min(state.stats.kills?.[q.enemyType] || 0, q.target)} / ${q.target}`;
-      case 'boss':
-      case 'boss2':
-      case 'boss3':
-      case 'voidboss':
-      case 'chaosboss': {
-        const bossKey = q.type === 'boss' ? 'bossDefeated'
-          : q.type === 'boss2' ? 'boss2Defeated'
-          : q.type === 'boss3' ? 'boss3Defeated'
-          : q.type === 'voidboss' ? 'voidBossDefeated'
-          : 'chaosBossDefeated';
-        return state.stats[bossKey] ? '完成' : `寻找 ${q.def?.waypoint?.label ?? 'Boss 区域'}`;
-      }
+        return `${Math.min(stats.kills?.[q.enemyType] || 0, q.target)} / ${q.target}`;
       case 'spells':
-        return `${Math.min(state.stats.spellCasts || 0, q.target)} / ${q.target} 次施法`;
-      case 'dungeon':
-        return state.stats.dungeonsCleared?.has(q.dungeonId) ? '完成' : '寻找地下城入口';
-      case 'mind':
-        return '营火升级「心智」至 ' + q.target;
+        return `${Math.min(stats.spellCasts || 0, q.target)} / ${q.target} 次施法`;
       case 'charged':
-        return `${Math.min(state.stats.chargedCasts || 0, q.target)} / ${q.target} 蓄力施法`;
+        return `${Math.min(stats.chargedCasts || 0, q.target)} / ${q.target} 蓄力施法`;
       case 'skills-unlocked':
-        return `${Math.min(state.stats.skillsUnlocked || 0, q.target)} / ${q.target} 技能`;
+        return `${Math.min(stats.skillsUnlocked || 0, q.target)} / ${q.target} 技能`;
       case 'chests':
-        return `${state.stats.chestsOpened || 0} / ${q.target} 宝箱`;
+        return `${stats.chestsOpened || 0} / ${q.target} 宝箱`;
+      case 'dungeon':
+        return stats.dungeonsCleared?.has(q.dungeonId) ? '完成' : '寻找地下城入口';
+      case 'dungeon-rerun':
+        return stats.dungeonRerun ? '完成' : '再次清空一座地下城';
       case 'npc':
-        return state.stats.npcTalked?.has(q.targetId) ? '完成' : '寻找 NPC';
+        return stats.npcTalked?.has(q.targetId) ? '完成' : '寻找 NPC';
       case 'level':
         return `在营火休息升级至 Lv.${q.target}`;
+      case 'mind':
+        return `营火升级「心智」至 ${q.target}`;
       case 'discovery':
-        return state.stats.discoveries?.has(q.targetId) ? '已完成' : `寻找 ${q.def?.waypoint?.label ?? '标记点'}`;
+        return stats.discoveries?.has(q.targetId) ? '已完成' : `寻找 ${q.waypoint?.label ?? '标记点'}`;
       case 'interact':
-        if (state.stats.discoveries?.has(q.targetId) && !q.requireAllFragments && !q.requireAscension && !q.requireTrueEnd && !q.requireInfinity) {
-          return '已完成触摸';
+        if (stats.discoveries?.has(q.targetId) && !interactGateCondition(q)) return '已完成触摸';
+        return keyText(q.desc);
+      default: {
+        const bossKey = BOSS_STAT_KEYS[q.bossId];
+        if (bossKey) {
+          return stats[bossKey] ? '完成' : `寻找 ${q.waypoint?.label ?? 'Boss 区域'}`;
         }
-        return q.desc;
-      default:
-        return q.desc;
+        return keyText(q.desc);
+      }
     }
   }
 
@@ -237,6 +243,10 @@ export class ObjectiveEngine {
     this.chapter = 1;
     this.activeObjectiveId = null;
     this._tick = 0;
+    // 统计账本由引擎**自己记**（形状与记账表都在 `content/objectives.js`）。
+    // 以前这里写着 `collectStats() { return this._stats || {} }` 等外部喂，而全仓没人调
+    // `setStatsSource` —— 于是判据永远读到一本空账，`CONDITIONS` 里那些函数也就永远为假。
+    this.stats = emptyStats();
 
     // 实例化所有目标
     for (const def of OBJECTIVES) {
@@ -247,18 +257,15 @@ export class ObjectiveEngine {
     this.syncState();
   }
 
+  /**
+   * 一个循环把 `STAT_EVENTS` 里那十件事各挂一条监听：记一笔账，再重算一次进度。
+   * 门控的「摸锚点」与不门控的走两条路（前者要条件齐时那一下交互，后者判据直接认账本），
+   * 但两边用的都是 `content/objectives.js` 里的同一份口径。
+   */
   setupListeners() {
-    // 监听游戏事件，转发给目标实例
-    on('discovery', (e) => this.onDiscovery(e.detail), EVENT_TAG);
-    on('enemy-defeated', (e) => this.onEnemyDefeated(e.detail), EVENT_TAG);
-    on('spell-cast', (e) => this.onSpellCast(e.detail), EVENT_TAG);
-    on('dungeon-cleared', (e) => this.onDungeonCleared(e.detail), EVENT_TAG);
-    on('weapon-skill-unlocked', () => this.onSkillUnlocked(), EVENT_TAG);
-    on('combat-hit', () => this.onHit(), EVENT_TAG);
-    on('poi-interact', (e) => this.onInteract(e.detail), EVENT_TAG);
-    on('chest-opened', () => this.onChestOpened(), EVENT_TAG);
-    on('npc-talk', (e) => this.onNPCTalk(e.detail), EVENT_TAG);
-    on('stats-changed', (e) => this.onStatsChanged(e.detail), EVENT_TAG);
+    for (const name of Object.keys(STAT_EVENTS)) {
+      on(name, (e) => this.onGameEvent(name, e.detail), EVENT_TAG);
+    }
     on('chapter-changed', (e) => this.onChapterChanged(e.detail), EVENT_TAG);
   }
 
@@ -267,20 +274,9 @@ export class ObjectiveEngine {
     return {
       flags: this.flags,
       chapter: this.chapter,
-      stats: this.collectStats(),
+      stats: this.stats,
       objectives: this,
     };
-  }
-
-  /** 收集统计数据（从各系统聚合） */
-  collectStats() {
-    // 由外部系统通过事件更新，这里返回引用
-    return this._stats || {};
-  }
-
-  /** 设置外部统计引用 */
-  setStatsSource(stats) {
-    this._stats = stats;
   }
 
   /** 设置标志 */
@@ -308,20 +304,27 @@ export class ObjectiveEngine {
     }
   }
 
-  /** 同步状态（读档时） */
+  /** 同步状态（读档时）：当前那一格已经过了就只挪指针，不重复结算标志与分支 */
   syncState() {
     let guard = 0;
-    while (this.activeObjectiveId && guard++ < 50) {
+    while (guard++ < 50) {
       const instance = this.objectives.get(this.activeObjectiveId);
-      if (!instance) break;
-      if (instance.status === OBJECTIVE_STATUS.DONE) {
-        this.advanceActive();
-      } else break;
+      if (!instance || instance.status !== OBJECTIVE_STATUS.DONE) break;
+      this.findNextActive();
     }
     this.checkActivations();
+    // 开局（或读档后指针为空）也要有一格在手：以前构造函数只做 `checkActivations`，
+    // 于是引擎带着 0 个 ACTIVE 目标上线，任何玩家事件都推不动它（`advanceActive` 直接 return）
+    if (!this.activeObjectiveId) this.findNextActive();
   }
 
-  /** 激活指定目标 */
+  /**
+   * 激活指定目标。
+   *
+   * 激活之后立刻重算一次进度：表里 `chapter-gate` 那几格写的是 `autoComplete`，
+   * 意思就是"走到这一格本身即完成"。没有这一喊，它们会一直 ACTIVE 到下一个玩家事件，
+   * 章节推进（`onObjectiveCompleted`）也就跟着晚一个事件才发生。
+   */
   activateObjective(id) {
     const instance = this.objectives.get(id);
     if (!instance) return false;
@@ -331,6 +334,7 @@ export class ObjectiveEngine {
       instance.visitCount++;
       this.activeObjectiveId = id;
       emit('objective-activate', { objective: instance.def, instance }, EVENT_TAG);
+      this.advanceActive();
       return true;
     }
     return false;
@@ -341,6 +345,13 @@ export class ObjectiveEngine {
     if (!this.activeObjectiveId) return;
     const instance = this.objectives.get(this.activeObjectiveId);
     if (!instance) return;
+
+    // 已完成的那一格不重复结算：`advance()` 对 DONE 只在 revisit 行放手，
+    // 但判据可能还在说"完成"（账本不会倒退），所以先把指针挪走
+    if (instance.status === OBJECTIVE_STATUS.DONE && !instance.def.revisit) {
+      this.findNextActive();
+      return;
+    }
 
     // 检查失败条件
     if (instance.checkFail(this.getState())) {
@@ -356,90 +367,31 @@ export class ObjectiveEngine {
     }
   }
 
-  /** 根据类型推进目标进度 */
+  /**
+   * 推进当前目标：判据只有 `content/objectives.js` 里那一份（`objectiveDone`）。
+   *
+   * 以前这里是一份 15 段的 switch，与 `QuestSystem` 里那两份是同一条算式的三份抄本。
+   * 抄本会漂：新表把五只 Boss 一律写成 `type: 'boss'` + 各自的 `bossId`，而这份抄本
+   * 按类型名读计数器，于是**影界守护者一倒地，大奥术师那一步就被判完成**（切片2 实测）。
+   */
   progressObjective(instance) {
     const q = instance.def;
-    const state = this.getState();
-
-    switch (q.type) {
-      case 'interact':
-        if (q.targetId && state.stats.discoveries?.has(q.targetId)) {
-          // 交互类由 poi-interact 事件直接触发 advance()
-          return false;
-        }
-        break;
-      case 'hits':
-        return instance.advance(state.stats.hits - instance.progress);
-      case 'kills':
-        return instance.advance((state.stats.kills?.[q.enemyType] || 0) - instance.progress);
-      case 'spells':
-        return instance.advance(state.stats.spellCasts - instance.progress);
-      case 'charged':
-        return instance.advance(state.stats.chargedCasts - instance.progress);
-      case 'skills-unlocked':
-        return instance.advance(state.stats.skillsUnlocked - instance.progress);
-      case 'chests':
-        return instance.advance(state.stats.chestsOpened - instance.progress);
-      case 'dungeon':
-        if (state.stats.dungeonsCleared?.has(q.dungeonId)) {
-          instance.progress = 1;
-          return true;
-        }
-        break;
-      case 'level':
-        if ((state.stats.level || 0) >= q.target) {
-          instance.progress = q.target;
-          return true;
-        }
-        break;
-      case 'mind':
-        if ((state.stats.mind || 0) >= q.target) {
-          instance.progress = q.target;
-          return true;
-        }
-        break;
-      case 'discovery':
-        if (state.stats.discoveries?.has(q.targetId)) {
-          instance.progress = 1;
-          return true;
-        }
-        break;
-      case 'boss':
-        if (state.stats.bossDefeated) { instance.progress = 1; return true; }
-        break;
-      case 'boss2':
-        if (state.stats.boss2Defeated) { instance.progress = 1; return true; }
-        break;
-      case 'boss3':
-        if (state.stats.boss3Defeated) { instance.progress = 1; return true; }
-        break;
-      case 'voidboss':
-        if (state.stats.voidBossDefeated) { instance.progress = 1; return true; }
-        break;
-      case 'chaosboss':
-        if (state.stats.chaosBossDefeated) { instance.progress = 1; return true; }
-        break;
-      case 'dungeon-rerun':
-        if (state.stats.dungeonRerun) { instance.progress = 1; return true; }
-        break;
-      case 'npc':
-        if (state.stats.npcTalked?.has(q.targetId)) {
-          instance.progress = 1;
-          return true;
-        }
-        break;
-      case 'chapter-gate':
-        if (q.autoComplete) {
-          instance.progress = 1;
-          return true;
-        }
-        break;
-    }
-    return false;
+    // 门控的「摸锚点」不因摸了一下就完成：推进它的是条件齐时的那一下交互（见 onInteract）
+    if (interactGateCondition(q)) return false;
+    if (!objectiveDone(q, this.stats)) return false;
+    // 数值步的进度直接对齐到账本口径：判据说过了，就不该留一个 3/5 的读数在那儿
+    return instance.advance(Math.max((q.target ?? 1) - instance.progress, 1));
   }
 
   /** 寻找下一个可激活目标 */
   findNextActive() {
+    const current = this.objectives.get(this.activeObjectiveId);
+    // 手上那一格还没结算（进行中，或分支刚把目标激活）就别抢位：分支目标必须自己走完，
+    // 否则它会永远停在 ACTIVE，而 sequencer 已经在看别处 —— 章节门控就是这样被抢掉的
+    if (current
+      && current.status !== OBJECTIVE_STATUS.DONE
+      && current.status !== OBJECTIVE_STATUS.FAILED) return;
+
     // 优先查找当前章节的可用目标
     for (const instance of this.objectives.values()) {
       if (instance.status === OBJECTIVE_STATUS.AVAILABLE
@@ -462,28 +414,38 @@ export class ObjectiveEngine {
     this.activeObjectiveId = null;
   }
 
-  /** 章节转换检查 */
-  checkChapterTransition() {
-    // 由 advance() 中的章节门控目标触发
+  /**
+   * 章节门控：走到 `chapter-gate` 那一格（表里的 `ch2-complete` / `ch3-start` …）
+   * 就把章节推到它标的那一档，并广播 `chapter-changed`。
+   *
+   * 以前这里是一个空方法加一句注释（"由 advance() 中的章节门控目标触发"）——
+   * 全仓没有任何代码改过 `this.chapter`，所以那条评论描述的机制不存在，
+   * 表里 `chapter: 3` 这类门控字段永远等着一个不会来的章节号。
+   */
+  onObjectiveCompleted(def) {
+    if (def.type === 'chapter-gate' && def.chapter > this.chapter) {
+      const prev = this.chapter;
+      this.chapter = def.chapter;
+      emit('chapter-changed', { chapter: this.chapter, prev }, EVENT_TAG);
+    }
+    this.checkActivations();
   }
 
-  // 事件处理器
-  onDiscovery(detail) { this.advanceActive(); }
-  onEnemyDefeated(detail) { this.advanceActive(); }
-  onSpellCast(detail) { this.advanceActive(); }
-  onDungeonCleared(detail) { this.advanceActive(); }
-  onSkillUnlocked() { this.advanceActive(); }
-  onHit() { this.advanceActive(); }
+  /** 一条游戏事件：先记账，再重算进度（记账表 `STAT_EVENTS` 全仓一份，与 `QuestSystem` 同一份） */
+  onGameEvent(name, detail) {
+    applyStatEvent(this.stats, name, detail);
+    if (name === 'poi-interact') this.onInteract(detail);
+    this.advanceActive();
+  }
+
   onInteract(detail) {
     const instance = this.objectives.get(this.activeObjectiveId);
-    if (instance && instance.def.type === 'interact' && detail.id === instance.def.targetId) {
-      instance.advance(1);
-      this.advanceActive();
-    }
+    const q = instance?.def;
+    if (!instance || q.type !== 'interact' || detail?.id !== q.targetId) return;
+    const gate = interactGateCondition(q);
+    // 门控格：条件齐了才由这一下交互推进；不门控的格交给 onGameEvent 里的判据
+    if (gate && conditionHolds(gate, this.stats)) instance.advance(1);
   }
-  onChestOpened() { this.advanceActive(); }
-  onNPCTalk(detail) { this.advanceActive(); }
-  onStatsChanged(detail) { this.advanceActive(); }
   onChapterChanged(detail) {
     this.chapter = detail.chapter;
     this.checkActivations();
@@ -538,6 +500,8 @@ export class ObjectiveEngine {
       flags: this.flags,
       chapter: this.chapter,
       activeObjectiveId: this.activeObjectiveId,
+      // 账本跟着落盘（形状由 `content/objectives.js` 推，存档层不必再逐格手抄）
+      stats: statsToJSON(this.stats),
     };
   }
 
@@ -546,6 +510,7 @@ export class ObjectiveEngine {
     this.flags = data.flags || {};
     this.chapter = data.chapter || 1;
     this.activeObjectiveId = data.activeObjectiveId || null;
+    this.stats = statsFromJSON(data.stats);
     if (data.objectives) {
       for (const [id, objData] of Object.entries(data.objectives)) {
         const instance = this.objectives.get(id);

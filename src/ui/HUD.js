@@ -87,9 +87,12 @@ export class HUD {
       </div>
       <div id="quest-panel" class="quest-panel">
         <div class="quest-label" data-ktext="当前任务 · ★目标 · 💀Boss · {questTracker} 助手"></div>
-        <div class="quest-title" id="quest-title">觉醒：世界之锚</div>
-        <div class="quest-progress" id="quest-progress">触摸世界之锚</div>
-        <div class="quest-guide" id="quest-guide">▶ 北 · 5m · 世界之锚</div>
+        <!-- 这三格没有初始文案：内容只有 quests.notifyUpdate() 与每帧的指引那两处会写，
+             模板里手抄一份等于给同一句话第二个答案，而开机第一眼读到的就是那份抄本
+             （实测：任务函数说「触摸枢纽中心的世界之锚。」，界面上写着「触摸世界之锚」） -->
+        <div class="quest-title" id="quest-title"></div>
+        <div class="quest-progress" id="quest-progress"></div>
+        <div class="quest-guide" id="quest-guide"></div>
       </div>
       <div id="boss-bar-wrap" class="boss-bar-wrap hidden">
         <div class="boss-name" id="boss-name">影界守护者</div>
@@ -307,6 +310,11 @@ export class HUD {
       const el = document.getElementById('camera-mode-display');
       if (el) el.textContent = e.detail.mode === 'first' ? '第一人称' : '第三人称';
     }, EVENT_TAG);
+
+    /* 开机那一格由那位唯一写手落一次。`quests` 比 HUD 早建（`core/Game.js`），
+     * 它构造函数里那次 `notifyUpdate()` 派发时这里还没挂监听 —— 于是任务面板第一眼
+     * 显示的是模板里那份手抄旧文案，直到玩家推进第一步才改口。 */
+    this.game.quests?.notifyUpdate();
   }
 
   /** 区副标题的唯一写入口：覆盖层优先于区域权威文本，撤掉后自动落回去 */

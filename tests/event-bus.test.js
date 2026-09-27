@@ -4,6 +4,7 @@ import { join, relative } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import { on, emit, offAll, listenerCount, UNGROUPED } from '../src/engine/EventBus.js';
 import { GAME_EVENTS } from '../src/engine/events.js';
+import { STAT_EVENTS } from '../src/content/objectives.js';
 
 /**
  * 事件总线与监听器注销（B44 剩下的另一半）。
@@ -124,6 +125,21 @@ const BARE_WINDOW_LISTENERS = {
   'world/RestNpcManager.js': 3,
 };
 
+/**
+ * 表驱动的裸监听：源文件里只有**一个** `window.addEventListener(name, …)` 调用点，
+ * `name` 是变量，运行时按名字表逐条挂上「表长」那么多条。
+ *
+ * 为什么要在台账外单独记这一笔：下面的扫描器认的是**字面量事件名**，所以 W-B3 切片2
+ * 把 `QuestSystem` 那十段抄本并成一个循环之后，逐字面量的扫描会把这个文件从 10 记成 0 ——
+ * 于是「欠账 131 → 121」看起来像迁走了一批，而**注销路径一条也没多出来**（这文件依旧
+ * 没有 dispose 时的 removeEventListener）。债没消失，只是从扫描器眼前消失了，
+ * 所以这里按运行时条数把债原样记回来，条数从生产表 `STAT_EVENTS` 自己数，不手抄。
+ */
+const TABLE_DRIVEN_BARE = [
+  // `names` 从生产表自己数（不手抄清单），`table` 是源锚点：那个文件必须被看见在遍历它
+  { file: 'game/QuestSystem.js', table: 'STAT_EVENTS', names: Object.keys(STAT_EVENTS) },
+];
+
 const scan = () => {
   const bare = {};
   const busUsers = new Map(); // file -> { on: n, offAll: n, untagged: [] }
@@ -133,6 +149,9 @@ const scan = () => {
     const code = stripComments(readFileSync(abs, 'utf8'));
     for (const m of code.matchAll(/window\.addEventListener\(\s*'([a-z0-9-]+)'/g)) {
       if (m[1] in GAME_EVENTS) bare[rel] = (bare[rel] ?? 0) + 1;
+    }
+    for (const t of TABLE_DRIVEN_BARE) {
+      if (t.file === rel) bare[rel] = (bare[rel] ?? 0) + t.names.length;
     }
     const onSites = [...code.matchAll(/(?:^|[^\w.])on\(\s*['"][a-z0-9-]+['"]/g)];
     const offAllSites = [...code.matchAll(/(?:^|[^\w.])offAll\(/g)];
@@ -242,6 +261,22 @@ describe('EventBus 行为', () => {
 describe('监听注销门禁（B44 剩余半区）', () => {
   it('裸 window 游戏事件监听逐文件台账：只许收缩，改动必须显式记一笔', () => {
     expect(bare).toEqual(BARE_WINDOW_LISTENERS);
+  });
+
+  it('表驱动那一笔不是白记的：文件真的在遍历那张表挂监听，条数=运行时监听数', () => {
+    for (const t of TABLE_DRIVEN_BARE) {
+      const code = stripComments(readSrc(t.file));
+      // ① 源锚点：一个变量名的调用点，且它遍历的就是记账所依据的那张名字表
+      const loopSites = [...code.matchAll(/window\.addEventListener\(\s*(?!['"])/g)];
+      expect(loopSites.length, `${t.file} 没有变量名的 addEventListener 调用点：这一格该从 TABLE_DRIVEN_BARE 删掉`).toBe(1);
+      expect(code.includes(`Object.keys(${t.table})`), `${t.file} 的循环不是在遍历 ${t.table}，那 names 那格数的就不是它挂的监听`).toBe(true);
+      // ② 名字必须是登记过的游戏事件：表里混进一个未登记名，这里就会虚记一笔债
+      for (const name of t.names) expect(name in GAME_EVENTS, `${t.table} 里的 ${name} 不在事件登记表`).toBe(true);
+      // ③ 台账那一格 = 字面量调用点 + 表驱动条数（少一层等于把债记丢了）
+      const literal = [...code.matchAll(/window\.addEventListener\(\s*'([a-z0-9-]+)'/g)]
+        .filter((m) => m[1] in GAME_EVENTS).length;
+      expect(bare[t.file], `${t.file}：台账应等于 字面量 ${literal} + 表驱动 ${t.names.length}`).toBe(literal + t.names.length);
+    }
   });
 
   it('台账确实在覆盖当前源码树（不是扫了一份过期快照就绿灯）', () => {

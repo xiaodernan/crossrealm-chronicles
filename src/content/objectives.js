@@ -498,7 +498,11 @@ export const CONDITIONS = {
   checkAllFragments: (state) => state.stats.discoveries?.has('fantasy-ring')
     && state.stats.discoveries?.has('magic-castle')
     && state.stats.discoveries?.has('space-tesseract'),
-  checkAllDungeons: (state) => state.stats.dungeonsCleared?.has('ruin-crypt')
+  // 「三界试炼」这一句在役表里问的是两件事实：三只地下城 + 第三只 Boss。
+  // 早先这里只数地下城，于是任何直接用它做门控的消费者都能让玩家**跳过奇点领主**去飞升；
+  // 在役表当时靠 `canAscend()` 另写一遍才没出事 —— 两份算式差一格，正是本切片要收掉的东西。
+  checkAllDungeons: (state) => Boolean(state.stats.boss3Defeated)
+    && state.stats.dungeonsCleared?.has('ruin-crypt')
     && state.stats.dungeonsCleared?.has('forbidden-library')
     && state.stats.dungeonsCleared?.has('five-dim-rift'),
   checkTrueEnd: (state) => state.stats.voidBossDefeated
@@ -516,3 +520,225 @@ export const FAIL_CONDITIONS = {
   // timeout: (state) => state.timeElapsed > 300, // 5分钟超时
   // deathInBoss: (state) => state.stats.deathsInCurrentBoss > 3,
 };
+/* ------------------------------------------------------------------ *
+ * 任务这一件事的三本账（W-B3 切片2）
+ *
+ * 为什么搬到这里而不是各留一份：这三件事今天一共被抄了三处以上 ——
+ *   判据「这一步完成了没有」在 `QuestSystem.isQuestObjectiveDone`、`QuestSystem.checkProgress`
+ *     与 `ObjectiveEngine.progressObjective` 各有一份 switch；
+ *   记账「哪个事件改哪个计数」在 `QuestSystem.setupListeners` 与 `ObjectiveEngine.setupListeners`
+ *     各有一份（后者只调 `advanceActive`，从来没人往里写数，所以它的账本永远是空的）；
+ *   名册「哪只 Boss 死了算哪一格」是 `QuestSystem` 里五行硬编码 if。
+ * 三份抄本最坏的地方是"改一份而另两份不动时不报错"：本切片实测到引擎那份已经把
+ * `boss2` / `boss3` 写成 `type: 'boss'`，于是它读的是**第一只** Boss 的计数器 ——
+ * 大奥术师会在影界守护者倒地那一刻就被判完成。判据只留一份，这类漂移就没有藏身处。
+ *
+ * 这一层只放**纯算式**：不 import 任何其它层（`content-boundary` 门禁），不碰 DOM，不发事件。
+ * ------------------------------------------------------------------ */
+
+/**
+ * Boss 名册：`bossId` → 统计账本里那一格的名字。
+ * 写账（击杀事件）与读账（判定）共用这一份，所以加一只 Boss 只改这里一次。
+ */
+export const BOSS_STAT_KEYS = {
+  'shadow-warden': 'bossDefeated',
+  'archmagus': 'boss2Defeated',
+  'singularity-herald': 'boss3Defeated',
+  'void-chronarch': 'voidBossDefeated',
+  'chaos-overlord': 'chaosBossDefeated',
+};
+
+/**
+ * Boss 那一族的类型名。`boss2` / `boss3` / `voidboss` / `chaosboss` 是主线表里的历史写法：
+ * "是哪只 Boss"本来已经由 `bossId` 说了，类型里再编一次号就是第二个答案。
+ * 这里留着它只为兼容在役表；新表（`OBJECTIVES`）一律写 `type: 'boss'` + `bossId`，
+ * 等主线表迁完（切片3）这一格就可以删掉。
+ */
+export const BOSS_TYPES = new Set(['boss', 'boss2', 'boss3', 'voidboss', 'chaosboss']);
+
+/**
+ * 「摸锚点」那四格的门控旗标：带着任何一条的 interact **不因摸了一下就算完成**，
+ * 推进它的是条件满足时的那一次交互（`CONDITIONS` 里同名的那几条）。
+ */
+export const INTERACT_GATES = ['requireAllFragments', 'requireAscension', 'requireTrueEnd', 'requireInfinity'];
+
+/**
+ * 在役表把「条件齐了没有」写成旗标（`requireAscension` 这类），新表写成 `condition` 函数名。
+ * 这是同一句话的两种写法，而条件**算式**只许有 `CONDITIONS` 那一份 ——
+ * 曾经它在两边各写一遍并且差了一格（`checkAllDungeons` 少算第三只 Boss）。
+ */
+export const GATE_CONDITIONS = {
+  requireAllFragments: 'checkAllFragments',
+  requireAscension: 'checkAllDungeons',
+  requireTrueEnd: 'checkTrueEnd',
+  requireInfinity: 'checkInfinity',
+};
+
+/** 这一格「摸锚点」是否挂了门控：挂了就不许"摸一下算完成"（两张表的两种写法都认） */
+export function hasInteractGate(def) {
+  if (!def || def.type !== 'interact') return false;
+  return INTERACT_GATES.some((k) => def[k]) || Boolean(def.condition);
+}
+
+/** 门控那一句由 `CONDITIONS` 里哪个函数说话；没挂门控返回 `null` */
+export function interactGateCondition(def) {
+  if (!hasInteractGate(def)) return null;
+  const flag = INTERACT_GATES.find((k) => def[k]);
+  return flag ? (GATE_CONDITIONS[flag] ?? null) : def.condition;
+}
+
+/**
+ * 跑一个条件函数。`CONDITIONS` 里的算式目前只读 `state.stats`，所以账本就够它用；
+ * 名字不存在或没登记映射时返回 `false` —— 宁可卡住一步，也不放过一个没验过的门。
+ */
+export function conditionHolds(name, stats) {
+  const fn = CONDITIONS[name];
+  return fn ? Boolean(fn({ stats })) : false;
+}
+
+/** 统计账本的初始形状。判据读的键必须全在这里，由用例逐格双向核对 */
+export function emptyStats() {
+  return {
+    hits: 0,
+    kills: {},
+    discoveries: new Set(),
+    npcTalked: new Set(),
+    dungeonsCleared: new Set(),
+    chestsOpened: 0,
+    spellCasts: 0,
+    chargedCasts: 0,
+    skillsUnlocked: 0,
+    dungeonRerun: false,
+    level: 1,
+    mind: 0,
+    ...Object.fromEntries(Object.values(BOSS_STAT_KEYS).map((k) => [k, false])),
+  };
+}
+
+/**
+ * 账本里那几格是**读数**（由别的系统推过来的派生值），不是任务系统自己的账：
+ * 存盘不落它们，读档后以生产方为准。留在磁盘上只会留下一个过期读数 ——
+ * `level` / `mind` 由 `PlayerStats` 推 `stats-changed`，`skillsUnlocked` 由
+ * `weaponSkills.unlocked` 的大小算，而这两处都发生在任务账本复原之后。
+ * 存档校验把 `quests.stats.skillsUnlocked` 判成非法（v5 起），靠的就是这一格不落盘。
+ */
+export const STAT_READINGS = ['level', 'mind', 'skillsUnlocked'];
+
+/**
+ * 账本 → 存档。形状从 `emptyStats()` 推：Set 落数组、读数不落盘，
+ * 所以加一格计数不必再去改存档层（以前那里逐格手抄了六个 Set/bool）。
+ */
+export function statsToJSON(stats) {
+  const out = {};
+  for (const [key, value] of Object.entries(stats)) {
+    if (STAT_READINGS.includes(key)) continue;
+    out[key] = value instanceof Set ? [...value] : value;
+  }
+  return out;
+}
+
+/**
+ * 存档 → 账本。以 `emptyStats()` 的形状为准**逐格取磁盘上有的那些**：
+ * 磁盘上多出来的键进不来（那类键一旦被判据读到就是伪账），缺的格子回到初始值，
+ * 而 `STAT_READINGS` 那两格连磁盘上有都不取 —— 读档时 `pushToConsumers()` 在任务账本
+ * 复原**之前**就推了读数，取磁盘那份等于让一个过期值盖掉生产方的现值。
+ */
+export function statsFromJSON(raw) {
+  const stats = emptyStats();
+  if (!raw || typeof raw !== 'object') return stats;
+  for (const [key, proto] of Object.entries(stats)) {
+    if (STAT_READINGS.includes(key)) continue;
+    const value = raw[key];
+    if (value === undefined) continue;
+    stats[key] = proto instanceof Set ? new Set(value ?? []) : value;
+  }
+  return stats;
+}
+
+/**
+ * 一个事件改哪些计数 —— 全仓唯一一份记账。
+ * 注意 `kills` 看的是 `detail.type`：曾经按"名字里含『虚空』"归类，于是 Boss 召出的
+ * 虚空仆从（type=soldier）全被记成 elite（B36）。
+ */
+export const STAT_EVENTS = {
+  'combat-hit': (s) => { s.hits += 1; },
+  'enemy-defeated': (s, d) => {
+    if (d.type !== 'boss') s.kills[d.type] = (s.kills[d.type] ?? 0) + 1;
+    const key = BOSS_STAT_KEYS[d.bossId];
+    if (key) s[key] = true;
+  },
+  'spell-cast': (s, d) => {
+    s.spellCasts += 1;
+    if (d.charged) s.chargedCasts += 1;
+  },
+  'dungeon-cleared': (s, d) => {
+    if (s.dungeonsCleared.has(d.id)) s.dungeonRerun = true;   // 第二次清空同一座 = 再探
+    s.dungeonsCleared.add(d.id);
+  },
+  'weapon-skill-unlocked': (s) => { s.skillsUnlocked += 1; },
+  'chest-opened': (s) => { s.chestsOpened += 1; },
+  'npc-talk': (s, d) => { s.npcTalked.add(d.id); },
+  'discovery': (s, d) => { s.discoveries.add(d.id); },
+  // 交互与发现同一条账：POI 摸过一次就算见过（主线那几格的判据读的就是它）
+  'poi-interact': (s, d) => { if (d.id) s.discoveries.add(d.id); },
+  // 等级与心智是**读数**（PlayerStats 推出来的），存进账本只为让"跳步"认得它们；
+  // 存盘不存这一格，读档时由 `stats-changed` 再推一次（以生产方为准，不抄磁盘）
+  'stats-changed': (s, d) => {
+    if (Number.isFinite(d.level)) s.level = d.level;
+    if (Number.isFinite(d.mind)) s.mind = d.mind;
+  },
+};
+
+/**
+ * 把一条事件记到账上。返回 `false` = 这条事件不改任何计数（调用方照样要重算进度）。
+ * 未知事件名不抛：任务系统不该因为别人多派发了一条消息就停摆。
+ */
+export function applyStatEvent(stats, name, detail) {
+  const fn = STAT_EVENTS[name];
+  if (!fn) return false;
+  fn(stats, detail ?? {});
+  return true;
+}
+
+/**
+ * 「这一步完成了没有」—— 全仓唯一一份判据。
+ *
+ * 入参是**定义行 + 统计账本**，两者形状在 `QuestSystem` 的在役表与 `OBJECTIVES` 新表之间通用：
+ * Boss 那一族一律按 `bossId` 找计数器（所以新表把 `boss2` 写成 `type: 'boss'` 也不会读错格子），
+ * 数值那一族一律与 `target` 比（`>=` 而不是 `===`：多砍一刀不许把已完成的那步判成未完成，
+ * 而"多一刀"在真实战斗里是常态）。
+ *
+ * `level` / `mind` 读的是账本里那两格读数，不是 `stats.vigor` 那类属性名 ——
+ * 心智那一步说的是"在营火升过几级"，穿一枚加心智的护符不该替玩家把任务做完。
+ */
+export function objectiveDone(def, stats) {
+  if (!def) return false;
+  switch (def.type) {
+    case 'interact':
+      // 门控那一格一律判未完成：锚点在第一步就摸过了，若"条件齐"就直接判完成，
+      // 玩家会在拿到最后一片碎片的瞬间看到「任务完成：重铸锚点」而根本没再摸一次。
+      // 推进它的是条件齐时的那一下交互（`interactGateCondition` + `conditionHolds`）
+      if (hasInteractGate(def)) return false;
+      return Boolean(stats.discoveries?.has(def.targetId));
+    case 'hits': return stats.hits >= def.target;
+    case 'kills': return (stats.kills?.[def.enemyType] ?? 0) >= def.target;
+    case 'discovery': return Boolean(stats.discoveries?.has(def.targetId));
+    case 'spells': return stats.spellCasts >= def.target;
+    case 'charged': return stats.chargedCasts >= def.target;
+    case 'chests': return stats.chestsOpened >= def.target;
+    case 'skills-unlocked': return stats.skillsUnlocked >= def.target;
+    case 'dungeon': return Boolean(stats.dungeonsCleared?.has(def.dungeonId));
+    case 'npc': return Boolean(stats.npcTalked?.has(def.targetId));
+    case 'level': return (stats.level ?? 0) >= def.target;
+    case 'mind': return (stats.mind ?? 0) >= def.target;
+    case 'dungeon-rerun': return Boolean(stats.dungeonRerun);
+    case 'chapter-gate': return Boolean(def.autoComplete);
+    default:
+      if (BOSS_TYPES.has(def.type)) {
+        const key = BOSS_STAT_KEYS[def.bossId];
+        // 名册里没有的 bossId 一律判未完成：宁可卡住一步，也不把"某只 Boss 死了"算成另一只
+        return key ? Boolean(stats[key]) : false;
+      }
+      return false;
+  }
+}
