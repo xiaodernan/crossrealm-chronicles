@@ -474,6 +474,14 @@ M0 ─→ M1 ─→ M2 ─→ M3 ─→ M4 ─┬─→ M5 ─→ M6
 ---
 
 ## 变更记录
+- 2026-09-27 **W-B5 切片3：什么地方掉什么东西 —— 掉落池按区域，兜底写成显式数据**（提交 `4a34aa7`）：
+  - 为什么：切片2 之后全局一张池，禁林与轨道电梯掉同一件，而 §1.2 的 B6 / C3 说的就是"区域之间没差别"；另一条是兜底必须看得见 —— 新区忘了列池，若落到"查不到即空"，表现将是"那里的怪什么都不掉"且不报错。
+  - 交付：`GEAR_POOLS`（default + 六区域，每格 `{ base, weight }` 列表）、`poolForZone` 一处兜底、`rollGear(rng, zoneId)`、`LootSystem.spawnKill(pos, souls, kind, zoneId)`、`EnemyManager` 用 `zoneIdAt` 按"它死在哪儿"反推（判据仍只有一份，调用点从两处变三处，有门禁盯着）。注册表加 `gearPools`：键 `keyRef` 到区域表 + `keyAllow: ['default']`、`rows.minLength: 1`、`base` 再 `ref` 到基表、`weight ≥ 1`；两条整表规则 = 兜底那格必须在 + 每件基表至少出现在一个池（永远掉不出的孤儿数据红在开机）。
+  - 门禁：新增 `tests/gear-pools.test.js` 25 例 + `tests/gear-declaration.test.js` 5 例，全套 **1481 → 1511 例 / 70 → 71 文件** 绿、lint 0/10 持平、build 无 circular chunk；切片2 那条"rng 接近 1 落进最后一段"随语义改写（base 现在来自默认池的最后一段，断言从池表现算而不是抄死数字）。
+  - 变异 **8/8 按预测变红**（控制组 193 例）：N1 删兜底 / N2 抽 base 忽略区域（红 4）/ N3 掉落层不接参数 / N4 敌人漏第四参（静态门禁咬住）/ N5、N6 各摘一条整表规则 / N7 摘掉 `default` 的显式豁免 / N8 某池只覆盖一个槽。N1 有两条预测押错（`rollGear` 的默认参数先接住 `undefined`，那条路径上兜底根本不可判别 —— 押错名单≠断言漏）。**N7 是本片的收获**：摘掉豁免让 registry 在**加载期**抛、测试文件收集期崩、0 条断言红 = 零证据；解法不是放宽判据而是**另开一个不 import 该模块的扫源码用例**（读 `registry.js` 文本，断言 `keyRef` / `keyAllow` / `minLength` / `invariant` 确实写在声明里），与切片13 的 U4 同形同法。
+  - 真浏览器读数 D5 / D6（同一份脚本）：D5 生产的 `enemyManager.spawn` 在玩家脚边放一只活的 → `takeDamage` 打死 → `enemyManager.update` 走真路：反推 `hub`、交出 `tide-charm`、属于 hub 池（合法 true）。D6 同一位置逐区域各掉一次：fantasy `ash-charm` / magic `quill-sigil` / space `ring-sigil` / void、abyss `oath-charm` / 走廊与未知 `ash-charm`，不同件数 4。两个坑：① 把敌人挪到别的区域中心会被性能档位按距离筛掉，"没掉"于是被读成"没生效"；② 注入 `rng = () => 0.5` 却忘了普通怪掉率 0.15，掉出为空 —— 骰子要按被测那一档的掉率来给。
+  - 放弃了什么：不做"这只 Boss 必掉那一件"（要先有奖励语义与面板）；稀有度不分区域加权；不给池加"区域专属"标记；不把 `zoneIdAt` 的结果缓存到敌人身上（那是第二份区域账）。
+  - 留了什么尾巴（W-B5 切片4+）：① 营火面板那一格（背包 + 自选穿戴）；② 按 Boss 的固定掉落；③ 池权重与档位仍是全局一份（void 与 abyss 第一段同件，读数直接量出"4 种而不是 6 种"）；④ 稀有度的地面特效与音效；⑤ 生产 `loot.rng` 仍是 `Math.random`（可复现只存在于测试里）。
 - 2026-09-27 **W-B5 切片2：装备掉在地上、捡起来穿上（更好的换上，差的折成魂）**（提交 `692d688` + `2c08981`）：
   - 为什么：切片1 是一本没有脸的账；这片接上"杀敌 → 掉 → 捡 → 穿上或折魂"，并且**只在有消费者的那一刻**才把显示名与稀有度颜色写进表。换下来的那件先去哪儿也是这片的核心取舍：包要先回答装得下几件、怎么排序、卸下留在哪（那是面板那一片的事），所以这里选**当场可说明**的处置 —— 提示里那句"旧的 X 折成 N 魂"就是收据，没有东西凭空消失。
   - 交付：① `GEAR_RARITY_DISPLAY` + `GEAR_NAMES` + `gearLabel`（拼装一处，表外词缀才露出 id）；② `GEAR_DROP.byKind`（`boss:1 / elite:0.5 / golem:0.35 / normal:0.15 / dummy:0 / none:0.15`，兜底与"什么都不掉"都写成显式一格）+ `soulValue`；③ 判据 `gearScore`（点数总和）与 `pickupChoice`（**严格**更好才换、相等不换、跨槽互不挤、坏件 `nothing`）；④ `LootSystem` 注入 rng + `onGear` 出口、一次击杀只走 `spawnKill`，`EnemyManager` 的档位只判一次（魂魄数与掉率读同一个 kind）；旧 `spawnDrop` 删除（生产里已无人调）。四张新表进注册表：`soulValue` / 字样 `keyRef` 到稀有度，`gearNames` 挂 `invariant` 做双向覆盖。
