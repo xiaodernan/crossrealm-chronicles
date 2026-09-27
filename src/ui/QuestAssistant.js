@@ -246,8 +246,8 @@ export class QuestAssistant {
         break;
       case 'level':
         this.game.stats.level = step.level ?? 5;
-        this.game.stats.applyToCombat(this.game.player.combat);
-        window.dispatchEvent(new CustomEvent('stats-changed', { detail: this.game.stats.toJSON() }));
+        // 属性被 cheat 改了就要重推一次：战斗数值与蓝条上限都跟着这份读数走
+        this.game.stats.pushToConsumers();
         qs.checkProgress();
         break;
       case 'spells':
@@ -263,7 +263,7 @@ export class QuestAssistant {
         break;
       case 'mind':
         this.game.stats.mind = step.value ?? 2;
-        window.dispatchEvent(new CustomEvent('stats-changed', { detail: this.game.stats.toJSON() }));
+        this.game.stats.pushToConsumers();
         qs.checkProgress();
         break;
       case 'skills':

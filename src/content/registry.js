@@ -38,6 +38,9 @@ import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
 import { SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { FRANCHISE } from './franchises.js';
+import {
+  GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES, rarityRank,
+} from './gear.js';
 
 /** `id` 字段的形状：小写字母开头，kebab-case。与 POI / 区域 id 同一把尺子 */
 export const ID_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
@@ -439,6 +442,44 @@ export const CONTENT_TABLES = [
       body: { t: 'string' },
     },
   },
+  {
+    kind: 'gearRarity',
+    note: '装备稀有度（W-B5 切片1）：掉一件装备抽几条词缀、相对权重多少 —— `affixes: 0` 的凡品是底座档',
+    shape: 'rows',
+    table: GEAR_RARITY,
+    row: {
+      id: { t: 'id' },
+      weight: { t: 'int', min: 1 },
+      affixes: { t: 'int', min: 0, max: 3 },
+    },
+    invariant: checkGearRarity,
+  },
+  {
+    kind: 'gearBases',
+    note: '装备基表（W-B5 切片1）：`slot` 只能是 GEAR_SLOTS 里那两个槽，`mods` 是这件装备天生给的属性点',
+    shape: 'rows',
+    table: GEAR_BASES,
+    row: {
+      id: { t: 'id' },
+      slot: { t: 'enum', of: GEAR_SLOTS },
+      weight: { t: 'int', min: 1 },
+      mods: { t: 'record' },
+    },
+    invariant: checkGearBases,
+  },
+  {
+    kind: 'gearAffixes',
+    note: '装备词缀池（W-B5 切片1）：`minRarity` 引用稀有度表 —— 凡品上不许长出史诗的词（打错一个字母的档位会在开机红）',
+    shape: 'rows',
+    table: GEAR_AFFIXES,
+    row: {
+      id: { t: 'id' },
+      weight: { t: 'int', min: 1 },
+      minRarity: { t: 'ref', of: 'gearRarity' },
+      mods: { t: 'record' },
+    },
+    invariant: checkGearAffixes,
+  },
 ];
 
 /* ------------------------------------------------------------------ *
@@ -581,6 +622,69 @@ export function assertContent(tables = CONTENT_TABLES) {
     throw new Error(`内容表校验未通过（${errors.length} 处）：\n  - ${errors.join('\n  - ')}`);
   }
   return tables;
+}
+
+/**
+ * 装备表的整表不变式（W-B5 切片1）。两件事是字段词汇表达不了的：
+ *
+ * 1. **`mods` 的键**。`record` 只保证"是个对象"，而装备给的点数最后要落进 `PlayerStats` 那五个
+ *    属性（`vigor / endurance / strength / arcane / mind`）。多写一个键不会报错，只会让那一点
+ *    属性没有主人 —— 装备说明上写着"+3 幸运"而玩家身上什么都不变。
+ * 2. **可达性**。某个槽位一条基表都没有、或某一档稀有度要 3 条词缀而它够不到的词缀不足 3 枚，
+ *    都是 `rollGear` 里"静默少给"的那一支：不报错，玩家捡到的装备就是比表上说的少一条。
+ */
+const gearModErrors = (mods, path) => {
+  const out = [];
+  const entries = Object.entries(mods ?? {});
+  if (!entries.length) return [`${path}: mods 不许是空对象（这件装备什么都不给）`];
+  for (const [stat, n] of entries) {
+    if (!GEAR_STATS.includes(stat)) {
+      out.push(`${path}.${stat}: 不是装备能改的属性（可用：${GEAR_STATS.join(' / ')}）`);
+    }
+    if (!Number.isInteger(n) || n < 1) {
+      out.push(`${path}.${stat}: 期望不小于 1 的整数，实际 ${JSON.stringify(n)}`);
+    }
+  }
+  return out;
+};
+
+export function checkGearBases(table) {
+  const out = [];
+  const covered = new Set();
+  (table ?? []).forEach((row, i) => {
+    out.push(...gearModErrors(row?.mods, `gearBases[${i}].mods`));
+    if (row?.slot) covered.add(row.slot);
+  });
+  for (const slot of GEAR_SLOTS) {
+    if (!covered.has(slot)) out.push(`gearBases: 槽位 "${slot}" 一条基表都没有 —— 它永远掉不出来`);
+  }
+  return out;
+}
+
+export function checkGearAffixes(table) {
+  const out = [];
+  (table ?? []).forEach((row, i) => {
+    out.push(...gearModErrors(row?.mods, `gearAffixes[${i}].mods`));
+  });
+  return out;
+}
+
+/**
+ * "这一档要的条数够不够得到" 挂在稀有度那张表上：`invariant` 只拿得到自己那一份表，
+ * 规则写在 gearAffixes 一侧就只能查出厂的词缀池 —— 改稀有度的人拿到的将是"没报错的少给"。
+ */
+export function checkGearRarity(table) {
+  const out = [];
+  for (const rarity of table ?? []) {
+    if (!rarity.affixes) continue;
+    const reachable = GEAR_AFFIXES
+      .filter((a) => rarityRank(a.minRarity) <= rarityRank(rarity.id)).length;
+    if (reachable < rarity.affixes) {
+      out.push(`gearRarity: 稀有度 "${rarity.id}" 要 ${rarity.affixes} 条词缀，`
+        + `但够得到的只有 ${reachable} 条 —— rollGear 会静默少给`);
+    }
+  }
+  return out;
 }
 
 /** 一行摘要，给 F3 面板与调试用："有哪些内容、各多少条" */

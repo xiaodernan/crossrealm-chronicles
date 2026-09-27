@@ -97,7 +97,7 @@ const makeGameStub = () => ({
     combat: {},
     teleport(x, y, z, opts) { this.landed = { x, y, z, ...opts }; },
   },
-  stats: { fromJSON() {}, applyToCombat() {}, toJSON: () => ({}) },
+  stats: { fromJSON() {}, pushToConsumers() {}, toJSON: () => ({}) },
   quests: { stats: {}, syncProgress() {}, notifyUpdate() {} },
   spells: {},
   settings: { data: {}, applyToGame() {} },

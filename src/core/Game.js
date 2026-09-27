@@ -222,6 +222,8 @@ export class Game {
     );
     // 法术命中与近战共用同一批特效池（同一个 CombatFeedback 实例）
     this.spells.feedback = this.combatFeedback;
+    // 属性读数的消费者在这里登记一次：升级与穿戴之后"把新数推下去"只有 `PlayerStats` 那一处
+    this.stats.bindConsumers({ combat: this.player.combat, spells: this.spells });
 
     this.hud = new HUD(this);
     this.upgrade = new UpgradePanel(this);
