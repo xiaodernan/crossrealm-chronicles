@@ -80,7 +80,7 @@ export class PlayerStats {
    * 谁读这些数，就在这里登记一次（`Game.setup` 调一次）。
    *
    * 为什么不是"调用方记得推"：升级那一步今天就是手抄了 `applyToCombat` + `syncMana` 两句，
-   * 少一句就是"升了级而蓝条没变"这种读不出原因的错。穿戴若也要每个调用方自己推，就是第三份 chore。
+   * 抄第二份的那一处迟早与第一份分家 —— 升级、穿戴、读档、cheat 从此都只走这一个口。
    */
   bindConsumers(consumers) {
     this._consumers = consumers;

@@ -187,6 +187,14 @@ describe('注册表对装备表的校验：好表过、坏表红', () => {
     expect(errors.join('\n')).toMatch(/gearBases\[0\]\.weight.*至少 1/s);
   });
 
+  it('三张表的权重下限各自都要拦住：少写一格的表就是那一格能填 0', () => {
+    // 只在 gearBases 上验一次，等于默认另外两张表的字段表抄对了 —— 变异探针 M12 就是从这里抓出来的
+    for (const kind of ['gearRarity', 'gearBases', 'gearAffixes']) {
+      const errors = checkWith(kind, (rows) => { rows[0].weight = 0; });
+      expect(errors.join('\n'), `${kind} 的 weight 收到 0 也不报`).toMatch(new RegExp(`${kind}\\[0\\]\\.weight.*至少 1`));
+    }
+  });
+
   it('门禁自证：三张表各自挂着整表规则，而不是靠字段表顺手报', () => {
     for (const kind of ['gearRarity', 'gearBases', 'gearAffixes']) {
       expect(tableOf(kind).invariant, `${kind} 没有 invariant：那条整表规则压根没跑`).toBeTypeOf('function');
@@ -552,7 +560,9 @@ describe('静态门禁', () => {
   });
 
   it('推送口只有一个名字：`applyToCombat` 只有推送口与桥接自己在调', () => {
-    // 读档那一步从前只推战斗，于是带着高 arcane 的档读进来之后蓝条上限还是旧的那一档
+    // 读档那一步从前直接推战斗。要如实记一笔：改前改后的真浏览器读数逐字相同
+    // （`SpellSystem.update` 每帧自己 `syncMana`），所以这条收成一处是**工程账**（少一份 chore），
+    // 不是修了一条玩家看得见的错 —— 门禁钉的是"没有第二处直接推"，不是"玩家的手感变了"
     const files = [...new Set(hits(/\.applyToCombat\s*\(/).map((h) => h.split(':')[0]))];
     expect(files.sort(), `又有人绕过推送口直接推战斗：${files.join(' / ')}`)
       .toEqual(['combat/CombatController.js', 'game/PlayerStats.js']);
@@ -571,7 +581,7 @@ describe('静态门禁', () => {
     expect(upgrade).not.toMatch(/syncMana\s*\(/);
     const save = readFileSync(join(SRC, 'game/SaveSystem.js'), 'utf8');
     expect(save).toMatch(/stats\.pushToConsumers\s*\(/);
-    expect(save, '读档只推战斗 = 属性涨了而蓝条没涨').not.toMatch(/stats\.applyToCombat\s*\(/);
+    expect(save, '读档绕过推送口自己拼 = 第二处"谁把读数推下去"的账').not.toMatch(/stats\.applyToCombat\s*\(/);
   });
 
   it('推送口只有一份实现，调用它的只有读档与 cheat', () => {

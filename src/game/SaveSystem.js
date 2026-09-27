@@ -90,7 +90,7 @@ export class SaveSystem {
       return false;
     }
     game.stats.fromJSON(data.stats);
-    game.stats.pushToConsumers();      // 战斗与蓝条一起跟：从前这里只推战斗，读档后 maxMana 是旧档
+    game.stats.pushToConsumers();      // 推送只有这一处：改前读档靠调用方各推，实测行为没变（见切片1 的记录）
     game.player.combat.hp = data.player.hp;
     game.player.combat.stamina = data.player.stamina;
     game.player.teleport(data.player.x, data.player.y, data.player.z, {
