@@ -501,12 +501,29 @@ describe('营火树的 `invariant`：形状表达不了的"这棵树连不连得
     b: { speaker: '甲', text: '……', choices: [{ label: '回', next: 'start' }] },
   };
 
+  /**
+   * 下面几条都要把种下去的那一棵**并进真表**再校验，不能只交一棵。
+   *
+   * 理由不是"写法偏好"：`checkRestDialogueTree` 现在多了一条成对规则（W-B4 切片1）——
+   * `REST_NPC_DEFS` 里有定义而表里没有那棵树，也要红。只交 `{ hub: … }` 的旧写法于是白拿
+   * 5 条"别的五座没树"的错，把我要看的那一条埋在下面。真表打底，红才只可能来自种植入的那一棵。
+   */
+  const whole = (over) => ({ ...REST_DIALOGUES, ...over });
+  const treeOf = (over) => checkRestDialogueTree(whole(over));
+
   it('控制组：合法树零错误（少了这条，下面五条只是"什么都报"）', () => {
-    expect(checkRestDialogueTree({ hub: { title: 't', nodes: legal } })).toEqual([]);
+    expect(treeOf({ hub: { title: 't', nodes: legal } })).toEqual([]);
+  });
+
+  it('控制组反面：只交一棵树要红 —— 成对规则读的是整张表，不是那一棵', () => {
+    const errs = checkRestDialogueTree({ hub: { title: 't', nodes: legal } });
+    // 五座有定义却没树的营火各报一次（旧写法把这五条当成"我要看的错"，其实一条都不是）
+    expect(errs).toHaveLength(5);
+    expect(errs.every((e) => /有 NPC 定义却没有对话树/.test(e))).toBe(true);
   });
 
   it('死 `next`：本树没有这一节点（运行时是 `if (!node) return`，玩家只看见窗口自己关掉）', () => {
-    const errs = checkRestDialogueTree({
+    const errs = treeOf({
       hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: 'x', next: 'b' }] } } },
     });
     expect(errs).toHaveLength(1);
@@ -514,7 +531,7 @@ describe('营火树的 `invariant`：形状表达不了的"这棵树连不连得
   });
 
   it('跨区互跳也算死 `next`：树按营火取，别的区有这一节点不算', () => {
-    const errs = checkRestDialogueTree({
+    const errs = treeOf({
       hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: 'x', next: 'magic-node' }] } } },
       magic: {
         title: 't',
@@ -531,7 +548,7 @@ describe('营火树的 `invariant`：形状表达不了的"这棵树连不连得
 
   it('孤儿节点：写了，但没有任何选择通向它 → 玩家永远看不到', () => {
     const rest = [{ label: '歇', action: 'rest' }];
-    const errs = checkRestDialogueTree({
+    const errs = treeOf({
       hub: {
         title: 't',
         nodes: {
@@ -544,21 +561,21 @@ describe('营火树的 `invariant`：形状表达不了的"这棵树连不连得
   });
 
   it('一格选择既没 `next` 也没 `action`：点它只有关窗（`_pick` 的兜底路径）', () => {
-    const errs = checkRestDialogueTree({
+    const errs = treeOf({
       hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: '随便' }] } } },
     });
     expect(errs.join('\n')).toMatch(/既没有 next 也没有 action/);
   });
 
   it('`next` 与 `action` 同时给：运行时先认 action，next 是白写的 → 要红', () => {
-    const errs = checkRestDialogueTree({
+    const errs = treeOf({
       hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: 'x', next: 'start', action: 'rest' }] } } },
     });
     expect(errs.join('\n')).toMatch(/next 与 action 同时给了/);
   });
 
   it('`choices` 不是数组：直接报，不钻进去', () => {
-    const errs = checkRestDialogueTree({
+    const errs = treeOf({
       hub: { title: 't', nodes: { start: { speaker: '甲', text: '甲', choices: { a: 1 } } } },
     });
     expect(errs).toEqual([expect.stringContaining('hub/start: choices 不是数组')]);
@@ -568,14 +585,15 @@ describe('营火树的 `invariant`：形状表达不了的"这棵树连不连得
     const entry = CONTENT_TABLES.find((t) => t.kind === 'restDialogues');
     const bad = {
       ...entry,
-      table: {
+      table: whole({
         hub: {
           title: 'x',
           nodes: { start: { speaker: '甲', text: '甲', choices: [{ label: 'l', next: 'ghost-node' }] } },
         },
-      },
+      }),
     };
-    const errs = checkTable(bad, { ids: new Map([['zones', new Set(['hub'])]]) });
+    // `zones` 的键集合直接从真表取：手抄一份"有哪六座"会在表变动时先红在这里（跟要看的错无关）
+    const errs = checkTable(bad, { ids: new Map([['zones', new Set(Object.keys(REST_DIALOGUES))]]) });
     expect(errs.join('\n')).toMatch(/next 指向 "ghost-node"/);
     // `ghost-node` 是合法 kebab id，字段表逐格全过 —— 剩下的错只可能来自 invariant
     expect(errs.filter((e) => !/没有这个节点/.test(e))).toEqual([]);

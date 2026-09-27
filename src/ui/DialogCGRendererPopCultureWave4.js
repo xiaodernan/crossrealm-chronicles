@@ -2,23 +2,27 @@
  *
  *  这里原本还有一张 `REST_DIALOGUE_CG_POP_WAVE4`（5 条预设），实测**全仓无人引用**，
  *  且与 `REST_DIALOGUE_CG_POP` 最后 5 条逐字相同 —— 第二真源 + 死代码，本切片删掉。
- *  真正被用上的是下面这几个 painter（由 `attachPopCultureCgRenderer` 装进渲染器）。
+ *  真正被用的是下面这几个 painter。
+ *
+ *  W-B4 切片1：它原本由 `attachWave4CgPainters(extraPainters)` 往调用方给的对象上**逐条赋值**
+ *  （名单的形状要到运行时才知道，静态扫一遍读不出来）。现在交出的是一张导出的表，
+ *  由致敬层那一批并进 `CG_PAINTERS`，撞名当场点名。
  */
-/** Wave4 CG preset + painters */
+/** Wave4 painters 名单 */
 
-export function attachWave4CgPainters(extraPainters) {
+export const POP_CG_PAINTERS_WAVE4 = {
 
-  extraPainters.cyber_alley = paintCyberAlley;
+  cyber_alley: (r, ctx, w, h, accent) => paintCyberAlley(ctx, w, h, accent),
 
-  extraPainters.samurai_torii = paintSamuraiTorii;
+  samurai_torii: (r, ctx, w, h, accent) => paintSamuraiTorii(ctx, w, h, accent),
 
-  extraPainters.cosmic_obelisk = paintCosmicObelisk;
+  cosmic_obelisk: (r, ctx, w, h, accent) => paintCosmicObelisk(ctx, w, h, accent),
 
-  extraPainters.starport_cantina = paintStarportCantina;
+  starport_cantina: (r, ctx, w, h, accent) => paintStarportCantina(ctx, w, h, accent),
 
-  extraPainters.wave4_grid = paintWave4Grid;
+  wave4_grid: (r, ctx, w, h, accent) => paintWave4Grid(ctx, w, h, accent),
 
-}
+};
 
 
 

@@ -106,7 +106,6 @@ import { UpsideDownVisualPass } from '../effects/UpsideDownVisualPass.js';
 import { PopCultureTriadVisualPass } from '../effects/PopCultureTriadVisualPass.js';
 import { PopCultureWave4VisualPass } from '../effects/PopCultureWave4VisualPass.js';
 import { attachPopCultureZones } from '../world/PopCultureZoneEnhancer.js';
-import { attachPopCultureCgRenderer } from '../ui/DialogCGRendererPopCulture.js';
 import { attachPopCultureSideQuests } from '../game/SideQuestPopCulture.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
@@ -172,7 +171,6 @@ export class Game {
     this.stats = new PlayerStats();
     this.dialog = new Dialog();
     this.dialogCg = new DialogCGRenderer();
-    attachPopCultureCgRenderer(this.dialogCg);
     this.dialog.setCgRenderer(this.dialogCg);
     this.world = new WorldManager(this.scene, this.dialog);
     this.world.build();

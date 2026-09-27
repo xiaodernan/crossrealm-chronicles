@@ -57,7 +57,10 @@ export class Dialog {
     if (this.speakerEl) {
       if (meta.speaker) {
         this.speakerEl.classList.remove('hidden');
-        this.speakerEl.innerHTML = `<span class="dialog-speaker-name" style="color:${meta.accent ?? '#c9a962'}">${meta.speaker}</span>${meta.speakerTitle ? `<span class="dialog-speaker-title">${meta.speakerTitle}</span>` : ''}`;
+        // 配色由说话人那一座带来（`REST_NPC_DEFS`）；没有就不写内联样式，让 CSS 那条规则说话
+        // —— 改前这里是 `meta.accent ?? '#c9a962'`，即"认不出就戴锚火看守的金边"
+        const accentStyle = meta.accent ? ` style="color:${meta.accent}"` : '';
+        this.speakerEl.innerHTML = `<span class="dialog-speaker-name"${accentStyle}>${meta.speaker}</span>${meta.speakerTitle ? `<span class="dialog-speaker-title">${meta.speakerTitle}</span>` : ''}`;
         this.speakerEl.dataset.mood = meta.mood ?? 'calm';
       } else {
         this.speakerEl.classList.add('hidden');
@@ -92,7 +95,12 @@ export class Dialog {
       this._hideCg();
       return;
     }
-    const url = this.cgRenderer.render(restId, nodeId, accent ?? '#c9a962', mood ?? 'calm');
+    const url = this.cgRenderer.render(restId, nodeId, accent, mood);
+    // 渲染器说"这一座没有 CG"就收起图位：宁可没图，不画别人家的火
+    if (!url) {
+      this._hideCg();
+      return;
+    }
     this.cgImg.src = url;
     this.cgEl.classList.remove('hidden');
     this.cgEl.classList.toggle('cg-warn', mood === 'warn');

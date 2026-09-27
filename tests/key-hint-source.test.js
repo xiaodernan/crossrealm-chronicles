@@ -163,8 +163,7 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     'ui/WeaponSkillJournalTab.js': ['refreshKeyText(panelEl)'],
     'player/DemoRunner.js': ['refreshKeyText(this.overlay)'],
     'game/CombatTutorialDirector.js': ['refreshKeyText(this._hint)'],
-    'ui/DialogCGRenderer.js': ['_syncKeyStamp()', 'keyText(preset.caption', "keyText('{parry} 弹反')"],
-    'ui/DialogCGRendererPopCulture.js': ['this._syncKeyStamp()', 'keyText(preset.caption'],
+    'ui/DialogCGRenderer.js': ['_syncKeyStamp()', 'keyText(caption', "keyText('{parry} 弹反')"],
   };
 
   it('每一处都还在原地问表', () => {

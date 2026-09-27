@@ -7,12 +7,17 @@
  * 的一条回边，B37 循环分块的成因之一。
  *
  * 拆分口径：**"有哪些 CG、叫什么、什么场景"是数据**，留在 `ui/` 的是
- * "怎么把它画出来"（`attachPopCultureCgRenderer` / `attachWave4CgPainters`）。
+ * "怎么把它画出来"（`ui/DialogCGRenderer.js` 的 `CG_PAINTERS` 与致敬层的 `POP_CG_PAINTERS`）。
  * 数据进了 `content/` 之后，画廊目录与渲染器读的是同一份，不会再各有一半。
  *
- * 合并顺序：基础表 → `_EXTRA` → `_POP`（后者覆盖前者的同名键）。
+ * 合并顺序：基础表 → `_EXTRA` → `_POP`。三张名单**必须互不相交** ——
+ * spread 的同名键是后层静默盖掉前层，界面上只看得到后一张的画面，谁也不知道少了一层。
+ * 这条不相交由 `registry.js` 的 `checkDialogueCgPresets` 在开机时逐键核（注册表条目 `restDialogueCg`）。
+ *
+ * 键是 `<营火 id>:<节点 id>` 的复合串，而 `game/CgGalleryRegistry.js` 直接按每个键建一行画廊目录：
+ * 写错的节点名 = 一条玩家永远解锁不了的画廊行，而 `side-cg-half` / 成就 `cg-half` 读的分母就是那张目录。
  */
-const REST_DIALOGUE_CG_BASE = {
+export const REST_DIALOGUE_CG_BASE = {
   'hub:start': { scene: 'anchor_fire', caption: '三界交汇 · 余温' },
   'hub:origin': { scene: 'anchor_fire', caption: '位面摩擦之火' },
   'hub:quest': { scene: 'quest_scroll', caption: '当前使命' },
@@ -86,8 +91,8 @@ export const REST_DIALOGUE_CG_POP = {
 };
 
 /** 合并后的全表：基础 + 扩写 + 致敬层。画廊目录与渲染器读的都是这一份 */
-export function mergeDialogueCg(base = REST_DIALOGUE_CG_BASE) {
-  return { ...base, ...REST_DIALOGUE_CG_EXTRA, ...REST_DIALOGUE_CG_POP };
+export function mergeDialogueCg() {
+  return { ...REST_DIALOGUE_CG_BASE, ...REST_DIALOGUE_CG_EXTRA, ...REST_DIALOGUE_CG_POP };
 }
 
 export const REST_DIALOGUE_CG = mergeDialogueCg();

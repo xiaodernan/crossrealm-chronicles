@@ -1,7 +1,63 @@
 import { REST_DIALOGUE_CG } from '../content/dialogueCgPresets.js';
 import { keyText, keyStamp } from '../content/keyHints.js';
+import { POP_CG_PAINTERS } from './DialogCGRendererPopCulture.js';
 
 /** 营火对话 CG — 节点 id → 场景预设（程序绘制 + 可选图片） */
+
+/**
+ * 默认配色。全仓只此一处（W-B4 切片1）。
+ *
+ * 改前这句话在四个文件里各抄一遍（`RestDialogue` 两处、画廊目录一处、`Dialog` 两处），
+ * 而它们抄的是**世界之锚看守那一座的配色** —— 于是"认不出说话人"在界面上表现成
+ * "说话人戴着锚火看守的金边"。现在说话人的配色只从 `REST_NPC_DEFS` 取，
+ * 取不到就没有 CG（见 `render` 返回 null），这一份只在调用方压根没给配色时兜底。
+ */
+export const CG_DEFAULT_ACCENT = '#c9a962';
+
+/**
+ * 场景名 → 绘制者。签名统一为 `(renderer, ctx, w, h, accent)`。
+ *
+ * 原先这个名单每次 `render` 新建一遍（20 个闭包），更要紧的是**没有别处能读出"有哪些场景可画"**：
+ * 预设表里写一个没有绘制者的 `scene` 时，改前的代码 `?? painters.anchor_fire` —— 不报错，
+ * 玩家看到的是世界之锚的那团火，而画廊与对话框都照常收下这张图。名单导出之后，
+ * `tests/dialogue-cg-pairing.test.js` 能逐预设问一句"这个场景有人画吗"。
+ */
+export const CG_PAINTERS = {
+  anchor_fire: (r, ctx, w, h, accent) => r._paintAnchorFire(ctx, w, h, accent),
+  forest_camp: (r, ctx, w, h, accent) => r._paintForestCamp(ctx, w, h, accent),
+  forest_map: (r, ctx, w, h, accent) => r._paintForestMap(ctx, w, h, accent),
+  magic_castle: (r, ctx, w, h, accent) => r._paintMagicCastle(ctx, w, h, accent),
+  space_endurance: (r, ctx, w, h, accent) => r._paintSpaceEndurance(ctx, w, h, accent),
+  gravity_well: (r, ctx, w, h, accent) => r._paintGravityWell(ctx, w, h, accent),
+  void_time: (r, ctx, w, h, accent) => r._paintVoidTime(ctx, w, h, accent),
+  time_stop: (r, ctx, w, h, accent) => r._paintTimeStop(ctx, w, h, accent),
+  chaos_border: (r, ctx, w, h, accent) => r._paintChaosBorder(ctx, w, h, accent),
+  boss_shadow: (r, ctx, w, h) => r._paintBossSilhouette(ctx, w, h, '#aa2222'),
+  boss_mage: (r, ctx, w, h) => r._paintBossSilhouette(ctx, w, h, '#8844ff'),
+  boss_singularity: (r, ctx, w, h) => r._paintBossSilhouette(ctx, w, h, '#4488ff'),
+  boss_chaos: (r, ctx, w, h) => r._paintBossSilhouette(ctx, w, h, '#ff2244'),
+  hidden_boss: (r, ctx, w, h, accent) => r._paintHiddenBoss(ctx, w, h, accent),
+  execution_art: (r, ctx, w, h, accent) => r._paintExecution(ctx, w, h, accent),
+  combat_tutorial: (r, ctx, w, h, accent) => r._paintCombatTutorial(ctx, w, h, accent),
+  quest_scroll: (r, ctx, w, h, accent) => r._paintQuestScroll(ctx, w, h, accent),
+  walker_silhouette: (r, ctx, w, h, accent) => r._paintWalker(ctx, w, h, accent),
+  spell_orbs: (r, ctx, w, h, accent) => r._paintSpellOrbs(ctx, w, h, accent),
+  final_gate: (r, ctx, w, h, accent) => r._paintFinalGate(ctx, w, h, accent),
+};
+
+/**
+ * 致敬层并入同一张名单（W-B4 切片1：从"覆盖整个 `render`"改成"登记场景"）。
+ *
+ * 改前 `attachPopCultureCgRenderer` 把 `render` 整个换掉，于是同一套像素写了两遍 ——
+ * 而致敬层那一份漏了 warn 的红边（只有满屏红罩子），基础层有。撞名也只会静默盖掉，
+ * 这里当场点名：一个场景两家绘制者，玩家看到哪张取决于谁后注册。
+ */
+for (const [scene, paint] of Object.entries(POP_CG_PAINTERS)) {
+  if (CG_PAINTERS[scene]) {
+    throw new Error(`CG 场景「${scene}」有两家绘制者 —— 致敬层与基础层撞名，后到的那张静默盖掉前一张`);
+  }
+  CG_PAINTERS[scene] = paint;
+}
 
 
 /** 程序 CG 绘制 — Canvas 2D 场景插画 */
@@ -18,8 +74,34 @@ export class DialogCGRenderer {
     return `${restId}:${nodeId}`;
   }
 
+  /**
+   * 节点 → 预设。具体节点找不到时退回**同一座营火**的开场预设（13 个节点是刻意共用的），
+   * 连营火都不认识就返回 null —— 改前这里是 `?? { scene: 'anchor_fire', caption: '' }`，
+   * 任何陌生营火 id 都画成世界之锚那团火，而界面照常收下那张图。
+   * `registry.js` 的 `checkDialogueCgPresets` 保证每棵树都有 `<营火>:start`，所以这里不会再退一层。
+   */
   getPreset(restId, nodeId) {
-    return REST_DIALOGUE_CG[this.getKey(restId, nodeId)] ?? REST_DIALOGUE_CG[`${restId}:start`] ?? { scene: 'anchor_fire', caption: '' };
+    return REST_DIALOGUE_CG[this.getKey(restId, nodeId)] ?? REST_DIALOGUE_CG[`${restId}:start`] ?? null;
+  }
+
+  /**
+   * 营火对话那一格该画的图。返回 null 表示"没有这张 CG"，调用方须把图位收起来 ——
+   * 没有图是看得出来的缺，画成别人家的火是看不出来的错。
+   */
+  render(restId, nodeId, accent = CG_DEFAULT_ACCENT, mood = 'calm') {
+    const preset = this.getPreset(restId, nodeId);
+    if (!preset) return null;
+    return this._paint(`${restId}:${nodeId}:${accent}:${mood}`, preset.scene, preset.caption, accent, mood);
+  }
+
+  /**
+   * 画廊里不属于任何营火的行（Boss 击破、连击记忆）：目录那一行自己写着 `scene`，就按它画。
+   *
+   * 改前这里没有入口，`CgJournalTab` 只能拿 `entry.zone` 去冒充一个营火节点
+   * —— 于是 `bonus:boss-shadow`（scene 写着 boss_shadow）画出来是灰林那顶帐篷。
+   */
+  renderScene(scene, caption, accent = CG_DEFAULT_ACCENT, mood = 'calm') {
+    return this._paint(`scene:${scene}:${caption ?? ''}:${accent}:${mood}`, scene, caption, accent, mood);
   }
 
   /**
@@ -27,7 +109,7 @@ export class DialogCGRenderer {
    *
    * 图上写着的键名（`{escape} 跳过`、战斗教学那两格）是**画进像素里的**：缓存键里没有键名，
    * 改绑之后只让 `keyText` 改口，界面上看到的就是"表已经换了、图里还写着 Esc" ——
-   * 而那一句玩家在 DOM 里读不到，改绑测试也抓不到。两条绘制路径（本文件与致敬层那一条）都先过这里。
+   * 而那一句玩家在 DOM 里读不到，改绑测试也抓不到。两条绘制路径（对话与画廊）都先过这里。
    */
   _syncKeyStamp() {
     const stamp = keyStamp();
@@ -38,41 +120,17 @@ export class DialogCGRenderer {
     return stamp;
   }
 
-  render(restId, nodeId, accent = '#c9a962', mood = 'calm') {
-    const key = `${restId}:${nodeId}:${accent}:${mood}`;
+  _paint(key, scene, caption, accent, mood) {
+    const paint = CG_PAINTERS[scene];
+    if (!paint) return null;
     this._syncKeyStamp();
     if (this.cache.has(key)) return this.cache.get(key);
 
-    const preset = this.getPreset(restId, nodeId);
     const ctx = this.ctx;
     const w = this.canvas.width;
     const h = this.canvas.height;
     ctx.clearRect(0, 0, w, h);
-
-    const painters = {
-      anchor_fire: () => this._paintAnchorFire(ctx, w, h, accent),
-      forest_camp: () => this._paintForestCamp(ctx, w, h, accent),
-      forest_map: () => this._paintForestMap(ctx, w, h, accent),
-      magic_castle: () => this._paintMagicCastle(ctx, w, h, accent),
-      space_endurance: () => this._paintSpaceEndurance(ctx, w, h, accent),
-      gravity_well: () => this._paintGravityWell(ctx, w, h, accent),
-      void_time: () => this._paintVoidTime(ctx, w, h, accent),
-      time_stop: () => this._paintTimeStop(ctx, w, h, accent),
-      chaos_border: () => this._paintChaosBorder(ctx, w, h, accent),
-      boss_shadow: () => this._paintBossSilhouette(ctx, w, h, '#aa2222'),
-      boss_mage: () => this._paintBossSilhouette(ctx, w, h, '#8844ff'),
-      boss_singularity: () => this._paintBossSilhouette(ctx, w, h, '#4488ff'),
-      boss_chaos: () => this._paintBossSilhouette(ctx, w, h, '#ff2244'),
-      hidden_boss: () => this._paintHiddenBoss(ctx, w, h, accent),
-      execution_art: () => this._paintExecution(ctx, w, h, accent),
-      combat_tutorial: () => this._paintCombatTutorial(ctx, w, h, accent),
-      quest_scroll: () => this._paintQuestScroll(ctx, w, h, accent),
-      walker_silhouette: () => this._paintWalker(ctx, w, h, accent),
-      spell_orbs: () => this._paintSpellOrbs(ctx, w, h, accent),
-      final_gate: () => this._paintFinalGate(ctx, w, h, accent),
-    };
-
-    (painters[preset.scene] ?? painters.anchor_fire)();
+    paint(this, ctx, w, h, accent);
 
     if (mood === 'warn') {
       ctx.fillStyle = 'rgba(255,60,40,0.12)';
@@ -86,7 +144,7 @@ export class DialogCGRenderer {
     ctx.fillRect(0, h - 52, w, 52);
     ctx.fillStyle = accent;
     ctx.font = '600 22px "Segoe UI","Microsoft YaHei",sans-serif';
-    ctx.fillText(keyText(preset.caption ?? ''), 24, h - 18);
+    ctx.fillText(keyText(caption ?? ''), 24, h - 18);
 
     const url = this.canvas.toDataURL('image/jpeg', 0.88);
     this.cache.set(key, url);

@@ -3,60 +3,41 @@
  *  预设表 `REST_DIALOGUE_CG_POP` 已搬到 `content/dialogueCgPresets.js`：
  *  它与绘制混住时，`game/CgGalleryRegistry.js` 要枚举全部 CG 就得 import 本文件，
  *  于是形成 `chunk-core → chunk-ui` 回边（B37）。数据与绘制分家之后这里只管画。
+ *
+ *  W-B4 切片1：这里原本导出 `attachPopCultureCgRenderer(renderer)`，它把渲染器的 `render`
+ *  整个换掉，再自己走一遍缓存、warn 罩子、字幕条 —— 同一套像素于是有两份实现，
+ *  而致敬层那一份漏了 warn 的那圈红边（基础层有）。现在这一层只交名单，管线归 `DialogCGRenderer` 一处。
  */
-import { attachWave4CgPainters } from './DialogCGRendererPopCultureWave4.js';
-import { keyText } from '../content/keyHints.js';
+import { POP_CG_PAINTERS_WAVE4 } from './DialogCGRendererPopCultureWave4.js';
 
-export function attachPopCultureCgRenderer(renderer) {
-  const extraPainters = {
-    wizard_school: (ctx, w, h, accent) => paintWizardSchool(ctx, w, h, accent, renderer),
-    broom_ring: (ctx, w, h, accent) => paintBroomRing(ctx, w, h, accent, renderer),
-    murphy_shelf: (ctx, w, h, accent) => paintMurphyShelf(ctx, w, h, accent, renderer),
-    upside_down: (ctx, w, h, accent) => paintUpsideDown(ctx, w, h, accent, renderer),
-    radio_tower: (ctx, w, h, accent) => paintRadioTower(ctx, w, h, accent, renderer),
-    one_ring: (ctx, w, h, accent) => paintOneRing(ctx, w, h, accent, renderer),
-    poster_wall: (ctx, w, h, accent) => paintPosterWall(ctx, w, h, accent, renderer),
-    nine_platform: (ctx, w, h, accent) => paintNinePlatform(ctx, w, h, accent),
-    patronus_lake: (ctx, w, h, accent) => paintPatronusLake(ctx, w, h, accent),
-    wormhole_arch: (ctx, w, h, accent) => paintWormholeArch(ctx, w, h, accent),
-    arcade_cab: (ctx, w, h, accent) => paintArcadeCab(ctx, w, h, accent),
-    vecna_clock: (ctx, w, h, accent) => paintVecnaClock(ctx, w, h, accent),
-    western_saloon: (ctx, w, h, accent) => paintWesternSaloon(ctx, w, h, accent),
-    duel_noon: (ctx, w, h, accent) => paintDuelNoon(ctx, w, h, accent),
-    noir_speakeasy: (ctx, w, h, accent) => paintNoirSpeakeasy(ctx, w, h, accent),
-    scifi_dome: (ctx, w, h, accent) => paintScifiDome(ctx, w, h, accent),
-    jump_gate: (ctx, w, h, accent) => paintJumpGate(ctx, w, h, accent),
-    triad_poster: (ctx, w, h, accent) => paintTriadPoster(ctx, w, h, accent),
-  };
-  attachWave4CgPainters(extraPainters);
+/** 场景名 → 绘制者。签名与 `CG_PAINTERS` 一致：`(renderer, ctx, w, h, accent)`，`renderer` 供需要复用基础层画法的格子用 */
+export const POP_CG_PAINTERS = {
+  wizard_school: (r, ctx, w, h, accent) => paintWizardSchool(ctx, w, h, accent, r),
+  broom_ring: (r, ctx, w, h, accent) => paintBroomRing(ctx, w, h, accent),
+  murphy_shelf: (r, ctx, w, h, accent) => paintMurphyShelf(ctx, w, h, accent),
+  upside_down: (r, ctx, w, h, accent) => paintUpsideDown(ctx, w, h, accent),
+  radio_tower: (r, ctx, w, h, accent) => paintRadioTower(ctx, w, h, accent),
+  one_ring: (r, ctx, w, h, accent) => paintOneRing(ctx, w, h, accent),
+  poster_wall: (r, ctx, w, h, accent) => paintPosterWall(ctx, w, h, accent),
+  nine_platform: (r, ctx, w, h, accent) => paintNinePlatform(ctx, w, h, accent),
+  patronus_lake: (r, ctx, w, h, accent) => paintPatronusLake(ctx, w, h, accent),
+  wormhole_arch: (r, ctx, w, h, accent) => paintWormholeArch(ctx, w, h, accent),
+  arcade_cab: (r, ctx, w, h, accent) => paintArcadeCab(ctx, w, h, accent),
+  vecna_clock: (r, ctx, w, h, accent) => paintVecnaClock(ctx, w, h, accent),
+  western_saloon: (r, ctx, w, h, accent) => paintWesternSaloon(ctx, w, h, accent),
+  duel_noon: (r, ctx, w, h, accent) => paintDuelNoon(ctx, w, h, accent),
+  noir_speakeasy: (r, ctx, w, h, accent) => paintNoirSpeakeasy(ctx, w, h, accent),
+  scifi_dome: (r, ctx, w, h, accent) => paintScifiDome(ctx, w, h, accent),
+  jump_gate: (r, ctx, w, h, accent) => paintJumpGate(ctx, w, h, accent),
+  triad_poster: (r, ctx, w, h, accent) => paintTriadPoster(ctx, w, h, accent),
+};
 
-  const orig = renderer.render.bind(renderer);
-  renderer.render = function popCultureRender(restId, nodeId, accent, mood) {
-    const preset = this.getPreset(restId, nodeId);
-    if (extraPainters[preset.scene]) {
-      const key = `${restId}:${nodeId}:${accent}:${mood}:${preset.scene}`;
-      this._syncKeyStamp();
-      if (this.cache.has(key)) return this.cache.get(key);
-      const ctx = this.ctx;
-      const w = this.canvas.width;
-      const h = this.canvas.height;
-      ctx.clearRect(0, 0, w, h);
-      extraPainters[preset.scene](ctx, w, h, accent);
-      if (mood === 'warn') {
-        ctx.fillStyle = 'rgba(255,60,40,0.12)';
-        ctx.fillRect(0, 0, w, h);
-      }
-      ctx.fillStyle = 'rgba(0,0,0,0.55)';
-      ctx.fillRect(0, h - 52, w, 52);
-      ctx.fillStyle = accent;
-      ctx.font = '600 22px "Segoe UI","Microsoft YaHei",sans-serif';
-      ctx.fillText(keyText(preset.caption ?? ''), 24, h - 18);
-      const url = this.canvas.toDataURL('image/jpeg', 0.88);
-      this.cache.set(key, url);
-      return url;
-    }
-    return orig(restId, nodeId, accent, mood);
-  };
+/** Wave4 那一批并进来。撞名当场点名 —— spread 会让后到的那张静默盖掉前一张 */
+for (const [scene, paint] of Object.entries(POP_CG_PAINTERS_WAVE4)) {
+  if (POP_CG_PAINTERS[scene]) {
+    throw new Error(`致敬层 CG 场景「${scene}」有两家绘制者（Wave4 与前面那批撞名）`);
+  }
+  POP_CG_PAINTERS[scene] = paint;
 }
 
 function grad(ctx, w, h, c1, c2) {

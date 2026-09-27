@@ -21,7 +21,8 @@ export class RestDialogue {
 
   start(restPoint) {
     this.activeRest = restPoint;
-    const tree = REST_DIALOGUES[restPoint.id ?? 'hub'];
+    // 认不出 id 的营火就走"没有对话"那一条（回血 + 升级面板），不再借世界之锚的台词说话
+    const tree = REST_DIALOGUES[restPoint.id];
     if (!tree) {
       this.game.combat.restHeal();
       this.game.upgrade.show(restPoint.name);
@@ -43,13 +44,15 @@ export class RestDialogue {
     // 台词里的 `{动作}` 在**离开这张表之前**展开：下游（NPC 气泡、营火记忆）拿到的是给人看的那一份，
     // 它们不认识占位 —— 传一句 `{escape}` 过去就是让玩家在气泡里看见花括号。
     const preview = typeof node?.text === 'string' ? keyText(node.text).replace(/\*\*/g, '').split('\n')[0] : '';
+    // 说话人名与配色只从 `REST_NPC_DEFS` 取（W-B4 切片1）：认不出这一座就没有名字 / 用默认色，
+    // 而不是冒充锚火看守 —— 成对关系由 `registry.js` 的 `checkRestDialogueTree` 第四、五条开机核。
     emit(type, {
       restId,
       nodeId,
       speaker: node?.speaker ?? def?.name,
       speakerId: restId,
       mood: node?.mood ?? 'calm',
-      accent: def?.accent ?? '#c9a962',
+      accent: def?.accent,
       linePreview: preview,
     });
   }
@@ -90,7 +93,7 @@ export class RestDialogue {
     this.game.dialog.showChoices(keyText(tree.title), highlightKeywords(text), choices, {
       speaker: node.speaker ?? def?.name,
       speakerTitle: def?.title,
-      accent: def?.accent ?? '#c9a962',
+      accent: def?.accent,
       mood: node.mood ?? 'calm',
       restId: this.activeRest.id,
       nodeId,

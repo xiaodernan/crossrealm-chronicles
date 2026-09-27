@@ -15,8 +15,12 @@ export const CG_GALLERY_CATALOG = [
       caption: preset.caption,
       mood: preset.mood ?? 'calm',
       zone: restId,
-      speaker: npc?.name ?? restId,
-      accent: npc?.accent ?? '#c9a962',
+      // 名与色只从 `REST_NPC_DEFS` 取（W-B4 切片1）：改前这里是 `?? restId` / `?? '#c9a962'` ——
+      // 认不出这一座时把 id 当说话人名摆进画廊，再给它戴上锚火看守的金边。
+      // `registry.js` 的 `checkDialogueCgPresets` 保证每个键的营火既有一棵树也有定义，
+      // 而 `restDialogues` 那一条保证定义里的 name/accent 是非空串，所以这里不需要兜底。
+      speaker: npc?.name,
+      accent: npc?.accent,
       unlock: 'dialogue',
       sort: 10,
     };

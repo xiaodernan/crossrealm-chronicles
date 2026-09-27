@@ -32,17 +32,27 @@ export class CgJournalTab {
     this.lightbox?.classList.add('hidden');
   }
 
+  /**
+   * 目录里的每一行按**自己写的**东西去画（W-B4 切片1）。
+   *
+   * 营火对话那批行有 `restId:nodeId`，走对话渲染器（与玩家在营火边看到的同一张）。
+   * 其余行（Boss 击破、连击记忆、迷宫清空）不属于任何营火，改前是拿 `entry.zone` 去冒充一个营火节点
+   * —— `bonus:boss-shadow` 的 `scene` 明明写着 boss_shadow，画出来却是灰林那顶帐篷，
+   * 而 `bonus:dungeon-clear` 的 zone 压根不是营火，画出来是世界之锚的火。现在按 scene 直接画。
+   */
+  _urlFor(entry) {
+    const renderer = this.game.dialogCg;
+    if (!renderer) return null;
+    return entry.restId && entry.nodeId
+      ? renderer.render(entry.restId, entry.nodeId, entry.accent, entry.mood)
+      : renderer.renderScene(entry.scene, entry.caption, entry.accent, entry.mood);
+  }
+
   showLightbox(entry) {
     const cg = this.game.cgGallery;
-    const renderer = this.game.dialogCg;
-    if (!entry || !renderer) return;
-
-    let url;
-    if (entry.restId && entry.nodeId) {
-      url = renderer.render(entry.restId, entry.nodeId, entry.accent, entry.mood);
-    } else {
-      url = renderer.render(entry.zone === 'combat' ? 'void' : entry.zone, entry.nodeId ?? 'exec', entry.accent, entry.mood);
-    }
+    if (!entry) return;
+    const url = this._urlFor(entry);
+    if (!url) return;   // 画不出来就不开灯 —— 开一盏写着别的画面的灯比不开更糟
 
     this.lightbox.querySelector('.cg-lightbox-img').src = url;
     this.lightbox.querySelector('.cg-lightbox-caption').textContent = entry.caption ?? entry.id;
@@ -102,10 +112,8 @@ export class CgJournalTab {
     panelEl.querySelectorAll('.cg-card-thumb').forEach((el) => {
       const entry = unlocked.find((e) => e.id === el.dataset.id);
       if (!entry) return;
-      const renderer = this.game.dialogCg;
-      let url;
-      if (entry.restId && entry.nodeId) url = renderer.render(entry.restId, entry.nodeId, entry.accent, entry.mood);
-      else url = renderer.render('void', 'exec', entry.accent, entry.mood);
+      const url = this._urlFor(entry);
+      if (!url) return;
       el.style.backgroundImage = `url(${url})`;
       el.addEventListener('click', () => this.showLightbox(entry));
     });

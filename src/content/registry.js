@@ -33,6 +33,9 @@ import { BOSS_DEFEAT_LINES, BOSS_PHASE_LINES, DUNGEON_BOSS_LINES } from './bossD
 import { ECHOES } from './echoes.js';
 import { ZONE_EVENTS_POP, LORE_FRAGMENTS_POP, NPC_LINES_POP } from './ambientLore.js';
 import { REST_DIALOGUES } from './restDialogues.js';
+import {
+  REST_DIALOGUE_CG, REST_DIALOGUE_CG_BASE, REST_DIALOGUE_CG_EXTRA, REST_DIALOGUE_CG_POP,
+} from './dialogueCgPresets.js';
 import { ACHIEVEMENTS_EXTRA, ACHIEVEMENTS_POP_CULTURE } from './achievements.js';
 import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
 import { SIDE_QUESTS_POP } from './sideQuests.js';
@@ -396,6 +399,23 @@ export const CONTENT_TABLES = [
     invariant: checkRestDialogueTree,
   },
   {
+    kind: 'restDialogueCg',
+    note: '营火对话 CG 预设（W-B4 切片1）：`<营火 id>:<节点 id>` → { scene, caption, mood? }。'
+      + '键是复合串，`keyRef` 表达不了"节点得在那棵树上"，所以键的形状与配对全在 invariant 里',
+    shape: 'index',
+    table: REST_DIALOGUE_CG,
+    // 刻意不挂 keyRef：键不是区域 id，而是"区域 id + 冒号 + 节点 id"
+    value: {
+      t: 'row',
+      of: {
+        scene: { t: 'string' },
+        caption: { t: 'string' },
+        mood: { t: 'enum', of: ['calm', 'warn'], required: false },
+      },
+    },
+    invariant: checkDialogueCgPresets,
+  },
+  {
     kind: 'achievementsExtra',
     note: '额外成就（W-B2：原 AchievementExtras）',
     shape: 'rows',
@@ -708,17 +728,19 @@ export function checkContent(tables = CONTENT_TABLES) {
 }
 
 /**
- * 营火树的结构不变式（`invariant` 槽位目前唯一的使用者）。
+ * 营火树的结构不变式。
  *
  * 为什么形状校验拦不住它：`RestDialogue._showNode` 开头是 `if (!node) return` ——
  * 写错的 `next` 不报错、不提示，玩家点下那一格只看到对话窗自己关掉。
  * "静默的死选择"正是内容表最典型的坏法，也是眼睛最难发现的那种。
  *
- * 三条：
+ * 五条：
  * 1. `next` 必须落在**同一棵树的同一区域**里（区域之间不互跳：树按营火取）；
  * 2. 每一格选择要么 `next` 要么 `action`，有且只有一个（运行时先认 action，
  *    两个都给等于 next 白写；两个都不给就是"点了只关窗"那条兜底路径）；
- * 3. 除 `start` 外不许有孤儿节点 —— 没有选择通向它的节点，玩家永远看不到。
+ * 3. 除 `start` 外不许有孤儿节点 —— 没有选择通向它的节点，玩家永远看不到；
+ * 4. 每一棵树的那座营火得有 NPC 定义，且 `name` / `accent` 是字符串（对话框与画廊读的就是这两格）；
+ * 5. 反向也成对：有 NPC 定义却没树的那座营火，按 E 只会直接开升级面板。
  */
 export function checkRestDialogueTree(table) {
   const out = [];
@@ -747,6 +769,89 @@ export function checkRestDialogueTree(table) {
     for (const id of ids) {
       if (id !== 'start' && !referenced.has(id)) {
         out.push(`restDialogues 营火 ${zone}/${id}: 没有任何选择通向它，玩家看不到这一节点`);
+      }
+    }
+    // 第四、五条：树与 NPC 定义得成对。改前运行时那一侧写的是 `def?.accent ?? '#c9a962'`，
+    // 缺定义不报错 —— 它拿**世界之锚那座的配色**给一座新营火说话（W-B4 切片1 把它换成开机点名，
+    // 那一侧现在只留渲染器自己的默认色一处，见 `ui/DialogCGRenderer.js` 的 `CG_DEFAULT_ACCENT`）
+    const def = REST_NPC_DEFS[zone];
+    if (!def) {
+      out.push(`restDialogues 营火 ${zone}: REST_NPC_DEFS 里没有这一座（说话人名与配色无处可取）`);
+    } else {
+      for (const field of ['name', 'accent']) {
+        if (typeof def[field] !== 'string' || !def[field]) {
+          out.push(`restDialogues 营火 ${zone}: NPC 定义的 ${field} 不是非空字符串（对话框与画廊那一行要说的是它）`);
+        }
+      }
+    }
+  }
+  for (const zone of Object.keys(REST_NPC_DEFS)) {
+    if (!table?.[zone]) {
+      out.push(`restNpcDefs 营火 ${zone}: 有 NPC 定义却没有对话树（走到火边按下交互键直接开升级面板，那句"愿火护佑"没人说）`);
+    }
+  }
+  return out;
+}
+
+/**
+ * 对话 CG 预设的整表规则（W-B4 切片1，`invariant` 槽位的第二个使用者）。
+ *
+ * 这张表的键是 `<营火 id>:<节点 id>` 的复合串，而它的两个读者都比表更"物理"：
+ * `game/CgGalleryRegistry.js` 按**每一个键**建一行画廊目录（`id` / `restId` / `nodeId` 由 `split(':')` 得来），
+ * `ui/DialogCGRenderer.getPreset` 按节点取预设。于是写错一个节点名不会报错，只会留下两样东西：
+ * ① 一行玩家**永远解锁不了**的画廊 —— `side-cg-half`（解锁 40%）与成就 `cg-half`（50%）读的分母正是那张目录；
+ * ② 一个渲染不到的节点 —— 它落到"本营火 `start` 那一格"，而 `start` 也在表里，
+ *    所以缺了 `start` 的那座营火才会一路落到别人家的画面（改前那条兜底直接写着 `anchor_fire`）。
+ *
+ * 四条：
+ * 1. 键的形状：正好一个冒号，两段都非空；
+ * 2. 营火要有树、节点要在那棵树里（孤儿预设 = 画廊里那一行永远灰着）；
+ * 3. 每棵树必须有 `<营火>:start`（那是"这一节点没有自己的预设"时唯一可落的那一格）；
+ * 4. 三层名单（基础 / 扩写 / 致敬）互不相交 —— spread 的同名键是后层静默盖掉前层。
+ *
+ * 刻意**不**要求的：每个节点都得有自己的预设。今天 77 个节点里 13 个共享本营火的 `start`，
+ * 那是有意的省（同一座火边闲聊不必每句换画），把它判成红只会逼人往表里灌 13 行重复。
+ */
+export function checkDialogueCgPresets(table) {
+  const out = [];
+  const covered = new Map();
+  for (const key of Object.keys(table ?? {})) {
+    const sep = key.indexOf(':');
+    const restId = sep > 0 ? key.slice(0, sep) : null;
+    const nodeId = sep > 0 ? key.slice(sep + 1) : null;
+    if (!restId || !nodeId || nodeId.includes(':')) {
+      out.push(`restDialogueCg 的键 "${key}": 不是 "<营火 id>:<节点 id>" 的形状`);
+      continue;
+    }
+    const tree = REST_DIALOGUES[restId];
+    if (!tree) {
+      out.push(`restDialogueCg "${key}": 营火 "${restId}" 没有对话树（画廊里有这一行，玩家走到哪儿都触发不了它）`);
+      continue;
+    }
+    if (!tree.nodes?.[nodeId]) {
+      out.push(`restDialogueCg "${key}": ${restId} 那棵树里没有节点 "${nodeId}"（可用：${Object.keys(tree.nodes ?? {}).sort().join(' / ')}）`);
+      continue;
+    }
+    if (!covered.has(restId)) covered.set(restId, new Set());
+    covered.get(restId).add(nodeId);
+  }
+  for (const restId of Object.keys(REST_DIALOGUES)) {
+    if (!covered.get(restId)?.has('start')) {
+      out.push(`restDialogueCg: ${restId} 没有 "<营火>:start" 那一格（节点没有自己的预设时无处可落）`);
+    }
+  }
+  const layers = [
+    ['基础', Object.keys(REST_DIALOGUE_CG_BASE)],
+    ['扩写', Object.keys(REST_DIALOGUE_CG_EXTRA)],
+    ['致敬', Object.keys(REST_DIALOGUE_CG_POP)],
+  ];
+  for (const [name, keys] of layers) {
+    for (const [otherName, otherKeys] of layers) {
+      if (otherName === name) continue;
+      for (const key of keys) {
+        if (otherKeys.includes(key)) {
+          out.push(`restDialogueCg "${key}": ${name}层与 ${otherName}层给了同一个键（spread 之后只剩后写那一层，前一层是白写的）`);
+        }
       }
     }
   }
