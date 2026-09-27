@@ -117,9 +117,10 @@ const weightedPick = (rows, rng, allowed) => {
  * 词缀**不重复**：同一枚词缀在一次 roll 里出现两遍等于同一件装备给自己加了两遍同一条属性，
  * 而"装备看起来只有一条词缀说明"—— 显示与账本分家（B47 那一族）。
  */
-export function rollGear(rng = Math.random) {
+export function rollGear(rng = Math.random, zoneId = 'default') {
   const rarity = weightedPick(GEAR_RARITY, rng);
-  const base = weightedPick(GEAR_BASES, rng, (b) => b.weight > 0);
+  const entry = weightedPick(poolForZone(zoneId), rng, (e) => e.weight > 0);
+  const base = BASES[entry.base];
   const wanted = rarity.affixes;
   const picked = [];
   const taken = new Set();
@@ -204,6 +205,37 @@ export const GEAR_DROP = {
   byKind: { boss: 1, elite: 0.5, golem: 0.35, normal: 0.15, dummy: 0, none: 0.15 },
   soulValue: { common: 20, uncommon: 45, rare: 90, epic: 160 },
 };
+
+/**
+ * 每个区域掉得出哪些基表（切片3）。`weight` 只在**本池内**比大小，所以同一个 base 可以在
+ * 两个区域用不同的权重。
+ *
+ * 为什么按区域而不是全局一张池：§1.2 的 B6 与 C3 都在说"区域之间没差别"，而"这里的怪掉的东西
+ * 与那里的不一样"是路线感知最便宜的一种做法。为什么 `default` 是显式一格：`corridor` 与
+ * `unknown` 都落它 —— 新加一个区域而忘了列池，表现将是"那里的怪什么都不掉"（静默，不报错）。
+ */
+export const GEAR_POOLS = {
+  default: [{ base: 'ash-charm', weight: 3 }, { base: 'tide-charm', weight: 3 },
+    { base: 'quill-sigil', weight: 2 }, { base: 'ring-sigil', weight: 2 }],
+  hub: [{ base: 'tide-charm', weight: 4 }, { base: 'ring-sigil', weight: 2 },
+    { base: 'ash-charm', weight: 2 }],
+  fantasy: [{ base: 'ash-charm', weight: 4 }, { base: 'ember-charm', weight: 3 },
+    { base: 'war-sigil', weight: 3 }],
+  magic: [{ base: 'quill-sigil', weight: 5 }, { base: 'dual-sigil', weight: 2 },
+    { base: 'oath-charm', weight: 3 }],
+  space: [{ base: 'ring-sigil', weight: 4 }, { base: 'war-sigil', weight: 3 },
+    { base: 'dual-sigil', weight: 3 }, { base: 'ember-charm', weight: 2 }],
+  void: [{ base: 'oath-charm', weight: 4 }, { base: 'dual-sigil', weight: 4 },
+    { base: 'ember-charm', weight: 2 }],
+  abyss: [{ base: 'oath-charm', weight: 3 }, { base: 'ember-charm', weight: 3 },
+    { base: 'dual-sigil', weight: 3 }, { base: 'war-sigil', weight: 3 }],
+};
+
+/** 这一片的兜底档名（`corridor` / `unknown` / 名单外的新区域都落这里） */
+export const GEAR_POOL_DEFAULT = 'default';
+
+/** 按位置反推出来的区域 id → 那一片能掉的基表。判据只在这里一次 */
+export const poolForZone = (zoneId) => GEAR_POOLS[zoneId] ?? GEAR_POOLS[GEAR_POOL_DEFAULT];
 
 export const dropChance = (kind) => GEAR_DROP.byKind[kind] ?? GEAR_DROP.byKind.none;
 export const soulValue = (rarityId) => GEAR_DROP.soulValue[rarityId] ?? 0;

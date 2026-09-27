@@ -40,7 +40,7 @@ import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { FRANCHISE } from './franchises.js';
 import {
   GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES,
-  GEAR_DROP, GEAR_NAMES, GEAR_RARITY_DISPLAY, rarityRank,
+  GEAR_DROP, GEAR_NAMES, GEAR_RARITY_DISPLAY, GEAR_POOLS, GEAR_POOL_DEFAULT, rarityRank,
 } from './gear.js';
 
 /** `id` 字段的形状：小写字母开头，kebab-case。与 POI / 区域 id 同一把尺子 */
@@ -518,6 +518,23 @@ export const CONTENT_TABLES = [
     value: { t: 'string' },
     invariant: checkGearNames,
   },
+  {
+    kind: 'gearPools',
+    note: '每个区域掉得出哪些基表（W-B5 切片3）：`default` 那一格是名单外区域（走廊 / unknown）的显式兜底',
+    shape: 'index',
+    table: GEAR_POOLS,
+    keyRef: { of: 'zones' },
+    keyAllow: [GEAR_POOL_DEFAULT],
+    value: {
+      t: 'rows',
+      minLength: 1,
+      of: {
+        base: { t: 'ref', of: 'gearBases' },
+        weight: { t: 'int', min: 1 },
+      },
+    },
+    invariant: checkGearPools,
+  },
 ];
 
 /* ------------------------------------------------------------------ *
@@ -743,6 +760,31 @@ export function checkGearNames(table, ctx) {
   }
   for (const id of known) {
     if (!table?.[id]) out.push(`gearNames: 缺 "${id}" —— 提示里会出现这个 id 本身而不是中文`);
+  }
+  return out;
+}
+
+/**
+ * 掉落池的整表规则（W-B5 切片3）：字段词汇说不了的两件事。
+ *
+ * 1. **兜底那一格必须在**：`poolForZone` 找不到区域时落 `default`，而"找不到"是常态
+ *    （走廊、未知区域、以后新加却没列池的区域）。少了这一格，掉落层拿到的是 `undefined` 的池，
+ *    表现是"那里的怪什么都不掉"，且不报错。
+ * 2. **每件装备都要有人掉得出**：一件基表从所有池里被抹掉，就是永远掉不出的孤儿数据 ——
+ *    表里还留着它（词条、名字、颜色都在），玩家却永远见不到。
+ */
+export function checkGearPools(table, ctx) {
+  const out = [];
+  const pools = table ?? {};
+  if (!Array.isArray(pools[GEAR_POOL_DEFAULT]) || pools[GEAR_POOL_DEFAULT].length === 0) {
+    out.push(`gearPools: 缺兜底那一格 "${GEAR_POOL_DEFAULT}" —— 名单外的区域将掉不出任何东西`);
+  }
+  const reachable = new Set();
+  for (const rows of Object.values(pools)) {
+    for (const row of rows ?? []) reachable.add(row?.base);
+  }
+  for (const id of ctx.ids.get('gearBases') ?? []) {
+    if (!reachable.has(id)) out.push(`gearPools: "${id}" 不在任何一个池里 —— 这件装备永远掉不出`);
   }
   return out;
 }

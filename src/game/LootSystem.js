@@ -48,14 +48,15 @@ export class LootSystem {
   }
 
   /**
-   * 一次击杀该交什么。档位名（`boss` / `elite` / `golem` / `normal` / `dummy`）由敌人那边给 ——
-   * "这一档掉不掉"的判据在 `content/gear.js`，这一处只是把两张表串起来。
+   * 一次击杀该交什么。档位名（`boss` / `elite` / `golem` / `normal` / `dummy`）与区域 id 都由
+   * 敌人那边给 —— "这一档掉不掉"与"这一片掉得出什么"两张表都在 `content/gear.js`，
+   * 这一处只是把它们串起来（掉落层自己不查、不抄）。
    */
-  spawnKill(pos, souls, kind) {
+  spawnKill(pos, souls, kind, zoneId) {
     const out = [this._spawn(pos, { souls, gear: null })];
     // `dropChance` 给 1 时那一掷必然命中，给 0 时必然不命中：兜底不靠这里再判一次
     if (this.rng() < dropChance(kind)) {
-      const gear = this.spawnGear(pos, rollGear(this.rng));
+      const gear = this.spawnGear(pos, rollGear(this.rng, zoneId));
       if (gear) out.push(gear);
     }
     return out;

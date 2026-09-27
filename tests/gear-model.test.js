@@ -14,8 +14,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES,
-  rollGear, gearMods, isGearInstance, rarityOf, rarityRank, baseOf, affixOf,
+  GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES, GEAR_POOL_DEFAULT,
+  rollGear, gearMods, isGearInstance, rarityOf, rarityRank, baseOf, affixOf, poolForZone,
 } from '../src/content/gear.js';
 import { CONTENT_TABLES, checkContent } from '../src/content/registry.js';
 import { PlayerStats } from '../src/game/PlayerStats.js';
@@ -217,11 +217,13 @@ describe('rollGear：抽出来的是表上说的那一件', () => {
     expect(got).toEqual({ base: 'ash-charm', rarity: 'common', affixes: [] });
   });
 
-  it('rng 接近 1 落进最后一段：史诗 + 最后一件基表 + 三条词缀', () => {
+  it('rng 接近 1 落进最后一段：史诗 + 池里最后一件基表 + 三条词缀', () => {
     // 0.9999 / 0.9999 都在各自累计段的最末一档；第三次起给 0 = 每轮都取当前池的第一条
     const got = rollGear(rngOf([0.9999, 0.9999, 0, 0, 0]));
     expect(got.rarity).toBe('epic');
-    expect(got.base).toBe('dual-sigil');
+    // 切片3 起 base 来自池表而不是整张基表：默认池的最后件是 `ring-sigil`（表上的最后件是 `dual-sigil`）
+    const last = poolForZone(GEAR_POOL_DEFAULT).at(-1).base;
+    expect(got.base, '默认池里最后那一段').toBe(last);
     expect(got.affixes).toHaveLength(3);
     // 史诗够得到池里每一条（rng 给 0 就取第一段），所以这三件是算得出的，不是"看到过就算对"
     expect(got.affixes).toEqual(['vigor-ward', 'endurance-march', 'ember-edge']);

@@ -10,6 +10,7 @@ import { SpaceBoss } from './SpaceBoss.js';
 import { VoidBoss } from './VoidBoss.js';
 import { ChaosBoss } from './ChaosBoss.js';
 import { chapterGateFor } from '../content/bossRoster.js';
+import { zoneIdAt } from '../content/ZoneIdentity.js';
 
 export class EnemyManager {
   constructor(scene, world, projectiles) {
@@ -363,7 +364,8 @@ export class EnemyManager {
         // 档位只问一次：魂魄数与"掉不掉装备"都读这同一个 `kind`（两条各判一遍迟早一个说精英一个说普通）
         const kind = enemy.isBoss ? 'boss' : enemy.type === 'golem' ? 'golem' : enemy.type === 'elite' ? 'elite' : 'normal';
         const souls = kind === 'boss' ? 500 : kind === 'golem' ? 80 : kind === 'elite' ? 120 : 25;
-        loot?.spawnKill(enemy.position, souls, kind);
+        // 掉哪一件按"它死在哪儿"查（`zoneIdAt` 是按位置反推区域的唯一一处，这里只是调用它）
+        loot?.spawnKill(enemy.position, souls, kind, zoneIdAt(enemy.position, game?.world?.zones));
       }
     }
 
