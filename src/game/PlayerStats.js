@@ -12,9 +12,11 @@ export class PlayerStats {
     this.baseStats = { ...BASE_STATS };
     /** 一件装备 = `{ base, rarity, affixes }`；空槽是 null。账本只有这一格 */
     this.gear = Object.fromEntries(GEAR_SLOTS.map((slot) => [slot, null]));
+    this._bonus = {};                            // 装备那几点的缓存，见 `gearBonus`
     this.totalKills = 0;
     this.chestsOpened = new Set();
     this._consumers = null;
+    this._rebuildBonus();
   }
 
   /**
@@ -38,14 +40,26 @@ export class PlayerStats {
   get mind() { return this.baseStats.mind + this.gearBonus('mind'); }
   set mind(v) { this.baseStats.mind = v; }
 
-  /** 槽里那些件换算成某一项属性的点数 —— 换算本身只在 `gearMods` 一处 */
-  gearBonus(stat) {
-    let n = 0;
+  /**
+   * 某一项属性上"装备给的那几点"，读的是缓存。
+   *
+   * 为什么不就地换算：`SpellSystem.update` 每帧 `syncMana`，而它读的就是 `stats.arcane` 与
+   * `stats.mind` —— 每帧重新换算等于每帧新建两份对象（M4 那两条零分配门禁针对的正是这个形状）。
+   * 缓存只在账本变化时重算：穿、卸、读档。
+   */
+  gearBonus(stat) { return this._bonus[stat] ?? 0; }
+
+  /** 缓存本身：连续两次读必须是同一个引用，否则"读数"就在偷偷重算 */
+  get gearBonusTable() { return this._bonus; }
+
+  _rebuildBonus() {
+    const out = {};
     for (const slot of GEAR_SLOTS) {
-      const mods = gearMods(this.gear[slot]);
-      if (mods) n += mods[stat] ?? 0;
+      const mods = gearMods(this.gear[slot]);      // 全仓唯一那道换算
+      if (!mods) continue;
+      for (const [stat, n] of Object.entries(mods)) out[stat] = (out[stat] ?? 0) + n;
     }
-    return n;
+    this._bonus = out;
   }
 
   /**
@@ -62,6 +76,7 @@ export class PlayerStats {
     if (!isGearInstance(instance)) return false;
     const previous = this.gear[slot];
     this.gear[slot] = cloneInstance(instance);
+    this._rebuildBonus();
     this.pushToConsumers();
     return previous;
   }
@@ -72,7 +87,10 @@ export class PlayerStats {
     }
     const previous = this.gear[slot];
     this.gear[slot] = null;
-    if (previous) this.pushToConsumers();
+    if (previous) {
+      this._rebuildBonus();
+      this.pushToConsumers();
+    }
     return previous;
   }
 
@@ -149,6 +167,7 @@ export class PlayerStats {
       const raw = data.gear?.[slot];
       this.gear[slot] = isGearInstance(raw) ? cloneInstance(raw) : null;
     }
+    this._rebuildBonus();
     this.chestsOpened = new Set(data.chests ?? []);
   }
 

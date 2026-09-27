@@ -357,6 +357,34 @@ describe('PlayerStats：出身点 + 装备 = 读数，而写的一侧只碰出�
     expect([s.maxHp, s.damageMult, s.skillMult, s.gearBonus('arcane')]).toEqual(before);
   });
 
+  it('读数是缓存的那一份：每帧读它不许新建对象（`SpellSystem.update` 每帧读 arcane 与 mind）', () => {
+    statsWithWindow();
+    const s = new PlayerStats();
+    const table = s.gearBonusTable;
+    expect(table, '缓存必须是个对象（没有它，读数就是在每次读时现算）').toBeTypeOf('object');
+    for (let i = 0; i < 50; i++) expect(s.vigor).toBe(1);
+    expect(s.gearBonusTable, '连续读之后换了表 = 每帧一次分配').toBe(table);
+    // 反手一验：改缓存就能改读数，证明那条 getter 真的读的是这一份（而不是每次现算一份）
+    table.vigor = 9;
+    expect(s.vigor).toBe(10);
+    s._rebuildBonus();
+    expect(s.vigor, '重算之后缓存里那一格该回到表上说的数').toBe(1);
+  });
+
+  it('账本一变，缓存跟着变：穿、卸、读档三条路都算', () => {
+    statsWithWindow();
+    const s = new PlayerStats();
+    const empty = s.gearBonusTable;
+    s.equip('charm', { base: 'ash-charm', rarity: 'common', affixes: [] });
+    expect(s.gearBonusTable).not.toBe(empty);
+    expect(s.gearBonus('vigor')).toBe(1);
+    s.unequip('charm');
+    expect(s.gearBonus('vigor')).toBe(0);
+    const other = new PlayerStats();
+    other.fromJSON({ gear: { charm: { base: 'ash-charm', rarity: 'common', affixes: [] }, sigil: null } });
+    expect(other.gearBonus('vigor'), '读档之后缓存是空的 = 穿上的装备不算数').toBe(1);
+  });
+
   it('空槽卸装：返回 null 且不发一次多余的推送', () => {
     const events = statsWithWindow();
     const s = new PlayerStats();
@@ -546,6 +574,9 @@ describe('静态门禁', () => {
     expect(defs[0].split(':')[0]).toBe('content/gear.js');
     // 调用点也要真的存在：只有定义、没人调用，就是"表有了而身上没穿"的另一份假绿
     expect(hits(/gearMods\(this\.gear\[slot\]\)/).length, 'PlayerStats 里没找到那次换算').toBeGreaterThan(0);
+    // 而且只能有一处：换算跑在读数里就是每帧分配（`SpellSystem.update` 每帧读 arcane）
+    expect(hits(/gearMods\(/).filter((h) => h.startsWith('game/PlayerStats.js')).length,
+      'PlayerStats 里出现了第二处换算').toBe(1);
   });
 
   it('装备账只由 PlayerStats 自己写：别处直接改格子就是绕过 `isGearInstance` 那道认件关', () => {
