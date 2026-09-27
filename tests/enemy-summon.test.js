@@ -190,7 +190,8 @@ describe('名额与归属', () => {
     const ctx = summonOnce();
     castUntil(ctx);
     let drops = 0;
-    const loot = { spawnDrop: () => { drops++; } };
+    // 替身只给生产代码真正会调的那一个口（切片2 起一次击杀走 `spawnKill`，别再留 `spawnDrop` 的形状）
+    const loot = { spawnKill: () => { drops++; } };
     for (const s of ownedBy(ctx.m, ctx.e)) s.takeDamage(9999, 0);
     ctx.m.update(DT, ctx.player, ctx.ref, loot, null);
     expect(drops).toBe(0);

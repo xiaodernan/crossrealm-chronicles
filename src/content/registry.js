@@ -39,7 +39,8 @@ import { SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { FRANCHISE } from './franchises.js';
 import {
-  GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES, rarityRank,
+  GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES,
+  GEAR_DROP, GEAR_NAMES, GEAR_RARITY_DISPLAY, rarityRank,
 } from './gear.js';
 
 /** `id` 字段的形状：小写字母开头，kebab-case。与 POI / 区域 id 同一把尺子 */
@@ -480,6 +481,43 @@ export const CONTENT_TABLES = [
     },
     invariant: checkGearAffixes,
   },
+  {
+    kind: 'gearDropChance',
+    note: '按敌人档位的装备掉率（W-B5 切片2）：`none` 是名单外档位的显式兜底，`dummy` 是显式的"什么都不掉"',
+    shape: 'index',
+    table: GEAR_DROP.byKind,
+    value: { t: 'number', min: 0, max: 1 },
+  },
+  {
+    kind: 'gearSoulValue',
+    note: '换下 / 不穿的装备折成多少魂（W-B5 切片2）：键必须是稀有度表里的 id —— 打错一档不会报错，只会"那一档折成 0 魂"',
+    shape: 'index',
+    table: GEAR_DROP.soulValue,
+    keyRef: { of: 'gearRarity' },
+    value: { t: 'int', min: 0 },
+  },
+  {
+    kind: 'gearRarityDisplay',
+    note: '稀有度的字样与颜色（W-B5 切片2）：地上那团光与拾取提示里那个词必须是同一个答案',
+    shape: 'index',
+    table: GEAR_RARITY_DISPLAY,
+    keyRef: { of: 'gearRarity' },
+    value: {
+      t: 'row',
+      of: {
+        label: { t: 'string' },
+        tint: { t: 'int', min: 0, max: 0xffffff },
+      },
+    },
+  },
+  {
+    kind: 'gearNames',
+    note: '装备与词缀的中文名（W-B5 切片2）：键必须与两张表的 id **互相**对得上（少一个 = 玩家看到一个 id，多一个 = 那条名字永远不会出现）',
+    shape: 'index',
+    table: GEAR_NAMES,
+    value: { t: 'string' },
+    invariant: checkGearNames,
+  },
 ];
 
 /* ------------------------------------------------------------------ *
@@ -683,6 +721,28 @@ export function checkGearRarity(table) {
       out.push(`gearRarity: 稀有度 "${rarity.id}" 要 ${rarity.affixes} 条词缀，`
         + `但够得到的只有 ${reachable} 条 —— rollGear 会静默少给`);
     }
+  }
+  return out;
+}
+
+/**
+ * 中文名单与两张 id 表必须互相覆盖（W-B5 切片2）。
+ *
+ * 为什么形状校验拦不住它：`{ t: 'id' }` 只说"这个键像个 id"，说不出"这个 id 在不在装备表里"。
+ * 少写一格的表现是提示里出现 `ash-charm`（玩家看得懂中文看不懂 slug），多写一格的表现是
+ * 那条名字永远不会出现 —— 两种都不报错，正是 `ref` 那一族换了方向的样子。
+ */
+export function checkGearNames(table, ctx) {
+  const out = [];
+  const known = new Set([
+    ...(ctx.ids.get('gearBases') ?? []),
+    ...(ctx.ids.get('gearAffixes') ?? []),
+  ]);
+  for (const id of Object.keys(table ?? {})) {
+    if (!known.has(id)) out.push(`gearNames: "${id}" 不是任何一件装备或词缀的 id（名字永远用不上）`);
+  }
+  for (const id of known) {
+    if (!table?.[id]) out.push(`gearNames: 缺 "${id}" —— 提示里会出现这个 id 本身而不是中文`);
   }
   return out;
 }

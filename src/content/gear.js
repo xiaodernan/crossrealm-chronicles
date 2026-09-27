@@ -10,11 +10,12 @@
  * 玩家只看到数字与预期不符却说不出哪儿不对）。
  * 加属性点则整条链一个字都不用改：**装备与升级吃同一本账**，稀有度越高就是点越多。
  *
- * ## 为什么这张表今天没有中文显示名与颜色
+ * ## 显示名与颜色为什么在切片2 才进来
  *
- * 因为还没有人读它。`name` 与 `tint` 会在"拾取提示 / 掉落物网格 / 营火面板"那一片接上（切片2），
- * 那时它们各自有消费者；现在写进表里就是一格"声明了没人校验也没人显示"的数据 ——
- * 本仓的门禁专门扫这种形状（切片20 那条"表里有而页面没有"就是它的读数版本）。
+ * 切片1 只有账，没有脸：那时写 `label` 与 `tint` 就是一格"没人校验也没人显示"的数据（切片20 那条
+ * "表里有而页面没有"扫的正是这种形状）。切片2 带来了两个真消费者 —— 拾取提示那一行字，和地上
+ * 那一团光的颜色 —— 字样与颜色从此有人读，也就开始被门禁双向盯着（名单里有而表里没有 = 那条名字
+ * 永远不会出现；表里有而名单没有 = 玩家看到一个 id）。
  *
  * ## 随机数从哪儿来
  *
@@ -169,4 +170,79 @@ export function isGearInstance(instance) {
     seen.add(id);
   }
   return true;
+}
+
+/* ------------------------------------------------------------------ *
+ * 显示与掉落（切片2）：这两件事第一次有了消费者
+ * ------------------------------------------------------------------ */
+
+/**
+ * 稀有度的字样与颜色。**只有这一处**：地上那团光与拾取提示里那个词必须是同一个答案，
+ * 分两处写迟早一个说蓝的一个说紫的（B36 那一族 —— 同一条算式抄两处，漂移不报错）。
+ */
+export const GEAR_RARITY_DISPLAY = {
+  common: { label: '凡品', tint: 0xbfc7d1 },
+  uncommon: { label: '良品', tint: 0x63d97a },
+  rare: { label: '稀有', tint: 0x4ea8ff },
+  epic: { label: '史诗', tint: 0xc77bff },
+};
+
+/** 基表与词缀的中文名：`id` 是数据用的，字样是给人看的，两者不许互换 */
+export const GEAR_NAMES = {
+  'ash-charm': '灰烬护符', 'tide-charm': '潮纹护符', 'ember-charm': '余烬护符', 'oath-charm': '誓约护符',
+  'quill-sigil': '笔痕印记', 'ring-sigil': '环纹印记', 'war-sigil': '战纹印记', 'dual-sigil': '双纹印记',
+  'vigor-ward': '固守', 'endurance-march': '长行', 'ember-edge': '余烬之锋', 'arcane-lens': '奥术透镜',
+  'clear-mind': '清明', 'twin-fang': '双牙', 'bulwark-oath': '壁垒之誓', 'archmagistone': '大贤者石',
+};
+
+/**
+ * 掉率与折魂数。`byKind` 的键是 `EnemyManager` 交过来的敌人档位名，`none` 是名单外档位的兜底 ——
+ * 兜底必须写成显式一格，否则"新加一种敌人"的表现是"它永远不掉装备"（静默，没有报错）。
+ * `dummy: 0` 同理是显式的"训练木人什么都不掉"，而不是"漏写了"。
+ */
+export const GEAR_DROP = {
+  byKind: { boss: 1, elite: 0.5, golem: 0.35, normal: 0.15, dummy: 0, none: 0.15 },
+  soulValue: { common: 20, uncommon: 45, rare: 90, epic: 160 },
+};
+
+export const dropChance = (kind) => GEAR_DROP.byKind[kind] ?? GEAR_DROP.byKind.none;
+export const soulValue = (rarityId) => GEAR_DROP.soulValue[rarityId] ?? 0;
+
+/** 一件"多重"= 它给的点数总和。判据只定义在这里：别处再造一个"装备战力"就是第二份算式 */
+export function gearScore(instance) {
+  const mods = gearMods(instance);
+  if (!mods) return 0;
+  return Object.values(mods).reduce((s, n) => s + n, 0);
+}
+
+/**
+ * 捡到一件之后的那条分岔：严格更好才换上，换下的那件当场折成灵魂。
+ *
+ * 为什么这一片不做包：包要先回答"装得下几件、怎么排序、卸下后留在哪"，那三件事都属于面板那一片
+ * （切片3）；先做包再做拾取，中间就有一段"捡了但看不见"。折成魂是**当场可说明**的处置 ——
+ * 提示里那句"旧的 X 折成 N 魂"就是它的收据，不会有一件东西凭空消失。
+ * 相等不换：把玩家刚穿的那件拆掉换一枚一样的，只多一条提示，没有收益。
+ */
+export function pickupChoice(current, incoming) {
+  if (!isGearInstance(incoming)) return { action: 'nothing' };
+  const slot = baseOf(incoming.base).slot;
+  const worn = current?.[slot] ?? null;
+  if (worn && gearScore(incoming) <= gearScore(worn)) {
+    return { action: 'dust', slot, souls: soulValue(incoming.rarity) };
+  }
+  return {
+    action: 'equip', slot, replaced: worn,
+    souls: worn ? soulValue(worn.rarity) : 0,
+    score: gearScore(incoming),
+  };
+}
+
+/** 给人看的那一行字：`稀有·余烬护符（长行 · 固守）`。拼装只有这一处 */
+export function gearLabel(instance) {
+  const base = baseOf(instance?.base);
+  if (!base) return '';
+  const rarity = GEAR_RARITY_DISPLAY[instance.rarity];
+  const affixes = (instance.affixes ?? []).map((id) => GEAR_NAMES[id] ?? id);
+  const name = GEAR_NAMES[base.id] ?? base.id;
+  return `${rarity ? `${rarity.label}·` : ''}${name}${affixes.length ? `（${affixes.join(' · ')}）` : ''}`;
 }

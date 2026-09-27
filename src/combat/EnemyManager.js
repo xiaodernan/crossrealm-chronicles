@@ -360,8 +360,10 @@ export class EnemyManager {
       // 仆从不掉魂魄：否则"让召唤者无限刷、再逐个收割"成了一条正当的致富路线
       if (!enemy.alive && enemy.type !== 'dummy' && !enemy.isSummon && !enemy._lootDropped) {
         enemy._lootDropped = true;
-        const souls = enemy.isBoss ? 500 : enemy.type === 'golem' ? 80 : enemy.type === 'elite' ? 120 : 25;
-        loot?.spawnDrop(enemy.position, souls);
+        // 档位只问一次：魂魄数与"掉不掉装备"都读这同一个 `kind`（两条各判一遍迟早一个说精英一个说普通）
+        const kind = enemy.isBoss ? 'boss' : enemy.type === 'golem' ? 'golem' : enemy.type === 'elite' ? 'elite' : 'normal';
+        const souls = kind === 'boss' ? 500 : kind === 'golem' ? 80 : kind === 'elite' ? 120 : 25;
+        loot?.spawnKill(enemy.position, souls, kind);
       }
     }
 

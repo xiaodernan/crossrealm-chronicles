@@ -113,6 +113,7 @@ import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
 import { Rumble } from '../engine/Rumble.js';
 import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
+import { gearLabel, pickupChoice } from '../content/gear.js';
 import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
   factoryGamepadBindings, setKeybindTable,
@@ -204,7 +205,9 @@ export class Game {
     this.shake = shake;
     this.combatFeedback = new CombatFeedback(this.scene);
     this.projectiles = new ProjectileManager(this.scene, this.audio);
-    this.loot = new LootSystem(this.scene, this.stats, this.audio);
+    this.loot = new LootSystem(this.scene, this.stats, this.audio, {
+      onGear: (instance) => this.pickUpGear(instance),   // 捡到装备之后怎么办，只有这一处说了算
+    });
     this.enemyManager = new EnemyManager(this.scene, this.world, this.projectiles);
     this.enemyManager.spawnDefaults();
 
@@ -537,6 +540,28 @@ export class Game {
    * 声明了 `hotkey` 的格子去问当前生效的热键表（返回键改绑之后手柄的 Start 跟着走），
    * 其余问游戏键生效表。
    */
+  /**
+   * 捡到一件装备：严格更好才换上，换下的那件当场折成灵魂，并把这一笔当场说出来（toast）。
+   *
+   * 判据与字样都不在这里现算 —— `pickupChoice` 与 `gearLabel` 在 `content/gear.js`，
+   * 这里只负责"把它装到玩家身上并告诉玩家发生了什么"（W-A7 切片6/7 那条同一形状：
+   * 显示、判定、真源各在一处）。
+   */
+  pickUpGear(instance) {
+    const choice = pickupChoice(this.stats.gear, instance);
+    if (choice.action === 'nothing') return null;
+    if (choice.action === 'dust') {
+      this.stats.addSouls(choice.souls);
+      this.dialog.toast(`拾取：${gearLabel(instance)} —— 不如身上的，折成 ${choice.souls} 魂`);
+      return choice;
+    }
+    const replaced = this.stats.equip(choice.slot, instance);
+    this.dialog.toast(replaced
+      ? `换上：${gearLabel(instance)}（旧的 ${gearLabel(replaced)} 折成 ${choice.souls} 魂）`
+      : `穿上：${gearLabel(instance)}`);
+    return choice;
+  }
+
   resolvePadBinding(slot) {
     if (slot.hotkey) {
       const code = this.hotkeyTable?.find((e) => e.action === slot.hotkey)?.code;
