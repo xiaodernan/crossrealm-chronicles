@@ -474,6 +474,14 @@ M0 ─→ M1 ─→ M2 ─→ M3 ─→ M4 ─┬─→ M5 ─→ M6
 ---
 
 ## 变更记录
+- 2026-09-28 **W-B3 切片2：任务的三本账各收成一份 —— 判据 / 记账 / Boss 名册归 `content/objectives.js`**（提交 `775228b`）：
+  - 为什么：同一句「这一步完成了没有」有三份抄本（`QuestSystem` 两处 + `ObjectiveEngine` 一处），记账两份，Boss 名册五段 if；这类形状的危险是"改一份而另两份不动时不报错"，而漂移已经发生 —— 引擎按**类型名**读计数器，新表把五只 Boss 都写成 `type:'boss'` + 各自 `bossId`，于是**影界守护者一倒地就把大奥术师判成完成**；同时引擎的账本从来没被人喂过（全仓零个 `setStatsSource` 调用者），`CONDITIONS` 那些函数在它手里永远为假
+  - 交付：三本账 + 门控映射 + 账本读写（`statsToJSON` / `statsFromJSON`）进 `content/objectives.js`（该层不 import 其它层、不碰 DOM）；`QuestSystem` 十段监听并成一个遍历 `STAT_EVENTS` 的循环、`canAscend` / `canTrueEnd` / `canInfinity` 三个自写方法删除（与表里那三份是同一条话的两种写法且**差一格**：`checkAllDungeons` 漏算第三只 Boss）、Boss 界面话术改按 `bossId` 认领；`ObjectiveEngine` 自己持账、开机必有一格在手、分支目标不被抢位、章节门真的推章节；`SaveSystem` 存取各退成一行，`level` / `mind` / `skillsUnlocked` 定成**读数**（不落盘、读档不取磁盘那份，以生产方为准）；HUD 模板里手抄的三格开机文案删掉，第一格改由 `quests.notifyUpdate()` 落。存档版本号一字未动
+  - 门禁：新增 `objective-rules` 23 例 + `objective-engine` 19 例 + `quest-system` 15 例（断言全部**从两张表的行反推**，不是我手抄的清单）；两处扫描器跟着改 —— `event-registry` 要认表驱动的监听位点，`event-bus` 的裸监听台账补一条见证：逐字面量扫描会把并成的循环记成 0 债（"131 → 121"看着像迁走一批，而注销路径一条也没多出来），改按运行时条数从 `STAT_EVENTS` 自己数记回原样；全套 **1626 例 / 76 文件** 绿（此前 1568 / 73）、lint 0 error / 9 warning、build 干净
+  - 变异 **18/18 由断言咬住**（控制组 105 例先绿、零崩溃套件、`cp` 备份 + 逐字节还原、不碰 git）。首轮 14/18，四条存活各是不同原因：M13 第一版是**等价变异**（换成了另一条同样在表里的 `case`），改判据读错格才拿到证据；另三条各补一条断言（指针持有推导 / Boss 判定交叉积 / 存档层往返）。新加的台账见证另做三探针（摘掉那笔记账 → 3 红、清单改空 → 2 红、源锚点指向不存在的表 → 1 红）
+  - 真浏览器读数（改前改后各一批，headless Chrome + 原生 CDP）：577 格叶子、54 格差异，逐条归类 = 1 格既定改动（HUD 开机那格）+ 44 格新增的等级/心智读数 + 8 格世界生成非确定的光点顺序 + 1 条被截断的存档串（键集与 `HEAD` 手抄那十四格差集两侧皆空）。**唯一一条真回归**只有对读看得见：我顺手把营火那行改成"在营火升级「心智」至 2"，出厂字样没有那个"在"字 —— 单元测试全绿
+  - 放弃了什么：不把 sequencer 接到 `Game`（切片3，要先有行为等价证明；今天引擎只由用例供着）、不升存档版本、不删在役表的 `boss2` / `voidboss` 那一族类型名、不把 `QuestSystem` 迁到 `EventBus`（那是 B44 那笔欠账的逐系统迁移）
+  - 留了什么尾巴（W-B3 切片3+）：① sequencer 接线（在役是线性 `questIndex` + 读账跳步，引擎按 `requires` 标志与 `chapter` 激活，两套排序今天没逐条对齐）；② `content-registry` 对 `objectives` 只有通用逐表 schema 校验，没有一行按名字钉过它；③ `SideQuestSystem` 兼容层仍在
 - 2026-09-27 **W-B5 切片3：什么地方掉什么东西 —— 掉落池按区域，兜底写成显式数据**（提交 `4a34aa7`）：
   - 为什么：切片2 之后全局一张池，禁林与轨道电梯掉同一件，而 §1.2 的 B6 / C3 说的就是"区域之间没差别"；另一条是兜底必须看得见 —— 新区忘了列池，若落到"查不到即空"，表现将是"那里的怪什么都不掉"且不报错。
   - 交付：`GEAR_POOLS`（default + 六区域，每格 `{ base, weight }` 列表）、`poolForZone` 一处兜底、`rollGear(rng, zoneId)`、`LootSystem.spawnKill(pos, souls, kind, zoneId)`、`EnemyManager` 用 `zoneIdAt` 按"它死在哪儿"反推（判据仍只有一份，调用点从两处变三处，有门禁盯着）。注册表加 `gearPools`：键 `keyRef` 到区域表 + `keyAllow: ['default']`、`rows.minLength: 1`、`base` 再 `ref` 到基表、`weight ≥ 1`；两条整表规则 = 兜底那格必须在 + 每件基表至少出现在一个池（永远掉不出的孤儿数据红在开机）。
