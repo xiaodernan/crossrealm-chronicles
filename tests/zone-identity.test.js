@@ -12,7 +12,8 @@ import {
 } from '../src/content/ZoneIdentity.js';
 import { WorldManager } from '../src/world/WorldManager.js';
 import { barkKeyForZone, COMBAT_BARKS_POP } from '../src/game/PopCultureCombatBarks.js';
-import { QuestSystem, QUESTS } from '../src/game/QuestSystem.js';
+import { QuestSystem } from '../src/game/QuestSystem.js';
+import { MAINLINE } from '../src/content/objectives.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
 const makeStubZone = (id, center, radius, extra = {}) => ({
@@ -270,7 +271,7 @@ describe('战斗台词按 id 选池', () => {
 describe('任务击杀归类看 type 不看显示名', () => {
   let qs;
   const kill = (detail) => window.dispatchEvent(new CustomEvent('enemy-defeated', { detail }));
-  const questById = (id) => QUESTS.find((q) => q.id === id);
+  const questById = (id) => MAINLINE.find((q) => q.id === id);
 
   beforeEach(() => {
     installWindowShim();

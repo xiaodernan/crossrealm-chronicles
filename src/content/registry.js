@@ -38,7 +38,7 @@ import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
 import { SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { FRANCHISE } from './franchises.js';
-import { OBJECTIVES } from './objectives.js';
+import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import {
   GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES, GEAR_SLOT_NAMES,
   GEAR_DROP, GEAR_NAMES, GEAR_RARITY_DISPLAY, GEAR_POOLS, GEAR_POOL_DEFAULT, GEAR_BAG,
@@ -594,13 +594,15 @@ export const CONTENT_TABLES = [
       id: { t: 'id' },
       title: { t: 'string' },
       desc: { t: 'string' },
-      type: { t: 'string' },
+      type: { t: 'enum', of: OBJECTIVE_TYPES },
       targetId: { t: 'id', required: false },
       target: { t: 'int', min: 1, required: false },
       enemyType: { t: 'string', required: false },
       bossId: { t: 'id', required: false },
       dungeonId: { t: 'id', required: false },
-      chapter: { t: 'int', min: 1, max: 5, required: false },
+      chapter: { t: 'int', min: 1, max: 5 },
+      announce: { t: 'string', required: false },
+      autoComplete: { t: 'bool', required: false },
       condition: { t: 'string', required: false },
       flags: { t: 'record', required: false },
       requires: { t: 'record', required: false },
@@ -618,6 +620,7 @@ export const CONTENT_TABLES = [
         of: { x: { t: 'int' }, z: { t: 'int' }, label: { t: 'string' } },
       },
     },
+    invariant: checkObjectiveTable,
   },
 ];
 
@@ -804,6 +807,84 @@ export function checkGearAffixes(table) {
   const out = [];
   (table ?? []).forEach((row, i) => {
     out.push(...gearModErrors(row?.mods, `gearAffixes[${i}].mods`));
+  });
+  return out;
+}
+
+/**
+ * 主线表（`objectives`）的整表不变式（W-B3 切片3）。
+ *
+ * 字段词汇表管到"这一格写得对不对"为止；下面五条都是**跨行**的关系，而它们在游戏里的
+ * 表现全都不报错：
+ * 1. **章节号沿表只升不降**。`chapter` 说的是"拿这一步时玩家在第几章"，而 sequencer 是按
+ *    表序走的：夹一行章节回退的进去，玩家会在第 4 章看到"Chapter 2 进行中"。
+ * 2. **门控行的位置**。`chapterGateAfter(id)` 读的是"紧跟在这一步后面的那一行"，
+ * 所以在役表不再自己抄一份"哪一步开哪一章"（那是四行 `finished?.id === …`）。
+ *    插一行、换序、或把 `branchTo` 指去别处，都会让翻转静默失踪 —— 这条钉住位置这个前提。
+ * 3. **开新章的门控必须喊话**（`announce`），且喊的那一章就是它开的那一章（`chapter`）；
+ *    不开新章的那一格（最后一道门）不许多喊 —— 喊了而章节没动，玩家看到的是一句对不上 HUD 的话。
+ * 4. **`requires` 的生产者必须在前头**：`ObjectiveEngine.canActivate` 拒绝一个没被设过的标志时
+ *    不抛，表现就是那一格永远不出现，而没人知道为什么。
+ * 5. **`branchTo` 只能指向紧跟其后的那一行**（就是第 2 条的反面）。
+ */
+export function checkObjectiveTable(table) {
+  const out = [];
+  const rows = Array.isArray(table) ? table : [];
+  /** flag → 第一次设它的那一行（值一起记着：`flags: { x: false }` 也是一种设置） */
+  const producers = new Map();
+  rows.forEach((row, i) => {
+    const path = `objectives[${i}]("${row?.id ?? '(无 id)'}")`;
+    const prev = rows[i - 1];
+    const gate = row?.type === 'chapter-gate';
+    if (gate) {
+      if (row.autoComplete !== true) {
+        out.push(`${path}: chapter-gate 必须写 autoComplete: true —— 玩家对这一格无事可做，`
+          + '不自动过就是主线在这儿断掉');
+      }
+      if (prev?.chapter !== row.chapter) {
+        if (!row.announce) {
+          out.push(`${path}: 这一格把玩家带进第 ${row.chapter} 章（上一行还是第 ${prev?.chapter} 章），`
+            + '所以必须写 announce —— 开章要对玩家喊的那一句由这一格说话');
+        } else if (!row.announce.startsWith(`Chapter ${row.chapter}`)) {
+          out.push(`${path}: announce「${row.announce}」喊的不是第 ${row.chapter} 章`
+            + '（chapter 说玩家进入哪一章，两句必须同一章）');
+        }
+      } else if (row.announce) {
+        out.push(`${path}: chapter 与上一步同为第 ${row.chapter} 章（没有开新章），却写着 announce`
+          + ' —— 喊了等于什么都不翻，玩家会看到一句对不上 HUD 的话');
+      }
+      if (!prev || prev.type === 'chapter-gate') {
+        out.push(`${path}: 门控行前面必须紧跟一个玩家能做的一步（chapterGateAfter 按位置读）`);
+      } else if (prev.branchTo !== row.id) {
+        out.push(`${path}: 前一步 "${prev.id}" 的 branchTo 是 ${JSON.stringify(prev.branchTo ?? null)}，`
+          + `没指回这一格 —— chapterGateAfter 靠位置认领，branchTo 与位置对不上时翻章会静默失踪`);
+      }
+    } else {
+      if (row?.announce !== undefined) out.push(`${path}: announce 只有 chapter-gate 那一族才有`);
+      if (row?.autoComplete !== undefined) out.push(`${path}: autoComplete 只有 chapter-gate 那一族才有`);
+      if (row?.branchTo && rows[i + 1]?.id !== row.branchTo) {
+        out.push(`${path}: branchTo "${row.branchTo}" 不是紧跟其后的那一行`
+          + (rows[i + 1]?.id ? `（下一行是 "${rows[i + 1].id}"）` : '（它已经是最后一行）'));
+      }
+    }
+    for (const [flag, want] of Object.entries(row?.requires ?? {})) {
+      const p = producers.get(flag);
+      if (!p) {
+        out.push(`${path}: requires.${flag} 在这一行之前没有任何一步的 flags 设过它`
+          + ' —— ObjectiveEngine 会永远拒绝激活这一格');
+      } else if (p.value !== want) {
+        out.push(`${path}: requires.${flag} 要 ${JSON.stringify(want)}，`
+          + `但 "${p.id}" 那行设的是 ${JSON.stringify(p.value)}`);
+      }
+    }
+    for (const [flag, value] of Object.entries(row?.flags ?? {})) {
+      if (!producers.has(flag)) producers.set(flag, { id: row.id, value });
+    }
+    if (prev && Number.isInteger(prev.chapter) && Number.isInteger(row?.chapter)
+      && row.chapter < prev.chapter) {
+      out.push(`${path}: chapter ${row.chapter} 比上一行 "${prev.id}" 的 ${prev.chapter} 小`
+        + ' —— 章节号沿表只升不降（chapter 说的是"拿这一步时玩家在第几章"）');
+    }
   });
   return out;
 }

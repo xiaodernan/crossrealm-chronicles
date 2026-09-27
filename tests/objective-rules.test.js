@@ -2,22 +2,20 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  BOSS_STAT_KEYS, BOSS_TYPES, CONDITIONS, GATE_CONDITIONS, INTERACT_GATES,
-  OBJECTIVES, STAT_READINGS,
-  applyStatEvent, conditionHolds, emptyStats, hasInteractGate, interactGateCondition,
+  BOSS_STAT_KEYS, CONDITIONS, MAINLINE, OBJECTIVES, STAT_READINGS,
+  applyStatEvent, conditionHolds, emptyStats, interactGateCondition,
   objectiveDone, statsFromJSON, statsToJSON,
 } from '../src/content/objectives.js';
-import { QUESTS } from '../src/game/QuestSystem.js';
 import { SaveValidator } from '../src/game/SaveValidator.js';
 
 /**
- * 门禁：任务的三本账（判据 / 记账 / Boss 名册）各只有 `content/objectives.js` 一份（W-B3 切片2）。
+ * 门禁：任务的三本账（判据 / 记账 / Boss 名册）各只有 `content/objectives.js` 一份（W-B3 切片2 立，切片3 只剩一张表）。
  *
  * 为什么钉这一层：切片2 动手之前，同一句「这一步完成了没有」在三处各写一遍
  * （`QuestSystem.isQuestObjectiveDone`、`QuestSystem.checkProgress`、`ObjectiveEngine.progressObjective`），
  * 记账表两遍，名册（哪只 Boss 死了算哪一格）五段 if。实测漂移已经发生：
  * 引擎那份把新表的 `boss2` 行当 `type: 'boss'` 读，于是**影界守护者一倒地，大奥术师就被判完成**。
- * 这类问题的共同形状是"改一份而另两份不动时不报错"，所以这里的断言全部**从两张表的行反推**，
+ * 这类问题的共同形状是"改一份而另两份不动时不报错"，所以这里的断言全部**从表里的行反推**，
  * 不把我脑子里那份清单抄成字面量。
  */
 
@@ -42,18 +40,16 @@ function snapshot(s) {
   return out;
 }
 
-/** 把两张表的行都过一遍判据，返回「账本一格满足全部条件」时每一步的读数 */
+/** 把表的每一行都过一遍判据，返回「账本一格满足全部条件」时每一步的读数 */
 const SATISFIED = () => {
   const s = emptyStats();
   s.hits = 9999;
-  for (const row of [...QUESTS, ...OBJECTIVES]) {
+  for (const row of OBJECTIVES) {
     if (row.enemyType) s.kills[row.enemyType] = 9999;
     if (row.targetId) s.discoveries.add(row.targetId);
     if (row.dungeonId) s.dungeonsCleared.add(row.dungeonId);
   }
-  s.npcTalked.add('wanderer');
-  s.npcTalked.add('astronaut-echo');
-  for (const row of [...QUESTS, ...OBJECTIVES]) if (row.type === 'npc') s.npcTalked.add(row.targetId);
+  for (const row of OBJECTIVES) if (row.type === 'npc') s.npcTalked.add(row.targetId);
   s.chestsOpened = 9999;
   s.spellCasts = 9999;
   s.chargedCasts = 9999;
@@ -155,15 +151,18 @@ describe('Boss 名册：哪只死了算哪一格只有一份', () => {
     for (const key of keys) expect(s[key]).toBe(false);
   });
 
-  it('两张表里每一行 Boss 都在名册上，名册上每一只都有行来认领', () => {
+  it('每一行 Boss 都在名册上，名册上每一只在投影与全表里各有一行认领', () => {
     const roster = Object.keys(BOSS_STAT_KEYS);
-    const inRoster = (row) => BOSS_TYPES.has(row.type);
-    for (const rows of [QUESTS, OBJECTIVES]) {
+    const inRoster = (row) => Boolean(BOSS_STAT_KEYS[row.bossId]);
+    for (const [name, rows] of [['MAINLINE', MAINLINE], ['OBJECTIVES', OBJECTIVES]]) {
       const bossIds = rows.filter(inRoster).map((r) => r.bossId);
-      expect(new Set(bossIds).size).toBe(bossIds.length);
-      for (const id of bossIds) expect(roster).toContain(id);
-      // 名册里的每一只都必须在两张表里各有一只行认领（主线五只 Boss 各一张表都要走到）
-      for (const id of roster) expect(bossIds).toContain(id);
+      expect(new Set(bossIds).size, `${name} 里同一只 Boss 出现了两行`).toBe(bossIds.length);
+      // 表里不许有行带着名册外的 bossId 冒充 Boss（那它永远打不完）
+      for (const row of rows) {
+        if (row.bossId) expect(roster, `${name}:${row.id} 的 bossId 不在名册上`).toContain(row.bossId);
+      }
+      // 名册里的每一只都必须有行来认领（主线五只 Boss 两张视图都要走到）
+      for (const id of roster) expect(bossIds, `${name} 里没有 ${id} 这一行`).toContain(id);
     }
   });
 
@@ -193,12 +192,12 @@ describe('Boss 名册：哪只死了算哪一格只有一份', () => {
 });
 
 describe('判据：一张表一份算式', () => {
-  it('两张表的每一行都被判据认得（账本满足时必然报"完成"）', () => {
+  it('表的每一行都被判据认得（账本满足时必然报"完成"）', () => {
     const s = SATISFIED();
     const unrecognized = [];
-    for (const [table, rows] of [['QUESTS', QUESTS], ['OBJECTIVES', OBJECTIVES]]) {
+    for (const [table, rows] of [['MAINLINE', MAINLINE], ['OBJECTIVES', OBJECTIVES]]) {
       for (const row of rows) {
-        if (hasInteractGate(row)) continue;   // 门控格按设计不因账本满足就算完成
+        if (interactGateCondition(row)) continue;   // 门控格按设计不因账本满足就算完成
         if (!objectiveDone(row, s)) unrecognized.push(`${table}:${row.id}(${row.type})`);
       }
     }
@@ -213,13 +212,11 @@ describe('判据：一张表一份算式', () => {
     expect(objectiveDone({ type: 'spells', target: 8 }, s)).toBe(false);
   });
 
-  it('门控的"摸锚点"不因摸了一下就算完成 —— 两种写法都拦（在役表的 requireX 与新表的 condition）', () => {
+  it('门控的"摸锚点"不因摸了一下就算完成 —— 条件写在那一行自己身上', () => {
     const s = SATISFIED();
-    const legacy = QUESTS.filter((r) => INTERACT_GATES.some((k) => r[k]));
-    const modern = OBJECTIVES.filter((r) => r.type === 'interact' && r.condition);
-    expect(legacy.length).toBe(4);
-    expect(modern.length).toBeGreaterThanOrEqual(4);
-    for (const row of [...legacy, ...modern]) {
+    const gated = OBJECTIVES.filter((r) => interactGateCondition(r));
+    expect(gated).toHaveLength(4);
+    for (const row of gated) {
       expect(s.discoveries.has(row.targetId)).toBe(true);
       expect(objectiveDone(row, s)).toBe(false);
     }
@@ -227,7 +224,7 @@ describe('判据：一张表一份算式', () => {
 
   it('不门控的 interact 与 discovery 只看摸没摸过', () => {
     const s = emptyStats();
-    const row = QUESTS[0];
+    const row = MAINLINE[0];
     expect(objectiveDone(row, s)).toBe(false);
     applyStatEvent(s, 'poi-interact', { id: row.targetId });
     expect(objectiveDone(row, s)).toBe(true);
@@ -261,28 +258,27 @@ describe('判据：一张表一份算式', () => {
 });
 
 describe('门控条件：四种写法指向同一份算式', () => {
-  it('每一条 INTERACT_GATES 都登记了条件函数名，而且那个函数真的存在', () => {
-    const missing = INTERACT_GATES.filter((k) => !(k in GATE_CONDITIONS));
-    expect(missing).toEqual([]);
-    const dangling = INTERACT_GATES
-      .map((k) => GATE_CONDITIONS[k])
-      .filter((fn) => !CONDITIONS[fn]);
+  it('每一格门控点名的条件函数都在 CONDITIONS 里真的存在', () => {
+    const used = MAINLINE.filter((r) => interactGateCondition(r)).map((r) => interactGateCondition(r));
+    expect(used).toHaveLength(4);
+    expect(new Set(used).size, '同一个条件函数挂了两格锚点').toBe(used.length);
+    const dangling = used.filter((fn) => !CONDITIONS[fn]);
     expect(dangling).toEqual([]);
   });
 
-  it('在役表的四个门控旗标各自映射到新表里那一格的 condition 名', () => {
-    for (const flag of INTERACT_GATES) {
-      const legacy = QUESTS.find((r) => r[flag]);
-      expect(legacy).toBeTruthy();
-      expect(interactGateCondition(legacy)).toBe(GATE_CONDITIONS[flag]);
-      const modern = OBJECTIVES.find((r) => r.type === 'interact' && r.condition === GATE_CONDITIONS[flag]);
-      expect(modern, `新表里要有一行用同一个条件函数：${flag}`).toBeTruthy();
+  it('每一格门控都能被它自己的条件放行（条件名 ↔ 行，一一配得上）', () => {
+    for (const flag of Object.values(CONDITIONS)) {
+      const gated = MAINLINE.find((r) => interactGateCondition(r) === flag);
+      if (!gated) continue;   // `checkChapter3Ready` 那类给分支用的条件没有锚点格
+      expect(gated.type).toBe('interact');
+      expect(gated.targetId).toBeTruthy();
     }
   });
 
   it('没挂门控的行返回 null，未知条件名一律为假', () => {
-    expect(interactGateCondition(QUESTS[0])).toBeNull();
+    expect(interactGateCondition(MAINLINE[0])).toBeNull();
     expect(interactGateCondition({ type: 'hits', target: 3 })).toBeNull();
+    expect(interactGateCondition(null)).toBeNull();
     expect(conditionHolds('no-such-condition', SATISFIED())).toBe(false);
   });
 

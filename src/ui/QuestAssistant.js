@@ -1,5 +1,6 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText } from '../content/keyHints.js';
+import { BOSS_STAT_KEYS } from '../content/objectives.js';
 
 /** 自动通关/带路整条流程的计时分组，用户中途取消时整体撤销 */
 const AUTOPILOT_TAG = 'quest-autopilot';
@@ -332,7 +333,11 @@ export class QuestAssistant {
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: q.targetId, title: q.title, text: q.desc } }));
     } else if (q.type === 'hits') {
       window.dispatchEvent(new CustomEvent('combat-hit'));
-    } else if (q.type === 'boss' || q.type === 'boss2' || q.type === 'boss3' || q.type === 'voidboss' || q.type === 'chaosboss') {
+    } else if (BOSS_STAT_KEYS[q.bossId]) {
+      // 是不是 Boss 步只问名册（`content/objectives.js` 的 `BOSS_STAT_KEYS`）：
+      // 以前这里逐个数类型名（`boss` / `boss2` / `boss3` / `voidboss` / `chaosboss`），
+      // 而主线表已经把所有 Boss 统一写成 `type: 'boss'` + 各自的 `bossId` ——
+      // 那份抄本一多出来，"自动带路到了 Boss 区"这句话就对不上号（它落进最后的 else）。
       this.game.dialog.toast(`已到达 ${wp?.label ?? 'Boss'} — 可点「自动通关」跑完全流程`);
       this.autoPilot = false;
     } else {

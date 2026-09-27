@@ -3,7 +3,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import { ObjectiveEngine, OBJECTIVE_STATUS } from '../src/game/ObjectiveEngine.js';
-import { BOSS_STAT_KEYS, OBJECTIVES, STAT_EVENTS, STAT_READINGS, emptyStats } from '../src/content/objectives.js';
+import { BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, STAT_EVENTS, STAT_READINGS, emptyStats, interactGateCondition } from '../src/content/objectives.js';
 import { emit, listenerCount } from '../src/engine/EventBus.js';
 
 /**
@@ -117,7 +117,7 @@ describe('记账：表里每一件事都真的能改到引擎的账上', () => {
 });
 
 describe('推进：一章走完就停手，不去抢下一档的目标', () => {
-  it('Chapter 1 按表里的顺序走完，然后指针为空（章节由 chapter-gate 说话）', () => {
+  it('Chapter 1 按表里的顺序走完，第一只 Boss 倒下不翻章（章节由 chapter-gate 说话）', () => {
     const walked = [engine.getCurrent().def.id];
     const step = (name, detail) => {
       emit(name, detail);
@@ -131,13 +131,18 @@ describe('推进：一章走完就停手，不去抢下一档的目标', () => {
     step('discovery', DETAIL.discovery);
     step('enemy-defeated', { name: '影界守护者', type: 'boss', bossId: 'shadow-warden' });
 
+    // 切片3 之后表里的 Chapter 1 是九格：`magic-frag` / `golem` / `space-frag` / `finale`
+    // 那四格玩家本来就是在章节 1 里做的（在役 sequencer 直到门控行才翻章），老表把它们标成 2，
+    // 于是引擎走完第五格就认为"这一章没目标了"—— 那正是两张表对不上时的形状。
     const ch1 = OBJECTIVES.filter((r) => r.chapter === 1).map((r) => r.id);
-    expect(walked).toEqual(ch1);
-    for (const id of ch1) expect(engine.getObjective(id).status).toBe(OBJECTIVE_STATUS.DONE);
-    // 第一只 Boss 倒下不该把玩家直接推去 Chapter 2 那一格：章节号还是 1，指针为空
+    expect(ch1.length).toBeGreaterThan(5);
+    // 这一串事件只够驱动前五格；第六格（`magic-frag`）已被 boss1 解锁，指针就停在那儿等它的发现物
+    expect(walked).toEqual(ch1.slice(0, 6));
+    for (const id of ch1.slice(0, 5)) expect(engine.getObjective(id).status).toBe(OBJECTIVE_STATUS.DONE);
+    expect(engine.getObjective(ch1[5]).status).toBe(OBJECTIVE_STATUS.ACTIVE);
+    // 章节号要等门控行才动，进度读数也只数已经过掉的那五格
     expect(engine.chapter).toBe(1);
-    expect(engine.getCurrent()).toBeNull();
-    expect(engine.getProgress()).toEqual({ done: ch1.length, total: ch1.length, chapter: 1 });
+    expect(engine.getProgress()).toEqual({ done: 5, total: ch1.length, chapter: 1 });
   });
 
   it('数值步的读数对齐账本口径：多砍一刀不会留下 3/5 那样的显示', () => {
@@ -155,8 +160,10 @@ describe('推进：一章走完就停手，不去抢下一档的目标', () => {
 
 describe('门控的「摸锚点」：条件齐时的那一下交互才推进它', () => {
   it('摸过锚点但碎片没齐 → 不完成；补齐三片后再摸 → 分支到章节门并推章节', () => {
-    const gateRow = OBJECTIVES.find((r) => r.branchTo === 'ch2-complete');
-    expect(gateRow.condition).toBeTruthy();
+    // 门控那一格由它自己的 `condition` 认出来，不靠"它分支到哪一节"的名字
+    const gateRow = MAINLINE.find((r) => interactGateCondition(r) === 'checkAllFragments');
+    const chapterGate = OBJECTIVES.find((r) => r.id === gateRow.branchTo);
+    expect(chapterGate.type).toBe('chapter-gate');
     engine.activateObjective(gateRow.id);
     expect(engine.getCurrent().def.id).toBe(gateRow.id);
 
@@ -169,11 +176,13 @@ describe('门控的「摸锚点」：条件齐时的那一下交互才推进它'
     }
     emit('poi-interact', { id: gateRow.targetId });
 
-    const chapterGate = engine.getObjective(gateRow.branchTo);
     expect(engine.getObjective(gateRow.id).status).toBe(OBJECTIVE_STATUS.BRANCHED);
-    expect(chapterGate.status).toBe(OBJECTIVE_STATUS.DONE);
-    expect(engine.chapter).toBe(chapterGate.def.chapter);
-    expect(engine.flags.chapter2Done).toBe(true);
+    expect(engine.getObjective(chapterGate.id).status).toBe(OBJECTIVE_STATUS.DONE);
+    expect(engine.chapter).toBe(chapterGate.chapter);
+    // 章节门自己说它留下哪些标志（名字跟着行走，不在这里另抄一份）
+    for (const [flag, value] of Object.entries(chapterGate.flags ?? {})) {
+      expect(engine.flags[flag], `门控行没落下 ${flag}`).toBe(value);
+    }
     // 章节门放行之后，指针该落在新章节的某一格上，而不是停在已完成的那格
     expect(engine.getCurrent().status).toBe(OBJECTIVE_STATUS.ACTIVE);
     expect(engine.getCurrent().def.chapter).toBe(engine.chapter);

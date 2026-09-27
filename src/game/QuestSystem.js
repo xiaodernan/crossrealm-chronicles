@@ -1,91 +1,48 @@
-import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { keyText } from '../content/keyHints.js';
 import {
-  BOSS_STAT_KEYS, STAT_EVENTS, applyStatEvent, conditionHolds,
-  emptyStats, interactGateCondition, objectiveDone,
+  BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterGateAfter,
+  conditionHolds, emptyStats, interactGateCondition, objectiveDone,
 } from '../content/objectives.js';
 
-export const QUESTS = [
-  { id: 'anchor', title: '觉醒：世界之锚', desc: '触摸枢纽中心的世界之锚。', type: 'interact', targetId: 'hub-anchor' },
-  { id: 'training', title: '战斗训练', desc: '训练木人命中 8 次。', type: 'hits', target: 8 },
-  { id: 'soldiers', title: '影之试炼', desc: '击败 2 名影之战士。', type: 'kills', enemyType: 'soldier', target: 2 },
-  { id: 'fantasy-frag', title: '第一碎片', desc: '调查至尊石环。', type: 'discovery', targetId: 'fantasy-ring' },
-  { id: 'boss', title: '影界守护者', desc: '击败灰白森林 Boss。', type: 'boss', bossId: 'shadow-warden' },
-  { id: 'magic-frag', title: '第二碎片', desc: '调查悬浮城堡。', type: 'discovery', targetId: 'magic-castle' },
-  { id: 'golem', title: '构装体歼灭', desc: '击败 1 名魔法构装体。', type: 'kills', enemyType: 'golem', target: 1 },
-  { id: 'space-frag', title: '第三碎片', desc: '触碰五维_tesseract。', type: 'discovery', targetId: 'space-tesseract' },
-  { id: 'finale', title: '重铸锚点', desc: '集齐碎片后再次触摸世界之锚。', type: 'interact', targetId: 'hub-anchor', requireAllFragments: true },
-  // Chapter 2
-  { id: 'chests', title: 'Hidden Treasures', desc: '开启 5 个隐藏宝箱。', type: 'chests', target: 5 },
-  { id: 'talk-wanderer', title: '位面流浪者', desc: '与枢纽的位面流浪者对话。', type: 'npc', targetId: 'wanderer' },
-  { id: 'boss2', title: '大奥术师', desc: '击败魔法遗境深处的大奥术师。', type: 'boss2', bossId: 'archmagus' },
-  { id: 'elite', title: '虚空骑士', desc: '击败精英·虚空骑士。', type: 'kills', enemyType: 'elite', target: 1 },
-  { id: 'level', title: '穿越者之路', desc: '将等级提升至 5。', type: 'level', target: 5 },
-  { id: 'epilogue', title: '无尽位面', desc: '与宇航员回声对话，开启无尽探索。', type: 'npc', targetId: 'astronaut-echo' },
-  // Chapter 3
-  { id: 'learn-spell', title: '奥术入门', desc: '施放任意法术 8 次（{spell1}–{spell4}）。', type: 'spells', target: 8 },
-  { id: 'crypt', title: '灰白遗城', desc: '清空森林地下城。', type: 'dungeon', dungeonId: 'ruin-crypt' },
-  { id: 'library', title: '禁书图书馆', desc: '清空魔法地下城。', type: 'dungeon', dungeonId: 'forbidden-library' },
-  { id: 'rift', title: '五维裂隙', desc: '清空星际地下城。', type: 'dungeon', dungeonId: 'five-dim-rift' },
-  { id: 'boss3', title: '奇点领主', desc: '击败米勒荒原的引力化身。', type: 'boss3', bossId: 'singularity-herald' },
-  { id: 'mind', title: '心智觉醒', desc: '在营火将「心智」升级至 2。', type: 'mind', target: 2 },
-  { id: 'ascension', title: '位面飞升', desc: '完成三界试炼后再次触摸世界之锚。', type: 'interact', targetId: 'hub-anchor', requireAscension: true },
-  // Chapter 4
-  { id: 'void-rift', title: '时线裂隙', desc: '调查破碎时线的裂隙。', type: 'discovery', targetId: 'void-rift' },
-  { id: 'charge-spell', title: '蓄力奥术', desc: '施放 5 次蓄力法术（长按 {spell1}/{spell2}/{spell3}）。', type: 'charged', target: 5 },
-  { id: 'void-boss', title: '时线执政官', desc: '击败破碎时线隐藏 Boss。', type: 'voidboss', bossId: 'void-chronarch' },
-  { id: 'void-tablet', title: '五维碑文', desc: '阅读时线位面的碑文。', type: 'discovery', targetId: 'void-tablet' },
-  { id: 'true-end', title: '真·位面行者', desc: '集齐四枚碎片后触摸世界之锚。', type: 'interact', targetId: 'hub-anchor', requireTrueEnd: true },
-  // Chapter 5 — 混沌边境
-  { id: 'chaos-core', title: '混沌之核', desc: '触碰混沌边境的能量核心。', type: 'discovery', targetId: 'chaos-core' },
-  { id: 'skills', title: '流派入门', desc: '解锁 3 个武器技能。', type: 'skills-unlocked', target: 3 },
-  { id: 'chaos-boss', title: '裂隙领主', desc: '击败混沌边境 Boss。', type: 'chaosboss', bossId: 'chaos-overlord' },
-  { id: 'dungeon-rerun', title: '深渊再探', desc: '再次清空一座地下城。', type: 'dungeon-rerun' },
-  { id: 'infinity', title: '无尽行者', desc: '完成混沌试炼后触摸世界之锚。', type: 'interact', targetId: 'hub-anchor', requireInfinity: true },
-];
+/* ------------------------------------------------------------------ *
+ * 主线只有一张表（W-B3 切片3）
+ *
+ * 这个文件以前自己带着 32 行任务定义（`QUESTS`）、一张按 id 抄的路点表
+ * （`QUEST_WAYPOINTS`）和四行"哪一步完成时翻章"的硬编码 —— 三份都是
+ * `content/objectives.js` 那张表的抄本，而抄本会漂：新表把五只 Boss 都写成
+ * `type: 'boss'` + 各自的 `bossId`、给每行标了 `chapter`，抄本这边却按类型名
+ * 读计数器、根本不读 `chapter`。两份各自都"对"，所以没有任何一处会红。
+ *
+ * 现在这里只剩**序列**：按表序走、问判据、指路。表说什么它做什么。
+ * 玩家序列 = `MAINLINE`（`OBJECTIVES` 去掉章节门控行），与旧抄本同序同 32 行，
+ * 所以磁盘上的 `quests.questIndex` 语义不变，不需要存档迁移。
+ * ------------------------------------------------------------------ */
+
+const ROW_BY_ID = new Map(MAINLINE.map((r) => [r.id, r]));
+const rowWaypoint = (id) => ROW_BY_ID.get(id)?.waypoint ?? null;
 
 /**
- * 任务导航目标 — 小地图金色标记 + 屏幕指引。
+ * 表里那些"拿到某样东西"的步，按 `flags` 的前缀认领。
  *
- * 凡是指向**整个位面**的路点，label 一律取 `ZONE_NAMES`：此前这里另抄了一份区名，
- * 于是文案漂移成"提示让你去『魔法遗境』，站进去招牌却写着『霍格沃兹遗境』"。
- * 指向具体物件（石环、木人、Boss、地下城入口）的仍写自己的名字，那不是区域文案的第二真源。
+ * 为什么不写死 id 清单：`checkAllFragments` 已经在 `CONDITIONS` 里数过那三枚碎片，
+ * 这里再抄一遍就是又一份"哪几样算碎片"—— 加一枚要改四处，而漏掉的那处只是
+ * 指路箭头少指一个地方（不报错）。
  */
-const QUEST_WAYPOINTS = {
-  anchor: { x: 0, z: 55, label: '世界之锚' },
-  training: { x: 12, z: 52, label: '训练木人' },
-  soldiers: { x: -200, z: 0, label: ZONE_NAMES[ZONE_IDS.FANTASY] },
-  'fantasy-frag': { x: -200, z: -30, label: '至尊石环' },
-  boss: { x: -250, z: -35, label: '影界守护者' },
-  'magic-frag': { x: 0, z: -180, label: ZONE_NAMES[ZONE_IDS.MAGIC] },
-  golem: { x: 20, z: -210, label: '构装体' },
-  'space-frag': { x: 200, z: 80, label: ZONE_NAMES[ZONE_IDS.SPACE] },
-  finale: { x: 0, z: 55, label: '世界之锚' },
-  chests: { x: -190, z: 25, label: '宝箱/地下城' },
-  'talk-wanderer': { x: -8, z: 45, label: '位面流浪者' },
-  boss2: { x: 5, z: -220, label: '大奥术师' },
-  elite: { x: -50, z: -60, label: '虚空骑士' },
-  level: { x: 0, z: 55, label: '营火升级' },
-  epilogue: { x: 200, z: 90, label: '宇航员回声' },
-  'learn-spell': { x: 12, z: 52, label: '训练木人' },
-  crypt: { x: -190, z: 25, label: '灰白遗城入口' },
-  library: { x: -35, z: -200, label: '禁书图书馆' },
-  rift: { x: 175, z: 95, label: '五维裂隙' },
-  boss3: { x: 235, z: 155, label: '奇点领主' },
-  mind: { x: 0, z: 55, label: '营火升级' },
-  ascension: { x: 0, z: 55, label: '世界之锚' },
-  'void-rift': { x: 0, z: 220, label: ZONE_NAMES[ZONE_IDS.VOID] },
-  'charge-spell': { x: 12, z: 52, label: '训练木人' },
-  'void-boss': { x: 0, z: 235, label: '时线执政官' },
-  'void-tablet': { x: 0, z: 225, label: '五维碑文' },
-  'true-end': { x: 0, z: 55, label: '世界之锚' },
-  'chaos-core': { x: -200, z: 220, label: '混沌之核' },
-  skills: { x: 0, z: 55, label: '营火·武器技能' },
-  'chaos-boss': { x: -200, z: 285, label: '混沌领主' },
-  'dungeon-rerun': { x: -190, z: 25, label: '地下城入口' },
-  infinity: { x: 0, z: 55, label: '世界之锚' },
-};
+const targetIdsByFlag = (prefix) => MAINLINE
+  .filter((r) => Object.keys(r.flags ?? {}).some((k) => k.startsWith(prefix)))
+  .map((r) => r.targetId);
 
+/** 三枚主线碎片 / 时线那两件 —— 都由行自己的 `flags` 说话 */
+const FRAGMENT_IDS = targetIdsByFlag('hasFragment');
+const VOID_DISCOVERY_IDS = targetIdsByFlag('hasVoid');
+/** 三界试炼要的三座地下城 = 表里 `type: 'dungeon'` 的那三行（`'dungeon-rerun'` 是另一族） */
+const DUNGEON_IDS = MAINLINE.filter((r) => r.type === 'dungeon').map((r) => r.dungeonId);
+
+/**
+ * POI 与地下城入口的路点。这两张**不是**主线行的抄本：它们按 `targetId` / `dungeonId`
+ * 认领的是"那个物件在哪儿"（同一个石环可以被主线步、快速旅行、地图图标各自指向），
+ * 而主线行上的 `waypoint` 说的是"这一步让你去哪儿"。两者今天数值相同，职责不同。
+ */
 const TARGET_WAYPOINTS = {
   'hub-anchor': { x: 0, z: 55, label: '世界之锚' },
   'fantasy-ring': { x: -200, z: -30, label: '至尊石环' },
@@ -104,24 +61,36 @@ const DUNGEON_WAYPOINTS = {
   'five-dim-rift': { x: 175, z: 95, label: '五维裂隙' },
 };
 
-/** 世界地图 Boss 标记（小地图骷髅） */
-export const MAP_BOSSES = [
-  { x: -250, z: -35, label: '影界', short: 'B1', color: '#ff5555', chapter: 1 },
-  { x: 5, z: -220, label: '奥术', short: 'B2', color: '#aa55ff', chapter: 2 },
-  { x: 235, z: 155, label: '奇点', short: 'B3', color: '#5588ff', chapter: 3 },
-  { x: 0, z: 235, label: '时线', short: 'B4', color: '#ddbb55', chapter: 4 },
-  { x: -200, z: 285, label: '混沌', short: 'B5', color: '#ff3366', chapter: 5 },
-];
+/**
+ * 地图骷髅自己的两个字段（简称与配色）。**坐标与章节不在这里** ——
+ * 以前那张五行表是手抄的，"第 i 个骷髅是哪只 Boss"只剩顺序这一条隐式约定，
+ * 而查它的人用的是 `MAP_BOSSES[名册下标]`：表里插一行或换一次序，骷髅就指到别处，
+ * 没有任何一处会红。如今按 `bossId` 从主线表取。
+ */
+const MAP_BOSS_META = {
+  'shadow-warden': { label: '影界', short: 'B1', color: '#ff5555' },
+  'archmagus': { label: '奥术', short: 'B2', color: '#aa55ff' },
+  'singularity-herald': { label: '奇点', short: 'B3', color: '#5588ff' },
+  'void-chronarch': { label: '时线', short: 'B4', color: '#ddbb55' },
+  'chaos-overlord': { label: '混沌', short: 'B5', color: '#ff3366' },
+};
 
-const FRAGMENT_IDS = ['fantasy-ring', 'magic-castle', 'space-tesseract'];
+/** 世界地图 Boss 标记（小地图骷髅），顺序 = 主线表里那五行 Boss 的表序 */
+export const MAP_BOSSES = MAINLINE
+  .filter((r) => BOSS_STAT_KEYS[r.bossId])
+  .map((r) => ({
+    bossId: r.bossId,
+    x: r.waypoint.x,
+    z: r.waypoint.z,
+    chapter: r.chapter,
+    ...MAP_BOSS_META[r.bossId],
+  }));
 
 /**
  * Boss 那一族的界面话术，按 `bossId` 认领。
  *
  * 为什么不再按类型名（`boss` / `boss2` / …）各写一遍"读哪个计数器"：那是把
- * `BOSS_STAT_KEYS` 那份名册抄进显示层，而新表把所有 Boss 都写成 `type: 'boss'` + `bossId`，
- * 抄本会当场读错格子（在役表今天侥幸不错，只因为类型名里也编了号）。
- * 顺序与 `MAP_BOSSES` 的对应由 `BOSS_ORDER` 说出，并由用例逐格钉住。
+ * `BOSS_STAT_KEYS` 那份名册抄进显示层。这里的文本含坐标读数，由用例逐格对过主线表。
  */
 const BOSS_DISPLAY = {
   'shadow-warden': { progress: '进入灰白森林 Boss 红圈 (X≈-250 Z≈-35)', waypoint: '影界守护者 Boss 区' },
@@ -130,8 +99,6 @@ const BOSS_DISPLAY = {
   'void-chronarch': { progress: '时线 Boss 红圈 (Z≈235 · Ch4+)', waypoint: '时线执政官 Boss 区' },
   'chaos-overlord': { progress: '混沌 Boss 红圈 (X≈-200 Z≈285 · Ch5+)', waypoint: '混沌领主 Boss 区' },
 };
-
-const BOSS_ORDER = Object.keys(BOSS_STAT_KEYS);
 
 export class QuestSystem {
   constructor(dialog) {
@@ -147,7 +114,7 @@ export class QuestSystem {
     this.notifyUpdate();
   }
 
-  get current() { return QUESTS[this.questIndex] ?? null; }
+  get current() { return MAINLINE[this.questIndex] ?? null; }
 
   /**
    * 监听器只做两件事：把事件记到账上（记账表在 `content/objectives.js`，全仓一份），
@@ -206,34 +173,48 @@ export class QuestSystem {
     return null;
   }
 
+  /**
+   * 门控「摸锚点」的指路：条件还没齐时指向**还缺的那件事**（少一片碎片就指碎片，
+   * 第三只 Boss 没打就指它的红圈），齐了才指回锚点。
+   *
+   * 分派键是行自己写的那个 `condition` 函数名（`interactGateCondition` 读出来的就是它）。
+   * 以前这里读的是抄本上的四个旗标（`requireAscension` 之类），于是"这一步门的是哪道关"
+   * 在两张表上各说一遍，而条件算式只有 `CONDITIONS` 那一份。
+   */
   _resolveInteractWaypoint(q) {
-    if (q.requireAllFragments) {
-      const m = this._firstMissing(FRAGMENT_IDS);
-      if (m) return m;
-      return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '集齐碎片后触摸世界之锚' };
-    }
-    if (q.requireAscension) {
-      if (!this.stats.boss3Defeated) return { ...QUEST_WAYPOINTS.boss3, hint: '先击败奇点领主' };
-      for (const id of ['ruin-crypt', 'forbidden-library', 'five-dim-rift']) {
-        if (!this.stats.dungeonsCleared.has(id) && DUNGEON_WAYPOINTS[id]) {
-          return { ...DUNGEON_WAYPOINTS[id], hint: '清空地下城' };
-        }
+    switch (interactGateCondition(q)) {
+      case 'checkAllFragments': {
+        const m = this._firstMissing(FRAGMENT_IDS);
+        if (m) return m;
+        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '集齐碎片后触摸世界之锚' };
       }
-      return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '三界试炼完成后触摸锚点' };
+      case 'checkAllDungeons': {
+        if (!this.stats.boss3Defeated) return { ...rowWaypoint('boss3'), hint: '先击败奇点领主' };
+        for (const id of DUNGEON_IDS) {
+          if (!this.stats.dungeonsCleared.has(id) && DUNGEON_WAYPOINTS[id]) {
+            return { ...DUNGEON_WAYPOINTS[id], hint: '清空地下城' };
+          }
+        }
+        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '三界试炼完成后触摸锚点' };
+      }
+      case 'checkTrueEnd': {
+        if (!this.stats.voidBossDefeated) return { ...rowWaypoint('void-boss'), hint: '击败时线执政官' };
+        const m = this._firstMissing(VOID_DISCOVERY_IDS);
+        if (m) return m;
+        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '条件满足后触摸锚点' };
+      }
+      case 'checkInfinity': {
+        if (!this.stats.chaosBossDefeated) return { ...rowWaypoint('chaos-boss'), hint: '击败混沌领主' };
+        if (this.stats.skillsUnlocked < ROW_BY_ID.get('skills').target) {
+          return { ...rowWaypoint('skills'), hint: '营火解锁3个武器技能' };
+        }
+        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '完成试炼后触摸锚点' };
+      }
+      default:
+        // 没有门控的那一格：摸过就没有指示了
+        if (this.stats.discoveries.has(q.targetId)) return null;
+        return rowWaypoint(q.id) ? { ...rowWaypoint(q.id) } : null;
     }
-    if (q.requireTrueEnd) {
-      if (!this.stats.voidBossDefeated) return { ...QUEST_WAYPOINTS['void-boss'], hint: '击败时线执政官' };
-      const m = this._firstMissing(['void-rift', 'void-tablet'].filter((id) => !this.stats.discoveries.has(id)));
-      if (m) return m;
-      return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '条件满足后触摸锚点' };
-    }
-    if (q.requireInfinity) {
-      if (!this.stats.chaosBossDefeated) return { ...QUEST_WAYPOINTS['chaos-boss'], hint: '击败混沌领主' };
-      if (this.stats.skillsUnlocked < 3) return { ...QUEST_WAYPOINTS.skills, hint: '营火解锁3个武器技能' };
-      return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '完成试炼后触摸锚点' };
-    }
-    if (this.stats.discoveries.has(q.targetId)) return null;
-    return TARGET_WAYPOINTS[q.targetId] ? { ...TARGET_WAYPOINTS[q.targetId] } : QUEST_WAYPOINTS[q.id] ? { ...QUEST_WAYPOINTS[q.id] } : null;
   }
 
   checkProgress() {
@@ -241,31 +222,28 @@ export class QuestSystem {
     if (this.current && this.isQuestObjectiveDone(this.current)) this.advance();
   }
 
+  /**
+   * 走完一步，顺带跨过它后面那道章节门。
+   *
+   * 「哪一步开哪一章」以前是四行 `finished?.id === 'finale'` 加四句硬编码的喊话，
+   * 与表里那些 `chapter` 是同一句话的两种写法（而且抄本那侧对不上：表把
+   * `magic-frag`..`finale` 标成第 2 章，玩家做这四格时 HUD 上写着 Chapter 1）。
+   * 现在门控行自己带 `chapter` 与 `announce`，这里只做一件事：章节变了就喊、就广播。
+   */
   advance() {
     const finished = this.current;
     const oldChapter = this.chapter;
     this.questIndex++;
-    if (finished?.id === 'finale') {
-      this.chapter = 2;
-      this.dialog.toast('Chapter 2：无尽位面 已开启');
-    }
-    if (finished?.id === 'epilogue') {
-      this.chapter = 3;
-      this.dialog.toast('Chapter 3：位面飞升 已开启 — 法术 1–4、三座地下城、第三 Boss');
-    }
-    if (finished?.id === 'ascension') {
-      this.chapter = 4;
-      this.dialog.toast('Chapter 4：破碎时线 已开启 — 向北探索，长按法术蓄力');
-    }
-    if (finished?.id === 'true-end') {
-      this.chapter = 5;
-      this.dialog.toast('Chapter 5：混沌边境 已开启 — 向西北探索，营火「武器技能」解锁流派');
+    const gate = finished ? chapterGateAfter(finished.id) : null;
+    if (gate && gate.chapter !== this.chapter) {
+      this.chapter = gate.chapter;
+      if (gate.announce) this.dialog.toast(gate.announce);
     }
     if (this.chapter !== oldChapter) {
       window.dispatchEvent(new CustomEvent('chapter-changed', { detail: { chapter: this.chapter, prev: oldChapter } }));
     }
     if (finished) this.dialog.toast(`任务完成：${finished.title}`);
-    if (this.questIndex >= QUESTS.length) {
+    if (this.questIndex >= MAINLINE.length) {
       this.completed = true;
       window.dispatchEvent(new CustomEvent('game-completed'));
     }
@@ -274,7 +252,7 @@ export class QuestSystem {
 
   notifyUpdate() {
     window.dispatchEvent(new CustomEvent('quest-updated', {
-      detail: { current: this.current, index: this.questIndex, total: QUESTS.length, completed: this.completed, chapter: this.chapter },
+      detail: { current: this.current, index: this.questIndex, total: MAINLINE.length, completed: this.completed, chapter: this.chapter },
     }));
   }
 
@@ -322,12 +300,12 @@ export class QuestSystem {
     if (q.type === 'interact') return this._resolveInteractWaypoint(q);
 
     if (q.type === 'discovery' && !this.stats.discoveries.has(q.targetId)) {
-      return TARGET_WAYPOINTS[q.targetId] ? { ...TARGET_WAYPOINTS[q.targetId] } : QUEST_WAYPOINTS[q.id] ? { ...QUEST_WAYPOINTS[q.id] } : null;
+      return TARGET_WAYPOINTS[q.targetId] ? { ...TARGET_WAYPOINTS[q.targetId] } : rowWaypoint(q.id) ? { ...rowWaypoint(q.id) } : null;
     }
 
     const bossKey = BOSS_STAT_KEYS[q.bossId];
     if (bossKey && !this.stats[bossKey]) {
-      return { ...MAP_BOSSES[BOSS_ORDER.indexOf(q.bossId)], label: BOSS_DISPLAY[q.bossId].waypoint };
+      return { ...MAP_BOSSES.find((b) => b.bossId === q.bossId), label: BOSS_DISPLAY[q.bossId].waypoint };
     }
 
     if (q.type === 'dungeon' && !this.stats.dungeonsCleared.has(q.dungeonId)) {
@@ -338,7 +316,7 @@ export class QuestSystem {
       return TARGET_WAYPOINTS[q.targetId] ? { ...TARGET_WAYPOINTS[q.targetId] } : null;
     }
 
-    if (QUEST_WAYPOINTS[q.id]) return { ...QUEST_WAYPOINTS[q.id] };
+    if (rowWaypoint(q.id)) return { ...rowWaypoint(q.id) };
     return null;
   }
 

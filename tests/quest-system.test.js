@@ -2,21 +2,20 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
-import { MAP_BOSSES, QUESTS, QuestSystem } from '../src/game/QuestSystem.js';
+import { MAP_BOSSES, QuestSystem } from '../src/game/QuestSystem.js';
 import { SaveSystem } from '../src/game/SaveSystem.js';
 import {
-  OBJECTIVES, STAT_EVENTS, BOSS_STAT_KEYS, INTERACT_GATES,
-  STAT_READINGS, emptyStats, statsToJSON,
+  MAINLINE, OBJECTIVES, STAT_EVENTS, BOSS_STAT_KEYS, STAT_READINGS,
+  emptyStats, interactGateCondition, statsToJSON,
 } from '../src/content/objectives.js';
 
 /**
- * 在役主线任务系统的行为账（W-B3 切片2）。
+ * 在役主线任务系统的行为账（W-B3 切片2 立，切片3 换表）。
  *
- * `QuestSystem` 是今天真正在跑的那一套（`core/Game.js` 装配它），所以切片2 收三本账时
- * 不许改它的**行为**：这一步什么时候算过、章节什么时候翻、路点指哪儿，都得和收账之前一样。
- * 这里因此只测三件事：
+ * `QuestSystem` 是今天真正在跑的那一套（`core/Game.js` 装配它）。切片3 把它自己那份 32 行手抄表
+ * 删了，序列改读 `content/objectives.js` 的非门控投影 `MAINLINE`，所以这里测的三件事不变：
  *  ① 十件事件仍然各记各的账并推动当前步（`setupListeners` 从九段 if 变成一个循环）；
- *  ② 门控的「摸锚点」仍然要条件齐时的那一下交互（判据换成了 `objectiveDone` 那一份）；
+ *  ② 门控的「摸锚点」仍然要条件齐时的那一下交互（条件名就写在那一行自己的 `condition` 上）；
  *  ③ Boss 的显示与路点按 `bossId` 认领 —— 五段硬编码 if 换成名册一次查表，
  *     而 `MAP_BOSSES` 与名册的位置对应由坐标反证（顺序错了就红，不靠肉眼）。
  */
@@ -92,7 +91,7 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     step('discovery', D.discover('fantasy-ring'));
     step('enemy-defeated', D.bossKill('shadow-warden'));
     // 前五格各推进一步，第六次读数落在下一档的第一步上
-    expect(titles).toEqual(QUESTS.slice(0, 6).map((q) => q.title));
+    expect(titles).toEqual(MAINLINE.slice(0, 6).map((q) => q.title));
     expect(qs.questIndex).toBe(5);
     expect(qs.chapter).toBe(1);
     expect(toasts.filter((t) => t.startsWith('任务完成：'))).toHaveLength(5);
@@ -107,7 +106,7 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
 
 describe('门控的「摸锚点」：条件齐时那一下交互才推进', () => {
   it('碎片没齐时摸锚点不动；补齐后摸一下才翻章节并广播', () => {
-    const gated = QUESTS.findIndex((q) => q.requireAllFragments);
+    const gated = MAINLINE.findIndex((q) => interactGateCondition(q) === 'checkAllFragments');
     qs.questIndex = gated;
     const changed = [];
     win.addEventListener('chapter-changed', (e) => changed.push(e.detail));
@@ -126,11 +125,11 @@ describe('门控的「摸锚点」：条件齐时那一下交互才推进', () =
   });
 
   it('四个门控步同一个脾气：条件没齐时摸一百下也不算过', () => {
-    const gatedRows = QUESTS.filter((q) => INTERACT_GATES.some((k) => q[k]));
+    const gatedRows = MAINLINE.filter((q) => interactGateCondition(q));
     expect(gatedRows.length).toBe(4);
     for (const row of gatedRows) {
       const probe = new QuestSystem(dialog);
-      probe.questIndex = QUESTS.indexOf(row);
+      probe.questIndex = MAINLINE.indexOf(row);
       // 门控判据一律拒绝（哪怕锚点已经摸过），推进它的必须是条件齐时的那一下交互
       expect(probe.isQuestObjectiveDone(row)).toBe(false);
       probe.stats.discoveries.add(row.targetId);
@@ -140,14 +139,16 @@ describe('门控的「摸锚点」：条件齐时那一下交互才推进', () =
 });
 
 describe('Boss：名册一次查表，位置对应由坐标反证', () => {
-  it('MAP_BOSSES 的顺序与名册同序（对不上号就是地图骷髅指错了 Boss）', () => {
+  it('MAP_BOSSES 由表里的 Boss 行推出来，顺序与名册同序（对不上号就是地图骷髅指错了 Boss）', () => {
     const roster = Object.keys(BOSS_STAT_KEYS);
     expect(roster).toHaveLength(5);
     expect(MAP_BOSSES).toHaveLength(roster.length);
+    // 切片3 之后这张表是 `MAINLINE.filter(名册认识)` 的投影：它自己不再有名次，名次来自表
+    expect(MAP_BOSSES.map((b) => b.bossId)).toEqual(roster);
     for (const row of OBJECTIVES.filter((r) => BOSS_STAT_KEYS[r.bossId])) {
       const i = roster.indexOf(row.bossId);
       expect(i, `名册里没有 ${row.bossId}`).toBeGreaterThan(-1);
-      // 地图上的骷髅与目标自己的路点必须是同一处 —— 顺序错了这条当场红
+      // 地图上的骷髅与目标自己的路点必须是同一处 —— 抄错了坐标这条当场红
       expect([MAP_BOSSES[i].x, MAP_BOSSES[i].z], `${row.bossId} 的地图坐标与目标路点对不上`)
         .toEqual([row.waypoint.x, row.waypoint.z]);
       expect(MAP_BOSSES[i].chapter, `${row.bossId} 的地图章节号`).toBe(row.chapter);
@@ -156,9 +157,9 @@ describe('Boss：名册一次查表，位置对应由坐标反证', () => {
 
   it('当前步是哪只 Boss，进度文本与路点就指向它（打完才改口）', () => {
     const roster = Object.keys(BOSS_STAT_KEYS);
-    for (const row of QUESTS.filter((q) => BOSS_STAT_KEYS[q.bossId])) {
+    for (const row of MAINLINE.filter((q) => BOSS_STAT_KEYS[q.bossId])) {
       const probe = new QuestSystem(dialog);
-      probe.questIndex = QUESTS.indexOf(row);
+      probe.questIndex = MAINLINE.indexOf(row);
       const other = roster.find((id) => id !== row.bossId);
       probe.stats[BOSS_STAT_KEYS[other]] = true;      // 别的 Boss 死了
       expect(probe.getProgressText()).toContain('Boss 红圈');
@@ -171,12 +172,15 @@ describe('Boss：名册一次查表，位置对应由坐标反证', () => {
   });
 
   it('显示层不许留着第二份名册抄本（Boss 话术只按 bossId 认领）', () => {
-    // 只看类体：`QUESTS` 那张表里的 `type: 'boss2'` 是在役表的历史写法，由 `BOSS_TYPES` 兼容
-    const body = readFileSync(SELF, 'utf8').split('export class QuestSystem')[1];
+    const code = readFileSync(SELF, 'utf8');
+    // 只看类体：`case 'boss2'` / `q.type === 'boss3'` 那类按类型名读计数器的五段 if 不该回来
+    // （表行自己的 id 就叫 `boss3`，所以这条必须在 `case`/`type` 的上下文里查）
+    const body = code.split('export class QuestSystem')[1];
     expect(body).toBeTruthy();
-    // `case 'boss2'` / `q.type === 'boss3'` 那类按类型名读计数器的五段 if 不该回来
     expect(body).not.toMatch(/(case|type\s*===|type\s*!==)\s*'(boss2|boss3|voidboss|chaosboss)'/);
     expect(body).toContain('BOSS_STAT_KEYS[');
+    // 切片3 收掉的那份手抄任务表不许回来：这里不再有带 `title` / `desc` 的行字面量
+    expect(code).not.toMatch(/^\s*\{[^}\n]*\btitle:/m);
   });
 });
 
@@ -187,7 +191,7 @@ describe('显示与同步：读数只说该干的事', () => {
     dispatch('poi-interact', D.interact('hub-anchor'));
     expect(qs.questIndex).toBe(0);
     expect(qs.getProgressText()).toContain('已完成触摸');
-    qs.questIndex = QUESTS.findIndex((q) => q.requireAscension);
+    qs.questIndex = MAINLINE.findIndex((q) => interactGateCondition(q) === 'checkAllDungeons');
     expect(qs.getProgressText()).not.toContain('已完成触摸');
   });
 
@@ -219,7 +223,7 @@ describe('显示与同步：读数只说该干的事', () => {
 describe('判据只有一份：在役表也一样', () => {
   it('每一格 Boss 步只认自己那只 Boss 的死讯', () => {
     const roster = Object.keys(BOSS_STAT_KEYS);
-    for (const row of QUESTS.filter((q) => BOSS_STAT_KEYS[q.bossId])) {
+    for (const row of MAINLINE.filter((q) => BOSS_STAT_KEYS[q.bossId])) {
       for (const only of roster) {
         const probe = new QuestSystem(dialog);
         probe.stats[BOSS_STAT_KEYS[only]] = true;

@@ -11,10 +11,10 @@
  * - 章节门控：完成 `chapter-gate` 那一格时把章节推到它标的那一档
  * - 事件总线集成：进度、完成、失败、分支、章节变更
  *
- * **现状（W-B3 切片2 实测）**：本类还没有消费者 —— 在役主线是 `game/QuestSystem.js`
- * （`core/Game.js` 装配它）。这里之所以把三本账接成同一份而不是继续自己抄一遍：
- * 判据（`objectiveDone`）、记账（`STAT_EVENTS`）、名册（`BOSS_STAT_KEYS`）都来自
- * `content/objectives.js`，切片3 把 sequencer 换过来时不需要再对一次行为。
+ * **现状（W-B3 切片3 实测）**：本类还没有消费者 —— 在役主线是 `game/QuestSystem.js`
+ * （`core/Game.js` 装配它）。切片3 没有把 sequencer 换成这里，而是把**另一边**的抄本删掉了：
+ * `QuestSystem` 现在读的就是本类读的那张表（`OBJECTIVES` 的非门控投影）。
+ * 于是两条 sequencer 共用一份判据、一份记账、一份名册，接线剩下的差别只在"要不要门控行本身占一步"。
  * 接线之前，本文件只由 `tests/objective-engine.test.js` 供着，别把它当成在跑的那套。
  */
 import {
@@ -415,7 +415,7 @@ export class ObjectiveEngine {
   }
 
   /**
-   * 章节门控：走到 `chapter-gate` 那一格（表里的 `ch2-complete` / `ch3-start` …）
+   * 章节门控：走到 `chapter-gate` 那一格（表里的 `ch1-complete` / `ch2-complete` …）
    * 就把章节推到它标的那一档，并广播 `chapter-changed`。
    *
    * 以前这里是一个空方法加一句注释（"由 advance() 中的章节门控目标触发"）——
@@ -426,6 +426,7 @@ export class ObjectiveEngine {
     if (def.type === 'chapter-gate' && def.chapter > this.chapter) {
       const prev = this.chapter;
       this.chapter = def.chapter;
+      if (def.announce) this.dialog.toast(def.announce);
       emit('chapter-changed', { chapter: this.chapter, prev }, EVENT_TAG);
     }
     this.checkActivations();

@@ -29,7 +29,7 @@ import {
 } from '../src/game/LoreFragments.js';
 import { SIDE_QUESTS } from '../src/game/SideQuestRegistry.js';
 import { ZONE_EVENTS_EXTRA } from '../src/game/WorldAmbientCatalog.js';
-import { QUESTS } from '../src/game/QuestSystem.js';
+import { MAINLINE } from '../src/content/objectives.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -222,7 +222,7 @@ describe('内容表的 `{动作}` 占位：真表跑真展开', () => {
     loreCodex: LORE_CODEX,
     sideQuests: SIDE_QUESTS,
     echoes: ECHOES,
-    quests: QUESTS,
+    quests: MAINLINE,
     npcChapterLines: NPC_CHAPTER_LINES,
     bossLore: BOSS_LORE,
     chapterIntros: CHAPTER_INTROS,
@@ -237,7 +237,17 @@ describe('内容表的 `{动作}` 占位：真表跑真展开', () => {
   };
   const STRINGS = Object.entries(TABLES).flatMap(([table, node]) => stringsOf(node).map((s) => `${table}: ${s}`));
 
-  it('扫描真跑得起来：带占位的文案够多（少一条就是 walker 或表坏了）', () => {
+  it('扫描真跑得起来：每张表都交得出文案，带占位的总数够多', () => {
+    /*
+     * 逐表钉一条"这张表真的走进了扫描"：`stringsOf(undefined)` 返回空数组，所以
+     * 一张表被改名、删掉或 import 写错时，这里的 `STRINGS` 只是少了几条 ——
+     * 只看总数（切片4 那版本）照样绿，而那几张有占位的表就此没人查过。
+     * W-B3 切片3 就把 `QuestSystem` 里那份主线抄本删了：这条当时确实一点没红。
+     */
+    const silent = Object.entries(TABLES)
+      .filter(([, node]) => stringsOf(node).length === 0)
+      .map(([name]) => name);
+    expect(silent, '这些表一条文案都没交出来（多半是 import 断了）').toEqual([]);
     const withToken = STRINGS.filter((s) => /\{[A-Za-z][A-Za-z0-9]*\}/.test(s));
     expect(withToken.length).toBeGreaterThanOrEqual(46);
   });

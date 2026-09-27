@@ -7,14 +7,16 @@
  *   - id: kebab-case 唯一标识符
  *   - title: 显示标题
  *   - desc: 描述（支持 {动作} 占位）
- *   - type: 目标类型（interact/kills/discovery/boss/chapter-gate/flag/spells/dungeon/chests/npc/level/mind/charged/skills-unlocked/voidboss/chaosboss/dungeon-rerun）
+ *   - type: 目标类型。允许值就是 `OBJECTIVE_TYPES` 那一格（判据 `objectiveDone` 认得的也只有它）
  *   - targetId: 交互/发现/击杀/对话目标 id（可选）
  *   - target: 数值目标值（可选）
  *   - enemyType: 敌人类型（kills 类型用）
  *   - bossId: Boss id（boss 类型用）
  *   - dungeonId: 地下城 id（dungeon 类型用）
- *   - chapter: 章节门控（完成前需达到该章节）
- *   - condition: 运行时条件函数名（字符串，引用 ObjectiveEngine.CONDITIONS 表）
+ *   - chapter: **玩家此刻在第几章**（W-B3 切片3 定的口径，见下面那段注释）
+ *   - announce: 只有章节门控那一族有 —— 跨过这一格时对玩家喊的那一句（"Chapter 2：… 已开启"）
+ *   - autoComplete: 只有章节门控那一族有 —— 走到这一格本身即完成（玩家没有可做的事）
+ *   - condition: 运行时条件函数名（字符串，引用 CONDITIONS 表）
  *   - flags: 完成时设置的标志 { flagName: true/false }
  *   - requires: 前置标志要求 { flagName: true/false }（全部满足才可激活）
  *   - failsOn: 失败条件函数名（可选）
@@ -27,6 +29,42 @@
  *   - journal: 完成后日志文本
  *   - waypoint: 世界坐标指引 { x, z, label }
  */
+
+import { ZONE_IDS, ZONE_NAMES } from './ZoneIdentity.js';
+
+/* ------------------------------------------------------------------ *
+ * `chapter` 到底说什么（W-B3 切片3 实测之后改的口径）
+ *
+ * 这张表刚写下来时它说的是"这一格属于哪一章"，而在役那套读的是"玩家现在在第几章"
+ * —— 同一个键两种意思，而且当场对不上：`magic-frag`..`finale` 四格被标成第 2 章，
+ * 玩家做这四格时 HUD 上明明白白写着 Chapter 1（章节要等'重铸锚点'完成才翻）。
+ * 两套读法最坏的后果不是显示，而是**没人能查出另一套错了**：死代码那份读前者，
+ * 在役那份读后者，于是两边各自都"对"。
+ *
+ * 现在只留一种意思：**拿这一格的时候，玩家在第几章**。于是
+ * - 章节号沿表**只升不降**（由注册表的整表不变式盯着），
+ * - 门控那一格的 `chapter` 就是它开的那一章（跨过它时玩家进入这一章），
+ * - 在役的 sequencer 不需要再认"哪一步完成时该翻章"（那是四行 `finished?.id === …`）。
+ *
+ * 改动的六格（值不是猜的，是在役那四道写死的翻转反推出来的）：
+ * `magic-frag` / `golem` / `space-frag` / `finale` 2→1，`ch3-complete` 3→4，`ch4-complete` 4→5。
+ * ------------------------------------------------------------------ */
+
+
+/* ------------------------------------------------------------------ */
+
+/**
+ * 判据认得的类型名，全仓一份（注册表拿它当 `type` 的允许值）。
+ *
+ * 为什么值得钉死：`objectiveDone` 对认不出的类型返回 `false`，而"这一步永远过不了"
+ * 在游戏里不报错 —— 表里打错一个字母（`bos2`）的表现就是主线卡死在那一格，
+ * 玩家看到的是"完成"两个字再也不出现。写错的人拿不到任何线索。
+ */
+export const OBJECTIVE_TYPES = [
+  'interact', 'hits', 'kills', 'discovery', 'boss', 'chapter-gate',
+  'spells', 'dungeon', 'chests', 'npc', 'level', 'mind',
+  'charged', 'skills-unlocked', 'dungeon-rerun',
+];
 
 export const OBJECTIVES = [
   // ── Chapter 1: 觉醒 ──
@@ -60,7 +98,7 @@ export const OBJECTIVES = [
     enemyType: 'soldier',
     target: 2,
     chapter: 1,
-    waypoint: { x: -200, z: 0, label: '灰白森林' },
+    waypoint: { x: -200, z: 0, label: ZONE_NAMES[ZONE_IDS.FANTASY] },
     reward: 10,
     journal: '两名影之战士倒在剑下。',
   },
@@ -95,9 +133,9 @@ export const OBJECTIVES = [
     desc: '调查悬浮城堡。',
     type: 'discovery',
     targetId: 'magic-castle',
-    chapter: 2,
+    chapter: 1,
     requires: { boss1Defeated: true },
-    waypoint: { x: 0, z: -180, label: '霍格沃兹遗境' },
+    waypoint: { x: 0, z: -180, label: ZONE_NAMES[ZONE_IDS.MAGIC] },
     reward: 15,
     journal: '悬浮城堡碎片入手 — 魔法的痕迹仍在。',
     flags: { hasFragmentMagic: true },
@@ -109,7 +147,7 @@ export const OBJECTIVES = [
     type: 'kills',
     enemyType: 'golem',
     target: 1,
-    chapter: 2,
+    chapter: 1,
     waypoint: { x: 20, z: -210, label: '构装体巡逻区' },
     reward: 10,
     journal: '一台魔法构装体停止了运作。',
@@ -120,9 +158,9 @@ export const OBJECTIVES = [
     desc: '触碰五维_tesseract。',
     type: 'discovery',
     targetId: 'space-tesseract',
-    chapter: 2,
+    chapter: 1,
     requires: { hasFragmentMagic: true },
-    waypoint: { x: 200, z: 80, label: '米勒荒原' },
+    waypoint: { x: 200, z: 80, label: ZONE_NAMES[ZONE_IDS.SPACE] },
     reward: 15,
     journal: '五维_tesseract 碎片入手 — 爱能跨越维度。',
     flags: { hasFragmentSpace: true },
@@ -133,26 +171,26 @@ export const OBJECTIVES = [
     desc: '集齐三枚碎片后再次触摸世界之锚。',
     type: 'interact',
     targetId: 'hub-anchor',
-    chapter: 2,
+    chapter: 1,
     requires: { hasFragmentFantasy: true, hasFragmentMagic: true, hasFragmentSpace: true },
     condition: 'checkAllFragments',
     waypoint: { x: 0, z: 55, label: '世界之锚' },
     reward: 30,
-    journal: '世界之锚重铸，Chapter 2 完成。',
-    flags: { chapter2Done: true },
-    branchTo: 'ch2-complete',
+    journal: '世界之锚重铸，觉醒篇收束。',
+    branchTo: 'ch1-complete',
     branchCondition: 'checkAllFragments',
   },
   {
-    id: 'ch2-complete',
-    title: 'Chapter 2 完成',
+    id: 'ch1-complete',
+    title: 'Chapter 1 完成',
     desc: '世界之锚重铸，无尽位面开启。',
     type: 'chapter-gate',
     chapter: 2,
     autoComplete: true,
+    announce: 'Chapter 2：无尽位面 已开启',
     reward: 0,
-    journal: 'Chapter 2：无尽位面 已开启 — 法术 1–4、三座地下城、第三 Boss。',
-    flags: { chapter2Done: true },
+    journal: 'Chapter 1：觉醒 已完成 — 无尽位面开启。',
+    flags: { chapter1Done: true },
   },
   {
     id: 'chests',
@@ -224,19 +262,20 @@ export const OBJECTIVES = [
     reward: 15,
     journal: '宇航员回声指引前路。',
     flags: { chapter3Ready: true },
-    branchTo: 'ch3-start',
+    branchTo: 'ch2-complete',
     branchCondition: 'checkChapter3Ready',
   },
   {
-    id: 'ch3-start',
-    title: 'Chapter 3 开启',
-    desc: '位面飞升篇章开启。',
+    id: 'ch2-complete',
+    title: 'Chapter 2 完成',
+    desc: '无尽位面收束，位面飞升篇章开启。',
     type: 'chapter-gate',
     chapter: 3,
     autoComplete: true,
+    announce: 'Chapter 3：位面飞升 已开启 — 法术 1–4、三座地下城、第三 Boss',
     reward: 0,
-    journal: 'Chapter 3：位面飞升 已开启 — 法术 1–4、三座地下城、第三 Boss。',
-    flags: { chapter3Done: false },
+    journal: 'Chapter 2：无尽位面 已完成 — 位面飞升开启。',
+    flags: { chapter2Done: true },
   },
   // ── Chapter 3: 位面飞升 ──
   {
@@ -330,8 +369,9 @@ export const OBJECTIVES = [
     title: 'Chapter 3 完成',
     desc: '位面飞升达成，破碎时线开启。',
     type: 'chapter-gate',
-    chapter: 3,
+    chapter: 4,
     autoComplete: true,
+    announce: 'Chapter 4：破碎时线 已开启 — 向北探索，长按法术蓄力',
     reward: 0,
     journal: 'Chapter 3：位面飞升 已完成 — 破碎时线开启。',
     flags: { chapter3Done: true },
@@ -345,7 +385,7 @@ export const OBJECTIVES = [
     targetId: 'void-rift',
     chapter: 4,
     requires: { chapter3Done: true },
-    waypoint: { x: 0, z: 220, label: '破碎时线' },
+    waypoint: { x: 0, z: 220, label: ZONE_NAMES[ZONE_IDS.VOID] },
     reward: 15,
     journal: '时线裂隙被发现，时间在此扭曲。',
     flags: { hasVoidRift: true },
@@ -365,7 +405,7 @@ export const OBJECTIVES = [
     id: 'void-boss',
     title: '时线执政官',
     desc: '击败破碎时线隐藏 Boss。',
-    type: 'voidboss',
+    type: 'boss',
     bossId: 'void-chronarch',
     chapter: 4,
     requires: { hasVoidRift: true },
@@ -407,8 +447,9 @@ export const OBJECTIVES = [
     title: 'Chapter 4 完成',
     desc: '真·位面行者觉醒，混沌边境开启。',
     type: 'chapter-gate',
-    chapter: 4,
+    chapter: 5,
     autoComplete: true,
+    announce: 'Chapter 5：混沌边境 已开启 — 向西北探索，营火「武器技能」解锁流派',
     reward: 0,
     journal: 'Chapter 4：破碎时线 已完成 — 混沌边境开启。',
     flags: { chapter4Done: true },
@@ -443,7 +484,7 @@ export const OBJECTIVES = [
     id: 'chaos-boss',
     title: '裂隙领主',
     desc: '击败混沌边境 Boss。',
-    type: 'chaosboss',
+    type: 'boss',
     bossId: 'chaos-overlord',
     chapter: 5,
     requires: { hasChaosCore: true },
@@ -493,6 +534,35 @@ export const OBJECTIVES = [
   },
 ];
 
+/* ------------------------------------------------------------------ *
+ * 主线只有一张表（W-B3 切片3）
+ *
+ * 今天玩家实际走的序列 = 这张表**去掉章节门控行**。门控行不是玩家能做的一步
+ * （它 `autoComplete`，走到即过），它是"跨过前面那一步时对玩家喊的话 + 翻到第几章"。
+ *
+ * 为什么要显式投影而不是让 sequencer 自己跳过：存档落的是 `quests.questIndex`，
+ * 那是**玩家序列**的下标。把门控行混进去，磁盘上的 `6` 就从"第五格宝箱"变成"第六步"，
+ * 而这类偏移不报错 —— 老档读进来只是任务提示指错地方，玩家会以为档坏了。
+ * 投影保持同序同 32 行（由 `tests/mainline-table.test.js` 钉住），所以下标语义不变，不需要迁移。
+ * ------------------------------------------------------------------ */
+
+/** 玩家序列：`OBJECTIVES` 里非门控的那些行，按表序 */
+export const MAINLINE = OBJECTIVES.filter((r) => r.type !== 'chapter-gate');
+
+/**
+ * 走完 `id` 那一步之后要跨过的门控行；没有则 `null`。
+ *
+ * 靠的是**位置**（门控行紧跟在它为之外的那一步后面），不是另抄一份"哪一步开哪一章"的清单 ——
+ * 那份清单正是切片3 删掉的东西（`finished?.id === 'finale'` 四行）。
+ * 位置这个前提由注册表的整表不变式盯着：门控行的前一行必须 `branchTo` 指回它。
+ */
+export function chapterGateAfter(id) {
+  const i = OBJECTIVES.findIndex((r) => r.id === id);
+  if (i < 0) return null;
+  const next = OBJECTIVES[i + 1];
+  return next?.type === 'chapter-gate' ? next : null;
+}
+
 // 条件函数表（引用 ObjectiveEngine.CONDITIONS）
 export const CONDITIONS = {
   checkAllFragments: (state) => state.stats.discoveries?.has('fantasy-ring')
@@ -539,6 +609,9 @@ export const FAIL_CONDITIONS = {
 /**
  * Boss 名册：`bossId` → 统计账本里那一格的名字。
  * 写账（击杀事件）与读账（判定）共用这一份，所以加一只 Boss 只改这里一次。
+ * "是不是 Boss 步"也只问这一份（`BOSS_STAT_KEYS[def.bossId]`）：曾经它是 `BOSS_TYPES`
+ * 那个类型名集合 —— 表里五只 Boss 写成 `boss` / `boss2` / `voidboss` / `chaosboss` 四种类型名，
+ * 于是名册要认类型、判据要认类型、显示层还要再抄一份类型名，三处都能各错各的。
  */
 export const BOSS_STAT_KEYS = {
   'shadow-warden': 'bossDefeated',
@@ -549,42 +622,18 @@ export const BOSS_STAT_KEYS = {
 };
 
 /**
- * Boss 那一族的类型名。`boss2` / `boss3` / `voidboss` / `chaosboss` 是主线表里的历史写法：
- * "是哪只 Boss"本来已经由 `bossId` 说了，类型里再编一次号就是第二个答案。
- * 这里留着它只为兼容在役表；新表（`OBJECTIVES`）一律写 `type: 'boss'` + `bossId`，
- * 等主线表迁完（切片3）这一格就可以删掉。
+ * 「摸一下锚点」那一族里带门控的那些格：门控就是行自己写的 `condition`。
+ * 挂了条件的 interact **不因摸了一下就算完成**（锚点第一步就摸过了，若"条件齐"直接判完成，
+ * 玩家会在拿到最后一片碎片的瞬间看到「任务完成：重铸锚点」而根本没再摸一次）；
+ * 推进它的是条件满足时的那一次交互（`conditionHolds`）。没有 `condition` 的 interact 摸过即算。
+ *
+ * 切片3 之前这里还认在役表抄本上的四个旗标写法（`requireAscension` 之类），并另抄一份
+ * 旗标 → 条件函数名的映射 —— 同一句话两种写法，而条件算式本来就只有 `CONDITIONS` 那一份。
+ * 在役表如今就是这张表的投影，所以那层兼容跟着抄本一起删掉。
  */
-export const BOSS_TYPES = new Set(['boss', 'boss2', 'boss3', 'voidboss', 'chaosboss']);
-
-/**
- * 「摸锚点」那四格的门控旗标：带着任何一条的 interact **不因摸了一下就算完成**，
- * 推进它的是条件满足时的那一次交互（`CONDITIONS` 里同名的那几条）。
- */
-export const INTERACT_GATES = ['requireAllFragments', 'requireAscension', 'requireTrueEnd', 'requireInfinity'];
-
-/**
- * 在役表把「条件齐了没有」写成旗标（`requireAscension` 这类），新表写成 `condition` 函数名。
- * 这是同一句话的两种写法，而条件**算式**只许有 `CONDITIONS` 那一份 ——
- * 曾经它在两边各写一遍并且差了一格（`checkAllDungeons` 少算第三只 Boss）。
- */
-export const GATE_CONDITIONS = {
-  requireAllFragments: 'checkAllFragments',
-  requireAscension: 'checkAllDungeons',
-  requireTrueEnd: 'checkTrueEnd',
-  requireInfinity: 'checkInfinity',
-};
-
-/** 这一格「摸锚点」是否挂了门控：挂了就不许"摸一下算完成"（两张表的两种写法都认） */
-export function hasInteractGate(def) {
-  if (!def || def.type !== 'interact') return false;
-  return INTERACT_GATES.some((k) => def[k]) || Boolean(def.condition);
-}
-
-/** 门控那一句由 `CONDITIONS` 里哪个函数说话；没挂门控返回 `null` */
 export function interactGateCondition(def) {
-  if (!hasInteractGate(def)) return null;
-  const flag = INTERACT_GATES.find((k) => def[k]);
-  return flag ? (GATE_CONDITIONS[flag] ?? null) : def.condition;
+  if (!def || def.type !== 'interact') return null;
+  return def.condition ?? null;
 }
 
 /**
@@ -715,10 +764,8 @@ export function objectiveDone(def, stats) {
   if (!def) return false;
   switch (def.type) {
     case 'interact':
-      // 门控那一格一律判未完成：锚点在第一步就摸过了，若"条件齐"就直接判完成，
-      // 玩家会在拿到最后一片碎片的瞬间看到「任务完成：重铸锚点」而根本没再摸一次。
-      // 推进它的是条件齐时的那一下交互（`interactGateCondition` + `conditionHolds`）
-      if (hasInteractGate(def)) return false;
+      // 门控那一格一律判未完成，理由见 `interactGateCondition`
+      if (interactGateCondition(def)) return false;
       return Boolean(stats.discoveries?.has(def.targetId));
     case 'hits': return stats.hits >= def.target;
     case 'kills': return (stats.kills?.[def.enemyType] ?? 0) >= def.target;
@@ -733,12 +780,11 @@ export function objectiveDone(def, stats) {
     case 'mind': return (stats.mind ?? 0) >= def.target;
     case 'dungeon-rerun': return Boolean(stats.dungeonRerun);
     case 'chapter-gate': return Boolean(def.autoComplete);
-    default:
-      if (BOSS_TYPES.has(def.type)) {
-        const key = BOSS_STAT_KEYS[def.bossId];
-        // 名册里没有的 bossId 一律判未完成：宁可卡住一步，也不把"某只 Boss 死了"算成另一只
-        return key ? Boolean(stats[key]) : false;
-      }
-      return false;
+    case 'boss': {
+      const key = BOSS_STAT_KEYS[def.bossId];
+      // 名册里没有的 bossId 一律判未完成：宁可卡住一步，也不把"某只 Boss 死了"算成另一只
+      return key ? Boolean(stats[key]) : false;
+    }
+    default: return false;
   }
 }
