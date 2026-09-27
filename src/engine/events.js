@@ -318,6 +318,41 @@ export const GAME_EVENTS = Object.freeze({
     payload: '（整体转发设置对象展开）',
     hook: '各系统在自己的面板动作里直接读 SettingsManager 生效，不需要事件驱动；这条给外部消费者预留，仓库内无监听点',
   },
+  'flag-changed': {
+    desc: 'ObjectiveEngine 标志变更。系统据此重新检查目标激活条件',
+    payload: '{ flag, value, old }',
+    hook: '派发方已结清三本账（标志、目标激活检查、章节门控）；这条给需要"标志变更时刻"的外部消费者预留，仓库内无监听点',
+  },
+  'objective-complete': {
+    desc: 'ObjectiveEngine 目标完成。包含目标定义与实例',
+    payload: '{ objective, instance }',
+    hook: '派发方已写入日志、发魂火、弹提示、触发章节门控；这条给外部统计/将来的成就系统预留，仓库内无监听点',
+  },
+  'objective-fail': {
+    desc: 'ObjectiveEngine 目标失败。包含目标定义、实例与原因',
+    payload: '{ objective, instance, reason }',
+    hook: '派发方已回滚/重启/分支；这条给外部统计预留，仓库内无监听点',
+  },
+  'objective-reset': {
+    desc: 'ObjectiveEngine 目标重置（回到可用态）',
+    payload: '{ objective, instance }',
+    hook: '派发方已清进度、清开始时间；这条给外部统计预留，仓库内无监听点',
+  },
+  'objective-restart': {
+    desc: 'ObjectiveEngine 目标重新开始（回到激活态）',
+    payload: '{ objective, instance }',
+    hook: '派发方已重设进度与时间；这条给外部统计预留，仓库内无监听点',
+  },
+  'objective-available': {
+    desc: 'ObjectiveEngine 目标变为可用（前置条件满足）',
+    payload: '{ objective, instance }',
+    hook: '派发方已检查前置标志与章节；这条给外部 UI 预留（如任务助手提前显示下一步），仓库内无监听点',
+  },
+  'objective-activate': {
+    desc: 'ObjectiveEngine 目标激活开始进行',
+    payload: '{ objective, instance }',
+    hook: '派发方已设置开始时间、记录访问次数；这条给外部统计/将来的计时 HUD 预留，仓库内无监听点',
+  },
   'game-saved': {
     desc: '存档写入成功，纯信号',
     payload: null,
