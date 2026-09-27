@@ -1295,6 +1295,18 @@ canvas {
 .skill-btn.owned { border-color: #c9a962; opacity: 0.6; }
 .skill-btn:disabled:not(.owned) { opacity: 0.4; cursor: not-allowed; }
 
+/* 装备页签（W-B5 切片4）：槽行是账，包是可点的一叠 —— 复用上面那套字号与圆角，不另立视觉语言 */
+.gear-slots { display: flex; flex-direction: column; gap: 6px; }
+.gear-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: rgba(255,255,255,0.04); border: 1px solid #333; border-radius: 4px; font-size: 0.8rem; }
+.gear-row .gear-slot-name { color: #c9a962; min-width: 44px; text-align: left; }
+.gear-row .gear-item { flex: 1; color: #ddd; text-align: left; }
+.gear-row .gear-item:empty, .gear-row .gear-item { min-height: 1em; }
+.gear-row-btn { padding: 4px 10px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: #ccc; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-family: inherit; }
+.gear-row-btn:hover:not(:disabled) { border-color: #c9a962; }
+.gear-row-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.gear-bag-count { color: #888; font-size: 0.75rem; font-weight: normal; }
+.gear-bag-empty { color: #888; font-size: 0.78rem; text-align: left; margin: 4px 0 0; }
+
 .overlay-panel {
   position: fixed;
   inset: 0;

@@ -112,9 +112,9 @@ const SECTIONS = mergeHelpSections([
 数值标黄 +N 表示该计数相对历史最低点净增 N；标红表示增幅超过容差——
 反复进出副本后「几何体 / 纹理 / 着色器 / 场景节点」应回落到原值，只增不减即泄漏。
 
-存档当前为 v5（crossrealm_save_v5）。{save} 存档 · {load} 读档 · {escape} 暂停菜单可导出/导入 JSON。
-旧的 v4 存档会在启动时显式迁移到 v5 并提示，原键保留一份以便回滚；
-解析不了的存档会转移到 crossrealm_save_v5:corrupt 并弹出说明，而不是静默丢失。`,
+存档当前为 v6（crossrealm_save_v6）。{save} 存档 · {load} 读档 · {escape} 暂停菜单可导出/导入 JSON。
+旧的 v4 / v5 存档会在启动时显式迁移到 v6 并提示，原键保留一份以便回滚；
+解析不了的存档会转移到 crossrealm_save_v6:corrupt 并弹出说明，而不是静默丢失。`,
   },
 ]);
 

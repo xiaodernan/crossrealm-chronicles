@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v6', version: 6 },
   { key: 'crossrealm_save_v5', version: 5 },
   { key: 'crossrealm_save_v4', version: 4 },
 ];
@@ -48,9 +49,22 @@ function migrateV4toV5(d) {
   return d;
 }
 
+/**
+ * v5 → v6
+ * - `stats.bag`：背包（W-B5 切片4）。v5 及更早的档没有包，这一跳补一个空包进去，
+ *   而不是让读档侧写 `?? []` —— 后者就是本文件开头禁止的"字段缺失就当默认值凑合读"，
+ *   它会让"迁移链漏跑一跳"与"这份档本来就没包"变得无法区分。
+ */
+function migrateV5toV6(d) {
+  const stats = (d.stats ??= {});
+  if (!Array.isArray(stats.bag)) stats.bag = [];
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
+  5: migrateV5toV6,
 };
 
 /**

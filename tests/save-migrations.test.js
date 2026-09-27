@@ -3,6 +3,7 @@ import { migrate, MIGRATIONS, SAVE_KEYS, SaveVersionError } from '../src/game/Sa
 import { SaveValidator, CURRENT_VERSION } from '../src/game/SaveValidator.js';
 import { SaveSystem } from '../src/game/SaveSystem.js';
 import v4 from '../tests/save_v4_fixture.json';
+import v5 from '../tests/save_v5_fixture.json';
 
 /** SaveSystem 通过 window 事件与 localStorage 落地，node 环境下补最小实现 */
 beforeAll(() => {
@@ -35,10 +36,23 @@ describe('存档迁移链', () => {
     for (let v = 1; v < CURRENT_VERSION; v++) expect(MIGRATIONS[v], `v${v}`).toBeTypeOf('function');
   });
 
-  it('v4 档能升到 v5 并通过校验', () => {
+  it('v4 档一路升到当前版本（v4 → v5 → v6）并通过校验', () => {
     const { data, from, applied } = migrate(clone(v4));
-    expect([from, applied]).toEqual([4, [4]]);
+    expect([from, applied]).toEqual([4, [4, 5]]);
     expect(data.version).toBe(CURRENT_VERSION);
+    expect(SaveValidator.validate(data)).toEqual([]);
+  });
+
+  it('v5 档只走 v6 那一跳：补出空的 stats.bag，其余字段一个都不动', () => {
+    const legacy = clone(v5);
+    const snapshot = clone(v5);
+    const { from, data, applied } = migrate(legacy);
+    expect([from, applied]).toEqual([5, [5]]);
+    expect(data.version).toBe(CURRENT_VERSION);
+    expect(data.stats.bag).toEqual([]);
+    // 迁移只该多出 bag 这一格：别处被顺手改写 = 这一跳在偷偷做别的事
+    const { bag: _newlyAdded, ...rest } = data.stats;
+    expect(rest).toEqual(snapshot.stats);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 
@@ -60,11 +74,11 @@ describe('存档迁移链', () => {
     const legacy = clone(v4);
     delete legacy.version;
     const { data, from, applied } = migrate(legacy);
-    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4]]);
+    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4, 5]]);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 
-  it('迁移幂等：v5 再走一次不改动任何字段', () => {
+  it('迁移幂等：升到当前版本后再走一次不改动任何字段', () => {
     const once = migrate(clone(v4)).data;
     const twice = migrate(clone(once));
     expect(twice.applied).toEqual([]);

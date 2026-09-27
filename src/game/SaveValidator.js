@@ -1,5 +1,5 @@
 /** 存档结构校验 — 版本号为 schema 的唯一权威，迁移链从这里取目标版本 */
-export const CURRENT_VERSION = 5;
+export const CURRENT_VERSION = 6;
 
 const VERSION = CURRENT_VERSION;
 
@@ -39,6 +39,10 @@ export class SaveValidator {
     }
     if (!data.stats || typeof data.stats !== 'object') {
       issues.push('缺少 stats 对象');
+    } else if (!Array.isArray(data.stats.bag)) {
+      // v6：背包入档（W-B5 切片4）。必填而不是"缺了当空包" —— 补齐由迁移链负责，
+      // 读档侧的 `?? []` 兜底正是本文件开头禁止的"字段缺失就当默认值凑合读"
+      issues.push('stats.bag 必须是数组');
     }
     // v5：这两项从"可选 + 读档侧兜底"升级为必填，兜底逻辑随之删除
     if (!data.spells || !Number.isFinite(data.spells.mana)) issues.push('spells.mana 必须是有限数');

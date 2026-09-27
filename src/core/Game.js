@@ -541,24 +541,37 @@ export class Game {
    * 其余问游戏键生效表。
    */
   /**
-   * 捡到一件装备：严格更好才换上，换下的那件当场折成灵魂，并把这一笔当场说出来（toast）。
+   * 捡到一件装备：严格更好就换上，其余进背包；换下的那件也进背包 —— 只有**包满**才折成魂。
    *
    * 判据与字样都不在这里现算 —— `pickupChoice` 与 `gearLabel` 在 `content/gear.js`，
    * 这里只负责"把它装到玩家身上并告诉玩家发生了什么"（W-A7 切片6/7 那条同一形状：
    * 显示、判定、真源各在一处）。
+   *
+   * 切片2 的处置是"换下的当场折魂"，那是在**没有包**时唯一说得出来的去处；切片4 的包在场，
+   * 折魂就成了一个玩家没得选的损失。改成"都进包"之后，包满那一格是显式兜底 —— 满了要说得出理由，
+   * 而不是东西凭空不见（`GEAR_BAG.capacity` 是表上的一格，不是这里写死的字面量）。
    */
   pickUpGear(instance) {
     const choice = pickupChoice(this.stats.gear, instance);
     if (choice.action === 'nothing') return null;
-    if (choice.action === 'dust') {
-      this.stats.addSouls(choice.souls);
-      this.dialog.toast(`拾取：${gearLabel(instance)} —— 不如身上的，折成 ${choice.souls} 魂`);
+    if (choice.action === 'equip') {
+      const replaced = this.stats.equip(choice.slot, instance);
+      if (replaced && this.stats.bagAdd(replaced)) {
+        this.dialog.toast(`换上：${gearLabel(instance)}（旧的 ${gearLabel(replaced)} 进了背包）`);
+      } else if (replaced) {
+        this.stats.addSouls(choice.souls);
+        this.dialog.toast(`换上：${gearLabel(instance)}（背包已满，旧的 ${gearLabel(replaced)} 折成 ${choice.souls} 魂）`);
+      } else {
+        this.dialog.toast(`穿上：${gearLabel(instance)}`);
+      }
       return choice;
     }
-    const replaced = this.stats.equip(choice.slot, instance);
-    this.dialog.toast(replaced
-      ? `换上：${gearLabel(instance)}（旧的 ${gearLabel(replaced)} 折成 ${choice.souls} 魂）`
-      : `穿上：${gearLabel(instance)}`);
+    if (this.stats.bagAdd(instance)) {
+      this.dialog.toast(`拾取：${gearLabel(instance)} —— 放进背包（${this.stats.bagCount}/${this.stats.bagCapacity}）`);
+      return choice;
+    }
+    this.stats.addSouls(choice.souls);
+    this.dialog.toast(`拾取：${gearLabel(instance)} —— 背包已满，折成 ${choice.souls} 魂`);
     return choice;
   }
 

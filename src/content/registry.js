@@ -39,9 +39,25 @@ import { SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { FRANCHISE } from './franchises.js';
 import {
-  GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES,
-  GEAR_DROP, GEAR_NAMES, GEAR_RARITY_DISPLAY, GEAR_POOLS, GEAR_POOL_DEFAULT, rarityRank,
+  GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES, GEAR_SLOT_NAMES,
+  GEAR_DROP, GEAR_NAMES, GEAR_RARITY_DISPLAY, GEAR_POOLS, GEAR_POOL_DEFAULT, GEAR_BAG, rarityRank,
 } from './gear.js';
+
+/**
+ * gearSlotNames 双向一致性（W-B5 切片4）。
+ * 必须在 CONTENT_TABLES 之前定义，因为 invariant 在数组字面量求值时就会被引用。
+ */
+export function checkGearSlotNames(table) {
+  const out = [];
+  const known = new Set(GEAR_SLOTS);
+  for (const id of Object.keys(table ?? {})) {
+    if (!known.has(id)) out.push(`gearSlotNames: "${id}" 不是任何槽位 id（没有这一格会永远不出现）`);
+  }
+  for (const id of known) {
+    if (!table?.[id]) out.push(`gearSlotNames: 缺 "${id}" 的中文名（界面上那一行会是空的）`);
+  }
+  return out;
+}
 
 /** `id` 字段的形状：小写字母开头，kebab-case。与 POI / 区域 id 同一把尺子 */
 export const ID_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
@@ -534,6 +550,22 @@ export const CONTENT_TABLES = [
       },
     },
     invariant: checkGearPools,
+  },
+  {
+    kind: 'gearSlotNames',
+    note: '槽位的中文名（W-B5 切片4）：与 `GEAR_SLOTS` **双向**对上（少一格 = 界面上那一行是空的，多一格 = 那个名字永远不出现）',
+    shape: 'index',
+    table: GEAR_SLOT_NAMES,
+    value: { t: 'string' },
+    invariant: checkGearSlotNames,
+  },
+  {
+    kind: 'gearBag',
+    note: '背包容量（W-B5 切片4）：键是旋钮名而不是 id（与 zoneIds 同一形状），值是格数 —— '
+      + '写成 0 或负数的表现是"永远捡不起来"，开机就该红',
+    shape: 'index',
+    table: GEAR_BAG,
+    value: { t: 'int', min: 1, max: 100 },
   },
 ];
 

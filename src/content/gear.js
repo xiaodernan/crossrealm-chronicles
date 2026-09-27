@@ -28,6 +28,13 @@
 export const GEAR_SLOTS = ['charm', 'sigil'];
 
 /**
+ * 槽位的中文名（W-B5 切片4）。切片1 只有账没有脸 —— 没有任何界面上说过这两个词，所以当时不写；
+ * 装备页签第一次要把槽显示给人看，名字才有了消费者（表里有而页面没有 / 页面上有而表里没有，
+ * 注册表那条**双向** invariant 两头都盯）。
+ */
+export const GEAR_SLOT_NAMES = { charm: '护符', sigil: '印记' };
+
+/**
  * 装备能改的属性点，只许是这五个。
  *
  * 为什么不是"随便什么键"：这五个各自有一个真消费者 —— `vigor → maxHp`、`endurance → maxStamina`、
@@ -240,6 +247,18 @@ export const poolForZone = (zoneId) => GEAR_POOLS[zoneId] ?? GEAR_POOLS[GEAR_POO
 export const dropChance = (kind) => GEAR_DROP.byKind[kind] ?? GEAR_DROP.byKind.none;
 export const soulValue = (rarityId) => GEAR_DROP.soulValue[rarityId] ?? 0;
 
+/**
+ * 背包容量（W-B5 切片4）。写成**显式一格**而不是"数组多长算多长"：包满时必须有一条说得出来的
+ * 路（折成魂并把理由写进提示），否则"新加一条规则忘了管满"的表现就是物品凭空消失，或者永远捡不起来。
+ *
+ * 为什么 20：六区域 × 十六件基表，一次探索掉三五件，20 格够存一整趟而不必在半路回营火；
+ * 这个数没有真人读数支撑，所以它只是一格能拧的表，不是一个写死在判断里的字面量。
+ */
+export const GEAR_BAG = { capacity: 20 };
+
+/** 包满没有？分岔只在这一处：能装就进包，装不下才折魂（`Game.pickUpGear` 与面板卸下都问它） */
+export const bagIsFull = (bag) => !Array.isArray(bag) || bag.length >= GEAR_BAG.capacity;
+
 /** 一件"多重"= 它给的点数总和。判据只定义在这里：别处再造一个"装备战力"就是第二份算式 */
 export function gearScore(instance) {
   const mods = gearMods(instance);
@@ -248,11 +267,10 @@ export function gearScore(instance) {
 }
 
 /**
- * 捡到一件之后的那条分岔：严格更好才换上，换下的那件当场折成灵魂。
+ * 捡到一件之后的那条分岔：严格更好才换上，其余（含相等）不换。
  *
- * 为什么这一片不做包：包要先回答"装得下几件、怎么排序、卸下后留在哪"，那三件事都属于面板那一片
- * （切片3）；先做包再做拾取，中间就有一段"捡了但看不见"。折成魂是**当场可说明**的处置 ——
- * 提示里那句"旧的 X 折成 N 魂"就是它的收据，不会有一件东西凭空消失。
+ * 这一片只回答"要不要往身上套"，**不回答"不套的那件去哪"** —— 去哪是切片4 的包的事：
+ * `Game.pickUpGear` 拿到 `dust` 之后先试着塞进背包，塞不下才折成魂（两条路都当场说清楚）。
  * 相等不换：把玩家刚穿的那件拆掉换一枚一样的，只多一条提示，没有收益。
  */
 export function pickupChoice(current, incoming) {

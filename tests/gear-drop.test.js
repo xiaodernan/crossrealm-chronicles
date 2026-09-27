@@ -288,11 +288,15 @@ describe('静态门禁', () => {
     expect(hits(/\.pickUpGear\s*\(/).length, 'pickUpGear 的调用点必须只有一个（就是拾取那一路）').toBe(1);
   });
 
-  it('判据与字样只在 Game 那一处拼进提示：别处再算一份"更好"就是第二份真相', () => {
-    for (const [re, name] of [[/pickupChoice\s*\(/g, 'pickupChoice'], [/gearLabel\s*\(/g, 'gearLabel']]) {
-      const files = [...new Set(hits(re).map((h) => h.split(':')[0]))];
-      expect(files.sort(), `${name} 出现在 ${files.join(' / ')}`).toEqual(['content/gear.js', 'core/Game.js']);
-    }
+  it('判据只在 Game 那一处：别处再算一份"更好"就是第二份真相', () => {
+    const files = [...new Set(hits(/pickupChoice\s*\(/g).map((h) => h.split(':')[0]))];
+    expect(files.sort(), `pickupChoice 出现在 ${files.join(' / ')}`).toEqual(['content/gear.js', 'core/Game.js']);
+  });
+
+  it('字样只有两处拼给人看：Game 的拾取提示与装备页签的穿卸行，别处手拼一行字就是第二份显示', () => {
+    const files = [...new Set(hits(/gearLabel\s*\(/g).map((h) => h.split(':')[0]))];
+    expect(files.sort(), `gearLabel 出现在 ${files.join(' / ')}`)
+      .toEqual(['content/gear.js', 'core/Game.js', 'ui/UpgradePanel.js']);
   });
 
   it('稀有度颜色只有一个来源：读 GEAR_RARITY_DISPLAY 的只有表自己、注册表与掉落层，而掉落层没再手抄一枚档位色', () => {

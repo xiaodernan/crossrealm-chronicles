@@ -1,4 +1,5 @@
 import { WEAPON_SKILLS } from '../game/WeaponSkillTree.js';
+import { GEAR_SLOTS, GEAR_SLOT_NAMES, gearLabel } from '../content/gear.js';
 import { focusFirstItem } from './FocusNav.js';
 
 export class UpgradePanel {
@@ -11,6 +12,7 @@ export class UpgradePanel {
     document.getElementById('tab-stats')?.addEventListener('click', () => { this.skillTab = 'stats'; this.refresh(); });
     document.getElementById('tab-skills')?.addEventListener('click', () => { this.skillTab = 'skills'; this.refresh(); });
     document.getElementById('tab-lore')?.addEventListener('click', () => { this.skillTab = 'lore'; this.refresh(); });
+    document.getElementById('tab-gear')?.addEventListener('click', () => { this.skillTab = 'gear'; this.refresh(); });
     this.panel?.querySelectorAll('[data-stat]').forEach((btn) => {
       btn.addEventListener('click', () => this.upgrade(btn.dataset.stat));
     });
@@ -51,6 +53,11 @@ export class UpgradePanel {
     document.getElementById('upgrade-stats-section')?.classList.toggle('hidden', this.skillTab !== 'stats');
     document.getElementById('upgrade-skills-section')?.classList.toggle('hidden', this.skillTab !== 'skills');
     document.getElementById('upgrade-lore-section')?.classList.toggle('hidden', this.skillTab !== 'lore');
+    document.getElementById('upgrade-gear-section')?.classList.toggle('hidden', this.skillTab !== 'gear');
+
+    if (this.skillTab === 'gear') {
+      this.renderGear();
+    }
 
     if (this.skillTab === 'skills' && ws) {
       this.renderSkills('sword-skills', 'sword', ws);
@@ -59,6 +66,58 @@ export class UpgradePanel {
     if (this.skillTab === 'lore' && ws) {
       this.renderLore(ws);
     }
+  }
+
+  /**
+   * 装备页签：两行槽 + 一格背包（W-B5 切片4）。
+   *
+   * 这一层只负责"把账显示出来、把一次点击翻译成一次调用"：能不能卸、卸下来去哪、穿上之后换下谁，
+   * 全在 `PlayerStats.storeFromSlot` / `wearFromBag` 里 —— 面板不许自己摆弄 `stats.bag`
+   * （静态门禁扫的就是这一条：第二本包账就是 B36 那一族，抄一遍就会与账本分家）。
+   *
+   * 显示也只问 `gearLabel`：槽名问 `GEAR_SLOT_NAMES`、件名问 `gearLabel`、格数问 `bagCapacity`，
+   * 这一层不出现任何一个能被当成数据的字面量。
+   */
+  renderGear() {
+    const s = this.game.stats;
+    const slotsEl = document.getElementById('gear-slots');
+    const bagEl = document.getElementById('gear-bag');
+    const countEl = document.getElementById('gear-bag-count');
+    if (!slotsEl || !bagEl) return;
+    if (countEl) countEl.textContent = `${s.bagCount}/${s.bagCapacity}`;
+    slotsEl.innerHTML = GEAR_SLOTS.map((slot) => {
+      const inst = s.gear[slot];
+      return `<div class="gear-row">
+        <span class="gear-slot-name">${GEAR_SLOT_NAMES[slot] ?? slot}</span>
+        <span class="gear-item">${inst ? gearLabel(inst) : '（空）'}</span>
+        ${inst ? `<button type="button" class="gear-row-btn" data-store="${slot}"${s.bagFull ? ' disabled' : ''}>${s.bagFull ? '背包已满' : '卸下'}</button>` : ''}
+      </div>`;
+    }).join('');
+    slotsEl.querySelectorAll('[data-store]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const previous = s.storeFromSlot(btn.dataset.store);
+        if (!previous) {
+          this.game.dialog.toast('背包已满，卸不下来');
+          return;
+        }
+        this.game.dialog.toast(`卸下：${gearLabel(previous)} —— 放进背包（${s.bagCount}/${s.bagCapacity}）`);
+        this.refresh();
+      });
+    });
+    bagEl.innerHTML = s.bag.length
+      ? s.bag.map((inst, i) => `<button type="button" class="skill-btn" data-wear="${i}">${gearLabel(inst)}<br><span>穿上这一件</span></button>`).join('')
+      : '<p class="gear-bag-empty">背包是空的 —— 捡到不穿的装备会先放在这里。</p>';
+    bagEl.querySelectorAll('[data-wear]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const worn = s.wearFromBag(Number(btn.dataset.wear));
+        if (worn) {
+          this.game.dialog.toast(worn.replaced
+            ? `换上：${gearLabel(worn.instance)}（旧的 ${gearLabel(worn.replaced)} 回到背包）`
+            : `穿上：${gearLabel(worn.instance)}`);
+        }
+        this.refresh();
+      });
+    });
   }
 
   renderSkills(containerId, branch, ws) {

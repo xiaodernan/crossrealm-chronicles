@@ -1,5 +1,5 @@
-/** RPG 成长：位面之魂、属性、等级、装备（W-B5 切片1） */
-import { GEAR_SLOTS, gearMods, isGearInstance } from '../content/gear.js';
+/** RPG 成长：位面之魂、属性、等级、装备与背包（W-B5 切片1 + 切片4） */
+import { GEAR_SLOTS, GEAR_BAG, bagIsFull, baseOf, gearMods, isGearInstance } from '../content/gear.js';
 
 /** 出身点：升级与装备都在这一份之上加，所以它是"玩家还没升级也没穿装备时"的那一档 */
 const BASE_STATS = { vigor: 1, endurance: 1, strength: 1, arcane: 1, mind: 0 };
@@ -12,6 +12,8 @@ export class PlayerStats {
     this.baseStats = { ...BASE_STATS };
     /** 一件装备 = `{ base, rarity, affixes }`；空槽是 null。账本只有这一格 */
     this.gear = Object.fromEntries(GEAR_SLOTS.map((slot) => [slot, null]));
+    /** 换下 / 捡到而不穿的装备落在这里（切片4）。容量是 `GEAR_BAG.capacity`，判满只有 `bagIsFull` 一处 */
+    this.bag = [];
     this._bonus = {};                            // 装备那几点的缓存，见 `gearBonus`
     this.totalKills = 0;
     this.chestsOpened = new Set();
@@ -95,6 +97,62 @@ export class PlayerStats {
   }
 
   /**
+   * 放一件进背包。满了返回 `false`（**不静默丢弃**，也不扩容）——
+   * 谁拿到 `false` 谁就要说出处置（拾取那条路折成魂、面板卸下那条路原样不动）。
+   */
+  bagAdd(instance) {
+    if (!isGearInstance(instance)) return false;
+    if (bagIsFull(this.bag)) return false;
+    this.bag.push(cloneInstance(instance));
+    return true;
+  }
+
+  /** 取出第几格（0 起）。下标越界 / 那一格是空的返回 null，不抛 */
+  bagTake(index) {
+    if (!Number.isInteger(index) || index < 0 || index >= this.bag.length) return null;
+    const [taken] = this.bag.splice(index, 1);
+    return taken ?? null;
+  }
+
+  /** 包里有几件（面板显示 `N / capacity` 与"满没满"读的是同一个数） */
+  get bagCount() { return this.bag.length; }
+
+  /** 包里最多能有几格（面板那句 `N / 20` 读的就是它，不许在 UI 里再抄一个 20） */
+  get bagCapacity() { return GEAR_BAG.capacity; }
+
+  get bagFull() { return bagIsFull(this.bag); }
+
+  /**
+   * 把包里第几格穿到它自己那个槽上，被换下的那件回到刚腾出来的那一格。
+   *
+   * 先取后穿的次序是**有意的**：取出必然腾出一个格子，所以回填换下的那件时 `bagAdd` 不可能因为
+   * 满而失败 —— 不存在"穿上了但旧的没地方去"的中间态。
+   * 返回 `{ slot, instance, replaced }`，那一格是空的返回 `false`。
+   */
+  wearFromBag(index) {
+    const inst = this.bagTake(index);
+    if (!inst) return false;
+    const slot = baseOf(inst.base).slot;
+    const replaced = this.equip(slot, inst);
+    if (replaced) this.bagAdd(replaced);
+    return { slot, instance: inst, replaced };
+  }
+
+  /**
+   * 卸下某槽进背包。包满返回 `false` 且**身上那件原样还在**（先看满不满，再动账），
+   * 所以玩家永远不会因为"想腾个格子"而丢掉穿着的装备。
+   */
+  storeFromSlot(slot) {
+    if (!GEAR_SLOTS.includes(slot)) {
+      throw new Error(`未知的装备槽 "${slot}"（可用：${GEAR_SLOTS.join(' / ')}）`);
+    }
+    if (bagIsFull(this.bag)) return false;
+    const previous = this.unequip(slot);
+    if (previous) this.bagAdd(previous);
+    return previous;
+  }
+
+  /**
    * 谁读这些数，就在这里登记一次（`Game.setup` 调一次）。
    *
    * 为什么不是"调用方记得推"：升级那一步今天就是手抄了 `applyToCombat` + `syncMana` 两句，
@@ -147,6 +205,7 @@ export class PlayerStats {
       mind: this.baseStats.mind,
       gear: Object.fromEntries(GEAR_SLOTS.map((slot) => [slot,
         this.gear[slot] ? cloneInstance(this.gear[slot]) : null])),
+      bag: this.bag.map(cloneInstance),
       totalKills: this.totalKills,
       chests: [...this.chestsOpened],
     };
@@ -167,6 +226,10 @@ export class PlayerStats {
       const raw = data.gear?.[slot];
       this.gear[slot] = isGearInstance(raw) ? cloneInstance(raw) : null;
     }
+    // 包同一条纪律：手写存档里混进来的坏件只丢它自己，合法的那几件一件不丢
+    // （不按容量截断 —— 容量只挡**新增**，玩家已经赚到的东西不在这里凭空消失）
+    this.bag = (Array.isArray(data.bag) ? data.bag : [])
+      .filter(isGearInstance).map(cloneInstance);
     this._rebuildBonus();
     this.chestsOpened = new Set(data.chests ?? []);
   }
