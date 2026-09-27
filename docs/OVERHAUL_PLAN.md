@@ -474,6 +474,15 @@ M0 ─→ M1 ─→ M2 ─→ M3 ─→ M4 ─┬─→ M5 ─→ M6
 ---
 
 ## 变更记录
+- 2026-09-27 **W-B5 切片1：装备的数据层与唯一总账（地基片，玩家侧暂无增量）**（提交 `e17e754` + `253baf0` + `ab9c0e8`）：
+  - 为什么：§1.2 的 B1「没有装备系统」是"前 1 小时"最靠上的未消项，而 W-B5 是 L —— 一上来同做掉落/拾取/面板会同时决定四件没有对照的事。这片只做**账**：装备是什么、谁换算成数值、谁推给消费者。判据是 `PlayerStats` 早已把 maxHp / maxStamina / damageMult / skillMult 写成派生 getter，`SpellSystem.syncMana` 读的也是同一批点数，所以装备**加属性点**而不是另开 `gearDamageMult` —— 开第二条链就是"最终伤害有两处生产者、相乘顺序没裁判"（B36 那一族）。
+  - 交付：① `content/gear.js`（两槽 / 四档稀有度 / 八件基表 / 八条词缀 + `rollGear(rng)` / `gearMods` / `isGearInstance`，今天不列没人读的显示名与颜色）；② 三张表进 `CONTENT_TABLES`，整表规则走 `invariant`（槽位覆盖、`mods` 的键必须在 `GEAR_STATS`、每档要的条数够得到）；③ `PlayerStats`：属性名是"出身点 + 装备"的**读数**，写的一侧与存盘只碰出身点（存读数就会在读档时把装备算两遍）；④ 推送收成 `pushToConsumers` 一处（改前面板手抄 `applyToCombat` + `syncMana`、读档自己调、cheat 自己发事件）。
+  - 两条自己挖的坑都靠量才发现：① 我原先写"读档只推战斗所以蓝条是旧档" —— 把那一行换回旧的一句再跑，`maxMana` 改前改后都是 114 逐字相同（`SpellSystem.update` 每帧自己 `syncMana`），注释与文案按测量改回：收成一处是**工程账**，不是玩家可见的修复；② `gearMods` 折进 getter 之后每帧的 `syncMana` 会新建两份对象（正是 M4 那两条零分配门禁的形状）—— 改成只在穿 / 卸 / 读档时重算并留缓存，用例两头验（连续 50 次读拿到同一份表；改缓存能改读数）。
+  - 门禁：新增 `tests/gear-model.test.js` **65 例**，全套 **1387 → 1452 例 / 67 → 68 文件** 绿、lint 0/10 持平、build 无 circular chunk；`save-migrations` 的假 game 桩补 `pushToConsumers`（桩少一层，生产路径就红）。
+  - 变异 **24/24 按预测变红**（控制组 153 例；内存存原始字节 + 还原逐 sha256，**不碰 git**）。**首轮 20/21，M12 是真洞**：拒绝侧只验了 `gearBases` 的 weight 下限，另外两张表的下限被摘掉时全套仍绿 —— **一张表验过 ≠ 三张表都验过**，补一条逐表循环的拒绝用例后 M12 / M22 / M23 各红。
+  - 真浏览器读数 G0–G4（headless Chrome + 原生 CDP，5299 口；除既有的 `favicon.ico` 404 外 0 条页面异常）：G1 出厂读数逐字 `[118, 108, 1.08, 1.12]`；G2 `stats.equip('charm', ash-charm/rare/arcane-lens+clear-mind)` 同一帧 `combat.maxHp` 118→136、`spells.maxMana` 92→114，而 `baseStats.vigor` 与 `toJSON().vigor` 都还是 1；G3 生产 `SaveSystem.save` → 刷新 → `load`：`crossrealm_save_v5` 里 `stats.gear.charm` 是那件、`stats.vigor` 是 1，读回来 出身 1 / 读数 2 / maxHp 136 / maxMana 114 与穿上当场逐字一致（没有算两遍）；G4 卸装把那件原样交回，读数与血条逐字回出厂。
+  - 放弃了什么：不给装备单开乘数链；不写没人读的显示名字段；不做背包 UI 也不给穿上/脱下按钮（等掉落那片带来消费者，提前给入口就是切片25 那条"点了不生效"）；不动出厂权重数值；不给 stats 加响应式。
+  - 留了什么尾巴（W-B5 切片2+）：① 掉落与拾取（`LootSystem` 现在只发灵魂且 `Math.random()` 自己写，rng 注入 + 稀有度颜色 / 名字第一次有消费者就在这里）；② 什么敌人掉哪一档 —— 今天没有这张表；③ 换下的那件去哪（进包 / 原地留）要先定，营火那一格是面板的天然宿主；④ `WeaponSystem` 自己那条 `skillMult` / `weaponMeleeMult` 链与装备谁做主人；⑤ "更好"的判据还没有名字，比较必须落在 `gearMods` 那份点数上，不许再造一个"装备战力"。
 - 2026-09-27 **W-A7 切片32：扳机那一根旋钮拆成 LT / RT 两档（收切片22 / 切片30 挂的那条尾巴）**（提交 `8d51b74`）：
   - 为什么：切片22 那一格 `pressThreshold` 同时管两枚扳机，而切片30 之后这两枚按钮干的不是同一件事 —— RT 是重击（`edge`，要"一碰就走"），LT 是蓄力法术（`level`，**推多深**决定起不起手）。共用一格就得取折中：拧浅了压着扳机走路顺手起手蓄力，拧深了重击按不动。改前读数把这句变成数字：单档 0.7 时 0.35 那一推 `spell:0 / heavy:0`（两枚都哑），单档 0.3 时同一推 `spell:1 / heavy:1`（两枚都响）；拆格之后 `LT 0.7 / RT 0.3` 下是 `heavy:1 / spell:0`，反手是 `spell:1 / heavy:0`。
   - 交付：① 两格新手感档 `leftTriggerDepth` / `rightTriggerDepth`（出厂同为 0.5 —— 没拧过的玩家手感一字未变，`0.5 × 0.7 = 0.35` 那条迟滞锚点原样保留；`triggerReleaseFactor` 仍只有一份、各跟各的档）；② 一处判据 `padPressDepth(tuning, index)`，桥四个 `_pressed` 调用点各问自己那枚，数字键那十四枚仍吃 `PAD.pressThreshold`（删它就是 `undefined` 参与比较，表现是"扳机按不动"）；③ 老档迁移住在 `padTuning()`：那一格老数若自己仍合法就垫给**没被拧过**的新家，玩家拧过的新格赢；壳页两根滑杆，范围与步长照旧只在 `PAD_TUNING`。
