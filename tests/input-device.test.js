@@ -81,54 +81,13 @@ describe('InputDevice：只记"最近被按动的一侧"', () => {
     d.reset();
     expect(d.current()).toBe(null);
   });
-});
 
-/**
- * 变化广播（W-A7 切片33）：提示文案要知道"这一手换人了"。
- *
- * 订阅挂在这本账上（而不是让键 / 鼠标 / 手柄三个通知点各自再喊一声）：那三处今天都只调
- * `note()`，各喊一声就等于"这一下算谁"多出三个说法 —— 切片29 挡掉的正是这个。
- */
-describe('InputDevice 的变化广播：只在真的变了那一次喊', () => {
-  it('换侧喊一次、同一侧重复注记不吵、`reset` 也算一次变化', () => {
-    const d = new InputDevice();
-    const heard = [];
-    d.onChange((kind) => heard.push(kind));
-    d.note('keyboard');
-    d.note('keyboard');
-    d.note('gamepad');
-    d.reset();
-    d.reset();
-    expect(heard).toEqual(['keyboard', 'gamepad', null]);
-  });
-
-  it('订阅者收到的是**变过之后**的那一侧，与 `current()` 一致', () => {
-    const d = new InputDevice();
-    let seen = 'x';
-    d.onChange(() => { seen = d.current(); });
-    d.note('mouse');
-    expect(seen).toBe('mouse');
-  });
-
-  it('拼错那一侧要抛，而抛错那次既不换侧也不广播', () => {
-    const d = new InputDevice();
-    const heard = [];
-    d.note('keyboard');
-    d.onChange((kind) => heard.push(kind));
-    expect(() => d.note('Keybaord')).toThrow(/未知的输入侧/);
-    expect(heard).toEqual([]);
-    expect(d.current()).toBe('keyboard');
-  });
-
-  it('退订函数是唯一出口：摘掉之后不再收；传进来的不是函数当场抛', () => {
-    const d = new InputDevice();
-    const heard = [];
-    const off = d.onChange((kind) => heard.push(kind));
-    d.note('keyboard');
-    off();
-    d.note('mouse');
-    expect(heard).toEqual(['keyboard']);
-    expect(() => d.onChange('不是函数')).toThrow(/要一个函数/);
+  /**
+   * 这本账只记不广播（W-A7 切片33）：换手的通知点已经有 `HUD.updateInputDevice()` 那一处
+   * （它每帧比对指示器那一格），再长一条订阅就是"这一下算谁"的第二个说法 —— 切片29 的立片理由。
+   */
+  it('不提供订阅：这本账没有 `onChange`，也没有订阅者名单', () => {
+    expect(read('engine/InputDevice.js')).not.toMatch(/onChange|_listeners/);
   });
 });
 
@@ -214,9 +173,17 @@ describe('接线：注记只挂在既有监听器上，文案只问模块', () =
     expect(hud).not.toMatch(/['"]键盘['"]|['"]鼠标['"]|['"]手柄['"]/);
   });
 
-  it('这本账的转述只有一处：`Game` 把变化交给提示出口，别处不许再记第二份（切片33）', () => {
-    expect((game.match(/setHintDevice\(/g) ?? []), '设备变化要喂给提示出口，且只有这一处').toHaveLength(1);
-    expect(game).toMatch(/this\.inputDevice\.onChange\(\(kind\) => setHintDevice\(kind\)\)/);
+  it('这本账的转述只有一处：`HUD` 在重算键名之前把当前那一侧喂给提示出口（切片33）', () => {
+    // 换手本来就已经被 HUD 盯着了（指示器那一格），所以提示出口不新增订阅 —— 写进设备的
+    // 那一句只许有一处，而且要和"重算声明式那批"在同一条路上（构造时 / 改绑时也走它）。
+    expect((hud.match(/setHintDevice\(/g) ?? []), '换手要喂给提示出口，且只有这一处').toHaveLength(1);
+    const body = /refreshKeyHints\(\) \{([\s\S]*?)\n {2}\}/.exec(hud)?.[1] ?? '';
+    expect(body, 'HUD 里找不到 refreshKeyHints 的方法体（门禁自己坏了）').toContain('refreshKeyText(document);');
+    expect(body, '换手那一句要和重算写在同一个方法里')
+      .toContain('setHintDevice(this.game.inputDevice?.current() ?? null);');
+    // `Game` 那一侧不许再转述一次（订阅已经拆了）：多一条就是"这一下算谁"多一个说法
+    expect(game, 'Game 重新订阅了这本账').not.toMatch(/inputDevice\.onChange/);
+    expect(game, '设备变化只许在 HUD 那一处喂给出口').not.toMatch(/setHintDevice\(/);
     // 提示出口自己不许去读 `navigator.getGamepads()`：读手柄只有桥那一处（切片1 的立片理由）
     expect(read('content/keyHints.js')).not.toMatch(/getGamepads/);
   });

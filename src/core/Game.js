@@ -116,7 +116,7 @@ import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
   factoryGamepadBindings, padOutletsFor, setKeybindTable,
 } from '../content/keybinds.js';
-import { setHintDevice, setHintPadOutlets } from '../content/keyHints.js';
+import { setHintPadOutlets } from '../content/keyHints.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
 import { InputDevice } from '../engine/InputDevice.js';
 import { topNavLayer } from '../ui/OverlayStack.js';
@@ -129,10 +129,9 @@ export class Game {
     this.keys = {};
     /** 最近一次被按动的是哪一侧输入（切片29）：判断只在 `InputDevice` 里，谁都不另记一份 */
     this.inputDevice = new InputDevice();
-    // 提示文案跟着"这一手是哪套输入"改口（切片33）。设备这本账仍只有 `InputDevice` 一处：
-    // 这里只是把它的**变化**转给提示出口，三个通知点（键 / 鼠标 / 手柄）不必各自再喊一声
-    // —— 那就是"这一下算谁"多出三个说法，正是切片29 挡掉的那种写法。
-    this.inputDevice.onChange((kind) => setHintDevice(kind));
+    // 提示文案跟着"这一手是哪套输入"改口（切片33）。设备这本账仍只有 `InputDevice` 一处，
+    // 换手的通知也仍然只有 `HUD.updateInputDevice()` 那一处（它每帧比对指示器那一格，
+    // 变了就在重算键名之前把这一侧写进出口）—— 这里既不订阅也不另记，只把"手柄表怎么问"交出去。
     this.pointerLocked = false;
     this.timeOfDay = 0.35;
     this.container = container;

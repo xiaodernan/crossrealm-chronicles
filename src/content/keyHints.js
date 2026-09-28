@@ -14,7 +14,6 @@
 import { bindingFor, keybindEpoch, padCellSource } from './keybinds.js';
 import { hotkeyCodeFor, hotkeyEpoch } from './hotkeys.js';
 import { keyLabel, mouseLabel, padSourceLabel } from './keyLabels.js';
-import { INPUT_DEVICE_KINDS } from '../engine/InputDevice.js';
 
 /**
  * 提示文案要说"哪只手"（W-A7 切片33）。
@@ -24,20 +23,34 @@ import { INPUT_DEVICE_KINDS } from '../engine/InputDevice.js';
  * 把它接到提示出口上 —— 纯手柄玩家的提示改说"右摇杆按下"。
  *
  * 三条形状：
- * - 状态仍只住在 `InputDevice` 里，这里收的是 `Game` 转来的一份**读数**（不另记账）；
+ * - 状态仍只住在 `InputDevice` 里，这里收的是一份**读数**（不另记账，也不订阅 ——
+ *   换手这件事本来就已经被 `HUD.updateInputDevice()` 每帧盯着了）；
  * - 出口由 `Game` 注入（生效手柄表在它手里），没接线时退回键盘那一套；
  * - 只有**手柄侧真有出口**的动作才改口。没有出口的动作照旧说键盘键名 ——
  *   手柄玩家未必没有键盘，而"什么都不说"比"说一个别的"更糟。
+ *
+ * 名单为什么不 import 引擎那一份（`engine/InputDevice.js` 的 `INPUT_DEVICE_KINDS`）：`content/`
+ * 是地基层，`tests/content-registry.test.js` 钉着"content/ 里没有一处 import 指向 content/ 之外"，
+ * 而这份名单是**显示侧**的事（它只决定提示改不改口），和引擎那本账不是同一条依赖方向。
+ *
+ * 抄一份名单等于自己开了一个分家的口子，所以这个口子由用例焊死：`tests/key-hint.test.js`
+ * 把引擎那份名单逐个喂给 `setHintDevice` —— 任一侧改名而另一侧没跟上，当场红。
  */
+const HINT_DEVICE_KINDS = ['keyboard', 'mouse', 'gamepad'];
+
 let HINT_DEVICE = null;
 
 /** 一个动作在生效手柄表里的全部出口 → 给 `keyHint` 用；由 `Game` 注入 */
 let HINT_PAD_OUTLETS = null;
 
-/** 记下"现在这一手是哪套输入"。名字拼错要抛 —— 拼错的后果是永远退回键盘那一套（静默） */
+/**
+ * 记下"现在这一手是哪套输入"；由 `HUD.refreshKeyHints()` 在重算键名之前同步（切片33）。
+ *
+ * 名字拼错要抛 —— 拼错的后果是永远退回键盘那一套，而屏幕上没有任何一处看起来是错的。
+ */
 export function setHintDevice(kind) {
-  if (kind !== null && !INPUT_DEVICE_KINDS.includes(kind)) {
-    throw new Error(`未知的输入侧 "${kind}"：名单只有 ${INPUT_DEVICE_KINDS.join(' / ')}`);
+  if (kind !== null && !HINT_DEVICE_KINDS.includes(kind)) {
+    throw new Error(`未知的输入侧 "${kind}"：名单只有 ${HINT_DEVICE_KINDS.join(' / ')}`);
   }
   HINT_DEVICE = kind;
   return HINT_DEVICE;

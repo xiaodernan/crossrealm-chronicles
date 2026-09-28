@@ -21,6 +21,7 @@ import {
   hintDevice, keyHint, keyStamp, keyText, keyTextCacheSize, refreshKeyText,
   setHintDevice, setHintPadOutlets,
 } from '../src/content/keyHints.js';
+import { INPUT_DEVICE_KINDS } from '../src/engine/InputDevice.js';
 import { scheduler } from '../src/engine/Scheduler.js';
 import { Tutorial } from '../src/ui/Tutorial.js';
 import { ContextualTutorial } from '../src/ui/ContextualTutorial.js';
@@ -249,6 +250,15 @@ describe('这一手是哪套输入：手柄玩家的提示改说手柄那一格'
     expect(hintDevice()).toBe(null);
   });
 
+  /**
+   * 名单在两边各有一份（`content/` 不许向上 import，所以 `keyHints.js` 抄了一份），
+   * 分家的口子由这一条焊住：引擎那边加一侧而这里没跟上，提示会静默退回键盘那一套。
+   */
+  it('引擎那份名单逐个喂得进来（两边各一份，靠用例对齐）', () => {
+    for (const kind of INPUT_DEVICE_KINDS) expect(setHintDevice(kind), kind).toBe(kind);
+    expect(() => setHintDevice(null)).not.toThrow();
+  });
+
   it('手柄侧：`interact` 说右摇杆按下（切片31 补的那一格）', () => {
     wire();
     setHintDevice('gamepad');
@@ -331,5 +341,51 @@ describe('这一手是哪套输入：手柄玩家的提示改说手柄那一格'
     expect(padCellSource(null)).toBe(null);
     expect(padSourceLabel({ kind: '摇杆' })).toBe(null);
     expect(padSourceLabel(null)).toBe(null);
+  });
+
+  /**
+   * 唯一转述点的**行为侧**（切片34）。
+   *
+   * 上面那几条都是直接调 `setHintDevice`，而生产里没有人这样调它 —— 真正喂它的是
+   * `HUD.refreshKeyHints()`。只测模块就是在测我自己的写法：把 `HUD` 里那一句删掉，
+   * 模块用例照常全绿，玩家屏幕上却永远写着键盘键名（`tests/input-device.test.js` 那条
+   * 静态扫描会红，但静态红只说"字形没了"，说不出"玩家看到什么"）。
+   *
+   * 所以这里跑**真方法 + 真设备账**，格子用假 DOM 记账：`refreshKeyHints()` 是
+   * "先同步出口、再重算声明式那批"，两件事的顺序反过来就得到"出口是新手、格子是旧键名"。
+   */
+  it('走真 `HUD.refreshKeyHints()`：出口跟着换手，声明式那批格子也当场按新手改口', async () => {
+    const { HUD } = await import('../src/ui/HUD.js');
+    const { InputDevice } = await import('../src/engine/InputDevice.js');
+    wire();
+    const cell = { dataset: { keys: 'interact' }, textContent: '' };
+    const prevDoc = globalThis.document;
+    globalThis.document = {
+      getElementById: () => null,
+      querySelectorAll: (sel) => (sel === '[data-keys]' ? [cell] : []),
+    };
+    const d = new InputDevice();
+    const hud = { game: { inputDevice: d } };
+    try {
+      refreshKeyText(globalThis.document);
+      expect(cell.textContent, '还没动过：格子说键盘那一套').toBe('E');
+
+      d.note('gamepad');
+      HUD.prototype.refreshKeyHints.call(hud);
+      expect(hintDevice(), '换手要写进出口（生产里只有 HUD 那一处会写）').toBe('gamepad');
+      expect(cell.textContent, '重算要按新手那一套重写：先同步再重算，顺序反了这格还是旧键名').toBe('右摇杆按下');
+
+      d.note('keyboard');
+      HUD.prototype.refreshKeyHints.call(hud);
+      expect(cell.textContent).toBe('E');
+
+      d.note('gamepad');
+      d.reset();
+      HUD.prototype.refreshKeyHints.call(hud);
+      expect(hintDevice(), '回到"还没动过"也是变化：提示要收回键盘那一套').toBe(null);
+      expect(cell.textContent).toBe('E');
+    } finally {
+      globalThis.document = prevDoc;
+    }
   });
 });

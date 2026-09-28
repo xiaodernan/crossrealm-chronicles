@@ -4,7 +4,7 @@ import { JOURNAL_CATEGORIES, DISCOVERABLE_TOTAL } from '../game/StoryJournal.js'
 import { mergeJournalCategories } from './JournalTabRegistry.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { on, offAll } from '../engine/EventBus.js';
-import { refreshKeyText } from '../content/keyHints.js';
+import { refreshKeyText, setHintDevice } from '../content/keyHints.js';
 import { focusFirstItem, parkFocus, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 import { inputDeviceLabel } from '../engine/InputDevice.js';
 
@@ -162,10 +162,18 @@ export class HUD {
    * "最近用的是哪一侧输入"变了（键盘 ↔ 手柄）也跑一次 —— 改绑与换手是同一类变化：
    * 都让屏幕上那些"该按什么键"变成假话。声明方式见 `refreshKeyText`。
    *
+   * 这里也是**唯一**把"这一手是哪套输入"写进出口的地方（切片33）：先同步再重算，
+   * 两件事不许分开 —— 重算了却没同步，屏幕上会整片按上一只手说话；反之同步了没重算，
+   * 声明式那批（只在改动时重算）永远停在上一次的键名上。
+   *
    * 走的是整份文档而不是 `#hud`：小地图标题、暂停菜单、区域面板、起始屏这些都声明在
    * `index.html` 里、却挂在 `#hud` 外面 —— 只扫容器的话，它们改绑后仍然说出厂键。
    */
   refreshKeyHints() {
+    // 通知出口这件事只有这一处（切片33）：把当前那一侧喂进出口，再重算整份文档的键名。
+    // 之所以放在"重算"里而不是 `updateInputDevice()` 里：构造时、改绑时（`Game.rebuildHotkeys`）
+    // 也走这一条 —— 少了这一句，那两条路上的格子会按上一只手说话，而屏幕上没有一处看起来是错的。
+    setHintDevice(this.game.inputDevice?.current() ?? null);
     refreshKeyText(document);
   }
 
