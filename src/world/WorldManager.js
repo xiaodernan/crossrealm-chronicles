@@ -167,7 +167,6 @@ export class WorldManager {
       id: 'hub-anchor',
       position: new THREE.Vector3(HUB_ZONE.center.x, anchorY, HUB_ZONE.center.z),
       label: '触摸世界之锚',
-      discovered: false,
       type: 'main',
       onInteract: () => {
         this.dialog.show(

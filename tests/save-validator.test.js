@@ -1,34 +1,35 @@
 import { describe, it, expect } from 'vitest';
 import { SaveValidator, CURRENT_VERSION } from '../src/game/SaveValidator.js';
 import v6 from '../tests/save_v6_fixture.json';
+import v7 from '../tests/save_v7_fixture.json';
 import v5 from '../tests/save_v5_fixture.json';
 import { migrate } from '../src/game/SaveMigrations.js';
 
-describe('SaveValidator v6', () => {
-  it('接受仓库内的 v6 fixture', () => {
-    expect(SaveValidator.validate(v6)).toEqual([]);
+describe('SaveValidator v7', () => {
+  it('接受仓库内的 v7 fixture', () => {
+    expect(SaveValidator.validate(v7)).toEqual([]);
   });
 
   it('拒绝错误版本', () => {
-    const bad = structuredClone(v6);
+    const bad = structuredClone(v7);
     bad.version = 4;
     expect(SaveValidator.validate(bad)).toContain(`version 必须为 ${CURRENT_VERSION}`);
   });
 
   it('拒绝缺失 player 字段', () => {
-    const bad = structuredClone(v6);
+    const bad = structuredClone(v7);
     delete bad.player.hp;
     expect(SaveValidator.validate(bad).length).toBeGreaterThan(0);
   });
 
   it('要求镜头轨道角入档（v5 新增）', () => {
-    const bad = structuredClone(v6);
+    const bad = structuredClone(v7);
     delete bad.player.yaw;
     expect(SaveValidator.validate(bad)).toContain('player.yaw 必须是有限数');
   });
 
   it('要求 spells/settings 为必填（v5 收紧）', () => {
-    const bad = structuredClone(v6);
+    const bad = structuredClone(v7);
     delete bad.settings;
     delete bad.spells;
     const issues = SaveValidator.validate(bad);
@@ -37,16 +38,16 @@ describe('SaveValidator v6', () => {
   });
 
   it('拒绝仍带派生字段 skillsUnlocked 的档（说明未走迁移）', () => {
-    const bad = structuredClone(v6);
+    const bad = structuredClone(v7);
     bad.quests.stats.skillsUnlocked = 3;
     expect(SaveValidator.validate(bad)).toContain('quests.stats.skillsUnlocked 已在 v5 移除（派生值）');
   });
 
   it('要求 stats.bag 是数组（v6 新增：背包入档，读档侧不许 ?? [] 兜底）', () => {
-    const missing = structuredClone(v6);
+    const missing = structuredClone(v7);
     delete missing.stats.bag;
     expect(SaveValidator.validate(missing)).toContain('stats.bag 必须是数组');
-    const wrong = structuredClone(v6);
+    const wrong = structuredClone(v7);
     wrong.stats.bag = {};
     expect(SaveValidator.validate(wrong)).toContain('stats.bag 必须是数组');
   });
@@ -58,8 +59,37 @@ describe('SaveValidator v6', () => {
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 
+  it('v6 那一跳补的是**推得出来的**事实：歇过的营火就算见过（B66 的旧档兼容）', () => {
+    const 旧档 = structuredClone(v6);
+    旧档.campfireMemory = { restCount: { fantasy: 2, magic: 1 } };
+    delete 旧档.restPointEnhancer;
+    expect(SaveValidator.validate(旧档)).toContain('缺少 restPointEnhancer 对象');
+    const { data, applied } = migrate(旧档);
+    expect(applied).toContain(6);
+    expect([...data.restPointEnhancer.discovered].sort()).toEqual(['fantasy', 'magic']);
+    expect(SaveValidator.validate(data)).toEqual([]);
+  });
+
+  it('restPointEnhancer 的三种坏形状都要红（数组、类型、id）', () => {
+    const 缺字段 = structuredClone(v7);
+    delete 缺字段.restPointEnhancer.discovered;
+    expect(SaveValidator.validate(缺字段)).toContain('restPointEnhancer.discovered 必须是数组');
+    const 类型错 = structuredClone(v7);
+    类型错.restPointEnhancer.discovered = 'fantasy';
+    expect(SaveValidator.validate(类型错)).toContain('restPointEnhancer.discovered 必须是数组');
+    const 混入对象 = structuredClone(v7);
+    混入对象.restPointEnhancer.discovered = ['fantasy', { id: 'magic' }];
+    expect(SaveValidator.validate(混入对象)).toContain('restPointEnhancer.discovered 里出现了非字符串的 id');
+    // 控制组：这一族的三条判据不能是"什么都报"
+    expect(SaveValidator.validate(structuredClone(v7))).toEqual([]);
+  });
+
+  it('v6 fixture 自己过不了当前校验 —— 它必须先走迁移链（版本号不宽松）', () => {
+    expect(SaveValidator.validate(v6)).toContain(`version 必须为 ${CURRENT_VERSION}`);
+  });
+
   it('把数字型 kills 规范化为对象（旧 Godot 导出兼容）', () => {
-    const legacy = structuredClone(v6);
+    const legacy = structuredClone(v7);
     legacy.quests.stats.kills = 12;
     expect(SaveValidator.validate(legacy).length).toBeGreaterThan(0);
     SaveValidator.normalize(legacy);

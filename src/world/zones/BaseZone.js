@@ -90,7 +90,6 @@ export class BaseZone {
       position: new THREE.Vector3(this.center.x + lx, ly, this.center.z + lz),
       label,
       onInteract,
-      discovered: false,
       type: options.type ?? 'lore',
     };
     this.pois.push(poi);

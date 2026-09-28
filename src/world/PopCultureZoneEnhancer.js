@@ -131,7 +131,6 @@ function attachHubPoster(world, game) {
     id: 'hub-poster-wall',
     position: new THREE.Vector3(42, y, 48),
     label: '位面海报墙',
-    discovered: false,
     type: 'lore',
     onInteract: () => {
       game.dialog.show(

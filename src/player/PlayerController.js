@@ -931,7 +931,9 @@ export class PlayerController {
 
       this.interactCooldown = 0.6;
 
-      this.nearbyPoint.discovered = true;
+      // 以前这里写 `this.nearbyPoint.discovered = true;` —— 那个字段全仓没有读者（写一次、没人读，
+      // 也不进存档），W-A2 尾巴③记的"discovered 不进存档"其实先该问"有没有人读它"。
+      // 发现与否由 `discovery` 事件与 `explorationMap.poiRevealed` 说话，那两份是真的有人消费。
 
       window.dispatchEvent(new CustomEvent('poi-interact', { detail: { id: this.nearbyPoint.id } }));
 

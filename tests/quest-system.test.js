@@ -252,6 +252,13 @@ describe('存档层只递账本，不抄账本', () => {
     weaponSkills: { unlocked: new Set(['a', 'b']), toJSON: () => ({}), fromJSON() {} },
     settings: { data: {}, applyToGame() {} },
     fastTravel: { unlocked: false },
+    // v7 起 `restPointEnhancer` 是必填格（存档 v7 / 修 B66；判据见 save-field-parity 那一片），
+    // 所以宿主得带上生产里那一份形状；不带上它，读档会被 validator 拒 —— 那正是想要的严格
+    restPointEnhancer: {
+      discovered: new Set(),
+      toJSON: () => ({ discovered: [] }),
+      fromJSON(d) { this.discovered = new Set(d?.discovered ?? []); },
+    },
     quests: system,
   });
 

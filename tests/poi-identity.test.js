@@ -10,6 +10,7 @@
  * 再对最终的 `pointsOfInterest` 做全量断言。逐个调用点手写 id 是最容易漏一半的活，
  * 所以门禁必须覆盖"整张表"，而不是只看某一区。
  */
+import { readFileSync } from 'node:fs';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { BaseZone } from '../src/world/zones/BaseZone.js';
 import { WorldManager } from '../src/world/WorldManager.js';
@@ -193,5 +194,31 @@ describe('真世界的 POI 登记表', () => {
     }
     world.pointsOfInterest.push({ id: 'fantasy-ring', label: '伪造', position: { x: 0, z: 0 } });
     expect(() => world.assertPoiIdentity()).toThrow(/重复/);
+  });
+});
+
+describe('那格死字段不许回来（W-A2 尾巴③ 的更正）', () => {
+  /**
+   * POI 上那个 `discovered` 以前是"写了没人读"的状态：三处构造点各写一份 `discovered: false`，
+   * `PlayerController` 摸一下写成 true，然后全仓没有任何一处读它 —— 也不进存档。
+   * 尾巴上记的是"它不进存档，加字段要走一次迁移"；这片一查，真正的前提是先有人读它。
+   * 现在四处一起删。这一条钉它不许只写回一半（例如恢复了构造点、判据仍然无人读）。
+   */
+  const 只数代码 = (文本) => 文本.split(/\r?\n/)
+    .filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l))
+    .join(' ');
+  const 读源码 = (rel) => 只数代码(readFileSync(new URL(`../src/${rel}`, import.meta.url), 'utf8'));
+  const 构造点 = ['world/WorldManager.js', 'world/zones/BaseZone.js', 'world/PopCultureZoneEnhancer.js',
+    'player/PlayerController.js'];
+
+  it('四个写它的地方都不再写', () => {
+    const 还在写 = 构造点.filter((rel) => /\bdiscovered:/.test(读源码(rel)) || /\.discovered\s*=/.test(读源码(rel)));
+    expect(还在写, `这些文件又往 POI 上写 discovered 了：${还在写.join('、')}`).toEqual([]);
+  });
+
+  it('判据不是空转：同一条扫法喂一段人造源码必须命中', () => {
+    const 人造 = 只数代码('    // discovered: 注释里提一句不算数\n    return { id, label, discovered: false, type };');
+    expect(人造).toMatch(/\bdiscovered:/);
+    expect(人造).not.toMatch(/注释里提一句/);
   });
 });

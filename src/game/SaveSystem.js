@@ -37,6 +37,10 @@ export class SaveSystem {
       exploration: game.explorationMap?.toJSON?.(),
       mapMarkers: game.mapMarkers?.toJSON?.(),
       restDialogue: game.restDialogue?.toJSON?.(),
+      // 营火地标（`发现营火 · X` 那一句只播一次的记账）—— v7 起入档。
+      // 读档侧 `applyData` 早就在读这个键了（`data.restPointEnhancer`），**却从来没人写过它**：
+      // 那行加载代码是死的，于是每次读档所有营火都退回"没见过"，同一句提示会再播一遍（B66）。
+      restPointEnhancer: game.restPointEnhancer?.toJSON?.(),
       combatTutorial: game.combatTutorial?.toJSON?.(),
       worldAmbient: game.worldAmbient?.toJSON?.(),
       cgGallery: game.cgGallery?.toJSON?.(),

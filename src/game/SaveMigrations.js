@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v7', version: 7 },
   { key: 'crossrealm_save_v6', version: 6 },
   { key: 'crossrealm_save_v5', version: 5 },
   { key: 'crossrealm_save_v4', version: 4 },
@@ -61,10 +62,27 @@ function migrateV5toV6(d) {
   return d;
 }
 
+/**
+ * v6 → v7
+ * - `restPointEnhancer.discovered`：营火地标"发现过哪些"入档（修 B66）。
+ *   v6 及更早的档里这个键根本不存在 —— 因为**写档侧从来没有写过它**，而读档侧一直在读，
+ *   那行加载代码是死的：每次读档所有营火都退回"没见过"，同一句"发现营火 · X"再播一遍。
+ *   旧档不补空集合，而是从它**自己已有的另一件事实**推出来：`campfireMemory.restCount` 的键
+ *   就是玩家歇过的营火 id，歇过必然见过。推不出来的一部分（走近过但没歇过）确实无法还原，
+ *   那部分宁可让它重播一次提示，也不在代码里假装知道。
+ */
+function migrateV6toV7(d) {
+  const 歇过 = Object.keys(d.campfireMemory?.restCount ?? {});
+  const enhancer = (d.restPointEnhancer ??= {});
+  if (!Array.isArray(enhancer.discovered)) enhancer.discovered = 歇过;
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
   5: migrateV5toV6,
+  6: migrateV6toV7,
 };
 
 /**
