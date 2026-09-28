@@ -17,8 +17,15 @@ beforeAll(installWindowShim);
 
 const DT = 1 / 60;
 
-/** 被代码真正读取的字段：多加一个没人读的数字，第一条用例会挡住 */
+/**
+ * 被代码真正读取的字段：多加一个没人读的数字，第一条用例会挡住。
+ *
+ * `telegraph` 只许有 `color` —— 圈画多大是 `Enemy.teleRadius()` 从 `moveRange` 现算的。
+ * 表里曾经还有 12 个 `ring`，从 W-B7 切片1 起就没有任何一行代码读过它，而它的值被拿来
+ * 当"这招的圈有多大"（切片2 的 charge 验收正是这么比的：表里 1.6 vs 0.9，画出来却一样）。
+ */
 const REQUIRED = ['windup', 'strike', 'recover', 'cooldown', 'damage', 'weight'];
+const TELEGRAPH_FIELDS = ['color'];
 
 describe('敌人招式表数据', () => {
   it('每类实战敌人 ≥3 招，且每招的时序字段齐全自洽', () => {
@@ -37,6 +44,7 @@ describe('敌人招式表数据', () => {
         if (m.aoe || m.ranged) expect(m.cone, `${id}.cone`).toBe(-2);
         else expect(typeof m.cone, `${id}.cone`).toBe('number');
         expect(typeof m.telegraph?.color, `${id}.telegraph`).toBe('number');
+        expect(Object.keys(m.telegraph).sort(), `${id}.telegraph 的字段`).toEqual(TELEGRAPH_FIELDS);
         // 竖直打击带：会落到玩家身上的招必须给出区间，否则"跳起来"这件事在竖直方向不存在。
         // 反过来，弹体与不伤人的招（防御/召唤）不该有 band —— 一个没人读的数字只是骗表格
         if (m.ranged || m.guard || m.summon) {

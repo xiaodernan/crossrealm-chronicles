@@ -282,45 +282,47 @@ export const AI = {
  * - `phase: true` + `blink`：相位招 —— `blink` 是它**够不够得着才起手**的距离（"能闪多远"），
  *   命中段把自己挪到目标背后 `reach` 之内再劈。两个数分开写：把 `blink` 当 `reach` 用，
  *   十米外起手的那一刀会隔着十米命中（一个数同时当"够得着"和"打得到"用，迟早分家）
- * - `telegraph`：预警分级 —— 前摇越长颜色越偏紫、圈越大，玩家一眼能读出该躲还是该弹
+ * - `telegraph`：预警分级。**只有颜色** —— 圈画多大由 `Enemy.teleRadius()` 从 `moveRange` / `aoe`
+ *   现算（那个数同时就是"够不够得着"，两处各写一个半径迟早对不上，而对不上时错的是圈）。
+ *   前摇 ≥ `AI.telegraphMarkWindup` 的招另外多一枚头顶旋转警示，那是"慢重招"的分级，同样不看本字段
  */
 export const ENEMY_MOVES = {
   sweep: {
     name: '横扫', windup: 0.75, strike: 0.35, recover: 0.45, reach: 0.8, cone: 0.10,
     band: [0.05, 1.05],
     damage: 1.0, cooldown: 1.5, weight: 3,
-    telegraph: { color: 0xff3322, ring: 1.0 },
+    telegraph: { color: 0xff3322 },
   },
   thrust: {
     name: '突刺', windup: 0.42, strike: 0.24, recover: 0.34, reach: 1.3, cone: 0.45,
     band: [0.6, 1.7],
     damage: 0.8, cooldown: 1.2, weight: 3, travel: 'lunge', travelSpeed: 3.2,
-    telegraph: { color: 0xffcc33, ring: 0.7 },
+    telegraph: { color: 0xffcc33 },
   },
   cleave: {
     name: '重劈', windup: 1.05, strike: 0.34, recover: 0.66, reach: 0.7, cone: -2,
     band: [1.1, 2.7],
     damage: 1.7, cooldown: 2.8, weight: 1,
-    telegraph: { color: 0xaa22ff, ring: 1.35 },
+    telegraph: { color: 0xaa22ff },
   },
   slam: {
     name: '崩地', windup: 1.15, strike: 0.30, recover: 0.80, cone: -2, aoe: 3.6,
     band: [0.0, 0.9],
     damage: 1.6, cooldown: 3.4, weight: 1,
-    telegraph: { color: 0xff2200, ring: 1.6 },
+    telegraph: { color: 0xff2200 },
   },
   flurry: {
     name: '三连刺', windup: 0.55, strike: 0.18, recover: 0.30, reach: 1.1, cone: 0.35,
     band: [0.55, 1.6],
     damage: 0.55, cooldown: 2.4, weight: 2, combo: 3, comboWindup: 0.3,
     travel: 'lunge', travelSpeed: 2.2,
-    telegraph: { color: 0xff8844, ring: 0.75 },
+    telegraph: { color: 0xff8844 },
   },
   shot: {
     name: '虚能弹', windup: 0.85, strike: 0.20, recover: 0.55, cone: -2,
     range: 13, minDist: 4.0,
     damage: 0.9, cooldown: 2.0, weight: 2, ranged: { speed: 14, color: 0x66ddff },
-    telegraph: { color: 0x33ccff, ring: 0.9 },
+    telegraph: { color: 0x33ccff },
   },
   dive: {
     // reach 比横扫长一档：让无人机在"弹体中段"就能扑，而不必贴脸才打得着（见 holdRangeOf）
@@ -328,7 +330,7 @@ export const ENEMY_MOVES = {
     name: '俯冲', windup: 0.38, strike: 0.22, recover: 0.28, reach: 3.3, cone: 0.20,
     band: [-0.6, 1.0],
     damage: 0.7, cooldown: 1.4, weight: 2, travel: 'lunge', travelSpeed: 4.2,
-    telegraph: { color: 0xffdd55, ring: 0.65 },
+    telegraph: { color: 0xffdd55 },
   },
   guard: {
     // 防御招：前摇是"举盾"，命中段不打人而是持续格挡正面伤害（`GUARD`），收招才是被绕后的代价。
@@ -336,14 +338,14 @@ export const ENEMY_MOVES = {
     // 写成 0 时它只在贴脸 2.2 米内可选，而士兵实测停在 2.9 米 —— 整条格挡链路从不触发。
     name: '格挡', windup: 0.5, strike: 1.5, recover: 0.55, reach: 0.9, cone: -2,
     damage: 0, cooldown: 6.5, weight: 1, guard: true,
-    telegraph: { color: 0x66aaff, ring: 0.9 },
+    telegraph: { color: 0x66aaff },
   },
   summon: {
     // 召唤招：命中段不打人，而是交出仆从（名额与生命周期见 `SUMMON`）。
     // 前摇是全场最长的一档 —— 念咒必须看得见，也必须来得及被弹反/打断。
     name: '召唤', windup: 1.4, strike: 0.25, recover: 0.7, reach: 0.9, cone: -2,
     damage: 0, cooldown: 11, weight: 1, summon: { type: 'soldier', count: 2 },
-    telegraph: { color: 0x66ff99, ring: 1.15 },
+    telegraph: { color: 0x66ff99 },
   },
   phase: {
     // 相位突袭（时线怨影，W-B7 切片2）：起手站在原地蓄势，命中段**直接落到玩家背后**再劈。
@@ -359,16 +361,18 @@ export const ENEMY_MOVES = {
     name: '相位突袭', windup: 0.7, strike: 0.3, recover: 0.5, reach: 1.2, cone: 0.35,
     band: [0.05, 1.05], phase: true, blink: 11,
     damage: 1.1, cooldown: 3.2, weight: 2,
-    telegraph: { color: 0xaa55ff, ring: 0.9 },
+    telegraph: { color: 0xaa55ff },
   },
   charge: {
     // 蓄力炮击（边境哨炮，W-B7 切片2）：全场最长的前摇换最重的一发。
     // 与 `shot` 的差别不是"同一发的加强版"：判定读的是**玩家看不看得出这一发不能硬吃** ——
-    // 预警圈 1.6 倍于虚能弹、前摇 1.7 秒（召唤那一档）、冷却 7.5 秒，够读完再翻滚。
+    // 前摇 1.7 秒（全场最长）、弹速 24（虚能弹 14）、冷却 7.5 秒，够读完再翻滚。
+    // 圈不在这条差别里：远程招的圈一律是 `attackRange`（`teleRadius`），两条一样大 ——
+    // "更显眼"靠的是这 1.7 秒前摇（头顶警示亮满 1.1 秒）与那一发本身的弹速。
     name: '蓄力炮击', windup: 1.7, strike: 0.22, recover: 0.9, cone: -2,
     range: 16, minDist: 4.5,
     damage: 2.4, cooldown: 7.5, weight: 1, ranged: { speed: 24, color: 0xffbb33 },
-    telegraph: { color: 0xff8800, ring: 1.6 },
+    telegraph: { color: 0xff8800 },
   },
   howl: {
     // 嚎叫引援（混沌掠行兽，W-B7 切片2）：不是打人的招（`damage: 0`），命中段呼来两只同类。
@@ -376,7 +380,7 @@ export const ENEMY_MOVES = {
     // 否则掠行兽群自己就是一台永动的增援机（名额上限只挡"同时在场的总数"，挡不住"永远刷不完"）。
     name: '嚎叫引援', windup: 1.2, strike: 0.25, recover: 0.6, reach: 0.9, cone: -2,
     damage: 0, cooldown: 15, weight: 1, summon: { type: 'stalker', count: 2 },
-    telegraph: { color: 0x99ff55, ring: 1.15 },
+    telegraph: { color: 0x99ff55 },
   },
 };
 

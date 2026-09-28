@@ -14,7 +14,7 @@
  * 这个文件按三件事钉：归属（谁有谁没有）、判据分家（够得着 / 打得到）、真跑一遍的落地。
  */
 import { describe, it, expect, beforeAll } from 'vitest';
-import { ENEMY_MOVES, ENEMY_MOVE_SETS, SUMMON } from '../src/content/tuning.js';
+import { AI, ENEMY_MOVES, ENEMY_MOVE_SETS, SUMMON } from '../src/content/tuning.js';
 import {
   hasUsableMove, holdRangeOf, landRange, moveHits, moveRange, moveUsable, seededRng,
 } from '../src/combat/EnemyMoves.js';
@@ -121,15 +121,31 @@ describe('相位突袭：动的是自己，判的是近战', () => {
 });
 
 describe('蓄力炮击：同一根链路，靠读得出来的代价换权重', () => {
-  it('比虚能弹更贵、更重、更远、更显眼 —— 四项都是玩家一眼能读出的差别', () => {
+  it('比虚能弹更贵、更重、更远、更快 —— 每一项都是玩家一眼能读出的差别', () => {
     const c = ENEMY_MOVES.charge;
     const s = ENEMY_MOVES.shot;
     expect(c.windup).toBeGreaterThan(s.windup * 1.5);
     expect(c.damage).toBeGreaterThan(s.damage * 2);
     expect(c.cooldown).toBeGreaterThan(s.cooldown * 3);
     expect(c.range).toBeGreaterThan(s.range);
-    expect(c.telegraph.ring).toBeGreaterThan(s.telegraph.ring);
     expect(c.ranged.speed).toBeGreaterThan(s.ranged.speed);
+  });
+
+  it('"更显眼"要落在玩家真看得见的那两个数上：前摇分级 + 圈半径现算', () => {
+    /* 表里曾经有一个 `telegraph.ring`（这一招写 1.6、虚能弹写 0.9），但那是个**没人读的数字** ——
+     * 圈画多大由 `Enemy.teleRadius()` 从 `moveRange` / `aoe` 现算，两条远程招的圈一样大。
+     * 这条用例改盯真正画出去的东西：前摇跨过 `telegraphMarkWindup` 多少（头顶警示亮多久）
+     * 与 `teleRadius()` 的取值来源。 */
+    const c = ENEMY_MOVES.charge;
+    const s = ENEMY_MOVES.shot;
+    expect(c.windup).toBeGreaterThan(AI.telegraphMarkWindup);
+    expect(s.windup).toBeGreaterThan(AI.telegraphMarkWindup);
+    expect(c.windup - AI.telegraphMarkWindup).toBeGreaterThan(s.windup - AI.telegraphMarkWindup);
+    const { e } = duel({ type: 'sentinel', x: 8, z: 0 });
+    e.activeMove = c;
+    expect(e.teleRadius()).toBe(e.attackRange);        // 远程只给自己一圈起手提示
+    e.activeMove = ENEMY_MOVES.slam;
+    expect(e.teleRadius()).toBe(ENEMY_MOVES.slam.aoe); // 范围招画的才是真实危险半径
   });
 
   it('命中段交出的是一枚弹体（不当场扣血），伤害与速度按本招自己的数走', () => {
