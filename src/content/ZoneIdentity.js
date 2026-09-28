@@ -41,8 +41,15 @@ export const ZONE_ORDER = [
   ZONE_IDS.ABYSS,
 ];
 
-/** 中文显示名 → id。**只用于迁移期与存档兼容**，新代码不得使用。 */
-const LEGACY_NAME_TO_ID = {
+/**
+ * 中文显示名 → id。**只用于迁移期与存档兼容**，新代码不得使用。
+ *
+ * 导出它**不是**为了让谁拿去做判定（那正是 B36 的病），而是让门禁能从两张表**推导**
+ * "哪些名字曾经是区名、现在不是了"（`keys(本表) - values(ZONE_NAMES)`），
+ * 于是"废弃区名还活在文案里"当场红 —— 而不是靠有人在测试里手抄一份旧名名单。
+ * 唯一的读者是下面的 `zoneIdOf()`（旧数据按中文名回退那一条分支）。
+ */
+export const LEGACY_NAME_TO_ID = {
   交汇枢纽: ZONE_IDS.HUB,
   灰白森林: ZONE_IDS.FANTASY,
   魔法遗境: ZONE_IDS.MAGIC,

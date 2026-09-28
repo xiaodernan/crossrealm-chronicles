@@ -31,7 +31,7 @@ export const BOSS_PHASE_LINES = {
 
 export const BOSS_DEFEAT_LINES = {
   'shadow-warden': { title: '影界守护者', text: '影散。灰白森林的第一道枷锁解除。\n\n营火可解锁「影界斩」剑系技能。' },
-  archmagus: { title: '大奥术师·萨尔林', text: '禁书合上。魔法遗境的奥术风暴平息。\n\n杖系「奥术共鸣 II」已在营火可用。' },
+  archmagus: { title: '大奥术师·萨尔林', text: '禁书合上。霍格沃兹遗境的奥术风暴平息。\n\n杖系「奥术共鸣 II」已在营火可用。' },
   'singularity-herald': { title: '奇点领主', text: '引力井坍缩。米勒荒原恢复静止。\n\n剑系「位面斩强化」已解锁。' },
   'void-chronarch': { title: '时线执政官', text: '时线重新缝合。你看见无数个自己的倒影消散。\n\n杖系「时线洞察」已解锁。' },
   'chaos-overlord': { title: '混沌裂隙领主', text: '混沌暂退。边境的闪电归于沉默。\n\n双流派终极技能「无尽行者」已解锁。' },

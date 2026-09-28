@@ -133,12 +133,14 @@ export class WorldManager {
     ring.position.y = 10.5;
     hub.add(ring);
 
+    // 同 `WorldDecorations._buildZoneGates`：这五行曾经各抄一个 `label` 区名，而牌是纯色块，
+    // 谁也没读过 —— W-B4 切片3 删掉（显示用的区名只有一处：`content/ZoneIdentity.js`）
     const signData = [
-      { label: '灰白森林', dir: Math.PI * 0.85, color: 0x3d5c3a },
-      { label: '魔法遗境', dir: Math.PI * 1.55, color: 0x5a3a8a },
-      { label: '米勒荒原', dir: Math.PI * 0.15, color: 0x2a4a6a },
-      { label: '破碎时线', dir: Math.PI * 1.0, color: 0x6a5a30 },
-      { label: '混沌边境', dir: Math.PI * 1.25, color: 0x6a2040 },
+      { dir: Math.PI * 0.85, color: 0x3d5c3a },
+      { dir: Math.PI * 1.55, color: 0x5a3a8a },
+      { dir: Math.PI * 0.15, color: 0x2a4a6a },
+      { dir: Math.PI * 1.0, color: 0x6a5a30 },
+      { dir: Math.PI * 1.25, color: 0x6a2040 },
     ];
     for (const s of signData) {
       const post = new THREE.Mesh(
@@ -170,7 +172,7 @@ export class WorldManager {
       onInteract: () => {
         this.dialog.show(
           '世界之锚',
-          '三块位面碎片在此交汇。穿越者的使命，是重铸锚点，阻止诸界崩塌。向西进入灰白森林，向南踏入魔法遗境，向东前往米勒荒原——每一处都藏有一枚位面碎片。'
+          '三块位面碎片在此交汇。穿越者的使命，是重铸锚点，阻止诸界崩塌。向西进入灰白森林，向南踏入霍格沃兹遗境，向东前往米勒荒原——每一处都藏有一枚位面碎片。'
         );
         window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'hub-anchor', title: '世界之锚', text: '三界交汇的核心。' } }));
       },

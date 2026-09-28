@@ -63,7 +63,7 @@ const SECTIONS = mergeHelpSections([
     title: '地下城与 Boss',
     body: `三座地下城入口（紫色传送环，按 {interact} 进入）：
 · 灰白森林 — 遗迹 crypt
-· 魔法遗境 — 禁忌图书馆
+· 霍格沃兹遗境 — 禁忌图书馆
 · 米勒荒原 — 五维裂隙
 
 清怪后可离开并推进任务。五名 Boss 各对应一章；
@@ -78,7 +78,7 @@ const SECTIONS = mergeHelpSections([
 · 招式慢、好弹反；锁定后绕背输出
 · 阶段二会召唤影兵，先清小怪或 {skill} 位面斩
 
-【大奥术师】魔法遗境北侧 X≈5 Z≈-220
+【大奥术师】霍格沃兹遗境北侧 X≈5 Z≈-220
 · 远程法术多，侧向翻滚（{roll}）贴近再打
 · 蓄力火球前摇长，可 {parry} 弹反或蓄力 {spell1} 号法术对轰
 

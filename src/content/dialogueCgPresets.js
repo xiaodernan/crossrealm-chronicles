@@ -26,7 +26,7 @@ export const REST_DIALOGUE_CG_BASE = {
   'fantasy:deep': { scene: 'forest_map', caption: '遗城与 Boss 环' },
   'fantasy:tip': { scene: 'combat_tutorial', caption: '弹反与终结' },
   'fantasy:boss1': { scene: 'boss_shadow', caption: '影界守护者', mood: 'warn' },
-  'magic:start': { scene: 'magic_castle', caption: '魔法遗境倒影' },
+  'magic:start': { scene: 'magic_castle', caption: '霍格沃兹遗境倒影' },
   'magic:spell': { scene: 'spell_orbs', caption: '奥术牵制' },
   'magic:boss2': { scene: 'boss_mage', caption: '大奥术师', mood: 'warn' },
   'space:start': { scene: 'space_endurance', caption: 'Endurance 应急火' },

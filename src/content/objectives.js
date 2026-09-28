@@ -218,13 +218,13 @@ export const OBJECTIVES = [
   {
     id: 'boss2',
     title: '大奥术师',
-    desc: '击败魔法遗境深处的大奥术师。',
+    desc: '击败霍格沃兹遗境深处的大奥术师。',
     type: 'boss',
     bossId: 'archmagus',
     chapter: 2,
     waypoint: { x: 5, z: -220, label: '大奥术师' },
     reward: 30,
-    journal: '大奥术师·萨尔林陨落，魔法遗境安宁。',
+    journal: '大奥术师·萨尔林陨落，霍格沃兹遗境安宁。',
     flags: { boss2Defeated: true },
   },
   {

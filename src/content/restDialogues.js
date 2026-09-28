@@ -325,7 +325,7 @@ J → 次元回声 按系列筛选。」`,
       wizard: {
         speaker: "奥术旅者",
         text: "「悬浮咒术学院 — 蜡烛会自己飞，楼梯爱换方向。别在禁林里追会发光的眼睛。」",
-        journal: { id: "rest-magic-wizard", title: "营火·咒术学院", text: "魔法遗境致敬魔法学院母题。" },
+        journal: { id: "rest-magic-wizard", title: "营火·咒术学院", text: "霍格沃兹遗境致敬魔法学院母题。" },
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -341,7 +341,7 @@ J → 次元回声 按系列筛选。」`,
       nine: {
         speaker: "奥术旅者",
         text: "「九分又四分三站台 — 砖墙会在月台中央裂开。别找检票口，找「相信」的那一步。」",
-        journal: { id: "rest-magic-nine", title: "营火·九分站台", text: "魔法遗境致敬经典站台母题。" },
+        journal: { id: "rest-magic-nine", title: "营火·九分站台", text: "霍格沃兹遗境致敬经典站台母题。" },
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },
@@ -356,7 +356,7 @@ J → 次元回声 按系列筛选。」`,
       cyber: {
         speaker: "奥术旅者",
         text: "「赛博霓虹渗入遗境 — 霓虹后巷、铬合金诊所、巨企尖塔。魔药与芯片同柜。」",
-        journal: { id: "rest-magic-cyber", title: "营火·赛博霓虹", text: "魔法遗境赛博朋克母题。" },
+        journal: { id: "rest-magic-cyber", title: "营火·赛博霓虹", text: "霍格沃兹遗境赛博朋克母题。" },
         choices: [
           { label: "休息", action: "rest" },
           { label: "返回", next: "start" },

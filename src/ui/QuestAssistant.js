@@ -1,6 +1,7 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText } from '../content/keyHints.js';
 import { BOSS_STAT_KEYS } from '../content/objectives.js';
+import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 
 /** 自动通关/带路整条流程的计时分组，用户中途取消时整体撤销 */
 const AUTOPILOT_TAG = 'quest-autopilot';
@@ -174,15 +175,15 @@ export class QuestAssistant {
       { label: '枢纽 · 世界之锚', action: 'tp', x: 0, z: 55 },
       { label: '触摸世界之锚', action: 'poi', id: 'hub-anchor' },
       { label: '训练木人', action: 'hits', x: 15, z: 45, count: 8 },
-      { label: '灰白森林', action: 'tp', x: -200, z: 0 },
+      { label: ZONE_NAMES[ZONE_IDS.FANTASY], action: 'tp', x: -200, z: 0 },
       { label: '击败影之战士', action: 'kills', type: 'soldier', count: 2 },
       { label: '至尊石环', action: 'discover', id: 'fantasy-ring', x: -200, z: -30 },
       { label: '影界 Boss', action: 'tp', x: -250, z: -35 },
       { label: '击败影界守护者', action: 'boss', key: 'bossDefeated', bossId: 'shadow-warden' },
-      { label: '魔法遗境', action: 'tp', x: 0, z: -180 },
+      { label: ZONE_NAMES[ZONE_IDS.MAGIC], action: 'tp', x: 0, z: -180 },
       { label: '悬浮城堡', action: 'discover', id: 'magic-castle', x: 0, z: -195 },
       { label: '构装体', action: 'kills', type: 'golem', count: 1 },
-      { label: '米勒荒原', action: 'tp', x: 200, z: 80 },
+      { label: ZONE_NAMES[ZONE_IDS.SPACE], action: 'tp', x: 200, z: 80 },
       { label: '五维_tesseract', action: 'discover', id: 'space-tesseract', x: 200, z: 80 },
       { label: '重铸锚点', action: 'poi', id: 'hub-anchor' },
       { label: 'Ch2 宝箱', action: 'chests', count: 5 },
@@ -196,13 +197,13 @@ export class QuestAssistant {
       { label: '奇点领主', action: 'boss', key: 'boss3Defeated', bossId: 'singularity-herald', x: 235, z: 155 },
       { label: '心智升级', action: 'mind', value: 2 },
       { label: '位面飞升', action: 'poi', id: 'hub-anchor' },
-      { label: '破碎时线', action: 'tp', x: 0, z: 220 },
+      { label: ZONE_NAMES[ZONE_IDS.VOID], action: 'tp', x: 0, z: 220 },
       { label: '时线裂隙', action: 'discover', id: 'void-rift', x: 0, z: 220 },
       { label: '蓄力法术', action: 'charged', count: 5 },
       { label: '时线执政官', action: 'boss', key: 'voidBossDefeated', bossId: 'void-chronarch', x: 0, z: 235 },
       { label: '五维碑文', action: 'discover', id: 'void-tablet', x: 0, z: 225 },
       { label: '真·位面行者', action: 'poi', id: 'hub-anchor' },
-      { label: '混沌边境', action: 'tp', x: -200, z: 220 },
+      { label: ZONE_NAMES[ZONE_IDS.ABYSS], action: 'tp', x: -200, z: 220 },
       { label: '混沌之核', action: 'discover', id: 'chaos-core', x: -200, z: 220 },
       { label: '武器技能×3', action: 'skills', count: 3 },
       { label: '混沌领主', action: 'boss', key: 'chaosBossDefeated', bossId: 'chaos-overlord', x: -200, z: 285 },

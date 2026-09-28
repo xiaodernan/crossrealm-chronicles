@@ -182,7 +182,7 @@ export class FantasyZone extends BaseZone {
     this.addCylinderCollider(60, -50, 3.2, this.sampleHeight(60, -50) + 8, { base: this.sampleHeight(60, -50) - 0.5 });
 
     this.addPOI({ x: 60, y: 0, z: -50 }, '攀登守望塔', () => {
-      this.dialog.show('灰白守望塔', '从塔顶望去，三条位面之路清晰可见。北方是魔法遗境的紫色光柱，东方是米勒荒原的引力透镜。');
+      this.dialog.show('灰白守望塔', '从塔顶望去，三条位面之路清晰可见。北方是霍格沃兹遗境的紫色光柱，东方是米勒荒原的引力透镜。');
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-tower', title: '灰白守望塔', text: '可俯瞰三界交汇。' } }));
     }, { id: 'fantasy-tower', color: 0xff6622 });
   }

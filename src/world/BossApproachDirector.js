@@ -3,7 +3,7 @@ import { MAP_BOSSES } from '../game/QuestSystem.js';
 /** 首次靠近 Boss 信标 — 播报 lore */
 const BOSS_LORE = {
   'shadow-warden': '影界守护者 — 灰林东侧。两阶段，红圈砸地前翻滚。',
-  archmagus: '大奥术师萨尔林 — 魔法遗境北侧。紫球追踪，弹反可打断。',
+  archmagus: '大奥术师萨尔林 — 霍格沃兹遗境北侧。紫球追踪，弹反可打断。',
   'singularity-herald': '奇点领主 — 米勒荒原。引力圈时向外滚。',
   'void-chronarch': '时线执政官 — 隐藏试炼。蓄力法术打断时停。',
   'chaos-overlord': '混沌裂隙领主 — 终焉 Boss。闪电风暴，贴身穿刺。',

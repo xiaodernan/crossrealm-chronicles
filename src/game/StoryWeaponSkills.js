@@ -4,7 +4,7 @@ export const STORY_SKILL_META = {
   's-combo': { chapter: 2, loreFragments: 1, lore: '精灵斥候：「连击不是炫耀 — 是压制。」' },
   's-riposte': { chapter: 2, boss: 'shadow-warden', lore: '影界守护者倒下后，你理解了弹反的 rhythm。' },
   's-finisher': { chapter: 3, boss: 'archmagus', lore: '大奥术师的最后一击被你学去 — 用于终结连段。' },
-  'm-arcane': { chapter: 2, lore: '魔法遗境的残页记载：奥术共鸣始于营火。' },
+  'm-arcane': { chapter: 2, lore: '霍格沃兹遗境的残页记载：奥术共鸣始于营火。' },
   'm-charge': { chapter: 3, loreFragments: 2, lore: '蓄力是信任 — 信任法力会回应你。' },
   'm-mana': { chapter: 2, quest: 'spells', lore: '宇航员回声：「时间在这里是圆的 — 法力也是。」' },
   'm-transform': { chapter: 4, boss: 'singularity-herald', lore: '奇点领主的化身术式被你逆向解析。' },

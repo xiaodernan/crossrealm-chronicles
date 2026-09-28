@@ -140,12 +140,15 @@ export class WorldDecorations {
   }
 
   _buildZoneGates() {
+    // 这五张牌上没有文字：曾经每行一个 `label` 抄着区名，而从 `arch` 到材质没人读过它
+    // （颜色就是座位面的颜色）。W-B4 切片3 把它删掉 —— 抄一份不会上屏的名字，只会在改口时
+    // 留下没人注意的旧文案。要加文字，接 `content/ZoneIdentity.js` 的 `ZONE_NAMES`。
     const gates = [
-      { x: -95, z: 5, ry: 0, label: '灰白森林', color: 0x668855 },
-      { x: 5, z: -95, ry: Math.PI / 2, label: '魔法遗境', color: 0x6644aa },
-      { x: 95, z: 45, ry: -0.35, label: '米勒荒原', color: 0x4466bb },
-      { x: 5, z: 130, ry: 0, label: '破碎时线', color: 0xaa8844 },
-      { x: -95, z: 130, ry: -0.5, label: '混沌边境', color: 0xaa2244 },
+      { x: -95, z: 5, ry: 0, color: 0x668855 },
+      { x: 5, z: -95, ry: Math.PI / 2, color: 0x6644aa },
+      { x: 95, z: 45, ry: -0.35, color: 0x4466bb },
+      { x: 5, z: 130, ry: 0, color: 0xaa8844 },
+      { x: -95, z: 130, ry: -0.5, color: 0xaa2244 },
     ];
     for (const g of gates) {
       const arch = new THREE.Group();

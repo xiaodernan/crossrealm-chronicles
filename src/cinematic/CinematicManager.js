@@ -11,7 +11,7 @@ const BOSS_CINEMATICS = {
   },
   archmagus: {
     title: '大奥术师·萨尔林',
-    subtitle: '魔法遗境 · 位面试炼 II',
+    subtitle: '霍格沃兹遗境 · 位面试炼 II',
     lines: '「奥术的本质，是吞噬一切位面的光。」\n\n躲避紫色法球 · 靠近弹反 · {spell1}–{spell4} 法术牵制',
     color: '#8844ff',
     duration: 6,
