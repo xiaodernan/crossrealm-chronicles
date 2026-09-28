@@ -98,6 +98,33 @@ export function hasUsableMove(enemy, dist, aimDot) {
 }
 
 /**
+ * 这一招现在**想用**吗 —— 站位诉求（`standoff`）把当前距离圈了进去，而且确实够得着。
+ *
+ * 修的是一条只在混合身位上出现的洞（B69）：`holdRangeOf` 取"同时可出的招最多"的那个边界，
+ * 于是"身体是近战、手里却有一招远距形状"的敌人（虚空爬兽：裂隙 7 米 + 两招近战）永远先贴到
+ * 3.3 米才出手 —— 那一招的 7 米在实战路径上一次也用不上，而它的整条存在意义
+ * （把这块地许诺出去，与 `slam` 的"别站我旁边"分开）恰恰是"从远处就该开始"。
+ *
+ * 所以诉求**声明在招上**，不从 `range` 反推：`range` 说的是"够得着"、`standoff` 说的是"想站哪"，
+ * 一个问题由两个数回答迟早分家（`blink` 与 `reach` 分家是同一条判据）。近战招不写这一格，
+ * 所以没有这一格的敌人逐帧与修前一致。
+ *
+ * "现在真的能出手"（`attackCooldown` 走完）也算在"想用"里 —— 这一条是量出来之后才加的：
+ * 只看距离时，丢完圈的那 8.5 秒冷却里它会站在圈外等（`orbit` 的等待环半径恰好落在诉求带内，
+ * 爬兽 1.5 × 3.3 = 4.95 米），于是**近战那半条命整条消失**（30 秒 × 5 种子：裂隙 20 次、
+ * 近战 0 次）。等冷却与贴身出手不冲突：手上没牌就往前压，有牌才站在原地打牌。
+ */
+export function readyStandoffMove(enemy, dist, aimDot = 2) {
+  if (enemy.attackCooldown > 0) return false;
+  return enemy.moves.some((m) => {
+    const band = m.standoff;
+    if (!Array.isArray(band) || band.length !== 2) return false;
+    if (dist < band[0] || dist > band[1]) return false;
+    return moveUsable(enemy, m, dist, aimDot);
+  });
+}
+
+/**
  * 敌人想站住的距离——**「同时可出的招最多」的那个边界**，不是"勉强够得着"的距离。
  *
  * 早期写法是"有近战招就贴到 attackRange，否则停在射程外圈"，追击却按最远招的

@@ -16,7 +16,7 @@
  * - 敌人之间与玩家身体之间互相推开（`ai/Separation`），不再重叠成一坨。
  */
 import { StateMachine } from '../engine/StateMachine.js';
-import { hasUsableMove } from '../combat/EnemyMoves.js';
+import { hasUsableMove, readyStandoffMove } from '../combat/EnemyMoves.js';
 
 /** 承诺态：进入后由自己的计时推进，外部判定不得改判 */
 const COMMITTED = new Set(['windup', 'strike', 'recover']);
@@ -25,8 +25,11 @@ const COMMITTED = new Set(['windup', 'strike', 'recover']);
 const PRIORITY = [
   ['stagger', (e) => e.staggerTimer > 0],
   ['return', (e) => e.sense.returning],
-  // 追击跑到本招的"甜点位"才停：停在最远招的够得着边缘上，招式表里其余的招就永远轮不到
-  ['pursue', (e) => e.sense.alerted && e.sense.dist > e.holdRange],
+  // 追击跑到本招的"甜点位"才停：停在最远招的够得着边缘上，招式表里其余的招就永远轮不到。
+  // 带站位诉求的招（`standoff`）是这条的例外：它在这个距离就够用，逼它先贴脸等于让那一招
+  // 在实战里从不发生（B69：裂隙的 7 米抛掷距离，实测起手点被两招近战顶到 3.25 米）。
+  ['pursue', (e) => e.sense.alerted && e.sense.dist > e.holdRange
+    && !readyStandoffMove(e, e.sense.dist, e.aimDot())],
   ['windup', (e, ctx) => ctx.canStrike],
   ['orbit', (e) => e.sense.alerted],
   ['idle', () => true],

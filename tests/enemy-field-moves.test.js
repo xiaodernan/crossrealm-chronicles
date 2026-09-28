@@ -19,7 +19,10 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ENEMY_MOVES, ENEMY_MOVE_SETS } from '../src/content/tuning.js';
-import { holdRangeOf, moveHits, moveRange, moveUsable, seededRng } from '../src/combat/EnemyMoves.js';
+import {
+  holdRangeOf, moveHits, moveRange, moveUsable, readyStandoffMove, seededRng,
+} from '../src/combat/EnemyMoves.js';
+import { resolveEnemyState } from '../src/ai/EnemyFSM.js';
 import {
   installWindowShim, makeManager, makePlayerRef, v, run, until, NEVER_LEAVES, spawn, duel,
 } from './helpers/enemyHarness.js';
@@ -382,6 +385,125 @@ describe('三类专属招在自己的甜点位上可用，而且在真 AI 里真
       const 读数 = `${type} 五个序列里「${name}」逐轮出场 ${JSON.stringify(每轮)}`;
       expect(累计, `${读数} —— 五轮 150 秒一共只有 ${累计} 次`).toBeGreaterThanOrEqual(阈值);
       expect(出场轮数, `${读数} —— 只有 ${出场轮数} 轮出场`).toBeGreaterThanOrEqual(4);
+    }
+  });
+});
+/** 数一次"这一招起手了"：连续帧只算一次（`activeMove` 在整段里都不变） */
+const 出招序列 = (m, seconds, player, ref, e) => {
+  const 序 = [];
+  let 上一招 = null;
+  for (let i = 0; i < Math.round(seconds / DT); i += 1) {
+    m.update(DT, player, ref, null, null);
+    const n = e.activeMove?.name ?? null;
+    if (n && n !== 上一招) 序.push({ 招: n, 距离: e.distanceTo(player), 时刻: i * DT });
+    上一招 = n;
+  }
+  return 序;
+};
+
+/**
+ * B69：站位诉求（`standoff`）—— "身体是近战、手里却有一招远距形状"的敌人不必先贴脸。
+ *
+ * 成因不是招本身弱，是**站位规则**：`holdRangeOf` 取"同时可出的招最多"的那个边界，两招近战
+ * （3.30 米）把裂隙的 7 米顶掉，于是它永远先走到脸上才丢圈（实测起手 3.25 米 / 20 秒里三次
+ * 都在脸上）。这一节钉两头：
+ *
+ * - **声明那头**（带子真有人拿、真落在够得着的范围里、带子里真的用得出）：防的是"写了没人读"
+ *   —— 这是 B68 一族在招式表上的版本，与技能树 `effect` 白名单同型；
+ * - **行为那头**（开场从带子里丢一次、然后照旧进来打近战）：只钉声明的话，把
+ *   `readyStandoffMove` 从状态机里整条摘掉照样全绿 —— 那条路才是这一片真正修的东西。
+ *
+ * 还有一条**反过来的洞**是本片量出来才补上的：只看距离时，丢完圈的那 8.5 秒冷却里敌人会站在
+ * 等待环上（`orbitKeep` 1.5 × 3.30 = 4.95 米，恰好落在诉求带内）干等，**近战那半条命整条消失**
+ * （30 秒 × 5 种子：裂隙 20 次、近战 0 次）。所以"想用"里必须带上"现在真的能出手"。
+ */
+describe('B69：站位诉求（`standoff`）不让近战敌人的远招被自己的身位顶掉', () => {
+  const 带诉求 = Object.entries(ENEMY_MOVES).filter(([, m]) => Array.isArray(m.standoff));
+
+  it('声明是活的：真有人拿、带子落在自己够得着的范围里、在带子里三段距离都用得出', () => {
+    expect(带诉求.length, '一条 `standoff` 都没有 —— 这一节在空转').toBeGreaterThan(0);
+    for (const [id, move] of 带诉求) {
+      const 持有者 = ownersOf(id);
+      expect(持有者.length, `${id} 写在表里却没有任何敌人拿它：那是一条谁也读不到的声明`).toBeGreaterThan(0);
+      const [lo, hi] = move.standoff;
+      expect(hi, `${id}.standoff ${JSON.stringify(move.standoff)} 不是一个 [近, 远] 带子`).toBeGreaterThan(lo);
+      expect(lo).toBeGreaterThanOrEqual(0);
+      for (const t of 持有者) {
+        const { m, player, ref, e } = duel({ type: t, x: 6, z: 0, ai: NEVER_LEAVES });
+        m.update(DT, player, ref, null, null);              // 召唤名额等每帧才盖上
+        expect(moveRange(e, move), `${t} 拿 ${id} 时够不着 ${hi} 米：带子的远界写在射程之外`)
+          .toBeGreaterThanOrEqual(hi);
+        for (const d of [lo, (lo + hi) / 2, hi]) {
+          expect(moveUsable(e, move, d, 2), `${t} 站在 ${d} 米（正是自己的诉求带里）却用不出 ${id}`).toBe(true);
+          expect(readyStandoffMove(e, d), `${t} 站在 ${d} 米时，"想用 ${id}"这件事没有被认出来`).toBe(true);
+        }
+        e.attackCooldown = 5;
+        expect(readyStandoffMove(e, (lo + hi) / 2), '冷却里的敌人不该"想用"任何东西：它得先往前压').toBe(false);
+      }
+    }
+  });
+
+  it('爬兽从六米外先丢圈：第一次起手落在诉求带里，不是先走到 3.3 米', () => {
+    const [lo, hi] = ENEMY_MOVES.rift.standoff;
+    for (const 起点 of [6, 10]) {
+      const m = makeManager();
+      const player = v(0, 0);
+      const ref = makePlayerRef();
+      const e = spawn(m, { type: 'crawler', x: 起点, z: 0, ai: NEVER_LEAVES, hp: 99999, posture: 99999 });
+      const 序 = 出招序列(m, 12, player, ref, e);
+      const 首次 = 序[0];
+      expect(首次?.招, `从 ${起点} 米起的第一招是 ${首次?.招}，不是裂隙（读到的序列 ${JSON.stringify(序)}）`).toBe('裂隙');
+      expect(首次.距离, `从 ${起点} 米起，裂隙的起手点 ${首次.距离.toFixed(2)} 米落在诉求带 ${JSON.stringify(ENEMY_MOVES.rift.standoff)} 之外`)
+        .toBeGreaterThanOrEqual(lo);
+      expect(首次.距离, `起手点 ${首次.距离.toFixed(2)} 米超出了自己够得着的 ${hi} 米`).toBeLessThanOrEqual(hi);
+    }
+  });
+
+  it('丢完照旧进来打近战：诉求带不是"站在圈外放风"的借口', () => {
+    const m = makeManager();
+    const player = v(0, 0);
+    const ref = makePlayerRef();
+    const e = spawn(m, { type: 'crawler', x: 6, z: 0, ai: NEVER_LEAVES, hp: 99999, posture: 99999 });
+    const 序 = 出招序列(m, 30, player, ref, e);
+    const [lo, hi] = ENEMY_MOVES.rift.standoff;
+    const 带内裂隙 = 序.filter((x) => x.招 === '裂隙' && x.距离 >= lo && x.距离 <= hi);
+    const 近战 = 序.filter((x) => x.招 !== '裂隙');
+    expect(带内裂隙.length, `30 秒里没有一次"从诉求带里丢圈"：${JSON.stringify(序.map((x) => x.招 + '@' + x.距离.toFixed(2)))}`)
+      .toBeGreaterThanOrEqual(1);
+    expect(近战.length, `30 秒里一次近战都没出 —— 诉求带把近战那半条命挤掉了：${JSON.stringify(近战)}`)
+      .toBeGreaterThanOrEqual(1);
+    expect(Math.max(...近战.map((x) => x.距离)), '近战招不该在诉求带里出：那距离上它够不着')
+      .toBeLessThan(lo);
+  });
+
+  it('诉求带之外照旧先贴脸：甜点位与带子之间那一小段仍然是 pursue', () => {
+    const { e } = duel({ type: 'crawler', x: 5, z: 0, ai: NEVER_LEAVES });
+    e.sense.alerted = true;
+    expect(e.holdRange, '爬兽的甜点位（近战那两招定的）').toBeCloseTo(3.3, 5);
+    e.attackCooldown = 0;
+    e.sense.dist = 5;
+    expect(resolveEnemyState(e, { canStrike: true }), '在诉求带里、手上有牌 → 当场起手').toBe('windup');
+    expect(resolveEnemyState(e, { canStrike: false }), '在诉求带里但抢不到名额 → 等待环，不该一路贴到脸上').toBe('orbit');
+    e.sense.dist = 3.4;
+    expect(resolveEnemyState(e, { canStrike: false }), '带子之外（甜点位与 4.5 米之间）照旧先贴脸').toBe('pursue');
+    e.sense.dist = 5;
+    e.attackCooldown = 3;
+    expect(resolveEnemyState(e, { canStrike: false }), '冷却里站在圈外干等 = 近战那半条命消失').toBe('pursue');
+  });
+
+  it('没有这一格的敌人一个都没被带动：十五类甜点位逐值钉住（本片改前改后同一个数）', () => {
+    /* 这张表钉的是"本片没有连带改动别人的身位"，不是"这些数永远对"：
+     * 有意重调某一招的 reach/range 时跟着改这里，并在提交信息里说明是重调。
+     * 值 = 2026-09-29 在 `duel({ type })` 的默认 attackRange 下量出来的（见本片 §9 那条 ADR）。 */
+    const 基线 = {
+      soldier: 2.9, elite: 2.9, golem: 2.9, dummy: 2.2, boss: 2.9, default: 2.9,
+      wraith: 3, stalker: 2.9, crawler: 3.3, knight: 2.9, dancer: 2.8, juggernaut: 2.9,
+      drone: 5.5, sentinel: 13, hexer: 13,
+    };
+    for (const [t, 期望] of Object.entries(基线)) {
+      const { m, player, ref, e } = duel({ type: t, x: 6, z: 0, ai: NEVER_LEAVES });
+      m.update(DT, player, ref, null, null);
+      expect(+holdRangeOf(e).toFixed(3), `${t} 的甜点位从 ${期望} 米动了`).toBe(期望);
     }
   });
 });
