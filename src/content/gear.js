@@ -292,6 +292,7 @@ export function rollBossGear(rng = Math.random, bossId = null) {
   const base = BASES[spec.base];
   const rarity = RARITY[spec.rarity];
   if (!base || !rarity) return null;
+  // rollBossGear 返回：固定底座与档位，只掷词缀
   return { base: base.id, rarity: rarity.id, affixes: rollAffixes(rng, rarity) };
 }
 
