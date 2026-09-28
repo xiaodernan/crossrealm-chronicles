@@ -20,129 +20,12 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { scheduler } from '../src/engine/Scheduler.js';
-import { AudioManager, MODE_TEMPO } from '../src/audio/AudioManager.js';
-import { installWindowShim } from './helpers/enemyHarness.js';
+import { MODE_TEMPO } from '../src/audio/AudioManager.js';
+import {
+  FRAME, armAudio, runAt, run, framesToFirst, notesOn, countOn, freshArm, disarmAudio,
+} from './helpers/fakeAudio.js';
 
 const SRC = join(process.cwd(), 'src');
-const FRAME = 1 / 60;
-
-/** 沿连接链走到被贴了标签的那条总线，音符"进了哪一层"由走回来的结果说了算 */
-function busOf(node) {
-  let cur = node;
-  for (let hops = 0; cur && hops < 8; hops++) {
-    if (cur.label) return cur.label;
-    cur = cur._target;
-  }
-  return null;
-}
-
-/** AudioParam 的形状：gain 与 frequency 在真设备上都是同一套方法，这里也别分家 */
-const audioParam = () => {
-  const p = { value: 0 };
-  p.setValueAtTime = () => p;
-  p.linearRampToValueAtTime = () => p;
-  p.exponentialRampToValueAtTime = () => p;
-  p.setTargetAtTime = () => p;
-  return p;
-};
-
-/**
- * 假 AudioContext：只实现 `AudioManager` 真的用到的那几样，
- * 并把每一次 `start()` 记成一条音符（总线 + 频率 + 时刻）。
- */
-function makeFakeAudioContext() {
-  return class FakeAudioContext {
-    constructor() {
-      this.state = 'suspended';
-      this.currentTime = 0;
-      this.sampleRate = 44100;
-      this.notes = [];
-      this.resumed = 0;
-      this.destination = this._node('destination');
-    }
-    _node(label, kind) {
-      const self = this;
-      const n = {
-        label,
-        kind: kind ?? null,
-        type: 'sine',
-        _target: null,
-        buffer: null,
-        gain: audioParam(),
-        frequency: audioParam(),
-        connect(target) { n._target = target; },
-        disconnect() { n._target = null; },
-        start(at) {
-          if (!n.kind) return;
-          self.notes.push({ kind: n.kind, bus: busOf(n), freq: n.frequency.value, at: at ?? self.currentTime });
-        },
-        stop() {},
-      };
-      return n;
-    }
-    resume() { this.resumed += 1; this.state = 'running'; }
-    createGain() { return this._node(null); }
-    createBiquadFilter() { return this._node(null); }
-    createOscillator() { return this._node(null, 'osc'); }
-    createBufferSource() { return this._node(null, 'noise'); }
-    createBuffer(_ch, len) { return { getChannelData: () => new Float32Array(len) }; }
-  };
-}
-
-const BUSES = { master: 'master', sfx: 'sfx', ambient: 'ambient', bgm: 'bgm', combatLayer: 'combat', bleed: 'bleed' };
-
-/**
- * 走真实的上屏路径：装假环境 → 造 manager → 由"第一次点击"解锁出 ctx。
- * 六条总线是解锁那一刻才存在的，所以标签在此之后才贴得上；
- * 解锁本身只起常驻底噪（两条振荡器），那不是节拍，数音之前把这段记录丢掉。
- */
-function armAudio() {
-  globalThis.AudioContext = makeFakeAudioContext();
-  installWindowShim();
-  const docHandlers = new Map();
-  globalThis.document = {
-    addEventListener(type, fn) {
-      if (!docHandlers.has(type)) docHandlers.set(type, new Set());
-      docHandlers.get(type).add(fn);
-    },
-    removeEventListener(type, fn) { docHandlers.get(type)?.delete(fn); },
-  };
-  const audio = new AudioManager();
-  docHandlers.get('click').forEach((fn) => fn());
-  const ctx = audio.ctx;
-  for (const [field, label] of Object.entries(BUSES)) audio[field].label = label;
-  ctx.notes.length = 0;
-  return { audio, ctx };
-}
-
-/** 固定步长推进主循环：调度器走一格，假 ctx 的时间跟着走一格；返回实际帧数 */
-function runAt(ctx, seconds, step = FRAME) {
-  let elapsed = 0;
-  let frames = 0;
-  while (elapsed < seconds - 1e-9) {
-    scheduler.update(step);
-    ctx.currentTime += step;
-    elapsed += step;
-    frames += 1;
-    if (frames > 100000) throw new Error('runAt() 未收敛');
-  }
-  return frames;
-}
-
-const run = (ctx, seconds) => runAt(ctx, seconds, FRAME);
-
-/** 逐帧推进到某条总线出声，返回用掉的帧数（出声那一帧算在内）；300 帧不出声返回 NaN */
-function framesToFirst(ctx, bus, step = FRAME) {
-  for (let i = 1; i <= 300; i++) {
-    scheduler.update(step);
-    ctx.currentTime += step;
-    if (ctx.notes.some((n) => n.bus === bus)) return i;
-  }
-  return Number.NaN;
-}
-
-const notesOn = (ctx, bus) => ctx.notes.filter((n) => n.bus === bus);
-const countOn = (ctx, bus) => notesOn(ctx, bus).length;
 
 /**
  * 链条的节拍：照 `Scheduler` 自己的算法把 remain 一帧一帧减到非正，得到第一拍的帧数，
@@ -163,12 +46,6 @@ function firstBeatFrame(periodSeconds, step) {
 
 const beatsIn = (periodSeconds, frames, step = FRAME) => Math.floor(frames / firstBeatFrame(periodSeconds, step));
 
-/** 换一个干净的 manager（调度器是模块单例，用例之间必须手工清零） */
-function freshArm() {
-  scheduler.clearAll();
-  return armAudio();
-}
-
 let audio = null;
 let ctx = null;
 
@@ -182,11 +59,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  scheduler.clearAll();
-  delete globalThis.AudioContext;
-  delete globalThis.document;
-  delete globalThis.window;
-  delete globalThis.CustomEvent;
+  disarmAudio();
 });
 
 describe('BGM 节拍跟着主循环的秒数走（B38 音频半区）', () => {

@@ -328,7 +328,7 @@ export const GAME_EVENTS = Object.freeze({
     payload: '{ mode }',
   },
   'game-audio-sfx': {
-    desc: '请求播一个音效：sfx 必须是 AudioManager 上的方法名，Game 里查不到就静默不播 —— 所以新增音效名要同时补 AudioManager',
+    desc: '请求播一个音效：sfx 必须是 AudioManager 导出的 SFX_NAMES 里那一格，名字不对由 playSfx 当场抛错（B71 之前是查不到就静默不播）。新增音效名要同时补 AudioManager 上的方法与那张表',
     payload: '{ sfx }',
   },
   'camera-mode-changed': {

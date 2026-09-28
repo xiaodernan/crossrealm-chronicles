@@ -39,6 +39,16 @@ const BOSS_BGM_MAP = {
 /** 每层 BGM 的旋律间隔（毫秒）：读它的是 `_startMelody`，单位换算在那里做一次。 */
 export const MODE_TEMPO = { zone: 520, dungeon: 680, boss: 380, 'boss-shadow': 360, 'boss-archmagus': 400, 'boss-singularity': 320, 'boss-void': 350, 'boss-chaos': 300, 'boss-dungeon': 420 };
 
+/**
+ * 允许"用名字远程请求"的音效 —— `game-audio-sfx` 事件里 `sfx` 那一格唯一的合法取值。
+ *
+ * 这张表加的是"哪些音可以被远程点"这一格信息，不是方法名单的拷贝。名单与实现的关系
+ * 由 `tests/audio-sfx-contract.test.js` 双向钉住：这里每一格必须真是本类的方法、
+ * `src/` 里每一处 `sfx: '<字面量>'` 必须在这里、这里每一格必须至少有一个调用方。
+ * 也就是说：加一格要么带一个真派发点，要么红。
+ */
+export const SFX_NAMES = Object.freeze(['doorOpen', 'roomClear', 'levelUp', 'bossPhase', 'loreDiscover']);
+
 export class AudioManager {
   constructor() {
     this.ctx = null;
@@ -341,6 +351,21 @@ export class AudioManager {
     freqs.forEach((f, i) => {
       scheduler.after(i * step, () => this.playTone(f, dur, 'sine', vol), TAG_ONESHOT);
     });
+  }
+
+  /**
+   * 按名字播一个音效 —— `game-audio-sfx` 的唯一咽喉（B71）。
+   *
+   * 修前 Game.js 里写的是 `if (fn && typeof this.audio[fn] === 'function') this.audio[fn]()`：
+   * 名字抄错一个字母的症状是**那一下没声音**，不报错、不掉帧、没人知道，
+   * 而这条契约只活在 `engine/events.js` 的一条 `desc` 注释里。这里把它升级成当场炸 ——
+   * 与 `engine/EventBus.js` 对未登记事件名同一条判据：静默失踪是最贵的一种失败。
+   */
+  playSfx(name) {
+    if (!SFX_NAMES.includes(name)) {
+      throw new Error(`未知的音效名 "${name}"：SFX_NAMES 里没有这一格（现有 ${SFX_NAMES.length} 条）。新增音效要同时补 AudioManager 上的方法与这张表。`);
+    }
+    this[name]();
   }
 
   swingLight() { this._playNoise(0.06, 0.07, 1200); this.playTone(180, 0.04, 'sine', 0.04); }

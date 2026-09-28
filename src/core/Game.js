@@ -371,8 +371,9 @@ export class Game {
       else this.audio.setMode(mode);
     });
     window.addEventListener('game-audio-sfx', (e) => {
-      const fn = e.detail.sfx;
-      if (fn && typeof this.audio[fn] === 'function') this.audio[fn]();
+      // 名字对不对由 AudioManager 自己判（B71）：这里不再做 `typeof === 'function'` 的静默兜底，
+      // 抄错音效名的代价从"那一下没声音"变成当场抛错给开发者看。
+      this.audio.playSfx(e.detail?.sfx);
     });
     window.addEventListener('dungeon-supply', (e) => {
       this.player.combat.restore(e.detail);
