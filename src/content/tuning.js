@@ -43,6 +43,13 @@ export const BODY_PLANS = {
   wraith:   { scale: 0.92, parts: ['head', 'torso'], radius: 0.42, hover: 0.7 },
   stalker:  { scale: 0.95, parts: ['head', 'torso', 'legs'], radius: 0.42 },
   sentinel: { scale: 1.05, parts: ['head', 'torso'], radius: 0.55, hover: 0.35 },
+  /**
+   * W-B7 切片3 新增的三类。爬兽贴地、骑士最重、舞者最轻 ——
+   * 体型差要能在"被击退多远"上读出来（`mass` 取自 `scale`）。
+   */
+  crawler: { scale: 1.02, parts: ['head', 'torso', 'legs'], radius: 0.50 },
+  knight:  { scale: 1.18, parts: ['head', 'torso', 'legs'], radius: 0.58 },
+  dancer:  { scale: 0.94, parts: ['head', 'torso', 'legs'], radius: 0.42 },
 };
 
 /**
@@ -55,7 +62,10 @@ export const HURTBOX = { snap: 0.9 };
 /** 防御减伤：1 - def/(def+K)，def=K 时 50%；cap 保证不会出现"免疫"手感 */
 export const MITIGATION = { K: 60, cap: 0.75 };
 
-/** 元素抗性（0~0.9），按敌人类型给出；未列出的类型视为无抗性 */
+/**
+ * 元素抗性，按敌人类型给出；未列出的类型视为无抗性。
+ * 符号约定见 `Resolution`（并被它夹在 [-0.5, 0.9]）：**正数减这一系的伤，负数更吃**。
+ */
 export const ENEMY_RESIST = {
   soldier: { fire: 0, ice: -0.15 },
   golem:   { fire: 0.25, ice: 0.35 },
@@ -63,12 +73,18 @@ export const ENEMY_RESIST = {
   drone:   { gravity: -0.25 },
   boss:    { fire: 0.15, ice: 0.15, gravity: 0.3 },
   dummy:   {},
-  /** 时线怨影：半透明的影子，怕火、被重力井拽得动 */
+  /** 时线怨影：半透明的影子，怕火（-0.15 = 更吃这一系），引力法术反倒打不实 */
   wraith:  { fire: -0.15, gravity: 0.2 },
-  /** 混沌掠行兽：贴地快体，重力井反而给它加速，冻不住 */
+  /** 混沌掠行兽：贴地快体，引力坍缩吃得最实，冰系反倒削得动 */
   stalker: { gravity: -0.2, ice: 0.1 },
   /** 边境哨炮：装甲构装，火与重力都啃不动多少 */
   sentinel: { fire: 0.25, gravity: 0.15 },
+  /** 虚空爬兽：裂隙里爬出来的冷血东西，怕冰；硬壳挡得住一点引力伤害 */
+  crawler: { ice: -0.25, gravity: 0.15 },
+  /** 深渊骑士：重甲，火与冰都啃不动 */
+  knight: { fire: 0.2, ice: 0.2 },
+  /** 刃舞者：轻装快体，冰与引力都啃得动 —— 负数在这一张表里是"更吃这一系"（见上面 `ENEMY_RESIST` 的符号约定） */
+  dancer: { gravity: -0.2, ice: -0.1 },
 };
 
 export const CRIT = {
@@ -212,6 +228,7 @@ export const HIT = {
 export const ENEMY_DEFENSE = {
   dummy: 0, soldier: 6, drone: 3, golem: 26, elite: 18, boss: 32,
   wraith: 4, stalker: 3, sentinel: 14,
+  crawler: 8, knight: 22, dancer: 6,
 };
 
 /** 玩家自身防御由装备/属性提供，M2 阶段基线为 0（先用闪避与弹反防御） */
@@ -381,6 +398,36 @@ export const ENEMY_MOVES = {
     name: '嚎叫引援', windup: 1.2, strike: 0.25, recover: 0.6, reach: 0.9, cone: -2,
     damage: 0, cooldown: 15, weight: 1, summon: { type: 'stalker', count: 2 },
     telegraph: { color: 0x99ff55 },
+  },
+  rift: {
+    // 裂隙（虚空爬兽，W-B7 切片3）：命中段不打人，而是**把这块地许诺出去** ——
+    // 在玩家脚下交出一个危险区（`hazards.spawn`），圈的生命周期与施法者**解耦**：
+    // 打死它，圈照样落下。这正是 `aoe` 招做不到的事（圈长在敌人脚下、它一死整招消失），
+    // 也是这一族与 `slam` 的分界线：`slam` 是"别站我旁边"，`rift` 是"别站你刚才那块地"。
+    // `damage` 是**乘数**（`Enemy.damage × 它`），与世界其余招的写法一致，绝对伤害在落地那一帧算。
+    // `range` 是"圈能丢多远"：丢得到才起手，不是刀有多长（`moveRange` 认这一格）。
+    name: '裂隙', windup: 1.05, strike: 0.28, recover: 0.7, cone: -2,
+    damage: 0, cooldown: 8.5, weight: 2, range: 7,
+    hazard: { radius: 2.6, telegraph: 1.1, damage: 0.6, duration: 4, tick: 0.8, color: 0x9ade55 },
+    telegraph: { color: 0x9ade55 },
+  },
+  bash: {
+    // 盾击（深渊骑士，W-B7 切片3）：近战那一刀之外多一步"把人推开"。
+    // 推开走玩家的**外部冲量账**（`applyKnockback`），不写 `velocity` —— 与引力井同一条纪律：
+    // 写速度会被玩家的状态机每帧改写回来，"被推开"就退化成"按住方向键"。`knock` 是初速（米/秒）。
+    name: '盾击', windup: 0.62, strike: 0.26, recover: 0.5, reach: 0.9, cone: 0.2,
+    band: [0.05, 1.15],
+    damage: 1.1, cooldown: 3.6, weight: 2, knock: 7.5,
+    telegraph: { color: 0x88aaff },
+  },
+  whirl: {
+    // 旋舞（刃舞者，W-B7 切片3）：以自己为中心的**三段环形斩** —— `aoe` 与 `combo` 第一次合在一条招上。
+    // 单段的 `aoe`（崩地）后撤一步就出去了；三段之间不给"退一步再退回来"的空档，
+    // 想躲只能真的跑出这个圈。段与段之间不换人、不交名额（连段本来就是同一坑）。
+    name: '旋舞', windup: 0.5, strike: 0.22, recover: 0.45, cone: -2, aoe: 2.8,
+    band: [0.0, 1.0],
+    damage: 0.5, cooldown: 4.2, weight: 2, combo: 3, comboWindup: 0.26,
+    telegraph: { color: 0xff66cc },
   },
 };
 
@@ -638,5 +685,9 @@ export const ENEMY_MOVE_SETS = {
   wraith: ['phase', 'dive', 'thrust', 'sweep'],
   stalker: ['flurry', 'howl', 'thrust', 'cleave'],
   sentinel: ['charge', 'shot', 'guard', 'cleave'],
+  /** W-B7 切片3：三类各配一条**只有它有**的招（裂隙 / 盾击 / 旋舞） */
+  crawler: ['rift', 'flurry', 'thrust'],
+  knight: ['bash', 'sweep', 'guard', 'cleave'],
+  dancer: ['whirl', 'flurry', 'thrust'],
 };
 

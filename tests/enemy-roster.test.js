@@ -9,10 +9,13 @@
  * 一个默认形状的隐形档敌人，而门禁一声不吭。这里把"每类必须四表齐全且招式 ≥3"
  * 钉死；出生侧 `EnemyManager.spawnDefaults` 写的 `type:` 字面量必须都登记过。
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BODY_PLANS, ENEMY_DEFENSE, ENEMY_RESIST, ENEMY_MOVES, ENEMY_MOVE_SETS } from '../src/content/tuning.js';
+import { installWindowShim, makeManager } from './helpers/enemyHarness.js';
+
+beforeAll(installWindowShim);
 
 const ROOT = process.cwd();
 const readSrc = (rel) => readFileSync(join(ROOT, 'src', rel), 'utf8');
@@ -79,5 +82,53 @@ describe('W-B7 切片1：时线怨影 / 混沌掠行兽 / 边境哨炮', () => {
     }
     // 新类型前面的注释要说明"为什么放这两个位面"—— 两个空位面是这片的存在理由
     expect(段).toMatch(/破碎时线与混沌边境此前没有原生敌人/);
+  });
+});
+
+describe('W-B7 切片3：虚空爬兽 / 深渊骑士 / 刃舞者', () => {
+  it('外形与减伤同序：看着越大的一档砍上去越硬，三类全是贴地的实体', () => {
+    expect(BODY_PLANS.knight.scale).toBeGreaterThan(BODY_PLANS.crawler.scale);
+    expect(BODY_PLANS.crawler.scale).toBeGreaterThan(BODY_PLANS.dancer.scale);
+    expect(ENEMY_DEFENSE.knight).toBeGreaterThan(ENEMY_DEFENSE.crawler);
+    expect(ENEMY_DEFENSE.crawler).toBeGreaterThan(ENEMY_DEFENSE.dancer);
+    for (const t of ['crawler', 'knight', 'dancer']) {
+      expect(BODY_PLANS[t].parts, `${t} 是贴地的实体，该占 legs 分段`).toContain('legs');
+      expect(BODY_PLANS[t].hover ?? 0, `${t} 不该悬浮（悬浮会让打击带与地表对不上）`).toBe(0);
+    }
+    expect(ENEMY_MOVE_SETS.crawler).toContain('rift');
+    expect(ENEMY_MOVE_SETS.knight).toContain('bash');
+    expect(ENEMY_MOVE_SETS.dancer).toContain('whirl');
+  });
+
+  it('抗性格按表头的符号约定说话：重甲骑士双抗为正，爬兽与舞者各有"更吃"的那一系', () => {
+    // 符号约定（`Resolution` 夹在 [-0.5, 0.9]）：正数减这一系的伤，负数更吃
+    for (const v of Object.values(ENEMY_RESIST.knight)) expect(v, 'knight').toBeGreaterThan(0);
+    expect(ENEMY_RESIST.crawler.ice).toBeLessThan(0);
+    expect(ENEMY_RESIST.dancer.gravity).toBeLessThan(0);
+    // 三条专属招的"贵"也要读得出来：裂隙与旋舞都比同位阶的常规招长冷却，盾击比横扫更费
+    expect(ENEMY_MOVES.rift.cooldown).toBeGreaterThan(ENEMY_MOVES.thrust.cooldown);
+    expect(ENEMY_MOVES.whirl.combo).toBeGreaterThan(1);
+    expect(ENEMY_MOVES.bash.reach).toBeGreaterThan(0);
+  });
+
+  it('九只新敌真的出生在场上，且全场出生点两两不重合（叠在同一点会互相挤着抖）', () => {
+    // 数的是真跑一遍 `spawnDefaults()` 之后的名册，不是源码里的字面量个数
+    const m = makeManager();
+    m.spawnDefaults();
+    expect(m.enemies.length, '场上敌人比上次少了一整批：出生表被动过了').toBeGreaterThanOrEqual(40);
+    const 按类型 = {};
+    for (const e of m.enemies) 按类型[e.type] = (按类型[e.type] ?? 0) + 1;
+    for (const t of ['crawler', 'knight', 'dancer']) {
+      expect(按类型[t] ?? 0, `${t} 在场上的出生点不足 3 处`).toBeGreaterThanOrEqual(3);
+    }
+    const 点位 = new Set();
+    const 重合 = [];
+    for (const e of m.enemies) {
+      const k = `${e.spawnPoint.x},${e.spawnPoint.z}`;
+      if (点位.has(k)) 重合.push(`${e.type}@${k}`);
+      点位.add(k);
+    }
+    expect(点位.size, '一个出生点都没扫到，这条就在空转').toBeGreaterThan(30);
+    expect(重合, `这些敌人出生在同一点：${重合.join('、')}`).toEqual([]);
   });
 });

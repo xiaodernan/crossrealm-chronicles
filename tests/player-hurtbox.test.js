@@ -187,7 +187,10 @@ describe('招式表的竖直维度', () => {
     let low = 0;
     let melee = 0;
     for (const [id, m] of Object.entries(ENEMY_MOVES)) {
-      if (m.ranged || m.guard || m.summon) continue;   // 弹体、举盾与召唤都不落到玩家身上
+      // 弹体、举盾、召唤与裂隙都不经过"玩家身上的打击带"：前两类当场不打人，弹体那一击
+      // 由弹体自己判，裂隙的伤害走 `GroundHazards` 的按段结算（那条路不递 part，
+      // 见证见 `enemy-field-moves.test.js`）—— 给它们配 band 等于配一个没人读的格子
+      if (m.ranged || m.guard || m.summon || m.hazard) continue;
       melee++;
       expect(m.band, id).toBeTruthy();
       expect(pickPart(standing, 0, m.band), `${id} 该打到站着的玩家`).toBeTruthy();

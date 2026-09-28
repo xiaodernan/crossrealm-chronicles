@@ -34,6 +34,13 @@ export class EnemyManager {
       // 远程招式交出的弹体走同一个管理器（敌方弹体由这里更新）
       projectiles: this.projectiles ?? null,
       /**
+       * 场地危险区的唯一出口（W-B7 切片3）。与 `projectiles` / `summon` 同一条纪律：
+       * 敌人只交出"这块地归我了"的意图，圈的生命周期、池化与撤销全归 `GroundHazards`。
+       * 此前只有 Boss 拿得到它（构造期注入），普通敌人一律没有 —— 于是"范围招"只剩
+       * 长在自己脚下、随自己一起消失的那一种（`aoe`）。
+       */
+      hazards: this.hazards,
+      /**
        * 召唤招式的唯一出口。敌人只交出"按这份规格放仆从"的意图，
        * 出生点、名额、归属与生命周期全在这里定 —— 让 `Enemy` 自己往 `enemies`
        * 里塞东西会在迭代途中改数组，也让"谁创建了谁"变成一笔糊账。
@@ -274,6 +281,20 @@ export class EnemyManager {
 
     for (const [x, z] of [[-172, 238], [-245, 280], [-160, 205]]) {
       this.spawn({ name: '边境哨炮', type: 'sentinel', x, z, hp: 180, posture: 70, damage: 16, speed: 3.2, aggroRange: 26, color: 0x3a4a68 });
+    }
+
+    // W-B7 切片3（战斗类型 7 → 10）：三类按"这位面缺什么样的威胁"落位。
+    // 坐标同样避开五座 Boss 场（半径 22）与各自营火，并且不与切片1 那三类的出生点重叠。
+    for (const [x, z] of [[70, 250], [-85, 258], [40, 168]]) {
+      this.spawn({ name: '虚空爬兽', type: 'crawler', x, z, hp: 150, posture: 58, damage: 15, speed: 5.6, aggroRange: 20, color: 0x5a7a3a });
+    }
+
+    for (const [x, z] of [[-255, 175], [-145, 250], [-205, 145]]) {
+      this.spawn({ name: '深渊骑士', type: 'knight', x, z, hp: 260, posture: 88, damage: 20, speed: 4.0, aggroRange: 22, color: 0x2a3550 });
+    }
+
+    for (const [x, z] of [[150, -20], [275, 10], [190, 200]]) {
+      this.spawn({ name: '刃舞者', type: 'dancer', x, z, hp: 135, posture: 52, damage: 13, speed: 6.4, aggroRange: 22, color: 0x7a2a5a });
     }
 
     const bx = -250, bz = -35;

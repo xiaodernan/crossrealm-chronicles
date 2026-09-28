@@ -46,10 +46,17 @@ describe('敌人招式表数据', () => {
         expect(typeof m.telegraph?.color, `${id}.telegraph`).toBe('number');
         expect(Object.keys(m.telegraph).sort(), `${id}.telegraph 的字段`).toEqual(TELEGRAPH_FIELDS);
         // 竖直打击带：会落到玩家身上的招必须给出区间，否则"跳起来"这件事在竖直方向不存在。
-        // 反过来，弹体与不伤人的招（防御/召唤）不该有 band —— 一个没人读的数字只是骗表格
-        if (m.ranged || m.guard || m.summon) {
+        // 反过来，不落到玩家身上的招不该有 band —— 一个没人读的数字只是骗表格。
+        // 这四类各自为什么没人读：弹体走弹、防御与召唤当场不打人，
+        // 裂隙的伤害由 `GroundHazards` 按段结，那条路**从不经过** `pickPart`
+        // （正面见证在 `enemy-field-moves.test.js`：裂隙砍中人时 `ref.parts` 里全是 `null`，
+        // 而同一次运行里近战招给出的是部位名 —— 有 band 才是说谎）
+        if (m.ranged || m.guard || m.summon || m.hazard) {
           expect(m.band, `${id}.band`).toBeUndefined();
-          if (m.guard || m.summon) expect(m.damage, `${id}.damage`).toBe(0);   // 这两类都不打人
+          // 同样地，`damage` 那一格是"当场落到玩家身上的那一击"的乘数：弹体那一击由弹体读它，
+          // 所以 ranged 不在下面这条里；防御/召唤/裂隙则没有任何人读它 ——
+          // 留着非零值就是一个没人读的数（B68 那一族），钉成 0 才算说了实话
+          if (m.guard || m.summon || m.hazard) expect(m.damage, `${id}.damage`).toBe(0);
         } else {
           expect(Array.isArray(m.band), `${id}.band`).toBe(true);
           expect(m.band[1], `${id}.band`).toBeGreaterThan(m.band[0]);

@@ -266,12 +266,18 @@ export class Enemy {
     this.windupNow = 0;
   }
 
-  /** 预警圈该画多大：范围招画真实危险半径，远程只给自己一圈起手提示 */
+  /**
+   * 预警圈该画多大：范围招画真实危险半径，"伤害会离开身体"的招只给自己一圈起手提示。
+   *
+   * 远程与裂隙同属后一类：真正的危险要么在弹体上、要么在玩家脚下那块地里，圈长在敌人
+   * 自己身上就只是在说"我在起手"。按 `moveRange`（裂隙是 7 米的抛掷距离）画出来的话，
+   * 玩家会后退七米以为躲开了，而那块地还是在原处开 —— 圈要说的是"离开哪儿"，不是"离我多远"。
+   */
   teleRadius() {
     const m = this.activeMove;
     if (!m) return 1.05;
     if (m.aoe) return m.aoe;
-    if (m.ranged) return this.attackRange;
+    if (m.ranged || m.hazard) return this.attackRange;
     return moveRange(this, m);
   }
 
@@ -370,11 +376,38 @@ export class Enemy {
     }
     const dist = this.distanceTo(ctx.target);
     if (!moveHits(this, move, dist, this.facingDotTo(ctx.target))) return false;
+    /* 裂隙：命中段交出的是"玩家此刻脚下这块地归我了"，这一帧一次血都不掉 —— 伤害由
+     * `GroundHazards` 按段结。`hazard.damage` 是乘数（与其余招同一写法），绝对值在这里
+     * 按本体伤害算一次，别处不再复制一份。无敌帧不挡这一手：圈不是"这一下"，是接下来
+     * 几秒的一块地，躲它的办法是走出去而不是在这一帧闪一下。
+     * 圆心取**玩家此刻的位置**、不是敌人脚下 —— 这正是它与 `aoe` 的分界：`aoe` 说的是
+     * "别站我旁边"，`rift` 说的是"别站你刚才那块地"。 */
+    if (move.hazard) {
+      const h = ctx.hazards;
+      if (!h) return false;
+      h.spawn({
+        x: ctx.target.x,
+        z: ctx.target.z,
+        radius: move.hazard.radius,
+        telegraph: move.hazard.telegraph,
+        damage: Math.round(this.damage * move.hazard.damage),
+        duration: move.hazard.duration,
+        tick: move.hazard.tick,
+        color: move.hazard.color,
+        owner: this,
+      });
+      return true;
+    }
     if (ref.combat.isInvulnerable()) return false;
     // 竖直方向也要相交：横扫低段该被跳掉、重劈高段跳不掉、玩家站高台时近战全部落空
     const part = pickPart(ref.combat, this.hurtBaseY(), move.band);
     if (!part) return false;
     ref.combat.takeDamage(damage, null, part);
+    /* 盾击那一类附带的推开：走玩家的**外部冲量账**，不写 `velocity` —— 写进去的速度
+     * 下一帧就被玩家状态机整条改写回来，"被推开"退化成"按住方向键"（W-A6 切片6）。
+     * 只在"这一刀真的砍到了"之后记这笔：无敌帧与被跳掉的低段都不该附赠位移，
+     * 否则玩家闪避成功了却被打飞，等于惩罚了正确的那一下。 */
+    if (move.knock) ref.applyKnockback(ctx.target.x - this.position.x, ctx.target.z - this.position.z, move.knock);
     return true;
   }
 

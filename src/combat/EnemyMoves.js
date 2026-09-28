@@ -50,6 +50,8 @@ export function isAttackMove(move) {
 
 /** 这招能打到的最远距离：远程用自己的射程，范围招至少覆盖自己的预警圈 */
 export function moveRange(enemy, move) {
+  // 裂隙类："够得着"是**圈能丢多远**（`range`），与刀长无关 —— 命中段判的是圈，不是近战那一刀
+  if (move.hazard) return move.range ?? 8;
   // 相位招的"够得着"是它能闪多远（`blink`），不是刀有多长 —— 落地之后那一刀由 `landRange` 判
   if (move.phase) return move.blink ?? 10;
   if (move.ranged) return move.range ?? 12;
