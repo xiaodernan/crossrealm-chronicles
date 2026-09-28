@@ -63,5 +63,22 @@ export default defineConfig({
     // 全局夹具：给 node 补一枚最小 ProgressEvent，消掉 three 纹理流式加载器在用例结束后
     // 抛出的未处理 rejection（详见 tests/setup.js 头注）。见 M4 测试夹具账。
     setupFiles: './tests/setup.js',
+    /**
+     * 全量分母只认 `tests/`（W-B4 切片1 追加留下的尾巴）。
+     *
+     * 为什么要写这一条：vitest 的默认 include 是"全树找 `.test` / `.spec` 后缀"那条模式，
+     * 而默认 exclude 只挡 `.idea` / `.git` / `.cache` / `.output` / `.temp` 这几类点目录 ——
+     * **挡不住本仓库的 `.tmp-*` 草稿目录**（那些目录 gitignored，但文件确实在磁盘上）。
+     * 实测证据：一次全量跑收到 80 个文件，其中一个是 `.tmp-wb3-slice3/replay.test.js`。
+     * 后果不是"数字难看"而是**记录不可复现**：§8/§9 每条验收都要写"多少例多少文件"，
+     * 分母随工作区堆了多少草稿而漂，读的人就没法判断红绿是不是同一件事。
+     *
+     * 收窄的代价由 `tests/suite-denominator.test.js` 付：它扫非点目录，要求"长得像测试
+     * 的文件全在 `tests/` 里"，所以今后把用例放到别处**不是被静默跳过而是当场红**。
+     *
+     * （这段注释里故意不写 glob 的字面形式：连续星号紧跟斜杠会提前关掉块注释，
+     * esbuild 报 "Expected identifier but found ."，整份配置加载不进来 —— 本条踩过。）
+     */
+    include: ['tests/**/*.test.js', 'tests/**/*.spec.js'],
   },
 });
