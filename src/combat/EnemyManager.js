@@ -289,11 +289,17 @@ export class EnemyManager {
       this.spawn({ name: '虚空爬兽', type: 'crawler', x, z, hp: 150, posture: 58, damage: 15, speed: 5.6, aggroRange: 20, color: 0x5a7a3a });
     }
 
-    for (const [x, z] of [[-255, 175], [-145, 250], [-205, 145]]) {
+    // B70：`[-255, 175]` 那一格四面都醒不过来（玩家贴到 1.7 米仍 `sense.alerted` 恒 false，
+    // 四个正方向全试过）—— 换到 `[-250, 120]`：同样在混沌边境、离最近的出生点 51.5 米、
+    // 离五座 Boss 场 133 米，四个方向都警觉。`tests/enemy-roster.test.js` 的"四向至少一向
+    // 会警觉"就是为这一类立的门禁（"站得下人"与"会警觉"从来是两件事）。
+    for (const [x, z] of [[-250, 120], [-145, 250], [-205, 145]]) {
       this.spawn({ name: '深渊骑士', type: 'knight', x, z, hp: 260, posture: 88, damage: 20, speed: 4.0, aggroRange: 22, color: 0x2a3550 });
     }
 
-    for (const [x, z] of [[150, -20], [275, 10], [190, 200]]) {
+    // B70 的第二处实例（同一族，由上面那道新门禁扫出来的）：`[275, 10]` 四向皆不警觉，换到
+    // `[240, -40]` —— 仍在米勒荒原、离最近的出生点 61 米、离 Boss 场 173 米，四个方向都警觉
+    for (const [x, z] of [[150, -20], [240, -40], [190, 200]]) {
       this.spawn({ name: '刃舞者', type: 'dancer', x, z, hp: 135, posture: 52, damage: 13, speed: 6.4, aggroRange: 22, color: 0x7a2a5a });
     }
 

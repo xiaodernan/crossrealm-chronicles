@@ -13,7 +13,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BODY_PLANS, ENEMY_DEFENSE, ENEMY_RESIST, ENEMY_MOVES, ENEMY_MOVE_SETS } from '../src/content/tuning.js';
-import { installWindowShim, makeManager } from './helpers/enemyHarness.js';
+import { installWindowShim, makeManager, makePlayerRef, v } from './helpers/enemyHarness.js';
 import { WorldManager } from '../src/world/WorldManager.js';
 import { ZONE_ORDER, zoneIdAt } from '../src/content/ZoneIdentity.js';
 
@@ -195,5 +195,56 @@ describe('W-B7 切片4：破阵重兵 / 位面咒师 —— 把两座位面的�
         expect(d, `${e.type}@${e.spawnPoint.x},${e.spawnPoint.z} 落在 Boss 场里`).toBeGreaterThan(20);
       }
     }
+  });
+});
+
+describe('W-B7 切片5：每个出生点都得醒得过来（B70 那一族）', () => {
+  /**
+   * “站得下人”与“会警觉”是两件事：`spawnDefaults` 只保证坐标在图上，不保证那一格的
+   * 视线不被挡。B70 的形状是 —— 玩家贴到 1.7 米、四个正方向全试一遍，`sense.alerted`
+   * 恒为 false：出生点被分离推力挪进了障碍，`Perception` 的求交把视线判没。台账最先
+   * 只记了 `knight@[-255,175]`，同一道门禁又扫出 `dancer@[275,10]` —— 同族两处实例。
+   * 这里**逐只隔离**测（一只敌人、一间真 `WorldManager` 世界），四向只要有一向醒得过来
+   * 就算这一格站得住人。
+   */
+  it('每个原生敌人的出生点，玩家贴到 1.7 米时四向至少有一向会警觉', () => {
+    const wm = new WorldManager({ add() {}, remove() {} }, { show() {}, toast() {} });
+    wm.build();
+    const 种子 = makeManager({ world: wm });
+    种子.spawnDefaults();
+    const 点 = 种子.enemies
+      .filter((e) => 原生敌人.includes(e.type))
+      .map((e) => ({ type: e.type, x: e.spawnPoint.x, z: e.spawnPoint.z }));
+    expect(点.length, '一个原生出生点都没扫到，这条门禁就在空转').toBeGreaterThanOrEqual(40);
+
+    const ref = makePlayerRef();
+    const 玩家 = v(0, 0);
+    const 四向 = [[1.7, 0], [-1.7, 0], [0, 1.7], [0, -1.7]];
+    const 闷点 = [];
+    for (const p of 点) {
+      // 一只一测：邻居之间的分离推力会互相干扰，混在一起测就分不清是谁站不住
+      const m = makeManager({ world: wm });
+      const e = m.spawn({ name: '哨探', type: p.type, x: p.x, z: p.z, hp: 999999, posture: 999999, respawn: false });
+      let 醒 = 0;
+      for (const [dx, dz] of 四向) {
+        e.sense.clear();
+        e.sense.returning = false;
+        玩家.set(p.x + dx, wm.getGroundHeight(p.x + dx, p.z + dz), p.z + dz);
+        for (let i = 0; i < 40; i += 1) m.update(1 / 60, 玩家, ref, null, null);
+        if (e.sense.alerted) 醒 += 1;
+      }
+      if (醒 === 0) 闷点.push(`${p.type}@${p.x},${p.z}`);
+    }
+    expect(闷点, `这些出生点四面都醒不过来（玩家贴脸也不警觉）：${闷点.join('、')}`).toEqual([]);
+  });
+
+  it('B70 换过的两格钉在表里：旧坐标（四向皆闷）不许悄悄回填', () => {
+    const m = makeManager();
+    m.spawnDefaults();
+    const 有 = (type, x, z) => m.enemies.some((e) => e.type === type && e.spawnPoint.x === x && e.spawnPoint.z === z);
+    expect(有('knight', -250, 120), '深渊骑士没在换过的 -250,120').toBe(true);
+    expect(有('knight', -255, 175), '深渊骑士又挪回了 -255,175（那一格四向皆不警觉）').toBe(false);
+    expect(有('dancer', 240, -40), '刃舞者没在换过的 240,-40').toBe(true);
+    expect(有('dancer', 275, 10), '刃舞者又挪回了 275,10（那一格四向皆不警觉）').toBe(false);
   });
 });
