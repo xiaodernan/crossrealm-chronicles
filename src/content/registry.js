@@ -618,7 +618,7 @@ export const CONTENT_TABLES = [
   },
   {
     kind: 'objectives',
-    note: '主线/任务目标（W-B3：ObjectiveEngine 数据驱动层）—— 分支、条件、标志、失败、重访',
+    note: '主线/任务目标（W-B3 切片1 的数据层）—— 分支、条件、标志、重访；在役读者只有 `game/QuestSystem.js`（按表序走）',
     shape: 'rows',
     table: OBJECTIVES,
     row: {
@@ -978,8 +978,11 @@ export function checkGearAffixes(table) {
  *    插一行、换序、或把 `branchTo` 指去别处，都会让翻转静默失踪 —— 这条钉住位置这个前提。
  * 3. **开新章的门控必须喊话**（`announce`），且喊的那一章就是它开的那一章（`chapter`）；
  *    不开新章的那一格（最后一道门）不许多喊 —— 喊了而章节没动，玩家看到的是一句对不上 HUD 的话。
- * 4. **`requires` 的生产者必须在前头**：`ObjectiveEngine.canActivate` 拒绝一个没被设过的标志时
- *    不抛，表现就是那一格永远不出现，而没人知道为什么。
+ * 4. **`requires` 的生产者必须在前头**。这一格今天没有运行时读者 —— 在役的是按表序走的
+ *    `QuestSystem`，会读 `requires` 的 `ObjectiveEngine` 已在 W-B3 切片4 删除。所以它的语义就是
+ *    这条不变式，加上 `tests/mainline-requires.test.js` 那条走查：按表序走到第 k 行时，
+ *    第 k 行声明的前置必须已经成立。少了这两道杠，"要一件还没人做的事"不会报错，
+ *    只会让表上写的资格变成装饰。
  * 5. **`branchTo` 只能指向紧跟其后的那一行**（就是第 2 条的反面）。
  */
 export function checkObjectiveTable(table) {
@@ -1026,7 +1029,7 @@ export function checkObjectiveTable(table) {
       const p = producers.get(flag);
       if (!p) {
         out.push(`${path}: requires.${flag} 在这一行之前没有任何一步的 flags 设过它`
-          + ' —— ObjectiveEngine 会永远拒绝激活这一格');
+          + ' —— 在役链按表序走，走到这一行时那件前置永远不会已经成立');
       } else if (p.value !== want) {
         out.push(`${path}: requires.${flag} 要 ${JSON.stringify(want)}，`
           + `但 "${p.id}" 那行设的是 ${JSON.stringify(p.value)}`);

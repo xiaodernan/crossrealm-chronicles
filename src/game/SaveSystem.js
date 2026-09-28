@@ -125,9 +125,10 @@ export class SaveSystem {
       game.settings.applyToGame(game);
     }
     if (game.fastTravel && data.fastTravel) game.fastTravel.unlocked = data.fastTravel;
-    game.quests.questIndex = data.quests.index;
-    game.quests.completed = data.quests.completed;
-    game.quests.chapter = data.quests.chapter ?? (data.quests.index > 8 ? 2 : 1);
+    // 落点与章节由 `QuestSystem.restoreFromSave` 向表核对（W-B3 切片4）：
+    // 这里以前是 `questIndex = data.quests.index` 加一句 `index > 8 ? 2 : 1` 猜章节 ——
+    // 前者让一份越界的档把玩家放进"没有当前任务"的状态而不报错，后者是门控位置的抄本
+    game.quests.restoreFromSave(data.quests);
     // 账本的形状、Set 的复原、读数不取磁盘那份 —— 全在 `content/objectives.js`（W-B3 切片2）。
     // 以前这里手抄了一遍形状：三个 Set 各一行、`kills` 的类型兜底、两个 bool 的缺省值，
     // 而判据读的是 `emptyStats()` 那一格 —— 两边各写各的，少抄的那格只是"回到初始值"，不报错

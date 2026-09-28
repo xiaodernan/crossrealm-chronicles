@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { migrate, MIGRATIONS, SAVE_KEYS, SaveVersionError } from '../src/game/SaveMigrations.js';
 import { SaveValidator, CURRENT_VERSION } from '../src/game/SaveValidator.js';
 import { SaveSystem } from '../src/game/SaveSystem.js';
+import { QuestSystem } from '../src/game/QuestSystem.js';
+import { installWindowShim } from './helpers/enemyHarness.js';
 import v4 from '../tests/save_v4_fixture.json';
 import v5 from '../tests/save_v5_fixture.json';
 
@@ -112,13 +114,17 @@ const makeGameStub = () => ({
     teleport(x, y, z, opts) { this.landed = { x, y, z, ...opts }; },
   },
   stats: { fromJSON() {}, pushToConsumers() {}, toJSON: () => ({}) },
-  quests: { stats: {}, syncProgress() {}, notifyUpdate() {} },
+  // `quests` 用**真的** `QuestSystem`：以前这里是一份手抄的最小壳，
+  // 于是 `applyData` 换调用点（切片4 改走 `quests.restoreFromSave`）时，这份壳只是让测试炸一下 ——
+  // 而"壳比生产少一格"正是 B63 那一族的病根（见 game-field-contract 的口径）
+  quests: new QuestSystem({ toast() {} }),
   spells: {},
   settings: { data: {}, applyToGame() {} },
   weaponSkills: { unlocked: new Set(['a', 'b']), fromJSON() {} },
 });
 
 describe('SaveSystem.ingest 的失败路径（不静默吞异常）', () => {
+  beforeAll(() => installWindowShim());
   const game = { dialog: { toasts: [], toast(t) { this.toasts.push(t); } } };
 
   it('v4 档一路走通：迁移 → 校验 → 应用，朝向角与派生字段都正确', () => {

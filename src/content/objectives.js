@@ -1,5 +1,5 @@
 /**
- * 目标/任务定义表（W-B3：ObjectiveEngine 数据驱动层）。
+ * 目标/任务定义表（W-B3 切片1 建的数据层；切片4 起在役读者只有 `game/QuestSystem.js`）。
  *
  * 结构：
  * - objectives: 目标定义数组，每个目标可包含分支、条件、标志、失败、重访逻辑
@@ -550,6 +550,21 @@ export const OBJECTIVES = [
 export const MAINLINE = OBJECTIVES.filter((r) => r.type !== 'chapter-gate');
 
 /**
+ * 走到第 `index` 步时玩家在哪一章 —— 由那一行自己标的 `chapter` 说话（W-B3 切片4）。
+ *
+ * 为什么要有这个函数：`SaveSystem` 读档时要么信盘上那份 `chapter`，要么用一句
+ * `index > 8 ? 2 : 1` 猜。那句 `8` 是"第一道门在第几格"的抄本 —— 表里插一行它就错，
+ * 而错了也只是 HUD 写着 Chapter 1、玩家正在做第 5 章的步骤（不报错）。
+ * 章节在表里本来就有两处真源（行上的 `chapter` 与门控行的 `chapter`），
+ * 而"门控行开的那一章就是它后面那些行的 `chapter`"这件事由注册表的整表不变式钉着，
+ * 所以这里取行上那一格就够了。
+ */
+export function chapterAt(index) {
+  const 落点 = Math.min(Math.max(Number.isInteger(index) ? index : 0, 0), MAINLINE.length - 1);
+  return MAINLINE[落点]?.chapter ?? 1;
+}
+
+/**
  * 走完 `id` 那一步之后要跨过的门控行；没有则 `null`。
  *
  * 靠的是**位置**（门控行紧跟在它为之外的那一步后面），不是另抄一份"哪一步开哪一章"的清单 ——
@@ -563,7 +578,7 @@ export function chapterGateAfter(id) {
   return next?.type === 'chapter-gate' ? next : null;
 }
 
-// 条件函数表（引用 ObjectiveEngine.CONDITIONS）
+// 条件函数表（在役的 `QuestSystem` 与已删除的 `ObjectiveEngine` 过去各写一份，这里是一份）
 export const CONDITIONS = {
   checkAllFragments: (state) => state.stats.discoveries?.has('fantasy-ring')
     && state.stats.discoveries?.has('magic-castle')
@@ -584,12 +599,9 @@ export const CONDITIONS = {
   checkInfinity: (state) => state.stats.chaosBossDefeated && (state.stats.skillsUnlocked || 0) >= 3,
 };
 
-// 失败条件表
-export const FAIL_CONDITIONS = {
-  // 示例：若玩家在特定条件下失败任务
-  // timeout: (state) => state.timeElapsed > 300, // 5分钟超时
-  // deathInBoss: (state) => state.stats.deathsInCurrentBoss > 3,
-};
+// 「失败条件」这一族以前有一张空表 + 两行注释掉的示例，唯一的读者是 `ObjectiveEngine`
+// （W-B3 切片4 已删）。要做任务失败，先从"哪一行的什么条件算失败"这张表立起来，
+// 而不是留一个没人读的空壳在数据层里。
 /* ------------------------------------------------------------------ *
  * 任务这一件事的三本账（W-B3 切片2）
  *

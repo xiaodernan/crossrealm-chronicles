@@ -1,6 +1,6 @@
 import { keyText } from '../content/keyHints.js';
 import {
-  BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterGateAfter,
+  BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
 } from '../content/objectives.js';
 
@@ -117,10 +117,44 @@ export class QuestSystem {
   get current() { return MAINLINE[this.questIndex] ?? null; }
 
   /**
+   * 读档落点：指针必须在表里，章节由那一格所在的位置说话（W-B3 切片4）。
+   *
+   * `SaveSystem` 以前把盘上的 `index` 直接写进 `questIndex`，于是 `index: 999` 只是让
+   * `current` 变成 `null` —— 少一行 HUD 任务、指路箭头失踪，而**不报错**；章节则要么信盘上
+   * 那份，要么用一句 `index > 8 ? 2 : 1` 猜（那个 8 是"第一道门在第几格"的抄本）。
+   * 现在这两件事都由表说话，盘上的值只在**与表一致**时被采纳；不一致就是坏档，
+   * 当场留下一条能读懂的理由，而不是静默地把玩家放进一个表说不可能存在的位置。
+   *
+   * @param {{ index?: unknown, completed?: unknown, chapter?: unknown }} saved `data.quests`
+   * @returns {{ index: number, chapter: number, 采纳的: { index: boolean, chapter: boolean } }}
+   */
+  restoreFromSave(saved = {}) {
+    const 上限 = MAINLINE.length - 1;
+    const raw = saved?.index;
+    const 是整数 = Number.isInteger(raw);
+    const 落点 = 是整数 ? Math.min(Math.max(raw, 0), 上限) : 0;
+    const 采纳了index = 是整数 && raw >= 0 && raw <= 上限;
+    if (!采纳了index) {
+      console.warn(`[quests] 存档里的 index ${JSON.stringify(raw)} 不能落在这条 ${MAINLINE.length} 步的主线上，`
+        + `已按第 ${落点} 步（"${MAINLINE[落点]?.id}"）继续`);
+    }
+    this.questIndex = 落点;
+    this.completed = Boolean(saved?.completed ?? false);
+    const 该在哪章 = chapterAt(落点);
+    const 采纳了章节 = saved?.chapter === undefined || saved.chapter === 该在哪章;
+    if (!采纳了章节) {
+      console.warn(`[quests] 存档写着 chapter ${JSON.stringify(saved.chapter)}，但第 ${落点} 步`
+        + `（"${MAINLINE[落点]?.id}"）在表上属于第 ${该在哪章} 章 —— 以表为准`);
+    }
+    this.chapter = 该在哪章;
+    return { index: 落点, chapter: 该在哪章, 采纳的: { index: 采纳了index, chapter: 采纳了章节 } };
+  }
+
+  /**
    * 监听器只做两件事：把事件记到账上（记账表在 `content/objectives.js`，全仓一份），
    * 然后问一句「当前这一步完成了没有」。
    *
-   * 为什么不再逐事件自己写计数：那九段与 `ObjectiveEngine` 的十一段是同一条算式的两份抄本，
+   * 为什么不再逐事件自己写计数：那九段与旧 `ObjectiveEngine` 的十一段是同一条算式的两份抄本（引擎已删），
    * 而 `poi-interact` 那一段把"记账 / 推进 / 门控"混在一起写了五遍同一句 `id === q.targetId`。
    */
   setupListeners() {
