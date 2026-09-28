@@ -27,7 +27,7 @@
 
 import { BOSS_ROSTER, BOSS_IDS, DUNGEON_BOSS_PREFIX } from './bossRoster.js';
 import { BOSS_ARENA_SCRIPTS, ARENA_MOVES, ARENA_TRIGGERS } from './arenaScripts.js';
-import { ZONE_IDS, ZONE_NAMES } from './ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES, ZONE_ORDER } from './ZoneIdentity.js';
 import { REST_NPC_DEFS } from './restNpcDefs.js';
 import { BOSS_DEFEAT_LINES, BOSS_PHASE_LINES, DUNGEON_BOSS_LINES } from './bossDialogue.js';
 import { ECHOES } from './echoes.js';
@@ -39,7 +39,7 @@ import {
 } from './dialogueCgPresets.js';
 import { ACHIEVEMENTS_EXTRA, ACHIEVEMENTS_POP_CULTURE } from './achievements.js';
 import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
-import { SIDE_QUESTS_BASE, SIDE_QUESTS_POP } from './sideQuests.js';
+import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
@@ -474,6 +474,7 @@ export const CONTENT_TABLES = [
     table: SIDE_QUESTS_BASE,
     row: {
       id: { t: 'id' },
+      zone: { t: 'enum', of: [...ZONE_ORDER, 'global'] },
       title: { t: 'string' },
       desc: { t: 'string' },
       // check 是运行时判据（签名 `(game) => boolean`），不参与静态校验；
@@ -482,6 +483,21 @@ export const CONTENT_TABLES = [
       journal: { t: 'string' },
     },
     invariant: checkSideQuestRosters,
+  },
+  {
+    kind: 'sideQuestsZone',
+    note: '分区支线（W-B12 切片1）：一位面一条，判据只用已持久化又可跳过的两件事（在那座火边歇够次数 + 看过那张门口插画）',
+    shape: 'rows',
+    table: SIDE_QUESTS_ZONE,
+    row: {
+      id: { t: 'id' },
+      zone: { t: 'enum', of: [...ZONE_ORDER, 'global'] },
+      title: { t: 'string' },
+      desc: { t: 'string' },
+      reward: { t: 'int', min: 1 },
+      journal: { t: 'string' },
+    },
+    invariant: checkZoneSideQuestCoverage,
   },
   {
     kind: 'sideQuestsPop',
@@ -775,7 +791,11 @@ export function checkContent(tables = CONTENT_TABLES) {
  */
 export function checkSideQuestRosters(baseTable) {
   const out = [];
-  const rosters = [['sideQuestsBase', baseTable ?? []], ['sideQuestsPop', SIDE_QUESTS_POP]];
+  const rosters = [
+    ['sideQuestsBase', baseTable ?? []],
+    ['sideQuestsZone', SIDE_QUESTS_ZONE],
+    ['sideQuestsPop', SIDE_QUESTS_POP],
+  ];
   for (const [kind, rows] of rosters) {
     if (!Array.isArray(rows) || rows.length === 0) {
       out.push(`${kind}: 一族支线空了 —— 分母与页签会跟着一起变小，玩家少的这几条不会报任何错`);
@@ -790,6 +810,24 @@ export function checkSideQuestRosters(baseTable) {
       if (见过.has(row?.id)) {
         out.push(`sideQuests: 支线 id "${row?.id}" 同时在 "${见过.get(row?.id)}" 与 "${kind}" 里 —— 合并名单只能留一条，另一条玩家看不到`);
       } else 见过.set(row?.id, kind);
+    }
+  }
+  return out;
+}
+
+/**
+ * 分区覆盖（W-B12 切片1）：**每个位面至少一条专属支线**。
+ *
+ * 这条不是形式主义 —— 板上"支线 7 → 15+"那个目标在 21 条时就已"达成"，
+ * 而玩家在一座位面里做的事跟它是不是那个位面毫无关系。**能检验的是覆盖，不是条数。**
+ * 判据挂在分区族这张表上（不是合并名单），这样用例能把这张表换成"少一位"的版本走 shipped 入口。
+ */
+export function checkZoneSideQuestCoverage(zoneTable) {
+  const 有专属 = new Set((zoneTable ?? []).filter((q) => ZONE_ORDER.includes(q?.zone)).map((q) => q.zone));
+  const out = [];
+  for (const zone of ZONE_ORDER) {
+    if (!有专属.has(zone)) {
+      out.push(`sideQuestsZone: 位面 "${zone}" 一条专属支线都没有 —— 这位面的内容深度是 0，而"条数够不够"那种门禁看不见它`);
     }
   }
   return out;

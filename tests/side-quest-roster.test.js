@@ -17,11 +17,14 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { SIDE_QUESTS_BASE, SIDE_QUESTS_POP, SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
+import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP, SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
+import { ZONE_ORDER } from '../src/content/ZoneIdentity.js';
 import { SideQuestSystem } from '../src/game/SideQuestSystem.js';
 import { SideQuestJournalTab } from '../src/ui/SideQuestJournalTab.js';
 import { checkSideQuestRosters, checkContent, CONTENT_TABLES } from '../src/content/registry.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
+
+
 
 const ROOT = process.cwd();
 const readSrc = (rel) => readFileSync(join(ROOT, 'src', rel), 'utf8');
@@ -50,10 +53,12 @@ afterEach(() => {
 });
 
 describe('一份名单、一个分母', () => {
-  it('控制组：两族都在，合并名单是它们之和且 id 唯一', () => {
+  it('控制组：三族都在，合并名单是它们之和且 id 唯一', () => {
     expect(SIDE_QUESTS_BASE.length, '基础族空了 —— 这条断言就只是"什么都比"').toBeGreaterThan(0);
+    expect(SIDE_QUESTS_ZONE.length, '分区族空了 —— 同上').toBeGreaterThan(0);
     expect(SIDE_QUESTS_POP.length, '致敬族空了 —— 同上').toBeGreaterThan(0);
-    expect(SIDE_QUESTS_ALL.length).toBe(SIDE_QUESTS_BASE.length + SIDE_QUESTS_POP.length);
+    expect(SIDE_QUESTS_ALL.length)
+      .toBe(SIDE_QUESTS_BASE.length + SIDE_QUESTS_ZONE.length + SIDE_QUESTS_POP.length);
     expect(new Set(SIDE_QUESTS_ALL.map((q) => q.id)).size).toBe(SIDE_QUESTS_ALL.length);
     // 致敬族那 14 条以前根本不在页签名单里：先钉"它确实在合并名单里"
     for (const q of SIDE_QUESTS_POP) {
@@ -191,5 +196,78 @@ describe('挂载那层 monkey-patch 删净了，注册表三条各配一次反�
     // reward 从 `min: 0` 收到 `min: 1`：0 奖励的支线是能过的"完成"，玩家只会看到一条没奖励的任务
     expect(planted('sideQuestsBase', [{ ...SIDE_QUESTS_BASE[0], reward: 0 }]).join('\n'))
       .toMatch(/reward/);
+  });
+});
+
+describe('W-B12 切片1：每个位面至少一条专属支线，而且那条真的能完成', () => {
+  /** 分区支线读的两份持久化状态，摆到位（或只摆一半） */
+  const 摆状态 = (game, zone, { 歇满 = true, 看过图 = true } = {}) => {
+    // 两份桩都带生产里那两处判据会读的方法 —— 少一格的话，别的支线会走进"判据抛错"那条路，
+    // 测试噪声会盖住真正要看的那件事（桩的形状必须像生产，见 §9 B63 那条）
+    game.campfireMemory = {
+      restCount: { [zone]: 歇满 ? 3 : 2 },
+      getStats: () => ({ zones: 1, total: 3, nodeCount: 0 }),
+    };
+    game.cgGallery = {
+      unlocked: new Set(看过图 ? [`${zone}:start`] : []),
+      getStats: () => ({ unlocked: 看过图 ? 1 : 0, total: 64, percent: 看过图 ? 2 : 0 }),
+    };
+  };
+
+  it('五座位面各有一条专属支线，且都标了自己的 `zone`', () => {
+    const 有专属 = ZONE_ORDER.filter((z) => SIDE_QUESTS_ALL.some((q) => q.zone === z));
+    expect(有专属, `这些位面一条专属支线都没有：${ZONE_ORDER.filter((z) => !有专属.includes(z)).join('、')}`)
+      .toEqual([...ZONE_ORDER]);
+    for (const q of SIDE_QUESTS_ALL) {
+      expect(['global', ...ZONE_ORDER], `${q.id} 的 zone 写的是没登记过的 "${q.zone}"`).toContain(q.zone);
+    }
+  });
+
+  it('分区支线的判据只读**已持久化**的两件事（不许拿 POI.discovered 那种不进存档的字段）', () => {
+    const 源码 = readSrc('content/sideQuests.js');
+    // 从两条判据助手那几行起切：判据是 `认得一座(zone)` 造出来的，读的东西都在助手里
+    const 起点 = 源码.indexOf('const 歇过 = ');
+    const 分区段 = codeOnly(源码.slice(起点, 源码.indexOf('export const SIDE_QUESTS_ALL')));
+    expect(分区段.includes('认得一座'), '切到的不是那一段（判据会空转）').toBe(true);
+    for (const 不该读 of ['discovered', 'getPoi(', 'world.']) {
+      expect(分区段, `分区支线的判据读了 "${不该读}" —— 它今天不进存档，读档后这条会凭空退回未完成`)
+        .not.toContain(不该读);
+    }
+    expect(分区段).toContain('restCount');   // 在那座火边歇过几次
+    expect(分区段).toContain('unlocked');   // 看过那张门口插画
+  });
+
+  it.each(ZONE_ORDER.map((z) => [z]))('位面 %s 那条：状态摆满就完成，缺一半就不完成', (zone) => {
+    installWindowShim();
+    const 支线 = SIDE_QUESTS_ZONE.find((q) => q.zone === zone);
+    expect(支线, `${zone} 没有专属支线`).toBeTruthy();
+    const { game, 记 } = makeGame();
+    const sq = new SideQuestSystem(game);
+    摆状态(game, zone, { 歇满: true, 看过图: false });
+    sq.checkAll();
+    expect(sq.completed.has(支线.id), '只看了一张图就该还没完成').toBe(false);
+    摆状态(game, zone, { 歇满: false, 看过图: true });
+    sq.checkAll();
+    expect(sq.completed.has(支线.id), '只歇了两次就该还没完成').toBe(false);
+    摆状态(game, zone, { 歇满: true, 看过图: true });
+    sq.checkAll();
+    expect(sq.completed.has(支线.id)).toBe(true);
+    expect(记.souls).toEqual([支线.reward]);
+    expect(记.toasts.join('')).toContain(支线.title);
+  });
+
+  it('不变式咬得住：抹掉某一座位面的专属支线，走 shipped 入口点名那一座', () => {
+    const 最后一座 = ZONE_ORDER[ZONE_ORDER.length - 1];
+    const planted = (kind, table) => checkContent(
+      CONTENT_TABLES.map((t) => (t.kind === kind ? { ...t, table } : t)),
+    );
+    expect(planted('sideQuestsZone', SIDE_QUESTS_ZONE)).toEqual([]);        // accept 方向
+    const 缺 = SIDE_QUESTS_ZONE.filter((q) => q.zone !== 最后一座);
+    const issues = planted('sideQuestsZone', 缺);
+    expect(issues.join(' ; '), `少了 "${最后一座}" 的专属支线，覆盖门禁没意见？`)
+      .toMatch(new RegExp(`位面 "${最后一座}" 一条专属支线都没有`));
+    // 反向的第二向：给一个没登记的 zone 也要红（不然"分区"只是一个自由文本）
+    const 野值 = [...SIDE_QUESTS_ZONE, { ...SIDE_QUESTS_ZONE[0], id: 'side-zone-ghost', zone: '月亮城' }];
+    expect(planted('sideQuestsZone', 野值).join(' ; ')).toMatch(/zone/);
   });
 });
