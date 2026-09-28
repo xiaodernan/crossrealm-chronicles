@@ -147,7 +147,10 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     // W-B2 切片4：成段的内容文案也走同一条链 —— 但**每一个显示出口**都要过，
     // 漏一处就是把字面的 `{parry}` 摆到玩家面前（说明书有正文与章节清单两处）
     'ui/HelpManual.js': ['keyText(sec.body)', 'keyText(s.title)', 'refreshKeyHints()'],
-    'game/RestDialogue.js': ['keyText(node.text)', 'keyText(c.label)', 'keyText(tree.title)'],
+    // W-B4 切片2：这里原本还点名 `keyText(tree.title)` —— 那一格随对话树的抄本一起删了，
+    // 标题现在是营火名（`this.activeRest.name`），名字里没有 `{动作}` 占位；
+    // 展开仍由 `Dialog` 那一道口径负责（下面 `'ui/Dialog.js': ['keyText(title)', …]` 盯着的就是它）
+    'game/RestDialogue.js': ['keyText(node.text)', 'keyText(c.label)'],
     // W-B2 切片5：剩下的都是"文案离开自己模块之前必须落定稿"的出口 ——
     // 对话框（20+ 调用方共用这一处）、日志卡片（快照存进去就再也不回头展开）、
     // 画布（图片有缓存，改绑不缓存就是旧键名）、CSS `content`（DOM 声明够不到，只能换成节点）

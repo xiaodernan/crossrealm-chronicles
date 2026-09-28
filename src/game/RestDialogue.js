@@ -90,7 +90,10 @@ export class RestDialogue {
     this._emit('node', this.activeRest.id, nodeId, node);
     this.nodeVisited.add(`${this.activeRest.id}:${nodeId}`);
 
-    this.game.dialog.showChoices(keyText(tree.title), highlightKeywords(text), choices, {
+    // 标题说的是"这座火叫什么"，所以取营火自己的名字（`restPoints` 的那一格），不再抄在对话树里：
+    // 抄本曾经和实际名漂过两座 —— 站在枢纽火边，提示写"世界之锚休息点"，一秒后对话标题写"世界之锚营火"
+    // （W-B4 切片2）。名字表在 `content/restPointNames.js`，`keyText` 由 `Dialog` 那一道口径负责，这里不重复展开
+    this.game.dialog.showChoices(this.activeRest.name, highlightKeywords(text), choices, {
       speaker: node.speaker ?? def?.name,
       speakerTitle: def?.title,
       accent: def?.accent,

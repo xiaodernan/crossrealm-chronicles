@@ -40,6 +40,7 @@ import { Dialog } from '../src/ui/Dialog.js';
 import { RestDialogue } from '../src/game/RestDialogue.js';
 import { gameSurface } from './helpers/gameSurface.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
+import { REST_POINT_NAMES } from '../src/content/restPointNames.js';
 
 /** 走 shipped 入口：把某一张表换成种植入的，其余照原样 */
 const planted = (kind, table) => checkContent(
@@ -152,7 +153,7 @@ describe('门禁 `restDialogues` 第四、五条：有一座树就得有一座�
     expect(leaf, '真表里找不到一处纯 action 的节点 —— 表形状变了，这条要跟着改').toBeTruthy();
     const errs = treeOf({
       ...REST_DIALOGUES,
-      corridor: { title: structuredClone(REST_DIALOGUES.hub.title), nodes: { start: leaf } },
+      corridor: { nodes: { start: leaf } },
     });
     expect(errs).toEqual([expect.stringContaining('restDialogues 营火 corridor: REST_NPC_DEFS 里没有这一座')]);
   });
@@ -493,21 +494,21 @@ describe('运行时：对话与图都只说真话', () => {
       expect(c, `${zone} 的 start 那一格没有 action:'rest' 的选项了`).toBeTruthy();
       return c;
     };
-    rd.start({ id: 'hub', name: '世界之锚营火' });
+    rd.start({ id: 'hub', name: REST_POINT_NAMES.hub });
     rd._pick(REST_DIALOGUES.hub, restChoiceOf('hub'), 'start');
     // 三层后果都要落地：只"没抛错"不算过 —— 当年抛错发生在 hide 之后，对话照样关得掉，
     // 所以界面上唯一能看出坏掉的地方是"血没回、面板没开"（浏览器读数：hp 停在 100 / 上限 118）
     expect(sunk.closed, '休息没把对话窗关掉').toHaveLength(1);
     expect(sunk.healed, '休息没回血').toHaveLength(1);
-    expect(sunk.upgraded).toEqual(['世界之锚营火']);
+    expect(sunk.upgraded).toEqual([REST_POINT_NAMES.hub]);
     expect(sunk.souls, '首访营火余温没加魂火').toEqual([5]);
     // 换一座：`visited` 按营火记，所以第二座也算首访
-    rd.start({ id: 'magic', name: '魔法遗境营火' });
+    rd.start({ id: 'magic', name: REST_POINT_NAMES.magic });
     rd._pick(REST_DIALOGUES.magic, restChoiceOf('magic'), 'start');
     expect(sunk.healed).toHaveLength(2);
     expect(sunk.souls).toEqual([5, 5]);
     // 回老火再歇一次：回血照给，+5 魂火不重复发
-    rd.start({ id: 'hub', name: '世界之锚营火' });
+    rd.start({ id: 'hub', name: REST_POINT_NAMES.hub });
     rd._pick(REST_DIALOGUES.hub, restChoiceOf('hub'), 'start');
     expect(sunk.healed).toHaveLength(3);
     expect(sunk.souls, '同一座火的首访魂火发了两次').toEqual([5, 5]);

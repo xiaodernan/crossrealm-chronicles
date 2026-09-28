@@ -33,6 +33,7 @@ import { BOSS_DEFEAT_LINES, BOSS_PHASE_LINES, DUNGEON_BOSS_LINES } from './bossD
 import { ECHOES } from './echoes.js';
 import { ZONE_EVENTS_POP, LORE_FRAGMENTS_POP, NPC_LINES_POP } from './ambientLore.js';
 import { REST_DIALOGUES } from './restDialogues.js';
+import { REST_POINT_NAMES } from './restPointNames.js';
 import {
   REST_DIALOGUE_CG, REST_DIALOGUE_CG_BASE, REST_DIALOGUE_CG_EXTRA, REST_DIALOGUE_CG_POP,
 } from './dialogueCgPresets.js';
@@ -355,15 +356,25 @@ export const CONTENT_TABLES = [
     value: { t: 'record' },
   },
   {
+    kind: 'restPointNames',
+    note: '营火显示名（W-B4 切片2）：营火 id → 那一个名字。对话标题 / 交互提示 / 快速旅行行 / '
+      + '营火记忆图鉴都从这一格取 —— 树上再抄一份就是第五个名字（改前的实物病例见 `restDialogues.js` 头注）',
+    shape: 'index',
+    table: REST_POINT_NAMES,
+    keyRef: { of: 'zones' },
+    value: { t: 'string' },
+    invariant: checkRestPointNames,
+  },
+  {
     kind: 'restDialogues',
-    note: '营火分支对话树（W-B2 整棵外移）：区域 id → { title, nodes: { 节点 id → 节点 } }',
+    note: '营火分支对话树（W-B2 整棵外移）：区域 id → { nodes: { 节点 id → 节点 } }。'
+      + '名字不在这张表里（W-B4 切片2 删掉了那份抄本），见 `restPointNames`',
     shape: 'index',
     table: REST_DIALOGUES,
     keyRef: { of: 'zones' },
     value: {
       t: 'row',
       of: {
-        title: { t: 'string' },
         nodes: {
           t: 'map',
           of: {
@@ -728,6 +739,37 @@ export function checkContent(tables = CONTENT_TABLES) {
 }
 
 /**
+ * 营火名的名册成对规则（W-B4 切片2）。
+ *
+ * 名字、对话树、NPC 定义是三张按同一批营火 id 索引的表，而玩家看到的每一处都要三张一起说话：
+ * 缺名字 → 提示与图鉴只能拿 id 冒充名字（正是这一族"不报错的说假话"）；多名字 → 那一格永远不会
+ * 出现在玩家面前。三条各配反向，写在 `tests/rest-point-name-single-source.test.js`。
+ */
+export function checkRestPointNames(table) {
+  const out = [];
+  for (const id of Object.keys(table ?? {})) {
+    const name = table[id];
+    if (typeof name !== 'string' || !name) {
+      out.push(`restPointNames "${id}": 名字不是非空字符串（交互提示与图鉴那一格会空掉，或写成 undefined）`);
+    }
+    if (!REST_DIALOGUES[id]) {
+      out.push(`restPointNames "${id}": 有名字却没有对话树（那一格永远不会出现在玩家面前）`);
+    }
+  }
+  for (const id of Object.keys(REST_DIALOGUES)) {
+    if (!table?.[id]) {
+      out.push(`restDialogues 营火 ${id}: 名字表里没有这一格（对话标题与脚下的提示都说不出它叫什么）`);
+    }
+  }
+  for (const id of Object.keys(REST_NPC_DEFS)) {
+    if (!table?.[id]) {
+      out.push(`restNpcDefs 营火 ${id}: 有 NPC 定义却没有营火名（图鉴筛选那一行只能拿 id 顶上）`);
+    }
+  }
+  return out;
+}
+
+/**
  * 营火树的结构不变式。
  *
  * 为什么形状校验拦不住它：`RestDialogue._showNode` 开头是 `if (!node) return` ——
@@ -741,10 +783,18 @@ export function checkContent(tables = CONTENT_TABLES) {
  * 3. 除 `start` 外不许有孤儿节点 —— 没有选择通向它的节点，玩家永远看不到；
  * 4. 每一棵树的那座营火得有 NPC 定义，且 `name` / `accent` 是字符串（对话框与画廊读的就是这两格）；
  * 5. 反向也成对：有 NPC 定义却没树的那座营火，按 E 只会直接开升级面板。
+ *
+ * 第六条（W-B4 切片2）：树上不许再带 `title`。那一格曾经就是对话标题，而营火名在
+ * `restPointNames` 只有一份 —— 抄回来不报错，只会让同一座火在同一个界面上有两个名字。
  */
 export function checkRestDialogueTree(table) {
   const out = [];
   for (const [zone, tree] of Object.entries(table ?? {})) {
+    // 第六条（W-B4 切片2）：树上不许再带名字。这一格曾经是对话标题的真源，而营火名在
+    // `restPointNames` 只有一份 —— 抄回来不报错，只会让同一座火在同一个界面上有两个名字
+    if (tree && Object.hasOwn(tree, 'title')) {
+      out.push(`restDialogues 营火 ${zone}: 树上又带了 title —— 营火名只有 restPointNames 那一份，标题取 restPoint.name`);
+    }
     const nodes = tree?.nodes ?? {};
     const ids = new Set(Object.keys(nodes));
     const referenced = new Set();

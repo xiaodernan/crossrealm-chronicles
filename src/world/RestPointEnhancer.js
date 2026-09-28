@@ -1,13 +1,21 @@
 import * as THREE from 'three';
+import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 
-/** 营火地标 — 木牌、光柱、首次发现提示 */
+/**
+ * 营火地标 —— 木牌、光柱、首次发现提示
+ *
+ * 木牌上的地名除枢纽外一律取**当前区名**（W-B4 切片2）。这张表以前六格全是手抄的，
+ * `magic` 那一格抄的是早已废弃的 '魔法遗境' —— 于是第一次走近魔法区那座火，
+ * 提示条说"发现营火 · 魔法遗境"，而同一屏脚下写着"霍格沃兹遗境营火"。
+ * 枢纽那一格不取区名（'交汇枢纽'）：木牌指的是场地中央那件东西，玩家口中的名字是世界之锚。
+ */
 const SIGN_LABELS = {
-  hub: '世界之锚',
-  fantasy: '灰白森林',
-  magic: '魔法遗境',
-  space: '米勒荒原',
-  void: '破碎时线',
-  abyss: '混沌边境',
+  [ZONE_IDS.HUB]: '世界之锚',
+  [ZONE_IDS.FANTASY]: ZONE_NAMES[ZONE_IDS.FANTASY],
+  [ZONE_IDS.MAGIC]: ZONE_NAMES[ZONE_IDS.MAGIC],
+  [ZONE_IDS.SPACE]: ZONE_NAMES[ZONE_IDS.SPACE],
+  [ZONE_IDS.VOID]: ZONE_NAMES[ZONE_IDS.VOID],
+  [ZONE_IDS.ABYSS]: ZONE_NAMES[ZONE_IDS.ABYSS],
 };
 
 export class RestPointEnhancer {

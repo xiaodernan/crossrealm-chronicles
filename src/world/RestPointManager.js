@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
+import { REST_POINT_NAMES } from '../content/restPointNames.js';
 
 export class RestPointManager {
   constructor(scene, world) {
@@ -9,7 +10,7 @@ export class RestPointManager {
   }
 
   /**
-   * @param {number} x @param {number} z @param {string} name UI 文案
+   * @param {number} x @param {number} z @param {string} name UI 文案（非空）
    * @param {string} id 稳定 id（`ZONE_IDS` 之一，或该营火自己的唯一名）
    */
   addRestPoint(x, z, name, id) {
@@ -17,6 +18,11 @@ export class RestPointManager {
     // 现在要么给真 id，要么在世界构建期就炸给开发者看，不留静默的第二真源。
     if (!id) throw new Error(`RestPointManager: 营火「${name}」缺少 id，快速旅行将无法认领目的地`);
     if (this.points.some((p) => p.id === id)) throw new Error(`RestPointManager: 营火 id ${id} 重复，快速旅行会跳错地方`);
+    // 名字同 id 一样是必需格：对话标题、交互提示、快速旅行与图鉴都说这一格，
+    // 缺了它对话标题会显示成字面的 "undefined"（W-B4 切片2）
+    if (typeof name !== 'string' || !name) {
+      throw new Error(`RestPointManager: 营火 ${id} 缺少显示名（对话标题与交互提示要说它叫什么）`);
+    }
     const group = new THREE.Group();
     const base = new THREE.Mesh(
       new THREE.CylinderGeometry(0.8, 1.2, 0.4, 8),
@@ -72,13 +78,15 @@ export class RestPointManager {
 
   buildDefaults() {
     // 营火与它所在的位面共用一个 id（快速旅行、NPC 归属、地图标记都认它）；
-    // 名字里的区名取 `ZONE_NAMES`，改区域文案时不会留下一座叫旧名的营火
-    this.addRestPoint(0, 55, '世界之锚休息点', ZONE_IDS.HUB);
-    this.addRestPoint(-200, 0, `${ZONE_NAMES[ZONE_IDS.FANTASY]}营火`, ZONE_IDS.FANTASY);
-    this.addRestPoint(0, -180, `${ZONE_NAMES[ZONE_IDS.MAGIC]}营火`, ZONE_IDS.MAGIC);
-    this.addRestPoint(200, 80, `${ZONE_NAMES[ZONE_IDS.SPACE]}营火`, ZONE_IDS.SPACE);
-    this.addRestPoint(0, 210, `${ZONE_NAMES[ZONE_IDS.VOID]}营火`, ZONE_IDS.VOID);
-    this.addRestPoint(-200, 210, `${ZONE_NAMES[ZONE_IDS.ABYSS]}营火`, ZONE_IDS.ABYSS);
+    // 名字不在这儿拼，也不在任何地方再写一遍 —— 只有 `content/restPointNames.js` 那一张表
+    // （W-B4 切片2：改前对话树自己抄了一份，于是站在同一座火边，提示说"世界之锚休息点"、
+    //  一秒后开出来的对话标题说"世界之锚营火"，而 `magic` 抄的还是早已废弃的区名）
+    this.addRestPoint(0, 55, REST_POINT_NAMES[ZONE_IDS.HUB], ZONE_IDS.HUB);
+    this.addRestPoint(-200, 0, REST_POINT_NAMES[ZONE_IDS.FANTASY], ZONE_IDS.FANTASY);
+    this.addRestPoint(0, -180, REST_POINT_NAMES[ZONE_IDS.MAGIC], ZONE_IDS.MAGIC);
+    this.addRestPoint(200, 80, REST_POINT_NAMES[ZONE_IDS.SPACE], ZONE_IDS.SPACE);
+    this.addRestPoint(0, 210, REST_POINT_NAMES[ZONE_IDS.VOID], ZONE_IDS.VOID);
+    this.addRestPoint(-200, 210, REST_POINT_NAMES[ZONE_IDS.ABYSS], ZONE_IDS.ABYSS);
   }
 
   getNearest(pos, range = 4) {

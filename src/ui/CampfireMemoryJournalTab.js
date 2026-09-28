@@ -11,8 +11,9 @@ export class CampfireMemoryJournalTab {
     const mem = this.game.campfireMemory;
     if (!mem) return;
     const stats = mem.getStats();
-    // 营火的名字只有一份真源（`RestPointManager`），这里不再抄一张表 ——
-    // 抄来的那份已经和实际营火漂移过（'世界之锚营火' vs '世界之锚休息点'）
+    // 营火的名字只有一份（`content/restPointNames.js` → 世界里的营火 → `nameOf(id)`），这里不抄表。
+    // 这句话曾经只是愿望：对话树自己抄过一份，于是枢纽那座在提示里叫"世界之锚休息点"、
+    // 在对话标题里叫"世界之锚营火"（W-B4 切片2 把抄本删掉，四处界面从此问同一个源）
     const restPoints = this.game.restPoints;
     const nameOf = (id) => restPoints?.nameOf(id) ?? id;
     const zones = ['all', ...(restPoints?.ids() ?? Object.keys(mem.restCount))];

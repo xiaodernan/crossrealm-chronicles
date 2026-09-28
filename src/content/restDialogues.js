@@ -1,6 +1,11 @@
 /**
  * 营火分支对话树 —— 全部区域（W-B2 数据外移）。
  *
+ * 树上**不带营火名**（W-B4 切片2）：这座火叫什么只有 `content/restPointNames.js` 那一格说了算。
+ * 这里曾经每棵树抄一份 `title` 当对话标题，于是玩家站在枢纽火边看到提示写"世界之锚休息点"、
+ * 一秒后开出来的对话标题写"世界之锚营火"，而 `magic` 抄的还是早已废弃的区名 '魔法遗境'。
+ * 两份都是合法字符串，加载期与内容校验都没意见 —— 只有玩家看得出这座火有两个名字。
+ *
  * 搬前分四层：`RestDialogue.js` 的基础树 + `RestDialogueExtras.js` +
  * `RestDialogueExtras2.js` + `RestDialoguePopCulture(Wave2/3/4).js`，
  * 每层都是 `structuredClone(base)` 之后 `nodes[nodeId] = node` 再往 `start.choices`
@@ -10,7 +15,6 @@
  */
 export const REST_DIALOGUES = {
   hub: {
-    title: "世界之锚营火",
     nodes: {
       start: {
         speaker: "锚火看守",
@@ -149,7 +153,6 @@ J → 次元回声 按系列筛选。」`,
     },
   },
   fantasy: {
-    title: "灰白森林营火",
     nodes: {
       start: {
         speaker: "精灵斥候",
@@ -253,7 +256,6 @@ J → 次元回声 按系列筛选。」`,
     },
   },
   magic: {
-    title: "魔法遗境营火",
     nodes: {
       start: {
         speaker: "奥术旅者",
@@ -363,7 +365,6 @@ J → 次元回声 按系列筛选。」`,
     },
   },
   space: {
-    title: "米勒荒原营火",
     nodes: {
       start: {
         speaker: "宇航员回声",
@@ -498,7 +499,6 @@ J → 次元回声 按系列筛选。」`,
     },
   },
   void: {
-    title: "破碎时线营火",
     nodes: {
       start: {
         speaker: "时线残影",
@@ -628,7 +628,6 @@ J → 次元回声 按系列筛选。」`,
     },
   },
   abyss: {
-    title: "混沌边境营火",
     nodes: {
       start: {
         speaker: "裂隙引路人",
