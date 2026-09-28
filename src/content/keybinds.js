@@ -565,6 +565,45 @@ export function padCellButtonName(table, action) {
   return claims.length ? PAD_BUTTON_BY_INDEX[claims[0][0]] : null;
 }
 
+/**
+ * 一格的**物理来源**（W-A7 切片33）：按钮格报按钮名，摇杆格报方向。
+ *
+ * 显示侧要的是"这格长什么样"而不是"它借了哪个键码" —— 移动那四格是**两个**入口
+ * （左摇杆 + 十字键），报成一枚按钮就是少说一半（`padStickLabel` 存在的理由）。
+ * 形状只有这一处认：`button` 与 `axes`+`dir` 是 `assertKeybinds` 立的契约。
+ */
+export function padCellSource(cell) {
+  if (!cell) return null;
+  if (cell.button !== undefined) return { kind: 'button', name: cell.button };
+  if (cell.dir !== undefined) return { kind: 'stick', dir: cell.dir };
+  return null;
+}
+
+/**
+ * 一个动作在**生效**的两张手柄表里的全部出口（W-A7 切片33）。
+ *
+ * 两类都要收：
+ * - 直接认领这个动作名的格子（`interact` → 右摇杆按下）；
+ * - 冒充某条 UI 热键的格子（`back` / `menu` 两格都声明 `hotkey: 'escape'`）——
+ *   它们在游戏里的确会在按下时办"暂停 / 返回"这件事，正是提示文案要说出口的那一条。
+ *
+ * 返回数组而不是单个格子：`escape` 今天就有三个主人（`pauseMenu` / `back` / `menu`），
+ * 挑一个出来说就是替玩家做选择；并列说"Start / B"才是真话。
+ */
+export function padOutletsFor(padTable, uiPadTable, action) {
+  const out = [];
+  const direct = padTable?.[action] ?? uiPadTable?.[action];
+  if (direct) out.push(direct);
+  // 冒充热键的格子两张表里都有（`pauseMenu` 在战斗表、`back` / `menu` 在界面表），
+  // 所以两张都要扫 —— 只扫界面表会漏掉"手柄 Start 也能开暂停菜单"这一半。
+  for (const table of [padTable, uiPadTable]) {
+    for (const cell of Object.values(table ?? {})) {
+      if (cell !== direct && cell.hotkey === action) out.push(cell);
+    }
+  }
+  return out;
+}
+
 export function padDpadIndex(direction) {
   return DPAD_BUTTON[direction];
 }

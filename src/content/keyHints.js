@@ -11,12 +11,64 @@
  * 两张表都不认识的动作 → 直接抛。这不是防御，是门禁：占位写错字（`{pray}`）
  * 会在渲染那一刻红，而不是让玩家看到一句"按 {pray} 弹反"。
  */
-import { bindingFor, keybindEpoch } from './keybinds.js';
+import { bindingFor, keybindEpoch, padCellSource } from './keybinds.js';
 import { hotkeyCodeFor, hotkeyEpoch } from './hotkeys.js';
-import { keyLabel, mouseLabel } from './keyLabels.js';
+import { keyLabel, mouseLabel, padSourceLabel } from './keyLabels.js';
+import { INPUT_DEVICE_KINDS } from '../engine/InputDevice.js';
+
+/**
+ * 提示文案要说"哪只手"（W-A7 切片33）。
+ *
+ * 切片6 让键名只剩一个出口，但那个出口只知道**绑定**、不知道**手头**：手柄玩家走到营火前，
+ * 屏幕上写着"按 E"。切片29 把"最近一次被按动的是哪一侧"记进了 `InputDevice`，这一片
+ * 把它接到提示出口上 —— 纯手柄玩家的提示改说"右摇杆按下"。
+ *
+ * 三条形状：
+ * - 状态仍只住在 `InputDevice` 里，这里收的是 `Game` 转来的一份**读数**（不另记账）；
+ * - 出口由 `Game` 注入（生效手柄表在它手里），没接线时退回键盘那一套；
+ * - 只有**手柄侧真有出口**的动作才改口。没有出口的动作照旧说键盘键名 ——
+ *   手柄玩家未必没有键盘，而"什么都不说"比"说一个别的"更糟。
+ */
+let HINT_DEVICE = null;
+
+/** 一个动作在生效手柄表里的全部出口 → 给 `keyHint` 用；由 `Game` 注入 */
+let HINT_PAD_OUTLETS = null;
+
+/** 记下"现在这一手是哪套输入"。名字拼错要抛 —— 拼错的后果是永远退回键盘那一套（静默） */
+export function setHintDevice(kind) {
+  if (kind !== null && !INPUT_DEVICE_KINDS.includes(kind)) {
+    throw new Error(`未知的输入侧 "${kind}"：名单只有 ${INPUT_DEVICE_KINDS.join(' / ')}`);
+  }
+  HINT_DEVICE = kind;
+  return HINT_DEVICE;
+}
+
+/** 现在这一手是哪一侧（`null` = 还没动过）；读数与测试用 */
+export function hintDevice() { return HINT_DEVICE; }
+
+/** 注入"这个动作在生效手柄表里有哪几个出口"；传空退回"手柄没有出口" */
+export function setHintPadOutlets(fn) {
+  if (fn !== null && typeof fn !== 'function') throw new Error('setHintPadOutlets 要一个函数');
+  HINT_PAD_OUTLETS = fn;
+}
+
+/** 手柄那一侧的出口字样：一格一条，多格并列（`escape` 今天有三个主人）；没有出口返回 null */
+function padHint(action) {
+  if (!HINT_PAD_OUTLETS) return null;
+  const words = [];
+  for (const cell of HINT_PAD_OUTLETS(action) ?? []) {
+    const label = padSourceLabel(padCellSource(cell));
+    if (label && !words.includes(label)) words.push(label);
+  }
+  return words.length ? words.join(' / ') : null;
+}
 
 /** 动作当前该按什么（人话）；两张表里都没有这个动作返回 null */
 export function keyHint(action) {
+  if (HINT_DEVICE === 'gamepad') {
+    const pad = padHint(action);
+    if (pad !== null) return pad;
+  }
   const b = bindingFor(action);
   if (b) return b.code ? keyLabel(b.code) : (b.mouse ? mouseLabel(b.mouse) : null);
   const code = hotkeyCodeFor(action);
@@ -43,7 +95,7 @@ const TOKEN = /\{([a-zA-Z][a-zA-Z0-9]*)\}/g;
  * 都不必让每个消费方去 import 两个 epoch 再自己拼字符串（那正是"两处各算一次"的写法）。
  */
 export function keyStamp() {
-  return `${keybindEpoch()}:${hotkeyEpoch()}`;
+  return `${keybindEpoch()}:${hotkeyEpoch()}:${HINT_DEVICE ?? '-'}`;
 }
 
 export function keyText(template) {

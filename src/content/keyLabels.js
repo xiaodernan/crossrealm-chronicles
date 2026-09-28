@@ -74,3 +74,17 @@ export function padStickLabel(direction) {
   const arrow = { up: '↑', down: '↓', left: '←', right: '→' }[direction] ?? '?';
   return `左摇杆 ${arrow} + 十字键 ${arrow}`;
 }
+
+/**
+ * 一格手柄出口的**物理来源** → 字样（W-A7 切片33）。
+ *
+ * 来源的形状由 `keybinds.js` 的 `padCellSource` 给（按钮 / 摇杆方向两种），
+ * 这里只负责把它说成人话 —— 两件事分开写，是因为"这格是什么"与"它叫什么"各有各的真源：
+ * 前者在表里，后者就这一处。形状认不出来返回 null（说不出口的格子不许编一个名字）。
+ */
+export function padSourceLabel(source) {
+  if (!source) return null;
+  if (source.kind === 'button') return padButtonLabel(source.name);
+  if (source.kind === 'stick') return padStickLabel(source.dir);
+  return null;
+}

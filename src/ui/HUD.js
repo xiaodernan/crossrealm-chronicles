@@ -158,8 +158,9 @@ export class HUD {
   /**
    * 把所有带键名的界面重算一遍（W-A7 切片6）。
    *
-   * 构造时跑一次，之后每次 `Game.rebuildHotkeys()` 再跑一次 —— 玩家改绑之后，
-   * HUD 上那些"该按什么键"跟着一起改口。声明方式见 `refreshKeyText`。
+   * 构造时跑一次，之后每次 `Game.rebuildHotkeys()` 再跑一次；切片33 起，
+   * "最近用的是哪一侧输入"变了（键盘 ↔ 手柄）也跑一次 —— 改绑与换手是同一类变化：
+   * 都让屏幕上那些"该按什么键"变成假话。声明方式见 `refreshKeyText`。
    *
    * 走的是整份文档而不是 `#hud`：小地图标题、暂停菜单、区域面板、起始屏这些都声明在
    * `index.html` 里、却挂在 `#hud` 外面 —— 只扫容器的话，它们改绑后仍然说出厂键。
@@ -435,6 +436,9 @@ export class HUD {
     this._inputDeviceShown = kind;
     const el = document.getElementById('input-device-display');
     if (el) el.textContent = kind ? inputDeviceLabel(kind) : '—';
+    // 指示器那一格变了，意味着"这一手"换了 —— 提示文案跟着换一套说法（切片33）。
+    // 声明式那批（HUD 键位行、起始屏、小地图标题）只在改动时重算，不每帧重写 DOM。
+    this.refreshKeyHints();
   }
 
   updateDiscoveryCount() {

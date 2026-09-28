@@ -112,10 +112,24 @@ describe('声明了占位的界面必须有人刷它', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('换生效表的那一处同时喂给四消费者：热键镜像、游戏键表、HUD 重算、说明书重算', () => {
+  /**
+   * 换手与改绑是同一类变化（切片33）：声明式那批（HUD 键位行、起始屏、小地图标题）
+   * 只在改动时重算，所以"设备变了"也必须把重算叫起来 —— 少了这一句，纯手柄玩家
+   * 读到的仍是键盘键名，而屏幕上没有任何一处看起来是错的。
+   */
+  it('换手也要重算声明式那批：设备一变，键名文案跟着改口', () => {
+    const hud = FILES.find((f) => f.name === 'ui/HUD.js').source;
+    const body = /updateInputDevice\(\) \{([\s\S]*?)\n {2}\}/.exec(hud)?.[1] ?? '';
+    expect(body, 'HUD 里找不到 updateInputDevice 的方法体（门禁自己坏了）').toContain('_inputDeviceShown');
+    expect(body, '换手之后没人重算声明式那批键名').toContain('this.refreshKeyHints();');
+  });
+
+  it('换生效表的那一处同时喂给五消费者：热键镜像、游戏键表、手柄出口、HUD 重算、说明书重算', () => {
     const game = FILES.find((f) => f.name === 'core/Game.js').source;
     for (const call of [
       'setHotkeyTable(hotkeyTable)', 'setKeybindTable(keyTable)',
+      // 切片33：手柄出口交出去的是**取值函数**而不是快照（表在 `this` 上，改绑之后自己跟上）
+      'setHintPadOutlets(',
       'hud?.refreshKeyHints?.()', 'helpManual?.refreshKeyHints?.()',
     ]) {
       expect(game, `改绑之后没人 ${call}`).toContain(call);

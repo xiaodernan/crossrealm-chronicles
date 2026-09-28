@@ -114,8 +114,9 @@ import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
 import { gearLabel, pickupChoice } from '../content/gear.js';
 import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
-  factoryGamepadBindings, setKeybindTable,
+  factoryGamepadBindings, padOutletsFor, setKeybindTable,
 } from '../content/keybinds.js';
+import { setHintDevice, setHintPadOutlets } from '../content/keyHints.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
 import { InputDevice } from '../engine/InputDevice.js';
 import { topNavLayer } from '../ui/OverlayStack.js';
@@ -128,6 +129,10 @@ export class Game {
     this.keys = {};
     /** 最近一次被按动的是哪一侧输入（切片29）：判断只在 `InputDevice` 里，谁都不另记一份 */
     this.inputDevice = new InputDevice();
+    // 提示文案跟着"这一手是哪套输入"改口（切片33）。设备这本账仍只有 `InputDevice` 一处：
+    // 这里只是把它的**变化**转给提示出口，三个通知点（键 / 鼠标 / 手柄）不必各自再喊一声
+    // —— 那就是"这一下算谁"多出三个说法，正是切片29 挡掉的那种写法。
+    this.inputDevice.onChange((kind) => setHintDevice(kind));
     this.pointerLocked = false;
     this.timeOfDay = 0.35;
     this.container = container;
@@ -503,6 +508,11 @@ export class Game {
     setHotkeyTable(hotkeyTable);
     // 游戏键生效表是模块级的：消费者（玩家 / 战斗 / 法术 / 武器 / 旅行）直接问 `codeFor`
     setKeybindTable(keyTable);
+    // 手柄出口也要活着（切片33）：提示文案得按"这一手是手柄"改说"右摇杆按下"，
+    // 而"这一格绑在哪"随改绑走 —— 所以交出去的是取值函数而不是一份快照。
+    setHintPadOutlets((action) => padOutletsFor(
+      this.padTable ?? GAMEPAD_BINDINGS, this.uiPadTable ?? UI_GAMEPAD_BINDINGS, action,
+    ));
     this.hud?.refreshKeyHints?.();
     // 说明书正文里也是 `{动作}` 占位（W-B2 切片4）：它开着的时候改绑，正文得跟着改口
     this.helpManual?.refreshKeyHints?.();

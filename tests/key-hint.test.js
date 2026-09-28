@@ -9,10 +9,18 @@
  * 也可以被下一段改掉生效表 —— 只有"现问"的那一处会跟着改口。
  */
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
-import { KEY_ACTIONS, buildBindingTables, factoryKeybindings, setKeybindTable } from '../src/content/keybinds.js';
+import {
+  KEY_ACTIONS, buildBindingTables, factoryKeybindings, setKeybindTable,
+  padCellSource, padOutletsFor,
+} from '../src/content/keybinds.js';
 import { UI_ACTIONS, UI_HOTKEYS, setHotkeyTable } from '../src/content/hotkeys.js';
-import { KEY_LABELS, MOUSE_LABELS, keyLabel, mouseLabel } from '../src/content/keyLabels.js';
-import { keyHint, keyText, keyTextCacheSize, refreshKeyText } from '../src/content/keyHints.js';
+import {
+  KEY_LABELS, MOUSE_LABELS, keyLabel, mouseLabel, padSourceLabel,
+} from '../src/content/keyLabels.js';
+import {
+  hintDevice, keyHint, keyStamp, keyText, keyTextCacheSize, refreshKeyText,
+  setHintDevice, setHintPadOutlets,
+} from '../src/content/keyHints.js';
 import { scheduler } from '../src/engine/Scheduler.js';
 import { Tutorial } from '../src/ui/Tutorial.js';
 import { ContextualTutorial } from '../src/ui/ContextualTutorial.js';
@@ -33,6 +41,8 @@ beforeAll(() => {
 afterEach(() => {
   setKeybindTable(factoryKeybindings());
   setHotkeyTable(UI_HOTKEYS.map((e) => ({ ...e })));
+  setHintDevice(null);
+  setHintPadOutlets(null);
 });
 
 describe('键码 → 显示名', () => {
@@ -205,5 +215,121 @@ describe('动作覆盖：两张表的动作名都能被 `keyHint` 问出来', ()
 
   it('`UI_ACTIONS` 全部有显示名', () => {
     for (const action of UI_ACTIONS) expect(keyHint(action), action).toBeTruthy();
+  });
+});
+
+/**
+ * 提示出口要知道"现在这一手是哪套输入"（W-A7 切片33）。
+ *
+ * 切片6 把键名出口收成一处，切片29 记下了"最近一次被按动的是哪一侧"，但两者没接上：
+ * 手柄玩家走到营火前，屏幕上写着"按 E"，而手柄表里 `interact` 早就有出口（切片31）。
+ * 这一片把那本账接到出口上，规矩三条、用例逐条钉：
+ * 1. **手柄侧真有出口**的动作才改口（`spell2` 没有手柄格，照旧说键盘）；
+ * 2. 按钮格说按钮名、摇杆格说两个入口、冒充热键的格子一起并列；
+ * 3. 换手与改绑一样会让旧文案变成假话 —— 缓存必须跟着作废。
+ */
+describe('这一手是哪套输入：手柄玩家的提示改说手柄那一格', () => {
+  /** 生效手柄表接进提示出口（与 `Game.rebuildHotkeys` 同一条路：表在，取值函数就在） */
+  const wire = (padOverrides = {}, uiPadOverrides = {}) => {
+    const { padTable, uiPadTable } = buildBindingTables({}, UI_HOTKEYS, padOverrides, uiPadOverrides);
+    setHintPadOutlets((action) => padOutletsFor(padTable, uiPadTable, action));
+    return { padTable, uiPadTable };
+  };
+
+  it('没接线时手柄侧退回键盘那一套（改绑那一处还没跑到时的样子）', () => {
+    setHintPadOutlets(null);
+    setHintDevice('gamepad');
+    expect(keyHint('interact')).toBe('E');
+  });
+
+  it('拼错的输入侧要抛：拼错的后果是永远退回键盘那一套，而它不会报错', () => {
+    expect(() => setHintDevice('gamePad')).toThrow(/未知的输入侧/);
+    expect(() => setHintDevice('touch')).toThrow(/未知的输入侧/);
+    expect(setHintDevice(null)).toBe(null);
+    expect(hintDevice()).toBe(null);
+  });
+
+  it('手柄侧：`interact` 说右摇杆按下（切片31 补的那一格）', () => {
+    wire();
+    setHintDevice('gamepad');
+    expect(hintDevice()).toBe('gamepad');
+    expect(keyHint('interact')).toBe('右摇杆按下');
+  });
+
+  it('按钮格说按钮名、摇杆格说两个入口（`padStickLabel` 存在的理由）', () => {
+    wire();
+    setHintDevice('gamepad');
+    expect(keyHint('spell1')).toBe('LT');
+    expect(keyHint('attackLight')).toBe('RB');
+    expect(keyHint('moveUp')).toBe('左摇杆 ↑ + 十字键 ↑');
+  });
+
+  it('冒充 UI 热键的格子一起收：`escape` 今天有三个主人，并列说', () => {
+    wire();
+    setHintDevice('gamepad');
+    expect(keyHint('escape')).toBe('Start / B');
+    expect(keyHint('uiUp')).toBe('左摇杆 ↑ + 十字键 ↑');
+  });
+
+  it('手柄侧没有出口的动作照旧说键盘 —— 手柄玩家未必没有键盘，什么都不说比说别的更糟', () => {
+    wire();
+    setHintDevice('gamepad');
+    expect(keyHint('spell2')).toBe('2');
+    expect(keyHint('fastTravel')).toBe('T');
+    expect(keyHint('journal')).toBe('J');
+  });
+
+  it('键盘 / 鼠标 / 还没动过：一个字都不变', () => {
+    wire();
+    for (const kind of [null, 'keyboard', 'mouse']) {
+      setHintDevice(kind);
+      expect(keyHint('interact'), String(kind)).toBe('E');
+      expect(keyHint('attackLight'), String(kind)).toBe('鼠标左键');
+      expect(keyText('{spell1} 法术'), String(kind)).toBe('1 法术');
+    }
+  });
+
+  it('换手之后同一句文案跟着改口，改回来又换回去（缓存按轮次作废）', () => {
+    wire();
+    expect(keyText('[{interact}] 休息')).toBe('[E] 休息');
+    setHintDevice('gamepad');
+    expect(keyText('[{interact}] 休息')).toBe('[右摇杆按下] 休息');
+    setHintDevice('keyboard');
+    expect(keyText('[{interact}] 休息')).toBe('[E] 休息');
+  });
+
+  it('`keyStamp` 把设备算进去（画布缓存那条链：改手不换图 = 图上还是旧键名）', () => {
+    wire();
+    setHintDevice('keyboard');
+    const keyboardStamp = keyStamp();
+    setHintDevice('gamepad');
+    expect(keyStamp()).not.toBe(keyboardStamp);
+    setHintDevice('keyboard');
+    expect(keyStamp()).toBe(keyboardStamp);
+  });
+
+  it('改绑跟着走：`interact` 搬去 LB 之后，手柄侧的提示也说 LB', () => {
+    wire({ interact: 'leftBumper', lockOn: 'rightStick' });
+    setHintDevice('gamepad');
+    expect(keyHint('interact')).toBe('LB');
+  });
+
+  it('每个游戏键动作的手柄出口都问得出来，名单不抄：`padOutletsFor` 逐表推', () => {
+    const { padTable, uiPadTable } = wire();
+    for (const action of KEY_ACTIONS) {
+      for (const cell of padOutletsFor(padTable, uiPadTable, action)) {
+        expect(padSourceLabel(padCellSource(cell)), action).toBeTruthy();
+      }
+    }
+    expect(padOutletsFor(padTable, uiPadTable, 'spell2')).toEqual([]);
+  });
+
+  it('`padCellSource` 只认两种形状，认不出来返回 null（说不出口的格子不许编个名字）', () => {
+    expect(padCellSource({ button: 'a' })).toEqual({ kind: 'button', name: 'a' });
+    expect(padCellSource({ axes: [0, 1], dir: 'up' })).toEqual({ kind: 'stick', dir: 'up' });
+    expect(padCellSource({ hotkey: 'escape' })).toBe(null);
+    expect(padCellSource(null)).toBe(null);
+    expect(padSourceLabel({ kind: '摇杆' })).toBe(null);
+    expect(padSourceLabel(null)).toBe(null);
   });
 });
