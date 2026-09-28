@@ -262,6 +262,20 @@ export class EnemyManager {
 
     this.spawn({ name: '精英·虚空骑士', type: 'elite', x: -50, z: -60, hp: 350, posture: 90, damage: 22, speed: 5.5, aggroRange: 25, color: 0x224466, respawnTime: 15 });
 
+    // W-B7 切片1：破碎时线与混沌边境此前没有原生敌人 —— 路过只有风景。
+    // 出生点避开 Boss 场（时线执政官 (0,235) / 混沌领主 (-200,285)，半径 22）与各自的营火。
+    for (const [x, z] of [[28, 212], [-32, 242], [12, 268], [-48, 205]]) {
+      this.spawn({ name: '时线怨影', type: 'wraith', x, z, hp: 110, posture: 44, damage: 13, speed: 6.2, aggroRange: 22, color: 0x5566aa });
+    }
+
+    for (const [x, z] of [[-222, 212], [-192, 248], [-238, 252]]) {
+      this.spawn({ name: '混沌掠行兽', type: 'stalker', x, z, hp: 140, posture: 62, damage: 14, speed: 6.8, color: 0x6a3038 });
+    }
+
+    for (const [x, z] of [[-172, 238], [-245, 280], [-160, 205]]) {
+      this.spawn({ name: '边境哨炮', type: 'sentinel', x, z, hp: 180, posture: 70, damage: 16, speed: 3.2, aggroRange: 26, color: 0x3a4a68 });
+    }
+
     const bx = -250, bz = -35;
     this.bossArena = this.buildBossArena({ x: bx, z: bz });
     this.spawnBoss({ bossId: 'shadow-warden', x: bx, z: bz });

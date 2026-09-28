@@ -434,6 +434,42 @@ export class Enemy {
       const wing = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.08, 0.3), mat);
       wing.position.y = 2.0;
       group.add(wing);
+    } else if (config.type === 'wraith') {
+      // 时线怨影：半透明罩袍罩住本体，胸口一点冷光 —— 悬浮身形靠 BODY_PLANS.hover 抬
+      const shroud = new THREE.Mesh(
+        new THREE.ConeGeometry(0.62, 1.9, 8, 1, true),
+        new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.5, side: THREE.DoubleSide, roughness: 0.4 })
+      );
+      shroud.position.y = 1.05;
+      group.add(shroud);
+      const core = new THREE.Mesh(
+        new THREE.SphereGeometry(0.14, 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0xaaddff, emissive: 0x335577, emissiveIntensity: 0.9 })
+      );
+      core.position.y = 1.55;
+      group.add(core);
+    } else if (config.type === 'stalker') {
+      // 混沌掠行兽：前倾的头与背脊，贴地跑（低矮靠 BODY_PLANS.scale 体现）
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.34, 0.6), mat);
+      head.position.set(0, 1.45, 0.62);
+      group.add(head);
+      const spine = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.9), mat);
+      spine.position.set(0, 1.85, -0.1);
+      group.add(spine);
+    } else if (config.type === 'sentinel') {
+      // 边境哨炮：肩甲与前置炮管，胸口带装甲核
+      const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.9), mat);
+      barrel.position.set(0, 1.5, 0.55);
+      group.add(barrel);
+      const pauldron = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.16, 0.5), mat);
+      pauldron.position.y = 1.95;
+      group.add(pauldron);
+      const core = new THREE.Mesh(
+        new THREE.OctahedronGeometry(0.16, 0),
+        new THREE.MeshStandardMaterial({ color: 0x88bbff, emissive: 0x224466, emissiveIntensity: 0.7 })
+      );
+      core.position.y = 1.5;
+      group.add(core);
     } else if (config.type !== 'boss') {
       const helm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.5), mat);
       helm.position.y = 2.15;

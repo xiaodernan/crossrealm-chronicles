@@ -36,6 +36,13 @@ export const BODY_PLANS = {
    * 套在玩家身上会让"跳起来躲横扫"永远擦到边，等于白做。
    */
   player:  { scale: 1.00, parts: ['head', 'torso', 'legs'], radius: 0.45, snap: 0.35 },
+  /**
+   * W-B7 切片1 新增的三类（破碎时线 / 混沌边境此前没有原生敌人）。
+   * 怨影与哨卫是悬浮体（不占 `legs` 分段），掠行兽是贴地的快速体。
+   */
+  wraith:   { scale: 0.92, parts: ['head', 'torso'], radius: 0.42, hover: 0.7 },
+  stalker:  { scale: 0.95, parts: ['head', 'torso', 'legs'], radius: 0.42 },
+  sentinel: { scale: 1.05, parts: ['head', 'torso'], radius: 0.55, hover: 0.35 },
 };
 
 /**
@@ -56,6 +63,12 @@ export const ENEMY_RESIST = {
   drone:   { gravity: -0.25 },
   boss:    { fire: 0.15, ice: 0.15, gravity: 0.3 },
   dummy:   {},
+  /** 时线怨影：半透明的影子，怕火、被重力井拽得动 */
+  wraith:  { fire: -0.15, gravity: 0.2 },
+  /** 混沌掠行兽：贴地快体，重力井反而给它加速，冻不住 */
+  stalker: { gravity: -0.2, ice: 0.1 },
+  /** 边境哨炮：装甲构装，火与重力都啃不动多少 */
+  sentinel: { fire: 0.25, gravity: 0.15 },
 };
 
 export const CRIT = {
@@ -198,6 +211,7 @@ export const HIT = {
 
 export const ENEMY_DEFENSE = {
   dummy: 0, soldier: 6, drone: 3, golem: 26, elite: 18, boss: 32,
+  wraith: 4, stalker: 3, sentinel: 14,
 };
 
 /** 玩家自身防御由装备/属性提供，M2 阶段基线为 0（先用闪避与弹反防御） */
@@ -579,5 +593,9 @@ export const ENEMY_MOVE_SETS = {
   dummy: [],
   boss: ['sweep', 'cleave', 'slam', 'shot'],
   default: ['sweep', 'thrust', 'cleave'],
+  /** W-B7 切片1：怨影俯冲接突刺；掠行兽连爪贴脸；哨炮远程压制兼守势 */
+  wraith: ['dive', 'thrust', 'sweep'],
+  stalker: ['flurry', 'thrust', 'cleave'],
+  sentinel: ['shot', 'guard', 'cleave'],
 };
 
