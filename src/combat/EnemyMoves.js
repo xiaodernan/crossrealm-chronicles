@@ -50,9 +50,23 @@ export function isAttackMove(move) {
 
 /** 这招能打到的最远距离：远程用自己的射程，范围招至少覆盖自己的预警圈 */
 export function moveRange(enemy, move) {
+  // 相位招的"够得着"是它能闪多远（`blink`），不是刀有多长 —— 落地之后那一刀由 `landRange` 判
+  if (move.phase) return move.blink ?? 10;
   if (move.ranged) return move.range ?? 12;
   const melee = enemy.attackRange + (move.reach ?? 0);
   return move.aoe ? Math.max(move.aoe, melee) : melee;
+}
+
+/**
+ * 命中段真正判距离用的范围。
+ *
+ * 与 `moveRange` 分开写是为了相位招：它**起手**时够得着 11 米（闪得过去），**落地之后**那一刀
+ * 仍按近战算（`attackRange + reach`）。一个数兼两份工作的话，两种情况里必有一种是错的 ——
+ * 而错的那一种恰好是最难发现的那种：闪不动（贴墙、落点被挡）时，敌人隔着八米判你命中。
+ */
+export function landRange(enemy, move) {
+  if (move.phase && !move.aoe) return enemy.attackRange + (move.reach ?? 0);
+  return moveRange(enemy, move);
 }
 
 /**
@@ -142,7 +156,7 @@ export function pickMove(enemy, dist, aimDot, rng) {
 /** 命中这一帧的横向判定：范围招不看朝向，其余要求在 `cone` 之内 */
 export function moveHits(enemy, move, dist, forwardDot) {
   if (move.aoe) return dist <= move.aoe;
-  if (dist > moveRange(enemy, move)) return false;
+  if (dist > landRange(enemy, move)) return false;
   if (move.cone === undefined || move.cone <= -1) return true;
   return forwardDot >= move.cone;
 }

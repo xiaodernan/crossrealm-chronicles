@@ -355,6 +355,11 @@ export class Enemy {
     /* 召唤招：敌人只说"按这份规格放仆从"，出生点、名额、归属与生命周期全归管理器。
      * 直接在这里往 enemies 里塞东西会在迭代途中改数组，也会让"谁创建了谁"变成一笔糊账 */
     if (move.summon) return ctx.summon ? ctx.summon(this, move.summon) === true : false;
+    /* 相位招：命中段落的是"我到你背后"这一步。落点越过目标 `reach` 米，位移走碰撞
+     * （`blinkBehind`），所以相位是位移、不是穿模 —— 玩家背靠墙时落点会短一截，
+     * 代价是这一刀砍在墙外，而不是"贴进墙里劈"。落点之后照样走下面同一条 `moveHits`，
+     * 它按 `landRange`（近战那一档）判距离，所以闪不动时也判不出"隔着八米命中" */
+    if (move.phase) this.blinkBehind(ctx.target, ctx.collision, move);
     const damage = Math.round(this.damage * (move.damage ?? 1));
     if (move.ranged) {
       // 远程：命中段改为交出一枚弹体，弹体在玩家侧走同一条 takeDamage 结算
@@ -370,6 +375,36 @@ export class Enemy {
     const part = pickPart(ref.combat, this.hurtBaseY(), move.band);
     if (!part) return false;
     ref.combat.takeDamage(damage, null, part);
+    return true;
+  }
+
+  /**
+   * 相位落点：越过目标落在它背后 `reach` 米处，落地即转向目标（W-B7 切片2）。
+   *
+   * 位移过 `moveCircle`：本仓"一个圆怎么沿障碍滑"只有这一处实现，绕开它自己写一份
+   * 就会得到"敌人随机穿进墙里"这一族症状（B36 那一族）。
+   */
+  blinkBehind(target, collision, move) {
+    const dx = target.x - this.position.x;
+    const dz = target.z - this.position.z;
+    const len = Math.hypot(dx, dz);
+    if (len < 1e-4) return false;                       // 与目标重合：没有"另一侧"可言
+    const behind = move.reach ?? 1;
+    const toX = target.x + (dx / len) * behind - this.position.x;
+    const toZ = target.z + (dz / len) * behind - this.position.z;
+    const footY = this.world.getGroundHeight(this.position.x, this.position.z);
+    const moved = collision
+      ? collision.moveCircle(this.position.x, this.position.z, this.radius, toX, toZ, footY)
+      : { x: this.position.x + toX, z: this.position.z + toZ };
+    this.position.x = moved.x;
+    this.position.z = moved.z;
+    /* 位置写在这里，贴地就必须同步在这里：`hurtBaseY()` 读的是 `mesh.position.y`，
+     * 而 `updateMeshY()` 要到 `Enemy.update()` 末尾才跑 —— 少了这一句，同一帧的命中判定
+     * 会拿起跳点的高度去比玩家的。真浏览器里 12.5 米的坡上闪下来、落差 10 米，
+     * 竖直方向当场判空，症状是"人已经贴在脸上、血条一动不动"（B67）。 */
+    this.updateMeshY();
+    // 落地即转向目标：相位是"从背后来的那一刀"，朝向不跟上就是空挥
+    this.mesh.rotation.y = Math.atan2(target.x - this.position.x, target.z - this.position.z);
     return true;
   }
 

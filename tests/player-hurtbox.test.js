@@ -185,15 +185,20 @@ describe('招式表的竖直维度', () => {
     const standing = { hurtbox: createHurtbox('player'), hurtBaseY: () => 0 };
     const airborne = { hurtbox: createHurtbox('player'), hurtBaseY: () => 2.0 };
     let low = 0;
+    let melee = 0;
     for (const [id, m] of Object.entries(ENEMY_MOVES)) {
       if (m.ranged || m.guard || m.summon) continue;   // 弹体、举盾与召唤都不落到玩家身上
+      melee++;
       expect(m.band, id).toBeTruthy();
       expect(pickPart(standing, 0, m.band), `${id} 该打到站着的玩家`).toBeTruthy();
       if (pickPart(airborne, 0, m.band) === null) low++;
     }
-    // 至少有一招低到能跳过去、也至少有一招高到跳了也没用：全低或全高都等于没有这个维度
+    // 至少有一招低到能跳过去、也至少有一招高到跳了也没用：全低或全高都等于没有这个维度。
+    // 上界跟**近战招总数**比，不写死一个数：那一格写死的日子，表每加一招它就会在某个切片里
+    // 翻面成"全低也算通过"（W-B7 切片2 加第七条近战招时正是这么红的）—— 它要判的是"有人高"，
+    // 而这个命题只在"与全体比"的形状下才成立
     expect(low).toBeGreaterThan(0);
-    expect(low).toBeLessThan(5);
+    expect(low).toBeLessThan(melee);
   });
 
   it('持盾的两类敌人才有格挡，构装体与无人机没有手', () => {

@@ -279,6 +279,9 @@ export const AI = {
  * - `summon: { type, count }`：召唤招，命中段不伤人而是交出仆从（名额与生命周期见 `SUMMON`）；
  *   与防御招一样不是"打人的招"，所以不参与站位打分，也没有 `band`
  * - `ranged`：命中段改为一枚弹体（不要求贴身），`range` 是它自己的射程，`minDist` 之下不许用它免得糊脸
+ * - `phase: true` + `blink`：相位招 —— `blink` 是它**够不够得着才起手**的距离（"能闪多远"），
+ *   命中段把自己挪到目标背后 `reach` 之内再劈。两个数分开写：把 `blink` 当 `reach` 用，
+ *   十米外起手的那一刀会隔着十米命中（一个数同时当"够得着"和"打得到"用，迟早分家）
  * - `telegraph`：预警分级 —— 前摇越长颜色越偏紫、圈越大，玩家一眼能读出该躲还是该弹
  */
 export const ENEMY_MOVES = {
@@ -341,6 +344,39 @@ export const ENEMY_MOVES = {
     name: '召唤', windup: 1.4, strike: 0.25, recover: 0.7, reach: 0.9, cone: -2,
     damage: 0, cooldown: 11, weight: 1, summon: { type: 'soldier', count: 2 },
     telegraph: { color: 0x66ff99, ring: 1.15 },
+  },
+  phase: {
+    // 相位突袭（时线怨影，W-B7 切片2）：起手站在原地蓄势，命中段**直接落到玩家背后**再劈。
+    // 为什么不是一个"更长的突刺"：这一招的威胁是**出刀在背后** —— 落点越过目标 `reach` 米，
+    // 于是正面架好的那一套（朝向、格挡弧、站位距离）全部错位，这是表里其余九招都没有的性质。
+    // `blink` 与 `reach` 各管一头（见文件头）：11 米内可起手，落地之后这一刀仍是近战那 1.2 米。
+    // 反制是**落地之后**那 0.5 秒收招：落点取你此刻站的地方，所以躲法不是"提前跑开"，
+    // 是"看见它闪到背后再翻滚"（0.7 秒前摇是给你读懂它的，不是给你跑到安全区的）。
+    // **没有 `minDist`**（这条是实测出来的，不是省事）：`minDist` 是给"弹体糊脸"那种放风筝招
+    // 用的，而这一招的伤害段是近战那一档（`landRange` = attackRange + reach）。写上一个最小
+    // 距离的后果是怨影的甜点位（`holdRangeOf` 选的 3.0 米，正好等于那一格）与追击的收脚余量
+    // （每帧 0.1 米，必然越过一点）把它挤到窗口外 —— 90 秒 42 次出手里它一次都没被选中。
+    name: '相位突袭', windup: 0.7, strike: 0.3, recover: 0.5, reach: 1.2, cone: 0.35,
+    band: [0.05, 1.05], phase: true, blink: 11,
+    damage: 1.1, cooldown: 3.2, weight: 2,
+    telegraph: { color: 0xaa55ff, ring: 0.9 },
+  },
+  charge: {
+    // 蓄力炮击（边境哨炮，W-B7 切片2）：全场最长的前摇换最重的一发。
+    // 与 `shot` 的差别不是"同一发的加强版"：判定读的是**玩家看不看得出这一发不能硬吃** ——
+    // 预警圈 1.6 倍于虚能弹、前摇 1.7 秒（召唤那一档）、冷却 7.5 秒，够读完再翻滚。
+    name: '蓄力炮击', windup: 1.7, strike: 0.22, recover: 0.9, cone: -2,
+    range: 16, minDist: 4.5,
+    damage: 2.4, cooldown: 7.5, weight: 1, ranged: { speed: 24, color: 0xffbb33 },
+    telegraph: { color: 0xff8800, ring: 1.6 },
+  },
+  howl: {
+    // 嚎叫引援（混沌掠行兽，W-B7 切片2）：不是打人的招（`damage: 0`），命中段呼来两只同类。
+    // 冷却取全场最长（15 秒）：把"一对二"变成"一对四"的招，频率必须低到玩家清得完场，
+    // 否则掠行兽群自己就是一台永动的增援机（名额上限只挡"同时在场的总数"，挡不住"永远刷不完"）。
+    name: '嚎叫引援', windup: 1.2, strike: 0.25, recover: 0.6, reach: 0.9, cone: -2,
+    damage: 0, cooldown: 15, weight: 1, summon: { type: 'stalker', count: 2 },
+    telegraph: { color: 0x99ff55, ring: 1.15 },
   },
 };
 
@@ -594,8 +630,9 @@ export const ENEMY_MOVE_SETS = {
   boss: ['sweep', 'cleave', 'slam', 'shot'],
   default: ['sweep', 'thrust', 'cleave'],
   /** W-B7 切片1：怨影俯冲接突刺；掠行兽连爪贴脸；哨炮远程压制兼守势 */
-  wraith: ['dive', 'thrust', 'sweep'],
-  stalker: ['flurry', 'thrust', 'cleave'],
-  sentinel: ['shot', 'guard', 'cleave'],
+  /** W-B7 切片2：每类配一条**只有它有**的招（相位突袭 / 嚎叫引援 / 蓄力炮击） */
+  wraith: ['phase', 'dive', 'thrust', 'sweep'],
+  stalker: ['flurry', 'howl', 'thrust', 'cleave'],
+  sentinel: ['charge', 'shot', 'guard', 'cleave'],
 };
 
