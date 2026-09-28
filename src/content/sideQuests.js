@@ -1,16 +1,78 @@
 /**
- * 致敬向支线任务数据表（W-B2：消灭 Wave/Extras 叠加）。
+ * 支线任务名册 —— 两族一张表（W-B3 切片5）
  *
- * 原 SIDE_QUESTS_POP 从 SideQuestPopCulture.js 迁移而来。
- * 字段：
- * - id: 任务 id
- * - title: 标题
- * - desc: 描述
- * - check: 检查函数（运行时由 SideQuestSystem 调用，接收 game 对象）
- * - reward: 奖励魂火
- * - journal: 完成后的日志文本
+ * 以前基础那 7 条住在 `src/game/SideQuestRegistry.js`、致敬那 14 条住在这里，
+ * 而致敬族是靠 `attachPopCultureSideQuests()` **改写 `checkAll` 方法**挂上去的
+ * （`Game.js` 第 317 行调它）。后果有两处，都是玩家看得见的：
+ *  - 进度分母只数基础那 7 条（`getProgress().total = SIDE_QUESTS.length`），
+ *    而致敬支线完成后进的是同一个 `completed` 集合 —— HUD 那一行可以显示 "(12/7)"；
+ *  - 支线页签只渲染基础那 7 张卡，14 条致敬支线**能完成、会弹提示、会写日志，却永远不出现在名单里**。
+ *
+ * 现在两族都在内容层、由 `SIDE_QUESTS_ALL` 一处合并；`SideQuestSystem` 只认这一份名单。
+ * 字段：`id` / `title` / `desc` / `check(game)` / `reward`（魂火）/ `journal`（完成后写进日志的那句）。
+ * `check` 是运行时判据，签名 `(game) => boolean`；它只看得到已经收进 `content/objectives.js`
+ * 的那本账与各子系统自报的读数 —— 判据不许自己另记一份数。
  */
 import { FRANCHISE } from './franchises.js';
+
+export const SIDE_QUESTS_BASE = [
+  {
+    id: 'side-wisp-12',
+    title: '魂火萤猎人',
+    desc: '吸收 12 个位面残响魂火',
+    check: (g) => (g.soulWisps?.collected?.size ?? 0) >= 12,
+    reward: 15,
+    journal: '十二萤火归锚，位面脉动稍稳。',
+  },
+  {
+    id: 'side-style-a',
+    title: '风格试炼',
+    desc: '单场战斗风格达 A 级',
+    check: (g) => (g.combatStyle?.sessionBest ?? 0) >= 250,
+    reward: 10,
+    journal: '弹反与处决的节奏，即是行者的语言。',
+  },
+  {
+    id: 'side-dungeon-3',
+    title: '迷宫清道夫',
+    desc: '清空 3 座不同地下城',
+    check: (g) => Object.keys(g.dungeonRuns?.clears ?? {}).length >= 3,
+    reward: 20,
+    journal: '三座迷宫的空房间，都在低声复述旧战争。',
+  },
+  {
+    id: 'side-rematch',
+    title: '信标猎人',
+    desc: 'Boss 再战 2 次',
+    check: (g) => (g.achievements?.stats?.rematches ?? 0) >= 2,
+    reward: 12,
+    journal: '信标再燃，证明你仍握剑。',
+  },
+  {
+    id: 'side-cg-half',
+    title: '插画旅人',
+    desc: 'CG 画廊解锁 40%',
+    check: (g) => (g.cgGallery?.getStats()?.percent ?? 0) >= 40,
+    reward: 8,
+    journal: '每一张 CG 都是位面记忆的切片。',
+  },
+  {
+    id: 'side-photo',
+    title: '荒原留影',
+    desc: '使用 {photoMode} 拍照模式',
+    check: (g) => g.achievements?.stats?.photoMode === true,
+    reward: 5,
+    journal: '米勒透镜下的留影，连引力都变慢。',
+  },
+  {
+    id: 'side-campfire-all',
+    title: '六火皆憩',
+    desc: '在全部 6 处营火休息',
+    check: (g) => (g.campfireMemory?.getStats()?.zones ?? 0) >= 6,
+    reward: 18,
+    journal: '六簇火，六段路，一条行者轨迹。',
+  },
+];
 
 function countFranchise(game, franchise) {
   const sys = game.popCulture;
@@ -103,3 +165,14 @@ export const SIDE_QUESTS_POP = [
 
 // 导出辅助函数供运行时使用
 export { countFranchise };
+/** 两族合并后的唯一名单：分母、页签、完成检测都只认它（撞 id 当场抛，静默覆盖就是少一条支线） */
+export const SIDE_QUESTS_ALL = (() => {
+  const 名单 = [...SIDE_QUESTS_BASE, ...SIDE_QUESTS_POP];
+  const 见过 = new Set();
+  for (const q of 名单) {
+    if (见过.has(q.id)) throw new Error(`sideQuests: 支线 id "${q.id}" 出现两次（后写的那条会静默盖掉前一条）`);
+    见过.add(q.id);
+  }
+  return 名单;
+})();
+

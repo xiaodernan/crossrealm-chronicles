@@ -106,7 +106,6 @@ import { UpsideDownVisualPass } from '../effects/UpsideDownVisualPass.js';
 import { PopCultureTriadVisualPass } from '../effects/PopCultureTriadVisualPass.js';
 import { PopCultureWave4VisualPass } from '../effects/PopCultureWave4VisualPass.js';
 import { attachPopCultureZones } from '../world/PopCultureZoneEnhancer.js';
-import { attachPopCultureSideQuests } from '../game/SideQuestPopCulture.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
@@ -314,7 +313,6 @@ export class Game {
     this.restNpcIdle.attachRestNpcs(this.restNpcs.npcs);
     attachCgGalleryExtras(this.cgGallery);
     attachAchievementExtras(this.achievements);
-    attachPopCultureSideQuests(this.sideQuests);
     attachPopCultureCombatBarks(this);
     this.bossRematch.syncFromQuests?.();
     this.cgGallery.unlock('bonus:world-anchor', 'init');

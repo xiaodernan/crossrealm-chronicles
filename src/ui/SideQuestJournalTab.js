@@ -1,4 +1,4 @@
-import { SIDE_QUESTS } from '../game/SideQuestRegistry.js';
+import { SIDE_QUESTS_ALL } from '../content/sideQuests.js';
 import { keyText, refreshKeyText } from '../content/keyHints.js';
 
 /** [J] 支线 Tab */
@@ -10,9 +10,9 @@ export class SideQuestJournalTab {
   render(panelEl) {
     const sq = this.game.sideQuests;
     const done = sq?.completed ?? new Set();
-    const prog = sq?.getProgress?.() ?? { done: 0, total: SIDE_QUESTS.length };
+    const prog = sq?.getProgress?.() ?? { done: 0, total: SIDE_QUESTS_ALL.length };
 
-    const cards = SIDE_QUESTS.map((q) => {
+    const cards = SIDE_QUESTS_ALL.map((q) => {
       const ok = done.has(q.id);
       return `<div class="sq-card${ok ? ' sq-done' : ''}">
         <div class="sq-title">${ok ? '✓ ' : ''}${q.title}</div>

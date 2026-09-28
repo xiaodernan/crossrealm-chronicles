@@ -39,7 +39,7 @@ import {
 } from './dialogueCgPresets.js';
 import { ACHIEVEMENTS_EXTRA, ACHIEVEMENTS_POP_CULTURE } from './achievements.js';
 import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
-import { SIDE_QUESTS_POP } from './sideQuests.js';
+import { SIDE_QUESTS_BASE, SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
@@ -468,16 +468,31 @@ export const CONTENT_TABLES = [
     },
   },
   {
+    kind: 'sideQuestsBase',
+    note: '基础支线（W-B3 切片5 从 `game/SideQuestRegistry.js` 搬进内容层）：与致敬族合成 `SIDE_QUESTS_ALL` 一份名单，分母、页签、完成检测都只认那一份',
+    shape: 'rows',
+    table: SIDE_QUESTS_BASE,
+    row: {
+      id: { t: 'id' },
+      title: { t: 'string' },
+      desc: { t: 'string' },
+      // check 是运行时判据（签名 `(game) => boolean`），不参与静态校验；
+      // 它是否存在由下面的 `checkSideQuestRosters` 当场核（少了它 = 这条支线永远完成不了，且不报错）
+      reward: { t: 'int', min: 1 },
+      journal: { t: 'string' },
+    },
+    invariant: checkSideQuestRosters,
+  },
+  {
     kind: 'sideQuestsPop',
-    note: '致敬向支线任务（W-B2：原 SideQuestPopCulture）',
+    note: '致敬向支线任务（W-B2：原 SideQuestPopCulture 的数据半壁；挂载那半壁是改写 `checkAll` 的 monkey-patch，切片5 已删）',
     shape: 'rows',
     table: SIDE_QUESTS_POP,
     row: {
       id: { t: 'id' },
       title: { t: 'string' },
       desc: { t: 'string' },
-      // check 是运行时函数，不参与静态校验
-      reward: { t: 'int', min: 0 },
+      reward: { t: 'int', min: 1 },
       journal: { t: 'string' },
     },
   },
@@ -745,6 +760,41 @@ export function checkContent(tables = CONTENT_TABLES) {
  * 缺名字 → 提示与图鉴只能拿 id 冒充名字（正是这一族"不报错的说假话"）；多名字 → 那一格永远不会
  * 出现在玩家面前。三条各配反向，写在 `tests/rest-point-name-single-source.test.js`。
  */
+/**
+ * 支线两族名册的成对规则（W-B3 切片5）。
+ *
+ * 这一族以前静默失效过：基础那 7 条住在 `game/`、致敬那 14 条住在 `content/`，
+ * 而"支线一共几条"有两个答案（分母读 7、完成检测读 21）—— HUD 能显示 "(12/7)"，
+ * 14 条致敬支线能完成却从不出现在页签里。判据 `check` 是函数、不能静态校验，
+ * 所以能静态核的就三件事，每件都对应一种"不报错的少内容"：
+ * 1. 两族都非空 —— 搬空一族不会红，只是玩家少了 14 条支线；
+ * 2. 两族之间 id 不重名 —— 合并表按"后写盖掉前写"的话，重名就是静默少一条（`SIDE_QUESTS_ALL`
+ *    自己也会抛，这条给的是开机时能读懂的消息，而不是构建期一个匿名异常）；
+ * 3. 每条都得有 `check` —— 少了它，遍历时抛 TypeError，而那一族以前包着 `catch (_) {}`，
+ *    于是那条支线**永远完成不了**且没有任何声响。
+ */
+export function checkSideQuestRosters(baseTable) {
+  const out = [];
+  const rosters = [['sideQuestsBase', baseTable ?? []], ['sideQuestsPop', SIDE_QUESTS_POP]];
+  for (const [kind, rows] of rosters) {
+    if (!Array.isArray(rows) || rows.length === 0) {
+      out.push(`${kind}: 一族支线空了 —— 分母与页签会跟着一起变小，玩家少的这几条不会报任何错`);
+    }
+  }
+  const 见过 = new Map();
+  for (const [kind, rows] of rosters) {
+    for (const row of rows ?? []) {
+      if (typeof row?.check !== 'function') {
+        out.push(`${kind} 支线 "${row?.id}": 没有 check 函数（运行时那句会抛 TypeError，这条支线永远完成不了）`);
+      }
+      if (见过.has(row?.id)) {
+        out.push(`sideQuests: 支线 id "${row?.id}" 同时在 "${见过.get(row?.id)}" 与 "${kind}" 里 —— 合并名单只能留一条，另一条玩家看不到`);
+      } else 见过.set(row?.id, kind);
+    }
+  }
+  return out;
+}
+
 export function checkRestPointNames(table) {
   const out = [];
   for (const id of Object.keys(table ?? {})) {

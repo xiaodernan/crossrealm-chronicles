@@ -27,7 +27,7 @@ import { LORE_CODEX } from '../src/game/LoreCodexRegistry.js';
 import {
   BOSS_LORE, CHAPTER_INTROS, DUNGEON_ENTER_LINES, LORE_FRAGMENTS, NPC_CHAPTER_LINES, ZONE_STORY_HOOKS,
 } from '../src/game/LoreFragments.js';
-import { SIDE_QUESTS } from '../src/game/SideQuestRegistry.js';
+import { SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
 import { ZONE_EVENTS_EXTRA } from '../src/game/WorldAmbientCatalog.js';
 import { MAINLINE } from '../src/content/objectives.js';
 
@@ -222,7 +222,7 @@ describe('内容表的 `{动作}` 占位：真表跑真展开', () => {
     restDialogues: REST_DIALOGUES,
     helpSectionsExtra: HELP_SECTIONS_EXTRA,
     loreCodex: LORE_CODEX,
-    sideQuests: SIDE_QUESTS,
+    sideQuests: SIDE_QUESTS_ALL,
     echoes: ECHOES,
     quests: MAINLINE,
     npcChapterLines: NPC_CHAPTER_LINES,

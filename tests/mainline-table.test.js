@@ -10,7 +10,7 @@ import { MAP_BOSSES, QuestSystem } from '../src/game/QuestSystem.js';
 import { AchievementSystem } from '../src/game/AchievementSystem.js';
 import { attachAchievementExtras } from '../src/game/AchievementSystemExtras.js';
 import { ALL_ACHIEVEMENTS_EXTRA } from '../src/content/achievements.js';
-import { SIDE_QUESTS } from '../src/game/SideQuestRegistry.js';
+import { SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
 import { BossApproachDirector } from '../src/world/BossApproachDirector.js';
 import { BossRematchDirector } from '../src/world/BossRematchDirector.js';
 
@@ -331,7 +331,7 @@ describe('④ 派生出来的 MAP_BOSSES 喂得动它的六个消费者', () => 
   it('再战真能计数：导演派发 → 成就监听 → 成就与支线各自翻面', () => {
     const consumers = (rows) => rows.filter((r) => String(r.check).includes('rematches'));
     const achRows = consumers(ALL_ACHIEVEMENTS_EXTRA);
-    const sideRows = consumers(SIDE_QUESTS);
+    const sideRows = consumers(SIDE_QUESTS_ALL);
     // 先钉"这条链有消费者"：判据改读别的字段时这里先红，不让下面的断言空转成"0 个都通过"
     expect(achRows.map((r) => r.id)).toEqual(['rematch-3']);
     expect(sideRows.map((r) => r.id)).toEqual(['side-rematch']);
