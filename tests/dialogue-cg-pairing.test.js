@@ -38,6 +38,7 @@ import { keyText } from '../src/content/keyHints.js';
 import { CgJournalTab } from '../src/ui/CgJournalTab.js';
 import { Dialog } from '../src/ui/Dialog.js';
 import { RestDialogue } from '../src/game/RestDialogue.js';
+import { gameSurface } from './helpers/gameSurface.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
 /** 走 shipped 入口：把某一张表换成种植入的，其余照原样 */
@@ -426,21 +427,29 @@ describe('画廊目录与预设表同一份', () => {
  * ------------------------------------------------------------------ */
 
 describe('运行时：对话与图都只说真话', () => {
-  /** 一棵能走通的假游戏：只给 `RestDialogue._showNode` / `start` 真会碰到的那几件 */
+  /** 一棵能走通的假游戏：字段形状**照 `src/core/Game.js` 长**，不多给一个 Game 没有的名字。
+   *  曾经这里写作 `combat: {...}`（Game 顶层没有 `combat`，真口是 `player.combat`），
+   *  于是六座营火点"休息"在浏览器里当场抛 TypeError，而这栋楼里 34 例全绿 —— 修 B63。 */
   function campfireGame(sunk) {
     return {
       quests: { chapter: 5, current: null, getProgressText: () => '', getAssistantHint: () => '' },
       audio: {},
-      combat: { restHeal: () => sunk.healed.push(1) },
+      player: { combat: { restHeal: () => sunk.healed.push(1) } },
       upgrade: { show: (name) => sunk.upgraded.push(name) },
-      dialog: { showChoices: (title, html, choices, meta) => sunk.metas.push(meta), toast: () => {} },
+      dialog: {
+        showChoices: (title, html, choices, meta) => sunk.metas.push(meta),
+        toast: () => {},
+        hide: () => sunk.closed.push(1),
+      },
       storyJournal: { add: () => {} },
+      stats: { addSouls: (n) => sunk.souls.push(n), toJSON: () => ({ souls: sunk.souls.reduce((a, b) => a + b, 0) }) },
+      restNpcs: { getByRestId: () => null },
     };
   }
 
   it('逐座逐节点走真 `_showNode`：递出去的配色就是那一座的定义', () => {
     installWindowShim();
-    const sunk = { metas: [], healed: [], upgraded: [] };
+    const sunk = { metas: [], healed: [], upgraded: [], souls: [], closed: [] };
     const rd = new RestDialogue(campfireGame(sunk));
     const 错色 = [];
     for (const [zone, tree] of Object.entries(REST_DIALOGUES)) {
@@ -465,7 +474,7 @@ describe('运行时：对话与图都只说真话', () => {
 
   it('认不出的营火：`start` 不开对话（改前借 hub 那棵树说话），走的是回血 + 升级面板那条兜底', () => {
     installWindowShim();
-    const sunk = { metas: [], healed: [], upgraded: [] };
+    const sunk = { metas: [], healed: [], upgraded: [], souls: [], closed: [] };
     const rd = new RestDialogue(campfireGame(sunk));
     rd.start({ id: 'ghostfire', name: '陌生的火' });
     expect(sunk.metas, '借了别家的对话树').toEqual([]);
@@ -473,6 +482,48 @@ describe('运行时：对话与图都只说真话', () => {
     expect(sunk.upgraded).toEqual(['陌生的火']);
     delete globalThis.window;
     delete globalThis.CustomEvent;
+  });
+
+  it('"休息 / 升级"那一格真按下去：回血、开面板、第一次加 5 魂火（B63 —— 浏览器里六座全崩）', () => {
+    installWindowShim();
+    const sunk = { metas: [], healed: [], upgraded: [], souls: [], closed: [] };
+    const rd = new RestDialogue(campfireGame(sunk));
+    const restChoiceOf = (zone) => {
+      const c = (REST_DIALOGUES[zone].nodes.start.choices ?? []).find((x) => x.action === 'rest');
+      expect(c, `${zone} 的 start 那一格没有 action:'rest' 的选项了`).toBeTruthy();
+      return c;
+    };
+    rd.start({ id: 'hub', name: '世界之锚营火' });
+    rd._pick(REST_DIALOGUES.hub, restChoiceOf('hub'), 'start');
+    // 三层后果都要落地：只"没抛错"不算过 —— 当年抛错发生在 hide 之后，对话照样关得掉，
+    // 所以界面上唯一能看出坏掉的地方是"血没回、面板没开"（浏览器读数：hp 停在 100 / 上限 118）
+    expect(sunk.closed, '休息没把对话窗关掉').toHaveLength(1);
+    expect(sunk.healed, '休息没回血').toHaveLength(1);
+    expect(sunk.upgraded).toEqual(['世界之锚营火']);
+    expect(sunk.souls, '首访营火余温没加魂火').toEqual([5]);
+    // 换一座：`visited` 按营火记，所以第二座也算首访
+    rd.start({ id: 'magic', name: '魔法遗境营火' });
+    rd._pick(REST_DIALOGUES.magic, restChoiceOf('magic'), 'start');
+    expect(sunk.healed).toHaveLength(2);
+    expect(sunk.souls).toEqual([5, 5]);
+    // 回老火再歇一次：回血照给，+5 魂火不重复发
+    rd.start({ id: 'hub', name: '世界之锚营火' });
+    rd._pick(REST_DIALOGUES.hub, restChoiceOf('hub'), 'start');
+    expect(sunk.healed).toHaveLength(3);
+    expect(sunk.souls, '同一座火的首访魂火发了两次').toEqual([5, 5]);
+    delete globalThis.window;
+    delete globalThis.CustomEvent;
+  });
+
+  it('假 `game` 的每一格都挂得在真 `Game` 表面上：桩件不许供生产没有的字段（B63）', () => {
+    const surface = gameSurface();
+    const stub = campfireGame({ metas: [], healed: [], upgraded: [], souls: [], closed: [] });
+    const 幻影 = Object.keys(stub).filter((k) => !surface.has(k));
+    // 当年这里写的是 `combat: {...}` —— Game 顶层没这个名字，真口在 `player.combat`，
+    // 于是 34 例全绿而浏览器里六座营火全崩。断言只问推导出来的表面，不抄名单。
+    expect(幻影, `桩件供了 Game 没有的字段：${幻影.join(' / ')}`).toEqual([]);
+    expect(surface.has('combat')).toBe(false);
+    expect(stub.player.combat).toBeTruthy();
   });
 
   it('`CgJournalTab` 让每一行按自己写着的去画：营火行走 render，其余走 renderScene', () => {

@@ -24,7 +24,7 @@ export class RestDialogue {
     // 认不出 id 的营火就走"没有对话"那一条（回血 + 升级面板），不再借世界之锚的台词说话
     const tree = REST_DIALOGUES[restPoint.id];
     if (!tree) {
-      this.game.combat.restHeal();
+      this.game.player.combat.restHeal();
       this.game.upgrade.show(restPoint.name);
       return;
     }
@@ -118,7 +118,9 @@ export class RestDialogue {
       window.dispatchEvent(new CustomEvent('rest-dialogue-close', { detail: { restId: this.activeRest?.id } }));
       window.dispatchEvent(new CustomEvent('dialog-overlay-hidden'));
       this.game.dialog.hide();
-      this.game.combat.restHeal();
+      // 回血的宿主是 `player.combat`（`95c0533` 把 CombatController 从 Game 顶层搬进了 PlayerController）：
+      // 读 `game.combat` 不报错、只是拿到 undefined，于是六座营火点"休息"全部当场崩 —— 修 B63
+      this.game.player.combat.restHeal();
       this.game.upgrade.show(this.activeRest?.name);
       if (!this.visited.has(this.activeRest?.id)) {
         this.visited.add(this.activeRest?.id);
