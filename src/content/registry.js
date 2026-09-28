@@ -486,7 +486,7 @@ export const CONTENT_TABLES = [
   },
   {
     kind: 'sideQuestsZone',
-    note: '分区支线（W-B12 切片1）：一位面一条，判据只用已持久化又可跳过的两件事（在那座火边歇够次数 + 看过那张门口插画）',
+    note: '分区支线（W-B12 切片1+2）：每位面 ≥2 条，判据只用已持久化又可跳过的位面事实（歇够次数 + 门口插画 + 该区萤火 + 火牌发现）',
     shape: 'rows',
     table: SIDE_QUESTS_ZONE,
     row: {
@@ -816,18 +816,27 @@ export function checkSideQuestRosters(baseTable) {
 }
 
 /**
- * 分区覆盖（W-B12 切片1）：**每个位面至少一条专属支线**。
+ * 分区覆盖（W-B12 切片1 立门禁 ≥1，切片2 升到 ≥2）：**每个位面至少两条专属支线**。
  *
  * 这条不是形式主义 —— 板上"支线 7 → 15+"那个目标在 21 条时就已"达成"，
  * 而玩家在一座位面里做的事跟它是不是那个位面毫无关系。**能检验的是覆盖，不是条数。**
+ * 切片1 时说过"要继续变严，得先有可跳过的持久化事实可绑"：当时每个位面只有两样
+ * （歇几次、看过插画）；切片2 起萤火（`soulWisps`，一直在存档里）与火牌发现
+ * （`restPointEnhancer.discovered`，存档 v7 落库 —— B66）也是位面账，每位面 ≥2 诚实做得到。
  * 判据挂在分区族这张表上（不是合并名单），这样用例能把这张表换成"少一位"的版本走 shipped 入口。
  */
 export function checkZoneSideQuestCoverage(zoneTable) {
-  const 有专属 = new Set((zoneTable ?? []).filter((q) => ZONE_ORDER.includes(q?.zone)).map((q) => q.zone));
+  const 计数 = new Map();
+  for (const q of zoneTable ?? []) {
+    if (ZONE_ORDER.includes(q?.zone)) 计数.set(q.zone, (计数.get(q.zone) ?? 0) + 1);
+  }
   const out = [];
   for (const zone of ZONE_ORDER) {
-    if (!有专属.has(zone)) {
+    const n = 计数.get(zone) ?? 0;
+    if (n === 0) {
       out.push(`sideQuestsZone: 位面 "${zone}" 一条专属支线都没有 —— 这位面的内容深度是 0，而"条数够不够"那种门禁看不见它`);
+    } else if (n < 2) {
+      out.push(`sideQuestsZone: 位面 "${zone}" 的专属支线只有 ${n} 条（W-B12 切片2 门禁：每位面 ≥2）—— 四样位面事实都在存档里，第二条没有理由缺席`);
     }
   }
   return out;

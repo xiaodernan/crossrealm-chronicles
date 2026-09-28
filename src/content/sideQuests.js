@@ -184,21 +184,30 @@ export const SIDE_QUESTS_POP = [
 export { countFranchise };
 
 /**
- * 分区支线（W-B12 切片1）—— 每一座位面各有一条属于自己的支线。
+ * 分区支线（W-B12）—— 每一座位面都有一条**属于自己的**支线（切片1 起），切片2 起每位面两条。
  *
  * 为什么现在才加：板上这条工作包写的是"支线 7 → 15+"，而切片5 把两族合成一份名单之后量出来
  * 已经有 **21 条** —— 数量早就过线了，真正的空白是**这 21 条没有一条绑在某个位面上**
  * （读的全是跨切面的账：魂火萤、迷宫数、CG 百分比、致敬共鸣、再战次数、拍照、营火覆盖）。
- * "内容深度"用条数量不出来，所以这片把目标换成能检验的那一条：每个位面至少一条专属支线。
+ * "内容深度"用条数量不出来，所以切片1 把目标换成能检验的那一条：每个位面至少一条专属支线。
  *
- * 判据只用**两样都持久化、且都可跳过**的事实：在那座火边歇过几次（`campfireMemory.restCount`，
- * 营火 id = 区域 id，见 W-A2 切片2）与看过那张门口插画（`cgGallery.unlocked`，键是 `<营火>:start`）。
- * 刻意不用 `POI.discovered` —— 它今天不进存档（W-A2 切片3 尾巴③），拿它当判据会让支线
- * 在读档后凭空退回"未完成"。
+ * 判据只读**持久化、且可跳过**的位面事实（四样，全在存档里）：
+ *  - 在那座火边歇过几次（`campfireMemory.restCount`，营火 id = 区域 id，见 W-A2 切片2）；
+ *  - 看过那张门口插画（`cgGallery.unlocked`，键是 `<营火>:start`）；
+ *  - 收下该位面的萤火（`soulWisps.collectedInZone(zone)`，位面归属写在出生点表上，随存档往返）；
+ *  - 认过那块火牌（`restPointEnhancer.discovered`，营火地标自己的账，存档 v7 起落库 —— B66）。
+ *
+ * 刻意不碰的仍是 `POI.discovered` 那种字段：它全仓没有读者、没人写、也不进存档
+ * （W-A2 切片3 尾巴③已溶解），拿它当判据会让支线在读档后凭空退回"未完成"。
  */
 const 歇过 = (game, zone, 次数) => (game.campfireMemory?.restCount?.[zone] ?? 0) >= 次数;
 const 看过该区门口那张 = (game, zone) => game.cgGallery?.unlocked?.has(`${zone}:start`) === true;
 const 认得一座 = (zone) => (game) => 看过该区门口那张(game, zone) && 歇过(game, zone, 3);
+
+/** 切片2 的第二对事实：萤火收齐 + 火牌认过 —— 同一座位面里两个不同地点的两件事 */
+const 收齐该区两枚萤 = (game, zone) => (game.soulWisps?.collectedInZone?.(zone) ?? 0) >= 2;
+const 认过那块火牌 = (game, zone) => game.restPointEnhancer?.discovered?.has(zone) === true;
+const 拾遗一座 = (zone) => (game) => 收齐该区两枚萤(game, zone) && 认过那块火牌(game, zone);
 
 /** 三族：基础 / 分区 / 致敬。`zone` 是它们唯一的分区依据，`'global'` = 不属于任何一位面 */
 export const SIDE_QUESTS_ZONE = [
@@ -246,6 +255,51 @@ export const SIDE_QUESTS_ZONE = [
     check: 认得一座(ZONE_IDS.ABYSS),
     reward: 18,
     journal: '混沌在墙外数你的呼吸，数到第三次就不再数了。',
+  },
+  {
+    id: 'side-wisp-fantasy',
+    zone: ZONE_IDS.FANTASY,
+    title: '林间双萤',
+    desc: '收下灰白森林的两枚残响魂火，并在它的火牌前驻足（发现营火）',
+    check: 拾遗一座(ZONE_IDS.FANTASY),
+    reward: 10,
+    journal: '两盏冷光跟着你走出林子，火牌在原地亮着。',
+  },
+  {
+    id: 'side-wisp-magic',
+    zone: ZONE_IDS.MAGIC,
+    title: '塔下双灯',
+    desc: '收下霍格沃兹遗境的两枚残响魂火，并认过那块火牌（发现营火）',
+    check: 拾遗一座(ZONE_IDS.MAGIC),
+    reward: 12,
+    journal: '城堡的灯不数脚步，数你带走的两点光。',
+  },
+  {
+    id: 'side-wisp-space',
+    zone: ZONE_IDS.SPACE,
+    title: '荒原双响',
+    desc: '收下米勒荒原的两枚残响魂火，并认过那块火牌（发现营火）',
+    check: 拾遗一座(ZONE_IDS.SPACE),
+    reward: 12,
+    journal: '沙暴盖得住脚印，盖不住两声应答。',
+  },
+  {
+    id: 'side-wisp-void',
+    zone: ZONE_IDS.VOID,
+    title: '时线双影',
+    desc: '收下破碎时线的两枚残响魂火，并认过那块火牌（发现营火）',
+    check: 拾遗一座(ZONE_IDS.VOID),
+    reward: 14,
+    journal: '同一条夜路上捡回两个自己，火牌替你签收。',
+  },
+  {
+    id: 'side-wisp-abyss',
+    zone: ZONE_IDS.ABYSS,
+    title: '边境双星',
+    desc: '收下混沌边境的两枚残响魂火，并认过那块火牌（发现营火）',
+    check: 拾遗一座(ZONE_IDS.ABYSS),
+    reward: 16,
+    journal: '墙外数呼吸的那位，今晚看见了额外两颗星。',
   },
 ];
 

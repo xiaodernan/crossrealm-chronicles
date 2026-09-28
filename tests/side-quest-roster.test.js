@@ -18,9 +18,10 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP, SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
-import { ZONE_ORDER } from '../src/content/ZoneIdentity.js';
+import { ZONE_IDS, ZONE_ORDER } from '../src/content/ZoneIdentity.js';
 import { SideQuestSystem } from '../src/game/SideQuestSystem.js';
 import { SideQuestJournalTab } from '../src/ui/SideQuestJournalTab.js';
+import { SoulWispManager } from '../src/world/SoulWispManager.js';
 import { checkSideQuestRosters, checkContent, CONTENT_TABLES } from '../src/content/registry.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
@@ -223,18 +224,25 @@ describe('W-B12 切片1：每个位面至少一条专属支线，而且那条真
     }
   });
 
-  it('分区支线的判据只读**已持久化**的两件事（不许拿 POI.discovered 那种不进存档的字段）', () => {
+  it('分区支线的判据只读**已持久化**的事实：裸 discovered 仍禁，restPointEnhancer.discovered 放行（v7 起落库）', () => {
     const 源码 = readSrc('content/sideQuests.js');
-    // 从两条判据助手那几行起切：判据是 `认得一座(zone)` 造出来的，读的东西都在助手里
+    // 从两条判据助手那几行起切：判据是 `认得一座(zone)` / `拾遗一座(zone)` 造出来的，读的东西都在助手里
     const 起点 = 源码.indexOf('const 歇过 = ');
     const 分区段 = codeOnly(源码.slice(起点, 源码.indexOf('export const SIDE_QUESTS_ALL')));
     expect(分区段.includes('认得一座'), '切到的不是那一段（判据会空转）').toBe(true);
-    for (const 不该读 of ['discovered', 'getPoi(', 'world.']) {
-      expect(分区段, `分区支线的判据读了 "${不该读}" —— 它今天不进存档，读档后这条会凭空退回未完成`)
-        .not.toContain(不该读);
+    expect(分区段.includes('拾遗一座'), '切片2 的助手不在这段里 —— 切段切早了').toBe(true);
+    for (const 不该读 of ['getPoi(', 'world.']) {
+      expect(分区段, `分区支线的判据读了 "${不该读}"`).not.toContain(不该读);
     }
-    expect(分区段).toContain('restCount');   // 在那座火边歇过几次
-    expect(分区段).toContain('unlocked');   // 看过那张门口插画
+    // 裸的 discovered 仍是禁区：`POI.discovered` 全仓没有读者、没人写、也不进存档。
+    // `restPointEnhancer.discovered` 是营火地标自己的账、存档 v7 起落库（B66）—— 只有带这个名字
+    // 前缀的读法放行（前后环视把两种写法都认了：`restPointEnhancer.discovered` / `restPointEnhancer?.discovered`）。
+    const 裸discovered = 分区段.match(/(?<!restPointEnhancer\?\.)(?<!restPointEnhancer\.)\bdiscovered\b/g) ?? [];
+    expect(裸discovered, '分区判据读了不带 restPointEnhancer 前缀的 discovered —— 那格不进存档，读档后支线会凭空退回').toEqual([]);
+    expect(分区段).toContain('restCount');          // 在那座火边歇过几次
+    expect(分区段).toContain('unlocked');           // 看过那张门口插画
+    expect(分区段).toContain('collectedInZone');    // 该位面的萤火（切片2）
+    expect(分区段).toContain('restPointEnhancer');  // 火牌发现（切片2，v7 落库）
   });
 
   it.each(ZONE_ORDER.map((z) => [z]))('位面 %s 那条：状态摆满就完成，缺一半就不完成', (zone) => {
@@ -269,5 +277,73 @@ describe('W-B12 切片1：每个位面至少一条专属支线，而且那条真
     // 反向的第二向：给一个没登记的 zone 也要红（不然"分区"只是一个自由文本）
     const 野值 = [...SIDE_QUESTS_ZONE, { ...SIDE_QUESTS_ZONE[0], id: 'side-zone-ghost', zone: '月亮城' }];
     expect(planted('sideQuestsZone', 野值).join(' ; ')).toMatch(/zone/);
+  });
+});
+
+describe('W-B12 切片2：每位面第二条专属支线 —— 萤火与火牌，两样都在存档里', () => {
+  /** 拾遗判据读的两份持久化状态，摆到位（或只摆一半） */
+  const 摆 = (game, zone, { 收 = 2, 认 = true } = {}) => {
+    game.soulWisps = { collectedInZone: (z) => (z === zone ? 收 : 0) };
+    game.restPointEnhancer = { discovered: new Set(认 ? [zone] : []) };
+  };
+
+  it('五座位面各有一条"拾遗"支线：每位面的专属支线 ≥2，id 成对出现', () => {
+    for (const zone of ZONE_ORDER) {
+      const 条数 = SIDE_QUESTS_ZONE.filter((q) => q.zone === zone).length;
+      expect(条数, `位面 ${zone} 的专属支线只有 ${条数} 条 —— 切片2 门禁是 ≥2`).toBeGreaterThanOrEqual(2);
+      expect(SIDE_QUESTS_ZONE.some((q) => q.id === `side-wisp-${zone}` && q.zone === zone),
+        `位面 ${zone} 缺 side-wisp-<zone> 那一条`).toBe(true);
+    }
+    expect(SIDE_QUESTS_ALL.length).toBe(SIDE_QUESTS_BASE.length + SIDE_QUESTS_ZONE.length + SIDE_QUESTS_POP.length);
+  });
+
+  it.each(ZONE_ORDER.map((z) => [z]))('位面 %s 拾遗那条：缺一样不完成，两样齐才完成', (zone) => {
+    installWindowShim();
+    const 支线 = SIDE_QUESTS_ZONE.find((q) => q.id === `side-wisp-${zone}`);
+    expect(支线, `${zone} 没有拾遗支线`).toBeTruthy();
+    const { game, 记 } = makeGame();
+    const sq = new SideQuestSystem(game);
+    摆(game, zone, { 收: 1, 认: true });
+    sq.checkAll();
+    expect(sq.completed.has(支线.id), '只收了一枚萤火就该还没完成').toBe(false);
+    摆(game, zone, { 收: 2, 认: false });
+    sq.checkAll();
+    expect(sq.completed.has(支线.id), '萤火收齐但没认过火牌就该还没完成').toBe(false);
+    摆(game, zone, { 收: 2, 认: true });
+    sq.checkAll();
+    expect(sq.completed.has(支线.id)).toBe(true);
+    expect(记.souls).toEqual([支线.reward]);
+    expect(记.toasts.join('')).toContain(支线.title);
+    // 其余四座的拾遗支线不得被这一座的账误完成
+    const 别座的 = SIDE_QUESTS_ZONE.filter((q) => q.id.startsWith('side-wisp-') && q.zone !== zone);
+    expect(别座的.every((q) => !sq.completed.has(q.id)), '别的位面凭空完成了').toBe(true);
+  });
+
+  it('soulWisps.collectedInZone 按出生点表数账（位面归属只在表上那一格，不在 id 前缀里）', () => {
+    installWindowShim();
+    const 场景 = { add: () => {} };
+    const 世界 = { getGroundHeight: () => 0 };
+    const mgr = new SoulWispManager(场景, 世界, { addSouls: () => {} }, { toast: () => {} }, {});
+    expect(mgr.collectedInZone(ZONE_IDS.FANTASY)).toBe(0);
+    // 走读档路径摆状态：fromJSON 是存档往返的另一半，读档后这个数必须不失真
+    mgr.fromJSON(['wisp-fantasy', 'wisp-fantasy2', 'wisp-magic']);
+    expect(mgr.collectedInZone(ZONE_IDS.FANTASY)).toBe(2);
+    expect(mgr.collectedInZone(ZONE_IDS.MAGIC)).toBe(1);
+    expect(mgr.collectedInZone(ZONE_IDS.SPACE)).toBe(0);
+    expect(mgr.collectedInZone(ZONE_IDS.HUB)).toBe(0);
+    expect(mgr.toJSON()).toEqual(['wisp-fantasy', 'wisp-fantasy2', 'wisp-magic']);
+  });
+
+  it('门禁升到 ≥2 咬得住：只留切片1 那五条时，每一位面都被点名', () => {
+    const planted = (kind, table) => checkContent(
+      CONTENT_TABLES.map((t) => (t.kind === kind ? { ...t, table } : t)),
+    );
+    expect(planted('sideQuestsZone', SIDE_QUESTS_ZONE)).toEqual([]);   // 全量通过
+    const 只有切片一 = SIDE_QUESTS_ZONE.filter((q) => !q.id.startsWith('side-wisp-'));
+    expect(只有切片一.length).toBe(ZONE_ORDER.length);                 // 桩本身是"每位面恰好一条"
+    const issues = planted('sideQuestsZone', 只有切片一);
+    expect(issues.join('\n')).toMatch(new RegExp(`位面 "${ZONE_ORDER[0]}" 的专属支线只有 1 条`));
+    expect(issues.filter((l) => l.includes('只有 1 条')).length, '五座位面都得被点名')
+      .toBe(ZONE_ORDER.length);
   });
 });

@@ -1,20 +1,26 @@
 import * as THREE from 'three';
 import { addShake } from '../engine/Shake.js';
+import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
-/** 位面残响 — 漂浮魂火，靠近会被吸引并吸收 */
+/**
+ * 位面残响 — 漂浮魂火，靠近会被吸引并吸收
+ *
+ * id 里的位面前缀（`wisp-fantasy`…）只是历史巧合，不是契约 —— 位面归属写成显式一格
+ * （W-B12 切片2），支线判据问 `collectedInZone(zone)`，不再自己拿 id 拼前缀。
+ */
 const WISP_SPOTS = [
-  { id: 'wisp-hub', x: -15, z: 48, souls: 8 },
-  { id: 'wisp-hub2', x: 18, z: 62, souls: 8 },
-  { id: 'wisp-fantasy', x: -175, z: 25, souls: 12 },
-  { id: 'wisp-fantasy2', x: -230, z: -20, souls: 15 },
-  { id: 'wisp-magic', x: -25, z: -195, souls: 12 },
-  { id: 'wisp-magic2', x: 40, z: -170, souls: 14 },
-  { id: 'wisp-space', x: 185, z: 70, souls: 12 },
-  { id: 'wisp-space2', x: 220, z: 120, souls: 15 },
-  { id: 'wisp-void', x: 10, z: 205, souls: 18 },
-  { id: 'wisp-void2', x: -15, z: 235, souls: 20 },
-  { id: 'wisp-abyss', x: -210, z: 205, souls: 18 },
-  { id: 'wisp-abyss2', x: -185, z: 250, souls: 22 },
+  { id: 'wisp-hub', zone: ZONE_IDS.HUB, x: -15, z: 48, souls: 8 },
+  { id: 'wisp-hub2', zone: ZONE_IDS.HUB, x: 18, z: 62, souls: 8 },
+  { id: 'wisp-fantasy', zone: ZONE_IDS.FANTASY, x: -175, z: 25, souls: 12 },
+  { id: 'wisp-fantasy2', zone: ZONE_IDS.FANTASY, x: -230, z: -20, souls: 15 },
+  { id: 'wisp-magic', zone: ZONE_IDS.MAGIC, x: -25, z: -195, souls: 12 },
+  { id: 'wisp-magic2', zone: ZONE_IDS.MAGIC, x: 40, z: -170, souls: 14 },
+  { id: 'wisp-space', zone: ZONE_IDS.SPACE, x: 185, z: 70, souls: 12 },
+  { id: 'wisp-space2', zone: ZONE_IDS.SPACE, x: 220, z: 120, souls: 15 },
+  { id: 'wisp-void', zone: ZONE_IDS.VOID, x: 10, z: 205, souls: 18 },
+  { id: 'wisp-void2', zone: ZONE_IDS.VOID, x: -15, z: 235, souls: 20 },
+  { id: 'wisp-abyss', zone: ZONE_IDS.ABYSS, x: -210, z: 205, souls: 18 },
+  { id: 'wisp-abyss2', zone: ZONE_IDS.ABYSS, x: -185, z: 250, souls: 22 },
 ];
 
 const CHASE_RANGE = 38;
@@ -119,6 +125,14 @@ export class SoulWispManager {
 
   toJSON() {
     return [...this.collected];
+  }
+
+  /**
+   * 该位面已收下几枚萤火 —— 子系统自报的读数（支线判据的唯一问法，W-B12 切片2）。
+   * `collected` 与存档往返（`toJSON`/`fromJSON`），所以读档后这个数不失真。
+   */
+  collectedInZone(zone) {
+    return this.wisps.filter((w) => w.spot.zone === zone && this.collected.has(w.spot.id)).length;
   }
 
   fromJSON(list) {
