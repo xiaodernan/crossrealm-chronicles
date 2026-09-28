@@ -59,12 +59,9 @@
         </div>
         <p class="upgrade-hint">升级后完全恢复 · <span data-keys="save"></span> 存档 · <span data-keys="load"></span> 读档</p>
         </div>
-        <div id="upgrade-skills-section" class="hidden">
-          <h3 class="skill-branch-title">剑系</h3>
-          <div id="sword-skills" class="skill-list"></div>
-          <h3 class="skill-branch-title">杖系</h3>
-          <div id="staff-skills" class="skill-list"></div>
-        </div>
+        <!-- 流派那几行由 `UpgradePanel` 按 `content/skillTrees.js` 的 `SKILL_BRANCHES` 在运行期生成。
+             手抄一份"有哪两条流派"的下场是：加第三条时这里静默少一整棵树，而没有任何报错。 -->
+        <div id="upgrade-skills-section" class="hidden"></div>
         <div id="upgrade-lore-section" class="hidden">
           <div id="upgrade-lore-body" class="upgrade-lore-body"></div>
         </div>

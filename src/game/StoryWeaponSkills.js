@@ -1,91 +1,56 @@
-/** 武器技能与剧情联动 — 章节门控 + Boss/任务自动解锁 */
-export const STORY_SKILL_META = {
-  's-blade': { chapter: 1, lore: '位面流浪者：「先学会挥剑，再学会在位面间挥剑。」' },
-  's-combo': { chapter: 2, loreFragments: 1, lore: '精灵斥候：「连击不是炫耀 — 是压制。」' },
-  's-riposte': { chapter: 2, boss: 'shadow-warden', lore: '影界守护者倒下后，你理解了弹反的 rhythm。' },
-  's-finisher': { chapter: 3, boss: 'archmagus', lore: '大奥术师的最后一击被你学去 — 用于终结连段。' },
-  'm-arcane': { chapter: 2, lore: '霍格沃兹遗境的残页记载：奥术共鸣始于营火。' },
-  'm-charge': { chapter: 3, loreFragments: 2, lore: '蓄力是信任 — 信任法力会回应你。' },
-  'm-mana': { chapter: 2, quest: 'spells', lore: '宇航员回声：「时间在这里是圆的 — 法力也是。」' },
-  'm-transform': { chapter: 4, boss: 'singularity-herald', lore: '奇点领主的化身术式被你逆向解析。' },
-};
+/**
+ * 技能树的剧情门槛 —— "这一格现在能不能动"的唯一判定（W-B6 切片1）。
+ *
+ * ## 修前这里住着第二份名单
+ *
+ * 这个文件原本有三样东西：`STORY_SKILL_META`（8 格的章节 / Boss / 碎片门槛 + 故事文本）、
+ * `NARRATIVE_SKILLS`（叙事技），以及 `getStoryLockReason`。前两样与
+ * `game/WeaponSkillTree.js` 的 `WEAPON_SKILLS` 构成"关于同一批 id 的两份名单"：
+ * 两份都得把同一个 id 写对，写错一份的症状是"这一格永远点不动 / 永远白送不了"，
+ * 而另一份毫无察觉 —— 与 B36（中文显示名判定）、B45（POI id 回退）同族。
+ * 数据已并进 `content/skillTrees.js` 的节点行（`lock` / `grant` / `lore`），这里只留判定。
+ *
+ * ## 顺带收掉的一张表
+ *
+ * `bossId → 统计账本里那一格` 这张映射，修前在本文件与 `WeaponSkillTree._bossDefeated`
+ * 里各有一份（另有 `world/BossRematchDirector.js` 与 `ui/QuestAssistant.js` 两个抄本，
+ * 共 4 份），而唯一真源是 `content/objectives.js` 的 `BOSS_STAT_KEYS`。现在一律读真源。
+ */
+import { BOSS_STAT_KEYS } from '../content/objectives.js';
+import { skillById } from '../content/skillTrees.js';
 
-/** Boss/章节击败后自动解锁（0 技能点） */
-export const NARRATIVE_SKILLS = {
-  sword: [
-    {
-      id: 's-shadow-cut',
-      name: '影界斩',
-      desc: '近战 +5% · 弹反窗口 +0.05s',
-      effect: { melee: 0.05, riposte: 0.05 },
-      unlock: { boss: 'shadow-warden' },
-      lore: '影界守护者的剑意残留于你的位面长剑。',
-    },
-    {
-      id: 's-realm-slash',
-      name: '位面斩强化',
-      desc: '位面斩 R 伤害 +25%',
-      effect: { skill: 0.25 },
-      unlock: { boss: 'singularity-herald' },
-      lore: '奇点领主坍缩瞬间，你截获了引力刃的一缕余波。',
-    },
-    {
-      id: 's-infinity',
-      name: '无尽行者',
-      desc: '终结技伤害 +30% · 连击 +10%',
-      effect: { finisher: 0.3, combo: 0.1 },
-      unlock: { boss: 'chaos-overlord' },
-      lore: '斩裂混沌后，你的剑成为位面行者的证明。',
-    },
-  ],
-  staff: [
-    {
-      id: 'm-arcane-ii',
-      name: '奥术共鸣 II',
-      desc: '法术 +8%',
-      effect: { spell: 0.08 },
-      unlock: { boss: 'archmagus' },
-      lore: '大奥术师萨尔林的法杖碎片融入你的杖芯。',
-    },
-    {
-      id: 'm-chrono',
-      name: '时线洞察',
-      desc: '蓄力伤害 +15% · 打断时停',
-      effect: { charge: 0.15 },
-      unlock: { boss: 'void-chronarch' },
-      lore: '时线执政官的钟表停在你胜利的那一刻。',
-    },
-    {
-      id: 'm-chaos-weave',
-      name: '混沌织法',
-      desc: '法力 +20 · 法术 +5%',
-      effect: { mana: 20, spell: 0.05 },
-      unlock: { chapter: 5 },
-      lore: 'Ch5 边境的混沌低语被你驯服为法力。',
-    },
-  ],
-};
+/**
+ * 这只 Boss 打过了吗。格子名问 `BOSS_STAT_KEYS`（未登记的怪 Boss 一律当作没打过 ——
+ * 与 `isKnownBossId` 对副本 Boss 放行的方向相反，因为这里问的是"账本上那一格写了吗"）。
+ */
+export function bossDefeated(game, bossId) {
+  const key = BOSS_STAT_KEYS[bossId];
+  if (!key) return false;
+  return !!game?.quests?.stats?.[key];
+}
 
+/**
+ * 这一格现在为什么不能加点（`null` = 没有东西拦着）。
+ *
+ * 规则**全部**来自节点行自己的 `lock` —— 这里不再自带任何一张门槛表。
+ * 每一格都必须真的有人读：修前 `m-mana` 那一格写的是 `quest: 'spells'`，而这里从来不读
+ * `quest`，且 `'spells'` 也不是任何一张任务表里的 id（那条任务叫 `learn-spell`）——
+ * 于是那一格是"看起来有门、其实敞着"。现在换成 `spellCasts`（读 `stats.spellCasts`，
+ * 正是 `learn-spell` 数的那本账）。
+ */
 export function getStoryLockReason(game, skillId) {
-  const meta = STORY_SKILL_META[skillId];
-  if (!meta) return null;
+  const lock = skillById(skillId)?.lock;
+  if (!lock || !game) return null;
   const q = game.quests;
-  if (meta.chapter && (q.chapter ?? 1) < meta.chapter) {
-    return `需 Chapter ${meta.chapter}`;
-  }
-  if (meta.loreFragments) {
+  if (lock.chapter && (q?.chapter ?? 1) < lock.chapter) return `需 Chapter ${lock.chapter}`;
+  if (lock.loreFragments) {
     const fr = game.storyJournal?.getCounts?.().fragment ?? 0;
-    if (fr < meta.loreFragments) return `需 ${meta.loreFragments} 条叙事碎片 (${fr}/${meta.loreFragments})`;
+    if (fr < lock.loreFragments) return `需 ${lock.loreFragments} 条叙事碎片 (${fr}/${lock.loreFragments})`;
   }
-  if (meta.boss) {
-    const map = {
-      'shadow-warden': q.stats.bossDefeated,
-      archmagus: q.stats.boss2Defeated,
-      'singularity-herald': q.stats.boss3Defeated,
-      'void-chronarch': q.stats.voidBossDefeated,
-      'chaos-overlord': q.stats.chaosBossDefeated,
-    };
-    if (!map[meta.boss]) return '需击败对应 Boss';
+  if (lock.spellCasts) {
+    const n = q?.stats?.spellCasts ?? 0;
+    if (n < lock.spellCasts) return `需施放法术 ${lock.spellCasts} 次 (${n}/${lock.spellCasts})`;
   }
+  if (lock.boss && !bossDefeated(game, lock.boss)) return '需击败对应 Boss';
   return null;
 }

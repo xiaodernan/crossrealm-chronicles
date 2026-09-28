@@ -1,8 +1,14 @@
-import { WEAPON_SKILLS } from '../game/WeaponSkillTree.js';
-import { STORY_SKILL_META } from '../game/StoryWeaponSkills.js';
+import { SKILL_BRANCHES, nodesOf, skillById } from '../content/skillTrees.js';
 import { refreshKeyText } from '../content/keyHints.js';
 
-/** [J] 流派 Tab — 剑/杖技能树一览 */
+/**
+ * [J] 流派 Tab — 三条技能树一览。
+ *
+ * 流派清单与营火面板同源（`SKILL_BRANCHES`）：修前这里手抄了两行
+ * `renderBranch('sword', '⚔ 位面长剑')` / `renderBranch('staff', '✦ 奥术法杖')`，
+ * 于是"加第三条流派"在日志里少一整棵树而不会报错。故事文本也不再读
+ * `STORY_SKILL_META` —— 那份名单已并回节点行自己的 `lore`。
+ */
 export class WeaponSkillJournalTab {
   constructor(game) {
     this.game = game;
@@ -13,26 +19,25 @@ export class WeaponSkillJournalTab {
     const unlocked = ws?.unlocked ?? new Set();
     const points = ws?.skillPoints ?? 0;
 
-    const renderBranch = (branch, title) => {
-      const skills = WEAPON_SKILLS[branch] ?? [];
+    const renderBranch = (branch) => {
+      const skills = nodesOf(branch.id).filter((s) => !s.grant);
       const cards = skills.map((s) => {
         const ok = unlocked.has(s.id);
-        const story = STORY_SKILL_META[s.id];
+        const lore = skillById(s.id)?.lore;
         return `<div class="sk-card${ok ? ' sk-on' : ''}">
           <div class="sk-name">${s.name}</div>
           <div class="sk-desc">${s.desc}</div>
-          ${story?.lore ? `<span class="sk-lore">${ok ? story.lore : '—'}</span>` : ''}
-          <div class="sk-cost">${ok ? '已解锁' : `${s.cost} 点${s.req ? ' · 需前置' : ''}`}</div>
+          ${lore ? `<span class="sk-lore">${ok ? lore : '—'}</span>` : ''}
+          <div class="sk-cost">${ok ? '已解锁' : `${s.cost} 点${s.reqs?.length ? ' · 需前置' : ''}`}</div>
         </div>`;
       }).join('');
-      return `<div class="sk-branch"><h3>${title}</h3><div class="sk-grid">${cards}</div></div>`;
+      return `<div class="sk-branch"><h3>${branch.name}</h3><div class="sk-grid">${cards}</div></div>`;
     };
 
     panelEl.innerHTML = `
       <h2 data-ktext="流派技能 · {journal} 关闭"></h2>
       <p class="sk-stats">可用技能点 ${points} · 已解锁 ${unlocked.size} · 营火升级面板可加点</p>
-      ${renderBranch('sword', '⚔ 位面长剑')}
-      ${renderBranch('staff', '✦ 奥术法杖')}
+      ${SKILL_BRANCHES.map(renderBranch).join('')}
       <p class="hint" data-ktext="剧情节点会自动解锁叙事技 · {swapWeapon} 切换剑/杖影响加成"></p>
     `;
 

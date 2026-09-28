@@ -1,4 +1,4 @@
-import { WEAPON_SKILLS } from '../game/WeaponSkillTree.js';
+import { SKILL_BRANCHES } from '../content/skillTrees.js';
 import { GEAR_SLOTS, GEAR_SLOT_NAMES, gearLabel } from '../content/gear.js';
 import { focusFirstItem } from './FocusNav.js';
 
@@ -60,8 +60,8 @@ export class UpgradePanel {
     }
 
     if (this.skillTab === 'skills' && ws) {
-      this.renderSkills('sword-skills', 'sword', ws);
-      this.renderSkills('staff-skills', 'staff', ws);
+      this._ensureSkillBranches();
+      for (const b of SKILL_BRANCHES) this.renderSkills(b.id, ws);
     }
     if (this.skillTab === 'lore' && ws) {
       this.renderLore(ws);
@@ -120,8 +120,25 @@ export class UpgradePanel {
     });
   }
 
-  renderSkills(containerId, branch, ws) {
-    const el = document.getElementById(containerId);
+  /**
+   * 流派那几行按 `SKILL_BRANCHES` 在运行期生成。
+   *
+   * 修前"有哪两条流派"被抄在三处：`index.html` 的两组标题 + 容器、这里的两次调用、
+   * 日志页签里的两次 `renderBranch(...)`。加第三条流派时三处都得改，漏一处的症状是
+   * **面板上少一整棵树而没有任何报错** —— 与 B36 / B45 同族（稳定清单靠人肉复制）。
+   * 现在只有 `content/skillTrees.js` 那一份名单。
+   */
+  _ensureSkillBranches() {
+    const host = document.getElementById('upgrade-skills-section');
+    if (!host || host.dataset.built === '1') return;
+    host.innerHTML = SKILL_BRANCHES.map((b) => `
+      <h3 class="skill-branch-title">${b.name}</h3>
+      <div class="skill-list" data-skill-branch="${b.id}"></div>`).join('');
+    host.dataset.built = '1';
+  }
+
+  renderSkills(branch, ws) {
+    const el = this.panel?.querySelector(`[data-skill-branch="${branch}"]`);
     if (!el) return;
     el.innerHTML = ws.getAllSkills(branch).map((sk) => {
       const owned = ws.unlocked.has(sk.id);
@@ -147,7 +164,7 @@ export class UpgradePanel {
     if (!el) return;
     const ch = this.game.quests.chapter ?? 1;
     const fr = this.game.storyJournal?.getCounts?.().fragment ?? 0;
-    const narrative = [...ws.getAllSkills('sword'), ...ws.getAllSkills('staff')].filter((s) => s.narrative);
+    const narrative = SKILL_BRANCHES.flatMap((b) => ws.getAllSkills(b.id)).filter((s) => s.narrative);
     const ownedN = narrative.filter((s) => ws.unlocked.has(s.id));
     el.innerHTML = `
       <p class="lore-intro">营火不仅是休息点 — 位面行者的剑与杖在此与<strong>剧情</strong>共鸣。击败 Boss、推进章节、收集叙事碎片，都会解锁新技能。</p>
@@ -155,7 +172,7 @@ export class UpgradePanel {
       <ul class="lore-skill-list">
         ${narrative.map((s) => `<li class="${ws.unlocked.has(s.id) ? 'owned' : 'locked'}">
           <strong>${s.name}</strong> — ${s.lore ?? s.desc}
-          ${ws.unlocked.has(s.id) ? '' : `<br><span class="hint">${s.unlock.boss ? '需击败 Boss' : `需 Chapter ${s.unlock.chapter}`}</span>`}
+          ${ws.unlocked.has(s.id) ? '' : `<br><span class="hint">${s.grant.boss ? '需击败 Boss' : `需 Chapter ${s.grant.chapter}`}</span>`}
         </li>`).join('')}
       </ul>
     `;

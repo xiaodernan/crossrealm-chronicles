@@ -41,6 +41,7 @@ import { ACHIEVEMENTS_EXTRA, ACHIEVEMENTS_POP_CULTURE } from './achievements.js'
 import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
 import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
+import { SKILL_TREES, SKILL_BRANCH_IDS, SKILL_EFFECT_KEYS } from './skillTrees.js';
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import {
@@ -61,6 +62,83 @@ export function checkGearSlotNames(table) {
   }
   for (const id of known) {
     if (!table?.[id]) out.push(`gearSlotNames: 缺 "${id}" 的中文名（界面上那一行会是空的）`);
+  }
+  return out;
+}
+
+/**
+ * 技能树的整表规则（W-B6 切片1）。
+ *
+ * 声明式词汇表能说"这一格是 id、是正整数"，说不了"这棵树连不连得起来"：
+ * `reqs` 是**跨行引用**（指向同一棵树里的其它节点），而"谁在谁前面"只有整表看得见。
+ * 与营火那棵树同一条理由（那里用的是 `checkRestDialogueTree`），也与仓库里那条纪律一致：
+ * 给条目留的函数槽位只装"形状表达不了的整表关系"。
+ *
+ * 这里钉住的每一条都对应一种**不会报错的坏法**：
+ * - 跨流派 id 撞车 —— 存档只存 id，撞了读档就会点亮错的格；
+ * - `reqs` 指向本树不存在的 id / 指向自己 / 连成环 —— 那一格永远点不亮，而面板只是灰着；
+ * - `effect` 的键不在消费者白名单里（把 `melee` 拼错）—— 花掉技能点什么也不会变（B68 那一族）；
+ * - 叙事技（`grant`）与剧情门（`lock`）同时写 —— 一个节点不可能既"达标白送"又"达标才能买"；
+ * - 叙事技写了非 0 的 `cost`，或可加点节点写了 0 —— 前者是白送却要钱，后者是免费却要买。
+ */
+export function checkSkillTrees(table) {
+  const out = [];
+  const known = new Set(SKILL_BRANCH_IDS);
+  const owner = new Map();
+  for (const key of Object.keys(table ?? {})) {
+    if (!known.has(key)) out.push(`skillTrees: "${key}" 不是登记过的流派（SKILL_BRANCHES 里没有这一条）`);
+  }
+  for (const b of SKILL_BRANCH_IDS) {
+    if (!table?.[b]) out.push(`skillTrees: 缺流派 "${b}"（面板上那一格会是空的）`);
+  }
+  for (const [branch, nodes] of Object.entries(table ?? {})) {
+    if (!Array.isArray(nodes)) { out.push(`skillTrees["${branch}"]: 期望数组`); continue; }
+    const local = new Set();
+    for (const n of nodes) {
+      if (!n?.id) continue;
+      if (owner.has(n.id)) {
+        out.push(`skillTrees: id "${n.id}" 在 "${owner.get(n.id)}" 与 "${branch}" 里重了 —— 存档只存 id，重了读档会点亮错的格`);
+      } else owner.set(n.id, branch);
+      local.add(n.id);
+    }
+    for (const n of nodes) {
+      if (!n?.id) { out.push(`skillTrees["${branch}"]: 有一行没有 id`); continue; }
+      const p = `skillTrees["${branch}"]["${n.id}"]`;
+      if (n.grant && n.lock) out.push(`${p}: 同时写了 grant 与 lock —— 一个节点不可能既"达标白送"又"达标才能买"`);
+      if (n.grant && n.cost !== 0) out.push(`${p}: 叙事技（grant）的 cost 必须是 0，实际 ${n.cost}`);
+      if (!n.grant && !(n.cost > 0)) out.push(`${p}: 可加点节点的 cost 必须是正整数，实际 ${n.cost}`);
+      const eff = n.effect ?? {};
+      const keys = Object.keys(eff);
+      if (keys.length === 0) out.push(`${p}: effect 是空的 —— 这一格花掉技能点什么也不会变`);
+      for (const k of keys) {
+        if (!SKILL_EFFECT_KEYS.includes(k)) {
+          out.push(`${p}.effect: "${k}" 不在消费者白名单里（拼错的键不会报错，只会安静地不生效；可用：${SKILL_EFFECT_KEYS.join(' / ')}`);
+        }
+        if (!Number.isFinite(eff[k]) || eff[k] === 0) out.push(`${p}.effect.${k}: 必须是有限且非 0 的数，实际 ${eff[k]}`);
+      }
+      if (!Array.isArray(n.reqs)) { out.push(`${p}.reqs: 必须是数组（没有前置就写 []）`); continue; }
+      if (new Set(n.reqs).size !== n.reqs.length) out.push(`${p}.reqs: 有重复的前置`);
+      for (const r of n.reqs) {
+        if (r === n.id) out.push(`${p}.reqs: 指向了自己`);
+        else if (!local.has(r)) out.push(`${p}.reqs: "${r}" 不在同一棵树里（跨流派的或拼错的 id 会让这一格永远点不亮）`);
+      }
+      if (n.lock && Object.keys(n.lock).length === 0) out.push(`${p}.lock: 是空对象（等于没有门，写它只会让人以为有）`);
+    }
+    // 无环 + 全部可达：从根出发反复剥"前置都已剥掉"的节点，剥不动的就在环里
+    const byId = new Map(nodes.filter((n) => n?.id).map((n) => [n.id, n]));
+    const done = new Set();
+    let moved = true;
+    while (moved) {
+      moved = false;
+      for (const [id, n] of byId) {
+        if (done.has(id)) continue;
+        const reqs = Array.isArray(n.reqs) ? n.reqs : [];
+        if (reqs.every((r) => done.has(r))) { done.add(id); moved = true; }
+      }
+    }
+    for (const id of byId.keys()) {
+      if (!done.has(id)) out.push(`skillTrees["${branch}"]["${id}"]: 前置连成一个环（这一格永远点不亮）`);
+    }
   }
   return out;
 }
@@ -684,6 +762,51 @@ export const CONTENT_TABLES = [
       },
     },
     invariant: checkObjectiveTable,
+  },
+  {
+    kind: 'skillTrees',
+    note: '技能树（W-B6 切片1）：键是流派 id，值是这一流的节点行 —— `id` 是**存档里的稳定身份**'
+      + '（`WeaponSkillTree.toJSON` 只存 id），所以跨流派也必须唯一；叙事技（`grant`）与可加点节点同表',
+    shape: 'index',
+    table: SKILL_TREES,
+    keyAllow: SKILL_BRANCH_IDS,
+    value: {
+      t: 'rows',
+      // §5 的数量目标：**每一流 ≥10 个节点**（这里数的是全部节点，含叙事技；
+      // "可加点"那一份由 `tests/skill-trees.test.js` 单独数）
+      minLength: 10,
+      of: {
+        id: { t: 'id' },
+        name: { t: 'string' },
+        desc: { t: 'string' },
+        cost: { t: 'int', min: 0 },
+        // `reqs` 故意不在这里声明：它是**跨行引用**（同树里其它节点的 id），
+        // 而声明式词汇表没有"一组 id"这种类型 —— 见 `checkSkillTrees`
+        effect: { t: 'record' },
+        // 可加点节点的剧情门。每一格都必须有人读（`getStoryLockReason`）；
+        // 修前 `m-mana` 那一格写的是没人读的 `quest`，等于敞着
+        lock: {
+          t: 'row',
+          required: false,
+          of: {
+            chapter: { t: 'int', min: 1, max: 5, required: false },
+            boss: { t: 'ref', of: 'bosses', required: false },
+            loreFragments: { t: 'int', min: 1, required: false },
+            spellCasts: { t: 'int', min: 1, required: false },
+          },
+        },
+        grant: {
+          t: 'row',
+          required: false,
+          of: {
+            chapter: { t: 'int', min: 1, max: 5, required: false },
+            boss: { t: 'ref', of: 'bosses', required: false },
+          },
+        },
+        lore: { t: 'string', required: false },
+      },
+    },
+    invariant: checkSkillTrees,
   },
 ];
 
