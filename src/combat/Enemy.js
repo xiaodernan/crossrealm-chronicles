@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { createHurtbox, pickPart } from './Hurtbox.js';
 import { AI, BODY_PLANS, ENEMY_DEFENSE, ENEMY_RESIST, HIT, SUMMON } from '../content/tuning.js';
 import {
-  holdRangeOf, moveHits, moveRange, pickMove, resolveMoveSet, seededRng, threatRangeOf,
+  fanTargets, holdRangeOf, moveHits, moveRange, pickMove, resolveMoveSet, seededRng, threatRangeOf,
 } from './EnemyMoves.js';
 import { Sense } from '../ai/Perception.js';
 import { createEnemyFSM, tryClaimStrikeSlot } from '../ai/EnemyFSM.js';
@@ -181,8 +181,23 @@ export class Enemy {
   /** 弹反窗口：已起手且进入本招前摇的后半段。窗口按**这一招**的前摇算，
    *  定值写法会让短前摇的快招根本弹不了（0.4 秒的突刺永远在窗口外结束） */
   isParriable() {
+    // 霸体招不给弹反窗口（W-B7 切片4）：弹得动却打不断是玩家读不出来的错位，
+    // 与 forceStagger 共用同一个判据 —— 这一招只能用走位解
+    if (this.isUnstoppableNow()) return false;
     return this.canAttack && this.state === 'windup'
       && this.stateTimer > this.windupNow * this.ai.parryRatio;
+  }
+
+  /**
+   * 这一招此刻是不是"霸体"（W-B7 切片4）。
+   *
+   * 只护**出手段**（windup / strike）：预警已经当众说出口，走完收招照常能被按进硬直。
+   * 架势**没有**被豁免：打满的那一笔照常记在账上（只是不落地），所以霸体一结束，
+   * 第一下就把它按下去 —— "破防→处决"这条循环被推迟，不是被取消，玩家学得到。
+   */
+  isUnstoppableNow() {
+    if (!this.activeMove?.unstoppable) return false;
+    return this.fsm.current === 'windup' || this.fsm.current === 'strike';
   }
 
   /** 正面格挡是否举着：只在防御招的命中段成立。
@@ -193,12 +208,16 @@ export class Enemy {
 
   /** 外部强制硬直（弹反成功）：架势条清零、交出进攻名额并立刻进入 stagger */
   forceStagger(seconds) {
+    // 霸体（W-B7 切片4）：出手段拒绝硬直；返回 false 让调用方读得出"这一下没打断它"。
+    // 这里不清架势 —— 攒满的那笔账要留到这一招走完，正是"霸体护招不护命"的落点
+    if (this.isUnstoppableNow()) return false;
     this.staggerTimer = seconds;
     this.posture = 0;
     this.fsm.change('stagger');
     this.state = 'stagger';
     this.stateTimer = 0;
     this.clearTelegraph();
+    return true;
   }
 
   /* ------------------------------------------------------------------ *
@@ -368,10 +387,17 @@ export class Enemy {
     if (move.phase) this.blinkBehind(ctx.target, ctx.collision, move);
     const damage = Math.round(this.damage * (move.damage ?? 1));
     if (move.ranged) {
-      // 远程：命中段改为交出一枚弹体，弹体在玩家侧走同一条 takeDamage 结算
+      // 远程：命中段改为交出弹体，弹体在玩家侧走同一条 takeDamage 结算。
+      // `ranged.count` > 1 时交出的是一个**扇面**（落点由 `fanTargets` 纯几何算）：
+      // 单发与旧行为逐字相同（count 缺省时 `fanTargets` 原样回目标自己）。
       const p = ctx.projectiles;
       if (!p) return false;
-      p.spawn(this.position, ctx.target, damage, move.ranged.speed, move.ranged.color);
+      for (const aim of fanTargets(this.position, ctx.target, move.ranged)) {
+        const point = ctx.target.clone();
+        point.x = aim.x;
+        point.z = aim.z;
+        p.spawn(this.position, point, damage, move.ranged.speed, move.ranged.color);
+      }
       return true;
     }
     const dist = this.distanceTo(ctx.target);
@@ -538,6 +564,29 @@ export class Enemy {
       );
       core.position.y = 1.5;
       group.add(core);
+    } else if (config.type === 'hexer') {
+      // 位面咒师：开口长袍罩住本体，掌心浮一枚符文环 —— 一眼是"念咒的"，不是"挥刀的"
+      const robe = new THREE.Mesh(
+        new THREE.ConeGeometry(0.58, 1.6, 8, 1, true),
+        new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0.1, side: THREE.DoubleSide })
+      );
+      robe.position.y = 0.95;
+      group.add(robe);
+      const rune = new THREE.Mesh(
+        new THREE.TorusGeometry(0.2, 0.045, 6, 12),
+        new THREE.MeshStandardMaterial({ color: 0xbfa8ff, emissive: 0x4a2f7a, emissiveIntensity: 0.8 })
+      );
+      rune.position.set(0.42, 1.35, 0.48);
+      group.add(rune);
+    } else if (config.type === 'juggernaut') {
+      // 破阵重兵：一副比同场骑士更宽的双肩厚甲 + 胸前撞角 —— 剪影上就比其他重甲更钝更宽
+      const pauldron = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.3, 0.7), mat);
+      pauldron.position.y = 1.95;
+      group.add(pauldron);
+      const ram = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.5, 6), mat);
+      ram.rotation.x = Math.PI / 2;
+      ram.position.set(0, 1.3, 0.62);
+      group.add(ram);
     } else if (config.type !== 'boss') {
       const helm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.5), mat);
       helm.position.y = 2.15;

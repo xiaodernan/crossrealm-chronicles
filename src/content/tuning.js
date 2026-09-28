@@ -50,6 +50,12 @@ export const BODY_PLANS = {
   crawler: { scale: 1.02, parts: ['head', 'torso', 'legs'], radius: 0.50 },
   knight:  { scale: 1.18, parts: ['head', 'torso', 'legs'], radius: 0.58 },
   dancer:  { scale: 0.94, parts: ['head', 'torso', 'legs'], radius: 0.42 },
+  /**
+   * W-B7 切片4 新增的两类。此前灰白森林（影之战士）与霍格沃兹遗境（魔法构装体）
+   * 各只有一种原生敌人 —— 这两类补的是「每座位面至少两类」，不是补总数。
+   */
+  hexer:      { scale: 0.98, parts: ['head', 'torso', 'legs'], radius: 0.46 },
+  juggernaut: { scale: 1.22, parts: ['head', 'torso', 'legs'], radius: 0.62 },
 };
 
 /**
@@ -85,6 +91,10 @@ export const ENEMY_RESIST = {
   knight: { fire: 0.2, ice: 0.2 },
   /** 刃舞者：轻装快体，冰与引力都啃得动 —— 负数在这一张表里是"更吃这一系"（见上面 `ENEMY_RESIST` 的符号约定） */
   dancer: { gravity: -0.2, ice: -0.1 },
+  /** 位面咒师：长袍术士，怕火；冰系打在他自己的护体咒上不痛不痒 */
+  hexer: { fire: -0.2, ice: 0.2 },
+  /** 破阵重兵：全身板甲，火与冰都不好使 —— 撬它靠的是架势与走位，不是属性 */
+  juggernaut: { fire: 0.15, ice: 0.25 },
 };
 
 export const CRIT = {
@@ -229,6 +239,7 @@ export const ENEMY_DEFENSE = {
   dummy: 0, soldier: 6, drone: 3, golem: 26, elite: 18, boss: 32,
   wraith: 4, stalker: 3, sentinel: 14,
   crawler: 8, knight: 22, dancer: 6,
+  hexer: 8, juggernaut: 24,
 };
 
 /** 玩家自身防御由装备/属性提供，M2 阶段基线为 0（先用闪避与弹反防御） */
@@ -296,6 +307,11 @@ export const AI = {
  * - `summon: { type, count }`：召唤招，命中段不伤人而是交出仆从（名额与生命周期见 `SUMMON`）；
  *   与防御招一样不是"打人的招"，所以不参与站位打分，也没有 `band`
  * - `ranged`：命中段改为一枚弹体（不要求贴身），`range` 是它自己的射程，`minDist` 之下不许用它免得糊脸
+ *   `ranged.count` > 1 时一次交出多枚（`spreadDeg` 是绕弹道轴摊开的半角），落点由
+ *   `fanTargets` 纯几何算（无随机）：铺一个扇面，横移半步躲不掉，要真的走出那个角
+ * - `unstoppable: true`：霸体 —— 这一招的**出手段**（windup/strike）不吃硬直、也不可弹反。
+ *   架势照常累积（打满只是不落地），所以躲法只有一个：走出它的判定形状。
+ *   走完 recover 之后第一下照常能按进硬直 —— 霸体护的是这一招，不是这条命
  * - `phase: true` + `blink`：相位招 —— `blink` 是它**够不够得着才起手**的距离（"能闪多远"），
  *   命中段把自己挪到目标背后 `reach` 之内再劈。两个数分开写：把 `blink` 当 `reach` 用，
  *   十米外起手的那一刀会隔着十米命中（一个数同时当"够得着"和"打得到"用，迟早分家）
@@ -428,6 +444,30 @@ export const ENEMY_MOVES = {
     band: [0.0, 1.0],
     damage: 0.5, cooldown: 4.2, weight: 2, combo: 3, comboWindup: 0.26,
     telegraph: { color: 0xff66cc },
+  },
+  volley: {
+    // 扇形齐射（位面咒师，W-B7 切片4）：一次交出**多枚**弹体，绕弹道轴摊成一个扇面。
+    // 与 `shot` 的分界不是"更疼"，是**覆盖面** —— 单发只要横移半步就出线，扇面要真的
+    // 走出那个角。单发伤害压到 `shot` 的三分之二：三发全吃比一发便宜，"躲开一部分"
+    // 才是这一招正确的读数。落点 `fanTargets` 纯几何、无随机，回归用例能逐点断言。
+    name: '扇形齐射', windup: 1.0, strike: 0.24, recover: 0.7, cone: -2,
+    range: 15, minDist: 4.5,
+    damage: 0.6, cooldown: 5.5, weight: 2,
+    ranged: { speed: 16, color: 0x9be7ff, count: 3, spreadDeg: 22 },
+    telegraph: { color: 0x9be7ff },
+  },
+  onslaught: {
+    // 破阵冲撞（破阵重兵，W-B7 切片4）：表里第一条**霸体**招 —— 出手段（windup/strike）
+    // 不吃硬直、也不可弹反。为什么值得单立一条形状：其余每一招都能被"架势打满"打断，
+    // 于是"破防 → 处决"是万能解；这一招把那个万能解按住一秒多，逼玩家改用走位。
+    // 代价写在数据上：前摇 0.95 秒（头顶警示亮满）、命中段短（0.3）、收招长（0.85）——
+    // 躲开之后那 0.85 秒就是它的窗口。霸体护的是这一招，不是这条命：走完 recover 的
+    // 第一下照常按进硬直（架势在霸体期间照常累积，只是不落地）。
+    name: '破阵冲撞', windup: 0.95, strike: 0.30, recover: 0.85, reach: 1.0, cone: -1,
+    band: [0.05, 1.6],
+    damage: 1.6, cooldown: 6.5, weight: 2, travel: 'lunge', travelSpeed: 5.5,
+    unstoppable: true,
+    telegraph: { color: 0xff5533 },
   },
 };
 
@@ -689,5 +729,8 @@ export const ENEMY_MOVE_SETS = {
   crawler: ['rift', 'flurry', 'thrust'],
   knight: ['bash', 'sweep', 'guard', 'cleave'],
   dancer: ['whirl', 'flurry', 'thrust'],
+  /** W-B7 切片4：此前各只有一类原生敌人的两座位面各补一类 */
+  hexer: ['volley', 'shot', 'guard'],
+  juggernaut: ['onslaught', 'slam', 'cleave', 'guard'],
 };
 

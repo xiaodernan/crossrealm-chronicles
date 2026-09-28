@@ -14,6 +14,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BODY_PLANS, ENEMY_DEFENSE, ENEMY_RESIST, ENEMY_MOVES, ENEMY_MOVE_SETS } from '../src/content/tuning.js';
 import { installWindowShim, makeManager } from './helpers/enemyHarness.js';
+import { WorldManager } from '../src/world/WorldManager.js';
+import { ZONE_ORDER, zoneIdAt } from '../src/content/ZoneIdentity.js';
 
 beforeAll(installWindowShim);
 
@@ -23,6 +25,12 @@ const readSrc = (rel) => readFileSync(join(ROOT, 'src', rel), 'utf8');
 /** 训练木人是不可攻击的摆设（招式表空是设计），default 是兜底档 —— 都不算"战斗类型" */
 const UTILITY = new Set(['dummy', 'default']);
 const 战斗类型 = Object.keys(ENEMY_MOVE_SETS).filter((t) => !UTILITY.has(t));
+/**
+ * §5「敌人 12 类」的口径：**再扣掉 `boss`**。Boss 跑自己的阶段脚本，
+ * `ENEMY_MOVES` 里那一行只是基类兜底 —— 把它算进来会让看板上的数与表里的数差一，
+ * 而"差一"正是这类计数最容易骗过人的地方，所以两个口径各起一个名字、各写一句为什么。
+ */
+const 原生敌人 = 战斗类型.filter((t) => t !== 'boss');
 
 describe('敌人名册：四表齐全、招式闭合（W-B7 切片1）', () => {
   it('每个战斗类型在四张表里都有一格，且招式 ≥3 —— 漏登记不会再静默落到兜底档', () => {
@@ -130,5 +138,62 @@ describe('W-B7 切片3：虚空爬兽 / 深渊骑士 / 刃舞者', () => {
     }
     expect(点位.size, '一个出生点都没扫到，这条就在空转').toBeGreaterThan(30);
     expect(重合, `这些敌人出生在同一点：${重合.join('、')}`).toEqual([]);
+  });
+});
+
+describe('W-B7 切片4：破阵重兵 / 位面咒师 —— 把两座位面的空位补上', () => {
+  it('原生敌人到齐 12 类（§5 的口径：不含 Boss 与训练木人）', () => {
+    expect(原生敌人.length, `目前只有 ${原生敌人.length} 类：${原生敌人.join('、')}`).toBeGreaterThanOrEqual(12);
+    for (const t of ['juggernaut', 'hexer']) expect(原生敌人).toContain(t);
+  });
+
+  it('两个新类型的形状各就各位：重兵是霸体近战，咒师是远程铺面', () => {
+    // 重兵：比同场骑士更重更大，靠"架不住"而不是靠快
+    expect(BODY_PLANS.juggernaut.scale).toBeGreaterThan(BODY_PLANS.knight.scale);
+    expect(ENEMY_MOVES.onslaught.unstoppable).toBe(true);
+    expect(ENEMY_MOVE_SETS.juggernaut).toContain('onslaught');
+    // 咒师：三条里两条是弹体，唯一一条近战是防御招 —— 它不该贴脸
+    expect(ENEMY_MOVE_SETS.hexer.filter((id) => ENEMY_MOVES[id].ranged)).toHaveLength(2);
+    expect(ENEMY_MOVES.volley.ranged.count).toBeGreaterThan(1);
+    expect(ENEMY_MOVES.volley.damage).toBeLessThan(ENEMY_MOVES.shot.damage);
+    expect(ENEMY_RESIST.hexer.fire).toBeLessThan(0);      // 怕火
+    expect(ENEMY_RESIST.juggernaut.ice).toBeGreaterThan(0); // 冰砍不动
+  });
+
+  it('每座位面至少两类原生敌人 —— 真世界几何下按坐标反查，不是照抄一份位面名单', () => {
+    const wm = new WorldManager({ add() {}, remove() {} }, { show() {}, toast() {} });
+    wm.build();
+    const m = makeManager();
+    m.spawnDefaults();
+    const 位面 = {};
+    for (const e of m.enemies) {
+      if (!原生敌人.includes(e.type)) continue;
+      const id = zoneIdAt(e.spawnPoint, wm.zones);
+      (位面[id] ??= new Set()).add(e.type);
+    }
+    for (const id of ZONE_ORDER) {
+      const 名单 = 位面[id] ? [...位面[id]] : [];
+      expect(名单.length, `位面 "${id}" 的原生敌人不足两类：${名单.join('、') || '一类都没有'}`)
+        .toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('六个新出生点：落在目标位面、避开五座 Boss 场、且不与任何已有出生点重合', () => {
+    const wm = new WorldManager({ add() {}, remove() {} }, { show() {}, toast() {} });
+    wm.build();
+    const m = makeManager();
+    m.spawnDefaults();
+    const arenas = [m.bossArena, m.boss2Arena, m.boss3Arena, m.voidArena, m.chaosArena].filter(Boolean);
+    const 新 = m.enemies.filter((e) => e.type === 'juggernaut' || e.type === 'hexer');
+    expect(新.length, '两个新类型各有 3 个出生点').toBe(6);
+    const 期望 = { juggernaut: 'fantasy', hexer: 'magic' };
+    for (const e of 新) {
+      expect(zoneIdAt(e.spawnPoint, wm.zones), `${e.type}@${e.spawnPoint.x},${e.spawnPoint.z}`)
+        .toBe(期望[e.type]);
+      for (const a of arenas) {
+        const d = Math.hypot(e.spawnPoint.x - a.center.x, e.spawnPoint.z - a.center.z) - a.radius;
+        expect(d, `${e.type}@${e.spawnPoint.x},${e.spawnPoint.z} 落在 Boss 场里`).toBeGreaterThan(20);
+      }
+    }
   });
 });

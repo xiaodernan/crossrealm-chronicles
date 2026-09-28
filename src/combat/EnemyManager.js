@@ -297,6 +297,17 @@ export class EnemyManager {
       this.spawn({ name: '刃舞者', type: 'dancer', x, z, hp: 135, posture: 52, damage: 13, speed: 6.4, aggroRange: 22, color: 0x7a2a5a });
     }
 
+    // W-B7 切片4（战斗类型 10 → 12）：补的是**每座位面至少两类原生敌人** ——
+    // 此前灰白森林只有影之战士、霍格沃兹遗境只有魔法构装体，各自整片位面只有一种威胁。
+    // 坐标同样避开五座 Boss 场（半径 22）与已有出生点（最近邻居 40 米以上）。
+    for (const [x, z] of [[-150, 55], [-250, 60], [-160, 90]]) {
+      this.spawn({ name: '破阵重兵', type: 'juggernaut', x, z, hp: 300, posture: 96, damage: 22, speed: 3.6, aggroRange: 22, color: 0x4b4a55 });
+    }
+
+    for (const [x, z] of [[80, -135], [-40, -140], [60, -215]]) {
+      this.spawn({ name: '位面咒师', type: 'hexer', x, z, hp: 130, posture: 50, damage: 15, speed: 4.6, aggroRange: 24, color: 0x6a5a9a });
+    }
+
     const bx = -250, bz = -35;
     this.bossArena = this.buildBossArena({ x: bx, z: bz });
     this.spawnBoss({ bossId: 'shadow-warden', x: bx, z: bz });

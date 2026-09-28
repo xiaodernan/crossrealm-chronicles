@@ -162,3 +162,37 @@ export function moveHits(enemy, move, dist, forwardDot) {
   if (move.cone === undefined || move.cone <= -1) return true;
   return forwardDot >= move.cone;
 }
+
+/**
+ * 扇形齐射的落点（W-B7 切片4）—— 纯几何、**无随机**。
+ *
+ * `ranged.count` 缺省或 1 时原样回一个点（旧招逐字不变）；>1 时以"出手者→目标"为轴，
+ * 把 count 个落点在**当前距离**上按 `spreadDeg`（半角，度）摊开，中点落在目标身上、
+ * 左右对称。
+ *
+ * 为什么给的是"落点"而不是"发射角"：`ProjectileManager` 的弹体是**持续朝 target 收**的。
+ * 落点分开 = 几条不同的进场线，散出去再从不同角度收拢，那才是扇面齐射该有的读法；
+ * 给同一枚弹体一个固定发射角只会让几发一路平行、永不交汇，玩家只要横移一点就全躲了。
+ *
+ * 距离为 0（与目标重合）时只回目标自己：没有轴就没有扇面。
+ */
+export function fanTargets(from, target, ranged) {
+  const count = Math.max(1, Math.floor(ranged?.count ?? 1));
+  if (count === 1) return [target];
+  const dx = target.x - from.x;
+  const dz = target.z - from.z;
+  const len = Math.hypot(dx, dz);
+  if (len < 1e-4) return [target];
+  // 弹道轴的单位向量与它的左手法线：摊开发生在法线方向上
+  const ax = dx / len;
+  const az = dz / len;
+  const nx = -az;
+  const nz = ax;
+  const half = Math.tan((((ranged.spreadDeg ?? 0) * Math.PI) / 180)) * len;
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    const t = (i - (count - 1) / 2) / ((count - 1) / 2);   // -1 … +1，中点 0
+    out.push({ x: target.x + nx * half * t, z: target.z + nz * half * t });
+  }
+  return out;
+}
