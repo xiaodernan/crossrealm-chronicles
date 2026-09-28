@@ -11,16 +11,19 @@ import { join, relative } from 'node:path';
  * （暂停时提示照跳、hitstop 期间横幅照弹、系统 dispose 后回调打到失效对象上）
  * 又都很难在功能测试里被发现。
  *
- * 允许的例外只有两类，且必须写明理由：
- * 1. `src/audio/**` —— 音序是"给 Web Audio 调度时间"的领域问题，
- *    与游戏世界的时间缩放无关，暂停时由 `AudioManager` 自行挂起；
- * 2. 注释里出现的 `setTimeout`（说明性文字）。
+ * 允许的例外只有一类，且必须写明理由：
+ * 1. 注释里出现的 `setTimeout`（说明性文字）。
+ *
+ * `src/audio/**` 曾经也有一条豁免，理由是"音序是给 Web Audio 调度时间的领域问题，
+ * 与游戏世界的时间缩放无关，暂停时由 `AudioManager` 自行挂起"。那句话是可验证为假的：
+ * AudioManager 里根本没有 suspend/pause 这条路（它只有 `enabled` 与 `setVolumes`），
+ * 而它的 BGM 节拍当时是两条 `setInterval` —— 后台标签页里浏览器把定时器节流到约 1Hz，
+ * 音乐就跟着变成断续。W-C7 切片1 把节拍改成走 `engine/Scheduler.js`，豁免随之删除。
+ * 今天的事实记在 `tests/audio-clock.test.js`：音序跟着主循环走，
+ * 而游戏内暂停菜单里音乐照常放（调度器用 rawDt 且在 `canPlay` 之前推进）—— 这是设计。
  */
 
 const SRC = join(process.cwd(), 'src');
-
-/** 允许保留 setTimeout 的目录（相对 src/） */
-const ALLOWED_DIRS = ['audio'];
 
 function walk(dir) {
   const out = [];
@@ -45,11 +48,10 @@ function stripNonCode(source) {
 describe('游戏逻辑计时门禁（B39）', () => {
   const files = walk(SRC);
 
-  it('src/ 下除 audio/ 外不得出现 setTimeout / setInterval', () => {
+  it('src/ 下不得出现 setTimeout / setInterval（audio 豁免已于 W-C7 切片1 拆除）', () => {
     const offenders = [];
     for (const file of files) {
       const rel = relative(SRC, file).replace(/\\/g, '/');
-      if (ALLOWED_DIRS.some((d) => rel.startsWith(`${d}/`))) continue;
       const code = stripNonCode(readFileSync(file, 'utf8'));
       // setInterval 没有任何例外：定时器比 setTimeout 更难撤销
       if (/\bsetInterval\s*\(/.test(code) || /\bsetTimeout\s*\(/.test(code)) {
