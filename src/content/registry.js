@@ -501,11 +501,12 @@ export const CONTENT_TABLES = [
   },
   {
     kind: 'sideQuestsPop',
-    note: '致敬向支线任务（W-B2：原 SideQuestPopCulture 的数据半壁；挂载那半壁是改写 `checkAll` 的 monkey-patch，切片5 已删）',
+    note: '致敬向支线任务（W-B2：原 SideQuestPopCulture 的数据半壁；挂载那半壁是改写 `checkAll` 的 monkey-patch，切片5 已删）。zone 自切片3 起不是自由文本：单系列的由回声表推（franchiseZone），多系列/百分比标 global',
     shape: 'rows',
     table: SIDE_QUESTS_POP,
     row: {
       id: { t: 'id' },
+      zone: { t: 'enum', of: [...ZONE_ORDER, 'global'] },
       title: { t: 'string' },
       desc: { t: 'string' },
       reward: { t: 'int', min: 1 },

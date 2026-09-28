@@ -17,7 +17,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP, SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
+import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP, SIDE_QUESTS_ALL, franchiseZone } from '../src/content/sideQuests.js';
+import { ECHOES } from '../src/content/echoes.js';
 import { ZONE_IDS, ZONE_ORDER } from '../src/content/ZoneIdentity.js';
 import { SideQuestSystem } from '../src/game/SideQuestSystem.js';
 import { SideQuestJournalTab } from '../src/ui/SideQuestJournalTab.js';
@@ -345,5 +346,52 @@ describe('W-B12 切片2：每位面第二条专属支线 —— 萤火与火牌�
     expect(issues.join('\n')).toMatch(new RegExp(`位面 "${ZONE_ORDER[0]}" 的专属支线只有 1 条`));
     expect(issues.filter((l) => l.includes('只有 1 条')).length, '五座位面都得被点名')
       .toBe(ZONE_ORDER.length);
+  });
+});
+
+describe('W-B12 切片3：单系列致敬支线的 zone 由回声表推，不再手抄', () => {
+  /** 与生产同一条规则的独立复算：系列 → 它所有回声住的（唯一那座）位面 */
+  const 复算 = (franchise) => {
+    const 座 = new Set(ECHOES.filter((e) => e.franchise === franchise).map((e) => e.zone));
+    return 座.size === 1 ? [...座][0] : null;
+  };
+  const 单系列条目 = SIDE_QUESTS_POP.filter((q) => q.id.endsWith('-tour'));
+
+  it('十条单系列致敬支线的 zone 与回声表一致（边写死边漂的情况不存在）', () => {
+    expect(单系列条目.length).toBe(10);
+    for (const q of 单系列条目) {
+      expect(q.zone, `${q.id} 的 zone 不是回声表推出来的那座`)
+        .toBe(复算({ 'side-wizard-tour': 'wizard', 'side-space-tour': 'interstellar', 'side-upside-tour': 'upside', 'side-western-tour': 'border', 'side-gangster-tour': 'family', 'side-scifi-tour': 'deepspace', 'side-cyber-tour': 'cyber', 'side-samurai-tour': 'samurai', 'side-cosmic-tour': 'cosmic', 'side-starport-tour': 'starport' }[q.id]));
+    }
+  });
+
+  it('多系列 / 全局百分比那四条仍标 global —— 任何一座位面都装不下它们', () => {
+    const 仍全局 = SIDE_QUESTS_POP.filter((q) => !q.id.endsWith('-tour'));
+    expect(仍全局.map((q) => q.id).sort()).toEqual(
+      ['side-echo-full', 'side-echo-half', 'side-triad-master', 'side-wave4-master'],
+    );
+    expect(仍全局.every((q) => q.zone === 'global')).toBe(true);
+  });
+
+  it('franchiseZone 自己的门：系列散进两位面 / 一条回声都没有时当场抛', () => {
+    const 人造表 = [
+      { franchise: '散的', zone: ZONE_IDS.MAGIC },
+      { franchise: '散的', zone: ZONE_IDS.SPACE },
+      { franchise: '独苗', zone: ZONE_IDS.ABYSS },
+    ];
+    expect(() => franchiseZone('散的', 人造表)).toThrow(/两个以上位面/);
+    expect(franchiseZone('独苗', 人造表)).toBe(ZONE_IDS.ABYSS);
+    expect(() => franchiseZone('不存在的系列', 人造表)).toThrow(/一条都没有/);
+  });
+
+  it('POP 表的 zone 已进 registry 的枚举门禁（野值红、合法值绿）', () => {
+    const planted = (kind, table) => checkContent(
+      CONTENT_TABLES.map((t) => (t.kind === kind ? { ...t, table } : t)),
+    );
+    expect(planted('sideQuestsPop', SIDE_QUESTS_POP)).toEqual([]);
+    const 野值 = SIDE_QUESTS_POP.map((q, i) => (i === 0 ? { ...q, zone: '月亮城' } : q));
+    expect(planted('sideQuestsPop', 野值).join('\n')).toMatch(/zone/);
+    const 缺格 = SIDE_QUESTS_POP.map((q, i) => (i === 1 ? { ...q, zone: undefined } : q));
+    expect(planted('sideQuestsPop', 缺格).join('\n')).toMatch(/缺少必填字段/);
   });
 });

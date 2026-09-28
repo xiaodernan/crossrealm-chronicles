@@ -15,6 +15,7 @@
  */
 import { FRANCHISE } from './franchises.js';
 import { ZONE_IDS } from './ZoneIdentity.js';
+import { ECHOES } from './echoes.js';
 
 export const SIDE_QUESTS_BASE = [
   {
@@ -88,6 +89,25 @@ function countFranchise(game, franchise) {
   return sys.getEntries('all').filter((e) => e.franchise === franchise && sys.unlocked.has(e.id)).length;
 }
 
+/**
+ * 系列 → 位面：**从回声表自己推**（W-B12 切片3）。
+ *
+ * 每条回声在 `content/echoes.js` 里都带着 `zone` 格，而同一个系列的回声今天恰好全住同一座位面。
+ * "咒术学院巡礼"这类判据读的是该系列回声的解锁数 —— 完成它就等于在那座位面里做事，
+ * 所以支线的 `zone` 标签不该手抄，从这里拿：回声漂了标签跟着漂，系列散进两位面时**开机即抛**
+ * （那时"标哪座位面"这个问题本身已经不成立，静默选一个就是说谎）。
+ */
+export function franchiseZone(franchise, 表 = ECHOES) {
+  const 座 = new Set(表.filter((e) => e.franchise === franchise).map((e) => e.zone));
+  if (座.size === 0) throw new Error(`sideQuests: 系列 "${franchise}" 在回声表里一条都没有，推不出位面`);
+  if (座.size > 1) throw new Error(`sideQuests: 系列 "${franchise}" 的回声散在 [${[...座].join('、')}] 两个以上位面里 —— 无法诚实标一座，先回数据层对账`);
+  return [...座][0];
+}
+
+/**
+ * 致敬族。`zone` 的口径（切片3）：判据读**单个系列**回声的，位面由 `franchiseZone()` 从回声表
+ * 推导（完成它就等于在那座位面里做事）；读全局百分比、或多系列合缴的，诚实标 `global`。
+ */
 export const SIDE_QUESTS_POP = [
   {
     id: 'side-echo-half',
@@ -100,7 +120,8 @@ export const SIDE_QUESTS_POP = [
   },
   {
     id: 'side-wizard-tour',
-    zone: 'global',
+    // 系列 → 位面由回声表推（切片3）：完成这条 = 在魔法位面里解锁它的回声
+    zone: franchiseZone(FRANCHISE.WIZARD),
     title: '咒术学院巡礼',
     desc: '共鸣 3 个魔法学院回声',
     check: (g) => countFranchise(g, FRANCHISE.WIZARD) >= 3,
@@ -109,7 +130,7 @@ export const SIDE_QUESTS_POP = [
   },
   {
     id: 'side-space-tour',
-    zone: 'global',
+    zone: franchiseZone(FRANCHISE.INTERSTELLAR),
     title: '星际方程',
     desc: '共鸣 3 个星际穿越回声',
     check: (g) => countFranchise(g, FRANCHISE.INTERSTELLAR) >= 3,
@@ -118,7 +139,7 @@ export const SIDE_QUESTS_POP = [
   },
   {
     id: 'side-upside-tour',
-    zone: 'global',
+    zone: franchiseZone(FRANCHISE.UPSIDE),
     title: '逆相界幸存者',
     desc: '共鸣 3 个逆相界回声',
     check: (g) => countFranchise(g, FRANCHISE.UPSIDE) >= 3,
@@ -136,7 +157,7 @@ export const SIDE_QUESTS_POP = [
   },
   {
     id: 'side-western-tour',
-    zone: 'global',
+    zone: franchiseZone(FRANCHISE.BORDER),
     title: '边境巡礼',
     desc: '共鸣 3 个边境往事回声',
     check: (g) => countFranchise(g, FRANCHISE.BORDER) >= 3,
@@ -145,7 +166,7 @@ export const SIDE_QUESTS_POP = [
   },
   {
     id: 'side-gangster-tour',
-    zone: 'global',
+    zone: franchiseZone(FRANCHISE.FAMILY),
     title: '幽冥入会',
     desc: '共鸣 3 个幽冥帮派回声',
     check: (g) => countFranchise(g, FRANCHISE.FAMILY) >= 3,
@@ -154,7 +175,7 @@ export const SIDE_QUESTS_POP = [
   },
   {
     id: 'side-scifi-tour',
-    zone: 'global',
+    zone: franchiseZone(FRANCHISE.DEEPSPACE),
     title: '深空编年',
     desc: '共鸣 3 个深空纪元回声',
     check: (g) => countFranchise(g, FRANCHISE.DEEPSPACE) >= 3,
@@ -163,6 +184,7 @@ export const SIDE_QUESTS_POP = [
   },
   {
     id: 'side-triad-master',
+    // 三个系列合缴的一条：任何单独一座位面都装不下它，诚实标就是 global
     zone: 'global',
     title: '三巨头同频',
     desc: '边境+帮派+深空各系列全共鸣',
@@ -173,10 +195,10 @@ export const SIDE_QUESTS_POP = [
     reward: 35,
     journal: '西部、黑帮、科幻 — 三巨头母题在同一条位面线上对齐。',
   },
-  { id: 'side-cyber-tour', zone: 'global', title: '赛博巡礼', desc: '共鸣 3 个赛博霓虹回声', check: (g) => countFranchise(g, FRANCHISE.CYBER) >= 3, reward: 18, journal: '霓虹、诊所、尖塔 — 赛博三灯齐亮。' },
-  { id: 'side-samurai-tour', zone: 'global', title: '武士入门', desc: '共鸣 3 个武士残响回声', check: (g) => countFranchise(g, FRANCHISE.SAMURAI) >= 3, reward: 18, journal: '鸟居、道场、刃冢 — 最后一式已共鸣。' },
-  { id: 'side-cosmic-tour', zone: 'global', title: '旧日幸存者', desc: '共鸣 3 个旧日低语回声', check: (g) => countFranchise(g, FRANCHISE.COSMIC) >= 3, reward: 22, journal: '方尖碑、抄写室、深井 — 回声不再数你。' },
-  { id: 'side-starport-tour', zone: 'global', title: '星港常客', desc: '共鸣 3 个星港商路回声', check: (g) => countFranchise(g, FRANCHISE.STARPORT) >= 3, reward: 18, journal: '酒肆、码头、星图 — 航线已谈判通过。' },
+  { id: 'side-cyber-tour', zone: franchiseZone(FRANCHISE.CYBER), title: '赛博巡礼', desc: '共鸣 3 个赛博霓虹回声', check: (g) => countFranchise(g, FRANCHISE.CYBER) >= 3, reward: 18, journal: '霓虹、诊所、尖塔 — 赛博三灯齐亮。' },
+  { id: 'side-samurai-tour', zone: franchiseZone(FRANCHISE.SAMURAI), title: '武士入门', desc: '共鸣 3 个武士残响回声', check: (g) => countFranchise(g, FRANCHISE.SAMURAI) >= 3, reward: 18, journal: '鸟居、道场、刃冢 — 最后一式已共鸣。' },
+  { id: 'side-cosmic-tour', zone: franchiseZone(FRANCHISE.COSMIC), title: '旧日幸存者', desc: '共鸣 3 个旧日低语回声', check: (g) => countFranchise(g, FRANCHISE.COSMIC) >= 3, reward: 22, journal: '方尖碑、抄写室、深井 — 回声不再数你。' },
+  { id: 'side-starport-tour', zone: franchiseZone(FRANCHISE.STARPORT), title: '星港常客', desc: '共鸣 3 个星港商路回声', check: (g) => countFranchise(g, FRANCHISE.STARPORT) >= 3, reward: 18, journal: '酒肆、码头、星图 — 航线已谈判通过。' },
   { id: 'side-wave4-master', zone: 'global', title: '四系行者', desc: 'Wave4 四系列全共鸣', check: (g) => [FRANCHISE.CYBER, FRANCHISE.SAMURAI, FRANCHISE.COSMIC, FRANCHISE.STARPORT].every((f) => countFranchise(g, f) >= 3), reward: 45, journal: '赛博、武士、旧日、星港 — 四系在同一条回声线上对齐。' },
 ];
 
