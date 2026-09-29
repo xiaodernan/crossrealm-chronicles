@@ -17,6 +17,9 @@ export class PlayerStats {
     this._bonus = {};                            // 装备那几点的缓存，见 `gearBonus`
     this.totalKills = 0;
     this.chestsOpened = new Set();
+    // W-B6 切片3：行为门槛统计
+    this.kills = {};        // { type: count }
+    this.skillUses = {};    // { skill: count }
     this._consumers = null;
     this._rebuildBonus();
   }
@@ -193,6 +196,18 @@ export class PlayerStats {
     this.pushToConsumers();
   }
 
+  // W-B6 切片3：行为门槛统计
+  addKill(type) {
+    this.kills[type] = (this.kills[type] ?? 0) + 1;
+    this.totalKills++;
+    this.pushToConsumers();
+  }
+
+  addSkillUse(skill) {
+    this.skillUses[skill] = (this.skillUses[skill] ?? 0) + 1;
+    this.pushToConsumers();
+  }
+
   toJSON() {
     return {
       level: this.level,
@@ -208,6 +223,8 @@ export class PlayerStats {
       bag: this.bag.map(cloneInstance),
       totalKills: this.totalKills,
       chests: [...this.chestsOpened],
+      kills: this.kills,
+      skillUses: this.skillUses,
     };
   }
 
@@ -217,6 +234,8 @@ export class PlayerStats {
       level: data.level ?? 1,
       souls: data.souls ?? 0,
       totalKills: data.totalKills ?? 0,
+      kills: data.kills ?? {},
+      skillUses: data.skillUses ?? {},
     });
     for (const stat of Object.keys(BASE_STATS)) {
       this.baseStats[stat] = data[stat] ?? BASE_STATS[stat];

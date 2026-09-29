@@ -500,6 +500,8 @@ export class CombatController {
     this.skillCooldown = 4;
     this.state = 'skill';
     this.stateTimer = 0;
+    // W-B6 切片3：技能使用统计
+    this.game?.stats?.addSkillUse('skill');
 
     this.player.characterModel?.playSkill?.();
     const ring = new THREE.Mesh(
@@ -622,6 +624,8 @@ export class CombatController {
     this.state = 'skill';
     this.stateTimer = 0;
     this.comboCount = 0;
+    // W-B6 切片3：终结技也计入 combo 使用
+    this.game?.stats?.addSkillUse('combo');
     const radius = 3.5 * (1 + (this.skillMods?.finisher ?? 0));
     const ring = new THREE.Mesh(
       new THREE.RingGeometry(0.3, radius, 24),
@@ -652,6 +656,8 @@ export class CombatController {
    */
   _dispatchExecution(enemy) {
     const boss = enemy.type === 'boss' || enemy.bossId;
+    // W-B6 切片3：击杀统计用于技能门槛
+    this.game?.stats?.addKill(enemy.type ?? 'normal');
     window.dispatchEvent(new CustomEvent('combat-execution', {
       detail: {
         boss: !!boss,

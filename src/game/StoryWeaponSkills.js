@@ -51,6 +51,16 @@ if (lock.spellCasts) {
     const n = q?.stats?.spellCasts ?? 0;
     if (n < lock.spellCasts) return `需施放法术 ${lock.spellCasts} 次 (${n}/${lock.spellCasts})`;
   }
+  if (lock.kills) {
+    const { type, count } = lock.kills;
+    const n = q?.stats?.kills?.[type] ?? 0;
+    if (n < count) return `需击败 ${count} 只 ${type} (${n}/${count})`;
+  }
+  if (lock.skillUses) {
+    const { skill, count } = lock.skillUses;
+    const n = q?.stats?.skillUses?.[skill] ?? 0;
+    if (n < count) return `需使用 ${count} 次 ${skill} (${n}/${count})`;
+  }
   if (lock.level) {
     const lvl = q?.stats?.level ?? 1;
     if (lvl < lock.level) return `需 Lv.${lock.level} (当前 Lv.${lvl})`;

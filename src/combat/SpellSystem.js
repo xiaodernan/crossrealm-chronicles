@@ -96,6 +96,9 @@ export class SpellSystem {
     else if (spell.type === 'aoe') this.castGravity(spell, charged);
     else if (spell.type === 'buff') this.castTransform(spell);
 
+    // W-B6 切片3：蓄力施法计入 charge 使用
+    if (charged) this.game?.stats?.addSkillUse('charge');
+
     window.dispatchEvent(new CustomEvent('spell-cast', {
       detail: { id: spell.id, name: spell.name, charged },
     }));
