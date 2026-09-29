@@ -71,6 +71,23 @@ describe('掉落池表：自洽', () => {
     expect(Object.keys(GEAR_POOLS), '走廊与未知区不该各列一格（它们落兜底）')
       .not.toContain(ZONE_IDS.CORRIDOR);
   });
+
+  it('void 与 abyss 的首件各不相同（切片6：Boss 掉落池权重拉开，避免两地首件同款）', () => {
+    const voidFirst = GEAR_POOLS.void[0].base;
+    const abyssFirst = GEAR_POOLS.abyss[0].base;
+    expect(voidFirst, 'void 首件应为誓约护符').toBe('oath-charm');
+    expect(abyssFirst, 'abyss 首件应为战纹印记').toBe('war-sigil');
+    expect(voidFirst).not.toBe(abyssFirst);
+  });
+
+  it('void 与 abyss 的首件权重严格大于次席，且符合设计值（切片6：Boss 掉落池权重拉开，避免权重并列导致"首件"不稳定）', () => {
+    expect(GEAR_POOLS.void[0]).toEqual({ base: 'oath-charm', weight: 5 });
+    expect(GEAR_POOLS.void[1]).toEqual({ base: 'dual-sigil', weight: 3 });
+    expect(GEAR_POOLS.void[0].weight).toBeGreaterThanOrEqual(5);
+    expect(GEAR_POOLS.abyss[0]).toEqual({ base: 'war-sigil', weight: 4 });
+    expect(GEAR_POOLS.abyss[1]).toEqual({ base: 'oath-charm', weight: 2 });
+    expect(GEAR_POOLS.abyss[0].weight).toBeGreaterThanOrEqual(4);
+  });
 });
 
 describe('poolForZone：只有一处兜底', () => {

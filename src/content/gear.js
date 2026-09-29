@@ -241,10 +241,10 @@ export const GEAR_POOLS = {
     { base: 'oath-charm', weight: 3 }],
   space: [{ base: 'ring-sigil', weight: 4 }, { base: 'war-sigil', weight: 3 },
     { base: 'dual-sigil', weight: 3 }, { base: 'ember-charm', weight: 2 }],
-  void: [{ base: 'oath-charm', weight: 4 }, { base: 'dual-sigil', weight: 4 },
+  void: [{ base: 'oath-charm', weight: 5 }, { base: 'dual-sigil', weight: 3 },
     { base: 'ember-charm', weight: 2 }],
-  abyss: [{ base: 'oath-charm', weight: 3 }, { base: 'ember-charm', weight: 3 },
-    { base: 'dual-sigil', weight: 3 }, { base: 'war-sigil', weight: 3 }],
+  abyss: [{ base: 'war-sigil', weight: 4 }, { base: 'oath-charm', weight: 2 },
+    { base: 'dual-sigil', weight: 3 }, { base: 'ember-charm', weight: 2 }],
 };
 
 /** 这一片的兜底档名（`corridor` / `unknown` / 名单外的新区域都落这里） */
