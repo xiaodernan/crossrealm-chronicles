@@ -23,16 +23,35 @@ export class WorldDecorations {
     this._buildWildlifeMarkers();
   }
 
-  applyTreeTextures() {
-    TextureLibrary.load().then((texLib) => {
-      if (!texLib.ready) return;
+  /**
+   * 给树干换贴图（W-C1 切片3）。
+   *
+   * 修前这里是**在循环里** `createMaterial` —— 每棵树一份材质，而所有树干本来共用
+   * `_scatterTrees` 里那一份 `trunkMat`（`color 0x6a5040` 对每棵树都是同一个值）。
+   * 于是"有多少棵树"就变成"多少份材质"，与 B73 记的另外两处同形；
+   * 而换下来的那一份 `trunkMat` 连 `dispose` 都没有，一起漏掉。
+   *
+   * 两条都改掉：共享一份（`sharedMaterial`）+ 换完之后把没人持有的旧材质拆掉。
+   * 旧材质能安全拆的前提是它**只属于树干** —— `trunkMat` 全文件只出现在 `_scatterTrees`
+   * 的赋值与建树干那一行，循环跑完每一棵树都已改指共享材质，它确实没有持有者了。
+   */
+  applyTreeTextures(texLib = null) {
+    const apply = (lib) => {
+      if (!lib?.ready) return;
+      const shared = lib.sharedMaterial('bark', 0x6a5040);
+      const replaced = new Set();
       for (const tree of this._treeGroups) {
         const trunk = tree.children[0];
-        if (trunk?.isMesh) {
-          trunk.material = texLib.createMaterial('bark', { color: new THREE.Color(0x6a5040) });
-        }
+        if (!trunk?.isMesh) continue;
+        if (trunk.material && trunk.material !== shared) replaced.add(trunk.material);
+        trunk.material = shared;
       }
-    });
+      for (const old of replaced) old.dispose();
+    };
+    // 可注入：不注入时自己 `load()`（生产路径），注入时同步跑完（用例路径）——
+    // 这一处要断言的正是"建了几份材质、拆了几份"，而真去加载贴图的用例跑不稳也跑不快
+    if (texLib) { apply(texLib); return; }
+    TextureLibrary.load().then(apply);
   }
 
   _scatterTrees() {

@@ -52,8 +52,9 @@ export class SceneEnhancer {
         return;
       }
       if (geo === 'ConeGeometry' && obj.material?.flatShading) {
-        texLib.applyToMesh(obj, 'rock', 0x8a8580);
-        obj.material.flatShading = false;
+        // flatShading 走 overrides 而不是"换完再就地改"：材质现在是共享的，
+        // 就地改会把同色的所有道具一起改掉（W-C1 切片2）
+        texLib.applyToMesh(obj, 'rock', 0x8a8580, { flatShading: false });
         return;
       }
       if (geo === 'CylinderGeometry' && obj.position.y > 1 && !obj.material?.emissiveIntensity) {
