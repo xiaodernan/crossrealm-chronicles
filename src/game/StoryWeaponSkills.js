@@ -47,9 +47,13 @@ export function getStoryLockReason(game, skillId) {
     const fr = game.storyJournal?.getCounts?.().fragment ?? 0;
     if (fr < lock.loreFragments) return `需 ${lock.loreFragments} 条叙事碎片 (${fr}/${lock.loreFragments})`;
   }
-  if (lock.spellCasts) {
+if (lock.spellCasts) {
     const n = q?.stats?.spellCasts ?? 0;
     if (n < lock.spellCasts) return `需施放法术 ${lock.spellCasts} 次 (${n}/${lock.spellCasts})`;
+  }
+  if (lock.level) {
+    const lvl = q?.stats?.level ?? 1;
+    if (lvl < lock.level) return `需 Lv.${lock.level} (当前 Lv.${lvl})`;
   }
   if (lock.boss && !bossDefeated(game, lock.boss)) return '需击败对应 Boss';
   return null;

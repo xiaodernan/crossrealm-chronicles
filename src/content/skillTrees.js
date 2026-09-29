@@ -102,8 +102,8 @@ export const SKILL_TREES = {
     { id: 's-realmedge', name: '位面锋芒', cost: 3, desc: '战技伤害 +25%', effect: { skill: 0.25 }, reqs: ['s-reach'] },
     { id: 's-echo', name: '回响斩', cost: 3, desc: '战技伤害 +20% · 连击 +10%', effect: { skill: 0.2, combo: 0.1 }, reqs: ['s-realmedge'] },
     { id: 's-annihilate', name: '湮灭', cost: 4, desc: '终结技范围 +30% · 处决伤害 +30%', effect: { finisher: 0.3, riposte: 0.3 }, reqs: ['s-guardbreak', 's-finisher'] },
-    { id: 's-apotheosis', name: '剑之极意', cost: 5, desc: '近战 +15% · 连击 +15% · 终结 +25% · 处决 +20% · 战技 +20%',
-      effect: { melee: 0.15, combo: 0.15, finisher: 0.25, riposte: 0.2, skill: 0.2 }, reqs: ['s-annihilate', 's-echo'] },
+{ id: 's-apotheosis', name: '剑之极意', cost: 5, desc: '近战 +15% · 连击 +15% · 终结 +25% · 处决 +20% · 战技 +20%',
+      effect: { melee: 0.15, combo: 0.15, finisher: 0.25, riposte: 0.2, skill: 0.2 }, reqs: ['s-annihilate', 's-echo'], lock: { level: 12 } },
   ],
   staff: [
     { id: 'm-arcane', name: '奥术共鸣 I', cost: 1, desc: '法术伤害 +10%', effect: { spell: 0.1 },
@@ -121,8 +121,8 @@ export const SKILL_TREES = {
     { id: 'm-font', name: '法力之泉', cost: 3, desc: '法力上限 +30', effect: { mana: 30 }, reqs: ['m-mana'] },
     { id: 'm-singularity', name: '奇点', cost: 4, desc: '法术 +20% · 蓄力 +15%', effect: { spell: 0.2, charge: 0.15 }, reqs: ['m-arcane2', 'm-echo'] },
     { id: 'm-avatar', name: '大圣化身·极', cost: 4, desc: '大圣化身 +6 秒 · 法力 +20', effect: { transform: 6, mana: 20 }, reqs: ['m-transform', 'm-font'] },
-    { id: 'm-omniscience', name: '全知', cost: 5, desc: '法术 +20% · 蓄力 +20% · 法力 +30 · 化身 +4 秒',
-      effect: { spell: 0.2, charge: 0.2, mana: 30, transform: 4 }, reqs: ['m-singularity', 'm-avatar'] },
+{ id: 'm-omniscience', name: '全知', cost: 5, desc: '法术 +20% · 蓄力 +20% · 法力 +30 · 化身 +4 秒',
+      effect: { spell: 0.2, charge: 0.2, mana: 30, transform: 4 }, reqs: ['m-singularity', 'm-avatar'], lock: { level: 12 } },
   ],
   realm: [
     { id: 'r-attune', name: '位面共鸣 I', cost: 1, desc: '法术伤害 +8%', effect: { spell: 0.08 }, reqs: [] },
@@ -136,8 +136,8 @@ export const SKILL_TREES = {
     { id: 'r-ascendant', name: '化身延展', cost: 3, desc: '大圣化身 +4 秒', effect: { transform: 4 }, reqs: ['r-overcharge'] },
     { id: 'r-breakthrough', name: '破界', cost: 4, desc: '战技 +30% · 法术 +15%', effect: { skill: 0.3, spell: 0.15 }, reqs: ['r-harmonics', 'r-riftstep'] },
     { id: 'r-timeless', name: '无时', cost: 4, desc: '大圣化身 +6 秒 · 法力 +20', effect: { transform: 6, mana: 20 }, reqs: ['r-ascendant', 'r-deepwell'] },
-    { id: 'r-convergence', name: '位面交汇', cost: 5, desc: '法术 +15% · 战技 +15% · 蓄力 +15% · 法力 +20 · 化身 +4 秒',
-      effect: { spell: 0.15, skill: 0.15, charge: 0.15, mana: 20, transform: 4 }, reqs: ['r-breakthrough', 'r-timeless'] },
+{ id: 'r-convergence', name: '位面交汇', cost: 5, desc: '法术 +15% · 战技 +15% · 蓄力 +15% · 法力 +20 · 化身 +4 秒',
+      effect: { spell: 0.15, skill: 0.15, charge: 0.15, mana: 20, transform: 4 }, reqs: ['r-breakthrough', 'r-timeless'], lock: { level: 12 } },
   ],
 };
 

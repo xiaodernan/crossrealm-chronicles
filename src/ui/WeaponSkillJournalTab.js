@@ -34,10 +34,27 @@ export class WeaponSkillJournalTab {
       return `<div class="sk-branch"><h3>${branch.name}</h3><div class="sk-grid">${cards}</div></div>`;
     };
 
+    const renderNarrative = () => {
+      const narrative = SKILL_BRANCHES.flatMap((b) => nodesOf(b.id)).filter((s) => s.grant);
+      const cards = narrative.map((s) => {
+        const ok = unlocked.has(s.id);
+        const lore = skillById(s.id)?.lore;
+        const cond = s.grant ? (s.grant.boss ? `需击败 ${s.grant.boss}` : `需 Chapter ${s.grant.chapter}`) : '';
+        return `<div class="sk-card${ok ? ' sk-on' : ''} sk-narrative">
+          <div class="sk-name">${s.name} <span class="sk-tag">叙事</span></div>
+          <div class="sk-desc">${s.desc}</div>
+          ${lore ? `<span class="sk-lore">${ok ? lore : '—'}</span>` : ''}
+          <div class="sk-cost">${ok ? '已解锁' : cond}</div>
+        </div>`;
+      }).join('');
+      return `<div class="sk-branch"><h3>叙事技能 (击败 Boss / 推进章节自动解锁)</h3><div class="sk-grid">${cards}</div></div>`;
+    };
+
     panelEl.innerHTML = `
       <h2 data-ktext="流派技能 · {journal} 关闭"></h2>
       <p class="sk-stats">可用技能点 ${points} · 已解锁 ${unlocked.size} · 营火升级面板可加点</p>
       ${SKILL_BRANCHES.map(renderBranch).join('')}
+      ${renderNarrative()}
       <p class="hint" data-ktext="剧情节点会自动解锁叙事技 · {swapWeapon} 切换剑/杖影响加成"></p>
     `;
 

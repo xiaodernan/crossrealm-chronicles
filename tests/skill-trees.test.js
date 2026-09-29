@@ -191,6 +191,9 @@ describe('W-B6 切片1：门槛是活的（m-mana 那格从"看起来有门"接�
     expect(getStoryLockReason(game(99, 2), 'm-arcane'), '章节达标就该放行').toBeNull();
     expect(getStoryLockReason(game(99, 2, 0), 's-combo')).toMatch(/叙事碎片/);
     expect(getStoryLockReason({ quests: { chapter: 1, stats: {} } }, 'm-transform')).toMatch(/需 Chapter 4/);
+    // level 门槛：s-apotheosis (Lv.12)
+    expect(getStoryLockReason({ quests: { chapter: 5, stats: { level: 10 } } }, 's-apotheosis')).toMatch(/需 Lv\.12/);
+    expect(getStoryLockReason({ quests: { chapter: 5, stats: { level: 12 } } }, 's-apotheosis')).toBeNull();
   });
 });
 
