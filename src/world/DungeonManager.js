@@ -255,19 +255,12 @@ export class DungeonManager {
       for (const e of room.enemySpawns) {
         const wx = dungeon.def.origin.x + e.x;
         const wz = dungeon.def.origin.z + e.z;
-        const cfg = {
-          name: e.type === 'golem' ? '构装守卫' : e.type === 'drone' ? '裂隙无人机' : '遗城战士',
-          type: e.type,
-          x: wx,
-          z: wz,
-          hp: e.hp,
-          posture: 70,
-          damage: 16,
-          respawn: false,
-          aggroRange: 14,
-        };
-        list.push(this.enemyManager.spawn(cfg));
-        dungeon.enemies.push(list[list.length - 1]);
+        // 身份（名字与数值）走 `content/enemies.js` 那一名册：副本里的 `golem` 与图书馆里的
+        // 那只是同一只（W-B10 切片2 之前，这里自己抄了一套「构装守卫 / posture 70 / damage 16」，
+        // 而没点名的类型一律兜底成「遗城战士」）。房间不该在玩家回头时刷新，所以盖 respawn。
+        const enemy = this.enemyManager.spawnAt(e.type, wx, wz, { respawn: false });
+        list.push(enemy);
+        dungeon.enemies.push(enemy);
       }
     }
 

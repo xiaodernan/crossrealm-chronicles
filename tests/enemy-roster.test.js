@@ -53,14 +53,15 @@ describe('敌人名册：四表齐全、招式闭合（W-B7 切片1）', () => {
     expect(野id, `这些招式 id 不在 ENEMY_MOVES 里：${野id.join('、')}`).toEqual([]);
   });
 
-  it('出生表闭合：spawnDefaults 写的每个 type: 都登记过（手滑写错类型名会静默变默认档）', () => {
-    const 源码 = readSrc('combat/EnemyManager.js');
-    const 起点 = 源码.indexOf('spawnDefaults()');
-    const 段 = 源码.slice(起点, 源码.indexOf('buildBossArena', 起点));
-    // 出生都是 for 循环：源码里每个类型字面量恰好一次，实例数在真浏览器读数里数
-    const 写过的 = [...段.matchAll(/type: '([a-z]+)'/g)].map((m) => m[1]);
-    expect(写过的.length, '没扫到任何 type: 字面量（切段切错了）').toBeGreaterThanOrEqual(8);
-    const 未登记 = [...new Set(写过的)].filter((t) => !Object.keys(ENEMY_MOVE_SETS).includes(t));
+  it('出生表闭合：真跑一遍出生，场上每一类都登记过（手滑写错类型名会静默变默认档）', () => {
+    // W-B10 切片2 之前这条扫源码里的 `type: '...'` 字面量。出生改成走名册之后源码里
+    // 一个 `type:` 都不剩（类型只在 `spawnAt` 的第一参数上出现），词法口径就此失明 ——
+    // 换成行为口径：让造出来的敌人自己报类型。写错的名字会更早地炸在 `enemyRosterOf`。
+    const m = makeManager();
+    m.spawnDefaults();
+    const 在场 = [...new Set(m.enemies.map((e) => e.type))];
+    expect(在场.length, '一个类型都没扫到（spawnDefaults 空转了）').toBeGreaterThanOrEqual(8);
+    const 未登记 = 在场.filter((t) => !Object.keys(ENEMY_MOVE_SETS).includes(t));
     expect(未登记, `spawnDefaults 用了没登记的类型：${未登记.join('、')}`).toEqual([]);
   });
 });
@@ -79,17 +80,20 @@ describe('W-B7 切片1：时线怨影 / 混沌掠行兽 / 边境哨炮', () => {
     expect(ENEMY_MOVE_SETS.sentinel).toContain('guard');
   });
 
-  it('两个空位面真的有人了：三个新类型都出现在出生表里（每类一个循环、坐标成组）', () => {
-    const 段 = (() => {
-      const 源码 = readSrc('combat/EnemyManager.js');
-      const 起点 = 源码.indexOf('spawnDefaults()');
-      return 源码.slice(起点, 源码.indexOf('buildBossArena', 起点));
-    })();
+  it('两个空位面真的有人了：三个新类型各成一组出生在场', () => {
+    // 同样从词法口径换成行为口径（数的是造出来的敌人，不是源码里的字面量）
+    const m = makeManager();
+    m.spawnDefaults();
+    const 按类型 = {};
+    for (const e of m.enemies) 按类型[e.type] = (按类型[e.type] ?? 0) + 1;
     for (const t of ['wraith', 'stalker', 'sentinel']) {
-      expect(段, `类型 "${t}" 没进 spawnDefaults`).toMatch(new RegExp(`type: '${t}'`));
+      expect(按类型[t] ?? 0, `空位面里 "${t}" 出生不足一组（<3 只）`).toBeGreaterThanOrEqual(3);
     }
     // 新类型前面的注释要说明"为什么放这两个位面"—— 两个空位面是这片的存在理由
-    expect(段).toMatch(/破碎时线与混沌边境此前没有原生敌人/);
+    const 源码 = readSrc('combat/EnemyManager.js');
+    const 起点 = 源码.indexOf('spawnDefaults()');
+    expect(源码.slice(起点, 源码.indexOf('buildBossArena', 起点)))
+      .toMatch(/破碎时线与混沌边境此前没有原生敌人/);
   });
 });
 

@@ -79,12 +79,14 @@ export function generateMaze(gridW, gridH, seed = Date.now()) {
   for (const room of rooms) {
     if (room.id === spawn.id || room.isExit) continue;
     const n = 1 + Math.floor(rnd() * 2);
+    // 出哪几类、一次几只：这两件事仍然写死在这一行（三类一视同仁）。切片3 把它换成按 def
+    // 认领的遭遇表。至于"每只多硬叫什么"，W-B10 切片2 已经交给 `content/enemies.js` 那一名册，
+    // 所以这里不再自带 `hp` —— 切片1 之前这里是 `hp: 120 + 摇 100`，与类型无关的一把骰子。
     for (let i = 0; i < n; i++) {
       room.enemySpawns.push({
         x: room.x + (rnd() - 0.5) * (CELL - 6),
         z: room.z + (rnd() - 0.5) * (CELL - 6),
         type: ['soldier', 'golem', 'drone'][Math.floor(rnd() * 3)],
-        hp: 120 + Math.floor(rnd() * 100),
       });
     }
   }

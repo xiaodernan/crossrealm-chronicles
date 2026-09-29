@@ -44,6 +44,8 @@ import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { SKILL_TREES, SKILL_BRANCH_IDS, SKILL_EFFECT_KEYS } from './skillTrees.js';
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
+import { ENEMY_ROSTER } from './enemies.js';
+import { ENEMY_MOVE_SETS, BODY_PLANS } from './tuning.js';
 import {
   GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES, GEAR_SLOT_NAMES,
   GEAR_DROP, GEAR_NAMES, GEAR_RARITY_DISPLAY, GEAR_POOLS, GEAR_POOL_DEFAULT, GEAR_BAG,
@@ -727,6 +729,30 @@ export const CONTENT_TABLES = [
     value: { t: 'int', min: 1, max: 100 },
   },
   {
+    kind: 'enemyRoster',
+    note: '敌人身份（W-B10 切片2）：名字与基础数值只有一份 —— 区域出生（`EnemyManager.spawnAt`）与'
+      + '副本出生（`DungeonManager._spawnRoomEnemies`）都读同一格。键要对齐 `ENEMY_MOVE_SETS` 与'
+      + ' `BODY_PLANS`：少一格 = 那一类只能靠手抄名字出生，多一格 = 那个名字永远不会出现',
+    shape: 'index',
+    table: ENEMY_ROSTER,
+    value: {
+      t: 'row',
+      of: {
+        name: { t: 'string' },
+        hp: { t: 'int', min: 1 },
+        posture: { t: 'int', min: 1 },
+        damage: { t: 'int', min: 1, required: false },
+        speed: { t: 'number', exclusiveMin: 0, required: false },
+        aggroRange: { t: 'int', min: 1, required: false },
+        color: { t: 'int', min: 0, max: 0xffffff },
+        canAttack: { t: 'bool', required: false },
+        respawn: { t: 'bool', required: false },
+        respawnTime: { t: 'int', min: 1, required: false },
+      },
+    },
+    invariant: checkEnemyRoster,
+  },
+  {
     kind: 'objectives',
     note: '主线/任务目标（W-B3 切片1 的数据层）—— 分支、条件、标志、重访；在役读者只有 `game/QuestSystem.js`（按表序走）',
     shape: 'rows',
@@ -1362,6 +1388,47 @@ export function checkGearBossDrops(table, ctx) {
     if (rarityRank(rarity) < rarityRank('rare')) {
       out.push(`gearBossDrops: "${id}" 的档位是 ${String(rarity)}（至少要 rare —— Boss 掉凡品等于让玩家白跑一趟）`);
     }
+  }
+  return out;
+}
+
+/**
+ * 名册与招式表 / 体型表对账（W-B10 切片2）。
+ *
+ * 形状校验能说"这一格有名字、hp 是正整数"，说不了"这一类到底存不存在"。而普查
+ * （`.tmp-20260930/wb10s1-census.mjs` M5）量的正是"存在但没登记"那一侧：副本那条
+ * 三元式只点名 `golem` / `drone`，其余一律兜底成「遗城战士」—— 名册 12 类里 9 类
+ * 一旦进副本就顶着别人的名字。这里钉住四条：
+ * - 名册里的每一类都得在 `ENEMY_MOVE_SETS` 有行：有名字没招式 = 出生落到 `default` 三板斧（B68 那一族）；
+ * - 每一类都得在 `BODY_PLANS` 有格：没体型 = 静默套 soldier 的形状，玩家看到的体型与名字对不上；
+ * - 反过来，`ENEMY_MOVE_SETS` 里的原生敌人（扣 `boss` / `default`）必须在名册有一格：
+ *   少一格的症状不是报错，而是"这一类只能靠调用点手抄名字出生" —— 正是这一片要终结的写法；
+ * - 名字两两不重复，且不可攻击的那一类不许写 `damage`（伤害数字会显示却永远不会打出来）。
+ */
+export const ROSTER_NOT_IDENTITY = ['boss', 'default'];
+
+export function checkEnemyRoster(table) {
+  const out = [];
+  const rows = table ?? {};
+  const 名字 = new Map();
+  for (const [id, row] of Object.entries(rows)) {
+    const p = `enemyRoster["${id}"]`;
+    if (ROSTER_NOT_IDENTITY.includes(id)) {
+      out.push(`${p}: "${id}" 不是一类敌人的身份（Boss 走 bossRoster，default 是查不到时的兜底档）`);
+    }
+    if (!ENEMY_MOVE_SETS[id]) out.push(`${p}: 招式表里没有这一类 —— 出生只会落到 default 三板斧`);
+    if (!BODY_PLANS[id]) out.push(`${p}: 体型表里没有这一类 —— 会静默套 soldier 的形状`);
+    if (!row?.name) continue;
+    if (名字.has(row.name)) {
+      out.push(`${p}.name: "${row.name}" 与 enemyRoster["${名字.get(row.name)}"] 重了 —— 同一屏幕里两类敌人叫同一个名字`);
+    } else 名字.set(row.name, id);
+    if (row.canAttack === false && row.damage !== undefined) {
+      out.push(`${p}: 不可攻击（canAttack: false）却写了 damage ${row.damage} —— 那个数字永远不会打出来`);
+    }
+  }
+  for (const id of Object.keys(ENEMY_MOVE_SETS)) {
+    if (ROSTER_NOT_IDENTITY.includes(id)) continue;
+    if (!rows[id]) out.push(`enemyRoster: 缺 "${id}"（招式表里有这一类，名册却没登记身份 —— 它只能靠调用点手抄名字出生）`);
   }
   return out;
 }

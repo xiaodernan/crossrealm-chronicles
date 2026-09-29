@@ -3,6 +3,7 @@ import { Enemy } from './Enemy.js';
 import { SquadController } from '../ai/Squad.js';
 import { bodyOf } from '../ai/Separation.js';
 import { AI, SUMMON } from '../content/tuning.js';
+import { enemyRosterOf } from '../content/enemies.js';
 import { Boss } from './Boss.js';
 import { GroundHazards } from './GroundHazards.js';
 import { MagicBoss } from './MagicBoss.js';
@@ -252,41 +253,52 @@ export class EnemyManager {
     return { group, center, radius: 22, activated: false };
   }
 
+  /**
+   * 按类型出生：名字与基础数值一律读 `content/enemies.js` 的名册（W-B10 切片2）。
+   *
+   * 修前这里是 13 处 `this.spawn({ name, type, hp, posture, damage, ... })` 的手抄，
+   * 而副本侧（`DungeonManager`）又抄了第二套 —— 同一只 `golem` 在图书馆叫「魔法构装体」
+   * 230 血，在迷宫里叫「构装守卫」120~219 血。坐标留在这里（那是关卡数据），身份进表。
+   */
+  spawnAt(type, x, z, extra = {}) {
+    return this.spawn({ ...enemyRosterOf(type), type, x, z, ...extra });
+  }
+
   spawnDefaults() {
-    this.spawn({ name: '训练木人', type: 'dummy', x: 15, z: 45, hp: 99999, posture: 99999, canAttack: false, respawn: false, color: 0x6a5040 });
+    this.spawnAt('dummy', 15, 45);
 
     for (const [x, z] of [[-215, -20], [-185, 35], [-230, 15], [-200, -45], [-170, -30]]) {
-      this.spawn({ name: '影之战士', type: 'soldier', x, z, hp: 160, posture: 58, damage: 15, color: 0x3a3038 });
+      this.spawnAt('soldier', x, z);
     }
 
     for (const [x, z] of [[10, -195], [-25, -210], [30, -170], [-10, -230]]) {
-      this.spawn({ name: '魔法构装体', type: 'golem', x, z, hp: 230, posture: 82, damage: 17, speed: 3.8, color: 0x4a3868 });
+      this.spawnAt('golem', x, z);
     }
 
     for (const [x, z] of [[220, 60], [185, 110], [240, 100], [160, 70], [210, 140]]) {
-      this.spawn({ name: '轨道无人机', type: 'drone', x, z, hp: 120, posture: 48, damage: 11, speed: 7.5, aggroRange: 24, color: 0x3a5068 });
+      this.spawnAt('drone', x, z);
     }
 
-    this.spawn({ name: '精英·虚空骑士', type: 'elite', x: -50, z: -60, hp: 350, posture: 90, damage: 22, speed: 5.5, aggroRange: 25, color: 0x224466, respawnTime: 15 });
+    this.spawnAt('elite', -50, -60);
 
     // W-B7 切片1：破碎时线与混沌边境此前没有原生敌人 —— 路过只有风景。
     // 出生点避开 Boss 场（时线执政官 (0,235) / 混沌领主 (-200,285)，半径 22）与各自的营火。
     for (const [x, z] of [[28, 212], [-32, 242], [12, 268], [-48, 205]]) {
-      this.spawn({ name: '时线怨影', type: 'wraith', x, z, hp: 110, posture: 44, damage: 13, speed: 6.2, aggroRange: 22, color: 0x5566aa });
+      this.spawnAt('wraith', x, z);
     }
 
     for (const [x, z] of [[-222, 212], [-192, 248], [-238, 252]]) {
-      this.spawn({ name: '混沌掠行兽', type: 'stalker', x, z, hp: 140, posture: 62, damage: 14, speed: 6.8, color: 0x6a3038 });
+      this.spawnAt('stalker', x, z);
     }
 
     for (const [x, z] of [[-172, 238], [-245, 280], [-160, 205]]) {
-      this.spawn({ name: '边境哨炮', type: 'sentinel', x, z, hp: 180, posture: 70, damage: 16, speed: 3.2, aggroRange: 26, color: 0x3a4a68 });
+      this.spawnAt('sentinel', x, z);
     }
 
     // W-B7 切片3（战斗类型 7 → 10）：三类按"这位面缺什么样的威胁"落位。
     // 坐标同样避开五座 Boss 场（半径 22）与各自营火，并且不与切片1 那三类的出生点重叠。
     for (const [x, z] of [[70, 250], [-85, 258], [40, 168]]) {
-      this.spawn({ name: '虚空爬兽', type: 'crawler', x, z, hp: 150, posture: 58, damage: 15, speed: 5.6, aggroRange: 20, color: 0x5a7a3a });
+      this.spawnAt('crawler', x, z);
     }
 
     // B70：`[-255, 175]` 那一格四面都醒不过来（玩家贴到 1.7 米仍 `sense.alerted` 恒 false，
@@ -294,24 +306,24 @@ export class EnemyManager {
     // 离五座 Boss 场 133 米，四个方向都警觉。`tests/enemy-roster.test.js` 的"四向至少一向
     // 会警觉"就是为这一类立的门禁（"站得下人"与"会警觉"从来是两件事）。
     for (const [x, z] of [[-250, 120], [-145, 250], [-205, 145]]) {
-      this.spawn({ name: '深渊骑士', type: 'knight', x, z, hp: 260, posture: 88, damage: 20, speed: 4.0, aggroRange: 22, color: 0x2a3550 });
+      this.spawnAt('knight', x, z);
     }
 
     // B70 的第二处实例（同一族，由上面那道新门禁扫出来的）：`[275, 10]` 四向皆不警觉，换到
     // `[240, -40]` —— 仍在米勒荒原、离最近的出生点 61 米、离 Boss 场 173 米，四个方向都警觉
     for (const [x, z] of [[150, -20], [240, -40], [190, 200]]) {
-      this.spawn({ name: '刃舞者', type: 'dancer', x, z, hp: 135, posture: 52, damage: 13, speed: 6.4, aggroRange: 22, color: 0x7a2a5a });
+      this.spawnAt('dancer', x, z);
     }
 
     // W-B7 切片4（战斗类型 10 → 12）：补的是**每座位面至少两类原生敌人** ——
     // 此前灰白森林只有影之战士、霍格沃兹遗境只有魔法构装体，各自整片位面只有一种威胁。
     // 坐标同样避开五座 Boss 场（半径 22）与已有出生点（最近邻居 40 米以上）。
     for (const [x, z] of [[-150, 55], [-250, 60], [-160, 90]]) {
-      this.spawn({ name: '破阵重兵', type: 'juggernaut', x, z, hp: 300, posture: 96, damage: 22, speed: 3.6, aggroRange: 22, color: 0x4b4a55 });
+      this.spawnAt('juggernaut', x, z);
     }
 
     for (const [x, z] of [[80, -135], [-40, -140], [60, -215]]) {
-      this.spawn({ name: '位面咒师', type: 'hexer', x, z, hp: 130, posture: 50, damage: 15, speed: 4.6, aggroRange: 24, color: 0x6a5a9a });
+      this.spawnAt('hexer', x, z);
     }
 
     const bx = -250, bz = -35;
