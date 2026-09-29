@@ -1,6 +1,14 @@
 import * as THREE from 'three';
 import { GEAR_RARITY_DISPLAY, dropChance, isGearInstance, rollBossGear, rollGear } from '../content/gear.js';
 
+/** 地上那一件的形状全系统共用一份：档位只改颜色，不改几何 */
+const DROP_RADIUS = 0.25;
+/** 魂的光色写在这里，装备的光色查表 —— 两边的分工与 `content/gear.js` 的显示档一致 */
+const SOUL_TINT = 0x44ddff;
+const SOUL_EMISSIVE = 0x116688;
+/** 没人捡的掉落物在地上留多久（秒，走主循环 dt） */
+const DROP_LIFE = 30;
+
 /**
  * 掉落：地上那一件东西，从"谁生成"到"谁捡走"只有这一个 owner。
  *
@@ -12,6 +20,10 @@ import { GEAR_RARITY_DISPLAY, dropChance, isGearInstance, rollBossGear, rollGear
  * "在范围内"，那是最弱的一种断言 —— 一件装备该不该掉、掉的是哪一档，全都查不出来）。
  * `onGear` 是装备被捡起时唯一的出口：谁把它变成"穿上 + 提示"由组装方（`Game`）决定，
  * 这一层不认识 `PlayerStats` 之外的任何人。
+ *
+ * 生命周期与 `effects/VoidEcho.js` 同一套口径：八面体一份、网格按池申领/归还，
+ * "新建过几份"因此跟**同时在场峰值**挂钩而不是跟累计击杀数挂钩（W-C1 切片1 的普查数：
+ * 改前 500 件掉落就是 500 个几何 + 500 个材质、`dispose` 0 次，峰值在场只有 40 件）。
  */
 export class LootSystem {
   constructor(scene, stats, audio, { rng = Math.random, onGear = null } = {}) {
@@ -21,23 +33,45 @@ export class LootSystem {
     this.rng = rng;
     this.onGear = onGear;
     this.drops = [];
+    /** 捡走或到期后摘出场景存这里：不再每件新建一份几何与材质，也不留"remove 却不归还"的孤儿 */
+    this._pool = [];
+    this.geometry = new THREE.OctahedronGeometry(DROP_RADIUS, 0);
+  }
+
+  /**
+   * 取一件地上的网格：池里有用完的就复用，没有才新建。
+   * 材质必须每件一份 —— 档位色就写在材质上，共用一份会变成"后掉的那件改掉前掉那件的颜色"。
+   */
+  _acquire() {
+    const mesh = this._pool.pop() ?? new THREE.Mesh(
+      this.geometry,
+      new THREE.MeshStandardMaterial({ metalness: 0.6, roughness: 0.2, emissiveIntensity: 0.9 }),
+    );
+    // 复用的那一格带着上一件的自转：不洗一眼就看得出"这件是第二次掉在地上"
+    mesh.rotation.set(0, 0, 0);
+    this.scene.add(mesh);
+    return mesh;
+  }
+
+  /** 还回池里而不是丢掉：从场景摘出去，资源留着下一件接着用 */
+  _release(mesh) {
+    this.scene.remove(mesh);
+    this._pool.push(mesh);
+  }
+
+  /** 池里备用网格数：泄漏 watchdog 与用例都看这个，不翻内部结构 */
+  pooled() {
+    return this._pool.length;
   }
 
   _spawn(pos, { souls, gear }) {
-    const geo = new THREE.OctahedronGeometry(0.25, 0);
-    const tint = gear ? GEAR_RARITY_DISPLAY[gear.rarity].tint : 0x44ddff;
-    const mat = new THREE.MeshStandardMaterial({
-      color: tint,
-      emissive: gear ? tint : 0x116688,
-      emissiveIntensity: 0.9,
-      metalness: 0.6,
-      roughness: 0.2,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
+    const mesh = this._acquire();
+    const tint = gear ? GEAR_RARITY_DISPLAY[gear.rarity].tint : SOUL_TINT;
+    mesh.material.color.setHex(tint);
+    mesh.material.emissive.setHex(gear ? tint : SOUL_EMISSIVE);
     mesh.position.copy(pos);
     mesh.position.y += 1;
-    this.scene.add(mesh);
-    this.drops.push({ mesh, souls, gear, life: 30, phase: this.rng() * Math.PI * 2 });
+    this.drops.push({ mesh, souls, gear, life: DROP_LIFE, phase: this.rng() * Math.PI * 2 });
     return this.drops[this.drops.length - 1];
   }
 
@@ -50,7 +84,7 @@ export class LootSystem {
   /**
    * 一次击杀该交什么。档位名（`boss` / `elite` / `golem` / `normal` / `dummy`）与区域 id 都由
    * 敌人那边给 —— "这一档掉不掉"与"这一片掉得出什么"两张表都在 `content/gear.js`，
-   * 这一处只是把它们串起来（掉落层自己不查、不抄）。
+   * 这一处只是把它们串起来（掉落层自己不抄、不查）。
    *
    * `bossId` 同理由敌人那边给（第五参，切片5）。只在 `kind === 'boss'` 时查固定掉落表：
    * 普通怪的击杀不带 bossId，就算带了也不该白掉一件 Boss 奖励；未登记的 bossId 交回 `null`
@@ -71,6 +105,16 @@ export class LootSystem {
     return out;
   }
 
+  /**
+   * 摘账的唯一出口：捡走与到期两条路都从这里归还。
+   * 分成两处写就留下"改了捡走那半、忘了到期那半"的空间 —— 那一半的症状不是报错，是池子只进不出。
+   */
+  _despawn(i) {
+    const d = this.drops[i];
+    this.drops.splice(i, 1);
+    this._release(d.mesh);
+  }
+
   update(dt, playerPos, pickupRadius = 2.5) {
     for (let i = this.drops.length - 1; i >= 0; i--) {
       const d = this.drops[i];
@@ -86,14 +130,10 @@ export class LootSystem {
         if (d.gear) this.onGear?.(d.gear, d.souls);
         else this.stats.addSouls(d.souls);
         this.audio?.pickup();
-        this.scene.remove(d.mesh);
-        this.drops.splice(i, 1);
+        this._despawn(i);
         continue;
       }
-      if (d.life <= 0) {
-        this.scene.remove(d.mesh);
-        this.drops.splice(i, 1);
-      }
+      if (d.life <= 0) this._despawn(i);
     }
   }
 }
