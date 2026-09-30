@@ -231,7 +231,8 @@ describe('`boss-phase` 全仓只有一处派发（多一处 = 每次切换响应
     const hits = [];
     for (const file of walk(SRC)) {
       const code = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
-      for (const m of code.matchAll(/new CustomEvent\(\s*'boss-phase'/g)) {
+      // 只数命中次数，不必取匹配对象本身
+      for (const _m of code.matchAll(/new CustomEvent\(\s*'boss-phase'/g)) {
         hits.push(file.slice(SRC.length + 1).replace(/\\/g, '/'));
       }
     }
