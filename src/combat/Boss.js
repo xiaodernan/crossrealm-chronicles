@@ -3,6 +3,7 @@ import { Enemy } from './Enemy.js';
 import { GROUND_HAZARD } from '../content/tuning.js';
 import { ARENA_MOVES, arenaScriptFor } from '../content/arenaScripts.js';
 import { barrageLayout } from './BarragePattern.js';
+import { BossStateMachine, BossState, BossPhase, PhaseTransitionCondition } from './BossStateMachine.js';
 
 /** 影界守护者 — 首个 Boss，三阶段 */
 export class Boss extends Enemy {
@@ -36,6 +37,11 @@ export class Boss extends Enemy {
     this.arenaScript = arenaScriptFor(this.bossId);
     this._arenaCd = this.arenaScript.map(() => 0);
     this.phaseTriggered = { p2: false, p3: false };
+    /** 状态机（W-B8 切片1） */
+    this.sm = new BossStateMachine(this);
+    this.sm.registerTransitionCondition(2, { type: 'hp_threshold', threshold: 0.5 });
+    this.sm.registerTransitionCondition(3, { type: 'hp_threshold', threshold: 0.25 });
+    this.sm.debug = false;
   }
 
   createMesh(config) {
@@ -99,19 +105,10 @@ export class Boss extends Enemy {
 
   checkPhase() {
     const ratio = this.hp / this.maxHp;
-    if (ratio <= 0.5 && !this.phaseTriggered.p2) {
-      this.phase = 2;
-      this.phaseTriggered.p2 = true;
-      this.speed = 5.5;
-      window.dispatchEvent(new CustomEvent('boss-phase', { detail: { phase: 2, name: this.name, bossId: this.bossId } }));
-    }
-    if (ratio <= 0.25 && !this.phaseTriggered.p3) {
-      this.phase = 3;
-      this.phaseTriggered.p3 = true;
-      this.speed = 7;
-      this.damage = 24;
-      this.attackCooldown = 0;
-      window.dispatchEvent(new CustomEvent('boss-phase', { detail: { phase: 3, name: this.name, bossId: this.bossId } }));
+    this.sm.checkPhaseTransitions();
+    // 同步 phase 到状态机（状态机是权威来源）
+    if (this.sm.phase !== this.phase) {
+      this.phase = this.sm.phase;
     }
   }
 
@@ -312,6 +309,9 @@ export class Boss extends Enemy {
       this.stateTimer = 0;
     }
     this.mesh.rotation.z = 0;
+
+    // 阶段切换检查（W-B8 切片1：状态机驱动）
+    this.sm.checkPhaseTransitions();
 
     const dist = this.distanceTo(playerPos);
     if (dist > this.aggroRange) {
