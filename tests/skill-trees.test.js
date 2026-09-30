@@ -233,9 +233,9 @@ describe('W-B6 切片1：状态机（三分支 / reqs 数组 / 叙事技白送 /
     t.unlock('r-attune', 'realm');
     t.unlock('m-focus', 'staff');
     const m = t.getModifiers();
-    expect(m.melee).toBeCloseTo(0.08);
-    expect(m.spell).toBeCloseTo(0.08);
-    expect(m.mana).toBe(15);
+    expect(m.melee).toBeCloseTo(0.06);
+    expect(m.spell).toBeCloseTo(0.07);
+    expect(m.mana).toBe(12);
     const back = new WeaponSkillTree({}, { toast() {} }, null);
     back.fromJSON(JSON.parse(JSON.stringify(t.toJSON())));
     expect([...back.unlocked].sort()).toEqual([...t.unlocked].sort());

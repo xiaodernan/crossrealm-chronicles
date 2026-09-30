@@ -36,9 +36,12 @@ const codeOnly = (text) => text.split('\n')
 
 /** 一条支线的判据想读什么都由用例给；`tally` 记下所有对外效应，好断言"完成"是真发生了事 */
 function makeGame(overrides = {}) {
-  const 记 = { toasts: [], souls: [], journal: [], events: [] };
+  const 记 = { toasts: [], souls: [], journal: [], events: [], questsCompleted: [] };
   const game = {
-    stats: { addSouls: (n) => 记.souls.push(n) },
+    stats: { 
+      addSouls: (n) => 记.souls.push(n),
+      onQuestCompleted: (id) => 记.questsCompleted.push(id),
+    },
     dialog: { toast: (t) => 记.toasts.push(t) },
     storyJournal: { add: (e) => 记.journal.push(e) },
     quests: { chapter: 3 },
