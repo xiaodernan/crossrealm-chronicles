@@ -1,4 +1,5 @@
 import { keyText } from '../content/keyHints.js';
+import { dungeonDefOf } from '../content/dungeons.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
@@ -39,9 +40,9 @@ const VOID_DISCOVERY_IDS = targetIdsByFlag('hasVoid');
 const DUNGEON_IDS = MAINLINE.filter((r) => r.type === 'dungeon').map((r) => r.dungeonId);
 
 /**
- * POI 与地下城入口的路点。这两张**不是**主线行的抄本：它们按 `targetId` / `dungeonId`
- * 认领的是"那个物件在哪儿"（同一个石环可以被主线步、快速旅行、地图图标各自指向），
- * 而主线行上的 `waypoint` 说的是"这一步让你去哪儿"。两者今天数值相同，职责不同。
+ * POI 的路点。这张**不是**主线行的抄本：它按 `targetId` 认领的是"那个物件在哪儿"
+ * （同一个石环可以被主线步、快速旅行、地图图标各自指向），而主线行上的 `waypoint`
+ * 说的是"这一步让你去哪儿"。两者今天数值相同，职责不同。
  */
 const TARGET_WAYPOINTS = {
   'hub-anchor': { x: 0, z: 55, label: '世界之锚' },
@@ -55,10 +56,15 @@ const TARGET_WAYPOINTS = {
   'astronaut-echo': { x: 200, z: 90, label: '宇航员回声' },
 };
 
-const DUNGEON_WAYPOINTS = {
-  'ruin-crypt': { x: -190, z: 25, label: '灰白遗城' },
-  'forbidden-library': { x: -35, z: -200, label: '禁书图书馆' },
-  'five-dim-rift': { x: 175, z: 95, label: '五维裂隙' },
+/**
+ * 地下城入口的路点：坐标与名字现问 `content/dungeons.js`。这里以前手抄过三行，
+ * 而副本表是同一件事的另一份说法 —— 表里挪一次入口，指路这一份不会跟着动，
+ * 也没有任何一处会红。`dungeonDefOf` 认不出就抛：能走到这里的 id 只有主线
+ * `type: 'dungeon'` 那几行，注册表已经拿 `ref: 'dungeons'` 钉住它们的 `dungeonId`。
+ */
+const dungeonWaypoint = (id) => {
+  const d = dungeonDefOf(id);
+  return { x: d.entrance.x, z: d.entrance.z, label: d.name };
 };
 
 /**
@@ -225,8 +231,8 @@ export class QuestSystem {
       case 'checkAllDungeons': {
         if (!this.stats.boss3Defeated) return { ...rowWaypoint('boss3'), hint: '先击败奇点领主' };
         for (const id of DUNGEON_IDS) {
-          if (!this.stats.dungeonsCleared.has(id) && DUNGEON_WAYPOINTS[id]) {
-            return { ...DUNGEON_WAYPOINTS[id], hint: '清空地下城' };
+          if (!this.stats.dungeonsCleared.has(id)) {
+            return { ...dungeonWaypoint(id), hint: '清空地下城' };
           }
         }
         return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '三界试炼完成后触摸锚点' };
@@ -266,6 +272,7 @@ export class QuestSystem {
    */
   advance() {
     const finished = this.current;
+    const finishedId = finished?.id;
     const oldChapter = this.chapter;
     this.questIndex++;
     const gate = finished ? chapterGateAfter(finished.id) : null;
@@ -277,6 +284,8 @@ export class QuestSystem {
       window.dispatchEvent(new CustomEvent('chapter-changed', { detail: { chapter: this.chapter, prev: oldChapter } }));
     }
     if (finished) this.dialog.toast(`任务完成：${finished.title}`);
+    // W-B6 切片4：记录任务完成
+    if (finishedId) this.game?.stats?.onQuestCompleted(finishedId);
     if (this.questIndex >= MAINLINE.length) {
       this.completed = true;
       window.dispatchEvent(new CustomEvent('game-completed'));
@@ -343,7 +352,7 @@ export class QuestSystem {
     }
 
     if (q.type === 'dungeon' && !this.stats.dungeonsCleared.has(q.dungeonId)) {
-      return DUNGEON_WAYPOINTS[q.dungeonId] ? { ...DUNGEON_WAYPOINTS[q.dungeonId] } : null;
+      return dungeonWaypoint(q.dungeonId);
     }
 
     if (q.type === 'npc' && !this.stats.npcTalked.has(q.targetId)) {

@@ -61,6 +61,21 @@ if (lock.spellCasts) {
     const n = q?.stats?.skillUses?.[skill] ?? 0;
     if (n < count) return `需使用 ${count} 次 ${skill} (${n}/${count})`;
   }
+  if (lock.bossDefeated) {
+    const { bossId, count = 1 } = lock.bossDefeated;
+    const defeated = q?.stats?.bossDefeated?.[bossId] ?? 0;
+    if (defeated < count) return `需击败 ${count} 次 ${bossId} (${defeated}/${count})`;
+  }
+  if (lock.questComplete) {
+    const { questId, count = 1 } = lock.questComplete;
+    const completed = q?.stats?.questsCompleted?.[questId] ?? 0;
+    if (completed < count) return `需完成 ${count} 次支线 ${questId} (${completed}/${count})`;
+  }
+  if (lock.itemCollected) {
+    const { itemId, count = 1 } = lock.itemCollected;
+    const collected = q?.stats?.itemsCollected?.[itemId] ?? 0;
+    if (collected < count) return `需收集 ${count} 个 ${itemId} (${collected}/${count})`;
+  }
   if (lock.level) {
     const lvl = q?.stats?.level ?? 1;
     if (lvl < lock.level) return `需 Lv.${lock.level} (当前 Lv.${lvl})`;

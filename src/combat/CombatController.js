@@ -658,6 +658,8 @@ export class CombatController {
     const boss = enemy.type === 'boss' || enemy.bossId;
     // W-B6 切片3：击杀统计用于技能门槛
     this.game?.stats?.addKill(enemy.type ?? 'normal');
+    // W-B6 切片4：Boss 击败统计
+    if (enemy.bossId) this.game?.stats?.addBossDefeated(enemy.bossId);
     window.dispatchEvent(new CustomEvent('combat-execution', {
       detail: {
         boss: !!boss,

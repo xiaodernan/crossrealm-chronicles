@@ -64,6 +64,8 @@ export class SideQuestSystem {
       chapter: this.game.quests?.chapter ?? 1,
     });
     window.dispatchEvent(new CustomEvent('side-quest-complete', { detail: q }));
+    // W-B6 切片4：记录支线完成
+    this.game?.stats?.onQuestCompleted(q.id);
   }
 
   /** 分母与页签都走这一句：它数的就是这一片遍历的那一份名单，不是其中一族 */

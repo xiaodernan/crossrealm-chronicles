@@ -20,6 +20,10 @@ export class PlayerStats {
     // W-B6 切片3：行为门槛统计
     this.kills = {};        // { type: count }
     this.skillUses = {};    // { skill: count }
+    // W-B6 切片4：更多行为门槛统计
+    this.bossDefeated = {};    // { bossId: count }
+    this.questsCompleted = {}; // { questId: count }
+    this.itemsCollected = {};  // { itemId: count }
     this._consumers = null;
     this._rebuildBonus();
   }
@@ -206,6 +210,31 @@ export class PlayerStats {
   addSkillUse(skill) {
     this.skillUses[skill] = (this.skillUses[skill] ?? 0) + 1;
     this.pushToConsumers();
+  }
+
+  // W-B6 切片4：更多行为门槛统计
+  addBossDefeated(bossId) {
+    this.bossDefeated[bossId] = (this.bossDefeated[bossId] ?? 0) + 1;
+    this.pushToConsumers();
+  }
+
+  addQuestCompleted(questId) {
+    this.questsCompleted[questId] = (this.questsCompleted[questId] ?? 0) + 1;
+    this.pushToConsumers();
+  }
+
+  addItemCollected(itemId) {
+    this.itemsCollected[itemId] = (this.itemsCollected[itemId] ?? 0) + 1;
+    this.pushToConsumers();
+  }
+
+  // W-B6 切片4：任务系统集成 - 当任务完成时自动记录
+  onQuestCompleted(questId) {
+    this.addQuestCompleted(questId);
+  }
+
+  onItemCollected(itemId) {
+    this.addItemCollected(itemId);
   }
 
   toJSON() {
