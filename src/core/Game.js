@@ -10,6 +10,7 @@ import { TimeController } from '../engine/Time.js';
 import { shake } from '../engine/Shake.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { PerfHUD } from '../engine/PerfHUD.js';
+import { registerPerfGauges } from '../game/perfGauges.js';
 import { HUD } from '../ui/HUD.js';
 import { Dialog } from '../ui/Dialog.js';
 import { HelpManual } from '../ui/HelpManual.js';
@@ -299,14 +300,11 @@ export class Game {
     this.weaponSkills.tryNarrativeUnlocks(this);
     this.settings.applyToGame(this);
 
-    // F3：GPU 对象与场景规模只增不减 = 泄漏；数值全部经公开接口取，不翻系统内部字段
-    this.perfHud = new PerfHUD({ renderer: this.renderer, scene: this.scene })
-      .gauge('存活敌人', () => this.enemyManager.getAliveEnemies().length)
-      .gauge('敌方弹体', () => this.projectiles.count())
-      .gauge('法术效果', () => this.spells.count())
-      .gauge('地面危险区', () => this.enemyManager.hazards.count())
-      .gauge('飘字', () => this.damageNumbers.activeCount())
-      .gauge('火花', () => this.combatFeedback.activeCount());
+    // F3：GPU 对象与场景规模只增不减 = 泄漏；数值全部经公开接口取，不翻系统内部字段。
+    // 清单搬进 `game/perfGauges.js`（W-C1 切片4）—— 修前这六行都没带 `leak: true`，
+    // 于是 `stats().leaks` 恒空、watchdog 从没可能报过警；搬出来之后用例能拿假 game 跑
+    // `registerPerfGauges` 并断言"注册完 leaks 不是空的"，那正是修前会红的那一条。
+    this.perfHud = registerPerfGauges(new PerfHUD({ renderer: this.renderer, scene: this.scene }), this);
 
     this.setupLights();
     this.ambientPass = new AmbientScenePass(this);
