@@ -3,7 +3,7 @@ import { Enemy } from './Enemy.js';
 import { GROUND_HAZARD } from '../content/tuning.js';
 import { ARENA_MOVES, arenaScriptFor } from '../content/arenaScripts.js';
 import { barrageLayout } from './BarragePattern.js';
-import { BossStateMachine, BossState, BossPhase, PhaseTransitionCondition } from './BossStateMachine.js';
+import { BossStateMachine, BossPhase, PhaseTransitionCondition } from './BossStateMachine.js';
 
 /** 影界守护者 — 首个 Boss，三阶段 */
 export class Boss extends Enemy {
@@ -39,8 +39,14 @@ export class Boss extends Enemy {
     this.phaseTriggered = { p2: false, p3: false };
     /** 状态机（W-B8 切片1） */
     this.sm = new BossStateMachine(this);
-    this.sm.registerTransitionCondition(2, { type: 'hp_threshold', threshold: 0.5 });
-    this.sm.registerTransitionCondition(3, { type: 'hp_threshold', threshold: 0.25 });
+    /* 门槛用**枚举**而不是字面量：写 `'hp_threshold'` 就是给这张枚举再抄一份真源，
+     * 抄错了不报错（只是那条条件永远不成立、那只 Boss 永远不进二阶段）。 */
+    this.sm.registerTransitionCondition(BossPhase.PHASE_2, {
+      type: PhaseTransitionCondition.HP_THRESHOLD, threshold: 0.5,
+    });
+    this.sm.registerTransitionCondition(BossPhase.PHASE_3, {
+      type: PhaseTransitionCondition.HP_THRESHOLD, threshold: 0.25,
+    });
     this.sm.debug = false;
   }
 
@@ -104,7 +110,7 @@ export class Boss extends Enemy {
   }
 
   checkPhase() {
-    const ratio = this.hp / this.maxHp;
+    // `ratio` 已删：它属于"自己再看一眼血量"的那条老路，阶段推进现在由状态机负责
     this.sm.checkPhaseTransitions();
     // 同步 phase 到状态机（状态机是权威来源）
     if (this.sm.phase !== this.phase) {
