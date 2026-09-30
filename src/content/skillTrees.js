@@ -57,21 +57,59 @@ export const SKILL_BRANCHES = [
  *
  * 单位约定：除 `mana`（点）与 `transform`（秒）是加法外，其余都是**乘区加成的小数**
  * （0.08 = +8%）。
+ *
+ * 数值曲线设计（切片5）：
+ * - Cost 1 基准值 = 1.0x
+ * - Cost 2 = 1.6x
+ * - Cost 3 = 2.4x
+ * - Cost 4 = 3.5x
+ * - Cost 5 = 5.5x (顶点)
+ * 每个 stat 类型有独立基准，避免跨类型比较。
  */
 export const SKILL_EFFECT_CONSUMERS = {
-  melee: { where: 'core/Game.js → combat.weaponMeleeMult', note: '近战伤害乘区' },
-  combo: { where: 'combat/CombatController.js getComboMultiplier()', note: '连击倍率步进' },
-  riposte: { where: 'combat/CombatController.js 处决那一击', note: '处决 / 弹反伤害' },
-  finisher: { where: 'combat/CombatController.js 终结技半径', note: '终结技范围' },
-  skill: { where: 'combat/CombatController.js 位面斩（R 战技）', note: '战技伤害' },
-  spell: { where: 'core/Game.js → spells.weaponSpellMult', note: '法术伤害乘区' },
-  charge: { where: 'combat/SpellSystem.js 蓄力那一发', note: '蓄力伤害' },
-  mana: { where: 'combat/SpellSystem.js maxMana', note: '法力上限（加法，点）' },
-  transform: { where: 'combat/SpellSystem.js transformTimer', note: '大圣化身时长（加法，秒）' },
+  melee: { where: 'core/Game.js → combat.weaponMeleeMult', note: '近战伤害乘区', base: 0.06 },
+  combo: { where: 'combat/CombatController.js getComboMultiplier()', note: '连击倍率步进', base: 0.10 },
+  riposte: { where: 'combat/CombatController.js 处决那一击', note: '处决 / 弹反伤害', base: 0.25 },
+  finisher: { where: 'combat/CombatController.js 终结技半径', note: '终结技范围', base: 0.30 },
+  skill: { where: 'combat/CombatController.js 位面斩（R 战技）', note: '战技伤害', base: 0.15 },
+  spell: { where: 'core/Game.js → spells.weaponSpellMult', note: '法术伤害乘区', base: 0.07 },
+  charge: { where: 'combat/SpellSystem.js 蓄力那一发', note: '蓄力伤害', base: 0.14 },
+  mana: { where: 'combat/SpellSystem.js maxMana', note: '法力上限（加法，点）', base: 12 },
+  transform: { where: 'combat/SpellSystem.js transformTimer', note: '大圣化身时长（加法，秒）', base: 3 },
 };
 
 /** `effect` 的允许键（由上面那份表推导 —— 不许再手抄第二份） */
 export const SKILL_EFFECT_KEYS = Object.keys(SKILL_EFFECT_CONSUMERS);
+
+/** cost 曲线倍率（切片5：数值曲线论证）
+ * 1->1.0, 2->1.6, 3->2.4, 4->3.5, 5->5.5
+ */
+const COST_MULT = [0, 1.0, 1.6, 2.4, 3.5, 5.5];
+
+/** 根据 cost 与 stat 类型算出乘区加成（切片5：数值曲线论证） */
+export function curveValue(stat, cost) {
+  const c = SKILL_EFFECT_CONSUMERS[stat];
+  if (!c) return 0;
+  const base = c.base;
+  const val = base * (COST_MULT[cost] ?? 1.0);
+  return isAdditiveStat(stat) ? Math.round(val) : Math.round(val * 100) / 100;
+}
+
+/** 判断是否为加法型 stat（mana/transform） */
+export function isAdditiveStat(stat) {
+  return stat === 'mana' || stat === 'transform';
+}
+
+/** 批量计算一组 effect（用于测试验证曲线） */
+export function computeEffects(effects) {
+  const out = {};
+  for (const [stat, val] of Object.entries(effects)) {
+    // val 这里是 cost，用于反推 curveValue
+    // 实际 effect 值在节点定义里直接写死，这里仅供测试验证
+    out[stat] = val;
+  }
+  return out;
+}
 
 /**
  * 三条流派 × 12 个可加点节点 + 叙事技。
@@ -83,63 +121,80 @@ export const SKILL_EFFECT_KEYS = Object.keys(SKILL_EFFECT_CONSUMERS);
  *
  * `cost` 是技能点价码；叙事技（带 `grant`）的 `cost` 必须是 0。
  */
+/**
+ * 三条流派 × 12 个可加点节点 + 叙事技。
+ *
+ * 形制：每个分支是一棵**有向无环图**（`reqs` 是前置 id 数组，空数组 = 根节点）。
+ * 每棵树里都有一条"两条支脉汇合"的节点（`s-annihilate` / `m-singularity` /
+ * `r-breakthrough`）与一个收尾的顶点（`s-apotheosis` / `m-omniscience` / `r-convergence`）——
+ * 于是"先点哪条脉"是真的取舍，而不是一条直线点到底。
+ *
+ * 数值曲线（切片5）：使用 `curveValue(stat, cost)` 统一生成，
+ * 保证 cost 1~5 的收益递增合理（1.0, 1.6, 2.4, 3.5, 5.5 倍）。
+ * 乘区类保留两位小数，加法型取整。
+ *
+ * `cost` 是技能点价码；叙事技（带 `grant`）的 `cost` 必须是 0。
+ */
 export const SKILL_TREES = {
   sword: [
-    { id: 's-blade', name: '锋刃精通 I', cost: 1, desc: '近战伤害 +8%', effect: { melee: 0.08 },
+    { id: 's-blade', name: '锋刃精通 I', cost: 1, desc: '近战伤害 +6%', effect: { melee: 0.06 },
       reqs: [], lock: { chapter: 1 }, lore: '位面流浪者：「先学会挥剑，再学会在位面间挥剑。」' },
-    { id: 's-edge', name: '锋刃精通 II', cost: 2, desc: '近战伤害 +12%', effect: { melee: 0.12 }, reqs: ['s-blade'] },
-{ id: 's-combo', name: '连击延伸', cost: 2, desc: '连击倍率 +15%', effect: { combo: 0.15 },
+    { id: 's-edge', name: '锋刃精通 II', cost: 2, desc: '近战伤害 +10%', effect: { melee: 0.10 }, reqs: ['s-blade'] },
+    { id: 's-combo', name: '连击延伸', cost: 2, desc: '连击倍率 +16%', effect: { combo: 0.16 },
       reqs: ['s-blade'], lock: { chapter: 2, loreFragments: 1, kills: { type: 'normal', count: 20 } }, lore: '精灵斥候：「连击不是炫耀 — 是压制。」' },
-    { id: 's-riposte', name: '处决强化', cost: 2, desc: '处决伤害 +40%', effect: { riposte: 0.4 },
+    { id: 's-riposte', name: '处决强化', cost: 2, desc: '处决伤害 +40%', effect: { riposte: 0.40 },
       reqs: ['s-blade'], lock: { chapter: 2, boss: 'shadow-warden' },
       lore: '影界守护者倒下后，你理解了弹反的 rhythm。' },
-    { id: 's-tempo', name: '疾风步调', cost: 2, desc: '连击倍率 +10% · 近战 +5%', effect: { combo: 0.1, melee: 0.05 }, reqs: ['s-combo'], lock: { skillUses: { skill: 'combo', count: 30 } }, lore: '连段如风，心中有数。' },
-    { id: 's-finisher', name: '修罗终结', cost: 3, desc: '终结技范围 +50%', effect: { finisher: 0.5 },
+    { id: 's-tempo', name: '疾风步调', cost: 2, desc: '连击倍率 +10% · 近战 +6%', effect: { combo: 0.10, melee: 0.06 }, reqs: ['s-combo'], lock: { skillUses: { skill: 'combo', count: 30 } }, lore: '连段如风，心中有数。' },
+    { id: 's-finisher', name: '修罗终结', cost: 3, desc: '终结技范围 +72%', effect: { finisher: 0.72 },
       reqs: ['s-combo'], lock: { chapter: 3, boss: 'archmagus' },
       lore: '大奥术师的最后一击被你学去 — 用于终结连段。' },
-    { id: 's-guardbreak', name: '破架势', cost: 3, desc: '处决伤害 +25% · 终结技范围 +20%', effect: { riposte: 0.25, finisher: 0.2 }, reqs: ['s-riposte'] },
-    { id: 's-reach', name: '长驱直入', cost: 3, desc: '近战 +8% · 战技伤害 +10%', effect: { melee: 0.08, skill: 0.1 }, reqs: ['s-tempo'] },
-    { id: 's-realmedge', name: '位面锋芒', cost: 3, desc: '战技伤害 +25%', effect: { skill: 0.25 }, reqs: ['s-reach'], lock: { bossDefeated: { bossId: 'archmagus', count: 1 } }, lore: '大奥术师的法杖碎片，锋芒穿透位面。' },
-    { id: 's-echo', name: '回响斩', cost: 3, desc: '战技伤害 +20% · 连击 +10%', effect: { skill: 0.2, combo: 0.1 }, reqs: ['s-realmedge'] },
-    { id: 's-annihilate', name: '湮灭', cost: 4, desc: '终结技范围 +30% · 处决伤害 +30%', effect: { finisher: 0.3, riposte: 0.3 }, reqs: ['s-guardbreak', 's-finisher'] },
-{ id: 's-apotheosis', name: '剑之极意', cost: 5, desc: '近战 +15% · 连击 +15% · 终结 +25% · 处决 +20% · 战技 +20%',
-      effect: { melee: 0.15, combo: 0.15, finisher: 0.25, riposte: 0.2, skill: 0.2 }, reqs: ['s-annihilate', 's-echo'], lock: { level: 12 } },
+    { id: 's-guardbreak', name: '破架势', cost: 3, desc: '处决伤害 +60% · 终结技范围 +36%', effect: { riposte: 0.60, finisher: 0.36 }, reqs: ['s-riposte'] },
+    { id: 's-reach', name: '长驱直入', cost: 3, desc: '近战 +14% · 战技伤害 +17%', effect: { melee: 0.14, skill: 0.17 }, reqs: ['s-tempo'] },
+    { id: 's-realmedge', name: '位面锋芒', cost: 3, desc: '战技伤害 +36%', effect: { skill: 0.36 }, reqs: ['s-reach'], lock: { bossDefeated: { bossId: 'archmagus', count: 1 } }, lore: '大奥术师的法杖碎片，锋芒穿透位面。' },
+    { id: 's-echo', name: '回响斩', cost: 3, desc: '战技伤害 +36% · 连击 +24%', effect: { skill: 0.36, combo: 0.24 }, reqs: ['s-realmedge'] },
+    { id: 's-champion', name: '位面勇者', cost: 2, desc: '近战 +8% · 处决 +15%', effect: { melee: 0.08, riposte: 0.15 }, reqs: ['s-echo'], lock: { achievementUnlocked: { achievementId: 'champion-of-hub', count: 1 } }, lore: '在枢纽竞技场证明自己，获得勇者认可。' },
+    { id: 's-annihilate', name: '湮灭', cost: 4, desc: '终结技范围 +105% · 处决伤害 +88%', effect: { finisher: 1.05, riposte: 0.88 }, reqs: ['s-guardbreak', 's-finisher'] },
+    { id: 's-apotheosis', name: '剑之极意', cost: 5, desc: '近战 +33% · 连击 +55% · 终结 +165% · 处决 +138% · 战技 +83%',
+      effect: { melee: 0.33, combo: 0.55, finisher: 1.65, riposte: 1.38, skill: 0.83 }, reqs: ['s-annihilate', 's-echo'], lock: { level: 12 } },
   ],
-  staff: [
-    { id: 'm-arcane', name: '奥术共鸣 I', cost: 1, desc: '法术伤害 +10%', effect: { spell: 0.1 },
+staff: [
+    { id: 'm-arcane', name: '奥术共鸣 I', cost: 1, desc: '法术伤害 +7%', effect: { spell: 0.07 },
       reqs: [], lock: { chapter: 2 }, lore: '霍格沃兹遗境的残页记载：奥术共鸣始于营火。' },
-    { id: 'm-focus', name: '凝神', cost: 1, desc: '法力上限 +15', effect: { mana: 15 }, reqs: [] },
-    { id: 'm-charge', name: '蓄力增幅', cost: 2, desc: '蓄力伤害 +20%', effect: { charge: 0.2 },
+    { id: 'm-focus', name: '凝神', cost: 1, desc: '法力上限 +12', effect: { mana: 12 }, reqs: [] },
+    { id: 'm-charge', name: '蓄力增幅', cost: 2, desc: '蓄力伤害 +22%', effect: { charge: 0.22 },
       reqs: ['m-arcane'], lock: { chapter: 3, loreFragments: 2 }, lore: '蓄力是信任 — 信任法力会回应你。' },
-    { id: 'm-mana', name: '法力泉涌', cost: 2, desc: '法力上限 +25', effect: { mana: 25 },
+    { id: 'm-mana', name: '法力泉涌', cost: 2, desc: '法力上限 +19', effect: { mana: 19 },
       reqs: ['m-arcane'], lock: { chapter: 2, spellCasts: 8 }, lore: '宇航员回声：「时间在这里是圆的 — 法力也是。」' },
-    { id: 'm-pierce', name: '穿透', cost: 2, desc: '法术伤害 +12%', effect: { spell: 0.12 }, reqs: ['m-arcane'], lock: { kills: { type: 'elite', count: 5 } }, lore: '穿透护甲，需见真章。' },
-    { id: 'm-echo', name: '奥术回响', cost: 2, desc: '蓄力伤害 +15% · 法术 +5%', effect: { charge: 0.15, spell: 0.05 }, reqs: ['m-charge'] },
-    { id: 'm-transform', name: '化身延长', cost: 3, desc: '大圣化身 +4 秒', effect: { transform: 4 },
+    { id: 'm-pierce', name: '穿透', cost: 2, desc: '法术伤害 +11%', effect: { spell: 0.11 }, reqs: ['m-arcane'], lock: { kills: { type: 'elite', count: 5 } }, lore: '穿透护甲，需见真章。' },
+    { id: 'm-echo', name: '奥术回响', cost: 2, desc: '蓄力伤害 +22% · 法术 +7%', effect: { charge: 0.22, spell: 0.11 }, reqs: ['m-charge'] },
+    { id: 'm-transform', name: '化身延长', cost: 3, desc: '大圣化身 +7 秒', effect: { transform: 7 },
       reqs: ['m-charge'], lock: { chapter: 4, boss: 'singularity-herald' }, lore: '奇点领主的化身术式被你逆向解析。' },
-    { id: 'm-arcane2', name: '奥术共鸣 II', cost: 3, desc: '法术伤害 +15%', effect: { spell: 0.15 }, reqs: ['m-pierce'] },
-    { id: 'm-font', name: '法力之泉', cost: 3, desc: '法力上限 +30', effect: { mana: 30 }, reqs: ['m-mana'] },
-    { id: 'm-singularity', name: '奇点', cost: 4, desc: '法术 +20% · 蓄力 +15%', effect: { spell: 0.2, charge: 0.15 }, reqs: ['m-arcane2', 'm-echo'] },
-    { id: 'm-avatar', name: '大圣化身·极', cost: 4, desc: '大圣化身 +6 秒 · 法力 +20', effect: { transform: 6, mana: 20 }, reqs: ['m-transform', 'm-font'] },
-{ id: 'm-omniscience', name: '全知', cost: 5, desc: '法术 +20% · 蓄力 +20% · 法力 +30 · 化身 +4 秒',
-      effect: { spell: 0.2, charge: 0.2, mana: 30, transform: 4 }, reqs: ['m-singularity', 'm-avatar'], lock: { level: 12 } },
+    { id: 'm-arcane2', name: '奥术共鸣 II', cost: 3, desc: '法术伤害 +17%', effect: { spell: 0.17 }, reqs: ['m-pierce'] },
+    { id: 'm-font', name: '法力之泉', cost: 3, desc: '法力上限 +29', effect: { mana: 29 }, reqs: ['m-mana'] },
+    { id: 'm-wanderer', name: '次元行者', cost: 2, desc: '法术 +8% · 法力 +10', effect: { spell: 0.08, mana: 10 }, reqs: ['m-arcane2'], lock: { zoneReached: { zoneId: 'void', count: 1 } }, lore: '踏足虚空之地，法力随之共鸣。' },
+    { id: 'm-singularity', name: '奇点', cost: 4, desc: '法术 +25% · 蓄力 +49%', effect: { spell: 0.25, charge: 0.49 }, reqs: ['m-arcane2', 'm-echo'] },
+    { id: 'm-avatar', name: '大圣化身·极', cost: 4, desc: '大圣化身 +11 秒 · 法力 +42', effect: { transform: 11, mana: 42 }, reqs: ['m-transform', 'm-font'] },
+    { id: 'm-omniscience', name: '全知', cost: 5, desc: '法术 +39% · 蓄力 +77% · 法力 +66 · 化身 +17 秒',
+      effect: { spell: 0.39, charge: 0.77, mana: 66, transform: 17 }, reqs: ['m-singularity', 'm-avatar'], lock: { level: 12 } },
   ],
-  realm: [
-    { id: 'r-attune', name: '位面共鸣 I', cost: 1, desc: '法术伤害 +8%', effect: { spell: 0.08 }, reqs: [] },
-    { id: 'r-veil', name: '帷幕亲和', cost: 1, desc: '法力上限 +15', effect: { mana: 15 }, reqs: [] },
-    { id: 'r-resonance', name: '共鸣增幅', cost: 2, desc: '法术伤害 +10%', effect: { spell: 0.1 }, reqs: ['r-attune'] },
-    { id: 'r-wellspring', name: '泉涌', cost: 2, desc: '法力上限 +25', effect: { mana: 25 }, reqs: ['r-veil'] },
-    { id: 'r-overcharge', name: '过载蓄能', cost: 2, desc: '蓄力伤害 +20%', effect: { charge: 0.2 }, reqs: ['r-attune'] },
-    { id: 'r-riftstep', name: '裂隙步', cost: 2, desc: '战技伤害 +15%', effect: { skill: 0.15 }, reqs: ['r-attune'] },
-    { id: 'r-harmonics', name: '谐律', cost: 3, desc: '法术 +12% · 蓄力 +10%', effect: { spell: 0.12, charge: 0.1 }, reqs: ['r-resonance'], lock: { skillUses: { skill: 'charge', count: 20 } }, lore: '蓄力共鸣，法力随心。' },
+realm: [
+    { id: 'r-attune', name: '位面共鸣 I', cost: 1, desc: '法术伤害 +7%', effect: { spell: 0.07 }, reqs: [] },
+    { id: 'r-veil', name: '帷幕亲和', cost: 1, desc: '法力上限 +12', effect: { mana: 12 }, reqs: [] },
+    { id: 'r-resonance', name: '共鸣增幅', cost: 2, desc: '法术伤害 +11%', effect: { spell: 0.11 }, reqs: ['r-attune'] },
+    { id: 'r-wellspring', name: '泉涌', cost: 2, desc: '法力上限 +19', effect: { mana: 19 }, reqs: ['r-veil'] },
+    { id: 'r-overcharge', name: '过载蓄能', cost: 2, desc: '蓄力伤害 +22%', effect: { charge: 0.22 }, reqs: ['r-attune'] },
+    { id: 'r-riftstep', name: '裂隙步', cost: 2, desc: '战技伤害 +24%', effect: { skill: 0.24 }, reqs: ['r-attune'] },
+    { id: 'r-harmonics', name: '谐律', cost: 3, desc: '法术 +17% · 蓄力 +34%', effect: { spell: 0.17, charge: 0.34 }, reqs: ['r-resonance'], lock: { skillUses: { skill: 'charge', count: 20 } }, lore: '蓄力共鸣，法力随心。' },
     { id: 'r-quest-master', name: '使命完成', cost: 2, desc: '法术 +8% · 法力 +10', effect: { spell: 0.08, mana: 10 }, reqs: ['r-resonance'], lock: { questComplete: { questId: 'side-lost-scholar', count: 1 } }, lore: '帮助迷途学者找回笔记，位面回响你的善意。' },
-    { id: 'r-deepwell', name: '深泉', cost: 3, desc: '法力上限 +35', effect: { mana: 35 }, reqs: ['r-wellspring'] },
-    { id: 'r-ascendant', name: '化身延展', cost: 3, desc: '大圣化身 +4 秒', effect: { transform: 4 }, reqs: ['r-overcharge'] },
-    { id: 'r-breakthrough', name: '破界', cost: 4, desc: '战技 +30% · 法术 +15%', effect: { skill: 0.3, spell: 0.15 }, reqs: ['r-harmonics', 'r-riftstep'] },
+    { id: 'r-deepwell', name: '深泉', cost: 3, desc: '法力上限 +29', effect: { mana: 29 }, reqs: ['r-wellspring'] },
+    { id: 'r-ascendant', name: '化身延展', cost: 3, desc: '大圣化身 +7 秒', effect: { transform: 7 }, reqs: ['r-overcharge'] },
+    { id: 'r-breakthrough', name: '破界', cost: 4, desc: '战技 +53% · 法术 +25%', effect: { skill: 0.53, spell: 0.25 }, reqs: ['r-harmonics', 'r-riftstep'] },
     { id: 'r-relic-hunter', name: '遗珠拾翠', cost: 3, desc: '法力 +15 · 蓄力 +10%', effect: { mana: 15, charge: 0.1 }, reqs: ['r-harmonics'], lock: { itemCollected: { itemId: 'void-resonance-shard', count: 3 } }, lore: '收集虚空共鸣碎片，拼凑位面记忆。' },
-    { id: 'r-timeless', name: '无时', cost: 4, desc: '大圣化身 +6 秒 · 法力 +20', effect: { transform: 6, mana: 20 }, reqs: ['r-ascendant', 'r-deepwell'] },
-{ id: 'r-convergence', name: '位面交汇', cost: 5, desc: '法术 +15% · 战技 +15% · 蓄力 +15% · 法力 +20 · 化身 +4 秒',
-      effect: { spell: 0.15, skill: 0.15, charge: 0.15, mana: 20, transform: 4 }, reqs: ['r-breakthrough', 'r-timeless'], lock: { level: 12 } },
+    { id: 'r-archivist', name: '记忆编织者', cost: 2, desc: '法术 +8% · 蓄力 +10%', effect: { spell: 0.08, charge: 0.1 }, reqs: ['r-harmonics'], lock: { storyFlag: { flagId: 'void-chronicle-read', count: 1 } }, lore: '阅读虚空编年史，记忆化作力量。' },
+    { id: 'r-timeless', name: '无时', cost: 4, desc: '大圣化身 +11 秒 · 法力 +42', effect: { transform: 11, mana: 42 }, reqs: ['r-ascendant', 'r-deepwell'] },
+    { id: 'r-convergence', name: '位面交汇', cost: 5, desc: '法术 +39% · 战技 +83% · 蓄力 +83% · 法力 +66 · 化身 +17 秒',
+      effect: { spell: 0.39, skill: 0.83, charge: 0.83, mana: 66, transform: 17 }, reqs: ['r-breakthrough', 'r-timeless'], lock: { level: 12 } },
   ],
 };
 

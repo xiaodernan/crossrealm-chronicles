@@ -76,6 +76,21 @@ if (lock.spellCasts) {
     const collected = q?.stats?.itemsCollected?.[itemId] ?? 0;
     if (collected < count) return `需收集 ${count} 个 ${itemId} (${collected}/${count})`;
   }
+  if (lock.achievementUnlocked) {
+    const { achievementId, count = 1 } = lock.achievementUnlocked;
+    const unlocked = q?.stats?.achievementsUnlocked?.[achievementId] ?? 0;
+    if (unlocked < count) return `需解锁 ${count} 次成就 ${achievementId} (${unlocked}/${count})`;
+  }
+  if (lock.zoneReached) {
+    const { zoneId, count = 1 } = lock.zoneReached;
+    const reached = q?.stats?.zonesReached?.[zoneId] ?? 0;
+    if (reached < count) return `需到达 ${count} 次区域 ${zoneId} (${reached}/${count})`;
+  }
+  if (lock.storyFlag) {
+    const { flagId, count = 1 } = lock.storyFlag;
+    const flagged = q?.stats?.storyFlags?.[flagId] ?? 0;
+    if (flagged < count) return `需触发 ${count} 次剧情 ${flagId} (${flagged}/${count})`;
+  }
   if (lock.level) {
     const lvl = q?.stats?.level ?? 1;
     if (lvl < lock.level) return `需 Lv.${lock.level} (当前 Lv.${lvl})`;

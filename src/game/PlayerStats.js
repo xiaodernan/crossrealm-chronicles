@@ -24,6 +24,10 @@ export class PlayerStats {
     this.bossDefeated = {};    // { bossId: count }
     this.questsCompleted = {}; // { questId: count }
     this.itemsCollected = {};  // { itemId: count }
+    // W-B6 切片5：更多行为门槛统计
+    this.achievementsUnlocked = {}; // { achievementId: count }
+    this.zonesReached = {};       // { zoneId: count }
+    this.storyFlags = {};         // { flagId: count }
     this._consumers = null;
     this._rebuildBonus();
   }
@@ -228,7 +232,23 @@ export class PlayerStats {
     this.pushToConsumers();
   }
 
-  // W-B6 切片4：任务系统集成 - 当任务完成时自动记录
+  // W-B6 切片5：更多行为门槛统计
+  addAchievementUnlocked(achievementId) {
+    this.achievementsUnlocked[achievementId] = (this.achievementsUnlocked[achievementId] ?? 0) + 1;
+    this.pushToConsumers();
+  }
+
+  addZoneReached(zoneId) {
+    this.zonesReached[zoneId] = (this.zonesReached[zoneId] ?? 0) + 1;
+    this.pushToConsumers();
+  }
+
+  addStoryFlag(flagId) {
+    this.storyFlags[flagId] = (this.storyFlags[flagId] ?? 0) + 1;
+    this.pushToConsumers();
+  }
+
+  // W-B6 切片5：任务系统集成 - 当任务完成时自动记录
   onQuestCompleted(questId) {
     this.addQuestCompleted(questId);
   }
@@ -237,7 +257,19 @@ export class PlayerStats {
     this.addItemCollected(itemId);
   }
 
-  toJSON() {
+  onAchievementUnlocked(achievementId) {
+    this.addAchievementUnlocked(achievementId);
+  }
+
+  onZoneReached(zoneId) {
+    this.addZoneReached(zoneId);
+  }
+
+  onStoryFlag(flagId) {
+    this.addStoryFlag(flagId);
+  }
+
+toJSON() {
     return {
       level: this.level,
       souls: this.souls,
@@ -254,10 +286,16 @@ export class PlayerStats {
       chests: [...this.chestsOpened],
       kills: this.kills,
       skillUses: this.skillUses,
+      bossDefeated: this.bossDefeated,
+      questsCompleted: this.questsCompleted,
+      itemsCollected: this.itemsCollected,
+      achievementsUnlocked: this.achievementsUnlocked,
+      zonesReached: this.zonesReached,
+      storyFlags: this.storyFlags,
     };
   }
 
-  fromJSON(data) {
+fromJSON(data) {
     if (!data) return;
     Object.assign(this, {
       level: data.level ?? 1,
@@ -265,6 +303,12 @@ export class PlayerStats {
       totalKills: data.totalKills ?? 0,
       kills: data.kills ?? {},
       skillUses: data.skillUses ?? {},
+      bossDefeated: data.bossDefeated ?? {},
+      questsCompleted: data.questsCompleted ?? {},
+      itemsCollected: data.itemsCollected ?? {},
+      achievementsUnlocked: data.achievementsUnlocked ?? {},
+      zonesReached: data.zonesReached ?? {},
+      storyFlags: data.storyFlags ?? {},
     });
     for (const stat of Object.keys(BASE_STATS)) {
       this.baseStats[stat] = data[stat] ?? BASE_STATS[stat];
