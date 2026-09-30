@@ -3,69 +3,7 @@ import { ProceduralDungeonGenerator } from './ProceduralDungeonGenerator.js';
 import { getRoomAt, clampToBounds } from './MazeLayout.js';
 import { DungeonBoss } from '../combat/DungeonBoss.js';
 import { BOSS_LORE, DUNGEON_ENTER_LINES } from '../game/LoreFragments.js';
-
-const DUNGEON_DEFS = [
-  {
-    id: 'ruin-crypt',
-    name: '灰白遗城',
-    theme: 0x4a5048,
-    accent: 0xc9a962,
-    themeType: 'soldier',
-    gridW: 6,
-    gridH: 6,
-    origin: { x: 5000, y: 120, z: 5000 },
-    entrance: { x: -190, z: 25 },
-    exterior: { x: -190, z: 25, label: '灰白遗城入口' },
-  },
-  {
-    id: 'forbidden-library',
-    name: '禁书图书馆',
-    theme: 0x2a2040,
-    accent: 0xaa66ff,
-    themeType: 'golem',
-    gridW: 5,
-    gridH: 6,
-    origin: { x: 5000, y: 120, z: 6500 },
-    entrance: { x: -35, z: -200 },
-    exterior: { x: -35, z: -200, label: '图书馆侧门' },
-  },
-  {
-    id: 'five-dim-rift',
-    name: '五维裂隙',
-    theme: 0x0a1830,
-    accent: 0x66ccff,
-    themeType: 'drone',
-    gridW: 5,
-    gridH: 5,
-    origin: { x: 5000, y: 120, z: 8000 },
-    entrance: { x: 175, z: 95 },
-    exterior: { x: 175, z: 95, label: '裂隙观测站' },
-  },
-  {
-    id: 'forest-shrine',
-    name: '古树神龛',
-    theme: 0x2a3828,
-    accent: 0x88cc66,
-    themeType: 'soldier',
-    gridW: 4,
-    gridH: 5,
-    origin: { x: 5000, y: 120, z: 9500 },
-    entrance: { x: -230, z: -15 },
-    exterior: { x: -230, z: -15, label: '神龛石门' },
-  },
-  {
-    id: 'hub-catacombs',
-    name: '枢纽地下墓穴',
-    theme: 0x3a3530,
-    accent: 0xffaa44,
-    themeType: 'elite',
-    gridW: 5,
-    gridH: 5,
-    origin: { x: 5000, y: 80, z: 11000 },
-    entrance: { x: 28, z: 72 },
-    exterior: { x: 28, z: 72, label: '墓穴阶梯' },
-  },
-];
+import { DUNGEON_DEFS } from '../content/dungeons.js';
 
 /** 递归释放并摘下一棵子树的网格资源。副本每次重建/离开都会走这里，
  *  旧实现只 group.remove() 不 dispose，反复进出迷宫会让 GPU 缓冲单调增长。 */

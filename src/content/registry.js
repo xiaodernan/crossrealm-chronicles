@@ -45,6 +45,7 @@ import { SKILL_TREES, SKILL_BRANCH_IDS, SKILL_EFFECT_KEYS } from './skillTrees.j
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import { ENEMY_ROSTER } from './enemies.js';
+import { DUNGEON_DEFS } from './dungeons.js';
 import { ENEMY_MOVE_SETS, BODY_PLANS } from './tuning.js';
 import {
   GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES, GEAR_SLOT_NAMES,
@@ -354,13 +355,33 @@ export const CONTENT_TABLES = [
     value: { t: 'record' },
   },
   {
+    kind: 'dungeons',
+    note: '副本（地下城）定义（W-B10 切片3a，从 `world/DungeonManager.js` 的私有 const 搬来）：'
+      + '五座迷宫的身份与关卡参数。**字段按实测读者声明** —— 搬之前普查证明 `themeType` 写 5 读 0，'
+      + '那一格随之删掉；今天再加"以后可能用得上"的格子就是重犯同一条错',
+    shape: 'rows',
+    table: DUNGEON_DEFS,
+    row: {
+      id: { t: 'id' },
+      name: { t: 'string' },
+      theme: { t: 'int', min: 0, max: 0xffffff },
+      accent: { t: 'int', min: 0, max: 0xffffff },
+      gridW: { t: 'int', min: 3, max: 8 },
+      gridH: { t: 'int', min: 3, max: 8 },
+      origin: { t: 'row', of: { x: { t: 'int' }, y: { t: 'int' }, z: { t: 'int' } } },
+      entrance: { t: 'row', of: { x: { t: 'int' }, z: { t: 'int' } } },
+      exterior: { t: 'row', of: { x: { t: 'int' }, z: { t: 'int' }, label: { t: 'string' } } },
+    },
+    invariant: checkDungeons,
+  },
+  {
     kind: 'dungeonBossLines',
     note: '副本 Boss 台词：键是**副本 id**（不是 bossId —— 两者由 `getDungeonBossId` 转换）',
     shape: 'index',
     table: DUNGEON_BOSS_LINES,
-    // 键是副本 id，而"有哪些副本"今天还没有一张表（归 W-B10 地下城房间套件），
-    // 所以这里**刻意不挂 keyRef** —— 挂一张不存在的表只会让门禁自己红。
-    // 等副本表落地，这一条加上 `keyRef: { of: 'dungeons' }` 即可。
+    // 切片3a 落了副本表，这里就补上当时欠的那一条 keyRef：
+    // 键写错一个字母的症状是"那场 Boss 打赢了却没有收尾台词"，而它不会红。
+    keyRef: { of: 'dungeons' },
     value: {
       t: 'row',
       of: {
@@ -766,7 +787,9 @@ export const CONTENT_TABLES = [
       target: { t: 'int', min: 1, required: false },
       enemyType: { t: 'string', required: false },
       bossId: { t: 'id', required: false },
-      dungeonId: { t: 'id', required: false },
+      // 副本 id 现在有一张表了（切片3a）：写错的字母以前只会让那条任务没有路点，
+      // 如今开机就红 —— 与 `zone: { t: 'ref', of: 'zones' }` 同一口径
+      dungeonId: { t: 'ref', of: 'dungeons', required: false },
       chapter: { t: 'int', min: 1, max: 5 },
       announce: { t: 'string', required: false },
       autoComplete: { t: 'bool', required: false },
@@ -860,8 +883,12 @@ function collectIds(tables) {
 /**
  * 校验一张表，返回**全部**错误（不抛、不早退）。
  * 一次跑完能看到"这张表一共有几处坏"，而不是改一处跑一次。
+ *
+ * `ctx` 不给就按在役注册表自己收一遍：`ref` 是**字段**的属性，不是调用方的礼节。
+ * 要求每个单独调 `checkTable` 的人都记得带上下文，等于让"这张表有没有断链"取决于谁怎么调它 ——
+ * 而漏带的那一支只会把 `ref` 检查变成一次 TypeError。
  */
-export function checkTable(entry, ctx) {
+export function checkTable(entry, ctx = { ids: collectIds(CONTENT_TABLES) }) {
   const out = shapeErrors(entry, ctx);
   // 有的不变式不是"某个字段长什么形状"，而是"这棵树自己连不连得起来"
   // （营火那棵树里 `next` 必须落在**同一区域**的某个节点上）。声明式词汇表到这里就到底了：
@@ -1271,6 +1298,13 @@ export function checkObjectiveTable(table) {
         out.push(`${path}: branchTo "${row.branchTo}" 不是紧跟其后的那一行`
           + (rows[i + 1]?.id ? `（下一行是 "${rows[i + 1].id}"）` : '（它已经是最后一行）'));
       }
+      // 切片3a：地下城入口的路点不再由 `game/QuestSystem.js` 手抄，而是按 `dungeonId`
+      // 问副本名册。少这一格的症状以前是"安静地没有箭头"，现在会在指路时抛 ——
+      // 所以把它挡在开机：`type: 'dungeon'` 的行必须认领一座真实存在的副本。
+      if (row?.type === 'dungeon' && !row.dungeonId) {
+        out.push(`${path}: type 是 dungeon 却没写 dungeonId —— 地下城路点要按 id 问 \`content/dungeons.js\`，`
+          + '缺这一格会在玩家走到这一步时当场抛（`DUNGEON_IDS` 也由这一格推导）');
+      }
     }
     for (const [flag, want] of Object.entries(row?.requires ?? {})) {
       const p = producers.get(flag);
@@ -1430,6 +1464,42 @@ export function checkEnemyRoster(table) {
     if (ROSTER_NOT_IDENTITY.includes(id)) continue;
     if (!rows[id]) out.push(`enemyRoster: 缺 "${id}"（招式表里有这一类，名册却没登记身份 —— 它只能靠调用点手抄名字出生）`);
   }
+  return out;
+}
+
+/**
+ * 副本表的整表关系（W-B10 切片3a）。形状能说"这一格有个颜色"，说不了"五座副本互相分得开"：
+ * - **配色两两不同**：B4 的原话是"房间只差配色"—— 如果连副本的颜色都撞了，五座就变成三座；
+ * - **名字与门口标签两两不同**：UI 列表、HUD 与传送 prompt 都直接显示它们，重名等于少一座副本；
+ * - **`entrance` 与 `exterior` 必须同点**：今天五座都是同一个坐标，这是"门口标记就是交互点"的
+ *   成对规则。分开写的症状是玩家在牌子跟前按交互却没反应（两个坐标各有读者：
+ *   `buildEntranceMarkers` 读 entrance、`buildExteriorShells` 读 exterior）。
+ */
+export function checkDungeons(table) {
+  const out = [];
+  const rows = Array.isArray(table) ? table : [];
+  const 撞 = (字段, 取值) => {
+    const 见过 = new Map();
+    rows.forEach((row, i) => {
+      const v = 取值(row);
+      if (v === undefined) return;
+      const p = `dungeons[${i}].${字段}`;
+      if (见过.has(v)) out.push(`${p}: "${v}" 与 ${见过.get(v)} 撞了 —— 界面上分不出这两座副本`);
+      else 见过.set(v, p);
+    });
+  };
+  撞('theme', (r) => r?.theme);
+  撞('accent', (r) => r?.accent);
+  撞('name', (r) => r?.name);
+  撞('exterior.label', (r) => r?.exterior?.label);
+  rows.forEach((row, i) => {
+    const e = row?.entrance; const x = row?.exterior;
+    if (!e || !x) return;
+    if (e.x !== x.x || e.z !== x.z) {
+      out.push(`dungeons[${i}]("${row.id}"): entrance (${e.x},${e.z}) 与 exterior (${x.x},${x.z}) 不同点 —— `
+        + '门口牌子上立着的交互点不是同一个地方（各有读者：`buildEntranceMarkers` / `buildExteriorShells`）');
+    }
+  });
   return out;
 }
 
