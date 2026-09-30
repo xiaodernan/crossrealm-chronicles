@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 import { generateMaze } from './MazeLayout.js';
+import { dungeonEncounterOf } from '../content/dungeonEncounters.js';
 
 /** 程序化迷宫地下城 — 多房间、多门、可探索 */
 export class ProceduralDungeonGenerator {
   static generate(def, seed = Date.now()) {
     const gridW = def.gridW ?? 5;
     const gridH = def.gridH ?? 5;
-    const layout = generateMaze(gridW, gridH, seed);
+    // 「出谁、几只」按副本 id 认领遭遇表（W-B10 切片3b）：认不出就抛，而不是兜到某一座的池子。
+    const layout = generateMaze(gridW, gridH, seed, dungeonEncounterOf(def.id));
     layout.theme = def.theme;
     layout.accent = def.accent;
     layout.name = def.name;

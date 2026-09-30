@@ -33,6 +33,9 @@ import { CONTENT_TABLES, checkContent, checkEnemyRoster } from '../src/content/r
 import { makeManager, installWindowShim } from './helpers/enemyHarness.js';
 import { DungeonManager } from '../src/world/DungeonManager.js';
 import { generateMaze } from '../src/world/MazeLayout.js';
+// 切片3b 之后 generateMaze 的第 4 个参数必填：这一支测的是"出怪点的 type 全在名册里"，
+// 所以递一张真表里的一格就够了（用哪一座不影响这一条的判据）
+import { dungeonEncounterOf } from '../src/content/dungeonEncounters.js';
 
 beforeAll(installWindowShim);
 
@@ -237,7 +240,7 @@ describe('④ 单一真源：两个出生嘴里不再有手抄身份', () => {
     const 野类 = [];
     const 带了hp = [];
     for (const seed of [1, 7, 12345, 999983]) {
-      for (const r of generateMaze(5, 5, seed).rooms) {
+      for (const r of generateMaze(5, 5, seed, dungeonEncounterOf('five-dim-rift')).rooms) {
         for (const e of r.enemySpawns ?? []) {
           扫到++;
           if (!ENEMY_ROSTER[e.type]) 野类.push(`${e.type}@${seed}`);

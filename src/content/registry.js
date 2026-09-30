@@ -45,7 +45,8 @@ import { SKILL_TREES, SKILL_BRANCH_IDS, SKILL_EFFECT_KEYS } from './skillTrees.j
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import { ENEMY_ROSTER } from './enemies.js';
-import { DUNGEON_DEFS } from './dungeons.js';
+import { DUNGEON_DEFS, DUNGEON_IDS } from './dungeons.js';
+import { DUNGEON_ENCOUNTERS } from './dungeonEncounters.js';
 import { ENEMY_MOVE_SETS, BODY_PLANS } from './tuning.js';
 import {
   GEAR_SLOTS, GEAR_STATS, GEAR_RARITY, GEAR_BASES, GEAR_AFFIXES, GEAR_SLOT_NAMES,
@@ -373,6 +374,43 @@ export const CONTENT_TABLES = [
       exterior: { t: 'row', of: { x: { t: 'int' }, z: { t: 'int' }, label: { t: 'string' } } },
     },
     invariant: checkDungeons,
+  },
+  {
+    kind: 'dungeonEncounters',
+    note: '副本遭遇表（W-B10 切片3b）：键是副本 id，值是"这一座出哪几类、一间房出几只"。'
+      + '切片3a 删掉写 5 读 0 的 `themeType` 之后，这是"这座副本出什么"唯一说话的地方 ——'
+      + '读者是 `ProceduralDungeonGenerator.generate`（按 def.id 申领后递给 `generateMaze`）。'
+      + '两边都得查得到：键对 `dungeons`（多一格 = 那座副本进不去，少一格 = 玩家进的是 A 打的是 B），'
+      + '`type` 对 `enemyRoster`（名字与数值只由名册说，这里不许再写一遍）',
+    shape: 'index',
+    table: DUNGEON_ENCOUNTERS,
+    keyRef: { of: 'dungeons' },
+    value: {
+      t: 'row',
+      of: {
+        pool: {
+          t: 'rows',
+          // 两类起步：这一片的全部理由是"五座打出同一场仗"，而单一类别的池子就是把那句话
+          // 写进表里。真要一座"只有一种敌人"的副本，那是切片4 房间模板库的遭遇设计，不是这里
+          minLength: 2,
+          of: {
+            type: { t: 'ref', of: 'enemyRoster' },
+            // 权重是相对值：只要求正整数，不要求和为 100（见 `dungeonEncounters.js` 的口径）
+            weight: { t: 'int', min: 1 },
+          },
+        },
+        group: {
+          t: 'row',
+          of: {
+            // 上下限都封在 1..4：普查实测是 1..2，而房间几何（CELL 18）与小队 aggro 名额
+            // 今天没有为"一房五只"调过参数。真要更大编组，改这里要连着改 B76 那一族
+            min: { t: 'int', min: 1, max: 4 },
+            max: { t: 'int', min: 1, max: 4 },
+          },
+        },
+      },
+    },
+    invariant: checkDungeonEncounters,
   },
   {
     kind: 'dungeonBossLines',
@@ -1503,7 +1541,65 @@ export function checkDungeons(table) {
   return out;
 }
 
-/** 一行摘要，给 F3 面板与调试用："有哪些内容、各多少条" */
+/**
+ * 副本遭遇表的整表关系（W-B10 切片3b）。字段表能说"这一格有一池子"，说不了这四件事：
+ * - **每座副本都得有一格**。缺格的症状不是"少了点内容"而是玩家进得去那座迷宫时当场抛
+ *   （`generateMaze` 的第 4 个参数必填）；把这件事交给开机而不是交给门口。
+ * - **一池之内同一类只许一行**。写两行的症状是那一类的实际权重悄悄翻倍，而表上看是 3 其实是 6。
+ * - **`group.min ≤ max`**。反了不是报错，是编组公式 `min + 摇 (max-min+1)` 里那个区间长度变成
+ *   0 或负数 —— 于是整座迷宫一间房都不出怪，玩家走空旷跑到 Boss 面前。
+ * - **五张池子两两不同**（按类型集合比，不按字符串比）。这一片的立身之本就是"别让五座打同一场仗"；
+ *   抄隔壁那一池是最省事的改法，也是把普查读数（M2：34 / 34 / 33 均匀三分）换个写法留下来。
+ * - **不可攻击的那一类不许进池**。名册里的 `dummy` 是训练木人（`canAttack: false`、hp 99999），
+ *   把它写进副本池 = 玩家在迷宫里遇见一个打不动也杀不掉的摆设。
+ * - **一池之内只许有一个最重**。并列第一等于"这座副本打头的是谁"没答案，实测主类会跟着
+ *   种子区间翻 —— 这一条不是设想，是切片3b 第一次跑分布读数时量出来的（墓穴 4/4 并列，
+ *   200 个种子的主类落到了 wraith 而不是表上排在最前的 soldier）。
+ */
+export function checkDungeonEncounters(table) {
+  const out = [];
+  const rows = table ?? {};
+  const 支撑 = (row) => [...new Set((row?.pool ?? []).map((e) => e?.type))].sort().join(' ');
+  for (const [id, row] of Object.entries(rows)) {
+    const p = `dungeonEncounters["${id}"]`;
+    const seen = new Set();
+    for (const [i, e] of (row?.pool ?? []).entries()) {
+      const key = `${p}.pool[${i}]`;
+      if (seen.has(e?.type)) out.push(`${key}: "${e?.type}" 在同一池里写了不止一行 —— 它的实际权重是各行相加，表上看不出来`);
+      else seen.add(e?.type);
+      const 类 = ENEMY_ROSTER[e?.type];
+      if (类 && 类.canAttack === false) {
+        out.push(`${key}: "${e?.type}"（${类.name}）不可攻击，不能进副本池 —— 玩家会遇到一个打不掉的摆设`);
+      }
+    }
+    const g = row?.group;
+    if (g && g.min > g.max) {
+      out.push(`${p}.group: min ${g.min} > max ${g.max} —— 编组区间是空的，整座迷宫一间房都不会出怪`);
+    }
+    // 并列最重 = 表上答不出"这一座打头的是谁"。这一条不是设想：切片3b 第一次跑分布读数时，
+    // 墓穴的 soldier 与 wraith 都写 4，200 个种子的实测主类是 wraith（4168 对 4121 —— 一枚硬币），
+    // 换一个种子区间就会翻过去。第⑤层要断言"实测主类 == 表上权重最大者"，那张表就必须只有一个第一。
+    const 池 = row?.pool ?? [];
+    const 最重 = Math.max(...池.map((e) => e?.weight ?? 0));
+    const 并列 = 池.filter((e) => e?.weight === 最重);
+    if (并列.length > 1) {
+      out.push(`${p}: ${并列.map((e) => `"${e.type}"`).join(' / ')} 并列最重（各 ${最重}）—— `
+        + '这一座打头的是谁表上答不出来，而实测主类会跟着种子区间漂');
+    }
+  }
+  const 缺 = DUNGEON_IDS.filter((id) => !rows[id]);
+  if (缺.length) {
+    out.push(`dungeonEncounters: 这些副本没有遭遇格（${缺.join(' / ')}）—— 玩家进那座迷宫时 generateMaze 会当场抛，该在这里红`);
+  }
+  const 撞 = new Map();
+  for (const [id, row] of Object.entries(rows)) {
+    const v = 支撑(row);
+    if (!v) continue;
+    if (撞.has(v)) out.push(`dungeonEncounters["${id}"].pool: 与 dungeonEncounters["${撞.get(v)}"] 是同一批敌人（${v}）—— 这两座副本打的是同一场仗`);
+    else 撞.set(v, id);
+  }
+  return out;
+}
 export function contentSummary(tables = CONTENT_TABLES) {
   const out = {};
   for (const t of tables) {

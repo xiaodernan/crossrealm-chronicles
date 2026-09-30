@@ -1,4 +1,3 @@
-/** 递归回溯迷宫 → 房间+门+墙+Boss 大房 */
 import { LORE_FRAGMENTS } from '../game/LoreFragments.js';
 
 const CELL = 18;
@@ -6,7 +5,22 @@ const BOSS_CELL = 34;
 const WALL_H = 5;
 const WALL_T = 0.6;
 
-export function generateMaze(gridW, gridH, seed = Date.now()) {
+/**
+ * 递归回溯迷宫 → 房间+门+墙+Boss 大房
+ *
+ * 「这一座出哪几类、一间房出几只」由调用方递进来的遭遇表说话（`content/dungeonEncounters.js`，
+ * W-B10 切片3b）。这一句以前写死在这里：`['soldier','golem','drone'][摇 3]` 配 `1 + 摇 2` 只，
+ * 于是五座副本打的是同一场仗（普查 `.tmp-20260930/wb10s1-census.mjs` M2 —— 各跑 200 个种子，
+ * 直方图 34 / 34 / 33，无怪房 0 间）。第 4 个参数**必填**：留一个默认池等于把
+ * "这座副本忘了登记" 变成 "这座副本悄悄用了别座的敌人"，而后者不是报错，是没人注意的换仗。
+ */
+export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
+  if (!encounters?.pool?.length || !encounters.group) {
+    throw new TypeError(
+      'generateMaze 需要一张遭遇表 { pool: [{ type, weight }], group: { min, max } }，'
+      + '由 `dungeonEncounterOf(def.id)` 申领（W-B10 切片3b）'
+    );
+  }
   let s = seed;
   const rnd = () => { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
 
@@ -78,15 +92,17 @@ export function generateMaze(gridW, gridH, seed = Date.now()) {
 
   for (const room of rooms) {
     if (room.id === spawn.id || room.isExit) continue;
-    const n = 1 + Math.floor(rnd() * 2);
-    // 出哪几类、一次几只：这两件事仍然写死在这一行（三类一视同仁）。切片3 把它换成按 def
-    // 认领的遭遇表。至于"每只多硬叫什么"，W-B10 切片2 已经交给 `content/enemies.js` 那一名册，
-    // 所以这里不再自带 `hp` —— 切片1 之前这里是 `hp: 120 + 摇 100`，与类型无关的一把骰子。
+    // 一次几只、出哪一类：两个数都从遭遇表来。编组公式与切片3b 之前逐字同形
+    // （`min + 摇 (max-min+1)` 在 min=1,max=2 时就是原来的 `1 + 摇 2`），
+    // 因为这一片改的是"**出谁**"而不是"难度曲线"——同时动两个变量就没法归因。
+    const { min, max } = encounters.group;
+    const n = min + Math.floor(rnd() * (max - min + 1));
+    // 每只多硬、叫什么，W-B10 切片2 已经交给 `content/enemies.js` 那一名册，所以这里不写 hp。
     for (let i = 0; i < n; i++) {
       room.enemySpawns.push({
         x: room.x + (rnd() - 0.5) * (CELL - 6),
         z: room.z + (rnd() - 0.5) * (CELL - 6),
-        type: ['soldier', 'golem', 'drone'][Math.floor(rnd() * 3)],
+        type: drawFromPool(encounters.pool, rnd),
       });
     }
   }
@@ -114,6 +130,23 @@ export function generateMaze(gridW, gridH, seed = Date.now()) {
     bounds: { minX, maxX, minZ, maxZ },
     wallH: WALL_H, wallT: WALL_T,
   };
+}
+
+/**
+ * 按权重从池子里抽一类。权重是**相对值**（不必凑成 100）：抽法是把 `rnd()` 落在的
+ * `[0, 总权重)` 摊到累计区间上，先跨过的那一类胜出。这样"往池子里加一类"不必重算全表，
+ * 而切片1 普查到的那种均匀三分也能用等权表达。
+ */
+function drawFromPool(pool, rnd) {
+  const total = pool.reduce((sum, e) => sum + e.weight, 0);
+  let t = rnd() * total;
+  for (const entry of pool) {
+    t -= entry.weight;
+    if (t < 0) return entry.type;
+  }
+  // 走到这里说明 `rnd()` 给出了不小于 1 的读数 —— 那不是设计里的抽样，让它交到
+  // `enemyRosterOf(undefined)` 手上抛（B71 口径：认不出就当场红，不许兜到某一类）
+  throw new RangeError(`遭遇池抽样越界：rnd() 给出 ${t + total} / 总权重 ${total}`);
 }
 
 function findFarthestRoom(spawn, rooms, doors) {
