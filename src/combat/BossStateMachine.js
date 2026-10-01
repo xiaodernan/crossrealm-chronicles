@@ -10,27 +10,24 @@
  * 6. 统一的阶段切换条件判定（血量阈值 / 时间 / 自定义条件）
  * 7. 统一的调试/日志开关
  *
- * **两条轴的现状（W-B8 切片3 实测）**：`phase` 这条轴是活的 —— 阶段推进、钩子、
- * `boss-phase` 事件都走它，五只世界 Boss 与副本 Boss 都已接上。`state` 那条**没人驱动**：
- * 全仓没有一处写 `sm.state = …`，`Boss` 自己另有一套 `this.state`（`'dead'` 之类，见 `Boss.die()`）。
- * 两条轴各记一份状态 = 迟早一处改了另一处没改，所以在那条轴接上之前
- * **不要读 `sm.state` 做判断**（它永远是 IDLE）。要么把 `Boss` 的战斗状态并进来
- * （那要连 `Enemy.state` 一起谈），要么删掉这一轴 —— 见 §8 的 W-B8 余项。
+ * **这一类的边界（W-B8 切片4 定）**：它只管**阶段**，不管战斗状态。
+ *
+ * 切片3 量出这里有两条轴，`state` 那条没人驱动；切片4 查清了它为什么不该存在：
+ * `Enemy` 已经有一套**真的在跑**的战斗状态机（`ai/EnemyFSM` 的 `createEnemyFSM`，
+ * `Enemy.update` 每帧 `this.state = this.fsm.current`），`Boss extends Enemy` 因此也有它。
+ * 本类再持一条 `state` 轴 = **同一件事记两份账**，而且那份账没人写、永远是 IDLE。
+ * 所以那一条连同它的枚举一起**删掉**（不是"先留着以后可能用得上" —— 那正是本项目
+ * 反复记过的那条错）。战斗状态问 `this.fsm.current` / `this.state`，阶段问这里。
+ *
+ * 同理删掉的还有 `toJSON` / `fromJSON`：全仓没有一处调用，而存档也确实**不持久化**
+ * Boss 的战斗状态（`SaveSystem` 只存 `bossRematch` 与 `bossApproach`）。留着它们会让人
+ * 以为"Boss 打到二阶段时存档，读回来还在二阶段"—— 那件事不存在。
+ *
+ * **保留但今天还没人用的**：`registerPhaseBehavior` / `getCurrentBehavior` /
+ * `onEnterPhase` / `onLeavePhase` 这条阶段钩子。目标 5（阶段行为表取代散落的
+ * `if (this.phase >= N)`）就是靠它落地，五只 Boss 目前都还没接 —— 这是 W-B8 的后续，
+ * 不是死代码，所以留着并在这里写明现状。
  */
-
-/**
- * 战斗状态枚举。**这一轴今天没人驱动**，见文件头注的说明 ——
- * 声明在这里是为了让"要不要这一轴"这个决定有地方落，
- * 不是因为现在有东西在读它。
- */
-export const BossState = {
-  IDLE: 'idle',
-  WINDUP: 'windup',
-  STRIKE: 'strike',
-  STAGGER: 'stagger',
-  SLAM: 'slam',
-  DEAD: 'dead',
-};
 
 export const BossPhase = {
   PHASE_1: 1,
@@ -47,11 +44,9 @@ export const PhaseTransitionCondition = {
 export class BossStateMachine {
   constructor(boss) {
     this.boss = boss;
-    this.state = BossState.IDLE;
     this.phase = BossPhase.PHASE_1;
-    this.prevPhase = BossPhase.PHASE_1;
+    /** 进这一阶段的时刻，`TIME_ELAPSED` 那条条件读它（其余地方不读） */
     this.phaseStartTime = 0;
-    this.phaseData = {}; // per-phase scratchpad
     this.phaseBehaviors = new Map(); // phase -> behavior table
     this.transitionConditions = new Map(); // phase -> condition
     this.debug = false;
@@ -98,10 +93,8 @@ export class BossStateMachine {
     // 离开旧阶段
     this.onLeavePhase(this.phase);
 
-    this.prevPhase = this.phase;
     this.phase = phase;
     this.phaseStartTime = performance.now();
-    this.phaseData = {};
 
     // 进入新阶段
     this.onEnterPhase(phase);
@@ -148,26 +141,14 @@ export class BossStateMachine {
     if (this.debug) console.log(`[BossSM:${this.boss.bossId}] ${msg}`);
   }
 
-  /** 序列化（用于存档） */
-  toJSON() {
-    return {
-      state: this.state,
-      phase: this.phase,
-      prevPhase: this.prevPhase,
-      phaseStartTime: this.phaseStartTime,
-      phaseData: this.phaseData,
-    };
-  }
-
-  /** 反序列化 */
-  fromJSON(data) {
-    if (!data) return;
-    this.state = data.state ?? BossState.IDLE;
-    this.phase = data.phase ?? 1;
-    this.prevPhase = data.prevPhase ?? 1;
-    this.phaseStartTime = data.phaseStartTime ?? 0;
-    this.phaseData = data.phaseData ?? {};
-  }
+  /**
+   * 这里**没有** `toJSON` / `fromJSON`（W-B8 切片4 删掉）。
+   *
+   * 它们原先在，注释还写着"用于存档"，但全仓没有一处调用 —— 而存档也确实**不持久化**
+   * Boss 的战斗状态（`SaveSystem` 只存 `bossRematch` 与 `bossApproach`）。留着的坏处是
+   * 读代码的人会以为"Boss 打到二阶段时存档，读回来还在二阶段"，而那是**不存在的行为**。
+   * 真要做"战斗中途存档"时，要连 Boss 的位置/血量/仇恨一起谈，不是补一对方法就完事。
+   */
 }
 
 export default BossStateMachine;

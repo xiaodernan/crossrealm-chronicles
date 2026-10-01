@@ -10,7 +10,7 @@
  *
  * ## 这一片要钉住的三件事
  *
- * 1. **枚举是契约**：`BossState` / `BossPhase` / `PhaseTransitionCondition` 的值被
+ * 1. **枚举是契约**：`BossPhase` / `PhaseTransitionCondition` 的值被
  *    `toJSON` 写进存档、被事件带出去、被 UI 读。**改一个字符串就是旧档读不出来**，
  *    所以逐格断言而不是"存在就行"。
  * 2. **切换只走一处出口**：`transitionTo` 负责改阶段、调钩子、派事件、重置 phase 台账。
@@ -23,7 +23,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  BossStateMachine, BossState, BossPhase, PhaseTransitionCondition,
+  BossStateMachine, BossPhase, PhaseTransitionCondition,
 } from '../src/combat/BossStateMachine.js';
 import { DungeonBoss } from '../src/combat/DungeonBoss.js';
 
@@ -58,32 +58,26 @@ afterEach(() => {
 });
 
 describe('枚举：值就是契约（写进存档、带进事件、被 UI 读）', () => {
-  it('三张枚举逐格对得上', () => {
-    expect(BossState).toEqual({
-      IDLE: 'idle', WINDUP: 'windup', STRIKE: 'strike',
-      STAGGER: 'stagger', SLAM: 'slam', DEAD: 'dead',
-    });
+  it('两张枚举逐格对得上（`BossState` 已在切片4 删掉，见下）', () => {
     expect(BossPhase).toEqual({ PHASE_1: 1, PHASE_2: 2, PHASE_3: 3 });
     expect(PhaseTransitionCondition).toEqual({
       HP_THRESHOLD: 'hp_threshold', TIME_ELAPSED: 'time_elapsed', CUSTOM: 'custom',
     });
   });
 
-  it('初值：IDLE + 一阶段，且 prevPhase 同源', () => {
+  it('初值：一阶段（本类只有阶段这一条轴）', () => {
     const sm = new BossStateMachine(fakeBoss());
-    expect(sm.state).toBe(BossState.IDLE);
     expect(sm.phase).toBe(BossPhase.PHASE_1);
-    expect(sm.prevPhase).toBe(BossPhase.PHASE_1);
+    expect(sm).not.toHaveProperty('state');   // 战斗状态归 `Enemy.fsm`，这里不许再记一份
   });
 });
 
 describe('`transitionTo`：切阶段的唯一出口', () => {
-  it('正常切换：改阶段、记 prevPhase、调离开/进入钩子、派一次事件', () => {
+  it('正常切换：改阶段、调离开/进入钩子、派一次事件', () => {
     const boss = fakeBoss();
     const sm = new BossStateMachine(boss);
     expect(sm.transitionTo(BossPhase.PHASE_2)).toBe(true);
     expect(sm.phase).toBe(2);
-    expect(sm.prevPhase).toBe(1);
     expect(boss.calls.leave).toEqual([1]);
     expect(boss.calls.enter).toEqual([2]);
     expect(events).toHaveLength(1);
@@ -102,11 +96,11 @@ describe('`transitionTo`：切阶段的唯一出口', () => {
     expect(events).toHaveLength(0);
   });
 
-  it('每进一个新阶段，phase 台账清空（旧阶段的临时数据不许带到新阶段）', () => {
+  it('每进一个新阶段都刷新 `phaseStartTime`（`TIME_ELAPSED` 那条条件靠它计时）', () => {
     const sm = new BossStateMachine(fakeBoss());
-    sm.phaseData = { leftover: 1 };
+    sm.phaseStartTime = 0;
     sm.transitionTo(BossPhase.PHASE_2);
-    expect(sm.phaseData).toEqual({});
+    expect(sm.phaseStartTime, '进阶段不刷新起算点 = 计时条件从"进程启动"开始算').toBeGreaterThan(0);
   });
 
   it('连切两次：事件两次、phase 依次推进', () => {
@@ -190,31 +184,18 @@ describe('切换条件：三种类型各自生效', () => {
   });
 });
 
-describe('存档：`toJSON` / `fromJSON` 往返', () => {
-  it('切过阶段再存再读，阶段与 prevPhase 都对得上', () => {
+describe('没有序列化（W-B8 切片4 删掉，理由写在 `BossStateMachine` 里）', () => {
+  it('本类不再提供 `toJSON` / `fromJSON` —— 存档不持久化 Boss 战斗状态', () => {
     const sm = new BossStateMachine(fakeBoss());
-    // 逐级推进：直接 transitionTo(3) 的 prevPhase 是 1，那样验不出"上一阶段"这一格
-    sm.transitionTo(2);
-    sm.transitionTo(3);
-    sm.state = BossState.STAGGER;
-    sm.phaseData = { k: 1 };
-    const saved = JSON.parse(JSON.stringify(sm.toJSON()));
-
-    const fresh = new BossStateMachine(fakeBoss());
-    fresh.fromJSON(saved);
-    expect(fresh.phase).toBe(3);
-    expect(fresh.prevPhase).toBe(2);
-    expect(fresh.state).toBe(BossState.STAGGER);
-    expect(fresh.phaseData).toEqual({ k: 1 });
+    expect(sm.toJSON).toBeUndefined();
+    expect(sm.fromJSON).toBeUndefined();
   });
 
-  it('空数据 / 缺字段不炸，落回缺省', () => {
-    const sm = new BossStateMachine(fakeBoss());
-    sm.fromJSON(null);
-    expect(sm.phase).toBe(1);
-    sm.fromJSON({});
-    expect(sm.phase).toBe(1);
-    expect(sm.state).toBe(BossState.IDLE);
+  it('门禁自证：这条不是因为"方法名写错"才通过（同文件里 `Boss` 确实有 toJSON 之类的写法）', () => {
+    // 用 `Object.prototype` 上的方法做对照：本类**只**有自己声明的那几个方法
+    const own = Object.getOwnPropertyNames(BossStateMachine.prototype);
+    expect(own).toContain('transitionTo');
+    expect(own).not.toContain('toJSON');
   });
 });
 

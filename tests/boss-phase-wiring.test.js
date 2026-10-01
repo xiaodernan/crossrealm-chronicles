@@ -14,18 +14,17 @@
  * - 门槛原先写的是字符串 `'hp_threshold'` 与数字 `2` / `3`，即给那两张枚举**各抄一份真源** ——
  *   抄错了不报错，只是那只 Boss 永远不进二阶段。本片改用枚举。
  *
- * ## 一条如实记录的现状
+ * ## `state` 那条轴：切片3 量出没人驱动，切片4 查明它不该存在
  *
- * `BossStateMachine` 有 `state` 与 `phase` 两条轴，但**`state` 那条今天没人驱动**：
- * 全仓没有一处写 `sm.state = …`，`Boss` 自己另有一套 `this.state`。
- * 两条轴各记一份状态 = 迟早一处改了另一处没改；在把它们并起来之前，
- * **不要**拿 `sm.state` 做判断 —— 它永远是 IDLE。这条用断言钉住，
- * 等真有人去驱动它时这里会红，那时再连 `Boss.this.state` 一起谈。
+ * `Enemy` 已经有一套**真的在跑**的战斗状态机（`ai/EnemyFSM` 的 `createEnemyFSM`，
+ * `Enemy.update` 每帧 `this.state = this.fsm.current`），`Boss extends Enemy` 因此也有它。
+ * `BossStateMachine` 再持一条 `state` 轴 = 同一件事记两份账，而且那份账没人写、永远是 IDLE。
+ * 所以切片4 把它连同 `BossState` 枚举一起**删掉**了。下面这几条断言的就是"它确实不在"。
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { BossStateMachine, BossState } from '../src/combat/BossStateMachine.js';
+import { BossStateMachine } from '../src/combat/BossStateMachine.js';
 
 const SRC = join(process.cwd(), 'src');
 const BOSS_FILES = ['Boss.js', 'MagicBoss.js', 'SpaceBoss.js', 'VoidBoss.js', 'ChaosBoss.js', 'DungeonBoss.js'];
@@ -81,25 +80,33 @@ describe('阶段推进只有一条路：子类不许自己改 `this.phase`', () 
   });
 });
 
-describe('一条如实记录的现状：`state` 轴今天没人驱动', () => {
-  it('`Boss.js` 不再 import `BossState`（它那条轴是 `this.state`，与本类无关）', () => {
-    const src = readFileSync(join(SRC, 'combat/Boss.js'), 'utf8');
-    expect(src).not.toMatch(/import \{[^}]*\bBossState\b[^}]*\}/);
+describe('`state` 轴已删（W-B8 切片4）：战斗状态归 `Enemy.fsm`', () => {
+  it('`BossStateMachine` 不再导出 `BossState`，实例上也没有 `state`', () => {
+    const sm = new BossStateMachine({ bossId: 'x', name: 'x', hp: 1, maxHp: 1 });
+    expect(sm).not.toHaveProperty('state');
+    expect(sm.constructor.name).toBe('BossStateMachine');
+    // 构造器也不该再往实例上落这一格（`toHaveProperty` 对 `undefined` 值会误判，所以查键）
+    expect(Object.keys(sm)).not.toContain('state');
   });
 
-  it('全仓没有一处给 `sm.state` 赋值 —— 所以别拿它做判断（它永远是 IDLE）', () => {
+  it('全仓没有一处读 `sm.state` 做判断（谁再写谁就要连 `Enemy.fsm` 一起谈）', () => {
     const hits = [];
     for (const file of walk(SRC)) {
       const c = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
-      const m = c.match(/\.sm\.state\s*=(?!=)/g);
+      const m = c.match(/\.sm\.state\b/g);
       if (m) hits.push(file.slice(SRC.length + 1).replace(/\\/g, '/'));
     }
-    expect(hits, '有人在驱动 sm.state 了 —— 那要把 Boss.this.state 一起并进来，见 BossStateMachine 头注').toEqual([]);
+    expect(hits, '有人在读 sm.state 了 —— 先读 `BossStateMachine` 头注再决定要不要把它加回来').toEqual([]);
   });
 
-  it('门禁自证：这条不是因为扫不到才通过的（状态机自己确实声明了这一轴）', () => {
-    const sm = new BossStateMachine({ bossId: 'x', name: 'x', hp: 1, maxHp: 1 });
-    expect(sm.state).toBe(BossState.IDLE);      // 构造时落的那个值
-    expect(BossState.DEAD).toBe('dead');         // 枚举里确实有这一格
+  it('战斗状态的真源仍在 `Enemy`（`this.state` 由 `fsm.current` 驱动）—— 别删错那一份', () => {
+    const enemy = readFileSync(join(SRC, 'combat/Enemy.js'), 'utf8');
+    expect(enemy).toMatch(/this\.state = this\.fsm\.current/);
+    expect(enemy).toMatch(/createEnemyFSM\(this\)/);
+  });
+
+  it('门禁自证：这条不是因为扫不到才通过的（`Enemy` 里确实有 `this.state =`）', () => {
+    const enemy = readFileSync(join(SRC, 'combat/Enemy.js'), 'utf8');
+    expect((enemy.match(/this\.state\s*=/g) ?? []).length).toBeGreaterThan(0);
   });
 });
