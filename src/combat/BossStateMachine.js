@@ -57,9 +57,21 @@ export class BossStateMachine {
     this.phaseBehaviors.set(phase, behavior);
   }
 
-  /** 获取当前阶段的行为表 */
+  /** 获取**当前阶段**的行为表（按状态机自己的 `phase` 取） */
   getCurrentBehavior() {
     return this.phaseBehaviors.get(this.phase);
+  }
+
+  /**
+   * 按**给定阶段**取行为表（W-B8 切片5 给 `Boss.tuning()` 用）。
+   *
+   * 为什么要有它而不是直接用 `getCurrentBehavior()`：Boss 那边所有读者读的是
+   * **同一个字段 `this.phase`**（场地脚本也读它），所以取值也应当按那个字段取 ——
+   * 用 `getCurrentBehavior()` 就等于"场地脚本读一个、阶段表读另一个"，
+   * 两者在正常路径下相等、在有人直接改 `this.phase` 时分叉。
+   */
+  behaviorFor(phase) {
+    return this.phaseBehaviors.get(phase);
   }
 
   /** 注册阶段切换条件 */

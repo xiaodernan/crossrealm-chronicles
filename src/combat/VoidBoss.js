@@ -74,10 +74,11 @@ export class VoidBoss extends Boss {
       return;
     }
 
-    if (this.phase >= 2 && this.timeStopCooldown <= 0 && this.distanceTo(playerPos) < 22) {
-      this.timeStopCooldown = 4;
+    const t = this.tuning();
+    if (t.canTimeStop && this.timeStopCooldown <= 0 && this.distanceTo(playerPos) < t.timeStopRange) {
+      this.timeStopCooldown = t.timeStopCooldown;
       this.timeStopActive = true;
-      this.timeStopTimer = 1.8;
+      this.timeStopTimer = t.timeStopDuration;
       window.dispatchEvent(new CustomEvent('time-stop-start'));
       addShake(0.12);
     }

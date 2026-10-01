@@ -72,15 +72,18 @@ export class MagicBoss extends Boss {
       orb.material.emissiveIntensity = 0.7 + Math.sin(performance.now() * 0.004) * 0.4;
     }
 
-    if (this.phase >= 2 && this.shootCooldown <= 0 && this.distanceTo(playerPos) < 25) {
+    // 三档的数都在 `content/bossPhases.js`（W-B8 切片5）：这里只问"这一档放不放"，
+    // 不再现算 `12 + this.phase * 4` 那种算术 —— 那种写法让"二阶段是什么样"没有一处读得到
+    const t = this.tuning();
+    if (t.canVolley && this.shootCooldown <= 0 && this.distanceTo(playerPos) < 25) {
       this.projectiles?.spawn(
         this.position.clone(),
         playerPos.clone(),
-        12 + this.phase * 4,
-        10 + this.phase * 2,
+        t.volleyDamage,
+        t.volleySpeed,
         0xcc44ff
       );
-      this.shootCooldown = this.phase >= 3 ? 1.2 : 2.0;
+      this.shootCooldown = t.volleyCooldown;
     }
 
     super.update(dt, playerPos, playerRef);

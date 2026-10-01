@@ -59,7 +59,8 @@ export class SpaceBoss extends Boss {
 
     const disk = this.mesh.getObjectByName('disk');
     const core = this.mesh.getObjectByName('body');
-    if (disk) disk.rotation.z += dt * (1 + this.phase * 0.5);
+    const t = this.tuning();
+    if (disk) disk.rotation.z += dt * t.diskSpin;
     if (core) core.rotation.y += dt * 0.8;
 
     this.orbitAngle += dt;
@@ -67,18 +68,18 @@ export class SpaceBoss extends Boss {
 
     this.pullCooldown = Math.max(0, this.pullCooldown - dt);
 
-    if (this.phase >= 2 && this.pullCooldown <= 0 && this.distanceTo(playerPos) < 30) {
-      this.pullCooldown = 3.5;
+    if (t.canPull && this.pullCooldown <= 0 && this.distanceTo(playerPos) < 30) {
+      this.pullCooldown = t.pullCooldown;
       if (playerRef) {
         const dx = this.position.x - playerPos.x;
         const dz = this.position.z - playerPos.z;
         // 一记 6 米/秒的外部冲量：走玩家的冲量账，所以它按秒衰减、也不吃按键的整条改写
-        playerRef.applyKnockback(dx, dz, 6);
+        playerRef.applyKnockback(dx, dz, t.pullImpulse);
       }
     }
 
-    if (this.phase >= 3 && this.shootCooldown <= 0) {
-      this.shootCooldown = 0.8;
+    if (t.canVolley && this.shootCooldown <= 0) {
+      this.shootCooldown = t.volleyCooldown;
       for (let i = 0; i < 6; i++) {
         const a = (i / 6) * Math.PI * 2 + this.orbitAngle;
         const tx = this.position.x + Math.cos(a) * 15;

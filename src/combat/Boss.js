@@ -4,6 +4,7 @@ import { GROUND_HAZARD } from '../content/tuning.js';
 import { ARENA_MOVES, arenaScriptFor } from '../content/arenaScripts.js';
 import { barrageLayout } from './BarragePattern.js';
 import { BossStateMachine, BossPhase, PhaseTransitionCondition } from './BossStateMachine.js';
+import { phaseTuningFor } from '../content/bossPhases.js';
 
 /** 影界守护者 — 首个 Boss，三阶段 */
 export class Boss extends Enemy {
@@ -48,6 +49,14 @@ export class Boss extends Enemy {
       type: PhaseTransitionCondition.HP_THRESHOLD, threshold: 0.25,
     });
     this.sm.debug = false;
+    /* 把三档参数注册成**阶段行为表**（W-B8 切片5）。
+     *
+     * 这正是切片1 就设计好、却一直没人用的那条钩子（切片4 曾如实记过"保留但今天还没人用"）——
+     * 它现在有位置了：`getCurrentBehavior()` 返回的就是"当前这一档该怎么打"，
+     * 各 Boss 的 `update` 不再按 `this.phase` 现算。 */
+    for (const phase of [BossPhase.PHASE_1, BossPhase.PHASE_2, BossPhase.PHASE_3]) {
+      this.sm.registerPhaseBehavior(phase, phaseTuningFor(this.bossId, phase));
+    }
   }
 
   createMesh(config) {
@@ -109,13 +118,34 @@ export class Boss extends Enemy {
     }));
   }
 
+  /**
+   * 阶段这条账的**权威在状态机**（`sm.phase`），`this.phase` 是每帧同步过来的**镜像**。
+   *
+   * 为什么不把 `phase` 做成只读取值器（那样"谁是权威"就靠结构而不靠约定了）：
+   * 本片量过 —— 只读化会让 **7 个测试文件、46 条用例**当场红（它们都写 `boss.phase = N`
+   * 来模拟"这只 Boss 已经在第 N 阶段"，而 6 个文件连 `window` 都没桩，`transitionTo`
+   * 派事件那一步也会炸）。那是另一件事，需要逐文件改成走状态机并补 `window` 桩，
+   * 不该塞进"接上阶段参数表"这一片里。**已记入看板余项**，连同那 46 条的实测数。
+   *
+   * 在那之前，这一片的做法是：**所有读者读同一个字段** —— 场地脚本读 `this.phase`，
+   * 阶段参数表也按 `this.phase` 取（`this.tuning()`），于是两边不会分叉。
+   */
+  /**
+   * 当前这一档的参数（W-B8 切片5）。**各 Boss 的 `update` 都从这里取数** ——
+   * 于是"这只 Boss 二阶段什么样"有唯一一处可读，而不是散在三段算术里。
+   *
+   * 取不到时（理论上不会：构造时把三档都注册了）退回基类缺省那一档，
+   * 而不是让调用方拿到 `undefined` 再自己 `?.` —— 后者会变成"某只 Boss 忘了兜底，
+   * 于是它的 `attackCooldown` 是 `undefined`、`strike` 之后立刻又能出手"。
+   */
+  tuning() {
+    return this.sm.behaviorFor(this.phase) ?? phaseTuningFor(this.bossId, this.phase);
+  }
+
   checkPhase() {
-    // `ratio` 已删：它属于"自己再看一眼血量"的那条老路，阶段推进现在由状态机负责
+    // 阶段推进由状态机负责；`this.phase` 是从它同步过来的**镜像**（见 `phase` 那段注释）
     this.sm.checkPhaseTransitions();
-    // 同步 phase 到状态机（状态机是权威来源）
-    if (this.sm.phase !== this.phase) {
-      this.phase = this.sm.phase;
-    }
+    if (this.sm.phase !== this.phase) this.phase = this.sm.phase;
   }
 
   die() {
@@ -342,7 +372,7 @@ export class Boss extends Enemy {
     if (this.state === 'strike') {
       if (this.stateTimer > 0.4) {
         this.state = 'idle';
-        this.attackCooldown = this.phase >= 3 ? 0.9 : this.phase >= 2 ? 1.2 : 1.6;
+        this.attackCooldown = this.tuning().attackCooldown;
       }
       return;
     }

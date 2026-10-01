@@ -47,10 +47,11 @@ export class ChaosBoss extends Boss {
     if (!this.alive) return;
     this.chaosPulse += dt;
 
-    if (this.phase >= 2 && this.chaosPulse > 2.5) {
+    const t = this.tuning();
+    if (t.canPulse && this.chaosPulse > t.pulseInterval) {
       this.chaosPulse = 0;
-      if (playerRef?.combat && this.distanceTo(playerPos) < 9) {
-        playerRef.combat.takeDamage(12);
+      if (playerRef?.combat && this.distanceTo(playerPos) < t.pulseRange) {
+        playerRef.combat.takeDamage(t.pulseDamage);
         addShake(0.12);
       }
     }

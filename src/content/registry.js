@@ -27,6 +27,7 @@
 
 import { BOSS_ROSTER, BOSS_IDS, DUNGEON_BOSS_PREFIX } from './bossRoster.js';
 import { BOSS_ARENA_SCRIPTS, ARENA_MOVES, ARENA_TRIGGERS } from './arenaScripts.js';
+import { BOSS_PHASE_TUNING } from './bossPhases.js';
 import { ZONE_IDS, ZONE_NAMES, ZONE_ORDER } from './ZoneIdentity.js';
 import { REST_NPC_DEFS } from './restNpcDefs.js';
 import { BOSS_DEFEAT_LINES, BOSS_PHASE_LINES, DUNGEON_BOSS_LINES } from './bossDialogue.js';
@@ -330,6 +331,20 @@ export const CONTENT_TABLES = [
         tint: { t: 'int', required: false, min: 0, max: 0xffffff },
       },
     },
+  },
+  {
+    kind: 'bossPhaseTuning',
+    note: '每只世界 Boss 的阶段参数（W-B8 切片5，`content/bossPhases.js`）：键 `keyRef` 到名册，'
+      + '值是"第几阶段 → 一格子具名数字"。修前这些数散在五份 `update` 里按 `this.phase` 现算'
+      + '（`12 + this.phase * 4`、`phase >= 3 ? 1.2 : 2.0` 之类），于是"这只 Boss 二阶段什么样"'
+      + '没有一处读得到，改坏一处的症状是"那一档偏软/偏硬"而不报错',
+    shape: 'index',
+    table: BOSS_PHASE_TUNING,
+    keyRef: { of: 'bosses' },
+    // 值再往下是"阶段 → 一格数"的索引，schema 的 `t` 词汇表里没有"索引的索引"，
+    // 所以这里只声明到 record，逐阶段与逐字段的规则交给 invariant
+    value: { t: 'record' },
+    invariant: checkBossPhaseTuning,
   },
   {
     kind: 'bossDefeatLines',
@@ -1513,6 +1528,47 @@ export function checkEnemyRoster(table) {
  *   成对规则。分开写的症状是玩家在牌子跟前按交互却没反应（两个坐标各有读者：
  *   `buildEntranceMarkers` 读 entrance、`buildExteriorShells` 读 exterior）。
  */
+/**
+ * 阶段参数表的整表规则（W-B8 切片5）。字段词汇说不了的四件事：
+ *
+ * 1. **名册里每只世界 Boss 都得有一档**（少一只 = 它悄悄走兜底，与"设计过"看不出区别）；
+ * 2. **不许有多余的键**（多一只 = 打错了 id，而那只 Boss 其实在用兜底）；
+ * 3. **每只都要有 1/2/3 三档**（缺一档 = 那一档落回 `DEFAULT`，曲线在这里断掉）；
+ * 4. **`attackCooldown` 随阶段非增** —— 阶段越高出手越慢是"数值改反了"的典型症状，
+ *    而它的表现只是"这只 Boss 越打越软"，不报错。
+ */
+export function checkBossPhaseTuning(table) {
+  const out = [];
+  const 表 = table ?? {};
+  const 已知 = new Set(BOSS_IDS);
+
+  for (const id of Object.keys(表)) {
+    if (!已知.has(id)) out.push(`bossPhaseTuning["${id}"]: 名册里没有这只 Boss —— 打错 id 的话它其实在用兜底`);
+  }
+  for (const id of BOSS_IDS) {
+    const 三档 = 表[id];
+    if (!三档) { out.push(`bossPhaseTuning["${id}"]: 名册里有它，这里没有 —— 它会悄悄走兜底`); continue; }
+    const 冷却 = [];
+    for (const phase of [1, 2, 3]) {
+      const 档 = 三档[phase];
+      const p = `bossPhaseTuning["${id}"][${phase}]`;
+      if (!档) { out.push(`${p}: 缺这一档`); continue; }
+      const cd = 档.attackCooldown;
+      if (typeof cd !== 'number' || !(cd > 0)) out.push(`${p}.attackCooldown: 要是正数，实际 ${JSON.stringify(cd)}`);
+      else 冷却.push([phase, cd]);
+      for (const [k, v] of Object.entries(档)) {
+        if (k.startsWith('can') && typeof v !== 'boolean') out.push(`${p}.${k}: 开关要是布尔，实际 ${typeof v}`);
+      }
+    }
+    for (let i = 1; i < 冷却.length; i++) {
+      if (冷却[i][1] > 冷却[i - 1][1]) {
+        out.push(`bossPhaseTuning["${id}"]: ${冷却[i][0]} 阶段的收招间隔(${冷却[i][1]}) 比 ${冷却[i - 1][0]} 阶段(${冷却[i - 1][1]}) 还长 —— 阶段越高越慢，多半是改反了`);
+      }
+    }
+  }
+  return out;
+}
+
 export function checkDungeons(table) {
   const out = [];
   const rows = Array.isArray(table) ? table : [];
