@@ -57,10 +57,23 @@ export function bossById(id) {
  * 副本 Boss（`dungeon-` 前缀且后面有内容）一律认；空后缀（`'dungeon-'`）不认 ——
  * 那是拼接时 `def.id` 为空才会出现的东西，属于接线错误。
  */
+/**
+ * 是不是副本 Boss（`dungeon-` 前缀且后面有内容）。
+ *
+ * 单独给一个具名谓词，是因为全仓有**四处**要问这个问题（音频选曲、故事日志、上下文教学、
+ * 阶段演出），而修前每一处都自己写 `bossId?.startsWith('dungeon-')` ——
+ * 前缀一共被抄了五份。**谓词在这里，前缀常量也在这里**，抄错的可能就没了。
+ */
+export function isDungeonBossId(id) {
+  return typeof id === 'string'
+    && id.startsWith(DUNGEON_BOSS_PREFIX)
+    && id.length > DUNGEON_BOSS_PREFIX.length;
+}
+
 export function isKnownBossId(id) {
   if (typeof id !== 'string' || id === '') return false;
   if (BOSS_IDS.includes(id)) return true;
-  return id.startsWith(DUNGEON_BOSS_PREFIX) && id.length > DUNGEON_BOSS_PREFIX.length;
+  return isDungeonBossId(id);
 }
 
 /**

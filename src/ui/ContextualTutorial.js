@@ -1,6 +1,7 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { keyText } from '../content/keyHints.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
+import { isDungeonBossId } from '../content/bossRoster.js';
 
 const STORAGE_KEY = 'crossrealm_contextual_tips';
 /** 队列推进的计时分组 */
@@ -57,7 +58,7 @@ export class ContextualTutorial {
     });
 
     window.addEventListener('boss-start', (e) => {
-      const isDungeon = e.detail.bossId?.startsWith('dungeon-');
+      const isDungeon = isDungeonBossId(e.detail.bossId);
       this.trigger(
         isDungeon ? 'first-dungeon-boss' : 'first-open-boss',
         isDungeon ? '迷宫守钥者' : `Boss 战 — ${e.detail.name}`,

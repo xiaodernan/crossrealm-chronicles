@@ -2,7 +2,7 @@ import {
   BOSS_PHASE_LINES,
   BOSS_DEFEAT_LINES,
   DUNGEON_BOSS_LINES,
-  getDungeonBossId,
+  dungeonIdOf,
 } from '../content/bossDialogue.js';
 import { addShake } from '../engine/Shake.js';
 import { scheduler } from '../engine/Scheduler.js';
@@ -51,8 +51,8 @@ export class BossPhaseDirector {
 
   onStart(detail) {
     const bossId = detail.bossId;
-    if (bossId?.startsWith('dungeon-')) {
-      const dungeonId = bossId.replace('dungeon-', '');
+    const dungeonId = dungeonIdOf(bossId);
+    if (dungeonId) {
       const lines = DUNGEON_BOSS_LINES[dungeonId];
       if (lines?.intro) {
         scheduler.after(0.6, () => this.game.dialog.toast(lines.intro, 4000));
@@ -62,8 +62,8 @@ export class BossPhaseDirector {
 
   onPhase(detail) {
     const bossId = detail.bossId ?? detail.name;
-    if (bossId?.startsWith('dungeon-')) {
-      const dungeonId = bossId.replace('dungeon-', '');
+    const dungeonId = dungeonIdOf(bossId);
+    if (dungeonId) {
       const lines = DUNGEON_BOSS_LINES[dungeonId];
       if (detail.phase === 2 && lines?.p2) {
         this.showBanner('守钥者 · 第二阶段', lines.p2, '#ff8866');
@@ -94,8 +94,8 @@ export class BossPhaseDirector {
 
   onDefeat(detail) {
     const bossId = detail.bossId;
-    if (bossId?.startsWith('dungeon-')) {
-      const dungeonId = bossId.replace('dungeon-', '');
+    const dungeonId = dungeonIdOf(bossId);
+    if (dungeonId) {
       const lines = DUNGEON_BOSS_LINES[dungeonId];
       if (lines?.defeat) {
         scheduler.after(0.8, () => this.game.dialog.show('守钥者已倒', lines.defeat));

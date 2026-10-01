@@ -75,3 +75,22 @@ export const DUNGEON_BOSS_LINES = {
 export function getDungeonBossId(dungeonId) {
   return `${DUNGEON_BOSS_PREFIX}${dungeonId}`;
 }
+
+/**
+ * 上面那个的**反向**：bossId → 副本 id，不是副本 Boss 就返回 `null`。
+ *
+ * 为什么要有它：`ui/BossPhaseDirector.js` 里**三处**（开场 / 阶段 / 击破）都手写着
+ * `if (bossId?.startsWith('dungeon-')) { const dungeonId = bossId.replace('dungeon-', ''); … }`
+ * —— 那两处 `'dungeon-'` 字面量就是给前缀**又抄了两份真源**（三处加起来五份）。
+ * 前缀改了名（或将来加第二类动态 Boss）时，抄错的那一处不会报错，
+ * 只是那座副本的 Boss **静默地没有开场白 / 阶段台词 / 击破台词**。
+ *
+ * 用 `null` 而不是空串表示"不是副本 Boss"：空串是**合法**的副本 id 候选值吗？不是 ——
+ * 但 `if (dungeonId)` 这种写法碰上空串会走 else，与 `null` 表现相同；
+ * 而返回 `null` 至少让"没认出来"这件事在类型上说得清。
+ */
+export function dungeonIdOf(bossId) {
+  if (typeof bossId !== 'string' || !bossId.startsWith(DUNGEON_BOSS_PREFIX)) return null;
+  const id = bossId.slice(DUNGEON_BOSS_PREFIX.length);
+  return id === '' ? null : id;      // `'dungeon-'` 这种空后缀不是一座副本
+}

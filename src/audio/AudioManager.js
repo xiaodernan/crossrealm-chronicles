@@ -1,5 +1,6 @@
 /** Web Audio — 区域 BGM + Boss 专属层 + 战斗节奏层 + 音效 */
 import { scheduler } from '../engine/Scheduler.js';
+import { isDungeonBossId } from '../content/bossRoster.js';
 
 /**
  * 节拍链的分组标签（撤销口径按层分，一条链只被自己那一层清）。
@@ -258,7 +259,7 @@ export class AudioManager {
     this.bossFightActive = true;
     this._bossPhase = 1;
     let profile = BOSS_BGM_MAP[bossId] ?? BOSS_BGM_MAP.default;
-    if (bossId?.startsWith('dungeon-')) profile = 'boss-dungeon';
+    if (isDungeonBossId(bossId)) profile = 'boss-dungeon';
     this.audioMode = 'boss';
     this._bossProfile = profile;
     this._startZoneDrone(profile);

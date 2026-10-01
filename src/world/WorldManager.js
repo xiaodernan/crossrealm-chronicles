@@ -5,7 +5,7 @@ import { SpaceZone } from './zones/SpaceZone.js';
 import { VoidZone } from './zones/VoidZone.js';
 import { AbyssZone } from './zones/AbyssZone.js';
 import { WorldTerrain } from './WorldTerrain.js';
-import { sampleGlobalHeight, sampleGlobalHeightSmooth, sampleGroundNormal } from './TerrainHeight.js';
+import { sampleGlobalHeightSmooth, sampleGroundNormal } from './TerrainHeight.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { CollisionWorld } from '../engine/Collision.js';
 import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from '../content/ZoneIdentity.js';

@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { keyText, refreshKeyText } from '../content/keyHints.js';
 
 /** 自动通关 — 操控玩家角色跑图，Boss 步骤会强制现身后再推进任务 */

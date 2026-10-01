@@ -223,7 +223,10 @@ describe('跨文件：`bossId` 字面量必须是名册里的 id', () => {
    */
   const FORMS = [
     /bossId\s*:\s*(?:[A-Za-z_$][\w$.]*\s*\?\?\s*)?'([^']+)'/g,
-    /bossId\s*[!=]==\s*'([^']+)'/g,
+    // `bossId === 'x'` / `!==` —— 但**排除 `typeof bossId !== 'string'`**：
+    // 那是类型检查，右边的字面量是类型名不是 bossId。W-B1 切片4 给 `dungeonIdOf` 加
+    // `typeof bossId !== 'string'` 时就被这条误报过一次（`'string'` 恰好也长得像 kebab-case id）。
+    /(?<!typeof\s)bossId\s*[!=]==\s*'([^']+)'/g,
   ];
 
   /** 扫全树，返回 `{ file, literal }[]` */
@@ -255,6 +258,16 @@ describe('跨文件：`bossId` 字面量必须是名册里的 id', () => {
     const bad = scan().filter((h) => !isKnownBossId(h.literal));
     const detail = bad.map((h) => `  ${h.file}: '${h.literal}'`).join('\n');
     expect(bad, `这些 bossId 名册里没有（打错一个字母的典型症状是"静默不生效"）：\n${detail}`).toEqual([]);
+  });
+
+  it('扫描器自证：`typeof bossId !== \'string\'` 不算一次 bossId 比较', () => {
+    // 这是本片踩到的假阳性：类型检查右边的字面量是类型名，不是 bossId
+    const code = stripComments("if (typeof bossId !== 'string' || !bossId) return null;");
+    const m = [...code.matchAll(FORMS[1])];
+    expect(m).toEqual([]);
+    // 而真正的比较仍要扫到
+    const real = stripComments("if (bossId !== 'shadow-warden') return;");
+    expect([...real.matchAll(FORMS[1])].map((x) => x[1])).toEqual(['shadow-warden']);
   });
 
   it('门禁自证：塞一个打错的名字进去，扫描必须咬得住', () => {

@@ -1,4 +1,6 @@
 /** 统一叙事日志 — 探索/碎片/NPC/Boss/地牢，可存档 */
+import { isDungeonBossId } from '../content/bossRoster.js';
+
 export const JOURNAL_CATEGORIES = {
   all: '全部',
   quest: '任务',
@@ -100,7 +102,7 @@ export class StoryJournal {
     });
 
     window.addEventListener('enemy-defeated', (e) => {
-      if (e.detail.type !== 'boss' || e.detail.bossId?.startsWith('dungeon-')) return;
+      if (e.detail.type !== 'boss' || isDungeonBossId(e.detail.bossId)) return;
       const names = {
         'shadow-warden': '影界守护者',
         archmagus: '大奥术师',

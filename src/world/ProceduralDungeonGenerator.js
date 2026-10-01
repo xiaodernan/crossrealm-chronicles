@@ -133,7 +133,6 @@ export class ProceduralDungeonGenerator {
   static _buildBossArena(group, room, layout, def, accentMat, wallMat) {
     const rw = room.w;
     const rd = room.d;
-    const CS = layout.cellSize;
     const WH = layout.wallH;
     const WT = layout.wallT;
     const doorW = 5;

@@ -15,7 +15,6 @@ export class PhotoModeDirector {
     this.active = !this.active;
     const hud = document.getElementById('hud');
     const journal = document.getElementById('journal-panel');
-    const dialog = document.getElementById('dialog-overlay');
     this.el.textContent = keyText('拍照模式 · {photoMode} 退出 · 滚轮缩放');
     if (this.active) {
       hud?.classList.add('photo-hidden');

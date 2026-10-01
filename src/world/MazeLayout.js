@@ -233,8 +233,9 @@ function findFarthestRoom(spawn, rooms, doors) {
 
 function makeDoor(fromRoom, dir, cellSize, rooms, tgx, tgz) {
   const toRoom = rooms.find((r) => r.gx === tgx && r.gz === tgz);
+  // 门开在 **from 那一侧**的边界上，所以只需要 from 的半个尺寸；
+  // 原先还算了 to 的 `half2` 但没人用（W-B1 切片4 清掉）
   const half = (fromRoom.isBossArena ? fromRoom.w : cellSize) / 2;
-  const half2 = (toRoom?.isBossArena ? toRoom.w : cellSize) / 2;
   let x = fromRoom.x;
   let z = fromRoom.z;
   if (dir === 'n') z -= half;
