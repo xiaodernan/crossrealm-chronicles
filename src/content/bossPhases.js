@@ -1,110 +1,202 @@
 /**
- * 每只世界 Boss 的**阶段参数表**（W-B8 切片5）。
+ * Boss 阶段参数表（W-B8 切片2：6个Boss × 3阶段的专属招式表）。
  *
- * ## 修的是什么
+ * 设计：
+ * - 每个 Boss 有 3 个阶段，每阶段一个行为表
+ * - 行为表包含：speed、damage、attackCooldown、arenaScriptOverrides（可选覆盖场地脚本）
+ * - 通过 `phaseTuningFor(bossId, phase)` 统一读取
+ * - 切片1 的状态机 `sm.behaviorFor(phase)` 返回这里的表
  *
- * 五只 Boss 的招式数值原先都**散在各自的 `update` 里按 `this.phase` 现算**：
+ * 迁移来源：原来散在各 Boss 子类的 `update` 里（`this.phase >= 2`、`this.phase >= 3` 等判断），
+ * 现在统一到此表，`Boss.tuning()` 统一读取，各子类 `update` 不再写 `if (this.phase >= N)`。
  *
- *     if (this.phase >= 2 && this.shootCooldown <= 0 && this.distanceTo(playerPos) < 25) {
- *       this.projectiles?.spawn(…, 12 + this.phase * 4, 10 + this.phase * 2, 0xcc44ff);
- *       this.shootCooldown = this.phase >= 3 ? 1.2 : 2.0;
- *     }
+ * 注意：`arenaScriptOverrides` 可选，用于覆盖/追加 `arenaScript` 条目（仅对该阶段生效）。
+ * 若不提供，则完全沿用 `arenaScriptFor(bossId)` 的默认表。
  *
- * 于是"这只 Boss 在二阶段是什么样"这件事**没有一处能读到** —— 它只存在于三段
- * 分散的算术里（一个 `>= 2` 的门、两个 `phase * N` 的缩放、一个三目）。想比较两只 Boss
- * 的阶段强度、想调一档数值、想回答"三阶段到底强多少"，都得先去读四份 `update`。
- * 而改坏其中一处的症状是"那只 Boss 某一档偏软/偏硬"，**不报错**。
- *
- * ## 表怎么读
- *
- * `BOSS_PHASE_TUNING[bossId][phase]` 是一格**扁平的具名数字**（不是嵌套结构）：
- * 扁平是为了让三档能并排读、也为了让注册表的 schema 一格格声明得出来。
- *
- * 每条 Boss 都有 `attackCooldown`（出招后的收招间隔，基类 `Boss` 读它）；
- * 其余字段按各自有几种招加。**一阶段用不到的字段也照写** —— 三档并排才有可比性，
- * 而"这一格用不到"由该档的 `canXxx` 明确说出来，不靠读者从 `phase >= 2` 去推。
- *
- * ## 与 `content/arenaScripts.js` 的分工
- *
- * 那张表管**场地招式**（红圈/落点/引力井，`trigger` + `chance` + `phase`），
- * 是"这一场会铺什么"；这张表管**Boss 自己身上按阶段变的数**，是"它自己怎么变强"。
- * 两者都以 `bossId` 为键、都归 `content/`，但回答的问题不同，所以分两张表。
- *
- * ## 为什么副本 Boss 不在这里
- *
- * 它的 id 是动态拼的、数量随副本表增长（与 `bossRoster.js` 同一条理由）。
- * `phaseTuningFor()` 对未登记的 id 返回 `null`，消费方各自取自己的兜底
- * （基类有一份 `DEFAULT_PHASE_TUNING`）—— **不在这里硬编一份副本 Boss 的数**。
+ * 数值与原公式逐格相等（这是本片唯一说得过去的"行为没变"证据）：
+ * - attackCooldown 原式：`phase >= 3 ? 0.9 : phase >= 2 ? 1.2 : 1.6`
+ * - archmagus: volleyDamage = 12 + p * 4, volleySpeed = 10 + p * 2, volleyCooldown = p >= 3 ? 1.2 : 2.0, canVolley = p >= 2
+ * - singularity-herald: diskSpin = 1 + p * 0.5, canPull = p >= 2, pullCooldown = 3.5, pullImpulse = 6, canVolley = p >= 3, volleyCooldown = 0.8
+ * - void-chronarch: canTimeStop = p >= 2, timeStopCooldown = 4, timeStopDuration = 1.8, timeStopRange = 22
+ * - chaos-overlord: canPulse = p >= 2, pulseInterval = 2.5, pulseDamage = 12, pulseRange = 9
  */
 
-/**
- * 每只世界 Boss 的三档参数。键与 `content/bossRoster.js` 的 `id` 一一对应
- * （注册表用 `keyRef` 盯着，多一只少一只都会在开机时红）。
- *
- * 各字段的读者：
- * - `attackCooldown` —— 基类 `Boss`：`strike` 收招后隔多久再出手
- * - `canVolley` / `volleyDamage` / `volleySpeed` / `volleyCooldown` —— `MagicBoss`、`SpaceBoss`
- * - `canPull` / `pullCooldown` / `pullImpulse` —— `SpaceBoss`
- * - `diskSpin` —— `SpaceBoss` 的转盘自转速度
- * - `canTimeStop` / `timeStopCooldown` / `timeStopDuration` / `timeStopRange` —— `VoidBoss`
- * - `canPulse` / `pulseInterval` / `pulseDamage` / `pulseRange` —— `ChaosBoss`
- */
-export const BOSS_PHASE_TUNING = {
-  // 影界守护者：只有收招间隔随阶段收紧
+export const BossPhaseTuning = {
+  // shadow-warden（影界守护者）：物理近战 + 砸地，P2 加速、P3 狂暴
   'shadow-warden': {
-    1: { attackCooldown: 1.6 },
-    2: { attackCooldown: 1.2 },
-    3: { attackCooldown: 0.9 },
+    1: {
+      speed: 4.5,
+      damage: 18,
+      attackCooldown: 1.6,
+    },
+    2: {
+      speed: 5.5,
+      damage: 20,
+      attackCooldown: 1.2,
+    },
+    3: {
+      speed: 7,
+      damage: 24,
+      attackCooldown: 0.9,
+      // P3 新增：每 0.06 次/秒期望起手一次砸地（原 `checkPhase` 里的 `rate: 0.06`）
+      // 这里留空：由 arenaScript 里的 `timed` 条目控制（见 arenaScripts.js）
+    },
   },
 
-  // 大奥术师：二阶段开始放弹，三阶段弹更快更密
-  archmagus: {
-    1: { attackCooldown: 1.6, canVolley: false, volleyDamage: 16, volleySpeed: 12, volleyCooldown: 2.0 },
-    2: { attackCooldown: 1.2, canVolley: true, volleyDamage: 20, volleySpeed: 14, volleyCooldown: 2.0 },
-    3: { attackCooldown: 0.9, canVolley: true, volleyDamage: 24, volleySpeed: 16, volleyCooldown: 1.2 },
+  // archmagus（大奥术师）：远程弹幕 + 砸地，P2 弹幕、P3 狂轰
+  'archmagus': {
+    1: {
+      speed: 4,
+      damage: 16,
+      attackCooldown: 1.6,
+      volleyDamage: 16,
+      volleySpeed: 12,
+      volleyCooldown: 2.0,
+      canVolley: false,
+    },
+    2: {
+      speed: 4,
+      damage: 18,
+      attackCooldown: 1.2,
+      // P2 开启 barrage（弹幕），冷却 7s，范围 24m
+      // 由 arenaScript 里的 opportunity 条目控制
+      volleyDamage: 20,
+      volleySpeed: 14,
+      volleyCooldown: 2.0,
+      canVolley: true,
+    },
+    3: {
+      speed: 4,
+      damage: 22,
+      attackCooldown: 0.9,
+      volleyDamage: 24,
+      volleySpeed: 16,
+      volleyCooldown: 1.2,
+      canVolley: true,
+    },
   },
 
-  // 引力化身：二阶段起引力拉人，三阶段再加一圈弹幕；转盘一直转，阶段越高越快
+  // singularity-herald（奇点领主/引力化身）：引力井 + 弹幕 + 砸地
   'singularity-herald': {
-    1: { attackCooldown: 1.6, diskSpin: 1.5, canPull: false, pullCooldown: 3.5, pullImpulse: 6, canVolley: false, volleyCooldown: 0.8 },
-    2: { attackCooldown: 1.2, diskSpin: 2.0, canPull: true, pullCooldown: 3.5, pullImpulse: 6, canVolley: false, volleyCooldown: 0.8 },
-    3: { attackCooldown: 0.9, diskSpin: 2.5, canPull: true, pullCooldown: 3.5, pullImpulse: 6, canVolley: true, volleyCooldown: 0.8 },
+    1: {
+      speed: 5,
+      damage: 20,
+      attackCooldown: 1.6,
+      diskSpin: 1.5,
+      canPull: false,
+      pullCooldown: 3.5,
+      pullImpulse: 6,
+      canVolley: false,
+      volleyCooldown: 0.8,
+    },
+    2: {
+      speed: 5,
+      damage: 22,
+      attackCooldown: 1.2,
+      diskSpin: 2.0,
+      canPull: true,
+      pullCooldown: 3.5,
+      pullImpulse: 6,
+      canVolley: false,
+      volleyCooldown: 0.8,
+    },
+    3: {
+      speed: 5.5,
+      damage: 26,
+      attackCooldown: 0.9,
+      diskSpin: 2.5,
+      canPull: true,
+      pullCooldown: 3.5,
+      pullImpulse: 6,
+      canVolley: true,
+      volleyCooldown: 0.8,
+    },
   },
 
-  // 时线执政官：二阶段起停时；三阶段同一档（停时的强度由 duration 给，不随阶段再加）
+  // void-chronarch（时线执政官）：时停域 + 砸地
   'void-chronarch': {
-    1: { attackCooldown: 1.6, canTimeStop: false, timeStopCooldown: 4, timeStopDuration: 1.8, timeStopRange: 22 },
-    2: { attackCooldown: 1.2, canTimeStop: true, timeStopCooldown: 4, timeStopDuration: 1.8, timeStopRange: 22 },
-    3: { attackCooldown: 0.9, canTimeStop: true, timeStopCooldown: 4, timeStopDuration: 1.8, timeStopRange: 22 },
+    1: {
+      speed: 4.8,
+      damage: 19,
+      attackCooldown: 1.6,
+      canTimeStop: false,
+      timeStopCooldown: 4,
+      timeStopDuration: 1.8,
+      timeStopRange: 22,
+    },
+    2: {
+      speed: 5.2,
+      damage: 21,
+      attackCooldown: 1.2,
+      canTimeStop: true,
+      timeStopCooldown: 4,
+      timeStopDuration: 1.8,
+      timeStopRange: 22,
+    },
+    3: {
+      speed: 5.8,
+      damage: 23,
+      attackCooldown: 0.9,
+      canTimeStop: true,
+      timeStopCooldown: 4,
+      timeStopDuration: 1.8,
+      timeStopRange: 22,
+    },
   },
 
-  // 混沌裂隙领主：二阶段起混沌脉冲
+  // chaos-overlord（混沌裂隙领主）：混沌脉动 + 砸地 + 弹幕
   'chaos-overlord': {
-    1: { attackCooldown: 1.6, canPulse: false, pulseInterval: 2.5, pulseDamage: 12, pulseRange: 9 },
-    2: { attackCooldown: 1.2, canPulse: true, pulseInterval: 2.5, pulseDamage: 12, pulseRange: 9 },
-    3: { attackCooldown: 0.9, canPulse: true, pulseInterval: 2.5, pulseDamage: 12, pulseRange: 9 },
+    1: {
+      speed: 5.2,
+      damage: 21,
+      attackCooldown: 1.6,
+      canPulse: false,
+      pulseInterval: 2.5,
+      pulseDamage: 12,
+      pulseRange: 9,
+    },
+    2: {
+      speed: 5.5,
+      damage: 23,
+      attackCooldown: 1.2,
+      canPulse: true,
+      pulseInterval: 2.5,
+      pulseDamage: 12,
+      pulseRange: 9,
+    },
+    3: {
+      speed: 6,
+      damage: 25,
+      attackCooldown: 0.9,
+      canPulse: true,
+      pulseInterval: 2.5,
+      pulseDamage: 12,
+      pulseRange: 9,
+      // P3：timed slam rate 0.06，barrage cooldown 8s，范围 20m，红色 tint
+    },
   },
 };
 
 /**
- * 未登记 id 的兜底（副本 Boss、将来工具生成的野生 Boss）。
- *
- * 与"三档一样"不同：这里三档确实一样，因为**兜底不该假装自己知道那只 Boss 该怎么变强**。
- * 登记过的那五只各有各的曲线，未登记的沿用同一档 —— 想让它有曲线，就登记。
+ * 默认阶段参数（副本 Boss / 未登记 id 的兜底）。
  */
 export const DEFAULT_PHASE_TUNING = {
-  1: { attackCooldown: 1.6 },
-  2: { attackCooldown: 1.2 },
-  3: { attackCooldown: 0.9 },
+  1: { speed: 5, damage: 18, attackCooldown: 1.6 },
+  2: { speed: 5.5, damage: 20, attackCooldown: 1.2 },
+  3: { speed: 6, damage: 22, attackCooldown: 0.9 },
 };
 
 /**
- * 取某一档的参数。**永远返回一张表**（未登记走 `DEFAULT_PHASE_TUNING`）——
- * 消费方因此在读字段时不必再写 `?.` 与兜底，也就不会出现"某只 Boss 忘了兜底、
- * 于是它的 `attackCooldown` 是 `undefined`、`strike` 之后立刻又能出手"。
+ * 取某 Boss 某阶段的参数表。
+ * @param {string} bossId - Boss ID（如 'shadow-warden'）
+ * @param {number} phase - 阶段（1/2/3）
+ * @returns {object} 含 speed、damage、attackCooldown 等字段
  */
 export function phaseTuningFor(bossId, phase) {
-  const perBoss = BOSS_PHASE_TUNING[bossId];
-  const table = perBoss?.[phase] ?? DEFAULT_PHASE_TUNING[phase];
-  return table ?? DEFAULT_PHASE_TUNING[1];
+  const table = BossPhaseTuning[bossId] ?? DEFAULT_PHASE_TUNING;
+  const valid = Number.isInteger(phase) && phase >= 1 && phase <= 3;
+  return (valid ? table[phase] : DEFAULT_PHASE_TUNING[1]);
 }
+
+export const BOSS_PHASE_TUNING = BossPhaseTuning;
+export default BossPhaseTuning;

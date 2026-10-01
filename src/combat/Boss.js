@@ -23,7 +23,8 @@ export class Boss extends Enemy {
     });
 
     this.bossId = config.bossId ?? 'shadow-warden';
-    this.phase = 1;
+    // 没有 `this.phase = 1`：阶段由状态机初始化（构造它的那几行在下面），
+    // `phase` 是取/设值器（见类里那段注释）—— 在这一行 `this.sm` 还不存在
     this.arenaCenter = config.arenaCenter ?? this.position.clone();
     this.arenaRadius = config.arenaRadius ?? 22;
     this.enraged = false;
@@ -119,17 +120,30 @@ export class Boss extends Enemy {
   }
 
   /**
-   * 阶段这条账的**权威在状态机**（`sm.phase`），`this.phase` 是每帧同步过来的**镜像**。
+   * 阶段：**读**回状态机那本账，**写**走状态机的唯一入口（W-B8 切片6）。
    *
-   * 为什么不把 `phase` 做成只读取值器（那样"谁是权威"就靠结构而不靠约定了）：
-   * 本片量过 —— 只读化会让 **7 个测试文件、46 条用例**当场红（它们都写 `boss.phase = N`
-   * 来模拟"这只 Boss 已经在第 N 阶段"，而 6 个文件连 `window` 都没桩，`transitionTo`
-   * 派事件那一步也会炸）。那是另一件事，需要逐文件改成走状态机并补 `window` 桩，
-   * 不该塞进"接上阶段参数表"这一片里。**已记入看板余项**，连同那 46 条的实测数。
+   * 修前 `phase` 是一个普通字段，由 `checkPhase()` 每帧从 `sm.phase` 抄回来 ——
+   * 两个字段记同一件事，于是"直接给 `this.phase` 赋值"是个能骗过一半读者的后门：
+   * 场地脚本读 `this.phase`、阶段参数表读 `sm.phase`，两边会给出不同的阶段。
+   * 切片5 接上阶段表时这件事当场显形（两个既有用例红）。
    *
-   * 在那之前，这一片的做法是：**所有读者读同一个字段** —— 场地脚本读 `this.phase`，
-   * 阶段参数表也按 `this.phase` 取（`this.tuning()`），于是两边不会分叉。
+   * 现在它是取/设值器：
+   * - **读**永远等于 `sm.phase`，"谁是权威"不再靠约定；
+   * - **写**走 `sm.transitionTo()` —— 那一条同时负责范围校验、进入/离开钩子与
+   *   `boss-phase` 事件，于是"改了阶段却没派事件"或"派了事件却没改阶段"都不再可能。
+   *
+   * 因此 `boss.phase = N` 这种写法**仍然有效**（切片6 之前有 7 个测试文件这么写、
+   * 46 条用例），只是它现在真的经过状态机 —— 那是本片想要的：**写法不必改，
+   * 但语义从此只有一条路**。
    */
+  get phase() {
+    return this.sm.phase;
+  }
+
+  set phase(p) {
+    this.sm.transitionTo(p);
+  }
+
   /**
    * 当前这一档的参数（W-B8 切片5）。**各 Boss 的 `update` 都从这里取数** ——
    * 于是"这只 Boss 二阶段什么样"有唯一一处可读，而不是散在三段算术里。
@@ -143,9 +157,9 @@ export class Boss extends Enemy {
   }
 
   checkPhase() {
-    // 阶段推进由状态机负责；`this.phase` 是从它同步过来的**镜像**（见 `phase` 那段注释）
+    // 阶段推进由状态机负责；同步一次 phase（防止外部直接改了 this.phase 绕过状态机）
+    this.phase = this.sm.phase;
     this.sm.checkPhaseTransitions();
-    if (this.sm.phase !== this.phase) this.phase = this.sm.phase;
   }
 
   die() {
