@@ -21,8 +21,7 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
       + '由 `dungeonEncounterOf(def.id)` 申领（W-B10 切片3b）'
     );
   }
-  let s = seed;
-  const rnd = () => { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
+  const rnd = makeSeededRng(seed);
 
   const visited = Array.from({ length: gridH }, () => Array(gridW).fill(false));
   const walls = Array.from({ length: gridH }, () =>
@@ -130,6 +129,62 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
     bounds: { minX, maxX, minZ, maxZ },
     wallH: WALL_H, wallT: WALL_T,
   };
+}
+
+/**
+ * 迷宫的随机流（W-B10 切片4a，修 B75）。换掉的那一行是
+ * `s = (s * 16807) % 2147483647; return (s - 1) / 2147483646;`。
+ *
+ * 它承诺 `[0,1)`，实际给的是 `[-4.66e-10, 0.9999999995]`，而消费方一律写 `Math.floor(rnd() * 长度)`：
+ * 那一发**负零头**取到 `[-1]`（undefined），下一行解构就抛。普查 `.tmp-20260930/wb10s4a-census2.mjs`
+ * 把坏的定义域量成了三块，而不是一块：
+ * - `seed ≡ 0 (mod 2^31-1)` 整族崩（0 / 2147483647 / 4294967294 / 6442450941 四颗全崩）；
+ * - `seed < 0` **整片**崩（随机 100 颗负种子里 100 颗第一发就不可用）—— JS 的 `%` 保留符号，
+ *   所以那是半个平面，不是台账原话里那种"个别边界值"；
+ * - `NaN` / `Infinity` 崩。
+ *
+ * 反过来，台账那句"进副本当场崩"在生产侧今天并不成立：唯一的调用点递 `Date.now()`，实测它前后
+ * 各 500 万毫秒里 **0 颗**落进坏值。所以这一片修的不是"现在会崩"，是**"种子的定义域没人管"**——
+ * 下一个不递 `Date.now()` 的调用方（存档里的种子、掷出来的负数、URL 上的字符串）才会把它变成门口的一次崩溃。
+ *
+ * 新做法：**有限整数种子 → 32 位整数状态**（mulberry32 那一步）。全是整数算术，积不会越过 2^53，
+ * 所以没有"乘法丢低位"那一档；`>>> 0` 之后每一发都落在 `[0,1)` 里 —— 这是构造出来的，不是祈祷的。
+ * 状态是 32 位，种子因此以 2^32 为周期。非有限与非数字**不兜底**（B71 口径，与 `dungeonEncounterOf`
+ * 同一把尺子）：静默把 `NaN` 折成 0 号种子等于把"调用方递错了"变成"这座副本悄悄用了别座的布局"。
+ */
+function makeSeededRng(seed) {
+  if (typeof seed !== 'number' || !Number.isFinite(seed)) {
+    throw new TypeError(
+      `generateMaze 的种子必须是一个有限数字（收到 ${typeof seed} ${显示(seed)}）—— `
+      + 'NaN / Infinity / 非数字都摇不出可重现的迷宫（W-B10 切片4a，修 B75）'
+    );
+  }
+  let a = fold32(Math.floor(seed));
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** 报错消息里要把收到的东西说出来，而 `String()` 自己也会抛（Symbol 进了模板、BigInt 进 JSON） */
+function 显示(v) {
+  try { return String(v); } catch { return Object.prototype.toString.call(v); }
+}
+
+/**
+ * 把任意有限整数搅成一个 32 位状态：右移—异或—乘大奇素数三段，于是种子的每一位都影响状态，
+ * 相邻种子不会只差一位。`>>> 0` 只看得见低 32 位，所以超过 2^32 的种子（`Date.now()` 就是）
+ * 把高位乘进来，`seed` 与 `seed + 2^32` 因此不并档。
+ */
+function fold32(n) {
+  const 低 = n >>> 0;
+  const 高 = Math.floor(n / 4294967296);
+  let x = (低 ^ Math.imul(高, 0x9e3779b1)) >>> 0;
+  x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0;
+  x = Math.imul(x ^ (x >>> 13), 0x45d9f3b) >>> 0;
+  return (x ^ (x >>> 16)) >>> 0;
 }
 
 /**
