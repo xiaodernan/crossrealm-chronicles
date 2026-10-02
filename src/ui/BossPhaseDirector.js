@@ -113,7 +113,7 @@ export class BossPhaseDirector {
       return;
     }
 
-    this._playPhaseTransitionFX(cfg.color ?? '#c9a962', cfg.shake ?? 0.12);
+    this._playPhaseTransitionFX(cfg.color ?? '#c9a962', cfg.shake ?? 0.12, detail.phase);
 
     this.showBanner(cfg.banner ?? `阶段 ${detail.phase}`, cfg.toast ?? '', cfg.color ?? '#c9a962');
     if (cfg.toast) this.game.dialog.toast(cfg.toast, 3500);
@@ -127,40 +127,36 @@ export class BossPhaseDirector {
     });
   }
 
-  _playPhaseTransitionFX(color, shakeIntensity) {
+  _playPhaseTransitionFX(color, shakeIntensity, phase = 2) {
     if (this.phaseFlashEl) {
       this.phaseFlashEl.classList.remove('hidden');
       this.phaseFlashEl.style.opacity = '0.6';
       this.phaseFlashEl.style.background = `radial-gradient(circle at 50% 50%, ${color} 0%, transparent 70%)`;
+      scheduler.clear(PHASE_FX_TAG);
       scheduler.after(0, () => {
         this.phaseFlashEl.style.opacity = '0';
-        scheduler.after(0.12, () => this.phaseFlashEl.classList.add('hidden'));
-      });
+        scheduler.after(0.12, () => this.phaseFlashEl.classList.add('hidden'), PHASE_FX_TAG);
+      }, PHASE_FX_TAG);
     }
 
     if (this.game?.enemyManager?.boss) {
       this._spawnPhaseParticles(this.game.enemyManager.boss, this.game.enemyManager.boss.bossId);
     }
 
-    const phaseShake = this._getPhaseShakeIntensity();
+    const phaseShake = this._getPhaseShakeIntensity(phase);
     if (phaseShake > 0) addShake(phaseShake);
 
     window.dispatchEvent(new CustomEvent('game-audio-sfx', { detail: { sfx: 'bossPhase' } }));
   }
 
-  _getPhaseShakeIntensity() {
-    const phase = this.sm?.phase ?? 1;
+  _getPhaseShakeIntensity(phase = 2) {
     const phaseMultipliers = { 1: 0.5, 2: 1.0, 3: 1.5 };
-    return 0.12 * (phaseMultipliers[this.sm?.phase ?? 1] ?? 1.0);
+    return 0.12 * (phaseMultipliers[phase] ?? 1.0);
   }
 
   _spawnPhaseParticles(boss, bossId) {
     if (!this.scene || typeof THREE === 'undefined') return;
 
-    const bossColor = this._getBossColor(bossId);
-
-    const count = 180;
-    const particlesGeo = new THREE.BufferGeometry();
     const pos = new Float32Array(180 * 3);
     const vel = new Float32Array(180 * 3);
     const colors = new Float32Array(180 * 3);
@@ -183,10 +179,10 @@ export class BossPhaseDirector {
       sizes[i] = 0.2 + Math.random() * 0.25;
     }
 
-    const particlesGeo1 = new THREE.BufferGeometry();
-    particlesGeo1.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    particlesGeo1.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    particlesGeo1.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    const particlesGeo = new THREE.BufferGeometry();
+    particlesGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    particlesGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    particlesGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
     const mat = new THREE.PointsMaterial({
       size: 0.35,
@@ -198,14 +194,14 @@ export class BossPhaseDirector {
       blending: THREE.AdditiveBlending,
     });
 
-    const particles = new THREE.Points(particlesGeo1, mat);
+    const particles = new THREE.Points(particlesGeo, mat);
     this.phaseParticleGroup.add(particles);
 
-    this._phaseParticles = { particles, velocities: [], lifetime: 0, maxLifetime: 1.5 };
-    this._phaseParticles.velocities = new Float32Array(180 * 3);
-    for (let i = 0; i < 180 * 3; i++) {
-      this._phaseParticles.velocities[i] = (Math.random() - 0.5) * (i % 3 === 1 ? 10 : 5);
-    }
+    this._phaseParticles = { particles, velocities: vel, lifetime: 0, maxLifetime: 1.5 };
+  }
+
+  update(dt) {
+    this._updatePhaseParticles(dt);
   }
 
   _updatePhaseParticles(dt) {
@@ -218,8 +214,6 @@ export class BossPhaseDirector {
     }
 
     const pos = this._phaseParticles.particles.geometry.attributes.position.array;
-    const vel = this._phaseParticles.velocities;
-    const lifeRatio = this._phaseParticles.lifetime / 1.5;
 
     for (let i = 0; i < 180; i++) {
       pos[i * 3] += this._phaseParticles.velocities[i * 3] * dt;

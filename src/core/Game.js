@@ -868,6 +868,7 @@ export class Game {
     if (playing) {
       this.bossRematch?.update(dt, this.player.position);
       this.bossApproach?.update(dt, this.player.position);
+      this.bossPhaseDirector?.update(dt);
     }
     /* 相机所有者的收尾：FOV 增量按帧申领，这一笔落下之后本帧的申领就清零 ——
      * 没有任何系统需要"记得恢复基准"（M3：相机唯一写入者）。
