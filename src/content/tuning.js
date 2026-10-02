@@ -56,6 +56,20 @@ export const BODY_PLANS = {
    */
   hexer:      { scale: 0.98, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   juggernaut: { scale: 1.22, parts: ['head', 'torso', 'legs'], radius: 0.62 },
+  /**
+   * W-B9 切片1 新增：幽暗林地 —— 迷雾缠绕的古老森林
+   * 怨影/哨卫是悬浮体，掠行兽是贴地快速体
+   */
+  gloom_wraith:   { scale: 0.90, parts: ['head', 'torso'], radius: 0.40, hover: 0.7 },
+  gloom_stalker:  { scale: 0.93, parts: ['head', 'torso', 'legs'], radius: 0.40 },
+  gloom_sentinel: { scale: 1.02, parts: ['head', 'torso'], radius: 0.52, hover: 0.35 },
+  /**
+   * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
+   * 爬兽贴地、骑士最重、舞者最轻
+   */
+  radiant_crawler: { scale: 1.00, parts: ['head', 'torso', 'legs'], radius: 0.48 },
+  radiant_knight:  { scale: 1.20, parts: ['head', 'torso', 'legs'], radius: 0.60 },
+  radiant_dancer:  { scale: 0.92, parts: ['head', 'torso', 'legs'], radius: 0.40 },
 };
 
 /**
@@ -95,6 +109,18 @@ export const ENEMY_RESIST = {
   hexer: { fire: -0.2, ice: 0.2 },
   /** 破阵重兵：全身板甲，火与冰都不好使 —— 撬它靠的是架势与走位，不是属性 */
   juggernaut: { fire: 0.15, ice: 0.25 },
+  /** W-B9 幽暗林地：幽暗怨影怕火（更吃），重力打不实 */
+  gloom_wraith: { fire: -0.15, gravity: 0.2 },
+  /** W-B9 幽暗林地：幽暗掠行兽贴地快体，引力吃得实，冰系削得动 */
+  gloom_stalker: { gravity: -0.2, ice: 0.1 },
+  /** W-B9 幽暗林地：幽暗哨卫装甲构装，火与重力都啃不动多少 */
+  gloom_sentinel: { fire: 0.25, gravity: 0.15 },
+  /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
+  radiant_crawler: { ice: -0.25, gravity: 0.15 },
+  /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
+  radiant_knight: { fire: 0.2, ice: 0.2 },
+  /** W-B9 辉煌圣域：辉煌舞者轻装快体，冰与引力都啃得动 */
+  radiant_dancer: { gravity: -0.2, ice: -0.1 },
 };
 
 export const CRIT = {
@@ -740,5 +766,13 @@ export const ENEMY_MOVE_SETS = {
   /** W-B7 切片4：此前各只有一类原生敌人的两座位面各补一类 */
   hexer: ['volley', 'shot', 'guard'],
   juggernaut: ['onslaught', 'slam', 'cleave', 'guard'],
+  /** W-B9 切片1：幽暗林地三类敌人 */
+  gloom_wraith: ['phase', 'dive', 'thrust', 'sweep'],
+  gloom_stalker: ['flurry', 'howl', 'thrust', 'cleave'],
+  gloom_sentinel: ['charge', 'shot', 'guard', 'cleave'],
+  /** W-B9 切片1：辉煌圣域三类敌人 */
+  radiant_crawler: ['rift', 'flurry', 'thrust'],
+  radiant_knight: ['bash', 'sweep', 'guard', 'cleave'],
+  radiant_dancer: ['whirl', 'flurry', 'thrust'],
 };
 

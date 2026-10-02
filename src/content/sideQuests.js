@@ -323,9 +323,43 @@ export const SIDE_QUESTS_ZONE = [
     reward: 16,
     journal: '墙外数呼吸的那位，今晚看见了额外两颗星。',
   },
+  {
+    id: 'side-zone-gloom',
+    zone: ZONE_IDS.GLOOM,
+    title: '雾林三歇',
+    desc: '在幽暗林地营火歇过三次，并看过那片迷雾深处的插画',
+    check: 认得一座(ZONE_IDS.GLOOM),
+    reward: 15,
+    journal: '迷雾记住了你的脚印，三次相逢方才肯认。',
+  },
+  {
+    id: 'side-zone-radiant',
+    zone: ZONE_IDS.RADIANT,
+    title: '圣域三歇',
+    desc: '在辉煌圣域营火歇过三次，并看过那座金色宫殿的插画',
+    check: 认得一座(ZONE_IDS.RADIANT),
+    reward: 18,
+    journal: '晨曦见证了你的坚持，圣域记下了你的名字。',
+  },
+  {
+    id: 'side-wisp-gloom',
+    zone: ZONE_IDS.GLOOM,
+    title: '雾林双萤',
+    desc: '收下幽暗林地的两枚残响魂火，并认过那块火牌（发现营火）',
+    check: 拾遗一座(ZONE_IDS.GLOOM),
+    reward: 12,
+    journal: '两盏冷光跟着你走出林子，火牌在原地亮着。',
+  },
+  {
+    id: 'side-wisp-radiant',
+    zone: ZONE_IDS.RADIANT,
+    title: '圣域双萤',
+    desc: '收下辉煌圣域的两枚残响魂火，并认过那块火牌（发现营火）',
+    check: 拾遗一座(ZONE_IDS.RADIANT),
+    reward: 16,
+    journal: '两盏暖光跟着你走出圣域，火牌在原地亮着。',
+  },
 ];
-
-/** 三族合并后的唯一名单：分母、页签、完成检测都只认它（撞 id 当场抛，静默覆盖就是少一条支线） */
 export const SIDE_QUESTS_ALL = (() => {
   const 名单 = [...SIDE_QUESTS_BASE, ...SIDE_QUESTS_ZONE, ...SIDE_QUESTS_POP];
   const 见过 = new Set();

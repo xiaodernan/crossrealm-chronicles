@@ -26,6 +26,10 @@ export const ZONE_IDS = {
   SPACE: 'space',
   VOID: 'void',
   ABYSS: 'abyss',
+  /** 新增：幽暗林地 — 迷雾缠绕的古老森林，介于幻想与虚空之间 */
+  GLOOM: 'gloom',
+  /** 新增：辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊 */
+  RADIANT: 'radiant',
   /** 位面之间的空旷走廊：不属于任何区域，大气取中性 */
   CORRIDOR: 'corridor',
   /** 兜底：不应该出现，出现即为接线错误 */
@@ -39,6 +43,8 @@ export const ZONE_ORDER = [
   ZONE_IDS.SPACE,
   ZONE_IDS.VOID,
   ZONE_IDS.ABYSS,
+  ZONE_IDS.GLOOM,
+  ZONE_IDS.RADIANT,
 ];
 
 /**
@@ -68,6 +74,8 @@ export const ZONE_NAMES = {
   [ZONE_IDS.SPACE]: '米勒荒原',
   [ZONE_IDS.VOID]: '破碎时线',
   [ZONE_IDS.ABYSS]: '混沌边境',
+  [ZONE_IDS.GLOOM]: '幽暗林地',
+  [ZONE_IDS.RADIANT]: '辉煌圣域',
   [ZONE_IDS.CORRIDOR]: '区际走廊',
 };
 
@@ -92,6 +100,37 @@ export const HUB_ZONE = Object.freeze({
 });
 
 /** 区际走廊 —— 不属于任何位面，中性大气；它同样要有身份，不能是 `null` */
+/** 幽暗林地 —— 迷雾缠绕的古老森林，介于幻想与虚空之间 */
+export const GLOOM_ZONE = Object.freeze({
+  id: ZONE_IDS.GLOOM,
+  center: Object.freeze({ x: 180, z: 100 }),
+  radius: 160,
+  mapRadius: 145,
+  mapColor: '#3a3a4a',
+  info: Object.freeze({
+    id: ZONE_IDS.GLOOM,
+    name: ZONE_NAMES[ZONE_IDS.GLOOM],
+    subtitle: '幽暗森林 · 迷雾之境',
+    description: '永恒的薄雾笼罩着扭曲的树木。这里没有阳光，只有微弱的荧光苔藓指引方向。',
+  }),
+});
+
+/** 辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊 */
+export const RADIANT_ZONE = Object.freeze({
+  id: ZONE_IDS.RADIANT,
+  center: Object.freeze({ x: -180, z: -160 }),
+  radius: 150,
+  mapRadius: 135,
+  mapColor: '#ffd700',
+  info: Object.freeze({
+    id: ZONE_IDS.RADIANT,
+    name: ZONE_NAMES[ZONE_IDS.RADIANT],
+    subtitle: '金沙圣域 · 晨曦之地',
+    description: '流动的金沙构成的宏伟宫殿。晨曦初照时，整座城市都在发光。',
+  }),
+});
+
+/** 区际走廊 —— 不属于任何区域，大气取中性 */
 export const CORRIDOR_ZONE = Object.freeze({
   id: ZONE_IDS.CORRIDOR,
   center: null,
@@ -109,6 +148,8 @@ export const CORRIDOR_ZONE = Object.freeze({
 /** 按 id 取静态描述（枢纽与走廊没有 Zone 实例，文案从这里拿） */
 export function zoneDescriptor(id) {
   if (id === ZONE_IDS.HUB) return HUB_ZONE;
+  if (id === ZONE_IDS.GLOOM) return GLOOM_ZONE;
+  if (id === ZONE_IDS.RADIANT) return RADIANT_ZONE;
   if (id === ZONE_IDS.CORRIDOR) return CORRIDOR_ZONE;
   return null;
 }
