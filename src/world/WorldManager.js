@@ -7,6 +7,8 @@ import { AbyssZone } from './zones/AbyssZone.js';
 import { GloomZone } from './zones/GloomZone.js';
 import { RadiantZone } from './zones/RadiantZone.js';
 import { WorldTerrain } from './WorldTerrain.js';
+import { InternalSpaceManager, InternalSpaceTemplates } from './InternalSpace.js';
+import { createVerticalScheduler } from './VerticalSchedule.js';
 import { sampleGlobalHeightSmooth, sampleGroundNormal } from './TerrainHeight.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { CollisionWorld } from '../engine/Collision.js';
@@ -28,6 +30,8 @@ export class WorldManager {
     this.currentZone = null;
     this.hubPOIs = [];
     this.bounds = WORLD_BOUNDS;
+    this.internalSpaceManager = new InternalSpaceManager();
+    this.verticalSchedulers = new Map(); // zoneId -> VerticalScheduler
   }
 
   /** 当前区域的稳定 id（修 B36：逻辑判据不再是中文显示名） */
@@ -38,6 +42,53 @@ export class WorldManager {
   /** 当前区域的显示文案（UI 专用；`name` 与 `subtitle` 允许随时改字） */
   get zoneInfo() {
     return this.currentZone?.info ?? null;
+  }
+
+  /** 当前内部空间（若玩家在室内/建筑内则返回 InternalSpace 实例，否则 null） */
+  get currentInternalSpace() {
+    return this.internalSpaceManager?.currentSpace ?? null;
+  }
+
+  /** 当前内部空间的楼层（无则 0） */
+  get internalSpaceFloor() {
+    return this.internalSpaceManager?.getCurrentFloor() ?? 0;
+  }
+
+  /** 当前内部空间的雾效配置（若有） */
+  get currentInternalFog() {
+    return this.internalSpaceManager?.getCurrentFog() ?? null;
+  }
+
+  /** 当前区域的竖向调度器（W-B9 切片3） */
+  get verticalScheduler() {
+    return this.verticalSchedulers?.get(this.zoneId) ?? null;
+  }
+
+  /** 当前楼层（由竖向调度器管理） */
+  get currentFloor() {
+    return this.verticalScheduler?.currentFloor ?? 0;
+  }
+
+  /** 检查竖向日程解锁条件（任务/道具/等级） */
+  _checkVerticalRequirement(req) {
+    // 支持：任务完成、道具拥有、等级达到
+    if (req.startsWith('quest:')) {
+      const questId = req.slice(6);
+      return this.game?.quests?.isCompleted?.(questId) ?? false;
+    }
+    if (req.startsWith('item:')) {
+      const itemId = req.slice(5);
+      return this.game?.player?.inventory?.has?.(itemId) ?? false;
+    }
+    if (req.startsWith('level:')) {
+      const level = parseInt(req.slice(6), 10);
+      return (this.game?.stats?.level ?? 0) >= level;
+    }
+    // 兼容支线任务 id 直接写
+    if (req.startsWith('side-')) {
+      return this.game?.quests?.isSideCompleted?.(req) ?? false;
+    }
+    return false;
   }
 
   build() {
@@ -60,6 +111,25 @@ export class WorldManager {
 
     this.buildHubLandmarks();
     this.buildCollision();
+
+    // 注册并构建内部空间（W-B9 切片2）
+    this.internalSpaceManager.register(InternalSpaceTemplates.gloomAncientShrine({ x: 180, z: 100 }));
+    this.internalSpaceManager.register(InternalSpaceTemplates.gloomTreeHollow({ x: 180, z: 100 }));
+    this.internalSpaceManager.register(InternalSpaceTemplates.radiantGrandHall({ x: -180, z: -160 }));
+    this.internalSpaceManager.register(InternalSpaceTemplates.radiantStarwatchTower({ x: -180, z: -160 }));
+
+    // 为每个区域构建内部空间
+    for (const zone of this.zones) {
+      this.internalSpaceManager.buildZone(zone.id, zone.center);
+    }
+
+    // 初始化竖向调度器（W-B9 切片3）
+    for (const zone of this.zones) {
+      const scheduler = createVerticalScheduler(zone.id, (req) => this._checkVerticalRequirement(req));
+      if (scheduler) {
+        this.verticalSchedulers.set(zone.id, scheduler);
+      }
+    }
 
     this.pointsOfInterest = [
       ...this.hubPOIs,
@@ -196,6 +266,37 @@ export class WorldManager {
         world.add({ ...c, x: c.x + zone.center.x, z: c.z + zone.center.z, rotated: !!c.rot });
       }
     }
+    // W-B9 切片2：添加内部空间碰撞体
+    for (const zone of this.zones) {
+      const spaces = this.internalSpaceManager?.spacesByZone?.get(zone.id) ?? [];
+      for (const space of spaces) {
+        for (const c of space.colliders ?? []) {
+          const wc = space.getWorldCenter(zone.center);
+          const worldBase = space.getWorldBaseHeight(zone.center);
+          if (c.shape === 'cyl') {
+            world.addCylinder({
+              x: wc.x + c.lx,
+              z: wc.z + c.lz,
+              r: c.r,
+              base: worldBase + c.base,
+              top: worldBase + c.top,
+              kind: c.kind,
+            });
+          } else if (c.shape === 'box') {
+            world.addBox({
+              x: wc.x + c.lx,
+              z: wc.z + c.lz,
+              hx: c.hx,
+              hz: c.hz,
+              base: worldBase + c.base,
+              top: worldBase + c.top,
+              rot: c.rot,
+              kind: c.kind,
+            });
+          }
+        }
+      }
+    }
     // 世界之锚石柱
     world.addCylinder({ x: HUB_ZONE.center.x, z: HUB_ZONE.center.z, r: 1.9, base: -1, top: 12 });
     // 边界墙：贴在地形网格内侧，避免走出虚空
@@ -213,11 +314,18 @@ export class WorldManager {
     if (this.dungeonManager?.isInside()) {
       return this.dungeonManager.getGroundHeight(x, z);
     }
+    // W-B9 切片2：内部空间优先
+    const internalHeight = this.internalSpaceManager?.getCurrentInternalHeight(x, z);
+    if (internalHeight !== null) return internalHeight;
     return sampleGlobalHeightSmooth(x, z, this.zones);
   }
 
   getGroundNormal(x, z) {
     if (this.dungeonManager?.isInside()) {
+      return { x: 0, y: 1, z: 0 };
+    }
+    // 内部空间内地面法向暂时返回向上（可按需扩展）
+    if (this.internalSpaceManager?.currentSpace) {
       return { x: 0, y: 1, z: 0 };
     }
     return sampleGroundNormal(x, z, this.zones);
@@ -229,11 +337,21 @@ export class WorldManager {
       this.hubCore.rotation.x += dt * 0.2;
     }
     for (const zone of this.zones) zone.update(dt);
+    this.internalSpaceManager.update(dt);
+
+    // 刷新竖向调度器（W-B9 切片3）
+    for (const scheduler of this.verticalSchedulers.values()) {
+      scheduler.refresh();
+    }
 
     // 归属由几何反推（`zoneIdAt`：枢纽优先 → 最近区 → 走廊），不再各处手写一遍距离比较
     const id = zoneIdAt(playerPos, this.zones);
     const zone = resolveZone(this.zones, id);
     if (!zone || zone === this.currentZone) return;
+
+    // 更新内部空间管理器（W-B9 切片2）
+    this.internalSpaceManager.updateCurrent(playerPos.x, playerPos.z, id, zone?.center ?? { x: 0, y: 0, z: 0 });
+
     if (id === ZONE_IDS.HUB) this.applyHubAtmosphere();
     else this.applyZoneAtmosphere(zone);
   }

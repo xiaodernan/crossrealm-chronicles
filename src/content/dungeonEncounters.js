@@ -83,6 +83,24 @@ export const DUNGEON_ENCOUNTERS = {
     ],
     group: { min: 2, max: 3 },
   },
+  // 幽暗林地：迷雾墓穴（5×5，可选）：幽暗怨影打头、树洞居所的掠行兽与哨卫
+  'gloom-mist-crypt': {
+    pool: [
+      { type: 'gloom_wraith', weight: 6 },
+      { type: 'gloom_stalker', weight: 3 },
+      { type: 'gloom_sentinel', weight: 2 },
+    ],
+    group: { min: 2, max: 3 },
+  },
+  // 辉煌圣域：晨曦圣殿（5×5，可选）：辉煌爬兽打头、骑士与舞者在阳台巡逻
+  'radiant-dawn-hall': {
+    pool: [
+      { type: 'radiant_crawler', weight: 6 },
+      { type: 'radiant_knight', weight: 3 },
+      { type: 'radiant_dancer', weight: 2 },
+    ],
+    group: { min: 2, max: 3 },
+  },
 };
 
 /** 已经登记遭遇的副本（注册表与用例都问这一份；它是推导，不是第二份名单） */

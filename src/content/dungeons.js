@@ -84,6 +84,28 @@ export const DUNGEON_DEFS = [
     entrance: { x: 28, z: 72 },
     exterior: { x: 28, z: 72, label: '墓穴阶梯' },
   },
+  {
+    id: 'gloom-mist-crypt',
+    name: '幽暗迷雾墓穴',
+    theme: 0x2a2a3a,
+    accent: 0x6a6a8a,
+    gridW: 5,
+    gridH: 5,
+    origin: { x: 5000, y: 120, z: 12500 },
+    entrance: { x: 200, z: 170 },
+    exterior: { x: 200, z: 170, label: '迷雾墓穴入口' },
+  },
+  {
+    id: 'radiant-dawn-hall',
+    name: '晨曦圣殿',
+    theme: 0xfff8d0,
+    accent: 0xffcc00,
+    gridW: 5,
+    gridH: 5,
+    origin: { x: 5000, y: 120, z: 14000 },
+    entrance: { x: -180, z: -95 },
+    exterior: { x: -180, z: -95, label: '晨曦圣殿大门' },
+  },
 ];
 
 /** 副本 id 的名册（注册表的 `keyRef` 与各处 `ref` 都问这一份；由表推导，不是第二份手抄清单） */

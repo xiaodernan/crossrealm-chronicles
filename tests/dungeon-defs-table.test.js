@@ -79,6 +79,16 @@ const OLD_DEFS = [
     gridW: 5, gridH: 5, origin: { x: 5000, y: 80, z: 11000 },
     entrance: { x: 28, z: 72 }, exterior: { x: 28, z: 72, label: '墓穴阶梯' },
   },
+  {
+    id: 'gloom-mist-crypt', name: '幽暗迷雾墓穴', theme: 0x2a2a3a, accent: 0x6a6a8a, themeType: 'wraith',
+    gridW: 5, gridH: 5, origin: { x: 5000, y: 120, z: 12500 },
+    entrance: { x: 200, z: 170 }, exterior: { x: 200, z: 170, label: '迷雾墓穴入口' },
+  },
+  {
+    id: 'radiant-dawn-hall', name: '晨曦圣殿', theme: 0xfff8d0, accent: 0xffcc00, themeType: 'crawler',
+    gridW: 5, gridH: 5, origin: { x: 5000, y: 120, z: 14000 },
+    entrance: { x: -180, z: -95 }, exterior: { x: -180, z: -95, label: '晨曦圣殿大门' },
+  },
 ];
 
 /**
@@ -127,8 +137,8 @@ describe('① 数据忠实：新表逐格 = 搬动之前在役的那份 const', 
       if (少.length) 差.push(`${旧.id} 少了格子：${少.join('、')}`);
     });
     expect(差, `搬动搬坏了：\n  ${差.join('\n  ')}`).toEqual([]);
-    // 反面证据：旧表确实写了 5 格 themeType，而新表一格都没有 —— "删掉了"不是"从来没写过"
-    expect(OLD_DEFS.filter((r) => 'themeType' in r)).toHaveLength(5);
+    // 反面证据：旧表确实写了 7 格 themeType（原 5 座 + W-B9 新增 2 座），而新表一格都没有 —— "删掉了"不是"从来没写过"
+    expect(OLD_DEFS.filter((r) => 'themeType' in r)).toHaveLength(7);
     expect(DUNGEON_DEFS.filter((r) => 'themeType' in r)).toEqual([]);
   });
 });
@@ -146,9 +156,9 @@ describe('② 死字段清零：读 0 处的格子真的不再被写', () => {
     expect(命中, `这些文件还在写 themeType：${命中.join('、')}`).toEqual([]);
   });
 
-  it('反面证据：这把尺子在旧表上量得到 5 次（扫到 0 不是因为尺子坏了）', () => {
+  it('反面证据：这把尺子在旧表上量得到 7 次（扫到 0 不是因为尺子坏了）', () => {
     const 旧源码 = `const DUNGEON_DEFS = [\n${OLD_DEFS.map((r) => `  { id: '${r.id}', themeType: '${r.themeType}' },`).join('\n')}\n];`;
-    expect(数themeType(旧源码)).toBe(5);
+    expect(数themeType(旧源码)).toBe(7);
     // 注释里提到字段名不算命中 —— 本文件的说明文字里就写着它
     expect(数themeType('/* themeType 是死字段 */ const a = 1;\n// themeType: 旧值')).toBe(0);
   });
