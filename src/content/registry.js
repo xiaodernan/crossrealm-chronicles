@@ -373,13 +373,19 @@ export const CONTENT_TABLES = [
   {
     kind: 'dungeons',
     note: '副本（地下城）定义（W-B10 切片3a，从 `world/DungeonManager.js` 的私有 const 搬来）：'
-      + '五座迷宫的身份与关卡参数。**字段按实测读者声明** —— 搬之前普查证明 `themeType` 写 5 读 0，'
-      + '那一格随之删掉；今天再加"以后可能用得上"的格子就是重犯同一条错',
+      + '各座迷宫的身份与关卡参数。**字段按实测读者声明** —— 搬之前普查证明 `themeType` 写 5 读 0，'
+      + '那一格随之删掉；今天再加"以后可能用得上"的格子就是重犯同一条错。'
+      + '切片3c 加的两格都有署名读者：`trial` → `TRIAL_DUNGEON_IDS`（飞升门 / 指路 / 开局点亮 / 助手清单），'
+      + '`mapLabel` → `ui/WorldMapPanel.js` 上那几个点旁边的字',
     shape: 'rows',
     table: DUNGEON_DEFS,
     row: {
       id: { t: 'id' },
       name: { t: 'string' },
+      // 两格都是**必填**：`trial` 省略就等于"新加的那座默认不算试炼"，而这句话正是切片3c
+      // 从四处手抄本收回来的那一句；`mapLabel` 省略则地图上的点没有字。
+      trial: { t: 'bool' },
+      mapLabel: { t: 'string' },
       theme: { t: 'int', min: 0, max: 0xffffff },
       accent: { t: 'int', min: 0, max: 0xffffff },
       gridW: { t: 'int', min: 3, max: 8 },
@@ -1585,7 +1591,13 @@ export function checkDungeons(table) {
   撞('theme', (r) => r?.theme);
   撞('accent', (r) => r?.accent);
   撞('name', (r) => r?.name);
+  撞('mapLabel', (r) => r?.mapLabel);
   撞('exterior.label', (r) => r?.exterior?.label);
+  // 试炼不能是空集：`checkAllDungeons` 的形状是"每一座都要清过"，空表上它恒真 ——
+  // 全改成 `trial: false` 的症状不是报错，是**第三章开门不需要打任何一座副本**。
+  if (rows.length && !rows.some((r) => r?.trial === true)) {
+    out.push('dungeons: 没有任何一行 `trial: true` —— 三界试炼成了空集，`checkAllDungeons` 会在零座副本清空的判据上返回真');
+  }
   rows.forEach((row, i) => {
     const e = row?.entrance; const x = row?.exterior;
     if (!e || !x) return;

@@ -1,5 +1,5 @@
 import { keyText } from '../content/keyHints.js';
-import { dungeonDefOf } from '../content/dungeons.js';
+import { dungeonDefOf, TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
@@ -36,8 +36,13 @@ const targetIdsByFlag = (prefix) => MAINLINE
 /** 三枚主线碎片 / 时线那两件 —— 都由行自己的 `flags` 说话 */
 const FRAGMENT_IDS = targetIdsByFlag('hasFragment');
 const VOID_DISCOVERY_IDS = targetIdsByFlag('hasVoid');
-/** 三界试炼要的三座地下城 = 表里 `type: 'dungeon'` 的那三行（`'dungeon-rerun'` 是另一族） */
-const DUNGEON_IDS = MAINLINE.filter((r) => r.type === 'dungeon').map((r) => r.dungeonId);
+
+/**
+ * 指路用的"还有哪几座没清"直接问 `content/dungeons.js` 的 `TRIAL_DUNGEON_IDS`。
+ * 这里以前自己算第五份（`MAINLINE.filter(r => r.type === 'dungeon')`）：与飞升门那条算式恰好同值，
+ * 而局部名 `DUNGEON_IDS` 又和副本表导出的同名常量（**全部**几座）撞名 —— 真把两处混成一个，
+ * 症状是三座试炼清完、门已开，箭头却改口让玩家去清其余的可选副本。
+ */
 
 /**
  * POI 的路点。这张**不是**主线行的抄本：它按 `targetId` 认领的是"那个物件在哪儿"
@@ -230,7 +235,7 @@ export class QuestSystem {
       }
       case 'checkAllDungeons': {
         if (!this.stats.boss3Defeated) return { ...rowWaypoint('boss3'), hint: '先击败奇点领主' };
-        for (const id of DUNGEON_IDS) {
+        for (const id of TRIAL_DUNGEON_IDS) {
           if (!this.stats.dungeonsCleared.has(id)) {
             return { ...dungeonWaypoint(id), hint: '清空地下城' };
           }

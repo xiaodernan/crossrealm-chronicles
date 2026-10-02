@@ -2,6 +2,7 @@ import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText } from '../content/keyHints.js';
 import { BOSS_STAT_KEYS } from '../content/objectives.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
+import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 
 /** 自动通关/带路整条流程的计时分组，用户中途取消时整体撤销 */
 const AUTOPILOT_TAG = 'quest-autopilot';
@@ -193,7 +194,7 @@ export class QuestAssistant {
       { label: '升级 Lv5', action: 'level', level: 5 },
       { label: '宇航员', action: 'npc', id: 'astronaut-echo', x: 200, z: 90 },
       { label: '法术练习', action: 'spells', count: 8 },
-      { label: '三座地下城', action: 'dungeons', ids: ['ruin-crypt', 'forbidden-library', 'five-dim-rift'] },
+      { label: `${TRIAL_DUNGEON_IDS.length} 座地下城`, action: 'dungeons', ids: TRIAL_DUNGEON_IDS },
       { label: '奇点领主', action: 'boss', key: 'boss3Defeated', bossId: 'singularity-herald', x: 235, z: 155 },
       { label: '心智升级', action: 'mind', value: 2 },
       { label: '位面飞升', action: 'poi', id: 'hub-anchor' },

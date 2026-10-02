@@ -1,6 +1,7 @@
 import { MAP_BOSSES } from '../game/QuestSystem.js';
 import { keyText } from '../content/keyHints.js';
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
+import { DUNGEON_DEFS } from '../content/dungeons.js';
 
 /** 全屏世界地图 + 迷雾 */
 export class WorldMapPanel {
@@ -148,22 +149,18 @@ export class WorldMapPanel {
     }
     ctx.setLineDash([]);
 
-    const dungeons = [
-      { x: -190, z: 25, t: '遗城', id: 'ruin-crypt' },
-      { x: -35, z: -200, t: '图书馆', id: 'forbidden-library' },
-      { x: 175, z: 95, t: '裂隙', id: 'five-dim-rift' },
-      { x: -230, z: -15, t: '神龛', id: 'forest-shrine' },
-      { x: 28, z: 72, t: '墓穴', id: 'hub-catacombs' },
-    ];
-    for (const d of dungeons) {
-      if (!em.isRevealed(d.x, d.z)) continue;
+    // 副本的点由 `content/dungeons.js` 推导：这座表加一行，地图上就有一个点，不用再来这里加一行。
+    // 以前这是一张五行的私有表（坐标逐格等于 `entrance`、简称是全名的手写缩写），
+    // 于是名册长到 7 座那天，新增的两座在地图上根本没有点（普查 .tmp-20261002/wb10s3c-census.mjs）。
+    for (const d of DUNGEON_DEFS) {
+      if (!em.isRevealed(d.entrance.x, d.entrance.z)) continue;
       ctx.fillStyle = '#bb77ff';
       ctx.beginPath();
-      ctx.arc(cx + d.x * scale, cy + d.z * scale, 5, 0, Math.PI * 2);
+      ctx.arc(cx + d.entrance.x * scale, cy + d.entrance.z * scale, 5, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#ddd';
       ctx.font = '9px sans-serif';
-      ctx.fillText(d.t, cx + d.x * scale + 7, cy + d.z * scale + 3);
+      ctx.fillText(d.mapLabel, cx + d.entrance.x * scale + 7, cy + d.entrance.z * scale + 3);
     }
 
     for (const b of MAP_BOSSES) {

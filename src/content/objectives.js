@@ -31,6 +31,7 @@
  */
 
 import { ZONE_IDS, ZONE_NAMES } from './ZoneIdentity.js';
+import { TRIAL_DUNGEON_IDS } from './dungeons.js';
 
 /* ------------------------------------------------------------------ *
  * `chapter` 到底说什么（W-B3 切片3 实测之后改的口径）
@@ -586,10 +587,9 @@ export const CONDITIONS = {
   // 「三界试炼」这一句在役表里问的是两件事实：三只地下城 + 第三只 Boss。
   // 早先这里只数地下城，于是任何直接用它做门控的消费者都能让玩家**跳过奇点领主**去飞升；
   // 在役表当时靠 `canAscend()` 另写一遍才没出事 —— 两份算式差一格，正是本切片要收掉的东西。
+  // 切片3c 收掉第二份：三座不再逐格写死，改读 `dungeons.js` 行上的 `trial`（推导见 `TRIAL_DUNGEON_IDS`）。
   checkAllDungeons: (state) => Boolean(state.stats.boss3Defeated)
-    && state.stats.dungeonsCleared?.has('ruin-crypt')
-    && state.stats.dungeonsCleared?.has('forbidden-library')
-    && state.stats.dungeonsCleared?.has('five-dim-rift'),
+    && TRIAL_DUNGEON_IDS.every((id) => state.stats.dungeonsCleared?.has(id)),
   checkTrueEnd: (state) => state.stats.voidBossDefeated
     && state.stats.discoveries?.has('fantasy-ring')
     && state.stats.discoveries?.has('magic-castle')

@@ -102,6 +102,13 @@ const OLD_WAYPOINTS = {
   'five-dim-rift': { x: 175, z: 95, label: '五维裂隙' },
 };
 
+/**
+ * 切片3c 起，允许新表比这份 golden **多出来**的格子只有这两格 —— 且每一格都在
+ * 下面那条用例里点名了自己的读者（`trial` → 飞升门/指路/开局点亮/助手清单，
+ * `mapLabel` → 世界地图的那个字）。豁免不是空白放行：多一格又没人读，就是下一个 `themeType`。
+ */
+const 新增格 = ['trial', 'mapLabel'];
+
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
@@ -131,7 +138,7 @@ describe('① 数据忠实：新表逐格 = 搬动之前在役的那份 const', 
         const b = JSON.stringify(新[k]);
         if (a !== b) 差.push(`${旧.id}.${k}: 旧 ${a} ≠ 新 ${b}`);
       }
-      const 多 = 新键.filter((k) => !旧键.includes(k));
+      const 多 = 新键.filter((k) => !旧键.includes(k) && !新增格.includes(k));
       if (多.length) 差.push(`${旧.id} 多出格子：${多.join('、')}`);
       const 少 = 旧键.filter((k) => k !== 'themeType' && !新键.includes(k));
       if (少.length) 差.push(`${旧.id} 少了格子：${少.join('、')}`);
@@ -140,6 +147,22 @@ describe('① 数据忠实：新表逐格 = 搬动之前在役的那份 const', 
     // 反面证据：旧表确实写了 7 格 themeType（原 5 座 + W-B9 新增 2 座），而新表一格都没有 —— "删掉了"不是"从来没写过"
     expect(OLD_DEFS.filter((r) => 'themeType' in r)).toHaveLength(7);
     expect(DUNGEON_DEFS.filter((r) => 'themeType' in r)).toEqual([]);
+  });
+
+  it('切片3c 新增的两格都在，且**只有**这两格是新的', () => {
+    // 这一条把上面那个例外清单钉成"有名字、有理由、有归属"的三条陈述：
+    // 豁免不是一条 `continue`，而是一格必须有读者、有声明、有对账 —— 否则它就长成下一个 `themeType`。
+    for (const d of DUNGEON_DEFS) {
+      expect(typeof d.trial, `${d.id} 的 trial 不是显式布尔`).toBe('boolean');
+      expect(typeof d.mapLabel, `${d.id} 没有 mapLabel`).toBe('string');
+      expect(d.mapLabel.length, `${d.id} 的 mapLabel 是空的`).toBeGreaterThan(0);
+    }
+    // `trial` 恰好是主线那三座（这一份是冻结的历史读数：切片3c 动手之前四个抄本都是这三枚 id）
+    expect(DUNGEON_DEFS.filter((d) => d.trial).map((d) => d.id))
+      .toEqual(['ruin-crypt', 'forbidden-library', 'five-dim-rift']);
+    // 两个读者各认领一格：地图上的点读 `mapLabel`，飞升门读 `trial` 推导出的那份清单
+    expect(readSrc('ui/WorldMapPanel.js')).toContain('d.mapLabel');
+    expect(readSrc('content/objectives.js')).toContain('TRIAL_DUNGEON_IDS');
   });
 });
 

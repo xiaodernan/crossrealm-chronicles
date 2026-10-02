@@ -1,4 +1,5 @@
 import { MAP_BOSSES } from './QuestSystem.js';
+import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 
 const CELL = 12;
 const MIN = -320;
@@ -13,7 +14,12 @@ export class ExplorationMap {
     this.revealed = new Uint8Array(GW * GH);
     this.zoneRevealed = new Set();
     this.poiRevealed = new Set();
-    this.dungeonRevealed = new Set(['ruin-crypt', 'forbidden-library', 'five-dim-rift']);
+    /**
+     * 开局就点亮的副本 —— 主线要清的那几座不藏在迷雾里（玩家该知道试炼入口在哪），
+     * 可选的那几座得自己走上去。清单由 `content/dungeons.js` 的 `trial` 推导，
+     * 以前这里是手抄的三枚 id，而 `fromJSON` 的兜底又抄了一遍同一串。
+     */
+    this.dungeonRevealed = new Set(TRIAL_DUNGEON_IDS);
   }
 
   _idx(gx, gz) {
@@ -120,7 +126,8 @@ export class ExplorationMap {
     }
     this.zoneRevealed = new Set(data.zoneRevealed ?? []);
     this.poiRevealed = new Set(data.poiRevealed ?? []);
-    this.dungeonRevealed = new Set(data.dungeonRevealed ?? ['ruin-crypt', 'forbidden-library', 'five-dim-rift']);
+    // 没有这一格的旧档：按**新建图**的同一份口径兜底，而不是再抄一串 id（抄的那份会跟着名册过期）
+    this.dungeonRevealed = new Set(data.dungeonRevealed ?? TRIAL_DUNGEON_IDS);
   }
 
   getGridSize() {
