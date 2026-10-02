@@ -106,9 +106,10 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
     }
   }
 
-  const lorePool = [...LORE_FRAGMENTS].sort(() => rnd() - 0.5);
+  // 洗的是文献池与"发文献的房序"两份**副本**：`rooms` 本体保持网格序（见 `shuffle` 的说明）。
+  const lorePool = shuffle(LORE_FRAGMENTS, rnd);
   let li = 0;
-  for (const room of rooms.sort(() => rnd() - 0.5)) {
+  for (const room of shuffle(rooms, rnd)) {
     if (room.isExit || room.id === spawn.id) continue;
     if (rnd() > 0.55 && li < lorePool.length) {
       room.lore = { ...lorePool[li++], discovered: false };
@@ -185,6 +186,35 @@ function fold32(n) {
   x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0;
   x = Math.imul(x ^ (x >>> 13), 0x45d9f3b) >>> 0;
   return (x ^ (x >>> 16)) >>> 0;
+}
+
+/**
+ * 洗一份**副本**：Fisher–Yates（W-B10 切片4b，修 B77）。换掉的是
+ * `arr.sort(() => rnd() - 0.5)` 那种"比较器掷硬币"的洗法，它坏在两层，第二层比第一层难查：
+ *
+ * 1. **分布不匀**。实测 n=5 的 120 种排列全出现过，但恒等排列 `01234` 占 9.54%、最稀的只占
+ *    0.18%（理论 0.83%）；同一把流下 Fisher–Yates 的最大偏差是 0.07 个百分点
+ *    （`.tmp-20261002/wb10s4b-census.mjs` P1）。落到玩法上是"哪间房带文献"有偏好：
+ *    n=25 里 0 号元素挤进前 8 的概率 45.1%，理论 32%（P4）—— 这种洗法把靠前的东西留在靠前。
+ * 2. **洗完之后流走到哪儿，由排序实现决定**。那个比较器每比一次吃两发，而比较次数随数据漂：
+ *    n=25 实测 61..90 发（P2）。引擎换个排序、数组换个规模，后面每一发（文献落点、池子抽样）
+ *    都跟着挪位 —— 于是"同一颗种子给同一座迷宫"只对当前这一个 V8 成立。
+ *    Fisher–Yates 恒为 n−1 次交换、n−1 发，流的位置只由规模决定。
+ *
+ * 返回新数组、不碰传进来的那一个：`LORE_FRAGMENTS` 是模块级共享的表，就地洗它等于
+ * 让第二次 `generateMaze` 洗的是已被上一次的种子重排过的那一份。
+ * 同样地，迷宫的 `rooms` 也不再被打乱本体 —— 消费者按数组序遍历房间，而那个序不承担任何玩法
+ * （房间身份是 `r_x_z`），它今天随机、明天可能又不随机，只是没人说过它该是什么样。
+ */
+export function shuffle(arr, rnd) {
+  const out = Array.from(arr);
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    const t = out[i];
+    out[i] = out[j];
+    out[j] = t;
+  }
+  return out;
 }
 
 /**
