@@ -266,6 +266,8 @@ export const ENEMY_DEFENSE = {
   wraith: 4, stalker: 3, sentinel: 14,
   crawler: 8, knight: 22, dancer: 6,
   hexer: 8, juggernaut: 24,
+  gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14,
+  radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6,
 };
 
 /** 玩家自身防御由装备/属性提供，M2 阶段基线为 0（先用闪避与弹反防御） */
@@ -502,6 +504,67 @@ export const ENEMY_MOVES = {
     damage: 1.6, cooldown: 6.5, weight: 2, travel: 'lunge', travelSpeed: 5.5,
     unstoppable: true,
     telegraph: { color: 0xff5533 },
+  },
+  /** W-B9 切片1：辉煌圣域专属招式 */
+  flare: {
+    // 圣光爆（辉煌爬兽）：命中段在玩家脚下召唤一团圣光，延迟 1 秒后爆发光环伤害。
+    // 与 `rift` 不同：圈在玩家身边**留存**且会随玩家移动（粘着），需主动冲出光环。
+    // `hazard` 型：伤害由 GroundHazards 独立结算，爬兽死后光环仍存续到 duration 结束。
+    name: '圣光爆', windup: 1.1, strike: 0.3, recover: 0.7, cone: -2,
+    damage: 0, cooldown: 9, weight: 2, range: 8, standoff: [5, 8],
+    hazard: { radius: 3.0, telegraph: 1.2, damage: 0.7, duration: 5, tick: 1.0, color: 0xffdd00, sticky: true },
+    telegraph: { color: 0xffdd00 },
+  },
+  sanctify: {
+    // 圣洁冲击（辉煌骑士）：盾击的光辉变体 —— 推开玩家的同时在原地留下一圈治愈光环。
+    // `knock` 推开玩家（外部冲量），`healZone` 在骑士脚下生成治疗区（玩家进入回血，敌人不受益）。
+    // 迫使玩家二选一：吃推开、或冒险进光环续血但被骑士贴脸压制。
+    name: '圣洁冲击', windup: 0.65, strike: 0.28, recover: 0.55, reach: 1.0, cone: 0.25,
+    band: [0.05, 1.2],
+    damage: 1.0, cooldown: 4.0, weight: 2, knock: 8.0,
+    healZone: { radius: 3.5, healPerTick: 8, tick: 1.0, duration: 6 },
+    telegraph: { color: 0xffee88 },
+  },
+  gleam: {
+    // 晨曦旋舞（辉煌舞者）：以自己为中心的**四段扇形光刃** —— `aoe` 与 `combo` 合体，且每段角度不同。
+    // 单段 `aoe` 3.2 米扇形 120°；四段转向累计覆盖 360°，中间没有"退一步再回来"的安全窗口。
+    // 想躲只能真的跑出整个光刃覆盖区。四段之间不换人、不交名额。
+    name: '晨曦旋舞', windup: 0.48, strike: 0.2, recover: 0.42, cone: -2, aoe: 3.2, fanDeg: 120,
+    band: [0.0, 1.1],
+    damage: 0.45, cooldown: 4.5, weight: 2, combo: 4, comboWindup: 0.24,
+    telegraph: { color: 0xffcc00 },
+  },
+  /** W-B9 切片1：幽暗林地专属招式 */
+  haunt: {
+    // 幽灵缠身（幽暗怨影）：相位突袭的迷雾变体 —— 闪到玩家身后留下一道"残影"，持续追踪玩家 3 秒。
+    // `blink` 越过玩家落在背后，`trail` 在原地生成残影（不攻击、只干扰锁定、视线判定视为障碍）。
+    // 玩家需在残影消失前解决它，或利用残影挡住其他敌人的视线。
+    name: '幽灵缠身', windup: 0.75, strike: 0.35, recover: 0.55, reach: 1.2, cone: 0.35,
+    band: [0.05, 1.05], phase: true, blink: 10,
+    damage: 1.0, cooldown: 3.8, weight: 2,
+    trail: { duration: 3, radius: 0.5, blocksSight: true, color: 0x4a4a6a },
+    telegraph: { color: 0xaa66ff },
+  },
+  prowl: {
+    // 潜行标记（幽暗掠行兽）：嚎叫引援的迷雾变体 —— 不召唤同类，而是给玩家打上"被标记"状态。
+    // `mark` 状态下：玩家受到的伤害 +20%、被所有幽暗林地敌人优先锁定、隐身/潜行无效。
+    // 持续 10 秒或击杀标记者后解除。迫使玩家主动猎杀标记者而非逃跑。
+    name: '潜行标记', windup: 1.0, strike: 0.25, recover: 0.6, reach: 0.9, cone: -2,
+    band: [0.0, 1.0],
+    damage: 0, cooldown: 12, weight: 1,
+    mark: { duration: 10, damageTakenMult: 1.2, priorityTarget: true, revealStealth: true, color: 0x4a4a7a },
+    telegraph: { color: 0x99dd55 },
+  },
+  beacon: {
+    // 信标照亮（幽暗哨卫）：蓄力炮击的迷雾变体 —— 发射一枚信标弹，落地后生成持续照明区。
+    // 区域内：玩家隐身/潜行失效、所有幽暗林地敌人获得"视野共享"（无视遮挡直接锁定玩家）。
+    // 信标持续 8 秒，可被玩家攻击摧毁（hp 30）。迫使玩家要么摧毁信标、要么冒险在光下战斗。
+    name: '信标照亮', windup: 1.8, strike: 0.25, recover: 1.0, cone: -2,
+    range: 18, minDist: 5,
+    damage: 0, cooldown: 8, weight: 1,
+    ranged: { speed: 12, color: 0x6a6a8a },
+    beacon: { radius: 6, duration: 8, revealStealth: true, shareVision: true, hp: 30, color: 0x6a6a8a },
+    telegraph: { color: 0x88aaff },
   },
 };
 
@@ -767,12 +830,12 @@ export const ENEMY_MOVE_SETS = {
   hexer: ['volley', 'shot', 'guard'],
   juggernaut: ['onslaught', 'slam', 'cleave', 'guard'],
   /** W-B9 切片1：幽暗林地三类敌人 */
-  gloom_wraith: ['phase', 'dive', 'thrust', 'sweep'],
-  gloom_stalker: ['flurry', 'howl', 'thrust', 'cleave'],
-  gloom_sentinel: ['charge', 'shot', 'guard', 'cleave'],
+  gloom_wraith: ['haunt', 'dive', 'thrust', 'sweep'],
+  gloom_stalker: ['prowl', 'flurry', 'thrust', 'cleave'],
+  gloom_sentinel: ['beacon', 'shot', 'guard', 'cleave'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
-  radiant_crawler: ['rift', 'flurry', 'thrust'],
-  radiant_knight: ['bash', 'sweep', 'guard', 'cleave'],
-  radiant_dancer: ['whirl', 'flurry', 'thrust'],
+  radiant_crawler: ['flare', 'flurry', 'thrust'],
+  radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],
+  radiant_dancer: ['gleam', 'flurry', 'thrust'],
 };
 

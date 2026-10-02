@@ -208,6 +208,12 @@ export class QuestAssistant {
       { label: '武器技能×3', action: 'skills', count: 3 },
       { label: '混沌领主', action: 'boss', key: 'chaosBossDefeated', bossId: 'chaos-overlord', x: -200, z: 285 },
       { label: '地下城再探', action: 'dungeonRerun' },
+      { label: ZONE_NAMES[ZONE_IDS.GLOOM], action: 'tp', x: 180, z: 100 },
+      { label: '幽暗深处', action: 'discover', id: 'gloom-deep-entrance', x: 180, z: 170 },
+      { label: '荧光苔藓', action: 'discover', id: 'gloom-moss', x: 150, z: 120 },
+      { label: ZONE_NAMES[ZONE_IDS.RADIANT], action: 'tp', x: -180, z: -160 },
+      { label: '圣域大门', action: 'discover', id: 'radiant-main-gate', x: -180, z: -95 },
+      { label: '晨曦祭坛', action: 'discover', id: 'radiant-altar', x: -155, z: -175 },
       { label: '无尽行者 · 通关', action: 'poi', id: 'hub-anchor' },
     ];
   }

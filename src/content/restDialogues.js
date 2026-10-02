@@ -713,4 +713,159 @@ J → 次元回声 按系列筛选。」`,
 ] },
     },
   },
+  gloom: {
+    nodes: {
+      start: {
+        speaker: "迷雾行者",
+        text: "薄雾里的火苗微弱却坚定。迷雾行者停在火边，手里的灯笼散着冷光。",
+        choices: [
+          { label: "休息 / 升级", action: "rest" },
+          { label: "迷雾深处有什么？", next: "deep" },
+          { label: "荧光苔藓怎么用？", next: "moss" },
+          { label: "幽暗怨影怎么打？", next: "wraith" },
+          { label: "灯笼怎么做？", next: "lantern" },
+          { label: "迷雾会消散吗？", next: "mist" },
+          { label: "支线任务？", next: "side" },
+          { label: "古树铭文？", next: "ancient" },
+        ],
+      },
+      deep: {
+        speaker: "迷雾行者",
+        text: "「迷雾最浓处藏着古老入口 — 地图西北紫点。进去前把灯笼点亮，别让迷雾吃了路。」",
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      moss: {
+        speaker: "迷雾行者",
+        text: "「荧光苔藓只长在幽暗林地 — 采下来在营火炼成「迷雾灯笼」。灯笼能让迷雾里的路现形。」",
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      wraith: {
+        speaker: "迷雾行者",
+        mood: "warn",
+        text: "「幽暗怨影会瞬移到身后 — 看见它蓄势时立刻翻滚。别在雾里硬抗，听声辨位。」",
+        journal: { id: "rest-gloom-wraith", title: "营火·幽暗怨影", text: "幽暗怨影瞬移落地后有硬直，那是反击窗口。" },
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      lantern: {
+        speaker: "迷雾行者",
+        text: "「三枚荧光苔藓 + 一截枯枝 = 迷雾灯笼。装备后迷雾里能看清 15 米外的轮廓。」",
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      mist: {
+        speaker: "迷雾行者",
+        text: "「迷雾不会全消 — 它是这片林子的呼吸。灯笼只能在脚下开出一条路。」",
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      side: {
+        speaker: "迷雾行者",
+        text: "「林子里有两条支线 — 「雾林三歇」坐火三次，「雾林双萤」收两枚萤火。完成都给魂火。」",
+        journal: { id: "rest-gloom-side", title: "营火·幽暗支线", text: "幽暗林地支线：三歇与双萤。" },
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      ancient: {
+        speaker: "迷雾行者",
+        text: "「扭曲古树树皮上有铭文 — 不是精灵文，更像某种契约。读懂它可能要先点亮三盏灯。」",
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+    },
+  },
+  radiant: {
+    nodes: {
+      start: {
+        speaker: "晨曦祭司",
+        text: "金沙流淌间，火焰燃得格外温暖。晨曦祭司在光环中合十低语。",
+        choices: [
+          { label: "休息 / 升级", action: "rest" },
+          { label: "圣域深处怎么进？", next: "deep" },
+          { label: "晨曦祝福是什么？", next: "blessing" },
+          { label: "辉煌骑士怎么打？", next: "knight" },
+          { label: "金沙有什么用？", next: "gold" },
+          { label: "祭坛在几点刷新？", next: "altar" },
+          { label: "支线任务？", next: "side" },
+          { label: "星港商路延伸？", next: "starport" },
+        ],
+      },
+      deep: {
+        speaker: "晨曦祭司",
+        text: "「晨曦时分（5:00-7:00）大门全开 — 地图正南紫点。别在正午去，金沙会烫穿靴子。」",
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      blessing: {
+        speaker: "晨曦祭司",
+        text: "「晨曦祭坛在晨曦时分祈祷，可得「晨曦祝福」 — 下次营火休息恢复双倍体力。」",
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      knight: {
+        speaker: "晨曦祭司",
+        mood: "warn",
+        text: "「辉煌骑士重甲抗斩 — 用 {parry} 弹反它的盾击，落地那瞬间腿部无甲。别贪连击。」",
+        journal: { id: "rest-radiant-knight", title: "营火·辉煌骑士", text: "辉煌骑士盾击后收招长，弹反接处决。" },
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      gold: {
+        speaker: "晨曦祭司",
+        text: "「流动金沙可在营火炼成「晨曦护符」 — 受击时有几率触发护盾，挡一次致命伤。」",
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      altar: {
+        speaker: "晨曦祭司",
+        text: "「晨曦祭坛每日 5:00-7:00 刷新 — 只有这两小时能祈祷。错过就等明天。」",
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      side: {
+        speaker: "晨曦祭司",
+        text: "「圣域有两条支线 — 「圣域三歇」坐火三次，「圣域双萤」收两枚萤火。完成都给魂火。」",
+        journal: { id: "rest-radiant-side", title: "营火·圣域支线", text: "辉煌圣域支线：三歇与双萤。" },
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+      starport: {
+        speaker: "晨曦祭司",
+        text: "「星港商路不止在荒原 — 金沙彼端也有走私码头。货物是「晨曦护符」，税是魂火。」",
+        journal: { id: "rest-radiant-starport", title: "营火·星港延伸", text: "辉煌圣域连接星港商路母题。" },
+        choices: [
+          { label: "休息", action: "rest" },
+          { label: "返回", next: "start" },
+        ],
+      },
+    },
+  },
 };

@@ -43,6 +43,14 @@ export const CG_PAINTERS = {
   walker_silhouette: (r, ctx, w, h, accent) => r._paintWalker(ctx, w, h, accent),
   spell_orbs: (r, ctx, w, h, accent) => r._paintSpellOrbs(ctx, w, h, accent),
   final_gate: (r, ctx, w, h, accent) => r._paintFinalGate(ctx, w, h, accent),
+  /** W-B9 新增：幽暗林地场景 */
+  misty_camp: (r, ctx, w, h, accent) => r._paintMistyCamp(ctx, w, h, accent),
+  misty_map: (r, ctx, w, h, accent) => r._paintMistyMap(ctx, w, h, accent),
+  gloom_wraith: (r, ctx, w, h, accent) => r._paintGloomWraith(ctx, w, h, accent),
+  /** W-B9 新增：辉煌圣域场景 */
+  golden_sands: (r, ctx, w, h, accent) => r._paintGoldenSands(ctx, w, h, accent),
+  radiant_map: (r, ctx, w, h, accent) => r._paintRadiantMap(ctx, w, h, accent),
+  radiant_knight: (r, ctx, w, h, accent) => r._paintRadiantKnight(ctx, w, h, accent),
 };
 
 /**
@@ -361,5 +369,98 @@ export class DialogCGRenderer {
     ctx.strokeStyle = accent;
     ctx.lineWidth = 5;
     ctx.strokeRect(w * 0.38, h * 0.28, w * 0.24, h * 0.42);
+  }
+
+  /** W-B9 新增：幽暗林地 */
+  _paintMistyCamp(ctx, w, h, accent) {
+    this._grad(ctx, w, h, '#1a1a2a', '#2a2a3a');
+    for (let i = 0; i < 40; i++) {
+      ctx.fillStyle = `rgba(106,106,138,${0.08 + Math.random() * 0.12})`;
+      ctx.beginPath();
+      ctx.arc(Math.random() * w, Math.random() * h, 1 + Math.random() * 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = accent;
+    ctx.beginPath();
+    ctx.arc(w * 0.5, h * 0.6, 30, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#6a6a8a';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  _paintMistyMap(ctx, w, h, accent) {
+    this._paintMistyCamp(ctx, w, h, accent);
+    ctx.fillStyle = '#4a4a6a';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('幽暗林地深处', w * 0.5, h * 0.25);
+    ctx.beginPath();
+    ctx.moveTo(w * 0.3, h * 0.5);
+    ctx.lineTo(w * 0.7, h * 0.7);
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  _paintGloomWraith(ctx, w, h, accent) {
+    this._paintMistyCamp(ctx, w, h, accent);
+    ctx.fillStyle = '#5566aa';
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.5, h * 0.2);
+    ctx.lineTo(w * 0.3, h * 0.6);
+    ctx.lineTo(w * 0.7, h * 0.6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  /** W-B9 新增：辉煌圣域 */
+  _paintGoldenSands(ctx, w, h, accent) {
+    this._grad(ctx, w, h, '#fff8d0', '#ffd700');
+    for (let i = 0; i < 60; i++) {
+      ctx.fillStyle = `rgba(255,215,0,${0.15 + Math.random() * 0.2})`;
+      ctx.beginPath();
+      ctx.arc(Math.random() * w, Math.random() * h, 1 + Math.random() * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#ffcc00';
+    ctx.beginPath();
+    ctx.moveTo(w * 0.5, h * 0.25);
+    ctx.lineTo(w * 0.3, h * 0.65);
+    ctx.lineTo(w * 0.7, h * 0.65);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#ffaa00';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  _paintRadiantMap(ctx, w, h, accent) {
+    this._paintGoldenSands(ctx, w, h, accent);
+    ctx.fillStyle = '#ffaa00';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('晨曦大门', w * 0.5, h * 0.2);
+    ctx.beginPath();
+    ctx.arc(w * 0.5, h * 0.5, 40, -Math.PI * 0.6, -Math.PI * 1.4);
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  }
+
+  _paintRadiantKnight(ctx, w, h, accent) {
+    this._paintGoldenSands(ctx, w, h, accent);
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillRect(w * 0.35, h * 0.3, w * 0.3, h * 0.45);
+    ctx.fillStyle = '#ffaa00';
+    ctx.beginPath();
+    ctx.arc(w * 0.5, h * 0.25, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 2;
+    ctx.stroke();
   }
 }

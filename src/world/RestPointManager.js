@@ -87,6 +87,8 @@ export class RestPointManager {
     this.addRestPoint(200, 80, REST_POINT_NAMES[ZONE_IDS.SPACE], ZONE_IDS.SPACE);
     this.addRestPoint(0, 210, REST_POINT_NAMES[ZONE_IDS.VOID], ZONE_IDS.VOID);
     this.addRestPoint(-200, 210, REST_POINT_NAMES[ZONE_IDS.ABYSS], ZONE_IDS.ABYSS);
+    this.addRestPoint(180, 100, REST_POINT_NAMES[ZONE_IDS.GLOOM], ZONE_IDS.GLOOM);
+    this.addRestPoint(-180, -160, REST_POINT_NAMES[ZONE_IDS.RADIANT], ZONE_IDS.RADIANT);
   }
 
   getNearest(pos, range = 4) {

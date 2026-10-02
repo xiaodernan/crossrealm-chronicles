@@ -326,6 +326,28 @@ export class EnemyManager {
       this.spawnAt('hexer', x, z);
     }
 
+    // W-B9 切片1：幽暗林地（gloom，中心 ~180,100，半径 160）—— 三类原生敌人
+    for (const [x, z] of [[120, 80], [240, 120], [160, 200]]) {
+      this.spawnAt('gloom_wraith', x, z);
+    }
+    for (const [x, z] of [[80, 140], [200, 60], [220, 80]]) {
+      this.spawnAt('gloom_stalker', x, z);
+    }
+    for (const [x, z] of [[220, 20], [300, 80], [140, 180]]) {
+      this.spawnAt('gloom_sentinel', x, z);
+    }
+
+    // W-B9 切片1：辉煌圣域（radiant，中心 ~-180,-160，半径 150）—— 三类原生敌人
+    for (const [x, z] of [[-240, -200], [-120, -100], [-300, -180]]) {
+      this.spawnAt('radiant_crawler', x, z);
+    }
+    for (const [x, z] of [[-80, -220], [-200, -80], [-240, -100]]) {
+      this.spawnAt('radiant_knight', x, z);
+    }
+    for (const [x, z] of [[-160, -240], [-220, -200], [-100, -140]]) {
+      this.spawnAt('radiant_dancer', x, z);
+    }
+
     const bx = -250, bz = -35;
     this.bossArena = this.buildBossArena({ x: bx, z: bz });
     this.spawnBoss({ bossId: 'shadow-warden', x: bx, z: bz });

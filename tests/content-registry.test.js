@@ -530,8 +530,8 @@ describe('营火树的 `invariant`：形状表达不了的"这棵树连不连得
 
   it('控制组反面：只交一棵树要红 —— 成对规则读的是整张表，不是那一棵', () => {
     const errs = checkRestDialogueTree({ hub: { nodes: legal } });
-    // 五座有定义却没树的营火各报一次（旧写法把这五条当成"我要看的错"，其实一条都不是）
-    expect(errs).toHaveLength(5);
+    // 七座有定义却没树的营火各报一次（旧写法把这些条当成"我要看的错"，其实一条都不是）
+    expect(errs).toHaveLength(7);
     expect(errs.every((e) => /有 NPC 定义却没有对话树/.test(e))).toBe(true);
   });
 
@@ -675,7 +675,7 @@ describe('W-B2 内容普查：条数钉死', () => {
       ambientZoneEvents: 6,
       loreFragments: 18,
       npcLines: 3,
-      restDialogues: 6,
+      restDialogues: 8,
       achievementsExtra: 7,
       achievementsPopCulture: 14,
       cgGalleryBonusExtra: 5,
@@ -684,7 +684,7 @@ describe('W-B2 内容普查：条数钉死', () => {
     });
   });
 
-  it('营火树：6 个营火 / 77 个节点 / 178 格选择（节点与选择藏在 map 里，`contentSummary` 数不到）', () => {
+  it('营火树：8 个营火 / 93 个节点 / 222 格选择（节点与选择藏在 map 里，`contentSummary` 数不到）', () => {
     let nodes = 0;
     let choices = 0;
     for (const tree of Object.values(REST_DIALOGUES)) {
@@ -693,11 +693,11 @@ describe('W-B2 内容普查：条数钉死', () => {
       choices += list.reduce((n, node) => n + (node.choices?.length ?? 0), 0);
     }
     expect({ zones: Object.keys(REST_DIALOGUES).length, nodes, choices })
-      .toEqual({ zones: 6, nodes: 77, choices: 178 });
+      .toEqual({ zones: 8, nodes: 93, choices: 222 });
   });
 
-  it('六大区域各有营火树，且每棵树都真的能被 `RestDialogue` 取到（键就是营火 id）', () => {
-    for (const zone of ['hub', 'fantasy', 'magic', 'space', 'void', 'abyss']) {
+  it('八大区域各有营火树，且每棵树都真的能被 `RestDialogue` 取到（键就是营火 id）', () => {
+    for (const zone of ['hub', 'fantasy', 'magic', 'space', 'void', 'abyss', 'gloom', 'radiant']) {
       expect(REST_DIALOGUES[zone], `${zone} 没有营火对话树`).toBeTruthy();
       expect(Object.keys(REST_DIALOGUES[zone].nodes)).toContain('start');
     }

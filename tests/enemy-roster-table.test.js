@@ -65,6 +65,14 @@ const OLD_BIRTH = {
   dancer: { name: '刃舞者', hp: 135, posture: 52, damage: 13, speed: 6.4, aggroRange: 22, color: 0x7a2a5a },
   juggernaut: { name: '破阵重兵', hp: 300, posture: 96, damage: 22, speed: 3.6, aggroRange: 22, color: 0x4b4a55 },
   hexer: { name: '位面咒师', hp: 130, posture: 50, damage: 15, speed: 4.6, aggroRange: 24, color: 0x6a5a9a },
+  /** W-B9 切片1 新增：幽暗林地 */
+  gloom_wraith: { name: '幽暗怨影', hp: 120, posture: 48, damage: 14, speed: 5.8, aggroRange: 24, color: 0x4a4a6a },
+  gloom_stalker: { name: '幽暗掠行兽', hp: 150, posture: 66, damage: 16, speed: 7.0, aggroRange: 28, color: 0x4a4a7a },
+  gloom_sentinel: { name: '幽暗哨卫', hp: 190, posture: 76, damage: 18, speed: 3.5, aggroRange: 30, color: 0x3a3a5a },
+  /** W-B9 切片1 新增：辉煌圣域 */
+  radiant_crawler: { name: '辉煌爬兽', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
+  radiant_knight: { name: '辉煌骑士', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },
+  radiant_dancer: { name: '辉煌舞者', hp: 145, posture: 56, damage: 14, speed: 6.8, aggroRange: 24, color: 0xffaa00 },
 };
 
 /** 出生时没写的那几格会落到 `Enemy` 构造器的默认值 —— 用例要按同一套默认说话，不许自己造数 */

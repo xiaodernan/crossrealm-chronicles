@@ -4,6 +4,8 @@ import { MagicZone } from './zones/MagicZone.js';
 import { SpaceZone } from './zones/SpaceZone.js';
 import { VoidZone } from './zones/VoidZone.js';
 import { AbyssZone } from './zones/AbyssZone.js';
+import { GloomZone } from './zones/GloomZone.js';
+import { RadiantZone } from './zones/RadiantZone.js';
 import { WorldTerrain } from './WorldTerrain.js';
 import { sampleGlobalHeightSmooth, sampleGroundNormal } from './TerrainHeight.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
@@ -44,8 +46,10 @@ export class WorldManager {
     const space = new SpaceZone(this.scene, { x: 200, z: 80 }, this.dialog);
     const voidZone = new VoidZone(this.scene, { x: 0, z: 220 }, this.dialog);
     const abyss = new AbyssZone(this.scene, { x: -200, z: 220 }, this.dialog);
+    const gloom = new GloomZone(this.scene, { x: 180, z: 100 }, this.dialog);
+    const radiant = new RadiantZone(this.scene, { x: -180, z: -160 }, this.dialog);
 
-    this.zones = [fantasy, magic, space, voidZone, abyss];
+    this.zones = [fantasy, magic, space, voidZone, abyss, gloom, radiant];
 
     this.worldTerrain = new WorldTerrain(this.scene, this);
     this.worldTerrain.build();
@@ -64,6 +68,8 @@ export class WorldManager {
       ...space.getPointsOfInterest(),
       ...voidZone.getPointsOfInterest(),
       ...abyss.getPointsOfInterest(),
+      ...gloom.getPointsOfInterest(),
+      ...radiant.getPointsOfInterest(),
     ];
     this.assertPoiIdentity();
 

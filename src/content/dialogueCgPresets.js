@@ -39,6 +39,14 @@ export const REST_DIALOGUE_CG_BASE = {
   'abyss:start': { scene: 'chaos_border', caption: '混沌边境', mood: 'warn' },
   'abyss:end': { scene: 'final_gate', caption: '终焉试炼' },
   'abyss:boss5': { scene: 'boss_chaos', caption: '裂隙领主', mood: 'warn' },
+  'gloom:start': { scene: 'misty_camp', caption: '幽暗林地营火' },
+  'gloom:deep': { scene: 'misty_map', caption: '古老入口' },
+  'gloom:wraith': { scene: 'gloom_wraith', caption: '幽暗怨影', mood: 'warn' },
+  'gloom:lantern': { scene: 'misty_camp', caption: '迷雾灯笼' },
+  'radiant:start': { scene: 'golden_sands', caption: '辉煌圣域晨曦' },
+  'radiant:deep': { scene: 'radiant_map', caption: '晨曦大门' },
+  'radiant:knight': { scene: 'radiant_knight', caption: '辉煌骑士', mood: 'warn' },
+  'radiant:gold': { scene: 'golden_sands', caption: '晨曦护符' },
 };
 
 export const REST_DIALOGUE_CG_EXTRA = {
