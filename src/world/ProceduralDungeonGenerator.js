@@ -1,15 +1,10 @@
 import * as THREE from 'three';
-import { generateMaze } from './MazeLayout.js';
+import { generateMaze, makeSeededRng } from './MazeLayout.js';
 import { dungeonEncounterOf } from '../content/dungeonEncounters.js';
 import {
   sharedBox, sharedPlane, sharedCircle, sharedCylinder, sharedTorus, dungeonMaterial,
 } from './dungeonAssets.js';
-import { ROOM_TEMPLATES, registerBaseTemplates, getRoomTemplate } from './RoomTemplates.js';
-
-/** 确保基础模板已注册（幂等） */
-if (Object.keys(ROOM_TEMPLATES).length === 0) {
-  registerBaseTemplates();
-}
+import { ROOM_TEMPLATES, templateFitsRoom, requiredPortCount, openPorts } from './RoomTemplates.js';
 
 /** 程序化迷宫地下城 — 多房间、多门、可探索 */
 export class ProceduralDungeonGenerator {
@@ -52,21 +47,15 @@ export class ProceduralDungeonGenerator {
       roughness: 0.85,
       metalness: 0.2,
     }));
-    const doorOpenMat = dungeonMaterial(`${def.id}:doorOpen`, () => new THREE.MeshStandardMaterial({
-      color: def.accent,
-      emissive: def.accent,
-      emissiveIntensity: 0.35,
-      transparent: true,
-      opacity: 0.5,
-    }));
 
     const CS = layout.cellSize;
     const WH = layout.wallH;
     const WT = layout.wallT;
     const doorW = 4;
 
-    // 为每个房间分配模板（W-B10 切片4：模板库 + 连接规则）
-    this._assignRoomTemplates(layout, def);
+    // 模板分配吃迷宫自己那颗种子（切片4e）：同一颗种子必须永远得到同一座迷宫，
+    // 不然"存档里的种子"与关卡编辑器的复现就没了根据 —— 那是 B75 一整片的立论。
+    this._assignRoomTemplates(layout);
 
     layout.loreMeshes = [];
     layout.doorMeshes = [];
@@ -83,19 +72,13 @@ export class ProceduralDungeonGenerator {
       // 标准房间几何：地面、墙、门洞（必须始终执行，保证门洞形状正确，W-B10 切片4c）
       this._buildRoomGeometry(room, layout, def, floorMat, wallMat, accentMat, doorW, CS, WH, WT);
 
-      // 模板内部装饰（灯光、柱子、装饰物等）——不包含墙/门
-      const template = room.template;
-      if (template?.buildInterior) {
-        template.buildInterior(room.group, room, layout, def, { floorMat, wallMat, accentMat });
-      } else if (template?.buildGeometry) {
-        // 兼容旧字段
-        template.buildGeometry(room.group, room, layout, def, { floorMat, wallMat, accentMat });
-      } else {
-        // 回退：默认内部装饰
-        this._buildDefaultInterior(room.group, room, layout, { floorMat, wallMat, accentMat });
-      }
+      // 模板只往已经建好的房间里摆装饰（切片4e 的合同：不再叠一层地面/墙、不再加灯）
+      room.template.buildInterior(room.group, room, layout, def, {
+        wallMat,
+        accentMat,
+        addCollider: (x, z, w, d) => pushCollider(layout, x, z, w, d),
+      });
 
-      // LORE 碎片
       if (room.lore) {
         const ob = new THREE.Mesh(sharedBox(0.8, 1.6, 0.3), accentMat);
         ob.position.set(room.x + (room.w ?? CS) * 0.25, 0.8, room.z - (room.d ?? CS) * 0.2);
@@ -126,9 +109,6 @@ export class ProceduralDungeonGenerator {
       frame.userData.isFrame = true;
       group.add(frame);
     }
-
-    layout._doorClosedMat = doorClosedMat;
-    layout._doorOpenMat = doorOpenMat;
   }
 
   /** 标准房间几何：地面、墙、门洞（W-B10 切片4c，修 B78） */
@@ -160,89 +140,31 @@ export class ProceduralDungeonGenerator {
     else addWallWithGap(room.group, wallMat, room.x + rw / 2, room.z, rd, WT, WH, doorW, layout, true);
   }
 
-  /** 为每个房间分配模板（W-B10 切片4：连接规则） */
-  static _assignRoomTemplates(layout, def) {
-    const entranceDir = this._getEntranceDirection(layout);
-    
+  /**
+   * 给每间房分配模板（W-B10 切片4e）。三条口径：
+   * - **Boss 场不套模板**：它由 `_buildBossArena` 自己建，34×34 也不在任何模板的尺寸假设里。
+   * - **只从贴合的模板里挑**（`templateFitsRoom`）：模板声明"必须有门"的方向，房间必须真的开着门。
+   *   这一条从根上禁掉旧写法里名字与端口互相矛盾的那些分配（死路房领 `lore:double-door`，
+   *   而那个模板声明 n、s 都必开 —— 死路房只有一扇门）。
+   * - **平手由种子定，不用 `Math.random()`**：同一颗种子必须永远得到同一座迷宫，
+   *   这是切片4a（修 B75）整片的立论；挑"必开门最多"的那个先，是让走廊/路口这类名字真的说话。
+   */
+  static _assignRoomTemplates(layout) {
+    const rnd = makeSeededRng(layout.seed);
+    const 全体 = Object.values(ROOM_TEMPLATES);
     for (const room of layout.rooms) {
-      if (room.isBossArena) {
-        room.template = { buildGeometry: this._buildBossArena };
-        continue;
+      if (room.isBossArena) { room.template = null; continue; }
+      const 候选 = 全体.filter((t) => templateFitsRoom(t, room));
+      if (!候选.length) {
+        throw new Error(
+          `${room.id}（${room.w}×${room.d}，开着的门：${openPorts(room).join('') || '无'}）`
+          + '没有任何贴合的模板 —— 模板库的尺寸/端口假设与迷宫造出来的房间脱节（W-B10 切片4e）'
+        );
       }
-      if (room.id === layout.spawn?.id) {
-        room.template = getRoomTemplate('hall', 'straight');
-        continue;
-      }
-      if (room.isExit) {
-        room.template = getRoomTemplate('arena', 'round');
-        continue;
-      }
-
-      // 根据门的连接情况选择模板
-      const ports = { n: !room.walls.n, e: !room.walls.e, s: !room.walls.s, w: !room.walls.w };
-      const connectedCount = Object.values(ports).filter(Boolean).length;
-      
-      let templateKey = 'chamber:square';
-      if (connectedCount >= 3) {
-        templateKey = ports.e && ports.w && !ports.n && !ports.s ? 'junction:tee' : 'junction:cross';
-      } else if (connectedCount === 2) {
-        if ((ports.n && ports.s) || (ports.e && ports.w)) {
-          templateKey = ports.n && ports.s ? 'hall:straight' : 'hall:straight';
-        } else {
-          templateKey = 'chamber:square';
-        }
-      } else if (connectedCount === 1) {
-        // 死路：宝藏房或 LORE 房
-        templateKey = Math.random() < 0.3 ? 'treasure:small' : 'lore:double-door';
-      }
-
-      room.template = getRoomTemplate(...templateKey.split(':'));
-      if (!room.template) {
-        room.template = getRoomTemplate('chamber', 'square');
-      }
-
-      // 准备房间的端口信息供模板使用
-      room.ports = {};
-      for (const dir of ['n', 'e', 's', 'w']) {
-        if (!room.walls[dir]) {
-          room.ports[dir] = { width: 4, offset: 0 };
-        }
-      }
+      const 最具体 = Math.max(...候选.map(requiredPortCount));
+      const 并列 = 候选.filter((t) => requiredPortCount(t) === 最具体);
+      room.template = 并列[Math.floor(rnd() * 并列.length)];
     }
-  }
-
-  static _getEntranceDirection(layout) {
-    // 简化：入口在 spawn 房
-    return layout.spawn ? 's' : 'n';
-  }
-
-  /** 回退：标准房间构建 */
-  static _buildStandardRoom(room, layout, mats) {
-    const CS = room.w ?? layout.cellSize;
-    const CSd = room.d ?? layout.cellSize;
-    const WH = layout.wallH;
-    const WT = layout.wallT;
-    const doorW = 4;
-
-    const floor = new THREE.Mesh(sharedPlane(CS - 0.4, CSd - 0.4), mats.floorMatBase);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.set(room.x, 0.02, room.z);
-    floor.receiveShadow = true;
-    room.group.add(floor);
-
-    const torch = new THREE.PointLight(mats.accentMatBase.color, 0.35, 14);
-    torch.position.set(room.x, 3.2, room.z);
-    room.group.add(torch);
-
-    const w = room.walls;
-    if (w.n) addWallSegment(room.group, mats.wallMatBase, room.x, room.z - CSd / 2, CS, WT, WH, layout);
-    else addWallWithGap(room.group, mats.wallMatBase, room.x, room.z - CSd / 2, CS, WT, WH, 4, layout);
-    if (w.s) addWallSegment(room.group, mats.wallMatBase, room.x, room.z + CSd / 2, CS, WT, WH, layout);
-    else addWallWithGap(room.group, mats.wallMatBase, room.x, room.z + CSd / 2, CS, WT, WH, 4, layout);
-    if (w.w) addWallSegment(room.group, mats.wallMatBase, room.x - CS / 2, room.z, WT, CSd, WH, layout, true);
-    else addWallWithGap(room.group, mats.wallMatBase, room.x - CS / 2, room.z, CSd, WT, WH, 4, layout, true);
-    if (w.e) addWallSegment(room.group, mats.wallMatBase, room.x + CS / 2, room.z, WT, CSd, WH, layout, true);
-    else addWallWithGap(room.group, mats.wallMatBase, room.x + CS / 2, room.z, CSd, WT, WH, 4, layout, true);
   }
 
   static setDoorOpen(layout, door, open) {

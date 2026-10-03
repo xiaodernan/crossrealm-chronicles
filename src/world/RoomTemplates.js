@@ -1,613 +1,198 @@
 import * as THREE from 'three';
+import { sharedBox, sharedCylinder } from './dungeonAssets.js';
 
 /**
- * 房间模板库 —— 「这一类房间长什么样、门怎么开、里面摆什么」只有一份答案（W-B10 切片4，修 B75/B76）。
+ * 房间模板库 —— 「这一类房间摆什么」只有一份答案（W-B10 切片4）。
  *
- * 为什么要有这个：
- * - 以前每个房间都是标准矩形（18×18），墙要么全有要么全开门，内部只有一盏灯。
- * - 现在每个模板自带：平面形状、门位置、内部装饰、碰撞体、灯光、LORE 点位。
- * - 连接规则显式声明：哪个模板能接哪个模板、哪个方向、需要几格门洞。
- * - 生成器按模板组装，而不再是"先刷网格再套模板"——模板决定形状，网格只是锚点。
- *
- * 模板签名由这些字段组成（做材质/几何共享的键）：
- *  - id、variant、wallTheme（墙面材质主题）、floorTheme（地面材质主题）
- *  这保证同一副本内同一模板只 build 一次几何/材质。
+ * ## 这一层的合同（切片4e 重写时定下的，之前是含糊的）
+ * 1. **模板只管室内装饰**。地面、外墙、门洞、碰撞由 `ProceduralDungeonGenerator._buildRoomGeometry`
+ *    建（切片4c 才把门洞那处参数错位修好，`tests/dungeon-wall-gap.test.js` 钉着它的形状）。
+ *    模板里再建一遍地面/墙 = 同一块地上叠两层（z-fighting）+ 同一面墙两份碰撞盒。
+ * 2. **尺寸读房间，不读模板**。迷宫与关卡编辑器这两个生产者都只往房间上写 `w`/`d`
+ *    （`MazeLayout.js` 的 `w: CELL, d: CELL`、`LevelEditor._addRoomAt` 的 `w: template.width`），
+ *    所以室内函数读 `room.w`/`room.d`。`tpl.width`/`tpl.depth` 表达的是"这个模板假设的房间大小"，
+ *    只在分配时筛掉不贴合的模板（`templateFitsRoom`），不当坐标用。
+ * 3. **门的位置由迷宫说了算，模板只声明"这类房间哪几边必须是门、哪几边必须是墙"**。
+ *    `ports[dir].required` 要求那一边真的开门，`.solid` 要求那一边真的是实墙 —— 两个都要，
+ *    因为室内摆设是**贴着某一边放的**：`lore:double-door` 的读经台靠东西墙，若那一边其实
+ *    是门，它就正好站在门洞中间（实测把 4 扇门的洞口堵死，`.tmp-20261004/wb10s4e-door-blockers.mjs`）。
+ *    这不是第二套连接规则 —— 墙与门只由 `MazeLayout` 生成一次，模板这边只是筛选候选。
+ * 4. **室内不加灯**。每间房一盏火把已由 `_buildRoomGeometry` 放好；模板再加灯就是把实时光
+ *    数量交回随机分配（切片1 普查：每场 25/36 盏，全部来自房间本体）。
+ * 5. **室内不 `new` 几何**。一律走 `dungeonAssets` 的共享缓存，尺寸写成常量。
  */
 
 const CELL = 18;
 
-/** 方向常量 */
-export const DIR = { n: 'n', e: 'e', s: 's', w: 'w' };
-const OPPOSITE = { n: 's', e: 'w', s: 'n', w: 'e' };
-
-/** 模板注册表 */
+/** 模板注册表：key = `id:variant` */
 export const ROOM_TEMPLATES = {};
 
 /**
  * 注册一个房间模板。
  * @param {object} tpl
- * @param {string} tpl.id - kebab-case 唯一 id（如 'hall-straight'）
- * @param {string} tpl.variant - 变体名（同 id 下可有多种，如 'hall-straight:wide'）
- * @param {number} tpl.width - 房间宽度（单位：米，需是 CELL 的倍数）
- * @param {number} tpl.depth - 房间深度
- * @param {object} tpl.ports - 门端口 { dir: { required: bool, width: number } }
- *   required=false 表示该向可选开门，true 表示必须有邻居才生成
- * @param {Function} tpl.buildGeometry - (group, room, layout, def, mats) => void
- *   挂载到房间组的构建函数，负责地面、墙、装饰、碰撞、灯光、LORE
- * @param {string[]} [tpl.tags=[]] - 标签（如 'hall' 'chamber' 'arena' 'lore' 'treasure'）
- * @param {string} [tpl.wallTheme='stone'] - 墙面材质主题键
- * @param {string} [tpl.floorTheme='stone'] - 地面材质主题键
+ * @param {string} tpl.id
+ * @param {string} tpl.variant
+ * @param {number} tpl.width - 假设的房间宽度（米），只供 `templateFitsRoom` 比对，不用于坐标
+ * @param {number} tpl.depth
+ * @param {object} tpl.ports - { n,e,s,w: { required, width } }；required 的方向必须真的开门
+ * @param {(group, room, layout, def, ctx) => void} tpl.buildInterior - 只摆室内装饰
+ * @param {string[]} [tpl.tags]
  */
 export function registerRoomTemplate(tpl) {
   const key = `${tpl.id}:${tpl.variant ?? 'base'}`;
-  if (ROOM_TEMPLATES[key]) {
-    throw new Error(`Room template ${key} already registered`);
+  if (ROOM_TEMPLATES[key]) throw new Error(`Room template ${key} already registered`);
+  if (typeof tpl.buildInterior !== 'function') {
+    throw new Error(`Room template ${key} 缺 buildInterior —— 模板只负责室内，没有室内函数就没有存在的理由`);
   }
-  // 标准化端口
   const ports = {};
   for (const dir of ['n', 'e', 's', 'w']) {
     const p = tpl.ports?.[dir];
-    ports[dir] = p ? {
-      required: p.required ?? false,
-      width: p.width ?? 4,
-      offset: p.offset ?? 0, // 相对房间中心的偏移（米）
-    } : null;
+    if (p?.required && p?.solid) {
+      throw new Error(`Room template ${key} 的 ${dir} 边同时声明 required 与 solid —— 一边不可能既必须是门又必须是墙`);
+    }
+    ports[dir] = p ? { required: p.required ?? false, solid: p.solid ?? false, width: p.width ?? 4 } : null;
   }
-  ROOM_TEMPLATES[key] = {
-    ...tpl,
-    key,
-    ports,
-    width: tpl.width,
-    depth: tpl.depth,
-    buildGeometry: tpl.buildGeometry,
-    tags: tpl.tags ?? [],
-    wallTheme: tpl.walkTheme ?? 'stone',
-    floorTheme: tpl.floorTheme ?? 'stone',
-  };
+  ROOM_TEMPLATES[key] = { ...tpl, key, ports, tags: tpl.tags ?? [] };
   return key;
 }
 
-/** 取模板（带变体回退） */
+/** 取模板（variant 省略时认 'base'） */
 export function getRoomTemplate(id, variant) {
-  const key = `${id}:${variant ?? 'base'}`;
-  return ROOM_TEMPLATES[key] ?? null;
+  return ROOM_TEMPLATES[`${id}:${variant ?? 'base'}`] ?? null;
 }
 
-/** 列出某标签下的所有模板 */
-export function listTemplatesByTag(tag) {
-  return Object.values(ROOM_TEMPLATES).filter((t) => t.tags.includes(tag));
-}
-
-/** 连接规则：给定模板 A 在 dir 方向，能接哪些模板 */
-export function canConnect(templateA, dir, templateB) {
-  const portA = templateA.ports[dir];
-  const portB = templateB.ports[OPPOSITE[dir]];
-  if (!portA || !portB) return false;
-  // 门宽兼容：取较小者
-  return Math.min(portA.width, portB.width) >= 2;
-}
+/** 这房间真实开着的门（`walls[dir] === false` 才是门） */
+export const openPorts = (room) => ['n', 'e', 's', 'w'].filter((d) => !room.walls?.[d]);
 
 /**
- * 根据模板与端口生成门洞几何（供 buildGeometry 调用）。
- * @param {object} params
- * @param {THREE.Group} group
- * @param {object} mat - 墙面材质
- * @param {number} x - 房间中心 x
- * @param {number} z - 房间中心 z
- * @param {number} wallLen - 该向墙总长
- * @param {number} thickness - 墙厚
- * @param {number} height - 墙高
- * @param {number} gap - 门洞宽
- * @param {number} offset - 门洞中心相对墙中心的偏移
- * @param {boolean} alongZ - true=南北墙(沿Z轴), false=东西墙(沿X轴)
+ * 贴合判据：模板假设的房间尺寸等于房间实际尺寸，且模板声明的每一边都对得上 ——
+ * `required` 的边真的开着门，`solid` 的边真的是实墙。
+ * 这是本层「连接规则」唯一的消费者 —— 分配只从贴合的候选里挑。
  */
-export function buildDoorGap(params) {
-  const { group, mat, x, z, wallLen, thickness, height, gap, offset, alongZ } = params;
-  const seg = (wallLen - gap) / 2;
-  const leftLen = seg + offset;
-  const rightLen = seg - offset;
-  if (alongZ) {
-    // 南北墙：沿 X 轴
-    if (leftLen > 0.1) addSeg(x - wallLen / 2 + leftLen / 2, z, thickness, leftLen);
-    if (rightLen > 0.1) addSeg(x + wallLen / 2 - rightLen / 2, z, thickness, rightLen);
-  } else {
-    // 东西墙：沿 Z 轴
-    if (leftLen > 0.1) addSeg(x, z - wallLen / 2 + leftLen / 2, rightLen, thickness);
-    if (rightLen > 0.1) addSeg(x, z + wallLen / 2 - rightLen / 2, rightLen, thickness);
+export function templateFitsRoom(tpl, room) {
+  if (tpl.width !== room.w || tpl.depth !== room.d) return false;
+  for (const dir of ['n', 'e', 's', 'w']) {
+    const p = tpl.ports[dir];
+    if (!p) continue;
+    if (p.required && room.walls[dir]) return false;
+    if (p.solid && !room.walls[dir]) return false;
   }
-
-  function addSeg(px, pz, w, d) {
-    const m = new THREE.Mesh(
-      new THREE.BoxGeometry(w, height, d),
-      mat
-    );
-    m.position.set(px, height / 2, pz);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    group.add(m);
-    // 碰撞体由调用方统一 push
-  }
+  return true;
 }
 
-/** 预置模板注册（由各副本主题自行 import 注册，这里只放通用基础模板） */
-export function registerBaseTemplates() {
-  // 直走廊
-  registerRoomTemplate({
-    id: 'hall',
-    variant: 'straight',
-    width: CELL,
-    depth: CELL,
-    tags: ['hall', 'connector'],
-    ports: {
-      n: { required: true, width: 4 },
-      s: { required: true, width: 4 },
-      e: { required: false, width: 4 },
-      w: { required: false, width: 4 },
-    },
-    buildGeometry: buildHallStraight,
-  });
+/** 模板声明了几个必开门 —— 分配时「最具体的那个赢」，用它排序 */
+export const requiredPortCount = (tpl) =>
+  ['n', 'e', 's', 'w'].filter((d) => tpl.ports[d]?.required).length;
 
-  // 宽走廊（可做大厅前厅）
-  registerRoomTemplate({
-    id: 'hall',
-    variant: 'wide',
-    width: CELL * 2,
-    depth: CELL,
-    tags: ['hall', 'connector', 'wide'],
-    ports: {
-      n: { required: true, width: 6 },
-      s: { required: true, width: 6 },
-      e: { required: false, width: 4 },
-      w: { required: false, width: 4 },
-    },
-    buildGeometry: buildHallWide,
-  });
+/* ===== 室内装饰 ===== */
 
-  // 标准方厅
-  registerRoomTemplate({
-    id: 'chamber',
-    variant: 'square',
-    width: CELL,
-    depth: CELL,
-    tags: ['chamber', 'combat'],
-    ports: {
-      n: { required: false, width: 4 },
-      s: { required: false, width: 4 },
-      e: { required: false, width: 4 },
-      w: { required: false, width: 4 },
-    },
-    buildGeometry: buildChamberSquare,
-  });
-
-  // 长方厅（横向）
-  registerRoomTemplate({
-    id: 'chamber',
-    variant: 'horizontal',
-    width: CELL * 2,
-    depth: CELL,
-    tags: ['chamber', 'combat', 'horizontal'],
-    ports: {
-      n: { required: false, width: 4 },
-      s: { required: false, width: 4 },
-      e: { required: true, width: 4 },
-      w: { required: true, width: 4 },
-    },
-    buildGeometry: buildChamberHorizontal,
-  });
-
-  // 十字路口
-  registerRoomTemplate({
-    id: 'junction',
-    variant: 'cross',
-    width: CELL,
-    depth: CELL,
-    tags: ['junction', 'connector'],
-    ports: {
-      n: { required: true, width: 4 },
-      s: { required: true, width: 4 },
-      e: { required: true, width: 4 },
-      w: { required: true, width: 4 },
-    },
-    buildGeometry: buildJunctionCross,
-  });
-
-  // T 型路口
-  registerRoomTemplate({
-    id: 'junction',
-    variant: 'tee',
-    width: CELL,
-    depth: CELL,
-    tags: ['junction', 'connector'],
-    ports: {
-      n: { required: true, width: 4 },
-      s: { required: true, width: 4 },
-      e: { required: true, width: 4 },
-      w: { required: false, width: 4 },
-    },
-    buildGeometry: buildJunctionTee,
-  });
-
-  // 圆形竞技场
-  registerRoomTemplate({
-    id: 'arena',
-    variant: 'round',
-    width: CELL * 2,
-    depth: CELL * 2,
-    tags: ['arena', 'boss'],
-    ports: {
-      n: { required: false, width: 5 },
-      s: { required: true, width: 5 },
-      e: { required: false, width: 4 },
-      w: { required: false, width: 4 },
-    },
-    buildGeometry: buildArenaRound,
-  });
-
-  // 宝藏房（小、只有一个门）
-  registerRoomTemplate({
-    id: 'treasure',
-    variant: 'small',
-    width: CELL,
-    depth: CELL,
-    tags: ['treasure', 'lore'],
-    ports: {
-      n: { required: false, width: 3 },
-      s: { required: true, width: 3 },
-      e: { required: false, width: 3 },
-      w: { required: false, width: 3 },
-    },
-    buildGeometry: buildTreasureSmall,
-  });
-
-  // LORE 房（中型、两门对开）
-  registerRoomTemplate({
-    id: 'lore',
-    variant: 'double-door',
-    width: CELL,
-    depth: CELL,
-    tags: ['lore', 'chamber'],
-    ports: {
-      n: { required: true, width: 4 },
-      s: { required: true, width: 4 },
-      e: { required: false, width: 4 },
-      w: { required: false, width: 4 },
-    },
-    buildGeometry: buildLoreDoubleDoor,
-  });
-}
-
-/* ===== 模板构建函数实现 ===== */
-
-function buildHallStraight(group, room, layout, def, mats) {
-  const { floorMat, wallMat, accentMat, doorClosedMat, doorOpenMat } = mats;
-  const CS = room.width;
-  const CSd = room.depth;
-
-  // 地面
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(CS - 0.4, CSd - 0.4),
-    room.floorMat ?? mats.floorMat
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.set(room.x, 0.02, room.z);
-  floor.receiveShadow = true;
-  room.group.add(floor);
-
-  // 灯光
-  const torch = new THREE.PointLight(room.accent ?? 0xc9a962, 0.3, 12);
-  torch.position.set(room.x, 3, room.z);
-  room.group.add(torch);
-
-  // 四面墙
-  buildStandardWalls(room, layout, mats);
-}
-
-function buildHallWide(group, room, layout, def, mats) {
-  const { floorMat, wallMat, accentMat } = mats;
-  const CS = room.width;
-  const CSd = room.depth;
-
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(room.width - 0.4, room.depth - 0.4),
-    room.floorMat ?? mats.floorMat
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.set(room.x, 0.02, room.z);
-  floor.receiveShadow = true;
-  room.group.add(floor);
-
-  // 两盏灯
-  const torch1 = new THREE.PointLight(room.accent ?? 0xc9a962, 0.3, 14);
-  torch1.position.set(room.x - CELL / 4, 3.5, room.z);
-  room.group.add(torch1);
-  const torch2 = new THREE.PointLight(room.accent ?? 0xc9a962, 0.3, 14);
-  torch2.position.set(room.x + CELL / 4, 3.5, room.z);
-  room.group.add(torch2);
-
-  buildStandardWalls(room, layout, mats);
-}
-
-function buildChamberSquare(group, room, layout, def, mats) {
-  buildStandardRoom(room, layout, mats, { pillars: 4, torches: 1 });
-}
-
-function buildChamberHorizontal(group, room, layout, def, mats) {
-  buildStandardRoom(room, layout, mats, { pillars: 6, torches: 2, torchOffset: CELL / 3 });
-}
-
-function buildJunctionCross(group, room, layout, def, mats) {
-  // 十字路口：四面开门，中心有装饰柱
-  buildStandardRoom(room, layout, mats, { 
-    centerPillar: true, 
-    torches: 4, 
-    torchOffset: CELL / 4,
-    centerDecor: true 
-  });
-}
-
-function buildJunctionTee(group, room, layout, def, mats) {
-  buildStandardRoom(room, layout, mats, { 
-    centerPillar: true, 
-    torches: 3,
-    centerDecor: true 
-  });
-}
-
-function buildArenaRound(group, room, layout, def, mats) {
-  const WH = room.wallHeight ?? 5;
-  const WT = 0.6;
-  const r = Math.min(room.width, room.depth) * 0.4;
-
-  // 圆形地面
-  const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(r - 0.2, 32),
-    room.floorMat ?? mats.floorMat
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.set(room.x, 0.02, room.z);
-  floor.receiveShadow = true;
-  room.group.add(floor);
-
-  // 环形灯带
-  const ring = new THREE.Mesh(
-    new THREE.RingGeometry(r - 1.5, r - 0.5, 48),
-    room.accentMat ?? mats.accentMat
-  );
-  ring.rotation.x = -Math.PI / 2;
-  ring.position.set(room.x, 0.05, room.z);
-  room.group.add(ring);
-
-  // 周围柱子
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2;
-    const px = room.x + Math.cos(a) * r * 0.85;
-    const pz = room.z + Math.sin(a) * r * 0.85;
-    const pillar = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.6, 0.8, WH + 1, 8),
-      room.wallMat ?? mats.wallMat
-    );
-    pillar.position.set(px, (WH + 1) / 2, pz);
-    pillar.castShadow = true;
-    room.group.add(pillar);
-  }
-
-  // 强光
-  const light = new THREE.PointLight(room.accent ?? 0xc9a962, 1.2, 40);
-  light.position.set(room.x, 8, room.z);
-  room.group.add(light);
-
-  // 围墙（圆形近似用 16 边）
-  const wallSides = 16;
-  for (let i = 0; i < wallSides; i++) {
-    const a = (i / wallSides) * Math.PI * 2;
-    const nx = Math.cos(a);
-    const nz = Math.sin(a);
-    const wx = room.x + nx * r;
-    const wz = room.z + nz * r;
-    const segLen = 2 * Math.PI * r / wallSides;
-    const m = new THREE.Mesh(
-      new THREE.BoxGeometry(segLen * 1.1, 5, 0.8),
-      room.wallMat ?? mats.wallMat
-    );
-    m.position.set(wx, 2.5, wz);
-    m.rotation.y = a + Math.PI / 2;
-    m.castShadow = true;
-    m.receiveShadow = true;
-    room.group.add(m);
-  }
-}
-
-function buildTreasureSmall(group, room, layout, def, mats) {
-  // 小宝箱房：地面、一面墙开门、中间宝箱基座
-  buildStandardRoom(room, layout, mats, { 
-    torches: 1, 
-    centerDecor: true,
-    decorType: 'treasure' 
-  });
-}
-
-function buildLoreDoubleDoor(group, room, layout, def, mats) {
-  buildStandardRoom(room, layout, mats, { 
-    torches: 2, 
-    torchOffset: CELL / 3,
-    centerDecor: true,
-    decorType: 'lore' 
-  });
-}
-
-/** 通用标准房间构建 */
-function buildStandardRoom(room, layout, mats, options = {}) {
-  const { floorMat, wallMat, accentMat } = mats;
-  const WH = room.wallHeight ?? 5;
-  const WT = 0.6;
-  const CS = room.width;
-  const CSd = room.depth;
-
-  // 地面
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(room.width - 0.4, room.depth - 0.4),
-    room.floorMat ?? floorMat
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.set(room.x, 0.02, room.z);
-  floor.receiveShadow = true;
-  room.group.add(floor);
-
-  // 灯光
-  if (options.torches) {
-    const count = options.torches;
-    const offset = options.torchOffset ?? CELL / 4;
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
-      const torch = new THREE.PointLight(
-        room.accent ?? 0xc9a962, 
-        0.35, 
-        14
-      );
-      torch.position.set(
-        room.x + Math.cos(angle) * offset,
-        3,
-        room.z + Math.sin(angle) * offset
-      );
-      room.group.add(torch);
-    }
-  }
-
-  // 中心装饰
-  if (options.centerDecor) {
-    if (options.centerPillar) {
-      const pillar = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.5, 0.7, 5, 8),
-        room.wallMat ?? mats.wallMat
-      );
-      pillar.position.set(room.x, 2.5, room.z);
-      pillar.castShadow = true;
-      room.group.add(pillar);
-    }
-    if (options.decorType === 'treasure') {
-      const base = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.8, 1.0, 0.6, 8),
-        room.accentMat ?? mats.accentMat
-      );
-      base.position.set(room.x, 0.3, room.z);
-      room.group.add(base);
-      const chest = new THREE.Mesh(
-        new THREE.BoxGeometry(1.2, 0.8, 0.8),
-        room.accentMat ?? mats.accentMat
-      );
-      chest.position.set(room.x, 1.2, room.z);
-      room.group.add(chest);
-    }
-    if (options.decorType === 'lore') {
-      const shard = new THREE.Mesh(
-        new THREE.BoxGeometry(0.8, 1.6, 0.3),
-        room.accentMat ?? mats.accentMat
-      );
-      shard.position.set(room.x, 0.8, room.z);
-      room.group.add(shard);
-    }
-  }
-
-  // 墙
-  buildStandardWalls(room, layout, mats);
-}
-
-/** 标准四面墙 + 门洞 */
-function buildStandardWalls(room, layout, mats) {
-  const { wallMat, doorClosedMat, doorOpenMat } = mats;
-  const WH = room.wallHeight ?? 5;
-  const WT = 0.6;
-  const CS = room.width;
-  const CSd = room.depth;
-  const doorW = room.doorWidth ?? 4;
-
-  const walls = room.walls ?? { n: true, e: true, s: true, w: true };
-
-  // 北墙
-  if (walls.n) {
-    if (room.ports?.n) {
-      const gap = room.ports.n.width ?? 4;
-      addWallWithDoor(room.group, mats.wallMat ?? mats.wallMat, room.x, room.z - room.depth / 2, room.width, WT, WH, gap, 0, true, layout);
-    } else {
-      addWallSegment(room.group, mats.wallMat ?? mats.wallMat, room.x, room.z - room.depth / 2, room.width, WT, WH, layout);
-    }
-  }
-  // 南墙
-  if (walls.s) {
-    if (room.ports?.s) {
-      const gap = room.ports.s.width ?? 4;
-      addWallWithDoor(room.group, mats.wallMat ?? mats.wallMat, room.x, room.z + room.depth / 2, room.width, WT, WH, gap, 0, true, layout);
-    } else {
-      addWallSegment(room.group, mats.wallMat ?? mats.wallMat, room.x, room.z + room.depth / 2, room.width, WT, WH, layout);
-    }
-  }
-  // 西墙
-  if (walls.w) {
-    if (room.ports?.w) {
-      const gap = room.ports.w.width ?? 4;
-      addWallWithDoor(room.group, mats.wallMat ?? mats.wallMat, room.x - room.width / 2, room.z, WT, room.depth, WH, gap, 0, false, layout);
-    } else {
-      addWallSegment(room.group, mats.wallMat ?? mats.wallMat, room.x - room.width / 2, room.z, WT, room.depth, WH, layout, true);
-    }
-  }
-  // 东墙
-  if (walls.e) {
-    if (room.ports?.e) {
-      const gap = room.ports.e.width ?? 4;
-      addWallWithDoor(room.group, mats.wallMat ?? mats.wallMat, room.x + room.width / 2, room.z, WT, room.depth, WH, gap, 0, false, layout);
-    } else {
-      addWallSegment(room.group, mats.wallMat ?? mats.wallMat, room.x + room.width / 2, room.z, WT, room.depth, WH, layout, true);
-    }
-  }
-}
-
-/** 添加带门洞的墙段 */
-function addWallWithDoor(group, mat, x, z, totalLen, thickness, height, gap, offset, alongZ, layout) {
-  const seg = (totalLen - gap) / 2;
-  const leftLen = seg;
-  const rightLen = seg;
-
-  if (alongZ) {
-    // 南北墙
-    if (leftLen > 0.1) addWallSeg(x - totalLen / 2 + leftLen / 2, z, thickness, leftLen);
-    if (rightLen > 0.1) addWallSeg(x + totalLen / 2 - rightLen / 2, z, thickness, rightLen);
-  } else {
-    // 东西墙
-    if (leftLen > 0.1) addWallSeg(x, z - totalLen / 2 + leftLen / 2, rightLen, thickness);
-    if (rightLen > 0.1) addWallSeg(x, z + totalLen / 2 - rightLen / 2, rightLen, thickness);
-  }
-
-  function addWallSeg(px, pz, w, d) {
-    const m = new THREE.Mesh(
-      new THREE.BoxGeometry(w, height, d),
-      mat
-    );
-    m.position.set(px, height / 2, pz);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    group.add(m);
-    if (layout) pushCollider(layout, px, pz, w, d);
-  }
-}
-
-function addWallSegment(group, mat, x, z, w, thickness, height, layout, alongZ = false) {
-  const m = new THREE.Mesh(
-    new THREE.BoxGeometry(alongZ ? thickness : w, height, alongZ ? w : thickness),
-    mat
-  );
-  m.position.set(x, height / 2, z);
+/** 一件装饰：摆进房间，并把 footprint 交给生成器那一份碰撞表 */
+function decor(ctx, group, geometry, material, x, z, y, cw, cd) {
+  const m = new THREE.Mesh(geometry, material);
+  m.position.set(x, y, z);
   m.castShadow = true;
-  m.receiveShadow = true;
   group.add(m);
-  if (layout) pushCollider(layout, x, z, alongZ ? thickness / 2 : w / 2, alongZ ? w / 2 : thickness / 2);
+  if (cw && cd) ctx.addCollider(x, z, cw, cd);
+  return m;
 }
 
-function pushCollider(layout, x, z, w, d) {
-  layout.colliders = layout.colliders || [];
-  layout.colliders.push({ x, z, hw: w, hd: d });
+function buildHallStraight(group, room, layout, def, ctx) {
+  // 直厅：两侧实墙根各两根壁柱，n↔s 那条通道留着
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) {
+      decor(ctx, group, sharedBox(0.8, 4, 0.8), ctx.wallMat,
+        room.x + sx * (room.w / 2 - 0.7), room.z + sz * (room.d / 4), 2, 0.8, 0.8);
+    }
+  }
 }
 
-// 初始化基础模板
+function buildChamberSquare(group, room, layout, def, ctx) {
+  // 方厅：四角柱，两条中线让给路
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) {
+      decor(ctx, group, sharedCylinder(0.45, 0.55, 3.6, 8), ctx.wallMat,
+        room.x + sx * (room.w / 2 - 2.2), room.z + sz * (room.d / 2 - 2.2), 1.8, 1.1, 1.1);
+    }
+  }
+}
+
+function buildJunctionCross(group, room, layout, def, ctx) {
+  // 十字口：四只火盆摆在四个对角，正中让给往四面的路
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) {
+      decor(ctx, group, sharedCylinder(0.5, 0.35, 1.1, 8), ctx.accentMat,
+        room.x + sx * (room.w / 2 - 3), room.z + sz * (room.d / 2 - 3), 0.55, 1, 1);
+    }
+  }
+}
+
+function buildJunctionTee(group, room, layout, def, ctx) {
+  // T 口：n/e/s 三面开门，唯一那堵实墙在西侧 —— 壁龛就靠它，两只火盆摆在北门口两侧
+  decor(ctx, group, sharedBox(1.6, 2.4, 0.6), ctx.wallMat,
+    room.x - (room.w / 2 - 0.6), room.z, 1.2, 0.6, 1.6);
+  for (const sx of [-1, 1]) {
+    decor(ctx, group, sharedCylinder(0.5, 0.35, 1.1, 8), ctx.accentMat,
+      room.x + sx * 3, room.z - (room.d / 2 - 1.6), 0.55, 1, 1);
+  }
+}
+
+function buildTreasureSmall(group, room, layout, def, ctx) {
+  // 宝藏房：必开门在南，基座与宝箱摆在靠北那一侧的中间
+  const z = room.z - room.d / 4;
+  decor(ctx, group, sharedCylinder(0.7, 0.9, 0.7, 8), ctx.accentMat, room.x, z, 0.35, 1.8, 1.8);
+  decor(ctx, group, sharedBox(1.4, 0.9, 1), ctx.accentMat, room.x, z, 1.15, 1.4, 1);
+}
+
+function buildLoreDoubleDoor(group, room, layout, def, ctx) {
+  // LORE 房：南北对开，两座读经台靠在东西实墙上
+  for (const sx of [-1, 1]) {
+    decor(ctx, group, sharedBox(0.6, 1.2, 0.6), ctx.wallMat,
+      room.x + sx * (room.w / 2 - 0.9), room.z, 0.6, 0.6, 0.6);
+  }
+}
+
+/** 预置模板注册（模块加载即执行；注册表是数据，谁 import 谁拿到完整的库） */
+function registerBaseTemplates() {
+  registerRoomTemplate({
+    id: 'hall', variant: 'straight', width: CELL, depth: CELL,
+    tags: ['hall', 'connector'],
+    ports: { n: { required: true, width: 4 }, s: { required: true, width: 4 } },
+    buildInterior: buildHallStraight,
+  });
+  registerRoomTemplate({
+    id: 'chamber', variant: 'square', width: CELL, depth: CELL,
+    tags: ['chamber', 'combat'],
+    ports: { n: {}, e: {}, s: {}, w: {} },
+    buildInterior: buildChamberSquare,
+  });
+  registerRoomTemplate({
+    id: 'junction', variant: 'cross', width: CELL, depth: CELL,
+    tags: ['junction', 'connector'],
+    ports: { n: { required: true }, e: { required: true }, s: { required: true }, w: { required: true } },
+    buildInterior: buildJunctionCross,
+  });
+  registerRoomTemplate({
+    id: 'junction', variant: 'tee', width: CELL, depth: CELL,
+    tags: ['junction', 'connector'],
+    // 三面开门、西侧那堵实墙 —— 壁龛就贴它，所以 w 必须是墙
+    ports: { n: { required: true }, e: { required: true }, s: { required: true }, w: { solid: true } },
+    buildInterior: buildJunctionTee,
+  });
+  registerRoomTemplate({
+    id: 'treasure', variant: 'small', width: CELL, depth: CELL,
+    tags: ['treasure', 'reward'],
+    ports: { s: { required: true, width: 3 } },
+    buildInterior: buildTreasureSmall,
+  });
+  registerRoomTemplate({
+    id: 'lore', variant: 'double-door', width: CELL, depth: CELL,
+    tags: ['lore', 'chamber'],
+    // 南北对开 + 东西两堵实墙：读经台贴着东西墙放，那两边一旦是门就正堵门洞（切片4e 实测 4 扇）
+    ports: { n: { required: true, width: 4 }, s: { required: true, width: 4 }, e: { solid: true }, w: { solid: true } },
+    buildInterior: buildLoreDoubleDoor,
+  });
+}
+
 registerBaseTemplates();
 
-export { CELL, OPPOSITE };
+export { CELL };

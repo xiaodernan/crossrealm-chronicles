@@ -153,10 +153,10 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
  * 状态是 32 位，种子因此以 2^32 为周期。非有限与非数字**不兜底**（B71 口径，与 `dungeonEncounterOf`
  * 同一把尺子）：静默把 `NaN` 折成 0 号种子等于把"调用方递错了"变成"这座副本悄悄用了别座的布局"。
  */
-function makeSeededRng(seed) {
+export function makeSeededRng(seed) {
   if (typeof seed !== 'number' || !Number.isFinite(seed)) {
     throw new TypeError(
-      `generateMaze 的种子必须是一个有限数字（收到 ${typeof seed} ${显示(seed)}）—— `
+      `迷宫的种子必须是一个有限数字（收到 ${typeof seed} ${显示(seed)}）—— `
       + 'NaN / Infinity / 非数字都摇不出可重现的迷宫（W-B10 切片4a，修 B75）'
     );
   }

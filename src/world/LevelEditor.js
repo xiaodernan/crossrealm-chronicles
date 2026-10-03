@@ -9,7 +9,7 @@
  */
 
 import * as THREE from 'three';
-import { ROOM_TEMPLATES, listTemplatesByTag, getRoomTemplate } from './RoomTemplates.js';
+import { ROOM_TEMPLATES, getRoomTemplate } from './RoomTemplates.js';
 import { codeFor, codesFor } from '../content/keybinds.js';
 import { keyLabel } from '../content/keyLabels.js';
 
