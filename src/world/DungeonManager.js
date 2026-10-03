@@ -4,19 +4,14 @@ import { getRoomAt, clampToBounds } from './MazeLayout.js';
 import { DungeonBoss } from '../combat/DungeonBoss.js';
 import { BOSS_LORE, DUNGEON_ENTER_LINES } from '../game/LoreFragments.js';
 import { DUNGEON_DEFS } from '../content/dungeons.js';
+import { disposeDungeonSubtree } from './dungeonAssets.js';
 
-/** 递归释放并摘下一棵子树的网格资源。副本每次重建/离开都会走这里，
- *  旧实现只 group.remove() 不 dispose，反复进出迷宫会让 GPU 缓冲单调增长。 */
-function disposeSubtree(root) {
-  for (const child of [...root.children]) {
-    root.remove(child);
-    child.traverse((o) => {
-      o.geometry?.dispose?.();
-      if (Array.isArray(o.material)) o.material.forEach((m) => m?.dispose?.());
-      else o.material?.dispose?.();
-    });
-  }
-}
+/** 副本每次重建/离开都会走这里（旧实现只 group.remove() 不 dispose，反复进出迷宫会让
+ *  GPU 缓冲单调增长）。
+ *  **释放权归 `dungeonAssets`**：地下城的几何与材质现在是七座副本共享的（B76），
+ *  在这里无差别 dispose 会让"离开一座副本"顺手毁掉另外六座的地面。
+ *  所以本地这份函数删掉，改调共享库那个会问归属的版本。 */
+const disposeSubtree = disposeDungeonSubtree;
 
 export class DungeonManager {
   constructor(scene, world, dialog, enemyManager, game = null) {
