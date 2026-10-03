@@ -32,7 +32,7 @@ const BUS_SELF = 'engine/EventBus.js';
 /** 浏览器原生事件名：不是游戏事件，允许直接挂在 addEventListener 上 */
 const DOM_EVENT_NAMES = new Set([
   'change', 'click', 'contextmenu', 'input',
-  'keydown', 'keyup', 'mousedown', 'mousemove',
+  'keydown', 'keyup', 'mousedown', 'mouseup', 'mousemove',
   'pointercancel', 'pointerdown', 'pointerlockchange', 'pointermove', 'pointerup',
   'resize', 'wheel',
 ]);

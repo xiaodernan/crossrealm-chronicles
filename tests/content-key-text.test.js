@@ -83,9 +83,9 @@ describe('说明书正文：键名从生效表来', () => {
     const { manual, body, nav } = mountManual();
     manual.show();
     manual.showSection('combat');
-    rebind({ parry: 'KeyY', roll: 'KeyJ', escape: 'KeyK', journal: 'KeyO' });
+    rebind({ parry: 'KeyI', roll: 'KeyJ', escape: 'KeyC', journal: 'KeyO' });
     manual.refreshKeyHints();
-    expect(body.innerHTML).toContain('Y — 弹反');
+    expect(body.innerHTML).toContain('I — 弹反');
     expect(body.innerHTML).toContain('J — 闪避');
     expect(body.innerHTML).not.toContain('F — 弹反');
     // 出厂那张表的字面动作名不该出现在正文里（说明书没有 `{parry}` 这种残留，也没有旧的 F）
@@ -189,12 +189,12 @@ describe('营火台词与选项：出这张表之前就把键名展开', () => {
   it('改绑之后新读的台词跟着改口', () => {
     const { rd, shown } = campfire();
     listeningWindow();
-    rebind({ interact: 'KeyB', escape: 'KeyK' });
+    rebind({ interact: 'KeyB', escape: 'KeyC' });
     rd._showNode(REST_DIALOGUES.hub, 'rematch');
     expect(shown[0].html).toContain('按 B 召唤');
     rd.activeRest = { id: 'void', name: '破碎时线营火' };
     rd._showNode(REST_DIALOGUES.void, 'start');
-    expect(shown[1].choices.map((c) => c.label)).toContain('K 跳过演出？');
+    expect(shown[1].choices.map((c) => c.label)).toContain('C 跳过演出？');
   });
 
   it('营火那句"按 N 自动通关"也是问出来的（这一条写在运行时里，不在表里）', () => {

@@ -126,7 +126,7 @@ describe('设置存储：v1 扁平 → v2 带版本', () => {
 
   it('`keybinds` 不与出厂默认共用同一个对象：改一次不污染出厂表', () => {
     const a = new SettingsManager();
-    a.data.keybinds.save = 'KeyK';
+    a.data.keybinds.save = 'KeyC';
     const b = new SettingsManager();
     expect(b.data.keybinds).toEqual({});
     expect(new SettingsManager().defaults.keybinds).toEqual({});
@@ -134,9 +134,9 @@ describe('设置存储：v1 扁平 → v2 带版本', () => {
 
   it('重映射写进去再读回来；清成 `{}` 就是出厂键位', () => {
     const a = new SettingsManager();
-    a.set('keybinds', { save: 'KeyK' });
+    a.set('keybinds', { save: 'KeyC' });
     const b = new SettingsManager();
-    expect(applyHotkeyOverrides(UI_HOTKEYS, b.get('keybinds')).find((e) => e.action === 'save').code).toBe('KeyK');
+    expect(applyHotkeyOverrides(UI_HOTKEYS, b.get('keybinds')).find((e) => e.action === 'save').code).toBe('KeyC');
     b.set('keybinds', {});
     const c = new SettingsManager();
     expect(c.get('keybinds')).toEqual({});
@@ -187,10 +187,10 @@ describe('面板：等键的监听只在等的时候存在', () => {
 
   it('改绑战斗键之后面板那一行立刻显示新键（读的是生效表，不是出厂常量）', () => {
     const host = fakeHost();
-    const { panel, game } = mount({ parry: 'KeyY' }, host);
+    const { panel, game } = mount({ parry: 'KeyI' }, host);
     panel.refresh();
-    expect(host.innerHTML).toMatch(/data-keybind="parry">Y</);
-    expect(game.keybindTable.parry.code).toBe('KeyY');
+    expect(host.innerHTML).toMatch(/data-keybind="parry">I</);
+    expect(game.keybindTable.parry.code).toBe('KeyI');
   });
 
   it('跨表抢键在面板这一侧同样挡住：把"日志"改绑到弹反占用的 F 键', () => {
@@ -252,8 +252,8 @@ describe('面板：等键的监听只在等的时候存在', () => {
   });
 
   it('出厂表已叠上玩家键位：面板显示的是生效中的那张表，不是常量', () => {
-    const { panel, game } = mount({ save: 'KeyK' });
-    expect(game.hotkeyTable.find((e) => e.action === 'save').code).toBe('KeyK');
+    const { panel, game } = mount({ save: 'KeyC' });
+    expect(game.hotkeyTable.find((e) => e.action === 'save').code).toBe('KeyC');
     expect(() => panel.refreshKeybinds()).not.toThrow();   // 没有 DOM 节点时安静返回
   });
 });

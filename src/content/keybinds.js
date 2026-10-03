@@ -263,6 +263,8 @@ export const KEY_ACTIONS = [
   'attackLight', 'attackHeavy',
   'spell1', 'spell2', 'spell3', 'spell4',
   'swapWeapon', 'interact', 'fastTravel',
+  // 编辑器动作（W-B11）
+  'editorCycleTemplate', 'editorToggleGrid', 'editorDelete',
 ];
 
 /**
@@ -293,6 +295,10 @@ export const KEY_BINDINGS = {
   swapWeapon: { code: 'KeyX' },
   interact: { code: 'KeyE' },
   fastTravel: { code: 'KeyT' },
+  // 编辑器动作（W-B11）
+  editorCycleTemplate: { code: 'KeyY' },
+  editorToggleGrid: { code: 'KeyK' },
+  editorDelete: { code: 'Delete', aliases: ['Backspace'] },
 };
 
 /**
@@ -718,9 +724,11 @@ export function bindingFor(action) {
 export const KEY_ACTION_LABELS = {
   moveUp: '前进', moveDown: '后退', moveLeft: '左移', moveRight: '右移',
   sprint: '冲刺', jump: '跳跃', roll: '翻滚', parry: '弹反',
-  skill: '位面斩', lockOn: '锁定', attackLight: '轻击', attackHeavy: '重击',
+  skill: '战技', lockOn: '锁定', attackLight: '轻击', attackHeavy: '重击',
   spell1: '法术一', spell2: '法术二', spell3: '法术三', spell4: '法术四',
-  swapWeapon: '切换武器', interact: '交互', fastTravel: '快速旅行',
+  swapWeapon: '换武器', interact: '交互', fastTravel: '快速旅行',
+  // 编辑器动作（W-B11）
+  editorCycleTemplate: '切换模板', editorToggleGrid: '切换网格', editorDelete: '删除',
 };
 
 export function assertKeyActionLabels(labels = KEY_ACTION_LABELS, table = KEY_BINDINGS) {

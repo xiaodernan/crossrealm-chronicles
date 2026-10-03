@@ -149,10 +149,10 @@ describe('手柄覆盖表：一枚按钮只许一个动作认领', () => {
 
   it('`buildBindingTables` 第三参一起建三张表：手柄改坏同样整体抛', () => {
     const { padTable, keyTable, hotkeyTable } = buildBindingTables(
-      { parry: 'KeyY' }, UI_HOTKEYS, { jump: 'rightStick', interact: 'a' });
+      { parry: 'KeyI' }, UI_HOTKEYS, { jump: 'rightStick', interact: 'a' });
     expect(padTable.jump.button).toBe('rightStick');
     expect(padTable.interact.button).toBe('a');
-    expect(keyTable.parry.code).toBe('KeyY');
+    expect(keyTable.parry.code).toBe('KeyI');
     expect(hotkeyTable).toHaveLength(UI_HOTKEYS.length);
     expect(() => buildBindingTables({}, UI_HOTKEYS, { jump: 'b' })).toThrow(/按钮 b已被动作 "jump" 认领/);
   });
@@ -894,7 +894,7 @@ describe('设置面板：多出来的那一列', () => {
   });
 
   it('恢复默认键位把三格覆盖一起清掉（少清一格就是半复位）', () => {
-    const { host, game } = mount({ parry: 'KeyY' }, { jump: 'rightStick', interact: 'a' }, { back: 'rightStick' });
+    const { host, game } = mount({ parry: 'KeyI' }, { jump: 'rightStick', interact: 'a' }, { back: 'rightStick' });
     host.click(resetBtn());
     expect(game.settings.get('keybinds')).toEqual({});
     expect(game.settings.get('gamepadBinds')).toEqual({});
@@ -907,13 +907,13 @@ describe('设置面板：多出来的那一列', () => {
   });
 
   it('手柄改绑与键盘改绑互不干扰：两格各存各的', () => {
-    const { panel, game } = mount({ parry: 'KeyY' });
+    const { panel, game } = mount({ parry: 'KeyI' });
     panel.setPadCapturing('parry');
     panel.capturePadButton('rightStick');
-    expect(game.settings.get('keybinds')).toEqual({ parry: 'KeyY' });
+    expect(game.settings.get('keybinds')).toEqual({ parry: 'KeyI' });
     expect(game.settings.get('gamepadBinds')).toEqual({ parry: 'rightStick', interact: 'x' });
     panel.captureKey({ code: 'KeyB', preventDefault() {}, stopPropagation() {} });   // 没在等键盘 → 静默返回
-    expect(game.settings.get('keybinds')).toEqual({ parry: 'KeyY' });
+    expect(game.settings.get('keybinds')).toEqual({ parry: 'KeyI' });
   });
 });
 

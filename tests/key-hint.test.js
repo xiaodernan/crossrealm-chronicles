@@ -116,9 +116,9 @@ describe('keyText：文案里的键名占位', () => {
 
   it('改绑游戏键之后，同一句文案跟着改口（缓存按轮次作废）', () => {
     expect(keyText('{parry} 弹反')).toBe('F 弹反');
-    const { keyTable } = buildBindingTables({ parry: 'KeyY' }, UI_HOTKEYS);
+    const { keyTable } = buildBindingTables({ parry: 'KeyI' }, UI_HOTKEYS);
     setKeybindTable(keyTable);
-    expect(keyText('{parry} 弹反')).toBe('Y 弹反');
+    expect(keyText('{parry} 弹反')).toBe('I 弹反');
   });
 
   it('改绑 UI 热键同样作废旧缓存（两张表各有各的轮次）', () => {
@@ -157,9 +157,9 @@ describe('refreshKeyText：整片容器按生效表重算', () => {
     const cell = { sel: '[data-keys]', dataset: { keys: 'parry' }, textContent: '' };
     refreshKeyText(fakeRoot([cell]));
     expect(cell.textContent).toBe('F');
-    setKeybindTable(buildBindingTables({ parry: 'KeyY' }, UI_HOTKEYS).keyTable);
+    setKeybindTable(buildBindingTables({ parry: 'KeyI' }, UI_HOTKEYS).keyTable);
     refreshKeyText(fakeRoot([cell]));
-    expect(cell.textContent).toBe('Y');
+    expect(cell.textContent).toBe('I');
   });
 
   it('两种声明混在一个容器里也各自处理', () => {
@@ -193,18 +193,18 @@ describe('存模板、播的时候才展开（建得早的界面不会冻在出�
   it('倒下提示在复活那一刻展开（HINTS 是模块级常量，展开晚了才不会说谎）', () => {
     const toasts = [];
     const d = new DeathHintDirector({ dialog: fakeDialog(toasts), quests: { chapter: 1 } });
-    setKeybindTable(buildBindingTables({ interact: 'KeyY' }, UI_HOTKEYS).keyTable);
+    setKeybindTable(buildBindingTables({ interact: 'KeyC' }, UI_HOTKEYS).keyTable);
     d.onRespawn();
-    expect(toasts[0]).toBe('提示 · 营火 Y 可回满生命；J 日志有 Boss 攻略与流派说明。');
+    expect(toasts[0]).toBe('提示 · 营火 C 可回满生命；J 日志有 Boss 攻略与流派说明。');
   });
 
   it('情境教程排队期间改绑，播出时跟到新键', () => {
     const shown = [];
     const c = new ContextualTutorial({ dialog: fakeDialog(shown) });
     c.trigger('probe', '标题', '按 {interact} 交互');
-    setKeybindTable(buildBindingTables({ interact: 'KeyY' }, UI_HOTKEYS).keyTable);
+    setKeybindTable(buildBindingTables({ interact: 'KeyC' }, UI_HOTKEYS).keyTable);
     scheduler.update(0.5);
-    expect(shown).toEqual(['按 Y 交互']);
+    expect(shown).toEqual(['按 C 交互']);
     scheduler.clear('contextual-tip');
   });
 });

@@ -430,9 +430,9 @@ describe('静态门禁：表、生产者与消费者必须指同一件事', () =
     for (const name of ['ui/Dialog.js', 'cinematic/CombatCinematicSkip.js']) {
       expect(sourceOf(name), `${name} 把 keydown 又挂回去了`).not.toContain("addEventListener('keydown'");
     }
-    // 全仓听 keydown 的地方只有三处：输入记录（Game）、音频解锁、改绑捕获
-    const listeners = FILES.filter((f) => f.source.includes("addEventListener('keydown'")).map((f) => f.name).sort();
-    expect(listeners).toEqual(['audio/AudioManager.js', 'core/Game.js', 'ui/SettingsPanel.js']);
+    // 现在全仓听 keydown 的地方只有四处：输入记录（Game）、音频解锁、改绑捕获、关卡编辑器
+    const listeners = FILES.filter((f) => f.source.includes("addEventListener('keydown")).map((f) => f.name).sort();
+    expect(listeners).toEqual(['audio/AudioManager.js', 'core/Game.js', 'ui/SettingsPanel.js', 'world/LevelEditor.js']);
   });
 
   it('级联那两格真的动手：关对话走 `hide()`，跳演出走 `skip()`（吃掉键不等于办了事）', () => {
