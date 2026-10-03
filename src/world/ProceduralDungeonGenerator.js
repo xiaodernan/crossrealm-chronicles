@@ -79,9 +79,9 @@ export class ProceduralDungeonGenerator {
       if (w.s) addWallSegment(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, layout);
       else addWallWithGap(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, doorW, layout);
       if (w.w) addWallSegment(group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, layout, true);
-      else addWallWithGap(group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, doorW, layout, true);
+      else addWallWithGap(group, wallMat, room.x - rw / 2, room.z, rd, WT, WH, doorW, layout, true);
       if (w.e) addWallSegment(group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, layout, true);
-      else addWallWithGap(group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, doorW, layout, true);
+      else addWallWithGap(group, wallMat, room.x + rw / 2, room.z, rd, WT, WH, doorW, layout, true);
 
       if (room.lore) {
         const ob = new THREE.Mesh(
@@ -185,9 +185,9 @@ export class ProceduralDungeonGenerator {
     if (w.s) addWallSegment(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, layout);
     else addWallWithGap(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, doorW, layout);
     if (w.w) addWallSegment(group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, layout, true);
-    else addWallWithGap(group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, doorW, layout, true);
+    else addWallWithGap(group, wallMat, room.x - rw / 2, room.z, rd, WT, WH, doorW, layout, true);
     if (w.e) addWallSegment(group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, layout, true);
-    else addWallWithGap(group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, doorW, layout, true);
+    else addWallWithGap(group, wallMat, room.x + rw / 2, room.z, rd, WT, WH, doorW, layout, true);
   }
 }
 
