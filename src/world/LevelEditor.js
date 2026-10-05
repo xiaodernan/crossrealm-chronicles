@@ -10,6 +10,7 @@
 
 import * as THREE from 'three';
 import { ROOM_TEMPLATES, getRoomTemplate } from './RoomTemplates.js';
+import { CELL, DOOR_WIDTH, BOSS_DOOR_WIDTH } from './dungeonDimensions.js';
 import { codeFor, codesFor } from '../content/keybinds.js';
 import { keyLabel } from '../content/keyLabels.js';
 
@@ -196,11 +197,15 @@ export class LevelEditor {
     this.raycaster.ray.intersectPlane(plane, intersect);
     if (this.dragTarget && this.roomMeshes.has(this.dragTarget)) {
       const roomObj = this.roomMeshes.get(this.dragTarget);
-      intersect.sub(new THREE.Vector2(this.dragOffset.x, this.dragOffset.y));
-      // 对齐网格
-      const CELL = 18;
-      intersect.x = Math.round(intersect.x / CELL) * CELL;
-      intersect.z = Math.round(intersect.z / CELL) * CELL;
+      // 偏移是平面上的一支 (x, z)，只能逐分量减：`Vector3.sub(Vector2)` 会去减 `v.z`，
+      // 而 Vector2 没有那一维 —— 减完 `intersect.z` 直接成 NaN（修 B87：拖动一次，
+      // 房间的 z 与房间号 `r_2_NaN` 一起坏掉，落格与相邻墙全部跟着漂）。
+      intersect.x -= this.dragOffset.x;
+      intersect.z -= this.dragOffset.y;
+      // 对齐网格：吃**这份布局**的格长，不是编辑器自己抄的一个 18（切片4f）
+      const step = this.layout.cellSize;
+      intersect.x = Math.round(intersect.x / step) * step;
+      intersect.z = Math.round(intersect.z / step) * step;
       roomObj.mesh.position.set(intersect.x, 0, intersect.z);
       this._updateRoomPosition(this.dragTarget, intersect.x, intersect.z);
     }
@@ -218,9 +223,9 @@ export class LevelEditor {
     const intersect = new THREE.Vector3();
     this.raycaster.ray.intersectPlane(plane, intersect);
     
-    const CELL = 18;
-    const gx = Math.round(intersect.x / CELL);
-    const gz = Math.round(intersect.z / CELL);
+    const step = this.layout.cellSize;
+    const gx = Math.round(intersect.x / step);
+    const gz = Math.round(intersect.z / step);
 
     this._addRoomAt(gx, gz, this.selectedTemplateId);
   }
@@ -267,12 +272,12 @@ export class LevelEditor {
     if (this.layout.rooms.some(r => r.id === id)) return;
 
     const template = getRoomTemplate(...templateKey.split(':'));
-    const CELL = 18;
+    const step = this.layout.cellSize;
     const room = {
       id,
       gx, gz,
-      x: gx * CELL,
-      z: gz * CELL,
+      x: gx * step,
+      z: gz * step,
       w: template.width,
       d: template.depth,
       walls: { n: true, e: true, s: true, w: true },
@@ -330,8 +335,8 @@ export class LevelEditor {
     if (!room) return;
     room.x = x;
     room.z = z;
-    room.gx = Math.round(x / 18);
-    room.gz = Math.round(z / 18);
+    room.gx = Math.round(x / this.layout.cellSize);
+    room.gz = Math.round(z / this.layout.cellSize);
     room.id = `r_${room.gx}_${room.gz}`;
     this._updateAdjacentWalls(room);
   }
@@ -364,6 +369,8 @@ export class LevelEditor {
       gridW: this.layout.gridW,
       gridH: this.layout.gridH,
       cellSize: this.layout.cellSize,
+      doorWidth: this.layout.doorWidth,
+      bossDoorWidth: this.layout.bossDoorWidth,
       rooms: this.layout.rooms.map(r => ({
         id: r.id,
         gx: r.gx,
@@ -412,13 +419,29 @@ export class LevelEditor {
     reader.readAsText(file);
   }
 
+  /**
+   * 导入布局时读一枚尺寸：缺（`undefined` / `null`）才回落到声明那一份，
+   * 带来了就必须是**有限正数**，否则当场点名是哪一枚 —— `||` 会把 0 悄悄变成 18，
+   * `??` 会把 0 原样收下再让吸附除出 Infinity，两种都比抛错难查（切片4f，⑤ 层）。
+   */
+  _读尺寸(名, 值, 默认) {
+    if (值 === undefined || 值 === null) return 默认;
+    if (typeof 值 !== 'number' || !Number.isFinite(值) || 值 <= 0) {
+      throw new TypeError(`导入的布局里 ${名} = ${JSON.stringify(值)} —— 得是有限正数，或者干脆不带（那就用声明的那一份）`);
+    }
+    return 值;
+  }
+
   _importLayoutData(data) {
     // 清空当前
     this._clearVisuals();
     this.layout = {
       gridW: data.gridW,
       gridH: data.gridH,
-      cellSize: data.cellSize || 18,
+      // 缺 cellSize 才回落到声明的那一份；带来了就**照它走**（吸附、反推格号都读布局）
+      cellSize: this._读尺寸('cellSize', data.cellSize, CELL),
+      doorWidth: this._读尺寸('doorWidth', data.doorWidth, DOOR_WIDTH),
+      bossDoorWidth: this._读尺寸('bossDoorWidth', data.bossDoorWidth, BOSS_DOOR_WIDTH),
       seed: data.seed,
       rooms: data.rooms,
       doors: data.doors,
@@ -437,7 +460,9 @@ export class LevelEditor {
     this.layout = {
       gridW: 5,
       gridH: 5,
-      cellSize: 18,
+      cellSize: CELL,
+      doorWidth: DOOR_WIDTH,
+      bossDoorWidth: BOSS_DOOR_WIDTH,
       seed: Date.now(),
       rooms: [],
       doors: [],

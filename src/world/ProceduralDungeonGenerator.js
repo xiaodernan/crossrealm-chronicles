@@ -5,6 +5,10 @@ import {
   sharedBox, sharedPlane, sharedCircle, sharedCylinder, sharedTorus, dungeonMaterial,
 } from './dungeonAssets.js';
 import { ROOM_TEMPLATES, templateFitsRoom, requiredPortCount, openPorts } from './RoomTemplates.js';
+import {
+  DOOR_JAMB, DOOR_H, DOOR_T, DOOR_FRAME_OVER, DOOR_FRAME_H, DOOR_FRAME_T,
+  DOOR_COLLIDER_HALF_DEPTH,
+} from './dungeonDimensions.js';
 
 /** 程序化迷宫地下城 — 多房间、多门、可探索 */
 export class ProceduralDungeonGenerator {
@@ -20,6 +24,14 @@ export class ProceduralDungeonGenerator {
   }
 
   static buildGeometry(group, layout, def) {
+    // 尺寸事实由布局带进来（切片4f）：几何层不再自己抄一份，所以一份缺字段的布局必须**当场**说缺哪一个，
+    // 而不是往下算出 NaN 的坐标 —— 那是 B80 的症状形状。关卡编辑器导入的 JSON 是这里唯一的外部入口。
+    const 缺 = ['wallH', 'wallT', 'doorWidth', 'bossDoorWidth']
+      .filter((k) => typeof layout[k] !== 'number' || !Number.isFinite(layout[k]));
+    if (缺.length) {
+      throw new TypeError(`布局缺少的尺寸字段：${缺.join('、')} —— 由 generateMaze 或关卡编辑器导出时带上（W-B10 切片4f）`);
+    }
+
     group.userData.layout = layout;
     group.userData.colliders = [];
 
@@ -48,10 +60,9 @@ export class ProceduralDungeonGenerator {
       metalness: 0.2,
     }));
 
-    const CS = layout.cellSize;
     const WH = layout.wallH;
     const WT = layout.wallT;
-    const doorW = 4;
+    const doorW = layout.doorWidth;
 
     // 模板分配吃迷宫自己那颗种子（切片4e）：同一颗种子必须永远得到同一座迷宫，
     // 不然"存档里的种子"与关卡编辑器的复现就没了根据 —— 那是 B75 一整片的立论。
@@ -70,7 +81,7 @@ export class ProceduralDungeonGenerator {
       }
 
       // 标准房间几何：地面、墙、门洞（必须始终执行，保证门洞形状正确，W-B10 切片4c）
-      this._buildRoomGeometry(room, layout, def, floorMat, wallMat, accentMat, doorW, CS, WH, WT);
+      this._buildRoomGeometry(room, layout, def, floorMat, wallMat, accentMat, doorW, WH, WT);
 
       // 模板只往已经建好的房间里摆装饰（切片4e 的合同：不再叠一层地面/墙、不再加灯）
       room.template.buildInterior(room.group, room, layout, def, {
@@ -81,7 +92,7 @@ export class ProceduralDungeonGenerator {
 
       if (room.lore) {
         const ob = new THREE.Mesh(sharedBox(0.8, 1.6, 0.3), accentMat);
-        ob.position.set(room.x + (room.w ?? CS) * 0.25, 0.8, room.z - (room.d ?? CS) * 0.2);
+        ob.position.set(room.x + room.w * 0.25, 0.8, room.z - room.d * 0.2);
         ob.userData.lore = room.lore;
         ob.userData.roomId = room.id;
         ob.name = 'lore_shard';
@@ -90,21 +101,27 @@ export class ProceduralDungeonGenerator {
       }
     }
 
-    // 门
+    // 门。门板/门框/门碰撞都是**这扇门所在那个洞**的派生量（切片4f）：
+    // 改前它们各抄了一份字面量（3.5 / 4.2 / hw 2），于是"关着的门盖不住自己的门洞"
+    // —— 逐扇量出来 537 扇门每侧见光 0.25 米（`.tmp-20261004/wb10s4f-census.mjs` ③）。
     for (const door of layout.doors) {
-      const panel = new THREE.Mesh(sharedBox(3.5, 4.2, 0.5), doorClosedMat);
-      panel.position.set(door.x, 2.1, door.z);
+      const panel = new THREE.Mesh(sharedBox(doorW - 2 * DOOR_JAMB, DOOR_H, DOOR_T), doorClosedMat);
+      panel.position.set(door.x, DOOR_H / 2, door.z);
       if (door.dir === 'n' || door.dir === 's') panel.rotation.y = 0;
       else panel.rotation.y = Math.PI / 2;
       panel.userData.door = door;
       panel.name = `door_${door.id}`;
       group.add(panel);
       layout.doorMeshes.push(panel);
-      door.collider = { x: door.x, z: door.z, hw: 2, hd: 0.45, open: false };
+      // 半轴取洞的一半，但它恒落在 x 轴上：南北向门因此正好跨住洞口，
+      // 东西向门则变成"沿通道 2 米、跨洞只有 0.45 米"（跨洞那 1.55 米靠墙段自己的碰撞盒补住）。
+      // 轴向该不该随 dir 转是另一件事，登记在台账，不在这一片动碰撞。
+      door.collider = { x: door.x, z: door.z, hw: doorW / 2, hd: DOOR_COLLIDER_HALF_DEPTH, open: false };
 
-      const frame = new THREE.Mesh(sharedBox(4.2, 4.8, 0.15), accentMat);
+      const frame = new THREE.Mesh(
+        sharedBox(doorW + DOOR_FRAME_OVER, DOOR_FRAME_H, DOOR_FRAME_T), accentMat);
       frame.position.copy(panel.position);
-      frame.position.y = 2.4;
+      frame.position.y = DOOR_FRAME_H / 2;
       if (door.dir === 'e' || door.dir === 'w') frame.rotation.y = Math.PI / 2;
       frame.userData.isFrame = true;
       group.add(frame);
@@ -112,9 +129,9 @@ export class ProceduralDungeonGenerator {
   }
 
   /** 标准房间几何：地面、墙、门洞（W-B10 切片4c，修 B78） */
-  static _buildRoomGeometry(room, layout, def, floorMat, wallMat, accentMat, doorW, CS, WH, WT) {
-    const rw = room.w ?? CS;
-    const rd = room.d ?? CS;
+  static _buildRoomGeometry(room, layout, def, floorMat, wallMat, accentMat, doorW, WH, WT) {
+    const rw = room.w;
+    const rd = room.d;
 
     // 地面
     const floor = new THREE.Mesh(sharedPlane(rw - 0.2, rd - 0.2), floorMat);
@@ -181,7 +198,7 @@ export class ProceduralDungeonGenerator {
     const rd = room.d;
     const WH = layout.wallH;
     const WT = layout.wallT;
-    const doorW = 5;
+    const doorW = layout.bossDoorWidth;
 
     const floorMat = dungeonMaterial(`${def.id}:bossFloor`, () => new THREE.MeshStandardMaterial({
       color: def.accent,

@@ -20,8 +20,13 @@
  * 3. **门洞真的通**（玩法层）：门中心没有被墙体 collider 盖住；
  *    而门洞两侧**确实有墙**（否则"通"可能是因为整面墙都没建）。
  * 4. **墙段位置**：两段分列门中心两侧，中点距门中心 == `(seg + gap) / 2`。
- * 5. **控制组**：门板与门框的尺寸逐座逐门一致（这一片不该碰它们）。
- * 6. **布局不受影响**：房间与门的布局签名冻四颗 —— 本片动的是几何，不是迷宫。
+ * 5. **门板/门框对得上洞**（切片4f 重写的一档）：门板尺寸逐座逐门一致 **且** 每扇板的沿墙尺寸
+ *    把**量出来的**洞盖到每侧只剩一条缝，缝不超过门框的收边。原先这一档写的是两个手抄三元组
+ *    （`3.5×4.2×0.5` / `4.2×4.8×0.15`），于是"每扇门的板都比自己的洞窄 0.25 米"被钉成了绿灯。
+ * 6. **布局不受影响**：房间与门的布局签名冻三颗 —— 本片动的是几何，不是迷宫。
+ *
+ * 期望的尺寸一律从 `layout` 读（`cellSize` / `doorWidth` / `bossDoorWidth` / `wallT` / `wallH`），
+ * 这一片自己的那份抄本也在切片4f 里收掉了：写死 `4` / `5` 时，改宽门洞要改九处。
  *
  * 反向证据（"这把尺子在错位那一版上量得到东西"）不放在这里，由变异臂脚本
  * `.tmp-20261003/wb10s4c-arms.mjs` 承担：改回 `(WT, rd, …)` 后点名哪几条会红。
@@ -70,6 +75,32 @@ function dedupeBySpot(meshes) {
   return [...seen.values()];
 }
 
+/**
+ * 从**墙段**量出这扇门所在那个洞的宽度（切片4f）：沿门所在的墙线，取贴着该线、
+ * 厚度等于 wallT、高度居中的盒段，洞宽 = 右侧最近段的内端 − 左侧最近段的内端。
+ * 量不出来回 null —— 那本身就是一条要报的读数（这一侧根本没有墙段收尾）。
+ */
+function 量门洞(layout, meshes, door) {
+  const 侧向 = door.dir === 'n' || door.dir === 's' ? 'x' : 'z';
+  const 轴向 = 侧向 === 'x' ? 'z' : 'x';
+  const 段 = [];
+  for (const m of meshes) {
+    if (m.geometry.type !== 'BoxGeometry') continue;
+    const p = m.geometry.parameters;
+    const 长 = 侧向 === 'x' ? p.width : p.depth;
+    const 厚 = 侧向 === 'x' ? p.depth : p.width;
+    if (Math.abs(厚 - layout.wallT) > 1e-6) continue;
+    if (Math.abs(m.position[轴向] - door[轴向]) > 1e-6) continue;
+    if (Math.abs(m.position.y - layout.wallH / 2) > 1e-6) continue;
+    const c = m.position[侧向];
+    段.push([c - 长 / 2, c + 长 / 2]);
+  }
+  const 左 = 段.filter(([a, b]) => b <= door[侧向] + 1e-6).map(([, b]) => b);
+  const 右 = 段.filter(([a]) => a >= door[侧向] - 1e-6).map(([a]) => a);
+  if (!左.length || !右.length) return null;
+  return Math.min(...右) - Math.max(...左);
+}
+
 describe('地下城墙段与门洞的形状（B78）', () => {
   describe('① 负尺寸绝迹', () => {
     it('没有任何网格的几何带 ≤0 的尺寸参数', () => {
@@ -115,7 +146,7 @@ describe('地下城墙段与门洞的形状（B78）', () => {
       for (const seed of [1, 42, 12345]) {
         const { layout, meshes } = build(def, seed);
         const WT = layout.wallT;
-        const expectLong = (layout.cellSize - 4) / 2;
+        const expectLong = (layout.cellSize - layout.doorWidth) / 2;
 
         for (const room of layout.rooms) {
           if (room.isBossArena) continue;
@@ -153,13 +184,14 @@ describe('地下城墙段与门洞的形状（B78）', () => {
       }
     });
 
-    it('Boss 场的门洞墙段按它自己的边长算（doorW 是 5）', () => {
+    it('Boss 场的门洞墙段按它自己的边长与自己的门洞宽算', () => {
       for (const def of DUNGEON_DEFS) {
         for (const seed of [1, 42]) {
           const { layout, meshes } = build(def, seed);
           const arena = layout.rooms.find((r) => r.isBossArena);
           if (!arena) continue;
           const WT = layout.wallT;
+          const 洞宽 = layout.bossDoorWidth;
 
           for (const s of [
             { open: !arena.walls.w, axis: 'x', at: arena.x - arena.w / 2, len: arena.d },
@@ -183,8 +215,8 @@ describe('地下城墙段与门洞的形状（B78）', () => {
             for (const m of uniq) {
               const sp = span(m.geometry);
               expect(sp.thin).toBeCloseTo(WT, 6);
-              // Boss 场沿这条边的全长是 s.len，门洞 5 米，两侧各 (len − 5)/2
-              expect(sp.long).toBeCloseTo((s.len - 5) / 2, 6);
+              // Boss 场沿这条边的全长是 s.len，门洞是布局带的那个宽度，两侧各 (len − 洞)/2
+              expect(sp.long).toBeCloseTo((s.len - 洞宽) / 2, 6);
             }
           }
         }
@@ -251,7 +283,7 @@ describe('地下城墙段与门洞的形状（B78）', () => {
       let checked = 0;
       for (const door of layout.doors) {
         const isEW = door.dir === 'e' || door.dir === 'w';
-        const off = 4 / 2 + 1.5;
+        const off = layout.doorWidth / 2 + 1.5;
         for (const sign of [-1, 1]) {
           const px = isEW ? door.x : door.x + sign * off;
           const pz = isEW ? door.z + sign * off : door.z;
@@ -270,7 +302,7 @@ describe('地下城墙段与门洞的形状（B78）', () => {
     it('两段分列门中心两侧，中点距门中心 == (seg + gap)/2', () => {
       const def = DUNGEON_DEFS[0];
       const { layout, meshes } = build(def, 42);
-      const gap = 4;
+      const gap = layout.doorWidth;
 
       for (const door of layout.doors) {
         const isEW = door.dir === 'e' || door.dir === 'w';
@@ -304,28 +336,54 @@ describe('地下城墙段与门洞的形状（B78）', () => {
     });
   });
 
-  describe('⑤ 控制组：这一片不该碰的东西', () => {
-    it('门板与门框的尺寸逐座逐门一致', () => {
+  describe('⑤ 门板与门框对得上自己那个洞', () => {
+    it('门板尺寸逐座逐门一致，且关上的板把量出来的洞盖到只剩一条门框收边之内的缝', () => {
+      // 这一档在切片4f 之前长的是另一个样子：`[3.5, 4.2, 0.5]` / `[4.2, 4.8, 0.15]` 两个手抄的
+      // 三元组。逐门一致这条把"每扇门的板都比自己的洞窄 0.25 米"钉成了绿灯 —— 它钉的是**一致性**，
+      // 而一致性恰好是这个缺陷的形状（一处抄错，处处跟着错）。所以现在问的是**与洞的关系**：
+      // 洞宽从墙段量（不是猜常量），门板沿墙必须把洞盖到每侧只剩一条缝，且那条缝不超过门框的收边。
+      const 每侧见光上限 = 0.06; // 一扇关着的门不许漏出可见的光缝；改前实测 0.25 米
       for (const def of DUNGEON_DEFS) {
-        const { layout, meshes } = build(def, 42);
-        const panels = meshes.filter((m) => m.name.startsWith('door_'));
-        expect(panels.length).toBe(layout.doors.length);
-        for (const p of panels) {
-          const q = p.geometry.parameters;
-          expect([q.width, q.height, q.depth]).toEqual([3.5, 4.2, 0.5]);
-        }
-        const frames = meshes.filter((m) => m.userData.isFrame);
-        expect(frames.length).toBe(layout.doors.length);
-        for (const f of frames) {
-          const q = f.geometry.parameters;
-          expect([q.width, q.height, q.depth]).toEqual([4.2, 4.8, 0.15]);
+        for (const seed of [42, 7]) {
+          const { layout, meshes } = build(def, seed);
+          const panels = meshes.filter((m) => m.name.startsWith('door_'));
+          const frames = meshes.filter((m) => m.userData.isFrame);
+          expect(panels.length).toBe(layout.doors.length);
+          expect(frames.length).toBe(layout.doors.length);
+
+          const 板尺寸 = new Set(panels.map((p) => {
+            const q = p.geometry.parameters;
+            return [q.width, q.height, q.depth].join(',');
+          }));
+          expect([...板尺寸], `${def.id}/${seed} 门板不止一种尺寸`).toHaveLength(1);
+
+          let 量到 = 0;
+          for (const door of layout.doors) {
+            const 洞 = 量门洞(layout, meshes, door);
+            expect(洞, `${def.id}/${seed} 门 ${door.id}（${door.dir}）量不到洞`).not.toBeNull();
+            量到++;
+            const 板 = panels.find((m) => m.name === `door_${door.id}`);
+            const 框 = frames.find((m) => near(m.position.x, door.x, 1e-6)
+              && near(m.position.z, door.z, 1e-6));
+            // 门板沿墙那一轴 = 局部 width（e/w 的板旋转 90°，旋转后局部 x 正落在墙线方向上）
+            const 每侧见光 = (洞 - 板.geometry.parameters.width) / 2;
+            expect(每侧见光, `${def.id}/${seed} 门 ${door.id} 门板跟墙段端面共面`).toBeGreaterThan(0);
+            expect(每侧见光, `${def.id}/${seed} 门 ${door.id} 关着的门漏光 ${每侧见光.toFixed(3)} 米`)
+              .toBeLessThanOrEqual(每侧见光上限);
+            // 门框沿墙比洞多出来的那一圈必须至少把板让的缝盖住，否则光缝还在，只是换了个来源
+            const 每侧收边 = (框.geometry.parameters.width - 洞) / 2;
+            expect(每侧收边, `${def.id}/${seed} 门 ${door.id} 门框没盖到洞口边缘`).toBeGreaterThan(0);
+            expect(每侧收边, `${def.id}/${seed} 门 ${door.id} 门框收边盖不住门板让出的缝`)
+              .toBeGreaterThanOrEqual(每侧见光);
+          }
+          expect(量到, `${def.id}/${seed} 量到的门太少，这一档成了空转`).toBeGreaterThan(8);
         }
       }
     });
   });
 
   describe('⑥ 布局不受影响', () => {
-    it('房间与门的布局签名四颗不变（本片动的是几何，不是迷宫）', () => {
+    it('房间与门的布局签名三颗不变（本片动的是几何，不是迷宫）', () => {
       const GOLDEN = {
         1: '68db0ef0',
         42: 'b9cfca00',

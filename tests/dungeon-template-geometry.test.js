@@ -47,8 +47,10 @@ import { ProceduralDungeonGenerator } from '../src/world/ProceduralDungeonGenera
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
 import * as RoomTemplatesModule from '../src/world/RoomTemplates.js';
 import {
-  ROOM_TEMPLATES, templateFitsRoom, requiredPortCount, openPorts, registerRoomTemplate, CELL,
+  ROOM_TEMPLATES, templateFitsRoom, requiredPortCount, openPorts, registerRoomTemplate,
 } from '../src/world/RoomTemplates.js';
+// 一格边长从尺寸那一份声明里读（切片4f 之前这里问的是 `RoomTemplates` 转手的 `CELL`）。
+import { CELL } from '../src/world/dungeonDimensions.js';
 import { dungeonAssetStats, isSharedAsset } from '../src/world/dungeonAssets.js';
 
 const SEEDS = [1, 42, 7, 12345, 999983, 2147483646, 555, 20261003];

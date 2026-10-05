@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { sharedBox, sharedCylinder } from './dungeonAssets.js';
+import { CELL } from './dungeonDimensions.js';
 
 /**
  * 房间模板库 —— 「这一类房间摆什么」只有一份答案（W-B10 切片4）。
@@ -22,8 +23,6 @@ import { sharedBox, sharedCylinder } from './dungeonAssets.js';
  * 5. **室内不 `new` 几何**。一律走 `dungeonAssets` 的共享缓存，尺寸写成常量。
  */
 
-const CELL = 18;
-
 /** 模板注册表：key = `id:variant` */
 export const ROOM_TEMPLATES = {};
 
@@ -34,7 +33,8 @@ export const ROOM_TEMPLATES = {};
  * @param {string} tpl.variant
  * @param {number} tpl.width - 假设的房间宽度（米），只供 `templateFitsRoom` 比对，不用于坐标
  * @param {number} tpl.depth
- * @param {object} tpl.ports - { n,e,s,w: { required, width } }；required 的方向必须真的开门
+ * @param {object} tpl.ports - { n,e,s,w: { required, solid } }；required 那一边必须真的开门，
+ *   solid 那一边必须是实墙。**门宽不在这里**：洞多宽由 `dungeonDimensions` 说一次，模板无权改
  * @param {(group, room, layout, def, ctx) => void} tpl.buildInterior - 只摆室内装饰
  * @param {string[]} [tpl.tags]
  */
@@ -50,7 +50,7 @@ export function registerRoomTemplate(tpl) {
     if (p?.required && p?.solid) {
       throw new Error(`Room template ${key} 的 ${dir} 边同时声明 required 与 solid —— 一边不可能既必须是门又必须是墙`);
     }
-    ports[dir] = p ? { required: p.required ?? false, solid: p.solid ?? false, width: p.width ?? 4 } : null;
+    ports[dir] = p ? { required: p.required ?? false, solid: p.solid ?? false } : null;
   }
   ROOM_TEMPLATES[key] = { ...tpl, key, ports, tags: tpl.tags ?? [] };
   return key;
@@ -156,7 +156,7 @@ function registerBaseTemplates() {
   registerRoomTemplate({
     id: 'hall', variant: 'straight', width: CELL, depth: CELL,
     tags: ['hall', 'connector'],
-    ports: { n: { required: true, width: 4 }, s: { required: true, width: 4 } },
+    ports: { n: { required: true }, s: { required: true } },
     buildInterior: buildHallStraight,
   });
   registerRoomTemplate({
@@ -181,18 +181,17 @@ function registerBaseTemplates() {
   registerRoomTemplate({
     id: 'treasure', variant: 'small', width: CELL, depth: CELL,
     tags: ['treasure', 'reward'],
-    ports: { s: { required: true, width: 3 } },
+    ports: { s: { required: true } },
     buildInterior: buildTreasureSmall,
   });
   registerRoomTemplate({
     id: 'lore', variant: 'double-door', width: CELL, depth: CELL,
     tags: ['lore', 'chamber'],
     // 南北对开 + 东西两堵实墙：读经台贴着东西墙放，那两边一旦是门就正堵门洞（切片4e 实测 4 扇）
-    ports: { n: { required: true, width: 4 }, s: { required: true, width: 4 }, e: { solid: true }, w: { solid: true } },
+    ports: { n: { required: true }, s: { required: true }, e: { solid: true }, w: { solid: true } },
     buildInterior: buildLoreDoubleDoor,
   });
 }
 
 registerBaseTemplates();
 
-export { CELL };

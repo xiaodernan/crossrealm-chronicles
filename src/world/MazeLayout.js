@@ -1,9 +1,7 @@
 import { LORE_FRAGMENTS } from '../game/LoreFragments.js';
-
-const CELL = 18;
-const BOSS_CELL = 34;
-const WALL_H = 5;
-const WALL_T = 0.6;
+import {
+  CELL, BOSS_CELL, WALL_H, WALL_T, DOOR_WIDTH, BOSS_DOOR_WIDTH, SPAWN_SPAN_MARGIN,
+} from './dungeonDimensions.js';
 
 /**
  * 递归回溯迷宫 → 房间+门+墙+Boss 大房
@@ -99,8 +97,8 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
     // 每只多硬、叫什么，W-B10 切片2 已经交给 `content/enemies.js` 那一名册，所以这里不写 hp。
     for (let i = 0; i < n; i++) {
       room.enemySpawns.push({
-        x: room.x + (rnd() - 0.5) * (CELL - 6),
-        z: room.z + (rnd() - 0.5) * (CELL - 6),
+        x: room.x + (rnd() - 0.5) * (CELL - SPAWN_SPAN_MARGIN),
+        z: room.z + (rnd() - 0.5) * (CELL - SPAWN_SPAN_MARGIN),
         type: drawFromPool(encounters.pool, rnd),
       });
     }
@@ -126,6 +124,8 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
 
   return {
     seed, gridW, gridH, cellSize: CELL, bossCell: BOSS_CELL,
+    // 门洞宽跟着布局走：几何层与编辑器读**这一份**，不再各自抄一个 4（切片4f）。
+    doorWidth: DOOR_WIDTH, bossDoorWidth: BOSS_DOOR_WIDTH,
     rooms, doors, spawn, exit,
     bounds: { minX, maxX, minZ, maxZ },
     wallH: WALL_H, wallT: WALL_T,
