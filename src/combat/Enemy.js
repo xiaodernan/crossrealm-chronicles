@@ -13,6 +13,33 @@ import { applyShadow } from '../engine/shadowPolicy.js';
 /** 分离推力在两个身体完全重合时需要一个稳定的"每人一个方向"，用出生顺序做身份差 */
 let aiSeq = 0;
 
+/* ---- 共享几何（W-C2 切片2）----
+ * 修前 `createMesh` / `_buildHpBar` / `_buildLockMarker` / `_ensureTelegraph` 里的几何
+ * 全部每实例新建：64 个敌人 × 每人 5~8 份 ≈ 数百份一模一样的 CapsuleGeometry /
+ * PlaneGeometry / RingGeometry（真实页面 `renderer.info.memory.geometries` 约 545 的主体）。
+ * 形状只由类型与构造参数决定，与个体无关 —— 缓存起来，全场景每个形状只建一份。
+ * 材质保持每实例一份：受击闪红要改自家 `emissive`，预警圈要按招式改色，不能共。
+ * `userData.shared` 是"别 dispose 我"的标记：敌人销毁（`dispose`）与血条 Billboard 销毁
+ * 见到它就跳过 —— 几何归缓存所有，随页面生命周期存活（与 dungeonAssets 的 sharedGeo 同一口径）。
+ */
+const ENEMY_GEO = new Map();
+
+/** 按"类型 + 构造参数"取一份共享几何；key 必须把决定形状的参数写全 */
+function enemyGeo(key, make) {
+  let g = ENEMY_GEO.get(key);
+  if (!g) {
+    g = make();
+    g.userData.shared = true;
+    ENEMY_GEO.set(key, g);
+  }
+  return g;
+}
+
+/** 给门禁用的读数：共享库里现在持有几份几何（tests/enemy-shared-geometry.test.js） */
+export function enemyGeoStats() {
+  return ENEMY_GEO.size;
+}
+
 export class Enemy {
   constructor(scene, world, config) {
     this.scene = scene;
@@ -110,13 +137,15 @@ export class Enemy {
     const bar = new Billboard(scene, { name: 'hpBar', offsetY: spec.offsetY });
     if (spec.bg != null) {
       const bg = new THREE.Mesh(
-        new THREE.PlaneGeometry(spec.width, spec.height),
+        enemyGeo(`hpBg:plane:${spec.width},${spec.height}`, () => new THREE.PlaneGeometry(spec.width, spec.height)),
         new THREE.MeshBasicMaterial({ color: spec.bg })
       );
       bar.add(bg);
     }
+    const fillW = spec.width * (spec.fillScale ?? 0.983);
+    const fillH = spec.height * 0.83;
     const fill = new THREE.Mesh(
-      new THREE.PlaneGeometry(spec.width * (spec.fillScale ?? 0.983), spec.height * 0.83),
+      enemyGeo(`hpFill:plane:${fillW},${fillH}`, () => new THREE.PlaneGeometry(fillW, fillH)),
       new THREE.MeshBasicMaterial({ color: spec.color })
     );
     // 稍稍前移，避免与底板 z-fighting（底板缺失时这点偏移无副作用）
@@ -131,14 +160,14 @@ export class Enemy {
   _buildLockMarker(scene) {
     const marker = new Billboard(scene, { name: 'lockMarker', offsetY: this.hpBarSpec().offsetY });
     const ring = new THREE.Mesh(
-      new THREE.RingGeometry(0.65, 0.85, 4),
+      enemyGeo('lockRing:0.65,0.85,4', () => new THREE.RingGeometry(0.65, 0.85, 4)),
       new THREE.MeshBasicMaterial({ color: 0xffcc44, transparent: true, opacity: 0.95, side: THREE.DoubleSide })
     );
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = -this.hpBarSpec().offsetY + 0.05;
     marker.add(ring);
     const diamond = new THREE.Mesh(
-      new THREE.ConeGeometry(0.18, 0.45, 4),
+      enemyGeo('lockDiamond:cone:0.18,0.45,4', () => new THREE.ConeGeometry(0.18, 0.45, 4)),
       new THREE.MeshBasicMaterial({ color: 0xffee88, transparent: true, opacity: 0.9 })
     );
     diamond.position.y = 0.55;
@@ -512,7 +541,10 @@ export class Enemy {
     const color = config.color ?? 0x553333;
     const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0.25 });
 
-    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 1.0, 8, 16), mat);
+    const body = new THREE.Mesh(
+      enemyGeo('body:capsule:0.4,1.0,8,16', () => new THREE.CapsuleGeometry(0.4, 1.0, 8, 16)),
+      mat
+    );
     body.position.y = 1.2;
     applyShadow(body, 'actor');
     body.name = 'body';
@@ -520,47 +552,62 @@ export class Enemy {
 
     if (config.type === 'golem') {
       const core = new THREE.Mesh(
-        new THREE.OctahedronGeometry(0.35, 0),
+        enemyGeo('golemCore:octa:0.35,0', () => new THREE.OctahedronGeometry(0.35, 0)),
         new THREE.MeshStandardMaterial({ color: 0xaa66ff, emissive: 0x442266, emissiveIntensity: 0.6 })
       );
       core.position.y = 2.2;
       group.add(core);
     } else if (config.type === 'drone') {
-      const wing = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.08, 0.3), mat);
+      const wing = new THREE.Mesh(
+        enemyGeo('droneWing:box:1.4,0.08,0.3', () => new THREE.BoxGeometry(1.4, 0.08, 0.3)),
+        mat
+      );
       wing.position.y = 2.0;
       group.add(wing);
     } else if (config.type === 'wraith') {
       // 时线怨影：半透明罩袍罩住本体，胸口一点冷光 —— 悬浮身形靠 BODY_PLANS.hover 抬
       const shroud = new THREE.Mesh(
-        new THREE.ConeGeometry(0.62, 1.9, 8, 1, true),
+        enemyGeo('wraithShroud:cone:0.62,1.9,8,1,true', () => new THREE.ConeGeometry(0.62, 1.9, 8, 1, true)),
         new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.5, side: THREE.DoubleSide, roughness: 0.4 })
       );
       shroud.position.y = 1.05;
       group.add(shroud);
       const core = new THREE.Mesh(
-        new THREE.SphereGeometry(0.14, 8, 8),
+        enemyGeo('wraithCore:sphere:0.14,8,8', () => new THREE.SphereGeometry(0.14, 8, 8)),
         new THREE.MeshStandardMaterial({ color: 0xaaddff, emissive: 0x335577, emissiveIntensity: 0.9 })
       );
       core.position.y = 1.55;
       group.add(core);
     } else if (config.type === 'stalker') {
       // 混沌掠行兽：前倾的头与背脊，贴地跑（低矮靠 BODY_PLANS.scale 体现）
-      const head = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.34, 0.6), mat);
+      const head = new THREE.Mesh(
+        enemyGeo('stalkerHead:box:0.42,0.34,0.6', () => new THREE.BoxGeometry(0.42, 0.34, 0.6)),
+        mat
+      );
       head.position.set(0, 1.45, 0.62);
       group.add(head);
-      const spine = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.9), mat);
+      const spine = new THREE.Mesh(
+        enemyGeo('stalkerSpine:box:0.14,0.3,0.9', () => new THREE.BoxGeometry(0.14, 0.3, 0.9)),
+        mat
+      );
       spine.position.set(0, 1.85, -0.1);
       group.add(spine);
     } else if (config.type === 'sentinel') {
       // 边境哨炮：肩甲与前置炮管，胸口带装甲核
-      const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.9), mat);
+      const barrel = new THREE.Mesh(
+        enemyGeo('sentinelBarrel:box:0.18,0.18,0.9', () => new THREE.BoxGeometry(0.18, 0.18, 0.9)),
+        mat
+      );
       barrel.position.set(0, 1.5, 0.55);
       group.add(barrel);
-      const pauldron = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.16, 0.5), mat);
+      const pauldron = new THREE.Mesh(
+        enemyGeo('sentinelPauldron:box:1.1,0.16,0.5', () => new THREE.BoxGeometry(1.1, 0.16, 0.5)),
+        mat
+      );
       pauldron.position.y = 1.95;
       group.add(pauldron);
       const core = new THREE.Mesh(
-        new THREE.OctahedronGeometry(0.16, 0),
+        enemyGeo('sentinelCore:octa:0.16,0', () => new THREE.OctahedronGeometry(0.16, 0)),
         new THREE.MeshStandardMaterial({ color: 0x88bbff, emissive: 0x224466, emissiveIntensity: 0.7 })
       );
       core.position.y = 1.5;
@@ -568,28 +615,37 @@ export class Enemy {
     } else if (config.type === 'hexer') {
       // 位面咒师：开口长袍罩住本体，掌心浮一枚符文环 —— 一眼是"念咒的"，不是"挥刀的"
       const robe = new THREE.Mesh(
-        new THREE.ConeGeometry(0.58, 1.6, 8, 1, true),
+        enemyGeo('hexerRobe:cone:0.58,1.6,8,1,true', () => new THREE.ConeGeometry(0.58, 1.6, 8, 1, true)),
         new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0.1, side: THREE.DoubleSide })
       );
       robe.position.y = 0.95;
       group.add(robe);
       const rune = new THREE.Mesh(
-        new THREE.TorusGeometry(0.2, 0.045, 6, 12),
+        enemyGeo('hexerRune:torus:0.2,0.045,6,12', () => new THREE.TorusGeometry(0.2, 0.045, 6, 12)),
         new THREE.MeshStandardMaterial({ color: 0xbfa8ff, emissive: 0x4a2f7a, emissiveIntensity: 0.8 })
       );
       rune.position.set(0.42, 1.35, 0.48);
       group.add(rune);
     } else if (config.type === 'juggernaut') {
       // 破阵重兵：一副比同场骑士更宽的双肩厚甲 + 胸前撞角 —— 剪影上就比其他重甲更钝更宽
-      const pauldron = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.3, 0.7), mat);
+      const pauldron = new THREE.Mesh(
+        enemyGeo('juggernautPauldron:box:1.5,0.3,0.7', () => new THREE.BoxGeometry(1.5, 0.3, 0.7)),
+        mat
+      );
       pauldron.position.y = 1.95;
       group.add(pauldron);
-      const ram = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.5, 6), mat);
+      const ram = new THREE.Mesh(
+        enemyGeo('juggernautRam:cone:0.26,0.5,6', () => new THREE.ConeGeometry(0.26, 0.5, 6)),
+        mat
+      );
       ram.rotation.x = Math.PI / 2;
       ram.position.set(0, 1.3, 0.62);
       group.add(ram);
     } else if (config.type !== 'boss') {
-      const helm = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.5), mat);
+      const helm = new THREE.Mesh(
+        enemyGeo('helm:box:0.5,0.35,0.5', () => new THREE.BoxGeometry(0.5, 0.35, 0.5)),
+        mat
+      );
       helm.position.y = 2.15;
       group.add(helm);
     }
@@ -755,7 +811,7 @@ export class Enemy {
     const group = new THREE.Group();
     group.name = 'telegraph';
     const ring = new THREE.Mesh(
-      new THREE.RingGeometry(0.15, 1.05, 16),
+      enemyGeo('teleRing:0.15,1.05,16', () => new THREE.RingGeometry(0.15, 1.05, 16)),
       new THREE.MeshBasicMaterial({ color: 0xff2222, transparent: true, opacity: 0.85, side: THREE.DoubleSide })
     );
     ring.rotation.x = -Math.PI / 2;
@@ -763,7 +819,7 @@ export class Enemy {
     ring.name = 'teleRing';
     group.add(ring);
     const inner = new THREE.Mesh(
-      new THREE.RingGeometry(0.05, 0.35, 12),
+      enemyGeo('teleInner:0.05,0.35,12', () => new THREE.RingGeometry(0.05, 0.35, 12)),
       new THREE.MeshBasicMaterial({ color: 0xffff44, transparent: true, opacity: 0.9, side: THREE.DoubleSide })
     );
     inner.rotation.x = -Math.PI / 2;
@@ -771,7 +827,7 @@ export class Enemy {
     inner.name = 'teleInner';
     group.add(inner);
     const warn = new THREE.Mesh(
-      new THREE.ConeGeometry(0.12, 0.35, 3),
+      enemyGeo('teleWarn:cone:0.12,0.35,3', () => new THREE.ConeGeometry(0.12, 0.35, 3)),
       new THREE.MeshBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.95 })
     );
     warn.position.y = 2.6;
@@ -793,7 +849,8 @@ export class Enemy {
   dispose() {
     this.scene.remove(this.mesh);
     this.mesh.traverse((o) => {
-      if (o.geometry) o.geometry.dispose();
+      // 共享几何（W-C2 切片2）不归本实例释放：拆了全场同类敌人一起渲染坏
+      if (o.geometry && !o.geometry.userData?.shared) o.geometry.dispose();
       if (o.material) o.material.dispose();
     });
     // 世界空间 UI 不在 `mesh` 子树里，必须单独摘（否则血条会留在场景里）
@@ -804,7 +861,7 @@ export class Enemy {
     if (this.telegraph) {
       this.scene.remove(this.telegraph);
       this.telegraph.traverse((o) => {
-        o.geometry?.dispose();
+        if (o.geometry && !o.geometry.userData?.shared) o.geometry.dispose();
         o.material?.dispose();
       });
     }

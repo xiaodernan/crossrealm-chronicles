@@ -178,61 +178,56 @@ describe('分工：`createMaterial` 保持"每次新建"，共享只走 `sharedM
 });
 
 /* ------------------------------------------------------------------ *
- * 同族第三处：树干换贴图（W-C1 切片3）
+ * 同族第三处：树干换贴图（W-C1 切片3；W-C2 切片2 合批后改成单网格换材质）
  * ------------------------------------------------------------------ */
 
-describe('`WorldDecorations.applyTreeTextures`：每棵树一份 → 一份 + 拆旧', () => {
-  const tree = () => {
-    const g = new THREE.Group();
-    g.add(propMesh('trunk'));
-    return g;
+describe('`WorldDecorations.applyTreeTextures`：一个树干合批网格换一次材质、拆一次旧', () => {
+  /** W-C2 切片2 之后 `_scatterTrees` 只产出**一个**树干 InstancedMesh —— 换贴图只碰它 */
+  const trunkMesh = () => {
+    const m = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshStandardMaterial());
+    return m;
   };
 
-  /** 只借那个方法用：它只碰 `this._treeGroups`，所以不必真去建一整张世界地图 */
-  const run = (groups, lib) => {
-    WorldDecorations.prototype.applyTreeTextures.call({ _treeGroups: groups }, lib);
+  /** 只借那个方法用：它只碰 `this._treeTrunk`，所以不必真去建一整张世界地图 */
+  const run = (trunk, lib) => {
+    WorldDecorations.prototype.applyTreeTextures.call({ _treeTrunk: trunk }, lib);
   };
 
-  it('200 棵树 = 1 份 bark 材质（修前是 200 份）', () => {
+  it('换完之后树干拿的是那份共享 bark（整批树干本来就是同一个网格）', () => {
     const lib = fakeLib({ bark: { map: null, roughness: 0.9 } });
-    const groups = Array.from({ length: 200 }, tree);
-    run(groups, lib);
+    const trunk = trunkMesh();
+    run(trunk, lib);
     expect(lib.sharedMaterialCount()).toBe(1);
-    expect(new Set(groups.map((g) => g.children[0].material)).size).toBe(1);
+    expect(trunk.material).toBe(lib.sharedMaterial('bark', 0x6a5040));
   });
 
-  it('换下来的旧材质被拆掉（修前连 dispose 都没有）', () => {
+  it('换下来的旧材质被拆掉，且只拆一次（合批后旧材质天生只有一份）', () => {
     const lib = fakeLib({ bark: { map: null, roughness: 0.9 } });
-    const groups = Array.from({ length: 5 }, tree);
+    const trunk = trunkMesh();
     const disposed = [];
-    // 5 棵树本来共用同一份旧材质（`_scatterTrees` 的 `trunkMat`）—— 拆一次就够
-    const oldShared = new THREE.MeshStandardMaterial();
-    oldShared.dispose = () => disposed.push('shared');
-    for (const g of groups) g.children[0].material = oldShared;
-    run(groups, lib);
-    expect(disposed).toEqual(['shared']);
-    expect(groups.every((g) => g.children[0].material === lib.sharedMaterial('bark', 0x6a5040))).toBe(true);
+    const old = trunk.material;
+    old.dispose = () => disposed.push('old');
+    run(trunk, lib);
+    expect(disposed).toEqual(['old']);
+    expect(trunk.material).toBe(lib.sharedMaterial('bark', 0x6a5040));
   });
 
-  it('旧材质各不相同就各拆各的，且不重复拆同一份', () => {
+  it('已经是共享材质就不再动（不重复换、也不把活着的共享材质拆掉）', () => {
     const lib = fakeLib({ bark: { map: null, roughness: 0.9 } });
-    const groups = Array.from({ length: 3 }, tree);
+    const shared = lib.sharedMaterial('bark', 0x6a5040);
+    const trunk = trunkMesh();
+    trunk.material = shared;
     const disposed = [];
-    const a = new THREE.MeshStandardMaterial();
-    const b = new THREE.MeshStandardMaterial();
-    a.dispose = () => disposed.push('a');
-    b.dispose = () => disposed.push('b');
-    groups[0].children[0].material = a;
-    groups[1].children[0].material = a;   // 两份树共用 a
-    groups[2].children[0].material = b;
-    run(groups, lib);
-    expect(disposed.sort()).toEqual(['a', 'b']);
+    shared.dispose = () => disposed.push('shared');
+    run(trunk, lib);
+    expect(disposed).toEqual([]);
+    expect(trunk.material).toBe(shared);
   });
 
   it('库还没就绪就什么都不做（也不建材质）', () => {
     const lib = fakeLib({ bark: {} });
-    const groups = [tree()];
-    run(groups, Object.assign(Object.create(Object.getPrototypeOf(lib)), lib, { ready: false }));
+    const trunk = trunkMesh();
+    run(trunk, Object.assign(Object.create(Object.getPrototypeOf(lib)), lib, { ready: false }));
     expect(lib.sharedMaterialCount()).toBe(0);
   });
 

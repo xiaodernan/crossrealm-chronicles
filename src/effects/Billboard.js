@@ -133,7 +133,9 @@ export class Billboard {
     this._disposed = true;
     if (this.scene) this.scene.remove(this.object3D);
     this.object3D.traverse((o) => {
-      o.geometry?.dispose();
+      // 标了 shared 的几何归共享缓存所有（W-C2 切片2：敌人的血条/锁定标记平面已共享）——
+      // 拆了它，同屏所有还在用这份数据的公告板一起渲染坏
+      if (o.geometry && !o.geometry.userData?.shared) o.geometry.dispose();
       o.material?.dispose();
     });
     // 摘干净引用：dispose 之后再 follow/faceCamera 是调用方的 bug，
