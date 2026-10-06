@@ -166,6 +166,11 @@ export class Game {
       0.28, 0.45, 0.92
     );
     this.composer.addPass(this.bloomPass);
+    // renderer.info 每趟 render() 结束就重置 —— composer 的最后一趟（全屏输出单三角）
+    // 会把 calls 覆盖成 1：PerfHUD 的 draw call 行从上线起就恒为 1（W-C3 切片4 真页面
+    // 读数实锤）。关掉 autoReset，改成每帧 render() 开头手动清零，info 累计整帧所有趟
+    // （场景趟 + bloom 各趟 + 输出趟）—— 那才是"这一帧画了多少"的账。
+    this.renderer.info.autoReset = false;
 
     this.labelRenderer = new CSS2DRenderer();
     this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -921,6 +926,8 @@ export class Game {
   }
 
   render() {
+    // 帧界：清零后 composer.render() 里所有趟都记进本帧（autoReset 已关，见构造函数）
+    this.renderer.info.reset();
     this.composer.render();
     this.labelRenderer.render(this.scene, this.camera);
   }

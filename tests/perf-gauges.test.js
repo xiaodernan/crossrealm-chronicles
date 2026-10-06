@@ -156,4 +156,13 @@ describe('接线不许分叉：`Game` 必须走这份清单', () => {
     hud.gauge('存活敌人', () => 3);          // 修前的写法：缺省 leak = false
     expect(hud.stats().leaks).toEqual({});
   });
+
+  it('renderer.info 的读数口径是整帧（W-C3 切片4）：autoReset 关 + 帧界手动 reset', () => {
+    // 真页面读数实锤：composer 的最后一趟（全屏输出单三角）把 calls 覆盖成 1，
+    // PerfHUD 的 draw call 行从上线起恒为 1。修法是 autoReset = false + 每帧开头 reset。
+    const src = readFileSync(join(SRC, 'core/Game.js'), 'utf8');
+    expect(src).toMatch(/this\.renderer\.info\.autoReset\s*=\s*false/);
+    // reset 必须紧贴在 composer.render() 之前（帧界在 render() 里，不是构造时清一次就完）
+    expect(src).toMatch(/info\.reset\(\);\s*\n\s*this\.composer\.render\(\)/);
+  });
 });
