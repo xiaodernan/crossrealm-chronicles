@@ -1,4 +1,4 @@
-import { setSunShadow } from '../engine/shadowPolicy.js';
+import { setSunShadow, applySunFollow } from '../engine/shadowPolicy.js';
 
 /**
  * 距离 LOD —— 让远处的敌人省掉逻辑开销。
@@ -42,12 +42,20 @@ export class PerformanceManager {
     return true;
   }
 
+  /**
+   * 阴影框跟随与总开关（每帧从 `Game` 调）。
+   *
+   * ## 改前那两行为什么删掉
+   * 原来写的是 `sun.shadow.camera.position.copy(playerPos)` —— 而它在 three 里是
+   * **死代码**：每次阴影渲染前 `LightShadow.updateMatrices(light)` 都从
+   * `light.matrixWorld` 重设阴影相机位置（0.172.0 `LightShadow.js:63-64`），手写的
+   * 任何值渲染前必被覆盖。实测后果：正交阴影框焊死在"光位 (80,120,60) 看向原点"那条
+   * 轴附近，而地形是 520×620 米 —— 玩家走出原点 ±140 米那一圈，整个画面**一片无影**。
+   * 现在改挪光本体与 target（`applySunFollow`，方向恒定只平移），阴影框才真的跟着人走。
+   */
   updateSunShadow(sun, playerPos, enabled) {
     if (!sun) return;
     setSunShadow(sun, enabled);
-    if (enabled) {
-      sun.shadow.camera.position.copy(playerPos);
-      sun.shadow.camera.updateProjectionMatrix?.();
-    }
+    if (enabled) applySunFollow(sun, playerPos);
   }
 }

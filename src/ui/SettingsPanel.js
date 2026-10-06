@@ -5,6 +5,7 @@ import {
 } from '../content/keybinds.js';
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
+import { SHADOW_QUALITY_SIZES, normalizeShadowQuality } from '../engine/shadowPolicy.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -79,6 +80,21 @@ export class SettingsPanel {
       s.set('shadows', sh.checked);
       s.applyToGame(this.game);
     });
+    // 阴影精度档（W-C3 切片2）：三档下拉。选项**从名册现推**而不是在 HTML 里抄一份 ——
+    // 抄了就会漏：名册加一档，面板上没有那一格，玩家永远选不到，也没有任何报错。
+    const sq = document.getElementById('set-shadow-quality');
+    if (sq) {
+      for (const size of SHADOW_QUALITY_SIZES) {
+        const opt = document.createElement('option');
+        opt.value = String(size);
+        opt.textContent = `${size}`;
+        sq.appendChild(opt);
+      }
+      sq.addEventListener('change', () => {
+        s.set('shadowQuality', Number(sq.value));
+        s.applyToGame(this.game);
+      });
+    }
     /* 震动（切片17）：走的还是"写设置 → `applyToGame`"那一条，面板自己不碰马达 ——
      * 否则"这一格开关到底管着谁"就有两个答案，而关掉的开关漏出一次震动是最难查的那种bug */
     const vib = document.getElementById('set-vibration');
@@ -259,6 +275,8 @@ export class SettingsPanel {
     for (const key of Object.keys(PAD_TUNING)) set(padKnobId(key), t[key]);
     const sh = document.getElementById('set-shadows');
     if (sh) sh.checked = d.shadows;
+    // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 `padTuning` 的回显同一纪律）
+    set('set-shadow-quality', normalizeShadowQuality(d.shadowQuality));
     /* 震动那一格问的是 `settings.get()`，与 `applyToGame` 用的是同一个判据（同一个取值口）：
      * 若这里改成看 `d.vibration === true`，那么一格存成 `null` 时会出现"框没勾、手柄还在震" ——
      * 显示与行为分家正是 B47 那一族的入口。 */

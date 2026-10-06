@@ -16,7 +16,7 @@
  * 门板与门框 → `prop`（它们是结构，从前 `[F,F]` 只是没人管，现在会正确投影/接收）、
  * lore 碎片 → `castOnly`。这三处是本片唯一的视觉变化，方向是"从没有影子到有影子"。
  *
- * ## 用例分六层
+ * ## 用例分七层
  * 1. **表本身**：四类的取值逐格；`shadowClassOf` 认不出就抛且说得出可用名单。
  * 2. **applyShadow 行为**：每类逐格生效；`deep` 落整棵子树；空对象不炸；返回传入的那个。
  * 3. **总开关**：`setSunShadow` 两个方向都生效；`null` 不炸。
@@ -24,6 +24,8 @@
  * 5. **真读者**：真跑地下城几何，断言它落到的值 == 策略表那一类 ——
  *    "表在那儿"与"表真的被用上了"是两件事。
  * 6. **那两行 no-op 不许长回来**：`x = x ?? true` 在 `castShadow` 上恒等于什么都不做。
+ * 7. **画质档与跟随（切片2）**：三档名册、两条取值口（内部抛 / 存储回落）、
+ *    换档释放旧深度图、跟随的方向不变式，以及"为什么跟随必须挪光本体"的死代码见证。
  */
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -31,6 +33,8 @@ import { join, relative } from 'node:path';
 import * as THREE from 'three';
 import {
   SHADOW_CLASSES, SHADOW_CLASS_IDS, shadowClassOf, applyShadow, setSunShadow,
+  SHADOW_QUALITY_SIZES, DEFAULT_SHADOW_QUALITY, shadowQualityOf, normalizeShadowQuality,
+  applySunShadowQuality, SUN_FOLLOW_OFFSET, applySunFollow,
 } from '../src/engine/shadowPolicy.js';
 import { ProceduralDungeonGenerator } from '../src/world/ProceduralDungeonGenerator.js';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
@@ -240,6 +244,132 @@ describe('阴影策略的单一所有者（W-C3 切片1）', () => {
     it('反面证据：那把正则认得出这个写法', () => {
       const bad = 'mesh.castShadow = mesh.castShadow ?? true;';
       expect(/castShadow\s*=\s*[\w.]*castShadow\s*\?\?/.test(bad)).toBe(true);
+    });
+  });
+
+  describe('⑦ 画质档与跟随（W-C3 切片2）', () => {
+    describe('名册', () => {
+      it('三档就是 1024 / 2048 / 4096，出厂档与硬编码时代的 4096 同值', () => {
+        expect(SHADOW_QUALITY_SIZES).toEqual([1024, 2048, 4096]);
+        expect(DEFAULT_SHADOW_QUALITY).toBe(4096);
+      });
+
+      it('名册是冻的', () => {
+        expect(Object.isFrozen(SHADOW_QUALITY_SIZES)).toBe(true);
+        expect(() => SHADOW_QUALITY_SIZES.push(8192)).toThrow();
+      });
+    });
+
+    describe('两条取值口', () => {
+      it('shadowQualityOf：认得出原样返回，认不出就抛且说得出有哪些档', () => {
+        expect(shadowQualityOf(2048)).toBe(2048);
+        expect(() => shadowQualityOf(8192)).toThrow(/未知的阴影精度档/);
+        expect(() => shadowQualityOf(8192)).toThrow(/1024/);
+        expect(() => shadowQualityOf('2048')).toThrow(/未知的阴影精度档/); // 字符串不算数
+      });
+
+      it('normalizeShadowQuality：内部口径抛的那批，存储口径回落出厂', () => {
+        for (const dirty of [8192, '2048', null, undefined, NaN, 0]) {
+          expect(normalizeShadowQuality(dirty), String(dirty)).toBe(DEFAULT_SHADOW_QUALITY);
+        }
+        for (const ok of SHADOW_QUALITY_SIZES) {
+          expect(normalizeShadowQuality(ok)).toBe(ok);
+        }
+      });
+    });
+
+    describe('applySunShadowQuality', () => {
+      const sun = () => {
+        const s = new THREE.DirectionalLight();
+        s.castShadow = true;
+        return s;
+      };
+
+      it('mapSize 落对档', () => {
+        const s = sun();
+        applySunShadowQuality(s, 1024);
+        expect(s.shadow.mapSize.x).toBe(1024);
+        expect(s.shadow.mapSize.y).toBe(1024);
+      });
+
+      it('换档释放旧深度图：只改 mapSize 不释放的话，three 仍按旧尺寸渲染', () => {
+        const s = sun();
+        const old = { disposed: 0, dispose() { this.disposed += 1; } };
+        s.shadow.map = old;
+        applySunShadowQuality(s, 2048);
+        expect(old.disposed).toBe(1);
+        expect(s.shadow.map).toBe(null);
+      });
+
+      it('开机时 map 还没建（null），不炸', () => {
+        const s = sun();
+        expect(() => applySunShadowQuality(s, 1024)).not.toThrow();
+        expect(s.shadow.map).toBe(null);
+      });
+
+      it('认不出的档当场抛（不是静默落一个别的档）', () => {
+        expect(() => applySunShadowQuality(sun(), 8192)).toThrow(/未知的阴影精度档/);
+      });
+
+      it('null 不炸', () => {
+        expect(applySunShadowQuality(null, 1024)).toBe(null);
+      });
+    });
+
+    describe('applySunFollow', () => {
+      it('target 到玩家脚下，光位 = 玩家 + 固定偏移', () => {
+        const s = new THREE.DirectionalLight();
+        applySunFollow(s, { x: 100, y: 3, z: -40 });
+        expect(s.target.position.x).toBe(100);
+        expect(s.target.position.y).toBe(3);
+        expect(s.target.position.z).toBe(-40);
+        expect(s.position.x).toBe(100 + SUN_FOLLOW_OFFSET.x);
+        expect(s.position.y).toBe(3 + SUN_FOLLOW_OFFSET.y);
+        expect(s.position.z).toBe(-40 + SUN_FOLLOW_OFFSET.z);
+      });
+
+      it('方向不变式：走到哪儿太阳的仰角都不变 —— 只平移，不转向', () => {
+        const s = new THREE.DirectionalLight();
+        applySunFollow(s, { x: 0, y: 0, z: 0 });
+        const dir0 = s.position.clone().sub(s.target.position).normalize();
+        for (const p of [{ x: 200, y: 0, z: 260 }, { x: -180, y: 2, z: -90 }]) {
+          applySunFollow(s, p);
+          const dir = s.position.clone().sub(s.target.position).normalize();
+          expect(dir.distanceTo(dir0)).toBeLessThan(1e-9);
+        }
+      });
+
+      it('偏移就是旧的光位 (80,120,60)：旧 target 在原点，方向零变更', () => {
+        expect(SUN_FOLLOW_OFFSET).toEqual({ x: 80, y: 120, z: 60 });
+      });
+
+      it('null 不炸', () => {
+        expect(applySunFollow(null, { x: 1, y: 1, z: 1 })).toBe(null);
+        const s = new THREE.DirectionalLight();
+        expect(applySunFollow(s, null)).toBe(s);
+      });
+    });
+
+    describe('死代码见证：为什么跟随必须挪光本体，而不是写 shadow.camera.position', () => {
+      /**
+       * 改前 PerformanceManager 写的就是 `shadow.camera.position.copy(playerPos)`。
+       * three 在每次阴影渲染前调 `updateMatrices(light)`（0.172.0 LightShadow.js:63-64），
+       * 从 light.matrixWorld 重设阴影相机位置 —— 手写的值渲染前必被覆盖。
+       * 这条用例把那次覆盖真的跑一遍：写给相机 → 跑 updateMatrices → 读回来的是光自己的位置。
+       * 谁要是把跟随改回"写 shadow.camera.position"，运行时不会报错，只会静默焊死在原点 ——
+       * 所以把它钉成一条测试，而不是一段注释。
+       */
+      it('手写进 shadow.camera.position 的值，渲染前被 updateMatrices 覆盖', () => {
+        const s = new THREE.DirectionalLight();
+        s.position.set(80, 120, 60);
+        s.target.position.set(0, 0, 0);
+        s.updateMatrixWorld();
+        s.shadow.camera.position.set(999, 999, 999); // 改前那行手写的"跟随"
+        s.shadow.updateMatrices(s);
+        expect(s.shadow.camera.position.x).toBe(80);
+        expect(s.shadow.camera.position.y).toBe(120);
+        expect(s.shadow.camera.position.z).toBe(60);
+      });
     });
   });
 });

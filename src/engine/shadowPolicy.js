@@ -76,3 +76,89 @@ export function setSunShadow(sun, enabled) {
   if (!sun) return;
   sun.castShadow = !!enabled;
 }
+
+/* ------------------------------------------------------------------ *
+ * 画质档与跟随（W-C3 切片2）
+ * ------------------------------------------------------------------ */
+
+/**
+ * 太阳影子贴图的精度档。改前 `mapSize` 在 `Game.js` 硬编码 4096，玩家没有降的那一档 ——
+ * 4096×4096 的深度图对核显是实打实的开销，而低配机器最想省的就是这一格。
+ * 名册冻在这里，设置面板的下拉从它现推（HTML 里不抄第二份，抄了就会漏）。
+ */
+export const SHADOW_QUALITY_SIZES = Object.freeze([1024, 2048, 4096]);
+
+/** 出厂档：与迁移前 `Game.js` 硬写的 4096 同值 —— 默认精度零变更，降档是玩家自己的选择。 */
+export const DEFAULT_SHADOW_QUALITY = 4096;
+
+/**
+ * 取一档精度：认不出就抛（说得出有哪些档），与 `shadowClassOf` 同口径。
+ * 只给**内部**用 —— 玩家可写的存储（localStorage）走 `normalizeShadowQuality` 回落，
+ * 两条路的分界是"调用方能不能对脏值负责"。
+ */
+export function shadowQualityOf(size) {
+  if (!SHADOW_QUALITY_SIZES.includes(size)) {
+    throw new Error(
+      `shadowQualityOf: 未知的阴影精度档 ${size}，可用的是 ${SHADOW_QUALITY_SIZES.join(' / ')}`
+    );
+  }
+  return size;
+}
+
+/**
+ * 存储侧的清洗：认得出返回数值，认不出回落出厂档（`padTuning` 的同一先例 ——
+ * 脏档回落而不是抛，否则一行手改的 localStorage 能把开机炸了）。
+ */
+export function normalizeShadowQuality(size) {
+  return SHADOW_QUALITY_SIZES.includes(size) ? size : DEFAULT_SHADOW_QUALITY;
+}
+
+/**
+ * 把一档精度落上太阳。换档必须**释放旧图**：three 会缓存 `shadow.map`（深度图的
+ * render target），只改 `mapSize` 不释放的话，下一帧仍按旧尺寸渲染 —— 表面上换了档，
+ * 实际显存里还是原来那张。开机时 `map` 还没建（null），释放那一步要防炸。
+ * @returns 传进去的那盏光
+ */
+export function applySunShadowQuality(sun, size) {
+  if (!sun) return sun;
+  const q = shadowQualityOf(size);
+  sun.shadow.mapSize.set(q, q);
+  if (sun.shadow.map) {
+    sun.shadow.map.dispose();
+    sun.shadow.map = null;
+  }
+  return sun;
+}
+
+/**
+ * 太阳的投光方向（从旧的光位 (80,120,60) 指向旧 target 原点，随切片2 冻结于此）。
+ * 跟随时**只平移、不转向**：offset 恒定 ⇒ 光的方向恒定 —— 太阳在天上的角度
+ * 不该因为玩家走动而变，变的只是影子框跟着谁。
+ */
+export const SUN_FOLLOW_OFFSET = Object.freeze({ x: 80, y: 120, z: 60 });
+
+/**
+ * 让阴影框跟着玩家走。
+ *
+ * ## 为什么不是改 `shadow.camera.position`
+ * 切片1 之前 `PerformanceManager` 写的就是那一行，而它是死代码：three 在每次阴影渲染
+ * 前调 `LightShadow.updateMatrices(light)`（0.172.0 `LightShadow.js:63-68`），从
+ * `light.matrixWorld` 重设阴影相机位置、看向 `light.target.matrixWorld` —— 手写进
+ * `shadow.camera.position` 的任何值渲染前必被覆盖。正交框真正跟谁走，由**光本体与
+ * target 的世界位**决定，所以这里挪的是它们两个。
+ *
+ * 前提：`sun.target` 必须已 `scene.add`（three 的老规矩 —— target 不进场景图，
+ * 它的 matrixWorld 永远是 identity，改了 position 也等于没改）。这一步归光源的声明方。
+ *
+ * @returns 传进去的那盏光
+ */
+export function applySunFollow(sun, playerPos) {
+  if (!sun || !playerPos) return sun;
+  sun.target.position.set(playerPos.x, playerPos.y, playerPos.z);
+  sun.position.set(
+    playerPos.x + SUN_FOLLOW_OFFSET.x,
+    playerPos.y + SUN_FOLLOW_OFFSET.y,
+    playerPos.z + SUN_FOLLOW_OFFSET.z
+  );
+  return sun;
+}

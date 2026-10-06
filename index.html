@@ -96,6 +96,8 @@
         <label>渲染精度 <input id="set-pixel" type="range" min="0.5" max="2" step="0.25" /></label>
         <label>敌人更新距离 <input id="set-lod" type="range" min="40" max="150" step="5" /></label>
         <label><input id="set-shadows" type="checkbox" /> 阴影</label>
+        <!-- 选项由 SettingsPanel 从 SHADOW_QUALITY_SIZES 现推（HTML 不抄名册，抄了就会漏） -->
+        <label>阴影精度 <select id="set-shadow-quality"></select></label>
         <h3>手柄手感</h3>
         <label>摇杆死区 <input id="set-deadzone" type="range" /></label>
         <label>外圈量程 <input id="set-analog-range" type="range" /></label>

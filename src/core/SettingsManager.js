@@ -1,4 +1,5 @@
 import { padTuning } from '../content/keybinds.js';
+import { applySunShadowQuality, normalizeShadowQuality } from '../engine/shadowPolicy.js';
 
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
@@ -9,6 +10,12 @@ const DEFAULTS = {
   sfxVolume: 0.5,
   bloomStrength: 0.35,
   shadows: true,
+  /**
+   * 太阳影子贴图的精度档（W-C3 切片2）：1024 / 2048 / 4096 三档，名册在
+   * `engine/shadowPolicy.js`。出厂 4096 与硬编码时代同值 —— 默认精度零变更。
+   * 存储里的脏值在 `applyToGame` 落地前经 `normalizeShadowQuality` 回落，不抛。
+   */
+  shadowQuality: 4096,
   pixelRatio: 1.5,
   enemyLodDistance: 85,
   showFps: true,
@@ -110,6 +117,10 @@ export class SettingsManager {
       game.renderer.shadowMap.enabled = this.get('shadows');
       game.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.get('pixelRatio')));
     }
+    // 阴影精度档（W-C3 切片2）：换档要释放 three 缓存的旧深度图，释放那一步在
+    // `applySunShadowQuality` 里。脏档回落出厂而不是抛 —— 存储是玩家可写的，
+    // 一行手改的 localStorage 不该把开机炸了（`padTuning` 的同一先例）
+    if (game.sun) applySunShadowQuality(game.sun, normalizeShadowQuality(this.get('shadowQuality')));
     if (game.performance) game.performance.enemyLodDistance = this.get('enemyLodDistance');
     // 手感旋钮推给桥（切片15）：`setTuning` 内部再走一次 `padTuning` 清洗 ——
     // 存储是玩家可写的，越界或 NaN 一律逐项回落出厂，不把脏值乘进每帧的舵量里

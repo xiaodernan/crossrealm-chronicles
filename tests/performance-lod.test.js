@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import * as THREE from 'three';
 import { PerformanceManager } from '../src/core/PerformanceManager.js';
 import { installWindowShim, duel, NEVER_LEAVES } from './helpers/enemyHarness.js';
 
@@ -116,5 +117,47 @@ describe('真管理器 + 真 LOD（B40 端到端）', () => {
     expect(updated).toBeGreaterThan(0);
     expect(e.mesh.visible).toBe(true);
     expect(e.position.distanceTo(before)).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * W-C3 切片2：`updateSunShadow` 的跟随半区。
+ *
+ * 改前那一版写的是 `sun.shadow.camera.position.copy(playerPos)` —— 死代码：
+ * three 每次阴影渲染前从 `light.matrixWorld` 重设阴影相机位置，手写的值必被覆盖
+ * （见证用例在 `shadow-policy.test.js` ⑦ 层）。后果是阴影框焊死在原点附近，而地形
+ * 520×620 —— 玩家走出原点 ±140 米整片无影。现在跟随走 `applySunFollow`：
+ * 挪光本体与 target，方向恒定只平移。这一层钉的是管理器自己的接线。
+ */
+describe('updateSunShadow：阴影框跟着玩家走（W-C3 切片2）', () => {
+  /** 真 light：跟随写的是 `position.set(...)`，假对象没有这一手就不像它要伺候的那个类型 */
+  const sun = () => {
+    const s = new THREE.DirectionalLight();
+    s.castShadow = true;
+    return s;
+  };
+
+  it('开着时：target 到玩家脚下、光位跟着玩家走', () => {
+    const perf = new PerformanceManager();
+    const s = sun();
+    perf.updateSunShadow(s, { x: 220, y: 4, z: -60 }, true);
+    expect(s.castShadow).toBe(true);
+    expect(s.target.position.x).toBe(220);
+    expect(s.target.position.z).toBe(-60);
+    expect(s.position.x).toBe(220 + 80);
+    expect(s.position.y).toBe(4 + 120);
+    expect(s.position.z).toBe(-60 + 60);
+  });
+
+  it('关掉时：总开关落 false（跟随挪不挪无所谓，深度图那一趟都不跑了）', () => {
+    const perf = new PerformanceManager();
+    const s = sun();
+    perf.updateSunShadow(s, { x: 220, y: 0, z: -60 }, false);
+    expect(s.castShadow).toBe(false);
+  });
+
+  it('null 不炸：设置里 shadows 关着且光还没建的那几帧照走', () => {
+    const perf = new PerformanceManager();
+    expect(() => perf.updateSunShadow(null, { x: 0, y: 0, z: 0 }, true)).not.toThrow();
   });
 });

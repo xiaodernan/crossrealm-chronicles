@@ -7,6 +7,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { PlayerController } from '../player/PlayerController.js';
 import { WorldManager } from '../world/WorldManager.js';
 import { TimeController } from '../engine/Time.js';
+import { DEFAULT_SHADOW_QUALITY } from '../engine/shadowPolicy.js';
 import { shake } from '../engine/Shake.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { PerfHUD } from '../engine/PerfHUD.js';
@@ -407,7 +408,7 @@ export class Game {
     this.sun = new THREE.DirectionalLight(0xfff4e8, 1.85);
     this.sun.position.set(80, 120, 60);
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(4096, 4096);
+    this.sun.shadow.mapSize.set(DEFAULT_SHADOW_QUALITY, DEFAULT_SHADOW_QUALITY);
     this.sun.shadow.bias = -0.0004;
     this.sun.shadow.normalBias = 0.03;
     this.sun.shadow.camera.near = 1;
@@ -417,6 +418,9 @@ export class Game {
     this.sun.shadow.camera.top = 140;
     this.sun.shadow.camera.bottom = -140;
     this.scene.add(this.sun);
+    // target 必须进场景图：不进的话它的 matrixWorld 恒为 identity，
+    // 每帧把 target 挪到玩家脚下就是白挪（阴影框依旧焊在原点，见 shadowPolicy.applySunFollow）
+    this.scene.add(this.sun.target);
   }
 
   /**
