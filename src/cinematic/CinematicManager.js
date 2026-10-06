@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 import { CAMERA_BLEND } from '../content/tuning.js';
+import { setDofEnabled, updateDofParams } from '../engine/DofPass.js';
+
+/** 过场 DoF 档：焦点永远钉在 Boss 注视点，背景随距离全虚；fade 是首尾的淡入淡出坡长 */
+const CINE_DOF = { maxblur: 0.85, fade: 0.5 };
 
 const BOSS_CINEMATICS = {
   'shadow-warden': {
@@ -114,7 +118,11 @@ export class CinematicManager {
   }
 
   update(dt) {
-    if (!this.active || !this.config) return;
+    if (!this.active || !this.config) {
+      // 幂等关灯：过场不在播就还灯，end 之外的任何退出路径都从这里兜住
+      setDofEnabled(this.game.dofPass, false);
+      return;
+    }
 
     this.timer += dt;
     this.orbitAngle += dt * 0.9;
@@ -138,6 +146,17 @@ export class CinematicManager {
         { owner: 'cinematic', transition: CAMERA_BLEND.enter }
       );
 
+    // 过场 DoF：焦点钉在本帧注视点（_cineLook），模糊量首尾各留一个 fade 坡 ——
+    // 进出过场时景深随镜头补间一起起落，不是一记硬切。
+    // dofPass 缺席（旧 save / 无后处理档位）时两个调用都在 pass 判空里自熄。
+    setDofEnabled(this.game.dofPass, true);
+    const edge = Math.min(this.timer, this.config.duration - this.timer, CINE_DOF.fade)
+      / CINE_DOF.fade;
+    updateDofParams(this.game.dofPass, {
+      focus: this._cinePos.distanceTo(this._cineLook),
+      maxblur: CINE_DOF.maxblur * Math.max(edge, 0),
+    });
+
     if (this.phase === 'title' && this.timer > 2.2) {
       this.phase = 'dialog';
       this.game.dialog.show(this.config.title, this.config.lines);
@@ -151,6 +170,8 @@ export class CinematicManager {
   end() {
     this.active = false;
     this.game.cinematicActive = false;
+    // 过场收尾当场还灯，不等下一帧的兜底
+    setDofEnabled(this.game.dofPass, false);
     this.letterbox.classList.add('hidden');
     if (this.game.dialog.open) this.game.dialog.hide?.();
     window.dispatchEvent(new CustomEvent('cinematic-end'));
