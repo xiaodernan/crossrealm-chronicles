@@ -359,6 +359,11 @@ export class Game {
     });
     window.addEventListener('boss-defeated', () => {
       this.audio.endBossFight();
+      // 击败 Boss 后立即重扫叙事技（W-B8 切片5）：`enemy-defeated` 先于本事件触发，
+      // 已把对应 Boss 的统计写进任务账本（`BOSS_STAT_KEYS` -> `quests.stats`），
+      // 所以此刻 `tryNarrativeUnlocks` 能立刻白送那条「条件=击败此 Boss」的叙事技，
+      // 不必等章节推进或下次读档。
+      this.weaponSkills.tryNarrativeUnlocks(this);
     });
     window.addEventListener('boss-phase', (e) => {
       this.audio.setBossPhase(e.detail.phase ?? 2);
