@@ -97,6 +97,8 @@ export class LevelEditor {
     this.ghostMesh = null;
     this.roomMeshes = new Map(); // room.id -> { mesh: THREE.Group, room, label }
     this.gridHelper = null;
+    this.colliderMeshes = []; // Array of collider meshes for toggle visibility
+    this.showColliders = false;
 
     // 交互
     this.raycaster = new THREE.Raycaster();
@@ -144,6 +146,7 @@ export class LevelEditor {
         <button id="le-import" style="background:#335;border:none;color:#ddd;padding:6px;cursor:pointer;">Import JSON</button>
         <button id="le-clear" style="background:#533;border:none;color:#ddd;padding:6px;cursor:pointer;">Clear All</button>
         <button id="le-rebuild" style="background:#353;border:none;color:#ddd;padding:6px;cursor:pointer;">Rebuild Geometry</button>
+        <button id="le-colliders" style="background:#535;border:none;color:#ddd;padding:6px;cursor:pointer;grid-column:span 2;">Toggle Colliders</button>
       </div>
       <div style="font-size:11px;color:#888;">
         LMB: Place | RMB: Delete | Drag: Move | {editorCycleTemplate}: Next Template | {editorToggleGrid}: Toggle Grid
@@ -171,6 +174,7 @@ export class LevelEditor {
     this.panel.querySelector('#le-file-input').addEventListener('change', (e) => this.importLayout(e));
     this.panel.querySelector('#le-clear').addEventListener('click', () => this.clearAll());
     this.panel.querySelector('#le-rebuild').addEventListener('click', () => this.rebuildGeometry());
+    this.panel.querySelector('#le-colliders').addEventListener('click', () => this.toggleColliders());
     this.templateList.addEventListener('change', (e) => {
       this.selectedTemplateId = e.target.value;
       this._更新幽灵();
@@ -562,6 +566,49 @@ export class LevelEditor {
       disposeDungeonSubtree(记录.mesh);
     }
     this.roomMeshes.clear();
+    // 碰撞体也要跟着清
+    this._clearColliders();
+  }
+
+  /** 清除所有碰撞体可视化 */
+  _clearColliders() {
+    for (const mesh of this.colliderMeshes) {
+      if (mesh.parent) mesh.parent.remove(mesh);
+      mesh.geometry?.dispose();
+      mesh.material?.dispose();
+    }
+    this.colliderMeshes = [];
+  }
+
+  /** 重建碰撞体可视化（从 layout.colliders 读取） */
+  _buildColliders() {
+    this._clearColliders();
+    if (!this.layout || !this.layout.colliders?.length) return;
+    
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0xff4444,
+      transparent: true,
+      opacity: 0.25,
+      wireframe: true,
+    });
+    
+    for (const col of this.layout.colliders) {
+      const geo = new THREE.BoxGeometry(col.hw * 2, 3, col.hd * 2);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(col.x, 1.5, col.z);
+      this.scene.add(mesh);
+      this.colliderMeshes.push(mesh);
+    }
+  }
+
+  /** 切换碰撞体显示/隐藏 */
+  toggleColliders() {
+    this.showColliders = !this.showColliders;
+    if (this.showColliders) {
+      this._buildColliders();
+    } else {
+      this._clearColliders();
+    }
   }
 
   _toggleGrid() {
