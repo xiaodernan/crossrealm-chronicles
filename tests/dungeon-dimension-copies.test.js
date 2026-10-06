@@ -27,7 +27,9 @@
  * ② 载体层：21 场布局都带那六枚数字且等于声明；558 间房的尺寸落在 `cellSize`/`bossCell` 上；
  *    房间坐标按生产者的口径 `(gx − gridW/2) * cellSize` 成立。
  * ③ 拒收层：`buildGeometry` 缺哪一枚就当场点名哪一枚（逐字段四臂 + 缺两枚点名两枚 + 齐货不抛）。
- * ④ 派生层：门板/门框/门碰撞随 `layout.doorWidth` 一起走，且每扇关着的门盖得住量出来的洞。
+ * ④ 派生层：门板/门框/门碰撞随 `layout.doorWidth` 一起走、碰撞轴向随 `door.dir` 转（切片4h 修 B84），
+ *    并把这两件事拉到 `clampPlayer` 上走一遍行为读数（关着的门挡得住整扇门洞、开着的门放行、
+ *    撞墙停在墙面不是传送 —— 后者是同一片修掉的 B99）。
  * ⑤ 编辑器层：吸附与反推格号吃 `layout.cellSize`，同一实例改数就改行为；真指针路径（投影回解）
  *    也走同一条 —— 只有那条路能量到 `_drag` 里的 B87。
  * ⑥ 绝迹层：18 处历史抄本在役源码里 0 命中，**同一把尺**在誊来的旧字节上数得到（armed）；
@@ -50,6 +52,7 @@ import { join, relative } from 'node:path';
 import * as THREE from 'three';
 import { ProceduralDungeonGenerator } from '../src/world/ProceduralDungeonGenerator.js';
 import { generateMaze } from '../src/world/MazeLayout.js';
+import { DungeonManager } from '../src/world/DungeonManager.js';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
 import { dungeonEncounterOf } from '../src/content/dungeonEncounters.js';
 import { ROOM_TEMPLATES } from '../src/world/RoomTemplates.js';
@@ -166,6 +169,55 @@ function 量门洞(layout, meshes, door) {
   const 右 = 段.filter(([a]) => a >= door[侧向] - 1e-6).map(([a]) => a);
   if (!左.length || !右.length) return null;
   return Math.min(...右) - Math.max(...左);
+}
+
+/** 行为面用的门洞偏移（沿跨洞轴）：0 = 房心中线，±1.4 已贴洞口边（洞半宽 2.0，墙段边距到 1.55） */
+const 门偏移表 = [0, 0.7, 1.4, -0.7, -1.4];
+/** clampPlayer 的推力边距（与 DungeonManager 里同一个数；它不是导出常量，被测的是它是否生效） */
+const 推挤边距 = 0.45;
+/** 关着的门沿通道轴把人停住的半轴 = 沿通道半轴 + 推力边距（两族同值，B84 修完才有这条同值） */
+const 停人距离 = DIM.DOOR_COLLIDER_HALF_DEPTH + 推挤边距;
+
+/**
+ * clampPlayer 夹具（切片4h）：只借真原型这一个方法 —— `active` 挂上布局就能跑
+ * （同 dungeon-defs-table 的 `.call(假)` 路子）。构造真 DungeonManager 要建七座副本 + window，
+ * 与这里量的东西（推挤几何）无关。
+ */
+function 碰撞夹具(layout, def) {
+  const 假 = { active: { def, layout }, _worldToLocal: DungeonManager.prototype._worldToLocal };
+  const 一步 = (局部点) => {
+    const p = { position: { x: def.origin.x + 局部点.x, z: def.origin.z + 局部点.z } };
+    DungeonManager.prototype.clampPlayer.call(假, p);
+    return { x: p.position.x - def.origin.x, z: p.position.z - def.origin.z };
+  };
+  return {
+    点: 一步,
+    /** 走 n 步、每步先位移再 clamp —— 与 PlayerController 每帧的"先移动、再 clampPlayer"同序 */
+    走: (起, 步, n) => {
+      let 终 = { ...起 };
+      for (let i = 0; i < n; i++) 终 = 一步({ x: 终.x + 步.x, z: 终.z + 步.z });
+      return 终;
+    },
+  };
+}
+
+/**
+ * 门洞走廊有没有被别的墙盒压住（切片4h）：在走廊上取样（五个偏移 × 通道轴 −1.5…+1.5），
+ * 任一点落进任何 collider 的「半轴 + 0.45」扩展盒即算压住。B79 那几扇被 Boss 场墙压住的门
+ * 会被这条划出去 —— 开着也走不过去的是墙、不是门。**谓词是推导的，不是手抄名单**。
+ */
+function 门洞被压(layout, door) {
+  const 跨洞在x = door.dir === 'n' || door.dir === 's';
+  for (const off of 门偏移表) {
+    for (const d of [-1.5, -1.0, -0.6, 0, 0.6, 1.0, 1.5]) {
+      const px = door.x + (跨洞在x ? off : d);
+      const pz = door.z + (跨洞在x ? d : off);
+      const 压 = (layout.colliders ?? []).some((c) =>
+        Math.abs(px - c.x) < c.hw + 推挤边距 && Math.abs(pz - c.z) < c.hd + 推挤边距);
+      if (压) return true;
+    }
+  }
+  return false;
 }
 
 describe('地下城尺寸事实的抄本收口（切片4f）', () => {
@@ -310,33 +362,149 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
           .toBeLessThanOrEqual(0.06);
         expect(每侧收边, `${door.id} 门框没盖到洞口`).toBeGreaterThan(0);
         expect(每侧收边, `${door.id} 门框收边盖不住门板让出的缝`).toBeGreaterThanOrEqual(每侧见光);
-        // 门碰撞跨洞那一轴的半轴 = 洞的一半（轴向不分南北东西是 B84，见下一条）
-        expect(door.collider.hw, `${door.id} 的碰撞跨洞半轴`).toBeCloseTo(洞 / 2, 6);
+        // 门碰撞：跨洞那一轴的半轴 = 洞的一半 —— 轴向随 dir 转（切片4h 修 B84）
+        const 跨洞在x = door.dir === 'n' || door.dir === 's';
+        expect(跨洞在x ? door.collider.hw : door.collider.hd, `${door.id} 的碰撞跨洞半轴`).toBeCloseTo(洞 / 2, 6);
+        expect(跨洞在x ? door.collider.hd : door.collider.hw, `${door.id} 的碰撞沿通道半轴`).toBeCloseTo(DIM.DOOR_COLLIDER_HALF_DEPTH, 6);
       }
     });
 
-    it('已知缺陷 B84 的形状钉住：门碰撞的长轴恒在 x，不随门的朝向转', () => {
-      // 门板与门框会按 dir 旋转，碰撞盒不会：n/s 向门的跨洞半轴正好是洞的一半，
-      // e/w 向门则变成"沿通道 2 米、跨洞只有 DOOR_COLLIDER_HALF_DEPTH"，
-      // 那 1.55 米靠墙段自己的碰撞盒补住（实测 `.tmp-20261004/wb10s4f-census.log` ③：
-      // 537 扇里 291 扇盖满 / 246 扇差 1.55 米）。这一条**不是在说它对**，是把形状钉成一个读数。
+    it('门碰撞轴向随 dir 转：跨洞半轴 = 洞宽 / 2、沿通道半轴 = DOOR_COLLIDER_HALF_DEPTH（切片4h 修 B84）', () => {
+      // 改前长轴恒在 x：537 扇里 246 扇东西向门的跨洞半轴只有 0.45 米（洞半宽 2.00）——
+      // 关着的门在洞口两侧各留 0.7 米可穿过的缝、又在门前 2.45 米处凭空挡人
+      // （形状读数 `.tmp-20261004/wb10s4f-census.log` ③；行为读数 `.tmp-20261007/wb10s4h-probe.mjs`）。
+      // 这一条**不是在说形状对不对**，是把两族的四格半轴逐扇钉住。
       const { layout } = build(DUNGEON_DEFS[0], 42);
       const 半 = layout.doorWidth / 2;
       let n = 0, e = 0;
       for (const door of layout.doors) {
         const c = door.collider;
         if (door.dir === 'n' || door.dir === 's') {
-          expect(c.hw, `${door.id} 南北向门的 x 半轴`).toBeCloseTo(半, 6);
-          expect(c.hd, `${door.id} 南北向门的 z 半轴`).toBeCloseTo(DIM.DOOR_COLLIDER_HALF_DEPTH, 6);
+          expect(c.hw, `${door.id} 南北向门跨洞半轴（x）`).toBeCloseTo(半, 6);
+          expect(c.hd, `${door.id} 南北向门沿通道半轴（z）`).toBeCloseTo(DIM.DOOR_COLLIDER_HALF_DEPTH, 6);
           n++;
         } else {
-          expect(c.hw, `${door.id} 东西向门的 x 半轴（本该是通道那一侧）`).toBeCloseTo(半, 6);
-          expect(c.hd, `${door.id} 东西向门的 z 半轴（跨洞那一侧，B84）`).toBeCloseTo(DIM.DOOR_COLLIDER_HALF_DEPTH, 6);
+          expect(c.hd, `${door.id} 东西向门跨洞半轴（z）`).toBeCloseTo(半, 6);
+          expect(c.hw, `${door.id} 东西向门沿通道半轴（x）`).toBeCloseTo(DIM.DOOR_COLLIDER_HALF_DEPTH, 6);
           e++;
         }
       }
       expect(n, '南北向门没见过').toBeGreaterThan(0);
       expect(e, '东西向门没见过').toBeGreaterThan(0);
+    });
+
+    it('关着的门挡得住整扇门洞、开着的门放行（clampPlayer 实测，切片4h 的行为面）', () => {
+      const def = DUNGEON_DEFS[0];
+      const { layout } = build(def, 42);
+      const 夹 = 碰撞夹具(layout, def);
+      const 门数 = layout.doors.length;
+
+      // ① 关着：每扇 × 五偏移 × 两侧，从 1.2 米外朝门里走 2.4 米（每步 0.12、先动后 clamp）。
+      //    改前的形状：e/w 门在洞口边沿留 0.7 米可穿过的缝；就算走到中线，也被推到门前
+      //    2.45 米外的"隐墙"处 —— 两条都会在这里红。
+      let 走次 = 0;
+      for (const door of layout.doors) {
+        const 跨洞在x = door.dir === 'n' || door.dir === 's';
+        const 通道 = 跨洞在x ? 'z' : 'x';
+        const 跨洞轴 = 跨洞在x ? 'x' : 'z';
+        for (const off of 门偏移表) {
+          for (const side of [-1, 1]) {
+            const 起 = { x: door.x, z: door.z };
+            起[通道] += side * 1.2;
+            起[跨洞轴] += off;
+            const 步 = { x: 0, z: 0 };
+            步[通道] = -side * 0.12;
+            const 终 = 夹.走(起, 步, 20);
+            const d = 终[通道] - door[通道];
+            走次++;
+            expect(Math.sign(d), `${door.id} 关着还穿过去了（off ${off}、side ${side}）`).toBe(side);
+            expect(Math.abs(d), `${door.id} 没停在门面（off ${off}、side ${side}）：距门 ${Math.abs(d).toFixed(3)} 米`)
+              .toBeCloseTo(停人距离, 6);
+            // 收敛：再走一步不该把终点挪走（改前的传送落点每帧都变，这一条抓抖动）
+            const 再 = 夹.走(终, 步, 1);
+            expect(Math.abs(再[通道] - 终[通道]), `${door.id} 终点在抖（off ${off}、side ${side}）`)
+              .toBeCloseTo(0, 9);
+          }
+        }
+      }
+      expect(走次, '一扇门都没走，这条就是空转').toBe(门数 * 门偏移表.length * 2);
+
+      // ② 开着：门洞没被别的墙压住的门逐扇放行。压门的几扇是 B79 的形状（开着也走不过去
+      //    的是墙），由上面的推导谓词划出去 —— 同时证明"划出去的那批"不是空集。
+      const 可试 = layout.doors.filter((d) => !门洞被压(layout, d));
+      expect(可试.length, '没有一扇门洞是干净的，谓词把全部门都划出去了').toBeGreaterThan(0);
+      expect(门数 - 可试.length, '这个布局里 B79 的压门形状应当被谓词认出来，否则「划出去」的真伪没人验过')
+        .toBeGreaterThanOrEqual(1);
+      for (const door of 可试) ProceduralDungeonGenerator.setDoorOpen(layout, door, true);
+      let 放行 = 0;
+      for (const door of 可试) {
+        const 跨洞在x = door.dir === 'n' || door.dir === 's';
+        const 通道 = 跨洞在x ? 'z' : 'x';
+        const 跨洞轴 = 跨洞在x ? 'x' : 'z';
+        for (const off of 门偏移表) {
+          for (const side of [-1, 1]) {
+            const 起 = { x: door.x, z: door.z };
+            起[通道] += side * 1.2;
+            起[跨洞轴] += off;
+            const 步 = { x: 0, z: 0 };
+            步[通道] = -side * 0.12;
+            const 终 = 夹.走(起, 步, 20);
+            放行++;
+            expect(Math.sign(终[通道] - door[通道]), `开着还走不过去（${door.id}、off ${off}、side ${side}）`)
+              .toBe(-side);
+          }
+        }
+      }
+      expect(放行).toBe(可试.length * 门偏移表.length * 2);
+    });
+
+    it('门前不再有隐墙、撞墙不再传送（B84 的另一半 + B99 的读数）', () => {
+      const def = DUNGEON_DEFS[0];
+      const { layout } = build(def, 42);
+      const 夹 = 碰撞夹具(layout, def);
+
+      const 净e = layout.doors.find((d) => d.dir === 'e' && !门洞被压(layout, d));
+      const 净n = layout.doors.find((d) => d.dir === 'n' && !门洞被压(layout, d));
+      expect(净e, '没有一扇干净的东西向门').toBeDefined();
+      expect(净n, '没有一扇干净的南北向门').toBeDefined();
+
+      // ① 门面外 1.0 / 1.5 米的点原地不动。改前 e/w 门的触发盒横着放（|dx| < 2.45），
+      //    这两个点会被"隐墙"推走 —— 即玩家在门前两米就撞上一堵看不见的墙。
+      for (const [door, 通道] of [[净e, 'x'], [净n, 'z']]) {
+        for (const 距 of [1.0, 1.5]) {
+          for (const side of [-1, 1]) {
+            const 起 = { x: door.x, z: door.z };
+            起[通道] += side * 距;
+            const 终 = 夹.点(起);
+            expect([终.x, 终.z], `${door.id} 门前 ${距} 米的点被推走了（隐墙）`).toEqual([起.x, 起.z]);
+          }
+        }
+      }
+      // ② 贴到门前 0.5 米：被推到门面 0.9 米处、停在来的那一侧 —— 挡是挡，挡在门口。
+      for (const [door, 通道] of [[净e, 'x'], [净n, 'z']]) {
+        for (const side of [-1, 1]) {
+          const 起 = { x: door.x, z: door.z };
+          起[通道] += side * 0.5;
+          const 终 = 夹.点(起);
+          expect((终[通道] - door[通道]) * side, `${door.id} 贴门没被推回该侧`).toBeCloseTo(停人距离, 6);
+        }
+      }
+      // ③ 撞墙不再传送（B99 的正反面）：一面普通墙段（按形状推导，不点名 id），
+      //    从侧面走进 1.2 米 —— 停在墙面前 0.75 米（半厚 0.3 + 边距 0.45），不是十几米外。
+      //    改前的落点写的是 `origin ± 半轴`：这一走会把玩家从墙边甩到 4993 米外的另一条坐标上。
+      const 墙 = (layout.colliders ?? []).find((c) => c.hw <= 1 && c.hd >= 2);
+      expect(墙, '找不到一面普通墙段（按形状推导）').toBeDefined();
+      for (const side of [-1, 1]) {
+        const 起 = { x: 墙.x + side * (墙.hw + 0.45 + 1.2), z: 墙.z };
+        const 终 = 夹.走(起, { x: -side * 0.12, z: 0 }, 20);
+        expect(终.x - 墙.x, `撞墙被送到墙外 ${Math.abs(终.x - 墙.x).toFixed(1)} 米（B99 的形状）`)
+          .toBeCloseTo(side * (墙.hw + 0.45), 6);
+        expect(终.z - 墙.z, '撞墙不该动另一条轴').toBeCloseTo(0, 9);
+      }
+      // ④ 控制组：空地不动 —— 推挤只在扩展盒里发生，房心一步 clamp 原地。
+      const 房 = layout.rooms.find((r) => !r.isBossArena);
+      const 终 = 夹.点({ x: 房.x, z: 房.z });
+      expect([终.x, 终.z], '空地上的点被动了 —— 推挤范围失控').toEqual([房.x, 房.z]);
     });
   });
 

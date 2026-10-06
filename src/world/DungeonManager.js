@@ -339,36 +339,33 @@ export class DungeonManager {
     if (!this.active?.layout) return;
     const o = this.active.def.origin;
     const local = this._worldToLocal(this.active, player.position.x, player.position.z);
-    const c = clampToBounds(this.active.layout, local.x, local.z, 1);
-    player.position.x = o.x + c.x;
-    player.position.z = o.z + c.z;
+    const b = clampToBounds(this.active.layout, local.x, local.z, 1);
+    let lx = b.x, lz = b.z;
 
-    for (const col of this.active.layout.colliders ?? []) {
-      const dx = local.x - col.x;
-      const dz = local.z - col.z;
-      const ox = col.hw + 0.45;
-      const oz = col.hd + 0.45;
-      if (Math.abs(dx) < ox && Math.abs(dz) < oz) {
-        const px = (Math.abs(dx) / ox) > (Math.abs(dz) / oz)
-          ? Math.sign(dx) * ox
-          : local.x;
-        const pz = (Math.abs(dx) / ox) <= (Math.abs(dz) / oz)
-          ? Math.sign(dz) * oz
-          : local.z;
-        player.position.x = o.x + px;
-        player.position.z = o.z + pz;
+    // 墙与**关着的门**是同一套推法（切片4h：关着的门 = 一道薄墙）：玩家中心落进
+    // 「半轴 + 0.45」的扩展盒里，就沿**绝对剩余距离更短**的那一轴推到盒边界。
+    // 落点必须带碰撞盒自己的中心 —— B99：改前写的是 `origin ± 半轴`、少了中心这一项，
+    // 1348 个撞入点里 1304 个把玩家从墙边甩到十几米外（墙与门两个循环同款）。
+    // 逐盒往下推：后一个盒看到的是推完的位置，不是进门时的旧坐标。
+    const 推 = (x, z, hw, hd) => {
+      const ox = hw + 0.45, oz = hd + 0.45;
+      const dx = lx - x, dz = lz - z;
+      if (Math.abs(dx) >= ox || Math.abs(dz) >= oz) return;
+      if (dx !== 0 && (dz === 0 || ox - Math.abs(dx) <= oz - Math.abs(dz))) {
+        lx = x + Math.sign(dx) * ox;
+      } else if (dz !== 0) {
+        lz = z + Math.sign(dz) * oz;
       }
-    }
+    };
+    for (const col of this.active.layout.colliders ?? []) 推(col.x, col.z, col.hw, col.hd);
     for (const door of this.active.layout.doors ?? []) {
       if (door.open || !door.collider) continue;
       const c = door.collider;
-      const dx = local.x - c.x;
-      const dz = local.z - c.z;
-      if (Math.abs(dx) < c.hw + 0.4 && Math.abs(dz) < c.hd + 0.4) {
-        player.position.x = o.x + (Math.abs(dx) > 0.01 ? Math.sign(dx) * (c.hw + 0.45) : local.x);
-        player.position.z = o.z + (Math.abs(dz) > 0.01 ? Math.sign(dz) * (c.hd + 0.45) : local.z);
-      }
+      推(c.x, c.z, c.hw, c.hd);
     }
+
+    player.position.x = o.x + lx;
+    player.position.z = o.z + lz;
   }
 
   getNearestDoor(playerPos, range = 3.5) {

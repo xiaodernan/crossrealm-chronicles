@@ -195,7 +195,7 @@ export const 抄本表 = [
     旧文本: [
       '      door.collider = { x: door.x, z: door.z, hw: 2, hd: 0.45, open: false };',
     ],
-    现在: 'hw: doorW / 2, hd: DOOR_COLLIDER_HALF_DEPTH',
+    现在: 'doorW / 2 与 DOOR_COLLIDER_HALF_DEPTH 按 door.dir 各落一轴（切片4h 修 B84：跨洞轴随朝向转）',
   },
   {
     标题: '门框三元组（4.2 = 洞宽 + 收边 的手抄）',

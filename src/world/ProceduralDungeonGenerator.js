@@ -142,10 +142,19 @@ export class ProceduralDungeonGenerator {
       panel.name = `door_${door.id}`;
       group.add(panel);
       layout.doorMeshes.push(panel);
-      // 半轴取洞的一半，但它恒落在 x 轴上：南北向门因此正好跨住洞口，
-      // 东西向门则变成"沿通道 2 米、跨洞只有 0.45 米"（跨洞那 1.55 米靠墙段自己的碰撞盒补住）。
-      // 轴向该不该随 dir 转是另一件事，登记在台账，不在这一片动碰撞。
-      door.collider = { x: door.x, z: door.z, hw: doorW / 2, hd: DOOR_COLLIDER_HALF_DEPTH, open: false };
+      // 门碰撞盒：**跨洞那一轴 = 门洞宽 / 2、沿通道那一轴 = DOOR_COLLIDER_HALF_DEPTH，
+      // 轴向随 dir 转**（切片4h 修 B84 —— 改前长轴恒在 x：246 扇东西向门的跨洞半轴只有
+      // 0.45 米（洞半宽 2.00），关着的门在洞口两侧各留 0.7 米可穿过的缝，又在门前 2.45 米
+      // 处凭空挡人）。n/s 门跨洞在 x、e/w 门跨洞在 z。
+      const 跨洞半轴 = doorW / 2;
+      const 沿通道半轴 = DOOR_COLLIDER_HALF_DEPTH;
+      const 跨洞在x = door.dir === 'n' || door.dir === 's';
+      door.collider = {
+        x: door.x, z: door.z,
+        hw: 跨洞在x ? 跨洞半轴 : 沿通道半轴,
+        hd: 跨洞在x ? 沿通道半轴 : 跨洞半轴,
+        open: false,
+      };
 
       const frame = new THREE.Mesh(
         sharedBox(doorW + DOOR_FRAME_OVER, DOOR_FRAME_H, DOOR_FRAME_T), accentMat);
