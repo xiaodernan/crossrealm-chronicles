@@ -149,16 +149,44 @@ export class ProceduralDungeonGenerator {
     torch.position.set(room.x, 3.2, room.z);
     room.group.add(torch);
 
-    // 外墙与门洞（W-B10 切片4c，修 B78）
+    // 外墙与门洞（W-B10 切片4c，修 B78 + B79）
     const w = room.walls;
-    if (w.n) addWallSegment(room.group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, layout);
-    else addWallWithGap(room.group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, doorW, layout);
-    if (w.s) addWallSegment(room.group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, layout);
-    else addWallWithGap(room.group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, doorW, layout);
-    if (w.w) addWallSegment(room.group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, layout, true);
-    else addWallWithGap(room.group, wallMat, room.x - rw / 2, room.z, rd, WT, WH, doorW, layout, true);
-    if (w.e) addWallSegment(room.group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, layout, true);
-    else addWallWithGap(room.group, wallMat, room.x + rw / 2, room.z, rd, WT, WH, doorW, layout, true);
+    
+    // 北墙
+    if (w.n) {
+      addWallSegment(room.group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, layout);
+    } else {
+      const door = findDoorForRoom(layout, room.id, 'n');
+      const offset = door ? door.x - room.x : 0;
+      addWallWithGap(room.group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, doorW, layout, false, offset);
+    }
+    
+    // 南墙
+    if (w.s) {
+      addWallSegment(room.group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, layout);
+    } else {
+      const door = findDoorForRoom(layout, room.id, 's');
+      const offset = door ? door.x - room.x : 0;
+      addWallWithGap(room.group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, doorW, layout, false, offset);
+    }
+    
+    // 西墙
+    if (w.w) {
+      addWallSegment(room.group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, layout, true);
+    } else {
+      const door = findDoorForRoom(layout, room.id, 'w');
+      const offset = door ? door.z - room.z : 0;
+      addWallWithGap(room.group, wallMat, room.x - rw / 2, room.z, rd, WT, WH, doorW, layout, true, offset);
+    }
+    
+    // 东墙
+    if (w.e) {
+      addWallSegment(room.group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, layout, true);
+    } else {
+      const door = findDoorForRoom(layout, room.id, 'e');
+      const offset = door ? door.z - room.z : 0;
+      addWallWithGap(room.group, wallMat, room.x + rw / 2, room.z, rd, WT, WH, doorW, layout, true, offset);
+    }
   }
 
   /**
@@ -244,14 +272,42 @@ export class ProceduralDungeonGenerator {
     group.add(bossLight);
 
     const w = room.walls;
-    if (w.n) addWallSegment(group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, layout);
-    else addWallWithGap(group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, doorW, layout);
-    if (w.s) addWallSegment(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, layout);
-    else addWallWithGap(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, doorW, layout);
-    if (w.w) addWallSegment(group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, layout, true);
-    else addWallWithGap(group, wallMat, room.x - rw / 2, room.z, rd, WT, WH, doorW, layout, true);
-    if (w.e) addWallSegment(group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, layout, true);
-    else addWallWithGap(group, wallMat, room.x + rw / 2, room.z, rd, WT, WH, doorW, layout, true);
+    
+    // Boss 场北墙
+    if (w.n) {
+      addWallSegment(group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, layout);
+    } else {
+      const door = findDoorForRoom(layout, room.id, 'n');
+      const offset = door ? door.x - room.x : 0;
+      addWallWithGap(group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, doorW, layout, false, offset);
+    }
+    
+    // Boss 场南墙
+    if (w.s) {
+      addWallSegment(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, layout);
+    } else {
+      const door = findDoorForRoom(layout, room.id, 's');
+      const offset = door ? door.x - room.x : 0;
+      addWallWithGap(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, doorW, layout, false, offset);
+    }
+    
+    // Boss 场西墙
+    if (w.w) {
+      addWallSegment(group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, layout, true);
+    } else {
+      const door = findDoorForRoom(layout, room.id, 'w');
+      const offset = door ? door.z - room.z : 0;
+      addWallWithGap(group, wallMat, room.x - rw / 2, room.z, rd, WT, WH, doorW, layout, true, offset);
+    }
+    
+    // Boss 场东墙
+    if (w.e) {
+      addWallSegment(group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, layout, true);
+    } else {
+      const door = findDoorForRoom(layout, room.id, 'e');
+      const offset = door ? door.z - room.z : 0;
+      addWallWithGap(group, wallMat, room.x + rw / 2, room.z, rd, WT, WH, doorW, layout, true, offset);
+    }
   }
 }
 
@@ -264,14 +320,32 @@ function addWallSegment(group, mat, x, z, w, d, h, layout) {
   pushCollider(layout, x, z, w, d);
 }
 
-function addWallWithGap(group, mat, x, z, totalLen, thickness, h, gap, layout, alongZ = false) {
+/**
+ * 找某间房在某个方向上的门（如果有的话）
+ */
+function findDoorForRoom(layout, roomId, dir) {
+  if (!layout.doors) return null;
+  return layout.doors.find(d => d.fromRoomId === roomId && d.dir === dir);
+}
+
+function addWallWithGap(group, mat, x, z, totalLen, thickness, h, gap, layout, alongZ = false, doorOffset = 0) {
+  // doorOffset: 门中心相对于墙中心的偏移（正数表示沿轴正方向偏移）
+  // 如果没有传 doorOffset，默认门在墙中心（gap 居中）
   const seg = (totalLen - gap) / 2;
+  const centerOffset = doorOffset;
+  
   if (alongZ) {
-    addWallSegment(group, mat, x, z - totalLen / 2 + seg / 2, thickness, seg, h, layout);
-    addWallSegment(group, mat, x, z + totalLen / 2 - seg / 2, thickness, seg, h, layout);
+    // 沿 Z 轴的墙（南北墙），门偏移影响 z 坐标
+    const seg1Z = z - totalLen / 2 + seg / 2 + centerOffset;
+    const seg2Z = z + totalLen / 2 - seg / 2 + centerOffset;
+    addWallSegment(group, mat, x, seg1Z, thickness, seg, h, layout);
+    addWallSegment(group, mat, x, seg2Z, thickness, seg, h, layout);
   } else {
-    addWallSegment(group, mat, x - totalLen / 2 + seg / 2, z, seg, thickness, h, layout);
-    addWallSegment(group, mat, x + totalLen / 2 - seg / 2, z, seg, thickness, h, layout);
+    // 沿 X 轴的墙（东西墙），门偏移影响 x 坐标
+    const seg1X = x - totalLen / 2 + seg / 2 + centerOffset;
+    const seg2X = x + totalLen / 2 - seg / 2 + centerOffset;
+    addWallSegment(group, mat, seg1X, z, seg, thickness, h, layout);
+    addWallSegment(group, mat, seg2X, z, seg, thickness, h, layout);
   }
 }
 
