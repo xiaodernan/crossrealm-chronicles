@@ -13,13 +13,17 @@
  * - ⑤ 解锁/移动层：楼梯冷却、电梯入口检查、传送门条件、历史轨迹记录。
  * - ⑥ 存档层：toJSON/fromJSON 往返不丢状态。
  * - ⑦ 管理器层：register / buildZone / querySpaceAt / updateCurrent 全链路跑通。
+ * - ⑧ 接线层（B83 判据的本义）：真世界 WorldManager.build() 之后点名「哪座模板注册了、
+ *   哪个区的调度器在跑」—— 模块级用例只证明契约写对了，接线断言才证明 WorldManager
+ *   真的喂了它们四座模板、两台调度器（buildZone 跑过 / 解锁回调活着）。
  *
  * 门禁：
  * - 全量套件保持全绿，lint 0 error，build 成功。
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { InternalSpace, InternalSpaceManager, InternalSpaceTemplates } from '../src/world/InternalSpace.js';
+import { WorldManager } from '../src/world/WorldManager.js';
 import {
   FloorLevel,
   VerticalMoveMode,
@@ -607,5 +611,62 @@ describe('B83: FloorLevel 行为', () => {
     expect(floor.discovered).toBe(false);
     floor.markDiscovered();
     expect(floor.discovered).toBe(true);
+  });
+});
+
+describe('B83: WorldManager 接线（真世界点名）', () => {
+  const makeScene = () => ({ add() {}, remove() {} });
+  const makeDialog = () => ({ show() {}, toast() {} });
+  let world;
+
+  beforeEach(() => {
+    // poi-identity 同款桩：node 里没有 window，WorldManager.build() 的 textures-ready 事件要有人接
+    globalThis.window = { addEventListener() {}, dispatchEvent() { return true; } };
+    globalThis.CustomEvent = class { constructor(type) { this.type = type; } };
+    world = new WorldManager(makeScene(), makeDialog());
+    world.build();
+  });
+
+  afterEach(() => {
+    delete globalThis.window;
+    delete globalThis.CustomEvent;
+  });
+
+  it('四座内部空间按区注册点名（gloom 2 / radiant 2），且 buildZone 真的跑过', () => {
+    const byZone = world.internalSpaceManager.spacesByZone;
+    const gloomIds = (byZone.get('gloom') ?? []).map((s) => s.id);
+    const radiantIds = (byZone.get('radiant') ?? []).map((s) => s.id);
+    expect(gloomIds).toEqual(expect.arrayContaining(['gloom-ancient-shrine', 'gloom-tree-hollow']));
+    expect(radiantIds).toEqual(expect.arrayContaining(['radiant-grand-hall', 'radiant-starwatch-tower']));
+    // 样本下限：不是"至少有一座"，是两区各自恰好这四座
+    expect(gloomIds).toHaveLength(2);
+    expect(radiantIds).toHaveLength(2);
+    // buildZone 没跑过的话 _built 还是 false —— "走进建筑没有室内"就是这么静默发生的
+    for (const space of [...byZone.get('gloom'), ...byZone.get('radiant')]) {
+      expect(space._built, `${space.id} 没被 buildZone 建过`).toBe(true);
+    }
+  });
+
+  it('gloom/radiant 两区的竖向调度器在跑（楼层带样本下限），preset 缺席的区不建', () => {
+    const gloom = world.verticalSchedulers.get('gloom');
+    const radiant = world.verticalSchedulers.get('radiant');
+    expect(gloom, 'gloom 调度器缺失').toBeTruthy();
+    expect(radiant, 'radiant 调度器缺失').toBeTruthy();
+    // 预置表：gloom 4 层（-1/0/1/2）、radiant 3 层（0/1/2）—— 只设下限，加层不破门禁
+    expect(gloom.floors.length).toBeGreaterThanOrEqual(4);
+    expect(radiant.floors.length).toBeGreaterThanOrEqual(3);
+    expect(gloom.currentFloor).toBe(0);
+    expect(gloom.isUnlocked(0)).toBe(true);
+    // fantasy 区存在但没有竖向预置 —— createVerticalScheduler 返回 null，WorldManager 不塞空壳
+    expect(world.verticalSchedulers.has('fantasy')).toBe(false);
+  });
+
+  it('解锁回调活着：调度器的 hasRequirement 接在 WorldManager._checkVerticalRequirement 上', () => {
+    const radiant = world.verticalSchedulers.get('radiant');
+    // hasRequirement 若没接上（undefined），refresh() 当场 TypeError —— 这正是"楼层永远读 0"的前置
+    expect(() => radiant.refresh()).not.toThrow();
+    // 支线 side-zone-radiant 未完成，1 层不许被解锁
+    radiant.refresh();
+    expect(radiant.isUnlocked(1)).toBe(false);
   });
 });
