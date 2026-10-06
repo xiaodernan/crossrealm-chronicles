@@ -21,8 +21,6 @@ const makeStubZone = (id, center, radius, extra = {}) => ({
   center,
   radius,
   info: { id, name: ZONE_NAMES[id], subtitle: 'stub', description: '' },
-  fogColor: 0x112233,
-  fogDensity: 0.01,
   updates: 0,
   update() { this.updates += 1; },
   distanceToCenter(x, z) { return Math.hypot(x - this.center.x, z - this.center.z); },
@@ -155,12 +153,11 @@ describe('WorldManager 的区域归属', () => {
     installWindowShim();
     events = [];
     window.addEventListener('zone-changed', (e) => events.push(e.detail));
-    // 雾色要能被断言，否则"分区成功"这件事根本没留下证据
-    scene = { fog: { color: { hex: 0, setHex(v) { this.hex = v; } }, density: 0 }, add() {}, remove() {} };
+    scene = { add() {}, remove() {} };
     wm = new WorldManager(scene, { show() {}, toast() {} });
     wm.hubCore = null;
     wm.zones = [
-      makeStubZone(ZONE_IDS.FANTASY, { x: -200, z: 0 }, 165, { fogColor: 0x4a5a48, fogDensity: 0.02 }),
+      makeStubZone(ZONE_IDS.FANTASY, { x: -200, z: 0 }, 165),
       makeStubZone(ZONE_IDS.MAGIC, { x: 0, z: -180 }, 150),
     ];
   });
@@ -175,14 +172,12 @@ describe('WorldManager 的区域归属', () => {
     expect(events.at(-1).zone.id).toBe(ZONE_IDS.HUB);
   });
 
-  it('从枢纽走进灰白森林：一次事件、雾色取该区自己的', () => {
+  it('从枢纽走进灰白森林：一次事件、分区走 id（雾的兑现归 ZoneFog，见 zone-fog.test.js）', () => {
     wm.applyHubAtmosphere(true);
     events.length = 0;
     wm.update(0.016, { x: -200, z: 0 });
     expect(events.length).toBe(1);
     expect(events[0].zoneId).toBe(ZONE_IDS.FANTASY);
-    expect(scene.fog.color.hex).toBe(0x4a5a48);
-    expect(scene.fog.density).toBeCloseTo(0.02 * 0.85);
   });
 
   it('走进两区之间：是走廊而不是 null（读方问得出"我在哪"）', () => {

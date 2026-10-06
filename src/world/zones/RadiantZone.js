@@ -8,8 +8,6 @@ export class RadiantZone extends BaseZone {
   constructor(scene, center, dialog) {
     super(scene, center, {
       radius: 150,
-      fogColor: 0xffd700,
-      fogDensity: 0.006,
       skyColor: 0xffeeaa,
       mapColor: '#ffd700',
       info: {

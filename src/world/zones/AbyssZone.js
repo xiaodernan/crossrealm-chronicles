@@ -7,8 +7,6 @@ export class AbyssZone extends BaseZone {
   constructor(scene, center, dialog) {
     super(scene, center, {
       radius: 135,
-      fogColor: 0x1a0a18,
-      fogDensity: 0.014,
       skyColor: 0x120810,
       mapColor: '#6a2040',
       info: {

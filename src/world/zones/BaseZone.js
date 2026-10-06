@@ -17,8 +17,6 @@ export class BaseZone {
      */
     this.id = this.info?.id ?? null;
     if (!this.id) console.warn(`[zone] ${this.constructor.name} 没有 info.id —— 逻辑将无法按区域分支（修 B36）`);
-    this.fogColor = config.fogColor ?? 0x888888;
-    this.fogDensity = config.fogDensity ?? 0.008;
     this.skyColor = config.skyColor ?? 0x87a8c4;
     this.mapColor = config.mapColor ?? '#4488aa';
     this.poiMarkers = [];

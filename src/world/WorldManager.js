@@ -361,36 +361,28 @@ export class WorldManager {
     // 修 B35：这里以前塞的是临时伪造对象 `{ info: { name: '交汇枢纽' } }`，
     // 于是枢纽内任何按 `zone.id / radius / colliders` 取用的代码都静默拿到 undefined
     this.currentZone = HUB_ZONE;
-    const fog = this.scene.fog;
-    if (fog) {
-      fog.color.setHex(0x7a92aa);
-      fog.density = 0.0042;
-    }
+    // 雾不再由这里写（W-C4 切片2）：区域大气参数表在 content/zoneAtmosphere.js，
+    // 落 fog 归 effects/ZoneFog.js 每帧平滑驱动 —— 改前这里写的值会被
+    // zone-changed 同步链上下一个写入者（WeatherSystem）覆盖
     window.dispatchEvent(new CustomEvent('zone-changed', {
       detail: { zone: HUB_ZONE.info, zoneId: HUB_ZONE.id, initial },
     }));
   }
 
   applyZoneAtmosphere(zone, initial = false) {
-    const fog = this.scene.fog;
     if (!zone || zone === CORRIDOR_ZONE) {
       // 区际走廊：不属于任何位面，回到中性大气，避免上一个区域的雾色粘连。
       // 它同样是一份真描述对象（带 id），而不是 null —— 读方要能问出"我在哪"
       this.currentZone = CORRIDOR_ZONE;
-      if (fog) {
-        fog.color.setHex(0x7a8ea6);
-        fog.density = 0.004;
-      }
       window.dispatchEvent(new CustomEvent('zone-changed', {
         detail: { zone: CORRIDOR_ZONE.info, zoneId: CORRIDOR_ZONE.id, initial },
       }));
       return;
     }
     this.currentZone = zone;
-    if (fog) {
-      fog.color.setHex(zone.fogColor);
-      fog.density = zone.fogDensity * 0.85;
-    }
+    // 雾不再由这里写（W-C4 切片2）：zone.fogColor / fogDensity 的直写退场，
+    // 参数收口进 content/zoneAtmosphere.js 的表（改前那组值连同 0.85 那个
+    // 没有出处的系数，被 WeatherSystem 的覆盖写当帧冲掉，从没生效过）
 
     window.dispatchEvent(
       new CustomEvent('zone-changed', {

@@ -8,8 +8,6 @@ export class SpaceZone extends BaseZone {
   constructor(scene, center, dialog) {
     super(scene, center, {
       radius: 160,
-      fogColor: 0x0a1020,
-      fogDensity: 0.006,
       skyColor: 0x050810,
       mapColor: '#2a4a6a',
       info: {

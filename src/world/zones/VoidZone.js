@@ -7,8 +7,6 @@ export class VoidZone extends BaseZone {
   constructor(scene, center, dialog) {
     super(scene, center, {
       radius: 140,
-      fogColor: 0x1a1820,
-      fogDensity: 0.011,
       skyColor: 0x121018,
       mapColor: '#8a7a50',
       info: {

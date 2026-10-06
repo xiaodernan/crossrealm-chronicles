@@ -8,8 +8,6 @@ export class FantasyZone extends BaseZone {
   constructor(scene, center, dialog) {
     super(scene, center, {
       radius: 165,
-      fogColor: 0x4a5a48,
-      fogDensity: 0.012,
       skyColor: 0x6a7a88,
       mapColor: '#3d5c3a',
       info: {

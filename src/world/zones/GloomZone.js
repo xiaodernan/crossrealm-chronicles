@@ -8,8 +8,6 @@ export class GloomZone extends BaseZone {
   constructor(scene, center, dialog) {
     super(scene, center, {
       radius: 160,
-      fogColor: 0x2a2a3a,
-      fogDensity: 0.012,
       skyColor: 0x1a1a2a,
       mapColor: '#3a3a4a',
       info: {

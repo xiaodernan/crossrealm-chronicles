@@ -18,9 +18,18 @@ const ZONE_PRESETS = {
 const SPLASH_GROWTH_PER_SEC = 1.08 ** 60;
 
 export class WeatherSystem {
-  constructor(scene, world) {
+  /**
+   * @param {THREE.Scene} scene
+   * @param {object} world
+   * @param {import('../effects/ZoneFog.js').ZoneFog} [zoneFog] 区域雾的运行期载体
+   *        （W-C4 切片2）：天气对雾密度的加成经 `setWeatherBoost` 供给 ——
+   *        改前这里直接重写 `fog.density`（在 zone-changed 同步链上后跑，
+   *        把 `WorldManager` 写的区域密度整个覆盖掉），三个写入者互相打架。
+   */
+  constructor(scene, world, zoneFog = null) {
     this.scene = scene;
     this.world = world;
+    this._zoneFog = zoneFog;
     this.zone = ZONE_IDS.HUB;
     this.preset = ZONE_PRESETS[ZONE_IDS.HUB];
     this.group = new THREE.Group();
@@ -104,11 +113,9 @@ export class WeatherSystem {
     this.preset = preset;
     this._buildParticles(preset);
 
-    const fog = this.scene.fog;
-    if (fog?.isFogExp2) {
-      const base = zoneId === ZONE_IDS.SPACE ? 0.0028 : zoneId === ZONE_IDS.ABYSS ? 0.0045 : 0.0038;
-      fog.density = base + (preset.fogBoost ?? 0);
-    }
+    // 天气加成推给区域雾（W-C4 切片2）：区域给基础密度、天气给 boost，
+    // 在 ZoneFog 里合成 —— 不再直接写 fog（改前这里把区域密度整个覆盖掉）
+    this._zoneFog?.setWeatherBoost(preset.fogBoost ?? 0);
   }
 
   update(dt, playerPos) {

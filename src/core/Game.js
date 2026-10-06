@@ -10,6 +10,7 @@ import { TimeController } from '../engine/Time.js';
 import { DEFAULT_SHADOW_QUALITY, applySunShadowQuality } from '../engine/shadowPolicy.js';
 import { DEFAULT_MSAA_SAMPLES, applyMsaaSamples } from '../engine/aaPolicy.js';
 import { shake } from '../engine/Shake.js';
+import { ZoneFog } from '../effects/ZoneFog.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { PerfHUD } from '../engine/PerfHUD.js';
 import { registerPerfGauges } from '../game/perfGauges.js';
@@ -146,7 +147,11 @@ export class Game {
     this.autoPlayMode = false;
 
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x8aa8c8, 0.0038);
+    // 初值 = 枢纽的大气行（content/zoneAtmosphere.js 的 HUB_ATMOSPHERE）——
+    // 开局即在目标上，没有开局过渡。此后 fog 的写权限归 ZoneFog（每帧驱动，
+    // 唯一写入者）；改前这行是全局唯一雾值，三个系统各写各的互相覆盖。
+    this.scene.fog = new THREE.FogExp2(0x7a92aa, 0.0038);
+    this.zoneFog = new ZoneFog(this.scene.fog);
 
     this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2500);
 
@@ -205,7 +210,7 @@ export class Game {
     this.restNpcs = new RestNpcManager(this.scene, this.world, this.restPoints, this);
     this.restCampfireAmbient = new RestCampfireAmbient(this.restPoints);
     this.restPointEnhancer = new RestPointEnhancer(this.restPoints, this);
-    this.weather = new WeatherSystem(this.scene, this.world);
+    this.weather = new WeatherSystem(this.scene, this.world, this.zoneFog);
     this.executionFx = new ExecutionEffects(this.scene, this);
     this.collectibles = new CollectibleManager(this.scene, this.world, this.stats, this.dialog);
     this.quests = new QuestSystem(this.dialog);
@@ -917,6 +922,9 @@ export class Game {
     this.sun.intensity = 0.9 + daylight * 0.85;
     this.ambient.intensity = 0.58 + daylight * 0.22;
     this.renderer.toneMappingExposure = 1.08 + daylight * 0.38;
+    // 区域雾跟昼夜同一个算式源：明度由 daylight 调制（正午原色），跨区由
+    // zoneFog 自己的指数平滑收敛 —— fog 的写权限在这里面，别处不许碰
+    this.zoneFog.update(dt, this.world.zoneId, daylight);
     if (this.skyUniforms) {
       const phi = THREE.MathUtils.degToRad(88 - daylight * 18);
       const theta = this.timeOfDay * Math.PI * 2;

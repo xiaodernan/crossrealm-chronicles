@@ -8,8 +8,6 @@ export class MagicZone extends BaseZone {
   constructor(scene, center, dialog) {
     super(scene, center, {
       radius: 155,
-      fogColor: 0x2a2040,
-      fogDensity: 0.01,
       skyColor: 0x1a1530,
       mapColor: '#5a3a8a',
       info: {
