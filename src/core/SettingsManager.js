@@ -1,6 +1,8 @@
 import { padTuning } from '../content/keybinds.js';
 import { applySunShadowQuality, normalizeShadowQuality } from '../engine/shadowPolicy.js';
 import { applyMsaaSamples, normalizeMsaaSamples } from '../engine/aaPolicy.js';
+import { DEFAULT_SSAO_QUALITY, normalizeSsaoQuality } from '../engine/ssaoSettings.js';
+import { updateSsaoQuality } from '../engine/SsaoPass.js';
 
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
@@ -23,6 +25,12 @@ const DEFAULTS = {
    * 一个不该守的值）。存储里的脏值在 `applyToGame` 落地前经 `normalizeMsaaSamples` 回落。
    */
   msaaSamples: 4,
+  /**
+   * SSAO 画质档（W-C4 切片5）：off / low / medium / high 四档，名册在
+   * `engine/ssaoSettings.js`。出厂 medium —— 提供基础的环境光遮蔽效果，增强深度感。
+   * 存储里的脏值在 `applyToGame` 落地前经 `normalizeSsaoQuality` 回落出厂。
+   */
+  ssaoQuality: DEFAULT_SSAO_QUALITY,
   pixelRatio: 1.5,
   enemyLodDistance: 85,
   showFps: true,
@@ -131,6 +139,10 @@ export class SettingsManager {
     // MSAA 档（W-C4 切片1）：与阴影精度档同口径 —— 脏值回落出厂不抛；
     // 换档要重建 multisample framebuffer，那一步在 `applyMsaaSamples` 里（dispose 懒重建）
     if (game.composer) applyMsaaSamples(game.composer, normalizeMsaaSamples(this.get('msaaSamples')));
+    // SSAO 档（W-C4 切片5）：换档更新 GTAOPass 参数，pass 不存在时静默跳过
+    if (game.ssaoPass) {
+      updateSsaoQuality(game.ssaoPass, normalizeSsaoQuality(this.get('ssaoQuality')));
+    }
     if (game.performance) game.performance.enemyLodDistance = this.get('enemyLodDistance');
     // 手感旋钮推给桥（切片15）：`setTuning` 内部再走一次 `padTuning` 清洗 ——
     // 存储是玩家可写的，越界或 NaN 一律逐项回落出厂，不把脏值乘进每帧的舵量里

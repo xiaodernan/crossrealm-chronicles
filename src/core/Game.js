@@ -5,6 +5,8 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { createSsaoPass } from '../engine/SsaoPass.js';
+import { DEFAULT_SSAO_QUALITY } from '../engine/ssaoSettings.js';
 import { ColorGrade } from '../effects/ColorGrade.js';
 import { PlayerController } from '../player/PlayerController.js';
 import { WorldManager } from '../world/WorldManager.js';
@@ -191,7 +193,16 @@ export class Game {
     // 出厂全中性（三个算式的恒等值），分级数值留给后续美术调参切片。
     this.colorGrade = new ColorGrade();
     this.composer.addPass(this.colorGrade.pass);
-        this.composer.addPass(new OutputPass());
+    // SSAO（W-C4 切片5）：屏幕空间环境光遮蔽，增强几何体接触阴影与深度感。
+    // 同样遵循"OutputPass 之前"的铁律 —— 在线性空间运行，合成到场景光照结果上。
+    // 出厂默认"中"档，玩家可在设置面板切换关/低/中/高四档。
+    const ssaoWidth = Math.floor(window.innerWidth / 2); // SSAO 以半分辨率运行（性能优化）
+    const ssaoHeight = Math.floor(window.innerHeight / 2);
+    this.ssaoPass = createSsaoPass(this.scene, this.camera, ssaoWidth, ssaoHeight, DEFAULT_SSAO_QUALITY);
+    if (this.ssaoPass) {
+      this.composer.addPass(this.ssaoPass);
+    }
+    this.composer.addPass(new OutputPass());
     // 全屏 MSAA（W-C4 切片1）：composer 自建的 target 默认 samples=0 —— 切到 composer
     // 链那天起全屏就没有过抗锯齿（上面 `antialias: true` 为死参数的另一半原因）。
     // 开机落出厂档，玩家档由 SettingsManager.applyToGame 走同一个出口。
