@@ -50,6 +50,17 @@ const MANIFEST = {
     repeat: [1 / SURFACE_SPECS.masonry.tileMeters, 1 / SURFACE_SPECS.masonry.tileMeters],
     roughness: 1.0,
   },
+  /**
+   * 石板（W-C5 切片2）：Boss 场地面。与 masonry 同一条程序生成管线（差在 4 米一铺、
+   * 2×2 对缝大板），文件与数值同样从规格表来。`repeat` 这个值只给"0..1-UV 的直挂路径"
+   * ——地面是圆盘，消费方走 `uvVariant('slabs', 直径/4, 直径/4)`（铺数逐场地不同）。
+   */
+  slabs: {
+    normalMap: [`${LOCAL}/${SURFACE_SPECS.slabs.files.normal}`],
+    roughnessMap: [`${LOCAL}/${SURFACE_SPECS.slabs.files.roughness}`],
+    repeat: [1 / SURFACE_SPECS.slabs.tileMeters, 1 / SURFACE_SPECS.slabs.tileMeters],
+    roughness: 1.0,
+  },
 };
 
 let _instance = null;

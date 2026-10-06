@@ -53,8 +53,9 @@ export const SURFACE_SPECS = deepFreeze({
     size: 256,
     /** 图案种子：换它 = 换一套砖块排布，其余参数不动 */
     seed: 20261007,
-    /** 砖块布局：行数 / 每行整砖数 / 灰缝宽（像素） */
-    bricks: { rows: 8, cols: 4, mortarPx: 4 },
+    /** 砖块布局：行数 / 每行整砖数 / 灰缝宽（像素）/ 逐行错缝比例（0 = 对缝大板，0.5 = 错缝顺砌）
+     *  / 网格相位（0..1：把块格整体平移这么多格 —— 让灰缝别压在贴图边上，见 slabs） */
+    bricks: { rows: 8, cols: 4, mortarPx: 4, stagger: 0.5, phase: 0 },
     /** 砖面颗粒：三层值噪声，lattice 必须整除 size（环面周期），amp 是叠加权重 */
     octaves: [
       { lattice: 16, amp: 0.3 },
@@ -71,6 +72,33 @@ export const SURFACE_SPECS = deepFreeze({
     files: {
       normal: 'gen/masonry_nor.png',
       roughness: 'gen/masonry_rough.png',
+    },
+  },
+
+  /**
+   * 石板（W-C5 切片2）—— **Boss 场地面**。与石砌同一套"分块 + 灰缝 + 颗粒"机制，
+   * 换的是尺子：4 米一铺、2×2 对缝大板（stagger 0），缝更深更粗 —— 远看是几块
+   * 整石板而不是小砖。Boss 场的地面是圆盘（`CircleGeometry` 的 UV 是 0..1 跨整个直径），
+   * 消费方按**直径 / tileMeters** 算铺数（见 `_buildBossArena`）。
+   */
+  slabs: {
+    tileMeters: 4,
+    size: 256,
+    seed: 20261008,
+    /** phase 0.5：块格平移半格，灰缝落在贴图**内部**（64/192）而不是贴图边上 ——
+     *  2×2 的块格若对缝起于 0，贴图左右/上下边就整条压在灰缝上（平铺自检会红：接缝处
+     *  每一对采样都跨灰缝底，邻差远大于内部平均）。平移半格后接缝落在整块板面中间。 */
+    bricks: { rows: 2, cols: 2, mortarPx: 3, stagger: 0, phase: 0.5 },
+    octaves: [
+      { lattice: 32, amp: 0.28 },
+      { lattice: 64, amp: 0.16 },
+    ],
+    normalStrength: 2.2,
+    roughBase: 0.82,
+    roughAmp: 0.12,
+    files: {
+      normal: 'gen/slabs_nor.png',
+      roughness: 'gen/slabs_rough.png',
     },
   },
 });

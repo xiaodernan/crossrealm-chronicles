@@ -126,19 +126,20 @@ export function fbm(u, v, octaves, seed) {
 }
 
 /* ------------------------------------------------------------------ *
- * 石砌表面：高度场 → 法线 + 粗糙度
+ * 分块表面（石砌 / 石板）：高度场 → 法线 + 粗糙度
  * ------------------------------------------------------------------ */
 
 /**
- * 生成一张石砌表面的三件套。返回：
+ * 生成一张"分块"表面的三件套（石砌与石板共用这一套机制，差在尺子：
+ * 行/列数、缝宽、错缝比例）。返回：
  * - `heightField`：Float32Array(W×H)，行优先（y 向下，与像素同序）
  * - `normal`：Uint8Array(W×H×3)，切线空间法线（R=+U 方向，G=+V 方向，three 口径）
  * - `roughness`：Uint8Array(W×H)，乘性粗糙度贴图（消费方 material.roughness 置 1）
  */
-export function buildMasonrySurface(spec) {
+export function buildTiledSurface(spec) {
   const W = spec.size;
   const H = spec.size;
-  const { rows, cols, mortarPx } = spec.bricks;
+  const { rows, cols, mortarPx, stagger, phase } = spec.bricks;
   const rowPx = W / rows;
   const blockPx = W / cols;
   const seed = spec.seed;
@@ -147,11 +148,14 @@ export function buildMasonrySurface(spec) {
   const height = new Float32Array(W * H);
   const joint = new Float32Array(W * H);
   for (let y = 0; y < H; y++) {
-    const row = Math.floor((y + 0.5) / rowPx) % rows;
-    const fy = frac((y + 0.5) / rowPx);
-    const offsetPx = (row % 2) ? blockPx / 2 : 0;
+    const yShift = (y + 0.5) / rowPx + phase;
+    const row = Math.floor(yShift) % rows;
+    const fy = frac(yShift);
+    // 逐行错缝：stagger 0.5 = 顺砌错半砖（石砌）、0 = 对缝（石板）。
+    // 取 frac(row × stagger) 而不是 row × 0.5 —— 前者对任意比例都在环上周期，平铺不破。
+    const offsetPx = frac(row * stagger) * blockPx;
     for (let x = 0; x < W; x++) {
-      const xShift = (x + 0.5 + offsetPx) / blockPx;
+      const xShift = (x + 0.5 + offsetPx) / blockPx + phase;
       const col = Math.floor(xShift) % cols;
       const fx = frac(xShift);
       const dxEdge = Math.min(fx, 1 - fx) * blockPx;
@@ -203,9 +207,9 @@ export function buildMasonrySurface(spec) {
   return { width: W, height: H, heightField: height, normal, roughness };
 }
 
-/** 规格 → 三件套（按图案类型分派；今天只有 masonry 一种，新图案从这里长） */
+/** 规格 → 三件套（按图案类型分派；今天只有"分块"一族 —— 石砌与石板同机制只差尺子，新图案从这里长） */
 export function buildSurface(spec) {
-  return buildMasonrySurface(spec);
+  return buildTiledSurface(spec);
 }
 
 /** 规格 → 输出文件（相对 `public/textures/`）。名字来自规格表，绝不手抄 */

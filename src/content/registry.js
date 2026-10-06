@@ -938,6 +938,8 @@ export const CONTENT_TABLES = [
             rows: { t: 'int', min: 1, max: 64 },
             cols: { t: 'int', min: 1, max: 64 },
             mortarPx: { t: 'int', min: 1, max: 32 },
+            stagger: { t: 'number', min: 0, max: 1 },
+            phase: { t: 'number', min: 0, max: 1 },
           },
         },
         octaves: {

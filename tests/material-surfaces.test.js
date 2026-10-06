@@ -1,10 +1,10 @@
 /**
- * 程序化表面贴图的门禁（W-C5 切片1）。
+ * 程序化表面贴图的门禁（W-C5 切片1；切片2 起每个表面都过 ②③ 两层的同一套尺）。
  *
  * ## 这一片交付了什么、这里钉的是什么
  * 一条**离线烘焙管线**：`content/materialSurfaces.js`（规格表）→ `npm run bake:textures`
  * → `public/textures/gen/*.png`（提交进仓）→ `TextureLibrary.uvVariant`（共享库）
- * → `ProceduralDungeonGenerator` 的地面 / 墙 / 柱（第一批消费者）。四段各有自己的坏法：
+ * → `ProceduralDungeonGenerator` 的地面 / 墙 / 柱（切片1）与 Boss 场石板地面（切片2）。四段各有自己的坏法：
  *
  * - **规格改了没重烘焙**：文件旧、规格新，不报错，只是墙上的砖换不了 —— ① 层拿规格**重算像素**
  *   再与提交的 PNG 逐字节比（解码端独立于编码端，CRC 逐个块验）。
@@ -12,8 +12,9 @@
  *   反向对照（线性斜坡场在这把尺下必须**红**，证明这把尺真的在量平铺性而不是在走过场）。
  * - **贴图铺数脱节**：几何 UV 是"每面 0..1"而材质只有一个 `repeat`，18 米的整墙与 7 米的墙段
  *   共用一份材质时砖尺寸必然不等 —— ⑤ 层量的是 **UV 以米计**（盒逐面 = 该面自己的尺寸、
- *   柱逐行 = 该行半径的周长、`repeat = 1 / tileMeters`），两者相乘每面都恰好 2 米一砖。
- * - **文件名抄第二份**：`gen/masonry_nor.png` 这个串只许出现在规格表里 —— ⑥ 层全仓扫。
+ *   柱逐行 = 该行半径的周长、`repeat = 1 / tileMeters`；Boss 场圆盘按直径），两者相乘每面都恰好一个 tileMeters。
+ * - **文件名抄第二份**：`gen/*.png` 这些串只许出现在规格表里 —— ⑥ 层的尺**从规格表现推**
+ *   （每个表面两个文件名），新增一个表面自动进扫。
  *
  * ## 反向控制（本文件内建，不依赖外部脚本）
  * - 解码器对**被改坏的字节**必须抛（CRC 不符）；
@@ -131,14 +132,15 @@ function 接缝诊断(field, W, H) {
 }
 
 /* ------------------------------------------------------------------ *
- * ⑤ 副本接线：假石砌库 + 逐网格读数
+ * ⑤ 副本接线：假表面库 + 逐网格读数
  * ------------------------------------------------------------------ */
 
 /** 一枚只有"接口形状"的库：真类、真 uvVariant、假纹理数据（node 里 DataTexture 不需要 GPU） */
-function 假石砌库() {
+function 假表面库() {
   const lib = new TextureLibrary();
   const dt = (bytes, v) => new THREE.DataTexture(new Uint8Array(bytes).fill(v), 4, 4);
   lib.sets.masonry = { map: null, normalMap: dt(48, 128), roughnessMap: dt(16, 200), roughness: 1 };
+  lib.sets.slabs = { map: null, normalMap: dt(48, 96), roughnessMap: dt(16, 168), roughness: 1 };
   lib.ready = true;
   return lib;
 }
@@ -250,8 +252,9 @@ describe('① 提交的 PNG 就是规格重算出来的那张（改数不重烤 
   });
 });
 
-describe('② 表面读数：可平铺、法线是单位向量、粗糙度围绕基准带对比', () => {
-  const spec = SURFACE_SPECS.masonry;
+// 每一个表面都过这五关（切片2 起不止一种：石板与石砌吃同一把尺）
+for (const 名 of SURFACE_NAMES) describe(`② 表面读数（${名}）：可平铺、法线是单位向量、粗糙度围绕基准带对比`, () => {
+  const spec = SURFACE_SPECS[名];
   const 图案 = buildSurface(spec);
   const W = spec.size;
   const H = spec.size;
@@ -307,26 +310,27 @@ describe('② 表面读数：可平铺、法线是单位向量、粗糙度围绕
     expect(min).toBeLessThan(210);
   });
 
-  it('砖块结构：砖心有真实高度差（不是一张纯噪声或平板）', () => {
-    const { rows, cols } = spec.bricks;
+  it('分块结构：块心有真实高度分布（不是一张纯噪声或平板）', () => {
+    const { rows, cols, stagger, phase } = spec.bricks;
     const rowPx = H / rows;
     const blockPx = W / cols;
     const 高度 = new Set();
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const offset = (r % 2) ? blockPx / 2 : 0;
-        const cx = Math.floor((((c + 0.5) * blockPx - offset) % W + W) % W);
-        const cy = Math.floor((r + 0.5) * rowPx);
+        // 与烘焙器同一条错缝/相位公式（切片2 起两者都在规格里：石砌 0.5/0、石板 0/0.5）
+        const offset = ((r * stagger) % 1) * blockPx;
+        const cx = Math.floor(((((c + 0.5 - phase) * blockPx - offset) % W) + W) % W);
+        const cy = Math.floor((((r + 0.5 - phase) * rowPx) % H + H) % H);
         高度.add(图案.heightField[cy * W + cx].toFixed(3));
       }
     }
-    // 实测 31/32 个砖心互不相同（错缝顺砌 + 每砖独立 hash）
-    expect(高度.size, `砖心高度只有 ${高度.size} 种`).toBeGreaterThanOrEqual(8);
+    // 实测：masonry 31/32 个砖心互不相同（错缝顺砌 + 每砖独立 hash）；slabs 2×2 = 4 块
+    expect(高度.size, `块心高度只有 ${高度.size} 种`).toBeGreaterThanOrEqual(Math.min(8, rows * cols));
   });
 });
 
-describe('③ 确定性：同规格永远同一张，换种子必须换图', () => {
-  const spec = SURFACE_SPECS.masonry;
+for (const 名 of SURFACE_NAMES) describe(`③ 确定性（${名}）：同规格永远同一张，换种子必须换图`, () => {
+  const spec = SURFACE_SPECS[名];
 
   it('两次构建逐字节相同（没有 Math.random / 没有时间）', () => {
     const a = buildSurface(spec);
@@ -354,13 +358,16 @@ describe('④ 共享库：loaded() 的同步口与 uvVariant 的按铺数缓存'
     expect(lib.ready).toBe(true);
     expect(TextureLibrary.loaded()).toBe(lib);
     expect('masonry' in lib.sets, 'masonry 没进 MANIFEST').toBe(true);
+    expect('slabs' in lib.sets, 'slabs 没进 MANIFEST').toBe(true);
     // node 没有 document，TextureLoader 载不出图 —— 这恰好就是"库在但这一组没贴图"的退路形状
     expect(lib.sets.masonry.normalMap).toBe(null);
+    expect(lib.sets.slabs.normalMap).toBe(null);
     expect(lib.uvVariant('masonry', 0.5, 0.5)).toBe(null);
+    expect(lib.uvVariant('slabs', 1 / SURFACE_SPECS.slabs.tileMeters, 1 / SURFACE_SPECS.slabs.tileMeters)).toBe(null);
   });
 
   it('uvVariant：clone 共享 Source、repeat 按铺数、同铺数同壳、异铺数新壳', () => {
-    const lib = 假石砌库();
+    const lib = 假表面库();
     const set = lib.sets.masonry;
     const v1 = lib.uvVariant('masonry', 0.5, 0.5);
     expect(v1).not.toBe(null);
@@ -387,7 +394,7 @@ describe('④ 共享库：loaded() 的同步口与 uvVariant 的按铺数缓存'
 describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计', () => {
   it('贴图路径：地面与墙的材料挂着同一份变体（normal + roughness 都非空）', () => {
     const def = DUNGEON_DEFS[0];
-    const lib = 假石砌库();
+    const lib = 假表面库();
     const { group } = 建一座(def, lib);
     const { 地面, 墙 } = 收集(group);
     const 变体 = lib.uvVariant('masonry', 1 / SURFACE_SPECS.masonry.tileMeters, 1 / SURFACE_SPECS.masonry.tileMeters);
@@ -411,7 +418,7 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
 
   it('UV 以米计：地面 uvMax = 17.8 米、每铺 2 米；墙段的 uvMax 就是它自己的宽', () => {
     const def = DUNGEON_DEFS[0];
-    const lib = 假石砌库();
+    const lib = 假表面库();
     const { group, layout } = 建一座(def, lib);
     const { 地面, 墙 } = 收集(group);
     const 砖 = 1 / SURFACE_SPECS.masonry.tileMeters;
@@ -448,7 +455,7 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
 
   it('柱面（wallMat 的圆柱）也按米：逐行 uMax = 该行半径的周长、vMax = 高', () => {
     const def = DUNGEON_DEFS[0];
-    const { group } = 建一座(def, 假石砌库());
+    const { group } = 建一座(def, 假表面库());
     const 墙材 = 收集(group).墙[0].material;
     let 柱 = 0;
     group.traverse((o) => {
@@ -474,7 +481,7 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
 
   it('模板装饰的墙材盒（壁柱 / 壁龛）逐面也是米 —— 全局 max 被同维盖住的那张脸在这里红', () => {
     const def = DUNGEON_DEFS[0];
-    const { group } = 建一座(def, 假石砌库());
+    const { group } = 建一座(def, 假表面库());
     const 墙材 = 收集(group).墙[0].material;
     let 件 = 0;
     group.traverse((o) => {
@@ -506,8 +513,51 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
     for (const m of 墙) expect(m.material.roughness).toBe(0.9);
   });
 
-  it('七座副本：贴/不贴两种面各 14 份材料，反复 build 缓存零增长（B76 的账在贴图之后照样成立）', () => {
-    const lib = 假石砌库();
+  it('Boss 场地面：石板贴图按直径算铺数（4 米一铺），缺库退回纯色自发光（W-C5 切片2）', () => {
+    // 取最后一座的 Boss 场：`dungeonMaterial` 的材质缓存是**全模块**的，前面的用例已经用
+    // 各自的库建过 def[0] 的 `bossFloor@tex` —— 那会拿到旧库的贴图，身份断言量的是缓存而不是接线。
+    const def = DUNGEON_DEFS[DUNGEON_DEFS.length - 1];
+    // 贴图路径：一张 4 米的石板图铺满直径 30.6 米的圆盘 ⇒ repeat = 直径 / tileMeters。
+    // 圆盘的 UV 是 0..1 跨整个直径（CircleGeometry 口径），所以"每铺米数"就是这条除法的读数。
+    {
+      const lib = 假表面库();
+      const { group } = 建一座(def, lib);
+      let 地面数 = 0;
+      group.traverse((o) => {
+        if (!o.isMesh || o.geometry.type !== 'CircleGeometry' || Math.abs(o.position.y - 0.03) > 1e-9) return;
+        地面数++;
+        expect(o.material.normalMap, 'Boss 场地面的石板法线图没挂上').not.toBe(null);
+        expect(o.material.roughnessMap).not.toBe(null);
+        expect(o.material.roughness, '贴图在时 material.roughness 必须是 1').toBe(1);
+        expect(o.material.color.getHex(), '颜色该还是这座副本的点缀色').toBe(def.accent);
+        expect(o.material.emissive.getHex(), '自发光没保住 —— 石板不该抹掉 Boss 场的底色').toBe(def.accent);
+        const 直径 = o.geometry.parameters.radius * 2;
+        expect(直径 / o.material.normalMap.repeat.x, '每铺米数不等于 slabs.tileMeters —— 石板尺寸脱节')
+          .toBeCloseTo(SURFACE_SPECS.slabs.tileMeters, 6);
+        // 变体就是库按这个铺数发的那一份（不是别的档、也不是直挂 set 级那份）
+        const 变体 = lib.uvVariant('slabs', 直径 / SURFACE_SPECS.slabs.tileMeters, 直径 / SURFACE_SPECS.slabs.tileMeters);
+        expect(o.material.normalMap).toBe(变体.normalMap);
+      });
+      expect(地面数, '一座 Boss 场的地面圆盘一个都没量到').toBe(1);
+    }
+    // 缺库退回：纯色自发光（roughness 回 0.75），与墙/地同一条退路
+    {
+      const { group } = 建一座(def, null);
+      let 地面数 = 0;
+      group.traverse((o) => {
+        if (!o.isMesh || o.geometry.type !== 'CircleGeometry' || Math.abs(o.position.y - 0.03) > 1e-9) return;
+        地面数++;
+        expect(o.material.normalMap).toBe(null);
+        expect(o.material.roughnessMap).toBe(null);
+        expect(o.material.roughness, '无贴图时该回到 0.75').toBe(0.75);
+        expect(o.material.color.getHex()).toBe(def.accent);
+      });
+      expect(地面数).toBe(1);
+    }
+  });
+
+  it('七座副本：贴/不贴两种面各 21 份材料，反复 build 缓存零增长（B76 的账在贴图之后照样成立）', () => {
+    const lib = 假表面库();
     const 一轮 = () => {
       const 材料 = new Set();
       for (const def of DUNGEON_DEFS) {
@@ -515,12 +565,16 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
         const { 地面, 墙 } = 收集(group);
         for (const m of 地面) 材料.add(m.material);
         for (const m of 墙) 材料.add(m.material);
+        // Boss 场石板地面（W-C5 切片2）也是每座一份
+        group.traverse((o) => {
+          if (o.isMesh && o.geometry.type === 'CircleGeometry' && Math.abs(o.position.y - 0.03) < 1e-9) 材料.add(o.material);
+        });
       }
       return 材料;
     };
     const 第一轮材料 = 一轮();
-    expect(第一轮材料.size, '7 座 ×（地面 + 墙）该是 14 份').toBe(DUNGEON_DEFS.length * 2);
-    expect(lib.uvVariantCount(), '全域铺数只有一个（1/2 米）—— 变体该只有一份').toBe(1);
+    expect(第一轮材料.size, '7 座 ×（地面 + 墙 + Boss 场石板）该是 21 份').toBe(DUNGEON_DEFS.length * 3);
+    expect(lib.uvVariantCount(), '两档铺数（石砌 1/2 米、石板按直径）—— 变体该是两份').toBe(2);
 
     const 第一轮 = dungeonAssetStats();
     const 第二轮材料 = 一轮();
@@ -538,16 +592,20 @@ describe('⑥ 文件名只有规格表一份（抄第二份的症状是 404 而�
   });
 
   it('src/ 与 scripts/ 里出现 gen/*.png 文件名的只能有 materialSurfaces.js', () => {
-    const 尺 = /masonry_(nor|rough)\.png/;
-    // 先证明尺子能咬：拿一个长得像拷贝的串试
-    expect(尺.test("files: { normal: 'gen/masonry_nor.png' }"), '尺子本身坏了').toBe(true);
+    // 尺**从规格表现推**（每个表面两个文件名；切片2 起不止一种）—— 新增一个表面自动进这把尺，
+    // 不再手抄 'masonry_(nor|rough)' 这种只有一个表面时够用的写法。
+    const 文件名 = SURFACE_NAMES
+      .flatMap((n) => [SURFACE_SPECS[n].files.normal, SURFACE_SPECS[n].files.roughness])
+      .map((p) => p.slice(p.lastIndexOf('/') + 1));
+    const 尺 = new RegExp(文件名.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'));
+    // 每一个表面的两个文件名都必须被这把尺咬住 —— 漏一个 = 那个文件名没人守
+    for (const f of 文件名) expect(尺.test(`files: { normal: 'gen/${f}' }`), `尺子咬不住 ${f}`).toBe(true);
 
     const 命中 = [];
     for (const f of [...walk(join(ROOT, 'src')), ...walk(join(ROOT, 'scripts'))]) {
       if (尺.test(readFileSync(f, 'utf8'))) 命中.push(relative(ROOT, f).replace(/\\/g, '/'));
     }
     expect(命中).toEqual(['src/content/materialSurfaces.js']);
-    expect(new Set(SURFACE_NAMES).has('masonry'), 'masonry 不在表面清单里 —— 上面那条会退化成空集断言').toBe(true);
   });
 });
 
@@ -566,6 +624,7 @@ describe('⑦ 表结构门禁：每一枚数值越界都各自点名（规格表
     ['size', { size: 4096 }, /size/],
     ['seed', { seed: -1 }, /seed/],
     ['bricks.mortarPx', { bricks: { rows: 8, cols: 4, mortarPx: 0 } }, /mortarPx/],
+    ['bricks.stagger', { bricks: { ...SURFACE_SPECS.masonry.bricks, stagger: -0.1 } }, /stagger/],
     ['octaves 空', { octaves: [] }, /octaves/],
     ['octaves.amp', { octaves: [{ lattice: 16, amp: 0 }] }, /amp/],
     ['normalStrength', { normalStrength: 0 }, /normalStrength/],

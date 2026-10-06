@@ -103,7 +103,7 @@ export class ProceduralDungeonGenerator {
       group.add(room.group);
 
       if (room.isBossArena) {
-        this._buildBossArena(room.group, room, layout, def, accentMat, wallMat);
+        this._buildBossArena(room.group, room, layout, def, accentMat, wallMat, lib);
         continue;
       }
 
@@ -260,20 +260,30 @@ export class ProceduralDungeonGenerator {
     mesh.visible = !open;
   }
 
-  static _buildBossArena(group, room, layout, def, accentMat, wallMat) {
+  static _buildBossArena(group, room, layout, def, accentMat, wallMat, lib = null) {
     const rw = room.w;
     const rd = room.d;
     const WH = layout.wallH;
     const WT = layout.wallT;
     const doorW = layout.bossDoorWidth;
 
-    const floorMat = dungeonMaterial(`${def.id}:bossFloor`, () => new THREE.MeshStandardMaterial({
+    // 石板地面（W-C5 切片2）：地面是圆盘（CircleGeometry 的 UV 是 0..1 跨整个直径），
+    // 铺数按**直径 / tileMeters** 算 —— 每块石板在任何一座 Boss 场都是同一个尺寸。
+    // 拿不到库就照旧纯色自发光（与墙/地同一条退路：进副本是同步路径，等不了加载）。
+    const 板材 = lib?.uvVariant('slabs', (rw * 0.9) / SURFACE_SPECS.slabs.tileMeters, (rw * 0.9) / SURFACE_SPECS.slabs.tileMeters) ?? null;
+    const floorParams = {
       color: def.accent,
       emissive: def.accent,
       emissiveIntensity: 0.08,
-      roughness: 0.75,
+      roughness: 板材 ? 1.0 : 0.75, // 贴图在时由贴图给值
       metalness: 0.15,
-    }));
+    };
+    if (板材) {
+      floorParams.normalMap = 板材.normalMap;
+      floorParams.roughnessMap = 板材.roughnessMap;
+      floorParams.normalScale = new THREE.Vector2(0.9, 0.9);
+    }
+    const floorMat = dungeonMaterial(板材 ? `${def.id}:bossFloor@tex` : `${def.id}:bossFloor`, () => new THREE.MeshStandardMaterial(floorParams));
     const floor = new THREE.Mesh(sharedCircle(rw * 0.45, 48), floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(room.x, 0.03, room.z);
