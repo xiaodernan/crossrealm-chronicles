@@ -818,6 +818,13 @@ export class Game {
     /* 演出与 UI 节奏走 rawDt：不受命中停顿/慢动作影响（B39）。
      * 放在最前面，让"这一帧该弹的横幅"在本帧的渲染里就位，而不是拖到下一帧。 */
     scheduler.update(rawDt);
+    // W-D1 切片1：模态栈开着时自动释放指针锁 —— 面板里的鼠标点击不再被游戏收走。
+    // 判据吃同一份现状（`overlayState()`），所以"返回键关掉的层"与"释放指针锁的层"是同一个；
+    // 不要求立刻重获锁定，等玩家点回 canvas 再要（`canvas.requestPointerLock()` 在 click 守卫里）。
+    const overlay = this.overlayState();
+    if (this.pointerLocked && topNavLayer(overlay)) {
+      document.exitPointerLock();
+    }
     this.combatCamera.update(rawDt);
     this.combatInputLock.update(rawDt);
     const dt = rawDt * this.time.timeScale * this.combatCamera.getTimeScale();

@@ -463,7 +463,7 @@ describe('Game：上下文判定与换表都只有一条路', () => {
 
   it('判据与"↑↓ 走进哪个面板"同源：都是 `topNavLayer`，别处不许另判一次', () => {
     const game = sourceOf('core/Game.js');
-    expect((game.match(/topNavLayer\(/g) || []).length, '第二处上下文判定').toBe(2);
+    expect((game.match(/topNavLayer\(/g) || []).length, '第三处上下文判定（W-D1 指针锁释放）').toBe(3);
     // 用面板布尔直接判"是不是界面态"就是抄了第二份判据
     expect(game).not.toMatch(/padUi\s*=\s*.*(pauseMenu|settingsPanel|helpManual)\.open/);
   });
