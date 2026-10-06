@@ -3,6 +3,129 @@ import {
   CELL, BOSS_CELL, WALL_H, WALL_T, DOOR_WIDTH, BOSS_DOOR_WIDTH, SPAWN_SPAN_MARGIN,
 } from './dungeonDimensions.js';
 
+/** 四个方向 → 一格之内的偏移 */
+export const DIR_STEP = { n: [0, -1], e: [1, 0], s: [0, 1], w: [-1, 0] };
+/** 一面墙的对面 */
+export const DIR_OPPOSITE = { n: 's', s: 'n', e: 'w', w: 'e' };
+/** 遍历方向时的固定顺序（门的名单按这个序发，改动它等于换一座迷宫） */
+export const DIRS = ['n', 'e', 's', 'w'];
+
+/**
+ * 格号 → 房心（米）。B86 的根就是这句话被说了两遍：生成器写 `(gx − gridW/2) * cellSize`
+ * （网格居中），编辑器反推格号写 `round(x / cellSize)`（原点格），两条口径差 gridW/2 格，
+ * 于是"位置一毫米没动"的一次拖动就把 `r_0_0` 改名成 `r_-3_-3`。现在两侧都问这一对函数。
+ */
+export const cellCenter = (g, gridCount, cellSize) => (g - gridCount / 2) * cellSize;
+/** 房心 → 格号：`cellCenter` 的逆，两者必须同进同出 */
+export const cellIndex = (world, gridCount, cellSize) => Math.round(world / cellSize + gridCount / 2);
+
+/**
+ * **墙与门由占用推导**（W-B11 切片1）。一句话：一面旗标只有在"那一边真的邻着一间房"时才算门，
+ * 一条共用边界由两侧**共同**决定，门的位置是两间房房心的正中。
+ *
+ * 为什么要有这一份：改前这条规则以两种形态各活在各说一遍 —— 生成器在 `generateMaze` 里内联
+ * 一段"扫每间房的 n/e 两面就造门"的循环，而关卡编辑器把它**抄成了一份看起来像常量的字面量**
+ * （`walls: { n: true, e: true, s: true, w: true }`）再配两个空壳函数 `_updateAdjacentWalls` /
+ * `_updateAllAdjacentWalls`。症状实测三条（`.tmp-20261006/wb11s1-census.mjs`）：
+ * - 编辑器自己放的房间**四面全实、doors 恒为空** ⇒ 导出的 JSON 进副本就是一排封死的盒子；
+ * - 删一间房之后那 3 扇门一扇没动（悬空指着不存在的房），而邻居留下的 3 面"朝空的洞"
+ *   照旧被建成门洞 —— 墙上一个豁口，外面是虚空；
+ * - 拖一间房之后门不跟着搬，房间改名，于是门的两端里那一端找不到了。
+ *
+ * 三条口径与理由：
+ * 1. **旗标朝向没有房的格子 ⇒ 收回成实墙**。空格子上不存在"另一侧"，那一边只能是墙；
+ *    留着它的症状不是少一扇门，而是几何层真的在墙上开一个走不通的洞。
+ * 2. **共用边界两侧不一致时取"开着"那一侧**（并侧）。一句话说清为什么不是取"实墙"：
+ *    两侧里任何一侧说"这里要开门"都是一个**意图**，抹掉意图的症状是修不出通路（作者看不见自己
+ *    开的门，导出后那一边仍是实墙），而照意图补齐的症状只是多一扇门 —— 前者会让工具不可用。
+ * 3. **门的位置 = 两房房心正中，不读任何尺寸常量**。对一对相邻的格子来说这就是格线，
+ *    与改前的 `fromRoom.x ± cellSize/2` 逐毫米相同（537 扇门实测最大偏差 0，
+ *    `.tmp-20261006/wb11s1-census.mjs` ⑦）；改成中点之后，`cellSize` 从这条规则里彻底退出，
+ *    于是"格长换了口径门还在不在格线上"这个问题不再存在。
+ *    Boss 场那 9 扇因此仍然站在邻居的格线上（±9 而不是 ±17）—— 那是 B85 的形状问题，
+ *    这一片**不**顺手改它，因为改了它就没法把"重构不改行为"这件事钉成一份摘要。
+ *
+ * `previousDoors` 只用来**继承运行时态**（`open` / `locked`）：门是按 `d_{gx}_{gz}_{dir}` 命名的，
+ * 房间一改名、一格拖动之后重新推导就会拿到同一枚 id，若无条件重置成"关着、锁着"，
+ * 编辑器里打开过的那扇门会在每次编辑后自己关上。
+ *
+ * **返回的门名单顺序 = `rooms` 数组序 × `n` 再 `e`**，与改前的内层循环逐字同形。这一条不是风格：
+ * `findFarthestRoom` 的 BFS 访问序吃门的数组序，访问序决定"哪间房是 Boss 场"，Boss 场决定整条
+ * 随机流后面摇到什么 —— 顺序一动就换一座迷宫。摘要 `e298c99d5619d7d0`（门序敏感）钉的就是它。
+ */
+export function reconcileOccupancy(rooms, previousDoors = []) {
+  const byCell = new Map();
+  for (const room of rooms) {
+    if (!Number.isFinite(room?.gx) || !Number.isFinite(room?.gz)) {
+      throw new TypeError(
+        `占用推导收到一间没有格号的房（下标 ${rooms.indexOf(room)}，gx=${显示(room?.gx)} gz=${显示(room?.gz)}）`
+        + ' —— 布局里每一间房都得站在一个有限的整数格上（W-B11 切片1）'
+      );
+    }
+    for (const dir of DIRS) {
+      if (typeof room.walls?.[dir] !== 'boolean') {
+        throw new TypeError(
+          `${room.id ?? `下标 ${rooms.indexOf(room)}`}.walls.${dir} = ${显示(room.walls?.[dir])} —— 墙得写成布尔：`
+          + '写成 `undefined` 时"这一面是墙还是门"没有答案，而 `templateFitsRoom` 会把"没有答案'
+          + '"当成"开着门"（W-B11 切片1）'
+        );
+      }
+    }
+    const 键 = `${room.gx},${room.gz}`;
+    const 已 = byCell.get(键);
+    if (已) {
+      throw new TypeError(
+        `两间房站在同一格 ${键}（${已.id} 与 ${room.id}）—— 占用推导只认一间，先删掉重复的那间（W-B11 切片1）`
+      );
+    }
+    byCell.set(键, room);
+  }
+
+  // 1 + 2：先归一旗标，再按归一后的旗标造门 —— 两步分开写，顺序不能倒
+  for (const room of rooms) {
+    for (const dir of DIRS) {
+      if (room.walls[dir] !== false) continue;
+      const [dx, dz] = DIR_STEP[dir];
+      const neighbour = byCell.get(`${room.gx + dx},${room.gz + dz}`);
+      if (!neighbour) {
+        room.walls[dir] = true;
+        continue;
+      }
+      const back = DIR_OPPOSITE[dir];
+      if (neighbour.walls[back] !== false) neighbour.walls[back] = false;
+    }
+  }
+
+  const 状态 = new Map();
+  for (const d of previousDoors) {
+    if (d && d.id) 状态.set(d.id, { open: d.open === true, locked: d.locked !== false });
+  }
+
+  const doors = [];
+  for (const room of rooms) {
+    // 只发 n/e 两面：一条共用边界有两个房各自的一面，发两遍就是同一扇门的门板与碰撞各两份。
+    // 西侧/南侧那两面已经由邻居以 n/e 的名义发过了。
+    for (const dir of ['n', 'e']) {
+      if (room.walls[dir] !== false) continue;
+      const [dx, dz] = DIR_STEP[dir];
+      const to = byCell.get(`${room.gx + dx},${room.gz + dz}`);
+      if (!to) continue; // 归一之后不可能发生；留着是因为它同时是"不许造悬空门"的判据
+      const id = `d_${room.gx}_${room.gz}_${dir}`;
+      const 旧 = 状态.get(id);
+      doors.push({
+        id, dir,
+        x: (room.x + to.x) / 2,
+        z: (room.z + to.z) / 2,
+        fromRoomId: room.id,
+        toRoomId: to.id,
+        locked: 旧 ? 旧.locked : true,
+        open: 旧 ? 旧.open : false,
+      });
+    }
+  }
+  return doors;
+}
+
 /**
  * 递归回溯迷宫 → 房间+门+墙+Boss 大房
  *
@@ -50,8 +173,8 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
       rooms.push({
         id: `r_${gx}_${gz}`,
         gx, gz,
-        x: (gx - gridW / 2) * CELL,
-        z: (gz - gridH / 2) * CELL,
+        x: cellCenter(gx, gridW, CELL),
+        z: cellCenter(gz, gridH, CELL),
         w: CELL, d: CELL,
         walls: { ...walls[gz][gx] },
         cleared: false,
@@ -63,15 +186,11 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
     }
   }
 
-  const doors = [];
-  for (let gz = 0; gz < gridH; gz++) {
-    for (let gx = 0; gx < gridW; gx++) {
-      const room = rooms.find((r) => r.gx === gx && r.gz === gz);
-      const w = room.walls;
-      if (!w.n && gz > 0) doors.push(makeDoor(room, 'n', CELL, rooms, gx, gz - 1));
-      if (!w.e && gx < gridW - 1) doors.push(makeDoor(room, 'e', CELL, rooms, gx + 1, gz));
-    }
-  }
+  // 门由占用推导（`reconcileOccupancy` 是这条规则的唯一一份，关卡编辑器问的是同一个函数）。
+  // 改前这里是内联的 `if (!w.n && gz > 0) doors.push(makeDoor(...))` 循环：它对生成的迷宫
+  // 恰好等价（每格都有房、两侧旗标同时被回溯步写下），所以摘要是同一个数 —— 这正是
+  // "把它提成共享规则而不是再造一份"的依据。
+  const doors = reconcileOccupancy(rooms);
 
   const spawn = rooms.find((r) => r.gx === 0 && r.gz === 0) ?? rooms[0];
   const exit = findFarthestRoom(spawn, rooms, doors);
@@ -259,27 +378,6 @@ function findFarthestRoom(spawn, rooms, doors) {
     }
   }
   return best;
-}
-
-function makeDoor(fromRoom, dir, cellSize, rooms, tgx, tgz) {
-  const toRoom = rooms.find((r) => r.gx === tgx && r.gz === tgz);
-  // 门开在 **from 那一侧**的边界上，所以只需要 from 的半个尺寸；
-  // 原先还算了 to 的 `half2` 但没人用（W-B1 切片4 清掉）
-  const half = (fromRoom.isBossArena ? fromRoom.w : cellSize) / 2;
-  let x = fromRoom.x;
-  let z = fromRoom.z;
-  if (dir === 'n') z -= half;
-  if (dir === 's') z += half;
-  if (dir === 'e') x += half;
-  if (dir === 'w') x -= half;
-  return {
-    id: `d_${fromRoom.gx}_${fromRoom.gz}_${dir}`,
-    dir, x, z,
-    fromRoomId: fromRoom.id,
-    toRoomId: toRoom.id,
-    locked: true,
-    open: false,
-  };
 }
 
 export function getRoomAt(layout, wx, wz) {

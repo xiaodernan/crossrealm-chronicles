@@ -32,8 +32,10 @@
  *    也走同一条 —— 只有那条路能量到 `_drag` 里的 B87。
  * ⑥ 绝迹层：18 处历史抄本在役源码里 0 命中，**同一把尺**在誊来的旧字节上数得到（armed）；
  *    幻影 API（`RoomTemplates` 转手的 `CELL`、端口的 `width` 键）都不在。
- * ⑦ 读数层：新量到的两条编辑器侧缺陷各钉一个数 —— B86（编辑器与迷宫的格坐标口径不同）
- *    的规模、B88（拖一次之后可视化与数据分家）。修好后这两处期望都改成 0 / 同位。
+ * ⑦ 读数层：W-B11 切片1 之后这两条都变成**同一口径的两面** —— B86（编辑器与迷宫的格坐标
+ *    口径不同）钉的是"导入真迷宫后把每间房原地拖一次，改名数必须是 0"，B88（拖一次之后
+ *    可视化与数据分家）钉的是"数据、`roomMeshes` 的键、`userData.roomId`、标签文字、Group 的
+ *    位置五件事一起走，第二次拖动按**新** id 照样抓得住、照样挪得动"。
  *
  * 顺带修掉的一条：拖动路径 `_drag` 用 `Vector3.sub(Vector2)` 减抓点偏移，减完 `intersect.z`
  * 成 NaN，房间号直接变 `r_2_NaN`（**B87**）。这一片的 ⑤ 层要走真指针路径，非修不可；
@@ -53,7 +55,7 @@ import { dungeonEncounterOf } from '../src/content/dungeonEncounters.js';
 import { ROOM_TEMPLATES } from '../src/world/RoomTemplates.js';
 import * as RoomTemplatesModule from '../src/world/RoomTemplates.js';
 import * as DIM from '../src/world/dungeonDimensions.js';
-import { LevelEditor } from '../src/world/LevelEditor.js';
+import { LevelEditor, LAYOUT_SIZE_CARRIERS } from '../src/world/LevelEditor.js';
 import {
   基准提交, 在役文件, 声明名册, 载体字段, 几何必需字段, 抄本表, 形状尺,
 } from './helpers/wb10s4f-copies.js';
@@ -81,7 +83,6 @@ function walk(dir, out = []) {
 const 世界文件 = walk(join(SRC, 'world'));
 
 /** 编辑器要 window/document：`_initUI` 建面板、`_createRoomVisual` 建房间标签 */
-let 原console = null;
 function 桩() {
   global.window = {
     document: {
@@ -98,17 +99,8 @@ function 桩() {
     URL: { createObjectURL: () => '', revokeObjectURL: () => {} },
   };
   global.document = global.window.document;
-  // 编辑器把 DOM 标签 `group.add(label)` 塞进 THREE.Group，three 会为那一句话 console.error
-  // —— 那是 W-B11 切片1 的活（见 #115 与 ⑦ 层的 B86）。这里只吞那一句，别的一律放行。
-  if (!原console) {
-    原console = console.error;
-    console.error = (...a) => {
-      if (!String(a[0]).startsWith('THREE.Object3D.add')) 原console(...a);
-    };
-  }
 }
 function 拆桩() {
-  if (原console) { console.error = 原console; 原console = null; }
   delete global.window;
   delete global.document;
 }
@@ -400,26 +392,32 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
     });
 
     it('放置落位与拖动反推都按这一份布局的格长（同一实例改数就改行为）', () => {
+      // W-B11 切片1 把 B86 并成一套口径之后，编辑器与迷宫共用 `(g − 格数/2) * 格长` 这一对
+      // `cellCenter` / `cellIndex`。改前编辑器按 `gx * cellSize` 的原点格放房，同一格发给它 36 ——
+      // 那一档读数现在钉在 ⑦ 层（导入真迷宫后原地拖动：改名数 0）。
       const 放 = (cellSize) => {
-        editor._importLayoutData({ gridW: 5, gridH: 5, rooms: [], doors: [], cellSize });
+        editor._importLayoutData({ gridW: 7, gridH: 7, rooms: [], doors: [], cellSize });
         editor._addRoomAt(2, 1, 'chamber:square');
         return editor.layout.rooms.find((r) => r.id === 'r_2_1');
       };
-      // 改前实测：cellSize=25 那一发给的是 36（编辑器自己的 `const CELL = 18`）
-      expect(放(25).x, 'cellSize=25 时 (2,1) 该落在 50').toBe(50);
-      expect(放(25).z).toBe(25);
+      expect([放(25).x, 放(25).z], 'cellSize=25：(2,1) 该落在网格居中的那一格').toEqual([-37.5, -62.5]);
       const 十八 = 放(18);
-      expect(十八.x, '同一格在 cellSize=18 下必须落在另一个数，否则上面那条是巧合').toBe(36);
+      expect([十八.x, 十八.z], '同一格在 cellSize=18 下必须是另一个数，否则上面那条是巧合')
+        .toEqual([-27, -45]);
 
-      // 拖完之后反推格号：60 米在 25 的格子里是第 2 格，在 18 的格子里是第 3 格。
-      // 第二次调用得拿**改名后的** id 去找那间房 —— 用旧 id 会 `if (!room) return` 安静地什么都不做。
+      // 拖完之后反推格号：世界点 20 米在 25 的格子里是第 4 格，在 18 的格子里是第 5 格。
+      // 拿**改名后的** id 去找那间房 —— 用旧 id 会当场返回 false（切片1 之前那一条是安静地什么都不做）。
       const 拖 = (cellSize, 起id) => {
         editor.layout.cellSize = cellSize;
-        editor._updateRoomPosition(起id, 60, 0);
+        editor._updateRoomPosition(起id, 20, 20);
         return editor.layout.rooms[0];
       };
-      expect(拖(25, 放(25).id).gx, '60 / 25 该是 2').toBe(2);
-      expect(拖(18, 'r_2_0').gx, '60 / 18 该是 3').toBe(3);
+      const 廿五 = 拖(25, 放(25).id);
+      expect(廿五.gx, '20 / 25 的网格居中口径该吸到第 4 格').toBe(4);
+      expect(廿五.id).toBe('r_4_4');
+      const 十八拖 = 拖(18, 廿五.id);
+      expect(十八拖.gx, '同一个 20 米在 18 的格子里必须是别的格，否则上面那条是巧合').toBe(5);
+      expect(十八拖.id).toBe('r_5_5');
     });
 
     it('真指针路径：放置与拖动的落格都吃这一份布局的格长（B87 之后 z 不再是 NaN）', () => {
@@ -449,30 +447,32 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
       const 放 = (cellSize) => {
         ed._importLayoutData({ gridW: 7, gridH: 7, rooms: [], doors: [], cellSize });
         ed.selectedTemplateId = 'chamber:square';
-        ed._placeRoom(客户端(60, 50));
+        ed._placeRoom(客户端(20, 40));
         return ed.layout.rooms[ed.layout.rooms.length - 1];
       };
       const 廿五 = 放(25);
-      expect([廿五.gx, 廿五.gz], 'cellSize=25：指针下的 (60,50) 该吸到第 (2,2) 格').toEqual([2, 2]);
-      expect([廿五.x, 廿五.z]).toEqual([50, 50]);
+      expect([廿五.gx, 廿五.gz], 'cellSize=25：指针下的 (20,40) 该吸到第 (4,5) 格').toEqual([4, 5]);
+      expect([廿五.x, 廿五.z]).toEqual([12.5, 37.5]);
       const 十八 = 放(18);
-      expect([十八.gx, 十八.gz], '同一指针在 18 的格子里必须是别的格，否则上面那条是巧合').toEqual([3, 3]);
-      expect(十八.id).toBe('r_3_3');
+      expect([十八.gx, 十八.gz], '同一指针在 18 的格子里必须是别的格，否则上面那条是巧合').toEqual([5, 6]);
+      expect(十八.id).toBe('r_5_6');
 
       ed._importLayoutData({ gridW: 7, gridH: 7, rooms: [], doors: [], cellSize: 25 });
       ed._addRoomAt(1, 1, 'chamber:square');
       ed.enabled = true;
       ed.dragTarget = 'r_1_1';
       ed.dragOffset.set(0, 0);
-      ed._drag(客户端(60, 50));
+      ed._drag(客户端(20, 40));
       const 拖完 = ed.layout.rooms[0];
-      expect(拖完.id, `拖一次房间号漂成 ${拖完.id} —— B87 的形状`).toBe('r_2_2');
-      expect([拖完.x, 拖完.z], '落点必须是吸过格的有限数，不是 NaN').toEqual([50, 50]);
-      const 网格 = ed.roomMeshes.get('r_1_1');
-      // 键**不随改名走**（B88 的第一格）：房间已经叫 r_2_2，可视化还挂在 r_1_1 上。
-      // 这一条不是在说它对，是把 W-B11 切片1 要修的读数钉住 —— 修好后这里应改成 get('r_2_2')。
-      expect(网格, '拖一次之后可视化丢了键就不是 B88 那一格').toBeDefined();
-      expect(网格.mesh.position.z, '落点那一份 group 的 z 也必须是数').toBe(50);
+      expect(拖完.id, `拖一次房间号漂成 ${拖完.id} —— B87 的形状`).toBe('r_4_5');
+      expect([拖完.x, 拖完.z], '落点必须是吸过格的有限数，不是 NaN').toEqual([12.5, 37.5]);
+      // 切片1（B88 第一格）：键**随改名走**。改前这里 `get('r_1_1')` 还在、`get('r_4_5')` 是空的，
+      // 于是第二次拖动按旧 id 认领得到画、认领不到数据。
+      expect(ed.roomMeshes.has('r_1_1'), '旧 id 的键还留着 = 同一间房挂了两份画').toBe(false);
+      const 组 = ed.roomMeshes.get('r_4_5')?.mesh;
+      expect(组, '拖一次之后可视化丢了键就不是 B88 那一格').toBeDefined();
+      expect(组.userData.roomId, 'Group 认领的房号必须跟数据一致').toBe('r_4_5');
+      expect([组.position.x, 组.position.z], '画面摆在数据说的那个位置').toEqual([12.5, 37.5]);
     });
 
     it('拖动偏移跟着指针一起走（B87 的另一半：抓住的不是格点而是当初按住的那一点）', () => {
@@ -481,19 +481,24 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
       ed._addRoomAt(0, 0, 'chamber:square');
       ed.enabled = true;
       ed.dragTarget = 'r_0_0';
-      // 抓在房间里偏 (+3, +4) 的位置：拖到 (60,50) 时先减偏移再吸格 → (57,46) → 第 (2,2) 格。
-      // 偏移减错方向或漏减 z，格子就会跳到别处去 —— 这一条钉的是"减的那一维对不对"。
-      ed.dragOffset.set(3, 4);
-      ed._drag(客户端(60, 50));
-      expect(ed.layout.rooms[0].id, '抓点偏移没有两维都减（B87 的另一半）').toBe('r_2_2');
-      expect([ed.layout.rooms[0].x, ed.layout.rooms[0].z]).toEqual([50, 50]);
+      // 抓在房间里偏 (+9, +9) 的位置：拖到 (32,32) 时先减偏移再吸格 → (23,23) → 第 (4,4) 格。
+      // 两个维度各自跨过一条格线，所以**漏减哪一维都会落到别的格** —— 这一条钉的是"减的那一维对不对"。
+      ed.dragOffset.set(9, 9);
+      ed._drag(客户端(32, 32));
+      expect(ed.layout.rooms[0].id, '抓点偏移没有两维都减（B87 的另一半）').toBe('r_4_4');
+      expect([ed.layout.rooms[0].x, ed.layout.rooms[0].z]).toEqual([12.5, 12.5]);
     });
 
-    it('导出的 JSON 带着三枚尺寸，绕一圈回来不被编辑器的默认值盖掉', () => {
-      editor._importLayoutData({
-        gridW: 3, gridH: 3, cellSize: 25, doorWidth: 6, bossDoorWidth: 7,
-        rooms: [], doors: [], seed: 7,
-      });
+    it('导出的 JSON 把六枚尺寸载体全带上，绕一圈回来不被编辑器的默认值盖掉（B89）', () => {
+      // 切片4f 立的合同是"尺寸事实的运行时载体在 `layout` 上，六枚一起走"。改前的导出只带
+      // 其中三枚（cellSize / doorWidth / bossDoorWidth），于是编辑器自己导出的载荷送回
+      // `buildGeometry` 就 `TypeError: 布局缺少的尺寸字段：wallH、wallT`
+      // （实测 `.tmp-20261006/wb11s1-census.mjs` ③ 与 `wb11s1-after.mjs` ⑦）。
+      // 名册从 `LevelEditor.LAYOUT_SIZE_CARRIERS` 推导，不在这里重抄一遍六枚名字。
+      const 名 = Object.keys(LAYOUT_SIZE_CARRIERS);
+      expect(名.sort(), '编辑器的载体名册与切片4f 那六枚不是同一份').toEqual([...载体字段].sort());
+      const 带 = Object.fromEntries(名.map((k, i) => [k, 20 + i * 3.5]));
+      editor._importLayoutData({ gridW: 3, gridH: 3, ...带, rooms: [], doors: [], seed: 7 });
       editor._addRoomAt(1, 1, 'chamber:square');
 
       const 原Blob = globalThis.Blob;
@@ -508,11 +513,13 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
         globalThis.URL = 原URL;
       }
       const 导出 = JSON.parse(写下);
-      expect([导出.cellSize, 导出.doorWidth, 导出.bossDoorWidth], '导出漏了哪一枚').toEqual([25, 6, 7]);
+      for (const k of 名) {
+        expect(导出[k], `导出漏了 ${k} 这一枚`).toBe(带[k]);
+      }
       editor._importLayoutData(导出);
-      expect(editor.layout.cellSize).toBe(25);
-      expect(editor.layout.doorWidth).toBe(6);
-      expect(editor.layout.bossDoorWidth).toBe(7);
+      for (const k of 名) {
+        expect(editor.layout[k], `${k} 绕一圈回来被默认值盖掉了`).toBe(带[k]);
+      }
     });
   });
 
@@ -554,14 +561,13 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
     });
   });
 
-  describe('⑦ 读数层：B86 与 B88 —— 编辑器的坐标口径与可视化对账', () => {
-    it('把一份真迷宫布局导入编辑器、原地拖动一间房，房间号会跳到别的格（规模钉住）', () => {
-      // 迷宫放房用 `(gx − gridW/2) * cellSize`（网格居中），编辑器反推格号用 `round(x / cellSize)`
-      // （原点格）。两条口径差 gridW/2 格，所以**位置一个毫米都没动**的一次拖动就把 r_0_0 改成
-      // r_-3_-3。实测 `.tmp-20261004/wb10s4f-editor-coords.mjs`：那座 36 间全被改名。
-      //
-      // 这条用例不是在说它对：W-B11 切片1 让墙与门由占用推导时，必须先把这一套口径并成一套，
-      // 那时这里的期望数改成 0。在此之前它是一条不许漂的读数。
+  describe('⑦ 读数层：B86 与 B88 —— 编辑器的坐标口径与可视化对账（W-B11 切片1 已并）', () => {
+    it('导入真迷宫后把每间房原地拖一次：改名数 0（B86 并口径之后的读数）', () => {
+      // 改前的形状（实测 `.tmp-20261004/wb10s4f-editor-coords.mjs`）：迷宫放房用
+      // `(gx − gridW/2) * cellSize`（网格居中），编辑器反推格号用 `round(x / cellSize)`（原点格），
+      // 两条口径差 gridW/2 格，于是**位置一个毫米都没动**的一次拖动把 36 间房全改成 r_-3_-3 那样的号。
+      // W-B11 切片1 把这一对口径写成 `MazeLayout.cellCenter` / `cellIndex` 这**一对函数**，
+      // 生成器与编辑器都问它们 —— 这一条从"不许漂的读数"变成"并成一套"的验收。
       桩();
       const editor = new LevelEditor(
         new THREE.Scene(),
@@ -575,56 +581,78 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
         cellSize: layout.cellSize, doorWidth: layout.doorWidth, bossDoorWidth: layout.bossDoorWidth,
         rooms: layout.rooms, doors: layout.doors, seed: layout.seed,
       });
-      let 改名 = 0;
+      let 改名 = 0, 跳格 = 0;
       for (let i = 0; i < editor.layout.rooms.length; i++) {
         const r = editor.layout.rooms[i];
         const before = { id: r.id, gx: r.gx, gz: r.gz };
-        editor._updateRoomPosition(r.id, r.x, r.z);
+        expect(editor._updateRoomPosition(r.id, r.x, r.z), `${r.id} 原地拖一次居然被拒绝`).toBe(true);
         const after = editor.layout.rooms[i];
-        if (after.id !== before.id || after.gx !== before.gx || after.gz !== before.gz) 改名++;
+        if (after.id !== before.id) 改名++;
+        if (after.gx !== before.gx || after.gz !== before.gz) 跳格++;
       }
-      const 总数 = editor.layout.rooms.length;
-      expect(总数, '一间房都没导入，这条就成了空转').toBeGreaterThan(20);
-      expect(改名, 'B86 的规模漂了 —— 修好后这里应改为 0').toBe(总数);
+      expect(editor.layout.rooms.length, '一间房都没导入，这条就成了空转').toBeGreaterThan(20);
+      expect(改名, 'B86：原地拖动一次就把房间号改掉，说明两套口径又漂开了').toBe(0);
+      expect(跳格, 'B86：原地拖动一次就把格号挪了').toBe(0);
       delete global.window;
       delete global.document;
     });
 
-    it('已知缺陷 B88 的形状钉住：拖一次之后可视化与数据分家（双重偏移 + 键不随改名走）', () => {
-      // `_createRoomVisual` 把盒子放在 `group` **里面**、并按房间坐标摆好 (room.x, 1, room.z)；
-      // `_drag` 又把 `group` 整体搬到落点 —— 于是画面上的盒子在「落点 + 原位置」，一格起步。
-      // 同时 `roomMeshes` 的键与内层 mesh 的 `userData.roomId` 都还停在旧 id 上，
-      // 第二次拖动 `_updateRoomPosition(旧 id, …)` 找不到房间就 `return`：**图在动，数据不动**。
-      // 实测 `.tmp-20261004/wb10s4f-visual.mjs`：拖一次 数据(50,50) / 图(75,75)，
-      // 再拖一次 数据仍 (50,50) / 图(125,125)。
-      //
-      // 这一条不是在说它对：W-B11 切片1 把墙与门改成由占用推导时，可视化必须整个重建一遍口径，
-      // 那时这里的期望改成"图与数据同位"。在此之前它是一条不许漂的读数。
+    it('可视化与数据同位，第二次拖动照常生效（B88 修好之后的形状）', () => {
+      // 改前的形状（实测 `.tmp-20261004/wb10s4f-visual.mjs` 与 `.tmp-20261006/wb11s1-census.mjs` ③）：
+      // `_createRoomVisual` 把盒子按房间坐标摆在 `group` **里面**，`_drag` 又把 `group` 整体搬到落点
+      // —— 画面上的盒子在「落点 + 原位置」，一格起步；同时 `roomMeshes` 的键与
+      // `userData.roomId` 都停在旧 id 上，第二次拖动按旧 id 认领得到画、认领不到数据：
+      // **图在动，数据不动**（拖两次 数据 (50,50) / 图 (125,125)）。
+      // 切片1 的口径是"Group 就是那间房，`_updateRoomPosition` 是数据与图的唯一写入口"。
       桩();
       const { ed, 客户端 } = 编辑器带指针(new THREE.Scene());
       ed._importLayoutData({ gridW: 7, gridH: 7, rooms: [], doors: [], cellSize: 25 });
       ed._addRoomAt(1, 1, 'chamber:square');
       ed.enabled = true;
-      ed.dragTarget = 'r_1_1';
-      ed.dragOffset.set(0, 0);
-      ed._drag(客户端(60, 50));
+      const 房初 = ed.layout.rooms[0];
+      expect([房初.x, 房初.z], 'r_1_1 在 7×7、格长 25 的网格里该落在网格居中的那一格').toEqual([-62.5, -62.5]);
 
-      const 房 = ed.layout.rooms[0];
-      const 组 = ed.roomMeshes.get('r_1_1').mesh;
-      const 盒 = 组.children.find((c) => c.isMesh);
-      盒.updateWorldMatrix(true, true);
-      const 世界 = new THREE.Vector3();
-      盒.getWorldPosition(世界);
-      // 数据说它在 (50,50)，画面把它画在 (75,75) —— 差恰好一格
-      expect([房.x, 房.z]).toEqual([50, 50]);
-      expect(世界.z - 房.z, '可视化相对数据的偏移').toBeCloseTo(25, 6);
-      expect(盒.userData.roomId, '内层 mesh 还挂在旧 id 上').toBe('r_1_1');
+      const 读 = (id) => {
+        const 记 = ed.roomMeshes.get(id);
+        const 房 = ed.layout.rooms.find((r) => r.id === id);
+        if (!记 || !房) return { 缺: true, 有记录: !!记, 有房: !!房 };
+        const 世界 = new THREE.Vector3();
+        记.mesh.getWorldPosition(世界);
+        return {
+          数据: [房.x, 房.z], 图: [世界.x, 世界.z],
+          房号: 记.mesh.userData.roomId, 标签: 记.label?.textContent,
+        };
+      };
 
-      // 第二次拖动：按旧 id 认领得到（图照搬），数据却因为找不到房间而原地不动
-      ed.dragTarget = 盒.userData.roomId;
-      ed._drag(客户端(100, 100));
-      expect(ed.layout.rooms[0].x, '数据跟着动了 —— B88 修好后这条期望要改').toBe(50);
-      expect(组.position.x, '图却搬到了第二个落点').toBe(100);
+      const 第一次 = 客户端(房初.x, 房初.z);
+      ed._tryStartDrag(第一次);
+      expect(ed.dragTarget, '真指针抓不住 r_1_1，第二次拖动就无从谈起').toBe('r_1_1');
+      expect(Math.abs(ed.dragOffset.x), '抓着房心按下，x 偏移就该是 0').toBeLessThan(1e-9);
+      expect(Math.abs(ed.dragOffset.y), '抓着房心按下，z 偏移就该是 0').toBeLessThan(1e-9);
+      ed._drag(客户端(20, 40));
+      ed._endDrag();
+      expect(读('r_1_1'), '改名之后旧键还在 = 同一间房两份画').toEqual({ 缺: true, 有记录: false, 有房: false });
+      const 落一 = 读('r_4_5');
+      expect(落一.缺, '拖一次之后可视化丢了键就不是 B88 那一格').toBeFalsy();
+      expect(落一.数据, '落点吸过格').toEqual([12.5, 37.5]);
+      expect(落一.图, '图与数据必须同位').toEqual(落一.数据);
+      expect(落一.房号).toBe('r_4_5');
+      expect(落一.标签, '标签文字是抄出来的房间号，也要跟着改名').toBe('r_4_5');
+
+      // 第二次拖动：按**新** id 抓得到，数据和图一起再走一格（改前这一发只搬图，数据停在 (50,50)）
+      const 第二次 = 客户端(12.5, 37.5);
+      ed._tryStartDrag(第二次);
+      expect(ed.dragTarget, '改名之后鼠标认领不到那间房，就是 B88 的老形状').toBe('r_4_5');
+      // 落点选 (30,30) 而不是 (25,25)：25 正好压在格线上，而 `cellIndex` 用 `Math.round` 决边，
+      // 指针投影再进一次射线反算会给出 24.999999999999996，两边就各自落到不同的格子里了。
+      ed._drag(客户端(30, 30));
+      ed._endDrag();
+      const 落二 = 读('r_5_5');
+      expect(落二.缺, '第二次拖动之后数据没动').toBeFalsy();
+      expect(落二.数据).toEqual([37.5, 37.5]);
+      expect(落二.图).toEqual(落二.数据);
+      expect(ed.roomMeshes.size, '两次拖动之后可视化留了两份').toBe(1);
+      expect(ed.layout.rooms.length).toBe(1);
       delete global.window;
       delete global.document;
     });
