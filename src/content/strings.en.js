@@ -28,6 +28,7 @@ export const STRINGS_EN = Object.freeze({
   settings_shadows: 'Shadows',
   settings_shadow_quality: 'Shadow Quality',
   settings_msaa: 'Anti-Aliasing',
+  settings_ssao: 'Ambient Occlusion',
   settings_graphics_preset: 'Quality Preset',
   settings_vibration: 'Controller Vibration',
   settings_pad_tuning: 'Controller Feel',

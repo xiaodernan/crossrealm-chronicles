@@ -5,7 +5,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { createSsaoPass } from '../engine/SsaoPass.js';
+import { setSsaoQuality } from '../engine/SsaoPass.js';
 import { DEFAULT_SSAO_QUALITY } from '../engine/ssaoSettings.js';
 import { createDofPass } from '../engine/DofPass.js';
 import { ColorGrade } from '../effects/ColorGrade.js';
@@ -194,16 +194,12 @@ export class Game {
     // 出厂全中性（三个算式的恒等值），分级数值留给后续美术调参切片。
     this.colorGrade = new ColorGrade();
     this.composer.addPass(this.colorGrade.pass);
-    // SSAO（W-C4 切片5）：屏幕空间环境光遮蔽，增强几何体接触阴影与深度感。
-    // 同样遵循"OutputPass 之前"的铁律 —— 在线性空间运行，合成到场景光照结果上。
-    // 出厂默认"中"档，玩家可在设置面板切换关/低/中/高四档。
-    const ssaoWidth = Math.floor(window.innerWidth / 2); // SSAO 以半分辨率运行（性能优化）
-    const ssaoHeight = Math.floor(window.innerHeight / 2);
-    this.ssaoPass = createSsaoPass(this.scene, this.camera, ssaoWidth, ssaoHeight, DEFAULT_SSAO_QUALITY);
-    if (this.ssaoPass) {
-      this.composer.addPass(this.ssaoPass);
-    }
-    // 景深（W-C4 切片6）：电影级对焦效果，用于处决镜头和对话场景。
+    // SSAO（W-C4 切片5）：屏幕空间环境光遮蔽，增强接触阴影与深度感。出厂 off
+    //（B98：GTAO 每帧多一趟全场景法线渲染（_renderGBuffer），draw call 近翻倍 ——
+    // B94 的 <400 验收线按出厂配置记的账，出厂就超线的档不配叫出厂）。
+    // 挂/摘/换档收口在 setSsaoQuality 一个出口；插链位置 RenderPass 之后、bloom
+    // 之前（AO 调制漫反射亮度，bloom 应基于 AO 后亮度），铁律"OutputPass 之前"自然满足。
+    setSsaoQuality(this, DEFAULT_SSAO_QUALITY);    // 景深（W-C4 切片6）：电影级对焦效果，用于处决镜头和对话场景。
     // 铁律：DoF pass 必须插在 OutputPass 之前（线性空间运行），默认禁用，由外部系统动态启用。
     this.dofPass = createDofPass(this.scene, this.camera, {
       focus: 10,

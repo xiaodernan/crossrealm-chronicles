@@ -28,6 +28,7 @@ export const STRINGS_ZH = Object.freeze({
   settings_shadows: '阴影',
   settings_shadow_quality: '阴影精度',
   settings_msaa: '抗锯齿',
+  settings_ssao: '环境光遮蔽',
   settings_graphics_preset: '画质预设',
   settings_vibration: '手柄震动',
   settings_pad_tuning: '手柄手感',
