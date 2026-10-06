@@ -1,5 +1,6 @@
 import { padTuning } from '../content/keybinds.js';
 import { applySunShadowQuality, normalizeShadowQuality } from '../engine/shadowPolicy.js';
+import { applyMsaaSamples, normalizeMsaaSamples } from '../engine/aaPolicy.js';
 
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
@@ -16,6 +17,12 @@ const DEFAULTS = {
    * 存储里的脏值在 `applyToGame` 落地前经 `normalizeShadowQuality` 回落，不抛。
    */
   shadowQuality: 4096,
+  /**
+   * 全屏 MSAA 采样数（W-C4 切片1）：0 / 2 / 4 三档，名册在 `engine/aaPolicy.js`。
+   * 出厂 4 —— 锯齿是每帧都看得见的缺陷，没有"迁移前同值"可守（迁移前实际是 0，
+   * 一个不该守的值）。存储里的脏值在 `applyToGame` 落地前经 `normalizeMsaaSamples` 回落。
+   */
+  msaaSamples: 4,
   pixelRatio: 1.5,
   enemyLodDistance: 85,
   showFps: true,
@@ -121,6 +128,9 @@ export class SettingsManager {
     // `applySunShadowQuality` 里。脏档回落出厂而不是抛 —— 存储是玩家可写的，
     // 一行手改的 localStorage 不该把开机炸了（`padTuning` 的同一先例）
     if (game.sun) applySunShadowQuality(game.sun, normalizeShadowQuality(this.get('shadowQuality')));
+    // MSAA 档（W-C4 切片1）：与阴影精度档同口径 —— 脏值回落出厂不抛；
+    // 换档要重建 multisample framebuffer，那一步在 `applyMsaaSamples` 里（dispose 懒重建）
+    if (game.composer) applyMsaaSamples(game.composer, normalizeMsaaSamples(this.get('msaaSamples')));
     if (game.performance) game.performance.enemyLodDistance = this.get('enemyLodDistance');
     // 手感旋钮推给桥（切片15）：`setTuning` 内部再走一次 `padTuning` 清洗 ——
     // 存储是玩家可写的，越界或 NaN 一律逐项回落出厂，不把脏值乘进每帧的舵量里

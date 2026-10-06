@@ -8,6 +8,7 @@ import { PlayerController } from '../player/PlayerController.js';
 import { WorldManager } from '../world/WorldManager.js';
 import { TimeController } from '../engine/Time.js';
 import { DEFAULT_SHADOW_QUALITY, applySunShadowQuality } from '../engine/shadowPolicy.js';
+import { DEFAULT_MSAA_SAMPLES, applyMsaaSamples } from '../engine/aaPolicy.js';
 import { shake } from '../engine/Shake.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { PerfHUD } from '../engine/PerfHUD.js';
@@ -149,7 +150,11 @@ export class Game {
 
     this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2500);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    // 没有 `antialias`：canvas 的 MSAA 帧缓冲只对"直接画到 canvas 的几何边"有效，
+    // 而下面每一帧都走 EffectComposer（场景先进 composer 的 render target，最后由
+    // 全屏三角上屏）—— 全屏三角没有几何边，这个构造参数自上线起就是死的。
+    // 抗锯齿的真身在 composer target 的 samples 上，由 engine/aaPolicy.js 单独管。
+    this.renderer = new THREE.WebGLRenderer({ powerPreference: 'high-performance' });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -166,6 +171,10 @@ export class Game {
       0.28, 0.45, 0.92
     );
     this.composer.addPass(this.bloomPass);
+    // 全屏 MSAA（W-C4 切片1）：composer 自建的 target 默认 samples=0 —— 切到 composer
+    // 链那天起全屏就没有过抗锯齿（上面 `antialias: true` 为死参数的另一半原因）。
+    // 开机落出厂档，玩家档由 SettingsManager.applyToGame 走同一个出口。
+    applyMsaaSamples(this.composer, DEFAULT_MSAA_SAMPLES);
     // renderer.info 每趟 render() 结束就重置 —— composer 的最后一趟（全屏输出单三角）
     // 会把 calls 覆盖成 1：PerfHUD 的 draw call 行从上线起就恒为 1（W-C3 切片4 真页面
     // 读数实锤）。关掉 autoReset，改成每帧 render() 开头手动清零，info 累计整帧所有趟

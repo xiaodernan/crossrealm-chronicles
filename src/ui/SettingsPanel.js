@@ -6,6 +6,7 @@ import {
 import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
 import { SHADOW_QUALITY_SIZES, normalizeShadowQuality } from '../engine/shadowPolicy.js';
+import { MSAA_SAMPLES, normalizeMsaaSamples } from '../engine/aaPolicy.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -92,6 +93,21 @@ export class SettingsPanel {
       }
       sq.addEventListener('change', () => {
         s.set('shadowQuality', Number(sq.value));
+        s.applyToGame(this.game);
+      });
+    }
+    // 抗锯齿档（W-C4 切片1）：与阴影精度档同一套纪律 —— 选项从名册现推，
+    // 名册改了面板自动跟上；落地只走 `applyToGame`，面板不直接碰 composer
+    const ms = document.getElementById('set-msaa');
+    if (ms) {
+      for (const n of MSAA_SAMPLES) {
+        const opt = document.createElement('option');
+        opt.value = String(n);
+        opt.textContent = n === 0 ? '关' : `${n}x`;
+        ms.appendChild(opt);
+      }
+      ms.addEventListener('change', () => {
+        s.set('msaaSamples', Number(ms.value));
         s.applyToGame(this.game);
       });
     }
@@ -277,6 +293,7 @@ export class SettingsPanel {
     if (sh) sh.checked = d.shadows;
     // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 `padTuning` 的回显同一纪律）
     set('set-shadow-quality', normalizeShadowQuality(d.shadowQuality));
+    set('set-msaa', normalizeMsaaSamples(d.msaaSamples));
     /* 震动那一格问的是 `settings.get()`，与 `applyToGame` 用的是同一个判据（同一个取值口）：
      * 若这里改成看 `d.vibration === true`，那么一格存成 `null` 时会出现"框没勾、手柄还在震" ——
      * 显示与行为分家正是 B47 那一族的入口。 */
