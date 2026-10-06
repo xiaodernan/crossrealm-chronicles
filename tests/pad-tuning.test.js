@@ -812,12 +812,21 @@ describe('静态门禁：一处范围、一处写入口、桥只读自己的手�
     const fromTable = Object.keys(PAD_TUNING).map(padKnobId);
     expect([...free].sort(), '壳页与 `PAD_TUNING` 不再是同一份名单（漏一格 = 拖不动，多一格 = 没人认）')
       .toEqual([...fromTable].sort());
-    // 每一格都真的有一行 `<label>名称 <input .../></label>`：没有名字的滑杆玩家不知道它管什么
+    // 每一格都真的有一行 `<label>名称 <input .../></label>`：没有名字的滑杆玩家不知道它管什么。
+    // 名字可以直接写在标签里，也可以包在 i18n 的 `<span data-i18n>` 里（W-D2 切片2 起）——
+    // 两种形态都必须真的带名字。
+    const NAMED_SLIDER = /<label>(?:<span[^>]*>)?[^<\s][^<]*?(?:<\/span>)?\s*<input/;
     for (const id of fromTable) {
       const line = html.split('\n').find((l) => l.includes(`id="${id}"`));
       expect(line, `${id} 不在了`).toBeTruthy();
-      expect(line, `${id} 那一行没有中文名`).toMatch(/<label>[^<]+<input/);
+      expect(line, `${id} 那一行没有中文名`).toMatch(NAMED_SLIDER);
     }
+    // 反向控制：把死区那一格的名字掏空（span 里什么都不剩），这条扫描必须立刻红 —— 防"正则一坏就永远通过"
+    const hollow = html.replace(/(<span data-i18n="settings_deadzone">)[^<]+/, '$1');
+    expect(hollow, '掏空那一格的替换没生效（反向控制的前提）').not.toBe(html);
+    const hollowLine = hollow.split('\n').find((l) => l.includes('id="set-deadzone"'));
+    expect(hollowLine, '掏空之后那一行找不到了').toBeTruthy();
+    expect(hollowLine, '名字空了这条扫描却没红').not.toMatch(NAMED_SLIDER);
   });
 
   it('手档进桥只有一条路：`setTuning(` 的定义在桥里，唯一的调用点在 `SettingsManager`', () => {

@@ -4,6 +4,7 @@ import { applyMsaaSamples, normalizeMsaaSamples } from '../engine/aaPolicy.js';
 import { DEFAULT_SSAO_QUALITY, normalizeSsaoQuality } from '../engine/ssaoSettings.js';
 import { updateSsaoQuality } from '../engine/SsaoPass.js';
 import { DEFAULT_GRAPHICS_PRESET, getGraphicsPreset, normalizeGraphicsPreset } from '../engine/graphicsPresets.js';
+import { setLanguage, applyTranslations } from '../engine/i18n.js';
 
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
@@ -73,6 +74,12 @@ const DEFAULTS = {
    * 打击反馈有两路输出，玩家只想关其中一路（例如有人在夜里玩）。
    */
   vibration: true,
+  /**
+   * 界面语言（W-D2 切片2）：'zh' / 'en' 两档，名册在 `engine/i18n.js` 的 TABLES。
+   * 出厂中文 —— 这是游戏的主语言。存储里的脏值在 `applyToGame` 落地前经 `setLanguage`
+   * 的合法性校验回落（未知语言当场抛错，调用点捕获后回落 'zh'）。
+   */
+  language: 'zh',
 };
 
 /**
@@ -179,5 +186,17 @@ export class SettingsManager {
     // 震动开关推给反馈层（切片17）：只认"真的勾上"——存储是玩家可写的，
     // 一个 `"1"` 或 `1` 都该当成关，而不是由这里替玩家猜他要震
     if (game.rumble) game.rumble.enabled = this.get('vibration') === true;
+    // 界面语言（W-D2 切片2）：先切表再走查 DOM。未知语言不让它炸开机 ——
+    // 存储是玩家可写的，回落中文而不是抛（与其余脏值同一口径）。
+    // 这里**不**写 `applyTranslations(document)`：`document` 这个标识符在无 DOM
+    // 的环境（纯逻辑测试）里取出即 ReferenceError，而走查本身在那种环境下
+    // 就该是 no-op —— 兜底在 `applyTranslations` 自己的默认起点里。
+    const lang = this.get('language');
+    try {
+      setLanguage(lang);
+    } catch {
+      setLanguage('zh');
+    }
+    applyTranslations();
   }
 }

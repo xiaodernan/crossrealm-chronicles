@@ -7,7 +7,9 @@ import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../conten
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
 import { SHADOW_QUALITY_SIZES, normalizeShadowQuality } from '../engine/shadowPolicy.js';
 import { MSAA_SAMPLES, normalizeMsaaSamples } from '../engine/aaPolicy.js';
+import { SSAO_QUALITY_NAMES, normalizeSsaoQuality } from '../engine/ssaoSettings.js';
 import { PRESET_NAMES } from '../engine/graphicsPresets.js';
+import { LANGUAGES } from '../engine/i18n.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -130,7 +132,38 @@ export class SettingsPanel {
         this.refreshKeybinds();
       });
     }
-    /* 震动（切片17）：走的还是"写设置 → `applyToGame`"那一条，面板自己不碰马达 ——
+    // 语言切换（W-D2 切片2）：选项从 `LANGUAGES` 现推（加一门语言只改那一处），
+    // 落地走 `applyToGame` —— 它内部先 `setLanguage` 再走查 DOM（`applyTranslations`），
+    // 所以"换语言"只需要写这一格，DOM 文案与 JS 侧 `t()` 同步跟着走。
+    const lang = document.getElementById('set-language');
+    if (lang) {
+      for (const { code, label } of LANGUAGES) {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = label;
+        lang.appendChild(opt);
+      }
+      lang.value = s.get('language');
+      lang.addEventListener('change', () => {
+        s.set('language', lang.value);
+        s.applyToGame(this.game);
+      });
+    }
+    // SSAO 档（W-C4 切片5）：与抗锯齿档同一套纪律 —— 选项从名册现推（HTML 不抄第二份），
+    // 落地只走 applyToGame（挂/摘/换档收口在 setSsaoQuality），面板不直接碰 composer
+    const ssao = document.getElementById('set-ssao');
+    if (ssao) {
+      for (const name of SSAO_QUALITY_NAMES) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = { off: '关', low: '低', medium: '中', high: '高' }[name] ?? name;
+        ssao.appendChild(opt);
+      }
+      ssao.addEventListener('change', () => {
+        s.set('ssaoQuality', ssao.value);
+        s.applyToGame(this.game);
+      });
+    }    /* 震动（切片17）：走的还是"写设置 → `applyToGame`"那一条，面板自己不碰马达 ——
      * 否则"这一格开关到底管着谁"就有两个答案，而关掉的开关漏出一次震动是最难查的那种bug */
     const vib = document.getElementById('set-vibration');
     vib?.addEventListener('change', () => {
@@ -313,6 +346,7 @@ export class SettingsPanel {
     // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 `padTuning` 的回显同一纪律）
     set('set-shadow-quality', normalizeShadowQuality(d.shadowQuality));
     set('set-msaa', normalizeMsaaSamples(d.msaaSamples));
+    set('set-ssao', normalizeSsaoQuality(d.ssaoQuality));
     /* 震动那一格问的是 `settings.get()`，与 `applyToGame` 用的是同一个判据（同一个取值口）：
      * 若这里改成看 `d.vibration === true`，那么一格存成 `null` 时会出现"框没勾、手柄还在震" ——
      * 显示与行为分家正是 B47 那一族的入口。 */

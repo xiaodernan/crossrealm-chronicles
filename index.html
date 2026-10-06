@@ -89,32 +89,34 @@
     </div>
     <div id="settings-panel" class="overlay-panel hidden">
       <div class="panel-box settings-box">
-        <h2>设置</h2>
-        <label>主音量 <input id="set-master-vol" type="range" min="0" max="1" step="0.05" /></label>
-        <label>音效 <input id="set-sfx-vol" type="range" min="0" max="1" step="0.05" /></label>
+        <h2 data-i18n="settings_title">设置</h2>
+        <!-- 语言（W-D2 切片2）：选项由 SettingsPanel 从 LANGUAGES 现推 -->
+        <label><span data-i18n="settings_language">语言</span> <select id="set-language"></select></label>
+        <label><span data-i18n="settings_master_volume">主音量</span> <input id="set-master-vol" type="range" min="0" max="1" step="0.05" /></label>
+        <label><span data-i18n="settings_sfx_volume">音效</span> <input id="set-sfx-vol" type="range" min="0" max="1" step="0.05" /></label>
         <label>Bloom <input id="set-bloom" type="range" min="0" max="1" step="0.05" /></label>
-        <label>渲染精度 <input id="set-pixel" type="range" min="0.5" max="2" step="0.25" /></label>
-        <label>敌人更新距离 <input id="set-lod" type="range" min="40" max="150" step="5" /></label>
-        <label><input id="set-shadows" type="checkbox" /> 阴影</label>
+        <label><span data-i18n="settings_pixel_ratio">渲染精度</span> <input id="set-pixel" type="range" min="0.5" max="2" step="0.25" /></label>
+        <label><span data-i18n="settings_lod_distance">敌人更新距离</span> <input id="set-lod" type="range" min="40" max="150" step="5" /></label>
+        <label><input id="set-shadows" type="checkbox" /> <span data-i18n="settings_shadows">阴影</span></label>
         <!-- 画质预设（W-D3 切片1）：低/中/高三档一键切换，选项由 SettingsPanel 从 PRESET_NAMES 现推 -->
-        <label>画质预设 <select id="set-graphics-preset"></select></label>
+        <label><span data-i18n="settings_graphics_preset">画质预设</span> <select id="set-graphics-preset"></select></label>
         <!-- 选项由 SettingsPanel 从 SHADOW_QUALITY_SIZES 现推（HTML 不抄名册，抄了就会漏） -->
-        <label>阴影精度 <select id="set-shadow-quality"></select></label>
+        <label><span data-i18n="settings_shadow_quality">阴影精度</span> <select id="set-shadow-quality"></select></label>
         <!-- 同上：选项由 SettingsPanel 从 MSAA_SAMPLES 现推 -->
-        <label>抗锯齿 <select id="set-msaa"></select></label>
-        <h3>手柄手感</h3>
-        <label>摇杆死区 <input id="set-deadzone" type="range" /></label>
-        <label>外圈量程 <input id="set-analog-range" type="range" /></label>
-        <label>镜头响应曲线 <input id="set-look-curve" type="range" /></label>
-        <label>镜头死区 <input id="set-look-deadzone" type="range" /></label>
-        <label>镜头转速 <input id="set-look-pixels-per-second" type="range" /></label>
-        <label>冲刺触发深度 <input id="set-move-sprint-threshold" type="range" /></label>
-        <label>左扳机深度（LT） <input id="set-left-trigger-depth" type="range" /></label>
-        <label>右扳机深度（RT） <input id="set-right-trigger-depth" type="range" /></label>
-        <label><input id="set-vibration" type="checkbox" /> 手柄震动</label>
-        <h3>键位</h3>
+        <label><span data-i18n="settings_msaa">抗锯齿</span> <select id="set-msaa"></select></label>
+        <h3 data-i18n="settings_pad_tuning">手柄手感</h3>
+        <label><span data-i18n="settings_deadzone">摇杆死区</span> <input id="set-deadzone" type="range" /></label>
+        <label><span data-i18n="settings_analog_range">外圈量程</span> <input id="set-analog-range" type="range" /></label>
+        <label><span data-i18n="settings_look_curve">镜头响应曲线</span> <input id="set-look-curve" type="range" /></label>
+        <label><span data-i18n="settings_look_deadzone">镜头死区</span> <input id="set-look-deadzone" type="range" /></label>
+        <label><span data-i18n="settings_look_speed">镜头转速</span> <input id="set-look-pixels-per-second" type="range" /></label>
+        <label><span data-i18n="settings_sprint_threshold">冲刺触发深度</span> <input id="set-move-sprint-threshold" type="range" /></label>
+        <label><span data-i18n="settings_left_trigger">左扳机深度（LT）</span> <input id="set-left-trigger-depth" type="range" /></label>
+        <label><span data-i18n="settings_right_trigger">右扳机深度（RT）</span> <input id="set-right-trigger-depth" type="range" /></label>
+        <label><input id="set-vibration" type="checkbox" /> <span data-i18n="settings_vibration">手柄震动</span></label>
+        <h3 data-i18n="settings_keybinds">键位</h3>
         <div id="set-keybinds" class="keybind-list"></div>
-        <button id="settings-close">关闭</button>
+        <button id="settings-close" data-i18n="common_close">关闭</button>
       </div>
     </div>
     <div id="fast-travel-panel" class="overlay-panel hidden">

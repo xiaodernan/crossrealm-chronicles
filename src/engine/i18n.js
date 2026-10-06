@@ -10,6 +10,12 @@ import { STRINGS_EN } from '../content/strings.en.js';
 
 const TABLES = { zh: STRINGS_ZH, en: STRINGS_EN };
 
+/** 语言名册（切片2）：面板的下拉选项从这里现推，加一门语言只改这一处 */
+export const LANGUAGES = Object.freeze([
+  { code: 'zh', label: '中文' },
+  { code: 'en', label: 'English' },
+]);
+
 /** 当前语言：'zh' | 'en'，默认中文 */
 let currentLang = 'zh';
 
@@ -66,6 +72,33 @@ function interpolate(template, params) {
  */
 export function getAllKeys() {
   return Object.keys(TABLES.zh);
+}
+
+/**
+ * 把整棵 DOM 里带 `data-i18n` 属性的元素文本换成当前语言的文案（切片2）。
+ *
+ * 契约：元素上的 `data-i18n` 值就是键名，文本内容被 `textContent` 整体替换。
+ * 找不到键的元素保持原文不动（`t()` 的 [MISSING:] 只在 JS 调用路径出现，
+ * DOM 走查路径不把开发期的报错字样写进玩家界面）。
+ *
+ * 无 DOM 的环境（纯逻辑测试 / 早期启动）下走查是 no-op：默认起点在 `document`
+ * 缺席时取 null，返回 0 —— `typeof` 探一次而不是让 `applyToGame` 记住哪些环境有 DOM。
+ * @param {ParentNode | null} [root] - 走查起点，缺省等于 `document`（若存在）
+ * @returns {number} 被替换的元素数（供测试断言）
+ */
+export function applyTranslations(root = typeof document !== 'undefined' ? document : null) {
+  if (!root?.querySelectorAll) return 0;
+  const table = TABLES[currentLang];
+  let count = 0;
+  for (const el of root.querySelectorAll('[data-i18n]')) {
+    const key = el.getAttribute('data-i18n');
+    const value = table[key];
+    if (value !== undefined) {
+      el.textContent = value;
+      count += 1;
+    }
+  }
+  return count;
 }
 
 /**
