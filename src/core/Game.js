@@ -7,6 +7,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { createSsaoPass } from '../engine/SsaoPass.js';
 import { DEFAULT_SSAO_QUALITY } from '../engine/ssaoSettings.js';
+import { createDofPass } from '../engine/DofPass.js';
 import { ColorGrade } from '../effects/ColorGrade.js';
 import { PlayerController } from '../player/PlayerController.js';
 import { WorldManager } from '../world/WorldManager.js';
@@ -201,6 +202,16 @@ export class Game {
     this.ssaoPass = createSsaoPass(this.scene, this.camera, ssaoWidth, ssaoHeight, DEFAULT_SSAO_QUALITY);
     if (this.ssaoPass) {
       this.composer.addPass(this.ssaoPass);
+    }
+    // 景深（W-C4 切片6）：电影级对焦效果，用于处决镜头和对话场景。
+    // 铁律：DoF pass 必须插在 OutputPass 之前（线性空间运行），默认禁用，由外部系统动态启用。
+    this.dofPass = createDofPass(this.scene, this.camera, {
+      focus: 10,
+      aperture: 0.025,
+      maxblur: 1.0,
+    });
+    if (this.dofPass) {
+      this.composer.addPass(this.dofPass);
     }
     this.composer.addPass(new OutputPass());
     // 全屏 MSAA（W-C4 切片1）：composer 自建的 target 默认 samples=0 —— 切到 composer
