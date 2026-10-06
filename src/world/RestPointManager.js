@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { REST_POINT_NAMES } from '../content/restPointNames.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 export class RestPointManager {
   constructor(scene, world) {
@@ -29,7 +30,7 @@ export class RestPointManager {
       new THREE.MeshStandardMaterial({ color: 0x4a4035, roughness: 0.9, metalness: 0.1 })
     );
     base.position.y = 0.2;
-    base.castShadow = true;
+    applyShadow(base, 'castOnly');
     group.add(base);
 
     const stone = new THREE.Mesh(

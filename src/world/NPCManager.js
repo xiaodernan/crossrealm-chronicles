@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { NPC_CHAPTER_LINES } from '../game/LoreFragments.js';
 import { keyText } from '../content/keyHints.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 const NPC_DATA = [
   {
@@ -56,7 +57,7 @@ export class NPCManager {
       const mat = new THREE.MeshStandardMaterial({ color: data.color, roughness: 0.75 });
       const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.38, 1.0, 8, 16), mat);
       body.position.y = 1.2;
-      body.castShadow = true;
+      applyShadow(body, 'actor');
       group.add(body);
 
       const marker = new THREE.Mesh(

@@ -8,6 +8,7 @@ import { Sense } from '../ai/Perception.js';
 import { createEnemyFSM, tryClaimStrikeSlot } from '../ai/EnemyFSM.js';
 import { separationPush } from '../ai/Separation.js';
 import { Billboard } from '../effects/Billboard.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** 分离推力在两个身体完全重合时需要一个稳定的"每人一个方向"，用出生顺序做身份差 */
 let aiSeq = 0;
@@ -513,7 +514,7 @@ export class Enemy {
 
     const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 1.0, 8, 16), mat);
     body.position.y = 1.2;
-    body.castShadow = true;
+    applyShadow(body, 'actor');
     body.name = 'body';
     group.add(body);
 

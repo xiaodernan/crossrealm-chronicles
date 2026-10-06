@@ -12,6 +12,7 @@ import { VoidBoss } from './VoidBoss.js';
 import { ChaosBoss } from './ChaosBoss.js';
 import { chapterGateFor } from '../content/bossRoster.js';
 import { zoneIdAt } from '../content/ZoneIdentity.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 export class EnemyManager {
   constructor(scene, world, projectiles) {
@@ -242,7 +243,7 @@ export class EnemyManager {
       const a = (i / 8) * Math.PI * 2;
       const p = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 4, 6), pillarMat);
       p.position.set(Math.cos(a) * 20, 2, Math.sin(a) * 20);
-      p.castShadow = true;
+      applyShadow(p, 'actor');
       group.add(p);
     }
 

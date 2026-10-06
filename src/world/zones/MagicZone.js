@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
+import { applyShadow } from '../../engine/shadowPolicy.js';
 
 /** 哈利波特风格 — 悬浮城堡、魔法光柱、禁林 */
 export class MagicZone extends BaseZone {
@@ -79,7 +80,7 @@ export class MagicZone extends BaseZone {
 
     const main = new THREE.Mesh(new THREE.BoxGeometry(20, 12, 16), wallMat);
     main.position.y = 18;
-    main.castShadow = true;
+    applyShadow(main, 'castOnly');
     castle.add(main);
 
     const towerPositions = [
@@ -91,7 +92,7 @@ export class MagicZone extends BaseZone {
     for (const [tx, , tz] of towerPositions) {
       const tower = new THREE.Mesh(new THREE.CylinderGeometry(3, 3.5, 22, 8), wallMat);
       tower.position.set(tx, 22, tz);
-      tower.castShadow = true;
+      applyShadow(tower, 'castOnly');
       castle.add(tower);
 
       const roof = new THREE.Mesh(new THREE.ConeGeometry(4, 6, 8), roofMat);

@@ -1,3 +1,5 @@
+import { setSunShadow } from '../engine/shadowPolicy.js';
+
 /**
  * 距离 LOD —— 让远处的敌人省掉逻辑开销。
  *
@@ -42,7 +44,7 @@ export class PerformanceManager {
 
   updateSunShadow(sun, playerPos, enabled) {
     if (!sun) return;
-    sun.castShadow = enabled;
+    setSunShadow(sun, enabled);
     if (enabled) {
       sun.shadow.camera.position.copy(playerPos);
       sun.shadow.camera.updateProjectionMatrix?.();

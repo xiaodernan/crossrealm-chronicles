@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Boss } from './Boss.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** 第二 Boss：大奥术师 — 魔法位面 */
 export class MagicBoss extends Boss {
@@ -28,7 +29,7 @@ export class MagicBoss extends Boss {
     });
     const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.65, 1.6, 12, 24), robe);
     body.position.y = 1.8;
-    body.castShadow = true;
+    applyShadow(body, 'actor');
     body.name = 'body';
     group.add(body);
 

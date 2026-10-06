@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 const CHESTS = [
   { id: 'chest-hub', x: 25, z: 70, souls: 50 },
@@ -29,7 +30,7 @@ export class CollectibleManager {
       const group = new THREE.Group();
       const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 0.8), mat);
       body.position.y = 0.4;
-      body.castShadow = true;
+      applyShadow(body, 'castOnly');
       group.add(body);
       const lid = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.25, 0.85), lidMat);
       lid.position.y = 0.9;

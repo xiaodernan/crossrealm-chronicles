@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /**
  * 营火地标 —— 木牌、光柱、首次发现提示
@@ -36,7 +37,7 @@ export class RestPointEnhancer {
       new THREE.MeshStandardMaterial({ color: 0x4a4035, roughness: 0.9 })
     );
     post.position.set(-0.6, 0.8, 0.3);
-    post.castShadow = true;
+    applyShadow(post, 'castOnly');
     point.mesh.add(post);
 
     const board = new THREE.Mesh(

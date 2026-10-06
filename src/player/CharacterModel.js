@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { ANIM_MANIFEST } from '../assets/AnimManifest.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 const MODEL_CANDIDATES = [
   '/assets/models/player.glb',
@@ -78,11 +79,11 @@ export class CharacterModel {
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3a4a5a, roughness: 0.7 });
     const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.35, 0.9, 8, 16), bodyMat);
     torso.position.y = 1.1;
-    torso.castShadow = true;
+    applyShadow(torso, 'actor');
     this.group.add(torso);
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), bodyMat);
     head.position.y = 2.0;
-    head.castShadow = true;
+    applyShadow(head, 'actor');
     this.group.add(head);
     this.modelRoot = this.group;
     this.fallback = true;
@@ -109,8 +110,7 @@ export class CharacterModel {
       model.rotation.y = Math.PI;
       model.traverse((c) => {
         if (c.isMesh) {
-          c.castShadow = true;
-          c.receiveShadow = true;
+          applyShadow(c, 'prop');
         }
       });
       this.group.add(model);

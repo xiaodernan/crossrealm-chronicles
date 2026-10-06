@@ -5,6 +5,7 @@ import {
   sharedBox, sharedPlane, sharedCircle, sharedCylinder, sharedTorus, dungeonMaterial,
 } from './dungeonAssets.js';
 import { ROOM_TEMPLATES, templateFitsRoom, requiredPortCount, openPorts } from './RoomTemplates.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 import {
   DOOR_JAMB, DOOR_H, DOOR_T, DOOR_FRAME_OVER, DOOR_FRAME_H, DOOR_FRAME_T,
   DOOR_COLLIDER_HALF_DEPTH,
@@ -96,6 +97,7 @@ export class ProceduralDungeonGenerator {
         ob.userData.lore = room.lore;
         ob.userData.roomId = room.id;
         ob.name = 'lore_shard';
+        applyShadow(ob, 'castOnly');
         group.add(ob);
         layout.loreMeshes.push(ob);
       }
@@ -109,6 +111,7 @@ export class ProceduralDungeonGenerator {
       panel.position.set(door.x, DOOR_H / 2, door.z);
       if (door.dir === 'n' || door.dir === 's') panel.rotation.y = 0;
       else panel.rotation.y = Math.PI / 2;
+      applyShadow(panel, 'prop');
       panel.userData.door = door;
       panel.name = `door_${door.id}`;
       group.add(panel);
@@ -123,6 +126,7 @@ export class ProceduralDungeonGenerator {
       frame.position.copy(panel.position);
       frame.position.y = DOOR_FRAME_H / 2;
       if (door.dir === 'e' || door.dir === 'w') frame.rotation.y = Math.PI / 2;
+      applyShadow(frame, 'prop');
       frame.userData.isFrame = true;
       group.add(frame);
     }
@@ -137,7 +141,7 @@ export class ProceduralDungeonGenerator {
     const floor = new THREE.Mesh(sharedPlane(rw - 0.2, rd - 0.2), floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(room.x, 0.02, room.z);
-    floor.receiveShadow = true;
+    applyShadow(floor, 'ground');
     room.group.add(floor);
 
     // 基础灯光
@@ -210,7 +214,7 @@ export class ProceduralDungeonGenerator {
     const floor = new THREE.Mesh(sharedCircle(rw * 0.45, 48), floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(room.x, 0.03, room.z);
-    floor.receiveShadow = true;
+    applyShadow(floor, 'ground');
     group.add(floor);
 
     for (let i = 0; i < 8; i++) {
@@ -219,7 +223,7 @@ export class ProceduralDungeonGenerator {
       const pz = room.z + Math.sin(a) * rd * 0.38;
       const pillar = new THREE.Mesh(sharedCylinder(0.5, 0.65, WH + 1, 8), wallMat);
       pillar.position.set(px, (WH + 1) / 2, pz);
-      pillar.castShadow = true;
+      applyShadow(pillar, 'castOnly');
       group.add(pillar);
       pushCollider(layout, px, pz, 1.2, 1.2);
     }
@@ -254,8 +258,8 @@ export class ProceduralDungeonGenerator {
 function addWallSegment(group, mat, x, z, w, d, h, layout) {
   const m = new THREE.Mesh(sharedBox(w, h, d), mat);
   m.position.set(x, h / 2, z);
-  m.castShadow = true;
-  m.receiveShadow = true;
+  applyShadow(m, 'prop');
+  m.userData.isWall = true;
   group.add(m);
   pushCollider(layout, x, z, w, d);
 }

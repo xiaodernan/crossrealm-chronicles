@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { REST_NPC_MODELS } from '../assets/RestNpcManifest.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 const _loader = new GLTFLoader();
 
@@ -33,7 +34,7 @@ export class RestNpcModel {
     const bodyH = def.height;
     const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, bodyH, 8, 14), bodyMat);
     body.name = 'body';
-    body.castShadow = true;
+    applyShadow(body, 'actor');
     body.position.y = def.idle === 'sit' || this.config.sit ? 0.72 : 1.15;
     this.group.add(body);
     this.fallbackMeshes.push(body);
@@ -85,8 +86,7 @@ export class RestNpcModel {
         model.rotation.y = this.config.rotY ?? Math.PI;
         model.traverse((c) => {
           if (c.isMesh) {
-            c.castShadow = true;
-            c.receiveShadow = true;
+            applyShadow(c, 'prop');
             if (this.config.ghost) {
               c.material = c.material.clone();
               c.material.transparent = true;

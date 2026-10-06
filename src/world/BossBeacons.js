@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { MAP_BOSSES } from '../game/QuestSystem.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** 全图可见 Boss 信标 — 光柱 + 标签 + 常驻竞技场环 */
 export class BossBeacons {
@@ -62,7 +63,7 @@ export class BossBeacons {
       })
     );
     pillar.position.y = gy + 7;
-    pillar.castShadow = true;
+    applyShadow(pillar, 'castOnly');
     g.add(pillar);
 
     const orb = new THREE.Mesh(

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 export class WorldDecorations {
   constructor(scene, world) {
     this.scene = scene;
@@ -74,7 +75,7 @@ export class WorldDecorations {
       const h = 2.5 + Math.random() * 2.5;
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.28, h, 6), trunkMat);
       trunk.position.y = h * 0.5;
-      trunk.castShadow = true;
+      applyShadow(trunk, 'castOnly');
       tree.add(trunk);
       const foliage = new THREE.Mesh(
         new THREE.ConeGeometry(0.9 + Math.random() * 0.5, 2.2 + Math.random(), 7),
@@ -84,7 +85,7 @@ export class WorldDecorations {
         })
       );
       foliage.position.y = h + 0.8;
-      foliage.castShadow = true;
+      applyShadow(foliage, 'castOnly');
       tree.add(foliage);
       tree.position.set(s.x, this.world.getGroundHeight(s.x, s.z), s.z);
       tree.rotation.y = Math.random() * Math.PI * 2;
@@ -118,8 +119,7 @@ export class WorldDecorations {
       rock.position.set(x, gy + 0.15, z);
       rock.rotation.set(Math.random(), Math.random(), Math.random());
       rock.scale.y = 0.5 + Math.random() * 0.5;
-      rock.castShadow = true;
-      rock.receiveShadow = true;
+      applyShadow(rock, 'prop');
       this.group.add(rock);
     }
   }
@@ -142,7 +142,7 @@ export class WorldDecorations {
     );
     const gy = this.world.getGroundHeight(x, z);
     post.position.set(x, gy + 1.1, z);
-    post.castShadow = true;
+    applyShadow(post, 'castOnly');
     const lamp = new THREE.Mesh(
       new THREE.SphereGeometry(0.22, 8, 8),
       new THREE.MeshStandardMaterial({
@@ -266,7 +266,7 @@ export class WorldDecorations {
       );
       bench.position.set(Math.cos(a) * 18, gy + 0.2, 55 + Math.sin(a) * 18);
       bench.rotation.y = -a;
-      bench.castShadow = true;
+      applyShadow(bench, 'castOnly');
       this.group.add(bench);
     }
   }
@@ -287,7 +287,7 @@ export class WorldDecorations {
         const z = cz + (Math.random() - 0.5) * 12;
         col.position.set(x, this.world.getGroundHeight(x, z) + 0.8, z);
         col.rotation.y = Math.random() * Math.PI;
-        col.castShadow = true;
+        applyShadow(col, 'castOnly');
         this.group.add(col);
       }
     }

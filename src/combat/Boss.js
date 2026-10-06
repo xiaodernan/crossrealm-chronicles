@@ -5,6 +5,7 @@ import { ARENA_MOVES, arenaScriptFor } from '../content/arenaScripts.js';
 import { barrageLayout } from './BarragePattern.js';
 import { BossStateMachine, BossPhase, PhaseTransitionCondition } from './BossStateMachine.js';
 import { phaseTuningFor } from '../content/bossPhases.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** 影界守护者 — 首个 Boss，三阶段 */
 export class Boss extends Enemy {
@@ -71,7 +72,7 @@ export class Boss extends Enemy {
     });
     const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.7, 1.8, 12, 24), cloakMat);
     body.position.y = 2.0;
-    body.castShadow = true;
+    applyShadow(body, 'actor');
     body.name = 'body';
     group.add(body);
 

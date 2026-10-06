@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
+import { applyShadow } from '../../engine/shadowPolicy.js';
 
 /** 新增：幽暗林地 — 迷雾缠绕的古老森林，介于幻想与虚空之间 */
 export class GloomZone extends BaseZone {
@@ -95,7 +96,7 @@ export class GloomZone extends BaseZone {
       rock.position.set(lx, this.sampleHeight(lx, lz) + 1, lz);
       rock.rotation.set(Math.random(), Math.random(), Math.random());
       rock.scale.set(1, 0.7 + Math.random() * 0.5, 1);
-      rock.castShadow = true;
+      applyShadow(rock, 'castOnly');
       if (rock.geometry.parameters.radius >= 1) {
         this.addCylinderCollider(lx, lz, rock.geometry.parameters.radius * 0.8, rock.position.y + rock.geometry.parameters.radius * 1.1, { base: rock.position.y - rock.geometry.parameters.radius });
       }

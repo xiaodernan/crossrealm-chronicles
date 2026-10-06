@@ -147,7 +147,5 @@ export class TextureLibrary {
     const mat = this.sharedMaterial(setName, colorTint, overrides);
     if (old?.map && !mat.map) mat.map = old.map;
     mesh.material = mat;
-    mesh.castShadow = mesh.castShadow ?? true;
-    mesh.receiveShadow = mesh.receiveShadow ?? true;
   }
 }

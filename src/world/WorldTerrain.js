@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { sampleGlobalHeight } from './TerrainHeight.js';
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** sculpt 主地形 + 贴合地面的蜿蜒古径（贴图 + 法线） */
 export class WorldTerrain {
@@ -108,7 +109,7 @@ export class WorldTerrain {
 
     const mesh = new THREE.Mesh(geo, mat);
     mesh.rotation.x = -Math.PI / 2;
-    mesh.receiveShadow = true;
+    applyShadow(mesh, 'ground');
     this.group.add(mesh);
     this._meshes.ground = mesh;
   }
@@ -184,7 +185,7 @@ export class WorldTerrain {
 
     const mesh = new THREE.Mesh(geo, mat);
     mesh.userData.tint = color;
-    mesh.receiveShadow = true;
+    applyShadow(mesh, 'ground');
     this.group.add(mesh);
     this._meshes.paths.push(mesh);
   }
@@ -203,8 +204,7 @@ export class WorldTerrain {
       cliff.position.set(x, this.heightAt(x, z) + rh * 0.35, z);
       cliff.rotation.y = Math.random() * Math.PI;
       cliff.scale.set(1.2, 1, 0.8);
-      cliff.castShadow = true;
-      cliff.receiveShadow = true;
+      applyShadow(cliff, 'prop');
       this.group.add(cliff);
       this._meshes.cliffs.push(cliff);
     }

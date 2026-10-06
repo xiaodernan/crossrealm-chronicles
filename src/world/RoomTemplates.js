@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { sharedBox, sharedCylinder } from './dungeonAssets.js';
 import { CELL } from './dungeonDimensions.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /**
  * 房间模板库 —— 「这一类房间摆什么」只有一份答案（W-B10 切片4）。
@@ -90,7 +91,7 @@ export const requiredPortCount = (tpl) =>
 function decor(ctx, group, geometry, material, x, z, y, cw, cd) {
   const m = new THREE.Mesh(geometry, material);
   m.position.set(x, y, z);
-  m.castShadow = true;
+  applyShadow(m, 'castOnly');
   group.add(m);
   if (cw && cd) ctx.addCollider(x, z, cw, cd);
   return m;

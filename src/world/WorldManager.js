@@ -13,6 +13,7 @@ import { sampleGlobalHeightSmooth, sampleGroundNormal } from './TerrainHeight.js
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { CollisionWorld } from '../engine/Collision.js';
 import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from '../content/ZoneIdentity.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** 地形网格 520×620，可通行边界留 10 单位余量 */
 export const WORLD_BOUNDS = { minX: -250, maxX: 250, minZ: -300, maxZ: 300 };
@@ -178,7 +179,7 @@ export class WorldManager {
       new THREE.MeshStandardMaterial({ color: 0x5a5550, roughness: 0.85 })
     );
     pillar.position.y = 5;
-    pillar.castShadow = true;
+    applyShadow(pillar, 'castOnly');
     hub.add(pillar);
 
     const core = new THREE.Mesh(

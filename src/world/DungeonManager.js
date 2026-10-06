@@ -5,6 +5,7 @@ import { DungeonBoss } from '../combat/DungeonBoss.js';
 import { BOSS_LORE, DUNGEON_ENTER_LINES } from '../game/LoreFragments.js';
 import { DUNGEON_DEFS } from '../content/dungeons.js';
 import { disposeDungeonSubtree } from './dungeonAssets.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** 副本每次重建/离开都会走这里（旧实现只 group.remove() 不 dispose，反复进出迷宫会让
  *  GPU 缓冲单调增长）。
@@ -64,7 +65,7 @@ export class DungeonManager {
 
       const base = new THREE.Mesh(new THREE.BoxGeometry(10, 6, 8), wallMat);
       base.position.y = 3;
-      base.castShadow = true;
+      applyShadow(base, 'castOnly');
       g.add(base);
 
       const roof = new THREE.Mesh(new THREE.ConeGeometry(7, 3, 4), wallMat);

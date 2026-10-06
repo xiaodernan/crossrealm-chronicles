@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { applyShadow } from '../../engine/shadowPolicy.js';
 
 export class BaseZone {
   constructor(scene, center, config) {
@@ -149,7 +150,7 @@ export class BaseZone {
       new THREE.MeshStandardMaterial({ color: 0x4a3020, roughness: 0.95 })
     );
     trunk.position.y = 1 * scale;
-    trunk.castShadow = true;
+    applyShadow(trunk, 'castOnly');
     group.add(trunk);
 
     const foliage = new THREE.Mesh(
@@ -157,7 +158,7 @@ export class BaseZone {
       new THREE.MeshStandardMaterial({ color: 0x2a5a30, roughness: 0.85 })
     );
     foliage.position.y = 3 * scale;
-    foliage.castShadow = true;
+    applyShadow(foliage, 'castOnly');
     group.add(foliage);
 
     const groundY = this.sampleHeight(x, z);
@@ -176,7 +177,7 @@ export class BaseZone {
     rock.position.set(x, this.sampleHeight(x, z) + size * 0.4, z);
     rock.rotation.set(Math.random(), Math.random(), Math.random());
     rock.scale.set(1, 0.7 + Math.random() * 0.5, 1);
-    rock.castShadow = true;
+    applyShadow(rock, 'castOnly');
     if (size >= 0.8) this.addCylinderCollider(x, z, size * 0.8, rock.position.y + size * 1.1, { base: rock.position.y - size });
     return rock;
   }

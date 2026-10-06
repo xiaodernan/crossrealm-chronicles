@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
+import { applyShadow } from '../../engine/shadowPolicy.js';
 
 /** 指环王风格 — 古老森林、灰白山峰、 ruins 遗迹 */
 export class FantasyZone extends BaseZone {
@@ -64,7 +65,7 @@ export class FantasyZone extends BaseZone {
     for (const [x, z, h, r] of peaks) {
       const m = new THREE.Mesh(new THREE.ConeGeometry(r, h, 6), mat);
       m.position.set(x, this.sampleHeight(x, z) + h * 0.5 - 2, z);
-      m.castShadow = true;
+      applyShadow(m, 'castOnly');
       this.group.add(m);
       this.addCylinderCollider(x, z, r * 0.78, this.sampleHeight(x, z) + h * 0.7, { base: this.sampleHeight(x, z) - 3 });
     }
@@ -91,7 +92,7 @@ export class FantasyZone extends BaseZone {
       const z = -15 + (Math.random() - 0.5) * 10;
       col.position.set(x, this.sampleHeight(x, z) + 2, z);
       col.rotation.z = (Math.random() - 0.5) * 0.3;
-      col.castShadow = true;
+      applyShadow(col, 'castOnly');
       this.group.add(col);
       this.addCylinderCollider(x, z, 0.85, this.sampleHeight(x, z) + 2 + h * 0.5, { base: this.sampleHeight(x, z) - 0.5 });
     }
@@ -169,7 +170,7 @@ export class FantasyZone extends BaseZone {
     const tower = new THREE.Group();
     const base = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 3, 8, 8), stoneMat);
     base.position.y = 4;
-    base.castShadow = true;
+    applyShadow(base, 'castOnly');
     tower.add(base);
     const top = new THREE.Mesh(new THREE.CylinderGeometry(2, 2.5, 4, 8), stoneMat);
     top.position.y = 10;
@@ -193,7 +194,7 @@ export class FantasyZone extends BaseZone {
     for (let i = 0; i < 12; i++) {
       const plank = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.15, 0.8), woodMat);
       plank.position.set(i * 2.2 - 12, 1.2 + Math.sin(i * 0.4) * 0.2, 0);
-      plank.castShadow = true;
+      applyShadow(plank, 'castOnly');
       bridge.add(plank);
     }
     const railMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
@@ -238,7 +239,7 @@ export class FantasyZone extends BaseZone {
       const lz = Math.sin(angle) * r;
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.35, 4 + Math.random() * 3, 5), treeMat);
       trunk.position.set(lx, this.sampleHeight(lx, lz) + 2, lz);
-      trunk.castShadow = true;
+      applyShadow(trunk, 'castOnly');
       this.group.add(trunk);
       const crown = new THREE.Mesh(new THREE.ConeGeometry(1.5 + Math.random(), 3, 6), treeMat);
       crown.position.set(lx, trunk.position.y + 3, lz);

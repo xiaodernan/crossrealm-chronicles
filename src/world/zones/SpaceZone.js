@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
+import { applyShadow } from '../../engine/shadowPolicy.js';
 
 /** 星际穿越风格 — 冰云行星、引力透镜、五维书架彩蛋 */
 export class SpaceZone extends BaseZone {
@@ -110,7 +111,7 @@ export class SpaceZone extends BaseZone {
       const crystal = new THREE.Mesh(new THREE.ConeGeometry(1 + Math.random(), h, 4), iceMat);
       crystal.position.set(x, this.sampleHeight(x, z) + h * 0.5, z);
       crystal.rotation.y = Math.random() * Math.PI;
-      crystal.castShadow = true;
+      applyShadow(crystal, 'castOnly');
       this.group.add(crystal);
       const gy = this.sampleHeight(x, z);
       this.addCylinderCollider(x, z, 0.7, gy + h, { base: gy - 0.5 });
@@ -204,7 +205,7 @@ export class SpaceZone extends BaseZone {
       const z = 60;
       mono.position.set(x, this.sampleHeight(x, z) + 3, z);
       mono.rotation.y = 0.2 * i;
-      mono.castShadow = true;
+      applyShadow(mono, 'castOnly');
       this.group.add(mono);
       this.addBoxCollider(x, z, 0.6, 0.25, this.sampleHeight(x, z) + 6 + i, { base: this.sampleHeight(x, z) - 0.5, rot: 0.2 * i });
     }

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { refreshKeyText } from '../content/keyHints.js';
+import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** 演示行者 — 金色小人，自动跑完全流程，镜头跟随观看（由 update 驱动，不依赖 async 等待） */
 export class DemoRunner {
@@ -46,11 +47,11 @@ export class DemoRunner {
     });
     const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.32, 0.65, 6, 10), bodyMat);
     torso.position.y = 1.1;
-    torso.castShadow = true;
+    applyShadow(torso, 'actor');
     g.add(torso);
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 10), bodyMat);
     head.position.y = 1.75;
-    head.castShadow = true;
+    applyShadow(head, 'actor');
     g.add(head);
     const cape = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 1.0), capeMat);
     cape.position.set(0, 1.15, 0.25);

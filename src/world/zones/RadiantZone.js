@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
+import { applyShadow } from '../../engine/shadowPolicy.js';
 
 /** 新增：辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊 */
 export class RadiantZone extends BaseZone {
@@ -94,7 +95,7 @@ export class RadiantZone extends BaseZone {
       const dune = new THREE.Mesh(new THREE.ConeGeometry(1.5 + Math.random(), 3 + Math.random() * 2, 6), mat);
       dune.position.set(lx, this.sampleHeight(lx, lz) + 1.5, lz);
       dune.rotation.y = Math.random() * Math.PI;
-      dune.castShadow = true;
+      applyShadow(dune, 'castOnly');
       this.group.add(dune);
       this.addCylinderCollider(lx, lz, 1.5, dune.position.y + 3, { base: dune.position.y - 1 });
     }
