@@ -48,12 +48,20 @@ describe('Game.js 接线扫描', () => {
     expect(addPassArgs(src).some((a) => a.includes('OutputPass'))).toBe(true);
   });
 
-  it('链序必须是 RenderPass -> bloom -> OutputPass —— bloom 光晕要在线性空间合成', () => {
+  it('链序必须是 RenderPass -> bloom -> [线性 pass...] -> OutputPass —— 显示变换永远链尾', () => {
     const args = addPassArgs(gameSrc()).filter((a) => a.includes('Pass'));
     expect(args.length).toBeGreaterThanOrEqual(3);
     expect(args[0]).toContain('RenderPass');
     expect(args[1]).toContain('bloomPass');
-    expect(args[2]).toContain('OutputPass');
+    expect(args[args.length - 1]).toContain('OutputPass');
+  });
+
+  it('色彩分级站 OutputPass 之前（W-C4 切片4）—— 线性空间铁律的正面案例', () => {
+    const args = addPassArgs(gameSrc());
+    const gradeIdx = args.findIndex((a) => a.includes('colorGrade.pass'));
+    const outputIdx = args.findIndex((a) => a.includes('OutputPass'));
+    expect(gradeIdx).toBeGreaterThan(-1);
+    expect(gradeIdx).toBeLessThan(outputIdx);
   });
 
   it('铁律：OutputPass 是最后一个 addPass —— 它后面不许再插任何 pass', () => {

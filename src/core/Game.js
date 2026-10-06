@@ -5,6 +5,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ColorGrade } from '../effects/ColorGrade.js';
 import { PlayerController } from '../player/PlayerController.js';
 import { WorldManager } from '../world/WorldManager.js';
 import { TimeController } from '../engine/Time.js';
@@ -185,7 +186,12 @@ export class Game {
     // 曲线之外。链尾归 OutputPass 后 bloom 改画回线性 readBuffer，场景 + bloom 先线性合成
     // 再一次 ACES + sRGB。铁律：**后续一切 pass（LUT/SSAO/景深）必须插在本行之前、
     // OutputPass 之前** —— 显示变换之后是 sRGB 空间，只有 OutputPass 允许站链尾。
-    this.composer.addPass(new OutputPass());
+    // 区域色彩分级（W-C4 切片4）：线性空间的 pass，**必须站 OutputPass 之前**（上面的铁律）。
+    // 参数唯一真源是 content/zoneGrade.js 的冻结表，uniforms 写权限归 ColorGrade 控制器；
+    // 出厂全中性（三个算式的恒等值），分级数值留给后续美术调参切片。
+    this.colorGrade = new ColorGrade();
+    this.composer.addPass(this.colorGrade.pass);
+        this.composer.addPass(new OutputPass());
     // 全屏 MSAA（W-C4 切片1）：composer 自建的 target 默认 samples=0 —— 切到 composer
     // 链那天起全屏就没有过抗锯齿（上面 `antialias: true` 为死参数的另一半原因）。
     // 开机落出厂档，玩家档由 SettingsManager.applyToGame 走同一个出口。
@@ -935,6 +941,8 @@ export class Game {
     // 区域雾跟昼夜同一个算式源：明度由 daylight 调制（正午原色），跨区由
     // zoneFog 自己的指数平滑收敛 —— fog 的写权限在这里面，别处不许碰
     this.zoneFog.update(dt, this.world.zoneId, daylight);
+    // 分级跟雾同一个驱动节奏：换区指数平滑收敛，uniforms 写权限在 ColorGrade 里面
+    this.colorGrade.update(dt, this.world.zoneId);
     if (this.skyUniforms) {
       const phi = THREE.MathUtils.degToRad(88 - daylight * 18);
       const theta = this.timeOfDay * Math.PI * 2;
