@@ -35,6 +35,7 @@ import {
   SHADOW_CLASSES, SHADOW_CLASS_IDS, shadowClassOf, applyShadow, setSunShadow,
   SHADOW_QUALITY_SIZES, DEFAULT_SHADOW_QUALITY, shadowQualityOf, normalizeShadowQuality,
   applySunShadowQuality, SUN_FOLLOW_OFFSET, applySunFollow,
+  SUN_SHADOW_FRUSTUM_BY_QUALITY, sunShadowFrustumOf,
 } from '../src/engine/shadowPolicy.js';
 import { ProceduralDungeonGenerator } from '../src/world/ProceduralDungeonGenerator.js';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
@@ -313,6 +314,38 @@ describe('阴影策略的单一所有者（W-C3 切片1）', () => {
 
       it('null 不炸', () => {
         expect(applySunShadowQuality(null, 1024)).toBe(null);
+      });
+    });
+
+    describe('正交框随档收紧（切片3）', () => {
+      it('三档半宽：高与改前 ±140 同值（默认零变更）、中 ±100、低 ±70', () => {
+        expect(SUN_SHADOW_FRUSTUM_BY_QUALITY).toEqual({ 1024: 70, 2048: 100, 4096: 140 });
+        for (const size of SHADOW_QUALITY_SIZES) {
+          expect(sunShadowFrustumOf(size), String(size)).toBe(SUN_SHADOW_FRUSTUM_BY_QUALITY[size]);
+        }
+        expect(sunShadowFrustumOf(DEFAULT_SHADOW_QUALITY)).toBe(140);
+      });
+
+      it('名册是冻的：没有登记半宽的档当场抛', () => {
+        expect(Object.isFrozen(SUN_SHADOW_FRUSTUM_BY_QUALITY)).toBe(true);
+        expect(() => sunShadowFrustumOf(8192)).toThrow(/未知的阴影精度档/);
+      });
+
+      it('applySunShadowQuality 把框真的落上相机（不是只改 mapSize）', () => {
+        const s = new THREE.DirectionalLight();
+        s.castShadow = true;
+        applySunShadowQuality(s, 1024);
+        expect([s.shadow.camera.left, s.shadow.camera.right]).toEqual([-70, 70]);
+        expect([s.shadow.camera.top, s.shadow.camera.bottom]).toEqual([70, -70]);
+        // 真读者：投影矩阵必须已经是新框的 —— 正交投影 elements[0] == 2/(right-left)
+        expect(s.shadow.camera.projectionMatrix.elements[0]).toBeCloseTo(2 / 140, 9);
+      });
+
+      it('接线门禁：Game.js 不再手写影子框与 mapSize，只走 applySunShadowQuality 一条路', () => {
+        const src = stripComments(readFileSync(join(SRC, 'core', 'Game.js'), 'utf8'));
+        expect(src).toMatch(/applySunShadowQuality\(this\.sun,\s*DEFAULT_SHADOW_QUALITY\)/);
+        expect(src).not.toMatch(/shadow\.camera\.(left|right|top|bottom)\s*=/);
+        expect(src).not.toMatch(/shadow\.mapSize/);
       });
     });
 

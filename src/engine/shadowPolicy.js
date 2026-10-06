@@ -114,15 +114,26 @@ export function normalizeShadowQuality(size) {
 }
 
 /**
- * 把一档精度落上太阳。换档必须**释放旧图**：three 会缓存 `shadow.map`（深度图的
- * render target），只改 `mapSize` 不释放的话，下一帧仍按旧尺寸渲染 —— 表面上换了档，
- * 实际显存里还是原来那张。开机时 `map` 还没建（null），释放那一步要防炸。
+ * 把一档画质落上太阳：**贴图精度 + 正交框半宽**一起落（两者是同一档画质的两半 ——
+ * 只落 mapSize 不落框，低档的纹素还是那把 ±140 的粗尺）。
+ *
+ * 换档必须**释放旧图**：three 会缓存 `shadow.map`（深度图的 render target），
+ * 只改 `mapSize` 不释放的话，下一帧仍按旧尺寸渲染 —— 表面上换了档，实际显存里
+ * 还是原来那张。开机时 `map` 还没建（null），释放那一步要防炸。
+ * 正交参数改完必须 `updateProjectionMatrix()`，否则投影矩阵仍是旧框的。
  * @returns 传进去的那盏光
  */
 export function applySunShadowQuality(sun, size) {
   if (!sun) return sun;
   const q = shadowQualityOf(size);
   sun.shadow.mapSize.set(q, q);
+  const e = sunShadowFrustumOf(q);
+  const cam = sun.shadow.camera;
+  cam.left = -e;
+  cam.right = e;
+  cam.top = e;
+  cam.bottom = -e;
+  cam.updateProjectionMatrix();
   if (sun.shadow.map) {
     sun.shadow.map.dispose();
     sun.shadow.map = null;
@@ -136,6 +147,36 @@ export function applySunShadowQuality(sun, size) {
  * 不该因为玩家走动而变，变的只是影子框跟着谁。
  */
 export const SUN_FOLLOW_OFFSET = Object.freeze({ x: 80, y: 120, z: 60 });
+
+/**
+ * 每档画质对应的阴影框半宽（正交相机的 left/right/top/bottom = ±这个值）。
+ *
+ * 改前这一框是 ±140 硬写的，四档共用一把尺 —— 问题是**纹素密度**：
+ * 框 280 米宽，4096 档一格 6.8cm，1024 档却是 27.3cm（糊成一片）。
+ * 紧致框是低档画质的另一半：框收小一倍，同样的贴图精度纹素就细一倍。
+ * 三档取值按雾的可见度定（`FogExp2` 密度 0.0038：100 米雾化 ~14%、140 米 ~27%）
+ * —— 阴影的消失边界落在低可见度区间，玩家看不出"影子在哪一圈断掉"：
+ * 高 4096 → ±140（**与改前同值，默认零变更**）、中 2048 → ±100（雾 ~26%）、低 1024 → ±70（雾 ~14%）。
+ * 跟随（切片2）是这一格的前提：框焊在原点时收紧它，收的是"离原点多远还有影"，
+ * 跟着玩家走之后收紧才有"阴影分辨率"这层意义。
+ */
+export const SUN_SHADOW_FRUSTUM_BY_QUALITY = Object.freeze({
+  1024: 70,
+  2048: 100,
+  4096: 140,
+});
+
+/** 取一档的框半宽；档位本身由 `shadowQualityOf` 把关 */
+export function sunShadowFrustumOf(size) {
+  const e = SUN_SHADOW_FRUSTUM_BY_QUALITY[shadowQualityOf(size)];
+  if (e === undefined) {
+    throw new Error(
+      `sunShadowFrustumOf: 精度档 ${size} 没有登记框半宽，登记的是 `
+      + Object.keys(SUN_SHADOW_FRUSTUM_BY_QUALITY).join(' / ')
+    );
+  }
+  return e;
+}
 
 /**
  * 让阴影框跟着玩家走。
