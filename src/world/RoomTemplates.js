@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { sharedBox, sharedCylinder } from './dungeonAssets.js';
+import { sharedBox, sharedCylinder, uvBox, uvCylinder } from './dungeonAssets.js';
 import { CELL } from './dungeonDimensions.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
@@ -101,7 +101,8 @@ function buildHallStraight(group, room, layout, def, ctx) {
   // 直厅：两侧实墙根各两根壁柱，n↔s 那条通道留着
   for (const sx of [-1, 1]) {
     for (const sz of [-1, 1]) {
-      decor(ctx, group, sharedBox(0.8, 4, 0.8), ctx.wallMat,
+      // 壁柱走 wallMat（带石砌贴图）—— 几何选 uvBox：UV 以米计，与墙段同一砖尺寸
+      decor(ctx, group, uvBox(0.8, 4, 0.8), ctx.wallMat,
         room.x + sx * (room.w / 2 - 0.7), room.z + sz * (room.d / 4), 2, 0.8, 0.8);
     }
   }
@@ -111,7 +112,7 @@ function buildChamberSquare(group, room, layout, def, ctx) {
   // 方厅：四角柱，两条中线让给路
   for (const sx of [-1, 1]) {
     for (const sz of [-1, 1]) {
-      decor(ctx, group, sharedCylinder(0.45, 0.55, 3.6, 8), ctx.wallMat,
+      decor(ctx, group, uvCylinder(0.45, 0.55, 3.6, 8), ctx.wallMat,
         room.x + sx * (room.w / 2 - 2.2), room.z + sz * (room.d / 2 - 2.2), 1.8, 1.1, 1.1);
     }
   }
@@ -129,7 +130,7 @@ function buildJunctionCross(group, room, layout, def, ctx) {
 
 function buildJunctionTee(group, room, layout, def, ctx) {
   // T 口：n/e/s 三面开门，唯一那堵实墙在西侧 —— 壁龛就靠它，两只火盆摆在北门口两侧
-  decor(ctx, group, sharedBox(1.6, 2.4, 0.6), ctx.wallMat,
+  decor(ctx, group, uvBox(1.6, 2.4, 0.6), ctx.wallMat,
     room.x - (room.w / 2 - 0.6), room.z, 1.2, 0.6, 1.6);
   for (const sx of [-1, 1]) {
     decor(ctx, group, sharedCylinder(0.5, 0.35, 1.1, 8), ctx.accentMat,
@@ -147,7 +148,7 @@ function buildTreasureSmall(group, room, layout, def, ctx) {
 function buildLoreDoubleDoor(group, room, layout, def, ctx) {
   // LORE 房：南北对开，两座读经台靠在东西实墙上
   for (const sx of [-1, 1]) {
-    decor(ctx, group, sharedBox(0.6, 1.2, 0.6), ctx.wallMat,
+    decor(ctx, group, uvBox(0.6, 1.2, 0.6), ctx.wallMat,
       room.x + sx * (room.w / 2 - 0.9), room.z, 0.6, 0.6, 0.6);
   }
 }

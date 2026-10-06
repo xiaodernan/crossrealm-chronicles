@@ -72,6 +72,73 @@ export const sharedTorus = (r, tube, rs, ts) =>
   sharedGeo(`torus:${n(r)},${n(tube)},${n(rs)},${n(ts)}`, () => new THREE.TorusGeometry(r, tube, rs, ts));
 
 /**
+ * UV 以**米**为单位的几何（W-C5）。
+ *
+ * ## 为什么要有这一族
+ * three 的几何 UV 都是"每个面 0..1"，贴图挂在材质上就只有一个 `repeat` ——
+ * 一面 18 米的整墙和一段 7 米的墙段（门洞旁边那截）要的铺数不同，同一份材质满足不了两个。
+ * 把 UV 先乘上自己的真实尺寸（"米"），贴图端就只剩**一个**铺数：`1 / 一砖两米`。
+ * 于是墙段、地面、柱子无论多大，砖都是 2 米一块 —— 而材质照样是每座副本一份（B76）。
+ *
+ * ## 与 `sharedBox` 等的关系
+ * 同一套缓存、同一份 `owned`（`isSharedAsset` 认它们），只是 UV 不同 ——
+ * `parameters` 原样保留（B75/B80 那批门禁在 `geometry.parameters` 上与它们对齐）。
+ * 门板 / 门框 / 饰品这些**不换贴图**的消费者继续走 `sharedBox`：UV 没人读，不欠它。
+ *
+ * ## 各面的 UV 对应
+ * - 盒：three 的六面顺序 px/nx/py/ny/pz/nz，每面 4 个顶点；UV 的 u/v 各对应哪两个尺寸
+ *   由 `BoxGeometry` 的 `buildPlane` 实参决定（下表），照抄即对。
+ * - 平面：u ↔ 宽，v ↔ 高。
+ * - 圆柱：躯干（group 0）u 绕周长、v 沿高；上下盖是平面投影，保持原样不缩放。
+ */
+const 盒面尺寸 = (w, h, d) => [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
+
+export const uvBox = (w, h, d) =>
+  sharedGeo(`uvbox:${n(w)},${n(h)},${n(d)}`, () => {
+    const g = new THREE.BoxGeometry(w, h, d);
+    const uv = g.attributes.uv;
+    // 只对 1 段/面的盒成立：每面 4 个顶点，面序即顶点序。带分段的盒 UV 是网格状，这套换算不适用。
+    if (uv.count !== 24) throw new Error(`uvBox 只接受不分段的盒（顶点 ${uv.count} ≠ 24）`);
+    const dims = 盒面尺寸(w, h, d);
+    for (let f = 0; f < 6; f++) {
+      for (let vi = f * 4; vi < f * 4 + 4; vi++) {
+        uv.setXY(vi, uv.getX(vi) * dims[f][0], uv.getY(vi) * dims[f][1]);
+      }
+    }
+    uv.needsUpdate = true;
+    return g;
+  });
+
+export const uvPlane = (w, h) =>
+  sharedGeo(`uvplane:${n(w)},${n(h)}`, () => {
+    const g = new THREE.PlaneGeometry(w, h);
+    const uv = g.attributes.uv;
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * w, uv.getY(i) * h);
+    uv.needsUpdate = true;
+    return g;
+  });
+
+export const uvCylinder = (rt, rb, h, rs) =>
+  sharedGeo(`uvcyl:${n(rt)},${n(rb)},${n(h)},${n(rs)}`, () => {
+    const g = new THREE.CylinderGeometry(rt, rb, h, rs);
+    const uv = g.attributes.uv;
+    const pos = g.attributes.position;
+    const { start, count } = g.groups[0]; // group 0 = 躯干（1/2 是上下盖）
+    const seen = new Set();
+    for (let i = start; i < start + count; i++) {
+      const vi = g.index.getX(i);
+      if (seen.has(vi)) continue;
+      seen.add(vi);
+      // 每行自己的半径：锥形柱（上细下粗）绕一圈的米数逐行不同，按行算才是真的米。
+      const v = (h / 2 - pos.getY(vi)) / h;
+      const r = v * (rb - rt) + rt;
+      uv.setXY(vi, uv.getX(vi) * 2 * Math.PI * r, uv.getY(vi) * h);
+    }
+    uv.needsUpdate = true;
+    return g;
+  });
+
+/**
  * 取一份共享材质。`key` 必须把"决定这份材质长什么样"的东西全写进去 ——
  * 地下城的材质由副本配色（`theme` / `accent`）决定，所以 key 里带副本 id。
  */

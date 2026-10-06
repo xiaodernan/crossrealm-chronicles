@@ -17,7 +17,8 @@
     "import:rest-npcs:open": "powershell -ExecutionPolicy Bypass -File scripts/import-rest-npcs.ps1 -OpenInbox",
     "import:rest-gestures": "powershell -ExecutionPolicy Bypass -File scripts/import-rest-gestures.ps1",
     "import:rest-gestures:open": "powershell -ExecutionPolicy Bypass -File scripts/import-rest-gestures.ps1 -OpenInbox",
-    "validate:save": "node scripts/validate-save-parity.mjs"
+    "validate:save": "node scripts/validate-save-parity.mjs",
+    "bake:textures": "node scripts/bake-textures.mjs"
   },
   "dependencies": {
     "three": "^0.172.0"

@@ -2,8 +2,11 @@ import * as THREE from 'three';
 import { generateMaze, makeSeededRng } from './MazeLayout.js';
 import { dungeonEncounterOf } from '../content/dungeonEncounters.js';
 import {
-  sharedBox, sharedPlane, sharedCircle, sharedCylinder, sharedTorus, dungeonMaterial,
+  sharedBox, sharedCircle, sharedTorus, dungeonMaterial,
+  uvBox, uvPlane, uvCylinder,
 } from './dungeonAssets.js';
+import { TextureLibrary } from '../assets/TextureLibrary.js';
+import { SURFACE_SPECS } from '../content/materialSurfaces.js';
 import { ROOM_TEMPLATES, templateFitsRoom, requiredPortCount, openPorts } from './RoomTemplates.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import {
@@ -24,7 +27,7 @@ export class ProceduralDungeonGenerator {
     return layout;
   }
 
-  static buildGeometry(group, layout, def) {
+  static buildGeometry(group, layout, def, texLib = null) {
     // 尺寸事实由布局带进来（切片4f）：几何层不再自己抄一份，所以一份缺字段的布局必须**当场**说缺哪一个，
     // 而不是往下算出 NaN 的坐标 —— 那是 B80 的症状形状。关卡编辑器导入的 JSON 是这里唯一的外部入口。
     const 缺 = ['wallH', 'wallT', 'doorWidth', 'bossDoorWidth']
@@ -36,19 +39,42 @@ export class ProceduralDungeonGenerator {
     group.userData.layout = layout;
     group.userData.colliders = [];
 
+    // 石砌面（W-C5）：normal / roughness 两种"表面事实"来自离线烘焙的贴图（`npm run bake:textures`），
+    // 颜色仍归各材料自己的 `color`（副本按主题染色）。墙与地面的 UV 以**米**计（见 dungeonAssets 的
+    // uvBox/uvPlane/uvCylinder），所以铺数只有一个：一砖两米 ⇒ repeat = 1 / tileMeters。
+    //
+    // `texLib` 是注入点（测试喂假库）；不给就问单例。**拿不到就按无贴图构建**：进入副本是同步路径，
+    // 等不了加载 —— 这与"masonry 没加载出来"同一条退路（库没就绪 / 这一组没文件都是 null）。
+    const lib = texLib ?? TextureLibrary.loaded();
+    const 砖 = 1 / SURFACE_SPECS.masonry.tileMeters;
+    const 石砌 = lib?.uvVariant('masonry', 砖, 砖) ?? null;
+
     // 几何与材质都按签名共享一份（B76）：七座副本开机各 build 一遍，改前是 1804 份几何
     // + 1804 份材质，而签名全域只有 16 种、材质只由副本配色决定。key 里带上 def.id ——
     // 配色不同的两座副本**必须**拿到不同份材质，共享错了会让一座变成另一座的颜色。
-    const floorMat = dungeonMaterial(`${def.id}:floor`, () => new THREE.MeshStandardMaterial({
+    // 带贴图的走 `@tex` 后缀的 key：同一座副本的两种面（贴与不贴）各有一份，互不挤占。
+    const floorParams = {
       color: def.theme,
-      roughness: 0.88,
+      roughness: 石砌 ? 1.0 : 0.88, // 贴图在时由贴图给值（均值 ≈ 0.85）
       metalness: 0.06,
       envMapIntensity: 0.35,
-    }));
-    const wallMat = dungeonMaterial(`${def.id}:wall`, () => new THREE.MeshStandardMaterial({
+    };
+    if (石砌) {
+      floorParams.normalMap = 石砌.normalMap;
+      floorParams.roughnessMap = 石砌.roughnessMap;
+      floorParams.normalScale = new THREE.Vector2(0.8, 0.8);
+    }
+    const floorMat = dungeonMaterial(石砌 ? `${def.id}:floor@tex` : `${def.id}:floor`, () => new THREE.MeshStandardMaterial(floorParams));
+    const wallParams = {
       color: new THREE.Color(def.theme).multiplyScalar(0.75),
-      roughness: 0.9,
-    }));
+      roughness: 石砌 ? 1.0 : 0.9,
+    };
+    if (石砌) {
+      wallParams.normalMap = 石砌.normalMap;
+      wallParams.roughnessMap = 石砌.roughnessMap;
+      wallParams.normalScale = new THREE.Vector2(0.8, 0.8);
+    }
+    const wallMat = dungeonMaterial(石砌 ? `${def.id}:wall@tex` : `${def.id}:wall`, () => new THREE.MeshStandardMaterial(wallParams));
     const accentMat = dungeonMaterial(`${def.id}:accent`, () => new THREE.MeshStandardMaterial({
       color: def.accent,
       emissive: def.accent,
@@ -137,8 +163,8 @@ export class ProceduralDungeonGenerator {
     const rw = room.w;
     const rd = room.d;
 
-    // 地面
-    const floor = new THREE.Mesh(sharedPlane(rw - 0.2, rd - 0.2), floorMat);
+    // 地面。UV 以米计（uvPlane）—— 17.8×17.8 的一整块与将来其它尺寸的地面共用同一个铺数
+    const floor = new THREE.Mesh(uvPlane(rw - 0.2, rd - 0.2), floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(room.x, 0.02, room.z);
     applyShadow(floor, 'ground');
@@ -249,7 +275,8 @@ export class ProceduralDungeonGenerator {
       const a = (i / 8) * Math.PI * 2;
       const px = room.x + Math.cos(a) * rw * 0.38;
       const pz = room.z + Math.sin(a) * rd * 0.38;
-      const pillar = new THREE.Mesh(sharedCylinder(0.5, 0.65, WH + 1, 8), wallMat);
+      // uvCylinder：柱面 UV 也按米算（绕周长 / 沿高），与墙同一砖尺寸
+      const pillar = new THREE.Mesh(uvCylinder(0.5, 0.65, WH + 1, 8), wallMat);
       pillar.position.set(px, (WH + 1) / 2, pz);
       applyShadow(pillar, 'castOnly');
       group.add(pillar);
@@ -312,7 +339,8 @@ export class ProceduralDungeonGenerator {
 }
 
 function addWallSegment(group, mat, x, z, w, d, h, layout) {
-  const m = new THREE.Mesh(sharedBox(w, h, d), mat);
+  // uvBox：墙段宽度从 18（整墙）到 7（门旁那截）不等，UV 以米计它们才是同一个砖尺寸
+  const m = new THREE.Mesh(uvBox(w, h, d), mat);
   m.position.set(x, h / 2, z);
   applyShadow(m, 'prop');
   m.userData.isWall = true;

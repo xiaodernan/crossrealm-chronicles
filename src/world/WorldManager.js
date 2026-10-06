@@ -107,7 +107,11 @@ export class WorldManager {
     this.worldTerrain.build();
     TextureLibrary.load().then((texLib) => {
       this.worldTerrain.applyTextures(texLib);
-      window.dispatchEvent(new CustomEvent('textures-ready', { detail: { texLib } }));
+      // node 测试里真世界也会建（poi-identity 那一路），那里没有 window 可发事件 ——
+      // 守卫在这里，否则这个 .then 会变成一发没人接的 unhandled rejection（整跑 exit 1）
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('textures-ready', { detail: { texLib } }));
+      }
     });
 
     this.buildHubLandmarks();

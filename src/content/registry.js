@@ -46,6 +46,7 @@ import { SKILL_TREES, SKILL_BRANCH_IDS, SKILL_EFFECT_KEYS } from './skillTrees.j
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import { ENEMY_ROSTER } from './enemies.js';
+import { SURFACE_SPECS } from './materialSurfaces.js';
 import { DUNGEON_DEFS, DUNGEON_IDS } from './dungeons.js';
 import { DUNGEON_ENCOUNTERS } from './dungeonEncounters.js';
 import { ENEMY_MOVE_SETS, BODY_PLANS } from './tuning.js';
@@ -915,6 +916,50 @@ export const CONTENT_TABLES = [
       },
     },
     invariant: checkSkillTrees,
+  },
+  {
+    kind: 'materialSurfaces',
+    note: '程序化表面贴图的烘焙规格（W-C5 切片1）：键是表面名，值是"这张贴图长什么样"的全部数值。'
+      + '三个读者共用这一份 —— `scripts/bake-textures.mjs` 按它产出 `public/textures/gen/*.png`、'
+      + '`assets/TextureLibrary.js` 从 `files` 推导 URL、`tests/material-surfaces.test.js` 重算比对。'
+      + '改任何一个数值都必须重烘焙（`npm run bake:textures`）：改数不重烤的症状是文件旧、规格新，'
+      + '而且**不报错** —— 所以测试拿规格重算，与提交的字节逐像素比',
+    shape: 'index',
+    table: SURFACE_SPECS,
+    value: {
+      t: 'row',
+      of: {
+        tileMeters: { t: 'number', exclusiveMin: 0 },
+        size: { t: 'int', min: 64, max: 1024 },
+        seed: { t: 'int', min: 0 },
+        bricks: {
+          t: 'row',
+          of: {
+            rows: { t: 'int', min: 1, max: 64 },
+            cols: { t: 'int', min: 1, max: 64 },
+            mortarPx: { t: 'int', min: 1, max: 32 },
+          },
+        },
+        octaves: {
+          t: 'rows',
+          minLength: 1,
+          of: {
+            lattice: { t: 'int', min: 2, max: 256 },
+            amp: { t: 'number', exclusiveMin: 0, max: 1 },
+          },
+        },
+        normalStrength: { t: 'number', exclusiveMin: 0, max: 16 },
+        roughBase: { t: 'number', min: 0, max: 1 },
+        roughAmp: { t: 'number', min: 0, max: 0.5 },
+        files: {
+          t: 'row',
+          of: {
+            normal: { t: 'string' },
+            roughness: { t: 'string' },
+          },
+        },
+      },
+    },
   },
 ];
 
