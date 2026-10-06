@@ -3,6 +3,7 @@ import { applySunShadowQuality, normalizeShadowQuality } from '../engine/shadowP
 import { applyMsaaSamples, normalizeMsaaSamples } from '../engine/aaPolicy.js';
 import { DEFAULT_SSAO_QUALITY, normalizeSsaoQuality } from '../engine/ssaoSettings.js';
 import { updateSsaoQuality } from '../engine/SsaoPass.js';
+import { DEFAULT_GRAPHICS_PRESET, getGraphicsPreset, normalizeGraphicsPreset } from '../engine/graphicsPresets.js';
 
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
@@ -31,6 +32,13 @@ const DEFAULTS = {
    * 存储里的脏值在 `applyToGame` 落地前经 `normalizeSsaoQuality` 回落出厂。
    */
   ssaoQuality: DEFAULT_SSAO_QUALITY,
+  /**
+   * 画质预设档（W-D3 切片1）：low / medium / high 三档，名册在
+   * `engine/graphicsPresets.js`。出厂 medium —— 兼顾画质与性能。
+   * 这一格只负责"记住玩家上次选的档位"，真正的批量设值由 `applyGraphicsPreset()` 完成。
+   * 存储里的脏值在读取时经 `normalizeGraphicsPreset` 回落出厂。
+   */
+  graphicsPreset: DEFAULT_GRAPHICS_PRESET,
   pixelRatio: 1.5,
   enemyLodDistance: 85,
   showFps: true,
@@ -119,6 +127,27 @@ export class SettingsManager {
   get(k) { return this.data[k] ?? DEFAULTS[k]; }
 
   get defaults() { return DEFAULTS; }
+
+  /**
+   * 应用画质预设（W-D3 切片1）：一次性把多格画质设置推到目标档位的值。
+   *
+   * 调用方只需传档位名和游戏实例，方法内部从冻结表取数、逐格 `set()` 并持久化，最后统一 `applyToGame`。
+   * 玩家之后仍可微调单格 —— 预设只负责"推过去"，不负责锁死。
+   * @param {string} presetName - 预设名（low / medium / high）
+   * @param {object} game - Game 实例，用于落地到运行时
+   */
+  applyGraphicsPreset(presetName, game) {
+    const name = normalizeGraphicsPreset(presetName);
+    const preset = getGraphicsPreset(name);
+    // 逐格写入并持久化：每一格都走 `set()`，保证存档同步更新
+    for (const [key, value] of Object.entries(preset)) {
+      this.set(key, value);
+    }
+    // 记住这一档的名字，下次读档时面板能回显
+    this.set('graphicsPreset', name);
+    // 统一落地到游戏实例
+    if (game) this.applyToGame(game);
+  }
 
   set(k, v) {
     this.data[k] = v;

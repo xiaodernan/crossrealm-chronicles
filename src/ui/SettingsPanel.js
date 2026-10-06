@@ -7,6 +7,7 @@ import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../conten
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
 import { SHADOW_QUALITY_SIZES, normalizeShadowQuality } from '../engine/shadowPolicy.js';
 import { MSAA_SAMPLES, normalizeMsaaSamples } from '../engine/aaPolicy.js';
+import { PRESET_NAMES } from '../engine/graphicsPresets.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -109,6 +110,24 @@ export class SettingsPanel {
       ms.addEventListener('change', () => {
         s.set('msaaSamples', Number(ms.value));
         s.applyToGame(this.game);
+      });
+    }
+    // 画质预设（W-D3 切片1）：低/中/高三档一键切换。选项从名册现推，
+    // 选了之后一次性把 shadowQuality / msaaSamples / ssaoQuality / pixelRatio / bloomStrength / enemyLodDistance 推到目标值。
+    // 玩家仍可微调单格 —— 预设只负责"推过去"，不负责锁死。
+    const gp = document.getElementById('set-graphics-preset');
+    if (gp) {
+      for (const name of PRESET_NAMES) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        // 显示给玩家的档位名：首字母大写（low → Low）
+        opt.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+        gp.appendChild(opt);
+      }
+      gp.addEventListener('change', () => {
+        s.applyGraphicsPreset(gp.value, this.game);
+        // 重新渲染键位区（各画质格的值变了，虽然它们不在键位区，但保持一致性）
+        this.refreshKeybinds();
       });
     }
     /* 震动（切片17）：走的还是"写设置 → `applyToGame`"那一条，面板自己不碰马达 ——
