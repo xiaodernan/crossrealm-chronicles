@@ -28,9 +28,12 @@
  *
  * 排除的三样各有理由：`[disabled]` 走不进去；`.hidden` 那一格看不见却能吃掉一步；
  * `type=file` 按 Enter 会弹出系统文件框（`#pause-import-file` 就是它，导入由 `#pause-import` 按钮触发）。
+ * `select` 在清单里（W-D3 切片3）：暂停菜单的存档槽与设置面板的语言选择此前是
+ * 键盘与手柄都走不进的死格 —— 面板认领了宿主，宿主里每一格可聚焦元素就都该走得到。
  */
 const NAV_SELECTOR = 'button:not([disabled]):not(.hidden),'
-  + 'input:not([disabled]):not(.hidden):not([type=file]):not([type=hidden])';
+  + 'input:not([disabled]):not(.hidden):not([type=file]):not([type=hidden]),'
+  + 'select:not([disabled]):not(.hidden)';
 
 /** 一个面板里的可导航清单（DOM 顺序）。宿主不在（还没渲染 / 面板不认这个 id）给空表 */
 export function navItems(host) {

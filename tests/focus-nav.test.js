@@ -132,7 +132,7 @@ describe('navItems：能停在哪几格只在这里说一次', () => {
     expect(navItems({})).toEqual([]);
   });
 
-  it('选择器真的在筛：禁用格、隐藏格、文件框、隐藏 input 一律进不了清单', () => {
+  it('选择器真的在筛：禁用格、隐藏格、文件框、隐藏 input 一律进不了清单；select 在清单里（W-D3 切片3）', () => {
     // 这条必须是行为断言，不许只看选择器字符串：上一版写成 `toContain('[disabled]')`，
     // 于是"button 那一半的 :not 全删掉"这种改法照样全绿（变异 N7）—— 字符串里还剩 input 那一半呢。
     const doc = fakeDoc();
@@ -144,8 +144,10 @@ describe('navItems：能停在哪几格只在这里说一次', () => {
       { id: 'secret', tag: 'input', type: 'hidden' },
       { id: 'vol', tag: 'input', type: 'range' },
       { id: 'check', tag: 'input', type: 'checkbox' },
+      { id: 'slot', tag: 'select' },
+      { id: 'shut-slot', tag: 'select', disabled: true },
     ], doc);
-    expect(navItems(host).map((e) => e.id)).toEqual(['plain', 'vol', 'check']);
+    expect(navItems(host).map((e) => e.id)).toEqual(['plain', 'vol', 'check', 'slot']);
   });
 
   it('清单里一格都没有（整面板都是禁用格）时不算"有落点"', () => {

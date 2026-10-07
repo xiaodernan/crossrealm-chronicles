@@ -1401,6 +1401,32 @@ body.finisher-flash::after {
 .panel-box button:hover { border-color: #c9a962; }
 
 /*
+ * 存档槽选择（W-D3 切片3）：与按钮同一副骨架 —— 它是面板清单里的一格，
+ * ↑↓ 移焦要能看见它落上来了（`.panel-box select:focus` 与按钮同一条 outline）。
+ */
+.pause-slot-row {
+  display: block;
+  margin: 8px 0;
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.panel-box select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid #444;
+  color: #eee;
+  border-radius: 6px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.panel-box select:hover { border-color: #c9a962; }
+
+/*
  * 面板内移焦（切片11）：↑↓ 走到的那一格必须有肉眼看得见的差别，
  * 否则"焦点在哪"这件事只存在于数据结构里、玩家看不见。
  * 用 `:focus` 而不是 `:focus-visible`：落焦是我们代码做的（见 FocusNav），

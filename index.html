@@ -77,14 +77,19 @@
       <div class="panel-box">
         <h2>暂停</h2>
         <button id="pause-resume">继续游戏</button>
+        <label class="pause-slot-row">存档槽
+          <!-- 选项由 PauseMenu 从 `SaveSystem.listSlots()` 现推（W-D3 切片3）：不抄第二份名单 -->
+          <select id="pause-slot"></select>
+        </label>
         <button id="pause-save">保存进度</button>
+        <button id="pause-load-slot">读取所选槽</button>
         <button id="pause-export">导出 JSON</button>
         <button id="pause-import">导入 JSON</button>
         <input id="pause-import-file" type="file" accept=".json,application/json" class="hidden" />
         <button id="pause-settings">设置</button>
         <button id="pause-manual">说明书 (<span data-keys="help"></span>)</button>
         <button id="pause-journal">日志 (<span data-keys="journal"></span>)</button>
-        <p class="hint"><span data-keys="escape"></span> 关闭 · <span data-keys="save load"></span> 快捷存读 · <span data-keys="help"></span> 说明书 · <span data-keys="perfHud"></span> 性能面板 · 存档 v5（旧档自动迁移）</p>
+        <p class="hint"><span data-keys="escape"></span> 关闭 · <span data-keys="save load"></span> 快捷存读（主槽） · <span data-keys="help"></span> 说明书 · <span data-keys="perfHud"></span> 性能面板 · 存档 v7（旧档自动迁移）</p>
       </div>
     </div>
     <div id="settings-panel" class="overlay-panel hidden">
