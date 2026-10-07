@@ -15,6 +15,7 @@ import { CollisionWorld } from '../engine/Collision.js';
 import { makeUvCylinderGeometry } from '../engine/uvGeometry.js';
 import { makeRegionSurfaceMaterial, applyRegionSurface } from './regionSurfaces.js';
 import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from '../content/ZoneIdentity.js';
+import { paletteOf } from '../content/materialPalette.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** 地形网格 520×620，可通行边界留 10 单位余量 */
@@ -199,7 +200,7 @@ export class WorldManager {
     // W-C5 切片6：中央石柱换 drum 表面（与区域断柱同一套鼓形石段），几何换
     // `makeUvCylinderGeometry`（UV 以米计）。它是唯一不归 BaseZone 管的石构 ——
     // 材质存一份在这里，`TextureLibrary.load().then` 回来时由 `applySurfaceTextures` 补挂。
-    this._hubSurfaceMat = makeRegionSurfaceMaterial({ color: 0x5a5550, roughness: 0.85 });
+    this._hubSurfaceMat = makeRegionSurfaceMaterial({ color: paletteOf('stone.gray'), roughness: 0.85 });
     const pillar = new THREE.Mesh(makeUvCylinderGeometry(1.2, 1.8, 10, 8), this._hubSurfaceMat);
     pillar.position.y = 5;
     applyShadow(pillar, 'castOnly');
@@ -208,7 +209,7 @@ export class WorldManager {
     const core = new THREE.Mesh(
       new THREE.OctahedronGeometry(1.4, 0),
       new THREE.MeshStandardMaterial({
-        color: 0x88ccff,
+        color: paletteOf('crystal.hub'),
         emissive: 0x224466,
         emissiveIntensity: 0.8,
         roughness: 0.2,
@@ -222,7 +223,7 @@ export class WorldManager {
     const ring = new THREE.Mesh(
       new THREE.TorusGeometry(3.5, 0.12, 8, 48),
       new THREE.MeshStandardMaterial({
-        color: 0xc9a962,
+        color: paletteOf('metal.gilt'),
         emissive: 0x443300,
         emissiveIntensity: 0.4,
         metalness: 0.7,
@@ -245,7 +246,7 @@ export class WorldManager {
     for (const s of signData) {
       const post = new THREE.Mesh(
         new THREE.CylinderGeometry(0.12, 0.15, 2.5, 6),
-        new THREE.MeshStandardMaterial({ color: 0x4a4035, roughness: 0.9 })
+        new THREE.MeshStandardMaterial({ color: paletteOf('wood.post'), roughness: 0.9 })
       );
       post.position.set(Math.sin(s.dir) * 8, 1.25, Math.cos(s.dir) * 8);
       hub.add(post);

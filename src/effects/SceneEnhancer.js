@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
+import { paletteOf } from '../content/materialPalette.js';
 
 /** 全局光影、环境贴图、场景材质升级 */
 export class SceneEnhancer {
@@ -48,17 +49,17 @@ export class SceneEnhancer {
       const geo = obj.geometry?.type ?? '';
 
       if (name.includes('trunk') || name.includes('pillar')) {
-        texLib.applyToMesh(obj, 'rock', 0x6a5a48);
+        texLib.applyToMesh(obj, 'rock', paletteOf('stone.propTrunk'));
         return;
       }
       if (geo === 'ConeGeometry' && obj.material?.flatShading) {
         // flatShading 走 overrides 而不是"换完再就地改"：材质现在是共享的，
         // 就地改会把同色的所有道具一起改掉（W-C1 切片2）
-        texLib.applyToMesh(obj, 'rock', 0x8a8580, { flatShading: false });
+        texLib.applyToMesh(obj, 'rock', paletteOf('stone.pale'), { flatShading: false });
         return;
       }
       if (geo === 'CylinderGeometry' && obj.position.y > 1 && !obj.material?.emissiveIntensity) {
-        texLib.applyToMesh(obj, 'rock', 0x5a5048);
+        texLib.applyToMesh(obj, 'rock', paletteOf('stone.propPost'));
       }
     });
   }

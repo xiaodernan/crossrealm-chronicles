@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
+import { paletteOf } from '../content/materialPalette.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
 /**
@@ -34,7 +35,7 @@ export class RestPointEnhancer {
     const label = SIGN_LABELS[point.id] ?? point.name;
     const post = new THREE.Mesh(
       new THREE.CylinderGeometry(0.06, 0.08, 1.6, 6),
-      new THREE.MeshStandardMaterial({ color: 0x4a4035, roughness: 0.9 })
+      new THREE.MeshStandardMaterial({ color: paletteOf('wood.post'), roughness: 0.9 })
     );
     post.position.set(-0.6, 0.8, 0.3);
     applyShadow(post, 'castOnly');
@@ -42,7 +43,7 @@ export class RestPointEnhancer {
 
     const board = new THREE.Mesh(
       new THREE.BoxGeometry(0.9, 0.35, 0.06),
-      new THREE.MeshStandardMaterial({ color: 0x3a3028, roughness: 0.85, emissive: 0x221100, emissiveIntensity: 0.2 })
+      new THREE.MeshStandardMaterial({ color: paletteOf('wood.door'), roughness: 0.85, emissive: 0x221100, emissiveIntensity: 0.2 })
     );
     board.position.set(-0.6, 1.55, 0.3);
     board.rotation.y = 0.35;

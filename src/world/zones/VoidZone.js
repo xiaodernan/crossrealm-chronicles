@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { makeUvCylinderGeometry } from '../../engine/uvGeometry.js';
+import { paletteOf } from '../../content/materialPalette.js';
 
 /** 第四主题：破碎时线 — 指环王 + 星际穿越时间主题融合 */
 export class VoidZone extends BaseZone {
@@ -39,7 +40,7 @@ export class VoidZone extends BaseZone {
 
   buildTimeRings() {
     const gold = new THREE.MeshStandardMaterial({
-      color: 0xc9a962,
+      color: paletteOf('metal.gilt'),
       emissive: 0x664400,
       emissiveIntensity: 0.5,
       metalness: 0.8,
@@ -56,7 +57,7 @@ export class VoidZone extends BaseZone {
 
   buildShards() {
     const shardMat = new THREE.MeshStandardMaterial({
-      color: 0x8899cc,
+      color: paletteOf('crystal.shard'),
       emissive: 0x223355,
       emissiveIntensity: 0.6,
       transparent: true,
@@ -77,7 +78,7 @@ export class VoidZone extends BaseZone {
     // W-C5 切片6：柱身换 drum 表面（与废墟石柱同一套鼓形石段），几何随之换
     // `makeUvCylinderGeometry`（UV 以米计）。八面体顶盖保持原样的自带材质 ——
     // 球面参数化的 UV 不是米制，贴上去石块会随角度拉伸。
-    const 退路 = { color: 0x2a2535, emissive: 0xc9a962, emissiveIntensity: 0.15, roughness: 0.85 };
+    const 退路 = { color: paletteOf('stone.voidPillar'), emissive: 0xc9a962, emissiveIntensity: 0.15, roughness: 0.85 };
     const pillarMat = this.addSurfaceMaterial(退路);
     const pillar = new THREE.Mesh(makeUvCylinderGeometry(0.8, 1.2, 12, 8), pillarMat);
     pillar.position.y = 6;
@@ -117,7 +118,7 @@ export class VoidZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x3a3548, roughness: 0.95 });
+    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.voidRock'), roughness: 0.95 });
     for (let i = 0; i < 20; i++) {
       const angle = (i / 20) * Math.PI * 2;
       const r = this.radius * 0.75 + Math.random() * 20;

@@ -13,6 +13,7 @@ import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { SURFACE_SPECS } from '../content/materialSurfaces.js';
+import { paletteOf } from '../content/materialPalette.js';
 import { makeUvBoxGeometry } from '../engine/uvGeometry.js';
 
 
@@ -225,7 +226,7 @@ export class PlayerController {
    */
   _buildWeapon() {
 
-    const mat = new THREE.MeshStandardMaterial({ color: 0xc9a962, roughness: 0.35, metalness: 0.7, emissive: 0x332200, emissiveIntensity: 0.2 });
+    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('metal.gilt'), roughness: 0.35, metalness: 0.7, emissive: 0x332200, emissiveIntensity: 0.2 });
 
     const sword = new THREE.Mesh(makeUvBoxGeometry(0.06, 0.9, 0.12), mat);
 

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { applyShadow } from '../../engine/shadowPolicy.js';
 import { makeRegionSurfaceMaterial, applyRegionSurface } from '../regionSurfaces.js';
+import { paletteOf } from '../../content/materialPalette.js';
 
 export class BaseZone {
   constructor(scene, center, config) {
@@ -167,7 +168,7 @@ export class BaseZone {
     const group = new THREE.Group();
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.15 * scale, 0.25 * scale, 2 * scale, 8),
-      new THREE.MeshStandardMaterial({ color: 0x4a3020, roughness: 0.95 })
+      new THREE.MeshStandardMaterial({ color: paletteOf('wood.zoneTrunk'), roughness: 0.95 })
     );
     trunk.position.y = 1 * scale;
     applyShadow(trunk, 'castOnly');
@@ -175,7 +176,7 @@ export class BaseZone {
 
     const foliage = new THREE.Mesh(
       new THREE.ConeGeometry(1.2 * scale, 3 * scale, 8),
-      new THREE.MeshStandardMaterial({ color: 0x2a5a30, roughness: 0.85 })
+      new THREE.MeshStandardMaterial({ color: paletteOf('foliage.zoneCrown'), roughness: 0.85 })
     );
     foliage.position.y = 3 * scale;
     applyShadow(foliage, 'castOnly');
@@ -192,7 +193,7 @@ export class BaseZone {
   createRock(x, z, size = 1) {
     const rock = new THREE.Mesh(
       new THREE.DodecahedronGeometry(size, 0),
-      new THREE.MeshStandardMaterial({ color: 0x5a5a58, roughness: 0.95, flatShading: true })
+      new THREE.MeshStandardMaterial({ color: paletteOf('stone.zoneRock'), roughness: 0.95, flatShading: true })
     );
     rock.position.set(x, this.sampleHeight(x, z) + size * 0.4, z);
     rock.rotation.set(Math.random(), Math.random(), Math.random());

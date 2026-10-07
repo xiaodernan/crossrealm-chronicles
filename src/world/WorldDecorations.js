@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
+import { paletteOf } from '../content/materialPalette.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
@@ -47,7 +48,7 @@ export class WorldDecorations {
   applyTreeTextures(texLib = null) {
     const apply = (lib) => {
       if (!lib?.ready) return;
-      const shared = lib.sharedMaterial('bark', 0x6a5040);
+      const shared = lib.sharedMaterial('bark', paletteOf('wood.bark'));
       const trunk = this._treeTrunk;
       if (!trunk) return;
       if (trunk.material && trunk.material !== shared) {
@@ -71,7 +72,7 @@ export class WorldDecorations {
    * instanceColor，长出来的树与修前同一副模样（同一组随机分布）。
    */
   _scatterTrees() {
-    const leafColors = [0x3a5a32, 0x2d4a28, 0x456838, 0x5a7040];
+    const leafColors = paletteOf('foliage.leaf');
     const spots = [
       ...this._ring(-200, 0, 120, 55),
       ...this._ring(0, -180, 110, 45),
@@ -100,7 +101,7 @@ export class WorldDecorations {
     }
     const trunks = new THREE.InstancedMesh(
       new THREE.CylinderGeometry(0.15, 0.28, 1, 6),
-      new THREE.MeshStandardMaterial({ color: 0x4a3528, roughness: 0.95 }),
+      new THREE.MeshStandardMaterial({ color: paletteOf('wood.trunk'), roughness: 0.95 }),
       trees.length
     );
     const foliage = new THREE.InstancedMesh(
@@ -143,7 +144,7 @@ export class WorldDecorations {
 
   /** 石头（W-C2 切片2）：80 块随机大小的石头 → 单位十二面体 + 每实例缩放 = 1 个 InstancedMesh */
   _scatterRocks() {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x5a5558, roughness: 0.92 });
+    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.fieldRock'), roughness: 0.92 });
     const rocks = [];
     for (let i = 0; i < 80; i++) {
       const x = (Math.random() - 0.5) * 480;
@@ -181,7 +182,7 @@ export class WorldDecorations {
     }
     const posts = new THREE.InstancedMesh(
       new THREE.CylinderGeometry(0.08, 0.1, 2.2, 6),
-      new THREE.MeshStandardMaterial({ color: 0x3a3028, roughness: 0.9 }),
+      new THREE.MeshStandardMaterial({ color: paletteOf('wood.door'), roughness: 0.9 }),
       pts.length
     );
     const lamps = new THREE.InstancedMesh(
@@ -254,7 +255,7 @@ export class WorldDecorations {
     const banners = new THREE.InstancedMesh(
       new THREE.PlaneGeometry(1.2, 2.5),
       new THREE.MeshStandardMaterial({
-        color: 0xc9a962,
+        color: paletteOf('metal.gilt'),
         emissive: 0x443300,
         emissiveIntensity: 0.3,
         side: THREE.DoubleSide,
@@ -275,7 +276,7 @@ export class WorldDecorations {
     const fountain = new THREE.Mesh(
       new THREE.TorusGeometry(3, 0.12, 8, 32),
       new THREE.MeshStandardMaterial({
-        color: 0x88ccff,
+        color: paletteOf('crystal.hub'),
         emissive: 0x224466,
         emissiveIntensity: 0.5,
         transparent: true,
@@ -301,8 +302,8 @@ export class WorldDecorations {
 
   _buildHubMarket() {
     const gy = this.world.getGroundHeight(0, 55);
-    const stallMat = new THREE.MeshStandardMaterial({ color: 0x5a4030, roughness: 0.85 });
-    const awningColors = [0x884422, 0x225588, 0x446633];
+    const stallMat = new THREE.MeshStandardMaterial({ color: paletteOf('wood.bridge'), roughness: 0.85 });
+    const awningColors = paletteOf('fabric.awning');
     // 六个摊位同形（W-C2 切片2）：底座一个 InstancedMesh；雨棚同几何、三色走 instanceColor
     const bases = new THREE.InstancedMesh(
       new THREE.BoxGeometry(2.2, 1.2, 1.8),
@@ -336,7 +337,7 @@ export class WorldDecorations {
     // 十条长椅同形同色（W-C2 切片2）：一个 InstancedMesh
     const benches = new THREE.InstancedMesh(
       new THREE.BoxGeometry(1.8, 0.35, 0.6),
-      new THREE.MeshStandardMaterial({ color: 0x4a3828, roughness: 0.9 }),
+      new THREE.MeshStandardMaterial({ color: paletteOf('wood.bench'), roughness: 0.9 }),
       10
     );
     for (let i = 0; i < 10; i++) {
@@ -354,7 +355,7 @@ export class WorldDecorations {
 
   /** 断柱（W-C2 切片2）：48 根高矮胖瘦全靠随机 → 单位方块 + 每实例缩放 = 1 个 InstancedMesh */
   _buildRuinClusters() {
-    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x7a756e, roughness: 0.92 });
+    const stoneMat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.ruin'), roughness: 0.92 });
     const clusters = [
       [-160, 15, 8], [-230, -20, 6], [30, -160, 7], [-20, -240, 5],
       [170, 60, 6], [240, 120, 5], [-10, 200, 6], [-170, 240, 5],
@@ -395,7 +396,7 @@ export class WorldDecorations {
     const inst = new THREE.InstancedMesh(
       new THREE.OctahedronGeometry(1, 0),
       new THREE.MeshStandardMaterial({
-        color: 0xaaddff,
+        color: paletteOf('crystal.wild'),
         emissive: 0x4488cc,
         emissiveIntensity: 0.8,
         transparent: true,

@@ -7,6 +7,7 @@ import {
 } from './dungeonAssets.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { SURFACE_SPECS } from '../content/materialSurfaces.js';
+import { paletteOf } from '../content/materialPalette.js';
 import { ROOM_TEMPLATES, templateFitsRoom, requiredPortCount, openPorts } from './RoomTemplates.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import {
@@ -86,7 +87,7 @@ export class ProceduralDungeonGenerator {
     const 板砖 = 1 / SURFACE_SPECS.plank.tileMeters;
     const 木纹 = lib?.uvVariant('plank', 板砖, 板砖) ?? null;
     const doorParams = {
-      color: 0x3a3028,
+      color: paletteOf('wood.door'),
       roughness: 木纹 ? 1.0 : 0.85, // 贴图在时由贴图给值（均值 ≈ 0.84，与旧常数 0.85 同档）
       metalness: 0.2,
     };

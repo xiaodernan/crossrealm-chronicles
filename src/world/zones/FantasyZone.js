@@ -3,6 +3,7 @@ import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
 import { makeUvCylinderGeometry } from '../../engine/uvGeometry.js';
+import { paletteOf } from '../../content/materialPalette.js';
 
 /** 指环王风格 — 古老森林、灰白山峰、 ruins 遗迹 */
 export class FantasyZone extends BaseZone {
@@ -49,7 +50,7 @@ export class FantasyZone extends BaseZone {
 
   buildMountains() {
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x7a8088,
+      color: paletteOf('stone.mountain'),
       roughness: 0.95,
       flatShading: true,
     });
@@ -85,7 +86,7 @@ export class FantasyZone extends BaseZone {
     // W-C5 切片6：石柱换 drum 表面（1 米见方的鼓形石段）。几何换 `makeUvCylinderGeometry` ——
     // UV 以米计（u 绕该行周长、v 沿高），0.6↔0.8 的收分不会把石块拉成楔形。
     // 材质经 `addSurfaceMaterial` 登记，贴图库就绪后由 `WorldManager` 的 `load().then` 补挂。
-    const stoneMat = this.addSurfaceMaterial({ color: 0x8a8580, roughness: 0.9 });
+    const stoneMat = this.addSurfaceMaterial({ color: paletteOf('stone.pale'), roughness: 0.9 });
 
     for (let i = 0; i < 6; i++) {
       const h = 4 + Math.random() * 3;
@@ -109,7 +110,7 @@ export class FantasyZone extends BaseZone {
   buildLandmarks() {
     const ringGroup = new THREE.Group();
     const ringMat = new THREE.MeshStandardMaterial({
-      color: 0xc9a030,
+      color: paletteOf('metal.ring'),
       roughness: 0.3,
       metalness: 0.8,
       emissive: 0x443300,
@@ -123,7 +124,7 @@ export class FantasyZone extends BaseZone {
 
     const pillar = new THREE.Mesh(
       new THREE.CylinderGeometry(0.3, 0.5, 6, 8),
-      new THREE.MeshStandardMaterial({ color: 0x6a6560, roughness: 0.85 })
+      new THREE.MeshStandardMaterial({ color: paletteOf('stone.tower'), roughness: 0.85 })
     );
     pillar.position.y = 3;
     ringGroup.add(pillar);
@@ -150,7 +151,7 @@ export class FantasyZone extends BaseZone {
 
   buildRiver() {
     const waterMat = new THREE.MeshStandardMaterial({
-      color: 0x3a6a8a,
+      color: paletteOf('water.river'),
       roughness: 0.15,
       metalness: 0.4,
       transparent: true,
@@ -168,7 +169,7 @@ export class FantasyZone extends BaseZone {
   }
 
   buildWatchtower() {
-    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x6a6560, roughness: 0.9 });
+    const stoneMat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.tower'), roughness: 0.9 });
     const tower = new THREE.Group();
     const base = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 3, 8, 8), stoneMat);
     base.position.y = 4;
@@ -191,7 +192,7 @@ export class FantasyZone extends BaseZone {
   }
 
   buildElvenBridge() {
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x5a4030, roughness: 0.85 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: paletteOf('wood.bridge'), roughness: 0.85 });
     const bridge = new THREE.Group();
     for (let i = 0; i < 12; i++) {
       const plank = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.15, 0.8), woodMat);
@@ -199,7 +200,7 @@ export class FantasyZone extends BaseZone {
       applyShadow(plank, 'castOnly');
       bridge.add(plank);
     }
-    const railMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
+    const railMat = new THREE.MeshStandardMaterial({ color: paletteOf('wood.rail'), roughness: 0.9 });
     const railL = new THREE.Mesh(new THREE.BoxGeometry(24, 0.8, 0.15), railMat);
     railL.position.set(0, 2, -1.2);
     bridge.add(railL);
@@ -213,7 +214,7 @@ export class FantasyZone extends BaseZone {
 
   buildBossEntrance() {
     const arch = new THREE.Group();
-    const mat = new THREE.MeshStandardMaterial({ color: 0x3a2838, emissive: 0x110022, emissiveIntensity: 0.3, roughness: 0.85 });
+    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.arch'), emissive: 0x110022, emissiveIntensity: 0.3, roughness: 0.85 });
     const left = new THREE.Mesh(new THREE.BoxGeometry(1.5, 6, 1.5), mat);
     left.position.set(-4, 3, 0);
     const right = left.clone();
@@ -233,7 +234,7 @@ export class FantasyZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const treeMat = new THREE.MeshStandardMaterial({ color: 0x2a4030, roughness: 0.95 });
+    const treeMat = new THREE.MeshStandardMaterial({ color: paletteOf('foliage.wild'), roughness: 0.95 });
     for (let i = 0; i < 40; i++) {
       const angle = (i / 40) * Math.PI * 2;
       const r = this.radius * 0.75 + Math.random() * this.radius * 0.2;
@@ -248,7 +249,7 @@ export class FantasyZone extends BaseZone {
       this.group.add(crown);
       this.addCylinderCollider(lx, lz, 0.5, trunk.position.y + 2 + trunk.geometry.parameters.height * 0.5, { base: this.sampleHeight(lx, lz) - 0.5 });
     }
-    const ruinMat = new THREE.MeshStandardMaterial({ color: 0x5a5550, roughness: 0.9 });
+    const ruinMat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.gray'), roughness: 0.9 });
     for (let i = 0; i < 8; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.6;
       const lz = (Math.random() - 0.5) * this.radius * 1.6;

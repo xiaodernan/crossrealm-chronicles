@@ -11,6 +11,7 @@ import { Billboard } from '../effects/Billboard.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { SURFACE_SPECS } from '../content/materialSurfaces.js';
+import { paletteOf } from '../content/materialPalette.js';
 import { makeUvBoxGeometry, makeUvCapsuleGeometry, makeUvConeGeometry } from '../engine/uvGeometry.js';
 
 /** 分离推力在两个身体完全重合时需要一个稳定的"每人一个方向"，用出生顺序做身份差 */
@@ -545,7 +546,7 @@ export class Enemy {
 
   createMesh(config) {
     const group = new THREE.Group();
-    const color = config.color ?? 0x553333;
+    const color = config.color ?? paletteOf('armor.fallback');
     // 装甲板面（W-C5 切片4）：normal / roughness 来自离线烘焙贴图（`npm run bake:textures`），
     // 颜色仍归每个类型自己的 `color`（名册按类型配色）。UV 以米计 ⇒ 铺数只有一个：1 / 0.5 米。
     // 材质**保持每实例一份**（W-C2 切片2 的口径不变）：受击闪红要改自家 emissive。
