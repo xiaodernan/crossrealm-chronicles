@@ -167,7 +167,12 @@ export class SpellSystem {
     }
     // 被吸进去的一击，火花也该往圆心喷 —— 方向要跟位移一致，不能各说一套
     if (knock < 0) { dir.x = -dir.x; dir.z = -dir.z; }
-    this.damageNumbers?.spawn(target.position, `${hit.damage}${suffix}${hitSuffix(hit)}`, hit.crit ? '#ff5566' : color);
+    this.damageNumbers?.spawn(
+      target.position,
+      `${hit.damage}${suffix}${hitSuffix(hit)}`,
+      hit.crit ? '#ff5566' : color,
+      hit.crit ? 'crit' : 'normal', // 种类冗余同 CombatController（W-D6 切片2）
+    );
     this.feedback?.impact(target.position, hit.blocked ? GUARD.spark : tint, heavy ? 1.3 : 1, dir);
   }
 

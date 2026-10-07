@@ -1650,6 +1650,23 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   white-space: nowrap;
 }
 
+/* 飘字种类的**非颜色冗余**（W-D6 切片2）：字号拉开档，配合 JS 里的 `!` / `+` 记号。
+   改前暴击与普通伤害只差一个颜色，对红绿色觉异常等于没有区分 ——
+   这几条让"是不是暴击"在关掉颜色之后仍然读得出来。 */
+.damage-number.dn-crit {
+  font-size: 19px;
+  letter-spacing: 0.5px;
+}
+
+.damage-number.dn-heal {
+  font-size: 16px;
+}
+
+.damage-number.dn-weak {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
 .quest-current {
   font-size: 0.82rem;
   color: #bbb;

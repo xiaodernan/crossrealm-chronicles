@@ -5,6 +5,36 @@ import { HIT } from '../content/tuning.js';
 const LIFE = 0.9;
 
 /**
+ * 飘字的**种类**：每一条都带"除颜色以外还看得出差别"的冗余（W-D6 切片2）。
+ *
+ * 改前暴击与普通伤害**只靠颜色区分**（`hit.crit ? '#ff5566' : s.color`，两处调用点），
+ * 对红绿色觉异常就等于没有区分。这里给每种 kind 三样东西：
+ *   - `cls`：CSS 类，用来给**字号**拉开档（见 `style.css` 的 `.dn-*`）；
+ *   - `prefix` / `suffix`：文本上的记号（治疗 `+`、暴击 `!`）。
+ *
+ * 于是"这一下是不是暴击"在**关掉颜色**之后仍然读得出来。
+ * `kind` 认不出就抛（与 `sfx:play` / `shadowClassOf` 同一口径）——
+ * 静默给个默认值等于让"写错种类名"变成"这一下悄悄显示成普通伤害"。
+ */
+export const DAMAGE_KINDS = Object.freeze({
+  normal: Object.freeze({ cls: 'dn-normal', prefix: '', suffix: '', label: '普通' }),
+  crit: Object.freeze({ cls: 'dn-crit', prefix: '', suffix: '!', label: '暴击' }),
+  heal: Object.freeze({ cls: 'dn-heal', prefix: '+', suffix: '', label: '治疗' }),
+  weak: Object.freeze({ cls: 'dn-weak', prefix: '', suffix: '', label: '低效' }),
+});
+
+export const DAMAGE_KIND_IDS = Object.freeze(Object.keys(DAMAGE_KINDS));
+
+/** 取一种飘字种类；认不出就抛（说得出有哪些） */
+export function damageKindOf(kind) {
+  const hit = DAMAGE_KINDS[kind];
+  if (!hit) {
+    throw new Error(`damageKindOf: 未知的飘字种类 "${kind}"，可用的是 ${DAMAGE_KIND_IDS.join(' / ')}`);
+  }
+  return hit;
+}
+
+/**
  * 伤害飘字 —— 定容量对象池。
  *
  * 旧实现每次命中都 `document.createElement` + 新建 `CSS2DObject` + `scene.add/remove`，
@@ -31,10 +61,21 @@ export class DamageNumbers {
     }
   }
 
-  spawn(position, text, color = '#ffcc44') {
+  /**
+   * @param {object} position 世界坐标
+   * @param {string} text 数字本体（不含种类记号）
+   * @param {string} [color] 颜色
+   * @param {string} [kind] 种类，见 `DAMAGE_KINDS`；决定**非颜色冗余**（字号与前后缀）
+   */
+  spawn(position, text, color = '#ffcc44', kind = 'normal') {
+    const k = damageKindOf(kind);
     const e = this.free.pop() ?? this._takeOldest();
     if (!e) return null;
-    e.div.textContent = text;
+    // `className` 每次**整体重设**而不是 `classList.add`：这一池子对象是复用的，
+    // 只加不减会让上一条暴击的 `dn-crit` 留在下一条普通伤害身上 —— 那正好把
+    // "非颜色冗余"变成假信息（普通伤害看起来像暴击）。
+    e.div.className = `damage-number ${k.cls}`;
+    e.div.textContent = `${k.prefix}${text}${k.suffix}`;
     e.div.style.color = color;
     // 同一目标连续掉血会叠在同一像素上，给一点水平散布
     e.label.position.set(

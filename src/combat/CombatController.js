@@ -600,7 +600,10 @@ export class CombatController {
       this.damageNumbers?.spawn(
         enemy.position,
         `${hit.damage}${s.suffix ?? ''}${hitSuffix(hit)}`,
-        hit.crit ? '#ff5566' : s.color
+        hit.crit ? '#ff5566' : s.color,
+        // 颜色之外还传一个种类（W-D6 切片2）：暴击会带 `!` 与更大的字号，
+        // 于是"这一下是不是暴击"在关掉颜色之后仍然读得出来。
+        hit.crit ? 'crit' : 'normal'
       );
       this.feedback?.impact(
         enemy.position, hit.blocked ? GUARD.spark : s.tint, s.heavy ? 1.3 : 1, dir
