@@ -5,6 +5,23 @@ import { statsFromJSON, statsToJSON } from '../content/objectives.js';
 /** 当前写入键；其余历史键只读，迁移成功后保留 */
 const KEY = SAVE_KEYS[0].key;
 
+/**
+ * 存档槽（W-D3 切片2）：槽 0 沿用**旧键**（`SAVE_KEYS` 首项），老玩家的档不用搬家、
+ * 开机自动读档的路径一字不改；槽 1 起在键名上带 `_slotN` 后缀。
+ * 槽位选择的面板是切片3 的事，这一片先把账做对：编址、互不覆盖、元数据读数。
+ */
+export const SAVE_SLOTS = 3;
+
+/**
+ * 槽位 → 存储键。越界的槽位**当场抛**：静默绕回别的键，后果是"存槽二把槽一覆盖了"。
+ */
+export function slotKey(slot) {
+  if (!Number.isInteger(slot) || slot < 0 || slot >= SAVE_SLOTS) {
+    throw new Error(`SaveSystem: 槽位必须是 0..${SAVE_SLOTS - 1} 的整数，收到 "${slot}" —— 静默落到别的键就是覆盖别人的档`);
+  }
+  return slot === 0 ? KEY : `${KEY}_slot${slot}`;
+}
+
 /** 把迁移/校验结果说成人话，交给 toast 与 console 两处 */
 function report(game, message) {
   console.warn(`[save] ${message}`);
@@ -145,7 +162,8 @@ export class SaveSystem {
     return true;
   }
 
-  static save(game) {
+  static save(game, slot = 0) {
+    const key = slotKey(slot);
     const data = SaveSystem.toData(game);
     const issues = SaveValidator.validate(data);
     if (issues.length) {
@@ -154,12 +172,12 @@ export class SaveSystem {
       return false;
     }
     try {
-      localStorage.setItem(KEY, JSON.stringify(data));
+      localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
       report(game, `保存失败：${e?.name ?? 'Error'} ${e?.message ?? ''}`.trim());
       return false;
     }
-    game.dialog?.toast('进度已保存');
+    game.dialog?.toast(slot === 0 ? '进度已保存' : `进度已保存 · 槽${slot + 1}`);
     window.dispatchEvent(new CustomEvent('game-saved'));
     return true;
   }
@@ -204,7 +222,29 @@ export class SaveSystem {
     return { ok: true, data: result.data, from: result.from, migrated: result.applied.length > 0, reason: '' };
   }
 
-  static load(game) {
+  /**
+   * 读档。槽 0 保留**版本回退链**（`SAVE_KEYS` 逐键试：旧版本键里的档迁移后落回当前键），
+   * 那是单槽时代留下的兼容路；副槽没有历史包袱，只读自己的那一格。
+   */
+  static load(game, slot = 0) {
+    if (slot !== 0) {
+      const key = slotKey(slot);
+      let raw;
+      try {
+        raw = localStorage.getItem(key);
+      } catch (e) {
+        report(game, `无法访问浏览器存储：${e?.message ?? e}`);
+        return false;
+      }
+      if (!raw) return false;
+      const r = SaveSystem.ingest(game, raw, { sourceKey: key });
+      if (!r.ok) {
+        if (r.reason) report(game, `${key} 读取失败：${r.reason}`);
+        return false;
+      }
+      game.dialog?.toast('存档已加载');
+      return true;
+    }
     for (const { key, version } of SAVE_KEYS) {
       let raw;
       try {
@@ -227,8 +267,31 @@ export class SaveSystem {
     return false;
   }
 
-  static exportFile(game) {
-    const filename = `${KEY}.json`;
+  /**
+   * 槽位列表读数：给未来的槽位面板用。只解析 `version` / `time` 两个元数据格，
+   * 不走迁移也不碰游戏状态 —— 列表永远安全，读档才应用。
+   */
+  static listSlots() {
+    return Array.from({ length: SAVE_SLOTS }, (_, slot) => {
+      const key = slotKey(slot);
+      let raw = null;
+      try {
+        raw = localStorage.getItem(key);
+      } catch {
+        raw = null;
+      }
+      if (!raw) return { slot, key, exists: false, version: null, time: null };
+      try {
+        const parsed = JSON.parse(raw);
+        return { slot, key, exists: true, version: parsed?.version ?? null, time: parsed?.time ?? null };
+      } catch {
+        return { slot, key, exists: true, version: null, time: null, corrupt: true };
+      }
+    });
+  }
+
+  static exportFile(game, slot = 0) {
+    const filename = `${slotKey(slot)}.json`;
     const json = JSON.stringify(SaveSystem.toData(game), null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -240,7 +303,7 @@ export class SaveSystem {
     game.dialog?.toast(`已导出 ${filename}`);
   }
 
-  static importFile(game, file) {
+  static importFile(game, file, slot = 0) {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -250,7 +313,7 @@ export class SaveSystem {
           resolve(false);
           return;
         }
-        localStorage.setItem(KEY, JSON.stringify(r.data));
+        localStorage.setItem(slotKey(slot), JSON.stringify(r.data));
         game.dialog?.toast('存档已导入并写入浏览器');
         resolve(true);
       };
