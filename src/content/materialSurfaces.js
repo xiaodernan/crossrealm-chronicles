@@ -47,6 +47,7 @@ export const SURFACE_SPECS = deepFreeze({
    * 在砖面高度上再叠三层高频噪声（16/32/64 格）当石面颗粒。
    */
   masonry: {
+    pattern: 'tiled',
     /** 一张贴图铺开的米数 —— repeat = 表面尺寸 / 这个数 */
     tileMeters: 2,
     /** 输出分辨率（正方形） */
@@ -82,6 +83,7 @@ export const SURFACE_SPECS = deepFreeze({
    * 消费方按**直径 / tileMeters** 算铺数（见 `_buildBossArena`）。
    */
   slabs: {
+    pattern: 'tiled',
     tileMeters: 4,
     size: 256,
     seed: 20261008,
@@ -113,6 +115,7 @@ export const SURFACE_SPECS = deepFreeze({
    * 消费方：`ProceduralDungeonGenerator` 的门板（几何走 `uvBox` 以米计 UV ⇒ repeat = 1 / tileMeters）。
    */
   plank: {
+    pattern: 'tiled',
     tileMeters: 2,
     size: 256,
     seed: 20261009,
@@ -146,6 +149,7 @@ export const SURFACE_SPECS = deepFreeze({
    * 敌人看起来还是那只敌人。
    */
   plate: {
+    pattern: 'tiled',
     tileMeters: 0.5,
     size: 256,
     seed: 20261010,
@@ -163,7 +167,43 @@ export const SURFACE_SPECS = deepFreeze({
       roughness: 'gen/plate_rough.png',
     },
   },
+
+  /**
+   * 拉丝钢（W-C5 切片5）—— **玩家剑面**（`player/PlayerController.js` 的剑；第三人称本体
+   * 与第一人称克隆共用一份材质与几何）。**第一族非分块图案**：拉丝是**一维条纹**而不是
+   * 二维格 —— `lines: 128` 条 2 毫米竖纹、`rows: 4` 格沿程漂移（纹路沿刀刃方向跑）。
+   * 0.25 米一铺：0.9 米的剑身 3.6 铺。粗糙度均值 ≈ 0.35，与剑改前那条常数同一档；
+   * 贴图补的是**法线与粗糙度的方向**（金属拉丝的关键事实），颜色仍归剑自己的材质。
+   *
+   * 消费方的 UV 以米计（`makeUvBoxGeometry`），铺数只有一个：`repeat = 1 / tileMeters = 4`。
+   * 剑是**晚到**的（PlayerController 在贴图库就绪前就可能构造）：拿不到走旧读数，
+   * 库落地后补挂 —— 两段都在 `_applySteelSurface` 里。
+   */
+  steel: {
+    pattern: 'brushed',
+    tileMeters: 0.25,
+    size: 256,
+    seed: 20261011,
+    /** 拉丝：条纹数（u 向格点，须整除 size —— 否则列边界在环上错位）/ 沿程段数（v 向格点）/ 条纹高度振幅 */
+    brushed: { lines: 128, rows: 4, amp: 0.8 },
+    /** 金属杂点：比石面轻一档 —— 拉丝是磨出来的，不是砌出来的 */
+    octaves: [
+      { lattice: 16, amp: 0.12 },
+      { lattice: 32, amp: 0.08 },
+      { lattice: 64, amp: 0.05 },
+    ],
+    normalStrength: 2.4,
+    roughBase: 0.35,
+    roughAmp: 0.12,
+    files: {
+      normal: 'gen/steel_nor.png',
+      roughness: 'gen/steel_rough.png',
+    },
+  },
 });
 
 /** 规格表里的表面名清单（消费方与门禁都从这里取，不许各自手抄） */
 export const SURFACE_NAMES = Object.freeze(Object.keys(SURFACE_SPECS));
+
+/** 图案族清单（W-C5 切片5）：构建器分派（`scripts/bake-textures.mjs`）与表结构 enum 共用的唯一一份 */
+export const SURFACE_PATTERNS = Object.freeze(['tiled', 'brushed']);

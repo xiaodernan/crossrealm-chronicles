@@ -85,6 +85,19 @@ const MANIFEST = {
     repeat: [1 / SURFACE_SPECS.plate.tileMeters, 1 / SURFACE_SPECS.plate.tileMeters],
     roughness: 1.0,
   },
+  /**
+   * 拉丝金属（W-C5 切片5）：玩家的剑（`player/PlayerController.js` 的 `_buildWeapon`）。
+   * 0.25 米一铺、水平拉丝 —— 首个非分块图案族（brushed，见 `materialSurfaces.js`）。
+   * 消费方走 `uvVariant('steel', 4, 4)`（= 1 / tileMeters）：剑身几何是 `makeUvBoxGeometry`，
+   * UV 以米计，0.9 米的剑身 3.6 铺。剑可能先于本库构建（`_loadModel` 不等贴图），
+   * 所以消费侧是"就绪就直接上、没就绪等 `TextureLibrary.load()` 回来再上"两段式。
+   */
+  steel: {
+    normalMap: [`${LOCAL}/${SURFACE_SPECS.steel.files.normal}`],
+    roughnessMap: [`${LOCAL}/${SURFACE_SPECS.steel.files.roughness}`],
+    repeat: [1 / SURFACE_SPECS.steel.tileMeters, 1 / SURFACE_SPECS.steel.tileMeters],
+    roughness: 1.0,
+  },
 };
 
 let _instance = null;

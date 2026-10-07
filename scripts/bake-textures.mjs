@@ -126,6 +126,36 @@ export function fbm(u, v, octaves, seed) {
 }
 
 /* ------------------------------------------------------------------ *
+ * 高度场 → 法线（两个图案族共用）
+ * ------------------------------------------------------------------ */
+
+/**
+ * 高度场 → 切线空间法线（环面中心差分；图里 y 向下 ⇒ G 通道取 +dH/dy_img，V 轴在 UV 里朝上）。
+ * 分块族与拉丝族共用这一段：法线怎么从高度场来是两个族共有的机制，换的只是高度场本身。
+ */
+export function normalFromHeight(height, W, H, S) {
+  const normal = new Uint8Array(W * H * 3);
+  const hAt = (x, y) => height[(((y % H) + H) % H) * W + (((x % W) + W) % W)];
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const dHdx = (hAt(x + 1, y) - hAt(x - 1, y)) / 2;
+      const dHdy = (hAt(x, y + 1) - hAt(x, y - 1)) / 2;
+      let nx = -dHdx * S;
+      let ny = dHdy * S;
+      const nz = 1;
+      const inv = 1 / Math.hypot(nx, ny, nz);
+      nx *= inv;
+      ny *= inv;
+      const i = (y * W + x) * 3;
+      normal[i] = Math.round((nx * 0.5 + 0.5) * 255);
+      normal[i + 1] = Math.round((ny * 0.5 + 0.5) * 255);
+      normal[i + 2] = Math.round((nz * inv * 0.5 + 0.5) * 255);
+    }
+  }
+  return normal;
+}
+
+/* ------------------------------------------------------------------ *
  * 分块表面（石砌 / 石板 / 木板）：高度场 → 法线 + 粗糙度
  * ------------------------------------------------------------------ */
 
@@ -170,26 +200,8 @@ export function buildTiledSurface(spec) {
     }
   }
 
-  // 二、法线：环面中心差分（图里 y 向下 ⇒ G 通道取 +dH/dy_img，V 轴在 UV 里朝上）
-  const normal = new Uint8Array(W * H * 3);
-  const S = spec.normalStrength;
-  const hAt = (x, y) => height[(((y % H) + H) % H) * W + (((x % W) + W) % W)];
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const dHdx = (hAt(x + 1, y) - hAt(x - 1, y)) / 2;
-      const dHdy = (hAt(x, y + 1) - hAt(x, y - 1)) / 2;
-      let nx = -dHdx * S;
-      let ny = dHdy * S;
-      const nz = 1;
-      const inv = 1 / Math.hypot(nx, ny, nz);
-      nx *= inv;
-      ny *= inv;
-      const i = (y * W + x) * 3;
-      normal[i] = Math.round((nx * 0.5 + 0.5) * 255);
-      normal[i + 1] = Math.round((ny * 0.5 + 0.5) * 255);
-      normal[i + 2] = Math.round((nz * inv * 0.5 + 0.5) * 255);
-    }
-  }
+  // 二、法线（环面中心差分 → 与拉丝族共用的一段，见 normalFromHeight）
+  const normal = normalFromHeight(height, W, H, spec.normalStrength);
 
   // 三、粗糙度：灰缝更糙、砖面对比 + 颗粒
   const roughness = new Uint8Array(W * H);
@@ -207,9 +219,88 @@ export function buildTiledSurface(spec) {
   return { width: W, height: H, heightField: height, normal, roughness };
 }
 
-/** 规格 → 三件套（按图案类型分派；今天只有"分块"一族 —— 石砌/石板/木板同机制只差尺子，新图案从这里长） */
+/* ------------------------------------------------------------------ *
+ * 拉丝金属（W-C5 切片5）：第一族"非分块"图案
+ * ------------------------------------------------------------------ */
+
+/**
+ * 拉丝表面的三件套 —— 与分块族的区别在**高度场的形状**：分块是"砖面 + 灰缝"的二维格，
+ * 拉丝是**一维条纹** —— u 方向逐列一个独立 hash（列内同值，不插值：条纹是刻出来的），
+ * v 方向 `rows` 格平滑起伏（纹路沿程的深浅漂移）。列号与行号都取模，接缝处的两条边
+ * 本来就是相邻列 —— 平铺不靠修边。高度场 → 法线、粗糙度围绕 base 两段与分块族共用。
+ */
+export function buildBrushedSurface(spec) {
+  const W = spec.size;
+  const H = spec.size;
+  const { lines, rows, amp } = spec.brushed;
+  const colW = W / lines;
+  const bandH = H / rows;
+  const seed = spec.seed;
+
+  // 一、格点（lines × rows 的 hash 网格）+ 高度场：沿 v 平滑插值、沿 u 逐列独立
+  const grid = new Float32Array(lines * rows);
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < lines; i++) grid[j * lines + i] = hash2(i, j, seed);
+  }
+  const streak = new Float32Array(W * H);
+  const height = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) {
+    const vy = (y + 0.5) / bandH;
+    const iy = Math.floor(vy);
+    const fy = smoothstep(vy - iy);
+    const y0 = iy % rows;
+    const y1 = (y0 + 1) % rows;
+    for (let x = 0; x < W; x++) {
+      const cx = Math.floor((x + 0.5) / colW);
+      const a = grid[y0 * lines + cx];
+      const b = grid[y1 * lines + cx];
+      const s = a + (b - a) * fy;
+      const i = y * W + x;
+      streak[i] = s;
+      const micro = fbm((x + 0.5) / W, (y + 0.5) / H, spec.octaves, seed);
+      height[i] = amp * s + micro * 0.6;
+    }
+  }
+
+  // 二、法线（同一段：环面中心差分）
+  const normal = normalFromHeight(height, W, H, spec.normalStrength);
+
+  // 三、粗糙度：条纹深浅 + 金属杂点颗粒，围绕 roughBase（均值 ≈ roughBase —— 贴图接管前后读数同档）
+  const roughness = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      const grain = valueNoise((x + 0.5) / W, (y + 0.5) / H, 64, seed ^ 0x5bd1e995);
+      const r = spec.roughBase
+        + spec.roughAmp * (1.6 * streak[i] - 0.8)
+        + spec.roughAmp * 0.6 * (grain - 0.5) * 2;
+      roughness[i] = Math.round(Math.min(1, Math.max(0, r)) * 255);
+    }
+  }
+
+  return { width: W, height: H, heightField: height, normal, roughness };
+}
+
+/* ------------------------------------------------------------------ *
+ * 图案分派
+ * ------------------------------------------------------------------ */
+
+/** 图案类型 → 构建器（键与 `SURFACE_PATTERNS` 一一对应，由门禁用例守着） */
+export const SURFACE_BUILDERS = {
+  tiled: buildTiledSurface,
+  brushed: buildBrushedSurface,
+};
+
+/**
+ * 规格 → 三件套。未知图案**当场抛**、不落到任何默认 —— "落到默认"会让表里写错图案名的
+ * 表面安静地按另一种图案烘出来：改数不重烤好歹还是同一张图，改错族名则是另一张图。
+ */
 export function buildSurface(spec) {
-  return buildTiledSurface(spec);
+  const build = SURFACE_BUILDERS[spec.pattern];
+  if (!build) {
+    throw new Error(`未知的图案类型 "${spec.pattern}"（只有 ${Object.keys(SURFACE_BUILDERS).join(' / ')}）`);
+  }
+  return build(spec);
 }
 
 /** 规格 → 输出文件（相对 `public/textures/`）。名字来自规格表，绝不手抄 */

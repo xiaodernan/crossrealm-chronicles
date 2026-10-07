@@ -28,8 +28,8 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { inflateSync } from 'node:zlib';
 import * as THREE from 'three';
-import { SURFACE_SPECS, SURFACE_NAMES } from '../src/content/materialSurfaces.js';
-import { buildSurface, encodePNG, surfaceFiles } from '../scripts/bake-textures.mjs';
+import { SURFACE_SPECS, SURFACE_NAMES, SURFACE_PATTERNS } from '../src/content/materialSurfaces.js';
+import { buildSurface, encodePNG, surfaceFiles, SURFACE_BUILDERS } from '../scripts/bake-textures.mjs';
 import { TextureLibrary } from '../src/assets/TextureLibrary.js';
 import {
   ProceduralDungeonGenerator,
@@ -37,7 +37,7 @@ import {
 import { isSharedAsset, dungeonAssetStats } from '../src/world/dungeonAssets.js';
 import { DOOR_JAMB } from '../src/world/dungeonDimensions.js';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
-import { CONTENT_TABLES, checkTable } from '../src/content/registry.js';
+import { CONTENT_TABLES, checkTable, checkSurfaceFamilies } from '../src/content/registry.js';
 
 const ROOT = process.cwd();
 const PUBLIC = join(ROOT, 'public', 'textures');
@@ -131,6 +131,41 @@ function 接缝诊断(field, W, H) {
   for (let y = 0; y < H; y++) 竖缝 += Math.abs(field[y * W] - field[y * W + W - 1]);
   for (let x = 0; x < W; x++) 横缝 += Math.abs(field[x] - field[(H - 1) * W + x]);
   return { 内部平均, 竖缝: 竖缝 / H, 横缝: 横缝 / W };
+}
+
+/**
+ * 列边界平均差（brushed 族的接缝基准，W-C5 切片5）。
+ *
+ * 拉丝是**竖条纹**（每 `colW` 像素一条独立拉丝线），右回卷那一对
+ * （x=W-1 与 x=0）恰恰是两条独立拉丝线之间的**普通列边界**，本来就该和
+ * 别的列边界一样跳（实测 0.16784 vs 列边界 0.22810 量级一致）。
+ * 拿全对平均当基准会假红：全对平均被"条纹内部的平滑对"拉低（0.11527），
+ * 而条纹内平滑正是拉丝的**设计**，不是瑕疵。所以这一族的基准换成
+ * "跨列边界那些对的平均" —— 分块族的接缝则对的是普通相邻对（沿用 内部平均）。
+ */
+function 列边界平均(field, W, H, colW) {
+  let 和 = 0, n = 0;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x + 1 < W; x++) {
+      if (Math.floor((x + 0.5) / colW) === Math.floor((x + 1.5) / colW)) continue;
+      和 += Math.abs(field[y * W + x + 1] - field[y * W + x]);
+      n++;
+    }
+  }
+  if (n === 0) throw new Error('列边界平均：一个边界对都没扫到 —— colW 与 W 的关系变了，这把尺失效');
+  return 和 / n;
+}
+
+/** 各向异性尺（brushed 族）：水平相邻对的平均差 ÷ 竖直相邻对的平均差 */
+function 各向异性(field, W, H) {
+  let du = 0, dv = 0, nu = 0, nv = 0;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x + 1 < W; x++) { du += Math.abs(field[y * W + x + 1] - field[y * W + x]); nu++; }
+  }
+  for (let y = 0; y + 1 < H; y++) {
+    for (let x = 0; x < W; x++) { dv += Math.abs(field[(y + 1) * W + x] - field[y * W + x]); nv++; }
+  }
+  return { 横: du / nu, 竖: dv / nv, 比: (du / nu) / (dv / nv) };
 }
 
 /* ------------------------------------------------------------------ *
@@ -255,19 +290,24 @@ describe('① 提交的 PNG 就是规格重算出来的那张（改数不重烤 
   });
 });
 
-// 每一个表面都过这五关（切片2 起不止一种：石板与石砌吃同一把尺）
+// 每一个表面都过这几关（切片2 起不止一种：石板与石砌吃同一把尺；切片5 起接缝/结构按族分家）
 for (const 名 of SURFACE_NAMES) describe(`② 表面读数（${名}）：可平铺、法线是单位向量、粗糙度围绕基准带对比`, () => {
   const spec = SURFACE_SPECS[名];
   const 图案 = buildSurface(spec);
   const W = spec.size;
   const H = spec.size;
+  const tiled = spec.pattern === 'tiled';
 
-  it('高度场的接缝不比内部更跳（不可平铺的噪声会在这里红）', () => {
+  it('高度场的接缝不比基准更跳（不可平铺的噪声会在这里红）', () => {
     const d = 接缝诊断(图案.heightField, W, H);
-    // 阈值 = 内部平均的 1.1 倍：不是"must equal"，是"不许明显更跳"。
-    // 实测（2026-10-07）：内部 0.02571、竖缝 0.02046、横缝 0.02524。
-    expect(d.竖缝, `竖缝 ${d.竖缝.toFixed(5)} vs 内部 ${d.内部平均.toFixed(5)}`).toBeLessThanOrEqual(d.内部平均 * 1.1);
-    expect(d.横缝, `横缝 ${d.横缝.toFixed(5)} vs 内部 ${d.内部平均.toFixed(5)}`).toBeLessThanOrEqual(d.内部平均 * 1.1);
+    // 阈值 = 基准的 1.1 倍：不是"must equal"，是"不许明显更跳"。
+    // 基准按族取（见 `列边界平均` 的注释）：分块族的接缝对的是全对平均，
+    // 拉丝族的右回卷那一对是**普通列边界**，基准换成跨列边界对的平均。
+    // 实测（2026-10-07/08）：masonry 内部 0.02571、竖缝 0.02046、横缝 0.02524；
+    // steel 竖缝 0.16784 vs 列边界 0.22810（全对平均 0.11527 会假红，正是分家的理由）。
+    const 基准 = tiled ? d.内部平均 : 列边界平均(图案.heightField, W, H, W / spec.brushed.lines);
+    expect(d.竖缝, `竖缝 ${d.竖缝.toFixed(5)} vs 基准 ${基准.toFixed(5)}`).toBeLessThanOrEqual(基准 * 1.1);
+    expect(d.横缝, `横缝 ${d.横缝.toFixed(5)} vs 基准 ${基准.toFixed(5)}`).toBeLessThanOrEqual(基准 * 1.1);
   });
 
   it('反向对照：同一把尺量线性斜坡场必须红（否则这把尺什么都没量）', () => {
@@ -306,30 +346,60 @@ for (const 名 of SURFACE_NAMES) describe(`② 表面读数（${名}）：可平
       方差 += d * d;
     }
     const sd = Math.sqrt(方差 / (W * H));
-    // 实测（2026-10-07）：均值 0.8453、sd 0.0522、min 194、max 255；规格 roughBase = 0.86
+    // 实测（2026-10-07/08）：masonry 均值 0.8453、sd 0.0522、min 194、max 255（规格 roughBase 0.86）；
+    // steel 均值 0.3461、sd 0.0569、min 49、max 130（规格 roughBase 0.35）。
+    // 动态范围按"跨度 > 32 字节"给两族共用下限；max/min 的绝对读数各是分块族的（见下一条）
     expect(Math.abs(mean - spec.roughBase), `均值 ${mean.toFixed(4)} 离基准 ${spec.roughBase} 太远`).toBeLessThan(0.08);
     expect(sd, '粗糙度几乎是常数 —— 这张图没有信息').toBeGreaterThan(0.02);
-    expect(max).toBeGreaterThan(250);
-    expect(min).toBeLessThan(210);
+    expect(max - min, `粗糙度跨度只有 ${max - min} 字节 —— 贴不出对比`).toBeGreaterThan(32);
   });
 
-  it('分块结构：块心有真实高度分布（不是一张纯噪声或平板）', () => {
-    const { rows, cols, stagger, phase } = spec.bricks;
-    const rowPx = H / rows;
-    const blockPx = W / cols;
-    const 高度 = new Set();
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        // 与烘焙器同一条错缝/相位公式（切片2 起两者都在规格里：石砌 0.5/0、石板 0/0.5）
-        const offset = ((r * stagger) % 1) * blockPx;
-        const cx = Math.floor(((((c + 0.5 - phase) * blockPx - offset) % W) + W) % W);
-        const cy = Math.floor((((r + 0.5 - phase) * rowPx) % H + H) % H);
-        高度.add(图案.heightField[cy * W + cx].toFixed(3));
+  if (tiled) {
+    it('分块结构：块心有真实高度分布（不是一张纯噪声或平板）', () => {
+      const { rows, cols, stagger, phase } = spec.bricks;
+      const rowPx = H / rows;
+      const blockPx = W / cols;
+      const 高度 = new Set();
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          // 与烘焙器同一条错缝/相位公式（切片2 起两者都在规格里：石砌 0.5/0、石板 0/0.5）
+          const offset = ((r * stagger) % 1) * blockPx;
+          const cx = Math.floor(((((c + 0.5 - phase) * blockPx - offset) % W) + W) % W);
+          const cy = Math.floor((((r + 0.5 - phase) * rowPx) % H + H) % H);
+          高度.add(图案.heightField[cy * W + cx].toFixed(3));
+        }
       }
-    }
-    // 实测：masonry 31/32 个砖心互不相同（错缝顺砌 + 每砖独立 hash）；slabs 2×2 = 4 块
-    expect(高度.size, `块心高度只有 ${高度.size} 种`).toBeGreaterThanOrEqual(Math.min(8, rows * cols));
-  });
+      // 实测：masonry 31/32 个砖心互不相同（错缝顺砌 + 每砖独立 hash）；slabs 2×2 = 4 块
+      expect(高度.size, `块心高度只有 ${高度.size} 种`).toBeGreaterThanOrEqual(Math.min(8, rows * cols));
+    });
+
+    it('粗糙度（分块族专属）：高基带上铺着近白的砖面（max/min 的绝对读数）', () => {
+      let min = 255, max = 0;
+      for (let i = 0; i < W * H; i++) {
+        const v = 图案.roughness[i];
+        if (v < min) min = v;
+        if (v > max) max = v;
+      }
+      expect(max, `分块族该有到顶的亮砖（实测 max 255），实际 ${max}`).toBeGreaterThan(250);
+      expect(min, `分块族的砖缝该压到 210 以下（实测 194），实际 ${min}`).toBeLessThan(210);
+    });
+  } else {
+    it('拉丝结构（拉丝族专属）：列宽整除、水平相邻差远大于竖直（实测 21.6 倍）', () => {
+      const { lines, rows } = spec.brushed;
+      expect(Number.isInteger(W / lines), `${W} 像素分不出 ${lines} 条整宽拉丝线`).toBe(true);
+      expect(Number.isInteger(H / rows), `${H} 像素分不出 ${rows} 行整高过渡带`).toBe(true);
+      const a = 各向异性(图案.heightField, W, H);
+      // 拉丝是**水平方向**的条纹：横着跨线跳（0.11527）、竖着沿线滑（0.00533）
+      expect(a.比, `各向异性只有 ${a.比.toFixed(2)} 倍（横 ${a.横.toFixed(5)} / 竖 ${a.竖.toFixed(5)}）—— 拉丝成了噪声`).toBeGreaterThan(3);
+    });
+
+    it('反向对照：场转置后各向异性必须翻过来（否则这把尺没在量方向）', () => {
+      const t = new Float32Array(W * H);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) t[y * W + x] = 图案.heightField[x * W + y];
+      const a = 各向异性(t, W, H);
+      expect(a.比, `转置后仍 ${a.比.toFixed(3)} —— 原场的方向性没有被尺子量到`).toBeLessThan(1 / 3);
+    });
+  }
 });
 
 for (const 名 of SURFACE_NAMES) describe(`③ 确定性（${名}）：同规格永远同一张，换种子必须换图`, () => {
@@ -364,15 +434,18 @@ describe('④ 共享库：loaded() 的同步口与 uvVariant 的按铺数缓存'
     expect('slabs' in lib.sets, 'slabs 没进 MANIFEST').toBe(true);
     expect('plank' in lib.sets, 'plank 没进 MANIFEST').toBe(true);
     expect('plate' in lib.sets, 'plate 没进 MANIFEST').toBe(true);
+    expect('steel' in lib.sets, 'steel 没进 MANIFEST').toBe(true);
     // node 没有 document，TextureLoader 载不出图 —— 这恰好就是"库在但这一组没贴图"的退路形状
     expect(lib.sets.masonry.normalMap).toBe(null);
     expect(lib.sets.slabs.normalMap).toBe(null);
     expect(lib.sets.plank.normalMap).toBe(null);
     expect(lib.sets.plate.normalMap).toBe(null);
+    expect(lib.sets.steel.normalMap).toBe(null);
     expect(lib.uvVariant('masonry', 0.5, 0.5)).toBe(null);
     expect(lib.uvVariant('slabs', 1 / SURFACE_SPECS.slabs.tileMeters, 1 / SURFACE_SPECS.slabs.tileMeters)).toBe(null);
     expect(lib.uvVariant('plank', 1 / SURFACE_SPECS.plank.tileMeters, 1 / SURFACE_SPECS.plank.tileMeters)).toBe(null);
     expect(lib.uvVariant('plate', 1 / SURFACE_SPECS.plate.tileMeters, 1 / SURFACE_SPECS.plate.tileMeters)).toBe(null);
+    expect(lib.uvVariant('steel', 1 / SURFACE_SPECS.steel.tileMeters, 1 / SURFACE_SPECS.steel.tileMeters)).toBe(null);
   });
 
   it('uvVariant：clone 共享 Source、repeat 按铺数、同铺数同壳、异铺数新壳', () => {
@@ -657,11 +730,16 @@ describe('⑥ 文件名只有规格表一份（抄第二份的症状是 404 而�
 describe('⑦ 表结构门禁：每一枚数值越界都各自点名（规格表真的在 schema 下）', () => {
   const 表 = CONTENT_TABLES.find((t) => t.kind === 'materialSurfaces');
   const 跑 = (改) => checkTable({ ...表, table: { masonry: { ...SURFACE_SPECS.masonry, ...改 } } }).join('\n');
+  const 钢跑 = (改) => checkTable({ ...表, table: { steel: { ...SURFACE_SPECS.steel, ...改 } } }).join('\n');
 
   it('真规格过，且登记在案', () => {
     expect(表, 'materialSurfaces 没进 CONTENT_TABLES').toBeTruthy();
     expect(表.value.t).toBe('row');
     expect(checkTable(表)).toEqual([]);
+  });
+
+  it('两族的整表不变式挂在条目上（不是只在别处被调用）', () => {
+    expect(表.invariant, 'pattern ↔ 参数的一致性命中不了任何一行门槛 —— 不变式根本没挂上').toBe(checkSurfaceFamilies);
   });
 
   it.each([
@@ -675,8 +753,45 @@ describe('⑦ 表结构门禁：每一枚数值越界都各自点名（规格表
     ['normalStrength', { normalStrength: 0 }, /normalStrength/],
     ['roughAmp', { roughAmp: 1 }, /roughAmp/],
     ['files 缺一枚', { files: { normal: 'gen/a.png' } }, /roughness/],
+    ['pattern 不在值域', { pattern: 'ghost' }, /不在允许值里/],
+    ['tiled 混进 brushed 行', { brushed: SURFACE_SPECS.steel.brushed }, /却带着 brushed 行/],
+    ['tiled 缺 bricks 行', { bricks: undefined }, /缺 bricks 行/],
   ])('变异 %s 被点名', (_名, 改, 图案) => {
     const 错误 = 跑(改);
     expect(错误, `${_名} 越界却过表了`).toMatch(图案);
+  });
+
+  it.each([
+    ['brushed 缺 brushed 行', { brushed: undefined }, /缺 brushed 行/],
+    ['brushed 混进 bricks 行', { bricks: SURFACE_SPECS.masonry.bricks }, /却带着 bricks 行/],
+    ['brushed.lines 越界（1 < 2）', { brushed: { ...SURFACE_SPECS.steel.brushed, lines: 1 } }, /lines/],
+    ['brushed.rows 越界（64+1 > 64）', { brushed: { ...SURFACE_SPECS.steel.brushed, rows: 65 } }, /rows/],
+    ['brushed.amp 为 0', { brushed: { ...SURFACE_SPECS.steel.brushed, amp: 0 } }, /amp/],
+    ['brushed.amp 超 1', { brushed: { ...SURFACE_SPECS.steel.brushed, amp: 1.5 } }, /amp/],
+  ])('拉丝族变异 %s 被点名', (_名, 改, 图案) => {
+    const 错误 = 钢跑(改);
+    expect(错误, `${_名} 越界却过表了`).toMatch(图案);
+  });
+
+  it('缺 pattern（必填）被点名 —— 形状层把它挡住，不是靠烘焙器读 undefined 才炸', () => {
+    // 注意不能走 `跑`：它先从真行铺底，缺的键会被铺回来；这里直接给一枚"没有 pattern"的行
+    const { pattern: _p, ...无 } = SURFACE_SPECS.masonry;
+    expect(checkTable({ ...表, table: { masonry: 无 } }).join('\n')).toMatch(/pattern.*缺少必填/);
+  });
+});
+
+describe('⑧ 图案族分派：SURFACE_BUILDERS 与 SURFACE_PATTERNS 是一份账，未知图案当场抛', () => {
+  it('两张表的键集必须相同（各漂一半 = 有族没烘焙器 / 有烘焙器没族名）', () => {
+    expect(Object.keys(SURFACE_BUILDERS).sort(), '烘焙器的族与 SURFACE_PATTERNS 漂了').toEqual([...SURFACE_PATTERNS].sort());
+  });
+
+  it('每一个登记的表面都有对应的烘焙器（spec.pattern 没有孤儿值）', () => {
+    for (const n of SURFACE_NAMES) {
+      expect(typeof SURFACE_BUILDERS[SURFACE_SPECS[n].pattern], `${n} 的 pattern "${SURFACE_SPECS[n].pattern}" 没有烘焙器`).toBe('function');
+    }
+  });
+
+  it('反向对照：未知图案类型当场抛（分派不许有默认分支 —— 默认会让坏规格安静地烤成别的样子）', () => {
+    expect(() => buildSurface({ ...SURFACE_SPECS.masonry, pattern: 'ghost' })).toThrow(/未知的图案类型/);
   });
 });

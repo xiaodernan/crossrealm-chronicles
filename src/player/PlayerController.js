@@ -11,6 +11,10 @@ import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE } from '../engine/
 import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND, LOCK_ON_CAMERA, PLAYER_KNOCK } from '../content/tuning.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
+import { TextureLibrary } from '../assets/TextureLibrary.js';
+import { SURFACE_SPECS } from '../content/materialSurfaces.js';
+import { makeUvBoxGeometry } from '../engine/uvGeometry.js';
+
 
 
 /** 第三人称轨道 + 第一人称 — 参考法环/黑神话：鼠标直控、镜头始终看向角色 */
@@ -190,19 +194,7 @@ export class PlayerController {
 
     await this.characterModel.load();
 
-    const sword = new THREE.Mesh(
-
-      new THREE.BoxGeometry(0.06, 0.9, 0.12),
-
-      new THREE.MeshStandardMaterial({ color: 0xc9a962, roughness: 0.35, metalness: 0.7, emissive: 0x332200, emissiveIntensity: 0.2 })
-
-    );
-
-    sword.position.set(0.55, 1.0, 0);
-
-    sword.rotation.z = -0.3;
-
-    sword.name = 'weapon';
+    const sword = this._buildWeapon();
 
     this.mesh.add(sword);
 
@@ -226,7 +218,64 @@ export class PlayerController {
 
   }
 
+  /**
+   * 剑（W-C5 切片5）：剑身贴拉丝金属（steel）。几何用米制 UV（`engine/uvGeometry.js`）——
+   * 0.9 米的剑身摊 3.6 铺贴图，与墙砖同一个"铺数只有一个"的口径（不随剑的缩放走）。
+   * 材质每实例一份（设计上要留着改自家 emissive 的口），纹理是共享壳。
+   */
+  _buildWeapon() {
 
+    const mat = new THREE.MeshStandardMaterial({ color: 0xc9a962, roughness: 0.35, metalness: 0.7, emissive: 0x332200, emissiveIntensity: 0.2 });
+
+    const sword = new THREE.Mesh(makeUvBoxGeometry(0.06, 0.9, 0.12), mat);
+
+    sword.position.set(0.55, 1.0, 0);
+
+    sword.rotation.z = -0.3;
+
+    sword.name = 'weapon';
+
+    this._applySteelSurface(mat);
+
+    return sword;
+
+  }
+
+  /**
+   * steel 两段式：`_loadModel` 不等贴图库（模型与贴图各加载各的），所以库已就绪就直接上；
+   * 没就绪挂到 `TextureLibrary.load()` 的同一份缓存 promise 上 —— 与 `WorldDecorations`
+   * 同一口径。敌人只走同步那一段（建得早就退回旧读数）：剑是整局在手的物件，等一次才不至于
+   * 整局没有金属纹理。上贴后 `needsUpdate`：材质可能已经编译过，新贴图要重收一次程序。
+   */
+  _applySteelSurface(mat) {
+
+    const 上贴 = (lib) => {
+
+      const 砖 = 1 / SURFACE_SPECS.steel.tileMeters;
+
+      const v = lib.uvVariant('steel', 砖, 砖);
+
+      if (!v) return;
+
+      if (v.normalMap) mat.normalMap = v.normalMap;
+
+      if (v.roughnessMap) mat.roughnessMap = v.roughnessMap;
+
+      mat.normalScale = new THREE.Vector2(0.8, 0.8);
+
+      mat.roughness = 1;
+
+      mat.needsUpdate = true;
+
+    };
+
+    const 就绪 = TextureLibrary.loaded();
+
+    if (就绪) 上贴(就绪);
+
+    else TextureLibrary.load().then(上贴);
+
+  }
 
   toggleCameraMode() {
 

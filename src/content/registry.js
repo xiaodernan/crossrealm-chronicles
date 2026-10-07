@@ -46,7 +46,7 @@ import { SKILL_TREES, SKILL_BRANCH_IDS, SKILL_EFFECT_KEYS } from './skillTrees.j
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import { ENEMY_ROSTER } from './enemies.js';
-import { SURFACE_SPECS } from './materialSurfaces.js';
+import { SURFACE_SPECS, SURFACE_PATTERNS } from './materialSurfaces.js';
 import { DUNGEON_DEFS, DUNGEON_IDS } from './dungeons.js';
 import { DUNGEON_ENCOUNTERS } from './dungeonEncounters.js';
 import { ENEMY_MOVE_SETS, BODY_PLANS } from './tuning.js';
@@ -273,6 +273,29 @@ export function checkFields(row, spec, path, ctx) {
 /* ------------------------------------------------------------------ *
  * 内容表清单
  * ------------------------------------------------------------------ */
+
+/**
+ * 表面族与参数的一致性（W-C5 切片5）。
+ *
+ * 声明式词汇表说不了"按 `pattern` 二选一"：`bricks` 与 `brushed` 都是可选字段，
+ * 于是"brushed 行缺 brushed""tiled 行混进 brushed"这类错在形状层是全静音的 ——
+ * 前者要等烘焙器读到 `undefined` 才炸；后者更糟：数值在场、没人读，
+ * 改它的人以为改了。`pattern` 的**值域**由 enum 那一层管，这里只管"说的和带的对不对得上"。
+ */
+export function checkSurfaceFamilies(specs) {
+  const out = [];
+  for (const [name, spec] of Object.entries(specs ?? {})) {
+    const p = `materialSurfaces["${name}"]`;
+    if (spec.pattern === 'tiled') {
+      if (!spec.bricks) out.push(`${p}: pattern "tiled" 却缺 bricks 行`);
+      if (spec.brushed) out.push(`${p}: pattern "tiled" 却带着 brushed 行 —— 这一族的数值没人读（改它以为改了）`);
+    } else if (spec.pattern === 'brushed') {
+      if (!spec.brushed) out.push(`${p}: pattern "brushed" 却缺 brushed 行`);
+      if (spec.bricks) out.push(`${p}: pattern "brushed" 却带着 bricks 行 —— 这一族的数值没人读（改它以为改了）`);
+    }
+  }
+  return out;
+}
 
 /**
  * 全仓的内容表。
@@ -929,17 +952,30 @@ export const CONTENT_TABLES = [
     value: {
       t: 'row',
       of: {
+        pattern: { t: 'enum', of: SURFACE_PATTERNS },
         tileMeters: { t: 'number', exclusiveMin: 0 },
         size: { t: 'int', min: 64, max: 1024 },
         seed: { t: 'int', min: 0 },
+        // 两族的参数各自可选（tiled 用 bricks、brushed 用 brushed），"按 pattern 二选一"
+        // 由 `checkSurfaceFamilies` 点名 —— 形状层表达不了条件必填
         bricks: {
           t: 'row',
+          required: false,
           of: {
             rows: { t: 'int', min: 1, max: 64 },
             cols: { t: 'int', min: 1, max: 64 },
             mortarPx: { t: 'int', min: 1, max: 32 },
             stagger: { t: 'number', min: 0, max: 1 },
             phase: { t: 'number', min: 0, max: 1 },
+          },
+        },
+        brushed: {
+          t: 'row',
+          required: false,
+          of: {
+            lines: { t: 'int', min: 2, max: 256 },
+            rows: { t: 'int', min: 2, max: 64 },
+            amp: { t: 'number', exclusiveMin: 0, max: 1 },
           },
         },
         octaves: {
@@ -962,6 +998,7 @@ export const CONTENT_TABLES = [
         },
       },
     },
+    invariant: checkSurfaceFamilies,
   },
 ];
 
