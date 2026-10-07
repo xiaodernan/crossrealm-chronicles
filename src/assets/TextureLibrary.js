@@ -155,9 +155,13 @@ export class TextureLibrary {
   }
 
   async init() {
-    for (const [key, def] of Object.entries(MANIFEST)) {
-      this.sets[key] = await this._loadSet(def);
-    }
+    // 各 set 互不依赖 —— 一次发起全部（22 个请求交给浏览器连接池排队），
+    // 初始等待从"22 个串行往返"变成"2 波并发"。`Promise.all` 保序：
+    // 完成顺序不参与，落库键序仍按 MANIFEST（与串行版逐键一致）。
+    const 成品 = await Promise.all(
+      Object.entries(MANIFEST).map(async ([key, def]) => [key, await this._loadSet(def)]),
+    );
+    for (const [key, set] of 成品) this.sets[key] = set;
     this.ready = true;
     return this;
   }
