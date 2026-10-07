@@ -1,0 +1,42 @@
+# W-D4 切片1 —— 三门禁上 CI。
+#
+# 门禁链就是仓库的完成定义（MASTER_PLAN §0.3）：lint → test → build，顺序不换。
+# 跑在 windows-latest：全仓的源码扫描门禁（读 src 原文、对 EOL 有假设的那批）
+# 是在 Windows 开发机上写绿的，CI 与开发平台保持同一边，别让"CI 绿了但本机红"
+# 有了第二个解释。Node 锁 24（与开发机一致）。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # npm ci 严格按 package-lock 装 —— 本地 node_modules 与锁文件的漂移在这里现形
+      - name: Install (npm ci)
+        run: npm ci
+
+      - name: Lint (0 error)
+        run: npm run lint
+
+      - name: Test (all green)
+        run: npm run test
+
+      - name: Build
+        run: npm run build
