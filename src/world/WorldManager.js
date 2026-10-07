@@ -319,8 +319,12 @@ export class WorldManager {
     if (this.dungeonManager?.isInside()) {
       return this.dungeonManager.getGroundHeight(x, z);
     }
-    // W-B9 切片2：内部空间优先
-    const internalHeight = this.internalSpaceManager?.getCurrentInternalHeight(x, z);
+    // W-B9 切片2：内部空间优先。
+    // 必须把当前区的中心传下去（B100）：室内高度是"区域中心 + 本层基准 + 局部采样"，
+    // 少传一次的结果是四座模板里两座的地形起伏整个失效（中心点差 10~12.5 米）。
+    const internalHeight = this.internalSpaceManager?.getCurrentInternalHeight(
+      x, z, this.currentZone?.center ?? { x: 0, y: 0, z: 0 }
+    );
     if (internalHeight !== null) return internalHeight;
     return sampleGlobalHeightSmooth(x, z, this.zones);
   }

@@ -262,10 +262,26 @@ export class InternalSpaceManager {
     return this.currentSpace;
   }
 
-  /** 获取当前空间的高度（若不在任何内部空间则返回 null） */
-  getCurrentInternalHeight(worldX, worldZ) {
+  /**
+   * 获取当前空间的高度（若不在任何内部空间则返回 null）。
+   *
+   * `zoneCenter` 是**必填**，不是可选装饰：高度 = 区域中心.y + 本层基准 + 局部采样(局部坐标)，
+   * 而局部坐标要由 `worldToLocal` 减掉区域中心才算得出来。改前这里硬编码 `{ x: 0, y: 0, z: 0 }`
+   * （B100），于是 `zoneCenter.y` 整个丢了、`x/z` 也少减一次 —— 实测四座模板里两座的高度函数
+   * 是非平凡的（幽暗神殿"中心凹陷 2 米"、晨曦大厅"中央隆起"），中心点差 **10~12.5 米**。
+   * 玩家侧的说法是"走进室内，地面高度整个不对"。
+   *
+   * 少了参数就抛（B71 口径：调用方递错了不要静默兜底，兜底会把"递错了"变成"高度悄悄是别的值"）。
+   */
+  getCurrentInternalHeight(worldX, worldZ, zoneCenter) {
     if (!this.currentSpace) return null;
-    return this.currentSpace.getInternalHeightAt(worldX, worldZ, { x: 0, y: 0, z: 0 });
+    if (!zoneCenter) {
+      throw new Error(
+        'InternalSpaceManager.getCurrentInternalHeight: 必须给 zoneCenter —— '
+        + '室内高度由"区域中心 + 本层基准 + 局部采样"算出来，缺了它算不出局部坐标（B100）'
+      );
+    }
+    return this.currentSpace.getInternalHeightAt(worldX, worldZ, zoneCenter);
   }
 
   /** 获取当前空间的所有碰撞体（已转世界坐标） */
