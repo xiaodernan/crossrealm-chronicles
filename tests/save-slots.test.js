@@ -13,7 +13,7 @@ import { SaveSystem, slotKey, SAVE_SLOTS } from '../src/game/SaveSystem.js';
 import { SAVE_KEYS, CURRENT_VERSION } from '../src/game/SaveMigrations.js';
 import { SaveValidator } from '../src/game/SaveValidator.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
-import { installWindowShim } from './helpers/enemyHarness.js';
+
 
 const ROOT = process.cwd();
 
