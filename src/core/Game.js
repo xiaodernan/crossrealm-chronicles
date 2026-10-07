@@ -20,6 +20,7 @@ import { scheduler } from '../engine/Scheduler.js';
 import { PerfHUD } from '../engine/PerfHUD.js';
 import { registerPerfGauges } from '../game/perfGauges.js';
 import { createErrorReporter } from '../engine/errorReporter.js';
+import { adoptSubsystem, runTeardowns } from '../engine/teardown.js';
 import { HUD } from '../ui/HUD.js';
 import { Dialog } from '../ui/Dialog.js';
 import { HelpManual } from '../ui/HelpManual.js';
@@ -257,10 +258,10 @@ export class Game {
     this.chaosLightning = new ChaosLightning(this.scene, this.camera);
     this.realmBleed = new RealmBleed();
 
-    this.damageNumbers = new DamageNumbers(this.scene);
+    this.damageNumbers = this._adopt('combat/DamageNumbers', new DamageNumbers(this.scene));
     /** 震屏：全局唯一实例，各战斗/法术系统直接 `addShake()` 请求，主循环只在这里推进 */
     this.shake = shake;
-    this.combatFeedback = new CombatFeedback(this.scene);
+    this.combatFeedback = this._adopt('effects/CombatFeedback', new CombatFeedback(this.scene));
     this.projectiles = new ProjectileManager(this.scene, this.audio);
     this.loot = new LootSystem(this.scene, this.stats, this.audio, {
       onGear: (instance) => this.pickUpGear(instance),   // 捡到装备之后怎么办，只有这一处说了算
@@ -285,14 +286,14 @@ export class Game {
     // 属性读数的消费者在这里登记一次：升级与穿戴之后"把新数推下去"只有 `PlayerStats` 那一处
     this.stats.bindConsumers({ combat: this.player.combat, spells: this.spells });
 
-    this.hud = new HUD(this);
+    this.hud = this._adopt('ui/HUD', new HUD(this));
     this.upgrade = new UpgradePanel(this);
     this.helpManual = new HelpManual(this);
     this.tutorial = new Tutorial(this.dialog, this.helpManual, this);
     this.cinematics = new CinematicManager(this);
     this.combatCamera = new CombatCameraDirector(this);
     attachCombatCameraSkip(this.combatCamera, this);
-    this.combatCinematicSkip = new CombatCinematicSkip(this);
+    this.combatCinematicSkip = this._adopt('cinematic/CombatCinematicSkip', new CombatCinematicSkip(this));
     this.executionSkipFx = new ExecutionSkipBurst();
     this.combatInputLock = new CombatInputLock(this);
     this.combatTutorial = new CombatTutorialDirector(this);
@@ -359,7 +360,7 @@ export class Game {
     // 清单搬进 `game/perfGauges.js`（W-C1 切片4）—— 修前这六行都没带 `leak: true`，
     // 于是 `stats().leaks` 恒空、watchdog 从没可能报过警；搬出来之后用例能拿假 game 跑
     // `registerPerfGauges` 并断言"注册完 leaks 不是空的"，那正是修前会红的那一条。
-    this.perfHud = registerPerfGauges(new PerfHUD({ renderer: this.renderer, scene: this.scene }), this);
+    this.perfHud = this._adopt('engine/PerfHUD', registerPerfGauges(new PerfHUD({ renderer: this.renderer, scene: this.scene }), this));
 
     // W-D5 切片2：把未捕获异常与未处理的 Promise 拒绝收进一个可读账本。
     // 尽早装（在 setupLights / setupInput 之前）—— 启动期的错最值得留现场。
@@ -388,6 +389,30 @@ export class Game {
     window.dispatchEvent(new CustomEvent('stats-changed', { detail: this.stats.toJSON() }));
 
     window.addEventListener('resize', () => this.onResize());
+  }
+
+  /**
+   * 收编一个子系统：构造完立刻把它的 `dispose` 交给登记表（W-A1 注销欠账迁移第二处）。
+   *
+   * **没有 `dispose()` 的子系统会被当场拒绝** —— 那正是"假装收编"的防线：
+   * 一句 `registerTeardown(tag, () => {})` 也能让账面上多一条，但拆卸时什么都不会发生。
+   * 要收编就得先有清理路径。
+   */
+  _adopt(tag, instance) {
+    return adoptSubsystem(tag, instance);
+  }
+
+  /**
+   * 把整个游戏收干净：按登记的反序执行各子系统的 `dispose()`，再摘掉全局错误收集器。
+   *
+   * `new Game()` 全仓只出现一次（`main.js` 的 `boot()`），所以这条路径今天主要由
+   * 测试与将来的"重开一局"使用 —— 但它是那笔 129 处裸监听欠账的**总出口**：
+   * 有了它，"注销路径存在"才会变成"注销会发生"。
+   */
+  dispose() {
+    const closed = runTeardowns();
+    this.errorReporter?.uninstall?.();
+    return closed;
   }
 
   setupEvents() {
