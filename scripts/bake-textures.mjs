@@ -126,12 +126,12 @@ export function fbm(u, v, octaves, seed) {
 }
 
 /* ------------------------------------------------------------------ *
- * 分块表面（石砌 / 石板）：高度场 → 法线 + 粗糙度
+ * 分块表面（石砌 / 石板 / 木板）：高度场 → 法线 + 粗糙度
  * ------------------------------------------------------------------ */
 
 /**
- * 生成一张"分块"表面的三件套（石砌与石板共用这一套机制，差在尺子：
- * 行/列数、缝宽、错缝比例）。返回：
+ * 生成一张"分块"表面的三件套（石砌 / 石板 / 木板共用这一套机制，差在尺子：
+ * 行/列数、缝宽、错缝比例、相位 —— 木板的 rows=1 即"整高无横缝的竖板"）。返回：
  * - `heightField`：Float32Array(W×H)，行优先（y 向下，与像素同序）
  * - `normal`：Uint8Array(W×H×3)，切线空间法线（R=+U 方向，G=+V 方向，three 口径）
  * - `roughness`：Uint8Array(W×H)，乘性粗糙度贴图（消费方 material.roughness 置 1）
@@ -207,7 +207,7 @@ export function buildTiledSurface(spec) {
   return { width: W, height: H, heightField: height, normal, roughness };
 }
 
-/** 规格 → 三件套（按图案类型分派；今天只有"分块"一族 —— 石砌与石板同机制只差尺子，新图案从这里长） */
+/** 规格 → 三件套（按图案类型分派；今天只有"分块"一族 —— 石砌/石板/木板同机制只差尺子，新图案从这里长） */
 export function buildSurface(spec) {
   return buildTiledSurface(spec);
 }

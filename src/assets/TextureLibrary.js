@@ -61,6 +61,17 @@ const MANIFEST = {
     repeat: [1 / SURFACE_SPECS.slabs.tileMeters, 1 / SURFACE_SPECS.slabs.tileMeters],
     roughness: 1.0,
   },
+  /**
+   * 木板（W-C5 切片3）：副本的门板（关着的那一块）。2 米一铺、5 块竖板。
+   * 消费方走 `uvVariant('plank', 1/tileMeters, 1/tileMeters)` —— 门板几何是 `uvBox`，
+   * UV 以米计，所以所有门的板宽都是同一个尺寸。
+   */
+  plank: {
+    normalMap: [`${LOCAL}/${SURFACE_SPECS.plank.files.normal}`],
+    roughnessMap: [`${LOCAL}/${SURFACE_SPECS.plank.files.roughness}`],
+    repeat: [1 / SURFACE_SPECS.plank.tileMeters, 1 / SURFACE_SPECS.plank.tileMeters],
+    roughness: 1.0,
+  },
 };
 
 let _instance = null;

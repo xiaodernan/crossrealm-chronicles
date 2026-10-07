@@ -83,7 +83,8 @@ export const sharedTorus = (r, tube, rs, ts) =>
  * ## 与 `sharedBox` 等的关系
  * 同一套缓存、同一份 `owned`（`isSharedAsset` 认它们），只是 UV 不同 ——
  * `parameters` 原样保留（B75/B80 那批门禁在 `geometry.parameters` 上与它们对齐）。
- * 门板 / 门框 / 饰品这些**不换贴图**的消费者继续走 `sharedBox`：UV 没人读，不欠它。
+ * 门框 / 饰品这些**不换贴图**的消费者继续走 `sharedBox`：UV 没人读，不欠它；
+ * 门板自 W-C5 切片3 起也走 `uvBox`（贴 plank 木纹，见 `ProceduralDungeonGenerator`）。
  *
  * ## 各面的 UV 对应
  * - 盒：three 的六面顺序 px/nx/py/ny/pz/nz，每面 4 个顶点；UV 的 u/v 各对应哪两个尺寸

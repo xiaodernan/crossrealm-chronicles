@@ -101,6 +101,36 @@ export const SURFACE_SPECS = deepFreeze({
       roughness: 'gen/slabs_rough.png',
     },
   },
+
+  /**
+   * 木板（W-C5 切片3）—— **副本的门板**（关着的那一块）。同一套"分块 + 缝 + 颗粒"机制，
+   * 尺子换成木匠的：2 米一铺、5 块竖板（板宽 0.4 米）。rows = 1 ⇒ 板身整高没有横缝，
+   * 只有 phase 0.5 把格线推到铺面中间的那一道**压条**（4.2 米高的门面上落在 1 米与 3 米
+   * 两处，像一块板拼门）；板与板的高低差来自 col hash 各自一档，缝因此有可见的深浅。
+   * 颗粒（octaves）比石面轻一档 —— 木板是刨过的。粗糙度均值 ≈ 0.84，与门板改前那条
+   * 常数 0.85 同档：贴图接管之后，门看起来还是那扇门。
+   *
+   * 消费方：`ProceduralDungeonGenerator` 的门板（几何走 `uvBox` 以米计 UV ⇒ repeat = 1 / tileMeters）。
+   */
+  plank: {
+    tileMeters: 2,
+    size: 256,
+    seed: 20261009,
+    /** rows = 1（板身整高）、stagger 在单行下不参与（留 0）、phase 0.5（压条落铺面中间） */
+    bricks: { rows: 1, cols: 5, mortarPx: 3, stagger: 0, phase: 0.5 },
+    octaves: [
+      { lattice: 16, amp: 0.22 },
+      { lattice: 32, amp: 0.14 },
+      { lattice: 64, amp: 0.08 },
+    ],
+    normalStrength: 2.4,
+    roughBase: 0.88,
+    roughAmp: 0.12,
+    files: {
+      normal: 'gen/plank_nor.png',
+      roughness: 'gen/plank_rough.png',
+    },
+  },
 });
 
 /** 规格表里的表面名清单（消费方与门禁都从这里取，不许各自手抄） */

@@ -175,7 +175,7 @@ export const 抄本表 = [
     旧文本: [
       '      const panel = new THREE.Mesh(sharedBox(3.5, 4.2, 0.5), doorClosedMat);',
     ],
-    现在: 'sharedBox(doorW - 2 * DOOR_JAMB, DOOR_H, DOOR_T)',
+    现在: 'uvBox(doorW - 2 * DOOR_JAMB, DOOR_H, DOOR_T)（W-C5 切片3 起：门板贴 plank，UV 以米计）',
   },
   {
     标题: '门板离地高度 2.1（= 板高 / 2 的手抄）',

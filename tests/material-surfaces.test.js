@@ -4,7 +4,8 @@
  * ## 这一片交付了什么、这里钉的是什么
  * 一条**离线烘焙管线**：`content/materialSurfaces.js`（规格表）→ `npm run bake:textures`
  * → `public/textures/gen/*.png`（提交进仓）→ `TextureLibrary.uvVariant`（共享库）
- * → `ProceduralDungeonGenerator` 的地面 / 墙 / 柱（切片1）与 Boss 场石板地面（切片2）。四段各有自己的坏法：
+ * → `ProceduralDungeonGenerator` 的地面 / 墙 / 柱（切片1）、Boss 场石板地面（切片2）
+ * 与门板木纹（切片3）。四段各有自己的坏法：
  *
  * - **规格改了没重烘焙**：文件旧、规格新，不报错，只是墙上的砖换不了 —— ① 层拿规格**重算像素**
  *   再与提交的 PNG 逐字节比（解码端独立于编码端，CRC 逐个块验）。
@@ -34,6 +35,7 @@ import {
   ProceduralDungeonGenerator,
 } from '../src/world/ProceduralDungeonGenerator.js';
 import { isSharedAsset, dungeonAssetStats } from '../src/world/dungeonAssets.js';
+import { DOOR_JAMB } from '../src/world/dungeonDimensions.js';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
 import { CONTENT_TABLES, checkTable } from '../src/content/registry.js';
 
@@ -141,6 +143,7 @@ function 假表面库() {
   const dt = (bytes, v) => new THREE.DataTexture(new Uint8Array(bytes).fill(v), 4, 4);
   lib.sets.masonry = { map: null, normalMap: dt(48, 128), roughnessMap: dt(16, 200), roughness: 1 };
   lib.sets.slabs = { map: null, normalMap: dt(48, 96), roughnessMap: dt(16, 168), roughness: 1 };
+  lib.sets.plank = { map: null, normalMap: dt(48, 120), roughnessMap: dt(16, 232), roughness: 1 };
   lib.ready = true;
   return lib;
 }
@@ -359,11 +362,14 @@ describe('④ 共享库：loaded() 的同步口与 uvVariant 的按铺数缓存'
     expect(TextureLibrary.loaded()).toBe(lib);
     expect('masonry' in lib.sets, 'masonry 没进 MANIFEST').toBe(true);
     expect('slabs' in lib.sets, 'slabs 没进 MANIFEST').toBe(true);
+    expect('plank' in lib.sets, 'plank 没进 MANIFEST').toBe(true);
     // node 没有 document，TextureLoader 载不出图 —— 这恰好就是"库在但这一组没贴图"的退路形状
     expect(lib.sets.masonry.normalMap).toBe(null);
     expect(lib.sets.slabs.normalMap).toBe(null);
+    expect(lib.sets.plank.normalMap).toBe(null);
     expect(lib.uvVariant('masonry', 0.5, 0.5)).toBe(null);
     expect(lib.uvVariant('slabs', 1 / SURFACE_SPECS.slabs.tileMeters, 1 / SURFACE_SPECS.slabs.tileMeters)).toBe(null);
+    expect(lib.uvVariant('plank', 1 / SURFACE_SPECS.plank.tileMeters, 1 / SURFACE_SPECS.plank.tileMeters)).toBe(null);
   });
 
   it('uvVariant：clone 共享 Source、repeat 按铺数、同铺数同壳、异铺数新壳', () => {
@@ -502,7 +508,7 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
 
   it('拿不到库（texLib = null）：退回无贴图，颜色与旧读数原样', () => {
     const def = DUNGEON_DEFS[0];
-    const { group } = 建一座(def, null);
+    const { group, layout } = 建一座(def, null);
     const { 地面, 墙 } = 收集(group);
     for (const m of 地面) {
       expect(m.material.normalMap).toBe(null);
@@ -511,6 +517,12 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
       expect(m.material.color.getHex()).toBe(def.theme);
     }
     for (const m of 墙) expect(m.material.roughness).toBe(0.9);
+    // 门板也一样退回（切片3）：贴着 `door:closed` 的键，不是 `door:closed@tex`
+    expect(layout.doorMeshes.length, '一扇门都没建出来').toBeGreaterThan(0);
+    for (const m of layout.doorMeshes) {
+      expect(m.material.normalMap, '无贴图时门板不该挂着木纹').toBe(null);
+      expect(m.material.roughness, '无贴图时该回到 0.85').toBe(0.85);
+    }
   });
 
   it('Boss 场地面：石板贴图按直径算铺数（4 米一铺），缺库退回纯色自发光（W-C5 切片2）', () => {
@@ -556,6 +568,35 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
     }
   });
 
+  it('门板：plank 木纹挂上、UV 以米计、铺数 = 1 / tileMeters（W-C5 切片3）', () => {
+    // 材质身份不逐份对：门板材质是**全模块**一份（先被哪个用例的库建出来就先得谁的贴图）——
+    // 与 Boss 场那条同一个坑。这里验的是四条事实：贴上了、铺数对、UV 以米计、全域共用。
+    const def = DUNGEON_DEFS[0];
+    const lib = 假表面库();
+    const { layout } = 建一座(def, lib);
+    const 板 = layout.doorMeshes;
+    expect(板.length, '一扇门都没量到').toBeGreaterThan(20);
+    const 砖 = 1 / SURFACE_SPECS.plank.tileMeters;
+    for (const m of 板) {
+      expect(m.material.normalMap, `${m.name} 的门板没有法线图`).not.toBe(null);
+      expect(m.material.roughnessMap, `${m.name} 的门板没有粗糙度图`).not.toBe(null);
+      expect(m.material.roughness, '贴图在时 material.roughness 必须是 1（贴图是唯一真源）').toBe(1);
+      expect(m.material.normalMap.repeat.x, '门板木纹的铺数与 tileMeters 脱节').toBeCloseTo(砖, 9);
+      const p = m.geometry.parameters;
+      expect(p.width, '门板宽该还是"洞宽减两侧让缝"的派生量').toBeCloseTo(layout.doorWidth - 2 * DOOR_JAMB, 6);
+      // 逐面：UV 以米计（uvBox），铺数乘上去每面都恰好一个 2 米见方 —— 门板是 3.9×4.2 的一张脸
+      const 实测面 = 逐面盒实测(m.geometry);
+      const 期望面 = 盒面期望(p.width, p.height, p.depth);
+      for (let f = 0; f < 6; f++) {
+        expect(实测面[f][0], `${m.name} 门板第 ${f} 面 uMax=${实测面[f][0]}，不是该面自己的尺寸（米）`).toBeCloseTo(期望面[f][0], 4);
+        expect(实测面[f][1], `${m.name} 门板第 ${f} 面 vMax=${实测面[f][1]}，不是该面自己的尺寸（米）`).toBeCloseTo(期望面[f][1], 4);
+      }
+      expect(isSharedAsset(m.geometry), '门板几何不在共享库里').toBe(true);
+    }
+    expect(new Set(板.map((m) => m.material)).size, '全部门板该共用一份材质（颜色与副本无关）').toBe(1);
+    expect(new Set(板.map((m) => m.geometry)).size, '全部门板该共用一份几何').toBe(1);
+  });
+
   it('七座副本：贴/不贴两种面各 21 份材料，反复 build 缓存零增长（B76 的账在贴图之后照样成立）', () => {
     const lib = 假表面库();
     const 一轮 = () => {
@@ -574,7 +615,8 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
     };
     const 第一轮材料 = 一轮();
     expect(第一轮材料.size, '7 座 ×（地面 + 墙 + Boss 场石板）该是 21 份').toBe(DUNGEON_DEFS.length * 3);
-    expect(lib.uvVariantCount(), '两档铺数（石砌 1/2 米、石板按直径）—— 变体该是两份').toBe(2);
+    // 三档铺数：石砌 1/2 米、石板按直径（7.65）、木板 1/2 米（切片3）—— 变体该是三份
+    expect(lib.uvVariantCount(), '石砌 / 石板 / 木板三份变体（木板与石砌同铺数但不同 set）').toBe(3);
 
     const 第一轮 = dungeonAssetStats();
     const 第二轮材料 = 一轮();

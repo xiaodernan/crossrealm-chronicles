@@ -80,12 +80,22 @@ export class ProceduralDungeonGenerator {
       emissive: def.accent,
       emissiveIntensity: 0.55,
     }));
-    // 门板关着时的颜色与副本无关，所以它是**全域**一份而不是每座一份
-    const doorClosedMat = dungeonMaterial('door:closed', () => new THREE.MeshStandardMaterial({
+    // 门板（W-C5 切片3）：关着的那一块贴 plank 木板面（门板几何走 uvBox、UV 以米计 ——
+    // 与墙同一条尺子，见下面建门板那一段）。颜色与副本无关，所以材质是**全域**一份；
+    // 键同样分贴/不贴两态（`@tex` 后缀，与地面/墙一条口径）：缺贴图时回到旧读数。
+    const 板砖 = 1 / SURFACE_SPECS.plank.tileMeters;
+    const 木纹 = lib?.uvVariant('plank', 板砖, 板砖) ?? null;
+    const doorParams = {
       color: 0x3a3028,
-      roughness: 0.85,
+      roughness: 木纹 ? 1.0 : 0.85, // 贴图在时由贴图给值（均值 ≈ 0.84，与旧常数 0.85 同档）
       metalness: 0.2,
-    }));
+    };
+    if (木纹) {
+      doorParams.normalMap = 木纹.normalMap;
+      doorParams.roughnessMap = 木纹.roughnessMap;
+      doorParams.normalScale = new THREE.Vector2(0.8, 0.8);
+    }
+    const doorClosedMat = dungeonMaterial(木纹 ? 'door:closed@tex' : 'door:closed', () => new THREE.MeshStandardMaterial(doorParams));
 
     const WH = layout.wallH;
     const WT = layout.wallT;
@@ -133,7 +143,9 @@ export class ProceduralDungeonGenerator {
     // 改前它们各抄了一份字面量（3.5 / 4.2 / hw 2），于是"关着的门盖不住自己的门洞"
     // —— 逐扇量出来 537 扇门每侧见光 0.25 米（`.tmp-20261004/wb10s4f-census.mjs` ③）。
     for (const door of layout.doors) {
-      const panel = new THREE.Mesh(sharedBox(doorW - 2 * DOOR_JAMB, DOOR_H, DOOR_T), doorClosedMat);
+      // 门板几何走 uvBox（以米计 UV，W-C5 切片3）：木纹是竖板+压条的图案，
+      // 铺数只能有一个（1 / 一板两米），UV 不乘尺寸的话每扇门都会拉成不一样宽
+      const panel = new THREE.Mesh(uvBox(doorW - 2 * DOOR_JAMB, DOOR_H, DOOR_T), doorClosedMat);
       panel.position.set(door.x, DOOR_H / 2, door.z);
       if (door.dir === 'n' || door.dir === 's') panel.rotation.y = 0;
       else panel.rotation.y = Math.PI / 2;
