@@ -1,3 +1,5 @@
+import { semanticColor, semanticLabel, raritySemanticId } from './semanticColors.js';
+
 /**
  * 装备的数据层（W-B5 切片1）：槽位、基表、稀有度、词缀，以及"一件装备等于几点属性"这一处算式。
  *
@@ -194,15 +196,20 @@ export function isGearInstance(instance) {
  * ------------------------------------------------------------------ */
 
 /**
- * 稀有度的字样与颜色。**只有这一处**：地上那团光与拾取提示里那个词必须是同一个答案，
+ * 稀有度的字样与颜色。**值本身只有一个来源**：`content/semanticColors.js` 的
+ * `rarity-*` 四条（W-D6 切片1）—— 地上那团光与拾取提示里那个词必须是同一个答案，
  * 分两处写迟早一个说蓝的一个说紫的（B36 那一族 —— 同一条算式抄两处，漂移不报错）。
+ *
+ * 这一层现在只做"稀有度 id → 语义键"的翻译：默认档的色值与改前**逐格相同**，
+ * 所以接上色板之后画面零变更；色盲档另给一组色，以及 `○◇◆★` 四个形状
+ * （`semanticGlyph`）作为非颜色冗余。
  */
-export const GEAR_RARITY_DISPLAY = {
-  common: { label: '凡品', tint: 0xbfc7d1 },
-  uncommon: { label: '良品', tint: 0x63d97a },
-  rare: { label: '稀有', tint: 0x4ea8ff },
-  epic: { label: '史诗', tint: 0xc77bff },
-};
+export const GEAR_RARITY_DISPLAY = Object.fromEntries(
+  GEAR_RARITY.map((r) => {
+    const id = raritySemanticId(r.id);
+    return [r.id, { label: semanticLabel(id), tint: semanticColor(id) }];
+  }),
+);
 
 /** 基表与词缀的中文名：`id` 是数据用的，字样是给人看的，两者不许互换 */
 export const GEAR_NAMES = {
