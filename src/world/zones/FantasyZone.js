@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { makeUvCylinderGeometry } from '../../engine/uvGeometry.js';
 
 /** 指环王风格 — 古老森林、灰白山峰、 ruins 遗迹 */
 export class FantasyZone extends BaseZone {
@@ -81,11 +82,14 @@ export class FantasyZone extends BaseZone {
   }
 
   buildRuins() {
-    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x8a8580, roughness: 0.9 });
+    // W-C5 切片6：石柱换 drum 表面（1 米见方的鼓形石段）。几何换 `makeUvCylinderGeometry` ——
+    // UV 以米计（u 绕该行周长、v 沿高），0.6↔0.8 的收分不会把石块拉成楔形。
+    // 材质经 `addSurfaceMaterial` 登记，贴图库就绪后由 `WorldManager` 的 `load().then` 补挂。
+    const stoneMat = this.addSurfaceMaterial({ color: 0x8a8580, roughness: 0.9 });
 
     for (let i = 0; i < 6; i++) {
       const h = 4 + Math.random() * 3;
-      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.8, h, 8), stoneMat);
+      const col = new THREE.Mesh(makeUvCylinderGeometry(0.6, 0.8, h, 8), stoneMat);
       const x = -20 + i * 8 + (Math.random() - 0.5) * 4;
       const z = -15 + (Math.random() - 0.5) * 10;
       col.position.set(x, this.sampleHeight(x, z) + 2, z);

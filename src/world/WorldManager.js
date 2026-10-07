@@ -12,6 +12,8 @@ import { createVerticalScheduler } from './VerticalSchedule.js';
 import { sampleGlobalHeightSmooth, sampleGroundNormal } from './TerrainHeight.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { CollisionWorld } from '../engine/Collision.js';
+import { makeUvCylinderGeometry } from '../engine/uvGeometry.js';
+import { makeRegionSurfaceMaterial, applyRegionSurface } from './regionSurfaces.js';
 import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from '../content/ZoneIdentity.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
@@ -30,6 +32,8 @@ export class WorldManager {
      */
     this.currentZone = null;
     this.hubPOIs = [];
+    /** 世界之锚石柱的石构材质（W-C5 切片6）：贴图库就绪后由 `applySurfaceTextures` 补挂 */
+    this._hubSurfaceMat = null;
     this.bounds = WORLD_BOUNDS;
     this.internalSpaceManager = new InternalSpaceManager();
     this.verticalSchedulers = new Map(); // zoneId -> VerticalScheduler
@@ -107,6 +111,9 @@ export class WorldManager {
     this.worldTerrain.build();
     TextureLibrary.load().then((texLib) => {
       this.worldTerrain.applyTextures(texLib);
+      // W-C5 切片6：世界构建不等贴图（上面所有区域与下面的地标都是同步立的），
+      // 石构材质在这里补挂 —— basezones 各自登记、hub 石柱单独一份。
+      this.applySurfaceTextures(texLib);
       // node 测试里真世界也会建（poi-identity 那一路），那里没有 window 可发事件 ——
       // 守卫在这里，否则这个 .then 会变成一发没人接的 unhandled rejection（整跑 exit 1）
       if (typeof window !== 'undefined') {
@@ -153,6 +160,17 @@ export class WorldManager {
   }
 
   /**
+   * 贴图库就绪后给石构补挂表面（W-C5 切片6，由 `build()` 里那个 `load().then` 调用）。
+   * 世界构建是同步的、贴图是异步的：区域石柱在 `addSurfaceMaterial` 时多半拿着退路读数，
+   * 这里把登记过的材质补成贴图态。返回挂上的总份数（hub 石柱 + 各区登记）。
+   */
+  applySurfaceTextures(texLib) {
+    let 数 = applyRegionSurface(this._hubSurfaceMat, texLib) ? 1 : 0;
+    for (const zone of this.zones) 数 += zone.applySurfaces(texLib);
+    return 数;
+  }
+
+  /**
    * POI 身份自检（修 B45）。
    *
    * `BaseZone.addPOI` 已经要求每个 POI 显式带 kebab-case id，但它只看得到本区；
@@ -178,10 +196,11 @@ export class WorldManager {
   buildHubLandmarks() {
     const hub = new THREE.Group();
 
-    const pillar = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.2, 1.8, 10, 8),
-      new THREE.MeshStandardMaterial({ color: 0x5a5550, roughness: 0.85 })
-    );
+    // W-C5 切片6：中央石柱换 drum 表面（与区域断柱同一套鼓形石段），几何换
+    // `makeUvCylinderGeometry`（UV 以米计）。它是唯一不归 BaseZone 管的石构 ——
+    // 材质存一份在这里，`TextureLibrary.load().then` 回来时由 `applySurfaceTextures` 补挂。
+    this._hubSurfaceMat = makeRegionSurfaceMaterial({ color: 0x5a5550, roughness: 0.85 });
+    const pillar = new THREE.Mesh(makeUvCylinderGeometry(1.2, 1.8, 10, 8), this._hubSurfaceMat);
     pillar.position.y = 5;
     applyShadow(pillar, 'castOnly');
     hub.add(pillar);

@@ -200,6 +200,39 @@ export const SURFACE_SPECS = deepFreeze({
       roughness: 'gen/steel_rough.png',
     },
   },
+
+  /**
+   * 石鼓（W-C5 切片6）—— **区域石构**（`zones/FantasyZone.js` 废墟石柱、
+   * `WorldManager` 枢纽地标石柱、`zones/VoidZone.js` 方尖碑柱身）。第四张分块尺：
+   * 2 米一铺、2×2 **对缝**（stagger 0 —— 石鼓上下对齐，不像墙砖错缝）、一块 1 米见方；
+   * `phase 0.5` 让灰缝落在铺面中间（0.5 / 1.5 / 2.5 米……），柱子的施工缝按米排。
+   * 粗糙度均值 ≈0.84，与三处改前常数（废墟 0.9 / 地标与方尖碑 0.85）同档 ——
+   * 贴图接管之后，石柱还是那几根石柱；颜色仍归各区域自己的材质。
+   *
+   * 消费方的 UV 以米计（`engine/uvGeometry.js` 的 `makeUvCylinderGeometry` —— 三处
+   * 都是锥台柱，u 按该行自己的周长算），铺数只有一个：`repeat = 1 / tileMeters = 0.5`。
+   * 区域工件建在贴图库就绪之前（`WorldManager.build` 同步建区），所以走
+   * "先按旧读数建、库到位后统一重贴"（`world/regionSurfaces.js`）。
+   */
+  drum: {
+    pattern: 'tiled',
+    tileMeters: 2.0,
+    size: 256,
+    seed: 20261012,
+    bricks: { rows: 2, cols: 2, mortarPx: 4, stagger: 0, phase: 0.5 },
+    octaves: [
+      { lattice: 16, amp: 0.20 },
+      { lattice: 32, amp: 0.12 },
+      { lattice: 64, amp: 0.08 },
+    ],
+    normalStrength: 2.2,
+    roughBase: 0.88,
+    roughAmp: 0.12,
+    files: {
+      normal: 'gen/drum_nor.png',
+      roughness: 'gen/drum_rough.png',
+    },
+  },
 });
 
 /** 规格表里的表面名清单（消费方与门禁都从这里取，不许各自手抄） */

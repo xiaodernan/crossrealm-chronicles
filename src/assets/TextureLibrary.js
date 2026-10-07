@@ -98,6 +98,25 @@ const MANIFEST = {
     repeat: [1 / SURFACE_SPECS.steel.tileMeters, 1 / SURFACE_SPECS.steel.tileMeters],
     roughness: 1.0,
   },
+  /**
+   * 鼓形石段（W-C5 切片6）：区域石构的柱子/方尖碑 —— 灰白森林废墟的 6 根断柱、
+   * 世界之锚的中央石柱、虚空区的尖碑柱身。2 米一铺、对缝 2×2（1 米见方的石块，
+   * 缝落在 0.5/1.5/2.5 米 —— 见 `materialSurfaces.js` 的 drum 行）。
+   * 消费方走 `uvVariant('drum', 0.5, 0.5)`（= 1 / tileMeters）：柱身几何是
+   * `makeUvCylinderGeometry`，UV 以米计（u 乘该行周长、v 乘高），所以粗柱细柱
+   * 上的石块都是同一个尺寸。
+   *
+   * 柱子在**世界构建期**就立好了（`WorldManager.build` 不等贴图），所以消费侧
+   * 走 `world/regionSurfaces.js` 的两段式：构建时拿 `TextureLibrary.loaded()`（多半是
+   * null，挂旧常数），`WorldManager` 里既有的 `load().then` 回来后再调 `applySurfaces`
+   * 补挂 —— 与切片的剑同一条机制，只是重挂点是世界管理器而不是武器构造。
+   */
+  drum: {
+    normalMap: [`${LOCAL}/${SURFACE_SPECS.drum.files.normal}`],
+    roughnessMap: [`${LOCAL}/${SURFACE_SPECS.drum.files.roughness}`],
+    repeat: [1 / SURFACE_SPECS.drum.tileMeters, 1 / SURFACE_SPECS.drum.tileMeters],
+    roughness: 1.0,
+  },
 };
 
 let _instance = null;

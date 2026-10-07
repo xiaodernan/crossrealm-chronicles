@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { makeRegionSurfaceMaterial, applyRegionSurface } from '../regionSurfaces.js';
 
 export class BaseZone {
   constructor(scene, center, config) {
@@ -23,6 +24,8 @@ export class BaseZone {
     this.pois = [];
     /** 本地坐标碰撞体，build 结束后由 WorldManager 平移到世界坐标 */
     this.colliders = [];
+    /** 登记过的区域石构材质（W-C5 切片6）：贴图库就绪后由 `applySurfaces` 补挂 */
+    this._surfaceMats = [];
   }
 
   /** 登记一个本地坐标障碍；kind: solid | platform | ghost */
@@ -37,6 +40,25 @@ export class BaseZone {
 
   addBoxCollider(x, z, hx, hz, top, { base = 0, rot = 0, kind = 'solid' } = {}) {
     return this.addCollider({ shape: 'box', x, z, hx, hz, base, top, rot, kind });
+  }
+
+  /**
+   * 登记一份区域石构材质（W-C5 切片6）：参数与 `MeshStandardMaterial` 同形，
+   * `roughness` 是贴图未就绪时的退路读数。返回的材质**归本区所有**（构建期就地挂到柱子上），
+   * 贴图库就绪后由 `applySurfaces` 补挂 —— 柱身几何必须已是米制 UV（`makeUvCylinderGeometry`），
+   * 否则石块尺寸会随柱子粗细走。
+   */
+  addSurfaceMaterial(params) {
+    const mat = makeRegionSurfaceMaterial(params);
+    this._surfaceMats.push(mat);
+    return mat;
+  }
+
+  /** 贴图库就绪后补挂本区登记过的石构材质（由 `WorldManager` 的 `load().then` 调用）；返回挂上的份数 */
+  applySurfaces(texLib) {
+    let 数 = 0;
+    for (const mat of this._surfaceMats) if (applyRegionSurface(mat, texLib)) 数++;
+    return 数;
   }
 
   distanceToCenter(x, z) {

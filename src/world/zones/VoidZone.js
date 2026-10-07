@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
+import { makeUvCylinderGeometry } from '../../engine/uvGeometry.js';
 
 /** 第四主题：破碎时线 — 指环王 + 星际穿越时间主题融合 */
 export class VoidZone extends BaseZone {
@@ -73,11 +74,15 @@ export class VoidZone extends BaseZone {
 
   buildLandmarks() {
     const obelisk = new THREE.Group();
-    const mat = new THREE.MeshStandardMaterial({ color: 0x2a2535, emissive: 0xc9a962, emissiveIntensity: 0.15, roughness: 0.85 });
-    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.2, 12, 8), mat);
+    // W-C5 切片6：柱身换 drum 表面（与废墟石柱同一套鼓形石段），几何随之换
+    // `makeUvCylinderGeometry`（UV 以米计）。八面体顶盖保持原样的自带材质 ——
+    // 球面参数化的 UV 不是米制，贴上去石块会随角度拉伸。
+    const 退路 = { color: 0x2a2535, emissive: 0xc9a962, emissiveIntensity: 0.15, roughness: 0.85 };
+    const pillarMat = this.addSurfaceMaterial(退路);
+    const pillar = new THREE.Mesh(makeUvCylinderGeometry(0.8, 1.2, 12, 8), pillarMat);
     pillar.position.y = 6;
     obelisk.add(pillar);
-    const cap = new THREE.Mesh(new THREE.OctahedronGeometry(1.5), mat);
+    const cap = new THREE.Mesh(new THREE.OctahedronGeometry(1.5), new THREE.MeshStandardMaterial(退路));
     cap.position.y = 13;
     obelisk.add(cap);
     obelisk.position.set(0, this.sampleHeight(0, 0), 0);
