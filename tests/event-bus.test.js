@@ -17,7 +17,7 @@ import { STAT_EVENTS } from '../src/content/objectives.js';
  * 三件事被分别钉住：
  *  ① 总线自己的行为（未登记名抛错、payload:null 的抛错、按 tag 整体注销、退订函数、同 handler 去重）；
  *  ② **裸 `window.addEventListener('<游戏事件>')` 的逐文件台账**：只许收缩，
- *     新增一位点、或某个文件多了一处，都当场变红（存量 40 文件 131 处是一笔明账，不是白名单豁免）；
+ *     新增一位点、或某个文件多了一处，都当场变红（存量 39 文件 129 处是一笔明账（原 40 文件 131 处，CombatCinematicSkip 于 2026-10-08 整文件迁完），不是白名单豁免）；
  *  ③ 用 `on()` 的文件必须同时用 `offAll()` —— 打了 tag 却不注销，比不打 tag 更糟，
  *     因为它让"有注销路径"变成一个假象。
  */
@@ -86,7 +86,9 @@ const BARE_WINDOW_LISTENERS = {
   'audio/AudioManager.js': 1,
   'cinematic/CinematicManager.js': 1,
   'cinematic/CombatCameraDirector.js': 3,
-  'cinematic/CombatCinematicSkip.js': 2,
+  // 'cinematic/CombatCinematicSkip.js': 2  ← 已迁完（2026-10-08）：两条监听走
+  //   `on(…, 'combat-cinematic-skip')`，`dispose()` 里 `offAll` 一并清掉待办计时。
+  //   这一行**删掉**而不是改成 0 —— 台账的口径是"整文件迁完就删行"。
   'cinematic/EndCreditsDirector.js': 1,
   'cinematic/RestSceneDirector.js': 3,
   'core/Game.js': 13,
@@ -281,8 +283,10 @@ describe('监听注销门禁（B44 剩余半区）', () => {
 
   it('台账确实在覆盖当前源码树（不是扫了一份过期快照就绿灯）', () => {
     const total = Object.values(bare).reduce((a, b) => a + b, 0);
-    expect(total).toBe(131);
-    // HUD 是本轮迁掉的那一个：它必须从台账里消失，并且改用总线
+    // 131 → 129（2026-10-08）：`cinematic/CombatCinematicSkip.js` 整文件迁完、台账删行。
+    // 这个数**故意是硬编码**：迁移是一笔一笔的欠账，自动跟随就等于"改多少都不算数"。
+    expect(total).toBe(129);
+    // HUD 是切片6 迁掉的那一个：它必须从台账里消失，并且改用总线
     expect(bare['ui/HUD.js']).toBeUndefined();
     expect(busUsers.get('ui/HUD.js')).toMatchObject({ on: 20, offAll: 1 });
   });
@@ -322,5 +326,67 @@ describe('监听注销门禁（B44 剩余半区）', () => {
     const rd = readSrc('game/RestDialogue.js');
     expect(rd).toMatch(/emit\(type,/);
     expect(rd).not.toMatch(/new CustomEvent\(type/);
+  });
+
+  describe('逐系统迁移：整文件迁完的那种（台账里删行，不是改成 0）', () => {
+    it('CombatCinematicSkip 的 dispose 真的解绑，不只是"写了 offAll"', async () => {
+      const { CombatCinematicSkip } = await import('../src/cinematic/CombatCinematicSkip.js');
+      const TAG = 'combat-cinematic-skip';
+      const before = listenerCount(TAG);
+      // 假 game：构造只碰 dialog / combatCamera / combatInputLock / player 这几处
+      const fakeGame = { dialog: { toast() {} } };
+      const skip = new CombatCinematicSkip(fakeGame);
+      expect(listenerCount(TAG), '构造后应当多两条').toBe(before + 2);
+      skip.dispose();
+      expect(listenerCount(TAG), 'dispose 之后应当回到原点').toBe(before);
+    });
+
+    it('构造两次再 dispose 两次，账仍然是平的（不重复挂、不重复解）', async () => {
+      const { CombatCinematicSkip } = await import('../src/cinematic/CombatCinematicSkip.js');
+      const TAG = 'combat-cinematic-skip';
+      const before = listenerCount(TAG);
+      const a = new CombatCinematicSkip({ dialog: { toast() {} } });
+      const b = new CombatCinematicSkip({ dialog: { toast() {} } });
+      expect(listenerCount(TAG)).toBe(before + 4);
+      a.dispose();
+      b.dispose();
+      expect(listenerCount(TAG)).toBe(before);
+    });
+
+    it('dispose 连那条待办计时一起清 —— 注销之后不许再弹提示', async () => {
+      const { CombatCinematicSkip } = await import('../src/cinematic/CombatCinematicSkip.js');
+      const { scheduler } = await import('../src/engine/Scheduler.js');
+      // Scheduler 没有查询接口（没有 has/size），所以"计时清没清"只能用**推过时间看回调是否触发**
+      // 来观测 —— 这比读一个内部字段更接近玩家看到的东西。
+      const toasts = [];
+      const fakeGame = { dialog: { toast: (t) => toasts.push(t) }, combatCamera: { active: true } };
+
+      // 对照组：不 dispose，推过 0.4 秒应当弹一次。
+      // 这里**直接调 `_maybeHint()`** 而不是 `emit` —— 把"事件送达"与"计时触发"分开量：
+      // 前者由 EventBus 自己的用例管，这一条只管后者。合在一起量的话，事件那一段
+      // 一旦不灵，这条会以"对照组没弹"红，看起来像计时坏了（第一版就是这么绕进去的）。
+      const keep = new CombatCinematicSkip(fakeGame);
+      keep._maybeHint();
+      scheduler.update(1);
+      expect(toasts.length, '对照组应当弹一次（否则这条用例什么都没量到）').toBe(1);
+      keep.dispose();
+
+      // 实验组：dispose 之后推过同样长的时间，不许再弹
+      toasts.length = 0;
+      const gone = new CombatCinematicSkip(fakeGame);
+      emit('combat-execution');
+      gone.dispose();
+      scheduler.update(1);
+      expect(toasts, '注销之后不该再弹提示').toEqual([]);
+    });
+
+    it('台账里已经没有这一行（整文件迁完就删行）', () => {
+      const src = readFileSync(join(process.cwd(), 'tests', 'event-bus.test.js'), 'utf8');
+      const table = src.slice(src.indexOf('const BARE_WINDOW_LISTENERS'), src.indexOf('};', src.indexOf('const BARE_WINDOW_LISTENERS')));
+      // 注释里提到它是允许的（那是"迁到哪儿去了"的索引），但**不许再是一行计数**
+      expect(table).not.toMatch(/^\s*'cinematic\/CombatCinematicSkip\.js'\s*:\s*\d+/m);
+      // 反面证据：同一把尺子对还在表里的邻居量得出来
+      expect(table).toMatch(/^\s*'cinematic\/CombatCameraDirector\.js'\s*:\s*\d+/m);
+    });
   });
 });
