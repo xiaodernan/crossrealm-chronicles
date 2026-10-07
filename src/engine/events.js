@@ -339,6 +339,11 @@ export const GAME_EVENTS = Object.freeze({
     desc: '拍照模式开关（成就要"拍过照"，图鉴要"看过风景"）',
     payload: '{ active }',
   },
+  'error-captured': {
+    desc: '捕获到一条运行时错误（未捕获异常或未处理的 Promise 拒绝）。由 engine/errorReporter.js 派发：账本上限 50 种、同指纹去重只累加 count、超出上限丢最旧的并记 dropped。**派发它不等于吞掉错误** —— 处理器不返回 true、也不调 preventDefault',
+    payload: '{ kind, message, count }',
+    hook: '派发方（errorReporter）已把记录写进自己的账本并由 `getErrors()` / `toReport()` 直接读取；这条是给外部统计与**将来的上报端点**留的出口（`setSink` 是同一件事的另一种接法），仓库内无监听点',
+  },
 });
 
 // Object.freeze 只冻一层：条目本身也要冻，否则"改登记"还能从 payload 溜过去

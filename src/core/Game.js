@@ -19,6 +19,7 @@ import { ZoneFog } from '../effects/ZoneFog.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { PerfHUD } from '../engine/PerfHUD.js';
 import { registerPerfGauges } from '../game/perfGauges.js';
+import { createErrorReporter } from '../engine/errorReporter.js';
 import { HUD } from '../ui/HUD.js';
 import { Dialog } from '../ui/Dialog.js';
 import { HelpManual } from '../ui/HelpManual.js';
@@ -359,6 +360,12 @@ export class Game {
     // 于是 `stats().leaks` 恒空、watchdog 从没可能报过警；搬出来之后用例能拿假 game 跑
     // `registerPerfGauges` 并断言"注册完 leaks 不是空的"，那正是修前会红的那一条。
     this.perfHud = registerPerfGauges(new PerfHUD({ renderer: this.renderer, scene: this.scene }), this);
+
+    // W-D5 切片2：把未捕获异常与未处理的 Promise 拒绝收进一个可读账本。
+    // 尽早装（在 setupLights / setupInput 之前）—— 启动期的错最值得留现场。
+    // **它不吞异常**：处理器不返回 true、也不调 preventDefault，控制台照常打印。
+    this.errorReporter = createErrorReporter();
+    this.errorReporter.install();
 
     this.setupLights();
     this.ambientPass = new AmbientScenePass(this);

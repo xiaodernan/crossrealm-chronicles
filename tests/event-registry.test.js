@@ -35,6 +35,11 @@ const DOM_EVENT_NAMES = new Set([
   'keydown', 'keyup', 'mousedown', 'mouseup', 'mousemove',
   'pointercancel', 'pointerdown', 'pointerlockchange', 'pointermove', 'pointerup',
   'resize', 'wheel',
+  // W-D5 切片2 补的两个：都是浏览器**原生**的全局事件，由 engine/errorReporter.js
+  // 挂在 window 上收未捕获异常与未处理的 Promise 拒绝。它们与上面那批同类
+  // （不是游戏事件、不需要进登记表），加进来是让"代码里出现的每个自定义事件名都已登记"
+  // 那条判据继续只盯游戏事件。
+  'error', 'unhandledrejection',
 ]);
 
 function walk(dir) {
