@@ -131,6 +131,38 @@ export const SURFACE_SPECS = deepFreeze({
       roughness: 'gen/plank_rough.png',
     },
   },
+
+  /**
+   * 装甲板（W-C5 切片4）—— **敌人身体**（`combat/Enemy.js` 的 mat 系几何：身体胶囊、
+   * 盔、翼、肩甲、炮管、撞角）。同一套"分块 + 缝 + 颗粒"机制，尺子换成军械师的：
+   * 0.5 米一铺、2×2 错缝板（行错半格互相压边，stagger 0.5）—— 一块板 25 厘米见方，
+   * 0.8 米宽的躯体绕一圈约 10 块。缝取细（mortarPx 3），装甲是拼起来的不是砌起来的。
+   * phase 0.5 与 slabs 同一条理由：2×2 的格线平移半格后落在铺面内部（128px），
+   * 而不是整条压在贴图边上（平铺自检）。
+   *
+   * 消费方的 UV 以米计（身体走 `makeUvCapsuleGeometry` 按剖面弧长、其余走 uvBox/uvCone），
+   * 所以铺数只有一个：`repeat = 1 / tileMeters = 2` —— 体型放大（BODY_PLANS.scale）不会
+   * 把板子一起放大。粗糙度均值 ≈ 0.76，与敌人身体改前的常数 0.75 同档：贴图接管之后，
+   * 敌人看起来还是那只敌人。
+   */
+  plate: {
+    tileMeters: 0.5,
+    size: 256,
+    seed: 20261010,
+    bricks: { rows: 2, cols: 2, mortarPx: 3, stagger: 0.5, phase: 0.5 },
+    octaves: [
+      { lattice: 16, amp: 0.18 },
+      { lattice: 32, amp: 0.12 },
+      { lattice: 64, amp: 0.08 },
+    ],
+    normalStrength: 2.0,
+    roughBase: 0.8,
+    roughAmp: 0.13,
+    files: {
+      normal: 'gen/plate_nor.png',
+      roughness: 'gen/plate_rough.png',
+    },
+  },
 });
 
 /** 规格表里的表面名清单（消费方与门禁都从这里取，不许各自手抄） */

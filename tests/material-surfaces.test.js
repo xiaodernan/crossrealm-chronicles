@@ -363,13 +363,16 @@ describe('④ 共享库：loaded() 的同步口与 uvVariant 的按铺数缓存'
     expect('masonry' in lib.sets, 'masonry 没进 MANIFEST').toBe(true);
     expect('slabs' in lib.sets, 'slabs 没进 MANIFEST').toBe(true);
     expect('plank' in lib.sets, 'plank 没进 MANIFEST').toBe(true);
+    expect('plate' in lib.sets, 'plate 没进 MANIFEST').toBe(true);
     // node 没有 document，TextureLoader 载不出图 —— 这恰好就是"库在但这一组没贴图"的退路形状
     expect(lib.sets.masonry.normalMap).toBe(null);
     expect(lib.sets.slabs.normalMap).toBe(null);
     expect(lib.sets.plank.normalMap).toBe(null);
+    expect(lib.sets.plate.normalMap).toBe(null);
     expect(lib.uvVariant('masonry', 0.5, 0.5)).toBe(null);
     expect(lib.uvVariant('slabs', 1 / SURFACE_SPECS.slabs.tileMeters, 1 / SURFACE_SPECS.slabs.tileMeters)).toBe(null);
     expect(lib.uvVariant('plank', 1 / SURFACE_SPECS.plank.tileMeters, 1 / SURFACE_SPECS.plank.tileMeters)).toBe(null);
+    expect(lib.uvVariant('plate', 1 / SURFACE_SPECS.plate.tileMeters, 1 / SURFACE_SPECS.plate.tileMeters)).toBe(null);
   });
 
   it('uvVariant：clone 共享 Source、repeat 按铺数、同铺数同壳、异铺数新壳', () => {

@@ -9,6 +9,9 @@ import { createEnemyFSM, tryClaimStrikeSlot } from '../ai/EnemyFSM.js';
 import { separationPush } from '../ai/Separation.js';
 import { Billboard } from '../effects/Billboard.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { TextureLibrary } from '../assets/TextureLibrary.js';
+import { SURFACE_SPECS } from '../content/materialSurfaces.js';
+import { makeUvBoxGeometry, makeUvCapsuleGeometry, makeUvConeGeometry } from '../engine/uvGeometry.js';
 
 /** 分离推力在两个身体完全重合时需要一个稳定的"每人一个方向"，用出生顺序做身份差 */
 let aiSeq = 0;
@@ -21,6 +24,10 @@ let aiSeq = 0;
  * 材质保持每实例一份：受击闪红要改自家 `emissive`，预警圈要按招式改色，不能共。
  * `userData.shared` 是"别 dispose 我"的标记：敌人销毁（`dispose`）与血条 Billboard 销毁
  * 见到它就跳过 —— 几何归缓存所有，随页面生命周期存活（与 dungeonAssets 的 sharedGeo 同一口径）。
+ *
+ * W-C5 切片4 起：身体 / 盔 / 翼 / 肩甲 / 炮管 / 撞角这些**走 `mat` 的件**改用米制 UV 族
+ * （`engine/uvGeometry.js`，键前缀 `uv:`）以贴装甲板面（plate）—— 体格放大（BODY_PLANS.scale）
+ * 不会把板子一起放大。自发光核心 / 半透明罩袍仍用各自的材质与裸几何（不换贴图，UV 没人读）。
  */
 const ENEMY_GEO = new Map();
 
@@ -539,10 +546,22 @@ export class Enemy {
   createMesh(config) {
     const group = new THREE.Group();
     const color = config.color ?? 0x553333;
-    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0.25 });
+    // 装甲板面（W-C5 切片4）：normal / roughness 来自离线烘焙贴图（`npm run bake:textures`），
+    // 颜色仍归每个类型自己的 `color`（名册按类型配色）。UV 以米计 ⇒ 铺数只有一个：1 / 0.5 米。
+    // 材质**保持每实例一份**（W-C2 切片2 的口径不变）：受击闪红要改自家 emissive。
+    // 拿不到库（同步构建路径 / 这一组没加载出来）退回旧读数：roughness 0.75、无贴图。
+    const lib = TextureLibrary.loaded();
+    const 板砖 = 1 / SURFACE_SPECS.plate.tileMeters;
+    const 板 = lib?.uvVariant('plate', 板砖, 板砖) ?? null;
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 板 ? 1.0 : 0.75, metalness: 0.25 });
+    if (板) {
+      if (板.normalMap) mat.normalMap = 板.normalMap;
+      if (板.roughnessMap) mat.roughnessMap = 板.roughnessMap;
+      mat.normalScale = new THREE.Vector2(0.8, 0.8);
+    }
 
     const body = new THREE.Mesh(
-      enemyGeo('body:capsule:0.4,1.0,8,16', () => new THREE.CapsuleGeometry(0.4, 1.0, 8, 16)),
+      enemyGeo('uv:body:capsule:0.4,1.0,8,16', () => makeUvCapsuleGeometry(0.4, 1.0, 8, 16)),
       mat
     );
     body.position.y = 1.2;
@@ -559,7 +578,7 @@ export class Enemy {
       group.add(core);
     } else if (config.type === 'drone') {
       const wing = new THREE.Mesh(
-        enemyGeo('droneWing:box:1.4,0.08,0.3', () => new THREE.BoxGeometry(1.4, 0.08, 0.3)),
+        enemyGeo('uv:droneWing:box:1.4,0.08,0.3', () => makeUvBoxGeometry(1.4, 0.08, 0.3)),
         mat
       );
       wing.position.y = 2.0;
@@ -581,13 +600,13 @@ export class Enemy {
     } else if (config.type === 'stalker') {
       // 混沌掠行兽：前倾的头与背脊，贴地跑（低矮靠 BODY_PLANS.scale 体现）
       const head = new THREE.Mesh(
-        enemyGeo('stalkerHead:box:0.42,0.34,0.6', () => new THREE.BoxGeometry(0.42, 0.34, 0.6)),
+        enemyGeo('uv:stalkerHead:box:0.42,0.34,0.6', () => makeUvBoxGeometry(0.42, 0.34, 0.6)),
         mat
       );
       head.position.set(0, 1.45, 0.62);
       group.add(head);
       const spine = new THREE.Mesh(
-        enemyGeo('stalkerSpine:box:0.14,0.3,0.9', () => new THREE.BoxGeometry(0.14, 0.3, 0.9)),
+        enemyGeo('uv:stalkerSpine:box:0.14,0.3,0.9', () => makeUvBoxGeometry(0.14, 0.3, 0.9)),
         mat
       );
       spine.position.set(0, 1.85, -0.1);
@@ -595,13 +614,13 @@ export class Enemy {
     } else if (config.type === 'sentinel') {
       // 边境哨炮：肩甲与前置炮管，胸口带装甲核
       const barrel = new THREE.Mesh(
-        enemyGeo('sentinelBarrel:box:0.18,0.18,0.9', () => new THREE.BoxGeometry(0.18, 0.18, 0.9)),
+        enemyGeo('uv:sentinelBarrel:box:0.18,0.18,0.9', () => makeUvBoxGeometry(0.18, 0.18, 0.9)),
         mat
       );
       barrel.position.set(0, 1.5, 0.55);
       group.add(barrel);
       const pauldron = new THREE.Mesh(
-        enemyGeo('sentinelPauldron:box:1.1,0.16,0.5', () => new THREE.BoxGeometry(1.1, 0.16, 0.5)),
+        enemyGeo('uv:sentinelPauldron:box:1.1,0.16,0.5', () => makeUvBoxGeometry(1.1, 0.16, 0.5)),
         mat
       );
       pauldron.position.y = 1.95;
@@ -629,13 +648,13 @@ export class Enemy {
     } else if (config.type === 'juggernaut') {
       // 破阵重兵：一副比同场骑士更宽的双肩厚甲 + 胸前撞角 —— 剪影上就比其他重甲更钝更宽
       const pauldron = new THREE.Mesh(
-        enemyGeo('juggernautPauldron:box:1.5,0.3,0.7', () => new THREE.BoxGeometry(1.5, 0.3, 0.7)),
+        enemyGeo('uv:juggernautPauldron:box:1.5,0.3,0.7', () => makeUvBoxGeometry(1.5, 0.3, 0.7)),
         mat
       );
       pauldron.position.y = 1.95;
       group.add(pauldron);
       const ram = new THREE.Mesh(
-        enemyGeo('juggernautRam:cone:0.26,0.5,6', () => new THREE.ConeGeometry(0.26, 0.5, 6)),
+        enemyGeo('uv:juggernautRam:cone:0.26,0.5,6', () => makeUvConeGeometry(0.26, 0.5, 6)),
         mat
       );
       ram.rotation.x = Math.PI / 2;
@@ -643,7 +662,7 @@ export class Enemy {
       group.add(ram);
     } else if (config.type !== 'boss') {
       const helm = new THREE.Mesh(
-        enemyGeo('helm:box:0.5,0.35,0.5', () => new THREE.BoxGeometry(0.5, 0.35, 0.5)),
+        enemyGeo('uv:helm:box:0.5,0.35,0.5', () => makeUvBoxGeometry(0.5, 0.35, 0.5)),
         mat
       );
       helm.position.y = 2.15;

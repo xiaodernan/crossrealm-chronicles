@@ -72,6 +72,19 @@ const MANIFEST = {
     repeat: [1 / SURFACE_SPECS.plank.tileMeters, 1 / SURFACE_SPECS.plank.tileMeters],
     roughness: 1.0,
   },
+  /**
+   * 装甲板（W-C5 切片4）：敌人身体（`combat/Enemy.js` 的 mat 系几何：身体 / 盔 / 翼 /
+   * 肩甲 / 炮管 / 撞角）。0.5 米一铺、2×2 错缝板 —— 一块板 25 厘米见方。
+   * 消费方走 `uvVariant('plate', 2, 2)`（= 1 / tileMeters）：身体胶囊的 UV 按剖面弧长
+   * 以米计（`engine/uvGeometry.js` 的 makeUvCapsuleGeometry），其余件走 uvBox/uvCone ——
+   * 体型放大（BODY_PLANS.scale）不会把板子一起放大。
+   */
+  plate: {
+    normalMap: [`${LOCAL}/${SURFACE_SPECS.plate.files.normal}`],
+    roughnessMap: [`${LOCAL}/${SURFACE_SPECS.plate.files.roughness}`],
+    repeat: [1 / SURFACE_SPECS.plate.tileMeters, 1 / SURFACE_SPECS.plate.tileMeters],
+    roughness: 1.0,
+  },
 };
 
 let _instance = null;
