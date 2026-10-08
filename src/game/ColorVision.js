@@ -4,11 +4,11 @@
  * ## 为什么是模块级当前档，而不是把档位递进每个消费者
  *
  * `content/semanticColors.js` 只回答"某个语义在某个档下是什么颜色"，**不回答现在是哪一档**。
- * 消费者散在几棵不同的子树上（掉落层读稀有度色、界面读战斗三件套），而它们的构造签名被
- * 几十条用例直接调用（加参数就要动一大片夹具）。这一格的状态是"整局游戏一份"，与
- * `engine/i18n.js` 的 `setLanguage` / `game/Difficulty.js` 的 `setDifficulty` 是同一个形状 ——
- * **先例在那里**：那种"全局唯一、随设置落地"的状态走模块级，而不是给每个消费者挂一份副本
- * （挂三份就是三个真源，正是 B36 那一族）。
+ * 消费者散在几棵不同的子树上（掉落层读稀有度色、HUD 读状态条色、飘字读治疗色），
+ * 而它们的构造签名被几十条用例直接调用（加参数就要动一大片夹具）。这一格的状态是
+ * "整局游戏一份"，与 `engine/i18n.js` 的 `setLanguage` / `game/Difficulty.js` 的
+ * `setDifficulty` 是同一个形状 —— **先例在那里**：那种"全局唯一、随设置落地"的状态走模块级，
+ * 而不是给每个消费者挂一份副本（挂三份就是三个真源，正是 B36 那一族）。
  *
  * 与它们一样，唯一写入口是 `setColorVision`，而它的调用者是 `SettingsManager.applyToGame` ——
  * 设置面板、存档、开机各一条路都汇到那一处（门禁按调用点计数钉住）。
@@ -24,6 +24,7 @@
  * 新生成的掉落按当前档取色；**场上已有的掉落会当场重涂**（`LootSystem.update` 每帧比对一次档位）。
  * 难度档对场上敌人是"出生那一瞬间定死"，色觉档不一样：它是**可访问性**开关，
  * 玩家切档的唯一目的就是让眼前已经存在的东西变得可分辫 —— 让他退出去重打一遍没有意义。
+ * HUD 状态条与治疗飘字同理，只是它们不需要每帧比对（`applyToGame` 换档时直接重写一次）。
  *
  * ## 限度（写清楚）
  *
@@ -61,7 +62,8 @@ export function colorVisionOptions() {
 }
 
 /**
- * 一个语义在当前档下的颜色。**语义写错当场抛** —— 与 `difficultyMultiplier` 同一口径：
+ * 一个语义在当前档下的颜色（**数**，给 three 的 `setHex` 用）。
+ * **语义写错当场抛** —— 与 `difficultyMultiplier` 同一口径：
  * 静默返回 `undefined` 的后果是把 `undefined` 涂到材质上，而那在画面上只是"那个东西没颜色"，
  * 报错栈里不会有任何一行指向那个拼错的语义名。
  */
@@ -70,10 +72,21 @@ export function colorOf(semanticId) {
 }
 
 /**
+ * 一个语义在某档下的 **CSS 颜色串**（`#rrggbb`，给 DOM/CSS 用）。
+ *
+ * 为什么要单开这一个出口：DOM 那一侧（飘字的 `style.color`、CSS 自定义属性）要的是串，
+ * three 那一侧（`material.color.setHex`）要的是数。两处各自 `toString(16)` 就是两条算式，
+ * 而其中一条写错时的症状只是"那个颜色悄悄地不对"，报错栈里一行都不会指过来。
+ */
+export function cssColorOf(semanticId, mode = currentMode) {
+  return `#${semanticColor(semanticId, mode).toString(16).padStart(6, '0')}`;
+}
+
+/**
  * 一件装备的稀有度色，按**当前档**取。
  *
  * 这里不直接读 gear.js 那份**出厂档快照**（注册表校验与"零视觉变更"对账都指着它）：
- * 都指着它），运行时换档必须走 `gearRarityDisplay(rarity, mode)` 这条带档位的路 ——
+ * 运行时换档必须走 `gearRarityDisplay(rarity, mode)` 这条带档位的路 ——
  * 否则"切了色盲档，地上已经掉的那件还是旧色"。
  */
 export function rarityTint(rarityId) {

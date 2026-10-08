@@ -21,9 +21,15 @@
  * ## 映射只有一份
  * `BAR_SEMANTIC` 是"哪条条读哪个语义"的唯一答案（与 `DROP_RING_BY_RARITY` 同一纪律）。
  * 门禁按调用点计数钉住：写颜色的地方只有这一个文件，HUD 只负责调用。
+ *
+ * ## 十六进制化只有一处
+ * "颜色"在本仓有两种形状：three 那侧要**数**（`material.color.setHex`），
+ * DOM 那侧要**串**（飘字的 `style.color`、这里的 CSS 自定义属性）。
+ * 两处各自 `toString(16)` 就是两条算式，其中一条写错时的症状只是
+ * "那个颜色悄悄地不对"，报错栈里一行都不会指过来。所以十六进制化只在
+ * `game/ColorVision.js` 的 `cssColorOf` 一处，本文件与 CombatController 都调它。
  */
-import { semanticColor } from '../content/semanticColors.js';
-import { getColorVisionMode } from '../game/ColorVision.js';
+import { cssColorOf, getColorVisionMode } from '../game/ColorVision.js';
 
 /** CSS 变量名：`bar-hp` → `--bar-hp` */
 const BAR_VAR = (bar) => `--bar-${bar}`;
@@ -51,18 +57,18 @@ export const BAR_SHADE = Object.freeze({
   mana: '#224488',
 });
 
-const hex = (n) => `#${n.toString(16).padStart(6, '0')}`;
-
 /**
  * 某条条在某档下的亮端。纯函数，不碰 DOM —— 门禁直接喂档位读数，不需要假浏览器。
  * 出厂档读出来必须与改前 CSS 那一枚逐字相同（`BAR_BRIGHT_DEFAULT` 由它推导并反向对账）。
+ *
+ * 颜色不从色板直接算，而是过 `cssColorOf`：十六进制化全仓只有那一处（见文件头末段）。
  */
 export function barBright(bar, mode = getColorVisionMode()) {
   const semantic = BAR_SEMANTIC[bar];
   if (!semantic) {
     throw new Error(`barBright: 未知的状态条 "${bar}"（可用：${Object.keys(BAR_SEMANTIC).join(' / ')}）`);
   }
-  return hex(semanticColor(semantic, mode));
+  return cssColorOf(semantic, mode);
 }
 
 /** 出厂档下每条条的亮端 —— 就是改前 `style.css` 里那一枚（零视觉变更的冻结读数） */

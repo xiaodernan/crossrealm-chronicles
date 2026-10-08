@@ -7,6 +7,7 @@ import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN, 
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
 import { anyDown, codeFor, codesFor, mouseFor } from '../content/keybinds.js';
+import { cssColorOf } from '../game/ColorVision.js';
 import { difficultyMultiplier } from '../game/Difficulty.js';
 
 const COMBO_WINDOW = 0.55;
@@ -268,18 +269,38 @@ export class CombatController {
 
   /** 外部补给/休息恢复走接口，避免其他系统直接改写战斗内部字段 */
   restore({ hp = 0, stamina = 0 } = {}) {
+    const before = this.hp;
     this.hp = Math.min(this.maxHp, this.hp + hp);
     this.stamina = Math.min(this.maxStamina, this.stamina + stamina);
     this.publishVitals();
+    this._spawnHealNumber(this.hp - before);
     window.dispatchEvent(new CustomEvent('player-healed', { detail: { hp: this.hp, maxHp: this.maxHp } }));
   }
 
   restHeal() {
     this.stats?.applyToCombat(this);
+    this._spawnHealNumber(this.maxHp - this.hp);
     this.hp = this.maxHp;
     this.stamina = this.maxStamina;
     this.publishVitals();
     window.dispatchEvent(new CustomEvent('player-healed', { detail: { hp: this.hp, maxHp: this.maxHp } }));
+  }
+
+  /**
+   * 回血时弹一枚治疗飘字（W-D6 切片5）。
+   *
+   * `DAMAGE_KINDS.heal` 自切片2 起就没有调用点：`restore`（`dungeon-supply` 事件入口）与
+   * `restHeal`（快速旅行/休息）都只改数值，玩家吃下一口补给时屏幕上一个数字都不弹，
+   * 只能靠血条跳一下猜自己回了多少。颜色之外还有 `+` 前缀与单独字号（见 `DamageNumbers`），
+   * 关掉颜色也读得出"这是治疗、不是伤害"。
+   *
+   * 颜色取 `safe` 语义：与"绿色=对自己有利"的读法一致，且跟着色盲档一起变。
+   * healed <= 0 时什么都不弹 —— 满血再吃补给不该凭空冒出一个 +0。
+   */
+  _spawnHealNumber(healed) {
+    if (healed <= 0) return 0;
+    this.damageNumbers?.spawn(this.player.position, String(healed), cssColorOf('safe'), 'heal');
+    return healed;
   }
 
   getComboMultiplier() {
