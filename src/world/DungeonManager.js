@@ -4,6 +4,7 @@ import { getRoomAt, clampToBounds } from './MazeLayout.js';
 import { DungeonBoss } from '../combat/DungeonBoss.js';
 import { BOSS_LORE, DUNGEON_ENTER_LINES } from '../game/LoreFragments.js';
 import { DUNGEON_DEFS } from '../content/dungeons.js';
+import { dungeonGrowthStage } from '../content/enemyGrowth.js';
 import { disposeDungeonSubtree } from './dungeonAssets.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
@@ -129,7 +130,12 @@ export class DungeonManager {
     const group = new THREE.Group();
     group.position.set(def.origin.x, def.origin.y, def.origin.z);
     this.scene.add(group);
-    return { def, group, enemies: [], roomEnemies: new Map(), spawned: false, layout: null, boss: null, bossSpawned: false };
+    return {
+      def, group, enemies: [], roomEnemies: new Map(), spawned: false, layout: null, boss: null, bossSpawned: false,
+      // 成长档位（W-E1 切片3）：建副本时定一次。每只怪出生时再查一次表是白跑，
+      // 而且"这座副本忘了配档位"会推迟到玩家进门才炸 —— 开机就炸才好修。
+      growthStage: dungeonGrowthStage(def.id),
+    };
   }
 
   getEntranceNear(pos, range = 5) {
@@ -201,7 +207,12 @@ export class DungeonManager {
         // 身份（名字与数值）走 `content/enemies.js` 那一名册：副本里的 `golem` 与图书馆里的
         // 那只是同一只（W-B10 切片2 之前，这里自己抄了一套「构装守卫 / posture 70 / damage 16」，
         // 而没点名的类型一律兜底成「遗城战士」）。房间不该在玩家回头时刷新，所以盖 respawn。
-        const enemy = this.enemyManager.spawnAt(e.type, wx, wz, { respawn: false });
+        const enemy = this.enemyManager.spawnAt(e.type, wx, wz, {
+          respawn: false,
+          // 成长档位显式递进去（W-E1 切片3）：副本坐标在 (5000, …) 独立空间里，
+          // spawnAt 默认那条"按出生点反推区域"在这里只会得到 corridor。
+          growthStage: dungeon.growthStage,
+        });
         list.push(enemy);
         dungeon.enemies.push(enemy);
       }

@@ -55,39 +55,109 @@ const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:]
  */
 const OLD_DEFS = [
   {
-    id: 'ruin-crypt', name: '灰白遗城', theme: 0x4a5048, accent: 0xc9a962, themeType: 'soldier',
-    gridW: 6, gridH: 6, origin: { x: 5000, y: 120, z: 5000 },
-    entrance: { x: -190, z: 25 }, exterior: { x: -190, z: 25, label: '灰白遗城入口' },
+    id: 'ruin-crypt',
+    name: '灰白遗城',
+    themeType: 'soldier',
+    trial: true,
+    stage: 0,
+    mapLabel: '遗城',
+    theme: 0x4a5048,
+    accent: 0xc9a962,
+    gridW: 6,
+    gridH: 6,
+    origin: { x: 5000, y: 120, z: 5000 },
+    entrance: { x: -190, z: 25 },
+    exterior: { x: -190, z: 25, label: '灰白遗城入口' },
   },
   {
-    id: 'forbidden-library', name: '禁书图书馆', theme: 0x2a2040, accent: 0xaa66ff, themeType: 'golem',
-    gridW: 5, gridH: 6, origin: { x: 5000, y: 120, z: 6500 },
-    entrance: { x: -35, z: -200 }, exterior: { x: -35, z: -200, label: '图书馆侧门' },
+    id: 'forbidden-library',
+    name: '禁书图书馆',
+    themeType: 'golem',
+    trial: true,
+    stage: 1,
+    mapLabel: '图书馆',
+    theme: 0x2a2040,
+    accent: 0xaa66ff,
+    gridW: 5,
+    gridH: 6,
+    origin: { x: 5000, y: 120, z: 6500 },
+    entrance: { x: -35, z: -200 },
+    exterior: { x: -35, z: -200, label: '图书馆侧门' },
   },
   {
-    id: 'five-dim-rift', name: '五维裂隙', theme: 0x0a1830, accent: 0x66ccff, themeType: 'drone',
-    gridW: 5, gridH: 5, origin: { x: 5000, y: 120, z: 8000 },
-    entrance: { x: 175, z: 95 }, exterior: { x: 175, z: 95, label: '裂隙观测站' },
+    id: 'five-dim-rift',
+    name: '五维裂隙',
+    themeType: 'drone',
+    trial: true,
+    stage: 2,
+    mapLabel: '裂隙',
+    theme: 0x0a1830,
+    accent: 0x66ccff,
+    gridW: 5,
+    gridH: 5,
+    origin: { x: 5000, y: 120, z: 8000 },
+    entrance: { x: 175, z: 95 },
+    exterior: { x: 175, z: 95, label: '裂隙观测站' },
   },
   {
-    id: 'forest-shrine', name: '古树神龛', theme: 0x2a3828, accent: 0x88cc66, themeType: 'soldier',
-    gridW: 4, gridH: 5, origin: { x: 5000, y: 120, z: 9500 },
-    entrance: { x: -230, z: -15 }, exterior: { x: -230, z: -15, label: '神龛石门' },
+    id: 'forest-shrine',
+    name: '古树神龛',
+    themeType: 'soldier',
+    trial: false,
+    stage: 1,
+    mapLabel: '神龛',
+    theme: 0x2a3828,
+    accent: 0x88cc66,
+    gridW: 4,
+    gridH: 5,
+    origin: { x: 5000, y: 120, z: 9500 },
+    entrance: { x: -230, z: -15 },
+    exterior: { x: -230, z: -15, label: '神龛石门' },
   },
   {
-    id: 'hub-catacombs', name: '枢纽地下墓穴', theme: 0x3a3530, accent: 0xffaa44, themeType: 'elite',
-    gridW: 5, gridH: 5, origin: { x: 5000, y: 80, z: 11000 },
-    entrance: { x: 28, z: 72 }, exterior: { x: 28, z: 72, label: '墓穴阶梯' },
+    id: 'hub-catacombs',
+    name: '枢纽地下墓穴',
+    themeType: 'elite',
+    trial: false,
+    stage: 0,
+    mapLabel: '墓穴',
+    theme: 0x3a3530,
+    accent: 0xffaa44,
+    gridW: 5,
+    gridH: 5,
+    origin: { x: 5000, y: 80, z: 11000 },
+    entrance: { x: 28, z: 72 },
+    exterior: { x: 28, z: 72, label: '墓穴阶梯' },
   },
   {
-    id: 'gloom-mist-crypt', name: '幽暗迷雾墓穴', theme: 0x2a2a3a, accent: 0x6a6a8a, themeType: 'wraith',
-    gridW: 5, gridH: 5, origin: { x: 5000, y: 120, z: 12500 },
-    entrance: { x: 200, z: 170 }, exterior: { x: 200, z: 170, label: '迷雾墓穴入口' },
+    id: 'gloom-mist-crypt',
+    name: '幽暗迷雾墓穴',
+    themeType: 'wraith',
+    trial: false,
+    stage: 5,
+    mapLabel: '迷雾墓穴',
+    theme: 0x2a2a3a,
+    accent: 0x6a6a8a,
+    gridW: 5,
+    gridH: 5,
+    origin: { x: 5000, y: 120, z: 12500 },
+    entrance: { x: 200, z: 170 },
+    exterior: { x: 200, z: 170, label: '迷雾墓穴入口' },
   },
   {
-    id: 'radiant-dawn-hall', name: '晨曦圣殿', theme: 0xfff8d0, accent: 0xffcc00, themeType: 'crawler',
-    gridW: 5, gridH: 5, origin: { x: 5000, y: 120, z: 14000 },
-    entrance: { x: -180, z: -95 }, exterior: { x: -180, z: -95, label: '晨曦圣殿大门' },
+    id: 'radiant-dawn-hall',
+    name: '晨曦圣殿',
+    themeType: 'crawler',
+    trial: false,
+    stage: 6,
+    mapLabel: '晨曦圣殿',
+    theme: 0xfff8d0,
+    accent: 0xffcc00,
+    gridW: 5,
+    gridH: 5,
+    origin: { x: 5000, y: 120, z: 14000 },
+    entrance: { x: -180, z: -95 },
+    exterior: { x: -180, z: -95, label: '晨曦圣殿大门' },
   },
 ];
 
@@ -103,11 +173,12 @@ const OLD_WAYPOINTS = {
 };
 
 /**
- * 切片3c 起，允许新表比这份 golden **多出来**的格子只有这两格 —— 且每一格都在
+ * 切片3c 起，允许新表比这份 golden **多出来**的格子只有这三格 —— 且每一格都在
  * 下面那条用例里点名了自己的读者（`trial` → 飞升门/指路/开局点亮/助手清单，
- * `mapLabel` → 世界地图的那个字）。豁免不是空白放行：多一格又没人读，就是下一个 `themeType`。
+ * `mapLabel` → 世界地图的那个字，`stage` → 敌人成长档位）。
+ * 豁免不是空白放行：多一格又没人读，就是下一个 `themeType`。
  */
-const 新增格 = ['trial', 'mapLabel'];
+const 新增格 = ['trial', 'mapLabel', 'stage'];
 
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
@@ -147,15 +218,21 @@ describe('① 数据忠实：新表逐格 = 搬动之前在役的那份 const', 
     // 反面证据：旧表确实写了 7 格 themeType（原 5 座 + W-B9 新增 2 座），而新表一格都没有 —— "删掉了"不是"从来没写过"
     expect(OLD_DEFS.filter((r) => 'themeType' in r)).toHaveLength(7);
     expect(DUNGEON_DEFS.filter((r) => 'themeType' in r)).toEqual([]);
+    // 反面证据：新表每行都有 trial / stage / mapLabel
+    expect(DUNGEON_DEFS.filter((r) => 'trial' in r)).toHaveLength(7);
+    expect(DUNGEON_DEFS.filter((r) => 'stage' in r)).toHaveLength(7);
+    expect(DUNGEON_DEFS.filter((r) => 'mapLabel' in r)).toHaveLength(7);
   });
 
-  it('切片3c 新增的两格都在，且**只有**这两格是新的', () => {
+  it('切片3c 新增的三格都在，且**只有**这三格是新的', () => {
     // 这一条把上面那个例外清单钉成"有名字、有理由、有归属"的三条陈述：
     // 豁免不是一条 `continue`，而是一格必须有读者、有声明、有对账 —— 否则它就长成下一个 `themeType`。
     for (const d of DUNGEON_DEFS) {
       expect(typeof d.trial, `${d.id} 的 trial 不是显式布尔`).toBe('boolean');
       expect(typeof d.mapLabel, `${d.id} 没有 mapLabel`).toBe('string');
       expect(d.mapLabel.length, `${d.id} 的 mapLabel 是空的`).toBeGreaterThan(0);
+      expect(Number.isInteger(d.stage), `${d.id} 的 stage 不是整数`).toBe(true);
+      expect(d.stage).toBeGreaterThanOrEqual(0);
     }
     // `trial` 恰好是主线那三座（这一份是冻结的历史读数：切片3c 动手之前四个抄本都是这三枚 id）
     expect(DUNGEON_DEFS.filter((d) => d.trial).map((d) => d.id))

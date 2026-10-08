@@ -46,12 +46,21 @@
  * `ui/WorldMapPanel.js` 以前自己养一张五行表（`{ x: -190, z: 25, t: '遗城', id: 'ruin-crypt' }`）：
  * 坐标逐格等于 `entrance`、简称是全名的手写缩写、而且**只有五行** —— 名册里多出来的两座
  * 在地图上没有点（普查 `.tmp-20261002/wb10s3c-census.mjs`：表 7 行 / 面板 5 行，差集正是新增的两座）。
+ *
+ * ### `stage` —— 这一座的敌人按哪一档成长曲线出（W-E1 切片3）
+ *
+ * 为什么**不按入口坐标反推区域**：`five-dim-rift` 的入口 (175, 95) 离幽暗林地中心
+ * (180, 100) 只有 7 米 —— 按 `zoneIdAt` 取最近区域，第三座试炼会拿到全游戏最晚的档位。
+ * 坐标在这里不是进度信号，**设计意图**才是；所以每座显式写一档，注册表必填 + 域内校验。
+ * 口径：三界试炼 0/1/2（主线进度），可选副本贴着它门口那个区的档位
+ * （神龛 1 / 墓穴 0 在枢纽隔壁 / 迷雾墓穴 5 / 晨曦圣殿 6）。
  */
 export const DUNGEON_DEFS = [
   {
     id: 'ruin-crypt',
     name: '灰白遗城',
     trial: true,
+    stage: 0,
     mapLabel: '遗城',
     theme: 0x4a5048,
     accent: 0xc9a962,
@@ -65,6 +74,7 @@ export const DUNGEON_DEFS = [
     id: 'forbidden-library',
     name: '禁书图书馆',
     trial: true,
+    stage: 1,
     mapLabel: '图书馆',
     theme: 0x2a2040,
     accent: 0xaa66ff,
@@ -78,6 +88,7 @@ export const DUNGEON_DEFS = [
     id: 'five-dim-rift',
     name: '五维裂隙',
     trial: true,
+    stage: 2,
     mapLabel: '裂隙',
     theme: 0x0a1830,
     accent: 0x66ccff,
@@ -91,6 +102,7 @@ export const DUNGEON_DEFS = [
     id: 'forest-shrine',
     name: '古树神龛',
     trial: false,
+    stage: 1,
     mapLabel: '神龛',
     theme: 0x2a3828,
     accent: 0x88cc66,
@@ -104,6 +116,7 @@ export const DUNGEON_DEFS = [
     id: 'hub-catacombs',
     name: '枢纽地下墓穴',
     trial: false,
+    stage: 0,
     mapLabel: '墓穴',
     theme: 0x3a3530,
     accent: 0xffaa44,
@@ -117,6 +130,7 @@ export const DUNGEON_DEFS = [
     id: 'gloom-mist-crypt',
     name: '幽暗迷雾墓穴',
     trial: false,
+    stage: 5,
     mapLabel: '迷雾墓穴',
     theme: 0x2a2a3a,
     accent: 0x6a6a8a,
@@ -130,6 +144,7 @@ export const DUNGEON_DEFS = [
     id: 'radiant-dawn-hall',
     name: '晨曦圣殿',
     trial: false,
+    stage: 6,
     mapLabel: '晨曦圣殿',
     theme: 0xfff8d0,
     accent: 0xffcc00,

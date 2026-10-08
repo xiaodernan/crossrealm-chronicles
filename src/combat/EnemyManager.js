@@ -12,6 +12,7 @@ import { VoidBoss } from './VoidBoss.js';
 import { ChaosBoss } from './ChaosBoss.js';
 import { chapterGateFor } from '../content/bossRoster.js';
 import { zoneIdAt } from '../content/ZoneIdentity.js';
+import { growthAt, zoneGrowthStage } from '../content/enemyGrowth.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { difficultyMultiplier } from '../game/Difficulty.js';
 
@@ -267,13 +268,25 @@ export class EnemyManager {
    * 乘子只写在这一处。乘的是名册那一格，不是另抄一份数值 —— 抄本会漂（B36/B45/B62 同族）。
    * `posture` 刻意**不乘**：它是硬直抗性，跟着血量一起缩放会把"更脆"变成
    * "更容易被打断两次"，那是另一件事，本片不做。
+   *
+   * **成长曲线也在这里落地**（W-E1 切片3）：档位默认按出生点所在区域推
+   * （`zoneGrowthStage(zoneIdAt(...))` —— 敌人强度是地方的属性），副本两条出生路
+   * 显式递 `extra.growthStage`（它们的坐标在 (5000, …) 的独立空间里，反推不出区域）。
+   * 最终血量 = 名册 hp × difficulty.enemyHp × growth.hp，两个乘子都是正有限数，
+   * 乘法可交换 —— 语义各占一边：难度是玩家选的，成长是地方给的。
    */
   spawnAt(type, x, z, extra = {}) {
     const roster = enemyRosterOf(type);
+    // growthStage 是给这条咽喉的指令，不是敌人的属性 —— 摘出来，别流进 spawn config
+    const { growthStage, ...rest } = extra;
+    const stage = growthStage ?? zoneGrowthStage(zoneIdAt({ x, z }, this.world?.zones));
+    const growth = growthAt(stage);
     return this.spawn({
       ...roster,
-      hp: Math.round(roster.hp * difficultyMultiplier('enemyHp')),
-      type, x, z, ...extra,
+      hp: Math.round(roster.hp * difficultyMultiplier('enemyHp') * growth.hp),
+      // damage 是可缺的（`dummy` 没有）：缺格不缩放，交给 Enemy 构造器的 `?? 12`
+      ...(roster.damage == null ? {} : { damage: Math.round(roster.damage * growth.damage) }),
+      type, x, z, ...rest,
     });
   }
 

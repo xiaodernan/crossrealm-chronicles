@@ -199,7 +199,7 @@ describe('③ 行为：出生后的敌人身份确实来自名册', () => {
     expect(() => enemyRosterOf('遗城战士')).toThrow(/可用/);
     // 副本那条嘴同样不许兜底：房间表里冒出没登记的类型，出生就得红，而不是顶着一张错名字
     const m2 = makeManager();
-    const dungeon = { def: { id: 'ruin', name: '遗城', origin: { x: 0, z: 0 } }, enemies: [], roomEnemies: new Map() };
+    const dungeon = { def: { id: 'ruin-crypt', name: '遗城', origin: { x: 0, z: 0 } }, enemies: [], roomEnemies: new Map() };
     const room = { id: 'r9', isBossArena: false, enemySpawns: [{ x: 1, z: 1, type: 'wraith ' }] };
     expect(() => DungeonManager.prototype._spawnRoomEnemies.call({ enemyManager: m2 }, dungeon, room))
       .toThrow(/敌人名册里没有/);

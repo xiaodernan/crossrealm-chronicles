@@ -9,5 +9,6 @@ public/godot-export/
 .vite/
 resume-stack
 .tmp-*
+test-output.txt
 vite.config.js.timestamp-*.mjs
 .workbuddy-ai/

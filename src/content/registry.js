@@ -48,6 +48,7 @@ import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import { ENEMY_ROSTER } from './enemies.js';
 import { SURFACE_SPECS, SURFACE_PATTERNS } from './materialSurfaces.js';
 import { DIFFICULTY_TIERS, checkDifficultyTable } from './difficulty.js';
+import { ENEMY_GROWTH, GROWTH_MAX_STAGE, checkEnemyGrowth } from './enemyGrowth.js';
 import { DUNGEON_DEFS, DUNGEON_IDS } from './dungeons.js';
 import { DUNGEON_ENCOUNTERS } from './dungeonEncounters.js';
 import { ENEMY_MOVE_SETS, BODY_PLANS } from './tuning.js';
@@ -410,12 +411,17 @@ export const CONTENT_TABLES = [
       + '各座迷宫的身份与关卡参数。**字段按实测读者声明** —— 搬之前普查证明 `themeType` 写 5 读 0，'
       + '那一格随之删掉；今天再加"以后可能用得上"的格子就是重犯同一条错。'
       + '切片3c 加的两格都有署名读者：`trial` → `TRIAL_DUNGEON_IDS`（飞升门 / 指路 / 开局点亮 / 助手清单），'
-      + '`mapLabel` → `ui/WorldMapPanel.js` 上那几个点旁边的字',
+       + '`mapLabel` → `ui/WorldMapPanel.js` 上那几个点旁边的字'
+      + '切片 W-E1 切片3 加的 `stage` → `dungeonGrowthStage()`（敌人成长档位）：'
+      + '副本出生点在 (5000, …) 的独立坐标空间里，按坐标反推区域会全军覆没，所以档位是显式设计决定',
     shape: 'rows',
     table: DUNGEON_DEFS,
     row: {
       id: { t: 'id' },
       name: { t: 'string' },
+      // 成长档位（W-E1 切片3）：必填 —— 省略即"这座副本的敌人按 0 档出"，
+      // 而那座副本门口可能隔着半个世界。域由 `GROWTH_MAX_STAGE` 说话（与曲线表同源）。
+      stage: { t: 'int', min: 0, max: GROWTH_MAX_STAGE },
       // 两格都是**必填**：`trial` 省略就等于"新加的那座默认不算试炼"，而这句话正是切片3c
       // 从四处手抄本收回来的那一句；`mapLabel` 省略则地图上的点没有字。
       trial: { t: 'bool' },
@@ -1044,6 +1050,21 @@ export const CONTENT_TABLES = [
       },
     },
     invariant: checkDifficultyTable,
+  },
+  {
+    kind: 'enemyGrowth',
+    note: '敌人成长曲线（W-E1 切片3）：行序即档位，第 i 行是"进度到第 i 档"的两个乘子'
+      + '（hp / damage）。档位数必须与 ZONE_ORDER 一致（每座真实区域一档）、0 档必须恒等'
+      + '（出发点区域"接上与不接一个样"）、逐档单调不降（"越往后越难"）—— 三条都由'
+      + ' `checkEnemyGrowth` 在开机与 `npm test` 各跑一次。读者是 `EnemyManager.spawnAt`'
+      + '（世界出生按区域下标取档，副本按定义行上的 `dungeons.stage` 取档）。',
+    shape: 'rows',
+    table: ENEMY_GROWTH,
+    row: {
+      hp: { t: 'number', exclusiveMin: 0 },
+      damage: { t: 'number', exclusiveMin: 0 },
+    },
+    invariant: checkEnemyGrowth,
   },
 ];
 
