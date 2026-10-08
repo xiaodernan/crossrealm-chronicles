@@ -99,6 +99,7 @@ import { AchievementsJournalTab } from '../ui/AchievementsJournalTab.js';
 import { LoreCodexSystem } from '../game/LoreCodexSystem.js';
 import { LoreCodexJournalTab } from '../ui/LoreCodexJournalTab.js';
 import { CombatStyleTracker } from '../game/CombatStyleTracker.js';
+import { Captions } from '../ui/Captions.js';
 import { CombatStyleOverlay } from '../ui/CombatStyleOverlay.js';
 import { BossRematchDirector } from '../world/BossRematchDirector.js';
 import { ZoneTransitionFX } from '../effects/ZoneTransitionFX.js';
@@ -270,7 +271,9 @@ export class Game {
     this.shake = shake;
     this.combatFeedback = this._adopt('effects/CombatFeedback', new CombatFeedback(this.scene));
     this.projectiles = new ProjectileManager(this.scene, this.audio);
-    this.loot = new LootSystem(this.scene, this.stats, this.audio, {
+    // W-D6 切片8：掉落层不再收 audio —— 声音走 game-cue（AudioManager 听它），
+    // 于是"掉了一件装备"这件事只有一个出口，不会出现"响了但没字幕"或反过来的漂移。
+    this.loot = new LootSystem(this.scene, this.stats, {
       onGear: (instance) => this.pickUpGear(instance),   // 捡到装备之后怎么办，只有这一处说了算
     });
     this.enemyManager = new EnemyManager(this.scene, this.world, this.projectiles);
@@ -340,6 +343,9 @@ export class Game {
     this.wave4VisualFx = new PopCultureWave4VisualPass(this);
 
     this.settings = new SettingsManager();
+    // 字幕条（W-D6 切片8）：建在 settings 之后、`applyToGame`（下面那一次）之前 ——
+    // 早于 settings 的话构造器读不到出厂档，晚于 applyToGame 的话开机后第一批字幕会被静默吞掉。
+    this.captions = this._adopt('ui/Captions', new Captions(this));
     this.performance = new PerformanceManager();
     this.weapons = new WeaponSystem(this.player, this.dialog, this.audio);
     this.achievements = this._adopt('game/AchievementSystem', new AchievementSystem(this.dialog));
@@ -893,6 +899,7 @@ export class Game {
     this.hotkeys.poll(this.keys, rawDt);
     this.combatStyle?.update(dt);
     this.combatStyleOverlay?.update(dt);
+    this.captions?.update(dt);
     this.zoneTransitionFx?.update(dt);
     this.soulStreak?.update(dt);
     this.sideQuests?.update(dt);

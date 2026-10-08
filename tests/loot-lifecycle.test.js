@@ -87,7 +87,7 @@ const v3 = (x, y, z) => new THREE.Vector3(x, y, z);
 const farAway = () => v3(999, 0, 999);
 
 /** 只关心进出场的最小装配：`rng` 固定成 0.99，`dropChance` 那一掷永不命中，掉落数就等于调用数 */
-const mkLoot = (scene) => new LootSystem(scene, { addSouls() {} }, null, { rng: () => 0.99 });
+const mkLoot = (scene) => new LootSystem(scene, { addSouls() {} }, { rng: () => 0.99 });
 
 /**
  * 每 `cadence` 帧掉一件，掉满 `total` 件之后让剩下的自然到期。
@@ -223,7 +223,7 @@ describe('两件出口与三件颜色：池化没把玩法改掉', () => {
   it('捡走的那一件回到池里：摘出场景、池子加一、魂到账', () => {
     const scene = new THREE.Scene();
     let souls = 0;
-    const loot = new LootSystem(scene, { addSouls: (n) => { souls += n; } }, null, { rng: () => 0 });
+    const loot = new LootSystem(scene, { addSouls: (n) => { souls += n; } }, { rng: () => 0 });
     loot._spawn(v3(2, 0, 3), { souls: 15, gear: null });
     expect(scene.children.length).toBe(1);
     loot.update(FRAME, v3(2, 0, 3), PICKUP_RADIUS);
@@ -300,7 +300,7 @@ describe('两件出口与三件颜色：池化没把玩法改掉', () => {
     const souls = [];
     const gears = [];
     // 0.4 < dropChance('elite') = 0.5 ⇒ 魂 + 一件装备
-    const loot = new LootSystem(scene, { addSouls: (n) => souls.push(n) }, null, {
+    const loot = new LootSystem(scene, { addSouls: (n) => souls.push(n) }, {
       rng: () => 0.4,
       onGear: (g) => gears.push(g),
     });
@@ -323,7 +323,11 @@ describe('掉落层还在主循环的接线位置上', () => {
   it('core/Game.js 仍然每帧推进 loot.update，掉落仍然由击杀入口交给它', () => {
     const game = readFileSync(join(SRC, 'core', 'Game.js'), 'utf8');
     expect(game).toMatch(/this\.loot\.update\(dt, this\.player\.position\)/);
-    expect(game).toMatch(/new LootSystem\(this\.scene, this\.stats, this\.audio/);
+    // W-D6 切片8：掉落层不再收 audio（声音走 game-cue），所以这里钉的是"没把 audio 塞回去"。
+    // 塞回去的症状不是报错，而是"响了但没字幕"—— 两条输出各走各的门，谁也不校验谁。
+    expect(game, 'Game.js 又把 audio 递给掉落层了：那条路上声音与字幕会重新分家')
+      .not.toMatch(/new LootSystem\(this\.scene, this\.stats, this\.audio/);
+    expect(game).toMatch(/new LootSystem\(this\.scene, this\.stats, \{/);
     const enemyManager = readFileSync(join(SRC, 'combat', 'EnemyManager.js'), 'utf8');
     // 派发处带可选链：`loot` 没装配起来的构造路径不该静默不掉落
     expect(enemyManager).toMatch(/loot\?\.spawnKill\(/);

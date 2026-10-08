@@ -1167,6 +1167,53 @@ canvas {
   transform: translateY(0);
 }
 
+/* 字幕条（W-D6 切片8）：把"只靠声音传递的信息"写到屏幕上。
+   摆在交互提示（bottom:120px）上方 48px —— 那一行是"按 E 互动"，字幕不能盖它。
+   pointer-events: none：字幕是纯输出，不许抢玩家的点击，也不该进走焦清单。 */
+#captions {
+  position: fixed;
+  bottom: 168px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.caption {
+  padding: 6px 16px;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 3px;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  animation: caption-in 0.18s ease-out;
+}
+
+/* 关键线索（处决）：停得久、也画得重 —— 与 CUE_KINDS.critical 的 ttl 5s 是一对 */
+.caption-critical {
+  border-color: rgba(201, 169, 98, 0.65);
+  color: #e8d9b0;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+}
+
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 #dialog-overlay {
   position: fixed;
   inset: 0;

@@ -62,7 +62,7 @@ afterEach(() => { resetColorVision(); });
 const FROZEN_BEFORE = { common: 0xbfc7d1, uncommon: 0x63d97a, rare: 0x4ea8ff, epic: 0xc77bff };
 
 const 假场景 = () => ({ add() {}, remove() {} });
-const mkLoot = () => new LootSystem(假场景(), { addSouls() {} }, null, { rng: () => 0 });
+const mkLoot = () => new LootSystem(假场景(), { addSouls() {} }, { rng: () => 0 });
 
 /* ------------------------------------------------------------------ *
  * ① 名册与回落

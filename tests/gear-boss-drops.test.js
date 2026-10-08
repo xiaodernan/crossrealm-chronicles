@@ -37,7 +37,7 @@ const countRng = () => {
   return c;
 };
 const fakeScene = () => ({ add() {}, remove() {} });
-const fakeLoot = (rng) => new LootSystem(fakeScene(), { addSouls() {} }, null, { rng });
+const fakeLoot = (rng) => new LootSystem(fakeScene(), { addSouls() {} }, { rng });
 
 /**
  * 固定件的可辨认样本：把 `shadow-warden` 的底座临时换成一件**不在兜底池里**的（`dual-sigil`），

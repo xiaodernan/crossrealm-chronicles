@@ -145,7 +145,7 @@ describe('rollGear(rng, zoneId)：抽出来的是那一片的东西', () => {
 
 describe('掉落层与敌人层：区域 id 一路带到抽样', () => {
   it('`spawnKill` 交出的装备属于死亡位置所在区域的池', () => {
-    const loot = new LootSystem(fakeScene(), { addSouls() {} }, null, { rng: seqRng([0.99, 0.4, 0.6, 0.2]) });
+    const loot = new LootSystem(fakeScene(), { addSouls() {} }, { rng: seqRng([0.99, 0.4, 0.6, 0.2]) });
     const created = loot.spawnKill({ x: 0, y: 0, z: 0 }, 25, 'boss', 'void');
     const gear = created.find((d) => d.gear);
     expect(gear, 'boss 那一档必掉').toBeTruthy();
@@ -153,7 +153,7 @@ describe('掉落层与敌人层：区域 id 一路带到抽样', () => {
   });
 
   it('没给区域 id 时（老调用形状）走兜底池，不抛', () => {
-    const loot = new LootSystem(fakeScene(), { addSouls() {} }, null, { rng: seqRng([0.99, 0.2, 0.3, 0.3]) });
+    const loot = new LootSystem(fakeScene(), { addSouls() {} }, { rng: seqRng([0.99, 0.2, 0.3, 0.3]) });
     const gear = loot.spawnKill({ x: 0, y: 0, z: 0 }, 25, 'boss').find((d) => d.gear);
     expect(poolIds(GEAR_POOL_DEFAULT)).toContain(gear.gear.base);
   });

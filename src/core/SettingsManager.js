@@ -81,6 +81,17 @@ const DEFAULTS = {
    */
   padTuning: padTuning(),
   /**
+   * 字幕开关（W-D6 切片8）：把"只靠声音传递的信息"写到屏幕上。
+   *
+   * **出厂关** —— 与色觉档 / 镜头灵敏度同一条纪律：机制片不夹带视觉变更。
+   * 而且字幕条要占屏幕下方一块地方，默认开着等于替所有玩家做决定。
+   * 面板里它紧挨着色觉模式（同在"辅助功能"那一语义区），需要的人一进设置就看得见。
+   *
+   * 只认 `true`：存储是玩家可写的，一个 `"1"` / `1` 都该当成关（与 `vibration` 同口径）。
+   * 关掉时**不影响声音** —— `game-cue` 照旧派发，只是没有人把它画出来。
+   */
+  captions: false,
+  /**
    * 手柄震动（切片17）：只挡"要不要给马达下令"这一格，相机抖不抖仍然照旧 ——
    * 打击反馈有两路输出，玩家只想关其中一路（例如有人在夜里玩）。
    */
@@ -237,6 +248,10 @@ export class SettingsManager {
     // 生效时机：下一次 `addCameraInput` 即生效 —— 它是每帧乘进去的，没有"场上已有的角度"要重算。
     // 脏值在 `normalizeLookSensitivity` 里夹回量程，不抛（存储是玩家可写的）。
     applyLookSensitivity(game.player, normalizeLookSensitivity(this.get('lookSensitivity')));
+    // 字幕开关（W-D6 切片8）：写入口只有这一处。生效时机：下一次 game-cue 即生效
+    // （没有"场上已有的字幕"要重算，到期自然退场）。放在色觉档之后纯属分组方便，
+    // 两者互不相干。
+    game.captions?.setEnabled(this.get('captions') === true);
     // HUD 状态条按当前色觉档重写一次（W-D6 切片4）：写颜色的地方只有 ui/barTheme.js 一处，
     // HUD 只负责转发。放在 setColorVision 之后 —— 先落档位再取色，顺序反了会涂上一档的颜色。
     game.hud?.refreshBarColors?.();

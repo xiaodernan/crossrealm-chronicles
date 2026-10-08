@@ -331,6 +331,10 @@ export const GAME_EVENTS = Object.freeze({
     desc: '请求播一个音效：sfx 必须是 AudioManager 导出的 SFX_NAMES 里那一格，名字不对由 playSfx 当场抛错（B71 之前是查不到就静默不播）。新增音效名要同时补 AudioManager 上的方法与那张表',
     payload: '{ sfx }',
   },
+  'game-cue': {
+    desc: '一条字幕线索发生了（W-D6 切片8）。cue 是 content/captions.js 里 CUE_CATALOG 的线索 id，data 是这条线索带的数（字幕插值与音效参数都从它取，缺省空表）。派发咽喉是 engine/cues.js 的 emitCue，表外 id 当场抛',
+    payload: '{ cue, data }',
+  },
   'camera-mode-changed': {
     desc: '第一/第三人称切换',
     payload: '{ mode }',

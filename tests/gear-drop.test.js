@@ -175,7 +175,7 @@ const fakeScene = () => {
 
 describe('LootSystem：该不掉由表说，掉哪一件由注入的 rng 说', () => {
   it('Boss 那一档必掉两件：灵魂 + 一件装备，而装备的 mesh 颜色就是稀有度那一格', () => {
-    const loot = new LootSystem(fakeScene(), { addSouls() {} }, null, { rng: seqRng([0.99, 0.1, 0.5, 0.5]) });
+    const loot = new LootSystem(fakeScene(), { addSouls() {} }, { rng: seqRng([0.99, 0.1, 0.5, 0.5]) });
     loot.spawnKill({ x: 0, y: 0, z: 0 }, 500, 'boss');
     expect(loot.drops).toHaveLength(2);
     const gear = loot.drops.find((d) => d.gear);
@@ -184,13 +184,13 @@ describe('LootSystem：该不掉由表说，掉哪一件由注入的 rng 说', (
   });
 
   it('训练木人显式不掉：一次击杀只交出灵魂', () => {
-    const loot = new LootSystem(fakeScene(), { addSouls() {} }, null, { rng: seqRng([0]) });
+    const loot = new LootSystem(fakeScene(), { addSouls() {} }, { rng: seqRng([0]) });
     loot.spawnKill({ x: 0, y: 0, z: 0 }, 25, 'dummy');
     expect(loot.drops.map((d) => d.gear)).toEqual([null]);
   });
 
   it('掷骰用的是**同一只** rng：注入序列就能复现出"这一只掉了哪一件"', () => {
-    const mk = () => new LootSystem(fakeScene(), { addSouls() {} }, null, { rng: seqRng([0.9, 0.7, 0.2, 0.4]) });
+    const mk = () => new LootSystem(fakeScene(), { addSouls() {} }, { rng: seqRng([0.9, 0.7, 0.2, 0.4]) });
     const a = mk(), b = mk();
     a.spawnKill({ x: 0, y: 0, z: 0 }, 25, 'normal');
     b.spawnKill({ x: 0, y: 0, z: 0 }, 25, 'normal');
@@ -200,7 +200,7 @@ describe('LootSystem：该不掉由表说，掉哪一件由注入的 rng 说', (
   it('捡起装备那一帧走 onGear，不碰灵魂账；捡起灵魂那一帧照旧 addSouls', () => {
     const seen = [];
     const souls = [];
-    const loot = new LootSystem(fakeScene(), { addSouls: (n) => souls.push(n) }, null,
+    const loot = new LootSystem(fakeScene(), { addSouls: (n) => souls.push(n) },
       { rng: seqRng([0.99, 0, 0, 0]), onGear: (g) => seen.push(g) });
     loot.spawnKill({ x: 0, y: 0, z: 0 }, 25, 'boss');
     const player = { x: 0, y: 0, z: 0 };
@@ -212,7 +212,7 @@ describe('LootSystem：该不掉由表说，掉哪一件由注入的 rng 说', (
 
   it('不认识的装备不捡走（onGear 收到 null 也算事件，得先拦在生成那一头）', () => {
     const seen = [];
-    const loot = new LootSystem(fakeScene(), { addSouls() {} }, null, { onGear: (g) => seen.push(g) });
+    const loot = new LootSystem(fakeScene(), { addSouls() {} }, { onGear: (g) => seen.push(g) });
     loot.spawnGear({ x: 0, y: 0, z: 0 }, charm('ghost-blade', 'common'));
     expect(seen).toEqual([]);
     // 坏的那一件在生成时就没进去：颜色查不到稀有度会当场抛，而不是等到玩家去捡
@@ -223,7 +223,7 @@ describe('LootSystem：该不掉由表说，掉哪一件由注入的 rng 说', (
     // 文本门禁查不住这件事（手抄一枚青色之后，`GEAR_RARITY_DISPLAY` 还在 import 里）——
     // 只有逐档真造一次掉落物才量得出（变异探针 M11 就是从那道缝里绿过去的）
     for (const rarity of GEAR_RARITY) {
-      const loot = new LootSystem(fakeScene(), { addSouls() {} }, null, { rng: () => 0 });
+      const loot = new LootSystem(fakeScene(), { addSouls() {} }, { rng: () => 0 });
       const drop = loot.spawnGear({ x: 0, y: 0, z: 0 }, charm('ash-charm', rarity.id, []));
       expect(drop, `${rarity.id} 那一档没生成掉落物`).toBeTruthy();
       expect(drop.mesh.material.color.getHex(), `${rarity.id} 的颜色不是表上那一枚`)
@@ -232,7 +232,7 @@ describe('LootSystem：该不掉由表说，掉哪一件由注入的 rng 说', (
   });
 
   it('没掷中掉率时那一格还是纯灵魂、颜色还是改前那枚青色（`normal` 档 rng 给 0.9 > 0.15）', () => {
-    const loot = new LootSystem(fakeScene(), { addSouls() {} }, null, { rng: () => 0.9 });
+    const loot = new LootSystem(fakeScene(), { addSouls() {} }, { rng: () => 0.9 });
     loot.spawnKill({ x: 0, y: 0, z: 0 }, 15, 'normal');
     expect(loot.drops).toHaveLength(1);
     expect(loot.drops[0].gear).toBe(null);
@@ -240,7 +240,7 @@ describe('LootSystem：该不掉由表说，掉哪一件由注入的 rng 说', (
   });
 
   it('到期与拾取都只摘自己那一格：一帧里掉两件，走开就都在', () => {
-    const loot = new LootSystem(fakeScene(), { addSouls() {} }, null, { rng: seqRng([0.99, 0, 0, 0]) });
+    const loot = new LootSystem(fakeScene(), { addSouls() {} }, { rng: seqRng([0.99, 0, 0, 0]) });
     loot.spawnKill({ x: 0, y: 0, z: 0 }, 25, 'boss');
     loot.update(0.016, { x: 100, y: 0, z: 100 });     // 玩家不在旁边
     expect(loot.drops).toHaveLength(2);

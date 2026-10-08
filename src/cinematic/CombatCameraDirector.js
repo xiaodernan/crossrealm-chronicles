@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { addShake } from '../engine/Shake.js';
+import { emitCue } from '../engine/cues.js';
 import { EXECUTION_CAMERA } from '../content/tuning.js';
 import { setDofEnabled, updateDofParams } from '../engine/DofPass.js';
 
@@ -221,7 +222,8 @@ export class CombatCameraDirector {
     this.vignette.classList.remove('hidden');
     addShake(preset.shake);
     this.game.audio?.heavyHit?.();
-    if (kind === 'bossKill' || kind === 'execution') this.game.audio?.executionSting?.();
+    if (kind === 'bossKill' || kind === 'execution') emitCue('execution');
+    // W-D6 切片8：处决只响不写，是听障玩家读不到的那一格 —— 改派字幕线索，声音与字幕同一个出口
     this.game.executionFx?.burst?.(this.target, kind);
   }
 

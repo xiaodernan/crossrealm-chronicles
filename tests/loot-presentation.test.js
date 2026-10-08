@@ -28,6 +28,8 @@ import * as THREE from 'three';
 import { LootSystem, DROP_RING_BY_RARITY, DROP_RING_SOUL } from '../src/game/LootSystem.js';
 import { GEAR_RARITY, GEAR_RARITY_DISPLAY, pickupChoice, rarityRank } from '../src/content/gear.js';
 import { SFX_NAMES } from '../src/audio/AudioManager.js';
+import { on, offAll } from '../src/engine/EventBus.js';
+import { installWindowShim } from './helpers/enemyHarness.js';
 import { freshArm, run, notesOn, disarmAudio } from './helpers/fakeAudio.js';
 
 const FRAME = 1 / 60;
@@ -35,10 +37,14 @@ const 装备 = (base, rarity, affixes = []) => ({ base, rarity, affixes });
 const 假场景 = () => ({ add() {}, remove() {} });
 const 远 = () => ({ x: 999, y: 0, z: 999 });
 const 空槽 = () => ({ charm: null, sigil: null });
-const mkLoot = (stats = { addSouls() {} }, audio = null) =>
-  new LootSystem(假场景(), stats, audio, { rng: () => 0 });
+const CUE_TAG = 'test/loot-presentation';
+const mkLoot = (stats = { addSouls() {} }) =>
+  new LootSystem(假场景(), stats, { rng: () => 0 });
 
-afterEach(() => disarmAudio());
+afterEach(() => {
+  offAll(CUE_TAG);
+  disarmAudio();
+});
 
 /* ------------------------------------------------------------------ *
  * 一、地面环
@@ -146,7 +152,7 @@ describe('② 高亮光柱：与 pickupChoice 是同一个答案', () => {
   });
 
   it('魂没有柱：光柱是"值得捡"的装备语义，不是所有掉落物都有', () => {
-    const loot = new LootSystem(假场景(), { addSouls() {} }, null, { rng: () => 0.99 });
+    const loot = new LootSystem(假场景(), { addSouls() {} }, { rng: () => 0.99 });
     loot.spawnKill({ x: 0, y: 0, z: 0 }, 5, 'dummy');
     expect(loot.drops).toHaveLength(1);
     expect(loot.drops[0].beam.visible).toBe(false);
@@ -194,23 +200,35 @@ describe('③ 池化 hygiene：上一格的环/柱状态不许穿到下一件', 
  * 四、落地音效
  * ------------------------------------------------------------------ */
 
-describe('④ 落地音效：档位越高越亮，魂落地不响', () => {
-  it('一件装备落地问一次 gearDrop，参数是档位序；魂与"不掉装备的击杀"都不响', () => {
-    const 响 = [];
-    const loot = mkLoot({ addSouls() {} }, { gearDrop: (...a) => 响.push(a) });
+describe('④ 落地音效：档位越高越亮，魂落地不响（W-D6 切片8 起改走 game-cue）', () => {
+  /** 装一次 window shim，把这一场所有 game-cue 收下来 —— 掉落层不再直接碰 audio */
+  const 收线索 = () => {
+    installWindowShim();
+    const 收到 = [];
+    on('game-cue', (e) => 收到.push(e.detail), CUE_TAG);
+    return 收到;
+  };
+
+  it('一件装备落地派一条 gearDrop 线索，负载带档位序与字样；魂不派', () => {
+    const 收到 = 收线索();
+    const loot = mkLoot({ addSouls() {} });
     loot.spawnGear({ x: 0, y: 0, z: 0 }, 装备('ash-charm', 'epic'));
-    expect(响).toEqual([[rarityRank('epic')]]);
+    expect(收到.map((d) => d.cue), '掉落层派的线索不是 gearDrop').toEqual(['gearDrop']);
+    expect(收到[0].data.rank, '音效那一格要的档位序不在负载里').toBe(rarityRank('epic'));
+    expect(收到[0].data.rarity, '字幕要写的字样不在负载里 —— 那一格就写不出"掉落：稀有"')
+      .toBe(GEAR_RARITY_DISPLAY.epic.label);
     loot._spawn({ x: 1, y: 0, z: 0 }, { souls: 5, gear: null });
-    expect(响, '魂落地不该响（捡起时那一声才是魂的）').toHaveLength(1);
+    expect(收到, '魂落地不该派线索（捡起时那一条才是魂的）').toHaveLength(1);
   });
 
-  it('Boss 一次交三格（魂 + 固定件 + 池件）时只有装备那两格响', () => {
-    const 响 = [];
-    const loot = mkLoot({ addSouls() {} }, { gearDrop: (...a) => 响.push(a) });
+  it('Boss 一次交三格（魂 + 固定件 + 池件）时只有装备那两格派线索', () => {
+    const 收到 = 收线索();
+    const loot = mkLoot({ addSouls() {} });
     loot.spawnKill({ x: 0, y: 0, z: 0 }, 500, 'boss', 'hub', 'shadow-warden');
     expect(loot.drops).toHaveLength(3);
-    expect(响, '两件装备各响一声，魂不响').toHaveLength(2);
-    expect(响.map(([r]) => r).sort(), '两声各带自己的档位序').toEqual([rarityRank('common'), rarityRank('rare')].sort());
+    expect(收到.map((d) => d.cue), '两件装备各派一条，魂不派').toEqual(['gearDrop', 'gearDrop']);
+    expect(收到.map((d) => d.data.rank).sort(), '两条各带自己的档位序')
+      .toEqual([rarityRank('common'), rarityRank('rare')].sort());
   });
 
   it('AudioManager.gearDrop：两声、档位抬频、越界收档（99 与 3 同频、-5/NaN 与 0 同频）、不进 SFX_NAMES', () => {
@@ -267,10 +285,23 @@ describe('⑤ 静态门禁：判据与消费口各只有一处', () => {
     expect(names, 'LootSystem 拿了 pickupChoice —— 判据入口被抄到了掉落层').not.toContain('pickupChoice');
   });
 
-  it('落地音效的接线在掉落层：gearDrop 的调用点只有 LootSystem，名册里没有它', () => {
-    // \b 是硬约束：`gearDropChance`（注册表里的掉率键）不是这个音效名，别把好心算成命中
+  it('落地音效的真源只有一份：方法在 AudioManager、名册在 captions、派发在掉落层', () => {
+    // \b 是硬约束：`gearDropChance`（注册表里的掉率键）不是这个音效名，别把好心算成命中。
+    // W-D6 切片8 起多出 content/captions.js（名册里 sound: 'gearDrop' 那一格）——
+    // 那不是第二个实现，而是"这个线索发什么声音"的唯一真源；派发点仍然只有掉落层一处。
     const files = [...new Set(hits(/\bgearDrop\b/).map((h) => h.split(':')[0]))].sort();
-    expect(files, `gearDrop 出现在 ${files.join(' / ')}`).toEqual(['audio/AudioManager.js', 'game/LootSystem.js']);
-    expect(SFX_NAMES).not.toContain('gearDrop');
+    expect(files, `gearDrop 出现在 ${files.join(' / ')}`)
+      .toEqual(['audio/AudioManager.js', 'content/captions.js', 'engine/cues.js', 'game/LootSystem.js']);
+    expect(SFX_NAMES, 'gearDrop 不许进 SFX_NAMES：那张表只管 game-audio-sfx 的远程请求面')
+      .not.toContain('gearDrop');
+    // 只数代码行：引擎文件头的示例注释里也写着 emitCue('gearDrop'…)，那不是派发点。
+    // 口径与 tests/save-field-parity.test.js 的 codeLines 一致（史料注释不算读者）。
+    const 派发 = hits(/emitCue\(\s*'gearDrop'/).filter((h) => {
+      const [rel, n] = h.split(':');
+      const line = readFileSync(join(SRC, rel), 'utf8').split(/\r?\n/)[Number(n) - 1] ?? '';
+      return !/^\s*(\/\/|\*|\/\*)/.test(line);
+    });
+    expect(派发, `gearDrop 的派发点不止一处：${派发.join(' / ')}`).toHaveLength(1);
+    expect(派发[0].startsWith('game/LootSystem.js'), '派发点不在掉落层').toBe(true);
   });
 });

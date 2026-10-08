@@ -9,6 +9,7 @@ import { createPlayerFSM } from './PlayerFSM.js';
 import { shake } from '../engine/Shake.js';
 import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE } from '../engine/CameraRig.js';
 import { LOOK_SENSITIVITY, DEFAULT_LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
+import { emitCue } from '../engine/cues.js';
 import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND, LOCK_ON_CAMERA, PLAYER_KNOCK } from '../content/tuning.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
@@ -934,7 +935,8 @@ export class PlayerController {
 
       this.game.collectibles.open(chest);
 
-      this.game.audio.pickup();
+      // W-D6 切片8：开箱也走字幕线索 —— 声音由 AudioManager 听 game-cue 播，字幕由 Captions 听同一条画
+      emitCue('pickup');
 
       prompt.classList.add('hidden');
 

@@ -1,6 +1,7 @@
 /** Web Audio — 区域 BGM + Boss 专属层 + 战斗节奏层 + 音效 */
 import { scheduler } from '../engine/Scheduler.js';
 import { isDungeonBossId } from '../content/bossRoster.js';
+import { cueOf } from '../content/captions.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -80,6 +81,11 @@ export class AudioManager {
     this._melodyStep = 0;
     this._combatStep = 0;
     this._noiseBuffer = null;
+    // 字幕线索（W-D6 切片8）：听 game-cue，按名册的 sound 那一格播声音。
+    // 挂在构造器而不是 _initOnGesture() 的解锁回调里（realm-bleed 挂在那）：
+    // 线索是「游戏世界发生了一件事」，它与喇叭解没解锁无关 —— 解锁前到的线索照样要记下，
+    // 而解锁前 playTone 自己会安静返回（this.ctx 还是 null），两边都不会炸。
+    audioOn('game-cue', (e) => this._playCue(e.detail));
     this._initOnGesture();
   }
 
@@ -376,6 +382,32 @@ export class AudioManager {
       throw new Error(`未知的音效名 "${name}"：SFX_NAMES 里没有这一格（现有 ${SFX_NAMES.length} 条）。新增音效要同时补 AudioManager 上的方法与这张表。`);
     }
     this[name]();
+  }
+
+  /**
+   * 字幕线索 → 声音（W-D6 切片8）。
+   *
+   * 与上面那个 playSfx 是**两条并列的咽喉**，管的面不同：playSfx 管「用名字远程点一个音」，
+   * 这里管「世界上发生了一件有声响的事」。调用点只 emitCue(...)，具体调本类哪个方法，
+   * 由 content/captions.js 里 CUE_CATALOG 的 sound 那一格说了算 —— 那一格是全仓唯一真源，
+   * 所以「这个线索发什么声音」不存在第二份抄写。
+   *
+   * 两道校验都不静默：
+   * ① 表外线索 id 由 cueOf() 当场抛（B71 口径：抄错名字的症状必须是启动就炸）；
+   * ② 名册点得出名字、本类上却没有那个方法，同样当场抛 —— 那是名册与实现之间漂了，
+   *    跳过它就等于把 B71 刚关上的门又打开一半（症状还是「那一下没声音」）。
+   */
+  _playCue(detail) {
+    const id = detail?.cue;
+    const cue = cueOf(id);
+    if (!cue.sound) return;
+    const fn = this[cue.sound];
+    if (typeof fn !== 'function') {
+      throw new Error(`字幕线索 "${id}" 的 sound 指向 "${cue.sound}"，但 AudioManager 上没有这个方法`);
+    }
+    // 只有个别音效要参数（gearDrop 按稀有度序定音高），那一格从 cue.soundArg 点名去 data 里取
+    if (cue.soundArg) fn.call(this, detail?.data?.[cue.soundArg]);
+    else fn.call(this);
   }
 
   swingLight() { this._playNoise(0.06, 0.07, 1200); this.playTone(180, 0.04, 'sine', 0.04); }

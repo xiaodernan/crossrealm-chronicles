@@ -210,6 +210,12 @@ export function gearRarityDisplay(rarityId, mode = DEFAULT_COLOR_MODE) {
   const id = raritySemanticId(rarityId);
   return { label: semanticLabel(id), tint: semanticColor(id, mode) };
 }
+/**
+ * 只要字样、不要颜色。字幕（W-D6 切片8）只需要那个词，让它去调 `gearRarityDisplay` 会把
+ * 掉落层变成一个"带档位的取色入口"，而"取色入口只有两处"那条门禁（tests/gear-drop.test.js）
+ * 数的是取色、不是取字。取字走这里，取色仍只有 ColorVision 一个出口。
+ */
+export const gearRarityLabel = (rarityId) => gearRarityDisplay(rarityId).label;
 
 /** 出厂档（`default`）下的字样与颜色快照：注册表与零变更对账都读这一份 */
 export const GEAR_RARITY_DISPLAY = Object.fromEntries(

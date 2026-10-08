@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { dropChance, gearIsUpgrade, isGearInstance, rarityRank, rollBossGear, rollGear } from '../content/gear.js';
+import { dropChance, gearIsUpgrade, gearRarityLabel, isGearInstance, rarityRank, rollBossGear, rollGear } from '../content/gear.js';
+import { emitCue } from '../engine/cues.js';
 import { getColorVisionMode, rarityTint } from './ColorVision.js';
 
 /** 地上那一件的形状全系统共用一份：档位只改颜色，不改几何 */
@@ -55,12 +56,11 @@ export const DROP_RING_SOUL = Object.freeze({ scale: 0.85, opacity: 0.28 });
  * （八面体 / 环 / 柱），每格三份材质 —— 与同时在场峰值挂钩，不与累计掉落数挂钩。
  */
 export class LootSystem {
-  constructor(scene, stats, audio, { rng = Math.random, onGear = null } = {}) {
+  constructor(scene, stats, { rng = Math.random, onGear = null } = {}) {
     this.scene = scene;
     this.stats = stats;
-    this.audio = audio;
-    this.rng = rng;
     this.onGear = onGear;
+    this.rng = rng;
     this.drops = [];
     /** 捡走或到期后摘出场景存这里：不再每件新建一份几何与材质，也不留"remove 却不归还"的孤儿 */
     this._pool = [];
@@ -158,8 +158,10 @@ export class LootSystem {
     beam.visible = gear ? gearIsUpgrade(this.stats?.gear ?? null, gear) : false;
     this.drops.push(d);
     this._lay(d, pos.y);
-    // 装备落地的一声，档位越高越亮（魂不响 —— 捡起时那一声才是魂的）
-    if (gear) this.audio?.gearDrop(rarityRank(gear.rarity));
+    // 装备落地的一声，档位越高越亮（魂不响 —— 捡起时那一声才是魂的）。
+    // W-D6 切片8：不再直接摸 audio，改成派一条字幕线索 —— 声音由 AudioManager 听 game-cue 播，
+    // 字幕由 ui/Captions 听同一条画。掉落层从此只负责"发生了什么"，不负责"怎么响"。
+    if (gear) emitCue('gearDrop', { rank: rarityRank(gear.rarity), rarity: gearRarityLabel(gear.rarity) });
     return d;
   }
 
@@ -230,7 +232,7 @@ export class LootSystem {
       if (dist < pickupRadius) {
         if (d.gear) this.onGear?.(d.gear, d.souls);
         else this.stats.addSouls(d.souls);
-        this.audio?.pickup();
+        emitCue('pickup');   // 同上：拾取也走线索（字幕 + 声音同一个出口）
         this._despawn(i);
         continue;
       }

@@ -101,6 +101,14 @@ export class SettingsPanel {
       s.set('shadows', sh.checked);
       s.applyToGame(this.game);
     });
+    // 字幕开关（W-D6 切片8）：与阴影同一副骨架（checkbox + change + set + applyToGame）。
+    // 只认 `checked` 的布尔，不走 `bind()` 的 `Number` —— 那不是数值滑杆，
+    // 而存储里一个 `"0"` 会被 Number 成 0（看着像关，其实是真的关，只是路径不同）。
+    const cap = document.getElementById('set-captions');
+    cap?.addEventListener('change', () => {
+      s.set('captions', cap.checked === true);
+      s.applyToGame(this.game);
+    });
     // 阴影精度档（W-C3 切片2）：三档下拉。选项**从名册现推**而不是在 HTML 里抄一份 ——
     // 抄了就会漏：名册加一档，面板上没有那一格，玩家永远选不到，也没有任何报错。
     const sq = document.getElementById('set-shadow-quality');
@@ -397,6 +405,10 @@ export class SettingsPanel {
     for (const key of Object.keys(PAD_TUNING)) set(padKnobId(key), t[key]);
     const sh = document.getElementById('set-shadows');
     if (sh) sh.checked = d.shadows;
+    // 回显的也是"真的勾上才算开"：与 `applyToGame` 里 `=== true` 同一个判据（同一个取值口）。
+    // 若这里改成看 `d.captions === true` 之外的形状，就会出现"框没勾、字幕却在弹"（B47 那一族）。
+    const cap = document.getElementById('set-captions');
+    if (cap) cap.checked = this.game.settings.get('captions') === true;
     // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 `padTuning` 的回显同一纪律）
     set('set-shadow-quality', normalizeShadowQuality(d.shadowQuality));
     set('set-msaa', normalizeMsaaSamples(d.msaaSamples));
