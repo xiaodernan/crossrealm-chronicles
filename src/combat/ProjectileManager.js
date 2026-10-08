@@ -57,7 +57,8 @@ export class ProjectileManager {
         (playerPos.x - p.mesh.position.x) ** 2 + (playerPos.z - p.mesh.position.z) ** 2
       );
       if (dist < 1.2 && playerRef && !playerRef.combat.isInvulnerable()) {
-        playerRef.combat.takeDamage(p.damage);
+        // 顶开方向 = 弹体→玩家，与来时的弹道同向：挨的这一下有"从哪飞来"的感觉
+        playerRef.combat.takeDamage(p.damage, null, null, { from: p.mesh.position });
         this._recycle(i);
         continue;
       }

@@ -209,44 +209,47 @@ describe('裂隙：伤害不在这一帧，在那块地上', () => {
     }
   });
 
-  it('推开玩家这件事只走外部冲量账：敌人侧不许直接给谁的速度赋值', () => {
+  it('推开玩家这件事只走外部冲量账：不许写 `velocity`，咽喉的顶开也必须经 `applyKnockback`', () => {
+    /* 切片7 把推开从 Enemy.js 挪进了 `CombatController.takeDamage`（受击顶开统一在咽喉记账），
+     * 所以"经账本出门"这一条改在咽喉上钉：两条合起来 = 位移从敌人出手到玩家账本，
+     * 全程不许有第二本账。 */
+    const 咽喉源码 = readFileSync(join(ROOT, 'src', 'combat', 'CombatController.js'), 'utf8');
+    expect(/this\.player\.applyKnockback\(/.test(咽喉源码),
+      '受击顶开必须经 `applyKnockback` 出门：直接写进 `velocity` 的那一笔，下一帧就被玩家状态机整条改写回来').toBe(true);
     const 源码 = readFileSync(join(ROOT, 'src', 'combat', 'Enemy.js'), 'utf8');
-    expect(/ref\.applyKnockback\(/.test(源码),
-      '敌人侧的推开必须经 `applyKnockback` 出门：直接写进 `velocity` 的那一笔，下一帧就被玩家状态机整条改写回来').toBe(true);
     expect(/\.velocity\s*=[^=]/.test(源码),
       'Enemy.js 里出现了给 `.velocity` 赋值的写法 —— 位移一律走 `setWish` 与冲量账这两本账').toBe(false);
   });
 });
 
 describe('盾击：砍到了才推，推开记在玩家的外力账上', () => {
-  it('这一刀之外多一步位移：掉一次血、记一笔冲量，方向是"离敌人而去"', () => {
+  it('这一刀之外多一步位移：掉一次血、把"谁出的手、推多远"递给咽喉', () => {
+    /* 方向的计算与入账都在咽喉（`CombatController.takeDamage`），所以这里量的是**交接面**：
+     * `from` 必须就是出手者自己的站位、`knock` 必须就是表里那一格 —— 方向对不对、
+     * 覆盖语义活不活，归 `player-hit-knockback.test.js` 用真咽喉见证。 */
     const { m, player, ref, e } = soloDuel('knight', 'bash', 1.8);
     expect(until(m, 6, DT, player, ref, () => ref.hits.length > 0)).toBe(true);
     expect(ref.hits).toEqual([Math.round(e.damage * ENEMY_MOVES.bash.damage)]);
-    expect(ref.tugs).toHaveLength(1);
-    const tug = ref.tugs[0];
-    expect(tug.speed).toBe(ENEMY_MOVES.bash.knock);
-    expect(Math.hypot(tug.dx, tug.dz)).toBeCloseTo(1, 6);     // 记的是单位方向 × 初速
-    const ax = player.x - e.position.x;                       // 敌人指向玩家
-    const az = player.z - e.position.z;
-    expect(tug.dx * ax + tug.dz * az, '推开方向要把玩家推离敌人，不是拽进来')
-      .toBeGreaterThan(0);
+    expect(ref.impacts).toHaveLength(1);
+    const impact = ref.impacts[0];
+    expect(impact.from, '递的 `from` 不是出手者自己的站位：顶开方向就没有真源').toBe(e.position);
+    expect(impact.knock).toBe(ENEMY_MOVES.bash.knock);
   });
 
-  it('无敌帧那一下不打人，也不附赠位移 —— 闪避成功了不该反被推飞', () => {
+  it('无敌帧那一下不打人，也不递顶开 —— 闪避成功了不该反被推飞', () => {
     const { m, player, ref } = soloDuel('knight', 'bash', 1.8);
     ref.invulnerable = true;
     run(m, 6, DT, player, ref);
     expect(ref.hits).toHaveLength(0);
-    expect(ref.tugs, '无敌帧挡的是这一整手，不只是那行数字').toHaveLength(0);
+    expect(ref.impacts, '无敌帧挡的是这一整手，不只是那行数字').toHaveLength(0);
   });
 
-  it('跳起来躲过低段：血不掉，位移也不记（band 与 knock 共用同一道闸）', () => {
+  it('跳起来躲过低段：血不掉，顶开也不递（band 与 knock 共用同一道闸）', () => {
     const { m, player, ref } = soloDuel('knight', 'bash', 1.8);
     ref.y = 2.0;                                              // 玩家受击盒的离地基准（跳起来）
     run(m, 6, DT, player, ref);
     expect(ref.hits, '低段招该被跳掉：这一刀的打击带覆盖不到 2 米高处').toHaveLength(0);
-    expect(ref.tugs, '打空的一刀不该附赠位移，否则跳跃被惩罚').toHaveLength(0);
+    expect(ref.impacts, '打空的一刀不该附赠位移，否则跳跃被惩罚').toHaveLength(0);
   });
 
   it('打击带是低段：站着必中、跳起来全空 —— 与高段重劈在这一格分家', () => {

@@ -466,12 +466,10 @@ export class Enemy {
     // 竖直方向也要相交：横扫低段该被跳掉、重劈高段跳不掉、玩家站高台时近战全部落空
     const part = pickPart(ref.combat, this.hurtBaseY(), move.band);
     if (!part) return false;
-    ref.combat.takeDamage(damage, null, part);
-    /* 盾击那一类附带的推开：走玩家的**外部冲量账**，不写 `velocity` —— 写进去的速度
-     * 下一帧就被玩家状态机整条改写回来，"被推开"退化成"按住方向键"（W-A6 切片6）。
-     * 只在"这一刀真的砍到了"之后记这笔：无敌帧与被跳掉的低段都不该附赠位移，
-     * 否则玩家闪避成功了却被打飞，等于惩罚了正确的那一下。 */
-    if (move.knock) ref.applyKnockback(ctx.target.x - this.position.x, ctx.target.z - this.position.z, move.knock);
+    /* 推开这一类附带位移（刀背/盾击的 `move.knock`）经 `impact` 一并交给咽喉
+     * （W-A6 切片7）：记账纪律写在 `CombatController.takeDamage` —— "真的砍到了才顶开、
+     * 无敌帧与跳掉的低段不附赠位移"那一段。这里只负责把"谁出的手、招要推多远"递过去。 */
+    ref.combat.takeDamage(damage, null, part, { from: this.position, knock: move.knock });
     return true;
   }
 

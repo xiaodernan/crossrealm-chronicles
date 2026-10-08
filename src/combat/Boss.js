@@ -376,7 +376,7 @@ export class Boss extends Enemy {
         this.state = 'strike';
         this.stateTimer = 0;
         if (dist < this.attackRange + 1 && playerRef && !playerRef.combat.isInvulnerable()) {
-          playerRef.combat.takeDamage(this.damage);
+          playerRef.combat.takeDamage(this.damage, null, null, { from: this.position });
         }
         this.clearTelegraph();
       }

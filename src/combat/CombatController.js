@@ -3,7 +3,7 @@ import { MOVES, LOCKED_CONE } from './MoveTable.js';
 import { hitDirection, hitKindOf, hitSuffix, isBehind, isGuarded, resolveHit } from './Resolution.js';
 import { createHurtbox, pickPart } from './Hurtbox.js';
 import { keyText } from '../content/keyHints.js';
-import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN, AIM_ASSIST } from '../content/tuning.js';
+import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_KNOCK, PLAYER_MOVES, STAMINA_REGEN, AIM_ASSIST } from '../content/tuning.js';
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
 import { anyDown, codeFor, codesFor, mouseFor } from '../content/keybinds.js';
@@ -223,8 +223,14 @@ export class CombatController {
    * 就是四份抄本，漏一条的症状是"某个来源在严酷档里不疼"（不报错，只是不一致）。
    * 乘在**结算之前**：防御 / 减伤 / 暴击那条管线看到的是缩放后的基数，
    * 于是"严酷档这一刀更疼"与"举盾仍按比例减伤"两件事同时成立。
+   *
+   * `impact`（W-A6 切片7）是"这一下从哪来、顶多远"：`{ from, knock? }`。传了 `from` 就走
+   * 受击顶开 —— 沿"出手者→玩家"在玩家的**外部冲量账**上记一笔（见 `PLAYER_KNOCK`）。
+   * 招自带 `knock` 的按招的数，**替掉**通用档而不是相加：一记至多一笔顶开，
+   * 否则"盾击 + 通用"会把同一次受击的位移翻一倍。**场地危险区刻意不传** ——
+   * 圈不是"这一下"（没有出手者），有拉力的井自带持续的力；四腿里只有三条接这条线是设计。
    */
-  takeDamage(amount, element = null, part = null) {
+  takeDamage(amount, element = null, part = null, impact = null) {
     if (this.isInvulnerable()) return;
     const hit = resolveHit({
       base: amount * difficultyMultiplier('damageTaken'), target: this, element, part, side: 'enemy', rng: this.rng,
@@ -238,6 +244,21 @@ export class CombatController {
     window.dispatchEvent(new CustomEvent('player-damaged', { detail: { hp: this.hp, maxHp: this.maxHp } }));
     // 挨一下晃多少按"这一刀占我多少血"给：小兵蹭皮不该和 Boss 砸脸同样天旋地转
     addShake(Math.min(0.2, 0.03 + (hit.damage / this.maxHp) * 0.7) * (hit.crit ? HIT.critScale : 1));
+    /* 受击顶开：走玩家的**外部冲量账**，不写 `velocity` —— 写进去的速度下一帧就被玩家状态机
+     * 整条改写回来，"被推开"退化成"按住方向键"（W-A6 切片6）。记账那一刻已经在"这一刀真的
+     * 砍到了"之后：无敌帧被上方的闸门拦掉，够不着 / 被跳掉的招在调用方各自 return 过了。
+     * 不写 `hit.damage > 0`：结算管线本身有 1 伤保底（Resolution 的 `Math.max(1, …)`），
+     * 那一格永远为真 —— 挡不住任何输入的红线是注释债，不是守卫。方向 = 玩家 − 出手者。 */
+    if (impact?.from) {
+      const speed = impact.knock > 0
+        ? impact.knock
+        : Math.min(PLAYER_KNOCK.onHit.cap, PLAYER_KNOCK.onHit.base + (hit.damage / this.maxHp) * PLAYER_KNOCK.onHit.scale);
+      this.player.applyKnockback(
+        this.player.position.x - impact.from.x,
+        this.player.position.z - impact.from.z,
+        speed,
+      );
+    }
     if (this.hp <= 0) this.respawn();
   }
 

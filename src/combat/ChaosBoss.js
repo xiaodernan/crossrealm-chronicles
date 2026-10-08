@@ -51,7 +51,7 @@ export class ChaosBoss extends Boss {
     if (t.canPulse && this.chaosPulse > t.pulseInterval) {
       this.chaosPulse = 0;
       if (playerRef?.combat && this.distanceTo(playerPos) < t.pulseRange) {
-        playerRef.combat.takeDamage(t.pulseDamage);
+        playerRef.combat.takeDamage(t.pulseDamage, null, null, { from: this.position });
         addShake(0.12);
       }
     }

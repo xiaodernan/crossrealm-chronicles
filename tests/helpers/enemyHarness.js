@@ -59,10 +59,17 @@ export const makeScene = () => new THREE.Scene();
  * `ref.y` 用来模拟跳起 / 站高台（敌人据此判断这一刀在竖直方向落不落得下）。
  */
 export const makePlayerRef = () => {
-  const ref = { hits: [], parts: [], invulnerable: false, y: 0, yaw: 0, combat: null };
+  const ref = { hits: [], parts: [], impacts: [], invulnerable: false, y: 0, yaw: 0, combat: null };
   ref.combat = {
     hurtbox: createHurtbox('player'),
-    takeDamage: (n, element = null, part = null) => { ref.hits.push(n); ref.parts.push(part); },
+    /**
+     * 第 4 参 `impact` 原样记账（W-A6 切片7）：敌人用例要验的是"这一招把谁、推多远
+     * 递给了咽喉"，不是"咽喉怎么算通用档"—— 后者归 `player-hit-knockback.test.js`
+     * 用真 `CombatController` 见证。桩件绝不自己合成 `{ from, knock }`。
+     */
+    takeDamage: (n, element = null, part = null, impact = null) => {
+      ref.hits.push(n); ref.parts.push(part); ref.impacts.push(impact);
+    },
     isInvulnerable: () => ref.invulnerable,
     hurtBaseY: () => ref.y,
     facingYaw: () => ref.yaw,
