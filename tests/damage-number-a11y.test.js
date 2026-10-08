@@ -11,23 +11,30 @@
  * **颜色以外**的东西：CSS 类（拉开**字号**，见 `style.css` 的 `.dn-*`）与文本记号
  * （暴击 `!`、治疗 `+`）。于是"这一下是不是暴击"在关掉颜色之后仍然读得出来。
  *
+ * ## 切片12 补的线
+ * `weak` 自切片2 起就是**空转的种类**：表里有它、CSS 里有 `.dn-weak`，却没有一处伤害
+ * 被判成低效 —— 等于给玩家留了一个永远看不到的字号档。现在 `Resolution.hitKindOf(hit)`
+ * 统一判种（会心优先、被格挡判低效），两个调用点都走它：同一条判据只此一份，
+ * 不再各写一遍三元式（B36）。
+ *
  * ## 用例分七层
  * ① 种类表与"认不出就抛"；② 非颜色冗余真的存在（记号 + 类名互异）；
  * ③ **CSS 里的字号真的不同**（读 `src/style.css`，不是信注释）；
  * ④ `spawn` 把类名与记号落到 DOM 上；⑤ **池化不留残留**（这一层是本片最要紧的不变量）；
- * ⑥ 调用方真的传了 kind；⑦ 反面证据。
+ * ⑥ 调用方真的传了 kind（含"名册里不许有空转的种类"）；⑦ 反面证据。
  *
  * ## 没有 jsdom
  * 仓里的测试环境是 node（既有惯例：`tests/key-hint.test.js` 喂一个只认两种选择器的假根节点），
  * 所以这里喂一个只认 `className` / `textContent` / `style` 的假 div。
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import * as THREE from 'three';
 import {
   DamageNumbers, DAMAGE_KINDS, DAMAGE_KIND_IDS, damageKindOf,
 } from '../src/combat/DamageNumbers.js';
+import { hitKindOf } from '../src/combat/Resolution.js';
 
 const ROOT = process.cwd();
 
@@ -181,10 +188,45 @@ describe('伤害飘字的非颜色冗余（W-D6 切片2）', () => {
   });
 
   describe('⑥ 调用方真的传了 kind', () => {
-    it('CombatController 与 SpellSystem 的暴击分支都传 crit', () => {
-      for (const rel of ['combat/CombatController.js', 'combat/SpellSystem.js']) {
-        const src = readFileSync(join(ROOT, 'src', rel), 'utf8');
-        expect(src, `${rel} 要传种类`).toMatch(/hit\.crit\s*\?\s*'crit'\s*:\s*'normal'/);
+    const CALLS = ['combat/CombatController.js', 'combat/SpellSystem.js'];
+    const srcOf = (rel) => readFileSync(join(ROOT, 'src', rel), 'utf8');
+
+    it('两处调用点都调 hitKindOf，不再各写一遍三元式', () => {
+      for (const rel of CALLS) {
+        const src = srcOf(rel);
+        expect(src, `${rel} 要 import hitKindOf`)
+          .toMatch(/import\s*\{[^}]*hitKindOf[^}]*\}\s*from\s*'\.\/Resolution\.js'/);
+        expect(src, `${rel} 要把 hitKindOf(hit) 传给 spawn`)
+          .toMatch(/spawn\([\s\S]{0,400}?hitKindOf\(hit\)/);
+        // 判据只许有一处：三元式回来了就说明又抄了一份副本（B36）
+        expect(src, `${rel} 不许再内联判据`).not.toMatch(/hit\.crit\s*\?\s*'crit'/);
+      }
+    });
+
+    it('hitKindOf：会心优先，被格挡判低效，其余普通', () => {
+      expect(hitKindOf({ crit: true, blocked: true })).toBe('crit');
+      expect(hitKindOf({ crit: true, blocked: false })).toBe('crit');
+      expect(hitKindOf({ crit: false, blocked: true })).toBe('weak');
+      expect(hitKindOf({ crit: false, blocked: false })).toBe('normal');
+      expect(hitKindOf({})).toBe('normal');
+    });
+
+    it('名册里每一样 kind 在战斗模块里都有真出处（切片12 补的就是这一条）', () => {
+      // 空转的种类比没有种类更糟：CSS 与表都为它准备了位置，玩家却永远看不到。
+      // 只扫 src/combat —— 飘字种类是战斗结算的私事，判种的那一行就在这个目录里；
+      // 扫全仓会被别处的同名字符串（`engine/Rumble.js` 就有一个 'weak'）蒙混过关。
+      const files = [];
+      const walk = (dir) => {
+        for (const e of readdirSync(dir, { withFileTypes: true })) {
+          const p = join(dir, e.name);
+          if (e.isDirectory()) walk(p); else if (e.name.endsWith('.js')) files.push(p);
+        }
+      };
+      walk(join(ROOT, 'src', 'combat'));
+      const all = files.map((f) => readFileSync(f, 'utf8')).join('\n');
+      for (const id of DAMAGE_KIND_IDS) {
+        const quoted = new RegExp("['\"`]" + id + "['\"`]");
+        expect(all, `${id} 要在 src/combat 里被真的判出来`).toMatch(quoted);
       }
     });
   });

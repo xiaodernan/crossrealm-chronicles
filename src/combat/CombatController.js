@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { MOVES, LOCKED_CONE } from './MoveTable.js';
-import { hitDirection, hitSuffix, isBehind, isGuarded, resolveHit } from './Resolution.js';
+import { hitDirection, hitKindOf, hitSuffix, isBehind, isGuarded, resolveHit } from './Resolution.js';
 import { createHurtbox, pickPart } from './Hurtbox.js';
 import { keyText } from '../content/keyHints.js';
 import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN, AIM_ASSIST } from '../content/tuning.js';
@@ -631,9 +631,9 @@ export class CombatController {
         enemy.position,
         `${hit.damage}${s.suffix ?? ''}${hitSuffix(hit)}`,
         hit.crit ? '#ff5566' : s.color,
-        // 颜色之外还传一个种类（W-D6 切片2）：暴击会带 `!` 与更大的字号，
-        // 于是"这一下是不是暴击"在关掉颜色之后仍然读得出来。
-        hit.crit ? 'crit' : 'normal'
+        // 颜色之外还传一个种类（W-D6 切片2/12）：会心带 `!` 与更大的字号，
+        // 被格挡判低效（更小更暗）——"这一下是不是暴击、有没有被打透"关掉颜色也读得出。
+        hitKindOf(hit)
       );
       this.feedback?.impact(
         enemy.position, hit.blocked ? GUARD.spark : s.tint, s.heavy ? 1.3 : 1, dir

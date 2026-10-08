@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { codeFor } from '../content/keybinds.js';
 import { SPELL_BANDS } from './MoveTable.js';
 import { pickPart } from './Hurtbox.js';
-import { hitDirection, hitSuffix, isGuarded, resolveHit } from './Resolution.js';
+import { hitDirection, hitKindOf, hitSuffix, isGuarded, resolveHit } from './Resolution.js';
 import { GUARD, HIT } from '../content/tuning.js';
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
@@ -171,7 +171,7 @@ export class SpellSystem {
       target.position,
       `${hit.damage}${suffix}${hitSuffix(hit)}`,
       hit.crit ? '#ff5566' : color,
-      hit.crit ? 'crit' : 'normal', // 种类冗余同 CombatController（W-D6 切片2）
+      hitKindOf(hit), // 种类判据同 CombatController：同一个 hitKindOf（W-D6 切片12）
     );
     this.feedback?.impact(target.position, hit.blocked ? GUARD.spark : tint, heavy ? 1.3 : 1, dir);
   }
