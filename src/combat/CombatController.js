@@ -7,6 +7,7 @@ import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_MOVES, STAMINA_REGEN, 
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
 import { anyDown, codeFor, codesFor, mouseFor } from '../content/keybinds.js';
+import { difficultyMultiplier } from '../game/Difficulty.js';
 
 const COMBO_WINDOW = 0.55;
 /**
@@ -215,10 +216,18 @@ export class CombatController {
   /**
    * 受击方接口（与 Enemy 同一份契约，供 Resolution 只读调用）。
    * `part` 是敌人那一刀撞到的玩家分段：同一记横扫扫在腿上和砸在头上不是一个数。
+   *
+   * **这里是"玩家受伤"的唯一咽喉**（W-E1 切片1）：敌人近战 / Boss 砸地 / 场地危险区 /
+   * 敌方弹体四条来路最终都调它，所以 `damageTaken` 乘子只写在这一处 —— 挂在四条来路上
+   * 就是四份抄本，漏一条的症状是"某个来源在严酷档里不疼"（不报错，只是不一致）。
+   * 乘在**结算之前**：防御 / 减伤 / 暴击那条管线看到的是缩放后的基数，
+   * 于是"严酷档这一刀更疼"与"举盾仍按比例减伤"两件事同时成立。
    */
   takeDamage(amount, element = null, part = null) {
     if (this.isInvulnerable()) return;
-    const hit = resolveHit({ base: amount, target: this, element, part, side: 'enemy', rng: this.rng });
+    const hit = resolveHit({
+      base: amount * difficultyMultiplier('damageTaken'), target: this, element, part, side: 'enemy', rng: this.rng,
+    });
     this.hp = Math.max(0, this.hp - hit.damage);
     this.player.characterModel?.playHit?.();
     this.audio?.playerHurt?.();

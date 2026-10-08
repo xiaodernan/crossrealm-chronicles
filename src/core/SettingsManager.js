@@ -5,6 +5,7 @@ import { DEFAULT_SSAO_QUALITY } from '../engine/ssaoSettings.js';
 import { setSsaoQuality } from '../engine/SsaoPass.js';
 import { DEFAULT_GRAPHICS_PRESET, getGraphicsPreset, normalizeGraphicsPreset } from '../engine/graphicsPresets.js';
 import { setLanguage, applyTranslations } from '../engine/i18n.js';
+import { DEFAULT_DIFFICULTY, setDifficulty } from '../game/Difficulty.js';
 
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
@@ -82,6 +83,13 @@ const DEFAULTS = {
    * 的合法性校验回落（未知语言当场抛错，调用点捕获后回落 'zh'）。
    */
   language: 'zh',
+  /**
+   * 难度档（W-E1 切片2）：story / standard / brutal 三档，名册在 `content/difficulty.js`。
+   * 出厂 standard —— 那一档逐格乘子为 1，"出厂行为与没有难度系统逐字节相同"由
+   * `assertDifficultyTable` 硬断言，不靠记忆。落地走 `applyToGame` 里的 `setDifficulty`，
+   * 脏值在出口内部回落出厂不抛。
+   */
+  difficulty: DEFAULT_DIFFICULTY,
 };
 
 /**
@@ -200,5 +208,11 @@ export class SettingsManager {
       setLanguage('zh');
     }
     applyTranslations();
+    // 难度档（W-E1 切片2）：写入口只有这一处（与语言同一形状 —— 整局一份的模块级状态）。
+    // `setDifficulty` 内部对脏值回落出厂不抛：存储是玩家可写的，一行手改的 localStorage
+    // 不该把开机炸了（`padTuning` / `normalizeShadowQuality` 同一先例）。
+    // 生效时机：`enemyHp` 乘在出生那一瞬间（场上已有的敌人保持当前血量），
+    // `damageTaken` / `souls` 对下一击 / 下一笔收入即生效。
+    setDifficulty(this.get('difficulty'));
   }
 }

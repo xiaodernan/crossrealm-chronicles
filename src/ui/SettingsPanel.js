@@ -10,6 +10,7 @@ import { MSAA_SAMPLES, normalizeMsaaSamples } from '../engine/aaPolicy.js';
 import { SSAO_QUALITY_NAMES, normalizeSsaoQuality } from '../engine/ssaoSettings.js';
 import { PRESET_NAMES } from '../engine/graphicsPresets.js';
 import { LANGUAGES } from '../engine/i18n.js';
+import { difficultyOptions } from '../game/Difficulty.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -146,6 +147,23 @@ export class SettingsPanel {
       lang.value = s.get('language');
       lang.addEventListener('change', () => {
         s.set('language', lang.value);
+        s.applyToGame(this.game);
+      });
+    }
+    // 难度档（W-E1 切片2）：与语言档同一套纪律 —— 选项从名册现推（`difficultyOptions()`，
+    // HTML 不抄第二份：抄了就会漏，漏一格的表现是"那一档在面板里选不到"而不是报错），
+    // 落地只走 applyToGame（换档的写入口只有 `setDifficulty` 一个，面板不直接碰运行时）。
+    const diff = document.getElementById('set-difficulty');
+    if (diff) {
+      for (const { id, label } of difficultyOptions()) {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = label;
+        diff.appendChild(opt);
+      }
+      diff.value = s.get('difficulty');
+      diff.addEventListener('change', () => {
+        s.set('difficulty', diff.value);
         s.applyToGame(this.game);
       });
     }

@@ -17,6 +17,7 @@ export const STRINGS_EN = Object.freeze({
   // Settings panel
   settings_title: 'Settings',
   settings_language: 'Language',
+  settings_difficulty: 'Difficulty',
   settings_graphics: 'Graphics',
   settings_audio: 'Audio',
   settings_controls: 'Controls',

@@ -47,6 +47,7 @@ import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import { ENEMY_ROSTER } from './enemies.js';
 import { SURFACE_SPECS, SURFACE_PATTERNS } from './materialSurfaces.js';
+import { DIFFICULTY_TIERS, checkDifficultyTable } from './difficulty.js';
 import { DUNGEON_DEFS, DUNGEON_IDS } from './dungeons.js';
 import { DUNGEON_ENCOUNTERS } from './dungeonEncounters.js';
 import { ENEMY_MOVE_SETS, BODY_PLANS } from './tuning.js';
@@ -1018,6 +1019,31 @@ export const CONTENT_TABLES = [
       },
     },
     invariant: checkSurfaceFamilies,
+  },
+  {
+    kind: 'difficulty',
+    note: '难度三档（W-E1 切片1）：键是档位 id，值是 label / desc / 三个乘子。'
+      + '乘子的键名单由 `DIFFICULTY_KEYS` 固定，而"每一格都得有人读"由 `tests/difficulty.test.js` '
+      + '逐个点名（表里加一格没人读 = 面板上多一个假旋钮）；出厂档 `standard` 必须逐格为 1，'
+      + '由本条目的 invariant 硬断言（有它，"出厂行为与没有难度系统逐字节相同"才不是一句记忆）',
+    shape: 'index',
+    table: DIFFICULTY_TIERS,
+    value: {
+      t: 'row',
+      of: {
+        label: { t: 'string' },
+        desc: { t: 'string' },
+        multipliers: {
+          t: 'row',
+          of: {
+            enemyHp: { t: 'number', exclusiveMin: 0 },
+            damageTaken: { t: 'number', exclusiveMin: 0 },
+            souls: { t: 'number', exclusiveMin: 0 },
+          },
+        },
+      },
+    },
+    invariant: checkDifficultyTable,
   },
 ];
 

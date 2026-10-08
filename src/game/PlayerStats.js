@@ -1,5 +1,6 @@
 /** RPG 成长：位面之魂、属性、等级、装备与背包（W-B5 切片1 + 切片4） */
 import { GEAR_SLOTS, GEAR_BAG, bagIsFull, baseOf, gearMods, isGearInstance } from '../content/gear.js';
+import { difficultyMultiplier } from './Difficulty.js';
 
 /** 出身点：升级与装备都在这一份之上加，所以它是"玩家还没升级也没穿装备时"的那一档 */
 const BASE_STATS = { vigor: 1, endurance: 1, strength: 1, arcane: 1, mind: 0 };
@@ -199,8 +200,15 @@ export class PlayerStats {
     return true;
   }
 
+  /**
+   * 魂的**收入**入口 —— 难度乘子 `souls` 的唯一咽喉（W-E1 切片1）。
+   *
+   * 击杀掉落（`LootSystem`）、支线奖励、营火对话、成就、连杀奖励五条来路都汇到这里，
+   * 所以乘子只写这一处。**只管收入**：扣账（升级走 `levelUp()` 直接 `-=`）不参与 ——
+   * 叙事档 ×1.25 乘到扣账上会变成"更容易的档扣得更多"，那是反的。
+   */
   addSouls(n) {
-    this.souls += n;
+    this.souls += n > 0 ? Math.round(n * difficultyMultiplier('souls')) : n;
     this.pushToConsumers();
   }
 

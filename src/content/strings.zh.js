@@ -17,6 +17,7 @@ export const STRINGS_ZH = Object.freeze({
   // 设置面板
   settings_title: '设置',
   settings_language: '语言',
+  settings_difficulty: '难度',
   settings_graphics: '画面',
   settings_audio: '音频',
   settings_controls: '控制',

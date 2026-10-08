@@ -13,6 +13,7 @@ import { ChaosBoss } from './ChaosBoss.js';
 import { chapterGateFor } from '../content/bossRoster.js';
 import { zoneIdAt } from '../content/ZoneIdentity.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { difficultyMultiplier } from '../game/Difficulty.js';
 
 export class EnemyManager {
   constructor(scene, world, projectiles) {
@@ -260,9 +261,20 @@ export class EnemyManager {
    * 修前这里是 13 处 `this.spawn({ name, type, hp, posture, damage, ... })` 的手抄，
    * 而副本侧（`DungeonManager`）又抄了第二套 —— 同一只 `golem` 在图书馆叫「魔法构装体」
    * 230 血，在迷宫里叫「构装守卫」120~219 血。坐标留在这里（那是关卡数据），身份进表。
+   *
+   * **这里是难度的唯一入口**（W-E1 切片1）：世界与副本两条出生路都汇到 `spawnAt`
+   * （`spawnDefaults` 与 `DungeonManager._spawnRoomEnemies` 都调它），所以 `enemyHp`
+   * 乘子只写在这一处。乘的是名册那一格，不是另抄一份数值 —— 抄本会漂（B36/B45/B62 同族）。
+   * `posture` 刻意**不乘**：它是硬直抗性，跟着血量一起缩放会把"更脆"变成
+   * "更容易被打断两次"，那是另一件事，本片不做。
    */
   spawnAt(type, x, z, extra = {}) {
-    return this.spawn({ ...enemyRosterOf(type), type, x, z, ...extra });
+    const roster = enemyRosterOf(type);
+    return this.spawn({
+      ...roster,
+      hp: Math.round(roster.hp * difficultyMultiplier('enemyHp')),
+      type, x, z, ...extra,
+    });
   }
 
   spawnDefaults() {
