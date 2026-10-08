@@ -21,6 +21,11 @@ import { PerfHUD } from '../engine/PerfHUD.js';
 import { registerPerfGauges } from '../game/perfGauges.js';
 import { createErrorReporter } from '../engine/errorReporter.js';
 import { adoptSubsystem, runTeardowns } from '../engine/teardown.js';
+import { on, offAll } from '../engine/EventBus.js';
+/** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
+ *  DOM 事件（resize / keydown / keyup）不走这里 —— 它们不在事件登记表里，EventBus 管不着。 */
+const GAME_EVENT_TAG = 'core/Game';
+const gameOn = (name, handler) => on(name, handler, GAME_EVENT_TAG);
 import { HUD } from '../ui/HUD.js';
 import { Dialog } from '../ui/Dialog.js';
 import { HelpManual } from '../ui/HelpManual.js';
@@ -410,21 +415,23 @@ export class Game {
    * 有了它，"注销路径存在"才会变成"注销会发生"。
    */
   dispose() {
+    // 本文件自己的监听先摘（W-A1 迁移第四处）：13 处游戏事件都挂在 `GAME_EVENT_TAG` 这一个所有权下。
+    offAll(GAME_EVENT_TAG);
     const closed = runTeardowns();
     this.errorReporter?.uninstall?.();
     return closed;
   }
 
   setupEvents() {
-    window.addEventListener('chapter-changed', () => {
+    gameOn('chapter-changed', () => {
       this.weaponSkills.tryNarrativeUnlocks(this);
     });
-    window.addEventListener('game-completed', () => {
+    gameOn('game-completed', () => {
       this.dialog.show('无尽行者', 'Chapter 5 完成。你斩裂混沌，成为真正的位面行者。\n\n五区贯通、六位 Boss 倒下，这段旅程到此为止——愿下次重逢时，这个世界更加辽阔。');
       SaveSystem.save(this);
     });
-    window.addEventListener('spell-toast', (e) => this.dialog.toast(e.detail.message));
-    window.addEventListener('zone-changed', (e) => {
+    gameOn('spell-toast', (e) => this.dialog.toast(e.detail.message));
+    gameOn('zone-changed', (e) => {
       // 区域 id 由世界层给出（修 B36：这里以前是一串 `name.includes('米勒')` 式的中文匹配）
       const zone = e.detail.zoneId;
       this.worldEffects.setZone(zone, this.player.position);
@@ -434,16 +441,16 @@ export class Game {
       // 换区的瞬间在旧位置留下的火花不该跨场景继续烧（池本身定容，这里只收干净画面）
       this.combatFeedback.reset();
     });
-    window.addEventListener('quest-updated', (e) => {
+    gameOn('quest-updated', (e) => {
       if ((e.detail.chapter ?? 1) >= 2) this.fastTravel.unlock();
     });
-    window.addEventListener('enemy-defeated', (e) => {
+    gameOn('enemy-defeated', (e) => {
       if (e.detail.type === 'boss') this.weaponSkills.addPoint(2);
     });
-    window.addEventListener('boss-start', (e) => {
+    gameOn('boss-start', (e) => {
       this.audio.startBossFight(e.detail.bossId);
     });
-    window.addEventListener('boss-defeated', () => {
+    gameOn('boss-defeated', () => {
       this.audio.endBossFight();
       // 击败 Boss 后立即重扫叙事技（W-B8 切片5）：`enemy-defeated` 先于本事件触发，
       // 已把对应 Boss 的统计写进任务账本（`BOSS_STAT_KEYS` -> `quests.stats`），
@@ -451,23 +458,23 @@ export class Game {
       // 不必等章节推进或下次读档。
       this.weaponSkills.tryNarrativeUnlocks(this);
     });
-    window.addEventListener('boss-phase', (e) => {
+    gameOn('boss-phase', (e) => {
       this.audio.setBossPhase(e.detail.phase ?? 2);
     });
-    window.addEventListener('game-audio-mode', (e) => {
+    gameOn('game-audio-mode', (e) => {
       const mode = e.detail.mode;
       if (mode === 'zone') this.audio.setMode('zone', this.world.zoneId);
       else this.audio.setMode(mode);
     });
-    window.addEventListener('game-audio-sfx', (e) => {
+    gameOn('game-audio-sfx', (e) => {
       // 名字对不对由 AudioManager 自己判（B71）：这里不再做 `typeof === 'function'` 的静默兜底，
       // 抄错音效名的代价从"那一下没声音"变成当场抛错给开发者看。
       this.audio.playSfx(e.detail?.sfx);
     });
-    window.addEventListener('dungeon-supply', (e) => {
+    gameOn('dungeon-supply', (e) => {
       this.player.combat.restore(e.detail);
     });
-    window.addEventListener('textures-ready', () => {
+    gameOn('textures-ready', () => {
       new SceneEnhancer(this).apply();
       this.worldDecorations?.applyTreeTextures?.();
     });

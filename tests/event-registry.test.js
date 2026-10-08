@@ -99,11 +99,34 @@ function recordListener(name, file) {
 }
 
 /**
+ * 总线订阅出口名单（W-A1 迁移第四处）。
+ *
+ * 迁到 `engine/EventBus.js` 之后，一个文件有两种写法挂监听：直接用 import 来的
+ * `on(name, handler, tag)`，或者像 `core/Game.js` 那样先定义一个本地包装再调它
+ * （`const gameOn = (name, handler) => on(name, handler, GAME_EVENT_TAG)`）。
+ * 扫描器两种都得认 —— 只认裸 `on(` 的话，迁得越干净门禁瞎得越彻底：那 13 处会被读成
+ * "没人听"，登记表里逐条写明的 `hook` 理由便与代码当面对不上，同一条用例红两处。
+ *
+ * 别名只从"import 自 EventBus 的订阅函数"里找：`const X = (...) => <订阅函数>(` 才算数，
+ * 别的巧合不算。`offAll` / `listenerCount` 不是订阅动作，不进名单。
+ */
+const BUS_SUBSCRIBERS = new Set(['on', 'once']);
+function busSubscribeFns(code) {
+  const imported = [...code.matchAll(/import\s*\{([^}]*)\}\s*from\s*['"][^'"]*EventBus\.js['"]/g)]
+    .flatMap((m) => m[1].split(',').map((s) => s.trim().split(/\s+as\s+/).pop()))
+    .filter((n) => n && BUS_SUBSCRIBERS.has(n));
+  const fns = new Set(imported);
+  for (const m of code.matchAll(/const\s+(\w+)\s*=\s*\(([^)]*)\)\s*=>\s*(\w+)\s*\(/g)) {
+    if (imported.includes(m[3])) fns.add(m[1]);
+  }
+  return [...fns];
+/**
  * 表驱动的监听位点（W-B3 切片2）：`QuestSystem.setupListeners` 与 `ObjectiveEngine.setupListeners`
  * 遍历 `STAT_EVENTS` 的键去挂监听，字面量事件名因此不在源码里。
  * 扫描必须认这张表，否则那十条会被读成"没人听"，登记表里的 `hook` 就成了假话。
  * 认的是**那句循环本身**（哪个文件里出现 `Object.keys(STAT_EVENTS)`），不是把十条名字再抄一遍。
  */
+}
 const tableDrivenListeners = [];
 
 for (const abs of walk(SRC)) {
@@ -111,6 +134,7 @@ for (const abs of walk(SRC)) {
   if (rel === SELF || rel === BUS_SELF) continue; // 登记表与总线实现里的字面量是"契约文本"，不是使用点
   const code = stripComments(readFileSync(abs, 'utf8'));
   if (/Object\.keys\(\s*STAT_EVENTS\s*\)/.test(code)) tableDrivenListeners.push(rel);
+  const subscribeFns = busSubscribeFns(code);
   /* 派发与监听各有两种写法：存量是裸 `new CustomEvent` / `window.addEventListener`，
    * 切片6 起新代码走 `emit()` / `on()`。扫描器两种都要认 —— 只认前者的话，
    * 迁移得越干净、门禁瞎得越彻底（登记表会以为这些名字再也没人生产/消费）。 */
@@ -138,6 +162,11 @@ for (const abs of walk(SRC)) {
   for (const m of code.matchAll(/(?:^|[^\w.])o(?:nce|n)\(\s*(['"])([^'"]+)\1/g)) {
     if (rel === BUS_SELF) continue;
     recordListener(m[2], rel);
+  }
+  // 总线订阅出口（含本地包装的别名，见 busSubscribeFns）：`gameOn('x', fn)` 与 `on('x', fn, tag)` 等价
+  for (const fn of subscribeFns) {
+    const re = new RegExp(`(?:^|[^\\w.])${fn}\\(\\s*(['"])([^'"]+)\\1`, 'g');
+    for (const m of code.matchAll(re)) recordListener(m[2], rel);
   }
 }
 

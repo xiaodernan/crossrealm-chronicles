@@ -91,7 +91,9 @@ const BARE_WINDOW_LISTENERS = {
   //   这一行**删掉**而不是改成 0 —— 台账的口径是"整文件迁完就删行"。
   'cinematic/EndCreditsDirector.js': 1,
   'cinematic/RestSceneDirector.js': 3,
-  'core/Game.js': 13,
+  // core/Game.js: 13  ← 已迁完（2026-10-08）：13 处游戏事件走 gameOn()（= on(name, handler, 'core/Game')），
+  //   Game.dispose() 里 offAll(GAME_EVENT_TAG) 一次结清。文件里仍留 3 处 window.addEventListener
+  //   （resize / keydown / keyup）—— 那是 DOM 事件，不在本台账的口径内。
   'effects/AmbientScenePass.js': 1,
   'effects/ExecutionEffects.js': 3,
   'effects/PopCultureTriadVisualPass.js': 1,
@@ -285,7 +287,8 @@ describe('监听注销门禁（B44 剩余半区）', () => {
     const total = Object.values(bare).reduce((a, b) => a + b, 0);
     // 131 → 129（2026-10-08）：`cinematic/CombatCinematicSkip.js` 整文件迁完、台账删行。
     // 这个数**故意是硬编码**：迁移是一笔一笔的欠账，自动跟随就等于"改多少都不算数"。
-    expect(total).toBe(129);
+    // 129 → 116（2026-10-08）：core/Game.js 的 13 处整文件迁完。
+    expect(total).toBe(116);
     // HUD 是切片6 迁掉的那一个：它必须从台账里消失，并且改用总线
     expect(bare['ui/HUD.js']).toBeUndefined();
     expect(busUsers.get('ui/HUD.js')).toMatchObject({ on: 20, offAll: 1 });
