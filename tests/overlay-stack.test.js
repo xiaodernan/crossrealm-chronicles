@@ -99,7 +99,8 @@ describe('一张表：层序、字段名与 blocks 的取值域', () => {
     // 上面那些"按列循环"的用例读的就是这张表本身，改表内容它们会跟着变 —— 所以逐行快照是唯一能咬住内容漂移的地方
     expect(OVERLAY_LAYERS.map((l) => `${l.layer}|${l.state}|${l.back ? 'back' : 'hard'}|${l.blocks}|${l.nav ?? '-'}`)).toEqual([
       'endCredits|endCreditsSkippable|back|false|-',
-      'dialog|dialogOpen|back|true|-',
+      // W-D6 切片10：对话框也收焦点（选项是玩法决策，纯键盘玩家此前只能鼠标点）
+      'dialog|dialogOpen|back|true|dialog-overlay',
       'worldMap|worldMapOpen|back|map|-',
       'autoPlay|autoPlayActive|back|false|-',
       'help|helpOpen|back|true|help-manual',
@@ -212,9 +213,9 @@ describe('topBackLayer：这一下返回归哪一层', () => {
 describe('topNavLayer：↑↓ 走进哪个面板（切片11，与返回键同一张表）', () => {
   const NAV = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.layer);
 
-  it('登记的层就是"焦点进得去"的那几层：说明书 / 日志 / 设置 / 快速旅行 / 暂停菜单 / 升级面板', () => {
-    // 升级面板那九格（切片24 / B55）与日志抽屉那八格（切片27 / B57）今天都有宿主
-    expect(NAV).toEqual(['help', 'journal', 'settings', 'fastTravel', 'pauseMenu', 'upgrade']);
+  it('登记的层就是"焦点进得去"的那几层：对话 / 说明书 / 日志 / 设置 / 快速旅行 / 暂停菜单 / 升级面板', () => {
+    // 对话框（切片10）里的选项是玩法决策；升级面板那九格（切片24 / B55）与日志抽屉那八格（切片27 / B57）今天都有宿主
+    expect(NAV).toEqual(['dialog', 'help', 'journal', 'settings', 'fastTravel', 'pauseMenu', 'upgrade']);
   });
 
   it('世界地图刻意不在名单里：那一格里只有"关闭"一格可停，认领它是给自己加一个假落点', () => {

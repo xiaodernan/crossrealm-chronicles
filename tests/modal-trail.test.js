@@ -473,8 +473,8 @@ describe('静态门禁：来路只有一处写、一处读，旧写法一贴回�
 
   it('park 只吃层表登记过的宿主：新面板要进来必须先登记 `nav`（不许多一份名单）', () => {
     const hosts = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.nav).sort();
-    // 升级面板那九格（页签 + 五项属性 + 继续探索）今天也有宿主（切片24 / B55）
-    expect(hosts).toEqual(['fast-travel-panel', 'help-manual', 'journal-panel',
+    // 对话框（切片10）与升级面板那九格（页签 + 五项属性 + 继续探索，切片24 / B55）今天也有宿主
+    expect(hosts).toEqual(['dialog-overlay', 'fast-travel-panel', 'help-manual', 'journal-panel',
       'pause-menu', 'settings-panel', 'upgrade-panel']);
     // 让位那两处写的必须是层表里登记过的宿主，而不是现场再抄一个 DOM id
     for (const name of ['ui/PauseMenu.js', 'ui/HelpManual.js']) {

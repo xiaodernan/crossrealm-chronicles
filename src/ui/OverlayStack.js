@@ -26,7 +26,14 @@ export const OVERLAY_LAYERS = [
    * 结果对话关完顺手弹出了暂停菜单（浏览器读数 R4 抓到）。关掉对话从此是级联的一格，
    * 而且它排在地图之前：对话压着地图时，返回键先还对话的自由。
    */
-  { layer: 'dialog', state: 'dialogOpen', back: true, blocks: true },
+  /**
+   * 对话框（W-D6 切片10）：它也收焦点。改前这一层没有 `nav`，于是对话框里的选项
+   * （接不接这个任务、在不在营火休息、读不读这段记忆）**只能鼠标点** —— ↑↓ 在它外面就落空。
+   * 而那些选项是**玩法决策**，不是装饰：纯键盘玩家走到营火前按 E，看到一段话和一个
+   * "继续探索"，却走不进任何一格。落焦由 `Dialog.show` / `showChoices` 做
+   * （`focusFirstItem`，全仓唯一出口），关掉之后焦点随 innerHTML 清空自然落回 body。
+   */
+  { layer: 'dialog', state: 'dialogOpen', back: true, blocks: true, nav: 'dialog-overlay' },
   { layer: 'worldMap', state: 'worldMapOpen', back: true, blocks: 'map' },
   { layer: 'autoPlay', state: 'autoPlayActive', back: true, blocks: false },
   { layer: 'help', state: 'helpOpen', back: true, blocks: true, nav: 'help-manual' },

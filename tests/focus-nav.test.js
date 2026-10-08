@@ -22,11 +22,12 @@ import {
 import {
   navItems, stepFocusIndex, nextFocusedItem, moveFocusWithin, focusFirstItem, adjustFocused, preserveFocus,
 } from '../src/ui/FocusNav.js';
-import { OVERLAY_LAYERS, topNavLayer } from '../src/ui/OverlayStack.js';
+import { OVERLAY_LAYERS, OVERLAY_LAYER_BY_STATE, topNavLayer, topBackLayer } from '../src/ui/OverlayStack.js';
 import { HotkeyRouter, hotkeyBlockedBy } from '../src/ui/HotkeyRouter.js';
 import { Game } from '../src/core/Game.js';
 import { FastTravelPanel } from '../src/ui/FastTravelPanel.js';
 import { HelpManual } from '../src/ui/HelpManual.js';
+import { Dialog } from '../src/ui/Dialog.js';
 import { fakeDoc, fakePanel, fakeItem, fakeBox } from './helpers/fakePanelDom.js';
 
 const SRC = join(process.cwd(), 'src');
@@ -718,7 +719,16 @@ describe('静态门禁：焦点只有一个出口，激活只有浏览器一个�
   });
 });
 
-/* ------------------------------------------- 焦点环：走得到，也要看得见（W-D6 切片9） */
+/** 状态进、状态出：字段名全部现问表（与 overlay-stack.test.js 同一副骨架，写错状态名立刻红） */
+const state = (over = {}) => {
+  const base = {};
+  for (const l of OVERLAY_LAYERS) base[l.state] = false;
+  for (const k of Object.keys(over)) {
+    expect(OVERLAY_LAYER_BY_STATE.has(k), `状态名 "${k}" 不在层表里`).toBe(true);
+  }
+  return { ...base, ...over };
+};
+
 
 /**
  * 这一片防的是**静默的不可用**：↑↓ 把焦点搬到那一格上了，数据里一切正常，
@@ -784,5 +794,90 @@ describe('焦点环：落焦的那一格必须肉眼可见（W-D6 切片9）', (
     expect(rules).toHaveLength(1);
     expect(rules[0].selectors).not.toContain('button:focus');
     expect(rules[0].selectors).toContain('.panel-box button:focus');
+  });
+});
+
+/* ------------------------------------- 对话框也走得进（W-D6 切片10） */
+
+/**
+ * 对话框是这一族里最要紧的一格：它的选项**不是装饰，是玩法决策** ——
+ * 接不接这个任务、在不在营火休息、读不读这段记忆。改前 `dialog` 层没有 `nav`，
+ * 于是 ↑↓ 在它外面落空，纯键盘玩家走到营火前按 E，看到一段话和一个"继续探索"，
+ * 却走不进任何一格（Tab 能摸到，但焦点落在哪看不出来，也谈不上"走"）。
+ *
+ * 这里用真 `Dialog` + 共用假 DOM 跑一遍：落焦、走格、环绕都走生产那条路，
+ * 不在这份测试里另写一套"以为它怎么工作"。
+ */
+describe('对话框：开着的那一刻焦点就落在里面，选项走得通（W-D6 切片10）', () => {
+  afterEach(() => { delete globalThis.document; });
+
+  /** 造一个够 `Dialog` 构造与 `showChoices` 跑起来的假 DOM（宿主用共用的那份面板桩） */
+  const mountDialog = (choices) => {
+    const doc = fakeDoc();
+    const { host, items } = fakePanel([...choices, 'dialog-close'], doc, 'dialog-overlay');
+    // `Dialog` 还会碰这两个桩面（classList.toggle 与 dataset）：补上，不改共用桩的形状
+    host.classList.toggle = () => {};
+    host.dataset = {};
+    const box = (id) => fakeBox(id);
+    doc.hosts = {
+      'dialog-overlay': host,
+      'dialog-title': box('dialog-title'),
+      'dialog-speaker': box('dialog-speaker'),
+      'dialog-cg': box('dialog-cg'),
+      'dialog-cg-img': box('dialog-cg-img'),
+      'dialog-text': box('dialog-text'),
+      'dialog-choices': box('dialog-choices'),
+      'toast-container': box('toast-container'),
+      'dialog-close': items.at(-1),
+    };
+    globalThis.document = doc;
+    return { dialog: new Dialog(), host, items, active: () => doc.activeElement?.id ?? null };
+  };
+
+  it('层表里 `dialog` 登记了 nav 宿主，且与吃返回键的是同一层', () => {
+    const row = OVERLAY_LAYERS.find((l) => l.layer === 'dialog');
+    expect(row.nav).toBe('dialog-overlay');
+    const both = state({ dialogOpen: true });
+    expect(topNavLayer(both).layer).toBe('dialog');
+    expect(topBackLayer(both)).toBe('dialog');
+  });
+
+  it('`showChoices` 一开焦就落在第一个选项上（不是落在 body，也不是落在关闭键）', () => {
+    const { dialog, active } = mountDialog(['take-quest', 'leave']);
+    dialog.showChoices('委托', '接不接？', [
+      { label: '接', onPick() {} },
+      { label: '不接', onPick() {} },
+    ]);
+    expect(active()).toBe('take-quest');
+  });
+
+  it('↑↓ 在选项之间走，并且环绕回第一格（与别的面板同一条路）', () => {
+    const { dialog, host, active } = mountDialog(['take-quest', 'leave']);
+    dialog.showChoices('委托', '接不接？', [
+      { label: '接', onPick() {} },
+      { label: '不接', onPick() {} },
+    ]);
+    expect(moveFocusWithin(host, 1)).toBe(true);
+    expect(active()).toBe('leave');
+    expect(moveFocusWithin(host, 1)).toBe(true);
+    expect(active()).toBe('dialog-close');
+    expect(moveFocusWithin(host, 1)).toBe(true);
+    expect(active(), '绕回第一格：两格选项 + 一个关闭，不该按到底就没反应').toBe('take-quest');
+    expect(moveFocusWithin(host, -1)).toBe(true);
+    expect(active()).toBe('dialog-close');
+  });
+
+  it('没有选项的纯对话也落焦：落在「继续探索」那一格，Enter 就能关', () => {
+    const { dialog, active } = mountDialog([]);
+    dialog.show('灰白森林', '按 {interact} 离开这里');
+    expect(active()).toBe('dialog-close');
+  });
+
+  it('这条扫描咬得住：把对话框里那两处落焦删掉，立刻红（防空跑门禁）', () => {
+    const original = sourceOf('ui/Dialog.js');
+    const smuggled = original.replace(/\n {4}focusFirstItem\(this\.overlay\);/g, '');
+    expect(smuggled, '锚点没命中：落焦那两行换了写法').not.toBe(original);
+    expect(/focusFirstItem\(this\.overlay\)/.test(original)).toBe(true);
+    expect(/focusFirstItem\(this\.overlay\)/.test(smuggled)).toBe(false);
   });
 });

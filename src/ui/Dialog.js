@@ -1,4 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
+import { focusFirstItem } from './FocusNav.js';
 import { keyText } from '../content/keyHints.js';
 
 /** toast 计时分组：toast 是最频繁的 UI 反馈，统一走主循环 dt（B39） */
@@ -49,6 +50,9 @@ export class Dialog {
     this.overlay.classList.remove('hidden');
     this.open = true;
     document.exitPointerLock?.();
+    // W-D6 切片10：落焦第一格（纯对话里就是「继续探索」那一格）。对话框是模态，
+    // 开的那一刻焦点必须落在它里面 —— 否则走焦在面板外面落空，玩家也看不出现在选中的是谁。
+    focusFirstItem(this.overlay);
   }
 
   showChoices(title, text, choices, meta = {}) {
@@ -88,6 +92,8 @@ export class Dialog {
     this.overlay.classList.remove('hidden');
     this.open = true;
     document.exitPointerLock?.();
+    // 同上：选项是玩法决策，第一格（第一个选项）要能被走到、被 Enter 激活。
+    focusFirstItem(this.overlay);
   }
 
   _showCg(restId, nodeId, accent, mood) {
