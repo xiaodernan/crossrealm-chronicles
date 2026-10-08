@@ -88,28 +88,12 @@ const BARE_WINDOW_LISTENERS = {
   // core/Game.js: 13  ← 已迁完（2026-10-08）：13 处游戏事件走 gameOn()（= on(name, handler, 'core/Game')），
   //   Game.dispose() 里 offAll(GAME_EVENT_TAG) 一次结清。文件里仍留 3 处 window.addEventListener
   //   （resize / keydown / keyup）—— 那是 DOM 事件，不在本台账的口径内。
-  'game/AchievementSystemExtras.js': 6,
-  'game/CampfireMemorySystem.js': 2,
-  'game/CgGalleryAchievements.js': 1,
-  'game/CgGallerySystemExtras.js': 5,
-  'game/CombatStyleTracker.js': 5,
-  'game/CombatTutorialDirector.js': 3,
-  'game/DeathHintDirector.js': 1,
-  'game/DungeonRunTracker.js': 3,
-  'game/ExplorationMap.js': 2,
-  'game/PopCultureAchievementExtras.js': 1,
-  'game/PopCultureCombatBarks.js': 1,
-  'game/PopCultureEchoSystem.js': 2,
-  'game/SoulStreakSystem.js': 2,
-  'game/StoryDirector.js': 3,
-  'game/StoryJournal.js': 4,
-  'ui/BossPhaseDirector.js': 3,
-  'ui/CombatSessionStats.js': 5,
-  'ui/CombatStyleOverlay.js': 1,
-  'world/BossRematchDirector.js': 1,
-  'world/DungeonManager.js': 3,
-  'world/RestNpcAnimDirector.js': 5,
-  'world/RestNpcManager.js': 3,
+  // 第八/九处（2026-10-08）：game×15 / ui×3 / world×4 共 22 个文件 62 条整批迁完，台账清零。
+  //   类文件统一"本地别名出口 + dispose() 里 offAll(TAG)"；attach 型函数返回
+  //   `{ dispose() { offAll(TAG) } }` 供 Game._adopt 收编。PopCultureAchievementExtras 是
+  //   被 attachAchievementExtras import 的子模块，其 dispose 由父级组合调用，不单独登记 tag。
+  //   清零不等于收工：下面 `expect(bare).toEqual(BARE_WINDOW_LISTENERS)` 这道门还立着，
+  //   谁把 `window.addEventListener('游戏事件')` 写回来，这条当场红。
 };
 
 /**
@@ -311,7 +295,10 @@ describe('监听注销门禁（B44 剩余半区）', () => {
     //   四个都走"本地出口带 tag + dispose() 里 offAll + Game._adopt 登记"同一套。
     // 79 → 62（2026-10-08）：迁移第七处 —— audio 1 / cinematic×5 / effects×6 共 11 个文件 17 条。
     //   形状与第五、六处完全一样：本地出口带 tag + dispose() 里 offAll + Game._adopt 登记。
-    expect(total).toBe(62);
+    // 62 → 0（2026-10-08）：迁移第八/九处 —— game×15 / ui×3 / world×4 共 22 个文件 62 条。
+    //   SettingsPanel.js 的 keydown 捕获键是 DOM 事件、不在 GAME_EVENTS 登记表里，
+    //   口径内不计 —— 也就是说 src/ 里已经一条游戏事件的裸监听都不剩。
+    expect(total).toBe(0);
     // HUD 是切片6 迁掉的那一个：它必须从台账里消失，并且改用总线
     expect(bare['ui/HUD.js']).toBeUndefined();
     expect(busUsers.get('ui/HUD.js')).toMatchObject({ on: 20, offAll: 1 });
@@ -334,9 +321,10 @@ describe('监听注销门禁（B44 剩余半区）', () => {
           .toMatch(new RegExp(`offAll\\(\\s*${tag}\\s*\\)`));
       }
     }
-    // 反面证据：同一把尺子在没迁的文件上必须量不到（否则这条用例是空转的）
-    const 未迁 = stripComments(readSrc('game/CampfireMemorySystem.js'));
-    expect(未迁).not.toMatch(/const\s+\w+\s*=\s*\([^)]*\)\s*=>\s*on\(/);
+    // 反面证据：同一把尺子在"没有本地别名出口"的文件上必须量不到（否则这条用例是空转的）。
+    // ui/HUD.js 是直调 on(name, handler, TAG) 的最早样板，没有 `=> on(` 形状的别名包装。
+    const 无别名 = stripComments(readSrc('ui/HUD.js'));
+    expect(无别名).not.toMatch(/const\s+\w+\s*=\s*\([^)]*\)\s*=>\s*on\(/);
   });
   it('on() 一律带 tag：省略 tag 的监听落进 UNGROUPED，等于换个地方继续漏', () => {
     const untagged = [...busUsers.values()].flatMap((u) => u.untagged);
@@ -420,13 +408,35 @@ describe('监听注销门禁（B44 剩余半区）', () => {
       expect(toasts, '注销之后不该再弹提示').toEqual([]);
     });
 
-    it('台账里已经没有这一行（整文件迁完就删行）', () => {
+    it('第八/九处 22 个文件都不再是台账里的一行计数（整文件迁完就删行）', () => {
       const src = readFileSync(join(process.cwd(), 'tests', 'event-bus.test.js'), 'utf8');
       const table = src.slice(src.indexOf('const BARE_WINDOW_LISTENERS'), src.indexOf('};', src.indexOf('const BARE_WINDOW_LISTENERS')));
-      // 注释里提到它是允许的（那是"迁到哪儿去了"的索引），但**不许再是一行计数**
-      expect(table).not.toMatch(/^\s*'cinematic\/CombatCinematicSkip\.js'\s*:\s*\d+/m);
-      // 反面证据：同一把尺子对还在表里的邻居量得出来
-      expect(table).toMatch(/^\s*'world\/DungeonManager\.js'\s*:\s*\d+/m);
+      // 注释里提到这些文件是允许的（那是"迁到哪儿去了"的索引），但**不许再是一行计数**
+      const 已迁完 = [
+        'cinematic/CombatCinematicSkip.js', 'core/Game.js', 'game/QuestSystem.js',
+        'game/AchievementSystem.js', 'game/CgGallerySystem.js', 'game/LoreCodexSystem.js',
+        'ui/ContextualTutorial.js', 'audio/AudioManager.js', 'cinematic/CinematicManager.js',
+        'cinematic/CombatCameraDirector.js', 'cinematic/RestSceneDirector.js',
+        'cinematic/EndCreditsDirector.js', 'effects/AmbientScenePass.js',
+        'effects/ExecutionEffects.js', 'effects/PopCultureTriadVisualPass.js',
+        'effects/RealmBleed.js', 'effects/UpsideDownVisualPass.js', 'effects/ZoneTransitionFX.js',
+        // 第八/九处（2026-10-08）
+        'game/AchievementSystemExtras.js', 'game/CampfireMemorySystem.js',
+        'game/CgGalleryAchievements.js', 'game/CgGallerySystemExtras.js',
+        'game/CombatStyleTracker.js', 'game/CombatTutorialDirector.js',
+        'game/DeathHintDirector.js', 'game/DungeonRunTracker.js', 'game/ExplorationMap.js',
+        'game/PopCultureAchievementExtras.js', 'game/PopCultureCombatBarks.js',
+        'game/PopCultureEchoSystem.js', 'game/SoulStreakSystem.js', 'game/StoryDirector.js',
+        'game/StoryJournal.js', 'ui/BossPhaseDirector.js', 'ui/CombatSessionStats.js',
+        'ui/CombatStyleOverlay.js', 'world/BossRematchDirector.js', 'world/DungeonManager.js',
+        'world/RestNpcAnimDirector.js', 'world/RestNpcManager.js',
+      ];
+      for (const file of 已迁完) {
+        const esc = file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        expect(table, `${file} 已整文件迁完，台账里不该再有它的计数行`).not.toMatch(new RegExp(`^\\s*'${esc}'\\s*:\\s*\\d+`, 'm'));
+      }
+      // 反面证据：台账现在空了，尺子不能因此空转 —— 拿一行"假如还欠着"的样例量，必须量得到
+      expect("  'world/DungeonManager.js': 3,").toMatch(/^\s*'world\/DungeonManager\.js'\s*:\s*\d+/m);
     });
   });
 });

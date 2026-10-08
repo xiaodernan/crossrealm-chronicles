@@ -8,6 +8,10 @@ import { addShake } from '../engine/Shake.js';
 import { scheduler } from '../engine/Scheduler.js';
 import * as THREE from 'three';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const UI_BOSSPHASEDIRECTOR = 'ui/BossPhaseDirector';
+const phaseDirOn = (name, handler) => on(name, handler, UI_BOSSPHASEDIRECTOR);
 /** 横幅计时分组：同一时刻只该有一条 Boss 横幅在走（重复触发先撤旧的） */
 const BANNER_TAG = 'boss-phase-banner';
 /** 相位特效标签分组：同一时刻只允许一个相位特效在跑 */
@@ -15,6 +19,11 @@ const PHASE_FX_TAG = 'boss-phase-fx';
 
 /** Boss 阶段演出 — 横幅 / 台词 / 镜头 / 叙事技能解锁 / 相位特效 */
 export class BossPhaseDirector {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第九处） */
+  dispose() {
+    offAll(UI_BOSSPHASEDIRECTOR);
+  }
+
   constructor(game) {
     this.game = game;
     this.bannerEl = null;
@@ -79,9 +88,9 @@ export class BossPhaseDirector {
   }
 
   setupListeners() {
-    window.addEventListener('boss-phase', (e) => this.onPhase(e.detail));
-    window.addEventListener('boss-defeated', (e) => this.onDefeat(e.detail));
-    window.addEventListener('boss-start', (e) => this.onStart(e.detail));
+    phaseDirOn('boss-phase', (e) => this.onPhase(e.detail));
+    phaseDirOn('boss-defeated', (e) => this.onDefeat(e.detail));
+    phaseDirOn('boss-start', (e) => this.onStart(e.detail));
   }
 
   onStart(detail) {

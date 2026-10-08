@@ -1,11 +1,20 @@
 import { CHAPTER_INTROS } from './LoreFragments.js';
 import { scheduler } from '../engine/Scheduler.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_STORYDIRECTOR = 'game/StoryDirector';
+const storyOn = (name, handler) => on(name, handler, GAME_STORYDIRECTOR);
 /** 章节开场与区域钩子共用一组计时（换区/跳章时先撤旧的，避免多条叠着弹） */
 const STORY_TAG = 'story-director';
 
 /** 章节/区域叙事导演 — 增强沉浸感 */
 export class StoryDirector {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_STORYDIRECTOR);
+  }
+
   constructor(game) {
     this.game = game;
     this.shownChapters = new Set();
@@ -24,7 +33,7 @@ export class StoryDirector {
   }
 
   setupListeners() {
-    window.addEventListener('chapter-changed', (e) => {
+    storyOn('chapter-changed', (e) => {
       const ch = e.detail.chapter;
       if (!CHAPTER_INTROS[ch] || this.shownChapters.has(ch)) return;
       this.shownChapters.add(ch);
@@ -41,7 +50,7 @@ export class StoryDirector {
       }, STORY_TAG);
     });
 
-    window.addEventListener('zone-changed', (e) => {
+    storyOn('zone-changed', (e) => {
       if (e.detail.initial) return;
       const zone = e.detail.zone;
       const hooks = {
@@ -72,7 +81,7 @@ export class StoryDirector {
       }
     });
 
-    window.addEventListener('dungeon-room-cleared', (e) => {
+    storyOn('dungeon-room-cleared', (e) => {
       const dungeon = this.game.dungeons?.active;
       if (!dungeon?.layout) return;
       const room = dungeon.layout.rooms.find((r) => r.id === e.detail.roomId);

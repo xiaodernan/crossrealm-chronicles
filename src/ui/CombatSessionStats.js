@@ -1,5 +1,15 @@
 /** 本局战斗统计浮层 — Backquote 切换 */
+import { on, offAll } from '../engine/EventBus.js';
+
+const UI_COMBATSESSIONSTATS = 'ui/CombatSessionStats';
+const sessionOn = (name, handler) => on(name, handler, UI_COMBATSESSIONSTATS);
+
 export class CombatSessionStats {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第九处） */
+  dispose() {
+    offAll(UI_COMBATSESSIONSTATS);
+  }
+
   constructor(game) {
     this.game = game;
     this.el = document.createElement('div');
@@ -15,14 +25,14 @@ export class CombatSessionStats {
   }
 
   setupListeners() {
-    window.addEventListener('enemy-defeated', (e) => {
+    sessionOn('enemy-defeated', (e) => {
       if (e.detail?.type !== 'dummy') this.kills += 1;
       this.refresh();
     });
-    window.addEventListener('parry-success', () => { this.parries += 1; this.refresh(); });
-    window.addEventListener('combo-finisher', () => { this.finishers += 1; this.refresh(); });
-    window.addEventListener('combat-execution', () => { this.executions += 1; this.refresh(); });
-    window.addEventListener('player-respawn', () => this.reset());
+    sessionOn('parry-success', () => { this.parries += 1; this.refresh(); });
+    sessionOn('combo-finisher', () => { this.finishers += 1; this.refresh(); });
+    sessionOn('combat-execution', () => { this.executions += 1; this.refresh(); });
+    sessionOn('player-respawn', () => this.reset());
   }
 
   toggle() {

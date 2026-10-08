@@ -7,6 +7,10 @@ import { DUNGEON_DEFS } from '../content/dungeons.js';
 import { disposeDungeonSubtree } from './dungeonAssets.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const WORLD_DUNGEONMANAGER = 'world/DungeonManager';
+const dungeonOn = (name, handler) => on(name, handler, WORLD_DUNGEONMANAGER);
 /** 副本每次重建/离开都会走这里（旧实现只 group.remove() 不 dispose，反复进出迷宫会让
  *  GPU 缓冲单调增长）。
  *  **释放权归 `dungeonAssets`**：地下城的几何与材质现在是七座副本共享的（B76），
@@ -15,6 +19,11 @@ import { applyShadow } from '../engine/shadowPolicy.js';
 const disposeSubtree = disposeDungeonSubtree;
 
 export class DungeonManager {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第九处） */
+  dispose() {
+    offAll(WORLD_DUNGEONMANAGER);
+  }
+
   constructor(scene, world, dialog, enemyManager, game = null) {
     this.scene = scene;
     this.world = world;
@@ -33,13 +42,13 @@ export class DungeonManager {
     this.build();
     this.buildEntranceMarkers();
     this.buildExteriorShells();
-    window.addEventListener('quest-updated', (e) => {
+    dungeonOn('quest-updated', (e) => {
       if ((e.detail.chapter ?? 1) >= 5) this.rerunUnlocked = true;
     });
-    window.addEventListener('enemy-defeated', () => this._checkRoomClear());
+    dungeonOn('enemy-defeated', () => this._checkRoomClear());
     // 在迷宫内死亡会被传回世界之锚，但 active 仍挂着会让玩家失去世界碰撞（走 bug）。
     // 这里按事件退出并释放本次副本资源，不反向读取战斗系统字段。
-    window.addEventListener('player-respawn', () => this.abandonRun());
+    dungeonOn('player-respawn', () => this.abandonRun());
   }
 
   abandonRun() {

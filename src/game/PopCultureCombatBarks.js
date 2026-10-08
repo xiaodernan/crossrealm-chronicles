@@ -1,6 +1,10 @@
 /** 战斗/探索随机 bark — 致敬向（不占用主 UI） */
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_POPCULTURECOMBATBARKS = 'game/PopCultureCombatBarks';
+const barksOn = (name, handler) => on(name, handler, GAME_POPCULTURECOMBATBARKS);
 export const COMBAT_BARKS_POP = {
   magic: [
     '悬浮蜡烛被剑气吹歪 — 像某所学院的夜巡被打扰。',
@@ -43,7 +47,7 @@ export function barkKeyForZone(zoneId, roll = Math.random()) {
 
 export function attachPopCultureCombatBarks(game) {
   let cd = 0;
-  window.addEventListener('enemy-defeated', () => {
+  barksOn('enemy-defeated', () => {
     cd -= 1;
     if (cd > 0) return;
     // 修 B36：台词池按区域 id 选（原来是 `includes('遗境')` 这种松匹配，
@@ -55,4 +59,5 @@ export function attachPopCultureCombatBarks(game) {
     cd = 4;
     game.dialog?.toast?.(list[Math.floor(Math.random() * list.length)], 2800);
   });
+  return { dispose() { offAll(GAME_POPCULTURECOMBATBARKS); } };
 }

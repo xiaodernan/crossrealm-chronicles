@@ -1,8 +1,12 @@
 /** 次元回声成就的**监听**（数据在 content/achievements.js，母题分组只认 franchises.js 的 id —— 修 B36） */
 import { ECHO_FRANCHISE_BUCKETS } from '../content/achievements.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_POPCULTUREACHIEVEMENTEXTRAS = 'game/PopCultureAchievementExtras';
+const popAchOn = (name, handler) => on(name, handler, GAME_POPCULTUREACHIEVEMENTEXTRAS);
 export function attachPopCultureAchievements(ach) {
-  window.addEventListener('pop-culture-unlocked', () => {
+  popAchOn('pop-culture-unlocked', () => {
     const sys = ach.game?.popCulture;
     if (!sys) return;
     const stats = sys.getStats();
@@ -13,4 +17,5 @@ export function attachPopCultureAchievements(ach) {
     }
     ach.checkAll();
   });
+  return { dispose() { offAll(GAME_POPCULTUREACHIEVEMENTEXTRAS); } };
 }

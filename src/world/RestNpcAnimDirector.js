@@ -4,8 +4,17 @@ import { RestNpcGesturePlayer } from './RestNpcGesturePlayer.js';
 import { RestNpcProceduralGestures } from './RestNpcProceduralGestures.js';
 import { mergeRestNpcGestureClips } from './RestNpcGestureClipLoader.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const WORLD_RESTNPCANIMDIRECTOR = 'world/RestNpcAnimDirector';
+const npcAnimOn = (name, handler) => on(name, handler, WORLD_RESTNPCANIMDIRECTOR);
 /** 营火 NPC 动画总导演 — 坐姿/挥手/对话姿态（扩写层，不侵入 RestNpcManager 核心） */
 export class RestNpcAnimDirector {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第九处） */
+  dispose() {
+    offAll(WORLD_RESTNPCANIMDIRECTOR);
+  }
+
   constructor(game) {
     this.game = game;
     this.layers = new Map();
@@ -30,11 +39,11 @@ export class RestNpcAnimDirector {
   }
 
   _bindEvents() {
-    window.addEventListener('rest-dialogue-open', (e) => this._onDialogueOpen(e.detail));
-    window.addEventListener('rest-dialogue-node', (e) => this._onDialogueNode(e.detail));
-    window.addEventListener('rest-dialogue-close', (e) => this._onDialogueClose(e.detail));
-    window.addEventListener('rest-npc-greet', (e) => this._onGreet(e.detail));
-    window.addEventListener('dialog-choice-picked', (e) => {
+    npcAnimOn('rest-dialogue-open', (e) => this._onDialogueOpen(e.detail));
+    npcAnimOn('rest-dialogue-node', (e) => this._onDialogueNode(e.detail));
+    npcAnimOn('rest-dialogue-close', (e) => this._onDialogueClose(e.detail));
+    npcAnimOn('rest-npc-greet', (e) => this._onGreet(e.detail));
+    npcAnimOn('dialog-choice-picked', (e) => {
       if (e.detail?.action === 'rest') this._onRestPicked(e.detail.restId);
     });
   }

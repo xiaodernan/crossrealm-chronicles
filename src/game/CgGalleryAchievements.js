@@ -1,11 +1,20 @@
 /** CG 画廊成就 — 全收集奖励 */
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_CGGALLERYACHIEVEMENTS = 'game/CgGalleryAchievements';
+const cgAchOn = (name, handler) => on(name, handler, GAME_CGGALLERYACHIEVEMENTS);
+
 export class CgGalleryAchievements {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_CGGALLERYACHIEVEMENTS);
+  }
+
   constructor(game) {
     this.game = game;
     this.claimed = new Set();
-    window.addEventListener('cg-unlocked', () => this.check());
+    cgAchOn('cg-unlocked', () => this.check());
   }
-
   check() {
     const cg = this.game.cgGallery;
     if (!cg) return;

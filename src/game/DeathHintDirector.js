@@ -1,5 +1,9 @@
 import { keyText } from '../content/keyHints.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_DEATHHINTDIRECTOR = 'game/DeathHintDirector';
+const deathHintOn = (name, handler) => on(name, handler, GAME_DEATHHINTDIRECTOR);
 /**
  * 倒下提示 —— 键名写成 `{动作}` 令牌，到 `onRespawn` 才展开。
  * 写在模块顶层的字符串若在加载期就拼成真实键名，玩家改绑之后这段文字会永远停在出厂键位上。
@@ -12,10 +16,15 @@ const HINTS = [
 ];
 
 export class DeathHintDirector {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_DEATHHINTDIRECTOR);
+  }
+
   constructor(game) {
     this.game = game;
     this.deathCount = 0;
-    window.addEventListener('player-respawn', () => this.onRespawn());
+    deathHintOn('player-respawn', () => this.onRespawn());
   }
 
   onRespawn() {

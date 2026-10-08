@@ -7,8 +7,17 @@ const STYLE_RANKS = [
   { min: 700, label: 'SS', color: '#ffdd44' },
 ];
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_COMBATSTYLETRACKER = 'game/CombatStyleTracker';
+const styleOn = (name, handler) => on(name, handler, GAME_COMBATSTYLETRACKER);
 /** 战斗风格积分 — 弹反/连击/处决/Boss */
 export class CombatStyleTracker {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_COMBATSTYLETRACKER);
+  }
+
   constructor(game) {
     this.game = game;
     this.score = 0;
@@ -20,14 +29,14 @@ export class CombatStyleTracker {
   }
 
   setupListeners() {
-    window.addEventListener('parry-success', () => this.add(35, '弹反'));
-    window.addEventListener('combo-finisher', () => this.add(80, '终结'));
-    window.addEventListener('combat-execution', () => this.add(120, '处决'));
-    window.addEventListener('enemy-defeated', (e) => {
+    styleOn('parry-success', () => this.add(35, '弹反'));
+    styleOn('combo-finisher', () => this.add(80, '终结'));
+    styleOn('combat-execution', () => this.add(120, '处决'));
+    styleOn('enemy-defeated', (e) => {
       if (e.detail?.type === 'boss') this.add(200, 'Boss');
       else this.add(8, '击杀');
     });
-    window.addEventListener('boss-defeated', () => this.add(300, '击破'));
+    styleOn('boss-defeated', () => this.add(300, '击破'));
   }
 
   add(pts, label) {

@@ -1,8 +1,17 @@
 import { ECHOES } from '../content/echoes.js';
 import { franchiseLabel } from '../content/franchises.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_POPCULTUREECHOSYSTEM = 'game/PopCultureEchoSystem';
+const echoOn = (name, handler) => on(name, handler, GAME_POPCULTUREECHOSYSTEM);
 /** 次元回声解锁 — 发现 POI / 致敬点时写入 */
 export class PopCultureEchoSystem {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_POPCULTUREECHOSYSTEM);
+  }
+
   constructor(game) {
     this.game = game;
     this.unlocked = new Set();
@@ -10,11 +19,11 @@ export class PopCultureEchoSystem {
   }
 
   setupListeners() {
-    window.addEventListener('discovery', (e) => {
+    echoOn('discovery', (e) => {
       const id = e.detail?.id;
       if (id) this.tryUnlock(`discovery:${id}`);
     });
-    window.addEventListener('pop-culture-echo', (e) => {
+    echoOn('pop-culture-echo', (e) => {
       const key = e.detail?.trigger;
       if (key) this.tryUnlock(key);
     });

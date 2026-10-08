@@ -1,5 +1,15 @@
 /** 战斗风格 HUD 浮层 */
+import { on, offAll } from '../engine/EventBus.js';
+
+const UI_COMBATSTYLEOVERLAY = 'ui/CombatStyleOverlay';
+const styleOverlayOn = (name, handler) => on(name, handler, UI_COMBATSTYLEOVERLAY);
+
 export class CombatStyleOverlay {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第九处） */
+  dispose() {
+    offAll(UI_COMBATSTYLEOVERLAY);
+  }
+
   constructor(game) {
     this.game = game;
     this.el = document.createElement('div');
@@ -12,7 +22,7 @@ export class CombatStyleOverlay {
   }
 
   setupListeners() {
-    window.addEventListener('combat-style-changed', (e) => {
+    styleOverlayOn('combat-style-changed', (e) => {
       const { rank, color, label, score } = e.detail ?? {};
       if (!label && score <= 0) {
         this.el.classList.add('hidden');

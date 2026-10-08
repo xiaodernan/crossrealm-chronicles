@@ -2,10 +2,19 @@ import * as THREE from 'three';
 import { RestNpcModel } from './RestNpcModel.js';
 import { REST_NPC_DEFS } from '../content/restNpcDefs.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const WORLD_RESTNPCMANAGER = 'world/RestNpcManager';
+const npcOn = (name, handler) => on(name, handler, WORLD_RESTNPCMANAGER);
 /** 营火常驻 NPC — Mixamo 模型 + RestDialogue 联动高亮 */
 
 
 export class RestNpcManager {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第九处） */
+  dispose() {
+    offAll(WORLD_RESTNPCMANAGER);
+  }
+
   constructor(scene, world, restPoints, game) {
     this.scene = scene;
     this.world = world;
@@ -20,19 +29,19 @@ export class RestNpcManager {
   }
 
   _bindEvents() {
-    window.addEventListener('rest-dialogue-open', (e) => {
+    npcOn('rest-dialogue-open', (e) => {
       const id = e.detail?.restId;
       this.highlightId = id;
       this.speakingId = e.detail?.speakerId ?? id;
       this._setNpcState(id, 'dialogue', e.detail);
       this.getByRestId(id)?.model?.playTalk?.(true);
     });
-    window.addEventListener('rest-dialogue-node', (e) => {
+    npcOn('rest-dialogue-node', (e) => {
       this.speakingId = e.detail?.speakerId ?? e.detail?.restId;
       this._pulseSpeaker(this.speakingId);
       this.getByRestId(e.detail?.restId)?.model?.playTalk?.(true);
     });
-    window.addEventListener('rest-dialogue-close', () => {
+    npcOn('rest-dialogue-close', () => {
       for (const n of this.npcs) n.model?.playTalk?.(false);
       this.speakingId = null;
       this.highlightId = null;

@@ -248,17 +248,17 @@ export class Game {
     this.worldEffects = new WorldEffects(this.scene);
     this.restPoints = new RestPointManager(this.scene, this.world);
     this.restPoints.buildDefaults();
-    this.restNpcs = new RestNpcManager(this.scene, this.world, this.restPoints, this);
+    this.restNpcs = this._adopt('world/RestNpcManager', new RestNpcManager(this.scene, this.world, this.restPoints, this));
     this.restCampfireAmbient = new RestCampfireAmbient(this.restPoints);
     this.restPointEnhancer = new RestPointEnhancer(this.restPoints, this);
     this.weather = new WeatherSystem(this.scene, this.world, this.zoneFog);
     this.executionFx = this._adopt('effects/ExecutionEffects', new ExecutionEffects(this.scene, this));
     this.collectibles = new CollectibleManager(this.scene, this.world, this.stats, this.dialog);
-    // W-A1 迁移第五～七处：这些系统的监听走总线（带 tag）⇒ 它们必须进 teardown 登记表，
+    // W-A1 迁移第五～八处：这些系统的监听走总线（带 tag）⇒ 它们必须进 teardown 登记表，
     // `_adopt` 会拒绝没有 dispose() 的子系统（"假装收编"的防线）。
     this.quests = this._adopt('game/QuestSystem', new QuestSystem(this.dialog));
-    this.storyJournal = new StoryJournal(this);
-    this.storyDirector = new StoryDirector(this);
+    this.storyJournal = this._adopt('game/StoryJournal', new StoryJournal(this));
+    this.storyDirector = this._adopt('game/StoryDirector', new StoryDirector(this));
     this.npcs = new NPCManager(this.scene, this.world, this.dialog, this);
     this.soulWisps = new SoulWispManager(this.scene, this.world, this.stats, this.dialog, this.audio);
     this.voidEcho = new VoidEcho(this.scene);
@@ -283,7 +283,7 @@ export class Game {
     this.player.combat.feedback = this.combatFeedback;
     this.player.combat.setTimeController(this.time);
 
-    this.dungeons = new DungeonManager(this.scene, this.world, this.dialog, this.enemyManager, this);
+    this.dungeons = this._adopt('world/DungeonManager', new DungeonManager(this.scene, this.world, this.dialog, this.enemyManager, this));
     this.world.setDungeonManager(this.dungeons);
     this.spells = new SpellSystem(
       this.scene, this.player, this.enemyManager, this.projectiles, this.damageNumbers, this.audio, this.stats
@@ -303,37 +303,37 @@ export class Game {
     this.combatCinematicSkip = this._adopt('cinematic/CombatCinematicSkip', new CombatCinematicSkip(this));
     this.executionSkipFx = new ExecutionSkipBurst();
     this.combatInputLock = new CombatInputLock(this);
-    this.combatTutorial = new CombatTutorialDirector(this);
+    this.combatTutorial = this._adopt('game/CombatTutorialDirector', new CombatTutorialDirector(this));
     this.restScene = this._adopt('cinematic/RestSceneDirector', new RestSceneDirector(this));
     this.worldAmbient = new WorldAmbientEvents(this);
     this.cgGallery = this._adopt('game/CgGallerySystem', new CgGallerySystem(this));
     this.cgJournalTab = new CgJournalTab(this);
-    this.cgGalleryAchievements = new CgGalleryAchievements(this);
-    this.restNpcAnimDirector = new RestNpcAnimDirector(this);
+    this.cgGalleryAchievements = this._adopt('game/CgGalleryAchievements', new CgGalleryAchievements(this));
+    this.restNpcAnimDirector = this._adopt('world/RestNpcAnimDirector', new RestNpcAnimDirector(this));
 
-    this.campfireMemory = new CampfireMemorySystem(this);
+    this.campfireMemory = this._adopt('game/CampfireMemorySystem', new CampfireMemorySystem(this));
     this.campfireMemoryTab = new CampfireMemoryJournalTab(this);
     this.achievementsJournalTab = new AchievementsJournalTab(this);
     this.loreCodex = this._adopt('game/LoreCodexSystem', new LoreCodexSystem(this));
     this.loreCodexTab = new LoreCodexJournalTab(this);
-    this.combatStyle = new CombatStyleTracker(this);
-    this.combatStyleOverlay = new CombatStyleOverlay(this);
-    this.bossRematch = new BossRematchDirector(this);
+    this.combatStyle = this._adopt('game/CombatStyleTracker', new CombatStyleTracker(this));
+    this.combatStyleOverlay = this._adopt('ui/CombatStyleOverlay', new CombatStyleOverlay(this));
+    this.bossRematch = this._adopt('world/BossRematchDirector', new BossRematchDirector(this));
     this.zoneTransitionFx = this._adopt('effects/ZoneTransitionFX', new ZoneTransitionFX(this));
     this.photoMode = new PhotoModeDirector(this);
 
-    this.dungeonRuns = new DungeonRunTracker(this);
+    this.dungeonRuns = this._adopt('game/DungeonRunTracker', new DungeonRunTracker(this));
     this.dungeonJournalTab = new DungeonJournalTab(this);
     this.weaponSkillJournalTab = new WeaponSkillJournalTab(this);
-    this.deathHints = new DeathHintDirector(this);
+    this.deathHints = this._adopt('game/DeathHintDirector', new DeathHintDirector(this));
     this.bossApproach = new BossApproachDirector(this);
-    this.soulStreak = new SoulStreakSystem(this);
+    this.soulStreak = this._adopt('game/SoulStreakSystem', new SoulStreakSystem(this));
     this.endCredits = this._adopt('cinematic/EndCreditsDirector', new EndCreditsDirector(this));
     this.sideQuests = new SideQuestSystem(this);
     this.sideQuestJournalTab = new SideQuestJournalTab(this);
-    this.sessionStats = new CombatSessionStats(this);
+    this.sessionStats = this._adopt('ui/CombatSessionStats', new CombatSessionStats(this));
     this.restNpcIdle = new RestNpcIdleDirector(this);
-    this.popCulture = new PopCultureEchoSystem(this);
+    this.popCulture = this._adopt('game/PopCultureEchoSystem', new PopCultureEchoSystem(this));
     this.popCultureTab = new PopCultureJournalTab(this);
     this.upsideDownFx = this._adopt('effects/UpsideDownVisualPass', new UpsideDownVisualPass(this));
     this.triadVisualFx = this._adopt('effects/PopCultureTriadVisualPass', new PopCultureTriadVisualPass(this));
@@ -348,10 +348,10 @@ export class Game {
     this.pauseMenu = new PauseMenu(this);
     this.fastTravelPanel = new FastTravelPanel(this);
     this.weaponSkills = new WeaponSkillTree(this.stats, this.dialog, this);
-    this.explorationMap = new ExplorationMap(this);
+    this.explorationMap = this._adopt('game/ExplorationMap', new ExplorationMap(this));
     this.mapMarkers = new MapMarkerManager(this);
     this.restDialogue = new RestDialogue(this);
-    this.bossPhaseDirector = new BossPhaseDirector(this);
+    this.bossPhaseDirector = this._adopt('ui/BossPhaseDirector', new BossPhaseDirector(this));
     this.worldMapPanel = new WorldMapPanel(this);
     this.questAssistant = new QuestAssistant(this);
     this.playerAutoPlay = new PlayerAutoPlay(this);
@@ -382,9 +382,9 @@ export class Game {
     SaveSystem.load(this);
     this.restNpcAnimDirector.attachRestNpcs(this.restNpcs.npcs);
     this.restNpcIdle.attachRestNpcs(this.restNpcs.npcs);
-    attachCgGalleryExtras(this.cgGallery);
-    attachAchievementExtras(this.achievements);
-    attachPopCultureCombatBarks(this);
+    this.cgGalleryExtras = this._adopt('game/CgGallerySystemExtras', attachCgGalleryExtras(this.cgGallery));
+    this.achievementExtras = this._adopt('game/AchievementSystemExtras', attachAchievementExtras(this.achievements));
+    this.popCultureBarks = this._adopt('game/PopCultureCombatBarks', attachPopCultureCombatBarks(this));
     this.bossRematch.syncFromQuests?.();
     this.cgGallery.unlock('bonus:world-anchor', 'init');
     this.quests.stats.skillsUnlocked = this.weaponSkills.unlocked.size;

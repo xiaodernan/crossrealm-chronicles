@@ -1,5 +1,9 @@
 import { MAP_BOSSES } from '../game/QuestSystem.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const WORLD_BOSSREMATCHDIRECTOR = 'world/BossRematchDirector';
+const rematchOn = (name, handler) => on(name, handler, WORLD_BOSSREMATCHDIRECTOR);
 /** Boss 信标再战 — 击败后 E 召唤 */
 const BOSS_SPAWN = {
   'shadow-warden': (em, x, z) => em.spawnBoss({ bossId: 'shadow-warden', x, z }),
@@ -10,6 +14,11 @@ const BOSS_SPAWN = {
 };
 
 export class BossRematchDirector {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第九处） */
+  dispose() {
+    offAll(WORLD_BOSSREMATCHDIRECTOR);
+  }
+
   constructor(game) {
     this.game = game;
     this.defeated = new Set();
@@ -18,7 +27,7 @@ export class BossRematchDirector {
   }
 
   setupListeners() {
-    window.addEventListener('boss-defeated', (e) => {
+    rematchOn('boss-defeated', (e) => {
       const id = e.detail?.bossId;
       if (id) this.defeated.add(id);
     });

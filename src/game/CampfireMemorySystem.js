@@ -1,5 +1,15 @@
 /** 营火记忆 — 记录每次休息与对话节点 */
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_CAMPFIREMEMORYSYSTEM = 'game/CampfireMemorySystem';
+const campfireOn = (name, handler) => on(name, handler, GAME_CAMPFIREMEMORYSYSTEM);
+
 export class CampfireMemorySystem {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_CAMPFIREMEMORYSYSTEM);
+  }
+
   constructor(game) {
     this.game = game;
     this.restCount = {};
@@ -9,12 +19,12 @@ export class CampfireMemorySystem {
   }
 
   setupListeners() {
-    window.addEventListener('dialog-choice-picked', (e) => {
+    campfireOn('dialog-choice-picked', (e) => {
       if (e.detail?.action !== 'rest') return;
       const restId = e.detail.restId ?? 'hub';
       this.recordRest(restId);
     });
-    window.addEventListener('rest-dialogue-node', (e) => {
+    campfireOn('rest-dialogue-node', (e) => {
       const { restId, nodeId, speaker, linePreview } = e.detail ?? {};
       if (!restId || !nodeId) return;
       const key = `${restId}:${nodeId}`;

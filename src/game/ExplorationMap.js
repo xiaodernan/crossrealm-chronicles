@@ -1,6 +1,10 @@
 import { MAP_BOSSES } from './QuestSystem.js';
 import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_EXPLORATIONMAP = 'game/ExplorationMap';
+const exploreOn = (name, handler) => on(name, handler, GAME_EXPLORATIONMAP);
 const CELL = 12;
 const MIN = -320;
 const MAX = 320;
@@ -9,6 +13,11 @@ const GH = GW;
 
 /** 世界迷雾探索 — 全屏地图数据 */
 export class ExplorationMap {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_EXPLORATIONMAP);
+  }
+
   constructor(game) {
     this.game = game;
     this.revealed = new Uint8Array(GW * GH);
@@ -96,11 +105,11 @@ export class ExplorationMap {
   }
 
   setupListeners() {
-    window.addEventListener('discovery', (e) => {
+    exploreOn('discovery', (e) => {
       const p = this.game.player.position;
       this.revealPoi(e.detail.id, p.x, p.z);
     });
-    window.addEventListener('dungeon-enter', (e) => {
+    exploreOn('dungeon-enter', (e) => {
       const def = [...(this.game.dungeons?.dungeons?.values() ?? [])].find((d) => d.def.id === e.detail.id)?.def;
       if (def?.entrance) this.revealDungeon(e.detail.id, def.entrance.x, def.entrance.z);
     });

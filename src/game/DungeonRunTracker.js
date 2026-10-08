@@ -1,5 +1,15 @@
 /** 地下城通关记录 — 次数 / 最近用时 / 最佳探索 */
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_DUNGEONRUNTRACKER = 'game/DungeonRunTracker';
+const runTrackerOn = (name, handler) => on(name, handler, GAME_DUNGEONRUNTRACKER);
+
 export class DungeonRunTracker {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_DUNGEONRUNTRACKER);
+  }
+
   constructor(game) {
     this.game = game;
     this.clears = {};
@@ -9,14 +19,14 @@ export class DungeonRunTracker {
   }
 
   setupListeners() {
-    window.addEventListener('dungeon-enter', (e) => {
+    runTrackerOn('dungeon-enter', (e) => {
       const id = e.detail?.id ?? e.detail?.dungeonId;
       this.activeRun = { id, start: performance.now(), rooms: 0, entered: Date.now() };
     });
-    window.addEventListener('dungeon-room-enter', () => {
+    runTrackerOn('dungeon-room-enter', () => {
       if (this.activeRun) this.activeRun.rooms += 1;
     });
-    window.addEventListener('dungeon-cleared', (e) => {
+    runTrackerOn('dungeon-cleared', (e) => {
       const id = e.detail?.id;
       if (!id) return;
       const elapsed = this.activeRun?.id === id

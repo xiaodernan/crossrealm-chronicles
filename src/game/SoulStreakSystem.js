@@ -1,5 +1,15 @@
 /** 连杀魂火 — 短时间多杀奖励 */
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_SOULSTREAKSYSTEM = 'game/SoulStreakSystem';
+const streakOn = (name, handler) => on(name, handler, GAME_SOULSTREAKSYSTEM);
+
 export class SoulStreakSystem {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_SOULSTREAKSYSTEM);
+  }
+
   constructor(game) {
     this.game = game;
     this.streak = 0;
@@ -9,7 +19,7 @@ export class SoulStreakSystem {
   }
 
   setupListeners() {
-    window.addEventListener('enemy-defeated', (e) => {
+    streakOn('enemy-defeated', (e) => {
       if (e.detail?.type === 'dummy') return;
       this.streak += 1;
       this.timer = 4.5;
@@ -21,7 +31,7 @@ export class SoulStreakSystem {
       }
       if (this.streak > this.best) this.best = this.streak;
     });
-    window.addEventListener('player-respawn', () => {
+    streakOn('player-respawn', () => {
       this.streak = 0;
       this.timer = 0;
     });

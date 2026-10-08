@@ -19,6 +19,27 @@ import {
   registerTeardown, runTeardowns, teardownTags, clearTeardowns, adoptSubsystem,
 } from '../src/engine/teardown.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
+import { CampfireMemorySystem } from '../src/game/CampfireMemorySystem.js';
+import { CgGalleryAchievements } from '../src/game/CgGalleryAchievements.js';
+import { CombatStyleTracker } from '../src/game/CombatStyleTracker.js';
+import { CombatTutorialDirector } from '../src/game/CombatTutorialDirector.js';
+import { DeathHintDirector } from '../src/game/DeathHintDirector.js';
+import { DungeonRunTracker } from '../src/game/DungeonRunTracker.js';
+import { ExplorationMap } from '../src/game/ExplorationMap.js';
+import { PopCultureEchoSystem } from '../src/game/PopCultureEchoSystem.js';
+import { SoulStreakSystem } from '../src/game/SoulStreakSystem.js';
+import { StoryDirector } from '../src/game/StoryDirector.js';
+import { StoryJournal } from '../src/game/StoryJournal.js';
+import { attachAchievementExtras } from '../src/game/AchievementSystemExtras.js';
+import { attachCgGalleryExtras } from '../src/game/CgGallerySystemExtras.js';
+import { attachPopCultureCombatBarks } from '../src/game/PopCultureCombatBarks.js';
+import { BossPhaseDirector } from '../src/ui/BossPhaseDirector.js';
+import { CombatSessionStats } from '../src/ui/CombatSessionStats.js';
+import { CombatStyleOverlay } from '../src/ui/CombatStyleOverlay.js';
+import { BossRematchDirector } from '../src/world/BossRematchDirector.js';
+import { DungeonManager } from '../src/world/DungeonManager.js';
+import { RestNpcAnimDirector } from '../src/world/RestNpcAnimDirector.js';
+import { RestNpcManager } from '../src/world/RestNpcManager.js';
 import { AchievementSystem } from '../src/game/AchievementSystem.js';
 import { CgGallerySystem } from '../src/game/CgGallerySystem.js';
 import { LoreCodexSystem } from '../src/game/LoreCodexSystem.js';
@@ -146,7 +167,7 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
       expect(src, '错误收集器也要卸').toMatch(/errorReporter\?\.uninstall\?\.\(\)/);
     });
 
-    it('二十一个已收编的子系统都点名在册（tag 逐条写死，不是循环拼的）', () => {
+    it('四十二个已收编的子系统都点名在册（tag 逐条写死，不是循环拼的）', () => {
       const src = gameSrc();
       for (const tag of [
         'combat/DamageNumbers', 'effects/CombatFeedback', 'ui/HUD',
@@ -161,6 +182,15 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
         'cinematic/RestSceneDirector', 'cinematic/EndCreditsDirector', 'effects/AmbientScenePass',
         'effects/ExecutionEffects', 'effects/PopCultureTriadVisualPass', 'effects/RealmBleed',
         'effects/UpsideDownVisualPass', 'effects/ZoneTransitionFX',
+        // W-A1 迁移第八/九处：game×15 / ui×3 / world×4，共 21 个新收编点
+        'game/AchievementSystemExtras', 'game/CampfireMemorySystem', 'game/CgGalleryAchievements',
+        'game/CgGallerySystemExtras', 'game/CombatStyleTracker', 'game/CombatTutorialDirector',
+        'game/DeathHintDirector', 'game/DungeonRunTracker', 'game/ExplorationMap',
+        'game/PopCultureCombatBarks', 'game/PopCultureEchoSystem', 'game/SoulStreakSystem',
+        'game/StoryDirector', 'game/StoryJournal',
+        'ui/BossPhaseDirector', 'ui/CombatSessionStats', 'ui/CombatStyleOverlay',
+        'world/BossRematchDirector', 'world/DungeonManager',
+        'world/RestNpcAnimDirector', 'world/RestNpcManager',
       ]) {
         expect(src, `${tag} 应当被收编`).toContain(`_adopt('${tag}'`);
       }
@@ -171,7 +201,7 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
       // 五个都收编了 —— 反面：如果谁写成 `this.hud = new HUD(this)`，这一条抓不出来，
       // 但上一条（点名 tag）会红。两条合起来才盖住"忘了收编"与"收编了没点名"两种。
       const adopted = [...src.matchAll(/_adopt\('([^']+)'/g)].map((m) => m[1]);
-      expect(adopted.length).toBeGreaterThanOrEqual(21);
+      expect(adopted.length).toBeGreaterThanOrEqual(42);
       expect(new Set(adopted).size, 'tag 不许重复').toBe(adopted.length);
     });
   });
@@ -212,6 +242,108 @@ describe('迁移第六处的四个系统：listenerCount(tag) 构造后 > 0、di
       delete globalThis.localStorage;
     });
   }
+});
+
+describe('迁移第八/九处的系统：构造后监听在册、dispose() 后归零', () => {
+  /** 这批系统的构造期只碰少量字段，一个通用假 game 就够；监听 handler 里的访问不入场 */
+  const fakeGame = () => ({
+    dialog: { toast() {}, show() {} },
+    stats: {},
+    quests: { chapter: 1 },
+    storyJournal: null,
+    dungeons: null,
+    cgGallery: null,
+    contextualTutorial: null,
+    popCulture: null,
+  });
+  const stubScene = () => ({ add() {}, remove() {} });
+
+  /** 三个 UI 件构造期要 document（与 engine-perfhud.test.js 同款的最小替身） */
+  function installDomStub() {
+    const makeEl = () => ({
+      style: {},
+      children: [],
+      innerHTML: '',
+      textContent: '',
+      className: '',
+      id: '',
+      classList: { add() {}, remove() {} },
+      querySelector: () => null,
+      appendChild(c) { this.children.push(c); return c },
+      remove() {},
+    });
+    globalThis.document = {
+      createElement() { return makeEl() },
+      body: makeEl(),
+      head: makeEl(),
+    };
+  }
+
+  const cases = [
+    { tag: 'game/AchievementSystemExtras', make: () => attachAchievementExtras(fakeGame()) },
+    { tag: 'game/CgGallerySystemExtras', make: () => attachCgGalleryExtras(fakeGame()) },
+    { tag: 'game/PopCultureCombatBarks', make: () => attachPopCultureCombatBarks(fakeGame()) },
+    { tag: 'game/CampfireMemorySystem', make: () => new CampfireMemorySystem(fakeGame()) },
+    { tag: 'game/CgGalleryAchievements', make: () => new CgGalleryAchievements(fakeGame()) },
+    { tag: 'game/CombatStyleTracker', make: () => new CombatStyleTracker(fakeGame()) },
+    { tag: 'game/CombatTutorialDirector', make: () => new CombatTutorialDirector(fakeGame()) },
+    { tag: 'game/DeathHintDirector', make: () => new DeathHintDirector(fakeGame()) },
+    { tag: 'game/DungeonRunTracker', make: () => new DungeonRunTracker(fakeGame()) },
+    { tag: 'game/ExplorationMap', make: () => { const m = new ExplorationMap(fakeGame()); m.setupListeners(); return m; } },
+    { tag: 'game/PopCultureEchoSystem', make: () => new PopCultureEchoSystem(fakeGame()) },
+    { tag: 'game/SoulStreakSystem', make: () => new SoulStreakSystem(fakeGame()) },
+    { tag: 'game/StoryDirector', make: () => new StoryDirector(fakeGame()) },
+    { tag: 'game/StoryJournal', make: () => { const j = new StoryJournal(fakeGame()); j.setupListeners(); return j; } },
+    { tag: 'ui/BossPhaseDirector', make: () => new BossPhaseDirector(fakeGame()) },
+    { tag: 'ui/CombatSessionStats', make: () => new CombatSessionStats(fakeGame()) },
+    { tag: 'ui/CombatStyleOverlay', make: () => new CombatStyleOverlay(fakeGame()) },
+    { tag: 'world/BossRematchDirector', make: () => new BossRematchDirector(fakeGame()) },
+    { tag: 'world/RestNpcAnimDirector', make: () => new RestNpcAnimDirector(fakeGame()) },
+    { tag: 'world/RestNpcManager', make: () => new RestNpcManager(stubScene(), { getGroundHeight: () => 0 }, { points: [] }, fakeGame()) },
+  ];
+
+  for (const c of cases) {
+    it(`${c.tag}：构造后监听在册，dispose() 后清零`, () => {
+      installWindowShim();
+      installDomStub();
+      offAll(c.tag);
+      const inst = c.make();
+      expect(listenerCount(c.tag), `${c.tag} 构造后一条监听都没有 —— 迁移把监听弄丢了`).toBeGreaterThan(0);
+      inst.dispose();
+      expect(listenerCount(c.tag), `${c.tag} dispose() 之后监听还在 —— 退订路径是假的`).toBe(0);
+      delete globalThis.window;
+      delete globalThis.CustomEvent;
+      delete globalThis.document;
+    });
+  }
+
+  it('DungeonManager：四个监听挂在自己的 tag 下，dispose 后归零', () => {
+    installWindowShim();
+    installDomStub();
+    offAll('world/DungeonManager');
+    const dm = new DungeonManager(stubScene(), { getGroundHeight: () => 0 }, { toast() {} }, null, fakeGame());
+    expect(listenerCount('world/DungeonManager'), 'DungeonManager 构造后应当有三条监听').toBeGreaterThan(0);
+    dm.dispose();
+    expect(listenerCount('world/DungeonManager')).toBe(0);
+    delete globalThis.window;
+    delete globalThis.CustomEvent;
+    delete globalThis.document;
+  });
+
+  it('attachAchievementExtras 的 dispose 连带清掉子模块 PopCultureAchievementExtras 的监听', () => {
+    installWindowShim();
+    installDomStub();
+    offAll('game/AchievementSystemExtras');
+    offAll('game/PopCultureAchievementExtras');
+    const extras = attachAchievementExtras(fakeGame());
+    expect(listenerCount('game/PopCultureAchievementExtras'), '子模块的监听没人收 —— 组合 dispose 是假的').toBe(1);
+    extras.dispose();
+    expect(listenerCount('game/PopCultureAchievementExtras')).toBe(0);
+    expect(listenerCount('game/AchievementSystemExtras')).toBe(0);
+    delete globalThis.window;
+    delete globalThis.CustomEvent;
+    delete globalThis.document;
+  });
 });
 
 describe('⑦ 反面证据：尺子自己要被量过', () => {

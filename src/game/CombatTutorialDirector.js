@@ -1,7 +1,16 @@
 import { refreshKeyText } from '../content/keyHints.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_COMBATTUTORIALDIRECTOR = 'game/CombatTutorialDirector';
+const tutorialOn = (name, handler) => on(name, handler, GAME_COMBATTUTORIALDIRECTOR);
 /** 首次战斗演出提示 + 处决输入锁定协调 */
 export class CombatTutorialDirector {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_COMBATTUTORIALDIRECTOR);
+  }
+
   constructor(game) {
     this.game = game;
     this.seen = new Set();
@@ -9,9 +18,9 @@ export class CombatTutorialDirector {
   }
 
   _bindEvents() {
-    window.addEventListener('combo-finisher', () => this._once('finisher', '连击终结：镜头绕轨锁定 — 此时无法移动/攻击'));
-    window.addEventListener('combat-riposte', () => this._once('riposte', '致命反击：慢镜头中输入已锁定'));
-    window.addEventListener('combat-execution', (e) => {
+    tutorialOn('combo-finisher', () => this._once('finisher', '连击终结：镜头绕轨锁定 — 此时无法移动/攻击'));
+    tutorialOn('combat-riposte', () => this._once('riposte', '致命反击：慢镜头中输入已锁定'));
+    tutorialOn('combat-execution', (e) => {
       const msg = e.detail?.boss ? 'Boss 击破：全屏演出期间输入锁定' : '处决：短瞬间无法操作';
       this._once(e.detail?.boss ? 'bossKill' : 'execution', msg);
     });

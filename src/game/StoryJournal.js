@@ -1,6 +1,10 @@
 /** 统一叙事日志 — 探索/碎片/NPC/Boss/地牢，可存档 */
 import { isDungeonBossId } from '../content/bossRoster.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_STORYJOURNAL = 'game/StoryJournal';
+const journalOn = (name, handler) => on(name, handler, GAME_STORYJOURNAL);
 export const JOURNAL_CATEGORIES = {
   all: '全部',
   quest: '任务',
@@ -15,6 +19,11 @@ export const JOURNAL_CATEGORIES = {
 export const DISCOVERABLE_TOTAL = 28;
 
 export class StoryJournal {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */
+  dispose() {
+    offAll(GAME_STORYJOURNAL);
+  }
+
   constructor(game) {
     this.game = game;
     this.entries = [];
@@ -76,7 +85,7 @@ export class StoryJournal {
   }
 
   setupListeners() {
-    window.addEventListener('discovery', (e) => {
+    journalOn('discovery', (e) => {
       const { id, title, text, category } = e.detail;
       if (this.has(id)) return;
       this.addSilent({
@@ -89,7 +98,7 @@ export class StoryJournal {
       window.dispatchEvent(new CustomEvent('journal-updated'));
     });
 
-    window.addEventListener('dungeon-cleared', (e) => {
+    journalOn('dungeon-cleared', (e) => {
       const def = [...(this.game.dungeons?.dungeons?.values() ?? [])].find((d) => d.def.id === e.detail.id)?.def;
       this.add({
         id: `dungeon-clear-${e.detail.id}`,
@@ -101,7 +110,7 @@ export class StoryJournal {
       });
     });
 
-    window.addEventListener('enemy-defeated', (e) => {
+    journalOn('enemy-defeated', (e) => {
       if (e.detail.type !== 'boss' || isDungeonBossId(e.detail.bossId)) return;
       const names = {
         'shadow-warden': '影界守护者',
@@ -120,7 +129,7 @@ export class StoryJournal {
       });
     });
 
-    window.addEventListener('quest-updated', (e) => {
+    journalOn('quest-updated', (e) => {
       const idx = e.detail.index;
       if (idx === this._lastQuestIndex) return;
       this._lastQuestIndex = idx;
