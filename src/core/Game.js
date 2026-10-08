@@ -254,7 +254,9 @@ export class Game {
     this.weather = new WeatherSystem(this.scene, this.world, this.zoneFog);
     this.executionFx = new ExecutionEffects(this.scene, this);
     this.collectibles = new CollectibleManager(this.scene, this.world, this.stats, this.dialog);
-    this.quests = new QuestSystem(this.dialog);
+    // W-A1 迁移第五处：十条记账监听走总线（带 tag），于是它必须进 teardown 登记表 ——
+    // `_adopt` 会拒绝没有 dispose() 的子系统（"假装收编"的防线）。
+    this.quests = this._adopt('game/QuestSystem', new QuestSystem(this.dialog));
     this.storyJournal = new StoryJournal(this);
     this.storyDirector = new StoryDirector(this);
     this.npcs = new NPCManager(this.scene, this.world, this.dialog, this);

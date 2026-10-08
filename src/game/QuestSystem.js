@@ -4,6 +4,13 @@ import {
   BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
 } from '../content/objectives.js';
+import { on, offAll } from '../engine/EventBus.js';
+
+/** 本文件自己的监听出口（W-A1 迁移第五处）：十个记账事件（`STAT_EVENTS`）都挂在同一个所有权下，
+ *  `dispose()` 里一次结清。事件名来自 `STAT_EVENTS`（运行时才知道是哪个），
+ *  所以这里带 tag 的那一层尤其要紧 —— 不然这十条监听没有任何退订路径。 */
+const QUEST_EVENT_TAG = 'game/QuestSystem';
+const questsOn = (name, handler) => on(name, handler, QUEST_EVENT_TAG);
 
 /* ------------------------------------------------------------------ *
  * 主线只有一张表（W-B3 切片3）
@@ -170,12 +177,17 @@ export class QuestSystem {
    */
   setupListeners() {
     for (const name of Object.keys(STAT_EVENTS)) {
-      window.addEventListener(name, (e) => {
+      questsOn(name, (e) => {
         applyStatEvent(this.stats, name, e.detail);
         if (name === 'poi-interact') this._onInteract(e.detail);
         this.checkProgress();
       });
     }
+  }
+
+  /** 十条记账监听的唯一退订路径（W-A1 迁移第五处）：由 `Game._adopt` 登记，反序执行 */
+  dispose() {
+    offAll(QUEST_EVENT_TAG);
   }
 
   /**

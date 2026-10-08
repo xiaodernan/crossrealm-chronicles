@@ -4,7 +4,6 @@ import { join, relative } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import { on, emit, offAll, listenerCount, UNGROUPED } from '../src/engine/EventBus.js';
 import { GAME_EVENTS } from '../src/engine/events.js';
-import { STAT_EVENTS } from '../src/content/objectives.js';
 
 /**
  * 事件总线与监听器注销（B44 剩下的另一半）。
@@ -115,7 +114,6 @@ const BARE_WINDOW_LISTENERS = {
   'game/PopCultureAchievementExtras.js': 1,
   'game/PopCultureCombatBarks.js': 1,
   'game/PopCultureEchoSystem.js': 2,
-  'game/QuestSystem.js': 10,
   'game/SoulStreakSystem.js': 2,
   'game/StoryDirector.js': 3,
   'game/StoryJournal.js': 4,
@@ -139,10 +137,16 @@ const BARE_WINDOW_LISTENERS = {
  * 没有 dispose 时的 removeEventListener）。债没消失，只是从扫描器眼前消失了，
  * 所以这里按运行时条数把债原样记回来，条数从生产表 `STAT_EVENTS` 自己数，不手抄。
  */
-const TABLE_DRIVEN_BARE = [
-  // `names` 从生产表自己数（不手抄清单），`table` 是源锚点：那个文件必须被看见在遍历它
-  { file: 'game/QuestSystem.js', table: 'STAT_EVENTS', names: Object.keys(STAT_EVENTS) },
-];
+/**
+ * 表驱动的裸监听：源文件里只有**一个** `window.addEventListener(name, …)` 调用点，
+ * `name` 是变量，运行时按名字表逐条挂上「表长」那么多条。
+ *
+ * W-A1 迁移第五处（2026-10-08）：`game/QuestSystem.js` 整文件迁完（走 `questsOn(name, …)`，
+ * `dispose()` 里 `offAll('game/QuestSystem')`），所以这一笔**从台账里删掉**而不是改成 0 ——
+ * 口径与 `BARE_WINDOW_LISTENERS` 一致：整文件迁完就删行。下面那条表驱动用例因此暂时空转，
+ * 它仍是下一批表驱动监听（例如 `ObjectiveEngine`）迁完前唯一的记债方式，故结构保留。
+ */
+const TABLE_DRIVEN_BARE = [];
 
 const scan = () => {
   const bare = {};
@@ -288,7 +292,9 @@ describe('监听注销门禁（B44 剩余半区）', () => {
     // 131 → 129（2026-10-08）：`cinematic/CombatCinematicSkip.js` 整文件迁完、台账删行。
     // 这个数**故意是硬编码**：迁移是一笔一笔的欠账，自动跟随就等于"改多少都不算数"。
     // 129 → 116（2026-10-08）：core/Game.js 的 13 处整文件迁完。
-    expect(total).toBe(116);
+    // 116 → 106（2026-10-08）：game/QuestSystem.js 的十条记账监听整文件迁完
+    //   （走 questsOn(name, …) + dispose() 里 offAll；Game._adopt 登记，反序执行）。
+    expect(total).toBe(106);
     // HUD 是切片6 迁掉的那一个：它必须从台账里消失，并且改用总线
     expect(bare['ui/HUD.js']).toBeUndefined();
     expect(busUsers.get('ui/HUD.js')).toMatchObject({ on: 20, offAll: 1 });

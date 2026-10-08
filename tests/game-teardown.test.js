@@ -18,6 +18,10 @@ import { join } from 'node:path';
 import {
   registerTeardown, runTeardowns, teardownTags, clearTeardowns, adoptSubsystem,
 } from '../src/engine/teardown.js';
+import { QuestSystem } from '../src/game/QuestSystem.js';
+import { STAT_EVENTS } from '../src/content/objectives.js';
+import { listenerCount, offAll } from '../src/engine/EventBus.js';
+import { installWindowShim } from './helpers/enemyHarness.js';
 
 const SRC = join(process.cwd(), 'src');
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '')
@@ -138,11 +142,14 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
       expect(src, '错误收集器也要卸').toMatch(/errorReporter\?\.uninstall\?\.\(\)/);
     });
 
-    it('五个已收编的子系统都点名在册（tag 逐条写死，不是循环拼的）', () => {
+    it('六个已收编的子系统都点名在册（tag 逐条写死，不是循环拼的）', () => {
       const src = gameSrc();
       for (const tag of [
         'combat/DamageNumbers', 'effects/CombatFeedback', 'ui/HUD',
         'cinematic/CombatCinematicSkip', 'engine/PerfHUD',
+        // W-A1 迁移第五处：QuestSystem 的十条记账监听走总线以后，它第一次有了退订路径，
+        // 于是它也必须进登记表 —— 否则那十条监听还是会跟着 Game 一起烂掉。
+        'game/QuestSystem',
       ]) {
         expect(src, `${tag} 应当被收编`).toContain(`_adopt('${tag}'`);
       }
@@ -153,12 +160,27 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
       // 五个都收编了 —— 反面：如果谁写成 `this.hud = new HUD(this)`，这一条抓不出来，
       // 但上一条（点名 tag）会红。两条合起来才盖住"忘了收编"与"收编了没点名"两种。
       const adopted = [...src.matchAll(/_adopt\('([^']+)'/g)].map((m) => m[1]);
-      expect(adopted.length).toBeGreaterThanOrEqual(5);
+      expect(adopted.length).toBeGreaterThanOrEqual(6);
       expect(new Set(adopted).size, 'tag 不许重复').toBe(adopted.length);
     });
   });
 
-  describe('⑦ 反面证据：尺子自己要被量过', () => {
+  describe('QuestSystem 的十条记账监听：挂在 tag 下，dispose 后归零（W-A1 迁移第五处）', () => {
+  const TAG = 'game/QuestSystem';
+  it('构造后 listenerCount(TAG) = STAT_EVENTS 的条数，dispose() 后为 0', () => {
+    installWindowShim();
+    offAll(TAG);
+    const qs = new QuestSystem({ toast() {}, play() {} });
+    expect(listenerCount(TAG), '十条记账监听没挂在 game/QuestSystem 这个所有权下')
+      .toBe(Object.keys(STAT_EVENTS).length);
+    qs.dispose();
+    expect(listenerCount(TAG), 'dispose() 之后监听还在 —— 退订路径是假的').toBe(0);
+    delete globalThis.window;
+    delete globalThis.CustomEvent;
+  });
+
+});
+describe('⑦ 反面证据：尺子自己要被量过', () => {
     it('"没有 dispose"那把尺子认得出三种坏形状', () => {
       const 有Dispose = (o) => typeof o?.dispose === 'function';
       expect(有Dispose({ dispose() {} })).toBe(true);
