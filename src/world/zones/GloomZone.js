@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { paletteOf } from '../../content/materialPalette.js';
 
 /** 新增：幽暗林地 — 迷雾缠绕的古老森林，介于幻想与虚空之间 */
 export class GloomZone extends BaseZone {
@@ -86,7 +87,7 @@ export class GloomZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x3a3a4a, roughness: 0.95 });
+    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.gloomRock'), roughness: 0.95 });
     for (let i = 0; i < 20; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.5;
       const lz = (Math.random() - 0.5) * this.radius * 1.5;

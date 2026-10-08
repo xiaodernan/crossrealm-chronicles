@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { paletteOf } from '../../content/materialPalette.js';
 
 /** 新增：辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊 */
 export class RadiantZone extends BaseZone {
@@ -86,7 +87,7 @@ export class RadiantZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffcc88, roughness: 0.85, metalness: 0.2 });
+    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.radiantRock'), roughness: 0.85, metalness: 0.2 });
     for (let i = 0; i < 18; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.4;
       const lz = (Math.random() - 0.5) * this.radius * 1.4;

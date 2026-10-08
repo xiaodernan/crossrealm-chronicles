@@ -22,8 +22,10 @@
  *     （`content/enemies.js`）、语义色（`semanticColors.js`）、区名色（`ZoneIdentity`）。
  *
  * 人口边界是那 11 个文件（六种烘焙表面的消费方 + 相邻实体表面 + 共享几何助手
- * `BaseZone`）。**其余区域（魔法/太空/深渊/微光/辐光）的表面色不在本片** ——
- * 它们的表面还没进烘焙管线，等各自的表面切片再搬进来。
+ * `BaseZone`）。**W-C5 切片9 把其余五区（魔法/太空/深渊/微光/辐光）的表面底色也搬了进来** ——
+ * 五区里仍在原处的是光与自发光、粒子、线框能量体、POI 身份色与 skyColor / mapColor
+ * （逐文件逐条见 `tests/material-palette.test.js` 的残留钉板）。五区的**法线/粗糙度还没进烘焙管线**，
+ * 那是各自表面切片的事（切片9 的记录在 §9）。
  *
  * ## 默认 = 现状，逐格同值
  *
@@ -65,6 +67,8 @@ export const MATERIAL_PALETTE = deepFreeze({
     bark: 0x6a5040,
     /** 区域树树干（`BaseZone.createTree`） */
     zoneTrunk: 0x4a3020,
+    /** 魔法区漂浮古书（15 本共用） */
+    book: 0x6a4030,
   },
   /** 石 —— 废墟 / 山体 / 散石 / 拱门 */
   stone: {
@@ -92,13 +96,35 @@ export const MATERIAL_PALETTE = deepFreeze({
     propPost: 0x5a5048,
     /** 区域山石（`BaseZone.createRock`） */
     zoneRock: 0x5a5a58,
+    /** 魔法区悬浮城堡墙体 */
+    castleWall: 0x4a4458,
+    /** 魔法区城堡塔顶（锥顶共用一份） */
+    castleRoof: 0x2a2040,
+    /** 深渊区外野岩块（`AbyssZone.buildOuterWilds`） */
+    abyssRock: 0x3a1828,
+    /** 微光区外野岩块 */
+    gloomRock: 0x3a3a4a,
+    /** 辐光区外野岩块（暖白） */
+    radiantRock: 0xffcc88,
+    /** 太空区外野散石 */
+    spaceRock: 0x2a3545,
   },
-  /** 金属 —— 剑与金环 */
+  /** 金属 —— 剑与金环、船体与方碑 */
   metal: {
     /** 鎏金：剑身（steel 表面）/ 时环 / 枢纽环 / 八面幡 */
     gilt: 0xc9a962,
     /** 至尊石环 */
     ring: 0xc9a030,
+    /** 魔法区魁地奇大环 */
+    quidditchRing: 0xffcc44,
+    /** 魔法区魁地奇球筐（两处共用） */
+    quidditchHoop: 0xffaa22,
+    /** 太空区飞船壳体（船身 + 机翼共用） */
+    hull: 0x3a4048,
+    /** 太空区引擎舱 */
+    engine: 0x2a3040,
+    /** 太空区独石方碑（四根共用） */
+    monolith: 0x111118,
   },
   /** 植被 */
   foliage: {
@@ -108,6 +134,10 @@ export const MATERIAL_PALETTE = deepFreeze({
     wild: 0x2a4030,
     /** 区域树冠（`BaseZone.createTree` 的锥形树冠） */
     zoneCrown: 0x2a5a30,
+    /** 魔法区禁林树冠（深到近黑） */
+    forbidden: 0x0a1a10,
+    /** 魔法区外野针叶 */
+    magicWild: 0x1a3020,
   },
   /** 水 */
   water: {
@@ -119,7 +149,7 @@ export const MATERIAL_PALETTE = deepFreeze({
     /** 集市雨棚三色（每摊取一） */
     awning: [0x884422, 0x225588, 0x446633],
   },
-  /** 晶体 / 发光实体的底色（自发光值与光色不在此列） */
+  /** 晶体 / 玻璃 / 发光实体的底色（自发光值与光色不在此列） */
   crystal: {
     /** 世界之锚核心 / 枢纽喷泉环 */
     hub: 0x88ccff,
@@ -127,6 +157,12 @@ export const MATERIAL_PALETTE = deepFreeze({
     wild: 0xaaddff,
     /** 时线碎片 */
     shard: 0x8899cc,
+    /** 魔法区外野水晶 / Boss 门拱（两处同色） */
+    magic: 0x5533aa,
+    /** 太空区冰构与冰刺（两处同色） */
+    ice: 0xaaccff,
+    /** 魔法区温室玻璃（透明实体表面） */
+    greenhouse: 0x88ccaa,
   },
   /** 装甲 */
   armor: {

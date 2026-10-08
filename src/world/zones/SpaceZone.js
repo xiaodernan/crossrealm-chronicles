@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { paletteOf } from '../../content/materialPalette.js';
 
 /** 星际穿越风格 — 冰云行星、引力透镜、五维书架彩蛋 */
 export class SpaceZone extends BaseZone {
@@ -95,7 +96,7 @@ export class SpaceZone extends BaseZone {
 
   buildIceStructures() {
     const iceMat = new THREE.MeshStandardMaterial({
-      color: 0xaaccff,
+      color: paletteOf('crystal.ice'),
       roughness: 0.15,
       metalness: 0.1,
       transparent: true,
@@ -163,7 +164,7 @@ export class SpaceZone extends BaseZone {
   }
 
   buildWreckage() {
-    const hullMat = new THREE.MeshStandardMaterial({ color: 0x3a4048, roughness: 0.7, metalness: 0.5 });
+    const hullMat = new THREE.MeshStandardMaterial({ color: paletteOf('metal.hull'), roughness: 0.7, metalness: 0.5 });
     const wreck = new THREE.Group();
     const body = new THREE.Mesh(new THREE.BoxGeometry(12, 3, 6), hullMat);
     body.rotation.z = 0.15;
@@ -175,7 +176,7 @@ export class SpaceZone extends BaseZone {
     wreck.add(wing);
     const engine = new THREE.Mesh(
       new THREE.CylinderGeometry(0.8, 1.2, 2, 8),
-      new THREE.MeshStandardMaterial({ color: 0x2a3040, emissive: 0x112244, emissiveIntensity: 0.5 })
+      new THREE.MeshStandardMaterial({ color: paletteOf('metal.engine'), emissive: 0x112244, emissiveIntensity: 0.5 })
     );
     engine.position.set(5, 1, 0);
     engine.rotation.z = Math.PI / 2;
@@ -193,7 +194,7 @@ export class SpaceZone extends BaseZone {
 
   buildMonoliths() {
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x111118,
+      color: paletteOf('metal.monolith'),
       roughness: 0.2,
       metalness: 0.9,
     });
@@ -239,7 +240,7 @@ export class SpaceZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const iceMat = new THREE.MeshStandardMaterial({ color: 0xaaccff, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 });
+    const iceMat = new THREE.MeshStandardMaterial({ color: paletteOf('crystal.ice'), roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 });
     for (let i = 0; i < 30; i++) {
       const angle = (i / 30) * Math.PI * 2;
       const r = this.radius * 0.65 + Math.random() * this.radius * 0.3;
@@ -252,7 +253,7 @@ export class SpaceZone extends BaseZone {
       const gy = this.sampleHeight(lx, lz);
       this.addCylinderCollider(lx, lz, 0.6, gy + spike.geometry.parameters.height, { base: gy - 0.5 });
     }
-    const rockMat = new THREE.MeshStandardMaterial({ color: 0x2a3545, roughness: 0.95 });
+    const rockMat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.spaceRock'), roughness: 0.95 });
     for (let i = 0; i < 12; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.4;
       const lz = (Math.random() - 0.5) * this.radius * 1.4;

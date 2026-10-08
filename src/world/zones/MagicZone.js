@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { paletteOf } from '../../content/materialPalette.js';
 
 /** 哈利波特风格 — 悬浮城堡、魔法光柱、禁林 */
 export class MagicZone extends BaseZone {
@@ -36,7 +37,7 @@ export class MagicZone extends BaseZone {
   buildMagicBossGate() {
     const gate = new THREE.Group();
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x5533aa,
+      color: paletteOf('crystal.magic'),
       emissive: 0x220044,
       emissiveIntensity: 0.6,
       transparent: true,
@@ -73,8 +74,8 @@ export class MagicZone extends BaseZone {
 
   buildCastle() {
     const castle = new THREE.Group();
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x4a4458, roughness: 0.85 });
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x2a2040, roughness: 0.8 });
+    const wallMat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.castleWall'), roughness: 0.85 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.castleRoof'), roughness: 0.8 });
 
     const main = new THREE.Mesh(new THREE.BoxGeometry(20, 12, 16), wallMat);
     main.position.y = 18;
@@ -116,7 +117,7 @@ export class MagicZone extends BaseZone {
       const z = Math.sin(angle) * r;
       const tree = this.createTree(x, z, 1 + Math.random() * 0.5);
       tree.children[1].material = new THREE.MeshStandardMaterial({
-        color: 0x0a1a10,
+        color: paletteOf('foliage.forbidden'),
         roughness: 0.95,
       });
       this.group.add(tree);
@@ -170,13 +171,13 @@ export class MagicZone extends BaseZone {
   buildQuidditchRing() {
     const ring = new THREE.Mesh(
       new THREE.TorusGeometry(8, 0.15, 8, 48),
-      new THREE.MeshStandardMaterial({ color: 0xffcc44, emissive: 0x443300, emissiveIntensity: 0.3, metalness: 0.6 })
+      new THREE.MeshStandardMaterial({ color: paletteOf('metal.quidditchRing'), emissive: 0x443300, emissiveIntensity: 0.3, metalness: 0.6 })
     );
     ring.position.set(-35, 18, -20);
     ring.rotation.x = Math.PI / 2.2;
     this.group.add(ring);
 
-    const hoopMat = new THREE.MeshStandardMaterial({ color: 0xffaa22, metalness: 0.8, roughness: 0.3 });
+    const hoopMat = new THREE.MeshStandardMaterial({ color: paletteOf('metal.quidditchHoop'), metalness: 0.8, roughness: 0.3 });
     for (const x of [-35, -27]) {
       const hoop = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.08, 8, 24), hoopMat);
       hoop.position.set(x, 16, -20);
@@ -186,7 +187,7 @@ export class MagicZone extends BaseZone {
 
   buildGreenhouses() {
     const glassMat = new THREE.MeshStandardMaterial({
-      color: 0x88ccaa,
+      color: paletteOf('crystal.greenhouse'),
       transparent: true,
       opacity: 0.45,
       roughness: 0.1,
@@ -211,7 +212,7 @@ export class MagicZone extends BaseZone {
 
   buildFloatingBooks() {
     this.books = [];
-    const bookMat = new THREE.MeshStandardMaterial({ color: 0x6a4030, roughness: 0.8 });
+    const bookMat = new THREE.MeshStandardMaterial({ color: paletteOf('wood.book'), roughness: 0.8 });
     for (let i = 0; i < 15; i++) {
       const book = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.35), bookMat);
       book.position.set((Math.random() - 0.5) * 60, 5 + Math.random() * 15, (Math.random() - 0.5) * 60);
@@ -237,7 +238,7 @@ export class MagicZone extends BaseZone {
 
   buildOuterWilds() {
     const crystalMat = new THREE.MeshStandardMaterial({
-      color: 0x5533aa,
+      color: paletteOf('crystal.magic'),
       emissive: 0x220044,
       emissiveIntensity: 0.5,
       transparent: true,
@@ -252,7 +253,7 @@ export class MagicZone extends BaseZone {
       crystal.position.set(lx, 2 + Math.sin(i) * 2, lz);
       this.group.add(crystal);
     }
-    const treeMat = new THREE.MeshStandardMaterial({ color: 0x1a3020, roughness: 0.95 });
+    const treeMat = new THREE.MeshStandardMaterial({ color: paletteOf('foliage.magicWild'), roughness: 0.95 });
     for (let i = 0; i < 20; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.5;
       const lz = (Math.random() - 0.5) * this.radius * 1.5;

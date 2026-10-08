@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
+import { paletteOf } from '../../content/materialPalette.js';
 
 /** 第五主题：混沌边境 — 三界交汇后的不稳定位面 */
 export class AbyssZone extends BaseZone {
@@ -86,7 +87,7 @@ export class AbyssZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x3a1828, roughness: 0.95 });
+    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.abyssRock'), roughness: 0.95 });
     for (let i = 0; i < 24; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.6;
       const lz = (Math.random() - 0.5) * this.radius * 1.6;

@@ -27,13 +27,13 @@
  * （0x8a8580 = `stone.pale`）—— 它们读的是真消费者建出来的材质，改表就会红。
  *
  * ## 用例分五层
- * ① 表值层：31 格逐格同值（历史字面量）；族名册与 `MATERIAL_PATHS` 由表推导，与期望闭合。
+ * ① 表值层：48 格逐格同值（历史字面量）；族名册与 `MATERIAL_PATHS` 由表推导，与期望闭合。
  * ② 契约层：`paletteOf` 取值；族名/条目/深路径三处认不出各当场抛，且报错文本读得到可用键。
  * ③ 冻结层：表、族、族里的数组三层深冻结 —— 改不动（`Reflect.set` 为假、数组 push 抛）。
- * ④ 残留层：11 个文件逐一钉"残留字面量"的**集合与条数**（合计 57 处 / 48 种）；尺先在一段
+ * ④ 残留层：16 个文件逐一钉"残留字面量"的**集合与条数**（合计 100 处 / 77 种）；尺先在一段
  *    陈旧字面上认过 —— 否则"扫到 0 处"可能只是在读空集。
- * ⑤ 引用层：10 个消费方逐文件钉 `paletteOf('…')` 调用数 + 提及数 + import 数（提及=调用，
- *    动态传参会让两者不等）；其余 src 文件 0 提及；每个字面路径有效且并集恰是那 31 格（无死格）。
+ * ⑤ 引用层：15 个消费方逐文件钉 `paletteOf('…')` 调用数 + 提及数 + import 数（提及=调用，
+ *    动态传参会让两者不等）；其余 src 文件 0 提及；每个字面路径有效且并集恰是那 48 格（无死格）。
  *
  * 反向证据由变异臂脚本 `.tmp-20261007/wc5s8-arms.mjs` 承担：改一格的值、把一个消费方
  * 退回字面量、删掉守卫、解开冻结，各点名哪几档会红。
@@ -109,9 +109,26 @@ const 期望值 = {
   'crystal.wild': 0xaaddff,
   'crystal.shard': 0x8899cc,
   'armor.fallback': 0x553333,
+  'stone.castleWall': 0x4a4458,
+  'stone.castleRoof': 0x2a2040,
+  'stone.abyssRock': 0x3a1828,
+  'stone.gloomRock': 0x3a3a4a,
+  'stone.radiantRock': 0xffcc88,
+  'stone.spaceRock': 0x2a3545,
+  'metal.quidditchRing': 0xffcc44,
+  'metal.quidditchHoop': 0xffaa22,
+  'metal.hull': 0x3a4048,
+  'metal.engine': 0x2a3040,
+  'metal.monolith': 0x111118,
+  'foliage.forbidden': 0x0a1a10,
+  'foliage.magicWild': 0x1a3020,
+  'wood.book': 0x6a4030,
+  'crystal.magic': 0x5533aa,
+  'crystal.ice': 0xaaccff,
+  'crystal.greenhouse': 0x88ccaa,
 };
 
-/** ④ 人口与钉板：11 个文件、残留字面量的集合与条数（读数来自 `.tmp-20261007/wc5s8-pins.mjs`，同一把帚） */
+/** ④ 人口与钉板：16 个文件、残留字面量的集合与条数（读数来自普查脚本，同一把帚） */
 const 残留钉板 = {
   'world/ProceduralDungeonGenerator.js': { 数: 0, 集: [] },
   'world/zones/FantasyZone.js': {
@@ -142,6 +159,28 @@ const 残留钉板 = {
   },
   'player/PlayerController.js': { 数: 1, 集: ['0x332200'] },
   'world/regionSurfaces.js': { 数: 0, 集: [] },
+  'world/zones/MagicZone.js': {
+    数: 11,
+    集: ['0x1a1530', '0x220044', '0x443300', '0x44aa66', '0x6644cc', '0x8844ff', '0xaa44ff',
+      '0xaa66ff', '0xaa88ff', '0xffaa44'],
+  },
+  'world/zones/SpaceZone.js': {
+    数: 11,
+    集: ['0x000000', '0x050810', '0x112244', '0x4488ff', '0x66aaff', '0x66ccff',
+      '0x88aacc', '0x88ccff', '0xff8844', '0xffffff'],
+  },
+  'world/zones/AbyssZone.js': {
+    数: 7,
+    集: ['0x120810', '0x880022', '0xff0044', '0xff2244', '0xff4488'],
+  },
+  'world/zones/GloomZone.js': {
+    数: 7,
+    集: ['0x1a1a2a', '0x2a2a4a', '0x3a3a5a', '0x4a4a6a', '0x6a6a8a'],
+  },
+  'world/zones/RadiantZone.js': {
+    数: 7,
+    集: ['0xffaa00', '0xffcc00', '0xffee00', '0xffeeaa'],
+  },
 };
 
 /** ⑤ 引用钉板：消费方逐文件 {调用, 提及, import}；新增消费方要把人口与钉子一起改 */
@@ -156,19 +195,24 @@ const 引用钉板 = {
   'effects/SceneEnhancer.js': { 调用: 3, 提及: 3, import: 1 },
   'combat/Enemy.js': { 调用: 1, 提及: 1, import: 1 },
   'player/PlayerController.js': { 调用: 1, 提及: 1, import: 1 },
+  'world/zones/MagicZone.js': { 调用: 10, 提及: 10, import: 1 },
+  'world/zones/SpaceZone.js': { 调用: 6, 提及: 6, import: 1 },
+  'world/zones/AbyssZone.js': { 调用: 1, 提及: 1, import: 1 },
+  'world/zones/GloomZone.js': { 调用: 1, 提及: 1, import: 1 },
+  'world/zones/RadiantZone.js': { 调用: 1, 提及: 1, import: 1 },
 };
 const 定义文件 = 'content/materialPalette.js';
 
 describe('W-C5 切片8 调色板', () => {
-  describe('① 表值层：31 格逐格同值，名册由表推导', () => {
+  describe('① 表值层：48 格逐格同值，名册由表推导', () => {
     it('每格经 paletteOf 取到的值与历史字面量相同', () => {
       for (const [路径, 期望] of Object.entries(期望值)) {
         expect(paletteOf(路径), 路径).toEqual(期望);
       }
     });
 
-    it('期望集合与 MATERIAL_PATHS 闭合（31 格，两侧都不多不少）', () => {
-      expect(MATERIAL_PATHS.length, '条目总数').toBe(31);
+    it('期望集合与 MATERIAL_PATHS 闭合（48 格，两侧都不多不少）', () => {
+      expect(MATERIAL_PATHS.length, '条目总数').toBe(48);
       expect([...MATERIAL_PATHS].sort(), 'MATERIAL_PATHS').toEqual(Object.keys(期望值).sort());
     });
 
@@ -227,7 +271,7 @@ describe('W-C5 切片8 调色板', () => {
     });
   });
 
-  describe('④ 残留层：11 个文件的残留字面量逐文件钉死', () => {
+  describe('④ 残留层：16 个文件的残留字面量逐文件钉死', () => {
     it('尺先在陈旧字面上认过（识别力下限；注释里的不算）', () => {
       const 样例 = 'a 0x3a3028 b 0xfff c 0x11223344; // 0xdeadbeef\n/* 0x00ff00 */\n';
       expect(扫字面量(去注释(样例)), '尺要认得出 6/3/8 位，且不把注释算进来').toEqual(
@@ -235,7 +279,7 @@ describe('W-C5 切片8 调色板', () => {
       );
     });
 
-    it('逐文件：集合与条数都不许漂（合计 57 处 / 48 种）', () => {
+    it('逐文件：集合与条数都不许漂（合计 100 处 / 77 种）', () => {
       let 总 = 0;
       const 全 = new Set();
       for (const [文件, 期望] of Object.entries(残留钉板)) {
@@ -245,8 +289,8 @@ describe('W-C5 切片8 调色板', () => {
         expect([...new Set(命中)].sort(), `${文件} 的残留字面量集合`).toEqual(期望.集);
         expect(命中.length, `${文件} 的残留字面量条数`).toBe(期望.数);
       }
-      expect(总, '残留字面量合计').toBe(57);
-      expect(全.size, '残留字面量不同值合计').toBe(48);
+      expect(总, '残留字面量合计').toBe(100);
+      expect(全.size, '残留字面量不同值合计').toBe(77);
     });
   });
 
@@ -262,7 +306,7 @@ describe('W-C5 切片8 调色板', () => {
       });
     }
 
-    it('10 个消费文件：调用 = 提及（动态传参会让两者不等），import 恰好一次', () => {
+    it('15 个消费文件：调用 = 提及（动态传参会让两者不等），import 恰好一次', () => {
       let 调用总 = 0;
       for (const [文件, 期望] of Object.entries(引用钉板)) {
         const 实 = 读数.get(文件);
@@ -273,7 +317,7 @@ describe('W-C5 切片8 调色板', () => {
         expect(实.提及, `${文件}：提及数 ≠ 调用数 —— 只准传字面路径`).toBe(实.调用.length);
         expect(实.import, `${文件} 的 import 数`).toBe(期望.import);
       }
-      expect(调用总, '消费方调用合计').toBe(42);
+      expect(调用总, '消费方调用合计').toBe(61);
     });
 
     it('其余 src 文件 0 提及；定义文件自己 0 字面调用', () => {
@@ -287,7 +331,7 @@ describe('W-C5 切片8 调色板', () => {
       }
     });
 
-    it('每个字面路径都解析得开，且并集恰是表里那 31 格（无死格）', () => {
+    it('每个字面路径都解析得开，且并集恰是表里那 48 格（无死格）', () => {
       const 引用 = new Set();
       for (const [, 实] of 读数) for (const p of 实.调用) 引用.add(p);
       for (const p of 引用) {
