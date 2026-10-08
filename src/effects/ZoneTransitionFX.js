@@ -1,5 +1,15 @@
+import { on, offAll } from '../engine/EventBus.js';
+
+const EFFECTS_ZONETRANSITIONFX = 'effects/ZoneTransitionFX';
+const zoneFxOn = (name, handler) => on(name, handler, EFFECTS_ZONETRANSITIONFX);
+
 /** 区域切换全屏过渡 */
 export class ZoneTransitionFX {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(EFFECTS_ZONETRANSITIONFX);
+  }
+
   constructor(game) {
     this.game = game;
     this.el = document.createElement('div');
@@ -12,7 +22,7 @@ export class ZoneTransitionFX {
   }
 
   setupListeners() {
-    window.addEventListener('zone-changed', (e) => {
+    zoneFxOn('zone-changed', (e) => {
       // 分支取 id（修 B36），显示名只当文案用
       const zone = e.detail.zoneId;
       if (zone === this.lastZone) return;

@@ -1,8 +1,17 @@
 import * as THREE from 'three';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const EFFECTS_AMBIENTSCENEPASS = 'effects/AmbientScenePass';
+const ambientOn = (name, handler) => on(name, handler, EFFECTS_AMBIENTSCENEPASS);
 /** 区域氛围粒子 + 营火光晕增强 */
 export class AmbientScenePass {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(EFFECTS_AMBIENTSCENEPASS);
+  }
+
   constructor(game) {
     this.game = game;
     this.group = new THREE.Group();
@@ -60,7 +69,7 @@ export class AmbientScenePass {
       [ZONE_IDS.ABYSS]: 0xff6688,
       [ZONE_IDS.FANTASY]: 0xaaccaa,
     };
-    window.addEventListener('zone-changed', (e) => {
+    ambientOn('zone-changed', (e) => {
       this.dust.material.color.setHex(dustColor[e.detail.zoneId] ?? 0xc9d8e8);
     });
   }

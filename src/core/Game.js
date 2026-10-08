@@ -232,7 +232,7 @@ export class Game {
     this.labelRenderer.domElement.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2';
     container.appendChild(this.labelRenderer.domElement);
 
-    this.audio = new AudioManager();
+    this.audio = this._adopt('audio/AudioManager', new AudioManager());
     this.stats = new PlayerStats();
     this.dialog = new Dialog();
     this.dialogCg = new DialogCGRenderer();
@@ -252,9 +252,9 @@ export class Game {
     this.restCampfireAmbient = new RestCampfireAmbient(this.restPoints);
     this.restPointEnhancer = new RestPointEnhancer(this.restPoints, this);
     this.weather = new WeatherSystem(this.scene, this.world, this.zoneFog);
-    this.executionFx = new ExecutionEffects(this.scene, this);
+    this.executionFx = this._adopt('effects/ExecutionEffects', new ExecutionEffects(this.scene, this));
     this.collectibles = new CollectibleManager(this.scene, this.world, this.stats, this.dialog);
-    // W-A1 迁移第五/六处：这些系统的监听走总线（带 tag）⇒ 它们必须进 teardown 登记表，
+    // W-A1 迁移第五～七处：这些系统的监听走总线（带 tag）⇒ 它们必须进 teardown 登记表，
     // `_adopt` 会拒绝没有 dispose() 的子系统（"假装收编"的防线）。
     this.quests = this._adopt('game/QuestSystem', new QuestSystem(this.dialog));
     this.storyJournal = new StoryJournal(this);
@@ -263,7 +263,7 @@ export class Game {
     this.soulWisps = new SoulWispManager(this.scene, this.world, this.stats, this.dialog, this.audio);
     this.voidEcho = new VoidEcho(this.scene);
     this.chaosLightning = new ChaosLightning(this.scene, this.camera);
-    this.realmBleed = new RealmBleed();
+    this.realmBleed = this._adopt('effects/RealmBleed', new RealmBleed());
 
     this.damageNumbers = this._adopt('combat/DamageNumbers', new DamageNumbers(this.scene));
     /** 震屏：全局唯一实例，各战斗/法术系统直接 `addShake()` 请求，主循环只在这里推进 */
@@ -297,14 +297,14 @@ export class Game {
     this.upgrade = new UpgradePanel(this);
     this.helpManual = new HelpManual(this);
     this.tutorial = new Tutorial(this.dialog, this.helpManual, this);
-    this.cinematics = new CinematicManager(this);
-    this.combatCamera = new CombatCameraDirector(this);
+    this.cinematics = this._adopt('cinematic/CinematicManager', new CinematicManager(this));
+    this.combatCamera = this._adopt('cinematic/CombatCameraDirector', new CombatCameraDirector(this));
     attachCombatCameraSkip(this.combatCamera, this);
     this.combatCinematicSkip = this._adopt('cinematic/CombatCinematicSkip', new CombatCinematicSkip(this));
     this.executionSkipFx = new ExecutionSkipBurst();
     this.combatInputLock = new CombatInputLock(this);
     this.combatTutorial = new CombatTutorialDirector(this);
-    this.restScene = new RestSceneDirector(this);
+    this.restScene = this._adopt('cinematic/RestSceneDirector', new RestSceneDirector(this));
     this.worldAmbient = new WorldAmbientEvents(this);
     this.cgGallery = this._adopt('game/CgGallerySystem', new CgGallerySystem(this));
     this.cgJournalTab = new CgJournalTab(this);
@@ -319,7 +319,7 @@ export class Game {
     this.combatStyle = new CombatStyleTracker(this);
     this.combatStyleOverlay = new CombatStyleOverlay(this);
     this.bossRematch = new BossRematchDirector(this);
-    this.zoneTransitionFx = new ZoneTransitionFX(this);
+    this.zoneTransitionFx = this._adopt('effects/ZoneTransitionFX', new ZoneTransitionFX(this));
     this.photoMode = new PhotoModeDirector(this);
 
     this.dungeonRuns = new DungeonRunTracker(this);
@@ -328,15 +328,15 @@ export class Game {
     this.deathHints = new DeathHintDirector(this);
     this.bossApproach = new BossApproachDirector(this);
     this.soulStreak = new SoulStreakSystem(this);
-    this.endCredits = new EndCreditsDirector(this);
+    this.endCredits = this._adopt('cinematic/EndCreditsDirector', new EndCreditsDirector(this));
     this.sideQuests = new SideQuestSystem(this);
     this.sideQuestJournalTab = new SideQuestJournalTab(this);
     this.sessionStats = new CombatSessionStats(this);
     this.restNpcIdle = new RestNpcIdleDirector(this);
     this.popCulture = new PopCultureEchoSystem(this);
     this.popCultureTab = new PopCultureJournalTab(this);
-    this.upsideDownFx = new UpsideDownVisualPass(this);
-    this.triadVisualFx = new PopCultureTriadVisualPass(this);
+    this.upsideDownFx = this._adopt('effects/UpsideDownVisualPass', new UpsideDownVisualPass(this));
+    this.triadVisualFx = this._adopt('effects/PopCultureTriadVisualPass', new PopCultureTriadVisualPass(this));
     this.wave4VisualFx = new PopCultureWave4VisualPass(this);
 
     this.settings = new SettingsManager();
@@ -376,7 +376,7 @@ export class Game {
     this.errorReporter.install();
 
     this.setupLights();
-    this.ambientPass = new AmbientScenePass(this);
+    this.ambientPass = this._adopt('effects/AmbientScenePass', new AmbientScenePass(this));
     this.setupInput();
     this.setupEvents();
     SaveSystem.load(this);

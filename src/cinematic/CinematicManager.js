@@ -2,6 +2,10 @@ import * as THREE from 'three';
 import { CAMERA_BLEND } from '../content/tuning.js';
 import { setDofEnabled, updateDofParams } from '../engine/DofPass.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const CINEMATIC_CINEMATICMANAGER = 'cinematic/CinematicManager';
+const cineOn = (name, handler) => on(name, handler, CINEMATIC_CINEMATICMANAGER);
 /** 过场 DoF 档：焦点永远钉在 Boss 注视点，背景随距离全虚；fade 是首尾的淡入淡出坡长 */
 const CINE_DOF = { maxblur: 0.85, fade: 0.5 };
 
@@ -65,6 +69,11 @@ const BOSS_CINEMATICS = {
 };
 
 export class CinematicManager {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(CINEMATIC_CINEMATICMANAGER);
+  }
+
   constructor(game) {
     this.game = game;
     this.active = false;
@@ -91,7 +100,7 @@ export class CinematicManager {
     `;
     document.body.appendChild(this.letterbox);
 
-    window.addEventListener('boss-start', (e) => this.tryPlay(e.detail));
+    cineOn('boss-start', (e) => this.tryPlay(e.detail));
   }
 
   tryPlay(detail) {

@@ -1,7 +1,16 @@
 /** 逆相界视觉 — 破碎时线红色孢子 overlay（怪奇物语气质） */
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const EFFECTS_UPSIDEDOWNVISUALPASS = 'effects/UpsideDownVisualPass';
+const upsideOn = (name, handler) => on(name, handler, EFFECTS_UPSIDEDOWNVISUALPASS);
 export class UpsideDownVisualPass {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(EFFECTS_UPSIDEDOWNVISUALPASS);
+  }
+
   constructor(game) {
     this.game = game;
     this.el = document.createElement('div');
@@ -10,7 +19,7 @@ export class UpsideDownVisualPass {
     document.body.appendChild(this.el);
     this.active = false;
     this.pulse = 0;
-    window.addEventListener('zone-changed', (e) => this.onZone(e));
+    upsideOn('zone-changed', (e) => this.onZone(e));
   }
 
   onZone(e) {

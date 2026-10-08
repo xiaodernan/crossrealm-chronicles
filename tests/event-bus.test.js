@@ -82,23 +82,12 @@ const readSrc = (rel) => readFileSync(join(SRC, rel), 'utf8');
  * 这份清单是**欠账表**，不是豁免名单：每迁走一处就要把数字改小、整文件迁完就删掉那一行。
  * 想加一处裸监听，就得先在这里给它记一笔 —— 而记这笔的动作本身就是显式的坏消息。 */
 const BARE_WINDOW_LISTENERS = {
-  'audio/AudioManager.js': 1,
-  'cinematic/CinematicManager.js': 1,
-  'cinematic/CombatCameraDirector.js': 3,
   // 'cinematic/CombatCinematicSkip.js': 2  ← 已迁完（2026-10-08）：两条监听走
   //   `on(…, 'combat-cinematic-skip')`，`dispose()` 里 `offAll` 一并清掉待办计时。
   //   这一行**删掉**而不是改成 0 —— 台账的口径是"整文件迁完就删行"。
-  'cinematic/EndCreditsDirector.js': 1,
-  'cinematic/RestSceneDirector.js': 3,
   // core/Game.js: 13  ← 已迁完（2026-10-08）：13 处游戏事件走 gameOn()（= on(name, handler, 'core/Game')），
   //   Game.dispose() 里 offAll(GAME_EVENT_TAG) 一次结清。文件里仍留 3 处 window.addEventListener
   //   （resize / keydown / keyup）—— 那是 DOM 事件，不在本台账的口径内。
-  'effects/AmbientScenePass.js': 1,
-  'effects/ExecutionEffects.js': 3,
-  'effects/PopCultureTriadVisualPass.js': 1,
-  'effects/RealmBleed.js': 1,
-  'effects/UpsideDownVisualPass.js': 1,
-  'effects/ZoneTransitionFX.js': 1,
   'game/AchievementSystemExtras.js': 6,
   'game/CampfireMemorySystem.js': 2,
   'game/CgGalleryAchievements.js': 1,
@@ -144,6 +133,25 @@ const BARE_WINDOW_LISTENERS = {
  */
 const TABLE_DRIVEN_BARE = [];
 
+/**
+ * 总线订阅出口：直接从 EventBus import 的 `on` / `once`，以及**本地别名**
+ * （`const gameOn = (name, handler) => on(name, handler, TAG)`）。
+ * 为什么必须认别名：迁移第五处起，各系统普遍先定义一个带 tag 的本地出口再调它。
+ * 扫描器只认裸 `on(` 的话，这些文件在下面的 `busUsers` 里就是隐形的 ——
+ * "打了 tag 不注销"与"注销的是别人的 tag"两条断言对它们全部失效，而它们恰恰是最该被查的。
+ */
+const RAW_SUBSCRIBERS = ["on", "once"];
+function busSubscribeFns(code) {
+  const imported = [...code.matchAll(/import\s*\{([^}]*)\}\s*from\s*['"][^'"]*EventBus\.js['"]/g)]
+    .flatMap((m) => m[1].split(',').map((t) => t.trim().split(/\s+as\s+/).pop()))
+    .filter((n) => RAW_SUBSCRIBERS.includes(n));
+  const fns = new Set(imported);
+  for (const m of code.matchAll(/const\s+(\w+)\s*=\s*\(([^)]*)\)\s*=>\s*(\w+)\s*\(/g)) {
+    if (imported.includes(m[3])) fns.add(m[1]);
+  }
+  return [...fns];
+}
+
 const scan = () => {
   const bare = {};
   const busUsers = new Map(); // file -> { on: n, offAll: n, untagged: [] }
@@ -157,12 +165,20 @@ const scan = () => {
     for (const t of TABLE_DRIVEN_BARE) {
       if (t.file === rel) bare[rel] = (bare[rel] ?? 0) + t.names.length;
     }
-    const onSites = [...code.matchAll(/(?:^|[^\w.])on\(\s*['"][a-z0-9-]+['"]/g)];
+    /* 订阅位点：裸 on()/once() 与本地别名都算。tag 的判定要分开 ——
+     * 别名是"把 tag 焊死在出口里"的写法，它自己的调用点只有两个参数，
+     * 拿 argCount < 3 去量会冤枉一片（迁移第五处以来的所有别名文件全中）。 */
+    const 出口们 = busSubscribeFns(code);
+    const onSites = [];
+    for (const fn of 出口们) {
+      const re = new RegExp(`(?:^|[^\\w.])${fn}\\(\\s*['"][a-z0-9-]+['"]`, 'g');
+      for (const m of code.matchAll(re)) onSites.push({ ...m, fn });
+    }
     const offAllSites = [...code.matchAll(/(?:^|[^\w.])offAll\(/g)];
     if (!onSites.length && !offAllSites.length) continue;
     const untagged = [];
     for (const m of onSites) {
-      // m[0] 里已经含住了 `(`，位点要按它在这一段里的实际位置算
+      if (!RAW_SUBSCRIBERS.includes(m.fn)) continue; // 别名自带 tag
       const openIdx = m.index + m[0].indexOf('(');
       if (argCount(innerOf(code, openIdx) ?? '') < 3) untagged.push(rel);
     }
@@ -293,7 +309,9 @@ describe('监听注销门禁（B44 剩余半区）', () => {
     // 106 → 79（2026-10-08）：迁移第六处一次收四个系统 27 条 ——
     //   AchievementSystem 8 / CgGallerySystem 7 / LoreCodexSystem 6 / ContextualTutorial 6，
     //   四个都走"本地出口带 tag + dispose() 里 offAll + Game._adopt 登记"同一套。
-    expect(total).toBe(79);
+    // 79 → 62（2026-10-08）：迁移第七处 —— audio 1 / cinematic×5 / effects×6 共 11 个文件 17 条。
+    //   形状与第五、六处完全一样：本地出口带 tag + dispose() 里 offAll + Game._adopt 登记。
+    expect(total).toBe(62);
     // HUD 是切片6 迁掉的那一个：它必须从台账里消失，并且改用总线
     expect(bare['ui/HUD.js']).toBeUndefined();
     expect(busUsers.get('ui/HUD.js')).toMatchObject({ on: 20, offAll: 1 });
@@ -306,6 +324,20 @@ describe('监听注销门禁（B44 剩余半区）', () => {
     expect(stranded).toEqual([]);
   });
 
+  it('本地出口带的 tag 与 dispose() 注销的是同一个（对不上 = 卸的是别人的监听）', () => {
+    for (const [file, u] of busUsers) {
+      if (u.on === 0) continue;
+      const code = stripComments(readSrc(file));
+      const aliases = [...code.matchAll(/const\s+(\w+)\s*=\s*\([^)]*\)\s*=>\s*on\([^)]*?,\s*(\w+)\)/g)];
+      for (const [, 出口, tag] of aliases) {
+        expect(code, `${file}：出口 ${出口} 带的是 ${tag}，但没有 offAll(${tag}) —— 那条所有权下的监听没人收`)
+          .toMatch(new RegExp(`offAll\\(\\s*${tag}\\s*\\)`));
+      }
+    }
+    // 反面证据：同一把尺子在没迁的文件上必须量不到（否则这条用例是空转的）
+    const 未迁 = stripComments(readSrc('game/CampfireMemorySystem.js'));
+    expect(未迁).not.toMatch(/const\s+\w+\s*=\s*\([^)]*\)\s*=>\s*on\(/);
+  });
   it('on() 一律带 tag：省略 tag 的监听落进 UNGROUPED，等于换个地方继续漏', () => {
     const untagged = [...busUsers.values()].flatMap((u) => u.untagged);
     expect(untagged).toEqual([]);
@@ -394,7 +426,7 @@ describe('监听注销门禁（B44 剩余半区）', () => {
       // 注释里提到它是允许的（那是"迁到哪儿去了"的索引），但**不许再是一行计数**
       expect(table).not.toMatch(/^\s*'cinematic\/CombatCinematicSkip\.js'\s*:\s*\d+/m);
       // 反面证据：同一把尺子对还在表里的邻居量得出来
-      expect(table).toMatch(/^\s*'cinematic\/CombatCameraDirector\.js'\s*:\s*\d+/m);
+      expect(table).toMatch(/^\s*'world\/DungeonManager\.js'\s*:\s*\d+/m);
     });
   });
 });

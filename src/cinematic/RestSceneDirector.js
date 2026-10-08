@@ -1,8 +1,17 @@
 import * as THREE from 'three';
 import { CAMERA_OVERRIDES_NONE } from '../engine/CameraRig.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const CINEMATIC_RESTSCENEDIRECTOR = 'cinematic/RestSceneDirector';
+const restSceneOn = (name, handler) => on(name, handler, CINEMATIC_RESTSCENEDIRECTOR);
 /** 营火对话 — 柔和轨道镜头，与 RestNpc 联动 */
 export class RestSceneDirector {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(CINEMATIC_RESTSCENEDIRECTOR);
+  }
+
   constructor(game) {
     this.game = game;
     this.active = false;
@@ -14,9 +23,9 @@ export class RestSceneDirector {
     this._angle = 0;
     this._tmp = new THREE.Vector3();
 
-    window.addEventListener('rest-dialogue-open', (e) => this._onOpen(e.detail));
-    window.addEventListener('rest-dialogue-close', () => this.release('dialogue'));
-    window.addEventListener('dialog-overlay-hidden', () => this.release('dialogue'));
+    restSceneOn('rest-dialogue-open', (e) => this._onOpen(e.detail));
+    restSceneOn('rest-dialogue-close', () => this.release('dialogue'));
+    restSceneOn('dialog-overlay-hidden', () => this.release('dialogue'));
   }
 
   _onOpen(detail) {

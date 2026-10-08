@@ -3,6 +3,10 @@ import { addShake } from '../engine/Shake.js';
 import { EXECUTION_CAMERA } from '../content/tuning.js';
 import { setDofEnabled, updateDofParams } from '../engine/DofPass.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const CINEMATIC_COMBATCAMERADIRECTOR = 'cinematic/CombatCameraDirector';
+const camDirOn = (name, handler) => on(name, handler, CINEMATIC_COMBATCAMERADIRECTOR);
 import { FOV_LAYER_OVERRIDE as COMBAT_FOV_LAYER } from '../engine/CameraRig.js';
 
 /** Boss 战 / 连击处决 — 慢动作 + 轨道锁定镜头 + FOV 压缩 */
@@ -62,6 +66,11 @@ const PRESETS = {
 };
 
 export class CombatCameraDirector {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(CINEMATIC_COMBATCAMERADIRECTOR);
+  }
+
   constructor(game) {
     this.game = game;
     this.active = false;
@@ -124,9 +133,9 @@ export class CombatCameraDirector {
   }
 
   _bindEvents() {
-    window.addEventListener('combo-finisher', () => this.play('finisher'));
-    window.addEventListener('combat-riposte', () => this.play('riposte'));
-    window.addEventListener('combat-execution', (e) => {
+    camDirOn('combo-finisher', () => this.play('finisher'));
+    camDirOn('combat-riposte', () => this.play('riposte'));
+    camDirOn('combat-execution', (e) => {
       if (e.detail?.boss) this.play('bossKill', e.detail);
       else this.play('execution', e.detail);
     });

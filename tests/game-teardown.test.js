@@ -146,7 +146,7 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
       expect(src, '错误收集器也要卸').toMatch(/errorReporter\?\.uninstall\?\.\(\)/);
     });
 
-    it('十个已收编的子系统都点名在册（tag 逐条写死，不是循环拼的）', () => {
+    it('二十一个已收编的子系统都点名在册（tag 逐条写死，不是循环拼的）', () => {
       const src = gameSrc();
       for (const tag of [
         'combat/DamageNumbers', 'effects/CombatFeedback', 'ui/HUD',
@@ -156,6 +156,11 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
         'game/QuestSystem',
         // W-A1 迁移第六处：四个追踪/提示系统一次收口（27 条监听）
         'game/AchievementSystem', 'game/CgGallerySystem', 'game/LoreCodexSystem', 'ui/ContextualTutorial',
+        // W-A1 迁移第七处：audio / cinematic×5 / effects×6
+        'audio/AudioManager', 'cinematic/CinematicManager', 'cinematic/CombatCameraDirector',
+        'cinematic/RestSceneDirector', 'cinematic/EndCreditsDirector', 'effects/AmbientScenePass',
+        'effects/ExecutionEffects', 'effects/PopCultureTriadVisualPass', 'effects/RealmBleed',
+        'effects/UpsideDownVisualPass', 'effects/ZoneTransitionFX',
       ]) {
         expect(src, `${tag} 应当被收编`).toContain(`_adopt('${tag}'`);
       }
@@ -166,7 +171,7 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
       // 五个都收编了 —— 反面：如果谁写成 `this.hud = new HUD(this)`，这一条抓不出来，
       // 但上一条（点名 tag）会红。两条合起来才盖住"忘了收编"与"收编了没点名"两种。
       const adopted = [...src.matchAll(/_adopt\('([^']+)'/g)].map((m) => m[1]);
-      expect(adopted.length).toBeGreaterThanOrEqual(10);
+      expect(adopted.length).toBeGreaterThanOrEqual(21);
       expect(new Set(adopted).size, 'tag 不许重复').toBe(adopted.length);
     });
   });

@@ -1,5 +1,9 @@
 import { refreshKeyText } from '../content/keyHints.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const CINEMATIC_ENDCREDITSDIRECTOR = 'cinematic/EndCreditsDirector';
+const creditsOn = (name, handler) => on(name, handler, CINEMATIC_ENDCREDITSDIRECTOR);
 /** 通关滚动字幕 */
 const CREDITS = [
   '跨界纪元 · Crossrealm Chronicles',
@@ -16,6 +20,11 @@ const CREDITS = [
 ];
 
 export class EndCreditsDirector {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(CINEMATIC_ENDCREDITSDIRECTOR);
+  }
+
   constructor(game) {
     this.game = game;
     this.el = document.createElement('div');
@@ -25,7 +34,7 @@ export class EndCreditsDirector {
     document.body.appendChild(this.el);
     this.active = false;
     this.el.querySelector('.end-credits-skip').addEventListener('click', () => this.hide());
-    window.addEventListener('game-completed', () => this.play());
+    creditsOn('game-completed', () => this.play());
   }
 
   play() {

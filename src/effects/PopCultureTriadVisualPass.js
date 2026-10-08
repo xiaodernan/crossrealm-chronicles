@@ -1,7 +1,16 @@
 /** 三巨头视觉 Pass — 西部尘雾 / 黑帮 noir / 深空扫描线 */
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const EFFECTS_POPCULTURETRIADVISUALPASS = 'effects/PopCultureTriadVisualPass';
+const triadOn = (name, handler) => on(name, handler, EFFECTS_POPCULTURETRIADVISUALPASS);
 export class PopCultureTriadVisualPass {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(EFFECTS_POPCULTURETRIADVISUALPASS);
+  }
+
   constructor(game) {
     this.game = game;
     this.mode = null;
@@ -14,7 +23,7 @@ export class PopCultureTriadVisualPass {
       scifi: this._mk('triad-fx triad-scifi hidden'),
     };
 
-    window.addEventListener('zone-changed', (e) => this.onZone(e));
+    triadOn('zone-changed', (e) => this.onZone(e));
   }
 
   _mk(cls) {

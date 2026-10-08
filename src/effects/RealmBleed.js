@@ -9,7 +9,16 @@ const ZONE_TINT = {
   wild: 'rgba(120,140,180,0.35)',
 };
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const EFFECTS_REALMBLEED = 'effects/RealmBleed';
+const bleedOn = (name, handler) => on(name, handler, EFFECTS_REALMBLEED);
 export class RealmBleed {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(EFFECTS_REALMBLEED);
+  }
+
   constructor() {
     this.overlay = document.createElement('div');
     this.overlay.id = 'realm-bleed';
@@ -17,7 +26,7 @@ export class RealmBleed {
     document.body.appendChild(this.overlay);
     this.lastKey = 'hub';
 
-    window.addEventListener('zone-changed', (e) => {
+    bleedOn('zone-changed', (e) => {
       if (e.detail.initial) return;
       // 修 B36：渗漏色按 id 取，认不出的 id（走廊、未来的新区）走中性 'wild'
       const key = ZONE_TINT[e.detail.zoneId] ? e.detail.zoneId : 'wild';

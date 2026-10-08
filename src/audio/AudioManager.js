@@ -2,6 +2,10 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { isDungeonBossId } from '../content/bossRoster.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const AUDIO_AUDIOMANAGER = 'audio/AudioManager';
+const audioOn = (name, handler) => on(name, handler, AUDIO_AUDIOMANAGER);
 /**
  * 节拍链的分组标签（撤销口径按层分，一条链只被自己那一层清）。
  * `audio/oneshot` 装的是"一次性的几声"：琶音、界域渗透后的模式回位，它们不该互相撤销。
@@ -51,6 +55,11 @@ export const MODE_TEMPO = { zone: 520, dungeon: 680, boss: 380, 'boss-shadow': 3
 export const SFX_NAMES = Object.freeze(['doorOpen', 'roomClear', 'levelUp', 'bossPhase', 'loreDiscover']);
 
 export class AudioManager {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(AUDIO_AUDIOMANAGER);
+  }
+
   constructor() {
     this.ctx = null;
     this.master = null;
@@ -123,7 +132,7 @@ export class AudioManager {
         this._noiseBuffer = this._createNoiseBuffer();
         this._startZoneDrone('hub');
         this._startMelody('hub');
-        window.addEventListener('realm-bleed', (e) => this.playRealmBleed(e.detail?.key ?? 'wild'));
+        audioOn('realm-bleed', (e) => this.playRealmBleed(e.detail?.key ?? 'wild'));
       }
       if (this.ctx.state === 'suspended') this.ctx.resume();
       document.removeEventListener('click', unlock);

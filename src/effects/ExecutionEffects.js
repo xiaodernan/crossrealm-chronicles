@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const EFFECTS_EXECUTIONEFFECTS = 'effects/ExecutionEffects';
+const execFxOn = (name, handler) => on(name, handler, EFFECTS_EXECUTIONEFFECTS);
 /**
  * 处决 / 终结技 — 地面冲击环、血雾碎片、竖向斩击。
  *
@@ -15,6 +19,11 @@ const SHARD_SPIN_Y = 0.08 * 60;
 const SHARD_GRAVITY = 9.8;
 
 export class ExecutionEffects {
+  /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
+  dispose() {
+    offAll(EFFECTS_EXECUTIONEFFECTS);
+  }
+
   constructor(scene, game) {
     this.scene = scene;
     this.game = game;
@@ -26,9 +35,9 @@ export class ExecutionEffects {
   }
 
   _bindEvents() {
-    window.addEventListener('combo-finisher', () => this.burst(null, 'finisher'));
-    window.addEventListener('combat-riposte', () => this.burst(null, 'riposte'));
-    window.addEventListener('combat-execution', (e) => {
+    execFxOn('combo-finisher', () => this.burst(null, 'finisher'));
+    execFxOn('combat-riposte', () => this.burst(null, 'riposte'));
+    execFxOn('combat-execution', (e) => {
       const pos = e.detail?.position;
       const v = pos instanceof THREE.Vector3 ? pos : pos ? new THREE.Vector3(pos.x, pos.y, pos.z) : null;
       this.burst(v, e.detail?.boss ? 'bossKill' : 'execution');
