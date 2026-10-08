@@ -1,6 +1,9 @@
-# W-D4 切片1 —— 三门禁上 CI。
+# W-D4 切片1 —— 三门禁上 CI；W-D5 切片3 —— 第四步首屏体积门禁。
 #
 # 门禁链就是仓库的完成定义（MASTER_PLAN §0.3）：lint → test → build，顺序不换。
+# 第四步 `npm run size` **必须在 build 之后**：它量的是 `dist/index.html` 直接引用的
+# 那几个产物（W-D5 切片1 的口径），没有 dist 就没有量具 —— 顺序反了它会以
+# "缺文件按失败算"当场红，而那是一条与体积无关的假红。
 # 跑在 windows-latest：全仓的源码扫描门禁（读 src 原文、对 EOL 有假设的那批）
 # 是在 Windows 开发机上写绿的，CI 与开发平台保持同一边，别让"CI 绿了但本机红"
 # 有了第二个解释。Node 锁 24（与开发机一致）。
@@ -40,3 +43,8 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # 第四步：首屏体积门禁（W-D5 切片1 定的口径 + 切片3 接上 CI）。
+      # 必须在 Build 之后 —— 它读 dist/index.html 与其直接引用的产物。
+      - name: Size budget (first paint < 2 MiB)
+        run: npm run size
