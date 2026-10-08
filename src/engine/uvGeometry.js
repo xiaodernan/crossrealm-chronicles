@@ -24,6 +24,8 @@ import * as THREE from 'three';
  * - 圆柱 / 圆锥：躯干（group 0）u 绕周长、v 沿高；上下盖是平面投影，保持原样不缩放。
  * - 胶囊：u 绕该行半径的周长、v 沿剖面弧长（`LatheGeometry` 的 v 是索引均分，
  *   直接乘总长会在圆柱段错 15 倍，必须按位置算 —— 见 `makeUvCapsuleGeometry`）。
+ * - 多面体：**按面投影**（三角形自己的法线取最大分量轴），不是球面 —— 球面/圆柱的
+ *   经线缝会切在石头的劈裂面上，见 `makeUvFacetGeometry`。
  */
 
 /** 不分段盒的六面 UV 尺寸表（面序 px/nx/py/ny/pz/nz，每面 4 顶点） */
@@ -106,6 +108,68 @@ export function makeUvCapsuleGeometry(radius, length, capSegments, radialSegment
     else if (y >= half) v = total - radius * Math.acos(clamp((y - half) / radius));
     else v = (Math.PI / 2) * radius + (y + half);
     uv.setXY(i, uv.getX(i) * 2 * Math.PI * rho, v);
+  }
+  uv.needsUpdate = true;
+  return g;
+}
+
+/**
+ * 多面体（十二面体散石）的**按面投影**米制 UV（W-C5 切片10）。
+ *
+ * ## 为什么球面投影不行
+ * 球面/圆柱投影要把 u 绕一圈（0..2πR），于是必然有一条**经线缝**：缝两边 u 从
+ * 2πR 跳到 0，除非 2πR 恰好是 tileMeters 的整数倍，否则贴图在缝上错开一格。
+ * 圆柱（`makeUvCylinderGeometry`）天然带这条缝，柱身是光滑曲面看不出来；**石头是
+ * 多面体，缝会正好切在某块劈裂面上**，比不贴还难看。
+ *
+ * ## 按面投影为什么行
+ * 取每个三角形自己的法线，按**最大的那个分量轴**投影 —— 同一平面的几个三角片法线
+ * 相同，因此用同一个投影，整个面内 u/v 连续，且就是**米**。相邻面各自投影，接缝处
+ * 仍连续（共享边的两个顶点在两边的 (u,v) 不同，但差值只是投影方向的视角差，
+ * 不是贴图错位）。这是石头 / 地形这一类"硬表面"的常规做法。
+ *
+ * ## 为什么要先 `toNonIndexed()`
+ * 一个顶点只能有一组 UV，所以"按面给投影"要求每个顶点只属于一个面。three 的
+ * `PolyhedronGeometry`（十二/二十/八面体）**本来就是非索引的**（detail 0 的十二面体
+ * 108 顶点 = 12 个五边形面 × 3 三角片 × 3），所以对它们这步是空转。
+ * 但入口不能假设这件事：传进来的是**索引**几何（`BoxGeometry` / `CylinderGeometry`
+ * / 合并过的缓冲区）时按面投影会静默错到别的面上去，所以先拆。`toNonIndexed()`
+ * 自己会在已非索引时原样返回，代价由那条支自己付。
+ *
+ * ## 保住的三个字段
+ * `type` / `parameters` 由 `toNonIndexed()` 丢掉，而调用方按 `geometry.parameters.radius`
+ * 算碰撞体（`GloomZone` / `SpaceZone` 的散石）—— 所以原样搬过来。这与
+ * `makeUvConeGeometry` "类型与 parameters 保持原样"是同一条纪律。
+ */
+export function makeUvFacetGeometry(geometry) {
+  const g = geometry.index ? geometry.toNonIndexed() : geometry;
+  if (geometry.index) {
+    g.type = geometry.type;
+    g.parameters = geometry.parameters;
+  }
+  const pos = g.attributes.position;
+  const uv = g.attributes.uv;
+  const a = new THREE.Vector3();
+  const b = new THREE.Vector3();
+  const c = new THREE.Vector3();
+  const n = new THREE.Vector3();
+  const ab = new THREE.Vector3();
+  const ac = new THREE.Vector3();
+  for (let i = 0; i + 2 < pos.count; i += 3) {
+    a.fromBufferAttribute(pos, i);
+    b.fromBufferAttribute(pos, i + 1);
+    c.fromBufferAttribute(pos, i + 2);
+    n.crossVectors(ab.subVectors(b, a), ac.subVectors(c, a)).normalize();
+    const ax = Math.abs(n.x), ay = Math.abs(n.y), az = Math.abs(n.z);
+    // 法线最大的那个轴：这一族三角片沿该轴投影，投影面是另外两维（单位即米）
+    const 投z = ax >= ay && ax >= az;      // 法线近 ±X ⇒ 用 (z, y)
+    const 投y = !投z && ay >= az;          // 法线近 ±Y ⇒ 用 (x, z)
+    for (let k = 0; k < 3; k++) {
+      const vi = i + k;
+      if (投z) uv.setXY(vi, pos.getZ(vi), pos.getY(vi));
+      else if (投y) uv.setXY(vi, pos.getX(vi), pos.getZ(vi));
+      else uv.setXY(vi, pos.getX(vi), pos.getY(vi));
+    }
   }
   uv.needsUpdate = true;
   return g;

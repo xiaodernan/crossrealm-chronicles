@@ -285,10 +285,79 @@ export function buildBrushedSurface(spec) {
  * 图案分派
  * ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ *
+ * 无格岩面（W-C5 切片10）：第三种图案族
+ * ------------------------------------------------------------------ */
+
+/**
+ * 生成一张"无格岩面"的三件套（岩 `crag` / 冰 `ice` 共用这一套机制，差在档位）。
+ *
+ * ## 为什么要有第三族
+ * 前两族都是"有人排过的纹样"：分块是砖工排的（`bricks`），拉丝是机床拉的（`brushed`）。
+ * 一块石头谁都没排过 —— 它的形是**一整块岩体被时间劈开**，特征是平台 + 台阶立面，
+ * 不是"格子里有什么"。所以这一族没有 `bricks` / `brushed` 那样的格参数，只有三格：
+ * `facets`（量化成几级台阶）/ `amp`（高度振幅）/ `grain`（台阶面上的细颗粒权重）。
+ *
+ * ## 高度场
+ * `t = fbm(octaves) / 总amp ∈ [0,1]` 是连续的岩体起伏；`facets > 1` 时量化成
+ * `floor(t × facets)` 级平台 —— 平台内是常数（劈裂面的"面"），平台之间相差
+ * 一格 1/(facets-1)（法线在那一条线上立起来）。再叠一层 64 格细颗粒（`grain` 权重，
+ * 环面取值）让平台不是死的。`facets: 1` 即不量化 —— 冰面用这一档，要的是缓慢的
+ * 冻胀起伏而不是劈裂面。
+ *
+ * ## 与另两族共用的部分
+ * 法线仍是 `normalFromHeight`（环面中心差分）；粗糙度仍围绕 `roughBase` 上下
+ * （这里由 `t` 驱动：岩体的低处更糙）。三族共有的机制不重写，换的只有高度场。
+ *
+ * ## 可平铺
+ * fbm 与细颗粒都在环面上取值（lattice 整除 size），量化是逐像素的纯函数 ——
+ * 右回卷那一对像素与任何一对相邻像素同分布，接缝不靠修边。
+ */
+export function buildCraggySurface(spec) {
+  const W = spec.size;
+  const H = spec.size;
+  const { facets, amp, grain } = spec.craggy;
+  const seed = spec.seed;
+  const 总amp = spec.octaves.reduce((s, o) => s + o.amp, 0);
+
+  // 一、高度场：量化台阶 + 细颗粒。t / 细 留着给粗糙度用（同一个循环里算掉，不多扫一遍）
+  const height = new Float32Array(W * H);
+  const t场 = new Float32Array(W * H);
+  const 细场 = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const u = (x + 0.5) / W;
+      const v = (y + 0.5) / H;
+      const t = fbm(u, v, spec.octaves, seed) / 总amp;
+      const 细 = valueNoise(u, v, 64, seed ^ 0x5bd1e995);
+      const q = facets > 1 ? Math.floor(t * facets) / (facets - 1) : t;
+      const i = y * W + x;
+      t场[i] = t;
+      细场[i] = 细;
+      height[i] = amp * q + grain * 细;
+    }
+  }
+
+  // 二、法线（与另两族共用）
+  const normal = normalFromHeight(height, W, H, spec.normalStrength);
+
+  // 三、粗糙度：由 t 驱动（岩体低处更糙）+ 细颗粒抖动，均值仍回到 roughBase
+  const roughness = new Uint8Array(W * H);
+  for (let i = 0; i < W * H; i++) {
+    const r = spec.roughBase
+      + spec.roughAmp * (0.75 - 1.5 * t场[i])
+      + spec.roughAmp * 0.5 * (细场[i] - 0.5) * 2;
+    roughness[i] = Math.round(Math.min(1, Math.max(0, r)) * 255);
+  }
+
+  return { width: W, height: H, heightField: height, normal, roughness };
+}
+
 /** 图案类型 → 构建器（键与 `SURFACE_PATTERNS` 一一对应，由门禁用例守着） */
 export const SURFACE_BUILDERS = {
   tiled: buildTiledSurface,
   brushed: buildBrushedSurface,
+  craggy: buildCraggySurface,
 };
 
 /**

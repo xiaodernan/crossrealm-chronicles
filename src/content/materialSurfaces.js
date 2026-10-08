@@ -233,10 +233,80 @@ export const SURFACE_SPECS = deepFreeze({
       roughness: 'gen/drum_rough.png',
     },
   },
+
+  /**
+   * 岩面（W-C5 切片10）—— **区域外野的散石与冰**。第五张尺子，也是第三种图案族
+   * `craggy`（无格多面体噪声）：前四族都是"有人排过的纹样"（顺砌错缝 / 对缝大板 /
+   * 竖板压条 / 拉丝条纹），而一块石头没有人排过 —— 它的形是**一整块岩体**被时间劈开，
+   * 所以这一族没有格：高度场 = fbm 连续起伏 + 量化成 `facets` 级台阶（劈裂面），
+   * 再叠一点细颗粒。`facets: 1` 即不量化 = 光滑起伏，冰面用的正是这一档。
+   *
+   * **1 米一铺**：外野岩石半径 0.3~2 米，一块 1 米见方的岩面细节正好；粗柱细柱上的
+   * 石块同一个尺寸（UV 以米计，见 `engine/uvGeometry.js`）。粗糙度均值 ≈ 0.9，与四座
+   * 区改前的常数（深渊 0.95 / 幽暗 0.95 / 虚空 0.95 / 圣域 0.85）同档 —— 贴图接管之后，
+   * 石头还是那些石头。颜色仍归各区自己的材质（`stone.*Rock` / `crystal.ice`）。
+   *
+   * 消费方的 UV 以米计（盒走 `makeUvBoxGeometry`、锥走 `makeUvConeGeometry`、
+   * 十二面体走 `makeUvFacetGeometry` —— 按面投影，没有接缝），铺数只有一个：
+   * `repeat = 1 / tileMeters`。区域工件建在贴图库就绪之前，所以走
+   * `world/regionSurfaces.js` 的两段式上贴（与 drum 同一条机制）。
+   */
+  crag: {
+    pattern: 'craggy',
+    tileMeters: 1,
+    size: 256,
+    seed: 20261013,
+    /** 无格岩面：`facets` 级台阶（把连续起伏量化成几级劈裂面）/ `amp` 高度振幅 / `grain` 台阶面上的细颗粒权重 */
+    craggy: { facets: 6, amp: 1.0, grain: 0.18 },
+    /** 岩体走向：低频给大块面、高频给颗粒（lattice 都整除 256 —— 环面取值，平铺不靠修边） */
+    octaves: [
+      { lattice: 4, amp: 0.45 },
+      { lattice: 8, amp: 0.3 },
+      { lattice: 16, amp: 0.18 },
+      { lattice: 64, amp: 0.07 },
+    ],
+    normalStrength: 3.0,
+    roughBase: 0.9,
+    roughAmp: 0.12,
+    files: {
+      normal: 'gen/crag_nor.png',
+      roughness: 'gen/crag_rough.png',
+    },
+  },
+
+  /**
+   * 冰面（W-C5 切片10）—— **太空位的冰构与冰刺**（`zones/SpaceZone.js`：15 座冰晶
+   * + 30 根冰刺）。与 crag 同一族、同一套机制，只换尺子与档位：`facets: 1`（不量化
+   * ⇒ 光滑起伏，冰是冻住的流体，不是劈开的岩）、1.5 米一铺、法线弱一档、
+   * 粗糙度均值 ≈ 0.2 —— 与改前的读数（冰构 0.15 / 冰刺 0.2）同档。
+   *
+   * 它是**半透明**的（opacity 0.85）：法线/粗糙度照贴，透明度是材质自己的事，
+   * 与表面事实两不相干。
+   */
+  ice: {
+    pattern: 'craggy',
+    tileMeters: 1.5,
+    size: 256,
+    seed: 20261014,
+    /** facets 1 = 不量化：冰不要劈裂面，要的是缓慢的冻胀起伏 */
+    craggy: { facets: 1, amp: 0.6, grain: 0.1 },
+    octaves: [
+      { lattice: 4, amp: 0.4 },
+      { lattice: 8, amp: 0.3 },
+      { lattice: 32, amp: 0.12 },
+    ],
+    normalStrength: 1.2,
+    roughBase: 0.2,
+    roughAmp: 0.12,
+    files: {
+      normal: 'gen/ice_nor.png',
+      roughness: 'gen/ice_rough.png',
+    },
+  },
 });
 
 /** 规格表里的表面名清单（消费方与门禁都从这里取，不许各自手抄） */
 export const SURFACE_NAMES = Object.freeze(Object.keys(SURFACE_SPECS));
 
 /** 图案族清单（W-C5 切片5）：构建器分派（`scripts/bake-textures.mjs`）与表结构 enum 共用的唯一一份 */
-export const SURFACE_PATTERNS = Object.freeze(['tiled', 'brushed']);
+export const SURFACE_PATTERNS = Object.freeze(['tiled', 'brushed', 'craggy']);

@@ -117,6 +117,31 @@ const MANIFEST = {
     repeat: [1 / SURFACE_SPECS.drum.tileMeters, 1 / SURFACE_SPECS.drum.tileMeters],
     roughness: 1.0,
   },
+
+  /**
+   * 岩面（W-C5 切片10）：五区外野的散石。1 米一铺、无格多面体图案（第三种族
+   * `craggy`，`facets: 6` 级劈裂面）。消费方走 `uvVariant('crag', 1, 1)`
+   * （= 1 / tileMeters）—— 几何 UV 以米计：盒走 `makeUvBoxGeometry`、锥走
+   * `makeUvConeGeometry`、十二面体走 `makeUvFacetGeometry`（按面投影，无接缝）。
+   * 五区的外野岩石共用同一份表面、各自保留自己的颜色（`stone.*Rock`）。
+   */
+  crag: {
+    normalMap: [`${LOCAL}/${SURFACE_SPECS.crag.files.normal}`],
+    roughnessMap: [`${LOCAL}/${SURFACE_SPECS.crag.files.roughness}`],
+    repeat: [1 / SURFACE_SPECS.crag.tileMeters, 1 / SURFACE_SPECS.crag.tileMeters],
+    roughness: 1.0,
+  },
+
+  /**
+   * 冰面（W-C5 切片10）：太空位的冰构与冰刺。1.5 米一铺、同一族但 `facets: 1`
+   * （不量化 ⇒ 光滑起伏）。半透明材质的透明度归材质自己，表面事实照贴。
+   */
+  ice: {
+    normalMap: [`${LOCAL}/${SURFACE_SPECS.ice.files.normal}`],
+    roughnessMap: [`${LOCAL}/${SURFACE_SPECS.ice.files.roughness}`],
+    repeat: [1 / SURFACE_SPECS.ice.tileMeters, 1 / SURFACE_SPECS.ice.tileMeters],
+    roughness: 1.0,
+  },
 };
 
 let _instance = null;

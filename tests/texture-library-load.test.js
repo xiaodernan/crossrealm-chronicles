@@ -6,7 +6,7 @@
  * 12 个 PNG（合计 630,530 字节 = 615.8 KiB）并成 2 张只省 10 次请求 —— 像素总量不变
  * （VRAM 不减）、材质本来就各不相同（绑定次数不减），而跨区域 `RepeatWrapping` 得动
  * `onBeforeCompile` 做 UV 重映射；CC0 那 5 个 set 是外部资源，进不了自家图集。
- * ② 真正量到的是**等待的形状**：`init()` 改前是一条 `for await` —— happy path 22 个请求
+ * ② 真正量到的是**等待的形状**：`init()` 改前是一条 `for await` —— happy path 26 个请求
  * （10 个 CC0 + 12 个烘焙）一个来回一个来回地等。本片改成一次发起全部（`Promise.all`），
  * 同负载微观对照（11 set × 20ms 桩）：**260.0ms → 20.0ms**。
  *
@@ -26,7 +26,7 @@ import * as THREE from 'three';
 import { TextureLibrary } from '../src/assets/TextureLibrary.js';
 
 /** MANIFEST 的键序快照。加 set 要动这里（这是**规格钉**：落库顺序是给人看的读数面） */
-const 名单 = ['grass', 'path', 'rock', 'forest', 'bark', 'masonry', 'slabs', 'plank', 'plate', 'steel', 'drum'];
+const 名单 = ['grass', 'path', 'rock', 'forest', 'bark', 'masonry', 'slabs', 'plank', 'plate', 'steel', 'drum', 'crag', 'ice'];
 
 /**
  * 假 loader：并发读数（在场 / 峰值 / 调用清单）+ 可控延迟与失败。
@@ -57,7 +57,7 @@ const 装 = (loader) => {
   return lib;
 };
 
-describe('并发：一次发起全部，而不是 22 个串行往返', () => {
+describe('并发：一次发起全部，而不是 26 个串行往返', () => {
   it('全部 set 的第一波请求同时发起 —— 峰值 = set 数（串行写法峰值只会是 1）', async () => {
     const loader = 假loader();
     const lib = 装(loader);
@@ -68,7 +68,7 @@ describe('并发：一次发起全部，而不是 22 个串行往返', () => {
       .toBe(键.length);
     expect(loader.读数.峰值, '峰值连 2 都没到 —— 这条用例没在量并发').toBeGreaterThanOrEqual(2);
     // happy path：假 loader 全命中第一条 URL ⇒ 每个槽恰好一次请求
-    expect(loader.读数.调用.length, '请求总数不是 22 个槽各一次').toBe(22);
+    expect(loader.读数.调用.length, '请求总数不是 26 个槽各一次').toBe(26);
   });
 
   it('门禁自证：同一把尺量串行调度，峰值必须掉回 1', async () => {
@@ -153,7 +153,7 @@ describe('静态单例：load() 的缓存语义不变', () => {
     expect(TextureLibrary.loaded(), 'load() 解析后 loaded() 还不是它').toBe(lib);
     expect(await TextureLibrary.load(), '就绪后再问 load()，实例换了').toBe(lib);
     expect(lib.ready).toBe(true);
-    // 真 loader 在 node 里载不出图（全部槽 null），但 11 个 set 一个不少、键序照旧
+    // 真 loader 在 node 里载不出图（全部槽 null），但 13 个 set 一个不少、键序照旧
     expect(Object.keys(lib.sets)).toEqual(名单);
   });
 });

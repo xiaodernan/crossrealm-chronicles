@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
+import { makeUvBoxGeometry } from '../../engine/uvGeometry.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
@@ -87,11 +88,16 @@ export class AbyssZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.abyssRock'), roughness: 0.95 });
+    // W-C5 切片10：外野散石上 crag 岩面（1 米一铺的无格多面体噪声）。退路读数 0.95
+    // 仍是改前那个常数 —— 贴图库就绪后由 `applySurfaces` 换成贴图态。
+    const mat = this.addSurfaceMaterial({ color: paletteOf('stone.abyssRock'), roughness: 0.95 }, 'crag');
+    // 24 块石头尺寸完全一样（1.5×2×1.5），原来每块各 new 一份几何 = 24 份一模一样的
+    // BufferGeometry。米制 UV（逐面 = 该面自己的米数）之后更是同一份就够：拿出来共用。
+    const geo = makeUvBoxGeometry(1.5, 2, 1.5);
     for (let i = 0; i < 24; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.6;
       const lz = (Math.random() - 0.5) * this.radius * 1.6;
-      const rock = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 1.5), mat);
+      const rock = new THREE.Mesh(geo, mat);
       rock.position.set(lx, this.sampleHeight(lx, lz) + 1, lz);
       rock.rotation.y = Math.random() * Math.PI;
       this.group.add(rock);

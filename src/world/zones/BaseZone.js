@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { makeUvFacetGeometry } from '../../engine/uvGeometry.js';
 import { makeRegionSurfaceMaterial, applyRegionSurface } from '../regionSurfaces.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
@@ -25,7 +26,12 @@ export class BaseZone {
     this.pois = [];
     /** 本地坐标碰撞体，build 结束后由 WorldManager 平移到世界坐标 */
     this.colliders = [];
-    /** 登记过的区域石构材质（W-C5 切片6）：贴图库就绪后由 `applySurfaces` 补挂 */
+    /**
+     * 登记过的区域表面材质（W-C5 切片6 立，切片10 起按表面名登记）：贴图库就绪后由
+     * `applySurfaces` 补挂。每条形如 `{ mat, surface }` —— surface 分开存是因为
+     * 同一个区可以有好几种表面（废墟石柱是 drum、外野散石是 crag），而补挂时
+     * 从材质本身问不出"它该贴哪一种"。
+     */
     this._surfaceMats = [];
   }
 
@@ -44,21 +50,23 @@ export class BaseZone {
   }
 
   /**
-   * 登记一份区域石构材质（W-C5 切片6）：参数与 `MeshStandardMaterial` 同形，
-   * `roughness` 是贴图未就绪时的退路读数。返回的材质**归本区所有**（构建期就地挂到柱子上），
-   * 贴图库就绪后由 `applySurfaces` 补挂 —— 柱身几何必须已是米制 UV（`makeUvCylinderGeometry`），
-   * 否则石块尺寸会随柱子粗细走。
+   * 登记一份区域表面材质（W-C5 切片6 立，切片10 起带表面名）：参数与
+   * `MeshStandardMaterial` 同形，`roughness` 是贴图未就绪时的退路读数。返回的材质
+   * **归本区所有**（构建期就地挂到柱子上），贴图库就绪后由 `applySurfaces` 补挂 ——
+   * 几何必须已是该表面的米制 UV（drum 走 `makeUvCylinderGeometry`、crag 走
+   * `makeUvBoxGeometry` / `makeUvConeGeometry` / `makeUvFacetGeometry`），
+   * 否则表面细节的尺寸会随工件大小走。
    */
-  addSurfaceMaterial(params) {
-    const mat = makeRegionSurfaceMaterial(params);
-    this._surfaceMats.push(mat);
+  addSurfaceMaterial(params, surface = 'drum') {
+    const mat = makeRegionSurfaceMaterial(params, surface);
+    this._surfaceMats.push({ mat, surface });
     return mat;
   }
 
   /** 贴图库就绪后补挂本区登记过的石构材质（由 `WorldManager` 的 `load().then` 调用）；返回挂上的份数 */
   applySurfaces(texLib) {
     let 数 = 0;
-    for (const mat of this._surfaceMats) if (applyRegionSurface(mat, texLib)) 数++;
+    for (const { mat, surface } of this._surfaceMats) if (applyRegionSurface(mat, texLib, surface)) 数++;
     return 数;
   }
 
@@ -190,11 +198,28 @@ export class BaseZone {
     return group;
   }
 
+  /**
+   * 外野散石的共享材质（W-C5 切片10）：`createRock` 每调一次就登记一份的话，
+   * 一座区几十块石头就是几十份一模一样的材质（十几份 GPU 程序、十几张贴图变体壳）。
+   * 参数完全相同 ⇒ 只建一份、共享。`flatShading` 保留：石头要的是劈面，不是光滑。
+   */
+  rockSurfaceMaterial() {
+    if (!this._rockMat) {
+      this._rockMat = this.addSurfaceMaterial(
+        { color: paletteOf('stone.zoneRock'), roughness: 0.95, flatShading: true },
+        'crag'
+      );
+    }
+    return this._rockMat;
+  }
+
   createRock(x, z, size = 1) {
-    const rock = new THREE.Mesh(
-      new THREE.DodecahedronGeometry(size, 0),
-      new THREE.MeshStandardMaterial({ color: paletteOf('stone.zoneRock'), roughness: 0.95, flatShading: true })
-    );
+    // W-C5 切片10：石头从"一块多面体 + 一个常数"换成 crag 岩面（1 米一铺的无格多面体噪声）。
+    // 几何走 `makeUvFacetGeometry`（按面投影的米制 UV）—— 每块石头的尺寸不同，
+    // 只有 UV 以米计才能让岩面细节在任何大小的石头上都是 1 米一格。
+    // 材质走 `addSurfaceMaterial` 两段式（世界构建早于贴图库就绪），退路读数仍是 0.95。
+    const mat = this.rockSurfaceMaterial();
+    const rock = new THREE.Mesh(makeUvFacetGeometry(new THREE.DodecahedronGeometry(size, 0)), mat);
     rock.position.set(x, this.sampleHeight(x, z) + size * 0.4, z);
     rock.rotation.set(Math.random(), Math.random(), Math.random());
     rock.scale.set(1, 0.7 + Math.random() * 0.5, 1);

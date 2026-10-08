@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { makeUvConeGeometry } from '../../engine/uvGeometry.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
 /** 新增：辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊 */
@@ -87,11 +88,16 @@ export class RadiantZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.radiantRock'), roughness: 0.85, metalness: 0.2 });
+    // W-C5 切片10：外野沙岩锥上 crag 岩面（1 米一铺的无格多面体噪声），退路读数 0.85。
+    // 锥体走 `makeUvConeGeometry`：u 逐行乘该行周长、v 乘高 —— 粗锥细锥的岩面细节同一尺寸。
+    const mat = this.addSurfaceMaterial({ color: paletteOf('stone.radiantRock'), roughness: 0.85, metalness: 0.2 }, 'crag');
     for (let i = 0; i < 18; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.4;
       const lz = (Math.random() - 0.5) * this.radius * 1.4;
-      const dune = new THREE.Mesh(new THREE.ConeGeometry(1.5 + Math.random(), 3 + Math.random() * 2, 6), mat);
+      const dune = new THREE.Mesh(
+        makeUvConeGeometry(1.5 + Math.random(), 3 + Math.random() * 2, 6),
+        mat
+      );
       dune.position.set(lx, this.sampleHeight(lx, lz) + 1.5, lz);
       dune.rotation.y = Math.random() * Math.PI;
       applyShadow(dune, 'castOnly');

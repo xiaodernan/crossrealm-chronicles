@@ -196,7 +196,7 @@ const 引用钉板 = {
   'combat/Enemy.js': { 调用: 1, 提及: 1, import: 1 },
   'player/PlayerController.js': { 调用: 1, 提及: 1, import: 1 },
   'world/zones/MagicZone.js': { 调用: 10, 提及: 10, import: 1 },
-  'world/zones/SpaceZone.js': { 调用: 6, 提及: 6, import: 1 },
+  'world/zones/SpaceZone.js': { 调用: 5, 提及: 5, import: 1 },
   'world/zones/AbyssZone.js': { 调用: 1, 提及: 1, import: 1 },
   'world/zones/GloomZone.js': { 调用: 1, 提及: 1, import: 1 },
   'world/zones/RadiantZone.js': { 调用: 1, 提及: 1, import: 1 },
@@ -317,7 +317,7 @@ describe('W-C5 切片8 调色板', () => {
         expect(实.提及, `${文件}：提及数 ≠ 调用数 —— 只准传字面路径`).toBe(实.调用.length);
         expect(实.import, `${文件} 的 import 数`).toBe(期望.import);
       }
-      expect(调用总, '消费方调用合计').toBe(61);
+      expect(调用总, '消费方调用合计').toBe(60);
     });
 
     it('其余 src 文件 0 提及；定义文件自己 0 字面调用', () => {

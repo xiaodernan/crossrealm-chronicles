@@ -282,16 +282,25 @@ export function checkFields(row, spec, path, ctx) {
  * 前者要等烘焙器读到 `undefined` 才炸；后者更糟：数值在场、没人读，
  * 改它的人以为改了。`pattern` 的**值域**由 enum 那一层管，这里只管"说的和带的对不对得上"。
  */
+/**
+ * 图案族 → 这一族自己的参数行名（W-C5 切片10 起三族）。**判据只有这一份**：
+ * 加第四族时在这里加一行，`checkSurfaceFamilies` 与门禁的逐族变异自动跟着长，
+ * 不用再去改 if/else 链（切片5 起那条链就是逐个族抄一遍，加一族抄一遍）。
+ */
+export const SURFACE_FAMILY_PARAM = Object.freeze({ tiled: 'bricks', brushed: 'brushed', craggy: 'craggy' });
+
 export function checkSurfaceFamilies(specs) {
   const out = [];
   for (const [name, spec] of Object.entries(specs ?? {})) {
     const p = `materialSurfaces["${name}"]`;
-    if (spec.pattern === 'tiled') {
-      if (!spec.bricks) out.push(`${p}: pattern "tiled" 却缺 bricks 行`);
-      if (spec.brushed) out.push(`${p}: pattern "tiled" 却带着 brushed 行 —— 这一族的数值没人读（改它以为改了）`);
-    } else if (spec.pattern === 'brushed') {
-      if (!spec.brushed) out.push(`${p}: pattern "brushed" 却缺 brushed 行`);
-      if (spec.bricks) out.push(`${p}: pattern "brushed" 却带着 bricks 行 —— 这一族的数值没人读（改它以为改了）`);
+    const 本族 = SURFACE_FAMILY_PARAM[spec.pattern];
+    // pattern 不在值域里由 enum 那一层点名，这里不重复判
+    if (!本族) continue;
+    if (!spec[本族]) out.push(`${p}: pattern "${spec.pattern}" 却缺 ${本族} 行`);
+    for (const [族, 行] of Object.entries(SURFACE_FAMILY_PARAM)) {
+      if (族 !== spec.pattern && spec[行]) {
+        out.push(`${p}: pattern "${spec.pattern}" 却带着 ${行} 行 —— 这一族的数值没人读（改它以为改了）`);
+      }
     }
   }
   return out;
@@ -976,6 +985,16 @@ export const CONTENT_TABLES = [
             lines: { t: 'int', min: 2, max: 256 },
             rows: { t: 'int', min: 2, max: 64 },
             amp: { t: 'number', exclusiveMin: 0, max: 1 },
+          },
+        },
+        craggy: {
+          t: 'row',
+          required: false,
+          of: {
+            // 台阶数（1 = 不量化 ⇒ 光滑起伏，冰面那一档）/ 高度振幅 / 台阶面上的细颗粒权重
+            facets: { t: 'int', min: 1, max: 64 },
+            amp: { t: 'number', exclusiveMin: 0, max: 4 },
+            grain: { t: 'number', min: 0, max: 1 },
           },
         },
         octaves: {

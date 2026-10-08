@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
+import { makeUvCylinderGeometry, makeUvFacetGeometry } from '../../engine/uvGeometry.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
-import { makeUvCylinderGeometry } from '../../engine/uvGeometry.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
 /** 第四主题：破碎时线 — 指环王 + 星际穿越时间主题融合 */
@@ -118,13 +118,15 @@ export class VoidZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.voidRock'), roughness: 0.95 });
+    // W-C5 切片10：外野散石上 crag 岩面（1 米一铺的无格多面体噪声），退路读数 0.95。
+    // 十二面体走按面投影的米制 UV —— 球面投影的经线缝会切在劈裂面上。
+    const mat = this.addSurfaceMaterial({ color: paletteOf('stone.voidRock'), roughness: 0.95 }, 'crag');
     for (let i = 0; i < 20; i++) {
       const angle = (i / 20) * Math.PI * 2;
       const r = this.radius * 0.75 + Math.random() * 20;
       const lx = Math.cos(angle) * r;
       const lz = Math.sin(angle) * r;
-      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(1 + Math.random()), mat);
+      const rock = new THREE.Mesh(makeUvFacetGeometry(new THREE.DodecahedronGeometry(1 + Math.random(), 0)), mat);
       rock.position.set(lx, this.sampleHeight(lx, lz) + 0.5, lz);
       this.group.add(rock);
     }

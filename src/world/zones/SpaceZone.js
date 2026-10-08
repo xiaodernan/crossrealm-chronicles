@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { makeUvConeGeometry, makeUvFacetGeometry } from '../../engine/uvGeometry.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
 /** 星际穿越风格 — 冰云行星、引力透镜、五维书架彩蛋 */
@@ -41,6 +42,28 @@ export class SpaceZone extends BaseZone {
 
   buildTerrain() {
     // 地面由 WorldTerrain 统一绘制
+  }
+
+  /**
+   * 冰面的共享材质（W-C5 切片10）。`buildIceStructures`（15 座冰晶）与
+   * `buildOuterWilds`（30 根冰刺）共用 —— 改前两处各建一份，读数还不一样
+   * （0.15 vs 0.2）。参数取**原先较低的那一份**（0.15）：冰面贴图接管之后
+   * 粗糙度由贴图说话，这个数只在不贴图时兜底，取原来更常见的那一档。
+   *
+   * 惰性建：两个 build 方法谁先被调用都能拿到，且只登记一次（同一份材质
+   * 在 `applySurfaces` 里只该补挂一次）。
+   */
+  iceSurfaceMaterial() {
+    if (!this._iceMat) {
+      this._iceMat = this.addSurfaceMaterial({
+        color: paletteOf('crystal.ice'),
+        roughness: 0.15,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.85,
+      }, 'ice');
+    }
+    return this._iceMat;
   }
 
   buildBlackHole() {
@@ -95,19 +118,16 @@ export class SpaceZone extends BaseZone {
   }
 
   buildIceStructures() {
-    const iceMat = new THREE.MeshStandardMaterial({
-      color: paletteOf('crystal.ice'),
-      roughness: 0.15,
-      metalness: 0.1,
-      transparent: true,
-      opacity: 0.85,
-    });
+    // W-C5 切片10：冰面（`ice` 表面，1.5 米一铺、光滑起伏）。`buildOuterWilds` 的 30 根
+    // 冰刺原来**又抄了一份一模一样的材质**（两份读数、两份 GPU 程序）。合成一份共用的：
+    // 45 件冰现在共享同一份材质与同一份贴图变体，而贴图只由这一份挂/补挂。
+    const iceMat = this.iceSurfaceMaterial();
 
     for (let i = 0; i < 15; i++) {
       const x = (Math.random() - 0.5) * 160;
       const z = (Math.random() - 0.5) * 160;
       const h = 3 + Math.random() * 8;
-      const crystal = new THREE.Mesh(new THREE.ConeGeometry(1 + Math.random(), h, 4), iceMat);
+      const crystal = new THREE.Mesh(makeUvConeGeometry(1 + Math.random(), h, 4), iceMat);
       crystal.position.set(x, this.sampleHeight(x, z) + h * 0.5, z);
       crystal.rotation.y = Math.random() * Math.PI;
       applyShadow(crystal, 'castOnly');
@@ -240,24 +260,28 @@ export class SpaceZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const iceMat = new THREE.MeshStandardMaterial({ color: paletteOf('crystal.ice'), roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 });
+    // W-C5 切片10：与 `buildIceStructures` 共用同一份冰面材质（改前这里是第二份抄本，
+    // 读数还不一样 —— 0.2 vs 0.15）。半透明的表面事实照贴，透明度是材质自己的事。
+    const iceMat = this.iceSurfaceMaterial();
     for (let i = 0; i < 30; i++) {
       const angle = (i / 30) * Math.PI * 2;
       const r = this.radius * 0.65 + Math.random() * this.radius * 0.3;
       const lx = Math.cos(angle) * r;
       const lz = Math.sin(angle) * r;
-      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.8, 3 + Math.random() * 4, 4), iceMat);
+      const spike = new THREE.Mesh(makeUvConeGeometry(0.8, 3 + Math.random() * 4, 4), iceMat);
       spike.position.set(lx, this.sampleHeight(lx, lz) + 1.5, lz);
       spike.rotation.y = Math.random() * Math.PI;
       this.group.add(spike);
       const gy = this.sampleHeight(lx, lz);
       this.addCylinderCollider(lx, lz, 0.6, gy + spike.geometry.parameters.height, { base: gy - 0.5 });
     }
-    const rockMat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.spaceRock'), roughness: 0.95 });
+    // W-C5 切片10：外野散岩上 crag 岩面（1 米一铺的无格多面体噪声），退路读数 0.95。
+    // 十二面体走按面投影的米制 UV —— 球面投影的经线缝会切在劈裂面上。
+    const rockMat = this.addSurfaceMaterial({ color: paletteOf('stone.spaceRock'), roughness: 0.95 }, 'crag');
     for (let i = 0; i < 12; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.4;
       const lz = (Math.random() - 0.5) * this.radius * 1.4;
-      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5 + Math.random()), rockMat);
+      const rock = new THREE.Mesh(makeUvFacetGeometry(new THREE.DodecahedronGeometry(1.5 + Math.random(), 0)), rockMat);
       rock.position.set(lx, this.sampleHeight(lx, lz) + 0.8, lz);
       this.group.add(rock);
       const s = rock.geometry.parameters.radius;

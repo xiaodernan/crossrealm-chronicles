@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { makeUvFacetGeometry } from '../../engine/uvGeometry.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
 /** 新增：幽暗林地 — 迷雾缠绕的古老森林，介于幻想与虚空之间 */
@@ -87,18 +88,20 @@ export class GloomZone extends BaseZone {
   }
 
   buildOuterWilds() {
-    const mat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.gloomRock'), roughness: 0.95 });
+    // W-C5 切片10：外野散石上 crag 岩面（1 米一铺的无格多面体噪声），退路读数 0.95。
+    // 岩石半径逐块随机（1.0~1.8），所以几何仍逐块建；但 UV 以米计（按面投影），
+    // 大石小石上的岩面细节都是同一个尺寸。
+    const mat = this.addSurfaceMaterial({ color: paletteOf('stone.gloomRock'), roughness: 0.95 }, 'crag');
     for (let i = 0; i < 20; i++) {
       const lx = (Math.random() - 0.5) * this.radius * 1.5;
       const lz = (Math.random() - 0.5) * this.radius * 1.5;
-      const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(1 + Math.random() * 0.8, 0), mat);
+      const 半径 = 1 + Math.random() * 0.8;
+      const rock = new THREE.Mesh(makeUvFacetGeometry(new THREE.DodecahedronGeometry(半径, 0)), mat);
       rock.position.set(lx, this.sampleHeight(lx, lz) + 1, lz);
       rock.rotation.set(Math.random(), Math.random(), Math.random());
       rock.scale.set(1, 0.7 + Math.random() * 0.5, 1);
       applyShadow(rock, 'castOnly');
-      if (rock.geometry.parameters.radius >= 1) {
-        this.addCylinderCollider(lx, lz, rock.geometry.parameters.radius * 0.8, rock.position.y + rock.geometry.parameters.radius * 1.1, { base: rock.position.y - rock.geometry.parameters.radius });
-      }
+      if (半径 >= 1) this.addCylinderCollider(lx, lz, 半径 * 0.8, rock.position.y + 半径 * 1.1, { base: rock.position.y - 半径 });
       this.group.add(rock);
     }
   }

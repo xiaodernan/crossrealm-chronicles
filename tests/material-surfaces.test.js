@@ -37,7 +37,7 @@ import {
 import { isSharedAsset, dungeonAssetStats } from '../src/world/dungeonAssets.js';
 import { DOOR_JAMB } from '../src/world/dungeonDimensions.js';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
-import { CONTENT_TABLES, checkTable, checkSurfaceFamilies } from '../src/content/registry.js';
+import { CONTENT_TABLES, checkTable, checkSurfaceFamilies, SURFACE_FAMILY_PARAM } from '../src/content/registry.js';
 
 const ROOT = process.cwd();
 const PUBLIC = join(ROOT, 'public', 'textures');
@@ -296,7 +296,10 @@ for (const 名 of SURFACE_NAMES) describe(`② 表面读数（${名}）：可平
   const 图案 = buildSurface(spec);
   const W = spec.size;
   const H = spec.size;
-  const tiled = spec.pattern === 'tiled';
+  // 三族各有自己的"结构尺"（切片10 起）：tiled 分块 / brushed 拉丝 / craggy 无格岩面。
+  // 分派写成 族名三路而不再是"tiled ? … : …"—— 两路的那版把"不是分块"默认成拉丝，
+  // 第三族进来时会被塞进拉丝的尺子里当场 TypeError（实测：`Cannot destructure … 'spec.brushed'`）。
+  const 族 = spec.pattern;
 
   it('高度场的接缝不比基准更跳（不可平铺的噪声会在这里红）', () => {
     const d = 接缝诊断(图案.heightField, W, H);
@@ -305,7 +308,11 @@ for (const 名 of SURFACE_NAMES) describe(`② 表面读数（${名}）：可平
     // 拉丝族的右回卷那一对是**普通列边界**，基准换成跨列边界对的平均。
     // 实测（2026-10-07/08）：masonry 内部 0.02571、竖缝 0.02046、横缝 0.02524；
     // steel 竖缝 0.16784 vs 列边界 0.22810（全对平均 0.11527 会假红，正是分家的理由）。
-    const 基准 = tiled ? d.内部平均 : 列边界平均(图案.heightField, W, H, W / spec.brushed.lines);
+    // 基准按族取（见 `列边界平均` 的注释）：拉丝的右回卷那一对是**普通列边界**，
+    // 基准换成跨列边界对的平均；分块与无格岩面都是各向同性的，基准就是全对平均。
+    const 基准 = 族 === 'brushed'
+      ? 列边界平均(图案.heightField, W, H, W / spec.brushed.lines)
+      : d.内部平均;
     expect(d.竖缝, `竖缝 ${d.竖缝.toFixed(5)} vs 基准 ${基准.toFixed(5)}`).toBeLessThanOrEqual(基准 * 1.1);
     expect(d.横缝, `横缝 ${d.横缝.toFixed(5)} vs 基准 ${基准.toFixed(5)}`).toBeLessThanOrEqual(基准 * 1.1);
   });
@@ -354,7 +361,7 @@ for (const 名 of SURFACE_NAMES) describe(`② 表面读数（${名}）：可平
     expect(max - min, `粗糙度跨度只有 ${max - min} 字节 —— 贴不出对比`).toBeGreaterThan(32);
   });
 
-  if (tiled) {
+  if (族 === 'tiled') {
     it('分块结构：块心有真实高度分布（不是一张纯噪声或平板）', () => {
       const { rows, cols, stagger, phase } = spec.bricks;
       const rowPx = H / rows;
@@ -383,7 +390,7 @@ for (const 名 of SURFACE_NAMES) describe(`② 表面读数（${名}）：可平
       expect(max, `分块族该有到顶的亮砖（实测 max 255），实际 ${max}`).toBeGreaterThan(250);
       expect(min, `分块族的砖缝该压到 210 以下（实测 194），实际 ${min}`).toBeLessThan(210);
     });
-  } else {
+  } else if (族 === 'brushed') {
     it('拉丝结构（拉丝族专属）：列宽整除、水平相邻差远大于竖直（实测 21.6 倍）', () => {
       const { lines, rows } = spec.brushed;
       expect(Number.isInteger(W / lines), `${W} 像素分不出 ${lines} 条整宽拉丝线`).toBe(true);
@@ -398,6 +405,54 @@ for (const 名 of SURFACE_NAMES) describe(`② 表面读数（${名}）：可平
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) t[y * W + x] = 图案.heightField[x * W + y];
       const a = 各向异性(t, W, H);
       expect(a.比, `转置后仍 ${a.比.toFixed(3)} —— 原场的方向性没有被尺子量到`).toBeLessThan(1 / 3);
+    });
+  } else {
+    // —— 无格岩面族（craggy）：台阶占比与"一级的高度差"
+    const 台阶统计 = (场) => {
+      let n = 0, 大 = 0, 幅和 = 0;
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x + 1 < W; x++) {
+          const d = Math.abs(场[y * W + x + 1] - 场[y * W + x]);
+          n++;
+          if (d > 0.1) { 大++; 幅和 += d; }
+        }
+      }
+      return { 占比: 大 / n, 均幅: 大 ? 幅和 / 大 : 0 };
+    };
+
+    it('岩面台阶（craggy 族专属）：facets>1 时有劈裂面，每级正好差 1/(facets-1)', () => {
+      const { facets } = spec.craggy;
+      if (facets > 1) {
+        const s = 台阶统计(图案.heightField);
+        // 实测 crag（6 级、amp 1.0）：小平滑 86.3%、台阶 4.42%、均幅 0.2004 ≈ 1/(6-1) = 0.2
+        expect(s.占比, `台阶只占 ${(s.占比 * 100).toFixed(2)}% —— 这是平滑噪声，不是岩面`)
+          .toBeGreaterThan(0.01);
+        expect(s.占比, `台阶占 ${(s.占比 * 100).toFixed(2)}% —— 这是楼梯，不是岩面`)
+          .toBeLessThan(0.2);
+        // 这一条是"量化真的发生了"的直接证据：台阶的幅度就是一级的高度差
+        expect(s.均幅, `台阶均幅 ${s.均幅.toFixed(4)} ≠ 一级高度差 ${(1 / (facets - 1)).toFixed(4)}`)
+          .toBeCloseTo(1 / (facets - 1), 2);
+        // 平台内是常数（劈裂面的"面"）：平滑对占绝大多数
+        expect(1 - s.占比, `平台占比 ${((1 - s.占比) * 100).toFixed(1)}% —— 劈裂面不成面`)
+          .toBeGreaterThan(0.5);
+      }
+    });
+
+    it('反向对照：同一把尺，facets 置 1 时一个台阶都没有（ice 用的就是这一档）', () => {
+      // 冰（facets: 1）走的是"不量化"档。这里把任一行的 facets 打成 1，台阶必须消失 ——
+      // 否则上一条断言量的是噪声而不是量化。
+      const 光滑 = buildSurface({ ...spec, craggy: { ...spec.craggy, facets: 1 } });
+      const s = 台阶统计(光滑.heightField);
+      expect(s.占比, `facets=1 还有 ${(s.占比 * 100).toFixed(2)}% 的台阶 —— 这把尺量的是别的东西`)
+        .toBeLessThan(0.001);
+    });
+
+    it('facets 真的进了图：换一档台阶数，台阶占比必须跟着变', () => {
+      const { facets } = spec.craggy;
+      if (facets <= 1) return;
+      const 另一种 = buildSurface({ ...spec, craggy: { ...spec.craggy, facets: facets + 2 } });
+      expect(台阶统计(另一种.heightField).占比)
+        .not.toBeCloseTo(台阶统计(图案.heightField).占比, 3);
     });
   }
 });
@@ -734,6 +789,7 @@ describe('⑦ 表结构门禁：每一枚数值越界都各自点名（规格表
   const 表 = CONTENT_TABLES.find((t) => t.kind === 'materialSurfaces');
   const 跑 = (改) => checkTable({ ...表, table: { masonry: { ...SURFACE_SPECS.masonry, ...改 } } }).join('\n');
   const 钢跑 = (改) => checkTable({ ...表, table: { steel: { ...SURFACE_SPECS.steel, ...改 } } }).join('\n');
+  const 岩跑 = (改) => checkTable({ ...表, table: { crag: { ...SURFACE_SPECS.crag, ...改 } } }).join('\n');
 
   it('真规格过，且登记在案', () => {
     expect(表, 'materialSurfaces 没进 CONTENT_TABLES').toBeTruthy();
@@ -774,6 +830,31 @@ describe('⑦ 表结构门禁：每一枚数值越界都各自点名（规格表
   ])('拉丝族变异 %s 被点名', (_名, 改, 图案) => {
     const 错误 = 钢跑(改);
     expect(错误, `${_名} 越界却过表了`).toMatch(图案);
+  });
+
+  it.each([
+    ['craggy 缺 craggy 行', { craggy: undefined }, /缺 craggy 行/],
+    ['craggy 混进 bricks 行', { bricks: SURFACE_SPECS.masonry.bricks }, /却带着 bricks 行/],
+    ['craggy 混进 brushed 行', { brushed: SURFACE_SPECS.steel.brushed }, /却带着 brushed 行/],
+    ['tiled 混进 craggy 行', { pattern: 'tiled', bricks: SURFACE_SPECS.masonry.bricks, craggy: SURFACE_SPECS.crag.craggy }, /却带着 craggy 行/],
+    ['brushed 混进 craggy 行', { pattern: 'brushed', brushed: SURFACE_SPECS.steel.brushed, craggy: SURFACE_SPECS.crag.craggy }, /却带着 craggy 行/],
+    ['facets 越界（0 < 1）', { craggy: { ...SURFACE_SPECS.crag.craggy, facets: 0 } }, /facets/],
+    ['facets 越界（65 > 64）', { craggy: { ...SURFACE_SPECS.crag.craggy, facets: 65 } }, /facets/],
+    ['amp 为 0', { craggy: { ...SURFACE_SPECS.crag.craggy, amp: 0 } }, /amp/],
+    ['amp 超 4', { craggy: { ...SURFACE_SPECS.crag.craggy, amp: 4.5 } }, /amp/],
+    ['grain 为负', { craggy: { ...SURFACE_SPECS.crag.craggy, grain: -0.1 } }, /grain/],
+    ['grain 超 1', { craggy: { ...SURFACE_SPECS.crag.craggy, grain: 1.5 } }, /grain/],
+  ])('无格岩面族变异 %s 被点名', (_名, 改, 图案) => {
+    const 错误 = 岩跑(改);
+    expect(错误, `${_名} 越界却过表了`).toMatch(图案);
+  });
+
+  it('不变式按族表长：三族各自的参数行互不串门（表的键集 = pattern 枚举的键集）', () => {
+    // `checkSurfaceFamilies` 里的族表与 `SURFACE_PATTERNS` 是两份东西，但必须一一对应：
+    // 族表少一族，那一族的"缺参数行"就再也没人点名；多一族则是死键。
+    expect(Object.keys(SURFACE_FAMILY_PARAM).sort(), '族表与 pattern 枚举漂了')
+      .toEqual([...SURFACE_PATTERNS].sort());
+    expect(SURFACE_FAMILY_PARAM.craggy, '第三族的参数行名没登记').toBe('craggy');
   });
 
   it('缺 pattern（必填）被点名 —— 形状层把它挡住，不是靠烘焙器读 undefined 才炸', () => {

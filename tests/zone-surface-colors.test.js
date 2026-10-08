@@ -92,7 +92,12 @@ describe('五区表面底色：调色板真的涂到了世界上（W-C5 切片9�
       const 文 = readFileSync(join(process.cwd(), 'src', 文件), 'utf8');
       for (const [名, 次数] of Object.entries(格)) {
         const 实 = 文.split(`paletteOf('${名}')`).length - 1;
-        expect(实, `${文件} 里 ${名} 的调用点数`).toBe(次数);
+        // W-C5 切片10 起：`crystal.ice` 在 SpaceZone 里从两处合成一处共享材质
+        // （`iceSurfaceMaterial()`）—— 站点数从 2 降到 1，而"两处指向同一格"这条纪律
+        // 反而更硬：压根只有一处能写字面量。所以只断言"不超过改前份数、且仍在场"，
+        // 而不是把合成后的份数写死成新常数（写死会让下一次合并又得改这里）。
+        expect(实, `${文件} 里 ${名} 的调用点数变多了 —— 抄本又分叉了`).toBeLessThanOrEqual(次数);
+        expect(实, `${文件} 里 ${名} 一次都没出现 —— 这一格被从世界上删了？`).toBeGreaterThan(0);
       }
     }
   });
@@ -100,7 +105,9 @@ describe('五区表面底色：调色板真的涂到了世界上（W-C5 切片9�
   it('三 座区域的调色板格子数：搬进来的站点一条不多一条不少', () => {
     const 站点 = {
       MagicZone: 10,
-      SpaceZone: 6,
+      SpaceZone: 5,
+      // W-C5 切片10：冰材质合成一份 ⇒ 少一处 paletteOf 站点（6 → 5）
+      // SpaceZone 上有 crag（1）+ ice（1）两种表面，但都只从调色板读一次颜色。
       AbyssZone: 1,
       GloomZone: 1,
       RadiantZone: 1,

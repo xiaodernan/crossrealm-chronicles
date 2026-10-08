@@ -46,10 +46,16 @@ const makeDialog = () => ({ show() {}, toast() {} });
 
 const 假纹理 = (v) => new THREE.DataTexture(new Uint8Array(48).fill(v), 4, 4);
 
-/** 只给 drum 假槽的一枚 `_loadSet` 桩（别的组留全 null，与 node 里载不出图同形） */
-const 装鼓桩 = () => { TextureLibrary.prototype._loadSet = async function (def) {
+/**
+ * 给**所有烘焙组**假槽的一枚 `_loadSet` 桩（W-C5 切片10 起不只是 drum：crag / ice
+ * 也在这个库里，且都是 `gen/` 下的程序化贴图）。判据取 URL 里的 `/gen/` 而不是逐个
+ * 列名字面量 —— 再加第八种表面时这个桩不用跟着改：列名字面量的桩会在新表面进来时
+ * 安静地只给旧组上贴，于是"新表面没接线"被桩伪装成"世界一切正常"。
+ * 别的组（CC0 照片贴图）仍留全 null，与 node 里真的载不出图同形。
+ */
+const 装烘焙桩 = () => { TextureLibrary.prototype._loadSet = async function (def) {
   const set = { map: null, normalMap: null, roughnessMap: null, roughness: def.roughness ?? 0.85 };
-  if (def?.normalMap?.[0]?.includes('drum')) {
+  if (def?.normalMap?.[0]?.includes('/gen/')) {
     set.normalMap = 假纹理(130);
     set.roughnessMap = 假纹理(190);
   }
@@ -74,6 +80,18 @@ function uv范围(geometry) {
   return { uMax, vMax };
 }
 
+/**
+ * 按**表面名**取本区登记过的材质（W-C5 切片10 起必须这样取）。
+ * 切片6 时一个区只登记一种表面，`_surfaceMats[0]` 就是石构；切片10 起
+ * `createRock` 也登记 crag，下标顺序取决于各 build 方法的调用次序 —— 按下标取
+ * 会把"石头材质"当成"石柱材质"，断言的还是 6 根断柱，错的却看不出来。
+ */
+function 本区表面(zone, surface) {
+  const 命中 = zone._surfaceMats.filter((r) => r.surface === surface).map((r) => r.mat);
+  expect(命中.length, `${zone.id ?? zone.constructor.name} 没有登记 ${surface} 表面`).toBeGreaterThan(0);
+  return 命中;
+}
+
 /** 逐行 uMax（只走躯干分组；y 取 1e-4 舍入成行号）—— 与 material-surfaces 的同名读数同口径 */
 function 柱行实测(o) {
   const g = o.geometry;
@@ -93,7 +111,7 @@ describe('① 延迟补挂：世界先建好、贴图后到（build() 的 load()
   it('build() 后石构是旧读数；load() 解析后同一份材质被上贴，且挂在网格上', async () => {
     expect(TextureLibrary.loaded(), '本用例必须最先跑：单例一旦 ready，延迟支就无法复现').toBe(null);
     const 真桩 = TextureLibrary.prototype._loadSet;
-    装鼓桩();
+    装烘焙桩();
     // `WorldManager.build()` → `applyHubAtmosphere` 会发 zone-changed：真世界里接的人一大把，
     // node 里给一条通道即可（与 poi-identity 的夹具同款）
     const handlers = new Map();
@@ -118,8 +136,8 @@ describe('① 延迟补挂：世界先建好、贴图后到（build() 的 load()
       const voidZone = world.zones[3];
       const hubMat = world._hubSurfaceMat;
       expect(hubMat, 'hub 石柱没登记材质 —— applySurfaceTextures 无从补挂').toBeTruthy();
-      const 断柱 = 找材质网格(fantasy.group, fantasy._surfaceMats[0]);
-      const 尖碑柱 = 找材质网格(voidZone.group, voidZone._surfaceMats[0]);
+      const 断柱 = 找材质网格(fantasy.group, 本区表面(fantasy, 'drum')[0]);
+      const 尖碑柱 = 找材质网格(voidZone.group, 本区表面(voidZone, 'drum')[0]);
       const hub柱 = 找材质网格(world.scene, hubMat);
       expect(断柱, '废墟断柱没找到 6 根 —— 这条用例没量到石构').toHaveLength(6);
       expect(尖碑柱, '尖碑柱身没找到').toHaveLength(1);
@@ -153,7 +171,7 @@ describe('① 延迟补挂：世界先建好、贴图后到（build() 的 load()
       const 顶盖 = [];
       voidZone.group.traverse((o) => { if (o.isMesh && o.geometry.type === 'OctahedronGeometry') 顶盖.push(o); });
       expect(顶盖, '尖碑顶盖没找到 —— 这条断言在量空气').toHaveLength(1);
-      expect(顶盖[0].material, '顶盖与柱身还共用一份材质 —— 分家没发生').not.toBe(voidZone._surfaceMats[0]);
+      expect(顶盖[0].material, '顶盖与柱身还共用一份材质 —— 分家没发生').not.toBe(本区表面(voidZone, 'drum')[0]);
       expect(顶盖[0].material.normalMap, '顶盖 UV 非米制，不该被上贴').toBe(null);
       expect(顶盖[0].material.roughness).toBe(0.85);
 
@@ -164,8 +182,20 @@ describe('① 延迟补挂：世界先建好、贴图后到（build() 的 load()
       const voidg = uv范围(尖碑柱[0].geometry);
       expect(voidg.uMax, '尖碑柱身 uMax 不是绕底圈的米数 2π·1.2').toBeCloseTo(2 * Math.PI * 1.2, 3);
 
+      // —— 补挂份数 = 登记数。Slice10 起各区还登记了外野岩/冰，所以不再是 3：
+      //     hub 1 + Fantasy(drum 断柱 / crag 散石) + Abyss(crag) + Gloom(crag)
+      //           + Void(drum 尖碑 / crag 散石) + Space(ice / crag) + Radiant(crag) = 10
+      // 逐条点名的意义：总数对得上也可能"漏挂的那一份刚好被别的抵掉"，所以下面按
+      // 登记表逐条问一遍 —— 每一条都该拿到**它自己那个表面**的变体（拿错表面也是红）。
+      const 登记 = world.zones.flatMap((z) => z._surfaceMats.map((r) => ({ ...r, 区: z.id })));
+      expect(world.applySurfaceTextures(lib), '补挂份数与登记数不符').toBe(登记.length + 1);
+      for (const { mat, surface, 区 } of 登记) {
+        const 铺 = 1 / SURFACE_SPECS[surface].tileMeters;
+        const v = lib.uvVariant(surface, 铺, 铺);
+        expect(mat.normalMap, `${区} 登记的 ${surface} 没被补挂（或挂成了别的表面）`).toBe(v.normalMap);
+        expect(mat.roughness, `${区} 的 ${surface} 上贴后 roughness 不是 1`).toBe(1);
+      }
       // —— 重复调用幂等：重挂不换壳、不重复建变体
-      expect(world.applySurfaceTextures(lib), '补挂份数不是 hub + 废墟 + 尖碑 = 3').toBe(3);
       expect(hubMat.normalMap, '再次补挂换了壳 —— uvVariant 缓存没生效').toBe(变体.normalMap);
     } finally {
       TextureLibrary.prototype._loadSet = 真桩;
@@ -182,16 +212,17 @@ describe('② 同步支：库已就绪时构造区域 ⇒ 登记的石材出生�
     const 变体 = lib.uvVariant('drum', 砖, 砖);
 
     const fantasy = new FantasyZone(makeScene(), { x: -200, z: 0 }, makeDialog());
-    expect(fantasy._surfaceMats, '一次 addSurfaceMaterial 都没发生').toHaveLength(1);
-    const stoneMat = fantasy._surfaceMats[0];
+    const drum们 = 本区表面(fantasy, 'drum');
+    expect(drum们, '断柱 drum 只该登记一份').toHaveLength(1);
+    const stoneMat = drum们[0];
     expect(stoneMat.normalMap, '已就绪的库在构造时没被用上 —— 同步支没跑').toBe(变体.normalMap);
     expect(stoneMat.roughness).toBe(1);
     expect(stoneMat.normalScale.x).toBe(0.8);
     expect(找材质网格(fantasy.group, stoneMat), '6 根断柱该共用同一份材质（GPU 与 draw 各只一份）').toHaveLength(6);
 
     const voidZone = new VoidZone(makeScene(), { x: 0, z: 220 }, makeDialog());
-    expect(voidZone._surfaceMats, '尖碑只该登记柱身一份（顶盖不是石段）').toHaveLength(1);
-    expect(voidZone._surfaceMats[0].normalMap).toBe(变体.normalMap);
+    expect(本区表面(voidZone, 'drum'), '尖碑 drum 只该登记柱身一份（顶盖不是石段）').toHaveLength(1);
+    expect(本区表面(voidZone, 'drum')[0].normalMap).toBe(变体.normalMap);
     const cap = [];
     voidZone.group.traverse((o) => { if (o.isMesh && o.geometry.type === 'OctahedronGeometry') cap.push(o); });
     expect(cap[0].material.normalMap, '八面体顶盖被上贴了 —— 分家回归').toBe(null);
@@ -205,7 +236,7 @@ describe('③ 退路：sets.drum 没加载出来 ⇒ 旧读数，但几何仍是
     delete lib.sets.drum;
     try {
       const fantasy = new FantasyZone(makeScene(), { x: -200, z: 0 }, makeDialog());
-      const mat = fantasy._surfaceMats[0];
+      const mat = 本区表面(fantasy, 'drum')[0];
       expect(mat.normalMap, 'drum 不在时不该有法线图').toBe(null);
       expect(mat.roughnessMap).toBe(null);
       expect(mat.roughness, '无贴图时该回到旧读数 0.9').toBe(0.9);
