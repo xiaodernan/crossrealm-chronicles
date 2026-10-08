@@ -18,8 +18,10 @@
  * （否则两种状态撞成一个颜色，比没配色更糟）。
  *
  * ## 默认档 = 现状，逐格同值
- * `default` 一列的值取自**改前在役的那些色**（稀有度四档直接对齐装备稀有度显示表的旧值），
- * 所以接上消费者之后默认档**零视觉变更**。调色是美术决定，机制片不夹带。
+ * `default` 一列的值取自**改前在役的那些色**：稀有度四档对齐装备稀有度显示表的旧值，
+ * 战斗三件套自切片4 起对齐 HUD 三条状态条的亮端（血条 `#cc4444` / 精力条 `#c9a962` /
+ * 法力条 `#8866cc`，见 `ui/barTheme.js`）。所以接上消费者之后默认档**零视觉变更**。
+ * 调色是美术决定，机制片不夹带。
  *
  * ## 切片3 补上"现在是哪一档"
  * 上面那一层只回答"某个语义在某个档下是什么颜色"，**不回答当前是哪一档** ——
@@ -64,25 +66,29 @@ const c = (label, glyph, colors) => Object.freeze({ label, glyph, colors: Object
 export const SEMANTIC_COLORS = Object.freeze({
   // 战斗状态三件套。三者在任何一档里都必须互不同色（门禁钉住）。
   danger: c('危险', '!', {
-    default: 0xff4444,
+    // 切片4 起对齐在役的血条亮端 `#cc4444`（HUD 状态条从这一格取色，见 ui/barTheme.js）
+    default: 0xcc4444,
     deuteranopia: 0xff9a00,   // 红→橙黄（红绿型最易混的就是红与绿）
     protanopia: 0xffb000,
     tritanopia: 0xff4488,     // 蓝黄型对红仍可辨，但避开与黄撞
   }),
   warning: c('警告', '▲', {
-    default: 0xffaa44,
+    // 切片4 起对齐在役的精力条亮端 `#c9a962`
+    default: 0xc9a962,
     deuteranopia: 0xffffff,   // 提到纯白：与 danger 的橙黄靠明度拉开
     protanopia: 0xfff2cc,
     tritanopia: 0xffcc44,
   }),
   safe: c('恢复', '+', {
-    default: 0x63d97a,
+    // 与 rarity-uncommon 的绿错开一格：两个语义撞色，玩家在治疗提示与良品光晕前分不出谁是谁
+    default: 0x4fd68a,
     deuteranopia: 0x66ccff,   // 绿→青蓝（红绿型下蓝黄轴仍可辨）
     protanopia: 0x4ea8ff,
     tritanopia: 0x66d9c0,
   }),
   resource: c('资源', '◆', {
-    default: 0x66ccff,
+    // 切片4 起对齐在役的法力条亮端 `#8866cc`
+    default: 0x8866cc,
     deuteranopia: 0xaa88ff,
     protanopia: 0x9a7bff,
     tritanopia: 0x8899ff,
@@ -139,4 +145,13 @@ export const semanticLabel = (id) => semanticOf(id).label;
 
 /** 稀有度 id → 语义键（`common` → `rarity-common`） */
 export const raritySemanticId = (rarityId) => `rarity-${rarityId}`;
+
+
+
+
+
+
+
+
+
 

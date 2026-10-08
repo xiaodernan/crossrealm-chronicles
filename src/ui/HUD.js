@@ -9,7 +9,7 @@ import { focusFirstItem, parkFocus, preserveFocus, restoreParkedFocus } from './
 import { inputDeviceLabel } from '../engine/InputDevice.js';
 
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
-
+import { applyBarTheme } from './barTheme.js';
 /** 区域横幅计时分组（连播两个区域时先撤旧的） */
 const ZONE_BANNER_TAG = 'hud-zone-banner';
 /** 连击终结闪光的分组 */
@@ -60,6 +60,9 @@ export class HUD {
     this._zoneSubtitle = '';
     this._subtitleOverlay = null;
 
+    // 状态条配色按当前色觉档落地（W-D6 切片4）：只在构造与换档时写一次 CSS 变量，
+    // 帧循环里只改 width 不碰颜色（见 ui/barTheme.js 文件头）。
+    this.refreshBarColors();
     this.buildHUD();
     this.setupListeners();
     this.bindJournalEntry();
@@ -169,6 +172,17 @@ export class HUD {
    * 走的是整份文档而不是 `#hud`：小地图标题、暂停菜单、区域面板、起始屏这些都声明在
    * `index.html` 里、却挂在 `#hud` 外面 —— 只扫容器的话，它们改绑后仍然说出厂键。
    */
+  /**
+   * 状态条配色按当前色觉档重写一次（W-D6 切片4）。
+   *   - 构造时调一次（开机就落到存档里那一档）；
+   *   - 玩家在设置里换色觉档时，由 `SettingsManager.applyToGame` 再调一次。
+   * 真正写颜色的是 `ui/barTheme.js`（全仓唯一写状态条颜色的地方），这里只是转发 ——
+   * HUD 自己出现第二组色值就是 B36 那一族。
+   */
+  refreshBarColors() {
+    applyBarTheme();
+  }
+
   refreshKeyHints() {
     // 通知出口这件事只有这一处（切片33）：把当前那一侧喂进出口，再重算整份文档的键名。
     // 之所以放在"重算"里而不是 `updateInputDevice()` 里：构造时、改绑时（`Game.rebuildHotkeys`）
@@ -862,3 +876,5 @@ export class HUD {
     ctx.fillText(`探索 ${hint?.visited}/${hint?.total} · 清空 ${hint?.cleared}/${hint?.total}`, 6, h - 8);
   }
 }
+
+

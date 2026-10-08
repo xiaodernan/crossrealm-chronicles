@@ -122,6 +122,20 @@ describe('语义色板（W-D6 切片1）', () => {
         }
       }
     });
+
+    it('八个语义在每一档下也互不相同（跨组撞色：治疗提示与良品光晕一个色）', () => {
+      // ③ 上面几条只查两个子组内部（战斗三件套 / 稀有度四档），查不出跨组撞色。
+      // 切片4 就撞了一回：`safe` 与 `rarity-uncommon` 在默认档同为 0x63d97a ——
+      // 玩家看到一团绿，分不清是"治疗"还是"地上有件良品"。
+      for (const mode of COLOR_MODES) {
+        const seen = new Map();
+        for (const id of SEMANTIC_IDS) {
+          const c = semanticColor(id, mode);
+          expect(seen.has(c), `${mode} 档下 ${id} 与 ${seen.get(c)} 撞色`).toBe(false);
+          seen.set(c, id);
+        }
+      }
+    });
   });
 
   describe('④ 认不出就抛', () => {
@@ -208,4 +222,5 @@ describe('语义色板（W-D6 切片1）', () => {
     });
   });
 });
+
 

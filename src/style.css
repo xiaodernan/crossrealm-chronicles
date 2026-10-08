@@ -658,11 +658,11 @@ canvas {
 }
 
 .bar-fill.hp {
-  background: linear-gradient(90deg, #8b2020, #cc4444);
+  background: linear-gradient(90deg, var(--bar-hp-shade, #8b2020), var(--bar-hp, #cc4444));
 }
 
 .bar-fill.st {
-  background: linear-gradient(90deg, #8b6914, #c9a962);
+  background: linear-gradient(90deg, var(--bar-st-shade, #8b6914), var(--bar-st, #c9a962));
   transition: width 0.08s linear;
 }
 
@@ -687,7 +687,7 @@ canvas {
 }
 
 .bar-fill.mana {
-  background: linear-gradient(90deg, #224488, #8866cc);
+  background: linear-gradient(90deg, var(--bar-mana-shade, #224488), var(--bar-mana, #8866cc));
   transition: width 0.08s linear;
 }
 

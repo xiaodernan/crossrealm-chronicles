@@ -225,5 +225,9 @@ export class SettingsManager {
     // 色觉档（W-D6 切片3）：与难度档同一套纪律 —— 写入口只有这一处，脏值回落出厂不抛。
     // 生效时机：新生成的掉落按当前档取色，场上已有的掉落在下一帧 `LootSystem.update` 重涂。
     setColorVision(this.get('colorVision'));
+    // HUD 状态条按当前色觉档重写一次（W-D6 切片4）：写颜色的地方只有 ui/barTheme.js 一处，
+    // HUD 只负责转发。放在 setColorVision 之后 —— 先落档位再取色，顺序反了会涂上一档的颜色。
+    game.hud?.refreshBarColors?.();
   }
 }
+
