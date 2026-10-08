@@ -14,6 +14,10 @@
  * 资源（且那一场确实掉过 500 件）、在场每一件各有材质与档位色（查表来的）、复用那一格先归位自转、
  * 池化期间一次 `dispose` 都不发生（还回去不等于拆掉）。
  *
+ * 切片7（掉落表现）起一格是**三件网格**：本体八面体 + 地面环 + 高亮光柱（后两件是本体的孩子）。
+ * 资源口径不变、只是按格 ×3 计：全局三份共享几何、每格三份材质 —— 下面各处对账随之改口径，
+ * "每格一份材料、跟峰值挂钩"的语义没变。
+ *
  * 另有三条对账跑在 `lootField` 的**每一帧**上（任何一刻没有两个掉落物共用一格、场景里挂的件数
  * 等于账上的件数、新建格数 = 在场 + 池里）。放在循环末尾对不住：双臂归还只在摘下的那一帧露馅，
  * 等收干净再对，错的那一格早被下一次申领回收了（变异臂10 就是这样从"只在一个用例里对账"溜过去的）。
@@ -126,9 +130,11 @@ function lootField({ total, cadence = 15, everyFrames = 0 }) {
     loot.update(FRAME, player, PICKUP_RADIUS);
     const meshes = loot.drops.map((d) => d.mesh.uuid);
     expect(new Set(meshes).size, `第 ${frames} 帧场上有两个掉落物共用一格（归还被走了两遍）`).toBe(meshes.length);
+    const rings = loot.drops.map((d) => d.ring.uuid);
+    expect(new Set(rings).size, `第 ${frames} 帧两份掉落共用了同一枚地面环`).toBe(rings.length);
     expect(scene.children.length, `第 ${frames} 帧场景里挂的和账上的对不上`).toBe(loot.drops.length);
-    // 每一格要么在场上要么在池里：多出来的是孤儿，少了的是凭空造的格
-    expect(loot.drops.length + loot.pooled(), `第 ${frames} 帧的格数对不上这一场新建过的总数`)
+    // 每一格要么在场上要么在池里：多出来的是孤儿，少了的是凭空造的格（每格三份材质，按 ×3 对账）
+    expect((loot.drops.length + loot.pooled()) * 3, `第 ${frames} 帧的材质数与这一场新建过的总数对不上`)
       .toBe(watch.seen.materials.size);
     frames++;
     if (frames > maxFrames) throw new Error(`掉落没有按期收干净：${maxFrames} 帧后场上还剩 ${loot.drops.length} 件`);
@@ -140,11 +146,13 @@ function lootField({ total, cadence = 15, everyFrames = 0 }) {
 }
 
 describe('掉落物池化：一件掉落不再新建一份资源（W-C1 切片2）', () => {
-  it('500 件掉落只用得到一份八面体：普查里那 500 个几何体归一', () => {
-    const { seen, spawns } = lootField({ total: 500 });
+  it('500 件掉落只用得到三份共享几何（本体 / 地面环 / 光柱）：普查里那 500 个几何体归一', () => {
+    const { seen, spawns, peak } = lootField({ total: 500 });
     expect(spawns).toBe(500);
-    expect(seen.geometries.size).toBe(1);
-    expect(seen.materials.size, '改前这一格等于累计掉落数').toBeLessThan(spawns / 2);
+    expect(seen.geometries.size, '多出来的是没复用的新几何').toBe(3);
+    // 材质按格 ×3（本体 / 环 / 柱）：改前这一格等于累计掉落数的三倍，现在跟峰值挂钩
+    expect(seen.materials.size).toBe(peak * 3);
+    expect(peak, '这一场真的堆起来过：峰值远小于累计数，池化才在做事').toBeLessThan(spawns / 3);
   });
 
   it('跑 200 件与跑 500 件见过同样多的资源：零增长，不是少增长', () => {
@@ -158,11 +166,11 @@ describe('掉落物池化：一件掉落不再新建一份资源（W-C1 切片2�
     expect(short.grabbed).toBe(0);
   });
 
-  it('新建过的网格数与同时在场峰值严格相等：既不许多造，也不许只造一格排队', () => {
+  it('新建过的格数与同时在场峰值严格相等（每格三份材质）：既不许多造，也不许只造一格排队', () => {
     const { seen, peak } = lootField({ total: 500 });
     expect(peak).toBeGreaterThan(20);
     // 第 k 次新建时前 k 格必都在场上（池子空了才造）；反过来峰值那一刻必有 peak 格不同的网格
-    expect(seen.materials.size).toBe(peak);
+    expect(seen.materials.size).toBe(peak * 3);
   });
 
   it('玩家一直在捡的时候，资源数仍只跟同时在场峰值挂钩', () => {
@@ -174,24 +182,24 @@ describe('掉落物池化：一件掉落不再新建一份资源（W-C1 切片2�
     expect(spawns).toBe(300);
     expect(grabbed).toBeGreaterThan(50);
     expect(peak, '这一场真的挤到过：峰值只有一件的话下面两条都是空的').toBeGreaterThan(20);
-    expect(seen.geometries.size).toBe(1);
-    expect(seen.materials.size, '捡走得多不等于要多造格子：归还口一开，池子就够转').toBe(peak);
+    expect(seen.geometries.size).toBe(3);
+    expect(seen.materials.size, '捡走得多不等于要多造格子：归还口一开，池子就够转').toBe(peak * 3);
   });
 
   it('池化期间一次 dispose 都不发生：还回去不等于拆掉', () => {
     const { disposes, seen } = lootField({ total: 300 });
     expect(disposes.geometries).toBe(0);
     expect(disposes.materials).toBe(0);
-    expect(seen.geometries.size).toBe(1);
+    expect(seen.geometries.size).toBe(3);
   });
 
   it('对账：在场 + 池里 = 这一场新建过的总数，场景里不留孤儿', () => {
     const expired = lootField({ total: 120 });
     expect(expired.loot.drops.length).toBe(0);
-    expect(expired.loot.pooled() + expired.loot.drops.length).toBe(expired.seen.materials.size);
+    expect((expired.loot.pooled() + expired.loot.drops.length) * 3).toBe(expired.seen.materials.size);
     expect(expired.scene.children.length).toBe(0);
     const picked = lootField({ total: 120, everyFrames: 20 });
-    expect(picked.loot.pooled() + picked.loot.drops.length).toBe(picked.seen.materials.size);
+    expect((picked.loot.pooled() + picked.loot.drops.length) * 3).toBe(picked.seen.materials.size);
   });
 
   it('摘账只有一个出口：捡走与到期都走 _despawn，别处不许再直接归还', () => {
@@ -202,9 +210,12 @@ describe('掉落物池化：一件掉落不再新建一份资源（W-C1 切片2�
     expect(countIn(/this\.scene\.remove\(/g)).toBe(1);
     expect(countIn(/this\._pool\.push\(/g)).toBe(1);
     expect(countIn(/_despawn\(/g)).toBe(3);
-    // 分配的口：几何一份、材质一份，都只在申领那一步里
+    // 分配的口：几何三份共享（本体 / 环 / 柱）、材质每格三份（标准一件 + 基本两件），都只在建格那一步里
     expect(countIn(/new THREE\.OctahedronGeometry\(/g)).toBe(1);
+    expect(countIn(/new THREE\.RingGeometry\(/g)).toBe(1);
+    expect(countIn(/new THREE\.CylinderGeometry\(/g)).toBe(1);
     expect(countIn(/new THREE\.MeshStandardMaterial\(/g)).toBe(1);
+    expect(countIn(/new THREE\.MeshBasicMaterial\(/g)).toBe(2);
   });
 });
 
@@ -244,7 +255,15 @@ describe('两件出口与三件颜色：池化没把玩法改掉', () => {
     expect(loot.drops).toHaveLength(Object.keys(GEAR_RARITY_DISPLAY).length + 1);
     const mats = loot.drops.map((d) => d.mesh.material.uuid);
     expect(new Set(mats).size, '两件掉落共用一块布，后掉的那件会改掉前那件的颜色').toBe(mats.length);
-    for (const d of loot.drops) expect(d.mesh.geometry).toBe(loot.geometry);
+    const 环布 = loot.drops.map((d) => d.ring.material.uuid);
+    expect(new Set(环布).size, '两件掉落共用一块环布，后掉的那件会改掉前那件的环色').toBe(环布.length);
+    const 柱布 = loot.drops.map((d) => d.beam.material.uuid);
+    expect(new Set(柱布).size, '两件掉落共用一块柱布：光柱颜色会互相改').toBe(柱布.length);
+    for (const d of loot.drops) {
+      expect(d.mesh.geometry).toBe(loot.geometry);
+      expect(d.ring.geometry, '环几何是全局共享那一份').toBe(loot.ringGeometry);
+      expect(d.beam.geometry, '柱几何是全局共享那一份').toBe(loot.beamGeometry);
+    }
   });
 
   it('长相照旧：魂一枚青、装备的色仍查表（改的是分配方式，不是颜色）', () => {

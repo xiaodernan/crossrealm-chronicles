@@ -383,6 +383,19 @@ export class AudioManager {
   bossRoar() { this.bossRoarSting(); }
   bossPhase() { this.playTone(70, 0.4, 'sawtooth', 0.15); this.playTone(140, 0.3, 'square', 0.1); }
   pickup() { this.playTone(660, 0.1, 'sine', 0.1); this.playTone(990, 0.15, 'sine', 0.08); }
+
+  /**
+   * 装备落地的一声（W-B5 切片7）：档位越高音越亮。与 `pickup` / `hit` 一样是**直接调用**的
+   * 游戏音效 —— 不进 `SFX_NAMES`（那张表只管 `game-audio-sfx` 的远程请求面）。
+   * `rank` 是稀有度序（0 起）。认不出的取值收进 0~3 而不是抛：声音不是账，
+   * 它不该有本事挡住一次掉落 —— 与 `setVolumes` 对越界值同一条口径。
+   */
+  gearDrop(rank = 0) {
+    const r = Number.isFinite(rank) ? Math.max(0, Math.min(3, Math.floor(rank))) : 0;
+    const base = 500 + r * 80;
+    this.playTone(base, 0.08, 'sine', 0.05 + r * 0.015);
+    this.playTone(base * 1.5, 0.16, 'triangle', 0.04 + r * 0.015);
+  }
   loreDiscover() { this.playTone(440, 0.15, 'sine', 0.08); this.playTone(554, 0.2, 'triangle', 0.06); }
   restDialogueOpen() { this.playTone(392, 0.2, 'sine', 0.06); this.playTone(523, 0.25, 'triangle', 0.05); }
   executionSting() { this.playTone(55, 0.35, 'sawtooth', 0.14); this.playTone(110, 0.25, 'square', 0.1); this._playNoise(0.06, 0.08, 280); }

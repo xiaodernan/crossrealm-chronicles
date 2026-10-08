@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GEAR_RARITY_DISPLAY, dropChance, isGearInstance, rollBossGear, rollGear } from '../content/gear.js';
+import { GEAR_RARITY_DISPLAY, dropChance, gearIsUpgrade, isGearInstance, rarityRank, rollBossGear, rollGear } from '../content/gear.js';
 
 /** 地上那一件的形状全系统共用一份：档位只改颜色，不改几何 */
 const DROP_RADIUS = 0.25;
@@ -8,6 +8,29 @@ const SOUL_TINT = 0x44ddff;
 const SOUL_EMISSIVE = 0x116688;
 /** 没人捡的掉落物在地上留多久（秒，走主循环 dt） */
 const DROP_LIFE = 30;
+/** 身体的浮动基准与幅度：地面环与光柱的贴地补偿都从这两个数推导（不再出现第二个 -0.78） */
+const BOB_BASE = 0.8;
+const BOB_AMP = 0.3;
+/** 地面环贴地高度与光柱中心高度（世界坐标，自地面算起；光柱高 3 米） */
+const RING_Y = 0.02;
+const BEAM_CENTER_Y = 1.5;
+/** 光柱的固定透明度：它是"这件值得捡"的语义灯，不随呼吸脉冲（环负责呼吸） */
+const BEAM_OPACITY = 0.22;
+
+/**
+ * 地面环的档位规格（环径倍率与环光强度）。形状与生命周期归掉落层（与 `DROP_RADIUS` 同一分工），
+ * 颜色仍查 `GEAR_RARITY_DISPLAY` —— 这里再出现一枚色值就是第二份真相。
+ * 键集与 `GEAR_RARITY` 逐一对齐由用例双向钉住：多一格是死格，少一格那一档的环会当场炸而不是悄悄变小。
+ */
+export const DROP_RING_BY_RARITY = Object.freeze({
+  common: Object.freeze({ scale: 1, opacity: 0.3 }),
+  uncommon: Object.freeze({ scale: 1.25, opacity: 0.4 }),
+  rare: Object.freeze({ scale: 1.55, opacity: 0.55 }),
+  epic: Object.freeze({ scale: 1.9, opacity: 0.7 }),
+});
+
+/** 魂那一枚没有档位：固定一档（比凡品的环再小一点、暗一点） */
+export const DROP_RING_SOUL = Object.freeze({ scale: 0.85, opacity: 0.28 });
 
 /**
  * 掉落：地上那一件东西，从"谁生成"到"谁捡走"只有这一个 owner。
@@ -24,6 +47,11 @@ const DROP_LIFE = 30;
  * 生命周期与 `effects/VoidEcho.js` 同一套口径：八面体一份、网格按池申领/归还，
  * "新建过几份"因此跟**同时在场峰值**挂钩而不是跟累计击杀数挂钩（W-C1 切片1 的普查数：
  * 改前 500 件掉落就是 500 个几何 + 500 个材质、`dispose` 0 次，峰值在场只有 40 件）。
+ *
+ * 切片7 起每格是"三件套"：八面体（本体）+ 地面环（档位色、档位环径，贴地呼吸）+ 高亮光柱
+ * （只有"比身上那件严格更好"的装备才亮 —— 判据问 `gearIsUpgrade`，与捡起时换不换是同一个答案）。
+ * 环与柱是本体网格的**孩子**，随格一起借还：资源账仍按格计 —— 全局三份共享几何
+ * （八面体 / 环 / 柱），每格三份材质 —— 与同时在场峰值挂钩，不与累计掉落数挂钩。
  */
 export class LootSystem {
   constructor(scene, stats, audio, { rng = Math.random, onGear = null } = {}) {
@@ -36,27 +64,48 @@ export class LootSystem {
     /** 捡走或到期后摘出场景存这里：不再每件新建一份几何与材质，也不留"remove 却不归还"的孤儿 */
     this._pool = [];
     this.geometry = new THREE.OctahedronGeometry(DROP_RADIUS, 0);
+    /** 环躺平（XZ 面）与光柱共用：两份几何全局各一份，网格按格借还 */
+    this.ringGeometry = new THREE.RingGeometry(0.32, 0.46, 24);
+    this.beamGeometry = new THREE.CylinderGeometry(0.035, 0.035, 3, 6);
   }
 
   /**
-   * 取一件地上的网格：池里有用完的就复用，没有才新建。
-   * 材质必须每件一份 —— 档位色就写在材质上，共用一份会变成"后掉的那件改掉前掉那件的颜色"。
+   * 取一格：池里有用完的就复用，没有才新建。
+   * 一格 = 本体 + 环 + 柱三件网格（后两件是本体的孩子，复用与归还都跟着走）。
+   * 材质必须每格一份 —— 档位色就写在材质上，共用一份会变成"后掉的那件改掉前掉那件的颜色"。
    */
   _acquire() {
-    const mesh = this._pool.pop() ?? new THREE.Mesh(
+    const slot = this._pool.pop() ?? this._build();
+    // 复用的那一格带着上一件的自转：不洗一眼就看得出"这件是第二次掉在地上"
+    slot.mesh.rotation.set(0, 0, 0);
+    this.scene.add(slot.mesh);
+    return slot;
+  }
+
+  /** 新建一格（只在池子空时走到这里）：三件网格、三份材质，几何全是共享的那三份 */
+  _build() {
+    const mesh = new THREE.Mesh(
       this.geometry,
       new THREE.MeshStandardMaterial({ metalness: 0.6, roughness: 0.2, emissiveIntensity: 0.9 }),
     );
-    // 复用的那一格带着上一件的自转：不洗一眼就看得出"这件是第二次掉在地上"
-    mesh.rotation.set(0, 0, 0);
-    this.scene.add(mesh);
-    return mesh;
+    const ring = new THREE.Mesh(
+      this.ringGeometry,
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }),
+    );
+    ring.rotation.x = -Math.PI / 2;
+    const beam = new THREE.Mesh(
+      this.beamGeometry,
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }),
+    );
+    mesh.add(ring);
+    mesh.add(beam);
+    return { mesh, ring, beam };
   }
 
-  /** 还回池里而不是丢掉：从场景摘出去，资源留着下一件接着用 */
-  _release(mesh) {
-    this.scene.remove(mesh);
-    this._pool.push(mesh);
+  /** 还回池里而不是丢掉：从场景摘出去，三件网格留着下一件接着用 */
+  _release(d) {
+    this.scene.remove(d.mesh);
+    this._pool.push({ mesh: d.mesh, ring: d.ring, beam: d.beam });
   }
 
   /** 池里备用网格数：泄漏 watchdog 与用例都看这个，不翻内部结构 */
@@ -64,15 +113,37 @@ export class LootSystem {
     return this._pool.length;
   }
 
+  /**
+   * 环与柱的贴地补偿：它们挂在浮动的身体下面，这里把世界高度拉回地面（同一处算术，spawn 与每帧共用）。
+   * 地面参照与身体一致（身体跟着玩家当前位置的地面走）—— 环因此永远躺在"脚边那一层"。
+   */
+  _lay(d, groundY) {
+    const 浮动 = BOB_BASE + Math.sin(d.phase) * BOB_AMP;
+    d.mesh.position.y = groundY + 浮动;
+    d.ring.position.y = RING_Y - 浮动;
+    d.beam.position.y = BEAM_CENTER_Y - 浮动;
+  }
+
   _spawn(pos, { souls, gear }) {
-    const mesh = this._acquire();
+    const { mesh, ring, beam } = this._acquire();
     const tint = gear ? GEAR_RARITY_DISPLAY[gear.rarity].tint : SOUL_TINT;
+    const look = gear ? DROP_RING_BY_RARITY[gear.rarity] : DROP_RING_SOUL;
     mesh.material.color.setHex(tint);
     mesh.material.emissive.setHex(gear ? tint : SOUL_EMISSIVE);
     mesh.position.copy(pos);
-    mesh.position.y += 1;
-    this.drops.push({ mesh, souls, gear, life: DROP_LIFE, phase: this.rng() * Math.PI * 2 });
-    return this.drops[this.drops.length - 1];
+    ring.material.color.setHex(tint);
+    ring.material.opacity = look.opacity;
+    ring.scale.setScalar(look.scale);
+    beam.material.color.setHex(tint);
+    beam.material.opacity = BEAM_OPACITY;
+    // 高亮光柱：出生那一刻先问一次；之后每帧 update 从**活的**装备账再问（换上/卸下当场跟上）
+    beam.visible = gear ? gearIsUpgrade(this.stats?.gear ?? null, gear) : false;
+    const d = { mesh, ring, beam, souls, gear, life: DROP_LIFE, phase: this.rng() * Math.PI * 2, look };
+    this.drops.push(d);
+    this._lay(d, pos.y);
+    // 装备落地的一声，档位越高越亮（魂不响 —— 捡起时那一声才是魂的）
+    if (gear) this.audio?.gearDrop(rarityRank(gear.rarity));
+    return d;
   }
 
   /** 一件装备：颜色就是它的档位（表里那一格，不是这里现编的）。坏的那一件不生成 —— 否则地上多一个捡不动的假掉落物 */
@@ -112,7 +183,7 @@ export class LootSystem {
   _despawn(i) {
     const d = this.drops[i];
     this.drops.splice(i, 1);
-    this._release(d.mesh);
+    this._release(d);
   }
 
   update(dt, playerPos, pickupRadius = 2.5) {
@@ -120,8 +191,15 @@ export class LootSystem {
       const d = this.drops[i];
       d.life -= dt;
       d.phase += dt * 3;
-      d.mesh.position.y = playerPos.y + 0.8 + Math.sin(d.phase) * 0.3;
+      this._lay(d, playerPos.y);
       d.mesh.rotation.y += dt * 2;
+      // 环呼吸：环径与环光一起起伏，倍率来自出生时的档位规格（表在 `DROP_RING_BY_RARITY`）
+      const 呼吸 = Math.sin(d.phase);
+      d.ring.scale.setScalar(d.look.scale * (1 + 呼吸 * 0.12));
+      d.ring.material.opacity = d.look.opacity * (0.8 + 呼吸 * 0.2);
+      // 高亮光柱：每帧从**活的**装备账问"这一件比身上好吗"（判据在 `gearIsUpgrade` 只有一处）；
+      // 魂没有柱，出生时就是灭的
+      if (d.gear) d.beam.visible = gearIsUpgrade(this.stats?.gear ?? null, d.gear);
 
       const dist = Math.sqrt(
         (playerPos.x - d.mesh.position.x) ** 2 + (playerPos.z - d.mesh.position.z) ** 2

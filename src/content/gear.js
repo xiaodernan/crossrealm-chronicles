@@ -323,6 +323,20 @@ export function gearScore(instance) {
 }
 
 /**
+ * "这一件比身上那件**严格更好**吗" —— 唯一判据。空槽算可换（true）；相等、更差、坏件都算 false。
+ *
+ * 为什么单拎出来：决定"换不换"（`pickupChoice`）与决定"地上那件要不要高亮"
+ * （`LootSystem` 的光柱）必须是同一个答案。分两处写就是 B36 那一族 ——
+ * 一条算式两个副本，改一处而另一处不动：玩家看到地上亮着，捡起来却说不如身上。
+ */
+export function gearIsUpgrade(current, incoming) {
+  if (!isGearInstance(incoming)) return false;
+  const slot = baseOf(incoming.base).slot;
+  const worn = current?.[slot] ?? null;
+  return !worn || gearScore(incoming) > gearScore(worn);
+}
+
+/**
  * 捡到一件之后的那条分岔：严格更好才换上，其余（含相等）不换。
  *
  * 这一片只回答"要不要往身上套"，**不回答"不套的那件去哪"** —— 去哪是切片4 的包的事：
@@ -333,7 +347,7 @@ export function pickupChoice(current, incoming) {
   if (!isGearInstance(incoming)) return { action: 'nothing' };
   const slot = baseOf(incoming.base).slot;
   const worn = current?.[slot] ?? null;
-  if (worn && gearScore(incoming) <= gearScore(worn)) {
+  if (!gearIsUpgrade(current, incoming)) {
     return { action: 'dust', slot, souls: soulValue(incoming.rarity) };
   }
   return {
