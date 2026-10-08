@@ -1,7 +1,17 @@
 import { CG_GALLERY_CATALOG, CG_ZONE_LABELS } from './CgGalleryRegistry.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_CGGALLERYSYSTEM = 'game/CgGallerySystem';
+const cgOn = (name, handler) => on(name, handler, GAME_CGGALLERYSYSTEM);
+
 /** CG 解锁追踪 — 对话/Boss/战斗演出 */
 export class CgGallerySystem {
+  /** CG 解锁监听（七条）都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第六处） */
+  dispose() {
+    offAll(GAME_CGGALLERYSYSTEM);
+  }
+
   constructor(game) {
     this.game = game;
     this.unlocked = new Set();
@@ -11,13 +21,13 @@ export class CgGallerySystem {
   }
 
   _bindEvents() {
-    window.addEventListener('rest-dialogue-node', (e) => {
+    cgOn('rest-dialogue-node', (e) => {
       const id = `${e.detail.restId}:${e.detail.nodeId}`;
       this.unlock(id, 'dialogue');
     });
-    window.addEventListener('combo-finisher', () => this.unlock('bonus:finisher', 'finisher'));
-    window.addEventListener('combat-riposte', () => this.unlock('bonus:riposte', 'riposte'));
-    window.addEventListener('combat-execution', (e) => {
+    cgOn('combo-finisher', () => this.unlock('bonus:finisher', 'finisher'));
+    cgOn('combat-riposte', () => this.unlock('bonus:riposte', 'riposte'));
+    cgOn('combat-execution', (e) => {
       if (e.detail?.boss) {
         this.unlock('bonus:execution', 'execution');
         const map = {
@@ -33,7 +43,7 @@ export class CgGallerySystem {
         this.unlock('bonus:execution', 'execution');
       }
     });
-    window.addEventListener('boss-defeated', (e) => {
+    cgOn('boss-defeated', (e) => {
       const map = {
         'shadow-warden': 'bonus:boss-shadow',
         archmagus: 'bonus:boss-mage',
@@ -44,8 +54,8 @@ export class CgGallerySystem {
       const cg = map[e.detail?.bossId];
       if (cg) this.unlock(cg, 'boss');
     });
-    window.addEventListener('dungeon-room-cleared', () => this.unlock('bonus:dungeon-clear', 'dungeon'));
-    window.addEventListener('chapter-changed', (e) => {
+    cgOn('dungeon-room-cleared', () => this.unlock('bonus:dungeon-clear', 'dungeon'));
+    cgOn('chapter-changed', (e) => {
       if ((e.detail?.chapter ?? 1) >= 1) this.unlock('bonus:world-anchor', 'quest');
     });
   }

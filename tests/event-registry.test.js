@@ -270,7 +270,9 @@ describe('B44 抓到的三条病例（回归钉）', () => {
 
   it('CG 图鉴认的是派发方真正发的那条名字', () => {
     const cg = read('game/CgGallerySystem.js');
-    expect(cg).toMatch(/addEventListener\('dungeon-room-cleared'/);
+    // 迁移第六处（2026-10-08）起这家走总线：`cgOn('dungeon-room-cleared', …)` = on(…, 'game/CgGallerySystem')。
+    // 判据跟着改成新出口名，钉住的仍是同一件事 —— 认的是派发方那条带 -d 的名字。
+    expect(cg).toMatch(/cgOn\('dungeon-room-cleared'/);
     expect(cg).not.toMatch(/'dungeon-room-clear'/);
     expect(read('world/DungeonManager.js')).toMatch(/new CustomEvent\('dungeon-room-cleared'/);
   });

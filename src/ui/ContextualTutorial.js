@@ -3,12 +3,22 @@ import { keyText } from '../content/keyHints.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { isDungeonBossId } from '../content/bossRoster.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const UI_CONTEXTUALTUTORIAL = 'ui/ContextualTutorial';
+const tipOn = (name, handler) => on(name, handler, UI_CONTEXTUALTUTORIAL);
+
 const STORAGE_KEY = 'crossrealm_contextual_tips';
 /** 队列推进的计时分组 */
 const TIP_TAG = 'contextual-tip';
 
 /** 情境教程 — 首次地下城/Boss/弹反/连击等触发 */
 export class ContextualTutorial {
+  /** 情境提示的六个事件监听挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第六处） */
+  dispose() {
+    offAll(UI_CONTEXTUALTUTORIAL);
+  }
+
   constructor(game) {
     this.game = game;
     this.seen = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
@@ -48,7 +58,7 @@ export class ContextualTutorial {
   }
 
   setupListeners() {
-    window.addEventListener('dungeon-enter', (e) => {
+    tipOn('dungeon-enter', (e) => {
       this.trigger(
         'first-dungeon',
         '迷宫探索',
@@ -57,7 +67,7 @@ export class ContextualTutorial {
       );
     });
 
-    window.addEventListener('boss-start', (e) => {
+    tipOn('boss-start', (e) => {
       const isDungeon = isDungeonBossId(e.detail.bossId);
       this.trigger(
         isDungeon ? 'first-dungeon-boss' : 'first-open-boss',
@@ -69,7 +79,7 @@ export class ContextualTutorial {
       );
     });
 
-    window.addEventListener('parry-success', () => {
+    tipOn('parry-success', () => {
       this.trigger(
         'first-parry',
         '完美弹反',
@@ -78,7 +88,7 @@ export class ContextualTutorial {
       );
     });
 
-    window.addEventListener('combo-finisher', () => {
+    tipOn('combo-finisher', () => {
       this.trigger(
         'first-combo-finisher',
         '连击终结',
@@ -87,7 +97,7 @@ export class ContextualTutorial {
       );
     });
 
-    window.addEventListener('journal-entry', (e) => {
+    tipOn('journal-entry', (e) => {
       if (e.detail.category !== 'fragment') return;
       this.trigger(
         'first-lore-fragment',
@@ -97,7 +107,7 @@ export class ContextualTutorial {
       );
     });
 
-    window.addEventListener('zone-changed', (e) => {
+    tipOn('zone-changed', (e) => {
       if (e.detail.initial) return;
       const ch = this.game.quests.chapter;
       const zoneId = e.detail.zoneId;

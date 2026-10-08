@@ -254,7 +254,7 @@ export class Game {
     this.weather = new WeatherSystem(this.scene, this.world, this.zoneFog);
     this.executionFx = new ExecutionEffects(this.scene, this);
     this.collectibles = new CollectibleManager(this.scene, this.world, this.stats, this.dialog);
-    // W-A1 迁移第五处：十条记账监听走总线（带 tag），于是它必须进 teardown 登记表 ——
+    // W-A1 迁移第五/六处：这些系统的监听走总线（带 tag）⇒ 它们必须进 teardown 登记表，
     // `_adopt` 会拒绝没有 dispose() 的子系统（"假装收编"的防线）。
     this.quests = this._adopt('game/QuestSystem', new QuestSystem(this.dialog));
     this.storyJournal = new StoryJournal(this);
@@ -306,7 +306,7 @@ export class Game {
     this.combatTutorial = new CombatTutorialDirector(this);
     this.restScene = new RestSceneDirector(this);
     this.worldAmbient = new WorldAmbientEvents(this);
-    this.cgGallery = new CgGallerySystem(this);
+    this.cgGallery = this._adopt('game/CgGallerySystem', new CgGallerySystem(this));
     this.cgJournalTab = new CgJournalTab(this);
     this.cgGalleryAchievements = new CgGalleryAchievements(this);
     this.restNpcAnimDirector = new RestNpcAnimDirector(this);
@@ -314,7 +314,7 @@ export class Game {
     this.campfireMemory = new CampfireMemorySystem(this);
     this.campfireMemoryTab = new CampfireMemoryJournalTab(this);
     this.achievementsJournalTab = new AchievementsJournalTab(this);
-    this.loreCodex = new LoreCodexSystem(this);
+    this.loreCodex = this._adopt('game/LoreCodexSystem', new LoreCodexSystem(this));
     this.loreCodexTab = new LoreCodexJournalTab(this);
     this.combatStyle = new CombatStyleTracker(this);
     this.combatStyleOverlay = new CombatStyleOverlay(this);
@@ -342,7 +342,7 @@ export class Game {
     this.settings = new SettingsManager();
     this.performance = new PerformanceManager();
     this.weapons = new WeaponSystem(this.player, this.dialog, this.audio);
-    this.achievements = new AchievementSystem(this.dialog);
+    this.achievements = this._adopt('game/AchievementSystem', new AchievementSystem(this.dialog));
     this.fastTravel = new FastTravelSystem(this);
     this.settingsPanel = new SettingsPanel(this);
     this.pauseMenu = new PauseMenu(this);
@@ -356,7 +356,7 @@ export class Game {
     this.questAssistant = new QuestAssistant(this);
     this.playerAutoPlay = new PlayerAutoPlay(this);
     this.gameGuide = new GameGuidePanel(this);
-    this.contextualTutorial = new ContextualTutorial(this);
+    this.contextualTutorial = this._adopt('ui/ContextualTutorial', new ContextualTutorial(this));
     this.storyJournal.setupListeners();
     this.explorationMap.setupListeners();
     this.explorationMap.revealZone('hub');

@@ -1,7 +1,17 @@
 import { LORE_CODEX } from './LoreCodexRegistry.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_LORECODEXSYSTEM = 'game/LoreCodexSystem';
+const codexOn = (name, handler) => on(name, handler, GAME_LORECODEXSYSTEM);
+
 /** 位面秘典解锁追踪 */
 export class LoreCodexSystem {
+  /** 秘典解锁监听（六条）都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第六处） */
+  dispose() {
+    offAll(GAME_LORECODEXSYSTEM);
+  }
+
   constructor(game) {
     this.game = game;
     this.unlocked = new Set();
@@ -9,18 +19,18 @@ export class LoreCodexSystem {
   }
 
   setupListeners() {
-    window.addEventListener('journal-entry', (e) => {
+    codexOn('journal-entry', (e) => {
       const id = e.detail?.id;
       if (id) this.tryUnlock(`journal:${id}`);
     });
-    window.addEventListener('cg-unlocked', (e) => {
+    codexOn('cg-unlocked', (e) => {
       const id = e.detail?.id;
       if (id) this.tryUnlock(`cg:${id}`);
     });
-    window.addEventListener('combo-finisher', () => this.tryUnlock('finisher'));
-    window.addEventListener('combat-execution', () => this.tryUnlock('execution'));
-    window.addEventListener('dungeon-cleared', () => this.tryUnlock('dungeon-clear'));
-    window.addEventListener('boss-defeated', (e) => {
+    codexOn('combo-finisher', () => this.tryUnlock('finisher'));
+    codexOn('combat-execution', () => this.tryUnlock('execution'));
+    codexOn('dungeon-cleared', () => this.tryUnlock('dungeon-clear'));
+    codexOn('boss-defeated', (e) => {
       const id = e.detail?.bossId;
       if (id) this.tryUnlock(`boss:${id}`);
     });

@@ -1,5 +1,10 @@
 import { ALL_ACHIEVEMENTS_EXTRA } from '../content/achievements.js';
 
+import { on, offAll } from '../engine/EventBus.js';
+
+const GAME_ACHIEVEMENTSYSTEM = 'game/AchievementSystem';
+const achieveOn = (name, handler) => on(name, handler, GAME_ACHIEVEMENTSYSTEM);
+
 /** 扩写成就追加在主表之后（W-B2：条目本体在 content/achievements.js） */
 const mergeAchievements = (base) => [...base, ...ALL_ACHIEVEMENTS_EXTRA];
 
@@ -19,6 +24,11 @@ export const ACHIEVEMENTS = mergeAchievements([
 ]);
 
 export class AchievementSystem {
+  /** 成就监听（八个）都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第六处） */
+  dispose() {
+    offAll(GAME_ACHIEVEMENTSYSTEM);
+  }
+
   constructor(dialog) {
     this.dialog = dialog;
     this.unlocked = new Set();
@@ -59,7 +69,7 @@ export class AchievementSystem {
   }
 
   setupListeners() {
-    window.addEventListener('enemy-defeated', (e) => {
+    achieveOn('enemy-defeated', (e) => {
       if (e.detail.type !== 'dummy') this.stats.kills++;
       if (e.detail.bossId === 'shadow-warden') this.stats.boss1 = true;
       if (e.detail.bossId === 'archmagus') this.stats.boss2 = true;
@@ -68,31 +78,31 @@ export class AchievementSystem {
       if (e.detail.bossId === 'chaos-overlord') this.stats.chaosBoss = true;
       this.checkAll();
     });
-    window.addEventListener('discovery', () => {
+    achieveOn('discovery', () => {
       this.stats.discoveries++;
       this.checkAll();
     });
-    window.addEventListener('dungeon-cleared', () => {
+    achieveOn('dungeon-cleared', () => {
       this.stats.dungeons++;
       this.checkAll();
     });
-    window.addEventListener('spell-cast', (e) => {
+    achieveOn('spell-cast', (e) => {
       if (e.detail.charged) this.stats.charged++;
       this.checkAll();
     });
-    window.addEventListener('combo-finisher', () => {
+    achieveOn('combo-finisher', () => {
       this.stats.comboFinishers++;
       this.checkAll();
     });
-    window.addEventListener('weapon-skill-unlocked', () => {
+    achieveOn('weapon-skill-unlocked', () => {
       this.stats.skills++;
       this.checkAll();
     });
-    window.addEventListener('parry-success', () => {
+    achieveOn('parry-success', () => {
       this.stats.parries++;
       this.checkAll();
     });
-    window.addEventListener('journal-entry', (e) => {
+    achieveOn('journal-entry', (e) => {
       if (e.detail.category === 'fragment') this.stats.loreFragments++;
       this.stats.journalEntries++;
       this.checkAll();

@@ -99,18 +99,15 @@ const BARE_WINDOW_LISTENERS = {
   'effects/RealmBleed.js': 1,
   'effects/UpsideDownVisualPass.js': 1,
   'effects/ZoneTransitionFX.js': 1,
-  'game/AchievementSystem.js': 8,
   'game/AchievementSystemExtras.js': 6,
   'game/CampfireMemorySystem.js': 2,
   'game/CgGalleryAchievements.js': 1,
-  'game/CgGallerySystem.js': 7,
   'game/CgGallerySystemExtras.js': 5,
   'game/CombatStyleTracker.js': 5,
   'game/CombatTutorialDirector.js': 3,
   'game/DeathHintDirector.js': 1,
   'game/DungeonRunTracker.js': 3,
   'game/ExplorationMap.js': 2,
-  'game/LoreCodexSystem.js': 6,
   'game/PopCultureAchievementExtras.js': 1,
   'game/PopCultureCombatBarks.js': 1,
   'game/PopCultureEchoSystem.js': 2,
@@ -120,7 +117,6 @@ const BARE_WINDOW_LISTENERS = {
   'ui/BossPhaseDirector.js': 3,
   'ui/CombatSessionStats.js': 5,
   'ui/CombatStyleOverlay.js': 1,
-  'ui/ContextualTutorial.js': 6,
   'world/BossRematchDirector.js': 1,
   'world/DungeonManager.js': 3,
   'world/RestNpcAnimDirector.js': 5,
@@ -294,7 +290,10 @@ describe('监听注销门禁（B44 剩余半区）', () => {
     // 129 → 116（2026-10-08）：core/Game.js 的 13 处整文件迁完。
     // 116 → 106（2026-10-08）：game/QuestSystem.js 的十条记账监听整文件迁完
     //   （走 questsOn(name, …) + dispose() 里 offAll；Game._adopt 登记，反序执行）。
-    expect(total).toBe(106);
+    // 106 → 79（2026-10-08）：迁移第六处一次收四个系统 27 条 ——
+    //   AchievementSystem 8 / CgGallerySystem 7 / LoreCodexSystem 6 / ContextualTutorial 6，
+    //   四个都走"本地出口带 tag + dispose() 里 offAll + Game._adopt 登记"同一套。
+    expect(total).toBe(79);
     // HUD 是切片6 迁掉的那一个：它必须从台账里消失，并且改用总线
     expect(bare['ui/HUD.js']).toBeUndefined();
     expect(busUsers.get('ui/HUD.js')).toMatchObject({ on: 20, offAll: 1 });
