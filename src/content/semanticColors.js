@@ -20,10 +20,40 @@
  * ## 默认档 = 现状，逐格同值
  * `default` 一列的值取自**改前在役的那些色**（稀有度四档直接对齐装备稀有度显示表的旧值），
  * 所以接上消费者之后默认档**零视觉变更**。调色是美术决定，机制片不夹带。
+ *
+ * ## 切片3 补上"现在是哪一档"
+ * 上面那一层只回答"某个语义在某个档下是什么颜色"，**不回答当前是哪一档** ——
+ * 后者是 `game/ColorVision.js` 的模块级当前档（与 `game/Difficulty.js` 同一形状），
+ * 唯一写入口是 `SettingsManager.applyToGame` 里的 `setColorVision`。分成两层是为了
+ * 让 content/ 继续不依赖 game/：表是纯数据，当前档是运行时状态。
  */
 
 /** 色觉档位。`default` 是出厂档；其余三档是常见的色觉异常类型 */
 export const COLOR_MODES = Object.freeze(['default', 'deuteranopia', 'protanopia', 'tritanopia']);
+
+/** 出厂色觉档，也是存储脏值的回落点 */
+export const DEFAULT_COLOR_MODE = 'default';
+
+/**
+ * 四个档位给人看的名字。放在这里而不是面板里，理由与 `content/difficulty.js` 的
+ * `label` 一样：**选项名单只有一个来源**（面板从 `colorVisionOptions()` 现推），
+ * 抄第二份的表现是"加了第四个档位而面板里只有三个"—— 不报错，只是选不到。
+ */
+export const COLOR_VISION_LABELS = Object.freeze({
+  default: '默认',
+  deuteranopia: '红绿色盲',
+  protanopia: '红色盲',
+  tritanopia: '蓝黄色盲',
+});
+
+/**
+ * 存储脏值回落出厂档，**不抛** —— 与 `normalizeDifficulty` / `normalizeShadowQuality`
+ * 同一先例：这一格是玩家可写的 localStorage，一行手改的错字不该把开机炸了。
+ * （代码里写死的档位仍然该抛 —— 那条路由 `semanticColor` 自己守。）
+ */
+export function normalizeColorVision(mode) {
+  return COLOR_MODES.includes(mode) ? mode : DEFAULT_COLOR_MODE;
+}
 
 const c = (label, glyph, colors) => Object.freeze({ label, glyph, colors: Object.freeze(colors) });
 
@@ -54,7 +84,7 @@ export const SEMANTIC_COLORS = Object.freeze({
   resource: c('资源', '◆', {
     default: 0x66ccff,
     deuteranopia: 0xaa88ff,
-    protanopia: 0xaa88ff,
+    protanopia: 0x9a7bff,
     tritanopia: 0x8899ff,
   }),
   // 稀有度四档：默认档与**装备稀有度显示表的旧值**逐格同值（零视觉变更；
@@ -63,7 +93,7 @@ export const SEMANTIC_COLORS = Object.freeze({
   // 注：这里刻意不写那张表的标识符 —— `tests/gear-drop.test.js` 有一条静态门禁
   // 按标识符点名"谁在读它"，注释里提一句会把它误算成第二个读者。
   'rarity-common': c('凡品', '○', {
-    default: 0xbfc7d1, deuteranopia: 0xc0c0c0, protanopia: 0xc0c0c0, tritanopia: 0xc8c8d8,
+    default: 0xbfc7d1, deuteranopia: 0xc0c0c0, protanopia: 0xd2d2dc, tritanopia: 0xc8c8d8,
   }),
   'rarity-uncommon': c('良品', '◇', {
     default: 0x63d97a, deuteranopia: 0xffe066, protanopia: 0xffd633, tritanopia: 0x9fe8b0,
@@ -71,10 +101,10 @@ export const SEMANTIC_COLORS = Object.freeze({
   'rarity-rare': c('稀有', '◆', {
     // tritanopia 那一格第一版与默认档**同值**（写成 0x4ea8ff），被 ② 那条门禁当场抓出来 ——
     // 同值意味着这一档对"稀有"这个语义什么都没做，那就是个空转的档位。
-    default: 0x4ea8ff, deuteranopia: 0x66d9ff, protanopia: 0x66d9ff, tritanopia: 0x8fc4ff,
+    default: 0x4ea8ff, deuteranopia: 0x66d9ff, protanopia: 0x8fd4ff, tritanopia: 0x8fc4ff,
   }),
   'rarity-epic': c('史诗', '★', {
-    default: 0xc77bff, deuteranopia: 0xff99ee, protanopia: 0xff99ee, tritanopia: 0xd9a0ff,
+    default: 0xc77bff, deuteranopia: 0xff99ee, protanopia: 0xffb0e8, tritanopia: 0xd9a0ff,
   }),
 });
 
@@ -109,3 +139,4 @@ export const semanticLabel = (id) => semanticOf(id).label;
 
 /** 稀有度 id → 语义键（`common` → `rarity-common`） */
 export const raritySemanticId = (rarityId) => `rarity-${rarityId}`;
+

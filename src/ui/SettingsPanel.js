@@ -10,6 +10,7 @@ import { MSAA_SAMPLES, normalizeMsaaSamples } from '../engine/aaPolicy.js';
 import { SSAO_QUALITY_NAMES, normalizeSsaoQuality } from '../engine/ssaoSettings.js';
 import { PRESET_NAMES } from '../engine/graphicsPresets.js';
 import { LANGUAGES } from '../engine/i18n.js';
+import { colorVisionOptions } from '../game/ColorVision.js';
 import { difficultyOptions } from '../game/Difficulty.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
@@ -164,6 +165,24 @@ export class SettingsPanel {
       diff.value = s.get('difficulty');
       diff.addEventListener('change', () => {
         s.set('difficulty', diff.value);
+        s.applyToGame(this.game);
+      });
+    }
+
+    // 色觉档（W-D6 切片3）：与难度档同一套纪律 —— 选项从名册现推（`colorVisionOptions()`，
+    // HTML 不抄第二份），落地只走 applyToGame（写入口只有 `setColorVision` 一个，
+    // 面板不直接碰运行时）。换档对场上掉落的重涂在 `LootSystem.update` 里。
+    const cv = document.getElementById('set-colorvision');
+    if (cv) {
+      for (const { id, label } of colorVisionOptions()) {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = label;
+        cv.appendChild(opt);
+      }
+      cv.value = s.get('colorVision');
+      cv.addEventListener('change', () => {
+        s.set('colorVision', cv.value);
         s.applyToGame(this.game);
       });
     }

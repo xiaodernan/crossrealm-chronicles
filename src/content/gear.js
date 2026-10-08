@@ -1,4 +1,4 @@
-import { semanticColor, semanticLabel, raritySemanticId } from './semanticColors.js';
+import { DEFAULT_COLOR_MODE, semanticColor, semanticLabel, raritySemanticId } from './semanticColors.js';
 
 /**
  * 装备的数据层（W-B5 切片1）：槽位、基表、稀有度、词缀，以及"一件装备等于几点属性"这一处算式。
@@ -200,15 +200,20 @@ export function isGearInstance(instance) {
  * `rarity-*` 四条（W-D6 切片1）—— 地上那团光与拾取提示里那个词必须是同一个答案，
  * 分两处写迟早一个说蓝的一个说紫的（B36 那一族 —— 同一条算式抄两处，漂移不报错）。
  *
- * 这一层现在只做"稀有度 id → 语义键"的翻译：默认档的色值与改前**逐格相同**，
- * 所以接上色板之后画面零变更；色盲档另给一组色，以及 `○◇◆★` 四个形状
- * （`semanticGlyph`）作为非颜色冗余。
+ * 切片3（W-D6）起多一个带档位的入口 `gearRarityDisplay(rarityId, mode)`：色盲档不是一张
+ * 另一份表，而是同一个语义键在另一个档下的一枚色值。`GEAR_RARITY_DISPLAY` 保留为
+ * **出厂档快照** —— 注册表校验（`kind: 'gearRarityDisplay'`）与"默认档 == 迁移前四个冻结值"
+ * 那条零视觉变更对账都指着它；运行时换档走 `game/ColorVision.js` 的 `rarityTint`，
+ * 不读这份快照（读了就等于切了档也换不了色）。
  */
+export function gearRarityDisplay(rarityId, mode = DEFAULT_COLOR_MODE) {
+  const id = raritySemanticId(rarityId);
+  return { label: semanticLabel(id), tint: semanticColor(id, mode) };
+}
+
+/** 出厂档（`default`）下的字样与颜色快照：注册表与零变更对账都读这一份 */
 export const GEAR_RARITY_DISPLAY = Object.fromEntries(
-  GEAR_RARITY.map((r) => {
-    const id = raritySemanticId(r.id);
-    return [r.id, { label: semanticLabel(id), tint: semanticColor(id) }];
-  }),
+  GEAR_RARITY.map((r) => [r.id, gearRarityDisplay(r.id)]),
 );
 
 /** 基表与词缀的中文名：`id` 是数据用的，字样是给人看的，两者不许互换 */

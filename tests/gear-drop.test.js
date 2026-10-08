@@ -299,11 +299,19 @@ describe('静态门禁', () => {
       .toEqual(['content/gear.js', 'core/Game.js', 'ui/UpgradePanel.js']);
   });
 
-  it('稀有度颜色只有一个来源：读 GEAR_RARITY_DISPLAY 的只有表自己、注册表与掉落层，而掉落层没再手抄一枚档位色', () => {
-    // registry.js 也读它 —— 那正是"把这张表接进校验"的样子，不是第二处颜色
+  it('稀有度颜色只有一个来源：出厂档快照只有注册表读，运行时档位只经 ColorVision 一个出口（W-D6 切片3）', () => {
+    // registry.js 也读快照 —— 那正是"把这张表接进校验"的样子，不是第二处颜色。
+    // 出厂档快照不再有运行时读者：换色觉档必须走 gearRarityDisplay(rarity, mode) 那条带档位的路，
+    // 读快照等于"切了档也换不了色"（W-D6 切片3 起 LootSystem 走 rarityTint）。
     const files = [...new Set(hits(/GEAR_RARITY_DISPLAY/).map((h) => h.split(':')[0]))].sort();
-    expect(files, `颜色被抄到了别处：${files.join(' / ')}`)
-      .toEqual(['content/gear.js', 'content/registry.js', 'game/LootSystem.js']);
+    expect(files, `出厂档快照被抄到了别处：${files.join(' / ')}`)
+      .toEqual(['content/gear.js', 'content/registry.js']);
+    const 带档位 = [...new Set(hits(/gearRarityDisplay\(/).map((h) => h.split(':')[0]))].sort();
+    expect(带档位, `带档位的取色入口出现了第二个：${带档位.join(' / ')}`)
+      .toEqual(['content/gear.js', 'game/ColorVision.js']);
+    const 出口 = [...new Set(hits(/rarityTint\(/).map((h) => h.split(':')[0]))].sort();
+    expect(出口, `运行时档位的出口出现了第二个：${出口.join(' / ')}`)
+      .toEqual(['game/ColorVision.js', 'game/LootSystem.js']);
     const text = readFileSync(join(SRC, 'game/LootSystem.js'), 'utf8');
     const hexes = text.match(/0x[0-9a-fA-F]{6}/g) ?? [];
     // 装备那一格的颜色是从表里取的，不是这里抄的：所以本文件只该留下灵魂掉落那一对既有常数

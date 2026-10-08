@@ -108,6 +108,20 @@ describe('语义色板（W-D6 切片1）', () => {
       const glyphs = SEMANTIC_IDS.filter((id) => id.startsWith('rarity-')).map(semanticGlyph);
       expect(new Set(glyphs).size).toBe(glyphs.length);
     });
+
+    it('同一语义在四个档下四枚互不相同的色值（抄了隔壁档的那一档就是空转的）', () => {
+      // ② 只查"每个非默认档与默认档不同"，查不出"两个色盲档互相抄"。
+      // protanopia 与 deuteranopia 是两种不同的色觉异常（缺红锥 / 缺绿锥），
+      // 照抄会让其中一档对那个语义什么都没做 —— 而那一格在表上看起来完全正常。
+      for (const id of SEMANTIC_IDS) {
+        const seen = new Map();
+        for (const mode of COLOR_MODES) {
+          const c = semanticColor(id, mode);
+          expect(seen.has(c), `${id} 在 ${mode} 与 ${seen.get(c)} 两档下同色`).toBe(false);
+          seen.set(c, mode);
+        }
+      }
+    });
   });
 
   describe('④ 认不出就抛', () => {
@@ -194,3 +208,4 @@ describe('语义色板（W-D6 切片1）', () => {
     });
   });
 });
+

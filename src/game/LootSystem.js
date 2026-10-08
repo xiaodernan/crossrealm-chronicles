@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { GEAR_RARITY_DISPLAY, dropChance, gearIsUpgrade, isGearInstance, rarityRank, rollBossGear, rollGear } from '../content/gear.js';
+import { dropChance, gearIsUpgrade, isGearInstance, rarityRank, rollBossGear, rollGear } from '../content/gear.js';
+import { getColorVisionMode, rarityTint } from './ColorVision.js';
 
 /** 地上那一件的形状全系统共用一份：档位只改颜色，不改几何 */
 const DROP_RADIUS = 0.25;
@@ -19,7 +20,7 @@ const BEAM_OPACITY = 0.22;
 
 /**
  * 地面环的档位规格（环径倍率与环光强度）。形状与生命周期归掉落层（与 `DROP_RADIUS` 同一分工），
- * 颜色仍查 `GEAR_RARITY_DISPLAY` —— 这里再出现一枚色值就是第二份真相。
+ * 颜色仍查表 —— 但走 `rarityTint()`（`game/ColorVision.js`），它按**当前色觉档**取值。
  * 键集与 `GEAR_RARITY` 逐一对齐由用例双向钉住：多一格是死格，少一格那一档的环会当场炸而不是悄悄变小。
  */
 export const DROP_RING_BY_RARITY = Object.freeze({
@@ -67,6 +68,11 @@ export class LootSystem {
     /** 环躺平（XZ 面）与光柱共用：两份几何全局各一份，网格按格借还 */
     this.ringGeometry = new THREE.RingGeometry(0.32, 0.46, 24);
     this.beamGeometry = new THREE.CylinderGeometry(0.035, 0.035, 3, 6);
+    /**
+     * 上色时用的色觉档（W-D6 切片3）。玩家在设置里换档时，`update` 比对出差异就重涂全场 ——
+     * 可访问性开关半生效（新掉落是新色、旧掉落是旧色）比不生效更难查。
+     */
+    this._tintMode = getColorVisionMode();
   }
 
   /**
@@ -124,21 +130,32 @@ export class LootSystem {
     d.beam.position.y = BEAM_CENTER_Y - 浮动;
   }
 
+  /**
+   * 上色：档位色查表（`rarityTint` 按**当前**色觉档取），魂走固定的那一对常数。
+   *   - 出生时调一次；
+   *   - 玩家在设置里换色觉档时，`update` 对所有在场掉落再调一次（见文件头"生效时机"）。
+   * 抽成方法而不是写在 `_spawn` 里，就是因为有这两个调用点 —— 抄第二遍的表现是
+   * "切了色盲档，新掉的是新色、旧掉的还是旧色"，而那正是可访问性开关最怕的半生效。
+   */
+  _paint(d) {
+    const tint = d.gear ? rarityTint(d.gear.rarity) : SOUL_TINT;
+    d.mesh.material.color.setHex(tint);
+    d.mesh.material.emissive.setHex(d.gear ? tint : SOUL_EMISSIVE);
+    d.ring.material.color.setHex(tint);
+    d.beam.material.color.setHex(tint);
+  }
+
   _spawn(pos, { souls, gear }) {
     const { mesh, ring, beam } = this._acquire();
-    const tint = gear ? GEAR_RARITY_DISPLAY[gear.rarity].tint : SOUL_TINT;
     const look = gear ? DROP_RING_BY_RARITY[gear.rarity] : DROP_RING_SOUL;
-    mesh.material.color.setHex(tint);
-    mesh.material.emissive.setHex(gear ? tint : SOUL_EMISSIVE);
+    const d = { mesh, ring, beam, souls, gear, life: DROP_LIFE, phase: this.rng() * Math.PI * 2, look };
+    this._paint(d);
     mesh.position.copy(pos);
-    ring.material.color.setHex(tint);
     ring.material.opacity = look.opacity;
     ring.scale.setScalar(look.scale);
-    beam.material.color.setHex(tint);
     beam.material.opacity = BEAM_OPACITY;
     // 高亮光柱：出生那一刻先问一次；之后每帧 update 从**活的**装备账再问（换上/卸下当场跟上）
     beam.visible = gear ? gearIsUpgrade(this.stats?.gear ?? null, gear) : false;
-    const d = { mesh, ring, beam, souls, gear, life: DROP_LIFE, phase: this.rng() * Math.PI * 2, look };
     this.drops.push(d);
     this._lay(d, pos.y);
     // 装备落地的一声，档位越高越亮（魂不响 —— 捡起时那一声才是魂的）
@@ -187,6 +204,12 @@ export class LootSystem {
   }
 
   update(dt, playerPos, pickupRadius = 2.5) {
+    // 色觉档换了就重涂全场（W-D6 切片3）：见构造处 `_tintMode` 的注释
+    const mode = getColorVisionMode();
+    if (mode !== this._tintMode) {
+      this._tintMode = mode;
+      for (const d of this.drops) this._paint(d);
+    }
     for (let i = this.drops.length - 1; i >= 0; i--) {
       const d = this.drops[i];
       d.life -= dt;
@@ -215,3 +238,4 @@ export class LootSystem {
     }
   }
 }
+

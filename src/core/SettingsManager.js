@@ -5,8 +5,8 @@ import { DEFAULT_SSAO_QUALITY } from '../engine/ssaoSettings.js';
 import { setSsaoQuality } from '../engine/SsaoPass.js';
 import { DEFAULT_GRAPHICS_PRESET, getGraphicsPreset, normalizeGraphicsPreset } from '../engine/graphicsPresets.js';
 import { setLanguage, applyTranslations } from '../engine/i18n.js';
+import { DEFAULT_COLOR_MODE, setColorVision } from '../game/ColorVision.js';
 import { DEFAULT_DIFFICULTY, setDifficulty } from '../game/Difficulty.js';
-
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
 const VERSION = 2;
@@ -90,6 +90,14 @@ const DEFAULTS = {
    * 脏值在出口内部回落出厂不抛。
    */
   difficulty: DEFAULT_DIFFICULTY,
+  /**
+   * 色觉档（W-D6 切片3）：default / deuteranopia / protanopia / tritanopia 四档，名册在
+   * `content/semanticColors.js`。出厂 `default` —— 与"没有色盲模式"逐格同值（那张表的
+   * `default` 一列就是迁移前在役的色），所以默认玩家的画面零变更；`tests/color-vision.test.js`
+   * 拿迁移前的四个冻结色值对账，不靠记忆。存储里的脏值在 `applyToGame` 落地前经
+   * `normalizeColorVision` 回落出厂，不抛。落地走 `setColorVision`（写入口只有那一处）。
+   */
+  colorVision: DEFAULT_COLOR_MODE,
 };
 
 /**
@@ -214,5 +222,8 @@ export class SettingsManager {
     // 生效时机：`enemyHp` 乘在出生那一瞬间（场上已有的敌人保持当前血量），
     // `damageTaken` / `souls` 对下一击 / 下一笔收入即生效。
     setDifficulty(this.get('difficulty'));
+    // 色觉档（W-D6 切片3）：与难度档同一套纪律 —— 写入口只有这一处，脏值回落出厂不抛。
+    // 生效时机：新生成的掉落按当前档取色，场上已有的掉落在下一帧 `LootSystem.update` 重涂。
+    setColorVision(this.get('colorVision'));
   }
 }
