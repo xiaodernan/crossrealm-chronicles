@@ -75,7 +75,7 @@ export class CgJournalTab {
     const grid = unlocked.map((e) => {
       const fav = cg.favorites.has(e.id) ? '★' : '☆';
       return `<div class="cg-card" data-id="${e.id}">
-        <div class="cg-card-thumb" data-id="${e.id}"></div>
+        <button type="button" class="cg-card-thumb" data-id="${e.id}" aria-label="${e.caption}"></button>
         <div class="cg-card-cap">${e.caption}</div>
         <div class="cg-card-sub">${e.speaker}</div>
         <button type="button" class="cg-fav-btn" data-id="${e.id}">${fav}</button>
@@ -109,6 +109,8 @@ export class CgJournalTab {
       this.game.hud.updateJournal();
     });
 
+    // W-D6 切片11：缩略图是 `button`（改前是 `div`）—— 于是它进得了 `navItems` 的清单，
+    // ↑↓ 走得到、Enter/空格由浏览器激活、焦点环也自动有（切片9 那条按标签写的规则）。
     panelEl.querySelectorAll('.cg-card-thumb').forEach((el) => {
       const entry = unlocked.find((e) => e.id === el.dataset.id);
       if (!entry) return;

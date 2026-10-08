@@ -881,3 +881,105 @@ describe('对话框：开着的那一刻焦点就落在里面，选项走得通�
     expect(/focusFirstItem\(this\.overlay\)/.test(smuggled)).toBe(false);
   });
 });
+
+/* ------------------------------- 点得到的，键盘也要点得到（W-D6 切片11） */
+
+/**
+ * 这一片防的是**看起来能点、其实只能鼠标点**的格子。
+ *
+ * 普查（改前）只有一格：CG 画廊的缩略图 `.cg-card-thumb` 是个 `div` 挂 `click` ——
+ * 日志抽屉里其余每格（页签 / 区域筛选 / 收藏 / 返回）都是 `button`，唯独"看图"这一下
+ * 走不进去：`navItems` 的清单里没有它，Enter 也没有反应。玩家能翻到那一页、看得见图，
+ * 就是打不开。改法是把它改成 `button`（`aria-label` 用既有的caption，不新造一句要翻译的话）。
+ *
+ * 两条尺子，各自咬一种漂移：
+ * 1. **视觉许诺**：CSS 里凡是画了 `cursor: pointer` 的类 / id，用它写元素的标签必须是可聚焦的
+ *    （鼠标指针变成手，就是在告诉玩家"这能点"—— 那键盘也该能点）。
+ * 2. **真的挂了 click**：凡是把 `addEventListener('click')` 直接挂在字面量选择器上的，
+ *    那个选择器命中的元素同样必须可聚焦。
+ */
+describe('点得到的东西，键盘也要点得到（W-D6 切片11）', () => {
+  const SHELL = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+  const CSS_RAW = readFileSync(join(process.cwd(), 'src/style.css'), 'utf8');
+  const 全部文本 = [...FILES.map((f) => f.source), SHELL];
+  /** 天生可聚焦的标签（与切片9 焦点环那条规则同一份清单） */
+  const FOCUSABLE_TAGS = ['button', 'input', 'select', 'textarea', 'a'];
+
+  /**
+   * 刻意不可聚焦的两处，各有理由（白名单要写理由，否则就是给自己留后门）：
+   * - 灯箱背景：点它关灯是**冗余便利**，Esc 与右上角那颗关闭钮都能关；
+   * - 地图画布：那是"在地图上放路点"那片，缺的是键盘动作登记，不是焦点格。
+   */
+  const 例外 = new Set(['.cg-lightbox-backdrop']);
+  /** 某个类名 / id 是用什么标签写的（壳页模板 + 源码模板 + 代码里 createElement 造出来的那类） */
+  const tagsIn = (texts, sel) => {
+    const name = sel.replace(/^[.#]/, '');
+    const re = sel.startsWith('#')
+      ? new RegExp(`<([a-z]+)[^>]*\\bid="${name}"`, 'gi')
+      : new RegExp(`<([a-z]+)[^>]*\\bclass="[^"]*\\b${name}\\b[^"]*"`, 'gi');
+    const out = new Set(texts.flatMap((s) => [...s.matchAll(re)].map((m) => m[1].toLowerCase())));
+    // 还有一类是代码里 createElement + className 造出来的（折叠钮就是）：模板里反查不到，得看创建那一行
+    const dyn = new RegExp(`createElement\\(\\s*['"]([a-z]+)['"]\\s*\\)[\\s\\S]{0,400}?className\\s*=\\s*['"][^'"]*\\b${name}\\b`, 'gi');
+    for (const s of texts) for (const m of s.matchAll(dyn)) out.add(m[1].toLowerCase());
+    return [...out];
+  };
+
+  /** 一条规则里写了 `cursor: pointer` 的那些主体选择器（剥掉伪类与后代，取最后一个复合） */
+  const pointerSubjects = (css) => [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+    .filter((m) => /cursor\s*:\s*pointer/.test(m[2]))
+    .flatMap((m) => m[1].split(',').map((s) => s.trim()))
+    .map((s) => s.split(/[\s>+~]+/).pop())
+    .filter((s) => /^[.#][\w-]+$/.test(s));
+  const clickBoundSelectors = (src) => [...src.matchAll(
+  /** 直接挂了 `click` 监听的字面量选择器（`SEL.addEventListener('click'` 同一行内） */
+    /(['"`])([.#][\w-]+)\1[^;\n]{0,200}?addEventListener\('click'/g,
+  )].map((m) => m[2]);
+
+  const tagsFor = (sel) => tagsIn(全部文本, sel);
+
+  it('CSS 里画了手势的每一个类 / id，都只写在可聚焦的标签上', () => {
+    const 主体 = [...new Set(pointerSubjects(CSS_RAW.replace(/\/\*[\s\S]*?\*\//g, '')))].sort();
+    expect(主体.length, '一个画了 cursor:pointer 的类都没有：这条扫描是空跑').toBeGreaterThan(5);
+    for (const sel of 主体) {
+      if (例外.has(sel)) continue;
+      const tags = tagsFor(sel);
+      expect(tags, `${sel} 在壳页与模板里找不到元素`).not.toEqual([]);
+      for (const tag of tags) {
+        expect(FOCUSABLE_TAGS, `${sel} 写在 <${tag}> 上：鼠标有手势，键盘走不进去`).toContain(tag);
+      }
+    }
+  });
+
+  it('直接挂 click 监听的选择器，命中的也是可聚焦的标签', () => {
+    const 选择器 = [...new Set(FILES.flatMap((f) => clickBoundSelectors(f.source)))].sort();
+    expect(选择器.length, '一个直接挂 click 的选择器都没有：这条扫描是空跑').toBeGreaterThan(5);
+    for (const sel of 选择器) {
+      if (例外.has(sel)) continue;
+      const tags = tagsFor(sel);
+      expect(tags, `${sel} 在壳页与模板里找不到元素`).not.toEqual([]);
+      for (const tag of tags) {
+        expect(FOCUSABLE_TAGS, `${sel} 命中的是 <${tag}>：只能鼠标点`).toContain(tag);
+      }
+    }
+  });
+
+  it('例外白名单里每一处都真的存在（白名单不许养死条目）', () => {
+    for (const sel of 例外) {
+      const name = sel.replace(/^[.#]/, '');
+      expect(全部文本.some((s) => s.includes(name)), `白名单里的 ${sel} 已经不存在了`).toBe(true);
+    }
+  });
+
+  it('这条扫描咬得住：把缩略图改回 div 立刻红（防空跑门禁）', () => {
+    const original = sourceOf('ui/CgJournalTab.js');
+    const smuggled = original.replace(
+      '<button type="button" class="cg-card-thumb"',
+      '<div class="cg-card-thumb"',
+    );
+    expect(smuggled, '锚点没命中：缩略图那一行的写法变了').not.toBe(original);
+    expect(tagsFor('.cg-card-thumb')).toEqual(['button']);
+    // 变异之后同一个反查就该给出 div：给不出来，说明上面两条尺子根本没在量标签
+    const 变异 = tagsIn(全部文本.map((s) => s.replace(`<button type="button" class="cg-card-thumb"`, `<div class="cg-card-thumb"`)), '.cg-card-thumb');
+    expect(变异, '改回 div 之后反查没跟着变：尺子是空转的').toEqual(['div']);
+  });
+});
