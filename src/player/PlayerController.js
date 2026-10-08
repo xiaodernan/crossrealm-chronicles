@@ -8,6 +8,7 @@ import { createPlayerFSM } from './PlayerFSM.js';
 
 import { shake } from '../engine/Shake.js';
 import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE } from '../engine/CameraRig.js';
+import { LOOK_SENSITIVITY, DEFAULT_LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
 import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND, LOCK_ON_CAMERA, PLAYER_KNOCK } from '../content/tuning.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
@@ -15,7 +16,6 @@ import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { SURFACE_SPECS } from '../content/materialSurfaces.js';
 import { paletteOf } from '../content/materialPalette.js';
 import { makeUvBoxGeometry } from '../engine/uvGeometry.js';
-
 
 
 /** 第三人称轨道 + 第一人称 — 参考法环/黑神话：鼠标直控、镜头始终看向角色 */
@@ -78,10 +78,12 @@ export class PlayerController {
 
     this.grounded = false;
 
-    this.cameraSensitivity = 0.002;
-
-    this.cameraSensitivityY = 0.0017;
-
+    /* 鼠标镜头的两枚出厂倍率（W-D6 切片7 之前是这里的两行硬编码）。
+       真源在 `engine/lookSensitivity.js` —— 设成字段只是为了 `addCameraInput` 少查一次表。
+       `lookSensitivityScale` 是玩家拧的倍率，出厂 1 = 与硬编码时代逐帧相同。 */
+    this.cameraSensitivity = LOOK_SENSITIVITY.x;
+    this.cameraSensitivityY = LOOK_SENSITIVITY.y;
+    this.lookSensitivityScale = DEFAULT_LOOK_SENSITIVITY;
     /** 震屏不归玩家所有：`engine/Shake.js` 的共享实例是唯一写入者，相机只读它的偏移 */
     this.shake = shake;
 
@@ -352,6 +354,23 @@ export class PlayerController {
   }
 
 
+
+  /**
+   * 镜头灵敏度倍率（W-D6 切片7）。出厂 1 = 与硬编码时代逐帧相同。
+   *
+   * 倍率乘在**两枚出厂值**上而不是覆盖它们：横竖比例（0.002 : 0.0017）是手感决定，
+   * 玩家拧的只是"整体快慢"，拧完比例不变。唯一写入口是
+   * `SettingsManager.applyToGame` 里的 `applyLookSensitivity` —— 与难度档 / 色觉档同一条纪律。
+   *
+   * 脏值在这里夹回量程而不是抛：这一格来自玩家可写的 localStorage，
+   * 一行手改的错字不该把开机炸了（`normalizeShadowQuality` 的同一先例）。
+   */
+  setLookSensitivity(scale) {
+    this.lookSensitivityScale = normalizeLookSensitivity(scale);
+    this.cameraSensitivity = LOOK_SENSITIVITY.x * this.lookSensitivityScale;
+    this.cameraSensitivityY = LOOK_SENSITIVITY.y * this.lookSensitivityScale;
+    return this.lookSensitivityScale;
+  }
 
   addCameraInput(dx, dy) {
     this.yaw -= dx * this.cameraSensitivity;

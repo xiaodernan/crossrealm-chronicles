@@ -12,6 +12,7 @@ import { PRESET_NAMES } from '../engine/graphicsPresets.js';
 import { LANGUAGES } from '../engine/i18n.js';
 import { colorVisionOptions } from '../game/ColorVision.js';
 import { difficultyOptions } from '../game/Difficulty.js';
+import { LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -64,6 +65,20 @@ export class SettingsPanel {
     bind('set-bloom', 'bloomStrength', Number);
     bind('set-pixel', 'pixelRatio', Number);
     bind('set-lod', 'enemyLodDistance', Number);
+    // 鼠标镜头灵敏度（W-D6 切片7）：一根滑杆，倍率不是绝对值。
+    // min/max/step 从 `LOOK_SENSITIVITY` 灌进来、不抄进 HTML —— 抄了就会漏：
+    // 改了量程而 HTML 不动，玩家拖到头会被 `normalizeLookSensitivity` 当成脏值悄悄夹回去。
+    const look = document.getElementById('set-look-sensitivity');
+    if (look) {
+      look.min = String(LOOK_SENSITIVITY.scaleMin);
+      look.max = String(LOOK_SENSITIVITY.scaleMax);
+      look.step = String(LOOK_SENSITIVITY.scaleStep);
+      look.value = String(normalizeLookSensitivity(s.get('lookSensitivity')));
+      look.addEventListener('input', () => {
+        s.set('lookSensitivity', normalizeLookSensitivity(Number(look.value)));
+        s.applyToGame(this.game);
+      });
+    }
     // 手感旋钮（切片15 起三根，切片21 再加三根）。滑杆的 min/max/step 由 `PAD_TUNING` 灌进来、
     // 名单也从那里现推：
     // 1. "滑到头的那个值"与"桥认的那个值"必须是同一份，否则玩家拖到底会被当成脏数据悄悄回落；
@@ -376,6 +391,8 @@ export class SettingsPanel {
     set('set-bloom', d.bloomStrength);
     set('set-pixel', d.pixelRatio);
     set('set-lod', d.enemyLodDistance);
+    // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 padTuning 的回显同一纪律）
+    set('set-look-sensitivity', normalizeLookSensitivity(d.lookSensitivity));
     const t = padTuning(d.padTuning);      // 回显的也是清洗过的值：脏档会显示成出厂那一格
     for (const key of Object.keys(PAD_TUNING)) set(padKnobId(key), t[key]);
     const sh = document.getElementById('set-shadows');

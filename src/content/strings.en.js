@@ -19,6 +19,7 @@ export const STRINGS_EN = Object.freeze({
   settings_language: 'Language',
   settings_difficulty: 'Difficulty',
   settings_colorvision: 'Color Vision',
+  settings_look_sensitivity: 'Look Sensitivity',
   settings_graphics: 'Graphics',
   settings_audio: 'Audio',
   settings_controls: 'Controls',

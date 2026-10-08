@@ -803,13 +803,22 @@ describe('设置那一格：范围只有一个真源、写进桥只有一条路'
 /* ------------------------------------------------------- 静态门禁 */
 
 describe('静态门禁：一处范围、一处写入口、桥只读自己的手档', () => {
+/**
+ * 同样"量程由表灌进壳页"但**不属于手柄手感**的滑杆（W-D6 切片7 起：鼠标镜头灵敏度）。
+ *
+ * 为什么显式点名而不是放宽那条扫描：这一族名单多一格就得在这里点一次名，
+ * 否则"壳页里多一个没人认的旋钮"就不再报错 —— 而那正是这条不变式要防的事
+ * （漏一格 = 拖不动，多一格 = 没人认，两者都不会抛，只会静静地不合预期）。
+ */
+const TABLE_FED_SLIDERS = Object.freeze(['set-look-sensitivity']);
+
   it('滑杆的范围只写在 `PAD_TUNING`：壳页里那些"旋钮格"不许带 min/max/step，而且与表**双向**对上', () => {
     const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
     const free = [];                                   // 没写范围的滑杆 = 由表灌范围的那一格
     for (const m of html.matchAll(/<input id="([^"]+)" type="range"([^>]*?)\/>/g)) {
       if (!/\b(min|max|step)=/.test(m[2])) free.push(m[1]);
     }
-    const fromTable = Object.keys(PAD_TUNING).map(padKnobId);
+    const fromTable = [...Object.keys(PAD_TUNING).map(padKnobId), ...TABLE_FED_SLIDERS];
     expect([...free].sort(), '壳页与 `PAD_TUNING` 不再是同一份名单（漏一格 = 拖不动，多一格 = 没人认）')
       .toEqual([...fromTable].sort());
     // 每一格都真的有一行 `<label>名称 <input .../></label>`：没有名字的滑杆玩家不知道它管什么。

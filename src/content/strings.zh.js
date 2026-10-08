@@ -19,6 +19,7 @@ export const STRINGS_ZH = Object.freeze({
   settings_language: '语言',
   settings_difficulty: '难度',
   settings_colorvision: '色觉模式',
+  settings_look_sensitivity: '镜头灵敏度',
   settings_graphics: '画面',
   settings_audio: '音频',
   settings_controls: '控制',

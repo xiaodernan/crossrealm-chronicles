@@ -7,6 +7,7 @@ import { DEFAULT_GRAPHICS_PRESET, getGraphicsPreset, normalizeGraphicsPreset } f
 import { setLanguage, applyTranslations } from '../engine/i18n.js';
 import { DEFAULT_COLOR_MODE, setColorVision } from '../game/ColorVision.js';
 import { DEFAULT_DIFFICULTY, setDifficulty } from '../game/Difficulty.js';
+import { DEFAULT_LOOK_SENSITIVITY, applyLookSensitivity, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
 const VERSION = 2;
@@ -45,6 +46,13 @@ const DEFAULTS = {
   graphicsPreset: DEFAULT_GRAPHICS_PRESET,
   pixelRatio: 1.5,
   enemyLodDistance: 85,
+  /**
+   * 鼠标镜头灵敏度倍率（W-D6 切片7）：1 = 改前那两枚硬编码值。
+   * 出厂 1 —— 机制片不夹带手感变更，玩家要快要慢自己拧（可访问性里最常被提到的一格：
+   * 高 DPI 鼠标轻轻一推就转过九十度，而手腕有伤 / 用触控板的玩家需要更小的舵量）。
+   * 真源与量程在 `engine/lookSensitivity.js`；脏值在那里夹回量程，不抛。
+   */
+  lookSensitivity: DEFAULT_LOOK_SENSITIVITY,
   showFps: true,
   /** 玩家的键位重映射 `动作名 → KeyboardEvent.code`；空表 = 用 `content/hotkeys.js` 的出厂绑定 */
   keybinds: {},
@@ -225,6 +233,10 @@ export class SettingsManager {
     // 色觉档（W-D6 切片3）：与难度档同一套纪律 —— 写入口只有这一处，脏值回落出厂不抛。
     // 生效时机：新生成的掉落按当前档取色，场上已有的掉落在下一帧 `LootSystem.update` 重涂。
     setColorVision(this.get('colorVision'));
+    // 鼠标镜头灵敏度倍率（W-D6 切片7）：写入口只有这一处（与难度档 / 色觉档同一条纪律）。
+    // 生效时机：下一次 `addCameraInput` 即生效 —— 它是每帧乘进去的，没有"场上已有的角度"要重算。
+    // 脏值在 `normalizeLookSensitivity` 里夹回量程，不抛（存储是玩家可写的）。
+    applyLookSensitivity(game.player, normalizeLookSensitivity(this.get('lookSensitivity')));
     // HUD 状态条按当前色觉档重写一次（W-D6 切片4）：写颜色的地方只有 ui/barTheme.js 一处，
     // HUD 只负责转发。放在 setColorVision 之后 —— 先落档位再取色，顺序反了会涂上一档的颜色。
     game.hud?.refreshBarColors?.();
