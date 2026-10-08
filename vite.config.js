@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { contentCheckPlugin } from './scripts/vite-plugin-content-check.mjs';
 
 /**
  * 分块规则（W-B1 切片1，修 B37）。
@@ -29,6 +30,13 @@ import { defineConfig } from 'vite';
  * 所以这里改了规则它跟着改，不会各说各话。
  */
 export default defineConfig({
+  /**
+   * 构建期内容校验（W-B1 余项）。`checkContent()` 此前只有 `npm test` 一个消费者，
+   * 于是只跑 `npm run build` 的人拿到的是一份"看起来成功"的产物，坏表要到玩家走进那一格
+   * 才现形。判据不在这里重写 —— 插件只负责把 `src/content/registry.js` 载进来、调它、
+   * 把错误列表变成一次构建失败（见 `scripts/vite-plugin-content-check.mjs` 的文件头）。
+   */
+  plugins: [contentCheckPlugin()],
   server: {
     port: 5173,
     open: true,
