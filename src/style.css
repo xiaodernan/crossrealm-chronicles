@@ -1168,7 +1168,7 @@ canvas {
 }
 
 /* 字幕条（W-D6 切片8）：把"只靠声音传递的信息"写到屏幕上。
-   摆在交互提示（bottom:120px）上方 48px —— 那一行是"按 E 互动"，字幕不能盖它。
+   摆在交互提示（bottom:120px）上方 48px —— 那一行写的是互动键提示，字幕不能盖它。
    pointer-events: none：字幕是纯输出，不许抢玩家的点击，也不该进走焦清单。 */
 #captions {
   position: fixed;
@@ -1478,9 +1478,21 @@ body.finisher-flash::after {
  * 否则"焦点在哪"这件事只存在于数据结构里、玩家看不见。
  * 用 `:focus` 而不是 `:focus-visible`：落焦是我们代码做的（见 FocusNav），
  * 浏览器的"上一次交互是鼠标还是键盘"判断在这种场合会把焦点环吃掉。
+ *
+ * W-D6 切片9：**按标签写，不按容器类写**。改前这条规则只认 `.panel-box button` 与
+ * `.settings-box input`，于是日志抽屉（`#journal-panel`，页签还是动态建的）、
+ * 升级面板（`#upgrade-panel`）、对话框（`#dialog-overlay`）、世界地图（`#world-map-panel`）
+ * 四处的按钮**键盘走得进去、却看不见落在哪** —— 而它们恰是「纯键盘可达全部 UI」
+ * 漏得最安静的四格（没有报错、没有 console，只是那一格没有焦点环）。
+ * 按标签写之后，往后新起的壳页忘了套 `.panel-box` 也照样有焦点环；漏没漏由
+ * `tests/focus-nav.test.js` 逐个数壳页里的可聚焦标签，不靠这里记类名。
  */
-.panel-box button:focus,
-.settings-box input:focus {
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus,
+[tabindex]:focus {
   outline: 2px solid #c9a962;
   outline-offset: 2px;
   border-color: #c9a962;

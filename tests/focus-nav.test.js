@@ -717,3 +717,72 @@ describe('静态门禁：焦点只有一个出口，激活只有浏览器一个�
     expect(hotkeyBlockedBy(open, 'ArrowLeft')).toBe(true);     // 改绑之后出厂 ← 反而被自己的面板拦下
   });
 });
+
+/* ------------------------------------------- 焦点环：走得到，也要看得见（W-D6 切片9） */
+
+/**
+ * 这一片防的是**静默的不可用**：↑↓ 把焦点搬到那一格上了，数据里一切正常，
+ * 屏幕上却看不出来焦点在哪 —— 没有报错、没有 console，玩家只是"不知道选的是谁"。
+ *
+ * 普查（改前）实测：焦点环规则只认 `.panel-box button` 与 `.settings-box input`，
+ * 于是日志抽屉（`#journal-panel`，八个页签是 `innerHTML` 动态建的）、升级面板
+ * （`#upgrade-panel`）、对话框（`#dialog-overlay`）、世界地图（`#world-map-panel`）
+ * 四处的按钮全都**键盘走得进去、却看不见落在哪**。前三格还都是 `OVERLAY_LAYERS`
+ * 里登记了 `nav` 的宿主 —— 也就是说切片11 特意把焦点送进去的地方，恰好是最看不见的。
+ *
+ * 所以这里不按容器类点名（点名就是再抄一份"哪个面板套了哪个类"的账，迟早漂），
+ * 而是**按标签**断言：天生可聚焦的标签一个不漏，外加 `[tabindex]` 兜住将来自造的聚焦格。
+ */
+describe('焦点环：落焦的那一格必须肉眼可见（W-D6 切片9）', () => {
+  const CSS = readFileSync(join(process.cwd(), 'src/style.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const SHELL = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+  /** 天生可聚焦的标签。漏一个，那一处的焦点就看不见 —— 且没有任何别处会报错 */
+  const FOCUSABLE_TAGS = ['button', 'input', 'select', 'textarea', 'a'];
+
+  /** 所有真的写了 `outline` 的 `:focus` 规则（先剥注释，否则注释里提一句 `:focus` 也算一条） */
+  const focusOutlineRules = (css) => [...css.matchAll(/([^{}]*:focus[^{}]*)\{([^}]*)\}/g)]
+    .map((m) => ({ selectors: m[1].split(',').map((s) => s.trim()).filter(Boolean), body: m[2] }))
+    .filter((r) => /outline\s*:/.test(r.body));
+
+  it('焦点环只有一条，且按标签覆盖全部天生可聚焦的元素', () => {
+    const rules = focusOutlineRules(CSS);
+    expect(rules, '写了 outline 的 `:focus` 规则不是恰好一条').toHaveLength(1);
+    for (const tag of FOCUSABLE_TAGS) {
+      expect(rules[0].selectors, `${tag}:focus 没有焦点环 —— 键盘玩家看不见焦点落在哪`).toContain(`${tag}:focus`);
+    }
+    expect(rules[0].selectors, '自造聚焦格（tabindex）没有焦点环').toContain('[tabindex]:focus');
+  });
+
+  it('没有任何一处把焦点环关掉（outline:none 在这一片是死罪）', () => {
+    expect(/outline\s*:\s*none/.test(CSS), '样式表里出现了 outline:none').toBe(false);
+    expect(/outline\s*:\s*0(?![.\d])/.test(CSS), '样式表里出现了 outline:0').toBe(false);
+  });
+
+  it('壳页里出现的可聚焦标签，全都在那条规则的覆盖清单里', () => {
+    const 覆盖 = new Set(focusOutlineRules(CSS)[0].selectors);
+    const 出现 = FOCUSABLE_TAGS.filter((tag) => new RegExp(`<${tag}[\\s>/]`, 'i').test(SHELL));
+    expect(出现.sort(), '壳页里一个可聚焦元素都没有：这条扫描是空跑').not.toEqual([]);
+    for (const tag of 出现) {
+      expect(覆盖, `壳页里用了 <${tag}>，但它没有焦点环`).toContain(`${tag}:focus`);
+    }
+  });
+
+  it('JS 动态建出来的可聚焦元素同样被覆盖（日志页签、掉落提示都是这么来的）', () => {
+    const 覆盖 = new Set(focusOutlineRules(CSS)[0].selectors);
+    const 出现 = FOCUSABLE_TAGS.filter((tag) => new RegExp(
+      `createElement\\(\\s*['"` + '`' + `]${tag}['"` + '`' + `]\\s*\\)`, 'i',
+    ).test(FILES.map((f) => f.source).join('\n')));
+    for (const tag of 出现) {
+      expect(覆盖, `源码里 createElement('${tag}')，但它没有焦点环`).toContain(`${tag}:focus`);
+    }
+  });
+
+  it('这条扫描咬得住：把规则收窄回"只认 .panel-box 的按钮"，立刻红（防空跑门禁）', () => {
+    const 收窄 = CSS.replace('button:focus,', '.panel-box button:focus,');
+    expect(收窄, '锚点没命中：焦点环那条规则换了写法').not.toBe(CSS);
+    const rules = focusOutlineRules(收窄);
+    expect(rules).toHaveLength(1);
+    expect(rules[0].selectors).not.toContain('button:focus');
+    expect(rules[0].selectors).toContain('.panel-box button:focus');
+  });
+});
