@@ -35,7 +35,15 @@ beforeAll(() => {
   globalThis.document = {
     createElement: () => ({ click() {}, set href(v) {}, get href() { return ''; } }),
   };
-  globalThis.URL = { createObjectURL: () => 'blob:x', revokeObjectURL() {} };
+  // `URL` **是构造器**，只许给它补两个静态方法，不许换成一个普通对象。
+  // 换掉的后果与调用点毫无关系：同一进程里任何 `x instanceof URL` 的读者当场抛
+  // （本仓库实测：沙箱 fs shim 的 `readFileSync` 直接崩，本文件那条源码门禁从此红）。
+  // 子类写法两件事都保住 —— 有 `createObjectURL`，`instanceof URL` 也仍然成立。
+  class StubURL extends globalThis.URL {
+    static createObjectURL() { return 'blob:x'; }
+    static revokeObjectURL() {}
+  }
+  globalThis.URL = StubURL;
   globalThis.Blob = class {};
 });
 

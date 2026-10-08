@@ -674,7 +674,12 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
       let 写下 = '';
       try {
         globalThis.Blob = class { constructor(parts) { 写下 = parts.join(''); } };
-        globalThis.URL = { createObjectURL: () => 'blob:stub', revokeObjectURL: () => {} };
+        // `URL` 是构造器：换成普通对象会让同一进程里所有 `instanceof URL` 的读者当场抛
+        // （门禁见 `tests/global-stub-hygiene.test.js`）。子类写法保住 `instanceof`。
+        globalThis.URL = class extends 原URL {
+          static createObjectURL() { return 'blob:stub'; }
+          static revokeObjectURL() {}
+        };
         editor.exportLayout();
       } finally {
         globalThis.Blob = 原Blob;
