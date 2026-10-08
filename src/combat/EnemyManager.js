@@ -149,14 +149,22 @@ export class EnemyManager {
     if (!this._pendingSummons.length) return;
     const r = SUMMON.ringRadius;
     for (const q of this._pendingSummons) {
+      // 仆从按**召唤者**的成长档位长（W-E1 切片4）：它是召唤者强度的回响，不是另一块
+      // 独立调过的数值。档位读召唤者身上那一个数（`spawnAt` 出生那一刻定下的），不按坐标
+      // 反推 —— 副本里反推只会得到 0 档。召唤者全是走 `spawnAt` 出来的普通敌人
+      // （`ENEMY_MOVE_SETS` 里带召唤招的只有 elite 与 stalker，Boss 不在此列），
+      // 所以 `?? 0` 只是"哪条路漏记档位就当没成长"的兜底，不是常态。
+      const growth = growthAt(q.owner.growthStage ?? 0);
       const e = this.spawn({
         name: SUMMON.name,
         type: q.type,
         x: q.owner.position.x + Math.sin(q.angle) * r,
         z: q.owner.position.z + Math.cos(q.angle) * r,
-        hp: SUMMON.hp,
+        hp: Math.round(SUMMON.hp * growth.hp),
+        // posture 刻意不乘：硬直抗性跟着血量缩会把"更脆"变成"更容易被打断两次"
+        // （与 spawnAt 对名册 posture 的同一条口径，切片3 立下的）
         posture: SUMMON.posture,
-        damage: SUMMON.damage,
+        damage: Math.round(SUMMON.damage * growth.damage),
         speed: SUMMON.speed,
         respawn: false,
         isSummon: true,
@@ -274,6 +282,10 @@ export class EnemyManager {
    * 显式递 `extra.growthStage`（它们的坐标在 (5000, …) 的独立空间里，反推不出区域）。
    * 最终血量 = 名册 hp × difficulty.enemyHp × growth.hp，两个乘子都是正有限数，
    * 乘法可交换 —— 语义各占一边：难度是玩家选的，成长是地方给的。
+   *
+   * **仆从也走这条曲线**（W-E1 切片4）：`_drainSummons` 按召唤者身上记下的档位缩放
+   * `SUMMON.hp` / `SUMMON.damage`（`posture` 仍不乘）。档位记在敌人身上而不是按坐标
+   * 反推，是因为副本的出生点在 `(5000, …)` 的独立坐标空间里 —— 反推只会得到 0 档。
    */
   spawnAt(type, x, z, extra = {}) {
     const roster = enemyRosterOf(type);
@@ -281,13 +293,18 @@ export class EnemyManager {
     const { growthStage, ...rest } = extra;
     const stage = growthStage ?? zoneGrowthStage(zoneIdAt({ x, z }, this.world?.zones));
     const growth = growthAt(stage);
-    return this.spawn({
+    const enemy = this.spawn({
       ...roster,
       hp: Math.round(roster.hp * difficultyMultiplier('enemyHp') * growth.hp),
       // damage 是可缺的（`dummy` 没有）：缺格不缩放，交给 Enemy 构造器的 `?? 12`
       ...(roster.damage == null ? {} : { damage: Math.round(roster.damage * growth.damage) }),
       type, x, z, ...rest,
     });
+    // 档位记在敌人身上（W-E1 切片4）：仆从按**召唤者**的档位长，而副本里的召唤者
+    // 按坐标反推只会得到 0 档（坐标在 (5000, …) 的独立空间里）—— 出生那一刻定下，
+    // 之后谁都不必再反推一次。`growthAt` 仍只在 spawnAt 与本文件里被读（门禁盯着）。
+    enemy.growthStage = stage;
+    return enemy;
   }
 
   spawnDefaults() {

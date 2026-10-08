@@ -1,7 +1,7 @@
 /**
  * 敌人成长曲线的门禁（W-E1 切片3）。
  *
- * 六层，每层各管一件事：
+ * 七层，每层各管一件事：
  *
  * 1. **表不变式**：档位数 == ZONE_ORDER 长度、0 档恒等、逐档单调、逐格有限正数。
  *    四条各配一条反向（喂坏表），证明 `checkEnemyGrowth` 真的会报。
@@ -12,9 +12,11 @@
  * 4. **三个咽喉各自真的生效**：世界出生按区域取档（真 zoneIdAt 路径）、
  *    副本出生按显式 growthStage 取档、两档读数逐档递增。
  * 5. **零变更与不泄漏**：0 档与名册逐格相同；`damage` 缺格的类别不产 NaN；
- *    `growthStage` 是给咽喉的指令，不流进敌人的 config。
+ *    指令不流进敌人的 config，但档位要记在敌人身上（仆从据此长，见第 7 层）。
  * 6. **每一格乘子都有人读**：扫 `src/`，`growthAt` 的读者覆盖 `GROWTH_KEYS` 两格 ——
  *    加一格没人读 = 表里多一个假旋钮（与难度那张表同一条纪律）。
+ * 7. **仆从也走这条曲线**（切片4）：`_drainSummons` 按召唤者身上记下的档位缩放 `SUMMON`，
+ *    0 档零变更、`posture` 不乘、档位不按坐标反推（副本里反推只会得到 0 档）。
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -27,6 +29,7 @@ import { ZONE_IDS, ZONE_ORDER } from '../src/content/ZoneIdentity.js';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
 import { CONTENT_TABLES, checkContent } from '../src/content/registry.js';
 import { ENEMY_ROSTER } from '../src/content/enemies.js';
+import { SUMMON, ENEMY_MOVE_SETS } from '../src/content/tuning.js';
 import { EnemyManager } from '../src/combat/EnemyManager.js';
 
 const ROOT = process.cwd();
@@ -197,9 +200,13 @@ describe('⑤ 零变更与不泄漏', () => {
     expect(Number.isFinite(cfg.hp)).toBe(true);
   });
 
-  it('`growthStage` 是给咽喉的指令，不流进敌人的 config', () => {
-    const cfg = 出生(null, 'soldier', 0, 0, { growthStage: 3 });
-    expect('growthStage' in cfg).toBe(false);
+  it('`growthStage` 是给咽喉的指令：不流进 spawn config，但档位要记在敌人身上', () => {
+    let handed = null;
+    const host = Object.create(EnemyManager.prototype);
+    host.spawn = (cfg) => { handed = cfg; return {}; };
+    const enemy = EnemyManager.prototype.spawnAt.call(host, 'soldier', 0, 0, { growthStage: 3 });
+    expect('growthStage' in handed, '指令不该流进 spawn config').toBe(false);
+    expect(enemy.growthStage, '档位记在敌人身上，仆从据此长（切片4）').toBe(3);
   });
 
   it('成长与难度两个乘子相乘，与先后无关（brutal × 6 档）', () => {
@@ -239,5 +246,70 @@ describe('⑥ 每一格乘子都有人读（扫 src/ 逐个点名）', () => {
       if (/growthAt\(/.test(text)) 读者.push(file.slice(srcDir.length + 1).replace(/\\/g, '/'));
     }
     expect(读者, 'growthAt 出现了第二个读者 —— 成长乘子有两条落地路径').toEqual([]);
+  });
+});
+
+describe('⑦ 仆从也走这条曲线（W-E1 切片4）', () => {
+  /** 假 spawn：收回 config，回一个 `_drainSummons` 够用的空壳（position / sense） */
+  const 假管理器 = () => {
+    const made = [];
+    const host = Object.create(EnemyManager.prototype);
+    host.spawn = (cfg) => {
+      made.push(cfg);
+      return { position: { x: cfg.x, z: cfg.z }, sense: { noteHostile() {} } };
+    };
+    return { host, made };
+  };
+
+  /** 放一只"档位 = ownerStage"的召唤者出去，看它召出来的仆从长什么样 */
+  const 仆从 = (ownerStage, type = 'soldier') => {
+    const { host, made } = 假管理器();
+    host._pendingSummons = [{ owner: { growthStage: ownerStage, position: { x: 10, z: 20 } }, type, angle: 0 }];
+    EnemyManager.prototype._drainSummons.call(host);
+    expect(host._pendingSummons, '排干之后队列要清空').toHaveLength(0);
+    return made[0];
+  };
+
+  it('仆从按召唤者的档位长：hp / damage 缩放，posture / speed 不动', () => {
+    const cfg = 仆从(6);
+    expect(cfg.hp).toBe(Math.round(SUMMON.hp * ENEMY_GROWTH[6].hp));
+    expect(cfg.damage).toBe(Math.round(SUMMON.damage * ENEMY_GROWTH[6].damage));
+    // posture 刻意不乘（与名册同一条口径）：硬直抗性跟着血量缩会把"更脆"变成"更容易被打断两次"
+    expect(cfg.posture).toBe(SUMMON.posture);
+    expect(cfg.speed).toBe(SUMMON.speed);
+    expect(cfg.name).toBe(SUMMON.name);
+    expect(cfg.isSummon).toBe(true);
+  });
+
+  it('0 档零变更：出发区里召出来的仆从与 SUMMON 常量逐格相同', () => {
+    const cfg = 仆从(0);
+    expect(cfg.hp).toBe(SUMMON.hp);
+    expect(cfg.damage).toBe(SUMMON.damage);
+  });
+
+  it('同一个坐标、两个召唤者两档强度：档位跟着召唤者走，不跟着坐标', () => {
+    expect(仆从(1).hp).not.toBe(仆从(5).hp);
+    expect(仆从(1).damage).not.toBe(仆从(5).damage);
+  });
+
+  it('真链路：elite 在 6 档区出生 → 它召的仆从按 6 档长（中间不经过坐标反推）', () => {
+    const { host, made } = 假管理器();
+    host.world = 假世界();
+    const owner = EnemyManager.prototype.spawnAt.call(host, 'elite', -180, -160);   // radiant → 6 档
+    host._pendingSummons = [{ owner, type: 'soldier', angle: 0 }];
+    EnemyManager.prototype._drainSummons.call(host);
+    expect(made).toHaveLength(2);                     // 先有召唤者，后有仆从
+    expect(made[1].hp).toBe(Math.round(SUMMON.hp * ENEMY_GROWTH[6].hp));
+    expect(made[1].damage).toBe(Math.round(SUMMON.damage * ENEMY_GROWTH[6].damage));
+  });
+
+  it('能召唤的只有名册里那两类（elite / stalker），且档位只有一处记账', () => {
+    const summoners = Object.entries(ENEMY_MOVE_SETS)
+      .filter(([, moves]) => moves.includes('summon') || moves.includes('howl'))
+      .map(([type]) => type).sort();
+    expect(summoners, '新加一类会召唤的敌人时，这里要点名').toEqual(['elite', 'stalker']);
+    const mgr = readFileSync(join(ROOT, 'src/combat/EnemyManager.js'), 'utf8');
+    // 档位只写在 spawnAt 一处：第二处记账 = "仆从按谁的档位长"有两个答案
+    expect((mgr.match(/\.growthStage = /g) || []).length).toBe(1);
   });
 });
