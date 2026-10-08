@@ -453,17 +453,19 @@ describe('Game：上下文判定与换表都只有一条路', () => {
     return g;
   };
 
-  it('收焦点的那五层开着 = 界面态；地图 / 对话 / 自动演示不算', () => {
+  it('收焦点的那几层开着 = 界面态；地图 / 自动演示不算', () => {
     const probe = (over) => Game.prototype.padUiMode.call(gameWith(over));
     // 判据是"有没有一层收了焦点"（`topNavLayer`），名单从层表现取 —— 测试里不抄第二份
     const navs = OVERLAY_LAYERS.filter((l) => l.nav).map((l) => l.state);
-    expect(navs.sort()).toEqual(['fastTravelOpen', 'helpOpen', 'journalOpen',
+    // 切片10 给对话框也认领了宿主（选项是玩法决策），它从此也是界面态；
+    // 那一版没同步这里，于是这条期望从切片10 起就是红的（HEAD 上即红）。
+    expect(navs.sort()).toEqual(['dialogOpen', 'fastTravelOpen', 'helpOpen', 'journalOpen',
       'pauseMenuOpen', 'settingsOpen', 'upgradeOpen'].sort());
     for (const k of navs) {
       expect(probe({ [k]: true }), k).toBe(true);
     }
     // 升级面板今天在里面（切片24 / B55）：它收焦点，所以那九格手柄走得到
-    for (const k of ['worldMapOpen', 'dialogOpen', 'autoPlayActive']) {
+    for (const k of ['worldMapOpen', 'autoPlayActive']) {
       expect(probe({ [k]: true }), k).toBe(false);   // 那些面板今天不收焦点 → 手柄仍归战斗
     }
     expect(probe({})).toBe(false);
@@ -471,7 +473,10 @@ describe('Game：上下文判定与换表都只有一条路', () => {
 
   it('判据与"↑↓ 走进哪个面板"同源：都是 `topNavLayer`，别处不许另判一次', () => {
     const game = sourceOf('core/Game.js');
-    expect((game.match(/topNavLayer\(/g) || []).length, '第三处上下文判定（W-D1 指针锁释放）').toBe(3);
+    // 四处，全是同一个函数：手柄界面态（padUiMode）、指针锁释放、↑↓←→ 落点（panelNav）、
+    // 以及模态开着时那一指 Tab 归谁（trapFocusKey，切片14）。数字钉的是"没有第五种问法"——
+    // 哪一边加了"自己看面板布尔"的判断，这条就红。
+    expect((game.match(/topNavLayer\(/g) || []).length, '第五处上下文判定').toBe(4);
     // 用面板布尔直接判"是不是界面态"就是抄了第二份判据
     expect(game).not.toMatch(/padUi\s*=\s*.*(pauseMenu|settingsPanel|helpManual)\.open/);
   });

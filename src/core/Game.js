@@ -137,7 +137,7 @@ import { setHintPadOutlets } from '../content/keyHints.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
 import { InputDevice } from '../engine/InputDevice.js';
 import { topNavLayer } from '../ui/OverlayStack.js';
-import { moveFocusWithin, activateFocused, adjustFocused } from '../ui/FocusNav.js';
+import { moveFocusWithin, activateFocused, adjustFocused, trapTabFocus } from '../ui/FocusNav.js';
 
 /**
  * 四个方向各自把地图光标推多少格（切片13）。
@@ -780,6 +780,24 @@ export class Game {
     return adjustFocused(dir === 'left' ? -1 : 1);
   }
 
+  /**
+   * 焦点陷阱（切片14）：模态开着时，浏览器那一指 Tab 归这里接。
+   *
+   * 病症见 `ui/FocusNav.js` 的 `trapTabFocus`：模态开着时 Tab 被 `overlayBlocksHotkeys` 拦下
+   * 不派发，于是 `preventDefault` 也不做，浏览器**自己**就把焦点带到模态背后的按钮上
+   * （暂停菜单压着设置面板时，那一层已被 CSS 让位成 `opacity: 0`，鼠标点不着、Tab 走得进）。
+   *
+   * 分工与 `panelNav` 一样窄：这里只问"该不该拦、落在哪个宿主"（层表，`topNavLayer`），
+   * 事件是不是浏览器那一指、怎么走格，都在 `FocusNav` 那一侧。判据因此仍只有一处 ——
+   * 顶层那一层登记了 `nav` 宿主，就在它那份清单里环绕；没有宿主（世界地图 / 自动演示 /
+   * 过场）不拦，浏览器照旧。
+   *
+   * @returns {boolean} `true` = 这一指被接住了，调用方（keydown 监听）据此 `preventDefault()`
+   */
+  trapFocusKey(e) {
+    return trapTabFocus(e, topNavLayer(this.overlayState()));
+  }
+
   /** Escape 那条级联的顺序就是产品决策，本体收在 `OVERLAY_LAYERS`（切片3 抽纯、切片10 成表） */
   runEscape() {
     switch (escapeRoute({
@@ -844,6 +862,8 @@ export class Game {
       this.inputDevice.note('keyboard');   // 顺手记一侧：不新增监听器（那会有第二个"这一下算谁"）
       // 事件这一刻只做"要不要挡浏览器默认行为"；动作派发交给 `hotkeys.poll()`（见 `ui/HotkeyRouter.js`）
       if (this.hotkeys.onKeydown(e.code)) e.preventDefault();
+      // 路由器没接的这一指，还可能是浏览器自己的"Tab 走到下一个可聚焦元素"（切片14 焦点陷阱）
+      else if (this.trapFocusKey(e)) e.preventDefault();
     });
     window.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
 

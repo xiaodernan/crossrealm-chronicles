@@ -31,6 +31,8 @@
  * `select` 在清单里（W-D3 切片3）：暂停菜单的存档槽与设置面板的语言选择此前是
  * 键盘与手柄都走不进的死格 —— 面板认领了宿主，宿主里每一格可聚焦元素就都该走得到。
  */
+import { BROWSER_FOCUS_CODE } from '../content/hotkeys.js';
+
 const NAV_SELECTOR = 'button:not([disabled]):not(.hidden),'
   + 'input:not([disabled]):not(.hidden):not([type=file]):not([type=hidden]),'
   + 'select:not([disabled]):not(.hidden)';
@@ -72,6 +74,41 @@ export function moveFocusWithin(host, delta, doc = globalThis.document) {
   if (!target) return false;
   target.focus();
   return true;
+}
+
+/**
+ * 焦点陷阱（W-D6 切片14）：模态开着时，把浏览器那一指 Tab 接过来。
+ *
+ * ## 病症
+ *
+ * 模态开着时 Tab 不在热键表里派发（它出厂绑的是 `zonePanel`，被
+ * `overlayBlocksHotkeys` 拦下），于是 `preventDefault` 也不做 —— 浏览器**自己**那一指
+ * "走到下一个可聚焦元素"就此漏了过去。后果是焦点走出模态：暂停菜单压着设置面板时，
+ * 设置面板已被 CSS 让位成 `opacity: 0`（鼠标点不着，`style.css` 那条 `body:has(...)`），
+ * 但 Tab 走得进去；更早一档的病症在对话框 —— 焦点会一路落到 `#game-guide` /
+ * `#autoplay-fab` 上。玩家按一下 Tab，看得见的模态还开着，焦点已经在看不见的地方，
+ * 再按 Enter 触发的是背后的东西。
+ *
+ * ## 字面量为什么住在 `content/hotkeys.js`
+ *
+ * "浏览器里哪个键负责移焦"既不是层表的事，也不是热键表的事，但它**确实是一枚键码** ——
+ * 而全仓的规矩是键码字面量只出现在 `content/` 那几张表里（`tests/keybind-behaviour.test.js`
+ * 那条全仓扫描：任何 `code === '键码'` 都是第二个真源）。所以那一指是哪一枚，问
+ * `BROWSER_FOCUS_CODE`，本文件一个键码都不写。
+ *
+ * 分工因此是三层：`Game.trapFocusKey` 问**该不该拦、落在哪个宿主**（层表，与 `panelNav`
+ * 同一条路）；本文件问**是不是浏览器那一指**（问表）与**怎么走格**（`moveFocusWithin`）。
+ *
+ * 没有宿主（`layer` 为 null：野外 / 世界地图 / 自动演示 / 过场）一律不拦 ——
+ * 与"方向键在野外是死键"同一条口径：层表说不清的事，这里不替它做主。
+ *
+ * @param {KeyboardEvent} e 只用 `code` 与 `shiftKey`
+ * @param {object|null} layer 顶层那一层（`topNavLayer` 的结论，`nav` 是宿主 id）
+ * @returns {boolean} `true` = 这一指被接住了，调用方据此 `preventDefault()`
+ */
+export function trapTabFocus(e, layer, doc = globalThis.document) {
+  if (!layer || e.code !== BROWSER_FOCUS_CODE) return false;
+  return moveFocusWithin(doc.getElementById(layer.nav), e.shiftKey ? -1 : 1);
 }
 
 /** 面板刚打开：焦点落在清单第一格，玩家立刻有"现在选中的是谁"可看（没有可落的东西返回 false） */

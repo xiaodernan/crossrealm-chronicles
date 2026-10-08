@@ -170,6 +170,16 @@ export function isNavCode(code) {
   return false;
 }
 
+/**
+ * 浏览器那一指"移到下一个可聚焦元素"落在哪枚键上（W-D6 切片14 焦点陷阱）。
+ *
+ * 这不是一条可改绑的绑定，而是**浏览器自己的行为**：Tab 在 DOM 里的本职就是移焦，
+ * 与我们把哪枚键绑给 `zonePanel` 无关（玩家把那一条改到 `KeyY` 之后，Tab 仍然是 Tab）。
+ * 模态开着时这一指要被接管（否则焦点会漏到模态背后的按钮上），接管方就得知道它是哪一枚 ——
+ * 字面量因此住在**键码的单一真源**这张表里，而不是住在 `ui/FocusNav.js`：
+ * 那儿多一个键码字面量，就是第二个真源（`tests/keybind-behaviour.test.js` 那条全仓扫描）。
+ */
+export const BROWSER_FOCUS_CODE = 'Tab';
 /** 动作名要有中文名：缺一行，设置面板上就是一格空白 */
 export function assertHotkeyLabels(labels = UI_HOTKEY_LABELS, table = UI_HOTKEYS) {
   for (const e of table) {
