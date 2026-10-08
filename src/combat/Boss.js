@@ -39,6 +39,12 @@ export class Boss extends Enemy {
      */
     this.arenaScript = arenaScriptFor(this.bossId);
     this._arenaCd = this.arenaScript.map(() => 0);
+    /**
+     * 最近一次已知的玩家位置（W-A6 切片8）。转阶段发生在 `takeDamage` 里，
+     * 那条路上没有 playerPos 参数 —— 入场招要"对着玩家铺"只能回头问这里。
+     * 存引用不拷贝：位置对象由玩家原地改写，读到的永远是最新值，热路径也零分配。
+     */
+    this._lastPlayerPos = null;
     this.phaseTriggered = { p2: false, p3: false };
     /** 状态机（W-B8 切片1） */
     this.sm = new BossStateMachine(this);
@@ -214,6 +220,10 @@ export class Boss extends Enemy {
     });
     this.state = 'slam';
     this.stateTimer = 0;
+    // 砸地接管这一拍：挥砍前摇作废（近战路径起手时本来就没有圈激活，这行是幂等的）；
+    // 入场砸地可能打断 windup，而挥砍圈的清理只在 strike 分支里 —— 那条路径不会再
+    // 走到，不清就是一圈永久挂着的假预警。
+    this.clearTelegraph();
     return true;
   }
 
@@ -265,6 +275,43 @@ export class Boss extends Enemy {
       this._arenaCd[i] = Math.max(0, this._arenaCd[i] - dt);
       if (this._arenaCd[i] > 0 || this.distanceTo(playerPos) >= e.range) continue;
       if (this.castArenaMove(e, playerPos)) this._arenaCd[i] = e.cooldown;
+    }
+  }
+
+  /**
+   * 转阶段入场招（W-A6 切片8）：转进某一档的那一帧，先把这一档的招牌圈铺下去。
+   *
+   * 这是 `BossStateMachine.onEnterPhase` 钩子的第一个消费者。它排在 `boss-phase`
+   * 事件**之前**（`transitionTo` 的次序：离开钩子 → 改档 → 进入钩子 → 派事件），
+   * 于是横幅/闪白落下的那一帧圈已经铺在玩家脚下 —— 演出和圈同帧见证，而不是
+   * "先亮个标题、圈下一帧才出现"。
+   *
+   * 与 `updateArenaCasts` 的闸门差异只有两处：
+   * - **绕反应闸**：不看 `chance` / `rate` / opportunity 冷却 —— 标记的语义就是
+   *   "这一档开场先来一招"，掷骰子会把入场变成"多半不亮"；`opportunity` 起手
+   *   成功后照落 `_arenaCd`，入场之后的常规节奏从这一刻起算。
+   * - **保留 `opportunity` 的 range 空间闸**：入场不是无条件铺 —— 引力化身那套
+   *   "贴身连吃两份、退开只吃弹幕"的距离博弈不因入场而破（井刻意没标 entry）。
+   *
+   * 两道自己的守卫：
+   * - `_lastPlayerPos` 为空（一帧都没跑过）就整组不点火：生产上转阶段必然发生在
+   *   开战之后；而"生成后、首帧前就转档"是用例与工具链的写法，不该顺带放出
+   *   一发没人躲的圈；
+   * - 已死不放：致死一击跨过门槛时状态机仍会转档（既有行为，本切片不动它），
+   *   但圈绝不能从坟里放出来 —— `die()` 刚把没落下的圈全部撤走（`cancelFor`），
+   *   这里再补一发就正好是那条注释要防的"死后从坟里砸玩家一下"。
+   */
+  onPhaseEnter(phase) {
+    if (!this.hazards || !this.alive) return;
+    const p = this._lastPlayerPos;
+    if (!p) return;
+    const script = this.arenaScript;
+    for (let i = 0; i < script.length; i++) {
+      const e = script[i];
+      if (e.entry !== true || e.phase !== phase) continue;
+      if (e.trigger === 'opportunity' && this.distanceTo(p) >= e.range) continue;
+      if (!this.castArenaMove(e, p)) continue;
+      if (e.trigger === 'opportunity') this._arenaCd[i] = e.cooldown;
     }
   }
 
@@ -337,6 +384,12 @@ export class Boss extends Enemy {
   update(dt, playerPos, playerRef) {
     if (!this.alive) return;
 
+    // 转阶段发生在 `takeDamage` 那条路上，而那条路没有 playerPos 参数 ——
+    // 入场招要"对着玩家铺"只能回头问这里（W-A6 切片8）。这里不加"playerPos 为空就跳过"
+    // 的守卫：本方法往下 `distanceTo(playerPos)` 无条件读它，那个参数在这条链上是**必需**的，
+    // 为它补一条只有测试能走到的分支，只会让门禁去证明一段不存在的路。
+    this._lastPlayerPos = playerPos;
+
     // 场地招排在 slam 早退之前：砸地的那 1.2 秒里，别处的圈照样该落下
     this.updateArenaCasts(dt, playerPos);
 
@@ -363,6 +416,11 @@ export class Boss extends Enemy {
 
     // 阶段切换检查（W-B8 切片1：状态机驱动）
     this.sm.checkPhaseTransitions();
+
+    // 入场砸地（W-A6 切片8）就发生在上面那一行里：它把 state 拨进 'slam'，
+    // 本帧剩下的决策（仇恨早退 / 出刀）都会把这笔账改写掉 —— 那记圈就永远等不到
+    // `updateSlam` 来收（`slamHazard` 卡住，后续砸地全被它挡掉）。
+    if (this.state === 'slam') return;
 
     const dist = this.distanceTo(playerPos);
     if (dist > this.aggroRange) {

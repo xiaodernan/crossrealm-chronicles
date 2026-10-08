@@ -32,43 +32,61 @@ export const ARENA_MOVES = {
 export const ARENA_TRIGGERS = ['melee', 'timed', 'opportunity'];
 
 /**
+ * `entry` 是与三条闸门正交的一枚**标记**（W-A6 切片8，不是第四种闸门）：
+ * 「本阶段的招牌圈在**转进这一阶段的那一帧**先亮一次」—— 与 `BossPhaseDirector`
+ * 的横幅/闪白/粒子同帧（`boss-phase` 事件派发前圈已铺好），玩家看到的不是"换了条血条"。
+ *
+ * 入场只点火一次、**绕过反应闸**（`chance` / `rate` / opportunity 冷却），但**保留**
+ * `opportunity` 的 `range` 空间闸 —— 弹幕/域以玩家此刻位置为心，他站得够远就不铺，
+ * 引力化身那张表的距离博弈不因入场而破。三层约束见 `assertArenaScript`：
+ * 布尔、`phase >= 2`（没有"转进一阶段"这一帧）、同一阶段至多一枚（一脚踩下去）。
+ */
+
+/**
  * 按 `bossId` 声明。数值口径：
  * - `chance 0.35` / `rate 0.08` / `rate 0.06` 与 `cooldown 7 / range 24` 都是**照抄切片1/2 的现值**，
  *   本切片不改手感，只把散在四处的门槛搬进一张表。
  * - 引力化身与混沌领主的弹幕是新增内容（它们从此也读场地招），各给一份 `tint` 保住自己的配色，
  *   且都放在第三阶段 —— 前中期先把"贴身换刀"的压力给足，铺场留到玩家已经会躲砸地之后。
+ * - `entry: true` 的落点（切片8）：**每阶段至多一枚招牌圈** —— 二阶段统一是砸地或弹幕，
+ *   三阶段是各家最响的那一招（弹幕/时停域）；引力化身的井刻意不标（理由见它那条注释）。
  */
 export const BOSS_ARENA_SCRIPTS = {
   default: [
-    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35 },
+    // 兜底也算"有戏"：转二阶段那一帧先踩一脚砸地（与点名 Boss 同一套入场语义）
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35, entry: true },
   ],
   'shadow-warden': [
-    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35 },
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35, entry: true },
   ],
   'archmagus': [
     { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35 },
-    { move: 'barrage', phase: 2, trigger: 'opportunity', cooldown: 7, range: 24 },
+    // 入场点的是弹幕：大奥术师的"变强"就是这片圈雨，`range 24` 让它当帧追着玩家亮
+    { move: 'barrage', phase: 2, trigger: 'opportunity', cooldown: 7, range: 24, entry: true },
   ],
   'singularity-herald': [
-    { move: 'slam', phase: 2, trigger: 'timed', rate: 0.08 },
-    { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 9, range: 22, tint: 0x4488ff },
+    { move: 'slam', phase: 2, trigger: 'timed', rate: 0.08, entry: true },
+    { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 9, range: 22, tint: 0x4488ff, entry: true },
     // 引力井是它的招牌：第三阶段起 12 秒一口，井口就开在你此刻站的地方。
-    // `range` 刻意比弹幕（22 米）近一档：跨阶段那一帧两条 opportunity 都会当帧起念，
-    // 15 米内是"贴脸连吃两口井"，稍远些只落弹幕 —— 玩家退开的位置决定挨哪一份。
+    // `range` 刻意比弹幕（22 米）近一档：转阶段那一帧弹幕作为入场先亮，井的冷却没走，
+    // 紧跟着的下一帧里 15 米内就是"贴脸连吃两份"，稍远些只落弹幕 ——
+    // 玩家退开的位置决定挨哪一份。（井**刻意不列入场**：标了它，这份距离博弈
+    // 就会在转阶段那一帧被无条件破掉一半。）
     { move: 'well', phase: 3, trigger: 'opportunity', cooldown: 12, range: 15 },
   ],
   'void-chronarch': [
-    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35 },
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35, entry: true },
     // 时停域：第三阶段起 14 秒一片，开在玩家此刻脚下。它自己那记**无场**的时停
     // （`VoidBoss.timeStopActive`，22 米内 4 秒一循环）留在那儿不动 —— 切片3 就说过
     // 非危险区的自走技归 W-B1 那张统一施法表，本切片只把"有场的那一份"补上。
     // 两条同时在身上时 `applyTimeScale` 取最小值：站在场里吃更狠的 0.3，不站吃 0.35。
-    { move: 'freeze', phase: 3, trigger: 'opportunity', cooldown: 14, range: 17 },
+    { move: 'freeze', phase: 3, trigger: 'opportunity', cooldown: 14, range: 17, entry: true },
   ],
   'chaos-overlord': [
-    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.3 },
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.3, entry: true },
     { move: 'slam', phase: 3, trigger: 'timed', rate: 0.06 },
-    { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 8, range: 20, tint: 0xff2244 },
+    // 入场点的是红色弹幕：第三阶段开场先来一片红的
+    { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 8, range: 20, tint: 0xff2244, entry: true },
   ],
 };
 
@@ -79,6 +97,8 @@ export const BOSS_ARENA_SCRIPTS = {
 export function assertArenaScript(table = BOSS_ARENA_SCRIPTS) {
   for (const [bossId, script] of Object.entries(table)) {
     if (!Array.isArray(script)) throw new Error(`场地脚本 ${bossId} 不是数组`);
+    /** 本 Boss 已标过入场的阶段（切片8：同一阶段至多一枚） */
+    const entryPhases = new Set();
     script.forEach((e, i) => {
       const at = `${bossId}[${i}]`;
       const specName = ARENA_MOVES[e.move];
@@ -89,6 +109,18 @@ export function assertArenaScript(table = BOSS_ARENA_SCRIPTS) {
       }
       if (!Number.isInteger(e.phase) || e.phase < 1 || e.phase > 3) {
         throw new Error(`${at} 的 phase 必须是 1~3 的整数（收到 ${e.phase}）`);
+      }
+      if (e.entry !== undefined && typeof e.entry !== 'boolean') {
+        throw new Error(`${at} 的 entry 必须是 true/false（收到 ${typeof e.entry}）`);
+      }
+      if (e.entry === true && e.phase < 2) {
+        throw new Error(`${at} 标了 entry 但 phase=${e.phase}：没有"转进一阶段"这一帧，入场招永远不会点火`);
+      }
+      if (e.entry === true) {
+        if (entryPhases.has(e.phase)) {
+          throw new Error(`${at} 的 entry：第 ${e.phase} 阶段已经有一枚入场招了（转阶段那一帧只该有一脚踩下去）`);
+        }
+        entryPhases.add(e.phase);
       }
       if (e.trigger === 'melee' && !(e.chance > 0 && e.chance <= 1)) {
         throw new Error(`${at} 的 melee 闸门要有 0~1 之间的 chance`);

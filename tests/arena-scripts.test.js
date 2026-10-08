@@ -2,8 +2,9 @@
  * Boss 场地脚本表（W-A6 切片3）：把散在四个子类里的"什么时候铺场"收进一张表。
  *
  * 这一档要钉住的是**边界**而不是数值：
- * 1. 表要在加载期自证 —— 招式名拼错、闸门名拼错、`opportunity` 少写 `range`，
- *    都要在 import 那一刻抛错，而不是等到某场 Boss 战里"它怎么不铺场了"。
+ * 1. 表要在加载期自证 —— 招式名拼错、闸门名拼错、`opportunity` 少写 `range`、
+ *    `entry` 的三种坏形状（非布尔 / 一阶段 / 同阶段两枚），都要在 import 那一刻抛错，
+ *    而不是等到某场 Boss 战里"它怎么不铺场了"。
  * 2. `EnemyManager` 真正生成的每一个 bossId 都必须在表里点了名，漏一个就静默落 `default`。
  * 3. 三种闸门各自的行为要说得出：`melee` 抢一次挥击、`timed` 按秒期望、`opportunity` 看冷却与距离。
  * 4. `combat/` 里不许再长出手写的场地起手 —— 那正是本切片删掉的东西（静态门禁守着）。
@@ -69,6 +70,44 @@ describe('脚本表自证', () => {
     expect(() => assertArenaScript({ x: [{ ...base, phase: 2.5 }] })).toThrow(/phase/);
     expect(() => assertArenaScript({ x: [{ ...base, phase: 4 }] })).toThrow(/phase/);
     expect(() => assertArenaScript({ x: [{ ...base, phase: 1 }] })).not.toThrow();
+  });
+
+  it('entry 不是布尔 → 抛错（`entry: "yes"` 会被真值判断静默启用）', () => {
+    const base = { move: 'slam', phase: 2, trigger: 'melee', chance: 0.3 };
+    expect(() => assertArenaScript({ x: [{ ...base, entry: 'yes' }] })).toThrow(/entry/);
+    // 收下的一侧：false 与不写都合法（不写 = 不标）
+    expect(() => assertArenaScript({ x: [{ ...base, entry: false }] })).not.toThrow();
+    expect(() => assertArenaScript({ x: [{ ...base }] })).not.toThrow();
+  });
+
+  it('entry 标在一阶段 → 抛错（没有"转进一阶段"这一帧，永远点不着火）', () => {
+    const e = { move: 'slam', phase: 1, trigger: 'melee', chance: 0.3, entry: true };
+    expect(() => assertArenaScript({ x: [e] })).toThrow(/entry/);
+  });
+
+  it('同一阶段两枚 entry → 抛错；不同阶段各一枚 → 收下', () => {
+    const p2 = { move: 'slam', phase: 2, trigger: 'melee', chance: 0.3, entry: true };
+    const p3 = { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 7, range: 24, entry: true };
+    expect(() => assertArenaScript({ x: [p2, p3] })).not.toThrow();
+    expect(() => assertArenaScript({ x: [p2, { ...p3, phase: 2 }] })).toThrow(/entry/);
+  });
+
+  it('入场标记集钉死：九枚 entry 的落点（动它必须来这里改，不许悄悄漂）', () => {
+    const marks = Object.entries(BOSS_ARENA_SCRIPTS).flatMap(([id, script]) =>
+      script.flatMap((e, i) => (e.entry === true ? [`${id}[${i}]:${e.move}@p${e.phase}`] : [])));
+    expect(marks).toEqual([
+      'default[0]:slam@p2',
+      'shadow-warden[0]:slam@p2',
+      'archmagus[1]:barrage@p2',
+      'singularity-herald[0]:slam@p2',
+      'singularity-herald[1]:barrage@p3',
+      'void-chronarch[0]:slam@p2',
+      'void-chronarch[1]:freeze@p3',
+      'chaos-overlord[0]:slam@p2',
+      'chaos-overlord[2]:barrage@p3',
+    ]);
+    // 井刻意不列入场：标了它，转阶段那一帧会无条件破掉引力化身的距离博弈
+    expect(marks.some((m) => m.includes(':well@'))).toBe(false);
   });
 
   it('未登记的 bossId 走 default，而不是什么都不干', () => {
@@ -225,7 +264,7 @@ describe('手抄闸门不得回归（静态门禁）', () => {
 
   it('Boss.js 查表而不是各写各的：闸门字段一律从 entry 上读', () => {
     const src = code('combat/Boss.js');
-    for (const field of ['e.phase', 'e.chance', 'e.rate', 'e.cooldown', 'e.range']) {
+    for (const field of ['e.phase', 'e.chance', 'e.rate', 'e.cooldown', 'e.range', 'e.entry']) {
       expect(src, `Boss.js 里找不到 ${field}，闸门可能又写死了`).toMatch(new RegExp(field.replace('.', '\\.')));
     }
     expect(src).toMatch(/arenaScriptFor\(this\.bossId\)/);
