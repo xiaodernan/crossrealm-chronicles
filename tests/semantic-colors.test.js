@@ -14,7 +14,8 @@
  * ## 用例分七层
  * ① 表完整性（glyph / label 非空且 label 是给人看的词）；
  * ② **色盲档真的不一样**（每语义在每个非默认档下与默认档不同 —— 否则那个开关是空转）；
- * ③ **同档互异**（danger / warning / safe 在任何一档下都不许撞色）；
+ * ③ **同档互异**（`DISTINCT_IN_ANY_MODE` 那四个在任何一档下都不许撞色 ——
+ *    其中 `threat` 与 `danger` 同屏出现，撞了比没配色更糟）；
  * ④ 认不出就抛（未知语义 / 未知档位）；
  * ⑤ **消费方接线**：`GEAR_RARITY_DISPLAY` 的字样与色值与色板逐格相同，
  *    且默认档等于**迁移前的四个冻结值**（零视觉变更的对账）；
@@ -52,9 +53,9 @@ describe('语义色板（W-D6 切片1）', () => {
       }
     });
 
-    it('八个语义都在（战斗三件套 + 资源 + 稀有度四档）', () => {
+    it('十个语义都在（战斗三件套 + 资源 + Boss 血条 + 架势条 + 稀有度四档）', () => {
       expect(SEMANTIC_IDS).toEqual([
-        'danger', 'warning', 'safe', 'resource',
+        'danger', 'warning', 'safe', 'resource', 'threat', 'posture',
         'rarity-common', 'rarity-uncommon', 'rarity-rare', 'rarity-epic',
       ]);
     });
@@ -81,7 +82,7 @@ describe('语义色板（W-D6 切片1）', () => {
   });
 
   describe('③ 同档互异', () => {
-    it('danger / warning / safe 在任何一档下都不许撞色', () => {
+    it('DISTINCT_IN_ANY_MODE 那四个在任何一档下都不许撞色', () => {
       for (const mode of COLOR_MODES) {
         const seen = new Map();
         for (const id of DISTINCT_IN_ANY_MODE) {
@@ -123,7 +124,7 @@ describe('语义色板（W-D6 切片1）', () => {
       }
     });
 
-    it('八个语义在每一档下也互不相同（跨组撞色：治疗提示与良品光晕一个色）', () => {
+    it('十个语义在每一档下也互不相同（跨组撞色：治疗提示与良品光晕一个色）', () => {
       // ③ 上面几条只查两个子组内部（战斗三件套 / 稀有度四档），查不出跨组撞色。
       // 切片4 就撞了一回：`safe` 与 `rarity-uncommon` 在默认档同为 0x63d97a ——
       // 玩家看到一团绿，分不清是"治疗"还是"地上有件良品"。

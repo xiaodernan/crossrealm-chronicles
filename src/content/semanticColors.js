@@ -20,8 +20,15 @@
  * ## 默认档 = 现状，逐格同值
  * `default` 一列的值取自**改前在役的那些色**：稀有度四档对齐装备稀有度显示表的旧值，
  * 战斗三件套自切片4 起对齐 HUD 三条状态条的亮端（血条 `#cc4444` / 精力条 `#c9a962` /
- * 法力条 `#8866cc`，见 `ui/barTheme.js`）。所以接上消费者之后默认档**零视觉变更**。
+ * 法力条 `#8866cc`）；Boss 血条与架势条自切片6 起对齐它们各自改前那一枚
+ * （`#ff3333` / `#8888ff`）。见 `ui/barTheme.js`。所以接上消费者之后默认档**零视觉变更**。
  * 调色是美术决定，机制片不夹带。
+ *
+ * ## 为什么 Boss 血条不直接用 `danger`
+ * 它俩是同一个语义（"有东西在掉血"），但**同时出现在屏幕上**：玩家血条在左下，
+ * Boss 血条在顶部居中。共用一个语义的后果是换档时两条一起变、变成同一枚色 ——
+ * 那时"我的血"与"它的血"只剩位置可分。所以另立 `threat`，并让 `DISTINCT_IN_ANY_MODE`
+ * 把这一对钉住：任何一档下都不许撞色。
  *
  * ## 切片3 补上"现在是哪一档"
  * 上面那一层只回答"某个语义在某个档下是什么颜色"，**不回答当前是哪一档** ——
@@ -93,6 +100,24 @@ export const SEMANTIC_COLORS = Object.freeze({
     protanopia: 0x9a7bff,
     tritanopia: 0x8899ff,
   }),
+  threat: c('威胁', '☠', {
+    // 切片6 起对齐在役的 Boss 血条亮端 `#ff3333`。
+    // 色盲档走**深红**而不是另一个色相：这一条要的还是"它是红的、而且比我自己的血更凶"，
+    // 靠明度与 `danger` 的橙黄 / 琥珀拉开（`DISTINCT_IN_ANY_MODE` 钉住这一对不许撞）。
+    default: 0xff3333,
+    deuteranopia: 0xd7263d,
+    protanopia: 0xc0392b,
+    tritanopia: 0xe01e37,
+  }),
+  posture: c('架势', '◈', {
+    // 切片6 起对齐在役的架势条亮端 `#8888ff`。
+    // 这一条是蓝黄色盲（tritanopia）最吃亏的一格 —— 改前 `#8888ff` 在那一档下几乎读不出明暗。
+    // 色盲档统一压成**深蓝**：色相还在"蓝"这一族里，明度与 `resource` / `rarity-rare` 拉开。
+    default: 0x8888ff,
+    deuteranopia: 0x2b4acb,
+    protanopia: 0x3d5afe,
+    tritanopia: 0x3949ab,
+  }),
   // 稀有度四档：默认档与**装备稀有度显示表的旧值**逐格同值（零视觉变更；
   // 那张表现在反过来从这四条取值，`content/gear.js` 只做 id → 语义键的翻译）。
   // 色盲档走**明度递进 + 形状递进**（○◇◆★），两条冗余互相印证。
@@ -117,8 +142,8 @@ export const SEMANTIC_COLORS = Object.freeze({
 /** 语义键清单（由表推导 —— 加一条只需要往表里加一行） */
 export const SEMANTIC_IDS = Object.freeze(Object.keys(SEMANTIC_COLORS));
 
-/** 任一档下都不许撞色的三个语义（门禁钉住） */
-export const DISTINCT_IN_ANY_MODE = Object.freeze(['danger', 'warning', 'safe']);
+/** 任一档下都不许撞色的四个语义（门禁钉住）。含 `threat`：它与 `danger` 同屏出现 */
+export const DISTINCT_IN_ANY_MODE = Object.freeze(['danger', 'warning', 'safe', 'threat']);
 
 /** 取一条语义；认不出就抛（说得出有哪些键） */
 export function semanticOf(id) {

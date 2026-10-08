@@ -682,7 +682,7 @@ canvas {
 }
 
 .bar-fill.po {
-  background: linear-gradient(90deg, #444488, #8888ff);
+  background: linear-gradient(90deg, var(--bar-po-shade, #444488), var(--bar-po, #8888ff));
   transition: width 0.1s linear;
 }
 
@@ -1632,8 +1632,8 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   height: 10px;
 }
 
-.boss-hp {
-  background: linear-gradient(90deg, #661111, #ff3333);
+.bar-fill.boss-hp {
+  background: linear-gradient(90deg, var(--bar-boss-hp-shade, #661111), var(--bar-boss-hp, #ff3333));
 }
 
 .boss-phase {

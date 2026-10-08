@@ -1,5 +1,5 @@
 /**
- * HUD 状态条的颜色主题（W-D6 切片4）。
+ * HUD 状态条的颜色主题（W-D6 切片4，切片6 扩到五条）。
  *
  * ## 这一片解决什么
  * 切片3 把色盲档接上了"地上掉落物的档位色"。但玩家**看得最多的三条颜色**一直没接：
@@ -22,6 +22,14 @@
  * `BAR_SEMANTIC` 是"哪条条读哪个语义"的唯一答案（与 `DROP_RING_BY_RARITY` 同一纪律）。
  * 门禁按调用点计数钉住：写颜色的地方只有这一个文件，HUD 只负责调用。
  *
+ * ## 切片6 为什么把 Boss 血条与架势条也收进来
+ * 切片4 刻意把这两条留在表外，理由是"它们与玩家三条分居屏幕两端，保持旧色反而让
+ * '我的血'与'它的血'更好分"。那个理由对**默认档**成立，对色盲档不成立：
+ * Boss 血条那枚 `#ff3333` 是写死的，切了档它一动不动 —— 开关切了，最该变的地方还是没变。
+ * 所以它们各立一个语义（`threat` / `posture`）而不是复用 `danger`：
+ * 复用会让两条血条在换档时变成同一枚色，那时"我的血"与"它的血"只剩位置可分。
+ * 这一对由 `DISTINCT_IN_ANY_MODE` 在任何一档下钉住不许撞色。
+ *
  * ## 十六进制化只有一处
  * "颜色"在本仓有两种形状：three 那侧要**数**（`material.color.setHex`），
  * DOM 那侧要**串**（飘字的 `style.color`、这里的 CSS 自定义属性）。
@@ -35,16 +43,19 @@ import { cssColorOf, getColorVisionMode } from '../game/ColorVision.js';
 const BAR_VAR = (bar) => `--bar-${bar}`;
 
 /**
- * 哪条状态条读哪个语义。键是 CSS 类名（`.bar-fill.hp` / `.bar-fill.st` / `.bar-fill.mana`），
- * 这样"加一条条"与"给它配色"在同一处看得见。
+ * 哪条状态条读哪个语义。键是 CSS 类名（`.bar-fill.hp` / `.bar-fill.st` / `.bar-fill.mana` /
+ * `.bar-fill.boss-hp` / `.bar-fill.po`），这样"加一条条"与"给它配色"在同一处看得见。
  *
- * **不在表里的两条**：`boss-hp`（Boss 血条）与 `po`（架势条）。它们与玩家三条状态条
- * 分居屏幕两端，保持旧色反而让"我的血"与"它的血"更好分；收进来是后续切片的事。
+ * **五个语义互不重复**：两条条共用一个语义就会在换档时一起变，玩家分不清哪条是哪条。
+ * 其中 `boss-hp` 与 `hp` 这一对最要紧 —— 它们同屏出现，撞色比没配色更糟
+ * （见 `content/semanticColors.js` 的"为什么 Boss 血条不直接用 danger"）。
  */
 export const BAR_SEMANTIC = Object.freeze({
   hp: 'danger',
   st: 'warning',
   mana: 'resource',
+  'boss-hp': 'threat',
+  po: 'posture',
 });
 
 /**
@@ -55,6 +66,8 @@ export const BAR_SHADE = Object.freeze({
   hp: '#8b2020',
   st: '#8b6914',
   mana: '#224488',
+  'boss-hp': '#661111',
+  po: '#444488',
 });
 
 /**
