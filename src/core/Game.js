@@ -138,6 +138,18 @@ import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.j
 import { InputDevice } from '../engine/InputDevice.js';
 import { topNavLayer } from '../ui/OverlayStack.js';
 import { moveFocusWithin, activateFocused, adjustFocused } from '../ui/FocusNav.js';
+
+/**
+ * 四个方向各自把地图光标推多少格（切片13）。
+ *
+ * 一张表而不是四行 if：方向写反一处（比如把 left 写成 +1）不会报错，只会让光标往右走 ——
+ * 那种 bug 在浏览器里看得见、在测试里却要专门造一条。收成一张表之后，
+ * "四个方向各推多少"只有一处可读。
+ */
+const CURSOR_STEP = Object.freeze({
+  up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0],
+});
+
 export class Game {
   constructor(container) {
     this.clock = new THREE.Clock();
@@ -708,6 +720,11 @@ export class Game {
           return this.worldMapPanel.draw();
         }
         return this.hud.toggleZonePanel();
+      // 世界地图：在光标那一格放 / 收路点（切片13）。鼠标那条走 `_onCanvasClick`，
+      // 键盘这条走 `markAtCursor` / `unmarkAtCursor`；两句判据（探没探索、附近有没有路点）
+      // 在 `WorldMapPanel.markAt` / `unmarkAt` 里只有一份，两条入口共用。
+      case 'mapMark': return this.worldMapPanel?.markAtCursor();
+      case 'mapUnmark': return this.worldMapPanel?.unmarkAtCursor();
       case 'questTracker': return this.questAssistant.toggle();
       case 'autoPlay': return this.questAssistant.startAutoPlay();
       case 'journal': return this.hud.toggleJournal();
@@ -718,14 +735,15 @@ export class Game {
       case 'load': return SaveSystem.load(this);
       case 'settings': return this.settingsPanel.show();
       case 'escape': return this.runEscape();
-      // 面板内移焦（切片11）：↑↓ 只在开着的面板里走路，野外按了什么都不做
-      case 'uiUp': return this.movePanelFocus(-1);
-      case 'uiDown': return this.movePanelFocus(1);
-      // 面板内调值（切片16）：← → 推焦点那一格的数值。这里刻意**不问层表** ——
-      // 该问的是"焦点在哪一格"，那是唯一事实；层表回答的是"走焦走进哪个面板"（`movePanelFocus`）。
-      // 手柄走的也是这一句：十字键左右在桥里冒充 ← →，于是两条输入只有一个消费者。
-      case 'uiLeft': return adjustFocused(-1);
-      case 'uiRight': return adjustFocused(1);
+      // 面板内导航：切片11 的 ↑↓ 走格、切片16 的 ← → 调值、切片13 的地图光标，四条路一个出口。
+      // "这一下该谁接"的判据（层表 + 地图开没开）只在 `panelNav` 里写一次，不在这四行各写一遍。
+      case 'uiUp': return this.panelNav('up');
+      case 'uiDown': return this.panelNav('down');
+      // ← → 推焦点那一格的数值（切片16）：今天能推的只有滑杆。出口仍是同一个 `panelNav`，
+      // 与 ↑↓ 走格、地图光标共用一句层表判据 —— 手柄走的也是这一句（十字键左右在桥里
+      // 冒充 ← →），于是两条输入只有一个消费者。
+      case 'uiLeft': return this.panelNav('left');
+      case 'uiRight': return this.panelNav('right');
       default: return false;
     }
   }
@@ -735,9 +753,31 @@ export class Game {
    * 所以"这一下返回关掉的面板"与"↑↓ 走进来的面板"是同一个 —— 清单与算式在 `ui/FocusNav.js`。
    */
   movePanelFocus(delta) {
+    return this.panelNav(delta < 0 ? 'up' : 'down');
+  }
+
+  /**
+   * ↑↓←→ 的落点：切片11 的走格、切片16 的调值、切片13 的地图光标，三条路一个入口。
+   *
+   * 先问层表（`topNavLayer`，与 Escape 级联、`padUiMode`、指针锁释放吃同一份现状）：
+   * - 有 `nav` 宿主 → ↑↓ 走格、←→ 推焦点那一格的数值（老路一字未改）；
+   * - 没有宿主、而世界地图开着 → 这四下推地图光标。地图是全屏模态里唯一一张画布，
+   *   改前 ↑↓ 在它那儿是死键（层表里没有它的 `nav`，`topNavLayer` 于是返回 null）。
+   *
+   * 判据只此一处：所以"地图上还压着暂停菜单"时箭头仍归菜单 —— 层表说不清的事，这里不替它做主。
+   */
+  panelNav(dir) {
     const layer = topNavLayer(this.overlayState());
-    if (!layer) return false;
-    return moveFocusWithin(document.getElementById(layer.nav), delta);
+    if (!layer) {
+      // 切片13：没有宿主可去、而世界地图开着 → 这四下推的是地图光标
+      if (!this.worldMapPanel?.open) return false;
+      const [dx, dy] = CURSOR_STEP[dir];
+      return this.worldMapPanel.moveCursor(dx, dy);
+    }
+    if (dir === 'up' || dir === 'down') {
+      return moveFocusWithin(document.getElementById(layer.nav), dir === 'up' ? -1 : 1);
+    }
+    return adjustFocused(dir === 'left' ? -1 : 1);
   }
 
   /** Escape 那条级联的顺序就是产品决策，本体收在 `OVERLAY_LAYERS`（切片3 抽纯、切片10 成表） */

@@ -368,6 +368,7 @@ const navGame = () => {
   };
   g.overlayState = () => Game.prototype.overlayState.call(g);
   g.movePanelFocus = (delta) => Game.prototype.movePanelFocus.call(g, delta);
+  g.panelNav = (dir) => Game.prototype.panelNav.call(g, dir);
   return g;
 };
 
@@ -658,14 +659,14 @@ describe('静态门禁：焦点只有一个出口，激活只有浏览器一个�
   it('导航动作在 `runHotkey` 里全部有出口：↑↓ 走格、← → 调值，方向不许反也不许多一条', () => {
     const body = sourceOf('core/Game.js').match(/runHotkey\(action\)\s*\{[\s\S]*?\n {2}\}/);
     expect(body, '找不到 runHotkey 的函数体').toBeTruthy();
-    const toNav = [...body[0].matchAll(/case '([a-zA-Z]+)':\s*return this\.movePanelFocus\((-?\d)\);/g)];
-    const toAdjust = [...body[0].matchAll(/case '([a-zA-Z]+)':\s*return adjustFocused\((-?\d)\);/g)];
-    expect(toNav.map((m) => m[1]).sort()).toEqual(['uiDown', 'uiUp']);
-    expect(toNav.map((m) => m[2])).toEqual(['-1', '1']);        // 上 = -1、下 = +1，方向不许反
-    expect(toAdjust.map((m) => m[1]).sort()).toEqual(['uiLeft', 'uiRight']);
-    expect(toAdjust.map((m) => m[2])).toEqual(['-1', '1']);      // ← = -1、→ = +1，同样不许反
-    // 四个动作一个不多一个不少：漏一个 = 那枚键在面板里是死的，多一个 = 有人绕过这两条出口
-    expect([...toNav, ...toAdjust].map((m) => m[1]).sort()).toEqual([...UI_NAV_ACTIONS].sort());
+    // 切片13 起四条路一个出口（`panelNav`）：↑↓ 走格、←→ 调值、地图开着时光标走格。
+    // 门禁仍然盯两件事 —— 一个动作一格、方向不许反。
+    const navs = [...body[0].matchAll(/case '([a-zA-Z]+)':\s*return this\.panelNav\('([a-z]+)'\);/g)];
+    const dirs = Object.fromEntries(navs.map((m) => [m[1], m[2]]));
+    expect(Object.keys(dirs).sort(), '漏一个 = 那枚键在面板里是死的；多一个 = 有人绕过了这一个出口')
+      .toEqual([...UI_NAV_ACTIONS].sort());
+    expect(dirs, '方向不许反：↑ = up、↓ = down、← = left、→ = right')
+      .toEqual({ uiUp: 'up', uiDown: 'down', uiLeft: 'left', uiRight: 'right' });
     for (const a of UI_NAV_ACTIONS) expect(UI_ACTIONS, `${a} 不在热键表里`).toContain(a);
   });
 

@@ -397,7 +397,15 @@ describe('一条路走到底：十字键经同一个派发口移焦，A 激活�
       isBlocked: () => false,
       onAction: (action) => {
         fired.push(action);
-        return Game.prototype.runHotkey.call({ runEscape: () => false }, action);
+        // 假 game 要满足 runHotkey 的依赖：切片13 起 uiLeft/uiRight 也走 panelNav，
+        // 而 panelNav 要问层表（overlayState）与地图开没开（worldMapPanel）
+        const fake = {
+          runEscape: () => false,
+          worldMapPanel: { open: false },
+          overlayState: () => ({ settingsOpen: true }),
+          panelNav: (dir) => Game.prototype.panelNav.call(fake, dir),
+        };
+        return Game.prototype.runHotkey.call(fake, action);
       },
     });
     press(pad, 'dpadLeft', true);

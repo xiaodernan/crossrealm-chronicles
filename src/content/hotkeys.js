@@ -14,6 +14,12 @@ export const UI_HOTKEYS = [
   { code: 'KeyG', action: 'worldMap' },
   { code: 'KeyV', action: 'cameraMode' },
   { code: 'Tab', action: 'zonePanel', preventDefault: true },
+  // 世界地图上的路点（W-D6 切片13）。改前画布上"点击放置 / Shift+点击移除"只能鼠标点，
+  // 而地图是全屏模态里唯一一张画布：纯键盘玩家看得见图、切得了导航路点，就是落不了自己的点。
+  // 这两格是"落点"那一下的键盘出口；光标本身不占键位 —— ↑↓←→ 本来就是移焦那四格，
+  // 地图开着时它们没有宿主可去（`worldMap` 层没有 `nav`），改推光标，不新开四条绑定。
+  { code: 'F4', action: 'mapMark', preventDefault: true },
+  { code: 'F6', action: 'mapUnmark', preventDefault: true },
   { code: 'KeyU', action: 'questTracker' },
   { code: 'KeyN', action: 'autoPlay', preventDefault: true },
   { code: 'KeyJ', action: 'journal' },
@@ -42,6 +48,8 @@ export const UI_HOTKEY_LABELS = {
   minimap: '小地图',
   worldMap: '世界地图',
   cameraMode: '视角切换',
+  mapMark: '放置路点',
+  mapUnmark: '移除路点',
   zonePanel: '区域信息',
   questTracker: '任务追踪',
   autoPlay: '自动演示',
@@ -123,13 +131,14 @@ export function hotkeyCodeFor(action) {
 }
 
 /**
- * 世界地图开着时仍然放行的三个动作：开图的那个键、关图的那个键、区域面板的开关。
+ * 世界地图开着时仍然放行的那几个动作：开图的那个键、关图的那个键、区域面板的开关，
+ * 以及落点那两格（切片13：地图开着时它们就是"在这一格放 / 收路点"，与鼠标同一条语义）。
  * 这里列的是**动作**不是键码 —— 玩家把"世界地图"改到 `C` 之后，例外就该跟着搬到 `C`，
  * 而不是继续给出厂的 `G` 放行（那等于改绑之后地图开着时按 `G` 还会穿透）。
  */
-export const MAP_PASSTHROUGH_ACTIONS = ['worldMap', 'escape', 'zonePanel'];
+export const MAP_PASSTHROUGH_ACTIONS = ['worldMap', 'escape', 'zonePanel', 'mapMark', 'mapUnmark'];
 
-/** 这个物理码是不是当前生效表里"地图例外"那三个动作之一 */
+/** 这个物理码是不是当前生效表里"地图例外"那几个动作之一 */
 export function isMapPassThrough(code) {
   for (const action of MAP_PASSTHROUGH_ACTIONS) {
     const bound = hotkeyCodeFor(action);
