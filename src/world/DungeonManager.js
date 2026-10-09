@@ -180,6 +180,7 @@ export class DungeonManager {
       dungeon.bossSpawned = true;
       const wx = dungeon.def.origin.x + room.x;
       const wz = dungeon.def.origin.z + room.z;
+      const wallT = dungeon.layout.wallT;
       const boss = new DungeonBoss(this.scene, this.world, {
         name: BOSS_LORE[dungeon.def.id]?.title ?? `${dungeon.def.name}守钥者`,
         x: wx,
@@ -189,6 +190,16 @@ export class DungeonManager {
         bossId: `dungeon-${dungeon.def.id}`,
         // 危险区跟着管理器走：副本 Boss 的 id 不在脚本表里，按 `default` 脚本打近战位砸地
         hazards: this.enemyManager.hazards,
+        // 场的真实边界（B101）：**墙的内表面**围出来的那个方子，逐格由布局推出来。
+        // 改前这里一个边界字段都没递，Boss 用的是 `Boss.js` 里那个没出处的名义 22，
+        // 而真墙内表面在 ±(room.w/2 − wallT/2)；`arenaCenter` 当时"碰巧对"只是因为
+        // Boss 生在房心（`bossSpawn = 场心`），那句话既没人写也没人测 —— 现在中心也来自同一个式子。
+        field: {
+          x: wx,
+          z: wz,
+          hw: room.w / 2 - wallT / 2,
+          hd: room.d / 2 - wallT / 2,
+        },
       });
       boss.setDialogToast((msg) => this.dialog.toast(msg));
       list.push(boss);

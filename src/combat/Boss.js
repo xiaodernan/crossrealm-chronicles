@@ -28,6 +28,20 @@ export class Boss extends Enemy {
     // `phase` 是取/设值器（见类里那段注释）—— 在这一行 `this.sm` 还不存在
     this.arenaCenter = config.arenaCenter ?? this.position.clone();
     this.arenaRadius = config.arenaRadius ?? 22;
+    /**
+     * **有墙的那个场**（W-B10 切片5e，B101）：`{ x, z, hw, hd }` 是墙**内表面**围出来的矩形，
+     * 由布局推出来交给这里（`room.w / 2 − wallT / 2`），不是再抄一个数。
+     *
+     * 与上面那一对的分工要说清，否则就是第二份真源：`arenaCenter / arenaRadius` 是**没有墙的再战**
+     * 用的名义圈（世界 Boss 的拴绳，22 那个数没有任何几何与它对齐），而 `field` 一旦出现就代表
+     * 这里真有一圈撞得到的墙 —— 落点钳制改按矩形逐轴走（`clampIntoArena`），并且砸地那种
+     * "圆心在自己脚下"的招在放不下时**不起手**（`startSlamTelegraph`）。
+     *
+     * 为什么值得为砸地单开一条：那记的圈不走钳制（圆心就是 Boss 自己），改前实测把 Boss 摆到墙根
+     * 能站到距场心 15.6 米，而 4.5 米的圈因此**越墙 3.40 米**（`.tmp-20261009/wb10s5b-probe3.mjs`）；
+     * 墙那侧不是虚空而是邻居房走得到的地板 ⇒ 那半枚圈是一记玩家看不见、却真打得到人的伤害。
+     */
+    this.field = config.field ?? null;
     this.enraged = false;
     /** 危险区系统由 `EnemyManager` 在生成 Boss 时交出（与远程招的 `projectiles` 同一条路） */
     this.hazards = config.hazards ?? null;
@@ -188,8 +202,21 @@ export class Boss extends Enemy {
    * 把场地落点夹回竞技场内，四周留出 `margin` 米边距（危险区传自己的半径）。
    * 圈不该画到墙外：玩家贴边躲雨时，场外的圈既打不着他、也不该铺出来 ——
    * 那等于用一片"永远走不进去也躲不开"的假预告糊满场地。
+   *
+   * 两种场分开走：有 `field`（真有一圈墙）时按**矩形逐轴**夹，因为场的形状就是那圈墙围出来的
+   * 方子 —— 用内切圆去夹会把四个角白白让出去（一枚 6 米的圈在 16.7 的方场里，角上还能再进去
+   * 数米）；没有 `field` 时仍是名义圆的拴绳，与改前逐字同形。
    */
   clampIntoArena(x, z, margin = 0) {
+    if (this.field) {
+      const f = this.field;
+      const 半x = Math.max(0, f.hw - margin);
+      const 半z = Math.max(0, f.hd - margin);
+      return {
+        x: Math.min(Math.max(x, f.x - 半x), f.x + 半x),
+        z: Math.min(Math.max(z, f.z - 半z), f.z + 半z),
+      };
+    }
     const c = this.arenaCenter;
     const limit = Math.max(0, this.arenaRadius - margin);
     const dx = x - c.x;
@@ -201,6 +228,17 @@ export class Boss extends Enemy {
   }
 
   /**
+   * 一枚半径 `r` 的圈放在 `(x, z)` 能不能**整枚**待在场里。
+   * 按轴判就是精确判：圆的 x 跨度正好是 `[x − r, x + r]`，两轴都在场内则整枚在场内。
+   * 没有 `field`（没有墙的再战）时恒真 —— 那里没有"越墙"这回事，不该拿名义圈去砍实招。
+   */
+  fieldFits(x, z, r) {
+    const f = this.field;
+    if (!f) return true;
+    return Math.abs(x - f.x) + r <= f.hw && Math.abs(z - f.z) + r <= f.hd;
+  }
+
+  /**
    * 起手砸地：把红圈交给场地危险区系统，本体只说"这一招我许诺出去了"。
    *
    * 返回 false 表示没能起手（已经有一圈在走 / 没有危险区系统 —— 例如用例直接 `new Boss`）。
@@ -209,6 +247,12 @@ export class Boss extends Enemy {
   startSlamTelegraph() {
     if (this.slamHazard || !this.hazards) return false;
     const spec = GROUND_HAZARD.bossSlam;
+    // 有墙的第三种"不起手"（B101）：这记的圆心就是 Boss 自己的脚，它不走 `clampIntoArena`，
+    // 所以贴墙那一下会把半枚圈画进墙里 —— 而墙那侧是走得到的地板（B79 让 Boss 场的墙穿过邻居房），
+    // 症状是一记看不见却打得着的伤害。宁可这一刀退回普通挥砍（`tryArenaMelee` 的 false 分支
+    // 就是给"没放成"留的），也不铺一枚圆心在脚下、边缘在墙外的假预告。
+    // 代价如实写在这里：玩家贴着墙打会少掉砸地，那是这一片换来的东西，不是漏掉的分支。
+    if (!this.fieldFits(this.position.x, this.position.z, spec.radius)) return false;
     this.slamHazard = this.hazards.spawn({
       x: this.position.x,
       z: this.position.z,
