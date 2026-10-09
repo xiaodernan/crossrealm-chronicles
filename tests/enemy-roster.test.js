@@ -251,4 +251,13 @@ describe('W-B7 切片5：每个出生点都得醒得过来（B70 那一族）', 
     expect(有('dancer', 240, -40), '刃舞者没在换过的 240,-40').toBe(true);
     expect(有('dancer', 275, 10), '刃舞者又挪回了 275,10（那一格四向皆不警觉）').toBe(false);
   });
+
+  it('B70 族排查记录钉在表里：gloom_wraith 保持四面通视的 240,120', () => {
+    const m = makeManager();
+    m.spawnDefaults();
+    const 有 = (type, x, z) => m.enemies.some((e) => e.type === type && e.spawnPoint.x === x && e.spawnPoint.z === z);
+    // 240,120 实测四面通视（断柱是装饰、不进碰撞，不挡视线）；曾误挪去 280,180 反而撞内部空间碰撞体
+    expect(有('gloom_wraith', 240, 120), '幽暗怨影没在实测通视的 240,120').toBe(true);
+    expect(有('gloom_wraith', 280, 180), '幽暗怨影挪回了 280,180（那一格四面皆闷：撞内部空间/神殿碰撞体）').toBe(false);
+  });
 });

@@ -15,3 +15,4 @@ export { AnimationMixer } from './AnimationMixer.js';
 export { AnimationLibrary, PLAYER_ANIM_PRESETS, ENEMY_ANIM_PRESETS, BOSS_ANIM_PRESETS } from './AnimationLibrary.js';
 export { AnimationController, createStateMachine, DEFAULT_PLAYER_STATE_MAP, DEFAULT_ENEMY_STATE_MAP, DEFAULT_BOSS_STATE_MAP } from './AnimationController.js';
 export { AnimationClipLoader, ANIM_ACTIONS, ANIM_ACTION_LABELS } from './AnimationClipLoader.js';
+export { AnimationEntityAdapter, createEntityAdapter } from './AnimationEntityAdapter.js';
