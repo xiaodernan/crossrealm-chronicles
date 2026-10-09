@@ -8,13 +8,19 @@ import { setLanguage, applyTranslations } from '../engine/i18n.js';
 import { DEFAULT_COLOR_MODE, setColorVision } from '../game/ColorVision.js';
 import { DEFAULT_DIFFICULTY, setDifficulty } from '../game/Difficulty.js';
 import { DEFAULT_LOOK_SENSITIVITY, applyLookSensitivity, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
+import { VOLUME_DEFAULTS } from '../audio/AudioVolumes.js';
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
 const VERSION = 2;
 
 const DEFAULTS = {
-  masterVolume: 0.35,
-  sfxVolume: 0.5,
+  /**
+   * 音量两格从 `audio/AudioVolumes.js` 的名册取，不在这里手抄数（B103）：改前这一格抄的是
+   * 0.5、而 `AudioManager` 的解锁回调抄的是 0.55 —— 同一个量两处定义，已经漂了 0.05。
+   * 存储里的脏值不在这里治，统一由 `setVolumes` 经 `normalizeVolume` 回落/钳住，不抛。
+   */
+  masterVolume: VOLUME_DEFAULTS.master,
+  sfxVolume: VOLUME_DEFAULTS.sfx,
   bloomStrength: 0.35,
   shadows: true,
   /**

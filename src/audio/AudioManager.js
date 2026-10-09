@@ -2,6 +2,7 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { isDungeonBossId } from '../content/bossRoster.js';
 import { cueOf } from '../content/captions.js';
+import { VOLUME_DEFAULTS, normalizeVolume } from './AudioVolumes.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -76,6 +77,12 @@ export class AudioManager {
     this._bossPhase = 1;
     this._savedMode = null;
     this.enabled = true;
+    /**
+     * 玩家音量的**当前档**（B103）：它是"想要的音量"，与"节点存不存在"无关。
+     * 节点在第一次手势解锁时才存在，所以这一份必须先活过解锁 —— 出厂值从
+     * `audio/AudioVolumes.js` 取，不在这里写字面量。
+     */
+    this.volumes = { ...VOLUME_DEFAULTS };
     this._droneOsc = [];
     this._droneGain = null;
     this._melodyStep = 0;
@@ -118,10 +125,12 @@ export class AudioManager {
       if (!this.ctx) {
         this.ctx = new AudioContext();
         this.master = this.ctx.createGain();
-        this.master.gain.value = 0.35;
+        /** 落的是 `this.volumes` 那份档，不是这里的字面量（B103：改前写死 0.35/0.55，
+         *  于是开机那次 `applyToGame` 之后玩家存的音量全被这一次覆盖） */
+        this.master.gain.value = this.volumes.master;
         this.master.connect(this.ctx.destination);
         this.sfx = this.ctx.createGain();
-        this.sfx.gain.value = 0.55;
+        this.sfx.gain.value = this.volumes.sfx;
         this.sfx.connect(this.master);
         this.ambient = this.ctx.createGain();
         this.ambient.gain.value = 0.12;
@@ -452,8 +461,20 @@ export class AudioManager {
   }
 
   setVolumes(master, sfx) {
-    if (this.master) this.master.gain.value = master;
-    if (this.sfx) this.sfx.gain.value = sfx;
+    /**
+     * 先记账再落笔（B103 的修法）。改前这两行是 `if (this.master) …` 就完了：开机那次
+     * `SettingsManager.applyToGame`（`core/Game.js:382`）跑在**任何用户手势之前**，那时
+     * ctx 还没建、节点还不存在，于是玩家存的音量被 `if` 安静吞掉，第一次点击解锁时
+     * `_initOnGesture` 又把自己的字面量写上去 —— 实测（`.tmp-20261010/wc7s3-probe2.mjs`）
+     * 存 0.9/0.2 的档，解锁后实得 0.35/0.55，整条音量路径今天只有"去面板再拖一次滑杆"
+     * 那一条能生效。存进 `this.volumes` 之后，解锁那一刻落的就是这份档。
+     */
+    this.volumes = {
+      master: normalizeVolume(master, VOLUME_DEFAULTS.master),
+      sfx: normalizeVolume(sfx, VOLUME_DEFAULTS.sfx),
+    };
+    if (this.master) this.master.gain.value = this.volumes.master;
+    if (this.sfx) this.sfx.gain.value = this.volumes.sfx;
   }
 
   spellCast() { this.playTone(520, 0.12, 'sine', 0.08); this.playTone(780, 0.08, 'triangle', 0.06); }
