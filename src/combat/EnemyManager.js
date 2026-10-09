@@ -298,6 +298,8 @@ export class EnemyManager {
       hp: Math.round(roster.hp * difficultyMultiplier('enemyHp') * growth.hp),
       // damage 是可缺的（`dummy` 没有）：缺格不缩放，交给 Enemy 构造器的 `?? 12`
       ...(roster.damage == null ? {} : { damage: Math.round(roster.damage * growth.damage) }),
+      // souls 收入倍率：只对收入生效（W-E1 切片1）
+      ...(roster.souls == null ? {} : { souls: Math.round(roster.souls * growth.souls) }),
       type, x, z, ...rest,
     });
     // 档位记在敌人身上（W-E1 切片4）：仆从按**召唤者**的档位长，而副本里的召唤者

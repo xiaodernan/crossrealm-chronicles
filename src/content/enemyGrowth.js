@@ -43,7 +43,7 @@ import { DUNGEON_DEFS, DUNGEON_IDS } from './dungeons.js';
  * 两个乘子的键名单。与 `DIFFICULTY_KEYS` 同一形状：加一格就必须同时加一个读者，
  * 否则 `tests/enemy-growth.test.js` 里"每一格都有人读"那条当场红。
  */
-export const GROWTH_KEYS = ['hp', 'damage'];
+export const GROWTH_KEYS = ['hp', 'damage', 'souls'];
 
 /**
  * 档位表。**index 即档位**，长度必须与 `ZONE_ORDER` 一致（每座真实区域一档，
@@ -54,13 +54,13 @@ export const GROWTH_KEYS = ['hp', 'damage'];
  * 够让"绕路去深渊"成为一个能感觉到的决定，又不至于让早期一击秒人。
  */
 export const ENEMY_GROWTH = Object.freeze([
-  Object.freeze({ hp: 1.0, damage: 1.0 }),    // 0 灰白森林（出发点）
-  Object.freeze({ hp: 1.1, damage: 1.05 }),   // 1 霍格沃兹遗境
-  Object.freeze({ hp: 1.2, damage: 1.1 }),    // 2 米勒荒原
-  Object.freeze({ hp: 1.3, damage: 1.15 }),   // 3 破碎时线
-  Object.freeze({ hp: 1.4, damage: 1.2 }),    // 4 混沌边境
-  Object.freeze({ hp: 1.5, damage: 1.25 }),   // 5 幽暗林地
-  Object.freeze({ hp: 1.6, damage: 1.3 }),    // 6 辉煌圣域
+  Object.freeze({ hp: 1.0, damage: 1.0, souls: 1.0 }),   // 0 
+  Object.freeze({ hp: 1.1, damage: 1.05, souls: 1.25 }),   // 1 
+  Object.freeze({ hp: 1.2, damage: 1.1, souls: 1.35 }),   // 2 
+  Object.freeze({ hp: 1.3, damage: 1.15, souls: 1.45 }),   // 3 
+  Object.freeze({ hp: 1.4, damage: 1.2, souls: 1.55 }),   // 4 
+  Object.freeze({ hp: 1.5, damage: 1.25, souls: 1.65 }),   // 5 
+  Object.freeze({ hp: 1.6, damage: 1.3, souls: 1.75 }),   // 6 
 ].map(Object.freeze));
 
 /** 最大合法档位（副本定义行上的 `stage` 上界，注册表也照此校验） */

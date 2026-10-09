@@ -241,8 +241,9 @@ describe('⑤ 世界地图真渲染：点位与文字都来自副本表', () => 
     const ctx = {
       fillStyle: '', strokeStyle: '', lineWidth: 1, font: '',
       beginPath() {}, moveTo() {}, lineTo() {}, closePath() {}, fill() {}, stroke() {},
-      setLineDash() {}, fillRect() {}, arc(x, y, r) { 圆.push({ x, y, r, fillStyle: ctx.fillStyle, font: ctx.font }); },
+      setLineDash() {}, fillRect() {}, strokeRect() {}, arc(x, y, r) { 圆.push({ x, y, r, fillStyle: ctx.fillStyle, font: ctx.font }); },
       fillText(t, x, y) { 文本.push({ t, x, y, fillStyle: ctx.fillStyle, font: ctx.font }); },
+      save() {}, restore() {},
     };
     const canvas = {
       clientWidth: 720, clientHeight: 520, width: 0, height: 0,

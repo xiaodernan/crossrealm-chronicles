@@ -448,7 +448,8 @@ describe('静态门禁：来路只有一处写、一处读，旧写法一贴回�
 
   it('这条也咬得住：把让位改成 visibility 版本立刻红（自证）', () => {
     const original = sourceOf('style.css');
-    const smuggled = original.replace('  opacity: 0;\n  pointer-events: none;', '  visibility: hidden;');
+    // 用正则替换，容忍不同的空白字符与换行符
+    const smuggled = original.replace(/opacity:\s*0;\s*pointer-events:\s*none;/, 'visibility: hidden;');
     expect(smuggled, '锚点没命中：让位规则的写法变了').not.toBe(original);
     const isHiddenWay = (css) => {
       const rule = css.match(/body:has\(#settings-panel:not\(\.hidden\)\) #pause-menu,[\s\S]*?\{[^}]*\}/);

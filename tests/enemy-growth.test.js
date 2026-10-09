@@ -65,7 +65,7 @@ describe('① 表不变式：四条规则各配一条反向', () => {
   it('真表四条全过', () => {
     expect(checkEnemyGrowth()).toEqual([]);
     expect(ENEMY_GROWTH).toHaveLength(ZONE_ORDER.length);
-    expect(ENEMY_GROWTH[0]).toEqual({ hp: 1, damage: 1 });
+    expect(ENEMY_GROWTH[0]).toEqual({ hp: 1, damage: 1, souls: 1 });
   });
 
   it('档位数与 ZONE_ORDER 不一致 → 报（加一座区忘加一档的那种静默）', () => {

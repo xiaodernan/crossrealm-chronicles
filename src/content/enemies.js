@@ -56,6 +56,28 @@ export const ENEMY_ROSTER = {
   radiant_dancer: { name: '辉煌舞者', hp: 145, posture: 56, damage: 14, speed: 6.8, aggroRange: 24, color: 0xffaa00 },
 };
 
+/**
+ * 击杀魂表（W-E1 切片5）：打死这一档敌人给多少魂。
+ *
+ * 键是 **`kind`**（`boss` / `elite` / `golem` / `normal`）而不是敌人 type ——
+ * 掉落层（`LootSystem.spawnKill` 里的 `dropChance(kind)`）与击杀层本来就共用这一套档位名，
+ * 魂表按它建，两张表才说得上"对齐"。改前这四个数写死在 `EnemyManager.update` 的一条三元式里
+ * （`boss ? 500 : golem ? 80 : elite ? 120 : 25`）：调经济得改行为代码，而且"这一档给多少魂"
+ * 与"这一档掉不掉装备"分成两处各判一遍 —— 那条注释自己承认了这个风险。
+ *
+ * 区域强度不在这张表里：基础值乘 `enemyGrowth.js` 的 `souls` 列（与 hp / damage 同一条分工），
+ * 难度档乘 `difficulty.js` 的 `souls`（在 `PlayerStats.addSouls` 那一口）。
+ */
+export const KILL_SOULS = Object.freeze({
+  boss: 500,
+  elite: 120,
+  golem: 80,
+  normal: 25,
+});
+
+/** 击杀魂表认得的档位名（注册表拿它对齐 `GEAR_DROP.byKind`） */
+export const KILL_SOUL_KINDS = Object.freeze(Object.keys(KILL_SOULS));
+
 /** 名册里登记过的敌人 id（注册表的 `keyRef` 与遭遇表的 `ref` 都问这一份） */
 export const ENEMY_ROSTER_IDS = Object.keys(ENEMY_ROSTER);
 
