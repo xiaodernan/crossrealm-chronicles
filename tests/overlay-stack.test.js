@@ -14,8 +14,9 @@
  *    `HotkeyRouter.js` 里不许再出现第二份名单或第二套顺序。
  */
 import { describe, it, expect, afterEach } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { UI_HOTKEYS, UI_NAV_ACTIONS, hotkeyCodeFor, applyHotkeyOverrides, setHotkeyTable, isMapPassThrough, isNavCode } from '../src/content/hotkeys.js';
 import {
   OVERLAY_LAYERS,
@@ -35,7 +36,18 @@ const walk = (dir) => readdirSync(dir).flatMap((n) => {
   return /\.js$/.test(n) ? [full] : [];
 });
 
-const FILES = walk(SRC).map((f) => ({ name: f.slice(SRC.length + 1).replace(/\\/g, '/'), source: readFileSync(f, 'utf8') }));
+/**
+ * 读被扫的源 —— 先把行尾归一成 LF（B104）。
+ *
+ * 判据问的是"这份代码写了什么"，不是"本机怎么把它铺到磁盘上"。本仓库的工作副本是**混合
+ * EOL**（实测 `src` + `tests` + `scripts` 422 份里 207 份纯 CRLF、207 份纯 LF、8 份内部混用），
+ * 而 `git worktree` / 克隆在 `core.autocrlf` 下铺出来的是清一色 CRLF —— 于是下面那些按 LF 写的
+ * 多行 needle 在一台新检出的机器上命中 0，症状是"代码一个字没改，门禁自己红"（分离平面实测
+ * 3155 例里恰好红这一条，且红的不是产品）。归一放在唯一的读手这一处，不在每条 needle 上补。
+ */
+const readSrc = (file) => readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+
+const FILES = walk(SRC).map((f) => ({ name: f.slice(SRC.length + 1).replace(/\\/g, '/'), source: readSrc(f) }));
 const sourceOf = (name) => {
   const found = FILES.find((f) => f.name === name);
   expect(found, `${name} 不在了`).toBeTruthy();
@@ -482,5 +494,37 @@ describe('静态门禁：表、生产者与消费者必须指同一件事', () =
     const handWritten = (src) => OVERLAY_LAYERS.some((l) => src.includes(l.state));
     expect(handWritten(original), '转发版本来就不该带状态名').toBe(false);
     expect(handWritten(reverted), '手写名单没被抓到').toBe(true);
+  });
+
+  /**
+   * 上面那条自证（还有 ①②层里那几条多行 needle）能不能信，取决于一件事：**扫描进去的字节
+   * 有没有被归一**。这一条钉的就是归一本身 —— 它不要求本机是什么行尾，只要求"进了扫描就没有 CR"。
+   */
+  it('进扫描的源一律没有 CR（检出怎么铺行尾都不许改变判据 —— B104 的死口径）', () => {
+    expect(FILES.length, '一份源都没扫到：这条门禁会在空集上恒真').toBeGreaterThan(100);
+    const withCR = FILES.filter((f) => f.source.includes('\r')).map((f) => f.name);
+    expect(withCR, `这些源带着 CR 进了扫描，多行 needle 会在 CRLF 检出上自红：${withCR.join(' / ')}`).toEqual([]);
+  });
+
+  /**
+   * 反面夹具自己造（不靠"本项目的检出碰巧是 LF"—— 那是把运行环境写成判据，正是 B104）。
+   * 走的是**同一个读手**，所以这条证的是读手，不是这个测试文件的运气。
+   */
+  it('同一份源，CRLF 铺法与 LF 铺法问出同一个答案', () => {
+    const lf = sourceOf('ui/HotkeyRouter.js');
+    const dir = mkdtempSync(join(tmpdir(), 'eol-probe-'));
+    try {
+      const file = join(dir, 'HotkeyRouter.js');
+      writeFileSync(file, lf.replace(/\n/g, '\r\n'), 'utf8');
+      // 这份夹具**真的**是 CRLF 铺的，否则下面一切证的东西都不存在
+      expect((readFileSync(file, 'utf8').match(/\r\n/g) || []).length, '夹具没有 CRLF').toBeGreaterThan(0);
+      const crlfRead = readSrc(file);
+      expect(crlfRead, '读手没归一行尾：CRLF 的源会带着 CR 进 needle').toBe(lf);
+      const needle = 'export function hotkeyBlockedBy(state, code) {\n  return overlayBlocksHotkeys(state, code);';
+      expect(lf.split(needle).length - 1, 'LF 铺法下 needle 没命中：needle 自己漂了').toBe(1);
+      expect(crlfRead.split(needle).length - 1, 'CRLF 铺法下 needle 没命中：行尾归一没生效').toBe(1);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

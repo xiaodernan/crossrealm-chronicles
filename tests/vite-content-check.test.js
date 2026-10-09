@@ -46,14 +46,39 @@ describe('构建期内容校验插件', () => {
     expect(CONTENT_REGISTRY_REL).toBe('src/content/registry.js');
     const 装载器 = registryUrl(ROOT);
     expect(装载器.protocol).toBe('file:');
-    // 非 ASCII 路径必须被编码（手拼 `file://` 字符串会漏掉这一步）
-    expect(装载器.href).toMatch(/%E5%A4%A7%E4%BD%9C/);
     expect(fileURLToPath(装载器)).toBe(
       fileURLToPath(new URL('../src/content/registry.js', import.meta.url))
     );
     // 换一个 root，锚跟着 root 走（不是相对本模块解析）
     expect(fileURLToPath(registryUrl(join(ROOT, 'src'), '../src/content/registry.js')))
       .toBe(fileURLToPath(装载器));
+  });
+
+  /**
+   * 「非 ASCII 路径必须被编码」这一条，改前写成 `expect(href).toMatch(/%E5%A4%A7%E4%BD%9C/)` ——
+   * 那是拿**本项目目录的名字**当证明（B104）：目录叫别的名字、或者检出到 ASCII 路径的机器上，
+   * 装载器做得完全正确也照样红。分离平面实测命中的正是这一条。现在条件由本用例自己造。
+   *
+   * 夹具里必须有 `#`：变异臂量出来，CJK 与空格**分不开** `pathToFileURL` 与手拼
+   * `new URL('file:///' + p)` —— URL 解析器也会编码它们。只有 `#` 会被解析器当成 fragment
+   * 起点，把路径尾巴整段吃掉（落点截成 `D:\proj\大作 `）。"编码无损"判的正是这件事。
+   */
+  it('非 ASCII、空格与 # 都会被编码，而且编码无损（条件自己造，不靠项目目录碰巧叫什么）', () => {
+    const 段 = '大作 #测试 目录'; // 非 ASCII + 空格 + `#`：少一个都少证一分
+    expect([...段].some((c) => c.codePointAt(0) > 0x7f), '夹具退化成纯 ASCII，这条就不再证任何编码').toBe(true);
+    expect(段.includes('#'), '夹具里没有 #：手拼 URL 与 pathToFileURL 就分不开').toBe(true);
+    const url = registryUrl(join(process.cwd(), 段));
+    expect(url.protocol).toBe('file:');
+    expect(url.href, `href 里还留着原文 "${段}" —— 那就是手拼 file:// 的写法`).not.toContain(段);
+    // 判据说的是"href 里不许有非 ASCII、也不许有裸空格"，这才是被编码这件事本身
+    expect([...url.href].every((c) => c.codePointAt(0) <= 0x7f), `href 里还有没编码的字符：${url.href}`).toBe(true);
+    expect(url.href, `href 里还有裸空格：${url.href}`).not.toContain(' ');
+    // `#` 是 ASCII，上面那条管不住它 —— 它一旦漏进 href 就变成 fragment 的起点
+    expect(url.hash, `有一个 # 没被编码，路径被切成 fragment：${url.href}`).toBe('');
+    expect(url.href).toContain(encodeURIComponent(段));
+    // 编码还得无损：构建期的消费者用 fileURLToPath 读回来，要找的模块路径必须原样对得上
+    const 落点 = fileURLToPath(url).replace(/\\/g, '/');
+    expect(落点.endsWith(`/${段}/${CONTENT_REGISTRY_REL}`), `落点是 ${落点}`).toBe(true);
   });
 
   it('真仓库当前零错，且注册表非空（防空跑）', () => {
