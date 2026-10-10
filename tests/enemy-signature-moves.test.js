@@ -228,9 +228,10 @@ describe('专属招在自己的甜点位上可用，而且在真 AI 里真的出
     ['wraith', 'phase', '相位突袭', 4],
     ['stalker', 'howl', '嚎叫引援', 2],
     ['sentinel', 'charge', '蓄力炮击', 4],
+    ['golem', 'ram', '践踏冲撞', 2],
   ];
 
-  it('三类敌人的甜点位都容得下自己的专属招，且不是"擦着边"（留 5% 余量）', () => {
+  it('四类敌人的甜点位都容得下自己的专属招，且不是"擦着边"（留 5% 余量）', () => {
     for (const [type, , name] of 专属) {
       const { m, player, ref, e } = duel({ type, x: 6, z: 0, ai: NEVER_LEAVES });
       // 先跑一帧：召唤名额由管理器每帧盖在敌人身上，`嚎叫引援` 的可选性读它

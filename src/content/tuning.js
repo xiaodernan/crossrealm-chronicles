@@ -472,6 +472,20 @@ export const ENEMY_MOVES = {
     damage: 1.1, cooldown: 3.6, weight: 2, knock: 7.5,
     telegraph: { color: 0x88aaff },
   },
+  ram: {
+    // 践踏冲撞（魔法构装体，W-B7 切片6）：构装体的第一条专属招 —— 大块头整具撞上来，`knock` 推玩家。
+    // **不放 `travel`**：`travel: 'lunge'` 是敌人**自身**沿朝向前冲的位移，强于分离推力；而构装体
+    // 即便当围攻锚点也不该自我位移 —— 冲撞的力量施加在**玩家**身上（走外部冲量账，与骑士 `bash`
+    // 同一纪律），构装体本身钉在原地沉腰发力，分离不变量安然无恙（`enemy-ai` 围攻里它自重压阵）。
+    // 与骑士 `bash` 的区分：都是近身推人，`bash` 是挥盾格挡反击（windup 0.62、reach 0.9、band 低到
+    // [0.05,1.15] 基本跳不掉、knock 7.5），`ram` 是重型构装体整具撞来 —— 起手更沉（windup 0.72，
+    // 大块头发力要时间）、落点更远（reach 1.1）、`band` 抬得更高 [0.05,1.7]（能跳躲，构装体撞的是
+    // 腰背而不是脚踝）、推力更大（knock 9，230 血的重型一撞不是小兵比得了的）、伤害更足（damage 1.3）。
+    name: '践踏冲撞', windup: 0.72, strike: 0.28, recover: 0.6, reach: 1.1, cone: 0.35,
+    band: [0.05, 1.7],
+    damage: 1.3, cooldown: 4.2, weight: 2, knock: 9,
+    telegraph: { color: 0xaa77ff },
+  },
   whirl: {
     // 旋舞（刃舞者，W-B7 切片3）：以自己为中心的**三段环形斩** —— `aoe` 与 `combo` 第一次合在一条招上。
     // 单段的 `aoe`（崩地）后撤一步就出去了；三段之间不给"退一步再退回来"的空档，
@@ -826,7 +840,7 @@ export const PLAYER_KNOCK = {
 export const ENEMY_MOVE_SETS = {
   soldier: ['sweep', 'thrust', 'cleave', 'guard'],
   elite: ['sweep', 'flurry', 'cleave', 'guard', 'summon'],
-  golem: ['cleave', 'slam', 'sweep'],
+  golem: ['cleave', 'slam', 'sweep', 'ram'],
   drone: ['shot', 'dive', 'sweep'],
   dummy: [],
   boss: ['sweep', 'cleave', 'slam', 'shot'],

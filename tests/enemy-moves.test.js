@@ -68,7 +68,7 @@ describe('敌人招式表数据', () => {
 
   it('按 type 装载招式，spawn config 的 moves 能整表覆盖成关卡特例', () => {
     const m = makeManager();
-    expect(spawn(m, { type: 'golem' }).moves.map((x) => x.name)).toEqual(['重劈', '崩地', '横扫']);
+    expect(spawn(m, { type: 'golem' }).moves.map((x) => x.name)).toEqual(['重劈', '崩地', '横扫', '践踏冲撞']);
     expect(spawn(m, { type: 'unknown-type' }).moves.map((x) => x.name)).toEqual(['横扫', '突刺', '重劈']);
     expect(spawn(m, { type: 'golem', moves: ['dive'] }).moves).toHaveLength(1);
     // 内联招式只覆盖写到的字段，其余落在默认招式上：特例不必重抄整表
@@ -114,7 +114,7 @@ describe('敌人招式表数据', () => {
     const usable = (e, d) => e.moves.filter((m) => isAttackMove(m) && moveUsable(e, m, d, 2)).length;
     const m = makeManager();
     const soldier = spawn(m, { type: 'soldier' });
-    expect(usable(soldier, soldier.holdRange)).toBe(3);           // 三招同时够用
+    expect(usable(soldier, soldier.holdRange)).toBe(3);           // 三招同时够用（sweep/thrust/cleave；guard 是防御招不数入）
     expect(soldier.holdRange).toBeLessThanOrEqual(3.0);           // 不会跑到横扫够不着的地方
     expect(usable(soldier, soldier.threatRange)).toBe(1);         // 修前的站位：整张表退化成一根突刺
     // 防御招的存在不能改变站位：加进招式表前后 holdRange 必须是同一个数
