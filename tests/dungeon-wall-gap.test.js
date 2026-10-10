@@ -184,40 +184,56 @@ describe('地下城墙段与门洞的形状（B78）', () => {
       }
     });
 
-    it('Boss 场的门洞墙段按它自己的边长与自己的门洞宽算', () => {
+    it('Boss 场的墙：自己的门开着，且让开迷宫里已有的门洞（B79 修好之后的形状）', () => {
       for (const def of DUNGEON_DEFS) {
         for (const seed of [1, 42]) {
           const { layout, meshes } = build(def, seed);
           const arena = layout.rooms.find((r) => r.isBossArena);
           if (!arena) continue;
           const WT = layout.wallT;
-          const 洞宽 = layout.bossDoorWidth;
 
           for (const s of [
-            { open: !arena.walls.w, axis: 'x', at: arena.x - arena.w / 2, len: arena.d },
-            { open: !arena.walls.e, axis: 'x', at: arena.x + arena.w / 2, len: arena.d },
-            { open: !arena.walls.n, axis: 'z', at: arena.z - arena.d / 2, len: arena.w },
-            { open: !arena.walls.s, axis: 'z', at: arena.z + arena.d / 2, len: arena.w },
+            { open: !arena.walls.w, dim: 'w', axis: 'x', at: arena.x - arena.w / 2, len: arena.d },
+            { open: !arena.walls.e, dim: 'e', axis: 'x', at: arena.x + arena.w / 2, len: arena.d },
+            { open: !arena.walls.n, dim: 'n', axis: 'z', at: arena.z - arena.d / 2, len: arena.w },
+            { open: !arena.walls.s, dim: 's', axis: 'z', at: arena.z + arena.d / 2, len: arena.w },
           ]) {
             if (!s.open) continue;
+            // 这一面墙的"固定坐标"（axis='x' 的 w/e 墙定在 x 上）与"沿墙中心"
+            const 墙心 = s.axis === 'x' ? arena.z : arena.x;
+            const 半 = s.len / 2;
             const segs = meshes.filter((m) => {
               if (m.geometry.type !== 'BoxGeometry') return false;
               const v = s.axis === 'x' ? m.position.x : m.position.z;
               if (!near(v, s.at, 1e-6)) return false;
               if (!near(m.position.y, layout.wallH / 2, 1e-6)) return false;
               const along = s.axis === 'x' ? m.position.z : m.position.x;
-              const center = s.axis === 'x' ? arena.z : arena.x;
-              const half = (s.axis === 'x' ? arena.d : arena.w) / 2;
-              return along >= center - half - 1e-6 && along <= center + half + 1e-6;
+              return along >= 墙心 - 半 - 1e-6 && along <= 墙心 + 半 + 1e-6;
             });
             const uniq = dedupeBySpot(segs);
-            expect(uniq.length).toBe(2);
+            // 切片4i 起这一段墙不再恒为两段：B79 的修法是"让开迷宫里已有的门洞"，
+            // 于是这一面墙上可能还有第二、第三个洞（别人的门穿过它）。钉的是三条不变量：
+            // ① 至少有一段（整面墙都不建也能让"门洞是空的"成立，那是假绿）；
+            // ② 每段的厚度是 wallT、长度为正；
+            // ③ **它自己的门位没有被任何一段盖住**（门洞真的开着）。
+            expect(uniq.length, `${def.id}/${seed} ${arena.id} 的 ${s.dim} 侧一段墙都没有`).toBeGreaterThan(0);
+            let 覆盖 = 0;
             for (const m of uniq) {
               const sp = span(m.geometry);
-              expect(sp.thin).toBeCloseTo(WT, 6);
-              // Boss 场沿这条边的全长是 s.len，门洞是布局带的那个宽度，两侧各 (len − 洞)/2
-              expect(sp.long).toBeCloseTo((s.len - 洞宽) / 2, 6);
+              expect(sp.thin, `厚度（${s.dim} 侧）`).toBeCloseTo(WT, 6);
+              expect(sp.long, `长度（${s.dim} 侧）`).toBeGreaterThan(0);
+              覆盖 += sp.long;
             }
+            const door = layout.doors.find((d) => d.fromRoomId === arena.id && d.dir === s.dim);
+            const 门位 = door ? (s.axis === 'x' ? door.z : door.x) : 墙心;
+            for (const m of uniq) {
+              const along = s.axis === 'x' ? m.position.z : m.position.x;
+              const half = span(m.geometry).long / 2;
+              expect(Math.abs(along - 门位), `${def.id}/${seed} ${arena.id} 的 ${s.dim} 侧门位被墙段盖住`)
+                .toBeGreaterThanOrEqual(half - 1e-6);
+            }
+            // 有洞才谈得上"开"：覆盖总长必须短于这一面的全长
+            expect(覆盖, `${def.id}/${seed} ${arena.id} 的 ${s.dim} 侧没有洞`).toBeLessThan(s.len - 1e-6);
           }
         }
       }
@@ -229,19 +245,14 @@ describe('地下城墙段与门洞的形状（B78）', () => {
       // 判据用「玩家半径」而不是门中心一个点：一个点太容易被边界擦过去 ——
       // 墙段算错时两段可以在门中心**恰好相接**，点判据擦着等号过去而玩家照样走不过去。
       //
-      // 排除被 Boss 场长墙压住的门 —— 那是另一条缺陷（B79，见下一条用例），
-      // 与本片的门洞几何无关。排除是**显式的**：判据只问"这扇门自己的墙把洞留对了吗"。
+      // 切片4i 起这里**不再排除任何门**：改前那一段 `if (arena && …) continue;` 是为了绕开
+      // B79（Boss 场的墙压住邻居的门）。B79 修好之后（0/537），那条豁免留着只会掩盖回归 ——
+      // 现在**每一扇门**都要过这一关。
       const R = 1.2;
       for (const def of DUNGEON_DEFS) {
         for (const seed of [1, 42, 12345]) {
           const { layout } = build(def, seed);
           for (const door of layout.doors) {
-            // 排除落在 Boss 场几何覆盖里的门 —— 那是 B79。用**空间判据**（这扇门是不是
-            // 在 Boss 场 34×34 的范围内）而不是按 collider 尺寸猜：普通整墙半长 9、
-            // Boss 场边半长 17，按尺寸分档会把普通墙也算成 Boss 场的。
-            const arena = layout.rooms.find((r) => r.isBossArena);
-            if (arena && Math.abs(door.x - arena.x) < arena.w / 2 + 2
-              && Math.abs(door.z - arena.z) < arena.d / 2 + 2) continue;
             const hits = (layout.colliders ?? []).filter(
               (c) => Math.abs(c.x - door.x) < c.hw + R && Math.abs(c.z - door.z) < c.hd + R
             );
@@ -251,14 +262,15 @@ describe('地下城墙段与门洞的形状（B78）', () => {
       }
     });
 
-    it('已知缺陷 B79 的规模被钉住：Boss 场的长墙越界压住了多少扇门', () => {
+    it('Boss 场的墙让开迷宫里已有的门洞（B79 已修：被压的门 83 → 0）', () => {
       // Boss 场是 34×34（跨两格），但在迷宫里只占一个格位 —— 它的四条边会伸进相邻
-      // 普通房间，把那些房间朝向它的门**整扇压住**（改前实测 83/537 = 15.5% 的门走不过去）。
+      // 普通房间，把那些房间朝向它的门**整扇压住**。改前实测 83/537 = 15.5% 的门走不过去，
+      // 逐扇归因 75 扇被整墙压、8 扇被入口两侧那两段压（`.tmp-20261009/b79-census.mjs`）。
       //
-      // 这条用例**不是**在断言"这是对的"，而是把症状钉成一个数：
-      // B79 修好之后这个数应当归零，那时把这里的期望改成 0。在此之前它是一条不许漂的读数。
+      // 修法（W-B10 切片4i）：每面墙先收集"必须没有墙"的区间（自己的门 5 米 + **别人的门**
+      // 4 米），再在剩下的区间上建墙。这条用例钉的就是修好之后的形状：**0 扇**。
+      // 残留在台账里的是 B102（场的墙**仍伸在邻居房间里** —— 一座场 ≈ 86 米，见下一条用例）。
       const R = 1.2;
-      const KNOWN_B79_BLOCKED = 83;
       let blocked = 0, doors = 0;
       for (const def of DUNGEON_DEFS) {
         for (const seed of [1, 42, 12345]) {
@@ -272,8 +284,64 @@ describe('地下城墙段与门洞的形状（B78）', () => {
           }
         }
       }
-      expect(doors).toBeGreaterThan(400);
-      expect(blocked, 'B79 的规模 —— 修好后这里应改为 0').toBe(KNOWN_B79_BLOCKED);
+      expect(doors).toBeGreaterThan(400); // 分母下限：门少了这条会绿成空转
+      expect(blocked, 'B79 又回来了 —— Boss 场的墙没让开门洞').toBe(0);
+    });
+
+    it('残留 B102 的规模被钉住：Boss 场的墙仍伸在邻居房间里多少米', () => {
+      // B79 修的是**症状**（门走不过去）。因是"34×34 的场只占一个格位"—— 它的四条边
+      // 各伸进邻居房间 8 米，所以那些墙**仍然插在别人屋里**（玩家看得见一截墙横在房间中段）。
+      // 这条把残留量钉成一个数：修它要动布局（让场真占 2×2 格位 —— 会改房间总数与
+      // `480 + rooms.length × 25` 的 Boss 血量公式；或把场收进一格 —— 会改场地大小），
+      // 两条都是产品决定，不在切片4i 里做。
+      //
+      // 量的是**真实重叠长度**（不是"段心落在屋里就算整段"）：墙段与邻居房间沿墙轴的
+      // 区间求交，逐段累加。钉住的意义：这个数不许悄悄变大（比如以后把 bossCell 调大），
+      // 也不许在没动布局的情况下被人"顺手"抹平 —— 抹平只有一种可能：场的墙没建。
+      const 重叠长 = (a1, a2, b1, b2) => Math.max(0, Math.min(a2, b2) - Math.max(a1, b1));
+      const 每场 = [];
+      let 总米 = 0;
+      for (const def of DUNGEON_DEFS) {
+        for (const seed of [1, 42, 12345]) {
+          const { layout, meshes } = build(def, seed);
+          const arena = layout.rooms.find((r) => r.isBossArena);
+          if (!arena) continue;
+          const 墙线 = [
+            { axis: 'x', at: arena.x - arena.w / 2 }, { axis: 'x', at: arena.x + arena.w / 2 },
+            { axis: 'z', at: arena.z - arena.d / 2 }, { axis: 'z', at: arena.z + arena.d / 2 },
+          ];
+          let 米 = 0;
+          for (const m of dedupeBySpot(meshes)) {
+            if (!m.userData.isWall || m.geometry.type !== 'BoxGeometry') continue;
+            if (!near(m.position.y, layout.wallH / 2, 1e-6)) continue;
+            const 线 = 墙线.find((l) => near(l.axis === 'x' ? m.position.x : m.position.z, l.at, 1e-6));
+            if (!线) continue;
+            const 沿X = 线.axis === 'x';
+            const 长 = span(m.geometry).long;
+            const 沿 = 沿X ? m.position.x : m.position.z;
+            for (const r of layout.rooms) {
+              if (r.id === arena.id) continue;
+              // 墙线要穿过这间屋（垂直方向），才谈得上重叠
+              const 垂直 = 沿X ? m.position.z : m.position.x;
+              const 屋心 = 沿X ? r.z : r.x;
+              const 屋半 = (沿X ? r.d : r.w) / 2;
+              if (Math.abs(垂直 - 屋心) >= 屋半 - 1e-6) continue;
+              const 沿心 = 沿X ? r.x : r.z;
+              const 沿半 = (沿X ? r.w : r.d) / 2;
+              米 += 重叠长(沿 - 长 / 2, 沿 + 长 / 2, 沿心 - 沿半, 沿心 + 沿半);
+            }
+          }
+          每场.push(米);
+          总米 += 米;
+        }
+      }
+      expect(每场.filter((v) => v > 0).length, '没有一场的墙插在邻居屋里 —— 那是布局变了，不是这条门禁该有的形状')
+        .toBeGreaterThan(0);
+      // 实测 21 场合计 **1803.0 米**（≈ 85.9 米/场）。为什么这么大：一面墙长 34 米，
+      // 而一格只有 18 米 —— 那条墙**几乎整条**都落在邻居房间里（34 ≈ 两个格），
+      // 三面实心边加起来就是 ~102 米，扣掉切片4i 凿开的洞，落在 86 米上下。
+      // 这也是"因"有多大的一把尺子：改布局让场真占 2×2 格位，这个数会直接归零。
+      expect(总米, 'B102 的规模 —— 变大了说明 bossCell 或布局动过，变小了说明场的墙没建全').toBeCloseTo(1803, 0);
     });
 
     it('门洞两侧确实有墙（不是因为整面墙都没建才"通"）', () => {

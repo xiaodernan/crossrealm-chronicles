@@ -429,12 +429,22 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
       }
       expect(走次, '一扇门都没走，这条就是空转').toBe(门数 * 门偏移表.length * 2);
 
-      // ② 开着：门洞没被别的墙压住的门逐扇放行。压门的几扇是 B79 的形状（开着也走不过去
-      //    的是墙），由上面的推导谓词划出去 —— 同时证明"划出去的那批"不是空集。
+      // ② 开着：门洞没被别的墙压住的门逐扇放行。
+      //
+      // **B79 修好之后（W-B10 切片4i）这个布局里已经一扇被压的门都没有了**，所以
+      // "谓词不是空转"这条自证只能靠人造样本：往一扇门的走廊正中塞一个盒子，
+      // 它必须当场被划出去、拿掉之后又回来。不这么写的话，"谓词永远返回 false" 与
+      // "真的没有压门"在读数上长得一模一样 —— 那正是这条自证当初存在的理由。
       const 可试 = layout.doors.filter((d) => !门洞被压(layout, d));
       expect(可试.length, '没有一扇门洞是干净的，谓词把全部门都划出去了').toBeGreaterThan(0);
-      expect(门数 - 可试.length, '这个布局里 B79 的压门形状应当被谓词认出来，否则「划出去」的真伪没人验过')
-        .toBeGreaterThanOrEqual(1);
+      expect(门数 - 可试.length, 'B79 又回来了 —— 有门洞被别的墙压住').toBe(0);
+      {
+        const 样本 = layout.doors[0];
+        layout.colliders.push({ x: 样本.x, z: 样本.z, hw: 1, hd: 1 });
+        expect(门洞被压(layout, 样本), '谓词认不出人造的压门盒 —— 那它划出去的东西没人验过').toBe(true);
+        layout.colliders.pop();
+        expect(门洞被压(layout, 样本), '谓词把干净的走廊也划出去了').toBe(false);
+      }
       for (const door of 可试) ProceduralDungeonGenerator.setDoorOpen(layout, door, true);
       let 放行 = 0;
       for (const door of 可试) {

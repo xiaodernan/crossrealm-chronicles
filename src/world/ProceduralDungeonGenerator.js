@@ -330,42 +330,47 @@ export class ProceduralDungeonGenerator {
     bossLight.position.set(room.x, 6, room.z);
     group.add(bossLight);
 
-    const w = room.walls;
-    
-    // Boss 场北墙
-    if (w.n) {
-      addWallSegment(group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, layout);
-    } else {
-      const door = findDoorForRoom(layout, room.id, 'n');
-      const offset = door ? door.x - room.x : 0;
-      addWallWithGap(group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, doorW, layout, false, offset);
-    }
-    
-    // Boss 场南墙
-    if (w.s) {
-      addWallSegment(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, layout);
-    } else {
-      const door = findDoorForRoom(layout, room.id, 's');
-      const offset = door ? door.x - room.x : 0;
-      addWallWithGap(group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, doorW, layout, false, offset);
-    }
-    
-    // Boss 场西墙
-    if (w.w) {
-      addWallSegment(group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, layout, true);
-    } else {
-      const door = findDoorForRoom(layout, room.id, 'w');
-      const offset = door ? door.z - room.z : 0;
-      addWallWithGap(group, wallMat, room.x - rw / 2, room.z, rd, WT, WH, doorW, layout, true, offset);
-    }
-    
-    // Boss 场东墙
-    if (w.e) {
-      addWallSegment(group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, layout, true);
-    } else {
-      const door = findDoorForRoom(layout, room.id, 'e');
-      const offset = door ? door.z - room.z : 0;
-      addWallWithGap(group, wallMat, room.x + rw / 2, room.z, rd, WT, WH, doorW, layout, true, offset);
+    /*
+     * Boss 场的四面墙（W-B10 切片4i，修 B79）。
+     *
+     * ## 修的是什么
+     *
+     * 场是 **34×34**，而迷宫里只占**一个格位**（`cellSize` 18）—— 它的四条边因此
+     * 各伸进邻居房间 8 米。改前每一面要么是一整条实心墙、要么是"中间开一个 5 米洞"的两段，
+     * 于是**压在邻居那扇门上**：实测七座 × 三颗种子 **83/537 扇门走不过去**（玩家半径 1.2 判），
+     * 逐扇归因 75 扇被整墙压、8 扇被入口两侧那两段压（`.tmp-20261009/b79-census.mjs`）。
+     * 玩家侧的说法是"走到某扇门跟前才发现过不去"。
+     *
+     * ## 修法：墙让开**迷宫里已有的门洞**
+     *
+     * 每面墙先收集"必须没有墙"的区间，再在剩下的区间上建墙。区间两个来源：
+     * 1. **它自己的门**（`walls[dir] === false`）—— 宽 `bossDoorWidth`（5 米），位置跟着门走；
+     * 2. **别人的门穿过这条墙线** —— 宽 `doorWidth`（4 米），位置跟着那扇门走。
+     *
+     * 第二条是 B79 的正面修法，判据是几何的、不是"看着像"：一条墙线（n/s 沿 x、e/w 沿 z）
+     * 与一扇门相交，当且仅当**门的开口在垂直方向上够得到这条线**（`|门的另一轴坐标 − 墙线坐标| ≤ doorWidth/2`）
+     * **且**门落在这面墙的跨度内。开洞宽度取 `doorWidth`：玩家直径 2.4 米，4 米留一倍余量，
+     * 而"够不够走"由门禁按**玩家半径**判（不是判门中心那一个点）。
+     *
+     * ## 放弃了什么（如实记）
+     *
+     * 这是**症状侧**的修法：门通了、邻居房间不再被门板压住，但**场的墙仍然伸在邻居房间里**
+     * （8×8 米那一个角）。把因也修掉要动布局 —— 让场真占 2×2 格位（会改房间总数、
+     * Boss 血量公式 `480 + rooms.length × 25` 与进度分母）或把场收进一格（会改场地大小），
+     * 两条都是产品决定。本片登记为 **B102**，读数与两条候选方向写在 §9。
+     */
+    const 洞 = bossWallGaps(room, layout, rw, rd, doorW);
+    for (const dir of ['n', 'e', 's', 'w']) {
+      const 沿Z = dir === 'e' || dir === 'w';
+      const 墙心 = 沿Z
+        ? { x: room.x + (dir === 'e' ? rw : -rw) / 2, z: room.z }
+        : { x: room.x, z: room.z + (dir === 's' ? rd : -rd) / 2 };
+      const 长 = 沿Z ? rd : rw;
+      const 轴心 = 沿Z ? room.z : room.x;
+      for (const 段 of 挖洞后的墙段(轴心, 长, 洞[dir])) {
+        if (沿Z) addWallSegment(group, wallMat, 墙心.x, 段.c, WT, 段.len, WH, layout);
+        else addWallSegment(group, wallMat, 段.c, 墙心.z, 段.len, WT, WH, layout);
+      }
     }
   }
 }
@@ -386,6 +391,84 @@ function addWallSegment(group, mat, x, z, w, d, h, layout) {
 function findDoorForRoom(layout, roomId, dir) {
   if (!layout.doors) return null;
   return layout.doors.find(d => d.fromRoomId === roomId && d.dir === dir);
+}
+
+/**
+ * Boss 场四面墙上"必须没有墙"的区间（W-B10 切片4i，修 B79）。
+ *
+ * 两个来源，见 `_buildBossArena` 里那段长注释：
+ * 1. 它自己的门（`walls[dir] === false`）—— 宽 `bossDoorWidth`；
+ * 2. 别人的门穿过这条墙线 —— 宽 `doorWidth`。
+ *
+ * 判据是纯几何的：墙线（n/s 沿 x 走、e/w 沿 z 走）与一扇门相交，当且仅当
+ * **门的开口在垂直那一轴上够得到这条线**（`|门的另一轴坐标 − 墙线坐标| ≤ doorWidth/2`）
+ * **且**门落在这一面墙的跨度内。两条都量，少一条就会在"门就在墙上但差半米"时漏掉。
+ *
+ * @returns {{n: Array<{c:number,w:number}>, e: …, s: …, w: …}} 每面墙的洞（`c` = 沿墙坐标，`w` = 洞宽）
+ */
+function bossWallGaps(room, layout, rw, rd, bossDoorW) {
+  const dw = layout.doorWidth;
+  const 洞 = { n: [], e: [], s: [], w: [] };
+
+  // ① 它自己的门：位置跟着门走（找不到门就居中 —— 与改前的 `offset = 0` 同义）
+  for (const dir of ['n', 'e', 's', 'w']) {
+    if (room.walls[dir] !== false) continue;
+    const 沿Z = dir === 'e' || dir === 'w';
+    const door = findDoorForRoom(layout, room.id, dir);
+    洞[dir].push({ c: door ? (沿Z ? door.z : door.x) : (沿Z ? room.z : room.x), w: bossDoorW });
+  }
+
+  // ② 别人的门穿过这条墙线（B79 的正面修法）
+  const 线 = {
+    n: { 轴: 'x', 坐标: room.z - rd / 2, 中心: room.x, 半: rw / 2 },
+    s: { 轴: 'x', 坐标: room.z + rd / 2, 中心: room.x, 半: rw / 2 },
+    w: { 轴: 'z', 坐标: room.x - rw / 2, 中心: room.z, 半: rd / 2 },
+    e: { 轴: 'z', 坐标: room.x + rw / 2, 中心: room.z, 半: rd / 2 },
+  };
+  for (const door of layout.doors ?? []) {
+    // 与这场自己的门不重复记（①已经记过；而且 solid 那一侧根本不会有自己的门）
+    if (door.fromRoomId === room.id || door.toRoomId === room.id) continue;
+    // 门的**墙面**沿哪一轴走：e/w 门的墙沿 z 走，n/s 门的墙沿 x 走
+    const 门墙沿Z = door.dir === 'e' || door.dir === 'w';
+    for (const dir of ['n', 'e', 's', 'w']) {
+      const L = 线[dir];
+      const 墙沿X = L.轴 === 'x';
+      // 两条线要**垂直**才谈得上相交：墙沿 x 走 ⇔ 门的墙沿 z 走
+      if (墙沿X !== 门墙沿Z) continue;
+      const 门的垂直坐标 = 墙沿X ? door.z : door.x;
+      if (Math.abs(门的垂直坐标 - L.坐标) > dw / 2) continue;
+      const 门的沿墙坐标 = 墙沿X ? door.x : door.z;
+      if (Math.abs(门的沿墙坐标 - L.中心) > L.半) continue;
+      洞[dir].push({ c: 门的沿墙坐标, w: dw });
+    }
+  }
+  return 洞;
+}
+
+/**
+ * 在一条墙线上"挖掉若干洞"之后剩下的墙段。
+ * 洞先夹到墙的跨度内、再排序合并（相邻两个洞会合成一个更宽的洞 ——
+ * 不合并的症状是两个洞之间夹一段几厘米的墙屑，既看不见又撞得到）。
+ */
+function 挖洞后的墙段(中心, 长, 洞们) {
+  const 起 = 中心 - 长 / 2;
+  const 止 = 中心 + 长 / 2;
+  const 区间 = [];
+  for (const g of 洞们 ?? []) {
+    const a = Math.max(起, g.c - g.w / 2);
+    const b = Math.min(止, g.c + g.w / 2);
+    if (b > a + 1e-9) 区间.push([a, b]);
+  }
+  区间.sort((p, q) => p[0] - q[0]);
+
+  const 段 = [];
+  let 游标 = 起;
+  for (const [a, b] of 区间) {
+    if (a > 游标 + 1e-9) 段.push({ c: (游标 + a) / 2, len: a - 游标 });
+    游标 = Math.max(游标, b);
+  }
+  if (止 > 游标 + 1e-9) 段.push({ c: (游标 + 止) / 2, len: 止 - 游标 });
+  return 段;
 }
 
 function addWallWithGap(group, mat, x, z, totalLen, thickness, h, gap, layout, alongZ = false, doorOffset = 0) {
