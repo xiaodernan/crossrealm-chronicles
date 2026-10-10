@@ -38,8 +38,11 @@ export const BossPhaseTuning = {
       speed: 7,
       damage: 24,
       attackCooldown: 0.9,
-      // P3 新增：每 0.06 次/秒期望起手一次砸地（原 `checkPhase` 里的 `rate: 0.06`）
-      // 这里留空：由 arenaScript 里的 `timed` 条目控制（见 arenaScripts.js）
+      // 无额外场地动作：shadow-warden 是纯物理近战，P3 只提速 / 加伤 / 缩冷却。
+      // （曾被注释谎称"P3 每 0.06 次/秒期望起手一次砸地，由 arenaScript 的 timed 条目控制"——
+      //   `git log -S 'rate: 0.06'` 考古已证伪：`rate: 0.06` 从来是 chaos-overlord 的 arena 条目
+      //   （arenaScripts.js），从没在 shadow-warden 的 checkPhase 里存在过；arenaScripts.js 里
+      //   shadow-warden 也只有 P2 的 melee 入场砸地。那条注释是误导，已删。）
     },
   },
 
