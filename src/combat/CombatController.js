@@ -238,7 +238,7 @@ export class CombatController {
     this.hp = Math.max(0, this.hp - hit.damage);
     this.player.characterModel?.playHit?.();
     this.audio?.playerHurt?.();
-    this.damageNumbers?.spawn(this.player.position, `-${hit.damage}${hitSuffix(hit)}`, hit.crit ? '#ff5566' : '#ff4444');
+    this.damageNumbers?.spawn(this.player.position, `-${hit.damage}${hitSuffix(hit)}`, hit.crit ? '#ff5566' : '#ff4444', hitKindOf(hit));
     this.audio?.hit?.();
     this.vitals.hp.set(this.hp);
     window.dispatchEvent(new CustomEvent('player-damaged', { detail: { hp: this.hp, maxHp: this.maxHp } }));

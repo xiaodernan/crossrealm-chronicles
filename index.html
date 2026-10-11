@@ -99,9 +99,11 @@
         <label><span data-i18n="settings_language">语言</span> <select id="set-language"></select></label>
         <!-- 难度档（W-E1 切片2）：选项由 SettingsPanel 从 difficultyOptions() 现推 -->
         <label><span data-i18n="settings_difficulty">难度</span> <select id="set-difficulty"></select></label>
+        <!-- 辅助功能（W-D6 切片8）：色觉、字幕、镜头灵敏度归入同一分区，统一入口 -->
+        <h3 data-i18n="settings_accessibility">辅助功能</h3>
         <!-- 色觉档（W-D6 切片3）：选项由 SettingsPanel 从 colorVisionOptions() 现推 -->
         <label><span data-i18n="settings_colorvision">色觉模式</span> <select id="set-colorvision"></select></label>
-        <!-- 字幕（W-D6 切片8）：把只靠声音传递的信息写到屏幕上。紧着色觉模式放 —— 两者同属辅助功能 -->
+        <!-- 字幕（W-D6 切片8）：把只靠声音传递的信息写到屏幕上 -->
         <label><input id="set-captions" type="checkbox" /> <span data-i18n="settings_captions">字幕</span></label>
         <!-- 鼠标镜头灵敏度（W-D6 切片7）：倍率不是绝对值，min/max/step 由 SettingsPanel 从 LOOK_SENSITIVITY 灌进来 -->
         <label><span data-i18n="settings_look_sensitivity">镜头灵敏度</span> <input id="set-look-sensitivity" type="range" /></label>
