@@ -133,6 +133,24 @@ describe('W-B6 切片1：effect 的每一格都真的有人读（B68 那一族�
         + `（白名单上写着：${野.map((k) => `${k} → ${SKILL_EFFECT_CONSUMERS[k].where}`).join('；')}）`,
     ).toEqual([]);
   });
+
+  it('`where` 的主文件就是真正读 `sk.<键>` 的那个文件 —— 失败信息引用 where 时不许把人带去错文件', () => {
+    const 野 = [];
+    for (const k of SKILL_EFFECT_KEYS) {
+      const where = SKILL_EFFECT_CONSUMERS[k].where;
+      // 主文件 = where 里第一个 .js 路径（`a.js → 下游` 取 a.js；`a.js 细节` 也取 a.js）
+      const primary = (where.match(/[A-Za-z0-9_/-]+\.js/) || [])[0];
+      if (!primary) { 野.push(`${k}（where 没写文件路径：${where}）`); continue; }
+      const code = readFileSync(join(ROOT, 'src', primary), 'utf8');
+      if (!code.includes(`sk.${k}`) && !code.includes(`skillMods?.${k}`)) {
+        野.push(`${k}（${primary} 里没有 sk.${k}，实际读取处在别处）`);
+      }
+    }
+    expect(
+      野,
+      `这些格子的 where 主文件对不上实际读取处 —— 门禁失败信息会把人带去错文件：${野.join('、')}`,
+    ).toEqual([]);
+  });
 });
 
 describe('W-B6 切片1：注册表不变式真的咬得住（坏表探针）', () => {

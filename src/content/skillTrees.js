@@ -55,6 +55,11 @@ export const SKILL_BRANCHES = [
  * 否则加的就是 B68 那一族（表里有、没人读）。`tests/skill-trees.test.js` 会逐格
  * 去源码里找 `sk.<键>` 或 `skillMods?.<键>`，找不到就红。
  *
+ * `where` 的**主文件 = 读 `sk.<键>` 的那个文件**（要么它直接用，要么它经 `→ 下游字段`
+ * 追到真正落地处）。门禁不光查"`sk.<键>` 在 src 某处出现"，还查**它就在 `where` 写的那个
+ * 文件里** —— 因为门禁的失败信息会把 `where` 念给开发者听（"白名单上写着：<键> → <where>"），
+ * 主文件若与实际读取处对不上，那句提示就会把人带去错文件排查。
+ *
  * 单位约定：除 `mana`（点）与 `transform`（秒）是加法外，其余都是**乘区加成的小数**
  * （0.08 = +8%）。
  *
@@ -73,9 +78,9 @@ export const SKILL_EFFECT_CONSUMERS = {
   finisher: { where: 'combat/CombatController.js 终结技半径', note: '终结技范围', base: 0.30 },
   skill: { where: 'combat/CombatController.js 位面斩（R 战技）', note: '战技伤害', base: 0.15 },
   spell: { where: 'core/Game.js → spells.weaponSpellMult', note: '法术伤害乘区', base: 0.07 },
-  charge: { where: 'combat/SpellSystem.js 蓄力那一发', note: '蓄力伤害', base: 0.14 },
-  mana: { where: 'combat/SpellSystem.js maxMana', note: '法力上限（加法，点）', base: 12 },
-  transform: { where: 'combat/SpellSystem.js transformTimer', note: '大圣化身时长（加法，秒）', base: 3 },
+  charge: { where: 'core/Game.js → spells.chargeBonus', note: '蓄力伤害', base: 0.14 },
+  mana: { where: 'core/Game.js → spells.bonusMana', note: '法力上限（加法，点）', base: 12 },
+  transform: { where: 'core/Game.js → spells.transformBonus', note: '大圣化身时长（加法，秒）', base: 3 },
 };
 
 /** `effect` 的允许键（由上面那份表推导 —— 不许再手抄第二份） */
