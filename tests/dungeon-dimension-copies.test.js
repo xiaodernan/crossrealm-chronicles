@@ -51,7 +51,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import * as THREE from 'three';
 import { ProceduralDungeonGenerator } from '../src/world/ProceduralDungeonGenerator.js';
-import { generateMaze } from '../src/world/MazeLayout.js';
+import { generateMaze, spanCenter, spanOf, cellsOf } from '../src/world/MazeLayout.js';
 import { DungeonManager } from '../src/world/DungeonManager.js';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
 import { dungeonEncounterOf } from '../src/content/dungeonEncounters.js';
@@ -177,6 +177,10 @@ const 门偏移表 = [0, 0.7, 1.4, -0.7, -1.4];
 const 推挤边距 = 0.45;
 /** 关着的门沿通道轴把人停住的半轴 = 沿通道半轴 + 推力边距（两族同值，B84 修完才有这条同值） */
 const 停人距离 = DIM.DOOR_COLLIDER_HALF_DEPTH + 推挤边距;
+/** 撞墙那条从墙外多远的地方起步走进来（B99 的读数：这 1.2 米不该把玩家甩到别处） */
+const 撞墙伸臂 = 1.2;
+/** `clampPlayer` 进门先过的 `clampToBounds(…, 1)` —— 可站区的边界余量，量撞墙时绕不开 */
+const 边界余量 = 1;
 
 /**
  * clampPlayer 夹具（切片4h）：只借真原型这一个方法 —— `active` 挂上布局就能跑
@@ -220,6 +224,50 @@ function 门洞被压(layout, door) {
   return false;
 }
 
+/**
+ * 会推人的盒子名册：墙段 + **还关着且有碰撞盒**的门。
+ * 口径与 `clampPlayer` 里那两圈 `推()` 一致 —— 漏掉门就等于假设门不挡人。
+ */
+function 推手名册(layout) {
+  const 盒 = [...(layout.colliders ?? [])];
+  for (const d of layout.doors ?? []) if (!d.open && d.collider) 盒.push(d.collider);
+  return 盒;
+}
+
+/**
+ * 一面**可量的普通墙段**（撞墙那条的选尺子口径，切片5d 之后才需要）：
+ * 形状是"薄而长"、走廊两端落在 `clampToBounds` 的可站区里、且那条走廊只归它一面管。
+ *
+ * 为什么不能像改前那样拿"第一枚 `hw≤1 && hd≥2`"：5d 把 Boss 场收成 2×2 之后
+ * `colliders` 的头一枚同款恰好是最外侧那道墙（`x = bounds.minX = -63`），
+ * 它的整条走廊在可站区之外 —— 玩家第一步就被边界接走，量到的是**边界落点 3.28 米**，
+ * 不是墙面 0.75 米。那条红读的是我的尺子，不是 B99。
+ * 谓词由布局推导、不点名 id，下面的用例带它自己的正反武装样本。
+ */
+function 可量墙段(layout, c) {
+  if (!(c.hw <= 1 && c.hd >= 2)) return false;
+  const b = layout.bounds;
+  const 可站 = (v, lo, hi) => v > lo + 边界余量 && v < hi - 边界余量;
+  const 外沿 = c.hw + 推挤边距 + 撞墙伸臂;
+  if (!可站(c.x - 外沿, b.minX, b.maxX) || !可站(c.x + 外沿, b.minX, b.maxX) || !可站(c.z, b.minZ, b.maxZ)) return false;
+  const 面 = c.hw + 推挤边距;
+  const 走廊 = [-1, 1].map((side) => {
+    const a = c.x + side * 面, d = c.x + side * 外沿;
+    return { lo: Math.min(a, d), hi: Math.max(a, d) };
+  });
+  for (const 廊 of 走廊) {
+    for (const q of 推手名册(layout)) {
+      if (q === c) continue;
+      const eps = 1e-9; // 走廊的近端正好贴在这面墙自己的扩展盒边界上
+      if (Math.abs(c.z - q.z) >= q.hd + 推挤边距 - eps) continue;
+      if (q.x + q.hw + 推挤边距 <= 廊.lo + eps) continue;
+      if (q.x - q.hw - 推挤边距 >= 廊.hi - eps) continue;
+      return false;
+    }
+  }
+  return true;
+}
+
 describe('地下城尺寸事实的抄本收口（切片4f）', () => {
   it('誊写基准是实存在册的（这几份文件都还在役）', () => {
     expect(基准提交).toMatch(/^[0-9a-f]{7,40}$/);
@@ -241,6 +289,30 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
       // 名册不许漏：那份文件里所有 export 的数都必须有名有姓
       const 实际 = Object.keys(DIM).filter((k) => typeof DIM[k] === 'number').sort();
       expect(实际).toEqual([...声明名册].sort());
+    });
+
+    it('洞宽的**档名**也只有一份：HOLE_WIDTH_CARRIERS 说的两枚都得是布局的载体', () => {
+      // 切片5d 让门带的是档名（`door.holeWidthCarrier`），数字留在 `layout` 上 —— 于是"抄数字"
+      // 换成了"抄字符串"：`{ normal: 'doorWdith' }` 这种一半的改动不会崩，只会让几何层
+      // 按 `门洞宽()` 抛（那一条有），而编辑器的 `LAYOUT_SIZE_CARRIERS` 照旧导出另一套键名。
+      // 所以这里对账的是**名字**：两档都得在载体名册里，且反向也认（载体里没有第三档洞宽）。
+      const 档 = Object.values(DIM.HOLE_WIDTH_CARRIERS);
+      expect(new Set(档).size, '两档洞宽不许同名').toBe(档.length);
+      for (const 名 of 档) {
+        expect(载体字段, `${名} 不是布局的载体`).toContain(名);
+        const 值 = LAYOUT_SIZE_CARRIERS[名];
+        expect(typeof 值, `${名} 背后得有声明那一份数`).toBe('number');
+        expect(Number.isFinite(值) && 值 > 0, `${名} = ${值}`).toBe(true);
+      }
+      // 布局的六枚里"洞宽"这一族必须恰好是这两档：多一枚就是又一档没人认的洞宽
+      const 洞宽族 = 载体字段.filter((名) => /Width$/.test(名)).sort();
+      expect(洞宽族, '载体里的洞宽档与门认的档对不上').toEqual([...档].sort());
+      // 抄本反证：档名不是在 `reconcileOccupancy` 里手写的字符串
+      const 源 = 去注释(readFileSync(join(SRC, 'world/MazeLayout.js'), 'utf8'));
+      const 手写 = 数(/holeWidthCarrier:\s*['"]/ , 源);
+      expect(手写, '门名单里手抄了档名字面量').toBe(0);
+      // arming：这一把尺认得"手抄"那一形（把上面那一行换成字面量就该数到 1）
+      expect(数(/holeWidthCarrier:\s*['"]/, `holeWidthCarrier: 'doorWidth',`)).toBe(1);
     });
 
     it('src/world 里没有第二份尺寸声明（同一把尺在旧字节上数得到）', () => {
@@ -298,10 +370,17 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
             const 边 = r.isBossArena ? layout.bossCell : layout.cellSize;
             expect(r.w, `${def.id}/${seed} ${r.id} 的宽`).toBe(边);
             expect(r.d, `${def.id}/${seed} ${r.id} 的深`).toBe(边);
-            // 生产者的口径是"网格居中"：x = (gx − gridW/2) * cellSize。
-            // 编辑器用的是另一套（x = gx * cellSize）—— 那两条对不上就是 ⑦ 层要钉的 B86。
-            expect(r.x, `${def.id}/${seed} ${r.id} 的 x`).toBeCloseTo((r.gx - def.gridW / 2) * layout.cellSize, 6);
-            expect(r.z, `${def.id}/${seed} ${r.id} 的 z`).toBeCloseTo((r.gz - def.gridH / 2) * layout.cellSize, 6);
+            // 场占的那几格必须真的占着 `BOSS_SPAN²` 格，而不是"写着 36 米却只站一格"（B102 的因）
+            expect(cellsOf(r), `${def.id}/${seed} ${r.id} 占的格数`).toHaveLength(
+              r.isBossArena ? DIM.BOSS_SPAN * DIM.BOSS_SPAN : 1
+            );
+            // 生产者的口径是"网格居中"，跨格的房再往东南挪半个跨距：`spanCenter` 是那条话的唯一一份，
+            // 这里**不重抄公式** —— 手抄一遍就等于再造一个 B86（1×1 时它逐字退回 `(gx − 格数/2)*格长`）。
+            // 编辑器用的是另一套（改前 x = gx * cellSize）—— 那两条对不上就是 ⑦ 层要钉的 B86。
+            expect(r.x, `${def.id}/${seed} ${r.id} 的 x`)
+              .toBeCloseTo(spanCenter(r.gx, spanOf(r, 'x'), def.gridW, layout.cellSize), 6);
+            expect(r.z, `${def.id}/${seed} ${r.id} 的 z`)
+              .toBeCloseTo(spanCenter(r.gz, spanOf(r, 'z'), def.gridH, layout.cellSize), 6);
             if (r.isBossArena) 场++; else 普通++;
           }
         }
@@ -342,14 +421,22 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
   });
 
   describe('④ 派生层：门板 / 门框 / 门碰撞跟着洞宽走', () => {
-    it.each([[4], [6], [2.5]])('doorWidth = %s 时，量出来的洞、门板让缝、门框收边与碰撞半轴全部自洽', (洞宽) => {
-      const { layout, meshes } = build(DUNGEON_DEFS[0], 42, (l) => { l.doorWidth = 洞宽; });
+    it.each([[4], [6], [2.5]])('doorWidth = %s（boss 档另取 +1）时，量出来的洞、门板让缝、门框收边与碰撞半轴全部自洽', (洞宽) => {
+      // 两档**各改各的**：切片5d 之后一扇进场门认的是 `bossDoorWidth`，把它也跟着 `doorWidth` 量
+      // 就等于宣布"两档其实是一档"。逐扇问 `layout[door.holeWidthCarrier]` 才是那条合同的原话。
+      const { layout, meshes } = build(DUNGEON_DEFS[0], 42, (l) => {
+        l.doorWidth = 洞宽;
+        l.bossDoorWidth = 洞宽 + 1;
+      });
       expect(layout.doors.length).toBeGreaterThan(20);
+      let 进场的 = 0;
       for (const door of layout.doors) {
+        const 这一档 = layout[door.holeWidthCarrier];
         const 洞 = 量门洞(layout, meshes, door);
         expect(洞, `${door.id} 量不到洞`).not.toBeNull();
         // 洞宽真的由布局说了算：不是"改了字段而几何照旧"
-        expect(洞, `${door.id} 的洞没跟着 layout.doorWidth 走`).toBeCloseTo(洞宽, 6);
+        expect(洞, `${door.id} 的洞没跟着 ${door.holeWidthCarrier} 走`).toBeCloseTo(这一档, 6);
+        if (这一档 === layout.bossDoorWidth) 进场的++;
 
         const 板 = layout.doorMeshes.find((m) => m.userData.door?.id === door.id).geometry.parameters.width;
         const 框 = meshes.find((m) => m.userData.isFrame
@@ -367,6 +454,9 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
         expect(跨洞在x ? door.collider.hw : door.collider.hd, `${door.id} 的碰撞跨洞半轴`).toBeCloseTo(洞 / 2, 6);
         expect(跨洞在x ? door.collider.hd : door.collider.hw, `${door.id} 的碰撞沿通道半轴`).toBeCloseTo(DIM.DOOR_COLLIDER_HALF_DEPTH, 6);
       }
+      // 两档各有门认（否则上面那条循环只量到一档，另一档改了也没人红）
+      expect(进场的, '一座迷宫里一扇进场门都没有').toBeGreaterThan(0);
+      expect(进场的).toBeLessThan(layout.doors.length);
     });
 
     it('门碰撞轴向随 dir 转：跨洞半轴 = 洞宽 / 2、沿通道半轴 = DOOR_COLLIDER_HALF_DEPTH（切片4h 修 B84）', () => {
@@ -375,9 +465,9 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
       // （形状读数 `.tmp-20261004/wb10s4f-census.log` ③；行为读数 `.tmp-20261007/wb10s4h-probe.mjs`）。
       // 这一条**不是在说形状对不对**，是把两族的四格半轴逐扇钉住。
       const { layout } = build(DUNGEON_DEFS[0], 42);
-      const 半 = layout.doorWidth / 2;
       let n = 0, e = 0;
       for (const door of layout.doors) {
+        const 半 = layout[door.holeWidthCarrier] / 2;
         const c = door.collider;
         if (door.dir === 'n' || door.dir === 's') {
           expect(c.hw, `${door.id} 南北向门跨洞半轴（x）`).toBeCloseTo(半, 6);
@@ -499,11 +589,23 @@ describe('地下城尺寸事实的抄本收口（切片4f）', () => {
           expect((终[通道] - door[通道]) * side, `${door.id} 贴门没被推回该侧`).toBeCloseTo(停人距离, 6);
         }
       }
-      // ③ 撞墙不再传送（B99 的正反面）：一面普通墙段（按形状推导，不点名 id），
+      // ③ 撞墙不再传送（B99 的正反面）：一面**可量的**普通墙段（形状 + 走廊独占 + 可站区推导，不点名 id），
       //    从侧面走进 1.2 米 —— 停在墙面前 0.75 米（半厚 0.3 + 边距 0.45），不是十几米外。
       //    改前的落点写的是 `origin ± 半轴`：这一走会把玩家从墙边甩到 4993 米外的另一条坐标上。
-      const 墙 = (layout.colliders ?? []).find((c) => c.hw <= 1 && c.hd >= 2);
-      expect(墙, '找不到一面普通墙段（按形状推导）').toBeDefined();
+      const 墙 = layout.colliders.find((c) => 可量墙段(layout, c));
+      expect(墙, '找不到一面可量的普通墙段（按形状 + 走廊 + 边界推导）').toBeDefined();
+      // ③′ 选尺子那条谓词不是空转：往它的走廊里塞一枚人造盒，必须当场不再可选，拿走又回来。
+      //     不这么钉的话，"谓词把所有墙都划出去"与"谓词真的在挑干净的墙"在读数上分不开。
+      {
+        const 人造 = { x: 墙.x - (墙.hw + 推挤边距 + 0.6), z: 墙.z, hw: 0.3, hd: 2 };
+        layout.colliders.push(人造);
+        expect(可量墙段(layout, 墙), '走廊里多了一枚盒子，谓词还说这面墙能量撞墙').toBe(false);
+        layout.colliders.pop();
+        expect(可量墙段(layout, 墙), '人造盒已经拿走，谓词却不肯放行').toBe(true);
+        // 边界那一档同款自证：把同样形状的盒贴着 bounds 边放，可站区必须把它划掉
+        // （切片5d 之后 `colliders` 的头一枚同款正是这种墙，缺这一档就没人说过它为什么不能拿来量）。
+        expect(可量墙段(layout, { ...墙, x: layout.bounds.minX + 0.2 }), '贴着边界的墙段被放行了 —— 那 3.28 米的读数没人挡').toBe(false);
+      }
       for (const side of [-1, 1]) {
         const 起 = { x: 墙.x + side * (墙.hw + 0.45 + 1.2), z: 墙.z };
         const 终 = 夹.走(起, { x: -side * 0.12, z: 0 }, 20);

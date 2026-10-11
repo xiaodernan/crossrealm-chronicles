@@ -40,9 +40,13 @@ export const 在役文件 = [
   'world/DungeonManager.js',
 ];
 
-/** 声明层：`src/world/` 里唯一一份尺寸名册，每个名字恰好声明一次 */
+/**
+ * 声明层：`src/world/` 里唯一一份尺寸名册，每个名字恰好声明一次。
+ * `BOSS_SPAN`（切片5d 新加的"场跨几格"）在里面：场的边长由它派生，所以它是一枚**尺寸事实**，
+ * 而名册是"所有导出的数都得有名有姓"那一条 —— 少登记一枚，那条就整句作废。
+ */
 export const 声明名册 = [
-  'CELL', 'BOSS_CELL', 'WALL_H', 'WALL_T', 'DOOR_WIDTH', 'BOSS_DOOR_WIDTH',
+  'CELL', 'BOSS_SPAN', 'BOSS_CELL', 'WALL_H', 'WALL_T', 'DOOR_WIDTH', 'BOSS_DOOR_WIDTH',
   'DOOR_JAMB', 'DOOR_H', 'DOOR_T', 'DOOR_FRAME_OVER', 'DOOR_FRAME_H', 'DOOR_FRAME_T',
   'DOOR_COLLIDER_HALF_DEPTH', 'SPAWN_SPAN_MARGIN',
 ];

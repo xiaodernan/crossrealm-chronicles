@@ -33,6 +33,7 @@ import { CONTENT_TABLES, checkContent, checkDungeons, checkTable } from '../src/
 import { MAINLINE } from '../src/content/objectives.js';
 import { DUNGEON_BOSS_LINES } from '../src/content/bossDialogue.js';
 import { ProceduralDungeonGenerator } from '../src/world/ProceduralDungeonGenerator.js';
+import { BOSS_SPAN } from '../src/world/dungeonDimensions.js';
 import { DungeonManager } from '../src/world/DungeonManager.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
@@ -279,7 +280,11 @@ describe('③ 真读者：几何与门口物件都按表起', () => {
         const layout = ProceduralDungeonGenerator.generate(def, seed);
         expect(layout.gridW, `${def.id} 的宽度`).toBe(def.gridW);
         expect(layout.gridH, `${def.id} 的高度`).toBe(def.gridH);
-        expect(layout.rooms).toHaveLength(def.gridW * def.gridH);
+        // 一间房 ≠ 一格了（切片5d）：Boss 场把 `BOSS_SPAN × BOSS_SPAN` 格并成一间，
+        // 块内另外三格连同它们的怪与文献一起从名单里退出 —— 所以房间数是格数减那个跨距，
+        // 这一枚减数由 `BOSS_SPAN` 说话，不写 25/36 这种按座数各抄一份的死数。
+        expect(layout.rooms, `${def.id} 的房间数（${def.gridW}×${def.gridH} 格里有一块 ${BOSS_SPAN}×${BOSS_SPAN} 的场）`)
+          .toHaveLength(def.gridW * def.gridH - (BOSS_SPAN * BOSS_SPAN - 1));
         expect(layout.theme, `${def.id} 的母题色`).toBe(def.theme);
         expect(layout.accent, `${def.id} 的点缀色`).toBe(def.accent);
         expect(layout.name, `${def.id} 的名字（HUD 与过场都显示它）`).toBe(def.name);

@@ -41,6 +41,7 @@ import { DUNGEON_DEFS, DUNGEON_IDS } from '../src/content/dungeons.js';
 import { ENEMY_ROSTER } from '../src/content/enemies.js';
 import { CONTENT_TABLES, checkContent, checkDungeonEncounters, checkTable } from '../src/content/registry.js';
 import { generateMaze } from '../src/world/MazeLayout.js';
+import { BOSS_SPAN } from '../src/world/dungeonDimensions.js';
 import { ProceduralDungeonGenerator } from '../src/world/ProceduralDungeonGenerator.js';
 
 const ROOT = process.cwd();
@@ -390,7 +391,9 @@ describe('⑤ 分布读数即验收：五座各打各的仗（对照普查 M2 �
   it('有怪的房间数与旧口径一致（出生房与 Boss 房恒空，其余每间都派怪）', () => {
     for (const def of DUNGEON_DEFS) {
       const { 有怪房, 房间数 } = 普查[def.id];
-      const 每局房间 = def.gridW * def.gridH;
+      // 一间房 ≠ 一格（切片5d）：Boss 场把 `BOSS_SPAN × BOSS_SPAN` 格并成一间，块内另外三格
+      // 连同它们的怪一起从名单里退出。所以"每局房间"这枚减数由跨距说话，不再等于格数。
+      const 每局房间 = def.gridW * def.gridH - (BOSS_SPAN * BOSS_SPAN - 1);
       const 每局空房 = 2; // 玩家出生房 + Boss 大房（遭遇表管不着那一间）
       expect(有怪房, `${def.id} 的有怪房数对不上`).toBe(200 * (每局房间 - 每局空房));
       expect(房间数).toBe(200 * 每局房间);

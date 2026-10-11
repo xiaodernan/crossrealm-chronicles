@@ -34,10 +34,13 @@
  * 1. **墙与门由占用推导，规则只有一份**：`MazeLayout.reconcileOccupancy` —— 生成器造门问它，
  *    编辑器每次改动之后也问它。编辑器这一侧不再自己写"哪一面是墙"。
  *    放置这个动作自带连通（`_开向邻居`：那一边邻着一间房就开门），因为工具的意义就是
- *    "摆几间房连成一座关"；而**导入**只推导不改写（生成的迷宫两侧旗标本就成对，门名单摘要
- *    `e298c99d5619d7d0` 逐字节不变），所以它不会把回溯树抹成满格网格。
- * 2. **坐标口径只有一对函数**：`cellCenter` / `cellIndex`（吃 `layout.gridW/gridH/cellSize`）。
+ *    "摆几间房连成一座关"；而**导入**只推导不改写（生成的迷宫两侧旗标本就成对、门位逐毫米
+ *    相同），所以它不会把回溯树抹成满格网格。
+ * 2. **坐标口径只有一对函数，跨格另有它们的一般式**：`cellCenter` / `cellIndex` 是 1×1 的特例，
+ *    跨格的房问 `spanCenter` / `spanAnchorIndex`（同一对数加/减半个跨距，`span = 1` 时逐毫米退回前者）。
  *    放置、拖动、反推格号、网格辅助线全部问它们，B86 因此没有第三条路可漂。
+ *    拖动反推的是**锚格**：2×2 的场房心落在四格中央的十字线上，按 `cellIndex` 反推会得到最靠
+ *    东南那一格，于是"位置一毫米没动"的一次拖动就把锚搬走一格 —— 那是 B86 的又一形。
  * 3. **画面摆在数据说的那个位置**：`Group` 就是那间房（`group.position = (room.x, 0, room.z)`），
  *    盒子在 `Group` 里只抬到 `房盒高/2`；改名同时换 `roomMeshes` 的键与 `userData.roomId`。
  *    拖动被拒绝（那格已有房 / 出了网格）时**数据与图都不动** —— B88 的"图在动数据不动"
@@ -46,10 +49,16 @@
  *    删除走 `disposeDungeonSubtree`（它**跳过**共享的那几份）。于是"忘了释放"在构造上不可能，
  *    而"顺手把副本共用的几何释放掉"（B76 的另一种死法）由同一条跳过挡住。
  *
- * ## 这一片**没有**动的两件事（已登记，见台账）
- * - Boss 场那 9 扇门仍然站在邻居的格线上（±9 而不是 ±17）、Boss 场自己 5 米的洞上没有门板 ——
- *   那是 B85 的形状问题。占用推导把门位写成"两房房心中正"，对生成的迷宫与改前逐毫米相同，
- *   所以 B85 原样留着，没有借重构偷偷改它。
+ * ## 改过的一件（W-B10 切片5d 顺带搬走的）
+ * - Boss 场真占 2×2 格位之后，场的墙线就是格线，朝它开的那些门逐毫米落在**场自己的墙上** ——
+ *   原本登记在这里的那条"9 扇门仍站在邻居格线（±9 而不是 ±17）、场四面墙一扇门板都没有"（B85）
+ *   已由占用推导与几何层一起修掉，没有留在这一片里。编辑器这一侧跟着搬的两件：
+ *   `_在网格里` / `_格子被占` / `_updateRoomPosition` 认**整块占位**（只按锚格判 = 把场拖进别人怀里），
+ *   `_开向邻居` 按**每条格子边**开旗（按房间级四面旗写 = 场的一面墙只开一条边，另一条建出实墙），
+ *   `_导出载荷` 带 `cells` / `cellWalls` / `isBossArena` 三份（少了后两份，导回来的跨格房会被
+ *   `reconcileOccupancy` 当场点名；少了 `isBossArena`，那扇门会悄悄退回普通洞宽那一档）。
+ *
+ * ## 这一片**没有**动的一件事（已登记，见台账）
  * - 编辑器还不画墙与门洞（只有房盒与标签）。把"每面墙 / 每个洞"画进视口需要一段能被副本与
  *   编辑器共用的墙段实现，那是切片2。
  */
@@ -61,6 +70,7 @@ import {
 } from './dungeonDimensions.js';
 import {
   DIR_STEP, DIR_OPPOSITE, DIRS, cellCenter, cellIndex, reconcileOccupancy,
+  cellsOf, cellOffsets, spanOf, spanCenter, spanAnchorIndex, setEdgeFlag,
 } from './MazeLayout.js';
 import { sharedBox, dungeonMaterial, disposeDungeonSubtree } from './dungeonAssets.js';
 import { codeFor } from '../content/keybinds.js';
@@ -82,6 +92,13 @@ export const LAYOUT_SIZE_CARRIERS = {
   bossDoorWidth: BOSS_DOOR_WIDTH,
 };
 const 载体名册 = Object.keys(LAYOUT_SIZE_CARRIERS);
+/**
+ * 把逐格边旗抄一层再交给 JSON：导出的载荷不能带活引用（改了导出的那份，画面里那间房跟着变，
+ * 而按钮上写的是"导出"）。四个方向从 `DIRS` 走，不在这里重抄一遍名字。
+ */
+const 抄逐格旗 = (表) => Object.fromEntries(
+  Object.entries(表).map(([格, 旗]) => [格, Object.fromEntries(DIRS.map((d) => [d, 旗[d]]))]),
+);
 
 export class LevelEditor {
   constructor(scene, camera, renderer, domElement) {
@@ -373,12 +390,30 @@ export class LevelEditor {
 
   /* ===== 占用与坐标（规则本体在 `MazeLayout.reconcileOccupancy`） ===== */
 
-  _在网格里(gx, gz) {
-    return gx >= 0 && gx < this.layout.gridW && gz >= 0 && gz < this.layout.gridH;
+  /**
+   * 锚格落在 (`gx`,`gz`) 时，这一间房占的那些格是否**全部**在网格里。
+   * `room` 不给就是 1×1（编辑器自己放的模板房）。跨格的场只能整块搬：留一格出界就整次拒绝 ——
+   * 分开搬出来的 `cells` 会撕成两半，而 `reconcileOccupancy` 的整数格校验正是拦那一形的。
+   */
+  _在网格里(gx, gz, room = null) {
+    return (room ? cellOffsets(room) : [[0, 0]]).every(([dx, dz]) => {
+      const x = gx + dx;
+      const z = gz + dz;
+      return x >= 0 && x < this.layout.gridW && z >= 0 && z < this.layout.gridH;
+    });
   }
 
+  /** 这一格被哪间房占着（跨格的房在它占的**任何**一格上都算邻居 —— 按锚格找会漏掉三格） */
+  _占格者(gx, gz) {
+    return this.layout.rooms.find((r) => cellsOf(r).some(([cx, cz]) => cx === gx && cz === gz)) ?? null;
+  }
+
+  /** 锚格落在 (`gx`,`gz`) 时是否与别的房撞格：把这一间要占的那些格逐格问 `_占格者` */
   _格子被占(gx, gz, 除了) {
-    return this.layout.rooms.some((r) => r !== 除了 && r.gx === gx && r.gz === gz);
+    return (除了 ? cellOffsets(除了) : [[0, 0]]).some(([dx, dz]) => {
+      const 占 = this._占格者(gx + dx, gz + dz);
+      return 占 !== null && 占 !== 除了;
+    });
   }
 
   /** 每次改动之后都问一遍规则：旗标归一、门名单重导（`previousDoors` 只用来继承 open/locked） */
@@ -386,20 +421,55 @@ export class LevelEditor {
     this.layout.doors = reconcileOccupancy(this.layout.rooms, this.layout.doors ?? []);
   }
 
-  /** 放置自带连通：那一边邻着一间房就把两面旗标一起开（规则的另一侧由 `_重建墙与门` 兜） */
+  /**
+   * 放置自带连通：那一边邻着一间房就把**这一条格子边**的两面旗标一起开（并侧由 `_重建墙与门` 兜）。
+   * 改前它按房间级四面旗写：对跨格的房等于"一面墙只有一条边"—— 场的北墙是两条格子边，
+   * 于是只开一条，另一条照旗标建出实墙；而 `cellWalls` 一旦存在，房间级那份旗就不再是它的对手。
+   */
   _开向邻居(room) {
-    for (const dir of DIRS) {
-      const [dx, dz] = DIR_STEP[dir];
-      const nb = this.layout.rooms.find((r) => r.gx === room.gx + dx && r.gz === room.gz + dz);
-      if (!nb) continue;
-      room.walls[dir] = false;
-      nb.walls[DIR_OPPOSITE[dir]] = false;
+    for (const [cx, cz] of cellsOf(room)) {
+      for (const dir of DIRS) {
+        const [dx, dz] = DIR_STEP[dir];
+        const 邻x = cx + dx;
+        const 邻z = cz + dz;
+        const nb = this._占格者(邻x, 邻z);
+        if (!nb || nb === room) continue; // 场内部那两条边：自己那一格不是邻居
+        setEdgeFlag(room, cx, cz, dir, false);
+        setEdgeFlag(nb, 邻x, 邻z, DIR_OPPOSITE[dir], false);
+      }
     }
+  }
+
+  /**
+   * 把一间房整体搬到新的锚格：`cells` 与 `cellWalls` 的**键**一起搬。
+   * 只改锚格不改那两份 = 占位还留在原地，下一次推导立刻报"两间房站在同一格"；
+   * 改了 `cells` 不改 `cellWalls` 的键 = 每条边旗找不到自己那一格，回落到房间级旗，
+   * "北墙两条边一条开一条封"就变成"两条都开"（那正是口径 1 要禁的走不通的洞）。
+   */
+  _搬格(room, 锚x, 锚z) {
+    const dx = 锚x - room.gx;
+    const dz = 锚z - room.gz;
+    if (dx === 0 && dz === 0) return;
+    if (room.cells) room.cells = room.cells.map(([cx, cz]) => [cx + dx, cz + dz]);
+    if (room.cellWalls) {
+      const 搬过 = {};
+      for (const [格, 旗] of Object.entries(room.cellWalls)) {
+        const [cx, cz] = 格.split(',').map(Number);
+        搬过[`${cx + dx},${cz + dz}`] = 旗;
+      }
+      room.cellWalls = 搬过;
+    }
+    room.gx = 锚x;
+    room.gz = 锚z;
   }
 
   _addRoomAt(gx, gz, templateKey) {
     if (!this.layout) return null;
     if (!this._在网格里(gx, gz)) return null;
+    // 占位而不是房号：跨格的场只有锚格叫 `r_2_2`，把它盖住的那三格（`r_2_3` 等）另有一间房
+    // 是放不下的 —— 改前这里只比对 id，于是放进去之后 `_重建墙与门` 报"两间房站在同一格"，
+    // 而一次鼠标左键不该把编辑器带崩。
+    if (this._格子被占(gx, gz)) return null;
     const id = `r_${gx}_${gz}`;
     if (this.layout.rooms.some((r) => r.id === id)) return null;
 
@@ -446,18 +516,19 @@ export class LevelEditor {
    * 把房间挪到世界坐标 (x, z) 所落的那一格 —— **数据与图的唯一写入口**。
    * 拒绝两种落点：出了网格、那格已有别的房；拒绝时返回 false 且两边都不动。
    * 改名是同生同死的：`roomMeshes` 的键、`Group.userData.roomId`、标签文字、画面位置一起走（B88）。
+   * 反推的是**锚格**：2×2 的场，房心正好落在四格中央的十字线上，用 `cellIndex` 反推会得到
+   * 最靠东南的那一格，于是"位置一毫米没动"的一次拖动就把锚搬走一格（B86 的又一形）。
    */
   _updateRoomPosition(roomId, x, z) {
     const room = this.layout.rooms.find((r) => r.id === roomId);
     if (!room) return false;
-    const gx = cellIndex(x, this.layout.gridW, this.layout.cellSize);
-    const gz = cellIndex(z, this.layout.gridH, this.layout.cellSize);
-    if (!this._在网格里(gx, gz)) return false;
+    const gx = spanAnchorIndex(x, this.layout.gridW, this.layout.cellSize, spanOf(room, 'x'));
+    const gz = spanAnchorIndex(z, this.layout.gridH, this.layout.cellSize, spanOf(room, 'z'));
+    if (!this._在网格里(gx, gz, room)) return false;
     if (this._格子被占(gx, gz, room)) return false;
-    room.gx = gx;
-    room.gz = gz;
-    room.x = cellCenter(gx, this.layout.gridW, this.layout.cellSize);
-    room.z = cellCenter(gz, this.layout.gridH, this.layout.cellSize);
+    this._搬格(room, gx, gz);
+    room.x = spanCenter(gx, spanOf(room, 'x'), this.layout.gridW, this.layout.cellSize);
+    room.z = spanCenter(gz, spanOf(room, 'z'), this.layout.gridH, this.layout.cellSize);
     const 新id = `r_${gx}_${gz}`;
     if (新id !== room.id) this._改名(room, 新id);
     this._摆可视化(room);
@@ -664,7 +735,12 @@ export class LevelEditor {
     this.setLayout(this.layout);
   }
 
-  /** 导出的那份载荷：面板按钮与门禁用例读同一个对象，两边不会各说一套 */
+  /**
+   * 导出的那份载荷：面板按钮与门禁用例读同一个对象，两边不会各说一套。
+   * `cells` 与 `cellWalls` 只在房真的跨格时才带（1×1 的房由 `cellsOf` 回落成 `[[gx,gz]]`，
+   * 把回落值抄进 JSON 就是再造一份抄本 —— 而 `reconcileOccupancy` 认的是"跨格必须逐格交代"，
+   * 少了这张表的载荷导回来会当场点名，而不是悄悄把一条边旗复制到四条边上）。
+   */
   _导出载荷() {
     const 尺寸 = {};
     for (const 名 of 载体名册) 尺寸[名] = this.layout[名];
@@ -681,9 +757,12 @@ export class LevelEditor {
         w: r.w,
         d: r.d,
         walls: { n: r.walls.n, e: r.walls.e, s: r.walls.s, w: r.walls.w },
+        ...(r.cells ? { cells: r.cells.map(([cx, cz]) => [cx, cz]) } : {}),
+        ...(r.cellWalls ? { cellWalls: 抄逐格旗(r.cellWalls) } : {}),
         templateKey: r.templateKey,
         enemySpawns: r.enemySpawns,
         lore: r.lore,
+        ...(r.isBossArena ? { isBossArena: true } : {}),
       })),
       doors: this.layout.doors.map((d) => ({
         id: d.id,

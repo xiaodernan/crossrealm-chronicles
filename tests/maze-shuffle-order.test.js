@@ -33,7 +33,7 @@
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { generateMaze, shuffle } from '../src/world/MazeLayout.js';
+import { generateMaze, shuffle, cellsOf } from '../src/world/MazeLayout.js';
 import { LORE_FRAGMENTS } from '../src/game/LoreFragments.js';
 import { ProceduralDungeonGenerator } from '../src/world/ProceduralDungeonGenerator.js';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
@@ -106,9 +106,22 @@ function 测试流(seed) {
 
 const 电池 = [0, 1, 2, -1, -2, 2147483647, -2147483647, 4294967294, 2 ** 32, Number.MAX_SAFE_INTEGER];
 
-/** 按数组序读出 `r_gx_gz`：网格序的定义就是"下标 i ⇒ gx=i%宽、gz=⌊i/宽⌋" */
+/**
+ * 按数组序读出 `r_gx_gz`：网格序的定义就是"下标 i ⇒ gx=i%宽、gz=⌊i/宽⌋"。
+ *
+ * 切片5d 之后 Boss 场把 2×2 四格并成**锚格那一间**，另外三格从名单里退出（它们的怪与文献随房一起没了），
+ * 所以名单是"网格序挖掉块内那三格"。挖哪三格由布局自己说（`cellsOf(场)` 去掉它的锚格），不手抄块坐标；
+ * 场站在哪一席也有唯一答案：`合并成场` 排回 `gz*宽+gx`，因为它的 id 说的就是锚格（B86）。
+ */
 const 数组序 = (l) => l.rooms.map((r) => r.id).join(',');
-const 网格序 = (l) => Array.from({ length: l.gridW * l.gridH }, (_, i) => `r_${i % l.gridW}_${Math.floor(i / l.gridW)}`).join(',');
+const 网格序 = (l) => {
+  const 场 = l.rooms.find((r) => r.isBossArena);
+  const 退格 = new Set(
+    场 ? cellsOf(场).filter(([cx, cz]) => cx !== 场.gx || cz !== 场.gz).map(([cx, cz]) => `r_${cx}_${cz}`) : [],
+  );
+  return Array.from({ length: l.gridW * l.gridH }, (_, i) => `r_${i % l.gridW}_${Math.floor(i / l.gridW)}`)
+    .filter((id) => !退格.has(id)).join(',');
+};
 const 文献串 = (l) => l.rooms.map((r) => (r.lore ? r.lore.id : '-')).join(',');
 
 const 摇样 = Array.from({ length: 600 }, (_, i) => i + 1);
@@ -203,7 +216,7 @@ describe('④ 名册不被污染：generateMaze 不许在 LORE_FRAGMENTS 上留�
 });
 
 describe('⑤ 返回体的房间序是网格序（不再有谁也没声明过的随机序）', () => {
-  it('电池种子上：下标 i 就是 gx=i%宽、gz=⌊i/宽⌋', () => {
+  it('电池种子上：名单就是网格序，Boss 场只占它锚格那一席', () => {
     for (const s of 电池) {
       const l = generateMaze(5, 5, s, 几何格);
       expect(数组序(l), `seed=${s} 的 rooms 不是网格序：${数组序(l).slice(0, 40)}…`).toBe(网格序(l));
@@ -285,11 +298,17 @@ describe('⑦ 文献的黄金签名：换洗法必须让这一条红，而不是
    * 而 `maze-seed-domain` 的 `布局签` 量的东西全在洗牌之前（房间数/门数/出口/编组/偏移）——
    * 少冻这一条，那一臂就静默通过。数值两条路各算一次（`.tmp-20261002/wb10s4b-refreeze.mjs` S2
    * 与本用例第一次跑红的 `Received:`），对得上才写进来。
+   *
+   * **切片5d 重冻**（三颗全换）：场并掉三格之后名单短了三位，"哪一篇给哪间"的落点自然重排。
+   * 归因不是"跑红了就换数"：同一份脚本里 `⑤ 网格序` 的两位口径（数组序 vs 由 `cellsOf(场)` 推出的
+   * 期望序）在电池 10 颗 + 真入口 28 座上**全绿**，而 ⑥ 的覆盖/不重复/出生出口房不带那些玩法不变量
+   * 一条没动 —— 换的只有"哪一间在场"，不是发放那套流。数值同样两条路各算一遍
+   * （`.tmp-wb10s5d/pins.mjs` ② 与本用例的 `Received:`）。
    */
   const 黄金 = [
-    [20261001, '-,lore-vecna,-,-,-,lore-nine,-,lore-upside,-,lore-murphy,-,lore-saloon,lore-jump-gate,-,-,-,lore-inter,-,-,lore-wizard,lore-duel,lore-wormhole,-,-,-'],
-    [7, '-,-,-,-,-,lore-5,-,-,lore-6,-,lore-4,-,-,-,-,lore-3,lore-vecna,lore-wormhole,lore-1,-,-,lore-ai-core,-,-,-'],
-    [-3, '-,-,lore-5,lore-murphy,-,lore-speakeasy,lore-2,-,lore-duel,lore-wizard,lore-1,-,-,-,lore-cantina,lore-3,-,-,-,-,lore-torii,lore-7,-,lore-arcade,-'],
+    [20261001, '-,-,lore-broom,lore-saloon,lore-2,-,lore-ai-core,-,lore-inter,-,lore-wizard,-,lore-obelisk,lore-6,lore-speakeasy,-,lore-4,-,-,-,-,-'],
+    [7, '-,lore-upside,-,-,lore-1,-,-,lore-6,-,lore-murphy,lore-arcade,-,lore-4,-,-,lore-saloon,-,-,-,lore-wormhole,lore-3,lore-nine'],
+    [-3, '-,lore-wizard,-,-,-,lore-speakeasy,lore-wormhole,lore-8,-,lore-cantina,-,lore-ai-core,lore-neon,-,lore-torii,-,-,-,-,lore-jump-gate,lore-4,lore-inter'],
   ];
   for (const [seed, 期望] of 黄金) {
     it(`seed=${seed} 的文献落点签名`, () => {

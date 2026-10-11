@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { generateMaze, makeSeededRng } from './MazeLayout.js';
+import { generateMaze, makeSeededRng, doorsOnSide } from './MazeLayout.js';
 import { dungeonEncounterOf } from '../content/dungeonEncounters.js';
 import {
   sharedBox, sharedCircle, sharedTorus, dungeonMaterial,
@@ -12,7 +12,7 @@ import { ROOM_TEMPLATES, templateFitsRoom, requiredPortCount, openPorts } from '
 import { applyShadow } from '../engine/shadowPolicy.js';
 import {
   DOOR_JAMB, DOOR_H, DOOR_T, DOOR_FRAME_OVER, DOOR_FRAME_H, DOOR_FRAME_T,
-  DOOR_COLLIDER_HALF_DEPTH,
+  DOOR_COLLIDER_HALF_DEPTH, HOLE_WIDTH_CARRIERS,
 } from './dungeonDimensions.js';
 
 /** 程序化迷宫地下城 — 多房间、多门、可探索 */
@@ -100,7 +100,6 @@ export class ProceduralDungeonGenerator {
 
     const WH = layout.wallH;
     const WT = layout.wallT;
-    const doorW = layout.doorWidth;
 
     // 模板分配吃迷宫自己那颗种子（切片4e）：同一颗种子必须永远得到同一座迷宫，
     // 不然"存档里的种子"与关卡编辑器的复现就没了根据 —— 那是 B75 一整片的立论。
@@ -119,7 +118,7 @@ export class ProceduralDungeonGenerator {
       }
 
       // 标准房间几何：地面、墙、门洞（必须始终执行，保证门洞形状正确，W-B10 切片4c）
-      this._buildRoomGeometry(room, layout, def, floorMat, wallMat, accentMat, doorW, WH, WT);
+      this._buildRoomGeometry(room, layout, def, floorMat, wallMat, WH, WT);
 
       // 模板只往已经建好的房间里摆装饰（切片4e 的合同：不再叠一层地面/墙、不再加灯）
       room.template.buildInterior(room.group, room, layout, def, {
@@ -146,7 +145,8 @@ export class ProceduralDungeonGenerator {
     for (const door of layout.doors) {
       // 门板几何走 uvBox（以米计 UV，W-C5 切片3）：木纹是竖板+压条的图案，
       // 铺数只能有一个（1 / 一板两米），UV 不乘尺寸的话每扇门都会拉成不一样宽
-      const panel = new THREE.Mesh(uvBox(doorW - 2 * DOOR_JAMB, DOOR_H, DOOR_T), doorClosedMat);
+      const 洞 = 门洞宽(layout, door);
+      const panel = new THREE.Mesh(uvBox(洞 - 2 * DOOR_JAMB, DOOR_H, DOOR_T), doorClosedMat);
       panel.position.set(door.x, DOOR_H / 2, door.z);
       if (door.dir === 'n' || door.dir === 's') panel.rotation.y = 0;
       else panel.rotation.y = Math.PI / 2;
@@ -159,7 +159,7 @@ export class ProceduralDungeonGenerator {
       // 轴向随 dir 转**（切片4h 修 B84 —— 改前长轴恒在 x：246 扇东西向门的跨洞半轴只有
       // 0.45 米（洞半宽 2.00），关着的门在洞口两侧各留 0.7 米可穿过的缝，又在门前 2.45 米
       // 处凭空挡人）。n/s 门跨洞在 x、e/w 门跨洞在 z。
-      const 跨洞半轴 = doorW / 2;
+      const 跨洞半轴 = 洞 / 2;
       const 沿通道半轴 = DOOR_COLLIDER_HALF_DEPTH;
       const 跨洞在x = door.dir === 'n' || door.dir === 's';
       door.collider = {
@@ -170,7 +170,7 @@ export class ProceduralDungeonGenerator {
       };
 
       const frame = new THREE.Mesh(
-        sharedBox(doorW + DOOR_FRAME_OVER, DOOR_FRAME_H, DOOR_FRAME_T), accentMat);
+        sharedBox(洞 + DOOR_FRAME_OVER, DOOR_FRAME_H, DOOR_FRAME_T), accentMat);
       frame.position.copy(panel.position);
       frame.position.y = DOOR_FRAME_H / 2;
       if (door.dir === 'e' || door.dir === 'w') frame.rotation.y = Math.PI / 2;
@@ -180,8 +180,16 @@ export class ProceduralDungeonGenerator {
     }
   }
 
-  /** 标准房间几何：地面、墙、门洞（W-B10 切片4c，修 B78） */
-  static _buildRoomGeometry(room, layout, def, floorMat, wallMat, accentMat, doorW, WH, WT) {
+  /**
+   * 标准房间几何：地面、墙、门洞（W-B10 切片4c 修 B78；切片5d 起洞宽与洞位都由**那扇门**说话）。
+   *
+   * 改前这一面墙的洞宽是调用方递进来的一个数（`layout.doorWidth`），洞位是"门心减房心"的偏移：
+   * 于是朝 Boss 场开的那一面墙按 4 米凿洞、门板却按 5 米做（场墙那一档），两侧各建一遍还互不相认。
+   * 现在一条墙线上的每一个洞都从 `doorsOnSide` 认领：位置取那扇门自己的沿墙坐标，宽度取
+   * `门洞宽(layout, door)`（口径 4 —— 一条共用墙线是两房合建的一面，宽度由**门**决定认哪一档，
+   * 数字本身留在 `layout` 上，所以导一份 `doorWidth: 6` 的布局进来，门真的跟着变宽）。
+   */
+  static _buildRoomGeometry(room, layout, def, floorMat, wallMat, WH, WT) {
     const rw = room.w;
     const rd = room.d;
 
@@ -198,48 +206,20 @@ export class ProceduralDungeonGenerator {
     room.group.add(torch);
 
     // 外墙与门洞（W-B10 切片4c，修 B78 + B79）
-    const w = room.walls;
-    
-    // 北墙
-    if (w.n) {
-      addWallSegment(room.group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, layout);
-    } else {
-      const door = findDoorForRoom(layout, room.id, 'n');
-      const offset = door ? door.x - room.x : 0;
-      addWallWithGap(room.group, wallMat, room.x, room.z - rd / 2, rw, WT, WH, doorW, layout, false, offset);
-    }
-    
-    // 南墙
-    if (w.s) {
-      addWallSegment(room.group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, layout);
-    } else {
-      const door = findDoorForRoom(layout, room.id, 's');
-      const offset = door ? door.x - room.x : 0;
-      addWallWithGap(room.group, wallMat, room.x, room.z + rd / 2, rw, WT, WH, doorW, layout, false, offset);
-    }
-    
-    // 西墙
-    if (w.w) {
-      addWallSegment(room.group, wallMat, room.x - rw / 2, room.z, WT, rd, WH, layout, true);
-    } else {
-      const door = findDoorForRoom(layout, room.id, 'w');
-      const offset = door ? door.z - room.z : 0;
-      addWallWithGap(room.group, wallMat, room.x - rw / 2, room.z, rd, WT, WH, doorW, layout, true, offset);
-    }
-    
-    // 东墙
-    if (w.e) {
-      addWallSegment(room.group, wallMat, room.x + rw / 2, room.z, WT, rd, WH, layout, true);
-    } else {
-      const door = findDoorForRoom(layout, room.id, 'e');
-      const offset = door ? door.z - room.z : 0;
-      addWallWithGap(room.group, wallMat, room.x + rw / 2, room.z, rd, WT, WH, doorW, layout, true, offset);
+    const 面 = [
+      ['n', false, room.x, room.z - rd / 2, rw],
+      ['s', false, room.x, room.z + rd / 2, rw],
+      ['w', true, room.x - rw / 2, room.z, rd],
+      ['e', true, room.x + rw / 2, room.z, rd],
+    ];
+    for (const [dir, 沿Z, 心x, 心z, 长] of 面) {
+      建一面墙(room.group, wallMat, 心x, 心z, 长, 洞在面(room, layout, dir, 沿Z), WH, WT, 沿Z, layout);
     }
   }
 
   /**
    * 给每间房分配模板（W-B10 切片4e）。三条口径：
-   * - **Boss 场不套模板**：它由 `_buildBossArena` 自己建，34×34 也不在任何模板的尺寸假设里。
+   * - **Boss 场不套模板**：它由 `_buildBossArena` 自己建，36×36（两格见方）也不在任何模板的尺寸假设里。
    * - **只从贴合的模板里挑**（`templateFitsRoom`）：模板声明"必须有门"的方向，房间必须真的开着门。
    *   这一条从根上禁掉旧写法里名字与端口互相矛盾的那些分配（死路房领 `lore:double-door`，
    *   而那个模板声明 n、s 都必开 —— 死路房只有一扇门）。
@@ -278,7 +258,6 @@ export class ProceduralDungeonGenerator {
     const rd = room.d;
     const WH = layout.wallH;
     const WT = layout.wallT;
-    const doorW = layout.bossDoorWidth;
 
     // 石板地面（W-C5 切片2）：地面是圆盘（CircleGeometry 的 UV 是 0..1 跨整个直径），
     // 铺数按**直径 / tileMeters** 算 —— 每块石板在任何一座 Boss 场都是同一个尺寸。
@@ -331,55 +310,43 @@ export class ProceduralDungeonGenerator {
     group.add(bossLight);
 
     /*
-     * Boss 场的四面墙（W-B10 切片4i，修 B79）。
+     * Boss 场的四面墙（W-B10 切片4i 修 B79 的症状；切片5d 把因一起修掉，B85 / B102 归零）。
      *
      * ## 修的是什么
      *
-     * 场是 **34×34**，而迷宫里只占**一个格位**（`cellSize` 18）—— 它的四条边因此
-     * 各伸进邻居房间 8 米。改前每一面要么是一整条实心墙、要么是"中间开一个 5 米洞"的两段，
-     * 于是**压在邻居那扇门上**：实测七座 × 三颗种子 **83/537 扇门走不过去**（玩家半径 1.2 判），
-     * 逐扇归因 75 扇被整墙压、8 扇被入口两侧那两段压（`.tmp-20261009/b79-census.mjs`）。
-     * 玩家侧的说法是"走到某扇门跟前才发现过不去"。
+     * 改前场是 **34×34** 而只占**一个格位**（`cellSize` 18）—— 它的四条边因此各伸进邻居房间 8 米。
+     * 每一面要么是一整条实心墙、要么是"中间开一个 5 米洞"的两段，于是**压在邻居那扇门上**：
+     * 实测七座 × 三颗种子 **83/537 扇门走不过去**（玩家半径 1.2 判），逐扇归因 75 扇被整墙压、
+     * 8 扇被入口两侧那两段压。玩家侧的说法是"走到某扇门跟前才发现过不去"。
      *
-     * ## 修法：墙让开**迷宫里已有的门洞**
+     * ## 两道口径，一道防线
      *
-     * 每面墙先收集"必须没有墙"的区间，再在剩下的区间上建墙。区间两个来源：
-     * 1. **它自己的门**（`walls[dir] === false`）—— 宽 `bossDoorWidth`（5 米），位置跟着门走；
-     * 2. **别人的门穿过这条墙线** —— 宽 `doorWidth`（4 米），位置跟着那扇门走。
-     *
-     * 第二条是 B79 的正面修法，判据是几何的、不是"看着像"：一条墙线（n/s 沿 x、e/w 沿 z）
-     * 与一扇门相交，当且仅当**门的开口在垂直方向上够得到这条线**（`|门的另一轴坐标 − 墙线坐标| ≤ doorWidth/2`）
-     * **且**门落在这面墙的跨度内。开洞宽度取 `doorWidth`：玩家直径 2.4 米，4 米留一倍余量，
-     * 而"够不够走"由门禁按**玩家半径**判（不是判门中心那一个点）。
+     * 每面墙先收集"必须没有墙"的区间（`bossWallGaps`），再在剩下的区间上建墙：
+     * 1. **它自己的门** —— 与标准房间同一条口径（`洞在面`）：一条格子边一扇门，一面墙可以两个洞，
+     *    洞宽认这扇门自己说的档位。切片5d 之前这里是"第一扇门 + 一个递进来的 5"，
+     *    所以朝场开的那九扇门**没有一扇**落在场自己的墙上（B85）。
+     * 2. **别人的门穿过这条墙线** —— 5d 之后**恒为空**：场真占 2×2 格位，墙线就是格线，
+     *    没有门再穿进场墙。这一层留着当防线，理由见 `bossWallGaps` 的注释。
      *
      * ## 放弃了什么（如实记）
      *
-     * 这是**症状侧**的修法：门通了、邻居房间不再被门板压住，但**场的墙仍然伸在邻居房间里**
-     * （34 米的一面墙 ≈ 两个 18 米格，几乎整条都落在别人屋里，实测 21 场合计 1803 米）。
-     * 把因也修掉要动布局 —— 让场真占 2×2 格位（`BOSS_CELL` 由 `2 × CELL` 派生、四格之间的
-     * 隔墙在进 `reconcileOccupancy` 之前封掉）或把场收进一格（会改场地大小），
-     * 两条都是产品决定。本片登记为 **B102**，读数与两条候选方向写在 §9。
+     * 场占两格 ⇒ 那三间被并进场里的邻居**不再存在**：它们的敌人出生点、文献、模板一起消失，
+     * 每座迷宫 25 间房变 22 间。换到的是"墙线 == 格线"这条结构性保证 ——
+     * 布局层面再也写不出"比自己的占位更宽的场"，B102（墙横在别人屋里，改前 21 场合计 1803 米）
+     * 因此不是"量出来变小"，是**造不出来**。
      *
-     * ## 与"占位改成 2×2"那一刀的关系（写给未来的自己）
+     * ## 与"占位改回一格"那一刀的关系（写给未来的自己）
      *
-     * 那一刀落下来之后，**不再有门穿过场墙**，于是本片这一层会变成**空转**
-     * （每面墙只剩"自己那个门"一个洞）。到那时它可以删，也可以留着当防线 ——
-     * 留着的价值是：布局一旦改回一格占位（或被别的东西重新排布），门**立刻**又是通的，
-     * 而不是要等到有人再走一遍 537 扇门才发现。删它的唯一理由是"少一层没人读的代码"，
-     * 而这一层**有人读**：`tests/dungeon-wall-gap.test.js` 的 B79 那一条按玩家半径逐扇量。
+     * 若将来把场收进一格（`BOSS_SPAN = 1`），第 2 层会重新吃到东西，而**门立刻还是通的** ——
+     * 这一层的价值就在这里：它不需要有人再走一遍全场门才发现墙压了门。
      */
-    const 洞 = bossWallGaps(room, layout, rw, rd, doorW);
+    const 洞 = bossWallGaps(room, layout, rw, rd);
     for (const dir of ['n', 'e', 's', 'w']) {
       const 沿Z = dir === 'e' || dir === 'w';
-      const 墙心 = 沿Z
-        ? { x: room.x + (dir === 'e' ? rw : -rw) / 2, z: room.z }
-        : { x: room.x, z: room.z + (dir === 's' ? rd : -rd) / 2 };
-      const 长 = 沿Z ? rd : rw;
-      const 轴心 = 沿Z ? room.z : room.x;
-      for (const 段 of 挖洞后的墙段(轴心, 长, 洞[dir])) {
-        if (沿Z) addWallSegment(group, wallMat, 墙心.x, 段.c, WT, 段.len, WH, layout);
-        else addWallSegment(group, wallMat, 段.c, 墙心.z, 段.len, WT, WH, layout);
-      }
+      建一面墙(group, wallMat,
+        dir === 'e' ? room.x + rw / 2 : dir === 'w' ? room.x - rw / 2 : room.x,
+        dir === 's' ? room.z + rd / 2 : dir === 'n' ? room.z - rd / 2 : room.z,
+        沿Z ? rd : rw, 洞[dir], WH, WT, 沿Z, layout);
     }
   }
 }
@@ -395,39 +362,93 @@ function addWallSegment(group, mat, x, z, w, d, h, layout) {
 }
 
 /**
- * 找某间房在某个方向上的门（如果有的话）
+ * **这一扇门所在那个洞的宽度**（W-B10 切片5d，占用推导的口径 4）。
+ *
+ * 门只带载体名（`holeWidthCarrier` = `'doorWidth'` / `'bossDoorWidth'`），数字仍留在 `layout` 上 ——
+ * 把 4 或 5 焊进门名单就是再造一份抄本：导一份 `doorWidth: 6` 的布局进来，墙上的洞是 6 米而门板
+ * 还是 4 米，症状是每侧见光一米，跟切片4f 修掉的那 0.25 米同一族。
+ * 两条读不到的路都要**当场抛**而不是兜到默认档：认不出档名说明这扇门不是这套几何造出来的
+ * （手写 JSON 或旧版存档），兜默认档的症状是朝场的那扇门悄悄退回 4 米，而 537 扇门的宽度读数
+ * 看起来"还挺整齐"。
  */
-function findDoorForRoom(layout, roomId, dir) {
-  if (!layout.doors) return null;
-  return layout.doors.find(d => d.fromRoomId === roomId && d.dir === dir);
+function 门洞宽(layout, door) {
+  const 载体 = door.holeWidthCarrier;
+  if (!Object.values(HOLE_WIDTH_CARRIERS).includes(载体)) {
+    throw new TypeError(
+      `门 ${door.id ?? '(无 id)'} 的 holeWidthCarrier = ${JSON.stringify(载体)} —— 只认 `
+      + `${JSON.stringify(Object.values(HOLE_WIDTH_CARRIERS))}（由 reconcileOccupancy 写下，W-B10 切片5d）`
+    );
+  }
+  const 宽 = layout[载体];
+  if (!(typeof 宽 === 'number' && Number.isFinite(宽) && 宽 > 0)) {
+    throw new TypeError(
+      `布局的尺寸载体 ${载体} = ${JSON.stringify(宽)} 不是一个正数 —— 门 ${door.id} 说不出自己的洞多宽`
+      + '（`buildGeometry` 开头那份「缺哪一个尺寸字段」的同族，W-B10 切片5d）'
+    );
+  }
+  return 宽;
 }
 
 /**
- * Boss 场四面墙上"必须没有墙"的区间（W-B10 切片4i，修 B79）。
+ * 这一间房朝 `dir` 的那一面墙上**必须没有墙**的区间（洞位与洞宽都由门名单说话）。
  *
- * 两个来源，见 `_buildBossArena` 里那段长注释：
- * 1. 它自己的门（`walls[dir] === false`）—— 宽 `bossDoorWidth`；
- * 2. 别人的门穿过这条墙线 —— 宽 `doorWidth`。
+ * 为什么按"这一面"而不是"这一扇门"：占 2×2 的 Boss 场，它的"北墙"是**两条格子边**，
+ * 可以各开一扇门 —— 改前 `findDoorForRoom` 只回第一扇，第二扇门的位置就没人凿洞，
+ * 门板站在一整条实心墙上（那正是 B85 的形状）。
+ * 一条边的旗标是 false ⇒ 那一条边上一定有一扇以这面为 `dir` 的门（占用推导演示过这件事），
+ * 所以数量对不上就是名单与旗标脱节，交给 `tests/dungeon-wall-gap.test.js` 的 B79 那一条按半径逐扇量。
+ */
+function 洞在面(room, layout, dir, 沿Z) {
+  if (room.walls[dir] !== false) return [];
+  return doorsOnSide(layout, room, dir).map((d) => ({ c: 沿Z ? d.z : d.x, w: 门洞宽(layout, d) }));
+}
+
+/**
+ * 一条墙线：把"必须没有墙"的区间挖掉之后，剩下的墙段逐段建出来（W-B10 切片5d 收口）。
+ *
+ * 这里原本有两份：`addWallWithGap`（一段墙一个居中的洞，洞宽由调用方递一个数）和
+ * `bossWallGaps` 里那段自建循环。两份合起来的症状是"一面墙只能有一个洞"，
+ * 而跨两格的场一面墙可以有两个洞。合成一份之后洞的**数量**与**宽度**都只有一条口径。
+ */
+function 建一面墙(group, mat, 心x, 心z, 长, 洞们, WH, WT, 沿Z, layout) {
+  const 中心 = 沿Z ? 心z : 心x;
+  if (!洞们.length) {
+    addWallSegment(group, mat, 心x, 心z, 沿Z ? WT : 长, 沿Z ? 长 : WT, WH, layout);
+    return;
+  }
+  for (const 段 of 挖洞后的墙段(中心, 长, 洞们)) {
+    addWallSegment(group, mat,
+      沿Z ? 心x : 段.c, 沿Z ? 段.c : 心z,
+      沿Z ? WT : 段.len, 沿Z ? 段.len : WT, WH, layout);
+  }
+}
+/**
+ * Boss 场四面墙上"必须没有墙"的区间（W-B10 切片4i 修 B79 的症状；切片5d 起 ① 由门名单认领）。
+ *
+ * 两个来源：
+ * 1. **它自己的门** —— 走 `洞在面`，与标准房间同一条口径：位置取那扇门自己的沿墙坐标，
+ *    宽度取 `门洞宽(layout, door)`（改前这里是"第一扇门 + 一个调用方递进来的 `bossDoorW`"，
+ *    所以跨两格的场一面北墙只凿得到一个洞，第二扇门站在实心墙上 —— 那是 B85）；
+ * 2. **别人的门穿过这条墙线** —— 切片5d 之后**应该恒为空**（场真占 2×2 格位，墙线就是格线，
+ *    没有门再穿进场墙）。留着它不是留代码，是留防线：布局一旦改回一格占位或被别的东西重新
+ *    排布，门**立刻**还是通的，而不是要等到有人再走一遍全场门才发现。宽度同样问 `门洞宽`，
+ *    不再抄 `layout.doorWidth`。
  *
  * 判据是纯几何的：墙线（n/s 沿 x 走、e/w 沿 z 走）与一扇门相交，当且仅当
- * **门的开口在垂直那一轴上够得到这条线**（`|门的另一轴坐标 − 墙线坐标| ≤ doorWidth/2`）
+ * **门的开口在垂直那一轴上够得到这条线**（`|门的另一轴坐标 − 墙线坐标| ≤ 洞宽 / 2`）
  * **且**门落在这一面墙的跨度内。两条都量，少一条就会在"门就在墙上但差半米"时漏掉。
  *
  * @returns {{n: Array<{c:number,w:number}>, e: …, s: …, w: …}} 每面墙的洞（`c` = 沿墙坐标，`w` = 洞宽）
  */
-function bossWallGaps(room, layout, rw, rd, bossDoorW) {
-  const dw = layout.doorWidth;
+function bossWallGaps(room, layout, rw, rd) {
   const 洞 = { n: [], e: [], s: [], w: [] };
 
-  // ① 它自己的门：位置跟着门走（找不到门就居中 —— 与改前的 `offset = 0` 同义）
+  // ① 它自己的门（一条边上有一扇就是一个洞，一面墙可以有两个洞）
   for (const dir of ['n', 'e', 's', 'w']) {
-    if (room.walls[dir] !== false) continue;
-    const 沿Z = dir === 'e' || dir === 'w';
-    const door = findDoorForRoom(layout, room.id, dir);
-    洞[dir].push({ c: door ? (沿Z ? door.z : door.x) : (沿Z ? room.z : room.x), w: bossDoorW });
+    洞[dir].push(...洞在面(room, layout, dir, dir === 'e' || dir === 'w'));
   }
 
-  // ② 别人的门穿过这条墙线（B79 的正面修法）
+  // ② 别人的门穿过这条墙线（B79 的正面修法；5d 起恒为空，留着当防线）
   const 线 = {
     n: { 轴: 'x', 坐标: room.z - rd / 2, 中心: room.x, 半: rw / 2 },
     s: { 轴: 'x', 坐标: room.z + rd / 2, 中心: room.x, 半: rw / 2 },
@@ -437,6 +458,7 @@ function bossWallGaps(room, layout, rw, rd, bossDoorW) {
   for (const door of layout.doors ?? []) {
     // 与这场自己的门不重复记（①已经记过；而且 solid 那一侧根本不会有自己的门）
     if (door.fromRoomId === room.id || door.toRoomId === room.id) continue;
+    const dw = 门洞宽(layout, door);
     // 门的**墙面**沿哪一轴走：e/w 门的墙沿 z 走，n/s 门的墙沿 x 走
     const 门墙沿Z = door.dir === 'e' || door.dir === 'w';
     for (const dir of ['n', 'e', 's', 'w']) {
@@ -478,27 +500,6 @@ function 挖洞后的墙段(中心, 长, 洞们) {
   }
   if (止 > 游标 + 1e-9) 段.push({ c: (游标 + 止) / 2, len: 止 - 游标 });
   return 段;
-}
-
-function addWallWithGap(group, mat, x, z, totalLen, thickness, h, gap, layout, alongZ = false, doorOffset = 0) {
-  // doorOffset: 门中心相对于墙中心的偏移（正数表示沿轴正方向偏移）
-  // 如果没有传 doorOffset，默认门在墙中心（gap 居中）
-  const seg = (totalLen - gap) / 2;
-  const centerOffset = doorOffset;
-  
-  if (alongZ) {
-    // 沿 Z 轴的墙（南北墙），门偏移影响 z 坐标
-    const seg1Z = z - totalLen / 2 + seg / 2 + centerOffset;
-    const seg2Z = z + totalLen / 2 - seg / 2 + centerOffset;
-    addWallSegment(group, mat, x, seg1Z, thickness, seg, h, layout);
-    addWallSegment(group, mat, x, seg2Z, thickness, seg, h, layout);
-  } else {
-    // 沿 X 轴的墙（东西墙），门偏移影响 x 坐标
-    const seg1X = x - totalLen / 2 + seg / 2 + centerOffset;
-    const seg2X = x + totalLen / 2 - seg / 2 + centerOffset;
-    addWallSegment(group, mat, seg1X, z, seg, thickness, h, layout);
-    addWallSegment(group, mat, seg2X, z, seg, thickness, h, layout);
-  }
 }
 
 function pushCollider(layout, x, z, w, d) {

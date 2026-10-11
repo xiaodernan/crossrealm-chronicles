@@ -711,13 +711,19 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
     const 板 = layout.doorMeshes;
     expect(板.length, '一扇门都没量到').toBeGreaterThan(20);
     const 砖 = 1 / SURFACE_SPECS.plank.tileMeters;
+    const 档名册 = new Set();
     for (const m of 板) {
       expect(m.material.normalMap, `${m.name} 的门板没有法线图`).not.toBe(null);
       expect(m.material.roughnessMap, `${m.name} 的门板没有粗糙度图`).not.toBe(null);
       expect(m.material.roughness, '贴图在时 material.roughness 必须是 1（贴图是唯一真源）').toBe(1);
       expect(m.material.normalMap.repeat.x, '门板木纹的铺数与 tileMeters 脱节').toBeCloseTo(砖, 9);
       const p = m.geometry.parameters;
-      expect(p.width, '门板宽该还是"洞宽减两侧让缝"的派生量').toBeCloseTo(layout.doorWidth - 2 * DOOR_JAMB, 6);
+      // 洞宽按**这扇门自己的那一档**问（切片5d：朝 Boss 场开的门走 `bossDoorWidth`）。
+      // 改前这里抄的是 `layout.doorWidth` 一枚 —— 那时候确实所有洞同宽，两档之后它就是半对半错。
+      const 档 = m.userData.door.holeWidthCarrier;
+      档名册.add(档);
+      expect(p.width, `${m.name}（${档}）的门板宽该还是"洞宽减两侧让缝"的派生量`)
+        .toBeCloseTo(layout[档] - 2 * DOOR_JAMB, 6);
       // 逐面：UV 以米计（uvBox），铺数乘上去每面都恰好一个 2 米见方 —— 门板是 3.9×4.2 的一张脸
       const 实测面 = 逐面盒实测(m.geometry);
       const 期望面 = 盒面期望(p.width, p.height, p.depth);
@@ -728,7 +734,11 @@ describe('⑤ 副本接线：地面 / 墙 / 柱都贴上了，且 UV 以米计',
       expect(isSharedAsset(m.geometry), '门板几何不在共享库里').toBe(true);
     }
     expect(new Set(板.map((m) => m.material)).size, '全部门板该共用一份材质（颜色与副本无关）').toBe(1);
-    expect(new Set(板.map((m) => m.geometry)).size, '全部门板该共用一份几何').toBe(1);
+    // 几何的份数由**这座副本真用到的档数**说了算（同一档的门共用一份），不是手抄的 1。
+    // 这一条同时是切片5d 的记账：朝场开的门与朝普通房的门洞不同宽，共用一份几何就必然贴错边。
+    const 期望份数 = 档名册.size;
+    expect(期望份数, '一档门都没量到 —— 上面那个循环是空转').toBeGreaterThanOrEqual(1);
+    expect(new Set(板.map((m) => m.geometry)).size, `门板几何该一档一份（这座用到 ${[...档名册].join('/')}）`).toBe(期望份数);
   });
 
   it('七座副本：贴/不贴两种面各 21 份材料，反复 build 缓存零增长（B76 的账在贴图之后照样成立）', () => {
