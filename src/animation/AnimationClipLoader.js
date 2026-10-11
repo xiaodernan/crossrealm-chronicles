@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 /**
  * 动画片段加载器 —— 统一加载 glTF/KFB/JSON 等格式的动画（W-C6 切片3）。
@@ -13,8 +14,8 @@ export class AnimationClipLoader {
    * @param {THREE.LoadingManager} [manager] - 共享加载管理器
    */
   constructor(manager = null) {
-    this.loader = manager ? new THREE.GLTFLoader(manager) : new THREE.GLTFLoader();
-    this._cache = new Map(); // url -> Promise<AnimationClip[]>
+    this.loader = manager ? new GLTFLoader(manager) : new GLTFLoader();
+    this._cache = new Map(); // url -> Promise<Map<name, AnimationClip>>（未过滤的原件）
   }
 
   /**
@@ -24,20 +25,27 @@ export class AnimationClipLoader {
    * @returns {Promise<Map<string, THREE.AnimationClip>>}
    */
   async loadGLTF(url, actionNames = null) {
-    if (this._cache.has(url)) return this._cache.get(url);
-
-    const promise = this.loader.loadAsync(url).then((gltf) => {
-      const clips = new Map();
-      for (const clip of gltf.animations) {
-        if (!actionNames || actionNames.includes(clip.name)) {
+    // 缓存的是**原件**：过滤写在读取侧（切片3 补测）。早先这里把「首个调用方的
+    // actionNames 过滤结果」按 url 存了下来 —— 同一个模型第二次要别的动作时，
+    // 拿到的是别人那份过滤结果，而且不会报错，只会悄悄少动画。
+    if (!this._cache.has(url)) {
+      this._cache.set(url, this.loader.loadAsync(url).then((gltf) => {
+        const clips = new Map();
+        for (const clip of gltf.animations) {
           clips.set(clip.name, clip);
         }
-      }
-      return clips;
-    });
+        return clips;
+      }));
+    }
 
-    this._cache.set(url, promise);
-    return promise;
+    const all = await this._cache.get(url);
+    if (!actionNames) return new Map(all);
+    const picked = new Map();
+    for (const name of actionNames) {
+      const clip = all.get(name);
+      if (clip) picked.set(name, clip);
+    }
+    return picked;
   }
 
   /**
