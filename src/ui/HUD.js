@@ -79,16 +79,16 @@ buildHUD() {
           </div>
         </div>
         <div class="hud-stats" id="hud-stats">
-          <div class="stat-item" id="souls-display" data-ktext="魂 {souls} · Lv.{level}"></div>
-          <div class="stat-item" id="chapter-display" data-ktext="Chapter {chapter}"></div>
-          <div class="stat-item" id="coord-display" data-ktext="X: {x} · Z: {z}"></div>
-          <div class="stat-item" id="discovery-count" data-ktext="发现 {found}/{total}"></div>
-          <div class="stat-item" id="skill-points-display" data-ktext="技能点 {points}"></div>
-          <div class="stat-item combo-display" id="combo-display" data-ktext="{combo} 连击"></div>
-          <div class="stat-item" id="weapon-display" data-ktext="⚔ {weapon}"></div>
-          <div class="stat-item" id="fps-display"></div>
-          <div class="stat-item" id="camera-mode-display" data-ktext="{mode}"></div>
-          <div class="stat-item" id="input-device-display"></div>
+          <div class="stat-item" id="souls-display">魂 0 · Lv.1</div>
+          <div class="stat-item" id="chapter-display">Chapter 1</div>
+          <div class="stat-item" id="coord-display">X: 0 · Z: 0</div>
+          <div class="stat-item" id="discovery-count">日志 0 · 碎片 0/8 · 地图 0%</div>
+          <div class="stat-item" id="skill-points-display">技能点 0</div>
+          <div class="stat-item combo-display" id="combo-display"></div>
+          <div class="stat-item" id="weapon-display">⚔ 位面长剑</div>
+          <div class="stat-item" id="fps-display">— FPS</div>
+          <div class="stat-item" id="camera-mode-display">第三人称</div>
+          <div class="stat-item" id="input-device-display">—</div>
         </div>
       </div>
       <div id="quest-panel" class="quest-panel" role="region" aria-label="当前任务">

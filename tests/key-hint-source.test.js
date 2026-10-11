@@ -15,7 +15,7 @@ import { join } from 'node:path';
 import { KEY_ACTIONS, KEY_BINDINGS } from '../src/content/keybinds.js';
 import { UI_ACTIONS, UI_HOTKEYS } from '../src/content/hotkeys.js';
 import { keyLabel, mouseLabel } from '../src/content/keyLabels.js';
-import { keyText } from '../src/content/keyHints.js';
+import { keyText, refreshKeyText } from '../src/content/keyHints.js';
 // 内容表本体（W-B2 切片4 起，它们的成段文案里带 `{动作}` 占位）
 import { REST_DIALOGUES } from '../src/content/restDialogues.js';
 import { HELP_SECTIONS_EXTRA } from '../src/content/helpManual.js';
@@ -82,6 +82,38 @@ describe('`{动作}` 占位必须是登记过的动作', () => {
       0,
     );
     expect(count).toBeGreaterThan(30);
+  });
+});
+
+describe('开机那一步真的跑得通（W-D1 切片2 回归：HUD 把统计格写成了键名占位）', () => {
+  /**
+   * `Game.rebuildHotkeys()` → `hud.refreshKeyHints()` → `refreshKeyText(document)` 是**开机路径**。
+   * 静态扫描管"占位写得对不对"，这一组管"真展开会不会抛"：2026-10-11 的事故是 HUD 的
+   * 统计格被写成 `data-ktext="魂 {souls} · Lv.{level}"` —— `{souls}` 不是动作，
+   * `keyText` 当场抛 "不是任何已登记的动作"，玩家看到的是**游戏初始化失败**。
+   * 静态扫描当时被白名单压红了（TEMPLATE_VARS），于是绿灯照着一个开不了机的仓库。
+   */
+  const bootTemplates = () => {
+    const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+    const hud = FILES.find((f) => f.name === 'ui/HUD.js')?.source ?? '';
+    return [html, hud].flatMap((src) => [...src.matchAll(/data-ktext="([^"]*)"/g)].map((m) => m[1]));
+  };
+
+  /** 极简宿主：只实现 refreshKeyText 认的那两个选择器 */
+  const rootOf = (els) => ({ querySelectorAll: (sel) => (sel === '[data-ktext]' ? els : []) });
+
+  it('HUD 与壳页的每一条 data-ktext 都能真的展开，不抛', () => {
+    const templates = bootTemplates();
+    expect(templates.length, '一条都没抓到，抓取本身坏了').toBeGreaterThan(10);
+    const els = templates.map((ktext) => ({ dataset: { ktext }, textContent: '' }));
+    expect(() => refreshKeyText(rootOf(els))).not.toThrow();
+    // 展开之后没有一条还是空的：空 = 那一格压根没被写到（等于开机时是白的）
+    expect(els.filter((el) => el.textContent === '').map((el) => el.dataset.ktext), '这几条没写进去').toEqual([]);
+  });
+
+  it('反向控制：写错字的占位当场抛（"不抛"不是因为分支根本没走）', () => {
+    const el = { dataset: { ktext: '按 {pray} 弹反' }, textContent: '' };
+    expect(() => refreshKeyText(rootOf([el]))).toThrow(/不是任何已登记的动作/);
   });
 });
 
