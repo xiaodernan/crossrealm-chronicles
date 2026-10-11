@@ -4,7 +4,6 @@
  * 所有 UI 可见的中文都从这里取，逻辑文件不再出现字面量。
  * 键名按"模块_用途"命名，值是唯一真源 —— 改显示文案只改这一处。
  */
-
 export const STRINGS_ZH = Object.freeze({
   // 通用
   common_confirm: '确认',
@@ -13,11 +12,13 @@ export const STRINGS_ZH = Object.freeze({
   common_save: '保存',
   common_load: '加载',
   common_reset: '重置',
+  common_ui: '界面',
 
   // 设置面板
   settings_title: '设置',
   settings_language: '语言',
   settings_difficulty: '难度',
+  settings_accessibility: '辅助功能',
   settings_colorvision: '色觉模式',
   settings_captions: '字幕（音频线索可视化）',
   caption_gear_drop: '掉落：${rarity}',
@@ -35,6 +36,7 @@ export const STRINGS_ZH = Object.freeze({
   settings_shadows: '阴影',
   settings_shadow_quality: '阴影精度',
   settings_msaa: '抗锯齿',
+  settings_msaa_off: '关',
   settings_ssao: '环境光遮蔽',
   settings_graphics_preset: '画质预设',
   settings_vibration: '手柄震动',
@@ -49,6 +51,18 @@ export const STRINGS_ZH = Object.freeze({
   settings_right_trigger: '右扳机深度（RT）',
   settings_keybinds: '键位',
   settings_keybind_reset: '恢复默认键位',
+  settings_keybind_confirm_label: '按下要绑定的键（再点一次取消）',
+  settings_keybind_pad_confirm_label: '按下要绑定的手柄键，松手即绑定（再点一次取消）',
+  settings_keybind_confirm_hint_browser: '激活交给浏览器原生 Enter / 空格（这一格不冒充键盘键）',
+  settings_keybind_invalid_or_occupied: '该键位无效或已被别的动作占用：${key}',
+  settings_keybind_swapped_with: '已与"${partnerName}"交换：${myButton} 归${myAction}，${theirButton} 归${partnerName}',
+  settings_keybind_pad_invalid: '该手柄按键无效或已被别的动作占用：${why}',
+  settings_keybind_group_movement_combat: '移动与战斗',
+  settings_keybind_group_ui_controller: '界面（手柄专属）',
+  settings_ssao_quality_off: '关',
+  settings_ssao_quality_low: '低',
+  settings_ssao_quality_medium: '中',
+  settings_ssao_quality_high: '高',
 
   // HUD
   hud_fps: 'FPS',
@@ -113,6 +127,8 @@ export const STRINGS_ZH = Object.freeze({
   save_success: '游戏已保存',
   load_success: '游戏已加载',
   save_failed: '保存失败',
+  settings_keybind_pad_invalid_reason_owner: '${button} 归${owner}，而那一格的出口挂在摇杆上，让不出这一枚按钮',
+  settings_keybind_pad_invalid_reason_unknown: '${button} 不是这张表认得的按钮',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

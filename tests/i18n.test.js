@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
@@ -126,5 +126,57 @@ describe('壳页接线（W-D2 切片2）', () => {
     const bad = scanI18nLeaves('<label data-i18n="x"><input id="y" /></label>');
     expect(bad.containers, '容器形态没被扫描咬住').toEqual(['x']);
     expect(bad.leaves).toBe(0);
+  });
+});
+
+describe('键的引用完整性（W-D2 切片4）', () => {
+  const walk = (dir) => readdirSync(dir).flatMap((name) => {
+    const p = join(dir, name);
+    return statSync(p).isDirectory() ? walk(p) : [p];
+  });
+  const FILES = [...walk(join(process.cwd(), 'src')), join(process.cwd(), 'index.html')];
+
+  it("代码里 t('…') 与壳页 data-i18n 引用的键都登记在表里（漏一个 = 玩家界面出现 [MISSING: ]）", () => {
+    const keys = new Set(getAllKeys());
+    const unknown = [];
+    for (const file of FILES) {
+      const text = readFileSync(file, 'utf8');
+      const rel = file.slice(process.cwd().length + 1).replace(/\\/g, '/');
+      for (const m of text.matchAll(/\bt\(\s*'([A-Za-z0-9_]+)'/g)) {
+        if (!keys.has(m[1])) unknown.push(`${rel}: t('${m[1]}')`);
+      }
+      if (rel === 'index.html') {
+        for (const m of text.matchAll(/data-i18n="([A-Za-z0-9_]+)"/g)) {
+          if (!keys.has(m[1])) unknown.push(`${rel}: data-i18n="${m[1]}"`);
+        }
+      }
+    }
+    expect(unknown, '引用了表里没有的键').toEqual([]);
+    // 反向控制：混一个假键，过滤器必须点名它（防"扫描永远返回空"）
+    const probe = [...new Set([...keys, 'no_such_key_xyz'])].filter((k) => !keys.has(k));
+    expect(probe, '过滤器连假键都认不出来').toEqual(['no_such_key_xyz']);
+  });
+
+  it('同一份文案最多两个键 —— 一个意思写三遍就是命名族失控（切片3 那次事故）', () => {
+    for (const [name, table] of Object.entries({ zh: STRINGS_ZH, en: STRINGS_EN })) {
+      const byValue = new Map();
+      for (const [key, value] of Object.entries(table)) {
+        byValue.set(value, [...(byValue.get(value) ?? []), key]);
+      }
+      const bloated = [...byValue]
+        .filter(([, ks]) => ks.length > 2)
+        .map(([v, ks]) => `${name}: ${ks.length}x ${ks.join(' / ')} = ${v}`);
+      expect(bloated, '一个文案被三个以上的键各写一遍').toEqual([]);
+    }
+  });
+
+  it('SettingsPanel 的 toast 一律问 t()：字面量中文一倒回来，切英文就露馅', () => {
+    const src = readFileSync(join(process.cwd(), 'src/ui/SettingsPanel.js'), 'utf8');
+    const calls = [...src.matchAll(/\.toast\(/g)];
+    expect(calls.length, '一条 toast 都没扫到，扫描坏了').toBeGreaterThanOrEqual(3);
+    const literals = calls
+      .map((m) => src.slice(m.index, m.index + 60))
+      .filter((snippet) => !/^\.toast\(\s*t\(/.test(snippet));
+    expect(literals, '有 toast 不走 t()').toEqual([]);
   });
 });

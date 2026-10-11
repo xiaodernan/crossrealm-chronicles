@@ -4,7 +4,6 @@
  * All UI-visible text comes from here; logic files contain no literals.
  * Keys follow "module_purpose" naming, values are the single source of truth.
  */
-
 export const STRINGS_EN = Object.freeze({
   // Common
   common_confirm: 'Confirm',
@@ -13,11 +12,13 @@ export const STRINGS_EN = Object.freeze({
   common_save: 'Save',
   common_load: 'Load',
   common_reset: 'Reset',
+  common_ui: 'UI',
 
   // Settings panel
   settings_title: 'Settings',
   settings_language: 'Language',
   settings_difficulty: 'Difficulty',
+  settings_accessibility: 'Accessibility',
   settings_colorvision: 'Color Vision',
   settings_captions: 'Captions (audio cues)',
   caption_gear_drop: 'Drop: ${rarity}',
@@ -35,6 +36,7 @@ export const STRINGS_EN = Object.freeze({
   settings_shadows: 'Shadows',
   settings_shadow_quality: 'Shadow Quality',
   settings_msaa: 'Anti-Aliasing',
+  settings_msaa_off: 'Off',
   settings_ssao: 'Ambient Occlusion',
   settings_graphics_preset: 'Quality Preset',
   settings_vibration: 'Controller Vibration',
@@ -49,6 +51,18 @@ export const STRINGS_EN = Object.freeze({
   settings_right_trigger: 'Right Trigger Depth (RT)',
   settings_keybinds: 'Keybinds',
   settings_keybind_reset: 'Reset Keybinds',
+  settings_keybind_confirm_label: 'Press key to bind (click again to cancel)',
+  settings_keybind_pad_confirm_label: 'Press controller button to bind (click again to cancel)',
+  settings_keybind_confirm_hint_browser: 'Activation uses browser native Enter / Space (this slot does not impersonate keyboard)',
+  settings_keybind_invalid_or_occupied: 'Key unavailable or already bound: ${key}',
+  settings_keybind_swapped_with: 'Swapped with "${partnerName}": ${myButton} now ${myAction}, ${theirButton} now ${partnerName}',
+  settings_keybind_pad_invalid: 'Gamepad button unavailable or already bound: ${why}',
+  settings_keybind_group_movement_combat: 'Movement & Combat',
+  settings_keybind_group_ui_controller: 'UI (Controller Only)',
+  settings_ssao_quality_off: 'Off',
+  settings_ssao_quality_low: 'Low',
+  settings_ssao_quality_medium: 'Medium',
+  settings_ssao_quality_high: 'High',
 
   // HUD
   hud_fps: 'FPS',
@@ -113,6 +127,8 @@ export const STRINGS_EN = Object.freeze({
   save_success: 'Game saved',
   load_success: 'Game loaded',
   save_failed: 'Save failed',
+  settings_keybind_pad_invalid_reason_owner: '${button} belongs to ${owner} and that cell exits through the stick, so it cannot hand this button over',
+  settings_keybind_pad_invalid_reason_unknown: '${button} is not a button this table recognizes',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

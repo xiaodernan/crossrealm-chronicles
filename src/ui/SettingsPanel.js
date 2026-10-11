@@ -9,7 +9,7 @@ import { SHADOW_QUALITY_SIZES, normalizeShadowQuality } from '../engine/shadowPo
 import { MSAA_SAMPLES, normalizeMsaaSamples } from '../engine/aaPolicy.js';
 import { SSAO_QUALITY_NAMES, normalizeSsaoQuality } from '../engine/ssaoSettings.js';
 import { PRESET_NAMES } from '../engine/graphicsPresets.js';
-import { LANGUAGES } from '../engine/i18n.js';
+import { LANGUAGES, t } from '../engine/i18n.js';
 import { colorVisionOptions } from '../game/ColorVision.js';
 import { difficultyOptions } from '../game/Difficulty.js';
 import { LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
@@ -131,7 +131,7 @@ export class SettingsPanel {
       for (const n of MSAA_SAMPLES) {
         const opt = document.createElement('option');
         opt.value = String(n);
-        opt.textContent = n === 0 ? '关' : `${n}x`;
+        opt.textContent = n === 0 ? t('settings_msaa_off') : `${n}x`;
         ms.appendChild(opt);
       }
       ms.addEventListener('change', () => {
@@ -216,7 +216,7 @@ export class SettingsPanel {
       for (const name of SSAO_QUALITY_NAMES) {
         const opt = document.createElement('option');
         opt.value = name;
-        opt.textContent = { off: '关', low: '低', medium: '中', high: '高' }[name] ?? name;
+        opt.textContent = t(`settings_ssao_quality_${name}`);
         ssao.appendChild(opt);
       }
       ssao.addEventListener('change', () => {
@@ -275,7 +275,7 @@ export class SettingsPanel {
       // 与 Game.rebuildHotkeys 同一条校验：面板放过的组合必须恰好是游戏会接受的
       buildBindingTables(overrides, UI_HOTKEYS, this._padOverrides(), this._uiPadOverrides());
     } catch {
-      this.game.dialog?.toast(`该键位无效或已被别的动作占用：${keyLabel(e.code)}`);
+      this.game.dialog?.toast(t('settings_keybind_invalid_or_occupied', { key: keyLabel(e.code) }));
       return this.refreshKeybinds();
     }
     this.game.settings.set('keybinds', overrides);
@@ -333,16 +333,20 @@ export class SettingsPanel {
     } catch {
       // 换不成（前主人是摇杆格那种）就一格都不写：半个交换比不换更难查
       const why = owner
-        ? `${padButtonLabel(name)} 归${actionLabel(owner)}，而那一格的出口挂在摇杆上，让不出这一枚按钮`
-        : `${padButtonLabel(name)} 不是这张表认得的按钮`;
-      this.game.dialog?.toast(`该手柄按键无效或已被别的动作占用：${why}`);
+        ? t('settings_keybind_pad_invalid_reason_owner', { button: padButtonLabel(name), owner: actionLabel(owner) })
+        : t('settings_keybind_pad_invalid_reason_unknown', { button: padButtonLabel(name) });
+      this.game.dialog?.toast(t('settings_keybind_pad_invalid', { why }));
       return this.refreshKeybinds();
     }
     this.game.settings.set(key, overrides);
     this.game.rebuildHotkeys();
     if (partner) {
-      this.game.dialog?.toast(`已与"${actionLabel(partner)}"交换：${padButtonLabel(name)} 归${actionLabel(action)}，`
-        + `${padButtonLabel(mine)} 归${actionLabel(partner)}`);
+      this.game.dialog?.toast(t('settings_keybind_swapped_with', {
+        partnerName: actionLabel(partner),
+        myButton: padButtonLabel(name),
+        myAction: actionLabel(action),
+        theirButton: padButtonLabel(mine),
+      }));
     }
     this.refreshKeybinds();
   }
@@ -436,7 +440,7 @@ export class SettingsPanel {
     const pads = [...combat, ...ui];
     const padFor = (rowAction) => pads.filter((e) => (e.hotkey ?? e.action) === rowAction);
     const rows = table.map((e) => this.keybindRow(e.action, UI_HOTKEY_LABELS[e.action] ?? e.action, e, padFor(e.action)));
-    rows.push('<h4 class="keybind-group">移动与战斗</h4>');
+    rows.push(`<h4 class="keybind-group">${t('settings_keybind_group_movement_combat')}</h4>`);
     for (const [action, binding] of Object.entries(keys)) {
       rows.push(this.keybindRow(action, KEY_ACTION_LABELS[action] ?? action, binding, padFor(action)));
     }
@@ -445,12 +449,12 @@ export class SettingsPanel {
      * （`padOnlyPadActions` 与它自己那条自检同一条判据），这里一份都不抄。 */
     const only = padOnlyPadActions();
     if (only.length) {
-      rows.push('<h4 class="keybind-group">界面（手柄专属）</h4>');
+      rows.push(`<h4 class="keybind-group">${t('settings_keybind_group_ui_controller')}</h4>`);
       for (const action of only) {
         rows.push(this.keybindRow(action, PAD_ONLY_ACTION_LABELS[action], null, padFor(action)));
       }
     }
-    rows.push('<button type="button" id="keybind-reset">恢复默认键位</button>');
+    rows.push(`<button type="button" id="keybind-reset">${t('settings_keybind_reset')}</button>`);
     // 重绘整张清单会销毁玩家正停着的那一格（切片28 / B58 的同一个形状）：
     // 点一颗手柄入口进入等待态、捕获回来之后清单就换了一批节点 —— 没有这一步，焦点掉回 `body`
     preserveFocus(host, () => {
@@ -475,12 +479,12 @@ export class SettingsPanel {
     // 提示只在该条目被点的那一格亮起 —— 比"整行都亮"少一桩误会（玩家会以为按了算两格）
     const waitingPad = (padEntries ?? []).some((e) => e.action === this.capturingPad);
     const shown = this.capturing === action
-      ? '按下要绑定的键（再点一次取消）'
+      ? t('settings_keybind_confirm_label')
       : waitingPad
-        ? '按下要绑定的手柄键，松手即绑定（再点一次取消）'
+        ? t('settings_keybind_pad_confirm_label')
         : binding
           ? (binding.aliases ?? []).map((c) => keyLabel(c)).join(' / ')
-          : '激活交给浏览器原生 Enter / 空格（这一格不冒充键盘键）';
+          : t('settings_keybind_confirm_hint_browser');
     const keyCell = binding
       ? `<button type="button" data-keybind="${action}">${keyLabel(binding.code ?? MOUSE_LABELS[binding.mouse] ?? '未绑定')}</button>`
       // 禁用格而不是一个 `<span>`：这一列的宽度挂在按钮上（真浏览器读数里普通行的键盘格是 398px，
@@ -522,7 +526,7 @@ export class SettingsPanel {
    * 一行里可能同时有战斗与界面两条（`escape` 那行今天三条），它们的动作名互不相同。
    */
   padChip(entry) {
-    const label = `${entry.ui ? '界面 ' : ''}${this.padChipLabel(entry)}`;
+    const label = `${entry.ui ? `${t('common_ui')} ` : ''}${this.padChipLabel(entry)}`;
     const part = entry.ui ? ' keybind-pad-part' : '';
     if (entry.button !== undefined) {
       return `<button type="button" class="keybind-pad${part}" data-padbind="${entry.action}">${label}</button>`;

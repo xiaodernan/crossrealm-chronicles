@@ -13,7 +13,7 @@
  * 用例尽量走**真帧轮询**（假 `navigator.getGamepads()` + 真 `GamepadInput`），
  * 断言的是 `keys` 哪一格在哪一帧为真、回调被叫了几次，而不是"函数存在"。
  */
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
+import { describe, it, expect, afterAll, afterEach, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
@@ -28,6 +28,7 @@ import { PAD_BUTTON_LABELS, padButtonLabel, padStickLabel } from '../src/content
 import { GamepadInput } from '../src/engine/GamepadInput.js';
 import { SettingsPanel } from '../src/ui/SettingsPanel.js';
 import { SettingsManager } from '../src/core/SettingsManager.js';
+import { setLanguage } from '../src/engine/i18n.js';
 
 const STORAGE_KEY = 'crossrealm_settings';
 
@@ -52,11 +53,12 @@ const realNavigator = globalThis.navigator;
 let pads = [];
 const setPads = (...list) => { pads = list; };
 
-beforeAll(() => {
+beforeEach(() => {
   Object.defineProperty(globalThis, 'navigator', {
     configurable: true,
     value: { getGamepads: () => pads },
   });
+  setLanguage('zh');
 });
 
 afterAll(() => {
