@@ -129,6 +129,23 @@ export const STRINGS_EN = Object.freeze({
   save_failed: 'Save failed',
   settings_keybind_pad_invalid_reason_owner: '${button} belongs to ${owner} and that cell exits through the stick, so it cannot hand this button over',
   settings_keybind_pad_invalid_reason_unknown: '${button} is not a button this table recognizes',
+
+  // Boot screens (W-D2 slice 5: loading / minimap title / guide panel / start screen)
+  start_brand: 'Crossrealm Chronicles',
+  loading_subtitle: 'Planes are converging…',
+  minimap_title: 'Map',
+  minimap_switch: 'Switch',
+  minimap_dungeon_hint: 'Shows the maze inside dungeons',
+  guide_head: 'What to do next · draggable',
+  guide_sync: 'Sync Quest',
+  autoplay_label: 'Auto-run',
+  start_click: 'Click to start · locks the mouse',
+  start_move: 'Move',
+  start_pause: 'Pause',
+  manual_short: 'Manual',
+  start_perf: 'Perf panel',
+  start_enter: 'Click to enter the game',
+  start_url_note: 'Open http://localhost:5173 (run npm run dev first)',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

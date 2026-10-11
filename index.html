@@ -9,14 +9,14 @@
   <body>
     <div id="loading">
       <div class="loading-inner">
-        <h1>跨界纪元</h1>
-        <p>位面正在汇聚…</p>
+        <h1 data-i18n="start_brand">跨界纪元</h1>
+        <p data-i18n="loading_subtitle">位面正在汇聚…</p>
         <div class="bar"><div class="bar-fill"></div></div>
       </div>
     </div>
     <div id="hud"></div>
     <div id="minimap-wrap">
-        <div class="minimap-title">地图 · <span data-keys="minimap"></span> 切换 · 地下城内显示迷宫</div>
+        <div class="minimap-title"><span data-i18n="minimap_title">地图</span> · <span data-keys="minimap"></span> <span data-i18n="minimap_switch">切换</span> · <span data-i18n="minimap_dungeon_hint">地下城内显示迷宫</span></div>
       <canvas id="minimap"></canvas>
     </div>
     <div id="zone-panel" class="hidden"></div>
@@ -24,16 +24,16 @@
     <div id="zone-banner" class="hidden"></div>
     <div id="interaction-prompt" class="hidden"></div>
     <div id="game-guide" class="game-guide">
-      <div class="guide-head panel-drag-handle">⋮⋮ 现在该做什么 · 可拖动</div>
+      <div class="guide-head panel-drag-handle">⋮⋮ <span data-i18n="guide_head">现在该做什么 · 可拖动</span></div>
       <div id="guide-title" class="guide-title">加载中…</div>
       <div id="guide-step" class="guide-step">请稍候</div>
       <div id="guide-hint" class="guide-hint"></div>
       <div class="guide-btns">
-        <button type="button" id="guide-sync">同步任务</button>
-        <button type="button" id="guide-autoplay">自动通关 <span data-keys="autoPlay"></span></button>
+        <button type="button" id="guide-sync" data-i18n="guide_sync">同步任务</button>
+        <button type="button" id="guide-autoplay"><span data-i18n="autoplay_label">自动通关</span> <span data-keys="autoPlay"></span></button>
       </div>
     </div>
-    <button type="button" id="autoplay-fab" title="自动通关">⚡ 自动通关</button>
+    <button type="button" id="autoplay-fab" title="自动通关">⚡ <span data-i18n="autoplay_label">自动通关</span></button>
     <div id="toast-container"></div>
     <div id="upgrade-panel" class="hidden">
       <div class="upgrade-box">
@@ -179,10 +179,10 @@
     </div>
     <div id="start-screen" class="hidden">
       <div class="start-inner">
-        <h2>跨界纪元</h2>
-        <p>点击开始 · 锁定鼠标 · <span data-keys="moveUp moveLeft moveDown moveRight"></span> 移动<br /><span data-keys="escape"></span> 暂停 · <span data-keys="help"></span> 说明书 · <span data-keys="journal"></span> 日志 · <span data-keys="perfHud"></span> 性能面板 · <span data-keys="autoPlay"></span> 自动通关</p>
-        <button type="button" id="start-btn">点击进入游戏</button>
-        <p class="start-url">请使用 http://localhost:5173 访问（需先运行 npm run dev）</p>
+        <h2 data-i18n="start_brand">跨界纪元</h2>
+        <p><span data-i18n="start_click">点击开始 · 锁定鼠标</span> · <span data-keys="moveUp moveLeft moveDown moveRight"></span> <span data-i18n="start_move">移动</span><br /><span data-keys="escape"></span> <span data-i18n="start_pause">暂停</span> · <span data-keys="help"></span> <span data-i18n="manual_short">说明书</span> · <span data-keys="journal"></span> <span data-i18n="journal_title">日志</span> · <span data-keys="perfHud"></span> <span data-i18n="start_perf">性能面板</span> · <span data-keys="autoPlay"></span> <span data-i18n="autoplay_label">自动通关</span></p>
+        <button type="button" id="start-btn" data-i18n="start_enter">点击进入游戏</button>
+        <p class="start-url" data-i18n="start_url_note">请使用 http://localhost:5173 访问（需先运行 npm run dev）</p>
         <p id="boot-error" class="hidden"></p>
       </div>
     </div>

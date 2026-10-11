@@ -129,6 +129,23 @@ export const STRINGS_ZH = Object.freeze({
   save_failed: '保存失败',
   settings_keybind_pad_invalid_reason_owner: '${button} 归${owner}，而那一格的出口挂在摇杆上，让不出这一枚按钮',
   settings_keybind_pad_invalid_reason_unknown: '${button} 不是这张表认得的按钮',
+
+  // 开机那几屏（W-D2 切片5：加载屏 / 小地图标题 / 指南面板 / 开始屏）
+  start_brand: '跨界纪元',
+  loading_subtitle: '位面正在汇聚…',
+  minimap_title: '地图',
+  minimap_switch: '切换',
+  minimap_dungeon_hint: '地下城内显示迷宫',
+  guide_head: '现在该做什么 · 可拖动',
+  guide_sync: '同步任务',
+  autoplay_label: '自动通关',
+  start_click: '点击开始 · 锁定鼠标',
+  start_move: '移动',
+  start_pause: '暂停',
+  manual_short: '说明书',
+  start_perf: '性能面板',
+  start_enter: '点击进入游戏',
+  start_url_note: '请使用 http://localhost:5173 访问（需先运行 npm run dev）',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

@@ -180,3 +180,58 @@ describe('键的引用完整性（W-D2 切片4）', () => {
     expect(literals, '有 toast 不走 t()').toEqual([]);
   });
 });
+
+describe('开机那几屏接线（W-D2 切片5）', () => {
+  const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+
+  /**
+   * 逐处点名：这一格今天必须走 `data-i18n`。
+   *
+   * 上面那两条扫的是"引用了的键都登记在表里" —— 方向是**表**。这一条反过来钉**壳页**：
+   * 属性被摘掉时没有报错，只是那一格静默留着出厂文案（切英文还是中文），
+   * 而"少翻了一格"恰好是最难被玩家之外的人发现的那种坏。
+   */
+  const PINS = [
+    '<h1 data-i18n="start_brand">',
+    '<p data-i18n="loading_subtitle">',
+    '<span data-i18n="minimap_title">',
+    '<span data-i18n="minimap_switch">',
+    '<span data-i18n="minimap_dungeon_hint">',
+    '<span data-i18n="guide_head">',
+    'id="guide-sync" data-i18n="guide_sync"',
+    'id="autoplay-fab" title="自动通关">⚡ <span data-i18n="autoplay_label"',
+    '<h2 data-i18n="start_brand">',
+    '<span data-i18n="start_click">',
+    '<span data-i18n="start_move">',
+    '<span data-i18n="start_pause">',
+    '<span data-i18n="manual_short">',
+    '<span data-i18n="journal_title">',
+    '<span data-i18n="start_perf">',
+    'id="start-btn" data-i18n="start_enter"',
+    '<p class="start-url" data-i18n="start_url_note">',
+  ];
+
+  it('开机那几屏的每一格都挂着 data-i18n（摘掉一格 = 那一格静默不翻）', () => {
+    const missing = PINS.filter((pin) => !html.includes(pin));
+    expect(missing, '这些地方今天没有走 data-i18n').toEqual([]);
+    expect(PINS.length, '钉的条数太少，清单本身要复核').toBeGreaterThanOrEqual(15);
+  });
+
+  it('被钉住的键在两张表里都有非空文案', () => {
+    const keys = [...new Set(PINS.map((p) => /data-i18n="([^"]+)"/.exec(p)?.[1]).filter(Boolean))];
+    expect(keys.length, 'PINS 里一条 data-i18n 都没解析出来，解析坏了').toBeGreaterThanOrEqual(15);
+    for (const key of keys) {
+      expect(STRINGS_ZH[key], `中文表缺 ${key}`).toBeTypeOf('string');
+      expect(STRINGS_ZH[key]?.length, `中文表 ${key} 为空`).toBeGreaterThan(0);
+      expect(STRINGS_EN[key], `英文表缺 ${key}`).toBeTypeOf('string');
+      expect(STRINGS_EN[key]?.length, `英文表 ${key} 为空`).toBeGreaterThan(0);
+    }
+  });
+
+  it('反面控制：一份不在壳页里的钉子必须被认出来（防"清单永远全过"）', () => {
+    const fake = '<span data-i18n="no_such_pin_key">';
+    expect(html).not.toContain(fake);
+    const missing = PINS.filter((pin) => !html.includes(pin));
+    expect([...missing, fake], '过滤器连假钉子都点不了名').toEqual([fake]);
+  });
+});

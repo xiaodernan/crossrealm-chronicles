@@ -512,10 +512,15 @@ describe('index.html 的键名也只能从表里来', () => {
   });
 
   it('这条扫描咬得住：把一处声明改回死键名立刻红', () => {
-    // 防的是"空跑门禁"（正则一坏就永远通过）—— 用真文件的一行来验
-    const reverted = html.replace('<span data-keys="minimap"></span>', 'M');
+    // 防的是"空跑门禁"（正则一坏就永远通过）—— 用真文件的一行来验。
+    // 验的这一行换过一次（W-D2 切片5）：小地图那句被 `data-i18n` 与 `data-keys` 交错
+    // 拆成多个 leaf span（同一句里既要翻译又要留键名槽，别无他法），而 `proseRuns`
+    // 按标签把正文切成一条条 run —— 拆开之后"键名"与"切换"不再落在同一个 run 里，
+    // 那一行就测不出违规了。换到今天仍然连成一句的暂停提示（`… Esc 关闭 · …`），
+    // 判据一条没松：仍然要求真红、并且红出来的那一句里认得出"关闭"。
+    const reverted = html.replace('<span data-keys="escape"></span>', 'Esc');
     expect(hardcoded(reverted).length).toBeGreaterThan(0);
-    expect(hardcoded(reverted).join('\n')).toContain('切换');
+    expect(hardcoded(reverted).join('\n')).toContain('关闭');
   });
 
   it('声明里的动作名都在两张表里，且一条声明都没有就是扫描坏了', () => {
