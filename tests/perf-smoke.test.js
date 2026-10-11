@@ -1,22 +1,35 @@
 /**
- * 性能冒烟门禁的门禁 —— W-D4 切片2。
+ * 性能冒烟门禁的门禁 —— W-D4 切片2（切片3 把判据搬进无副作用模块）。
  *
  * `npm run perf` 起真游戏推真帧，量逻辑价（update）与全帧价。预算表是它红绿的唯一依据，
  * 而"把预算改松"和"把脚本删了"是同一种静默腐烂 —— 这里直接 **import 预算表**按值断言：
  * 数值只能比这里的上限更严，不能更松；接线（npm script）也钉住。
+ *
+ * **注意 import 的是 `perf-budgets.mjs` 而不是 `perf-smoke.mjs`**：后者"导入即执行"
+ * （顶层起 vite 与 Chrome），import 它等于在 `npm test` 里跑一遍性能冒烟 ——
+ * 那是全量套件里那条 `Error: process.exit unexpectedly called with "0"`
+ * （源自 `scripts/perf-smoke.mjs`）的来历。下面有一条判据钉住这个分家。
  */
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { PERF_BUDGETS } from '../scripts/perf-smoke.mjs';
+import { PERF_BUDGETS } from '../scripts/perf-budgets.mjs';
 
 const ROOT = process.cwd();
+const 脚本源 = existsSync(join(ROOT, 'scripts', 'perf-smoke.mjs'))
+  ? readFileSync(join(ROOT, 'scripts', 'perf-smoke.mjs'), 'utf8') : '';
 
 describe('性能冒烟（W-D4 切片2）', () => {
   it('脚本在，npm script 接上了（没接线的门禁只有写它的人会跑）', () => {
     expect(existsSync(join(ROOT, 'scripts', 'perf-smoke.mjs')), 'perf-smoke.mjs 不在了').toBe(true);
     const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
     expect(pkg.scripts.perf, 'package.json 里没有 "perf" 脚本').toBe('node scripts/perf-smoke.mjs');
+  });
+
+  it('判据与执行分家：可执行脚本不许导出东西（导出 = 有人会 import 它 = 单测里跑起浏览器）', () => {
+    expect(脚本源, 'perf-smoke.mjs 又导出了东西').not.toMatch(/^export /m);
+    expect(脚本源, 'perf-smoke.mjs 没有从无副作用的表里取预算').toContain("from './perf-budgets.mjs'");
+    expect(existsSync(join(ROOT, 'scripts', 'perf-budgets.mjs')), '预算表模块不在了').toBe(true);
   });
 
   it('预算表按值钉死：只许收紧，不许放松（基线实测 2026-10-07，见脚本头注）', () => {

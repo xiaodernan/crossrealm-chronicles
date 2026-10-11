@@ -18,26 +18,16 @@ import { spawn } from 'child_process';
 import { existsSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { PERF_BUDGETS } from './perf-budgets.mjs';
 
-/** 预算表（门禁 tests/perf-smoke.test.js 钉住这几个数不许被悄悄放松）。
+/**
+ * 预算表在 `./perf-budgets.mjs` —— **判据与执行分家**（W-D4 切片3 修）。
  *
- * 实测基线（2026-10-07，本机无头 + SwiftShader 软件光栅）：灰白森林站
- * `update()` 单独 18.8ms / p95 33.6ms；update+render 全帧 175~286ms（渲染价在软渲染下噪声很大）。
- * 预算 = 基线 × 2 上下：防"垮一个数量级"，不防 5% 的漂移。真正的帧率回归要在真 GPU 上看，
- * 这条门禁抓的是**逻辑价**（AI/系统每帧攒的账）与灾难级的渲染/堆/稳定性回归。
+ * 本文件是"导入即执行"的（顶层就起 vite 与 Chrome）。此前门禁为了拿这张表
+ * `import` 了本文件，于是 `npm test` 里真跑了一遍性能冒烟，还多出一条
+ * `process.exit unexpectedly called` 的未捕获异常。**本文件不导出任何东西**，
+ * 谁想拿判据就去 `perf-budgets.mjs`。
  */
-export const PERF_BUDGETS = {
-  /** update() 平均耗时上限（ms）：内容膨胀拖垮的第一个数（12 类敌人的 AI、分离、感知都在这里面） */
-  updateAvgMs: 40,
-  /** update() p95 上限（ms）：个别重帧不许连成片 */
-  updateP95Ms: 80,
-  /** 全帧（update+render）平均上限（ms）：软渲染噪声大，只做灾难级护栏 */
-  frameAvgMs: 600,
-  /** JS 堆峰值上限（MB）：超了说明有东西在每帧攒垃圾（B 一族"只加不收"的另一种形状） */
-  heapMb: 1200,
-  /** 未捕获异常：0 条，性能门禁顺手兼做稳定性门禁 */
-  exceptions: 0,
-};
 
 const VITE_PORT = 5321;
 const CDP_PORT = 9424;

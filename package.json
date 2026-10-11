@@ -20,6 +20,7 @@
     "validate:save": "node scripts/validate-save-parity.mjs",
     "bake:textures": "node scripts/bake-textures.mjs",
     "perf": "node scripts/perf-smoke.mjs",
+    "e2e": "node scripts/e2e-clear.mjs",
     "size": "node scripts/check-bundle-size.mjs"
   },
   "dependencies": {
