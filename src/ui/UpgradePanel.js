@@ -48,7 +48,7 @@ export class UpgradePanel {
     document.getElementById('stat-mind').textContent = s.mind;
     document.getElementById('stat-hp-preview').textContent = s.maxHp;
     document.getElementById('stat-st-preview').textContent = s.maxStamina;
-    document.getElementById('skill-points-display').textContent = ws?.skillPoints ?? 0;
+    document.getElementById('upgrade-skill-points').textContent = ws?.skillPoints ?? 0;
 
     document.getElementById('upgrade-stats-section')?.classList.toggle('hidden', this.skillTab !== 'stats');
     document.getElementById('upgrade-skills-section')?.classList.toggle('hidden', this.skillTab !== 'skills');
