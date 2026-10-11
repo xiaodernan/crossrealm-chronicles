@@ -153,6 +153,44 @@ function buildLoreDoubleDoor(group, room, layout, def, ctx) {
   }
 }
 
+/**
+ * 转角房（W-B10 切片6）：两面开门、两面实墙，扶壁立在**那两面实墙夹出来的内角**上。
+ *
+ * 为什么要这一族：普查（`.tmp-20261010/room-shape-census.mjs`，7 座 × 40 颗种子 6880 间房）
+ * 量到**转角是迷宫最常见的形状** —— 两开口房间占 81%，其中四种转角（`sw`/`nw`/`en`/`es`）
+ * 合计 **3412 间 = 49.6%**，而模板库里**一款转角都没有**，于是这近一半的房间全部落回
+ * `chamber:square` 那个"四角柱、不认墙"的兜底。玩家侧的说法是"地下城每间房长得一样"。
+ *
+ * `open` 是这间房真正开着的那两边；扶壁摆在另外两边夹出的角上，与两个门洞都隔着一个房间。
+ */
+function buildCornerElbow(group, room, layout, def, ctx, open) {
+  const cx = open.includes('e') ? -1 : 1; // 东边是门 ⇒ 实墙在西 ⇒ 内角偏西
+  const cz = open.includes('s') ? -1 : 1;
+  const bx = room.x + cx * (room.w / 2 - 1.1);
+  const bz = room.z + cz * (room.d / 2 - 1.1);
+  // 扶壁：一根贴内角的方柱
+  decor(ctx, group, uvBox(1.1, 3.4, 1.1), ctx.wallMat, bx, bz, 1.7, 1.1, 1.1);
+  // 矮凳：贴着**内角那两面实墙里的另一面**（法线沿 z 的那面）摆，与扶壁隔开 2.2 米
+  decor(ctx, group, sharedBox(1.8, 0.5, 0.6), ctx.accentMat,
+    bx - cx * 2.2, bz, 0.25, 1.8, 0.6);
+}
+
+/**
+ * 东西向走廊（W-B10 切片6）：与 `hall:straight` 同一件事、转 90°。
+ *
+ * 普查读数：两开口房间里 `ew` 有 **1064 间 = 15.5%**，而两款两开口模板
+ * （`hall:straight` / `lore:double-door`）**都只认南北向** —— 于是东西向走廊
+ * 一律落回通用房。这里把壁柱改贴南北两堵实墙（`z` 方向偏移、`x` 方向排开）。
+ */
+function buildHallCrosswise(group, room, layout, def, ctx) {
+  for (const sz of [-1, 1]) {
+    for (const sx of [-1, 1]) {
+      decor(ctx, group, uvBox(0.8, 4, 0.8), ctx.wallMat,
+        room.x + sx * (room.w / 4), room.z + sz * (room.d / 2 - 0.7), 2, 0.8, 0.8);
+    }
+  }
+}
+
 /** 预置模板注册（模块加载即执行；注册表是数据，谁 import 谁拿到完整的库） */
 function registerBaseTemplates() {
   registerRoomTemplate({
@@ -193,6 +231,33 @@ function registerBaseTemplates() {
     ports: { n: { required: true }, s: { required: true }, e: { solid: true }, w: { solid: true } },
     buildInterior: buildLoreDoubleDoor,
   });
+
+  /* ---- W-B10 切片6：补上迷宫真正长出来的两种形状（转角 49.6% + 东西向走廊 15.5%）----
+   *
+   * 为什么是"派生"而不是再手写五段：这四个转角除了"哪两边开着"以外**完全同形** ——
+   * 手抄四份的下场是四份各漂一次（B36/B45 那一族）。这里 `open` 是唯一的那一格数据，
+   * 端口声明与室内函数都由它推出来。
+   */
+  registerRoomTemplate({
+    id: 'hall', variant: 'crosswise', width: CELL, depth: CELL,
+    tags: ['hall', 'connector'],
+    // 东西对开、南北两堵实墙 —— 与 `hall:straight` 同一件事转 90°
+    ports: { e: { required: true }, w: { required: true }, n: { solid: true }, s: { solid: true } },
+    buildInterior: buildHallCrosswise,
+  });
+  for (const open of [['n', 'w'], ['n', 'e'], ['s', 'w'], ['s', 'e']]) {
+    registerRoomTemplate({
+      id: 'corner',
+      // 变体名 = 开口按字母序拼起来（`e`+`s` → `es`），四个角一个不多一个不少
+      variant: [...open].sort().join(''),
+      width: CELL, depth: CELL,
+      tags: ['corner', 'connector'],
+      ports: Object.fromEntries(['n', 'e', 's', 'w'].map((d) => [
+        d, open.includes(d) ? { required: true } : { solid: true },
+      ])),
+      buildInterior: (group, room, layout, def, ctx) => buildCornerElbow(group, room, layout, def, ctx, open),
+    });
+  }
 }
 
 registerBaseTemplates();

@@ -408,9 +408,12 @@ describe('房间模板层的几何契约与可重现性（B80/B81/B82）', () =>
   });
 
   describe('④ B82 的账：零消费者的 API 与只写不读的字段不再存在', () => {
-    it('注册表恰好是那六个模板', () => {
+    it('注册表恰好是这十一款模板（切片6 补了转角四款与东西向走廊一款）', () => {
+      // 这一条钉的是"库里有哪些款"这件事本身 —— 加一款就要在这里加一个名字，
+      // 顺带逼着加的人回答"它在迷宫里什么时候会被选中"（见 ⑤ 那两条读数门禁）。
       expect(Object.keys(ROOM_TEMPLATES).sort()).toEqual([
-        'chamber:square', 'hall:straight', 'junction:cross', 'junction:tee',
+        'chamber:square', 'corner:en', 'corner:es', 'corner:nw', 'corner:sw',
+        'hall:crosswise', 'hall:straight', 'junction:cross', 'junction:tee',
         'lore:double-door', 'treasure:small',
       ]);
     });
@@ -444,7 +447,64 @@ describe('房间模板层的几何契约与可重现性（B80/B81/B82）', () =>
       })).toThrow(/既是门又必须是墙|不可能/);
 
       // 三个拒绝都不该留下半个模板
-      expect(Object.keys(ROOM_TEMPLATES).length).toBe(6);
+      expect(Object.keys(ROOM_TEMPLATES).length).toBe(11);
+    });
+  });
+
+  describe('⑤ 模板库覆盖迷宫真正长出来的形状（W-B10 切片6）', () => {
+    /** 7 座 × 40 颗种子扫一遍，按"实际被选中的模板"计数（判据与生产同路：`buildGeometry` 会分配） */
+    const sweep = () => {
+      const 用量 = new Map();
+      const 形状 = new Map(); // 开口组合 → 房间数
+      let 总 = 0;
+      for (const def of DUNGEON_DEFS) {
+        for (let i = 1; i <= 40; i++) {
+          const { layout } = build(def, i * 7919);
+          for (const r of layout.rooms) {
+            if (r.isBossArena || r.id === layout.spawn.id) continue;
+            总++;
+            const k = r.template?.key ?? '(无)';
+            用量.set(k, (用量.get(k) ?? 0) + 1);
+            const 键 = openPorts(r).sort().join('') || '(封死)';
+            形状.set(键, (形状.get(键) ?? 0) + 1);
+          }
+        }
+      }
+      return { 用量, 形状, 总 };
+    };
+
+    it('通用兜底房不再是主旋律：`chamber:square` 占比从 51% 降到 20% 以内', () => {
+      // 改前读数（`.tmp-20261010/room-template-census.mjs`，6880 间）：
+      // chamber:square **3512 间 = 51.05%** —— 因为转角（49.6%）与东西向走廊（15.5%）
+      // 两款形状**一款模板都没有**，全落回它。玩家侧的说法是"每间房长得一样"。
+      const { 用量, 总 } = sweep();
+      const 兜底 = 用量.get('chamber:square') ?? 0;
+      expect(总, '一间房都没扫到，这条是空转').toBeGreaterThan(3000);
+      expect(兜底 / 总, `通用兜底房占 ${(兜底 / 总 * 100).toFixed(1)}% —— 模板库又跟不上迷宫了`)
+        .toBeLessThan(0.20);
+    });
+
+    it('两款最常见的两开口形状都有专属模板（转角四款 + 东西向走廊一款）', () => {
+      // 两开口房间占 81%，其中四种转角 49.6%、东西向 15.5%。**每一款两开口形状都必须有
+      // 一个"必开门数 ≥ 2"的模板贴合它** —— 否则那一整族房间就只能落回兜底房（改前正是如此）。
+      const 两开口 = ['en', 'es', 'nw', 'sw', 'ew', 'ns'];
+      const 未覆盖 = [];
+      for (const 形状 of 两开口) {
+        const dirs = [...形状];
+        const 命中 = Object.values(ROOM_TEMPLATES)
+          .filter((t) => templateFitsRoom(t, roomOf('probe', dirs)) && requiredPortCount(t) >= 2);
+        if (!命中.length) 未覆盖.push(形状);
+      }
+      expect(未覆盖, `这两开口形状没有专属模板：${未覆盖.join(' / ')}`).toEqual([]);
+    });
+
+    it('每一款注册的模板都真的被选中过（写了没人读的模板 = 死内容）', () => {
+      const { 用量 } = sweep();
+      const 零 = Object.keys(ROOM_TEMPLATES).filter((k) => !(用量.get(k) > 0));
+      expect(零, `这些模板在 7 座 × 40 颗种子里一次都没被选中：${零.join(' / ')}`).toEqual([]);
+      // `junction:cross` 是天然稀有（四开口房 6880 间里 1 间）—— 它的读数一并钉住，
+      // 免得哪天它真的掉到 0 而没人发现（"稀有"与"死掉"在读数上必须分得开）。
+      expect(用量.get('junction:cross'), '四开口路口那款模板掉了').toBeGreaterThanOrEqual(1);
     });
   });
 });
