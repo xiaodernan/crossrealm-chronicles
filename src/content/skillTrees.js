@@ -105,17 +105,6 @@ export function isAdditiveStat(stat) {
   return stat === 'mana' || stat === 'transform';
 }
 
-/** 批量计算一组 effect（用于测试验证曲线） */
-export function computeEffects(effects) {
-  const out = {};
-  for (const [stat, val] of Object.entries(effects)) {
-    // val 这里是 cost，用于反推 curveValue
-    // 实际 effect 值在节点定义里直接写死，这里仅供测试验证
-    out[stat] = val;
-  }
-  return out;
-}
-
 /**
  * 三条流派 × 12 个可加点节点 + 叙事技。
  *
@@ -125,20 +114,12 @@ export function computeEffects(effects) {
  * 于是"先点哪条脉"是真的取舍，而不是一条直线点到底。
  *
  * `cost` 是技能点价码；叙事技（带 `grant`）的 `cost` 必须是 0。
- */
-/**
- * 三条流派 × 12 个可加点节点 + 叙事技。
  *
- * 形制：每个分支是一棵**有向无环图**（`reqs` 是前置 id 数组，空数组 = 根节点）。
- * 每棵树里都有一条"两条支脉汇合"的节点（`s-annihilate` / `m-singularity` /
- * `r-breakthrough`）与一个收尾的顶点（`s-apotheosis` / `m-omniscience` / `r-convergence`）——
- * 于是"先点哪条脉"是真的取舍，而不是一条直线点到底。
- *
- * 数值曲线（切片5）：使用 `curveValue(stat, cost)` 统一生成，
- * 保证 cost 1~5 的收益递增合理（1.0, 1.6, 2.4, 3.5, 5.5 倍）。
- * 乘区类保留两位小数，加法型取整。
- *
- * `cost` 是技能点价码；叙事技（带 `grant`）的 `cost` 必须是 0。
+ * 数值曲线（切片5）：可加点节点（`cost ≥ 1`）的 effect 值**手工按 `curveValue` 的增长
+ * 比率取值** —— 单属性节点与 `curveValue(stat, cost)` 逐值吻合，多属性节点是折价组合
+ * （每项 ≤ 同 cost 的单属性曲线值）。`curveValue` 不进运行时路径（节点是硬编码数据），
+ * 它是曲线的**参考实现**，由 `tests/skill-trees.test.js` 拿来核对"没有节点越过曲线"。
+ * 叙事技（`cost: 0`）是免费剧情奖励，不归曲线管。
  */
 export const SKILL_TREES = {
   sword: [
@@ -198,8 +179,8 @@ realm: [
     { id: 'r-relic-hunter', name: '遗珠拾翠', cost: 3, desc: '法力 +15 · 蓄力 +10%', effect: { mana: 15, charge: 0.1 }, reqs: ['r-harmonics'], lock: { itemCollected: { itemId: 'void-resonance-shard', count: 3 } }, lore: '收集虚空共鸣碎片，拼凑位面记忆。' },
     { id: 'r-archivist', name: '记忆编织者', cost: 2, desc: '法术 +8% · 蓄力 +10%', effect: { spell: 0.08, charge: 0.1 }, reqs: ['r-harmonics'], lock: { storyFlag: { flagId: 'void-chronicle-read', count: 1 } }, lore: '阅读虚空编年史，记忆化作力量。' },
     { id: 'r-timeless', name: '无时', cost: 4, desc: '大圣化身 +11 秒 · 法力 +42', effect: { transform: 11, mana: 42 }, reqs: ['r-ascendant', 'r-deepwell'] },
-    { id: 'r-convergence', name: '位面交汇', cost: 5, desc: '法术 +39% · 战技 +83% · 蓄力 +83% · 法力 +66 · 化身 +17 秒',
-      effect: { spell: 0.39, skill: 0.83, charge: 0.83, mana: 66, transform: 17 }, reqs: ['r-breakthrough', 'r-timeless'], lock: { level: 12 } },
+    { id: 'r-convergence', name: '位面交汇', cost: 5, desc: '法术 +39% · 战技 +83% · 蓄力 +77% · 法力 +66 · 化身 +17 秒',
+      effect: { spell: 0.39, skill: 0.83, charge: 0.77, mana: 66, transform: 17 }, reqs: ['r-breakthrough', 'r-timeless'], lock: { level: 12 } },
   ],
 };
 

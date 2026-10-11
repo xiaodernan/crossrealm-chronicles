@@ -22,7 +22,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   SKILL_BRANCHES, SKILL_BRANCH_IDS, SKILL_TREES, SKILL_EFFECT_CONSUMERS, SKILL_EFFECT_KEYS,
-  nodesOf, purchasableNodes, skillById, isGrant,
+  nodesOf, purchasableNodes, skillById, isGrant, curveValue,
 } from '../src/content/skillTrees.js';
 import { CONTENT_TABLES, checkContent } from '../src/content/registry.js';
 import { WeaponSkillTree } from '../src/game/WeaponSkillTree.js';
@@ -149,6 +149,32 @@ describe('W-B6 切片1：effect 的每一格都真的有人读（B68 那一族�
     expect(
       野,
       `这些格子的 where 主文件对不上实际读取处 —— 门禁失败信息会把人带去错文件：${野.join('、')}`,
+    ).toEqual([]);
+  });
+
+  it('付费节点的 effect 值不越过 curveValue 曲线，且曲线单调递增（切片5 数值曲线论证接成门禁）', () => {
+    // `curveValue` 是曲线的参考实现（cost 1~5 = 1.0/1.6/2.4/3.5/5.5 倍），节点硬编码值按它取。
+    // 它此前零调用 = 死码；这里把它接成门禁：曲线单调递增 + 没有付费节点越过单属性曲线值。
+    const curve = [1, 2, 3, 4, 5].map((c) => curveValue('melee', c));
+    for (let i = 1; i < curve.length; i += 1) {
+      expect(curve[i], `cost ${i + 1} 的 melee 曲线值没比 cost ${i} 大 —— 曲线不单调`).toBeGreaterThan(curve[i - 1]);
+    }
+
+    const 越线 = [];
+    for (const branch of SKILL_BRANCH_IDS) {
+      for (const n of SKILL_TREES[branch]) {
+        if (isGrant(n)) continue; // 叙事技 cost 0，免费剧情奖励，不归曲线管
+        for (const [stat, val] of Object.entries(n.effect ?? {})) {
+          const cap = curveValue(stat, n.cost);
+          if (!(val > 0)) 越线.push(`${n.id}.${stat}=${val}（非正）`);
+          // 1e-9 容差只挡浮点毛刺，挡不住真越线（越线是 0.6 vs 0.06 那种量级）
+          else if (val > cap + 1e-9) 越线.push(`${n.id}.${stat}=${val} > 曲线 cap ${cap}（cost ${n.cost}）`);
+        }
+      }
+    }
+    expect(
+      越线,
+      `这些付费节点的 effect 值越过了 curveValue 曲线（单属性曲线值是同 cost 的上限）：${越线.join('、')}`,
     ).toEqual([]);
   });
 });
