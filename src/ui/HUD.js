@@ -68,94 +68,174 @@ export class HUD {
     this.bindJournalEntry();
   }
 
-  buildHUD() {
+buildHUD() {
     this.container.innerHTML = `
       <div class="hud-top">
-        <div class="zone-badge">
-          <div class="name" id="zone-name">交汇枢纽</div>
-          <div class="desc" id="zone-subtitle">位面中心</div>
+        <div class="zone-badge" id="zone-badge">
+          <div class="zone-icon" id="zone-icon" aria-hidden="true"></div>
+          <div class="zone-info">
+            <div class="zone-name" id="zone-name">交汇枢纽</div>
+            <div class="zone-subtitle" id="zone-subtitle">位面中心</div>
+          </div>
         </div>
-        <div class="stats">
-          <div id="souls-display">魂 0 · Lv.1</div>
-          <div id="chapter-display">Chapter 1</div>
-          <div id="coord-display">X: 0 · Z: 0</div>
-          <div id="discovery-count">发现 0 / 10</div>
-          <div id="skill-points-display">技能点 0</div>
-          <div id="combo-display"></div>
-          <div id="weapon-display">⚔ 位面长剑</div>
-          <div id="fps-display">— FPS</div>
-          <div id="camera-mode-display">第三人称</div>
-          <div id="input-device-display">—</div>
+        <div class="hud-stats" id="hud-stats">
+          <div class="stat-item" id="souls-display" data-ktext="魂 {souls} · Lv.{level}"></div>
+          <div class="stat-item" id="chapter-display" data-ktext="Chapter {chapter}"></div>
+          <div class="stat-item" id="coord-display" data-ktext="X: {x} · Z: {z}"></div>
+          <div class="stat-item" id="discovery-count" data-ktext="发现 {found}/{total}"></div>
+          <div class="stat-item" id="skill-points-display" data-ktext="技能点 {points}"></div>
+          <div class="stat-item combo-display" id="combo-display" data-ktext="{combo} 连击"></div>
+          <div class="stat-item" id="weapon-display" data-ktext="⚔ {weapon}"></div>
+          <div class="stat-item" id="fps-display"></div>
+          <div class="stat-item" id="camera-mode-display" data-ktext="{mode}"></div>
+          <div class="stat-item" id="input-device-display"></div>
         </div>
       </div>
-      <div id="quest-panel" class="quest-panel">
-        <div class="quest-label" data-ktext="当前任务 · ★目标 · 💀Boss · {questTracker} 助手"></div>
-        <!-- 这三格没有初始文案：内容只有 quests.notifyUpdate() 与每帧的指引那两处会写，
-             模板里手抄一份等于给同一句话第二个答案，而开机第一眼读到的就是那份抄本
-             （实测：任务函数说「触摸枢纽中心的世界之锚。」，界面上写着「触摸世界之锚」） -->
-        <div class="quest-title" id="quest-title"></div>
-        <div class="quest-progress" id="quest-progress"></div>
-        <div class="quest-guide" id="quest-guide"></div>
+      <div id="quest-panel" class="quest-panel" role="region" aria-label="当前任务">
+        <div class="quest-header">
+          <span class="quest-icon" aria-hidden="true">📜</span>
+          <span class="quest-label" data-ktext="当前任务"></span>
+        </div>
+        <div class="quest-title" id="quest-title" aria-live="polite"></div>
+        <div class="quest-progress" id="quest-progress" aria-live="polite"></div>
+        <div class="quest-guide" id="quest-guide" aria-live="polite"></div>
       </div>
-      <div id="boss-bar-wrap" class="boss-bar-wrap hidden">
-        <div class="boss-name" id="boss-name">影界守护者</div>
-        <div class="bar-track boss-track"><div class="bar-fill boss-hp" id="boss-hp-bar" style="width:100%"></div></div>
-        <div class="boss-phase" id="boss-phase">阶段 I</div>
+      <div id="boss-bar-wrap" class="boss-bar-wrap hidden" role="region" aria-label="Boss 血量">
+        <div class="boss-header">
+          <div class="boss-name" id="boss-name">影界守护者</div>
+          <div class="boss-phase" id="boss-phase">阶段 I</div>
+        </div>
+        <div class="boss-bar-track">
+          <div class="boss-bar-fill hp" id="boss-hp-bar" style="width:100%"></div>
+          <div class="boss-bar-fill po" id="boss-poise-bar" style="width:0%"></div>
+        </div>
       </div>
-      <div class="status-bars">
-        <div class="bar-row"><span>生命</span><div class="bar-track"><div class="bar-fill hp" id="hp-bar" style="width:100%"></div></div></div>
-        <div class="bar-row"><span>精力</span><div class="bar-track bar-track-st"><div class="bar-fill st" id="stamina-bar" style="width:100%"></div><div class="bar-fill roll-cd" id="roll-cd-bar" style="width:0%"></div></div></div>
-        <div class="bar-row"><span>法力</span><div class="bar-track"><div class="bar-fill mana" id="mana-bar" style="width:100%"></div></div></div>
-        <div class="bar-row lock-row hidden" id="lock-row"><span>架势</span><div class="bar-track"><div class="bar-fill po" id="posture-bar" style="width:0%"></div></div></div>
+      <div class="status-bars" role="region" aria-label="状态条">
+        <div class="bar-row hp-row">
+          <span class="bar-label" data-ktext="生命"></span>
+          <div class="bar-track">
+            <div class="bar-fill hp" id="hp-bar" style="width:100%"></div>
+          </div>
+          <span class="bar-value" id="hp-value" aria-live="off">100/100</span>
+        </div>
+        <div class="bar-row stamina-row">
+          <span class="bar-label" data-ktext="精力"></span>
+          <div class="bar-track bar-track-st">
+            <div class="bar-fill st" id="stamina-bar" style="width:100%"></div>
+            <div class="bar-fill roll-cd" id="roll-cd-bar" style="width:0%"></div>
+          </div>
+          <span class="bar-value" id="stamina-value" aria-live="off">100/100</span>
+        </div>
+        <div class="bar-row mana-row">
+          <span class="bar-label" data-ktext="法力"></span>
+          <div class="bar-track">
+            <div class="bar-fill mana" id="mana-bar" style="width:100%"></div>
+          </div>
+          <span class="bar-value" id="mana-value" aria-live="off">100/100</span>
+        </div>
+        <div class="bar-row posture-row hidden" id="lock-row">
+          <span class="bar-label" data-ktext="架势"></span>
+          <div class="bar-track">
+            <div class="bar-fill po" id="posture-bar" style="width:0%"></div>
+          </div>
+          <span class="bar-value" id="posture-value" aria-live="off">0/60</span>
+        </div>
       </div>
-      <div id="spell-bar" class="spell-bar">
-        <div class="spell-slot" data-slot="1"><span class="key" data-keys="spell1"></span>真火</div>
-        <div class="spell-slot" data-slot="2"><span class="key" data-keys="spell2"></span>玄冰</div>
-        <div class="spell-slot" data-slot="3"><span class="key" data-keys="spell3"></span>引力</div>
-        <div class="spell-slot" data-slot="4"><span class="key" data-keys="spell4"></span>化身</div>
+      <div id="spell-bar" class="spell-bar" role="region" aria-label="法术快捷栏">
+        <div class="spell-slot" data-slot="1" role="button" tabindex="0" aria-label="法术 1">
+          <span class="spell-key" data-keys="spell1"></span>
+          <span class="spell-name">真火</span>
+          <span class="spell-cooldown" aria-hidden="true"></span>
+        </div>
+        <div class="spell-slot" data-slot="2" role="button" tabindex="0" aria-label="法术 2">
+          <span class="spell-key" data-keys="spell2"></span>
+          <span class="spell-name">玄冰</span>
+          <span class="spell-cooldown" aria-hidden="true"></span>
+        </div>
+        <div class="spell-slot" data-slot="3" role="button" tabindex="0" aria-label="法术 3">
+          <span class="spell-key" data-keys="spell3"></span>
+          <span class="spell-name">引力</span>
+          <span class="spell-cooldown" aria-hidden="true"></span>
+        </div>
+        <div class="spell-slot" data-slot="4" role="button" tabindex="0" aria-label="法术 4">
+          <span class="spell-key" data-keys="spell4"></span>
+          <span class="spell-name">化身</span>
+          <span class="spell-cooldown" aria-hidden="true"></span>
+        </div>
       </div>
-      <div id="charge-wrap" class="charge-wrap hidden"><div id="charge-indicator" class="charge-fill"></div></div>
-      <div id="lock-target" class="lock-target hidden"></div>
-      <div id="quest-arrow" class="quest-arrow hidden">▶</div>
-      <div class="crosshair"></div>
-      <div id="controls-teach" class="controls-teach">
-        <div class="controls-teach-title panel-drag-handle">⋮⋮ 操作 · <span data-keys="help"></span> 完整说明 · 可拖动</div>
-        <div class="ctrl-grid">
-          <div class="ctrl-item"><kbd data-keys="moveUp moveLeft moveDown moveRight"></kbd><span>移动</span></div>
-          <div class="ctrl-item"><kbd data-keys="sprint"></kbd><span>冲刺</span></div>
-          <div class="ctrl-item"><kbd data-keys="attackLight"></kbd><span>轻击</span></div>
-          <div class="ctrl-item"><kbd data-keys="attackHeavy"></kbd><span>重击</span></div>
-          <div class="ctrl-item"><kbd data-keys="parry"></kbd><span>弹反</span></div>
-          <div class="ctrl-item"><kbd data-keys="roll"></kbd><span>闪避</span></div>
-          <div class="ctrl-item"><kbd data-keys="lockOn"></kbd><span>锁定</span></div>
-          <div class="ctrl-item"><kbd data-keys="spell1 spell2 spell3 spell4"></kbd><span>法术</span></div>
-          <div class="ctrl-item"><kbd data-keys="interact"></kbd><span>交互</span></div>
-          <div class="ctrl-item"><kbd data-keys="journal"></kbd><span>日志/CG</span></div>
-          <div class="ctrl-item"><kbd data-keys="photoMode"></kbd><span>拍照</span></div>
-          <div class="ctrl-item"><kbd data-keys="sessionStats"></kbd><span>本局统计</span></div>
-          <div class="ctrl-item"><kbd data-keys="questTracker"></kbd><span>助手</span></div>
-          <div class="ctrl-item"><kbd data-keys="cameraMode"></kbd><span>视角</span></div>
-          <div class="ctrl-item"><kbd data-keys="minimap"></kbd><span>小地图</span></div>
-          <div class="ctrl-item"><kbd data-keys="worldMap"></kbd><span>全图/路点</span></div>
-          <div class="ctrl-item"><kbd data-keys="save load"></kbd><span>存读</span></div>
+      <div id="charge-wrap" class="charge-wrap hidden" role="progressbar" aria-label="蓄力进度" aria-valuemin="0" aria-valuemax="100">
+        <div id="charge-indicator" class="charge-fill"></div>
+      </div>
+      <div id="lock-target" class="lock-target hidden" aria-hidden="true"></div>
+      <div id="quest-arrow" class="quest-arrow hidden" aria-hidden="true">▶</div>
+      <div class="crosshair" aria-hidden="true"></div>
+      <div id="controls-teach" class="controls-teach panel-draggable">
+        <div class="panel-header panel-drag-handle">
+          <span class="panel-drag-icon" aria-hidden="true">⋮⋮</span>
+          <span class="panel-title" data-ktext="操作"></span>
+          <span class="panel-shortcut" data-ktext="{help} 完整说明"></span>
+          <button class="panel-collapse-btn" aria-label="折叠/展开" aria-expanded="true">▼</button>
+        </div>
+        <div class="panel-body">
+          <div class="ctrl-grid">
+            <div class="ctrl-item"><kbd data-keys="moveUp moveLeft moveDown moveRight"></kbd><span data-ktext="移动"></span></div>
+            <div class="ctrl-item"><kbd data-keys="sprint"></kbd><span data-ktext="冲刺"></span></div>
+            <div class="ctrl-item"><kbd data-keys="attackLight"></kbd><span data-ktext="轻击"></span></div>
+            <div class="ctrl-item"><kbd data-keys="attackHeavy"></kbd><span data-ktext="重击"></span></div>
+            <div class="ctrl-item"><kbd data-keys="parry"></kbd><span data-ktext="弹反"></span></div>
+            <div class="ctrl-item"><kbd data-keys="roll"></kbd><span data-ktext="闪避"></span></div>
+            <div class="ctrl-item"><kbd data-keys="lockOn"></kbd><span data-ktext="锁定"></span></div>
+            <div class="ctrl-item"><kbd data-keys="spell1 spell2 spell3 spell4"></kbd><span data-ktext="法术"></span></div>
+            <div class="ctrl-item"><kbd data-keys="interact"></kbd><span data-ktext="交互"></span></div>
+            <div class="ctrl-item"><kbd data-keys="journal"></kbd><span data-ktext="日志/CG"></span></div>
+            <div class="ctrl-item"><kbd data-keys="photoMode"></kbd><span data-ktext="拍照"></span></div>
+            <div class="ctrl-item"><kbd data-keys="sessionStats"></kbd><span data-ktext="本局统计"></span></div>
+            <div class="ctrl-item"><kbd data-keys="questTracker"></kbd><span data-ktext="助手"></span></div>
+            <div class="ctrl-item"><kbd data-keys="cameraMode"></kbd><span data-ktext="视角"></span></div>
+            <div class="ctrl-item"><kbd data-keys="minimap"></kbd><span data-ktext="小地图"></span></div>
+            <div class="ctrl-item"><kbd data-keys="worldMap"></kbd><span data-ktext="全图/路点"></span></div>
+            <div class="ctrl-item"><kbd data-keys="save load"></kbd><span data-ktext="存读"></span></div>
+          </div>
         </div>
       </div>
       <div class="hud-bottom">
-        <div class="controls-hint hidden" id="controls-hint">
-          <div data-ktext="{attackLight} 连击 · {attackHeavy} 重击 / 处决 · {parry} 弹反 · {skill} 位面斩 · {lockOn} 锁定 · {roll} 闪避"></div>
-          <div data-ktext="{spell1}~{spell4} 法术 · {swapWeapon} 切换剑 / 杖 · {fastTravel} 营火快速旅行 · {help} 说明书 · {escape} 暂停"></div>
+        <div class="controls-hint hidden" id="controls-hint" aria-live="polite">
+          <div data-ktext="{attackLight} 连击 · {attackHeavy} 重击/处决 · {parry} 弹反 · {skill} 位面斩 · {lockOn} 锁定 · {roll} 闪避"></div>
+          <div data-ktext="{spell1}~{spell4} 法术 · {swapWeapon} 切换武器 · {fastTravel} 快速旅行 · {help} 说明书 · {escape} 暂停"></div>
         </div>
-        <div class="compass" id="compass">N</div>
+        <div class="compass" id="compass" aria-label="罗盘">N</div>
       </div>
     `;
     this.bossBarWrap = document.getElementById('boss-bar-wrap');
     this.minimapWrap?.classList.remove('hidden');
-    attachDraggable(document.getElementById('controls-teach'), {
-      storageKey: 'controls-teach',
-      handle: '.controls-teach-title',
-    });
-    attachCollapsible(document.getElementById('controls-teach'), { storageKey: 'controls-teach' });
+    this._setupDraggablePanels();
+    this._setupCollapsiblePanels();
     this.refreshKeyHints();
+  }
+
+  _setupDraggablePanels() {
+    const teach = document.getElementById('controls-teach');
+    if (teach) {
+      attachDraggable(teach, {
+        storageKey: 'controls-teach',
+        handle: '.panel-drag-handle',
+      });
+    }
+  }
+
+  _setupCollapsiblePanels() {
+    const teach = document.getElementById('controls-teach');
+    if (teach) {
+      const btn = teach.querySelector('.panel-collapse-btn');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const collapsed = teach.classList.toggle('collapsed');
+          btn.setAttribute('aria-expanded', !collapsed);
+          btn.textContent = collapsed ? '▲' : '▼';
+        });
+      }
+      attachCollapsible(teach, { storageKey: 'controls-teach' });
+    }
   }
 
   /**

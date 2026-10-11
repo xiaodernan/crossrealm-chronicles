@@ -164,7 +164,7 @@ describe('接线：注记只挂在既有监听器上，文案只问模块', () =
   it('HUD 那一格：格子在 HUD 自己的模板里、文案只问标签函数、并且不做每帧重写', () => {
     // HUD 的主体是 `buildHUD()` 现拼的（FPS / 视角那一列都在里面），壳页里只有一个空 #hud
     expect(readShell()).toMatch(/<div id="hud"><\/div>/);
-    expect(hud).toMatch(/<div id="input-device-display">/);
+    expect(hud).toMatch(/<div class="stat-item" id="input-device-display">/);
     expect(hud).toMatch(/this\.updateInputDevice\(\);/);
     expect(hud).toMatch(/const kind = this\.game\.inputDevice\?\.current\(\) \?\? null;/);
     expect(hud).toMatch(/if \(kind === this\._inputDeviceShown\) return;/);
