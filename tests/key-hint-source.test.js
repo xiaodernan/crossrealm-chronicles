@@ -500,9 +500,21 @@ describe('index.html 的键名也只能从表里来', () => {
   /** 只有出现在"操作说明"句式里才算违规：`位面之魂`、`Bloom` 之类不该被牵连 */
   const TRIGGER = /切换|关闭|存档|读档|说明书|暂停|日志|移动|快捷存读|自动通关|打开|跳过|性能|锁定|弹反|翻滚|交互|冲刺|跳跃|视角/;
 
-  /** 正文（去掉标签与注释）+ 会显示给人的属性；`data-keys` 随标签一起消失 */
+  /** 正文（去掉标签与注释）+ 会显示给人的属性；`data-keys` 随标签一起消失。
+   *
+   * 行内元素（span / strong / a / br…）**当空格**，块级元素才换行 —— 一句中文被
+   * `data-i18n` 与 `data-keys` 拆成三四个 leaf span 时，仍是**同一句**（W-D2 切片5/6
+   * 就是这么拆的：同一句里既翻译又要留键名槽）。早先一视同仁地按标签切，
+   * "键名"与"关闭/切换"被切进不同的 run，扫描对这类句子当场失明 —— 反面控制
+   * 连着咬松过两次（切片5 换针，换完切片6 一拆句又松），所以修的是扫描器。
+   * 标签内部的正文本就为空的 `data-keys` 槽不会凭空产出键名 —— 只有把键名
+   * **写成正文**的人才会被咬住，这正是要抓的那一种。 */
+  const INLINE = new Set(['span', 'a', 'strong', 'em', 'b', 'i', 'code', 'small', 'sub', 'sup', 'br']);
   const proseRuns = (src) => [
-    ...src.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]*>/g, '\n').split('\n'),
+    ...src
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<\/?([a-zA-Z][\w-]*)[^>]*>/g, (m, tag) => (INLINE.has(tag.toLowerCase()) ? ' ' : '\n'))
+      .split('\n'),
     ...[...src.matchAll(/\b(?:title|placeholder|alt)="([^"]*)"/g)].map((m) => m[1]),
   ];
   const hardcoded = (src) => proseRuns(src).filter((line) => TRIGGER.test(line) && LABEL.test(line));
@@ -512,15 +524,20 @@ describe('index.html 的键名也只能从表里来', () => {
   });
 
   it('这条扫描咬得住：把一处声明改回死键名立刻红', () => {
-    // 防的是"空跑门禁"（正则一坏就永远通过）—— 用真文件的一行来验。
-    // 验的这一行换过一次（W-D2 切片5）：小地图那句被 `data-i18n` 与 `data-keys` 交错
-    // 拆成多个 leaf span（同一句里既要翻译又要留键名槽，别无他法），而 `proseRuns`
-    // 按标签把正文切成一条条 run —— 拆开之后"键名"与"切换"不再落在同一个 run 里，
-    // 那一行就测不出违规了。换到今天仍然连成一句的暂停提示（`… Esc 关闭 · …`），
-    // 判据一条没松：仍然要求真红、并且红出来的那一句里认得出"关闭"。
-    const reverted = html.replace('<span data-keys="escape"></span>', 'Esc');
-    expect(hardcoded(reverted).length).toBeGreaterThan(0);
-    expect(hardcoded(reverted).join('\n')).toContain('关闭');
+    // 防的是"空跑门禁"（正则一坏就永远通过）—— 用真文件的行来验。
+    // 两根针。暂停提示那根（Esc 关闭）一直咬得住；小地图那根（M 切换）当初正是被
+    // "按标签一律换行"咬松的 —— W-D2 切片5 把那句拆成 data-i18n 与 data-keys 交错的
+    // leaf span 之后，键名与"切换"落进不同的 run，这根针当场 0 违规 = 扫描失明。
+    // 行内元素改当空格（见 proseRuns）之后它必须重新咬得住 —— 这里就是那次修复的回归判据。
+    const cases = [
+      ['<span data-keys="escape"></span>', 'Esc', '关闭'],
+      ['<span data-keys="minimap"></span>', 'M', '切换'],
+    ];
+    for (const [needle, deadKey, word] of cases) {
+      const reverted = html.replace(needle, deadKey);
+      expect(hardcoded(reverted).length, `${needle} 换成死键名居然不红`).toBeGreaterThan(0);
+      expect(hardcoded(reverted).join('\n'), `红出来的句子里没有" ${word} "`).toContain(word);
+    }
   });
 
   it('声明里的动作名都在两张表里，且一条声明都没有就是扫描坏了', () => {
