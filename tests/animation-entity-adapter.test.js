@@ -74,20 +74,27 @@ describe('AnimationEntityAdapter：只对接真接口（W-C6 切片2）', () => 
     const adapter = new AnimationEntityAdapter(makeEntity(), new AnimationLibrary());
     adapter.registerStates();
     adapter.registerProceduralClips();
+    // 初始化：库就绪后通过 update(0) 触发 syncFromEntity 播放 idle
+    adapter.update(0);
 
     expect(adapter.getState()).toBe('idle');
+    expect(adapter.getCurrentAction()).toBe('idle');
     adapter.entity.combatState = 'combo1';
     adapter.syncFromEntity();
-    expect(adapter.getState()).toBe('attack1');
+    expect(adapter.getState()).toBe('combo1');
+    expect(adapter.getCurrentAction()).toBe('attack1');
 
     adapter.entity.combatState = 'locomotion';
     adapter.entity.sprinting = true;
     adapter.syncFromEntity();
+    // sprinting=true 时，控制器状态为 'run'，动作为 'run'
     expect(adapter.getState()).toBe('run');
+    expect(adapter.getCurrentAction()).toBe('run');
 
     // 同状态再来一次：currentState 不变，不该触发第二次 setState（靠 update 不崩验证）
     adapter.update(1 / 60);
     expect(adapter.getState()).toBe('run');
+    expect(adapter.getCurrentAction()).toBe('run');
   });
 
   it('库内没有的动作不谎报：setState 到一个没注册的动作，控制器保持原状', () => {

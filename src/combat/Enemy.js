@@ -121,6 +121,9 @@ export class Enemy {
 
     this.fsm = createEnemyFSM(this);
 
+    /** 可选：外部挂载的动画适配器（由 entry chunk 创建，保持 chunk-combat 零 import animation） */
+    this.animationAdapter = null;
+
     this.mesh = this.createMesh(config);
     this.mesh.userData.enemy = this;
     this.updateMeshY();
@@ -885,6 +888,8 @@ export class Enemy {
     }
     this.telegraph = null;
     this.teleParts = null;
+    this.animationAdapter?.dispose();
+    this.animationAdapter = null;
   }
 
   /**
@@ -920,6 +925,9 @@ export class Enemy {
     this.stateTimer = this.fsm.time;
 
     this._advance(dt, ctx);
+
+    // 动画适配器（若外部已挂载）：同步实体状态 + 推进 mixer
+    this.animationAdapter?.update(dt);
     this.updateMeshY();
     this.updateWorldUi(ctx.camera);
   }

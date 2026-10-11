@@ -29,7 +29,13 @@ export class AnimationController {
     this.currentState = opts.defaultState ?? 'idle';
     this._prevState = null;
     this._transitioning = false;
-    this._callbacks = new Map(); // 状态变更回调
+    this._callbacks = new Map();
+    // 自动播放默认状态（若库中已有该动作）
+    const defaultState = opts.defaultState ?? 'idle';
+    const actionName = this.stateMap[defaultState] ?? defaultState;
+    if (this.library.has(actionName)) {
+      this.mixer.play(actionName);
+    }
   }
 
   /**
@@ -38,7 +44,8 @@ export class AnimationController {
    * @param {object} [opts] - 过渡选项
    */
   setState(state, opts = {}) {
-    if (state === this.currentState && !this._transitioning) return;
+    const force = opts.force === true;
+    if (!force && state === this.currentState && !this._transitioning) return;
 
     const actionName = this.stateMap[state] ?? state;
     if (!this.library.has(actionName)) {

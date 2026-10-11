@@ -35,6 +35,7 @@ import { EnemyManager } from '../combat/EnemyManager.js';
 import { CombatController } from '../combat/CombatController.js';
 import { DamageNumbers } from '../combat/DamageNumbers.js';
 import { ProjectileManager } from '../combat/ProjectileManager.js';
+import { createEntityAdapter } from '../animation/index.js';
 import { QuestSystem } from '../game/QuestSystem.js';
 import { PlayerStats } from '../game/PlayerStats.js';
 import { SaveSystem } from '../game/SaveSystem.js';
@@ -290,6 +291,8 @@ export class Game {
     });
     this.enemyManager = new EnemyManager(this.scene, this.world, this.projectiles);
     this.enemyManager.spawnDefaults();
+    // 为现有敌人挂载动画适配器（entry chunk 独有 import animation，chunk-combat 零依赖）
+    this._attachEnemyAnimAdapters();
 
     this.player = new PlayerController(this.scene, this.camera, this.world, this);
     this.player.combat = new CombatController(
@@ -1004,6 +1007,8 @@ export class Game {
       );
       this.spells.update(dt, this.keys);
       this.fastTravel.tryOpen(this.keys);
+      // 为新生成的敌人（召唤物、重生）挂载动画适配器
+      this._attachEnemyAnimAdapters();
       this.enemyManager.update(dt, this.player.position, this.player, this.loot, this);
       this.projectiles.update(dt, this.player.position, this.player);
     }
@@ -1098,6 +1103,15 @@ export class Game {
     this.renderer.info.reset();
     this.composer.render();
     this.labelRenderer.render(this.scene, this.camera);
+  }
+
+  /** 为所有现有敌人挂载动画适配器（entry chunk 独有 import animation） */
+  _attachEnemyAnimAdapters() {
+    for (const enemy of this.enemyManager.enemies) {
+      if (!enemy.animationAdapter) {
+        enemy.animationAdapter = createEntityAdapter(enemy);
+      }
+    }
   }
 
   run() {
