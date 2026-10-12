@@ -20,11 +20,14 @@ export class AnimationController {
    * @param {object} [opts]
    * @param {object} [opts.stateMap] - 状态到动作名的映射 { state: actionName }
    * @param {string} [opts.defaultState='idle']
+   * @param {THREE.Object3D} [opts.root] - 片段绑定的根对象。**默认是实体自己的变换节点，
+   *   而那正是逻辑（朝向/贴地/摆动）每帧在写的地方** —— 所以调用方（`AnimationEntityAdapter`）
+   *   必须传入视觉层根节点，见切片5 的所有权分家。
    */
   constructor(entity, library, opts = {}) {
     this.entity = entity;
     this.library = library;
-    this.mixer = new AnimationMixer(entity.mesh || entity.object3D, library);
+    this.mixer = new AnimationMixer(opts.root ?? entity.mesh ?? entity.object3D, library);
     this.stateMap = opts.stateMap ?? {};
     this.currentState = opts.defaultState ?? 'idle';
     this._prevState = null;
@@ -148,52 +151,8 @@ export class AnimationController {
   }
 }
 
-/**
- * 状态机定义辅助：从简单配置生成状态映射。
- * @param {object} config - { states: { stateName: { action, transitions: { toState: condition } } } }
- */
-export function createStateMachine(config) {
-  const stateMap = {};
-  for (const [state, def] of Object.entries(config.states)) {
-    stateMap[state] = def.action ?? state;
-  }
-  return stateMap;
-}
-
-/** 默认玩家状态机 */
-export const DEFAULT_PLAYER_STATE_MAP = Object.freeze({
-  idle: 'idle',
-  walk: 'walk',
-  run: 'run',
-  attack: 'attack',
-  dodge: 'dodge',
-  hit: 'hit',
-  death: 'death',
-  interact: 'interact',
-  spellcast: 'spellcast',
-});
-
-/** 默认敌人状态机 */
-export const DEFAULT_ENEMY_STATE_MAP = Object.freeze({
-  idle: 'idle',
-  patrol: 'walk',
-  chase: 'run',
-  attack: 'attack',
-  hit: 'hit',
-  death: 'death',
-  stagger: 'hit',
-});
-
-/** 默认 Boss 状态机 */
-export const DEFAULT_BOSS_STATE_MAP = Object.freeze({
-  idle: 'idle',
-  intro: 'intro',
-  phase1: 'idle',
-  phase2: 'phaseChange',
-  phase3: 'phaseChange',
-  attack1: 'attack1',
-  attack2: 'attack2',
-  special: 'special',
-  stagger: 'hit',
-  death: 'death',
-});
+/* 切片5 删掉了这里的 `createStateMachine` 与 `DEFAULT_{PLAYER,ENEMY,BOSS}_STATE_MAP` 四件：
+ * 全仓零读者（只有 `index.js` 再导出），却是"状态 → 动作名"的第二份陈述 —— 而且它们在撒谎：
+ * `interact` / `spellcast` / `intro` / `phaseChange` / `special` 这些动作名在运动表
+ * （`AnimationLibrary.ANIM_MOTION`）里一个都不存在。真在跑的那一份映射收在
+ * `AnimationEntityAdapter.js` 的 `STATE_TO_ACTION`，由门禁用例对着运动表逐条核对。 */

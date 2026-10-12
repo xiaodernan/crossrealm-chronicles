@@ -31,11 +31,28 @@ export class AnimationMixer {
   }
 
   /**
+   * 循环口径（切片5）：`opts.loop` 显式覆盖 → 否则问 library 的配置 → 否则循环。
+   *
+   * 改前这里写死 `opts.loop !== false`，调用方不传就是"永远循环"：库里的 `loop:false`
+   * 从来没生效过，`death` 倒下之后会自己站起来再倒一次。一次性动作还要 `clampWhenFinished`
+   * —— 停住的那一刻停在**最后一个关键帧**，`ANIM_MOTION.death` 的末帧才是躺在地上。
+   * @returns {boolean} 最终采用的循环档
+   */
+  _applyLoop(action, name, opts = {}) {
+    const cfg = this.library.has(name) ? this.library.getConfig(name) : null;
+    const loop = opts.loop ?? cfg?.loop ?? true;
+    action.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce);
+    action.clampWhenFinished = !loop;
+    action.timeScale = opts.timeScale ?? 1;
+    return loop;
+  }
+
+  /**
    * 播放动作（立即切换，无过渡）。
    * @param {string} name - 动作名（需在 library 中注册）
    * @param {object} [opts] - 选项
    * @param {number} [opts.layer=0] - 层级
-   * @param {boolean} [opts.loop=true] - 是否循环
+   * @param {boolean} [opts.loop] - 是否循环（不传则问 library 配置）
    * @param {number} [opts.timeScale=1] - 播放速度
    * @returns {THREE.AnimationAction}
    */
@@ -45,8 +62,10 @@ export class AnimationMixer {
 
     const layer = opts.layer ?? 0;
     const action = this.mixer.clipAction(clip);
-    action.setLoop(opts.loop !== false ? THREE.LoopRepeat : THREE.LoopOnce);
-    action.timeScale = opts.timeScale ?? 1;
+    // reset 把上一次 fadeOut 留下的权重插值清掉，并从第一帧起放：没有这一步，
+    // "切回一个曾经淡出过的动作"会以有效权重 0 在跑 —— 看着就像没切。
+    action.reset();
+    this._applyLoop(action, name, opts);
     action.play();
 
     // 停止同层级的其他动作
@@ -74,15 +93,21 @@ export class AnimationMixer {
 
     const layer = opts.layer ?? 0;
     const action = this.mixer.clipAction(clip);
-    action.setLoop(opts.loop !== false ? THREE.LoopRepeat : THREE.LoopOnce);
-    action.timeScale = opts.timeScale ?? 1;
-    action.enabled = true;
+    const prev = this.currentAction;
 
-    if (this.currentAction && this._getLayer(this.currentAction) === layer) {
-      this.currentAction.crossFadeTo(action, duration, true);
-    } else {
-      action.play();
+    /* three 的 `crossFadeTo` → `crossFadeFrom` 里只有 `fadeOutAction.fadeOut()` 和
+     * `this.fadeIn()`（three.core.js:33092），**没有任何 `play()`**：目标 action 不进 mixer
+     * 的激活表，权重淡到 1 也不写一帧属性。改前每次状态切换走的都是这条路径，于是"切过去了，
+     * 但场上一个动作都没跑"。这里按 three 文档的标准写法配对：目标先 reset（一次性动作要能
+     * 从头重放），旧动作淡出、目标淡入并 play。 */
+    action.reset();
+    this._applyLoop(action, name, opts);
+
+    // 同层级的其他动作（除目标外）淡出：主动作切换时不能有两份 clip 抢同一个属性
+    if (prev && prev !== action && this._getLayer(prev) === layer) {
+      prev.fadeOut(duration);
     }
+    action.fadeIn(duration).play();
 
     this.actions.set(name, action);
     this.currentAction = action;
@@ -101,8 +126,7 @@ export class AnimationMixer {
     if (!clip) throw new Error(`AnimationMixer: 未知动作 "${name}"`);
 
     const action = this.mixer.clipAction(clip);
-    action.setLoop(opts.loop !== false ? THREE.LoopRepeat : THREE.LoopOnce);
-    action.timeScale = opts.timeScale ?? 1;
+    this._applyLoop(action, name, opts);
     action.weight = weight;
     action.play();
 
