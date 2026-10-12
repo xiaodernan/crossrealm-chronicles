@@ -153,7 +153,7 @@ staff: [
     { id: 'm-mana', name: '法力泉涌', cost: 2, desc: '法力上限 +19', effect: { mana: 19 },
       reqs: ['m-arcane'], lock: { chapter: 2, spellCasts: 8 }, lore: '宇航员回声：「时间在这里是圆的 — 法力也是。」' },
     { id: 'm-pierce', name: '穿透', cost: 2, desc: '法术伤害 +11%', effect: { spell: 0.11 }, reqs: ['m-arcane'], lock: { kills: { type: 'elite', count: 5 } }, lore: '穿透护甲，需见真章。' },
-    { id: 'm-echo', name: '奥术回响', cost: 2, desc: '蓄力伤害 +22% · 法术 +7%', effect: { charge: 0.22, spell: 0.11 }, reqs: ['m-charge'] },
+    { id: 'm-echo', name: '奥术回响', cost: 2, desc: '蓄力伤害 +22% · 法术 +11%', effect: { charge: 0.22, spell: 0.11 }, reqs: ['m-charge'] },
     { id: 'm-transform', name: '化身延长', cost: 3, desc: '大圣化身 +7 秒', effect: { transform: 7 },
       reqs: ['m-charge'], lock: { chapter: 4, boss: 'singularity-herald' }, lore: '奇点领主的化身术式被你逆向解析。' },
     { id: 'm-arcane2', name: '奥术共鸣 II', cost: 3, desc: '法术伤害 +17%', effect: { spell: 0.17 }, reqs: ['m-pierce'] },

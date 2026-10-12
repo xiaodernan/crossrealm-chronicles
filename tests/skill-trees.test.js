@@ -379,4 +379,26 @@ describe('W-B6 切片1：营火面板的流派行是按表生成的（"少一整
       globalThis.document = 真文档;
     }
   });
+  it('tooltip 不撒谎：desc 里每个 +N% 都等于本节点某个百分比 effect 值×100（W-B6 切片2c）', () => {
+    // 抓的是 m-echo 那一类：desc 与 effect 各自维护，曲线遍历只改了 effect 漏改 desc，
+    // 玩家读到的 tooltip 就低估了加成。口径：绝对效果键（法力上限 mana / 化身秒数 transform）
+    // 在 desc 里写成无 % 的形式（"+29" / "+7 秒"），不参与核对；其余键都是百分比（值可 >1，
+    // 如终结技范围 1.05 = +105%），desc 的每个 +N% 必须命中某个 effect×100，且数量对齐。
+    const 绝对键 = new Set(['mana', 'transform']);
+    const 百分比 = (effect) =>
+      Object.entries(effect).filter(([k]) => !绝对键.has(k)).map(([, v]) => Math.round(v * 100));
+    const 撒谎 = [];
+    for (const [branch, nodes] of Object.entries(SKILL_TREES)) {
+      for (const n of nodes) {
+        if (!n.desc || !n.effect) continue;
+        const descPct = [...n.desc.matchAll(/\+(\d+)%/g)].map((m) => Number(m[1]));
+        const effPct = 百分比(n.effect);
+        const 没命中 = descPct.filter((d) => !effPct.includes(d));
+        if (没命中.length || descPct.length !== effPct.length) {
+          撒谎.push(`${branch}/${n.id}: desc%=[${descPct}] 但 effect%=[${effPct}]（没命中=[${没命中}]）`);
+        }
+      }
+    }
+    expect(撒谎, `这些节点的 tooltip 与 effect 不一致：${撒谎.join('；')}`).toEqual([]);
+  });
 });
