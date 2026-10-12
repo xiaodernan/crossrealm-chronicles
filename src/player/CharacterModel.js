@@ -11,6 +11,13 @@ const MODEL_CANDIDATES = [
 
 export const ANIM_CATALOG = ANIM_MANIFEST;
 
+/**
+ * 视觉层根节点的名字 —— 与 `animation/AnimationEntityAdapter.js` 的 `ANIM_ROOT_NAME`
+ * 是同一条约定（两边相等由 `tests/player-combat-feedback.test.js` 钉住）。
+ * 不 import 那个模块：玩家块不该为了一个组名把整条动画管线拖进自己的 chunk。
+ */
+export const PLAYER_VISUAL_ROOT_NAME = '__anim';
+
 /** 战斗动画状态机 — 支持 Mixamo 多 Clip GLB */
 export class CharacterModel {
   constructor() {
@@ -33,7 +40,16 @@ export class CharacterModel {
   }
 
   _startProcCombat(kind, duration, intensity = 1) {
-    this._procCombat = { t: duration, kind, intensity };
+    // 趔趄的方向**一次定死**，整段受击都用这一份。改前 `hit` 分支每帧重摇 `Math.random()`：
+    // 60Hz 下实测 20 局受击里 `proc.roll` 逐帧翻号 248 次、总变分 2.278（单调衰减应当 ≈ 2×峰值
+    // = 0.21）—— 玩家看到的不是"往一边歪一下"，是身体每帧抖一下。GLB clip 那条路径
+    // （`playHit` 的 `_playOnce`）本来就是一次性赋值，这里向它对齐。
+    this._procCombat = {
+      t: duration,
+      kind,
+      intensity,
+      rollOffset: (Math.random() - 0.5) * 0.25 * intensity,
+    };
   }
 
   _applyProcCombat(dt) {
@@ -53,7 +69,8 @@ export class CharacterModel {
       this.proc.pitch = 0.1 * i;
     } else if (k === 'hit') {
       this.proc.pitch = 0.4 * i;
-      this.proc.roll = (Math.random() - 0.5) * 0.25 * i;
+      // 用的是起手那一刻冻住的 `rollOffset`，不是每帧新摇（见 `_startProcCombat` 的注）
+      this.proc.roll = this._procCombat.rollOffset;
     } else if (k === 'block') {
       this.proc.pitch = -0.18 * i;
       this.proc.roll = -0.1 * i;
@@ -80,12 +97,23 @@ export class CharacterModel {
     const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.35, 0.9, 8, 16), bodyMat);
     torso.position.y = 1.1;
     applyShadow(torso, 'actor');
-    this.group.add(torso);
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), bodyMat);
     head.position.y = 2.0;
     applyShadow(head, 'actor');
-    this.group.add(head);
-    this.modelRoot = this.group;
+    // 部件住进**视觉层根节点**，不直接挂 `group`：`group.rotation.y` 是 `PlayerController`
+    // 每帧 lerp 出来的逻辑朝向（`PlayerController.js:124` 把 `mesh` 就指向这个 `group`），
+    // 战斗反馈（pitch / roll / yawOff）必须写另一层。改前这里 `modelRoot = group`，于是
+    // `update()` 里那句 `modelRoot !== group` 守卫把整段写入静默跳过 —— 实测（探针
+    // `probe-player-hit.mjs` [b] 段）5 招 × 30 帧落点最大变化 `0.00e+0`：没有 GLB 的玩家
+    // 在战斗里一动不动，而 proc 自己算到了 0.7 弧度。
+    let 视觉 = this.group.children.find((o) => o.name === PLAYER_VISUAL_ROOT_NAME);
+    if (!视觉) {
+      视觉 = new THREE.Group();
+      视觉.name = PLAYER_VISUAL_ROOT_NAME;
+      this.group.add(视觉);
+    }
+    视觉.add(torso, head);   // `add()` 会先从旧父级摘下 ⇒ 重复调用也不套第二层
+    this.modelRoot = 视觉;
     this.fallback = true;
     this.loaded = true;
   }
@@ -277,7 +305,12 @@ export class CharacterModel {
     this.proc.pitch = THREE.MathUtils.lerp(this.proc.pitch, 0, this._procDecay * dt);
     this.proc.roll = THREE.MathUtils.lerp(this.proc.roll, 0, this._procDecay * dt);
     this.proc.yawOff = THREE.MathUtils.lerp(this.proc.yawOff, 0, this._procDecay * dt);
-    if (this.modelRoot && this.modelRoot !== this.group) {
+    // 落点永远是视觉层：两条构造路径都把 `modelRoot` 设成 `group` 的**子**节点
+    // （fallback 走 `PLAYER_VISUAL_ROOT_NAME` 那个组，GLB 走 `gltf.scene`）。
+    // 这里不再判 `modelRoot !== this.group` —— 那个判据不是防护，是把整段反馈吞掉的静默兜底
+    // （B109），防护的职责已经由"构造时分家"承担了，`tests/player-combat-feedback.test.js`
+    // 拿逻辑朝向哨兵钉住"动画不写 group"这件事。
+    if (this.modelRoot) {
       this.modelRoot.rotation.x = this.proc.pitch;
       this.modelRoot.rotation.z = this.proc.roll;
       this.modelRoot.rotation.y = Math.PI + this.proc.yawOff;
