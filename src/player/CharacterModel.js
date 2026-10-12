@@ -135,14 +135,23 @@ export class CharacterModel {
     try {
       const model = gltf.scene;
       model.scale.set(1.1, 1.1, 1.1);
+      // GLB 素材的朝向偏移（π）留在 model 自己这个节点上 —— 视觉层只承载 proc 三份值，
+      // 两者合成朝向仍是 `π + yawOff`（画面与改前逐帧相同）。改前视觉层直接是 model，
+      // 于是 proc 的 yawOff 只能写成 `π + yawOff`，把非对称部件（剑）镜像到另一侧（B110）。
       model.rotation.y = Math.PI;
       model.traverse((c) => {
         if (c.isMesh) {
           applyShadow(c, 'prop');
         }
       });
-      this.group.add(model);
-      this.modelRoot = model;
+      let 视觉 = this.group.children.find((o) => o.name === PLAYER_VISUAL_ROOT_NAME);
+      if (!视觉) {
+        视觉 = new THREE.Group();
+        视觉.name = PLAYER_VISUAL_ROOT_NAME;
+        this.group.add(视觉);
+      }
+      视觉.add(model);
+      this.modelRoot = 视觉;
       const box = new THREE.Box3().setFromObject(model);
       model.position.y -= box.min.y;
       this.mixer = new THREE.AnimationMixer(model);
@@ -313,7 +322,10 @@ export class CharacterModel {
     if (this.modelRoot) {
       this.modelRoot.rotation.x = this.proc.pitch;
       this.modelRoot.rotation.z = this.proc.roll;
-      this.modelRoot.rotation.y = Math.PI + this.proc.yawOff;
+      // 视觉层只承载 proc 三份值，**不含** GLB 素材那半圈朝向偏移（π）—— 那个 π 归 GLB 分支
+      // 自己的节点（`load()` 里 `model.rotation.y = Math.PI`）。改前这里写 `Math.PI + yawOff`，
+      // 于是任何挂进视觉层的非对称部件（剑）会被那半圈镜像到身体另一侧并甩出去一截（B110）。
+      this.modelRoot.rotation.y = this.proc.yawOff;
     }
     this.mixer?.update(dt);
     if (this.actionLock <= 0 && this.currentAction?.loop === THREE.LoopOnce) {

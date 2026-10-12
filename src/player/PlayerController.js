@@ -200,7 +200,11 @@ export class PlayerController {
 
     const sword = this._buildWeapon();
 
-    this.mesh.add(sword);
+    // 剑挂**视觉层**（`characterModel.modelRoot`，即 `__anim` 组），不挂逻辑节点 `mesh`（= group）。
+    // 逻辑节点每帧被 `PlayerController` 的朝向 lerp 覆写、且承载 GLB 素材那半圈 π；
+    // 剑住进视觉层才随身体的前倾 / 侧倾一起歪（B110），而世界 x 仍在 +0.55 那一侧（不含 π，不镜像）。
+    // 第一人称那把（`fpWeaponGroup`）留在相机下 —— 身体前倾不该走着手腕去拧相机。
+    (this.characterModel.modelRoot ?? this.mesh).add(sword);
 
 
 

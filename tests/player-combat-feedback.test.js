@@ -30,8 +30,8 @@
  *
  * 逐招"落点与 proc 三通道逐帧相等"是**接线**判据（写没写到对的地方），逐招"偏离不为零"是
  * **反馈存在**判据（前一条对全 0 也成立），逻辑朝向哨兵是**不越界**判据（切片5 的同款陷阱：
- * 只删守卫不分家 ⇒ 那句 `rotation.y = Math.PI + yawOff` 落在逻辑朝向上，改前实测
- * `1.5708 → 3.2616`）。三条各钉一层，少一条就有一类漂移能溜过去。
+ * 只删守卫不分家 ⇒ 那句 `rotation.y = yawOff`（B110 之前是 `Math.PI + yawOff`）落在逻辑朝向上，
+ * 改前实测 `1.5708 → 3.2616`）。三条各钉一层，少一条就有一类漂移能溜过去。
  * 采样一律把 `Math.random` 钉成定值：趔趄方向现在是一次抽签定的，不钉住的那条"不为零"腿
  * 就是靠运气绿（抽到 0.5 附近偏离不到 0.05）；只有受击那一例改用一份**会翻号**的序列，
  * 因为"每帧重摇"这个坏味道只在随机值跨 0.5 时才露出来。
@@ -84,7 +84,8 @@ function 推进(cm, 起招, 帧数 = 30, dt = 1 / 60, 随机 = 默认随机) {
       cm.update(dt);
       const m = cm.modelRoot;
       序.落点.push([m.rotation.x, m.rotation.y, m.rotation.z]);
-      序.proc.push([cm.proc.pitch, Math.PI + cm.proc.yawOff, cm.proc.roll]);
+      // B110：视觉层只承载 proc 三份值，**不含** GLB 素材那半圈 π（π 归 GLB 分支自己的节点）
+      序.proc.push([cm.proc.pitch, cm.proc.yawOff, cm.proc.roll]);
       序.group.push([cm.group.rotation.x, cm.group.rotation.y, cm.group.rotation.z]);
     }
   } finally {
@@ -154,7 +155,7 @@ describe('玩家战斗反馈：视觉层分家与一次定死的趔趄（W-C6 �
       const 偏离 = Math.max(
         绝对峰(序.落点, 0),                        // 前倾 / 后仰
         Math.max(...序.落点.map((三) => Math.abs(三[2]))), // 侧倾
-        Math.max(...序.落点.map((三) => Math.abs(三[1] - Math.PI))), // 偏头
+        Math.max(...序.落点.map((三) => Math.abs(三[1]))), // 偏头（B110：视觉层不含 π）
       );
       // 0.05 弧度（≈ 2.9°）是"一眼看不出就不算反馈"的下限，不是从某次读数反推的数
       expect(偏离, `${名}：视觉层几乎没动 —— 反馈又被谁吞了？`).toBeGreaterThan(0.05);
@@ -209,7 +210,7 @@ describe('玩家战斗反馈：视觉层分家与一次定死的趔趄（W-C6 �
     for (const 式 of [
       'this.modelRoot.rotation.x = this.proc.pitch;',
       'this.modelRoot.rotation.z = this.proc.roll;',
-      'this.modelRoot.rotation.y = Math.PI + this.proc.yawOff;',
+      'this.modelRoot.rotation.y = this.proc.yawOff;',   // B110：不再带 GLB 素材那半圈 π
     ]) {
       expect(净源.includes(式), `写入落点的式子不见了：${式}`).toBe(true);
     }
@@ -218,16 +219,19 @@ describe('玩家战斗反馈：视觉层分家与一次定死的趔趄（W-C6 �
       .includes('this.modelRoot !== this.group'), '判据本身失灵').toBe(true);
   });
 
-  it('`load()` 的顺序见证：先 `group.add(model)` 再把它当落点（写在没进场景图的节点上＝看不见）', () => {
-    净源.includes('this.group.add(model)');   // 保证下面 indexOf 的两条都在这份源里
-    const 加 = 净源.indexOf('this.group.add(model)');
-    const 指 = 净源.indexOf('this.modelRoot = model;');
-    expect(加, 'GLB 分支没往 group 上加东西？').toBeGreaterThanOrEqual(0);
-    expect(指, 'GLB 分支没设落点？').toBeGreaterThanOrEqual(0);
-    expect(加 < 指, '落点在 add 之前就被指定了：写入落在一个还没进场景图的节点上').toBe(true);
-    // 反向对照：先指后加的那种源码，同一把尺必须判 false
-    const 坏 = 'const m = 1;\n this.modelRoot = model;\n this.group.add(model)';
-    expect(stripComments(坏).indexOf('this.group.add(model)') < stripComments(坏).indexOf('this.modelRoot = model;')).toBe(false);
+  it('`load()` 的顺序见证：model 先装进视觉层、再把它当落点；π 留在 model 自己那节点上（B110）', () => {
+    // B110 之后 GLB 分支的落点是 `__anim` 视觉层（不是 model 自己），model 被装进它
+    const 装 = 净源.indexOf('视觉.add(model)');
+    const 指 = 净源.lastIndexOf('this.modelRoot = 视觉;');   // load 那一处（fallback 那一处更早）
+    expect(装, 'GLB 分支没把 model 装进视觉层？').toBeGreaterThanOrEqual(0);
+    expect(指, 'GLB 分支没把落点设成视觉层？').toBeGreaterThanOrEqual(0);
+    expect(装 < 指, '落点在 model 装进视觉层之前就被指定了：写入落在一个还没进场景图的节点上').toBe(true);
+    // GLB 素材的朝向偏移 π 留在 model 自己那节点上（视觉层不含 π —— 否则剑会被镜像，B110）
+    expect(净源.includes('model.rotation.y = Math.PI;'), 'π 不在 model 上了：合成朝向会少半圈').toBe(true);
+    expect(净源.includes('Math.PI + this.proc.yawOff'), '视觉层又把 π 加回来了：剑会被镜像到另一侧').toBe(false);
+    // 反向对照：先指后装的那种源码，同一把尺必须判 false
+    const 坏 = 'const m = 1;\n this.modelRoot = 视觉;\n 视觉.add(model)';
+    expect(stripComments(坏).indexOf('视觉.add(model)') < stripComments(坏).lastIndexOf('this.modelRoot = 视觉;')).toBe(false);
   });
 
   it('重复 `createFallback()` 只套一层视觉根（重试加载不许把部件埋进两层组）', () => {
