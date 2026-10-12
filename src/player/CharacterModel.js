@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { ANIM_MANIFEST } from '../assets/AnimManifest.js';
+import { isSkeletonClipName, registerSkeletonClips } from '../assets/SkeletonMotion.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
 const MODEL_CANDIDATES = [
@@ -31,6 +32,9 @@ export class CharacterModel {
     this.actionLock = 0;
     this.footOffset = 0;
     this.catalog = {};
+    // 招式 → 骨骼片段在 `actions` 里的键名（`SkeletonMotion` 那四条）。与 `catalog` 分两本账：
+    // `catalog` 只说"GLB 素材自己提供了哪个 clip"，这里说"我们替这具骨架编出来了哪几招"。
+    this.skeletal = {};
     this.combatState = 'idle';
     this.comboStep = 0;
     this.proc = { pitch: 0, roll: 0, yawOff: 0 };
@@ -90,6 +94,14 @@ export class CharacterModel {
       if (partial) return partial;
     }
     return null;
+  }
+
+  /**
+   * 这个 Action 播的是不是本仓 `SkeletonMotion` 编出来的骨骼片段。
+   * 判据只看 clip 名的前缀（`__sk:`），因为交接方式只取决于是不是同一类轨道 —— 见 `_playOnce`。
+   */
+  _isSkeletal(action) {
+    return !!action && isSkeletonClipName(action.getClip?.()?.name);
   }
 
   createFallback() {
@@ -162,10 +174,27 @@ export class CharacterModel {
         this.catalog[key] = this.pickAnim(list);
       }
       this.hasMixamoClips = !!(this.catalog.hit && this.catalog.block && this.catalog.dodge);
-      console.info('[AnimCatalog]', this.catalog, 'mixamo:', this.hasMixamoClips, Object.keys(this.actions));
+      // 出厂素材一条攻击 clip 都没有（`Soldier.glb` 只有 `Idle / Run / Walk / TPose`），但
+      // 49 根 `mixamorig:*` 骨骼是现成的 ⇒ 缺的只有"每一招的关键帧"。把 `SkeletonMotion` 的
+      // 表编成 clip 注册进来，左键那一下才是挥砍而不是原地踏步（B111）。
+      // 注册放在 catalog 之后：`catalog.*` 继续只说"素材自己提供了什么"，骨骼片段记在
+      // `this.skeletal` 这本独立的账上，不把素材账本涂成真有其事。
+      const 在世骨骼 = new Set();
+      model.traverse((o) => { if (o.isBone) 在世骨骼.add(o.name); });
+      const 骨骼片 = registerSkeletonClips(this.mixer, 在世骨骼);
+      for (const [招式, 名] of Object.entries(骨骼片.片段名)) {
+        this.actions[名] = 骨骼片.动作[招式];
+        this.skeletal[招式] = 名;
+      }
+      console.info('[AnimCatalog]', this.catalog, 'mixamo:', this.hasMixamoClips,
+        '骨骼片段:', `${骨骼片.接上}招/${骨骼片.轨道数}轨`, Object.keys(this.actions));
       this._playLoop(this.catalog.idle || 'Idle', 1, 0);
       this.loaded = true;
-    } catch {
+    } catch (e) {
+      // 退回胶囊是**看得见的降级**，但原因必须说出来：这段 try 里现在包含了骨骼片段的注册，
+      // 表里用了没配基准姿态的骨会当场抛（`SkeletonMotion.buildSkeletonClip`），
+      // 不让它变成一次没有日志的"素材没加载上"。
+      console.error('[CharacterModel] GLB 装配失败，退回胶囊：', e);
       this.createFallback();
     }
   }
@@ -187,12 +216,27 @@ export class CharacterModel {
     const name = this.pickAnim(candidates);
     if (name && this.mixer) {
       const action = this.actions[name];
+      const 骨骼 = this._isSkeletal(action);
       action.reset();
       action.setLoop(THREE.LoopOnce, 1);
       action.clampWhenFinished = true;
-      action.setEffectiveTimeScale(timeScale);
-      if (this.currentAction && this.currentAction !== action) this.currentAction.fadeOut(0.06);
-      action.fadeIn(0.06).play();
+      // 骨骼片段的关键帧是**秒**：`SkeletonMotion` 的 `strikeAt` 与 `combat/MoveTable.js` 的 `at`
+      // 同源，倍速会把视觉峰从判定帧上挪开（一式要 1.12 倍 ⇒ 峰早一帧），所以这一类不跟手感倍速。
+      action.setEffectiveTimeScale(骨骼 ? 1 : timeScale);
+      // 交接方式只有一条判据：**跨类就硬切，同类才淡入淡出**。
+      // 跨类不能淡：GLB clip 用四元数驱动全部 49 根骨，骨骼片段用 `.rotation[x]` 数字轨道驱动
+      // 其中 11 根，而 `Object3D` 的 `quaternion` 与 `rotation` 互相同步 —— 淡入期内同一根骨每帧
+      // 被两个写者各写一遍，谁后写谁全赢，权重斜坡根本不构成插值（看着像没接上，其实是接脏了）。
+      // 硬切的跳变实测 ≈ 3 厘米：`Idle` 在自己整圈循环里离它第 0 帧最远 0.034 米
+      // （探针 `.tmp-20261013/probe-idle-deviation.mjs`），而片段首/末帧的增量都是 0，
+      // 加完 `SKELETON_REST` 正好就是 `Idle` 第 0 帧那一档 —— 接缝两边本来就是同一个姿势。
+      // 同类之间（连段一式接二式）两边都是数字欧拉轨道，three 的加权求和是真插值，照旧淡。
+      const 跨类 = 骨骼 !== this._isSkeletal(this.currentAction);
+      if (this.currentAction && this.currentAction !== action) {
+        if (跨类) this.currentAction.stop();
+        else this.currentAction.fadeOut(0.06);
+      }
+      action.fadeIn(跨类 ? 0 : 0.06).play();
       this.currentAction = action;
     }
     this.actionLock = duration;
@@ -205,9 +249,12 @@ export class CharacterModel {
     this.combatState = `combo${step}`;
     const dur = 0.36 + step * 0.06;
     const sets = [
-      [this.catalog.attack1, ...ANIM_MANIFEST.attack1, this.catalog.walk, 'Walk'],
-      [this.catalog.attack2, ...ANIM_MANIFEST.attack2, this.catalog.run, 'Run'],
-      [this.catalog.attack3, ...ANIM_MANIFEST.attack3, ...ANIM_MANIFEST.heavy, this.catalog.run, 'Run'],
+      // 优先级：素材真有攻击 clip（`catalog.attack1` / `ANIM_MANIFEST` 里的名字）> 我们替这具
+      // 骨架编的骨骼片段 > 跑步/走路当替身。最后那一档就是 B111 的病根：出厂 GLB 一条攻击都没有，
+      // 于是每一招都落到 `'Walk'`/`'Run'` × 倍速 —— 玩家看到一边挥空手一边原地踏步。
+      [this.catalog.attack1, ...ANIM_MANIFEST.attack1, this.skeletal.attack1, this.catalog.walk, 'Walk'],
+      [this.catalog.attack2, ...ANIM_MANIFEST.attack2, this.skeletal.attack2, this.catalog.run, 'Run'],
+      [this.catalog.attack3, ...ANIM_MANIFEST.attack3, this.skeletal.attack3, ...ANIM_MANIFEST.heavy, this.catalog.run, 'Run'],
     ];
     const procs = [
       { pitch: -0.22, yawOff: 0.08 },
@@ -227,7 +274,7 @@ export class CharacterModel {
   playHeavyAttack() {
     this.combatState = 'heavy';
     if (!this._playOnce(
-      [this.catalog.heavy, ...ANIM_MANIFEST.heavy, this.catalog.attack3, ...ANIM_MANIFEST.attack3],
+      [this.catalog.heavy, ...ANIM_MANIFEST.heavy, this.skeletal.heavy, this.catalog.attack3, ...ANIM_MANIFEST.attack3],
       0.92, 0.62, { pitch: -0.45, roll: 0.05 }
     )) {
       this._playOnce([this.catalog.run, 'Run'], 0.65, 0.62, { pitch: -0.45 });
@@ -332,7 +379,10 @@ export class CharacterModel {
       this.combatState = 'idle';
       const idle = this.catalog.idle || 'Idle';
       if (this.actions[idle] && this.currentAction !== this.actions[idle]) {
-        this._playLoop(idle, 1, 0.12);
+        // 骨骼片段收在站姿上（末帧增量 0 ⇒ 加完 `SKELETON_REST` 就是 `Idle` 的第 0 帧那一档），
+        // 所以回到 `Idle` 时硬切即连续；留 0.12 的淡入淡出反而让两类轨道同时写那 11 根骨
+        // —— 与 `_playOnce` 里进招式那一侧是同一条理由，判据也共用 `_isSkeletal`。
+        this._playLoop(idle, 1, this._isSkeletal(this.currentAction) ? 0 : 0.12);
       }
     }
   }
