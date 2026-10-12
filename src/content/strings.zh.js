@@ -177,6 +177,29 @@ export const STRINGS_ZH = Object.freeze({
   start_perf: '性能面板',
   start_enter: '点击进入游戏',
   start_url_note: '请使用 http://localhost:5173 访问（需先运行 npm run dev）',
+
+  // 指南面板动态文案（W-D2 切片8：GameGuidePanel 三元素）
+  guide_title_auto: '⚡ 自动通关进行中',
+  guide_step_auto: '你的角色正在跑图…',
+  guide_title_dungeon_prefix: '🗺 ',
+  guide_step_dungeon: '已探索 {visited}/{total} 房 · 已清空 {cleared}/{total}',
+  guide_hint_dungeon_boss: '⚔ 迷宫守钥者 — 击败后出口环才可用',
+  guide_hint_dungeon_enemies: '⚔ 当前房 {enemies} 个敌人 — 清空后门会开',
+  guide_hint_dungeon_exit: '▶ 守钥者已倒 — 出口环 {interact} 离开',
+  guide_hint_dungeon_explore: '▶ 穿门探索 · 留意发光石碑 {interact} 读叙事',
+  guide_title_complete: '🎉 主线已完成',
+  guide_step_complete: '自由探索五区 · 小地图 {minimap} 看 Boss 💀',
+  guide_hint_complete: '按 {autoPlay} 可重跑自动通关',
+  guide_title_chapter_prefix: 'Ch{chapter} · ',
+  guide_hint_waypoint: '▶ 走向：{label}{hint}',
+  guide_hint_assistant: '位面助手：{hint}',
+
+  // Toast（指南面板同步/自动通关）
+  guide_toast_sync_progress: '已推进 {n} 个任务',
+  guide_toast_synced: '任务已同步到最新',
+
+  // 指南面板自动通关提示
+  guide_hint_auto: '{escape} 停止 · 请看屏幕中央的角色移动',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

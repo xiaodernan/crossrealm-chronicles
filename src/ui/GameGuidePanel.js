@@ -1,5 +1,6 @@
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 import { keyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 
 /** 常驻游戏指引 — 告诉玩家现在该干什么 */
 export class GameGuidePanel {
@@ -11,9 +12,10 @@ export class GameGuidePanel {
     this.stepEl = this.el.querySelector('#guide-step');
     this.hintEl = this.el.querySelector('#guide-hint');
     attachDraggable(this.el, { storageKey: 'game-guide', handle: '.guide-head' });
-    attachCollapsible(this.el, { storageKey: 'game-guide' });    this.el.querySelector('#guide-sync')?.addEventListener('click', () => {
+    attachCollapsible(this.el, { storageKey: 'game-guide' });
+    this.el.querySelector('#guide-sync')?.addEventListener('click', () => {
       const n = this.game.quests.syncProgress();
-      this.game.dialog.toast(n > 0 ? `已推进 ${n} 个任务` : '任务已同步到最新');
+      this.game.dialog.toast(n > 0 ? t('guide_toast_sync_progress', { n }) : t('guide_toast_synced'));
       this.refresh();
     });
     this.el.querySelector('#guide-autoplay')?.addEventListener('click', () => {
@@ -27,37 +29,39 @@ export class GameGuidePanel {
     const q = this.game.quests.current;
     const ap = this.game.playerAutoPlay?.active;
     if (ap) {
-      if (this.titleEl) this.titleEl.textContent = '⚡ 自动通关进行中';
-      if (this.stepEl) this.stepEl.textContent = this.game.playerAutoPlay.statusEl?.textContent ?? '你的角色正在跑图…';
-      if (this.hintEl) this.hintEl.textContent = keyText('{escape} 停止 · 请看屏幕中央的角色移动');
+      if (this.titleEl) this.titleEl.textContent = t('guide_title_auto');
+      if (this.stepEl) this.stepEl.textContent = this.game.playerAutoPlay.statusEl?.textContent ?? t('guide_step_auto');
+      if (this.hintEl) this.hintEl.textContent = keyText(t('guide_hint_auto'));
       return;
     }
     const dg = this.game.dungeons?.getExplorationHint?.();
     if (dg) {
-      if (this.titleEl) this.titleEl.textContent = `🗺 ${dg.name}`;
-      if (this.stepEl) this.stepEl.textContent = `已探索 ${dg.visited}/${dg.total} 房 · 已清空 ${dg.cleared}/${dg.total}`;
+      if (this.titleEl) this.titleEl.textContent = t('guide_title_dungeon_prefix') + dg.name;
+      if (this.stepEl) this.stepEl.textContent = t('guide_step_dungeon', { visited: dg.visited, total: dg.total, cleared: dg.cleared });
       if (this.hintEl) {
         this.hintEl.textContent = dg.bossAlive
-          ? '⚔ 迷宫守钥者 — 击败后出口环才可用'
+          ? t('guide_hint_dungeon_boss')
           : dg.enemies > 0
-          ? `⚔ 当前房 ${dg.enemies} 个敌人 — 清空后门会开`
-          : dg.isExit ? keyText('▶ 守钥者已倒 — 出口环 [{interact}] 离开') : keyText('▶ 穿门探索 · 留意发光石碑 [{interact}] 读叙事');
+            ? t('guide_hint_dungeon_enemies', { enemies: dg.enemies })
+            : dg.isExit
+              ? keyText(t('guide_hint_dungeon_exit'))
+              : keyText(t('guide_hint_dungeon_explore'));
       }
       return;
     }
     if (!q) {
-      if (this.titleEl) this.titleEl.textContent = '🎉 主线已完成';
-      if (this.stepEl) this.stepEl.textContent = keyText('自由探索五区 · 小地图 {minimap} 看 Boss 💀');
-      if (this.hintEl) this.hintEl.textContent = keyText('按 {autoPlay} 可重跑自动通关');
+      if (this.titleEl) this.titleEl.textContent = t('guide_title_complete');
+      if (this.stepEl) this.stepEl.textContent = keyText(t('guide_step_complete'));
+      if (this.hintEl) this.hintEl.textContent = keyText(t('guide_hint_complete'));
       return;
     }
-    if (this.titleEl) this.titleEl.textContent = `Ch${this.game.quests.chapter} · ${q.title}`;
+    if (this.titleEl) this.titleEl.textContent = t('guide_title_chapter_prefix', { chapter: this.game.quests.chapter }) + q.title;
     if (this.stepEl) this.stepEl.textContent = this.game.quests.getProgressText();
     const wp = this.game.quests.getQuestWaypoint();
     if (this.hintEl) {
       this.hintEl.textContent = wp
-        ? `▶ 走向：${wp.label}${wp.hint ? `（${wp.hint}）` : ''}`
-        : this.game.quests.getAssistantHint();
+        ? t('guide_hint_waypoint', { label: wp.label, hint: wp.hint ? `（${wp.hint}）` : '' })
+        : t('guide_hint_assistant', { hint: this.game.quests.getAssistantHint() });
     }
   }
 

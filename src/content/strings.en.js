@@ -177,6 +177,29 @@ export const STRINGS_EN = Object.freeze({
   start_perf: 'Perf panel',
   start_enter: 'Click to enter the game',
   start_url_note: 'Open http://localhost:5173 (run npm run dev first)',
+
+  // Guide panel dynamic texts (W-D2 slice 8: GameGuidePanel three elements)
+  guide_title_auto: '⚡ Auto-run in progress',
+  guide_step_auto: 'Your character is pathing…',
+  guide_title_dungeon_prefix: '🗺 ',
+  guide_step_dungeon: 'Explored {visited}/{total} rooms · Cleared {cleared}/{total}',
+  guide_hint_dungeon_boss: '⚔ Maze Keykeeper — defeat to unlock exit portal',
+  guide_hint_dungeon_enemies: '⚔ Current room {enemies} enemies — clear to open doors',
+  guide_hint_dungeon_exit: '▶ Keykeeper down — exit portal {interact} to leave',
+  guide_hint_dungeon_explore: '▶ Delve deeper · watch for glowing stelae {interact} for lore',
+  guide_title_complete: '🎉 Main quest complete',
+  guide_step_complete: 'Freely explore five zones · Minimap {minimap} shows Boss 💀',
+  guide_hint_complete: 'Press {autoPlay} to replay auto-run',
+  guide_title_chapter_prefix: 'Ch{chapter} · ',
+  guide_hint_waypoint: '▶ Head to: {label}{hint}',
+  guide_hint_assistant: 'Plane Assistant: {hint}',
+
+  // Toast (guide panel sync / auto-play)
+  guide_toast_sync_progress: 'Advanced {n} quests',
+  guide_toast_synced: 'Quests synced to latest',
+
+  // Guide panel auto-play hint
+  guide_hint_auto: '{escape} to stop · watch your character move',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

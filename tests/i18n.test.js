@@ -367,3 +367,58 @@ describe('升级面板静态标签（W-D2 切片7）', () => {
     expect([...missing, fake], '过滤器连假钉子都点不了名').toEqual([fake]);
   });
 });
+
+describe('指南面板动态文案（W-D2 切片8）', () => {
+  const gpSrc = readFileSync(join(process.cwd(), 'src/ui/GameGuidePanel.js'), 'utf8');
+
+  /**
+   * GameGuidePanel.refresh() 里的所有文案现在都走 t()。
+   * 逐键点名：这些键必须在两张表里且非空；JS 里不许出现裸字面量。
+   */
+  const GUIDE_KEYS = [
+    'guide_title_auto',
+    'guide_step_auto',
+    'guide_title_dungeon_prefix',
+    'guide_step_dungeon',
+    'guide_hint_dungeon_boss',
+    'guide_hint_dungeon_enemies',
+    'guide_hint_dungeon_exit',
+    'guide_hint_dungeon_explore',
+    'guide_title_complete',
+    'guide_step_complete',
+    'guide_hint_complete',
+    'guide_title_chapter_prefix',
+    'guide_hint_waypoint',
+    'guide_hint_assistant',
+    'guide_toast_sync_progress',
+    'guide_toast_synced',
+    'guide_hint_auto',
+  ];
+
+  it('GameGuidePanel 里的文案键在两张表里都有非空文案', () => {
+    for (const key of GUIDE_KEYS) {
+      expect(STRINGS_ZH[key], `中文表缺 ${key}`).toBeTypeOf('string');
+      expect(STRINGS_ZH[key]?.length, `中文表 ${key} 为空`).toBeGreaterThan(0);
+      expect(STRINGS_EN[key], `英文表缺 ${key}`).toBeTypeOf('string');
+      expect(STRINGS_EN[key]?.length, `英文表 ${key} 为空`).toBeGreaterThan(0);
+    }
+  });
+
+  it('JS 里不许出现这组文案的裸字面量（改完键之后界面还得说真话）', () => {
+    const literals = GUIDE_KEYS
+      .map((k) => STRINGS_ZH[k])
+      .filter((v) => v && v.length > 2)
+      .filter((v) => gpSrc.includes(v));
+    expect(literals, '这些中文文案仍以裸字面量存在于 GameGuidePanel.js').toEqual([]);
+  });
+
+  it('反面控制：删掉一把键 JS 扫描器必须红', () => {
+    // 模拟删键：从源码里把某个 t('key') 改成 t('no_such_key')
+    const reverted = gpSrc.replace("t('guide_title_auto')", "t('no_such_key')");
+    const missing = GUIDE_KEYS
+      .map((k) => STRINGS_ZH[k])
+      .filter((v) => v && v.length > 2)
+      .filter((v) => reverted.includes(v));
+    expect(missing.length).toBeLessThan(GUIDE_KEYS.length);
+  });
+});
