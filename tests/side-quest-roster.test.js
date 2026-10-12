@@ -18,6 +18,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP, SIDE_QUESTS_ALL, franchiseZone } from '../src/content/sideQuests.js';
+import { keyText } from '../src/content/keyHints.js';
 import { ECHOES } from '../src/content/echoes.js';
 import { ZONE_IDS, ZONE_ORDER } from '../src/content/ZoneIdentity.js';
 import { SideQuestSystem } from '../src/game/SideQuestSystem.js';
@@ -397,4 +398,16 @@ describe('W-B12 切片3：单系列致敬支线的 zone 由回声表推，不再
     const 缺格 = SIDE_QUESTS_POP.map((q, i) => (i === 1 ? { ...q, zone: undefined } : q));
     expect(planted('sideQuestsPop', 缺格).join('\n')).toMatch(/缺少必填字段/);
   });
+
+  it('每条支线的 desc 过一遍真渲染 keyText() 不抛 —— 写错的 {动作} token 打开 [J] 面板就崩', () => {
+    // SideQuestJournalTab 渲染每条 desc 走 keyText(q.desc)；keyText 遇到两张键位表
+    // 都不认识的 {action} 会直接 throw，崩掉整个支线面板（OVERHAUL_PLAN 点名的 {pray} 类）。
+    // 这条门禁把"名单里任何一条 desc 写错键名"当场钉红，而不是等玩家打开面板才崩。
+    for (const q of SIDE_QUESTS_ALL) {
+      expect(() => keyText(q.desc), `支线 ${q.id} 的 desc 渲染失败`).not.toThrow();
+    }
+    // 反证：门禁真的会咬 —— 一个两表都不认识的 token 必须抛（否则上面是假绿）。
+    expect(() => keyText('用 {photMode} 拍照')).toThrow(/不是任何已登记的动作/);
+  });
+
 });
