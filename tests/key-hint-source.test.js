@@ -416,9 +416,9 @@ describe('界面上说出的键名只能从两张表来（字样尺子）', () =
   const byLen = [...FACTORY].sort((a, b) => b.length - a.length).map(esc).join('|');
   const wordy = [...FACTORY].filter((l) => !DIGITS.has(l)).sort((a, b) => b.length - a.length).map(esc).join('|');
   const PATTERNS = [
-    new RegExp(`(?:按|按住|长按)\\s*[\\[【(]?\\s*(?:${byLen})(?![0-9A-Za-z])`, 'g'),
-    new RegExp(`(?:可|后|前|再)\\s*[\\[【(]?\\s*(?:${byLen})(?![0-9A-Za-z])`, 'g'),
-    new RegExp(`[\\[【(]\\s*(?:${wordy})\\s*[\\]】)]`, 'g'),
+    new RegExp(`(?:按|按住|长按)\\s*[\\[【(（]?\\s*(?:${byLen})(?![0-9A-Za-z])`, 'g'),
+    new RegExp(`(?:可|后|前|再)\\s*[\\[【(（]?\\s*(?:${byLen})(?![0-9A-Za-z])`, 'g'),
+    new RegExp(`[\\[【(（]\\s*(?:${wordy})\\s*[\\]】)）]`, 'g'),
     new RegExp(`(?:${byLen})(?![0-9A-Za-z])\\s*(?:关闭|离开|跳出|跳过|打开|退出|解除|切换|弹反|翻滚|锁定|闪避|拍照|蓄力|键|可)`, 'g'),
   ];
 
@@ -444,9 +444,14 @@ describe('界面上说出的键名只能从两张表来（字样尺子）', () =
     // 防的是"空跑门禁"（正则一坏就永远通过）—— 用真文件里的一格占位反向改回去验
     const codex = FILES.find((f) => f.name === 'game/LoreCodexRegistry.js').source;
     expect(labelHits(codex)).toEqual([]);
+    // 半角裸写
     const reverted = codex.replace('{escape} 可跳过演出', 'Esc 可跳过演出');
     expect(reverted).not.toEqual(codex);
     expect(labelHits(reverted)).toContain('Esc 可');
+    // 全角括号包裹 —— 旧正则的 `[\[【(]?` 不覆盖 `（`，此针专防那种漏网
+    const revertedFull = codex.replace('{escape} 可跳过演出', '（Esc）可跳过演出');
+    expect(revertedFull).not.toEqual(codex);
+    expect(labelHits(revertedFull)).toContain('（Esc）');
   });
 
   it('尺子不缺齿：两张表里每一枚键名都真的进了正则', () => {
