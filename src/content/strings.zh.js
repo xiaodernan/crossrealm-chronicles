@@ -200,6 +200,54 @@ export const STRINGS_ZH = Object.freeze({
 
   // 指南面板自动通关提示
   guide_hint_auto: '{escape} 停止 · 请看屏幕中央的角色移动',
+
+  // HUD 运行期文案 / 模板默认值（W-D2 切片9）
+  // 占位符统一用 ${name}（与本仓 i18n `interpolate` 契约一致；单花括号不会被插值）。
+  hud_zone_name_default: '交汇枢纽',
+  hud_zone_subtitle_default: '位面中心',
+  hud_souls_display_fmt: '魂 ${souls} · Lv.${level}',
+  hud_discovery_fmt: '日志 ${count} · 碎片 ${fr}/8 · 地图 ${pct}%',
+  hud_skill_points_fmt: '技能点 ${points}',
+  hud_weapon_default: '⚔ 位面长剑',
+  hud_camera_mode_first: '第一人称',
+  hud_camera_mode_third: '第三人称',
+  hud_boss_name_default: '影界守护者',
+  hud_boss_phase_fmt: '阶段 ${phase}',
+  hud_spell_1: '真火',
+  hud_spell_2: '玄冰',
+  hud_spell_3: '引力',
+  hud_spell_4: '化身',
+  hud_toast_new_discovery: '新发现：${title}',
+  hud_toast_lore_fragment: '📜 叙事碎片：${title}',
+  hud_quest_empty_title: '无尽探索',
+  hud_quest_empty_progress: '自由探索整个世界',
+  hud_combo_executable: '⚡ 可处决',
+  hud_combo_count: '连击 x${count}',
+  hud_subtitle_planar_bleed: '位面渗漏 · ${zone}',
+  hud_boss_phase_1: '阶段 I',
+  hud_boss_phase_2: '阶段 II',
+  hud_boss_phase_3: '阶段 III',
+  hud_toast_rerun: '深渊再探 — 新随机布局已生成',
+  hud_subtitle_time_stop: '⏳ 时停中 — 蓄力法术可打断',
+  hud_map_anchor_hub: '枢纽',
+  hud_map_anchor_forest: '森林',
+  hud_map_anchor_magic: '魔法',
+  hud_map_anchor_space: '星际',
+  hud_map_anchor_timeline: '时线',
+  hud_map_anchor_chaos: '混沌',
+  hud_map_anchor_ruin: '遗城',
+  hud_map_anchor_library: '图书馆',
+  hud_map_anchor_rift: '裂隙',
+  hud_map_anchor_shrine: '神龛',
+  hud_map_anchor_tomb: '墓穴',
+  hud_journal_empty: '此类别暂无记录 — 探索世界、读石碑、对话 NPC',
+  hud_journal_hint: '已记录 ${count} 条 · 全游戏可发现约 ${total}+ 处',
+  hud_journal_back: '← 返回日志清单',
+  hud_journal_close_hint: '按 ${zonePanel} 关闭',
+
+  // 补充：HUD 任务/日志标题（切片9 补全）
+  hud_quest_in_progress: '进行中',
+  hud_journal_title: '跨界日志 · ${journal} 关闭',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

@@ -7,6 +7,7 @@ import { on, offAll } from '../engine/EventBus.js';
 import { refreshKeyText, setHintDevice } from '../content/keyHints.js';
 import { focusFirstItem, parkFocus, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 import { inputDeviceLabel } from '../engine/InputDevice.js';
+import { t } from '../engine/i18n.js';
 
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 import { applyBarTheme } from './barTheme.js';
@@ -285,7 +286,7 @@ buildHUD() {
 
     on('discovery', (e) => {
       this.updateDiscoveryCount();
-      this.game.dialog.toast(`新发现：${e.detail.title}`);
+      this.game.dialog.toast(t('hud_toast_new_discovery', { title: e.detail.title }));
     }, EVENT_TAG);
 
     on('journal-updated', () => {
@@ -295,12 +296,12 @@ buildHUD() {
 
     on('journal-entry', (e) => {
       if (e.detail.category === 'fragment') {
-        this.game.dialog.toast(`📜 叙事碎片：${e.detail.title}`, 3500);
+        this.game.dialog.toast(t('hud_toast_lore_fragment', { title: e.detail.title }), 3500);
       }
     }, EVENT_TAG);
 
     on('stats-changed', (e) => {
-      document.getElementById('souls-display').textContent = `魂 ${e.detail.souls} · Lv.${e.detail.level}`;
+      document.getElementById('souls-display').textContent = t('hud_souls_display_fmt', { souls: e.detail.souls, level: e.detail.level });
     }, EVENT_TAG);
 
     on('quest-updated', (e) => {
@@ -311,8 +312,8 @@ buildHUD() {
         document.getElementById('quest-title').textContent = q.title;
         document.getElementById('quest-progress').textContent = this.game.quests.getProgressText();
       } else {
-        document.getElementById('quest-title').textContent = '无尽探索';
-        document.getElementById('quest-progress').textContent = '自由探索整个世界';
+        document.getElementById('quest-title').textContent = t('hud_quest_empty_title');
+        document.getElementById('quest-progress').textContent = t('hud_quest_empty_progress');
       }
     }, EVENT_TAG);
 
@@ -337,7 +338,7 @@ buildHUD() {
         this.stamina = v.stamina.value;
         this.combo = v.combo.value;
         const comboEl = document.getElementById('combo-display');
-        if (comboEl) comboEl.textContent = v.parryable.value ? '⚡ 可处决' : (this.combo > 1 ? `连击 x${this.combo}` : '');
+        if (comboEl) comboEl.textContent = v.parryable.value ? t('hud_combo_executable') : (this.combo > 1 ? t('hud_combo_count', { count: this.combo }) : '');
       };
       this._offs.push(v.stamina.subscribe(refreshStamina));
       this._offs.push(v.combo.subscribe(refreshStamina));
@@ -362,7 +363,7 @@ buildHUD() {
     }, EVENT_TAG);
 
     on('realm-bleed', (e) => {
-      this._setSubtitleOverlay('bleed', `⟡ 位面渗漏 · ${e.detail.zone}`);
+      this._setSubtitleOverlay('bleed', t('hud_subtitle_planar_bleed', { zone: e.detail.zone }));
     }, EVENT_TAG);
 
     on('boss-start', () => {
@@ -375,7 +376,8 @@ buildHUD() {
       const { hp, maxHp, phase, name } = e.detail;
       document.getElementById('boss-name').textContent = name;
       document.getElementById('boss-hp-bar').style.width = `${(hp / maxHp) * 100}%`;
-      document.getElementById('boss-phase').textContent = ['', '阶段 I', '阶段 II', '阶段 III'][phase] || '阶段 I';
+      const phaseLabels = [t('hud_boss_phase_1'), t('hud_boss_phase_2'), t('hud_boss_phase_3')];
+      document.getElementById('boss-phase').textContent = phaseLabels[phase - 1] || t('hud_boss_phase_1');
     }, EVENT_TAG);
 
     on('boss-defeated', () => {
@@ -392,15 +394,15 @@ buildHUD() {
 
     on('skill-points-changed', (e) => {
       const el = document.getElementById('skill-points-display');
-      if (el) el.textContent = `技能点 ${e.detail.points ?? 0}`;
+      if (el) el.textContent = t('hud_skill_points_fmt', { points: e.detail.points ?? 0 });
     }, EVENT_TAG);
 
     on('dungeon-enter', (e) => {
-      if (e.detail.rerun) this.game.dialog.toast('深渊再探 — 新随机布局已生成');
+      if (e.detail.rerun) this.game.dialog.toast(t('hud_toast_rerun'));
     }, EVENT_TAG);
 
     on('time-stop-start', () => {
-      this._setSubtitleOverlay('timeStop', '⏳ 时停中 — 蓄力法术可打断');
+      this._setSubtitleOverlay('timeStop', t('hud_subtitle_time_stop'));
     }, EVENT_TAG);
 
     /* 修 B44：VoidBoss 到期与被打断两处都派发 time-stop-end，而修前全仓无人监听 ——
@@ -411,7 +413,7 @@ buildHUD() {
 
     on('camera-mode-changed', (e) => {
       const el = document.getElementById('camera-mode-display');
-      if (el) el.textContent = e.detail.mode === 'first' ? '第一人称' : '第三人称';
+      if (el) el.textContent = e.detail.mode === 'first' ? t('hud_camera_mode_first') : t('hud_camera_mode_third');
     }, EVENT_TAG);
 
     /* 开机那一格由那位唯一写手落一次。`quests` 比 HUD 早建（`core/Game.js`），
@@ -548,7 +550,7 @@ buildHUD() {
     const n = j?.entries?.length ?? 0;
     const fr = j?.getCounts?.().fragment ?? 0;
     const pct = this.game.explorationMap?.getExploredPercent?.() ?? 0;
-    document.getElementById('discovery-count').textContent = `日志 ${n} · 碎片 ${fr}/8 · 地图 ${pct}%`;
+    document.getElementById('discovery-count').textContent = t('hud_discovery_fmt', { count: n, fr: fr, pct: pct });
   }
 
   /**
@@ -585,17 +587,17 @@ buildHUD() {
     }).join('');
     let questHtml = '';
     if (q.current) {
-      questHtml = `<p class="quest-current"><strong>Ch${q.chapter} · 进行中</strong>${q.current.title}<br><span>${q.getProgressText()}</span></p>`;
+      questHtml = `<p class="quest-current"><strong>Ch${q.chapter} · ${t('hud_quest_in_progress')}</strong>${q.current.title}<br><span>${q.getProgressText()}</span></p>`;
     }
     const items = j.getFiltered(tab).map((d) =>
       `<li><span class="journal-cat">${cats[d.category] ?? d.category}</span><strong>${d.title}</strong><span>${d.text}</span></li>`
     ).join('');
     this.journalPanel.innerHTML = `
-      <h2 data-ktext="跨界日志 · {journal} 关闭"></h2>
+      <h2>${t('hud_journal_title')}</h2>
       <div class="journal-tabs">${tabs}</div>
       ${questHtml}
-      <ul class="journal-list">${items || '<li class="empty">此类别暂无记录 — 探索世界、读石碑、对话 NPC</li>'}</ul>
-      <p class="hint">已记录 ${j.entries.length} 条 · 全游戏可发现约 ${DISCOVERABLE_TOTAL}+ 处</p>
+      <ul class="journal-list">${items || `<li class="empty">${t('hud_journal_empty')}</li>`}</ul>
+      <p class="hint">${t('hud_journal_hint', { count: j.entries.length, total: DISCOVERABLE_TOTAL })}</p>
     `;
     refreshKeyText(this.journalPanel);
     this.journalPanel.querySelectorAll('.journal-tab').forEach((btn) => {

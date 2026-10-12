@@ -200,6 +200,54 @@ export const STRINGS_EN = Object.freeze({
 
   // Guide panel auto-play hint
   guide_hint_auto: '{escape} to stop · watch your character move',
+
+  // HUD runtime texts / template defaults (W-D2 slice 9)
+  // Placeholders use ${name} (matches the repo i18n `interpolate` contract; single braces are not interpolated).
+  hud_zone_name_default: 'Nexus',
+  hud_zone_subtitle_default: 'Plane Center',
+  hud_souls_display_fmt: 'Souls ${souls} · Lv.${level}',
+  hud_discovery_fmt: 'Logs ${count} · Fragments ${fr}/8 · Map ${pct}%',
+  hud_skill_points_fmt: 'Skill Points ${points}',
+  hud_weapon_default: '⚔ Planeslong Sword',
+  hud_camera_mode_first: 'First Person',
+  hud_camera_mode_third: 'Third Person',
+  hud_boss_name_default: 'Shadowguard',
+  hud_boss_phase_fmt: 'Phase ${phase}',
+  hud_spell_1: 'True Fire',
+  hud_spell_2: 'Xuan Ice',
+  hud_spell_3: 'Gravity',
+  hud_spell_4: 'Avatar',
+  hud_toast_new_discovery: 'New Discovery: ${title}',
+  hud_toast_lore_fragment: '📜 Lore Fragment: ${title}',
+  hud_quest_empty_title: 'Endless Exploration',
+  hud_quest_empty_progress: 'Freely explore the world',
+  hud_combo_executable: '⚡ Executable',
+  hud_combo_count: 'Combo x${count}',
+  hud_subtitle_planar_bleed: 'Planar Bleed · ${zone}',
+  hud_boss_phase_1: 'Phase I',
+  hud_boss_phase_2: 'Phase II',
+  hud_boss_phase_3: 'Phase III',
+  hud_toast_rerun: 'Abyss Rerun — new random layout generated',
+  hud_subtitle_time_stop: '⏳ Time Stop — charged spells can interrupt',
+  hud_map_anchor_hub: 'Hub',
+  hud_map_anchor_forest: 'Forest',
+  hud_map_anchor_magic: 'Magic',
+  hud_map_anchor_space: 'Space',
+  hud_map_anchor_timeline: 'Timeline',
+  hud_map_anchor_chaos: 'Chaos',
+  hud_map_anchor_ruin: 'Ruins',
+  hud_map_anchor_library: 'Library',
+  hud_map_anchor_rift: 'Rift',
+  hud_map_anchor_shrine: 'Shrine',
+  hud_map_anchor_tomb: 'Tomb',
+  hud_journal_empty: 'No records in this category — explore the world, read stelae, talk to NPCs',
+  hud_journal_hint: 'Recorded ${count} entries · ~${total}+ discoverable in total',
+  hud_journal_back: '← Back to journal list',
+  hud_journal_close_hint: 'Press ${zonePanel} to close',
+
+  // Additional: HUD quest/journal titles (slice 9 completion)
+  hud_quest_in_progress: 'In Progress',
+  hud_journal_title: 'Crossrealm Journal · ${journal} to close',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */
