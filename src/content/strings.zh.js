@@ -130,6 +130,26 @@ export const STRINGS_ZH = Object.freeze({
   upgrade_title: '营火升级',
   upgrade_continue: '继续探索',
 
+  // 升级面板静态标签（W-D2 切片7）
+  upgrade_tab_stats: '属性',
+  upgrade_tab_skills: '武器技能',
+  upgrade_tab_lore: '剧情技能',
+  upgrade_tab_gear: '装备',
+  upgrade_stat_hp: '生命上限',
+  upgrade_stat_st: '精力上限',
+  upgrade_stat_vigor: '活力',
+  upgrade_stat_endurance: '耐力',
+  upgrade_stat_strength: '力量',
+  upgrade_stat_arcane: '奥术',
+  upgrade_stat_mind: '心智',
+  upgrade_hint: '升级后完全恢复',
+  upgrade_gear_bag: '背包',
+  upgrade_meta_souls: '位面之魂',
+  upgrade_meta_cost: '升级需',
+  upgrade_meta_level: 'Lv.',
+  upgrade_meta_points: '技能点',
+  upgrade_rest_default: '营火',
+
   // 自动演示
   autoplay_start: '开始自动演示',
   autoplay_stop: '停止自动演示',

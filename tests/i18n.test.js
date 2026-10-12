@@ -312,3 +312,58 @@ describe('死键只减不增（W-D2 切片6 门槛）', () => {
     expect(dead, `死键计数 ${dead} 超过上限（应 ≤ 48）`).toBeLessThanOrEqual(48);
   });
 });
+
+describe('升级面板静态标签（W-D2 切片7）', () => {
+  const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+
+  /**
+   * 升级面板壳页静态标签：这些元素无 JS 覆写（写者普查过）。
+   * `upgrade-rest-name` 虽有 JS 写入，但默认值 '营火' 需要 i18n 兜底（JS 覆盖前可见）。
+   * 技能/剧情/装备区域的正文由 UpgradePanel 运行期生成（含 skillTrees），归后续切片。
+   */
+  const PINS7 = [
+    '<h2 id="upgrade-rest-name" data-i18n="upgrade_rest_default">',
+    '<span data-i18n="upgrade_meta_souls">',
+    '<span data-i18n="upgrade_meta_cost">',
+    '<span data-i18n="upgrade_meta_level">',
+    '<span data-i18n="upgrade_meta_points">',
+    '<button type="button" id="tab-stats" data-i18n="upgrade_tab_stats">',
+    '<button type="button" id="tab-skills" data-i18n="upgrade_tab_skills">',
+    '<button type="button" id="tab-lore" data-i18n="upgrade_tab_lore">',
+    '<button type="button" id="tab-gear" data-i18n="upgrade_tab_gear">',
+    '<span data-i18n="upgrade_stat_hp">',
+    '<span data-i18n="upgrade_stat_st">',
+    '<span data-i18n="upgrade_stat_vigor">',
+    '<span data-i18n="upgrade_stat_endurance">',
+    '<span data-i18n="upgrade_stat_strength">',
+    '<span data-i18n="upgrade_stat_arcane">',
+    '<span data-i18n="upgrade_stat_mind">',
+    '<span data-i18n="upgrade_hint">',
+    '<span data-i18n="upgrade_gear_bag">',
+    '<button id="upgrade-close" data-i18n="upgrade_continue">',
+  ];
+
+  it('升级面板静态标签都挂 data-i18n', () => {
+    const missing = PINS7.filter((pin) => !html.includes(pin));
+    expect(missing, '这些地方今天没有走 data-i18n').toEqual([]);
+    expect(PINS7.length, '钉的条数太少，清单本身要复核').toBeGreaterThanOrEqual(17);
+  });
+
+  it('被钉住的键在两张表里都有非空文案', () => {
+    const keys = [...new Set(PINS7.map((p) => /data-i18n="([^"]+)"/.exec(p)?.[1]).filter(Boolean))];
+    expect(keys.length, 'PINS7 里一条 data-i18n 都没解析出来，解析坏了').toBeGreaterThanOrEqual(17);
+    for (const key of keys) {
+      expect(STRINGS_ZH[key], `中文表缺 ${key}`).toBeTypeOf('string');
+      expect(STRINGS_ZH[key]?.length, `中文表 ${key} 为空`).toBeGreaterThan(0);
+      expect(STRINGS_EN[key], `英文表缺 ${key}`).toBeTypeOf('string');
+      expect(STRINGS_EN[key]?.length, `英文表 ${key} 为空`).toBeGreaterThan(0);
+    }
+  });
+
+  it('反面控制：假钉子必须被点名（防清单永远全过）', () => {
+    const fake = '<span data-i18n="no_such_pin_key_7">';
+    expect(html).not.toContain(fake);
+    const missing = PINS7.filter((pin) => !html.includes(pin));
+    expect([...missing, fake], '过滤器连假钉子都点不了名').toEqual([fake]);
+  });
+});

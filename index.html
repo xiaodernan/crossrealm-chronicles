@@ -37,27 +37,27 @@
     <div id="toast-container"></div>
     <div id="upgrade-panel" class="hidden">
       <div class="upgrade-box">
-        <h2 id="upgrade-rest-name">营火</h2>
-        <p class="upgrade-meta">位面之魂 <strong id="upgrade-souls">0</strong> · 升级需 <strong id="upgrade-cost">0</strong> · Lv.<strong id="upgrade-level">1</strong> · 技能点 <strong id="upgrade-skill-points">0</strong></p>
+        <h2 id="upgrade-rest-name" data-i18n="upgrade_rest_default">营火</h2>
+        <p class="upgrade-meta"><span data-i18n="upgrade_meta_souls">位面之魂</span> <strong id="upgrade-souls">0</strong> · <span data-i18n="upgrade_meta_cost">升级需</span> <strong id="upgrade-cost">0</strong> · <span data-i18n="upgrade_meta_level">Lv.</span><strong id="upgrade-level">1</strong> · <span data-i18n="upgrade_meta_points">技能点</span> <strong id="upgrade-skill-points">0</strong></p>
         <div class="upgrade-tabs">
-          <button type="button" id="tab-stats">属性</button>
-          <button type="button" id="tab-skills">武器技能</button>
-          <button type="button" id="tab-lore">剧情技能</button>
-          <button type="button" id="tab-gear">装备</button>
+          <button type="button" id="tab-stats" data-i18n="upgrade_tab_stats">属性</button>
+          <button type="button" id="tab-skills" data-i18n="upgrade_tab_skills">武器技能</button>
+          <button type="button" id="tab-lore" data-i18n="upgrade_tab_lore">剧情技能</button>
+          <button type="button" id="tab-gear" data-i18n="upgrade_tab_gear">装备</button>
         </div>
         <div id="upgrade-stats-section">
         <div class="upgrade-stats">
-          <div><span>生命上限</span><strong id="stat-hp-preview">118</strong></div>
-          <div><span>精力上限</span><strong id="stat-st-preview">108</strong></div>
+          <div><span data-i18n="upgrade_stat_hp">生命上限</span><strong id="stat-hp-preview">118</strong></div>
+          <div><span data-i18n="upgrade_stat_st">精力上限</span><strong id="stat-st-preview">108</strong></div>
         </div>
         <div class="upgrade-btns">
-          <button data-stat="vigor">活力 <span id="stat-vigor">1</span></button>
-          <button data-stat="endurance">耐力 <span id="stat-endurance">1</span></button>
-          <button data-stat="strength">力量 <span id="stat-strength">1</span></button>
-          <button data-stat="arcane">奥术 <span id="stat-arcane">1</span></button>
-          <button data-stat="mind">心智 <span id="stat-mind">0</span></button>
+          <button data-stat="vigor"><span data-i18n="upgrade_stat_vigor">活力</span> <span id="stat-vigor">1</span></button>
+          <button data-stat="endurance"><span data-i18n="upgrade_stat_endurance">耐力</span> <span id="stat-endurance">1</span></button>
+          <button data-stat="strength"><span data-i18n="upgrade_stat_strength">力量</span> <span id="stat-strength">1</span></button>
+          <button data-stat="arcane"><span data-i18n="upgrade_stat_arcane">奥术</span> <span id="stat-arcane">1</span></button>
+          <button data-stat="mind"><span data-i18n="upgrade_stat_mind">心智</span> <span id="stat-mind">0</span></button>
         </div>
-        <p class="upgrade-hint">升级后完全恢复 · <span data-keys="save"></span> 存档 · <span data-keys="load"></span> 读档</p>
+        <p class="upgrade-hint"><span data-i18n="upgrade_hint">升级后完全恢复</span> · <span data-keys="save"></span> 存档 · <span data-keys="load"></span> 读档</p>
         </div>
         <!-- 流派那几行由 `UpgradePanel` 按 `content/skillTrees.js` 的 `SKILL_BRANCHES` 在运行期生成。
              手抄一份"有哪两条流派"的下场是：加第三条时这里静默少一整棵树，而没有任何报错。 -->
@@ -67,10 +67,10 @@
         </div>
         <div id="upgrade-gear-section" class="hidden">
           <div class="gear-slots" id="gear-slots"></div>
-          <h3 class="skill-branch-title">背包 <span id="gear-bag-count" class="gear-bag-count"></span></h3>
+          <h3 class="skill-branch-title"><span data-i18n="upgrade_gear_bag">背包</span> <span id="gear-bag-count" class="gear-bag-count"></span></h3>
           <div class="skill-list" id="gear-bag"></div>
         </div>
-        <button id="upgrade-close">继续探索</button>
+        <button id="upgrade-close" data-i18n="upgrade_continue">继续探索</button>
       </div>
     </div>
     <div id="pause-menu" class="overlay-panel hidden">

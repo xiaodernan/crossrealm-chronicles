@@ -130,6 +130,26 @@ export const STRINGS_EN = Object.freeze({
   upgrade_title: 'Campfire Upgrade',
   upgrade_continue: 'Continue Exploring',
 
+  // Upgrade Panel static labels (W-D2 slice 7)
+  upgrade_tab_stats: 'Stats',
+  upgrade_tab_skills: 'Weapon Skills',
+  upgrade_tab_lore: 'Narrative Skills',
+  upgrade_tab_gear: 'Gear',
+  upgrade_stat_hp: 'Max HP',
+  upgrade_stat_st: 'Max Stamina',
+  upgrade_stat_vigor: 'Vigor',
+  upgrade_stat_endurance: 'Endurance',
+  upgrade_stat_strength: 'Strength',
+  upgrade_stat_arcane: 'Arcane',
+  upgrade_stat_mind: 'Mind',
+  upgrade_hint: 'Fully restores after upgrade',
+  upgrade_gear_bag: 'Bag',
+  upgrade_meta_souls: 'Plane Souls',
+  upgrade_meta_cost: 'Upgrade Cost',
+  upgrade_meta_level: 'Lv.',
+  upgrade_meta_points: 'Skill Points',
+  upgrade_rest_default: 'Campfire',
+
   // Auto Play
   autoplay_start: 'Start Auto Play',
   autoplay_stop: 'Stop Auto Play',
