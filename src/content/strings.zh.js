@@ -93,16 +93,27 @@ export const STRINGS_ZH = Object.freeze({
   menu_settings: '设置',
   menu_quit: '退出',
 
+  // 暂停菜单（W-D2 切片6）
+  pause_resume: '继续游戏',
+  slot_label: '存档槽',
+  pause_save: '保存进度',
+  pause_load_slot: '读取所选槽',
+  pause_export: '导出 JSON',
+  pause_import: '导入 JSON',
+  quick_save_slot: '快捷存读（主槽）',
+  save_version_note: '存档 v7（旧档自动迁移）',
+
   // 快速旅行
   fast_travel_title: '快速旅行',
   fast_travel_unlocked: '已解锁路点',
   fast_travel_locked: '未解锁',
 
   // 世界地图
-  world_map_title: '世界地图',
+  world_map_title: '位面全图 · 迷雾探索',
   world_map_current_zone: '当前位置',
 
-  // 帮助手册
+  // 说明书
+  manual_title: '跨界纪元 · 说明书',
   help_title: '帮助',
   help_controls: '操作说明',
   help_gameplay: '游戏机制',

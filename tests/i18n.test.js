@@ -235,3 +235,80 @@ describe('开机那几屏接线（W-D2 切片5）', () => {
     expect([...missing, fake], '过滤器连假钉子都点不了名').toEqual([fake]);
   });
 });
+
+describe('暂停/快速旅行/世界地图/说明书头/对话关闭（W-D2 切片6）', () => {
+  const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+
+  /**
+   * 逐处点名：这几个面板的静态标签今天必须走 data-i18n。
+   * 这些元素无 JS 覆写（写者普查过）—— 暂停菜单/快速旅行/对话/世界地图/说明书头
+   * 的标题、按钮、提示文本均为壳页直出。
+   */
+  const PINS6 = [
+    '<h2 data-i18n="menu_pause">',
+    '<button id="pause-resume" data-i18n="pause_resume">',
+    '<span data-i18n="slot_label">',
+    '<button id="pause-save" data-i18n="pause_save">',
+    '<button id="pause-load-slot" data-i18n="pause_load_slot">',
+    '<button id="pause-export" data-i18n="pause_export">',
+    '<button id="pause-import" data-i18n="pause_import">',
+    '<button id="pause-settings" data-i18n="menu_settings">',
+    '<span data-i18n="manual_short">',
+    '<span data-i18n="journal_title">',
+    '<span data-i18n="common_close">',
+    '<span data-i18n="quick_save_slot">',
+    '<span data-i18n="manual_short">',
+    '<span data-i18n="start_perf">',
+    '<span data-i18n="save_version_note">',
+    '<h2 data-i18n="fast_travel_title">',
+    '<button id="fast-travel-close" data-i18n="common_cancel">',
+    '<button id="dialog-close" data-i18n="upgrade_continue">',
+    '<h2 data-i18n="world_map_title">',
+    '<span data-i18n="common_close">',
+    '<h2 data-i18n="manual_title">',
+    '<span data-i18n="common_close">',
+  ];
+
+  it('暂停/旅行/地图/说明书/对话关闭的静态标签都挂 data-i18n', () => {
+    const missing = PINS6.filter((pin) => !html.includes(pin));
+    expect(missing, '这些地方今天没有走 data-i18n').toEqual([]);
+    expect(PINS6.length, '钉的条数太少，清单本身要复核').toBeGreaterThanOrEqual(20);
+  });
+
+  it('被钉住的键在两张表里都有非空文案', () => {
+    const keys = [...new Set(PINS6.map((p) => /data-i18n="([^"]+)"/.exec(p)?.[1]).filter(Boolean))];
+    expect(keys.length, 'PINS6 里一条 data-i18n 都没解析出来，解析坏了').toBeGreaterThanOrEqual(12);
+    for (const key of keys) {
+      expect(STRINGS_ZH[key], `中文表缺 ${key}`).toBeTypeOf('string');
+      expect(STRINGS_ZH[key]?.length, `中文表 ${key} 为空`).toBeGreaterThan(0);
+      expect(STRINGS_EN[key], `英文表缺 ${key}`).toBeTypeOf('string');
+      expect(STRINGS_EN[key]?.length, `英文表 ${key} 为空`).toBeGreaterThan(0);
+    }
+  });
+
+  it('反面控制：假钉子必须被点名（防清单永远全过）', () => {
+    const fake = '<span data-i18n="no_such_pin_key_6">';
+    expect(html).not.toContain(fake);
+    const missing = PINS6.filter((pin) => !html.includes(pin));
+    expect([...missing, fake], '过滤器连假钉子都点不了名').toEqual([fake]);
+  });
+});
+
+describe('死键只减不增（W-D2 切片6 门槛）', () => {
+  const walk = (dir) => readdirSync(dir).flatMap((name) => {
+    const p = join(dir, name);
+    return statSync(p).isDirectory() ? walk(p) : [p];
+  });
+  const FILES = [...walk(join(process.cwd(), 'src')).filter(f => !f.endsWith('.map')), join(process.cwd(), 'index.html')];
+
+  it('字符串字面量可见的死键计数只许降不许升（今天 53 → 切片6 后 ≤ 48）', async () => {
+    const { STRING_KEYS } = await import('../src/content/strings.zh.js');
+    let dead = 0;
+    for (const key of STRING_KEYS) {
+      const ref = FILES.some((f) => readFileSync(f, 'utf8').includes(key));
+      if (!ref) dead++;
+    }
+    // 基线 53（切片5 前）；切片6 新增 9 个键全接线，死键应减少
+    expect(dead, `死键计数 ${dead} 超过上限（应 ≤ 48）`).toBeLessThanOrEqual(48);
+  });
+});

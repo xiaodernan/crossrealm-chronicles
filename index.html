@@ -75,21 +75,21 @@
     </div>
     <div id="pause-menu" class="overlay-panel hidden">
       <div class="panel-box">
-        <h2>暂停</h2>
-        <button id="pause-resume">继续游戏</button>
-        <label class="pause-slot-row">存档槽
+        <h2 data-i18n="menu_pause">暂停</h2>
+        <button id="pause-resume" data-i18n="pause_resume">继续游戏</button>
+        <label class="pause-slot-row"><span data-i18n="slot_label">存档槽</span>
           <!-- 选项由 PauseMenu 从 `SaveSystem.listSlots()` 现推（W-D3 切片3）：不抄第二份名单 -->
           <select id="pause-slot"></select>
         </label>
-        <button id="pause-save">保存进度</button>
-        <button id="pause-load-slot">读取所选槽</button>
-        <button id="pause-export">导出 JSON</button>
-        <button id="pause-import">导入 JSON</button>
+        <button id="pause-save" data-i18n="pause_save">保存进度</button>
+        <button id="pause-load-slot" data-i18n="pause_load_slot">读取所选槽</button>
+        <button id="pause-export" data-i18n="pause_export">导出 JSON</button>
+        <button id="pause-import" data-i18n="pause_import">导入 JSON</button>
         <input id="pause-import-file" type="file" accept=".json,application/json" class="hidden" />
-        <button id="pause-settings">设置</button>
-        <button id="pause-manual">说明书 (<span data-keys="help"></span>)</button>
-        <button id="pause-journal">日志 (<span data-keys="journal"></span>)</button>
-        <p class="hint"><span data-keys="escape"></span> 关闭 · <span data-keys="save load"></span> 快捷存读（主槽） · <span data-keys="help"></span> 说明书 · <span data-keys="perfHud"></span> 性能面板 · 存档 v7（旧档自动迁移）</p>
+        <button id="pause-settings" data-i18n="menu_settings">设置</button>
+        <button id="pause-manual"><span data-i18n="manual_short">说明书</span> (<span data-keys="help"></span>)</button>
+        <button id="pause-journal"><span data-i18n="journal_title">日志</span> (<span data-keys="journal"></span>)</button>
+        <p class="hint"><span data-keys="escape"></span> <span data-i18n="common_close">关闭</span> · <span data-keys="save load"></span> <span data-i18n="quick_save_slot">快捷存读（主槽）</span> · <span data-keys="help"></span> <span data-i18n="manual_short">说明书</span> · <span data-keys="perfHud"></span> <span data-i18n="start_perf">性能面板</span> · <span data-i18n="save_version_note">存档 v7（旧档自动迁移）</span></p>
       </div>
     </div>
     <div id="settings-panel" class="overlay-panel hidden">
@@ -138,9 +138,9 @@
     </div>
     <div id="fast-travel-panel" class="overlay-panel hidden">
       <div class="panel-box">
-        <h2>快速旅行</h2>
+        <h2 data-i18n="fast_travel_title">快速旅行</h2>
         <div id="fast-travel-list"></div>
-        <button id="fast-travel-close">取消</button>
+        <button id="fast-travel-close" data-i18n="common_cancel">取消</button>
       </div>
     </div>
     <div id="dialog-overlay" class="hidden">
@@ -152,14 +152,14 @@
         </div>
         <p id="dialog-text"></p>
         <div id="dialog-choices" class="dialog-choices hidden"></div>
-        <button id="dialog-close">继续探索</button>
+        <button id="dialog-close" data-i18n="upgrade_continue">继续探索</button>
       </div>
     </div>
     <div id="world-map-panel" class="overlay-panel hidden">
       <div class="world-map-box">
         <div class="world-map-header">
-          <h2>位面全图 · 迷雾探索</h2>
-          <button type="button" id="world-map-close">关闭 (<span data-keys="worldMap"></span>)</button>
+          <h2 data-i18n="world_map_title">位面全图 · 迷雾探索</h2>
+          <button type="button" id="world-map-close"><span data-i18n="common_close">关闭</span> (<span data-keys="worldMap"></span>)</button>
         </div>
         <canvas id="world-map-canvas"></canvas>
         <div id="world-map-legend" class="world-map-legend"></div>
@@ -168,8 +168,8 @@
     <div id="help-manual" class="overlay-panel hidden">
       <div class="panel-box help-box">
         <div class="help-header">
-          <h2>跨界纪元 · 说明书</h2>
-          <button type="button" id="help-close">关闭 (<span data-keys="escape"></span>)</button>
+          <h2 data-i18n="manual_title">跨界纪元 · 说明书</h2>
+          <button type="button" id="help-close"><span data-i18n="common_close">关闭</span> (<span data-keys="escape"></span>)</button>
         </div>
         <div class="help-layout">
           <nav id="help-nav" class="help-nav"></nav>

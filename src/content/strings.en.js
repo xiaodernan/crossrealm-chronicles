@@ -93,16 +93,27 @@ export const STRINGS_EN = Object.freeze({
   menu_settings: 'Settings',
   menu_quit: 'Quit',
 
+  // Pause Menu (W-D2 slice 6)
+  pause_resume: 'Resume Game',
+  slot_label: 'Save slot',
+  pause_save: 'Save game',
+  pause_load_slot: 'Load selected slot',
+  pause_export: 'Export JSON',
+  pause_import: 'Import JSON',
+  quick_save_slot: 'Quick save/load (main slot)',
+  save_version_note: 'Save v7 (old saves auto-migrated)',
+
   // Fast Travel
   fast_travel_title: 'Fast Travel',
   fast_travel_unlocked: 'Unlocked Waypoints',
   fast_travel_locked: 'Locked',
 
   // World Map
-  world_map_title: 'World Map',
+  world_map_title: 'World Map · Fog of War',
   world_map_current_zone: 'Current Location',
 
-  // Help Manual
+  // Manual
+  manual_title: 'Crossrealm Chronicles · Manual',
   help_title: 'Help',
   help_controls: 'Controls',
   help_gameplay: 'Gameplay',
