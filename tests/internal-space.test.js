@@ -166,6 +166,27 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
       expect(cyl.x).toBeCloseTo(wc.x + 3, 9);
       expect(cyl.z).toBeCloseTo(wc.z - 4, 9);
       expect(cyl.r).toBeCloseTo(1.5, 9);
+      // base/top 只加一次 worldBase（= ZC.y + baseHeight + floor*floorHeight = 12-3-5 = 4），
+      // 不许再叠一次 baseHeight（双击 baseHeight 的回归 bug，切片6 修）。
+      expect(cyl.base).toBeCloseTo(4, 9);
+      expect(cyl.top).toBeCloseTo(7, 9);
+    });
+
+    it('盒碰撞体：base/top 同样只加一次 worldBase（反向控制双击 baseHeight）', () => {
+      const mgr = new InternalSpaceManager();
+      const s = makeSpace('gloomAncientShrine');
+      s.addBoxCollider(-2, -1, 1, 1, 4, { base: 1, rot: 0.3, kind: 'trigger' });
+      mgr.register(s);
+      const wc = s.getWorldCenter(ZC);
+      mgr.updateCurrent(wc.x, wc.z, s.zoneId, ZC);
+      const box = mgr.getCurrentCollidersWorld(ZC).find((c) => c.shape === 'box');
+      expect(box).toBeTruthy();
+      expect(box.x).toBeCloseTo(wc.x - 2, 9);
+      expect(box.z).toBeCloseTo(wc.z - 1, 9);
+      expect(box.base).toBeCloseTo(4 + 1, 9); // worldBase 4 + 局部 base 1
+      expect(box.top).toBeCloseTo(4 + 4, 9);
+      expect(box.rot).toBeCloseTo(0.3, 9);
+      expect(box.kind).toBe('trigger');
     });
 
     it('不在空间里时碰撞体列表是空的', () => {

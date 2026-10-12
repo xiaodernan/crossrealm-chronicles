@@ -103,8 +103,11 @@ export class InternalSpace {
       lx,
       lz,
       r,
-      base: this.baseHeight + base,
-      top: this.baseHeight + top,
+      // base / top 相对本层地面（floor ground），展开时由 _expandCollider 加上
+      // worldBase（= zoneCenter.y + baseHeight + floor*floorHeight，已含 baseHeight）。
+      // 这里绝不能再加 baseHeight，否则世界坐标会多算一次（双击 baseHeight 的回归 bug）。
+      base,
+      top,
       kind,
     });
   }
@@ -116,8 +119,8 @@ export class InternalSpace {
       lz,
       hx,
       hz,
-      base: this.baseHeight + base,
-      top: this.baseHeight + top,
+      base,
+      top,
       rot,
       kind,
     });

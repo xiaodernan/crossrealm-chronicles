@@ -169,8 +169,8 @@ describe('B83: InternalSpace 碰撞体', () => {
     expect(c.lx).toBe(3);
     expect(c.lz).toBe(7);
     expect(c.r).toBe(2);
-    expect(c.base).toBe(3); // 2 + 1
-    expect(c.top).toBe(7); // 2 + 5
+    expect(c.base).toBe(1); // 局部 base = 参数 1（不再叠加 baseHeight，切片6 修双击 baseHeight）
+    expect(c.top).toBe(5); // 局部 top = 参数 5
     expect(c.kind).toBe('solid');
   });
 
@@ -183,8 +183,8 @@ describe('B83: InternalSpace 碰撞体', () => {
     expect(c.lz).toBe(-2);
     expect(c.hx).toBe(3);
     expect(c.hz).toBe(4);
-    expect(c.base).toBe(2); // 2 + 0
-    expect(c.top).toBe(8); // 2 + 6
+    expect(c.base).toBe(0); // 局部 base = 参数 0（不再叠加 baseHeight）
+    expect(c.top).toBe(6); // 局部 top = 参数 6
     expect(c.rot).toBe(Math.PI / 4);
     expect(c.kind).toBe('passable');
   });
