@@ -33,7 +33,13 @@
  * - Boss：`content/bossRoster.js` 与 `DungeonManager` 自己的房间数公式，不进来；
  * - 召唤物：**收编了**（W-E1 切片4）—— 它们不走 `spawnAt`（招式表里自报户口），
  *   而是按**召唤者身上记下的档位**长（`EnemyManager._drainSummons`），与名册同一张表；
- * - 魂收入：那是难度乘子 `souls` 的轴（W-E1 切片1），成长曲线不碰 —— 两个轴各司其职。
+ *
+ * 魂收入**分两轴、各司其职**（这一条曾被误列在"不管什么"里，说"成长曲线不碰"——
+ * 那是 `49e3b685` 给本表加 `souls` 列**之前**的旧话，加列后忘了改，W-B6 切片2e 更正）：
+ * - 本表 `souls` 列：按区域档位放大**单个敌人的基础掉落**（`EnemyManager.spawnAt`
+ *   算 `roster.souls * growth.souls`）—— 回答"哪个区更富"；
+ * - 难度乘子 `souls`（W-E1 切片1）：在唯一收入咽喉 `PlayerStats.addSouls` 一并结算
+ *   —— 回答"这一局多难"。两轴相乘，但分处生产端与收口端，互不越界。
  */
 
 import { ZONE_IDS, ZONE_ORDER } from './ZoneIdentity.js';
