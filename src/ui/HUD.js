@@ -4,7 +4,7 @@ import { JOURNAL_CATEGORIES, DISCOVERABLE_TOTAL } from '../game/StoryJournal.js'
 import { mergeJournalCategories } from './JournalTabRegistry.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { on, offAll } from '../engine/EventBus.js';
-import { refreshKeyText, setHintDevice } from '../content/keyHints.js';
+import { refreshKeyText, setHintDevice, keyText } from '../content/keyHints.js';
 import { focusFirstItem, parkFocus, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 import { inputDeviceLabel } from '../engine/InputDevice.js';
 import { t } from '../engine/i18n.js';
@@ -593,7 +593,7 @@ buildHUD() {
       `<li><span class="journal-cat">${cats[d.category] ?? d.category}</span><strong>${d.title}</strong><span>${d.text}</span></li>`
     ).join('');
     this.journalPanel.innerHTML = `
-      <h2>${t('hud_journal_title')}</h2>
+      <h2>${t('hud_journal_title', { journal: keyText('{journal}') })}</h2>
       <div class="journal-tabs">${tabs}</div>
       ${questHtml}
       <ul class="journal-list">${items || `<li class="empty">${t('hud_journal_empty')}</li>`}</ul>
@@ -638,7 +638,7 @@ buildHUD() {
       <h2>${zone.name}</h2>
       <p style="color:#888;margin-bottom:12px">${zone.subtitle}</p>
       <p>${zone.description}</p>
-      <p style="margin-top:16px;font-size:0.8rem;color:#666" data-i18n="hud_journal_close_hint" data-params='{"zonePanel": "zonePanel"}'></p>
+      <p style="margin-top:16px;font-size:0.8rem;color:#666">${t('hud_journal_close_hint', { zonePanel: keyText('{zonePanel}') })}</p>
     `;
     // innerHTML 每次都重写整块，所以写入这一刻自己展开一次（改绑那条路走 refreshKeyHints）
     refreshKeyText(this.zonePanel);

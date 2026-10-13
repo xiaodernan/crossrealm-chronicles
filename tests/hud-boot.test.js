@@ -134,4 +134,31 @@ describe('HUD 开机构造', () => {
     expect(bad.parent).toBeNull();
     expect(hud).toBeTruthy();
   });
+
+  it('区域面板关闭提示走 i18n + 键位真渲染（W-D2 余：不残留字面占位）', () => {
+    // 这一格是切片9 收尾时漏的一处：曾经写成 data-i18n + data-params，而 refreshKeyText
+    // 只认 data-ktext / data-keys —— 那个写法在运行期把"hud_journal_close_hint"当字面量摆出来。
+    // 改走 t() + keyText 之后，这里断言落地的文案是解析过的、且不再含占位或键名。
+    hud.updateZonePanel({ name: '交汇枢纽', subtitle: '位面中心', description: '中心' });
+    const ps = hud.zonePanel.querySelectorAll('p');
+    const closeHint = ps[ps.length - 1];
+    expect(closeHint.textContent).toContain('关闭');
+    expect(closeHint.textContent, '占位没被解析').not.toContain('${zonePanel}');
+    expect(closeHint.textContent, '键名当字面量摆出来了').not.toContain('hud_journal_close_hint');
+  });
+
+  it('日志标题把键名占位解析进 i18n（同一处漏网：t() 漏传参会摆出 ${journal}）', () => {
+    // hud_journal_title 含 ${journal}，调用方必须传 { journal: keyText('{journal}') }；
+    // 漏传参时 t() 原样返回 '跨界日志 · ${journal} 关闭'，玩家面前会出现模板语法。
+    hud.game.storyJournal = {
+      getFiltered: () => [],
+      getCounts: () => ({}),
+      entries: { length: 0 },
+    };
+    hud.updateJournal();
+    const h2 = hud.journalPanel.querySelector('h2');
+    expect(h2.textContent).toContain('跨界日志');
+    expect(h2.textContent).toContain('关闭');
+    expect(h2.textContent, '占位没被解析').not.toContain('${journal}');
+  });
 });
