@@ -581,21 +581,32 @@ export class CombatController {
     this._weaponAnim = { t: 0, dur: duration, heavy };
   }
 
+  /**
+   * 挥砍时武器的姿势**只有一个写者**（B112 的交接）。判据取挂载那一刻留下的记号，不是"此刻在播什么"：
+   * - 剑挂进**手骨**（真素材在场）⇒ `userData.handGrip` 在 ⇒ 骨骼动画带着手把它甩出去，这里一个字都不写。
+   *   若改按"当前 Action 是不是骨骼片段"来判，同一把剑会在两个写者之间来回换手 —— 那正是切片5 起
+   *   一路在收的病（`CharacterModel._playOnce` 的跨类硬切同一条理由）。
+   * - 剑挂**视觉层**（胶囊 fallback 没有手臂骨）⇒ 程序摆动就是它的全部动作。静止姿态读挂载时记下的
+   *   `userData.swingRest`，不在本文件里硬写 `-0.3` —— 那个数是躯干挂点的静止值，写死在这里就等于
+   *   第二个地方持有"剑长什么样"。两条都没有（既没进手也没记静止档）⇒ 谁都不写，直接作废这次摆动。
+   */
   _updateWeaponAnim(dt) {
     const a = this._weaponAnim;
     if (!a) return;
     const weapon = this.player.mesh.getObjectByName?.('weapon');
     a.t += dt;
     if (!weapon) { this._weaponAnim = null; return; }
+    const rest = weapon.userData.swingRest;
+    if (weapon.userData.handGrip || !rest) { this._weaponAnim = null; return; }
     const t = a.t / a.dur;
     if (t >= 1) {
       this._weaponAnim = null;
-      weapon.rotation.z = -0.3;
-      weapon.rotation.x = 0;
+      weapon.rotation.z = rest.z;
+      weapon.rotation.x = rest.x;
       return;
     }
-    weapon.rotation.z = -0.3 - Math.sin(t * Math.PI) * (a.heavy ? 1.8 : 1.2);
-    weapon.rotation.x = Math.sin(t * Math.PI) * 0.8;
+    weapon.rotation.z = rest.z - Math.sin(t * Math.PI) * (a.heavy ? 1.8 : 1.2);
+    weapon.rotation.x = rest.x + Math.sin(t * Math.PI) * 0.8;
   }
 
   processHitWindow() {

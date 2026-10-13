@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { ANIM_MANIFEST } from '../assets/AnimManifest.js';
-import { isSkeletonClipName, registerSkeletonClips } from '../assets/SkeletonMotion.js';
+import { isSkeletonClipName, registerSkeletonClips, boneName } from '../assets/SkeletonMotion.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
 const MODEL_CANDIDATES = [
@@ -32,6 +32,9 @@ export class CharacterModel {
     this.actionLock = 0;
     this.footOffset = 0;
     this.catalog = {};
+    // 骨名 → 骨节点（`load()` 的 `isBone` 遍历顺手填）。唯一取骨口是 `boneOf()`：
+    // 挂武器的一方不该自己写 `mixamorig` 前缀，也不该自己去 `getObjectByName` 撞运气。
+    this.bones = {};
     // 招式 → 骨骼片段在 `actions` 里的键名（`SkeletonMotion` 那四条）。与 `catalog` 分两本账：
     // `catalog` 只说"GLB 素材自己提供了哪个 clip"，这里说"我们替这具骨架编出来了哪几招"。
     this.skeletal = {};
@@ -104,6 +107,15 @@ export class CharacterModel {
     return !!action && isSkeletonClipName(action.getClip?.()?.name);
   }
 
+  /**
+   * 按 Mixamo 标签取骨（`'RightHand'` → 节点上那个 `mixamorigRightHand`）。前缀口径归
+   * `SkeletonMotion.BONE_PREFIX` —— 与骨骼片段驱动的是同一套名字，不会出现"表动 A 骨、剑挂 B 骨"。
+   * 素材不在（胶囊 fallback、GLB 装配失败）时返回 null，调用方据此退回视觉层挂点。
+   */
+  boneOf(标签) {
+    return this.bones[boneName(标签)] ?? null;
+  }
+
   createFallback() {
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3a4a5a, roughness: 0.7 });
     const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.35, 0.9, 8, 16), bodyMat);
@@ -126,6 +138,9 @@ export class CharacterModel {
     }
     视觉.add(torso, head);   // `add()` 会先从旧父级摘下 ⇒ 重复调用也不套第二层
     this.modelRoot = 视觉;
+    // 胶囊没有骨骼可挂。`load()` 的 catch 可能在 `bones` 已填之后才抛（骨骼片段注册就在那段 try 里），
+    // 留着那份账会让 `boneOf` 认出一根不在场景图里的骨 ⇒ 剑被挂进空气里，玩家看不见武器。
+    this.bones = {};
     this.fallback = true;
     this.loaded = true;
   }
@@ -180,7 +195,11 @@ export class CharacterModel {
       // 注册放在 catalog 之后：`catalog.*` 继续只说"素材自己提供了什么"，骨骼片段记在
       // `this.skeletal` 这本独立的账上，不把素材账本涂成真有其事。
       const 在世骨骼 = new Set();
-      model.traverse((o) => { if (o.isBone) 在世骨骼.add(o.name); });
+      model.traverse((o) => {
+        if (!o.isBone) return;
+        在世骨骼.add(o.name);
+        this.bones[o.name] = o;
+      });
       const 骨骼片 = registerSkeletonClips(this.mixer, 在世骨骼);
       for (const [招式, 名] of Object.entries(骨骼片.片段名)) {
         this.actions[名] = 骨骼片.动作[招式];

@@ -4,6 +4,8 @@ import { keyText } from '../content/keyHints.js';
 
 import { CharacterModel } from './CharacterModel.js';
 
+import { attachToHand, GRIP } from './WeaponGrip.js';
+
 import { createPlayerFSM } from './PlayerFSM.js';
 
 import { shake } from '../engine/Shake.js';
@@ -200,11 +202,20 @@ export class PlayerController {
 
     const sword = this._buildWeapon();
 
-    // 剑挂**视觉层**（`characterModel.modelRoot`，即 `__anim` 组），不挂逻辑节点 `mesh`（= group）。
-    // 逻辑节点每帧被 `PlayerController` 的朝向 lerp 覆写、且承载 GLB 素材那半圈 π；
-    // 剑住进视觉层才随身体的前倾 / 侧倾一起歪（B110），而世界 x 仍在 +0.55 那一侧（不含 π，不镜像）。
-    // 第一人称那把（`fpWeaponGroup`）留在相机下 —— 身体前倾不该走着手腕去拧相机。
-    (this.characterModel.modelRoot ?? this.mesh).add(sword);
+    // 剑挂**右手骨**（B112）：切片8 之后手臂真的挥了，剑却还住在视觉层的 (0.55, 1.0, 0)。
+    // 对着 `Soldier.glb` 字节量 Idle 第 0 帧：右手在 (-0.332, 1.072, -0.215)，剑心离右手 0.910 米、
+    // 离左手只有 0.317 米 —— 玩家看到的是"左手边挂剑、右手挥空"（肩线读数见 `WeaponGrip.js` 头注）。
+    // 素材不在（胶囊 fallback / GLB 装配失败）⇒ `boneOf` 返回 null，退回切片7 的视觉层挂点：
+    // 那一层才带 proc 的前倾 / 侧倾（B110），并把静止姿态交给程序摆动（`swingRest`，见 CombatController）。
+    // 第一人称那把（下面的 `fpWeaponGroup`）两条路径都留在相机下 —— 身体前倾不该走着手腕去拧相机。
+    const 右手 = this.characterModel.boneOf(GRIP.骨标签);
+
+    if (右手) attachToHand(右手, sword);
+
+    else {
+      sword.userData.swingRest = { x: sword.rotation.x, z: sword.rotation.z };
+      (this.characterModel.modelRoot ?? this.mesh).add(sword);
+    }
 
 
 
