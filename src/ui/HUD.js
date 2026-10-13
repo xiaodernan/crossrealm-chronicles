@@ -638,7 +638,7 @@ buildHUD() {
       <h2>${zone.name}</h2>
       <p style="color:#888;margin-bottom:12px">${zone.subtitle}</p>
       <p>${zone.description}</p>
-      <p style="margin-top:16px;font-size:0.8rem;color:#666" data-ktext="按 {zonePanel} 关闭"></p>
+      <p style="margin-top:16px;font-size:0.8rem;color:#666" data-i18n="hud_journal_close_hint" data-params='{"zonePanel": "zonePanel"}'></p>
     `;
     // innerHTML 每次都重写整块，所以写入这一刻自己展开一次（改绑那条路走 refreshKeyHints）
     refreshKeyText(this.zonePanel);

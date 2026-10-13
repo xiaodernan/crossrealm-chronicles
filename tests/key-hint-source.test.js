@@ -176,7 +176,7 @@ describe('声明了占位的界面必须有人刷它', () => {
 describe('迁移点点名：这些界面的键名是问出来的，不是抄的', () => {
   const CALLED = {
     'player/PlayerController.js': ["keyText('[{interact}]')", "keyText('({cameraMode} 切换)')"],
-    'ui/HUD.js': ['refreshKeyText(document)', 'refreshKeyText(this.zonePanel)', 'data-ktext="按 {zonePanel} 关闭"'],
+    'ui/HUD.js': ['refreshKeyText(document)', 'refreshKeyText(this.zonePanel)', 'data-i18n="hud_journal_close_hint"'],
     'ui/QuestAssistant.js': ['refreshKeyText(this._panel)'],
     'player/PlayerAutoPlay.js': ['refreshKeyText(this.overlay)'],
     'cinematic/EndCreditsDirector.js': ['refreshKeyText(this.el)'],
