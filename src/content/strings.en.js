@@ -248,6 +248,78 @@ export const STRINGS_EN = Object.freeze({
   // Additional: HUD quest/journal titles (slice 9 completion)
   hud_quest_in_progress: 'In Progress',
   hud_journal_title: 'Crossrealm Journal · ${journal} to close',
+
+  // Dialog System (W-D2 slice 10)
+  // Dialog.js generic
+  dialog_title_unknown: 'Unknown',
+  dialog_toast_chapter_required: 'Chapter ${chapter} required to ask this.',
+  dialog_toast_rest_heal: 'Campfire warmth +5 souls',
+  dialog_toast_npc_farewell: '${name}: "May fire guide your path."',
+  dialog_choice_continue: 'Continue Exploring',
+
+  // RestDialogue.js
+  rest_dialogue_main_complete: 'Main quest complete — freely explore, or press ${autoPlay} for auto-run.',
+  rest_dialogue_progress_fmt: 'Current: ${title}\n${progress}\n\n${hint}',
+  rest_dialogue_journal_title: '${title}',
+  rest_dialogue_journal_text: '${text}',
+
+  // NPCManager.js lines (per NPC)
+  npc_wanderer_0: 'Traveler... do you smell it? Three planes\' breaths are converging.',
+  npc_wanderer_1: 'The Greywood Guardian is only the start. The Archmagus of Hogwarts Legacy is far more dangerous.',
+  npc_wanderer_2: 'Open chests, rest at campfires to upgrade — the basics of survival.',
+  npc_scout_0: 'The Sovereign Ring lies west of the forest. The Boss arena lies deeper — come prepared.',
+  npc_scout_1: 'Watch the enemy\'s red circle, dodge or parry at the last instant.',
+  npc_astronaut_0: 'Endurance log states: time is a circle here.',
+  npc_astronaut_1: 'The 5D tesseract hides the last fragment secret...',
+
+  // QuestSystem.js progress / hints
+  quest_progress_all_complete: 'All quests complete — endless exploration mode',
+  quest_progress_hits: '${current} / ${target} hits',
+  quest_progress_spells: '${current} / ${target} casts',
+  quest_progress_dungeon: '${dungeon_done}',
+  quest_progress_mind: 'Upgrade campfire "Mind" to ${target}',
+  quest_progress_charged: '${current} / ${target} charged casts',
+  quest_progress_skills: '${current} / ${target} skills',
+  quest_progress_dungeon_rerun: '${rerun_done}',
+  quest_progress_chests: '${current} / ${target} chests',
+  quest_progress_npc: '${npc_done}',
+  quest_progress_level: 'Rest at campfire to reach Lv.${target}',
+  quest_progress_discovery: '${discovery_done}',
+  quest_progress_touch_done: 'Touch done — if no jump, click bottom-right "Sync Quest"',
+  quest_assistant_hint_all_done: 'All clear. Press ${questTracker} to open assistant for full auto-run demo.',
+  quest_assistant_hint_step_done: 'Step done, click assistant "Sync Quest Progress"',
+  quest_assistant_hint_boss_dist: 'Enter the red circle on map skull to activate Boss · ${progress}',
+  quest_assistant_hint_step_done_2: 'Step done — press U → Sync Quest Progress',
+  quest_assistant_hint_near_wp: 'Approaching · ${label}',
+  quest_waypoint_hint_chapter: 'Chapter ${chapter} required to touch anchor.',
+  quest_waypoint_hint_boss3: 'Defeat Singularity Herald first',
+  quest_waypoint_hint_dungeon: 'Clear the dungeon',
+  quest_waypoint_hint_trials_done: 'Touch anchor after three trials done',
+  quest_waypoint_hint_void_boss: 'Defeat Void Chronarch',
+  quest_waypoint_hint_skills: 'Unlock 3 weapon skills at campfire',
+  quest_waypoint_hint_chaos_boss: 'Defeat Chaos Overlord',
+  quest_waypoint_hint_touch_anchor: 'Touch World Anchor after collecting fragments',
+  quest_waypoint_hint_touch_anchor_2: 'Touch anchor when conditions met',
+  quest_waypoint_hint_touch_anchor_3: 'Touch anchor after trials complete',
+  quest_toast_chapter_announce: '${announce}',
+  quest_toast_task_complete: 'Quest complete: ${title}',
+  quest_get_assistant_hint: 'Plane Assistant: ${hint}',
+  quest_title_all_done: 'All clear. Press ${questTracker} to open assistant for full auto-run demo.',
+  quest_waypoint_far: 'Enter red circle on map skull to activate Boss · ${progress}',
+  quest_waypoint_near: 'Approaching · ${label}',
+
+  // Directions (QuestSystem.js getWaypointHint)
+  dir_north: 'N',
+  dir_northeast: 'NE',
+  dir_east: 'E',
+  dir_southeast: 'SE',
+  dir_south: 'S',
+  dir_southwest: 'SW',
+  dir_west: 'W',
+  dir_northwest: 'NW',
+
+  // DialogCGRenderer.js
+  dialog_cg_caption_parry: '${parry} Parry',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

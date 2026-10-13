@@ -248,6 +248,78 @@ export const STRINGS_ZH = Object.freeze({
   // 补充：HUD 任务/日志标题（切片9 补全）
   hud_quest_in_progress: '进行中',
   hud_journal_title: '跨界日志 · ${journal} 关闭',
+
+  // 对话系统（W-D2 切片10）
+  // Dialog.js 通用
+  dialog_title_unknown: '未知',
+  dialog_toast_chapter_required: '需要 Chapter ${chapter} 后再来问这个。',
+  dialog_toast_rest_heal: '营火余温 +5 魂火',
+  dialog_toast_npc_farewell: '${name}：「愿火护佑下一程。」',
+  dialog_choice_continue: '继续探索',
+
+  // RestDialogue.js
+  rest_dialogue_main_complete: '主线已完成 — 自由探索，或按 ${autoPlay} 自动通关。',
+  rest_dialogue_progress_fmt: '当前：${title}\n${progress}\n\n${hint}',
+  rest_dialogue_journal_title: '${title}',
+  rest_dialogue_journal_text: '${text}',
+
+  // NPCManager.js 台词池（每条单独一键，按 NPC 分组）
+  npc_wanderer_0: '穿越者…你闻到了吗？三个位面的气息正在融合。',
+  npc_wanderer_1: '灰白森林的守护者只是开始。霍格沃兹遗境的大奥术师更为危险。',
+  npc_wanderer_2: '打开宝箱、在营火休息升级——这是生存的基本。',
+  npc_scout_0: '至尊石环在森林西侧。Boss 竞技场在更深处——做好充分准备。',
+  npc_scout_1: '观察敌人红圈，在最后一瞬闪避或弹反。',
+  npc_astronaut_0: 'Endurance 号的日志说：时间在这里是圆的。',
+  npc_astronaut_1: '五维_tesseract 藏着最后的碎片秘密…',
+
+  // QuestSystem.js 进度文案 / 提示
+  quest_progress_all_complete: '全部任务已完成 — 无尽探索模式',
+  quest_progress_hits: '${current} / ${target} 命中',
+  quest_progress_spells: '${current} / ${target} 次施法',
+  quest_progress_dungeon: '${dungeon_done}',
+  quest_progress_mind: '营火升级「心智」至 ${target}',
+  quest_progress_charged: '${current} / ${target} 蓄力施法',
+  quest_progress_skills: '${current} / ${target} 技能',
+  quest_progress_dungeon_rerun: '${rerun_done}',
+  quest_progress_chests: '${current} / ${target} 宝箱',
+  quest_progress_npc: '${npc_done}',
+  quest_progress_level: '在营火休息升级至 Lv.${target}',
+  quest_progress_discovery: '${discovery_done}',
+  quest_progress_touch_done: '已完成触摸 — 若未跳转请点右下角「同步任务」',
+  quest_assistant_hint_all_done: '全部通关。按 ${questTracker} 打开助手可重跑全流程演示。',
+  quest_assistant_hint_step_done: '本步已完成，点击助手「同步任务进度」',
+  quest_assistant_hint_boss_dist: '走进地图骷髅标记的红圈激活 Boss · ${progress}',
+  quest_assistant_hint_step_done_2: '本步已完成 — 点 U → 同步任务进度',
+  quest_assistant_hint_near_wp: '已接近 · ${label}',
+  quest_waypoint_hint_chapter: '需要 Chapter ${chapter} 后再来触摸。',
+  quest_waypoint_hint_boss3: '先击败奇点领主',
+  quest_waypoint_hint_dungeon: '清空地下城',
+  quest_waypoint_hint_trials_done: '三界试炼完成后触摸锚点',
+  quest_waypoint_hint_void_boss: '击败时线执政官',
+  quest_waypoint_hint_skills: '营火解锁3个武器技能',
+  quest_waypoint_hint_chaos_boss: '击败混沌领主',
+  quest_waypoint_hint_touch_anchor: '集齐碎片后触摸世界之锚',
+  quest_waypoint_hint_touch_anchor_2: '条件满足后触摸锚点',
+  quest_waypoint_hint_touch_anchor_3: '完成试炼后触摸锚点',
+  quest_toast_chapter_announce: '${announce}',
+  quest_toast_task_complete: '任务完成：${title}',
+  quest_get_assistant_hint: '位面助手：${hint}',
+  quest_title_all_done: '全部通关。按 ${questTracker} 打开助手可重跑全流程演示。',
+  quest_waypoint_far: '走进地图骷髅标记的红圈激活 Boss · ${progress}',
+  quest_waypoint_near: '已接近 · ${label}',
+
+  // 方位词（QuestSystem.js getWaypointHint 里的 dirs）
+  dir_north: '北',
+  dir_northeast: '东北',
+  dir_east: '东',
+  dir_southeast: '东南',
+  dir_south: '南',
+  dir_southwest: '西南',
+  dir_west: '西',
+  dir_northwest: '西北',
+
+  // DialogCGRenderer.js
+  dialog_cg_caption_parry: '${parry} 弹反',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

@@ -61,8 +61,6 @@ export class Dialog {
     if (this.speakerEl) {
       if (meta.speaker) {
         this.speakerEl.classList.remove('hidden');
-        // 配色由说话人那一座带来（`REST_NPC_DEFS`）；没有就不写内联样式，让 CSS 那条规则说话
-        // —— 改前这里是 `meta.accent ?? '#c9a962'`，即"认不出就戴锚火看守的金边"
         const accentStyle = meta.accent ? ` style="color:${meta.accent}"` : '';
         this.speakerEl.innerHTML = `<span class="dialog-speaker-name"${accentStyle}>${meta.speaker}</span>${meta.speakerTitle ? `<span class="dialog-speaker-title">${meta.speakerTitle}</span>` : ''}`;
         this.speakerEl.dataset.mood = meta.mood ?? 'calm';
