@@ -5,6 +5,7 @@ import {
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
 } from '../content/objectives.js';
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 /** 本文件自己的监听出口（W-A1 迁移第五处）：十个记账事件（`STAT_EVENTS`）都挂在同一个所有权下，
  *  `dispose()` 里一次结清。事件名来自 `STAT_EVENTS`（运行时才知道是哪个），
@@ -243,29 +244,29 @@ export class QuestSystem {
       case 'checkAllFragments': {
         const m = this._firstMissing(FRAGMENT_IDS);
         if (m) return m;
-        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '集齐碎片后触摸世界之锚' };
+        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: t('quest_waypoint_hint_touch_anchor') };
       }
       case 'checkAllDungeons': {
-        if (!this.stats.boss3Defeated) return { ...rowWaypoint('boss3'), hint: '先击败奇点领主' };
+        if (!this.stats.boss3Defeated) return { ...rowWaypoint('boss3'), hint: t('quest_waypoint_hint_boss3') };
         for (const id of TRIAL_DUNGEON_IDS) {
           if (!this.stats.dungeonsCleared.has(id)) {
-            return { ...dungeonWaypoint(id), hint: '清空地下城' };
+            return { ...dungeonWaypoint(id), hint: t('quest_waypoint_hint_dungeon') };
           }
         }
-        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '三界试炼完成后触摸锚点' };
+        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: t('quest_waypoint_hint_touch_anchor_3') };
       }
       case 'checkTrueEnd': {
-        if (!this.stats.voidBossDefeated) return { ...rowWaypoint('void-boss'), hint: '击败时线执政官' };
+        if (!this.stats.voidBossDefeated) return { ...rowWaypoint('void-boss'), hint: t('quest_waypoint_hint_void_boss') };
         const m = this._firstMissing(VOID_DISCOVERY_IDS);
         if (m) return m;
-        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '条件满足后触摸锚点' };
+        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: t('quest_waypoint_hint_touch_anchor_2') };
       }
       case 'checkInfinity': {
-        if (!this.stats.chaosBossDefeated) return { ...rowWaypoint('chaos-boss'), hint: '击败混沌领主' };
+        if (!this.stats.chaosBossDefeated) return { ...rowWaypoint('chaos-boss'), hint: t('quest_waypoint_hint_chaos_boss') };
         if (this.stats.skillsUnlocked < ROW_BY_ID.get('skills').target) {
-          return { ...rowWaypoint('skills'), hint: '营火解锁3个武器技能' };
+          return { ...rowWaypoint('skills'), hint: t('quest_waypoint_hint_skills') };
         }
-        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: '完成试炼后触摸锚点' };
+        return { ...TARGET_WAYPOINTS['hub-anchor'], hint: t('quest_waypoint_hint_touch_anchor_3') };
       }
       default:
         // 没有门控的那一格：摸过就没有指示了
@@ -295,12 +296,12 @@ export class QuestSystem {
     const gate = finished ? chapterGateAfter(finished.id) : null;
     if (gate && gate.chapter !== this.chapter) {
       this.chapter = gate.chapter;
-      if (gate.announce) this.dialog.toast(gate.announce);
+      if (gate.announce) this.dialog.toast(t('quest_toast_chapter_announce', { announce: gate.announce }));
     }
     if (this.chapter !== oldChapter) {
       window.dispatchEvent(new CustomEvent('chapter-changed', { detail: { chapter: this.chapter, prev: oldChapter } }));
     }
-    if (finished) this.dialog.toast(`任务完成：${finished.title}`);
+    if (finished) this.dialog.toast(t('quest_toast_task_complete', { title: finished.title }));
     // W-B6 切片4：记录任务完成
     if (finishedId) this.game?.stats?.onQuestCompleted(finishedId);
     if (this.questIndex >= MAINLINE.length) {
@@ -318,29 +319,29 @@ export class QuestSystem {
 
   getProgressText() {
     const q = this.current;
-    if (!q) return '全部任务已完成 — 无尽探索模式';
+    if (!q) return t('quest_progress_all_complete');
     switch (q.type) {
-      case 'hits': return `${Math.min(this.stats.hits, q.target)} / ${q.target} 命中`;
+      case 'hits': return t('quest_progress_hits', { current: Math.min(this.stats.hits, q.target), target: q.target });
       case 'kills': return `${Math.min(this.stats.kills[q.enemyType] || 0, q.target)} / ${q.target}`;
-      case 'spells': return `${Math.min(this.stats.spellCasts, q.target)} / ${q.target} 次施法`;
-      case 'dungeon': return this.stats.dungeonsCleared.has(q.dungeonId) ? '完成' : '寻找地下城入口（紫环）';
-      case 'mind': return `营火升级「心智」至 ${q.target}`;
-      case 'charged': return `${Math.min(this.stats.chargedCasts, q.target)} / ${q.target} 蓄力施法`;
-      case 'skills-unlocked': return `${Math.min(this.stats.skillsUnlocked, q.target)} / ${q.target} 技能`;
-      case 'dungeon-rerun': return this.stats.dungeonRerun ? '完成' : '再次进入地下城（Chapter 5 后）';
-      case 'chests': return `${this.stats.chestsOpened} / ${q.target} 宝箱`;
-      case 'npc': return this.stats.npcTalked.has(q.targetId) ? '完成' : '寻找 NPC（绿点）';
-      case 'level': return `在营火休息升级至 Lv.${q.target}`;
-      case 'discovery': return this.stats.discoveries.has(q.targetId) ? '已完成' : `寻找 ${TARGET_WAYPOINTS[q.targetId]?.label ?? '标记点'}`;
+      case 'spells': return t('quest_progress_spells', { current: Math.min(this.stats.spellCasts, q.target), target: q.target });
+      case 'dungeon': return this.stats.dungeonsCleared.has(q.dungeonId) ? t('quest_progress_dungeon', { dungeon_done: '完成' }) : t('quest_progress_dungeon', { dungeon_done: '寻找地下城入口（紫环）' });
+      case 'mind': return t('quest_progress_mind', { target: q.target });
+      case 'charged': return t('quest_progress_charged', { current: Math.min(this.stats.chargedCasts, q.target), target: q.target });
+      case 'skills-unlocked': return t('quest_progress_skills', { current: Math.min(this.stats.skillsUnlocked, q.target), target: q.target });
+      case 'dungeon-rerun': return this.stats.dungeonRerun ? t('quest_progress_dungeon_rerun', { rerun_done: '完成' }) : t('quest_progress_dungeon_rerun', { rerun_done: '再次进入地下城（Chapter 5 后）' });
+      case 'chests': return t('quest_progress_chests', { current: this.stats.chestsOpened, target: q.target });
+      case 'npc': return this.stats.npcTalked.has(q.targetId) ? t('quest_progress_npc', { npc_done: '完成' }) : t('quest_progress_npc', { npc_done: `寻找 NPC（绿点）` });
+      case 'level': return t('quest_progress_level', { target: q.target });
+      case 'discovery': return this.stats.discoveries.has(q.targetId) ? t('quest_progress_discovery', { discovery_done: '已完成' }) : t('quest_progress_discovery', { discovery_done: `寻找 ${TARGET_WAYPOINTS[q.targetId]?.label ?? '标记点'}` });
       case 'interact':
         // 门控那一格不许显示"已完成触摸"：摸过锚点不等于这一步过了（判据同一条口径）
         if (this.stats.discoveries.has(q.targetId) && !interactGateCondition(q)) {
-          return '已完成触摸 — 若未跳转请点右下角「同步任务」';
+          return t('quest_progress_touch_done');
         }
         return keyText(q.desc);
       default: {
         const bossKey = BOSS_STAT_KEYS[q.bossId];
-        if (bossKey) return this.stats[bossKey] ? '完成' : BOSS_DISPLAY[q.bossId].progress;
+        if (bossKey) return this.stats[bossKey] ? t('quest_progress_dungeon', { dungeon_done: '完成' }) : BOSS_DISPLAY[q.bossId].progress;
         return keyText(q.desc);
       }
     }
@@ -382,30 +383,30 @@ export class QuestSystem {
 
   getAssistantHint() {
     const q = this.current;
-    if (!q) return keyText('全部通关。按 {questTracker} 打开助手可重跑全流程演示。');
+    if (!q) return t('quest_assistant_hint_all_done', { questTracker: keyText('{questTracker}') });
     const wp = this.getQuestWaypoint();
     if (wp?.hint) return wp.hint;
     if (q.type === 'interact' && this.stats.discoveries.has(q.targetId)) {
-      return '本步已完成，点击助手「同步任务进度」';
+      return t('quest_assistant_hint_step_done');
     }
     if (BOSS_STAT_KEYS[q.bossId]) {
-      return `走进地图骷髅标记的红圈激活 Boss · ${this.getProgressText()}`;
+      return t('quest_assistant_hint_boss_dist', { progress: this.getProgressText() });
     }
     return this.getProgressText();
   }
 
   getQuestDirectionText(playerX, playerZ) {
     const q = this.current;
-    if (!q) return '主线已完成';
-    if (this.isQuestObjectiveDone(q)) return '本步已完成 — 点 U → 同步任务进度';
+    if (!q) return t('quest_title_all_done', { questTracker: keyText('{questTracker}') });
+    if (this.isQuestObjectiveDone(q)) return t('quest_assistant_hint_step_done_2');
     const wp = this.getQuestWaypoint();
     if (!wp) return this.getAssistantHint();
     const dx = wp.x - playerX;
     const dz = wp.z - playerZ;
     const dist = Math.sqrt(dx * dx + dz * dz);
-    if (dist < 8) return `已接近 · ${wp.label}`;
+    if (dist < 8) return t('quest_waypoint_near', { label: wp.label });
     const angle = Math.atan2(dx, dz);
-    const dirs = ['北', '东北', '东', '东南', '南', '西南', '西', '西北'];
+    const dirs = [t('dir_north'), t('dir_northeast'), t('dir_east'), t('dir_southeast'), t('dir_south'), t('dir_southwest'), t('dir_west'), t('dir_northwest')];
     const idx = Math.round((angle / (Math.PI * 2)) * 8) % 8;
     const dir = dirs[(idx + 8) % 8];
     return `▶ ${dir} · ${Math.round(dist)}m · ${wp.label}`;

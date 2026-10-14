@@ -300,7 +300,7 @@ export const STRINGS_ZH = Object.freeze({
   quest_waypoint_hint_chaos_boss: '击败混沌领主',
   quest_waypoint_hint_touch_anchor: '集齐碎片后触摸世界之锚',
   quest_waypoint_hint_touch_anchor_2: '条件满足后触摸锚点',
-  quest_waypoint_hint_touch_anchor_3: '完成试炼后触摸锚点',
+  quest_waypoint_hint_touch_anchor_3: '三界试炼完成后触摸锚点',
   quest_toast_chapter_announce: '${announce}',
   quest_toast_task_complete: '任务完成：${title}',
   quest_get_assistant_hint: '位面助手：${hint}',

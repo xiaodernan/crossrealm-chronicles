@@ -5,6 +5,7 @@ import { emit } from '../engine/EventBus.js';
 // 也不再把它转口一遍 —— 转口会让"这张表的真源在哪"重新变成两个答案。
 import { REST_DIALOGUES } from '../content/restDialogues.js';
 import { keyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 
 function highlightKeywords(text) {
   if (!text) return '';
@@ -63,7 +64,7 @@ export class RestDialogue {
 
     const chapter = this.game.quests?.chapter ?? 1;
     if (node.minChapter && chapter < node.minChapter) {
-      this.game.dialog.toast(`需要 Chapter ${node.minChapter} 后再来问这个。`);
+      this.game.dialog.toast(t('dialog_toast_chapter_required', { chapter: node.minChapter }));
       this._showNode(tree, 'start');
       return;
     }
@@ -74,8 +75,8 @@ export class RestDialogue {
     if (nodeId === 'quest' && tree === REST_DIALOGUES.hub) {
       const q = this.game.quests;
       text = q.current
-        ? `当前：${q.current.title}\n${q.getProgressText()}\n\n${q.getAssistantHint()}`
-        : keyText('主线已完成 — 自由探索，或按 {autoPlay} 自动通关。');
+        ? t('rest_dialogue_progress_fmt', { title: q.current.title, progress: q.getProgressText(), hint: q.getAssistantHint() })
+        : t('rest_dialogue_main_complete', { autoPlay: keyText('{autoPlay}') });
     }
 
     const def = REST_NPC_DEFS[this.activeRest?.id];
@@ -128,11 +129,11 @@ export class RestDialogue {
       if (!this.visited.has(this.activeRest?.id)) {
         this.visited.add(this.activeRest?.id);
         this.game.stats.addSouls(5);
-        this.game.dialog.toast('营火余温 +5 魂火');
+        this.game.dialog.toast(t('dialog_toast_rest_heal'));
         window.dispatchEvent(new CustomEvent('stats-changed', { detail: this.game.stats.toJSON() }));
       }
       const npc = this.game.restNpcs?.getByRestId?.(this.activeRest?.id);
-      if (npc) this.game.dialog.toast(`${npc.name}：「愿火护佑下一程。」`, 2400);
+      if (npc) this.game.dialog.toast(t('dialog_toast_npc_farewell', { name: npc.name }), 2400);
       return;
     }
     if (choice.next) {
