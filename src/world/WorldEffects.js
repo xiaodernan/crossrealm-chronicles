@@ -1,6 +1,18 @@
 import * as THREE from 'three';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 
+/**
+ * 光球 / 余烬每秒的浮动速率（米/秒）。
+ *
+ * 改前写的是 `arr[i + 1] += Math.sin(墙钟 + i) * 0.002` —— 既**不乘 dt**，量的是"每一帧"，
+ * 而帧与帧之间隔多久由机器说了算。实测同一秒世界时：60 帧漂移 0.00030，180 帧漂移 0.00093
+ * （`.tmp-20261015/probe-visual-clock.log`，3.1 倍）。换算成每秒值之后，60 fps 下的逐帧增量
+ * 与改前一字不差（`0.002 × 60`），帧率与它无关了。同一条口径的先例见
+ * `WeatherSystem` 的 `SPLASH_GROWTH_PER_SEC`（W-A1 切片4 / B43）。
+ */
+const 光球浮速 = 0.002 * 60;
+const 余烬浮速 = 0.003 * 60;
+
 /** 区域天空、粒子、氛围光 */
 export class WorldEffects {
   constructor(scene) {
@@ -15,6 +27,8 @@ export class WorldEffects {
     this.meteorStreaks = [];
     this.meteorTimer = 0;
     this.zoneLights = [];
+    /** 世界时累计（秒）：极光等振荡的相位源（B118，同 `SoulWispManager._时相` 的口径） */
+    this._时相 = 0;
     this.build();
   }
 
@@ -198,13 +212,14 @@ export class WorldEffects {
   }
 
   update(dt, playerPos) {
-    const t = performance.now() * 0.001;
+    this._时相 += dt;
+    const t = this._时相;
     if (this.fireflies?.visible) this.fireflies.rotation.y += dt * 0.02;
     if (this.magicOrbs?.visible) {
       this.magicOrbs.rotation.y += dt * 0.05;
       const arr = this.magicOrbs.geometry.attributes.position.array;
       for (let i = 0; i < arr.length; i += 3) {
-        arr[i + 1] += Math.sin(t + i) * 0.002;
+        arr[i + 1] += Math.sin(t + i) * 光球浮速 * dt;
       }
       this.magicOrbs.geometry.attributes.position.needsUpdate = true;
     }
@@ -216,7 +231,7 @@ export class WorldEffects {
       this.chaosEmbers.rotation.y += dt * 0.03;
       const arr = this.chaosEmbers.geometry.attributes.position.array;
       for (let i = 0; i < arr.length; i += 3) {
-        arr[i + 1] += Math.sin(t * 1.2 + i * 0.1) * 0.003;
+        arr[i + 1] += Math.sin(t * 1.2 + i * 0.1) * 余烬浮速 * dt;
       }
       this.chaosEmbers.geometry.attributes.position.needsUpdate = true;
     }

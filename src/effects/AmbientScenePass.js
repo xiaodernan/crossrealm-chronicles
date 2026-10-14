@@ -19,6 +19,7 @@ export class AmbientScenePass {
     game.scene.add(this.group);
     this.dust = null;
     this.restGlows = [];
+    this._时相 = 0;               // B118：尘光/营火光晕的呼吸相位改走世界时积分
     this.build();
     this.setupZoneListener();
   }
@@ -76,7 +77,8 @@ export class AmbientScenePass {
 
   update(dt, playerPos) {
     if (!this.dust) return;
-    const t = performance.now() * 0.001;
+    this._时相 += dt;
+    const t = this._时相;                 // 改前是 `performance.now() * 0.001`（B118）：尘光方向取墙钟、营火光晕整个吃墙钟
     const arr = this.dust.geometry.attributes.position.array;
     for (let i = 0; i < arr.length; i += 3) {
       arr[i + 1] += Math.sin(t + arr[i] * 0.01) * dt * 0.4;

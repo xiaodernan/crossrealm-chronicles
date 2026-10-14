@@ -228,7 +228,7 @@ export class MagicZone extends BaseZone {
       this.particles.rotation.y += dt * 0.1;
     }
     if (this.books) {
-      const t = performance.now() * 0.001;
+      const t = this._时相;                 // `_时相` 由 `super.update(dt)` 累加（B118：改前这里是墙钟，漂浮书在定帧里照样上下飞）
       for (const b of this.books) {
         b.mesh.position.y = b.baseY + Math.sin(t + b.phase) * 0.6;
         b.mesh.rotation.y += dt * 0.5;

@@ -5,6 +5,12 @@ import { applyShadow } from '../engine/shadowPolicy.js';
 
 const _loader = new GLTFLoader();
 
+// B118：兜底头部的呼吸是**逐帧累加**，改前每帧加 `sin(墙钟×0.008)×0.0008`，
+// 帧率越高累得越快（180 fps ≈ 60 fps 的 3 倍位移，且不封顶）。系数按 60 fps 折算成每秒速率，
+// 60 fps 下逐帧增量与改前完全相同。
+const 头部呼吸速率 = 0.0008 * 60;
+const 头部呼吸角速度 = 8;   // 改前 0.008 rad/ms = 8 rad/s
+
 /** 单个营火 NPC — Mixamo GLB + 程序化兜底 + idle/talk 动画 */
 export class RestNpcModel {
   constructor(restId, visualDef) {
@@ -20,6 +26,7 @@ export class RestNpcModel {
     this.useGlb = false;
     this.fallbackMeshes = [];
     this.talkPulse = 0;
+    this._时相 = 0;
   }
 
   buildFallback() {
@@ -143,10 +150,11 @@ export class RestNpcModel {
   }
 
   update(dt) {
+    this._时相 += dt;
     this.mixer?.update(dt);
     this.talkPulse = Math.max(0, this.talkPulse - dt * 0.5);
     if (!this.useGlb && this.fallbackMeshes[1]) {
-      this.fallbackMeshes[1].position.y += Math.sin(performance.now() * 0.008) * 0.0008 * (1 + this.talkPulse);
+      this.fallbackMeshes[1].position.y += Math.sin(this._时相 * 头部呼吸角速度) * 头部呼吸速率 * dt * (1 + this.talkPulse);
     }
   }
 }

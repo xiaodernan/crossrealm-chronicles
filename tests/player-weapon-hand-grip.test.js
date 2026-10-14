@@ -725,10 +725,11 @@ describe('⑥ 法杖两件换手：proc 带着杖倒、静止珠在头侧、招�
       const s = 杖(x), o = 珠(x);
       x.ws.current = 'staff'; x.ws.applyVisual();
       const 读 = [];
-      for (const t of [0, 400, 800, 1200]) {
-        const 真 = performance.now; performance.now = () => t;
+      // B118 之后浮动的相位来自 `_时相` 的积分：这四帧就是四个自变量。
+      // 改前这里桩的是 `performance.now = () => t`（0/400/800/1200 毫秒），它喂的那个入参
+      // 现在没人读了 —— 留着只会让读的人以为墙钟还是这条曲线的自变量。
+      for (let i = 0; i < 4; i += 1) {
         x.ws.update(1 / 60, {});
-        performance.now = 真;
         x.cm.group.updateMatrixWorld(true);
         读.push({ 局部y: o.position.y, 离头: o.getWorldPosition(new THREE.Vector3()).distanceTo(杖头(s)) });
       }

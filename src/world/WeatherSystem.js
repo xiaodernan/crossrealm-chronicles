@@ -44,6 +44,9 @@ export class WeatherSystem {
 
     this._follow = new THREE.Vector3();
     this._box = { x: 55, y: 32, z: 55 };
+    /** 世界时累计（秒）—— 雪的横向摆动相位源（B118）。改前摆动**幅值**乘了 dt、方向却取墙钟：
+     *  定帧那一档（世界时 0.08 秒）实测仍走出正常档 **76.9%** 的路径，等于雪在定格里满速乱摆 */
+    this._时相 = 0;
     this._buildParticles(this.preset);
   }
 
@@ -123,6 +126,7 @@ export class WeatherSystem {
     this._updateSplashes(dt);
     if (!this.particles || !this.velocities) return;
 
+    this._时相 += dt;
     this._follow.lerp(playerPos, dt * 2.5);
     this.group.position.set(this._follow.x, 0, this._follow.z);
 
@@ -153,7 +157,7 @@ export class WeatherSystem {
       }
 
       if (preset.kind === 'snow') {
-        vel[i * 3] += Math.sin(performance.now() * 0.001 + i) * dt * 0.4;
+        vel[i * 3] += Math.sin(this._时相 + i) * dt * 0.4;
       }
     }
 

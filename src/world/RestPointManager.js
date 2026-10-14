@@ -8,6 +8,8 @@ export class RestPointManager {
     this.scene = scene;
     this.world = world;
     this.points = [];
+    /** 世界时累计（秒）：火苗抖动与自发光脉动的相位源（B118） */
+    this._时相 = 0;
   }
 
   /**
@@ -113,7 +115,10 @@ export class RestPointManager {
   }
 
   update(dt) {
-    const t = performance.now() * 0.003;
+    this._时相 += dt;
+    // 改前 `performance.now() * 0.003` = 每秒 3 弧度（B118）。实测时停那一档火苗仍抖
+    // 0.279（缩放累计）/ 自发光脉动 1.356 —— 营火是玩家"安全"的视觉锚点，它比谁都跳得欢。
+    const t = this._时相 * 3;
     for (const p of this.points) {
       if (p.flame) {
         p.flame.scale.y = 1 + Math.sin(t + p.position.x) * 0.15;

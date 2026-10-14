@@ -24,6 +24,7 @@ export class RestNpcManager {
     this.highlightId = null;
     this._tmp = new THREE.Vector3();
     this._barkCd = {};
+    this._时相 = 0;             // B118：NPC 待机呼吸的相位源改走世界时积分（改前六处各吃墙钟）
     this.build(restPoints);
     this._bindEvents();
   }
@@ -162,6 +163,8 @@ export class RestNpcManager {
   }
 
   update(dt, playerPos) {
+    this._时相 += dt;
+    const t = this._时相;              // 以下所有呼吸的相位源（B118）：改前六处各写 `performance.now() × k`
     for (const id of Object.keys(this._barkCd)) {
       this._barkCd[id] = Math.max(0, (this._barkCd[id] ?? 0) - dt);
     }
@@ -183,17 +186,17 @@ export class RestNpcManager {
 
       const idle = n.def.idle;
       if (idle === 'float') {
-        m.position.y = n.baseY + Math.sin(performance.now() * 0.0014 + n.homeYaw) * 0.12;
+        m.position.y = n.baseY + Math.sin(t * 1.4 + n.homeYaw) * 0.12;
       } else if (idle === 'ghost') {
-        m.position.y = n.baseY + Math.sin(performance.now() * 0.0009) * 0.06;
-        const op = 0.55 + Math.sin(performance.now() * 0.002) * 0.15 + (speaking ? 0.2 : 0);
+        m.position.y = n.baseY + Math.sin(t * 0.9) * 0.06;
+        const op = 0.55 + Math.sin(t * 2) * 0.15 + (speaking ? 0.2 : 0);
         if (n.cloak?.material) n.cloak.material.opacity = op;
       } else if (idle !== 'sit') {
-        m.position.y = n.baseY + Math.sin(performance.now() * 0.0016) * 0.03;
+        m.position.y = n.baseY + Math.sin(t * 1.6) * 0.03;
       }
 
       if (speaking || inDialogue) {
-        n.head?.position && (n.head.position.y = n.body.position.y + n.def.height * 0.55 + 0.18 + Math.sin(performance.now() * 0.008) * 0.025);
+        n.head?.position && (n.head.position.y = n.body.position.y + n.def.height * 0.55 + 0.18 + Math.sin(t * 8) * 0.025);
       }
 
       n.speakPulse = Math.max(0, n.speakPulse - dt * 0.6);
@@ -202,7 +205,7 @@ export class RestNpcManager {
       n.halo.material.opacity = THREE.MathUtils.lerp(n.halo.material.opacity, hi * 0.55 + sp * 0.45, dt * 8);
       n.halo.scale.setScalar(1 + hi * 0.15 + sp * 0.2);
       if (n.cloak?.material) {
-        n.cloak.material.emissiveIntensity = 0.3 + hi * 0.35 + sp * 0.5 + Math.sin(performance.now() * 0.0018) * 0.1;
+        n.cloak.material.emissiveIntensity = 0.3 + hi * 0.35 + sp * 0.5 + Math.sin(t * 1.8) * 0.1;
       }
       n.ember.intensity = 0.28 + (d < 6 ? 0.15 : 0) + hi * 0.35 + sp * 0.4;
 

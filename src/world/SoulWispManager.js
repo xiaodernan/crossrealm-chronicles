@@ -37,6 +37,14 @@ export class SoulWispManager {
     this.wisps = [];
     this.collected = new Set();
     this._chaseSoundTimer = 0;
+    /**
+     * 世界时累计（秒）—— 漂浮与脉动的相位由它推出来（B118）。
+     * 改前这里写 `performance.now()`，于是同一条 `update` 有两个时钟：`rotation.y += dt * 1.2`
+     * 吃世界时，`sin(t*2 + phase)` 吃墙钟。实测（`.tmp-20261015/probe-visual-clock.mjs`）
+     * 时停那一档（60 帧 × dt=0，真实时间照样过了 1 秒）魂火仍走出 **0.649 米** 的上下路径、
+     * 光晕缩放累计 0.413、透明度累计 0.265 —— B/A 全是 1.000，"世界凝住"凝的只有别人。
+     */
+    this._时相 = 0;
     this.build();
   }
 
@@ -67,7 +75,8 @@ export class SoulWispManager {
   }
 
   update(dt, playerPos) {
-    const t = performance.now() * 0.001;
+    this._时相 += dt;
+    const t = this._时相;
     let anyChasing = false;
 
     for (const w of this.wisps) {

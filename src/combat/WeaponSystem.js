@@ -34,7 +34,8 @@ const 杖身长 = 1.4;
 const 躯干挂点 = Object.freeze([0.5, 1.1, 0]);
 const 躯干侧倾 = -0.15;
 const 珠静止 = Object.freeze([0, 杖身长 / 2, 0]);
-const 珠浮 = Object.freeze({ 幅: 0.08, 角速度: 0.004 });
+/** `角速度` 的单位是**弧度/秒**（B118 之前是 0.004 弧度/毫秒，且相位直接取墙钟 ⇒ 定帧时杖珠仍浮） */
+const 珠浮 = Object.freeze({ 幅: 0.08, 角速度: 4 });
 
 export class WeaponSystem {
   constructor(player, dialog, audio) {
@@ -43,6 +44,7 @@ export class WeaponSystem {
     this.audio = audio;
     this.current = 'sword';
     this.cooldown = 0;
+    this._时相 = 0;           // B118：杖珠浮动的相位改走世界时积分（改前吃墙钟）
     this._buildStaffMesh();
     /**
      * 挂点必须等骨架就位。生产里 `new WeaponSystem` 在 `Game` 的构造函数里跑（`core/Game.js`），
@@ -121,6 +123,7 @@ export class WeaponSystem {
   }
 
   update(dt, keys) {
+    this._时相 += dt;
     this.cooldown = Math.max(0, this.cooldown - dt);
     if (keys[codeFor('swapWeapon')]) {
       keys[codeFor('swapWeapon')] = false;
@@ -129,6 +132,6 @@ export class WeaponSystem {
     // 浮动画在**杖身局部**：锚点与珠的静止位是同一个推导（`珠静止[1] = 杖身长/2`）。
     // 改前那句 `orb.position.y = 1.75 + …` 写的是逻辑节点上的挂点坐标 —— 换一次挂层就得跟着
     // 供一份那个抄本，这正是 B113③ 留到本篇的尾巴。
-    if (this._orb.visible) this._orb.position.y = 珠静止[1] + Math.sin(performance.now() * 珠浮.角速度) * 珠浮.幅;
+    if (this._orb.visible) this._orb.position.y = 珠静止[1] + Math.sin(this._时相 * 珠浮.角速度) * 珠浮.幅;
   }
 }

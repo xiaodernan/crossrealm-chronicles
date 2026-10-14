@@ -17,6 +17,7 @@ export class MagicBoss extends Boss {
     });
     this.projectiles = config.projectiles;
     this.shootCooldown = 0;
+    this._时相 = 0;             // B118：光球脉动的相位改走世界时积分（改前吃墙钟，定帧时照样闪）
   }
 
   createMesh() {
@@ -65,12 +66,13 @@ export class MagicBoss extends Boss {
 
   update(dt, playerPos, playerRef) {
     if (!this.alive) return;
+    this._时相 += dt;
     this.shootCooldown = Math.max(0, this.shootCooldown - dt);
 
     const orb = this.mesh.getObjectByName('orb');
     if (orb) {
       orb.rotation.y += dt * 2;
-      orb.material.emissiveIntensity = 0.7 + Math.sin(performance.now() * 0.004) * 0.4;
+      orb.material.emissiveIntensity = 0.7 + Math.sin(this._时相 * 4) * 0.4;   // 改前 0.004 rad/ms = 每秒 4 弧度（B118）
     }
 
     // 三档的数都在 `content/bossPhases.js`（W-B8 切片5）：这里只问"这一档放不放"，

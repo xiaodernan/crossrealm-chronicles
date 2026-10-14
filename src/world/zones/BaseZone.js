@@ -33,6 +33,12 @@ export class BaseZone {
      * 从材质本身问不出"它该贴哪一种"。
      */
     this._surfaceMats = [];
+    /**
+     * 世界时累计（秒）：POI 标记浮动（B118 同族）。同一条 update 里 `rotation.y += dt * 0.4`
+     * 吃世界时，改前的浮动却吃墙钟 —— 定帧期间标记照样上下飘。子类各自用自己的 `_时相`
+     * （同名同口径，见 `MagicZone` / `SpaceZone`），互不共享：两个区可以一个在戏一个不在。
+     */
+    this._时相 = 0;
   }
 
   /** 登记一个本地坐标障碍；kind: solid | platform | ghost */
@@ -163,7 +169,8 @@ export class BaseZone {
   }
 
   update(dt) {
-    const t = performance.now() * 0.002;
+    this._时相 += dt;
+    const t = this._时相 * 2;                 // 改前 `performance.now() * 0.002` = 每秒 2 弧度
     for (const { marker } of this.poiMarkers) {
       marker.position.y = marker.userData.baseY ?? marker.position.y;
       if (marker.userData.baseY === undefined) marker.userData.baseY = marker.position.y;

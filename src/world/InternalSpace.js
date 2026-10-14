@@ -44,6 +44,8 @@ export class InternalSpace {
     this.pois = [];
     this.poiMarkers = [];
     this.decorations = [];
+    /** 世界时累计（秒）：POI 标记浮动的相位源（B118，与 `zones/BaseZone._时相` 同口径） */
+    this._时相 = 0;
     this._built = false;
   }
 
@@ -216,7 +218,8 @@ export class InternalSpace {
   }
 
   update(dt) {
-    const t = performance.now() * 0.002;
+    this._时相 += dt;
+    const t = this._时相 * 2;                 // 改前 `performance.now() * 0.002` = 每秒 2 弧度
     for (const { marker } of this.poiMarkers) {
       marker.position.y = marker.userData.baseY ?? marker.position.y;
       if (marker.userData.baseY === undefined) marker.userData.baseY = marker.position.y;

@@ -255,7 +255,9 @@ export class SpaceZone extends BaseZone {
     }
     if (this.timeRing) {
       this.timeRing.rotation.z += dt * 0.8;
-      this.timeRing.material.opacity = 0.3 + Math.sin(performance.now() * 0.002) * 0.15;
+      // `_时相` 由 `super.update(dt)` 累加（B118）：改前这里吃墙钟 —— 时停时"时间环"自己还在闪，
+      // 而那正是时停要演示的东西。0.002/毫秒 = 每秒 2 弧度。
+      this.timeRing.material.opacity = 0.3 + Math.sin(this._时相 * 2) * 0.15;
     }
   }
 

@@ -6,6 +6,7 @@ export class RestNpcProceduralGestures {
     this.npc = npcEntry;
     this.mode = 'idle';
     this.timer = 0;
+    this._时相 = 0;             // B118：坐姿/说话点头的呼吸相位改走世界时积分
     this._base = {
       bodyY: npcEntry.body?.position.y ?? 1.15,
       headY: npcEntry.head?.position.y ?? 1.8,
@@ -56,7 +57,8 @@ export class RestNpcProceduralGestures {
   }
 
   update(dt) {
-    const t = performance.now() * 0.001;
+    this._时相 += dt;
+    const t = this._时相;         // 改前 `performance.now() * 0.001`（B118）：坐姿胸口与说话点头吃墙钟，定帧时仍继续起伏
     if (this.mode === 'procedural_sit' || this.mode === 'procedural_sit_talk') {
       if (this.npc.body) this.npc.body.position.y = 0.72 + Math.sin(t * 1.2) * 0.015;
       if (this.mode === 'procedural_sit_talk' && this.npc.head) {
