@@ -85,15 +85,24 @@ export class CharacterModel {
     if (this._procCombat.t <= 0) this._procCombat.kind = null;
   }
 
+  /**
+   * 从候选名里挑一个真有 Action 的。
+   *
+   * 三档里只有第一档（精确键）认骨骼片段：`this.skeletal.X` 是 `__sk:招式` 这种**内部地址**，
+   * 调用方必须把它**明写**进候选表。忽略大小写与子串那两档是给素材名留的余地
+   * （`'Roll'` 撞上 `'Run To Rolling'`），让它们能撞进 `__sk:` 就把"这招没有 clip"偷换成了
+   * "借了隔壁那招的骨骼片段"（B113①：`playSkill` / `playRiposte` 的候选里有 `heavy`，
+   * 子串档于是每次都挑中 `__sk:heavy` —— 战技和弹反反击共用重击那一档的骨，而且一声不响）。
+   */
   pickAnim(candidates) {
+    const 可撞 = Object.keys(this.actions).filter((k) => !isSkeletonClipName(k));
     for (const c of candidates) {
       if (!c) continue;
       if (this.actions[c]) return c;
-      const hit = Object.keys(this.actions).find((k) => k.toLowerCase() === String(c).toLowerCase());
+      const 小写 = String(c).toLowerCase();
+      const hit = 可撞.find((k) => k.toLowerCase() === 小写);
       if (hit) return hit;
-      const partial = Object.keys(this.actions).find((k) =>
-        k.toLowerCase().includes(String(c).toLowerCase()) && String(c).length > 3
-      );
+      const partial = 可撞.find((k) => k.toLowerCase().includes(小写) && 小写.length > 3);
       if (partial) return partial;
     }
     return null;
@@ -304,17 +313,20 @@ export class CharacterModel {
 
   playRiposte() {
     this.combatState = 'riposte';
-    this._playOnce(
-      [this.catalog.parry, ...ANIM_MANIFEST.parry, this.catalog.heavy, ...ANIM_MANIFEST.heavy],
+    // 骨骼片段的档位与这一招的状态锁**同长**（0.55），所以不需要再借重击那一档（B113②）。
+    if (!this._playOnce(
+      [this.catalog.parry, ...ANIM_MANIFEST.parry, this.skeletal.riposte, this.catalog.heavy, ...ANIM_MANIFEST.heavy],
       1.1, 0.55, { pitch: -0.5, yawOff: 0.18 }
-    );
+    )) {
+      if (!this.hasMixamoClips) this._startProcCombat('heavy', 0.55, 1.1);
+    }
     return true;
   }
 
   playDodge() {
     this.combatState = 'dodge';
     if (!this._playOnce(
-      [this.catalog.dodge, ...ANIM_MANIFEST.dodge, this.catalog.run, 'Run'],
+      [this.catalog.dodge, ...ANIM_MANIFEST.dodge, this.skeletal.dodge, this.catalog.run, 'Run'],
       1.22, 0.52, { pitch: 0.12, roll: 0.22 }
     )) {
       this._playOnce(['Run'], 1.75, 0.52, { pitch: 0.15, roll: 0.25 });
@@ -326,21 +338,23 @@ export class CharacterModel {
   playHit() {
     this.combatState = 'hit';
     if (!this._playOnce(
-      [this.catalog.hit, ...ANIM_MANIFEST.hit, this.catalog.walk, 'Walk'],
+      [this.catalog.hit, ...ANIM_MANIFEST.hit, this.skeletal.hit, this.catalog.walk, 'Walk'],
       1.0, 0.48, { pitch: 0.35, roll: (Math.random() - 0.5) * 0.3 }
     )) {
-      this._playOnce(['Walk'], -1.6, 0.42, { pitch: 0.32 });
-      if (!this.hasMixamoClips) this._startProcCombat('hit', 0.42, 1);
+      // 这里原来是 `0.42` —— 与上面那条 0.48 的状态锁不一致，兜底那一跑把锁缩了 6 帧。
+      this._playOnce(['Walk'], -1.6, 0.48, { pitch: 0.32 });
+      if (!this.hasMixamoClips) this._startProcCombat('hit', 0.48, 1);
     }
     return true;
   }
 
   playBlock() {
     this.combatState = 'block';
-    this.actionLock = 0.38;
+    // 原来这里先写 `actionLock = 0.38`，紧接着 `_playOnce` 又把它覆盖成 0.35 —— 那个 0.38
+    // 从来没有生效过，留着只让人以为格挡锁 0.38。锁的真源是 `_playOnce` 的第三参。
     this.proc.pitch = -0.14;
     this.proc.roll = -0.08;
-    if (!this._playOnce([this.catalog.block, ...ANIM_MANIFEST.block, this.catalog.idle, 'Idle'], 1.0, 0.35, {})) {
+    if (!this._playOnce([this.catalog.block, ...ANIM_MANIFEST.block, this.skeletal.block, this.catalog.idle, 'Idle'], 1.0, 0.35, {})) {
       this._playLoop(this.catalog.idle || 'Idle', 0.2, 0.05);
       if (!this.hasMixamoClips) this._startProcCombat('block', 0.35, 0.9);
     }
@@ -349,19 +363,26 @@ export class CharacterModel {
 
   playParrySuccess() {
     this.combatState = 'parry';
-    this.actionLock = 0.48;
+    // 同上：`actionLock = 0.48` 是一笔死账，`_playOnce` 的 0.45 才是生效的那一份。
     this.proc.pitch = -0.25;
     this.proc.yawOff = 0.2;
-    this._playOnce([this.catalog.parry, ...ANIM_MANIFEST.parry, this.catalog.block, ...ANIM_MANIFEST.block], 1.1, 0.45, {});
+    if (!this._playOnce(
+      [this.catalog.parry, ...ANIM_MANIFEST.parry, this.skeletal.parry, this.catalog.block, ...ANIM_MANIFEST.block],
+      1.1, 0.45, {}
+    )) {
+      if (!this.hasMixamoClips) this._startProcCombat('attack', 0.45, 0.9);
+    }
     return true;
   }
 
   playSkill() {
     this.combatState = 'skill';
-    this._playOnce(
-      [this.catalog.skill, ...ANIM_MANIFEST.skill, this.catalog.heavy, ...ANIM_MANIFEST.heavy],
+    if (!this._playOnce(
+      [this.catalog.skill, ...ANIM_MANIFEST.skill, this.skeletal.skill, this.catalog.heavy, ...ANIM_MANIFEST.heavy],
       1.05, 0.5, { pitch: -0.3, yawOff: 0.15 }
-    );
+    )) {
+      if (!this.hasMixamoClips) this._startProcCombat('attack', 0.5, 1.2);
+    }
     return true;
   }
 

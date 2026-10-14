@@ -42,6 +42,7 @@ import { join } from 'node:path';
 import * as THREE from 'three';
 import { CharacterModel, PLAYER_VISUAL_ROOT_NAME } from '../src/player/CharacterModel.js';
 import { ANIM_ROOT_NAME } from '../src/animation/AnimationEntityAdapter.js';
+import { SKELETON_MOTION } from '../src/assets/SkeletonMotion.js';
 
 const ROOT = process.cwd();
 const 源路径 = join(ROOT, 'src/player/CharacterModel.js');
@@ -161,6 +162,41 @@ describe('玩家战斗反馈：视觉层分家与一次定死的趔趄（W-C6 �
       expect(偏离, `${名}：视觉层几乎没动 —— 反馈又被谁吞了？`).toBeGreaterThan(0.05);
     });
   }
+
+  /**
+   * 兜底账：`_playOnce` 挑不到 clip ⇒ 返回 `false` ⇒ 调用方起 `_startProcCombat`。
+   * 这一档以前**一条判据都没有**：把 `return !!name` 改成 `return true`（谎称挑到了动画），
+   * 上面那二十条全绿 —— 因为 `Object.assign(this.proc, proc)` 在 `if (name && this.mixer)`
+   * **外面**，前倾照写，"落点不为零"量不到丢了兜底这件事（变异臂 S12 实测 0 红）。
+   * 这里量的就是那件丢了的事：档位、时长，以及"确实一条动画都没挑到"。
+   * `t` 与 `actionLock` 都对 `SkeletonMotion` 的片段时长：`playHit` 改前那笔兜底 0.42 ≠ 片段 0.48
+   * （缩 6 帧的锁）正是这条要拦的形状。
+   */
+  const 兜底表 = [
+    ['轻击一式', (cm) => cm.playComboAttack(1), 'attack1', 'attack'],
+    ['轻击二式', (cm) => cm.playComboAttack(2), 'attack2', 'attack'],
+    ['轻击三式', (cm) => cm.playComboAttack(3), 'attack3', 'attack'],
+    ['重击', (cm) => cm.playHeavyAttack(), 'heavy', 'heavy'],
+    ['翻滚', (cm) => cm.playDodge(), 'dodge', 'dodge'],
+    ['受击', (cm) => cm.playHit(), 'hit', 'hit'],
+    ['格挡', (cm) => cm.playBlock(), 'block', 'block'],
+    ['弹反反击', (cm) => cm.playRiposte(), 'riposte', 'heavy'],
+    ['弹反成功', (cm) => cm.playParrySuccess(), 'parry', 'attack'],
+    ['战技', (cm) => cm.playSkill(), 'skill', 'attack'],
+  ];
+  it('兜底口径：胶囊玩家一条 clip 都没挑到，十招全靠 `_procCombat` 动起来', () => {
+    for (const [名, 起招, 片段, 档] of 兜底表) {
+      const cm = 人偶();
+      expect(cm.actions, `前置条件：${名} 的兜底要说的是"没有动画可挑"`).toEqual({});
+      expect(cm.mixer, `前置条件：${名} 没有混音器`).toBe(null);
+      const 长 = SKELETON_MOTION[片段].duration;
+      起招(cm);
+      expect(cm.currentAction, `${名} 没挑到动画却还留着上一条`).toBe(null);
+      expect(cm._procCombat.kind, `${名} 的兜底趔趄没起 —— _playOnce 的返回值还决定决定什么？`).toBe(档);
+      expect(cm._procCombat.t, `${名} 的兜底时长 ${cm._procCombat.t} 与 ${片段} 片段 ${长} 不同长`).toBeCloseTo(长, 6);
+      expect(cm.actionLock, `${名} 的状态锁与兜底时长分家`).toBeCloseTo(长, 6);
+    }
+  });
 
   it('逻辑朝向哨兵：十招打下来 `group.rotation` 一字不动（B107 的玩家版不许回来）', () => {
     for (const [名, 起招] of 招式表) {

@@ -62,14 +62,37 @@
  * | A11 | 夹具不铺节点静止缩放 | 「夹具按米站立」+ 逐帧三条 + 「片段真的动出货场景里的模型」（5） |
  *
  * 另有一条不靠变异成立：`registerSkeletonClips` 与 `MOVES` 的账分开记（`cm.skeletal`），
- * 所以「load 后：四招在册」里 `catalog.attack1` 仍然挑不到素材 clip、`hasMixamoClips` 仍然 false。
+ * 所以「load 后：招式在册…」里 `catalog.attack1` 仍然挑不到素材 clip、`hasMixamoClips` 仍然 false。
+ *
+ * ## 切片10：这张表从"四招全是劈砍"变成"十招六种形状"，判据跟着分档
+ *
+ * 上面那套读数（峰速钉在判定帧、命中帧前送 ≥15 厘米、行程 >1.2 米）是**劈砍的形状要求**。
+ * 把 `hit / block / parry / dodge / skill / riposte` 接进同一套判据会产生两类错：
+ * - 正确的受击判不合格：挨一刀该把手往**身后**带（实测 −0.269 米），"前送 ≥0.15"直接红；
+ * - 错误的抽搐判合格：把 `RightArm.x` 写成每帧抖一下，前送照样能凑到 0.15。
+ * 所以形状写进数据（`kind`，`MOVE_KINDS` 六档），读数闸门**按档取**，并且双向钉：
+ * 表里每招的档位都得有闸门，闸门里的每一档都得有招在用（新增一档没人量 ⇒ 先红）。
+ * 地面值全部来自 `.tmp-20261014/probe-defense-moves.mjs`（真骨架 + `Idle` 第 0 帧站姿，与下面
+ * `逐帧()` 同一算法），每档余量写在闸门表的注释里。
+ *
+ * 另外三笔是切片10 实测到的洞，登记在 B113：
+ * - **候选表靠子串撞中**（B113①）：`pickAnim` 的忽略大小写/子串那两档能撞进 `__sk:` 键 ——
+ *   `playSkill` / `playRiposte` 的候选里有 `heavy`，于是战技和弹反反击**每次都借走 `__sk:heavy`**，
+ *   一声不响。修法是结构性的：模糊那两档只许撞素材名，骨骼片段的键是内部地址，必须**明写**。
+ * - **时长撞车**：`hit` 与 `attack2` 都是 0.48 秒。原来"每招时长互不相同"那条把两者判成重合，
+ *   但那个判据真正要防的是"连段看不出长短"与"两招共用一条 clip"。前者收口到连段四招，
+ *   后者由一条更硬的账接管：**每一招的时长 = 它自己那条 play 方法的 `actionLock`**（逐招读行为）。
+ * - **`playBlock` / `playParrySuccess` 各有一笔死账**（0.38 / 0.48 写进 `actionLock` 后立刻被
+ *   `_playOnce` 覆盖）：删掉，状态锁只有一处真源。
  */
 import { describe, it, expect, afterAll } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {
-  BONE_PREFIX, SKELETON_MOTION, SKELETON_REST, boneName, buildSkeletonClip,
-  isSkeletonClipName, listedBones, registerSkeletonClips, requiredBones, skeletonClipName,
+  BONE_PREFIX, MOVE_KINDS, SKELETON_MOTION, SKELETON_REST, boneName, buildSkeletonClip,
+  defineSkeletonMove, isSkeletonClipName, listedBones, registerSkeletonClips, requiredBones, skeletonClipName,
 } from '../src/assets/SkeletonMotion.js';
 import { MOVES } from '../src/combat/MoveTable.js';
 import { PARTS } from '../src/content/tuning.js';
@@ -83,6 +106,28 @@ const 招式名 = Object.keys(SKELETON_MOTION);
 const dt = 1 / 60;
 const { json, bin } = readGlb();
 const 在世 = buildRig(json).在世;
+
+/**
+ * 招式 → `CharacterModel` 里那条 play 方法。表里每一招都得在这里有一行（漏一行就是
+ * "片段编好了但没人调用它" —— 由下面那条"玩法表覆盖整张招式表"钉住）。
+ */
+const 玩法表 = Object.fromEntries([
+  ...[1, 2, 3].map((步) => [`attack${步}`, (cm) => cm.playComboAttack(步)]),
+  ['heavy', (cm) => cm.playHeavyAttack()],
+  ['hit', (cm) => cm.playHit()],
+  ['block', (cm) => cm.playBlock()],
+  ['parry', (cm) => cm.playParrySuccess()],
+  ['dodge', (cm) => cm.playDodge()],
+  ['skill', (cm) => cm.playSkill()],
+  ['riposte', (cm) => cm.playRiposte()],
+]);
+
+const ROOT = process.cwd();
+/** 剥注释：说明文字里提到旧写法是常态，不是接线（与 chunk-graph / visual-root 同款口径） */
+const stripComments = (src) => src
+  .replace(/\/\*[\s\S]*?\*\//g, '')
+  .split('\n').map((ln) => { const i = ln.indexOf('//'); return i >= 0 ? ln.slice(0, i) : ln; }).join('\n');
+const 净源 = stripComments(readFileSync(join(ROOT, 'src/player/CharacterModel.js'), 'utf8'));
 
 /** 把轨道名还原成表里的标签：`mixamorigSpine1.rotation[y]` → `Spine1`。 */
 const 骨标签 = (轨道名) => 轨道名.split('.')[0].slice(BONE_PREFIX.length);
@@ -164,6 +209,10 @@ describe('招式表结构：写的是增量，而且不越视觉层的所有权'
       expect(SKELETON_MOTION[`attack${步}`].strikeAt, `${步}式的判定帧该等于轻击的 at`).toBe(MOVES.light.at);
     }
     expect(SKELETON_MOTION.heavy.strikeAt).toBe(MOVES.heavy.at);
+    // 战技自己有一条判定；弹反反击走的是**重击**那条判定（`CombatController.tryRiposte` 里
+    // `this._setStrike(MOVES.heavy, …)`）—— 抄错一档就是"动画到位的那一刻机制没生效"。
+    expect(SKELETON_MOTION.skill.strikeAt, '战技的到位帧与 `MOVES.skill.at` 脱钩').toBe(MOVES.skill.at);
+    expect(SKELETON_MOTION.riposte.strikeAt, '弹反反击的到位帧与该复用的重击判定脱钩').toBe(MOVES.heavy.at);
     // 时长那半边取**行为读数**：`actionLock` 是状态机真正锁住的时间，不是这里手抄的数
     const cm = new CharacterModel();
     for (const 步 of [1, 2, 3]) {
@@ -172,6 +221,17 @@ describe('招式表结构：写的是增量，而且不越视觉层的所有权'
     }
     cm.playHeavyAttack();
     expect(cm.actionLock, 'playHeavyAttack 的状态锁与重击时长脱钩').toBeCloseTo(SKELETON_MOTION.heavy.duration, 6);
+    // 切片10 新增的六招同样一条不落地对账：这一条同时是"每一招有自己的一档时长"的硬账
+    // （旧那条"全表时长互不相同"要防的两件事里，"连段看不出长短"收在连段四招，
+    // "两招共用一条 clip"由这里逐招读状态锁接管 —— `hit` 与 `attack2` 都是 0.48 秒是**手感**，
+    // 不是共用：改它得动 `MOVES`，不该由动画表说了算）。
+    for (const [招, 玩] of Object.entries(玩法表)) {
+      const 人偶 = new CharacterModel();
+      人偶.createFallback();
+      玩(人偶);
+      expect(人偶.actionLock, `${招}：play 方法的状态锁与片段时长 ${SKELETON_MOTION[招].duration} 脱钩`)
+        .toBeCloseTo(SKELETON_MOTION[招].duration, 6);
+    }
   });
 
   it('编出来的 clip：轨道名是本表口径、时刻严格递增、两端值就是基准姿态本身', () => {
@@ -215,7 +275,11 @@ function 逐帧(招) {
   const 条目 = SKELETON_MOTION[招];
   const clip = buildSkeletonClip(招, 在世);
   const 站姿rig = seedPose(json, bin, buildRig(json), 'Idle', 0);
-  const 站姿 = { rh: worldOf(站姿rig, boneName('RightHand')), lh: worldOf(站姿rig, boneName('LeftHand')) };
+  const 站姿 = {
+    rh: worldOf(站姿rig, boneName('RightHand')),
+    lh: worldOf(站姿rig, boneName('LeftHand')),
+    rf: worldOf(站姿rig, boneName('RightFoot')),
+  };
   const rig = seedPose(json, bin, buildRig(json), 'Idle', 0);
   const mixer = new THREE.AnimationMixer(rig.root);
   const act = mixer.clipAction(clip);
@@ -243,6 +307,7 @@ function 逐帧(招) {
     rig.root.updateMatrixWorld(true);
     const h = worldOf(rig, boneName('RightHand'));
     const l = worldOf(rig, boneName('LeftHand'));
+    const ft = worldOf(rig, boneName('RightFoot'));
     if (前手) 累计 += h.distanceTo(前手);
     序.push({
       t,
@@ -254,6 +319,8 @@ function 逐帧(招) {
       高: h.y - 站姿.rh.y,
       右: h.x - 站姿.rh.x,
       左手前: l.z - 站姿.lh.z,
+      // 右脚离站姿的高度：`mobility` 那一档唯一的"重心"代理（骨架没有 `Hips` 平移通道）
+      脚: ft.y - 站姿.rf.y,
     });
     前手 = h;
   });
@@ -264,10 +331,72 @@ function 逐帧(招) {
   const 峰 = 速度.reduce((a, b, i) => (b > 速度[a] ? i : a), 0);
   // 蓄力档的秒数与 `SkeletonMotion` 里 `关键槽` 同式（那函数没导出，这里按同一条公式取）
   const iH = 最近帧(条目.strikeAt - Math.min(0.09, 条目.strikeAt - 1 / 60));
-  return { 序, 横速, iS, 峰秒: 序[峰].t, 峰速: 速度[峰], 命中: 序[iS], 蓄力: 序[iH], 末: 序.at(-1), 条目 };
+  const 峰_of = (取) => Math.max(...序.map(取));
+  return {
+    序, 横速, iS, 峰秒: 序[峰].t, 峰速: 速度[峰], 命中: 序[iS], 蓄力: 序[iH], 末: 序.at(-1), 条目,
+    前峰: 峰_of((s) => s.前),
+    手最峰: 峰_of((s) => s.高),
+    脚峰: 峰_of((s) => s.脚),
+    判定右: 序[iS].右,
+  };
 }
 
-describe('逐帧读数：四招都是"送出去的一刀"，不是原地踏步', () => {
+/**
+ * 档位 → 读数闸门。**每档一组，取值互不相同甚至反号**（地面值见每条后面的实测括号）。
+ * 单位：帧 / 米每秒 / 米。`[下限, 上限]`，`null` 那一侧不封。
+ *
+ * 为什么必须分档：`strike` 要的"判定帧往前送 ≥0.15"在 `recoil` 上恰好是**反的**
+ * （挨一刀该往后收，实测 −0.269），拿一套判据量六种形状会把对的判成错的、把抽搐判成合格。
+ */
+const 读数闸门 = {
+  strike: {
+    峰离帧: [null, 2], 峰速: [4, 16], 手的行程: [1.2, 3.6], 判定帧往前送: [0.15, null], 右脚不离地: [null, 0.10],
+  },
+  thrust: {
+    峰离帧: [null, 2], 峰速: [4, 16], 手的行程: [1.2, 3.6], 判定帧往前送: [0.18, null], 右脚不离地: [null, 0.10],
+    蓄力帧在身后: [null, -0.15], 判定帧左手往回拉: [null, -0.05],
+  },
+  cast: {
+    峰离帧: [null, 2], 峰速: [4, 16], 手的行程: [1.2, 3.6], 判定帧往前送: [0.15, null], 右脚不离地: [null, 0.10],
+    蓄力帧在身后: [null, -0.10], 判定帧左手也送出: [0.10, null],
+  },
+  guard: {
+    峰离帧: [null, 3], 峰速: [4, 16], 手的行程: [0.9, 2.0], 判定帧往前送: [0.15, null], 右脚不离地: [null, 0.10],
+    判定帧手抬高: [0.10, null], 到位即定住: [null, 0.03],
+  },
+  recoil: {
+    峰离帧: [null, 3], 峰速: [3, 16], 手的行程: [0.9, 2.0], 右脚不离地: [null, 0.10],
+    判定帧往后收: [null, -0.15], 全程没往前送过: [null, 0.05],
+  },
+  mobility: {
+    峰离帧: [null, 2], 峰速: [3, 12], 手的行程: [0.9, 2.2],
+    判定帧手不抬高: [null, 0.0], 全程手不抬高: [null, 0.05], 右脚抬起来: [0.20, null],
+  },
+};
+
+/** 一招的全部读数 → 闸门里那条腿的名字取数（腿名与数对不上就该红在"这条腿没数"上）。 */
+function 取数(r) {
+  return {
+    峰离帧: (r.峰秒 - r.条目.strikeAt) * 60,
+    峰速: r.峰速,
+    手的行程: r.末.程,
+    判定帧往前送: r.命中.前,
+    判定帧往后收: r.命中.前,
+    判定帧手抬高: r.命中.高,
+    判定帧手不抬高: r.命中.高,
+    全程手不抬高: r.手最峰,
+    全程没往前送过: r.前峰,
+    蓄力帧在身后: r.蓄力.前,
+    判定帧左手往回拉: r.命中.左手前,
+    判定帧左手也送出: r.命中.左手前,
+    右脚不离地: r.脚峰,
+    右脚抬起来: r.脚峰,
+    // "到位即定住" = 判定帧的前送**就是**全程最前（防御不是穿过去的一刀，是停住的一挡）
+    到位即定住: Math.abs(r.前峰 - r.命中.前),
+  };
+}
+
+describe('逐帧读数：十招各按自己那一档量，不是全都拿劈砍的尺子量', () => {
   it('起手与收招都在站姿（首末帧偏移毫米级，不是"甩出去再跳回来"）', () => {
     for (const 招 of 招式名) {
       const r = 逐帧(招);
@@ -280,16 +409,44 @@ describe('逐帧读数：四招都是"送出去的一刀"，不是原地踏步',
     }
   });
 
-  it('速度峰落在判定帧 ±2 帧内，峰速在 4–16 米/秒，命中帧往前送出至少 15 厘米', () => {
+  it('速度峰落在判定帧（按档取读数闸门：峰位/峰速/行程/前送方向…）', () => {
     for (const 招 of 招式名) {
+      const 档 = SKELETON_MOTION[招].kind;
+      const 表 = 读数闸门[档];
+      expect(表, `${招} 的档位 "${档}" 在门禁里没有读数闸门 —— 新增一档要么配读数，要么并进已有档`).toBeTruthy();
       const r = 逐帧(招);
-      const 偏帧 = (r.峰秒 - r.条目.strikeAt) * 60;
-      expect(Math.abs(偏帧), `${招} 峰值速度离命中帧 ${偏帧.toFixed(1)} 帧`).toBeLessThanOrEqual(2);
-      expect(r.峰速, `${招} 峰速 ${r.峰速.toFixed(1)} 米/秒：太慢就是手在判定那一刻停住`).toBeGreaterThan(4);
-      expect(r.峰速, `${招} 峰速 ${r.峰速.toFixed(1)} 米/秒：太快就是抽风`).toBeLessThan(16);
-      expect(r.命中.前, `${招} 命中帧前送只有 ${r.命中.前.toFixed(3)} 米`).toBeGreaterThanOrEqual(0.15);
-      expect(r.末.程, `${招} 整招手的行程 ${r.末.程.toFixed(2)} 米：没有挥出去`).toBeGreaterThan(1.2);
+      const 数 = 取数(r);
+      for (const [腿, 界] of Object.entries(表)) {
+        const v = 数[腿];
+        expect(v, `${招}〔${档}〕的闸门有一条 "${腿}" 门禁里没有这个读数（名字打错了？）`).toBeTypeOf('number');
+        const 话 = `${招}〔${档}〕${腿} = ${v.toFixed(3)}，闸门 [${界[0] ?? '−∞'}, ${界[1] ?? '+∞'}] 之外`;
+        if (界[0] !== null) expect(v, 话).toBeGreaterThanOrEqual(界[0]);
+        if (界[1] !== null) expect(v, 话).toBeLessThanOrEqual(界[1]);
+      }
     }
+  });
+
+  it('档位名单与闸门双向对齐：每一档有人量、每一个闸门有人用', () => {
+    const 在册档 = new Set(招式名.map((招) => SKELETON_MOTION[招].kind));
+    expect([...在册档].every((k) => MOVE_KINDS.includes(k)), `表里有档位不在名单：${[...在册档].filter((k) => !MOVE_KINDS.includes(k)).join(', ')}`).toBe(true);
+    for (const 档 of MOVE_KINDS) {
+      expect(读数闸门[档], `名单里有档位 ${档}，门禁却没给它配读数`).toBeTruthy();
+      expect(招式名.filter((招) => SKELETON_MOTION[招].kind === 档).length, `档位 ${档} 有闸门却没有任何一招在用（空档 = 白配的判据）`).toBeGreaterThan(0);
+    }
+    expect(Object.keys(读数闸门).sort(), '闸门的档位与名单不是一一对应').toEqual([...MOVE_KINDS].sort());
+    // 腿名也得双向：闸门里写了一条读数里没有的腿 ⇒ 上一条例会红，这里先钉住"每条腿都有读数"
+    const 样例 = 取数(逐帧('attack1'));
+    for (const 表 of Object.values(读数闸门)) {
+      for (const 腿 of Object.keys(表)) expect(样例, `闸门用了读数表里没有的腿 "${腿}"`).toHaveProperty(腿);
+    }
+  });
+
+  it('认不出的档位进不了表：`defineSkeletonMove` 是表的构造口，也是这道防线的入口', () => {
+    // 只测"表里现在没有非法档位"不够 —— 那是常量真值。这里用**出货那个构造口**注入一个非法档，
+    // 证明它真的会拒（`SKELETON_MOTION` 是冻结的，从外部改不进去，所以能改的只有这一道门）。
+    expect(() => defineSkeletonMove(0.4, 0.1, {}, 'flail')).toThrow(/不在名单/);
+    expect(() => defineSkeletonMove(0.4, 0.1, {}, undefined)).toThrow(/不在名单/);
+    expect(defineSkeletonMove(0.4, 0.1, {}, 'strike').kind, '合法档位也被拒 ⇒ 上面两条红得没有意义').toBe('strike');
   });
 
   it('一式与二式命中帧的横向速度反号（连段看得出"来回"的唯一凭据）', () => {
@@ -313,6 +470,35 @@ describe('逐帧读数：四招都是"送出去的一刀"，不是原地踏步',
     expect(r.蓄力.右, `二式蓄力帧的左右偏移 ${r.蓄力.右.toFixed(3)}：手没有过身到左侧`).toBeLessThan(-0.1);
     expect(Math.max(...r.序.map((s) => s.前)), '二式全程没往前送').toBeGreaterThan(0.15);
   });
+
+  it('两条 guard 的判定帧横向**反号**：格挡往中线收，弹反往外侧磕开', () => {
+    const 挡 = 逐帧('block');
+    const 反 = 逐帧('parry');
+    expect(挡.判定右, `格挡判定帧横向 ${挡.判定右.toFixed(3)}：没有把剑横到身前`).toBeLessThanOrEqual(-0.20);
+    expect(反.判定右, `弹反判定帧横向 ${反.判定右.toFixed(3)}：没有往外侧磕开（与格挡同侧 ⇒ 两档看不出区别）`).toBeGreaterThanOrEqual(0.05);
+    // 弹反那一磕是"先收进来再往外送"：蓄力帧还在内侧，判定帧翻到外侧
+    expect(反.蓄力.右, `弹反蓄力帧横向 ${反.蓄力.右.toFixed(3)}：起手没有先收进来`).toBeLessThanOrEqual(-0.02);
+    expect(反.判定右 - 反.蓄力.右, '弹反那一趟横向行程太短，看不出是一次磕打').toBeGreaterThanOrEqual(0.10);
+  });
+
+  it('只有 `mobility` 那一档脚离地：翻滚的"重心"读数不跟别的档抢', () => {
+    // 骨架没有 `Hips` 平移通道 ⇒ 重心只能由腿读。这条把"其他档都不许抬脚"与"翻滚必须抬脚"
+    // 两头钉死（实测其他九招 ≤0.023 米，翻滚 0.293 米），也顺便钉住 `取数` 真的读到了那一帧。
+    const 抬脚 = 招式名.map((招) => [招, SKELETON_MOTION[招].kind, 逐帧(招).脚峰]);
+    const 机动 = 抬脚.filter(([, 档]) => 档 === 'mobility');
+    const 其余 = 抬脚.filter(([, 档]) => 档 !== 'mobility');
+    expect(机动.length, '前置条件：表里没有 mobility 那一档').toBeGreaterThan(0);
+    expect(其余.length, '前置条件：除了翻滚就没有别的档了 ⇒ 这条判据量不到东西').toBeGreaterThan(1);
+    for (const [招, , 峰] of 机动) expect(峰, `${招} 的脚最高 ${峰.toFixed(3)} 米：滚身没有收腿`).toBeGreaterThanOrEqual(0.20);
+    for (const [招, , 峰] of 其余) expect(峰, `${招} 的脚最高 ${峰.toFixed(3)} 米：这一档不该抬脚（抬脚是 mobility 的读数）`).toBeLessThanOrEqual(0.10);
+  });
+
+  it('`cast` 与 `thrust` 的判定帧左手反号：双手齐出 vs 后手收腰', () => {
+    const 施 = 逐帧('skill');
+    const 刺 = 逐帧('riposte');
+    expect(施.命中.左手前, `战技判定帧左手 ${施.命中.左手前.toFixed(3)}：不是双手往前推`).toBeGreaterThanOrEqual(0.10);
+    expect(刺.命中.左手前, `弹反反击判定帧左手 ${刺.命中.左手前.toFixed(3)}：后手没有收在腰侧`).toBeLessThanOrEqual(-0.05);
+  });
 });
 
 describe('基准姿态：`SKELETON_REST` 就是素材 `Idle` 第 0 帧（逐骨逐轴对着 GLB 字节重算）', () => {
@@ -333,12 +519,33 @@ describe('基准姿态：`SKELETON_REST` 就是素材 `Idle` 第 0 帧（逐骨�
   it('片段时长是各自独立的一招，不是把 `Idle` 的循环拿来按倍速播', () => {
     const 循环 = clipDuration(json, bin, 'Idle');
     expect(循环, '前置条件：素材的 Idle 是一段可循环的时间').toBeGreaterThan(1.5);
-    const 已用 = new Set();
     for (const [招, 条目] of Object.entries(SKELETON_MOTION)) {
       expect(条目.duration, `${招} 的时长不该等于 Idle 循环`).not.toBeCloseTo(循环, 4);
       expect(条目.duration, `${招} 比 Idle 还长，一招打不完`).toBeLessThan(循环);
-      expect(已用.has(条目.duration), `${招} 的时长与另一招重合：连段看不出长短区别`).toBe(false);
-      已用.add(条目.duration);
+    }
+    // "互不相同"这条**只属于连段**：连段四招靠时长长短读出一刀比一刀重。
+    // 全表互不相同是过头的判据 —— 受击 0.48 与二式 0.48 撞车是**手感**上的巧合（两处都取自
+    // `MOVES`，谁也不该为了动画表的唯一性去动战斗表），而"两招共用一条片段"这件事由上面
+    // 那条逐招对 `actionLock` 的账接管，不由时长唯一性代劳。
+    const 连段 = ['attack1', 'attack2', 'attack3', 'heavy'];
+    const 已用 = new Map();
+    for (const 招 of 连段) {
+      const 值 = SKELETON_MOTION[招].duration;
+      expect(已用.has(值), `${招} 的时长与 ${已用.get(值)} 重合：连段看不出长短区别`).toBe(false);
+      已用.set(值, 招);
+    }
+  });
+
+  it('整张招式表都有人调用：玩法表覆盖每一招，且 play 方法候选表里明写了 `skeletal.*`', () => {
+    // 双向：表里多一招而玩法表没登记 ⇒ 片段编好了没人播（切片10 的病根之一）；
+    //      玩法表多一行 ⇒ 对着一招不存在的名字调账。
+    expect(Object.keys(玩法表).sort(), '玩法表与招式表不是同一批招').toEqual([...招式名].sort());
+    for (const 招 of 招式名) {
+      // 候选表**明写** `this.skeletal.招`，不是靠 `pickAnim` 的子串档撞进去（B113①②：
+      // 撞中的结果是战技/弹反反击借走 `__sk:heavy` —— 形状错了还一路绿灯）。
+      // 剥注释再数：说明文字里出现旧写法是常态。
+      const 出处 = 净源.match(new RegExp(`this\\.skeletal\\.${招}\\b`, 'g')) || [];
+      expect(出处.length, `CharacterModel 的候选表里没有明写 this.skeletal.${招}`).toBeGreaterThanOrEqual(1);
     }
   });
 });
@@ -367,10 +574,11 @@ describe('接线：`load()` 注册骨骼片段，出招挑到的是片段而不�
     return { cm, rig: f.rig };
   };
 
-  it('load 后：四招在册，素材账本没被涂脏，"没有 GLB 攻击 clip"这件事仍然诚实', async () => {
+  it('load 后：十招在册，素材账本没被涂脏，"没有 GLB 攻击 clip"这件事仍然诚实', async () => {
     const { cm } = await 装配();
     expect(cm.fallback, '不该退回胶囊').toBe(false);
-    expect(Object.keys(cm.skeletal).sort()).toEqual(['attack1', 'attack2', 'attack3', 'heavy']);
+    expect(Object.keys(cm.skeletal).sort(), '注册器接出来的招式与招式表不是同一批').toEqual([...招式名].sort());
+    expect(招式名.length, '前置条件：表里少于十招就是这一档白钉').toBeGreaterThanOrEqual(10);
     for (const 招 of 招式名) {
       expect(cm.actions[skeletonClipName(招)], `${招} 的片段没进 actions`).toBeTruthy();
       expect(cm.skeletal[招]).toBe(skeletonClipName(招));
@@ -379,6 +587,66 @@ describe('接线：`load()` 注册骨骼片段，出招挑到的是片段而不�
     expect(cm.catalog.attack1 ?? null).toBe(null);
     expect(cm.catalog.idle).toBe('Idle');
     expect(cm.hasMixamoClips, '素材没有 hit/block/dodge，这里不许改成 true').toBe(false);
+  });
+
+  /**
+   * 每一招各跑一遍真 `load()`：候选表挑中的必须是**自己那条**片段。
+   * 切片10 的病根（B113①）正是这里 —— `playSkill` 的候选里有 `heavy`，`pickAnim` 的子串档
+   * 撞上 `__sk:heavy`，于是战技播的是重击那一档的骨，而且上面那条"在册"照样全绿。
+   * 所以除了"挑中自己"，还钉一条"没有借到隔壁"：六招各自的片段名互不相同。
+   */
+  const 接线表 = [
+    ['hit', (cm) => cm.playHit()],
+    ['block', (cm) => cm.playBlock()],
+    ['parry', (cm) => cm.playParrySuccess()],
+    ['dodge', (cm) => cm.playDodge()],
+    ['skill', (cm) => cm.playSkill()],
+    ['riposte', (cm) => cm.playRiposte()],
+  ];
+  for (const [招, 玩] of 接线表) {
+    it(`${招}：真 load 后播的是 __sk:${招}，状态锁等于片段时长，收招交回 Idle`, async () => {
+      const { cm } = await 装配();
+      const idle = cm.actions.Idle;
+      expect(idle.isRunning(), '前置条件：出招前 Idle 在播').toBe(true);
+      玩(cm);
+      expect(cm.currentAction.getClip().name, `${招} 没播自己那条骨骼片段（借了隔壁 ⇒ 形状与机制脱钩）`)
+        .toBe(skeletonClipName(招));
+      expect(cm.actionLock, `${招} 的状态锁与片段时长脱钩`).toBeCloseTo(SKELETON_MOTION[招].duration, 6);
+      expect(cm.currentAction.getEffectiveTimeScale(), '骨骼片段跟着手感倍速走 ⇒ 峰值速度偏离到位帧').toBe(1);
+      expect(idle.isRunning(), `${招} 跨类切换没硬切 ⇒ Idle 的四元数轨道仍在抢那 11 根骨`).toBe(false);
+      // 真骨架这一档不许再叠胶囊的趔趄：`_startProcCombat` 是**没有 clip 时**的兜底写者，
+      // 片段已经在动那 11 根骨，同一次前倾由两个写者各写一遍就成了"骨架动画 + 每帧再加一份 proc"。
+      expect(cm._procCombat.t, `${招} 在真骨架上又起了胶囊趔趄 ⇒ 片段与 proc 抢同一次前倾`).toBe(0);
+      // 走完这一招：`update` 把 Idle 交回去，片段停止活着
+      const 帧 = Math.ceil(SKELETON_MOTION[招].duration / dt) + 2;
+      for (let i = 0; i < 帧; i++) cm.update(dt);
+      expect(cm.currentAction.getClip().name, `${招} 收招没交回 Idle`).toBe('Idle');
+      expect(cm.actions[skeletonClipName(招)].isRunning(), `${招} 的片段收招后还在混音器里活着`).toBe(false);
+      expect(cm.actionLock, `${招} 收招后状态锁没归零`).toBe(0);
+    });
+  }
+
+  it('六招各播各的：同一份候选表里不许两招共用一条片段', async () => {
+    const { cm } = await 装配();
+    const 播过的 = 接线表.map(([, 玩]) => { 玩(cm); return cm.currentAction.getClip().name; });
+    expect(new Set(播过的).size, `六招只播出 ${new Set(播过的).size} 种形状：${播过的.join(' / ')}`).toBe(接线表.length);
+  });
+
+  it('模糊那两档撞不进 `__sk:`：骨骼片段的键是内部地址，必须明写（B113①）', () => {
+    // 只有 `actions`、没有真骨架的一份玩家：这里量的是 `pickAnim` 的挑选口径，不是混音器。
+    const cm = new CharacterModel();
+    cm.actions = { [skeletonClipName('heavy')]: { getClip: () => ({ name: skeletonClipName('heavy') }) } };
+    // 改前实测：`'Heavy'` / `'heavy attack'` 都撞上 `__sk:heavy`（子串档），战技与弹反反击
+    // 就这样一声不响地借走重击那一档的骨。
+    expect(cm.pickAnim(['Heavy']), `忽略大小写/子串那两档撞进了骨骼片段键：${cm.pickAnim(['Heavy'])}`).toBe(null);
+    expect(cm.pickAnim(['heavy attack'])).toBe(null);
+    expect(cm.pickAnim(['Block', 'Parry', 'Skill', 'Roll'])).toBe(null);
+    // 明写的那一档必须仍然挑得到（否则修过头，`skeletal.*` 成了死账）
+    expect(cm.pickAnim([skeletonClipName('heavy')])).toBe(skeletonClipName('heavy'));
+    // 素材名那一侧的余地还在：子串档仍然给素材名用（与 character-anim-catalog 那条同源，双向）
+    const 素材 = new CharacterModel();
+    素材.actions = { 'Run To Rolling': {} };
+    expect(素材.pickAnim(['Roll']), '子串档被一并拆掉 ⇒ 素材名的余地没了').toBe('Run To Rolling');
   });
 
   it('一式：挑到骨骼片段、倍速钉成 1.0、Idle 被硬切（不是淡出）', async () => {
