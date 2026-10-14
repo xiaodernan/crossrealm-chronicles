@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { NPC_CHAPTER_LINES } from '../game/LoreFragments.js';
 import { keyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
 const NPC_DATA = [
@@ -11,9 +12,9 @@ const NPC_DATA = [
     z: 62,
     color: 0x556677,
     lines: [
-      '穿越者…你闻到了吗？三个位面的气息正在融合。',
-      '灰白森林的守护者只是开始。霍格沃兹遗境的大奥术师更为危险。',
-      '打开宝箱、在营火休息升级——这是生存的基本。',
+      'npc_wanderer_0',
+      'npc_wanderer_1',
+      'npc_wanderer_2',
     ],
   },
   {
@@ -23,8 +24,8 @@ const NPC_DATA = [
     z: 30,
     color: 0x3a5a40,
     lines: [
-      '至尊石环在森林西侧。Boss 竞技场在更深处——做好充分准备。',
-      '观察敌人红圈，在最后一瞬闪避或弹反。',
+      'npc_scout_0',
+      'npc_scout_1',
     ],
   },
   {
@@ -34,8 +35,8 @@ const NPC_DATA = [
     z: 95,
     color: 0x8899aa,
     lines: [
-      'Endurance 号的日志说：时间在这里是圆的。',
-      '五维_tesseract 藏着最后的碎片秘密…',
+      'npc_astronaut_0',
+      'npc_astronaut_1',
     ],
   },
 ];
@@ -93,7 +94,8 @@ export class NPCManager {
     const idx = this.lineIndex[npc.id] % pool.length;
     // 台词里的 `{动作}` 在**离开这一格之前**展开（W-B2 切片5）：同一句话接下来有三个去处 ——
     // 对话框、日志条目、`npc-talk` 事件。日志存的是定稿，改绑之后回头翻不该看到字面占位。
-    const line = keyText(pool[idx]);
+    const lineKey = pool[idx];
+    const line = keyText(t(lineKey));
     this.dialog.show(npc.name, line);
     this.lineIndex[npc.id]++;
     window.dispatchEvent(new CustomEvent('npc-talk', { detail: { id: npc.id, line, chapter } }));

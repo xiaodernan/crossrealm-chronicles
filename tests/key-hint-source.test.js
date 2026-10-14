@@ -201,7 +201,7 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     // 对话框（20+ 调用方共用这一处）、日志卡片（快照存进去就再也不回头展开）、
     // 画布（图片有缓存，改绑不缓存就是旧键名）、CSS `content`（DOM 声明够不到，只能换成节点）
     'ui/Dialog.js': ['keyText(title)', 'keyText(text)', 'keyText(c.label)', 'keyText(message)'],
-    'world/NPCManager.js': ['keyText(pool[idx])'],
+    'world/NPCManager.js': ['keyText(t(lineKey))'],
     'game/QuestSystem.js': ['keyText(q.desc)'],
     'ui/LoreCodexJournalTab.js': ['keyText(e.text)', 'refreshKeyText(panelEl)'],
     'ui/PopCultureJournalTab.js': ['keyText(e.desc)', 'refreshKeyText(panelEl)'],
