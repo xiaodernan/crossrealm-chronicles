@@ -117,4 +117,18 @@ describe('玩家的剑随身体倾（W-C6 切片7 / B110）', () => {
     const 坏 = 'this.group.add(model);\n this.modelRoot = model;';
     expect(坏.includes('视觉.add(model)')).toBe(false);
   });
+
+  it('结构腿：相机进场景图 —— 否则挂在相机下的第一人称武器不渲染', () => {
+    const 净 = stripComments(readFileSync(join(ROOT, 'src/core/Game.js'), 'utf8'));
+    expect(净.includes('this.scene.add(this.camera)'),
+      '相机没进场景图：第一人称武器（挂在相机下）根本不会被渲染').toBe(true);
+    // 机制见证：three 只遍历 `scene` 子树 —— 挂在相机下的东西，要相机在场景里才可达
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+    const 挂件 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1));
+    cam.add(挂件);
+    expect(scene.getObjectById(挂件.id), '相机没进场景时挂件本不该在场景图里').toBeUndefined();
+    scene.add(cam);
+    expect(scene.getObjectById(挂件.id), '相机进场景后挂件必须可达，否则它不渲染').toBe(挂件);
+  });
 });

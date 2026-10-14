@@ -75,11 +75,15 @@ export class WorldTerrain {
     const pos = geo.attributes.position;
     const uvs = geo.attributes.uv;
 
+    // 平面绕 X 轴转 -90° 摊平后，顶点局部 (lx, lz, h) 落到世界 (lx, h, -lz) —— 世界 z = -局部 y。
+    // 高度与贴图坐标必须按**世界**坐标采样，否则这张地面网格在 z 上被镜像：物理侧（玩家
+    // `getGroundHeight`、区域落点、蜿蜒路径带）全用世界 (x, z)，唯独这张网格用局部坐标 →
+    // 玩家 / 建筑相对可见地面整体陷进去或浮出来（探针实测平均错位 5.5 米、最坏 19 米）。
     for (let i = 0; i < pos.count; i++) {
       const lx = pos.getX(i);
-      const lz = pos.getY(i);
-      pos.setZ(i, this.heightAt(lx, lz));
-      uvs.setXY(i, (lx + w * 0.5) / 18, (lz + d * 0.5) / 18);
+      const wz = -pos.getY(i);   // 局部 y → 世界 -z
+      pos.setZ(i, this.heightAt(lx, wz));
+      uvs.setXY(i, (lx + w * 0.5) / 18, (wz + d * 0.5) / 18);
     }
 
     geo.computeVertexNormals();
@@ -92,9 +96,9 @@ export class WorldTerrain {
       const colors = [];
       for (let i = 0; i < pos.count; i++) {
         const lx = pos.getX(i);
-        const lz = pos.getY(i);
-        const tint = this._zoneTintAt(lx, lz);
-        const slope = Math.min(1, Math.abs(this.heightAt(lx, lz)) / 14);
+        const wz = -pos.getY(i);   // 与几何同一约定：局部 y → 世界 -z
+        const tint = this._zoneTintAt(lx, wz);
+        const slope = Math.min(1, Math.abs(this.heightAt(lx, wz)) / 14);
         const shade = 0.78 + slope * 0.12;
         colors.push(tint.r * shade, tint.g * shade, tint.b * shade);
       }

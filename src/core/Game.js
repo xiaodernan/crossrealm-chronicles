@@ -180,6 +180,11 @@ export class Game {
     this.zoneFog = new ZoneFog(this.scene.fog);
 
     this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2500);
+    // 相机必须进场景图，否则挂在它下面的东西一个都不渲染（three 只遍历 `scene` 的子树）：
+    // 第一人称武器 `PlayerController.fpWeaponGroup` 就挂在相机下（`this.camera.add(...)`），
+    // 相机不在场景里 ⇒ 切到第一人称看不到手里那把剑（「视角切换有问题」的一个具体症状）。
+    // 相机本身不是可渲染几何，进场景图不会有副作用。
+    this.scene.add(this.camera);
 
     // 没有 `antialias`：canvas 的 MSAA 帧缓冲只对"直接画到 canvas 的几何边"有效，
     // 而下面每一帧都走 EffectComposer（场景先进 composer 的 render target，最后由
