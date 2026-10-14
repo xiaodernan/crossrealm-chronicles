@@ -45,10 +45,42 @@ export const WEAPON_GRIP_NAME = 'weaponGrip';
 export const GRIP = Object.freeze({
   /** Mixamo 标签（`CharacterModel.boneOf` 负责加 `mixamorig` 前缀 —— 口径只有一处）。 */
   骨标签: 'RightHand',
+  /** 握持层的节点名：一根手骨下可以有多个握持层（剑一件、杖一件），所以名字必须各自唯一。 */
+  挂名: WEAPON_GRIP_NAME,
   /** 剑身中心在握持层里的位置（米）；握持层已反缩放，所以这里就是世界米数。 */
   柄心: Object.freeze([0, 0.47, 0]),
   /** 绕手骨局部 X 抬起的弧度：把剑尖从"拖地"抬到"斜前方持握"。 */
   前抬: 0.6,
+});
+
+/**
+ * 法杖的握持规格（W-C6 切片11，关 B113③）—— 同一层机制，另一档数值。
+ *
+ * 为什么 `前抬` 是 2.0 而不是剑那一档 0.6：握持层的局部 +Y 在静止时**朝下** —— Idle 第 0 帧
+ * 手骨局部 Y 的世界方向实测 `(-0.252, -0.930, 0.269)`，与竖直夹 **68.4°**（切片9 的"剑尖拖地"
+ * 是同一条轴）。剑要的是"斜向下前方劈"，杖要的是"杖珠在头侧、杖尾垂在胯边"，长杆得把珠那一端
+ * 翻过竖直方向 ⇒ 抬起角必须大于 π/2，绕 X 每加 1 弧度抬 57°。
+ *
+ * 逐档读数见 `.tmp-20261014/probe-staff-grip.mjs`（真 `CharacterModel.load()` + 真 `cm.update(dt)`
+ * 的出货路径；21 档扫描、3 档过判据；静止轮廓在任何 proc 写入**之前**采，否则量到的是弯完的身子）。
+ * 选中这一档（柄心 0.45 / 前抬 2.0）：
+ * - 静止：珠端离地 **1.850 米**、杖尾离地 **0.903 米**、珠端水平离身 0.748 米；
+ *   杖心离右手 **0.450 米**、离左手 0.759 米（改前挂逻辑节点是 0.859 / 0.277 —— 反在左手外侧；
+ *   口径：`mixer.update(0)` 之后的在戏姿态，`.tmp-20261014/probe-oldmount-idle.mjs`）。
+ * - `proc.pitch` 0 → −0.35：杖心世界位移 **0.4810 米**（改前 **0.0000**，同刻剑动 0.2812 米）。
+ * - 招式跟手：`playSkill`（cast）珠端/右手行程比 **1.98**、峰值位移 0.931 米；
+ *   `playComboAttack(1)` 比 **2.28**、峰值位移 1.588 米；两招全程杖尾最低都 **0.903 米**（不插地）。
+ * 落选的两档：柄心 0.45 / 前抬 1.8 —— 珠端只到 1.672 米、水平离身 0.892 米，整根杖躺成"旗杆横举"；
+ * 柄心 0.60 / 前抬 2.4 —— 珠端 2.243 米，高过头顶像举火炬。
+ * 那把尺子的对照读数（同一份挂法改成挂逻辑节点）是比值 0、位移 0 —— 所以判据抓得动，不是恒真。
+ */
+export const STAFF_GRIP_NAME = 'staffGrip';
+
+export const STAFF_GRIP = Object.freeze({
+  骨标签: 'RightHand',
+  挂名: STAFF_GRIP_NAME,
+  柄心: Object.freeze([0, 0.45, 0]),
+  前抬: 2.0,
 });
 
 /** 骨链局部缩放的乘积（沿父链连乘，不读 `matrixWorld`）。 */
@@ -61,15 +93,18 @@ export function 骨链缩放(骨) {
 /**
  * 把武器挂进这只手。返回握持层，调用方只保留对武器本身的命名引用（`getObjectByName('weapon')`
  * 仍从 `player.mesh` 那侧找得到 —— 手骨在 `mesh` 的子树里）。
+ *
+ * `规格` 默认剑那一档（`GRIP`）；法杖走 `STAFF_GRIP`。握持层的构造（反缩放 + 抬角 + 局部柄心）
+ * 只有这一处 —— 一件武器一份，名字各自唯一（`规格.挂名`），同一根手骨下两层不会互相顶掉。
  */
-export function attachToHand(手骨, 武器) {
+export function attachToHand(手骨, 武器, 规格 = GRIP) {
   const 缩放 = 骨链缩放(手骨);
   if (!(缩放 > 0)) throw new Error(`WeaponGrip: 骨链缩放不是正数（${缩放}）—— 挂上去会缩成 0 或 NaN`);
   const grip = new THREE.Group();
-  grip.name = WEAPON_GRIP_NAME;
+  grip.name = 规格.挂名;
   grip.scale.setScalar(1 / 缩放);
-  grip.rotation.x = GRIP.前抬;
-  武器.position.fromArray(GRIP.柄心);
+  grip.rotation.x = 规格.前抬;
+  武器.position.fromArray(规格.柄心);
   // 躯干挂点那档静止侧倾（`_buildWeapon` 的 `rotation.z = -0.3`）属于视觉层，不带到手里：
   // 握持层已经承载了朝向，剑自身局部旋转归零 ⇒ 只有一个写者。
   武器.rotation.set(0, 0, 0);
