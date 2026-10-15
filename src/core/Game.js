@@ -172,6 +172,19 @@ export class Game {
     this.spectatorMode = false;
     this.autoPlayMode = false;
 
+    this._buildRenderStack();
+
+    this._buildWorldAndCombat();
+
+    this._buildPlayerCombat();
+
+    this._buildUiAndSystems();
+
+    this._buildSettingsAndFinalize();
+  }
+
+  /** _buildRenderStack —— M7 装配层解耦：把这一组子系统的构造从构造函数里搬出来，行为逐字不变。 */
+  _buildRenderStack() {
     this.scene = new THREE.Scene();
     // 初值 = 枢纽的大气行（content/zoneAtmosphere.js 的 HUB_ATMOSPHERE）——
     // 开局即在目标上，没有开局过渡。此后 fog 的写权限归 ZoneFog（每帧驱动，
@@ -198,7 +211,7 @@ export class Game {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.28;
-    container.appendChild(this.renderer.domElement);
+    this.container.appendChild(this.renderer.domElement);
 
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
@@ -249,8 +262,11 @@ export class Game {
     this.labelRenderer = new CSS2DRenderer();
     this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
     this.labelRenderer.domElement.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2';
-    container.appendChild(this.labelRenderer.domElement);
+    this.container.appendChild(this.labelRenderer.domElement);
+  }
 
+  /** _buildWorldAndCombat —— M7 装配层解耦：把这一组子系统的构造从构造函数里搬出来，行为逐字不变。 */
+  _buildWorldAndCombat() {
     this.audio = this._adopt('audio/AudioManager', new AudioManager());
     this.stats = new PlayerStats();
     this.dialog = new Dialog();
@@ -298,7 +314,10 @@ export class Game {
     this.enemyManager.spawnDefaults();
     // 为现有敌人挂载动画适配器（entry chunk 独有 import animation，chunk-combat 零依赖）
     this._attachEnemyAnimAdapters();
+  }
 
+  /** _buildPlayerCombat —— M7 装配层解耦：把这一组子系统的构造从构造函数里搬出来，行为逐字不变。 */
+  _buildPlayerCombat() {
     this.player = new PlayerController(this.scene, this.camera, this.world, this);
     this.player.combat = new CombatController(
       this.player, this.enemyManager, this.dialog, this.damageNumbers, this.audio, this.stats
@@ -315,7 +334,10 @@ export class Game {
     this.spells.feedback = this.combatFeedback;
     // 属性读数的消费者在这里登记一次：升级与穿戴之后"把新数推下去"只有 `PlayerStats` 那一处
     this.stats.bindConsumers({ combat: this.player.combat, spells: this.spells });
+  }
 
+  /** _buildUiAndSystems —— M7 装配层解耦：把这一组子系统的构造从构造函数里搬出来，行为逐字不变。 */
+  _buildUiAndSystems() {
     this.hud = this._adopt('ui/HUD', new HUD(this));
     this.upgrade = new UpgradePanel(this);
     this.helpManual = new HelpManual(this);
@@ -361,7 +383,10 @@ export class Game {
     this.upsideDownFx = this._adopt('effects/UpsideDownVisualPass', new UpsideDownVisualPass(this));
     this.triadVisualFx = this._adopt('effects/PopCultureTriadVisualPass', new PopCultureTriadVisualPass(this));
     this.wave4VisualFx = new PopCultureWave4VisualPass(this);
+  }
 
+  /** _buildSettingsAndFinalize —— M7 装配层解耦：把这一组子系统的构造从构造函数里搬出来，行为逐字不变。 */
+  _buildSettingsAndFinalize() {
     this.settings = new SettingsManager();
     // 字幕条（W-D6 切片8）：建在 settings 之后、`applyToGame`（下面那一次）之前 ——
     // 早于 settings 的话构造器读不到出厂档，晚于 applyToGame 的话开机后第一批字幕会被静默吞掉。
