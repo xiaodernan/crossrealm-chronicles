@@ -441,19 +441,21 @@ describe('帧率独立性：同一秒世界时，60 帧与 180 帧走到同一�
 });
 
 /* -------------------------------------------------------------------------
- * 结构普查：视觉家族不再读墙钟，剩下的每一处都得点名登记（B118②）。
- * 名单不是豁免表 —— 它说的是"这一处量的是真实时间，改它要先决定语义"，
- * 而语义决定不在本片（见 MASTER_PLAN §9 的 W-A1 切片7 ADR）。
+ * 结构普查：视觉家族不再读墙钟，剩下的每一处都得点名登记（B118② 已在切片8 判完）。
+ * 名单不是豁免表 —— 每一条的理由必须**对着代码可读**：这一处量的确实是真实时间，
+ * 而且它服务的对象也真的由真实时间驱动（对不上就是下一片的账）。
+ * 切片7 登记时这里是七条；切片8 逐处判定后删掉三条：
+ *   · `combat/BossStateMachine.js` —— `TIME_ELAPSED` 改成世界时台账 `phaseElapsed`；
+ *   · `game/CombatStyleTracker.js` —— `lastEvent` 写两处、读零处，连招窗口本来就是 `decayTimer`；
+ *   · `game/DungeonRunTracker.js` —— 「用时」改成 `update(dt)` 累计的世界秒（暂停不再计入）。
+ * 判定过程与读数见 MASTER_PLAN §9 的 W-A1 切片8 ADR，门禁在 `tests/gameplay-clock-semantics.test.js`。
  * ---------------------------------------------------------------------- */
 const SRC = join(process.cwd(), 'src');
 const 玩法侧墙钟 = {
   'core/Game.js': '世界时的喂入口本身：clock.getDelta() 与 performance.now()/1000 就是两支钟的源头',
-  'combat/BossStateMachine.js': 'TIME_ELAPSED 条件按真实秒判阶段 —— 定帧时那一档该不该提前开是玩法问题',
-  'cinematic/CombatCameraDirector.js': 'blocksInputUntil：锁输入的窗口量的是玩家等得起的毫秒',
-  'cinematic/CombatCameraDirectorExtensions.js': '同上，跳过路径读同一个截止时间',
-  'cinematic/CombatCinematicSkip.js': '同上，跳过键读同一个截止时间',
-  'game/CombatStyleTracker.js': 'lastEvent：连招窗口是输入节奏，hitstop 不该把它拉长',
-  'game/DungeonRunTracker.js': '计时器显示的是玩家真实游玩时长',
+  'cinematic/CombatCameraDirector.js': 'blocksInputUntil = 墙钟 + duration×1000，而它守的那段演出每帧吃 rawDt（Game.update 里 combatCamera.update(rawDt)）—— 同支钟才对得上，见 gameplay-clock-semantics 的配对腿',
+  'cinematic/CombatCameraDirectorExtensions.js': '跳过路径读同一个 blocksInputUntil 截止时间（不另起一支钟）',
+  'cinematic/CombatCinematicSkip.js': 'canSkip 读同一个 blocksInputUntil 截止时间（不另起一支钟）',
 };
 
 function stripNonCode(source) {

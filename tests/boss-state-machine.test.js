@@ -68,6 +68,7 @@ describe('枚举：值就是契约（写进存档、带进事件、被 UI 读）
   it('初值：一阶段（本类只有阶段这一条轴）', () => {
     const sm = new BossStateMachine(fakeBoss());
     expect(sm.phase).toBe(BossPhase.PHASE_1);
+    expect(sm.phaseElapsed, '世界时台账必须有初值：+= dt 落在未赋值的字段上是 NaN，条件永远不成立').toBe(0);
     expect(sm).not.toHaveProperty('state');   // 战斗状态归 `Enemy.fsm`，这里不许再记一份
   });
 });
@@ -96,11 +97,21 @@ describe('`transitionTo`：切阶段的唯一出口', () => {
     expect(events).toHaveLength(0);
   });
 
-  it('每进一个新阶段都刷新 `phaseStartTime`（`TIME_ELAPSED` 那条条件靠它计时）', () => {
+  it('每进一个新阶段都把世界时台账清零（`TIME_ELAPSED` 那一档从进阶段那一刻起算）', () => {
     const sm = new BossStateMachine(fakeBoss());
-    sm.phaseStartTime = 0;
+    sm.tick(4);
+    expect(sm.phaseElapsed).toBe(4);
     sm.transitionTo(BossPhase.PHASE_2);
-    expect(sm.phaseStartTime, '进阶段不刷新起算点 = 计时条件从"进程启动"开始算').toBeGreaterThan(0);
+    /* 判据不是"起算点是个正数"（那是墙钟时代的形状）：换成世界时台账之后，
+     * 真正会坏的是"进新阶段不清零" —— 二阶段的计时条件拿着一阶段的时长当场成立。 */
+    expect(sm.phaseElapsed, '进阶段不清零 = 新阶段的计时条件带着上一阶段的时间立刻成立').toBe(0);
+  });
+
+  it('`tick(dt)` 只累加给出的 dt：时停（dt=0）一帧都不推进', () => {
+    const sm = new BossStateMachine(fakeBoss());
+    sm.tick(0.5);
+    for (let i = 0; i < 60; i += 1) sm.tick(0);
+    expect(sm.phaseElapsed, '定帧期间还继续走账 = 命中停顿替 Boss 读条（B118②）').toBe(0.5);
   });
 
   it('连切两次：事件两次、phase 依次推进', () => {
@@ -148,15 +159,25 @@ describe('切换条件：三种类型各自生效', () => {
     expect(sm.checkTransition(2)).toBe(false);
   });
 
-  it('TIME_ELAPSED：按 phaseStartTime 起算的秒数，未到不算', () => {
+  it('TIME_ELAPSED：按世界时台账判秒，未到不算', () => {
     const sm = new BossStateMachine(fakeBoss());
     sm.registerTransitionCondition(2, { type: PhaseTransitionCondition.TIME_ELAPSED, seconds: 10 });
-    // 起算点往回拨 11 秒 → 已过 10 秒。不写死 0：`performance.now()` 是"进程启动至今"，
-    // 刚跑起来才一两秒，写 0 会让它变成"还没到"，用例就假绿了。
-    sm.phaseStartTime = performance.now() - 11_000;
+    /* 判据喂的是 `tick(dt)` 累计出来的世界秒，不是"把起算点往回拨"：
+     * 后者只有墙钟能做到（`performance.now() - 11_000`），而世界时台账的语义正是
+     * "这一阶段在**世界里**走了多久" —— 暂停菜单开一分钟不该给它加一秒。 */
+    for (let i = 0; i < 900; i += 1) sm.tick(1 / 60);   // 世界时 15 秒
     expect(sm.checkTransition(2), '过了 10 秒应当达成').toBe(true);
-    sm.phaseStartTime = performance.now();
+    sm.transitionTo(BossPhase.PHASE_2);
     expect(sm.checkTransition(2), '刚进阶段不算达成').toBe(false);
+  });
+
+  it('TIME_ELAPSED：慢动作/时停里走的那些帧只按世界时计入', () => {
+    const sm = new BossStateMachine(fakeBoss());
+    sm.registerTransitionCondition(2, { type: PhaseTransitionCondition.TIME_ELAPSED, seconds: 10 });
+    // 60 帧 × dt=0.1/60 ⇒ 真实 1 秒、世界时 0.1 秒：闸门绝不该因此提前开
+    for (let i = 0; i < 60; i += 1) sm.tick(0.1 / 60);
+    expect(sm.phaseElapsed, '0.1 倍时标下世界时应是 0.1 秒').toBeCloseTo(0.1, 10);
+    expect(sm.checkTransition(2), '真实时间过了一秒就判开 = 又回到了墙钟').toBe(false);
   });
 
   it('CUSTOM：把 boss 交给自定义函数', () => {

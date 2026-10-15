@@ -459,6 +459,9 @@ export class Boss extends Enemy {
     this.mesh.rotation.z = 0;
 
     // 阶段切换检查（W-B8 切片1：状态机驱动）
+    // 计时先记再判：`TIME_ELAPSED` 那条条件读的是"这一阶段在世界里走了多久"，
+    // 而这里正是世界 dt 的入口 —— 放在别处（例如墙钟）就让暂停菜单替 Boss 读条（W-A1 切片8 / B118②）
+    this.sm.tick(dt);
     this.sm.checkPhaseTransitions();
 
     // 入场砸地（W-A6 切片8）就发生在上面那一行里：它把 state 拨进 'slam'，

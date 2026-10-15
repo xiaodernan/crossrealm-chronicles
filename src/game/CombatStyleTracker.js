@@ -23,7 +23,9 @@ export class CombatStyleTracker {
     this.score = 0;
     this.sessionBest = 0;
     this.comboChain = 0;
-    this.lastEvent = 0;
+    /* 这里曾经有一格 `this.lastEvent = performance.now()`：全仓没有任何读者（写两处、读零处），
+     * 而连招窗口真正的账是 `decayTimer`，它由 `update(dt)` 的世界时推进。
+     * 留着那格就是留一个"看起来像时钟、其实没人看"的墙钟（W-A1 切片8 / B118②）。 */
     this.decayTimer = 0;
     this.setupListeners();
   }
@@ -42,7 +44,6 @@ export class CombatStyleTracker {
   add(pts, label) {
     this.score += pts;
     this.comboChain += 1;
-    this.lastEvent = performance.now();
     this.decayTimer = 8;
     if (this.score > this.sessionBest) this.sessionBest = this.score;
     const rank = this.getRank();

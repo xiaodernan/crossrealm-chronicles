@@ -45,8 +45,10 @@ export class BossStateMachine {
   constructor(boss) {
     this.boss = boss;
     this.phase = BossPhase.PHASE_1;
-    /** 进这一阶段的时刻，`TIME_ELAPSED` 那条条件读它（其余地方不读） */
-    this.phaseStartTime = 0;
+    /** 进这一阶段以来**世界时**走了多少秒，`TIME_ELAPSED` 那条条件读它（其余地方不读）。
+     *  为什么不是"进入时刻"：那一格只能由墙钟填，于是暂停菜单开一分钟会把 10 秒的闸门当场判开 ——
+     *  与 B118 同族（暂停跳账），只是这里跳的是阶段而不是相位。见 §9 的 W-A1 切片8。 */
+    this.phaseElapsed = 0;
     this.phaseBehaviors = new Map(); // phase -> behavior table
     this.transitionConditions = new Map(); // phase -> condition
     this.debug = false;
@@ -79,6 +81,17 @@ export class BossStateMachine {
     this.transitionConditions.set(phase, condition);
   }
 
+  /**
+   * 把这一帧的**世界** dt 记进当前阶段的计时（`Boss.update` 每帧喂一次）。
+   *
+   * 为什么不就地用 `performance.now()` 起算：这条闸门判的是"这一阶段在世界里过了多久"，
+   * 而暂停菜单与命中停顿都不是世界的一部分 —— 墙钟底会把一分钟的暂停算成 Boss 的读条时间，
+   * 玩家退回来时二阶段已经提前开了。
+   */
+  tick(dt) {
+    this.phaseElapsed += dt;
+  }
+
   /** 检查是否满足切换到某阶段的条件 */
   checkTransition(phase) {
     const cond = this.transitionConditions.get(phase);
@@ -87,7 +100,7 @@ export class BossStateMachine {
       return this.boss.hp / this.boss.maxHp <= cond.threshold;
     }
     if (cond.type === PhaseTransitionCondition.TIME_ELAPSED) {
-      return (performance.now() - this.phaseStartTime) / 1000 >= cond.seconds;
+      return this.phaseElapsed >= cond.seconds;
     }
     if (cond.type === PhaseTransitionCondition.CUSTOM) {
       return cond.fn(this.boss);
@@ -106,7 +119,7 @@ export class BossStateMachine {
     this.onLeavePhase(this.phase);
 
     this.phase = phase;
-    this.phaseStartTime = performance.now();
+    this.phaseElapsed = 0;
 
     // 进入新阶段
     this.onEnterPhase(phase);

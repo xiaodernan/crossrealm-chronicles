@@ -21,7 +21,10 @@ export class DungeonRunTracker {
   setupListeners() {
     runTrackerOn('dungeon-enter', (e) => {
       const id = e.detail?.id ?? e.detail?.dungeonId;
-      this.activeRun = { id, start: performance.now(), rooms: 0, entered: Date.now() };
+      /* `秒` 是**世界时**：只在本系统被 `update(dt)` 驱动时前进（`Game` 只在"在玩的那些帧"喂）。
+       *  改前这里存的是 `start: performance.now()`，于是日志那一行「Ch1 · 70s · 1 房」里
+       *  有 60 秒是玩家开着暂停菜单的时间（探针 `.tmp-20261015/probe-b118-2.mjs` P2 实测）。 */
+      this.activeRun = { id, 秒: 0, rooms: 0 };
     });
     runTrackerOn('dungeon-room-enter', () => {
       if (this.activeRun) this.activeRun.rooms += 1;
@@ -29,9 +32,7 @@ export class DungeonRunTracker {
     runTrackerOn('dungeon-cleared', (e) => {
       const id = e.detail?.id;
       if (!id) return;
-      const elapsed = this.activeRun?.id === id
-        ? (performance.now() - this.activeRun.start) / 1000
-        : 0;
+      const elapsed = this.activeRun?.id === id ? this.activeRun.秒 : 0;
       this.clears[id] = (this.clears[id] ?? 0) + 1;
       const entry = {
         id,
@@ -39,6 +40,7 @@ export class DungeonRunTracker {
         elapsed: Math.round(elapsed),
         rooms: this.activeRun?.rooms ?? 0,
         chapter: this.game.quests?.chapter ?? 1,
+        /** 记录发生的真实时刻 —— 这一格本来就该是墙钟（存档里的时间戳，不是"跑了多久"） */
         time: Date.now(),
       };
       this.runs.unshift(entry);
@@ -46,6 +48,12 @@ export class DungeonRunTracker {
       this.activeRun = null;
       window.dispatchEvent(new CustomEvent('dungeon-run-logged', { detail: entry }));
     });
+  }
+
+  /** 世界时的推进口：`Game` 只在"在玩的那些帧"喂这里，暂停/过场期间一帧都不加。
+   *  这就是这一片要的东西 —— 日志里的「用时」是玩家在副本里走了多久，不是他开着菜单多久。 */
+  update(dt) {
+    if (this.activeRun) this.activeRun.秒 += dt;
   }
 
   _name(id) {

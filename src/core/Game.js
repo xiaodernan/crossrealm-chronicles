@@ -1016,6 +1016,9 @@ export class Game {
       this._attachEnemyAnimAdapters();
       this.enemyManager.update(dt, this.player.position, this.player, this.loot, this);
       this.projectiles.update(dt, this.player.position, this.player);
+      // 副本「用时」只在这种帧里走账（W-A1 切片8 / B118②）：暂停、过场、开着面板的那些帧
+      // 一秒都不记 —— 这一条腿必须和「玩家真的在副本里活动」同一个闸，否则日志那行又是一笔假账
+      this.dungeonRuns?.update(dt);
     }
     this.dungeons.update(dt);
     this.loot.update(dt, this.player.position);
