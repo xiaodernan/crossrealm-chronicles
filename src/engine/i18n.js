@@ -41,8 +41,8 @@ export function getLanguage() {
 /**
  * 根据键名获取文案
  * @param {string} key - 文案键名（如 'settings_title'）
- * @param {object} [params] - 可选插值参数（暂未实现，预留）
- * @returns {string} 对应语言的文案，键不存在时返回键名本身（便于排查）
+ * @param {object} [params] - 可选插值参数：模板里的 `${name}` 按名替换（见 `interpolate`）
+ * @returns {string} 对应语言的文案，键不存在时返回 `[MISSING: key]` 便于排查
  */
 export function t(key, params) {
   const table = TABLES[currentLang];
@@ -52,7 +52,6 @@ export function t(key, params) {
     console.warn(`i18n: 未找到键名 "${key}"（语言: ${currentLang}）`);
     return `[MISSING: ${key}]`;
   }
-  // TODO: 简单插值支持 `${name}` → params.name
   return params ? interpolate(value, params) : value;
 }
 

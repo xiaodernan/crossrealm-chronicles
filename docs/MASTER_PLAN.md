@@ -103,9 +103,9 @@
 
 | # | 短板 | 证据 |
 |---|------|------|
-| A1 | 战斗只有"轻击/重击/翻滚/弹反"四个动作，**没有取消关系与输入缓冲**，连段之间是硬直等待 | `MoveTable` 有 `at/duration` 但没有 `cancelInto`；`CombatController` 无输入队列 |
-| A2 | 世界空间 UI（敌人血条、锁定标记）是**不面向相机的平面**，侧看即变成一条线 | `Enemy.updateHpBar()`（`Enemy.js:68-81` 区段） |
-| A3 | 敌人只有 **5 类**（训练木人 / 影之战士 / 魔法构装体 / 轨道无人机 / 精英虚空骑士），同类敌人换个颜色就是新敌人 | `EnemyManager.spawnDefaults()` |
+| A1 | 战斗只有"轻击/重击/翻滚/弹反"四个动作，**没有取消关系与输入缓冲**，连段之间是硬直等待 | ✅ 已消：`combat/MoveTable.js` 的 `MOVES` 带 `cancel: { from, into }`（轻击 `from 0.22 → light/heavy/roll`、重击 `from 0.36 → roll`；`from >= at` 由注释与门禁共同钉住），`CombatController.bufferAction()` + `INPUT.buffer` 提供输入缓冲（`ttl` 到期作废）。门禁 `tests/combat-cancel.test.js` |
+| A2 | 世界空间 UI（敌人血条、锁定标记）是**不面向相机的平面**，侧看即变成一条线 | ✅ 已消：`effects/Billboard.js`（`faceCamera` / `yawToCamera`）+ `Enemy.updateHpBar()` 调 `this.hpBar.faceCamera(camPos)`、锁定标记同理。门禁 `tests/world-ui-billboard.test.js` |
+| A3 | 敌人只有 **5 类**（训练木人 / 影之战士 / 魔法构装体 / 轨道无人机 / 精英虚空骑士），同类敌人换个颜色就是新敌人 | ✅ 已消：`content/enemies.js` 的 `ENEMY_ROSTER` 现有 **13 条基础档**（dummy/soldier/golem/drone/elite/wraith/stalker/sentinel/crawler/knight/dancer/juggernaut/hexer）+ 各区变体 + boss（W-B7 5 → 12+），`EnemyManager.spawnDefaults()` 按类型铺场 |
 | A4 | 镜头只有单层覆盖，**没有混合栈**：进出过场是一帧硬切，锁定无阻尼、无越肩 | ✅ W-A5 切片1（`5575801`）消"进出过场一帧硬切"（所有权交接补间）；切片2（`e162c20`）消"锁定无阻尼"（锁定重定位按秒指数逼近）；切片3（`0433777`）补"非锁定瞄准磁吸"（挥砍对最对准星的侧前目标做纯宽容补判，`AIM_ASSIST` 可调）。A4 全消 |
 
 **B. 前 1 小时**
