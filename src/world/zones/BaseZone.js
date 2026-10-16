@@ -7,7 +7,24 @@ import { paletteOf } from '../../content/materialPalette.js';
 export class BaseZone {
   constructor(scene, center, config) {
     this.scene = scene;
-    this.center = center;
+    /**
+     * 区域中心是**三维**的。竖直分量取 0，因为这就是区域自己那一面的高度 ——
+     * 下面 `group.position.set(center.x, 0, center.z)` 把整个区域组放在 y=0 的平面上，
+     * 区域不携带自己的高程，地表起伏一律由 `TerrainHeight.sampleGlobalHeight` 回答。
+     *
+     * 为什么要在意这个 0：`InternalSpace.getWorldBaseHeight(zoneCenter)` 算的是
+     * `zoneCenter.y + baseHeight + floor * floorHeight`，而生产递进来的正是这个对象。
+     * 改前这里直接存调用方给的 `{x, z}`，`center.y` 就是 `undefined`，于是**每一次**
+     * 室内高度都算成 `NaN`（B120）：走进晨曦大厅 → 地面 NaN →
+     * `PlayerController.js:859` 那句 `position.y <= walkY + 0.12` 永远为假 →
+     * 玩家一路下坠（实测到 -110 米）；此后任何一次拿 `getGroundHeight` 定落点的传送
+     * （快速旅行 / 副本出口 / 存档落地）把 NaN 写进 `position`，阻尼相机从 NaN 出发
+     * 再也 `lerp` 不回来 → 视锥六个面全 NaN → 整场剔除失效。
+     *
+     * 写门禁的那一批用例当初是拿 `{x: 180, y: 12, z: 100}` 这种**合成**中心验算式的
+     * （B100），而生产从来没给过 `y` —— 契约在 fixture 里成立、在世界上不成立。
+     */
+    this.center = { x: center.x, y: 0, z: center.z };
     this.radius = config.radius ?? 120;
     this.group = new THREE.Group();
     this.group.position.set(center.x, 0, center.z);

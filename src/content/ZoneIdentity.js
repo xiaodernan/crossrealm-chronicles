@@ -103,7 +103,11 @@ export const HUB_ZONE = Object.freeze({
 /** 幽暗林地 —— 迷雾缠绕的古老森林，介于幻想与虚空之间 */
 export const GLOOM_ZONE = Object.freeze({
   id: ZONE_IDS.GLOOM,
-  center: Object.freeze({ x: 180, z: 100 }),
+  // `y: 0` 不是装饰：这座描述对象是 `resolveZone` 对 gloom 的返回值，
+  // 于是它（不是 `GloomZone` 实例）就是玩家站在幽暗林地时的 `zone.center`。
+  // 室内高度 = `center.y + baseHeight + floor * floorHeight`，缺 y 得到的是 NaN 而不是"差一点"（B120）。
+  // `BaseZone` 的实例侧是另一份同样的声明，两份必须由同一个门禁对着坐标与基准面钉住，否则搬区时烂掉一份。
+  center: Object.freeze({ x: 180, y: 0, z: 100 }),
   radius: 160,
   mapRadius: 145,
   mapColor: '#3a3a4a',
@@ -118,7 +122,7 @@ export const GLOOM_ZONE = Object.freeze({
 /** 辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊 */
 export const RADIANT_ZONE = Object.freeze({
   id: ZONE_IDS.RADIANT,
-  center: Object.freeze({ x: -180, z: -160 }),
+  center: Object.freeze({ x: -180, y: 0, z: -160 }),  // 同 `GLOOM_ZONE`：这座描述对象在辉煌圣域里就是 `zone.center`，室内高度要读它的 `y`（B120）
   radius: 150,
   mapRadius: 135,
   mapColor: '#ffd700',

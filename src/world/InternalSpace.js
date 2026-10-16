@@ -269,25 +269,36 @@ export class InternalSpaceManager {
   }
 
   /**
-   * 获取当前空间的高度（若不在任何内部空间则返回 null）。
+   * 某个**世界点**的室内地面高度；这个点不在任何室内空间里则返回 null。
    *
-   * `zoneCenter` 是**必填**，不是可选装饰：高度 = 区域中心.y + 本层基准 + 局部采样(局部坐标)，
-   * 而局部坐标要由 `worldToLocal` 减掉区域中心才算得出来。改前这里硬编码 `{ x: 0, y: 0, z: 0 }`
-   * （B100），于是 `zoneCenter.y` 整个丢了、`x/z` 也少减一次 —— 实测四座模板里两座的高度函数
-   * 是非平凡的（幽暗神殿"中心凹陷 2 米"、晨曦大厅"中央隆起"），中心点差 **10~12.5 米**。
-   * 玩家侧的说法是"走进室内，地面高度整个不对"。
+   * 两代契约都写在这里，因为它们各是各的坑：
    *
-   * 少了参数就抛（B71 口径：调用方递错了不要静默兜底，兜底会把"递错了"变成"高度悄悄是别的值"）。
+   * - **B100**：改前这里硬编码 `{ x: 0, y: 0, z: 0 }`，于是 `zoneCenter.y` 整个丢了、
+   *   `worldToLocal` 也少减一次区域中心 —— 实测四座模板里两座的高度函数是非平凡的
+   *   （幽暗神殿"中心凹陷 2 米"、晨曦大厅"中央隆起"），中心点差 **10~12.5 米**。
+   *   修法是把区域中心一路传进来，并规定"少了就抛"（B71 口径：调用方递错了不要静默兜底，
+   *   兜底会把"递错了"变成"高度悄悄是别的值"）。
+   * - **B120**：传进来的那个对象**根本没有 `y`**。生产的区域中心是 `{x, z}`（`BaseZone`
+   *   直接存下调用方递的字面量），于是 `zoneCenter.y + baseHeight + floor*floorHeight`
+   *   恒为 `NaN` —— 上一代的修法把一个"差 10 米"修成了"差一个世界"。写上一代门禁的那批
+   *   用例拿的是合成中心 `{x:180, y:12, z:100}`：算式在 fixture 里成立，在世界上不成立。
+   *   现在 `BaseZone` 把 `y` 声明成区域自己的竖直基准（0，与 `group.position` 同一面），
+   *   这里再把"必须有限"钉成硬拒绝：宁可炸给开发者看，不许把 NaN 交给玩家的下坠。
+   *
+   * 另外这里问的是**这个点**落在哪座空间（`querySpaceAt`），不是缓存的 `currentSpace`：
+   * 后者只按玩家的上一帧位置刷新，而 `getGroundHeight` 会被用来问几百米外的点
+   * （快速旅行的目的地、副本出口、敌人、装饰、天气粒子）。按缓存回答的结果是
+   * "玩家刚站过晨曦大厅，于是整个区的地板都是大厅那一块"。
    */
-  getCurrentInternalHeight(worldX, worldZ, zoneCenter) {
-    if (!this.currentSpace) return null;
-    if (!zoneCenter) {
+  getInternalHeightAtPoint(worldX, worldZ, zoneId, zoneCenter) {
+    if (!zoneCenter || !Number.isFinite(zoneCenter.y)) {
       throw new Error(
-        'InternalSpaceManager.getCurrentInternalHeight: 必须给 zoneCenter —— '
-        + '室内高度由"区域中心 + 本层基准 + 局部采样"算出来，缺了它算不出局部坐标（B100）'
+        'InternalSpaceManager.getInternalHeightAtPoint: zoneCenter 必须带有限的 y —— '
+        + '室内高度 = zoneCenter.y + baseHeight + floor * floorHeight，缺 y 得到的不是"差一点"而是 NaN（B120）'
       );
     }
-    return this.currentSpace.getInternalHeightAt(worldX, worldZ, zoneCenter);
+    const space = this.querySpaceAt(worldX, worldZ, zoneId, zoneCenter);
+    return space ? space.getInternalHeightAt(worldX, worldZ, zoneCenter) : null;
   }
 
   /** 获取当前空间的所有碰撞体（已转世界坐标） */

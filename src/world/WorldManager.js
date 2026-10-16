@@ -21,6 +21,9 @@ import { applyShadow } from '../engine/shadowPolicy.js';
 /** 地形网格 520×620，可通行边界留 10 单位余量 */
 export const WORLD_BOUNDS = { minX: -250, maxX: 250, minZ: -300, maxZ: 300 };
 
+/** `zoneIdAt` 只需要 `x/z`，而 `getGroundHeight` 每帧会被问很多次 —— 复用同一个探针对象 */
+const _点 = { x: 0, z: 0 };
+
 export class WorldManager {
   constructor(scene, dialog) {
     this.scene = scene;
@@ -126,10 +129,13 @@ export class WorldManager {
     this.buildCollision();
 
     // 注册并构建内部空间（W-B9 切片2）
-    this.internalSpaceManager.register(InternalSpaceTemplates.gloomAncientShrine({ x: 180, z: 100 }));
-    this.internalSpaceManager.register(InternalSpaceTemplates.gloomTreeHollow({ x: 180, z: 100 }));
-    this.internalSpaceManager.register(InternalSpaceTemplates.radiantGrandHall({ x: -180, z: -160 }));
-    this.internalSpaceManager.register(InternalSpaceTemplates.radiantStarwatchTower({ x: -180, z: -160 }));
+    // 模板拿到 `zoneCenter` 但**并不存它**（空间只记 `localCenter`，摆位发生在查询时），
+    // 所以这里必须传区对象自己的那个 center —— 传手抄字面量就是第二份坐标，
+    // 搬区时它会烂在原地（B120 同族：契约在调用处看着成立，其实没人读）。
+    this.internalSpaceManager.register(InternalSpaceTemplates.gloomAncientShrine(gloom.center));
+    this.internalSpaceManager.register(InternalSpaceTemplates.gloomTreeHollow(gloom.center));
+    this.internalSpaceManager.register(InternalSpaceTemplates.radiantGrandHall(radiant.center));
+    this.internalSpaceManager.register(InternalSpaceTemplates.radiantStarwatchTower(radiant.center));
 
     // 为每个区域构建内部空间
     for (const zone of this.zones) {
@@ -339,22 +345,53 @@ export class WorldManager {
     if (this.dungeonManager?.isInside()) {
       return this.dungeonManager.getGroundHeight(x, z);
     }
-    // W-B9 切片2：内部空间优先。
-    // 必须把当前区的中心传下去（B100）：室内高度是"区域中心 + 本层基准 + 局部采样"，
-    // 少传一次的结果是四座模板里两座的地形起伏整个失效（中心点差 10~12.5 米）。
-    const internalHeight = this.internalSpaceManager?.getCurrentInternalHeight(
-      x, z, this.currentZone?.center ?? { x: 0, y: 0, z: 0 }
-    );
-    if (internalHeight !== null) return internalHeight;
+    // W-B9 切片7（修 B120）：室内高度按**这个点**回答。
+    // 改前问的是"玩家上一帧站的那座空间"那份缓存 —— 它只按玩家的上一帧位置刷新，而这条路径要回答的
+    // 点常常不是玩家站的地方：快速旅行的目的地、副本出口、敌人脚下、装饰落位、天气粒子。
+    // 于是"玩家刚站过晨曦大厅"会让几百米外那个点也拿到大厅的地板高度，
+    // 而生产的区域中心又不带 `y`，那个高度还是 NaN。两条叠在一起就是玩家侧的说法：
+    // NaN 地面 → 传送把 NaN 写进 `position` → 阻尼相机 `lerp` 从 NaN 出发再也回不来 →
+    // 视锥六个面全 NaN → 整场剔除失效。
+    const zone = this._zoneWithSpaceAt(x, z);
+    if (zone) {
+      const internalHeight = this.internalSpaceManager?.getInternalHeightAtPoint(x, z, zone.id, zone.center);
+      if (internalHeight !== null) return internalHeight;
+    }
     return sampleGlobalHeightSmooth(x, z, this.zones);
+  }
+
+  /**
+   * 这个点自己属于哪个区 —— 不是"玩家属于哪个区"（B120）。
+   * 归属一律由几何反推（`zoneIdAt`：枢纽优先 → 最近区 → 走廊），与 `update()` 同一口径。
+   */
+  _zoneAt(x, z) {
+    _点.x = x; _点.z = z;
+    return resolveZone(this.zones, zoneIdAt(_点, this.zones));
+  }
+
+  /**
+   * 只有"这个点所属的区**且该区注册过室内空间**"才返回区对象，否则 null。
+   *
+   * 用"有没有空间"当闸门而不是用 `center.y` 存不存在当闸门：`HUB_ZONE.center` 是
+   * `{x, z}` 的二维描述（枢纽本来就没有室内），拿它去算高度会喂给 `getInternalHeightAtPoint`
+   * 一个 undefined 的 y；而有室内空间的区万一缺 `y`，必须照旧**炸给开发者看**，
+   * 不许在这里被顺手兜成 0。
+   */
+  _zoneWithSpaceAt(x, z) {
+    const mgr = this.internalSpaceManager;
+    if (!mgr) return null;
+    const zone = this._zoneAt(x, z);
+    if (!zone) return null;
+    return mgr.spacesByZone.get(zone.id)?.length ? zone : null;
   }
 
   getGroundNormal(x, z) {
     if (this.dungeonManager?.isInside()) {
       return { x: 0, y: 1, z: 0 };
     }
-    // 内部空间内地面法向暂时返回向上（可按需扩展）
-    if (this.internalSpaceManager?.currentSpace) {
+    // 内部空间内地面法向暂时返回向上（可按需扩展）—— 同样按点问，不问玩家上一帧（B120）
+    const zone = this._zoneWithSpaceAt(x, z);
+    if (zone && this.internalSpaceManager.querySpaceAt(x, z, zone.id, zone.center)) {
       return { x: 0, y: 1, z: 0 };
     }
     return sampleGroundNormal(x, z, this.zones);
@@ -376,10 +413,14 @@ export class WorldManager {
     // 归属由几何反推（`zoneIdAt`：枢纽优先 → 最近区 → 走廊），不再各处手写一遍距离比较
     const id = zoneIdAt(playerPos, this.zones);
     const zone = resolveZone(this.zones, id);
-    if (!zone || zone === this.currentZone) return;
 
-    // 更新内部空间管理器（W-B9 切片2）
+    // W-B9 切片7（修 B120）：室内归属**每帧**刷新。
+    // 改前这一句在 `zone === this.currentZone` 的早退之后 —— 于是"走进大厅再走出来"这种
+    // 不跨区的移动永远不会重算，`currentSpace` 就把玩家已经离开的那座空间一直留着，
+    // 而它回答的是雾（`currentInternalFog`）、层号（`internalSpaceFloor`）、地面法向。
     this.internalSpaceManager.updateCurrent(playerPos.x, playerPos.z, id, zone?.center ?? { x: 0, y: 0, z: 0 });
+
+    if (!zone || zone === this.currentZone) return;
 
     if (id === ZONE_IDS.HUB) this.applyHubAtmosphere();
     else this.applyZoneAtmosphere(zone);

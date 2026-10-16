@@ -299,9 +299,8 @@ describe('B83: InternalSpaceManager 注册与查询', () => {
     expect(manager.currentSpace.id).toBe('s1');
   });
 
-  it('getCurrentInternalHeight 不在任何空间时返回 null', () => {
-    manager.updateCurrent(999, 999, 'zone-a', zoneCenter);
-    const h = manager.getCurrentInternalHeight(999, 999);
+  it('getInternalHeightAtPoint 不在任何空间时返回 null', () => {
+    const h = manager.getInternalHeightAtPoint(999, 999, 'zone-a', zoneCenter);
     expect(h).toBe(null);
   });
 
