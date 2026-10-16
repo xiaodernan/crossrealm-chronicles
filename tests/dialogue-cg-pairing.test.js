@@ -35,11 +35,13 @@ import { CG_PAINTERS, CG_DEFAULT_ACCENT, DialogCGRenderer } from '../src/ui/Dial
 import { POP_CG_PAINTERS } from '../src/ui/DialogCGRendererPopCulture.js';
 import { CG_GALLERY_CATALOG } from '../src/game/CgGalleryRegistry.js';
 import { keyText } from '../src/content/keyHints.js';
+import { t, setLanguage } from '../src/engine/i18n.js';
 import { CgJournalTab } from '../src/ui/CgJournalTab.js';
 import { Dialog } from '../src/ui/Dialog.js';
 import { RestDialogue } from '../src/game/RestDialogue.js';
 import { gameSurface } from './helpers/gameSurface.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
+import { makeMarkupDom } from './helpers/fakeMarkupDom.js';
 import { REST_POINT_NAMES } from '../src/content/restPointNames.js';
 
 /** 走 shipped 入口：把某一张表换成种植入的，其余照原样 */
@@ -331,8 +333,9 @@ describe('真渲染：兜底不许说谎', () => {
       const url = r.render(zone, nodeId, '#123456', 'calm');
       if (!url) { 画不出.push(`${key}（scene=${preset.scene}）`); continue; }
       const drawn = rec.captions[rec.captions.length - 1];
-      if (drawn !== keyText(preset.caption)) {
-        画不出.push(`${key}：画上写 "${drawn}"，表展开后是 "${keyText(preset.caption)}"`);
+      const expected = keyText(t(preset.caption));
+      if (drawn !== expected) {
+        画不出.push(`${key}：画上写 "${drawn}"，表展开后是 "${expected}"`);
       }
       // 画进像素的键名必须是定稿：留一个 `{escape}` 就是"改绑之后图上还写着旧键"那一类
       if (/\{[a-zA-Z]/.test(drawn)) 画不出.push(`${key}：画上写着未展开的占位 "${drawn}"`);
@@ -371,7 +374,7 @@ describe('真渲染：兜底不许说谎', () => {
     for (const row of bonus) {
       rec.captions.length = 0;
       expect(r.renderScene(row.scene, row.caption, row.accent, row.mood), `${row.id} 画不出来`).toBeTruthy();
-      expect(rec.captions.at(-1), `${row.id} 的字幕对不上目录那一行`).toBe(row.caption);
+      expect(rec.captions.at(-1), `${row.id} 的字幕对不上目录那一行`).toBe(t(row.caption));
     }
     expect(r.renderScene('no-such-scene', '甲', '#123456', 'calm')).toBe(null);
   });
@@ -381,7 +384,7 @@ describe('真渲染：兜底不许说谎', () => {
     rec.captions.length = 0;
     expect(r.render('hub', 'start')).toBeTruthy();
     expect(CG_DEFAULT_ACCENT).toBe(REST_NPC_DEFS.hub.accent);   // 同一个值，但只此一处抄写
-    expect(rec.captions.at(-1)).toBe(REST_DIALOGUE_CG['hub:start'].caption);
+    expect(rec.captions.at(-1)).toBe(t(REST_DIALOGUE_CG['hub:start'].caption));
   });
 });
 
@@ -426,6 +429,83 @@ describe('画廊目录与预设表同一份', () => {
 /* ------------------------------------------------------------------ *
  * 六、运行时那一侧：不再抄默认色，也不再借别家的话说
  * ------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------ *
+ * 六、目录存键、出口展开（W-D2 切片13）
+ * ------------------------------------------------------------------ */
+
+describe('目录存的是文案键，展开只发生在出口', () => {
+  /**
+   * 为什么这条要单独立：这张目录同时喂两个完全不同的出口 —— 界面上的字（卡片 / 灯箱 /
+   * 解锁 toast）与**画进 CG 像素里的那一行**。改前营火行在导入期就 `t()` 成了中文、
+   * bonus 行存的是键，同一张表两套口径：`CgJournalTab` 拿到什么显示什么，于是
+   * `cg_gallery_finisher` 这样的裸键会被摆进玩家界面，而 `t('荒原留影')` 又会回
+   * `[MISSING: 荒原留影]` 并把开发期字样画到图上。两条都**不报错**，只有横向对比看得见。
+   */
+  it('分母守卫：目录非空，且每一行的 caption 都是**键**（不是文案，也不是没登记的键）', () => {
+    expect(CG_GALLERY_CATALOG.length).toBeGreaterThan(0);
+    const 存了文案 = [];
+    const 没登记 = [];
+    for (const row of CG_GALLERY_CATALOG) {
+      if (/[\u4e00-\u9fff]/.test(row.caption)) 存了文案.push(`${row.id}: ${row.caption}`);
+      if (t(row.caption).startsWith('[MISSING')) 没登记.push(`${row.id}: ${row.caption}`);
+    }
+    expect(存了文案, `这些行的 caption 是文案本身而不是键：\n${存了文案.join('\n')}`).toEqual([]);
+    expect(没登记, `这些行的键在双表里查不到（玩家会读到 [MISSING: …]）：\n${没登记.join('\n')}`).toEqual([]);
+  });
+
+  it('画廊卡片与灯箱给的是文案：裸键一个都不许摆到玩家面前', () => {
+    const doc = makeMarkupDom();
+    const prevDoc = globalThis.document;
+    globalThis.document = doc;
+    try {
+      const row = CG_GALLERY_CATALOG.find((r) => !r.restId);
+      const tab = new CgJournalTab({
+        dialogCg: { render: () => 'data:r', renderScene: () => 'data:s' },
+        cgGallery: {
+          getStats: () => ({ unlocked: 1, total: 2, percent: 50, favorites: 0 }),
+          getEntries: () => [row],
+          getLockedPreview: () => [],
+          favorites: new Set(),
+          viewCounts: {},
+          recordView() {},
+        },
+        hud: { journalTab: 'cg', updateJournal() {} },
+      });
+
+      const panel = doc.createElement('div');
+      tab.render(panel);
+      expect(panel.innerHTML).toContain(t(row.caption));      // 显示的是文案
+      expect(panel.innerHTML).not.toContain(row.caption);     // 不是裸键
+
+      tab.showLightbox(row);
+      expect(tab.lightbox.querySelector('.cg-lightbox-caption').textContent).toBe(t(row.caption));
+    } finally {
+      globalThis.document = prevDoc;
+    }
+  });
+
+  it('换语言之后画出来的字幕跟着换（语言不进缓存戳 ⇒ 复用上一语言那张图）', () => {
+    const rec = fakeCanvasEnv();
+    try {
+      const r = new DialogCGRenderer();
+      const row = CG_GALLERY_CATALOG.find((x) => !x.restId);
+      setLanguage('zh');
+      r.renderScene(row.scene, row.caption, row.accent, row.mood);
+      const zh = rec.captions.at(-1);
+      setLanguage('en');
+      r.renderScene(row.scene, row.caption, row.accent, row.mood);
+      const en = rec.captions.at(-1);
+      expect(zh, '中文那一次就没画出来').not.toMatch(/\[MISSING/);
+      expect(en, '英文那一次没画出来').not.toMatch(/\[MISSING/);
+      expect(zh).not.toBe(en);
+      expect(rec.frames, '第二次命中了缓存 —— 图上还留着上一个语言的字').toBe(2);
+    } finally {
+      setLanguage('zh');
+      delete globalThis.document;
+    }
+  });
+});
 
 describe('运行时：对话与图都只说真话', () => {
   /** 一棵能走通的假游戏：字段形状**照 `src/core/Game.js` 长**，不多给一个 Game 没有的名字。

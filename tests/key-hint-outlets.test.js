@@ -20,7 +20,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { factoryKeybindings, setKeybindTable, buildBindingTables } from '../src/content/keybinds.js';
 import { UI_HOTKEYS, setHotkeyTable } from '../src/content/hotkeys.js';
 import { Dialog } from '../src/ui/Dialog.js';
-import { NPCManager } from '../src/world/NPCManager.js';
+import { NPCManager, npcLine } from '../src/world/NPCManager.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import { DialogCGRenderer } from '../src/ui/DialogCGRenderer.js';
 import { LORE_CODEX } from '../src/game/LoreCodexRegistry.js';
@@ -194,6 +194,46 @@ describe('NPC 台词：对话框、日志条目、事件三份都是定稿', () 
     expect(after).toContain('F9');
     expect(entries[0].text).toBe(before);   // 存进去的定稿不该被后来的改绑重写
     expect(entries[1].text).toBe(after);
+  });
+
+  /**
+   * B119：两个台词池的**口径不同**，`t()` 只能给其中一池。
+   *
+   * `npc.lines` 是文案键，`NPC_CHAPTER_LINES` 是成段正文。改前两条池子共用一句
+   * `keyText(t(raw))`，于是有章节台词的 NPC 全在念 `[MISSING: 宝箱里的魂火能升级属性。]`
+   * —— 而对话框、日志、`npc-talk` 三处**同时**收到同一份坏字，上面那两条用例比的是
+   * "三处一样"所以全绿。这条问的是另一件事：那一句**本身**念不念得出来。
+   */
+  it('每一句台词都念得出来：章节池里的每一格都不许变成 `[MISSING: …]`（B119）', () => {
+    const { mgr, shown } = mountNpcTalk();
+    let 句数 = 0;
+    for (const [id, byChapter] of Object.entries(NPC_CHAPTER_LINES)) {
+      const npc = mgr.npcs.find((n) => n.id === id);
+      if (!npc) throw new Error(`NPC_DATA 里没有 ${id}：台词表挂在没人认领的 id 上`);
+      for (const [chapter, lines] of Object.entries(byChapter)) {
+        for (let idx = 0; idx < lines.length; idx++) {
+          mgr.game.quests.chapter = Number(chapter);
+          mgr.lineIndex[id] = idx;      // 生产里由玩家反复对话推进
+          mgr.talk(npc);
+          句数 += 1;
+        }
+      }
+    }
+    expect(句数, '章节池空了 —— 这一族用例失去意义，请一起删').toBeGreaterThan(20);
+    const 坏 = shown.filter((s) => s.text.includes('[MISSING'));
+    expect(坏.map((s) => `${s.title}｜${s.text}`), '这些台词把开发期字样念给了玩家').toEqual([]);
+  });
+
+  /**
+   * 反向控制：判据必须看得见改前那个形状 —— 把**正文**池按"键"处理，`t()` 会把整句话
+   * 当键名查并回 `[MISSING: …]`。没有这一臂，"全都不带 `[MISSING`"与"这条链根本没跑"
+   * 在读数上一模一样。
+   */
+  it('反向控制：正文池按"键"处理必须念出 `[MISSING: …]`（改前的形状）', () => {
+    const raw = placeholderLine().raw;
+    expect(npcLine(raw, true), 't() 对整句正文竟然不报缺键 —— 这把尺子看不见 B119').toContain('[MISSING');
+    expect(npcLine(raw, false)).not.toContain('[MISSING');
+    expect(npcLine('npc_wanderer_0', true), '键池那一侧反而查不到键').not.toContain('[MISSING');
   });
 });
 

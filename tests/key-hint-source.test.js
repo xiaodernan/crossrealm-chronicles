@@ -201,7 +201,11 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     // 对话框（20+ 调用方共用这一处）、日志卡片（快照存进去就再也不回头展开）、
     // 画布（图片有缓存，改绑不缓存就是旧键名）、CSS `content`（DOM 声明够不到，只能换成节点）
     'ui/Dialog.js': ['keyText(title)', 'keyText(text)', 'keyText(c.label)', 'keyText(message)'],
-    'world/NPCManager.js': ['keyText(t(lineKey))'],
+    // B119：台词池是**两套口径** —— 键池（`npc.lines`）先过 `t()`，正文池
+    // （`NPC_CHAPTER_LINES`）原样留下；两边最后都过 `keyText()` 展开 `{动作}`。
+    // 这两件事抽成了 `npcLine()` 一处（运行时与门禁调的是同一个函数），点名形状跟着改：
+    // 改前写成一句 `keyText(t(lineKey))`，把正文池也当键查 ⇒ 章节台词全念成 `[MISSING: …]`。
+    'world/NPCManager.js': ['npcLine(pool[idx]', 'keyText(fromKeys ? t(raw) : raw)'],
     'game/QuestSystem.js': ['keyText(q.desc)'],
     'ui/LoreCodexJournalTab.js': ['keyText(e.text)', 'refreshKeyText(panelEl)'],
     'ui/PopCultureJournalTab.js': ['keyText(e.desc)', 'refreshKeyText(panelEl)'],
@@ -212,7 +216,10 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     'ui/WeaponSkillJournalTab.js': ['refreshKeyText(panelEl)'],
     'player/DemoRunner.js': ['refreshKeyText(this.overlay)'],
     'game/CombatTutorialDirector.js': ['refreshKeyText(this._hint)'],
-    'ui/DialogCGRenderer.js': ['_syncKeyStamp()', 'keyText(caption', "keyText('{parry} 弹反')"],
+    // W-D2 切片13：画布上那两格键名提示搬进了双表，出口因此是 `keyText(t(键))` ——
+    // 两件事都还在原地做：`t()` 把键换成文案、`keyText` 把文案里的 `{动作}` 换成当前键名。
+    // 点名形状跟着改（写成 `${parry}` 会让 `$` 留在图上，由 key-hint-outlets 咬住）。
+    'ui/DialogCGRenderer.js': ['_syncKeyStamp()', 'keyText(t(caption', "keyText(t('cg_caption_parry'))"],
   };
 
   it('每一处都还在原地问表', () => {

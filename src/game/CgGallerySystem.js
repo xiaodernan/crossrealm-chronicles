@@ -1,6 +1,7 @@
 import { CG_GALLERY_CATALOG, CG_ZONE_LABELS } from './CgGalleryRegistry.js';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const GAME_CGGALLERYSYSTEM = 'game/CgGallerySystem';
 const cgOn = (name, handler) => on(name, handler, GAME_CGGALLERYSYSTEM);
@@ -64,10 +65,13 @@ export class CgGallerySystem {
     if (this.unlocked.has(id)) return false;
     this.unlocked.add(id);
     const entry = CG_GALLERY_CATALOG.find((c) => c.id === id);
+    // 目录存的是**文案键**，出口展开（W-D2 切片13）：`cg-unlocked` 的监听方（成就 / 秘典）
+    // 与 toast 拿到的是同一份给人看的字样，不是一个裸键。
+    const caption = entry ? t(entry.caption) : id;
     window.dispatchEvent(new CustomEvent('cg-unlocked', {
-      detail: { id, caption: entry?.caption ?? id, source },
+      detail: { id, caption, source },
     }));
-    this.game.dialog?.toast?.(`CG 解锁：${entry?.caption ?? id}`, 2600);
+    this.game.dialog?.toast?.(`CG 解锁：${caption}`, 2600);
     return true;
   }
 

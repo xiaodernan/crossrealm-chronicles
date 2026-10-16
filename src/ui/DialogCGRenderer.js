@@ -1,6 +1,7 @@
 import { REST_DIALOGUE_CG } from '../content/dialogueCgPresets.js';
 import { keyText, keyStamp } from '../content/keyHints.js';
 import { POP_CG_PAINTERS } from './DialogCGRendererPopCulture.js';
+import { t, getLanguage } from '../engine/i18n.js';
 
 /** 营火对话 CG — 节点 id → 场景预设（程序绘制 + 可选图片） */
 
@@ -115,12 +116,16 @@ export class DialogCGRenderer {
   /**
    * 键名轮次一变就丢掉全部缓存图（W-B2 切片5）。
    *
-   * 图上写着的键名（`{escape} 跳过`、战斗教学那两格）是**画进像素里的**：缓存键里没有键名，
-   * 改绑之后只让 `keyText` 改口，界面上看到的就是"表已经换了、图里还写着 Esc" ——
-   * 而那一句玩家在 DOM 里读不到，改绑测试也抓不到。两条绘制路径（对话与画廊）都先过这里。
+   * 图上写着的字（`{escape} 跳过`、战斗教学那两格、以及每一行字幕）是**画进像素里的**：
+   * 缓存键里没有这些字样，改绑 / 换语言之后只让 `keyText` 与 `t()` 改口，界面上看到的
+   * 就是"表已经换了、图里还写着旧的" —— 而那一句玩家在 DOM 里读不到，改绑测试也抓不到。
+   * 两条绘制路径（对话与画廊）都先过这里。
+   *
+   * 语言与键名同属这一族（W-D2 切片13）：字幕进双表之后，`caption` 那一格是键，
+   * 缓存键里同样不含展开后的字样，所以语言也得进这条判据。
    */
   _syncKeyStamp() {
-    const stamp = keyStamp();
+    const stamp = `${keyStamp()}:${getLanguage()}`;
     if (stamp !== this._keyStamp) {
       this.cache.clear();
       this._keyStamp = stamp;
@@ -152,7 +157,7 @@ export class DialogCGRenderer {
     ctx.fillRect(0, h - 52, w, 52);
     ctx.fillStyle = accent;
     ctx.font = '600 22px "Segoe UI","Microsoft YaHei",sans-serif';
-    ctx.fillText(keyText(caption ?? ''), 24, h - 18);
+    ctx.fillText(keyText(t(caption ?? '')), 24, h - 18);
 
     const url = this.canvas.toDataURL('image/jpeg', 0.88);
     this.cache.set(key, url);
@@ -328,8 +333,8 @@ export class DialogCGRenderer {
     this._paintForestCamp(ctx, w, h, accent);
     ctx.fillStyle = '#ffdd88';
     ctx.font = 'bold 20px sans-serif';
-    ctx.fillText(keyText('{parry} 弹反'), w * 0.12, h * 0.35);
-    ctx.fillText(keyText('{lockOn} 锁定'), w * 0.62, h * 0.35);
+    ctx.fillText(keyText(t('cg_caption_parry')), w * 0.12, h * 0.35);
+    ctx.fillText(keyText(t('cg_caption_lockon')), w * 0.62, h * 0.35);
   }
 
   _paintQuestScroll(ctx, w, h, accent) {
@@ -393,7 +398,7 @@ export class DialogCGRenderer {
     this._paintMistyCamp(ctx, w, h, accent);
     ctx.fillStyle = '#4a4a6a';
     ctx.font = '16px sans-serif';
-    ctx.fillText('幽暗林地深处', w * 0.5, h * 0.25);
+    ctx.fillText(keyText(t('cg_caption_misty_deep')), w * 0.5, h * 0.25);
     ctx.beginPath();
     ctx.moveTo(w * 0.3, h * 0.5);
     ctx.lineTo(w * 0.7, h * 0.7);
@@ -443,7 +448,7 @@ export class DialogCGRenderer {
     this._paintGoldenSands(ctx, w, h, accent);
     ctx.fillStyle = '#ffaa00';
     ctx.font = '16px sans-serif';
-    ctx.fillText('晨曦大门', w * 0.5, h * 0.2);
+    ctx.fillText(keyText(t('cg_caption_radiant_deep')), w * 0.5, h * 0.2);
     ctx.beginPath();
     ctx.arc(w * 0.5, h * 0.5, 40, -Math.PI * 0.6, -Math.PI * 1.4);
     ctx.strokeStyle = accent;

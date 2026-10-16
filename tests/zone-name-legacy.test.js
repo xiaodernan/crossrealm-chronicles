@@ -126,7 +126,9 @@ describe('改口之后：三处 label 接的是表，成段文案钉的是字面
     expect(srcText('src/content/objectives.js')).toContain("desc: '击败霍格沃兹遗境深处的大奥术师。'");
     expect(srcText('src/ui/HelpManual.js')).toContain('· 霍格沃兹遗境 — 禁忌图书馆');
     expect(srcText('src/cinematic/CinematicManager.js')).toContain("'霍格沃兹遗境 · 位面试炼 II'");
-    expect(srcText('src/content/dialogueCgPresets.js')).toContain("caption: '霍格沃兹遗境倒影'");
+    // W-D2 切片13：CG 字幕进双表之后，这一句的字面从 `dialogueCgPresets.js`（那里现在存的是键）
+    // 搬到了中文表 —— 钉的仍是"玩家读到的那几个字"，只是换了住址，不是把这一格删掉。
+    expect(srcText('src/content/strings.zh.js')).toContain("cg_caption_magic_start: '霍格沃兹遗境倒影'");
   });
 
   it(`名字表本身也钉一格字面（ZONE_NAMES[MAGIC]）`, () => {

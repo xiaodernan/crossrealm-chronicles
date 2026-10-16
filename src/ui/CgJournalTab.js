@@ -1,5 +1,13 @@
 import { CG_ZONE_LABELS } from '../game/CgGallerySystem.js';
 import { refreshKeyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
+
+/**
+ * 目录里的 `caption` 是**文案键**（W-D2 切片13），界面上的三处（卡片字幕 / `aria-label` /
+ * 灯箱字幕）都在这里展开一次。目录自己不再展开 —— 它导入期展开过一次的话，换语言
+ * 就再也跟不上（那张表是模块加载时建的），而 `_paint` 那条路也会把它当键再展开一次。
+ */
+const captionOf = (entry) => (entry.caption ? t(entry.caption) : entry.id);
 
 /** [J] 日志 — CG 画廊 Tab 渲染 */
 export class CgJournalTab {
@@ -55,7 +63,7 @@ export class CgJournalTab {
     if (!url) return;   // 画不出来就不开灯 —— 开一盏写着别的画面的灯比不开更糟
 
     this.lightbox.querySelector('.cg-lightbox-img').src = url;
-    this.lightbox.querySelector('.cg-lightbox-caption').textContent = entry.caption ?? entry.id;
+    this.lightbox.querySelector('.cg-lightbox-caption').textContent = captionOf(entry);
     this.lightbox.querySelector('.cg-lightbox-meta').textContent =
       `${entry.speaker ?? ''} · ${CG_ZONE_LABELS[entry.zone] ?? entry.zone} · 观看 ${(cg.viewCounts[entry.id] ?? 0) + 1} 次`;
     this.lightbox.classList.remove('hidden');
@@ -75,8 +83,8 @@ export class CgJournalTab {
     const grid = unlocked.map((e) => {
       const fav = cg.favorites.has(e.id) ? '★' : '☆';
       return `<div class="cg-card" data-id="${e.id}">
-        <button type="button" class="cg-card-thumb" data-id="${e.id}" aria-label="${e.caption}"></button>
-        <div class="cg-card-cap">${e.caption}</div>
+        <button type="button" class="cg-card-thumb" data-id="${e.id}" aria-label="${captionOf(e)}"></button>
+        <div class="cg-card-cap">${captionOf(e)}</div>
         <div class="cg-card-sub">${e.speaker}</div>
         <button type="button" class="cg-fav-btn" data-id="${e.id}">${fav}</button>
       </div>`;

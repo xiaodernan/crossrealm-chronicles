@@ -12,6 +12,11 @@ export const CG_GALLERY_CATALOG = [
       restId,
       nodeId,
       scene: preset.scene,
+      // `caption` 存**文案键**（W-D2 切片13）：这张目录是数据层，显示侧（画廊卡片 /
+      // 灯箱 / 解锁 toast / 画进 CG 的那一行）各自在播出那一刻 `t()` 展开。
+      // 改前这里是 `t(preset.caption)` —— 营火行导入期就冻成中文，而 bonus 行存的是键，
+      // 同一张目录两套口径：`CgJournalTab` 拿到什么就显示什么，于是 bonus 行会把
+      // `cg_gallery_finisher` 这样的裸键摆进玩家界面。
       caption: preset.caption,
       mood: preset.mood ?? 'calm',
       zone: restId,
@@ -25,16 +30,16 @@ export const CG_GALLERY_CATALOG = [
       sort: 10,
     };
   }),
-  { id: 'bonus:finisher', scene: 'execution_art', caption: '连击终结', mood: 'calm', zone: 'combat', speaker: '战斗记忆', accent: '#ffcc44', unlock: 'finisher', sort: 100 },
-  { id: 'bonus:riposte', scene: 'combat_tutorial', caption: '致命反击', mood: 'warn', zone: 'combat', speaker: '战斗记忆', accent: '#ff8866', unlock: 'riposte', sort: 101 },
-  { id: 'bonus:execution', scene: 'execution_art', caption: '处决瞬间', mood: 'warn', zone: 'combat', speaker: '战斗记忆', accent: '#ff4422', unlock: 'execution', sort: 102 },
-  { id: 'bonus:boss-shadow', scene: 'boss_shadow', caption: '影界守护者击破', mood: 'warn', zone: 'fantasy', speaker: 'Boss', accent: '#aa2222', unlock: 'boss:shadow-warden', sort: 110 },
-  { id: 'bonus:boss-mage', scene: 'boss_mage', caption: '大奥术师击破', mood: 'warn', zone: 'magic', speaker: 'Boss', accent: '#8844ff', unlock: 'boss:archmagus', sort: 111 },
-  { id: 'bonus:boss-singularity', scene: 'boss_singularity', caption: '奇点领主击破', mood: 'warn', zone: 'space', speaker: 'Boss', accent: '#4488ff', unlock: 'boss:singularity-herald', sort: 112 },
-  { id: 'bonus:boss-void', scene: 'hidden_boss', caption: '时线执政官击破', mood: 'warn', zone: 'void', speaker: 'Boss', accent: '#c9a962', unlock: 'boss:void-chronarch', sort: 113 },
-  { id: 'bonus:boss-chaos', scene: 'boss_chaos', caption: '混沌领主击破', mood: 'warn', zone: 'abyss', speaker: 'Boss', accent: '#ff2244', unlock: 'boss:chaos-overlord', sort: 114 },
-  { id: 'bonus:dungeon-clear', scene: 'forest_map', caption: '迷宫清空', mood: 'calm', zone: 'dungeon', speaker: '探索', accent: '#889977', unlock: 'dungeon-clear', sort: 120 },
-  { id: 'bonus:world-anchor', scene: 'anchor_fire', caption: '世界之锚觉醒', mood: 'calm', zone: 'hub', speaker: '序章', accent: '#c9a962', unlock: 'quest:ch1', sort: 1 },
+  { id: 'bonus:finisher', scene: 'execution_art', caption: 'cg_gallery_finisher', mood: 'calm', zone: 'combat', speaker: '战斗记忆', accent: '#ffcc44', unlock: 'finisher', sort: 100 },
+  { id: 'bonus:riposte', scene: 'combat_tutorial', caption: 'cg_gallery_riposte', mood: 'warn', zone: 'combat', speaker: '战斗记忆', accent: '#ff8866', unlock: 'riposte', sort: 101 },
+  { id: 'bonus:execution', scene: 'execution_art', caption: 'cg_gallery_execution', mood: 'warn', zone: 'combat', speaker: '战斗记忆', accent: '#ff4422', unlock: 'execution', sort: 102 },
+  { id: 'bonus:boss-shadow', scene: 'boss_shadow', caption: 'cg_gallery_boss_shadow', mood: 'warn', zone: 'fantasy', speaker: 'Boss', accent: '#aa2222', unlock: 'boss:shadow-warden', sort: 110 },
+  { id: 'bonus:boss-mage', scene: 'boss_mage', caption: 'cg_gallery_boss_mage', mood: 'warn', zone: 'magic', speaker: 'Boss', accent: '#8844ff', unlock: 'boss:archmagus', sort: 111 },
+  { id: 'bonus:boss-singularity', scene: 'boss_singularity', caption: 'cg_gallery_boss_singularity', mood: 'warn', zone: 'space', speaker: 'Boss', accent: '#4488ff', unlock: 'boss:singularity-herald', sort: 112 },
+  { id: 'bonus:boss-void', scene: 'hidden_boss', caption: 'cg_gallery_boss_void', mood: 'warn', zone: 'void', speaker: 'Boss', accent: '#c9a962', unlock: 'boss:void-chronarch', sort: 113 },
+  { id: 'bonus:boss-chaos', scene: 'boss_chaos', caption: 'cg_gallery_boss_chaos', mood: 'warn', zone: 'abyss', speaker: 'Boss', accent: '#ff2244', unlock: 'boss:chaos-overlord', sort: 114 },
+  { id: 'bonus:dungeon-clear', scene: 'forest_map', caption: 'cg_gallery_dungeon_clear', mood: 'calm', zone: 'dungeon', speaker: '探索', accent: '#889977', unlock: 'dungeon-clear', sort: 120 },
+  { id: 'bonus:world-anchor', scene: 'anchor_fire', caption: 'cg_gallery_world_anchor', mood: 'calm', zone: 'hub', speaker: '序章', accent: '#c9a962', unlock: 'quest:ch1', sort: 1 },
   ...CG_GALLERY_BONUS_EXTRA,
 ];
 
