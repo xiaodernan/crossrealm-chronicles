@@ -201,6 +201,9 @@ export class DungeonManager {
           hd: room.d / 2 - wallT / 2,
         },
       });
+      // 副本 Boss 也走难度×成长链（W-E1 切片6）：档位按副本定义行上的 `stage`，
+      // 副本出生点在 (5000, …) 的独立坐标空间里、反推不出区域，所以显式递。
+      this.enemyManager._scaleBoss(boss, dungeonGrowthStage(dungeon.def.id));
       boss.setDialogToast((msg) => this.dialog.toast(msg));
       list.push(boss);
       dungeon.boss = boss;

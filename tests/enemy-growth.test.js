@@ -309,7 +309,10 @@ describe('⑦ 仆从也走这条曲线（W-E1 切片4）', () => {
       .map(([type]) => type).sort();
     expect(summoners, '新加一类会召唤的敌人时，这里要点名').toEqual(['elite', 'stalker']);
     const mgr = readFileSync(join(ROOT, 'src/combat/EnemyManager.js'), 'utf8');
-    // 档位只写在 spawnAt 一处：第二处记账 = "仆从按谁的档位长"有两个答案
-    expect((mgr.match(/\.growthStage = /g) || []).length).toBe(1);
+    // 档位记在 actor 的 `growthStage` 上，赋值点只有两处：
+    //   `spawnAt`（普通敌人）与 `_scaleBoss`（Boss，W-E1 切片6 让 Boss 也收成长、
+    //   且其召唤物按这一档长）。仆从统一只读 `owner.growthStage` 一处——
+    //   新增**第三处**赋值（尤其不在这两方法里）才会让"仆从按谁的档位长"出现第二份真相。
+    expect((mgr.match(/\.growthStage = /g) || []).length).toBe(2);
   });
 });

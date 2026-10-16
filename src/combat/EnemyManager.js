@@ -16,6 +16,25 @@ import { growthAt, zoneGrowthStage } from '../content/enemyGrowth.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { difficultyMultiplier } from '../game/Difficulty.js';
 
+/**
+ * 击杀魂魄基数（W-E1 切片6：收口"余"里的"魂收入不随成长缩放"）。
+ *
+ * 修前写在 `update` 循环里的硬编码常量（boss 500 / golem 80 / elite 120 / normal 25），
+ * 只经 `addSouls` 乘难度、**不乘成长**——"哪个区更富"在击杀掉落这条路上没生效，
+ * 与 `enemyGrowth.js` 的 `souls` 列（"按区域档位放大单个敌人的基础掉落"）说的是两回事。
+ * 现在按敌人记下的档位乘 `growth.souls`，难度乘子仍只在 `addSouls` 那一口结算
+ * （两轴各司其职，与 `enemyGrowth.js` 文件头那一段同一分工）。
+ *
+ * 抽成纯函数：循环里只调用、门禁也能直接调，不抄第二份基数表。
+ */
+const KILL_SOULS = Object.freeze({ boss: 500, golem: 80, elite: 120, normal: 25 });
+
+/** 击杀掉魂 = 基类 × `growth.souls`（难度乘子在 `PlayerStats.addSouls` 结算） */
+export function killRewardSouls(kind, growthStage = 0) {
+  const base = KILL_SOULS[kind] ?? KILL_SOULS.normal;
+  return Math.round(base * growthAt(growthStage).souls);
+}
+
 export class EnemyManager {
   constructor(scene, world, projectiles) {
     this.scene = scene;
@@ -192,6 +211,7 @@ export class EnemyManager {
 
   spawnBoss(config) {
     const boss = new Boss(this.scene, this.world, { ...config, hazards: this.hazards });
+    this._scaleBoss(boss, zoneGrowthStage(zoneIdAt({ x: config.x ?? 0, z: config.z ?? 0 }, this.world?.zones)));
     this.boss = boss;
     this.enemies.push(boss);
     return boss;
@@ -201,6 +221,7 @@ export class EnemyManager {
     const boss = new MagicBoss(this.scene, this.world, {
       ...config, projectiles: this.projectiles, hazards: this.hazards,
     });
+    this._scaleBoss(boss, zoneGrowthStage(zoneIdAt({ x: config.x ?? 0, z: config.z ?? 0 }, this.world?.zones)));
     this.boss2 = boss;
     this.enemies.push(boss);
     return boss;
@@ -210,6 +231,7 @@ export class EnemyManager {
     const boss = new SpaceBoss(this.scene, this.world, {
       ...config, projectiles: this.projectiles, hazards: this.hazards,
     });
+    this._scaleBoss(boss, zoneGrowthStage(zoneIdAt({ x: config.x ?? 0, z: config.z ?? 0 }, this.world?.zones)));
     this.boss3 = boss;
     this.enemies.push(boss);
     return boss;
@@ -219,6 +241,7 @@ export class EnemyManager {
     const boss = new VoidBoss(this.scene, this.world, {
       ...config, hazards: this.hazards,
     });
+    this._scaleBoss(boss, zoneGrowthStage(zoneIdAt({ x: config.x ?? 0, z: config.z ?? 0 }, this.world?.zones)));
     this.voidBoss = boss;
     this.enemies.push(boss);
     return boss;
@@ -228,8 +251,35 @@ export class EnemyManager {
     const boss = new ChaosBoss(this.scene, this.world, {
       ...config, hazards: this.hazards,
     });
+    this._scaleBoss(boss, zoneGrowthStage(zoneIdAt({ x: config.x ?? 0, z: config.z ?? 0 }, this.world?.zones)));
     this.chaosBoss = boss;
     this.enemies.push(boss);
+    return boss;
+  }
+
+  /**
+   * Boss 也走难度×成长这一条缩放链（W-E1 切片6：收口"余"里的"Boss 不收成长"）。
+   *
+   * 修前五个 `spawn*Boss` 直接 `new BossX(config)`，绕过了 `spawnAt` 的难度×成长咽喉，
+   * 于是同一只影界守护者在灰白森林与破碎时线里血量是同一个 800、伤害同一个 18 ——
+   * "越往后越难"在 Boss 身上断档。这里的缩放口径**逐格对齐** `spawnAt`（290–310）：
+   * - 血量 = 构造基值 × `difficulty.enemyHp` × `growth.hp`（与 `spawnAt` 同一式）；
+   * - 伤害 = 构造基值 × `growth.damage`（与 `spawnAt` 同一式：**不乘难度**——
+   *   难度的 `damageTaken` 是玩家侧的，敌人出招伤害只随成长，否则 brutal 档会把
+   *   "更肉"变成"更疼两道"，那是另一件事）；
+   * - 把档位记在 Boss 身上（`growthStage`），于是 Boss 召的仆从也跟着这一档长
+   *   （`_drainSummons` 读 `owner.growthStage`，把"召唤物不收成长"那半句话一并结了）。
+   *
+   * 基值从 `boss.maxHp` / `boss.damage` 现读，不抄第二份：新增一只 Boss 类改了默认血量，
+   * 这里自动跟着变，不用回来同步一个常数。
+   */
+  _scaleBoss(boss, stage) {
+    const growth = growthAt(stage);
+    const hpMul = difficultyMultiplier('enemyHp') * growth.hp;
+    const dmgMul = growth.damage;
+    boss.maxHp = boss.hp = Math.round(boss.maxHp * hpMul);
+    boss.damage = Math.round(boss.damage * dmgMul);
+    boss.growthStage = stage;
     return boss;
   }
 
@@ -499,7 +549,8 @@ export class EnemyManager {
         enemy._lootDropped = true;
         // 档位只问一次：魂魄数与"掉不掉装备"都读这同一个 `kind`（两条各判一遍迟早一个说精英一个说普通）
         const kind = enemy.isBoss ? 'boss' : enemy.type === 'golem' ? 'golem' : enemy.type === 'elite' ? 'elite' : 'normal';
-        const souls = kind === 'boss' ? 500 : kind === 'golem' ? 80 : kind === 'elite' ? 120 : 25;
+        // 按敌人死时记下的档位乘成长（`growth.souls`）；难度乘子在 `addSouls` 结算
+        const souls = killRewardSouls(kind, enemy.growthStage ?? 0);
         // 掉哪一件按"它死在哪儿"查（`zoneIdAt` 是按位置反推区域的唯一一处，这里只是调用它）；
         // `bossId` 同理由这里给（切片5 固定掉落只认世界 Boss 的登记，野生/副本 Boss 交 null）
         loot?.spawnKill(enemy.position, souls, kind, zoneIdAt(enemy.position, game?.world?.zones), enemy.bossId ?? null);
