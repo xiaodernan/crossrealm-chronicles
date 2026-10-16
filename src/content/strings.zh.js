@@ -316,6 +316,69 @@ export const STRINGS_ZH = Object.freeze({
   npc_astronaut_c3_p1: '对接舱旋转 — 两船同速，否则金属的葬礼。',
   npc_astronaut_c3_p2: '虫洞拱门在西侧 — 光在环里折叠。',
 
+  // 营火常驻 NPC 的说话人名 / 头衔 / 口癖（content/restNpcDefs.js，W-D2 切片15）。
+  // 说话人名**只有这一份** —— `content/restDialogues.js` 里那 93 处 `speaker` 抄本已删净。
+  rest_npc_hub_name: '锚火看守',
+  rest_npc_hub_title: '看守 · 余温',
+  rest_npc_hub_bark_0: '火不会灭，只要锚还在。',
+  rest_npc_hub_bark_1: '三个位面的风，在这里交汇。',
+  rest_npc_hub_bark_2: '休息前先听听风声。',
+  rest_npc_fantasy_name: '精灵斥候',
+  rest_npc_fantasy_title: '斥候 · 灰林',
+  rest_npc_fantasy_bark_0: '森林记得每一场战争。',
+  rest_npc_fantasy_bark_1: 'Boss 红圈别贪刀。',
+  rest_npc_fantasy_bark_2: '连击终结能清小怪。',
+  rest_npc_magic_name: '奥术旅者',
+  rest_npc_magic_title: '旅者 · 遗境',
+  rest_npc_magic_bark_0: '火焰里倒映着未发生的灾难。',
+  rest_npc_magic_bark_1: '蓄力法术是对 Boss 的礼貌。',
+  rest_npc_magic_bark_2: '禁书在迷宫深处。',
+  rest_npc_space_name: '宇航员回声',
+  rest_npc_space_title: '回声 · Endurance',
+  rest_npc_space_bark_0: '时间在这里是圆的。',
+  rest_npc_space_bark_1: '引力井会把你拉向中心。',
+  rest_npc_space_bark_2: '奇点领主有三阶段。',
+  rest_npc_void_name: '时线残影',
+  rest_npc_void_title: '残影 · 折叠',
+  rest_npc_void_bark_0: '有时火焰会倒着烧。',
+  rest_npc_void_bark_1: '时停可以用蓄力打断。',
+  rest_npc_void_bark_2: '隐藏 Boss 在北侧。',
+  rest_npc_abyss_name: '裂隙引路人',
+  rest_npc_abyss_title: '引路 · 边境',
+  rest_npc_abyss_bark_0: '门越多，界越薄。',
+  rest_npc_abyss_bark_1: '混沌脉冲别贴身。',
+  rest_npc_abyss_bark_2: 'Ch5 后可重进迷宫。',
+  rest_npc_gloom_name: '迷雾行者',
+  rest_npc_gloom_title: '行者 · 幽暗',
+  rest_npc_gloom_bark_0: '迷雾里只有脚印不撒谎。',
+  rest_npc_gloom_bark_1: '灯笼点亮前别往深处走。',
+  rest_npc_gloom_bark_2: '怨影落地后有硬直。',
+  rest_npc_radiant_name: '晨曦祭司',
+  rest_npc_radiant_title: '祭司 · 圣域',
+  rest_npc_radiant_bark_0: '晨曦洗礼过的灵魂不惧黑暗。',
+  rest_npc_radiant_bark_1: '骑士盾击后腿部无甲。',
+  rest_npc_radiant_bark_2: '祭坛只在晨曦时开放。',
+
+  // CG 画廊：筛选行的区域名 + bonus 行的说话人（game/CgGalleryRegistry.js，W-D2 切片15）。
+  // 与字幕同一条口径：目录里存键，界面在播出那一刻展开（营火行的说话人取自上面那份定义）。
+  cg_zone_all: '全部',
+  cg_zone_hub: '枢纽',
+  cg_zone_fantasy: '森林',
+  cg_zone_magic: '魔法',
+  cg_zone_space: '荒原',
+  cg_zone_void: '时线',
+  cg_zone_abyss: '混沌',
+  cg_zone_combat: '战斗',
+  cg_zone_dungeon: '地牢',
+  cg_speaker_combat_memory: '战斗记忆',
+  cg_speaker_boss: 'Boss',
+  cg_speaker_explore: '探索',
+  cg_speaker_prologue: '序章',
+  cg_speaker_beacon: '信标',
+  cg_speaker_chronicle: '纪事',
+  cg_speaker_campfire: '营火',
+  cg_speaker_photo: '拍照',
+
   // QuestSystem.js 进度文案 / 提示
   quest_progress_all_complete: '全部任务已完成 — 无尽探索模式',
   quest_progress_hits: '${current} / ${target} 命中',
@@ -462,6 +525,145 @@ export const STRINGS_ZH = Object.freeze({
   cg_gallery_codex_full: '秘典全收录',
   cg_gallery_photo: '荒原留影',
   cg_gallery_campfire_all: '六火皆憩',
+
+  // HelpManual.js — 说明书正文（切片14）
+  // 章节标题
+  hm_title_start: '快速开始',
+  hm_title_combat: '战斗操作',
+  hm_title_world: '世界与位面',
+  hm_title_dungeons: '地下城与 Boss',
+  hm_title_bosses: '五 Boss 攻略',
+  hm_title_autoplay: '自动通关',
+  hm_title_perf_hud: '性能 HUD 与存档',
+
+  // 章节正文（带 {action} 占位，由 keyText 在播出那一刻展开）
+  hm_body_start: `欢迎来到《跨界纪元》浏览器 Demo。
+
+1. 点击画面锁定鼠标，WASD 移动，{sprint} 冲刺
+2. {cameraMode} 切换第一/第三人称（推荐第三人称 — 法环式轨道镜头，鼠标直接转视角）
+3. 滚轮缩放镜头距离 · 镜头始终看向角色，不再「看前方地面」导致晕
+2. 走到蓝色「世界之锚」按 {interact} 接受使命
+3. 东侧训练木人练习连击（左键轻击、右键重击）
+4. 按 {journal} 打开任务日志，跟随 Chapter 1→5 主线
+5. 靠近营火按 {interact} 与**常驻 NPC** 分支对话，再选「休息 / 升级」；Chapter 2 起可用 {fastTravel} 快速旅行
+6. {save} 存档 · {load} 读档 · {escape} 暂停（可导出/导入 JSON 存档，旧版会自动迁移）
+7. {questTracker} 位面助手 →「自动通关」：你的角色亲自跑完全流程 · {escape} 停止`,
+
+  hm_body_combat: `左键 — 轻击连击（连击增伤，高连击可终结技闪屏）
+右键 — 重击 / 处决（弹反成功后）
+{parry} — 弹反（敌人红圈攻击前按下）
+{roll} — 闪避（HUD 精力条下方显示翻滚 CD）
+{lockOn} — 锁定最近敌人（再按取消）
+{skill} — 位面斩（武器技能）
+{spell1}–{spell4} — 法术（长按 {spell1}/{spell2}/{spell3} 蓄力，可打断 Boss 时停）
+{swapWeapon} — 切换剑 / 杖（影响近战与法术加成）
+弹反成功后可右键处决；Boss 战注意阶段提示与架势条
+
+【Boss 通用打法】
+1. 靠近 Boss 按 {lockOn} 锁定，镜头会跟随目标
+2. 观察脚下红圈：圈快满时按 {parry} 弹反 → 立刻右键处决（伤害极高）
+3. 不会弹反就 {roll} 翻滚躲开，等 Boss 收招再左键连击
+4. 连击 3~5 下再重击，打满敌人头顶架势条可 stagger 硬直；**处决/Boss 击破**有慢镜头轨道锁定
+5. 精力不够就拉开距离，等回满再打；快死了找营火 {interact} 休息回满
+6. {skill} 位面斩（范围 AOE）适合小怪围殴或 Boss 硬直时补刀
+7. {spell1}~{spell4} 法术：Boss 放时停/大招时长按 {spell1}/{spell2}/{spell3} 蓄力可打断`,
+
+  hm_body_world: `交汇枢纽 — 起点，世界之锚与训练木人
+灰白森林 (西) — 影界守护者 Boss
+霍格沃兹遗境 (北) — 大奥术师 Boss，Bloom 增强
+米勒荒原 (东) — 奇点领主 Boss
+破碎时线 (东北) — 隐藏位面，重力反转 + 时间回响
+混沌边境 (西北) — 混沌领主，闪电风暴
+
+跨区时会触发「位面渗漏」视觉 + 音效层。
+地图上有 12 处「位面残响」魂火：靠近会被吸引并吸收，获得位面之魂。
+{zonePanel} 打开区域面板 · {minimap} 小地图 · 发现物记入 {journal} 日志`,
+
+  hm_body_dungeons: `三座地下城入口（紫色传送环，按 {interact} 进入）：
+· 灰白森林 — 遗迹 crypt
+· 霍格沃兹遗境 — 禁忌图书馆
+· 米勒荒原 — 五维裂隙
+
+清怪后可离开并推进任务。五名 Boss 各对应一章；
+时线执政官为 Chapter 4 隐藏 Boss（破碎时线深处 Z≈235）。
+击败 Boss 获得大量魂火 + 2 武器技能点。
+{settings} 打开画面设置（音量、Bloom、阴影等）`,
+
+  hm_body_bosses: `【影界守护者】灰白森林西侧 X≈-250
+· 招式慢、好弹反；锁定后绕背输出
+· 阶段二会召唤影兵，先清小怪或 {skill} 位面斩
+
+【大奥术师】霍格沃兹遗境北侧 X≈5 Z≈-220
+· 远程法术多，侧向翻滚（{roll}）贴近再打
+· 蓄力火球前摇长，可 {parry} 弹反或蓄力 {spell1} 号法术对轰
+
+【奇点领主】米勒荒原 X≈235 Z≈155
+· 会瞬移，锁定 {lockOn} 不要丢
+· 引力圈时向外滚，落地硬直时重击
+
+【时线执政官】破碎时线 Z≈235（Ch4+，重力反转区）
+· 注意行走高度变化，翻滚方向与平时相反
+· 时停前会有蓝色预兆，蓄力法术可打断
+
+【混沌领主】混沌边境 X≈-200 Z≈285（Ch5+）
+· 闪电风暴降视野，贴身穿刺输出
+· 二阶段狂暴，弹反窗口变短，优先翻滚`,
+
+  hm_body_autoplay: `按 {questTracker} 打开位面助手 → 点「自动通关（操控你的角色）」。
+
+你的角色会从枢纽出发，自动走路经过五区并推进全部任务。
+镜头跟在背后，无需操作；{escape} 随时停止。
+
+若只想跳过走路直接完成验收，点「瞬间验收」。`,
+
+  hm_body_perf_hud: `{perfHud} 开关性能 HUD（开发期工具，不影响玩法）。
+
+数值标黄 +N 表示该计数相对历史最低点净增 N；标红表示增幅超过容差——
+反复进出副本后「几何体 / 纹理 / 着色器 / 场景节点」应回落到原值，只增不减即泄漏。
+
+存档当前为 v6（crossrealm_save_v6）。{save} 存档 · {load} 读档 · {escape} 暂停菜单可导出/导入 JSON。
+旧的 v4 / v5 存档会在启动时显式迁移到 v6 并提示，原键保留一份以便回滚；
+解析不了的存档会转移到 crossrealm_save_v6:corrupt 并弹出说明，而不是静默丢失。`,
+
+  // 扩写章节（HELP_SECTIONS_EXTRA，W-D2 切片15）
+  hm_title_journal_tabs: '日志页签',
+  hm_body_journal_tabs: `[{journal}] 打开跨界日志，除任务/碎片/Boss 外还有：
+
+· CG画廊 — 营火与战斗插画，点击放大
+· 成就 — 弹反、连击、Boss、探索
+· 秘典 — 位面 lore 图鉴
+· 营火记忆 — 休息次数与对话回顾
+· 地下城 — 迷宫清空记录
+· 流派 — 剑/杖技能树预览
+· 支线 — 可选目标，自动奖魂火
+
+页签按钮上显示已解锁数量。`,
+  hm_title_meta_systems: '进阶系统',
+  hm_body_meta_systems: `战斗风格 — 弹反/终结/处决/Boss 累积评级 C~SS
+Boss 再战 — 击败后在信标按 {interact} 召唤，+5 魂火
+连杀魂火 — 4.5 秒内连续击杀 ≥3 额外魂火
+{photoMode} 拍照 — 隐藏 HUD 截屏
+{escape} — 处决慢镜头可跳过；通关字幕也可跳过
+区域切换 — 全屏过渡动画 + 区域名`,
+  hm_title_pop_culture: '次元回声（致敬）',
+  hm_body_pop_culture: `借母题与氛围致敬流行文化，名称已做区分（非官方授权）。
+
+霍格沃兹遗境 — 咒术学院、飞天环赛、魔药温室
+米勒荒原 — 墨菲书架、米勒沙漏、对接舱
+破碎时线 — 逆相界：广播塔、裂口、霓虹、裂隙猎犬
+枢纽东侧 — 位面海报墙
+
+{journal} → 次元回声页签 · 按 {interact} 调查地图光柱 POI
+
+Wave2：九分站台、护念湖、三强赛台、虫洞、曼恩信标、街机厅、裂相钟塔等
+
+Wave3 三巨头母题：
+· 灰白森林 — 边境往事（西部）：沙龙镜墙、正午决斗圈、幽灵铁道
+· 混沌边境 — 幽冥帮派（黑帮）：禁酒窖、家族圣龛、码头货仓
+· 米勒荒原 — 深空纪元（科幻）：殖民穹顶、休眠 AI、跃迁门阵列
+进入对应位面有轻微视觉 overlay；POI 交互时短暂增强。
+
+Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低语（时线）· 星港商路（荒原）`,
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

@@ -4,52 +4,25 @@
  * 原 HELP_SECTIONS_EXTRA 从 HelpManualExtras.js 迁移而来。
  */
 
+/**
+ * 扩写章节数据表（W-D2 切片15 起：正文与标题进双表，这里只存文案键）。
+ * 真正的中文/英文住在 `content/strings.zh.js` / `.en.js`（hm_title_* / hm_body_*），
+ * 播出那一刻由 `ui/HelpManual.js` 走 `keyText(t(key))` 展开 —— 与主线章节、CG 字幕同源。
+ */
 export const HELP_SECTIONS_EXTRA = [
   {
     id: 'journal-tabs',
-    title: '日志页签',
-    body: `[{journal}] 打开跨界日志，除任务/碎片/Boss 外还有：
-
-· CG画廊 — 营火与战斗插画，点击放大
-· 成就 — 弹反、连击、Boss、探索
-· 秘典 — 位面 lore 图鉴
-· 营火记忆 — 休息次数与对话回顾
-· 地下城 — 迷宫清空记录
-· 流派 — 剑/杖技能树预览
-· 支线 — 可选目标，自动奖魂火
-
-页签按钮上显示已解锁数量。`,
+    title: 'hm_title_journal_tabs',
+    body: 'hm_body_journal_tabs',
   },
   {
     id: 'meta-systems',
-    title: '进阶系统',
-    body: `战斗风格 — 弹反/终结/处决/Boss 累积评级 C~SS
-Boss 再战 — 击败后在信标按 {interact} 召唤，+5 魂火
-连杀魂火 — 4.5 秒内连续击杀 ≥3 额外魂火
-{photoMode} 拍照 — 隐藏 HUD 截屏
-{escape} — 处决慢镜头可跳过；通关字幕也可跳过
-区域切换 — 全屏过渡动画 + 区域名`,
+    title: 'hm_title_meta_systems',
+    body: 'hm_body_meta_systems',
   },
   {
     id: 'pop-culture',
-    title: '次元回声（致敬）',
-    body: `借母题与氛围致敬流行文化，名称已做区分（非官方授权）。
-
-霍格沃兹遗境 — 咒术学院、飞天环赛、魔药温室
-米勒荒原 — 墨菲书架、米勒沙漏、对接舱
-破碎时线 — 逆相界：广播塔、裂口、霓虹、裂隙猎犬
-枢纽东侧 — 位面海报墙
-
-{journal} → 次元回声页签 · 按 {interact} 调查地图光柱 POI
-
-Wave2：九分站台、护念湖、三强赛台、虫洞、曼恩信标、街机厅、裂相钟塔等
-
-Wave3 三巨头母题：
-· 灰白森林 — 边境往事（西部）：沙龙镜墙、正午决斗圈、幽灵铁道
-· 混沌边境 — 幽冥帮派（黑帮）：禁酒窖、家族圣龛、码头货仓
-· 米勒荒原 — 深空纪元（科幻）：殖民穹顶、休眠 AI、跃迁门阵列
-进入对应位面有轻微视觉 overlay；POI 交互时短暂增强。
-
-Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低语（时线）· 星港商路（荒原）`,
+    title: 'hm_title_pop_culture',
+    body: 'hm_body_pop_culture',
   },
 ];

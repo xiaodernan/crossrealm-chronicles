@@ -316,6 +316,71 @@ export const STRINGS_EN = Object.freeze({
   npc_astronaut_c3_p1: 'The docking bay spins — match speeds, or it is a metal funeral.',
   npc_astronaut_c3_p2: 'The wormhole arch is to the west — light folds inside the ring.',
 
+  // Campfire resident NPC name / title / barks (content/restNpcDefs.js, W-D2 slice 15).
+  // The speaker name lives HERE and only here — the 93 `speaker` copies in
+  // content/restDialogues.js were deleted after a probe proved all 93 were byte-identical.
+  rest_npc_hub_name: 'Anchor Fire Warden',
+  rest_npc_hub_title: 'Warden · Ember Warmth',
+  rest_npc_hub_bark_0: 'The fire never dies, as long as the anchor holds.',
+  rest_npc_hub_bark_1: 'The winds of three planes meet here.',
+  rest_npc_hub_bark_2: 'Listen to the wind before you rest.',
+  rest_npc_fantasy_name: 'Elven Scout',
+  rest_npc_fantasy_title: 'Scout · Greywood',
+  rest_npc_fantasy_bark_0: 'The forest remembers every war.',
+  rest_npc_fantasy_bark_1: 'Do not get greedy on the boss red circle.',
+  rest_npc_fantasy_bark_2: 'A finisher clears the small ones.',
+  rest_npc_magic_name: 'Arcane Traveler',
+  rest_npc_magic_title: 'Traveler · Ruins',
+  rest_npc_magic_bark_0: 'Fire mirrors disasters that have not happened yet.',
+  rest_npc_magic_bark_1: 'A charged spell is courtesy toward a boss.',
+  rest_npc_magic_bark_2: 'The forbidden books lie deep in the maze.',
+  rest_npc_space_name: 'Astronaut Echo',
+  rest_npc_space_title: 'Echo · Endurance',
+  rest_npc_space_bark_0: 'Time is a circle here.',
+  rest_npc_space_bark_1: 'The gravity well pulls you toward the center.',
+  rest_npc_space_bark_2: 'The Singularity Herald has three phases.',
+  rest_npc_void_name: 'Timeline Afterimage',
+  rest_npc_void_title: 'Afterimage · Folded',
+  rest_npc_void_bark_0: 'Sometimes the fire burns backwards.',
+  rest_npc_void_bark_1: 'A charged cast can break the time stop.',
+  rest_npc_void_bark_2: 'The hidden boss waits to the north.',
+  rest_npc_abyss_name: 'Rift Guide',
+  rest_npc_abyss_title: 'Guide · Border',
+  rest_npc_abyss_bark_0: 'The more doors, the thinner the boundary.',
+  rest_npc_abyss_bark_1: 'Do not hug the chaos pulse.',
+  rest_npc_abyss_bark_2: 'You can re-enter dungeons after Ch5.',
+  rest_npc_gloom_name: 'Mist Walker',
+  rest_npc_gloom_title: 'Walker · Gloom',
+  rest_npc_gloom_bark_0: 'In the mist, only footprints do not lie.',
+  rest_npc_gloom_bark_1: 'Do not go deeper until the lanterns are lit.',
+  rest_npc_gloom_bark_2: 'The wraith is open after it lands.',
+  rest_npc_radiant_name: 'Dawn Priest',
+  rest_npc_radiant_title: 'Priest · Sanctuary',
+  rest_npc_radiant_bark_0: 'A soul washed in dawnlight does not fear the dark.',
+  rest_npc_radiant_bark_1: 'The knight leaves the leg unarmored after a shield bash.',
+  rest_npc_radiant_bark_2: 'The altar only opens at dawn.',
+
+  // CG gallery: zone filter labels + bonus-row speakers (game/CgGalleryRegistry.js, W-D2 slice 15).
+  // Same contract as the captions: the catalog stores keys, the UI expands at paint time
+  // (campfire rows take their speaker from the definitions above).
+  cg_zone_all: 'All',
+  cg_zone_hub: 'Hub',
+  cg_zone_fantasy: 'Forest',
+  cg_zone_magic: 'Magic',
+  cg_zone_space: 'Wastes',
+  cg_zone_void: 'Timeline',
+  cg_zone_abyss: 'Chaos',
+  cg_zone_combat: 'Combat',
+  cg_zone_dungeon: 'Dungeon',
+  cg_speaker_combat_memory: 'Combat Memory',
+  cg_speaker_boss: 'Boss',
+  cg_speaker_explore: 'Exploration',
+  cg_speaker_prologue: 'Prologue',
+  cg_speaker_beacon: 'Beacon',
+  cg_speaker_chronicle: 'Chronicle',
+  cg_speaker_campfire: 'Campfire',
+  cg_speaker_photo: 'Photo',
+
   // QuestSystem.js progress / hints
   quest_progress_all_complete: 'All quests complete — endless exploration mode',
   quest_progress_hits: '${current} / ${target} hits',
@@ -463,6 +528,143 @@ export const STRINGS_EN = Object.freeze({
   cg_gallery_codex_full: 'Codex Complete',
   cg_gallery_photo: 'Wasteland Snapshot',
   cg_gallery_campfire_all: 'Six Fires Rested',
+
+  // HelpManual.js — Help Manual body (slice 14)
+  hm_title_start: 'Quick Start',
+  hm_title_combat: 'Combat Controls',
+  hm_title_world: 'World & Planes',
+  hm_title_dungeons: 'Dungeons & Bosses',
+  hm_title_bosses: 'Five Boss Guide',
+  hm_title_autoplay: 'Auto-play',
+  hm_title_perf_hud: 'Performance HUD & Save',
+
+  hm_body_start: `Welcome to the Crossrealm Chronicles browser Demo.
+
+1. Click the screen to lock the mouse, WASD to move, {sprint} to sprint
+2. {cameraMode} to switch first/third person (recommended third person — Dark Souls style orbital camera, mouse directly turns view)
+3. Mouse wheel to scale camera distance · Camera always looks at character, no more "looking at the ground in front" causing motion sickness
+2. Walk to the blue "World Anchor" and press {interact} to accept the mission
+3. East training dummy to practice combos (left click light hit, right click heavy hit)
+4. Press {journal} to open the quest log, follow Chapter 1→5 main line
+5. Approach campfire and press {interact} with **Resident NPC** for branch dialogue, then select "Rest / Upgrade"; Chapter 2 onward can use {fastTravel} fast travel
+6. {save} save · {load} read · {escape} pause (can export/import JSON save, old version auto migrates)
+7. {questTracker} Plane Assistant → "Auto-play" : your character personally runs the whole flow · {escape} stop`,
+
+  hm_body_combat: `Left click — light hit combo (combo increased damage, high combo can finish tech flash screen)
+Right click — heavy hit / execution (parry success after)
+{parry} — parry (enemy red circle attack before pressing)
+{roll} — dodge (HUD stamina bar below shows dodge CD)
+{lockOn} — lock onto nearest enemy (press again to cancel)
+{skill} — Plane Slash (weapon skill)
+{spell1}–{spell4} — magic (long press {spell1}/{spell2}/{spell3} to charge, can interrupt Boss time stop)
+{swapWeapon} — switch sword / staff (affects melee and magic bonus)
+Parry success then right click to execute; Boss fight note phase hint and stance bar
+
+【Boss General Tactics】
+1. Approach Boss and press {lockOn} to lock on, camera will follow target
+2. Observe red circle under feet: when circle almost full press {parry} parry → immediately right click execute (high damage)
+3. Can't parry? {roll} dodge roll away, wait for Boss to finish move then left click combo
+4. Combo 3~5 times then heavy hit, fill enemy top stance bar to stagger hard state；**execution/Boss 击破**has slow motion track lock
+5. Not enough stamina? pull back, wait for full refill；dead find campfire {interact} rest to refill
+6. {skill} Plane Slash (range AOE) suitable for small mobs surrounding or Boss hard state补刀
+7. {spell1}~{spell4} magic：Boss when time stop/big move long press {spell1}/{spell2}/{spell3} to charge can interrupt`,
+
+  hm_body_world: `Exchange Hub — start point, World Anchor and Training Dummy
+Greywhite Forest (West) — Shadow Warden Boss
+Hogwarts Legacy Relic (North) — Great Arcanist Boss，Bloom enhanced
+Miller Wasteland (East) — Singularity Lord Boss
+Broken Timeline (Northeast) — hidden plane，gravity inversion + time echo
+Chaos Border (Northwest) — Chaos Lord，lightning storm
+
+Crossing area triggers "Plane Leak" visual + sound layer.
+Map has 12 "Plane Echo" soul fires：approach will be attracted and absorbed，gain Plane Souls.
+{zonePanel} open area panel · {minimap} mini map · discovered objects recorded in {journal} log`,
+
+  hm_body_dungeons: `Three dungeon entrances (purple teleport ring，press {interact} to enter):
+· Greywhite Forest — Ruin crypt
+· Hogwarts Legacy Relic — Forbidden Library
+· Miller Wasteland — Five-dimensional Rift
+
+Clear monsters then can leave and push mission。Five Bosses each correspond to one chapter；
+Timeline Executor is Chapter 4 hidden Boss（Broken Timeline deep Z≈235）。
+Defeat Boss gains large amount soul fire + 2 weapon skill points.
+{settings} open screen settings（volume，Bloom，shadow etc）`,
+
+  hm_body_bosses: `【Shadow Warden】Greywhite Forest west X≈-250
+· slow moves，good to parry；lock on then backstab
+· Phase 2 will summon shadow soldiers，first clear small mobs or {skill} Plane Slash
+
+【Great Arcanist】Hogwarts Legacy north X≈5 Z≈-220
+· many remote magic，sidestep dodge（{roll}）approach then hit
+· charge fireball windup long，can {parry} parry or charge {spell1} magic duel
+
+【Singularity Lord】Miller Wasteland X≈235 Z≈155
+· will teleport，lock on {lockOn} don't lose
+· gravity circle when roll outward，landing hard state heavy hit
+
+【Timeline Executor】Broken Timeline Z≈235（Ch4+，gravity inversion area）
+· notice walking height change，roll direction opposite usual
+· time stop前 will have blue forewarning，charge spell can interrupt
+
+【Chaos Lord】Chaos Border X≈-200 Z≈285（Ch5+）
+· lightning storm lowers vision，贴身穿刺输出
+· 二阶段狂暴，弹反窗口变短，优先翻滚`,
+
+  hm_body_autoplay: `Press {questTracker} to open Plane Assistant → click "Auto-play (operate your character)"。
+
+Your character will start from Hub，automatically walk through five zones and push all missions.
+Camera follows behind，no need to operate；{escape} stop anytime。
+
+If only want skip walking directly complete acceptance，click "Instant Acceptance".`,
+
+  hm_body_perf_hud: `{perfHud} toggle Performance HUD（dev tool，doesn't affect gameplay）。
+
+Value shows yellow +N means this count relative to historical lowest net increase N；red means increase exceeds tolerance——
+Repeat in/out副本 after "Geometry / Texture / Shader / Scene Node" should return to original value，only increase no decrease即泄漏。
+
+Save currently v6（crossrealm_save_v6）。{save} save · {load} read · {escape} pause menu can export/import JSON。
+Old v4 / v5 save will at startup explicitly migrate to v6 and hint，original key keep one for rollback；
+Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation，instead of silently lost。`,
+
+  // Extra sections (HELP_SECTIONS_EXTRA, W-D2 slice15)
+  hm_title_journal_tabs: 'Journal Tabs',
+  hm_body_journal_tabs: `[{journal}] open Crossrealm Journal, besides quests/fragments/Boss there are:
+
+· CG Gallery — campfire & combat illustrations, click to enlarge
+· Achievements — parry, combo, Boss, exploration
+· Codex — plane lore gallery
+· Campfire Memory — rest count & dialogue review
+· Dungeons — maze clear records
+· Styles — sword/staff skill tree preview
+· Side Quests — optional objectives, auto-reward souls
+
+Tab buttons show unlocked count。`,
+  hm_title_meta_systems: 'Meta Systems',
+  hm_body_meta_systems: `Combat Style — parry/finish/execute/Boss accumulate rating C~SS
+Boss Rematch — after defeat, summon at beacon with {interact}, +5 souls
+Kill-streak Souls — 3+ kills within 4.5s gives extra souls
+{photoMode} Photo — hide HUD screenshot
+{escape} — execution slow-mo skippable; ending credits skippable
+Zone Switch — fullscreen transition + zone name`,
+  hm_title_pop_culture: 'Cross-echoes (Homage)',
+  hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
+
+Hogwarts Ruins — spell academy, flying-ring race, potion greenhouse
+Miller Wastes — Murphy bookshelf, Miller hourglass, docking pod
+Shattered Timeline — inverse realm: broadcast tower, rift, neon, rift hound
+Hub east — plane poster wall
+
+{journal} → Cross-echoes tab · press {interact} to investigate map light-pillar POI
+
+Wave2: Nine-platform Station, Mind Lake, Triwizard Stage, Wormhole, Mann Beacon, Arcade, Phase-clock Tower, etc.
+
+Wave3 three-franchise motifs:
+· Greywhite Forest — Frontier Past (Western): salon mirror wall, noon duel circle, ghost railroad
+· Chaos Frontier — Ghost Gang (mob): bootleg cellar, family shrine, dock warehouse
+· Miller Wastes — Deep-space Era (sci-fi): colony dome, dormant AI, jump-gate array
+Entering the corresponding plane has slight visual overlay; POI interaction briefly enhances.
+
+Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (Timeline) · Star Port (Wastes)`,
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

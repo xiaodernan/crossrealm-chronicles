@@ -8,11 +8,22 @@
  *
  * 定义（名字 / 头衔 / 配色 / 站位）是数据，"怎么把 NPC 建出来、怎么跟着对话高亮"
  * 是行为，后者留在 `world/RestNpcManager.js`。
+ *
+ * `name` / `title` / `barks` 存的是**文案键**（W-D2 切片15），不是文案本身 —— 与 CG 目录、
+ * 台词池同一个口径：数据层存键，显示侧在播出那一刻 `t()`。三处出口各自展开：
+ * `game/RestDialogue.js`（对话框说话人 / 头衔 / `rest-dialogue` 事件的 `speaker`，
+ * 它会被营火记忆**存成快照**，所以必须在离开这一格之前说完真话）、
+ * `world/RestNpcManager.js`（口癖气泡与两条 toast）、`game/CgGalleryRegistry.js`（画廊卡片）。
+ *
+ * 顺带收掉一份 93 行的抄本：`content/restDialogues.js` 的每个节点过去都自带一格
+ * `speaker: "…"`，实测 93 处**逐字等于**这里的 `name`（探针
+ * `.tmp-20261016-wd2s15/probe-speaker-copies.mjs`：93 处 / 0 处不一致）—— 已删净，
+ * 说话人名从此只有这一份（`registry.js` 的节点 schema 相应把 `speaker` 收成可选）。
  */
 export const REST_NPC_DEFS = {
   hub: {
-    name: '锚火看守',
-    title: '看守 · 余温',
+    name: 'rest_npc_hub_name',
+    title: 'rest_npc_hub_title',
     body: 0x5a5048,
     cloak: 0xc9a962,
     emissive: 0x664422,
@@ -20,11 +31,11 @@ export const REST_NPC_DEFS = {
     height: 1.05,
     offset: [1.35, 0, 0.6],
     idle: 'stand',
-    barks: ['火不会灭，只要锚还在。', '三个位面的风，在这里交汇。', '休息前先听听风声。'],
+    barks: ['rest_npc_hub_bark_0', 'rest_npc_hub_bark_1', 'rest_npc_hub_bark_2'],
   },
   fantasy: {
-    name: '精灵斥候',
-    title: '斥候 · 灰林',
+    name: 'rest_npc_fantasy_name',
+    title: 'rest_npc_fantasy_title',
     body: 0x3a5a40,
     cloak: 0x2a4030,
     emissive: 0x224422,
@@ -32,11 +43,11 @@ export const REST_NPC_DEFS = {
     height: 0.95,
     offset: [-1.1, 0, 0.45],
     idle: 'sit',
-    barks: ['森林记得每一场战争。', 'Boss 红圈别贪刀。', '连击终结能清小怪。'],
+    barks: ['rest_npc_fantasy_bark_0', 'rest_npc_fantasy_bark_1', 'rest_npc_fantasy_bark_2'],
   },
   magic: {
-    name: '奥术旅者',
-    title: '旅者 · 遗境',
+    name: 'rest_npc_magic_name',
+    title: 'rest_npc_magic_title',
     body: 0x4a3868,
     cloak: 0x8866cc,
     emissive: 0x5533aa,
@@ -44,11 +55,11 @@ export const REST_NPC_DEFS = {
     height: 1.0,
     offset: [0.9, 0, -0.7],
     idle: 'float',
-    barks: ['火焰里倒映着未发生的灾难。', '蓄力法术是对 Boss 的礼貌。', '禁书在迷宫深处。'],
+    barks: ['rest_npc_magic_bark_0', 'rest_npc_magic_bark_1', 'rest_npc_magic_bark_2'],
   },
   space: {
-    name: '宇航员回声',
-    title: '回声 · Endurance',
+    name: 'rest_npc_space_name',
+    title: 'rest_npc_space_title',
     body: 0x8899aa,
     cloak: 0x667788,
     emissive: 0x334455,
@@ -57,11 +68,11 @@ export const REST_NPC_DEFS = {
     offset: [-0.8, 0, 0.9],
     idle: 'stand',
     helmet: true,
-    barks: ['时间在这里是圆的。', '引力井会把你拉向中心。', '奇点领主有三阶段。'],
+    barks: ['rest_npc_space_bark_0', 'rest_npc_space_bark_1', 'rest_npc_space_bark_2'],
   },
   void: {
-    name: '时线残影',
-    title: '残影 · 折叠',
+    name: 'rest_npc_void_name',
+    title: 'rest_npc_void_title',
     body: 0x6a6050,
     cloak: 0x998866,
     emissive: 0xaa8844,
@@ -70,11 +81,11 @@ export const REST_NPC_DEFS = {
     offset: [0.7, 0, 0.5],
     idle: 'ghost',
     transparent: true,
-    barks: ['有时火焰会倒着烧。', '时停可以用蓄力打断。', '隐藏 Boss 在北侧。'],
+    barks: ['rest_npc_void_bark_0', 'rest_npc_void_bark_1', 'rest_npc_void_bark_2'],
   },
   abyss: {
-    name: '裂隙引路人',
-    title: '引路 · 边境',
+    name: 'rest_npc_abyss_name',
+    title: 'rest_npc_abyss_title',
     body: 0x3a2028,
     cloak: 0x661122,
     emissive: 0xff2244,
@@ -82,11 +93,11 @@ export const REST_NPC_DEFS = {
     height: 1.12,
     offset: [-0.95, 0, -0.4],
     idle: 'stand',
-    barks: ['门越多，界越薄。', '混沌脉冲别贴身。', 'Ch5 后可重进迷宫。'],
+    barks: ['rest_npc_abyss_bark_0', 'rest_npc_abyss_bark_1', 'rest_npc_abyss_bark_2'],
   },
   gloom: {
-    name: '迷雾行者',
-    title: '行者 · 幽暗',
+    name: 'rest_npc_gloom_name',
+    title: 'rest_npc_gloom_title',
     body: 0x3a3a4a,
     cloak: 0x4a4a6a,
     emissive: 0x556688,
@@ -94,11 +105,11 @@ export const REST_NPC_DEFS = {
     height: 1.02,
     offset: [1.0, 0, -0.5],
     idle: 'sit',
-    barks: ['迷雾里只有脚印不撒谎。', '灯笼点亮前别往深处走。', '怨影落地后有硬直。'],
+    barks: ['rest_npc_gloom_bark_0', 'rest_npc_gloom_bark_1', 'rest_npc_gloom_bark_2'],
   },
   radiant: {
-    name: '晨曦祭司',
-    title: '祭司 · 圣域',
+    name: 'rest_npc_radiant_name',
+    title: 'rest_npc_radiant_title',
     body: 0xffdd88,
     cloak: 0xffcc00,
     emissive: 0xffaa00,
@@ -106,6 +117,6 @@ export const REST_NPC_DEFS = {
     height: 1.05,
     offset: [-1.1, 0, 0.7],
     idle: 'stand',
-    barks: ['晨曦洗礼过的灵魂不惧黑暗。', '骑士盾击后腿部无甲。', '祭坛只在晨曦时开放。'],
+    barks: ['rest_npc_radiant_bark_0', 'rest_npc_radiant_bark_1', 'rest_npc_radiant_bark_2'],
   },
 };

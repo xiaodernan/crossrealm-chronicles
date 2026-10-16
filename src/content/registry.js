@@ -580,7 +580,10 @@ export const CONTENT_TABLES = [
           of: {
             t: 'row',
             of: {
-              speaker: { t: 'string' },
+              // 说话人名**不是**节点自己的字段了（W-D2 切片15）：它在 `REST_NPC_DEFS[zone].name`
+              // 里只有一份，这里那 93 处 `speaker` 抄本（实测逐字等于定义里的名字）已删净。
+              // 留着这一格是为了"某一节点确实换了说话人"那种情况 —— 写的话要是**文案键**。
+              speaker: { t: 'string', required: false },
               // hub 的 quest 那一格文本由运行时按当前任务现填，所以允许 null ——
               // 但不许空串：空串在界面上是一块空白，null 至少说明"这一格是有意留的"
               text: { t: 'string', nullable: true },

@@ -12,6 +12,25 @@ function highlightKeywords(text) {
   return text.replace(/\*\*(.+?)\*\*/g, '<strong class="dialog-kw">$1</strong>');
 }
 
+/**
+ * 这一句是谁说的 → 给人看的名字（W-D2 切片15）。
+ *
+ * `REST_NPC_DEFS[zone].name` 存的是**文案键**，节点自己那 93 处 `speaker` 抄本已删净
+ * （探针证明 93/93 逐字等于定义里的名字），所以这里的取值顺序仍是"节点若写了就用节点的
+ * （写的话要是键），否则用这一座定义的名字"，只是**统一在出口展开一次**。
+ * 认不出这一座就没有名字（返回 `undefined`，由调用方决定怎么显示），不冒充锚火看守 ——
+ * 成对关系由 `registry.js` 的 `checkRestDialogueTree` 第四、五条开机核。
+ */
+function speakerNameOf(node, def) {
+  const key = node?.speaker ?? def?.name;
+  return key ? t(key) : undefined;
+}
+
+/** 这一座 NPC 的头衔（同样是键；认不出就没有） */
+function speakerTitleOf(def) {
+  return def?.title ? t(def.title) : undefined;
+}
+
 export class RestDialogue {
   constructor(game) {
     this.game = game;
@@ -47,10 +66,12 @@ export class RestDialogue {
     const preview = typeof node?.text === 'string' ? keyText(node.text).replace(/\*\*/g, '').split('\n')[0] : '';
     // 说话人名与配色只从 `REST_NPC_DEFS` 取（W-B4 切片1）：认不出这一座就没有名字 / 用默认色，
     // 而不是冒充锚火看守 —— 成对关系由 `registry.js` 的 `checkRestDialogueTree` 第四、五条开机核。
+    // 名字在**离开这一格之前**换成给人看的那一份（W-D2 切片15）：`rest-dialogue` 的负载会被
+    // 营火记忆存成日志条目，存进去的就是定稿，改语言之后回头翻不该看到键名。
     emit(type, {
       restId,
       nodeId,
-      speaker: node?.speaker ?? def?.name,
+      speaker: speakerNameOf(node, def),
       speakerId: restId,
       mood: node?.mood ?? 'calm',
       accent: def?.accent,
@@ -95,8 +116,8 @@ export class RestDialogue {
     // 抄本曾经和实际名漂过两座 —— 站在枢纽火边，提示写"世界之锚休息点"，一秒后对话标题写"世界之锚营火"
     // （W-B4 切片2）。名字表在 `content/restPointNames.js`，`keyText` 由 `Dialog` 那一道口径负责，这里不重复展开
     this.game.dialog.showChoices(this.activeRest.name, highlightKeywords(text), choices, {
-      speaker: node.speaker ?? def?.name,
-      speakerTitle: def?.title,
+      speaker: speakerNameOf(node, def),
+      speakerTitle: speakerTitleOf(def),
       accent: def?.accent,
       mood: node.mood ?? 'calm',
       restId: this.activeRest.id,

@@ -9,6 +9,14 @@ import { t } from '../engine/i18n.js';
  */
 const captionOf = (entry) => (entry.caption ? t(entry.caption) : entry.id);
 
+/**
+ * 说话人与区域名也是键（W-D2 切片15），同一条口径：**界面**是唯一的展开点。
+ * 营火行的说话人取自 `REST_NPC_DEFS[zone].name`（那边存键），bonus 行取自
+ * `cg_speaker_*` —— 两处都是键，所以这一层不需要知道"这一行是哪一类"。
+ */
+const speakerOf = (entry) => (entry.speaker ? t(entry.speaker) : '');
+const zoneLabelOf = (zone) => (zone && CG_ZONE_LABELS[zone] ? t(CG_ZONE_LABELS[zone]) : (zone ?? ''));
+
 /** [J] 日志 — CG 画廊 Tab 渲染 */
 export class CgJournalTab {
   constructor(game) {
@@ -65,7 +73,7 @@ export class CgJournalTab {
     this.lightbox.querySelector('.cg-lightbox-img').src = url;
     this.lightbox.querySelector('.cg-lightbox-caption').textContent = captionOf(entry);
     this.lightbox.querySelector('.cg-lightbox-meta').textContent =
-      `${entry.speaker ?? ''} · ${CG_ZONE_LABELS[entry.zone] ?? entry.zone} · 观看 ${(cg.viewCounts[entry.id] ?? 0) + 1} 次`;
+      `${speakerOf(entry)} · ${zoneLabelOf(entry.zone)} · 观看 ${(cg.viewCounts[entry.id] ?? 0) + 1} 次`;
     this.lightbox.classList.remove('hidden');
     cg.recordView(entry.id);
   }

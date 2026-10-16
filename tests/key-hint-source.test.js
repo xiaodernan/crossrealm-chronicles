@@ -194,7 +194,7 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     'ui/SettingsPanel.js': ["from '../content/keyLabels.js'"],
     // W-B2 切片4：成段的内容文案也走同一条链 —— 但**每一个显示出口**都要过，
     // 漏一处就是把字面的 `{parry}` 摆到玩家面前（说明书有正文与章节清单两处）
-    'ui/HelpManual.js': ['keyText(sec.body)', 'keyText(s.title)', 'refreshKeyHints()'],
+    'ui/HelpManual.js': ['keyText(t(sec.body))', 'keyText(t(s.title))', 'refreshKeyHints()'],
     // W-B4 切片2：这里原本还点名 `keyText(tree.title)` —— 那一格随对话树的抄本一起删了，
     // 标题现在是营火名（`this.activeRest.name`），名字里没有 `{动作}` 占位；
     // 展开仍由 `Dialog` 那一道口径负责（下面 `'ui/Dialog.js': ['keyText(title)', …]` 盯着的就是它）
@@ -346,10 +346,11 @@ describe('内容表的 `{动作}` 占位：真表跑真展开', () => {
  * 后者是 W-B1 的闸门。数量口径见 `key-prose` 正则，动它就要连同这里一起改。
  */
 const LEDGER = {
-  // `WASD 移动`：四个动作连写成一-cluster，`keyHint` 只答"某一个动作按哪枚键"，
-  // 占位化会把它写成 `W 移动`（少三枚键）或 `{moveUp}{moveLeft}{moveDown}{moveRight}`（一串没人读的字符）。
-  // 这条留到"移动方式能整组改绑"再说，今天它是**四键连写的老写法**（同 `index.html` 门禁里那条）。
-  'ui/HelpManual.js': 1,
+  // `WASD 移动`：说明书正文里那一句（W-D2 切片15 起住在 `content/strings.zh.js` 的
+  // `hm_body_start`，en 表另有 1 处同类写法 → 计 2）。正文里的键名占位交给 `keyText`，
+  // 但 "WASD 移动" 是四键连写的老写法（见上面那条说明），占位化会失真，所以这本账随正文一起搬进双表。
+  'content/strings.zh.js': 1,
+  'content/strings.en.js': 2,
   // `请按 F12 查看控制台详情`：开机失败那一条错误里指的是**浏览器**的开发者工具，
   // 不是任何一张表里的动作 —— 它没有可改绑的入口，也就没有"改绑之后说谎"这件事。
   'main.js': 1,

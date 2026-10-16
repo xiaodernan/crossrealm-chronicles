@@ -3,6 +3,7 @@ import { RestNpcModel } from './RestNpcModel.js';
 import { REST_NPC_DEFS } from '../content/restNpcDefs.js';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const WORLD_RESTNPCMANAGER = 'world/RestNpcManager';
 const npcOn = (name, handler) => on(name, handler, WORLD_RESTNPCMANAGER);
@@ -98,11 +99,13 @@ export class RestNpcManager {
     point.mesh.add(model.group);
 
     model.loadGlb().then((ok) => {
-      if (ok) this.game.dialog?.toast?.(`${def.name} 模型已加载`, 1800);
+      if (ok) this.game.dialog?.toast?.(`${t(def.name)} 模型已加载`, 1800);
     });
 
     return {
       id: point.id,
+      // `name` / `title` 存的是**文案键**（W-D2 切片15）：这一层是数据搬运，显示侧才展开
+      // （口癖气泡与 toast 各一处）。存展开后的字会让"改语言"永远追不上这一份拷贝。
       name: def.name,
       title: def.title,
       accent: def.accent,
@@ -156,7 +159,7 @@ export class RestNpcManager {
     if (Math.hypot(playerPos.x - this._tmp.x, playerPos.z - this._tmp.z) > 6) return;
     if (Math.random() > 0.004) return;
     const line = npc.def.barks[Math.floor(Math.random() * npc.def.barks.length)];
-    this.game.dialog.toast(`${npc.name}：${line}`, 3200);
+    this.game.dialog.toast(`${t(npc.name)}：${t(line)}`, 3200);
     this._barkCd[restId] = 28;
     this.speakingId = restId;
     npc.speakPulse = 0.5;

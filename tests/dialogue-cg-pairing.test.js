@@ -543,8 +543,11 @@ describe('运行时：对话与图都只说真话', () => {
         if (meta.accent !== REST_NPC_DEFS[zone].accent) {
           错色.push(`${zone}/${nodeId}: 递出 "${meta.accent}"，定义写 "${REST_NPC_DEFS[zone].accent}"`);
         }
-        if (meta.speaker !== (tree.nodes[nodeId].speaker ?? REST_NPC_DEFS[zone].name)) {
-          错色.push(`${zone}/${nodeId}: 说话人 "${meta.speaker}"`);
+        // 定义表 `REST_NPC_DEFS[zone].name` 在 W-D2 切片15 起存的是**文案键**，
+        // 递出去的 `speaker` 由 `RestDialogue.speakerNameOf` 在出口展开成中文 —— 比较要过同一道 `t()`。
+        const expectedSpeaker = t(tree.nodes[nodeId].speaker ?? REST_NPC_DEFS[zone].name);
+        if (meta.speaker !== expectedSpeaker) {
+          错色.push(`${zone}/${nodeId}: 说话人 "${meta.speaker}"，定义展开为 "${expectedSpeaker}"`);
         }
       }
     }
