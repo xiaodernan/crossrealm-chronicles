@@ -30,6 +30,8 @@ import {
 import { SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
 import { ZONE_EVENTS_EXTRA } from '../src/game/WorldAmbientCatalog.js';
 import { MAINLINE } from '../src/content/objectives.js';
+import { t } from '../src/engine/i18n.js';
+import { STRING_KEYS } from '../src/content/strings.zh.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -201,11 +203,9 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     // 对话框（20+ 调用方共用这一处）、日志卡片（快照存进去就再也不回头展开）、
     // 画布（图片有缓存，改绑不缓存就是旧键名）、CSS `content`（DOM 声明够不到，只能换成节点）
     'ui/Dialog.js': ['keyText(title)', 'keyText(text)', 'keyText(c.label)', 'keyText(message)'],
-    // B119：台词池是**两套口径** —— 键池（`npc.lines`）先过 `t()`，正文池
-    // （`NPC_CHAPTER_LINES`）原样留下；两边最后都过 `keyText()` 展开 `{动作}`。
-    // 这两件事抽成了 `npcLine()` 一处（运行时与门禁调的是同一个函数），点名形状跟着改：
-    // 改前写成一句 `keyText(t(lineKey))`，把正文池也当键查 ⇒ 章节台词全念成 `[MISSING: …]`。
-    'world/NPCManager.js': ['npcLine(pool[idx]', 'keyText(fromKeys ? t(raw) : raw)'],
+    // B119 / W-D2 切片14：台词池两套口径已经并回一套 —— 池子里**只有键**，
+    // 展开走 `npcLine()` 一处（运行时与门禁调的是同一个函数）：先 `t()` 换语言，再 `keyText()` 换键名。
+    'world/NPCManager.js': ['npcLine(pool[idx]', 'keyText(t(key))'],
     'game/QuestSystem.js': ['keyText(q.desc)'],
     'ui/LoreCodexJournalTab.js': ['keyText(e.text)', 'refreshKeyText(panelEl)'],
     'ui/PopCultureJournalTab.js': ['keyText(e.desc)', 'refreshKeyText(panelEl)'],
@@ -290,7 +290,17 @@ describe('内容表的 `{动作}` 占位：真表跑真展开', () => {
     loreFragmentsPop: LORE_FRAGMENTS_POP,
     dialogueCg: [REST_DIALOGUE_CG, REST_DIALOGUE_CG_EXTRA, REST_DIALOGUE_CG_POP],
   };
-  const STRINGS = Object.entries(TABLES).flatMap(([table, node]) => stringsOf(node).map((s) => `${table}: ${s}`));
+  /**
+   * 表里那一格是**键**就先过 `t()`（W-D2 切片14 起 NPC 台词池就是这样），
+   * 是正文就原样留下 —— 两段展开都走真函数，判据与运行时同源。
+   *
+   * 这一层不是"顺手多做一次"：池子里的键与内容表里的正文混在同一个 walker 里，
+   * 不给键这一层，那几条带 `{动作}` 的台词就从扫描里消失（占位计数会掉到门槛以下），
+   * 而"池子里装的是键还是正文"这件事**只有 `npcLine` 一处口径**（B119 就是这里翻的车）。
+   */
+  const resolve = (s) => (STRING_KEYS.includes(s) ? t(s) : s);
+  const STRINGS = Object.entries(TABLES).flatMap(([table, node]) =>
+    stringsOf(node).map((s) => `${table}: ${resolve(s)}`));
 
   it('扫描真跑得起来：每张表都交得出文案，带占位的总数够多', () => {
     /*

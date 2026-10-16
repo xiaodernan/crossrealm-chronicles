@@ -42,19 +42,20 @@ const NPC_DATA = [
 ];
 
 /**
- * 池子里的那一格 → 玩家真正读到的那一句（B119）。
+ * 池子里的那一格 → 玩家真正读到的那一句。
  *
- * `fromKeys` 说这一池存的是**文案键**（`npc_wanderer_0`）还是**已经写好的正文**
- * （`NPC_CHAPTER_LINES` 里那些中文句子）。两件事都要做，但顺序与去留不同：
- * 键要先过 `t()` 换成当前语言那一句，正文原样留下；两边最后都过 `keyText()`
- * 把 `{动作}` 展开成当前键名（同一句话接下来有三个去处：对话框 / 日志条目 / `npc-talk`
- * 事件，日志存的是定稿，改绑之后回头翻不该看到字面占位）。
+ * 两个池子（`npc.lines` 与 `NPC_CHAPTER_LINES`）现在**都是文案键**（W-D2 切片14 收口），
+ * 所以这里只剩两段展开：`t()` 把键换成当前语言那一句，`keyText()` 把 `{动作}` 换成当前键名。
+ * 两段都要，顺序不能反：同一句话接下来有三个去处（对话框 / 日志条目 / `npc-talk` 事件），
+ * 日志存的是定稿，改绑之后回头翻不该看到字面占位。
  *
- * 抽成一个函数是为了让门禁调的与运行时调的是**同一处**：口径写成两遍，
- * 下一次改绑或加语言时两边就会各漂一次。
+ * 抽成一个函数是为了让门禁调的与运行时调的是**同一处**：B119 的病根正是"池子里装的是什么"
+ * 这件事没有单一出口 —— 切片12 把一段正文也送进了 `t()`，30/30 句章节台词念成 `[MISSING: …]`。
+ * 现在口径由 `tests/key-hint-outlets.test.js` 双向钉住：池子每一格都必须是**已登记的键**，
+ * 且逐句走真 `talk()` 之后一个字都不许留 `[MISSING`。
  */
-export function npcLine(raw, fromKeys) {
-  return keyText(fromKeys ? t(raw) : raw);
+export function npcLine(key) {
+  return keyText(t(key));
 }
 
 export class NPCManager {
@@ -108,14 +109,11 @@ export class NPCManager {
     const chapterLines = NPC_CHAPTER_LINES[npc.id]?.[chapter] ?? NPC_CHAPTER_LINES[npc.id]?.[1];
     const pool = chapterLines ?? npc.lines;
     const idx = this.lineIndex[npc.id] % pool.length;
-    // 两个池子的**口径不同**，`t()` 只给其中一池（B119）：
-    //  · `npc.lines` 是**文案键** —— 过 `t()` 才拿到当前语言那一句；
-    //  · `NPC_CHAPTER_LINES` 是**成段正文**（`game/LoreFragments.js` 里就是中文句子，
-    //    还没进双表）—— `t()` 会把整句话当键名查，回 `[MISSING: …]` 并**念给玩家听**。
-    // 改前两条池子共用一句 `keyText(t(raw))`：探针实测 **30/30** 句章节台词全成了
-    // `[MISSING: 宝箱里的魂火能升级属性。别忽视营火。]`，而对话框、日志、`npc-talk`
-    // 三处**同时**收到同一份坏字，门禁比的是"三处一样"所以一路绿 —— 典型的"两边一起漏"。
-    const line = npcLine(pool[idx], !chapterLines);
+    // 两个池子**同一个口径**：装的都是文案键（W-D2 切片14 把正文搬进双表之后）。
+    // B119 的教训留在这里：`NPC_CHAPTER_LINES` 曾经装的是成段正文，与 `npc.lines` 混着
+    // 送进 `t()` ⇒ 整句话被当键名查、回 `[MISSING: …]` 并念给玩家听；而对话框、日志、
+    // `npc-talk` 三处**同时**收到同一份坏字，所以旧用例比"三处一样"时一路绿。
+    const line = npcLine(pool[idx]);
     this.dialog.show(npc.name, line);
     this.lineIndex[npc.id]++;
     window.dispatchEvent(new CustomEvent('npc-talk', { detail: { id: npc.id, line, chapter } }));

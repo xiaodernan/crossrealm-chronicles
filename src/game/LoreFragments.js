@@ -133,47 +133,58 @@ export const ZONE_STORY_HOOKS = {
 
 
 
+/**
+ * NPC 章节台词池（W-D2 切片14）。
+ *
+ * **这里存的是文案键，不是正文** —— 与 `npc.lines`（`world/NPCManager.js` 里那份）同一个口径。
+ * 切片12 曾经把两个池子混着处理（`keyText(t(raw))`），正文被当键名查 ⇒ 30/30 句章节台词
+ * 念成 `[MISSING: …]`（B119）；切片13 修掉症状，这一片把**因**收掉：正文进双表，
+ * 池子里只剩键，两个池子从此共用一条展开链（`npcLine`）。
+ *
+ * 键名 `npc_<谁>_c<章>_<池内下标>`；`content/ambientLore.js` 的致敬层追加用 `_p` 前缀。
+ * 与 `npc.lines` 那七条重名的两句复用旧键（一行文案只有一个键）。
+ */
 export const NPC_CHAPTER_LINES = mergeNpcChapterLines({
 
   wanderer: {
 
-    1: ['穿越者…你闻到了吗？三个位面的气息正在融合。', '触摸世界之锚后，去灰白森林找至尊石环。'],
+    1: ['npc_wanderer_0', 'npc_wanderer_c1_1'],
 
-    2: ['宝箱里的魂火能升级属性。别忽视营火。', '三座地下城还没清？迷宫里的石碑值得一读。'],
+    2: ['npc_wanderer_c2_0', 'npc_wanderer_c2_1'],
 
-    3: ['奇点领主会扭曲你的法术轨迹 — 靠近再打。', '禁书图书馆的守页人会在二阶段加速。'],
+    3: ['npc_wanderer_c3_0', 'npc_wanderer_c3_1'],
 
-    4: ['时线区长按 {spell1}–{spell3} 蓄力，能打断 Boss 大招。', '你读过的叙事碎片，都在日志 [{journal}] 里。'],
+    4: ['npc_wanderer_c4_0', 'npc_wanderer_c4_1'],
 
-    5: ['深渊再探会随机迷宫布局 — 每次都不一样。', '成为无尽行者之后，位面仍会渗漏 — 留意天空。'],
+    5: ['npc_wanderer_c5_0', 'npc_wanderer_c5_1'],
 
   },
 
   'elf-scout': {
 
-    1: ['至尊石环在森林西侧。Boss 红圈在更深处。', '观察敌人红圈，最后一瞬 {parry} 弹反或 {roll} 翻滚。'],
+    1: ['npc_scout_c1_0', 'npc_scout_c1_1'],
 
-    2: ['精灵遗迹有额外探索点 — 记入日志。', '连击第三段有终结技，别只点两下。'],
+    2: ['npc_scout_c2_0', 'npc_scout_c2_1'],
 
-    3: ['古树神龛是可选迷宫，奖励额外魂火。', '{lockOn} 锁定后 {sprint}+{lockOn} 可解除。'],
+    3: ['npc_scout_c3_0', 'npc_scout_c3_1'],
 
-    4: ['时线执政官会时停 — 蓄力法术可破。', '破碎时线的视野会偶尔扭曲，属正常。'],
+    4: ['npc_scout_c4_0', 'npc_scout_c4_1'],
 
-    5: ['混沌边境的闪电没有预警 — 保持移动。', '你已经走得比大多数穿越者远了。'],
+    5: ['npc_scout_c5_0', 'npc_scout_c5_1'],
 
   },
 
   'astronaut-echo': {
 
-    1: ['Endurance 号的日志说：时间在这里是圆的。', '五维_tesseract 藏着碎片秘密…'],
+    1: ['npc_astronaut_0', 'npc_astronaut_c1_1'],
 
-    2: ['米勒荒原的引力井不是自然现象。', '裂隙观测站通向五维迷宫。'],
+    2: ['npc_astronaut_c2_0', 'npc_astronaut_c2_1'],
 
-    3: ['位面飞升意味着你不再只是访客。', '蓄力引力法术可以把敌人拉进处决范围。'],
+    3: ['npc_astronaut_c3_0', 'npc_astronaut_c3_1'],
 
-    4: ['另一个时间线的我失败了 — 这条线靠你。', '五维碑文与 tesseract 是同一谜题的两面。'],
+    4: ['npc_astronaut_c4_0', 'npc_astronaut_c4_1'],
 
-    5: ['混沌不是敌人，是未完成的方程。', '斩裂领主之后，听枢纽的风声 — 那是庆祝。'],
+    5: ['npc_astronaut_c5_0', 'npc_astronaut_c5_1'],
 
   },
 

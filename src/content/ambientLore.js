@@ -78,12 +78,19 @@ export const LORE_FRAGMENTS_POP = [
 ];
 
 /** NPC 章节台词：npcId → { 章节号: [台词...] } */
+/**
+ * 致敬层追加的 NPC 章节台词（W-D2 切片14）。
+ *
+ * 与基础池同一个口径：**这里存文案键**，正文在双表里（`npc_<谁>_c<章>_p<下标>`）。
+ * 合并进 `NPC_CHAPTER_LINES` 的顺序是"基础池在前、这一池追加在后"，
+ * 键里的 `_p` 前缀让"池内下标"这件事在两种来源之间不会串。
+ */
 export const NPC_LINES_POP = {
-  "astronaut-echo": { 3: [ "墨菲书架在荒原东侧 — 引力会在书页间写字。", "对接舱旋转 — 两船同速，否则金属的葬礼。", "虫洞拱门在西侧 — 光在环里折叠。" ] },
-  "elf-scout": { 1: [ "沙龙镜墙在灰林东侧 — 边境往事从裂镜开始。", "正午决斗圈别恋战 — 太阳不会等你。" ], 2: [ "至尊石环的铭文改了词 — 指环已碎，石环仍在。" ] },
+  "astronaut-echo": { 3: [ "npc_astronaut_c3_p0", "npc_astronaut_c3_p1", "npc_astronaut_c3_p2" ] },
+  "elf-scout": { 1: [ "npc_scout_c1_p0", "npc_scout_c1_p1" ], 2: [ "npc_scout_c2_p0" ] },
   wanderer: {
-    "4": [ "街机厅 CRT 还在闪 — 吃豆人与恶魔循环。", "裂相钟塔指向 11:06 — 别在钟声里抬头。" ],
-    "5": [ "混沌边境的禁酒窖 — 幽冥帮派谈界关税。", "深空纪元跃迁门须三门同相。" ],
+    "4": [ "npc_wanderer_c4_p0", "npc_wanderer_c4_p1" ],
+    "5": [ "npc_wanderer_c5_p0", "npc_wanderer_c5_p1" ],
   },
 };
 

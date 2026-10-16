@@ -21,6 +21,8 @@ import { factoryKeybindings, setKeybindTable, buildBindingTables } from '../src/
 import { UI_HOTKEYS, setHotkeyTable } from '../src/content/hotkeys.js';
 import { Dialog } from '../src/ui/Dialog.js';
 import { NPCManager, npcLine } from '../src/world/NPCManager.js';
+import { t } from '../src/engine/i18n.js';
+import { STRING_KEYS } from '../src/content/strings.zh.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import { DialogCGRenderer } from '../src/ui/DialogCGRenderer.js';
 import { LORE_CODEX } from '../src/game/LoreCodexRegistry.js';
@@ -146,12 +148,17 @@ function mountNpcTalk() {
 }
 
 describe('NPC 台词：对话框、日志条目、事件三份都是定稿', () => {
-  /** 表里确实带占位的那一句（`{parry}` / `{roll}` 那一组，改绑最常动的几格）：连章节与下标一起找回来 */
+  /**
+   * 池子里确实带占位的那一格（`{parry}` / `{roll}` 那一组，改绑最常动的几格）。
+   *
+   * W-D2 切片14 之后池子存的是**键**，所以占位要在**表里那一句**上找 —— `key` 是池子里那一格，
+   * `text` 是 `t(key)` 展开出来的正文。两者都要带回去：一个用来定位，一个用来做反向读法。
+   */
   const placeholderLine = () => {
     for (const [id, byChapter] of Object.entries(NPC_CHAPTER_LINES)) {
       for (const [chapter, lines] of Object.entries(byChapter)) {
-        const idx = lines.findIndex((l) => /\{[a-z]/.test(l));
-        if (idx >= 0) return { id, chapter: Number(chapter), idx, raw: lines[idx] };
+        const idx = lines.findIndex((key) => /\{[a-z]/.test(t(key)));
+        if (idx >= 0) return { id, chapter: Number(chapter), idx, key: lines[idx], text: t(lines[idx]) };
       }
     }
     throw new Error('NPC_CHAPTER_LINES 里没有带占位的台词了 —— 这一族用例失去意义，请一起删');
@@ -176,9 +183,9 @@ describe('NPC 台词：对话框、日志条目、事件三份都是定稿', () 
     expect(entries[0].text).toBe(shown[0].text);
     expect(events[0].detail.line).toBe(shown[0].text);
     expect(events[0].type).toBe('npc-talk');
-    // 反向读法：展开真的发生过 —— 表里那一格**至今**还带着占位，说出来的与它不同
-    expect(spec.raw).toMatch(/\{[a-z]/);
-    expect(shown[0].text).not.toBe(spec.raw);
+    // 反向读法：展开真的发生过 —— 表里那一句**至今**还带着占位，说出来的与它不同
+    expect(spec.text).toMatch(/\{[a-z]/);
+    expect(shown[0].text).not.toBe(spec.text);
   });
 
   it('改绑之后新读的那一句跟着改口，而已经存进日志的那一份**不**追改（快照语义）', () => {
@@ -197,15 +204,32 @@ describe('NPC 台词：对话框、日志条目、事件三份都是定稿', () 
   });
 
   /**
-   * B119：两个台词池的**口径不同**，`t()` 只能给其中一池。
+   * B119：池子里装的是什么，必须只有一种答案。
    *
-   * `npc.lines` 是文案键，`NPC_CHAPTER_LINES` 是成段正文。改前两条池子共用一句
-   * `keyText(t(raw))`，于是有章节台词的 NPC 全在念 `[MISSING: 宝箱里的魂火能升级属性。]`
-   * —— 而对话框、日志、`npc-talk` 三处**同时**收到同一份坏字，上面那两条用例比的是
-   * "三处一样"所以全绿。这条问的是另一件事：那一句**本身**念不念得出来。
+   * 切片12 把 `NPC_CHAPTER_LINES` 那段**成段正文**也送进 `t()`，于是有章节台词的 NPC 全在念
+   * `[MISSING: 宝箱里的魂火能升级属性。]` —— 而对话框、日志、`npc-talk` 三处**同时**收到
+   * 同一份坏字，上面那两条用例比的是"三处一样"所以全绿。切片14 把正文搬进双表、池子里只剩键，
+   * 于是这条拆成一对：**结构腿**问"每一格是不是已登记的键"，**行为腿**问"念出来那一声对不对"。
+   * 两条都自带分母守卫，空集不许绿成"干净"。
    */
-  it('每一句台词都念得出来：章节池里的每一格都不许变成 `[MISSING: …]`（B119）', () => {
+  it('结构腿：章节池每一格都是**已登记的键**（正文一个都不许留在池子里）', () => {
+    const 坏 = [];
+    let 格数 = 0;
+    for (const [id, byChapter] of Object.entries(NPC_CHAPTER_LINES)) {
+      for (const [chapter, lines] of Object.entries(byChapter)) {
+        for (const [i, key] of lines.entries()) {
+          格数 += 1;
+          if (typeof key !== 'string' || !STRING_KEYS.includes(key)) 坏.push(`${id} ch${chapter} #${i}: ${key}`);
+        }
+      }
+    }
+    expect(格数, '章节池空了 —— 这一族用例失去意义，请一起删').toBeGreaterThan(20);
+    expect(坏, '这些格子里装的不是键（正文会被 t() 当键名查，回 [MISSING: …]）').toEqual([]);
+  });
+
+  it('行为腿：每一句台词都念得出来 —— 既不许是 `[MISSING: …]`，也不许是裸键（B119）', () => {
     const { mgr, shown } = mountNpcTalk();
+    const 坏 = [];
     let 句数 = 0;
     for (const [id, byChapter] of Object.entries(NPC_CHAPTER_LINES)) {
       const npc = mgr.npcs.find((n) => n.id === id);
@@ -216,24 +240,29 @@ describe('NPC 台词：对话框、日志条目、事件三份都是定稿', () 
           mgr.lineIndex[id] = idx;      // 生产里由玩家反复对话推进
           mgr.talk(npc);
           句数 += 1;
+          const said = shown[shown.length - 1].text;
+          // 两种坏形状都要拦：缺键（t() 没换成文案）与**没换**（说了个裸键）。
+          // 只查 `[MISSING` 的话，"`npcLine` 忘了过 `t()`"那一臂会静默放行 —— 图上写着
+          // `npc_wanderer_c1_1`，不含 `[MISSING`，读数与"一切正常"一模一样。
+          if (said.includes('[MISSING')) 坏.push(`${id} ch${chapter} #${idx}：${said}`);
+          else if (said === lines[idx]) 坏.push(`${id} ch${chapter} #${idx}：念的是裸键 ${said}`);
         }
       }
     }
     expect(句数, '章节池空了 —— 这一族用例失去意义，请一起删').toBeGreaterThan(20);
-    const 坏 = shown.filter((s) => s.text.includes('[MISSING'));
-    expect(坏.map((s) => `${s.title}｜${s.text}`), '这些台词把开发期字样念给了玩家').toEqual([]);
+    expect(坏, '这些台词没念出人话').toEqual([]);
   });
 
   /**
-   * 反向控制：判据必须看得见改前那个形状 —— 把**正文**池按"键"处理，`t()` 会把整句话
-   * 当键名查并回 `[MISSING: …]`。没有这一臂，"全都不带 `[MISSING`"与"这条链根本没跑"
-   * 在读数上一模一样。
+   * 反向控制：判据必须看得见改前那个形状 —— **把正文当键查**，`t()` 会把整句话当键名
+   * 并回 `[MISSING: …]`。没有这一臂，"全都不带 `[MISSING`"与"这条链根本没跑"在读数上
+   * 一模一样；也没有任何东西拦着下一个人再往池子里塞一句正文。
    */
-  it('反向控制：正文池按"键"处理必须念出 `[MISSING: …]`（改前的形状）', () => {
-    const raw = placeholderLine().raw;
-    expect(npcLine(raw, true), 't() 对整句正文竟然不报缺键 —— 这把尺子看不见 B119').toContain('[MISSING');
-    expect(npcLine(raw, false)).not.toContain('[MISSING');
-    expect(npcLine('npc_wanderer_0', true), '键池那一侧反而查不到键').not.toContain('[MISSING');
+  it('反向控制：把正文当键查必须念出 `[MISSING: …]`（改前的形状）', () => {
+    const { text, key } = placeholderLine();
+    expect(t(text), 't() 对整句正文竟然不报缺键 —— 这把尺子看不见 B119').toContain('[MISSING');
+    expect(npcLine(text), '正文直接过 npcLine 竟然也能念出来').toContain('[MISSING');
+    expect(npcLine(key), '键那一侧反而查不到').not.toContain('[MISSING');
   });
 });
 
