@@ -13,13 +13,41 @@ const mergeHelpSections = (base) => [...base, ...HELP_SECTIONS_EXTRA];
  * 由 `keyText` 换当前键名，改语言由 `t()` 换当前语言，两者都只在这一处发生。
  */
 export const SECTIONS = mergeHelpSections([
-  { id: 'start', title: 'hm_title_start', body: 'hm_body_start' },
-  { id: 'combat', title: 'hm_title_combat', body: 'hm_body_combat' },
-  { id: 'world', title: 'hm_title_world', body: 'hm_body_world' },
-  { id: 'dungeons', title: 'hm_title_dungeons', body: 'hm_body_dungeons' },
-  { id: 'bosses', title: 'hm_title_bosses', body: 'hm_body_bosses' },
-  { id: 'autoplay', title: 'hm_title_autoplay', body: 'hm_body_autoplay' },
-  { id: 'perf-hud', title: 'hm_title_perf_hud', body: 'hm_body_perf_hud' },
+  {
+    id: 'start',
+    title: 'hm_title_start',
+    body: 'hm_body_start',
+  },
+  {
+    id: 'combat',
+    title: 'hm_title_combat',
+    body: 'hm_body_combat',
+  },
+  {
+    id: 'world',
+    title: 'hm_title_world',
+    body: 'hm_body_world',
+  },
+  {
+    id: 'dungeons',
+    title: 'hm_title_dungeons',
+    body: 'hm_body_dungeons',
+  },
+  {
+    id: 'bosses',
+    title: 'hm_title_bosses',
+    body: 'hm_body_bosses',
+  },
+  {
+    id: 'autoplay',
+    title: 'hm_title_autoplay',
+    body: 'hm_body_autoplay',
+  },
+  {
+    id: 'perf-hud',
+    title: 'hm_title_perf_hud',
+    body: 'hm_body_perf_hud',
+  },
 ]);
 
 export class HelpManual {

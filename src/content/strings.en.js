@@ -564,9 +564,9 @@ Parry success then right click to execute; Boss fight note phase hint and stance
 1. Approach Boss and press {lockOn} to lock on, camera will follow target
 2. Observe red circle under feet: when circle almost full press {parry} parry → immediately right click execute (high damage)
 3. Can't parry? {roll} dodge roll away, wait for Boss to finish move then left click combo
-4. Combo 3~5 times then heavy hit, fill enemy top stance bar to stagger hard state；**execution/Boss 击破**has slow motion track lock
+4. Combo 3~5 times then heavy hit, fill enemy top stance bar to stagger hard state；**execution/Boss break** has slow motion track lock
 5. Not enough stamina? pull back, wait for full refill；dead find campfire {interact} rest to refill
-6. {skill} Plane Slash (range AOE) suitable for small mobs surrounding or Boss hard state补刀
+6. {skill} Plane Slash (range AOE) suitable for small mobs surrounding or Boss hard state follow-up
 7. {spell1}~{spell4} magic：Boss when time stop/big move long press {spell1}/{spell2}/{spell3} to charge can interrupt`,
 
   hm_body_world: `Exchange Hub — start point, World Anchor and Training Dummy
@@ -604,11 +604,11 @@ Defeat Boss gains large amount soul fire + 2 weapon skill points.
 
 【Timeline Executor】Broken Timeline Z≈235（Ch4+，gravity inversion area）
 · notice walking height change，roll direction opposite usual
-· time stop前 will have blue forewarning，charge spell can interrupt
+· before time stop will have blue forewarning，charge spell can interrupt
 
 【Chaos Lord】Chaos Border X≈-200 Z≈285（Ch5+）
-· lightning storm lowers vision，贴身穿刺输出
-· 二阶段狂暴，弹反窗口变短，优先翻滚`,
+· lightning storm lowers vision，close-range stab output
+· Phase 2 enrage，parry window shorter，prioritize dodge roll`,
 
   hm_body_autoplay: `Press {questTracker} to open Plane Assistant → click "Auto-play (operate your character)"。
 
@@ -620,7 +620,7 @@ If only want skip walking directly complete acceptance，click "Instant Acceptan
   hm_body_perf_hud: `{perfHud} toggle Performance HUD（dev tool，doesn't affect gameplay）。
 
 Value shows yellow +N means this count relative to historical lowest net increase N；red means increase exceeds tolerance——
-Repeat in/out副本 after "Geometry / Texture / Shader / Scene Node" should return to original value，only increase no decrease即泄漏。
+Repeat in/out dungeons after "Geometry / Texture / Shader / Scene Node" should return to original value，only increase no decrease means leak。
 
 Save currently v6（crossrealm_save_v6）。{save} save · {load} read · {escape} pause menu can export/import JSON。
 Old v4 / v5 save will at startup explicitly migrate to v6 and hint，original key keep one for rollback；
