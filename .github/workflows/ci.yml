@@ -1,12 +1,21 @@
-# W-D4 切片1 —— 三门禁上 CI；W-D5 切片3 —— 第四步首屏体积门禁。
+# W-D4 切片1 —— 三门禁上 CI；W-D5 切片3 —— 第四步首屏体积门禁；W-D4 余 —— perf + e2e 接进 CI 链。
 #
-# 门禁链就是仓库的完成定义（MASTER_PLAN §0.3）：lint → test → build，顺序不换。
+# 门禁链就是仓库的完成定义（MASTER_PLAN §0.3）：lint → test → build → size → perf → e2e，顺序不换。
 # 第四步 `npm run size` **必须在 build 之后**：它量的是 `dist/index.html` 直接引用的
 # 那几个产物（W-D5 切片1 的口径），没有 dist 就没有量具 —— 顺序反了它会以
 # "缺文件按失败算"当场红，而那是一条与体积无关的假红。
 # 跑在 windows-latest：全仓的源码扫描门禁（读 src 原文、对 EOL 有假设的那批）
 # 是在 Windows 开发机上写绿的，CI 与开发平台保持同一边，别让"CI 绿了但本机红"
 # 有了第二个解释。Node 锁 24（与开发机一致）。
+#
+# perf / e2e 两道门禁要无头 Chrome（软渲染、原生 CDP）。`windows-latest` 不预装 Chrome，
+# 所以用 `browser-actions/setup-chrome` 装一份 Chrome for Testing，并把它的路径通过
+# `CHROME` 环境变量交给脚本（`scripts/perf-smoke.mjs` / `scripts/e2e-clear.mjs` 的
+# `findChrome()` 优先读 `process.env.CHROME`）。两道门禁自己起 dev 口、自己收，
+# 退出码非 0 即红（预算表在 `scripts/perf-budgets.mjs`，判据与执行分家，W-D4 切片4 / B104）。
+#
+# 「需远端首跑读数」：perf 预算是无头软渲染的保守值，首跑远端给出真实 fps / 帧距，
+# 若与 `PERF_BUDGETS` 不符就按那次读数校准（门禁不许假绿，也不许拿环境当条件）。
 name: CI
 
 on:
@@ -31,6 +40,11 @@ jobs:
           node-version: 24
           cache: npm
 
+      # 无头 Chrome（perf / e2e 门禁要）。装好之后把路径交给 `CHROME`。
+      - name: Install Chrome (headless, for perf + e2e gates)
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+
       # npm ci 严格按 package-lock 装 —— 本地 node_modules 与锁文件的漂移在这里现形
       - name: Install (npm ci)
         run: npm ci
@@ -48,3 +62,17 @@ jobs:
       # 必须在 Build 之后 —— 它读 dist/index.html 与其直接引用的产物。
       - name: Size budget (first paint < 2 MiB)
         run: npm run size
+
+      # 性能冒烟（W-D4 切片2）：枢纽空载 + 灰白森林中心各 8 秒，读平均 fps / p95 帧距 /
+      # JS 堆峰值 / 未捕获异常。预算表在 `scripts/perf-budgets.mjs`。
+      - name: Perf smoke (headless fps budget)
+        env:
+          CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
+        run: npm run perf
+
+      # 无头 E2E 自动通关（W-D4 切片3）：`startFullDemo()` 的 44 步走真的 QuestSystem /
+      # 章节门 / 事件总线，主线骨架断一处就红。
+      - name: E2E auto-clear (headless full playthrough)
+        env:
+          CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
+        run: npm run e2e
