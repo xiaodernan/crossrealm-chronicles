@@ -359,7 +359,7 @@
 
 | 编号 | 工作包 | 状态 |
 |------|--------|------|
-| W-E1 | 数值平衡与难度曲线（3 档难度 + 敌人成长曲线） | 🔶 切片1+2+3 完成（难度三档全链路 + 敌人成长曲线；余：Boss/召唤物不收成长、魂收入不随成长缩放） |
+| W-E1 | 数值平衡与难度曲线（3 档难度 + 敌人成长曲线） | ✅ 切片1+2+3+4+6 完成（难度三档全链路 + 敌人成长曲线 + 召唤物/魂收入/Boss 随成长缩放；余已全部收口） |
 | W-E2 | 性能回归门禁与持续优化 | ⬜ |
 | W-E3 | 内容持续追加（新敌人 / 新 Boss / 新区域 / 新装备池） | ⬜ |
 
@@ -3088,3 +3088,12 @@ Phase D（系统与质量）
   - **放弃了什么**：① **没有顺手把相机链的非有限拒绝/重定位一起做** —— 玩家 snap 回有限地面后机位与四元数仍是 NaN、在锥仍是 1235/1235（救回臂实测），剔除不会自己恢复；那是另一处出口（`PlayerController` 落笔处 + `CameraRig.setView`），两条修复放进同一个见证就需要各自的单撤臂，按 B71/B99 的口径分开做。② 没动 gloom / space 的半径或坐标（玩法几何，动它之前要先量重叠面积）。③ 没给四座室内空间补几何与碰撞（0 网格 0 碰撞，归 W-B11）。④ 没改 `InternalSpace.addPOI` / `createPOIMarker` 里那两处 `zoneCenter = { x: 0, y: 0, z: 0 }` —— 复核后**仍然零调用**，是预留接口不是活跃缺陷，接线时第一件事就是把区中心传进去（B100 那行的尾巴原样保留）。
   - **留了什么尾巴**：① 相机链的 NaN 拒绝与重定位（上面②，下一片）；② **B121**：`gloom-ancient-shrine` 的世界心实测 `(200, 70)`，离 `space` 中心只 10.0 米、离 gloom 中心 36.1 米，两区半径（160 / 160）都覆盖它而 `zoneIdAt` 取最近 ⇒ 判给 space，space 名下零座室内 ⇒ 那座神殿的地板永远不回答（探针 `.tmp-20261016-b120/probe-b121.mjs`；另三座逐座判给自己那区）；"重叠区归谁"这件事今天既没写下来也没测过；③ 辉煌圣域驻站那 38 个非有限世界矩阵（`__anim` 那一族）是 NaN 玩家的下游，修后必须复测；④ B94 的分母重测（W-C2 切片4/5 都压在它上面）。
   - **顺带修的文档腐坏（不是我这片写坏的，如实记）**：`docs/MASTER_PLAN.md` 末尾 14 行各自带着一段 `NNNN→` 前缀 —— 那是 `3e8d5a2`（W-D2 切片15 回填）把**带行号的读文件输出**直接粘进了正文，于是 §9 末笔那一段在渲染时每行前面多一个假行号、且 B119 那一行被两个空行踢出了 §1.4 的表格（表格里断空行会让后续行不再是表）。本次一并剥净（脚本断言命中数 == 14、剥后残留 0、总行数 3078 不变）并把 B119~B121 三行接回表内（各行竖线数 5，与表头一致）。
+
+- **2026-10-16 W-E1 切片6 —— Boss 收成长 + 魂收入随成长缩放：关掉"Boss/召唤物不收成长、魂收入不随成长缩放"那半句（`37c0de4`）**
+  - **为什么做**：W-E1 余注里最后两句是"Boss/召唤物不收成长、魂收入不随成长缩放"。切片3 的 `growthAt` 只挂在 `spawnAt` 一个咽喉上，而五个 `spawn*Boss` 全走 `new BossX(config)` 直连、`_drainSummons` 已按 `owner.growthStage` 缩放（切片4 收口，召唤物那半句本片只是把"Boss 自身"也纳入同一档），击杀掉落则是硬编码常量 × 难度、完全不乘成长。所以这一片要做的只有三件事：让 Boss 经同一条难度×成长链、让副本 Boss 也走这条链、让魂收入按敌人档位缩放。
+  - **根因（实测，不是推演）**：① `EnemyManager.spawnAt`（290–310）是 `roster.hp * difficultyMultiplier('enemyHp') * growth.hp` 的唯一咽喉，但 `spawnBoss/MagicBoss/SpaceBoss/VoidBoss/ChaosBoss`（193–234）直接 `new BossX(config)` 绕过它；② `Boss` 构造器把 `hp:800` / `damage:18` 等**字面量放在 `...config` 之后** ⇒ 即便 config 传进来也会被覆盖，所以 Boss 必须**构造后再缩放**（不能在 config 里塞缩放值）；③ 击杀段（`update` 502 附近）魂基数是 `kind==='boss'?500:...` 硬编码常量，走 `addSouls` 只乘难度，`growth.souls` 从未被乘；④ `spawnAt` 第302行给普通敌人写的 `souls: roster.souls * growth.souls` 字段在击杀路径里**根本没被消费**（死字段，属"已立未用契约"——本片没删它，如实记）。
+  - **修法（三处，口径逐格对齐 spawnAt）**：① 新增 `_scaleBoss(boss, stage)`：`boss.maxHp = Math.round(boss.hp * difficultyMultiplier('enemyHp') * growth.hp)`、`boss.damage = Math.round(boss.damage * growth.damage)`（damage 不乘难度——`difficultyMultiplier('damage')` 是玩家侧的 `damageTaken`，与敌人输出是两轴，与 `enemyGrowth.js` 文档头同一句）、`boss.growthStage = stage`（让 Boss 召的仆从也按这一档长）；五个 `spawn*Boss` 在 `new BossX` 之后调它。② `DungeonManager` 副本 Boss 显式递 `dungeonGrowthStage(dungeon.def.id)` 走同一 `_scaleBoss`（出生点在 `(5000,…)` 独立坐标空间，反推不出区域，不能靠 `zoneIdAt`）。③ 击杀魂基数抽成纯函数 `killRewardSouls(kind, growthStage)`：`KILL_REWARD[kind] * growth.souls`，`update` 击杀分支改为 `killRewardSouls(kind, enemy.growthStage ?? 0)`；难度乘子仍在 `PlayerStats.addSouls` 结算（两轴各司其职）。
+  - **约束（提前量过，没破坏既有门禁）**：`boss-phase-entrance.test.js:63` 依赖 `boss.hp === 800`（`takeDamage(500)`→300→37.5% 进二阶段）。我的缩放在**标准难度 + 0 档区**下 `growth.hp==1`、`difficulty.enemyHp==1` ⇒ 仍得 800；测试夹具 `this.world?.zones` 为空 ⇒ `zoneIdAt` 落 CORRIDOR ⇒ stage 0，所以所有 Boss 测试都按 0 档，读数不受影响。难度仅 `difficulty.test.js` 用且 `afterEach(resetDifficulty)`，不污染。
+  - **门禁**：新增 `tests/boss-growth-scaling.test.js` 12 例（分母守卫 ≥8）：① 0 档恒等（标准难度 hp/damage/souls 不变）；② 成长（stage 升 ⇒ hp/damage 按 `growth.*` 放大）；③ 难度（`setDifficulty('brutal')` ⇒ hp 再乘 `difficulty.enemyHp`）；④ 五类 Boss 同一缩放式（Magic/Space/Void/Chaos/Dungeon 各验证 `maxHp == round(baseHp * dm * growth.hp)`）；⑤ 变异探针（`_scaleBoss` 打成 no-op ⇒ 预言只给基值、缩放断言全红、且**无预言外红**）；⑥ 魂收入端到端（`killRewardSouls` 随 `growthStage` 放大）+ 反向控制（关成长 ⇒ 魂基数回 base）。`tests/enemy-growth.test.js` 的"档位只记一处"断言 `1 → 2` 处（`spawnAt` + `_scaleBoss`，仆从仍只读 `owner.growthStage` 一处，不是第二份真相）。
+  - **读数**：`npm run lint` 0 error；全量 **179 文件 / 3473 例 / 0 红**（`.tmp-vitest2` 复验，前一次 `.tmp-vitest` 因系统 Temp EPERM 偶发丢 1 文件为环境误报）。本片净增量 +1 文件 / +12 例。
+  - **如实记的坑（不在本片范围）**：`DungeonBoss` 把 `hp: 480 + rooms*25` / `damage:20` 传给 `Boss`，但 `Boss` 构造器用字面量覆盖 ⇒ **副本 Boss 的定制血量公式其实是死代码**（既有 bug，B100 同类"契约在 fixture 成立、在世界不成立"——待另片修，不在此格动）。`spawnAt` 给敌人写的 `souls` 字段仍未被击杀路径消费，`killRewardSouls` 改用 `growthStage` 重算、不依赖该字段。
