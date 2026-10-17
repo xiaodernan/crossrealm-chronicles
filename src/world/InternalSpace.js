@@ -235,6 +235,48 @@ export class InternalSpaceManager {
     /** @type {Map<string, InternalSpace[]>} zoneId -> spaces[] */
     this.spacesByZone = new Map();
     this.currentSpace = null;
+    /**
+     * 「按区 id 现问区域中心」的问手，由宿主世界挂上（`attachZoneCenterResolver`）。
+     * 挂的是**问手**不是坐标：抄一份 `center` 就是第二份真相，搬区时它会烂在原地
+     * （B120 那一族的同一个形状）。
+     */
+    this._zoneCenterOf = null;
+  }
+
+  /**
+   * 挂上"按区 id 现问区域中心"的问手（W-B9 切片9，修 B121）。
+   *
+   * 为什么室内查询需要它：一座空间的归属**不能**先由区半径把点收敛成一个区、再去那个区名下找空间。
+   * 区半径是 135~165 米的大气圆，彼此大面积重叠（实测 space × gloom 的连心线重叠带宽 **291.7 米**），
+   * 而空间自己的半径是 8~25 米 —— 收敛这一步会把整座空间判给邻区。实测四座里有那座
+   * `gloom-ancient-shrine`（登记在 gloom 名下，世界心 `(200, 70)`）：**它 100 % 的足迹**
+   * 按"最近区"判给 space（离 space 心 10.0 米、离 gloom 心 36.1 米），而 space 名下零座室内
+   * ⇒ 那座神殿的地板永远不回答，玩家在那里吃到全局地形（探针 `.tmp-20261018-b121/probe-overlap.mjs`）。
+   * 所以这一条问的是「这个点落不落进某座空间自己的范围」，用**登记它的那个区**的中心换算，
+   * 与大气归属（`zoneIdAt`，仍按最近区）是两件事、两个口径 —— 见 §「口径」注释。
+   */
+  attachZoneCenterResolver(resolve) {
+    this._zoneCenterOf = resolve;
+    return this;
+  }
+
+  /**
+   * 这座空间登记在谁名下，就现问谁的中心。
+   *
+   * 问不到（区 id 写错 / 世界上没有这个区）**当场抛**，不静默跳过：静默跳过的症状就是 B121 本身 ——
+   * 一座永远不回答的室内空间，既不崩也不降级。
+   */
+  _zoneCenterFor(zoneId) {
+    if (!this._zoneCenterOf) {
+      throw new Error('InternalSpaceManager: 按世界点问室内归属之前，必须先 attachZoneCenterResolver(...) —— '
+        + '没有问手就只能按调用方递进来的区中心问，而那条路会把归属交给调用方（B121）');
+    }
+    const center = this._zoneCenterOf(zoneId);
+    if (!center) {
+      throw new Error(`InternalSpaceManager: 内部空间登记在 "${zoneId}" 名下，但世界上问不到这个区的中心 —— `
+        + '要么改模板的 zoneId，要么把这个区建出来（静默跳过得到的是 B121：一座永远不回答的室内空间）');
+    }
+    return center;
   }
 
   /** 注册一个内部空间到所属区域 */
@@ -251,54 +293,74 @@ export class InternalSpaceManager {
     }
   }
 
-  /** 根据世界坐标查询玩家当前所在的内部空间 */
-  querySpaceAt(worldX, worldZ, zoneId, zoneCenter) {
-    const spaces = this.spacesByZone.get(zoneId) ?? [];
-    for (const space of spaces) {
-      if (space.containsWorldPoint(worldX, worldZ, zoneCenter)) {
-        return space;
+  /**
+   * 这个**世界点**落在哪座室内空间里 —— 判据是空间自己的水平范围，不是大气归属。
+   * 命中返回 `{ space, zoneId, zoneCenter }`，否则 null。
+   *
+   * 这是室内归属唯一的一条路（W-B9 切片9 删掉了 `querySpaceAt(x, z, zoneId, zoneCenter)`：
+   * 只要还存在"由调用方指定区"的入口，"先把点收敛成一个区、再去那个区名下找空间"就走得回去）。
+   *
+   * 为什么必须有这一条而不是"先 `zoneIdAt` 收敛成一个区、再去那个区名下找"：那是 B121 的形状
+   * （`attachZoneCenterResolver` 的注里有实测读数 —— `gloom-ancient-shrine` 整片足迹被判给 space）。
+   *
+   * 遍历顺序 = 登记表顺序，命中即返回。四座空间的足迹实测两两分离（最小心距 72.1 对半径和 35），
+   * 所以"取第一个命中"今天无歧义；那条下限由门禁钉着（`tests/zone-internal-ownership.test.js` 的结构腿）。
+   * 以后若有两座空间互相压住，这里必须改成显式判定，不许靠遍历顺序决定玩家踩在哪层地板上。
+   */
+  spaceAtWorldPoint(worldX, worldZ) {
+    for (const [zoneId, spaces] of this.spacesByZone) {
+      const zoneCenter = this._zoneCenterFor(zoneId);
+      for (const space of spaces) {
+        if (space.containsWorldPoint(worldX, worldZ, zoneCenter)) return { space, zoneId, zoneCenter };
       }
     }
     return null;
   }
 
-  /** 更新当前空间（由 WorldManager 每帧调用） */
-  updateCurrent(worldX, worldZ, zoneId, zoneCenter) {
-    this.currentSpace = this.querySpaceAt(worldX, worldZ, zoneId, zoneCenter);
+  /** 更新当前空间（由 WorldManager 每帧调用）—— 与地面高度问的是同一条判据（B121） */
+  updateCurrent(worldX, worldZ) {
+    this.currentSpace = this.spaceAtWorldPoint(worldX, worldZ)?.space ?? null;
     return this.currentSpace;
   }
 
   /**
    * 某个**世界点**的室内地面高度；这个点不在任何室内空间里则返回 null。
    *
-   * 两代契约都写在这里，因为它们各是各的坑：
+   * 这是那条高度加法唯一的入口，三代契约都写在这里，因为它们各是各的坑：
    *
-   * - **B100**：改前这里硬编码 `{ x: 0, y: 0, z: 0 }`，于是 `zoneCenter.y` 整个丢了、
+   * - **B100**：最早这里硬编码 `{ x: 0, y: 0, z: 0 }`，于是 `zoneCenter.y` 整个丢了、
    *   `worldToLocal` 也少减一次区域中心 —— 实测四座模板里两座的高度函数是非平凡的
    *   （幽暗神殿"中心凹陷 2 米"、晨曦大厅"中央隆起"），中心点差 **10~12.5 米**。
-   *   修法是把区域中心一路传进来，并规定"少了就抛"（B71 口径：调用方递错了不要静默兜底，
-   *   兜底会把"递错了"变成"高度悄悄是别的值"）。
-   * - **B120**：传进来的那个对象**根本没有 `y`**。生产的区域中心是 `{x, z}`（`BaseZone`
-   *   直接存下调用方递的字面量），于是 `zoneCenter.y + baseHeight + floor*floorHeight`
-   *   恒为 `NaN` —— 上一代的修法把一个"差 10 米"修成了"差一个世界"。写上一代门禁的那批
-   *   用例拿的是合成中心 `{x:180, y:12, z:100}`：算式在 fixture 里成立，在世界上不成立。
-   *   现在 `BaseZone` 把 `y` 声明成区域自己的竖直基准（0，与 `group.position` 同一面），
-   *   这里再把"必须有限"钉成硬拒绝：宁可炸给开发者看，不许把 NaN 交给玩家的下坠。
+   *   区域中心必须由**登记它的那个区**现问（`_zoneCenterFor`），不由调用方递。
+   * - **B120**：调用方递进来的那个对象**根本没有 `y`**。生产的区域中心曾经是 `{x, z}`，
+   *   于是 `zoneCenter.y + baseHeight + floor*floorHeight` 恒为 `NaN` —— 上一代的修法
+   *   把一个"差 10 米"修成了"差一个世界"。现在 `BaseZone` 把 `y` 声明成区域自己的竖直基准，
+   *   这里再把"必须有限"钉成硬拒绝（`_requireFiniteZoneBase`）：宁可炸给开发者看，
+   *   不许把 NaN 交给玩家的下坠。
+   * - **B121**：问手曾经是"这个点属于哪个区"（`zoneIdAt` 那步收敛），重叠的区半径会把
+   *   整座空间判给邻区 ⇒ 永远不回答。现在只按**空间自己的范围**认领这个点。
    *
-   * 另外这里问的是**这个点**落在哪座空间（`querySpaceAt`），不是缓存的 `currentSpace`：
-   * 后者只按玩家的上一帧位置刷新，而 `getGroundHeight` 会被用来问几百米外的点
-   * （快速旅行的目的地、副本出口、敌人、装饰、天气粒子）。按缓存回答的结果是
-   * "玩家刚站过晨曦大厅，于是整个区的地板都是大厅那一块"。
+   * 问的是**这个点**，不是缓存的 `currentSpace`：后者只按玩家的上一帧位置刷新，而这条路径
+   * 会被用来问几百米外的点（快速旅行的目的地、副本出口、敌人、装饰、天气粒子）。
+   * 按缓存回答的结果是"玩家刚站过晨曦大厅，于是整个区的地板都是大厅那一块"。
    */
-  getInternalHeightAtPoint(worldX, worldZ, zoneId, zoneCenter) {
+  getInternalHeightAtWorldPoint(worldX, worldZ) {
+    const hit = this.spaceAtWorldPoint(worldX, worldZ);
+    if (!hit) return null;
+    this._requireFiniteZoneBase(hit.zoneCenter, hit.zoneId);
+    return hit.space.getInternalHeightAt(worldX, worldZ, hit.zoneCenter);
+  }
+
+  /**
+   * 「区域中心必须带有限的 `y`」只写这一遍（B100 的"少传"与 B120 的"传进来是残缺对象"共用一条硬拒绝）。
+   */
+  _requireFiniteZoneBase(zoneCenter, zoneId) {
     if (!zoneCenter || !Number.isFinite(zoneCenter.y)) {
       throw new Error(
-        'InternalSpaceManager.getInternalHeightAtPoint: zoneCenter 必须带有限的 y —— '
+        `InternalSpaceManager.getInternalHeight（${zoneId ?? '未指名的区'}）: zoneCenter 必须带有限的 y —— `
         + '室内高度 = zoneCenter.y + baseHeight + floor * floorHeight，缺 y 得到的不是"差一点"而是 NaN（B120）'
       );
     }
-    const space = this.querySpaceAt(worldX, worldZ, zoneId, zoneCenter);
-    return space ? space.getInternalHeightAt(worldX, worldZ, zoneCenter) : null;
   }
 
   /** 获取当前空间的所有碰撞体（已转世界坐标） */

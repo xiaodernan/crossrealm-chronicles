@@ -12,7 +12,7 @@
  * - ④ VerticalScheduler 创建层：gloom/radiant 两区各生成调度器，楼层数 ≥ 3 / ≥ 3。
  * - ⑤ 解锁/移动层：楼梯冷却、电梯入口检查、传送门条件、历史轨迹记录。
  * - ⑥ 存档层：toJSON/fromJSON 往返不丢状态。
- * - ⑦ 管理器层：register / buildZone / querySpaceAt / updateCurrent 全链路跑通。
+ * - ⑦ 管理器层：register / buildZone / spaceAtWorldPoint / updateCurrent 全链路跑通。
  * - ⑧ 接线层（B83 判据的本义）：真世界 WorldManager.build() 之后点名「哪座模板注册了、
  *   哪个区的调度器在跑」—— 模块级用例只证明契约写对了，接线断言才证明 WorldManager
  *   真的喂了它们四座模板、两台调度器（buildZone 跑过 / 解锁回调活着）。
@@ -251,8 +251,9 @@ describe('B83: InternalSpace POI 登记', () => {
 });
 
 describe('B83: InternalSpaceManager 注册与查询', () => {
-  const manager = new InternalSpaceManager();
   const zoneCenter = { x: 0, y: 0, z: 0 };
+  // B121：按世界点问归属时要向问手现问登记区的中心，所以夹具也得挂一个
+  const manager = new InternalSpaceManager().attachZoneCenterResolver(() => zoneCenter);
 
   it('register 把空间按 zoneId 分组', () => {
     const s1 = new InternalSpace({
@@ -282,26 +283,25 @@ describe('B83: InternalSpaceManager 注册与查询', () => {
     expect(manager.spacesByZone.get('zone-b').length).toBe(1);
   });
 
-  it('querySpaceAt 返回玩家所在的空间', () => {
+  it('spaceAtWorldPoint 返回玩家所在的空间', () => {
     const s1 = manager.spacesByZone.get('zone-a')[0];
-    const found = manager.querySpaceAt(0, 0, 'zone-a', zoneCenter);
-    expect(found).toBe(s1);
+    const found = manager.spaceAtWorldPoint(0, 0);
+    expect(found?.space).toBe(s1);
+    expect(found?.zoneId).toBe('zone-a');
   });
 
-  it('querySpaceAt 在半径外返回 null', () => {
-    const found = manager.querySpaceAt(100, 100, 'zone-a', zoneCenter);
-    expect(found).toBe(null);
+  it('spaceAtWorldPoint 在半径外返回 null', () => {
+    expect(manager.spaceAtWorldPoint(100, 100)).toBe(null);
   });
 
   it('updateCurrent 更新 currentSpace', () => {
-    manager.updateCurrent(0, 0, 'zone-a', zoneCenter);
+    manager.updateCurrent(0, 0);
     expect(manager.currentSpace).not.toBeNull();
     expect(manager.currentSpace.id).toBe('s1');
   });
 
-  it('getInternalHeightAtPoint 不在任何空间时返回 null', () => {
-    const h = manager.getInternalHeightAtPoint(999, 999, 'zone-a', zoneCenter);
-    expect(h).toBe(null);
+  it('getInternalHeightAtWorldPoint 不在任何空间时返回 null', () => {
+    expect(manager.getInternalHeightAtWorldPoint(999, 999)).toBe(null);
   });
 
   it('buildZone 调用每个空间的 build 方法', () => {

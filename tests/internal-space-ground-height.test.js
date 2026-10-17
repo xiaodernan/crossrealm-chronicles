@@ -96,7 +96,7 @@ describe('B120：室内高度在生产形状下成立', () => {
   });
 
   describe('② 走进室内：高度由本层基准 + 局部采样推出来', () => {
-    it('每座**认得出**的空间，中心点高度 == 区域基准 y + baseHeight + floor*层高 + 局部采样(0,0)', () => {
+    it('每座空间**都认得出**，中心点高度 == 区域基准 y + baseHeight + floor*层高 + 局部采样(0,0)', () => {
       const 全部 = [...world.internalSpaceManager.spacesByZone.values()].flat();
       expect(全部.length, '四座模板都要注册进真世界').toBe(4);
       let 认出 = 0;
@@ -104,14 +104,13 @@ describe('B120：室内高度在生产形状下成立', () => {
         const wc = 空间中心(world, space);
         const 期望 = 室内地板(world, space);
         const 实际 = world.getGroundHeight(wc.x, wc.z);
-        // gloom-ancient-shrine 现在认不出：它的世界中心 (200, 70) 离米勒荒原更近，
-        // `zoneIdAt` 把这个点判给了 space 区，而 space 区没有室内空间（B121，另片修）。
-        const 认得出 = Math.abs(实际 - 期望) < 1e-9;
-        if (认得出) { 认出++; continue; }
-        if (space.id === 'gloom-ancient-shrine') continue;
+        // B121 曾在这里留一格豁免：`gloom-ancient-shrine` 的世界中心 (200, 70) 离 space 心只有
+        // 10.0 米、离 gloom 心 36.1 米，"先把点收敛成一个区"把它整片足迹判给了 space，
+        // 于是那座神殿的地板永远不回答。豁免已随修复删除 —— 四座就是四座。
         expect(实际, `${space.id} 中心点高度`).toBeCloseTo(期望, 9);
+        认出++;
       }
-      expect(认出, '认得出的室内空间数（B121 修好后升到 4，门禁只设下限）').toBeGreaterThanOrEqual(3);
+      expect(认出, '认得出的室内空间数').toBe(全部.length);
     });
 
     it('大厅中心的高度**不等于**全球地形采样（室内分支真的活着，不是恒走室外）', () => {
@@ -136,7 +135,7 @@ describe('B120：室内高度在生产形状下成立', () => {
     it('缓存落在大厅时，几百米外那个点拿的不是大厅地板', () => {
       const hall = 大厅(world);
       const wc = 空间中心(world, hall);
-      world.internalSpaceManager.updateCurrent(wc.x, wc.z, hall.zoneId, 区的载体(world, hall.zoneId).center);
+      world.internalSpaceManager.updateCurrent(wc.x, wc.z);
       expect(world.internalSpaceManager.currentSpace, '先把缓存落到大厅').toBe(hall);
       const 远处 = { x: wc.x + 600, z: wc.z + 600 };
       const 地面 = world.getGroundHeight(远处.x, 远处.z);

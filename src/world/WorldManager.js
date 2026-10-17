@@ -21,9 +21,6 @@ import { applyShadow } from '../engine/shadowPolicy.js';
 /** 地形网格 520×620，可通行边界留 10 单位余量 */
 export const WORLD_BOUNDS = { minX: -250, maxX: 250, minZ: -300, maxZ: 300 };
 
-/** `zoneIdAt` 只需要 `x/z`，而 `getGroundHeight` 每帧会被问很多次 —— 复用同一个探针对象 */
-const _点 = { x: 0, z: 0 };
-
 export class WorldManager {
   constructor(scene, dialog) {
     this.scene = scene;
@@ -136,6 +133,11 @@ export class WorldManager {
     this.internalSpaceManager.register(InternalSpaceTemplates.gloomTreeHollow(gloom.center));
     this.internalSpaceManager.register(InternalSpaceTemplates.radiantGrandHall(radiant.center));
     this.internalSpaceManager.register(InternalSpaceTemplates.radiantStarwatchTower(radiant.center));
+
+    // W-B9 切片9（修 B121）：室内归属问的是**这座空间自己登记在谁名下**，所以要给它一个
+    // "按区 id 现问中心"的问手 —— 挂的是问手不是坐标（同一个 `resolveZone` 出口，大气归属与
+    // 室内归属拿到的是同一个载体，不会漂成两份）。
+    this.internalSpaceManager.attachZoneCenterResolver((zoneId) => resolveZone(this.zones, zoneId)?.center ?? null);
 
     // 为每个区域构建内部空间
     for (const zone of this.zones) {
@@ -341,6 +343,14 @@ export class WorldManager {
     world.build();
   }
 
+  /**
+   * 室内归属**不再**经过"先把这个点收敛成一个区、再去那个区名下找空间"（W-B9 切片9，修 B121）。
+   * 改前那两步就是症状：区半径互相重叠（space × gloom 的重叠带宽实测 291.7 米），`zoneIdAt`
+   * 取最近 ⇒ `gloom-ancient-shrine` 整片足迹被判给 space，而 space 名下零座室内 ⇒ 那座神殿的
+   * 地板永远不回答。现在的判据只有一条：这个点落不落进**某座空间自己的范围**，
+   * 用登记它的那个区的中心换算 —— 由 `internalSpaceManager.spaceAtWorldPoint` 回答（问手在
+   * `build()` 里挂上，见 `attachZoneCenterResolver`）。
+   */
   getGroundHeight(x, z) {
     if (this.dungeonManager?.isInside()) {
       return this.dungeonManager.getGroundHeight(x, z);
@@ -352,48 +362,18 @@ export class WorldManager {
     // 而生产的区域中心又不带 `y`，那个高度还是 NaN。两条叠在一起就是玩家侧的说法：
     // NaN 地面 → 传送把 NaN 写进 `position` → 阻尼相机 `lerp` 从 NaN 出发再也回不来 →
     // 视锥六个面全 NaN → 整场剔除失效。
-    const zone = this._zoneWithSpaceAt(x, z);
-    if (zone) {
-      const internalHeight = this.internalSpaceManager?.getInternalHeightAtPoint(x, z, zone.id, zone.center);
-      if (internalHeight !== null) return internalHeight;
-    }
+    const internalHeight = this.internalSpaceManager.getInternalHeightAtWorldPoint(x, z);
+    if (internalHeight !== null) return internalHeight;
     return sampleGlobalHeightSmooth(x, z, this.zones);
-  }
-
-  /**
-   * 这个点自己属于哪个区 —— 不是"玩家属于哪个区"（B120）。
-   * 归属一律由几何反推（`zoneIdAt`：枢纽优先 → 最近区 → 走廊），与 `update()` 同一口径。
-   */
-  _zoneAt(x, z) {
-    _点.x = x; _点.z = z;
-    return resolveZone(this.zones, zoneIdAt(_点, this.zones));
-  }
-
-  /**
-   * 只有"这个点所属的区**且该区注册过室内空间**"才返回区对象，否则 null。
-   *
-   * 用"有没有空间"当闸门而不是用 `center.y` 存不存在当闸门：`HUB_ZONE.center` 是
-   * `{x, z}` 的二维描述（枢纽本来就没有室内），拿它去算高度会喂给 `getInternalHeightAtPoint`
-   * 一个 undefined 的 y；而有室内空间的区万一缺 `y`，必须照旧**炸给开发者看**，
-   * 不许在这里被顺手兜成 0。
-   */
-  _zoneWithSpaceAt(x, z) {
-    const mgr = this.internalSpaceManager;
-    if (!mgr) return null;
-    const zone = this._zoneAt(x, z);
-    if (!zone) return null;
-    return mgr.spacesByZone.get(zone.id)?.length ? zone : null;
   }
 
   getGroundNormal(x, z) {
     if (this.dungeonManager?.isInside()) {
       return { x: 0, y: 1, z: 0 };
     }
-    // 内部空间内地面法向暂时返回向上（可按需扩展）—— 同样按点问，不问玩家上一帧（B120）
-    const zone = this._zoneWithSpaceAt(x, z);
-    if (zone && this.internalSpaceManager.querySpaceAt(x, z, zone.id, zone.center)) {
-      return { x: 0, y: 1, z: 0 };
-    }
+    // 内部空间内地面法向暂时返回向上（可按需扩展）—— 按点问、不问玩家上一帧（B120），
+    // 且归属由空间自己的范围回答（B121，与 `getGroundHeight` 同一条判据）
+    if (this.internalSpaceManager?.spaceAtWorldPoint(x, z)) return { x: 0, y: 1, z: 0 };
     return sampleGroundNormal(x, z, this.zones);
   }
 
@@ -418,7 +398,9 @@ export class WorldManager {
     // 改前这一句在 `zone === this.currentZone` 的早退之后 —— 于是"走进大厅再走出来"这种
     // 不跨区的移动永远不会重算，`currentSpace` 就把玩家已经离开的那座空间一直留着，
     // 而它回答的是雾（`currentInternalFog`）、层号（`internalSpaceFloor`）、地面法向。
-    this.internalSpaceManager.updateCurrent(playerPos.x, playerPos.z, id, zone?.center ?? { x: 0, y: 0, z: 0 });
+    // W-B9 切片9（修 B121）：这里不再把 `id`（大气归属）递给管理器 —— 递过去就等于把室内归属
+    // 交给区半径去收敛，站在神殿里判给 space、于是 `currentSpace` 永远是 null，雾与层号一起丢。
+    this.internalSpaceManager.updateCurrent(playerPos.x, playerPos.z);
 
     if (!zone || zone === this.currentZone) return;
 

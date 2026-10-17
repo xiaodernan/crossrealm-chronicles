@@ -184,6 +184,15 @@ export function zoneIdOf(zone) {
  * `zones` 是 WorldManager 维护的实例数组，各自带 `id / center / radius`。
  * 枢纽优先：它落在四区之间，按距离取最近会把"站在锚点上"算成某个位面。
  *
+ * ## 它只回答"大气归属"，不回答"脚下有没有室内空间"（B121）
+ * 区的半径是**氛围的领地**，量级 135–165 米，彼此大面积重叠（实测 space×gloom
+ * 重叠带宽 291.7 米）。室内空间的半径是**一座建筑的占地**，量级 8–25 米。
+ * 于是"把这个点折成一个区，再在那个区名下找空间"必然出错：`gloom-ancient-shrine`
+ * 登记在 `gloom` 名下，占地整个落在 gloom 半径内，但按最近区折叠判给了 `space`
+ * —— 它 0.0 % 的占地能被 `gloom` 认领，地板永远不回答。
+ * 室内归属由 `InternalSpaceManager.spaceAtWorldPoint` 按**占地自身**回答；
+ * 本函数继续保持原样（雾、BGM、区域 HUD 那条链读的是氛围）。
+ *
  * @param {{x: number, z: number}} pos
  * @param {Array<{id: string, center: {x: number, z: number}, radius: number}>} zones
  * @param {{hub?: {center: {x: number, z: number}, radius: number}}} [options]

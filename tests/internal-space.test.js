@@ -91,11 +91,13 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
     it('Manager 那条路与单空间**逐格一致** —— 不丢区域中心', () => {
       const mgr = new InternalSpaceManager();
       for (const name of TEMPLATE_NAMES) mgr.register(makeSpace(name));
+      // B121：区域中心由问手现问（这里每座都登记在 ZC 那个区下）
+      mgr.attachZoneCenterResolver(() => ZC);
 
       for (const name of TEMPLATE_NAMES) {
         const s = makeSpace(name);
         const wc = s.getWorldCenter(ZC);
-        const viaManager = mgr.getInternalHeightAtPoint(wc.x, wc.z, s.zoneId, ZC);
+        const viaManager = mgr.getInternalHeightAtWorldPoint(wc.x, wc.z);
         const viaSpace = s.getInternalHeightAt(wc.x, wc.z, ZC);
         expect(viaManager, `${name} 中心点：Manager 与单空间`).toBeCloseTo(viaSpace, 9);
       }
@@ -106,72 +108,86 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
       const s = makeSpace('radiantStarwatchTower');
       mgr.register(s);
       const wc = s.getWorldCenter(ZC);
-      const a = mgr.getInternalHeightAtPoint(wc.x, wc.z, s.zoneId, ZC);
-      const b = mgr.getInternalHeightAtPoint(wc.x, wc.z, s.zoneId, { ...ZC, y: ZC.y + 7 });
+      mgr.attachZoneCenterResolver(() => ZC);
+      const a = mgr.getInternalHeightAtWorldPoint(wc.x, wc.z);
+      mgr.attachZoneCenterResolver(() => ({ ...ZC, y: ZC.y + 7 }));
+      const b = mgr.getInternalHeightAtWorldPoint(wc.x, wc.z);
       expect(b - a).toBeCloseTo(7, 9);
     });
 
-    it('中心没有有限的 y 就当场抛 —— 不许把 NaN 交给玩家的下坠（B120）', () => {
+    it('登记区问不到中心就当场抛 —— 不许把 NaN 交给玩家的下坠（B120）', () => {
       const mgr = new InternalSpaceManager();
       const s = makeSpace('radiantGrandHall');
       mgr.register(s);
       const wc = s.getWorldCenter(ZC);
       // 生产的区域中心曾经就是这张 `{x, z}`（`BaseZone` 直接存调用方递的字面量），
       // 于是 `zoneCenter.y + baseHeight + floor*floorHeight` 恒为 NaN。
-      expect(() => mgr.getInternalHeightAtPoint(wc.x, wc.z, s.zoneId, { x: ZC.x, z: ZC.z }))
-        .toThrow(/有限的 y/);
-      expect(() => mgr.getInternalHeightAtPoint(wc.x, wc.z, s.zoneId, { x: ZC.x, y: NaN, z: ZC.z }))
-        .toThrow(/有限的 y/);
-      expect(() => mgr.getInternalHeightAtPoint(wc.x, wc.z, s.zoneId, null)).toThrow(/有限的 y/);
+      mgr.attachZoneCenterResolver(() => ({ x: ZC.x, z: ZC.z }));
+      expect(() => mgr.getInternalHeightAtWorldPoint(wc.x, wc.z)).toThrow(/有限的 y/);
+      mgr.attachZoneCenterResolver(() => ({ x: ZC.x, y: NaN, z: ZC.z }));
+      expect(() => mgr.getInternalHeightAtWorldPoint(wc.x, wc.z)).toThrow(/有限的 y/);
+      // 缺 y 的那个区要点名得出：静默跳过得到的就是 B121（一座永远不回答的空间）
+      expect(() => mgr.getInternalHeightAtWorldPoint(wc.x, wc.z))
+        .toThrow(new RegExp(`getInternalHeight（${s.zoneId}）`));
     });
 
     it('不在任何内部空间时返回 null', () => {
       const mgr = new InternalSpaceManager();
       mgr.register(makeSpace('gloomAncientShrine'));
-      expect(mgr.getInternalHeightAtPoint(99999, 99999, 'gloom', ZC)).toBe(null);
+      mgr.attachZoneCenterResolver(() => ZC);
+      expect(mgr.getInternalHeightAtWorldPoint(99999, 99999)).toBe(null);
     });
 
     it('按**点**回答，不按缓存的 currentSpace 回答（B120 的另一半）', () => {
       const mgr = new InternalSpaceManager();
       const hall = makeSpace('radiantGrandHall');
       mgr.register(hall);
+      // B121：`updateCurrent` 不再收调用方递进来的区 id，改为向问手现问登记区的中心
+      mgr.attachZoneCenterResolver(() => ZC);
       const wc = hall.getWorldCenter(ZC);
       // 玩家站在大厅里：缓存指向那座空间
-      expect(mgr.updateCurrent(wc.x, wc.z, hall.zoneId, ZC)).toBe(hall);
+      expect(mgr.updateCurrent(wc.x, wc.z)).toBe(hall);
       expect(mgr.currentSpace, '缓存应当还在那座大厅').toBe(hall);
       // 问一个 600 米外的点 —— 那是快速旅行目的地/敌人脚下那一类问法，
       // 改前拿的是缓存，于是"整个区的地板都是大厅那一块"
       const 远处 = { x: wc.x + 600, z: wc.z };
-      expect(mgr.getInternalHeightAtPoint(远处.x, 远处.z, hall.zoneId, ZC), '点不在大厅里就不该给大厅的地板')
+      expect(mgr.getInternalHeightAtWorldPoint(远处.x, 远处.z), '点不在大厅里就不该给大厅的地板')
         .toBe(null);
     });
   });
 
-  describe('④ Manager 的查询', () => {
-    it('范围内查到那一座、范围外 null', () => {
+  describe('④ Manager 的查询：占地自己认领这个点', () => {
+    it('范围内查到那一座（连带说出登记在谁名下）、范围外 null', () => {
       const mgr = new InternalSpaceManager();
       const shrine = makeSpace('gloomAncientShrine');
       mgr.register(shrine);
+      mgr.attachZoneCenterResolver(() => ZC);
       const wc = shrine.getWorldCenter(ZC);
-      expect(mgr.querySpaceAt(wc.x, wc.z, shrine.zoneId, ZC)?.id).toBe(shrine.id);
-      expect(mgr.querySpaceAt(wc.x + 500, wc.z, shrine.zoneId, ZC)).toBe(null);
+      expect(mgr.spaceAtWorldPoint(wc.x, wc.z)?.space.id).toBe(shrine.id);
+      expect(mgr.spaceAtWorldPoint(wc.x, wc.z)?.zoneId).toBe('gloom');
+      expect(mgr.spaceAtWorldPoint(wc.x + 500, wc.z)).toBe(null);
     });
 
-    it('分区隔离：别的区查不到这座', () => {
+    it('占地是用**登记区**的中心换算的：那个中心挪了，认得这个点的地方跟着挪', () => {
       const mgr = new InternalSpaceManager();
       const shrine = makeSpace('gloomAncientShrine');
       mgr.register(shrine);
-      const wc = shrine.getWorldCenter(ZC);
-      expect(mgr.querySpaceAt(wc.x, wc.z, 'radiant', ZC)).toBe(null);
+      const 另一个区心 = { x: ZC.x + 500, y: ZC.y, z: ZC.z - 400 };
+      mgr.attachZoneCenterResolver((zoneId) => (zoneId === 'gloom' ? 另一个区心 : ZC));
+      const 新心 = shrine.getWorldCenter(另一个区心);
+      expect(mgr.spaceAtWorldPoint(新心.x, 新心.z)?.space.id, '挪过之后占地也挪了').toBe(shrine.id);
+      const 旧心 = shrine.getWorldCenter(ZC);
+      expect(mgr.spaceAtWorldPoint(旧心.x, 旧心.z), '旧位置不再是那座空间（换算没有硬编码 0）').toBe(null);
     });
 
     it('updateCurrent 会把 currentSpace 更新成 null（走出去了）', () => {
       const mgr = new InternalSpaceManager();
       const shrine = makeSpace('gloomAncientShrine');
       mgr.register(shrine);
+      mgr.attachZoneCenterResolver(() => ZC);
       const wc = shrine.getWorldCenter(ZC);
-      expect(mgr.updateCurrent(wc.x, wc.z, shrine.zoneId, ZC)).toBeTruthy();
-      expect(mgr.updateCurrent(wc.x + 500, wc.z, shrine.zoneId, ZC)).toBe(null);
+      expect(mgr.updateCurrent(wc.x, wc.z)).toBeTruthy();
+      expect(mgr.updateCurrent(wc.x + 500, wc.z)).toBe(null);
       expect(mgr.currentSpace).toBe(null);
     });
   });
@@ -183,7 +199,8 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
       s.addCylinderCollider(3, -4, 1.5, 3);
       mgr.register(s);
       const wc = s.getWorldCenter(ZC);
-      mgr.updateCurrent(wc.x, wc.z, s.zoneId, ZC);
+      mgr.attachZoneCenterResolver(() => ZC);
+      mgr.updateCurrent(wc.x, wc.z);
       const cols = mgr.getCurrentCollidersWorld(ZC);
       const cyl = cols.find((c) => c.shape === 'cyl');
       expect(cyl).toBeTruthy();
@@ -202,7 +219,8 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
       s.addBoxCollider(-2, -1, 1, 1, 4, { base: 1, rot: 0.3, kind: 'trigger' });
       mgr.register(s);
       const wc = s.getWorldCenter(ZC);
-      mgr.updateCurrent(wc.x, wc.z, s.zoneId, ZC);
+      mgr.attachZoneCenterResolver(() => ZC);
+      mgr.updateCurrent(wc.x, wc.z);
       const box = mgr.getCurrentCollidersWorld(ZC).find((c) => c.shape === 'box');
       expect(box).toBeTruthy();
       expect(box.x).toBeCloseTo(wc.x - 2, 9);
@@ -347,9 +365,10 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
       return 去注释(src.slice(起, 止));
     };
 
-    // 判据：室内高度必须**按这个点**问，并把这个点所属区的 center 整个递下去。
-    // 刻意不写成 `this.currentZone?...` —— B120 的病根就是把"玩家在哪"当成"这个点在哪"。
-    const ASKS_BY_POINT = /getInternalHeightAtPoint\(\s*x,\s*z,\s*zone\.id,\s*zone\.center\s*,?\s*\)/;
+    // 判据：室内高度必须**按这个点自己**问。两条弯路都不许走回去 ——
+    // 读玩家缓存是 B120，先把点收敛成一个区、再去那个区名下找空间是 B121（重叠的区半径
+    // 会把整座空间判给邻区，实测 space × gloom 的重叠带宽 291.7 米）。
+    const ASKS_BY_POINT = /getInternalHeightAtWorldPoint\(\s*x,\s*z\s*,?\s*\)/;
 
     /** 室内归属的刷新必须排在"区没变就早退"之前 */
     const 刷新早于早退 = (体) => {
@@ -358,17 +377,25 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
       return 刷新 >= 0 && 早退 >= 0 && 刷新 < 早退;
     };
 
-    it('getGroundHeight 按点问室内高度，并把该区的 center 整个传下去', () => {
+    it('getGroundHeight 按点问室内高度，且**不把这个点交给区半径去收敛**', () => {
       const 体 = 切方法(wmSrc(), 'getGroundHeight(x, z) {');
-      expect(体, 'WorldManager 的高度分支里应当有 getInternalHeightAtPoint 调用').toMatch(ASKS_BY_POINT);
-      // 反面：这条路上不许再读缓存、不许留着上一片那个"按玩家问"的入口、也不许用当前区答外部点
-      for (const 坏字样 of ['currentSpace', 'getCurrentInternalHeight', 'this.currentZone']) {
+      expect(体, 'WorldManager 的高度分支里应当有 getInternalHeightAtWorldPoint 调用').toMatch(ASKS_BY_POINT);
+      // 反面：这条路上不许再读缓存、不许留着"按玩家问"的旧入口、
+      // 也不许把区 id / 区中心递进室内查询（那正是 B121 的那一步收敛）
+      for (const 坏字样 of [
+        'currentSpace', 'getCurrentInternalHeight', 'this.currentZone',
+        'zoneIdAt', 'zone.id', 'zoneCenter', 'querySpaceAt',
+      ]) {
         expect(体.includes(坏字样), `getGroundHeight 的高度分支里不该出现 ${坏字样}`).toBe(false);
       }
     });
 
-    it('update() 每帧刷归属：`updateCurrent` 排在"区没变就早退"之前', () => {
-      expect(刷新早于早退(切方法(wmSrc(), 'update(dt, playerPos) {'))).toBe(true);
+    it('update() 每帧刷归属：`updateCurrent` 排在"区没变就早退"之前，且不递区 id', () => {
+      const 体 = 切方法(wmSrc(), 'update(dt, playerPos) {');
+      expect(刷新早于早退(体)).toBe(true);
+      const 刷新 = 体.slice(体.indexOf('updateCurrent('), 体.indexOf(')', 体.indexOf('updateCurrent(')));
+      expect(刷新, '把大气归属递给室内查询就是 B121 的形状（室内归属会被区半径收敛）')
+        .not.toMatch(/zoneId|zone\.center|zone\?\.center|\bid\b/);
     });
 
     it('反面证据：两把尺子都量得出坏写法，也放得过好写法', () => {
@@ -377,26 +404,30 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
         'getCurrentInternalHeight(x, z, this.currentZone?.center ?? { x: 0, y: 0, z: 0 })',
         // 名字改对了、仍然拿"玩家所在的区"回答外部点（B120 的本体）
         'getInternalHeightAtPoint(x, z, this.currentZone?.id, this.currentZone?.center)',
-        // 少了区 id：跨区隔离会失效
-        'getInternalHeightAtPoint(x, z, zone.center)',
+        // B121 那一版：先按大气归属把点收敛成一个区，再去那个区名下找空间
+        'getInternalHeightAtPoint(x, z, zone.id, zone.center)',
+        // 新的按点入口又递回区 id：收敛那一步没拆掉，只是换了个函数名
+        'getInternalHeightAtWorldPoint(x, z, id)',
+        // 少了坐标：问不成这个点
+        'getInternalHeightAtWorldPoint(z, x)',
       ];
       for (const b of 坏高度写法) {
         expect(ASKS_BY_POINT.test(b), `应当认出坏写法：${b.slice(0, 46)}…`).toBe(false);
       }
       // 好写法（跨行）要放行
-      const good = 'this.internalSpaceManager?.getInternalHeightAtPoint(\n        x, z, zone.id, zone.center,\n      )';
+      const good = 'this.internalSpaceManager.getInternalHeightAtWorldPoint(\n        x, z,\n      )';
       expect(ASKS_BY_POINT.test(good)).toBe(true);
 
-      const 晚刷新 = 'const zone = resolveZone(this.zones, id);\n    if (!zone || zone === this.currentZone) return;\n    this.internalSpaceManager.updateCurrent(playerPos.x, playerPos.z, id, zone.center);';
+      const 晚刷新 = 'const zone = resolveZone(this.zones, id);\n    if (!zone || zone === this.currentZone) return;\n    this.internalSpaceManager.updateCurrent(playerPos.x, playerPos.z);';
       expect(刷新早于早退(晚刷新), '早退之后才刷新的写法应当被认出').toBe(false);
-      const 没有早退 = 'this.internalSpaceManager.updateCurrent(playerPos.x, playerPos.z, id, zone.center);';
+      const 没有早退 = 'this.internalSpaceManager.updateCurrent(playerPos.x, playerPos.z);';
       expect(刷新早于早退(没有早退), '找不到早退那句时不许算通过').toBe(false);
 
       // 去注释这一层自己也要两头量得出：本片的 B120 说明里正好抄了那句早退
       const 注释里的早退 = [
         'update(dt, playerPos) {',
         '  // 改前这一句写在 `zone === this.currentZone` 的早退之后',
-        '  this.internalSpaceManager.updateCurrent(x, z, id, zone.center);',
+        '  this.internalSpaceManager.updateCurrent(x, z);',
         '  if (!zone || zone === this.currentZone) return;',
         '}',
       ].join('\n');
@@ -426,11 +457,12 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
     it('每座模板都能被 Manager 查到（不是"注册了但查不到"）', () => {
       const mgr = new InternalSpaceManager();
       for (const name of TEMPLATE_NAMES) mgr.register(makeSpace(name));
+      mgr.attachZoneCenterResolver(() => ZC);
       let found = 0;
       for (const name of TEMPLATE_NAMES) {
         const s = makeSpace(name);
         const wc = s.getWorldCenter(ZC);
-        if (mgr.querySpaceAt(wc.x, wc.z, s.zoneId, ZC)) found++;
+        if (mgr.spaceAtWorldPoint(wc.x, wc.z)?.space.id === s.id) found++;
       }
       expect(found).toBe(4);
     });
