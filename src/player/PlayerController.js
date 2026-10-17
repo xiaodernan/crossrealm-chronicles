@@ -9,7 +9,7 @@ import { attachToHand, GRIP } from './WeaponGrip.js';
 import { createPlayerFSM } from './PlayerFSM.js';
 
 import { shake } from '../engine/Shake.js';
-import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE } from '../engine/CameraRig.js';
+import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE, isFiniteVec3 } from '../engine/CameraRig.js';
 import { LOOK_SENSITIVITY, DEFAULT_LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
 import { emitCue } from '../engine/cues.js';
 import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND, LOCK_ON_CAMERA, PLAYER_KNOCK } from '../content/tuning.js';
@@ -1125,6 +1125,28 @@ export class PlayerController {
 
 
 
+  /**
+   * 阻尼槽重播种（B122 / B120 尾巴①）。
+   *
+   * 原判据只认「槽还是 (0,0,0)」这一种没用过的状态。NaN 是另一种更糟的状态：
+   * `lerp` 从 NaN 出发还是 NaN，而 `lengthSq()` 在 NaN 上算出 NaN，判据永不为真 ——
+   * 于是玩家被救回有限地面 600 帧之后机位仍是 `[#,NaN,#]`（`.tmp-20261017-b122/probe-camera-nan.mjs`
+   * 用真 rig + 真相机 + 真 PlayerController 实测），四元数跟着全 NaN，视锥平面变垃圾、剔除"看见一切"。
+   * 所以"这槽能不能用"必须问有限性，而不只问是不是零。
+   *
+   * 期望值本身非有限时照旧播种（那时 rig 会拒收这一笔，画面停在最后一帧有效机位），
+   * 关键区别是：**上游一旦回到有限值，下一帧就能自己接上**，不需要任何外力去复位。
+   */
+  _reseedIfUnusable(desired, look) {
+    if (!isFiniteVec3(this.currentCameraPos) || !isFiniteVec3(this.currentLookTarget)
+      || this.currentCameraPos.lengthSq() === 0) {
+      this.currentCameraPos.copy(desired);
+      this.currentLookTarget.copy(look);
+    }
+  }
+
+
+
   _updateFirstPersonCamera(dt) {
 
     const eyeY = this.position.y + this.eyeHeight;
@@ -1174,13 +1196,8 @@ export class PlayerController {
 
     const smooth = 1 - Math.exp(-22 * dt);
 
-    if (this.currentCameraPos.lengthSq() === 0) {
-
-      this.currentCameraPos.copy(pos);
-
-      this.currentLookTarget.copy(target);
-
-    }
+    // 阻尼槽"能不能用"要问有限性，不只问是不是零 —— 见 `_reseedIfUnusable` 的注（B122）
+    this._reseedIfUnusable(pos, target);
 
     this.currentCameraPos.lerp(pos, smooth);
 
@@ -1298,10 +1315,8 @@ export class PlayerController {
 
     this.shake.applyTo(desired, lookAt);
 
-    if (this.currentCameraPos.lengthSq() === 0) {
-      this.currentCameraPos.copy(desired);
-      this.currentLookTarget.copy(lookAt);
-    }
+    // 阻尼槽"能不能用"要问有限性，不只问是不是零 —— 见 `_reseedIfUnusable` 的注（B122）
+    this._reseedIfUnusable(desired, lookAt);
 
     /* 收进来快、伸出去慢：贴墙时镜头必须立刻让位（否则就是穿模），
      * 离开墙时慢慢展开（否则每贴一次墙画面就弹一下）。两个速率都按秒算，与帧率无关。 */

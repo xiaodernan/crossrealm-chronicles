@@ -25,6 +25,17 @@ export const CAMERA_OVERRIDES_NONE = Object.freeze({
 });
 
 /**
+ * 三个分量都有限，才算一枚「能落的机位」。
+ *
+ * 判据只有一处定义：`setView` 用它决定收不收这一笔，上游阻尼槽（`PlayerController` 的
+ * `currentCameraPos/currentLookTarget`、`SpectatorCamera` 的 `smoothPos/smoothLook`）用它决定
+ * 要不要重播种。两边各写一份 `Number.isFinite` 迟早漂开 —— 而一旦漂开，就会出现
+ * "rig 收了、阻尼槽没重播种"或反之，那正是 B122 最难查的那一类半自愈状态。
+ */
+export const isFiniteVec3 = (v) =>
+  Number.isFinite(v?.x) && Number.isFinite(v?.y) && Number.isFinite(v?.z);
+
+/**
  * 相机唯一所有者（M3 第一切片）。
  *
  * 收口之前是"谁拿到 camera 谁写一笔"：`PlayerController` 每帧写位置与注视点，
@@ -64,6 +75,14 @@ export class CameraRig {
     this._tmpLook = new THREE.Vector3();
     this._viewOwner = null;
     this._blend = null;
+    /* —— 非有限落笔的拒绝账（B122）——
+     * `rejections` 累计（会话内单调，是"镜头为什么冻住了"的现成探针）；
+     * `rejectionRun` 是当前这一串连续被拒的笔数，只在 0→1 那一笔告警，恢复时清零并回报长度
+     * —— 否则一帧 60 次的 NaN 风暴会把控制台刷满，而真正的信号（"开始坏了 / 好了"）被淹掉；
+     * `lastRejection` 存这一串**第一笔**的六个数：快照而非引用，因为调用方递进来的是复用临时向量。 */
+    this.rejections = 0;
+    this.rejectionRun = 0;
+    this.lastRejection = null;
   }
 
   /** 基准 FOV（第一 / 第三人称切换、初始化）。各层增量留在账上，不被这次切换抹掉 */
@@ -76,9 +95,16 @@ export class CameraRig {
    * 「这一帧我要压多少 FOV」。同名层以最后一次申领为准。
    * 只在确实还想压的时候调用 —— 不想要就别调用，更不要申领一个 0：
    * 那等于把"记得收尾"的义务又塞回每个调用方，正是本模块要消掉的东西。
+   *
+   * 非有限的申领一律不收（B122）：`Infinity` 是 truthy，旧写法 `if (delta)` 照收，
+   * 于是 `camera.fov = Infinity`，`updateProjectionMatrix()` 把 16 个元素里的 4 个写成 NaN，
+   * `Frustum` 四个平面随之不再有限。后果不是"看见一切"而是"判什么都不作数"：
+   * 实测同一枚 Infinity 下，一个 5000 米外的盒子被判为**不可见** —— 剔除的返回值与场景无关了。
+   * （`NaN` 倒是碰不到这条门：NaN 是 falsy，`if (delta)` 顺手就挡了 —— 那是巧合不是守卫，
+   * 所以"有限"要写成明文判据，不能压在一条没人打算遵守的真值规则上。）
    */
   requestFov(id, delta) {
-    if (delta) this._asking.set(id, delta);
+    if (Number.isFinite(delta) && delta) this._asking.set(id, delta);
     return this;
   }
 
@@ -140,8 +166,36 @@ export class CameraRig {
    * @param {THREE.Vector3} position
    * @param {THREE.Vector3} lookAt
    * @param {{ owner?: string, transition?: number, snap?: boolean }} [opts]
+   *
+   * **非有限拒绝（B122）**：任一分量不是有限数就整笔不收 —— 不改 `_pos/_look`、不认领所有权、
+   * 不起补间，画面停在最后一次有效机位。这不是防御性洁癖，是 B120 实测过的账：
+   * 一枚 NaN 落到 `camera.position` 之后，`lookAt` 算出的四元数四分量全 NaN，
+   * 把玩家救回有限地面再跑 600 帧，机位仍是 `[#,NaN,#]`（阻尼槽 `lerp` 出来还是 NaN，
+   * 而原复位判据 `lengthSq() === 0` 在 NaN 上永远为假）。投影/视图矩阵随之变垃圾，
+   * `Frustum` 的四个平面读不出意义，剔除当场变成「看见一切」—— 那是整帧渲染的账单，
+   * 不是"画面抖一下"。冻在最后一帧好画面严格优于把 NaN 交给 GPU，而且上游一回到有限值就自动接上。
    */
   setView(position, lookAt, opts = {}) {
+    if (!isFiniteVec3(position) || !isFiniteVec3(lookAt)) {
+      this.rejections++;
+      this.rejectionRun++;
+      if (this.rejectionRun === 1) {
+        this.lastRejection = {
+          owner: opts.owner ?? DEFAULT_VIEW_OWNER,
+          position: [position?.x, position?.y, position?.z],
+          lookAt: [lookAt?.x, lookAt?.y, lookAt?.z],
+        };
+        console.warn(`CameraRig: 拒绝非有限机位（所有者 ${this.lastRejection.owner}，`
+          + `position=${this.lastRejection.position} lookAt=${this.lastRejection.lookAt}）`
+          + ' —— 画面停在最后一次有效机位，等上游回到有限值');
+      }
+      return this;
+    }
+    if (this.rejectionRun > 0) {
+      console.warn(`CameraRig: 机位恢复有限（上一串被拒 ${this.rejectionRun} 笔）`);
+      this.rejectionRun = 0;
+    }
+
     this._pos.copy(position);
     this._look.copy(lookAt);
 

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CAMERA_BLEND } from '../content/tuning.js';
+import { isFiniteVec3 } from '../engine/CameraRig.js';
 
 /**
  * 观看模式相机 — 法环式越肩跟随，固定俯角，无需鼠标。
@@ -40,7 +41,11 @@ export class SpectatorCamera {
     const lookAt = pivot.clone();
     lookAt.y += 0.2;
 
-    if (!this._initialized) {
+    /* 阻尼槽的复位判据要问有限性，不只问"初始化过没有"（B122 / B120 尾巴①）：
+     * `_initialized` 一旦为真就再也不播种，而 `targetPos` 带着 NaN 进来时这里播的种本身就是 NaN，
+     * 之后每帧 `lerp` 都从 NaN 出发 —— 观看模式会永久停在一片垃圾上。 */
+    if (!this._initialized
+      || !isFiniteVec3(this.smoothPos) || !isFiniteVec3(this.smoothLook)) {
       this.smoothPos.copy(desired);
       this.smoothLook.copy(lookAt);
       this._initialized = true;
