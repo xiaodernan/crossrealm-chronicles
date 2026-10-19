@@ -58,6 +58,12 @@ export const BOSS_ARENA_SCRIPTS = {
   ],
   'shadow-warden': [
     { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35, entry: true },
+    // 影界守护者是"套着场地招的近战王牌"，不是"只会砸地的兜底"：第三阶段起每 8 秒在玩家脚下
+    // 甩一片影弹（与奥术师读同一枚 barrage，各自留 `tint` 保住配色）。`range 22` 让它只咬近处
+    // —— 退到底就只挨 P2 砸地那记，贴上来连吃两份，和前两阶段的贴身压力是同一股劲。
+    // **刻意不标 entry**：二阶段的砸地已是招牌入场招；三阶段的影弹是节奏里的常态招，
+    // 转阶段那一帧再来一次就在同 frame 把"入场砸地"和"预告影弹"叠成两脚，观众看不懂。
+    { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 8, range: 22, tint: 0x6a3bbf },
   ],
   'archmagus': [
     { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35 },

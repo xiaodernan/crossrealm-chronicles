@@ -18,6 +18,7 @@ import {
   ARENA_MOVES, BOSS_ARENA_SCRIPTS, arenaScriptFor, assertArenaScript,
 } from '../src/content/arenaScripts.js';
 import { GROUND_HAZARD } from '../src/content/tuning.js';
+import { BOSS_IDS } from '../src/content/bossRoster.js';
 import { Boss } from '../src/combat/Boss.js';
 import { MagicBoss } from '../src/combat/MagicBoss.js';
 import { SpaceBoss } from '../src/combat/SpaceBoss.js';
@@ -113,6 +114,20 @@ describe('脚本表自证', () => {
   it('未登记的 bossId 走 default，而不是什么都不干', () => {
     expect(arenaScriptFor('dungeon-crypt-of-nowhere')).toBe(BOSS_ARENA_SCRIPTS.default);
     expect(arenaScriptFor('shadow-warden')).not.toBe(BOSS_ARENA_SCRIPTS.default);
+  });
+
+  it('每只世界 Boss 必须有自己的编排：登记了就不许和 default 兜底一模一样', () => {
+    // "逐 Boss 遭遇编排"的反面不是"没登记"（未登记本就走 default），而是**登记了却抄了兜底**
+    // —— 表里多了个 key、读起来像写过了，打起来和没写一字不差。这比彻底漏登记更阴：
+    // 漏登记会被下面那条重名闸门抓到，克隆 default 则什么闸门都不响。
+    // 副本 Boss 刻意不在 BOSS_IDS 里，它们本就该走 default —— 这条只管名册上的世界 Boss。
+    const def = JSON.stringify(BOSS_ARENA_SCRIPTS.default);
+    for (const id of BOSS_IDS) {
+      const script = BOSS_ARENA_SCRIPTS[id];
+      expect(script, `${id} 没在场地脚本表里点名（会静默落 default）`).toBeTruthy();
+      expect(JSON.stringify(script),
+        `${id} 的编排与 default 兜底完全一致——等于没给这只世界 Boss 写专属遭遇`).not.toBe(def);
+    }
   });
 
   it('EnemyManager 生成的每个 bossId 都被表点了名', () => {
