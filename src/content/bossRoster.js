@@ -34,11 +34,16 @@
  * 两句手写的 `if (boss.bossId === '...' && chapter < N) return;`，现在改成读这张表。
  */
 export const BOSS_ROSTER = [
+  // `name` 是**全名**，身份台口（过场标题 / 击败横幅 / 血条名牌）一律用它；`shortName` 是
+  // 省地方的口子（目标标题 / 航点标签 / 日志 / 营火选择）用的短名。**两个都只在这里登记一次**
+  // —— 修前这些显示名被抄成字面量散在 objectives / bossDialogue / StoryJournal / QuestAssistant
+  // 里，抄着抄着就分叉（同一只奇点领主，过场叫全名、横幅却叫短名）。没登记 shortName 的 Boss，
+  // 省地方的口子退回全名。门禁 `tests/boss-name-consistency.test.js` 横向钉住这些出口。
   { id: 'shadow-warden', name: '影界守护者', chapter: 1 },
-  { id: 'archmagus', name: '大奥术师·萨尔林', chapter: 1 },
-  { id: 'singularity-herald', name: '引力化身·奇点领主', chapter: 1 },
+  { id: 'archmagus', name: '大奥术师·萨尔林', shortName: '大奥术师', chapter: 1 },
+  { id: 'singularity-herald', name: '引力化身·奇点领主', shortName: '奇点领主', chapter: 1 },
   { id: 'void-chronarch', name: '时线执政官', chapter: 4 },
-  { id: 'chaos-overlord', name: '混沌裂隙领主', chapter: 5 },
+  { id: 'chaos-overlord', name: '混沌裂隙领主', shortName: '裂隙领主', chapter: 5 },
 ];
 
 /** 副本 Boss 的 id 前缀：实际 id 是 `dungeon-<副本定义 id>` */

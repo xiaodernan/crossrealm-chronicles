@@ -9,7 +9,7 @@ const cineOn = (name, handler) => on(name, handler, CINEMATIC_CINEMATICMANAGER);
 /** 过场 DoF 档：焦点永远钉在 Boss 注视点，背景随距离全虚；fade 是首尾的淡入淡出坡长 */
 const CINE_DOF = { maxblur: 0.85, fade: 0.5 };
 
-const BOSS_CINEMATICS = {
+export const BOSS_CINEMATICS = {
   'shadow-warden': {
     title: '影界守护者',
     subtitle: '灰白森林 · 位面试炼 I',

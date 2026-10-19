@@ -1,5 +1,5 @@
 /** 统一叙事日志 — 探索/碎片/NPC/Boss/地牢，可存档 */
-import { isDungeonBossId } from '../content/bossRoster.js';
+import { isDungeonBossId, bossById } from '../content/bossRoster.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -112,14 +112,9 @@ export class StoryJournal {
 
     journalOn('enemy-defeated', (e) => {
       if (e.detail.type !== 'boss' || isDungeonBossId(e.detail.bossId)) return;
-      const names = {
-        'shadow-warden': '影界守护者',
-        archmagus: '大奥术师',
-        'singularity-herald': '奇点领主',
-        'void-chronarch': '时线执政官',
-        'chaos-overlord': '混沌裂隙领主',
-      };
-      const title = names[e.detail.bossId] ?? e.detail.name;
+      // 显示名从名册读（短名优先）—— 修前这里内联抄了一份 `id → 名` 表，与名册/过场各说各话
+      const known = bossById(e.detail.bossId);
+      const title = known?.shortName ?? known?.name ?? e.detail.name;
       this.add({
         id: `boss-${e.detail.bossId}`,
         category: 'boss',

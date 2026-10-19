@@ -32,6 +32,10 @@
 
 import { ZONE_IDS, ZONE_NAMES } from './ZoneIdentity.js';
 import { TRIAL_DUNGEON_IDS } from './dungeons.js';
+import { bossById } from './bossRoster.js';
+
+/** 世界 Boss 在目标/航点/日志里的显示名：短名优先、没登记短名回落全名。名册单源，别抄字面量。 */
+const bossLabel = (id) => bossById(id)?.shortName ?? bossById(id)?.name ?? '';
 
 /* ------------------------------------------------------------------ *
  * `chapter` 到底说什么（W-B3 切片3 实测之后改的口径）
@@ -117,14 +121,14 @@ export const OBJECTIVES = [
   },
   {
     id: 'boss',
-    title: '影界守护者',
+    title: bossLabel('shadow-warden'),
     desc: '击败灰白森林 Boss。',
     type: 'boss',
     bossId: 'shadow-warden',
     chapter: 1,
-    waypoint: { x: -250, z: -35, label: '影界守护者' },
+    waypoint: { x: -250, z: -35, label: bossLabel('shadow-warden') },
     reward: 25,
-    journal: '影界守护者陨落，森林重获安宁。',
+    journal: `${bossLabel('shadow-warden')}陨落，森林重获安宁。`,
     flags: { boss1Defeated: true },
   },
   // ── Chapter 2: 无尽位面 ──
@@ -218,14 +222,16 @@ export const OBJECTIVES = [
   },
   {
     id: 'boss2',
-    title: '大奥术师',
+    title: bossLabel('archmagus'),
+    // `desc` 是**玩家读到的成段文案**，按本仓口径钉字面（`tests/zone-name-legacy.test.js`：
+    // 玩家读到的那几句钉字面，等式两边一起改口才看得见）—— 它不从名册派生。
     desc: '击败霍格沃兹遗境深处的大奥术师。',
     type: 'boss',
     bossId: 'archmagus',
     chapter: 2,
-    waypoint: { x: 5, z: -220, label: '大奥术师' },
+    waypoint: { x: 5, z: -220, label: bossLabel('archmagus') },
     reward: 30,
-    journal: '大奥术师·萨尔林陨落，霍格沃兹遗境安宁。',
+    journal: `${bossLabel('archmagus')}陨落，霍格沃兹遗境安宁。`,
     flags: { boss2Defeated: true },
   },
   {
@@ -328,14 +334,14 @@ export const OBJECTIVES = [
   },
   {
     id: 'boss3',
-    title: '奇点领主',
+    title: bossLabel('singularity-herald'),
     desc: '击败米勒荒原的引力化身。',
     type: 'boss',
     bossId: 'singularity-herald',
     chapter: 3,
-    waypoint: { x: 235, z: 155, label: '奇点领主' },
+    waypoint: { x: 235, z: 155, label: bossLabel('singularity-herald') },
     reward: 35,
-    journal: '奇点领主·引力化身陨落。',
+    journal: `${bossLabel('singularity-herald')}·引力化身陨落。`,
     flags: { boss3Defeated: true },
   },
   {
@@ -404,15 +410,15 @@ export const OBJECTIVES = [
   },
   {
     id: 'void-boss',
-    title: '时线执政官',
+    title: bossLabel('void-chronarch'),
     desc: '击败破碎时线隐藏 Boss。',
     type: 'boss',
     bossId: 'void-chronarch',
     chapter: 4,
     requires: { hasVoidRift: true },
-    waypoint: { x: 0, z: 235, label: '时线执政官' },
+    waypoint: { x: 0, z: 235, label: bossLabel('void-chronarch') },
     reward: 40,
-    journal: '时线执政官陨落，真相大白。',
+    journal: `${bossLabel('void-chronarch')}陨落，真相大白。`,
     flags: { voidBossDefeated: true },
   },
   {
@@ -483,15 +489,15 @@ export const OBJECTIVES = [
   },
   {
     id: 'chaos-boss',
-    title: '裂隙领主',
+    title: bossLabel('chaos-overlord'),
     desc: '击败混沌边境 Boss。',
     type: 'boss',
     bossId: 'chaos-overlord',
     chapter: 5,
     requires: { hasChaosCore: true },
-    waypoint: { x: -200, z: 285, label: '裂隙领主' },
+    waypoint: { x: -200, z: 285, label: bossLabel('chaos-overlord') },
     reward: 50,
-    journal: '混沌裂隙领主陨落，终局开启。',
+    journal: `${bossLabel('chaos-overlord')}陨落，终局开启。`,
     flags: { chaosBossDefeated: true },
   },
   {

@@ -1,4 +1,4 @@
-import { DUNGEON_BOSS_PREFIX } from './bossRoster.js';
+import { DUNGEON_BOSS_PREFIX, bossById } from './bossRoster.js';
 
 /** Boss 专属台词 — 开场 / 阶段 / 击败 / 地牢守钥者 */
 export const BOSS_PHASE_LINES = {
@@ -29,12 +29,16 @@ export const BOSS_PHASE_LINES = {
   },
 };
 
+/**
+ * 击败横幅。`title` 一律是名册**全名**（身份台口不省地方）—— 直接 `bossById(id).name`，
+ * 不在这里抄第二份显示名（修前 singularity-herald 写的是短名「奇点领主」，与过场分叉）。
+ */
 export const BOSS_DEFEAT_LINES = {
-  'shadow-warden': { title: '影界守护者', text: '影散。灰白森林的第一道枷锁解除。\n\n营火可解锁「影界斩」剑系技能。' },
-  archmagus: { title: '大奥术师·萨尔林', text: '禁书合上。霍格沃兹遗境的奥术风暴平息。\n\n杖系「奥术共鸣 II」已在营火可用。' },
-  'singularity-herald': { title: '奇点领主', text: '引力井坍缩。米勒荒原恢复静止。\n\n剑系「位面斩强化」已解锁。' },
-  'void-chronarch': { title: '时线执政官', text: '时线重新缝合。你看见无数个自己的倒影消散。\n\n杖系「时线洞察」已解锁。' },
-  'chaos-overlord': { title: '混沌裂隙领主', text: '混沌暂退。边境的闪电归于沉默。\n\n双流派终极技能「无尽行者」已解锁。' },
+  'shadow-warden': { title: bossById('shadow-warden').name, text: '影散。灰白森林的第一道枷锁解除。\n\n营火可解锁「影界斩」剑系技能。' },
+  archmagus: { title: bossById('archmagus').name, text: '禁书合上。霍格沃兹遗境的奥术风暴平息。\n\n杖系「奥术共鸣 II」已在营火可用。' },
+  'singularity-herald': { title: bossById('singularity-herald').name, text: '引力井坍缩。米勒荒原恢复静止。\n\n剑系「位面斩强化」已解锁。' },
+  'void-chronarch': { title: bossById('void-chronarch').name, text: '时线重新缝合。你看见无数个自己的倒影消散。\n\n杖系「时线洞察」已解锁。' },
+  'chaos-overlord': { title: bossById('chaos-overlord').name, text: '混沌暂退。边境的闪电归于沉默。\n\n双流派终极技能「无尽行者」已解锁。' },
 };
 
 export const DUNGEON_BOSS_LINES = {

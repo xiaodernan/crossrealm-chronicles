@@ -1,6 +1,7 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText } from '../content/keyHints.js';
 import { BOSS_STAT_KEYS } from '../content/objectives.js';
+import { bossById } from '../content/bossRoster.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 
@@ -180,7 +181,7 @@ export class QuestAssistant {
       { label: '击败影之战士', action: 'kills', type: 'soldier', count: 2 },
       { label: '至尊石环', action: 'discover', id: 'fantasy-ring', x: -200, z: -30 },
       { label: '影界 Boss', action: 'tp', x: -250, z: -35 },
-      { label: '击败影界守护者', action: 'boss', key: 'bossDefeated', bossId: 'shadow-warden' },
+      { label: `击败${bossById('shadow-warden')?.shortName ?? bossById('shadow-warden')?.name}`, action: 'boss', key: 'bossDefeated', bossId: 'shadow-warden' },
       { label: ZONE_NAMES[ZONE_IDS.MAGIC], action: 'tp', x: 0, z: -180 },
       { label: '悬浮城堡', action: 'discover', id: 'magic-castle', x: 0, z: -195 },
       { label: '构装体', action: 'kills', type: 'golem', count: 1 },
@@ -189,25 +190,25 @@ export class QuestAssistant {
       { label: '重铸锚点', action: 'poi', id: 'hub-anchor' },
       { label: 'Ch2 宝箱', action: 'chests', count: 5 },
       { label: '流浪者', action: 'npc', id: 'wanderer', x: -8, z: 45 },
-      { label: '大奥术师', action: 'boss', key: 'boss2Defeated', bossId: 'archmagus', x: 5, z: -220 },
+      { label: bossById('archmagus')?.shortName ?? bossById('archmagus')?.name, action: 'boss', key: 'boss2Defeated', bossId: 'archmagus', x: 5, z: -220 },
       { label: '虚空骑士', action: 'kills', type: 'elite', count: 1 },
       { label: '升级 Lv5', action: 'level', level: 5 },
       { label: '宇航员', action: 'npc', id: 'astronaut-echo', x: 200, z: 90 },
       { label: '法术练习', action: 'spells', count: 8 },
       { label: `${TRIAL_DUNGEON_IDS.length} 座地下城`, action: 'dungeons', ids: TRIAL_DUNGEON_IDS },
-      { label: '奇点领主', action: 'boss', key: 'boss3Defeated', bossId: 'singularity-herald', x: 235, z: 155 },
+      { label: bossById('singularity-herald')?.shortName ?? bossById('singularity-herald')?.name, action: 'boss', key: 'boss3Defeated', bossId: 'singularity-herald', x: 235, z: 155 },
       { label: '心智升级', action: 'mind', value: 2 },
       { label: '位面飞升', action: 'poi', id: 'hub-anchor' },
       { label: ZONE_NAMES[ZONE_IDS.VOID], action: 'tp', x: 0, z: 220 },
       { label: '时线裂隙', action: 'discover', id: 'void-rift', x: 0, z: 220 },
       { label: '蓄力法术', action: 'charged', count: 5 },
-      { label: '时线执政官', action: 'boss', key: 'voidBossDefeated', bossId: 'void-chronarch', x: 0, z: 235 },
+      { label: bossById('void-chronarch')?.shortName ?? bossById('void-chronarch')?.name, action: 'boss', key: 'voidBossDefeated', bossId: 'void-chronarch', x: 0, z: 235 },
       { label: '五维碑文', action: 'discover', id: 'void-tablet', x: 0, z: 225 },
       { label: '真·位面行者', action: 'poi', id: 'hub-anchor' },
       { label: ZONE_NAMES[ZONE_IDS.ABYSS], action: 'tp', x: -200, z: 220 },
       { label: '混沌之核', action: 'discover', id: 'chaos-core', x: -200, z: 220 },
       { label: '武器技能×3', action: 'skills', count: 3 },
-      { label: '混沌领主', action: 'boss', key: 'chaosBossDefeated', bossId: 'chaos-overlord', x: -200, z: 285 },
+      { label: bossById('chaos-overlord')?.shortName ?? bossById('chaos-overlord')?.name, action: 'boss', key: 'chaosBossDefeated', bossId: 'chaos-overlord', x: -200, z: 285 },
       { label: '地下城再探', action: 'dungeonRerun' },
       { label: ZONE_NAMES[ZONE_IDS.GLOOM], action: 'tp', x: 180, z: 100 },
       { label: '幽暗深处', action: 'discover', id: 'gloom-deep-entrance', x: 180, z: 170 },
