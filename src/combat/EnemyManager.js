@@ -3,7 +3,7 @@ import { Enemy } from './Enemy.js';
 import { SquadController } from '../ai/Squad.js';
 import { bodyOf } from '../ai/Separation.js';
 import { AI, SUMMON } from '../content/tuning.js';
-import { enemyRosterOf } from '../content/enemies.js';
+import { enemyRosterOf, KILL_SOULS } from '../content/enemies.js';
 import { Boss } from './Boss.js';
 import { GroundHazards } from './GroundHazards.js';
 import { MagicBoss } from './MagicBoss.js';
@@ -25,9 +25,10 @@ import { difficultyMultiplier } from '../game/Difficulty.js';
  * 现在按敌人记下的档位乘 `growth.souls`，难度乘子仍只在 `addSouls` 那一口结算
  * （两轴各司其职，与 `enemyGrowth.js` 文件头那一段同一分工）。
  *
- * 抽成纯函数：循环里只调用、门禁也能直接调，不抄第二份基数表。
+ * 抽成纯函数：循环里只调用、门禁也能直接调。基数表**只此一份**：`KILL_SOULS` 住在
+ * `content/enemies.js`（那里还派生 `KILL_SOUL_KINDS` 供注册表对齐 `GEAR_DROP.byKind`）——
+ * 本文件 import 它，不再另抄一份（再抄就会冒出"改一处、另一处不跟着变"的两个击杀魂口径）。
  */
-const KILL_SOULS = Object.freeze({ boss: 500, golem: 80, elite: 120, normal: 25 });
 
 /** 击杀掉魂 = 基类 × `growth.souls`（难度乘子在 `PlayerStats.addSouls` 结算） */
 export function killRewardSouls(kind, growthStage = 0) {
