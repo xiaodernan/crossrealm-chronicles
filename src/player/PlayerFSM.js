@@ -49,7 +49,7 @@ function locomotion(owner, dt, ctx, { speedScale = 1, allowSprint = true } = {})
   owner.setAnimState(true, sprint);
 }
 
-const STATES = {
+const PLAYER_STATES = {
   roll: {
     allowJump: false,
     allowInteract: false,
@@ -132,7 +132,7 @@ export function stateAllows(sm, key) {
 }
 
 export function createPlayerFSM(player) {
-  const sm = new StateMachine(player, STATES, 'idle');
+  const sm = new StateMachine(player, PLAYER_STATES, 'idle');
   sm.resolve = (ctx) => {
     const next = resolvePlayerState(player, ctx);
     if (next !== sm.current) sm.change(next);

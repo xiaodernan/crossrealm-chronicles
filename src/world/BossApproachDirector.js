@@ -1,7 +1,7 @@
 import { MAP_BOSSES } from '../game/QuestSystem.js';
 
 /** 首次靠近 Boss 信标 — 播报 lore */
-const BOSS_LORE = {
+const BOSS_APPROACH_INTEL = {
   'shadow-warden': '影界守护者 — 灰林东侧。两阶段，红圈砸地前翻滚。',
   archmagus: '大奥术师萨尔林 — 霍格沃兹遗境北侧。紫球追踪，弹反可打断。',
   'singularity-herald': '奇点领主 — 米勒荒原。引力圈时向外滚。',
@@ -27,7 +27,7 @@ export class BossApproachDirector {
       if (dx * dx + dz * dz > 55 * 55) continue;
       this.seen.add(b.bossId);
       this.cooldown = 8;
-      const lore = BOSS_LORE[b.bossId] ?? b.label;
+      const lore = BOSS_APPROACH_INTEL[b.bossId] ?? b.label;
       this.game.dialog.toast(`⚠ ${lore}`, 4500);
       this.game.storyJournal?.add?.({
         id: `boss-beacon-${b.bossId}`,

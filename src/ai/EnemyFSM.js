@@ -55,7 +55,7 @@ export function resolveEnemyState(enemy, ctx) {
   return 'idle';
 }
 
-const STATES = {
+const ENEMY_STATES = {
   /** 无目标：站定；不可攻击的训练木桩保留原来"慢慢转身"的摆设感 */
   idle: {
     update(owner, sm, dt) {
@@ -203,7 +203,7 @@ const STATES = {
 };
 
 export function createEnemyFSM(enemy) {
-  const sm = new StateMachine(enemy, STATES, 'idle');
+  const sm = new StateMachine(enemy, ENEMY_STATES, 'idle');
   sm.isCommitted = () => COMMITTED.has(sm.current);
   sm.resolve = (ctx) => {
     // 承诺态由自己的计时推进；期间外部判定一律不改判
