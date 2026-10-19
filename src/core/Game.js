@@ -17,6 +17,7 @@ import { DEFAULT_MSAA_SAMPLES, applyMsaaSamples } from '../engine/aaPolicy.js';
 import { shake } from '../engine/Shake.js';
 import { ZoneFog } from '../effects/ZoneFog.js';
 import { scheduler } from '../engine/Scheduler.js';
+import { tick as frameTick } from '../engine/FrameBudget.js';
 import { PerfHUD } from '../engine/PerfHUD.js';
 import { registerPerfGauges } from '../game/perfGauges.js';
 import { createErrorReporter } from '../engine/errorReporter.js';
@@ -950,6 +951,9 @@ export class Game {
   update() {
     this.time.tick(this.clock.getDelta(), performance.now() / 1000);
     const rawDt = this.time.rawDt;
+    // W-E2 切片1：帧计数出口。每帧 +1，供"按 1/2、1/4 帧率更新"的视觉系统统一分母；
+    // 不碰 dt / timeScale / hitstop（与 B118 口径一致：慢动作里帧照数，不传送）。
+    frameTick();
     this.perfHud?.update(rawDt);
     /* 演出与 UI 节奏走 rawDt：不受命中停顿/慢动作影响（B39）。
      * 放在最前面，让"这一帧该弹的横幅"在本帧的渲染里就位，而不是拖到下一帧。 */
