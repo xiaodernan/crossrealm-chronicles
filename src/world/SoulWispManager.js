@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { addShake } from '../engine/Shake.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
+import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
 
 /**
  * 位面残响 — 漂浮魂火，靠近会被吸引并吸收
@@ -75,6 +76,9 @@ export class SoulWispManager {
   }
 
   update(dt, playerPos) {
+    // 相位每帧累积（B118：慢动作里不传送）；视觉更新（漂浮/旋转/脉动）降频 1/2 帧。
+    // 追逐逻辑（距离/移动/收集）每帧做，影响玩法判定。
+    const 视觉帧 = frameShouldUpdate(2);
     this._时相 += dt;
     const t = this._时相;
     let anyChasing = false;
@@ -101,10 +105,12 @@ export class SoulWispManager {
         w.mesh.children[1].material.color.setHex(0x66ccff);
       }
 
-      const gy = this.world.getGroundHeight(w.px, w.pz);
-      w.mesh.position.set(w.px, gy + 1.2 + Math.sin(t * 2 + w.phase) * 0.35, w.pz);
-      w.mesh.rotation.y += dt * (w.chasing ? 2.4 : 1.2);
-      glowPulse(w.mesh.children[0], t, w.phase, w.chasing);
+      if (视觉帧) {
+        const gy = this.world.getGroundHeight(w.px, w.pz);
+        w.mesh.position.set(w.px, gy + 1.2 + Math.sin(t * 2 + w.phase) * 0.35, w.pz);
+        w.mesh.rotation.y += dt * (w.chasing ? 2.4 : 1.2);
+        glowPulse(w.mesh.children[0], t, w.phase, w.chasing);
+      }
 
       if (dist < COLLECT_RANGE) this.collect(w);
     }

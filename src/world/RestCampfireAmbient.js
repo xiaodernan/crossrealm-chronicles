@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
 
 /** 营火环境粒子 — 每个休息点额外火星 / 奥术屑 */
 const ZONE_EMBER = {
@@ -38,6 +39,8 @@ export class RestCampfireAmbient {
   }
 
   update(dt, playerPos) {
+    // 相位每帧累积（B118）；粒子位置更新降频 1/2 帧；可见性判定每帧做。
+    const 视觉帧 = frameShouldUpdate(2);
     for (const s of this.systems) {
       s.t += dt;
       const arr = s.pts.geometry.attributes.position.array;
@@ -45,17 +48,19 @@ export class RestCampfireAmbient {
       s.pts.visible = near;
       if (!near) continue;
 
-      for (let i = 0; i < arr.length / 3; i++) {
-        arr[i * 3 + 1] += s.preset.speed * dt * (0.8 + Math.sin(s.t + i) * 0.2);
-        arr[i * 3] += Math.sin(s.t * 2 + i * 0.3) * dt * 0.15;
-        if (arr[i * 3 + 1] > 2.8) {
-          arr[i * 3] = (Math.random() - 0.5) * 2.2;
-          arr[i * 3 + 1] = 0.4;
-          arr[i * 3 + 2] = (Math.random() - 0.5) * 2.2;
+      if (视觉帧) {
+        for (let i = 0; i < arr.length / 3; i++) {
+          arr[i * 3 + 1] += s.preset.speed * dt * (0.8 + Math.sin(s.t + i) * 0.2);
+          arr[i * 3] += Math.sin(s.t * 2 + i * 0.3) * dt * 0.15;
+          if (arr[i * 3 + 1] > 2.8) {
+            arr[i * 3] = (Math.random() - 0.5) * 2.2;
+            arr[i * 3 + 1] = 0.4;
+            arr[i * 3 + 2] = (Math.random() - 0.5) * 2.2;
+          }
         }
+        s.pts.geometry.attributes.position.needsUpdate = true;
+        s.pts.material.opacity = 0.55 + Math.sin(s.t * 3) * 0.2;
       }
-      s.pts.geometry.attributes.position.needsUpdate = true;
-      s.pts.material.opacity = 0.55 + Math.sin(s.t * 3) * 0.2;
     }
   }
 }
