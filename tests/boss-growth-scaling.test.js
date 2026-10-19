@@ -14,10 +14,11 @@
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { killRewardSouls } from '../src/combat/EnemyManager.js';
+import { DungeonBoss } from '../src/combat/DungeonBoss.js';
 import { growthAt } from '../src/content/enemyGrowth.js';
 import { setDifficulty, resetDifficulty } from '../src/game/Difficulty.js';
 import {
-  installWindowShim, makeManager, makePlayerRef, v,
+  installWindowShim, makeManager, makePlayerRef, makeScene, makeWorld, v,
 } from './helpers/enemyHarness.js';
 
 beforeEach(() => installWindowShim());
@@ -71,25 +72,40 @@ describe('W-E1 切片6：Boss 走难度×成长咽喉', () => {
     expect(b.growthStage).toBe(4);
   });
 
-  it('每只世界 Boss 声明的基数（hp/damage）在构造后就得成立，不被父类字面量覆盖', () => {
-    // B100：契约不能"在夹具成立、在世界不成立"。病灶是 `Boss` 构造器用**字面量**
-    // `hp: 800` / `damage: 18` 覆盖了 `...config`，于是 Magic 650 / Space 900 / Void 750 /
-    // Chaos 820（以及 DungeonBoss 的 `480 + rooms*25`、damage 16/20/19/21）全是死代码 ——
-    // 五只外强中干都是 800/18，而各子类里写着不一样的数、没有任何闸门会响。
+  it('每只世界 Boss 声明的 tunable（hp/damage/posture/speed）在构造后就成立，不被父类字面量覆盖', () => {
+    // B100：契约不能"在夹具成立、在世界不成立"。病灶是 `Boss` 构造器用**字面量**覆盖
+    // `...config`，于是子类声明的每个值都可能是死数据。这条把 hp/damage/posture/speed
+    // 逐只钉住（posture 落在 `maxPosture`，瞬时 posture 从 0 起）。
     const m = makeManager();
+    //                              hp   dmg  posture speed
     const declared = [
-      ['spawnBoss', 'shadow-warden', 800, 18],
-      ['spawnMagicBoss', 'archmagus', 650, 16],
-      ['spawnSpaceBoss', 'singularity-herald', 900, 20],
-      ['spawnVoidBoss', 'void-chronarch', 750, 19],
-      ['spawnChaosBoss', 'chaos-overlord', 820, 21],
+      ['spawnBoss', 'shadow-warden', 800, 18, 120, 4.5],
+      ['spawnMagicBoss', 'archmagus', 650, 16, 100, 4],
+      ['spawnSpaceBoss', 'singularity-herald', 900, 20, 130, 5],
+      ['spawnVoidBoss', 'void-chronarch', 750, 19, 110, 4.8],
+      ['spawnChaosBoss', 'chaos-overlord', 820, 21, 115, 5.2],
     ];
-    for (const [fn, id, hp, dmg] of declared) {
+    for (const [fn, id, hp, dmg, posture, speed] of declared) {
       const b = m[fn]({ bossId: id, x: 0, z: 0, respawn: false });
-      expect(b.maxHp, `${id} 血量基数被父类字面量吃掉了`).toBe(hp);
+      expect(b.maxHp, `${id} 血量`).toBe(hp);
       expect(b.hp, `${id} 当前血量`).toBe(hp);
-      expect(b.damage, `${id} 伤害基数被父类字面量吃掉了`).toBe(dmg);
+      expect(b.damage, `${id} 伤害`).toBe(dmg);
+      expect(b.maxPosture, `${id} posture（韧性上限）`).toBe(posture);
+      expect(b.speed, `${id} 速度`).toBe(speed);
     }
+  });
+
+  it('DungeonBoss 声明的 aggroRange/attackRange/speed/posture 与副本血量公式都读得回来', () => {
+    // DungeonBoss 是唯一另写 aggroRange/attackRange 的，且血量走 `480 + rooms*25` 公式
+    // （先前判"副本血量公式是死代码"正是它）。这里构造真身（不借原型方法）逐项读回。
+    const b = new DungeonBoss(makeScene(), makeWorld(), { x: 0, z: 0 });
+    expect(b.aggroRange).toBe(28);
+    expect(b.attackRange).toBe(3.8);
+    expect(b.speed).toBe(5);
+    expect(b.maxPosture).toBe(100);
+    expect(b.maxHp).toBe(520);                              // 未递 hp → 落在 DungeonBoss 自己那档兜底
+    const big = new DungeonBoss(makeScene(), makeWorld(), { x: 0, z: 0, hp: 480 + 8 * 25 });
+    expect(big.maxHp).toBe(480 + 8 * 25);                   // 公式照走，不再被基类 800 盖掉
   });
 
   it('五类 Boss 都过同一缩放器：各自从**自己的**基数起缩放（不是都从 800/18）', () => {
