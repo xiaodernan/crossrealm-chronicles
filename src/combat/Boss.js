@@ -13,9 +13,17 @@ export class Boss extends Enemy {
     super(scene, world, {
       ...config,
       type: 'boss',
-      hp: 800,
+      // 这一组是**基类影界守护者**的档，是缺省值，不是所有 Boss 的。写死字面量会把子类递上来的
+      // 覆盖成死数据（B100：契约在子类夹具里写着、在世界里一条都不成立，且无闸门会响）。
+      // `hp`/`damage` 两格按"拿子类递上来的、缺省才落基类档"接回来 —— Magic650 / Space900 /
+      // Void750 / Chaos820、DungeonBoss 的 `480 + rooms*25` 与 damage 16/20/19/21 从此是活数据
+      // （B 上一笔判"副本 Boss 定制血量公式是死代码…待另片修"正是这一格，此片了结）。
+      // **仍未接的同族**：`posture` / `speed` / `aggroRange` / `attackRange` 同样被这里的字面量
+      // 吃掉（子类与 DungeonBoss 各写各的档）—— 同一病灶的其余几格，动的是全部 Boss 的手感与
+      // 仇恨半径，属另一片的平衡决定，此片刻意不碰、留此注记为凭。
+      hp: config.hp ?? 800,
       posture: 120,
-      damage: 18,
+      damage: config.damage ?? 18,
       speed: 4.5,
       aggroRange: 40,
       attackRange: 3.5,

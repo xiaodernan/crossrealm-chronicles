@@ -71,20 +71,41 @@ describe('W-E1 切片6：Boss 走难度×成长咽喉', () => {
     expect(b.growthStage).toBe(4);
   });
 
-  it('五类 Boss 都过同一缩放器：Magic/Space/Void/Chaos 在 stage 6 同式缩放', () => {
+  it('每只世界 Boss 声明的基数（hp/damage）在构造后就得成立，不被父类字面量覆盖', () => {
+    // B100：契约不能"在夹具成立、在世界不成立"。病灶是 `Boss` 构造器用**字面量**
+    // `hp: 800` / `damage: 18` 覆盖了 `...config`，于是 Magic 650 / Space 900 / Void 750 /
+    // Chaos 820（以及 DungeonBoss 的 `480 + rooms*25`、damage 16/20/19/21）全是死代码 ——
+    // 五只外强中干都是 800/18，而各子类里写着不一样的数、没有任何闸门会响。
+    const m = makeManager();
+    const declared = [
+      ['spawnBoss', 'shadow-warden', 800, 18],
+      ['spawnMagicBoss', 'archmagus', 650, 16],
+      ['spawnSpaceBoss', 'singularity-herald', 900, 20],
+      ['spawnVoidBoss', 'void-chronarch', 750, 19],
+      ['spawnChaosBoss', 'chaos-overlord', 820, 21],
+    ];
+    for (const [fn, id, hp, dmg] of declared) {
+      const b = m[fn]({ bossId: id, x: 0, z: 0, respawn: false });
+      expect(b.maxHp, `${id} 血量基数被父类字面量吃掉了`).toBe(hp);
+      expect(b.hp, `${id} 当前血量`).toBe(hp);
+      expect(b.damage, `${id} 伤害基数被父类字面量吃掉了`).toBe(dmg);
+    }
+  });
+
+  it('五类 Boss 都过同一缩放器：各自从**自己的**基数起缩放（不是都从 800/18）', () => {
     const m = makeManager();
     const cases = [
-      ['spawnMagicBoss', 'archmagus'],
-      ['spawnSpaceBoss', 'singularity-herald'],
-      ['spawnVoidBoss', 'void-chronarch'],
-      ['spawnChaosBoss', 'chaos-overlord'],
+      ['spawnMagicBoss', 'archmagus', 650, 16],
+      ['spawnSpaceBoss', 'singularity-herald', 900, 20],
+      ['spawnVoidBoss', 'void-chronarch', 750, 19],
+      ['spawnChaosBoss', 'chaos-overlord', 820, 21],
     ];
     const g = growthAt(6);
-    for (const [fn, id] of cases) {
+    for (const [fn, id, baseHp, baseDmg] of cases) {
       const b = m[fn]({ bossId: id, x: 0, z: 0, respawn: false });
       m._scaleBoss(b, 6);
-      expect(b.maxHp, `${fn} 血量`).toBe(Math.round(BASE_HP * g.hp));
-      expect(b.damage, `${fn} 伤害`).toBe(Math.round(BASE_DMG * g.damage));
+      expect(b.maxHp, `${fn} 血量`).toBe(Math.round(baseHp * g.hp));
+      expect(b.damage, `${fn} 伤害`).toBe(Math.round(baseDmg * g.damage));
     }
   });
 
