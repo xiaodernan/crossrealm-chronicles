@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
+import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
 
 /**
  * 光球 / 余烬每秒的浮动速率（米/秒）。
@@ -212,10 +213,13 @@ export class WorldEffects {
   }
 
   update(dt, playerPos) {
+    // 相位累积每帧做（B118：慢动作里视觉相位不传送、不冻结），
+    // 几何更新降频到 1/2 帧（W-C2 切片4 余项：纯装饰性视觉不需每帧跑）。
+    const 几何帧 = frameShouldUpdate(2);
     this._时相 += dt;
     const t = this._时相;
-    if (this.fireflies?.visible) this.fireflies.rotation.y += dt * 0.02;
-    if (this.magicOrbs?.visible) {
+    if (this.fireflies?.visible && 几何帧) this.fireflies.rotation.y += dt * 0.02;
+    if (this.magicOrbs?.visible && 几何帧) {
       this.magicOrbs.rotation.y += dt * 0.05;
       const arr = this.magicOrbs.geometry.attributes.position.array;
       for (let i = 0; i < arr.length; i += 3) {
@@ -223,11 +227,11 @@ export class WorldEffects {
       }
       this.magicOrbs.geometry.attributes.position.needsUpdate = true;
     }
-    if (this.aurora?.visible) {
+    if (this.aurora?.visible && 几何帧) {
       this.aurora.material.opacity = 0.06 + Math.sin(t * 0.5) * 0.04;
       this.aurora.rotation.z = Math.sin(t * 0.2) * 0.1;
     }
-    if (this.chaosEmbers?.visible) {
+    if (this.chaosEmbers?.visible && 几何帧) {
       this.chaosEmbers.rotation.y += dt * 0.03;
       const arr = this.chaosEmbers.geometry.attributes.position.array;
       for (let i = 0; i < arr.length; i += 3) {

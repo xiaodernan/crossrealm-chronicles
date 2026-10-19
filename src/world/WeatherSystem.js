@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
+import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
 
 /** 区域天气 — 雨 / 雪 / 灰烬 / 奥术 drizzle，跟随玩家 */
 const ZONE_PRESETS = {
@@ -126,6 +127,8 @@ export class WeatherSystem {
     this._updateSplashes(dt);
     if (!this.particles || !this.velocities) return;
 
+    // 相位每帧累积（B118：慢动作里不传送）；粒子位置更新降频到 1/2 帧（W-C2 切片4 余项）。
+    const 几何帧 = frameShouldUpdate(2);
     this._时相 += dt;
     this._follow.lerp(playerPos, dt * 2.5);
     this.group.position.set(this._follow.x, 0, this._follow.z);
@@ -136,10 +139,7 @@ export class WeatherSystem {
     const groundBase = this.world.getGroundHeight(playerPos.x, playerPos.z);
 
     for (let i = 0; i < arr.length / 3; i++) {
-      arr[i * 3] += vel[i * 3] * dt;
-      arr[i * 3 + 1] += vel[i * 3 + 1] * dt;
-      arr[i * 3 + 2] += vel[i * 3 + 2] * dt;
-
+      // 包围盒检测每帧做，防止粒子逃逸；位置积分仅在几何帧推进。
       const px = arr[i * 3];
       const py = arr[i * 3 + 1];
       const pz = arr[i * 3 + 2];
@@ -154,14 +154,19 @@ export class WeatherSystem {
       if (outOfBox) {
         this._randomizeParticle(arr, vel, i, preset, false);
         arr[i * 3 + 1] = this._box.y + Math.random() * 6;
+      } else if (几何帧) {
+        arr[i * 3] += vel[i * 3] * dt;
+        arr[i * 3 + 1] += vel[i * 3 + 1] * dt;
+        arr[i * 3 + 2] += vel[i * 3 + 2] * dt;
       }
 
       if (preset.kind === 'snow') {
+        // 雪的横向摆动每帧做（幅值小，不降频影响不大），相位源仍是 _时相
         vel[i * 3] += Math.sin(this._时相 + i) * dt * 0.4;
       }
     }
 
-    this.particles.geometry.attributes.position.needsUpdate = true;
+    if (几何帧) this.particles.geometry.attributes.position.needsUpdate = true;
 
     if (preset.kind === 'rain' && Math.random() < dt * 18) {
       this._spawnSplash(
