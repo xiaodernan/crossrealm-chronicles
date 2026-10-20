@@ -259,6 +259,27 @@ export const STRINGS_EN = Object.freeze({
   rest_point_campfire_name: '${zone} Campfire',
   rest_point_name_hub: 'World Anchor Rest Point',
 
+  // Gear names (W-D2 slice 16m: the name tables hold keys; the content layer expands by language)
+  gear_slot_charm: 'Charm',
+  gear_slot_sigil: 'Sigil',
+  gear_name_ash_charm: 'Ashen Charm',
+  gear_name_tide_charm: 'Tideweave Charm',
+  gear_name_ember_charm: 'Ember Charm',
+  gear_name_oath_charm: 'Oathbound Charm',
+  gear_name_quill_sigil: 'Quillsigil',
+  gear_name_ring_sigil: 'Ringsigil',
+  gear_name_war_sigil: 'Warsigil',
+  gear_name_dual_sigil: 'Dualsigil',
+  gear_name_vigor_ward: 'Steadfast Ward',
+  gear_name_endurance_march: 'Long March',
+  gear_name_ember_edge: 'Ember Edge',
+  gear_name_arcane_lens: 'Arcane Lens',
+  gear_name_clear_mind: 'Clear Mind',
+  gear_name_twin_fang: 'Twin Fang',
+  gear_name_bulwark_oath: 'Bulwark Oath',
+  gear_name_archmagistone: 'Archmagistone',
+
+
   // 成就文案（W-D2 切片16l：标题/描述全是键）
   ach_first_blood_title: "First Blood",
   ach_first_blood_desc: "Defeat an enemy for the first time",

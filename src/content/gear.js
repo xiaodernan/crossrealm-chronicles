@@ -1,4 +1,11 @@
 import { DEFAULT_COLOR_MODE, semanticColor, semanticLabel, raritySemanticId } from './semanticColors.js';
+import { STRINGS_ZH } from './strings.zh.js';
+import { STRINGS_EN } from './strings.en.js';
+
+// 装备名表存的是**文案键**（W-D2 切片16m），不是文案本身 —— 显示侧在那一刻展开。
+// 双表住在**同层**（content/strings.*），所以内容层读它不违反"地基层不向上够"那条约定。
+const 双表 = { zh: STRINGS_ZH, en: STRINGS_EN };
+const 表 = (lang) => 双表[lang] ?? STRINGS_ZH;
 
 /**
  * 装备的数据层（W-B5 切片1）：槽位、基表、稀有度、词缀，以及"一件装备等于几点属性"这一处算式。
@@ -34,7 +41,7 @@ export const GEAR_SLOTS = ['charm', 'sigil'];
  * 装备页签第一次要把槽显示给人看，名字才有了消费者（表里有而页面没有 / 页面上有而表里没有，
  * 注册表那条**双向** invariant 两头都盯）。
  */
-export const GEAR_SLOT_NAMES = { charm: '护符', sigil: '印记' };
+export const GEAR_SLOT_NAMES = { charm: 'gear_slot_charm', sigil: 'gear_slot_sigil' };
 
 /**
  * 装备能改的属性点，只许是这五个。
@@ -222,12 +229,16 @@ export const GEAR_RARITY_DISPLAY = Object.fromEntries(
   GEAR_RARITY.map((r) => [r.id, gearRarityDisplay(r.id)]),
 );
 
-/** 基表与词缀的中文名：`id` 是数据用的，字样是给人看的，两者不许互换 */
+/** 基表与词缀的显示名：`id` 是数据用的，值是**文案键**（W-D2 切片16m），字样是给人看的 */
 export const GEAR_NAMES = {
-  'ash-charm': '灰烬护符', 'tide-charm': '潮纹护符', 'ember-charm': '余烬护符', 'oath-charm': '誓约护符',
-  'quill-sigil': '笔痕印记', 'ring-sigil': '环纹印记', 'war-sigil': '战纹印记', 'dual-sigil': '双纹印记',
-  'vigor-ward': '固守', 'endurance-march': '长行', 'ember-edge': '余烬之锋', 'arcane-lens': '奥术透镜',
-  'clear-mind': '清明', 'twin-fang': '双牙', 'bulwark-oath': '壁垒之誓', 'archmagistone': '大贤者石',
+  'ash-charm': 'gear_name_ash_charm', 'tide-charm': 'gear_name_tide_charm',
+  'ember-charm': 'gear_name_ember_charm', 'oath-charm': 'gear_name_oath_charm',
+  'quill-sigil': 'gear_name_quill_sigil', 'ring-sigil': 'gear_name_ring_sigil',
+  'war-sigil': 'gear_name_war_sigil', 'dual-sigil': 'gear_name_dual_sigil',
+  'vigor-ward': 'gear_name_vigor_ward', 'endurance-march': 'gear_name_endurance_march',
+  'ember-edge': 'gear_name_ember_edge', 'arcane-lens': 'gear_name_arcane_lens',
+  'clear-mind': 'gear_name_clear_mind', 'twin-fang': 'gear_name_twin_fang',
+  'bulwark-oath': 'gear_name_bulwark_oath', 'archmagistone': 'gear_name_archmagistone',
 };
 
 /**
@@ -368,12 +379,25 @@ export function pickupChoice(current, incoming) {
   };
 }
 
-/** 给人看的那一行字：`稀有·余烬护符（长行 · 固守）`。拼装只有这一处 */
-export function gearLabel(instance) {
+/**
+ * 给人看的那一行字：`稀有·余烬护符（长行 · 固守）`。拼装只有这一处。
+ *
+ * `lang` 决定读哪张双表（W-D2 切片16m）：名表存的是**键**，这里按语言展开一次。
+ * 显示侧传 `getLanguage()` —— 内容层不 import `engine/`（地基层不许向上够那条约定）。
+ */
+export function gearLabel(instance, lang = 'zh') {
   const base = baseOf(instance?.base);
   if (!base) return '';
+  const T = 表(lang);
   const rarity = GEAR_RARITY_DISPLAY[instance.rarity];
-  const affixes = (instance.affixes ?? []).map((id) => GEAR_NAMES[id] ?? id);
-  const name = GEAR_NAMES[base.id] ?? base.id;
+  const affixes = (instance.affixes ?? []).map((id) => T[GEAR_NAMES[id]] ?? id);
+  const name = T[GEAR_NAMES[base.id]] ?? base.id;
   return `${rarity ? `${rarity.label}·` : ''}${name}${affixes.length ? `（${affixes.join(' · ')}）` : ''}`;
+}
+
+/** 槽位显示名（同样按语言展开） */
+export function gearSlotName(slot, lang = 'zh') {
+  const key = GEAR_SLOT_NAMES[slot];
+  if (!key) return slot;
+  return 表(lang)[key] ?? slot;
 }

@@ -1,7 +1,7 @@
 import { SKILL_BRANCHES } from '../content/skillTrees.js';
-import { GEAR_SLOTS, GEAR_SLOT_NAMES, gearLabel } from '../content/gear.js';
+import { GEAR_SLOTS, gearLabel, gearSlotName } from '../content/gear.js';
 import { focusFirstItem } from './FocusNav.js';
-import { t } from '../engine/i18n.js';
+import { t, getLanguage } from '../engine/i18n.js';
 
 export class UpgradePanel {
   constructor(game) {
@@ -89,8 +89,8 @@ export class UpgradePanel {
     slotsEl.innerHTML = GEAR_SLOTS.map((slot) => {
       const inst = s.gear[slot];
       return `<div class="gear-row">
-        <span class="gear-slot-name">${GEAR_SLOT_NAMES[slot] ?? slot}</span>
-        <span class="gear-item">${inst ? gearLabel(inst) : t('gear_slot_empty')}</span>
+        <span class="gear-slot-name">${gearSlotName(slot, getLanguage())}</span>
+        <span class="gear-item">${inst ? gearLabel(inst, getLanguage()) : t('gear_slot_empty')}</span>
         ${inst ? `<button type="button" class="gear-row-btn" data-store="${slot}"${s.bagFull ? ' disabled' : ''}>${s.bagFull ? t('gear_bag_full') : t('gear_unequip')}</button>` : ''}
       </div>`;
     }).join('');
@@ -102,21 +102,21 @@ export class UpgradePanel {
           return;
         }
         this.game.dialog.toast(t('gear_unequip_to_bag', {
-          item: gearLabel(previous), n: s.bagCount, cap: s.bagCapacity,
+          item: gearLabel(previous, getLanguage()), n: s.bagCount, cap: s.bagCapacity,
         }));
         this.refresh();
       });
     });
     bagEl.innerHTML = s.bag.length
-      ? s.bag.map((inst, i) => `<button type="button" class="skill-btn" data-wear="${i}">${gearLabel(inst)}<br><span>${t('gear_wear_this')}</span></button>`).join('')
+      ? s.bag.map((inst, i) => `<button type="button" class="skill-btn" data-wear="${i}">${gearLabel(inst, getLanguage())}<br><span>${t('gear_wear_this')}</span></button>`).join('')
       : `<p class="gear-bag-empty">${t('gear_bag_empty')}</p>`;
     bagEl.querySelectorAll('[data-wear]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const worn = s.wearFromBag(Number(btn.dataset.wear));
         if (worn) {
           this.game.dialog.toast(worn.replaced
-            ? t('gear_equip_swapped_bag', { item: gearLabel(worn.instance), old: gearLabel(worn.replaced) })
-            : t('gear_equip_new', { item: gearLabel(worn.instance) }));
+            ? t('gear_equip_swapped_bag', { item: gearLabel(worn.instance, getLanguage()), old: gearLabel(worn.replaced, getLanguage()) })
+            : t('gear_equip_new', { item: gearLabel(worn.instance, getLanguage()) }));
         }
         this.refresh();
       });

@@ -259,6 +259,27 @@ export const STRINGS_ZH = Object.freeze({
   rest_point_campfire_name: '${zone}营火',
   rest_point_name_hub: '世界之锚休息点',
 
+  // 装备名（W-D2 切片16m：名表存键，内容层按语言展开）
+  gear_slot_charm: '护符',
+  gear_slot_sigil: '印记',
+  gear_name_ash_charm: '灰烬护符',
+  gear_name_tide_charm: '潮纹护符',
+  gear_name_ember_charm: '余烬护符',
+  gear_name_oath_charm: '誓约护符',
+  gear_name_quill_sigil: '笔痕印记',
+  gear_name_ring_sigil: '环纹印记',
+  gear_name_war_sigil: '战纹印记',
+  gear_name_dual_sigil: '双纹印记',
+  gear_name_vigor_ward: '固守',
+  gear_name_endurance_march: '长行',
+  gear_name_ember_edge: '余烬之锋',
+  gear_name_arcane_lens: '奥术透镜',
+  gear_name_clear_mind: '清明',
+  gear_name_twin_fang: '双牙',
+  gear_name_bulwark_oath: '壁垒之誓',
+  gear_name_archmagistone: '大贤者石',
+
+
   // 成就文案（W-D2 切片16l：标题/描述全是键）
   ach_first_blood_title: '初阵',
   ach_first_blood_desc: '首次击杀敌人',

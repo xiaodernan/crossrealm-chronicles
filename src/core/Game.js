@@ -133,6 +133,7 @@ import { GamepadInput } from '../engine/GamepadInput.js';
 import { Rumble } from '../engine/Rumble.js';
 import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
 import { gearLabel, pickupChoice } from '../content/gear.js';
+import { getLanguage } from '../engine/i18n.js';
 import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
   factoryGamepadBindings, padOutletsFor, setKeybindTable,
@@ -716,25 +717,25 @@ export class Game {
     if (choice.action === 'equip') {
       const replaced = this.stats.equip(choice.slot, instance);
       if (replaced && this.stats.bagAdd(replaced)) {
-        this.dialog.toast(t('gear_equip_swapped_bag', { item: gearLabel(instance), old: gearLabel(replaced) }));
+        this.dialog.toast(t('gear_equip_swapped_bag', { item: gearLabel(instance, getLanguage()), old: gearLabel(replaced, getLanguage()) }));
       } else if (replaced) {
         this.stats.addSouls(choice.souls);
         this.dialog.toast(t('gear_equip_swapped_souls', {
-          item: gearLabel(instance), old: gearLabel(replaced), souls: choice.souls,
+          item: gearLabel(instance, getLanguage()), old: gearLabel(replaced, getLanguage()), souls: choice.souls,
         }));
       } else {
-        this.dialog.toast(t('gear_equip_new', { item: gearLabel(instance) }));
+        this.dialog.toast(t('gear_equip_new', { item: gearLabel(instance, getLanguage()) }));
       }
       return choice;
     }
     if (this.stats.bagAdd(instance)) {
       this.dialog.toast(t('gear_pickup_bag', {
-        item: gearLabel(instance), n: this.stats.bagCount, cap: this.stats.bagCapacity,
+        item: gearLabel(instance, getLanguage()), n: this.stats.bagCount, cap: this.stats.bagCapacity,
       }));
       return choice;
     }
     this.stats.addSouls(choice.souls);
-    this.dialog.toast(t('gear_pickup_souls', { item: gearLabel(instance), souls: choice.souls }));
+    this.dialog.toast(t('gear_pickup_souls', { item: gearLabel(instance, getLanguage()), souls: choice.souls }));
     return choice;
   }
 
