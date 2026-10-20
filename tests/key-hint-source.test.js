@@ -182,14 +182,18 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     'ui/QuestAssistant.js': ['refreshKeyText(this._panel)'],
     'player/PlayerAutoPlay.js': ['refreshKeyText(this.overlay)'],
     'cinematic/EndCreditsDirector.js': ['refreshKeyText(this.el)'],
-    'ui/Tutorial.js': ['keyText(step.text)'],
-    'ui/ContextualTutorial.js': ['keyText(text)'],
-    'game/DeathHintDirector.js': ['keyText(HINTS.find'],
+    // W-D2 切片16d/16e/16f/16g：这些出口的文案**进了双表**，于是展开从
+    // `keyText('字面量')` 变成 `keyText(t('键'))` —— 两件事仍在这**同一个调用点**做：
+    // `t()` 把键换成文案、`keyText()` 把文案里的 `{动作}` 换成当前键名。
+    // 形状跟着改（`keyText` 仍在原位，只是内层多了一层 `t()`）。
+    'ui/Tutorial.js': ['keyText(t(step.text))'],
+    'ui/ContextualTutorial.js': ['keyText(t(text, params))'],
+    'game/DeathHintDirector.js': ['keyText(t(HINTS.find'],
     'ui/GameGuidePanel.js': ['keyText('],
     'ui/WorldMapPanel.js': ['keyText('],
     'ui/DungeonJournalTab.js': ['keyText('],
-    'combat/CombatController.js': ["keyText('（{lockOn} 切换）')"],
-    'game/FastTravelSystem.js': ["keyText('快速旅行已解锁 — 在营火按 {fastTravel}')"],
+    'combat/CombatController.js': ["keyText(t('combat_lock_hint'))"],
+    'game/FastTravelSystem.js': ["keyText(t('fast_travel_toast_unlocked'))"],
     'cinematic/CombatCinematicSkip.js': ["keyText('按 {escape} 可跳过战斗演出')"],
     'ui/SettingsPanel.js': ["from '../content/keyLabels.js'"],
     // W-B2 切片4：成段的内容文案也走同一条链 —— 但**每一个显示出口**都要过，

@@ -2,6 +2,7 @@ import { scheduler } from '../engine/Scheduler.js';
 import { keyText } from '../content/keyHints.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { isDungeonBossId } from '../content/bossRoster.js';
+import { t } from '../engine/i18n.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -31,11 +32,18 @@ export class ContextualTutorial {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...this.seen]));
   }
 
-  trigger(id, title, text, delay = 0) {
+  /**
+   * 排一条情境提示。
+   *
+   * `title` / `text` 是**文案键**（W-D2 切片16g），不是文案本身 ——
+   * 展开只发生在 `_drain()` 播出那一刻（一条提示可能排队几秒，期间玩家改过键位）。
+   * `params` 是给 `t()` 的插值参数（如副本名与房间数）。
+   */
+  trigger(id, title, text, delay = 0, params = {}) {
     if (this.seen.has(id)) return;
     this.seen.add(id);
     this._persist();
-    this.queue.push({ title, text });
+    this.queue.push({ title, text, params });
     if (!this.busy) this._drain(delay);
   }
 
@@ -45,10 +53,10 @@ export class ContextualTutorial {
       return;
     }
     this.busy = true;
-    const { title, text } = this.queue.shift();
+    const { title, text, params } = this.queue.shift();
     scheduler.after(initialDelay / 1000, () => {
       // 触发时只存模板，播出时才展开：一条提示可能排队几秒，期间玩家已经改过键位
-      this.game.dialog.show(title, keyText(text));
+      this.game.dialog.show(t(title, params), keyText(t(text, params)));
       const onClose = () => {
         document.getElementById('dialog-close')?.removeEventListener('click', onClose);
         scheduler.after(0.3, () => this._drain(400), TIP_TAG);
@@ -61,9 +69,10 @@ export class ContextualTutorial {
     tipOn('dungeon-enter', (e) => {
       this.trigger(
         'first-dungeon',
-        '迷宫探索',
-        `${e.detail.name} — ${e.detail.rooms} 个房间、${e.detail.doors} 扇门。\n\n清剿房间敌人后门会打开；发光石碑按 [{interact}] 阅读叙事；最远的大圆房有守钥者 Boss。`,
-        1200
+        'tip_dungeon_title',
+        'tip_dungeon_text',
+        1200,
+        { name: e.detail.name, rooms: e.detail.rooms, doors: e.detail.doors }
       );
     });
 
@@ -71,19 +80,18 @@ export class ContextualTutorial {
       const isDungeon = isDungeonBossId(e.detail.bossId);
       this.trigger(
         isDungeon ? 'first-dungeon-boss' : 'first-open-boss',
-        isDungeon ? '迷宫守钥者' : `Boss 战 — ${e.detail.name}`,
-        isDungeon
-          ? '守钥者会在约 45% 生命进入二阶段：更快、更狠。\n\n{lockOn} 锁定 · {parry} 在红光最后一瞬弹反 · {roll} 翻滚穿招。'
-          : '观察敌人脚下红圈：扩大时按 {parry} 弹反，或 {roll} 翻滚。\n\n架势条满会踉跄 — {attackHeavy} 可处决。',
-        800
+        isDungeon ? 'tip_dungeon_boss_title' : 'tip_boss_title',
+        isDungeon ? 'tip_dungeon_boss_text' : 'tip_boss_text',
+        800,
+        { name: e.detail.name }
       );
     });
 
     tipOn('parry-success', () => {
       this.trigger(
         'first-parry',
-        '完美弹反',
-        '敌人进入长时间硬直 — 立刻 {attackHeavy} 重击处决，伤害大幅提升。',
+        'tip_parry_title',
+        'tip_parry_text',
         200
       );
     });
@@ -91,8 +99,8 @@ export class ContextualTutorial {
     tipOn('combo-finisher', () => {
       this.trigger(
         'first-combo-finisher',
-        '连击终结',
-        '第三段连击命中会触发终结技：额外伤害与屏幕闪光。继续压制！',
+        'tip_finisher_title',
+        'tip_finisher_text',
         200
       );
     });
@@ -101,8 +109,8 @@ export class ContextualTutorial {
       if (e.detail.category !== 'fragment') return;
       this.trigger(
         'first-lore-fragment',
-        '叙事碎片',
-        '碎片已记入探索日志 [{journal}]。收集足够碎片，你会拼凑出位面崩裂的真相。',
+        'tip_fragment_title',
+        'tip_fragment_text',
         600
       );
     });
@@ -118,7 +126,7 @@ export class ContextualTutorial {
         this.trigger(
           'void-zone-tip',
           ZONE_NAMES[ZONE_IDS.VOID],
-          '重力与视野在此不稳定。蓄力法术 [按住 {spell1}~{spell4}] 可打断 Boss 节奏。',
+          'tip_void_zone_text',
           2500
         );
       }
@@ -126,7 +134,7 @@ export class ContextualTutorial {
         this.trigger(
           'chaos-zone-tip',
           ZONE_NAMES[ZONE_IDS.ABYSS],
-          '闪电会随机劈落。击败裂隙领主后，可重复挑战地下城「深渊再探」。',
+          'tip_chaos_zone_text',
           2500
         );
       }
