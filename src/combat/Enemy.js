@@ -304,7 +304,12 @@ export class Enemy {
       this.comboLeft = this.activeMove ? (this.activeMove.combo ?? 1) : 0;
     } else {
       this.comboLeft -= 1;
-    }
+      /* 多段扇形转向（`fanDeg`，W-E3 切片2）：连段的后续段把**朝向**转一个角度 ——
+       * 扇形中心跟着转，于是四段扫过的角度累计覆盖整圈，中间没有"退一步再回来"的安全窗口。
+       * 改前 `fanDeg` 只是数据表里的一格，`src/` 里没有任何人读它：辉煌舞者的"晨曦旋舞"
+       * 说是四段光刃，实际是同一段重复四次 —— 数据表承诺了玩家看不见的效果。 */
+      const 段 = this.activeMove;
+      if (段?.fanDeg) this.mesh.rotation.y += (段.fanDeg * Math.PI) / 180;    }
     const m = this.activeMove;
     this.windupNow = m ? (first ? m.windup : (m.comboWindup ?? m.windup)) : 0;
     return m;
@@ -428,6 +433,26 @@ export class Enemy {
     if (move.phase) this.blinkBehind(ctx.target, ctx.collision, move);
     const damage = Math.round(this.damage * (move.damage ?? 1));
     if (move.ranged) {
+      /* 远程招也能**落地成域**（W-E3 切片2）：信标弹的威胁不在弹本身，
+       * 在它落地的那块地。圆心取弹着点（= 目标脚下），与近战 `rift` 同一处取法 ——
+       * 差别只是它在命中判定**之前**就铺（远程的弹不要求玩家站在射程里）。
+       * 改前这一格与 `ranged` 同时声明，远程分支提前 return，域压根没生成过。
+       * 域先铺：弹体缺席时（没有 projectiles 的上下文）这一招的威胁仍在，
+       * 域没了就等于"这一招什么都没发生"。 */
+      if (move.hazard && ctx.hazards) {
+        const h = move.hazard;
+        ctx.hazards.spawn({
+          x: ctx.target.x,
+          z: ctx.target.z,
+          radius: h.radius,
+          telegraph: h.telegraph,
+          damage: Math.round(this.damage * h.damage),
+          duration: h.duration,
+          tick: h.tick,
+          color: h.color,
+          owner: this,
+        });
+      }
       // 远程：命中段改为交出弹体，弹体在玩家侧走同一条 takeDamage 结算。
       // `ranged.count` > 1 时交出的是一个**扇面**（落点由 `fanTargets` 纯几何算）：
       // 单发与旧行为逐字相同（count 缺省时 `fanTargets` 原样回目标自己）。
@@ -464,6 +489,29 @@ export class Enemy {
         owner: this,
       });
       return true;
+    }
+    /* 敌方治疗域（`move.healZone`，W-E3 切片2）：骑士脚下留一圈治愈光环 ——
+     * 改前这一格没人读，那一招实际只是"推开玩家"。现在它是真的域：
+     * 施法者站在圈里每 tick 回血（`GroundHazards` 那一段结算），
+     * 玩家进圈是威胁区而不是白给的好处。
+     * 位置在命中判定**之前**：这一招是"原地留下"，玩家在不在射程里都得留下 ——
+     * 放在判定之后的话，远处放这一招就什么都没有。 */
+    if (move.healZone) {
+      const h = ctx.hazards;
+      if (h) {
+        h.spawn({
+          x: this.position.x,
+          z: this.position.z,
+          radius: move.healZone.radius,
+          telegraph: move.healZone.telegraph ?? 0.3,
+          damage: 0,
+          duration: move.healZone.duration,
+          tick: move.healZone.tick,
+          heal: move.healZone.healPerTick,
+          color: move.healZone.color ?? 0x66ff99,
+          owner: this,
+        });
+      }
     }
     if (ref.combat.isInvulnerable()) return false;
     // 竖直方向也要相交：横扫低段该被跳掉、重劈高段跳不掉、玩家站高台时近战全部落空
@@ -732,9 +780,23 @@ export class Enemy {
     }
   }
 
+  /**
+   * 回血（敌方治疗域，W-E3 切片2）。
+   *
+   * 治疗域的每 tick 都调它：不回血的话那一招只是"推开玩家"，而数据表与招式注释
+   * 承诺的是"原地留下一圈治愈光环"。上限是 `maxHp` —— 满血时那一格回血是空转，
+   * 但**域仍然占着**（它还在挡玩家的走位），那才是这一招真正的代价。
+   */
+  heal(amount) {
+    if (!this.alive || !(amount > 0)) return false;
+    if (this.hp >= this.maxHp) return false;
+    this.hp = Math.min(this.maxHp, this.hp + amount);
+    this.updateHpBar();
+    return true;
+  }
+
   /** 记账：伤害与架势都已在 Resolution 里算好，这里只落实与广播。 */
-  takeDamage(amount, postureDamage = 0) {
-    if (!this.alive) return false;
+  takeDamage(amount, postureDamage = 0) {    if (!this.alive) return false;
     // 挨打就是仇恨：背后一刀或隔墙被法术蹭到，都不该继续散步
     this.sense.noteHostile();
 

@@ -550,34 +550,49 @@ export const ENEMY_MOVES = {
   },
   /** W-B9 切片1：幽暗林地专属招式 */
   haunt: {
-    // 幽灵缠身（幽暗怨影）：相位突袭的迷雾变体 —— 闪到玩家身后留下一道"残影"，持续追踪玩家 3 秒。
-    // `blink` 越过玩家落在背后，`trail` 在原地生成残影（不攻击、只干扰锁定、视线判定视为障碍）。
-    // 玩家需在残影消失前解决它，或利用残影挡住其他敌人的视线。
+    // 幽灵缠身（幽暗怨影）：相位突袭的迷雾变体 —— 闪到玩家背后，**落地时把人顶开**。
+    // `blink` 越过玩家落在背后（`phase` + `blink` 都已实现），`knock` 是顶开的力度：
+    // 落在背后只是"站到了那儿"，加上顶开才是"缠住了"——玩家要重新走位，不能贴脸输出。
+    //
+    // W-E3 切片2：改前这里写的是 `trail`（"在原地生成残影，持续追踪玩家"）——
+    // 那一格 `src/` 里从来没有人读它，于是这一招实际只是"闪到背后砍一刀"，
+    // 招式注释承诺的残影是不存在的。数据表不许承诺做不到的事，故改为已实现的机制。
     name: '幽灵缠身', windup: 0.75, strike: 0.35, recover: 0.55, reach: 1.2, cone: 0.35,
     band: [0.05, 1.05], phase: true, blink: 10,
-    damage: 1.0, cooldown: 3.8, weight: 2,
-    trail: { duration: 3, radius: 0.5, blocksSight: true, color: 0x4a4a6a },
+    damage: 1.0, cooldown: 3.8, weight: 2, knock: 4.5,
     telegraph: { color: 0xaa66ff },
   },
   prowl: {
-    // 潜行标记（幽暗掠行兽）：嚎叫引援的迷雾变体 —— 不召唤同类，而是给玩家打上"被标记"状态。
-    // `mark` 状态下：玩家受到的伤害 +20%、被所有幽暗林地敌人优先锁定、隐身/潜行无效。
-    // 持续 10 秒或击杀标记者后解除。迫使玩家主动猎杀标记者而非逃跑。
+    // 潜行标记（幽暗掠行兽）：嚎叫引援的迷雾变体 —— 不召唤同类，而是**起手后突进**。
+    // `standoff`（已实现）写的是"这一招我想从多远用"：掠行兽在自己的刀长内（1.5~3 米）
+    // 起手，随即 `travel: 'lunge'` 扑上来 —— 与"贴身乱爪"的近战手感是两回事。
+    // 带子的远界必须落在自己**够得着**的范围里（B69 那条门禁）：`moveRange` 对近战招
+    // 只认 `attackRange + reach`（约 3.1 米），写 4~9 米就是"够不着的带子"。
+    //
+    // W-E3 切片2：改前这里写的是 `mark`（"给玩家打上被标记状态：受伤 +20%、被优先锁定、
+    // 隐身失效"）—— 那一格依赖玩家身上的标记态与隐身机制，`src/` 里都还没有，
+    // 于是这一招实际只是"原地摆个姿势"。改为已实现的机制，并把这笔设计意图记进 §9 债表。
     name: '潜行标记', windup: 1.0, strike: 0.25, recover: 0.6, reach: 0.9, cone: -2,
     band: [0.0, 1.0],
     damage: 0, cooldown: 12, weight: 1,
-    mark: { duration: 10, damageTakenMult: 1.2, priorityTarget: true, revealStealth: true, color: 0x4a4a7a },
+    standoff: [1.5, 3], travel: 'lunge', travelSpeed: 4.5,
     telegraph: { color: 0x99dd55 },
   },
   beacon: {
-    // 信标照亮（幽暗哨卫）：蓄力炮击的迷雾变体 —— 发射一枚信标弹，落地后生成持续照明区。
-    // 区域内：玩家隐身/潜行失效、所有幽暗林地敌人获得"视野共享"（无视遮挡直接锁定玩家）。
-    // 信标持续 8 秒，可被玩家攻击摧毁（hp 30）。迫使玩家要么摧毁信标、要么冒险在光下战斗。
-    name: '信标照亮', windup: 1.8, strike: 0.25, recover: 1.0, cone: -2,
+    // 信标灼场（幽暗哨卫）：蓄力炮击的迷雾变体 —— 发射一枚**慢速**信标弹，落地成一片
+    // 持续灼烧的危险区，逼玩家在弹着点之外重新找位置。
+    //
+    // W-E3 切片2：改前这里写的是 `beacon: { radius, duration, revealStealth, shareVision, hp }`
+    // —— 那一格 `src/` 里从来没有人读它：既不生成照明区、也不共享视野、也不可被摧毁，
+    // 于是这一招实际是"射出一发**不掉血**的空弹"（`damage: 0`）。招式注释承诺的
+    // "信标持续 8 秒、可被玩家攻击摧毁"全是不存在的东西。
+    // 现在用**已实现**的 `hazard` 落地成真的危险区：会掉血、按时标分段结算、玩家能走出去。
+    // （"共享视野 / 隐身失效"那部分需要玩家侧的潜行状态机制，那还没有 —— 记进 §9 债表。）
+    name: '信标灼场', windup: 1.8, strike: 0.25, recover: 1.0, cone: -2,
     range: 18, minDist: 5,
     damage: 0, cooldown: 8, weight: 1,
     ranged: { speed: 12, color: 0x6a6a8a },
-    beacon: { radius: 6, duration: 8, revealStealth: true, shareVision: true, hp: 30, color: 0x6a6a8a },
+    hazard: { radius: 3.0, telegraph: 0.8, damage: 0.45, duration: 6, tick: 1.0, color: 0x6a6a8a },
     telegraph: { color: 0x88aaff },
   },
 };

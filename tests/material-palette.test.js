@@ -152,10 +152,12 @@ const 残留钉板 = {
   'world/RestPointEnhancer.js': { 数: 2, 集: ['0x221100', '0xffaa44'] },
   'effects/SceneEnhancer.js': { 数: 2, 集: ['0x2a3828', '0xc8d8f0'] },
   'combat/Enemy.js': {
-    数: 17,
-    集: ['0x222222', '0x224466', '0x335577', '0x442266', '0x4a2f7a', '0x88bbff', '0xaa66ff',
-      '0xaaddff', '0xbfa8ff', '0xcc3333', '0xff0000', '0xff2222', '0xff4444', '0xffcc44',
-      '0xffee88', '0xffff44'],
+    // W-E3 切片2：敌方治疗域的圈色（`0x66ff99`）—— 治疗域是**绿色**的一圈，
+    // 与所有红色危险区一眼分得开（玩家看到绿圈要知道那是敌方在给自己回血）。
+    数: 18,
+    集: ['0x222222', '0x224466', '0x335577', '0x442266', '0x4a2f7a', '0x66ff99', '0x88bbff',
+      '0xaa66ff', '0xaaddff', '0xbfa8ff', '0xcc3333', '0xff0000', '0xff2222', '0xff4444',
+      '0xffcc44', '0xffee88', '0xffff44'],
   },
   'player/PlayerController.js': { 数: 1, 集: ['0x332200'] },
   'world/regionSurfaces.js': { 数: 0, 集: [] },
@@ -289,8 +291,9 @@ describe('W-C5 切片8 调色板', () => {
         expect([...new Set(命中)].sort(), `${文件} 的残留字面量集合`).toEqual(期望.集);
         expect(命中.length, `${文件} 的残留字面量条数`).toBe(期望.数);
       }
-      expect(总, '残留字面量合计').toBe(100);
-      expect(全.size, '残留字面量不同值合计').toBe(77);
+      // W-E3 切片2：新增敌方治疗域的圈色（0x66ff99）—— 合计 100 → 101 处 / 77 → 78 种
+      expect(总, '残留字面量合计').toBe(101);
+      expect(全.size, '残留字面量不同值合计').toBe(78);
     });
   });
 

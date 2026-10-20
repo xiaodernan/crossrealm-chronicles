@@ -71,6 +71,15 @@ export class GroundHazards {
       pull: spec.pull ?? 0,
       /** 玩家在圈内时的时标（0.45 = 只剩四成半速度）；0 = 不改时标 */
       slow: spec.slow ?? 0,
+      /**
+       * 每 tick 给**施法者**回的血（敌方治疗域，W-E3 切片2）。
+       *
+       * 改前 `move.healZone` 只是数据表里的一格，`src/` 里没有任何人读它 ——
+       * 辉煌骑士的"圣洁冲击"写着"在原地留下一圈治愈光环"，实际那一招只是把玩家推开。
+       * 现在它是**真的**：骑士站在圈里每 tick 回血，玩家进圈是威胁区（不是白给的好处），
+       * 于是"吃推开"与"冒险进圈"成了真正的二选一。
+       */
+      heal: spec.heal ?? 0,
       /** 时标账本里属于这一项的 key（只有 `slow` 的才需要，一个项一格，两个域不互相顶账） */
       timeKey: spec.slow ? `hazard:${++this._spawnSeq}` : null,
       /** 这一项此刻是否持有玩家那一格时标 */
@@ -176,6 +185,9 @@ export class GroundHazards {
     it.tickT += dt;
     while (it.tickT >= it.tick) {
       it.tickT -= it.tick;
+      // 敌方治疗域：回的是**施法者**（`owner`），不是玩家。
+      // 与伤害同一段结算：域活着的那几秒，骑士每 tick 续一次血。
+      if (it.heal) it.owner?.heal?.(it.heal);
       if (!playerRef.combat.isInvulnerable()) playerRef.combat.takeDamage(it.damage);
     }
   }
