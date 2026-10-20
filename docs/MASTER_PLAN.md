@@ -361,7 +361,8 @@
 | 编号 | 工作包 | 状态 |
 |------|--------|------|
 | W-E1 | 数值平衡与难度曲线（3 档难度 + 敌人成长曲线） | ✅ 切片1+2+3+4+6 完成（难度三档全链路 + 敌人成长曲线 + 召唤物/魂收入/Boss 随成长缩放；余已全部收口） |
-| W-E2 | 性能回归门禁与持续优化 | 🔶 切片1（`fdc4fde`）：帧计数出口 `src/engine/FrameBudget.js` —— 主循环每帧 `tick()` +1，供“按 1/2、1/4 帧率更新”的视觉系统统一分母；`shouldUpdate(interval)` 按 `frameCount % interval === 0`，interval 非正整数当场抛；`resetForTest()` 只供测试/重置。接线 `src/core/Game.js` `update()` 首部；单测 `tests/frame-budget.test.js` 7 例。三门禁：lint 0 error / test 184 文件 3,564 例全绿 / build 通过。余：引入真帧计数消费者（W-C2 余项降频档）、CI 接 `npm run perf`（W-D4 切片2，待远端首跑读数）。 |
+| W-E2 | 性能回归门禁与持续优化 | 🔶 切片1（`fdc4fde`）：帧计数出口 `src/engine/FrameBudget.js` —— 主循环每帧 `tick()` +1，供“按 1/2、1/4 帧率更新”的视觉系统统一分母；`shouldUpdate(interval)` 按 `frameCount % interval === 0`，interval 非正整数当场抛；`resetForTest()` 只供测试/重置。接线 `src/core/Game.js` `update()` 首部；单测 `tests/frame-budget.test.js` 7 例。三门禁：lint 0 error / test 184 文件 3,564 例全绿 / build 通过。余：引入真帧计数消费者（W-C2 余项降频档）、CI 接 `npm run perf`（W-D4 切片2，待远端首跑读数）。
+  - 切片2（`0ac2828`）：更多消费者接入 —— PopCultureWave4VisualPass / PopCultureTriadVisualPass / UpsideDownVisualPass + VoidZone/SpaceZone 远距离装饰，全部接入 `frameShouldUpdate(4)` 降频 1/4 帧。三门禁通过。 |
 | W-E3 | 内容持续追加（新敌人 / 新 Boss / 新区域 / 新装备池） | ⬜ |
 
 ---
