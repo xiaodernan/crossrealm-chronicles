@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { CAMERA_BLEND } from '../content/tuning.js';
-import { requestDof } from '../engine/DofManager.js';
+import { CAMERA_BLEND, DOF_PRESETS } from '../content/tuning.js';
+import { requestDof, cancelDof } from '../engine/DofManager.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -152,6 +152,13 @@ export class CinematicManager {
         { owner: 'cinematic', transition: CAMERA_BLEND.enter }
       );
 
+    // 相位先切、再按相位声明这一帧的 DoF：反过来的话，切到 dialog 的那一帧还在请求
+    // cinematicIntro，中段的满模糊整整晚一帧才起步。
+    if (this.phase === 'title' && this.timer > 2.2) {
+      this.phase = 'dialog';
+      this.game.dialog.show(this.config.title, this.config.lines);
+    }
+
     // 过场 DoF：使用预设表驱动，按 phase 自动切换淡入/保持/淡出 ——
     // title: cinematicIntro (弱模糊、快淡入) → dialog: cinematicMid (满模糊) → 结束: cinematicOutro (长淡出)
     const focus = this._cinePos.distanceTo(this._cineLook);
@@ -161,21 +168,18 @@ export class CinematicManager {
       requestDof({ preset: 'cinematicMid', focus });
     }
 
-    if (this.phase === 'title' && this.timer > 2.2) {
-      this.phase = 'dialog';
-      this.game.dialog.show(this.config.title, this.config.lines);
-    }
-
     if (this.timer >= this.config.duration) {
       this.end();
     }
   }
 
   end() {
+    if (!this.active) return;
     this.active = false;
     this.game.cinematicActive = false;
-    // 过场收尾：请求 cinematicOutro 预设（长淡出），由 DofManager 平滑关灯
-    requestDof({ preset: 'cinematicOutro', focus: this._cinePos.distanceTo(this._cineLook) });
+    /* 过场收尾：按 cinematicOutro 的长 fadeOut 从当前模糊量退到 0，再由 DofManager 关灯。
+     * 以前这里把 cinematicOutro 当普通预请求（向 0.30 淡入并永远 hold），灯就再也关不掉了。 */
+    cancelDof(DOF_PRESETS.cinematicOutro.fadeOut);
     this.letterbox.classList.add('hidden');
     if (this.game.dialog.open) this.game.dialog.hide?.();
     window.dispatchEvent(new CustomEvent('cinematic-end'));

@@ -1090,7 +1090,9 @@ export class Game {
     }
     // W-C4 切片6 余量：DoF 统一驱动（CombatCameraDirector / CinematicManager 只声明参数，
     // 这里每帧按有无请求开关 pass 与写 uniform，零遗漏关灯）。
-    updateDof(this.dofPass);
+    // 走 rawDt：淡入淡出是镜头节奏，和 commitView / 震动同一个口径（B39）——
+    // 命中停顿/慢动作不该把一次处决演出的景深拉长；漏传 dt 会让计时器变成 NaN，永远淡不完。
+    updateDof(this.dofPass, rawDt);
     /* 相机所有者的收尾：FOV 增量按帧申领，这一笔落下之后本帧的申领就清零 ——
      * 没有任何系统需要"记得恢复基准"（M3：相机唯一写入者）。
      * commitView 用 rawDt 推进一次"所有权交接补间"（进出过场/观看模式的软接，W-A5 切片1，短板 A4）：

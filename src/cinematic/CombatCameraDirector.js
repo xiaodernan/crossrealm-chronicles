@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { addShake } from '../engine/Shake.js';
 import { emitCue } from '../engine/cues.js';
 import { EXECUTION_CAMERA } from '../content/tuning.js';
-import { requestDof, cancelDof, setDofEnabled } from '../engine/DofManager.js';
+import { requestDof, cancelDof } from '../engine/DofManager.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -301,9 +301,8 @@ export class CombatCameraDirector {
     const wasActive = this.active;
     if (!this.active) {
       if (wasActive) {
-        // 从活跃变非活跃：显式取消 DoF 请求并立即关灯
+        // 从活跃变非活跃：只撤请求，淡出与关灯都归 DofManager（硬切会抹掉 fadeOut）
         cancelDof();
-        if (this.game.dofPass) setDofEnabled(this.game.dofPass, false);
       }
       return;
     }
@@ -324,9 +323,8 @@ export class CombatCameraDirector {
       /* 演出一结束就当场收回这层偏移，不等下一帧的申领结算：跳过、面板抢占、异常路径
        * 都可能让"下一帧"迟到，而 FOV 残留在玩家眼里就是"画面突然变广了没还原" */
       this.game.player?.rig?.revokeFov(COMBAT_FOV_LAYER);
-      // DoF 显式取消：立即关灯，不等下一帧
+      // DoF 收尾：进入预设的 fadeOut，淡完由 DofManager 关灯
       cancelDof();
-      if (this.game.dofPass) setDofEnabled(this.game.dofPass, false);
     } else {
       const ov = this.getCameraOverrides();
       // 只申领，不写相机：全仓库只有 `CameraRig` 一处会碰 `camera.fov`
@@ -342,7 +340,7 @@ export class CombatCameraDirector {
     }
   }
 
-  /** 正常播完或被 skip：显式取消 DoF 请求，并立即关灯（不等下一帧）。 */
+  /** 正常播完或被 skip：撤 DoF 请求，按 preset fadeOut 淡出后由 DofManager 关灯。 */
   end() {
     if (!this.active) return;
     this.active = false;
@@ -356,7 +354,6 @@ export class CombatCameraDirector {
     this.game.combatInputLock?.release();
     this.game.player?.rig?.revokeFov(COMBAT_FOV_LAYER);
     cancelDof();
-    if (this.game.dofPass) setDofEnabled(this.game.dofPass, false);
   }
 
   /** 外部强制中断（ESC / 面板抢占等）—— 走同一条收尾路径。 */

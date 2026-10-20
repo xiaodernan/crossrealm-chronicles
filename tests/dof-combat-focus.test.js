@@ -122,14 +122,19 @@ describe('处决演出：DoF 预设 execution 含平滑淡入淡出', () => {
       .toBeLessThan(DOF_PRESETS.execution.maxblur * 0.1);
   });
 
-  it('skip() 立即进入 fadeOut，fadeOut 结束后关灯', async () => {
+  it('skip() 进入 fadeOut：淡出结束后关灯，而不是当场硬切', async () => {
     const { d, game } = await mkGame(mkDofPass());
     d.play('execution', { position: { x: 0, y: 0, z: 4 }, stature: 2.2, base: 0 });
     tickAll(d, game, 1 / 60);
     expect(game.dofPass.enabled).toBe(true);
     d.skip();
-    // end() 内已调用 setDofEnabled(false) 立即关灯，后续无需再驱动 updateDof
+    // 跳过只是撤销请求：灯还亮着，由 updateDof 按 preset fadeOut 退到 0 再关
+    expect(game.dofPass.enabled).toBe(true);
+    for (let t = 0; t <= DOF_PRESETS.execution.fadeOut; t += 1 / 60) {
+      updateDof(game.dofPass, 1 / 60);
+    }
     expect(game.dofPass.enabled).toBe(false);
+    expect(game.dofPass.uniforms['maxblur'].value).toBe(0);
   });
 
   it('没有 dofPass 的旧 save 全程不炸', async () => {

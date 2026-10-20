@@ -83,31 +83,37 @@ describe('Boss 过场：预设 cinematicIntro -> cinematicMid -> cinematicOutro'
   it('phase 切换到 dialog 后请求 cinematicMid：模糊量升到峰值平台', async () => {
     const { cine, game } = playBoss(mkDofPass());
     const duration = cine.config.duration;
-    // 推进到 phase 切换点
+    // 推进到 phase 切换点：切相位与请求预设在同一帧内完成
     cine.update(duration / 2);
     updateDof(game.dofPass, duration / 2);
+    expect(cine.phase).toBe('dialog');
     const mid = game.dofPass.uniforms['maxblur'].value;
     // cinematicIntro maxblur = 0.25, cinematicMid maxblur = 0.85
     // 切换到 dialog 时已进入 cinematicMid 预设，模糊量应显著超过 cinematicIntro 的峰值
     expect(mid).toBeGreaterThan(DOF_PRESETS.cinematicIntro.maxblur);
-    // 推进剩余时间
-    cine.update(duration / 2);
-    updateDof(game.dofPass, duration / 2);
-    const mid2 = game.dofPass.uniforms['maxblur'].value;
-    // 中段应接近 cinematicMid 峰值
-    expect(mid2).toBeCloseTo(DOF_PRESETS.cinematicMid.maxblur, 0);
+    // 继续推进，中段应贴住 cinematicMid 峰值（同 preset hold，重入不重置 fade）
+    cine.update(0.5);
+    updateDof(game.dofPass, 0.5);
+    expect(game.dofPass.uniforms['maxblur'].value).toBeCloseTo(DOF_PRESETS.cinematicMid.maxblur, 1);
   });
 
-  it('结束时请求 cinematicOutro：end() 立即关灯', async () => {
+  it('结束时请求 cinematicOutro：按长 fadeOut 平滑淡出后关灯', async () => {
     const { cine, game } = playBoss(mkDofPass());
     const duration = cine.config.duration;
-    for (let t = 0; t < duration; t += 1 / 60) {
+    for (let t = 0; t < duration - 0.2; t += 1 / 60) {
       cine.update(1 / 60);
       updateDof(game.dofPass, 1 / 60);
     }
-    // end() 内已立即关灯
+    expect(cine.active).toBe(true);
     cine.end();
+    // 取消不是硬切：还在亮灯，模糊量从当前值开始退
+    expect(game.dofPass.enabled).toBe(true);
+    expect(game.dofPass.uniforms['maxblur'].value).toBeGreaterThan(0);
+    for (let t = 0; t <= DOF_PRESETS.cinematicOutro.fadeOut; t += 1 / 60) {
+      updateDof(game.dofPass, 1 / 60);
+    }
     expect(game.dofPass.enabled).toBe(false);
+    expect(game.dofPass.uniforms['maxblur'].value).toBe(0);
   });
 
   it('没有 dofPass 也不炸', async () => {
