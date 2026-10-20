@@ -522,6 +522,25 @@ export const STRINGS_EN = Object.freeze({
   cg_gallery_boss_chaos: 'Chaos Overlord Defeated',
   cg_gallery_dungeon_clear: 'Dungeon Cleared',
   cg_gallery_world_anchor: 'World Anchor Awakened',
+
+  // Maze lore fragments (LORE_FRAGMENTS, slice 14)
+  lore_1_title: 'Faded Stele',
+  lore_1_text: '"The anchor split at the crossing of three realms; the walker must re-weld the gate with blood and fire."',
+  lore_2_title: 'Soldier\'s Diary',
+  lore_2_text: 'Third night. The walls move. Not a metaphor. Behind every door is wind, and in the wind is snow from another plane.',
+  lore_3_title: 'Arcane Scrap',
+  lore_3_text: 'The library does not store books—it stores disasters that have not yet happened.',
+  lore_4_title: 'Stellar Beacon',
+  lore_4_text: 'The gravity well on Miller\'s Wastes is no natural phenomenon. Someone is digging underneath.',
+  lore_5_title: 'Timeline Inscription',
+  lore_5_text: 'As you read this, another you has already fallen. Keep walking.',
+  lore_6_title: 'Chaos Whisper',
+  lore_6_text: 'The more doors, the thinner the boundary. The Boss is not a guardian—it is the crack itself.',
+  lore_7_title: 'Keywarden\'s Plaque',
+  lore_7_text: '"I only keep the doors. I do not ask where the traveler goes. But the maze remembers every lost soul."',
+  lore_8_title: 'Hub Echo',
+  lore_8_text: 'The World Anchor\'s pulse connects to every dungeon. Clear one dungeon, and the anchor glows a little brighter.',
+
   // The five bonus rows (were literals in content/cgGallery.js; same batch as the ten above)
   cg_gallery_style_ss: 'Combat Style SS',
   cg_gallery_rematch: 'Boss Rematch',

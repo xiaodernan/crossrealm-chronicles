@@ -519,6 +519,25 @@ export const STRINGS_ZH = Object.freeze({
   cg_gallery_boss_chaos: '混沌领主击破',
   cg_gallery_dungeon_clear: '迷宫清空',
   cg_gallery_world_anchor: '世界之锚觉醒',
+
+  // 迷宫叙事碎片（LORE_FRAGMENTS，切片14）
+  lore_1_title: '褪色碑刻',
+  lore_1_text: '「锚点裂于三界之交，行者当以血与火重焊门闩。」',
+  lore_2_title: '士兵日记',
+  lore_2_text: '第三夜。墙在移动。不是比喻。门后总有风，风里有别的位面的雪。',
+  lore_3_title: '奥术残页',
+  lore_3_text: '图书馆并非藏书——它收藏的是尚未发生的灾难。',
+  lore_4_title: '星际信标',
+  lore_4_text: '米勒荒原的引力井不是自然现象。有人在下面挖东西。',
+  lore_5_title: '时线铭文',
+  lore_5_text: '你读这句话时，另一个你已经倒下了。继续走。',
+  lore_6_title: '混沌低语',
+  lore_6_text: '门越多，界越薄。Boss 不是守卫——是裂缝本身。',
+  lore_7_title: '守钥者铭牌',
+  lore_7_text: '「我只保管门，不询问来者去向。但迷宫记得每一个迷路的人。」',
+  lore_8_title: '枢纽残响',
+  lore_8_text: '世界之锚的脉动与所有地下城相连。清空一座迷宫，锚点就亮一分。',
+
   // bonus 五条（原在 content/cgGallery.js 里是字面量，与上面十条同一批收口）
   cg_gallery_style_ss: '战斗风格 SS',
   cg_gallery_rematch: 'Boss 再战',

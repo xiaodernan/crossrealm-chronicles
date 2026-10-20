@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { anyDown, codeFor } from '../content/keybinds.js';
 import { keyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 
 import { CharacterModel } from './CharacterModel.js';
 
@@ -1068,7 +1069,7 @@ export class PlayerController {
       const lore = this.game.dungeons.getNearbyLore?.(this.position);
       prompt.classList.remove('hidden');
       if (lore) {
-        prompt.textContent = `${interact} 阅读 — ${lore.title}`;
+        prompt.textContent = `${interact} 阅读 — ${t(lore.title)}`;
       } else if (hint?.bossAlive) {
         prompt.textContent = `${interact} 击败守钥者后离开 · Boss 二阶段留意`;
       } else if (hint?.enemies > 0) {
