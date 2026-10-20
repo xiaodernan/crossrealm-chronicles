@@ -89,6 +89,9 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'gloom_wraith', weight: 6 },
       { type: 'gloom_stalker', weight: 3 },
       { type: 'gloom_sentinel', weight: 2 },
+      // W-E3 切片3 新增的守夜人：它最沉（hp 215 / 架势 84），但**权重最低** ——
+      // 池子的"最重"指的是**谁打头**，不是谁最耐打；守夜人要靠"撞见"而不是"常驻"。
+      { type: 'gloom_warden', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },
@@ -98,6 +101,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'radiant_crawler', weight: 6 },
       { type: 'radiant_knight', weight: 3 },
       { type: 'radiant_dancer', weight: 2 },
+      // W-E3 切片3 新增的圣印者：远距标点的那一类，权重最低（少但每次都准）
+      { type: 'radiant_brand', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

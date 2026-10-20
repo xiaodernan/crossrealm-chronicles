@@ -126,6 +126,27 @@ describe('① 数据忠实：五座各一格，池子两两不同，且只说"�
     }
   });
 
+  /**
+   * W-E3 切片3 立：加一类新敌人之后，它**必须在某个池里出现过**。
+   *
+   * 症状不是报错：名册里有它、体型有它、招式有它、出生点有它 —— 唯独副本里碰不到它，
+   * 于是"加了新敌人"这件事在玩家实际会打的仗里**等于没加**（表里有而页面没有那一族）。
+   * 这条门禁让"加敌人"这件事必须走完最后一格。
+   *
+   * 豁免两名（各有各的理由，不是一笔糊涂账）：
+   * - `dummy`：不可攻击的摆设（训练木人），本就不该出现在副本里；
+   * - `elite`：**野外专属**（`EnemyManager.spawnAt` 一处，带 respawnTime），主线有一条"击杀五名精英"的
+   *   任务就是冲它去的 —— 它在世界里出现，不靠副本池。
+   */
+  it('名册里每一类战斗敌人都必须在某个遭遇池里出现过（加了新敌人就要走完最后一格）', () => {
+    const 野外专属 = new Set(['dummy', 'elite']);
+    const 池里有的 = new Set(Object.values(DUNGEON_ENCOUNTERS).flatMap((r) => r.pool.map((e) => e.type)));
+    const 缺席 = Object.keys(ENEMY_ROSTER).filter((t) => !野外专属.has(t) && !池里有的.has(t));
+    expect(缺席, `这些敌人登记进名册却不在任何副本池里 —— 玩家在副本里永远碰不到它们：${缺席.join('、')}`).toEqual([]);
+    // 反向见证：池子不能是空的（否则上面那条恒真）
+    expect(池里有的.size, '一个池里的类型都没扫到，这条门禁在空转').toBeGreaterThanOrEqual(10);
+  });
+
   it('每一池的"最重那一类"唯一 —— 表上要答得出这座副本打头的是谁', () => {
     for (const [id, row] of Object.entries(DUNGEON_ENCOUNTERS)) {
       const 最重 = Math.max(...row.pool.map((e) => e.weight));
