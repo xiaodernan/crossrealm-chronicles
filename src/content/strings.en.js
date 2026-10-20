@@ -238,6 +238,7 @@ export const STRINGS_EN = Object.freeze({
   zone_subtitle_corridor: 'Between the Planes',
   zone_desc_corridor: 'A bare corridor between fragments, where wind takes the place of a zone theme.',
   rest_point_campfire_name: '${zone} Campfire',
+  rest_point_name_hub: 'World Anchor Rest Point',
 
   // Waypoint labels (W-D2 slice 16i: waypoint.label is a key, not a literal)
   wp_label_anchor: 'World Anchor',
@@ -256,11 +257,16 @@ export const STRINGS_EN = Object.freeze({
   wp_label_chaos_core: 'Chaos Core',
   wp_label_campfire_weapon_skills: 'Campfire · Weapon Skills',
   wp_label_dungeon_entrance: 'Dungeon Entrance',
-  wp_label_boss_shadow: 'Shadow Warden',
-  wp_label_boss_mage: 'Archmagus',
-  wp_label_boss_singularity: 'Singularity Herald',
-  wp_label_boss_void: 'Void Chronarch',
-  wp_label_boss_chaos: 'Rift Lord',
+
+  // Boss roster string keys (W-D2 slice 16j: the roster says what it is called; the key says where that sentence lives)
+  boss_name_shadow: 'Shadow Warden',
+  boss_name_mage: 'Archmagus Saloran',
+  boss_name_singularity: 'Gravitational Avatar · Singularity Herald',
+  boss_name_void: 'Void Chronarch',
+  boss_name_chaos: 'Chaos Rift Lord',
+  boss_short_mage: 'Archmagus',
+  boss_short_singularity: 'Singularity Herald',
+  boss_short_chaos: 'Rift Lord',
 
   // Plane assistant demo steps (W-D2 slice 16i)
   demo_step_anchor: 'Hub · World Anchor',
@@ -278,7 +284,7 @@ export const STRINGS_EN = Object.freeze({
   demo_step_level5: 'Reach Lv5',
   demo_step_astronaut: 'Astronaut',
   demo_step_spells: 'Spell Practice',
-  demo_step_dungeons: 'Dungeons',
+  demo_step_dungeons: '${n} Dungeons',
   demo_step_mind: 'Mind Upgrade',
   demo_step_ascend: 'Plane Ascension',
   demo_step_void_rift: 'Timeline Rift',
@@ -416,7 +422,8 @@ export const STRINGS_EN = Object.freeze({
   hud_skill_points_fmt: 'Skill Points ${points}',
   hud_weapon_default: '⚔ Planeslong Sword',
   hud_camera_mode_first: 'First Person',
-  hud_camera_mode_third: 'Third Person',  hud_boss_phase_fmt: 'Phase ${phase}',
+  hud_camera_mode_third: 'Third Person',
+  hud_boss_phase_fmt: 'Phase ${phase}',
   hud_spell_1: 'True Fire',
   hud_spell_2: 'Xuan Ice',
   hud_spell_3: 'Gravity',

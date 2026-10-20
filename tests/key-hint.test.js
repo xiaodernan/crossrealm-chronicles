@@ -201,10 +201,13 @@ describe('存模板、播的时候才展开（建得早的界面不会冻在出�
   it('情境教程排队期间改绑，播出时跟到新键', () => {
     const shown = [];
     const c = new ContextualTutorial({ dialog: fakeDialog(shown) });
-    c.trigger('probe', '标题', '按 {interact} 交互');
+    // W-D2 切片16g：`trigger()` 收的是**文案键**（数据层只存键）——
+    // 模板与展开的时机没变：仍是"触发时只存模板，播出时才展开"，
+    // 所以排队期间改绑，播出时跟到新键。
+    c.trigger('probe', 'guide_title_complete', 'guide_hint_dungeon_exit');
     setKeybindTable(buildBindingTables({ interact: 'KeyC' }, UI_HOTKEYS).keyTable);
     scheduler.update(0.5);
-    expect(shown).toEqual(['按 C 交互']);
+    expect(shown).toEqual(['▶ 守钥者已倒 — 出口环 C 离开']);
     scheduler.clear('contextual-tip');
   });
 });

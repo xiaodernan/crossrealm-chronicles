@@ -238,6 +238,7 @@ export const STRINGS_ZH = Object.freeze({
   zone_subtitle_corridor: '位面之间',
   zone_desc_corridor: '碎片之间的空旷走廊，风声代替区域的主题。',
   rest_point_campfire_name: '${zone}营火',
+  rest_point_name_hub: '世界之锚休息点',
 
   // 路点标签（W-D2 切片16i：waypoint.label 是键，不是字面量）
   wp_label_anchor: '世界之锚',
@@ -256,11 +257,16 @@ export const STRINGS_ZH = Object.freeze({
   wp_label_chaos_core: '混沌之核',
   wp_label_campfire_weapon_skills: '营火·武器技能',
   wp_label_dungeon_entrance: '地下城入口',
-  wp_label_boss_shadow: '影界守护者',
-  wp_label_boss_mage: '大奥术师',
-  wp_label_boss_singularity: '奇点领主',
-  wp_label_boss_void: '时线执政官',
-  wp_label_boss_chaos: '裂隙领主',
+
+  // Boss 名册的文案键（W-D2 切片16j：名册登记"它叫什么"，键是"这句话住在哪一格"）
+  boss_name_shadow: '影界守护者',
+  boss_name_mage: '大奥术师·萨尔林',
+  boss_name_singularity: '引力化身·奇点领主',
+  boss_name_void: '时线执政官',
+  boss_name_chaos: '混沌裂隙领主',
+  boss_short_mage: '大奥术师',
+  boss_short_singularity: '奇点领主',
+  boss_short_chaos: '裂隙领主',
 
   // 位面助手演示步骤（W-D2 切片16i）
   demo_step_anchor: '枢纽 · 世界之锚',
@@ -278,7 +284,7 @@ export const STRINGS_ZH = Object.freeze({
   demo_step_level5: '升级 Lv5',
   demo_step_astronaut: '宇航员',
   demo_step_spells: '法术练习',
-  demo_step_dungeons: '座地下城',
+  demo_step_dungeons: '${n} 座地下城',
   demo_step_mind: '心智升级',
   demo_step_ascend: '位面飞升',
   demo_step_void_rift: '时线裂隙',
@@ -416,7 +422,8 @@ export const STRINGS_ZH = Object.freeze({
   hud_skill_points_fmt: '技能点 ${points}',
   hud_weapon_default: '⚔ 位面长剑',
   hud_camera_mode_first: '第一人称',
-  hud_camera_mode_third: '第三人称',  hud_boss_phase_fmt: '阶段 ${phase}',
+  hud_camera_mode_third: '第三人称',
+  hud_boss_phase_fmt: '阶段 ${phase}',
   hud_spell_1: '真火',
   hud_spell_2: '玄冰',
   hud_spell_3: '引力',

@@ -26,6 +26,7 @@ import { RestDialogue } from '../src/game/RestDialogue.js';
 import { RestPointManager } from '../src/world/RestPointManager.js';
 import { RestPointEnhancer } from '../src/world/RestPointEnhancer.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
+import { t } from '../src/engine/i18n.js';
 
 const src = (rel) => readFileSync(new URL(`../src/${rel}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 
@@ -83,23 +84,28 @@ describe('营火名与另两张名册配成一对', () => {
   });
 
   it('五座位面营火的名字由区名派生：改区名，营火名跟着改（问的是生产方）', () => {
+    // W-D2 切片16i：名字表存的是**文案键**，区名那几格是模板键
+    // `rest_point_campfire_name`（`${zone}` 现取区域名）—— 于是"区名改口时营火跟着改"
+    // 这条性质仍在：两者是**同一次展开**算出来的，不是两份各自抄的。
     for (const zone of ZONE_ORDER) {
-      expect(REST_POINT_NAMES[zone], `${zone} 那座不是"区名 + 营火"那个形状`)
-        .toBe(`${ZONE_NAMES[zone]}营火`);
+      const 展开 = t(REST_POINT_NAMES[zone], { zone: t(ZONE_NAMES[zone]) });
+      expect(展开, `${zone} 那座不是"区名 + 营火"那个形状`).toBe(`${t(ZONE_NAMES[zone])}营火`);
     }
   });
 
   it('枢纽那座是显式例外：不等于"区名 + 营火"，而它自己的写法钉字面', () => {
-    expect(REST_POINT_NAMES[ZONE_IDS.HUB]).not.toBe(`${ZONE_NAMES[ZONE_IDS.HUB]}营火`);
+    expect(t(REST_POINT_NAMES[ZONE_IDS.HUB], { zone: t(ZONE_NAMES[ZONE_IDS.HUB]) }))
+      .not.toBe(`${t(ZONE_NAMES[ZONE_IDS.HUB])}营火`);
     // 与上一条等式同时为真时，只有这个字面能挡住"两张表一起改口"
-    expect(REST_POINT_NAMES[ZONE_IDS.HUB]).toBe('世界之锚休息点');
+    expect(t(REST_POINT_NAMES[ZONE_IDS.HUB])).toBe('世界之锚休息点');
   });
 
   it('营火名里的区名部分必须是当前仍在用的那一个（废弃区名是实物病例）', () => {
-    const 现役区名 = Object.values(ZONE_NAMES);
+    const 现役区名 = Object.values(ZONE_NAMES).map((k) => t(k));
     const 漏网的 = [];
-    for (const [id, name] of Object.entries(REST_POINT_NAMES)) {
+    for (const [id, key] of Object.entries(REST_POINT_NAMES)) {
       if (id === ZONE_IDS.HUB) continue;   // 枢纽那座不叫"交汇枢纽营火"，见名字表头注
+      const name = t(key, { zone: t(ZONE_NAMES[id]) });
       const 区名部分 = name.replace(/营火$/, '');
       if (!现役区名.includes(区名部分)) 漏网的.push(`${id}: "${name}" 的区名部分 "${区名部分}" 不在 ${现役区名.join(' / ')} 里`);
     }
@@ -150,7 +156,10 @@ describe('营火名的消费者：世界与对话都问同一个源', () => {
     mgr.buildDefaults();
     expect(mgr.points).toHaveLength(Object.keys(REST_POINT_NAMES).length);
     for (const p of mgr.points) {
-      expect(p.name, `${p.id} 那座在营火列表里的名字与名字表不同`).toBe(REST_POINT_NAMES[p.id]);
+      // W-D2 切片16i：名字表存的是**键**，世界里存的是**展开后的显示名**
+      // （展开在 `buildDefaults` 那一刻做 —— 于是每座营火的名字仍然互不相同）。
+      const 期望 = t(REST_POINT_NAMES[p.id], { zone: t(ZONE_NAMES[p.id]) });
+      expect(p.name, `${p.id} 那座在营火列表里的名字与名字表不同`).toBe(期望);
     }
     // 同名会让"按名字认路"的老链路跳错地方（B36 那一族的旧账），这里把它钉成不变式
     expect(new Set(mgr.points.map((p) => p.name)).size).toBe(mgr.points.length);
@@ -179,14 +188,14 @@ describe('营火名的消费者：世界与对话都问同一个源', () => {
 
   it('营火木牌上的地名取当前区名（同一族里的第五份抄本，废弃名实测在 magic 那一格）', () => {
     const points = Object.keys(REST_POINT_NAMES).map((id) => ({
-      id, name: REST_POINT_NAMES[id], mesh: { add() {} },
+      id, name: t(REST_POINT_NAMES[id], { zone: t(ZONE_NAMES[id]) }), mesh: { add() {} },
     }));
     const game = { restPoints: { points }, dialog: { toast() {} }, quests: { chapter: 1 } };
     new RestPointEnhancer({ points }, game);
     const 错的 = [];
     for (const p of points) {
       // 枢纽那座牌上不写片区名 '交汇枢纽'：木牌指的是场地中央那件东西（钉字面）
-      const 期望 = p.id === ZONE_IDS.HUB ? '世界之锚' : ZONE_NAMES[p.id];
+      const 期望 = p.id === ZONE_IDS.HUB ? '世界之锚' : t(ZONE_NAMES[p.id]);
       if (p.zoneLabel !== 期望) 错的.push(`${p.id}: 牌上 "${p.zoneLabel}"，当前该叫 "${期望}"`);
     }
     expect(错的, `这些营火牌上写的是废弃地名：\n${错的.join('\n')}`).toEqual([]);
@@ -196,11 +205,14 @@ describe('营火名的消费者：世界与对话都问同一个源', () => {
     withWindow(() => {
       const sunk = newSunk();
       const rd = new RestDialogue(campfireGame(sunk));
-      for (const [id, name] of Object.entries(REST_POINT_NAMES)) rd.start({ id, name });
+      // 名字表存的是**键**，对话标题拿的是展开后的显示名（世界在 buildDefaults 那一刻展开）
+      const 展开 = Object.fromEntries(Object.entries(REST_POINT_NAMES)
+        .map(([id, key]) => [id, t(key, { zone: t(ZONE_NAMES[id]) })]));
+      for (const [id, name] of Object.entries(展开)) rd.start({ id, name });
       const ids = Object.keys(REST_POINT_NAMES);
       expect(sunk.titles).toHaveLength(ids.length);
       ids.forEach((id, i) => {
-        expect(sunk.titles[i].title, `${id} 的对话标题不是营火名`).toBe(REST_POINT_NAMES[id]);
+        expect(sunk.titles[i].title, `${id} 的对话标题不是营火名`).toBe(展开[id]);
         expect(sunk.titles[i].meta.restId, `${id} 的对话 meta 走错了营火`).toBe(id);
       });
     });
@@ -210,8 +222,8 @@ describe('营火名的消费者：世界与对话都问同一个源', () => {
     withWindow(() => {
       const sunk = newSunk();
       const rd = new RestDialogue(campfireGame(sunk));
-      rd.start({ id: 'hub', name: REST_POINT_NAMES.hub });
-      rd.start({ id: 'magic', name: REST_POINT_NAMES.magic });
+      rd.start({ id: 'hub', name: t(REST_POINT_NAMES.hub, { zone: t(ZONE_NAMES.hub) }) });
+      rd.start({ id: 'magic', name: t(REST_POINT_NAMES.magic, { zone: t(ZONE_NAMES.magic) }) });
       expect(sunk.titles[0].title).toBe('世界之锚休息点');
       expect(sunk.titles[1].title).toBe('霍格沃兹遗境营火');
     });

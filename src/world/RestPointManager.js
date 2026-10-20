@@ -85,14 +85,30 @@ export class RestPointManager {
     // 名字不在这儿拼，也不在任何地方再写一遍 —— 只有 `content/restPointNames.js` 那一张表
     // （W-B4 切片2：改前对话树自己抄了一份，于是站在同一座火边，提示说"世界之锚休息点"、
     //  一秒后开出来的对话标题说"世界之锚营火"，而 `magic` 抄的还是早已废弃的区名）
-    this.addRestPoint(0, 55, REST_POINT_NAMES[ZONE_IDS.HUB], ZONE_IDS.HUB);
-    this.addRestPoint(-200, 0, REST_POINT_NAMES[ZONE_IDS.FANTASY], ZONE_IDS.FANTASY);
-    this.addRestPoint(0, -180, REST_POINT_NAMES[ZONE_IDS.MAGIC], ZONE_IDS.MAGIC);
-    this.addRestPoint(200, 80, REST_POINT_NAMES[ZONE_IDS.SPACE], ZONE_IDS.SPACE);
-    this.addRestPoint(0, 210, REST_POINT_NAMES[ZONE_IDS.VOID], ZONE_IDS.VOID);
-    this.addRestPoint(-200, 210, REST_POINT_NAMES[ZONE_IDS.ABYSS], ZONE_IDS.ABYSS);
-    this.addRestPoint(180, 100, REST_POINT_NAMES[ZONE_IDS.GLOOM], ZONE_IDS.GLOOM);
-    this.addRestPoint(-180, -160, REST_POINT_NAMES[ZONE_IDS.RADIANT], ZONE_IDS.RADIANT);
+    this.addRestPoint(0, 55, this._expand(REST_POINT_NAMES[ZONE_IDS.HUB], ZONE_IDS.HUB), ZONE_IDS.HUB);
+    this.addRestPoint(-200, 0, this._expand(REST_POINT_NAMES[ZONE_IDS.FANTASY], ZONE_IDS.FANTASY), ZONE_IDS.FANTASY);
+    this.addRestPoint(0, -180, this._expand(REST_POINT_NAMES[ZONE_IDS.MAGIC], ZONE_IDS.MAGIC), ZONE_IDS.MAGIC);
+    this.addRestPoint(200, 80, this._expand(REST_POINT_NAMES[ZONE_IDS.SPACE], ZONE_IDS.SPACE), ZONE_IDS.SPACE);
+    this.addRestPoint(0, 210, this._expand(REST_POINT_NAMES[ZONE_IDS.VOID], ZONE_IDS.VOID), ZONE_IDS.VOID);
+    this.addRestPoint(-200, 210, this._expand(REST_POINT_NAMES[ZONE_IDS.ABYSS], ZONE_IDS.ABYSS), ZONE_IDS.ABYSS);
+    this.addRestPoint(180, 100, this._expand(REST_POINT_NAMES[ZONE_IDS.GLOOM], ZONE_IDS.GLOOM), ZONE_IDS.GLOOM);
+    this.addRestPoint(-180, -160, this._expand(REST_POINT_NAMES[ZONE_IDS.RADIANT], ZONE_IDS.RADIANT), ZONE_IDS.RADIANT);
+  }
+
+  /**
+   * 营火显示名的**唯一展开点**（W-D2 切片16i）。
+   *
+   * 名字表（`content/restPointNames.js`）存的是**文案键**，区名那一格用的是模板键
+   * `rest_point_campfire_name`（`${zone}` 现取区域名）—— 于是"区名改口时营火跟着改"
+   * 这条性质还在：两者是**同一次展开**算出来的，不是两份各自抄的。
+   *
+   * 展开放在 `world/` 而不是 `content/`：内容层是纯数据，不 import `engine/`。
+   * 展开发生在**建营火那一刻**，世界里存的仍是显示名（与改前逐字相同）——
+   * 于是"按名字认路"那条不变式（每座营火的名字互不相同）照样成立。
+   */
+  _expand(key, zoneId) {
+    const zoneKey = restPointZoneKey(zoneId);
+    return t(key, { zone: zoneKey ? t(zoneKey) : '' });
   }
 
   getNearest(pos, range = 4) {
@@ -112,23 +128,7 @@ export class RestPointManager {
 
   /** id → 显示名。找不到返回 null，由调用方决定兜底文案（不许拿 id 冒充名字） */
   nameOf(id) {
-    return this._displayName(this.points.find((p) => p.id === id));
-  }
-
-  /**
-   * 营火显示名的**唯一展开点**（W-D2 切片16i）。
-   *
-   * `p.name` 存的是文案键（`content/restPointNames.js`），区名那一格用的是模板键
-   * `rest_point_campfire_name`（`${zone}` 现取区域名）—— 于是"区名改口时营火跟着改"
-   * 这条性质还在：两者是**同一次展开**算出来的，不是两份各自抄的。
-   *
-   * 展开放在 `world/` 而不是 `content/`：内容层是纯数据，不 import `engine/`。
-   */
-  _displayName(point) {
-    if (!point) return null;
-    const zoneKey = restPointZoneKey(point.id);
-    const zone = zoneKey ? t(zoneKey) : '';
-    return t(point.name, { zone });
+    return this.points.find((p) => p.id === id)?.name ?? null;
   }
 
   update(dt) {

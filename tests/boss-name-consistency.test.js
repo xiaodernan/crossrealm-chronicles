@@ -21,6 +21,7 @@ import { BOSS_DEFEAT_LINES } from '../src/content/bossDialogue.js';
 import { BOSS_CINEMATICS } from '../src/cinematic/CinematicManager.js';
 import { OBJECTIVES } from '../src/content/objectives.js';
 import { REST_DIALOGUES } from '../src/content/restDialogues.js';
+import { t } from '../src/engine/i18n.js';
 
 const ROOT = process.cwd();
 const WORLD_IDS = BOSS_ROSTER.map((b) => b.id);
@@ -55,7 +56,14 @@ describe('Boss 显名单源（名册是"它叫什么"的唯一真源）', () => 
       if (!o.bossId) continue;
       const expected = shortOf(o.bossId);
       expect(o.title, `目标 ${o.id} 标题`).toBe(expected);
-      if (o.waypoint) expect(o.waypoint.label, `目标 ${o.id} 航点标签`).toBe(expected);
+      if (o.waypoint) {
+        // W-D2 切片16j：航点标签是**名册登记的短名键**（不是自抄的字面量）——
+        // 展开之后必须与名册登记的短名逐字相等。
+        expect(o.waypoint.label, `目标 ${o.id} 航点标签没接名册的短名键`)
+          .toBe(bossById(o.bossId).shortNameKey);
+        expect(t(o.waypoint.label), `目标 ${o.id} 航点标签展开后与名册短名不同`)
+          .toBe(expected);
+      }
     }
   });
 

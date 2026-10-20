@@ -23,6 +23,18 @@ const SIGN_LABELS = {
   [ZONE_IDS.RADIANT]: ZONE_NAMES[ZONE_IDS.RADIANT],
 };
 
+/**
+ * 木牌上的地名的**展开点**（W-D2 切片16i）。
+ *
+ * 区名那几格存的是**文案键**（`ZONE_NAMES` 的值），木牌要写的是玩家看到的那几个字 ——
+ * 于是这里 `t()` 展开一次。枢纽那格是它自己的写法（'世界之锚'），不走区名。
+ */
+const signLabelOf = (id) => {
+  const 键 = SIGN_LABELS[id];
+  if (!键) return null;
+  return 键 === SIGN_LABELS[ZONE_IDS.HUB] ? 键 : t(键);
+};
+
 export class RestPointEnhancer {
   constructor(restPoints, game) {
     this.game = game;
@@ -33,7 +45,7 @@ export class RestPointEnhancer {
   }
 
   _enhance(point) {
-    const label = SIGN_LABELS[point.id] ?? point.name;
+    const label = signLabelOf(point.id) ?? point.name;
     const post = new THREE.Mesh(
       new THREE.CylinderGeometry(0.06, 0.08, 1.6, 6),
       new THREE.MeshStandardMaterial({ color: paletteOf('wood.post'), roughness: 0.9 })

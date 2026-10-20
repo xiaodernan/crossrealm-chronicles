@@ -15,6 +15,7 @@ import { RestPointManager } from '../src/world/RestPointManager.js';
 import { FastTravelSystem } from '../src/game/FastTravelSystem.js';
 import { FastTravelPanel } from '../src/ui/FastTravelPanel.js';
 import { ZONE_IDS, ZONE_NAMES } from '../src/content/ZoneIdentity.js';
+import { t } from '../src/engine/i18n.js';
 
 const makeWorld = (height = 0) => ({ getGroundHeight: () => height });
 
@@ -69,7 +70,8 @@ describe('营火 id 契约', () => {
     for (const z of [ZONE_IDS.HUB, ...Object.values(ZONE_IDS).filter((i) => i !== ZONE_IDS.HUB && i !== ZONE_IDS.CORRIDOR && i !== ZONE_IDS.UNKNOWN)]) {
       expect(ids).toContain(z);
     }
-    expect(game.restPoints.nameOf(ZONE_IDS.MAGIC)).toBe(`${ZONE_NAMES[ZONE_IDS.MAGIC]}营火`);
+    // W-D2 切片16i：区名与营火名都由**键**在同一次展开里算出来（`RestPointManager._expand`）
+    expect(game.restPoints.nameOf(ZONE_IDS.MAGIC)).toBe(`${t(ZONE_NAMES[ZONE_IDS.MAGIC])}营火`);
   });
 
   it('nameOf 查不到返回 null，不用 id 冒充名字', () => {

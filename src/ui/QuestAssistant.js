@@ -2,6 +2,7 @@ import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText } from '../content/keyHints.js';
 import { applyTranslations, t } from '../engine/i18n.js';
 import { BOSS_STAT_KEYS } from '../content/objectives.js';
+import { bossById } from '../content/bossRoster.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 
@@ -164,7 +165,7 @@ export class QuestAssistant {
       if (!this.demoRunning) break;
       this._demoStep = i + 1;
       const step = steps[i];
-      this._hintEl.textContent = t(step.label);
+      this._hintEl.textContent = t(step.label, step.params);
       await this._runDemoStep(step, true);
       this.game.quests.syncProgress();
       this.refresh();
@@ -194,25 +195,25 @@ export class QuestAssistant {
       { label: 'demo_step_reforge', action: 'poi', id: 'hub-anchor' },
       { label: 'demo_step_chests', action: 'chests', count: 5 },
       { label: 'demo_step_wanderer', action: 'npc', id: 'wanderer', x: -8, z: 45 },
-      { label: 'wp_label_boss_mage', action: 'boss', key: 'boss2Defeated', bossId: 'archmagus', x: 5, z: -220 },
+      { label: bossById('archmagus').shortNameKey, action: 'boss', key: 'boss2Defeated', bossId: 'archmagus', x: 5, z: -220 },
       { label: 'demo_step_void_knight', action: 'kills', type: 'elite', count: 1 },
       { label: 'demo_step_level5', action: 'level', level: 5 },
       { label: 'demo_step_astronaut', action: 'npc', id: 'astronaut-echo', x: 200, z: 90 },
       { label: 'demo_step_spells', action: 'spells', count: 8 },
-      { label: 'demo_step_dungeons', action: 'dungeons', ids: TRIAL_DUNGEON_IDS },
-      { label: 'wp_label_boss_singularity', action: 'boss', key: 'boss3Defeated', bossId: 'singularity-herald', x: 235, z: 155 },
+      { label: 'demo_step_dungeons', params: { n: TRIAL_DUNGEON_IDS.length }, action: 'dungeons', ids: TRIAL_DUNGEON_IDS },
+      { label: bossById('singularity-herald').shortNameKey, action: 'boss', key: 'boss3Defeated', bossId: 'singularity-herald', x: 235, z: 155 },
       { label: 'demo_step_mind', action: 'mind', value: 2 },
       { label: 'demo_step_ascend', action: 'poi', id: 'hub-anchor' },
       { label: ZONE_NAMES[ZONE_IDS.VOID], action: 'tp', x: 0, z: 220 },
       { label: 'demo_step_void_rift', action: 'discover', id: 'void-rift', x: 0, z: 220 },
       { label: 'demo_step_charged', action: 'charged', count: 5 },
-      { label: 'wp_label_boss_void', action: 'boss', key: 'voidBossDefeated', bossId: 'void-chronarch', x: 0, z: 235 },
+      { label: bossById('void-chronarch').shortNameKey, action: 'boss', key: 'voidBossDefeated', bossId: 'void-chronarch', x: 0, z: 235 },
       { label: 'wp_label_void_tablet', action: 'discover', id: 'void-tablet', x: 0, z: 225 },
       { label: 'demo_step_true_walker', action: 'poi', id: 'hub-anchor' },
       { label: ZONE_NAMES[ZONE_IDS.ABYSS], action: 'tp', x: -200, z: 220 },
       { label: 'wp_label_chaos_core', action: 'discover', id: 'chaos-core', x: -200, z: 220 },
       { label: 'demo_step_weapon_skills', action: 'skills', count: 3 },
-      { label: 'wp_label_boss_chaos', action: 'boss', key: 'chaosBossDefeated', bossId: 'chaos-overlord', x: -200, z: 285 },
+      { label: bossById('chaos-overlord').shortNameKey, action: 'boss', key: 'chaosBossDefeated', bossId: 'chaos-overlord', x: -200, z: 285 },
       { label: 'demo_step_dungeon_rerun', action: 'dungeonRerun' },
       { label: ZONE_NAMES[ZONE_IDS.GLOOM], action: 'tp', x: 180, z: 100 },
       { label: 'demo_step_gloom_deep', action: 'discover', id: 'gloom-deep-entrance', x: 180, z: 170 },

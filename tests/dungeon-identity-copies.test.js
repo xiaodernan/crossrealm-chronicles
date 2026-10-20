@@ -44,6 +44,7 @@ import { CONTENT_TABLES, checkDungeons, checkFields } from '../src/content/regis
 import { ExplorationMap } from '../src/game/ExplorationMap.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import { QuestAssistant } from '../src/ui/QuestAssistant.js';
+import { t } from '../src/engine/i18n.js';
 import { WorldMapPanel } from '../src/ui/WorldMapPanel.js';
 import { 串抄, 抄本表, 试炼三座, 旧面板表, 门抄, 滤抄 } from './helpers/wb10s3c-copies.js';
 
@@ -218,8 +219,11 @@ describe('④ 指路与助手清单读同一份', () => {
     expect(步.ids).toEqual(TRIAL_DUNGEON_IDS);
     // 文案跟着清单走：以前写着"三座地下城"，名册长到第七座那天它也不会改口。
     // 光比 `${length} 座地下城` 抓不到退回去写死的中文数词（三 == 3），所以另一条要认数字格式。
-    expect(步.label).toBe(`${步.ids.length} 座地下城`);
-    expect(步.label.match(/^\d+ 座/), `「${步.label}」把座数写成了字，不再由清单说`).toBeTruthy();
+    // W-D2 切片16i：标签是**文案键**，座数由 `params.n` 现取 —— 派生关系仍在。
+    expect(步.label).toBe('demo_step_dungeons');
+    expect(步.params?.n, '座数没有从清单现取（写死的话名册长到第七座那天就不改口了）').toBe(步.ids.length);
+    expect(t(步.label, 步.params)).toBe(`${步.ids.length} 座地下城`);
+    expect(t(步.label, 步.params).match(/^\d+ 座/), `「${t(步.label, 步.params)}」把座数写成了字，不再由清单说`).toBeTruthy();
   });
 });
 

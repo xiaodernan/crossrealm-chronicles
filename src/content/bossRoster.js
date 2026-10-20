@@ -39,11 +39,17 @@ export const BOSS_ROSTER = [
   // —— 修前这些显示名被抄成字面量散在 objectives / bossDialogue / StoryJournal / QuestAssistant
   // 里，抄着抄着就分叉（同一只奇点领主，过场叫全名、横幅却叫短名）。没登记 shortName 的 Boss，
   // 省地方的口子退回全名。门禁 `tests/boss-name-consistency.test.js` 横向钉住这些出口。
-  { id: 'shadow-warden', name: '影界守护者', chapter: 1 },
-  { id: 'archmagus', name: '大奥术师·萨尔林', shortName: '大奥术师', chapter: 1 },
-  { id: 'singularity-herald', name: '引力化身·奇点领主', shortName: '奇点领主', chapter: 1 },
-  { id: 'void-chronarch', name: '时线执政官', chapter: 4 },
-  { id: 'chaos-overlord', name: '混沌裂隙领主', shortName: '裂隙领主', chapter: 5 },
+  //
+  // `nameKey` / `shortNameKey` 是**文案键**（W-D2 切片16j）：显示侧在播出那一刻 `t()` 展开。
+  // 中文实值仍登记在同一行的 `name` / `shortName` 上 —— 那两个是"它叫什么"的名册，
+  // 键是"这句话住在哪一格"的住址，两者由门禁横向钉住（改一处不改正处当场红）。
+  // 没登记 `shortName` 的 Boss，短名就是全名 —— 那时 `shortNameKey` **指回 `nameKey`**，
+  // 不另开一格（同一句话两个键是上限，开了就成"一个意思写三遍"的命名族失控）。
+  { id: 'shadow-warden', name: '影界守护者', nameKey: 'boss_name_shadow', shortNameKey: 'boss_name_shadow', chapter: 1 },
+  { id: 'archmagus', name: '大奥术师·萨尔林', nameKey: 'boss_name_mage', shortName: '大奥术师', shortNameKey: 'boss_short_mage', chapter: 1 },
+  { id: 'singularity-herald', name: '引力化身·奇点领主', nameKey: 'boss_name_singularity', shortName: '奇点领主', shortNameKey: 'boss_short_singularity', chapter: 1 },
+  { id: 'void-chronarch', name: '时线执政官', nameKey: 'boss_name_void', shortNameKey: 'boss_name_void', chapter: 4 },
+  { id: 'chaos-overlord', name: '混沌裂隙领主', nameKey: 'boss_name_chaos', shortName: '裂隙领主', shortNameKey: 'boss_short_chaos', chapter: 5 },
 ];
 
 /** 副本 Boss 的 id 前缀：实际 id 是 `dungeon-<副本定义 id>` */
