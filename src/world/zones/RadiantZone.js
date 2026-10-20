@@ -15,8 +15,8 @@ export class RadiantZone extends BaseZone {
       info: {
         id: ZONE_IDS.RADIANT,
         name: ZONE_NAMES[ZONE_IDS.RADIANT],
-        subtitle: '金沙圣域 · 晨曦之地',
-        description: '流动的金沙构成的宏伟宫殿。晨曦初照时，整座城市都在发光。',
+        subtitle: 'zone_subtitle_radiant',
+        description: 'zone_desc_radiant',
       },
     });
     this.dialog = dialog;

@@ -10,6 +10,7 @@ const ZONE_TINT = {
 };
 
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const EFFECTS_REALMBLEED = 'effects/RealmBleed';
 const bleedOn = (name, handler) => on(name, handler, EFFECTS_REALMBLEED);
@@ -32,7 +33,7 @@ export class RealmBleed {
       const key = ZONE_TINT[e.detail.zoneId] ? e.detail.zoneId : 'wild';
       if (key === this.lastKey) return;
       this.lastKey = key;
-      this.pulse(key, e.detail.zone?.name ?? '');
+      this.pulse(key, e.detail.zone?.name ? t(e.detail.zone.name) : '');
     });
   }
 

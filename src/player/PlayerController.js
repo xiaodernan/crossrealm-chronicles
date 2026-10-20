@@ -1085,9 +1085,12 @@ export class PlayerController {
 
       const rn = this.game.restNpcs?.getByRestId?.(rest.id);
 
+      // 营火名存的是**文案键**（W-D2 切片16i），展开走 `restPoints.nameOf()` 一处
+      const 营火名 = this.game.restPoints?.nameOf?.(rest.id) ?? rest.name;
+
       prompt.textContent = rn
-        ? `${interact} 与 ${rn.name} 交谈 · 休息 — ${rest.name}`
-        : `${interact} 休息 / 升级 — ${rest.name}`;
+        ? `${interact} 与 ${rn.name} 交谈 · 休息 — ${营火名}`
+        : `${interact} 休息 / 升级 — ${营火名}`;
 
     } else if (npc) {
 

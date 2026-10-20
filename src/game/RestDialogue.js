@@ -115,7 +115,9 @@ export class RestDialogue {
     // 标题说的是"这座火叫什么"，所以取营火自己的名字（`restPoints` 的那一格），不再抄在对话树里：
     // 抄本曾经和实际名漂过两座 —— 站在枢纽火边，提示写"世界之锚休息点"，一秒后对话标题写"世界之锚营火"
     // （W-B4 切片2）。名字表在 `content/restPointNames.js`，`keyText` 由 `Dialog` 那一道口径负责，这里不重复展开
-    this.game.dialog.showChoices(this.activeRest.name, highlightKeywords(text), choices, {
+    // W-D2 切片16i：营火名存的是**文案键**，展开走 `restPoints.nameOf()` 一处（那里把 `${zone}` 那格也算好）
+    const 营火名 = this.game.restPoints?.nameOf?.(this.activeRest.id) ?? this.activeRest.name;
+    this.game.dialog.showChoices(营火名, highlightKeywords(text), choices, {
       speaker: speakerNameOf(node, def),
       speakerTitle: speakerTitleOf(def),
       accent: def?.accent,

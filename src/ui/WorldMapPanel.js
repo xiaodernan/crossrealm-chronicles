@@ -2,6 +2,7 @@ import { MAP_BOSSES } from '../game/QuestSystem.js';
 import { keyText } from '../content/keyHints.js';
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { DUNGEON_DEFS } from '../content/dungeons.js';
+import { t } from '../engine/i18n.js';
 
 /** 全屏世界地图 + 迷雾 */
 export class WorldMapPanel {
@@ -212,7 +213,7 @@ export class WorldMapPanel {
       ctx.stroke();
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
       ctx.font = '11px sans-serif';
-      ctx.fillText(zone.name, cx + zone.center.x * scale - 20, cy + zone.center.z * scale - zone.radius * scale - 4);
+      ctx.fillText(t(zone.name), cx + zone.center.x * scale - 20, cy + zone.center.z * scale - zone.radius * scale - 4);
     }
 
     ctx.strokeStyle = 'rgba(201,169,98,0.35)';

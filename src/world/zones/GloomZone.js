@@ -15,8 +15,8 @@ export class GloomZone extends BaseZone {
       info: {
         id: ZONE_IDS.GLOOM,
         name: ZONE_NAMES[ZONE_IDS.GLOOM],
-        subtitle: '幽暗森林 · 迷雾之境',
-        description: '永恒的薄雾笼罩着扭曲的树木。这里没有阳光，只有微弱的荧光苔藓指引方向。',
+        subtitle: 'zone_subtitle_gloom',
+        description: 'zone_desc_gloom',
       },
     });
     this.dialog = dialog;

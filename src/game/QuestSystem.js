@@ -404,11 +404,11 @@ export class QuestSystem {
     const dx = wp.x - playerX;
     const dz = wp.z - playerZ;
     const dist = Math.sqrt(dx * dx + dz * dz);
-    if (dist < 8) return t('quest_waypoint_near', { label: wp.label });
+    if (dist < 8) return t('quest_waypoint_near', { label: t(wp.label) });
     const angle = Math.atan2(dx, dz);
     const dirs = [t('dir_north'), t('dir_northeast'), t('dir_east'), t('dir_southeast'), t('dir_south'), t('dir_southwest'), t('dir_west'), t('dir_northwest')];
     const idx = Math.round((angle / (Math.PI * 2)) * 8) % 8;
     const dir = dirs[(idx + 8) % 8];
-    return `▶ ${dir} · ${Math.round(dist)}m · ${wp.label}`;
+    return `▶ ${dir} · ${Math.round(dist)}m · ${t(wp.label)}`;
   }
 }

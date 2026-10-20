@@ -14,9 +14,8 @@ export class MagicZone extends BaseZone {
       info: {
         id: ZONE_IDS.MAGIC,
         name: ZONE_NAMES[ZONE_IDS.MAGIC],
-        subtitle: '魔法位面 · 哈利波特',
-        description:
-          '悬浮在夜空的魔法学院残影。移动的楼梯、漂浮的蜡烛、禁林深处的独角兽低语。此处时空法则与其他位面不同。',
+        subtitle: 'zone_subtitle_magic',
+        description: 'zone_desc_magic',
       },
     });
 

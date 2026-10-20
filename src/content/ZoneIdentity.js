@@ -66,17 +66,27 @@ export const LEGACY_NAME_TO_ID = {
   区际走廊: ZONE_IDS.CORRIDOR,
 };
 
-/** 显示名（UI 用）。与 id 分开维护，改文案不再影响逻辑。 */
+/**
+ * 显示名（UI 用）。与 id 分开维护，改文案不再影响逻辑。
+ *
+ * **值是文案键**（W-D2 切片16i），不是文案本身 —— 与 `REST_NPC_DEFS[].name`
+ * 同一个口径：数据层只存键，显示侧在播出那一刻 `t()` 展开。
+ * 键名 `zone_name_<区>`；正文的副标题与描述是 `zone_subtitle_<区>` / `zone_desc_<区>`。
+ *
+ * 为什么这一格特别要紧：区域名是**玩家看得最多的一个字符串** —— HUD 横幅、
+ * 区域面板、世界地图、故事旁白、任务路点、营火名、位面助手的面板行全都读它。
+ * 改前它是纯中文硬编码，于是切到英文语言时这十几个地方**原样留在中文**。
+ */
 export const ZONE_NAMES = {
-  [ZONE_IDS.HUB]: '交汇枢纽',
-  [ZONE_IDS.FANTASY]: '灰白森林',
-  [ZONE_IDS.MAGIC]: '霍格沃兹遗境',
-  [ZONE_IDS.SPACE]: '米勒荒原',
-  [ZONE_IDS.VOID]: '破碎时线',
-  [ZONE_IDS.ABYSS]: '混沌边境',
-  [ZONE_IDS.GLOOM]: '幽暗林地',
-  [ZONE_IDS.RADIANT]: '辉煌圣域',
-  [ZONE_IDS.CORRIDOR]: '区际走廊',
+  [ZONE_IDS.HUB]: 'zone_name_hub',
+  [ZONE_IDS.FANTASY]: 'zone_name_fantasy',
+  [ZONE_IDS.MAGIC]: 'zone_name_magic',
+  [ZONE_IDS.SPACE]: 'zone_name_space',
+  [ZONE_IDS.VOID]: 'zone_name_void',
+  [ZONE_IDS.ABYSS]: 'zone_name_abyss',
+  [ZONE_IDS.GLOOM]: 'zone_name_gloom',
+  [ZONE_IDS.RADIANT]: 'zone_name_radiant',
+  [ZONE_IDS.CORRIDOR]: 'zone_name_corridor',
 };
 
 /**
@@ -94,8 +104,8 @@ export const HUB_ZONE = Object.freeze({
   info: Object.freeze({
     id: ZONE_IDS.HUB,
     name: ZONE_NAMES[ZONE_IDS.HUB],
-    subtitle: '位面中心',
-    description: '三条古径通向不同的位面碎片。世界之锚在此闪烁，等待被修复。',
+    subtitle: 'zone_subtitle_hub',
+    description: 'zone_desc_hub',
   }),
 });
 
@@ -114,8 +124,8 @@ export const GLOOM_ZONE = Object.freeze({
   info: Object.freeze({
     id: ZONE_IDS.GLOOM,
     name: ZONE_NAMES[ZONE_IDS.GLOOM],
-    subtitle: '幽暗森林 · 迷雾之境',
-    description: '永恒的薄雾笼罩着扭曲的树木。这里没有阳光，只有微弱的荧光苔藓指引方向。',
+    subtitle: 'zone_subtitle_gloom',
+    description: 'zone_desc_gloom',
   }),
 });
 
@@ -129,8 +139,8 @@ export const RADIANT_ZONE = Object.freeze({
   info: Object.freeze({
     id: ZONE_IDS.RADIANT,
     name: ZONE_NAMES[ZONE_IDS.RADIANT],
-    subtitle: '金沙圣域 · 晨曦之地',
-    description: '流动的金沙构成的宏伟宫殿。晨曦初照时，整座城市都在发光。',
+    subtitle: 'zone_subtitle_radiant',
+    description: 'zone_desc_radiant',
   }),
 });
 
@@ -144,8 +154,8 @@ export const CORRIDOR_ZONE = Object.freeze({
   info: Object.freeze({
     id: ZONE_IDS.CORRIDOR,
     name: ZONE_NAMES[ZONE_IDS.CORRIDOR],
-    subtitle: '位面之间',
-    description: '碎片之间的空旷走廊，风声代替区域的主题。',
+    subtitle: 'zone_subtitle_corridor',
+    description: 'zone_desc_corridor',
   }),
 });
 

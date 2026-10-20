@@ -1,5 +1,6 @@
 /** 营火记忆 — 记录每次休息与对话节点 */
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const GAME_CAMPFIREMEMORYSYSTEM = 'game/CampfireMemorySystem';
 const campfireOn = (name, handler) => on(name, handler, GAME_CAMPFIREMEMORYSYSTEM);
@@ -33,7 +34,7 @@ export class CampfireMemorySystem {
         key,
         restId,
         nodeId,
-        speaker: speaker ?? this.game.restPoints?.nameOf(restId) ?? '位面营火',
+        speaker: speaker ?? this.game.restPoints?.nameOf(restId) ?? t('campfire_memory_default_speaker'),
         preview: linePreview ?? '',
         chapter: this.game.quests?.chapter ?? 1,
         time: Date.now(),

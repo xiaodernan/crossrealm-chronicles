@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
-import { REST_POINT_NAMES } from '../content/restPointNames.js';
+import { REST_POINT_NAMES, restPointZoneKey } from '../content/restPointNames.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { t } from '../engine/i18n.js';
 
 export class RestPointManager {
   constructor(scene, world) {
@@ -111,7 +112,23 @@ export class RestPointManager {
 
   /** id → 显示名。找不到返回 null，由调用方决定兜底文案（不许拿 id 冒充名字） */
   nameOf(id) {
-    return this.points.find((p) => p.id === id)?.name ?? null;
+    return this._displayName(this.points.find((p) => p.id === id));
+  }
+
+  /**
+   * 营火显示名的**唯一展开点**（W-D2 切片16i）。
+   *
+   * `p.name` 存的是文案键（`content/restPointNames.js`），区名那一格用的是模板键
+   * `rest_point_campfire_name`（`${zone}` 现取区域名）—— 于是"区名改口时营火跟着改"
+   * 这条性质还在：两者是**同一次展开**算出来的，不是两份各自抄的。
+   *
+   * 展开放在 `world/` 而不是 `content/`：内容层是纯数据，不 import `engine/`。
+   */
+  _displayName(point) {
+    if (!point) return null;
+    const zoneKey = restPointZoneKey(point.id);
+    const zone = zoneKey ? t(zoneKey) : '';
+    return t(point.name, { zone });
   }
 
   update(dt) {

@@ -15,9 +15,8 @@ export class VoidZone extends BaseZone {
       info: {
         id: ZONE_IDS.VOID,
         name: ZONE_NAMES[ZONE_IDS.VOID],
-        subtitle: '第四位面 · 时间裂隙',
-        description:
-          '世界之锚飞升后才会显现的隐藏位面。金色时环悬浮于虚空，过去与未来在此重叠。时线执政官守护着「第四枚碎片」。',
+        subtitle: 'zone_subtitle_void',
+        description: 'zone_desc_void',
       },
     });
     this.dialog = dialog;

@@ -14,9 +14,8 @@ export class AbyssZone extends BaseZone {
       info: {
         id: ZONE_IDS.ABYSS,
         name: ZONE_NAMES[ZONE_IDS.ABYSS],
-        subtitle: '第五位面 · 诸界裂隙',
-        description:
-          '四枚碎片重铸后，位面边缘仍不断泄漏混沌能量。熔岩与寒冰并存，是穿越者试炼武器技能树的终极之地。',
+        subtitle: 'zone_subtitle_abyss',
+        description: 'zone_desc_abyss',
       },
     });
     this.dialog = dialog;

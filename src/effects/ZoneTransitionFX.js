@@ -1,4 +1,5 @@
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const EFFECTS_ZONETRANSITIONFX = 'effects/ZoneTransitionFX';
 const zoneFxOn = (name, handler) => on(name, handler, EFFECTS_ZONETRANSITIONFX);
@@ -26,7 +27,7 @@ export class ZoneTransitionFX {
       // 分支取 id（修 B36），显示名只当文案用
       const zone = e.detail.zoneId;
       if (zone === this.lastZone) return;
-      this.play(zone, e.detail.zone?.name ?? '');
+      this.play(zone, e.detail.zone?.name ? t(e.detail.zone.name) : '');
       this.lastZone = zone;
     });
   }

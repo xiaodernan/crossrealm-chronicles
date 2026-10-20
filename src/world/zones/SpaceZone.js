@@ -16,9 +16,8 @@ export class SpaceZone extends BaseZone {
       info: {
         id: ZONE_IDS.SPACE,
         name: ZONE_NAMES[ZONE_IDS.SPACE],
-        subtitle: '星际位面 · 星际穿越',
-        description:
-          '引力异常扭曲的荒原。巨大的黑洞透镜悬于天际，冰云在地表流动。传说五维空间的书架藏于此处，记录着所有位面的命运。',
+        subtitle: 'zone_subtitle_space',
+        description: 'zone_desc_space',
       },
     });
 

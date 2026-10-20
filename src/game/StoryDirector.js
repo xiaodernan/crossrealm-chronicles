@@ -70,11 +70,12 @@ export class StoryDirector {
       const hook = ZONE_STORY_HOOKS[id];
       if (hook) {
         scheduler.after(2.0, () => {
-          this.game.dialog.toast(`${zone.name} — ${zone.subtitle}`, 4500);
+          // 区域名与副标题存的是**文案键**（W-D2 切片16i），显示侧在播出那一刻展开
+          this.game.dialog.toast(`${t(zone.name)} — ${t(zone.subtitle)}`, 4500);
           this.game.storyJournal?.addSilent({
             id: `zone-hook-${id}`,
             category: 'poi',
-            title: zone.name,
+            title: t(zone.name),
             text: keyText(t(hook.journal)),
             chapter: this.game.quests.chapter,
           });

@@ -15,9 +15,8 @@ export class FantasyZone extends BaseZone {
       info: {
         id: ZONE_IDS.FANTASY,
         name: ZONE_NAMES[ZONE_IDS.FANTASY],
-        subtitle: '中洲遗境 · 指环王',
-        description:
-          '古老的精灵森林覆盖着灰白山脉的缓坡。倒塌的石柱诉说着失落文明的传说。传说世界之锚的碎片沉眠于「至尊石环」之下。',
+        subtitle: 'zone_subtitle_fantasy',
+        description: 'zone_desc_fantasy',
       },
     });
 

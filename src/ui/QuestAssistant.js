@@ -2,7 +2,6 @@ import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText } from '../content/keyHints.js';
 import { applyTranslations, t } from '../engine/i18n.js';
 import { BOSS_STAT_KEYS } from '../content/objectives.js';
-import { bossById } from '../content/bossRoster.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 
@@ -123,7 +122,7 @@ export class QuestAssistant {
       return;
     }
     this._teleport(wp.x, wp.z);
-    this.game.dialog.toast(t('qa_toast_teleported', { label: wp.label }));
+    this.game.dialog.toast(t('qa_toast_teleported', { label: t(wp.label) }));
     this.refresh();
   }
 
@@ -165,7 +164,7 @@ export class QuestAssistant {
       if (!this.demoRunning) break;
       this._demoStep = i + 1;
       const step = steps[i];
-      this._hintEl.textContent = step.label;
+      this._hintEl.textContent = t(step.label);
       await this._runDemoStep(step, true);
       this.game.quests.syncProgress();
       this.refresh();
@@ -179,49 +178,49 @@ export class QuestAssistant {
 
   _buildDemoSteps() {
     return [
-      { label: '枢纽 · 世界之锚', action: 'tp', x: 0, z: 55 },
-      { label: '触摸世界之锚', action: 'poi', id: 'hub-anchor' },
-      { label: '训练木人', action: 'hits', x: 15, z: 45, count: 8 },
+      { label: 'demo_step_anchor', action: 'tp', x: 0, z: 55 },
+      { label: 'demo_step_touch_anchor', action: 'poi', id: 'hub-anchor' },
+      { label: 'demo_step_training_dummy', action: 'hits', x: 15, z: 45, count: 8 },
       { label: ZONE_NAMES[ZONE_IDS.FANTASY], action: 'tp', x: -200, z: 0 },
-      { label: '击败影之战士', action: 'kills', type: 'soldier', count: 2 },
-      { label: '至尊石环', action: 'discover', id: 'fantasy-ring', x: -200, z: -30 },
-      { label: '影界 Boss', action: 'tp', x: -250, z: -35 },
-      { label: `击败${bossById('shadow-warden')?.shortName ?? bossById('shadow-warden')?.name}`, action: 'boss', key: 'bossDefeated', bossId: 'shadow-warden' },
+      { label: 'demo_step_kill_soldier', action: 'kills', type: 'soldier', count: 2 },
+      { label: 'wp_label_one_ring', action: 'discover', id: 'fantasy-ring', x: -200, z: -30 },
+      { label: 'demo_step_shadow_boss', action: 'tp', x: -250, z: -35 },
+      { label: 'demo_step_boss_shadow_defeat', action: 'boss', key: 'bossDefeated', bossId: 'shadow-warden' },
       { label: ZONE_NAMES[ZONE_IDS.MAGIC], action: 'tp', x: 0, z: -180 },
-      { label: '悬浮城堡', action: 'discover', id: 'magic-castle', x: 0, z: -195 },
-      { label: '构装体', action: 'kills', type: 'golem', count: 1 },
+      { label: 'demo_step_magic_castle', action: 'discover', id: 'magic-castle', x: 0, z: -195 },
+      { label: 'wp_label_golem_patrol', action: 'kills', type: 'golem', count: 1 },
       { label: ZONE_NAMES[ZONE_IDS.SPACE], action: 'tp', x: 200, z: 80 },
-      { label: '五维_tesseract', action: 'discover', id: 'space-tesseract', x: 200, z: 80 },
-      { label: '重铸锚点', action: 'poi', id: 'hub-anchor' },
-      { label: 'Ch2 宝箱', action: 'chests', count: 5 },
-      { label: '流浪者', action: 'npc', id: 'wanderer', x: -8, z: 45 },
-      { label: bossById('archmagus')?.shortName ?? bossById('archmagus')?.name, action: 'boss', key: 'boss2Defeated', bossId: 'archmagus', x: 5, z: -220 },
-      { label: '虚空骑士', action: 'kills', type: 'elite', count: 1 },
-      { label: '升级 Lv5', action: 'level', level: 5 },
-      { label: '宇航员', action: 'npc', id: 'astronaut-echo', x: 200, z: 90 },
-      { label: '法术练习', action: 'spells', count: 8 },
-      { label: `${TRIAL_DUNGEON_IDS.length} 座地下城`, action: 'dungeons', ids: TRIAL_DUNGEON_IDS },
-      { label: bossById('singularity-herald')?.shortName ?? bossById('singularity-herald')?.name, action: 'boss', key: 'boss3Defeated', bossId: 'singularity-herald', x: 235, z: 155 },
-      { label: '心智升级', action: 'mind', value: 2 },
-      { label: '位面飞升', action: 'poi', id: 'hub-anchor' },
+      { label: 'demo_step_tesseract', action: 'discover', id: 'space-tesseract', x: 200, z: 80 },
+      { label: 'demo_step_reforge', action: 'poi', id: 'hub-anchor' },
+      { label: 'demo_step_chests', action: 'chests', count: 5 },
+      { label: 'demo_step_wanderer', action: 'npc', id: 'wanderer', x: -8, z: 45 },
+      { label: 'wp_label_boss_mage', action: 'boss', key: 'boss2Defeated', bossId: 'archmagus', x: 5, z: -220 },
+      { label: 'demo_step_void_knight', action: 'kills', type: 'elite', count: 1 },
+      { label: 'demo_step_level5', action: 'level', level: 5 },
+      { label: 'demo_step_astronaut', action: 'npc', id: 'astronaut-echo', x: 200, z: 90 },
+      { label: 'demo_step_spells', action: 'spells', count: 8 },
+      { label: 'demo_step_dungeons', action: 'dungeons', ids: TRIAL_DUNGEON_IDS },
+      { label: 'wp_label_boss_singularity', action: 'boss', key: 'boss3Defeated', bossId: 'singularity-herald', x: 235, z: 155 },
+      { label: 'demo_step_mind', action: 'mind', value: 2 },
+      { label: 'demo_step_ascend', action: 'poi', id: 'hub-anchor' },
       { label: ZONE_NAMES[ZONE_IDS.VOID], action: 'tp', x: 0, z: 220 },
-      { label: '时线裂隙', action: 'discover', id: 'void-rift', x: 0, z: 220 },
-      { label: '蓄力法术', action: 'charged', count: 5 },
-      { label: bossById('void-chronarch')?.shortName ?? bossById('void-chronarch')?.name, action: 'boss', key: 'voidBossDefeated', bossId: 'void-chronarch', x: 0, z: 235 },
-      { label: '五维碑文', action: 'discover', id: 'void-tablet', x: 0, z: 225 },
-      { label: '真·位面行者', action: 'poi', id: 'hub-anchor' },
+      { label: 'demo_step_void_rift', action: 'discover', id: 'void-rift', x: 0, z: 220 },
+      { label: 'demo_step_charged', action: 'charged', count: 5 },
+      { label: 'wp_label_boss_void', action: 'boss', key: 'voidBossDefeated', bossId: 'void-chronarch', x: 0, z: 235 },
+      { label: 'wp_label_void_tablet', action: 'discover', id: 'void-tablet', x: 0, z: 225 },
+      { label: 'demo_step_true_walker', action: 'poi', id: 'hub-anchor' },
       { label: ZONE_NAMES[ZONE_IDS.ABYSS], action: 'tp', x: -200, z: 220 },
-      { label: '混沌之核', action: 'discover', id: 'chaos-core', x: -200, z: 220 },
-      { label: '武器技能×3', action: 'skills', count: 3 },
-      { label: bossById('chaos-overlord')?.shortName ?? bossById('chaos-overlord')?.name, action: 'boss', key: 'chaosBossDefeated', bossId: 'chaos-overlord', x: -200, z: 285 },
-      { label: '地下城再探', action: 'dungeonRerun' },
+      { label: 'wp_label_chaos_core', action: 'discover', id: 'chaos-core', x: -200, z: 220 },
+      { label: 'demo_step_weapon_skills', action: 'skills', count: 3 },
+      { label: 'wp_label_boss_chaos', action: 'boss', key: 'chaosBossDefeated', bossId: 'chaos-overlord', x: -200, z: 285 },
+      { label: 'demo_step_dungeon_rerun', action: 'dungeonRerun' },
       { label: ZONE_NAMES[ZONE_IDS.GLOOM], action: 'tp', x: 180, z: 100 },
-      { label: '幽暗深处', action: 'discover', id: 'gloom-deep-entrance', x: 180, z: 170 },
-      { label: '荧光苔藓', action: 'discover', id: 'gloom-moss', x: 150, z: 120 },
+      { label: 'demo_step_gloom_deep', action: 'discover', id: 'gloom-deep-entrance', x: 180, z: 170 },
+      { label: 'demo_step_gloom_moss', action: 'discover', id: 'gloom-moss', x: 150, z: 120 },
       { label: ZONE_NAMES[ZONE_IDS.RADIANT], action: 'tp', x: -180, z: -160 },
-      { label: '圣域大门', action: 'discover', id: 'radiant-main-gate', x: -180, z: -95 },
-      { label: '晨曦祭坛', action: 'discover', id: 'radiant-altar', x: -155, z: -175 },
-      { label: '无尽行者 · 通关', action: 'poi', id: 'hub-anchor' },
+      { label: 'demo_step_radiant_gate', action: 'discover', id: 'radiant-main-gate', x: -180, z: -95 },
+      { label: 'demo_step_radiant_altar', action: 'discover', id: 'radiant-altar', x: -155, z: -175 },
+      { label: 'demo_step_endless_walker', action: 'poi', id: 'hub-anchor' },
     ];
   }
 
@@ -331,7 +330,7 @@ export class QuestAssistant {
     p.velocity.z = (dz / dist) * speed;
     p.targetYaw = p.meshYawFromDirection(dx, dz);
     p.yaw = p.targetYaw;
-    if (this._hintEl) this._hintEl.textContent = `自动带路 → ${wp.label} (${Math.round(dist)}m)`;
+    if (this._hintEl) this._hintEl.textContent = `${t('qa_hint_autopilot', { label: t(wp.label) })} (${Math.round(dist)}m)`;
   }
 
   _tryAutoAction() {

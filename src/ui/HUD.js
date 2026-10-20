@@ -275,13 +275,16 @@ buildHUD() {
   setupListeners() {
     on('zone-changed', (e) => {
       const z = e.detail.zone;
-      document.getElementById('zone-name').textContent = z.name;
-      this._zoneSubtitle = z.subtitle;
+      // 区域名与副标题现在存的是**文案键**（W-D2 切片16i），显示侧在这展开一次
+      const 区名 = t(z.name);
+      const 副标题 = t(z.subtitle);
+      document.getElementById('zone-name').textContent = 区名;
+      this._zoneSubtitle = 副标题;
       // 换区是一次权威的重写：任何覆盖层（渗漏提示、时停）到此作废
       this._subtitleOverlay = null;
       this._renderZoneSubtitle();
       this.updateZonePanel(z);
-      if (!e.detail.initial) this.showZoneBanner(z.name, z.subtitle);
+      if (!e.detail.initial) this.showZoneBanner(区名, 副标题);
     }, EVENT_TAG);
 
     on('discovery', (e) => {
@@ -634,10 +637,11 @@ buildHUD() {
 
   updateZonePanel(zone) {
     if (!zone) return;
+    // 区域三件套（名 / 副标题 / 描述）现在都是**文案键**（W-D2 切片16i）
     this.zonePanel.innerHTML = `
-      <h2>${zone.name}</h2>
-      <p style="color:#888;margin-bottom:12px">${zone.subtitle}</p>
-      <p>${zone.description}</p>
+      <h2>${t(zone.name)}</h2>
+      <p style="color:#888;margin-bottom:12px">${t(zone.subtitle)}</p>
+      <p>${t(zone.description)}</p>
       <p style="margin-top:16px;font-size:0.8rem;color:#666">${t('hud_journal_close_hint', { zonePanel: keyText('{zonePanel}') })}</p>
     `;
     // innerHTML 每次都重写整块，所以写入这一刻自己展开一次（改绑那条路走 refreshKeyHints）

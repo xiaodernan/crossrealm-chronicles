@@ -18,6 +18,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { ZONE_IDS, ZONE_ORDER, ZONE_NAMES, LEGACY_NAME_TO_ID, zoneIdOf } from '../src/content/ZoneIdentity.js';
+import { t } from '../src/engine/i18n.js';
 
 const ROOT = process.cwd();
 const srcText = (rel) => readFileSync(join(ROOT, rel), 'utf8').replace(/\r\n/g, '\n');
@@ -37,9 +38,15 @@ const SRC_FILES = walk(join(ROOT, 'src')).sort();
 /** 定义着那张旧名映射表的文件 —— 它是唯一豁免，豁免的理由由第 3 条当场可查 */
 const DEFINING_FILE = 'src/content/ZoneIdentity.js';
 
-/** 废弃区名：曾经是区名（在映射表里）、现在不是（不在 `ZONE_NAMES` 的值里） */
+/**
+ * 废弃区名：曾经是区名（在映射表里）、现在不是（不在 `ZONE_NAMES` 的值里）
+ *
+ * W-D2 切片16i 之后 `ZONE_NAMES` 的值是**文案键**（`zone_name_*`），
+ * 所以"现行名"要取**展开后**的那一份（`t(键)`）—— 否则每个区名都会被当成废弃名，
+ * 这条门禁当场变成"全仓都写着废弃名"。
+ */
 function legacyZoneNames() {
-  const current = new Set(Object.values(ZONE_NAMES));
+  const current = new Set(Object.values(ZONE_NAMES).map((k) => t(k)));
   return Object.keys(LEGACY_NAME_TO_ID).filter((n) => !current.has(n));
 }
 
@@ -64,7 +71,7 @@ describe('废弃区名门禁：名单由两张表推导，扫描线一个名字�
     expect(names.length, '两张表一推导就该至少剩一个废弃名（否则这条门禁在空转）').toBeGreaterThan(0);
     expect(names).toContain('魔法遗境');
     // 反向：登记成现行名的那些，一个都不许进名单（否则门禁会去查今天正在用的字）
-    for (const used of Object.values(ZONE_NAMES)) {
+    for (const used of Object.values(ZONE_NAMES).map((k) => t(k))) {
       expect(names, `现行区名 "${used}" 不该被当成废弃名`).not.toContain(used);
     }
   });
@@ -107,8 +114,11 @@ describe('豁免的可达性：那张旧名表确实有读者，不是留着当�
 describe('改口之后：三处 label 接的是表，成段文案钉的是字面', () => {
   it('任务助手那五行"去某位面"的 label 不再抄区名', () => {
     const 源码 = srcText('src/ui/QuestAssistant.js');
+    // W-D2 切片16i：区名的**显示值**住在双表里，源码里出现的是键（`zone_name_*`）
+    // —— 所以这里查的是**展开后**的现行名，抄本仍然是抄本。
+    const 现行名 = Object.values(ZONE_NAMES).map((k) => t(k));
     const 抄来的 = 源码.split('\n').filter((l) => /label: '[^']*'/.test(l)
-      && Object.values(ZONE_NAMES).some((nm) => l.includes(nm)));
+      && 现行名.some((nm) => l.includes(nm)));
     expect(抄来的, `这些行又把区名抄进面板行了：\n${抄来的.join('\n')}`).toEqual([]);
     for (const zone of ZONE_ORDER) {
       expect(源码, `助手里缺了去 ${zone} 那一格，或它没接名字表`).toContain(`ZONE_NAMES[ZONE_IDS.${zone.toUpperCase()}]`);
@@ -134,6 +144,8 @@ describe('改口之后：三处 label 接的是表，成段文案钉的是字面
   });
 
   it(`名字表本身也钉一格字面（ZONE_NAMES[MAGIC]）`, () => {
-    expect(ZONE_NAMES[ZONE_IDS.MAGIC]).toBe('霍格沃兹遗境');
+    // W-D2 切片16i：`ZONE_NAMES` 的值是**文案键**，现行名住在双表里 ——
+    // 钉的仍是"玩家读到的那几个字"，只是从表里搬进了双表。
+    expect(t(ZONE_NAMES[ZONE_IDS.MAGIC])).toBe('霍格沃兹遗境');
   });
 });

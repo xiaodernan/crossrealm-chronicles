@@ -60,7 +60,7 @@ export class GameGuidePanel {
     const wp = this.game.quests.getQuestWaypoint();
     if (this.hintEl) {
       this.hintEl.textContent = wp
-        ? t('guide_hint_waypoint', { label: wp.label, hint: wp.hint ? `（${wp.hint}）` : '' })
+        ? t('guide_hint_waypoint', { label: t(wp.label), hint: wp.hint ? `（${wp.hint}）` : '' })
         : t('guide_hint_assistant', { hint: this.game.quests.getAssistantHint() });
     }
   }
