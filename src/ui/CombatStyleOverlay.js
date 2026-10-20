@@ -1,5 +1,6 @@
 /** 战斗风格 HUD 浮层 */
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const UI_COMBATSTYLEOVERLAY = 'ui/CombatStyleOverlay';
 const styleOverlayOn = (name, handler) => on(name, handler, UI_COMBATSTYLEOVERLAY);
@@ -30,7 +31,9 @@ export class CombatStyleOverlay {
       }
       this.el.querySelector('.css-rank').textContent = rank ?? '—';
       this.el.querySelector('.css-rank').style.color = color ?? '#c9a962';
-      this.el.querySelector('.css-label').textContent = label ? `${label} +${score}` : `${score}`;
+      // `label` 是**文案键**（W-D2 切片16d）—— 展开只在这一处做。
+      const 标签 = label ? t(label) : '';
+      this.el.querySelector('.css-label').textContent = 标签 ? `${标签} +${score}` : `${score}`;
       this.el.classList.remove('hidden');
       this.hideTimer = 2.2;
     });

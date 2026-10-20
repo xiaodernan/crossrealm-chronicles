@@ -16,11 +16,18 @@ const LIFE = 0.9;
  * `kind` 认不出就抛（与 `sfx:play` / `shadowClassOf` 同一口径）——
  * 静默给个默认值等于让"写错种类名"变成"这一下悄悄显示成普通伤害"。
  */
+/**
+ * 飘字种类表 —— 每种带**非颜色冗余**（W-D6 切片2）。
+ *
+ * `label` 是**文案键**（W-D2 切片16d），不是文案本身：它是"颜色之外再给一份冗余"
+ * 里的那个**词**（普通 / 暴击 / 治疗 / 低效），显示侧在需要说它时 `t()` 展开。
+ * `cls` / `prefix` / `suffix` 不用翻译 —— 那是字号档与文本记号，语言无关。
+ */
 export const DAMAGE_KINDS = Object.freeze({
-  normal: Object.freeze({ cls: 'dn-normal', prefix: '', suffix: '', label: '普通' }),
-  crit: Object.freeze({ cls: 'dn-crit', prefix: '', suffix: '!', label: '暴击' }),
-  heal: Object.freeze({ cls: 'dn-heal', prefix: '+', suffix: '', label: '治疗' }),
-  weak: Object.freeze({ cls: 'dn-weak', prefix: '', suffix: '', label: '低效' }),
+  normal: Object.freeze({ cls: 'dn-normal', prefix: '', suffix: '', label: 'damage_kind_normal' }),
+  crit: Object.freeze({ cls: 'dn-crit', prefix: '', suffix: '!', label: 'damage_kind_crit' }),
+  heal: Object.freeze({ cls: 'dn-heal', prefix: '+', suffix: '', label: 'damage_kind_heal' }),
+  weak: Object.freeze({ cls: 'dn-weak', prefix: '', suffix: '', label: 'damage_kind_weak' }),
 });
 
 export const DAMAGE_KIND_IDS = Object.freeze(Object.keys(DAMAGE_KINDS));

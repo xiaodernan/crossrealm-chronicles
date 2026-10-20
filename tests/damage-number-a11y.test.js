@@ -35,6 +35,7 @@ import {
   DamageNumbers, DAMAGE_KINDS, DAMAGE_KIND_IDS, damageKindOf,
 } from '../src/combat/DamageNumbers.js';
 import { hitKindOf } from '../src/combat/Resolution.js';
+import { t } from '../src/engine/i18n.js';
 
 const ROOT = process.cwd();
 
@@ -66,6 +67,9 @@ describe('伤害飘字的非颜色冗余（W-D6 切片2）', () => {
         expect(typeof k.prefix).toBe('string');
         expect(typeof k.suffix).toBe('string');
         expect(k.label, `${id}.label`).toBeTruthy();
+        // `label` 是**文案键**（W-D2 切片16d）—— 它必须真的指向双表里的一格，
+        // 否则"非颜色冗余"里的那个词会在换语言时原样留在中文。
+        expect(t(k.label), `${id}.label = ${k.label} 没有登记在双表里`).not.toContain('[MISSING');
       }
     });
 

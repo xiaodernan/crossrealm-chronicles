@@ -9,6 +9,7 @@ import { Observable } from '../engine/Observable.js';
 import { anyDown, codeFor, codesFor, mouseFor } from '../content/keybinds.js';
 import { cssColorOf } from '../game/ColorVision.js';
 import { difficultyMultiplier } from '../game/Difficulty.js';
+import { t } from '../engine/i18n.js';
 
 const COMBO_WINDOW = 0.55;
 /**
@@ -168,16 +169,16 @@ export class CombatController {
       const next = candidates[(idx + 1) % candidates.length];
       this.lockTarget = next;
       this.enemies.setLockTarget(next);
-      this.dialog.toast(`切换锁定：${next.name}`);
+      this.dialog.toast(t('combat_lock_switch', { name: next.name }));
       return;
     }
     const target = this.enemies.getBestLockTarget(this.player.position, forward, this.lockRange);
     if (target) {
       this.lockTarget = target;
       this.enemies.setLockTarget(target);
-      this.dialog.toast(`锁定：${target.name}${keyText('（{lockOn} 切换）')}`);
+      this.dialog.toast(`${t('combat_lock_on', { name: target.name })}${keyText(t('combat_lock_hint'))}`);
     } else {
-      this.dialog.toast('附近没有可锁定目标');
+      this.dialog.toast(t('combat_lock_none'));
     }
   }
 
@@ -273,7 +274,7 @@ export class CombatController {
     this._strike = null;
     this.comboCount = 0;
     this.clearInputBuffer();
-    this.dialog.toast('穿越者倒下了…在世界之锚处重生');
+    this.dialog.toast(t('combat_player_defeated'));
     window.dispatchEvent(new CustomEvent('player-respawn', { detail: {} }));
     this.publishVitals();
   }
@@ -496,7 +497,7 @@ export class CombatController {
     });
     this.animateWeapon(0.5, true);
     this.player.characterModel?.playRiposte?.();
-    this.dialog.toast('致命一击！');
+    this.dialog.toast(t('combat_riposte'));
     window.dispatchEvent(new CustomEvent('combat-riposte'));
     return true;
   }
@@ -535,7 +536,7 @@ export class CombatController {
         this.player.characterModel?.playParrySuccess?.();
         this.feedback?.parryFlash(this.player.position);
         this.audio?.parry();
-        this.dialog.toast('完美弹反！');
+        this.dialog.toast(t('combat_perfect_parry'));
         addShake(0.08);
         window.dispatchEvent(new CustomEvent('parry-success'));
         return true;
@@ -711,7 +712,7 @@ export class CombatController {
     });
     this.audio?.swingHeavy?.();
     window.dispatchEvent(new CustomEvent('combo-finisher'));
-    this.dialog.toast('连击终结！');
+    this.dialog.toast(t('combat_finisher'));
   }
 
   /**
@@ -782,7 +783,7 @@ export class CombatController {
       if (anyDown(keys, 'sprint')) {
         for (const c of codesFor('sprint')) keys[c] = false;
         this.clearLock();
-        this.dialog.toast('已解除锁定');
+        this.dialog.toast(t('combat_lock_cleared'));
       } else {
         this.toggleLock();
       }

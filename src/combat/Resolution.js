@@ -9,6 +9,7 @@
  * （`getDefense` / `getResist` / `isStaggered` / `isGuarding` / `facingYaw`），写账仍由目标自己的 `takeDamage` 完成。
  */
 import { BACKSTAB, CRIT, GUARD, MITIGATION, POSTURE } from '../content/tuning.js';
+import { t } from '../engine/i18n.js';
 
 /**
  * 出手者是否位于目标正后方（背刺位）。
@@ -111,10 +112,12 @@ export function resolveHit({
 /** 伤害飘字后缀：把结算结果里的"为什么这么多"直接写进数字旁边 */
 export function hitSuffix(hit) {
   let s = '';
-  if (hit.blocked) s += '格挡';
+  // 三个后缀是**文案键**（W-D2 切片16d），在这里展开一次 —— 飘字是纯视觉文本，
+  // 不走 `keyText()`（它没有 `{动作}` 占位，只有字）。
+  if (hit.blocked) s += t('hit_suffix_blocked');
   if (hit.part?.label) s += hit.part.label;
-  if (hit.backstab) s += '背刺';
-  if (hit.crit) s += '会心';
+  if (hit.backstab) s += t('hit_suffix_backstab');
+  if (hit.crit) s += t('hit_suffix_crit');
   return s;
 }
 

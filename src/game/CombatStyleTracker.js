@@ -31,14 +31,17 @@ export class CombatStyleTracker {
   }
 
   setupListeners() {
-    styleOn('parry-success', () => this.add(35, '弹反'));
-    styleOn('combo-finisher', () => this.add(80, '终结'));
-    styleOn('combat-execution', () => this.add(120, '处决'));
+    /* 标签是**文案键**（W-D2 切片16d），不是文案本身：事件里传的是键，
+     * 显示侧（`ui/CombatStyleOverlay.js`）在那一刻 `t()` 展开 ——
+     * 换语言时那一行会跟着变，而事件负载的形状（键）不变。 */
+    styleOn('parry-success', () => this.add(35, 'style_label_parry'));
+    styleOn('combo-finisher', () => this.add(80, 'style_label_finisher'));
+    styleOn('combat-execution', () => this.add(120, 'style_label_execution'));
     styleOn('enemy-defeated', (e) => {
-      if (e.detail?.type === 'boss') this.add(200, 'Boss');
-      else this.add(8, '击杀');
+      if (e.detail?.type === 'boss') this.add(200, 'style_label_boss');
+      else this.add(8, 'style_label_kill');
     });
-    styleOn('boss-defeated', () => this.add(300, '击破'));
+    styleOn('boss-defeated', () => this.add(300, 'style_label_break'));
   }
 
   add(pts, label) {

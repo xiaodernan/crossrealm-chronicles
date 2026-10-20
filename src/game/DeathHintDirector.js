@@ -1,4 +1,5 @@
 import { keyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -7,12 +8,15 @@ const deathHintOn = (name, handler) => on(name, handler, GAME_DEATHHINTDIRECTOR)
 /**
  * 倒下提示 —— 键名写成 `{动作}` 令牌，到 `onRespawn` 才展开。
  * 写在模块顶层的字符串若在加载期就拼成真实键名，玩家改绑之后这段文字会永远停在出厂键位上。
+ *
+ * `text` 存的是**文案键**（W-D2 切片16d）：提示正文进双表，`{动作}` 令牌那层
+ * 仍由 `keyText()` 在播出那一刻展开 —— 两层占位各管各的。
  */
 const HINTS = [
-  { test: (g) => (g.player?.combat?.comboCount ?? 0) >= 4, text: '高连击时别贪刀 — 留精力翻滚。' },
-  { test: (g) => g.enemyManager?.boss?.alive, text: 'Boss 战：{lockOn} 锁定，红圈前 {parry} 弹反或 {roll} 翻滚。' },
-  { test: (g) => g.dungeons?.active, text: '迷宫内先清小怪再进 Boss 房，留意小地图未探索房间。' },
-  { test: () => true, text: '营火 {interact} 可回满生命；{journal} 日志有 Boss 攻略与流派说明。' },
+  { test: (g) => (g.player?.combat?.comboCount ?? 0) >= 4, text: 'death_hint_combo' },
+  { test: (g) => g.enemyManager?.boss?.alive, text: 'death_hint_boss' },
+  { test: (g) => g.dungeons?.active, text: 'death_hint_dungeon' },
+  { test: () => true, text: 'death_hint_campfire' },
 ];
 
 export class DeathHintDirector {
@@ -29,12 +33,13 @@ export class DeathHintDirector {
 
   onRespawn() {
     this.deathCount += 1;
-    const hint = keyText(HINTS.find((h) => h.test(this.game))?.text ?? HINTS[HINTS.length - 1].text);
-    this.game.dialog.toast(`提示 · ${hint}`, 4200);
+    // 两层展开：先 `t()` 取文案（键 → 句子），再 `keyText()` 把 `{动作}` 令牌换成真实键名。
+    const hint = keyText(t(HINTS.find((h) => h.test(this.game))?.text ?? HINTS[HINTS.length - 1].text));
+    this.game.dialog.toast(`${t('death_hint_prefix')} ${hint}`, 4200);
     this.game.storyJournal?.add?.({
       id: `death-${this.deathCount}-${Date.now()}`,
       category: 'poi',
-      title: `第 ${this.deathCount} 次倒下`,
+      title: t('death_journal_title', { n: this.deathCount }),
       text: hint,
       chapter: this.game.quests?.chapter ?? 1,
     });
