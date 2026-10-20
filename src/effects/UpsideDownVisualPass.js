@@ -1,7 +1,7 @@
 /** 逆相界视觉 — 破碎时线红色孢子 overlay（怪奇物语气质） */
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
-
 import { on, offAll } from '../engine/EventBus.js';
+import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
 
 const EFFECTS_UPSIDEDOWNVISUALPASS = 'effects/UpsideDownVisualPass';
 const upsideOn = (name, handler) => on(name, handler, EFFECTS_UPSIDEDOWNVISUALPASS);
@@ -40,6 +40,8 @@ export class UpsideDownVisualPass {
 
   update(dt) {
     if (!this.active) return;
+    // 远距离视觉 LOD：1/4 帧率更新
+    if (!frameShouldUpdate(4)) return;
     this.pulse += dt;
     const o = 0.08 + Math.sin(this.pulse * 1.2) * 0.04;
     this.el.style.opacity = String(o);

@@ -4,6 +4,7 @@ import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
 import { makeUvConeGeometry, makeUvFacetGeometry } from '../../engine/uvGeometry.js';
 import { paletteOf } from '../../content/materialPalette.js';
+import { shouldUpdate as frameShouldUpdate } from '../../engine/FrameBudget.js';
 
 /** 星际穿越风格 — 冰云行星、引力透镜、五维书架彩蛋 */
 export class SpaceZone extends BaseZone {
@@ -246,6 +247,8 @@ export class SpaceZone extends BaseZone {
 
   update(dt) {
     super.update(dt);
+    // 远距离装饰 LOD：1/4 帧率更新
+    if (!frameShouldUpdate(4)) return;
     if (this.blackHole) {
       this.blackHole.rotation.z += dt * 0.05;
     }

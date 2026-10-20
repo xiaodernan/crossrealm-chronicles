@@ -1,4 +1,5 @@
 /** Wave4 视觉 — POI 交互时 flash overlay（不与 Triad 位面 overlay 冲突） */
+import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
 export class PopCultureWave4VisualPass {
   constructor(game) {
     this.game = game;
@@ -34,6 +35,8 @@ export class PopCultureWave4VisualPass {
 
   update(dt) {
     if (!this.mode) return;
+    // 远距离视觉 LOD：1/4 帧率更新
+    if (!frameShouldUpdate(4)) return;
     this.pulse += dt;
     const el = this.layers[this.mode];
     if (!el) return;

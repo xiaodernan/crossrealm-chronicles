@@ -1,7 +1,7 @@
 /** 三巨头视觉 Pass — 西部尘雾 / 黑帮 noir / 深空扫描线 */
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
-
 import { on, offAll } from '../engine/EventBus.js';
+import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
 
 const EFFECTS_POPCULTURETRIADVISUALPASS = 'effects/PopCultureTriadVisualPass';
 const triadOn = (name, handler) => on(name, handler, EFFECTS_POPCULTURETRIADVISUALPASS);
@@ -56,6 +56,8 @@ export class PopCultureTriadVisualPass {
 
   update(dt) {
     if (!this.mode) return;
+    // 远距离视觉 LOD：1/4 帧率更新
+    if (!frameShouldUpdate(4)) return;
     this.pulse += dt;
     const el = this.layers[this.mode];
     if (!el) return;

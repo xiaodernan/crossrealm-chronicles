@@ -3,6 +3,7 @@ import { BaseZone } from './BaseZone.js';
 import { makeUvCylinderGeometry, makeUvFacetGeometry } from '../../engine/uvGeometry.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { paletteOf } from '../../content/materialPalette.js';
+import { shouldUpdate as frameShouldUpdate } from '../../engine/FrameBudget.js';
 
 /** 第四主题：破碎时线 — 指环王 + 星际穿越时间主题融合 */
 export class VoidZone extends BaseZone {
@@ -134,6 +135,8 @@ export class VoidZone extends BaseZone {
 
   update(dt) {
     super.update(dt);
+    // 远距离装饰环 LOD：1/4 帧率更新
+    if (!frameShouldUpdate(4)) return;
     for (let i = 0; i < 5; i++) {
       const ring = this.group.getObjectByName(`timeRing${i}`);
       if (ring) ring.rotation.z += dt * (0.3 + i * 0.1);

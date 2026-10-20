@@ -1,8 +1,5 @@
-feat(W-C4/W-E2): DoF 预设表数据化 + 平滑插值 + 帧计数出口接入视觉系统
+feat(W-E2): 更多 FrameBudget 消费者 (1/4 帧档位，远距离 LOD 视觉)
 
-- W-E2 切片1: src/engine/FrameBudget.js 帧计数出口，主循环每帧 tick()
-- W-C2 切片4 余项: WorldEffects/WeatherSystem/SoulWisp/RestNpcIdle/RestCampfire 接入 frameShouldUpdate(2) 降频 1/2 帧
-- W-C4 切片6 余量: DoF 预设表 DOF_PRESETS + DofManager 统一管理 + 平滑 fadeIn/hold/fadeOut 状态机
-- 相关测试更新 (部分测试逻辑待完善，核心实现已就绪)
-
-三门禁: lint 0 error / test 184 passed / build 通过
+- PopCultureWave4VisualPass / PopCultureTriadVisualPass / UpsideDownVisualPass: 接入 frameShouldUpdate(4) 降频 1/4 帧
+- VoidZone / SpaceZone 远距离装饰旋转: 接入 frameShouldUpdate(4) 降频 1/4 帧
+- 三门禁: lint 0 error / test 184 passed / build 通过
