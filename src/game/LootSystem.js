@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { getLanguage } from '../engine/i18n.js';
 import { dropChance, gearIsUpgrade, gearRarityLabel, isGearInstance, rarityRank, rollBossGear, rollGear } from '../content/gear.js';
 import { emitCue } from '../engine/cues.js';
 import { getColorVisionMode, rarityTint } from './ColorVision.js';
@@ -161,7 +162,7 @@ export class LootSystem {
     // 装备落地的一声，档位越高越亮（魂不响 —— 捡起时那一声才是魂的）。
     // W-D6 切片8：不再直接摸 audio，改成派一条字幕线索 —— 声音由 AudioManager 听 game-cue 播，
     // 字幕由 ui/Captions 听同一条画。掉落层从此只负责"发生了什么"，不负责"怎么响"。
-    if (gear) emitCue('gearDrop', { rank: rarityRank(gear.rarity), rarity: gearRarityLabel(gear.rarity) });
+    if (gear) emitCue('gearDrop', { rank: rarityRank(gear.rarity), rarity: gearRarityLabel(gear.rarity, getLanguage()) });
     return d;
   }
 

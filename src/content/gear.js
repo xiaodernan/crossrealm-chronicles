@@ -238,7 +238,12 @@ export function gearRarityDisplay(rarityId, mode = DEFAULT_COLOR_MODE) {
  * 掉落层变成一个"带档位的取色入口"，而"取色入口只有两处"那条门禁（tests/gear-drop.test.js）
  * 数的是取色、不是取字。取字走这里，取色仍只有 ColorVision 一个出口。
  */
-export const gearRarityLabel = (rarityId) => gearRarityDisplay(rarityId).label;
+/**
+ * 稀有度字样的**显示名**（按语言展开）。
+ *
+ * 它会进字幕（"掉落：稀有"）—— 显示名必须是那句人看的话，不是键。
+ */
+export const gearRarityLabel = (rarityId, lang = 'zh') => semanticLabel(raritySemanticId(rarityId), lang);
 
 /** 出厂档（`default`）下的字样与颜色快照：注册表与零变更对账都读这一份 */
 export const GEAR_RARITY_DISPLAY = Object.fromEntries(
@@ -420,7 +425,9 @@ export function gearLabel(instance, lang = 'zh') {
   const rarity = GEAR_RARITY_DISPLAY[instance.rarity];
   const affixes = (instance.affixes ?? []).map((id) => T[GEAR_NAMES[id]] ?? id);
   const name = T[GEAR_NAMES[base.id]] ?? base.id;
-  return `${rarity ? `${rarity.label}·` : ''}${name}${affixes.length ? `（${affixes.join(' · ')}）` : ''}`;
+  // 稀有度那一格也是**键**（W-D2 切片16t）：按当前语言展开
+  const 档名 = rarity ? (T[rarity.label] ?? rarity.label) : '';
+  return `${rarity ? `${档名}·` : ''}${name}${affixes.length ? `（${affixes.join(' · ')}）` : ''}`;
 }
 
 /** 槽位显示名（同样按语言展开） */

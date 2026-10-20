@@ -31,6 +31,7 @@
  * 模块级状态在测试里是共享的：换档的用例要自己 `resetColorVision()` 收尾。
  * 这条不是"设计缺陷"，而是"整局一份"这件事的必然代价（换成注入只是把这份代价挪到夹具里）。
  */
+import { t } from '../engine/i18n.js';
 import {
   COLOR_MODES, COLOR_VISION_LABELS, DEFAULT_COLOR_MODE, normalizeColorVision, semanticColor,
 } from '../content/semanticColors.js';
@@ -58,7 +59,8 @@ export function getColorVisionMode() {
 
 /** 面板要的选项名单（从名册现推，不抄第二份 —— B47 家族的老规矩） */
 export function colorVisionOptions() {
-  return COLOR_MODES.map((id) => ({ id, label: COLOR_VISION_LABELS[id] }));
+  // 档位名存的是**文案键**（W-D2 切片16t）—— 面板要的是那句人看的话
+  return COLOR_MODES.map((id) => ({ id, label: t(COLOR_VISION_LABELS[id]) }));
 }
 
 /**

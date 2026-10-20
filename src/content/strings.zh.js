@@ -259,6 +259,22 @@ export const STRINGS_ZH = Object.freeze({
   rest_point_campfire_name: '${zone}营火',
   rest_point_name_hub: '世界之锚休息点',
 
+  // 语义色板与色觉档名（W-D2 切片16t：label 存键，显示侧展开）
+  sem_label_danger: '危险',
+  sem_label_warning: '警告',
+  sem_label_safe: '恢复',
+  sem_label_resource: '资源',
+  sem_label_threat: '威胁',
+  sem_label_posture: '架势',
+  sem_label_rarity_common: '凡品',
+  sem_label_rarity_uncommon: '良品',
+  sem_label_rarity_rare: '稀有',
+  sem_label_rarity_epic: '史诗',
+  sem_cv_default: '默认',
+  sem_cv_deuteranopia: '红绿色盲',
+  sem_cv_protanopia: '红色盲',
+  sem_cv_tritanopia: '蓝黄色盲',
+
   // 敌人名（W-D2 切片16s：名册存键，出生那一刻展开）
   enemy_name_dummy: '训练木人',
   enemy_name_summon: '虚空仆从',

@@ -36,6 +36,7 @@ import { GEAR_RARITY, GEAR_RARITY_DISPLAY, gearRarityDisplay } from '../src/cont
 import { SettingsManager } from '../src/core/SettingsManager.js';
 import { SettingsPanel } from '../src/ui/SettingsPanel.js';
 import { LootSystem } from '../src/game/LootSystem.js';
+import { t } from '../src/engine/i18n.js';
 
 const ROOT = process.cwd();
 
@@ -143,7 +144,8 @@ describe('③ 运行时所有者：模块级当前档，两条路分开', () => 
 
   it('选项名单从名册现推，且 id 与名字一一对上', () => {
     expect(colorVisionOptions().map((o) => o.id)).toEqual([...COLOR_MODES]);
-    expect(colorVisionOptions().map((o) => o.label)).toEqual(COLOR_MODES.map((m) => COLOR_VISION_LABELS[m]));
+    // W-D2 切片16t：档位名存的是**文案键** —— 比的是展开后那一句（键两两不同是白送）
+    expect(colorVisionOptions().map((o) => o.label)).toEqual(COLOR_MODES.map((m) => t(COLOR_VISION_LABELS[m])));
   });
 });
 
@@ -274,7 +276,7 @@ describe('⑥ 设置接线：面板从名册现推、写入口只有 applyToGame
       expect(opts.map((o) => o.value), '选项不是从名册现推的 —— 面板抄了第二份名单')
         .toEqual([...COLOR_MODES]);
       expect(opts.map((o) => o.textContent))
-        .toEqual(COLOR_MODES.map((m) => COLOR_VISION_LABELS[m]));
+        .toEqual(COLOR_MODES.map((m) => t(COLOR_VISION_LABELS[m])));
       expect(sel.value, '面板没回显当前档').toBe(DEFAULT_COLOR_MODE);
       sel.value = 'tritanopia';
       sel.dispatchEvent({ type: 'change' });

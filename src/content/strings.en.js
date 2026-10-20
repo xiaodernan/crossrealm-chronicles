@@ -259,6 +259,22 @@ export const STRINGS_EN = Object.freeze({
   rest_point_campfire_name: '${zone} Campfire',
   rest_point_name_hub: 'World Anchor Rest Point',
 
+  // Semantic color board and color-vision mode names (W-D2 slice 16t: labels are keys, expanded on display)
+  sem_label_danger: 'Danger',
+  sem_label_warning: 'Warning',
+  sem_label_safe: 'Safe',
+  sem_label_resource: 'Resource',
+  sem_label_threat: 'Threat',
+  sem_label_posture: 'Posture',
+  sem_label_rarity_common: 'Common',
+  sem_label_rarity_uncommon: 'Uncommon',
+  sem_label_rarity_rare: 'Rare',
+  sem_label_rarity_epic: 'Epic',
+  sem_cv_default: 'Default',
+  sem_cv_deuteranopia: 'Deuteranopia',
+  sem_cv_protanopia: 'Protanopia',
+  sem_cv_tritanopia: 'Tritanopia',
+
   // Enemy names (W-D2 slice 16s: the roster holds keys, expanded at spawn time)
   enemy_name_dummy: 'Training Dummy',
   enemy_name_summon: 'Void Thrall',

@@ -38,6 +38,16 @@
  */
 
 /** 色觉档位。`default` 是出厂档；其余三档是常见的色觉异常类型 */
+import { STRINGS_ZH } from './strings.zh.js';
+import { STRINGS_EN } from './strings.en.js';
+
+/**
+ * 双表住在**同层**（content/strings.*）—— 内容层读它不违反"地基层不向上够"那条约定。
+ * `lang` 决定读哪张（与 `content/gear.js` 里那件按语言拼装的事同一套办法）。
+ */
+const 双表 = { zh: STRINGS_ZH, en: STRINGS_EN };
+const 表 = (lang) => 双表[lang] ?? STRINGS_ZH;
+
 export const COLOR_MODES = Object.freeze(['default', 'deuteranopia', 'protanopia', 'tritanopia']);
 
 /** 出厂色觉档，也是存储脏值的回落点 */
@@ -49,10 +59,10 @@ export const DEFAULT_COLOR_MODE = 'default';
  * 抄第二份的表现是"加了第四个档位而面板里只有三个"—— 不报错，只是选不到。
  */
 export const COLOR_VISION_LABELS = Object.freeze({
-  default: '默认',
-  deuteranopia: '红绿色盲',
-  protanopia: '红色盲',
-  tritanopia: '蓝黄色盲',
+  default: 'sem_cv_default',
+  deuteranopia: 'sem_cv_deuteranopia',
+  protanopia: 'sem_cv_protanopia',
+  tritanopia: 'sem_cv_tritanopia',
 });
 
 /**
@@ -72,35 +82,35 @@ const c = (label, glyph, colors) => Object.freeze({ label, glyph, colors: Object
  */
 export const SEMANTIC_COLORS = Object.freeze({
   // 战斗状态三件套。三者在任何一档里都必须互不同色（门禁钉住）。
-  danger: c('危险', '!', {
+  danger: c('sem_label_danger', '!', {
     // 切片4 起对齐在役的血条亮端 `#cc4444`（HUD 状态条从这一格取色，见 ui/barTheme.js）
     default: 0xcc4444,
     deuteranopia: 0xff9a00,   // 红→橙黄（红绿型最易混的就是红与绿）
     protanopia: 0xffb000,
     tritanopia: 0xff4488,     // 蓝黄型对红仍可辨，但避开与黄撞
   }),
-  warning: c('警告', '▲', {
+  warning: c('sem_label_warning', '▲', {
     // 切片4 起对齐在役的精力条亮端 `#c9a962`
     default: 0xc9a962,
     deuteranopia: 0xffffff,   // 提到纯白：与 danger 的橙黄靠明度拉开
     protanopia: 0xfff2cc,
     tritanopia: 0xffcc44,
   }),
-  safe: c('恢复', '+', {
+  safe: c('sem_label_safe', '+', {
     // 与 rarity-uncommon 的绿错开一格：两个语义撞色，玩家在治疗提示与良品光晕前分不出谁是谁
     default: 0x4fd68a,
     deuteranopia: 0x66ccff,   // 绿→青蓝（红绿型下蓝黄轴仍可辨）
     protanopia: 0x4ea8ff,
     tritanopia: 0x66d9c0,
   }),
-  resource: c('资源', '◆', {
+  resource: c('sem_label_resource', '◆', {
     // 切片4 起对齐在役的法力条亮端 `#8866cc`
     default: 0x8866cc,
     deuteranopia: 0xaa88ff,
     protanopia: 0x9a7bff,
     tritanopia: 0x8899ff,
   }),
-  threat: c('威胁', '☠', {
+  threat: c('sem_label_threat', '☠', {
     // 切片6 起对齐在役的 Boss 血条亮端 `#ff3333`。
     // 色盲档走**深红**而不是另一个色相：这一条要的还是"它是红的、而且比我自己的血更凶"，
     // 靠明度与 `danger` 的橙黄 / 琥珀拉开（`DISTINCT_IN_ANY_MODE` 钉住这一对不许撞）。
@@ -109,7 +119,7 @@ export const SEMANTIC_COLORS = Object.freeze({
     protanopia: 0xc0392b,
     tritanopia: 0xe01e37,
   }),
-  posture: c('架势', '◈', {
+  posture: c('sem_label_posture', '◈', {
     // 切片6 起对齐在役的架势条亮端 `#8888ff`。
     // 这一条是蓝黄色盲（tritanopia）最吃亏的一格 —— 改前 `#8888ff` 在那一档下几乎读不出明暗。
     // 色盲档统一压成**深蓝**：色相还在"蓝"这一族里，明度与 `resource` / `rarity-rare` 拉开。
@@ -123,18 +133,18 @@ export const SEMANTIC_COLORS = Object.freeze({
   // 色盲档走**明度递进 + 形状递进**（○◇◆★），两条冗余互相印证。
   // 注：这里刻意不写那张表的标识符 —— `tests/gear-drop.test.js` 有一条静态门禁
   // 按标识符点名"谁在读它"，注释里提一句会把它误算成第二个读者。
-  'rarity-common': c('凡品', '○', {
+  'rarity-common': c('sem_label_rarity_common', '○', {
     default: 0xbfc7d1, deuteranopia: 0xc0c0c0, protanopia: 0xd2d2dc, tritanopia: 0xc8c8d8,
   }),
-  'rarity-uncommon': c('良品', '◇', {
+  'rarity-uncommon': c('sem_label_rarity_uncommon', '◇', {
     default: 0x63d97a, deuteranopia: 0xffe066, protanopia: 0xffd633, tritanopia: 0x9fe8b0,
   }),
-  'rarity-rare': c('稀有', '◆', {
+  'rarity-rare': c('sem_label_rarity_rare', '◆', {
     // tritanopia 那一格第一版与默认档**同值**（写成 0x4ea8ff），被 ② 那条门禁当场抓出来 ——
     // 同值意味着这一档对"稀有"这个语义什么都没做，那就是个空转的档位。
     default: 0x4ea8ff, deuteranopia: 0x66d9ff, protanopia: 0x8fd4ff, tritanopia: 0x8fc4ff,
   }),
-  'rarity-epic': c('史诗', '★', {
+  'rarity-epic': c('sem_label_rarity_epic', '★', {
     default: 0xc77bff, deuteranopia: 0xff99ee, protanopia: 0xffb0e8, tritanopia: 0xd9a0ff,
   }),
 });
@@ -166,7 +176,19 @@ export function semanticColor(id, mode = 'default') {
 export const semanticGlyph = (id) => semanticOf(id).glyph;
 
 /** 非颜色冗余：词 */
-export const semanticLabel = (id) => semanticOf(id).label;
+/**
+ * 语义标签的**文案键**（W-D2 切片16t）。
+ *
+ * 改前 `label` 是中文写死在色板里，于是"危险""稀有"这些词在英文界面下永远不变。
+ * 现在它是一格**键**（`sem_label_*`），显示侧在那一刻展开。
+ */
+export const semanticLabelKey = (id) => semanticOf(id).label;
+
+/** 语义标签的显示名（按语言展开；键找不到就退回键本身，不静默给一个空串） */
+export const semanticLabel = (id, lang = 'zh') => {
+  const key = semanticOf(id).label;
+  return 表(lang)[key] ?? key;
+};
 
 /** 稀有度 id → 语义键（`common` → `rarity-common`） */
 export const raritySemanticId = (rarityId) => `rarity-${rarityId}`;
