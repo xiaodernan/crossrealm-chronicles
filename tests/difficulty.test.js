@@ -143,8 +143,9 @@ describe('难度：认不出就抛 / 脏值回落（两条路分开）', () => {
   it('面板选项从名册现推（不是 HTML 里抄的第二份）', () => {
     expect(difficultyOptions().map((o) => o.id)).toEqual(DIFFICULTY_IDS);
     for (const o of difficultyOptions()) {
-      expect(o.label).toBe(DIFFICULTY_TIERS[o.id].label);
-      expect(o.desc).toBe(DIFFICULTY_TIERS[o.id].desc);
+      // W-D2 切片16v：档位名与说明存的是**文案键** —— 比展开后那一句
+      expect(o.label).toBe(t(DIFFICULTY_TIERS[o.id].label));
+      expect(o.desc).toBe(t(DIFFICULTY_TIERS[o.id].desc));
     }
   });
 });
@@ -304,7 +305,7 @@ describe('设置接线：面板从名册现推、写入口只有 applyToGame 一
       new SettingsPanel(game);
       expect(opts.map((o) => o.value), '选项不是从名册现推的 —— 面板抄了第二份名单')
         .toEqual(DIFFICULTY_IDS);
-      expect(opts.map((o) => o.textContent)).toEqual(DIFFICULTY_IDS.map((id) => DIFFICULTY_TIERS[id].label));
+      expect(opts.map((o) => o.textContent)).toEqual(DIFFICULTY_IDS.map((id) => t(DIFFICULTY_TIERS[id].label)));
       expect(sel.value, '面板没回显当前档').toBe(DEFAULT_DIFFICULTY);
       sel.value = 'story';
       sel.dispatchEvent({ type: 'change' });

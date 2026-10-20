@@ -37,6 +37,7 @@ import { BOSS_SPAN } from '../src/world/dungeonDimensions.js';
 import { DungeonManager } from '../src/world/DungeonManager.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
+import { t } from '../src/engine/i18n.js';
 
 beforeAll(installWindowShim);
 
@@ -206,6 +207,14 @@ describe('① 数据忠实：新表逐格 = 搬动之前在役的那份 const', 
       const 新键 = Object.keys(新);
       for (const k of 旧键) {
         if (k === 'themeType') continue;
+        // W-D2 切片16v：name / mapLabel / exterior.label 三格存的是**文案键** ——
+        // 旧抄本记的是"它叫什么"（中文），所以要比**展开后**的那一句，而不是键本身。
+        if (k === 'name' || k === 'mapLabel' || k === 'exterior') {
+          const 旧值 = k === 'exterior' ? 旧[k].label : 旧[k];
+          const 新值 = k === 'exterior' ? 新[k]?.label : 新[k];
+          if (t(新值) !== 旧值) 差.push(`${旧.id}.${k}: 旧 "${旧值}" ≠ 新 "${t(新值)}"`);
+          continue;
+        }
         const a = JSON.stringify(旧[k]);
         const b = JSON.stringify(新[k]);
         if (a !== b) 差.push(`${旧.id}.${k}: 旧 ${a} ≠ 新 ${b}`);
@@ -345,7 +354,7 @@ describe('④ 指路：路点由表推导，认不出就抛', () => {
     for (const row of 副本步) {
       const def = dungeonDefOf(row.dungeonId);
       // QuestSystem 的路点是 `{ entrance.x, entrance.z, name }`（与旧抄本同一形状同一值）
-      expect([def.entrance.x, def.entrance.z, def.name], `${row.id} 指的入口与旧抄本对不上`)
+      expect([def.entrance.x, def.entrance.z, t(def.name)], `${row.id} 指的入口与旧抄本对不上`)
         .toEqual([OLD_WAYPOINTS[row.dungeonId].x, OLD_WAYPOINTS[row.dungeonId].z, OLD_WAYPOINTS[row.dungeonId].label]);
     }
   });
@@ -357,7 +366,7 @@ describe('④ 指路：路点由表推导，认不出就抛', () => {
       probe.questIndex = MAINLINE.indexOf(row);
       const wp = probe.getQuestWaypoint();
       expect(wp, `${row.id} 这一 step 没有路点`).toBeTruthy();
-      expect([wp.x, wp.z, wp.label], `${row.id} 指错了入口`)
+      expect([wp.x, wp.z, t(wp.label)], `${row.id} 指错了入口`)
         .toEqual([OLD_WAYPOINTS[row.dungeonId].x, OLD_WAYPOINTS[row.dungeonId].z, OLD_WAYPOINTS[row.dungeonId].label]);
       // 清完这座就不该再指它（判据读的是同一张表的 id）
       probe.stats.dungeonsCleared.add(row.dungeonId);
@@ -377,7 +386,7 @@ describe('④ 指路：路点由表推导，认不出就抛', () => {
       指的.push(probe.getQuestWaypoint());
       probe.stats.dungeonsCleared.add(id);
     }
-    expect(指的.map((w) => w.label)).toEqual(['灰白遗城', '禁书图书馆', '五维裂隙']);
+    expect(指的.map((w) => t(w.label))).toEqual(['灰白遗城', '禁书图书馆', '五维裂隙']);
     for (const [w, id] of 指的.map((w, i) => [w, DUNGEON_IDS.filter((x) => OLD_WAYPOINTS[x])[i]])) {
       expect([w.x, w.z], `${id} 指错了入口坐标`).toEqual([OLD_WAYPOINTS[id].x, OLD_WAYPOINTS[id].z]);
       expect(w.hint, `${id} 的提示不该是别的事`).toBe('清空地下城');
@@ -390,7 +399,7 @@ describe('④ 指路：路点由表推导，认不出就抛', () => {
     expect(() => dungeonDefOf('ruin-crypts')).toThrow(/副本表里没有/);
     expect(() => dungeonDefOf('')).toThrow(/副本表里没有/);
     expect(() => dungeonDefOf('遗城')).toThrow(/可用：ruin-crypt/);
-    expect(dungeonDefOf('hub-catacombs').name).toBe('枢纽地下墓穴');
+    expect(t(dungeonDefOf('hub-catacombs').name)).toBe('枢纽地下墓穴');
   });
 
   it('QuestSystem 里那份手抄地下城路点表没了，改为现问副本表', () => {

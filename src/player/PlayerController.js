@@ -1106,7 +1106,7 @@ export class PlayerController {
 
       prompt.classList.remove('hidden');
 
-      prompt.textContent = `${interact} 进入 — ${dungeon.def.name}`;
+      prompt.textContent = t('dungeon_enter_prompt_fmt', { interact, name: t(dungeon.def.name) });
 
     } else if (this.nearbyPoint) {
 

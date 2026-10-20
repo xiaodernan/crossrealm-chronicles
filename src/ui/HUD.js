@@ -931,7 +931,7 @@ buildHUD() {
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = 'rgba(201,169,98,0.9)';
     ctx.font = '9px sans-serif';
-    ctx.fillText(`${this.game.dungeons.active.def.name} · 迷宫`, 6, 14);
+    ctx.fillText(t('hud_dungeon_title_fmt', { name: t(this.game.dungeons.active.def.name) }), 6, 14);
 
     for (const r of rooms) {
       const rx = r.x * sc + ox;

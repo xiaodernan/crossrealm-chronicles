@@ -61,18 +61,18 @@ export const DEFAULT_DIFFICULTY = 'standard';
  */
 export const DIFFICULTY_TIERS = Object.freeze({
   story: Object.freeze({
-    label: '叙事',
-    desc: '敌人更脆、你挨得更轻、魂更多 —— 想先把故事走完的选这档',
+    label: 'difficulty_story_label',
+    desc: 'difficulty_story_desc',
     multipliers: Object.freeze({ enemyHp: 0.8, damageTaken: 0.6, souls: 1.25 }),
   }),
   standard: Object.freeze({
-    label: '标准',
-    desc: '出厂配置，一切按名册与阶段表原样',
+    label: 'difficulty_standard_label',
+    desc: 'difficulty_standard_desc',
     multipliers: Object.freeze({ enemyHp: 1, damageTaken: 1, souls: 1 }),
   }),
   brutal: Object.freeze({
-    label: '严酷',
-    desc: '敌人更硬、你挨得更狠、魂更少 —— 每一刀都要算',
+    label: 'difficulty_brutal_label',
+    desc: 'difficulty_brutal_desc',
     multipliers: Object.freeze({ enemyHp: 1.3, damageTaken: 1.5, souls: 0.8 }),
   }),
 });

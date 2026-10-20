@@ -187,7 +187,7 @@ export class DungeonManager {
         // `BOSS_LORE[...].title` 现在是**文案键**（W-D2 切片16c）—— 展开在这一处做。
         name: BOSS_LORE[dungeon.def.id]
           ? keyText(t(BOSS_LORE[dungeon.def.id].title))
-          : `${dungeon.def.name}守钥者`,
+          : t('boss_dungeon_name_fmt', { dungeon: t(dungeon.def.name) }),
         x: wx,
         z: wz,
         hp: 480 + dungeon.layout.rooms.length * 25,
@@ -322,14 +322,14 @@ export class DungeonManager {
       doors: doorCount,
     }));
     this.dialog.show(
-      dungeon.def.name,
+      t(dungeon.def.name),
       `${进入语 ? 进入语 + '\n\n' : ''}${统计行}`
     );
     window.dispatchEvent(new CustomEvent('dungeon-enter', {
       // rerun 是 HUD「深渊再探」提示的判据；修前这里从不带，那条提示永远不弹（B44）
       detail: {
         id: dungeon.def.id,
-        name: dungeon.def.name,
+        name: t(dungeon.def.name),
         rooms: roomCount,
         doors: doorCount,
         rerun: this.cleared.has(dungeon.def.id),
@@ -488,7 +488,7 @@ export class DungeonManager {
     const enemies = (this.active.roomEnemies.get(this.currentRoomId) ?? []).filter((e) => e.alive).length;
     const bossAlive = this.active.boss?.alive;
     return {
-      name: this.active.def.name,
+      name: t(this.active.def.name),
       room: room?.id ?? '?',
       cleared,
       total: layout.rooms.length,

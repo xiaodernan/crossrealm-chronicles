@@ -243,7 +243,7 @@ export class WorldMapPanel {
       ctx.fill();
       ctx.fillStyle = '#ddd';
       ctx.font = '9px sans-serif';
-      ctx.fillText(d.mapLabel, cx + d.entrance.x * scale + 7, cy + d.entrance.z * scale + 3);
+      ctx.fillText(t(d.mapLabel), cx + d.entrance.x * scale + 7, cy + d.entrance.z * scale + 3);
     }
 
     for (const b of MAP_BOSSES) {

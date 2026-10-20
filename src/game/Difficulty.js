@@ -22,6 +22,7 @@ import {
   DIFFICULTY_IDS, DIFFICULTY_KEYS, difficultyOf, normalizeDifficulty,
 } from '../content/difficulty.js';
 import { DEFAULT_DIFFICULTY } from '../content/difficulty.js';
+import { t } from '../engine/i18n.js';
 
 export { DEFAULT_DIFFICULTY };
 
@@ -53,8 +54,11 @@ export function getDifficulty() {
 
 /** 面板要的选项名单（从名册现推，不抄第二份 —— B47 家族的老规矩） */
 export function difficultyOptions() {
-  return DIFFICULTY_IDS.map((id) => ({ id, ...difficultyOf(id) }));
-}
+  // W-D2 切片16v：档位名与说明存的是**文案键** —— 面板要的是那句人看的话
+  return DIFFICULTY_IDS.map((id) => {
+    const tier = difficultyOf(id);
+    return { ...tier, id, label: t(tier.label), desc: t(tier.desc) };
+  });}
 
 /**
  * 取一个乘子。**键写错当场抛** —— 与 `difficultyOf` / `enemyRosterOf` 同一口径：

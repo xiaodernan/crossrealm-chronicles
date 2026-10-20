@@ -286,7 +286,7 @@ describe('⑤ 世界地图真渲染：点位与文字都来自副本表', () => 
   it('每座副本各一个点、各一枚标签，坐标就是表里的 entrance', () => {
     const { 紫点, 标签, panel } = 跑一次面板();
     expect(紫点.length, `地图上有 ${紫点.length} 个副本点，名册有 ${DUNGEON_DEFS.length} 座`).toBe(DUNGEON_DEFS.length);
-    expect(标签.map((l) => l.t)).toEqual(DUNGEON_DEFS.map((d) => d.mapLabel));
+    expect(标签.map((l) => l.t)).toEqual(DUNGEON_DEFS.map((d) => t(d.mapLabel)));
     // 落点拿面板自己算出的 `_cx/_cy/_scale` 对：改错投影的人在这里红，而不是在我抄的常数里红
     expect(紫点.length).toBe(标签.length);
     紫点.forEach((c, i) => {
@@ -318,13 +318,16 @@ describe('⑤ 世界地图真渲染：点位与文字都来自副本表', () => 
     expect(新增.map((d) => d.id)).toEqual(['gloom-mist-crypt', 'radiant-dawn-hall']);
     expect(标签.length - 旧面板表.length, '抄本那五行之外并没有多出两座：新增的座还是没点上').toBe(新增.length);
     for (const d of 新增) {
-      expect(标签.map((l) => l.t), `名册里的 "${d.id}" 在地图上仍然没有标签`).toContain(d.mapLabel);
+      expect(标签.map((l) => l.t), `名册里的 "${d.id}" 在地图上仍然没有标签`).toContain(t(d.mapLabel));
     }
   });
 
   it('名册临时多一座 → 地图上真的多一个点（会长证据：走的是同一条循环，不是我又算一遍）', () => {
     const 探针 = {
-      id: 'probe-extra', name: '探针座', trial: false, mapLabel: '探针',
+      id: 'probe-extra', name: '探针座', trial: false,
+      // W-D2 切片16v：`mapLabel` 存的是**文案键** —— 探针也得给真键（给字面量的话
+      // 面板上画出来的是 "[MISSING: 探针]"，这条用例就测不到"多一个点"了）
+      mapLabel: 'dungeon_gloom_mist_crypt_map_label',
       theme: 0x111111, accent: 0x222222, gridW: 3, gridH: 3, origin: { x: 0, y: 0, z: 0 },
       entrance: { x: 12, z: 34 }, exterior: { x: 12, z: 34, label: '探针口' },
     };
@@ -334,7 +337,7 @@ describe('⑤ 世界地图真渲染：点位与文字都来自副本表', () => 
     try {
       const 加后 = 跑一次面板();
       expect(加后.紫点.length, '加了名册没加点：面板还在遍历它自己那张表').toBe(基线.紫点.length + 1);
-      expect(加后.标签.map((l) => l.t)).toEqual([...基线.标签.map((l) => l.t), '探针']);
+      expect(加后.标签.map((l) => l.t)).toEqual([...基线.标签.map((l) => l.t), t('dungeon_gloom_mist_crypt_map_label')]);
       expect(加后.紫点.some((c) => Number.isFinite(c.x) && c.r === 5), '新加那座的点没画出来').toBe(true);
     } finally {
       DUNGEON_DEFS.length = 0;
