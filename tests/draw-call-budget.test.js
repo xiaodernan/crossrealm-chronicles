@@ -240,15 +240,33 @@ describe('反面控制：判定函数真的咬得住（喂坏数据必须红）'
     expect(extraCeilings(['a'], 上限)).toEqual([]);
   });
 
-  it('真表本身也不越线：用实测基线当读数跑一遍当前上限', () => {
-    // 2026-10-18 的分母重测读数（B94 台账）：八站整帧 151–918。
-    // 这批数**不是**本配方下的读数（那是另一把尺子），所以这里只断言"不小于下限量级"，
-    // 真正的上限由 `npm run perf` 在本配方下重跑钉死（切片4 的读数见 §9）。
-    const 基线 = { hub: 396, fantasy: 613, magic: 903, space: 244, void: 151, abyss: 159, gloom: 208, radiant: 918 };
-    for (const [id, 读数] of Object.entries(基线)) {
+  it('真表本身也不越线：上限必须落在本配方实测值的两侧带里', () => {
+    // 2026-10-21 的**本配方**五轮最大值（`.tmp-wc2s5/perf-r{1,3,4,8,9}.log`，区域静态合批之后，
+    // 由 `.tmp-wc2s5/repin.mjs` 从日志算出）：三列各自一张表。
+    //
+    // 为什么不能用 2026-10-18 那批数当下限：那是**合批之前**的世界、另一把尺子读出来的，
+    // 把它钉成地板就等于宣布"以后任何优化都不许把上限压到 396 以下" —— 一条专门拦住
+    // 优化的门禁。地板必须由**量出上限的那同一把尺**给（"floor 要来自同一次扫描"）。
+    //
+    // 于是这条是**双向**的：
+    // - 下界：上限必须大于实测最大值，否则 `npm run perf` 永远红，护栏失去意义（旧版只查这半边）。
+    // - 上界：上限不许超过实测值的 1.6 倍（推导规则是 ×1.15 上取整到 10 ⇒ 正常最松也远在此内）。
+    //   没有这半边，谁都能把某格悄悄改回"合批前的 510"还说自己在收紧预算 —— 表只会被放宽，
+    //   永远不会被压紧。
+    const 实测 = {
+      frame: { hub: 278, fantasy: 273, magic: 567, space: 209, void: 133, abyss: 124, gloom: 177, radiant: 432 },
+      body: { hub: 202, fantasy: 206, magic: 524, space: 149, void: 91, abyss: 77, gloom: 109, radiant: 387 },
+      shadow: { hub: 77, fantasy: 67, magic: 43, space: 61, void: 46, abyss: 47, gloom: 68, radiant: 49 },
+    };
+    for (const id of DRAW_CALL_STATION_IDS) {
       const 上 = DRAW_CALL_CEILINGS[id];
       expect(上, `站点 "${id}" 没有上限`).toBeTruthy();
-      expect(上.frame, `站点 "${id}" 的整帧上限 ${上.frame} 比 2026-10-18 实测 ${读数} 还小`).toBeGreaterThan(读数);
+      for (const 列 of ['frame', 'body', 'shadow']) {
+        const 读数 = 实测[列][id];
+        expect(读数, `站点 "${id}" 缺 ${列} 列的实测值（地板不是从这次扫描来的）`).toBeTruthy();
+        expect(上[列], `站点 "${id}" 的 ${列} 上限 ${上[列]} 低于本配方实测 ${读数} ⇒ 门禁会永远红`).toBeGreaterThan(读数);
+        expect(上[列], `站点 "${id}" 的 ${列} 上限 ${上[列]} 超过本配方实测 ${读数} 的 1.6 倍 ⇒ 这一格被凭空放宽`).toBeLessThanOrEqual(读数 * 1.6);
+      }
     }
   });
 });

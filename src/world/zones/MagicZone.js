@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
+import { markNoBatch } from '../zoneBatching.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
 /** 哈利波特风格 — 悬浮城堡、魔法光柱、禁林 */
@@ -109,17 +110,19 @@ export class MagicZone extends BaseZone {
   }
 
   buildForbiddenForest() {
+    // W-C2 切片5：改前这里逐棵 `tree.children[1].material = new …` —— 50 棵禁林树
+    // 50 份同样的深绿材质，合批（按材质分桶）时每桶只剩一棵，等于合不动。
+    // 现在一片林子一份材质，靠 `createTree` 的 `foliageMaterial` 递进去。
+    const forbidden = new THREE.MeshStandardMaterial({
+      color: paletteOf('foliage.forbidden'),
+      roughness: 0.95,
+    });
     for (let i = 0; i < 50; i++) {
       const angle = Math.random() * Math.PI * 2;
       const r = 40 + Math.random() * 60;
       const x = Math.cos(angle) * r;
       const z = Math.sin(angle) * r;
-      const tree = this.createTree(x, z, 1 + Math.random() * 0.5);
-      tree.children[1].material = new THREE.MeshStandardMaterial({
-        color: paletteOf('foliage.forbidden'),
-        roughness: 0.95,
-      });
-      this.group.add(tree);
+      this.group.add(this.createTree(x, z, 1 + Math.random() * 0.5, { foliageMaterial: forbidden }));
     }
   }
 
@@ -216,7 +219,9 @@ export class MagicZone extends BaseZone {
       const book = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.35), bookMat);
       book.position.set((Math.random() - 0.5) * 60, 5 + Math.random() * 15, (Math.random() - 0.5) * 60);
       book.rotation.set(Math.random(), Math.random(), Math.random());
-      this.group.add(book);
+      // 每帧浮 + 每帧转（`update` 里改 `mesh.position.y` / `rotation.y`）：合进批里
+      // 顶点就被烘死了，`this.books` 里那些引用会变成"改了没人看"。
+      this.group.add(markNoBatch(book));
       this.books.push({ mesh: book, baseY: book.position.y, phase: Math.random() * Math.PI * 2 });
     }
   }

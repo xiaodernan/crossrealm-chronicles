@@ -127,6 +127,7 @@ import { UpsideDownVisualPass } from '../effects/UpsideDownVisualPass.js';
 import { PopCultureTriadVisualPass } from '../effects/PopCultureTriadVisualPass.js';
 import { PopCultureWave4VisualPass } from '../effects/PopCultureWave4VisualPass.js';
 import { attachPopCultureZones } from '../world/PopCultureZoneEnhancer.js';
+import { batchZoneStatics } from '../world/zoneBatching.js';
 import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
@@ -279,6 +280,9 @@ export class Game {
     this.world = new WorldManager(this.scene, this.dialog);
     this.world.build();
     attachPopCultureZones(this);
+    // W-C2 切片5：区域静态几何合批。致敬层是最后往 `zone.group` 追加装饰的一方，
+    // 早一步合批就会把它追加的那些留在外面当散件（`world/zoneBatching.js`）。
+    this.zoneBatchStats = batchZoneStatics(this.world);
     this.worldDecorations = new WorldDecorations(this.scene, this.world);
     this.worldDecorations.build();
     this.bossBeacons = new BossBeacons(this.scene, this.world);

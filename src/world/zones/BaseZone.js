@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { applyShadow } from '../../engine/shadowPolicy.js';
 import { makeUvFacetGeometry } from '../../engine/uvGeometry.js';
 import { makeRegionSurfaceMaterial, applyRegionSurface } from '../regionSurfaces.js';
+import { markNoBatch } from '../zoneBatching.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
 export class BaseZone {
@@ -178,7 +179,8 @@ export class BaseZone {
     group.add(ring);
 
     group.position.set(x, y, z);
-    return group;
+    // 光柱每帧上下浮、自转（`update` 里的 `_时相`），且本来就是半透明 —— 不合批。
+    return markNoBatch(group);
   }
 
   getPointsOfInterest() {
@@ -196,11 +198,31 @@ export class BaseZone {
     }
   }
 
-  createTree(x, z, scale = 1) {
+  /**
+   * 树的共享材质（W-C2 切片5）：`createTree` 原来每调一次建两份新材质，中洲 80 棵
+   * 林子就是 160 份一模一样的 `MeshStandardMaterial`。合批按材质分桶，每桶只剩一棵树
+   * ⇒ 想省下的那 160 次绘制一次也省不掉。参数相同就只建一份、全区共用。
+   */
+  treeMaterials() {
+    if (!this._treeMats) {
+      this._treeMats = {
+        trunk: new THREE.MeshStandardMaterial({ color: paletteOf('wood.zoneTrunk'), roughness: 0.95 }),
+        foliage: new THREE.MeshStandardMaterial({ color: paletteOf('foliage.zoneCrown'), roughness: 0.85 }),
+      };
+    }
+    return this._treeMats;
+  }
+
+  /**
+   * 一棵占位树。`foliageMaterial` 让某个区的某片林子换上自己的叶色而**不必逐棵新建**
+   * （禁林 50 棵原来就是逐棵 `tree.children[1].material = new …`，把共享打回原形）。
+   */
+  createTree(x, z, scale = 1, { foliageMaterial } = {}) {
+    const { trunk: trunkMat, foliage: crownMat } = this.treeMaterials();
     const group = new THREE.Group();
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.15 * scale, 0.25 * scale, 2 * scale, 8),
-      new THREE.MeshStandardMaterial({ color: paletteOf('wood.zoneTrunk'), roughness: 0.95 })
+      trunkMat
     );
     trunk.position.y = 1 * scale;
     applyShadow(trunk, 'castOnly');
@@ -208,7 +230,7 @@ export class BaseZone {
 
     const foliage = new THREE.Mesh(
       new THREE.ConeGeometry(1.2 * scale, 3 * scale, 8),
-      new THREE.MeshStandardMaterial({ color: paletteOf('foliage.zoneCrown'), roughness: 0.85 })
+      foliageMaterial ?? crownMat
     );
     foliage.position.y = 3 * scale;
     applyShadow(foliage, 'castOnly');

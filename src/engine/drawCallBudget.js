@@ -48,8 +48,10 @@
  * 而"实测值"取的是**五轮里的最大值**（理由见 `DRAW_CALL_CEILINGS` 上面那张表）。
  * 它是**灾难护栏**（防"垮一个数量级"，与 `perf-budgets.mjs` 里 `frameAvgMs` 同一取向），
  * 不是"达标"的同义词。§1 那条验收线 `acceptLine: 400` 单列着给 HUD 用，两者在文档里对账：
- * 2026-10-20 的同配方读数里**枢纽站五轮读 411–438**（灰白森林一带更不必说），所以"draw call < 400
- * 达标"这句在无头软渲染上从来没成立过；真机读数出来之前，这一条只当**开发期提示**用。
+ * 2026-10-21（区域静态合批之后）的同配方五轮最大值里**八站有六站已经落进 400 以内**
+ * （hub 278、fantasy 273、space 209、gloom 177、void 133、abyss 124），只有 magic 567 与
+ * radiant 432 还越线 —— 切片4 之前那句"这一条从来没成立过"从此不再成立，但真机读数出来之前，
+ * 这一条仍只当**开发期提示**用，门禁认的是逐站三列。
  */
 import { ZONE_IDS, ZONE_ORDER, HUB_ZONE } from '../content/ZoneIdentity.js';
 
@@ -83,44 +85,67 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
 /**
  * 逐站上限（三列，单位 = call/整帧）。
  *
- * **数从哪来**：2026-10-20 在 detached 平面（HEAD `2e74047` + 本片六个文件，`D:/3a-plane-wc2s4`）
- * 用本配方**连跑五轮**（`.tmp-20261018-b94/wc2s4-plane-perf{4,5,7,9,10}.log`），
- * 下表是**逐列取五轮最大值**，再 × 1.15 **上取整到 10**（推导脚本 `.tmp-20261020-wc2s4/repin.mjs`，
- * 它读日志算上限，不手抄数）：
+ * **数从哪来**：2026-10-21 在 detached 平面（HEAD `2e74047` 之后的 W-C2 切片5 那批文件，
+ * `D:/3a-plane-wc2s5`）用本配方**连跑五轮**（`.tmp-wc2s5/perf-r{1,3,4,8,9}.log`），
+ * 下表是**逐列取五轮最大值**，再 × 1.15 **上取整到 10**（推导脚本 `.tmp-wc2s5/repin.mjs`，
+ * 它读日志算上限，不手抄数；站点对不上本表键集时它当场抛）：
  *
  * | 站 | 整帧 | 本体 | 阴影 |
  * |---|---|---|---|
- * | hub | 438 | 232 | 206 |
- * | fantasy | 627 | 327 | 300 |
- * | magic | 901 | 743 | 160 |
- * | space | 236 | 159 | 79 |
- * | void | 150 | 80 | 70 |
- * | abyss | 183 | 75 | 109 |
- * | gloom | 214 | 129 | 85 |
- * | radiant | 877 | 668 | 214 |
+ * | hub | 278 | 202 | 77 |
+ * | fantasy | 273 | 206 | 67 |
+ * | magic | 567 | 524 | 43 |
+ * | space | 209 | 149 | 61 |
+ * | void | 133 | 91 | 46 |
+ * | abyss | 124 | 77 | 47 |
+ * | gloom | 177 | 109 | 68 |
+ * | radiant | 432 | 387 | 49 |
  *
  * **为什么是"五轮最大值"而不是"某一轮的数"**：静置读数本身在抖 —— 同一配方同一站，
- * abyss 阴影五轮读 91/109/97/90/94（跨度 19），radiant 阴影 190/209/214/214/202（跨度 24），
- * hub 整帧 411–438（跨度 27）。第一版上限是按单轮（perf4）钉的，于是第二次真跑就出现
- * "阴影 214 vs 上限 220"这种只剩 6 个 call 余量的格 —— 门禁的红绿从此由噪声决定，
- * 而这正是本模块头部"口径"一节要避免的事。取最大值 ⇒ 余量来自实测抖动，不来自运气。
+ * hub 整帧五轮跨度 8、radiant 7、void 阴影 4（完整跨度见上面那张表的推导脚本输出）。
+ * 切片4 的第一版上限是按单轮（perf4）钉的，于是第二次真跑就出现"阴影 214 vs 上限 220"
+ * 这种只剩 6 个 call 余量的格 —— 门禁的红绿从此由噪声决定，而这正是本模块头部"口径"
+ * 一节要避免的事。取最大值 ⇒ 余量来自实测抖动，不来自运气。
  *
- * 这批数**替代**了上一版本按 2026-10-18 只读普查推的第一版上限 —— 那版没有本体/阴影分列的
- * 同配方读数，三列里两列是猜的。第一次真跑就红了三次（magic 本体 739 > 620、abyss 阴影 91 > 90、
- * radiant 本体 648 > 640），那三条红是**表的功劳**：它量出了自己没量过的东西。
+ * ## 这一版比上一版紧了一个量级，因为区域静态几何合批了（切片5 / B94）
+ *
+ * 上一版（切片4）的数：hub 510/270/240、fantasy 730/380/350、magic 1040/860/190、
+ * space 280/190/100、void 180/100/90、abyss 220/90/130、gloom 250/150/100、
+ * radiant 1010/770/250。同一台机器、同一配方、同一批站点，合批之后整帧读数是
+ * **hub 438→278、fantasy 627→273、magic 901→567、radiant 877→432**，阴影列掉得更狠
+ * （hub 206→77、fantasy 300→67、radiant 214→49）—— 阴影框里那些散件本来就要再画一遍，
+ * 合一件就少一趟。
+ *
+ * **合批的效果另有一组对照臂**（把 `Game.js` 里那句 `batchZoneStatics` 摘掉，同平面同日跑两轮
+ * `perf-nb{1,3}.log`）：无合批时 hub 读 418–430 / fantasy 603–619 / radiant 839–875，
+ * 与合批后的 273–278 / 273 / 432 差出一个数量级的一半 —— 这一版上限的余量因此**不是**
+ * 照着旧表打折，而是重新量出来的。
+ *
+ * **两格需要点名解释**（其余逐列都收紧，唯独这两格放宽；不写清楚，下一个人只会看到数字变大）：
+ * - **void 本体 100 → 110**：合批**关掉**的对照臂同样读到 79 与 91 —— 这一格从来不是被合批推上去的，
+ *   而是切片4 那个 100 来自另一天/另一平面的一轮（`perf4`），今天的五轮最大值 91 × 1.15 就落到 110。
+ *   按"数从同一把尺来"的纪律，尺子换成今天这五轮，这一格就得跟着今天走。
+ * - **abyss 本体 75 → 77（上限仍 90）**：合批之后散落的碎石被并进**一个**合并网格，而合并网格只有
+ *   **一个**包围球 —— 整片场地只要有一部分进视锥就整件画。件数少了（该站阴影趟 109→47、
+ *   整帧 183→124），但"这一件里有多少三角形在画面外"变粗了。这是合批的固有代价，
+ *   写在 `tests/zone-batching.test.js` 的守恒口径之外，由本表这一格盯住。
+ *
+ * 这批数**替代**了切片4 那版 —— 那版量的是合批前的世界。第一次真跑就红了三次
+ * （magic 本体 739 > 620、abyss 阴影 91 > 90、radiant 本体 648 > 640），那三条红是**表的功劳**：
+ * 它量出了自己没量过的东西。今天同理：如果下一片把某站推回旧量级，这张表会当场喊。
  *
  * **键必须与 `DRAW_CALL_STATION_IDS` 完全一致** —— 多一格是"给一个没测过的站发通行证"，
  * 少一格是"这一站被静默放开"，两种都由 `tests/draw-call-budget.test.js` 当场拦。
  */
 export const DRAW_CALL_CEILINGS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 510, body: 270, shadow: 240 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 730, body: 380, shadow: 350 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 1040, body: 860, shadow: 190 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 280, body: 190, shadow: 100 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 180, body: 100, shadow: 90 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 90, shadow: 130 }),
-  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 250, body: 150, shadow: 100 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 1010, body: 770, shadow: 250 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 320, body: 240, shadow: 90 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 320, body: 240, shadow: 80 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 610, shadow: 50 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 250, body: 180, shadow: 80 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 160, body: 110, shadow: 60 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 150, body: 90, shadow: 60 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 210, body: 130, shadow: 80 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 500, body: 450, shadow: 60 }),
 });
 
 /** 把三样东西收成一个对象，方便读者一次拿全（HUD 只取 `acceptLine`，门禁取整份） */

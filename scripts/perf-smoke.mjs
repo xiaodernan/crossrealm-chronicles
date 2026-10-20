@@ -211,11 +211,18 @@ try {
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
   let ready = false;
-  for (let i = 0; i < 60 && !ready; i += 1) {
+  /**
+   * 开机窗口 120 秒（不是 30 秒）：`.tmp-20261020-wc2s5/why-no-game.mjs` 在同一条 dev 口上量到过
+   * `window.__game` 要 **57.5 秒**才出现（vite 冷缓存按需转译 ~300 个模块，每个的 duration 是排队
+   * 时间而不是编译时间）。30 秒那一档红的是缓存，不是代码 —— 而这一条腿将来要进 CI（W-D4 切片3），
+   * CI 的 node_modules/.vite 每轮都是冷的。普查侧（`.tmp-wc2s5/census.mjs`）早就放宽到 120 秒，
+   * 两边同一把尺。
+   */
+  for (let i = 0; i < 240 && !ready; i += 1) {
     await sleep(500);
     ready = await evalJs('!!window.__game && !!window.__game.enemyManager');
   }
-  if (!ready) throw new Error('游戏 30 秒内没起来');
+  if (!ready) throw new Error('游戏 120 秒内没起来');
 
   /**
    * 一站读数：手工推帧（真 `game.update()` + 真 `game.render()`），量 CPU 耗时。

@@ -199,14 +199,33 @@ const 魔法区 = {
     return [m ? m.position.y : 0, m ? m.rotation.y : 0];
   },
 };
+const 漂浮书相位 = [0, Math.PI / 4, Math.PI / 2 + 0.6, -0.9];
 const 漂浮书 = {
   文件: 'src/world/zones/MagicZone.js', 名: '魔法区漂浮书',
-  造: () => ({ obj: new MagicZone(new THREE.Scene(), new THREE.Vector3(0, 0, -180), { toast() {} }) }),
-  读: (x) => {
-    const b = x.obj.books?.[0];
-    return [b ? b.mesh.position.y : 0];
+  造: () => {
+    const obj = new MagicZone(new THREE.Scene(), new THREE.Vector3(0, 0, -180), { toast() {} });
+    // 把读的那几本书的**相位钉死**（生产里 `phase: Math.random()*2π`，这里只是把夹具选中
+    // 那几本的相位改成已知值 —— 不改振幅、不改公式、不改其余本）。
+    //
+    // 为什么必须钉：C 档只走 0.08 时标，即 60 帧把 `_时相` 推进 0.08 弧度；如果这一本的相位
+    // 落在 sin 的**转折点**（`cos ≈ 0`，波峰/波谷）上，那点窗口内的位移是**二阶小量**，
+    // C/A 读到 0.011 而不是 0.08 —— 用例红，而系统没错。夹具的通过与否不能靠播种流恰好
+    // 抽到哪一档：切片5 把禁林那 50 棵树的材质改成共享，抽到的相位从 344.4° 变成 271.6°
+    // （后者离波谷只差 1.6°），于是一条量"相位吃不吃世界时"的用例被**无关的构建改动**打红。
+    // 相位由夹具点名之后，这条对播种流的变动免疫，而 B 档（dt=0 ⇒ `_时相` 不动）依然为 0。
+    obj.books.slice(0, 漂浮书相位.length).forEach((b, i) => { b.phase = 漂浮书相位[i]; });
+    return { obj };
   },
+  读: (x) => 漂浮书相位.map((_, i) => {
+    const b = x.obj.books?.[i];
+    return b ? b.mesh.position.y : 0;
+  }),
 };
+// 夹具自己的体检：钉进去的相位不许站在 sin 的转折点上（那会让上面那条比值变成二阶小量，
+// 也就是把这条用例的余量交还给运气 —— 只是这次由夹具而不是播种流决定）。
+for (const 相 of 漂浮书相位) {
+  if (Math.abs(Math.cos(相)) < 0.3) throw new Error(`漂浮书夹具的相位 ${相} 落在 sin 转折点附近`);
+}
 const 时环 = {
   文件: 'src/world/zones/SpaceZone.js', 名: '太空区时环透明度',
   造: () => ({ obj: new SpaceZone(new THREE.Scene(), new THREE.Vector3(0, 0, 180), { toast() {} }) }),

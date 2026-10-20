@@ -3,6 +3,7 @@ import { BaseZone } from './BaseZone.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { applyShadow } from '../../engine/shadowPolicy.js';
 import { makeUvConeGeometry, makeUvFacetGeometry } from '../../engine/uvGeometry.js';
+import { markNoBatch } from '../zoneBatching.js';
 import { paletteOf } from '../../content/materialPalette.js';
 import { shouldUpdate as frameShouldUpdate } from '../../engine/FrameBudget.js';
 
@@ -99,7 +100,7 @@ export class SpaceZone extends BaseZone {
 
     bhGroup.position.set(30, 80, -40);
     this.group.add(bhGroup);
-    this.blackHole = bhGroup;
+    this.blackHole = markNoBatch(bhGroup);
 
     const starsGeo = new THREE.BufferGeometry();
     const starCount = 500;
@@ -241,7 +242,9 @@ export class SpaceZone extends BaseZone {
     zone.add(ring);
     zone.position.set(10, this.sampleHeight(10, 0), 0);
     this.group.add(zone);
-    this.timeRing = ring;
+    // 今天它靠"半透明不合批"侥幸躲过；真正的事实是 `update` 每帧转它、还改它的
+    // `material.opacity` —— 声明出来，别让它靠材质的偶然性保命。
+    this.timeRing = markNoBatch(ring);
   }
 
   update(dt) {
