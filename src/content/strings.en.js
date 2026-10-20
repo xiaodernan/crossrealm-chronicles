@@ -259,6 +259,26 @@ export const STRINGS_EN = Object.freeze({
   rest_point_campfire_name: '${zone} Campfire',
   rest_point_name_hub: 'World Anchor Rest Point',
 
+  // 两座后期副本守钥者台词（此前一句都没有）
+  boss_dungeon_gloom_mist_crypt_intro: "Mist pours up from the depths of the crypt — the warden opens its eyes inside the fog.",
+  boss_dungeon_gloom_mist_crypt_p2: "Something in the mist wakes — the warden is no longer only a warden.",
+  boss_dungeon_gloom_mist_crypt_defeat: "The mist clears. The shadow of a fragment shows deep in the crypt.",
+  boss_dungeon_radiant_dawn_hall_intro: "Dawn light falls from the vault — the warden raises the Key of the Hub.",
+  boss_dungeon_radiant_dawn_hall_p2: "The hall's light turns white — the warden's shadow begins to split.",
+  boss_dungeon_radiant_dawn_hall_defeat: "The hall falls quiet. The fragment behind the door is still warm.",
+
+  // 副本守钥者第三阶段（补两座）
+  boss_dungeon_gloom_mist_crypt_p3: "The mist swallows the lamps — the warden's outline shifts behind the fog.",
+  boss_dungeon_radiant_dawn_hall_p3: "The hall's golden light turns white — the warden raises the Key of the Hub.",
+
+  // 副本守钥者第三阶段（W-D2 / W-E3 切片5）
+  boss_dungeon_ruin_crypt_p3: "The tomb warden calls up every dead soul — the gravestones begin to move.",
+  boss_dungeon_forbidden_library_p3: "The page-keeper tears the forbidden book open — the loose pages chase you.",
+  boss_dungeon_five_dim_rift_p3: "The supervisor twists the geometry — the room begins to fold.",
+  boss_dungeon_forest_shrine_p3: "The ancient tree's roots break the surface — the warden no longer holds a fixed shape.",
+  boss_dungeon_hub_catacombs_p3: "The Key of the Hub begins to resonate — the walls of the crypt shift.",
+  boss_dungeon_phase3_banner: "Key Warden · Phase III",
+
   // 秘典文案（W-D2 切片16w）
   codex_anchor_title: "World Anchor",
   codex_anchor_text: "The stable point where the three realms meet. The anchor flame is not wood — it is the afterglow of planes grinding together.",

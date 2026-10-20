@@ -45,27 +45,44 @@ export const DUNGEON_BOSS_LINES = {
   'ruin-crypt': {
     intro: 'boss_dungeon_ruin_crypt_intro',
     p2: 'boss_dungeon_ruin_crypt_p2',
+    p3: 'boss_dungeon_ruin_crypt_p3',
     defeat: 'boss_dungeon_ruin_crypt_defeat',
   },
   'forbidden-library': {
     intro: 'boss_dungeon_forbidden_library_intro',
     p2: 'boss_dungeon_forbidden_library_p2',
+    p3: 'boss_dungeon_forbidden_library_p3',
     defeat: 'boss_dungeon_forbidden_library_defeat',
   },
   'five-dim-rift': {
     intro: 'boss_dungeon_five_dim_rift_intro',
     p2: 'boss_dungeon_five_dim_rift_p2',
+    p3: 'boss_dungeon_five_dim_rift_p3',
     defeat: 'boss_dungeon_five_dim_rift_defeat',
   },
   'forest-shrine': {
     intro: 'boss_dungeon_forest_shrine_intro',
     p2: 'boss_dungeon_forest_shrine_p2',
+    p3: 'boss_dungeon_forest_shrine_p3',
     defeat: 'boss_dungeon_forest_shrine_defeat',
   },
   'hub-catacombs': {
     intro: 'boss_dungeon_hub_catacombs_intro',
     p2: 'boss_dungeon_hub_catacombs_p2',
+    p3: 'boss_dungeon_hub_catacombs_p3',
     defeat: 'boss_dungeon_hub_catacombs_defeat',
+  },
+  'radiant-dawn-hall': {
+    intro: 'boss_dungeon_radiant_dawn_hall_intro',
+    p2: 'boss_dungeon_radiant_dawn_hall_p2',
+    p3: 'boss_dungeon_radiant_dawn_hall_p3',
+    defeat: 'boss_dungeon_radiant_dawn_hall_defeat',
+  },
+  'gloom-mist-crypt': {
+    intro: 'boss_dungeon_gloom_mist_crypt_intro',
+    p2: 'boss_dungeon_gloom_mist_crypt_p2',
+    p3: 'boss_dungeon_gloom_mist_crypt_p3',
+    defeat: 'boss_dungeon_gloom_mist_crypt_defeat',
   },
 };
 

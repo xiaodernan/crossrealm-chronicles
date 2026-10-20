@@ -94,6 +94,48 @@ export const BOSS_ARENA_SCRIPTS = {
     // 入场点的是红色弹幕：第三阶段开场先来一片红的
     { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 8, range: 20, tint: 0xff2244, entry: true },
   ],
+  /**
+   * W-E3 切片5：五座副本守钥者各配一份**专属**场地脚本。
+   *
+   * 改前它们全吃 `default` 兜底（转二阶段砸一次地）—— 于是五座副本的守钥者战
+   * 在场地维度上是**同一场仗**：玩家在五座迷宫里看到的红圈、节奏与躲法完全一样。
+   * 现在每座有自己的招牌：墓碑与亡魂、飞页追人、几何折叠、根须破土、枢纽之钥共鸣。
+   *
+   * 数值口径：
+   * - `range` 都收在 18 米以内 —— 副本的房间比 Boss 竞技场小，圈铺在房间外没有意义；
+   * - 每座**只有一枚入场招**（同一阶段至多一枚，见 `assertArenaScript`）；
+   * - 冷却与频率错开，避免"砸地与大范围普攻互相顶"（引力化身与混沌领主那一族的老问题）。
+   */
+  'dungeon-ruin-crypt': [
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.4, entry: true },
+    { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 9, range: 16, tint: 0x8a8a72 },
+  ],
+  'dungeon-forbidden-library': [
+    { move: 'barrage', phase: 2, trigger: 'opportunity', cooldown: 6, range: 18, entry: true },
+    { move: 'slam', phase: 3, trigger: 'timed', rate: 0.07 },
+  ],
+  'dungeon-five-dim-rift': [
+    { move: 'slam', phase: 2, trigger: 'timed', rate: 0.08, entry: true },
+    { move: 'well', phase: 3, trigger: 'opportunity', cooldown: 11, range: 13 },
+  ],
+  'dungeon-forest-shrine': [
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.45, entry: true },
+    { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 8, range: 15, tint: 0x88cc66 },
+  ],
+  'dungeon-hub-catacombs': [
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35, entry: true },
+    { move: 'freeze', phase: 3, trigger: 'opportunity', cooldown: 12, range: 15 },
+  ],
+  'dungeon-gloom-mist-crypt': [
+    // 迷雾墓穴：雾里看不清脚下 —— 招牌是**时停域**（视野一暗，站错就是四秒不能动）
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.4, entry: true },
+    { move: 'freeze', phase: 3, trigger: 'opportunity', cooldown: 13, range: 14, tint: 0x4a4a7a },
+  ],
+  'dungeon-radiant-dawn-hall': [
+    // 晨曦圣殿：金光里到处是圈 —— 招牌是**弹幕**（入场的第一片就压过来）
+    { move: 'barrage', phase: 2, trigger: 'opportunity', cooldown: 6, range: 18, tint: 0xffdd66, entry: true },
+    { move: 'slam', phase: 3, trigger: 'timed', rate: 0.07 },
+  ],
 };
 
 /**

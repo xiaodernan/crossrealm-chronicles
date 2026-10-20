@@ -19,6 +19,7 @@ import {
 } from '../src/content/arenaScripts.js';
 import { GROUND_HAZARD } from '../src/content/tuning.js';
 import { BOSS_IDS } from '../src/content/bossRoster.js';
+import { DUNGEON_IDS } from '../src/content/dungeons.js';
 import { Boss } from '../src/combat/Boss.js';
 import { MagicBoss } from '../src/combat/MagicBoss.js';
 import { SpaceBoss } from '../src/combat/SpaceBoss.js';
@@ -93,7 +94,7 @@ describe('脚本表自证', () => {
     expect(() => assertArenaScript({ x: [p2, { ...p3, phase: 2 }] })).toThrow(/entry/);
   });
 
-  it('入场标记集钉死：九枚 entry 的落点（动它必须来这里改，不许悄悄漂）', () => {
+  it('入场标记集钉死：十六枚 entry 的落点（动它必须来这里改，不许悄悄漂）', () => {
     const marks = Object.entries(BOSS_ARENA_SCRIPTS).flatMap(([id, script]) =>
       script.flatMap((e, i) => (e.entry === true ? [`${id}[${i}]:${e.move}@p${e.phase}`] : [])));
     expect(marks).toEqual([
@@ -106,6 +107,14 @@ describe('脚本表自证', () => {
       'void-chronarch[1]:freeze@p3',
       'chaos-overlord[0]:slam@p2',
       'chaos-overlord[2]:barrage@p3',
+      // W-E3 切片5：七座副本守钥者各有一枚入场招（此前它们全吃 default）
+      'dungeon-ruin-crypt[0]:slam@p2',
+      'dungeon-forbidden-library[0]:barrage@p2',
+      'dungeon-five-dim-rift[0]:slam@p2',
+      'dungeon-forest-shrine[0]:slam@p2',
+      'dungeon-hub-catacombs[0]:slam@p2',
+      'dungeon-gloom-mist-crypt[0]:slam@p2',
+      'dungeon-radiant-dawn-hall[0]:barrage@p2',
     ]);
     // 井刻意不列入场：标了它，转阶段那一帧会无条件破掉引力化身的距离博弈
     expect(marks.some((m) => m.includes(':well@'))).toBe(false);
@@ -120,13 +129,31 @@ describe('脚本表自证', () => {
     // "逐 Boss 遭遇编排"的反面不是"没登记"（未登记本就走 default），而是**登记了却抄了兜底**
     // —— 表里多了个 key、读起来像写过了，打起来和没写一字不差。这比彻底漏登记更阴：
     // 漏登记会被下面那条重名闸门抓到，克隆 default 则什么闸门都不响。
-    // 副本 Boss 刻意不在 BOSS_IDS 里，它们本就该走 default —— 这条只管名册上的世界 Boss。
+    // W-E3 切片5 起，**副本守钥者也各有自己的编排**（见下面那条）—— 这条只管名册上的世界 Boss。
     const def = JSON.stringify(BOSS_ARENA_SCRIPTS.default);
     for (const id of BOSS_IDS) {
       const script = BOSS_ARENA_SCRIPTS[id];
       expect(script, `${id} 没在场地脚本表里点名（会静默落 default）`).toBeTruthy();
       expect(JSON.stringify(script),
         `${id} 的编排与 default 兜底完全一致——等于没给这只世界 Boss 写专属遭遇`).not.toBe(def);
+    }
+  });
+
+  /**
+   * W-E3 切片5：五座副本守钥者**各有**自己的场地编排。
+   *
+   * 改前它们全吃 `default` 兜底 —— 于是五座副本的守钥者战在场地维度上是**同一场仗**：
+   * 玩家在五座迷宫里看到的红圈、节奏与躲法完全一样。
+   * 症状不是报错，只是"第五座副本打起来像第一座的复印件"。
+   */
+  it('每一座副本守钥者都有自己的场地编排（不吃 default 兜底）', () => {
+    const def = JSON.stringify(BOSS_ARENA_SCRIPTS.default);
+    expect(DUNGEON_IDS.length, '副本一座都没有，这条门禁在空转').toBeGreaterThanOrEqual(5);
+    for (const id of DUNGEON_IDS) {
+      const script = BOSS_ARENA_SCRIPTS[`dungeon-${id}`];
+      expect(script, `副本 "${id}" 的守钥者没有自己的场地编排（会静默落 default）`).toBeTruthy();
+      expect(JSON.stringify(script),
+        `副本 "${id}" 的编排与 default 兜底完全一致——等于没给这座守钥者写专属遭遇`).not.toBe(def);
     }
   });
 

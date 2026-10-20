@@ -259,6 +259,26 @@ export const STRINGS_ZH = Object.freeze({
   rest_point_campfire_name: '${zone}营火',
   rest_point_name_hub: '世界之锚休息点',
 
+  // 两座后期副本守钥者台词（此前一句都没有）
+  boss_dungeon_gloom_mist_crypt_intro: "迷雾从墓穴深处涌出 — 守钥者在雾里睁眼。",
+  boss_dungeon_gloom_mist_crypt_p2: "雾里的东西醒了 — 守钥者不再只是守钥者。",
+  boss_dungeon_gloom_mist_crypt_defeat: "雾散了。墓穴深处露出碎片的影子。",
+  boss_dungeon_radiant_dawn_hall_intro: "晨光从穹顶落下 — 守钥者举起枢纽之钥。",
+  boss_dungeon_radiant_dawn_hall_p2: "圣殿的光转成白色 — 守钥者的影子开始分裂。",
+  boss_dungeon_radiant_dawn_hall_defeat: "圣殿归于安静。门后的碎片在发烫。",
+
+  // 副本守钥者第三阶段（补两座）
+  boss_dungeon_gloom_mist_crypt_p3: "迷雾吞没了灯火 — 守钥者的轮廓在雾里换了几次。",
+  boss_dungeon_radiant_dawn_hall_p3: "圣殿的金光骤然变白 — 守钥者举起枢纽之钥。",
+
+  // 副本守钥者第三阶段（W-D2 / W-E3 切片5）
+  boss_dungeon_ruin_crypt_p3: "守墓者唤起全部亡魂 — 墓碑开始移动。",
+  boss_dungeon_forbidden_library_p3: "守页人撕开禁书 — 飞出的纸页会追着你。",
+  boss_dungeon_five_dim_rift_p3: "监工扭曲几何 — 房间开始折叠。",
+  boss_dungeon_forest_shrine_p3: "古树的根须破土 — 守钥者不再有固定形状。",
+  boss_dungeon_hub_catacombs_p3: "枢纽之钥开始共鸣 — 墓穴的墙在移动。",
+  boss_dungeon_phase3_banner: "守钥者 · 第三阶段",
+
   // 秘典文案（W-D2 切片16w）
   codex_anchor_title: "世界之锚",
   codex_anchor_text: "三界交汇处的稳定点。锚火非柴焰，而是位面摩擦的余温。",
