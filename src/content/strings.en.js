@@ -644,6 +644,60 @@ export const STRINGS_EN = Object.freeze({
   ambient_abyss_p1: 'Crates collide in the dock warehouse — the soulfire smuggling line still runs.',
   ambient_abyss_p2: 'Three family-altar candles light a black mirror — the one in it is not you.',
 
+  // Dungeon boss intro (W-D2 slice 16c)
+  boss_lore_ruin_crypt_title: 'Ruin Crypt Keeper',
+  boss_lore_ruin_crypt_text: 'The tomb keeper at the bottom of the Greywhite Ruins has awoken. Defeat it, and the anchor fragment will appear.',
+  boss_lore_forbidden_library_title: 'Forbidden Library Pagekeeper',
+  boss_lore_forbidden_library_text: 'Ten thousand forbidden books fused into a single name. It allows no one to read the last page.',
+  boss_lore_five_dim_rift_title: 'Rift Foreman',
+  boss_lore_five_dim_rift_text: 'A projection of a five-dimensional being. Here it is only three-dimensional — and still deadly enough.',
+  boss_lore_forest_shrine_title: 'Shrine Ancient Tree',
+  boss_lore_forest_shrine_text: 'The roots entwine more than stone — they entwine the memory of a previous era.',
+  boss_lore_hub_catacombs_title: 'Hub Keywarden',
+  boss_lore_hub_catacombs_text: 'At the deepest point of the catacombs, the keywarden waits for the one who can walk every maze.',
+
+  // Chapter intros (W-D2 slice 16c)
+  chapter_intro_2_title: 'Chapter 2 · Endless Planes',
+  chapter_intro_2_text: `After the anchor was reforged, the walls between planes thinned.
+
+The wanderer says chests and campfires are the basics of survival; the elven scout points to deeper boss circles. Beyond the five zones, more mazes are waiting.`,
+  chapter_intro_3_title: 'Chapter 3 · Plane Ascension',
+  chapter_intro_3_text: `The arcane and stellar fragments are both in hand. The three dungeons are the final trials before ascension: the ruins, the library, the rift.
+
+Learn spells 1–4, unlock weapon skills at a campfire, then face the Singularity Herald.`,
+  chapter_intro_4_title: 'Chapter 4 · Broken Timeline',
+  chapter_intro_4_text: `Time folds here. Head north into the Broken Timeline — a charged spell can interrupt a boss.
+
+The Void Chronarch guards the fourth fragment. Defeat it, and you will reach the threshold of the true Plane Walker.`,
+  chapter_intro_5_title: 'Chapter 5 · Chaos Border',
+  chapter_intro_5_text: `Chaos is not the end, it is a sieve. Lightning strikes without warning in the northwest border.
+
+After the Rift Lord falls, the old dungeons return with a random layout for the "abyss redive" — the last step toward becoming an Endless Walker.`,
+
+  // Zone story hooks (W-D2 slice 16c: the single source of truth in ZONE_STORY_HOOKS)
+  zone_hook_hub_toast: 'Hub: where all planes intersect. The World Anchor\'s pulse spreads from here.',
+  zone_hook_hub_journal: 'Crossing Hub — the center of the planes. Every cross-plane journey leaves a footprint on the anchor.',
+  zone_hook_fantasy_toast: 'Greywhite Forest: elven ruins and the One Ring. The Shadow Warden holds the west.',
+  zone_hook_fantasy_journal: 'The Greywhite Forest reeks of old wars. The ring and the tower hold the Ch1 fragments.',
+  zone_hook_magic_toast: 'Hogwarts Ruins: floating castles drift in the fog. The Forbidden Forest whispers you off course.',
+  zone_hook_magic_journal: 'Hogwarts-style ruins. The Archmagus\'s arena lies deeper in.',
+  zone_hook_space_toast: 'Miller\'s Wastes: the gravitational lens bends starlight. The Endurance wreck is still broadcasting.',
+  zone_hook_space_journal: 'Time feels unreliable in the stellar zone. The five-dimensional tesseract is the core puzzle of Ch3.',
+  zone_hook_void_toast: 'Broken Timeline: gravity flips without warning. A charged spell is the key to survival.',
+  zone_hook_void_journal: 'Timeline rifts and five-dimensional steles meet here. The true ending of Ch4 is hidden within.',
+  zone_hook_abyss_toast: 'Chaos Border: lightning falls without warning. The chaos core pulses to the northwest.',
+  zone_hook_abyss_journal: 'The endgame of Ch5. The Rift Lord\'s arena is the last judgment.',
+
+  // Dungeon entry lines and stats (W-D2 slice 16c)
+  dungeon_enter_ruin_crypt: 'Ruins Maze: the stone walls remember every footstep.',
+  dungeon_enter_forbidden_library: 'Forbidden Maze: behind the shelves is not books, but disasters that have not happened.',
+  dungeon_enter_five_dim_rift: 'Rift Maze: geometry is not trustworthy here.',
+  dungeon_enter_forest_shrine: 'Shrine Maze: the roots breathe underfoot.',
+  dungeon_enter_hub_catacombs: 'Hub Catacombs: the shortest maze, the deepest keywarden.',
+  dungeon_enter_stats: 'Maze ${w}×${h} · ${rooms} rooms · ${doors} doors.\nClear a room\'s enemies and its door opens; glowing stelae [{interact}] read the lore; the roundest room holds the keywarden.',
+  keywarden_cleared_title: 'The Keywarden Has Fallen',
+  keywarden_cleared_text: 'The exit ring lights up. You hear a sigh from deep in the hub — as if some plane finally exhaled.\n\n[{interact}] Leave the maze and continue the main line.',
+
   // The five bonus rows (were literals in content/cgGallery.js; same batch as the ten above)
   cg_gallery_style_ss: 'Combat Style SS',
   cg_gallery_rematch: 'Boss Rematch',

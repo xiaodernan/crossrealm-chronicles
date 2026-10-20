@@ -1,5 +1,7 @@
-import { CHAPTER_INTROS } from './LoreFragments.js';
+import { CHAPTER_INTROS, ZONE_STORY_HOOKS, KEYWARDEN_CLEARED } from './LoreFragments.js';
 import { scheduler } from '../engine/Scheduler.js';
+import { t } from '../engine/i18n.js';
+import { keyText } from '../content/keyHints.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -39,12 +41,16 @@ export class StoryDirector {
       this.shownChapters.add(ch);
       const intro = CHAPTER_INTROS[ch];
       scheduler.after(1.2, () => {
-        this.game.dialog.show(intro.title, intro.text);
+        /* `intro.title` / `intro.text` 现在是**文案键**（W-D2 切片16c）：
+         * 展开只在这一处做一次，对话框与日志条目拿到同一份快照。 */
+        const 标题 = keyText(t(intro.title));
+        const 正文 = keyText(t(intro.text));
+        this.game.dialog.show(标题, 正文);
         this.game.storyJournal?.addSilent({
           id: `chapter-intro-${ch}`,
           category: 'quest',
-          title: intro.title,
-          text: intro.text,
+          title: 标题,
+          text: 正文,
           chapter: ch,
         });
       }, STORY_TAG);
@@ -53,28 +59,23 @@ export class StoryDirector {
     storyOn('zone-changed', (e) => {
       if (e.detail.initial) return;
       const zone = e.detail.zone;
-      const hooks = {
-        hub: '交汇枢纽 — 位面中心。每一次跨区域旅行，锚点都会记录你的足迹。',
-        fantasy: '灰白森林弥漫着旧战争的气息。石环与塔楼是 Ch1 碎片的所在。',
-        magic: '霍格莫茨风格的废墟。大奥术师的竞技场在更深处。',
-        space: '星际区的时间感不可靠。五维_tesseract 是 Ch3 的核心谜题。',
-        void: '时线裂隙与五维碑文在此交汇。Ch4 的真结局隐藏于此。',
-        abyss: 'Ch5 终局之地。裂隙领主的竞技场是最后的审判。',
-      };
       // 修 B35：去重 key 此前取 `zone?.id ?? 'unknown'`，而枢纽与走廊是伪造对象、
       // 没有 id —— 于是两者的日志永久落在同一个 'unknown' 上，只有一条进得了日志
       const id = e.detail.zoneId;
       if (this.shownZones.has(id)) return;
       this.shownZones.add(id);
-      const journal = hooks[id];
-      if (journal) {
+      /* 区域钩子只从 `ZONE_STORY_HOOKS` 取（W-D2 切片16c）——
+       * 改前这里自己手抄了六句 `journal`，与那张表逐字相同却各说各的：
+       * 改表不改这里（或反过来），两处就分家了。抄本随本片一并删净。 */
+      const hook = ZONE_STORY_HOOKS[id];
+      if (hook) {
         scheduler.after(2.0, () => {
           this.game.dialog.toast(`${zone.name} — ${zone.subtitle}`, 4500);
           this.game.storyJournal?.addSilent({
             id: `zone-hook-${id}`,
             category: 'poi',
             title: zone.name,
-            text: journal,
+            text: keyText(t(hook.journal)),
             chapter: this.game.quests.chapter,
           });
         }, STORY_TAG);
@@ -87,8 +88,8 @@ export class StoryDirector {
       const room = dungeon.layout.rooms.find((r) => r.id === e.detail.roomId);
       if (room?.isBossArena) {
         this.game.dialog.show(
-          '守钥者已倒',
-          '出口环亮起。你听见枢纽深处传来一声叹息——像是某个位面终于松了一口气。\n\n[{interact}] 离开迷宫，继续主线。'
+          keyText(t(KEYWARDEN_CLEARED.title)),
+          keyText(t(KEYWARDEN_CLEARED.text)),
         );
       }
     });

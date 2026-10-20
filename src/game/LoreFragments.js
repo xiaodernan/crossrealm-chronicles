@@ -14,59 +14,83 @@ export const LORE_FRAGMENTS = [
 ];
 
 
+/**
+ * 副本 Boss 的开场白（**文案键**，W-D2 切片16c）。
+ *
+ * 改前这里是裸中文（标题 + 正文各一句），于是切到英文语言时副本 Boss 仍然用中文自我介绍，
+ * 而对话框里其它句子已经是英文 —— 一屏两语。数据层只存键，显示侧
+ * （`DungeonManager` 的 Boss 出生那段）在那一刻 `keyText(t(键))` 展开。
+ *
+ * 键名 `boss_lore_<副本 id>_title` / `_text`。
+ */
 export const BOSS_LORE = {
-  'ruin-crypt': { title: '遗城守墓者', text: '灰白遗城最深处的守墓者苏醒。击败它，锚点碎片才会显露。' },
-  'forbidden-library': { title: '禁书守页人', text: '万卷禁书合成一个名字。它不允许任何人读到最后一页。' },
-  'five-dim-rift': { title: '裂隙监工', text: '五维生物的投影。在这里它只有三维，但依然足够致命。' },
-  'forest-shrine': { title: '神龛古树', text: '根须缠绕的不仅是石头，还有上一个纪元的记忆。' },
-  'hub-catacombs': { title: '枢纽守钥者', text: '墓穴最深处，守钥者等待能走完全部迷宫的人。' },
+  'ruin-crypt': { title: 'boss_lore_ruin_crypt_title', text: 'boss_lore_ruin_crypt_text' },
+  'forbidden-library': { title: 'boss_lore_forbidden_library_title', text: 'boss_lore_forbidden_library_text' },
+  'five-dim-rift': { title: 'boss_lore_five_dim_rift_title', text: 'boss_lore_five_dim_rift_text' },
+  'forest-shrine': { title: 'boss_lore_forest_shrine_title', text: 'boss_lore_forest_shrine_text' },
+  'hub-catacombs': { title: 'boss_lore_hub_catacombs_title', text: 'boss_lore_hub_catacombs_text' },
 };
 
 
+/**
+ * 章节导语（**文案键**，W-D2 切片16c）。
+ *
+ * 键名 `chapter_intro_<章节>_title` / `_text`。显示侧：`game/StoryDirector.js`
+ * 在 `chapter-changed` 那一帧展开一次，对话框与日志条目拿到同一份。
+ */
 export const CHAPTER_INTROS = {
   2: {
-    title: 'Chapter 2 · 无尽位面',
-    text: '锚点重铸之后，位面之间的墙变薄了。\n\n流浪者说宝箱与营火是生存之本；精灵斥候指向更深的 Boss 红圈。五区之外，还有迷宫在等待。',
+    title: 'chapter_intro_2_title',
+    text: 'chapter_intro_2_text',
   },
   3: {
-    title: 'Chapter 3 · 位面飞升',
-    text: '奥术与星际的碎片齐备。三座地下城是飞升前的最后试炼：遗城、图书馆、裂隙。\n\n学会法术 1–4，在营火解锁武器技能，然后面对奇点领主。',
+    title: 'chapter_intro_3_title',
+    text: 'chapter_intro_3_text',
   },
   4: {
-    title: 'Chapter 4 · 破碎时线',
-    text: '时间在这里折叠。向北进入破碎时线，长按法术蓄力可打断 Boss。\n\n时线执政官守护着第四碎片——击败它，你将触及「真·位面行者」的门槛。',
+    title: 'chapter_intro_4_title',
+    text: 'chapter_intro_4_text',
   },
   5: {
-    title: 'Chapter 5 · 混沌边境',
-    text: '混沌不是终点，是筛子。西北的边境会随机劈落闪电。\n\n击败裂隙领主后，旧地下城会以随机布局「深渊再探」——这是成为无尽行者的最后一步。',
+    title: 'chapter_intro_5_title',
+    text: 'chapter_intro_5_text',
   },
 };
 
 
+/**
+ * 区域故事钩子（**文案键**，W-D2 切片16c）。
+ *
+ * 键名 `zone_hook_<区>_toast` / `zone_hook_<区>_journal`。
+ *
+ * **这份表是区域钩子的唯一真源** —— 改前 `game/StoryDirector.js` 自己又手抄了六句
+ * `journal`（逐字等于这里的 `journal` 字段），两处各说各的：改这一处，另一处不变。
+ * 现在 `StoryDirector` 直接读这份表，抄本随本片一并删净。
+ */
 export const ZONE_STORY_HOOKS = {
   hub: {
-    toast: '枢纽：所有位面的交汇点。世界之锚的脉动从这里扩散。',
-    journal: '交汇枢纽 — 位面中心。每一次跨区域旅行，锚点都会记录你的足迹。',
+    toast: 'zone_hook_hub_toast',
+    journal: 'zone_hook_hub_journal',
   },
   fantasy: {
-    toast: '灰白森林：精灵遗迹与至尊石环。影界守护者镇守西侧。',
-    journal: '灰白森林弥漫着旧战争的气息。石环与塔楼是 Ch1 碎片的所在。',
+    toast: 'zone_hook_fantasy_toast',
+    journal: 'zone_hook_fantasy_journal',
   },
   magic: {
-    toast: '霍格沃兹遗境：悬浮城堡在雾中漂移。禁林低语会迷惑方向。',
-    journal: '霍格莫茨风格的废墟。大奥术师的竞技场在更深处。',
+    toast: 'zone_hook_magic_toast',
+    journal: 'zone_hook_magic_journal',
   },
   space: {
-    toast: '米勒荒原：引力透镜扭曲星光。Endurance 号残骸仍在广播。',
-    journal: '星际区的时间感不可靠。五维_tesseract 是 Ch3 的核心谜题。',
+    toast: 'zone_hook_space_toast',
+    journal: 'zone_hook_space_journal',
   },
   void: {
-    toast: '破碎时线：重力会突然翻转。蓄力法术是生存关键。',
-    journal: '时线裂隙与五维碑文在此交汇。Ch4 的真结局隐藏于此。',
+    toast: 'zone_hook_void_toast',
+    journal: 'zone_hook_void_journal',
   },
   abyss: {
-    toast: '混沌边境：闪电无预警劈落。混沌之核在西北脉动。',
-    journal: 'Ch5 终局之地。裂隙领主的竞技场是最后的审判。',
+    toast: 'zone_hook_abyss_toast',
+    journal: 'zone_hook_abyss_journal',
   },
 };
 
@@ -111,10 +135,27 @@ export const NPC_CHAPTER_LINES = mergeNpcChapterLines({
 });
 
 
+/**
+ * 副本进入语（**文案键**，W-D2 切片16c）。
+ *
+ * 键名 `dungeon_enter_<副本 id>`。显示侧：`DungeonManager.enter()` 那一刻展开。
+ */
 export const DUNGEON_ENTER_LINES = {
-  'ruin-crypt': '遗城迷宫：石墙记得每一次脚步声。',
-  'forbidden-library': '禁书迷宫：书架后面不是书，是未发生的灾难。',
-  'five-dim-rift': '裂隙迷宫：几何在这里不可信。',
-  'forest-shrine': '神龛迷宫：根须在脚下呼吸。',
-  'hub-catacombs': '枢纽墓穴：最短的迷宫，最深的守钥者。',
+  'ruin-crypt': 'dungeon_enter_ruin_crypt',
+  'forbidden-library': 'dungeon_enter_forbidden_library',
+  'five-dim-rift': 'dungeon_enter_five_dim_rift',
+  'forest-shrine': 'dungeon_enter_forest_shrine',
+  'hub-catacombs': 'dungeon_enter_hub_catacombs',
+};
+
+
+/**
+ * 副本守钥者倒下后的收束语（**文案键**，W-D2 切片16c）。
+ *
+ * 改前这两句直接写在 `game/StoryDirector.js` 的监听里 —— 那里是唯一一处"数据写在
+ * 行为文件里"的地方。现在与其它叙事文案同口径：数据层存键，显示侧展开。
+ */
+export const KEYWARDEN_CLEARED = {
+  title: 'keywarden_cleared_title',
+  text: 'keywarden_cleared_text',
 };

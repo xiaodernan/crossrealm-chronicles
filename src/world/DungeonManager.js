@@ -184,7 +184,10 @@ export class DungeonManager {
       const wz = dungeon.def.origin.z + room.z;
       const wallT = dungeon.layout.wallT;
       const boss = new DungeonBoss(this.scene, this.world, {
-        name: BOSS_LORE[dungeon.def.id]?.title ?? `${dungeon.def.name}守钥者`,
+        // `BOSS_LORE[...].title` 现在是**文案键**（W-D2 切片16c）—— 展开在这一处做。
+        name: BOSS_LORE[dungeon.def.id]
+          ? keyText(t(BOSS_LORE[dungeon.def.id].title))
+          : `${dungeon.def.name}守钥者`,
         x: wx,
         z: wz,
         hp: 480 + dungeon.layout.rooms.length * 25,
@@ -214,7 +217,10 @@ export class DungeonManager {
       window.dispatchEvent(new CustomEvent('boss-start', {
         detail: { name: boss.name, bossId: boss.bossId, position: boss.position.clone() },
       }));
-      this.dialog.show(BOSS_LORE[dungeon.def.id]?.title ?? '迷宫守钥者', BOSS_LORE[dungeon.def.id]?.text ?? '击败守钥者以打开出口。');
+      this.dialog.show(
+        BOSS_LORE[dungeon.def.id] ? keyText(t(BOSS_LORE[dungeon.def.id].title)) : '迷宫守钥者',
+        BOSS_LORE[dungeon.def.id] ? keyText(t(BOSS_LORE[dungeon.def.id].text)) : '击败守钥者以打开出口。',
+      );
       window.dispatchEvent(new CustomEvent('game-audio-mode', { detail: { mode: 'boss' } }));
     } else if (!room.isBossArena) {
       for (const e of room.enemySpawns) {
@@ -305,9 +311,19 @@ export class DungeonManager {
     const roomCount = dungeon.layout.rooms.length;
     const doorCount = dungeon.layout.doors.length;
     const enterLine = DUNGEON_ENTER_LINES[dungeon.def.id];
+    /* 进入语与统计行现在都是**文案键**（W-D2 切片16c）。
+     * `${…}` 走 `t()` 的插值、`[{interact}]` 走 `keyText()` 的动作占位 ——
+     * 两套占位语法在一条文案里共存，各自那一层只认自己那一种。 */
+    const 进入语 = enterLine ? keyText(t(enterLine)) : '';
+    const 统计行 = keyText(t('dungeon_enter_stats', {
+      w: dungeon.layout.gridW,
+      h: dungeon.layout.gridH,
+      rooms: roomCount,
+      doors: doorCount,
+    }));
     this.dialog.show(
       dungeon.def.name,
-      `${enterLine ? enterLine + '\n\n' : ''}迷宫 ${dungeon.layout.gridW}×${dungeon.layout.gridH} · ${roomCount} 个房间 · ${doorCount} 扇门。\n清剿房间敌人后门会打开；发光石碑 [{interact}] 读叙事；最远圆房有守钥者。`
+      `${进入语 ? 进入语 + '\n\n' : ''}${统计行}`
     );
     window.dispatchEvent(new CustomEvent('dungeon-enter', {
       // rerun 是 HUD「深渊再探」提示的判据；修前这里从不带，那条提示永远不弹（B44）

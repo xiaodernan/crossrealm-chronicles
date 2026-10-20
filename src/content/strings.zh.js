@@ -641,6 +641,60 @@ export const STRINGS_ZH = Object.freeze({
   ambient_abyss_p1: '码头货仓木箱碰撞 — 魂火走私线仍通。',
   ambient_abyss_p2: '家族圣龛三支蜡烛照黑镜 — 镜里不是你自己。',
 
+  // 副本 Boss 开场白（W-D2 切片16c）
+  boss_lore_ruin_crypt_title: '遗城守墓者',
+  boss_lore_ruin_crypt_text: '灰白遗城最深处的守墓者苏醒。击败它，锚点碎片才会显露。',
+  boss_lore_forbidden_library_title: '禁书守页人',
+  boss_lore_forbidden_library_text: '万卷禁书合成一个名字。它不允许任何人读到最后一页。',
+  boss_lore_five_dim_rift_title: '裂隙监工',
+  boss_lore_five_dim_rift_text: '五维生物的投影。在这里它只有三维，但依然足够致命。',
+  boss_lore_forest_shrine_title: '神龛古树',
+  boss_lore_forest_shrine_text: '根须缠绕的不仅是石头，还有上一个纪元的记忆。',
+  boss_lore_hub_catacombs_title: '枢纽守钥者',
+  boss_lore_hub_catacombs_text: '墓穴最深处，守钥者等待能走完全部迷宫的人。',
+
+  // 章节导语（W-D2 切片16c）
+  chapter_intro_2_title: 'Chapter 2 · 无尽位面',
+  chapter_intro_2_text: `锚点重铸之后，位面之间的墙变薄了。
+
+流浪者说宝箱与营火是生存之本；精灵斥候指向更深的 Boss 红圈。五区之外，还有迷宫在等待。`,
+  chapter_intro_3_title: 'Chapter 3 · 位面飞升',
+  chapter_intro_3_text: `奥术与星际的碎片齐备。三座地下城是飞升前的最后试炼：遗城、图书馆、裂隙。
+
+学会法术 1–4，在营火解锁武器技能，然后面对奇点领主。`,
+  chapter_intro_4_title: 'Chapter 4 · 破碎时线',
+  chapter_intro_4_text: `时间在这里折叠。向北进入破碎时线，长按法术蓄力可打断 Boss。
+
+时线执政官守护着第四碎片——击败它，你将触及「真·位面行者」的门槛。`,
+  chapter_intro_5_title: 'Chapter 5 · 混沌边境',
+  chapter_intro_5_text: `混沌不是终点，是筛子。西北的边境会随机劈落闪电。
+
+击败裂隙领主后，旧地下城会以随机布局「深渊再探」——这是成为无尽行者的最后一步。`,
+
+  // 区域故事钩子（W-D2 切片16c：`ZONE_STORY_HOOKS` 的唯一真源）
+  zone_hook_hub_toast: '枢纽：所有位面的交汇点。世界之锚的脉动从这里扩散。',
+  zone_hook_hub_journal: '交汇枢纽 — 位面中心。每一次跨区域旅行，锚点都会记录你的足迹。',
+  zone_hook_fantasy_toast: '灰白森林：精灵遗迹与至尊石环。影界守护者镇守西侧。',
+  zone_hook_fantasy_journal: '灰白森林弥漫着旧战争的气息。石环与塔楼是 Ch1 碎片的所在。',
+  zone_hook_magic_toast: '霍格沃兹遗境：悬浮城堡在雾中漂移。禁林低语会迷惑方向。',
+  zone_hook_magic_journal: '霍格莫茨风格的废墟。大奥术师的竞技场在更深处。',
+  zone_hook_space_toast: '米勒荒原：引力透镜扭曲星光。Endurance 号残骸仍在广播。',
+  zone_hook_space_journal: '星际区的时间感不可靠。五维_tesseract 是 Ch3 的核心谜题。',
+  zone_hook_void_toast: '破碎时线：重力会突然翻转。蓄力法术是生存关键。',
+  zone_hook_void_journal: '时线裂隙与五维碑文在此交汇。Ch4 的真结局隐藏于此。',
+  zone_hook_abyss_toast: '混沌边境：闪电无预警劈落。混沌之核在西北脉动。',
+  zone_hook_abyss_journal: 'Ch5 终局之地。裂隙领主的竞技场是最后的审判。',
+
+  // 副本进入语与统计行（W-D2 切片16c）
+  dungeon_enter_ruin_crypt: '遗城迷宫：石墙记得每一次脚步声。',
+  dungeon_enter_forbidden_library: '禁书迷宫：书架后面不是书，是未发生的灾难。',
+  dungeon_enter_five_dim_rift: '裂隙迷宫：几何在这里不可信。',
+  dungeon_enter_forest_shrine: '神龛迷宫：根须在脚下呼吸。',
+  dungeon_enter_hub_catacombs: '枢纽墓穴：最短的迷宫，最深的守钥者。',
+  dungeon_enter_stats: '迷宫 ${w}×${h} · ${rooms} 个房间 · ${doors} 扇门。\n清剿房间敌人后门会打开；发光石碑 [{interact}] 读叙事；最远圆房有守钥者。',
+  keywarden_cleared_title: '守钥者已倒',
+  keywarden_cleared_text: '出口环亮起。你听见枢纽深处传来一声叹息——像是某个位面终于松了一口气。\n\n[{interact}] 离开迷宫，继续主线。',
+
   // bonus 五条（原在 content/cgGallery.js 里是字面量，与上面十条同一批收口）
   cg_gallery_style_ss: '战斗风格 SS',
   cg_gallery_rematch: 'Boss 再战',
