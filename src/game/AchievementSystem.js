@@ -1,6 +1,7 @@
 import { ALL_ACHIEVEMENTS_EXTRA } from '../content/achievements.js';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const GAME_ACHIEVEMENTSYSTEM = 'game/AchievementSystem';
 const achieveOn = (name, handler) => on(name, handler, GAME_ACHIEVEMENTSYSTEM);
@@ -9,18 +10,18 @@ const achieveOn = (name, handler) => on(name, handler, GAME_ACHIEVEMENTSYSTEM);
 const mergeAchievements = (base) => [...base, ...ALL_ACHIEVEMENTS_EXTRA];
 
 export const ACHIEVEMENTS = mergeAchievements([
-  { id: 'first-blood', title: '初阵', desc: '首次击杀敌人', check: (s) => s.kills >= 1 },
-  { id: 'parry-master', title: '弹反大师', desc: '成功弹反 5 次', check: (s) => s.parries >= 5 },
-  { id: 'boss-trio', title: '三界审判', desc: '击败全部 3 主线 Boss', check: (s) => s.boss1 && s.boss2 && s.boss3 },
-  { id: 'dungeon-clear', title: '地下城猎人', desc: '清空 3 座地下城', check: (s) => s.dungeons >= 3 },
-  { id: 'charged-10', title: '蓄力宗师', desc: '蓄力施法 10 次', check: (s) => s.charged >= 10 },
-  { id: 'void-slayer', title: '时线斩断者', desc: '击败时线执政官', check: (s) => s.voidBoss },
-  { id: 'chaos-lord', title: '裂隙斩断者', desc: '击败混沌裂隙领主', check: (s) => s.chaosBoss },
-  { id: 'skill-master', title: '流派大师', desc: '解锁 4 个武器技能', check: (s) => s.skills >= 4 },
-  { id: 'combo-6', title: '连击修罗', desc: '达成 6 连击终结', check: (s) => s.comboFinishers >= 1 },
-  { id: 'explorer', title: '位面学者', desc: '发现 12 个探索点', check: (s) => s.discoveries >= 12 },
-  { id: 'lore-scholar', title: '碎片学者', desc: '收集 6 条迷宫叙事碎片', check: (s) => s.loreFragments >= 6 },
-  { id: 'journal-keeper', title: '纪事官', desc: '日志记录 20 条', check: (s) => s.journalEntries >= 20 },
+  { id: 'first-blood', title: 'ach_first_blood_title', desc: 'ach_first_blood_desc', check: (s) => s.kills >= 1 },
+  { id: 'parry-master', title: 'ach_parry_master_title', desc: 'ach_parry_master_desc', check: (s) => s.parries >= 5 },
+  { id: 'boss-trio', title: 'ach_boss_trio_title', desc: 'ach_boss_trio_desc', check: (s) => s.boss1 && s.boss2 && s.boss3 },
+  { id: 'dungeon-clear', title: 'ach_dungeon_clear_title', desc: 'ach_dungeon_clear_desc', check: (s) => s.dungeons >= 3 },
+  { id: 'charged-10', title: 'ach_charged_10_title', desc: 'ach_charged_10_desc', check: (s) => s.charged >= 10 },
+  { id: 'void-slayer', title: 'ach_void_slayer_title', desc: 'ach_void_slayer_desc', check: (s) => s.voidBoss },
+  { id: 'chaos-lord', title: 'ach_chaos_lord_title', desc: 'ach_chaos_lord_desc', check: (s) => s.chaosBoss },
+  { id: 'skill-master', title: 'ach_skill_master_title', desc: 'ach_skill_master_desc', check: (s) => s.skills >= 4 },
+  { id: 'combo-6', title: 'ach_combo_6_title', desc: 'ach_combo_6_desc', check: (s) => s.comboFinishers >= 1 },
+  { id: 'explorer', title: 'ach_explorer_title', desc: 'ach_explorer_desc', check: (s) => s.discoveries >= 12 },
+  { id: 'lore-scholar', title: 'ach_lore_scholar_title', desc: 'ach_lore_scholar_desc', check: (s) => s.loreFragments >= 6 },
+  { id: 'journal-keeper', title: 'ach_journal_keeper_title', desc: 'ach_journal_keeper_desc', check: (s) => s.journalEntries >= 20 },
 ]);
 
 export class AchievementSystem {
@@ -118,7 +119,8 @@ export class AchievementSystem {
 
   unlock(a) {
     this.unlocked.add(a.id);
-    this.dialog.toast(`🏆 成就：${a.title}`);
+    // W-D2 切片16l：成就的 title 是**文案键** —— 展开在播出的那一刻。
+    this.dialog.toast(t('achievement_unlocked', { title: t(a.title) }));
     window.dispatchEvent(new CustomEvent('achievement-unlocked', { detail: a }));
   }
 
