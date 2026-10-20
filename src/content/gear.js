@@ -81,6 +81,12 @@ export const GEAR_BASES = [
   { id: 'ring-sigil', slot: 'sigil', weight: 22, mods: { mind: 1 } },
   { id: 'war-sigil', slot: 'sigil', weight: 14, mods: { strength: 1 } },
   { id: 'dual-sigil', slot: 'sigil', weight: 8, mods: { strength: 1, arcane: 1 } },
+  // W-E3 切片1：后期底座（双属性点）。权重刻意压低 —— 它们是"走了很远才见得到"的那种东西，
+  // 压在 5~6 的档位上，掉一件就记得住。
+  { id: 'storm-charm', slot: 'charm', weight: 5, mods: { vigor: 1, strength: 1 } },
+  { id: 'glass-charm', slot: 'charm', weight: 5, mods: { mind: 1, endurance: 1 } },
+  { id: 'eclipse-sigil', slot: 'sigil', weight: 5, mods: { arcane: 1, mind: 1 } },
+  { id: 'void-sigil', slot: 'sigil', weight: 6, mods: { strength: 1, mind: 1 } },
 ];
 
 /**
@@ -99,6 +105,16 @@ export const GEAR_AFFIXES = [
   { id: 'twin-fang', weight: 8, minRarity: 'rare', mods: { strength: 1, arcane: 1 } },
   { id: 'bulwark-oath', weight: 6, minRarity: 'rare', mods: { vigor: 1, endurance: 1 } },
   { id: 'archmagistone', weight: 2, minRarity: 'epic', mods: { arcane: 2, mind: 1 } },
+  // W-E3 切片1：新词缀。分布刻意补在**旧词缀没覆盖的属性组合**上 ——
+  // 旧表里 vigor+strength / arcane+mind / mind+endurance 这几条一个都没有，
+  // 于是"双属性词缀"实际上是同一个形状（双点）换了个名字。补齐之后，
+  // 一件史诗的六种可能里属性配对各不相同，掉到的东西才真的不一样。
+  { id: 'flame-guard', weight: 12, minRarity: 'uncommon', mods: { vigor: 1, strength: 1 } },
+  { id: 'tide-mind', weight: 12, minRarity: 'uncommon', mods: { endurance: 1, mind: 1 } },
+  { id: 'starsight', weight: 8, minRarity: 'rare', mods: { arcane: 1, mind: 1 } },
+  { id: 'iron-vow', weight: 7, minRarity: 'rare', mods: { vigor: 2, endurance: 1 } },
+  { id: 'void-tide', weight: 4, minRarity: 'epic', mods: { arcane: 1, endurance: 1, mind: 1 } },
+  { id: 'chaos-core', weight: 2, minRarity: 'epic', mods: { strength: 1, vigor: 1, endurance: 1 } },
 ];
 
 /** 表内查表用的索引：`id` 是数据里的钥匙，重复的 id 由注册表在加载期算红 */
@@ -239,6 +255,12 @@ export const GEAR_NAMES = {
   'ember-edge': 'gear_name_ember_edge', 'arcane-lens': 'gear_name_arcane_lens',
   'clear-mind': 'gear_name_clear_mind', 'twin-fang': 'gear_name_twin_fang',
   'bulwark-oath': 'gear_name_bulwark_oath', 'archmagistone': 'gear_name_archmagistone',
+  // W-E3 切片1：新底座与新词缀的名字
+  'storm-charm': 'gear_name_storm_charm', 'glass-charm': 'gear_name_glass_charm',
+  'eclipse-sigil': 'gear_name_eclipse_sigil', 'void-sigil': 'gear_name_void_sigil',
+  'flame-guard': 'gear_name_flame_guard', 'tide-mind': 'gear_name_tide_mind',
+  'starsight': 'gear_name_starsight', 'iron-vow': 'gear_name_iron_vow',
+  'void-tide': 'gear_name_void_tide', 'chaos-core': 'gear_name_chaos_core',
 };
 
 /**
@@ -274,6 +296,12 @@ export const GEAR_POOLS = {
     { base: 'ember-charm', weight: 2 }],
   abyss: [{ base: 'war-sigil', weight: 4 }, { base: 'oath-charm', weight: 2 },
     { base: 'dual-sigil', weight: 3 }, { base: 'ember-charm', weight: 2 }],
+  // W-E3 切片1：后期底座只从对应的后期区掉（虚空 → 混沌 → 辉煌圣域）。
+  // 不放进 `default` 兜底 —— 那意味着"在走廊里也能捡到混沌核心"，路线感就没了。
+  gloom: [{ base: 'storm-charm', weight: 4 }, { base: 'ash-charm', weight: 3 },
+    { base: 'ember-charm', weight: 2 }, { base: 'war-sigil', weight: 2 }],
+  radiant: [{ base: 'glass-charm', weight: 4 }, { base: 'eclipse-sigil', weight: 3 },
+    { base: 'void-sigil', weight: 2 }, { base: 'ring-sigil', weight: 3 }],
 };
 
 /** 这一片的兜底档名（`corridor` / `unknown` / 名单外的新区域都落这里） */

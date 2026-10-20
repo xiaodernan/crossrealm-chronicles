@@ -533,6 +533,17 @@ export const STRINGS_ZH = Object.freeze({
   gear_name_twin_fang: '双牙',
   gear_name_bulwark_oath: '壁垒之誓',
   gear_name_archmagistone: '大贤者石',
+  // W-E3 切片1：新底座与新词缀
+  gear_name_storm_charm: '风暴护符',
+  gear_name_glass_charm: '琉璃护符',
+  gear_name_eclipse_sigil: '蚀光印记',
+  gear_name_void_sigil: '虚空印记',
+  gear_name_flame_guard: '炽焰守',
+  gear_name_tide_mind: '潮汐心智',
+  gear_name_starsight: '星视',
+  gear_name_iron_vow: '铁誓',
+  gear_name_void_tide: '虚空潮汐',
+  gear_name_chaos_core: '混沌核心',
 
 
   // 成就文案（W-D2 切片16l：标题/描述全是键）

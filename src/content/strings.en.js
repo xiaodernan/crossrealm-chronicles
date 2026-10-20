@@ -533,6 +533,17 @@ export const STRINGS_EN = Object.freeze({
   gear_name_twin_fang: 'Twin Fang',
   gear_name_bulwark_oath: 'Bulwark Oath',
   gear_name_archmagistone: 'Archmagistone',
+  // W-E3 slice 1: new bases and affixes
+  gear_name_storm_charm: 'Storm Charm',
+  gear_name_glass_charm: 'Glass Charm',
+  gear_name_eclipse_sigil: 'Eclipsesigil',
+  gear_name_void_sigil: 'Voidsigil',
+  gear_name_flame_guard: 'Flameguard',
+  gear_name_tide_mind: 'Tidemind',
+  gear_name_starsight: 'Starsight',
+  gear_name_iron_vow: 'Ironvow',
+  gear_name_void_tide: 'Voidtide',
+  gear_name_chaos_core: 'Chaosheart',
 
 
   // 成就文案（W-D2 切片16l：标题/描述全是键）
