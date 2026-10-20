@@ -63,6 +63,8 @@ export const BODY_PLANS = {
   gloom_wraith:   { scale: 0.90, parts: ['head', 'torso'], radius: 0.40, hover: 0.7 },
   gloom_stalker:  { scale: 0.93, parts: ['head', 'torso', 'legs'], radius: 0.40 },
   gloom_sentinel: { scale: 1.02, parts: ['head', 'torso'], radius: 0.52, hover: 0.35 },
+  /** W-E3 切片3：幽暗守夜人 —— 守夜人比哨卫更重更大（那是它"站在那里"的手感来源） */
+  gloom_warden:   { scale: 1.16, parts: ['head', 'torso', 'legs'], radius: 0.56 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -70,6 +72,8 @@ export const BODY_PLANS = {
   radiant_crawler: { scale: 1.00, parts: ['head', 'torso', 'legs'], radius: 0.48 },
   radiant_knight:  { scale: 1.20, parts: ['head', 'torso', 'legs'], radius: 0.60 },
   radiant_dancer:  { scale: 0.92, parts: ['head', 'torso', 'legs'], radius: 0.40 },
+  /** W-E3 切片3：辉煌圣印者 —— 施法者身量轻（它是远距那一类） */
+  radiant_brand:   { scale: 0.95, parts: ['head', 'torso', 'legs'], radius: 0.46 },
 };
 
 /**
@@ -115,12 +119,16 @@ export const ENEMY_RESIST = {
   gloom_stalker: { gravity: -0.2, ice: 0.1 },
   /** W-B9 幽暗林地：幽暗哨卫装甲构装，火与重力都啃不动多少 */
   gloom_sentinel: { fire: 0.25, gravity: 0.15 },
+  /** 幽暗守夜人：披甲，冰与引力都啃不动多少 —— 撬它靠的是架势与走位 */
+  gloom_warden:   { ice: 0.2, gravity: 0.1 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
   radiant_knight: { fire: 0.2, ice: 0.2 },
   /** W-B9 辉煌圣域：辉煌舞者轻装快体，冰与引力都啃得动 */
   radiant_dancer: { gravity: -0.2, ice: -0.1 },
+  /** 辉煌圣印者：怕火（更多吃这一系），冰系削得动 */
+  radiant_brand:   { fire: -0.2, ice: 0.1 },
 };
 
 export const CRIT = {
@@ -266,8 +274,8 @@ export const ENEMY_DEFENSE = {
   wraith: 4, stalker: 3, sentinel: 14,
   crawler: 8, knight: 22, dancer: 6,
   hexer: 8, juggernaut: 24,
-  gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14,
-  radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6,
+  gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16,
+  radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
 };
 
 /** 玩家自身防御由装备/属性提供，M2 阶段基线为 0（先用闪避与弹反防御） */
@@ -577,6 +585,45 @@ export const ENEMY_MOVES = {
     damage: 0, cooldown: 12, weight: 1,
     standoff: [1.5, 3], travel: 'lunge', travelSpeed: 4.5,
     telegraph: { color: 0x99dd55 },
+  },
+  /**
+   * 潜行扑杀（幽暗守夜人）—— W-E3 切片3。
+   *
+   * **超长前摇的窄角度扑杀**：守夜人先伏低身子（1.4 秒，圈内预警一直亮着），
+   * 随后 `travel: 'lunge'` 扑上来。刀很长（reach 1.6）、命中面比**同类的扑击**窄
+   * （cone 0.15 —— 突刺是 0.45、连爪是 0.35，它只有它们的零头），
+   * 命中还把人顶开（knock 7）—— 读招窗口很长，但一旦被贴身就很难脱身。
+   *
+   * `standoff: [1.5, 3]` 写的是"这一招我想从多远用"：它必须**贴身**才起手
+   * （带子的远界要落在自己够得着的范围里 —— 近战招的够得着 = attackRange + reach ≈ 3.8 米）。
+   * 与同区怨影的相位突袭（`haunt`：闪到背后）不同：这一招不换位，只加速与变窄。
+   */
+  lurk: {
+    name: '潜行扑杀', windup: 1.4, strike: 0.2, recover: 0.9, reach: 1.6, cone: 0.15,
+    band: [0.05, 1.2],
+    damage: 1.5, cooldown: 5.0, weight: 2, knock: 7.0,
+    travel: 'lunge', travelSpeed: 6.5, standoff: [1.5, 3],
+    telegraph: { color: 0x8855ff },
+  },
+  /**
+   * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
+   *
+   * **远距标点**：站位诉求要求它自己待在 6~11 米外（`standoff`），射出一枚慢速圣印弹，
+   * 落地成一片持续灼烧的域（`hazard`）。本体这一下不直接打人（`damage: 0`），
+   * 威胁全在"那块地"上 —— 玩家要么走出去，要么绕。
+   *
+   * 与两条同族招的区别是明确的：`rift` 是**玩家脚下**铺裂隙（近身才铺），
+   * `beacon` 是射弹 + 铺场但**零站位诉求**（它站在哪都行）；这一招是**远距起手型**，
+   * 逼玩家朝它走 —— 与 `hexer` 的"远程铺面"也不同，那一族的 `volley` 打的是伤害不是地。
+   */
+  brand: {
+    name: '圣印灼场', windup: 0.95, strike: 0.25, recover: 0.6, cone: -2,
+    range: 12, minDist: 4,
+    damage: 0, cooldown: 7.5, weight: 2,
+    standoff: [6, 11],
+    ranged: { speed: 11, color: 0xffe066 },
+    hazard: { radius: 2.6, telegraph: 1.4, damage: 0.6, duration: 4, tick: 1.0, color: 0xffe066 },
+    telegraph: { color: 0xffdd66 },
   },
   beacon: {
     // 信标灼场（幽暗哨卫）：蓄力炮击的迷雾变体 —— 发射一枚**慢速**信标弹，落地成一片
@@ -912,9 +959,13 @@ export const ENEMY_MOVE_SETS = {
   gloom_wraith: ['haunt', 'dive', 'thrust', 'sweep'],
   gloom_stalker: ['prowl', 'flurry', 'thrust', 'cleave'],
   gloom_sentinel: ['beacon', 'shot', 'guard', 'cleave'],
+  /** W-E3 切片3：幽暗守夜人 —— 潜行扑杀（超长前摇的窄角度扑杀） + 近战三板斧 */
+  gloom_warden:   ['lurk', 'sweep', 'cleave', 'guard'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],
   radiant_dancer: ['gleam', 'flurry', 'thrust'],
+  /** W-E3 切片3：辉煌圣印者 —— 圣印灼场（远距标点） + 远程与守势 */
+  radiant_brand:   ['brand', 'shot', 'guard', 'thrust'],
 };
 

@@ -73,6 +73,15 @@ const OLD_BIRTH = {
   radiant_crawler: { name: '辉煌爬兽', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: '辉煌骑士', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },
   radiant_dancer: { name: '辉煌舞者', hp: 145, posture: 56, damage: 14, speed: 6.8, aggroRange: 24, color: 0xffaa00 },
+  /**
+   * W-E3 切片3 新增：幽暗守夜人 / 辉煌圣印者。
+   *
+   * 这张 golden 的规矩是"**动手之前在役的那份**逐格抄下来"，所以每加一类新敌人，
+   * 它的每一格也在这里登一次记 —— 之后手改数值（hp / 伤害 / 速度）会当场红，
+   * 而不是"改了也没人知道那老账对不上了"。
+   */
+  gloom_warden: { name: '幽暗守夜人', hp: 215, posture: 84, damage: 19, speed: 4.2, aggroRange: 26, color: 0x3a3a6a },
+  radiant_brand: { name: '辉煌圣印者', hp: 155, posture: 60, damage: 16, speed: 4.6, aggroRange: 26, color: 0xffe066 },
 };
 
 /** 出生时没写的那几格会落到 `Enemy` 构造器的默认值 —— 用例要按同一套默认说话，不许自己造数 */

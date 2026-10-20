@@ -50,10 +50,22 @@ export const ENEMY_ROSTER = {
   gloom_wraith: { name: '幽暗怨影', hp: 120, posture: 48, damage: 14, speed: 5.8, aggroRange: 24, color: 0x4a4a6a },
   gloom_stalker: { name: '幽暗掠行兽', hp: 150, posture: 66, damage: 16, speed: 7.0, aggroRange: 28, color: 0x4a4a7a },
   gloom_sentinel: { name: '幽暗哨卫', hp: 190, posture: 76, damage: 18, speed: 3.5, aggroRange: 30, color: 0x3a3a5a },
+  /**
+   * W-E3 切片3：幽暗守夜人 —— 迷雾里的重装守夜人。
+   * 血厚、架势高、出手慢（4.2 速），与同区的怨影（快、轻）、掠行兽（贴地乱爪）、
+   * 哨卫（浮空远程）都不重叠：它是**站在那里等你走过来**的那一种。
+   */
+  gloom_warden: { name: '幽暗守夜人', hp: 215, posture: 84, damage: 19, speed: 4.2, aggroRange: 26, color: 0x3a3a6a },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: '辉煌爬兽', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: '辉煌骑士', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },
   radiant_dancer: { name: '辉煌舞者', hp: 145, posture: 56, damage: 14, speed: 6.8, aggroRange: 24, color: 0xffaa00 },
+  /**
+   * W-E3 切片3：辉煌圣印者 —— 远距标点的施法者。
+   * 血少、身轻、出手远：它不贴上来，而是站在 6~11 米外把一块地**标成灼场**。
+   * 与同区的爬兽（贴地乱爪）、骑士（重装近战）、舞者（连段旋舞）都不重叠。
+   */
+  radiant_brand: { name: '辉煌圣印者', hp: 155, posture: 60, damage: 16, speed: 4.6, aggroRange: 26, color: 0xffe066 },
 };
 
 /**

@@ -437,6 +437,12 @@ export class EnemyManager {
     for (const [x, z] of [[220, 20], [300, 80], [140, 180]]) {
       this.spawnAt('gloom_sentinel', x, z);
     }
+    // W-E3 切片3：幽暗守夜人（三点）。坐标是**用门禁自己的那把尺子挑出来的** ——
+    // 一只敌人、一间真世界，玩家贴到 1.7 米试四个正方向，至少一向要醒得过来；
+    // 且与已有出生点铺开（挤在一起的敌人会互相推着抖）。
+    for (const [x, z] of [[60, 0], [60, 80], [240, 240]]) {
+      this.spawnAt('gloom_warden', x, z);
+    }
 
     // W-B9 切片1：辉煌圣域（radiant，中心 ~-180,-160，半径 150）—— 三类原生敌人
     for (const [x, z] of [[-240, -200], [-120, -100], [-300, -180]]) {
@@ -447,6 +453,10 @@ export class EnemyManager {
     }
     for (const [x, z] of [[-160, -240], [-220, -200], [-100, -140]]) {
       this.spawnAt('radiant_dancer', x, z);
+    }
+    // W-E3 切片3：辉煌圣印者（三点）。同上，坐标由门禁的尺子挑出来。
+    for (const [x, z] of [[-320, -120], [-300, -240], [-240, -280]]) {
+      this.spawnAt('radiant_brand', x, z);
     }
 
     const bx = -250, bz = -35;

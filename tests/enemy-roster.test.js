@@ -145,6 +145,44 @@ describe('W-B7 切片3：虚空爬兽 / 深渊骑士 / 刃舞者', () => {
   });
 });
 
+/**
+ * W-E3 切片3：两个新类型（幽暗守夜人 / 辉煌圣印者）。
+ *
+ * 这一条钉的不是"它们存在"，而是**它们各自的手感**——
+ * 守夜人是"站在那里等你走过来"的重装近战，圣印者是"站在远处把一块地标成灼场"的施法者。
+ * 形状被改掉（守夜人变轻、圣印者贴上来）时手感就变了，而手感变了这件事**没有任何报错**。
+ */
+describe('W-E3 切片3：两个新类型的手感钉住', () => {
+  it('幽暗守夜人：比同区哨卫更重更大，超长前摇的窄角度扑杀', () => {
+    expect(BODY_PLANS.gloom_warden.scale).toBeGreaterThan(BODY_PLANS.gloom_sentinel.scale);
+    expect(ENEMY_DEFENSE.gloom_warden).toBeGreaterThan(ENEMY_DEFENSE.gloom_sentinel);
+    expect(ENEMY_MOVE_SETS.gloom_warden).toContain('lurk');
+    // 潜行扑杀：读招窗口很长（比常规横扫慢一截）、命中面比**同类的扑击**窄、命中把人顶开
+    expect(ENEMY_MOVES.lurk.windup).toBeGreaterThan(ENEMY_MOVES.sweep.windup);
+    expect(ENEMY_MOVES.lurk.cone).toBeLessThan(ENEMY_MOVES.thrust.cone);
+    expect(ENEMY_MOVES.lurk.cone).toBeLessThan(ENEMY_MOVES.flurry.cone);
+    expect(ENEMY_MOVES.lurk.reach).toBeGreaterThan(ENEMY_MOVES.sweep.reach);
+    expect(ENEMY_MOVES.lurk.knock).toBeGreaterThan(0);
+    expect(ENEMY_MOVES.lurk.travel).toBe('lunge');
+    // 它是贴地的实体（悬浮会让打击带与地表对不上）
+    expect(BODY_PLANS.gloom_warden.parts).toContain('legs');
+    expect(BODY_PLANS.gloom_warden.hover ?? 0).toBe(0);
+  });
+
+  it('辉煌圣印者：身量轻、远距起手，威胁全在"那块地"上', () => {
+    expect(BODY_PLANS.radiant_brand.scale).toBeLessThan(BODY_PLANS.radiant_knight.scale);
+    expect(ENEMY_DEFENSE.radiant_brand).toBeLessThan(ENEMY_DEFENSE.radiant_knight);
+    expect(ENEMY_MOVE_SETS.radiant_brand).toContain('brand');
+    // 圣印灼场：射弹 + 落地成域 + 站位诉求在远处；本体这一下不直接打人
+    expect(ENEMY_MOVES.brand.hazard).toBeTruthy();
+    expect(ENEMY_MOVES.brand.ranged).toBeTruthy();
+    expect(ENEMY_MOVES.brand.standoff[0]).toBeGreaterThan(4);
+    expect(ENEMY_MOVES.brand.damage).toBe(0);
+    // 与同族的"贴地近战"区分开：它不靠贴身
+    expect(ENEMY_RESIST.radiant_brand.fire).toBeLessThan(0); // 怕火
+  });
+});
+
 describe('W-B7 切片4：破阵重兵 / 位面咒师 —— 把两座位面的空位补上', () => {
   it('原生敌人到齐 12 类（§5 的口径：不含 Boss 与训练木人）', () => {
     expect(原生敌人.length, `目前只有 ${原生敌人.length} 类：${原生敌人.join('、')}`).toBeGreaterThanOrEqual(12);
@@ -164,8 +202,7 @@ describe('W-B7 切片4：破阵重兵 / 位面咒师 —— 把两座位面的�
     expect(ENEMY_RESIST.juggernaut.ice).toBeGreaterThan(0); // 冰砍不动
   });
 
-  it('每座位面至少两类原生敌人 —— 真世界几何下按坐标反查，不是照抄一份位面名单', () => {
-    const wm = new WorldManager({ add() {}, remove() {} }, { show() {}, toast() {} });
+  it('每座位面至少两类原生敌人 —— 真世界几何下按坐标反查，不是照抄一份位面名单', () => {    const wm = new WorldManager({ add() {}, remove() {} }, { show() {}, toast() {} });
     wm.build();
     const m = makeManager();
     m.spawnDefaults();
