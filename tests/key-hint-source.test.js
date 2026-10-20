@@ -214,7 +214,7 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     // 展开走 `npcLine()` 一处（运行时与门禁调的是同一个函数）：先 `t()` 换语言，再 `keyText()` 换键名。
     'world/NPCManager.js': ['npcLine(pool[idx]', 'keyText(t(key))'],
     'game/QuestSystem.js': ['keyText(t(q.desc))'],
-    'ui/LoreCodexJournalTab.js': ['keyText(e.text)', 'refreshKeyText(panelEl)'],
+    'ui/LoreCodexJournalTab.js': ['keyText(t(e.text))', 'refreshKeyText(panelEl)'],
     'ui/PopCultureJournalTab.js': ['keyText(t(e.desc))', 'refreshKeyText(panelEl)'],
     'ui/SideQuestJournalTab.js': ['keyText(t(q.desc))', 'refreshKeyText(panelEl)'],
     'ui/AchievementsJournalTab.js': ['refreshKeyText(panelEl)'],
@@ -475,7 +475,9 @@ describe('界面上说出的键名只能从两张表来（字样尺子）', () =
 
   it('这条扫描咬得住：把一处字样改回死键名立刻红', () => {
     // 防的是"空跑门禁"（正则一坏就永远通过）—— 用真文件里的一格占位反向改回去验
-    const codex = FILES.find((f) => f.name === 'game/LoreCodexRegistry.js').source;
+    // W-D2 切片16w：秘典正文搬进双表之后，这一句住在 `content/strings.zh.js` 里
+    //（表里存的是键，正文在双表）—— 反向控制也得跟着搬，否则它改的是一句不存在的话。
+    const codex = FILES.find((f) => f.name === 'content/strings.zh.js').source;
     expect(labelHits(codex)).toEqual([]);
     // 半角裸写
     const reverted = codex.replace('{escape} 可跳过演出', 'Esc 可跳过演出');

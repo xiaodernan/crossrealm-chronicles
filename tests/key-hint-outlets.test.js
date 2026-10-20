@@ -364,14 +364,16 @@ describe('营火 CG 图：键名画进像素，缓存要跟着改绑作废', () 
 
 describe('位面秘典卡片：文本经对话框出口时不留占位', () => {
   it('表里带占位的那几条，出口展开得开（卡片与日志存的就是这一份）', () => {
-    const withToken = LORE_CODEX.filter((e) => /\{[a-z]/.test(e.text ?? ''));
+    // W-D2 切片16w：秘典表的 `text` 存的是**文案键** —— 占位在展开后的那一句里，
+    // 所以这里先 `t()` 展开再找占位（与运行时同源）。
+    const withToken = LORE_CODEX.filter((e) => /\{[a-z]/.test(t(e.text ?? '')));
     expect(withToken.length).toBeGreaterThan(0);
     const { dialog, hosts } = mountDialog();
     const textEl = hosts['dialog-text'];
     for (const e of withToken) {
-      dialog.show(e.title, e.text);
-      expect(textEl._text, e.text).not.toMatch(/\{[A-Za-z]/);
-      expect(textEl._text).not.toBe(e.text);   // 反向读法：表里那一格确实还是占位
+      dialog.show(t(e.title), t(e.text));
+      expect(textEl._text, t(e.text)).not.toMatch(/\{[A-Za-z]/);
+      expect(textEl._text).not.toBe(t(e.text));   // 反向读法：表里那一格确实还是占位
     }
   });
 });
