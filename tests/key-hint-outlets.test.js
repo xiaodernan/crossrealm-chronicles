@@ -283,12 +283,14 @@ describe('任务进度文案：`getProgressText` 是唯一显示口，它得展�
   it('未完成的可交互任务：desc 里的占位在出口处展开', () => {
     const qs = Object.create(QuestSystem.prototype);
     qs.stats = { discoveries: new Set(), hits: 0, kills: {}, spellCasts: 0, chargedCasts: 0, chestsOpened: 0, npcTalked: new Set(), skillsUnlocked: 0, dungeonsCleared: new Set() };
+    // W-D2 切片16j：`desc` 存的是**文案键** —— 展开发生在出口那一处（`t()` 换文案、
+    // `keyText()` 换键名），所以这里给的是一个带 `{interact}` 占位的真键。
     Object.defineProperty(qs, 'current', {
-      value: { id: 'touch-anchor', type: 'interact', targetId: 'world-anchor', desc: '按 {interact} 触摸世界之锚' },
+      value: { id: 'touch-anchor', type: 'interact', targetId: 'world-anchor', desc: 'guide_hint_dungeon_exit' },
     });
-    expect(qs.getProgressText()).toBe('按 E 触摸世界之锚');
+    expect(qs.getProgressText()).toBe('▶ 守钥者已倒 — 出口环 E 离开');
     rebind({ interact: 'F9' });
-    expect(qs.getProgressText()).toBe('按 F9 触摸世界之锚');
+    expect(qs.getProgressText()).toBe('▶ 守钥者已倒 — 出口环 F9 离开');
   });
 });
 

@@ -210,7 +210,7 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     // B119 / W-D2 切片14：台词池两套口径已经并回一套 —— 池子里**只有键**，
     // 展开走 `npcLine()` 一处（运行时与门禁调的是同一个函数）：先 `t()` 换语言，再 `keyText()` 换键名。
     'world/NPCManager.js': ['npcLine(pool[idx]', 'keyText(t(key))'],
-    'game/QuestSystem.js': ['keyText(q.desc)'],
+    'game/QuestSystem.js': ['keyText(t(q.desc))'],
     'ui/LoreCodexJournalTab.js': ['keyText(e.text)', 'refreshKeyText(panelEl)'],
     'ui/PopCultureJournalTab.js': ['keyText(e.desc)', 'refreshKeyText(panelEl)'],
     'ui/SideQuestJournalTab.js': ['keyText(q.desc)', 'refreshKeyText(panelEl)'],
@@ -245,7 +245,7 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
    * 所以这类"一条链上的并列分支"要点名次数。
    */
   const COUNTED = {
-    'game/QuestSystem.js': [['keyText(q.desc)', 2]],
+    'game/QuestSystem.js': [['keyText(t(q.desc))', 2]],
   };
   it('并列分支按次数点名：少一处问表也是红', () => {
     const wrong = [];
@@ -317,7 +317,7 @@ describe('内容表的 `{动作}` 占位：真表跑真展开', () => {
       .filter(([, node]) => stringsOf(node).length === 0)
       .map(([name]) => name);
     expect(silent, '这些表一条文案都没交出来（多半是 import 断了）').toEqual([]);
-    const withToken = STRINGS.filter((s) => /\{[A-Za-z][A-Za-z0-9]*\}/.test(s));
+    const withToken = STRINGS.filter((s) => /(?<!\$)\{[A-Za-z][A-Za-z0-9]*\}/.test(s));
     expect(withToken.length).toBeGreaterThanOrEqual(46);
   });
 
@@ -332,7 +332,11 @@ describe('内容表的 `{动作}` 占位：真表跑真展开', () => {
         bad.push(`${s} -> ${e.message}`);
         continue;
       }
-      if (/\{[A-Za-z]/.test(out)) bad.push(`${s} -> 展开后还剩花括号：${out}`);
+      // W-D2 切片16j：两种占位语法要分得开 ——
+      //   `{动作}`（没有 `$`）是 `keyText()` 的动作占位，展开后必须不留花括号；
+      //   `${参数}`（带 `$`）是 `t()` 的插值参数（`${boss}` 那种），它由 `t()` 自己替换，
+      //   不是动作名 —— 拿它去问键位表当然问不到。
+      if (/(?<!\$)\{[A-Za-z]/.test(out)) bad.push(`${s} -> 展开后还剩花括号：${out}`);
     }
     expect(bad).toEqual([]);
   });

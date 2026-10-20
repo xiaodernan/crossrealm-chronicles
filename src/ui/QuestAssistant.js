@@ -86,7 +86,7 @@ export class QuestAssistant {
       } else if (!q) {
         this._statusEl.textContent = t('qa_status_all_done');
       } else {
-        this._statusEl.textContent = t('qa_status_quest', { ch: this.game.quests.chapter, title: q.title });
+        this._statusEl.textContent = t('qa_status_quest', { ch: this.game.quests.chapter, title: t(q.title) });
       }
     }
     if (this._hintEl) {
@@ -344,7 +344,7 @@ export class QuestAssistant {
       // 现在与下面的 discovery 分支同构 —— 只认任务自己的 `targetId`。
       window.dispatchEvent(new CustomEvent('poi-interact', { detail: { id: q.targetId } }));
     } else if (q.type === 'discovery' && q.targetId) {
-      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: q.targetId, title: q.title, text: q.desc } }));
+      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: q.targetId, title: t(q.title), text: t(q.desc) } }));
     } else if (q.type === 'hits') {
       window.dispatchEvent(new CustomEvent('combat-hit'));
     } else if (BOSS_STAT_KEYS[q.bossId]) {

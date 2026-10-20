@@ -133,7 +133,8 @@ describe('改口之后：三处 label 接的是表，成段文案钉的是字面
   });
 
   it('玩家读到的那几句钉字面：现行区名，不是等式两边一起改口', () => {
-    expect(srcText('src/content/objectives.js')).toContain("desc: '击败霍格沃兹遗境深处的大奥术师。'");
+    // W-D2 切片16j：任务 `desc` 进了双表 —— 钉的仍是"玩家读到的那几个字"，只是换了住址。
+    expect(srcText('src/content/strings.zh.js')).toContain("obj_boss2_desc: '击败霍格沃兹遗境深处的大奥术师。'");
     // W-D2 切片15：说明书正文进双表，`hm_body_dungeons` 那一句从 `HelpManual.js` 搬到中文表 ——
     // 钉的仍是"玩家读到的那几个字"，只是换了住址（与 CG 字幕同一处逻辑）。
     expect(srcText('src/content/strings.zh.js')).toContain('· 霍格沃兹遗境 — 禁忌图书馆');

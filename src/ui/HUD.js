@@ -312,7 +312,7 @@ buildHUD() {
       const q = e.detail.current;
       document.getElementById('chapter-display').textContent = `Chapter ${e.detail.chapter ?? 1}`;
       if (q) {
-        document.getElementById('quest-title').textContent = q.title;
+        document.getElementById('quest-title').textContent = t(q.title);
         document.getElementById('quest-progress').textContent = this.game.quests.getProgressText();
       } else {
         document.getElementById('quest-title').textContent = t('hud_quest_empty_title');

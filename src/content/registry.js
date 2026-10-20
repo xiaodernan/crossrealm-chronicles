@@ -46,6 +46,10 @@ import { SKILL_TREES, SKILL_BRANCH_IDS, SKILL_EFFECT_KEYS } from './skillTrees.j
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import { ENEMY_ROSTER } from './enemies.js';
+// 章节判据要读**展开后**的 announce（`announce` 存的是键，W-D2 切片16j）——
+// 中文表就在**同层**（`content/strings.zh.js`），不构成"向上够 engine"。
+// 读中文表够用：判的是"喊的是不是第 N 章"，而 `Chapter N` 这句写法两种语言一致。
+import { STRINGS_ZH } from './strings.zh.js';
 import { SURFACE_SPECS, SURFACE_PATTERNS } from './materialSurfaces.js';
 import { DIFFICULTY_TIERS, checkDifficultyTable } from './difficulty.js';
 import { ENEMY_GROWTH, GROWTH_MAX_STAGE, checkEnemyGrowth } from './enemyGrowth.js';
@@ -1489,7 +1493,9 @@ export function checkObjectiveTable(table) {
         if (!row.announce) {
           out.push(`${path}: 这一格把玩家带进第 ${row.chapter} 章（上一行还是第 ${prev?.chapter} 章），`
             + '所以必须写 announce —— 开章要对玩家喊的那一句由这一格说话');
-        } else if (!row.announce.startsWith(`Chapter ${row.chapter}`)) {
+        } else if (!String(STRINGS_ZH[row.announce] ?? row.announce).startsWith(`Chapter ${row.chapter}`)) {
+          // W-D2 切片16j：`announce` 存的是**文案键** —— 章节判据要读**展开后**的那一句，
+          // 否则键名（`obj_ch1_complete_announce`）永远不以 "Chapter " 开头。
           out.push(`${path}: announce「${row.announce}」喊的不是第 ${row.chapter} 章`
             + '（chapter 说玩家进入哪一章，两句必须同一章）');
         }

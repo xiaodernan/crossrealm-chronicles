@@ -296,7 +296,8 @@ export class QuestSystem {
     const gate = finished ? chapterGateAfter(finished.id) : null;
     if (gate && gate.chapter !== this.chapter) {
       this.chapter = gate.chapter;
-      if (gate.announce) this.dialog.toast(t('quest_toast_chapter_announce', { announce: gate.announce }));
+      // W-D2 切片16j：`announce` 存的是**文案键** —— 显示侧在播出的那一刻展开
+      if (gate.announce) this.dialog.toast(t('quest_toast_chapter_announce', { announce: t(gate.announce) }));
     }
     if (this.chapter !== oldChapter) {
       window.dispatchEvent(new CustomEvent('chapter-changed', { detail: { chapter: this.chapter, prev: oldChapter } }));
@@ -338,11 +339,11 @@ export class QuestSystem {
         if (this.stats.discoveries.has(q.targetId) && !interactGateCondition(q)) {
           return t('quest_progress_touch_done');
         }
-        return keyText(q.desc);
+        return keyText(t(q.desc));
       default: {
         const bossKey = BOSS_STAT_KEYS[q.bossId];
         if (bossKey) return this.stats[bossKey] ? t('quest_progress_dungeon', { dungeon_done: '完成' }) : BOSS_DISPLAY[q.bossId].progress;
-        return keyText(q.desc);
+        return keyText(t(q.desc));
       }
     }
   }

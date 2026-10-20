@@ -2,6 +2,7 @@
 import { isDungeonBossId, bossById } from '../content/bossRoster.js';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const GAME_STORYJOURNAL = 'game/StoryJournal';
 const journalOn = (name, handler) => on(name, handler, GAME_STORYJOURNAL);
@@ -133,8 +134,8 @@ export class StoryJournal {
       this.addSilent({
         id: `quest-active-${idx}`,
         category: 'quest',
-        title: q.title,
-        text: q.desc ?? q.hint ?? '新的位面使命已展开。',
+        title: t(q.title),
+        text: t(q.desc ?? q.hint ?? 'quest_journal_default_text'),
         chapter: e.detail.chapter,
       });
     });

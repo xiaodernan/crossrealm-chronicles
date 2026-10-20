@@ -55,7 +55,7 @@ export class GameGuidePanel {
       if (this.hintEl) this.hintEl.textContent = keyText(t('guide_hint_complete'));
       return;
     }
-    if (this.titleEl) this.titleEl.textContent = t('guide_title_chapter_prefix', { chapter: this.game.quests.chapter }) + q.title;
+    if (this.titleEl) this.titleEl.textContent = t('guide_title_chapter_prefix', { chapter: this.game.quests.chapter }) + t(q.title);
     if (this.stepEl) this.stepEl.textContent = this.game.quests.getProgressText();
     const wp = this.game.quests.getQuestWaypoint();
     if (this.hintEl) {
