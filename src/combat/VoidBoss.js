@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Boss } from './Boss.js';
+import { bossNameKeyOf } from '../content/bossRoster.js';
 import { addShake } from '../engine/Shake.js';
 import { TIME_SCALE_LEASH } from '../content/tuning.js';
 import { t } from '../engine/i18n.js';
@@ -16,7 +17,7 @@ export class VoidBoss extends Boss {
       posture: 110,
       damage: 19,
       speed: 4.8,
-      name: '时线执政官',
+      name: t(bossNameKeyOf('void-chronarch')),
       // id 走 config：`Boss` 构造期就要按它查场地脚本
       bossId: config.bossId ?? 'void-chronarch',
     });

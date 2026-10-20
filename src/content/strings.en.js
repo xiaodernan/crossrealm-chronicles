@@ -259,6 +259,21 @@ export const STRINGS_EN = Object.freeze({
   rest_point_campfire_name: '${zone} Campfire',
   rest_point_name_hub: 'World Anchor Rest Point',
 
+  // Player-facing leftovers (W-D2 slice 16r)
+  enemy_name_default: 'Enemy',
+  boss_name_dungeon_warden: 'Maze Keywarden',
+  boss_name_unknown: 'Unknown Foe',
+  cg_gallery_unlocked_toast: 'CG unlocked: ${caption}',
+  lore_codex_unlocked_toast: '📜 Codex: ${title}',
+  soul_streak_toast: 'Kill streak ×${streak} · +${bonus} soulfire',
+  combat_style_score_fmt: '${label} +${score}',
+  boss_spawn_toast: '⚔️ Boss appeared: ${name}',
+  journal_tab_achievements: 'Achievement Wall · {journal} to close',
+  journal_tab_dimension_echoes: 'Dimension Echoes · {journal} to close',
+  journal_tab_side_quests: 'Side Quests · {journal} to close',
+  pop_culture_stats: 'Resonated ${unlocked} / ${total} (${percent}%)',
+  pop_culture_note: 'A nod to how indie games do it: borrow the motifs and the atmosphere, with the names clearly differentiated',
+
   // Campfire dialogue strings (W-D2 slice 16q: lines, choices and journal entries are all keys)
   rest_dlg_hub_start_text: "The flame flickers beside the World Anchor, and you can feel the pulse of three planes meeting here.\n\nThe Warden looks up: \"Off again?\"",
   rest_dlg_label_rest_upgrade: "Rest / Upgrade",

@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { Enemy } from './Enemy.js';
+import { bossNameKeyOf } from '../content/bossRoster.js';
+import { t } from '../engine/i18n.js';
 import { GROUND_HAZARD } from '../content/tuning.js';
 import { ARENA_MOVES, arenaScriptFor } from '../content/arenaScripts.js';
 import { barrageLayout } from './BarragePattern.js';
@@ -26,7 +28,7 @@ export class Boss extends Enemy {
       aggroRange: config.aggroRange ?? 40,
       attackRange: config.attackRange ?? 3.5,
       respawn: false,
-      name: config.name ?? '影界守护者',
+      name: config.name ?? t(bossNameKeyOf(config.bossId ?? 'shadow-warden')),
     });
 
     this.bossId = config.bossId ?? 'shadow-warden';

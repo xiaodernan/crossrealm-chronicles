@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createHurtbox, pickPart } from './Hurtbox.js';
+import { t } from '../engine/i18n.js';
 import { AI, BODY_PLANS, ENEMY_DEFENSE, ENEMY_RESIST, HIT, SUMMON } from '../content/tuning.js';
 import {
   fanTargets, holdRangeOf, moveHits, moveRange, pickMove, resolveMoveSet, seededRng, threatRangeOf,
@@ -53,7 +54,7 @@ export class Enemy {
     this.scene = scene;
     this.world = world;
     this.aiSeed = ++aiSeq;
-    this.name = config.name ?? '敌人';
+    this.name = config.name ?? t('enemy_name_default');
     this.type = config.type ?? 'soldier';
     this.position = new THREE.Vector3(config.x, 0, config.z);
     this.maxHp = config.hp ?? 100;

@@ -26,9 +26,9 @@ export class PopCultureJournalTab {
     }).join('');
 
     panelEl.innerHTML = `
-      <h2 data-ktext="次元回声 · {journal} 关闭"></h2>
-      <p class="pc-stats">已共鸣 ${stats.unlocked} / ${stats.total}（${stats.percent}%）</p>
-      <p class="pc-note">致敬独立游戏常见做法：借母题与氛围，名称已做区分处理</p>
+      <h2>${keyText(t('journal_tab_dimension_echoes'))}</h2>
+      <p class="pc-stats">${t('pop_culture_stats', { unlocked: stats.unlocked, total: stats.total, percent: stats.percent })}</p>
+      <p class="pc-note">${t('pop_culture_note')}</p>
       <div class="pc-filter">${filters}</div>
       <div class="pc-grid">${cards}</div>
     `;

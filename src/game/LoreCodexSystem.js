@@ -1,6 +1,7 @@
 import { LORE_CODEX } from './LoreCodexRegistry.js';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const GAME_LORECODEXSYSTEM = 'game/LoreCodexSystem';
 const codexOn = (name, handler) => on(name, handler, GAME_LORECODEXSYSTEM);
@@ -40,7 +41,7 @@ export class LoreCodexSystem {
     for (const entry of LORE_CODEX) {
       if (entry.unlock !== key || this.unlocked.has(entry.id)) continue;
       this.unlocked.add(entry.id);
-      this.game.dialog?.toast(`📜 秘典：${entry.title}`, 3200);
+      this.game.dialog?.toast(t('lore_codex_unlocked_toast', { title: t(entry.title) }), 3200);
       window.dispatchEvent(new CustomEvent('codex-unlocked', { detail: entry }));
     }
   }

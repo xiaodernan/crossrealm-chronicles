@@ -75,6 +75,23 @@ export function bossById(id) {
  * 阶段演出），而修前每一处都自己写 `bossId?.startsWith('dungeon-')` ——
  * 前缀一共被抄了五份。**谓词在这里，前缀常量也在这里**，抄错的可能就没了。
  */
+/**
+ * Boss 显示名的**文案键**（W-D2 切片16r）。
+ *
+ * 名册的 `name` 仍然是"它叫什么"（中文，登记处）；`nameKey` 是"这句话住在哪一格"。
+ * 各 Boss 类的默认名、事件负载里的 `name` 都从这里取键再 `t()` 展开 ——
+ * 改前那些地方各自抄了一句中文（六个 Boss 类各一份），英文界面下它们永远是中文。
+ *
+ * 副本 Boss 的 id 是 `dungeon-<副本定义 id>` 动态拼的，不在名册里；它们共用
+ * "迷宫守钥者"那一格（副本真正用的名字由 `BOSS_LORE` 给出，类里的只是兜底）。
+ */
+export function bossNameKeyOf(bossId) {
+  const b = bossById(bossId);
+  if (b?.nameKey) return b.nameKey;
+  if (typeof bossId === 'string' && bossId.startsWith(DUNGEON_BOSS_PREFIX)) return 'boss_name_dungeon_warden';
+  return 'boss_name_unknown';
+}
+
 export function isDungeonBossId(id) {
   return typeof id === 'string'
     && id.startsWith(DUNGEON_BOSS_PREFIX)

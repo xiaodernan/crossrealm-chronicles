@@ -33,7 +33,7 @@ export class CombatStyleOverlay {
       this.el.querySelector('.css-rank').style.color = color ?? '#c9a962';
       // `label` 是**文案键**（W-D2 切片16d）—— 展开只在这一处做。
       const 标签 = label ? t(label) : '';
-      this.el.querySelector('.css-label').textContent = 标签 ? `${标签} +${score}` : `${score}`;
+      this.el.querySelector('.css-label').textContent = 标签 ? t('combat_style_score_fmt', { label: 标签, score }) : `${score}`;
       this.el.classList.remove('hidden');
       this.hideTimer = 2.2;
     });

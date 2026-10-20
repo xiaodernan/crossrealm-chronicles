@@ -1,4 +1,5 @@
 import { Boss } from './Boss.js';
+import { bossNameKeyOf } from '../content/bossRoster.js';
 import { BossPhase, PhaseTransitionCondition } from './BossStateMachine.js';
 import { t } from '../engine/i18n.js';
 
@@ -8,7 +9,7 @@ export class DungeonBoss extends Boss {
     super(scene, world, {
       ...config,
       bossId: config.bossId ?? 'dungeon-warden',
-      name: config.name ?? '迷宫守钥者',
+      name: config.name ?? t(bossNameKeyOf(config.bossId ?? 'dungeon-warden')),
       hp: config.hp ?? 520,
       posture: 100,
       damage: 20,

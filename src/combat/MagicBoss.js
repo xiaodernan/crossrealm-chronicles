@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { Boss } from './Boss.js';
+import { t } from '../engine/i18n.js';
+import { bossNameKeyOf } from '../content/bossRoster.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
 /** 第二 Boss：大奥术师 — 魔法位面 */
@@ -11,7 +13,7 @@ export class MagicBoss extends Boss {
       posture: 100,
       damage: 16,
       speed: 4,
-      name: '大奥术师·萨尔林',
+      name: t(bossNameKeyOf('archmagus')),
       // bossId 必须在 `super` 里定下：场地脚本按 id 取，晚一步赋值就会取到基类的那个
       bossId: config.bossId ?? 'archmagus',
     });

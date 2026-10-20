@@ -259,6 +259,21 @@ export const STRINGS_ZH = Object.freeze({
   rest_point_campfire_name: '${zone}营火',
   rest_point_name_hub: '世界之锚休息点',
 
+  // 玩家可见的残余文案（W-D2 切片16r）
+  enemy_name_default: '敌人',
+  boss_name_dungeon_warden: '迷宫守钥者',
+  boss_name_unknown: '未知强敌',
+  cg_gallery_unlocked_toast: 'CG 解锁：${caption}',
+  lore_codex_unlocked_toast: '📜 秘典：${title}',
+  soul_streak_toast: '连杀 ×${streak} · +${bonus} 魂火',
+  combat_style_score_fmt: '${label} +${score}',
+  boss_spawn_toast: '⚔️ Boss 现身：${name}',
+  journal_tab_achievements: '成就墙 · {journal} 关闭',
+  journal_tab_dimension_echoes: '次元回声 · {journal} 关闭',
+  journal_tab_side_quests: '支线任务 · {journal} 关闭',
+  pop_culture_stats: '已共鸣 ${unlocked} / ${total}（${percent}%）',
+  pop_culture_note: '致敬独立游戏常见做法：借母题与氛围，名称已做区分处理',
+
   // 营火对话树文案（W-D2 切片16q：台词/选项/日志条目全是键）
   rest_dlg_hub_start_text: "火焰在世界之锚旁跳动，你能感到三个位面的脉动在此交汇。\n\n看守者抬眼：「又要出发了？」",
   rest_dlg_label_rest_upgrade: "休息 / 升级",

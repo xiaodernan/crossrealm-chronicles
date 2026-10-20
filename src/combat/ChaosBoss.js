@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { Boss } from './Boss.js';
+import { t } from '../engine/i18n.js';
+import { bossNameKeyOf } from '../content/bossRoster.js';
 import { addShake } from '../engine/Shake.js';
 
 /** Chapter 5 Boss — 混沌裂隙领主 */
@@ -11,7 +13,7 @@ export class ChaosBoss extends Boss {
       posture: 115,
       damage: 21,
       speed: 5.2,
-      name: '混沌裂隙领主',
+      name: t(bossNameKeyOf('chaos-overlord')),
       // id 走 config：`Boss` 构造期就要按它查场地脚本
       bossId: config.bossId ?? 'chaos-overlord',
     });

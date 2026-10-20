@@ -30,6 +30,7 @@ import {
 } from '../src/content/bossRoster.js';
 import { ZONE_IDS, ZONE_NAMES } from '../src/content/ZoneIdentity.js';
 import { REST_DIALOGUES } from '../src/content/restDialogues.js';
+import { t } from '../src/engine/i18n.js';
 
 const ROOT = process.cwd();
 const SRC = join(ROOT, 'src');
@@ -182,17 +183,25 @@ describe('真表：注册表里的每一张都过自己的 schema', () => {
     const voidB = readFileSync(join(SRC, 'combat/VoidBoss.js'), 'utf8');
     const chaos = readFileSync(join(SRC, 'combat/ChaosBoss.js'), 'utf8');
     const named = {
-      'shadow-warden': [src, /name:\s*config\.name \?\? '([^']+)'/],
-      'archmagus': [magic, /name:\s*'([^']+)'/],
-      'singularity-herald': [space, /name:\s*'([^']+)'/],
-      'void-chronarch': [voidB, /name:\s*'([^']+)'/],
-      'chaos-overlord': [chaos, /name:\s*'([^']+)'/],
+      'shadow-warden': src,
+      'archmagus': magic,
+      'singularity-herald': space,
+      'void-chronarch': voidB,
+      'chaos-overlord': chaos,
     };
     for (const b of BOSS_ROSTER) {
-      const [text, re] = named[b.id];
-      const m = text.match(re);
-      expect(m, `${b.id} 的类里找不到默认名`).toBeTruthy();
-      expect(m[1], `${b.id}：名册写 "${b.name}"，类里写 "${m[1]}"`).toBe(b.name);
+      const text = named[b.id];
+      /*
+       * W-D2 切片16r：默认名从"各抄一份中文"改成**名册的键**
+       * （`name: t(bossNameKeyOf('…'))`）—— 名字住在名册那一格，
+       * 六个 Boss 类不再各写一遍。改前这条门禁是拿源码里的中文字面量去比，
+       * 键化之后它必须改抓**键的出处**：用的是哪个 bossId 的键、展开后是不是名册登记的那一句。
+       */
+      const m = text.match(/name:[^\n]*bossNameKeyOf\([^)']*'([^']+)'/);
+      expect(m, `${b.id} 的类里找不到默认名（找的是 "name: … bossNameKeyOf('…')" 这一行）`).toBeTruthy();
+      expect(m[1], `${b.id} 的类里用的是另一个 bossId 的名字`).toBe(b.id);
+      // 展开后必须与名册登记的中文逐字相等 —— 名册的 `name` 是"它叫什么"
+      expect(t(b.nameKey), `${b.id}：名册写 "${b.name}"，键展开是 "${t(b.nameKey)}"`).toBe(b.name);
     }
   });
 

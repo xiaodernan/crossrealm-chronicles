@@ -45,7 +45,7 @@ export class SideQuestSystem {
       } catch (e) {
         if (!this._报错过的.has(q.id)) {
           this._报错过的.add(q.id);
-          console.error(`[sideQuests] 判据抛错，这条支线永远不会完成：${q.id}（${q.title}）—— ${e?.message ?? e}`);
+          console.error(`[sideQuests] 判据抛错，这条支线永远不会完成：${q.id}（${t(q.title)}）—— ${e?.message ?? e}`);
         }
         continue;
       }

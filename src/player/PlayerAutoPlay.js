@@ -1,4 +1,5 @@
 import { keyText, refreshKeyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 
 /** 自动通关 — 操控玩家角色跑图，Boss 步骤会强制现身后再推进任务 */
 export class PlayerAutoPlay {
@@ -165,7 +166,7 @@ export class PlayerAutoPlay {
       boss.position.z - this.game.player.position.z
     );
     this.game.player.yaw = this.game.player.targetYaw;
-    this.game.dialog.toast(`⚔️ Boss 现身：${boss.name}`, 4000);
+    this.game.dialog.toast(t('boss_spawn_toast', { name: boss.name }), 4000);
   }
 
   update(dt) {

@@ -13,7 +13,7 @@ import { t } from '../engine/i18n.js';
  * 枢纽那一格不取区名（'交汇枢纽'）：木牌指的是场地中央那件东西，玩家口中的名字是世界之锚。
  */
 const SIGN_LABELS = {
-  [ZONE_IDS.HUB]: '世界之锚',
+  [ZONE_IDS.HUB]: 'wp_label_anchor',
   [ZONE_IDS.FANTASY]: ZONE_NAMES[ZONE_IDS.FANTASY],
   [ZONE_IDS.MAGIC]: ZONE_NAMES[ZONE_IDS.MAGIC],
   [ZONE_IDS.SPACE]: ZONE_NAMES[ZONE_IDS.SPACE],
@@ -27,12 +27,16 @@ const SIGN_LABELS = {
  * 木牌上的地名的**展开点**（W-D2 切片16i）。
  *
  * 区名那几格存的是**文案键**（`ZONE_NAMES` 的值），木牌要写的是玩家看到的那几个字 ——
- * 于是这里 `t()` 展开一次。枢纽那格是它自己的写法（'世界之锚'），不走区名。
+ * 于是这里 `t()` 展开一次。
+ *
+ * W-D2 切片16r：枢纽那格也变成**键**了（`wp_label_anchor` = '世界之锚'）——
+ * 早先它是一句字面量，于是这里要靠"是不是枢纽那格"来区分该不该展开；
+ * 现在**每一格都是键**，展开口径统一成一处。
  */
 const signLabelOf = (id) => {
   const 键 = SIGN_LABELS[id];
   if (!键) return null;
-  return 键 === SIGN_LABELS[ZONE_IDS.HUB] ? 键 : t(键);
+  return t(键);
 };
 
 export class RestPointEnhancer {

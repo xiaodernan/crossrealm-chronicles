@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { Boss } from './Boss.js';
+import { t } from '../engine/i18n.js';
+import { bossNameKeyOf } from '../content/bossRoster.js';
 
 /** 第三 Boss：引力化身 — 星际位面 */
 export class SpaceBoss extends Boss {
@@ -10,7 +12,7 @@ export class SpaceBoss extends Boss {
       posture: 130,
       damage: 20,
       speed: 5,
-      name: '引力化身·奇点领主',
+      name: t(bossNameKeyOf('singularity-herald')),
       // id 走 config：`Boss` 构造期就要按它查场地脚本，晚一步赋默认值会查到别人的表
       bossId: config.bossId ?? 'singularity-herald',
     });

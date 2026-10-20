@@ -24,7 +24,7 @@ export class SideQuestJournalTab {
     }).join('');
 
     panelEl.innerHTML = `
-      <h2 data-ktext="支线任务 · {journal} 关闭"></h2>
+      <h2>${keyText(t('journal_tab_side_quests'))}</h2>
       <p class="sq-stats">${t('side_quest_progress', { done: prog.done, total: prog.total })}</p>
       <div class="sq-grid">${cards}</div>
       <p class="hint">${t('side_quest_hint')}</p>

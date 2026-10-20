@@ -71,7 +71,7 @@ export class CgGallerySystem {
     window.dispatchEvent(new CustomEvent('cg-unlocked', {
       detail: { id, caption, source },
     }));
-    this.game.dialog?.toast?.(`CG 解锁：${caption}`, 2600);
+    this.game.dialog?.toast?.(t('cg_gallery_unlocked_toast', { caption }), 2600);
     return true;
   }
 

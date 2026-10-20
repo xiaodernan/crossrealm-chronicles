@@ -1,5 +1,5 @@
 import { ACHIEVEMENTS } from '../game/AchievementSystem.js';
-import { refreshKeyText } from '../content/keyHints.js';
+import { keyText, refreshKeyText } from '../content/keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /** [J] 成就墙 Tab */
@@ -27,7 +27,7 @@ export class AchievementsJournalTab {
     }).join('');
 
     panelEl.innerHTML = `
-      <h2 data-ktext="成就墙 · {journal} 关闭"></h2>
+      <h2>${keyText(t('journal_tab_achievements'))}</h2>
       <p class="ach-stats">${t('achievement_stats', { done, total, pct })}</p>
       <div class="ach-grid">${cards}</div>
       <p class="hint">${t('achievement_hint')}</p>

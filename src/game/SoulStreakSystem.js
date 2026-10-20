@@ -1,5 +1,6 @@
 /** 连杀魂火 — 短时间多杀奖励 */
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const GAME_SOULSTREAKSYSTEM = 'game/SoulStreakSystem';
 const streakOn = (name, handler) => on(name, handler, GAME_SOULSTREAKSYSTEM);
@@ -26,7 +27,7 @@ export class SoulStreakSystem {
       if (this.streak >= 3) {
         const bonus = Math.min(this.streak, 8);
         this.game.stats.addSouls(bonus);
-        this.game.dialog.toast(`连杀 ×${this.streak} · +${bonus} 魂火`, 1800);
+        this.game.dialog.toast(t('soul_streak_toast', { streak: this.streak, bonus }), 1800);
         window.dispatchEvent(new CustomEvent('soul-streak', { detail: { streak: this.streak, bonus } }));
       }
       if (this.streak > this.best) this.best = this.streak;
