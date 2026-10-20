@@ -8,6 +8,7 @@
  * 都得反向依赖游戏装配点 —— 这正是 W-B1 切片1 立 `content/` 的那条规矩。
  */
 import { SKILL_BRANCH_IDS, SKILL_TREES, isGrant, nodesOf, skillById } from '../content/skillTrees.js';
+import { t } from '../engine/i18n.js';
 import { bossDefeated, getStoryLockReason } from './StoryWeaponSkills.js';
 
 /**
@@ -58,12 +59,12 @@ export class WeaponSkillTree {
         if (!this._checkNarrativeCondition(sk.grant)) continue;
         this.unlocked.add(sk.id);
         this.narrativeUnlocked.add(sk.id);
-        this.dialog.toast(`📜 叙事技能：${sk.name}`);
+        this.dialog.toast(t('skill_narrative_unlocked', { title: t(sk.name) }));
         this.game?.storyJournal?.addSilent({
           id: `skill-${sk.id}`,
           category: 'quest',
-          title: `技能 · ${sk.name}`,
-          text: sk.lore ?? sk.desc,
+          title: t('skill_journal_title', { title: t(sk.name) }),
+          text: t(sk.lore ?? sk.desc),
           chapter: this.game?.quests?.chapter ?? 1,
         });
         window.dispatchEvent(new CustomEvent('weapon-skill-unlocked', { detail: sk }));
@@ -80,7 +81,8 @@ export class WeaponSkillTree {
   }
 
   getStoryLore(skillId) {
-    return skillById(skillId)?.lore ?? '';
+    const l = skillById(skillId)?.lore;
+    return l ? t(l) : '';
   }
 
   /**
@@ -106,12 +108,12 @@ export class WeaponSkillTree {
     this.skillPoints -= skill.cost;
     this.unlocked.add(skill.id);
     const lore = this.getStoryLore(skill.id);
-    this.dialog.toast(`技能解锁：${skill.name}`);
+    this.dialog.toast(t('skill_unlocked', { title: t(skill.name) }));
     if (lore) {
       this.game?.storyJournal?.addSilent({
         id: `skill-unlock-${skill.id}`,
         category: 'quest',
-        title: skill.name,
+        title: t(skill.name),
         text: lore,
         chapter: this.game?.quests?.chapter ?? 1,
       });

@@ -158,7 +158,7 @@ export class UpgradePanel {
       const narrative = sk.narrative;
       const tag = narrative ? (owned ? '叙事✓' : '击败 Boss 解锁') : (sk.cost ? `${sk.cost}点` : '');
       return `<button type="button" class="skill-btn ${owned ? 'owned' : ''} ${narrative ? 'narrative' : ''}" data-id="${sk.id}" data-branch="${branch}" ${owned || !can || narrative ? 'disabled' : ''}>
-        ${sk.name} ${tag ? `(${tag})` : ''}<br><span>${sk.desc}</span>
+        ${t(sk.name)} ${tag ? `(${tag})` : ''}<br><span>${t(sk.desc)}</span>
         ${lock ? `<em class="skill-lock">${lock}</em>` : ''}
         ${owned && ws.getStoryLore(sk.id) ? `<em class="skill-lore">${ws.getStoryLore(sk.id)}</em>` : ''}
       </button>`;
@@ -182,7 +182,7 @@ export class UpgradePanel {
       <p>当前 Chapter ${ch} · 叙事碎片 ${fr} 条 · 叙事技能 ${ownedN.length}/${narrative.length}</p>
       <ul class="lore-skill-list">
         ${narrative.map((s) => `<li class="${ws.unlocked.has(s.id) ? 'owned' : 'locked'}">
-          <strong>${s.name}</strong> — ${s.lore ?? s.desc}
+          <strong>${t(s.name)}</strong> — ${t(s.lore ?? s.desc)}
           ${ws.unlocked.has(s.id) ? '' : `<br><span class="hint">${s.grant.boss ? '需击败 Boss' : `需 Chapter ${s.grant.chapter}`}</span>`}
         </li>`).join('')}
       </ul>

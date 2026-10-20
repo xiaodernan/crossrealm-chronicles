@@ -28,6 +28,7 @@ import { CONTENT_TABLES, checkContent } from '../src/content/registry.js';
 import { WeaponSkillTree } from '../src/game/WeaponSkillTree.js';
 import { getStoryLockReason } from '../src/game/StoryWeaponSkills.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
+import { t } from '../src/engine/i18n.js';
 
 installWindowShim();
 
@@ -391,7 +392,10 @@ describe('W-B6 切片1：营火面板的流派行是按表生成的（"少一整
     for (const [branch, nodes] of Object.entries(SKILL_TREES)) {
       for (const n of nodes) {
         if (!n.desc || !n.effect) continue;
-        const descPct = [...n.desc.matchAll(/\+(\d+)%/g)].map((m) => Number(m[1]));
+        // W-D2 切片16p：`desc` 存的是**文案键** —— 百分比要从展开后的那句里读。
+        // 读中文表够用：`+N%` 这个写法两种语言一致，核对的是数字不是措辞。
+        const 文案 = t(n.desc);
+        const descPct = [...文案.matchAll(/\+(\d+)%/g)].map((m) => Number(m[1]));
         const effPct = 百分比(n.effect);
         const 没命中 = descPct.filter((d) => !effPct.includes(d));
         if (没命中.length || descPct.length !== effPct.length) {

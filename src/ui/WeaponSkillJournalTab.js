@@ -1,6 +1,6 @@
 import { SKILL_BRANCHES, nodesOf, skillById, skillBranchText } from '../content/skillTrees.js';
 import { refreshKeyText } from '../content/keyHints.js';
-import { getLanguage } from '../engine/i18n.js';
+import { getLanguage, t } from '../engine/i18n.js';
 
 /**
  * [J] 流派 Tab — 三条技能树一览。
@@ -24,7 +24,7 @@ export class WeaponSkillJournalTab {
       const skills = nodesOf(branch.id).filter((s) => !s.grant);
       const cards = skills.map((s) => {
         const ok = unlocked.has(s.id);
-        const lore = skillById(s.id)?.lore;
+        const lore = skillById(s.id)?.lore ? t(skillById(s.id).lore) : null;
         return `<div class="sk-card${ok ? ' sk-on' : ''}">
           <div class="sk-name">${s.name}</div>
           <div class="sk-desc">${s.desc}</div>
@@ -39,7 +39,7 @@ export class WeaponSkillJournalTab {
       const narrative = SKILL_BRANCHES.flatMap((b) => nodesOf(b.id)).filter((s) => s.grant);
       const cards = narrative.map((s) => {
         const ok = unlocked.has(s.id);
-        const lore = skillById(s.id)?.lore;
+        const lore = skillById(s.id)?.lore ? t(skillById(s.id).lore) : null;
         const cond = s.grant ? (s.grant.boss ? `需击败 ${s.grant.boss}` : `需 Chapter ${s.grant.chapter}`) : '';
         return `<div class="sk-card${ok ? ' sk-on' : ''} sk-narrative">
           <div class="sk-name">${s.name} <span class="sk-tag">叙事</span></div>
