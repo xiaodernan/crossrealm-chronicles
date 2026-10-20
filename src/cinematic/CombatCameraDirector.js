@@ -152,7 +152,7 @@ export class CombatCameraDirector {
     this.active = true;
     this.timer = 0;
     this.duration = preset.duration;
-    this.preset = preset;
+    this.preset = kind;  // 存预设名字符串，供 DoF 预设表使用
     this._timeScale = preset.timeScale;
 
     const player = this.game.player;
@@ -332,12 +332,12 @@ export class CombatCameraDirector {
       // 只申领，不写相机：全仓库只有 `CameraRig` 一处会碰 `camera.fov`
       this.game.player?.rig?.requestFov(COMBAT_FOV_LAYER, ov.fovAdd);
       this.vignette.style.opacity = String(0.15 + (ov.orbit?.blend ?? 0) * 0.35);
-      /* 演出 DoF：焦点钉在本帧注视点（orbit.lookAt），模糊量随镜头包络呼吸 ——
-       * 起手与收尾各是 0 → 峰值 → 0，没有"突然糊了/突然清晰了"的硬切。
-       * dofPass 缺席（旧 save / 无后处理档位）时请求在 DofManager 里自熄。 */
+      /* 演出 DoF：使用预设表驱动，含平滑淡入淡出 ——
+       * 焦点钉在本帧注视点，模糊量由预设 fadeIn/fadeOut 平滑过渡，
+       * 不再手动写 maxblur，避免硬切。 */
       requestDof({
+        preset: this.preset,              // 'finisher' | 'riposte' | 'execution' | 'bossKill'
         focus: ov.orbit.position.distanceTo(ov.orbit.lookAt),
-        maxblur: EXECUTION_CAMERA.dofMaxblur * this._envelope(t),
       });
     }
   }

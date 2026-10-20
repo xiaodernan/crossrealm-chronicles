@@ -1,13 +1,11 @@
 import * as THREE from 'three';
 import { CAMERA_BLEND } from '../content/tuning.js';
-import { requestDof, cancelDof, setDofEnabled } from '../engine/DofManager.js';
+import { requestDof } from '../engine/DofManager.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
 const CINEMATIC_CINEMATICMANAGER = 'cinematic/CinematicManager';
 const cineOn = (name, handler) => on(name, handler, CINEMATIC_CINEMATICMANAGER);
-/** 过场 DoF 档：焦点永远钉在 Boss 注视点，背景随距离全虚；fade 是首尾的淡入淡出坡长 */
-const CINE_DOF = { maxblur: 0.85, fade: 0.5 };
 
 export const BOSS_CINEMATICS = {
   'shadow-warden': {
@@ -154,15 +152,14 @@ export class CinematicManager {
         { owner: 'cinematic', transition: CAMERA_BLEND.enter }
       );
 
-    // 过场 DoF：焦点钉在本帧注视点（_cineLook），模糊量首尾各留一个 fade 坡 ——
-    // 进出过场时景深随镜头补间一起起落，不是一记硬切。
-    // dofPass 缺席（旧 save / 无后处理档位）时请求在 DofManager 里自熄。
-    const edge = Math.min(this.timer, this.config.duration - this.timer, CINE_DOF.fade)
-      / CINE_DOF.fade;
-    requestDof({
-      focus: this._cinePos.distanceTo(this._cineLook),
-      maxblur: CINE_DOF.maxblur * Math.max(edge, 0),
-    });
+    // 过场 DoF：使用预设表驱动，按 phase 自动切换淡入/保持/淡出 ——
+    // title: cinematicIntro (弱模糊、快淡入) → dialog: cinematicMid (满模糊) → 结束: cinematicOutro (长淡出)
+    const focus = this._cinePos.distanceTo(this._cineLook);
+    if (this.phase === 'title') {
+      requestDof({ preset: 'cinematicIntro', focus });
+    } else if (this.phase === 'dialog') {
+      requestDof({ preset: 'cinematicMid', focus });
+    }
 
     if (this.phase === 'title' && this.timer > 2.2) {
       this.phase = 'dialog';
@@ -177,9 +174,8 @@ export class CinematicManager {
   end() {
     this.active = false;
     this.game.cinematicActive = false;
-    // 过场收尾显式取消 DoF：立即关灯
-    cancelDof();
-    if (this.game.dofPass) setDofEnabled(this.game.dofPass, false);
+    // 过场收尾：请求 cinematicOutro 预设（长淡出），由 DofManager 平滑关灯
+    requestDof({ preset: 'cinematicOutro', focus: this._cinePos.distanceTo(this._cineLook) });
     this.letterbox.classList.add('hidden');
     if (this.game.dialog.open) this.game.dialog.hide?.();
     window.dispatchEvent(new CustomEvent('cinematic-end'));

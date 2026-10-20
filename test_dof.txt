@@ -1,0 +1,20 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/3a大作[39m
+
+ [31m❯[39m tests/dof-cinematic-focus.test.js [2m([22m[2m10 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[90m 23[2mms[22m[39m
+[31m   [31m×[31m 处决演出：DoF 随镜头包络呼吸[2m > [22mplay 后第一帧亮灯：焦点是有限正数，模糊量已随包络起步[90m 10[2mms[22m[31m[39m
+[31m     → expected false to be true // Object.is equality[39m
+[31m   [31m×[31m 处决演出：DoF 随镜头包络呼吸[2m > [22m模糊量呼吸到峰值再落回：包络是 0 → 1 → 0，不糊在终点[90m 1[2mms[22m[31m[39m
+[31m     → expected 1 to be less than 0.13[39m
+[31m   [31m×[31m 处决演出：DoF 随镜头包络呼吸[2m > [22mskip() 之后下一帧还灯：收敛出口在 update 的非活跃分支[90m 1[2mms[22m[31m[39m
+[31m     → expected false to be true // Object.is equality[39m
+[31m   [31m×[31m Boss 过场：DoF 首尾淡入淡出[2m > [22m第一帧亮灯：焦点在绕轨注视点（14 米档），模糊量还在 fade 坡上[90m 1[2mms[22m[31m[39m
+[31m     → expected false to be true // Object.is equality[39m
+[31m   [31m×[31m Boss 过场：DoF 首尾淡入淡出[2m > [22m中段满糊、收尾落坡、end 后还灯[90m 1[2mms[22m[31m[39m
+[31m     → expected 1 to be close to 0.85, received difference is 0.15000000000000002, but expected 5e-7[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 14:52:10
+[2m   Duration [22m 2.80s[2m (transform 654ms, setup 21ms, collect 1.47s, tests 23ms, environment 0ms, prepare 602ms)[22m
+

@@ -1,0 +1,275 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/3a大作[39m
+
+ [32m✓[39m tests/rumble.test.js [2m([22m[2m38 tests[22m[2m)[22m[90m 71[2mms[22m[39m
+ [32m✓[39m tests/gamepad-remap.test.js [2m([22m[2m72 tests[22m[2m)[22m[90m 249[2mms[22m[39m
+ [32m✓[39m tests/key-hint-source.test.js [2m([22m[2m22 tests[22m[2m)[22m[90m 182[2mms[22m[39m
+ [32m✓[39m tests/pad-tuning.test.js [2m([22m[2m60 tests[22m[2m)[22m[90m 90[2mms[22m[39m
+ [32m✓[39m tests/player-skeleton-moves.test.js [2m([22m[2m34 tests[22m[2m)[22m[33m 914[2mms[22m[39m
+ [32m✓[39m tests/content-registry.test.js [2m([22m[2m55 tests[22m[2m)[22m[33m 713[2mms[22m[39m
+ [32m✓[39m tests/overlay-stack.test.js [2m([22m[2m44 tests[22m[2m)[22m[90m 71[2mms[22m[39m
+ [32m✓[39m tests/dialogue-cg-pairing.test.js [2m([22m[2m39 tests[22m[2m)[22m[33m 872[2mms[22m[39m
+   [33m[2m✓[22m[39m 运行时：对话与图都只说真话[2m > [22m假 `game` 的每一格都挂得在真 `Game` 表面上：桩件不许供生产没有的字段（B63） [33m360[2mms[22m[39m
+ [32m✓[39m tests/dungeon-encounters-table.test.js [2m([22m[2m32 tests[22m[2m)[22m[33m 946[2mms[22m[39m
+   [33m[2m✓[22m[39m ④ 权重是相对值，而且真的起作用[2m > [22m五座的实测比例都落在表里权重的附近（±8 个百分点，不是只有主类对） [33m396[2mms[22m[39m
+ [32m✓[39m tests/dungeon-dimension-copies.test.js [2m([22m[2m42 tests[22m[2m)[22m[33m 1577[2mms[22m[39m
+   [33m[2m✓[22m[39m 地下城尺寸事实的抄本收口（切片4f）[2m > [22m④ 派生层：门板 / 门框 / 门碰撞跟着洞宽走[2m > [22m关着的门挡得住整扇门洞、开着的门放行（clampPlayer 实测，切片4h 的行为面） [33m454[2mms[22m[39m
+ [32m✓[39m tests/enemy-field-moves.test.js [2m([22m[2m29 tests[22m[2m)[22m[90m 238[2mms[22m[39m
+ [32m✓[39m tests/gear-model.test.js [2m([22m[2m65 tests[22m[2m)[22m[33m 2389[2mms[22m[39m
+   [33m[2m✓[22m[39m 静态门禁[2m > [22m装备换算只有 `gearMods` 那一处：定义在 gear.js，调用它的只有 PlayerStats [33m655[2mms[22m[39m
+   [33m[2m✓[22m[39m 静态门禁[2m > [22m装备账只由 PlayerStats 自己写：别处直接改格子就是绕过 `isGearInstance` 那道认件关 [33m339[2mms[22m[39m
+   [33m[2m✓[22m[39m 静态门禁[2m > [22m推送口只有一个名字：`applyToCombat` 只有推送口与桥接自己在调 [33m449[2mms[22m[39m
+   [33m[2m✓[22m[39m 静态门禁[2m > [22m推送口只有一份实现，调用它的只有读档与 cheat [33m642[2mms[22m[39m
+ [32m✓[39m tests/player-weapon-hand-grip.test.js [2m([22m[2m35 tests[22m[2m)[22m[33m 2377[2mms[22m[39m
+   [33m[2m✓[22m[39m ④ 挥砍姿势只有一个写者：判据取挂载记号，不取"此刻在播什么"[2m > [22m普查腿：握持记号只有 WeaponGrip 写、静止档只有挂载方写，战斗侧不再有姿态常数 [33m420[2mms[22m[39m
+   [33m[2m✓[22m[39m ⑥ 法杖两件换手：proc 带着杖倒、静止珠在头侧、招式跟手甩[2m > [22m普查腿：握持层名与 `attachToHand` 的调用方各自点名，杖的消费方只有 WeaponSystem [33m338[2mms[22m[39m
+ [32m✓[39m tests/dungeon-wall-gap.test.js [2m([22m[2m12 tests[22m[2m)[22m[33m 3224[2mms[22m[39m
+   [33m[2m✓[22m[39m 地下城墙段与门洞的形状（B78）[2m > [22m① 负尺寸绝迹[2m > [22m没有任何网格的几何带 ≤0 的尺寸参数 [33m670[2mms[22m[39m
+   [33m[2m✓[22m[39m 地下城墙段与门洞的形状（B78）[2m > [22m① 负尺寸绝迹[2m > [22m没有任何 collider 的半宽或半深 ≤ 0 [33m576[2mms[22m[39m
+   [33m[2m✓[22m[39m 地下城墙段与门洞的形状（B78）[2m > [22m③ 门洞真的通（玩法层）[2m > [22m门洞走得出人（按玩家半径判，不是判门中心那一个点） [33m408[2mms[22m[39m
+   [33m[2m✓[22m[39m 地下城墙段与门洞的形状（B78）[2m > [22m③ 门洞真的通（玩法层）[2m > [22mB102 归零：场的墙线就是格线，场的墙一米都不伸在邻居屋里（W-B10 切片5d） [33m328[2mms[22m[39m
+   [33m[2m✓[22m[39m 地下城墙段与门洞的形状（B78）[2m > [22m⑤ 门板与门框对得上自己那个洞[2m > [22m门板尺寸逐座逐门一致，且关上的板把量出来的洞盖到只剩一条门框收边之内的缝 [33m365[2mms[22m[39m
+ [32m✓[39m tests/internal-space.test.js [2m([22m[2m31 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/dungeon-identity-copies.test.js [2m([22m[2m36 tests[22m[2m)[22m[90m 240[2mms[22m[39m
+ [32m✓[39m tests/internal-space-vertical-schedule.test.js [2m([22m[2m58 tests[22m[2m)[22m[33m 550[2mms[22m[39m
+ [32m✓[39m tests/dungeon-defs-table.test.js [2m([22m[2m22 tests[22m[2m)[22m[90m 206[2mms[22m[39m
+ [32m✓[39m tests/event-bus.test.js [2m([22m[2m21 tests[22m[2m)[22m[90m 154[2mms[22m[39m
+ [32m✓[39m tests/side-quest-roster.test.js [2m([22m[2m35 tests[22m[2m)[22m[90m 98[2mms[22m[39m
+ [32m✓[39m tests/gamepad-input.test.js [2m([22m[2m40 tests[22m[2m)[22m[90m 193[2mms[22m[39m
+ [32m✓[39m tests/skill-trees.test.js [2m([22m[2m29 tests[22m[2m)[22m[90m 252[2mms[22m[39m
+ [32m✓[39m tests/visual-world-clock.test.js [2m([22m[2m18 tests[22m[2m)[22m[33m 2002[2mms[22m[39m
+   [33m[2m✓[22m[39m 结构普查：谁还在读墙钟（B118② 名单由扫描推导，不是手抄）[2m > [22msrc/ 里读墙钟的文件恰好是登记过的那一批（新增一处 ⇒ 当场红） [33m434[2mms[22m[39m
+   [33m[2m✓[22m[39m 结构普查：谁还在读墙钟（B118② 名单由扫描推导，不是手抄）[2m > [22m登记名单不养僵尸条目：每一处今天还得真的读墙钟 [33m408[2mms[22m[39m
+   [33m[2m✓[22m[39m 结构普查：谁还在读墙钟（B118② 名单由扫描推导，不是手抄）[2m > [22m积分点（`_时相 += dt`）的名单就是这片改过的那一批 [33m420[2mms[22m[39m
+ [32m✓[39m tests/gravity-well.test.js [2m([22m[2m40 tests[22m[2m)[22m[90m 147[2mms[22m[39m
+ [32m✓[39m tests/gameplay-clock-semantics.test.js [2m([22m[2m24 tests[22m[2m)[22m[33m 328[2mms[22m[39m
+ [32m✓[39m tests/chrono-field.test.js [2m([22m[2m40 tests[22m[2m)[22m[90m 124[2mms[22m[39m
+ [32m✓[39m tests/material-surfaces.test.js [2m([22m[2m118 tests[22m[2m)[22m[33m 4699[2mms[22m[39m
+   [33m[2m✓[22m[39m ① 提交的 PNG 就是规格重算出来的那张（改数不重烤 = 红灯）[2m > [22m逐表面：文件存在、尺寸与规格一致、像素与重算逐字节相同 [33m560[2mms[22m[39m
+ [32m✓[39m tests/hit-feedback.test.js [2m([22m[2m39 tests[22m[2m)[22m[90m 167[2mms[22m[39m
+ [32m✓[39m tests/captions.test.js [2m([22m[2m40 tests[22m[2m)[22m[33m 714[2mms[22m[39m
+ [32m✓[39m tests/pad-ui-nav.test.js [2m([22m[2m31 tests[22m[2m)[22m[90m 114[2mms[22m[39m
+ [32m✓[39m tests/modal-trail.test.js [2m([22m[2m47 tests[22m[2m)[22m[90m 144[2mms[22m[39m
+ [32m✓[39m tests/maze-shuffle-order.test.js [2m([22m[2m23 tests[22m[2m)[22m[33m 1090[2mms[22m[39m
+   [33m[2m✓[22m[39m ⑥ 文献落点的玩法不变量：换洗法只许换"哪一篇给哪间"[2m > [22m同一颗种子连摇两次，文献落点一字不差（副本洗法不吃上一次的结果） [33m667[2mms[22m[39m
+ [32m✓[39m tests/mainline-table.test.js [2m([22m[2m26 tests[22m[2m)[22m[90m 245[2mms[22m[39m
+[90mstderr[2m | tests/key-hint-outlets.test.js[2m > [22m[2mNPC 台词：对话框、日志条目、事件三份都是定稿[2m > [22m[2m反向控制：把正文当键查必须念出 `[MISSING: …]`（改前的形状）
+[22m[39mi18n: 未找到键名 "时线区长按 {spell1}–{spell3} 蓄力，能打断 Boss 大招。"（语言: zh）
+i18n: 未找到键名 "时线区长按 {spell1}–{spell3} 蓄力，能打断 Boss 大招。"（语言: zh）
+
+ [32m✓[39m tests/key-hint-outlets.test.js [2m([22m[2m16 tests[22m[2m)[22m[90m 43[2mms[22m[39m
+ [32m✓[39m tests/keybind-behaviour.test.js [2m([22m[2m29 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/focus-nav.test.js [2m([22m[2m64 tests[22m[2m)[22m[33m 592[2mms[22m[39m
+ [32m✓[39m tests/enemy-roster-table.test.js [2m([22m[2m18 tests[22m[2m)[22m[90m 219[2mms[22m[39m
+ [32m✓[39m tests/keybind-source.test.js [2m([22m[2m36 tests[22m[2m)[22m[33m 327[2mms[22m[39m
+ [32m✓[39m tests/dungeon-occupancy.test.js [2m([22m[2m17 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+ [32m✓[39m tests/stick-nav-focus.test.js [2m([22m[2m21 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+ [32m✓[39m tests/shadow-policy.test.js [2m([22m[2m34 tests[22m[2m)[22m[33m 482[2mms[22m[39m
+ [32m✓[39m tests/nav-repeat.test.js [2m([22m[2m18 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/zone-rock-surface.test.js [2m([22m[2m9 tests[22m[2m)[22m[33m 340[2mms[22m[39m
+ [32m✓[39m tests/key-hint.test.js [2m([22m[2m40 tests[22m[2m)[22m[90m 133[2mms[22m[39m
+ [32m✓[39m tests/game-teardown.test.js [2m([22m[2m44 tests[22m[2m)[22m[90m 74[2mms[22m[39m
+ [32m✓[39m tests/world-ui-billboard.test.js [2m([22m[2m37 tests[22m[2m)[22m[90m 151[2mms[22m[39m
+ [32m✓[39m tests/loot-presentation.test.js [2m([22m[2m14 tests[22m[2m)[22m[33m 444[2mms[22m[39m
+ [32m✓[39m tests/camera-finite-guard.test.js [2m([22m[2m23 tests[22m[2m)[22m[33m 442[2mms[22m[39m
+ [32m✓[39m tests/difficulty.test.js [2m([22m[2m18 tests[22m[2m)[22m[33m 378[2mms[22m[39m
+ [32m✓[39m tests/gear-drop.test.js [2m([22m[2m30 tests[22m[2m)[22m[33m 1117[2mms[22m[39m
+ [32m✓[39m tests/color-vision.test.js [2m([22m[2m23 tests[22m[2m)[22m[90m 154[2mms[22m[39m
+ [32m✓[39m tests/player-combat-feedback.test.js [2m([22m[2m29 tests[22m[2m)[22m[90m 127[2mms[22m[39m
+ [32m✓[39m tests/map-keyboard.test.js [2m([22m[2m23 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m tests/gear-bag.test.js [2m([22m[2m25 tests[22m[2m)[22m[90m 56[2mms[22m[39m
+ [32m✓[39m tests/region-surface.test.js [2m([22m[2m4 tests[22m[2m)[22m[90m 271[2mms[22m[39m
+ [32m✓[39m tests/boss-arena-field.test.js [2m([22m[2m10 tests[22m[2m)[22m[90m 196[2mms[22m[39m
+ [32m✓[39m tests/enemy-moves.test.js [2m([22m[2m18 tests[22m[2m)[22m[90m 224[2mms[22m[39m
+[90mstderr[2m | tests/event-registry.test.js[2m > [22m[2m营火对话的阶段映射（派生名族的行为面）[2m > [22m[2m合法阶段派发到登记过的名字
+[22m[39mi18n: 未找到键名 "锚火看守"（语言: zh）
+i18n: 未找到键名 "锚火看守"（语言: zh）
+
+ [32m✓[39m tests/event-registry.test.js [2m([22m[2m12 tests[22m[2m)[22m[90m 111[2mms[22m[39m
+ [32m✓[39m tests/execution-camera.test.js [2m([22m[2m21 tests[22m[2m)[22m[90m 238[2mms[22m[39m
+ [32m✓[39m tests/material-palette.test.js [2m([22m[2m14 tests[22m[2m)[22m[90m 56[2mms[22m[39m
+ [32m✓[39m tests/enemy-growth.test.js [2m([22m[2m26 tests[22m[2m)[22m[90m 118[2mms[22m[39m
+ [32m✓[39m tests/animation-visual-root.test.js [2m([22m[2m11 tests[22m[2m)[22m[33m 755[2mms[22m[39m
+   [33m[2m✓[22m[39m 视觉层根节点：动画不接管实体变换（W-C6 切片5）[2m > [22m旧的两份陈述删净：`*ANIM_PRESETS` / `DEFAULT_*_STATE_MAP` / `createStateMachine` 在 src 里零出现（带 planted 对照） [33m704[2mms[22m[39m
+ [32m✓[39m tests/gear-boss-drops.test.js [2m([22m[2m28 tests[22m[2m)[22m[33m 434[2mms[22m[39m
+ [32m✓[39m tests/effect-lifecycle.test.js [2m([22m[2m18 tests[22m[2m)[22m[90m 78[2mms[22m[39m
+ [32m✓[39m tests/objective-rules.test.js [2m([22m[2m23 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/boss-state-machine.test.js [2m([22m[2m25 tests[22m[2m)[22m[90m 166[2mms[22m[39m
+ [32m✓[39m tests/quest-system.test.js [2m([22m[2m15 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32m✓[39m tests/analog-input.test.js [2m([22m[2m25 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/keybind-remap.test.js [2m([22m[2m25 tests[22m[2m)[22m[90m 63[2mms[22m[39m
+ [32m✓[39m tests/zone-internal-ownership.test.js [2m([22m[2m21 tests[22m[2m)[22m[33m 4288[2mms[22m[39m
+   [33m[2m✓[22m[39m B121：大气归属与室内归属分家[2m > [22m⑤ 一条判据三处共用（高度、法向、每帧缓存）[2m > [22m站在神殿里法向朝上；走出占地 5 米就交还给全局，且那一帧不用跨区 [33m326[2mms[22m[39m
+ [32m✓[39m tests/enemy-signature-moves.test.js [2m([22m[2m20 tests[22m[2m)[22m[33m 394[2mms[22m[39m
+ [32m✓[39m tests/combat-cancel.test.js [2m([22m[2m22 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/enemy-armor-surface.test.js [2m([22m[2m8 tests[22m[2m)[22m[90m 41[2mms[22m[39m
+ [32m✓[39m tests/arena-scripts.test.js [2m([22m[2m25 tests[22m[2m)[22m[90m 132[2mms[22m[39m
+ [32m✓[39m tests/quest-save-restore.test.js [2m([22m[2m14 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32m✓[39m tests/error-reporter.test.js [2m([22m[2m25 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+ [32m✓[39m tests/enemy-roster.test.js [2m([22m[2m15 tests[22m[2m)[22m[33m 1709[2mms[22m[39m
+   [33m[2m✓[22m[39m W-B7 切片4：破阵重兵 / 位面咒师 —— 把两座位面的空位补上[2m > [22m每座位面至少两类原生敌人 —— 真世界几何下按坐标反查，不是照抄一份位面名单 [33m434[2mms[22m[39m
+   [33m[2m✓[22m[39m W-B7 切片5：每个出生点都得醒得过来（B70 那一族）[2m > [22m每个原生敌人的出生点，玩家贴到 1.7 米时四向至少有一向会警觉 [33m802[2mms[22m[39m
+ [32m✓[39m tests/audio-clock.test.js [2m([22m[2m16 tests[22m[2m)[22m[90m 53[2mms[22m[39m
+ [32m✓[39m tests/draw-call-budget.test.js [2m([22m[2m22 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/zone-identity.test.js [2m([22m[2m28 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/audio-sfx-contract.test.js [2m([22m[2m15 tests[22m[2m)[22m[90m 61[2mms[22m[39m
+ [32m✓[39m tests/combat-resolution.test.js [2m([22m[2m19 tests[22m[2m)[22m[90m 33[2mms[22m[39m
+ [32m✓[39m tests/rest-point-name-single-source.test.js [2m([22m[2m15 tests[22m[2m)[22m[90m 78[2mms[22m[39m
+ [32m✓[39m tests/gear-pools.test.js [2m([22m[2m27 tests[22m[2m)[22m[33m 660[2mms[22m[39m
+ [32m✓[39m tests/player-hit-knockback.test.js [2m([22m[2m9 tests[22m[2m)[22m[90m 67[2mms[22m[39m
+ [32m✓[39m tests/bar-theme.test.js [2m([22m[2m21 tests[22m[2m)[22m[90m 190[2mms[22m[39m
+ [32m✓[39m tests/dungeon-template-geometry.test.js [2m([22m[2m22 tests[22m[2m)[22m[33m 11348[2mms[22m[39m
+   [33m[2m✓[22m[39m 房间模板层的几何契约与可重现性（B80/B81/B82）[2m > [22m① 尺寸契约：房间只有一套拼法（B80）[2m > [22m几何与材质全部来自共享库，反复 build 时缓存零增长（B76 的账） [33m320[2mms[22m[39m
+   [33m[2m✓[22m[39m 房间模板层的几何契约与可重现性（B80/B81/B82）[2m > [22m② 可重现：这座迷宫由种子决定（B81）[2m > [22m决策级的 Math.random 一发不见（three 发号那一类除外，并拿它当 arming 下限） [33m3625[2mms[22m[39m
+   [33m[2m✓[22m[39m 房间模板层的几何契约与可重现性（B80/B81/B82）[2m > [22m③ 贴合与可达：模板说的话必须真的成立（B82 + 新量到的堵门）[2m > [22m真副本里每一次分配都满足模板自己的 required/solid [33m419[2mms[22m[39m
+   [33m[2m✓[22m[39m 房间模板层的几何契约与可重现性（B80/B81/B82）[2m > [22m③ 贴合与可达：模板说的话必须真的成立（B82 + 新量到的堵门）[2m > [22m室内摆设不往门洞里放东西（普通门全部走得出人，B79 那一族除外） [33m315[2mms[22m[39m
+   [33m[2m✓[22m[39m 房间模板层的几何契约与可重现性（B80/B81/B82）[2m > [22m⑤ 模板库覆盖迷宫真正长出来的形状（W-B10 切片6）[2m > [22m通用兜底房不再是主旋律：`chamber:square` 占比从 51% 降到 20% 以内 [33m2942[2mms[22m[39m
+   [33m[2m✓[22m[39m 房间模板层的几何契约与可重现性（B80/B81/B82）[2m > [22m⑤ 模板库覆盖迷宫真正长出来的形状（W-B10 切片6）[2m > [22m每一款注册的模板都真的被选中过（写了没人读的模板 = 死内容） [33m2245[2mms[22m[39m
+ [32m✓[39m tests/damage-number-a11y.test.js [2m([22m[2m19 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+ [32m✓[39m tests/boss-phase-tuning.test.js [2m([22m[2m22 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/texture-shared.test.js [2m([22m[2m18 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32m✓[39m tests/ssao-policy.test.js [2m([22m[2m20 tests[22m[2m)[22m[90m 46[2mms[22m[39m
+ [32m✓[39m tests/zone-fog.test.js [2m([22m[2m20 tests[22m[2m)[22m[90m 28[2mms[22m[39m
+ [32m✓[39m tests/player-knockback.test.js [2m([22m[2m20 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+ [32m✓[39m tests/enemy-summon.test.js [2m([22m[2m16 tests[22m[2m)[22m[33m 935[2mms[22m[39m
+   [33m[2m✓[22m[39m 名额与归属[2m > [22m全场总量封顶：一群召唤者一起念咒也不会把帧预算花光 [33m582[2mms[22m[39m
+ [32m✓[39m tests/look-sensitivity.test.js [2m([22m[2m23 tests[22m[2m)[22m[90m 262[2mms[22m[39m
+ [32m✓[39m tests/player-hurtbox.test.js [2m([22m[2m14 tests[22m[2m)[22m[90m 62[2mms[22m[39m
+ [32m✓[39m tests/maze-seed-domain.test.js [2m([22m[2m34 tests[22m[2m)[22m[33m 12371[2mms[22m[39m
+   [33m[2m✓[22m[39m ③ [0,1) 的行为见证：量后果，不复制那条流[2m > [22m五座 × 600 颗种子（含负数与 2^31-1 的倍数）里，每个出怪点都落在半开区间内 [33m1650[2mms[22m[39m
+   [33m[2m✓[22m[39m ④ 可重现：种子这件事要有唯一答案[2m > [22m相邻种子给出不同迷宫：1..3000 与 Date.now() 连续 5000 毫秒都没有并档 [33m9804[2mms[22m[39m
+ [32m✓[39m tests/combat.test.js [2m([22m[2m13 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+ [32m✓[39m tests/semantic-colors.test.js [2m([22m[2m20 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/player-weapon-surface.test.js [2m([22m[2m5 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/enemy-ai.test.js [2m([22m[2m17 tests[22m[2m)[22m[90m 248[2mms[22m[39m
+ [32m✓[39m tests/enemy-volley-armor.test.js [2m([22m[2m12 tests[22m[2m)[22m[90m 69[2mms[22m[39m
+ [32m✓[39m tests/boss-phase-entrance.test.js [2m([22m[2m11 tests[22m[2m)[22m[90m 60[2mms[22m[39m
+[90mstdout[2m | tests/bundle-size-budget.test.js[2m > [22m[2m首屏体积门禁（W-D5 切片1）[2m > [22m[2m⑤ 真 dist（存在时才算）[2m > [22m[2m当前首屏在 2 MiB 预算内
+[22m[39m首屏读数：1561742 字节 = 1.49 MiB / 预算 2.00 MiB
+     677382  modulepreload  /assets/vendor-three-C3J0Yoyl.js
+     433923  modulepreload  /assets/chunk-core-D38Y6GhB.js
+     146544  modulepreload  /assets/chunk-world-CT5KZxOa.js
+     134101  modulepreload  /assets/chunk-ui-DpzlDbVa.js
+      77125  modulepreload  /assets/chunk-combat-BK3RuDz7.js
+      50814  module         /assets/index-C3fCC8s7.js
+      41853  stylesheet     /assets/index-CGfp6QRm.css
+
+ [32m✓[39m tests/bundle-size-budget.test.js [2m([22m[2m17 tests[22m[2m)[22m[90m 180[2mms[22m[39m
+ [32m✓[39m tests/audio-volume.test.js [2m([22m[2m11 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/journal-tab-return.test.js [2m([22m[2m8 tests[22m[2m)[22m[90m 235[2mms[22m[39m
+ [32m✓[39m tests/barrage.test.js [2m([22m[2m16 tests[22m[2m)[22m[90m 68[2mms[22m[39m
+ [32m✓[39m tests/content-key-text.test.js [2m([22m[2m12 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/fast-travel.test.js [2m([22m[2m17 tests[22m[2m)[22m[90m 70[2mms[22m[39m
+ [32m✓[39m tests/ground-hazard.test.js [2m([22m[2m17 tests[22m[2m)[22m[90m 57[2mms[22m[39m
+ [32m✓[39m tests/vertical-schedule.test.js [2m([22m[2m17 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/input-device.test.js [2m([22m[2m13 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/poi-identity.test.js [2m([22m[2m16 tests[22m[2m)[22m[33m 1497[2mms[22m[39m
+ [32m✓[39m tests/camera-occlusion.test.js [2m([22m[2m15 tests[22m[2m)[22m[90m 296[2mms[22m[39m
+ [32m✓[39m tests/heal-number.test.js [2m([22m[2m18 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/global-stub-hygiene.test.js [2m([22m[2m4 tests[22m[2m)[22m[90m 199[2mms[22m[39m
+ [32m✓[39m tests/boss-growth-scaling.test.js [2m([22m[2m14 tests[22m[2m)[22m[90m 65[2mms[22m[39m
+ [32m✓[39m tests/camera-alloc.test.js [2m([22m[2m21 tests[22m[2m)[22m[90m 126[2mms[22m[39m
+ [32m✓[39m tests/internal-space-ground-height.test.js [2m([22m[2m12 tests[22m[2m)[22m[33m 1998[2mms[22m[39m
+ [32m✓[39m tests/world-ambient-events.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/perf-gauges.test.js [2m([22m[2m13 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/dof-cinematic-focus.test.js [2m([22m[2m10 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/texture-library-load.test.js [2m([22m[2m8 tests[22m[2m)[22m[33m 517[2mms[22m[39m
+ [32m✓[39m tests/zone-name-legacy.test.js [2m([22m[2m10 tests[22m[2m)[22m[90m 155[2mms[22m[39m
+ [32m✓[39m tests/player-weapon-visual-layer.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32m✓[39m tests/effect-timing.test.js [2m([22m[2m10 tests[22m[2m)[22m[90m 41[2mms[22m[39m
+ [32m✓[39m tests/content-boundary.test.js [2m([22m[2m5 tests[22m[2m)[22m[90m 239[2mms[22m[39m
+ [32m✓[39m tests/zone-grade.test.js [2m([22m[2m14 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/zone-surface-colors.test.js [2m([22m[2m4 tests[22m[2m)[22m[90m 96[2mms[22m[39m
+ [32m✓[39m tests/hud-boot.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/timing-boundary.test.js [2m([22m[2m7 tests[22m[2m)[22m[90m 228[2mms[22m[39m
+ [32m✓[39m tests/save-field-parity.test.js [2m([22m[2m5 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/hotkey-router.test.js [2m([22m[2m16 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/e2e-clear.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+[90mstderr[2m | tests/save-migrations.test.js[2m > [22m[2mSaveSystem.ingest 的失败路径（不静默吞异常）[2m > [22m[2mv4 档一路走通：迁移 → 校验 → 应用，朝向角与派生字段都正确
+[22m[39m[save] 旧存档 v4 已迁移到 v7（跨 3 跳）
+
+[90mstderr[2m | tests/save-migrations.test.js[2m > [22m[2mSaveSystem.ingest 的失败路径（不静默吞异常）[2m > [22m[2m坏 JSON 被隔离到 :corrupt，原文保留且不删除键之外的数据
+[22m[39m[save] 存档 crossrealm_save_v5 已损坏（Expected double-quoted property name in JSON at position 13 (line 1 column 14)），原文件转移到 crossrealm_save_v5:corrupt
+
+[90mstderr[2m | tests/save-migrations.test.js[2m > [22m[2mSaveSystem.ingest 的失败路径（不静默吞异常）[2m > [22m[2m校验不通过的档不会进入应用阶段
+[22m[39m[save] 旧存档 v4 已迁移到 v7（跨 3 跳）
+[save] 存档校验未通过，已跳过加载：缺少 quests 对象
+
+ [32m✓[39m tests/save-migrations.test.js [2m([22m[2m14 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m tests/aim-assist.test.js [2m([22m[2m12 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/vite-content-check.test.js [2m([22m[2m7 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/focus-trap.test.js [2m([22m[2m11 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/pad-spell-charge.test.js [2m([22m[2m9 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32m✓[39m tests/decoration-batching.test.js [2m([22m[2m7 tests[22m[2m)[22m[90m 83[2mms[22m[39m
+ [32m✓[39m tests/save-slots.test.js [2m([22m[2m9 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/boss-dungeon-prefix.test.js [2m([22m[2m11 tests[22m[2m)[22m[90m 129[2mms[22m[39m
+ [32m✓[39m tests/pad-interact.test.js [2m([22m[2m9 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/performance-lod.test.js [2m([22m[2m14 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/composer-chain.test.js [2m([22m[2m9 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/camera-blend.test.js [2m([22m[2m9 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/boss-phase-wiring.test.js [2m([22m[2m9 tests[22m[2m)[22m[90m 139[2mms[22m[39m
+ [32m✓[39m tests/camera-contract.test.js [2m([22m[2m8 tests[22m[2m)[22m[90m 262[2mms[22m[39m
+[90mstderr[2m | tests/animation-entity-adapter.test.js[2m > [22m[2mAnimationEntityAdapter：只对接真接口（W-C6 切片2）[2m > [22m[2m库内没有的动作不谎报：setState 到一个没注册的动作，控制器保持原状
+[22m[39mAnimationController: 状态 "teleport" 对应的动作 "teleport" 未在库中注册
+
+[90mstderr[2m | tests/animation-entity-adapter.test.js[2m > [22m[2mAnimationEntityAdapter：只对接真接口（W-C6 切片2）[2m > [22m[2m工厂：有 mesh 的实体返回可用适配器，没有的返回 null
+[22m[39m[AnimationEntityAdapter] 实体没有 mesh/object3D，跳过
+
+ [32m✓[39m tests/animation-entity-adapter.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/engine-observable.test.js [2m([22m[2m15 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/engine-camera-rig.test.js [2m([22m[2m13 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/camera-lockon.test.js [2m([22m[2m8 tests[22m[2m)[22m[90m 134[2mms[22m[39m
+ [32m✓[39m tests/camera-pitch-consistency.test.js [2m([22m[2m3 tests[22m[2m)[22m[90m 131[2mms[22m[39m
+ [32m✓[39m tests/chunk-graph.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/game-field-contract.test.js [2m([22m[2m5 tests[22m[2m)[22m[90m 230[2mms[22m[39m
+ [32m✓[39m tests/loot-lifecycle.test.js [2m([22m[2m14 tests[22m[2m)[22m[33m 12408[2mms[22m[39m
+   [33m[2m✓[22m[39m 掉落物池化：一件掉落不再新建一份资源（W-C1 切片2）[2m > [22m500 件掉落只用得到三份共享几何（本体 / 地面环 / 光柱）：普查里那 500 个几何体归一 [33m2363[2mms[22m[39m
+   [33m[2m✓[22m[39m 掉落物池化：一件掉落不再新建一份资源（W-C1 切片2）[2m > [22m跑 200 件与跑 500 件见过同样多的资源：零增长，不是少增长 [33m3803[2mms[22m[39m
+   [33m[2m✓[22m[39m 掉落物池化：一件掉落不再新建一份资源（W-C1 切片2）[2m > [22m新建过的格数与同时在场峰值严格相等（每格三份材质）：既不许多造，也不许只造一格排队 [33m2682[2mms[22m[39m
+   [33m[2m✓[22m[39m 掉落物池化：一件掉落不再新建一份资源（W-C1 切片2）[2m > [22m玩家一直在捡的时候，资源数仍只跟同时在场峰值挂钩 [33m1176[2mms[22m[39m
+   [33m[2m✓[22m[39m 掉落物池化：一件掉落不再新建一份资源（W-C1 切片2）[2m > [22m池化期间一次 dispose 都不发生：还回去不等于拆掉 [33m1408[2mms[22m[39m
+   [33m[2m✓[22m[39m 掉落物池化：一件掉落不再新建一份资源（W-C1 切片2）[2m > [22m对账：在场 + 池里 = 这一场新建过的总数，场景里不留孤儿 [33m939[2mms[22m[39m
+ [32m✓[39m tests/save-slot-panel.test.js [2m([22m[2m4 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/player-fsm.test.js [2m([22m[2m15 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/enemy-shared-geometry.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+ [32m✓[39m tests/aa-policy.test.js [2m([22m[2m11 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/perf-smoke.test.js [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/engine-scheduler.test.js [2m([22m[2m14 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/suite-denominator.test.js [2m([22m[2m4 tests[22m[2m)[22m[90m 69[2mms[22m[39m
+ [32m✓[39m tests/collision.test.js [2m([22m[2m14 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m tests/save-validator.test.js [2m([22m[2m12 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/boss-name-consistency.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/character-anim-catalog.test.js [2m([22m[2m8 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/dom-id-ownership.test.js [2m([22m[2m4 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/enemy-animation-integration.test.js [2m([22m[2m4 tests[22m[2m)[22m[90m 28[2mms[22m[39m
+ [32m✓[39m tests/ci-pipeline.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/gear-declaration.test.js [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/franchise-identity.test.js [2m([22m[2m7 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/game-constructor-decoupled.test.js [2m([22m[2m3 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/world-terrain-ground-align.test.js [2m([22m[2m2 tests[22m[2m)[22m[90m 272[2mms[22m[39m
+ [32m✓[39m tests/boss-phase-fx.test.js [2m([22m[2m7 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/frame-budget.test.js [2m([22m[2m7 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/narrative-trigger.test.js [2m([22m[2m3 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/kill-souls-single-source.test.js [2m([22m[2m4 tests[22m[2m)[22m[90m 173[2mms[22m[39m
+ [32m✓[39m tests/engine-primitives.test.js [2m([22m[2m8 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/engine-perfhud.test.js [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/animation-clip-loader.test.js [2m([22m[2m5 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/terrain-height.test.js [2m([22m[2m6 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+[90mstderr[2m | tests/help-manual-i18n.test.js[2m > [22m[2m说明书正文 i18n（W-D2 切片15）[2m > [22m[2m反向控制：一个没登记的键必须回 [MISSING（证明解析路径是活的）
+[22m[39mi18n: 未找到键名 "hm_body_does_not_exist_xyz"（语言: zh）
+
+ [32m✓[39m tests/help-manual-i18n.test.js [2m([22m[2m33 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/no-duplicate-tables.test.js [2m([22m[2m1 test[22m[2m)[22m[90m 93[2mms[22m[39m
+ [32m✓[39m tests/shake-camera.test.js [2m([22m[2m4 tests[22m[2m)[22m[90m 108[2mms[22m[39m
+ [32m✓[39m tests/level-editor-basic.test.js [2m([22m[2m3 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+[90mstderr[2m | tests/i18n.test.js[2m > [22m[2mi18n 文案表（W-D2 切片1）[2m > [22m[2mt() 对缺失键返回 [MISSING: key] 而不是静默失败
+[22m[39mi18n: 未找到键名 "nonexistent_key_xyz"（语言: zh）
+
+ [32m✓[39m tests/i18n.test.js [2m([22m[2m30 tests[22m[2m)[22m[33m 19923[2mms[22m[39m
+   [33m[2m✓[22m[39m 死键只减不增（W-D2 切片6 门槛）[2m > [22m字符串字面量可见的死键计数只许降不许升（今天 53 → 切片6 后 ≤ 48） [33m19712[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m187 passed[39m[22m[90m (187)[39m
+[2m      Tests [22m [1m[32m3576 passed[39m[22m[90m (3576)[39m
+[2m   Start at [22m 03:57:06
+[2m   Duration [22m 27.64s[2m (transform 11.71s, setup 1.80s, collect 99.30s, tests 107.93s, environment 53ms, prepare 38.90s)[22m
+

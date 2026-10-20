@@ -651,6 +651,42 @@ export const EXECUTION_CAMERA = {
 };
 
 /**
+ * 景深（DoF）预设表 —— W-C4 切片6 余量续：数据驱动 DoF 参数。
+ *
+ * 结构：
+ *   - maxblur: 最大模糊半径（BokehPass aperture 对应，0~1）
+ *   - fadeIn:  淡入时长（秒），0 = 瞬间全开
+ *   - fadeOut: 淡出时长（秒），0 = 瞬间关闭
+ *   - aperture: 光圈大小（默认 0.025，越小越糊）
+ *   - focus:   固定焦点距离（米），undefined = 由导演每帧计算注视点距离
+ *
+ * 键名即导演请求的 preset 名（`requestDof({ preset: 'execution' })`），
+ * 便于门禁扫描与防拼写错误。
+ */
+export const DOF_PRESETS = Object.freeze({
+  /** 连击终结 / 轻击终结 —— 短促、轻微虚化，聚焦动作 */
+  finisher:     { maxblur: 0.35, fadeIn: 0.10, fadeOut: 0.15, aperture: 0.025, focus: undefined },
+
+  /** 致命反击 —— 稍长、中等虚化，强调反击瞬间 */
+  riposte:      { maxblur: 0.45, fadeIn: 0.12, fadeOut: 0.20, aperture: 0.025, focus: undefined },
+
+  /** 标准处决 —— 标准剧情镜头，完整淡入淡出，模糊峰值 0.65（EXECUTION_CAMERA.dofMaxblur） */
+  execution:    { maxblur: 0.65, fadeIn: 0.18, fadeOut: 0.25, aperture: 0.025, focus: undefined },
+
+  /** Boss 击破 —— 最长、最强虚化，长淡入淡出配合长镜头 */
+  bossKill:     { maxblur: 0.75, fadeIn: 0.25, fadeOut: 0.35, aperture: 0.022, focus: undefined },
+
+  /** Boss 过场开场 —— 极弱虚化，极快淡入，聚焦 Boss 全身 */
+  cinematicIntro:  { maxblur: 0.25, fadeIn: 0.05, fadeOut: 0.40, aperture: 0.030, focus: 14 },
+
+  /** Boss 过场中段 —— 满模糊，焦点钉 Boss 注视点 */
+  cinematicMid:    { maxblur: 0.85, fadeIn: 0.50, fadeOut: 0.50, aperture: 0.020, focus: undefined },
+
+  /** Boss 过场结尾 —— 长淡出，模糊缓慢消退 */
+  cinematicOutro:  { maxblur: 0.30, fadeIn: 0.10, fadeOut: 0.80, aperture: 0.025, focus: undefined },
+});
+
+/**
  * 两种镜头模式的基准 FOV —— 全仓库只有这一处定义。
  * 演出系统（`CombatCameraDirector`）与玩家相机（`PlayerController`）都在写 `camera.fov`，
  * 数字写两遍必然漂移（第一人称的处决镜头此前就是只改了一半）。M3 把相机收进唯一所有者后，

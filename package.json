@@ -21,7 +21,8 @@
     "bake:textures": "node scripts/bake-textures.mjs",
     "perf": "node scripts/perf-smoke.mjs",
     "e2e": "node scripts/e2e-clear.mjs",
-    "size": "node scripts/check-bundle-size.mjs"
+    "size": "node scripts/check-bundle-size.mjs",
+    "e2e:combat": "node scripts/e2e-combat.mjs"
   },
   "dependencies": {
     "three": "^0.172.0"

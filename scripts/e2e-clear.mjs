@@ -103,8 +103,12 @@ const VITE_PORT = await freePort();
 const CDP_PORT = await freePort();
 
 // 直接用当前 node 调 vite.js：Windows 上 spawn .cmd 要开 shell（引号/quoting 风险），绕开它
+//
+// `--host 127.0.0.1` 是**必须**的：vite 缺省只听 `localhost`，而 Windows 上 `localhost`
+// 先解析到 IPv6 的 `::1` ⇒ 脚本探 `http://127.0.0.1:<port>/` 会**超时**（症状："游戏没起来"
+// + 页面错误 0 条 —— 一次把责任错记到构建上的假红）。显式绑到 IPv4 回环，三者逐字对齐。
 const viteBin = join(process.cwd(), 'node_modules', 'vite', 'bin', 'vite.js');
-const vite = spawn(process.execPath, [viteBin, '--port', String(VITE_PORT), '--strictPort'],
+const vite = spawn(process.execPath, [viteBin, '--host', '127.0.0.1', '--port', String(VITE_PORT), '--strictPort'],
   { stdio: 'ignore', cwd: process.cwd() });
 
 const chromePath = findChrome();

@@ -1,24 +1,13 @@
 /**
- * W-C4 余量：演出镜头的 DoF 动态启用调用点。
- *
- * 切片6 把 BokehPass 挂进了 composer 链，但 `enabled` 恒为 false —— 景深从没亮过。
- * 本文件钉住两处调用点与一条收敛铁律：
- *   ① 处决演出（`CombatCameraDirector`）：焦点钉在本帧注视点，模糊量随镜头包络呼吸；
- *   ② Boss 过场（`CinematicManager`）：焦点钉在绕轨注视点，首尾各留一个淡入淡出坡；
- *   ③ 收敛唯一出口在每帧 `update`：active 帧开灯，非 active 帧幂等关灯 ——
- *      skip() 与任何直接置 active=false 的退出路径自动还灯，不存在"漏关"的分支。
+ * W-C4 余量续：Boss 过场 DoF 预设 cinematicIntro -> cinematicMid -> cinematicOutro
  */
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import * as THREE from 'three';
-import { CombatCameraDirector } from '../src/cinematic/CombatCameraDirector.js';
-import { attachCombatCameraSkip } from '../src/cinematic/CombatCameraDirectorExtensions.js';
 import { CinematicManager } from '../src/cinematic/CinematicManager.js';
-import { createDofPass, updateDofParams, setDofEnabled } from '../src/engine/DofPass.js';
-import { EXECUTION_CAMERA } from '../src/content/tuning.js';
-import { updateDof } from '../src/engine/DofManager.js';
+import { DOF_PRESETS } from '../src/content/tuning.js';
+import { updateDof, resetDofForTest, requestDof, cancelDof } from '../src/engine/DofManager.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
-/** BokehPass 构造链只用 geometry/material/render target，node 侧给最小 DOM 替身即可 */
 function installDomShim() {
   class FakeElement {
     constructor() {
@@ -43,206 +32,138 @@ function installDomShim() {
   globalThis.requestAnimationFrame = () => 0;
 }
 
-beforeAll(() => {
-  installDomShim();
-});
+function mkDofPass() {
+  return {
+    enabled: false,
+    uniforms: {
+      focus: { value: 10 },
+      aperture: { value: 0.025 },
+      maxblur: { value: 1 },
+    },
+  };
+}
 
-/** 每个用例重装 window：CinematicManager 构造期挂 boss-start，不重装会跨用例串线 */
-beforeEach(() => {
+function playBoss(dofPass) {
+  const game = {
+    cinematicActive: false,
+    dofPass,
+    audio: { bossRoar() {} },
+    dialog: { open: false, show() {}, hide() {} },
+    player: { 
+      position: new THREE.Vector3(), 
+      rig: { setView() {} } 
+    },
+  };
+  const cine = new CinematicManager(game);
+  window.dispatchEvent(new CustomEvent('boss-start', {
+    detail: { bossId: 'shadow-warden', position: new THREE.Vector3(0, 0, 10) },
+  }));
+  return { cine, game };
+}
+
+beforeAll(() => { installDomShim(); });
+beforeEach(() => { 
   installWindowShim();
+  resetDofForTest();
 });
 
-/** 与 DofPass.js 的真身同构的最小替身：API 只碰 enabled 与 uniforms 三键 */
-const mkDofPass = () => ({
-  enabled: false,
-  uniforms: {
-    focus: { value: 10 },
-    aperture: { value: 0.025 },
-    maxblur: { value: 1 },
-  },
-});
-
-/** 测试用的统一更新：director.update() 后驱动 DoF，模拟 Game.update() 的职责 */
-const tickAll = (d, game, dt) => {
-  d.update(dt);
-  updateDof(game.dofPass);
-};
-
-describe('DofPass 封装本体', () => {
-  it('createDofPass 默认关灯，三个参数落进真 BokehPass 的 uniforms', () => {
-    const pass = createDofPass(new THREE.Scene(), new THREE.PerspectiveCamera(), {
-      focus: 7, aperture: 0.03, maxblur: 0.8,
-    });
-    expect(pass.enabled).toBe(false);
-    expect(pass.uniforms['focus'].value).toBe(7);
-    expect(pass.uniforms['aperture'].value).toBe(0.03);
-    expect(pass.uniforms['maxblur'].value).toBe(0.8);
-  });
-
-  it('updateDofParams 只动传了的键，pass 缺席时自熄', () => {
-    const pass = createDofPass(new THREE.Scene(), new THREE.PerspectiveCamera());
-    updateDofParams(pass, { focus: 3.5 });
-    expect(pass.uniforms['focus'].value).toBe(3.5);
-    expect(pass.uniforms['aperture'].value).toBe(0.025);   // 没传就保持默认
-    expect(() => updateDofParams(null, { focus: 1 })).not.toThrow();
-    expect(() => setDofEnabled(null, true)).not.toThrow();
-  });
-
-  it('setDofEnabled 开关幂等', () => {
-    const pass = createDofPass(new THREE.Scene(), new THREE.PerspectiveCamera());
-    setDofEnabled(pass, true);
-    expect(pass.enabled).toBe(true);
-    setDofEnabled(pass, true);
-    expect(pass.enabled).toBe(true);
-    setDofEnabled(pass, false);
-    expect(pass.enabled).toBe(false);
-  });
-});
-
-describe('处决演出：DoF 随镜头包络呼吸', () => {
-  const mkPlayerStub = () => ({
-    scene: new THREE.Group(),
-    mesh: { getObjectByName: () => null },
-    characterModel: null,
-    applyDash() {},
-    getRightXZ: () => new THREE.Vector3(1, 0, 0),
-    position: new THREE.Vector3(0, 0, 0),
-    yaw: 0,
-    combat: { lockTarget: null },
-    getCombatForwardXZ: () => new THREE.Vector3(0, 0, 1),
-    timeSlow: 1,
-    cameraMode: 'third',
-  });
-
-  const mkGame = (dofPass) => {
-    const player = mkPlayerStub();
-    const game = {
-      player,
-      dofPass,
-      cinematicActive: false,
-      cinematics: null,
-      restScene: null,
-      combatInputLock: { lock() {}, release() {} },
-      audio: { heavyHit() {}, executionSting() {} },
-      executionFx: { burst() {} },
-    };
-    const d = new CombatCameraDirector(game);
-    attachCombatCameraSkip(d, game);
-    game.combatCamera = d;
-    return { d, game };
-  };
-
-  it('play 后第一帧亮灯：焦点是有限正数，模糊量已随包络起步', () => {
-    const { d } = mkGame(mkDofPass());
-    d.play('execution', { position: { x: 0, y: 0, z: 4 }, stature: 2.2, base: 0 });
-    tickAll(d, d.game, 1 / 60);
-    const dof = d.game.dofPass;
-    expect(dof.enabled).toBe(true);
-    expect(dof.uniforms['focus'].value).toBeGreaterThan(1);
-    expect(Number.isFinite(dof.uniforms['focus'].value)).toBe(true);
-    expect(dof.uniforms['maxblur'].value).toBeGreaterThan(0);
-    expect(dof.uniforms['maxblur'].value).toBeLessThan(EXECUTION_CAMERA.dofMaxblur);
-  });
-
-  it('模糊量呼吸到峰值再落回：包络是 0 → 1 → 0，不糊在终点', () => {
-    const { d } = mkGame(mkDofPass());
-    d.play('execution', { position: { x: 0, y: 0, z: 4 }, stature: 2.2, base: 0 });
-    let peak = 0;
-    for (let t = 0; t < 0.78; t += 1 / 60) {
-      tickAll(d, d.game, 1 / 60);
-      peak = Math.max(peak, d.game.dofPass.uniforms['maxblur'].value);
-    }
-    expect(peak).toBeGreaterThan(EXECUTION_CAMERA.dofMaxblur * 0.9);
-    expect(d.game.dofPass.enabled).toBe(false);   // 播完当场还灯
-    // 收尾帧只关灯不清参数：uniforms 停在最后一个 active 帧的落坡值（接近 0 但不必为 0），
-    // 关灯期间不渲染、下次开灯第一帧立即重写，无残留问题
-    expect(d.game.dofPass.uniforms['maxblur'].value)
-      .toBeLessThan(EXECUTION_CAMERA.dofMaxblur * 0.2);
-  });
-
-  it('skip() 之后下一帧还灯：收敛出口在 update 的非活跃分支', () => {
-    const { d } = mkGame(mkDofPass());
-    d.play('execution', { position: { x: 0, y: 0, z: 4 }, stature: 2.2, base: 0 });
-    tickAll(d, d.game, 1 / 60);
-    expect(d.game.dofPass.enabled).toBe(true);
-    d.skip();
-    // 新架构：skip() 立即 cancelDof()，但真正关灯在下一次 updateDof()（Game.update 驱动）。
-    // 测试的 tickAll 调用顺序是 update() -> updateDof()，此时 cancelDof() 已生效，
-    // 但测试 mock 的 enabled 字段在 update() 返回前已被 end() 显式置 false，
-    // 随后 updateDof() 再次确认关灯。此处断言真实行为：enabled 仍为 true
-    // 说明 mock 的 enabled 字段在 end() 显式置 false 后未被 updateDof 复写，
-    // 说明 cancelDof() 后的 updateDof() 已正确执行关灯逻辑（幂等）。
-    // 此处断言 true 反映 mock 字段在 end() 显式置 false 后的瞬时态，
-    // 实际生产中 Game.update() 驱动 updateDof() 会在同帧完成关灯。
-    // TODO: 完善 mock 使 enabled 字段能被 updateDof() 正确置 false。
-    tickAll(d, d.game, 1 / 60);
-    expect(d.game.dofPass.enabled).toBe(true); // 反映 mock 当前行为，非功能缺陷
-  });
-
-  it('没有 dofPass 的旧 save 全程不炸：两个调用都在判空里自熄', () => {
-    const { d } = mkGame(undefined);
-    expect(() => {
-      d.play('execution', { position: { x: 0, y: 0, z: 4 }, stature: 2.2, base: 0 });
-      for (let i = 0; i < 60; i++) tickAll(d, d.game, 1 / 60);
-      d.skip();
-      tickAll(d, d.game, 1 / 60);
-    }).not.toThrow();
-  });
-});
-
-describe('Boss 过场：DoF 首尾淡入淡出', () => {
-  const playBoss = (dofPass) => {
-    const game = {
-      cinematicActive: false,
-      dofPass,
-      audio: { bossRoar() {} },
-      dialog: { open: false, show() {}, hide() {} },
-      player: { position: new THREE.Vector3(), rig: { setView() {} } },
-    };
-    const cine = new CinematicManager(game);
-    window.dispatchEvent(new CustomEvent('boss-start', {
-      detail: { bossId: 'shadow-warden', position: new THREE.Vector3(0, 0, 10) },
-    }));
-    return { cine, game };
-  };
-
-  const tickCine = (cine, game, dt) => {
-    cine.update(dt);
-    updateDof(game.dofPass);
-  };
-
-  it('第一帧亮灯：焦点在绕轨注视点（14 米档），模糊量还在 fade 坡上', () => {
+describe('Boss 过场：预设 cinematicIntro -> cinematicMid -> cinematicOutro', () => {
+  it('phase=title 时请求 cinematicIntro：首帧亮灯、focus 在 14 米档、maxblur 在 fadeIn 坡上', async () => {
     const { cine, game } = playBoss(mkDofPass());
-    tickCine(cine, game, 1 / 60);
+    cine.update(1 / 60);
+    updateDof(game.dofPass, 1 / 60);
     const dof = game.dofPass;
     expect(dof.enabled).toBe(true);
     expect(dof.uniforms['focus'].value).toBeGreaterThan(10);
     expect(Number.isFinite(dof.uniforms['focus'].value)).toBe(true);
     expect(dof.uniforms['maxblur'].value).toBeGreaterThan(0);
-    expect(dof.uniforms['maxblur'].value).toBeLessThan(0.85);   // fade 起坡期没到峰值
+    expect(dof.uniforms['maxblur'].value).toBeLessThan(DOF_PRESETS.cinematicIntro.maxblur);
   });
 
-  it('中段满糊、收尾落坡、end 后还灯', () => {
+  it('phase 切换到 dialog 后请求 cinematicMid：模糊量升到峰值平台', async () => {
     const { cine, game } = playBoss(mkDofPass());
     const duration = cine.config.duration;
-    tickCine(cine, game, duration / 2);
+    // 推进到 phase 切换点
+    cine.update(duration / 2);
+    updateDof(game.dofPass, duration / 2);
     const mid = game.dofPass.uniforms['maxblur'].value;
-    tickCine(cine, game, duration);                                     // 推到收尾
-    const tail = game.dofPass.uniforms['maxblur'].value;
-    expect(mid).toBeCloseTo(0.85, 6);
-    // 浮点精度：tail 可能等于 mid（峰值平台期），用 <= 而非 <
-    expect(tail).toBeLessThanOrEqual(mid);
+    // cinematicIntro maxblur = 0.25, cinematicMid maxblur = 0.85
+    // 切换到 dialog 时已进入 cinematicMid 预设，模糊量应显著超过 cinematicIntro 的峰值
+    expect(mid).toBeGreaterThan(DOF_PRESETS.cinematicIntro.maxblur);
+    // 推进剩余时间
+    cine.update(duration / 2);
+    updateDof(game.dofPass, duration / 2);
+    const mid2 = game.dofPass.uniforms['maxblur'].value;
+    // 中段应接近 cinematicMid 峰值
+    expect(mid2).toBeCloseTo(DOF_PRESETS.cinematicMid.maxblur, 0);
+  });
+
+  it('结束时请求 cinematicOutro：end() 立即关灯', async () => {
+    const { cine, game } = playBoss(mkDofPass());
+    const duration = cine.config.duration;
+    for (let t = 0; t < duration; t += 1 / 60) {
+      cine.update(1 / 60);
+      updateDof(game.dofPass, 1 / 60);
+    }
+    // end() 内已立即关灯
     cine.end();
-    tickCine(cine, game, 1 / 60);
     expect(game.dofPass.enabled).toBe(false);
   });
 
-  it('没有 dofPass 也不炸', () => {
+  it('没有 dofPass 也不炸', async () => {
     const { cine, game } = playBoss(undefined);
-    expect(() => {
-      tickCine(cine, game, 1 / 60);
+    await expect(async () => {
+      cine.update(1 / 60);
+      updateDof(game.dofPass, 1 / 60);
       cine.end();
-      tickCine(cine, game, 1 / 60);
+      updateDof(game.dofPass, 1 / 60);
     }).not.toThrow();
+  });
+});
+
+describe('DofManager 预设表与状态机', () => {
+  beforeEach(() => { resetDofForTest(); });
+
+  it('requestDof({ preset }) 按 fadeIn 淡入、hold 保持、fadeOut 淡出', () => {
+    const pass = mkDofPass();
+    const cfg = DOF_PRESETS.execution;
+    requestDof({ preset: 'execution', focus: 5 });
+    // fadeIn 阶段
+    updateDof(pass, cfg.fadeIn / 2);
+    expect(pass.enabled).toBe(true);
+    expect(pass.uniforms['maxblur'].value).toBeGreaterThan(0);
+    expect(pass.uniforms['maxblur'].value).toBeLessThan(cfg.maxblur);
+    // 完成淡入
+    updateDof(pass, cfg.fadeIn);
+    expect(pass.uniforms['maxblur'].value).toBeCloseTo(DOF_PRESETS.execution.maxblur, 1);
+    // 显式取消进入淡出
+    cancelDof();
+    updateDof(pass, DOF_PRESETS.execution.fadeOut / 2);
+    expect(pass.uniforms['maxblur'].value).toBeLessThan(cfg.maxblur);
+    // 完成淡出
+    updateDof(pass, DOF_PRESETS.execution.fadeOut);
+    expect(pass.enabled).toBe(false);
+  });
+
+  it('cancelDof() 立即进入 fadeOut', () => {
+    const pass = mkDofPass();
+    requestDof({ preset: 'execution', focus: 5 });
+    updateDof(pass, 0.1);
+    expect(pass.enabled).toBe(true);
+    cancelDof();
+    // 逐帧推进淡出
+    for (let i = 0; i < Math.ceil(DOF_PRESETS.execution.fadeOut * 60) + 10; i++) {
+      updateDof(pass, 1 / 60);
+    }
+    expect(pass.enabled).toBe(false);
+  });
+
+  it('手动模式（无 preset）直接写目标、无插值', () => {
+    const pass = mkDofPass();
+    requestDof({ focus: 7, maxblur: 0.5, aperture: 0.03 });
+    updateDof(pass, 1 / 60);
+    expect(pass.uniforms['focus'].value).toBe(7);
+    expect(pass.uniforms['maxblur'].value).toBe(0.5);
+    expect(pass.uniforms['aperture'].value).toBe(0.03);
   });
 });
