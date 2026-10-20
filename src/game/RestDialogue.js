@@ -63,7 +63,7 @@ export class RestDialogue {
     const def = REST_NPC_DEFS[restId];
     // 台词里的 `{动作}` 在**离开这张表之前**展开：下游（NPC 气泡、营火记忆）拿到的是给人看的那一份，
     // 它们不认识占位 —— 传一句 `{escape}` 过去就是让玩家在气泡里看见花括号。
-    const preview = typeof node?.text === 'string' ? keyText(node.text).replace(/\*\*/g, '').split('\n')[0] : '';
+    const preview = typeof node?.text === 'string' ? keyText(t(node.text)).replace(/\*\*/g, '').split('\n')[0] : '';
     // 说话人名与配色只从 `REST_NPC_DEFS` 取（W-B4 切片1）：认不出这一座就没有名字 / 用默认色，
     // 而不是冒充锚火看守 —— 成对关系由 `registry.js` 的 `checkRestDialogueTree` 第四、五条开机核。
     // 名字在**离开这一格之前**换成给人看的那一份（W-D2 切片15）：`rest-dialogue` 的负载会被
@@ -92,7 +92,7 @@ export class RestDialogue {
 
     // 台词与选项都是 `{动作}` 占位（W-B2 切片4）—— 出这张表的那一刻展开一次，
     // 让下游（对话框、气泡、营火记忆、日志）拿到的都是给人看的那一份。
-    let text = node.text ? keyText(node.text) : node.text;
+    let text = node.text ? keyText(t(node.text)) : node.text;
     if (nodeId === 'quest' && tree === REST_DIALOGUES.hub) {
       const q = this.game.quests;
       text = q.current
@@ -105,7 +105,7 @@ export class RestDialogue {
 
     const choices = filteredChoices.map((c, i) => ({
       id: String(i),
-      label: keyText(c.label),
+      label: keyText(t(c.label)),
       onPick: () => this._pick(tree, c, nodeId),
     }));
 
@@ -129,8 +129,8 @@ export class RestDialogue {
     if (node.journal) {
       this.game.storyJournal?.add({
         ...node.journal,
-        title: keyText(node.journal.title),
-        text: keyText(node.journal.text),
+        title: keyText(t(node.journal.title)),
+        text: keyText(t(node.journal.text)),
         category: 'campfire',
         chapter,
       });

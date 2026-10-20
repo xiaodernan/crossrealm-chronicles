@@ -3,7 +3,9 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { GAME_EVENTS, REST_DIALOGUE_EVENTS } from '../src/engine/events.js';
 import { STAT_EVENTS } from '../src/content/objectives.js';
+import { REST_NPC_DEFS } from '../src/content/restNpcDefs.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
+import { t } from '../src/engine/i18n.js';
 
 /**
  * 门禁：事件名必须有登记，且登记必须是真的（B44 的命名半区）。
@@ -310,14 +312,19 @@ describe('营火对话的阶段映射（派生名族的行为面）', () => {
     window.addEventListener('rest-dialogue-open', (e) => seen.push(['open', e.detail]));
     window.addEventListener('rest-dialogue-node', (e) => seen.push(['node', e.detail]));
     const dialogue = new RestDialogue({});
-    dialogue._emit('open', 'hub', 'start', { speaker: '锚火看守', text: '第一行\n第二行' });
-    dialogue._emit('node', 'hub', 'next', { speaker: '锚火看守', text: '另一句' });
+    // W-D2 切片16q：对话树整树进双表，`_emit` 的负载那一格现在也是**文案键** ——
+    // 展开走 `t()`（换语言）与 `keyText()`（换 `{动作}` 占位）两道口径。
+    // 夹具于是得给真键：给字面量的话 `t()` 认不出来，负载会变成 `[MISSING: …]`。
+    const 说话人 = REST_NPC_DEFS.hub.name;
+    dialogue._emit('open', 'hub', 'start', { speaker: 说话人, text: 'rest_dlg_hub_start_text' });
+    dialogue._emit('node', 'hub', 'next', { speaker: 说话人, text: 'rest_dlg_hub_origin_text' });
     expect(seen.map((s) => s[0])).toEqual(['open', 'node']);
     // 负载形状与登记一致
     expect(Object.keys(seen[0][1]).sort()).toEqual(
       ['accent', 'linePreview', 'mood', 'nodeId', 'restId', 'speaker', 'speakerId'],
     );
-    expect(seen[0][1].linePreview).toBe('第一行');
+    // 预览是**展开后**的那一句的第一行（`rest-dialogue` 的负载会被营火记忆存成日志条目）
+    expect(seen[0][1].linePreview).toBe(t('rest_dlg_hub_start_text').split('\n')[0]);
   });
 
   it('未知阶段直接抛错，而不是静默派发一条没人听的事件', () => {

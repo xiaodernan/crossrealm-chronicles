@@ -202,7 +202,10 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     // W-B4 切片2：这里原本还点名 `keyText(tree.title)` —— 那一格随对话树的抄本一起删了，
     // 标题现在是营火名（`this.activeRest.name`），名字里没有 `{动作}` 占位；
     // 展开仍由 `Dialog` 那一道口径负责（下面 `'ui/Dialog.js': ['keyText(title)', …]` 盯着的就是它）
-    'game/RestDialogue.js': ['keyText(node.text)', 'keyText(c.label)'],
+    // W-D2 切片16q：营火对话树整树进双表，于是出口从 `keyText(node.text)` 变成
+    // `keyText(t(node.text))` —— **两件事都还在原地做**：`t()` 把键换成文案，
+    // `keyText()` 把文案里的 `{动作}` 换成当前键名（对话正文里那一批占位就是这么活的）。
+    'game/RestDialogue.js': ['keyText(t(node.text))', 'keyText(t(c.label))', 'keyText(t(node.journal.title))'],
     // W-B2 切片5：剩下的都是"文案离开自己模块之前必须落定稿"的出口 ——
     // 对话框（20+ 调用方共用这一处）、日志卡片（快照存进去就再也不回头展开）、
     // 画布（图片有缓存，改绑不缓存就是旧键名）、CSS `content`（DOM 声明够不到，只能换成节点）
@@ -357,8 +360,12 @@ const LEDGER = {
   // `WASD 移动`：说明书正文里那一句（W-D2 切片15 起住在 `content/strings.zh.js` 的
   // `hm_body_start`，en 表另有 1 处同类写法 → 计 2）。正文里的键名占位交给 `keyText`，
   // 但 "WASD 移动" 是四键连写的老写法（见上面那条说明），占位化会失真，所以这本账随正文一起搬进双表。
-  'content/strings.zh.js': 1,
-  'content/strings.en.js': 2,
+  //
+  // W-D2 切片16q：营火对话树整树进双表之后，`自定义路点 Shift+点击` 那句
+  // 也从 `content/restDialogues.js` 搬进了双表 —— **这笔账跟着文案搬了家，总数一处没多**
+  // （4 → 4）。逐文件的数字于是变成 zh 2 / en 3 / restDialogues 0。
+  'content/strings.zh.js': 2,
+  'content/strings.en.js': 3,
   // `请按 F12 查看控制台详情`：开机失败那一条错误里指的是**浏览器**的开发者工具，
   // 不是任何一张表里的动作 —— 它没有可改绑的入口，也就没有"改绑之后说谎"这件事。
   'main.js': 1,
@@ -369,8 +376,8 @@ const LEDGER = {
   // W-B2 切片3：文案搬进 content/ 之后账本跟着换名字，总数一处没变（68 → 68，逐文件实测）；
   // 切片4 把说明书与营火对话的 45 笔改成 `{动作}` 占位（68 → 23）；
   // 切片5 清完剩下的内容键名，并把"界面上每一句键名都问表"那条更严的尺子立成门禁（见下面 `LABEL_PROSE`）。
-  // 这里只剩一条：营火里那句 `自定义路点 Shift+点击` 与上面 `ui/WorldMapPanel.js` 说的是同一件事。
-  'content/restDialogues.js': 1,
+  // 切片16q 之后这里归零：营火对话树整树进双表，连这一句也搬走了。
+  'content/restDialogues.js': 0,
 };
 
 const LIT = /`(?:\\.|[^`\\])*`|'(?:\\.|[^'\n])*'|"(?:\\.|[^"\n])*"/g;
