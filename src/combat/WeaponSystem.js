@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { codeFor } from '../content/keybinds.js';
 import { attachToHand, STAFF_GRIP } from '../player/WeaponGrip.js';
+import { t } from '../engine/i18n.js';
 
 /** 双武器：剑（近战）/ 杖（法术增幅）— 键位见 `content/keybinds.js` 的 `swapWeapon` */
 export const WEAPONS = {
@@ -107,7 +108,7 @@ export class WeaponSystem {
     this.current = this.current === 'sword' ? 'staff' : 'sword';
     this.cooldown = 0.6;
     this.applyVisual();
-    this.dialog.toast(`切换武器：${this.weapon.name}`);
+    this.dialog.toast(t('weapon_switch', { name: this.weapon.name }));
     this.audio?.weaponSwitch?.();
     window.dispatchEvent(new CustomEvent('weapon-changed', { detail: { weapon: this.current, name: this.weapon.name } }));
   }

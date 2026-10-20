@@ -117,6 +117,27 @@ export const STRINGS_EN = Object.freeze({
   death_hint_campfire: 'Campfire {interact} restores health; the {journal} log has boss guides and style notes.',
   death_journal_title: 'Fall #${n}',
 
+  // Pickup and gear feedback (W-D2 slice 16e)
+  gear_equip_swapped_bag: 'Equipped: ${item} (the old ${old} went to the bag)',
+  gear_equip_swapped_souls: 'Equipped: ${item} (bag full, the old ${old} became ${souls} soulfire)',
+  gear_equip_new: 'Equipped: ${item}',
+  gear_pickup_bag: 'Picked up: ${item} — into the bag (${n}/${cap})',
+  gear_pickup_souls: 'Picked up: ${item} — bag full, became ${souls} soulfire',
+  gear_slot_empty: '(empty)',
+  gear_bag_full: 'Bag full',
+  gear_unequip: 'Unequip',
+  gear_bag_full_cannot_unequip: 'The bag is full — cannot unequip',
+  gear_unequip_to_bag: 'Unequipped: ${item} — into the bag (${n}/${cap})',
+  gear_wear_this: 'Wear this',
+  gear_bag_empty: 'The bag is empty — gear you pick up but do not wear lands here first.',
+  upgrade_success: 'Upgraded: ${stat} — +1 skill point',
+  upgrade_not_enough_souls: 'Not enough plane soulfire',
+  chest_souls_gained: 'Chest: ${n} plane soulfire gained',
+  soul_wisp_absorb: 'Absorbed a plane echo +${n} soulfire',
+  soul_wisp_title: 'Plane Echo',
+  soul_wisp_desc: 'A memory fragment drifting in the seams between planes; it tracks whoever comes close.',
+  weapon_switch: 'Switched weapon: ${name}',
+
   // Menu
   menu_pause: 'Pause',
   menu_resume: 'Resume',

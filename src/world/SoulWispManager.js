@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { addShake } from '../engine/Shake.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
+import { t } from '../engine/i18n.js';
 
 /**
  * 位面残响 — 漂浮魂火，靠近会被吸引并吸收
@@ -130,10 +131,10 @@ export class SoulWispManager {
     this.collected.add(w.spot.id);
     this.stats.addSouls(w.spot.souls);
     this.audio?.wispAbsorb?.();
-    this.dialog.toast(`吸收位面残响 +${w.spot.souls} 魂`);
+    this.dialog.toast(t('soul_wisp_absorb', { n: w.spot.souls }));
     window.dispatchEvent(new CustomEvent('soul-wisp-collected', { detail: { id: w.spot.id, souls: w.spot.souls } }));
     window.dispatchEvent(new CustomEvent('discovery', {
-      detail: { id: w.spot.id, title: '位面残响', text: '游荡在位面缝中的记忆碎片，会追踪靠近的行者。' },
+      detail: { id: w.spot.id, title: t('soul_wisp_title'), text: t('soul_wisp_desc') },
     }));
     addShake(0.04);
   }

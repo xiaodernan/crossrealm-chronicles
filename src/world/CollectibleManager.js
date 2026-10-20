@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { t } from '../engine/i18n.js';
 
 const CHESTS = [
   { id: 'chest-hub', x: 25, z: 70, souls: 50 },
@@ -69,7 +70,7 @@ export class CollectibleManager {
     this.stats.chestsOpened.add(chest.id);
     this.stats.addSouls(chest.souls);
     chest.mesh.visible = false;
-    this.dialog.toast(`宝箱：获得 ${chest.souls} 位面之魂`);
+    this.dialog.toast(t('chest_souls_gained', { n: chest.souls }));
     window.dispatchEvent(new CustomEvent('chest-opened', { detail: { id: chest.id } }));
   }
 

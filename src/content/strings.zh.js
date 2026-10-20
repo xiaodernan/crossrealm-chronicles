@@ -117,6 +117,27 @@ export const STRINGS_ZH = Object.freeze({
   death_hint_campfire: '营火 {interact} 可回满生命；{journal} 日志有 Boss 攻略与流派说明。',
   death_journal_title: '第 ${n} 次倒下',
 
+  // 拾取与装备反馈（W-D2 切片16e）
+  gear_equip_swapped_bag: '换上：${item}（旧的 ${old} 进了背包）',
+  gear_equip_swapped_souls: '换上：${item}（背包已满，旧的 ${old} 折成 ${souls} 魂）',
+  gear_equip_new: '穿上：${item}',
+  gear_pickup_bag: '拾取：${item} —— 放进背包（${n}/${cap}）',
+  gear_pickup_souls: '拾取：${item} —— 背包已满，折成 ${souls} 魂',
+  gear_slot_empty: '（空）',
+  gear_bag_full: '背包已满',
+  gear_unequip: '卸下',
+  gear_bag_full_cannot_unequip: '背包已满，卸不下来',
+  gear_unequip_to_bag: '卸下：${item} —— 放进背包（${n}/${cap}）',
+  gear_wear_this: '穿上这一件',
+  gear_bag_empty: '背包是空的 —— 捡到不穿的装备会先放在这里。',
+  upgrade_success: '升级成功：${stat} · 获得 1 技能点',
+  upgrade_not_enough_souls: '位面之魂不足',
+  chest_souls_gained: '宝箱：获得 ${n} 位面之魂',
+  soul_wisp_absorb: '吸收位面残响 +${n} 魂',
+  soul_wisp_title: '位面残响',
+  soul_wisp_desc: '游荡在位面缝中的记忆碎片，会追踪靠近的行者。',
+  weapon_switch: '切换武器：${name}',
+
   // 菜单
   menu_pause: '暂停',
   menu_resume: '继续',

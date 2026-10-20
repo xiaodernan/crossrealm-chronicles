@@ -9,6 +9,7 @@ import { setSsaoQuality } from '../engine/SsaoPass.js';
 import { DEFAULT_SSAO_QUALITY } from '../engine/ssaoSettings.js';
 import { createDofPass } from '../engine/DofPass.js';
 import { updateDof } from '../engine/DofManager.js';
+import { t } from '../engine/i18n.js';
 import { ColorGrade } from '../effects/ColorGrade.js';
 import { PlayerController } from '../player/PlayerController.js';
 import { WorldManager } from '../world/WorldManager.js';
@@ -715,21 +716,25 @@ export class Game {
     if (choice.action === 'equip') {
       const replaced = this.stats.equip(choice.slot, instance);
       if (replaced && this.stats.bagAdd(replaced)) {
-        this.dialog.toast(`换上：${gearLabel(instance)}（旧的 ${gearLabel(replaced)} 进了背包）`);
+        this.dialog.toast(t('gear_equip_swapped_bag', { item: gearLabel(instance), old: gearLabel(replaced) }));
       } else if (replaced) {
         this.stats.addSouls(choice.souls);
-        this.dialog.toast(`换上：${gearLabel(instance)}（背包已满，旧的 ${gearLabel(replaced)} 折成 ${choice.souls} 魂）`);
+        this.dialog.toast(t('gear_equip_swapped_souls', {
+          item: gearLabel(instance), old: gearLabel(replaced), souls: choice.souls,
+        }));
       } else {
-        this.dialog.toast(`穿上：${gearLabel(instance)}`);
+        this.dialog.toast(t('gear_equip_new', { item: gearLabel(instance) }));
       }
       return choice;
     }
     if (this.stats.bagAdd(instance)) {
-      this.dialog.toast(`拾取：${gearLabel(instance)} —— 放进背包（${this.stats.bagCount}/${this.stats.bagCapacity}）`);
+      this.dialog.toast(t('gear_pickup_bag', {
+        item: gearLabel(instance), n: this.stats.bagCount, cap: this.stats.bagCapacity,
+      }));
       return choice;
     }
     this.stats.addSouls(choice.souls);
-    this.dialog.toast(`拾取：${gearLabel(instance)} —— 背包已满，折成 ${choice.souls} 魂`);
+    this.dialog.toast(t('gear_pickup_souls', { item: gearLabel(instance), souls: choice.souls }));
     return choice;
   }
 

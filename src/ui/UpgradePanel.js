@@ -1,6 +1,7 @@
 import { SKILL_BRANCHES } from '../content/skillTrees.js';
 import { GEAR_SLOTS, GEAR_SLOT_NAMES, gearLabel } from '../content/gear.js';
 import { focusFirstItem } from './FocusNav.js';
+import { t } from '../engine/i18n.js';
 
 export class UpgradePanel {
   constructor(game) {
@@ -89,31 +90,33 @@ export class UpgradePanel {
       const inst = s.gear[slot];
       return `<div class="gear-row">
         <span class="gear-slot-name">${GEAR_SLOT_NAMES[slot] ?? slot}</span>
-        <span class="gear-item">${inst ? gearLabel(inst) : '（空）'}</span>
-        ${inst ? `<button type="button" class="gear-row-btn" data-store="${slot}"${s.bagFull ? ' disabled' : ''}>${s.bagFull ? '背包已满' : '卸下'}</button>` : ''}
+        <span class="gear-item">${inst ? gearLabel(inst) : t('gear_slot_empty')}</span>
+        ${inst ? `<button type="button" class="gear-row-btn" data-store="${slot}"${s.bagFull ? ' disabled' : ''}>${s.bagFull ? t('gear_bag_full') : t('gear_unequip')}</button>` : ''}
       </div>`;
     }).join('');
     slotsEl.querySelectorAll('[data-store]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const previous = s.storeFromSlot(btn.dataset.store);
         if (!previous) {
-          this.game.dialog.toast('背包已满，卸不下来');
+          this.game.dialog.toast(t('gear_bag_full_cannot_unequip'));
           return;
         }
-        this.game.dialog.toast(`卸下：${gearLabel(previous)} —— 放进背包（${s.bagCount}/${s.bagCapacity}）`);
+        this.game.dialog.toast(t('gear_unequip_to_bag', {
+          item: gearLabel(previous), n: s.bagCount, cap: s.bagCapacity,
+        }));
         this.refresh();
       });
     });
     bagEl.innerHTML = s.bag.length
-      ? s.bag.map((inst, i) => `<button type="button" class="skill-btn" data-wear="${i}">${gearLabel(inst)}<br><span>穿上这一件</span></button>`).join('')
-      : '<p class="gear-bag-empty">背包是空的 —— 捡到不穿的装备会先放在这里。</p>';
+      ? s.bag.map((inst, i) => `<button type="button" class="skill-btn" data-wear="${i}">${gearLabel(inst)}<br><span>${t('gear_wear_this')}</span></button>`).join('')
+      : `<p class="gear-bag-empty">${t('gear_bag_empty')}</p>`;
     bagEl.querySelectorAll('[data-wear]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const worn = s.wearFromBag(Number(btn.dataset.wear));
         if (worn) {
           this.game.dialog.toast(worn.replaced
-            ? `换上：${gearLabel(worn.instance)}（旧的 ${gearLabel(worn.replaced)} 回到背包）`
-            : `穿上：${gearLabel(worn.instance)}`);
+            ? t('gear_equip_swapped_bag', { item: gearLabel(worn.instance), old: gearLabel(worn.replaced) })
+            : t('gear_equip_new', { item: gearLabel(worn.instance) }));
         }
         this.refresh();
       });
@@ -186,10 +189,10 @@ export class UpgradePanel {
       this.game.player.combat.stamina = this.game.stats.maxStamina;
       this.game.weaponSkills?.addPoint(1);
       this.game.audio.levelUp();
-      this.game.dialog.toast(`升级成功：${stat} · 获得 1 技能点`);
+      this.game.dialog.toast(t('upgrade_success', { stat }));
       this.refresh();
     } else {
-      this.game.dialog.toast('位面之魂不足');
+      this.game.dialog.toast(t('upgrade_not_enough_souls'));
     }
   }
 }
