@@ -15,6 +15,7 @@
  * 分母与页签同源于它；注册表那条 `checkSideQuestRosters` 管"一族被搬空 / 两族撞 id / 少一个 check"。
  */
 import { describe, it, expect, afterEach } from 'vitest';
+import { t } from '../src/engine/i18n.js';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP, SIDE_QUESTS_ALL, franchiseZone } from '../src/content/sideQuests.js';
@@ -87,9 +88,9 @@ describe('一份名单、一个分母', () => {
     game.sideQuests = sq;
     const 面板 = fakePanel();
     new SideQuestJournalTab(game).render(面板);
-    const 缺 = SIDE_QUESTS_ALL.filter((q) => !面板.innerHTML.includes(q.title)).map((q) => q.id);
+    const 缺 = SIDE_QUESTS_ALL.filter((q) => !面板.innerHTML.includes(t(q.title))).map((q) => q.id);
     expect(缺, `这些支线在页签里看不见：${缺.join('、')}`).toEqual([]);
-    expect(面板.innerHTML).toContain(`完成 0 / ${SIDE_QUESTS_ALL.length}`);
+    expect(面板.innerHTML).toContain(t('side_quest_progress', { done: 0, total: SIDE_QUESTS_ALL.length }));
   });
 });
 
@@ -111,7 +112,7 @@ describe('完成检测走 shipped 路径：致敬族与基础族同一条路', (
     }
     expect(sq.completed.has(目标.id), '致敬族这条没被记为完成 —— 它以前根本不在遍历里').toBe(true);
     expect(记.souls).toEqual([目标.reward]);
-    expect(记.toasts.join('')).toContain(目标.title);
+    expect(记.toasts.join('')).toContain(t(目标.title));
     expect(记.journal.map((j) => j.id)).toContain(目标.id);
     expect(事件).toEqual([目标.id]);
   });
@@ -266,7 +267,7 @@ describe('W-B12 切片1：每个位面至少一条专属支线，而且那条真
     sq.checkAll();
     expect(sq.completed.has(支线.id)).toBe(true);
     expect(记.souls).toEqual([支线.reward]);
-    expect(记.toasts.join('')).toContain(支线.title);
+    expect(记.toasts.join('')).toContain(t(支线.title));
   });
 
   it('不变式咬得住：抹掉某一座位面的专属支线，走 shipped 入口点名那一座', () => {
@@ -318,7 +319,7 @@ describe('W-B12 切片2：每位面第二条专属支线 —— 萤火与火牌�
     sq.checkAll();
     expect(sq.completed.has(支线.id)).toBe(true);
     expect(记.souls).toEqual([支线.reward]);
-    expect(记.toasts.join('')).toContain(支线.title);
+    expect(记.toasts.join('')).toContain(t(支线.title));
     // 其余四座的拾遗支线不得被这一座的账误完成
     const 别座的 = SIDE_QUESTS_ZONE.filter((q) => q.id.startsWith('side-wisp-') && q.zone !== zone);
     expect(别座的.every((q) => !sq.completed.has(q.id)), '别的位面凭空完成了').toBe(true);

@@ -56,12 +56,13 @@ export class SideQuestSystem {
   complete(q) {
     this.completed.add(q.id);
     this.game.stats.addSouls(q.reward);
-    this.game.dialog.toast(t('side_quest_complete', { title: q.title, reward: q.reward }), 3200);
+    // W-D2 切片16k：支线的 title / desc / journal 都是**文案键** —— 展开在播出的那一刻。
+    this.game.dialog.toast(t('side_quest_complete', { title: t(q.title), reward: q.reward }), 3200);
     this.game.storyJournal?.add?.({
       id: q.id,
       category: 'quest',
-      title: t('side_quest_journal_title', { title: q.title }),
-      text: q.journal ?? q.desc,
+      title: t('side_quest_journal_title', { title: t(q.title) }),
+      text: t(q.journal ?? q.desc),
       chapter: this.game.quests?.chapter ?? 1,
     });
     window.dispatchEvent(new CustomEvent('side-quest-complete', { detail: q }));
