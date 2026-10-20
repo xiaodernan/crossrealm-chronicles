@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { CAMERA_BLEND } from '../content/tuning.js';
-import { setDofEnabled, updateDofParams } from '../engine/DofPass.js';
+import { requestDof, cancelDof, setDofEnabled } from '../engine/DofManager.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -128,8 +128,7 @@ export class CinematicManager {
 
   update(dt) {
     if (!this.active || !this.config) {
-      // 幂等关灯：过场不在播就还灯，end 之外的任何退出路径都从这里兜住
-      setDofEnabled(this.game.dofPass, false);
+      // 无需手动关灯：DofManager 发现无请求时自动关闭（幂等、零遗漏）
       return;
     }
 
@@ -157,11 +156,10 @@ export class CinematicManager {
 
     // 过场 DoF：焦点钉在本帧注视点（_cineLook），模糊量首尾各留一个 fade 坡 ——
     // 进出过场时景深随镜头补间一起起落，不是一记硬切。
-    // dofPass 缺席（旧 save / 无后处理档位）时两个调用都在 pass 判空里自熄。
-    setDofEnabled(this.game.dofPass, true);
+    // dofPass 缺席（旧 save / 无后处理档位）时请求在 DofManager 里自熄。
     const edge = Math.min(this.timer, this.config.duration - this.timer, CINE_DOF.fade)
       / CINE_DOF.fade;
-    updateDofParams(this.game.dofPass, {
+    requestDof({
       focus: this._cinePos.distanceTo(this._cineLook),
       maxblur: CINE_DOF.maxblur * Math.max(edge, 0),
     });
@@ -179,8 +177,9 @@ export class CinematicManager {
   end() {
     this.active = false;
     this.game.cinematicActive = false;
-    // 过场收尾当场还灯，不等下一帧的兜底
-    setDofEnabled(this.game.dofPass, false);
+    // 过场收尾显式取消 DoF：立即关灯
+    cancelDof();
+    if (this.game.dofPass) setDofEnabled(this.game.dofPass, false);
     this.letterbox.classList.add('hidden');
     if (this.game.dialog.open) this.game.dialog.hide?.();
     window.dispatchEvent(new CustomEvent('cinematic-end'));

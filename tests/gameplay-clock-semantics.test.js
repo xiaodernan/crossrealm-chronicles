@@ -425,7 +425,7 @@ describe('过场锁输入留墙钟的前提：它守的那段演出也走真实�
       if (n > 0) 读者.push(`${rel}×${n}`);
     }
     expect(读者.sort(), '截止时间被第四处另起一份 = 又有了第二个真相').toEqual([
-      'cinematic/CombatCameraDirector.js×4',
+      'cinematic/CombatCameraDirector.js×5',
       'cinematic/CombatCameraDirectorExtensions.js×2',
       'cinematic/CombatCinematicSkip.js×1',
     ]);

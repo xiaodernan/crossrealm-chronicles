@@ -8,6 +8,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { setSsaoQuality } from '../engine/SsaoPass.js';
 import { DEFAULT_SSAO_QUALITY } from '../engine/ssaoSettings.js';
 import { createDofPass } from '../engine/DofPass.js';
+import { updateDof } from '../engine/DofManager.js';
 import { ColorGrade } from '../effects/ColorGrade.js';
 import { PlayerController } from '../player/PlayerController.js';
 import { WorldManager } from '../world/WorldManager.js';
@@ -1087,6 +1088,9 @@ export class Game {
       this.bossApproach?.update(dt, this.player.position);
       this.bossPhaseDirector?.update(dt);
     }
+    // W-C4 切片6 余量：DoF 统一驱动（CombatCameraDirector / CinematicManager 只声明参数，
+    // 这里每帧按有无请求开关 pass 与写 uniform，零遗漏关灯）。
+    updateDof(this.dofPass);
     /* 相机所有者的收尾：FOV 增量按帧申领，这一笔落下之后本帧的申领就清零 ——
      * 没有任何系统需要"记得恢复基准"（M3：相机唯一写入者）。
      * commitView 用 rawDt 推进一次"所有权交接补间"（进出过场/观看模式的软接，W-A5 切片1，短板 A4）：

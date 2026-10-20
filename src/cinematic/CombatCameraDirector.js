@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { addShake } from '../engine/Shake.js';
 import { emitCue } from '../engine/cues.js';
 import { EXECUTION_CAMERA } from '../content/tuning.js';
-import { setDofEnabled, updateDofParams } from '../engine/DofPass.js';
+import { requestDof, cancelDof, setDofEnabled } from '../engine/DofManager.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -298,10 +298,13 @@ export class CombatCameraDirector {
 
   update(rawDt) {
     this._cooldown = Math.max(0, this._cooldown - rawDt);
+    const wasActive = this.active;
     if (!this.active) {
-      // 幂等关灯：skip() 与任何直接把 active 置 false 的退出路径都从这里自动还灯，
-      // 不需要每条退出路径各自记着关 DoF（每帧一次布尔赋值，零成本）
-      setDofEnabled(this.game.dofPass, false);
+      if (wasActive) {
+        // 从活跃变非活跃：显式取消 DoF 请求并立即关灯
+        cancelDof();
+        if (this.game.dofPass) setDofEnabled(this.game.dofPass, false);
+      }
       return;
     }
 
@@ -321,8 +324,9 @@ export class CombatCameraDirector {
       /* 演出一结束就当场收回这层偏移，不等下一帧的申领结算：跳过、面板抢占、异常路径
        * 都可能让"下一帧"迟到，而 FOV 残留在玩家眼里就是"画面突然变广了没还原" */
       this.game.player?.rig?.revokeFov(COMBAT_FOV_LAYER);
-      // 演出收尾当场还灯，不让景深多活一帧（与上面 revokeFov 同一条美学）
-      setDofEnabled(this.game.dofPass, false);
+      // DoF 显式取消：立即关灯，不等下一帧
+      cancelDof();
+      if (this.game.dofPass) setDofEnabled(this.game.dofPass, false);
     } else {
       const ov = this.getCameraOverrides();
       // 只申领，不写相机：全仓库只有 `CameraRig` 一处会碰 `camera.fov`
@@ -330,12 +334,33 @@ export class CombatCameraDirector {
       this.vignette.style.opacity = String(0.15 + (ov.orbit?.blend ?? 0) * 0.35);
       /* 演出 DoF：焦点钉在本帧注视点（orbit.lookAt），模糊量随镜头包络呼吸 ——
        * 起手与收尾各是 0 → 峰值 → 0，没有"突然糊了/突然清晰了"的硬切。
-       * dofPass 缺席（旧 save / 无后处理档位）时两个调用都在 pass 判空里自熄。 */
-      setDofEnabled(this.game.dofPass, true);
-      updateDofParams(this.game.dofPass, {
+       * dofPass 缺席（旧 save / 无后处理档位）时请求在 DofManager 里自熄。 */
+      requestDof({
         focus: ov.orbit.position.distanceTo(ov.orbit.lookAt),
         maxblur: EXECUTION_CAMERA.dofMaxblur * this._envelope(t),
       });
     }
+  }
+
+  /** 正常播完或被 skip：显式取消 DoF 请求，并立即关灯（不等下一帧）。 */
+  end() {
+    if (!this.active) return;
+    this.active = false;
+    this._timeScale = 1;
+    if (this.game.player) this.game.player.timeSlow = 1;
+    this.label.classList.add('hidden');
+    this.letterbox.classList.add('hidden');
+    this.vignette.classList.add('hidden');
+    this._cooldown = 0.35;
+    this.blocksInputUntil = 0;
+    this.game.combatInputLock?.release();
+    this.game.player?.rig?.revokeFov(COMBAT_FOV_LAYER);
+    cancelDof();
+    if (this.game.dofPass) setDofEnabled(this.game.dofPass, false);
+  }
+
+  /** 外部强制中断（ESC / 面板抢占等）—— 走同一条收尾路径。 */
+  skip() {
+    if (this.active) this.end();
   }
 }
