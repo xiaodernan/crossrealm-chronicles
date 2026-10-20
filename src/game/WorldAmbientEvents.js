@@ -1,6 +1,16 @@
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { mergeZoneEvents } from './WorldAmbientCatalog.js';
 import { mergePopCultureAmbient } from '../content/ambientLore.js';
+import { t } from '../engine/i18n.js';
+import { keyText } from '../content/keyHints.js';
+
+/**
+ * 氛围事件进日志时的条目标题（**文案键**，W-D2 切片16a）。
+ *
+ * 改前这里是裸中文 `'旅途见闻'` —— 日志里那一条的标题永远中文，
+ * 切到英文语言时它不变，而同一条的正文会跟着变 —— 一条日志两个语种。
+ */
+export const AMBIENT_JOURNAL_TITLE = 'ambient_journal_title';
 
 /**
  * 探索时随机氛围事件 — 区域台词 / 小惊喜。
@@ -25,43 +35,56 @@ import { mergePopCultureAmbient } from '../content/ambientLore.js';
  * 门禁 `tests/world-ambient-events.test.js` 逐个真实区域点名，谁都别再悄悄少一格。
  */
 
-/** 探索时随机氛围事件 — 区域台词 / 小惊喜 */
+/**
+ * 探索时随机氛围事件 — 区域台词 / 小惊喜。
+ *
+ * ## `text` 存的是**文案键**（W-D2 切片16a），不是文案本身
+ *
+ * 三张表（基础 / 扩写 / 致敬层）合起来 60 条，全是玩家会看到的字。
+ * 改前它们都是裸中文，于是切到英文语言时这一族台词**原样留在中文** ——
+ * 界面上一半是英文一半是中文，而没有任何一处会报错。
+ * 现在数据层只存键（`ambient_<区>_<序号>`，扩展层 `_e` 后缀、致敬层 `_p` 后缀），
+ * 显示侧（`update()` 那一条路）在播出那一刻 `keyText(t(键))` 展开。
+ *
+ * **键即身份**：`seen` 去重账用键而不是文案前 12 个字 —— 换语言时同一句的文案变了，
+ * 键没变，那条"已见过"才不会因为换了语言就重新弹一遍。
+ */
 const _BASE_ZONE_EVENTS = {
   hub: [
-    { text: '世界之锚发出低沉嗡鸣 — 位面仍相连。', weight: 1 },
-    { text: '远处营火看守在整理柴薪（其实没有柴）。', weight: 0.6 },
+    { text: 'ambient_hub_0', weight: 1 },
+    { text: 'ambient_hub_1', weight: 0.6 },
   ],
   fantasy: [
-    { text: '灰白森林起雾了 — 小心红圈。', weight: 1 },
-    { text: '树梢传来精灵口哨 — 斥候在巡逻。', weight: 0.7 },
-    { text: '地下城方向传来石门摩擦声…', weight: 0.5 },
+    { text: 'ambient_fantasy_0', weight: 1 },
+    { text: 'ambient_fantasy_1', weight: 0.7 },
+    { text: 'ambient_fantasy_2', weight: 0.5 },
   ],
   magic: [
-    { text: '紫色奥术屑飘落 — 大奥术师在远处活跃。', weight: 1 },
-    { text: '禁书图书馆的方向有微光闪烁。', weight: 0.6 },
+    { text: 'ambient_magic_0', weight: 1 },
+    { text: 'ambient_magic_1', weight: 0.6 },
   ],
   space: [
-    { text: '米勒荒原引力异常 — 跳跃高度略减。', weight: 0.8 },
-    { text: 'Endurance 号日志碎片在风里打转。', weight: 0.7 },
+    { text: 'ambient_space_0', weight: 0.8 },
+    { text: 'ambient_space_1', weight: 0.7 },
   ],
   void: [
-    { text: '时间卡顿了一帧 — 你又前进了。', weight: 1 },
-    { text: '时线残影在远处闪烁后消失。', weight: 0.6 },
+    { text: 'ambient_void_0', weight: 1 },
+    { text: 'ambient_void_1', weight: 0.6 },
   ],
   abyss: [
-    { text: '混沌脉冲掠过地平线 — 裂隙在呼吸。', weight: 1 },
-    { text: '引路人的低语：「快一点，界在变薄的。」', weight: 0.7 },
+    { text: 'ambient_abyss_0', weight: 1 },
+    { text: 'ambient_abyss_1', weight: 0.7 },
   ],
   // W-B9 的两座新区域（2026-10-12 补；改前它们的条数是 0，玩家听到的是枢纽台词）
   gloom: [
-    { text: '雾又厚了一层 — 前方三步就看不清了。', weight: 1 },
-    { text: '头顶枝叶间有东西挪了一下，随即安静。', weight: 0.7 },
-    { text: '苔藓的荧光在树根间明灭，像谁在呼吸。', weight: 0.6 },
+    { text: 'ambient_gloom_0', weight: 1 },
+    { text: 'ambient_gloom_1', weight: 0.7 },
+    { text: 'ambient_gloom_2', weight: 0.6 },
   ],
   radiant: [
-    { text: '金沙被风推着流过脚背，烫而细。', weight: 1 },
-    { text: '远处的圣殿轮廓在热气里轻轻晃动。', weight: 0.7 },
-    { text: '一声很轻的钟响 — 你分不清来自哪一座塔。', weight: 0.5 },
+    { text: 'ambient_radiant_0', weight: 1 },
+    { text: 'ambient_radiant_1', weight: 0.7 },
+    { text: 'ambient_radiant_2', weight: 0.5 },
   ],
 };
 
@@ -125,19 +148,23 @@ export class WorldAmbientEvents {
       if (r <= 0) { pick = e; break; }
     }
 
-    const key = `${this.zone}:${pick.text.slice(0, 12)}`;
+    /* `pick.text` 现在是**文案键**（W-D2 切片16a）：展开只在这一处做，
+     * 展开出来的句子进日志（快照语义 —— 换语言不回改已存的那一条），
+     * 而 `seen` 去重账存**键**：键不随语言变，同一句换语言后不会被当成"没见过的"重弹一遍。 */
+    const 文案 = keyText(t(pick.text));
+    const key = `${this.zone}:${pick.text}`;
     if (!this.seen.has(key)) {
       this.seen.add(key);
       this.game.storyJournal?.add?.({
         id: `ambient-${key}`,
         category: 'poi',
-        title: '旅途见闻',
-        text: pick.text,
+        title: keyText(t(AMBIENT_JOURNAL_TITLE)),
+        text: 文案,
         chapter: this.game.quests?.chapter ?? 1,
       });
     }
 
-    this.game.dialog.toast(pick.text, 3600);
+    this.game.dialog.toast(文案, 3600);
     this.game.audio?.loreDiscover?.();
     this.timer = 55 + Math.random() * 45;
   }

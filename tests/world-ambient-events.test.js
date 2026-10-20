@@ -25,6 +25,8 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ZONE_IDS, ZONE_ORDER, ZONE_NAMES } from '../src/content/ZoneIdentity.js';
+import { t } from '../src/engine/i18n.js';
+import { keyText } from '../src/content/keyHints.js';
 import {
   AMBIENT_ZONE_EVENTS,
   NO_AMBIENT_ZONES,
@@ -129,12 +131,14 @@ describe('世界氛围事件（W-B9 余项：每个真实区域都有自己的�
       vi.spyOn(Math, 'random').mockReturnValue(0.5);
       amb.update(1 / 60, { x: 0, z: 0 });
       expect(toasts.length, `${zone} 推了一帧却没弹出任何氛围台词`).toBe(1);
-      const 本区 = ambientPoolFor(zone, 5).map((e) => e.text);
+      // `e.text` 现在是**文案键**（W-D2 切片16a），弹出来的是展开后的那句 ——
+      // 比的是展开后的同一份，不是键（键是内部地址，玩家看不见）。
+      const 本区 = ambientPoolFor(zone, 5).map((e) => keyText(t(e.text)));
       expect(本区, `${zone} 弹出的"${toasts[0]}"不在本区的池子里`).toContain(toasts[0]);
     }
 
     // 反向：走廊里不该弹 —— 而且**尤其**不该弹出枢纽那两句（改前正是这样）
-    const 枢纽台词 = ambientPoolFor(ZONE_IDS.HUB, 5).map((e) => e.text);
+    const 枢纽台词 = ambientPoolFor(ZONE_IDS.HUB, 5).map((e) => keyText(t(e.text)));
     const { game: 走廊游戏, toasts: 走廊吐司 } = 造游戏(ZONE_IDS.CORRIDOR);
     const 走廊氛围 = new WorldAmbientEvents(走廊游戏);
     走廊氛围.setZone(ZONE_IDS.CORRIDOR);
@@ -142,5 +146,43 @@ describe('世界氛围事件（W-B9 余项：每个真实区域都有自己的�
     走廊氛围.update(1 / 60, { x: 0, z: 0 });
     expect(走廊吐司, '走廊里弹出了氛围台词').toEqual([]);
     for (const t of 走廊吐司) expect(枢纽台词, `走廊弹出了枢纽的台词"${t}"`).not.toContain(t);
+  });
+
+  it('每一条 `text` 都是**已登记的文案键**（W-D2 切片16a：数据层只存键）', () => {
+    // 反向控制：一个没登记的键必须回 `[MISSING: …]`（证明解析路径是活的）
+    expect(t('ambient_hub_0')).not.toContain('[MISSING');
+    const 坏 = [];
+    for (const [zone, list] of Object.entries(AMBIENT_ZONE_EVENTS)) {
+      for (const [i, e] of list.entries()) {
+        const 展开 = t(e.text);
+        if (展开.startsWith('[MISSING:')) 坏.push(`${zone}[${i}] ${e.text}`);
+      }
+    }
+    expect(坏.join(' / '), '这些氛围台词的键没有登记在双表里 —— 玩家会看到 [MISSING: …]').toBe('');
+  });
+
+  it('`seen` 去重账用键而不是文案：换语言不会让同一句重新弹一遍', () => {
+    const 造游戏 = () => ({
+      toasts: [], journal: [],
+      game: {
+        dialog: { open: false, toast: (t) => {} },
+        combatCamera: { blocksInput: () => false },
+        dungeons: { active: false },
+        quests: { chapter: 5 },
+        storyJournal: { add: (e) => {} },
+        audio: { loreDiscover() {} },
+        zone: ZONE_IDS.HUB,
+      },
+    });
+    const { game } = 造游戏();
+    const amb = new WorldAmbientEvents(game);
+    amb.setZone(ZONE_IDS.HUB);
+    amb.timer = 0;
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    amb.update(1 / 60, { x: 0, z: 0 });
+    // seen 里的每一格都带**键**，不带展开后的文案
+    for (const s of amb.seen) {
+      expect(s, `seen 的一格"${s}"不是键的形状（应当含 ambient_ 前缀）`).toContain('ambient_');
+    }
   });
 });

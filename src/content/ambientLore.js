@@ -6,78 +6,102 @@
  * `LoreFragmentsPopCulture.js` 四层里，靠三层 `merge*Wave4(merge*Wave3(base))` 叠出来 ——
  * 每加一条要先回答"该加进哪一层"，而那一层除了历史顺序没有任何含义。
  * 现在按**合并以后的有效值**平铺成一张表，形状由 `content/registry.js` 在加载期校验。
+ *
+ * ## 文案键（W-D2 切片16a/16b）
+ *
+ * 这两张表里的每一个字都是玩家会看到的（toast / 对话框 / 日志条目），
+ * 改前全是裸中文 —— 切到英文语言时它们**原样留在中文**，界面上一半英文一半中文，
+ * 而没有任何一处会报错。现在数据层只存**文案键**，显示侧在播出那一刻展开：
+ * - 区域氛围事件：`ambient_<区>_<序号>`，扩展层 `_e` 后缀、致敬层 `_p` 后缀
+ * - 致敬层 lore 碎片：`lore_pop_<slug>_title` / `lore_pop_<slug>_text`
+ *
+ * 键即身份：`seen` 去重账用键而不是文案前若干个字 —— 换语言时同一句的文案变了，
+ * 键没变，那条"已见过"才不会因为换了语言就重新弹一遍。
  */
 
-/** 区域氛围事件：zoneId → 候选台词（weight 是相对权重，0~1） */
+/**
+ * 区域氛围事件：zoneId → 候选台词（weight 是相对权重，0~1）
+ *
+ * `text` 存**文案键**，不是文案本身 —— 显示侧（`WorldAmbientEvents.update()`）
+ * 在播出那一刻 `keyText(t(键))` 展开。
+ */
 export const ZONE_EVENTS_POP = {
   magic: [
-    { text: "悬浮蜡烛从塔楼窗口飘出 — 像某所咒术学院的夜巡。", weight: 0.6 },
-    { text: "禁林深处传来独角兽的低语 — 或是曼德拉草的梦。", weight: 0.5 },
-    { text: "九分又四分三站台的砖墙在雾里若隐若现。", weight: 0.45 },
-    { text: "护念湖镜映出银光 — 像有人在远处奔跑。", weight: 0.4 },
-    { text: "霓虹后巷全息短路 — 赛博渗入遗境。", weight: 0.4 },
+    { text: "ambient_magic_p0", weight: 0.6 },
+    { text: "ambient_magic_p1", weight: 0.5 },
+    { text: "ambient_magic_p2", weight: 0.45 },
+    { text: "ambient_magic_p3", weight: 0.4 },
+    { text: "ambient_magic_p4", weight: 0.4 },
   ],
   space: [
-    { text: "墨菲书架的方向，引力微微扭曲。", weight: 0.5 },
-    { text: "米勒沙漏的沙子落得太快 — 别在这里恋战。", weight: 0.6 },
-    { text: "对接舱的金属环在远处缓慢旋转。", weight: 0.4 },
-    { text: "虫洞拱门在荒原西侧折叠星光 — 别盯着看太久。", weight: 0.45 },
-    { text: "曼恩假信标在冰原上闪烁 — 光与谎言同频。", weight: 0.35 },
-    { text: "殖民穹顶内是人工黄昏 — 荒原外是另一个天空。", weight: 0.5 },
-    { text: "休眠 AI 核心低频嗡鸣：「任务未完成。」", weight: 0.45 },
-    { text: "跃迁门阵列蓝光脉动 — 三门须同相。", weight: 0.4 },
-    { text: "星港酒肆百种方言混成一种笑。", weight: 0.4 },
+    { text: "ambient_space_p0", weight: 0.5 },
+    { text: "ambient_space_p1", weight: 0.6 },
+    { text: "ambient_space_p2", weight: 0.4 },
+    { text: "ambient_space_p3", weight: 0.45 },
+    { text: "ambient_space_p4", weight: 0.35 },
+    { text: "ambient_space_p5", weight: 0.5 },
+    { text: "ambient_space_p6", weight: 0.45 },
+    { text: "ambient_space_p7", weight: 0.4 },
+    { text: "ambient_space_p8", weight: 0.4 },
   ],
   void: [
-    { text: "红色孢子飘落 — 逆相界的风从裂口渗出。", weight: 0.7 },
-    { text: "旧镇广播塔在雾中闪烁红灯。", weight: 0.5 },
-    { text: "Walkman 的磁带在风里倒放 — 你听见 1983 年的 SOS。", weight: 0.4 },
-    { text: "四盏单车灯在雾中排成线 — 像夜游的队伍。", weight: 0.45 },
-    { text: "街机 CRT 在远处闪绿光 — 吃豆人永远差一步。", weight: 0.4 },
-    { text: "裂相钟塔无声指向 11:06 — 天花板感觉更远了。", weight: 0.35 },
-    { text: "螺旋深井回声在数数 — 别靠近井口。", weight: 0.45 },
+    { text: "ambient_void_p0", weight: 0.7 },
+    { text: "ambient_void_p1", weight: 0.5 },
+    { text: "ambient_void_p2", weight: 0.4 },
+    { text: "ambient_void_p3", weight: 0.45 },
+    { text: "ambient_void_p4", weight: 0.5 },
+    { text: "ambient_void_p5", weight: 0.35 },
+    { text: "ambient_void_p6", weight: 0.45 },
   ],
   fantasy: [
-    { text: "至尊石环低声吟诵 — One Realm to bind them all…", weight: 0.5 },
-    { text: "沙龙镜墙方向传来旋转门吱呀声 — 边境往事在灰林边缘苏醒。", weight: 0.45 },
-    { text: "正午决斗圈的 chalk 线在雾里发亮 — 别在圈里恋战。", weight: 0.4 },
-    { text: "幽灵铁道远处汽笛 — 火车从不到站。", weight: 0.35 },
-    { text: "鸟居残门在雾里发红 — 武士残响未散。", weight: 0.4 },
+    { text: "ambient_fantasy_p0", weight: 0.5 },
+    { text: "ambient_fantasy_p1", weight: 0.45 },
+    { text: "ambient_fantasy_p2", weight: 0.4 },
+    { text: "ambient_fantasy_p3", weight: 0.35 },
+    { text: "ambient_fantasy_p4", weight: 0.4 },
   ],
   hub: [
-    { text: "海报墙在东侧 — 六张褪色位面海报等待共鸣。", weight: 0.4 },
-    { text: "海报墙新增三色 — 西部、黑帮、深空科幻母题已写入回声。", weight: 0.35 },
+    { text: "ambient_hub_p0", weight: 0.4 },
+    { text: "ambient_hub_p1", weight: 0.35 },
   ],
   abyss: [
-    { text: "禁酒窖门缝漏出暖光 — 幽冥帮派在谈界关税。", weight: 0.5 },
-    { text: "码头货仓木箱碰撞 — 魂火走私线仍通。", weight: 0.45 },
-    { text: "家族圣龛三支蜡烛照黑镜 — 镜里不是你自己。", weight: 0.4 },
+    { text: "ambient_abyss_p0", weight: 0.5 },
+    { text: "ambient_abyss_p1", weight: 0.45 },
+    { text: "ambient_abyss_p2", weight: 0.4 },
   ],
 };
 
-/** Lore 碎片：章节门控的叙事碎片 */
+/**
+ * Lore 碎片：章节门控的叙事碎片
+ *
+ * `title` / `text` 存**文案键**（W-D2 切片16b），不是文案本身 ——
+ * 显示侧（`DungeonManager.tryReadLore` / `PlayerController` 的交互提示）
+ * 在播出那一刻 `keyText(t(键))` 展开。
+ */
 export const LORE_FRAGMENTS_POP = [
-  { id: "lore-wizard", title: "咒术学院残页", text: "「楼梯会换方向，蜡烛会自己飞 — 但魂火不会。」", chapter: 2 },
-  { id: "lore-inter", title: "坚韧号副录", text: "「不要温和地走进那个良夜 — 但可以在营火边休息。」", chapter: 3 },
-  { id: "lore-upside", title: "逆相界录音", text: "「1983 年 11 月 6 日 — 裂口打开。红色闪电，没有星星。」", chapter: 4 },
-  { id: "lore-murphy", title: "引力笔迹", text: "「Stay — 写在书架上的不是字，是维度之间的握手。」", chapter: 3 },
-  { id: "lore-broom", title: "环赛记分", text: "「飞天环赛第三圈 — 鬼火领先扫帚半个月亮。」", chapter: 2 },
-  { id: "lore-nine", title: "站台残页", text: "「砖墙在月台中央裂开 — 相信的人不会问检票口在哪。」", chapter: 2 },
-  { id: "lore-wormhole", title: "虫洞副录", text: "「穿过环的人，年龄与记忆不同步 — 但爱可以。」", chapter: 3 },
-  { id: "lore-arcade", title: "街机厅收据", text: "「1983 年 11 月 6 日 — 投币口塞满红色孢子，游戏永不结束。」", chapter: 4 },
-  { id: "lore-vecna", title: "裂相钟塔报", text: "「指针停在 11:06 — 每次钟声，天花板就远一点。」", chapter: 4 },
-  { id: "lore-saloon", title: "沙龙镜墙残页", text: "「裂镜里的倒影永远快半拍 — 决斗前先问：你在打谁？」", chapter: 1 },
-  { id: "lore-speakeasy", title: "禁酒窖收据", text: "「关税不是金币，是魂火 — 幽冥帮派管界与界之间的缝。」", chapter: 5 },
-  { id: "lore-ai-core", title: "AI 核心日志", text: "「任务未完成。目标：位面行者。优先级：高于跃迁。」", chapter: 3 },
-  { id: "lore-jump-gate", title: "跃迁门手册", text: "「三门同相。错相者循环第一秒 — 比米勒沙漏更残酷。」", chapter: 3 },
-  { id: "lore-duel", title: "决斗圈 chalk", text: "「正午太阳不动，直到有人拔剑 — 或 {parry} 弹反。」", chapter: 1 },
-  { id: "lore-neon", title: "霓虹收据", text: "「义眼 99% 真实 — 1% 是广告。」", chapter: 2 },
-  { id: "lore-torii", title: "鸟居残铭", text: "「门后不是神域 — 是决斗。」", chapter: 1 },
-  { id: "lore-obelisk", title: "方尖碑拓片", text: "「铭文是角度 — 不是字。」", chapter: 4 },
-  { id: "lore-cantina", title: "星港菜单", text: "「特供：跃迁合同、赏金、坐标。」", chapter: 3 },
+  { id: "lore-wizard", title: "lore_pop_wizard_title", text: "lore_pop_wizard_text", chapter: 2 },
+  { id: "lore-inter", title: "lore_pop_inter_title", text: "lore_pop_inter_text", chapter: 3 },
+  { id: "lore-upside", title: "lore_pop_upside_title", text: "lore_pop_upside_text", chapter: 4 },
+  { id: "lore-murphy", title: "lore_pop_murphy_title", text: "lore_pop_murphy_text", chapter: 3 },
+  { id: "lore-broom", title: "lore_pop_broom_title", text: "lore_pop_broom_text", chapter: 2 },
+  { id: "lore-nine", title: "lore_pop_nine_title", text: "lore_pop_nine_text", chapter: 2 },
+  { id: "lore-wormhole", title: "lore_pop_wormhole_title", text: "lore_pop_wormhole_text", chapter: 3 },
+  { id: "lore-arcade", title: "lore_pop_arcade_title", text: "lore_pop_arcade_text", chapter: 4 },
+  { id: "lore-vecna", title: "lore_pop_vecna_title", text: "lore_pop_vecna_text", chapter: 4 },
+  { id: "lore-saloon", title: "lore_pop_saloon_title", text: "lore_pop_saloon_text", chapter: 1 },
+  { id: "lore-speakeasy", title: "lore_pop_speakeasy_title", text: "lore_pop_speakeasy_text", chapter: 5 },
+  { id: "lore-ai-core", title: "lore_pop_ai_core_title", text: "lore_pop_ai_core_text", chapter: 3 },
+  { id: "lore-jump-gate", title: "lore_pop_jump_gate_title", text: "lore_pop_jump_gate_text", chapter: 3 },
+  { id: "lore-duel", title: "lore_pop_duel_title", text: "lore_pop_duel_text", chapter: 1 },
+  { id: "lore-neon", title: "lore_pop_neon_title", text: "lore_pop_neon_text", chapter: 2 },
+  { id: "lore-torii", title: "lore_pop_torii_title", text: "lore_pop_torii_text", chapter: 1 },
+  { id: "lore-obelisk", title: "lore_pop_obelisk_title", text: "lore_pop_obelisk_text", chapter: 4 },
+  { id: "lore-cantina", title: "lore_pop_cantina_title", text: "lore_pop_cantina_text", chapter: 3 },
 ];
 
-/** NPC 章节台词：npcId → { 章节号: [台词...] } */
+/**
+ * NPC 章节台词：npcId → { 章节号: [台词...] }
+ */
 /**
  * 致敬层追加的 NPC 章节台词（W-D2 切片14）。
  *

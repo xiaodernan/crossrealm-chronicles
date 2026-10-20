@@ -7,6 +7,8 @@ import { DUNGEON_DEFS } from '../content/dungeons.js';
 import { dungeonGrowthStage } from '../content/enemyGrowth.js';
 import { disposeDungeonSubtree } from './dungeonAssets.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { t } from '../engine/i18n.js';
+import { keyText } from '../content/keyHints.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -343,9 +345,13 @@ export class DungeonManager {
       const dz = local.z - mesh.position.z;
       if (Math.hypot(dx, dz) > 3) continue;
       lore.discovered = true;
-      this.dialog.show(lore.title, lore.text);
+      /* `lore.title` / `lore.text` 现在是**文案键**（W-D2 切片16b）：
+       * 展开只在这一处做一次，弹出的对话框与 `discovery` 事件拿到的是同一份快照。 */
+      const 标题 = keyText(t(lore.title));
+      const 正文 = keyText(t(lore.text));
+      this.dialog.show(标题, 正文);
       window.dispatchEvent(new CustomEvent('discovery', {
-        detail: { id: lore.id, title: lore.title, text: lore.text, category: 'fragment' },
+        detail: { id: lore.id, title: 标题, text: 正文, category: 'fragment' },
       }));
       window.dispatchEvent(new CustomEvent('game-audio-sfx', { detail: { sfx: 'loreDiscover' } }));
       return true;
