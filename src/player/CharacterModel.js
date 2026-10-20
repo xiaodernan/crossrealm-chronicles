@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { ANIM_MANIFEST } from '../assets/AnimManifest.js';
+import { ANIMATION_GLB_MANIFEST } from '../assets/AnimationGLBManifest.js';
 import { isSkeletonClipName, registerSkeletonClips, boneName } from '../assets/SkeletonMotion.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
@@ -191,18 +192,22 @@ export class CharacterModel {
       const box = new THREE.Box3().setFromObject(model);
       model.position.y -= box.min.y;
       this.mixer = new THREE.AnimationMixer(model);
+
+      // 1) 主模型自带 clip（Idle/Run/Walk/TPose...）
       for (const clip of gltf.animations) {
         this.actions[clip.name] = this.mixer.clipAction(clip);
       }
+
+      // 2) 额外动画 GLB（Mixamo 真 clip）—— 真 clip 到位即覆盖同名程序化片段
+      await this._loadExtraAnimationGLBs(loader);
+
+      // 3) 建 catalog（真 clip 优先 → 程序化 → 素材 fallback）
       for (const [key, list] of Object.entries(ANIM_MANIFEST)) {
         this.catalog[key] = this.pickAnim(list);
       }
       this.hasMixamoClips = !!(this.catalog.hit && this.catalog.block && this.catalog.dodge);
-      // 出厂素材一条攻击 clip 都没有（`Soldier.glb` 只有 `Idle / Run / Walk / TPose`），但
-      // 49 根 `mixamorig:*` 骨骼是现成的 ⇒ 缺的只有"每一招的关键帧"。把 `SkeletonMotion` 的
-      // 表编成 clip 注册进来，左键那一下才是挥砍而不是原地踏步（B111）。
-      // 注册放在 catalog 之后：`catalog.*` 继续只说"素材自己提供了什么"，骨骼片段记在
-      // `this.skeletal` 这本独立的账上，不把素材账本涂成真有其事。
+
+      // 4) 骨骼收集 + 程序化片段注册（作为兜底，真 clip 已在 actions 里则不会被覆盖）
       const 在世骨骼 = new Set();
       model.traverse((o) => {
         if (!o.isBone) return;
@@ -211,8 +216,11 @@ export class CharacterModel {
       });
       const 骨骼片 = registerSkeletonClips(this.mixer, 在世骨骼);
       for (const [招式, 名] of Object.entries(骨骼片.片段名)) {
-        this.actions[名] = 骨骼片.动作[招式];
-        this.skeletal[招式] = 名;
+        // 只有当 actions 里还没有真 clip 同名 action 时，才注册程序化片段
+        if (!this.actions[名]) {
+          this.actions[名] = 骨骼片.动作[招式];
+          this.skeletal[招式] = 名;
+        }
       }
       console.info('[AnimCatalog]', this.catalog, 'mixamo:', this.hasMixamoClips,
         '骨骼片段:', `${骨骼片.接上}招/${骨骼片.轨道数}轨`, Object.keys(this.actions));
@@ -224,6 +232,22 @@ export class CharacterModel {
       // 不让它变成一次没有日志的"素材没加载上"。
       console.error('[CharacterModel] GLB 装配失败，退回胶囊：', e);
       this.createFallback();
+    }
+  }
+
+  /** 加载额外动画 GLB（W-C6 余项续：真 Mixamo clip 管线） */
+  async _loadExtraAnimationGLBs(loader) {
+    for (const url of ANIMATION_GLB_MANIFEST) {
+      try {
+        const gltf = await loader.loadAsync(url);
+        console.info('[CharacterModel] extra anim loaded', url);
+        for (const clip of gltf.animations || []) {
+          // 真 clip 直接覆盖同名 action（优先级高于程序化片段）
+          this.actions[clip.name] = this.mixer.clipAction(clip);
+        }
+      } catch (e) {
+        console.warn('[CharacterModel] extra anim load failed:', url, e.message);
+      }
     }
   }
 

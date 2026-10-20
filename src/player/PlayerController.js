@@ -6,6 +6,8 @@ import { CharacterModel } from './CharacterModel.js';
 
 import { attachToHand, GRIP } from './WeaponGrip.js';
 
+import { PlayerAnimationAdapter } from './animation/PlayerAnimationAdapter.js';
+
 import { createPlayerFSM } from './PlayerFSM.js';
 
 import { shake } from '../engine/Shake.js';
@@ -199,6 +201,11 @@ export class PlayerController {
   async _loadModel() {
 
     await this.characterModel.load();
+
+    // W-C6 余项：玩家接入动画适配器系统（与敌人统一管理）
+    this.animAdapter = new PlayerAnimationAdapter(this.characterModel);
+    this.animAdapter.registerStates();
+    this.animAdapter.registerProceduralClips();
 
     const sword = this._buildWeapon();
 
@@ -706,6 +713,8 @@ export class PlayerController {
     this.combat?.update(dt, keys);
 
     this.characterModel.update(dt);
+    // W-C6 余项：玩家动画适配器同步更新
+    this.animAdapter?.update(dt);
 
     this.interactCooldown = Math.max(0, this.interactCooldown - dt);
 
