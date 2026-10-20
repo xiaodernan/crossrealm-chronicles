@@ -1,4 +1,6 @@
 /** 全屏地图自定义路点 */
+import { t } from '../engine/i18n.js';
+
 export class MapMarkerManager {
   constructor(game) {
     this.game = game;
@@ -16,12 +18,14 @@ export class MapMarkerManager {
       id,
       x: Math.round(x),
       z: Math.round(z),
-      label: label ?? `路点 ${this.markers.length + 1}`,
+      // 默认路点名也是**文案键**（W-D2 切片16f）—— 存进存档的是这句话本身，
+      // 所以它必须随语言走：换一个语言，旧档里的默认路点名也得跟着。
+      label: label ?? t('map_marker_default_name', { n: this.markers.length + 1 }),
       color: '#66ddff',
     };
     this.markers.push(marker);
     this.activeId = id;
-    this.game.dialog.toast(`已标记：${marker.label} (${marker.x}, ${marker.z})`);
+    this.game.dialog.toast(t('map_marker_added', { label: marker.label, x: marker.x, z: marker.z }));
     window.dispatchEvent(new CustomEvent('map-marker-changed'));
     return marker;
   }
@@ -58,7 +62,7 @@ export class MapMarkerManager {
     const idx = this.markers.findIndex((m) => m.id === this.activeId);
     const next = this.markers[(idx + 1) % this.markers.length];
     this.activeId = next.id;
-    this.game.dialog.toast(`导航路点：${next.label}`);
+    this.game.dialog.toast(t('map_marker_navigating', { label: next.label }));
     return next;
   }
 

@@ -1,6 +1,7 @@
 import { MAP_BOSSES } from '../game/QuestSystem.js';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const WORLD_BOSSREMATCHDIRECTOR = 'world/BossRematchDirector';
 const rematchOn = (name, handler) => on(name, handler, WORLD_BOSSREMATCHDIRECTOR);
@@ -69,7 +70,7 @@ export class BossRematchDirector {
     const em = this.game.enemyManager;
     const active = em.enemies?.some((e) => e.bossId === beacon.bossId && e.alive);
     if (active) {
-      this.game.dialog.toast(`${beacon.label} 已在场`);
+      this.game.dialog.toast(t('boss_rematch_already_present', { name: beacon.label }));
       return;
     }
     const spawn = BOSS_SPAWN[beacon.bossId];
@@ -77,7 +78,7 @@ export class BossRematchDirector {
 
     spawn(em, beacon.x, beacon.z);
     this.cooldown = 12;
-    this.game.dialog.toast(`再战：${beacon.label}`, 2800);
+    this.game.dialog.toast(t('boss_rematch_started', { name: beacon.label }), 2800);
     this.game.stats.addSouls(5);
     window.dispatchEvent(new CustomEvent('boss-rematch-started', { detail: { bossId: beacon.bossId } }));
     window.dispatchEvent(new CustomEvent('stats-changed', { detail: this.game.stats.toJSON() }));

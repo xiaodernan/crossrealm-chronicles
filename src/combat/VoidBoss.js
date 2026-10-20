@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Boss } from './Boss.js';
 import { addShake } from '../engine/Shake.js';
 import { TIME_SCALE_LEASH } from '../content/tuning.js';
+import { t } from '../engine/i18n.js';
 
 /** 时标账本里这一格的署名：一个来源一个 key，与场地时停域各记各的账 */
 const TIME_STOP_KEY = 'void-chronarch:time-stop';
@@ -91,7 +92,7 @@ export class VoidBoss extends Boss {
       this.timeStopActive = false;
       this.timeStopTimer = 0;
       window.dispatchEvent(new CustomEvent('time-stop-end'));
-      window.dispatchEvent(new CustomEvent('spell-toast', { detail: { message: '蓄力法术打断了时停！' } }));
+      window.dispatchEvent(new CustomEvent('spell-toast', { detail: { message: t('boss_void_timestop_broken') } }));
     }
     super.takeDamage(amount, postureDamage);
   }

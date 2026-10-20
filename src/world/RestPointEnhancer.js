@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { paletteOf } from '../content/materialPalette.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { t } from '../engine/i18n.js';
 
 /**
  * 营火地标 —— 木牌、光柱、首次发现提示
@@ -75,13 +76,13 @@ export class RestPointEnhancer {
       }
       if (d < 12 && !this.discovered.has(p.id)) {
         this.discovered.add(p.id);
-        this.game.dialog.toast(`发现营火 · ${p.zoneLabel ?? p.name}`, 2800);
+        this.game.dialog.toast(t('rest_point_discovered', { name: p.zoneLabel ?? p.name }), 2800);
         this.game.explorationMap?.revealZone?.(p.id);
         this.game.storyJournal?.add?.({
           id: `rest-found-${p.id}`,
           category: 'campfire',
           title: p.zoneLabel ?? p.name,
-          text: `在 ${p.name} 与常驻 NPC 交谈可获战术提示。`,
+          text: t('rest_point_journal_text', { name: p.name }),
           chapter: this.game.quests?.chapter ?? 1,
         });
       }

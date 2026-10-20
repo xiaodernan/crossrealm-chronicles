@@ -1,5 +1,6 @@
 import { Boss } from './Boss.js';
 import { BossPhase, PhaseTransitionCondition } from './BossStateMachine.js';
+import { t } from '../engine/i18n.js';
 
 /** 迷宫终点 Boss — 双阶段，地牢专用 */
 export class DungeonBoss extends Boss {
@@ -47,6 +48,6 @@ export class DungeonBoss extends Boss {
     this.phaseTriggered.p2 = true;
     this.speed = 6.5;
     this.damage = 26;
-    this.dialogToast?.('守钥者进入第二阶段！');
+    this.dialogToast?.(t('boss_keywarden_phase2'));
   }
 }

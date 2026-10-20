@@ -1,4 +1,5 @@
 import { SIDE_QUESTS_ALL } from '../content/sideQuests.js';
+import { t } from '../engine/i18n.js';
 
 /**
  * 支线任务 —— 自动检测完成（名单在 `content/sideQuests.js`，两族合并成一份）
@@ -55,11 +56,11 @@ export class SideQuestSystem {
   complete(q) {
     this.completed.add(q.id);
     this.game.stats.addSouls(q.reward);
-    this.game.dialog.toast(`支线完成：${q.title} · +${q.reward} 魂火`, 3200);
+    this.game.dialog.toast(t('side_quest_complete', { title: q.title, reward: q.reward }), 3200);
     this.game.storyJournal?.add?.({
       id: q.id,
       category: 'quest',
-      title: `支线 · ${q.title}`,
+      title: t('side_quest_journal_title', { title: q.title }),
       text: q.journal ?? q.desc,
       chapter: this.game.quests?.chapter ?? 1,
     });

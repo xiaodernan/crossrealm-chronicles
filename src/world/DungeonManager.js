@@ -264,14 +264,14 @@ export class DungeonManager {
       if (list.length && list.every((e) => !e.alive)) {
         room.cleared = true;
         this._unlockDoorsFromRoom(dungeon, room.id);
-        this.dialog.toast(`房间已清空 — 门已打开`);
+        this.dialog.toast(t('dungeon_room_cleared'));
         window.dispatchEvent(new CustomEvent('game-audio-sfx', { detail: { sfx: 'roomClear' } }));
         window.dispatchEvent(new CustomEvent('dungeon-room-cleared', { detail: { roomId: room.id, dungeonId: dungeon.def.id } }));
         if (room.isBossArena) {
-          this.dialog.toast('守钥者已倒下 — 出口已开启');
+          this.dialog.toast(t('dungeon_keywarden_down'));
           window.dispatchEvent(new CustomEvent('game-audio-sfx', { detail: { sfx: 'levelUp' } }));
         } else if (Math.random() < 0.22) {
-          this.dialog.toast('隐藏补给：体力与生命略微恢复');
+          this.dialog.toast(t('dungeon_hidden_supply'));
           window.dispatchEvent(new CustomEvent('dungeon-supply', { detail: { hp: 8, stamina: 15 } }));
         }
       }
@@ -384,7 +384,7 @@ export class DungeonManager {
       room.visited = true;
       if (room.hasEnemies && !room.cleared && !this.active.roomEnemies.has(room.id)) {
         this._spawnRoomEnemies(this.active, room);
-        this.dialog.toast('敌人出现！');
+        this.dialog.toast(t('dungeon_enemies_appear'));
       }
       window.dispatchEvent(new CustomEvent('dungeon-room-enter', { detail: { roomId: room.id } }));
     }
@@ -453,14 +453,14 @@ export class DungeonManager {
       if (!this.active.bossSpawned) this._spawnRoomEnemies(this.active, exitRoom);
       const all = this.active.roomEnemies.get(exitRoom.id) ?? list;
       if (all.some((e) => e.alive)) {
-        this.dialog.toast('击败守钥者后再从出口离开');
+        this.dialog.toast(t('dungeon_exit_blocked_enemies'));
         return false;
       }
       exitRoom.cleared = true;
     }
 
     if (this.active.boss?.alive) {
-      this.dialog.toast('击败守钥者后再离开');
+      this.dialog.toast(t('dungeon_exit_blocked_boss'));
       return false;
     }
 
@@ -475,7 +475,7 @@ export class DungeonManager {
     this.resetDungeon(leaving);
     this.game.player?.resolveOverlap?.();
     window.dispatchEvent(new CustomEvent('game-audio-mode', { detail: { mode: 'zone' } }));
-    this.dialog.toast('迷宫探索完成！');
+    this.dialog.toast(t('dungeon_exploration_complete'));
     return true;
   }
 

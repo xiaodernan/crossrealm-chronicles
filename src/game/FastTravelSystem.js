@@ -1,5 +1,6 @@
 import { codeFor } from '../content/keybinds.js';
 import { keyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 
 /** 营火快速旅行 — Chapter 2 解锁，休息界面或 `fastTravel` 键（`content/keybinds.js`） */
 export class FastTravelSystem {
@@ -11,7 +12,7 @@ export class FastTravelSystem {
   unlock() {
     if (this.unlocked) return;
     this.unlocked = true;
-    this.game.dialog.toast(keyText('快速旅行已解锁 — 在营火按 {fastTravel}'));
+    this.game.dialog.toast(keyText(t('fast_travel_toast_unlocked')));
   }
 
   getDestinations() {
@@ -35,7 +36,7 @@ export class FastTravelSystem {
     const y = this.game.world.getGroundHeight(dest.x, dest.z);
     this.game.player.teleport(dest.x, y + 0.1, dest.z);
     this.game.player.combat.restHeal();
-    this.game.dialog.toast(`快速旅行：${dest.name}`);
+    this.game.dialog.toast(t('fast_travel_arrived', { name: dest.name }));
     return true;
   }
 
@@ -44,7 +45,7 @@ export class FastTravelSystem {
     keys[codeFor('fastTravel')] = false;
     const rest = this.game.restPoints.getNearest(this.game.player.position, 5);
     if (!rest) {
-      this.game.dialog.toast('靠近营火才能快速旅行');
+      this.game.dialog.toast(t('fast_travel_need_campfire'));
       return false;
     }
     this.game.fastTravelPanel?.show(rest.id);
