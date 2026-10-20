@@ -259,6 +259,30 @@ export const STRINGS_ZH = Object.freeze({
   rest_point_campfire_name: '${zone}营火',
   rest_point_name_hub: '世界之锚休息点',
 
+  // 敌人名（W-D2 切片16s：名册存键，出生那一刻展开）
+  enemy_name_dummy: '训练木人',
+  enemy_name_summon: '虚空仆从',
+  enemy_name_soldier: '影之战士',
+  enemy_name_golem: '魔法构装体',
+  enemy_name_drone: '轨道无人机',
+  enemy_name_elite: '精英·虚空骑士',
+  enemy_name_wraith: '时线怨影',
+  enemy_name_stalker: '混沌掠行兽',
+  enemy_name_sentinel: '边境哨炮',
+  enemy_name_crawler: '虚空爬兽',
+  enemy_name_knight: '深渊骑士',
+  enemy_name_dancer: '刃舞者',
+  enemy_name_juggernaut: '破阵重兵',
+  enemy_name_hexer: '位面咒师',
+  enemy_name_gloom_wraith: '幽暗怨影',
+  enemy_name_gloom_stalker: '幽暗掠行兽',
+  enemy_name_gloom_sentinel: '幽暗哨卫',
+  enemy_name_gloom_warden: '幽暗守夜人',
+  enemy_name_radiant_crawler: '辉煌爬兽',
+  enemy_name_radiant_knight: '辉煌骑士',
+  enemy_name_radiant_dancer: '辉煌舞者',
+  enemy_name_radiant_brand: '辉煌圣印者',
+
   // 玩家可见的残余文案（W-D2 切片16r）
   enemy_name_default: '敌人',
   boss_name_dungeon_warden: '迷宫守钥者',
@@ -1086,7 +1110,6 @@ export const STRINGS_ZH = Object.freeze({
 
   // 路点标签（W-D2 切片16i：waypoint.label 是键，不是字面量）
   wp_label_anchor: '世界之锚',
-  wp_label_training_dummy: '训练木人',
   wp_label_one_ring: '至尊石环',
   wp_label_golem_patrol: '构装体巡逻区',
   wp_label_chests_dungeon: '宝箱/地下城',
@@ -1115,7 +1138,6 @@ export const STRINGS_ZH = Object.freeze({
   // 位面助手演示步骤（W-D2 切片16i）
   demo_step_anchor: '枢纽 · 世界之锚',
   demo_step_touch_anchor: '触摸世界之锚',
-  demo_step_training_dummy: '训练木人',
   demo_step_kill_soldier: '击败影之战士',
   demo_step_shadow_boss: '影界 Boss',
   demo_step_boss_shadow_defeat: '击败影界守护者',

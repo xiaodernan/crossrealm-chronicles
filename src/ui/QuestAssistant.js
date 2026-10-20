@@ -181,7 +181,7 @@ export class QuestAssistant {
     return [
       { label: 'demo_step_anchor', action: 'tp', x: 0, z: 55 },
       { label: 'demo_step_touch_anchor', action: 'poi', id: 'hub-anchor' },
-      { label: 'demo_step_training_dummy', action: 'hits', x: 15, z: 45, count: 8 },
+      { label: 'enemy_name_dummy', action: 'hits', x: 15, z: 45, count: 8 },
       { label: ZONE_NAMES[ZONE_IDS.FANTASY], action: 'tp', x: -200, z: 0 },
       { label: 'demo_step_kill_soldier', action: 'kills', type: 'soldier', count: 2 },
       { label: 'wp_label_one_ring', action: 'discover', id: 'fantasy-ring', x: -200, z: -30 },

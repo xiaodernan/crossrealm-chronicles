@@ -31,41 +31,49 @@
  */
 
 /** id → 身份。id 就是 `spawn({ type })` 的那个字符串，也是四张调参表用的同一批键。 */
+/**
+ * 敌人名册 —— `name` 存的是**文案键**（W-D2 切片16s），不是文案本身。
+ *
+ * 改前这一列是 22 句中文写死在这儿，玩家在锁定提示、击败横幅、字幕里看到的
+ * "幽暗怨影"永远是中文 —— 切到英文也不变。键名 `enemy_name_<type>`，
+ * 展开在**出生那一刻**（`EnemyManager.spawnAt` 一处）：世界里存的是显示名，
+ * 于是"它叫什么"在事件负载里仍然是那句人看的话（与营火名同一套办法）。
+ */
 export const ENEMY_ROSTER = {
   /** 训练木人：不可攻击、不刷新的摆设，`hp/posture` 写成 99999 是为了让玩家试刀时它不倒 */
-  dummy: { name: '训练木人', hp: 99999, posture: 99999, canAttack: false, respawn: false, color: 0x6a5040 },
-  soldier: { name: '影之战士', hp: 160, posture: 58, damage: 15, color: 0x3a3038 },
-  golem: { name: '魔法构装体', hp: 230, posture: 82, damage: 17, speed: 3.8, color: 0x4a3868 },
-  drone: { name: '轨道无人机', hp: 120, posture: 48, damage: 11, speed: 7.5, aggroRange: 24, color: 0x3a5068 },
-  elite: { name: '精英·虚空骑士', hp: 350, posture: 90, damage: 22, speed: 5.5, aggroRange: 25, color: 0x224466, respawnTime: 15 },
-  wraith: { name: '时线怨影', hp: 110, posture: 44, damage: 13, speed: 6.2, aggroRange: 22, color: 0x5566aa },
-  stalker: { name: '混沌掠行兽', hp: 140, posture: 62, damage: 14, speed: 6.8, color: 0x6a3038 },
-  sentinel: { name: '边境哨炮', hp: 180, posture: 70, damage: 16, speed: 3.2, aggroRange: 26, color: 0x3a4a68 },
-  crawler: { name: '虚空爬兽', hp: 150, posture: 58, damage: 15, speed: 5.6, aggroRange: 20, color: 0x5a7a3a },
-  knight: { name: '深渊骑士', hp: 260, posture: 88, damage: 20, speed: 4.0, aggroRange: 22, color: 0x2a3550 },
-  dancer: { name: '刃舞者', hp: 135, posture: 52, damage: 13, speed: 6.4, aggroRange: 22, color: 0x7a2a5a },
-  juggernaut: { name: '破阵重兵', hp: 300, posture: 96, damage: 22, speed: 3.6, aggroRange: 22, color: 0x4b4a55 },
-  hexer: { name: '位面咒师', hp: 130, posture: 50, damage: 15, speed: 4.6, aggroRange: 24, color: 0x6a5a9a },
+  dummy: { name: 'enemy_name_dummy', hp: 99999, posture: 99999, canAttack: false, respawn: false, color: 0x6a5040 },
+  soldier: { name: 'enemy_name_soldier', hp: 160, posture: 58, damage: 15, color: 0x3a3038 },
+  golem: { name: 'enemy_name_golem', hp: 230, posture: 82, damage: 17, speed: 3.8, color: 0x4a3868 },
+  drone: { name: 'enemy_name_drone', hp: 120, posture: 48, damage: 11, speed: 7.5, aggroRange: 24, color: 0x3a5068 },
+  elite: { name: 'enemy_name_elite', hp: 350, posture: 90, damage: 22, speed: 5.5, aggroRange: 25, color: 0x224466, respawnTime: 15 },
+  wraith: { name: 'enemy_name_wraith', hp: 110, posture: 44, damage: 13, speed: 6.2, aggroRange: 22, color: 0x5566aa },
+  stalker: { name: 'enemy_name_stalker', hp: 140, posture: 62, damage: 14, speed: 6.8, color: 0x6a3038 },
+  sentinel: { name: 'enemy_name_sentinel', hp: 180, posture: 70, damage: 16, speed: 3.2, aggroRange: 26, color: 0x3a4a68 },
+  crawler: { name: 'enemy_name_crawler', hp: 150, posture: 58, damage: 15, speed: 5.6, aggroRange: 20, color: 0x5a7a3a },
+  knight: { name: 'enemy_name_knight', hp: 260, posture: 88, damage: 20, speed: 4.0, aggroRange: 22, color: 0x2a3550 },
+  dancer: { name: 'enemy_name_dancer', hp: 135, posture: 52, damage: 13, speed: 6.4, aggroRange: 22, color: 0x7a2a5a },
+  juggernaut: { name: 'enemy_name_juggernaut', hp: 300, posture: 96, damage: 22, speed: 3.6, aggroRange: 22, color: 0x4b4a55 },
+  hexer: { name: 'enemy_name_hexer', hp: 130, posture: 50, damage: 15, speed: 4.6, aggroRange: 24, color: 0x6a5a9a },
   /** W-B9 切片1 新增：幽暗林地 —— 迷雾缠绕的古老森林 */
-  gloom_wraith: { name: '幽暗怨影', hp: 120, posture: 48, damage: 14, speed: 5.8, aggroRange: 24, color: 0x4a4a6a },
-  gloom_stalker: { name: '幽暗掠行兽', hp: 150, posture: 66, damage: 16, speed: 7.0, aggroRange: 28, color: 0x4a4a7a },
-  gloom_sentinel: { name: '幽暗哨卫', hp: 190, posture: 76, damage: 18, speed: 3.5, aggroRange: 30, color: 0x3a3a5a },
+  gloom_wraith: { name: 'enemy_name_gloom_wraith', hp: 120, posture: 48, damage: 14, speed: 5.8, aggroRange: 24, color: 0x4a4a6a },
+  gloom_stalker: { name: 'enemy_name_gloom_stalker', hp: 150, posture: 66, damage: 16, speed: 7.0, aggroRange: 28, color: 0x4a4a7a },
+  gloom_sentinel: { name: 'enemy_name_gloom_sentinel', hp: 190, posture: 76, damage: 18, speed: 3.5, aggroRange: 30, color: 0x3a3a5a },
   /**
    * W-E3 切片3：幽暗守夜人 —— 迷雾里的重装守夜人。
    * 血厚、架势高、出手慢（4.2 速），与同区的怨影（快、轻）、掠行兽（贴地乱爪）、
    * 哨卫（浮空远程）都不重叠：它是**站在那里等你走过来**的那一种。
    */
-  gloom_warden: { name: '幽暗守夜人', hp: 215, posture: 84, damage: 19, speed: 4.2, aggroRange: 26, color: 0x3a3a6a },
+  gloom_warden: { name: 'enemy_name_gloom_warden', hp: 215, posture: 84, damage: 19, speed: 4.2, aggroRange: 26, color: 0x3a3a6a },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
-  radiant_crawler: { name: '辉煌爬兽', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
-  radiant_knight: { name: '辉煌骑士', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },
-  radiant_dancer: { name: '辉煌舞者', hp: 145, posture: 56, damage: 14, speed: 6.8, aggroRange: 24, color: 0xffaa00 },
+  radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
+  radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },
+  radiant_dancer: { name: 'enemy_name_radiant_dancer', hp: 145, posture: 56, damage: 14, speed: 6.8, aggroRange: 24, color: 0xffaa00 },
   /**
    * W-E3 切片3：辉煌圣印者 —— 远距标点的施法者。
    * 血少、身轻、出手远：它不贴上来，而是站在 6~11 米外把一块地**标成灼场**。
    * 与同区的爬兽（贴地乱爪）、骑士（重装近战）、舞者（连段旋舞）都不重叠。
    */
-  radiant_brand: { name: '辉煌圣印者', hp: 155, posture: 60, damage: 16, speed: 4.6, aggroRange: 26, color: 0xffe066 },
+  radiant_brand: { name: 'enemy_name_radiant_brand', hp: 155, posture: 60, damage: 16, speed: 4.6, aggroRange: 26, color: 0xffe066 },
 };
 
 /**

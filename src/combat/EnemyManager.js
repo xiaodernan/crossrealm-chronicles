@@ -15,6 +15,7 @@ import { zoneIdAt } from '../content/ZoneIdentity.js';
 import { growthAt, zoneGrowthStage } from '../content/enemyGrowth.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { difficultyMultiplier } from '../game/Difficulty.js';
+import { t } from '../engine/i18n.js';
 
 /**
  * 击杀魂魄基数（W-E1 切片6：收口"余"里的"魂收入不随成长缩放"）。
@@ -176,7 +177,7 @@ export class EnemyManager {
       // 所以 `?? 0` 只是"哪条路漏记档位就当没成长"的兜底，不是常态。
       const growth = growthAt(q.owner.growthStage ?? 0);
       const e = this.spawn({
-        name: SUMMON.name,
+        name: t(SUMMON.name),
         type: q.type,
         x: q.owner.position.x + Math.sin(q.angle) * r,
         z: q.owner.position.z + Math.cos(q.angle) * r,
@@ -346,6 +347,9 @@ export class EnemyManager {
     const growth = growthAt(stage);
     const enemy = this.spawn({
       ...roster,
+      // 名字是**文案键**（W-D2 切片16s）：展开在出生这一刻 ——
+      // 于是"它叫什么"在事件负载里仍然是那句人看的话（锁定提示 / 击败横幅 / 字幕都读它）。
+      name: t(roster.name),
       hp: Math.round(roster.hp * difficultyMultiplier('enemyHp') * growth.hp),
       // damage 是可缺的（`dummy` 没有）：缺格不缩放，交给 Enemy 构造器的 `?? 12`
       ...(roster.damage == null ? {} : { damage: Math.round(roster.damage * growth.damage) }),

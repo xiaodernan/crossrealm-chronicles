@@ -259,6 +259,30 @@ export const STRINGS_EN = Object.freeze({
   rest_point_campfire_name: '${zone} Campfire',
   rest_point_name_hub: 'World Anchor Rest Point',
 
+  // Enemy names (W-D2 slice 16s: the roster holds keys, expanded at spawn time)
+  enemy_name_dummy: 'Training Dummy',
+  enemy_name_summon: 'Void Thrall',
+  enemy_name_soldier: 'Shadow Warrior',
+  enemy_name_golem: 'Magic Golem',
+  enemy_name_drone: 'Orbital Drone',
+  enemy_name_elite: 'Elite · Void Knight',
+  enemy_name_wraith: 'Timeline Wraith',
+  enemy_name_stalker: 'Chaos Stalker',
+  enemy_name_sentinel: 'Border Turret',
+  enemy_name_crawler: 'Void Crawler',
+  enemy_name_knight: 'Abyss Knight',
+  enemy_name_dancer: 'Blade Dancer',
+  enemy_name_juggernaut: 'Siegebreaker',
+  enemy_name_hexer: 'Plane Hexer',
+  enemy_name_gloom_wraith: 'Gloom Wraith',
+  enemy_name_gloom_stalker: 'Gloom Stalker',
+  enemy_name_gloom_sentinel: 'Gloom Sentinel',
+  enemy_name_gloom_warden: 'Gloom Warden',
+  enemy_name_radiant_crawler: 'Radiant Crawler',
+  enemy_name_radiant_knight: 'Radiant Knight',
+  enemy_name_radiant_dancer: 'Radiant Dancer',
+  enemy_name_radiant_brand: 'Radiant Brander',
+
   // Player-facing leftovers (W-D2 slice 16r)
   enemy_name_default: 'Enemy',
   boss_name_dungeon_warden: 'Maze Keywarden',
@@ -1086,7 +1110,6 @@ export const STRINGS_EN = Object.freeze({
 
   // Waypoint labels (W-D2 slice 16i: waypoint.label is a key, not a literal)
   wp_label_anchor: 'World Anchor',
-  wp_label_training_dummy: 'Training Dummy',
   wp_label_one_ring: 'One Ring',
   wp_label_golem_patrol: 'Golem Patrol Area',
   wp_label_chests_dungeon: 'Chests / Dungeon',
@@ -1115,7 +1138,6 @@ export const STRINGS_EN = Object.freeze({
   // Plane assistant demo steps (W-D2 slice 16i)
   demo_step_anchor: 'Hub · World Anchor',
   demo_step_touch_anchor: 'Touch the World Anchor',
-  demo_step_training_dummy: 'Training Dummy',
   demo_step_kill_soldier: 'Defeat the Shadow Warriors',
   demo_step_shadow_boss: 'Shadow Warden Boss',
   demo_step_boss_shadow_defeat: 'Defeat the Shadow Warden',

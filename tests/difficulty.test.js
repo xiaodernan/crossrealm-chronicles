@@ -42,6 +42,7 @@ import { CombatController } from '../src/combat/CombatController.js';
 import { PlayerStats } from '../src/game/PlayerStats.js';
 import { ENEMY_ROSTER } from '../src/content/enemies.js';
 import { makePlayer } from './helpers/playerHarness.js';
+import { t } from '../src/engine/i18n.js';
 
 const ROOT = process.cwd();
 
@@ -210,8 +211,9 @@ describe('三个咽喉各自真的生效（三档读数逐档比）', () => {
     expect(at('story', 'soldier')).toBe(Math.round(base * 0.8));
     expect(at('brutal', 'soldier')).toBe(Math.round(base * 1.3));
     // 名字与坐标不受影响（乘子只管那一格）
+    // W-D2 切片16s：名册的 `name` 是**文案键**，出生那一刻展开 —— 比的是展开后那一句
     const cfg = (setDifficulty('story'), EnemyManager.prototype.spawnAt.call(host, 'golem', 7, 8));
-    expect(cfg.name).toBe(ENEMY_ROSTER.golem.name);
+    expect(cfg.name).toBe(t(ENEMY_ROSTER.golem.name));
     expect(cfg.x).toBe(7); expect(cfg.z).toBe(8);
     // `posture` 刻意不乘（见 spawnAt 注释）
     expect(cfg.posture).toBe(ENEMY_ROSTER.golem.posture);

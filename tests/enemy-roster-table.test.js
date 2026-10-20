@@ -36,6 +36,7 @@ import { generateMaze } from '../src/world/MazeLayout.js';
 // 切片3b 之后 generateMaze 的第 4 个参数必填：这一支测的是"出怪点的 type 全在名册里"，
 // 所以递一张真表里的一格就够了（用哪一座不影响这一条的判据）
 import { dungeonEncounterOf } from '../src/content/dungeonEncounters.js';
+import { t } from '../src/engine/i18n.js';
 
 beforeAll(installWindowShim);
 
@@ -101,12 +102,21 @@ describe('① 数据忠实：名册 = 切片2 之前那份手抄出生表，逐�
       expect(新, `${type} 在名册里没有格`).toBeTruthy();
       const 旧键 = Object.keys(旧).sort();
       expect(Object.keys(新).sort(), `${type} 的字段集与旧抄本不同`).toEqual(旧键);
-      for (const k of 旧键) expect(新[k], `${type}.${k}`).toBe(旧[k]);
+      for (const k of 旧键) {
+        // W-D2 切片16s：`name` 存的是**文案键**了 —— 旧抄本记的是"它叫什么"（中文），
+        // 所以这一格要比**展开后**的那一句，而不是键本身。
+        if (k === 'name') {
+          expect(t(新[k]), `${type}.name（键 ${新[k]} 展开后）`).toBe(旧[k]);
+          continue;
+        }
+        expect(新[k], `${type}.${k}`).toBe(旧[k]);
+      }
     }
   });
 
   it('名字两两不重复（同一屏幕里两类敌人叫同一个名字是普查里那 9 类的病根）', () => {
-    const 名字 = ENEMY_ROSTER_IDS.map((t) => ENEMY_ROSTER[t].name);
+    // 比**展开后**的（键两两不同是白送；真正的病是"两类敌人叫同一个名字"）
+    const 名字 = ENEMY_ROSTER_IDS.map((type) => t(ENEMY_ROSTER[type].name));
     expect(new Set(名字).size, `重名：${名字.filter((n, i) => 名字.indexOf(n) !== i).join('、')}`).toBe(名字.length);
   });
 });
@@ -153,7 +163,12 @@ describe('③ 行为：出生后的敌人身份确实来自名册', () => {
     for (const e of 原生) {
       const row = ENEMY_ROSTER[e.type];
       expect(row, `场上有只 "${e.type}" 不在名册里 —— 它的名字是手抄的`).toBeTruthy();
-      const 查 = (k, got) => { if (row[k] !== undefined && row[k] !== got) 对不上.push(`${e.type}.${k}: 名册 ${row[k]} ≠ 场上 ${got}`); };
+      // W-D2 切片16s：`name` 存的是**文案键** —— 场上那一只是**展开后**的显示名，
+      // 所以这一格要比展开后的那一句（键与键相同是白送，比的是"它叫什么"）。
+      const 查 = (k, got) => {
+        const 期望 = k === 'name' ? t(row[k]) : row[k];
+        if (row[k] !== undefined && 期望 !== got) 对不上.push(`${e.type}.${k}: 名册 ${期望} ≠ 场上 ${got}`);
+      };
       查('name', e.name);
       查('hp', e.maxHp);
       查('posture', e.maxPosture);
@@ -187,7 +202,7 @@ describe('③ 行为：出生后的敌人身份确实来自名册', () => {
     expect(m.enemies.length, '房间里一只都没生下来').toBe(3);
     for (const e of m.enemies) {
       const row = ENEMY_ROSTER[e.type];
-      expect(e.name, `${e.type} 的名字不是名册给的`).toBe(row.name);
+      expect(e.name, `${e.type} 的名字不是名册给的`).toBe(t(row.name));
       expect(e.maxHp, `${e.type} 的血量不是名册给的`).toBe(row.hp);
       expect(e.maxPosture, `${e.type} 的韧性不是名册给的`).toBe(row.posture);
       expect(e.damage, `${e.type} 的伤害不是名册给的`).toBe(row.damage);

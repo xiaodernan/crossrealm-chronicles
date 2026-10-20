@@ -31,6 +31,7 @@ import { CONTENT_TABLES, checkContent } from '../src/content/registry.js';
 import { ENEMY_ROSTER } from '../src/content/enemies.js';
 import { SUMMON, ENEMY_MOVE_SETS } from '../src/content/tuning.js';
 import { EnemyManager } from '../src/combat/EnemyManager.js';
+import { t } from '../src/engine/i18n.js';
 
 const ROOT = process.cwd();
 
@@ -277,7 +278,8 @@ describe('⑦ 仆从也走这条曲线（W-E1 切片4）', () => {
     // posture 刻意不乘（与名册同一条口径）：硬直抗性跟着血量缩会把"更脆"变成"更容易被打断两次"
     expect(cfg.posture).toBe(SUMMON.posture);
     expect(cfg.speed).toBe(SUMMON.speed);
-    expect(cfg.name).toBe(SUMMON.name);
+    // W-D2 切片16s：`SUMMON.name` 是**文案键**，出生那一刻展开
+    expect(cfg.name).toBe(t(SUMMON.name));
     expect(cfg.isSummon).toBe(true);
   });
 

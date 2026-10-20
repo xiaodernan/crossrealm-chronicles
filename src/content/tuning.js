@@ -665,7 +665,8 @@ export const SUMMON = {
   posture: 30,
   damage: 9,
   speed: 5.2,
-  name: '虚空仆从',
+  /** 召唤物名（W-D2 切片16s）：键 —— 展开在出生那一刻 */
+  name: 'enemy_name_summon',
 };
 
 /**
