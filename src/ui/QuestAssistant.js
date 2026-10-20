@@ -1,5 +1,6 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText } from '../content/keyHints.js';
+import { applyTranslations, t } from '../engine/i18n.js';
 import { BOSS_STAT_KEYS } from '../content/objectives.js';
 import { bossById } from '../content/bossRoster.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
@@ -29,17 +30,17 @@ export class QuestAssistant {
     this._panel.className = 'quest-assistant hidden';
     this._panel.innerHTML = `
       <div class="qa-header">
-        <strong>位面助手</strong>
+        <strong data-i18n="qa_title">位面助手</strong>
         <button type="button" id="qa-close">×</button>
       </div>
       <p id="qa-status" class="qa-status" data-ktext="按 {questTracker} 打开助手"></p>
       <p id="qa-hint" class="qa-hint"></p>
       <div class="qa-btns">
-        <button type="button" id="qa-autoplay" class="qa-primary">自动通关（你的角色）</button>
-        <button type="button" id="qa-sync">同步任务进度</button>
-        <button type="button" id="qa-pilot">自动带路</button>
-        <button type="button" id="qa-tp">传送到 Boss/目标</button>
-        <button type="button" id="qa-quick">瞬间验收</button>
+        <button type="button" id="qa-autoplay" class="qa-primary" data-i18n="qa_btn_autoplay">自动通关（你的角色）</button>
+        <button type="button" id="qa-sync" data-i18n="qa_btn_sync">同步任务进度</button>
+        <button type="button" id="qa-pilot" data-i18n="qa_btn_pilot">自动带路</button>
+        <button type="button" id="qa-tp" data-i18n="qa_btn_teleport">传送到 Boss/目标</button>
+        <button type="button" id="qa-quick" data-i18n="qa_btn_demo">瞬间验收</button>
       </div>
       <p class="qa-note" data-ktext="左下角「⚡自动通关」或按 {autoPlay} · 角色亲自跑图 · Boss 会现身 · {escape} 停止"></p>
     `;
@@ -63,6 +64,9 @@ export class QuestAssistant {
     this.panelOpen = true;
     // 面板只在构造时建一次 DOM：每次显示前按生效表重算一遍键名（切片6）
     refreshKeyText(this._panel);
+    // 面板骨架的静态文字走 `data-i18n`（W-D2 切片16h）：换语言时整体重写，
+    // 不用重建 DOM —— 重建会丢掉"用户正在看哪一行"的状态。
+    applyTranslations(this._panel);
     this._panel?.classList.remove('hidden');
     this.refresh();
   }
@@ -76,32 +80,33 @@ export class QuestAssistant {
     const q = this.game.quests.current;
     if (this._statusEl) {
       if (this.autoPlayRunning) {
-        this._statusEl.textContent = '自动通关进行中…';
+        this._statusEl.textContent = t('qa_status_autoplay');
       } else if (this.demoRunning) {
-        this._statusEl.textContent = `瞬间验收… ${this._demoStep}`;
+        this._statusEl.textContent = t('qa_status_demo', { n: this._demoStep });
       } else if (!q) {
-        this._statusEl.textContent = '已全部通关 — 无尽探索';
+        this._statusEl.textContent = t('qa_status_all_done');
       } else {
-        this._statusEl.textContent = `Ch${this.game.quests.chapter} · ${q.title}`;
+        this._statusEl.textContent = t('qa_status_quest', { ch: this.game.quests.chapter, title: q.title });
       }
     }
     if (this._hintEl) {
       this._hintEl.textContent = this.game.quests.getAssistantHint();
     }
     const pilotBtn = this._panel?.querySelector('#qa-pilot');
-    if (pilotBtn) pilotBtn.textContent = this.autoPilot ? '停止带路' : '自动带路';
+    // 带路按钮**不带** `data-i18n`：它的文字随开关变，由这里现填。
+    if (pilotBtn) pilotBtn.textContent = this.autoPilot ? t('qa_btn_pilot_stop') : t('qa_btn_pilot');
   }
 
   syncQuests() {
     const n = this.game.quests.syncProgress();
-    this.game.dialog.toast(n > 0 ? `已同步 ${n} 个已完成任务` : '任务进度已是最新');
+    this.game.dialog.toast(n > 0 ? t('qa_toast_synced', { n }) : t('qa_toast_already_synced'));
     this.refresh();
   }
 
   toggleAutoPilot() {
     if (this.demoRunning || this.autoPlayRunning) return;
     this.autoPilot = !this.autoPilot;
-    this.game.dialog.toast(this.autoPilot ? '自动带路已开启 — 会走向当前目标' : '自动带路已关闭');
+    this.game.dialog.toast(this.autoPilot ? t('qa_toast_pilot_on') : t('qa_toast_pilot_off'));
     this.refresh();
   }
 
@@ -111,14 +116,14 @@ export class QuestAssistant {
       this.syncQuests();
       const wp2 = this.game.quests.getQuestWaypoint();
       if (!wp2) {
-        this.game.dialog.toast('当前任务无固定坐标，已尝试同步');
+        this.game.dialog.toast(t('qa_toast_no_waypoint'));
         return;
       }
       this._teleport(wp2.x, wp2.z);
       return;
     }
     this._teleport(wp.x, wp.z);
-    this.game.dialog.toast(`已传送至：${wp.label}`);
+    this.game.dialog.toast(t('qa_toast_teleported', { label: wp.label }));
     this.refresh();
   }
 
@@ -132,7 +137,7 @@ export class QuestAssistant {
 
   startAutoPlay() {
     if (this.autoPlayRunning || this.game.playerAutoPlay?.active) {
-      this.game.dialog.toast('自动通关已在进行中');
+      this.game.dialog.toast(t('qa_toast_autoplay_running'));
       return;
     }
     this.autoPilot = false;
@@ -143,7 +148,7 @@ export class QuestAssistant {
     const ok = this.game.playerAutoPlay.begin(steps, (step) => this._runDemoStep(step, false));
     if (!ok) {
       this.autoPlayRunning = false;
-      this.game.dialog.toast('无法启动自动通关');
+      this.game.dialog.toast(t('qa_toast_autoplay_failed'));
       this.refresh();
     }
   }
@@ -152,7 +157,7 @@ export class QuestAssistant {
     if (this.demoRunning || this.autoPlayRunning || this.game.playerAutoPlay?.active) return;
     this.autoPilot = false;
     this.demoRunning = true;
-    this.game.dialog.toast('瞬间验收 — 直接推进全部任务');
+    this.game.dialog.toast(t('qa_toast_demo_start'));
     this.refresh();
 
     const steps = this._buildDemoSteps();
@@ -168,7 +173,7 @@ export class QuestAssistant {
     }
 
     this.demoRunning = false;
-    this.game.dialog.toast('瞬间验收完成');
+    this.game.dialog.toast(t('qa_toast_demo_done'));
     this.refresh();
   }
 
