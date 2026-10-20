@@ -5,6 +5,13 @@
  * `e.franchise === '魔法学院'` 做判定：改一行文案，十条成就和四条支线就会静默失效。
  * 现在条目存 id，中文只在这张表的值里出现一次，显示统一走 `franchiseLabel()`。
  */
+import { STRINGS_ZH } from './strings.zh.js';
+import { STRINGS_EN } from './strings.en.js';
+
+// 双表住在**同层**（content/strings.*）—— 内容层读它不违反"地基层不向上够"那条约定。
+const 双表 = { zh: STRINGS_ZH, en: STRINGS_EN };
+const 表 = (lang) => 双表[lang] ?? STRINGS_ZH;
+
 export const FRANCHISE = {
   WIZARD: 'wizard',
   INTERSTELLAR: 'interstellar',
@@ -20,21 +27,29 @@ export const FRANCHISE = {
   CROSSOVER: 'crossover',
 };
 
-/** 图鉴筛选：`all` 是「不按母题过滤」的哨兵，不是母题 */
+/**
+ * 母题显示名：值是**文案键**（W-D2 切片16o），不是文案本身 —— 显示侧在那一刻展开。
+ * 键名 `franchise_<母题 id>_label`。
+ */
 export const FRANCHISE_LABELS = {
-  all: '全部',
-  [FRANCHISE.WIZARD]: '魔法学院',
-  [FRANCHISE.INTERSTELLAR]: '星际穿越',
-  [FRANCHISE.UPSIDE]: '逆相界',
-  [FRANCHISE.MIDDLE_EARTH]: '中洲',
-  [FRANCHISE.BORDER]: '边境往事',
-  [FRANCHISE.FAMILY]: '幽冥帮派',
-  [FRANCHISE.DEEPSPACE]: '深空纪元',
-  [FRANCHISE.CYBER]: '赛博霓虹',
-  [FRANCHISE.SAMURAI]: '武士残响',
-  [FRANCHISE.COSMIC]: '旧日低语',
-  [FRANCHISE.STARPORT]: '星港商路',
-  [FRANCHISE.CROSSOVER]: '跨界',
+  all: 'franchise_all_label',
+  [FRANCHISE.WIZARD]: 'franchise_wizard_label',
+  [FRANCHISE.INTERSTELLAR]: 'franchise_interstellar_label',
+  [FRANCHISE.UPSIDE]: 'franchise_upside_label',
+  [FRANCHISE.MIDDLE_EARTH]: 'franchise_middle_earth_label',
+  [FRANCHISE.BORDER]: 'franchise_border_label',
+  [FRANCHISE.FAMILY]: 'franchise_family_label',
+  [FRANCHISE.DEEPSPACE]: 'franchise_deepspace_label',
+  [FRANCHISE.CYBER]: 'franchise_cyber_label',
+  [FRANCHISE.SAMURAI]: 'franchise_samurai_label',
+  [FRANCHISE.COSMIC]: 'franchise_cosmic_label',
+  [FRANCHISE.STARPORT]: 'franchise_starport_label',
+  [FRANCHISE.CROSSOVER]: 'franchise_crossover_label',
 };
 
-export const franchiseLabel = (id) => FRANCHISE_LABELS[id] ?? id;
+/** 母题显示名（按语言展开；键找不到就退回 id） */
+export const franchiseLabel = (id, lang = 'zh') => {
+  const key = FRANCHISE_LABELS[id];
+  if (!key) return id;
+  return 表(lang)[key] ?? id;
+};

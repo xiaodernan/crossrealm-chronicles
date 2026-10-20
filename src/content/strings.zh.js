@@ -259,6 +259,28 @@ export const STRINGS_ZH = Object.freeze({
   rest_point_campfire_name: '${zone}营火',
   rest_point_name_hub: '世界之锚休息点',
 
+  // 母题与流派名（W-D2 切片16o）
+  franchise_all_label: '全部',
+  franchise_wizard_label: '魔法学院',
+  franchise_interstellar_label: '星际穿越',
+  franchise_upside_label: '逆相界',
+  franchise_middle_earth_label: '中洲',
+  franchise_border_label: '边境往事',
+  franchise_family_label: '幽冥帮派',
+  franchise_deepspace_label: '深空纪元',
+  franchise_cyber_label: '赛博霓虹',
+  franchise_samurai_label: '武士残响',
+  franchise_cosmic_label: '旧日低语',
+  franchise_starport_label: '星港商路',
+  franchise_crossover_label: '跨界',
+  skill_branch_sword_name: '⚔ 位面长剑',
+  skill_branch_sword_note: '近战流派：连段、弹反、终结技与位面斩',
+  skill_branch_staff_name: '✦ 奥术法杖',
+  skill_branch_staff_note: '法术流派：法术强度、蓄力、法力与化身',
+  skill_branch_realm_name: '⟡ 位面共鸣',
+  skill_branch_realm_note: '跨界流派：位面斩、法力与化身的交汇',
+
+
   // 次元回声文案（W-D2 切片16n：标题/描述全是键）
   pop_culture_echo_unlocked: '📡 次元回声：${title}',
   pop_culture_echo_journal_title: '[${franchise}] ${title}',

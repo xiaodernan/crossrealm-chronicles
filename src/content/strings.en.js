@@ -259,6 +259,28 @@ export const STRINGS_EN = Object.freeze({
   rest_point_campfire_name: '${zone} Campfire',
   rest_point_name_hub: 'World Anchor Rest Point',
 
+  // Franchise and style-tree names (W-D2 slice 16o)
+  franchise_all_label: 'All',
+  franchise_wizard_label: 'Wizarding Academy',
+  franchise_interstellar_label: 'Interstellar',
+  franchise_upside_label: 'Upside-Down',
+  franchise_middle_earth_label: 'Middle-earth',
+  franchise_border_label: 'Border Past',
+  franchise_family_label: 'Underworld Gang',
+  franchise_deepspace_label: 'Deep-Space Era',
+  franchise_cyber_label: 'Cyber Neon',
+  franchise_samurai_label: 'Samurai Echo',
+  franchise_cosmic_label: 'Old Days Whisper',
+  franchise_starport_label: 'Starport Trade Route',
+  franchise_crossover_label: 'Crossover',
+  skill_branch_sword_name: '⚔ Plane Longsword',
+  skill_branch_sword_note: 'Melee style: combos, parries, finishers and the plane slash',
+  skill_branch_staff_name: '✦ Arcane Staff',
+  skill_branch_staff_note: 'Spell style: spell power, charge, mana and avatar',
+  skill_branch_realm_name: '⟡ Plane Resonance',
+  skill_branch_realm_note: 'Cross style: where the plane slash, mana and avatar meet',
+
+
   // Dimension echo strings (W-D2 slice 16n: titles and descriptions are keys)
   pop_culture_echo_unlocked: '📡 Dimension echo: ${title}',
   pop_culture_echo_journal_title: '[${franchise}] ${title}',

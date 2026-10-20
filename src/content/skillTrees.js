@@ -37,16 +37,32 @@
  * "谁在什么地方读它"，而 `tests/skill-trees.test.js` 会去源码里核对这句话仍然成立。
  */
 
+import { STRINGS_ZH } from './strings.zh.js';
+import { STRINGS_EN } from './strings.en.js';
+
 /**
  * 分支清单 —— "一共几条流派"的唯一真源。
  *
  * 面板、日志页签、状态机的遍历全部读它，所以加第四条流派时不需要再改四个 `['sword','staff']`。
  */
+/**
+ * 流派清单：`name` / `note` 存的是**文案键**（W-D2 切片16o），不是文案本身。
+ * 键名 `skill_branch_<id>_name` / `_note`。
+ */
 export const SKILL_BRANCHES = [
-  { id: 'sword', name: '⚔ 位面长剑', note: '近战流派：连段、弹反、终结技与位面斩' },
-  { id: 'staff', name: '✦ 奥术法杖', note: '法术流派：法术强度、蓄力、法力与化身' },
-  { id: 'realm', name: '⟡ 位面共鸣', note: '跨界流派：位面斩、法力与化身的交汇' },
+  { id: 'sword', name: 'skill_branch_sword_name', note: 'skill_branch_sword_note' },
+  { id: 'staff', name: 'skill_branch_staff_name', note: 'skill_branch_staff_note' },
+  { id: 'realm', name: 'skill_branch_realm_name', note: 'skill_branch_realm_note' },
 ];
+
+/** 流派显示名 / 说明（按语言展开） */
+export function skillBranchText(branch, lang = 'zh') {
+  const t = lang === 'en' ? STRINGS_EN : STRINGS_ZH;
+  return {
+    name: t[branch.name] ?? branch.id,
+    note: t[branch.note] ?? '',
+  };
+}
 
 /**
  * `effect` 的允许键 → **谁在读它**。

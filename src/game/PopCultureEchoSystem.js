@@ -1,5 +1,5 @@
 import { ECHOES } from '../content/echoes.js';
-import { t } from '../engine/i18n.js';
+import { t, getLanguage } from '../engine/i18n.js';
 import { franchiseLabel } from '../content/franchises.js';
 
 import { on, offAll } from '../engine/EventBus.js';
@@ -38,7 +38,7 @@ export class PopCultureEchoSystem {
       this.game.storyJournal?.add?.({
         id: echo.id,
         category: 'fragment',
-        title: t('pop_culture_echo_journal_title', { franchise: franchiseLabel(echo.franchise), title: t(echo.title) }),
+        title: t('pop_culture_echo_journal_title', { franchise: franchiseLabel(echo.franchise, getLanguage()), title: t(echo.title) }),
         text: echo.desc,
         chapter: this.game.quests?.chapter ?? 1,
       });

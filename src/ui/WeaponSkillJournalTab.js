@@ -1,5 +1,6 @@
-import { SKILL_BRANCHES, nodesOf, skillById } from '../content/skillTrees.js';
+import { SKILL_BRANCHES, nodesOf, skillById, skillBranchText } from '../content/skillTrees.js';
 import { refreshKeyText } from '../content/keyHints.js';
+import { getLanguage } from '../engine/i18n.js';
 
 /**
  * [J] 流派 Tab — 三条技能树一览。
@@ -31,7 +32,7 @@ export class WeaponSkillJournalTab {
           <div class="sk-cost">${ok ? '已解锁' : `${s.cost} 点${s.reqs?.length ? ' · 需前置' : ''}`}</div>
         </div>`;
       }).join('');
-      return `<div class="sk-branch"><h3>${branch.name}</h3><div class="sk-grid">${cards}</div></div>`;
+      return `<div class="sk-branch"><h3>${skillBranchText(branch, getLanguage()).name}</h3><div class="sk-grid">${cards}</div></div>`;
     };
 
     const renderNarrative = () => {

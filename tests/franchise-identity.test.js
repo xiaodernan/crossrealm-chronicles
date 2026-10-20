@@ -8,6 +8,7 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { FRANCHISE, FRANCHISE_LABELS, franchiseLabel } from '../src/content/franchises.js';
+import { t } from '../src/engine/i18n.js';
 import { ECHOES } from '../src/content/echoes.js';
 import { ACHIEVEMENTS_POP_CULTURE, ECHO_FRANCHISE_BUCKETS } from '../src/content/achievements.js';
 import { attachPopCultureAchievements } from '../src/game/PopCultureAchievementExtras.js';
@@ -46,7 +47,8 @@ describe('母题身份表', () => {
   });
 
   it('franchiseLabel 认得的用它自己，认不出的原样交回（不吞掉未知 id）', () => {
-    expect(franchiseLabel(FRANCHISE.WIZARD)).toBe(FRANCHISE_LABELS[FRANCHISE.WIZARD]);
+    // W-D2 切片16o：母题名存的是**文案键**，所以比的是**展开后**的那一句
+    expect(franchiseLabel(FRANCHISE.WIZARD)).toBe(t(FRANCHISE_LABELS[FRANCHISE.WIZARD]));
     expect(franchiseLabel('not-a-franchise')).toBe('not-a-franchise');
   });
 });

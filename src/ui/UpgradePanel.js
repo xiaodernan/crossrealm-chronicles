@@ -1,4 +1,4 @@
-import { SKILL_BRANCHES } from '../content/skillTrees.js';
+import { SKILL_BRANCHES, skillBranchText } from '../content/skillTrees.js';
 import { GEAR_SLOTS, gearLabel, gearSlotName } from '../content/gear.js';
 import { focusFirstItem } from './FocusNav.js';
 import { t, getLanguage } from '../engine/i18n.js';
@@ -133,11 +133,19 @@ export class UpgradePanel {
    */
   _ensureSkillBranches() {
     const host = document.getElementById('upgrade-skills-section');
-    if (!host || host.dataset.built === '1') return;
-    host.innerHTML = SKILL_BRANCHES.map((b) => `
-      <h3 class="skill-branch-title">${b.name}</h3>
-      <div class="skill-list" data-skill-branch="${b.id}"></div>`).join('');
-    host.dataset.built = '1';
+    if (!host) return;
+    if (host.dataset.built !== '1') {
+      host.innerHTML = SKILL_BRANCHES.map((b) => `
+        <h3 class="skill-branch-title" data-skill-branch-title="${b.id}"></h3>
+        <div class="skill-list" data-skill-branch="${b.id}"></div>`).join('');
+      host.dataset.built = '1';
+    }
+    // 标题每次刷新都重写（W-D2 切片16o：标题是**文案键**，换语言后它必须跟着变 ——
+    // 只在构造那一刻写一次的话，英文界面上的流派名会永远停在中文）。
+    for (const b of SKILL_BRANCHES) {
+      const h = host.querySelector(`[data-skill-branch-title="${b.id}"]`);
+      if (h) h.textContent = skillBranchText(b, getLanguage()).name;
+    }
   }
 
   renderSkills(branch, ws) {

@@ -1,6 +1,6 @@
 import { FRANCHISE_LABELS, franchiseLabel } from '../content/franchises.js';
 import { keyText, refreshKeyText } from '../content/keyHints.js';
-import { t } from '../engine/i18n.js';
+import { t, getLanguage } from '../engine/i18n.js';
 
 /** [J] 次元回声 Tab — HP / 星际 / 怪奇等致敬图鉴 */
 export class PopCultureJournalTab {
@@ -19,7 +19,7 @@ export class PopCultureJournalTab {
     const cards = sys.getEntries(this.filter).map((e) => {
       const ok = sys.unlocked.has(e.id);
       return `<div class="pc-card${ok ? '' : ' pc-locked'}">
-        <span class="pc-franchise">${franchiseLabel(e.franchise)}</span>
+        <span class="pc-franchise">${franchiseLabel(e.franchise, getLanguage())}</span>
         <div class="pc-title">${ok ? t(e.title) : '???'}</div>
         <div class="pc-desc">${ok ? keyText(t(e.desc)) : t('pop_culture_echo_locked_hint')}</div>
       </div>`;
