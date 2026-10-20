@@ -6,6 +6,7 @@ import {
 } from '../content/bossDialogue.js';
 import { addShake } from '../engine/Shake.js';
 import { scheduler } from '../engine/Scheduler.js';
+import { t } from '../engine/i18n.js';
 import * as THREE from 'three';
 
 import { on, offAll } from '../engine/EventBus.js';
@@ -74,10 +75,10 @@ export class BossPhaseDirector {
 
   showBanner(text, sub = '', color = '#c9a962', duration = 2800) {
     if (!this.bannerEl) return;
-    const t = this.bannerEl.querySelector('.bp-text');
-    const s = this.bannerEl.querySelector('.bp-sub');
-    if (t) { t.textContent = text; t.style.color = color; }
-    if (s) s.textContent = sub;
+    const textEl = this.bannerEl.querySelector('.bp-text');
+    const subEl = this.bannerEl.querySelector('.bp-sub');
+    if (textEl) { textEl.textContent = text; textEl.style.color = color; }
+    if (subEl) subEl.textContent = sub;
     this.bannerEl.classList.remove('hidden');
     this.bannerEl.classList.add('show');
     scheduler.clear(BANNER_TAG);
@@ -99,7 +100,7 @@ export class BossPhaseDirector {
     if (dungeonId) {
       const lines = DUNGEON_BOSS_LINES[dungeonId];
       if (lines?.intro) {
-        scheduler.after(0.6, () => this.game.dialog.toast(lines.intro, 4000));
+        scheduler.after(0.6, () => this.game.dialog.toast(t(lines.intro), 4000));
       }
     }
   }
@@ -110,7 +111,7 @@ export class BossPhaseDirector {
     if (dungeonId) {
       const lines = DUNGEON_BOSS_LINES[dungeonId];
       if (detail.phase === 2 && lines?.p2) {
-        this.showBanner('守钥者 · 第二阶段', lines.p2, '#ff8866');
+        this.showBanner(t('boss_dungeon_phase2_banner'), t(lines.p2), '#ff8866');
       }
       window.dispatchEvent(new CustomEvent('game-audio-sfx', { detail: { sfx: 'bossPhase' } }));
       return;
@@ -118,20 +119,23 @@ export class BossPhaseDirector {
 
     const cfg = BOSS_PHASE_LINES[bossId]?.[detail.phase];
     if (!cfg) {
-      this.game.dialog.toast(`Boss 第 ${detail.phase} 阶段！`);
+      this.game.dialog.toast(t('boss_phase_fallback_toast', { phase: detail.phase }));
       return;
     }
 
     this._playPhaseTransitionFX(cfg.color ?? '#c9a962', cfg.shake ?? 0.12, detail.phase);
 
-    this.showBanner(cfg.banner ?? `阶段 ${detail.phase}`, cfg.toast ?? '', cfg.color ?? '#c9a962');
-    if (cfg.toast) this.game.dialog.toast(cfg.toast, 3500);
+    // W-D2 切片16u：横幅与台词都是**文案键** —— 展开在演出这一刻
+    const 横幅 = t(cfg.banner ?? 'boss_phase_fallback_banner', { phase: detail.phase });
+    const 台词 = cfg.toast ? t(cfg.toast) : '';
+    this.showBanner(横幅, 台词, cfg.color ?? '#c9a962');
+    if (台词) this.game.dialog.toast(台词, 3500);
     window.dispatchEvent(new CustomEvent('game-audio-sfx', { detail: { sfx: 'bossPhase' } }));
     this.game.storyJournal?.addSilent({
       id: `boss-phase-${bossId}-${detail.phase}`,
       category: 'boss',
-      title: cfg.banner ?? `Boss 阶段 ${detail.phase}`,
-      text: cfg.toast ?? '',
+      title: 横幅,
+      text: 台词,
       chapter: this.game.quests.chapter,
     });
   }
@@ -265,13 +269,13 @@ export class BossPhaseDirector {
     if (dungeonId) {
       const lines = DUNGEON_BOSS_LINES[dungeonId];
       if (lines?.defeat) {
-        scheduler.after(0.8, () => this.game.dialog.show('守钥者已倒', lines.defeat));
+        scheduler.after(0.8, () => this.game.dialog.show(t('boss_dungeon_defeat_banner'), t(lines.defeat)));
       }
       return;
     }
     const cfg = BOSS_DEFEAT_LINES[bossId];
     if (cfg) {
-      scheduler.after(1.0, () => this.game.dialog.show(cfg.title, cfg.text));
+      scheduler.after(1.0, () => this.game.dialog.show(t(cfg.title), t(cfg.text)));
     }
     this.game.weaponSkills?.tryNarrativeUnlocks?.(this.game);
   }

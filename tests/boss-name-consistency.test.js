@@ -47,7 +47,8 @@ describe('Boss 显名单源（名册是"它叫什么"的唯一真源）', () => 
   it('击败横幅标题：每只世界 Boss 都用名册全名', () => {
     for (const id of WORLD_IDS) {
       expect(BOSS_DEFEAT_LINES[id]?.title, `${id} 没有击败横幅`).toBeTruthy();
-      expect(BOSS_DEFEAT_LINES[id].title, `${id} 击败横幅标题 ≠ 名册全名`).toBe(bossById(id).name);
+      // W-D2 切片16u：横幅标题是名册的**键**（`nameKey`）—— 展开后必须与名册全名逐字相等
+      expect(t(BOSS_DEFEAT_LINES[id].title), `${id} 击败横幅标题 ≠ 名册全名`).toBe(bossById(id).name);
     }
   });
 
