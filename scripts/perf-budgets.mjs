@@ -19,7 +19,22 @@
  * `update()` 单独 18.8ms / p95 33.6ms；update+render 全帧 175~286ms（渲染价在软渲染下噪声很大）。
  * 预算 = 基线 × 2 上下：防"垮一个数量级"，不防 5% 的漂移。真正的帧率回归要在真 GPU 上看，
  * 这条门禁抓的是**逻辑价**（AI/系统每帧攒的账）与灾难级的渲染/堆/稳定性回归。
+ *
+ * ## draw call 这一格为什么是"从 src 引进来的"（W-C2 切片4）
+ *
+ * `renderer.info.render.calls` 的判据有两个读者：CI 里这张表，和开发期 HUD 上那一行红绿
+ * （`src/engine/PerfHUD.js`）。此前 HUD 里写的是硬编码的 `> 400` —— 两处定义"达标"，
+ * 改一处另一处不会跟着变。所以 draw call 的名册（站点 / 配方 / 逐站三列上限 / 验收线）
+ * **住在 `src/engine/drawCallBudget.js`**（零依赖，node 能直接 import），这张表只是把它挂进来。
+ *
+ * 三个**判定函数**也一起转发（`overCeiling` / `missingCeilings` / `extraCeilings`）：
+ * 脚本端与门禁端必须问同一个"判"，各判一次迟早漂开 —— 这是 W-D4 切片3
+ * "判据与执行分家"的同一条纪律在 draw call 这一格上的延伸。
  */
+import { DRAW_CALL_BUDGETS, overCeiling, missingCeilings, extraCeilings } from '../src/engine/drawCallBudget.js';
+
+export { overCeiling, missingCeilings, extraCeilings };
+
 export const PERF_BUDGETS = {
   /** update() 平均耗时上限（ms）：内容膨胀拖垮的第一个数（12 类敌人的 AI、分离、感知都在这里面） */
   updateAvgMs: 40,
@@ -31,4 +46,10 @@ export const PERF_BUDGETS = {
   heapMb: 1200,
   /** 未捕获异常：0 条，性能门禁顺手兼做稳定性门禁 */
   exceptions: 0,
+  /**
+   * draw call 名册（站点 / 配方 / 逐站三列上限 / 验收线）—— 唯一所有者在
+   * `src/engine/drawCallBudget.js`，PerfHUD 读同一份。见那个文件的头部：
+   * **读数只有在配方钉死时才是数**（朝向 237↔476、首帧 289 vs 结算后 402）。
+   */
+  drawCalls: DRAW_CALL_BUDGETS,
 };

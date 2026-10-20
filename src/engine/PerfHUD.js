@@ -5,7 +5,12 @@
  * 计数器（几何体/纹理/场景节点是最典型的泄漏信号）。所有数值刷新走 dt 累计，不开定时器。
  *
  * 它不认识任何玩法系统：外部计数通过 `gauge(label, getter)` 注册，避免反向读取内部字段。
+ *
+ * draw call 那一行的红绿阈值来自 `engine/drawCallBudget.js`（与 `npm run perf` 同一份表，
+ * W-C2 切片4）—— 此前这里是硬编码的 `> 400`，于是"达标"有两处定义：门禁改了上限，
+ * 画面上的红不会跟着变。
  */
+import { DRAW_CALL_ACCEPT_LINE } from './drawCallBudget.js';
 export class PerfHUD {
   /**
    * @param renderer THREE.WebGLRenderer（读取 renderer.info）
@@ -95,7 +100,7 @@ export class PerfHUD {
     if (info) {
       const mem = info.memory;
       rows.push(
-        { label: 'draw call', value: info.render.calls, warn: info.render.calls > 400 },
+        { label: 'draw call', value: info.render.calls, warn: info.render.calls > DRAW_CALL_ACCEPT_LINE },
         { label: '三角面', value: `${(info.render.triangles / 1000).toFixed(1)}k` },
         { label: '几何体', value: mem.geometries, leak: true },
         { label: '纹理', value: mem.textures, leak: true },

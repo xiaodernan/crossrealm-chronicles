@@ -44,10 +44,11 @@
  *
  * ## 上限怎么来的（不是 §1 那条 400）
  *
- * 每站的三个上限 = 本机（无头 + SwiftShader 软件光栅）**同配方实测值 × 1.15 上取整到 10**。
+ * 每站的三个上限 = 本机（无头 + SwiftShader 软件光栅）**同配方实测值 × 1.15 上取整到 10**，
+ * 而"实测值"取的是**五轮里的最大值**（理由见 `DRAW_CALL_CEILINGS` 上面那张表）。
  * 它是**灾难护栏**（防"垮一个数量级"，与 `perf-budgets.mjs` 里 `frameAvgMs` 同一取向），
  * 不是"达标"的同义词。§1 那条验收线 `acceptLine: 400` 单列着给 HUD 用，两者在文档里对账：
- * 2026-10-20 的同配方读数里**枢纽站自己就是 426**（灰白森林一带更不必说），所以"draw call < 400
+ * 2026-10-20 的同配方读数里**枢纽站五轮读 411–438**（灰白森林一带更不必说），所以"draw call < 400
  * 达标"这句在无头软渲染上从来没成立过；真机读数出来之前，这一条只当**开发期提示**用。
  */
 import { ZONE_IDS, ZONE_ORDER, HUB_ZONE } from '../content/ZoneIdentity.js';
@@ -83,18 +84,26 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
  * 逐站上限（三列，单位 = call/整帧）。
  *
  * **数从哪来**：2026-10-20 在 detached 平面（HEAD `2e74047` + 本片六个文件，`D:/3a-plane-wc2s4`）
- * 用本配方跑出来的整站读数，逐列 × 1.15 后**上取整到 10**（`.tmp-20261018-b94/wc2s4-plane-perf4.log`）：
+ * 用本配方**连跑五轮**（`.tmp-20261018-b94/wc2s4-plane-perf{4,5,7,9,10}.log`），
+ * 下表是**逐列取五轮最大值**，再 × 1.15 **上取整到 10**（推导脚本 `.tmp-20261020-wc2s4/repin.mjs`，
+ * 它读日志算上限，不手抄数）：
  *
  * | 站 | 整帧 | 本体 | 阴影 |
  * |---|---|---|---|
- * | hub | 426 | 228 | 198 |
- * | fantasy | 611 | 318 | 293 |
- * | magic | 899 | 739 | 160 |
- * | space | 235 | 156 | 79 |
- * | void | 144 | 79 | 65 |
- * | abyss | 165 | 74 | 91 |
- * | gloom | 210 | 125 | 85 |
- * | radiant | 838 | 648 | 190 |
+ * | hub | 438 | 232 | 206 |
+ * | fantasy | 627 | 327 | 300 |
+ * | magic | 901 | 743 | 160 |
+ * | space | 236 | 159 | 79 |
+ * | void | 150 | 80 | 70 |
+ * | abyss | 183 | 75 | 109 |
+ * | gloom | 214 | 129 | 85 |
+ * | radiant | 877 | 668 | 214 |
+ *
+ * **为什么是"五轮最大值"而不是"某一轮的数"**：静置读数本身在抖 —— 同一配方同一站，
+ * abyss 阴影五轮读 91/109/97/90/94（跨度 19），radiant 阴影 190/209/214/214/202（跨度 24），
+ * hub 整帧 411–438（跨度 27）。第一版上限是按单轮（perf4）钉的，于是第二次真跑就出现
+ * "阴影 214 vs 上限 220"这种只剩 6 个 call 余量的格 —— 门禁的红绿从此由噪声决定，
+ * 而这正是本模块头部"口径"一节要避免的事。取最大值 ⇒ 余量来自实测抖动，不来自运气。
  *
  * 这批数**替代**了上一版本按 2026-10-18 只读普查推的第一版上限 —— 那版没有本体/阴影分列的
  * 同配方读数，三列里两列是猜的。第一次真跑就红了三次（magic 本体 739 > 620、abyss 阴影 91 > 90、
@@ -104,14 +113,14 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
  * 少一格是"这一站被静默放开"，两种都由 `tests/draw-call-budget.test.js` 当场拦。
  */
 export const DRAW_CALL_CEILINGS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 490, body: 270, shadow: 230 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 710, body: 370, shadow: 340 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 1040, body: 850, shadow: 190 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 280, body: 180, shadow: 100 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 170, body: 100, shadow: 80 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 190, body: 90, shadow: 110 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 510, body: 270, shadow: 240 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 730, body: 380, shadow: 350 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 1040, body: 860, shadow: 190 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 280, body: 190, shadow: 100 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 180, body: 100, shadow: 90 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 90, shadow: 130 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 250, body: 150, shadow: 100 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 970, body: 750, shadow: 220 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 1010, body: 770, shadow: 250 }),
 });
 
 /** 把三样东西收成一个对象，方便读者一次拿全（HUD 只取 `acceptLine`，门禁取整份） */

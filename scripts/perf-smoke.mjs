@@ -14,11 +14,11 @@
  * 用法：`npm run perf`（自己起 dev 口与浏览器，结束自己收）。
  * 退出码非 0 = 越预算 —— 将来接进 CI（W-D4 切片3）时就是红绿的来源。
  */
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { existsSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { PERF_BUDGETS } from './perf-budgets.mjs';
+import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings } from './perf-budgets.mjs';
 
 /**
  * 预算表在 `./perf-budgets.mjs` —— **判据与执行分家**（W-D4 切片3 修）。
@@ -54,15 +54,76 @@ async function waitForHttp(url, tries = 40) {
   return false;
 }
 
+/**
+ * **开跑前先看这两个口是不是空的**（2026-10-20 加的，起因是两次假红）。
+ *
+ * 症状：连着两轮 `npm run perf` 红，一轮报"Chrome CDP 口没起来"、一轮报"游戏 30 秒内没起来"，
+ * 而代码根本没动。查下来是上一轮泄漏的无头 Chrome 还占着 9424：Chrome 发现口被占时
+ * **不报错，只是不开这个口**，于是脚本探的是自己那个从没听过的浏览器；更坏的一种是
+ * 探口探到了**别人**的 Chrome 上，在它那个 about:blank / 别的构建的页里等 `window.__game`，
+ * 最后红成"游戏没起来" —— 把责任错记到刚改的代码上。vite 那一侧同理：`--strictPort`
+ * 会让自家服务起不来，但探口那一下会连到外来的 vite，读到的是另一个工作树的构建。
+ *
+ * 所以这里反过来用同一把尺子：**探得通 = 有人占着 = 这一轮不作数**，当场拒掉并说清是哪一口。
+ * 修之前"空口"与"别人的口"两种情形走的是同一条代码，红的原因却完全不同。
+ */
+async function 口被占(端口) {
+  try {
+    await fetch(`http://127.0.0.1:${端口}/`, { signal: AbortSignal.timeout(800) });
+    return '有人在这个口上应答（不是本脚本起的）';
+  } catch (e) {
+    const 码 = e?.cause?.code ?? e?.code ?? '';
+    if (/ECONNREFUSED|ENOTFOUND/.test(String(码))) return null; // 真空着
+    if (e?.name === 'TimeoutError' || /UND_ERR_CONNECT_TIMEOUT/.test(String(码))) {
+      return '连得上但不答话（有东西在听这个口）';
+    }
+    return `探测失败：${码 || e?.message}`;
+  }
+}
+
 // 直接用当前 node 调 vite.js：Windows 上 spawn .cmd 要开 shell（引号/quoting 风险），绕开它
+//
+// `--host 127.0.0.1` 是**必须**的，不是可选优化：vite 缺省只听 `localhost`，
+// 而在 Windows 上 `localhost` 先解析到 IPv6 的 `::1` —— 于是"起 dev 口"成功、
+// 脚本拿 `http://127.0.0.1:5321/` 去探却**超时**（实测：探 localhost 200、探 127.0.0.1 超时）。
+// 症状是"游戏 30 秒内没起来" + 页面错误 0 条 —— 一次把责任错记到构建上的假红。
+// 显式把口绑到 IPv4 回环，脚本探什么、浏览器开什么、vite 听什么，三者逐字对齐。
+/**
+ * 占口检查的**重试形状**：分两种占法。
+ * - 有人在**应答** ⇒ 那是别人的 vite / 别人的浏览器，等多久都不会变成我的 ⇒ 当场拒。
+ * - 连得上但**不答话** ⇒ 是上一轮自己那份正在断气（`taskkill /F` 之后 socket 关掉要一点时间）
+ *   ⇒ 给它一个有限的等待窗口；窗口过了还答不上来，也照样拒（不猜）。
+ * 2026-10-20 实测：连跑两轮时第二轮就撞上这个窗口，红成"CDP 口没起来"的前身。
+ */
+async function 等口空(端口, 等待毫秒 = 12000) {
+  const 截止 = Date.now() + 等待毫秒;
+  for (;;) {
+    const 由 = await 口被占(端口);
+    if (!由) return null;
+    if (!/不答话/.test(由)) return 由;
+    if (Date.now() >= 截止) return `${由}（等了 ${Math.round(等待毫秒 / 1000)} 秒仍在听）`;
+    await sleep(500);
+  }
+}
+
+const 被占的口 = [];
+for (const [名, 口] of [['dev 口 (vite)', VITE_PORT], ['CDP 口 (Chrome)', CDP_PORT]]) {
+  const 由 = await 等口空(口);
+  if (由) 被占的口.push(`  ${名} 127.0.0.1:${口} —— ${由}`);
+}
+if (被占的口.length > 0) {
+  console.error('perf-smoke 拒绝开跑：这两个口不是空的。\n' + 被占的口.join('\n')
+    + '\n占口的是上一轮泄漏的 vite / Chrome —— 这一轮会连到它们的进程上，读数不再属于这个工作树。');
+  process.exit(2);
+}
 const viteBin = join(process.cwd(), 'node_modules', 'vite', 'bin', 'vite.js');
-const vite = spawn(process.execPath, [viteBin, '--port', String(VITE_PORT), '--strictPort'],
+const vite = spawn(process.execPath, [viteBin, '--host', '127.0.0.1', '--port', String(VITE_PORT), '--strictPort'],
   { stdio: 'ignore', cwd: process.cwd() });
 
 const chromePath = findChrome();
 if (!chromePath) {
   console.error('perf-smoke: 找不到 Chrome（可用 CHROME 环境变量指定路径）');
-  vite.kill();
+  拔树(vite);
   process.exit(2);
 }
 const profileDir = join(tmpdir(), `perf-smoke-${Date.now()}`);
@@ -79,9 +140,34 @@ const chrome = spawn(chromePath, [
   'about:blank',
 ], { stdio: 'ignore' });
 
+/**
+ * 收尾：把**自己起的**那棵树连根拔掉（Windows 上要的是 /T，不是 kill()）。
+ *
+ * 2026-10-20 实测：`npm run perf` 正常跑完（PERF-EXIT=0）之后，它起的无头 Chrome 还活着，
+ * 9424 还 LISTENING —— `child.kill()` 在 Windows 上只终止**那一个** PID，而 headless Chrome
+ * 有一整棵子进程（crashpad、renderer、utility），主进程被孤儿们钉住不走。
+ * 后果不是"脏"而是**假红**：下一轮脚本连到上一轮的浏览器上，红成"游戏 30 秒内没起来"，
+ * 责任落在一次根本没改过的代码上（前面那两条占口拒就是把这种红变成当场可归的红）。
+ *
+ * 用 `taskkill /T /F /PID <我们 spawn 的那个 PID>`：只杀自己那棵树，PID 来自本次 spawn，
+ * 不搜进程名（搜名字会打到别人并行跑的 Chrome/vite 上）。
+ */
+function 拔树(子进程) {
+  if (!子进程?.pid) return;
+  try {
+    if (process.platform === 'win32') {
+      const r = spawnSync('taskkill', ['/PID', String(子进程.pid), '/T', '/F'], { stdio: 'ignore' });
+      if (r.status !== 0) 子进程.kill(); // 已经没了 / taskkill 不可用：退回原办法
+    } else {
+      子进程.kill();
+    }
+  } catch { /* 已经退出 */ }
+}
+
 const cleanup = () => {
-  try { chrome.kill(); } catch { /* 已退出 */ }
-  try { vite.kill(); } catch { /* 已退出 */ }
+  拔树(chrome);
+  拔树(vite);
+  // 临时 profile 要等浏览器真死了才删得动：先拔树，再删目录
   try { rmSync(profileDir, { recursive: true, force: true }); } catch { /* 留着也无害 */ }
 };
 process.on('exit', cleanup);
@@ -109,7 +195,14 @@ try {
   });
   const evalJs = async (expr) => {
     const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true });
-    if (r.result?.exceptionDetails) throw new Error('页面内抛错: ' + JSON.stringify(r.result.exceptionDetails).slice(0, 300));
+    if (r.result?.exceptionDetails) {
+      // 把**页面里那句话**带出来：抽 JSON 前 300 字会正好切掉 description（异常自己的话），
+      // 于是红只会说"页面内抛错"，责任落不到具体那条拒上（2026-10-20 第一次真跑就这样瞎了一次）。
+      const d = r.result.exceptionDetails;
+      const 原话 = d.exception?.description ?? d.exception?.value ?? d.text ?? '?';
+      const 位置 = `${d.url || '页内'}:${(d.lineNumber ?? -1) + 1}:${d.columnNumber ?? '?'}`;
+      throw new Error(`页面内抛错 @${位置}：${String(原话).split('\n')[0].slice(0, 400)}`);
+    }
     return r.result?.result?.value;
   };
 
@@ -177,11 +270,118 @@ try {
   const 枢纽 = await 站('枢纽空载', 'window.__game.player.teleport(0, 0, 55)');
   const 森林 = await 站('灰白森林', 'window.__game.player.teleport(-200, 0, 0)');
 
+  /**
+   * ## draw call 腿（W-C2 切片4，#157）—— 放在 CPU 计时之后，因为这一腿要拧阴影开关
+   *
+   * 站点名单、配方与上限全部来自 `src/engine/drawCallBudget.js`（PerfHUD 读同一份），
+   * 脚本自己**不发明数**。每站三列：整帧（场景趟 + bloom/DoF/输出趟，B93 的口径）、
+   * 关掉 `shadowMap.enabled` 之后的本体+后处理、两者的差 = 阴影那一趟。
+   *
+   * **取账方式与 2026-10-18 的 `.tmp-20261018-b94/remeasure.mjs` 逐字一致**（钉时刻 →
+   * update → `info.reset()` → `render()`），那批读数（151–918）就是本表上限的来源 ——
+   * 口径换一套，等于拿另一把尺子量同一张桌子。
+   *
+   * **坐标不抄**（B120 / B121 那一课）：站点名单里只有 id，坐标在页面里从
+   * `world.zones` 里那一实例自己的 `center` 读（枢纽读 `HUB_ZONE.center`）。
+   * 抄一份坐标 = 区域一搬家抄本烂在原地，而门禁还绿着。
+   *
+   * 四处当场拒（读数作废，而不是"记为通过"）：
+   * ① 站点 id 在世界里找不到（名单与世界分家）；② 站过去落在了别的区；
+   * ③ `timeOfDay` 没钉住；④ **阴影趟为 0**（说明那个开关根本没改变这帧 —— 三列账就是假的）。
+   * 另有一条**世界侧的对账**：世界里有的区不在站点名单里 ⇒ 当场抛
+   * （加了新区域却没进 `ZONE_ORDER`，那一站会被静默跳过 = 静默放开）。
+   */
+  const 名册 = PERF_BUDGETS.drawCalls;
+  const 配方串 = JSON.stringify(名册.recipe);
+  const 枢纽中心 = JSON.stringify(名册.hubCenter);
+  const draw读数 = [];
+  for (const 站id of 名册.stationIds) {
+    const 源 = `(() => {
+      const g = window.__game, i = g.renderer.info;
+      const 站id = ${JSON.stringify(站id)};
+      const 配方 = ${配方串};
+      const 枢纽 = ${枢纽中心};
+      // 坐标：枢纽读静态描述，其余从世界里那一实例自己的 center 读（不抄）
+      let x, z;
+      if (站id === 'hub') { x = 枢纽.x; z = 枢纽.z; }
+      else {
+        const 找 = (g.world.zones || []).find((Z) => Z.id === 站id);
+        if (!找) throw new Error('世界里没有 id 为 "' + 站id + '" 的区 —— 站点名单与世界分家了');
+        x = 找.center.x; z = 找.center.z;
+      }
+      const y = g.world.getGroundHeight(x, z);
+      if (!Number.isFinite(y)) throw new Error('站点 ' + 站id + ' 的地面高度非有限：' + y);
+      g.player.teleport(x, y + 0.1, z, { yaw: 配方.yaw, pitch: 配方.pitch });
+      const 钉 = () => { g.timeOfDay = 配方.timeOfDay; };
+      钉(); g.update();
+      for (let k = 0; k < 配方.settleFrames; k += 1) { 钉(); g.update(); }
+      // 每一趟的取账顺序：update() → 钉时刻 → info.reset() → render()。
+      // 钉时刻必须放在 update **之后**、render **之前**：update() 每帧都把昼夜往前推一步
+      // （updateDayNight 里 timeOfDay + dt * 0.005，Game.js:1115），所以"钉完再 update"之后
+      // 读到的时刻**永远**不等于配方 —— 这条拒会在第一个站点就红，量的是算式不是游戏。
+      // 2026-10-20 第一次真跑就是这个红。
+      // 与 2026-10-18 那批（.tmp-20261018-b94/remeasure.mjs）的差别只有一步：那边的序是
+      // 钉 → update → reset → render，渲染时字段上是"配方 + 一步"（≤ 0.00025，钳在 maxDelta 0.05），
+      // 光照差在小数点后第四位。这里要的是**精确相等**的拒 —— 不容差，因为容差只会变成
+      // 下一个红之后被放宽的那个数。
+      const 一趟 = () => {
+        g.update();
+        钉();
+        const 钉住的 = g.timeOfDay;
+        i.reset();
+        g.render();
+        if (钉住的 !== 配方.timeOfDay || g.timeOfDay !== 钉住的) {
+          throw new Error('timeOfDay 没钉住（render 前 ' + 钉住的 + ' / render 后 ' + g.timeOfDay
+            + ' / 配方 ' + 配方.timeOfDay + '）—— 这一帧的时刻不属于配方，读数作废');
+        }
+        return { calls: i.render.calls, triangles: i.render.triangles };
+      };
+      const 整帧 = 一趟();
+      g.renderer.shadowMap.enabled = false;
+      const 本体 = 一趟();
+      g.renderer.shadowMap.enabled = true;
+      if (g.renderer.shadowMap.enabled !== true) {
+        throw new Error('阴影开关没拧回来（回读 ' + g.renderer.shadowMap.enabled + '）—— 后面的站都会带着这把坏尺子');
+      }
+      const 区 = g.world.currentZone && g.world.currentZone.id;
+      if (区 !== 站id) throw new Error('站点 ' + 站id + ' 现在落在 "' + 区 + '" 区里 —— 坐标与世界分家了，这批读数作废');
+      return { 区, 整帧: 整帧.calls, 本体: 本体.calls, 阴影: 整帧.calls - 本体.calls, 三角面: 整帧.triangles };
+    })()`;
+    const r = await evalJs(源);
+    if (!(r.阴影 > 0)) {
+      throw new Error(`站点 ${站id} 的阴影趟读到 ${r.阴影}（整帧 ${r.整帧} / 本体 ${r.本体}）—— 关阴影没有减少任何 call，两列分家就是假的`);
+    }
+    draw读数.push({ 站: 站id, ...r });
+    const 上 = 名册.ceilings[站id];
+    const 上串 = 上 ? `（上限 ${上.frame}/${上.body}/${上.shadow}）` : '（名册里**没有这一站**）';
+    console.log(`perf-smoke [draw call|${站id}] 整帧=${r.整帧} 本体=${r.本体} 阴影=${r.阴影} tri=${r.三角面} ${上串}`);
+  }
+
+  // 世界侧对账：世界里有的区必须都在站点名单里。少一站 = 那一站被静默跳过 = 静默放开。
+  const 世界的区 = await evalJs('(window.__game.world.zones || []).map((Z) => Z.id)');
+  const 名单漏站 = 世界的区.filter((id) => !名册.stationIds.includes(id));
+  if (名单漏站.length) {
+    throw new Error(`世界里有区不在 draw call 站点名单里：${名单漏站.join(', ')} —— 那一站会被静默跳过（= 静默放开），先把它加进 ZONE_ORDER 与上限表`);
+  }
+
+  // 上限表自身的对账（判定函数与门禁共用一份，见 `src/engine/drawCallBudget.js`）
+  const 缺站 = missingCeilings(名册.stationIds, 名册.ceilings);
+  if (缺站.length) {
+    throw new Error(`draw call 上限表缺站：${缺站.join(', ')} —— 那一站会被静默跳过（= 静默放开），先给它钉上限`);
+  }
+  const 多站 = extraCeilings(名册.stationIds, 名册.ceilings);
+  if (多站.length) {
+    throw new Error(`draw call 上限表多站：${多站.join(', ')} —— 给一个没测过的站发通行证，与漏一站同罪`);
+  }
+
   const heapMb = await evalJs('performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : -1');
   console.log(`perf-smoke [堆] usedJSHeap=${heapMb}MB exceptions=${exceptions.length}`);
 
   const 预算 = PERF_BUDGETS;
   const 越线 = [];
+  for (const r of draw读数) {
+    越线.push(...overCeiling(r, 预算.drawCalls.ceilings));
+  }
   if (枢纽.updateAvgMs > 预算.updateAvgMs) 越线.push(`枢纽 updateAvg ${枢纽.updateAvgMs}ms > ${预算.updateAvgMs}ms`);
   if (森林.updateAvgMs > 预算.updateAvgMs) 越线.push(`森林 updateAvg ${森林.updateAvgMs}ms > ${预算.updateAvgMs}ms`);
   if (枢纽.updateP95Ms > 预算.updateP95Ms) 越线.push(`枢纽 updateP95 ${枢纽.updateP95Ms}ms > ${预算.updateP95Ms}ms`);
