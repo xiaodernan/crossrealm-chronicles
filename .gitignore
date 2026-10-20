@@ -12,3 +12,8 @@ resume-stack
 test-output.txt
 vite.config.js.timestamp-*.mjs
 .workbuddy-ai/
+# 根目录的一次性构建/测试日志与补丁脚本（收尾时从索引里退出，本机文件保留）
+/test_*.txt
+/build*.txt
+/commit-msg.txt
+/fix-help-*.mjs

@@ -1,5 +1,0 @@
-feat(W-E2): 更多 FrameBudget 消费者 (1/4 帧档位，远距离 LOD 视觉)
-
-- PopCultureWave4VisualPass / PopCultureTriadVisualPass / UpsideDownVisualPass: 接入 frameShouldUpdate(4) 降频 1/4 帧
-- VoidZone / SpaceZone 远距离装饰旋转: 接入 frameShouldUpdate(4) 降频 1/4 帧
-- 三门禁: lint 0 error / test 184 passed / build 通过
