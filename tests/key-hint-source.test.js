@@ -212,7 +212,7 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     'world/NPCManager.js': ['npcLine(pool[idx]', 'keyText(t(key))'],
     'game/QuestSystem.js': ['keyText(t(q.desc))'],
     'ui/LoreCodexJournalTab.js': ['keyText(e.text)', 'refreshKeyText(panelEl)'],
-    'ui/PopCultureJournalTab.js': ['keyText(e.desc)', 'refreshKeyText(panelEl)'],
+    'ui/PopCultureJournalTab.js': ['keyText(t(e.desc))', 'refreshKeyText(panelEl)'],
     'ui/SideQuestJournalTab.js': ['keyText(t(q.desc))', 'refreshKeyText(panelEl)'],
     'ui/AchievementsJournalTab.js': ['refreshKeyText(panelEl)'],
     'ui/CampfireMemoryJournalTab.js': ['refreshKeyText(panelEl)'],

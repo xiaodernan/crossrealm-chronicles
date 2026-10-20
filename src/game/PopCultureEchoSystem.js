@@ -1,4 +1,5 @@
 import { ECHOES } from '../content/echoes.js';
+import { t } from '../engine/i18n.js';
 import { franchiseLabel } from '../content/franchises.js';
 
 import { on, offAll } from '../engine/EventBus.js';
@@ -33,11 +34,11 @@ export class PopCultureEchoSystem {
     for (const echo of ECHOES) {
       if (echo.trigger !== triggerKey || this.unlocked.has(echo.id)) continue;
       this.unlocked.add(echo.id);
-      this.game.dialog?.toast(`📡 次元回声：${echo.title}`, 3400);
+      this.game.dialog?.toast(t('pop_culture_echo_unlocked', { title: t(echo.title) }), 3400);
       this.game.storyJournal?.add?.({
         id: echo.id,
         category: 'fragment',
-        title: `[${franchiseLabel(echo.franchise)}] ${echo.title}`,
+        title: t('pop_culture_echo_journal_title', { franchise: franchiseLabel(echo.franchise), title: t(echo.title) }),
         text: echo.desc,
         chapter: this.game.quests?.chapter ?? 1,
       });

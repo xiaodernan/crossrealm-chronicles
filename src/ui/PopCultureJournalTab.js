@@ -1,5 +1,6 @@
 import { FRANCHISE_LABELS, franchiseLabel } from '../content/franchises.js';
 import { keyText, refreshKeyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 
 /** [J] 次元回声 Tab — HP / 星际 / 怪奇等致敬图鉴 */
 export class PopCultureJournalTab {
@@ -19,8 +20,8 @@ export class PopCultureJournalTab {
       const ok = sys.unlocked.has(e.id);
       return `<div class="pc-card${ok ? '' : ' pc-locked'}">
         <span class="pc-franchise">${franchiseLabel(e.franchise)}</span>
-        <div class="pc-title">${ok ? e.title : '???'}</div>
-        <div class="pc-desc">${ok ? keyText(e.desc) : '探索各位面 POI、营火对话与致敬点'}</div>
+        <div class="pc-title">${ok ? t(e.title) : '???'}</div>
+        <div class="pc-desc">${ok ? keyText(t(e.desc)) : t('pop_culture_echo_locked_hint')}</div>
       </div>`;
     }).join('');
 
