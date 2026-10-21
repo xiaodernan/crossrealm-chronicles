@@ -106,6 +106,26 @@ export const DUNGEON_ENCOUNTERS = {
     ],
     group: { min: 2, max: 3 },
   },
+  // 破碎时线：断时之匣（5×5，可选，W-B10 切片7 新增）：哨卫打头、怨影与爬兽在匣里绕
+  // （主类**不能**是 `wraith` —— 枢纽地下墓穴已经用它打头了；两座副本打同一场仗，
+  //   门禁 `tests/dungeon-encounters-table.test.js` ⑤ 会当场点出来）
+  'void-broken-casket': {
+    pool: [
+      { type: 'sentinel', weight: 5 },
+      { type: 'wraith', weight: 3 },
+      { type: 'crawler', weight: 2 },
+    ],
+    group: { min: 2, max: 3 },
+  },
+  // 混沌边境：深渊之颚（6×5，可选，W-B10 切片7 新增）：掠行兽打头、骑士与哨卫守着最下面那张嘴
+  'abyss-deep-maw': {
+    pool: [
+      { type: 'stalker', weight: 5 },
+      { type: 'knight', weight: 3 },
+      { type: 'sentinel', weight: 2 },
+    ],
+    group: { min: 2, max: 3 },
+  },
 };
 
 /** 已经登记遭遇的副本（注册表与用例都问这一份；它是推导，不是第二份名单） */

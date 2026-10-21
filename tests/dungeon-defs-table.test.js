@@ -175,12 +175,13 @@ const OLD_WAYPOINTS = {
 };
 
 /**
- * 切片3c 起，允许新表比这份 golden **多出来**的格子只有这三格 —— 且每一格都在
+ * 切片3c 起，允许新表比这份 golden **多出来**的格子只有这几格 —— 且每一格都在
  * 下面那条用例里点名了自己的读者（`trial` → 飞升门/指路/开局点亮/助手清单，
- * `mapLabel` → 世界地图的那个字，`stage` → 敌人成长档位）。
+ * `mapLabel` → 世界地图的那个字，`stage` → 敌人成长档位，
+ * **`zone` → 这座副本属于哪一位面** —— W-B10 切片7 加的，见下面那条用例）。
  * 豁免不是空白放行：多一格又没人读，就是下一个 `themeType`。
  */
-const 新增格 = ['trial', 'mapLabel', 'stage'];
+const 新增格 = ['trial', 'mapLabel', 'stage', 'zone'];
 
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
@@ -193,10 +194,18 @@ function walk(dir, out = []) {
 const FILES = walk(SRC);
 
 describe('① 数据忠实：新表逐格 = 搬动之前在役的那份 const', () => {
-  it('五座、同序、同 id（顺序就是载入顺序，UI 列表按它排）', () => {
-    expect(DUNGEON_DEFS).toHaveLength(OLD_DEFS.length);
-    expect(DUNGEON_DEFS.map((d) => d.id)).toEqual(OLD_DEFS.map((d) => d.id));
+  it('前七座同序同 id（顺序就是载入顺序，UI 列表按它排）；新增的只许往后加', () => {
+    // W-B10 切片7 往后加了两座（破碎时线 / 混沌边境 —— 这两位面原先一座副本都没有）。
+    // 冻结的 golden 仍是**前七座**：它记的是"切片3a 动手之前在役的那份 const"，
+    // 往后加的行不改它（改了就等于抹掉那件事怎么被发现的）。所以断言分两半：
+    // 前七座**逐格未动**（同序同 id），后面新增的座数只许多不许少、且不许插在前面
+    // （插在前面会挪动载入顺序 ⇒ 玩家的副本列表会换位）。
+    expect(DUNGEON_DEFS.length, '副本座数比冻结名单还少 —— 少的那几座去哪了').toBeGreaterThanOrEqual(OLD_DEFS.length);
+    expect(DUNGEON_DEFS.slice(0, OLD_DEFS.length).map((d) => d.id)).toEqual(OLD_DEFS.map((d) => d.id));
     expect(DUNGEON_IDS).toEqual(DUNGEON_DEFS.map((d) => d.id));
+    // 新增的那些不许跟冻结的撞 id
+    const 新增 = DUNGEON_DEFS.slice(OLD_DEFS.length).map((d) => d.id);
+    expect(new Set([...OLD_DEFS.map((d) => d.id), ...新增]).size, '有副本 id 撞了').toBe(DUNGEON_DEFS.length);
   });
 
   it('除 `themeType` 之外逐格相等，且被删掉的只有那一格', () => {
@@ -228,14 +237,14 @@ describe('① 数据忠实：新表逐格 = 搬动之前在役的那份 const', 
     // 反面证据：旧表确实写了 7 格 themeType（原 5 座 + W-B9 新增 2 座），而新表一格都没有 —— "删掉了"不是"从来没写过"
     expect(OLD_DEFS.filter((r) => 'themeType' in r)).toHaveLength(7);
     expect(DUNGEON_DEFS.filter((r) => 'themeType' in r)).toEqual([]);
-    // 反面证据：新表每行都有 trial / stage / mapLabel
-    expect(DUNGEON_DEFS.filter((r) => 'trial' in r)).toHaveLength(7);
-    expect(DUNGEON_DEFS.filter((r) => 'stage' in r)).toHaveLength(7);
-    expect(DUNGEON_DEFS.filter((r) => 'mapLabel' in r)).toHaveLength(7);
+    // 反面证据：新表每行都有 trial / stage / mapLabel（**每一行**，不是前七行）
+    expect(DUNGEON_DEFS.filter((r) => 'trial' in r)).toHaveLength(DUNGEON_DEFS.length);
+    expect(DUNGEON_DEFS.filter((r) => 'stage' in r)).toHaveLength(DUNGEON_DEFS.length);
+    expect(DUNGEON_DEFS.filter((r) => 'mapLabel' in r)).toHaveLength(DUNGEON_DEFS.length);
   });
 
-  it('切片3c 新增的三格都在，且**只有**这三格是新的', () => {
-    // 这一条把上面那个例外清单钉成"有名字、有理由、有归属"的三条陈述：
+  it('切片3c 新增的格都在，且**只有**这些格是新的', () => {
+    // 这一条把上面那个例外清单钉成"有名字、有理由、有归属"的陈述：
     // 豁免不是一条 `continue`，而是一格必须有读者、有声明、有对账 —— 否则它就长成下一个 `themeType`。
     for (const d of DUNGEON_DEFS) {
       expect(typeof d.trial, `${d.id} 的 trial 不是显式布尔`).toBe('boolean');
@@ -250,6 +259,20 @@ describe('① 数据忠实：新表逐格 = 搬动之前在役的那份 const', 
     // 两个读者各认领一格：地图上的点读 `mapLabel`，飞升门读 `trial` 推导出的那份清单
     expect(readSrc('ui/WorldMapPanel.js')).toContain('d.mapLabel');
     expect(readSrc('content/objectives.js')).toContain('TRIAL_DUNGEON_IDS');
+  });
+
+  it('`zone`（W-B10 切片7）：这座副本属于哪一位面，是**设计意图**而不是几何反推', () => {
+    // 为什么不能反推：`zoneIdAt` 取**最近**的区，而位面半径 135~165 米、大面积重叠 ——
+    // `five-dim-rift` 的入口 (175, 95) 离幽暗林地中心 (180, 100) 只有 7 米，
+    // 按坐标反推会把一座**米勒荒原**的副本说成幽暗林地的（这正是 `stage` 当年也要写死的原因）。
+    // 所以 `zone` 与 `stage` 一样是**写下来的设计意图**。
+    for (const d of DUNGEON_DEFS) {
+      expect(typeof d.zone, `${d.id} 没有 zone（它属于哪一位面）`).toBe('string');
+      expect(d.zone.length, `${d.id} 的 zone 是空的`).toBeGreaterThan(0);
+    }
+    // 它的读者：那道"每一位面都至少有一座副本"的门禁（`tests/dungeon-zone-coverage.test.js`）
+    expect(readSrc('content/dungeons.js'), 'zone 那一格没有读者（写下来就没人读 = 下一个 themeType）')
+      .toContain("zone: '");
   });
 });
 

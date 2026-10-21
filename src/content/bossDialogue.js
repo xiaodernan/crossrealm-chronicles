@@ -84,6 +84,20 @@ export const DUNGEON_BOSS_LINES = {
     p3: 'boss_dungeon_gloom_mist_crypt_p3',
     defeat: 'boss_dungeon_gloom_mist_crypt_defeat',
   },
+  // 破碎时线：断时之匣（W-B10 切片7 新增的副本 —— 守钥者是匣里那只还在走的钟）
+  'void-broken-casket': {
+    intro: 'boss_dungeon_void_broken_casket_intro',
+    p2: 'boss_dungeon_void_broken_casket_p2',
+    p3: 'boss_dungeon_void_broken_casket_p3',
+    defeat: 'boss_dungeon_void_broken_casket_defeat',
+  },
+  // 混沌边境：深渊之颚（W-B10 切片7 新增的副本 —— 守钥者是边境裂口最下面那张嘴）
+  'abyss-deep-maw': {
+    intro: 'boss_dungeon_abyss_deep_maw_intro',
+    p2: 'boss_dungeon_abyss_deep_maw_p2',
+    p3: 'boss_dungeon_abyss_deep_maw_p3',
+    defeat: 'boss_dungeon_abyss_deep_maw_defeat',
+  },
 };
 
 /**

@@ -94,7 +94,7 @@ describe('脚本表自证', () => {
     expect(() => assertArenaScript({ x: [p2, { ...p3, phase: 2 }] })).toThrow(/entry/);
   });
 
-  it('入场标记集钉死：十六枚 entry 的落点（动它必须来这里改，不许悄悄漂）', () => {
+  it('入场标记集钉死：十八枚 entry 的落点（动它必须来这里改，不许悄悄漂）', () => {
     const marks = Object.entries(BOSS_ARENA_SCRIPTS).flatMap(([id, script]) =>
       script.flatMap((e, i) => (e.entry === true ? [`${id}[${i}]:${e.move}@p${e.phase}`] : [])));
     expect(marks).toEqual([
@@ -115,6 +115,9 @@ describe('脚本表自证', () => {
       'dungeon-hub-catacombs[0]:slam@p2',
       'dungeon-gloom-mist-crypt[0]:slam@p2',
       'dungeon-radiant-dawn-hall[0]:barrage@p2',
+      // W-B10 切片7：破碎时线 / 混沌边境那两座副本守钥者也各有一枚入场招
+      'dungeon-void-broken-casket[0]:slam@p2',
+      'dungeon-abyss-deep-maw[0]:barrage@p2',
     ]);
     // 井刻意不列入场：标了它，转阶段那一帧会无条件破掉引力化身的距离博弈
     expect(marks.some((m) => m.includes(':well@'))).toBe(false);

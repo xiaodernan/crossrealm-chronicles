@@ -58,6 +58,7 @@
 export const DUNGEON_DEFS = [
   {
     id: 'ruin-crypt',
+    zone: 'fantasy',
     name: 'dungeon_ruin_crypt_name',
     trial: true,
     stage: 0,
@@ -72,6 +73,7 @@ export const DUNGEON_DEFS = [
   },
   {
     id: 'forbidden-library',
+    zone: 'magic',
     name: 'wp_label_forbidden_library',
     trial: true,
     stage: 1,
@@ -86,6 +88,7 @@ export const DUNGEON_DEFS = [
   },
   {
     id: 'five-dim-rift',
+    zone: 'space',
     name: 'wp_label_five_dim_rift',
     trial: true,
     stage: 2,
@@ -100,6 +103,7 @@ export const DUNGEON_DEFS = [
   },
   {
     id: 'forest-shrine',
+    zone: 'fantasy',
     name: 'dungeon_forest_shrine_name',
     trial: false,
     stage: 1,
@@ -114,6 +118,7 @@ export const DUNGEON_DEFS = [
   },
   {
     id: 'hub-catacombs',
+    zone: 'hub',
     name: 'dungeon_hub_catacombs_name',
     trial: false,
     stage: 0,
@@ -128,6 +133,7 @@ export const DUNGEON_DEFS = [
   },
   {
     id: 'gloom-mist-crypt',
+    zone: 'gloom',
     name: 'dungeon_gloom_mist_crypt_name',
     trial: false,
     stage: 5,
@@ -142,6 +148,7 @@ export const DUNGEON_DEFS = [
   },
   {
     id: 'radiant-dawn-hall',
+    zone: 'radiant',
     name: 'dungeon_radiant_dawn_hall_name',
     trial: false,
     stage: 6,
@@ -153,6 +160,39 @@ export const DUNGEON_DEFS = [
     origin: { x: 5000, y: 120, z: 14000 },
     entrance: { x: -180, z: -95 },
     exterior: { x: -180, z: -95, label: 'dungeon_radiant_dawn_hall_exterior_label' },
+  },
+  {
+    // 破碎时线（W-B10 切片7）：这座区原先**一座副本都没有** —— 玩家在时线里只能打原生的散兵，
+    // 没有一处"钻进去打一整场"的地方。断时之匣是时线尽头的匣子：里面的钟还在走。
+    id: 'void-broken-casket',
+    zone: 'void',
+    name: 'dungeon_void_broken_casket_name',
+    trial: false,
+    stage: 3,
+    mapLabel: 'dungeon_void_broken_casket_map_label',
+    theme: 0x141c28,
+    accent: 0x4ad0b0,
+    gridW: 5,
+    gridH: 5,
+    origin: { x: 5000, y: 120, z: 15500 },
+    entrance: { x: -30, z: 165 },
+    exterior: { x: -30, z: 165, label: 'dungeon_void_broken_casket_exterior_label' },
+  },
+  {
+    // 混沌边境（W-B10 切片7）：同上 —— 这座区原先也没有副本。深渊之颚是边境裂口的最下面那张嘴。
+    id: 'abyss-deep-maw',
+    zone: 'abyss',
+    name: 'dungeon_abyss_deep_maw_name',
+    trial: false,
+    stage: 4,
+    mapLabel: 'dungeon_abyss_deep_maw_map_label',
+    theme: 0x1a0a18,
+    accent: 0xd05a7a,
+    gridW: 6,
+    gridH: 5,
+    origin: { x: 5000, y: 120, z: 17000 },
+    entrance: { x: -140, z: 175 },
+    exterior: { x: -140, z: 175, label: 'dungeon_abyss_deep_maw_exterior_label' },
   },
 ];
 

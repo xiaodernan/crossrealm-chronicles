@@ -146,6 +146,16 @@ export const BOSS_ARENA_SCRIPTS = {
     { move: 'barrage', phase: 2, trigger: 'opportunity', cooldown: 6, range: 18, tint: 0xffdd66, entry: true },
     { move: 'slam', phase: 3, trigger: 'timed', rate: 0.07 },
   ],
+  'dungeon-void-broken-casket': [
+    // 断时之匣（W-B10 切片7）：匣里的钟还在走 —— 招牌是**弹幕**（点缀色取这座副本自己的 accent）
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.4, entry: true },
+    { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 9, range: 16, tint: 0x4ad0b0 },
+  ],
+  'dungeon-abyss-deep-maw': [
+    // 深渊之颚（W-B10 切片7）：最下面那张嘴 —— 招牌是**引力井**（把玩家往里拖）
+    { move: 'barrage', phase: 2, trigger: 'opportunity', cooldown: 7, range: 17, tint: 0xd05a7a, entry: true },
+    { move: 'well', phase: 3, trigger: 'opportunity', cooldown: 12, range: 14 },
+  ],
 };
 
 /**
