@@ -73,8 +73,11 @@ describe('账本形状：emptyStats 与判据/记账双向对齐', () => {
   it('每一条事件都真的往账上写了一格：跑完一遍后没有一格纹丝不动', () => {
     const s = emptyStats();
     const before = snapshot(s);
-    const kills = [{ type: 'soldier' }];
-    for (const bossId of Object.keys(BOSS_STAT_KEYS)) kills.push({ type: 'boss', bossId });
+    // 探针载荷要照**真实的**事件负载来：`enemy-defeated` 现在带着 `zone`
+    // （敌人**出生在**哪座区 —— W-B12 切片7 那一格的生产者靠它）。
+    // 少了它，`zoneKills` 那格就没人写 —— 那正是这条断言要抓的东西。
+    const kills = [{ type: 'soldier', zone: 'fantasy' }];
+    for (const bossId of Object.keys(BOSS_STAT_KEYS)) kills.push({ type: 'boss', bossId, zone: 'fantasy' });
     const details = {
       'combat-hit': [{}],
       'enemy-defeated': kills,

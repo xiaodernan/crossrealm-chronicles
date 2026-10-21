@@ -130,8 +130,8 @@ export const GAME_EVENTS = Object.freeze({
     payload: null,
   },
   'enemy-defeated': {
-    desc: '敌人倒下。type 是敌人类型符号（boss/soldier/…），任务与成就按它判定 —— 别再拿显示名猜',
-    payload: '{ name, type, bossId }',
+    desc: '敌人倒下。type 是敌人类型符号（boss/soldier/…），任务与成就按它判定 —— 别再拿显示名猜。zone 是它**出生在**哪一座位面（W-B12 切片7：出生点那一次反推的结果，任务账里"该位面的清剿数"按它记）',
+    payload: '{ name, type, bossId, zone }',
   },
   'boss-start': {
     desc: 'Boss 战开始（野外与副本都走这条），镜头、HUD、教程、音频各自进场',

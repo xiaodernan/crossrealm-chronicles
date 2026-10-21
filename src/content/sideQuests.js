@@ -231,6 +231,49 @@ const 收齐该区两枚萤 = (game, zone) => (game.soulWisps?.collectedInZone?.
 const 认过那块火牌 = (game, zone) => game.restPointEnhancer?.discovered?.has(zone) === true;
 const 拾遗一座 = (zone) => (game) => 收齐该区两枚萤(game, zone) && 认过那块火牌(game, zone);
 
+/**
+ * 第三对事实：该位面的**清剿数**（W-B12 切片7）。
+ *
+ * 为什么要有第三样：前两对事实（歇脚 / 插画、萤火 / 火牌）都是"去过那里"的证据，
+ * 而**"你把那里清了一遍"**是另一种经历 —— 它要一个**敌人**维度的持久化事实。
+ * 那本账是任务账里的 `zoneKills`（按区位分，W-B12 切片7 新增），生产者是
+ * `enemy-defeated` 事件里的 `zone`（敌人**出生在**哪座区）。
+ *
+ * 门槛 10 只：一位区原生敌人 3~5 类、共十几只（且会重生）⇒ 认真打一场是够得着的，
+ * 而"路过顺手清几只"不够 —— 它是一条**要你回头再来一趟**的支线（与前两对事实的性质不同）。
+ */
+const 清剿只数 = 10;
+const 清剿那座区 = (game, zone) => (game.quests?.stats?.zoneKills?.[zone] ?? 0) >= 清剿只数;
+
+/**
+ * 第三族的分档：奖励随位面往后走（与前两族同一条梯度）。
+ *
+ * 为什么不写成七段一模一样的行：七份形状相同的行就是七份**可以各自漂的抄本**
+ * （改一处奖励忘了另一处，没人查）。这里把**差异**列成一张小表，形状由这一段生成 ——
+ * 形状只有一份。**键名逐条写出来**（不拼）：拼出来的键名那把"死键"尺子看不见
+ * （`tests/i18n.test.js` 只数字符串字面量），拼出来的键会显得是死键。
+ * 描述是**共用**的一格（`sq_side_cull_desc`），区名用 `${zone}` 占位在渲染那一刻现取 ——
+ * 免得"灰白森林"这个显示名抄两份（改了区名而描述里还是旧的）。
+ */
+const 清剿档 = [
+  { 区: ZONE_IDS.FANTASY, title: 'sq_side_cull_fantasy_title', journal: 'sq_side_cull_fantasy_journal', 奖励: 16 },
+  { 区: ZONE_IDS.MAGIC, title: 'sq_side_cull_magic_title', journal: 'sq_side_cull_magic_journal', 奖励: 18 },
+  { 区: ZONE_IDS.SPACE, title: 'sq_side_cull_space_title', journal: 'sq_side_cull_space_journal', 奖励: 18 },
+  { 区: ZONE_IDS.VOID, title: 'sq_side_cull_void_title', journal: 'sq_side_cull_void_journal', 奖励: 20 },
+  { 区: ZONE_IDS.ABYSS, title: 'sq_side_cull_abyss_title', journal: 'sq_side_cull_abyss_journal', 奖励: 22 },
+  { 区: ZONE_IDS.GLOOM, title: 'sq_side_cull_gloom_title', journal: 'sq_side_cull_gloom_journal', 奖励: 20 },
+  { 区: ZONE_IDS.RADIANT, title: 'sq_side_cull_radiant_title', journal: 'sq_side_cull_radiant_journal', 奖励: 24 },
+];
+const 清剿 = 清剿档.map(({ 区, title, journal, 奖励 }) => ({
+  id: `side-cull-${区}`,
+  zone: 区,
+  title,
+  desc: 'sq_side_cull_desc',
+  journal,
+  check: (game) => 清剿那座区(game, 区),
+  reward: 奖励,
+}));
+
 /** 三族：基础 / 分区 / 致敬。`zone` 是它们唯一的分区依据，`'global'` = 不属于任何一位面 */
 export const SIDE_QUESTS_ZONE = [
   {
@@ -359,6 +402,7 @@ export const SIDE_QUESTS_ZONE = [
     reward: 16,
     journal: 'sq_side_wisp_radiant_journal',
   },
+  ...清剿,
 ];
 export const SIDE_QUESTS_ALL = (() => {
   const 名单 = [...SIDE_QUESTS_BASE, ...SIDE_QUESTS_ZONE, ...SIDE_QUESTS_POP];

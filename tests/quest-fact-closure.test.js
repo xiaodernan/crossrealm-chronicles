@@ -39,13 +39,24 @@ describe('① 真表闭包成立', () => {
     expect(errs, `注册表没接上闭包检查：\n${errs.join('\n')}`).toEqual([]);
   });
 
-  it('三份推导是同一组格子（读 = 写 = 账本形状），且不是空集', () => {
+  it('写 = 账本形状（每一格都有人写，写出去的每一格都在账本里），且主线的读 ⊆ 写', () => {
+    // 口径（2026-10-21 更正）：原先写的是"读 = 写 = 账本形状"，那是**主线**判据与
+    // **整个账本**都一模一样时的样子。W-B12 切片7 加了 `zoneKills`（该位面的清剿数）——
+    // 那一格**支线**读、主线判据不读，于是"读 = 写"不再成立。
+    //
+    // 拆开说仍然成立的三条：① **写 = 账本形状**（每一格都有人写，写出去的都在账本里 ——
+    // 这条才是"没有死格、没有伪账"）；② **主线的读 ⊆ 写**（主线判据读的每一格都有生产者）；
+    // ③ 支线读的那几格（`zoneKills`）由 `content/zoneFacts.js` 那道门管
+    // （那位面有没有生产者）—— 那是**位面维度**的闭包，不在这道门的职责里。
     const 读 = 排序(questFactsRead());
     const 写 = 排序(questFactsWritten());
     const 形状 = 排序(questLedgerShape());
-    expect(读.length, '推导出的事实是空集 —— 那这道门禁在空集上恒真').toBeGreaterThan(10);
-    expect(读).toEqual(写);
-    expect(写).toEqual(形状);
+    expect(写.length, '推导出的事实是空集 —— 那这道门禁在空集上恒真').toBeGreaterThan(10);
+    expect(写, '账本的每一格都该有人写，且写出去的每一格都在账本里').toEqual(形状);
+    expect(读.length, '主线判据读出来的事实是空集 —— 那这道门禁在空集上恒真').toBeGreaterThan(10);
+    for (const k of 读) {
+      expect(写, `主线读的 "${k}" 没有生产者`).toContain(k);
+    }
   });
 
   it('Boss 那一族在推导里（计算写 `s[key] = true` 扫不出键，靠名册补）', () => {
@@ -105,7 +116,8 @@ describe('③ 交叉证据：推导没有漏', () => {
     // 看账本上真的变了哪几格。两边对不上 ⇒ 扫描不准（那就是这道门禁自己坏了）。
     const 实跑 = new Set();
     // 探针载荷：通用的一份 + Boss 那一族各一只（计算写要 bossId 才写得进去）。
-    const 通用 = { id: 'probe', type: 'soldier', charged: true, level: 5, mind: 3 };
+    // `zone` 也要带上（真实负载里有 —— W-B12 切片7 的 `zoneKills` 靠它写）。
+    const 通用 = { id: 'probe', type: 'soldier', charged: true, level: 5, mind: 3, zone: 'fantasy' };
     const 细节们 = (名) => (名 === 'enemy-defeated'
       ? [...Object.keys(BOSS_STAT_KEYS).map((bossId) => ({ ...通用, type: 'boss', bossId })), 通用]
       : [通用]);

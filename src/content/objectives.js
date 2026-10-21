@@ -673,6 +673,14 @@ export function emptyStats() {
     chargedCasts: 0,
     skillsUnlocked: 0,
     dungeonRerun: false,
+    /**
+     * 该位面的清剿数：`{ [区 id]: 已清掉的只数 }`（W-B12 切片7）。
+     *
+     * 为什么单开一格而不复用 `kills`（那是按**敌人类型**分的）：分区支线要问的是
+     * "**你在这座区**清了多少只" —— 按类型的那本账答不了这个（两个区可能有同一种敌人）。
+     * 生产者是 `enemy-defeated` 事件里的 `zone`（敌人**出生在**哪座区）。
+     */
+    zoneKills: {},
     level: 1,
     mind: 0,
     ...Object.fromEntries(Object.values(BOSS_STAT_KEYS).map((k) => [k, false])),
@@ -730,6 +738,10 @@ export const STAT_EVENTS = {
     if (d.type !== 'boss') s.kills[d.type] = (s.kills[d.type] ?? 0) + 1;
     const key = BOSS_STAT_KEYS[d.bossId];
     if (key) s[key] = true;
+    // 该位面的清剿数（W-B12 切片7）：`zone` 是敌人**出生在**哪座区（出生点那一次反推的结果）。
+    // 副本里的敌人出生在独立坐标空间 ⇒ 那里算出来的区没有意义 —— 但那一格记下来也无害
+    // （分区支线只读那七座真实位面）。
+    if (d.zone) s.zoneKills[d.zone] = (s.zoneKills[d.zone] ?? 0) + 1;
   },
   'spell-cast': (s, d) => {
     s.spellCasts += 1;

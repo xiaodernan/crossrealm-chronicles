@@ -56,6 +56,14 @@ export class Enemy {
     this.aiSeed = ++aiSeq;
     this.name = config.name ?? t('enemy_name_default');
     this.type = config.type ?? 'soldier';
+    /**
+     * 它**出生在**哪一座位面（W-B12 切片7）。
+     *
+     * 为什么记在出生那一刻而不是死的时候：出生点表那一次 `zoneIdAt` 反推（给成长档用的）
+     * **本来就要算**，复用那一次等于不多一次几何判断；而"你在这座区清了多少只"问的正是
+     * **这一区的原生敌人**，不是"它死的时候脚下是哪块地"（它可能追着玩家跑了很远）。
+     */
+    this.zone = config.zone ?? null;
     this.position = new THREE.Vector3(config.x, 0, config.z);
     this.maxHp = config.hp ?? 100;
     this.hp = this.maxHp;
@@ -841,7 +849,7 @@ export class Enemy {
     this.endMove();
     this.deathTimer = this.respawnTime;
     window.dispatchEvent(new CustomEvent('enemy-defeated', {
-      detail: { name: this.name, type: this.type, bossId: this.bossId },
+      detail: { name: this.name, type: this.type, bossId: this.bossId, zone: this.zone },
     }));
   }
 

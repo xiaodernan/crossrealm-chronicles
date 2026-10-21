@@ -28,6 +28,9 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { sideQuestFactsFromSource, FACT_ACCESSORS } from '../src/content/sideQuestFacts.js';
 import { SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
+import {
+  STAT_EVENTS, STAT_READINGS, BOSS_STAT_KEYS, emptyStats,
+} from '../src/content/objectives.js';
 
 const ROOT = process.cwd();
 const 读 = (rel) => readFileSync(join(ROOT, rel), 'utf8');
@@ -65,6 +68,17 @@ const 转义 = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /**
  * 支线判据的事实闭包检查。
  *
+ * ## 属主的两种（2026-10-21 加的第二种）
+ *
+ * 判据读的一格要么是**某个系统自己的字段**（`game.soulWisps.collected` —— 生产者在
+ * `SoulWispManager` 那个文件里），要么是**任务账上的那一格**
+ * （`game.quests.stats.zoneKills` —— 生产者在**账本的记账表** `content/objectives.js`
+ * 的 `STAT_EVENTS` 里，而 `QuestSystem` 只是**持有**那本账：`this.stats = emptyStats()`）。
+ *
+ * 早先只认第一种 ⇒ 凡是读任务账的支线都被误报成"那一格没人写"。现在按**那一格是不是
+ * 账本格**分流：账本格去账本那张表里核（`emptyStats()` 的形状 + `STAT_EVENTS` 的写入），
+ * 其余仍在属主文件里核。
+ *
  * @param {string} sqSrc 支线判据所在模块的源码
  * @param {string} gameSrc `Game` 的源码
  * @returns {string[]} 错误清单（空数组 = 闭包成立）
@@ -74,6 +88,8 @@ function checkSideQuestFacts(sqSrc, gameSrc) {
   const 系统 = gameSystems(gameSrc);
   const 类文件 = classFiles(gameSrc);
   const { 根, 事实 } = sideQuestFactsFromSource(sqSrc);
+  const 账本格 = new Set(Object.keys(emptyStats()));
+  const 账本写入 = 账本生产者();
 
   for (const r of [...根].sort()) {
     const 类 = 系统.get(r);
@@ -89,6 +105,14 @@ function checkSideQuestFacts(sqSrc, gameSrc) {
     }
     const 属主 = 剥注释(读(join('src/core', rel)));
     for (const 叶 of [...(事实.get(r) ?? [])].sort()) {
+      if (账本格.has(叶)) {
+        // 账本上的那一格：生产者是**账本的记账表**（`content/objectives.js` 的 `STAT_EVENTS`）
+        if (!账本写入.has(叶)) {
+          errs.push(`支线判据读的账本格 "game.${r}.stats.${叶}" 没有人写 —— `
+            + '账本的记账表（`content/objectives.js` 的 `STAT_EVENTS`）里没有它，读它的那条支线永远完成不了');
+        }
+        continue;
+      }
       const re = new RegExp(`(?<![\\w$])${转义(叶)}(?![\\w$])`);
       if (!re.test(属主)) {
         errs.push(`支线判据读的 "game.${r}.${叶}" 在属主 ${类}（${rel}）里找不到 —— `
@@ -97,6 +121,20 @@ function checkSideQuestFacts(sqSrc, gameSrc) {
     }
   }
   return errs;
+}
+
+/**
+ * 账本上**有人写**的那些格 —— 从记账函数的源码里抠（与 `src/content/questFacts.js`
+ * 同一套口径：事实是**推导**出来的，不是手抄一份名单）。
+ */
+function 账本生产者() {
+  const 出 = new Set();
+  for (const fn of Object.values(STAT_EVENTS)) {
+    for (const m of fn.toString().matchAll(/(?<![\w$.])s\.([A-Za-z_$][\w$]*)/g)) 出.add(m[1]);
+  }
+  for (const k of Object.values(BOSS_STAT_KEYS)) 出.add(k);
+  for (const k of STAT_READINGS) 出.add(k);
+  return 出;
 }
 
 describe('① 真表闭包成立', () => {
@@ -157,5 +195,22 @@ describe('② 门禁会咬：两条变异臂', () => {
     const errs = checkSideQuestFacts(SQ_SRC, 变异);
     expect(errs.length, '门禁没咬住一个被摘掉的系统').toBeGreaterThan(0);
     expect(errs.join('\n')).toMatch(/popCulture/);
+  });
+
+  it('变异臂④：账本上那一格没人写 ⇒ 门禁红（账本格那一支）', () => {
+    // 账本格（`game.quests.stats.zoneKills`）的生产者在**账本的记账表**里 ——
+    // 这一支与"属主文件里找那一格"是两条路，删掉记账函数就是让那一格没人写。
+    const 备份 = STAT_EVENTS['enemy-defeated'];
+    STAT_EVENTS['enemy-defeated'] = (s, d) => {
+      if (d.type !== 'boss') s.kills[d.type] = (s.kills[d.type] ?? 0) + 1;
+    };
+    try {
+      const errs = checkSideQuestFacts(SQ_SRC, GAME_SRC);
+      expect(errs.length, '门禁没咬住一个没人写的账本格').toBeGreaterThan(0);
+      expect(errs.join('\n')).toMatch(/zoneKills/);
+      expect(errs.join('\n')).toMatch(/账本格/);
+    } finally {
+      STAT_EVENTS['enemy-defeated'] = 备份;
+    }
   });
 });

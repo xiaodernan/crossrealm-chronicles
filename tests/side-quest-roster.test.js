@@ -340,16 +340,30 @@ describe('W-B12 切片2：每位面第二条专属支线 —— 萤火与火牌�
     expect(mgr.toJSON()).toEqual(['wisp-fantasy', 'wisp-fantasy2', 'wisp-magic']);
   });
 
-  it('门禁升到 ≥2 咬得住：只留切片1 那五条时，每一位面都被点名', () => {
+  it('门禁升到 ≥3 咬得住：只留切片1 那七条时，每一位面都被点名', () => {
     const planted = (kind, table) => checkContent(
       CONTENT_TABLES.map((t) => (t.kind === kind ? { ...t, table } : t)),
     );
     expect(planted('sideQuestsZone', SIDE_QUESTS_ZONE)).toEqual([]);   // 全量通过
-    const 只有切片一 = SIDE_QUESTS_ZONE.filter((q) => !q.id.startsWith('side-wisp-'));
+    // 桩：每位面**恰好一条**（只留切片1 那一族）
+    const 只有切片一 = SIDE_QUESTS_ZONE.filter((q) => q.id.startsWith('side-zone-'));
     expect(只有切片一.length).toBe(ZONE_ORDER.length);                 // 桩本身是"每位面恰好一条"
     const issues = planted('sideQuestsZone', 只有切片一);
     expect(issues.join('\n')).toMatch(new RegExp(`位面 "${ZONE_ORDER[0]}" 的专属支线只有 1 条`));
-    expect(issues.filter((l) => l.includes('只有 1 条')).length, '五座位面都得被点名')
+    expect(issues.filter((l) => l.includes('只有 1 条')).length, '七座位面都得被点名')
+      .toBe(ZONE_ORDER.length);
+  });
+
+  it('门禁升到 ≥3 咬得住：只留两条那族时，每一位面都被点名', () => {
+    const planted = (kind, table) => checkContent(
+      CONTENT_TABLES.map((t) => (t.kind === kind ? { ...t, table } : t)),
+    );
+    // 桩：每位面恰好两条（切片1 + 切片2 两族）
+    const 只有前两族 = SIDE_QUESTS_ZONE.filter((q) => !q.id.startsWith('side-cull-'));
+    expect(只有前两族.length).toBe(ZONE_ORDER.length * 2);
+    const issues = planted('sideQuestsZone', 只有前两族);
+    expect(issues.join('\n')).toMatch(new RegExp(`位面 "${ZONE_ORDER[0]}" 的专属支线只有 2 条`));
+    expect(issues.filter((l) => l.includes('只有 2 条')).length, '七座位面都得被点名')
       .toBe(ZONE_ORDER.length);
   });
 });

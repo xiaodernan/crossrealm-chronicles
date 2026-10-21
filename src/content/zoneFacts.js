@@ -32,6 +32,7 @@
 import { WISP_SPOTS } from './wispSpots.js';
 import { REST_POINT_NAMES } from './restPointNames.js';
 import { REST_DIALOGUE_CG } from './dialogueCgPresets.js';
+import { STAT_EVENTS } from './objectives.js';
 import { SIDE_QUESTS_ZONE } from './sideQuests.js';
 
 /**
@@ -76,7 +77,26 @@ export function checkZoneFactProducers(questTable = SIDE_QUESTS_ZONE, 表 = {}) 
       out.push(`位面 "${zone}" 没有 "<区>:start" 那一格对话 CG —— 分区支线要"看过那张门口插画"，`
         + '那一格不在 ⇒ 那条支线永远完成不了');
     }
+
+    // ④ 清剿数（W-B12 切片7）：第三样位面事实的生产者是 `enemy-defeated` 事件里的 `zone`。
+    // 那一格**必须有人写** —— 没人写它，那条"清剿"支线就永远差最后一步。
+    // （"那位面到底有没有敌人可杀"是**运行期**那一问，由 `tests/enemy-spawns-table.test.js`
+    //   真造一个世界来核 —— 内容层没有世界，算不出区位。）
+    if (!清剿数有生产者()) {
+      out.push('清剿数（`stats.zoneKills`）没有生产者 —— `enemy-defeated` 事件的记账函数'
+        + '必须写它（`zoneKills[区位] += 1`），不然每位面那条"清剿"支线永远差最后一步');
+    }
   }
 
   return out;
+}
+
+/**
+ * 清剿数那一格有没有人写 —— **从记账函数的源码里抠**（与 `questFacts.js` 同一套口径：
+ * 事实是**推导**出来的，不是手抄一份名单）。
+ */
+function 清剿数有生产者() {
+  const 记账 = STAT_EVENTS?.['enemy-defeated'];
+  if (typeof 记账 !== 'function') return false;
+  return /(?<![\w$.])s\.zoneKills\b/.test(记账.toString());
 }

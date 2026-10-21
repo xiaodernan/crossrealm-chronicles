@@ -345,7 +345,10 @@ export class EnemyManager {
     const roster = enemyRosterOf(type);
     // growthStage 是给这条咽喉的指令，不是敌人的属性 —— 摘出来，别流进 spawn config
     const { growthStage, ...rest } = extra;
-    const stage = growthStage ?? zoneGrowthStage(zoneIdAt({ x, z }, this.world?.zones));
+    // 区位**只反推一次**（W-B12 切片7）：成长档要它，"这一区的原生敌人"也要它 ——
+    // 而后者是任务账里"该位面的清剿数"那一格的生产者（判据问"你在这座区清了多少只"）。
+    const 区位 = zoneIdAt({ x, z }, this.world?.zones);
+    const stage = growthStage ?? zoneGrowthStage(区位);
     const growth = growthAt(stage);
     const enemy = this.spawn({
       ...roster,
@@ -363,6 +366,10 @@ export class EnemyManager {
     // 按坐标反推只会得到 0 档（坐标在 (5000, …) 的独立空间里）—— 出生那一刻定下，
     // 之后谁都不必再反推一次。`growthAt` 仍只在 spawnAt 与本文件里被读（门禁盯着）。
     enemy.growthStage = stage;
+    // 区位同样记在敌人身上（W-B12 切片7）：反推**只做一次**（上面那一次），死亡事件带着它走 ——
+    // 于是任务账里"该位面的清剿数"有一份生产者，而 `zoneIdAt` 的调用点没有多一处
+    // （`tests/gear-pools.test.js` 钉着"调用方只有世界与敌人两处"）。
+    enemy.zone = 区位;
     return enemy;
   }
 
