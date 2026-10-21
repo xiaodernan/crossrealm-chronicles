@@ -3311,3 +3311,9 @@ Phase D（系统与质量）
   - **切片4 交付**：两座后期副本池各加一类新敌人（权重 1 —— 池子的"最重"指的是**谁打头**，不是谁最耐打）；新门禁一条：**名册里每一类战斗敌人都必须在某个遭遇池里出现过**。豁免两名且各有理由：`dummy` 是不可攻击的摆设，`elite` 是**野外专属**（`EnemyManager.spawnAt` 一处，带 respawnTime，主线有一条"击杀五名精英"的任务就是冲它去的）。变异自证：临时把 `gloom_warden` 从池里去掉 → 门禁红并精确点名它。
   - **切片5 交付**：三处同族病灶一起收 —— ① 副本守钥者有**三个**阶段（门槛 0.5 / 0.25，与世界 Boss 同一套）却没有第三阶段台词，演出侧也只认 phase 2，玩家看到血条掉到四分之一却什么也没发生；② 幽暗迷雾墓穴与晨曦圣殿两座**一句台词都没有**（表里根本没有这两格），那两座副本的守钥者从头到尾是哑的；③ 七座守钥者的场地脚本全吃 `default` 兜底，于是七座副本的守钥者战在场地维度上是同一场仗。现在每座有自己的招牌：墓碑与亡魂 / 飞页追人 / 几何折叠 / 根须破土 / 枢纽之钥共鸣 / 雾中时停域 / 金光弹幕。`range` 都收在 18 米以内（副本的房间比 Boss 竞技场小，圈铺在房间外没有意义）；每座只有一枚入场招；冷却与频率错开，避免"砸地与大范围普攻互相顶"（引力化身与混沌领主那一族的老问题）。新门禁一条：**每一座副本守钥者都必须有自己的场地编排**（不吃 default 兜底），并把"入场标记集钉死"那条从九枚同步到十六枚。
   - **留了什么尾巴**：世界 Boss 的场地招只有四种（砸地 / 弹幕 / 引力井 / 时停域），六只世界 Boss 已在用 —— 再加第五种（例如"追踪落点"或"分裂召唤"）要动 `GROUND_HAZARD` 与 `Boss` 的驱动，代价与收益要另算一片。
+
+- **2026-10-21 击杀档位域对齐门禁（`330f36a`）：让"KILL_SOUL_KINDS 对齐 GEAR_DROP.byKind"从空头支票变成真门禁**
+  - **病灶**：`EnemyManager.js` 头部注释称「`content/enemies.js` 派生 `KILL_SOUL_KINDS` 供注册表对齐 `GEAR_DROP.byKind`」，但 `KILL_SOUL_KINDS` 修前**没有任何消费者**（`KILL_SOULS` 也没进注册表）—— 空头支票。真正该守的不变量是：能被 `killRewardSouls` 认的每个 kind，`GEAR_DROP.byKind` 都得给得出掉率，否则"这一档掉魂、却查不到掉宝率"会在 `spawnKill` 那条路上静默落到 `none` 兜底、且没人发现。
+  - **做**：`tests/kill-souls-single-source.test.js` 增"击杀档位域对齐"门禁 —— `KILL_SOUL_KINDS ⊆ Object.keys(GEAR_DROP.byKind)`，并把 `GEAR_DROP` 多出来的档（`dummy` 训练木人 / `none` 名单外兜底）这份差集钉死：两张"击杀档位"表不许各说各话、也不许悄悄长成同一张。`EnemyManager.js` 注释改成实指（"由门禁 tests/kill-souls-single-source.test.js 对齐"），`KILL_SOUL_KINDS` 这个导出由此有了真消费者。
+  - **验证**：kill-souls-single-source / no-duplicate-tables / boss-name-consistency 三门禁 12 例全绿；eslint 2 文件 0 error。**全量套件当时不能作凭证**：工作树被并发会话的 `Game.js`/`OverlayStack.js` 在途改动占着（9 个 import Game.js 的测试文件收集失败），非本片引入；本片只动注释 + 纯新增测试，零行为变化。
+  - **留了什么尾巴**：`KILL_SOULS` 仍未进注册表（`content/registry.js` 只校验了 `GEAR_DROP`）；要不要把击杀魂基数也纳进加载期校验，等注册表那一族稳定后再定 —— 现在由门禁对齐，够用。
