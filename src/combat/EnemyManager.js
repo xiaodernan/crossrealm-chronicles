@@ -10,6 +10,7 @@ import { MagicBoss } from './MagicBoss.js';
 import { SpaceBoss } from './SpaceBoss.js';
 import { VoidBoss } from './VoidBoss.js';
 import { ChaosBoss } from './ChaosBoss.js';
+import { releaseSubtree } from '../engine/releaseSubtree.js';
 import { chapterGateFor } from '../content/bossRoster.js';
 import { zoneIdAt } from '../content/ZoneIdentity.js';
 import { ENEMY_SPAWNS } from '../content/enemySpawns.js';
@@ -52,6 +53,25 @@ export class EnemyManager {
      * 与 `projectiles` 同一处理由 —— 远程招交出弹体、砸地招交出圈，二者都要活得比施法者久。
      */
     this.hazards = new GroundHazards(scene, world);
+    /**
+     * Boss 场的**两份共享几何**与**一份共享材质**（W-C1 切片3g）。
+     *
+     * 改前每一座场各造各的：八根柱子各造一份 `CylinderGeometry`、一个圆盘各造一份
+     * ⇒ **五座场 = 5 个圆盘 + 40 根柱子 = 45 份几何**，而它们**一模一样**
+     * （半径 22 的圆盘 / 0.4→0.5×4 的柱子）。现在全场共用**两份**。
+     *
+     * 场的**地面材质**逐场一份（颜色不同 —— 那是它认哪一只 Boss 的标记）。
+     */
+    this._场圆盘几何 = new THREE.CircleGeometry(22, 48);
+    this._场柱几何 = new THREE.CylinderGeometry(0.4, 0.5, 4, 6);
+    this._场柱材质 = new THREE.MeshStandardMaterial({ color: 0x5a4050, roughness: 0.85 });
+    // 这三份**不属于任何一棵子树**（五座场共用）⇒ 标上共享标记，子树释放器会跳过它们，
+    // 由这一层自己释放**一次**（`dispose()` 里）。标记的语义是"不由所在子树负责释放"。
+    this._场圆盘几何.userData.shared = true;
+    this._场柱几何.userData.shared = true;
+    this._场柱材质.userData.shared = true;
+    /** 造出来的 Boss 场清单（`buildBossArena` 入册，拆卸按它走） */
+    this.arenas = [];
     /** 每帧复用同一份 AI 上下文，避免为每只敌人分配对象 */
     this._aiCtx = {
       target: null,
@@ -297,15 +317,14 @@ export class EnemyManager {
       opacity: 0.35,
       side: THREE.DoubleSide,
     });
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(22, 48), mat);
+    const floor = new THREE.Mesh(this._场圆盘几何, mat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = 0.08;
     group.add(floor);
 
-    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x5a4050, roughness: 0.85 });
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2;
-      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 4, 6), pillarMat);
+      const p = new THREE.Mesh(this._场柱几何, this._场柱材质);
       p.position.set(Math.cos(a) * 20, 2, Math.sin(a) * 20);
       applyShadow(p, 'actor');
       group.add(p);
@@ -315,7 +334,10 @@ export class EnemyManager {
     group.visible = true;
     floor.material.opacity = 0.2;
     this.scene.add(group);
-    return { group, center, radius: 22, activated: false };
+    // 场**入册**：拆卸时按这一份清单走（改前只有 `bossArena` / `boss2Arena` … 五个具名字段，
+    // 清单外的场就拆不到 —— "造了没人能拆"的一种）。
+    this.arenas.push({ group, center, radius: 22, activated: false });
+    return this.arenas[this.arenas.length - 1];
   }
 
   /**
@@ -529,5 +551,30 @@ export class EnemyManager {
 
   setLockTarget(target) {
     for (const e of this.enemies) e.setLocked(e === target);
+  }
+
+  /**
+   * 拆干净：五座 Boss 场 + 那三份共用资源（W-C1 切片3g）。
+   *
+   * 为什么现在才有：`Game._adopt` **拒绝**没有 `dispose()` 的子系统（"假装收编"的防线），
+   * 而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒ `Game.dispose()` 走完，
+   * 五座场的几何与材质**一份都不还**。
+   *
+   * **在场的敌人**各自有 `Enemy.dispose()`（死亡与回收那两条路都走它），
+   * **这一层不重复释放它们** —— 敌人的几何是共享库那份（`ENEMY_GEO`，带共享标记 ⇒ 不释放），
+   * 材质逐只一份（由敌人自己还）⇒ 归属清楚，不在这里再走一遍。
+   */
+  dispose() {
+    for (const arena of this.arenas) {
+      if (!arena?.group) continue;
+      this.scene.remove(arena.group);
+      releaseSubtree(arena.group);
+    }
+    this.arenas.length = 0;
+    this._场圆盘几何?.dispose?.();
+    this._场柱几何?.dispose?.();
+    this._场柱材质?.dispose?.();
+    // 场地危险区（圈）是这一层的另一个属主 ⇒ 它自己拆
+    this.hazards?.dispose?.();
   }
 }

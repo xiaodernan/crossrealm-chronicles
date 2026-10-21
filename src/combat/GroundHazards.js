@@ -25,6 +25,8 @@ const PULSE = 14;
 export class GroundHazards {
   constructor(scene, world) {
     this.world = world;
+    /** 场景：拆的时候要把那一组摘下来（改前只在构造时用过一次场景，没存 ⇒ 拆不了） */
+    this.scene = scene;
     this.geometry = new THREE.CircleGeometry(1, 48);
     this.group = new THREE.Group();
     this.group.name = 'ground-hazards';
@@ -268,5 +270,25 @@ export class GroundHazards {
   /** 池里备用网格数：泄漏 watchdog（F3）与用例都看这个，不翻内部结构 */
   pooled() {
     return this._pool.length;
+  }
+
+  /**
+   * 拆干净：把危险区那一组从场景里摘掉，逐个释放圈的材质，再释放那份共享几何。
+   *
+   * 为什么现在才有（W-C1 切片3g）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   *
+   * 圈的**几何**是这一层共享的一份（所有圈同一个大小）⇒ 只释放一次；
+   * 圈的**材质**逐圈一份（透明度与颜色各自推进）⇒ 逐个释放。
+   */
+  dispose() {
+    this.scene.remove(this.group);
+    for (const disc of [...this._pool, ...this._items.map((it) => it.disc)]) {
+      disc.material?.dispose?.();
+    }
+    this._pool.length = 0;
+    this._items.length = 0;
+    this.geometry?.dispose?.();
   }
 }

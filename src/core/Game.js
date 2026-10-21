@@ -319,7 +319,7 @@ export class Game {
     this.loot = this._adopt('game/LootSystem', new LootSystem(this.scene, this.stats, {
       onGear: (instance) => this.pickUpGear(instance),   // 捡到装备之后怎么办，只有这一处说了算
     }));
-    this.enemyManager = new EnemyManager(this.scene, this.world, this.projectiles);
+    this.enemyManager = this._adopt('combat/EnemyManager', new EnemyManager(this.scene, this.world, this.projectiles));
     this.enemyManager.spawnDefaults();
     // 为现有敌人挂载动画适配器（entry chunk 独有 import animation，chunk-combat 零依赖）
     this._attachEnemyAnimAdapters();
