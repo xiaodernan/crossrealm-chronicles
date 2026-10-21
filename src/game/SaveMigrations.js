@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v10', version: 10 },
   { key: 'crossrealm_save_v9', version: 9 },
   { key: 'crossrealm_save_v8', version: 8 },
   { key: 'crossrealm_save_v7', version: 7 },
@@ -151,6 +152,28 @@ function migrateV8toV9(d) {
   return d;
 }
 
+/**
+ * v9 → v10：**主线走进两座非试炼副本**（W-E3 切片12）。
+ *
+ * 这一跳插了两步（`void-casket` 断时之匣 / `abyss-maw` 深渊之颚）—— 它们是
+ * **主线**第一次指向**非试炼**的副本（断时之匣在破碎时线，深渊之颚在混沌边境）。
+ *
+ * 插入点（**旧序列**的下标）：
+ * - 27 —— 在 `void-boss` 之前（`void-casket`）
+ * - 33 —— 在 `chaos-boss` 之前（`abyss-maw`）
+ *
+ * 插点是**历史事实**（写死在这里，由门禁对着那份冻结的 v9 名单核对），
+ * **不能**从当前主线表反推 —— 表会再变，而迁移必须永远按当初那件事算。
+ */
+export const V10_INSERT_POINTS = [27, 33];
+
+function migrateV9toV10(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V10_INSERT_POINTS);
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -158,6 +181,7 @@ export const MIGRATIONS = {
   6: migrateV6toV7,
   7: migrateV7toV8,
   8: migrateV8toV9,
+  9: migrateV9toV10,
 };
 
 /**

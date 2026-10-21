@@ -372,13 +372,23 @@ describe('③ 真读者：几何与门口物件都按表起', () => {
 describe('④ 指路：路点由表推导，认不出就抛', () => {
   const 副本步 = MAINLINE.filter((r) => r.type === 'dungeon');
 
-  it('主线指的三座 == 切片3a 之前那份手抄三行，逐格', () => {
-    expect(副本步.map((r) => r.dungeonId).sort()).toEqual(Object.keys(OLD_WAYPOINTS).sort());
+  it('试炼那三座的入口 == 切片3a 之前那份手抄三行，逐格（历史契约）', () => {
+    for (const [id, 旧] of Object.entries(OLD_WAYPOINTS)) {
+      const def = dungeonDefOf(id);
+      // QuestSystem 的路点是 `{ entrance.x, entrance.z, name }`（与旧抄本同一形状同一值）
+      expect([def.entrance.x, def.entrance.z, t(def.name)], `${id} 的入口与旧抄本对不上`)
+        .toEqual([旧.x, 旧.z, 旧.label]);
+    }
+  });
+
+  it('主线指的那几座副本，入口都来自各自的定义表（认不出就抛）', () => {
+    // W-E3 切片12 起主线指的不止那三座试炼（还有断时之匣 / 深渊之颚）⇒
+    // 这条不再拿"三座"当基准，改成"**每一座**主线指着的副本，它的路点必须等于它自己那格入口"
     for (const row of 副本步) {
       const def = dungeonDefOf(row.dungeonId);
-      // QuestSystem 的路点是 `{ entrance.x, entrance.z, name }`（与旧抄本同一形状同一值）
-      expect([def.entrance.x, def.entrance.z, t(def.name)], `${row.id} 指的入口与旧抄本对不上`)
-        .toEqual([OLD_WAYPOINTS[row.dungeonId].x, OLD_WAYPOINTS[row.dungeonId].z, OLD_WAYPOINTS[row.dungeonId].label]);
+      expect(def, `主线步 "${row.id}" 指的副本 "${row.dungeonId}" 认不出来`).toBeTruthy();
+      expect([row.waypoint.x, row.waypoint.z], `${row.id} 指的入口与副本表对不上`)
+        .toEqual([def.entrance.x, def.entrance.z]);
     }
   });
 
@@ -389,13 +399,15 @@ describe('④ 指路：路点由表推导，认不出就抛', () => {
       probe.questIndex = MAINLINE.indexOf(row);
       const wp = probe.getQuestWaypoint();
       expect(wp, `${row.id} 这一 step 没有路点`).toBeTruthy();
+      // 基准是**它自己那格入口**（主线现在指的不止那三座试炼 ⇒ 不能再拿"三座"当基准）
+      const def = dungeonDefOf(row.dungeonId);
       expect([wp.x, wp.z, t(wp.label)], `${row.id} 指错了入口`)
-        .toEqual([OLD_WAYPOINTS[row.dungeonId].x, OLD_WAYPOINTS[row.dungeonId].z, OLD_WAYPOINTS[row.dungeonId].label]);
+        .toEqual([def.entrance.x, def.entrance.z, t(def.name)]);
       // 清完这座就不该再指它（判据读的是同一张表的 id）
       probe.stats.dungeonsCleared.add(row.dungeonId);
       const 清完 = probe.getQuestWaypoint();
       expect([清完.x, 清完.z], `${row.id} 清完了还在指老地方`)
-        .not.toEqual([OLD_WAYPOINTS[row.dungeonId].x, OLD_WAYPOINTS[row.dungeonId].z]);
+        .not.toEqual([def.entrance.x, def.entrance.z]);
     }
   });
 

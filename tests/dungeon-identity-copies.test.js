@@ -85,11 +85,24 @@ describe('① 推导账：`trial` 是那句话唯一的一次陈述', () => {
     expect(checkDungeons(全false).join('\n')).toContain('三界试炼成了空集');
   });
 
-  it('试炼清单与主线行（`type: "dungeon"` 的 `dungeonId`）双向对齐 —— 两条算式只剩一条', () => {
+  it('试炼清单 ⊆ 主线行的副本步（试炼都在故事里；主线还可以走别的副本）', () => {
     const 主线指的 = MAINLINE.filter((r) => r.type === 'dungeon').map((r) => r.dungeonId);
-    expect([...主线指的].sort()).toEqual([...TRIAL_DUNGEON_IDS].sort());
+    // ① 每一座试炼都被主线指着（试炼是故事的一部分 —— 少了就是两条算式脱节）
+    for (const id of TRIAL_DUNGEON_IDS) {
+      expect(主线指的, `试炼座 "${id}" 没有主线步指着它 —— 试炼清单与主线脱节了`).toContain(id);
+    }
+    // ② 主线指的每一座副本都是真的（不是拼错的 id）
     for (const id of 主线指的) {
-      expect(DUNGEON_DEFS.find((d) => d.id === id)?.trial, `"${id}" 有主线步却不是试炼座`).toBe(true);
+      expect(DUNGEON_DEFS.find((d) => d.id === id), `主线指的副本 "${id}" 不在副本定义表里`).toBeTruthy();
+    }
+    // ③ 主线指的副本**不重复**（同一步指两次 = 抄了一份名单）
+    expect(new Set(主线指的).size, '主线有重复的副本步').toBe(主线指的.length);
+    // ④ 主线**可以**走非试炼的副本（W-E3 切片12 起：断时之匣 / 深渊之颚进了主线）——
+    //    这一条是"放宽"的正面证据：以前这里是"主线只指试炼"，现在主线指的是**故事里的**副本。
+    const 非试炼的 = 主线指的.filter((id) => !TRIAL_DUNGEON_IDS.includes(id));
+    expect(非试炼的.length, '主线一步非试炼副本都没指 —— 那条放宽等于没放宽').toBeGreaterThan(0);
+    for (const id of 非试炼的) {
+      expect(DUNGEON_DEFS.find((d) => d.id === id)?.trial, `"${id}" 是非试炼座`).toBe(false);
     }
   });
 

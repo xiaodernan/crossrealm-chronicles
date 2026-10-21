@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
-import { V8_INSERT_POINTS, V9_INSERT_POINTS } from '../src/game/SaveMigrations.js';
+import { V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS } from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
 } from '../src/content/objectives.js';
@@ -97,6 +97,25 @@ const V9_ORDER = [
   'skills', 'chaos-boss', 'dungeon-rerun', 'infinity',
 ];
 
+/**
+ * **v10 之后**在役的那条序列（W-E3 切片12 主线走进两座非试炼副本）。
+ *
+ * 相对 `V9_ORDER` 多了两处（**旧序列**的下标）：
+ * - 27 —— `void-casket`（匣里的钟 —— 下断时之匣），在 `void-boss` 之前
+ * - 33 —— `abyss-maw`（边界之下的颚 —— 下深渊之颚），在 `chaos-boss` 之前
+ *
+ * 这两步是**主线第一次指向非试炼的副本** ⇒ 它们要求那条不变式从"相等"放宽成
+ * "**试炼清单 ⊆ 主线指的副本步**"（试炼仍是那三座；第 2 章的门、地图的已揭示、副本清单
+ * 都读**试炼清单** ⇒ 一处都不受影响 ⇒ 不会死锁）。
+ */
+const V10_ORDER = [
+  'anchor', 'training', 'soldiers', 'fantasy-frag', 'boss', 'magic-frag', 'golem', 'space-frag',
+  'finale', 'chests', 'talk-wanderer', 'boss2', 'elite', 'hexer-hunt', 'level', 'epilogue',
+  'learn-spell', 'crypt', 'library', 'rift', 'boss3', 'mind', 'ascension', 'void-rift',
+  'charge-spell', 'void-hunt', 'crawler-hunt', 'void-casket', 'void-boss', 'void-tablet', 'true-end', 'chaos-core',
+  'knight-hunt', 'skills', 'abyss-maw', 'chaos-boss', 'dungeon-rerun', 'infinity',
+];
+
 const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 
 beforeEach(() => { installWindowShim(); });
@@ -123,7 +142,6 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片10 之后：主线是 36 步，三处插入，其余每一步的次序一个都没动', () => {
     expect(V9_ORDER).toHaveLength(36);
     expect(new Set(V9_ORDER).size, 'v9 序列里有重复 id').toBe(V9_ORDER.length);
-    expect(MAINLINE.map((r) => r.id)).toEqual(V9_ORDER);
     // 三处插入，其余逐字相同（把 v9 那条序列按三个插点拆开重组，逐段对）
     // 注意：这里用的是**新序列**里那三步的下标（13 / 26 / 31）——
     // 迁移常量那边用的是**旧序列**的下标（13 / 25 / 29），两套口径别混。
@@ -139,7 +157,23 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V9_ORDER[31], '第 31 位不是 knight-hunt').toBe('knight-hunt');
   });
 
-  it('迁移的插入点与那份冻结名单一致（`V8_INSERT_POINTS` / `V9_INSERT_POINTS` 算错位置当场红）', () => {
+  it('W-E3 切片12 之后：主线是 38 步，两处插入（主线第一次走进非试炼副本）', () => {
+    expect(V10_ORDER).toHaveLength(38);
+    expect(new Set(V10_ORDER).size, 'v10 序列里有重复 id').toBe(V10_ORDER.length);
+    expect(MAINLINE.map((r) => r.id)).toEqual(V10_ORDER);
+    // 两处插入，其余逐字相同（新序列里那两步的下标是 27 / 34）
+    const 新序列插点 = [27, 34];
+    const 旧 = [];
+    for (let i = 0; i < V10_ORDER.length; i++) {
+      if (新序列插点.includes(i)) continue;
+      旧.push(V10_ORDER[i]);
+    }
+    expect(旧, '去掉两处插入后应当逐字等于 v9 那条序列').toEqual(V9_ORDER);
+    expect(V10_ORDER[27], '第 27 位不是 void-casket').toBe('void-casket');
+    expect(V10_ORDER[34], '第 34 位不是 abyss-maw').toBe('abyss-maw');
+  });
+
+  it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {
     expect(V8_INSERT_POINTS).toEqual([24]);
     // v7 → v8：旧序列的 24 号位是 `void-boss`，新步插在它**之前**
     expect(HEAD_ORDER[24]).toBe('void-boss');
@@ -153,6 +187,12 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V9_ORDER[13 + 1], '老档的 13 号位（level）没落到新表的 level 上').toBe('level');
     expect(V9_ORDER[25 + 2], '老档的 25 号位（void-boss）没落到新表的 void-boss 上').toBe('void-boss');
     expect(V9_ORDER[29 + 3], '老档的 29 号位（skills）没落到新表的 skills 上').toBe('skills');
+    // v9 → v10：两个插点（**旧序列**口径）
+    expect(V10_INSERT_POINTS).toEqual([27, 33]);
+    expect(V9_ORDER[27]).toBe('void-boss');
+    expect(V9_ORDER[33]).toBe('chaos-boss');
+    expect(V10_ORDER[27 + 1], '老档的 27 号位（void-boss）没落到新表的 void-boss 上').toBe('void-boss');
+    expect(V10_ORDER[33 + 2], '老档的 33 号位（chaos-boss）没落到新表的 chaos-boss 上').toBe('chaos-boss');
   });
 
   it('投影只去掉章节门控行：一格不多一格不少，且不重排', () => {
