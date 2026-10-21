@@ -21,6 +21,7 @@ export const ARENA_MOVES = {
   barrage: 'barrage',
   well: 'gravityWell',
   freeze: 'chronoField',
+  homing: 'homingStrike',
 };
 
 /**
@@ -64,11 +65,16 @@ export const BOSS_ARENA_SCRIPTS = {
     // **刻意不标 entry**：二阶段的砸地已是招牌入场招；三阶段的影弹是节奏里的常态招，
     // 转阶段那一帧再来一次就在同 frame 把"入场砸地"和"预告影弹"叠成两脚，观众看不懂。
     { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 8, range: 22, tint: 0x6a3bbf },
+    // 第四种场地机制：引力井 —— 影界的引力扭曲，第三阶段 15 秒一口井口开在玩家脚下
+    { move: 'well', phase: 3, trigger: 'opportunity', cooldown: 15, range: 14, tint: 0x221144 },
   ],
   'archmagus': [
     { move: 'slam', phase: 2, trigger: 'melee', chance: 0.35 },
     // 入场点的是弹幕：大奥术师的"变强"就是这片圈雨，`range 24` 让它当帧追着玩家亮
     { move: 'barrage', phase: 2, trigger: 'opportunity', cooldown: 7, range: 24, entry: true },
+    // 第四种场地机制：引力井 —— 奥术师的秘法扭曲空间，第三阶段 14 秒一口
+    // 井刻意不标 entry：转阶段那一帧会无条件破掉距离博弈
+    { move: 'well', phase: 3, trigger: 'opportunity', cooldown: 14, range: 16, tint: 0x44aaff },
   ],
   'singularity-herald': [
     { move: 'slam', phase: 2, trigger: 'timed', rate: 0.08, entry: true },
@@ -87,6 +93,10 @@ export const BOSS_ARENA_SCRIPTS = {
     // 非危险区的自走技归 W-B1 那张统一施法表，本切片只把"有场的那一份"补上。
     // 两条同时在身上时 `applyTimeScale` 取最小值：站在场里吃更狠的 0.3，不站吃 0.35。
     { move: 'freeze', phase: 3, trigger: 'opportunity', cooldown: 14, range: 17, entry: true },
+    // 追踪落点（第五种场地招）：第三阶段起 10 秒一枚，圈在**前 0.96 秒**贴着玩家走、之后
+    // 锁死落地 —— 与上面那记时停域"开在脚下就钉死"是两种躲法：这一种提前跑开没用，得看圈
+    // 不再动才闪。`range 20` 与 freeze 的 17 错开，别两招同帧都够条件、把节奏挤成一团。
+    { move: 'homing', phase: 3, trigger: 'opportunity', cooldown: 10, range: 20 },
   ],
   'chaos-overlord': [
     { move: 'slam', phase: 2, trigger: 'melee', chance: 0.3, entry: true },

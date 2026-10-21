@@ -61,6 +61,8 @@ export class GroundHazards {
       z: spec.z,
       radius: spec.radius,
       telegraph: spec.telegraph,
+      /** 追踪落点：前摇前 `trackRatio` 段跟着玩家走（0 = 不追，画下即钉死） */
+      trackRatio: spec.track ?? 0,
       damage: spec.damage,
       owner: spec.owner ?? null,
       /** 域的持续时长；0 / undefined = 落地一击定音 */
@@ -122,6 +124,14 @@ export class GroundHazards {
       const it = this._items[i];
       it.t += dt;
       if (!it.done) {
+        // 追踪落点（第五种场地招）：前摇的**前 `trackRatio` 段**跟着玩家走，之后锁死不再动。
+        // 非追踪的圈 `trackRatio === 0`，这段整个跳过 —— 与修前逐字节一致。
+        if (it.trackRatio > 0 && playerPos && it.t < it.telegraph * it.trackRatio) {
+          it.x = playerPos.x;
+          it.z = playerPos.z;
+          const gy = (this.world?.getGroundHeight(it.x, it.z) ?? 0) + GROUND_HAZARD.yOffset;
+          it.disc.position.set(it.x, gy, it.z);
+        }
         const p = Math.min(1, it.t / it.telegraph);
         const g = GROUND_HAZARD.growFrom;
         it.disc.scale.setScalar(it.radius * (g + (1 - g) * p));

@@ -304,6 +304,7 @@ export class Boss extends Enemy {
   castArenaMove(entry, playerPos) {
     if (entry.move === 'barrage') return this.startBarrage(playerPos, entry);
     if (entry.move === 'slam') return this.startSlamTelegraph();
+    if (entry.move === 'homing') return this.startHoming(playerPos, entry);
     return this.startDomain(playerPos, entry);
   }
 
@@ -428,6 +429,28 @@ export class Boss extends Enemy {
       tick: spec.tick,
       pull: spec.pull,
       slow: spec.slow,
+      owner: this,
+    });
+    return true;
+  }
+
+  /**
+   * 追踪落点（W-A6 第五种场地招）：在玩家此刻脚下起一枚圈，但它在**前摇的前 `track` 段**
+   * 跟着玩家走，之后锁死、原地落地。与砸地/弹幕/域"画下那一刻就钉死"相反 —— 光提前跑开没用，
+   * 得看圈**不再动**了才闪。跟多久由 `GROUND_HAZARD.homingStrike.track` 定（< 1，留出躲的窗口）。
+   */
+  startHoming(playerPos, entry) {
+    if (!this.hazards || !playerPos) return false;
+    const spec = this.arenaSpec(entry);
+    const at = this.clampIntoArena(playerPos.x, playerPos.z, spec.radius);
+    this.hazards.spawn({
+      x: at.x,
+      z: at.z,
+      radius: spec.radius,
+      telegraph: spec.telegraph,
+      damage: spec.damage,
+      color: entry?.tint ?? spec.color,
+      track: spec.track,
       owner: this,
     });
     return true;
