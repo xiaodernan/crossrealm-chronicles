@@ -46,6 +46,7 @@ import { HELP_SECTIONS_EXTRA } from './helpManual.js';
 import { SKILL_TREES, SKILL_BRANCH_IDS, SKILL_EFFECT_KEYS } from './skillTrees.js';
 import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
+import { checkQuestFactClosure } from './questFacts.js';
 import { ENEMY_ROSTER } from './enemies.js';
 // 章节判据要读**展开后**的 announce（`announce` 存的是键，W-D2 切片16j）——
 // 中文表就在**同层**（`content/strings.zh.js`），不构成"向上够 engine"。
@@ -934,7 +935,7 @@ export const CONTENT_TABLES = [
         of: { x: { t: 'int' }, z: { t: 'int' }, label: { t: 'string' } },
       },
     },
-    invariant: checkObjectiveTable,
+    invariant: checkObjectivesTable,
   },
   {
     kind: 'skillTrees',
@@ -1472,6 +1473,17 @@ export function checkGearAffixes(table) {
     out.push(...gearModErrors(row?.mods, `gearAffixes[${i}].mods`));
   });
   return out;
+}
+
+/**
+ * 主线表（`objectives`）的整表不变式（W-B3 切片3）+ **判据闭包**（切片6）。
+ *
+ * `checkObjectiveTable` 管的是**行与行之间**的关系；`checkQuestFactClosure` 管的是
+ * **判据与账本之间**的关系 —— 判据读的那一格有没有人写。两半都必须过，
+ * 所以这里把两半合成一个 invariant（一个槽位只放一个函数）。
+ */
+export function checkObjectivesTable(table, ctx) {
+  return [...checkObjectiveTable(table, ctx), ...checkQuestFactClosure()];
 }
 
 /**
