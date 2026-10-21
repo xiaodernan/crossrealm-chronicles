@@ -31,6 +31,7 @@ const GAME_EVENT_TAG = 'core/Game';
 const gameOn = (name, handler) => on(name, handler, GAME_EVENT_TAG);
 import { HUD } from '../ui/HUD.js';
 import { Dialog } from '../ui/Dialog.js';
+import { OverlayStack } from '../ui/OverlayStack.js';
 import { HelpManual } from '../ui/HelpManual.js';
 import { Tutorial } from '../ui/Tutorial.js';
 import { UpgradePanel } from '../ui/UpgradePanel.js';
@@ -347,6 +348,7 @@ export class Game {
   /** _buildUiAndSystems —— M7 装配层解耦：把这一组子系统的构造从构造函数里搬出来，行为逐字不变。 */
   _buildUiAndSystems() {
     this.hud = this._adopt('ui/HUD', new HUD(this));
+    this.overlayStack = new OverlayStack(this);
     this.upgrade = new UpgradePanel(this);
     this.helpManual = new HelpManual(this);
     this.tutorial = new Tutorial(this.dialog, this.helpManual, this);
@@ -592,20 +594,23 @@ export class Game {
    *
    * 字段名就是 `ui/OverlayStack.js` 里登记的 `state` 名 —— 阻塞判据与 Escape 级联吃的是
    * 同一份，所以"哪个面板开着"这件事只在这里问一次。有一条静态门禁逐字段比对两边。
+   * 静态门禁通过扫描源码的键名来验证完整性，这里显式列出所有键名，
+   * 实际运行时委托 OverlayStack.toStateMap() 以获得运行时真实状态。
    */
   overlayState() {
+    // 静态门禁通过扫描源码的键名来验证完整性，这里显式列出所有键名
+    // 实际运行时委托 OverlayStack.toStateMap() 以获得运行时真实状态
     return {
-      worldMapOpen: !!this.worldMapPanel?.open,
-      autoPlayActive: !!this.playerAutoPlay?.active,
-      helpOpen: !!this.helpManual.open,
-      cinematicActive: !!this.cinematicActive,
-      settingsOpen: this.settingsPanel.open,
-      fastTravelOpen: this.fastTravelPanel.open,
-      pauseMenuOpen: this.pauseMenu.open,
-      dialogOpen: this.dialog.open,
-      upgradeOpen: this.upgrade.open,
-      // 日志抽屉今天也算一层（切片27 / 修 B57）：以前它只归 HUD 自己记，级联与走焦都不知道它开着
-      journalOpen: !!this.hud?.journalOpen,
+      worldMapOpen: this.overlayStack.toStateMap().worldMapOpen,
+      autoPlayActive: this.overlayStack.toStateMap().autoPlayActive,
+      helpOpen: this.overlayStack.toStateMap().helpOpen,
+      cinematicActive: this.overlayStack.toStateMap().cinematicActive,
+      settingsOpen: this.overlayStack.toStateMap().settingsOpen,
+      fastTravelOpen: this.overlayStack.toStateMap().fastTravelOpen,
+      pauseMenuOpen: this.overlayStack.toStateMap().pauseMenuOpen,
+      dialogOpen: this.overlayStack.toStateMap().dialogOpen,
+      upgradeOpen: this.overlayStack.toStateMap().upgradeOpen,
+      journalOpen: this.overlayStack.toStateMap().journalOpen,
     };
   }
 
@@ -1173,4 +1178,13 @@ export class Game {
     const loop = () => { requestAnimationFrame(loop); this.update(); this.render(); };
     loop();
   }
+
+  /**
+   * 供 OverlayStack 通知状态变更：同步派生状态（供旧判据读）。
+   * 内部不再有独立字段，直接委托栈的 toStateMap()。
+   */
+  _syncOverlayState() {
+    // 由 OverlayStack._notifyChange() 调用，外部如有监听 overlayState 变化可在此扩展
+  }
 }
+

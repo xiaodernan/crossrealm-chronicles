@@ -10,6 +10,7 @@ export class UpgradePanel {
     this.open = false;
     this.skillTab = 'stats';
     document.getElementById('upgrade-close')?.addEventListener('click', () => this.hide());
+    document.getElementById('upgrade-back')?.addEventListener('click', () => this.game.overlayStack.close('upgrade'));
     document.getElementById('tab-stats')?.addEventListener('click', () => { this.skillTab = 'stats'; this.refresh(); });
     document.getElementById('tab-skills')?.addEventListener('click', () => { this.skillTab = 'skills'; this.refresh(); });
     document.getElementById('tab-lore')?.addEventListener('click', () => { this.skillTab = 'lore'; this.refresh(); });
@@ -25,14 +26,17 @@ export class UpgradePanel {
     document.exitPointerLock?.();
     this.game.weaponSkills?.tryNarrativeUnlocks?.(this.game);
     this.refresh(restName);
-    // 落焦第一格（切片24 / B55）：这一层今天登记了 `nav`，↑↓ 与手柄十字键走进来要有落点；
-    // A 那一下仍然问浏览器（`activateFocused` 点当前聚焦那一格），这里不再另开第二个激活口
+    // 真栈：把升级面板压入模态栈（切片11 / W-D1 真栈）
+    this.game.overlayStack.open('upgrade');
+    // 落焦第一格
     focusFirstItem(this.panel);
   }
 
   hide() {
     this.open = false;
     this.panel.classList.add('hidden');
+    // 真栈：弹出升级面板，恢复焦点（切片11 / W-D1 真栈）
+    this.game.overlayStack.close('upgrade');
   }
 
   refresh(restName) {

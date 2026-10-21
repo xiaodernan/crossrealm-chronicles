@@ -1356,6 +1356,7 @@ export const STRINGS_EN = Object.freeze({
   // Upgrade Panel
   upgrade_title: 'Campfire Upgrade',
   upgrade_continue: 'Continue Exploring',
+  upgrade_back: 'Back',
 
   // Upgrade Panel static labels (W-D2 slice 7)
   upgrade_tab_stats: 'Stats',

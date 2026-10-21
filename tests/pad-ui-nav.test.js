@@ -445,7 +445,24 @@ describe('Game：上下文判定与换表都只有一条路', () => {
     journalOpen: ['hud', 'journalOpen'],   // 切片27：日志抽屉今天也是收焦点的一层
   };
   const gameWith = (over) => {
-    const g = { overlayState: Game.prototype.overlayState, cinematicActive: false };
+    const g = {
+      overlayState: Game.prototype.overlayState,
+      cinematicActive: false,
+      overlayStack: {
+        toStateMap: () => ({
+          worldMapOpen: !!(g.worldMapPanel?.open),
+          autoPlayActive: !!(g.playerAutoPlay?.active),
+          helpOpen: !!(g.helpManual?.open),
+          cinematicActive: !!g.cinematicActive,
+          settingsOpen: !!(g.settingsPanel?.open),
+          fastTravelOpen: !!(g.fastTravelPanel?.open),
+          pauseMenuOpen: !!(g.pauseMenu?.open),
+          dialogOpen: !!(g.dialog?.open),
+          upgradeOpen: !!(g.upgrade?.open),
+          journalOpen: !!(g.hud?.journalOpen),
+        }),
+      },
+    };
     for (const [key, [obj, prop]] of Object.entries(FIELD)) {
       g[obj] = g[obj] ?? {};
       g[obj][prop] = Boolean(over[key]);

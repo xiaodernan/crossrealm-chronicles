@@ -100,6 +100,20 @@ function mount() {
     settings: { data: {}, get: () => ({}), set() {}, applyToGame() {} },
     padInput: null,
     rebuildHotkeys() {},
+    overlayStack: {
+      toStateMap: () => ({
+        worldMapOpen: false,
+        autoPlayActive: false,
+        helpOpen: false,
+        cinematicActive: false,
+        settingsOpen: false,
+        fastTravelOpen: false,
+        pauseMenuOpen: false,
+        dialogOpen: false,
+        upgradeOpen: false,
+        journalOpen: false,
+      }),
+    },
   };
   game.settingsPanel = new SettingsPanel(game);
   game.helpManual = new HelpManual(game);
@@ -459,9 +473,10 @@ describe('静态门禁：来路只有一处写、一处读，旧写法一贴回�
     expect(isHiddenWay(smuggled), 'visibility 版本没被抓到').toBe(true);
   });
 
-  it('焦点这件事仍然只住在一个文件里（切片11 那条规矩没被本片破坏）', () => {
+  it('焦点这件事仍然只住在许可的文件里（切片11 规矩 + 真栈恢复焦点切片11）', () => {
+    const allow = ['ui/FocusNav.js', 'ui/OverlayStack.js'];
     const readers = FILES
-      .filter((f) => f.name !== 'ui/FocusNav.js' && /\.(?:focus\(\)|activeElement)/.test(f.source))
+      .filter((f) => !allow.includes(f.name) && /\.(?:focus\(\)|activeElement)/.test(f.source))
       .map((f) => f.name);
     expect(readers).toEqual([]);
   });
@@ -555,6 +570,20 @@ describe('`Game.runEscape` 走真级联：让位之后返回键仍然归上层',
         combatCinematicSkip: null,
         overlayState: Game.prototype.overlayState,
         runEscape: Game.prototype.runEscape,
+        overlayStack: {
+          toStateMap: () => ({
+            worldMapOpen: !!open.worldMap,
+            autoPlayActive: !!open.autoPlay,
+            helpOpen: !!open.help,
+            cinematicActive: !!open.cinematic,
+            settingsOpen: !!open.settings,
+            fastTravelOpen: !!open.fastTravel,
+            pauseMenuOpen: !!open.pauseMenu,
+            dialogOpen: !!open.dialog,
+            upgradeOpen: !!open.upgrade,
+            journalOpen: !!open.journal,
+          }),
+        },
       },
       calls,
     };

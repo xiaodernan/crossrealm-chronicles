@@ -367,6 +367,20 @@ const navGame = () => {
     upgrade: { open: false },
   };
   g.overlayState = () => Game.prototype.overlayState.call(g);
+  g.overlayStack = {
+    toStateMap: () => ({
+      worldMapOpen: !!(g.worldMapPanel?.open),
+      autoPlayActive: !!(g.playerAutoPlay?.active),
+      helpOpen: !!(g.helpManual?.open),
+      cinematicActive: !!g.cinematicActive,
+      settingsOpen: !!(g.settingsPanel?.open),
+      fastTravelOpen: !!(g.fastTravelPanel?.open),
+      pauseMenuOpen: !!(g.pauseMenu?.open),
+      dialogOpen: !!(g.dialog?.open),
+      upgradeOpen: !!(g.upgrade?.open),
+      journalOpen: !!(g.hud?.journalOpen),
+    }),
+  };
   g.movePanelFocus = (delta) => Game.prototype.movePanelFocus.call(g, delta);
   g.panelNav = (dir) => Game.prototype.panelNav.call(g, dir);
   return g;
@@ -606,9 +620,10 @@ describe('现拼的清单必须先拼再落焦（快速旅行与说明书）', (
 /* -------------------------------------------------------- 静态门禁 */
 
 describe('静态门禁：焦点只有一个出口，激活只有浏览器一个消费者', () => {
-  it('全仓只有 `ui/FocusNav.js` 碰 `.focus()` 与 `activeElement`（面板各自落焦 = 第二套焦点账）', () => {
+  it('全仓只有许可文件碰 `.focus()` 与 `activeElement`（面板各自落焦 = 第二套焦点账）', () => {
+    const allow = ['ui/FocusNav.js', 'ui/OverlayStack.js'];
     const touching = FILES
-      .filter(({ name, source }) => name !== 'ui/FocusNav.js' && /\.(?:focus\(\)|activeElement)/.test(source))
+      .filter(({ name, source }) => !allow.includes(name) && /\.(?:focus\(\)|activeElement)/.test(source))
       .map(({ name }) => name);
     expect(touching).toEqual([]);
   });

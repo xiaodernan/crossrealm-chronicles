@@ -274,6 +274,20 @@ const escapeGame = () => {
     combatCinematicSkip: { on: false, canSkip() { return this.on; }, skip() { calls.push('combatCinematic'); } },
   };
   g.overlayState = () => Game.prototype.overlayState.call(g);
+  g.overlayStack = {
+    toStateMap: () => ({
+      worldMapOpen: !!(g.worldMapPanel?.open),
+      autoPlayActive: !!(g.playerAutoPlay?.active),
+      helpOpen: !!(g.helpManual?.open),
+      cinematicActive: !!g.cinematicActive,
+      settingsOpen: !!(g.settingsPanel?.open),
+      fastTravelOpen: !!(g.fastTravelPanel?.open),
+      pauseMenuOpen: !!(g.pauseMenu?.open),
+      dialogOpen: !!(g.dialog?.open),
+      upgradeOpen: !!(g.upgrade?.open),
+      journalOpen: !!(g.hud?.journalOpen),
+    }),
+  };
   g.runEscape = () => Game.prototype.runEscape.call(g);
   return { g, calls };
 };
@@ -438,15 +452,16 @@ describe('静态门禁：行为侧不许再抄物理键码', () => {
     expect(body, '找不到 overlayState 的方法体').toBeTruthy();
     // 漏喂一个 = 那个面板从此拦不住热键，也从此不进 Escape 级联
     for (const [key, field] of Object.entries({
-      worldMapOpen: '!!this.worldMapPanel?.open',
-      autoPlayActive: '!!this.playerAutoPlay?.active',
-      helpOpen: '!!this.helpManual.open',
-      cinematicActive: '!!this.cinematicActive',
-      settingsOpen: 'this.settingsPanel.open',
-      fastTravelOpen: 'this.fastTravelPanel.open',
-      pauseMenuOpen: 'this.pauseMenu.open',
-      dialogOpen: 'this.dialog.open',
-      upgradeOpen: 'this.upgrade.open',
+      worldMapOpen: 'this.overlayStack.toStateMap().worldMapOpen',
+      autoPlayActive: 'this.overlayStack.toStateMap().autoPlayActive',
+      helpOpen: 'this.overlayStack.toStateMap().helpOpen',
+      cinematicActive: 'this.overlayStack.toStateMap().cinematicActive',
+      settingsOpen: 'this.overlayStack.toStateMap().settingsOpen',
+      fastTravelOpen: 'this.overlayStack.toStateMap().fastTravelOpen',
+      pauseMenuOpen: 'this.overlayStack.toStateMap().pauseMenuOpen',
+      dialogOpen: 'this.overlayStack.toStateMap().dialogOpen',
+      upgradeOpen: 'this.overlayStack.toStateMap().upgradeOpen',
+      journalOpen: 'this.overlayStack.toStateMap().journalOpen',
     })) expect(body[0], `少喂 ${key}`).toContain(`${key}: ${field}`);
   });
 

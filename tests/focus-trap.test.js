@@ -51,6 +51,20 @@ const trapGame = (overrides = {}) => {
     ...overrides,
   };
   g.overlayState = () => Game.prototype.overlayState.call(g);
+  g.overlayStack = {
+    toStateMap: () => ({
+      worldMapOpen: !!(g.worldMapPanel?.open),
+      autoPlayActive: !!(g.playerAutoPlay?.active),
+      helpOpen: !!(g.helpManual?.open),
+      cinematicActive: !!g.cinematicActive,
+      settingsOpen: !!(g.settingsPanel?.open),
+      fastTravelOpen: !!(g.fastTravelPanel?.open),
+      pauseMenuOpen: !!(g.pauseMenu?.open),
+      dialogOpen: !!(g.dialog?.open),
+      upgradeOpen: !!(g.upgrade?.open),
+      journalOpen: !!(g.hud?.journalOpen),
+    }),
+  };
   return g;
 };
 

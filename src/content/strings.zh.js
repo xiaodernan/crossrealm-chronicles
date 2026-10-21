@@ -1356,6 +1356,7 @@ export const STRINGS_ZH = Object.freeze({
   // 升级面板
   upgrade_title: '营火升级',
   upgrade_continue: '继续探索',
+  upgrade_back: '返回',
 
   // 升级面板静态标签（W-D2 切片7）
   upgrade_tab_stats: '属性',

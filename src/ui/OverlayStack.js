@@ -1,7 +1,7 @@
 import { hotkeyCodeFor, isMapPassThrough, isNavCode } from '../content/hotkeys.js';
 
 /**
- * 模态层清单（W-D1 第一片 / 修 **B46**）。
+ * 模态层清单 + 真栈管理（W-D1 真栈 / 修 B53/B54/B55）。
  *
  * 一行一层，三个问题在同一行答完：
  * - `back`：这一层吃不吃"返回"（Escape / 手柄 B）。**数组顺序就是吃键顺序**，越靠前越顶层。
@@ -15,8 +15,14 @@ import { hotkeyCodeFor, isMapPassThrough, isNavCode } from '../content/hotkeys.j
  * 于是暂停菜单只能靠鼠标点"继续"。两份清单合成一份之后，"改一边另一边立刻不一致"这件事
  * 才有地方被测试钉住（见 `tests/overlay-stack.test.js` 的静态门禁）。
  *
- * `state` 那格是**消费方传进来的状态字段名**：`Game.overlayState()` 是唯一的生产者，
+ * `state` 那格是**消费方传进来的状态字段名**：`OverlayStack.toStateMap()` 是唯一的生产者，
  * 表里登记的字段与它返回的键必须一一对齐（同样有门禁）。
+ *
+ * ## 真栈
+ *
+ * 维护一份**显式栈**（数组，越靠后越顶层），push/pop 只在这一处发生。
+ * 于是"谁压谁"、"先关谁"、"退回哪一格"都有唯一真源。
+ * 旧版每帧从各面板 `.open` 现算一份布尔表，**无栈序**、无"谁压谁"、无来路。
  */
 export const OVERLAY_LAYERS = [
   { layer: 'endCredits', state: 'endCreditsSkippable', back: true, blocks: false },
@@ -141,3 +147,149 @@ export function assertOverlayLayers(layers = OVERLAY_LAYERS) {
 assertOverlayLayers();
 
 export { BY_STATE as OVERLAY_LAYER_BY_STATE };
+
+/**
+ * 真栈（真栈）：模态层栈管理（W-D1 真栈第一格 / 修 B53/B54/B55）。
+ *
+ * 与旧 `overlayState()` 的区别：
+ * - 旧版：每帧从各面板 `.open` 现算一份布尔表，**无栈序**、无"谁压谁"、无来路。
+ * - 新版：维护一份**显式栈**（数组，越靠后越顶层），push/pop 只在这一处发生。
+ *   于是"谁压谁"、"先关谁"、"退回哪一格"都有唯一真源。
+ *
+ * 与旧 `overlayState()` 的兼容：依然暴露 `toStateMap()` 供旧判据读（返回同键布尔表），
+ * 但内部改为栈维护，**唯一的写入口只在这一个类里**。
+ */
+export class OverlayStack {
+  constructor(game) {
+    this.game = game;
+    this._stack = [];  // 栈顶在最后，每项 { layer, state, back, blocks, nav }
+    this._focusPark = null;  // { hostId, index } 唯一焦点停车位
+  }
+
+  /** 内部：把层定义转成栈项 */
+  _toItem(layerDef) {
+    return {
+      layer: layerDef.layer,
+      state: layerDef.state,
+      back: layerDef.back,
+      blocks: layerDef.blocks,
+      nav: layerDef.nav,
+    };
+  }
+
+  /** 开启一层：push 到栈顶，记录焦点，更新派生状态 */
+  open(layerName) {
+    const def = this._findDef(layerName);
+    if (!def) return false;
+    if (this._stack.some((s) => s.layer === layerName)) return true; // 已在栈中
+
+    // 记录当前焦点（被压下的那一层的焦点）
+    const top = this._stack[this._stack.length - 1];
+    if (top) {
+      const host = document.getElementById(top.nav);
+      if (host) {
+        const focusIdx = Array.from(host.querySelectorAll(
+          'button:not([disabled]):not(.hidden),' +
+          'input:not([disabled]):not(.hidden):not([type=file]):not([type=hidden]),' +
+          'select:not([disabled]):not(.hidden)'
+        )).indexOf(document.activeElement);
+        if (focusIdx >= 0) {
+          this._focusPark = { hostId: top.nav, index: focusIdx };
+        }
+      }
+    }
+
+    const item = this._toItem(def);
+    this._stack.push(item);
+    this._notifyChange();
+    return true;
+  }
+
+  /** 关闭指定层（或栈顶）：pop，恢复焦点，更新派生状态 */
+  close(layerName) {
+    const idx = this._stack.findIndex((s) => s.layer === layerName);
+    if (idx === -1) return false;
+
+    this._stack.splice(idx, 1)[0];
+
+    // 若关的是栈顶且有焦点停车位，尝试恢复
+    if (idx === this._stack.length && this._focusPark) {
+      const host = document.getElementById(this._focusPark.hostId);
+      if (host) {
+        const items = host.querySelectorAll(
+          'button:not([disabled]):not(.hidden),' +
+          'input:not([disabled]):not(.hidden):not([type=file]):not([type=hidden]),' +
+          'select:not([disabled]):not(.hidden)'
+        );
+        const idx = Math.min(this._focusPark.index, items.length - 1);
+        if (idx >= 0 && idx < items.length) {
+          items[idx].focus();
+        }
+      }
+      this._focusPark = null;
+    }
+
+    this._notifyChange();
+    return true;
+  }
+
+  /** 关闭栈顶（返回键 / 手柄 B 的标准路径） */
+  closeTop() {
+    if (this._stack.length === 0) return false;
+    const top = this._stack[this._stack.length - 1];
+    if (!top.back) return false; // 硬模态不吃返回键
+    return this.close(top.layer);
+  }
+
+  /** 当前栈顶层名（供旧判据用） */
+  topLayer() {
+    return this._stack[this._stack.length - 1]?.layer ?? null;
+  }
+
+  /** 供旧判据兼容：生成与旧 overlayState() 同形状的布尔表 */
+  toStateMap() {
+    const map = {};
+    for (const def of OVERLAY_LAYERS) map[def.state] = false;
+    for (const item of this._stack) map[item.state] = true;
+    return map;
+  }
+
+  /** 当前栈内容（供调试/门禁） */
+  getStack() {
+    return [...this._stack];
+  }
+
+  /** 判断某层是否开着 */
+  has(layerName) {
+    return this._stack.some((s) => s.layer === layerName);
+  }
+
+  /** 派生状态通知：同步到 Game 供旧判据读 */
+  _notifyChange() {
+    // 由 Game 调用 this._syncOverlayState() 同步
+    if (this.game._syncOverlayState) this.game._syncOverlayState();
+  }
+
+  /** 内部：按层名找定义 */
+  _findDef(name) {
+    return OVERLAY_LAYERS.find((l) => l.layer === name);
+  }
+
+  /** 指针锁自动释放（W-D1 切片1 / B46）：模态开着时自动释放指针锁 */
+  checkPointerLock() {
+    const top = this.getTopModal();
+    if (top && document.pointerLockElement === this.game.renderer?.domElement) {
+      document.exitPointerLock?.();
+    }
+  }
+
+  /** 获取当前顶层模态（有 blocks 的） */
+  getTopModal() {
+    for (let i = this._stack.length - 1; i >= 0; i--) {
+      if (this._stack[i].blocks) return this._stack[i];
+    }
+    return null;
+  }
+}
+
+export default OverlayStack;
