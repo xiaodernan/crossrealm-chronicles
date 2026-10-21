@@ -2186,9 +2186,12 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .sq-grid { display: grid; gap: 8px; max-height: 44vh; overflow-y: auto; }
 .sq-card { background: rgba(0,0,0,0.32); border: 1px solid rgba(100,180,120,0.25); border-radius: 6px; padding: 10px; }
 .sq-card.sq-done { border-color: rgba(100,220,140,0.5); opacity: 0.85; }
+.sq-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .sq-title { color: #88ccaa; font-size: 0.82rem; font-weight: 600; }
 .sq-desc { font-size: 0.72rem; color: #aaa; margin: 4px 0; }
 .sq-reward { font-size: 0.68rem; color: #666; }
+/* 位面徽标（W-B12 切片6）：这条支线绑在哪座位面 —— `global` 的那些不挂（它们不属于任何一座区） */
+.sq-zone { flex: 0 0 auto; font-size: 0.62rem; color: #8fa8c8; border: 1px solid rgba(140,170,210,0.32); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
 
 .session-stats { position: fixed; top: 120px; left: 20px; z-index: 88; background: rgba(0,0,0,0.55); border: 1px solid rgba(201,169,98,0.35); border-radius: 6px; padding: 10px 12px; font-size: 0.72rem; color: #ccc; line-height: 1.6; pointer-events: none; }
 .session-stats.hidden { display: none; }

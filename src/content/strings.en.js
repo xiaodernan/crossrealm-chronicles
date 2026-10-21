@@ -160,6 +160,7 @@ export const STRINGS_EN = Object.freeze({
   side_quest_journal_title: 'Side quest · ${title}',
   side_quest_reward: 'Reward ${reward} soulfire',
   side_quest_progress: 'Completed ${done} / ${total}',
+  side_quest_zone_badge: 'Zone: ${zone}',
   side_quest_hint: 'Side quests are detected automatically — kills, CG, campfires, rematches, photos, etc.',
 
   // Achievement UI strings (W-D2 slice 16l)

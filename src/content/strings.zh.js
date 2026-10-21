@@ -160,6 +160,7 @@ export const STRINGS_ZH = Object.freeze({
   side_quest_journal_title: '支线 · ${title}',
   side_quest_reward: '奖励 ${reward} 魂火',
   side_quest_progress: '完成 ${done} / ${total}',
+  side_quest_zone_badge: '位面：${zone}',
   side_quest_hint: '支线自动检测 — 连杀、CG、营火、再战、拍照等',
 
   // 成就界面文案（W-D2 切片16l）
