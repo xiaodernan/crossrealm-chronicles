@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v9', version: 9 },
   { key: 'crossrealm_save_v8', version: 8 },
   { key: 'crossrealm_save_v7', version: 7 },
   { key: 'crossrealm_save_v6', version: 6 },
@@ -80,19 +81,33 @@ function migrateV6toV7(d) {
 }
 
 /**
+ * 按插入点把**旧下标**折算成**新下标**（W-E3 切片9/10）。
+ *
+ * 插入点的含义：「新步插在旧序列的第 p 位**之前**」⇒ 旧下标 ≥ p 的每一步都往后挪一位。
+ * 于是新下标 = 旧下标 + (那些 ≤ 旧下标的插入点的个数)。
+ *
+ * 为什么把这条折算**收成一个函数**：插一步要一条折算、插三步要三条折算 ——
+ * 各写一遍就是三份可能互相漂开的算式（"插点 ≤ 还是 < 旧下标"这种差一位的错误，
+ * 症状是老存档落到**相邻**那一步上 ⇒ 静默丢一段内容）。
+ */
+function 偏移后(旧下标, 插入点) {
+  return 旧下标 + 插入点.filter((p) => p <= 旧下标).length;
+}
+
+/**
  * v7 → v8：**主线加长一步**（W-E3 切片9），主线那 32 步的下标是**存档语义**
  * （`quests.index` 就是这条序列的下标）⇒ 在中间插一步，后面每一步的下标全部 +1。
  *
  * ## 为什么必须是迁移，而不是"读档侧兜底"
  *
  * `quests.index` 是**位置**，不是 id。改前那份 24 号位是 `void-boss`（破碎时线的执政官），
- * 改后 24 号位变成了新插的 `void-casket`（断时之匣）—— 若不迁移，老存档读进来会
- * **跳过**新插的那一步，直接落到执政官身上 ⇒ 玩家永远看不到断时之匣，
+ * 改后 24 号位变成了新插的 `void-hunt`（怨影肃清）—— 若不迁移，老存档读进来会
+ * **跳过**新插的那一步，直接落到执政官身上 ⇒ 玩家永远看不到那一步，
  * 而存档看起来"完全正常"（没有报错、没有坏档提示）⇒ **静默丢一段内容**。
  *
  * ## 插入点是**历史事实**，写死在这里
  *
- * `V8_INSERT_AT = 24` 记的是"v8 这一版把新步插在了第 24 位"这一件**发生过的事**。
+ * `V8_INSERT_POINTS = [24]` 记的是"v8 这一版把新步插在了第 24 位"这一件**发生过的事**。
  * 它**不能**从当前主线表反推（表会再变，而迁移必须永远按当初那件事算）；
  * 但它**可以**被门禁核：门禁断言"当前表的第 24 位就是那个新步"，
  * 于是"迁移算错位置"当场红。
@@ -104,12 +119,35 @@ function migrateV6toV7(d) {
  * B120 那一族），而偏移与不偏移**落在同一格** ⇒ 两种做法等价，而"少一个常量"
  * 更要紧（多一个"当时那条序列有多长"的常量，就多一处可能写错的地方）。
  */
-export const V8_INSERT_AT = 24;
+export const V8_INSERT_POINTS = [24];
 
 function migrateV7toV8(d) {
   const quests = d.quests ?? {};
   const idx = Number(quests.index);
-  if (Number.isInteger(idx) && idx >= V8_INSERT_AT) quests.index = idx + 1;
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V8_INSERT_POINTS);
+  return d;
+}
+
+/**
+ * v8 → v9：**主线再长三步**（W-E3 切片10）。
+ *
+ * 这一跳插了三步（`hexer-hunt` / `crawler-hunt` / `knight-hunt`）⇒ 插入点是**三个数**，
+ * 而不是一个 ⇒ 折算走上面那个共用的 `偏移后`（老下标 ≥ 某个插点的都往后挪）。
+ *
+ * 三个插点的口径（**旧序列**的下标）：
+ * - 13 —— 在 `level` 之前（`hexer-hunt`）
+ * - 25 —— 在 `void-boss` 之前（`crawler-hunt`）
+ * - 29 —— 在 `skills` 之前（`knight-hunt`）
+ *
+ * 同样：插点是**历史事实**（写死在这里，由门禁对着那份冻结的 v8 名单核对），
+ * **不能**从当前主线表反推 —— 表会再变，而迁移必须永远按当初那件事算。
+ */
+export const V9_INSERT_POINTS = [13, 25, 29];
+
+function migrateV8toV9(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V9_INSERT_POINTS);
   return d;
 }
 
@@ -119,6 +157,7 @@ export const MIGRATIONS = {
   5: migrateV5toV6,
   6: migrateV6toV7,
   7: migrateV7toV8,
+  8: migrateV8toV9,
 };
 
 /**
