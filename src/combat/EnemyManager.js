@@ -12,6 +12,7 @@ import { VoidBoss } from './VoidBoss.js';
 import { ChaosBoss } from './ChaosBoss.js';
 import { chapterGateFor } from '../content/bossRoster.js';
 import { zoneIdAt } from '../content/ZoneIdentity.js';
+import { ENEMY_SPAWNS } from '../content/enemySpawns.js';
 import { growthAt, zoneGrowthStage } from '../content/enemyGrowth.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { difficultyMultiplier } from '../game/Difficulty.js';
@@ -366,104 +367,10 @@ export class EnemyManager {
   }
 
   spawnDefaults() {
-    this.spawnAt('dummy', 15, 45);
-
-    for (const [x, z] of [[-215, -20], [-185, 35], [-230, 15], [-200, -45], [-170, -30]]) {
-      this.spawnAt('soldier', x, z);
-    }
-
-    for (const [x, z] of [[10, -195], [-25, -210], [30, -170], [-10, -230]]) {
-      this.spawnAt('golem', x, z);
-    }
-
-    for (const [x, z] of [[220, 60], [185, 110], [240, 100], [160, 70], [210, 140]]) {
-      this.spawnAt('drone', x, z);
-    }
-
-    this.spawnAt('elite', -50, -60);
-
-    // W-B7 切片1：破碎时线与混沌边境此前没有原生敌人 —— 路过只有风景。
-    // 出生点避开 Boss 场（时线执政官 (0,235) / 混沌领主 (-200,285)，半径 22）与各自的营火。
-    for (const [x, z] of [[28, 212], [-32, 242], [12, 268], [-48, 205]]) {
-      this.spawnAt('wraith', x, z);
-    }
-
-    for (const [x, z] of [[-222, 212], [-192, 248], [-238, 252]]) {
-      this.spawnAt('stalker', x, z);
-    }
-
-    for (const [x, z] of [[-172, 238], [-245, 280], [-160, 205]]) {
-      this.spawnAt('sentinel', x, z);
-    }
-
-    // W-B7 切片3（战斗类型 7 → 10）：三类按"这位面缺什么样的威胁"落位。
-    // 坐标同样避开五座 Boss 场（半径 22）与各自营火，并且不与切片1 那三类的出生点重叠。
-    for (const [x, z] of [[70, 250], [-85, 258], [40, 168]]) {
-      this.spawnAt('crawler', x, z);
-    }
-
-    // B70：`[-255, 175]` 那一格四面都醒不过来（玩家贴到 1.7 米仍 `sense.alerted` 恒 false，
-    // 四个正方向全试过）—— 换到 `[-250, 120]`：同样在混沌边境、离最近的出生点 51.5 米、
-    // 离五座 Boss 场 133 米，四个方向都警觉。`tests/enemy-roster.test.js` 的"四向至少一向
-    // 会警觉"就是为这一类立的门禁（"站得下人"与"会警觉"从来是两件事）。
-    for (const [x, z] of [[-250, 120], [-145, 250], [-205, 145]]) {
-      this.spawnAt('knight', x, z);
-    }
-
-    // B70 的第二处实例（同一族，由上面那道新门禁扫出来的）：`[275, 10]` 四向皆不警觉，换到
-    // `[240, -40]` —— 仍在米勒荒原、离最近的出生点 61 米、离 Boss 场 173 米，四个方向都警觉
-    for (const [x, z] of [[150, -20], [240, -40], [190, 200]]) {
-      this.spawnAt('dancer', x, z);
-    }
-
-    // W-B7 切片4（战斗类型 10 → 12）：补的是**每座位面至少两类原生敌人** ——
-    // 此前灰白森林只有影之战士、霍格沃兹遗境只有魔法构装体，各自整片位面只有一种威胁。
-    // 坐标同样避开五座 Boss 场（半径 22）与已有出生点（最近邻居 40 米以上）。
-    for (const [x, z] of [[-150, 55], [-250, 60], [-160, 90]]) {
-      this.spawnAt('juggernaut', x, z);
-    }
-
-    for (const [x, z] of [[80, -135], [-40, -140], [60, -215]]) {
-      this.spawnAt('hexer', x, z);
-    }
-
-    // W-B9 切片1：幽暗林地（gloom，中心 ~180,100，半径 160）—— 三类原生敌人。
-    // B70 族排查记录：`_buildRuinClusters` 的断柱簇 `[240,120,5]` 是**装饰**（不注册碰撞），
-    // 它不挡 `Sense` 的 `world.blocked` 视线判定 —— 那只看 zone.collider / 内部空间 / 边界墙。
-    // 实测（scripts 里逐点 `blocked` 四向）`(240,120)` 四面通视，本就是能醒的格子；曾一度误判
-    // 成"压在断柱上"挪去 `(280,180)`，那一格正撞内部空间/神殿碰撞体堆（r1.4~1.8 圆柱），
-    // 四面皆闷 —— 已改回。东侧的 `(250,60)`/`(280,40)` 同样压在 `box hx6 hz3` 与大边界箱上，别选。
-    for (const [x, z] of [[120, 80], [240, 120], [160, 200]]) {
-      this.spawnAt('gloom_wraith', x, z);
-    }
-    for (const [x, z] of [[80, 140], [200, 60], [220, 80]]) {
-      this.spawnAt('gloom_stalker', x, z);
-    }
-    for (const [x, z] of [[220, 20], [300, 80], [140, 180]]) {
-      this.spawnAt('gloom_sentinel', x, z);
-    }
-    // W-E3 切片3：幽暗守夜人（三点）。坐标是**用门禁自己的那把尺子挑出来的** ——
-    // 一只敌人、一间真世界，玩家贴到 1.7 米试四个正方向，至少一向要醒得过来；
-    // 且与已有出生点铺开（挤在一起的敌人会互相推着抖）。
-    for (const [x, z] of [[60, 0], [60, 80], [240, 240]]) {
-      this.spawnAt('gloom_warden', x, z);
-    }
-
-    // W-B9 切片1：辉煌圣域（radiant，中心 ~-180,-160，半径 150）—— 三类原生敌人
-    for (const [x, z] of [[-240, -200], [-120, -100], [-300, -180]]) {
-      this.spawnAt('radiant_crawler', x, z);
-    }
-    for (const [x, z] of [[-80, -220], [-200, -80], [-240, -100]]) {
-      this.spawnAt('radiant_knight', x, z);
-    }
-    for (const [x, z] of [[-160, -240], [-220, -200], [-100, -140]]) {
-      this.spawnAt('radiant_dancer', x, z);
-    }
-    // W-E3 切片3：辉煌圣印者（三点）。同上，坐标由门禁的尺子挑出来。
-    for (const [x, z] of [[-320, -120], [-300, -240], [-240, -280]]) {
-      this.spawnAt('radiant_brand', x, z);
-    }
-
+    // 出生点表在内容层（W-B7 切片7 搬过来的）：`content/enemySpawns.js` ——
+    // 坐标与类型是**内容**，混在行为文件里既没人知道它是内容，内容层也够不着它
+    // （"那位面到底有没有敌人可杀"因此查不到）。
+    for (const s of ENEMY_SPAWNS) this.spawnAt(s.type, s.x, s.z);
     const bx = -250, bz = -35;
     this.bossArena = this.buildBossArena({ x: bx, z: bz });
     this.spawnBoss({ bossId: 'shadow-warden', x: bx, z: bz });

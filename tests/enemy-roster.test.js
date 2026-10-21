@@ -89,11 +89,13 @@ describe('W-B7 切片1：时线怨影 / 混沌掠行兽 / 边境哨炮', () => {
     for (const t of ['wraith', 'stalker', 'sentinel']) {
       expect(按类型[t] ?? 0, `空位面里 "${t}" 出生不足一组（<3 只）`).toBeGreaterThanOrEqual(3);
     }
-    // 新类型前面的注释要说明"为什么放这两个位面"—— 两个空位面是这片的存在理由
+    // 新类型前面的注释要说明"为什么放这两个位面"—— 两个空位面是这片的存在理由。
+    // W-B7 切片7：出生点表搬进内容层之后，那段说明跟着数据一起搬走了（数据与它的理由要在一起）。
+    const 表 = readSrc('content/enemySpawns.js');
+    expect(表, '出生点表里没有"为什么放这两个位面"那段说明').toMatch(/破碎时线与混沌边境此前没有原生敌人/);
+    // 生产代码那边不许留第二份（理由抄两份就会漂）
     const 源码 = readSrc('combat/EnemyManager.js');
-    const 起点 = 源码.indexOf('spawnDefaults()');
-    expect(源码.slice(起点, 源码.indexOf('buildBossArena', 起点)))
-      .toMatch(/破碎时线与混沌边境此前没有原生敌人/);
+    expect(源码, '出生点表搬走了，理由却还抄了一份在行为文件里').not.toMatch(/破碎时线与混沌边境此前没有原生敌人/);
   });
 });
 

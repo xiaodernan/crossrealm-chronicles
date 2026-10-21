@@ -246,10 +246,15 @@ describe('④ 单一真源：两个出生嘴里不再有手抄身份', () => {
     const 源码 = readSrc('combat/EnemyManager.js');
     const 起点 = 源码.indexOf('spawnDefaults()');
     const 段 = stripComments(源码.slice(起点, 源码.indexOf('buildBossArena', 起点)));
-    expect(段.length, '没切到 spawnDefaults 那一段').toBeGreaterThan(120);
+    expect(段.length, '没切到 spawnDefaults 那一段').toBeGreaterThan(60);
     expect(抄回(段, 'spawnDefaults'), '出生点又手抄了身份字段').toEqual([]);
-    // 反面证据：这一段确实在出生（不是被切空了才"没有"）
-    expect(段.match(/this\.spawnAt\(/g).length, '出生嘴里没有 spawnAt 调用').toBeGreaterThanOrEqual(13);
+    // 反面证据：这一段确实在出生（不是被切空了才"没有"）。
+    // W-B7 切片7：出生点表搬进内容层之后，生产代码是**遍历表**（一句 spawnAt），
+    // 于是"确实在出生"的证据分两半：代码里那一遍遍历 + 表里那几十行。
+    expect(段.match(/this\.spawnAt\(/g).length, '出生嘴里没有 spawnAt 调用').toBeGreaterThanOrEqual(1);
+    expect(段, '出生嘴里没有遍历出生点表').toMatch(/ENEMY_SPAWNS/);
+    const 表 = readSrc('content/enemySpawns.js');
+    expect((表.match(/type:\s*'/g) ?? []).length, '出生点表里没有几十行').toBeGreaterThanOrEqual(13);
   });
 
   it('副本房间出生只剩 `spawnAt(类型, x, z, { respawn })`：那串三元式没了', () => {

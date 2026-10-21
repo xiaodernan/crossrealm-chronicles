@@ -50,6 +50,7 @@ import { FRANCHISE } from './franchises.js';
 import { OBJECTIVES, OBJECTIVE_TYPES } from './objectives.js';
 import { checkQuestFactClosure } from './questFacts.js';
 import { ENEMY_ROSTER } from './enemies.js';
+import { ENEMY_SPAWNS } from './enemySpawns.js';
 // 章节判据要读**展开后**的 announce（`announce` 存的是键，W-D2 切片16j）——
 // 中文表就在**同层**（`content/strings.zh.js`），不构成"向上够 engine"。
 // 读中文表够用：判的是"喊的是不是第 N 章"，而 `Chapter N` 这句写法两种语言一致。
@@ -893,6 +894,21 @@ export const CONTENT_TABLES = [
     shape: 'index',
     table: GEAR_BAG,
     value: { t: 'int', min: 1, max: 100 },
+  },
+  {
+    kind: 'enemySpawns',
+    note: '野外原生敌人的出生点（W-B7 切片7 从 `combat/EnemyManager.js` 搬进内容层）：'
+      + '键是出场次序（**顺序也是契约** —— 出生点的先后决定 `spawnAt` 的调用序，而那决定敌人的列表序），'
+      + '值是"哪一类敌人 / 站在哪个坐标"。读者是 `combat/EnemyManager.js` 的 `spawnDefaults()`。'
+      + '表里**没有区位那一格** —— 区位是按坐标反推的（`zoneIdAt`，按位置反推区域的唯一一处），'
+      + '在这里再抄一格就是第二份真相',
+    shape: 'rows',
+    table: ENEMY_SPAWNS,
+    row: {
+      type: { t: 'ref', of: 'enemyRoster' },
+      x: { t: 'number' },
+      z: { t: 'number' },
+    },
   },
   {
     kind: 'enemyRoster',
