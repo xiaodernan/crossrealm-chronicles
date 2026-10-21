@@ -36,14 +36,18 @@ import { DRAW_CALL_BUDGETS, overCeiling, missingCeilings, extraCeilings } from '
 export { overCeiling, missingCeilings, extraCeilings };
 
 export const PERF_BUDGETS = {
-  /** update() 平均耗时上限（ms）：内容膨胀拖垮的第一个数（12 类敌人的 AI、分离、感知都在这里面） */
-  updateAvgMs: 40,
-  /** update() p95 上限（ms）：个别重帧不许连成片 */
-  updateP95Ms: 80,
-  /** 全帧（update+render）平均上限（ms）：软渲染噪声大，只做灾难级护栏 */
-  frameAvgMs: 600,
-  /** JS 堆峰值上限（MB）：超了说明有东西在每帧攒垃圾（B 一族"只加不收"的另一种形状） */
-  heapMb: 1200,
+  /** update() 平均耗时上限（ms）：内容膨胀拖垮的第一个数（12 类敌人的 AI、分离、感知都在这里面）
+   * 基线实测：枢纽 3.13ms / 灰白森林 5.58ms → 校准上限 = max(5.58) × 2 ≈ 12ms */
+  updateAvgMs: 12,
+  /** update() p95 上限（ms）：个别重帧不许连成片
+   * 基线实测：枢纽 4ms / 灰白森林 6.2ms → 校准上限 = max(6.2) × 2 ≈ 12ms */
+  updateP95Ms: 12,
+  /** 全帧（update+render）平均上限（ms）：软渲染噪声大，只做灾难级护栏
+   * 基线实测：枢纽 82.2ms / 灰白森林 80.6ms → 校准上限 = max(82.2) × 2 ≈ 165ms */
+  frameAvgMs: 165,
+  /** JS 堆峰值上限（MB）：超了说明有东西在每帧攒垃圾（B 一族"只加不收"的另一种形状）
+   * 基线实测：87MB → 校准上限 = 87 × 2 ≈ 180MB */
+  heapMb: 180,
   /** 未捕获异常：0 条，性能门禁顺手兼做稳定性门禁 */
   exceptions: 0,
   /**
