@@ -34,6 +34,17 @@
  * 推帧**只调 update()，不调 render()**：软渲染一帧 ~150ms（`perf-smoke` 实测），
  * 两千多帧会把这个门禁拖成五分钟。任务推进不经过渲染路径 —— 渲染价的回归归 perf-smoke。
  *
+ * ## 这一轮连的是哪台浏览器、哪个页（W-C2 切片6c，与 `perf-smoke` 同一套口径）
+ *
+ * 这条门禁只报一个数：**异常 0 条**。而"CDP 事件通道一条都没送"与"页面真的没抛错"
+ * 读出来是同一个 0 —— 所以通道的**正面见证**（有执行上下文、有 load）是这条预算的前提，
+ * 不是装饰。同理，口不能靠探：`--remote-debugging-port=<固定口>` 在端口被占时 Chrome
+ * **不报错，只是不开这个口**，而探口探到**别人**那台 Chrome 时，脚本会在别人的 profile 里
+ * 跑这一轮，读数不再属于这个工作树。所以口交给 Chrome 自己挑（`=0`），再从**它自己的话**里读回来；
+ * 页地址必须落在本进程的 vite 口上。三样判据（`解析CDP口` / `页地址问题` / `通道问题`）
+ * 都住在 `./harness-readings.mjs` —— 那是两个 harness 共用的判据模块，写成本文件的私有函数
+ * 就等于把"这条门禁说的话算不算数"复制两份、各自漂移。
+ *
  * ## 退出码
  *
  * `0` 通关且在预算内；`1` 没通关 / 超帧预算 / 有未捕获异常；`2` 环境问题（找不到 Chrome、
@@ -41,12 +52,13 @@
  *
  * 用法：`npm run e2e`（自己起 dev 口与浏览器，结束自己收）。
  */
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { existsSync, rmSync } from 'fs';
 import { createServer } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { E2E_BUDGETS } from './e2e-budgets.mjs';
+import { 解析CDP口, 页地址问题, 通道问题 } from './harness-readings.mjs';
 
 /**
  * 预算表在 `./e2e-budgets.mjs` —— **判据与执行分家**。
@@ -58,12 +70,14 @@ import { E2E_BUDGETS } from './e2e-budgets.mjs';
  */
 
 /**
- * 取一个当下空闲的端口。
+ * 取一个当下空闲的端口（现在只用在 **vite** 那上口）。
  *
- * 为什么不用写死的端口（`perf-smoke` 用的是 5321/9424 那一对）：实测连跑两次，
- * 第二次会以 "Chrome CDP 口没起来" 收场 —— 上一轮的 Chrome 还没退干净，端口还占着。
- * 一条**时绿时红**的门禁比没有门禁更糟（它会教人忽略红灯），所以端口按当下空闲的取。
+ * 为什么 dev 口不用写死的（`perf-smoke` 那边是 5321 + "开跑前先验口空"）：实测连跑两次，
+ * 第二次会以 "Chrome CDP 口没起来" 收场 —— 上一轮的进程还没退干净，端口还占着。
+ * 一条**时绿时红**的门禁比没有门禁更糟（它会教人忽略红灯），所以这一侧按当下空闲的取。
  * 竞态窗口（探测与占用之间）在单机上是毫秒级，且真撞上也只是这一条红，不会静默假绿。
+ *
+ * CDP 那上口**不**再用它：见下面 `CDP_SPEC` —— 探来的口不等于 Chrome 会听那个口。
  */
 const freePort = () => new Promise((res, rej) => {
   const srv = createServer();
@@ -76,6 +90,22 @@ const freePort = () => new Promise((res, rej) => {
 });
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * CDP 口交给 **Chrome 自己挑**（W-C2 切片6c，与 `perf-smoke` 切片6b 同一处修法）。
+ *
+ * 此前这里写的是 `const CDP_PORT = await freePort()`：先探一个空的，再把它塞给 Chrome。
+ * 探到的那个"空"只属于探测那一瞬间 —— 上一轮泄漏的无头 Chrome（Windows 上 `child.kill()`
+ * 杀不掉整棵树，见 `拔树`）随时可能还占着它，而 `--remote-debugging-port=<被占的口>` 的失败方式
+ * 不是报错，是**不开口**：于是这一条红成"Chrome CDP 口没起来"，责任落在根本没改过的代码上。
+ * 更坏的一种：探到的口上答话的是**别人**的 Chrome ⇒ 脚本连进别人的浏览器，在它那个 about:blank
+ * 里等 `window.__game`，最后红成"游戏没起来"，或者（页恰好是我们那个构建时）跑成一次不属于
+ * 这个工作树的**绿**。
+ *
+ * `=0` 之后口由 Chrome 挑一个真空闲的，再通过它自己的话交回来（`DevTools listening on ws://…`）。
+ * 于是"口来自我 spawn 的那个进程"由构造成立 —— 撞不上别人的口，也连不上别人的浏览器。
+ */
+const CDP_SPEC = 0;
 
 function findChrome() {
   const candidates = [
@@ -97,10 +127,8 @@ async function waitForHttp(url, tries = 40) {
   return false;
 }
 
-// 端口按当下空闲的取（见 `freePort` 的注释）：两个都先占好再起进程，
-// 免得 vite 与 Chrome 之间互相抢
+// vite 的口按当下空闲的取（见 `freePort` 的注释）；CDP 的口不取，等 Chrome 报。
 const VITE_PORT = await freePort();
-const CDP_PORT = await freePort();
 
 // 直接用当前 node 调 vite.js：Windows 上 spawn .cmd 要开 shell（引号/quoting 风险），绕开它
 //
@@ -114,13 +142,15 @@ const vite = spawn(process.execPath, [viteBin, '--host', '127.0.0.1', '--port', 
 const chromePath = findChrome();
 if (!chromePath) {
   console.error('e2e-clear: 找不到 Chrome（可用 CHROME 环境变量指定路径）');
-  vite.kill();
+  拔树(vite);
   process.exit(2);
 }
 const profileDir = join(tmpdir(), `e2e-clear-${Date.now()}`);
+/** 浏览器自己报的话（stderr 为主，stdout 一起收 —— 有的构建把 DevTools 行打到 stdout） */
+const 浏览器输出 = [];
 const chrome = spawn(chromePath, [
   '--headless=new',
-  `--remote-debugging-port=${CDP_PORT}`,
+  `--remote-debugging-port=${CDP_SPEC}`,
   `--user-data-dir=${profileDir}`,
   '--no-first-run',
   '--disable-gpu',
@@ -129,11 +159,53 @@ const chrome = spawn(chromePath, [
   '--disable-backgrounding-occluded-windows',
   '--disable-renderer-backgrounding',
   'about:blank',
-], { stdio: 'ignore' });
+], { stdio: ['ignore', 'pipe', 'pipe'] });
+chrome.stderr.on('data', (b) => 浏览器输出.push(String(b)));
+chrome.stdout.on('data', (b) => 浏览器输出.push(String(b)));
+
+/**
+ * 从 Chrome 自己的话里取回它挑中的口（有界等待，取不到就带上它说过的话红）。
+ *
+ * 这一句是整条腿的**来源证明**：口不是探来的，是**我 spawn 的那个进程**亲口报的。
+ * 上限给 25 秒是为 CI —— 没有上限，一次 Chrome 起不来就变成挂住而不是红。
+ */
+async function 读CDP口(等待毫秒 = 25000) {
+  const 截止 = Date.now() + 等待毫秒;
+  for (;;) {
+    const 全文 = 浏览器输出.join('');
+    const 得 = 解析CDP口(全文);
+    if (得) return { ...得, 全文 };
+    if (Date.now() >= 截止) {
+      throw new Error(`Chrome ${Math.round(等待毫秒 / 1000)} 秒内没报出 DevTools 口（--remote-debugging-port=${CDP_SPEC}）。它自己的话：\n${全文.slice(0, 1200) || '(空)'}`);
+    }
+    await sleep(250);
+  }
+}
+
+/**
+ * 收尾：把**自己起的**那棵树连根拔掉（Windows 上要的是 /T，不是 kill()）。
+ *
+ * `child.kill()` 在 Windows 上只终止那一个 PID，而 headless Chrome 有一整棵子进程
+ * （crashpad、renderer、utility），主进程被孤儿们钉住不走。上一轮就是这么把 dev 口与浏览器留活的，
+ * 而上面 `freePort` / `CDP_SPEC` 那两段说的"连跑两次必红"就是它的后果 —— 拔树是让那两条前提成立的那一环。
+ * 只杀自己那棵树：PID 来自本次 spawn，不搜进程名（搜名字会打到别人并行跑的 Chrome/vite 上）。
+ */
+function 拔树(子进程) {
+  if (!子进程?.pid) return;
+  try {
+    if (process.platform === 'win32') {
+      const r = spawnSync('taskkill', ['/PID', String(子进程.pid), '/T', '/F'], { stdio: 'ignore' });
+      if (r.status !== 0) 子进程.kill(); // 已经没了 / taskkill 不可用：退回原办法
+    } else {
+      子进程.kill();
+    }
+  } catch { /* 已经退出 */ }
+}
 
 const cleanup = () => {
-  try { chrome.kill(); } catch { /* 已退出 */ }
-  try { vite.kill(); } catch { /* 已退出 */ }
+  拔树(chrome);
+  拔树(vite);
+  // 临时 profile 要等浏览器真死了才删得动：先拔树，再删目录
   try { rmSync(profileDir, { recursive: true, force: true }); } catch { /* 留着也无害 */ }
 };
 process.on('exit', cleanup);
@@ -141,16 +213,28 @@ process.on('exit', cleanup);
 let failures = 0;
 try {
   if (!await waitForHttp(`http://127.0.0.1:${VITE_PORT}/`)) throw new Error('dev 口 20 秒内没起来');
-  if (!await waitForHttp(`http://127.0.0.1:${CDP_PORT}/json/version`)) throw new Error('Chrome CDP 口没起来');
+  const { 口: CDP口, 浏览器ws } = await 读CDP口();
+  console.log(`e2e-clear：Chrome 报出自己的口 ${CDP口}（${浏览器ws.slice(0, 46)}…）`);
 
-  const targets = await (await fetch(`http://127.0.0.1:${CDP_PORT}/json/list`)).json();
+  const targets = await (await fetch(`http://127.0.0.1:${CDP口}/json/list`)).json();
   const page = targets.find((t) => t.type === 'page');
+  /** 点名目标的清单：口是通的、缺的是页 —— "CDP 口没起来"这句会把责任记错地方 */
+  if (!page) {
+    throw new Error(`CDP 口 ${CDP口} 通了但 /json/list 里没有 page 目标：${JSON.stringify(targets).slice(0, 300)}`);
+  }
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 
   let msgId = 0;
   const pending = new Map();
   const exceptions = [];
+  /**
+   * 事件通道的**自证**：这条门禁的预算里有一条"异常 0 条"，
+   * 而"通道一条都没送"与"页面真的没抛"读出来是同一个 0 —— 后者会被当成达标。
+   * 所以顺手数两样一定会来的东西（`Runtime.enable` 会 flush 现存执行上下文；导航后必有 load），
+   * 起跑前先一并核。判据在 `./harness-readings.mjs`，与 `perf-smoke` 共用同一把尺。
+   */
+  const 通道 = { 执行上下文: 0, 加载完成: 0 };
   ws.onmessage = (ev) => {
     const m = JSON.parse(ev.data);
     if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); }
@@ -158,6 +242,8 @@ try {
       exceptions.push(m.params?.exceptionDetails?.exception?.description
         ?? m.params?.exceptionDetails?.text ?? '?');
     }
+    else if (m.method === 'Runtime.executionContextCreated') 通道.执行上下文 += 1;
+    else if (m.method === 'Page.loadEventFired') 通道.加载完成 += 1;
   };
   const send = (method, params = {}) => new Promise((res) => {
     const id = ++msgId; pending.set(id, res); ws.send(JSON.stringify({ id, method, params }));
@@ -165,7 +251,12 @@ try {
   const evalJs = async (expr) => {
     const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: false, returnByValue: true });
     if (r.result?.exceptionDetails) {
-      throw new Error('页面内抛错: ' + JSON.stringify(r.result.exceptionDetails).slice(0, 300));
+      // 把**页面里那句话**与位置带出来：抽 JSON 前 300 字会正好切掉 description，
+      // 于是红只会说"页面内抛错"，责任落不到具体哪一句拒上（perf-smoke 2026-10-20 第一次真跑就这么瞎过一次）。
+      const d = r.result.exceptionDetails;
+      const 原话 = d.exception?.description ?? d.exception?.value ?? d.text ?? '?';
+      const 位置 = `${d.url || '页内'}:${(d.lineNumber ?? -1) + 1}:${d.columnNumber ?? '?'}`;
+      throw new Error(`页面内抛错 @${位置}：${String(原话).split('\n')[0].slice(0, 400)}`);
     }
     return r.result?.result?.value;
   };
@@ -175,11 +266,31 @@ try {
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
   let ready = false;
-  for (let i = 0; i < 60 && !ready; i += 1) {
+  /**
+   * 开机窗口 120 秒（不是 30 秒），与 `perf-smoke` 同一把尺：vite 冷缓存要按需转译 ~300 个模块，
+   * `.tmp-20261020-wc2s5/why-no-game.mjs` 在同一条 dev 口上量到过 `window.__game` 要 **57.5 秒**才出现。
+   * 30 秒那一档红的是缓存而不是代码 —— 而 CI 的 `node_modules/.vite` 每轮都是冷的。
+   */
+  for (let i = 0; i < 240 && !ready; i += 1) {
     await sleep(500);
     ready = await evalJs('!!window.__game && !!window.__game.quests && !!window.__game.questAssistant');
   }
-  if (!ready) throw new Error('游戏 30 秒内没起来');
+  if (!ready) throw new Error('游戏 120 秒内没起来');
+
+  /**
+   * **这一轮真的连到了这一轮起的那个页**，且事件通道在送东西（切片6c）。
+   *
+   * 页是从 `/json/list` 里挑的第一个 `type === 'page'`；地址必须落在**本进程的 vite 口**上，
+   * 否则下面那 44 步走的是别人的构建。通道那条同理是"exceptions=0 这句算不算数"的前提。
+   * 判据住在 `./harness-readings.mjs`：写在本地就只能拿正则数一遍字符串，
+   * "把 `if` 改成 `if (false)`"那种变异臂照样绿（2026-10-22 电池实测 A4/A5 两条作废就是这么来的）。
+   */
+  const 页地址 = await evalJs('location.href');
+  const 页问 = 页地址问题(页地址, VITE_PORT);
+  if (页问.length) throw new Error(`连到的页不对：\n - ${页问.join('\n - ')}`);
+  const 通问 = 通道问题(通道);
+  if (通问.length) throw new Error(`CDP 通道没有正面见证：\n - ${通问.join('\n - ')}`);
+  console.log(`e2e-clear：页=${页地址.slice(0, 60)} 执行上下文=${通道.执行上下文} 加载完成=${通道.加载完成}`);
 
   // ① 换成固定步长：这一句是"读数与机器快慢无关"的全部依据（见头注"确定性"）
   await evalJs('window.__game.clock.getDelta = () => 1 / 60; true');

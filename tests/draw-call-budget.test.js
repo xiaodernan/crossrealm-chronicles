@@ -47,6 +47,7 @@ import {
 } from '../src/engine/drawCallBudget.js';
 import { ZONE_IDS, ZONE_ORDER, HUB_ZONE } from '../src/content/ZoneIdentity.js';
 import { PERF_BUDGETS } from '../scripts/perf-budgets.mjs';
+import { draw读数问题 } from '../scripts/harness-readings.mjs';
 
 const SRC = join(process.cwd(), 'src');
 const 读 = (相对) => readFileSync(join(SRC, ...相对), 'utf8');
@@ -174,8 +175,17 @@ describe('脚本真的在用这三列 + 那几处当场拒', () => {
     // ① 站错区 ② timeOfDay 没钉住 ③ 阴影趟为 0 ④ 站点 id 在世界里找不到
     expect(脚本源, '少了"站错区"那条拒').toMatch(/现在落在/);
     expect(脚本源, '少了"timeOfDay 没钉住"那条拒').toMatch(/timeOfDay 没钉住/);
-    expect(脚本源, '少了"阴影趟为 0"那条拒').toMatch(/阴影趟读到/);
     expect(脚本源, '少了"世界里没有这一区"那条拒').toMatch(/世界里没有 id 为/);
+    /**
+     * ③ 这一条从切片6b 起住在 `scripts/harness-readings.mjs`（"每一列都得是数"那条判据的邻居），
+     * 脚本只负责"不合格就抛"。所以这里**不再**在脚本里找那句话 —— 那句话改由下面的行为腿
+     * 真喂一份坏读数验它出得来；脚本这一侧验的是"它确实问了那个判、且问了就抛"。
+     */
+    expect(脚本源, '脚本没有问三列的完整性判据').toMatch(/const 问 = draw读数问题\(站id, r\);/);
+    expect(脚本源, '问了之后没有作废（不抛 = 记为通过）').toMatch(/站点 \$\{站id\} 的 draw call 腿不是一次测量/);
+    const 问 = draw读数问题('hub', { 整帧: 278, 本体: 278, 阴影: 0, 三角面: 120000 });
+    expect(问.join('\n'), '阴影趟读到 0 那句话不再出自判据模块').toMatch(/阴影趟读到 0（整帧 278 \/ 本体 278）/);
+    expect(问.join('\n')).toMatch(/关阴影没有减少任何 call/);
   });
 
   it('世界侧对账也在（加了新区域却没进名单 ⇒ 当场红）', () => {

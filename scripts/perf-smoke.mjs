@@ -19,6 +19,7 @@ import { existsSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings } from './perf-budgets.mjs';
+import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题 } from './harness-readings.mjs';
 
 /**
  * 预算表在 `./perf-budgets.mjs` —— **判据与执行分家**（W-D4 切片3 修）。
@@ -30,7 +31,21 @@ import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings } from './per
  */
 
 const VITE_PORT = 5321;
-const CDP_PORT = 9424;
+/**
+ * CDP 口交给 **Chrome 自己挑**（W-C2 切片6b，#165）。
+ *
+ * 此前这里写的是 `const CDP_PORT = 9424`，配一段"开跑前先探这个口是不是空的"。占口检查
+ * 把那批红变**响**了，但没把它变**准**：`--remote-debugging-port=9424` 在端口被占时
+ * Chrome **不报错，只是不开这个口**，于是脚本只剩两种结局 —— 红成"CDP 口没起来"（2026-10-21
+ * 连撞四次：`.tmp-wc2s5/perf-r2.log`、`perf-r5.log`、`perf-r7.log`、`perf-nb2.log`，
+ * 都是 123~126 字节、一句 `Chrome CDP 口没起来`、退出码 2），或者更坏的一种：探口探到**别人**
+ * 那台 Chrome 上，然后在它那个 profile / 那套启动参数里跑我们这一轮 —— 读数不再属于这台浏览器。
+ *
+ * `=0` 之后口由 Chrome 挑一个真空闲的，再通过它自己的 stderr 交回来（`DevTools listening on ws://…`）。
+ * 于是"口是从**我 spawn 的那个进程**的 stderr 里读出来的"由构造成立：既撞不上别人的口，
+ * 也不可能连到别人的浏览器。解析与拒绝在 `./harness-readings.mjs`（判据与执行分家）。
+ */
+const CDP_SPEC = 0;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -106,14 +121,26 @@ async function 等口空(端口, 等待毫秒 = 12000) {
   }
 }
 
+/**
+ * 占口检查的**重试形状**：分两种占法。
+ * - 有人在**应答** ⇒ 那是别人的 vite，等多久都不会变成我的 ⇒ 当场拒。
+ * - 连得上但**不答话** ⇒ 是上一轮自己那份正在断气（`taskkill /F` 之后 socket 关掉要一点时间）
+ *   ⇒ 给它一个有限的等待窗口；窗口过了还答不上来，也照样拒（不猜）。
+ * 2026-10-20 实测：连跑两轮时第二轮就撞上这个窗口，红成"CDP 口没起来"的前身。
+ *
+ * **只剩 dev 口要查**（切片6b）：CDP 那上口现在由 Chrome 自己挑（`--remote-debugging-port=0`），
+ * 挑中的那一刻它就是空的，没什么可查 —— 那一侧"连到别人浏览器"的可能由构造消失。
+ * vite 这一侧不能同样放手：浏览器打开的就是 `http://127.0.0.1:5321/`，
+ * 连到外来 vite = 读到另一个工作树的构建，而那仍然会是一次**绿**的红。
+ */
 const 被占的口 = [];
-for (const [名, 口] of [['dev 口 (vite)', VITE_PORT], ['CDP 口 (Chrome)', CDP_PORT]]) {
+for (const [名, 口] of [['dev 口 (vite)', VITE_PORT]]) {
   const 由 = await 等口空(口);
   if (由) 被占的口.push(`  ${名} 127.0.0.1:${口} —— ${由}`);
 }
 if (被占的口.length > 0) {
-  console.error('perf-smoke 拒绝开跑：这两个口不是空的。\n' + 被占的口.join('\n')
-    + '\n占口的是上一轮泄漏的 vite / Chrome —— 这一轮会连到它们的进程上，读数不再属于这个工作树。');
+  console.error('perf-smoke 拒绝开跑：dev 口不是空的。\n' + 被占的口.join('\n')
+    + '\n占口的是上一轮泄漏的 vite —— 这一轮会连到它的进程上，读数不再属于这个工作树。');
   process.exit(2);
 }
 const viteBin = join(process.cwd(), 'node_modules', 'vite', 'bin', 'vite.js');
@@ -127,9 +154,11 @@ if (!chromePath) {
   process.exit(2);
 }
 const profileDir = join(tmpdir(), `perf-smoke-${Date.now()}`);
+/** 浏览器自己报的话（stderr 为主，stdout 一起收 —— 有的构建把 DevTools 行打到 stdout） */
+const 浏览器输出 = [];
 const chrome = spawn(chromePath, [
   '--headless=new',
-  `--remote-debugging-port=${CDP_PORT}`,
+  `--remote-debugging-port=${CDP_SPEC}`,
   `--user-data-dir=${profileDir}`,
   '--no-first-run',
   '--disable-gpu',
@@ -138,7 +167,28 @@ const chrome = spawn(chromePath, [
   '--disable-backgrounding-occluded-windows',
   '--disable-renderer-backgrounding',
   'about:blank',
-], { stdio: 'ignore' });
+], { stdio: ['ignore', 'pipe', 'pipe'] });
+chrome.stderr.on('data', (b) => 浏览器输出.push(String(b)));
+chrome.stdout.on('data', (b) => 浏览器输出.push(String(b)));
+
+/**
+ * 从 Chrome 自己的话里取回它挑中的口（有界等待，取不到就带上 stderr 摘要红）。
+ *
+ * 这一句是整条腿的**来源证明**：口不是我们猜的、也不是探出来的，是**我 spawn 的那个进程**
+ * 亲口报的。25 秒的上限是给 CI 的 —— 没有上限，一次 Chrome 起不来就变成挂住而不是红。
+ */
+async function 读CDP口(等待毫秒 = 25000) {
+  const 截止 = Date.now() + 等待毫秒;
+  for (;;) {
+    const 全文 = 浏览器输出.join('');
+    const 得 = 解析CDP口(全文);
+    if (得) return { ...得, 全文 };
+    if (Date.now() >= 截止) {
+      throw new Error(`Chrome ${Math.round(等待毫秒 / 1000)} 秒内没报出 DevTools 口（--remote-debugging-port=${CDP_SPEC}）。它自己的话：\n${全文.slice(0, 1200) || '(空)'}`);
+    }
+    await sleep(250);
+  }
+}
 
 /**
  * 收尾：把**自己起的**那棵树连根拔掉（Windows 上要的是 /T，不是 kill()）。
@@ -175,20 +225,34 @@ process.on('exit', cleanup);
 let failures = 0;
 try {
   if (!await waitForHttp(`http://127.0.0.1:${VITE_PORT}/`)) throw new Error('dev 口 20 秒内没起来');
-  if (!await waitForHttp(`http://127.0.0.1:${CDP_PORT}/json/version`)) throw new Error('Chrome CDP 口没起来');
+  const { 口: CDP口, 浏览器ws } = await 读CDP口();
+  console.log(`perf-smoke：Chrome 报出自己的口 ${CDP口}（${浏览器ws.slice(0, 46)}…）`);
 
-  const targets = await (await fetch(`http://127.0.0.1:${CDP_PORT}/json/list`)).json();
+  const targets = await (await fetch(`http://127.0.0.1:${CDP口}/json/list`)).json();
   const page = targets.find((t) => t.type === 'page');
+  /** 点名目标的清单：连不上页时"CDP 口没起来"这句太粗 —— 口是通的，缺的是页 */
+  if (!page) {
+    throw new Error(`CDP 口 ${CDP口} 通了但 /json/list 里没有 page 目标：${JSON.stringify(targets).slice(0, 300)}`);
+  }
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 
   let msgId = 0;
   const pending = new Map();
   const exceptions = [];
+  /**
+   * 事件通道的**自证**（切片6b）：`exceptions.length` 那一格判的是"0 条"，
+   * 而"通道一条都没送"与"页面真的没抛"读出来是同一个 0。所以这里顺手数两样一定会来的东西
+   * （`Runtime.enable` 会 flush 现存执行上下文；导航后必有 load），最后一并核。
+   * 不这么钉，这条预算格可以在通道断掉的情况下永远绿。
+   */
+  const 通道 = { 执行上下文: 0, 加载完成: 0 };
   ws.onmessage = (ev) => {
     const m = JSON.parse(ev.data);
     if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); }
     else if (m.method === 'Runtime.exceptionThrown') exceptions.push(m.params?.exceptionDetails?.text ?? '?');
+    else if (m.method === 'Runtime.executionContextCreated') 通道.执行上下文 += 1;
+    else if (m.method === 'Page.loadEventFired') 通道.加载完成 += 1;
   };
   const send = (method, params = {}) => new Promise((res) => {
     const id = ++msgId; pending.set(id, res); ws.send(JSON.stringify({ id, method, params }));
@@ -225,20 +289,45 @@ try {
   if (!ready) throw new Error('游戏 120 秒内没起来');
 
   /**
+   * **这个页就是这一轮起的那个页**（切片6b）。
+   *
+   * 口是从自己孩子的 stderr 读回来的，理论上不该再连错；但"页"是 `/json/list` 里挑的第一个
+   * `type === 'page'`，同一台浏览器里可能同时有别人开的页。地址必须落在**本进程的 vite 口**上，
+   * 否则下面那 10 个站点量的是别人的构建 —— 又一次绿的红。
+   *
+   * 判据住在 `./harness-readings.mjs`：写在这里的话，门禁只能拿正则数一遍字符串，
+   * "把 `if` 改成 `if (false)`"那种臂照样绿（2026-10-22 电池实测 A4/A5 两条作废就是这么来的）。
+   */
+  const 页地址 = await evalJs('location.href');
+  const 页问 = 页地址问题(页地址, VITE_PORT);
+  if (页问.length) throw new Error(`连到的页不对：\n - ${页问.join('\n - ')}`);
+  const 通问 = 通道问题(通道);
+  if (通问.length) throw new Error(`CDP 通道没有正面见证：\n - ${通问.join('\n - ')}`);
+  console.log(`perf-smoke：页=${页地址.slice(0, 60)} 执行上下文=${通道.执行上下文} 加载完成=${通道.加载完成}`);
+
+  /**
    * 一站读数：手工推帧（真 `game.update()` + 真 `game.render()`），量 CPU 耗时。
    *
    * 不用真实 rAF：无头页的帧由合成器供给，页面不被认为可见时 rAF 会被饿到几乎不跑
    * （实测出现过 18 秒的单帧距），那种读数量的是节流不是游戏。推帧是确定性的：
    * 240 帧 × (update 单独记一次账 + update+render 全帧记一次账)，60 帧一批喂给 CDP 免超时。
+   *
+   * 批数与每批帧数是**这里**的两个数，"应有帧数"由它们推（不另抄一个 240）：
+   * 有一批 evalJs 没回来时，交出的帧数会短，而短样本上的 `均值` 只会变小或变 NaN ——
+   * 预算表那几条 `>` 抓不到 NaN（`NaN > 40` 是 false），于是这一轮会**绿在缺样上**。
+   * 所以每一站交出之后先问 `cpu读数问题`，不合格就点名站点抛（读数作废，不是"记为通过"）。
    */
+  const 计时批数 = 4;
+  const 每批帧数 = 60;
+  const 应有帧数 = 计时批数 * 每批帧数;
   const 站 = async (名字, 表达式) => {
     await evalJs(表达式);
     await sleep(800); // 等传送/场景切换的尖刺过去再开始计时
     const batches = [];
-    for (let b = 0; b < 4; b += 1) {
+    for (let b = 0; b < 计时批数; b += 1) {
       batches.push(await evalJs(`(() => {
         const 只更新 = [];
-        for (let i = 0; i < 60; i += 1) {
+        for (let i = 0; i < ${每批帧数}; i += 1) {
           const t0 = performance.now();
           window.__game.update();
           只更新.push(performance.now() - t0);
@@ -248,10 +337,10 @@ try {
     }
     // 全帧账单独一批：update + render 合起来量（软渲染的 render 是大头，分开两批避免相互干扰）
     const 全帧批 = [];
-    for (let b = 0; b < 4; b += 1) {
+    for (let b = 0; b < 计时批数; b += 1) {
       全帧批.push(await evalJs(`(() => {
         const 帧耗时 = [];
-        for (let i = 0; i < 60; i += 1) {
+        for (let i = 0; i < ${每批帧数}; i += 1) {
           const t0 = performance.now();
           window.__game.update();
           window.__game.render();
@@ -270,6 +359,8 @@ try {
       updateP95Ms: Math.round(取(更新, 0.95) * 100) / 100,
       frameAvgMs: Math.round(均值(全帧) * 10) / 10,
     };
+    const 问 = cpu读数问题(名字, r, 应有帧数);
+    if (问.length) throw new Error(`站点「${名字}」的 CPU 腿不是一次测量：\n - ` + 问.join('\n - '));
     console.log(`perf-smoke [${名字}] frames=${r.frames} updateAvg=${r.updateAvgMs}ms updateP95=${r.updateP95Ms}ms frameAvg=${r.frameAvgMs}ms`);
     return r;
   };
@@ -355,14 +446,27 @@ try {
       return { 区, 整帧: 整帧.calls, 本体: 本体.calls, 阴影: 整帧.calls - 本体.calls, 三角面: 整帧.triangles };
     })()`;
     const r = await evalJs(源);
-    if (!(r.阴影 > 0)) {
-      throw new Error(`站点 ${站id} 的阴影趟读到 ${r.阴影}（整帧 ${r.整帧} / 本体 ${r.本体}）—— 关阴影没有减少任何 call，两列分家就是假的`);
-    }
+    /**
+     * 三列都得是数，而且得自洽（判据在 `./harness-readings.mjs`，脚本这里只负责"不合格就作废"）。
+     * 原先这一腿只问 `r.阴影 > 0` 一条：`整帧`/`本体` 读到 NaN、`tri` 读到 0、
+     * 差值列不再等于两列之差 —— 那些都会照常打出一行日志并往下走。
+     */
+    const 问 = draw读数问题(站id, r);
+    if (问.length) throw new Error(`站点 ${站id} 的 draw call 腿不是一次测量：\n - ` + 问.join('\n - '));
     draw读数.push({ 站: 站id, ...r });
     const 上 = 名册.ceilings[站id];
     const 上串 = 上 ? `（上限 ${上.frame}/${上.body}/${上.shadow}）` : '（名册里**没有这一站**）';
     console.log(`perf-smoke [draw call|${站id}] 整帧=${r.整帧} 本体=${r.本体} 阴影=${r.阴影} tri=${r.三角面} ${上串}`);
   }
+
+  /**
+   * **每一站都得真的交出读数**（切片6b）。上面两条对账查的是"表"：名册与上限表一不一致、
+   * 世界与名册一不一致。这一条查的是**这一轮**：名册里有八站而 `draw读数` 只有七行，
+   * 就是有一站被跳过了（今天没有 `continue`，但把 `for` 改成 `for (…of 名单.slice(0, 7))`
+   * 或提前 break 都不会被任何一条现有判据抓住 —— 少一站只是少一行日志）。
+   */
+  const 覆盖 = 覆盖问题(名册.stationIds, draw读数);
+  if (覆盖.length) throw new Error(`draw call 腿的站点覆盖不全（名册 ${名册.stationIds.length} 站 / 交出 ${draw读数.length} 份）：\n - ` + 覆盖.join('\n - '));
 
   // 世界侧对账：世界里有的区必须都在站点名单里。少一站 = 那一站被静默跳过 = 静默放开。
   const 世界的区 = await evalJs('(window.__game.world.zones || []).map((Z) => Z.id)');
