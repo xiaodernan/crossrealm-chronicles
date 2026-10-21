@@ -43,6 +43,23 @@ export class RestPointEnhancer {
   constructor(restPoints, game) {
     this.game = game;
     this.discovered = new Set();
+    /**
+     * 三份**共享几何**与两份**共享材质**（W-C1 切片3c）—— 八座营火共用这一套。
+     *
+     * 改前每一座各造各的 ⇒ 八座就是 **24 份几何 + 24 份材质**，而它们长得一模一样
+     * （木牌柱 / 牌面 / 地标光柱）。
+     *
+     * **光柱的材质必须逐座一份**：`update` 里每座按**自己的距离**调透明度
+     * （`p.landmarkBeam.material.opacity = …`）—— 共用一份就是"一座靠近，八座一起亮"。
+     * 木牌柱与牌面从不被改 ⇒ 共用。
+     */
+    this._柱几何 = new THREE.CylinderGeometry(0.06, 0.08, 1.6, 6);
+    this._牌面几何 = new THREE.BoxGeometry(0.9, 0.35, 0.06);
+    this._光柱几何 = new THREE.CylinderGeometry(0.02, 0.12, 8, 8, 1, true);
+    this._柱材质 = new THREE.MeshStandardMaterial({ color: paletteOf('wood.post'), roughness: 0.9 });
+    this._牌面材质 = new THREE.MeshStandardMaterial({
+      color: paletteOf('wood.door'), roughness: 0.85, emissive: 0x221100, emissiveIntensity: 0.2,
+    });
     for (const p of restPoints.points) {
       this._enhance(p);
     }
@@ -51,23 +68,24 @@ export class RestPointEnhancer {
   _enhance(point) {
     const label = signLabelOf(point.id) ?? point.name;
     const post = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.06, 0.08, 1.6, 6),
-      new THREE.MeshStandardMaterial({ color: paletteOf('wood.post'), roughness: 0.9 })
+      this._柱几何,
+      this._柱材质,
     );
     post.position.set(-0.6, 0.8, 0.3);
     applyShadow(post, 'castOnly');
     point.mesh.add(post);
 
     const board = new THREE.Mesh(
-      new THREE.BoxGeometry(0.9, 0.35, 0.06),
-      new THREE.MeshStandardMaterial({ color: paletteOf('wood.door'), roughness: 0.85, emissive: 0x221100, emissiveIntensity: 0.2 })
+      this._牌面几何,
+      this._牌面材质,
     );
     board.position.set(-0.6, 1.55, 0.3);
     board.rotation.y = 0.35;
     point.mesh.add(board);
 
+    // 光柱的材质**逐座一份** —— 它按自己的距离调透明度（共用一份就是"一座靠近，八座一起亮"）
     const beam = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.02, 0.12, 8, 8, 1, true),
+      this._光柱几何,
       new THREE.MeshBasicMaterial({
         color: 0xffaa44,
         transparent: true,
@@ -75,7 +93,7 @@ export class RestPointEnhancer {
         side: THREE.DoubleSide,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
-      })
+      }),
     );
     beam.position.y = 4.5;
     point.mesh.add(beam);
@@ -111,5 +129,33 @@ export class RestPointEnhancer {
 
   fromJSON(data) {
     if (data?.discovered) this.discovered = new Set(data.discovered);
+  }
+
+  /**
+   * 拆干净：把每一座营火上挂的三件装饰摘下来，逐座释放光柱的材质，再释放那三份共享几何与两份共享材质。
+   *
+   * 为什么现在才有（W-C1 切片3c）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编\"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   *
+   * 拆卸登记表按**登记的反序**执行 ⇒ 营火本体（`RestPointManager`，先登记）后拆，
+   * 这一层先拆 —— 装饰还挂在营火上的时候摘得掉；等营火本体摘走场景，装饰也跟着没了，
+   * 那时再摘就找不到了。
+   */
+  dispose() {
+    for (const p of this.game?.restPoints?.points ?? []) {
+      for (const child of [...(p.mesh?.children ?? [])]) {
+        // 只摘**自己挂上去的三件**（木牌柱 / 牌面 / 光柱）—— 营火本体那四件不是这一层的
+        if (child.geometry === this._柱几何 || child.geometry === this._牌面几何 || child.geometry === this._光柱几何) {
+          p.mesh.remove(child);
+        }
+      }
+      p.landmarkBeam?.material?.dispose?.();
+    }
+    this._柱几何?.dispose?.();
+    this._牌面几何?.dispose?.();
+    this._光柱几何?.dispose?.();
+    this._柱材质?.dispose?.();
+    this._牌面材质?.dispose?.();
   }
 }

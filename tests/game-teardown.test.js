@@ -167,7 +167,7 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
       expect(src, '错误收集器也要卸').toMatch(/errorReporter\?\.uninstall\?\.\(\)/);
     });
 
-    it('四十四个已收编的子系统都点名在册（tag 逐条写死，不是循环拼的）', () => {
+    it('四十六个已收编的子系统都点名在册（tag 逐条写死，不是循环拼的）', () => {
       const src = gameSrc();
       for (const tag of [
         'combat/DamageNumbers', 'effects/CombatFeedback', 'ui/HUD',
@@ -196,6 +196,9 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
         'world/SoulWispManager',
         // W-C1 切片3b：掉落层同理（三份共享几何 + 每格三份材质都有释放路径）。
         'game/LootSystem',
+        // W-C1 切片3c：营火一家（本体四份共享几何 + 装饰三份共享几何，都有释放路径）。
+        // 拆卸登记表按**登记的反序**执行 ⇒ 装饰层先拆（装饰还挂在营火上），本体后拆。
+        'world/RestPointManager', 'world/RestPointEnhancer',
       ]) {
         expect(src, `${tag} 应当被收编`).toContain(`_adopt('${tag}'`);
       }
@@ -206,7 +209,7 @@ describe('子系统清理登记表（W-A1 迁移第二处）', () => {
       // 五个都收编了 —— 反面：如果谁写成 `this.hud = new HUD(this)`，这一条抓不出来，
       // 但上一条（点名 tag）会红。两条合起来才盖住"忘了收编"与"收编了没点名"两种。
       const adopted = [...src.matchAll(/_adopt\('([^']+)'/g)].map((m) => m[1]);
-      expect(adopted.length).toBeGreaterThanOrEqual(44);
+      expect(adopted.length).toBeGreaterThanOrEqual(46);
       expect(new Set(adopted).size, 'tag 不许重复').toBe(adopted.length);
     });
   });

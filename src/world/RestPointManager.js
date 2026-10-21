@@ -11,6 +11,23 @@ export class RestPointManager {
     this.points = [];
     /** 世界时累计（秒）：火苗抖动与自发光脉动的相位源（B118） */
     this._时相 = 0;
+    /**
+     * 四份**共享几何**与三份**共享材质**（W-C1 切片3c）—— 八座营火共用这一套。
+     *
+     * 改前每一座营火各造各的：`new THREE.CylinderGeometry(...)` 之类写在 `addRestPoint` 里 ⇒
+     * 八座就是 **32 份几何 + 32 份材质**，而它们**长得一模一样**（底座 / 石圈 / 火苗 / 光环）。
+     *
+     * **火苗的材质必须逐座一份**：`update` 里每座各自脉动
+     * （`p.flame.material.emissiveIntensity = …`）—— 共用一份就是"一座在跳，全场在跳"。
+     * 那三份（底座 / 石圈 / 光环）从不被改 ⇒ 共用。
+     */
+    this._底座几何 = new THREE.CylinderGeometry(0.8, 1.2, 0.4, 8);
+    this._石圈几何 = new THREE.TorusGeometry(0.5, 0.08, 6, 12);
+    this._火苗几何 = new THREE.ConeGeometry(0.35, 0.9, 6);
+    this._光环几何 = new THREE.TorusGeometry(1.4, 0.05, 8, 32);
+    this._底座材质 = new THREE.MeshStandardMaterial({ color: 0x4a4035, roughness: 0.9, metalness: 0.1 });
+    this._石圈材质 = new THREE.MeshStandardMaterial({ color: 0x6a5a48, roughness: 0.85 });
+    this._光环材质 = new THREE.MeshStandardMaterial({ color: 0xc9a962, emissive: 0x443300, emissiveIntensity: 0.5 });
   }
 
   /**
@@ -29,38 +46,39 @@ export class RestPointManager {
     }
     const group = new THREE.Group();
     const base = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.8, 1.2, 0.4, 8),
-      new THREE.MeshStandardMaterial({ color: 0x4a4035, roughness: 0.9, metalness: 0.1 })
+      this._底座几何,
+      this._底座材质,
     );
     base.position.y = 0.2;
     applyShadow(base, 'castOnly');
     group.add(base);
 
     const stone = new THREE.Mesh(
-      new THREE.TorusGeometry(0.5, 0.08, 6, 12),
-      new THREE.MeshStandardMaterial({ color: 0x6a5a48, roughness: 0.85 })
+      this._石圈几何,
+      this._石圈材质,
     );
     stone.rotation.x = Math.PI / 2;
     stone.position.y = 0.35;
     group.add(stone);
 
+    // 火苗的材质**逐座一份** —— 它在 `update` 里各自脉动（共用一份就是"一座在跳，全场在跳"）。
     const flame = new THREE.Mesh(
-      new THREE.ConeGeometry(0.35, 0.9, 6),
+      this._火苗几何,
       new THREE.MeshStandardMaterial({
         color: 0xffaa44,
         emissive: 0xff6622,
         emissiveIntensity: 1.2,
         transparent: true,
         opacity: 0.9,
-      })
+      }),
     );
     flame.position.y = 1.0;
     flame.name = 'flame';
     group.add(flame);
 
     const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(1.4, 0.05, 8, 32),
-      new THREE.MeshStandardMaterial({ color: 0xc9a962, emissive: 0x443300, emissiveIntensity: 0.5 })
+      this._光环几何,
+      this._光环材质,
     );
     ring.rotation.x = Math.PI / 2;
     ring.position.y = 0.05;
@@ -142,5 +160,29 @@ export class RestPointManager {
         p.flame.material.emissiveIntensity = 0.9 + Math.sin(t * 2) * 0.3;
       }
     }
+  }
+
+  /**
+   * 拆干净：把八座营火从场景里摘掉，逐座释放火苗的材质，再释放那四份共享几何与三份共享材质。
+   *
+   * 为什么现在才有（W-C1 切片3c）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   *
+   * 火苗的材质**逐座**释放（每座一份 —— 它们各自脉动），共享的那七份**只释放一次**。
+   */
+  dispose() {
+    for (const p of this.points) {
+      this.scene.remove(p.mesh);
+      p.flame?.material?.dispose?.();
+    }
+    this.points.length = 0;
+    this._底座几何?.dispose?.();
+    this._石圈几何?.dispose?.();
+    this._火苗几何?.dispose?.();
+    this._光环几何?.dispose?.();
+    this._底座材质?.dispose?.();
+    this._石圈材质?.dispose?.();
+    this._光环材质?.dispose?.();
   }
 }

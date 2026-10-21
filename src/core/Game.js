@@ -290,11 +290,11 @@ export class Game {
     this.bossBeacons.build();
 
     this.worldEffects = new WorldEffects(this.scene);
-    this.restPoints = new RestPointManager(this.scene, this.world);
+    this.restPoints = this._adopt('world/RestPointManager', new RestPointManager(this.scene, this.world));
     this.restPoints.buildDefaults();
     this.restNpcs = this._adopt('world/RestNpcManager', new RestNpcManager(this.scene, this.world, this.restPoints, this));
     this.restCampfireAmbient = new RestCampfireAmbient(this.restPoints);
-    this.restPointEnhancer = new RestPointEnhancer(this.restPoints, this);
+    this.restPointEnhancer = this._adopt('world/RestPointEnhancer', new RestPointEnhancer(this.restPoints, this));
     this.weather = new WeatherSystem(this.scene, this.world, this.zoneFog);
     this.executionFx = this._adopt('effects/ExecutionEffects', new ExecutionEffects(this.scene, this));
     this.collectibles = new CollectibleManager(this.scene, this.world, this.stats, this.dialog);
