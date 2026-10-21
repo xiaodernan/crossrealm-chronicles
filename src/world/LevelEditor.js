@@ -73,6 +73,8 @@ import {
   cellsOf, cellOffsets, spanOf, spanCenter, spanAnchorIndex, setEdgeFlag,
 } from './MazeLayout.js';
 import { sharedBox, dungeonMaterial, disposeDungeonSubtree } from './dungeonAssets.js';
+// 墙段口径（W-B11 切片3）：与副本的几何层共用这一份 —— 洞开在哪只有一处答案
+import { 房间墙面表, 建一面墙 } from './dungeonWalls.js';
 import { codeFor } from '../content/keybinds.js';
 import { keyLabel } from '../content/keyLabels.js';
 
@@ -563,6 +565,18 @@ export class LevelEditor {
     );
     mesh.position.set(0, ROOM_BOX_H / 2, 0);
     group.add(mesh);
+
+    // 墙与门洞（W-B11 切片3）：此前编辑器只画房盒，于是"这面墙上有没有门"**看不见** ——
+    // 摆两间房挨着，看到的是两个孤零零的方盒，而导出的载荷里那两间房确实是通的（占用推导出了门）。
+    // 看到的与导出的对不上，门就成了一句"听说的"。
+    //
+    // 墙段口径**不在这儿重写**：问 `dungeonWalls.js` 那一份（副本的几何层用同一份），
+    // 于是"洞开在哪、洞多宽"在编辑器与副本之间只有一处答案。
+    //
+    // 坐标：Group 摆在房心，墙段是它的**孩子** ⇒ 用局部坐标（`房间墙面表` 的第三个参数
+    // 传房心）。拖动时 Group 整体搬走，墙跟着走 —— 与盒子的口径一致。
+    this._建墙段(group, room);
+
     this.scene.add(group);
 
     const label = document.createElement('div');
@@ -571,6 +585,29 @@ export class LevelEditor {
     this.labelLayer?.appendChild(label);
 
     this.roomMeshes.set(room.id, { mesh: group, room, label });
+  }
+
+  /**
+   * 一间房的四面墙（预览用）：门洞按 `dungeonWalls.js` 那份口径挖开。
+   *
+   * 墙高与墙厚取**布局自己的尺寸载体**（`wallH` / `wallT`）而不是编辑器随手写的数 ——
+   * 随手写的话预览里的洞宽与门高比例和导出的副本对不上，而编辑器正是用来校对那件事的地方。
+   */
+  _建墙段(group, room) {
+    const layout = this.layout;
+    if (!layout) return;
+    const 高 = Number.isFinite(layout.wallH) ? layout.wallH : WALL_H;
+    const 厚 = Number.isFinite(layout.wallT) ? layout.wallT : WALL_T;
+    const mat = dungeonMaterial('editor:wall', () => new THREE.MeshBasicMaterial({
+      color: 0x88aacc, transparent: true, opacity: 0.22, wireframe: true,
+    }));
+    for (const 面 of 房间墙面表(room, layout, { x: room.x, z: room.z })) {
+      建一面墙(group, mat, 面, 面.洞, {
+        高, 厚,
+        // 预览不投阴影、不记碰撞：编辑器画的是"将会长成什么样"，不是那间房的碰撞体
+        投阴影: false,
+      });
+    }
   }
 
   /** 画面跟着数据走：只有这一处写 Group 的位置 */
