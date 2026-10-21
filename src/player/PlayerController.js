@@ -1351,6 +1351,25 @@ export class PlayerController {
 
   }
 
+  /**
+   * 拆干净：把玩家从场景里摘掉，拆掉动画适配器与那具模型。
+   *
+   * 为什么现在才有（W-C1 切片3j）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，玩家造的资源（模型 / 剑 / 混放器）**一份都不还**。
+   *
+   * **剑的几何与材质归模型那一组**（剑挂在模型的视觉根上 ⇒ 在 `CharacterModel` 那一组里）
+   * ⇒ 由 `CharacterModel.dispose()` 释放，这里**不重复一遍**。
+   *
+   * 这一层**自己没有监听**（它读输入设备，不订阅事件）⇒ 收编它不会漏掉解绑。
+   */
+  dispose() {
+    this.scene?.remove(this.mesh);
+    this.animAdapter?.dispose?.();
+    this.animAdapter = null;
+    this.characterModel?.dispose?.();
+  }
+
 }
 
 

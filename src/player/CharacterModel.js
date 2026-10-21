@@ -4,6 +4,7 @@ import { ANIM_MANIFEST } from '../assets/AnimManifest.js';
 import { ANIMATION_GLB_MANIFEST } from '../assets/AnimationGLBManifest.js';
 import { isSkeletonClipName, registerSkeletonClips, boneName } from '../assets/SkeletonMotion.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { releaseSubtree } from '../engine/releaseSubtree.js';
 
 const MODEL_CANDIDATES = [
   '/assets/models/player.glb',
@@ -453,5 +454,29 @@ export class CharacterModel {
 
   getObjectByName(name) {
     return this.group.getObjectByName(name);
+  }
+
+  /**
+   * 拆干净：把混放器的根从缓存里摘掉，释放这一组的几何与材质。
+   *
+   * 为什么现在才有（W-C1 切片3j）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，玩家那具模型造的资源**一份都不还**。
+   *
+   * **混放器没有容器替它还** ⇒ 这一层自己 `uncacheRoot` ✓。
+   *
+   * **纹理没还**（GLB 自带的贴图）—— 释放器只管几何与材质；贴图的归属是**另一件事**
+   * （贴图库那份是**进程生命周期**的，不能碰；GLB 自带的那份要单独认领）—— 记在 §9 的尾巴里。
+   */
+  dispose() {
+    // 混放器没有容器替它还 ⇒ 这一层自己 `uncacheRoot` ✓
+    if (this.mixer && this.modelRoot) this.mixer.uncacheRoot(this.modelRoot);
+    this.mixer = null;
+    this.actions = {};
+    this.skeletal = {};
+    this.bones = {};
+    this.modelRoot = null;
+    // 几何与材质：这一组是这一层自己的 ⇒ 释放（**纹理没还** —— 见 §9 的尾巴）
+    releaseSubtree(this.group);
   }
 }

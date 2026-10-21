@@ -327,7 +327,7 @@ export class Game {
 
   /** _buildPlayerCombat —— M7 装配层解耦：把这一组子系统的构造从构造函数里搬出来，行为逐字不变。 */
   _buildPlayerCombat() {
-    this.player = new PlayerController(this.scene, this.camera, this.world, this);
+    this.player = this._adopt('player/PlayerController', new PlayerController(this.scene, this.camera, this.world, this));
     this.player.combat = new CombatController(
       this.player, this.enemyManager, this.dialog, this.damageNumbers, this.audio, this.stats
     );
