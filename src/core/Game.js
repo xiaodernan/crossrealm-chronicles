@@ -316,9 +316,9 @@ export class Game {
     this.projectiles = new ProjectileManager(this.scene, this.audio);
     // W-D6 切片8：掉落层不再收 audio —— 声音走 game-cue（AudioManager 听它），
     // 于是"掉了一件装备"这件事只有一个出口，不会出现"响了但没字幕"或反过来的漂移。
-    this.loot = new LootSystem(this.scene, this.stats, {
+    this.loot = this._adopt('game/LootSystem', new LootSystem(this.scene, this.stats, {
       onGear: (instance) => this.pickUpGear(instance),   // 捡到装备之后怎么办，只有这一处说了算
-    });
+    }));
     this.enemyManager = new EnemyManager(this.scene, this.world, this.projectiles);
     this.enemyManager.spawnDefaults();
     // 为现有敌人挂载动画适配器（entry chunk 独有 import animation，chunk-combat 零依赖）

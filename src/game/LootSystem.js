@@ -115,6 +115,36 @@ export class LootSystem {
     this._pool.push({ mesh: d.mesh, ring: d.ring, beam: d.beam });
   }
 
+  /**
+   * 拆干净：把在场的与池里的都摘掉，材质与三份共享几何释放掉。
+   *
+   * 为什么现在才有（W-C1 切片3b）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   *
+   * 材质**逐格**释放（每格三份：本体 / 环 / 柱 —— 档位色写在材质上，共用会串色）；
+   * 几何**只释放那三份共享的**。
+   */
+  dispose() {
+    // 摘账走**唯一那个出口**（`_despawn` → `_release`）：归还路径只有一条 ——
+    // 这里若自己再写一次 `scene.remove`，就成了第二条归还路（门禁
+    // `tests/loot-lifecycle.test.js`「摘账只有一个出口」正是数这一处）。
+    for (let i = this.drops.length - 1; i >= 0; i--) this._despawn(i);
+    // 池里的那些：材质逐格释放（几何是共享的，不在这里释放）
+    for (const slot of this._pool) this._释放一格的材质(slot);
+    this._pool.length = 0;
+    this.geometry.dispose();
+    this.ringGeometry.dispose();
+    this.beamGeometry.dispose();
+  }
+
+  /** 一格的三份材质（几何是共享的，不在这里释放） */
+  _释放一格的材质(slot) {
+    slot.mesh?.material?.dispose?.();
+    slot.ring?.material?.dispose?.();
+    slot.beam?.material?.dispose?.();
+  }
+
   /** 池里备用网格数：泄漏 watchdog 与用例都看这个，不翻内部结构 */
   pooled() {
     return this._pool.length;

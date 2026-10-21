@@ -205,11 +205,14 @@ describe('掉落物池化：一件掉落不再新建一份资源（W-C1 切片2�
   it('摘账只有一个出口：捡走与到期都走 _despawn，别处不许再直接归还', () => {
     const src = readFileSync(join(SRC, 'game', 'LootSystem.js'), 'utf8');
     const countIn = (re) => (src.match(re) ?? []).length;
-    // 申领与归还各一处；`_despawn` 出现 3 次 = 定义一次 + update 里两条出口各一次
+    // 申领与归还各一处；`_despawn` 出现 4 次 = 定义一次 + update 里两条出口各一次
+    // + **拆卸那一条**（W-C1 切片3b：`dispose()` 把在场的都摘掉）。
+    // 拆卸也走 `_despawn` ⇒ 它**不是第二条归还路**（归还仍旧只有 `_release` 一处），
+    // 这条门禁量的正是"别处直接归还"，所以多一个调用方不算破约。
     expect(countIn(/this\.scene\.add\(/g)).toBe(1);
     expect(countIn(/this\.scene\.remove\(/g)).toBe(1);
     expect(countIn(/this\._pool\.push\(/g)).toBe(1);
-    expect(countIn(/_despawn\(/g)).toBe(3);
+    expect(countIn(/_despawn\(/g)).toBe(4);
     // 分配的口：几何三份共享（本体 / 环 / 柱）、材质每格三份（标准一件 + 基本两件），都只在建格那一步里
     expect(countIn(/new THREE\.OctahedronGeometry\(/g)).toBe(1);
     expect(countIn(/new THREE\.RingGeometry\(/g)).toBe(1);
