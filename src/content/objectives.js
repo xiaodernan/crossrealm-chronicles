@@ -406,6 +406,18 @@ export const OBJECTIVES = [
     journal: 'obj_charge_spell_journal',
   },
   {
+    id: 'void-hunt',
+    title: 'obj_void_hunt_title',
+    desc: 'obj_void_hunt_desc',
+    type: 'kills',
+    enemyType: 'wraith',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 0, z: 220, label: 'zone_name_void' },
+    reward: 15,
+    journal: 'obj_void_hunt_journal',
+  },
+  {
     id: 'void-boss',
     title: bossById('void-chronarch').shortNameKey,
     desc: 'obj_void_boss_desc',

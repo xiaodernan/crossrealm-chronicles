@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
+import { V8_INSERT_AT } from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
 } from '../src/content/objectives.js';
@@ -56,6 +57,25 @@ const HEAD_ORDER = [
   'dungeon-rerun', 'infinity',
 ];
 
+/**
+ * **v8 之后**在役的那条序列（W-E3 切片9 加长主线一步）。
+ *
+ * 相对 `HEAD_ORDER` 只多了一处：`void-hunt`（怨影肃清 —— 清理三只时线怨影）插在第 24 位，
+ * 也就是 `void-boss` 之前。**其余每一步的相对次序一个都没动**（下面两条断言钉住这件事）。
+ *
+ * 为什么要动主线：§1.2 C3 的通关时长读数指出「**缺口在主线**」（可选内容已经够长），
+ * 而主线那 32 步的下标是**存档语义**（`quests.index`）⇒ 插步必须带一条存档迁移
+ * （`SaveMigrations` 的 v7 → v8），否则老存档会**静默跳过**新插的那一步。
+ */
+const V8_ORDER = [
+  'anchor', 'training', 'soldiers', 'fantasy-frag', 'boss', 'magic-frag', 'golem', 'space-frag',
+  'finale', 'chests', 'talk-wanderer', 'boss2', 'elite', 'level', 'epilogue', 'learn-spell',
+  'crypt', 'library', 'rift', 'boss3', 'mind', 'ascension', 'void-rift', 'charge-spell',
+  'void-hunt',
+  'void-boss', 'void-tablet', 'true-end', 'chaos-core', 'skills', 'chaos-boss',
+  'dungeon-rerun', 'infinity',
+];
+
 const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 
 beforeEach(() => { installWindowShim(); });
@@ -65,10 +85,27 @@ afterEach(() => {
 });
 
 describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => {
-  it('MAINLINE 就是切片3 之前在役的那 32 步，同 id 同序（存档 questIndex 语义不变）', () => {
+  it('v7 存档里的那 32 步就是老抄本（这份 golden 自己没被动过）', () => {
     expect(HEAD_ORDER).toHaveLength(32);
     expect(new Set(HEAD_ORDER).size, '老抄本里有重复 id').toBe(HEAD_ORDER.length);
-    expect(MAINLINE.map((r) => r.id)).toEqual(HEAD_ORDER);
+  });
+
+  it('W-E3 切片9 之后：主线是 33 步，新步只插在第 24 位，其余每一步的次序一个都没动', () => {
+    expect(V8_ORDER).toHaveLength(33);
+    expect(new Set(V8_ORDER).size, 'v8 序列里有重复 id').toBe(V8_ORDER.length);
+    expect(MAINLINE.map((r) => r.id)).toEqual(V8_ORDER);
+    // 只多了一处插入 —— 头尾两段逐字相同（"加长"不是"重排"）
+    expect(V8_ORDER.slice(0, 24)).toEqual(HEAD_ORDER.slice(0, 24));
+    expect(V8_ORDER.slice(25)).toEqual(HEAD_ORDER.slice(24));
+    expect(V8_ORDER[24], '第 24 位不是新插的那一步').toBe('void-hunt');
+  });
+
+  it('迁移的插入点与当前表一致（`V8_INSERT_AT` 算错位置当场红）', () => {
+    expect(V8_INSERT_AT).toBe(24);
+    expect(MAINLINE[V8_INSERT_AT].id).toBe('void-hunt');
+    // 老档的 24 号位是 `void-boss` —— 迁移要把它挪到 25（那正是新表的 `void-boss` 位置）
+    expect(HEAD_ORDER[24]).toBe('void-boss');
+    expect(V8_ORDER[V8_INSERT_AT + 1]).toBe('void-boss');
   });
 
   it('投影只去掉章节门控行：一格不多一格不少，且不重排', () => {
