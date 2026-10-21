@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { MAP_BOSSES } from '../game/QuestSystem.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { releaseSubtree } from '../engine/releaseSubtree.js';
 
 /** 全图可见 Boss 信标 — 光柱 + 标签 + 常驻竞技场环 */
 export class BossBeacons {
@@ -101,5 +102,19 @@ export class BossBeacons {
 
     g.position.set(x, 0, z);
     this.group.add(g);
+  }
+
+  /**
+   * 拆干净：把信标那一组从场景里摘掉，释放环 / 内盘 / 柱 / 球 / 光柱的几何与材质。
+   *
+   * 为什么现在才有（W-C1 切片3e）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   *
+   * 标签是 `CSS2DObject`（HTML 标签，不是 three 的网格）—— 释放器跳过它 ✓（它没有几何也没有材质）。
+   */
+  dispose() {
+    this.scene.remove(this.group);
+    releaseSubtree(this.group);
   }
 }

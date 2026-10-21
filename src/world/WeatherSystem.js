@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
+import { releaseSubtree } from '../engine/releaseSubtree.js';
 
 /** 区域天气 — 雨 / 雪 / 灰烬 / 奥术 drizzle，跟随玩家 */
 const ZONE_PRESETS = {
@@ -209,5 +210,23 @@ export class WeatherSystem {
       s.ring.material.opacity = s.life * 2;
       s.ring.scale.multiplyScalar(SPLASH_GROWTH_PER_SEC ** dt);
     }
+  }
+
+  /**
+   * 拆干净：把天气那一组从场景里摘掉，释放雨/雪粒子的几何与材质、以及还活着的涟漪。
+   *
+   * 为什么现在才有（W-C1 切片3e）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   *
+   * 涟漪**不逐个退**（`_retireSplash` 会各自释放一次）：子树释放器已经把整棵
+   * `splashGroup` 走了一遍 —— 逐个退完再释放就是**释放两遍**。
+   */
+  dispose() {
+    this.scene.remove(this.group);
+    releaseSubtree(this.group);
+    this.splashes.length = 0;
+    this.particles = null;
+    this.velocities = null;
   }
 }

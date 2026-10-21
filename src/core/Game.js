@@ -286,16 +286,16 @@ export class Game {
     this.zoneBatchStats = batchZoneStatics(this.world);
     this.worldDecorations = new WorldDecorations(this.scene, this.world);
     this.worldDecorations.build();
-    this.bossBeacons = new BossBeacons(this.scene, this.world);
+    this.bossBeacons = this._adopt('world/BossBeacons', new BossBeacons(this.scene, this.world));
     this.bossBeacons.build();
 
-    this.worldEffects = new WorldEffects(this.scene);
+    this.worldEffects = this._adopt('world/WorldEffects', new WorldEffects(this.scene));
     this.restPoints = this._adopt('world/RestPointManager', new RestPointManager(this.scene, this.world));
     this.restPoints.buildDefaults();
     this.restNpcs = this._adopt('world/RestNpcManager', new RestNpcManager(this.scene, this.world, this.restPoints, this));
     this.restCampfireAmbient = new RestCampfireAmbient(this.restPoints);
     this.restPointEnhancer = this._adopt('world/RestPointEnhancer', new RestPointEnhancer(this.restPoints, this));
-    this.weather = new WeatherSystem(this.scene, this.world, this.zoneFog);
+    this.weather = this._adopt('world/WeatherSystem', new WeatherSystem(this.scene, this.world, this.zoneFog));
     this.executionFx = this._adopt('effects/ExecutionEffects', new ExecutionEffects(this.scene, this));
     this.collectibles = this._adopt('world/CollectibleManager', new CollectibleManager(this.scene, this.world, this.stats, this.dialog));
     // W-A1 迁移第五～八处：这些系统的监听走总线（带 tag）⇒ 它们必须进 teardown 登记表，

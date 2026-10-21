@@ -303,6 +303,10 @@ export class TextureLibrary {
       ...(colorTint === null || colorTint === undefined ? {} : { color: new THREE.Color(colorTint) }),
       ...(overrides ?? {}),
     });
+    // **共享标记**（W-C1 切片3e）：共享库造出来的资源是**进程生命周期**的 ——
+    // 使用方拆自己那一棵子树时不该把它释放掉（`engine/releaseSubtree.js` 认这个标记）。
+    // `world/dungeonAssets.js` 的共享资源早就是这么标的；这一份是第二个库跟上同一口径。
+    mat.userData.shared = true;
     this._shared.set(key, mat);
     return mat;
   }

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
+import { releaseSubtree } from '../engine/releaseSubtree.js';
 
 /**
  * 光球 / 余烬每秒的浮动速率（米/秒）。
@@ -241,5 +242,18 @@ export class WorldEffects {
     }
     this.updateMeteors(dt);
     this.group.position.lerp(new THREE.Vector3(playerPos.x * 0.3, 0, playerPos.z * 0.3), dt * 0.5);
+  }
+
+  /**
+   * 拆干净：把世界特效那一组从场景里摘掉，释放流星 / 萤火 / 奥术球 / 星野 / 极光 / 余烬的
+   * 几何与材质。
+   *
+   * 为什么现在才有（W-C1 切片3e）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   */
+  dispose() {
+    this.scene.remove(this.group);
+    releaseSubtree(this.group);
   }
 }
