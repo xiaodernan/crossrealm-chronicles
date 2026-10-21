@@ -304,7 +304,7 @@ export class Game {
     this.storyJournal = this._adopt('game/StoryJournal', new StoryJournal(this));
     this.storyDirector = this._adopt('game/StoryDirector', new StoryDirector(this));
     this.npcs = new NPCManager(this.scene, this.world, this.dialog, this);
-    this.soulWisps = new SoulWispManager(this.scene, this.world, this.stats, this.dialog, this.audio);
+    this.soulWisps = this._adopt('world/SoulWispManager', new SoulWispManager(this.scene, this.world, this.stats, this.dialog, this.audio));
     this.voidEcho = new VoidEcho(this.scene);
     this.chaosLightning = new ChaosLightning(this.scene, this.camera);
     this.realmBleed = this._adopt('effects/RealmBleed', new RealmBleed());

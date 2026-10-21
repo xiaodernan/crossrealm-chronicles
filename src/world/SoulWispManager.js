@@ -31,6 +31,19 @@ export class SoulWispManager {
     this.collected = new Set();
     this._chaseSoundTimer = 0;
     /**
+     * 两份**共享几何**（本体 / 光晕）—— W-C1 切片3a。
+     *
+     * 改前每一枚魂火**各造两份几何**（`new THREE.SphereGeometry(...)` 在循环里）⇒
+     * 十二枚就是 **24 份几何**，而它们长得一模一样、也永远不会被改（形状不变，变的只有颜色
+     * 与透明度 —— 那两样在**材质**上）。共享之后全局只有**两份**。
+     *
+     * 材质**不能共享**：追逐时本体要转金色、光晕要脉动（`collect` 附近那两行
+     * `w.mesh.children[1].material.color.setHex(...)`）—— 一份材质被两枚魂火轮流改，
+     * 表现就是"一枚转金色，全场都转"。
+     */
+    this._本体几何 = new THREE.SphereGeometry(0.22, 10, 10);
+    this._光晕几何 = new THREE.SphereGeometry(0.45, 10, 10);
+    /**
      * 世界时累计（秒）—— 漂浮与脉动的相位由它推出来（B118）。
      * 改前这里写 `performance.now()`，于是同一条 `update` 有两个时钟：`rotation.y += dt * 1.2`
      * 吃世界时，`sin(t*2 + phase)` 吃墙钟。实测（`.tmp-20261015/probe-visual-clock.mjs`）
@@ -45,11 +58,11 @@ export class SoulWispManager {
     for (const spot of WISP_SPOTS) {
       const y = this.world.getGroundHeight(spot.x, spot.z);
       const core = new THREE.Mesh(
-        new THREE.SphereGeometry(0.22, 10, 10),
+        this._本体几何,
         new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.9 })
       );
       const glow = new THREE.Mesh(
-        new THREE.SphereGeometry(0.45, 10, 10),
+        this._光晕几何,
         new THREE.MeshBasicMaterial({
           color: 0x66ccff, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending,
         })
@@ -149,6 +162,29 @@ export class SoulWispManager {
       const w = this.wisps.find((x) => x.spot.id === id);
       if (w) w.collected = true;
     }
+  }
+
+  /**
+   * 拆干净：把场景里那十二组网格摘掉，材质与两份共享几何释放掉。
+   *
+   * 为什么现在才有（W-C1 切片3a）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那 24 份几何与 24 份材质**一份都不还**。
+   * 加上这一条之后 `Game` 才收编它（`this._adopt('world/SoulWispManager', …)`），
+   * 于是"销毁路径存在"才变成"销毁会发生"。
+   *
+   * 材质**逐枚**释放（每枚一份 —— 追逐时各自变色），几何**只释放那两份共享的**。
+   */
+  dispose() {
+    for (const w of this.wisps) {
+      this.scene.remove(w.mesh);
+      for (const child of w.mesh.children) {
+        child.material?.dispose?.();
+      }
+    }
+    this.wisps.length = 0;
+    this._本体几何?.dispose?.();
+    this._光晕几何?.dispose?.();
   }
 }
 
