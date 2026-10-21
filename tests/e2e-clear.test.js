@@ -12,7 +12,11 @@
  * ③ **这一轮连的是不是自己起的那台浏览器、那个页**（W-C2 切片6c，与 `perf-smoke` 同一把尺）：
  *    口不能靠探（Chrome 撞口时不报错、只是不开口，而探到别人的口就连进别人的浏览器），
  *    页地址必须落在本进程的 dev 口上，"异常 0 条"那句预算更是要先见证事件通道真的在送东西
- *    —— "通道断了"与"页面没抛错"读出来是同一个 0。
+ *    —— "通道断了"与"页面没抛错"读出来是同一个 0；
+ * ④ **这一轮从头到尾是同一个页**（W-C2 切片6d）：这 44 步要靠几百次 `evalJs` 打在同一个页面上跑完，
+ *    共用工作树里谁往 `src/` 写一下就是一次 vite 全量重载 —— `window.__game` 变回 undefined，
+ *    最先红的是一句 `TypeError: … reading 'quests'`，读起来像主线坏了。
+ *    作废判据 `重载问题` 的正反行为在 `tests/perf-smoke.test.js` 测（判据不抄两份），这里钉接线。
  *
  * 归属三判（`解析CDP口` / `页地址问题` / `通道问题`）住在 `scripts/harness-readings.mjs`，
  * **它们的正反行为在那里测**（`tests/perf-smoke.test.js`）。这里只钉接线：调了没、不合格抛了没、
@@ -78,6 +82,38 @@ const 判据 = {
   抛错带原话: (s) => s.includes('d.exception?.description') && s.includes('页面内抛错 @'),
 };
 
+/**
+ * 切片6d 的接线腿（#167）：页在中途被重建 ⇒ 本轮读数作废。
+ *
+ * 与 `tests/perf-smoke.test.js` 里同名的那一组**形状一致、锚点不同**：
+ * 那边用第一站当"测量开始"的锚，这边用 `qa.startFullDemo()`；
+ * 预算表也各是各的（`PERF_BUDGETS` / `E2E_BUDGETS`）。
+ * 判据本体（`重载问题` 收到什么输入报什么话）只在 `tests/perf-smoke.test.js` 测一遍 ——
+ * 在两个文件里各复刻一遍判断，就会有两把尺子各自漂。
+ */
+const 接腿 = {
+  调了判据: (s) => /const 重问 = 重载问题\(基线上下文, 通道\.执行上下文\);/.test(s),
+  不合格就作废: (s) => s.includes('if (重问.length) {') && s.includes('废.读数作废 = true;') && s.includes('throw 废;'),
+  基线取在见证之后起跑之前: (s) => {
+    const 见 = s.indexOf('const 通问 = 通道问题(通道)');
+    const 基 = s.indexOf('基线上下文 = 通道.执行上下文;');
+    const 起跑 = s.indexOf('qa.startFullDemo()');
+    return 见 >= 0 && 基 >= 0 && 起跑 >= 0 && 见 < 基 && 基 < 起跑;
+  },
+  作废在算越线之前: (s) => {
+    const 作 = s.indexOf('const 重问 = 重载问题(');
+    const 预 = s.indexOf('const 预算 = E2E_BUDGETS;');
+    return 作 >= 0 && 预 >= 0 && 作 < 预;
+  },
+  归因在catch里: (s) => s.includes('if (!err?.读数作废) {')
+    && s.includes('const 归因 = 重载问题(基线上下文, 通道.执行上下文);')
+    && s.includes("console.error('e2e-clear 归因："),
+  // 计数器只能有一份，且声明在 try 外面（catch 读得到）。try 内再 const 一次 = 遮蔽 = 归因永远读到 0。
+  通道只有一份: (s) => (s.match(/^\s*const 通道 = /gm) ?? []).length === 1
+    && (s.match(/^\s*let 基线上下文 = /gm) ?? []).length === 1
+    && s.search(/^\s*const 通道 = /m) < s.indexOf('let failures = 0;'),
+};
+
 describe('无头 E2E 自动通关（W-D4 切片3）', () => {
   it('脚本在，npm script 接上了（没接线的门禁只有写它的人会跑）', () => {
     expect(existsSync(SCRIPT), 'scripts/e2e-clear.mjs 不在了').toBe(true);
@@ -138,6 +174,47 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     expect(拔 >= 0 && 删 >= 0 && 拔 < 删, '先删 profile 再拔树 —— 浏览器还活着时那目录删不动').toBe(true);
     // 只报"页面内抛错"的 JSON 前 300 字，会把 description 正好切掉：红得看不出是哪一句拒
     expect(判据.抛错带原话(源文), '页面异常没带原话与位置').toBe(true);
+  });
+
+  it('页在中途被重建 ⇒ 本轮读数作废并点名，而不是红成一句页面内 TypeError', () => {
+    /**
+     * 这 44 步要靠几百次 `evalJs` 打在同一个页面上跑完。共用工作树里谁往 `src/` 写一下
+     * ⇒ vite 发一次全量重载 ⇒ `window.__game` 变回 undefined ⇒ 最先红的是一句
+     * `TypeError: Cannot read properties of undefined (reading 'quests')` ——
+     * 那句红读起来像"主线第 N 步坏了"，而真实原因是"这一轮的页被换掉了"。
+     * 归因记错地方，下一个人就会去查一个没被改过的文件。
+     *
+     * 正面信号是 `Runtime.executionContextCreated` 的条数：本仓不起 worker、不挂 iframe，
+     * 一次正常轮次里它不该动（实测见 `docs/MASTER_PLAN.md` §9 的回填）。它一动就是页被重建过。
+     */
+    expect(源文, '脚本没有 import 重载问题').toMatch(/import \{[^}]*重载问题[^}]*\} from '\.\/harness-readings\.mjs'/);
+    for (const [名, 尺] of Object.entries(接腿)) {
+      expect(尺(源文), `接线腿"${名}"在真源码上不过`).toBe(true);
+    }
+    // 计数的正面来源：谁在数执行上下文条数（没人数的话，这一判读的是两个常数）
+    expect(源文, '没有人在数执行上下文条数').toMatch(/通道\.执行上下文 \+= 1/);
+  });
+
+  it('反向控制：6d 的四处拆法各自被对应的腿抓住', () => {
+    // 与 perf 一侧同一批坏法 —— 两个 harness 要坏得一样红，否则"共用一把尺"只是话术
+    const 坏 = {
+      不调判据: 源文.replace('const 重问 = 重载问题(基线上下文, 通道.执行上下文);', 'const 重问 = [];'),
+      条件废掉: 源文.replace('if (重问.length) {', 'if (false) {'),
+      基线不取: 源文.replace('  基线上下文 = 通道.执行上下文;', ''),
+      归因删掉: 源文.replace('if (!err?.读数作废) {', 'if (false) {'),
+      计数器遮蔽: 源文.replace('  const exceptions = [];', '  const exceptions = [];\n  const 通道 = { 执行上下文: 0, 加载完成: 0 };'),
+    };
+    expect(接腿.调了判据(坏.不调判据), '判据不调，腿却仍判为"调了"').toBe(false);
+    expect(接腿.作废在算越线之前(坏.不调判据), '判据被换成常量，"作废排在越线之前"却仍判为真').toBe(false);
+    expect(接腿.不合格就作废(坏.条件废掉), 'if 改成 if (false)，腿却仍判为"会抛"').toBe(false);
+    expect(接腿.基线取在见证之后起跑之前(坏.基线不取), '基线不取了，腿却仍判为"顺序对"').toBe(false);
+    expect(接腿.归因在catch里(坏.归因删掉), '归因没了，腿却仍判为"在 catch 里"').toBe(false);
+    expect(接腿.通道只有一份(坏.计数器遮蔽), 'try 内再 const 一次把外层遮蔽了，腿却仍判为"只有一份"').toBe(false);
+    // 控制的控制：每一处只坏在自己那一格上（其余腿照过），否则一条红带倒五条就说不清是哪只蝴蝶
+    expect(接腿.不合格就作废(坏.不调判据), '不调判据那一处连累了别的腿').toBe(true);
+    expect(接腿.归因在catch里(坏.条件废掉)).toBe(true);
+    expect(接腿.调了判据(坏.归因删掉)).toBe(true);
+    expect(接腿.调了判据(坏.计数器遮蔽)).toBe(true);
   });
 
   it('判据与执行分家：可执行脚本不许导出东西，判据在无副作用的表里', () => {

@@ -45,10 +45,25 @@
  * 都住在 `./harness-readings.mjs` —— 那是两个 harness 共用的判据模块，写成本文件的私有函数
  * 就等于把"这条门禁说的话算不算数"复制两份、各自漂移。
  *
+ * ## 这一轮从头到尾是同一个页吗（W-C2 切片6d）
+ *
+ * 上面那三问都发生在**测量开始之前**，而这条门禁的测量要跑几十秒、几百次 `evalJs`。
+ * 这个工作树是并发会话共用的：谁在这期间往 `src/` 写一下，vite 就发一次全量重载，
+ * `window.__game` 当场变回 undefined，最先红的是一句
+ * `TypeError: Cannot read properties of undefined (reading 'quests')` ——
+ * 那句红读起来像"主线第 N 步坏了"，而真实原因是"这一轮的页被换掉了"：归因记错地方，
+ * 下一个人会去查一个没被改过的文件。重载得晚时更坏 —— 它**不红**，只是那几十步的读数来自两个页。
+ *
+ * 正面信号还是 `Runtime.executionContextCreated` 的条数：本仓不起 worker、不挂 iframe，
+ * 一次正常轮次里它不该动。基线取在通道见证之后、起跑之前，收尾时再问一次；
+ * 动过 ⇒ 整轮**作废**（抛出，退出码 2），而不是把那批数拿去和预算比、报成"越线"（退出码 1）。
+ * 判据 `重载问题` 也住在 `./harness-readings.mjs`，与 `perf-smoke` 同一把尺。
+ *
  * ## 退出码
  *
  * `0` 通关且在预算内；`1` 没通关 / 超帧预算 / 有未捕获异常；`2` 环境问题（找不到 Chrome、
- * dev 口或游戏没起来）。与 `perf-smoke` 同一套约定 —— 将来接进 CI（W-D4 切片4）时就是红绿的来源。
+ * dev 口或游戏没起来、这一轮的页中途被重建）。与 `perf-smoke` 同一套约定 —— 将来接进 CI
+ * （W-D4 切片4）时就是红绿的来源。
  *
  * 用法：`npm run e2e`（自己起 dev 口与浏览器，结束自己收）。
  */
@@ -58,7 +73,7 @@ import { createServer } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { E2E_BUDGETS } from './e2e-budgets.mjs';
-import { 解析CDP口, 页地址问题, 通道问题 } from './harness-readings.mjs';
+import { 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
 
 /**
  * 预算表在 `./e2e-budgets.mjs` —— **判据与执行分家**。
@@ -210,6 +225,19 @@ const cleanup = () => {
 };
 process.on('exit', cleanup);
 
+/**
+ * 事件通道的**自证**（切片6c）+ 中途重载的**基线**（切片6d，#167），声明在 try 外面。
+ *
+ * 数两样一定会来的东西（`Runtime.enable` 会 flush 现存执行上下文；导航后必有 load）：
+ * 这条门禁的预算里有一条"异常 0 条"，而"通道一条都没送"与"页面真的没抛"读出来是同一个 0。
+ * 作用域要在 try 外面，是因为 catch 也要能问"上下文条数动过没有"——中途有人往 `src/` 写了一下
+ * ⇒ vite 发全量重载 ⇒ 下一句 `evalJs` 红成 `TypeError: … reading 'quests'`，
+ * 那句红读着像代码坏了，实际是这一轮的量被换掉了。
+ */
+const 通道 = { 执行上下文: 0, 加载完成: 0 };
+/** 测量开始前的上下文条数；`null` = 还没走到见证，那一段的红不归"重载"管 */
+let 基线上下文 = null;
+
 let failures = 0;
 try {
   if (!await waitForHttp(`http://127.0.0.1:${VITE_PORT}/`)) throw new Error('dev 口 20 秒内没起来');
@@ -228,13 +256,7 @@ try {
   let msgId = 0;
   const pending = new Map();
   const exceptions = [];
-  /**
-   * 事件通道的**自证**：这条门禁的预算里有一条"异常 0 条"，
-   * 而"通道一条都没送"与"页面真的没抛"读出来是同一个 0 —— 后者会被当成达标。
-   * 所以顺手数两样一定会来的东西（`Runtime.enable` 会 flush 现存执行上下文；导航后必有 load），
-   * 起跑前先一并核。判据在 `./harness-readings.mjs`，与 `perf-smoke` 共用同一把尺。
-   */
-  const 通道 = { 执行上下文: 0, 加载完成: 0 };
+  // 计数的是**外层**那个 `通道` 对象（声明在 try 外面，见那里的注释）：catch 也要读得到它。
   ws.onmessage = (ev) => {
     const m = JSON.parse(ev.data);
     if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); }
@@ -291,6 +313,8 @@ try {
   const 通问 = 通道问题(通道);
   if (通问.length) throw new Error(`CDP 通道没有正面见证：\n - ${通问.join('\n - ')}`);
   console.log(`e2e-clear：页=${页地址.slice(0, 60)} 执行上下文=${通道.执行上下文} 加载完成=${通道.加载完成}`);
+  // 基线取在**见证之后、起跑之前**：此后上下文条数一旦变动，就是"页在中途被换过"的实锤
+  基线上下文 = 通道.执行上下文;
 
   // ① 换成固定步长：这一句是"读数与机器快慢无关"的全部依据（见头注"确定性"）
   await evalJs('window.__game.clock.getDelta = () => 1 / 60; true');
@@ -344,6 +368,23 @@ try {
     + `completed=${读数.completed} 演示跑完=${演示跑完} exceptions=${exceptions.length}`);
   if (exceptions.length) console.log('e2e-clear [异常] ' + exceptions.slice(0, 5).join(' | '));
 
+  /**
+   * **这一轮从头到尾是同一个页吗**（切片6d，#167）—— 问在算越线之前。
+   *
+   * 顺序要紧：这 44 步是靠几百次 `evalJs` 打在同一个页面上跑完的。中途有人往 `src/` 写了一下
+   * ⇒ vite 发全量重载 ⇒ `window.__game` 变回 undefined ⇒ 最先红的是一句 `TypeError: … reading 'quests'`，
+   * 它读起来像"主线第 N 步坏了"，实际是这一轮的页被换掉了。就算它没红、跑到了这里，
+   * 那 `questIndex` 也不是从同一个页里读出来的 —— 把它和预算比再报"退出码 1"，是把环境问题记到代码头上。
+   */
+  const 重问 = 重载问题(基线上下文, 通道.执行上下文);
+  if (重问.length) {
+    // 带个标记抛出：catch 里那条"归因"是给**别的原因**准备的（TypeError 那类），
+    // 这一条自己已经说全了，不该再被复述一遍当成第二个结论
+    const 废 = new Error(`本轮读数作废：\n - ${重问.join('\n - ')}`);
+    废.读数作废 = true;
+    throw 废;
+  }
+
   const 预算 = E2E_BUDGETS;
   const 越线 = [];
   if (预算.requireCompleted && !读数.completed) {
@@ -364,6 +405,12 @@ try {
   ws.close();
 } catch (err) {
   console.error('e2e-clear 失败：', err?.message ?? err);
+  // 中途被重建时，最先红的**总是**某一句 evalJs 的 TypeError（`reading 'quests'`），
+  // 它读起来像主线坏了。这一句把责任挪回它该在的地方：不是这一轮的代码，是这一轮的页。
+  if (!err?.读数作废) {
+    const 归因 = 重载问题(基线上下文, 通道.执行上下文);
+    if (归因.length) console.error('e2e-clear 归因：\n - ' + 归因.join('\n - '));
+  }
   failures = 2;
 } finally {
   cleanup();

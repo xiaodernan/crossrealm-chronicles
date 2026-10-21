@@ -14,7 +14,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { PERF_BUDGETS } from '../scripts/perf-budgets.mjs';
-import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, DRAW列, CPU列 } from '../scripts/harness-readings.mjs';
+import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题, DRAW列, CPU列 } from '../scripts/harness-readings.mjs';
 
 const ROOT = process.cwd();
 const 脚本源 = existsSync(join(ROOT, 'scripts', 'perf-smoke.mjs'))
@@ -362,3 +362,106 @@ describe('读数完整性（切片6b）：每一站每一列都得是数', () =>
     expect(解析CDP口(undefined), 'undefined 撞到一个裸 TypeError').toBeNull();
   });
 });
+
+/**
+ * ## 这一轮从头到尾是同一个页吗（W-C2 切片6d，#167）
+ *
+ * 上面那些腿问的都是**测量开始之前**的事（口、页、通道）。剩下的洞在**测量中途**：
+ * 这个工作树是并发会话共用的，谁往 `src/` 写一下，vite 就发一次全量重载 ——
+ * `window.__game` 变回 undefined，最先红的是某一句 `evalJs` 的
+ * `TypeError: Cannot read properties of undefined (reading 'player')`。
+ * 那句红读起来像"代码坏了"，实际原因是"这一轮的量被换掉了"—— 归因记错地方，
+ * 下一个人会去查一个没被改过的文件。更坏的是重载来得晚（最后一站之后）时**根本不红**：
+ * 十个读数来自两个页，而它照样绿。
+ *
+ * 正面信号用 `Runtime.executionContextCreated` 的**条数**：本仓不起 worker、不挂 iframe，
+ * 一次正常轮次里它不该动。它一动就是页被重建过（数的是必然会来的东西，不是"没看到坏东西"）。
+ * 判据形状与 6b/6c 一致 —— 住在 `harness-readings.mjs`，正反两种输入都喂得进去；
+ * 脚本那侧只钉"确实调用、不合格就作废、顺序对"。
+ */
+const 接腿 = {
+  调了判据: (s) => /const 重问 = 重载问题\(基线上下文, 通道\.执行上下文\);/.test(s),
+  // 作废必须是**抛出**：把它降级成"push 进越线"就把环境问题写成了越预算（退出码 1 = 代码坏了）
+  不合格就作废: (s) => s.includes('if (重问.length) {') && s.includes('废.读数作废 = true;') && s.includes('throw 废;'),
+  基线取在见证之后测量之前: (s) => {
+    const 见 = s.indexOf('const 通问 = 通道问题(通道)');
+    const 基 = s.indexOf('基线上下文 = 通道.执行上下文;');
+    const 首站 = s.indexOf("const 枢纽 = await 站('枢纽空载'");
+    return 见 >= 0 && 基 >= 0 && 首站 >= 0 && 见 < 基 && 基 < 首站;
+  },
+  作废在算越线之前: (s) => {
+    const 作 = s.indexOf('const 重问 = 重载问题(');
+    const 预 = s.indexOf('const 预算 = PERF_BUDGETS;');
+    return 作 >= 0 && 预 >= 0 && 作 < 预;
+  },
+  归因在catch里: (s) => s.includes('if (!err?.读数作废) {')
+    && s.includes('const 归因 = 重载问题(基线上下文, 通道.执行上下文);')
+    && s.includes("console.error('perf-smoke 归因："),
+  // 计数器**只能有一份，且声明在 try 外面**。多一份（试内再 const 一次）就把外层那个遮蔽了：
+  // catch 里的 `通道.执行上下文` 永远是 0，归因那条从此只会沉默 —— 2026-10-22 搬 e2e-clear 时真错过一次。
+  通道只有一份: (s) => (s.match(/^\s*const 通道 = /gm) ?? []).length === 1
+    && (s.match(/^\s*let 基线上下文 = /gm) ?? []).length === 1
+    && s.search(/^\s*const 通道 = /m) < s.indexOf('let failures = 0;'),
+};
+
+describe('中途重载（切片6d）：读数作废并点名，而不是报成页面内 TypeError', () => {
+  it('反面控制：从头到尾同一个页，什么都不报', () => {
+    expect(重载问题(2, 2), '页没被重建却被判作废（这条门禁会永远红）').toEqual([]);
+    expect(重载问题(7, 7), '条数相同却被判作废').toEqual([]);
+    // 还没取到基线 ⇒ 这一条不判。它是"作废已有读数"的判据，不是"见证存在"的判据
+    //（后者归 `通道问题` 管）；并到一起会把开机阶段那些与重载无关的红记到这条上。
+    expect(重载问题(null, 3), '还没取基线就把开机阶段的红报成重载').toEqual([]);
+    // 0→0 也放行，尽管 0 条通道是断的 —— 那一问由 `通道问题` 在起跑前拒掉，这里不重复收口
+    expect(重载问题(0, 0)).toEqual([]);
+  });
+
+  it('条数动过 ⇒ 点名动了多少、为什么动、并说清"这一轮不作数"', () => {
+    const 问 = 重载问题(2, 5).join('\n');
+    expect(问).toMatch(/执行上下文从 2 条变成 5 条/);
+    expect(问, '差值必须是从喂进来的两个数推的（抄进话术里的数字会随基线烂掉）').toMatch(/差 3/);
+    expect(问, '没点名最常见的原因：并发写入触发的 vite 全量重载').toMatch(/全量重载/);
+    expect(问, '没说出结论：这一轮不作数').toMatch(/这一轮不作数/);
+    // 条数**变少**同样是页被重建（新文档先把旧上下文销毁）—— 只防"变多"是半个判据
+    expect(重载问题(5, 2).join('\n'), '条数减少被判成同一个页').toMatch(/从 5 条变成 2 条（差 -3）/);
+  });
+
+  it('基线或结束是一把手上空尺 ⇒ 点名尺子，不靠 NaN 的巧合红', () => {
+    // 基线自己不是整数 = 这条判据被喂了个空尺（`NaN !== 0` 会让它"红"，但红的话是错的）
+    expect(重载问题(NaN, 3).join('\n'), '基线是 NaN 时没有点名基线自己坏了').toMatch(/基线条数不是整数/);
+    // 结束值来自事件计数器：字段改名或计数搬走 ⇒ undefined，差算成 NaN。
+    // 这里要的是"说清是哪一头空了"，不是靠 NaN 恰好不等于 0 蒙一次红。
+    expect(重载问题(2, undefined).join('\n'), '结束值读到 undefined 没有点名').toMatch(/变成 undefined 条/);
+  });
+
+  it('脚本真的问了这一判，且顺序对（基线在测量之前、作废在算越线之前）', () => {
+    expect(脚本源, '脚本没有 import 重载问题').toMatch(/import \{[^}]*重载问题[^}]*\} from '\.\/harness-readings\.mjs'/);
+    for (const [名, 尺] of Object.entries(接腿)) {
+      expect(尺(脚本源), `接线腿"${名}"在真源码上不过`).toBe(true);
+    }
+    // 计数的正面来源：谁在数 executionContextCreated
+    expect(脚本源, '没有人在数执行上下文条数（那这一判读的是两个常数）').toMatch(/通道\.执行上下文 \+= 1/);
+  });
+
+  it('反向控制：五处拆法各自被对应的腿抓住（自证这些腿不是空转）', () => {
+    const 坏 = {
+      不调判据: 脚本源.replace('const 重问 = 重载问题(基线上下文, 通道.执行上下文);', 'const 重问 = [];'),
+      条件废掉: 脚本源.replace('if (重问.length) {', 'if (false) {'),
+      基线不取: 脚本源.replace('  基线上下文 = 通道.执行上下文;', ''),
+      归因删掉: 脚本源.replace('if (!err?.读数作废) {', 'if (false) {'),
+      计数器遮蔽: 脚本源.replace('  const exceptions = [];', '  const exceptions = [];\n  const 通道 = { 执行上下文: 0, 加载完成: 0 };'),
+    };
+    expect(接腿.调了判据(坏.不调判据), '判据不调，腿却仍判为"调了"').toBe(false);
+    expect(接腿.作废在算越线之前(坏.不调判据), '判据被换成常量，"作废排在越线之前"却仍判为真').toBe(false);
+    expect(接腿.不合格就作废(坏.条件废掉), 'if 改成 if (false)，腿却仍判为"会抛"').toBe(false);
+    expect(接腿.基线取在见证之后测量之前(坏.基线不取), '基线不取了，腿却仍判为"顺序对"').toBe(false);
+    expect(接腿.归因在catch里(坏.归因删掉), '归因没了，腿却仍判为"在 catch 里"').toBe(false);
+    expect(接腿.通道只有一份(坏.计数器遮蔽), 'try 内再 const 一次把外层遮蔽了，腿却仍判为"只有一份"').toBe(false);
+    // 控制的控制：这五处每一处只坏在它自己那一格上（其余腿照过）——
+    // 否则一条红能带倒五条，就说不清是哪只蝴蝶
+    expect(接腿.不合格就作废(坏.不调判据), '不调判据那一处连累了别的腿').toBe(true);
+    expect(接腿.归因在catch里(坏.条件废掉)).toBe(true);
+    expect(接腿.调了判据(坏.归因删掉)).toBe(true);
+    expect(接腿.调了判据(坏.计数器遮蔽)).toBe(true);
+  });
+});
+

@@ -12,14 +12,16 @@
  * 的回归，不是"差 5%"的手感漂移。跑批有噪声，连跑两次取好的一次。
  *
  * 用法：`npm run perf`（自己起 dev 口与浏览器，结束自己收）。
- * 退出码非 0 = 越预算 —— 将来接进 CI（W-D4 切片3）时就是红绿的来源。
+ * 退出码：`1` = 越预算（量到了，而且贵了）；`2` = 环境一侧的红 —— 口/页/通道不成、
+ * 某一站没交出读数、或**这一轮的页在中途被重建**（切片6d：那批数作废，不拿去比预算）。
+ * 将来接进 CI（W-D4 切片3）时就是红绿的来源。
  */
 import { spawn, spawnSync } from 'child_process';
 import { existsSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings } from './perf-budgets.mjs';
-import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题 } from './harness-readings.mjs';
+import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
 
 /**
  * 预算表在 `./perf-budgets.mjs` —— **判据与执行分家**（W-D4 切片3 修）。
@@ -222,6 +224,22 @@ const cleanup = () => {
 };
 process.on('exit', cleanup);
 
+/**
+ * 事件通道的**自证**（切片6b）+ 中途重载的**基线**（切片6d，#167）。
+ *
+ * 数两样一定会来的东西（`Runtime.enable` 会 flush 现存执行上下文；导航后必有 load）：
+ * `exceptions.length` 那一格判的是"0 条"，而"通道一条都没送"与"页面真的没抛"读出来是同一个 0。
+ * 不这么钉，这条预算格可以在通道断掉的情况下永远绿。
+ *
+ * 这个对象**声明在 try 外面**是 6d 要的：红的时候最有用的一句话在 catch 里 ——
+ * 中途有人往 `src/` 写了一下 ⇒ vite 发全量重载 ⇒ `window.__game` 变回 undefined ⇒
+ * 下一句 `evalJs` 红成 `TypeError: … reading 'player'`，看着像代码坏了，其实是这一轮的量被换掉了。
+ * catch 要能问"上下文条数动过没有"，计数器就得活在它看得见的作用域里。
+ */
+const 通道 = { 执行上下文: 0, 加载完成: 0 };
+/** 测量开始前的上下文条数；`null` = 还没走到见证，那一段的红不归"重载"管（不拿没证过的东西说话） */
+let 基线上下文 = null;
+
 let failures = 0;
 try {
   if (!await waitForHttp(`http://127.0.0.1:${VITE_PORT}/`)) throw new Error('dev 口 20 秒内没起来');
@@ -240,13 +258,6 @@ try {
   let msgId = 0;
   const pending = new Map();
   const exceptions = [];
-  /**
-   * 事件通道的**自证**（切片6b）：`exceptions.length` 那一格判的是"0 条"，
-   * 而"通道一条都没送"与"页面真的没抛"读出来是同一个 0。所以这里顺手数两样一定会来的东西
-   * （`Runtime.enable` 会 flush 现存执行上下文；导航后必有 load），最后一并核。
-   * 不这么钉，这条预算格可以在通道断掉的情况下永远绿。
-   */
-  const 通道 = { 执行上下文: 0, 加载完成: 0 };
   ws.onmessage = (ev) => {
     const m = JSON.parse(ev.data);
     if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); }
@@ -304,6 +315,8 @@ try {
   const 通问 = 通道问题(通道);
   if (通问.length) throw new Error(`CDP 通道没有正面见证：\n - ${通问.join('\n - ')}`);
   console.log(`perf-smoke：页=${页地址.slice(0, 60)} 执行上下文=${通道.执行上下文} 加载完成=${通道.加载完成}`);
+  // 基线取在**见证之后、第一站之前**：此后上下文条数一旦变动，就是"页在中途被换过"的实锤
+  基线上下文 = 通道.执行上下文;
 
   /**
    * 一站读数：手工推帧（真 `game.update()` + 真 `game.render()`），量 CPU 耗时。
@@ -488,6 +501,22 @@ try {
   const heapMb = await evalJs('performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : -1');
   console.log(`perf-smoke [堆] usedJSHeap=${heapMb}MB exceptions=${exceptions.length}`);
 
+  /**
+   * **这一轮从头到尾是同一个页吗**（切片6d，#167）—— 问在算越线之前。
+   *
+   * 顺序要紧：如果页在中途被重建过，上面那些数就不是从同一个页里读出来的，
+   * 此时把它们和预算比、然后报一句"越预算（退出码 1）"是把**环境问题记到代码头上**。
+   * 作废要单独红、并且要说清怎么重跑（先让工作树安静）。
+   */
+  const 重问 = 重载问题(基线上下文, 通道.执行上下文);
+  if (重问.length) {
+    // 带个标记抛出：catch 里那条"归因"是给**别的原因**准备的（TypeError 那类），
+    // 这一条自己已经说全了，不该再被复述一遍当成第二个结论
+    const 废 = new Error(`本轮读数作废：\n - ${重问.join('\n - ')}`);
+    废.读数作废 = true;
+    throw 废;
+  }
+
   const 预算 = PERF_BUDGETS;
   const 越线 = [];
   for (const r of draw读数) {
@@ -511,6 +540,12 @@ try {
   ws.close();
 } catch (err) {
   console.error('perf-smoke 失败：', err?.message ?? err);
+  // 中途被重建时，最先红的**总是**某一句 evalJs 的 TypeError（`reading 'player'`），
+  // 它读起来像代码坏了。这一句把责任挪回它该在的地方：不是这一轮的代码，是这一轮的页。
+  if (!err?.读数作废) {
+    const 归因 = 重载问题(基线上下文, 通道.执行上下文);
+    if (归因.length) console.error('perf-smoke 归因：\n - ' + 归因.join('\n - '));
+  }
   failures = 2;
 } finally {
   cleanup();
