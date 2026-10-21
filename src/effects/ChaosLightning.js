@@ -89,4 +89,18 @@ export class ChaosLightning {
       this.strike(playerPos);
     }
   }
+
+  /**
+   * 拆干净：把闪灯与雷那一组从场景里摘掉，释放那条线的几何与材质。
+   *
+   * 为什么现在才有（W-C1 切片3i）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   */
+  dispose() {
+    this.scene.remove(this.flash);
+    this.scene.remove(this.boltGroup);
+    this.boltGeo.dispose();
+    this.boltMat.dispose();
+  }
 }

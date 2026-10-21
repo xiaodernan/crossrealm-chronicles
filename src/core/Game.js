@@ -293,7 +293,7 @@ export class Game {
     this.restPoints = this._adopt('world/RestPointManager', new RestPointManager(this.scene, this.world));
     this.restPoints.buildDefaults();
     this.restNpcs = this._adopt('world/RestNpcManager', new RestNpcManager(this.scene, this.world, this.restPoints, this));
-    this.restCampfireAmbient = new RestCampfireAmbient(this.restPoints);
+    this.restCampfireAmbient = this._adopt('world/RestCampfireAmbient', new RestCampfireAmbient(this.restPoints));
     this.restPointEnhancer = this._adopt('world/RestPointEnhancer', new RestPointEnhancer(this.restPoints, this));
     this.weather = this._adopt('world/WeatherSystem', new WeatherSystem(this.scene, this.world, this.zoneFog));
     this.executionFx = this._adopt('effects/ExecutionEffects', new ExecutionEffects(this.scene, this));
@@ -305,8 +305,8 @@ export class Game {
     this.storyDirector = this._adopt('game/StoryDirector', new StoryDirector(this));
     this.npcs = this._adopt('world/NPCManager', new NPCManager(this.scene, this.world, this.dialog, this));
     this.soulWisps = this._adopt('world/SoulWispManager', new SoulWispManager(this.scene, this.world, this.stats, this.dialog, this.audio));
-    this.voidEcho = new VoidEcho(this.scene);
-    this.chaosLightning = new ChaosLightning(this.scene, this.camera);
+    this.voidEcho = this._adopt('effects/VoidEcho', new VoidEcho(this.scene));
+    this.chaosLightning = this._adopt('effects/ChaosLightning', new ChaosLightning(this.scene, this.camera));
     this.realmBleed = this._adopt('effects/RealmBleed', new RealmBleed());
 
     this.damageNumbers = this._adopt('combat/DamageNumbers', new DamageNumbers(this.scene));

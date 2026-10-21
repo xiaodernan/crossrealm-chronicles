@@ -49,6 +49,26 @@ export class VoidEcho {
     this._pool.push(mesh);
   }
 
+  /**
+   * 拆干净：把残影那一组从场景里摘掉，逐道释放材质，再释放那份共享的胶囊几何。
+   *
+   * 为什么现在才有（W-C1 切片3i）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   *
+   * 残影的**几何是共享**的那一份（所有残影同一个胶囊）⇒ 只释放一次；
+   * **材质逐道一份**（透明度各道自己算）⇒ 逐道释放。
+   */
+  dispose() {
+    this.scene.remove(this.group);
+    for (const e of this.echoes) e.mesh?.material?.dispose?.();
+    for (const mesh of this._pool) mesh.material?.dispose?.();
+    this.echoes.length = 0;
+    this._pool.length = 0;
+    this.geometry.dispose();
+    this.mat.dispose();
+  }
+
   /** 池里备用网格数：泄漏 watchdog 与用例都看这个，不翻内部结构 */
   pooled() {
     return this._pool.length;

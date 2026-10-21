@@ -56,6 +56,17 @@ export class RestNpcProceduralGestures {
     }
   }
 
+  /**
+   * 拆干净：放下那只挥手手臂的引用（**不释放**它的几何与材质）。
+   *
+   * 为什么现在才有（W-C1 切片3i）：那一层（`RestNpcAnimDirector`）此前**只解绑监听**、
+   * 不管这些资源 ⇒ 它们归**容器**（营火本体那一组）释放 —— 在这里释放就是**释放两遍**。
+   */
+  dispose() {
+    this._waveArm = null;
+    this.npc = null;
+  }
+
   update(dt) {
     this._时相 += dt;
     const t = this._时相;         // 改前 `performance.now() * 0.001`（B118）：坐姿胸口与说话点头吃墙钟，定帧时仍继续起伏

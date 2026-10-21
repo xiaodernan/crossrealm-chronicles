@@ -13,6 +13,10 @@ export class RestNpcAnimDirector {
   /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第九处） */
   dispose() {
     offAll(WORLD_RESTNPCANIMDIRECTOR);
+    // 程序化手势那一族自己拆（挥手手臂的引用）——
+    // 它的几何与材质归**容器**（营火本体那一组）释放，不在这里重复一遍。
+    for (const layer of this.layers.values()) layer.proc?.dispose?.();
+    this.layers.clear();
   }
 
   constructor(game) {

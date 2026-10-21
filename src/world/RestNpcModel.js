@@ -84,6 +84,26 @@ export class RestNpcModel {
     return { body, head, cloak };
   }
 
+  /**
+   * 拆干净：把混放器的根从缓存里摘掉，放下这一层的引用（**不释放**那些网格资源）。
+   *
+   * 为什么现在才有（W-C1 切片3i）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编。
+   *
+   * **为什么不释放那些资源**：这一组的网格是**挂在营火那一组上**的
+   * （`RestNpcManager` 里 `point.mesh.add(model.group)`）⇒ 它们的几何与材质归**容器**
+   * （营火本体）释放 —— 拆卸登记表按**登记的反序**执行，这一层先拆（网格还挂在营火上），
+   * 营火本体后拆（那时才轮到那些资源）。在这里释放一遍就是**释放两遍**。
+   * **混放器**（动画混放器）没有容器替它还 ⇒ 由这一层自己 `uncacheRoot` ✓。
+   */
+  dispose() {
+    if (this.mixer && this.modelRoot) this.mixer.uncacheRoot(this.modelRoot);
+    this.mixer = null;
+    this.modelRoot = null;
+    this.actions = {};
+    this.fallbackMeshes.length = 0;
+  }
+
   async loadGlb() {
     for (const url of this.config.glb) {
       try {
