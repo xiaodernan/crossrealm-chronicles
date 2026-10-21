@@ -313,7 +313,7 @@ export class Game {
     /** 震屏：全局唯一实例，各战斗/法术系统直接 `addShake()` 请求，主循环只在这里推进 */
     this.shake = shake;
     this.combatFeedback = this._adopt('effects/CombatFeedback', new CombatFeedback(this.scene));
-    this.projectiles = new ProjectileManager(this.scene, this.audio);
+    this.projectiles = this._adopt('combat/ProjectileManager', new ProjectileManager(this.scene, this.audio));
     // W-D6 切片8：掉落层不再收 audio —— 声音走 game-cue（AudioManager 听它），
     // 于是"掉了一件装备"这件事只有一个出口，不会出现"响了但没字幕"或反过来的漂移。
     this.loot = this._adopt('game/LootSystem', new LootSystem(this.scene, this.stats, {
@@ -336,9 +336,9 @@ export class Game {
 
     this.dungeons = this._adopt('world/DungeonManager', new DungeonManager(this.scene, this.world, this.dialog, this.enemyManager, this));
     this.world.setDungeonManager(this.dungeons);
-    this.spells = new SpellSystem(
+    this.spells = this._adopt('combat/SpellSystem', new SpellSystem(
       this.scene, this.player, this.enemyManager, this.projectiles, this.damageNumbers, this.audio, this.stats
-    );
+    ));
     // 法术命中与近战共用同一批特效池（同一个 CombatFeedback 实例）
     this.spells.feedback = this.combatFeedback;
     // 属性读数的消费者在这里登记一次：升级与穿戴之后"把新数推下去"只有 `PlayerStats` 那一处
@@ -402,7 +402,7 @@ export class Game {
     // 早于 settings 的话构造器读不到出厂档，晚于 applyToGame 的话开机后第一批字幕会被静默吞掉。
     this.captions = this._adopt('ui/Captions', new Captions(this));
     this.performance = new PerformanceManager();
-    this.weapons = new WeaponSystem(this.player, this.dialog, this.audio);
+    this.weapons = this._adopt('combat/WeaponSystem', new WeaponSystem(this.player, this.dialog, this.audio));
     this.achievements = this._adopt('game/AchievementSystem', new AchievementSystem(this.dialog));
     this.fastTravel = new FastTravelSystem(this);
     this.settingsPanel = new SettingsPanel(this);

@@ -49,6 +49,19 @@ export class SpellSystem {
       transform: new Observable(0, { quantize: 0.1 }),
     };
     this.weaponSpellMult = 1;
+    /**
+     * 两份**共享几何**（W-C1 切片3h）：蓄力弹（0.85 球）与普通弹（0.4 球）。
+     *
+     * 改前每次施法各造一份 ⇒ 一次战斗下来成百上千份几何，而它们**一模一样**
+     * （只有蓄力与不蓄力两种形状）。现在全局只有**两份**。
+     *
+     * 弹的**材质**逐发一份（颜色按法术走 ⇒ 共用会串色）；
+     * **领域环**的几何按半径走（每次都不一样）⇒ 那一族仍逐个造、也逐个释放 ✓。
+     */
+    this._弹几何 = {
+      蓄力: new THREE.SphereGeometry(0.85, 12, 12),
+      普通: new THREE.SphereGeometry(0.4, 8, 8),
+    };
     /** 暴击随机源；单测注入确定值，正式局用 Math.random */
     this.rng = Math.random;
     /** 弹体与领域效果由主循环 dt 驱动（原为自建 rAF + 固定 0.016 步长，B9） */
@@ -114,10 +127,10 @@ export class SpellSystem {
     origin.y += 1.4;
     const range = charged ? 28 : 20;
     const target = origin.clone().add(new THREE.Vector3(aim.x * range, 0, aim.z * range));
-    const size = charged ? 0.85 : 0.4;
     const dmgBase = charged ? spell.chargeDamage * (1 + (this.chargeBonus ?? 0)) : spell.damage;
 
-    const geometry = new THREE.SphereGeometry(size, charged ? 12 : 8, charged ? 12 : 8);
+    // 几何是**共享**的那两份之一（蓄力 / 不蓄力）—— 逐发再造就是"施法一次多一份几何"
+    const geometry = charged ? this._弹几何.蓄力 : this._弹几何.普通;
     const material = new THREE.MeshBasicMaterial({ color: spell.color, transparent: true, opacity: 0.9 });
     const orb = new THREE.Mesh(geometry, material);
     orb.position.copy(origin);
@@ -210,7 +223,7 @@ export class SpellSystem {
     const b = this._bolts[i];
     this._bolts.splice(i, 1);
     this.vfxGroup.remove(b.mesh);
-    b.geometry.dispose();
+    // 弹的几何是**共享**的那两份之一 ⇒ 这里**不释放**（释放了，下一发弹就没形状了）
     b.material.dispose();
   }
 
@@ -332,5 +345,30 @@ export class SpellSystem {
       this.mana = Math.min(this.maxMana, this.mana + dt * 8);
     }
     this.emitMana();
+  }
+
+  /**
+   * 拆干净：在场的弹与领域环都摘掉，释放那份共享的两份几何（W-C1 切片3h）。
+   *
+   * 为什么现在才有：`Game._adopt` **拒绝**没有 `dispose()` 的子系统（"假装收编"的防线），
+   * 而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒ `Game.dispose()` 走完，
+   * 它造的那些几何与材质**一份都不还**。
+   *
+   * 弹的**材质**逐发一份（颜色按法术走）⇒ 逐个释放；
+   * **领域环**的几何按半径走（每次都不一样）⇒ 那一族的几何与材质**逐个**释放 ✓。
+   */
+  dispose() {
+    this.scene.remove(this.vfxGroup);
+    for (const b of this._bolts) {
+      b.mesh.material?.dispose?.();
+    }
+    for (const a of this._aoes) {
+      a.geometry?.dispose?.();
+      a.material?.dispose?.();
+    }
+    this._bolts.length = 0;
+    this._aoes.length = 0;
+    this._弹几何?.蓄力?.dispose?.();
+    this._弹几何?.普通?.dispose?.();
   }
 }

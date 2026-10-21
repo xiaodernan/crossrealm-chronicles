@@ -235,7 +235,10 @@ describe('法术弹体的生命周期', () => {
     expect(e.hits).toHaveLength(1);
     expect(spells._bolts).toHaveLength(0);
     expect(spells.vfxGroup.children).toHaveLength(0);
-    expect(seen).toEqual({ geometry: 1, material: 1 });
+    // W-C1 切片3h：弹的**几何是共享的那两份之一**（蓄力 / 不蓄力）⇒ 弹死时**不释放它**
+    // （释放了，下一发弹就没形状了）⇒ 释放的是**逐发一份的材质**。
+    // 共享几何由 `SpellSystem.dispose()` 释放一次（`tests/player-combat-assets.test.js` 钉住）。
+    expect(seen).toEqual({ geometry: 0, material: 1 });
   });
 
   it('未命中的弹体到期后同样释放，不留在场景里', () => {
@@ -245,7 +248,8 @@ describe('法术弹体的生命周期', () => {
     runTo((dt) => spells.update(dt, {}), 1.5, 1 / 60);
     expect(spells._bolts).toHaveLength(0);
     expect(spells.vfxGroup.children).toHaveLength(0);
-    expect(seen).toEqual({ geometry: 1, material: 1 });
+    // 同上：几何是共享的那两份之一（由 `dispose()` 释放一次），到期时释放的是材质
+    expect(seen).toEqual({ geometry: 0, material: 1 });
   });
 
   it('引力领域在展开结束后结算一次并释放', () => {

@@ -7,10 +7,19 @@ export class ProjectileManager {
     this.scene = scene;
     this.audio = audio;
     this.projectiles = [];
+    /**
+     * 一份**共享几何**（W-C1 切片3h）—— 所有弹体都是同一个球。
+     *
+     * 改前每发弹体各造一份 `SphereGeometry` ⇒ 一次齐射就是 N 份几何（N 场战斗下来
+     * 成百上千份），而它们**一模一样**。现在全局只有**一份**。
+     *
+     * 材质**逐发一份**（颜色按法术走 ⇒ 共用会串色）。
+     */
+    this.geometry = new THREE.SphereGeometry(0.35, 8, 8);
   }
 
   spawn(from, target, damage, speed = 12, color = 0xaa44ff) {
-    const geometry = new THREE.SphereGeometry(0.35, 8, 8);
+    const geometry = this.geometry;
     const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.85 });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.copy(from);
@@ -31,8 +40,24 @@ export class ProjectileManager {
     const p = this.projectiles[i];
     this.projectiles.splice(i, 1);
     this.scene.remove(p.mesh);
-    p.geometry.dispose();
+    // 几何是**共享**的那一份 ⇒ 这里**不释放**（释放了，后一发弹体就没形状了）
     p.material.dispose();
+  }
+
+  /**
+   * 拆干净：把在场的弹体都摘掉，逐发释放材质，再释放那份共享几何（W-C1 切片3h）。
+   *
+   * 为什么现在才有：`Game._adopt` **拒绝**没有 `dispose()` 的子系统（"假装收编"的防线），
+   * 而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒ `Game.dispose()` 走完，
+   * 它造的那些几何与材质**一份都不还**。
+   */
+  dispose() {
+    for (const p of this.projectiles) {
+      this.scene.remove(p.mesh);
+      p.material.dispose();
+    }
+    this.projectiles.length = 0;
+    this.geometry.dispose();
   }
 
   /** 存活弹体数 — 观察者接口，避免外部翻内部数组 */

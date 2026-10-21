@@ -79,6 +79,29 @@ export class WeaponSystem {
     staff.add(orb);
     this._staff = staff;
     this._orb = orb;
+    // 记下自己造的那四份资源：拆的时候要还掉（改前这一层**没有** `dispose()` ⇒ 它们永远不还）
+    this._own = {
+      杖几何: staff.geometry,
+      杖材质: staff.material,
+      珠几何: orb.geometry,
+      珠材质: orb.material,
+    };
+  }
+
+  /**
+   * 拆干净：把杖从手上摘下来，释放它那四份资源（W-C1 切片3h）。
+   *
+   * 为什么现在才有：`Game._adopt` **拒绝**没有 `dispose()` 的子系统（"假装收编"的防线），
+   * 而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒ `Game.dispose()` 走完，
+   * 杖身与珠那四份资源**一份都不还**。
+   */
+  dispose() {
+    // 杖挂在**手的骨**上（`attachToHand`）⇒ 摘的时候得从它真正的父节点上摘
+    this._staff?.parent?.remove(this._staff);
+    for (const r of Object.values(this._own ?? {})) r?.dispose?.();
+    this._own = null;
+    this._staff = null;
+    this._orb = null;
   }
 
   /**
