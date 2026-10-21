@@ -205,20 +205,23 @@ describe('掉落物池化：一件掉落不再新建一份资源（W-C1 切片2�
   it('摘账只有一个出口：捡走与到期都走 _despawn，别处不许再直接归还', () => {
     const src = readFileSync(join(SRC, 'game', 'LootSystem.js'), 'utf8');
     const countIn = (re) => (src.match(re) ?? []).length;
-    // 申领与归还各一处；`_despawn` 出现 4 次 = 定义一次 + update 里两条出口各一次
-    // + **拆卸那一条**（W-C1 切片3b：`dispose()` 把在场的都摘掉）。
-    // 拆卸也走 `_despawn` ⇒ 它**不是第二条归还路**（归还仍旧只有 `_release` 一处），
-    // 这条门禁量的正是"别处直接归还"，所以多一个调用方不算破约。
-    expect(countIn(/this\.scene\.add\(/g)).toBe(1);
-    expect(countIn(/this\.scene\.remove\(/g)).toBe(1);
+    // 申领与归还各一处（**每一族**各一处）：掉落格一族、迸发碎片一族（W-B8 切片7 加的）。
+    // 碎片有自己的池（`this._碎片池`），所以"别处直接归还**掉落格**"这件事仍然被数着 ——
+    // 归还路径仍旧只有 `_release` 一处。碎片那一族的 `scene.remove` 有两处（活完回池 / 拆卸），
+    // 那是**两个不同的出口**（归还 vs 拆卸），不是"归还被走了两遍"。
+    expect(countIn(/this\.scene\.add\(/g)).toBe(2);
+    expect(countIn(/this\.scene\.remove\(/g)).toBe(3);
     expect(countIn(/this\._pool\.push\(/g)).toBe(1);
+    expect(countIn(/this\._碎片池\.push\(/g)).toBe(1);
     expect(countIn(/_despawn\(/g)).toBe(4);
     // 分配的口：几何三份共享（本体 / 环 / 柱）、材质每格三份（标准一件 + 基本两件），都只在建格那一步里
     expect(countIn(/new THREE\.OctahedronGeometry\(/g)).toBe(1);
     expect(countIn(/new THREE\.RingGeometry\(/g)).toBe(1);
     expect(countIn(/new THREE\.CylinderGeometry\(/g)).toBe(1);
     expect(countIn(/new THREE\.MeshStandardMaterial\(/g)).toBe(1);
-    expect(countIn(/new THREE\.MeshBasicMaterial\(/g)).toBe(2);
+    // 基本材质三处：掉落格的环 / 柱 / **迸发碎片的那一份**（碎片复用本体的几何，
+    // 材质逐片一份 —— 淡出各自独立）。这三处都是**构造点**的个数，不是实例数。
+    expect(countIn(/new THREE\.MeshBasicMaterial\(/g)).toBe(3);
   });
 });
 
@@ -317,7 +320,10 @@ describe('两件出口与三件颜色：池化没把玩法改掉', () => {
     expect(typeof gears[0].base).toBe('string');
     expect(loot.drops).toHaveLength(0);
     expect(loot.pooled()).toBe(2);
-    expect(scene.children.length).toBe(0);
+    // 装备落地那一下的**迸发碎片**还活着（0.45 秒）—— 它们不是孤儿，走完自己那一段就回池。
+    // 所以"场景里不留孤儿"要等碎片也走完（W-B8 切片7 起场景里多了一族短命的东西）。
+    for (let i = 0; i < 40; i++) loot.update(FRAME, v3(999, 0, 999), PICKUP_RADIUS);
+    expect(scene.children.length, '掉落与碎片都摘干净后，场景里还留着东西').toBe(0);
   });
 });
 

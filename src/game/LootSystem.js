@@ -20,6 +20,25 @@ const BEAM_CENTER_Y = 1.5;
 /** 光柱的固定透明度：它是"这件值得捡"的语义灯，不随呼吸脉冲（环负责呼吸） */
 const BEAM_OPACITY = 0.22;
 
+// ── 落地的迸发（W-B8 切片7）────────────────────────────────────────────
+// 装备落在地上那一下，碎片从落点散开、落下、淡出。魂落地**不**迸发 ——
+// 一次普通击杀都闪一下的话，画面会一直在闪，闪到最后没人看见"那件是史诗的"。
+
+/** 一次迸发散出几片 */
+const 迸发片数 = 8;
+/** 碎片池的大小（**固定**，不与掉落数挂钩 —— 资源账靠这一条） */
+const 碎片池大小 = 12;
+/** 碎片活多久（秒，走主循环 dt） */
+const 碎片寿命 = 0.45;
+/** 碎片散出去的水平初速（米/秒） */
+const 迸发初速 = 3.2;
+/** 碎片往上蹿的初速（米/秒） */
+const 迸发初速Y = 2.4;
+/** 碎片的重力（米/秒²） */
+const 碎片重力 = 9.8;
+/** 碎片的大小（本体八面体的缩放 —— **几何是共享的那一份**，不另造） */
+const 碎片缩放 = 0.45;
+
 /**
  * 地面环的档位规格（环径倍率与环光强度）。形状与生命周期归掉落层（与 `DROP_RADIUS` 同一分工），
  * 颜色仍查表 —— 但走 `rarityTint()`（`game/ColorVision.js`），它按**当前色觉档**取值。
@@ -65,6 +84,17 @@ export class LootSystem {
     this.drops = [];
     /** 捡走或到期后摘出场景存这里：不再每件新建一份几何与材质，也不留"remove 却不归还"的孤儿 */
     this._pool = [];
+    /**
+     * 迸发碎片的池（W-B8 切片7）：**固定大小**，不与掉落数挂钩。
+     *
+     * 碎片**复用本体那份八面体几何**（`this.geometry`）—— 所以这一族**不新增几何**，
+     * 资源账里"三份共享几何"那句话仍然成立；碎片自己的材质**逐片一份**（淡出要各自独立），
+     * 但那也是**固定份数**（最多 12 份），不随掉落数增长。
+     */
+    this._碎片池 = [];
+    this._碎片活 = [];
+    /** 已经造出来的碎片**总数**（池 + 活着的）—— 它封顶在 `碎片池大小`，与掉落数无关 */
+    this._碎片总数 = 0;
     this.geometry = new THREE.OctahedronGeometry(DROP_RADIUS, 0);
     /** 环躺平（XZ 面）与光柱共用：两份几何全局各一份，网格按格借还 */
     this.ringGeometry = new THREE.RingGeometry(0.32, 0.46, 24);
@@ -133,6 +163,14 @@ export class LootSystem {
     // 池里的那些：材质逐格释放（几何是共享的，不在这里释放）
     for (const slot of this._pool) this._释放一格的材质(slot);
     this._pool.length = 0;
+    // 迸发的碎片（W-B8 切片7）：几何是共享的那一份（下面随本体一起释放），
+    // 材质逐片一份 ⇒ 这里逐片释放
+    for (const 片 of [...this._碎片活, ...this._碎片池]) {
+      this.scene.remove(片.mesh);
+      片.mesh.material?.dispose?.();
+    }
+    this._碎片活.length = 0;
+    this._碎片池.length = 0;
     this.geometry.dispose();
     this.ringGeometry.dispose();
     this.beamGeometry.dispose();
@@ -176,6 +214,88 @@ export class LootSystem {
     d.beam.material.color.setHex(tint);
   }
 
+  /**
+   * 落地的迸发：碎片从落点散开、落下、淡出（W-B8 切片7）。
+   *
+   * 只给**装备**用 —— 魂落地不闪。一次普通击杀都闪一下的话，画面会一直在闪，
+   * 闪到最后没人看见"那件是史诗的"。
+   *
+   * **几何不新增**：碎片复用本体那份八面体（`this.geometry`），只是缩小 ⇒
+   * 资源账里"三份共享几何"那句话仍然成立。
+   */
+  _迸发(pos, tint) {
+    for (let i = 0; i < 迸发片数; i++) {
+      const 片 = this._取碎片();
+      if (!片) return;
+      const 角 = (i / 迸发片数) * Math.PI * 2 + this.rng() * 0.7;
+      const 速 = 迸发初速 * (0.55 + this.rng() * 0.8);
+      片.mesh.position.set(pos.x, pos.y + 0.15, pos.z);
+      片.mesh.material.color.setHex(tint);
+      片.mesh.material.opacity = 1;
+      片.mesh.scale.setScalar(碎片缩放);
+      片.mesh.visible = true;
+      this.scene.add(片.mesh);
+      片.vx = Math.cos(角) * 速;
+      片.vz = Math.sin(角) * 速;
+      片.vy = 迸发初速Y * (0.7 + this.rng() * 0.6);
+      片.life = 碎片寿命;
+      this._碎片活.push(片);
+    }
+  }
+
+  /**
+   * 取一片碎片：池里优先；池空而**总数还没到上限**就**新建**一片（并发时两次迸发各有各的碎片 ——
+   * 否则第二次会把第一次还活着的碎片"瞬移"到新位置）；到上限了才重开**最老**的那一片
+   * （它正在淡出，切掉看不出来）。
+   *
+   * "到上限才重开"这一支是**资源数封顶**的关键：没有它，一次并发的迸发就会临时再造几片 ——
+   * 而那正是"资源数与累计掉落数挂钩"的老毛病（碎片总数与掉落数无关，只与**并发迸发数**有关）。
+   */
+  _取碎片() {
+    const 备着的 = this._碎片池.pop();
+    if (备着的) return 备着的;
+    if (this._碎片总数 < 碎片池大小) return this._新建碎片();
+    const 最老 = this._碎片活.shift();
+    return 最老 ?? this._新建碎片();
+  }
+
+  /** 新建一片碎片（几何是共享的那一份，材质逐片一份 —— 淡出各自独立） */
+  _新建碎片() {
+    // **不写初始颜色** —— 颜色在迸发那一刻由 `setHex(tint)` 给（那一档的颜色）。
+    // 这里留一个字面量就是"手抄一枚颜色"（门禁 `tests/gear-drop.test.js`
+    // 「稀有度颜色只有一个来源」数的就是这个文件里的颜色字面量）。
+    const mesh = new THREE.Mesh(
+      this.geometry,
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 1 }),
+    );
+    mesh.scale.setScalar(碎片缩放);
+    this._碎片总数 += 1;
+    return { mesh, life: 0, vx: 0, vy: 0, vz: 0 };
+  }
+
+  /** 碎片飞出去、落下、淡出；活完回池（几何不释放 —— 它是共享的那一份） */
+  _推进碎片(dt) {
+    for (let i = this._碎片活.length - 1; i >= 0; i--) {
+      const 片 = this._碎片活[i];
+      片.life -= dt;
+      片.vy -= 碎片重力 * dt;
+      片.mesh.position.x += 片.vx * dt;
+      片.mesh.position.y += 片.vy * dt;
+      片.mesh.position.z += 片.vz * dt;
+      片.mesh.rotation.x += dt * 7;
+      片.mesh.rotation.z += dt * 5;
+      const 剩 = Math.max(片.life, 0) / 碎片寿命;
+      片.mesh.material.opacity = 剩;
+      片.mesh.scale.setScalar(碎片缩放 * (0.35 + 剩 * 0.65));
+      if (片.life <= 0) {
+        this.scene.remove(片.mesh);
+        片.mesh.visible = false;
+        this._碎片活.splice(i, 1);
+        this._碎片池.push(片);
+      }
+    }
+  }
+
   _spawn(pos, { souls, gear }) {
     const { mesh, ring, beam } = this._acquire();
     const look = gear ? DROP_RING_BY_RARITY[gear.rarity] : DROP_RING_SOUL;
@@ -193,6 +313,9 @@ export class LootSystem {
     // W-D6 切片8：不再直接摸 audio，改成派一条字幕线索 —— 声音由 AudioManager 听 game-cue 播，
     // 字幕由 ui/Captions 听同一条画。掉落层从此只负责"发生了什么"，不负责"怎么响"。
     if (gear) emitCue('gearDrop', { rank: rarityRank(gear.rarity), rarity: gearRarityLabel(gear.rarity, getLanguage()) });
+    // 落地的迸发（W-B8 切片7）：只给**装备**（魂落地不闪）。碎片色 = 那一档的颜色
+    // （`rarityTint` 走当前色觉档 —— 与环与柱同一个来源，不另编一份颜色）。
+    if (gear) this._迸发(pos, rarityTint(gear.rarity));
     return d;
   }
 
@@ -237,6 +360,8 @@ export class LootSystem {
   }
 
   update(dt, playerPos, pickupRadius = 2.5) {
+    // 迸发的碎片：走主循环 dt（不另起一个时钟 —— B39 纪律：游戏逻辑不自带计时）
+    this._推进碎片(dt);
     // 色觉档换了就重涂全场（W-D6 切片3）：见构造处 `_tintMode` 的注释
     const mode = getColorVisionMode();
     if (mode !== this._tintMode) {
