@@ -930,8 +930,8 @@ export const CONTENT_TABLES = [
       type: { t: 'enum', of: OBJECTIVE_TYPES },
       targetId: { t: 'id', required: false },
       target: { t: 'int', min: 1, required: false },
-      enemyType: { t: 'string', required: false },
-      bossId: { t: 'id', required: false },
+      enemyType: { t: 'ref', of: 'enemyRoster', required: false },
+      bossId: { t: 'ref', of: 'bosses', required: false },
       // 副本 id 现在有一张表了（切片3a）：写错的字母以前只会让那条任务没有路点，
       // 如今开机就红 —— 与 `zone: { t: 'ref', of: 'zones' }` 同一口径
       dungeonId: { t: 'ref', of: 'dungeons', required: false },

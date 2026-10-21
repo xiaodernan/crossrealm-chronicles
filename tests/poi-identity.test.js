@@ -15,6 +15,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { BaseZone } from '../src/world/zones/BaseZone.js';
 import { WorldManager } from '../src/world/WorldManager.js';
 import { attachPopCultureZones } from '../src/world/PopCultureZoneEnhancer.js';
+import { OBJECTIVES } from '../src/content/objectives.js';
 
 const makeScene = () => ({ add() {}, remove() {} });
 const makeDialog = () => ({ show() {}, toast() {} });
@@ -176,13 +177,18 @@ describe('真世界的 POI 登记表', () => {
   it('主线任务的每个 targetId 都能在世界里找到对应的认领方', () => {
     // 任务的 interact / discovery 目标必须真有人在表里指出来，
     // 否则"完成条件"永远凑不齐，而玩家只看得到"任务卡住"。
+    //
+    // 那份名单**从主线表推导**（原先是手抄的六个 id —— 那是第二份抄本：
+    // 主线加一行 discovery，这张抄本不会跟着长，于是那一行没人管）。
+    const 发现目标 = OBJECTIVES.filter((o) => o.type === 'discovery').map((o) => o.targetId);
+    expect(发现目标.length, '主线里一条 discovery 都没有 —— 这一族走空了，判据空转').toBeGreaterThan(3);
     const discovered = new Set();
     for (const poi of world.pointsOfInterest) {
       if (typeof poi.onInteract !== 'function') continue;
       window.addEventListener('discovery', (e) => discovered.add(e.detail.id));
       poi.onInteract();
     }
-    for (const id of ['fantasy-ring', 'magic-castle', 'space-tesseract', 'void-rift', 'void-tablet', 'chaos-core']) {
+    for (const id of 发现目标) {
       expect(discovered.has(id), `${id} 没有任何 POI 会登记它`).toBe(true);
     }
     expect(world.hubPOIs.map((p) => p.id)).toContain('hub-anchor');
