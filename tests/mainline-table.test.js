@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
-import { V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS } from '../src/game/SaveMigrations.js';
+import { V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS } from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
 } from '../src/content/objectives.js';
@@ -116,6 +116,29 @@ const V10_ORDER = [
   'knight-hunt', 'skills', 'abyss-maw', 'chaos-boss', 'dungeon-rerun', 'infinity',
 ];
 
+/**
+ * **v11 之后**在役的那条序列（W-E3 切片13 主线把剩下四座副本也走一遍）。
+ *
+ * 相对 `V10_ORDER` 多了四处（**旧序列**的下标）：
+ * - 2 —— `hub-catacombs`（枢纽之下的墓穴），在 `soldiers` 之前
+ * - 10 —— `forest-shrine`（古树下的神龛），在 `talk-wanderer` 之前
+ * - 35 —— `gloom-mist-crypt`（雾里的墓穴），在 `chaos-boss` 之前
+ * - 36 —— `radiant-dawn-hall`（圣殿的清晨），在 `dungeon-rerun` 之前
+ *
+ * 至此**主线把九座副本全走了一遍**（三座试炼 + 六座别的）。
+ *
+ * **一次插四处**（而不是分四片插四跳）：存档链已经六跳了，每加一步主线就多一跳 ⇒
+ * 一次多插几处，链才长得慢。
+ */
+const V11_ORDER = [
+  'anchor', 'training', 'hub-catacombs', 'soldiers', 'fantasy-frag', 'boss', 'magic-frag', 'golem',
+  'space-frag', 'finale', 'chests', 'forest-shrine', 'talk-wanderer', 'boss2', 'elite', 'hexer-hunt',
+  'level', 'epilogue', 'learn-spell', 'crypt', 'library', 'rift', 'boss3', 'mind',
+  'ascension', 'void-rift', 'charge-spell', 'void-hunt', 'crawler-hunt', 'void-casket', 'void-boss', 'void-tablet',
+  'true-end', 'chaos-core', 'knight-hunt', 'skills', 'abyss-maw', 'gloom-mist-crypt', 'chaos-boss', 'radiant-dawn-hall',
+  'dungeon-rerun', 'infinity',
+];
+
 const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 
 beforeEach(() => { installWindowShim(); });
@@ -160,7 +183,6 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片12 之后：主线是 38 步，两处插入（主线第一次走进非试炼副本）', () => {
     expect(V10_ORDER).toHaveLength(38);
     expect(new Set(V10_ORDER).size, 'v10 序列里有重复 id').toBe(V10_ORDER.length);
-    expect(MAINLINE.map((r) => r.id)).toEqual(V10_ORDER);
     // 两处插入，其余逐字相同（新序列里那两步的下标是 27 / 34）
     const 新序列插点 = [27, 34];
     const 旧 = [];
@@ -173,8 +195,25 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V10_ORDER[34], '第 34 位不是 abyss-maw').toBe('abyss-maw');
   });
 
-  it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {
-    expect(V8_INSERT_POINTS).toEqual([24]);
+  it('W-E3 切片13 之后：主线是 42 步，四处插入（主线把九座副本全走了一遍）', () => {
+    expect(V11_ORDER).toHaveLength(42);
+    expect(new Set(V11_ORDER).size, 'v11 序列里有重复 id').toBe(V11_ORDER.length);
+    expect(MAINLINE.map((r) => r.id)).toEqual(V11_ORDER);
+    // 四处插入，其余逐字相同（新序列里那四步的下标是 2 / 11 / 37 / 39）
+    const 新序列插点 = [2, 11, 37, 39];
+    const 旧 = [];
+    for (let i = 0; i < V11_ORDER.length; i++) {
+      if (新序列插点.includes(i)) continue;
+      旧.push(V11_ORDER[i]);
+    }
+    expect(旧, '去掉四处插入后应当逐字等于 v10 那条序列').toEqual(V10_ORDER);
+    expect(V11_ORDER[2], '第 2 位不是 hub-catacombs').toBe('hub-catacombs');
+    expect(V11_ORDER[11], '第 11 位不是 forest-shrine').toBe('forest-shrine');
+    expect(V11_ORDER[37], '第 37 位不是 gloom-mist-crypt').toBe('gloom-mist-crypt');
+    expect(V11_ORDER[39], '第 39 位不是 radiant-dawn-hall').toBe('radiant-dawn-hall');
+  });
+
+  it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);
     // v7 → v8：旧序列的 24 号位是 `void-boss`，新步插在它**之前**
     expect(HEAD_ORDER[24]).toBe('void-boss');
     expect(V8_ORDER[24]).toBe('void-hunt');
@@ -193,6 +232,17 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V9_ORDER[33]).toBe('chaos-boss');
     expect(V10_ORDER[27 + 1], '老档的 27 号位（void-boss）没落到新表的 void-boss 上').toBe('void-boss');
     expect(V10_ORDER[33 + 2], '老档的 33 号位（chaos-boss）没落到新表的 chaos-boss 上').toBe('chaos-boss');
+    // v10 → v11：四个插点（**旧序列**口径）
+    expect(V11_INSERT_POINTS).toEqual([2, 10, 35, 36]);
+    expect(V10_ORDER[2]).toBe('soldiers');
+    expect(V10_ORDER[10]).toBe('talk-wanderer');
+    expect(V10_ORDER[35]).toBe('chaos-boss');
+    expect(V10_ORDER[36]).toBe('dungeon-rerun');
+    // 折算后的落点 = 新序列里那些步的位置（老档要落回同一步）
+    expect(V11_ORDER[2 + 1], '老档的 2 号位（soldiers）没落到新表的 soldiers 上').toBe('soldiers');
+    expect(V11_ORDER[10 + 2], '老档的 10 号位（talk-wanderer）没落到新表的 talk-wanderer 上').toBe('talk-wanderer');
+    expect(V11_ORDER[35 + 3], '老档的 35 号位（chaos-boss）没落到新表的 chaos-boss 上').toBe('chaos-boss');
+    expect(V11_ORDER[36 + 4], '老档的 36 号位（dungeon-rerun）没落到新表的 dungeon-rerun 上').toBe('dungeon-rerun');
   });
 
   it('投影只去掉章节门控行：一格不多一格不少，且不重排', () => {

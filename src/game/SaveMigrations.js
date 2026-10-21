@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v11', version: 11 },
   { key: 'crossrealm_save_v10', version: 10 },
   { key: 'crossrealm_save_v9', version: 9 },
   { key: 'crossrealm_save_v8', version: 8 },
@@ -174,6 +175,31 @@ function migrateV9toV10(d) {
   return d;
 }
 
+/**
+ * v10 → v11：**主线把剩下四座副本也走一遍**（W-E3 切片13）。
+ *
+ * 这一跳插了四步（`hub-catacombs` 枢纽地下墓穴 / `forest-shrine` 古树神龛 /
+ * `gloom-mist-crypt` 幽暗迷雾墓穴 / `radiant-dawn-hall` 晨曦圣殿）⇒ 至此
+ * **主线把九座副本全走了一遍**。
+ *
+ * 插入点（**旧序列**的下标）：
+ * - 2 —— 在 `soldiers` 之前（`hub-catacombs`）
+ * - 10 —— 在 `talk-wanderer` 之前（`forest-shrine`）
+ * - 35 —— 在 `chaos-boss` 之前（`gloom-mist-crypt`）
+ * - 36 —— 在 `dungeon-rerun` 之前（`radiant-dawn-hall`）
+ *
+ * **一次插四处**（而不是分四片插四跳）：存档链已经六跳了，每加一步主线就多一跳 ⇒
+ * 一次多插几处，链才长得慢。
+ */
+export const V11_INSERT_POINTS = [2, 10, 35, 36];
+
+function migrateV10toV11(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V11_INSERT_POINTS);
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -182,6 +208,7 @@ export const MIGRATIONS = {
   7: migrateV7toV8,
   8: migrateV8toV9,
   9: migrateV9toV10,
+  10: migrateV10toV11,
 };
 
 /**
