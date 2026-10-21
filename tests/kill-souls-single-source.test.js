@@ -14,6 +14,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { KILL_SOULS, KILL_SOUL_KINDS } from '../src/content/enemies.js';
+import { GEAR_DROP } from '../src/content/gear.js';
 import { killRewardSouls } from '../src/combat/EnemyManager.js';
 import { growthAt } from '../src/content/enemyGrowth.js';
 
@@ -59,5 +60,19 @@ describe('KILL_SOULS 单一定义（击杀魂基数表不许有两份）', () =>
   // 分隔守卫：kinds 非空，上面两条 for 循环不许空转成"干净"
   it('四种击杀档位都在（分隔守卫）', () => {
     expect(KILL_SOUL_KINDS.slice().sort()).toEqual(['boss', 'elite', 'golem', 'normal']);
+  });
+
+  it('击杀档位域对齐 GEAR_DROP.byKind：掉魂的每个 kind 都得有掉宝率', () => {
+    // `EnemyManager.js` 头部原写"KILL_SOUL_KINDS 供注册表对齐 GEAR_DROP.byKind"，但修前它
+    // 根本没有消费者（KILL_SOULS 也没进注册表）—— 那句是空头支票。真正该守的不变量是：
+    // 能被 killRewardSouls 认的每个 kind，GEAR_DROP.byKind 都得给得出掉率，否则"这一档掉魂、
+    // 却查不到掉宝率"会在 `spawnKill` 那条路上静默落到 `none` 兜底，且没人会发现。
+    const gearKinds = Object.keys(GEAR_DROP.byKind);
+    for (const kind of KILL_SOUL_KINDS) {
+      expect(gearKinds, `击杀档位「${kind}」在 GEAR_DROP.byKind 里没有对应格`).toContain(kind);
+    }
+    // 反向：GEAR_DROP 多出来的档是"有掉宝率但不掉魂"的（dummy 训练木人 / none 名单外兜底），
+    // 记死这份差集 —— 别让两张表悄悄长成同一张，也别让某一档只进一张、另一张漏登。
+    expect(gearKinds.filter((k) => !KILL_SOUL_KINDS.includes(k)).sort()).toEqual(['dummy', 'none']);
   });
 });

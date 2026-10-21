@@ -27,7 +27,8 @@ import { t } from '../engine/i18n.js';
  * （两轴各司其职，与 `enemyGrowth.js` 文件头那一段同一分工）。
  *
  * 抽成纯函数：循环里只调用、门禁也能直接调。基数表**只此一份**：`KILL_SOULS` 住在
- * `content/enemies.js`（那里还派生 `KILL_SOUL_KINDS` 供注册表对齐 `GEAR_DROP.byKind`）——
+ * `content/enemies.js`（那里还派生 `KILL_SOUL_KINDS`，由门禁
+ * `tests/kill-souls-single-source.test.js` 对齐 `GEAR_DROP.byKind` 的击杀档位域）——
  * 本文件 import 它，不再另抄一份（再抄就会冒出"改一处、另一处不跟着变"的两个击杀魂口径）。
  */
 
