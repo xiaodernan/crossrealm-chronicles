@@ -2,6 +2,7 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { isDungeonBossId } from '../content/bossRoster.js';
 import { cueOf } from '../content/captions.js';
+import { ambienceOf, AMBIENCE_KINDS } from '../content/zoneAmbience.js';
 import { VOLUME_DEFAULTS, normalizeVolume } from './AudioVolumes.js';
 
 import { on, offAll } from '../engine/EventBus.js';
@@ -15,6 +16,8 @@ const audioOn = (name, handler) => on(name, handler, AUDIO_AUDIOMANAGER);
 const TAG_MELODY = 'audio/melody';
 const TAG_COMBAT = 'audio/combat';
 const TAG_ONESHOT = 'audio/oneshot';
+/** 环境层的前缀：每一层**自己的** tag（`audio/amb-<序号>`），撤销时一层一层清 */
+const TAG_AMBIENCE = 'audio/amb';
 
 const ZONE_DRONES = {
   hub: { base: 55, harm: 82, type: 'sine', scale: [0, 2, 4, 7, 9] },
@@ -60,6 +63,15 @@ export class AudioManager {
   /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
   dispose() {
     offAll(AUDIO_AUDIOMANAGER);
+    // 环境层（W-C7 切片4）：每一层有自己的排程 tag，逐层清干净 ——
+    // 留着的话"滴答"会一直排下去，而 `AudioManager` 已经不在了（回调打空对象）。
+    // 淡出的收尾（断开）走**另一个** tag（`层tag-fade`），它也要清 ——
+    // 否则音频系统拆了之后还有一条"断开节点"的回调排着。
+    for (const [, 句柄] of this._环境层) {
+      scheduler.clear(句柄.tag);
+      scheduler.clear(句柄.淡出tag);
+    }
+    this._环境层.clear();
   }
 
   constructor() {
@@ -88,6 +100,11 @@ export class AudioManager {
     this._melodyStep = 0;
     this._combatStep = 0;
     this._noiseBuffer = null;
+    /**
+     * 当前在响的环境层（W-C7 切片4）：键 = `amb-<序号>-<配方>`，值 = `{ 键, tag, 淡出, gain }`。
+     * 换区时旧的几层淡出、新的几层淡入；`dispose()` 一次结清。
+     */
+    this._环境层 = new Map();
     // 字幕线索（W-D6 切片8）：听 game-cue，按名册的 sound 那一格播声音。
     // 挂在构造器而不是 _initOnGesture() 的解锁回调里（realm-bleed 挂在那）：
     // 线索是「游戏世界发生了一件事」，它与喇叭解没解锁无关 —— 解锁前到的线索照样要记下，
@@ -147,6 +164,9 @@ export class AudioManager {
         this._noiseBuffer = this._createNoiseBuffer();
         this._startZoneDrone('hub');
         this._startMelody('hub');
+        // 分层环境音（W-C7 切片4）：解锁那一刻按当前所在区起层（此前没有 ctx，起不了）。
+        // 用 `this.currentZone` 而不是写死 'hub' —— 解锁可能发生在玩家已经在某座区里之后。
+        this._换环境层(this.currentZone);
         audioOn('realm-bleed', (e) => this.playRealmBleed(e.detail?.key ?? 'wild'));
       }
       if (this.ctx.state === 'suspended') this.ctx.resume();
@@ -273,9 +293,191 @@ export class AudioManager {
     this._bossProfile = key;
     this._startZoneDrone(key in ZONE_DRONES ? key : mode);
     this._startMelody(key in ZONE_DRONES ? key : mode);
+    // 分层环境音（W-C7 切片4）：旧的几层淡出、新的几层淡入。
+    // 走 `setMode` 而不是 `setZone` —— 因为切区、进副本、开 Boss 战都汇到这一处，
+    // 少一个入口就少一次"环境声没跟着换"的机会。
+    this._换环境层(key);
     if (this.bgm) {
       this.bgm.gain.value = mode === 'boss' || String(key).startsWith('boss') ? 0.22 : mode === 'dungeon' ? 0.16 : 0.14;
     }
+  }
+
+  /* ===== 分层环境音（W-C7 切片4） ===== */
+
+  /**
+   * 换区：旧的几层淡出，新的几层淡入。
+   *
+   * 淡入淡出走**音频自己的时间**（`AudioContext.currentTime` 上的 ramp），不走 `scheduler` ——
+   * 声音的淡出是"物理上音量渐变"，与游戏帧率无关；而 `scheduler` 走的是 rawDt（会被掉帧拉长）。
+   * 两者混用会让"切区那一秒"在低帧率机器上淡不掉。
+   */
+  _换环境层(zoneKey) {
+    this._停环境层();
+    if (!this.ctx || !this.enabled) return;
+    const 层表 = ambienceOf(zoneKey);
+    for (const [i, 层] of 层表.entries()) {
+      const 句柄 = this._起一层(层, i);
+      if (句柄) this._环境层.set(句柄.键, 句柄);
+    }
+  }
+
+  /**
+   * 停掉当前所有环境层（淡出 → 断开 → 清掉它的排程）。
+   *
+   * 淡出期间旧层仍挂在 `ambient` 总线上（所以是"交叉淡出"而不是"断掉再起"）——
+   * 直接断会有一声"咔"（Web Audio 的节点被强行断开时的爆音）。
+   */
+  _停环境层() {
+    if (!this._环境层.size) return;
+    const t = this.ctx?.currentTime ?? 0;
+    for (const [, 句柄] of this._环境层) {
+      句柄.淡出?.(t);
+      scheduler.clear(句柄.tag);
+    }
+    this._环境层.clear();
+  }
+
+  /**
+   * 起一层环境声。返回 `{ 键, tag, 淡出 }`；音频没解锁（`ctx` 还没建）时返回 null。
+   *
+   * 四种配方各一条合成链，**链的末端都接这一层自己的 Gain** —— 淡入淡出动的是那一格，
+   * 于是"这一层单独淡出"与"整层一起淡出"是同一件事。
+   */
+  _起一层(层, 序号) {
+    if (!this.ctx || !this.enabled) return null;
+    if (!AMBIENCE_KINDS.includes(层.kind)) {
+      throw new Error(`环境音层配方 "${层.kind}" 不在名单里（可用：${AMBIENCE_KINDS.join(' / ')}）`);
+    }
+    const ctx = this.ctx;
+    const g = ctx.createGain();
+    const 淡入秒 = 1.2;
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(层.音量, ctx.currentTime + 淡入秒);
+    g.connect(this.ambient);
+
+    const 键 = `amb-${序号}-${层.kind}`;
+    const tag = `${TAG_AMBIENCE}-${序号}`;
+    /**
+     * 淡出的收尾（断开）走**另一个** tag —— 它不能挂在层自己的 tag 上：
+     * `_停环境层` 换区时会 `clear(层.tag)`，而那个 clear 恰好会把"淡出走完之后断开"
+     * 那个任务一起清掉 ⇒ 旧层永远连在 `ambient` 总线上，两座区的声叠着，
+     * 而且音量越走越高。两条 tag 分开是这条的**唯一**修法。
+     */
+    const 淡出tag = `${tag}-fade`;
+    const 停机件 = [];   // 断开时要停的节点
+    const 淡出 = (t) => {
+      try {
+        g.gain.cancelScheduledValues(t);
+        g.gain.setValueAtTime(g.gain.value, t);
+        g.gain.linearRampToValueAtTime(0.0001, t + 0.8);
+        // 淡出结束后断开 —— 但**不停**振荡器：停了会在那一瞬间有一次幅度跳变（爆音）。
+        // 振荡器自己停在那儿（`stop` 不接 = 一直响），但它的输出已经断了，CPU 上还占着 ——
+        // 所以在淡出结束时把它停掉，那一刻它已经不接任何输出。
+        for (const n of 停机件) {
+          try { if (typeof n.stop === 'function') n.stop(t + 0.85); } catch { /* 已停 */ }
+          try { n.disconnect(); } catch { /* 已断 */ }
+        }
+        scheduler.after(0.9, () => { try { g.disconnect(); } catch { /* 已断 */ } }, 淡出tag);
+      } catch { /* 音频节点已被拆 */ }
+    };
+
+    if (层.kind === 'wind') {
+      // 噪声 → 带通滤波，中心频率被一条慢 LFO 扫（风声会"呼吸"）
+      const src = ctx.createBufferSource();
+      src.buffer = this._noiseBuffer;
+      src.loop = true;
+      const filt = ctx.createBiquadFilter();
+      filt.type = 'bandpass';
+      filt.frequency.value = 层.中心频率 ?? 400;
+      filt.Q.value = 0.8;
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = 0.06;
+      const lfoGain = ctx.createGain();
+      lfoGain.gain.value = 层.扫频 ?? 200;
+      lfo.connect(lfoGain);
+      lfoGain.connect(filt.frequency);
+      src.connect(filt);
+      filt.connect(g);
+      src.start();
+      lfo.start();
+      停机件.push(src, lfo);
+    } else if (层.kind === 'rumble') {
+      // 低频振荡器 + 慢速颤音（空间在"响"）
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = 层.频率 ?? 45;
+      const trem = ctx.createOscillator();
+      trem.frequency.value = 0.11;
+      const tremGain = ctx.createGain();
+      tremGain.gain.value = (层.音量 ?? 0.05) * 0.5;
+      trem.connect(tremGain);
+      tremGain.connect(g.gain);
+      osc.connect(g);
+      osc.start();
+      trem.start();
+      停机件.push(osc, trem);
+    } else if (层.kind === 'drip') {
+      // 每隔若干秒一声短促的滤波噪声脉冲（洞穴 / 雨）
+      const 打一次 = () => {
+        const t = ctx.currentTime;
+        const src = ctx.createBufferSource();
+        src.buffer = this._noiseBuffer;
+        const filt = ctx.createBiquadFilter();
+        filt.type = 'bandpass';
+        filt.frequency.value = 层.音高 ?? 200;
+        filt.Q.value = 6;
+        const bg = ctx.createGain();
+        bg.gain.setValueAtTime(0.9, t);
+        bg.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+        src.connect(filt);
+        filt.connect(bg);
+        bg.connect(g);
+        src.start(t);
+        src.stop(t + 0.18);
+      };
+      打一次();
+      this._排程重复(层.间隔 ?? 4, 打一次, tag);
+    } else if (层.kind === 'chime') {
+      // 每隔若干秒一串正弦泛音（神殿 / 冰晶）
+      const 响一次 = () => {
+        const t = ctx.currentTime;
+        const 泛音 = [1, 2.01, 2.98];
+        泛音.forEach((倍, i) => {
+          const o = ctx.createOscillator();
+          o.type = 'sine';
+          o.frequency.value = (层.音高 ?? 660) * 倍;
+          const bg = ctx.createGain();
+          const 起 = t + i * 0.012;
+          bg.gain.setValueAtTime(0.0001, 起);
+          bg.gain.linearRampToValueAtTime(0.5 / (i + 1), 起 + 0.01);
+          bg.gain.exponentialRampToValueAtTime(0.0001, 起 + 1.1 - i * 0.2);
+          o.connect(bg);
+          bg.connect(g);
+          o.start(起);
+          o.stop(起 + 1.2);
+        });
+      };
+      响一次();
+      this._排程重复(层.间隔 ?? 6, 响一次, tag);
+    }
+
+    return { 键, tag, 淡出tag, 淡出, gain: g };
+  }
+
+  /**
+   * 自排下一拍（与 `_scheduleBeat` 同一形状，但**不**再自我重排 —— 由调用方决定要不要继续）。
+   *
+   * 环境层的"滴水 / 铃"是**一次性**的间隔声：打一次之后隔一段时间再打一次。
+   * 撤销靠 `scheduler.clear(tag)`（每层一个 tag）。
+   */
+  _排程重复(间隔秒, 打一次, tag) {
+    const 一步 = () => {
+      scheduler.after(间隔秒, () => {
+        打一次();
+        一步();
+      }, tag);
+    };
+    一步();
   }
 
   startBossFight(bossId) {

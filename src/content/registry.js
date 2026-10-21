@@ -29,6 +29,7 @@ import { BOSS_ROSTER, BOSS_IDS, DUNGEON_BOSS_PREFIX } from './bossRoster.js';
 import { BOSS_ARENA_SCRIPTS, ARENA_MOVES, ARENA_TRIGGERS } from './arenaScripts.js';
 import { BOSS_PHASE_TUNING } from './bossPhases.js';
 import { ZONE_IDS, ZONE_NAMES, ZONE_ORDER } from './ZoneIdentity.js';
+import { ZONE_AMBIENCE, AMBIENCE_KINDS, AMBIENCE_MAX_GAIN } from './zoneAmbience.js';
 import { REST_NPC_DEFS } from './restNpcDefs.js';
 import { BOSS_DEFEAT_LINES, BOSS_PHASE_LINES, DUNGEON_BOSS_LINES } from './bossDialogue.js';
 import { ECHOES } from './echoes.js';
@@ -328,6 +329,23 @@ export const CONTENT_TABLES = [
     shape: 'index',
     table: ZONE_NAMES,
     value: { t: 'string' },
+  },
+  {
+    kind: 'zoneAmbience',
+    note: '分层环境音（W-C7 切片4）：键是区 id，值是"这一座叠几层环境声"。'
+      + '读者是 `audio/AudioManager` 的 `_换环境层`（照着这张表合成声线，'
+      + '表里没有的层就听不见、表里多的层就多一条声线）。'
+      + '键不强制对 `zones` —— `dungeon` / `wild` / `boss` 三档是**音频模式**不是位面，'
+      + '而 `boss-*` 各档走 `boss` 那一档（见 `zoneAmbience.js` 的 `ambienceOf`）',
+    shape: 'index',
+    table: ZONE_AMBIENCE,
+    value: {
+      t: 'rows',
+      of: {
+        kind: { t: 'enum', of: AMBIENCE_KINDS },
+        音量: { t: 'number', exclusiveMin: 0, max: AMBIENCE_MAX_GAIN },
+      },
+    },
   },
   {
     kind: 'zoneIds',

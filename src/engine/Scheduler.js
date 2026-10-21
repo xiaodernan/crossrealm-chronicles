@@ -70,6 +70,23 @@ export class Scheduler {
   }
 
   /**
+   * 某个分组下未到期的任务数（`pending` 的**分档**版）。
+   *
+   * 为什么需要它：`pending` 是**总数**，而"这条链只有一条待办"是分档的断言。
+   * 音频层同时挂着旋律链、战斗链、一次性回位、以及分层环境音各自的间隔声链
+   * （"滴水" / "铃"，W-C7 切片4）—— 数总数会把**不相干的链**算进来，于是断言要么写死
+   * 一个会随别的子系统漂移的数，要么在别的子系统加一条链时红（那不是本断言要说的事）。
+   *
+   * @param {string} tag 分组标签（与 `after()` / `clear()` 用的是同一个）
+   * @returns {number}
+   */
+  pendingByTag(tag) {
+    let n = 0;
+    for (const t of this._tasks) if (t.tag === tag) n += 1;
+    return n;
+  }
+
+  /**
    * @param {number} dt 秒
    */
   update(dt) {

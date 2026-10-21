@@ -36,6 +36,11 @@ export const audioParam = () => {
   p.linearRampToValueAtTime = () => p;
   p.exponentialRampToValueAtTime = () => p;
   p.setTargetAtTime = () => p;
+  // `cancelScheduledValues` 是真 AudioParam 的方法：分层环境音的淡出走它
+  // （"先取消旧的那条 ramp，再从当前值起一条新的"）。夹具缺这一格时生产代码会在
+  // `g.gain.cancelScheduledValues(t)` 上抛 —— 而那一抛被自己的 try/catch 吞掉，
+  // 症状是"淡出排程从未发生、旧层永远连在总线上"，比直接抛更难查。
+  p.cancelScheduledValues = () => p;
   return p;
 };
 
@@ -63,6 +68,10 @@ export function makeFakeAudioContext() {
         buffer: null,
         gain: audioParam(),
         frequency: audioParam(),
+        // `Q` 是 BiquadFilterNode 的第三个 AudioParam（真设备上同样是 AudioParam）。
+        // 分层环境音的风声要用它（带通滤波的 Q 值）—— 夹具缺这一格时生产代码会
+        // "Cannot set properties of undefined" —— 那是夹具少了一颗牙，不是生产错了。
+        Q: audioParam(),
         connect(target) { n._target = target; },
         disconnect() { n._target = null; },
         start(at) {

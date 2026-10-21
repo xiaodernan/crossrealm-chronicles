@@ -46,6 +46,21 @@ function firstBeatFrame(periodSeconds, step) {
 
 const beatsIn = (periodSeconds, frames, step = FRAME) => Math.floor(frames / firstBeatFrame(periodSeconds, step));
 
+/**
+ * 音频层的**音乐链**待办数（旋律 + 战斗 + 一次性回位）。
+ *
+ * 为什么不用 `音乐链待办()`（总数）：分层环境音（W-C7 切片4）给音频层挂上各自的
+ * 间隔声链（"滴水" / "铃"），那是**另一族**排程，与"这条旋律链只有一条待办"无关。
+ * 数总数会把不相干的链算进来 —— 断言要么写死一个会随别的子系统漂移的数，
+ * 要么在别的子系统加一条链时红（那不是本断言要说的事）。
+ *
+ * 分档由 `Scheduler.pendingByTag` 提供（只读入口，不许测试伸手进 `_tasks`）。
+ */
+const 音乐链待办 = () =>
+  scheduler.pendingByTag('audio/melody')
+  + scheduler.pendingByTag('audio/combat')
+  + scheduler.pendingByTag('audio/oneshot');
+
 let audio = null;
 let ctx = null;
 
@@ -65,7 +80,7 @@ afterEach(() => {
 describe('BGM 节拍跟着主循环的秒数走（B38 音频半区）', () => {
   it('解锁之后旋律是一条待办，不是一条墙钟定时器', () => {
     // 正面门槛：豁免拆掉之后，"src 里没有 setTimeout"不能靠"把音频计时整个删掉"来满足
-    expect(scheduler.pending).toBe(1);
+    expect(音乐链待办()).toBe(1);
     expect(countOn(ctx, 'bgm')).toBe(0); // 一拍都还没到
   });
 
@@ -89,21 +104,21 @@ describe('BGM 节拍跟着主循环的秒数走（B38 音频半区）', () => {
   it('换区域只重排那一条链，不会攒出第二条', () => {
     audio.setMode('zone', 'magic');
     audio.setMode('dungeon', 'dungeon');
-    expect(scheduler.pending).toBe(1); // 旋律链换人了，但仍然只有一条
+    expect(音乐链待办()).toBe(1); // 旋律链换人了，但仍然只有一条
     const frames = run(ctx, 2);
     expect(countOn(ctx, 'bgm')).toBe(beatsIn(MODE_TEMPO.dungeon / 1000, frames));
     expect(countOn(ctx, 'bgm')).toBeLessThan(beatsIn(MODE_TEMPO.zone / 1000, frames)); // 680ms 比 520ms 稀
   });
 
   it('boss 战武装战斗层，结束时按 tag 撤销干净', () => {
-    const baseline = scheduler.pending;
+    const baseline = 音乐链待办();
     audio.startBossFight('shadow-warden');
-    expect(scheduler.pending).toBe(baseline + 1); // 多出来的那条是战斗层
+    expect(音乐链待办()).toBe(baseline + 1); // 多出来的那条是战斗层
     const frames = run(ctx, 1.5);
     expect(countOn(ctx, 'combat')).toBeGreaterThan(0);
     expect(countOn(ctx, 'bgm')).toBe(beatsIn(MODE_TEMPO['boss-shadow'] / 1000, frames));
     audio.endBossFight();
-    expect(scheduler.pending).toBe(baseline); // 战斗链不留待办
+    expect(音乐链待办()).toBe(baseline); // 战斗链不留待办
     ctx.notes.length = 0;
     run(ctx, 1.5);
     expect(countOn(ctx, 'combat')).toBe(0); // 也不留后续音符
@@ -131,7 +146,7 @@ describe('BGM 节拍跟着主循环的秒数走（B38 音频半区）', () => {
       fresh.audio.startBossFight('chaos-overlord');
       if (phase > 1) fresh.audio.setBossPhase(phase);
       const first = framesToFirst(fresh.ctx, 'combat');
-      return { first, pending: scheduler.pending };
+      return { first, pending: 音乐链待办() };
     };
     const p1 = probe(1);
     const p3 = probe(3);
@@ -147,7 +162,7 @@ describe('BGM 节拍跟着主循环的秒数走（B38 音频半区）', () => {
     ctx.notes.length = 0;
     // 这里一秒都不推进：链版本什么都不会发生，墙钟定时器版本会继续往 notes 里塞音
     expect(countOn(ctx, 'bgm')).toBe(0);
-    expect(scheduler.pending).toBe(2);
+    expect(音乐链待办()).toBe(2);
   });
 });
 
@@ -185,11 +200,11 @@ describe('一次性音效的偏移改成秒', () => {
     expect(countOn(ctx, 'bleed')).toBe(1); // 扫频当场起音，不等钟
 
     run(ctx, 0.1); // 离 0.12 秒还差一点：回位那条还排在待办里
-    expect(scheduler.pending).toBe(2); // 旋律链 + 还没到点的回位
+    expect(音乐链待办()).toBe(2); // 旋律链 + 还没到点的回位
     ctx.notes.length = 0;
 
     run(ctx, 0.65); // 过了点，也过了新链的第一拍
-    expect(scheduler.pending).toBe(1); // 回位已经发生：旋律换了一条，不是加了一条
+    expect(音乐链待办()).toBe(1); // 回位已经发生：旋律换了一条，不是加了一条
     const after = notesOn(ctx, 'bgm');
     expect(after).toHaveLength(1);
     expect(after[0].freq).toBeLessThan(hub[0]); // void 的根音比 hub 低： audible 地说明"真的换了区"
@@ -202,7 +217,7 @@ describe('一次性音效的偏移改成秒', () => {
     run(ctx, 0.5); // 0.12 秒那道恢复分支必须被 bossFightActive 拦住
     expect(audio.bossFightActive).toBe(true);
     expect(audio.audioMode).toBe('boss');
-    expect(scheduler.pending).toBe(2); // 没有为"回到区域"重排第三条
+    expect(音乐链待办()).toBe(2); // 没有为"回到区域"重排第三条
     expect(notesOn(ctx, 'bgm').length - before.length).toBe(1); // 响的仍是 boss 层那一拍
   });
 
@@ -216,7 +231,7 @@ describe('一次性音效的偏移改成秒', () => {
     audio.playRealmBleed('boss-shadow');
     run(ctx, 0.4);
     expect(audio.audioMode).toBe('boss');
-    expect(scheduler.pending).toBe(2);
+    expect(音乐链待办()).toBe(2);
   });
 
   it('副本 BGM 期间渗透音不重排区域层（回位只认 zone 态）', () => {
@@ -224,7 +239,7 @@ describe('一次性音效的偏移改成秒', () => {
     audio.playRealmBleed('void');
     run(ctx, 0.3); // 过了 0.12 秒那个点
     expect(audio.audioMode).toBe('dungeon');
-    expect(scheduler.pending).toBe(1); // 还是 dungeon 那一条链，没被换成 zone 的
+    expect(音乐链待办()).toBe(1); // 还是 dungeon 那一条链，没被换成 zone 的
   });
 
   it('换区域只清旋律那一层，不该顺手撤销已经在飞的渗透回位', () => {
@@ -236,9 +251,9 @@ describe('一次性音效的偏移改成秒', () => {
     audio.setMode('zone', 'abyss');
     const before = droneBase();
     run(ctx, 0.06); // 第 7 帧
-    expect(scheduler.pending).toBe(2); // 旋律链 + 那条还在等的回位
+    expect(音乐链待办()).toBe(2); // 旋律链 + 那条还在等的回位
     run(ctx, 0.05); // 第 10 帧：过了点
-    expect(scheduler.pending).toBe(1);
+    expect(音乐链待办()).toBe(1);
     expect(droneBase()).toBeLessThan(before); // 底噪已经换成 void 那一套，不是停在 abyss
   });
 });
