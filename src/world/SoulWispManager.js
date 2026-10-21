@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { addShake } from '../engine/Shake.js';
-import { ZONE_IDS } from '../content/ZoneIdentity.js';
+// 出生点表搬进内容层（W-B12 切片5）：纯数据本就该在 `content/`，
+// 而且分区支线要判"那位面到底有没有萤火"——表在 `world/` 时内容层够不着它。
+import { WISP_SPOTS } from '../content/wispSpots.js';
 import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
 import { t } from '../engine/i18n.js';
 
@@ -9,21 +11,10 @@ import { t } from '../engine/i18n.js';
  *
  * id 里的位面前缀（`wisp-fantasy`…）只是历史巧合，不是契约 —— 位面归属写成显式一格
  * （W-B12 切片2），支线判据问 `collectedInZone(zone)`，不再自己拿 id 拼前缀。
+ *
+ * 出生点表在 `content/wispSpots.js`（W-B12 切片5 搬进来的）：纯数据留在内容层，
+ * 而分区支线"那位面到底有没有萤火"这件事也才因此查得到。
  */
-const WISP_SPOTS = [
-  { id: 'wisp-hub', zone: ZONE_IDS.HUB, x: -15, z: 48, souls: 8 },
-  { id: 'wisp-hub2', zone: ZONE_IDS.HUB, x: 18, z: 62, souls: 8 },
-  { id: 'wisp-fantasy', zone: ZONE_IDS.FANTASY, x: -175, z: 25, souls: 12 },
-  { id: 'wisp-fantasy2', zone: ZONE_IDS.FANTASY, x: -230, z: -20, souls: 15 },
-  { id: 'wisp-magic', zone: ZONE_IDS.MAGIC, x: -25, z: -195, souls: 12 },
-  { id: 'wisp-magic2', zone: ZONE_IDS.MAGIC, x: 40, z: -170, souls: 14 },
-  { id: 'wisp-space', zone: ZONE_IDS.SPACE, x: 185, z: 70, souls: 12 },
-  { id: 'wisp-space2', zone: ZONE_IDS.SPACE, x: 220, z: 120, souls: 15 },
-  { id: 'wisp-void', zone: ZONE_IDS.VOID, x: 10, z: 205, souls: 18 },
-  { id: 'wisp-void2', zone: ZONE_IDS.VOID, x: -15, z: 235, souls: 20 },
-  { id: 'wisp-abyss', zone: ZONE_IDS.ABYSS, x: -210, z: 205, souls: 18 },
-  { id: 'wisp-abyss2', zone: ZONE_IDS.ABYSS, x: -185, z: 250, souls: 22 },
-];
 
 const CHASE_RANGE = 38;
 const COLLECT_RANGE = 2.8;

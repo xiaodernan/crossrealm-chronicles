@@ -30,6 +30,8 @@ import { BOSS_ARENA_SCRIPTS, ARENA_MOVES, ARENA_TRIGGERS } from './arenaScripts.
 import { BOSS_PHASE_TUNING } from './bossPhases.js';
 import { ZONE_IDS, ZONE_NAMES, ZONE_ORDER } from './ZoneIdentity.js';
 import { ZONE_AMBIENCE, AMBIENCE_KINDS, AMBIENCE_MAX_GAIN } from './zoneAmbience.js';
+import { WISP_SPOTS } from './wispSpots.js';
+import { checkZoneFactProducers } from './zoneFacts.js';
 import { REST_NPC_DEFS } from './restNpcDefs.js';
 import { BOSS_DEFEAT_LINES, BOSS_PHASE_LINES, DUNGEON_BOSS_LINES } from './bossDialogue.js';
 import { ECHOES } from './echoes.js';
@@ -330,6 +332,24 @@ export const CONTENT_TABLES = [
     shape: 'index',
     table: ZONE_NAMES,
     value: { t: 'string' },
+  },
+  {
+    kind: 'wispSpots',
+    note: '漂浮魂火（残响）的出生点（W-B12 切片5 从 `world/SoulWispManager.js` 搬进内容层）：'
+      + '键是那一枚自己的 id，值是"归属哪座区 / 在哪 / 给多少魂火"。'
+      + '读者是 `world/SoulWispManager.js` 的 `build()`（照这张表造魂火）。'
+      + '搬进内容层的**直接收益**：分区支线"那位面到底有没有萤火"这件事查得到 —— '
+      + '表在 `world/` 时内容层够不着它，于是"某座区一条萤火都没有 ⇒ 那条支线永远完成不了"'
+      + '没人能查（gloom / radiant 就真的没有过，见 `content/zoneFacts.js` 的病根那段）',
+    shape: 'rows',
+    table: WISP_SPOTS,
+    row: {
+      id: { t: 'id' },
+      zone: { t: 'enum', of: [...ZONE_ORDER, 'hub'] },
+      x: { t: 'number' },
+      z: { t: 'number' },
+      souls: { t: 'int', min: 1 },
+    },
   },
   {
     kind: 'zoneAmbience',
@@ -723,7 +743,7 @@ export const CONTENT_TABLES = [
       reward: { t: 'int', min: 1 },
       journal: { t: 'string' },
     },
-    invariant: checkZoneSideQuestCoverage,
+    invariant: (table, ctx) => [...checkZoneSideQuestCoverage(table, ctx), ...checkZoneFactProducers(table)],
   },
   {
     kind: 'sideQuestsPop',
