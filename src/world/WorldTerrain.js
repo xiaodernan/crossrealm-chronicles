@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { sampleGlobalHeight } from './TerrainHeight.js';
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { releaseSubtree } from '../engine/releaseSubtree.js';
 
 /** sculpt 主地形 + 贴合地面的蜿蜒古径（贴图 + 法线） */
 export class WorldTerrain {
@@ -212,5 +213,20 @@ export class WorldTerrain {
       this.group.add(cliff);
       this._meshes.cliffs.push(cliff);
     }
+  }
+
+  /**
+   * 拆干净：把地形那一组从场景里摘掉，释放地表 / 崖壁 / 小径的几何与材质（W-C1 切片3f）。
+   *
+   * 为什么现在才有：`Game._adopt` **拒绝**没有 `dispose()` 的子系统（"假装收编"的防线），
+   * 而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒ `Game.dispose()` 走完，
+   * 它造的那些几何与材质**一份都不还**。
+   *
+   * **共享库造的资源不碰** —— 释放器按 `userData.shared` 标记跳过它们
+   * （`engine/releaseSubtree.js`）。
+   */
+  dispose() {
+    this.scene.remove(this.group);
+    releaseSubtree(this.group);
   }
 }

@@ -12,6 +12,7 @@ import { createVerticalScheduler } from './VerticalSchedule.js';
 import { sampleGlobalHeightSmooth, sampleGroundNormal } from './TerrainHeight.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { CollisionWorld } from '../engine/Collision.js';
+import { releaseSubtree } from '../engine/releaseSubtree.js';
 import { makeUvCylinderGeometry } from '../engine/uvGeometry.js';
 import { makeRegionSurfaceMaterial, applyRegionSurface } from './regionSurfaces.js';
 import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from '../content/ZoneIdentity.js';
@@ -204,6 +205,9 @@ export class WorldManager {
 
   buildHubLandmarks() {
     const hub = new THREE.Group();
+    // 枢纽组挂在 `this` 上：`dispose()` 要拆得到它 —— 改前它是这一处的局部变量，
+    // 外面谁也拿不到（"造了没人能拆"的一种）。
+    this.hubGroup = hub;
 
     // W-C5 切片6：中央石柱换 drum 表面（与区域断柱同一套鼓形石段），几何换
     // `makeUvCylinderGeometry`（UV 以米计）。它是唯一不归 BaseZone 管的石构 ——
@@ -479,5 +483,31 @@ export class WorldManager {
 
   setDungeonManager(dungeonManager) {
     this.dungeonManager = dungeonManager;
+  }
+
+  /**
+   * 拆干净：地形 + 七座区 + 枢纽组（W-C1 切片3f）。
+   *
+   * 为什么现在才有：`Game._adopt` **拒绝**没有 `dispose()` 的子系统（"假装收编"的防线），
+   * 而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒ `Game.dispose()` 走完，
+   * **整个世界**造的资源（地表 / 崖壁 / 七座区的树石桥塔 / 致敬层那四族增强器挂在区上的装饰）
+   * **一份都不还**。
+   *
+   * **七座区的装饰归位面管**：致敬层那四个增强器（`world/PopCultureZoneEnhancer*`）
+   * 是**函数**，它们的网格挂在区的那一组上 ⇒ 位面的 `dispose()` 一并释放 ✓
+   * （`BaseZone.dispose()` 是继承来的 —— 七座区共用同一口径）。
+   *
+   * **四座内部空间**（神堂 / 树洞 / 大厅 / 星望塔）的网格同样挂在区的那一组上，
+   * 它们自己的 `group` 是空的 ⇒ 不必单独拆。
+   */
+  dispose() {
+    this.worldTerrain?.dispose?.();
+    for (const zone of this.zones) zone.dispose?.();
+    this.zones.length = 0;
+    if (this.hubGroup) {
+      this.scene.remove(this.hubGroup);
+      releaseSubtree(this.hubGroup);
+      this.hubGroup = null;
+    }
   }
 }

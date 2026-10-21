@@ -4,6 +4,7 @@ import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { paletteOf } from '../content/materialPalette.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { releaseSubtree } from '../engine/releaseSubtree.js';
 
 /** 矩阵装配用的临时对象：build 一次性跑完，模块级一份就够 */
 const _dummy = new THREE.Object3D();
@@ -413,5 +414,20 @@ export class WorldDecorations {
     });
     sealBatch(inst);
     this.group.add(inst);
+  }
+
+  /**
+   * 拆干净：把装饰那一组从场景里摘掉，释放它造的那些几何与材质（W-C1 切片3f）。
+   *
+   * 为什么现在才有：`Game._adopt` **拒绝**没有 `dispose()` 的子系统（"假装收编"的防线），
+   * 而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒ `Game.dispose()` 走完，
+   * 它造的那些几何与材质**一份都不还**。
+   *
+   * **共享库造的资源不碰** —— 树皮的共享材质（`TextureLibrary.sharedMaterial`）带
+   * `userData.shared` 标记 ⇒ 释放器跳过它（`engine/releaseSubtree.js`）。
+   */
+  dispose() {
+    this.scene.remove(this.group);
+    releaseSubtree(this.group);
   }
 }

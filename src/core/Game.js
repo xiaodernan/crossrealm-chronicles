@@ -278,13 +278,13 @@ export class Game {
     this.dialog = new Dialog();
     this.dialogCg = new DialogCGRenderer();
     this.dialog.setCgRenderer(this.dialogCg);
-    this.world = new WorldManager(this.scene, this.dialog);
+    this.world = this._adopt('world/WorldManager', new WorldManager(this.scene, this.dialog));
     this.world.build();
     attachPopCultureZones(this);
     // W-C2 切片5：区域静态几何合批。致敬层是最后往 `zone.group` 追加装饰的一方，
     // 早一步合批就会把它追加的那些留在外面当散件（`world/zoneBatching.js`）。
     this.zoneBatchStats = batchZoneStatics(this.world);
-    this.worldDecorations = new WorldDecorations(this.scene, this.world);
+    this.worldDecorations = this._adopt('world/WorldDecorations', new WorldDecorations(this.scene, this.world));
     this.worldDecorations.build();
     this.bossBeacons = this._adopt('world/BossBeacons', new BossBeacons(this.scene, this.world));
     this.bossBeacons.build();

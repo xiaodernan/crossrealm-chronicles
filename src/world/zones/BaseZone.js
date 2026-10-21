@@ -4,6 +4,7 @@ import { makeUvFacetGeometry } from '../../engine/uvGeometry.js';
 import { makeRegionSurfaceMaterial, applyRegionSurface } from '../regionSurfaces.js';
 import { markNoBatch } from '../zoneBatching.js';
 import { paletteOf } from '../../content/materialPalette.js';
+import { releaseSubtree } from '../../engine/releaseSubtree.js';
 
 export class BaseZone {
   constructor(scene, center, config) {
@@ -272,5 +273,21 @@ export class BaseZone {
     applyShadow(rock, 'castOnly');
     if (size >= 0.8) this.addCylinderCollider(x, z, size * 0.8, rock.position.y + size * 1.1, { base: rock.position.y - size });
     return rock;
+  }
+
+  /**
+   * 拆干净：把这一座位面从场景里摘掉，释放它造的那些几何与材质（W-C1 切片3f）。
+   *
+   * 为什么现在才有：`Game._adopt` **拒绝**没有 `dispose()` 的子系统（"假装收编"的防线），
+   * 而 `WorldManager` 此前**没有** `dispose()` ⇒ 它从不被收编 ⇒ `Game.dispose()` 走完，
+   * **七座区**（含致敬层那四族增强器挂在区上的装饰）造的资源**一份都不还**。
+   *
+   * **共享库造的资源不碰** —— 释放器按 `userData.shared` 标记跳过它们
+   * （`engine/releaseSubtree.js`）。七座区共用同一口径，这一条在这里是**继承**来的：
+   * 子类不需要各写一份 `dispose()`。
+   */
+  dispose() {
+    this.scene.remove(this.group);
+    releaseSubtree(this.group);
   }
 }
