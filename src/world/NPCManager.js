@@ -66,6 +66,17 @@ export class NPCManager {
     this.game = game;
     this.npcs = [];
     this.lineIndex = {};
+    /**
+     * 两份**共享几何**与一份**共享材质**（W-C1 切片3d）—— 三个 NPC 共用这一套。
+     *
+     * 改前每一个 NPC 各造两份几何（胶囊体 / 标记球）⇒ **三个就是 6 份几何**，
+     * 而它们**长得一模一样**；标记球那枚材质（`0x44ffaa`，人人一样）也是各造一份。
+     *
+     * **身体的材质逐个一份** —— 每个人的颜色不一样（`data.color`），那是他的身份。
+     */
+    this._身体几何 = new THREE.CapsuleGeometry(0.38, 1.0, 8, 16);
+    this._标记几何 = new THREE.SphereGeometry(0.15, 8, 8);
+    this._标记材质 = new THREE.MeshBasicMaterial({ color: 0x44ffaa });
     this.build();
   }
 
@@ -73,15 +84,12 @@ export class NPCManager {
     for (const data of NPC_DATA) {
       const group = new THREE.Group();
       const mat = new THREE.MeshStandardMaterial({ color: data.color, roughness: 0.75 });
-      const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.38, 1.0, 8, 16), mat);
+      const body = new THREE.Mesh(this._身体几何, mat);
       body.position.y = 1.2;
       applyShadow(body, 'actor');
       group.add(body);
 
-      const marker = new THREE.Mesh(
-        new THREE.SphereGeometry(0.15, 8, 8),
-        new THREE.MeshBasicMaterial({ color: 0x44ffaa })
-      );
+      const marker = new THREE.Mesh(this._标记几何, this._标记材质);
       marker.position.y = 2.5;
       group.add(marker);
 
@@ -89,7 +97,8 @@ export class NPCManager {
       group.position.set(data.x, y, data.z);
       this.scene.add(group);
 
-      this.npcs.push({ ...data, mesh: group, position: new THREE.Vector3(data.x, y, data.z) });
+      // `material` 挂在这一条上：`dispose()` 要逐个释放它（身体材质是逐人一份的）
+      this.npcs.push({ ...data, mesh: group, material: mat, position: new THREE.Vector3(data.x, y, data.z) });
       this.lineIndex[data.id] = 0;
     }
   }
@@ -130,5 +139,25 @@ export class NPCManager {
     for (const n of this.npcs) {
       n.mesh.rotation.y += dt * 0.4;
     }
+  }
+
+  /**
+   * 拆干净：把三个人从场景里摘掉，逐个释放身体的材质，再释放那两份共享几何与一份共享材质。
+   *
+   * 为什么现在才有（W-C1 切片3d）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   *
+   * 身体的材质**逐个**释放（颜色是每个人的身份，不能共用），标记球那份共用 ⇒ 只释放一次。
+   */
+  dispose() {
+    for (const n of this.npcs) {
+      this.scene.remove(n.mesh);
+      n.material?.dispose?.();
+    }
+    this.npcs.length = 0;
+    this._身体几何?.dispose?.();
+    this._标记几何?.dispose?.();
+    this._标记材质?.dispose?.();
   }
 }

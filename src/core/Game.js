@@ -297,13 +297,13 @@ export class Game {
     this.restPointEnhancer = this._adopt('world/RestPointEnhancer', new RestPointEnhancer(this.restPoints, this));
     this.weather = new WeatherSystem(this.scene, this.world, this.zoneFog);
     this.executionFx = this._adopt('effects/ExecutionEffects', new ExecutionEffects(this.scene, this));
-    this.collectibles = new CollectibleManager(this.scene, this.world, this.stats, this.dialog);
+    this.collectibles = this._adopt('world/CollectibleManager', new CollectibleManager(this.scene, this.world, this.stats, this.dialog));
     // W-A1 迁移第五～八处：这些系统的监听走总线（带 tag）⇒ 它们必须进 teardown 登记表，
     // `_adopt` 会拒绝没有 dispose() 的子系统（"假装收编"的防线）。
     this.quests = this._adopt('game/QuestSystem', new QuestSystem(this.dialog));
     this.storyJournal = this._adopt('game/StoryJournal', new StoryJournal(this));
     this.storyDirector = this._adopt('game/StoryDirector', new StoryDirector(this));
-    this.npcs = new NPCManager(this.scene, this.world, this.dialog, this);
+    this.npcs = this._adopt('world/NPCManager', new NPCManager(this.scene, this.world, this.dialog, this));
     this.soulWisps = this._adopt('world/SoulWispManager', new SoulWispManager(this.scene, this.world, this.stats, this.dialog, this.audio));
     this.voidEcho = new VoidEcho(this.scene);
     this.chaosLightning = new ChaosLightning(this.scene, this.camera);

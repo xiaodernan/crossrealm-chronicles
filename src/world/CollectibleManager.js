@@ -20,20 +20,29 @@ export class CollectibleManager {
     this.stats = stats;
     this.dialog = dialog;
     this.chests = [];
+    /**
+     * 两份**共享几何**与两份**共享材质**（W-C1 切片3d）—— 八个宝箱共用这一套。
+     *
+     * 改前每一个宝箱各造两份几何（`new THREE.BoxGeometry(...)` 写在循环里）⇒
+     * **八个就是 16 份几何**，而它们**长得一模一样**（箱体 / 箱盖）。
+     * 材质本来就是共用的（改前就在 `build()` 里造一次），这一片只是把它们也提上来，
+     * 好让 `dispose()` 找得到它们。
+     */
+    this._箱体几何 = new THREE.BoxGeometry(1.2, 0.8, 0.8);
+    this._箱盖几何 = new THREE.BoxGeometry(1.25, 0.25, 0.85);
+    this._箱体材质 = new THREE.MeshStandardMaterial({ color: 0x6a5030, roughness: 0.8, metalness: 0.3 });
+    this._箱盖材质 = new THREE.MeshStandardMaterial({ color: 0x8a7040, roughness: 0.7, metalness: 0.4 });
     this.build();
   }
 
   build() {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x6a5030, roughness: 0.8, metalness: 0.3 });
-    const lidMat = new THREE.MeshStandardMaterial({ color: 0x8a7040, roughness: 0.7, metalness: 0.4 });
-
     for (const c of CHESTS) {
       const group = new THREE.Group();
-      const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 0.8), mat);
+      const body = new THREE.Mesh(this._箱体几何, this._箱体材质);
       body.position.y = 0.4;
       applyShadow(body, 'castOnly');
       group.add(body);
-      const lid = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.25, 0.85), lidMat);
+      const lid = new THREE.Mesh(this._箱盖几何, this._箱盖材质);
       lid.position.y = 0.9;
       lid.name = 'lid';
       group.add(lid);
@@ -76,5 +85,23 @@ export class CollectibleManager {
 
   getOpenedCount() {
     return this.chests.filter((c) => c.opened).length;
+  }
+
+  /**
+   * 拆干净：把八个宝箱从场景里摘掉，释放那两份共享几何与两份共享材质。
+   *
+   * 为什么现在才有（W-C1 切片3d）：`Game._adopt` **拒绝**没有 `dispose()` 的子系统
+   * （"假装收编"的防线），而这一层此前**没有** `dispose()` ⇒ 它从不被收编 ⇒
+   * `Game.dispose()` 走完，它造的那些几何与材质**一份都不还**。
+   */
+  dispose() {
+    for (const c of this.chests) {
+      this.scene.remove(c.mesh);
+    }
+    this.chests.length = 0;
+    this._箱体几何?.dispose?.();
+    this._箱盖几何?.dispose?.();
+    this._箱体材质?.dispose?.();
+    this._箱盖材质?.dispose?.();
   }
 }
