@@ -565,6 +565,10 @@ export class EnemyManager {
    * 材质逐只一份（由敌人自己还）⇒ 归属清楚，不在这里再走一遍。
    */
   dispose() {
+    // 在场的敌人（含 Boss）各自有 `Enemy.dispose()` —— 死亡与回收那两条路都走它，
+    // 拆卸这一条也不能漏（它们的材质是**逐只一份**的 ⇒ 漏了就是白漏）。
+    for (const e of this.enemies) e.dispose?.();
+    this.enemies.length = 0;
     for (const arena of this.arenas) {
       if (!arena?.group) continue;
       this.scene.remove(arena.group);
