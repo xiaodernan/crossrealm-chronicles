@@ -16,6 +16,7 @@
 import { FRANCHISE } from './franchises.js';
 import { ZONE_IDS } from './ZoneIdentity.js';
 import { ECHOES } from './echoes.js';
+import { DUNGEON_DEFS } from './dungeons.js';
 
 export const SIDE_QUESTS_BASE = [
   {
@@ -274,6 +275,51 @@ const 清剿 = 清剿档.map(({ 区, title, journal, 奖励 }) => ({
   reward: 奖励,
 }));
 
+/**
+ * 第四族的事实：**那位面的副本**（W-E3 切片7）。
+ *
+ * 为什么要有第四样：前两对事实（歇脚 / 插画、萤火 / 火牌）都是"**去过那里**"的证据，
+ * 第三样（清剿数）是"**你把那里的敌人清了一遍**"—— 三样都发生在**野外**。
+ * 而**副本**是另一种经历：它有入口（那位面里那座地下城）、有守钥者、有碎片回报，
+ * 而且它是全局最长的一段内容 ⇒ "那位面你到底下过没有"值得单列一条。
+ *
+ * 事实从哪来：**副本定义表里那格 `zone`**（W-B10 切片7 新增）—— 位面 → 副本的映射是
+ * **推导**的，不是手抄的一份名单（抄一份就是第二份真相：改了副本的位面而名单没改，
+ * 那一支就永远做不完）。
+ *
+ * 门槛：一座副本通一次（`dungeonRuns.clears`）—— 副本能重复刷，但"下过一次"就够了。
+ * **一位面有两座副本时**（灰白森林有灰白遗城与古树神龛），通**其中一座**就算数 ——
+ * 判据是"那位面的副本下过了没有"，不是"两座都下过"（后者是另一个目标，更长）。
+ */
+const 那位面的副本 = (zone) => DUNGEON_DEFS.filter((d) => d.zone === zone).map((d) => d.id);
+const 通了那座区的副本 = (game, zone) => {
+  const ids = 那位面的副本(zone);
+  return ids.length > 0 && ids.some((id) => (game.dungeonRuns?.clears?.[id] ?? 0) >= 1);
+};
+
+/**
+ * 第四族的分档：奖励随位面往后走，且**比第三族（清剿）高** ——
+ * 下一次副本比在野外清十只敌人更费工夫（找入口 / 走迷宫 / 打守钥者）。
+ */
+const 副本档 = [
+  { 区: ZONE_IDS.FANTASY, title: 'sq_side_dun_fantasy_title', journal: 'sq_side_dun_fantasy_journal', 奖励: 20 },
+  { 区: ZONE_IDS.MAGIC, title: 'sq_side_dun_magic_title', journal: 'sq_side_dun_magic_journal', 奖励: 22 },
+  { 区: ZONE_IDS.SPACE, title: 'sq_side_dun_space_title', journal: 'sq_side_dun_space_journal', 奖励: 22 },
+  { 区: ZONE_IDS.VOID, title: 'sq_side_dun_void_title', journal: 'sq_side_dun_void_journal', 奖励: 24 },
+  { 区: ZONE_IDS.ABYSS, title: 'sq_side_dun_abyss_title', journal: 'sq_side_dun_abyss_journal', 奖励: 26 },
+  { 区: ZONE_IDS.GLOOM, title: 'sq_side_dun_gloom_title', journal: 'sq_side_dun_gloom_journal', 奖励: 24 },
+  { 区: ZONE_IDS.RADIANT, title: 'sq_side_dun_radiant_title', journal: 'sq_side_dun_radiant_journal', 奖励: 28 },
+];
+const 副本族 = 副本档.map(({ 区, title, journal, 奖励 }) => ({
+  id: `side-dun-${区}`,
+  zone: 区,
+  title,
+  desc: 'sq_side_dun_desc',
+  journal,
+  check: (game) => 通了那座区的副本(game, 区),
+  reward: 奖励,
+}));
+
 /** 三族：基础 / 分区 / 致敬。`zone` 是它们唯一的分区依据，`'global'` = 不属于任何一位面 */
 export const SIDE_QUESTS_ZONE = [
   {
@@ -403,6 +449,7 @@ export const SIDE_QUESTS_ZONE = [
     journal: 'sq_side_wisp_radiant_journal',
   },
   ...清剿,
+  ...副本族,
 ];
 export const SIDE_QUESTS_ALL = (() => {
   const 名单 = [...SIDE_QUESTS_BASE, ...SIDE_QUESTS_ZONE, ...SIDE_QUESTS_POP];

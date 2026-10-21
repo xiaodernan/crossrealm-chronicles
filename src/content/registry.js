@@ -1273,6 +1273,8 @@ export function checkSideQuestRosters(baseTable) {
  * （`restPointEnhancer.discovered`，存档 v7 落库 —— B66）也是位面账，每位面 ≥2 诚实做得到；
  * **切片7 起第三样位面事实落地**：该位面的**清剿数**（任务账 `zoneKills`，生产者是
  * `enemy-defeated` 事件里的 `zone`），于是每位面 ≥3 也诚实做得到。
+   * **W-E3 切片7 起第四样位面事实落地**：那位面的**副本**（`dungeonRuns.clears`；
+   * 位面 → 副本的映射由副本定义表那格 `zone` **推导**，不是手抄的名单）⇒ 每位面 ≥4。
  * 判据挂在分区族这张表上（不是合并名单），这样用例能把这张表换成"少一位"的版本走 shipped 入口。
  */
 export function checkZoneSideQuestCoverage(zoneTable) {
@@ -1285,9 +1287,9 @@ export function checkZoneSideQuestCoverage(zoneTable) {
     const n = 计数.get(zone) ?? 0;
     if (n === 0) {
       out.push(`sideQuestsZone: 位面 "${zone}" 一条专属支线都没有 —— 这位面的内容深度是 0，而"条数够不够"那种门禁看不见它`);
-    } else if (n < 3) {
-      out.push(`sideQuestsZone: 位面 "${zone}" 的专属支线只有 ${n} 条（W-B12 切片7 门禁：每位面 ≥3）`
-        + ' —— 三样位面事实（歇脚与插画 / 萤火与火牌 / 清剿数）都在存档里，第三条没有理由缺席');
+    } else if (n < 4) {
+      out.push(`sideQuestsZone: 位面 "${zone}" 的专属支线只有 ${n} 条（W-E3 切片7 门禁：每位面 ≥4）`
+        + ' —— 四样位面事实（歇脚与插画 / 萤火与火牌 / 清剿数 / 那位面的副本）都在存档里，第四条没有理由缺席');
     }
   }
   return out;

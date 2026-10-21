@@ -354,16 +354,16 @@ describe('W-B12 切片2：每位面第二条专属支线 —— 萤火与火牌�
       .toBe(ZONE_ORDER.length);
   });
 
-  it('门禁升到 ≥3 咬得住：只留两条那族时，每一位面都被点名', () => {
+  it('门禁升到 ≥4 咬得住：只留三条那族时，每一位面都被点名', () => {
     const planted = (kind, table) => checkContent(
       CONTENT_TABLES.map((t) => (t.kind === kind ? { ...t, table } : t)),
     );
-    // 桩：每位面恰好两条（切片1 + 切片2 两族）
-    const 只有前两族 = SIDE_QUESTS_ZONE.filter((q) => !q.id.startsWith('side-cull-'));
-    expect(只有前两族.length).toBe(ZONE_ORDER.length * 2);
-    const issues = planted('sideQuestsZone', 只有前两族);
-    expect(issues.join('\n')).toMatch(new RegExp(`位面 "${ZONE_ORDER[0]}" 的专属支线只有 2 条`));
-    expect(issues.filter((l) => l.includes('只有 2 条')).length, '七座位面都得被点名')
+    // 桩：每位面恰好三条（切片1 + 切片2 + 切片7 三族；W-E3 切片7 的「副本」族被抽掉）
+    const 只有前三族 = SIDE_QUESTS_ZONE.filter((q) => !q.id.startsWith('side-dun-'));
+    expect(只有前三族.length).toBe(ZONE_ORDER.length * 3);
+    const issues = planted('sideQuestsZone', 只有前三族);
+    expect(issues.join('\n')).toMatch(new RegExp(`位面 "${ZONE_ORDER[0]}" 的专属支线只有 3 条`));
+    expect(issues.filter((l) => l.includes('只有 3 条')).length, '七座位面都得被点名')
       .toBe(ZONE_ORDER.length);
   });
 });

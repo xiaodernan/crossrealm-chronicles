@@ -44,9 +44,14 @@ describe('① 每位面恰好一条清剿支线', () => {
     expect(new Set(SIDE_QUESTS_ALL.map((q) => q.id)).size).toBe(SIDE_QUESTS_ALL.length);
   });
 
-  it('奖励比同区前两族高（它是更费工夫的那一条）', () => {
+  it('奖励比同区前两族高（它是比那两族更费工夫的那一条）', () => {
     for (const q of 清剿支线) {
-      const 同区前两族 = SIDE_QUESTS_ZONE.filter((x) => x.zone === q.zone && !x.id.startsWith('side-cull-'));
+      // 只比**前两族**（歇脚与插画 / 萤火与火牌）—— W-E3 切片7 起同区还有第四族
+      // （那位面的副本），那条比清剿**更**费工夫 ⇒ 它的奖励更高（见
+      // `tests/side-quest-dungeon-family.test.js`）。这一条量的是"清剿比野外那两族费工夫"。
+      const 同区前两族 = SIDE_QUESTS_ZONE.filter((x) => x.zone === q.zone
+        && !x.id.startsWith('side-cull-') && !x.id.startsWith('side-dun-'));
+      expect(同区前两族.length, `位面 "${q.zone}" 的前两族不在表里`).toBeGreaterThan(0);
       for (const 其他 of 同区前两族) {
         expect(q.reward, `清剿支线 "${q.id}" 的奖励 ${q.reward} 不比同区 "${其他.id}" 的 ${其他.reward} 高`).toBeGreaterThan(其他.reward);
       }
