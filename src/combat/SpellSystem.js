@@ -7,8 +7,12 @@ import { GUARD, HIT } from '../content/tuning.js';
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
 
-/** 黑神话式法术：真火 / 玄冰 / 引力 / 大圣化身 + 蓄力派生 */
-export const SPELLS = {
+/**
+ * 黑神话式法术：真火 / 玄冰 / 引力 / 大圣化身 + 蓄力派生。
+ * **模块内私有**：只有本文件读它（`export` 曾挂在这里，但全仓 src+tests 无一处 import ——
+ * 挂着的导出是假 API，谁都能以为它是公共表。要真有外部读者时再 `export`，并顺手补门禁）。
+ */
+const SPELLS = {
   1: { id: 'fire', name: '真火咒', cost: 16, cooldown: 0.4, damage: 38, posture: 8, color: 0xff5522, type: 'bolt', chargeDamage: 72, chargePosture: 18, chargeCost: 28 },
   2: { id: 'ice', name: '玄冰刺', cost: 12, cooldown: 0.35, damage: 30, posture: 8, color: 0x66ccff, type: 'bolt', chargeDamage: 58, chargePosture: 18, chargeCost: 22 },
   3: { id: 'gravity', name: '引力坍缩', cost: 28, cooldown: 2.5, damage: 45, posture: 25, color: 0x8844ff, type: 'aoe', radius: 5.5, chargeRadius: 9, chargeDamage: 78, chargePosture: 35, chargeCost: 40 },

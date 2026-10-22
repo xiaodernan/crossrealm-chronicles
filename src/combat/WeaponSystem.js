@@ -3,8 +3,12 @@ import { codeFor } from '../content/keybinds.js';
 import { attachToHand, STAFF_GRIP } from '../player/WeaponGrip.js';
 import { t } from '../engine/i18n.js';
 
-/** 双武器：剑（近战）/ 杖（法术增幅）— 键位见 `content/keybinds.js` 的 `swapWeapon` */
-export const WEAPONS = {
+/**
+ * 双武器：剑（近战）/ 杖（法术增幅）— 键位见 `content/keybinds.js` 的 `swapWeapon`。
+ * **模块内私有**：只有 `get weapon()` 读它（`export` 曾挂在这里，但全仓 src+tests 无一处
+ * import —— 名字经"换武器"事件送到 HUD，走的是事件 detail，不是这个导出）。
+ */
+const WEAPONS = {
   sword: {
     id: 'sword',
     name: '位面长剑',
