@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v12', version: 12 },
   { key: 'crossrealm_save_v11', version: 11 },
   { key: 'crossrealm_save_v10', version: 10 },
   { key: 'crossrealm_save_v9', version: 9 },
@@ -200,6 +201,33 @@ function migrateV10toV11(d) {
   return d;
 }
 
+/**
+ * v11 → v12：**主线加五步"发现"**（W-E3 切片14）。
+ *
+ * 这一跳插了五步（`fantasy-ruins` / `magic-forest` / `space-wreck` / `gloom-moss` /
+ * `radiant-altar`）—— 每一位面一处**地标**（世界里本来就有的 POI ⇒ 玩家是真的在探索，
+ * 不是在点任务框）。
+ *
+ * **为什么是"发现"而不是再堆副本步**：切片13 之后主线里已经有九座副本（主线时长已经
+ * 由副本撑住）⇒ 再堆副本步 = 同一批副本走两遍，不会让故事更长 ⇒ 要加就加**别的种类**
+ * 的段落（这里是"探索"）。
+ *
+ * 插入点（**旧序列**的下标）：
+ * - 5 —— 在 `boss` 之前（`fantasy-ruins`）
+ * - 16 —— 在 `level` 之前（`magic-forest`）
+ * - 22 —— 在 `boss3` 之前（`space-wreck`）
+ * - 38 —— 在 `chaos-boss` 之前（`gloom-moss`）
+ * - 40 —— 在 `dungeon-rerun` 之前（`radiant-altar`）
+ */
+export const V12_INSERT_POINTS = [5, 16, 22, 38, 40];
+
+function migrateV11toV12(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V12_INSERT_POINTS);
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -209,6 +237,7 @@ export const MIGRATIONS = {
   8: migrateV8toV9,
   9: migrateV9toV10,
   10: migrateV10toV11,
+  11: migrateV11toV12,
 };
 
 /**

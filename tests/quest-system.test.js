@@ -81,7 +81,7 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     }
   });
 
-  it('Chapter 1 六步走完就接上第二档（在役表是线性的，章节号只跟着四格门控翻）', () => {
+  it('Chapter 1 七步走完就接上第二档（在役表是线性的，章节号只跟着四格门控翻）', () => {
     const titles = [qs.current.title];
     const step = (name, detail) => {
       dispatch(name, detail);
@@ -93,12 +93,14 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     step('dungeon-cleared', D.dungeon('hub-catacombs'));
     for (let i = 0; i < 2; i += 1) step('enemy-defeated', D.kill('soldier'));
     step('discovery', D.discover('fantasy-ring'));
+    // W-E3 切片14：第 1 章多了一步「废墟里的回声」（发现步）⇒ 走完它才轮到影之战士
+    step('discovery', D.discover('fantasy-ruins'));
     step('enemy-defeated', D.bossKill('shadow-warden'));
-    // 前六格各推进一步，第七次读数落在下一档的第一步上
-    expect(titles).toEqual(MAINLINE.slice(0, 7).map((q) => q.title));
-    expect(qs.questIndex).toBe(6);
+    // 前七格各推进一步，第八次读数落在下一档的第一步上
+    expect(titles).toEqual(MAINLINE.slice(0, 8).map((q) => q.title));
+    expect(qs.questIndex).toBe(7);
     expect(qs.chapter).toBe(1);
-    expect(toasts.filter((t) => t.startsWith('任务完成：'))).toHaveLength(6);
+    expect(toasts.filter((t) => t.startsWith('任务完成：'))).toHaveLength(7);
   });
 
   it('账本里没有的那一下交互不改任务也不抛（载荷少一个 id 是常态）', () => {
