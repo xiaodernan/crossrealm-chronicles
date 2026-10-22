@@ -98,8 +98,9 @@ export const REST_DIALOGUE_CG_POP = {
   'hub:wave4': { scene: 'wave4_grid', caption: 'cg_caption_hub_wave4' },
 };
 
-/** 合并后的全表：基础 + 扩写 + 致敬层。画廊目录与渲染器读的都是这一份 */
-export function mergeDialogueCg() {
+/** 合并后的全表：基础 + 扩写 + 致敬层。画廊目录与渲染器读的都是这一份。
+ * 曾 `export` 但全仓零 import（真出口是下面的 REST_DIALOGUE_CG）—— 收成模块内私有。 */
+function mergeDialogueCg() {
   return { ...REST_DIALOGUE_CG_BASE, ...REST_DIALOGUE_CG_EXTRA, ...REST_DIALOGUE_CG_POP };
 }
 

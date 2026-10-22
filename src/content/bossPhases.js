@@ -21,7 +21,10 @@
  * - chaos-overlord: canPulse = p >= 2, pulseInterval = 2.5, pulseDamage = 12, pulseRange = 9
  */
 
-export const BossPhaseTuning = {
+// 小写命名导出 `BossPhaseTuning` 是全仓零 import 的冗余别名 —— 同一张表经下方
+// `BOSS_PHASE_TUNING`（:204）与 default（:205）二次导出，外部消费者用的全是 BOSS_PHASE_TUNING。
+// 收成模块内私有 const，去掉这份多余的命名导出。
+const BossPhaseTuning = {
   // shadow-warden（影界守护者）：物理近战 + 砸地，P2 加速、P3 狂暴
   'shadow-warden': {
     1: {
