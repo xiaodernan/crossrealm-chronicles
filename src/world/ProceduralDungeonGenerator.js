@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { generateMaze, makeSeededRng } from './MazeLayout.js';
+import { 布局从载荷 } from './dungeonLayoutPayload.js';
 import { dungeonEncounterOf } from '../content/dungeonEncounters.js';
 import {
   sharedBox, sharedCircle, sharedTorus, dungeonMaterial,
@@ -22,8 +23,13 @@ export class ProceduralDungeonGenerator {
   static generate(def, seed = Date.now()) {
     const gridW = def.gridW ?? 5;
     const gridH = def.gridH ?? 5;
+    const 遭遇 = dungeonEncounterOf(def.id);
     // 「出谁、几只」按副本 id 认领遭遇表（W-B10 切片3b）：认不出就抛，而不是兜到某一座的池子。
-    const layout = generateMaze(gridW, gridH, seed, dungeonEncounterOf(def.id));
+    // W-B11 切片4：副本定义可以带一份**设计好的布局**（关卡编辑器导出的载荷）
+    // ⇒ 那份不"摇"，而是**补完**（与游戏自己摇的迷宫共用同一段补完规则）
+    const layout = def.layout
+      ? 布局从载荷(def.layout, { encounters: 遭遇, seed, gridW, gridH })
+      : generateMaze(gridW, gridH, seed, 遭遇);
     layout.theme = def.theme;
     layout.accent = def.accent;
     layout.name = def.name;

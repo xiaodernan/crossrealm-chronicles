@@ -466,6 +466,9 @@ export const CONTENT_TABLES = [
       // 成长档位（W-E1 切片3）：必填 —— 省略即"这座副本的敌人按 0 档出"，
       // 而那座副本门口可能隔着半个世界。域由 `GROWTH_MAX_STAGE` 说话（与曲线表同源）。
       stage: { t: 'int', min: 0, max: GROWTH_MAX_STAGE },
+      // W-B11 切片4：一份**设计好的布局**（关卡编辑器导出的载荷）——
+      // 带了它，那座副本就不"摇"，改"补完"（与摇出来的共用同一段补完规则）。
+      layout: { t: 'record', required: false },
       // 两格都是**必填**：`trial` 省略就等于"新加的那座默认不算试炼"，而这句话正是切片3c
       // 从四处手抄本收回来的那一句；`mapLabel` 省略则地图上的点没有字。
       trial: { t: 'bool' },

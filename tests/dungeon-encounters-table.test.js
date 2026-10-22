@@ -248,7 +248,14 @@ describe('② 三元式绝迹：那句写死的三分在 src/ 里出现 0 次', 
   it('生成器把 def.id 递给遭遇表，认不出就抛（不留默认池）', () => {
     const 源码 = readSrc('world/ProceduralDungeonGenerator.js');
     expect(源码).toContain("import { dungeonEncounterOf } from '../content/dungeonEncounters.js'");
-    expect(stripComments(源码)).toMatch(/generateMaze\(\s*gridW,\s*gridH,\s*seed,\s*dungeonEncounterOf\(def\.id\)\s*\)/);
+    // W-B11 切片4：遭遇表现在**先**从 def.id 申领（认不出就抛），再**两条路共用同一张表**
+    // —— 摇出来的那条与**关卡编辑器导出的载荷**那条（W-B11 切片4）不许各拿各的。
+    const 绑定 = stripComments(源码).match(/const\s+([^\s=]+)\s*=\s*dungeonEncounterOf\(def\.id\)/);
+    expect(绑定, '生成器没有把 def.id 递给遭遇表').toBeTruthy();
+    const 表 = 绑定[1];
+    // 现在的形状：`generateMaze(gridW, gridH, seed, 遭遇)` —— 变量名是上面那个 const 绑定的
+    expect(stripComments(源码)).toMatch(new RegExp(`generateMaze\\(\\s*gridW,\\s*gridH,\\s*seed,\\s*${表}\\s*\\)`));
+    expect(stripComments(源码)).toMatch(new RegExp(`布局从载荷\\([^)]*encounters:\\s*${表}`));
     expect(() => dungeonEncounterOf('ruin-crypts')).toThrow(/遭遇表里没有/);
     expect(() => dungeonEncounterOf('遗城')).toThrow(/已登记：ruin-crypt/);
     expect(dungeonEncounterOf('hub-catacombs').pool.length).toBeGreaterThanOrEqual(2);

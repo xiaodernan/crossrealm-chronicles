@@ -289,15 +289,20 @@ function 重叠中点(心1, 长1, 心2, 长2) {
  * 直方图 34 / 34 / 33，无怪房 0 间）。第 4 个参数**必填**：留一个默认池等于把
  * "这座副本忘了登记" 变成 "这座副本悄悄用了别座的敌人"，而后者不是报错，是没人注意的换仗。
  */
-export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
-  if (!encounters?.pool?.length || !encounters.group) {
-    throw new TypeError(
-      'generateMaze 需要一张遭遇表 { pool: [{ type, weight }], group: { min, max } }，'
-      + '由 `dungeonEncounterOf(def.id)` 申领（W-B10 切片3b）'
-    );
-  }
-  const rnd = makeSeededRng(seed);
-
+/**
+ * 造迷宫：**只有房间**（递归回溯 + 每格一间房）。
+ *
+ * 为什么要单独拆出来（W-B11 切片4）：关卡编辑器导出的是**布局的几何部分**
+ * （房间 / 门 / 六枚尺寸载体），而生产路径还要在这份几何之上**补完**
+ * （出生点 / 出口 / Boss 场 / 门 / 怪 / 文献 / 边界）—— 那段此前长在 `generateMaze` 里，
+ * 于是「编辑器导出的载荷」与「游戏自己摇的迷宫」走的是两条路，编辑器那份永远补不全。
+ *
+ * 拆开之后两边共用同一段**补完** ⇒ 编辑器导出的载荷也能进生产路径。
+ *
+ * @param {number} gridW @param {number} gridH @param {() => number} rnd 种子流
+ * @returns {object[]} 每格一间房（还没补完）
+ */
+export function 造迷宫房间(gridW, gridH, rnd) {
   const visited = Array.from({ length: gridH }, () => Array(gridW).fill(false));
   const walls = Array.from({ length: gridH }, () =>
     Array.from({ length: gridW }, () => ({ n: true, e: true, s: true, w: true }))
@@ -339,7 +344,24 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
       });
     }
   }
+  return rooms;
+}
 
+/**
+ * 补完：给一份**只有房间**的布局补上出生点 / 出口 / Boss 场 / 门 / 怪 / 文献 / 边界。
+ *
+ * 这是「几何」与「可玩」之间那一段（W-B11 切片4）：
+ * - **出生点** = (0,0) 那一格；**出口（Boss 场）** = 离出生点最远的那一间；
+ * - **Boss 场真占 2×2 格位**（合并成一间 36×36 的场，块内的隔墙先封掉）；
+ * - **门与占位**由同一条规则说话（`reconcileOccupancy` 是这条规则的唯一一份）；
+ * - 每间房出几只、出哪一类，由递进来的**遭遇表**说话；
+ * - **文献**在洗过的池子里按概率发（同一颗种子连摇两次落点一字不差）。
+ *
+ * @param {object[]} rooms 只有房间的布局（`造迷宫房间` 的产物，或编辑器导出的那份）
+ * @param {{gridW:number, gridH:number, rnd:() => number, encounters:object, seed:number}} 选项
+ * @returns {object} 可玩的完整布局
+ */
+export function 补完布局(rooms, { gridW, gridH, rnd, encounters, seed }) {
   // 门与占位由同一条规则说话（`reconcileOccupancy` 是这条规则的唯一一份，关卡编辑器问的是同一个函数）。
   // 改前这里是内联的 `if (!w.n && gz > 0) doors.push(makeDoor(...))` 循环：它对生成的迷宫
   // 恰好等价（每格都有房、两侧旗标同时被回溯步写下），所以摘要是同一个数 —— 这正是
@@ -407,6 +429,43 @@ export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
     bounds: { minX, maxX, minZ, maxZ },
     wallH: WALL_H, wallT: WALL_T,
   };
+}
+
+/**
+ * 递归回溯迷宫 → 房间 + 门 + Boss 大房。
+ *
+ * 「这一座出哪几类、一间房出几只」由调用方递进来的遭遇表说话（`content/dungeonEncounters.js`，
+ * W-B10 切片3b）。这一句以前写死在这里：`['soldier','golem','drone'] × 3` + `1 + ?2` 只，
+ * 于是五座副本打的是同一场仗（各跑 200 个种子，直方图 34 / 34 / 33，无怪房 0 间）。
+ * 第 4 个参**必填**：留一个默认池等于「这座副本忘了登记」变成「这座副本悄悄用了别座的敌人」，
+ * 而后者不是报错，是没人注意的换仗。
+ *
+ * 这一版由**两段**组成（`造迷宫房间` + `补完布局`）—— 拆开是为了让
+ * **关卡编辑器的导出载荷**也能走同一段「补完」（W-B11 切片4）。
+ */
+/**
+ * 「这一座出哪几类、一间房出几只」必须由调用方申领 —— 留一个默认池等于
+ * 「这座副本忘了登记」变成「这座副本悄悄用了别座的敌人」，而后者不是报错，是没人注意的换仗。
+ *
+ * 两条路都过这道闸（W-B11 切片4）：游戏自己摇的迷宫（`generateMaze`）与
+ * **关卡编辑器导出的载荷**（`布局从载荷`）—— 载荷那条路以前根本没有「出谁」这件事，
+ * 于是编辑器那份副本会**一只怪都不出**（不是报错，是一座空城）。
+ */
+export function 校验遭遇表(encounters, 谁 = 'generateMaze') {
+  if (!encounters?.pool?.length || !encounters.group) {
+    throw new TypeError(
+      `${谁} 需要一张遭遇表 { pool: [{ type, weight }], group: { min, max } }，`
+      + '由 `dungeonEncounterOf(def.id)` 申领（W-B10 切片3b）'
+    );
+  }
+  return encounters;
+}
+
+export function generateMaze(gridW, gridH, seed = Date.now(), encounters) {
+  校验遭遇表(encounters);
+  const rnd = makeSeededRng(seed);
+  const rooms = 造迷宫房间(gridW, gridH, rnd);
+  return 补完布局(rooms, { gridW, gridH, rnd, encounters, seed });
 }
 
 /**

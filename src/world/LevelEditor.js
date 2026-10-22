@@ -65,14 +65,15 @@
 
 import * as THREE from 'three';
 import { ROOM_TEMPLATES, getRoomTemplate } from './RoomTemplates.js';
-import {
-  CELL, BOSS_CELL, WALL_H, WALL_T, DOOR_WIDTH, BOSS_DOOR_WIDTH,
-} from './dungeonDimensions.js';
+
 import {
   DIR_STEP, DIR_OPPOSITE, DIRS, cellCenter, cellIndex, reconcileOccupancy,
   cellsOf, cellOffsets, spanOf, spanCenter, spanAnchorIndex, setEdgeFlag,
 } from './MazeLayout.js';
 import { sharedBox, dungeonMaterial, disposeDungeonSubtree } from './dungeonAssets.js';
+// 尺寸事实（W-B11 切片4）：六枚**载体**的名册与回落值搬到 `dungeonLayoutPayload.js`
+// （生产路径也要读它们 ⇒ 不能只住在开发工具里）；这里仍直接用到的三枚从这里取。
+import { CELL, WALL_H, WALL_T } from './dungeonDimensions.js';
 // 墙段口径（W-B11 切片3）：与副本的几何层共用这一份 —— 洞开在哪只有一处答案
 import { 房间墙面表, 建一面墙 } from './dungeonWalls.js';
 import { codeFor } from '../content/keybinds.js';
@@ -85,15 +86,11 @@ const ROOM_BOX_H = 2;
  * 运行时载体在 `layout` 上"）。名册与回落值都只在这里写一次 —— 导入、清场、导出载荷
  * 三处都从这一张表走，于是"导出只带其中三枚"（B89）这种漂移没有第三条路可走。
  */
-export const LAYOUT_SIZE_CARRIERS = {
-  cellSize: CELL,
-  bossCell: BOSS_CELL,
-  wallH: WALL_H,
-  wallT: WALL_T,
-  doorWidth: DOOR_WIDTH,
-  bossDoorWidth: BOSS_DOOR_WIDTH,
-};
-const 载体名册 = Object.keys(LAYOUT_SIZE_CARRIERS);
+// 六枚尺寸载体的名册与回落值住在 `dungeonLayoutPayload.js`（生产路径也要读它们 ⇒
+// 不能只住在开发工具里 —— W-B11 切片4）。这里再导出一次，是为了让既有读者不改 import。
+import { LAYOUT_SIZE_CARRIERS, 载体名册, 读尺寸 } from './dungeonLayoutPayload.js';
+// 再导出一次：既有读者（`tests/level-editor-basic.test.js`）不改 import。
+export { LAYOUT_SIZE_CARRIERS, 载体名册 };
 /**
  * 把逐格边旗抄一层再交给 JSON：导出的载荷不能带活引用（改了导出的那份，画面里那间房跟着变，
  * 而按钮上写的是"导出"）。四个方向从 `DIRS` 走，不在这里重抄一遍名字。
@@ -748,12 +745,7 @@ export class LevelEditor {
    * 变成 18，`??` 会把 0 原样收下再让吸附除出 Infinity，两种都比抛错难查（切片4f，⑤ 层）。
    */
   _读尺寸(名, 值, 默认, 要整数 = false) {
-    if (值 === undefined || 值 === null) return 默认;
-    if (typeof 值 !== 'number' || !Number.isFinite(值) || 值 <= 0
-      || (要整数 && !Number.isInteger(值))) {
-      throw new TypeError(`导入的布局里 ${名} = ${JSON.stringify(值)} —— 得是有限正数${要整数 ? '整数' : ''}，或者干脆不带（那就用声明的那一份）`);
-    }
-    return 值;
+    return 读尺寸(名, 值, 默认, 要整数);
   }
 
   _importLayoutData(data) {

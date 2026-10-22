@@ -138,6 +138,9 @@ export const DUNGEON_DEFS = [
     origin: { x: 5000, y: 80, z: 11000 },
     entrance: { x: 28, z: 72 },
     exterior: { x: 28, z: 72, label: 'dungeon_hub_catacombs_exterior_label' },
+    // W-B11 切片4：这一座带一份**设计好的布局**（关卡编辑器导出的载荷）
+    // ⇒ 它不再"摇"，改"补完"（与摇出来的共用同一段补完规则）。
+    // 教学副本每次进来都是同一张图 ⇒ 认得路。
   },
   {
     id: 'gloom-mist-crypt',
