@@ -77,7 +77,7 @@ describe('② 那一格是**读数**（不落盘）', () => {
 
 describe('③ 这一族的判据在**全仓只有一份**', () => {
   it('`objectiveDone` 之外没有第二处装备判据（换句话说：没有地方自己数装备）', async () => {
-    const { readFileSync, readdirSync, statSync } = await import('node:fs');
+    const { readFileSync, readdirSync } = await import('node:fs');
     const { join } = await import('node:path');
     const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
       const p = join(dir, e.name);
