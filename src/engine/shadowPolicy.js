@@ -203,3 +203,87 @@ export function applySunFollow(sun, playerPos) {
   );
   return sun;
 }
+
+/* ------------------------------------------------------------------ *
+ * 投影门：一件投射件这一帧到底投不投（W-C2 切片7，#164）
+ * ------------------------------------------------------------------ */
+
+/**
+ * 阴影框的半宽，从**光自己**读回来。
+ *
+ * 为什么不传一个数值档进来：门限的正确取值就是"这一档画质真正的框"，而框唯一的写者
+ * 是 `applySunShadowQuality`。在这里按档位重算一遍 = 第二份真相 —— 玩家降档之后门限
+ * 仍按 140 放行的话，低档的框只有 ±70，门就成了摆设。
+ * 读不到（光还没落过画质，或压根没有光）才回落出厂档的登记值。
+ */
+export function shadowFrameExtentOf(sun) {
+  const e = sun?.shadow?.camera?.top;
+  return Number.isFinite(e) && e > 0 ? e : sunShadowFrustumOf(DEFAULT_SHADOW_QUALITY);
+}
+
+/**
+ * 这一件该不该投影。两条判据，**先归属后距离**：
+ *
+ * - **同位面 ⇒ 永远投**。这一条是保险丝：玩家就站在自己那面的营火旁，那名的投影
+ *   不许被任何数值判据关掉（切片6 的普查里，投影件被关掉的全是"玩家走不到的位面"）。
+ * - **跨位面 ⇒ 只有落进阴影框才投**。普查读数：`field:restNpcs.npcs(<别位面>)`
+ *   八站合计 **22 绘 / 125,136 面 = 全部阴影面的 30%**，而它们的影子落在玩家看不见的那一圈。
+ *
+ * 门限取框半宽本身：太阳几乎在头顶（`SUN_FOLLOW_OFFSET` 的水平/垂直比 0.67），
+ * 一个 2 米高的件其影子只偏移 1.3 米 —— 本体在框外的件，影子也在框外。
+ *
+ * 两个数不是有限正数要**抛**，不许当成"关掉"：`NaN <= 140` 永远是 false，
+ * 静默走下去就是"影子莫名其妙没了，而没有任何一句话说过量不到"。
+ */
+export function shouldCastShadow({ distance, sameZone, extent }) {
+  if (!Number.isFinite(distance)) {
+    throw new Error(
+      `shouldCastShadow: 距离不是有限数（收到 ${String(distance)}）—— "量不到"不许当成"关投影"`
+    );
+  }
+  if (!Number.isFinite(extent) || extent <= 0) {
+    throw new Error(
+      `shouldCastShadow: 阴影框半宽不是正有限数（收到 ${String(extent)}）—— 门限来自 shadowFrameExtentOf`
+    );
+  }
+  if (sameZone) return true;
+  return distance <= extent;
+}
+
+/** 记下每件**原本的**投影值（弱键：件被回收，这份记忆跟着走） */
+const 原投影 = new WeakMap();
+
+/**
+ * 落投影门：`on=false` 关掉这一棵子树里所有件的投影，`on=true` **还回各自的原值**。
+ *
+ * 为什么是"还原值"而不是"写 `true`"：`castShadow` 的原值归**类别表**管
+ * （`prop` / `actor` 投，`ground` 不投）。直接写 `= on` 会让一个地面件在门开的那一帧
+ * 被点亮 —— 于是"关投影"这个出口顺手改了另一件事，而切片1 的纪律是先收口、后调值。
+ * 只认原值 ⇒ 这一层唯一的效果是"少画几件"。
+ *
+ * 为什么记在 WeakMap 里而不是物件的一个字段：`castShadow` 是 three 的属性，
+ * 挂 `__wasCasting` 之类的字段等于给每个网格加一份运行时拷贝，而且下一层的
+ * `applyShadow` 重写类别时不会清它 —— 记忆会烂在原地。
+ *
+ * 返回 `改过`：调用方**只在翻转的那一帧 traverse**（八位面 × 每帧一次走树是白干的活）。
+ *
+ * @returns {{ 改过: boolean, 投影件数: number }}
+ */
+export function applyShadowCastGate(root, on) {
+  let 改过 = false;
+  let 投影件数 = 0;
+  if (!root) return { 改过, 投影件数 };
+  const 落 = (o) => {
+    if (!o?.isMesh) return;
+    if (!原投影.has(o)) 原投影.set(o, o.castShadow === true);
+    const want = on ? 原投影.get(o) : false;
+    if (o.castShadow !== want) {
+      o.castShadow = want;
+      改过 = true;
+    }
+    if (want) 投影件数 += 1;
+  };
+  if (root.isMesh) 落(root);
+  else root.traverse?.(落);
+  return { 改过, 投影件数 };
+}

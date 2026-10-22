@@ -3,6 +3,7 @@ import { RestNpcModel } from './RestNpcModel.js';
 import { REST_NPC_DEFS } from '../content/restNpcDefs.js';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { applyShadowCastGate, shadowFrameExtentOf, shouldCastShadow } from '../engine/shadowPolicy.js';
 import { t } from '../engine/i18n.js';
 
 const WORLD_RESTNPCMANAGER = 'world/RestNpcManager';
@@ -103,11 +104,18 @@ export class RestNpcManager {
     point.mesh.add(model.group);
 
     model.loadGlb().then((ok) => {
-      if (ok) this.game.dialog?.toast?.(`${t(def.name)} 模型已加载`, 1800);
+      if (!ok) return;
+      this.game.dialog?.toast?.(`${t(def.name)} 模型已加载`, 1800);
+      // GLB 是**异步**落地的：它带进来的那批网格按 `prop` 类天生投影，而投影门可能早就
+      // 把这一名判成"不投"了 —— 判据没翻转就不会重走树，新网格于是白留一份阴影。
+      this._重落投影门(point.id);
     });
 
     return {
       id: point.id,
+      // 营火与它所在的位面共用一个 id（`RestPointManager.buildDefaults()` 八座全是），
+      // 所以"这名属哪个位面"就是 `point.id` —— 投影门的豁免支认它。
+      plane: point.id,
       // `name` / `title` 存的是**文案键**（W-D2 切片15）：这一层是数据搬运，显示侧才展开
       // （口癖气泡与 toast 各一处）。存展开后的字会让"改语言"永远追不上这一份拷贝。
       name: def.name,
@@ -127,7 +135,17 @@ export class RestNpcManager {
       homeYaw: model.group.rotation.y,
       state: 'idle',
       speakPulse: 0,
+      // 投影门的**上一次判定**（null = 还没判过，第一次 update 连着当时的网格一起落）。
+      // 存这一格是为了"只在翻转时走树"：每帧重走一遍八棵子树只为写下同一个值，是白干的活。
+      投影中: null,
     };
+  }
+
+  /** 把当前的投影判定**重新落一遍**到这一名的子树上（GLB 晚到时要它，见 `_createNpc`） */
+  _重落投影门(restId) {
+    const n = this.getByRestId(restId);
+    if (!n || n.投影中 === null) return;
+    applyShadowCastGate(n.mesh, n.投影中);
   }
 
   _setNpcState(restId, state, detail) {
@@ -172,6 +190,9 @@ export class RestNpcManager {
   update(dt, playerPos) {
     this._时相 += dt;
     const t = this._时相;              // 以下所有呼吸的相位源（B118）：改前六处各写 `performance.now() × k`
+    // 投影门每帧只问一次世界与光：站位变了才换判定，判据本身不随 NPC 变
+    const 位面 = this.world?.zoneId;
+    const 影框 = shadowFrameExtentOf(this.game?.sun);
     for (const id of Object.keys(this._barkCd)) {
       this._barkCd[id] = Math.max(0, (this._barkCd[id] ?? 0) - dt);
     }
@@ -183,6 +204,17 @@ export class RestNpcManager {
       const d = Math.hypot(playerPos.x - this._tmp.x, playerPos.z - this._tmp.z);
       const inDialogue = n.state === 'dialogue';
       const speaking = this.speakingId === n.id;
+
+      // 玩家位非有限时**保持上一次判定**：`NaN <= 框半宽` 永远是 false，顺着走就等于
+      // "量不到 ⇒ 关投影"，而 B120 那一课说的是另一种下场 —— 让坏值自己说出口。
+      // （判据函数本身对非有限数是抛的，这一层是它进主循环前的边界。）
+      if (Number.isFinite(d)) {
+        const 该投 = shouldCastShadow({ distance: d, sameZone: n.plane === 位面, extent: 影框 });
+        if (n.投影中 !== 该投) {
+          n.投影中 = 该投;
+          applyShadowCastGate(m, 该投);
+        }
+      }
 
       if (inDialogue || speaking || d < 14) {
         const ang = Math.atan2(playerPos.x - this._tmp.x, playerPos.z - this._tmp.z);
