@@ -47,11 +47,6 @@ export function getDifficultyId() {
   return currentId;
 }
 
-/** 当前档位整行（只读用；调用方不要就地改它 —— 表是 `Object.freeze` 过的） */
-export function getDifficulty() {
-  return currentTier;
-}
-
 /** 面板要的选项名单（从名册现推，不抄第二份 —— B47 家族的老规矩） */
 export function difficultyOptions() {
   // W-D2 切片16v：档位名与说明存的是**文案键** —— 面板要的是那句人看的话

@@ -77,9 +77,6 @@ export const DIFFICULTY_TIERS = Object.freeze({
   }),
 });
 
-/** 注册表用的键名单（`index` 形状的表要有这一份，且要与 `DIFFICULTY_IDS` 同源） */
-export const DIFFICULTY_TIER_IDS = Object.keys(DIFFICULTY_TIERS);
-
 /**
  * 认不出的 id **当场抛**（与 `enemyRosterOf` / `sfx:play` 同一口径）。
  * 静默回落出厂档的症状是"选了个不存在的难度，玩起来像标准"，没人会去查。

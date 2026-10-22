@@ -60,9 +60,6 @@ const n = (v) => (typeof v === 'number' ? v.toFixed(6) : String(v));
 export const sharedBox = (w, h, d) =>
   sharedGeo(`box:${n(w)},${n(h)},${n(d)}`, () => new THREE.BoxGeometry(w, h, d));
 
-export const sharedPlane = (w, h) =>
-  sharedGeo(`plane:${n(w)},${n(h)}`, () => new THREE.PlaneGeometry(w, h));
-
 export const sharedCircle = (r, seg) =>
   sharedGeo(`circle:${n(r)},${n(seg)}`, () => new THREE.CircleGeometry(r, seg));
 
