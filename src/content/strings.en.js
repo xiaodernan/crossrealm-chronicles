@@ -1774,7 +1774,7 @@ export const STRINGS_EN = Object.freeze({
   quest_waypoint_hint_touch_anchor_2: 'Touch anchor when conditions met',
   quest_waypoint_hint_touch_anchor_3: 'Touch anchor after trials complete',
   quest_toast_chapter_announce: '${announce}',
-  quest_toast_task_complete: 'Quest complete: ${title}',
+  quest_toast_task_complete: 'Quest complete: ${title} · +${reward} soulfire',
   quest_get_assistant_hint: 'Plane Assistant: ${hint}',
   quest_title_all_done: 'All clear. Press ${questTracker} to open assistant for full auto-run demo.',
   quest_waypoint_far: 'Enter red circle on map skull to activate Boss · ${progress}',

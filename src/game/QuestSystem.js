@@ -3,6 +3,7 @@ import { dungeonDefOf, TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
+  objectiveChosen, objectiveReward,
 } from '../content/objectives.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';
@@ -302,7 +303,14 @@ export class QuestSystem {
     if (this.chapter !== oldChapter) {
       window.dispatchEvent(new CustomEvent('chapter-changed', { detail: { chapter: this.chapter, prev: oldChapter } }));
     }
-    if (finished) this.dialog.toast(t('quest_toast_task_complete', { title: finished.title }));
+        // W-E3 切片20：**主线那 56 步的 `reward`（完成奖励魂火）从来没有读者** ⇒
+    // 玩家做完整条主线拿不到一魂火（支线那 45 条一直有）。这里把它发出去。
+    // 魂火总账：主线 56 步合计 1194（升到 21 级要 11050 ⇒ 约 11%，温和）。
+    const 回报 = objectiveReward(finished, this.stats);
+    if (finished && 回报 > 0) this.game?.stats?.addSouls(回报);
+    // 提示里那个 title 是**文案键** ⇒ 展开在播出的那一刻（改前直接传了键，
+    // 玩家看到的是 "任务完成：obj_anchor_title"）。
+    if (finished) this.dialog.toast(t('quest_toast_task_complete', { title: t(finished.title), reward: 回报 }));
     // W-B6 切片4：记录任务完成
     if (finishedId) this.game?.stats?.onQuestCompleted(finishedId);
     if (this.questIndex >= MAINLINE.length) {
@@ -346,9 +354,12 @@ export class QuestSystem {
       case 'gear': return this.isQuestObjectiveDone(q)
         ? t('quest_progress_gear', { slot_done: '已装备' })
         : t('quest_progress_gear', { slot_done: '装备一件再出发' });
-      case 'choice': return this.isQuestObjectiveDone(q)
-        ? t('quest_progress_choice', { choice_done: '已抉择' })
-        : t('quest_progress_choice', { choice_done: '做出抉择方能前行' });
+      case 'choice': {
+        const 选中的 = objectiveChosen(q, this.stats);
+        return 选中的
+          ? t('quest_progress_choice', { choice_done: t(选中的.label) })
+          : t('quest_progress_choice', { choice_done: '做出抉择方能前行' });
+      }
       case 'chests': return t('quest_progress_chests', { current: this.stats.chestsOpened, target: q.target });
       case 'npc': return this.stats.npcTalked.has(q.targetId) ? t('quest_progress_npc', { npc_done: '完成' }) : t('quest_progress_npc', { npc_done: `寻找 NPC（绿点）` });
       case 'level': return t('quest_progress_level', { target: q.target });

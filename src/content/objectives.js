@@ -1093,6 +1093,32 @@ export function applyStatEvent(stats, name, detail) {
  * `level` / `mind` 读的是账本里那两格读数，不是 `stats.vigor` 那类属性名 ——
  * 心智那一步说的是"在营火升过几级"，穿一枚加心智的护符不该替玩家把任务做完。
  */
+/**
+ * 这一步**随抉择而变**的那一格：玩家选中的那条路（还没选就 null）。
+ *
+ * 为什么要单独一个函数（W-E3 切片20）：「抉择」步有两样东西随选择而变 ——
+ * 进度文案（玩家看到自己选了哪条）与完成回报（这一步给多少魂火）。
+ * 两样都问这一份 ⇒ **判据只有一处**（进度文案自己再抄一遍"哪条被选了"，
+ * 就是本仓反复抓到的那个"两份算式"）。
+ */
+export function objectiveChosen(row, stats) {
+  if (row?.type !== 'choice' || !Array.isArray(row.choices)) return null;
+  return row.choices.find((c) => stats?.decisions?.has(c.flag)) ?? null;
+}
+
+/**
+ * 这一步完成后该发多少魂火。
+ *
+ * 「抉择」步的那两条路**给一样多**（W-E3 切片20 的设计决定）—— 若一条路给得多、
+ * 又没有别的代价，那它就**严格更优** ⇒ 玩家永远选那条 ⇒ 抉择就不成其为抉择。
+ * 真正的分歧后果（哪条路通向不同的内容）要等**分支树**机制 ⇒ 独立一片。
+ */
+export function objectiveReward(row, stats) {
+  const 选中的 = objectiveChosen(row, stats);
+  if (选中的 && Number.isInteger(选中的.reward)) return 选中的.reward;
+  return row?.reward ?? 0;
+}
+
 export function objectiveDone(def, stats) {
   if (!def) return false;
   switch (def.type) {

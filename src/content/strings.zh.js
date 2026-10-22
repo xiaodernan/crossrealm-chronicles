@@ -1772,7 +1772,7 @@ export const STRINGS_ZH = Object.freeze({
   quest_waypoint_hint_touch_anchor_2: '条件满足后触摸锚点',
   quest_waypoint_hint_touch_anchor_3: '三界试炼完成后触摸锚点',
   quest_toast_chapter_announce: '${announce}',
-  quest_toast_task_complete: '任务完成：${title}',
+  quest_toast_task_complete: '任务完成：${title} · +${reward} 魂火',
   quest_get_assistant_hint: '位面助手：${hint}',
   quest_title_all_done: '全部通关。按 ${questTracker} 打开助手可重跑全流程演示。',
   quest_waypoint_far: '走进地图骷髅标记的红圈激活 Boss · ${progress}',
