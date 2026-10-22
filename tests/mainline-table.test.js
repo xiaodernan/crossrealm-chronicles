@@ -2,7 +2,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
-import { V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS, V13_INSERT_POINTS, V14_INSERT_POINTS, V15_INSERT_POINTS } from '../src/game/SaveMigrations.js';
+import {
+  V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS,
+  V13_INSERT_POINTS, V14_INSERT_POINTS, V15_INSERT_POINTS, V16_INSERT_POINTS, V17_INSERT_POINTS,
+} from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
 } from '../src/content/objectives.js';
@@ -241,6 +244,30 @@ const V16_ORDER = [
   'choice-void', 'true-end', 'chaos-core', 'knight-hunt', 'skills', 'abyss-maw', 'gloom-mist-crypt', 'gloom-moss', 'warden-hunt',
   'chaos-boss', 'radiant-dawn-hall', 'radiant-altar', 'radiant-hunt', 'dungeon-rerun', 'chests-all', 'infinity',
 ];
+
+/**
+ * **v17 之后**在役的那条序列（W-E3 切片21 主线加三步"清剿"：圣域三道守卫）。
+ *
+ * 相对 `V16_ORDER` 多了三处 —— 三步是**连续**的（在 `dungeon-rerun` 之前）：
+ * - 圣域骑士（`radiant-knight-hunt`）
+ * - 圣域舞者（`radiant-dancer-hunt`）
+ * - 圣印者（`radiant-brand-hunt`）
+ *
+ * 圣域那位面原本只有爬兽进了主线，而它自己的另外三种独占敌人只在野外与副本里
+ * ⇒ 主线走那段故事时，那位面的**身份**（金甲、旋舞、灼场）一个都没露。
+ */
+const V17_ORDER = [
+  'anchor', 'training', 'hub-catacombs', 'soldiers', 'fantasy-frag', 'fantasy-ruins', 'elf-scout', 'boss',
+  'magic-frag', 'golem', 'space-frag', 'finale', 'chests', 'forest-shrine', 'fantasy-tower', 'talk-wanderer',
+  'boss2', 'elite', 'hexer-hunt', 'magic-forest', 'gear-charm', 'level', 'epilogue', 'learn-spell',
+  'crypt', 'library', 'rift', 'space-lens', 'space-wreck', 'boss3', 'mind', 'ascension',
+  'gear-sigil', 'void-rift', 'charge-spell', 'void-hunt', 'crawler-hunt', 'void-casket', 'void-boss', 'void-tablet',
+  'choice-void', 'true-end', 'chaos-core', 'knight-hunt', 'skills', 'abyss-maw', 'gloom-mist-crypt', 'gloom-moss',
+  'warden-hunt', 'gloom-wraith-hunt', 'gloom-stalker-hunt', 'gloom-sentinel-hunt', 'chaos-boss',
+  'radiant-dawn-hall', 'radiant-altar', 'radiant-hunt',
+  'radiant-knight-hunt', 'radiant-dancer-hunt', 'radiant-brand-hunt',
+  'dungeon-rerun', 'chests-all', 'infinity',
+];
 const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 
 beforeEach(() => { installWindowShim(); });
@@ -383,11 +410,26 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片18 之后：主线是 56 步，多一步"抉择"', () => {
     expect(V16_ORDER).toHaveLength(56);
     expect(new Set(V16_ORDER).size, 'v16 序列里有重复 id').toBe(V16_ORDER.length);
-    expect(MAINLINE.map((r) => r.id)).toEqual(V16_ORDER);
+    // 这一份是**历史**冻结名单（在役序列由下面 v17 那一条比）——
     // 相对 v15 多的那一步：choice-void（抉择）
     const 旧 = V16_ORDER.filter((id) => id !== 'choice-void');
     expect(旧, '去掉 choice-void 后应当逐字等于 v15 那条序列').toEqual(V15_ORDER);
     expect(V16_ORDER[40], '第 40 位不是 choice-void').toBe('choice-void');
+  });
+
+  it('W-E3 切片21 之后：主线是 62 步，多六步"清剿"（两位面各三道守卫）', () => {
+    expect(V17_ORDER).toHaveLength(62);
+    expect(new Set(V17_ORDER).size, 'v17 序列里有重复 id').toBe(V17_ORDER.length);
+    expect(MAINLINE.map((r) => r.id)).toEqual(V17_ORDER);
+    // 相对 v16 多的那六步：两处，**每处三步连续**
+    const 新增 = ['gloom-wraith-hunt', 'gloom-stalker-hunt', 'gloom-sentinel-hunt',
+      'radiant-knight-hunt', 'radiant-dancer-hunt', 'radiant-brand-hunt'];
+    const 旧 = V17_ORDER.filter((id) => !新增.includes(id));
+    expect(旧, '去掉那六步后应当逐字等于 v16 那条序列').toEqual(V16_ORDER);
+    expect(V17_ORDER[49], '第 49 位不是 gloom-wraith-hunt').toBe('gloom-wraith-hunt');
+    expect(V17_ORDER[51], '第 51 位不是 gloom-sentinel-hunt').toBe('gloom-sentinel-hunt');
+    expect(V17_ORDER[56], '第 56 位不是 radiant-knight-hunt').toBe('radiant-knight-hunt');
+    expect(V17_ORDER[58], '第 58 位不是 radiant-brand-hunt').toBe('radiant-brand-hunt');
   });
 
   it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);
@@ -449,6 +491,19 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V14_ORDER[14 + 1], '老档的 14 号位（talk-wanderer）没落到新表上').toBe('talk-wanderer');
     expect(V14_ORDER[25 + 2], '老档的 25 号位（space-wreck）没落到新表上').toBe('space-wreck');
     expect(V14_ORDER[43 + 3], '老档的 44 号位（chaos-boss）没落到新表上').toBe('chaos-boss');
+    // v15 → v16：一处插点（**旧序列**口径）
+    expect(V16_INSERT_POINTS).toEqual([40]);
+    expect(V15_ORDER[40], '旧序列第 40 位不是 true-end（choice-void 插在它之前）').toBe('true-end');
+    expect(V16_ORDER[40], '新序列第 40 位不是 choice-void').toBe('choice-void');
+    expect(V16_ORDER[41], '老档的 40 号位（true-end）没落到新表上').toBe('true-end');
+    // v16 → v17：**两处**插点，每处**三个**相同的数（六步分成两组，各组连续）
+    expect(V17_INSERT_POINTS).toEqual([49, 49, 49, 53, 53, 53]);
+    expect(V16_ORDER[48], '旧序列第 48 位不是 warden-hunt').toBe('warden-hunt');
+    expect(V16_ORDER[49], '旧序列第 49 位不是 chaos-boss').toBe('chaos-boss');
+    expect(V16_ORDER[52], '旧序列第 52 位不是 radiant-hunt').toBe('radiant-hunt');
+    expect(V16_ORDER[53], '旧序列第 53 位不是 dungeon-rerun').toBe('dungeon-rerun');
+    expect(V17_ORDER[52], '老档的 49 号位（chaos-boss）没落到新表上').toBe('chaos-boss');
+    expect(V17_ORDER[59], '老档的 53 号位（dungeon-rerun）没落到新表上').toBe('dungeon-rerun');
     // v14 → v15：两个插点（**旧序列**口径）
     expect(V15_INSERT_POINTS).toEqual([20, 31]);
     expect(V14_ORDER[20]).toBe('level');

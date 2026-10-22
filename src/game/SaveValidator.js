@@ -1,5 +1,5 @@
 /** 存档结构校验 — 版本号为 schema 的唯一权威，迁移链从这里取目标版本 */
-export const CURRENT_VERSION = 16;
+export const CURRENT_VERSION = 17;
 
 const VERSION = CURRENT_VERSION;
 

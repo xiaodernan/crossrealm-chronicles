@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v17', version: 17 },
   { key: 'crossrealm_save_v16', version: 16 },
   { key: 'crossrealm_save_v15', version: 15 },
   { key: 'crossrealm_save_v14', version: 14 },
@@ -325,6 +326,36 @@ function migrateV15toV16(d) {
   return d;
 }
 
+/**
+ * v16 → v17：**主线加三步"清剿"**（W-E3 切片21）—— 圣域的三道守卫。
+ *
+ * 这一跳插了**六**步：幽暗林地那三类型（`gloom-wraith-hunt` / `gloom-stalker-hunt` /
+ * `gloom-sentinel-hunt`）与圣域那三类型（`radiant-knight-hunt` / `radiant-dancer-hunt` /
+ * `radiant-brand-hunt`（圣印者）—— 圣域那位面原本只有爬兽进了主线，
+ * 而它自己的另外三种独占敌人只在野外与副本里 ⇒ 主线走那段故事时，
+ * 那位面的**身份**（金甲、旋舞、灼场）一个都没露 ⇒ 三个插点把它接进来。
+ *
+ * **这一跳不改存档形状**：三步都是**清剿**（判据读的是击杀计数，那一格早就在账本上）⇒
+ * 老档缺的从来不是"没打过的怪"，只是**主线的下标**。
+ *
+ * 插入点（**旧序列**的下标）：**49**（幽暗三步，在 `chaos-boss` 之前）与
+ * **53**（圣域三步，在 `dungeon-rerun` 之前）。
+ *
+ * 为什么每一处是**三个相同的数**而不是 `[49, 50, 51]`：那三步是**连续**的
+ * （旧序列的同一处插了三步）⇒ 三个插点落在旧序列的**同一处**。
+ * 折算式 `偏移后(旧下标, 插入点)` 数的正是"≤ 旧下标的插点有几个"
+ * ⇒ 旧 48（`warden-hunt`）不动、旧 49（`chaos-boss`）往后挪三格、
+ * 旧 53（`dungeon-rerun`）往后挪六格 ✓。
+ */
+export const V17_INSERT_POINTS = [49, 49, 49, 53, 53, 53];
+
+function migrateV16toV17(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V17_INSERT_POINTS);
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -339,6 +370,7 @@ export const MIGRATIONS = {
   13: migrateV13toV14,
   14: migrateV14toV15,
   15: migrateV15toV16,
+  16: migrateV16toV17,
 };
 
 /**
