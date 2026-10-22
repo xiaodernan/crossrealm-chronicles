@@ -30,6 +30,33 @@ describe('敌人感知', () => {
     expect(e.distanceTo(player)).toBeLessThan(9.8);
   });
 
+  /**
+   * B125 的 B 类：`CollisionWorld.blocked()` 把整条视线压成**一个高度**上的采样。
+   * 改前 `Sense` 递的是绝对的 `ai.eyeHeight`（1.5 米），等于假设世界从 y=0 起 ——
+   * 敌人站在 10 米台地上时那条线落在地表以下 8 米，正好穿过一块**埋进坡里**的石头，
+   * 于是四向全被判成遮挡、玩家贴到 1.7 米也不警觉。症状与"出生在实体里"那一族
+   * 一模一样，因却是另一条，所以两条各立一例。
+   */
+  it('站在高台上的敌人不被埋进坡里的石头判瞎：视线高度跟着站立面走', () => {
+    // 石头顶面 3.4 米，脚下的地台 10.4 米：它挡得住"绝对 1.5 米那条线"，挡不住"10.4+1.5 那条"
+    const world = makeWorld([{ x: 1, z: 0, r: 1.2, base: -2, top: 3.4 }], 10.4);
+    const m = makeManager({ world });
+    const e = spawn(m, { x: 0, z: 0 });
+    const player = v(1.7, 0);
+    run(m, 0.5, 1 / 60, player, makePlayerRef());
+    expect(e.sense.seen, '台地上的敌人被脚下八米深的石头判成看不见贴脸的玩家').toBe(true);
+    expect(e.sense.alerted).toBe(true);
+  });
+
+  it('反向控制：同一块石头、同一层地面，视线当真被挡住（判据改的是高度，不是把遮挡判据拆了）', () => {
+    const world = makeWorld([{ x: 1, z: 0, r: 1.2, base: -2, top: 3.4 }], 0);
+    const m = makeManager({ world });
+    const e = spawn(m, { x: 0, z: 0 });
+    run(m, 0.5, 1 / 60, v(1.7, 0), makePlayerRef());
+    expect(e.sense.seen, '这块石头本来就该挡住视线，用例才有对照组').toBe(false);
+    expect(e.sense.alerted).toBe(false);
+  });
+
   it('受击即仇恨（不需要看得见）；丢失视野后追满记忆时间才放弃', () => {
     const world = makeWorld([{ x: 5, z: 0, hx: 1, hz: 6, base: 0, top: 5 }]);
     const m = makeManager({ world });

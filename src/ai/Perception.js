@@ -3,6 +3,7 @@
  *
  * 三件事集中在这里，`EnemyFSM` 只读结果：
  * 1. **视距**：`aggroRange` 内且视线不被遮挡才算看见（旧实现只看平面距离，隔一堵墙照样扑过来）；
+ *    遮挡判定用的那条视线是**站着的那一层 + 眼高**，不是绝对 1.5 米（见 `eyeY()`）；
  * 2. **记忆**：看见过之后丢失视野仍追 `AI.memory` 秒（否则绕根柱子就脱战，是"怪很傻"的主要来源）；
  * 3. **仇恨**：被打到立刻仇恨，不需要看得见（背后一刀不该让敌人继续散步）。
  *
@@ -36,6 +37,23 @@ export class Sense {
   }
 
   /**
+   * 视线采样的高度：**站立面 + 眼高**，不是绝对的那 1.5 米。
+   *
+   * `CollisionWorld.blocked()` 把这一个数当整条视线的等高高度。直接递 `ai.eyeHeight`
+   * 就等于假设"世界从绝对 y=0 起"：在 10 米台地上，那条线落在**地表以下 8 米**，
+   * 埋在坡里的那块石头于是把四个方向全判成遮挡 —— 高台上的敌人永远看不见贴到 1.7 米
+   * 的玩家（B125 的 B 类，与"出生在实体里"那一族同一条门禁、不同一条因）。
+   * 取两端**较高**的那层站立面：保证视线不从任何一端的脚下钻过去；口径与
+   * `_advance()`／`unpenetrate()` 一致（脚下高度一律问 `getGroundHeight`，敌人的
+   * `position.y` 恒为 0，不可用）。只在视距内被调用，短路交给 `update()` 的 `&&`。
+   */
+  eyeY(targetPos) {
+    const e = this.enemy;
+    const 本站 = e.world?.getGroundHeight(e.position.x, e.position.z) ?? 0;
+    return Math.max(本站, targetPos.y) + e.ai.eyeHeight;
+  }
+
+  /**
    * @param world `CollisionWorld`，副本等未登记碰撞的场景传 null（视为无遮挡）
    */
   update(dt, targetPos, world) {
@@ -44,7 +62,7 @@ export class Sense {
     this.dist = e.distanceTo(targetPos);
     const range = e.aggroRange;
     this.seen = this.dist <= range
-      && (world ? !world.blocked(e.position.x, e.position.z, targetPos.x, targetPos.z, e.ai.eyeHeight) : true);
+      && (world ? !world.blocked(e.position.x, e.position.z, targetPos.x, targetPos.z, this.eyeY(targetPos)) : true);
 
     if (this.seen) {
       this.lost = 0;

@@ -31,14 +31,19 @@ export function installWindowShim() {
   };
 }
 
-/** 空平地世界；colliders 用来验证敌人真的被实体挡住 */
-export const makeWorld = (colliders = []) => {
+/**
+ * 空平地世界；colliders 用来验证敌人真的被实体挡住。
+ *
+ * 第 2 参 `groundY` 把整片地面抬到某个高度（一块台地）—— 站立面与碰撞带的相对关系
+ * 是感知判据的一部分，只在 y=0 试过就等于只在平地上试过（B125 的 B 类）。
+ */
+export const makeWorld = (colliders = [], groundY = 0) => {
   const cw = new CollisionWorld(16);
   for (const c of colliders) {
     if (c.hx) cw.addBox(c); else cw.addCylinder(c);
   }
   cw.build();
-  return { getGroundHeight: () => 0, collision: cw };
+  return { getGroundHeight: () => groundY, collision: cw };
 };
 
 /**

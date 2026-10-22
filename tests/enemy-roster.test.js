@@ -13,7 +13,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BODY_PLANS, ENEMY_DEFENSE, ENEMY_RESIST, ENEMY_MOVES, ENEMY_MOVE_SETS } from '../src/content/tuning.js';
-import { installWindowShim, makeManager, makePlayerRef, v } from './helpers/enemyHarness.js';
+import { installWindowShim, makeManager, makePlayerRef, makeWorld, spawn, v } from './helpers/enemyHarness.js';
 import { WorldManager } from '../src/world/WorldManager.js';
 import { ZONE_ORDER, zoneIdAt } from '../src/content/ZoneIdentity.js';
 
@@ -249,36 +249,145 @@ describe('W-B7 切片5：每个出生点都得醒得过来（B70 那一族）', 
    * 只记了 `knight@[-255,175]`，同一道门禁又扫出 `dancer@[275,10]` —— 同族两处实例。
    * 这里**逐只隔离**测（一只敌人、一间真 `WorldManager` 世界），四向只要有一向醒得过来
    * 就算这一格站得住人。
+   *
+   * B125 给这条门禁补了两件事，因为它们各自掩盖过真故障：
+   *
+   * 1. **门禁读的布局必须点名**（`钉死布局` / `建世界`）。各区装饰与 `addRandomObstacles`
+   *    用未播种的 `Math.random()` 摆障碍 ⇒ 改前每一轮 `build()` 是另一份布局 ⇒ 同一张
+   *    出生点表这轮全绿、下轮冒出一个闷点，全量套件轮换红。红率读数：300 轮 6 次。
+   * 2. **闷点要报出挡住的那一块**（`挡事者`）。"这一格四向皆闷"修不动，
+   *    "闷在 `cyl@160.45,69.72 r=2.01 y[-1.95,3.72]` 这块石头上"才修得动 ——
+   *    这两条因（出生在实体里 / 视线高度不跟着站立面）就是靠报名加钉种子分开的。
+   *
+   * 两条都没有放宽断言：判据仍是"四向至少一向警觉"，仍是真世界几何、真 40 帧。
    */
-  it('每个原生敌人的出生点，玩家贴到 1.7 米时四向至少有一向会警觉', () => {
+  const 四向 = [[1.7, 0], [-1.7, 0], [0, 1.7], [0, -1.7]];
+
+  /**
+   * 钉死的那几份布局。`52` 不是随手挑的：它是 B125 复现时暴露"高台上的敌人被脚下的
+   * 石头判瞎"那一颗（`drone@160,70`，脚下地面 10.38 米、石头顶面 3.72 米）。
+   */
+  const 钉死布局 = [1, 2, 3, 5, 12, 52];
+
+  /**
+   * 建一份布局：只在 `build()` 这一段时间里把随机源换成 `seed` 的确定性序列，
+   * 建完立刻还原（`finally`：建图抛错也不把播种留在 `Math.random` 上，否则同一 worker
+   * 里后面的用例都在替身随机数上跑）。`seed = null` 表示不点名 —— 反向控制用它。
+   */
+  function 建世界(seed) {
+    const 原 = Math.random;
+    if (seed !== null) {
+      let s = (seed * 2654435761) >>> 0;
+      Math.random = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 0x100000000; };
+    }
     const wm = new WorldManager({ add() {}, remove() {} }, { show() {}, toast() {} });
-    wm.build();
+    try {
+      wm.build();
+    } finally {
+      Math.random = 原;
+    }
+    return wm;
+  }
+
+  /** 把一份碰撞体写成能照着修的一句话 */
+  const 挡事者 = (c) => {
+    if (!c) return '无（这一向的视线其实没被任何碰撞体判住 —— 那就是判据之外的因）';
+    const 尺 = c.shape === 'cyl' ? `r=${c.r.toFixed(2)}` : `hx=${c.hx.toFixed(2)},hz=${c.hz.toFixed(2)}`;
+    return `${c.shape}@${c.x.toFixed(2)},${c.z.toFixed(2)} ${尺} y[${c.base.toFixed(2)},${c.top.toFixed(2)}]`;
+  };
+
+  /** 一格四向的警觉读数；闷掉的方向顺手记下挡住它的那一块（问生产自己的 `blockedBy`，不复刻采样） */
+  function 四向警觉(wm, p) {
+    // 一只一测：邻居之间的分离推力会互相干扰，混在一起测就分不清是谁站不住
+    const m = makeManager({ world: wm });
+    const e = m.spawn({ name: '哨探', type: p.type, x: p.x, z: p.z, hp: 999999, posture: 999999, respawn: false });
+    const ref = makePlayerRef();
+    const 玩家 = v(0, 0);
+    let 醒 = 0;
+    const 闷 = [];
+    for (const [dx, dz] of 四向) {
+      e.sense.clear();
+      e.sense.returning = false;
+      玩家.set(p.x + dx, wm.getGroundHeight(p.x + dx, p.z + dz), p.z + dz);
+      for (let i = 0; i < 40; i += 1) m.update(1 / 60, 玩家, ref, null, null);
+      if (e.sense.alerted) 醒 += 1;
+      else 闷.push(`(${dx},${dz})被${挡事者(wm.collision.blockedBy(
+        e.position.x, e.position.z, 玩家.x, 玩家.z, e.sense.eyeY(玩家),
+      ))}`);
+    }
+    return { 醒, 闷: 闷.join('、') };
+  }
+
+  /** 出生点表在某一轮布局下的**实际**出生坐标（脱困之后那一格，不是表上那一格） */
+  function 出生格(wm, seed) {
     const 种子 = makeManager({ world: wm });
     种子.spawnDefaults();
     const 点 = 种子.enemies
       .filter((e) => 原生敌人.includes(e.type))
       .map((e) => ({ type: e.type, x: e.spawnPoint.x, z: e.spawnPoint.z }));
-    expect(点.length, '一个原生出生点都没扫到，这条门禁就在空转').toBeGreaterThanOrEqual(40);
+    expect(点.length, `种子 ${seed} 一个原生出生点都没扫到，这条门禁就在空转`).toBeGreaterThanOrEqual(40);
+    return 点;
+  }
 
-    const ref = makePlayerRef();
-    const 玩家 = v(0, 0);
-    const 四向 = [[1.7, 0], [-1.7, 0], [0, 1.7], [0, -1.7]];
+  it('钉死布局的每个原生出生点，玩家贴到 1.7 米时四向至少有一向会警觉', () => {
     const 闷点 = [];
-    for (const p of 点) {
-      // 一只一测：邻居之间的分离推力会互相干扰，混在一起测就分不清是谁站不住
-      const m = makeManager({ world: wm });
-      const e = m.spawn({ name: '哨探', type: p.type, x: p.x, z: p.z, hp: 999999, posture: 999999, respawn: false });
-      let 醒 = 0;
-      for (const [dx, dz] of 四向) {
-        e.sense.clear();
-        e.sense.returning = false;
-        玩家.set(p.x + dx, wm.getGroundHeight(p.x + dx, p.z + dz), p.z + dz);
-        for (let i = 0; i < 40; i += 1) m.update(1 / 60, 玩家, ref, null, null);
-        if (e.sense.alerted) 醒 += 1;
+    for (const seed of 钉死布局) {
+      const wm = 建世界(seed);
+      for (const p of 出生格(wm, seed)) {
+        const { 醒, 闷 } = 四向警觉(wm, p);
+        if (醒 === 0) 闷点.push(`seed=${seed} ${p.type}@${p.x.toFixed(2)},${p.z.toFixed(2)}：${闷}`);
       }
-      if (醒 === 0) 闷点.push(`${p.type}@${p.x},${p.z}`);
     }
-    expect(闷点, `这些出生点四面都醒不过来（玩家贴脸也不警觉）：${闷点.join('、')}`).toEqual([]);
+    expect(闷点, `这些出生点四面都醒不过来（玩家贴脸也不警觉）：\n${闷点.join('\n')}`).toEqual([]);
+  });
+
+  it('钉子真的钉住了：同种子逐位相同、异种子各不相同、不播种就漂', () => {
+    /** 布局指纹：把每块碰撞体的形状/坐标/尺寸/高度带压成一个 32 位散列 */
+    const 指纹 = (cs) => {
+      let h = 0x811c9dc5;
+      for (const c of cs) {
+        const 尺 = c.shape === 'cyl' ? c.r : `${c.hx}x${c.hz}@${(c.rot ?? 0).toFixed(3)}`;
+        const 串 = `${c.shape}|${c.x.toFixed(3)}|${c.z.toFixed(3)}|${尺}|${c.base.toFixed(3)}|${c.top.toFixed(3)}`;
+        for (let i = 0; i < 串.length; i += 1) {
+          h ^= 串.charCodeAt(i);
+          h = Math.imul(h, 0x01000193) >>> 0;
+        }
+      }
+      return h;
+    };
+    const 一次 = (seed) => 指纹(建世界(seed).collision.colliders);
+
+    expect(一次(7), '同一个种子第二次建图交出另一份布局 ⇒ 播种没生效，门禁钉的是空气')
+      .toBe(一次(7));
+    const 六份 = 钉死布局.map(一次);
+    expect(new Set(六份).size, '钉死的几颗种子建出了同一份布局 ⇒ 其中一颗是抄的')
+      .toBe(钉死布局.length);
+    // 反向控制：随机源不点名时两份布局本来就不一样 —— 这正是改前那条门禁轮换红的因
+    expect(一次(null), '不播种两次建图竟逐位相同 ⇒ 障碍布局并不由随机源摆放，钉种子无从谈起')
+      .not.toBe(一次(null));
+  });
+
+  /**
+   * B125 的 A 类（生产侧的因，不是测试侧的运气）：`Enemy._advance()` 在速度近零时
+   * `return`，**根本不碰碰撞** ⇒ 出生在实体里的那一只永远不会被推出去，一辈子站在一块
+   * 石头肚子里。这里把脱困本身钉住：埋进柱子要被打出来，干净地面不许被推走。
+   */
+  it('出生在实体里会被推出去：埋进柱子的出生点记的是站得住那一格', () => {
+    const 柱 = { x: 0, z: 0, r: 1.6, base: -1.2, top: 3.4 };
+    const m = makeManager({ world: makeWorld([柱]) });
+    const e = spawn(m, { x: 0.2, z: 0 });
+    const 离轴心 = Math.hypot(e.spawnPoint.x - 柱.x, e.spawnPoint.z - 柱.z);
+    expect(离轴心, '出生点还埋在那根柱子里（脱困没跑）').toBeGreaterThanOrEqual(柱.r + e.radius - 1e-6);
+    const { 醒 } = 四向警觉(m.world, { type: 'soldier', x: e.spawnPoint.x, z: e.spawnPoint.z });
+    expect(醒, '推出去了还是四向皆闷').toBeGreaterThan(0);
+  });
+
+  it('反向控制：干净地面的出生点一步都不该被推走（脱困不许把谁踢离表上那一格）', () => {
+    const 柱 = { x: 0, z: 0, r: 1.6, base: -1.2, top: 3.4 };
+    const m = makeManager({ world: makeWorld([柱]) });
+    const e = spawn(m, { x: 9, z: 9 });
+    expect(e.spawnPoint.x, '没埋进实体也被推走了 ⇒ 脱困在改每一只的出生点').toBe(9);
+    expect(e.spawnPoint.z, '没埋进实体也被推走了 ⇒ 脱困在改每一只的出生点').toBe(9);
   });
 
   it('B70 换过的两格钉在表里：旧坐标（四向皆闷）不许悄悄回填', () => {

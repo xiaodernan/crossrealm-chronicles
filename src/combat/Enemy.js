@@ -83,7 +83,6 @@ export class Enemy {
     this.staggerTimer = 0;
     this.hitFlash = 0;
     this.bodyMesh = null;
-    this.spawnPoint = this.position.clone();
     this.alive = true;
     this.isBoss = config.type === 'boss';
 
@@ -95,6 +94,13 @@ export class Enemy {
     this.hover = config.hover ?? BODY_PLANS[this.type]?.hover ?? 0;
     /** 分离与碰撞用的身体半径 */
     this.radius = config.radius ?? BODY_PLANS[this.type]?.radius ?? 0.45;
+    /* 出生那一格埋在实体里时先脱困（B125）：`_advance()` 在速度近零时**根本不碰碰撞**
+     * （`if (s < 1e-5) return`），于是一块随机落下的碎石就能把一只敌人永远卡在它肚子里 ——
+     * 四向视线全被判没、玩家贴到 1.7 米也不警觉。脱困只在出生做一次，之后由 `_advance()`
+     * 的 `moveCircle` 接管；口径与玩家重生同一条（`PlayerController` 的 `unpenetrate`）。
+     * `spawnPoint` 因此记的是**站得住的那一格**，归位与 leash 才不会把家安在石头里。 */
+    this._escapeSolid();
+    this.spawnPoint = this.position.clone();
     /** AI 行为参数：默认全表，spawn config 可按只覆盖（同一类敌人也能有特例） */
     this.ai = { ...AI, ...(config.ai ?? {}) };
     /** 招式表：整类默认取自 `ENEMY_MOVE_SETS`，spawn config 的 `moves` 可给 id 或内联招式 */
@@ -353,6 +359,22 @@ export class Enemy {
     if (m.aoe) return m.aoe;
     if (m.ranged || m.hazard) return this.attackRange;
     return moveRange(this, m);
+  }
+
+  /**
+   * 出生点埋在实体里时脱困一次（B125）。
+   *
+   * 判据不在这里重写：走 `CollisionWorld.unpenetrate()`，与玩家重生用的是同一条脱困口径。
+   * 没有碰撞世界（副本那类"未登记碰撞的场景"）就当无处可埋，原样站着 —— 与 `_advance()`
+   * 里 `if (!c)` 那一格同一个前提。
+   */
+  _escapeSolid() {
+    const c = this.world?.collision;
+    if (!c) return;
+    const footY = this.world.getGroundHeight(this.position.x, this.position.z);
+    const out = c.unpenetrate(this.position.x, this.position.z, this.radius, footY);
+    this.position.x = out.x;
+    this.position.z = out.z;
   }
 
   /** 本帧位移意图（米/秒），由状态写入、`_advance()` 积分 */

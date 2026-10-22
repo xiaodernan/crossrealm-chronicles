@@ -240,12 +240,26 @@ export class CollisionWorld {
    *
    * 注意：按 1.5 米步进、且**不含端点**，所以两端距离小于一拍时一个采样都不取（恒为未阻挡）。
    * 现用途是 AI 视线（距离远大于一步），镜头遮挡因此改用上面的 `blocksPoint()`。
+   *
+   * 判据只有一份：这里就是 `blockedBy()` 非空。**别在调用方另抄一遍采样**（B125 的门禁
+   * 要说出"挡住的是哪一份碰撞体"，那条需求由 `blockedBy()` 满足，而不是由谁去复刻这段循环）。
    */
   blocked(fromX, fromZ, toX, toZ, y) {
+    return this.blockedBy(fromX, fromZ, toX, toZ, y) !== null;
+  }
+
+  /**
+   * 挡住视线的那一份碰撞体（没有则 null）—— `blocked()` 的同一件事，只是把**答案**交出来。
+   *
+   * 为什么要有这一格：一句"这一格四向皆闷"不能修，而"闷在 `cyl@239.3,100.1 r=1.64`
+   * 这一块石头上"能修。它同时是**一条诊断**（哪个工件压住了出生点）与**一份证据**
+   * （门禁不必重抄采样口径，也就不会和生产侧漂开）。
+   */
+  blockedBy(fromX, fromZ, toX, toZ, y) {
     const dx = toX - fromX;
     const dz = toZ - fromZ;
     const len = Math.hypot(dx, dz);
-    if (len < 1e-3) return false;
+    if (len < 1e-3) return null;
     const steps = Math.min(64, Math.ceil(len / 1.5));
     for (let i = 1; i < steps; i++) {
       const t = i / steps;
@@ -254,17 +268,17 @@ export class CollisionWorld {
       for (const c of this.candidates(px, pz, 0.6)) {
         if (!this.blocks(c, y)) continue;
         if (c.shape === 'cyl') {
-          if (Math.hypot(px - c.x, pz - c.z) < c.r) return true;
+          if (Math.hypot(px - c.x, pz - c.z) < c.r) return c;
         } else {
           const rx = px - c.x;
           const rz = pz - c.z;
           const ax = c.rot ? rx * Math.cos(c.rot) + rz * Math.sin(c.rot) : rx;
           const az = c.rot ? rz * Math.cos(c.rot) - rx * Math.sin(c.rot) : rz;
-          if (Math.abs(ax) < c.hx && Math.abs(az) < c.hz) return true;
+          if (Math.abs(ax) < c.hx && Math.abs(az) < c.hz) return c;
         }
       }
     }
-    return false;
+    return null;
   }
 
   clear() {

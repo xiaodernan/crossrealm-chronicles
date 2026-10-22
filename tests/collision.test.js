@@ -73,6 +73,34 @@ describe('CollisionWorld', () => {
     expect(w.blocked(0, 0, 10, 0, 9)).toBe(false); // 高于障碍顶面
   });
 
+  /**
+   * `blockedBy()` 是 `blocked()` 的同一件事、只是把**答案**交出来（B125 的门禁要说
+   * "闷在哪一块上"）。两条必须逐段同意 —— 谁抄了谁的采样、或谁漏了一种形状，这里就红。
+   */
+  it('blocked() 就是 blockedBy() 非空：逐段一致，交出的正是挡住那一份', () => {
+    const w = new CollisionWorld();
+    w.addCylinder({ x: 5, z: 0, r: 1.5, top: 8 });
+    w.addBox({ x: 0, z: 6, hx: 1, hz: 3, base: 0, top: 4 });
+    w.build();
+    const 段 = [
+      [0, 0, 10, 0, 1],      // 穿柱
+      [0, 5, 10, 5, 1],      // 从盒子边上过去
+      [0, 4.2, 10, 4.2, 1],  // 更贴盒子边（1.25 米那一格刚好在外）
+      [0, 0, 0, 12, 1],      // 穿盒
+      [0, 0, 10, 0, 9],      // 高于一切顶面
+      [0, 0, 1, 0, 1],       // 短于一拍：段内一个采样点都不取
+    ];
+    for (const [x1, z1, x2, z2, y] of 段) {
+      const 报名 = w.blockedBy(x1, z1, x2, z2, y) !== null;
+      expect(报名, `线段 (${x1},${z1})→(${x2},${z2}) y=${y}：两条判据说的不是一件事`)
+        .toBe(w.blocked(x1, z1, x2, z2, y));
+    }
+    expect(w.blockedBy(0, 0, 10, 0, 1).shape).toBe('cyl');
+    expect(w.blockedBy(0, 0, 0, 12, 1).shape).toBe('box');
+    expect(w.blockedBy(0, 4.2, 10, 4.2, 1)).toBe(null);
+    expect(w.blockedBy(0, 0, 1, 0, 1), '短于一拍却报出了东西 —— 采样语义与文档不一致').toBe(null);
+  });
+
   it('空间哈希只返回邻域候选', () => {
     const w = new CollisionWorld(8);
     for (let i = 0; i < 200; i++) w.addCylinder({ x: i * 3, z: 0, r: 0.5, top: 4 });
