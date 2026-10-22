@@ -1544,20 +1544,20 @@ export const STRINGS_EN = Object.freeze({
   guide_title_auto: '⚡ Auto-run in progress',
   guide_step_auto: 'Your character is pathing…',
   guide_title_dungeon_prefix: '🗺 ',
-  guide_step_dungeon: 'Explored {visited}/{total} rooms · Cleared {cleared}/{total}',
+  guide_step_dungeon: 'Explored ${visited}/${total} rooms · Cleared ${cleared}/${total}',
   guide_hint_dungeon_boss: '⚔ Maze Keykeeper — defeat to unlock exit portal',
-  guide_hint_dungeon_enemies: '⚔ Current room {enemies} enemies — clear to open doors',
+  guide_hint_dungeon_enemies: '⚔ Current room ${enemies} enemies — clear to open doors',
   guide_hint_dungeon_exit: '▶ Keykeeper down — exit portal {interact} to leave',
   guide_hint_dungeon_explore: '▶ Delve deeper · watch for glowing stelae {interact} for lore',
   guide_title_complete: '🎉 Main quest complete',
   guide_step_complete: 'Freely explore five zones · Minimap {minimap} shows Boss 💀',
   guide_hint_complete: 'Press {autoPlay} to replay auto-run',
-  guide_title_chapter_prefix: 'Ch{chapter} · ',
-  guide_hint_waypoint: '▶ Head to: {label}{hint}',
-  guide_hint_assistant: 'Plane Assistant: {hint}',
+  guide_title_chapter_prefix: 'Ch${chapter} · ',
+  guide_hint_waypoint: '▶ Head to: ${label}${hint}',
+  guide_hint_assistant: 'Plane Assistant: ${hint}',
 
   // Toast (guide panel sync / auto-play)
-  guide_toast_sync_progress: 'Advanced {n} quests',
+  guide_toast_sync_progress: 'Advanced ${n} quests',
   guide_toast_synced: 'Quests synced to latest',
 
   // Guide panel auto-play hint
@@ -1750,8 +1750,8 @@ export const STRINGS_EN = Object.freeze({
   quest_progress_mind: 'Upgrade campfire "Mind" to ${target}',
   quest_progress_charged: '${current} / ${target} charged casts',
   quest_progress_skills: '${current} / ${target} skills',
-  quest_progress_gear: 'Gear slot: {slot_done}',
-  quest_progress_choice: 'Choice: {choice_done}',
+  quest_progress_gear: 'Gear slot: ${slot_done}',
+  quest_progress_choice: 'Choice: ${choice_done}',
   quest_progress_dungeon_rerun: '${rerun_done}',
   quest_progress_chests: '${current} / ${target} chests',
   quest_progress_npc: '${npc_done}',
@@ -1865,7 +1865,7 @@ export const STRINGS_EN = Object.freeze({
   cg_caption_void_cosmic: 'Old Ones Whisper',
   cg_caption_space_starport: 'Starport Trade Route',
   cg_caption_hub_wave4: 'Wave4 Four Systems',
-  // Combat tutorial: these two hold **key hints** (single-brace `{action}`, expanded by
+  // Combat tutorial: these two hold **key hints** (single-brace `${action}`, expanded by
   // keyText at paint time). Written as `${parry}` the i18n syntax wins: `t()` without params
   // does not substitute and `keyText` only knows single braces, so the `$` stayed on the
   // canvas — measured "$F Parry" (caught by tests/key-hint-outlets).
