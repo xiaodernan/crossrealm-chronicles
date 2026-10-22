@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v15', version: 15 },
   { key: 'crossrealm_save_v14', version: 14 },
   { key: 'crossrealm_save_v13', version: 13 },
   { key: 'crossrealm_save_v12', version: 12 },
@@ -272,6 +273,29 @@ function migrateV13toV14(d) {
   return d;
 }
 
+/**
+ * v14 → v15：**主线加两步"装备"**（W-E3 切片17）。
+ *
+ * 这一跳插了两步 —— `gear-charm`（挂上护符）与 `gear-sigil`（嵌上徽记）。
+ * 它们是**主线第一次要求玩家动装备**的一类段落（前面五种：副本 / 发现 / 对话 / 清剿 / 收集）。
+ *
+ * **这一跳不改存档形状**：装备那一格是**读数**（`STAT_READINGS` 里的 `gearSlots`），
+ * 不落盘 ⇒ 读档后由 `stats-changed` 再推一次（以生产方为准，不抄磁盘）⇒
+ * 老档缺的从来不是"装备过什么"，而是**现在挂着什么**（读数本来就不在盘上）。
+ *
+ * 插入点（**旧序列**的下标）：
+ * - 20 —— 在 `level` 之前（`gear-charm`）
+ * - 31 —— 在 `void-rift` 之前（`gear-sigil`）
+ */
+export const V15_INSERT_POINTS = [20, 31];
+
+function migrateV14toV15(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V15_INSERT_POINTS);
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -284,6 +308,7 @@ export const MIGRATIONS = {
   11: migrateV11toV12,
   12: migrateV12toV13,
   13: migrateV13toV14,
+  14: migrateV14toV15,
 };
 
 /**

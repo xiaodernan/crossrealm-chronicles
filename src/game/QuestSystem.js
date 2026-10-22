@@ -330,6 +330,9 @@ export class QuestSystem {
       case 'charged': return t('quest_progress_charged', { current: Math.min(this.stats.chargedCasts, q.target), target: q.target });
       case 'skills-unlocked': return t('quest_progress_skills', { current: Math.min(this.stats.skillsUnlocked, q.target), target: q.target });
       case 'dungeon-rerun': return this.stats.dungeonRerun ? t('quest_progress_dungeon_rerun', { rerun_done: '完成' }) : t('quest_progress_dungeon_rerun', { rerun_done: '再次进入地下城（Chapter 5 后）' });
+      case 'gear': return this.isQuestObjectiveDone(q)
+        ? t('quest_progress_gear', { slot_done: '已装备' })
+        : t('quest_progress_gear', { slot_done: '装备一件再出发' });
       case 'chests': return t('quest_progress_chests', { current: this.stats.chestsOpened, target: q.target });
       case 'npc': return this.stats.npcTalked.has(q.targetId) ? t('quest_progress_npc', { npc_done: '完成' }) : t('quest_progress_npc', { npc_done: `寻找 NPC（绿点）` });
       case 'level': return t('quest_progress_level', { target: q.target });

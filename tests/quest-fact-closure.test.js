@@ -117,7 +117,12 @@ describe('③ 交叉证据：推导没有漏', () => {
     const 实跑 = new Set();
     // 探针载荷：通用的一份 + Boss 那一族各一只（计算写要 bossId 才写得进去）。
     // `zone` 也要带上（真实负载里有 —— W-B12 切片7 的 `zoneKills` 靠它写）。
-    const 通用 = { id: 'probe', type: 'soldier', charged: true, level: 5, mind: 3, zone: 'fantasy' };
+    const 通用 = {
+      id: 'probe', type: 'soldier', charged: true, level: 5, mind: 3, zone: 'fantasy',
+      // 装备那一格是**读数**（`stats-changed` 从 `PlayerStats.toJSON()` 里的 `gear` 推来）⇒
+      // 探针载荷也得带上它，否则「实跑一遍记账函数」那一半看不到这一格被写
+      gear: { charm: { base: 'ash-charm' } },
+    };
     const 细节们 = (名) => (名 === 'enemy-defeated'
       ? [...Object.keys(BOSS_STAT_KEYS).map((bossId) => ({ ...通用, type: 'boss', bossId })), 通用]
       : [通用]);

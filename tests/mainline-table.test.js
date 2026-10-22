@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
-import { V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS, V13_INSERT_POINTS, V14_INSERT_POINTS } from '../src/game/SaveMigrations.js';
+import { V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS, V13_INSERT_POINTS, V14_INSERT_POINTS, V15_INSERT_POINTS } from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
 } from '../src/content/objectives.js';
@@ -203,6 +203,25 @@ const V14_ORDER = [
   'radiant-altar', 'radiant-hunt', 'dungeon-rerun', 'chests-all', 'infinity',
 ];
 
+/**
+ * **v15 之后**在役的那条序列（W-E3 切片17 主线加两步"装备"）。
+ *
+ * 相对 `V14_ORDER` 多了两处（**旧序列**的下标）：
+ * - 20 —— `gear-charm`（挂上护符），在 `level` 之前
+ * - 32 —— `gear-sigil`（嵌上徽记），在 `void-rift` 之前
+ *
+ * 主线第一次要求玩家**动装备**（前面五种段落：副本 / 发现 / 对话 / 清剿 / 收集）。
+ */
+const V15_ORDER = [
+  'anchor', 'training', 'hub-catacombs', 'soldiers', 'fantasy-frag', 'fantasy-ruins', 'elf-scout', 'boss',
+  'magic-frag', 'golem', 'space-frag', 'finale', 'chests', 'forest-shrine', 'fantasy-tower', 'talk-wanderer',
+  'boss2', 'elite', 'hexer-hunt', 'magic-forest', 'gear-charm', 'level', 'epilogue', 'learn-spell',
+  'crypt', 'library', 'rift', 'space-lens', 'space-wreck', 'boss3', 'mind', 'ascension',
+  'gear-sigil', 'void-rift', 'charge-spell', 'void-hunt', 'crawler-hunt', 'void-casket', 'void-boss', 'void-tablet',
+  'true-end', 'chaos-core', 'knight-hunt', 'skills', 'abyss-maw', 'gloom-mist-crypt', 'gloom-moss', 'warden-hunt',
+  'chaos-boss', 'radiant-dawn-hall', 'radiant-altar', 'radiant-hunt', 'dungeon-rerun', 'chests-all', 'infinity',
+];
+
 const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 
 beforeEach(() => { installWindowShim(); });
@@ -313,7 +332,6 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片16 之后：主线是 53 步，三处插入（守望塔 / 引力透镜 / 幽暗守夜）', () => {
     expect(V14_ORDER).toHaveLength(53);
     expect(new Set(V14_ORDER).size, 'v14 序列里有重复 id').toBe(V14_ORDER.length);
-    expect(MAINLINE.map((r) => r.id)).toEqual(V14_ORDER);
     // 三处插入，其余逐字相同（新序列里那三步的下标是 14 / 26 / 45）
     const 新序列插点 = [14, 26, 45];
     const 旧 = [];
@@ -325,6 +343,22 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V14_ORDER[14], '第 14 位不是 fantasy-tower').toBe('fantasy-tower');
     expect(V14_ORDER[26], '第 26 位不是 space-lens').toBe('space-lens');
     expect(V14_ORDER[45], '第 45 位不是 warden-hunt').toBe('warden-hunt');
+  });
+
+  it('W-E3 切片17 之后：主线是 55 步，两处插入（挂护符 / 嵌徽记）', () => {
+    expect(V15_ORDER).toHaveLength(55);
+    expect(new Set(V15_ORDER).size, 'v15 序列里有重复 id').toBe(V15_ORDER.length);
+    expect(MAINLINE.map((r) => r.id)).toEqual(V15_ORDER);
+    // 两处插入，其余逐字相同（新序列里那两步的下标是 20 / 32）
+    const 新序列插点 = [20, 32];
+    const 旧 = [];
+    for (let i = 0; i < V15_ORDER.length; i++) {
+      if (新序列插点.includes(i)) continue;
+      旧.push(V15_ORDER[i]);
+    }
+    expect(旧, '去掉两处插入后应当逐字等于 v14 那条序列').toEqual(V14_ORDER);
+    expect(V15_ORDER[20], '第 20 位不是 gear-charm').toBe('gear-charm');
+    expect(V15_ORDER[32], '第 32 位不是 gear-sigil').toBe('gear-sigil');
   });
 
   it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);
@@ -386,6 +420,12 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V14_ORDER[14 + 1], '老档的 14 号位（talk-wanderer）没落到新表上').toBe('talk-wanderer');
     expect(V14_ORDER[25 + 2], '老档的 25 号位（space-wreck）没落到新表上').toBe('space-wreck');
     expect(V14_ORDER[43 + 3], '老档的 44 号位（chaos-boss）没落到新表上').toBe('chaos-boss');
+    // v14 → v15：两个插点（**旧序列**口径）
+    expect(V15_INSERT_POINTS).toEqual([20, 31]);
+    expect(V14_ORDER[20]).toBe('level');
+    expect(V14_ORDER[31]).toBe('void-rift');
+    expect(V15_ORDER[20 + 1], '老档的 20 号位（level）没落到新表上').toBe('level');
+    expect(V15_ORDER[31 + 2], '老档的 31 号位（void-rift）没落到新表上').toBe('void-rift');
   });
 
   it('投影只去掉章节门控行：一格不多一格不少，且不重排', () => {

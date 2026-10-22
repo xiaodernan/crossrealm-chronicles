@@ -77,7 +77,7 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
               : name === 'poi-interact' ? D.interact('chaos-core')
                 : name === 'spell-cast' ? { id: 'bolt', name: '奥术弹' }
                   : name === 'chest-opened' ? { id: 'c1' }
-                    : name === 'stats-changed' ? { souls: 100, level: 7, mind: 3 } : D.hit;
+                    : name === 'stats-changed' ? { souls: 100, level: 7, mind: 3, gear: { charm: { base: 'ash-charm' } } } : D.hit;
       dispatch(name, detail);
       expect(snapshot(qs.stats), `事件「${name}」没改到任何一格`).not.toBe(before);
     }

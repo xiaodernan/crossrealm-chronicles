@@ -947,6 +947,9 @@ export const CONTENT_TABLES = [
       targetId: { t: 'id', required: false },
       target: { t: 'int', min: 1, required: false },
       enemyType: { t: 'ref', of: 'enemyRoster', required: false },
+      // 「装备」步（W-E3 切片17）：要挂东西的**槽位**（护符 / 徽记）——
+      // 枚举而不是自由 id ⇒ 写错槽位名在开机那一刻就红（注册表必填校验走的是这一格）
+      gearSlot: { t: 'enum', of: GEAR_SLOTS, required: false },
       bossId: { t: 'ref', of: 'bosses', required: false },
       // 副本 id 现在有一张表了（切片3a）：写错的字母以前只会让那条任务没有路点，
       // 如今开机就红 —— 与 `zone: { t: 'ref', of: 'zones' }` 同一口径

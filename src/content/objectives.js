@@ -33,6 +33,7 @@
 import { ZONE_IDS, ZONE_NAMES } from './ZoneIdentity.js';
 import { TRIAL_DUNGEON_IDS } from './dungeons.js';
 import { bossById } from './bossRoster.js';
+import { GEAR_SLOTS } from './gear.js';
 
 /* ------------------------------------------------------------------ *
  * `chapter` 到底说什么（W-B3 切片3 实测之后改的口径）
@@ -65,7 +66,7 @@ import { bossById } from './bossRoster.js';
 export const OBJECTIVE_TYPES = [
   'interact', 'hits', 'kills', 'discovery', 'boss', 'chapter-gate',
   'spells', 'dungeon', 'chests', 'npc', 'level', 'mind',
-  'charged', 'skills-unlocked', 'dungeon-rerun',
+  'charged', 'skills-unlocked', 'dungeon-rerun', 'gear',
 ];
 
 export const OBJECTIVES = [
@@ -322,6 +323,17 @@ export const OBJECTIVES = [
     journal: 'obj_magic_forest_journal',
   },
   {
+    id: 'gear-charm',
+    title: 'obj_gear_charm_title',
+    desc: 'obj_gear_charm_desc',
+    type: 'gear',
+    gearSlot: 'charm',
+    chapter: 2,
+    waypoint: { x: 0, z: 55, label: 'wp_label_campfire_upgrade' },
+    reward: 12,
+    journal: 'obj_gear_charm_journal',
+  },
+  {
     id: 'level',
     title: 'obj_level_title',
     desc: 'obj_level_desc',
@@ -481,6 +493,17 @@ export const OBJECTIVES = [
     flags: { chapter3Done: true },
   },
   // ── Chapter 4: 破碎时线 ──
+  {
+    id: 'gear-sigil',
+    title: 'obj_gear_sigil_title',
+    desc: 'obj_gear_sigil_desc',
+    type: 'gear',
+    gearSlot: 'sigil',
+    chapter: 4,
+    waypoint: { x: 0, z: 55, label: 'wp_label_campfire_upgrade' },
+    reward: 16,
+    journal: 'obj_gear_sigil_journal',
+  },
   {
     id: 'void-rift',
     title: 'obj_void_rift_title',
@@ -920,6 +943,11 @@ export function emptyStats() {
     zoneKills: {},
     level: 1,
     mind: 0,
+    /**
+     * **读数**（不是账）：当前挂着东西的装备槽位（W-E3 切片17）。
+     * 由 `stats-changed` 从 `PlayerStats` 推来 ⇒ 不落盘（`STAT_READINGS` 跳过它）。
+     */
+    gearSlots: [],
     ...Object.fromEntries(Object.values(BOSS_STAT_KEYS).map((k) => [k, false])),
   };
 }
@@ -931,7 +959,7 @@ export function emptyStats() {
  * `weaponSkills.unlocked` 的大小算，而这两处都发生在任务账本复原之后。
  * 存档校验把 `quests.stats.skillsUnlocked` 判成非法（v5 起），靠的就是这一格不落盘。
  */
-export const STAT_READINGS = ['level', 'mind', 'skillsUnlocked'];
+export const STAT_READINGS = ['level', 'mind', 'skillsUnlocked', 'gearSlots'];
 
 /**
  * 账本 → 存档。形状从 `emptyStats()` 推：Set 落数组、读数不落盘，
@@ -999,6 +1027,13 @@ export const STAT_EVENTS = {
   'stats-changed': (s, d) => {
     if (Number.isFinite(d.level)) s.level = d.level;
     if (Number.isFinite(d.mind)) s.mind = d.mind;
+    // 装备过的**槽位**（W-E3 切片17）：`PlayerStats.toJSON()` 里本来就带着 `gear`
+    // （槽位 → 那件装备或 null）⇒ 这里直接问"哪些槽位上有东西"，
+    // **不需要新事件、也不改存档形状**（它是一格**读数**，落盘时跳过 ⇒ 读档后由
+    // `stats-changed` 再推一次，以生产方为准）。
+    if (d.gear && typeof d.gear === 'object') {
+      s.gearSlots = GEAR_SLOTS.filter((slot) => Boolean(d.gear[slot]));
+    }
   },
 };
 
@@ -1043,6 +1078,7 @@ export function objectiveDone(def, stats) {
     case 'level': return (stats.level ?? 0) >= def.target;
     case 'mind': return (stats.mind ?? 0) >= def.target;
     case 'dungeon-rerun': return Boolean(stats.dungeonRerun);
+    case 'gear': return (stats.gearSlots ?? []).includes(def.gearSlot);
     case 'chapter-gate': return Boolean(def.autoComplete);
     case 'boss': {
       const key = BOSS_STAT_KEYS[def.bossId];
