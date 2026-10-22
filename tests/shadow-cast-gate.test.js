@@ -2,12 +2,14 @@
  * W-C2 切片7（#164）：骨骼投射件的"位面归属 + 距离"投影门
  *
  * ## 这一片在修什么（切片6 的普查给的靶子）
- * 阴影趟普查（八站 433 call / 411,884 面，逐站读数记在 `docs/MASTER_PLAN.md` 的 W-C2 切片6 条目）
- * 读出来的唯一一笔意外是：
- * `field:restNpcs.npcs(<别位面>)` —— **玩家走不到的那些位面上的营火常驻 NPC** ——
- * 共 **22 绘 / 125,136 面 = 全部阴影面的 30%**（hub 一站 8 绘 45,504、fantasy 一站 12 绘 68,256）。
+ * 阴影趟普查读出来的唯一一笔意外是 `field:restNpcs.npcs(<别位面>)` ——
+ * **玩家走不到的那些位面上的营火常驻 NPC** —— 它们占着阴影面里很可观的一成（逐站读数、
+ * 以及切片7 修后"同一轮门开 / 门关"的反事实对账，都记在 `docs/MASTER_PLAN.md` 的 W-C2 条目里）。
  * 源码对得上：`RestNpcManager.build()` 开机就把八位面的 NPC 全建出来，
  * `RestNpcModel` 给身体 `applyShadow(body,'actor')`，此后**没有任何一关问它该不该投**。
+ *
+ * 省下的量按**投射件**计而不是按 NPC 名数计：`public/assets/models/rest/*.glb` 不在盘上时，
+ * 每名兜底到 `Soldier.glb`，一个身体会带出好几个 `prop` 类投射件 —— 所以别拿"几绘 ÷ 几名"对账。
  *
  * ## 门为什么长这样（两条腿，一条都不能少）
  * - **同位面 ⇒ 永远投**：玩家就站在自己那面的营火旁，那名的影子不许被任何数值判据关掉。
@@ -97,12 +99,23 @@ describe('① 判据：同位面永远投，跨位面看距离', () => {
     expect(shouldCastShadow({ distance: 框 - 1, sameZone: false, extent: 框 })).toBe(true);
     expect(shouldCastShadow({ distance: 框, sameZone: false, extent: 框 }), '正好压在框边那一格').toBe(true);
     expect(shouldCastShadow({ distance: 框 + 1, sameZone: false, extent: 框 })).toBe(false);
-    expect(shouldCastShadow({ distance: 206, sameZone: false, extent: 框 }),
-      '普查里 hub↔fantasy 两座营火实际相距约 206 米 ⇒ 门开着时它必被关掉').toBe(false);
+    // 距离由营火坐标表自己算，不抄一份测量：`world/RestPointManager.js` 的 buildDefaults
+    const 距 = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const hub = [0, 55];
+    const fantasy = [-200, 0];
+    const space = [200, 80];
+    const gloom = [180, 100];
+    expect(shouldCastShadow({ distance: 距(hub, fantasy), sameZone: false, extent: 框 }),
+      '营火表里 hub↔fantasy 相距约 207 米，远在框外 ⇒ 站在 hub 时它那一名必被关掉').toBe(false);
+    // 反向：营火表里**确有**两位面的营火挨得比框半宽还近（space↔gloom 只有约 28 米）。
+    // 门不是"别位面一律关"：这一对若被关掉，玩家站在 space 就看不见隔壁 gloom 那名的影子。
+    expect(距(space, gloom), 'space↔gloom 这两座营火确实落在框内').toBeLessThan(框);
+    expect(shouldCastShadow({ distance: 距(space, gloom), sameZone: false, extent: 框 }),
+      '跨位面但框内 ⇒ 照投（这一格正是探针在 space 站看见的：被关的名单里没有 gloom）').toBe(true);
   });
 
   it('量不到就抛，不许当成"关掉"', () => {
-    // `NaN <= 140` 永远是 false：静默走下去就是"影子莫名其妙没了，而没有任何一句话说过量不到"
+    // `NaN <= 框半宽` 永远是 false：静默走下去就是"影子莫名其妙没了，而没有任何一句话说过量不到"
     for (const 坏 of [NaN, Infinity, -Infinity, undefined, null, '120']) {
       expect(() => shouldCastShadow({ distance: 坏, sameZone: false, extent: 框 }),
         `距离收到 ${String(坏)} 必须抛`).toThrow(/不是有限数/);
@@ -262,7 +275,7 @@ describe('④ 行为：营火 NPC 一族真的按位面与距离翻转', () => {
     const { mgr } = 造(ZONE_IDS.HUB);
     const 读数 = 走一步(mgr, new THREE.Vector3(0, 0, 0));
     expect(读数.hub, '本站营火的 NPC 不许失去影子').toBeGreaterThan(0);
-    expect(读数.void, '别位面的那一名就是普查里那 22 绘 / 125,136 面').toBe(0);
+    expect(读数.void, '别位面那一名（void 营火在原点以北 200 米开外，远在框外）的影子由这一条关掉').toBe(0);
   });
 
   it('走近 ⇒ 恢复；走远 ⇒ 关掉（同一判据的两种相位各测一遍）', () => {
