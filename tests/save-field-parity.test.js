@@ -24,7 +24,7 @@ const readSrc = (rel) => readFileSync(join(ROOT, 'src', rel), 'utf8').replace(/\
 /** 判据口径与门禁一致：只数代码行（史料注释里提到某个键名不算读写） */
 const codeLines = (text) => text.split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l));
 
-const 存档键 = 'crossrealm_save_v13';
+const 存档键 = 'crossrealm_save_v14';
 const 存储 = new Map();
 
 beforeAll(() => {

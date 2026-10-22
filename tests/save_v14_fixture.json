@@ -1,0 +1,66 @@
+{
+  "version": 14,
+  "time": 1700000000000,
+  "player": {
+    "x": 0,
+    "y": 2,
+    "z": 60,
+    "yaw": 3.14159,
+    "pitch": 0.38,
+    "hp": 100,
+    "stamina": 100
+  },
+  "stats": {
+    "level": 1,
+    "souls": 0,
+    "vigor": 1,
+    "endurance": 1,
+    "strength": 1,
+    "arcane": 1,
+    "mind": 0,
+    "totalKills": 0,
+    "chests": [],
+    "gear": {
+      "charm": null,
+      "sigil": null
+    },
+    "bag": []
+  },
+  "spells": {
+    "mana": 100
+  },
+  "dungeons": {
+    "cleared": []
+  },
+  "weapon": "sword",
+  "weaponSkills": {
+    "unlocked": [],
+    "skillPoints": 0
+  },
+  "settings": {},
+  "fastTravel": false,
+  "quests": {
+    "index": 0,
+    "completed": false,
+    "chapter": 1,
+    "stats": {
+      "hits": 0,
+      "kills": {},
+      "discoveries": [],
+      "bossDefeated": false,
+      "boss2Defeated": false,
+      "boss3Defeated": false,
+      "voidBossDefeated": false,
+      "chaosBossDefeated": false,
+      "dungeonRerun": false,
+      "spellCasts": 0,
+      "chargedCasts": 0,
+      "dungeonsCleared": [],
+      "npcTalked": [],
+      "chestsOpened": 0
+    }
+  },
+  "restPointEnhancer": {
+    "discovered": []
+  }
+}

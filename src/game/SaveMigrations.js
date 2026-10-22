@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v14', version: 14 },
   { key: 'crossrealm_save_v13', version: 13 },
   { key: 'crossrealm_save_v12', version: 12 },
   { key: 'crossrealm_save_v11', version: 11 },
@@ -251,6 +252,26 @@ function migrateV12toV13(d) {
   return d;
 }
 
+/**
+ * v13 → v14：**主线再加三步**（W-E3 切片16）。
+ *
+ * 这一跳插了三步 —— 守望塔（地标）/ 引力透镜（地标）/ 幽暗守夜（清剿）：
+ * **每一位面至多一处新地标**（上一片定的节奏：同一座位面连着两个"去某处看看"会变成跑腿）✓
+ *
+ * 插入点（**旧序列**的下标）：
+ * - 14 —— 在 `talk-wanderer` 之前（`fantasy-tower`）
+ * - 25 —— 在 `space-wreck` 之前（`space-lens`）
+ * - 43 —— 在 `chaos-boss` 之前（`warden-hunt`）
+ */
+export const V14_INSERT_POINTS = [14, 25, 43];
+
+function migrateV13toV14(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V14_INSERT_POINTS);
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -262,6 +283,7 @@ export const MIGRATIONS = {
   10: migrateV10toV11,
   11: migrateV11toV12,
   12: migrateV12toV13,
+  13: migrateV13toV14,
 };
 
 /**
