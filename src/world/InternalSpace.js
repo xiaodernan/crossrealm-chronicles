@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SOLID } from '../engine/Collision.js';
 
 /**
  * 内部空间 —— 区域内的房间/建筑/洞穴/楼层（W-B9 切片2）。
@@ -99,7 +100,7 @@ export class InternalSpace {
     return collider;
   }
 
-  addCylinderCollider(lx, lz, r, top, { base = 0, kind = 'solid' } = {}) {
+  addCylinderCollider(lx, lz, r, top, { base = 0, kind = SOLID } = {}) {
     return this.addCollider({
       shape: 'cyl',
       lx,
@@ -114,7 +115,7 @@ export class InternalSpace {
     });
   }
 
-  addBoxCollider(lx, lz, hx, hz, top, { base = 0, rot = 0, kind = 'solid' } = {}) {
+  addBoxCollider(lx, lz, hx, hz, top, { base = 0, rot = 0, kind = SOLID } = {}) {
     return this.addCollider({
       shape: 'box',
       lx,

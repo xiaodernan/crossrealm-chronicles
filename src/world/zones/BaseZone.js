@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { applyShadow } from '../../engine/shadowPolicy.js';
 import { makeUvFacetGeometry } from '../../engine/uvGeometry.js';
+import { SOLID } from '../../engine/Collision.js';
 import { makeRegionSurfaceMaterial, applyRegionSurface } from '../regionSurfaces.js';
 import { markNoBatch } from '../zoneBatching.js';
 import { paletteOf } from '../../content/materialPalette.js';
@@ -66,11 +67,11 @@ export class BaseZone {
     return collider;
   }
 
-  addCylinderCollider(x, z, r, top, { base = 0, kind = 'solid' } = {}) {
+  addCylinderCollider(x, z, r, top, { base = 0, kind = SOLID } = {}) {
     return this.addCollider({ shape: 'cyl', x, z, r, base, top, kind });
   }
 
-  addBoxCollider(x, z, hx, hz, top, { base = 0, rot = 0, kind = 'solid' } = {}) {
+  addBoxCollider(x, z, hx, hz, top, { base = 0, rot = 0, kind = SOLID } = {}) {
     return this.addCollider({ shape: 'box', x, z, hx, hz, base, top, rot, kind });
   }
 
