@@ -30,6 +30,8 @@ const D = {
   interact: (id) => ({ id }),
   /** 清空一座副本（W-E3 切片13 起主线里有了副本步 ⇒ 用例要能走完那一步） */
   dungeon: (id) => ({ id, name: '副本' }),
+  /** 与一位 NPC 说过话（W-E3 切片15 起主线里有了对话步） */
+  npcTalk: (id) => ({ id, line: '', chapter: 1 }),
 };
 
 let win;
@@ -81,7 +83,7 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     }
   });
 
-  it('Chapter 1 七步走完就接上第二档（在役表是线性的，章节号只跟着四格门控翻）', () => {
+  it('Chapter 1 八步走完就接上第二档（在役表是线性的，章节号只跟着四格门控翻）', () => {
     const titles = [qs.current.title];
     const step = (name, detail) => {
       dispatch(name, detail);
@@ -95,12 +97,14 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     step('discovery', D.discover('fantasy-ring'));
     // W-E3 切片14：第 1 章多了一步「废墟里的回声」（发现步）⇒ 走完它才轮到影之战士
     step('discovery', D.discover('fantasy-ruins'));
+    // W-E3 切片15：第 1 章多了一步「暗夜斥候」（对话步）⇒ 走完它才轮到影之战士
+    step('npc-talk', D.npcTalk('elf-scout'));
     step('enemy-defeated', D.bossKill('shadow-warden'));
-    // 前七格各推进一步，第八次读数落在下一档的第一步上
-    expect(titles).toEqual(MAINLINE.slice(0, 8).map((q) => q.title));
-    expect(qs.questIndex).toBe(7);
+    // 前八格各推进一步，第九次读数落在下一档的第一步上
+    expect(titles).toEqual(MAINLINE.slice(0, 9).map((q) => q.title));
+    expect(qs.questIndex).toBe(8);
     expect(qs.chapter).toBe(1);
-    expect(toasts.filter((t) => t.startsWith('任务完成：'))).toHaveLength(7);
+    expect(toasts.filter((t) => t.startsWith('任务完成：'))).toHaveLength(8);
   });
 
   it('账本里没有的那一下交互不改任务也不抛（载荷少一个 id 是常态）', () => {

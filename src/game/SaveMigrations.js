@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v13', version: 13 },
   { key: 'crossrealm_save_v12', version: 12 },
   { key: 'crossrealm_save_v11', version: 11 },
   { key: 'crossrealm_save_v10', version: 10 },
@@ -228,6 +229,28 @@ function migrateV11toV12(d) {
   return d;
 }
 
+/**
+ * v12 → v13：**主线加三步"别的种类"的段落**（W-E3 切片15）。
+ *
+ * 这一跳插了三步 —— 切片14 的尾巴写着"下一片优先加**别的种类**（对话 / 抉择）"：
+ * - `elf-scout`（**对话** —— 与暗夜斥候交谈；三位 NPC 里他还没被主线用过）
+ * - `radiant-hunt`（**清剿** —— 辉煌圣域的原生爬兽；那座位面还没有清剿步）
+ * - `chests-all`（**收集** —— 八个箱子全找齐；散在七座区里）
+ *
+ * 插入点（**旧序列**的下标）：
+ * - 6 —— 在 `boss` 之前（`elf-scout`）
+ * - 45 —— 在 `dungeon-rerun` 之前（`radiant-hunt`）
+ * - 46 —— 在 `infinity` 之前（`chests-all`）
+ */
+export const V13_INSERT_POINTS = [6, 45, 46];
+
+function migrateV12toV13(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V13_INSERT_POINTS);
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -238,6 +261,7 @@ export const MIGRATIONS = {
   9: migrateV9toV10,
   10: migrateV10toV11,
   11: migrateV11toV12,
+  12: migrateV12toV13,
 };
 
 /**

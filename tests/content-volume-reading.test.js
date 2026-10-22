@@ -40,7 +40,7 @@ describe('① 读数里的数 = 内容表的实数', () => {
     const 行 = c3行();
     const 分区支线 = SIDE_QUESTS_ALL.filter((q) => ZONE_ORDER.includes(q.zone)).length;
     const 实数 = {
-      '主线 47 步': MAINLINE.length === 47,
+      '主线 50 步': MAINLINE.length === 50,
       '分区专属支线 38': 分区支线 === 38,
       '副本 9': DUNGEON_DEFS.length === 9,
       '回声 49': ECHOES.length === 49,
@@ -80,7 +80,7 @@ describe('② 读数说的是**哪一段**时长', () => {
     expect(行, 'C3 读数没有点名缺口在主线').toContain('缺口在**主线**');
   });
 
-  it('主线那 47 步的下标是存档语义 —— 读数里说清了"要加长主线得先有存档迁移"', () => {
+  it('主线那 50 步的下标是存档语义 —— 读数里说清了"要加长主线得先有存档迁移"', () => {
     const 行 = c3行();
     // 点名的是**存档里的那个字段**（`quests.index`）—— 迁移改的就是它
     expect(行, 'C3 读数没提主线插步的存档语义').toContain('quests.index');

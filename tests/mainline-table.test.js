@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
-import { V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS } from '../src/game/SaveMigrations.js';
+import { V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS, V13_INSERT_POINTS } from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
 } from '../src/content/objectives.js';
@@ -161,6 +161,27 @@ const V12_ORDER = [
   'gloom-mist-crypt', 'gloom-moss', 'chaos-boss', 'radiant-dawn-hall', 'radiant-altar', 'dungeon-rerun', 'infinity',
 ];
 
+/**
+ * **v13 之后**在役的那条序列（W-E3 切片15 主线加三步"别的种类"的段落）。
+ *
+ * 相对 `V12_ORDER` 多了三处（**旧序列**的下标）：
+ * - 6 —— `elf-scout`（**对话** —— 与暗夜斥候交谈），在 `boss` 之前
+ * - 45 —— `radiant-hunt`（**清剿** —— 辉煌圣域的原生爬兽），在 `dungeon-rerun` 之前
+ * - 46 —— `chests-all`（**收集** —— 八个箱子全找齐），在 `infinity` 之前
+ *
+ * 切片14 的尾巴写着"下一片优先加**别的种类**（对话 / 抉择）" ⇒ 这一片就是那句话的兑现：
+ * 对话（NPC）/ 清剿（独占原生敌人）/ 收集（散在七座区的箱子）—— 三种**不同**的段落。
+ */
+const V13_ORDER = [
+  'anchor', 'training', 'hub-catacombs', 'soldiers', 'fantasy-frag', 'fantasy-ruins', 'elf-scout', 'boss',
+  'magic-frag', 'golem', 'space-frag', 'finale', 'chests', 'forest-shrine', 'talk-wanderer', 'boss2',
+  'elite', 'hexer-hunt', 'magic-forest', 'level', 'epilogue', 'learn-spell', 'crypt', 'library',
+  'rift', 'space-wreck', 'boss3', 'mind', 'ascension', 'void-rift', 'charge-spell', 'void-hunt',
+  'crawler-hunt', 'void-casket', 'void-boss', 'void-tablet', 'true-end', 'chaos-core', 'knight-hunt', 'skills',
+  'abyss-maw', 'gloom-mist-crypt', 'gloom-moss', 'chaos-boss', 'radiant-dawn-hall', 'radiant-altar', 'radiant-hunt', 'dungeon-rerun',
+  'chests-all', 'infinity',
+];
+
 const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 
 beforeEach(() => { installWindowShim(); });
@@ -237,7 +258,6 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片14 之后：主线是 47 步，五处插入（每一位面一处地标）', () => {
     expect(V12_ORDER).toHaveLength(47);
     expect(new Set(V12_ORDER).size, 'v12 序列里有重复 id').toBe(V12_ORDER.length);
-    expect(MAINLINE.map((r) => r.id)).toEqual(V12_ORDER);
     // 五处插入，其余逐字相同（新序列里那五步的下标是 5 / 17 / 24 / 41 / 44）
     const 新序列插点 = [5, 17, 24, 41, 44];
     const 旧 = [];
@@ -251,6 +271,23 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V12_ORDER[24], '第 24 位不是 space-wreck').toBe('space-wreck');
     expect(V12_ORDER[41], '第 41 位不是 gloom-moss').toBe('gloom-moss');
     expect(V12_ORDER[44], '第 44 位不是 radiant-altar').toBe('radiant-altar');
+  });
+
+  it('W-E3 切片15 之后：主线是 50 步，三处插入（对话 / 圣域清剿 / 宝箱收尾）', () => {
+    expect(V13_ORDER).toHaveLength(50);
+    expect(new Set(V13_ORDER).size, 'v13 序列里有重复 id').toBe(V13_ORDER.length);
+    expect(MAINLINE.map((r) => r.id)).toEqual(V13_ORDER);
+    // 三处插入，其余逐字相同（新序列里那三步的下标是 6 / 46 / 48）
+    const 新序列插点 = [6, 46, 48];
+    const 旧 = [];
+    for (let i = 0; i < V13_ORDER.length; i++) {
+      if (新序列插点.includes(i)) continue;
+      旧.push(V13_ORDER[i]);
+    }
+    expect(旧, '去掉三处插入后应当逐字等于 v12 那条序列').toEqual(V12_ORDER);
+    expect(V13_ORDER[6], '第 6 位不是 elf-scout').toBe('elf-scout');
+    expect(V13_ORDER[46], '第 46 位不是 radiant-hunt').toBe('radiant-hunt');
+    expect(V13_ORDER[48], '第 48 位不是 chests-all').toBe('chests-all');
   });
 
   it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);
@@ -296,6 +333,14 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V12_ORDER[22 + 3], '老档的 22 号位（boss3）没落到新表的 boss3 上').toBe('boss3');
     expect(V12_ORDER[38 + 4], '老档的 38 号位（chaos-boss）没落到新表的 chaos-boss 上').toBe('chaos-boss');
     expect(V12_ORDER[40 + 5], '老档的 40 号位（dungeon-rerun）没落到新表的 dungeon-rerun 上').toBe('dungeon-rerun');
+    // v12 → v13：三个插点（**旧序列**口径）
+    expect(V13_INSERT_POINTS).toEqual([6, 45, 46]);
+    expect(V12_ORDER[6]).toBe('boss');
+    expect(V12_ORDER[45]).toBe('dungeon-rerun');
+    expect(V12_ORDER[46]).toBe('infinity');
+    expect(V13_ORDER[6 + 1], '老档的 6 号位（boss）没落到新表的 boss 上').toBe('boss');
+    expect(V13_ORDER[45 + 2], '老档的 45 号位（dungeon-rerun）没落到新表的 dungeon-rerun 上').toBe('dungeon-rerun');
+    expect(V13_ORDER[46 + 3], '老档的 46 号位（infinity）没落到新表的 infinity 上').toBe('infinity');
   });
 
   it('投影只去掉章节门控行：一格不多一格不少，且不重排', () => {
