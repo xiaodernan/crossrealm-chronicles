@@ -1336,6 +1336,8 @@ export const STRINGS_ZH = Object.freeze({
   obj_true_end_title: '真·位面行者',
   obj_true_end_desc: '集齐四枚碎片后触摸世界之锚。',
   obj_true_end_journal: '四枚碎片齐聚，真·位面行者诞生。',
+  obj_true_end_desc_sealed: '你把虚空封回石里。锚点沉了一寸，时线重新绷紧 —— 世界照旧，只是没人再听见那声叹息。',
+  obj_true_end_desc_studied: '你把虚空读完了。禁忌留在掌心里发烫，锚点却不再回应 —— 门开了，只是开向的东西已经认得你。',
   obj_ch4_complete_title: 'Chapter 4 完成',
   obj_ch4_complete_desc: '真·位面行者觉醒，混沌边境开启。',
   obj_ch4_complete_journal: 'Chapter 4：破碎时线 已完成 — 混沌边境开启。',

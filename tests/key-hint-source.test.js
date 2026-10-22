@@ -213,7 +213,9 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     // B119 / W-D2 切片14：台词池两套口径已经并回一套 —— 池子里**只有键**，
     // 展开走 `npcLine()` 一处（运行时与门禁调的是同一个函数）：先 `t()` 换语言，再 `keyText()` 换键名。
     'world/NPCManager.js': ['npcLine(pool[idx]', 'keyText(t(key))'],
-    'game/QuestSystem.js': ['keyText(t(q.desc))'],
+    // W-E3 切片22：主线的文案键要问 `objectiveDesc`（随抉择而变的那一格）
+    // ⇒ 键位提示的展开仍在原地（`keyText` 包着 `t()`），只是键从哪儿来换了出处
+    'game/QuestSystem.js': ['keyText(t(objectiveDesc(q, this.stats)))'],
     'ui/LoreCodexJournalTab.js': ['keyText(t(e.text))', 'refreshKeyText(panelEl)'],
     'ui/PopCultureJournalTab.js': ['keyText(t(e.desc))', 'refreshKeyText(panelEl)'],
     'ui/SideQuestJournalTab.js': ['keyText(t(q.desc))', 'refreshKeyText(panelEl)'],
@@ -248,7 +250,7 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
    * 所以这类"一条链上的并列分支"要点名次数。
    */
   const COUNTED = {
-    'game/QuestSystem.js': [['keyText(t(q.desc))', 2]],
+    'game/QuestSystem.js': [['keyText(t(objectiveDesc(q, this.stats)))', 2]],
   };
   it('并列分支按次数点名：少一处问表也是红', () => {
     const wrong = [];

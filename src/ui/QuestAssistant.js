@@ -1,7 +1,7 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText } from '../content/keyHints.js';
 import { applyTranslations, t } from '../engine/i18n.js';
-import { BOSS_STAT_KEYS } from '../content/objectives.js';
+import { BOSS_STAT_KEYS, objectiveDesc } from '../content/objectives.js';
 import { bossById } from '../content/bossRoster.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
@@ -373,7 +373,7 @@ export class QuestAssistant {
       // 现在与下面的 discovery 分支同构 —— 只认任务自己的 `targetId`。
       window.dispatchEvent(new CustomEvent('poi-interact', { detail: { id: q.targetId } }));
     } else if (q.type === 'discovery' && q.targetId) {
-      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: q.targetId, title: t(q.title), text: t(q.desc) } }));
+      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: q.targetId, title: t(q.title), text: t(objectiveDesc(q, this.game.quests.stats)) } }));
     } else if (q.type === 'hits') {
       window.dispatchEvent(new CustomEvent('combat-hit'));
     } else if (BOSS_STAT_KEYS[q.bossId]) {

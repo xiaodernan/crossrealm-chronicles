@@ -3,7 +3,7 @@ import { dungeonDefOf, TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
-  objectiveChosen, objectiveReward,
+  objectiveChosen, objectiveReward, objectiveDesc,
 } from '../content/objectives.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';
@@ -369,11 +369,11 @@ export class QuestSystem {
         if (this.stats.discoveries.has(q.targetId) && !interactGateCondition(q)) {
           return t('quest_progress_touch_done');
         }
-        return keyText(t(q.desc));
+        return keyText(t(objectiveDesc(q, this.stats)));
       default: {
         const bossKey = BOSS_STAT_KEYS[q.bossId];
         if (bossKey) return this.stats[bossKey] ? t('quest_progress_dungeon', { dungeon_done: '完成' }) : BOSS_DISPLAY[q.bossId].progress;
-        return keyText(t(q.desc));
+        return keyText(t(objectiveDesc(q, this.stats)));
       }
     }
   }

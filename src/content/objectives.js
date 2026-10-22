@@ -607,6 +607,12 @@ export const OBJECTIVES = [
     id: 'true-end',
     title: 'obj_true_end_title',
     desc: 'obj_true_end_desc',
+    // W-E3 切片22：真结局的**文案**随玩家在「封印 / 研习」里选的那条走
+    // ⇒ 抉择不再只是一句被记下的话（旗标名在这里是**引用**，注册表核它确有 choices 设过）
+    descByChoice: {
+      choice_void_sealed: 'obj_true_end_desc_sealed',
+      choice_void_studied: 'obj_true_end_desc_studied',
+    },
     type: 'interact',
     targetId: 'hub-anchor',
     chapter: 4,
@@ -1189,6 +1195,28 @@ export function objectiveReward(row, stats) {
   const 选中的 = objectiveChosen(row, stats);
   if (选中的 && Number.isInteger(选中的.reward)) return 选中的.reward;
   return row?.reward ?? 0;
+}
+
+/**
+ * 这一步的**文案键**（W-E3 切片22）：若有「随抉择而变」的变体，
+ * 按玩家**已经记下**的那个旗标取那一条；没有变体、或玩家还没做过相关抉择 ⇒ 回原样。
+ *
+ * 为什么要这样：抉择那一族（W-E3 切片18）只把"玩家选了哪条"**记下来**，
+ * 后面的内容完全不看它 ⇒ 抉择成了一句没兑现的话。
+ * 而"哪一条被选中"这件事**只能有一处算式** —— 显示侧（进度行 / 日志 / 自动通关）
+ * 各自去读 `row.desc` 就成了四份各说各话的真相（改一处另三处不动时不报错，
+ * 只是玩家看到的文案与实际选的那条对不上）。
+ *
+ * 旗标名在别处（抉择那一步的 `choices[].flag`）出现时是**引用**而不是第二份真相：
+ * 注册表的不变式核"这个旗标确实有某一步的 choices 设过它"（与 `requires` 同一套口径）。
+ */
+export function objectiveDesc(row, stats) {
+  const 变体 = row?.descByChoice;
+  if (!变体) return row?.desc;
+  for (const [旗标, 键] of Object.entries(变体)) {
+    if (stats?.decisions?.has(旗标)) return 键;
+  }
+  return row?.desc;
 }
 
 export function objectiveDone(def, stats) {

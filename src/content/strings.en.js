@@ -1336,6 +1336,8 @@ export const STRINGS_EN = Object.freeze({
   obj_true_end_title: "True Plane Walker",
   obj_true_end_desc: "Touch the World Anchor after gathering all four fragments.",
   obj_true_end_journal: "Four fragments gathered; the true Plane Walker is born.",
+  obj_true_end_desc_sealed: 'You sealed the void back into the stone. The anchor sank an inch and the timeline tightened again — the world goes on, and nobody hears that sigh any more.',
+  obj_true_end_desc_studied: 'You read the void to the end. The forbidden thing burns in your palm and the anchor no longer answers — the gate is open, and what waits behind it knows your face.',
   obj_ch4_complete_title: "Chapter 4 Complete",
   obj_ch4_complete_desc: "The true Plane Walker awakens; the Chaos Border opens.",
   obj_ch4_complete_journal: "Chapter 4: Broken Timeline complete — the Chaos Border opens.",

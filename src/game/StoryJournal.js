@@ -3,6 +3,7 @@ import { isDungeonBossId, bossById } from '../content/bossRoster.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';
+import { objectiveDesc } from '../content/objectives.js';
 
 const GAME_STORYJOURNAL = 'game/StoryJournal';
 const journalOn = (name, handler) => on(name, handler, GAME_STORYJOURNAL);
@@ -135,7 +136,8 @@ export class StoryJournal {
         id: `quest-active-${idx}`,
         category: 'quest',
         title: t(q.title),
-        text: t(q.desc ?? q.hint ?? 'quest_journal_default_text'),
+        // W-E3 切片22：日志的正文也问那处算式（抉择那一步之后的真结局会按选中的那条走）
+        text: t(objectiveDesc(q, this.game?.quests?.stats) ?? q.hint ?? 'quest_journal_default_text'),
         chapter: e.detail.chapter,
       });
     });

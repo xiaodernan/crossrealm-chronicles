@@ -956,6 +956,9 @@ export const CONTENT_TABLES = [
       // 「抉择」步（W-E3 切片18）：两条路供玩家选一条，每条带一个 flag
       // 选哪条 ⇒ 记那个 flag；判据只查"是否记了这一组里的某个 flag"
       choices: { t: 'rows', of: { id: { t: 'id' }, label: { t: 'string' }, flag: { t: 'string' } }, required: false },
+      // 「抉择」步之后**随抉择而变**的那一格（W-E3 切片22）：旗标 → 文案键
+      // 旗标名在这里是**引用**（真源是抉择那一步的 `choices[].flag`）⇒ 不变式核它确有设过
+      descByChoice: { t: 'record', required: false },
       bossId: { t: 'ref', of: 'bosses', required: false },
       // 副本 id 现在有一张表了（切片3a）：写错的字母以前只会让那条任务没有路点，
       // 如今开机就红 —— 与 `zone: { t: 'ref', of: 'zones' }` 同一口径
@@ -1560,6 +1563,19 @@ export function checkObjectiveTable(table) {
   const rows = Array.isArray(table) ? table : [];
   /** flag → 第一次设它的那一行（值一起记着：`flags: { x: false }` 也是一种设置） */
   const producers = new Map();
+  /**
+   * 抉择步设过的旗标（`choices[].flag`）—— `descByChoice` 引用的就是它们。
+   *
+   * 为什么单独一张：行的 `flags` 是"这一步完成就点亮哪几格"，
+   * 而 `choices[].flag` 是"玩家选了哪条" ⇒ 两者是**不同的生产者**
+   * （旗标名相同也只是巧合）⇒ 不能混在一张表里。
+   */
+  const 抉择旗标 = new Set();
+  for (const row of rows) {
+    for (const c of row?.choices ?? []) {
+      if (c?.flag) 抉择旗标.add(c.flag);
+    }
+  }
   rows.forEach((row, i) => {
     const path = `objectives[${i}]("${row?.id ?? '(无 id)'}")`;
     const prev = rows[i - 1];
@@ -1612,6 +1628,13 @@ export function checkObjectiveTable(table) {
       } else if (p.value !== want) {
         out.push(`${path}: requires.${flag} 要 ${JSON.stringify(want)}，`
           + `但 "${p.id}" 那行设的是 ${JSON.stringify(p.value)}`);
+      }
+    }
+    // W-E3 切片22：`descByChoice` 引用的旗标必须真的有抉择步设过
+    // ⇒ 否则这一格永远换不了文案（玩家选了也是原来那一句，且没有任何报错）。
+    for (const 旗标 of Object.keys(row?.descByChoice ?? {})) {
+      if (!抉择旗标.has(旗标)) {
+        out.push(`${path}: descByChoice.${旗标} 没有任何一步的 choices 设过它 —— 这一格永远不会换文案`);
       }
     }
     for (const [flag, value] of Object.entries(row?.flags ?? {})) {
