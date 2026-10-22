@@ -12,6 +12,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v16', version: 16 },
   { key: 'crossrealm_save_v15', version: 15 },
   { key: 'crossrealm_save_v14', version: 14 },
   { key: 'crossrealm_save_v13', version: 13 },
@@ -296,6 +297,34 @@ function migrateV14toV15(d) {
   return d;
 }
 
+/**
+ * v15 → v16：**主线加一步"抉择"**（W-E3 切片18）。
+ *
+ * 这一跳插了一步 —— `choice-void`（虚空的归宿）：主线第一次**让玩家选一条路**。
+ * 前面六种段落（副本 / 发现 / 对话 / 清剿 / 收集 / 装备）都是"去做某件事"，
+ * 这一种是"在两条路里挑一条" ⇒ 它要**记下挑了哪一条**。
+ *
+ * **这一跳改存档形状**：抉择是**已经发生的事**（不是"现在的状态"）⇒ 必须落盘。
+ * 新增的那一格是 `quests.stats.decisions`（一个 flag 名的数组）⇒
+ * 老档缺这一格 ⇒ **这一跳必须补上**（不是"缺失就当默认值凑合读"）。
+ * 补的是**空数组**：老档的玩家没做过任何抉择（那一步在老版本里根本不存在）。
+ *
+ * 插入点（**旧序列**的下标）：
+ * - 40 —— 在 `true-end` 之前（`choice-void`）
+ */
+export const V16_INSERT_POINTS = [40];
+
+function migrateV15toV16(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V16_INSERT_POINTS);
+  // 抉择那一格：老档没有 ⇒ 补一个空数组（那一步在老版本里不存在 ⇒ 没人做过抉择）
+  if (!Array.isArray(quests.stats?.decisions)) {
+    quests.stats = { ...(quests.stats ?? {}), decisions: [] };
+  }
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -309,6 +338,7 @@ export const MIGRATIONS = {
   12: migrateV12toV13,
   13: migrateV13toV14,
   14: migrateV14toV15,
+  15: migrateV15toV16,
 };
 
 /**

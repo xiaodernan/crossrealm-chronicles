@@ -35,6 +35,8 @@ export class QuestAssistant {
       </div>
       <p id="qa-status" class="qa-status" data-ktext="按 {questTracker} 打开助手"></p>
       <p id="qa-hint" class="qa-hint"></p>
+      <!-- 抉择按钮（W-E3 切片18）：当前任务是 choice 类型时显示 -->
+      <div id="qa-choices" class="qa-choices hidden"></div>
       <div class="qa-btns">
         <button type="button" id="qa-autoplay" class="qa-primary" data-i18n="qa_btn_autoplay">自动通关（你的角色）</button>
         <button type="button" id="qa-sync" data-i18n="qa_btn_sync">同步任务进度</button>
@@ -92,6 +94,26 @@ export class QuestAssistant {
     if (this._hintEl) {
       this._hintEl.textContent = this.game.quests.getAssistantHint();
     }
+    // 抉择按钮（W-E3 切片18）：当前任务是 choice 类型时显示两个选项
+    const choicesEl = this._panel?.querySelector('#qa-choices');
+    const btnsEl = this._panel?.querySelector('.qa-btns');
+    if (q && q.type === 'choice' && choicesEl) {
+      choicesEl.innerHTML = '';
+      choicesEl.classList.remove('hidden');
+      if (btnsEl) btnsEl.classList.add('hidden');
+      for (const c of q.choices) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'qa-choice-btn';
+        btn.textContent = t(c.label);
+        btn.addEventListener('click', () => this.makeChoice(c.flag));
+        choicesEl.appendChild(btn);
+      }
+    } else if (choicesEl) {
+      choicesEl.classList.add('hidden');
+      choicesEl.innerHTML = '';
+      if (btnsEl) btnsEl.classList.remove('hidden');
+    }
     const pilotBtn = this._panel?.querySelector('#qa-pilot');
     // 带路按钮**不带** `data-i18n`：它的文字随开关变，由这里现填。
     if (pilotBtn) pilotBtn.textContent = this.autoPilot ? t('qa_btn_pilot_stop') : t('qa_btn_pilot');
@@ -100,6 +122,13 @@ export class QuestAssistant {
   syncQuests() {
     const n = this.game.quests.syncProgress();
     this.game.dialog.toast(n > 0 ? t('qa_toast_synced', { n }) : t('qa_toast_already_synced'));
+    this.refresh();
+  }
+
+  /** 玩家做出抉择（W-E3 切片18）：记录 flag 并让任务系统判进度 */
+  makeChoice(flag) {
+    if (!this.game?.quests) return;
+    this.game.quests.recordChoice(flag);
     this.refresh();
   }
 

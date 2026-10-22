@@ -52,6 +52,8 @@ const SATISFIED = () => {
   for (const row of OBJECTIVES) if (row.type === 'npc') s.npcTalked.add(row.targetId);
   // 「装备」步：那一格是**读数**（当前挂着东西的槽位）⇒ 这里直接把它填上
   for (const row of OBJECTIVES) if (row.type === 'gear') s.gearSlots.push(row.gearSlot);
+  // 「抉择」步：那一格是**读数**（当前记下的 flag）⇒ 这里直接把它填上
+  for (const row of OBJECTIVES) if (row.type === 'choice') row.choices?.forEach(c => s.decisions.add(c.flag));
   s.chestsOpened = 9999;
   s.spellCasts = 9999;
   s.chargedCasts = 9999;
@@ -91,6 +93,8 @@ describe('账本形状：emptyStats 与判据/记账双向对齐', () => {
       'discovery': [{ id: 'hub-anchor' }],
       'poi-interact': [{ id: 'fantasy-ring' }],
       'stats-changed': [{ level: 7, mind: 3, gear: { charm: { base: 'ash-charm' } } }],
+      // 「抉择」那一格的生产者（W-E3 切片18）：少了它，`decisions` 就没人写
+      'choice-made': [{ flag: 'choice_void_sealed' }],
     };
     for (const [name, list] of Object.entries(details)) {
       for (const detail of list) applyStatEvent(s, name, detail);

@@ -122,6 +122,10 @@ describe('③ 交叉证据：推导没有漏', () => {
       // 装备那一格是**读数**（`stats-changed` 从 `PlayerStats.toJSON()` 里的 `gear` 推来）⇒
       // 探针载荷也得带上它，否则「实跑一遍记账函数」那一半看不到这一格被写
       gear: { charm: { base: 'ash-charm' } },
+      // 抉择的 flag（W-E3 切片18）：`choice-made` 那一格靠它写
+      flag: 'choice_void_sealed',
+      // 抉择旗标（W-E3 切片18）：由 QuestSystem 记录，探针也带上
+      flags: ['choice_void_sealed'],
     };
     const 细节们 = (名) => (名 === 'enemy-defeated'
       ? [...Object.keys(BOSS_STAT_KEYS).map((bossId) => ({ ...通用, type: 'boss', bossId })), 通用]

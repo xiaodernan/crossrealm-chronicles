@@ -55,6 +55,10 @@ export const GAME_EVENTS = Object.freeze({
     desc: '与 NPC 交谈，任务系统据此推进 talk 目标。任务助手面板只补 id（它是"直接达成"那条路径），线出的对话文本走 NPCManager',
     payload: '{ id, line, chapter }',
   },
+  'choice-made': {
+    desc: '玩家做了一次抉择（W-E3 切片18）。任务系统据此把那个 flag 记进账本（quests.stats.decisions），并按当前这一步的判据推进主线',
+    payload: '{ flag }',
+  },
   'chest-opened': {
     desc: '宝箱开启，只带箱子 id；掉落由 CollectibleManager 自己给',
     payload: '{ id }',

@@ -66,7 +66,7 @@ import { GEAR_SLOTS } from './gear.js';
 export const OBJECTIVE_TYPES = [
   'interact', 'hits', 'kills', 'discovery', 'boss', 'chapter-gate',
   'spells', 'dungeon', 'chests', 'npc', 'level', 'mind',
-  'charged', 'skills-unlocked', 'dungeon-rerun', 'gear',
+  'charged', 'skills-unlocked', 'dungeon-rerun', 'gear', 'choice',
 ];
 
 export const OBJECTIVES = [
@@ -589,6 +589,21 @@ export const OBJECTIVES = [
     flags: { hasVoidTablet: true },
   },
   {
+    id: 'choice-void',
+    title: 'obj_choice_void_title',
+    desc: 'obj_choice_void_desc',
+    type: 'choice',
+    chapter: 4,
+    requires: { voidBossDefeated: true, hasVoidTablet: true },
+    waypoint: { x: 0, z: 225, label: 'wp_label_void_tablet' },
+    reward: 15,
+    journal: 'obj_choice_void_journal',
+    choices: [
+      { id: 'seal', label: 'obj_choice_void_seal_label', flag: 'choice_void_sealed' },
+      { id: 'study', label: 'obj_choice_void_study_label', flag: 'choice_void_studied' },
+    ],
+  },
+  {
     id: 'true-end',
     title: 'obj_true_end_title',
     desc: 'obj_true_end_desc',
@@ -948,6 +963,21 @@ export function emptyStats() {
      * 由 `stats-changed` 从 `PlayerStats` 推来 ⇒ 不落盘（`STAT_READINGS` 跳过它）。
      */
     gearSlots: [],
+    /**
+    /**
+     * **账**（不是读数）：玩家做过的关键抉择（W-E3 切片18）。
+     *
+     * 为什么它是账而不是读数：抉择是**已经发生的事**（"你封印了虚空"），
+     * 不是"现在的状态"（像装备槽那样会随玩家取下而变）⇒ 它必须**落盘**，
+     * 否则读档后玩家做过的抉择会消失，那一步会"退回去"。
+     *
+     * 名字叫 `decisions` 而不是 `flags`：表里每一行那个 `flags`（完成时置位的标志）
+     * 是**另一件事**（那是"这一步完成就点亮哪几格"），两个都叫 flags 会读混。
+     *
+     * 形状是 `Set`（像 `discoveries` 那样）：一个 flag 只能记一次，
+     * 落盘时落成数组、读档时读回 `Set`（`statsToJSON` / `statsFromJSON` 自动认）。
+     */
+    decisions: new Set(),
     ...Object.fromEntries(Object.values(BOSS_STAT_KEYS).map((k) => [k, false])),
   };
 }
@@ -1024,6 +1054,10 @@ export const STAT_EVENTS = {
   'poi-interact': (s, d) => { if (d.id) s.discoveries.add(d.id); },
   // 等级与心智是**读数**（PlayerStats 推出来的），存进账本只为让"跳步"认得它们；
   // 存盘不存这一格，读档时由 `stats-changed` 再推一次（以生产方为准，不抄磁盘）
+  // 抉择（W-E3 切片18）：玩家选了一条路 ⇒ 记下那个 flag。
+  // 生产者是**这一条**（不是任务系统直接写账）—— 判据读的那一格因此有生产者，
+  // 闭包门禁扫得到（"账本里有这一格却没人写"会当场红）。
+  'choice-made': (s, d) => { if (d.flag) s.decisions.add(d.flag); },
   'stats-changed': (s, d) => {
     if (Number.isFinite(d.level)) s.level = d.level;
     if (Number.isFinite(d.mind)) s.mind = d.mind;
@@ -1079,6 +1113,7 @@ export function objectiveDone(def, stats) {
     case 'mind': return (stats.mind ?? 0) >= def.target;
     case 'dungeon-rerun': return Boolean(stats.dungeonRerun);
     case 'gear': return (stats.gearSlots ?? []).includes(def.gearSlot);
+    case 'choice': return def.choices?.some((c) => stats.decisions?.has(c.flag)) ?? false;
     case 'chapter-gate': return Boolean(def.autoComplete);
     case 'boss': {
       const key = BOSS_STAT_KEYS[def.bossId];

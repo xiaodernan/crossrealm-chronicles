@@ -318,6 +318,19 @@ export class QuestSystem {
     }));
   }
 
+  /**
+   * 记录玩家的抉择（W-E3 切片18）：派发一条 `choice-made` 事件。
+   *
+   * 为什么**不直接写账**：账本那一格（`stats.decisions`）的生产者必须是**一条事件**
+   * （`STAT_EVENTS` 里那一条）⇒ 判据闭包门禁才扫得到它
+   * （"账本里有这一格却没人写"会当场红）。
+   * `setupListeners` 按 `STAT_EVENTS` 的键自动接线 ⇒ 这里派发即可，
+   * 记账与判进度都由那条通用路完成（`applyStatEvent` → `checkProgress`）。
+   */
+  recordChoice(flag) {
+    window.dispatchEvent(new CustomEvent('choice-made', { detail: { flag } }));
+  }
+
   getProgressText() {
     const q = this.current;
     if (!q) return t('quest_progress_all_complete');
@@ -333,6 +346,9 @@ export class QuestSystem {
       case 'gear': return this.isQuestObjectiveDone(q)
         ? t('quest_progress_gear', { slot_done: '已装备' })
         : t('quest_progress_gear', { slot_done: '装备一件再出发' });
+      case 'choice': return this.isQuestObjectiveDone(q)
+        ? t('quest_progress_choice', { choice_done: '已抉择' })
+        : t('quest_progress_choice', { choice_done: '做出抉择方能前行' });
       case 'chests': return t('quest_progress_chests', { current: this.stats.chestsOpened, target: q.target });
       case 'npc': return this.stats.npcTalked.has(q.targetId) ? t('quest_progress_npc', { npc_done: '完成' }) : t('quest_progress_npc', { npc_done: `寻找 NPC（绿点）` });
       case 'level': return t('quest_progress_level', { target: q.target });

@@ -222,6 +222,25 @@ const V15_ORDER = [
   'chaos-boss', 'radiant-dawn-hall', 'radiant-altar', 'radiant-hunt', 'dungeon-rerun', 'chests-all', 'infinity',
 ];
 
+
+/**
+ * **v16 之后**在役的那条序列（W-E3 切片18 主线加一步"抉择"）。
+ *
+ * 相对 `V15_ORDER` 多了一处（**旧序列**的下标）：
+ * - 40 —— `choice-void`（虚空的归宿），在 `true-end` 之前
+ *
+ * 主线第一次**让玩家选一条路**（前面六种段落：副本 / 发现 / 对话 / 清剿 / 收集 / 装备，
+ * 那六种都是"去做某件事"，这一种是"在两条路里挑一条"）。
+ */
+const V16_ORDER = [
+  'anchor', 'training', 'hub-catacombs', 'soldiers', 'fantasy-frag', 'fantasy-ruins', 'elf-scout', 'boss',
+  'magic-frag', 'golem', 'space-frag', 'finale', 'chests', 'forest-shrine', 'fantasy-tower', 'talk-wanderer',
+  'boss2', 'elite', 'hexer-hunt', 'magic-forest', 'gear-charm', 'level', 'epilogue', 'learn-spell',
+  'crypt', 'library', 'rift', 'space-lens', 'space-wreck', 'boss3', 'mind', 'ascension',
+  'gear-sigil', 'void-rift', 'charge-spell', 'void-hunt', 'crawler-hunt', 'void-casket', 'void-boss', 'void-tablet',
+  'choice-void', 'true-end', 'chaos-core', 'knight-hunt', 'skills', 'abyss-maw', 'gloom-mist-crypt', 'gloom-moss', 'warden-hunt',
+  'chaos-boss', 'radiant-dawn-hall', 'radiant-altar', 'radiant-hunt', 'dungeon-rerun', 'chests-all', 'infinity',
+];
 const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 
 beforeEach(() => { installWindowShim(); });
@@ -348,7 +367,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片17 之后：主线是 55 步，两处插入（挂护符 / 嵌徽记）', () => {
     expect(V15_ORDER).toHaveLength(55);
     expect(new Set(V15_ORDER).size, 'v15 序列里有重复 id').toBe(V15_ORDER.length);
-    expect(MAINLINE.map((r) => r.id)).toEqual(V15_ORDER);
+    // 这一份是**历史**冻结名单（在役序列由下面 v16 那一条比）——
     // 两处插入，其余逐字相同（新序列里那两步的下标是 20 / 32）
     const 新序列插点 = [20, 32];
     const 旧 = [];
@@ -359,6 +378,16 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(旧, '去掉两处插入后应当逐字等于 v14 那条序列').toEqual(V14_ORDER);
     expect(V15_ORDER[20], '第 20 位不是 gear-charm').toBe('gear-charm');
     expect(V15_ORDER[32], '第 32 位不是 gear-sigil').toBe('gear-sigil');
+  });
+
+  it('W-E3 切片18 之后：主线是 56 步，多一步"抉择"', () => {
+    expect(V16_ORDER).toHaveLength(56);
+    expect(new Set(V16_ORDER).size, 'v16 序列里有重复 id').toBe(V16_ORDER.length);
+    expect(MAINLINE.map((r) => r.id)).toEqual(V16_ORDER);
+    // 相对 v15 多的那一步：choice-void（抉择）
+    const 旧 = V16_ORDER.filter((id) => id !== 'choice-void');
+    expect(旧, '去掉 choice-void 后应当逐字等于 v15 那条序列').toEqual(V15_ORDER);
+    expect(V16_ORDER[40], '第 40 位不是 choice-void').toBe('choice-void');
   });
 
   it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);

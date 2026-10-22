@@ -1,5 +1,5 @@
 /** 存档结构校验 — 版本号为 schema 的唯一权威，迁移链从这里取目标版本 */
-export const CURRENT_VERSION = 15;
+export const CURRENT_VERSION = 16;
 
 const VERSION = CURRENT_VERSION;
 
@@ -7,6 +7,9 @@ const QUEST_STAT_KEYS = [
   'hits', 'discoveries', 'bossDefeated', 'boss2Defeated', 'boss3Defeated',
   'voidBossDefeated', 'chaosBossDefeated', 'dungeonRerun',
   'spellCasts', 'chargedCasts', 'dungeonsCleared', 'npcTalked', 'chestsOpened',
+  // 「抉择」那一格（W-E3 切片18）：它是**账**（已经发生的事）⇒ 必须落盘 ⇒
+  // 老档缺它 ⇒ 迁移那一跳补上（不是"缺失就当默认值凑合读"）
+  'decisions',
 ];
 
 export class SaveValidator {

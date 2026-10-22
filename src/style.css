@@ -404,6 +404,31 @@ canvas {
   padding: 9px;
 }
 
+/* 抉择按钮（W-E3 切片18）：当前任务是 choice 类型时替掉那排工具按钮 */
+.qa-choices {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.qa-choices.hidden { display: none; }
+
+.qa-choice-btn {
+  padding: 10px 10px;
+  font-size: 0.8rem;
+  text-align: left;
+  line-height: 1.4;
+  background: rgba(255, 170, 68, 0.14);
+  border: 1px solid rgba(255, 170, 68, 0.45);
+  color: #ffe0b0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.qa-choice-btn:hover { background: rgba(255, 170, 68, 0.26); }
+
 .qa-btns button.qa-primary:hover { background: rgba(255, 204, 68, 0.28); }
 
 .qa-note {
