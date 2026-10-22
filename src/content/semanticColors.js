@@ -175,16 +175,7 @@ export function semanticColor(id, mode = 'default') {
 /** 非颜色冗余：形状符号 */
 export const semanticGlyph = (id) => semanticOf(id).glyph;
 
-/** 非颜色冗余：词 */
-/**
- * 语义标签的**文案键**（W-D2 切片16t）。
- *
- * 改前 `label` 是中文写死在色板里，于是"危险""稀有"这些词在英文界面下永远不变。
- * 现在它是一格**键**（`sem_label_*`），显示侧在那一刻展开。
- */
-export const semanticLabelKey = (id) => semanticOf(id).label;
-
-/** 语义标签的显示名（按语言展开；键找不到就退回键本身，不静默给一个空串） */
+/** 非颜色冗余：词（按语言展开；键找不到就退回键本身，不静默给一个空串） */
 export const semanticLabel = (id, lang = 'zh') => {
   const key = semanticOf(id).label;
   return 表(lang)[key] ?? key;
