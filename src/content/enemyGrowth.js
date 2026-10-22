@@ -165,8 +165,9 @@ export function checkEnemyGrowth(table = ENEMY_GROWTH) {
   return out;
 }
 
-/** 加载期入口：有问题就抛，把**全部**错误一次说完（与 `assertDifficultyTable` 同一条纪律） */
-export function assertEnemyGrowth(table = ENEMY_GROWTH) {
+/** 加载期入口：有问题就抛，把**全部**错误一次说完（与 `assertDifficultyTable` 同一条纪律）。
+ * 曾 `export` 但全仓零 import —— 收成模块内私有（本文件加载时自调用 177 行那枚）。 */
+function assertEnemyGrowth(table = ENEMY_GROWTH) {
   const errors = checkEnemyGrowth(table);
   if (errors.length) {
     throw new Error(`敌人成长曲线校验未通过（${errors.length} 处）：\n  - ${errors.join('\n  - ')}`);

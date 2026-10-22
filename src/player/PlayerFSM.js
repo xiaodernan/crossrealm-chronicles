@@ -126,8 +126,9 @@ export function resolvePlayerState(player, ctx) {
   return 'idle';
 }
 
-/** 当前状态是否放行某个动作位（jump / interact），未声明即放行 */
-export function stateAllows(sm, key) {
+/** 当前状态是否放行某个动作位（jump / interact），未声明即放行。
+ * 曾 `export` 但全仓零 import —— 收成模块内私有（仅 140 行 `sm.allows` 内部用）。 */
+function stateAllows(sm, key) {
   return sm.states[sm.current]?.[key] !== false;
 }
 

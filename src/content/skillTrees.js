@@ -116,8 +116,8 @@ export function curveValue(stat, cost) {
   return isAdditiveStat(stat) ? Math.round(val) : Math.round(val * 100) / 100;
 }
 
-/** 判断是否为加法型 stat（mana/transform） */
-export function isAdditiveStat(stat) {
+/** 判断是否为加法型 stat（mana/transform）。曾 `export` 但全仓零 import —— 收成模块内私有 */
+function isAdditiveStat(stat) {
   return stat === 'mana' || stat === 'transform';
 }
 
