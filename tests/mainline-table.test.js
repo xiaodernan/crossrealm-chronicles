@@ -665,6 +665,15 @@ describe('③ 章节由门控行按位置说话（chapterGateAfter 与整表不�
     expect(issues.some((m) => m.includes('requires.hasFragmentFantasy'))).toBe(true);
   });
 
+  it('双向：同一个旗标两个生产者设不同的值 → 抓住（W-E3 切片24：后写覆盖会改掉别行的 requires）', () => {
+    // `boss1Defeated` 由 boss1 那行置 true；再让后面的 magic-frag 把它置 false
+    const i = indexOf('magic-frag');
+    const issues = runWith((t) => { t[i].flags = { hasFragmentMagic: true, boss1Defeated: false }; });
+    expect(issues).toHaveLength(1);
+    expect(issues[0]).toContain('flags.boss1Defeated');
+    expect(issues[0]).toContain('两个生产者');
+  });
+
   it('双向：玩家步借用门控行的字段 → 抓住', () => {
     const issues = runWith((t) => {
       t[indexOf('chests')].autoComplete = true;

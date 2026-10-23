@@ -1,5 +1,5 @@
 /** 存档结构校验 — 版本号为 schema 的唯一权威，迁移链从这里取目标版本 */
-export const CURRENT_VERSION = 17;
+export const CURRENT_VERSION = 18;
 
 const VERSION = CURRENT_VERSION;
 
@@ -10,6 +10,9 @@ const QUEST_STAT_KEYS = [
   // 「抉择」那一格（W-E3 切片18）：它是**账**（已经发生的事）⇒ 必须落盘 ⇒
   // 老档缺它 ⇒ 迁移那一跳补上（不是"缺失就当默认值凑合读"）
   'decisions',
+  // 「主线旗标」那一格（W-E3 切片24）：同样是**账**（哪一步走完了）⇒ 必须落盘 ⇒
+  // 老档缺它 ⇒ v17 → v18 那一跳按 `questIndex` 重放补上
+  'objectiveFlags',
 ];
 
 export class SaveValidator {
@@ -77,6 +80,10 @@ export class SaveValidator {
     if (!('kills' in stats)) issues.push('quests.stats 缺少 kills');
     else if (typeof stats.kills !== 'object' || stats.kills === null || Array.isArray(stats.kills)) {
       issues.push('quests.stats.kills 必须是对象（非数字/数组）');
+    }
+    if (typeof stats.objectiveFlags !== 'object' || stats.objectiveFlags === null
+      || Array.isArray(stats.objectiveFlags)) {
+      issues.push('quests.stats.objectiveFlags 必须是对象（旗标名 → 布尔）');
     }
   }
 

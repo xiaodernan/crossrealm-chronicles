@@ -48,6 +48,7 @@
  */
 import {
   CONDITIONS, STAT_EVENTS, STAT_READINGS, BOSS_STAT_KEYS, emptyStats, objectiveDone,
+  applyObjectiveFlags,
 } from './objectives.js';
 
 /** 写入扫描：`s.<格>`。前视断言挡住 `stats.hits` 里那个 `s`（它前面是字母，属单词字符）。 */
@@ -99,9 +100,10 @@ export function questFactsRead() {
 /**
  * 生产者写的那几格。
  *
- * 三个来源：① `STAT_EVENTS` 全体（事件 → 记账）；② `BOSS_STAT_KEYS` 的值（计算写的键）；
+ * 四个来源：① `STAT_EVENTS` 全体（事件 → 记账）；② `BOSS_STAT_KEYS` 的值（计算写的键）；
  * ③ `STAT_READINGS`（由别的系统推来的读数 —— 就算它们同时也在 `STAT_EVENTS` 里，
- * 列出来是为了让"这一格由谁推"这件事在表上看得见）。
+ * 列出来是为了让"这一格由谁推"这件事在表上看得见）；④ `applyObjectiveFlags`
+ * （W-E3 切片24：旗标账本的写入出口，形参名与写入形状都不同 ⇒ 单独扫）。
  *
  * @returns {Set<string>}
  */
@@ -112,6 +114,11 @@ export function questFactsWritten() {
   }
   for (const k of Object.values(BOSS_STAT_KEYS)) out.add(k);
   for (const k of STAT_READINGS) out.add(k);
+  // ④ `applyObjectiveFlags`（W-E3 切片24）：旗标账本（`objectiveFlags`）的唯一写入出口。
+  //    它的形参叫 `stats`（不叫 `s`），且写的是 `stats.objectiveFlags[flag]`（计算写，
+  //    键在运行时才知道）⇒ 拿读侧那条正则扫它的源码：出现即生产者。这样"改了账本格名
+  //    却忘了改写入方"照样红在闭包规则上，而不是等玩家遇到一步永远完不成的主线。
+  for (const k of 抠格名(applyObjectiveFlags.toString(), 读正则)) out.add(k);
   return out;
 }
 

@@ -18,7 +18,8 @@
  *   - autoComplete: 只有章节门控那一族有 —— 走到这一格本身即完成（玩家没有可做的事）
  *   - condition: 运行时条件函数名（字符串，引用 CONDITIONS 表）
  *   - flags: 完成时设置的标志 { flagName: true/false }
- *   - requires: 前置标志要求 { flagName: true/false }（全部满足才可激活）
+ *   - requires: 前置标志要求 { flagName: true/false }（全部满足才可激活；
+ *     W-E3 切片24 起由 `objectiveRequiresMet` 在运行时读，旗标账本是 `stats.objectiveFlags`）
  *   - failsOn: 失败条件函数名（可选）
  *   - failMessage: 失败时显示的文案
  *   - onFail: 失败时执行的动作（reset/restart/branch）
@@ -961,19 +962,6 @@ export const CONDITIONS = {
     && state.stats.discoveries?.has('magic-castle')
     && state.stats.discoveries?.has('space-tesseract')
     && state.stats.discoveries?.has('void-rift'),
-  // W-E3 切片23：真结局的条件随决择而异
-  checkTrueEndSealed: (state) => state.stats.voidBossDefeated
-    && state.stats.discoveries?.has('fantasy-ring')
-    && state.stats.discoveries?.has('magic-castle')
-    && state.stats.discoveries?.has('space-tesseract')
-    && state.stats.discoveries?.has('void-rift')
-    && state.stats.decisions?.has('choice_void_sealed'),
-  checkTrueEndStudied: (state) => state.stats.voidBossDefeated
-    && state.stats.discoveries?.has('fantasy-ring')
-    && state.stats.discoveries?.has('magic-castle')
-    && state.stats.discoveries?.has('space-tesseract')
-    && state.stats.discoveries?.has('void-rift')
-    && state.stats.decisions?.has('choice_void_studied'),
   checkChapter3Ready: (state) => state.stats.boss2Defeated,
   checkInfinity: (state) => state.stats.chaosBossDefeated && (state.stats.skillsUnlocked || 0) >= 3,
 };
@@ -1079,6 +1067,21 @@ export function emptyStats() {
      * 落盘时落成数组、读档时读回 `Set`（`statsToJSON` / `statsFromJSON` 自动认）。
      */
     decisions: new Set(),
+    /**
+     * **账**（不是读数）：主线每一步完成时点亮的那几格旗标（W-E3 切片24）。
+     *
+     * 与 `decisions` 的分工：`decisions` 记的是"玩家选了哪条"（由 `choice-made`
+     * 事件写），这一格记的是"哪一步走完了"（由 `QuestSystem.advance()` 按行自己的
+     * `flags` 写）—— 表上那 13 行 `requires` 要读的就是这一格。名字不与行字段
+     * `flags` 同名：行上的 `flags` 是**声明**（这一步完成会点亮什么），这一格是
+     * **事实**（已经点亮了什么）。
+     *
+     * 为什么是普通对象而不是 `Set`：行的 `flags` 可以置 `false`
+     * （`flags: { x: false }` 也是一种"这一步完成时把 x 按灭"的语义，
+     * 注册表的生产者登记同样记值）⇒ `Set` 装不下 false 这一种。
+     * 落盘/读档由 `statsToJSON` / `statsFromJSON` 自动带上（不在 `STAT_READINGS` 里）。
+     */
+    objectiveFlags: {},
     ...Object.fromEntries(Object.values(BOSS_STAT_KEYS).map((k) => [k, false])),
   };
 }
@@ -1195,6 +1198,43 @@ export function applyStatEvent(stats, name, detail) {
  * 心智那一步说的是"在营火升过几级"，穿一枚加心智的护符不该替玩家把任务做完。
  */
 /**
+ * 这一步完成后点亮哪几格（W-E3 切片24）—— 表上 `flags` 的唯一写入出口。
+ *
+ * 为什么写入方在 QuestSystem 而不在判据里：判据（`objectiveDone`）是纯读，
+ * 写账只能发生在"这一步真的完成了"的那一刻（`advance()`），而 `advance()`
+ * 同时负责跨过章节门 ⇒ 门的 `flags` 也在这里一并写（门控行不在 `MAINLINE` 里，
+ * 不随 `questIndex` 推进，但"跨过这一刻"同样是一个事实）。
+ *
+ * 同名旗标被两行设成不同值由注册表不变式挡住（两份生产者说两个值，
+ * 运行时"后写覆盖"会把前置资格静默改掉）⇒ 这里照行的声明写即可。
+ */
+export function applyObjectiveFlags(stats, row) {
+  const flags = row?.flags;
+  if (!flags) return stats;
+  for (const [flag, value] of Object.entries(flags)) {
+    stats.objectiveFlags[flag] = value;
+  }
+  return stats;
+}
+
+/**
+ * 这一步的**前置资格**：`requires` 声明的每一格旗标都要正好等于它要的值（W-E3 切片24）。
+ *
+ * 没有 `requires` 的行恒真。旗标没被任何一步点亮过一律算不满足
+ * （`undefined !== want`，连 `want: false` 也不放过）—— 老档靠迁移那一跳
+ * 按 `questIndex` 重放补上（见 `SaveMigrations` 的 v17 → v18），
+ * 新档由 `advance()` 边走边写 ⇒ 按表序走到任一行时，它的 `requires` 必然已成立。
+ */
+export function objectiveRequiresMet(def, stats) {
+  const requires = def?.requires;
+  if (!requires) return true;
+  for (const [flag, want] of Object.entries(requires)) {
+    if (stats?.objectiveFlags?.[flag] !== want) return false;
+  }
+  return true;
+}
+
+/**
  * 这一步**随抉择而变**的那一格：玩家选中的那条路（还没选就 null）。
  *
  * 为什么要单独一个函数（W-E3 切片20）：「抉择」步有两样东西随选择而变 ——
@@ -1244,6 +1284,11 @@ export function objectiveDesc(row, stats) {
 
 export function objectiveDone(def, stats) {
   if (!def) return false;
+  // W-E3 切片24：`requires` 从此有运行时读者 —— 前置旗标没齐，这一步连"完成"都不算。
+  // 按表序推进时它恒真（注册表核"生产者必须在前头"，`advance()` 每步写 flags）；
+  // 它真正防的是**资格被跳过**：分支跳转 / 坏档 / 未来的表改动让某一步的前置
+  // 根本没被点亮时，玩家不会被推过一件还不够格做的事（也不会被 syncProgress 跳过它）。
+  if (!objectiveRequiresMet(def, stats)) return false;
   switch (def.type) {
     case 'interact':
       // 门控那一格一律判未完成，理由见 `interactGateCondition`

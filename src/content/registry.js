@@ -1556,7 +1556,10 @@ export function checkObjectivesTable(table, ctx) {
  *    这条不变式，加上 `tests/mainline-requires.test.js` 那条走查：按表序走到第 k 行时，
  *    第 k 行声明的前置必须已经成立。少了这两道杠，"要一件还没人做的事"不会报错，
  *    只会让表上写的资格变成装饰。
- * 5. **`branchTo` 只能指向紧跟其后的那一行**（就是第 2 条的反面）。
+ * 5. **`branchTo` 必须指向表里真实存在的一行**（W-E3 切片23 起分支树允许跳过中间步，
+ *    不再要求"紧跟其后"；第 2 条钉的是章节门那道位置前提，两者各管一件事）。
+ * 6. **同一个 `flags` 旗标只许一个值**（W-E3 切片24）。flags 有运行时读者之后，
+ *    "后写覆盖"会让两份生产者里活下来的那一份悄悄决定别的行 `requires` 的成败。
  */
 export function checkObjectiveTable(table) {
   const out = [];
@@ -1640,7 +1643,15 @@ export function checkObjectiveTable(table) {
       }
     }
     for (const [flag, value] of Object.entries(row?.flags ?? {})) {
-      if (!producers.has(flag)) producers.set(flag, { id: row.id, value });
+      const p = producers.get(flag);
+      if (!p) producers.set(flag, { id: row.id, value });
+      // W-E3 切片24：`flags` 从此有运行时写入者（`applyObjectiveFlags` 后写覆盖）⇒
+      // 同一个旗标两个生产者说两个值，就是"前置资格被静默改掉"—— 静态挡住它。
+      else if (p.value !== value) {
+        out.push(`${path}: flags.${flag} 与 "${p.id}" 那行设的值不同`
+          + `（${JSON.stringify(p.value)} vs ${JSON.stringify(value)}）`
+          + ' —— 一个旗标两个生产者说两个值，运行时后写覆盖会把别的行的 requires 悄悄改掉');
+      }
     }
     if (prev && Number.isInteger(prev.chapter) && Number.isInteger(row?.chapter)
       && row.chapter < prev.chapter) {

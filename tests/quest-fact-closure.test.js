@@ -22,7 +22,7 @@ import {
   checkQuestFactClosure, questFactsRead, questFactsWritten, questLedgerShape,
 } from '../src/content/questFacts.js';
 import {
-  CONDITIONS, STAT_EVENTS, BOSS_STAT_KEYS, emptyStats,
+  CONDITIONS, STAT_EVENTS, BOSS_STAT_KEYS, emptyStats, applyObjectiveFlags,
 } from '../src/content/objectives.js';
 import { checkContent } from '../src/content/registry.js';
 
@@ -145,6 +145,18 @@ describe('③ 交叉证据：推导没有漏', () => {
               : v !== 初值;
           if (变了) 实跑.add(k);
         }
+      }
+    }
+    // W-E3 切片24：旗标账本（`objectiveFlags`）的生产者不是事件，是
+    // `applyObjectiveFlags` ⇒ 实跑也要跑它，否则"扫描说有人写、实跑没人写"会红在这一格
+    {
+      const 账 = emptyStats();
+      const 初 = emptyStats();
+      applyObjectiveFlags(账, { id: 'probe', flags: { probe: true } });
+      for (const [k, v] of Object.entries(账)) {
+        const 变了 = v !== null && typeof v === 'object'
+          ? JSON.stringify(v) !== JSON.stringify(初[k]) : v !== 初[k];
+        if (变了) 实跑.add(k);
       }
     }
     const 扫 = questFactsWritten();

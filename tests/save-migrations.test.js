@@ -3,6 +3,7 @@ import { migrate, MIGRATIONS, SAVE_KEYS, SaveVersionError } from '../src/game/Sa
 import { SaveValidator, CURRENT_VERSION } from '../src/game/SaveValidator.js';
 import { SaveSystem } from '../src/game/SaveSystem.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
+import { MAINLINE, OBJECTIVES } from '../src/content/objectives.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import v4 from '../tests/save_v4_fixture.json';
 import v5 from '../tests/save_v5_fixture.json';
@@ -38,18 +39,18 @@ describe('存档迁移链', () => {
     for (let v = 1; v < CURRENT_VERSION; v++) expect(MIGRATIONS[v], `v${v}`).toBeTypeOf('function');
   });
 
-  it('v4 档一路升到当前版本（v4 → v5 → v6 → v7 → v8 → v9 → v10 → v11 → v12 → v13 → v14 → v15 → v16 → v17）并通过校验', () => {
+  it('v4 档一路升到当前版本（v4 → v5 → v6 → v7 → v8 → v9 → v10 → v11 → v12 → v13 → v14 → v15 → v16 → v17 → v18）并通过校验', () => {
     const { data, from, applied } = migrate(clone(v4));
-    expect([from, applied]).toEqual([4, [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]]);
+    expect([from, applied]).toEqual([4, [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]]);
     expect(data.version).toBe(CURRENT_VERSION);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 
-  it('v5 档走 v6、v7、v8、v9、v10、v11、v12、v13、v14、v15、v16、v17 十二跳：补出空的 stats.bag、restPointEnhancer 与 quests.stats.decisions，其余字段一个都不动', () => {
+  it('v5 档走 v6、v7、v8、v9、v10、v11、v12、v13、v14、v15、v16、v17、v18 十三跳：补出空的 stats.bag、restPointEnhancer、quests.stats.decisions 与 quests.stats.objectiveFlags，其余字段一个都不动', () => {
     const legacy = clone(v5);
     const snapshot = clone(v5);
     const { from, data, applied } = migrate(legacy);
-    expect([from, applied]).toEqual([5, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]]);
+    expect([from, applied]).toEqual([5, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]]);
     expect(data.version).toBe(CURRENT_VERSION);
     expect(data.stats.bag).toEqual([]);
     // 迁移只该多出 bag 与 restPointEnhancer 这两格：别处被顺手改写 = 这一跳在偷偷做别的事
@@ -57,11 +58,12 @@ describe('存档迁移链', () => {
     expect(rest).toEqual(snapshot.stats);
     // v15 → v16 那一跳还补了 `quests.stats.decisions`（抉择那一格是**账** ⇒ 必须落盘 ⇒
     // 老档缺它 ⇒ 这一跳补一个空数组；"其余字段一个都不动"要把它也算进"这一跳该补的"）
-    const { decisions: _决策 } = data.quests.stats;
+    const { decisions: _决策, objectiveFlags: _旗标 } = data.quests.stats;
     expect(_决策, 'v15 → v16 那一跳没有补出 decisions').toEqual([]);
+    expect(_旗标, 'v17 → v18 那一跳没有补出 objectiveFlags').toEqual({});
     const { restPointEnhancer: _新补的, stats: { bag: _bag, ...没有bag的stats }, ...restRoot } = data;
     // 把这一跳补的那几格去掉之后，其余字段一个都不动
-    const 去掉decisions = (o) => { const { decisions: _d, ...r } = o; return r; };
+    const 去掉decisions = (o) => { const { decisions: _d, objectiveFlags: _f, ...r } = o; return r; };
     expect({
       ...restRoot,
       quests: { ...data.quests, stats: 去掉decisions(data.quests.stats) },
@@ -132,8 +134,11 @@ describe('存档迁移链', () => {
     expect(d.quests.stats.decisions, 'v15 那一档本来就不该有这一格').toBeUndefined();
     const after = MIGRATIONS[15](d);
     expect(after.quests.stats.decisions, '这一跳没有补出抉择那一格').toEqual([]);
-    // 老档的玩家没做过任何抉择（那一步在老版本里根本不存在）⇒ 补的是空的
-    expect(SaveValidator.validate({ ...after, version: CURRENT_VERSION })).toEqual([]);
+    // 老档的玩家没做过任何抉择（那一步在老版本里根本不存在）⇒ 补的是空的。
+    // 后面还有 v17 → v18（补旗标账本）才到当前版本 ⇒ 整链走完再校验
+    const { data: 到当前 } = migrate({ ...after, version: 16 });
+    expect(SaveValidator.validate(到当前)).toEqual([]);
+    expect(到当前.quests.stats.decisions).toEqual([]);
   });
 
   it('v16 → v17：主线加六步"清剿"，两处插点各三个（老档落回同一步）', () => {
@@ -161,6 +166,55 @@ describe('存档迁移链', () => {
     expect(落点(999)).toBe(1005);
     // 不是整数的下标不参与偏移（它本来就不是位置）
     expect(落点('abc')).toBe('abc');
+  });
+
+  it('v17 → v18：主线旗标入档 —— 按 questIndex 重放走完的那些步（不插行，index 原样不动）', () => {
+    // 造一份 **v17** 的档（v4 一路升到 v17，不走 v18 那一跳）
+    const 造v17 = () => {
+      const d = MIGRATIONS[16](MIGRATIONS[15](MIGRATIONS[14](MIGRATIONS[13](MIGRATIONS[12](MIGRATIONS[11](MIGRATIONS[10](MIGRATIONS[9](MIGRATIONS[8](MIGRATIONS[7](MIGRATIONS[6](MIGRATIONS[5](MIGRATIONS[4](clone(v4))))))))))))));
+      d.version = 17;
+      return d;
+    };
+    /** 重放口径（与迁移同源）：停在当前步**之前**（它还没完成）；通关档整表走完 */
+    const 期望旗标 = (index) => {
+      const flags = {};
+      const 停在 = index >= MAINLINE.length ? null : MAINLINE[index]?.id;
+      for (const row of OBJECTIVES) {
+        if (row.id === 停在) break;
+        for (const [flag, value] of Object.entries(row.flags ?? {})) flags[flag] = value;
+      }
+      return flags;
+    };
+    const 跑 = (index) => {
+      const d = 造v17();
+      expect(d.quests.stats.objectiveFlags, 'v17 那一档本来就不该有这一格').toBeUndefined();
+      d.quests.index = index;
+      return MIGRATIONS[17](d);
+    };
+    // 开头：一步没走 ⇒ 一格旗标都不该亮
+    expect(跑(0).quests.stats.objectiveFlags).toEqual({});
+    expect(跑(0).quests.index, '这一跳不插行 ⇒ 下标原样不动').toBe(0);
+    // 中段几个落点：与"走到那儿时该点亮的一切"逐格相同
+    for (const index of [1, 3, 7, 20, 33, 48]) {
+      expect(跑(index).quests.stats.objectiveFlags, `落点 ${index}`).toEqual(期望旗标(index));
+    }
+    // 跨章节门的落点：门控行的 flags 也点亮（`chaos-core` 的 requires 等的就是 chapter4Done）
+    const 门后 = MAINLINE.findIndex((r) => r.id === 'chaos-core');
+    expect(跑(门后).quests.stats.objectiveFlags.chapter4Done).toBe(true);
+    // 当前步自己的旗标不点亮 —— 它还没完成（`hasChaosCore` 是 chaos-core 自己的 flags）
+    expect(跑(门后).quests.stats.objectiveFlags.hasChaosCore).toBeUndefined();
+    // 通关档（index 越界）：整表点亮，含最后一行
+    const 通关 = 跑(999);
+    expect(通关.quests.stats.objectiveFlags).toEqual(期望旗标(MAINLINE.length));
+    expect(通关.quests.stats.objectiveFlags.gameCompleted).toBe(true);
+    // 不是整数的下标不重放（读档侧按 0 落点继续，旗标也该是空的）
+    const 坏 = 造v17();
+    坏.quests.index = 'abc';
+    expect(MIGRATIONS[17](坏).quests.stats.objectiveFlags).toEqual({});
+    // 整链走完通过校验（v18 的 fixture 形状就是这一跳补出来的形状）
+    const { data } = migrate(造v17());
+    expect(data.version).toBe(CURRENT_VERSION);
+    expect(SaveValidator.validate(data)).toEqual([]);
   });
 
   it('v13 → v14：主线再加三步，三个插点各自往后挪（老档落回同一步）', () => {
@@ -395,7 +449,7 @@ it('v8 → v9：主线再长三步，三处插入点各自往后挪（老档落�
     const legacy = clone(v4);
     delete legacy.version;
     const { data, from, applied } = migrate(legacy);
-    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]]);
+    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]]);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 

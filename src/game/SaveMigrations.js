@@ -6,12 +6,14 @@
  * 不允许"字段缺失就当默认值凑合读"——那正是 v4 之前丢进度而无人察觉的原因。
  */
 import { SaveValidator, CURRENT_VERSION } from './SaveValidator.js';
+import { MAINLINE, OBJECTIVES } from '../content/objectives.js';
 
 export { CURRENT_VERSION };
 
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v18', version: 18 },
   { key: 'crossrealm_save_v17', version: 17 },
   { key: 'crossrealm_save_v16', version: 16 },
   { key: 'crossrealm_save_v15', version: 15 },
@@ -356,6 +358,42 @@ function migrateV16toV17(d) {
   return d;
 }
 
+/**
+ * v17 → v18：**主线旗标入档**（W-E3 切片24）。
+ *
+ * 这一跳**改存档形状**：`quests.stats.objectiveFlags` 是新的一格账
+ * （"哪一步走完了"—— 表上那 13 行 `requires` 的运行时读者）。
+ * 老档缺这一格 ⇒ 这一跳负责补上，而且不是补个空对象凑数：
+ * **按 `questIndex` 把走完的那些步声明过的旗标重放一遍**。
+ *
+ * 为什么重放是安全的：注册表不变式钉着"`requires` 的生产者必须在前头"，
+ * 且 v17 及以前的主线严格线性（分支只落在紧跟的章节门上，不跳步）
+ * ⇒ `questIndex` 之前的每一行都确确实实走完了 ⇒ 它们的 `flags` 是事实。
+ * 通关档（`index >= MAINLINE.length`）整表走完。
+ *
+ * 注意这一跳**不插行**（主线没加步）⇒ `index` 原样不动。
+ * v18 及以后的新档由 `QuestSystem.advance()` 边走边写，不再需要重放。
+ */
+function migrateV17toV18(d) {
+  const quests = d.quests ?? {};
+  const stats = quests.stats ?? {};
+  if (stats.objectiveFlags === undefined) {
+    const flags = {};
+    const idx = Number(quests.index);
+    if (Number.isInteger(idx)) {
+      const 落点 = Math.min(Math.max(idx, 0), MAINLINE.length);
+      // 落点越界（通关档）⇒ 不停，整表走完；否则停在当前步之前（它还没完成）
+      const 停在 = 落点 >= MAINLINE.length ? null : MAINLINE[落点]?.id;
+      for (const row of OBJECTIVES) {
+        if (row.id === 停在) break;
+        for (const [flag, value] of Object.entries(row.flags ?? {})) flags[flag] = value;
+      }
+    }
+    quests.stats = { ...stats, objectiveFlags: flags };
+  }
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -371,6 +409,7 @@ export const MIGRATIONS = {
   14: migrateV14toV15,
   15: migrateV15toV16,
   16: migrateV16toV17,
+  17: migrateV17toV18,
 };
 
 /**

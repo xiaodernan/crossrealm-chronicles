@@ -6,7 +6,7 @@ import { MAP_BOSSES, QuestSystem } from '../src/game/QuestSystem.js';
 import { SaveSystem } from '../src/game/SaveSystem.js';
 import {
   MAINLINE, OBJECTIVES, STAT_EVENTS, BOSS_STAT_KEYS, STAT_READINGS,
-  emptyStats, interactGateCondition, statsToJSON,
+  applyObjectiveFlags, emptyStats, interactGateCondition, statsToJSON,
 } from '../src/content/objectives.js';
 
 /**
@@ -239,6 +239,9 @@ describe('判据只有一份：在役表也一样', () => {
     for (const row of MAINLINE.filter((q) => BOSS_STAT_KEYS[q.bossId])) {
       for (const only of roster) {
         const probe = new QuestSystem(dialog);
+        // W-E3 切片24：Boss 步也可能带 `requires`（如 void-chronarch 要 hasVoidRift）
+        // ⇒ 先把资格点亮，这条要量的才只剩"认不认自己那只的死讯"
+        for (const r of OBJECTIVES) applyObjectiveFlags(probe.stats, r);
         probe.stats[BOSS_STAT_KEYS[only]] = true;
         expect(probe.isQuestObjectiveDone(row), `只有「${only}」死了，${row.id} 不该算过`)
           .toBe(only === row.bossId);
@@ -282,7 +285,7 @@ describe('存档层只递账本，不抄账本', () => {
     dispatch('dungeon-cleared', { id: 'ruin-crypt' });
 
     const data = SaveSystem.toData(host(qs));
-    // 键集合由 `emptyStats()` 推：手抄那十四行时，抄漏的那格只是"回到初始值"，不报错
+    // 键集合由 `emptyStats()` 推：手抄那十五行时，抄漏的那格只是"回到初始值"，不报错
     expect(Object.keys(data.quests.stats).sort())
       .toEqual(Object.keys(statsToJSON(emptyStats())).sort());
     for (const key of STAT_READINGS) expect(data.quests.stats).not.toHaveProperty(key);

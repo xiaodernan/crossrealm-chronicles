@@ -15,8 +15,8 @@
 import { describe, it, expect } from 'vitest';
 import { join } from 'node:path';
 import {
-  OBJECTIVE_TYPES, MAINLINE, emptyStats, objectiveDone, applyStatEvent,
-  statsToJSON, statsFromJSON, STAT_READINGS, STAT_EVENTS,
+  OBJECTIVE_TYPES, MAINLINE, OBJECTIVES, emptyStats, objectiveDone, applyStatEvent,
+  applyObjectiveFlags, statsToJSON, statsFromJSON, STAT_READINGS, STAT_EVENTS,
 } from '../src/content/objectives.js';
 
 const 抉择步 = MAINLINE.filter((r) => r.type === 'choice');
@@ -41,6 +41,9 @@ describe('① 步型与判据', () => {
   it('没选 ⇒ 不算完成；选了那一格 ⇒ 算完成', () => {
     const row = 抉择步[0];
     const stats = emptyStats();
+    // W-E3 切片24：抉择步也有 `requires`（时线 Boss + 碑文）⇒ 先把资格点亮，
+    // 这条用例要量的才只剩"选没选"这一件事
+    for (const r of OBJECTIVES) applyObjectiveFlags(stats, r);
     expect(objectiveDone(row, stats), '还没选就算完成了').toBe(false);
     applyStatEvent(stats, 'choice-made', { flag: row.choices[0].flag });
     expect(objectiveDone(row, stats), '选了却没算完成').toBe(true);

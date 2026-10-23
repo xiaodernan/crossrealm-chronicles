@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   BOSS_STAT_KEYS, CONDITIONS, MAINLINE, OBJECTIVES, STAT_READINGS,
-  applyStatEvent, conditionHolds, emptyStats, interactGateCondition,
+  applyObjectiveFlags, applyStatEvent, conditionHolds, emptyStats, interactGateCondition,
   objectiveDone, statsFromJSON, statsToJSON,
 } from '../src/content/objectives.js';
 import { SaveValidator } from '../src/game/SaveValidator.js';
@@ -62,6 +62,9 @@ const SATISFIED = () => {
   s.level = 99;
   s.mind = 99;
   for (const key of Object.values(BOSS_STAT_KEYS)) s[key] = true;
+  // W-E3 切片24：`requires` 也是判据的一半 ⇒ "全满足"的账本要把每一行的 flags 都点亮
+  //（走到任一步时它的前置必然已成立 —— 那正是这条用例想量的"必然报完成"）
+  for (const row of OBJECTIVES) applyObjectiveFlags(s, row);
   return s;
 };
 
@@ -99,6 +102,9 @@ describe('账本形状：emptyStats 与判据/记账双向对齐', () => {
     for (const [name, list] of Object.entries(details)) {
       for (const detail of list) applyStatEvent(s, name, detail);
     }
+    // W-E3 切片24：旗标那一格（`objectiveFlags`）的生产者不是事件，是
+    // `applyObjectiveFlags`（`advance()` 走完一步时写）⇒ 实跑也要把它算进来
+    applyObjectiveFlags(s, { id: 'probe', flags: { probe: true } });
     const after = snapshot(s);
     const moved = Object.keys(after).filter((k) => JSON.stringify(after[k]) !== JSON.stringify(before[k]));
     // 反方向也要问：账本里不许有一格谁也不写（那判据读到的永远是初始值）
@@ -140,7 +146,7 @@ describe('账本形状：emptyStats 与判据/记账双向对齐', () => {
     expect(statsFromJSON('nonsense')).toEqual(emptyStats());
   });
 
-  it('存档侧的形状与校验器说的那十四格一模一样（不靠版本号，靠校验器本人）', () => {
+  it('存档侧的形状与校验器说的那十五格一模一样（不靠版本号，靠校验器本人）', () => {
     const issues = [];
     SaveValidator.validateQuestStats(statsToJSON(emptyStats()), issues);
     expect(issues).toEqual([]);

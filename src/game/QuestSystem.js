@@ -3,7 +3,7 @@ import { dungeonDefOf, TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
-  objectiveChosen, objectiveReward, objectiveDesc,
+  objectiveChosen, objectiveReward, objectiveDesc, applyObjectiveFlags,
 } from '../content/objectives.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';
@@ -329,6 +329,12 @@ export class QuestSystem {
     }
 
     const gate = finished ? chapterGateAfter(finished.id) : null;
+    // W-E3 切片24：表上每一行的 `flags`（"这一步完成就点亮哪几格"）从此有运行时读者。
+    // 写完这一步，再写它身后那道章节门 —— 门控行不在 `MAINLINE` 里、不随 `questIndex`
+    // 推进，但"跨过这一刻"同样是一个事实（`chaos-core` 们的 `requires` 等的就是它）。
+    // 读档时历史旗标由 `SaveMigrations` 的 v17 → v18 按 `questIndex` 重放补上。
+    if (finished) applyObjectiveFlags(this.stats, finished);
+    if (gate) applyObjectiveFlags(this.stats, gate);
     if (gate && gate.chapter !== this.chapter) {
       this.chapter = gate.chapter;
       // W-D2 切片16j：`announce` 存的是**文案键** —— 显示侧在播出的那一刻展开

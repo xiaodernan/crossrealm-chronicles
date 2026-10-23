@@ -23,7 +23,8 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import {
-  MAINLINE, objectiveChosen, objectiveReward, objectiveDone, emptyStats, applyStatEvent,
+  MAINLINE, OBJECTIVES, objectiveChosen, objectiveReward, objectiveDone, emptyStats,
+  applyStatEvent, applyObjectiveFlags,
 } from '../src/content/objectives.js';
 import { t } from '../src/engine/i18n.js';
 
@@ -151,6 +152,8 @@ describe('⑤ "选了哪条"只有一份算式', () => {
   it('判据与"选了哪条"是同源（选中 ⇒ 这一步算完成）', () => {
     const row = MAINLINE.find((r) => r.type === 'choice');
     const stats = emptyStats();
+    // W-E3 切片24：抉择步的 `requires` 先点亮，这条要量的才只剩"选没选"
+    for (const r of OBJECTIVES) applyObjectiveFlags(stats, r);
     expect(objectiveDone(row, stats)).toBe(false);
     applyStatEvent(stats, 'choice-made', { flag: row.choices[0].flag });
     expect(objectiveDone(row, stats)).toBe(true);
