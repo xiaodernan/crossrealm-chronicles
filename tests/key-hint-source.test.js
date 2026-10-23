@@ -370,15 +370,21 @@ const LEDGER = {
   // W-D2 切片16q：营火对话树整树进双表之后，`自定义路点 Shift+点击` 那句
   // 也从 `content/restDialogues.js` 搬进了双表 —— **这笔账跟着文案搬了家，总数一处没多**
   // （4 → 4）。逐文件的数字于是变成 zh 2 / en 3 / restDialogues 0。
-  'content/strings.zh.js': 2,
-  'content/strings.en.js': 3,
+  //
+  // W-D2 切片29：世界地图图例整块进双表，`鼠标：点击放置路点 · Shift+点击移除` 那句
+  // 从 `ui/WorldMapPanel.js` 搬进 `world_map_legend_mouse_hint` —— 同样只是搬家
+  // （zh 2 → 3 / en 3 → 4 / WorldMapPanel 1 → 0，总数一处没多）。
+  'content/strings.zh.js': 3,
+  'content/strings.en.js': 4,
   // `请按 F12 查看控制台详情`：开机失败那一条错误里指的是**浏览器**的开发者工具，
   // 不是任何一张表里的动作 —— 它没有可改绑的入口，也就没有"改绑之后说谎"这件事。
   'main.js': 1,
   // `自定义路点 Shift+点击`：这里说的是浏览器原生 `e.shiftKey`（`ui/WorldMapPanel.js` 读的就是它），
   // **不是任何一张表里的动作**。占位化它会显示成改绑后的那枚键，而行为仍然只认 Shift —— 那是假话。
   // 真要还这笔债，得先给"修饰键"登记成可改绑的动作，那是输入侧的事，不是文案侧的。
-  'ui/WorldMapPanel.js': 1,
+  // W-D2 切片29：整句搬进双表（`world_map_legend_mouse_hint`），这笔账随之搬去
+  // `content/strings.*.js`（见上），本文件归零。
+  'ui/WorldMapPanel.js': 0,
   // W-B2 切片3：文案搬进 content/ 之后账本跟着换名字，总数一处没变（68 → 68，逐文件实测）；
   // 切片4 把说明书与营火对话的 45 笔改成 `{动作}` 占位（68 → 23）；
   // 切片5 清完剩下的内容键名，并把"界面上每一句键名都问表"那条更严的尺子立成门禁（见下面 `LABEL_PROSE`）。

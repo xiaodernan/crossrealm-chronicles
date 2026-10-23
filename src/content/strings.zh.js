@@ -1714,6 +1714,15 @@ export const STRINGS_ZH = Object.freeze({
   // 世界地图
   world_map_title: '位面全图 · 迷雾探索',
   world_map_current_zone: '当前位置',
+  world_map_not_explored: '该区域尚未探索 — 靠近揭开迷雾',
+  world_map_marker_removed_fmt: '已移除：${label}',
+  world_map_no_marker_nearby: '附近没有路点',
+  world_map_in_dungeon_hint: '迷宫内请用小地图 ({minimap}) 查看房间',
+  world_map_explore_label: '探索度',
+  world_map_legend_quest: '任务目标 ▲',
+  world_map_legend_marker: '自定义路点 ◆',
+  world_map_legend_hints: '{worldMap} 关闭 · 方向键移动光标 · {mapMark} 放置路点 · {mapUnmark} 移除路点 · {zonePanel} 切换导航路点',
+  world_map_legend_mouse_hint: '鼠标：点击放置路点 · Shift+点击移除',
 
   // 说明书
   manual_title: '跨界纪元 · 说明书',

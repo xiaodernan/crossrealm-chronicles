@@ -55,7 +55,7 @@ export class WorldMapPanel {
   markAt(x, z) {
     if (!this.open) return false;
     if (!this.game.explorationMap?.isRevealed(x, z)) {
-      this.game.dialog.toast('该区域尚未探索 — 靠近揭开迷雾');
+      this.game.dialog.toast(t('world_map_not_explored'));
       return false;
     }
     this.game.mapMarkers.add(x, z);
@@ -67,7 +67,7 @@ export class WorldMapPanel {
   unmarkAt(x, z) {
     if (!this.open) return false;
     const removed = this.game.mapMarkers.removeNearest(x, z);
-    this.game.dialog.toast(removed ? `已移除：${removed.label}` : '附近没有路点');
+    this.game.dialog.toast(removed ? t('world_map_marker_removed_fmt', { label: removed.label }) : t('world_map_no_marker_nearby'));
     this._afterMarkerEdit();
     return !!removed;
   }
@@ -132,7 +132,7 @@ export class WorldMapPanel {
 
   show() {
     if (this.game.dungeons?.active) {
-      this.game.dialog.toast(keyText('迷宫内请用小地图 ({minimap}) 查看房间'));
+      this.game.dialog.toast(keyText(t('world_map_in_dungeon_hint')));
       return;
     }
     this.open = true;
@@ -157,15 +157,15 @@ export class WorldMapPanel {
     const pct = this.game.explorationMap?.getExploredPercent?.() ?? 0;
     const ch = this.game.quests.chapter ?? 1;
     this.legendEl.innerHTML = `
-      <div>探索度 <strong>${pct}%</strong> · Chapter ${ch}</div>
-      <div class="wm-legend-row"><span class="dot hub"></span>枢纽</div>
+      <div>${t('world_map_explore_label')} <strong>${pct}%</strong> · Chapter ${ch}</div>
+      <div class="wm-legend-row"><span class="dot hub"></span>${t('hud_map_anchor_hub')}</div>
       <div class="wm-legend-row"><span class="dot boss"></span>Boss 💀</div>
-      <div class="wm-legend-row"><span class="dot dungeon"></span>地下城</div>
-      <div class="wm-legend-row"><span class="dot rest"></span>营火</div>
-      <div class="wm-legend-row"><span class="dot quest"></span>任务目标 ▲</div>
-      <div class="wm-legend-row"><span class="dot marker"></span>自定义路点 ◆</div>
-      <div class="wm-hint">${keyText('{worldMap} 关闭 · 方向键移动光标 · {mapMark} 放置路点 · {mapUnmark} 移除路点 · {zonePanel} 切换导航路点')}</div>
-      <div class="wm-hint">${keyText('鼠标：点击放置路点 · Shift+点击移除')}</div>
+      <div class="wm-legend-row"><span class="dot dungeon"></span>${t('journal_tab_dungeon')}</div>
+      <div class="wm-legend-row"><span class="dot rest"></span>${t('upgrade_rest_default')}</div>
+      <div class="wm-legend-row"><span class="dot quest"></span>${t('world_map_legend_quest')}</div>
+      <div class="wm-legend-row"><span class="dot marker"></span>${t('world_map_legend_marker')}</div>
+      <div class="wm-hint">${keyText(t('world_map_legend_hints'))}</div>
+      <div class="wm-hint">${keyText(t('world_map_legend_mouse_hint'))}</div>
     `;
   }
 

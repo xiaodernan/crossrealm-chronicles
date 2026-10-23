@@ -1716,6 +1716,15 @@ export const STRINGS_EN = Object.freeze({
   // World Map
   world_map_title: 'World Map · Fog of War',
   world_map_current_zone: 'Current Location',
+  world_map_not_explored: 'Area not explored yet — approach to reveal the fog',
+  world_map_marker_removed_fmt: 'Removed: ${label}',
+  world_map_no_marker_nearby: 'No waypoint nearby',
+  world_map_in_dungeon_hint: 'Use the minimap ({minimap}) to view rooms inside a dungeon',
+  world_map_explore_label: 'Explored',
+  world_map_legend_quest: 'Quest Objective ▲',
+  world_map_legend_marker: 'Custom Waypoint ◆',
+  world_map_legend_hints: '{worldMap} Close · Arrow keys move cursor · {mapMark} Place waypoint · {mapUnmark} Remove waypoint · {zonePanel} Cycle nav waypoint',
+  world_map_legend_mouse_hint: 'Mouse: click to place · Shift+click to remove',
 
   // Manual
   manual_title: 'Crossrealm Chronicles · Manual',
