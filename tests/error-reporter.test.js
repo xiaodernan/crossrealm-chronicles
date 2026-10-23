@@ -17,7 +17,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  createErrorReporter, MAX_ERRORS, MAX_STACK_LINES, ERROR_EVENT_NAME, errorEventRegistered,
+  createErrorReporter, MAX_ERRORS, MAX_STACK_LINES, MAX_MESSAGE_CHARS, ERROR_EVENT_NAME, errorEventRegistered,
 } from '../src/engine/errorReporter.js';
 import { GAME_EVENTS } from '../src/engine/events.js';
 
@@ -301,6 +301,30 @@ describe('运行时错误收集（W-D5 切片2）', () => {
       t.fire('error', { message: '深栈', error: { message: '深栈', stack: long } });
       const e = rep.getErrors()[0];
       expect(e.stack.split('\n').length).toBe(MAX_STACK_LINES);
+    });
+
+    it('长消息只留 MAX_MESSAGE_CHARS 字符 + 一枚省略号（报告不被一条长消息淹掉）', () => {
+      const rep = mk();
+      rep.record({ kind: 'error', message: 'x'.repeat(MAX_MESSAGE_CHARS + 50) });
+      const e = rep.getErrors()[0];
+      expect(e.message.length).toBe(MAX_MESSAGE_CHARS + 1); // 300 字符 + '…'
+      expect(e.message.endsWith('…')).toBe(true);
+    });
+
+    it('短消息原样保留（不截断、不加省略号）', () => {
+      const rep = mk();
+      rep.record({ kind: 'error', message: '短消息' });
+      expect(rep.getErrors()[0].message).toBe('短消息');
+    });
+
+    it('只在 MAX_MESSAGE_CHARS 之后才不同的两条消息算同一条（指纹用的是截断后的 message）', () => {
+      const rep = mk();
+      const prefix = 'a'.repeat(MAX_MESSAGE_CHARS);
+      rep.record({ kind: 'error', message: `${prefix}X` });
+      rep.record({ kind: 'error', message: `${prefix}Y` });
+      // 两者都截断成 prefix + '…' ⇒ 同指纹 ⇒ 去重成一条，count 累到 2
+      expect(rep.size()).toBe(1);
+      expect(rep.getErrors()[0].count).toBe(2);
     });
 
     it('setSink 之后每条都被送到出口；置 null 之后不再送', () => {
