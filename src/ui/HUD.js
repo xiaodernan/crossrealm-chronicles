@@ -86,7 +86,7 @@ buildHUD() {
           <div class="stat-item" id="discovery-count">日志 0 · 碎片 0/8 · 地图 0%</div>
           <div class="stat-item" id="skill-points-display">技能点 0</div>
           <div class="stat-item combo-display" id="combo-display"></div>
-          <div class="stat-item" id="weapon-display">⚔ 位面长剑</div>
+          <div class="stat-item" id="weapon-display" data-i18n="hud_weapon_default">⚔ 位面长剑</div>
           <div class="stat-item" id="fps-display">— FPS</div>
           <div class="stat-item" id="camera-mode-display">第三人称</div>
           <div class="stat-item" id="input-device-display">—</div>
@@ -145,22 +145,22 @@ buildHUD() {
       <div id="spell-bar" class="spell-bar" role="region" data-i18n-aria="hud_aria_spell_bar">
         <div class="spell-slot" data-slot="1" role="button" tabindex="0" data-i18n-aria="hud_aria_spell_slot_1">
           <span class="spell-key" data-keys="spell1"></span>
-          <span class="spell-name">真火</span>
+          <span class="spell-name" data-i18n="hud_spell_1">真火</span>
           <span class="spell-cooldown" aria-hidden="true"></span>
         </div>
         <div class="spell-slot" data-slot="2" role="button" tabindex="0" data-i18n-aria="hud_aria_spell_slot_2">
           <span class="spell-key" data-keys="spell2"></span>
-          <span class="spell-name">玄冰</span>
+          <span class="spell-name" data-i18n="hud_spell_2">玄冰</span>
           <span class="spell-cooldown" aria-hidden="true"></span>
         </div>
         <div class="spell-slot" data-slot="3" role="button" tabindex="0" data-i18n-aria="hud_aria_spell_slot_3">
           <span class="spell-key" data-keys="spell3"></span>
-          <span class="spell-name">引力</span>
+          <span class="spell-name" data-i18n="hud_spell_3">引力</span>
           <span class="spell-cooldown" aria-hidden="true"></span>
         </div>
         <div class="spell-slot" data-slot="4" role="button" tabindex="0" data-i18n-aria="hud_aria_spell_slot_4">
           <span class="spell-key" data-keys="spell4"></span>
-          <span class="spell-name">化身</span>
+          <span class="spell-name" data-i18n="hud_spell_4">化身</span>
           <span class="spell-cooldown" aria-hidden="true"></span>
         </div>
       </div>
@@ -284,6 +284,17 @@ buildHUD() {
     if (system) system.textContent = keyText(t('hud_hint_system'));
     const shortcut = document.getElementById('controls-shortcut');
     if (shortcut) shortcut.textContent = keyText(t('hud_help_full'));
+    // W-D2 切片35：武器显示格的名字是 JS 现展开的（data-i18n 只够到开机那一格）——
+    // 换语言时 applyTranslations 会把它涂回默认武器，这里按当前武器重算一次
+    const w = this.game.weapons;
+    if (w?.weapon?.nameKey) this._renderWeaponDisplay(w.current, w.weapon.nameKey);
+  }
+
+  /** 武器显示格：图标按武器 id 现算 + 名字按文案键现展开（W-D2 切片35） */
+  _renderWeaponDisplay(weapon, nameKey) {
+    const el = document.getElementById('weapon-display');
+    if (!el || !nameKey) return;
+    el.textContent = (weapon === 'staff' ? '✦ ' : '⚔ ') + t(nameKey);
   }
 
   setupListeners() {
@@ -405,8 +416,9 @@ buildHUD() {
     }, EVENT_TAG);
 
     on('weapon-changed', (e) => {
-      const el = document.getElementById('weapon-display');
-      if (el) el.textContent = (e.detail.weapon === 'staff' ? '✦ ' : '⚔ ') + e.detail.name;
+      // 载荷里是**文案键**（W-D2 切片35）：图标按武器 id 现算，名字 t() 现展开 ——
+      // 改前把载荷里的裸中文直接写进 DOM，英文玩家的这一格从开机起就是中文
+      this._renderWeaponDisplay(e.detail.weapon, e.detail.nameKey);
     }, EVENT_TAG);
 
     on('skill-points-changed', (e) => {

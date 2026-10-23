@@ -12,6 +12,7 @@ const WEAPONS = {
   sword: {
     id: 'sword',
     name: '位面长剑',
+    nameKey: 'weapon_name_sword',
     meleeMult: 1.15,
     spellMult: 1,
     skillMult: 1,
@@ -20,6 +21,7 @@ const WEAPONS = {
   staff: {
     id: 'staff',
     name: '奥术法杖',
+    nameKey: 'weapon_name_staff',
     meleeMult: 0.85,
     spellMult: 1.35,
     skillMult: 1.2,
@@ -135,9 +137,31 @@ export class WeaponSystem {
     this.current = this.current === 'sword' ? 'staff' : 'sword';
     this.cooldown = 0.6;
     this.applyVisual();
-    this.dialog.toast(t('weapon_switch', { name: this.weapon.name }));
+    this.dialog.toast(t('weapon_switch', { name: t(this.weapon.nameKey) }));
     this.audio?.weaponSwitch?.();
-    window.dispatchEvent(new CustomEvent('weapon-changed', { detail: { weapon: this.current, name: this.weapon.name } }));
+    this._emitWeaponChanged();
+  }
+
+  /**
+   * 读档落位（W-D2 切片35）：换当前武器但不弹 toast —— "玩家主动切换"与"存档恢复"
+   * 是两件事，后者不该播一句「切换武器：…」。HUD 的武器显示格仍要同步：改前它只认
+   * `weapon-changed`，读档后那一格永远留着旧武器的名字（换语言后连语言都是旧的）。
+   */
+  setCurrent(id) {
+    if (!WEAPONS[id] || id === this.current) return;
+    this.current = id;
+    this.applyVisual();
+    this._emitWeaponChanged();
+  }
+
+  /**
+   * 武器显示名走**文案键**（W-D2 切片35）：载荷带 `nameKey` 不带字，HUD 侧 `t()` 现展开 ——
+   * 改前载荷带的是 `name`（裸中文），英文玩家的 HUD 武器格与切换 toast 都会被掺进一句中文。
+   */
+  _emitWeaponChanged() {
+    window.dispatchEvent(new CustomEvent('weapon-changed', {
+      detail: { weapon: this.current, nameKey: this.weapon.nameKey },
+    }));
   }
 
   applyVisual() {

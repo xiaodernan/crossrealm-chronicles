@@ -111,8 +111,9 @@ export class SaveSystem {
       game.dungeons.cleared = new Set(data.dungeons.cleared);
     }
     if (game.weapons && data.weapon) {
-      game.weapons.current = data.weapon;
-      game.weapons.applyVisual();
+      // 走 setCurrent 而不是直接写 current（W-D2 切片35）：它顺带派发 weapon-changed，
+      // HUD 的武器显示格才跟着读档结果改口（改前那一格留着旧武器的名字）
+      game.weapons.setCurrent(data.weapon);
     }
     if (game.weaponSkills && data.weaponSkills) game.weaponSkills.fromJSON(data.weaponSkills);
     if (game.soulWisps && data.soulWisps) game.soulWisps.fromJSON(data.soulWisps);

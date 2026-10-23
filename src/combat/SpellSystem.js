@@ -6,6 +6,7 @@ import { hitDirection, hitKindOf, hitSuffix, isGuarded, resolveHit } from './Res
 import { GUARD, HIT } from '../content/tuning.js';
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';
+import { t } from '../engine/i18n.js';
 
 /**
  * 黑神话式法术：真火 / 玄冰 / 引力 / 大圣化身 + 蓄力派生。
@@ -13,10 +14,10 @@ import { Observable } from '../engine/Observable.js';
  * 挂着的导出是假 API，谁都能以为它是公共表。要真有外部读者时再 `export`，并顺手补门禁）。
  */
 const SPELLS = {
-  1: { id: 'fire', name: '真火咒', cost: 16, cooldown: 0.4, damage: 38, posture: 8, color: 0xff5522, type: 'bolt', chargeDamage: 72, chargePosture: 18, chargeCost: 28 },
-  2: { id: 'ice', name: '玄冰刺', cost: 12, cooldown: 0.35, damage: 30, posture: 8, color: 0x66ccff, type: 'bolt', chargeDamage: 58, chargePosture: 18, chargeCost: 22 },
-  3: { id: 'gravity', name: '引力坍缩', cost: 28, cooldown: 2.5, damage: 45, posture: 25, color: 0x8844ff, type: 'aoe', radius: 5.5, chargeRadius: 9, chargeDamage: 78, chargePosture: 35, chargeCost: 40 },
-  4: { id: 'transform', name: '大圣化身', cost: 45, cooldown: 18, duration: 10, type: 'buff', damageMult: 1.65, speedMult: 1.3 },
+  1: { id: 'fire', nameKey: 'spell_name_fire', name: '真火咒', cost: 16, cooldown: 0.4, damage: 38, posture: 8, color: 0xff5522, type: 'bolt', chargeDamage: 72, chargePosture: 18, chargeCost: 28 },
+  2: { id: 'ice', nameKey: 'spell_name_ice', name: '玄冰刺', cost: 12, cooldown: 0.35, damage: 30, posture: 8, color: 0x66ccff, type: 'bolt', chargeDamage: 58, chargePosture: 18, chargeCost: 22 },
+  3: { id: 'gravity', nameKey: 'spell_name_gravity', name: '引力坍缩', cost: 28, cooldown: 2.5, damage: 45, posture: 25, color: 0x8844ff, type: 'aoe', radius: 5.5, chargeRadius: 9, chargeDamage: 78, chargePosture: 35, chargeCost: 40 },
+  4: { id: 'transform', nameKey: 'spell_name_transform', name: '大圣化身', cost: 45, cooldown: 18, duration: 10, type: 'buff', damageMult: 1.65, speedMult: 1.3 },
 };
 
 const CHARGE_TIME = 0.55;
@@ -117,7 +118,7 @@ export class SpellSystem {
     if (charged) this.game?.stats?.addSkillUse('charge');
 
     window.dispatchEvent(new CustomEvent('spell-cast', {
-      detail: { id: spell.id, name: spell.name, charged },
+      detail: { id: spell.id, nameKey: spell.nameKey, charged },
     }));
     this.audio?.spellCast?.();
     return true;
@@ -296,7 +297,11 @@ export class SpellSystem {
   castTransform(spell) {
     this.transformTimer = spell.duration + (this.transformBonus ?? 0);
     window.dispatchEvent(new CustomEvent('transform-start', { detail: { duration: spell.duration } }));
-    window.dispatchEvent(new CustomEvent('spell-toast', { detail: { message: '大圣化身 — 伤害与移速大幅提升' } }));
+    // 化身提示整句进双表（W-D2 切片35）：名字走插值，仍由 SpellSystem 这一侧展开 ——
+    // 这条 toast 的读者只有 Game 的 dialog，载荷是**展开后的句子**（与 VoidBoss 同一形状）
+    window.dispatchEvent(new CustomEvent('spell-toast', {
+      detail: { message: t('spell_transform_toast', { name: t(spell.nameKey) }) },
+    }));
   }
 
   emitMana() {

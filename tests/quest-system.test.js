@@ -266,7 +266,7 @@ describe('存档层只递账本，不抄账本', () => {
     stats: { toJSON: () => ({ bag: [], souls: 10 }), fromJSON() {}, pushToConsumers() {} },
     spells: { mana: 50 },
     dungeons: { cleared: new Set() },
-    weapons: { current: 'sword', applyVisual() {} },
+    weapons: { current: 'sword', applyVisual() {}, setCurrent(id) { this.current = id; } },
     weaponSkills: { unlocked: new Set(['a', 'b']), toJSON: () => ({}), fromJSON() {} },
     settings: { data: {}, applyToGame() {} },
     fastTravel: { unlocked: false },

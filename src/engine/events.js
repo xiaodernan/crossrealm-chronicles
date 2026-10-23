@@ -166,8 +166,8 @@ export const GAME_EVENTS = Object.freeze({
     payload: null,
   },
   'spell-cast': {
-    desc: '法术释放；charged 表示这是一次蓄力施法',
-    payload: '{ id, name, charged }',
+    desc: '法术释放；charged 表示这是一次蓄力施法。nameKey 是法术显示名的文案键（W-D2 切片35），消费者要显示名就 t() 展开（改前载荷带裸中文 name，英文侧拿到即露馅）',
+    payload: '{ id, nameKey, charged }',
   },
   'spell-toast': {
     desc: '法术层要向玩家说一句话（化身、打断等）。派发到 Toast 的唯一入口，避免施法系统直接持有 UI',
@@ -184,8 +184,8 @@ export const GAME_EVENTS = Object.freeze({
     hook: '同上：化身表现走 spells.vitals，事件是给外部消费者留的出口，仓库内无监听点',
   },
   'weapon-changed': {
-    desc: '切换武器。weapon 是武器 id 符号，name 是显示名',
-    payload: '{ weapon, name }',
+    desc: '切换武器。weapon 是武器 id 符号，nameKey 是显示名的文案键（W-D2 切片35）—— HUD 侧 t() 现展开，换语言时由 HUD.refreshLabels 重算（改前载荷带裸中文 name）',
+    payload: '{ weapon, nameKey }',
   },
   'player-damaged': {
     desc: '玩家受击后的血量快照，喂 HUD 的血条与受击反馈',
