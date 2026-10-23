@@ -33,6 +33,7 @@ import { ECHOES } from '../src/content/echoes.js';
 import { BOSS_ROSTER } from '../src/content/bossRoster.js';
 import { SKILL_TREES } from '../src/content/skillTrees.js';
 import { REST_NPC_DEFS } from '../src/content/restNpcDefs.js';
+import { NPC_DATA } from '../src/world/NPCManager.js';
 import { REST_POINT_NAMES } from '../src/content/restPointNames.js';
 import { ALL_ACHIEVEMENTS_EXTRA } from '../src/content/achievements.js';
 import { HELP_SECTIONS_EXTRA } from '../src/content/helpManual.js';
@@ -59,6 +60,7 @@ const 行表 = [
   { 名: 'BOSS_ROSTER（Boss 名册）', 行: BOSS_ROSTER, 字段: ['nameKey', 'shortNameKey'] },
   { 名: 'SKILL_TREES（技能树）', 行: Object.values(SKILL_TREES).flat(), 字段: ['name', 'desc', 'lore'] },
   { 名: 'REST_NPC_DEFS（营火 NPC）', 行: Object.values(REST_NPC_DEFS), 字段: ['name', 'title', 'barks'] },
+  { 名: 'NPC_DATA（世界 NPC）', 行: NPC_DATA, 字段: ['name'] },   // W-D2 切片25
   { 名: 'ALL_ACHIEVEMENTS_EXTRA（成就）', 行: ALL_ACHIEVEMENTS_EXTRA, 字段: ['title', 'desc'] },
   { 名: 'HELP_SECTIONS_EXTRA（说明书）', 行: HELP_SECTIONS_EXTRA, 字段: ['title', 'body'] },
   { 名: 'CG_GALLERY_BONUS_EXTRA（CG 画廊）', 行: CG_GALLERY_BONUS_EXTRA, 字段: ['caption', 'speaker'] },

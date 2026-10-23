@@ -2475,6 +2475,12 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   boss_approach_singularity: '奇点领主 — 米勒荒原。引力圈时向外滚。',
   boss_approach_void: '时线执政官 — 隐藏试炼。蓄力法术打断时停。',
   boss_approach_chaos: '混沌裂隙领主 — 终焉 Boss。闪电风暴，贴身穿刺。',
+  // NPC 名与日志条目（W-D2 切片25：NPC_DATA 三个名字 + 日志条目标题/正文）
+  journal_dungeon_generic_name: '地下城',
+  journal_dungeon_cleared_fmt: '${name}已征服',
+  journal_dungeon_cleared_text: '迷宫守钥者倒下，位面之门再次闭合。你带走的不只是战利品，还有被埋藏的记忆。',
+  journal_boss_defeated_fmt: '击败 ${name}',
+  journal_boss_defeated_text: '又一道位面枷锁被斩断。锚点的脉动在你胸口回响。',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

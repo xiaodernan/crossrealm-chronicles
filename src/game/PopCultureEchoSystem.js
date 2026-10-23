@@ -39,7 +39,9 @@ export class PopCultureEchoSystem {
         id: echo.id,
         category: 'fragment',
         title: t('pop_culture_echo_journal_title', { franchise: franchiseLabel(echo.franchise, getLanguage()), title: t(echo.title) }),
-        text: echo.desc,
+        // W-D2 切片25：`echo.desc` 是**文案键**（`content/echoes.js`，与 `echo.title` 同一口径）——
+        // 修前这里直接把键当正文写进日志，玩家读到的是 `echo_wizard_school_desc` 这一串。
+        text: t(echo.desc),
         chapter: this.game.quests?.chapter ?? 1,
       });
       window.dispatchEvent(new CustomEvent('pop-culture-unlocked', { detail: echo }));

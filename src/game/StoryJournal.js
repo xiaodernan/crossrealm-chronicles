@@ -116,8 +116,11 @@ export class StoryJournal {
       this.add({
         id: `dungeon-clear-${e.detail.id}`,
         category: 'dungeon',
-        title: `${def?.name ?? '地下城'}已征服`,
-        text: '迷宫守钥者倒下，位面之门再次闭合。你带走的不只是战利品，还有被埋藏的记忆。',
+        // W-D2 切片25：`def.name` 本来就是文案键（`content/dungeons.js`），查不到副本定义时
+        // 退回 `journal_dungeon_generic_name`。**日志是快照出口**（`HUD.renderJournal` 直接把
+        // `d.title` / `d.text` 插进 innerHTML，不过 `t()`），所以展开必须发生在写进去那一刻。
+        title: t('journal_dungeon_cleared_fmt', { name: t(def?.name ?? 'journal_dungeon_generic_name') }),
+        text: t('journal_dungeon_cleared_text'),
         chapter: this.game.quests.chapter,
         meta: { dungeonId: e.detail.id },
       });
@@ -127,12 +130,16 @@ export class StoryJournal {
       if (e.detail.type !== 'boss' || isDungeonBossId(e.detail.bossId)) return;
       // 显示名从名册读（短名优先）—— 修前这里内联抄了一份 `id → 名` 表，与名册/过场各说各话
       const known = bossById(e.detail.bossId);
-      const title = known?.shortName ?? known?.name ?? e.detail.name;
+      // W-D2 切片24 起名册给的是**键**（`shortNameKey` / `nameKey`），所以这里取键再 `t()`；
+      // 名册里没有的那一个（副本 Boss 已在上面被 `isDungeonBossId` 挡掉，剩下的是野生 Boss）
+      // 退回事件负载里的 `name` —— 那一格在 `Boss` 构造时就已经展开过，是定稿不是键。
+      const titleKey = known?.shortNameKey ?? known?.nameKey;
+      const title = titleKey ? t(titleKey) : e.detail.name;
       this.add({
         id: `boss-${e.detail.bossId}`,
         category: 'boss',
-        title: `击败 ${title}`,
-        text: '又一道位面枷锁被斩断。锚点的脉动在你胸口回响。',
+        title: t('journal_boss_defeated_fmt', { name: title }),
+        text: t('journal_boss_defeated_text'),
         chapter: this.game.quests.chapter,
       });
     });

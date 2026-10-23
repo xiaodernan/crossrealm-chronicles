@@ -4,10 +4,17 @@ import { keyText } from '../content/keyHints.js';
 import { t } from '../engine/i18n.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
-const NPC_DATA = [
+export const NPC_DATA = [
+  // `name` 是**文案键**（W-D2 切片25）：三个消费点（对话框说话人 / 日志条目标题 / 交互提示）
+  // 都在播出那一刻 `t()` 展开。三格全部**复用既有键**而不新开 —— 「同一份文案最多两个键」
+  // 是 `tests/i18n.test.js` 的硬上限，而这三串名字在表里已经有活键了：
+  //   · 位面流浪者 = `wp_label_wanderer`（同一角色的地图路点标签，主线目标标题也是这一格）；
+  //   · 精灵嗷侣 = `rest_npc_fantasy_name`、宇航员回声 = `rest_npc_space_name`
+  //     （后两个与营火常驻 NPC **同名同配色**：body 0x3a5a40 / 0x8899aa，就是同一个人）。
+  // 新开第三格会让门禁当场红，而复用让「这个人叫什么」全仓只有一处住址。
   {
     id: 'wanderer',
-    name: '位面流浪者',
+    name: 'wp_label_wanderer',
     x: 8,
     z: 62,
     color: 0x556677,
@@ -19,7 +26,7 @@ const NPC_DATA = [
   },
   {
     id: 'elf-scout',
-    name: '精灵斥候',
+    name: 'rest_npc_fantasy_name',
     x: -160,
     z: 30,
     color: 0x3a5a40,
@@ -30,7 +37,7 @@ const NPC_DATA = [
   },
   {
     id: 'astronaut-echo',
-    name: '宇航员回声',
+    name: 'rest_npc_space_name',
     x: 195,
     z: 95,
     color: 0x8899aa,
@@ -123,13 +130,13 @@ export class NPCManager {
     // 送进 `t()` ⇒ 整句话被当键名查、回 `[MISSING: …]` 并念给玩家听；而对话框、日志、
     // `npc-talk` 三处**同时**收到同一份坏字，所以旧用例比"三处一样"时一路绿。
     const line = npcLine(pool[idx]);
-    this.dialog.show(npc.name, line);
+    this.dialog.show(t(npc.name), line);
     this.lineIndex[npc.id]++;
     window.dispatchEvent(new CustomEvent('npc-talk', { detail: { id: npc.id, line, chapter } }));
     this.game?.storyJournal?.add({
       id: `npc-${npc.id}-ch${chapter}-${idx}`,
       category: 'npc',
-      title: npc.name,
+      title: t(npc.name),
       text: line,
       chapter,
     });

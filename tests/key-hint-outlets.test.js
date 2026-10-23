@@ -178,7 +178,8 @@ describe('NPC 台词：对话框、日志条目、事件三份都是定稿', () 
   it('三份里一个花括号都不留，且三份是同一句话', () => {
     const { spec, npc, shown, entries, events } = talkOnce();
     expect(shown).toHaveLength(1);
-    expect(shown[0].title).toBe(npc.name);
+    // W-D2 切片25：`npc.name` 是文案键，快照出口存的是展开后的名字
+    expect(shown[0].title).toBe(t(npc.name));
     expect(shown[0].text).not.toMatch(/\{[A-Za-z]/);
     expect(entries[0].text).toBe(shown[0].text);
     expect(events[0].detail.line).toBe(shown[0].text);

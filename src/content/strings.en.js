@@ -2478,6 +2478,12 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   boss_approach_singularity: 'Singularity Herald — Miller\'s Wastes. Roll outward when the gravity ring pulls.',
   boss_approach_void: 'Chronarch — hidden trial. Interrupt the time stop with a charged spell.',
   boss_approach_chaos: 'Chaos Rift Overlord — the final Boss. Lightning storm; stay close for the thrust.',
+  // NPC names and journal entries (W-D2 slice 25: the three NPC_DATA names + journal titles/bodies)
+  journal_dungeon_generic_name: 'Unknown Dungeon',
+  journal_dungeon_cleared_fmt: '${name} conquered',
+  journal_dungeon_cleared_text: 'The keywarden falls and the plane gate seals once more. You leave with more than loot - you carry the buried memories.',
+  journal_boss_defeated_fmt: 'Defeated ${name}',
+  journal_boss_defeated_text: 'Another planar shackle is cut. The pulse of the anchor echoes in your chest.',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

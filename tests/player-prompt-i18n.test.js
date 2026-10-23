@@ -115,9 +115,11 @@ const 场景 = [
   ['副本-有敌房', () => ({ dungeons: 副本({ getExplorationHint: () => ({ name: t('dungeon_hub_catacombs_name'), enemies: 4 }), getNearbyLore: () => null }) }), 'prompt_dungeon_room_enemies_fmt', () => ({ enemies: 4 })],
   ['副本-出口房', () => ({ dungeons: 副本({ getExplorationHint: () => ({ name: t('dungeon_hub_catacombs_name'), isExit: true }), getNearbyLore: () => null }) }), 'prompt_dungeon_leave_fmt', () => ({ name: t('dungeon_hub_catacombs_name') })],
   ['副本-普通房', () => ({ dungeons: 副本({ getExplorationHint: () => ({ name: t('dungeon_hub_catacombs_name'), visited: 3, total: 8 }), getNearbyLore: () => null }) }), 'prompt_dungeon_explore_fmt', () => ({ visited: 3, total: 8 })],
-  ['营火-有NPC', () => ({ rest: { id: 'hub', name: '世界之锚休息点' }, restNpc: { name: '守墓人' } }), 'prompt_rest_npc_fmt', () => ({ npc: '守墓人', rest: '世界之锚休息点' })],
+  // W-D2 切片25：`restNpc.name` 是文案键（`content/restNpcDefs.js`），不再是显示名
+  ['营火-有NPC', () => ({ rest: { id: 'hub', name: '世界之锚休息点' }, restNpc: { name: 'rest_npc_hub_name' } }), 'prompt_rest_npc_fmt', () => ({ npc: t('rest_npc_hub_name'), rest: '世界之锚休息点' })],
   ['营火-无NPC', () => ({ rest: { id: 'hub', name: '世界之锚休息点' } }), 'prompt_rest_plain_fmt', () => ({ rest: '世界之锚休息点' })],
-  ['NPC', () => ({ npc: { name: '位面行者' } }), 'prompt_npc_talk_fmt', () => ({ name: '位面行者' })],
+  // W-D2 切片25：`npc.name` 也是文案键（`world/NPCManager.js` 的 NPC_DATA）
+  ['NPC', () => ({ npc: { name: 'wp_label_wanderer' } }), 'prompt_npc_talk_fmt', () => ({ name: t('wp_label_wanderer') })],
   ['宝箱', () => ({ chest: { id: 'c1' } }), 'prompt_chest_open', () => ({})],
   ['副本入口', () => ({ dungeons: { active: null, getEntranceNear: () => ({ def: { name: 'dungeon_hub_catacombs_name' } }) } }), 'dungeon_enter_prompt_fmt', () => ({ name: t('dungeon_hub_catacombs_name') })],
   ['POI', () => ({ poi: { id: 'hub-anchor', label: 'wp_label_anchor' } }), null, () => ({})],

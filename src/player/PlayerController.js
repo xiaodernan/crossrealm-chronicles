@@ -1085,16 +1085,21 @@ export class PlayerController {
 
       const rn = this.game.restNpcs?.getByRestId?.(rest.id);
 
-      // 营火名在 `RestPointManager.buildDefaults` 那一刻就展开好了（世界里存的是显示名）
+      // 两个名字来源不同，别混：
+      // `rest.name` 是**显示名**（`RestPointManager.buildDefaults` 那一刻就展开好了，世界里存的是定稿）；
+      // `rn.name` 是**文案键**（`content/restNpcDefs.js`，W-D2 切片15；`RestNpcManager` 只做搬运），
+      // 所以它必须在这儿 `t()` —— 修前没包，英文玩家在交互提示里看到的是 `rest_npc_hub_name` 这一串。
       prompt.textContent = rn
-        ? t('prompt_rest_npc_fmt', { interact, npc: rn.name, rest: rest.name })
+        ? t('prompt_rest_npc_fmt', { interact, npc: t(rn.name), rest: rest.name })
         : t('prompt_rest_plain_fmt', { interact, rest: rest.name });
 
     } else if (npc) {
 
       prompt.classList.remove('hidden');
 
-      prompt.textContent = t('prompt_npc_talk_fmt', { interact, name: npc.name });
+      // `npc.name` 是文案键（W-D2 切片25，见 `world/NPCManager.js` 的 NPC_DATA）—— 外框在切片22 就迁好了，
+      // 漏的是这个参数本身：不包 `t()` 时英文玩家看到的是键名而不是人名。
+      prompt.textContent = t('prompt_npc_talk_fmt', { interact, name: t(npc.name) });
 
     } else if (chest) {
 
