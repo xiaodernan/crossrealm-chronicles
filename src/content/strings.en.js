@@ -88,6 +88,25 @@ export const STRINGS_EN = Object.freeze({
   hud_hint_system: '{spell1}~{spell4} Spells · {swapWeapon} Swap Weapon · {fastTravel} Fast Travel · {help} Manual · {escape} Pause',
   hud_souls: 'Planar Souls',
   hud_level: 'Level',
+  // 性能 HUD 与泄漏 watchdog 标签（W-D2 切片42）：PerfHUD._lines() 内建行 + perfGauges 清单。
+  // label 仍兼作 stats().leaks 的键（改名等于改门禁的键），显示层经 t(key) 展开。
+  perf_hud_frame_ms: 'Frame time',
+  perf_hud_peak_frame: 'Peak frame',
+  perf_hud_triangles: 'Triangles',
+  perf_hud_geometries: 'Geometries',
+  perf_hud_textures: 'Textures',
+  perf_hud_shaders: 'Shaders',
+  perf_hud_scene_nodes: 'Scene nodes',
+  perf_hud_js_heap: 'JS heap',
+  gauge_alive_enemies: 'Alive enemies',
+  gauge_enemy_projectiles: 'Enemy projectiles',
+  gauge_spell_effects: 'Spell effects',
+  gauge_ground_hazards: 'Ground hazards',
+  gauge_damage_numbers: 'Damage numbers',
+  gauge_sparks: 'Sparks',
+  gauge_loot_drops: 'Loot drops',
+  gauge_loot_pool: 'Loot pool',
+  gauge_void_echo_pool: 'Echo pool',
 
   // Dialog & Toasts
   dialog_click_to_lock: 'Click center of screen to lock mouse',

@@ -11,6 +11,7 @@
  * 画面上的红不会跟着变。
  */
 import { DRAW_CALL_ACCEPT_LINE } from './drawCallBudget.js';
+import { t } from './i18n.js';
 export class PerfHUD {
   /**
    * @param renderer THREE.WebGLRenderer（读取 renderer.info）
@@ -34,11 +35,12 @@ export class PerfHUD {
 
   /**
    * 注册一条计数。`leak: true` 表示该值应当有界——超过历史最小值容忍带即标红。
-   * @param label   显示名
+   * @param label   显示名，同时是 `stats().leaks` 的键（改名等于改门禁的键）
    * @param getter  () => number
+   * @param key     可选文案键（W-D2 切片42）：显示层经 `t(key)` 展开，缺省回落 `label`
    */
-  gauge(label, getter, { leak = false, tolerance = 32 } = {}) {
-    this._gauges.push({ label, getter, leak, tolerance });
+  gauge(label, getter, { leak = false, tolerance = 32, key } = {}) {
+    this._gauges.push({ label, key, getter, leak, tolerance });
     return this;
   }
 
@@ -94,29 +96,29 @@ export class PerfHUD {
     const info = this.renderer?.info;
     const rows = [
       { label: 'FPS', value: this._fps.toFixed(1), warn: this._fps > 0 && this._fps < 55 },
-      { label: '帧耗时', value: `${this._frameMs.toFixed(2)}ms`, warn: this._frameMs > 20 },
-      { label: '峰值帧', value: `${this._maxFrameMs.toFixed(1)}ms`, warn: this._maxFrameMs > 50 },
+      { label: '帧耗时', key: 'perf_hud_frame_ms', value: `${this._frameMs.toFixed(2)}ms`, warn: this._frameMs > 20 },
+      { label: '峰值帧', key: 'perf_hud_peak_frame', value: `${this._maxFrameMs.toFixed(1)}ms`, warn: this._maxFrameMs > 50 },
     ];
     if (info) {
       const mem = info.memory;
       rows.push(
         { label: 'draw call', value: info.render.calls, warn: info.render.calls > DRAW_CALL_ACCEPT_LINE },
-        { label: '三角面', value: `${(info.render.triangles / 1000).toFixed(1)}k` },
-        { label: '几何体', value: mem.geometries, leak: true },
-        { label: '纹理', value: mem.textures, leak: true },
-        { label: '着色器', value: info.programs?.length ?? 0, leak: true },
+        { label: '三角面', key: 'perf_hud_triangles', value: `${(info.render.triangles / 1000).toFixed(1)}k` },
+        { label: '几何体', key: 'perf_hud_geometries', value: mem.geometries, leak: true },
+        { label: '纹理', key: 'perf_hud_textures', value: mem.textures, leak: true },
+        { label: '着色器', key: 'perf_hud_shaders', value: info.programs?.length ?? 0, leak: true },
       );
     }
     if (this.scene) {
       let nodes = 0;
       this.scene.traverse(() => { nodes++; });
-      rows.push({ label: '场景节点', value: nodes, leak: true, tolerance: 200 });
+      rows.push({ label: '场景节点', key: 'perf_hud_scene_nodes', value: nodes, leak: true, tolerance: 200 });
     }
     if (performance.memory) {
-      rows.push({ label: 'JS 堆', value: `${(performance.memory.usedJSHeapSize / 1048576).toFixed(0)}MB` });
+      rows.push({ label: 'JS 堆', key: 'perf_hud_js_heap', value: `${(performance.memory.usedJSHeapSize / 1048576).toFixed(0)}MB` });
     }
     for (const g of this._gauges) {
-      rows.push({ label: g.label, value: this._value(g), leak: g.leak, tolerance: g.tolerance });
+      rows.push({ label: g.label, key: g.key, value: this._value(g), leak: g.leak, tolerance: g.tolerance });
     }
     return rows;
   }
@@ -126,7 +128,7 @@ export class PerfHUD {
       const growth = r.leak ? this._growth(r.label, r.value) : 0;
       const bad = r.warn || (r.leak && growth > (r.tolerance ?? 32));
       const tail = r.leak && growth > 0 ? ` <span class="perf-warn">+${growth}</span>` : '';
-      return `<div class="${bad ? 'perf-bad' : ''}">${r.label}: ${r.value}${tail}</div>`;
+      return `<div class="${bad ? 'perf-bad' : ''}">${r.key ? t(r.key) : r.label}: ${r.value}${tail}</div>`;
     }).join('');
     this.el.innerHTML = html;
   }

@@ -39,6 +39,8 @@
  * 每条 gauge 一项。
  *
  * - `label` —— 显示名，也是 `stats().leaks` 的键。**改名等于改门禁的键**，别顺手改。
+ * - `key` — 文案键（W-D2 切片42）：显示层经 `t(key)` 展开，缺省回落 `label`。
+ *   `label` 保持中文不变（leaks 的键就是它），换语言只换显示不换账。
  * - `read` —— 从 `game` 取当前值。**只走公开接口**，不翻系统内部字段
  *   （与 `PerfHUD` 原有的口径一致：翻内部字段的读数会在重构时静默失效）。
  * - `tolerance` —— 容忍带：growth 超过它才标红。每条后面的注释写明出处。
@@ -47,22 +49,22 @@ export const PERF_GAUGES = [
   // ── 战斗侧（原有六条，本片给它们装上 leak 标记与量出来的带子）──
   // 量到 41（开局名册 46 个出生点里的存活数，`spawnDefaults` 只开一次）；`SUMMON.total` 另有 8 只上限。
   // 带 96 = 实测的 2.3 倍，够得到"再叠一次名册"（把 `spawnDefaults` 调两遍就是 +41，那正是该红的样子）。
-  { label: '存活敌人', read: (g) => g.enemyManager.getAliveEnemies().length, tolerance: 96 },
+  { label: '存活敌人', key: 'gauge_alive_enemies', read: (g) => g.enemyManager.getAliveEnemies().length, tolerance: 96 },
   // 量到 24（`ProjectileManager.spawn` 是怨影/哨炮/咒师共用的真出口，一口气交 24 枚）。
   // 这条链是**每枚新建一份几何 + 材质**，所以它涨不停就是真泄漏；带 64 = 实测的 2.7 倍。
-  { label: '敌方弹体', read: (g) => g.projectiles.count(), tolerance: 64 },
+  { label: '敌方弹体', key: 'gauge_enemy_projectiles', read: (g) => g.projectiles.count(), tolerance: 64 },
   // 量到 3（满名册混战里真放法术）。带 12 = 实测的 4 倍 —— 比原来的估值 32 紧得多，
   // 因为"场上法术效果"本就该是个位数：再多就说明 `_recycleBolt` / `_recycleAoe` 有一条没走。
-  { label: '法术效果', read: (g) => g.spells.count(), tolerance: 12 },
+  { label: '法术效果', key: 'gauge_spell_effects', read: (g) => g.spells.count(), tolerance: 12 },
   // 量到 0（本片没能让它涨起来：Boss 与裂隙爬兽才开圈，headless 里 1.2 fps 等不到那一招）。
   // 这条是 `GroundHazards` 自己的 `pooled() + count()` 那本账，带子沿用估值。
-  { label: '地面危险区', read: (g) => g.enemyManager.hazards.count(), tolerance: 24 },
+  { label: '地面危险区', key: 'gauge_ground_hazards', read: (g) => g.enemyManager.hazards.count(), tolerance: 24 },
   // 量到 26 = 它的池容量本身（`HIT.numberPool`），即"同时在场"的硬上限：满池就会挤掉最老的。
   // 带 = 池容量，因此只有"池容量本身变大"或"activeCount 不再归还"才会红。
-  { label: '飘字', read: (g) => g.damageNumbers.activeCount(), tolerance: 26 },
+  { label: '飘字', key: 'gauge_damage_numbers', read: (g) => g.damageNumbers.activeCount(), tolerance: 26 },
   // 量到 124（一次 40 个命中溅出的活跃火花数）。带 130 取在实测峰值之上一点点 ——
   // 这是六条里最紧的一条，因为火花池满就没得涨，涨过池容量只可能是不归还。
-  { label: '火花', read: (g) => g.combatFeedback.activeCount(), tolerance: 130 },
+  { label: '火花', key: 'gauge_sparks', read: (g) => g.combatFeedback.activeCount(), tolerance: 130 },
 
   // ── W-C1 池化过的三处（切片1..3 修的就是它们"只进不出"）──
   // 加了池子之后，"同时在场"与"池子里备着几件"是两笔账：前者该在捡走/到期后落回去，
@@ -72,11 +74,11 @@ export const PERF_GAUGES = [
   // 量到 15（开局地上就有 15 件）／硬刷后瞬时的 112（原地掉 80 件、一件都不捡，只能等到期）。
   // 带 192 = 实测峰值的 1.7 倍：地上堆上百件是合法局面（30 秒到期 + 玩家没去捡），
   // 但"只增不减"会一路顶穿这个数，所以它仍是一条有效的杠。
-  { label: '掉落物', read: (g) => g.loot.drops.length, tolerance: 192 },
-  { label: '掉落池', read: (g) => g.loot.pooled(), tolerance: 192 },
+  { label: '掉落物', key: 'gauge_loot_drops', read: (g) => g.loot.drops.length, tolerance: 192 },
+  { label: '掉落池', key: 'gauge_loot_pool', read: (g) => g.loot.pooled(), tolerance: 192 },
   // 量到 0（本片那一窗里残影都已经归还了），但 `VoidEcho.MAX_ECHOES = 12` 是硬上限，
   // 归还路径写坏才会超过它。带 24 = 上限的 2 倍。
-  { label: '残影池', read: (g) => g.voidEcho.pooled(), tolerance: 24 },
+  { label: '残影池', key: 'gauge_void_echo_pool', read: (g) => g.voidEcho.pooled(), tolerance: 24 },
 ];
 
 /**
@@ -86,8 +88,8 @@ export const PERF_GAUGES = [
  * （F3 面板里那些纯信息行由 `PerfHUD._lines()` 自己出，不走这里）。
  */
 export function registerPerfGauges(hud, game) {
-  for (const { label, read, tolerance } of PERF_GAUGES) {
-    hud.gauge(label, () => read(game), { leak: true, tolerance });
+  for (const { label, key, read, tolerance } of PERF_GAUGES) {
+    hud.gauge(label, () => read(game), { leak: true, tolerance, key });
   }
   return hud;
 }

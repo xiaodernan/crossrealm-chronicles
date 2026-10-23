@@ -88,6 +88,25 @@ export const STRINGS_ZH = Object.freeze({
   hud_hint_system: '{spell1}~{spell4} 法术 · {swapWeapon} 切换武器 · {fastTravel} 快速旅行 · {help} 说明书 · {escape} 暂停',
   hud_souls: '位面之魂',
   hud_level: '等级',
+  // 性能 HUD 与泄漏 watchdog 标签（W-D2 切片42）：PerfHUD._lines() 内建行 + perfGauges 清单。
+  // label 仍兼作 stats().leaks 的键（改名等于改门禁的键），显示层经 t(key) 展开。
+  perf_hud_frame_ms: '帧耗时',
+  perf_hud_peak_frame: '峰值帧',
+  perf_hud_triangles: '三角面',
+  perf_hud_geometries: '几何体',
+  perf_hud_textures: '纹理',
+  perf_hud_shaders: '着色器',
+  perf_hud_scene_nodes: '场景节点',
+  perf_hud_js_heap: 'JS 堆',
+  gauge_alive_enemies: '存活敌人',
+  gauge_enemy_projectiles: '敌方弹体',
+  gauge_spell_effects: '法术效果',
+  gauge_ground_hazards: '地面危险区',
+  gauge_damage_numbers: '飘字',
+  gauge_sparks: '火花',
+  gauge_loot_drops: '掉落物',
+  gauge_loot_pool: '掉落池',
+  gauge_void_echo_pool: '残影池',
 
   // 对话与提示
   dialog_click_to_lock: '请点击画面中央再次锁定鼠标',
