@@ -1,4 +1,5 @@
 import { MAP_BOSSES } from '../game/QuestSystem.js';
+import { MAP_SPAN_M } from '../game/ExplorationMap.js';
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { JOURNAL_CATEGORIES, DISCOVERABLE_TOTAL } from '../game/StoryJournal.js';
 import { mergeJournalCategories } from './JournalTabRegistry.js';
@@ -17,6 +18,17 @@ const ZONE_BANNER_TAG = 'hud-zone-banner';
 const FINISHER_TAG = 'hud-finisher-flash';
 /** 本类全部监听的所有权标识：dispose() 按它一次性注销（B44 剩余半区） */
 const EVENT_TAG = 'ui/HUD';
+
+/**
+ * 小地图在没有布局可量时的退路边长（jsdom / 离屏渲染）。
+ *
+ * 真源在 `style.css`：`#minimap` 是 `width:100%` + `aspect-ratio:1/1`，它等于
+ * `#minimap-wrap` 的声明宽度减去左右各一道边框（全站 `box-sizing:border-box`），
+ * 也就是 180 − 2×1 = **178**。`drawMinimap()` 优先量 `clientWidth`，这一格只在量不到的
+ * 时候兜底 —— 但它不能随手写：写歪了位图与盒子就各画各的（浏览器再缩放一次 ⇒ 糊）。
+ * 所以 `tests/minimap-layout-capture.test.js` 从样式里把这三个数解析出来核对。
+ */
+export const MINIMAP_CSS_SIZE = 178;
 
 /**
  * 日志抽屉里的"子页签"：这些格子不套清单模板，而是把整块 `#journal-panel` 换成自己的界面
@@ -841,19 +853,44 @@ buildHUD() {
     return `▶ ${dirs[(idx + 8) % 8]} · ${Math.round(dist)}m · ${label}`;
   }
 
+  /**
+   * 把小地图的画布对齐到它的 CSS 盒子，返回**逻辑**边长（ drawing 用的坐标空间）。
+   *
+   * 三件事，每件都对应一处过去的糊：
+   * - 尺寸**量出来**，不是抄一份 220 —— 盒子 180 而位图 220 ⇒ 浏览器缩放 0.82 倍，
+   *   网格线和 7–9px 的字就是这么糊掉的。样式那一格才是真源（`MINIMAP_CSS_SIZE` 只兜底）。
+   * - backing store 按 `devicePixelRatio` 放大再 `setTransform` 回来 ⇒ 2× 屏上 1 CSS px
+   *   对 2 个真实像素，字不再发虚。上限 2 与 `core/Game.js` 给 WebGL 设的
+   *   `setPixelRatio(Math.min(devicePixelRatio, 2))` 同一条口径。
+   * - 写 `canvas.width` 等于清屏 + 重新分配位图，以前**每帧都写**。现在只在真的变了才写
+   *   （窗口/DPR 变了才走这条路），其余帧只做一次 `setTransform`。
+   */
+  _fitMinimapCanvas(ctx) {
+    const css = Math.round(this.minimapCanvas.clientWidth) || MINIMAP_CSS_SIZE;
+    const dpr = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+    const px = Math.round(css * dpr);
+    if (this.minimapCanvas.width !== px) {
+      this.minimapCanvas.width = px;
+      this.minimapCanvas.height = px;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return css;
+  }
+
   drawMinimap() {
     if (!this.minimapVisible || !this.minimapCanvas) return;
     const ctx = this.minimapCanvas.getContext('2d');
-    const w = 220;
-    const h = 220;
-    this.minimapCanvas.width = w;
-    this.minimapCanvas.height = h;
+    const w = this._fitMinimapCanvas(ctx);
+    const h = w;
 
     if (this.game.dungeons?.active?.layout) {
       this._drawDungeonMinimap(ctx, w, h);
       return;
     }
-    const scale = 0.135;
+    // 一张雷达的口径：可见世界跨度 = 边长 / scale。0.135 是把**整个世界**（±320 米）
+    // 塞进 180 个像素（要 2370 才装得下），于是本地走一步针尖不动、区名全叠在一起 ——
+    // 跨度由 `ExplorationMap` 的格子说话（和世界地图量同一张纸），改地图不用改这里。
+    const scale = w / MAP_SPAN_M;
     const cx = w / 2;
     const cy = h / 2;
 

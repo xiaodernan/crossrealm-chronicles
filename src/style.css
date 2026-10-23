@@ -15,7 +15,16 @@ body {
   user-select: none;
 }
 
-canvas {
+/*
+ * 铺满视口的是 **WebGL 那一块**，由 `core/Game.js` 给它挂 `.gl-canvas`。
+ * 以前这条规则的选择器是裸 `canvas` —— 页面里后来长出了第二、第三块画布
+ * （`#minimap` / `#world-map-canvas` / CG 的离屏画布），它们一起被 `position:fixed`
+ * + `inset:0` + `width/height:100% !important` 抓走：`#minimap-wrap` 上有
+ * `backdrop-filter` ⇒ 它自己就是 fixed 后代的包含块，而那个盒子只有标题那么高，
+ * 于是小地图被压成一条 ~180×24 的横条（玩家看到的"缩成一团"）。
+ * 要铺满请加类名，不要再回来宽选元素类型。
+ */
+.gl-canvas {
   display: block;
   position: fixed;
   inset: 0;
@@ -335,9 +344,18 @@ canvas {
   display: none;
 }
 
+/*
+ * 小地图的**尺寸真源是这里**，但这一格故意不写像素：`width:100%` + `aspect-ratio` 让
+ * 画布跟着 `#minimap-wrap` 的内容盒走（边框吃掉多少就让多少），`ui/HUD.js` 的
+ * `drawMinimap()` 量 `clientWidth` 来画位图。以前这里是"样式写 180、代码抄 220"，
+ * 浏览器把 220 的位图缩到 180 的盒子里 ⇒ 网格线和 7–9px 的字一起糊。
+ * 写死像素等于重新制造两份真源，所以由 `tests/minimap-layout-capture.test.js` 钉住
+ * "这里只能是 100% / aspect-ratio"，并核对 HUD 里那个量不到时的退路常数
+ * （`MINIMAP_CSS_SIZE` = wrap 宽度 − 左右边框）。
+ */
 #minimap {
-  width: 180px;
-  height: 180px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   display: block;
 }
 

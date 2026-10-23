@@ -11,6 +11,13 @@ const MAX = 320;
 const GW = Math.ceil((MAX - MIN) / CELL);
 const GH = GW;
 
+/**
+ * 地图覆盖的世界跨度（米）。`getGridSize()` 把它藏成 min/max 两个数，而画两张图
+ * （世界地图 / 小地图）的人要的其实是"这一格像素对多少米"——以前两边各自手抄，
+ * 小地图那份抄成了 0.135，把整个世界压进一枚针尖。样式或格子改了，这里跟着动。
+ */
+export const MAP_SPAN_M = MAX - MIN;
+
 /** 世界迷雾探索 — 全屏地图数据 */
 export class ExplorationMap {
   /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第八处） */

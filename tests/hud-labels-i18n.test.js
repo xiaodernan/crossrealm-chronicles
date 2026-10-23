@@ -442,6 +442,8 @@ function recordingCtx() {
       fillRect() {}, strokeRect() {}, clearRect() {},
       beginPath() {}, closePath() {}, moveTo() {}, lineTo() {},
       stroke() {}, fill() {}, arc() {}, setLineDash() {},
+      // `drawMinimap()` 每次落笔前先把位图坐标系按 devicePixelRatio 摆正
+      setTransform() {},
     },
   };
 }

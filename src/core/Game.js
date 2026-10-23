@@ -217,6 +217,9 @@ export class Game {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.28;
+    // W-D2 之后 HUD 里有了第二、第三块 canvas（小地图 / 世界地图 / CG），
+    // "铺满视口"这条规则必须只认这一块 —— 它靠 `.gl-canvas` 认领，不再靠元素类型。
+    this.renderer.domElement.classList.add('gl-canvas');
     this.container.appendChild(this.renderer.domElement);
 
     this.composer = new EffectComposer(this.renderer);
