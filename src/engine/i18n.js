@@ -80,6 +80,11 @@ export function getAllKeys() {
  * 找不到键的元素保持原文不动（`t()` 的 [MISSING:] 只在 JS 调用路径出现，
  * DOM 走查路径不把开发期的报错字样写进玩家界面）。
  *
+ * `data-i18n-aria`（W-D2 切片32）：同一份契约套在 `aria-label` 上 —— 读屏软件念的
+ * 就是它，它同样是玩家的界面文案。`aria-label` 既不是 textContent（`data-i18n`
+ * 换不到它）、也不是 `{动作}` 占位（`keyText` 不碰属性），所以单开一个属性名，
+ * 换语言时与 `data-i18n` 同一次走查里换掉。
+ *
  * 无 DOM 的环境（纯逻辑测试 / 早期启动）下走查是 no-op：默认起点在 `document`
  * 缺席时取 null，返回 0 —— `typeof` 探一次而不是让 `applyToGame` 记住哪些环境有 DOM。
  * @param {ParentNode | null} [root] - 走查起点，缺省等于 `document`（若存在）
@@ -94,6 +99,14 @@ export function applyTranslations(root = typeof document !== 'undefined' ? docum
     const value = table[key];
     if (value !== undefined) {
       el.textContent = value;
+      count += 1;
+    }
+  }
+  for (const el of root.querySelectorAll('[data-i18n-aria]')) {
+    const key = el.getAttribute('data-i18n-aria');
+    const value = table[key];
+    if (value !== undefined) {
+      el.setAttribute('aria-label', value);
       count += 1;
     }
   }

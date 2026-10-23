@@ -2582,6 +2582,16 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   autoplay_toast_complete: '🎉 Auto-play complete! All quests advanced',
   autoplay_toast_stopped: 'Auto-play stopped — you can keep exploring manually',
   autoplay_toast_step_failed: 'Step failed: ${label}',
+  hud_aria_boss_hp: 'Boss HP',
+  hud_aria_status_bars: 'Status Bars',
+  hud_aria_spell_bar: 'Spell Bar',
+  hud_aria_spell_slot_1: 'Spell 1',
+  hud_aria_spell_slot_2: 'Spell 2',
+  hud_aria_spell_slot_3: 'Spell 3',
+  hud_aria_spell_slot_4: 'Spell 4',
+  hud_aria_charge: 'Charge Progress',
+  hud_aria_collapse: 'Collapse/Expand',
+  hud_aria_compass: 'Compass',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

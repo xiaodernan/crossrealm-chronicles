@@ -2579,6 +2579,16 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   autoplay_toast_complete: '🎉 自动通关完成！任务已全部推进',
   autoplay_toast_stopped: '已停止自动通关，可继续手动探索',
   autoplay_toast_step_failed: '步骤失败：${label}',
+  hud_aria_boss_hp: 'Boss 血量',
+  hud_aria_status_bars: '状态条',
+  hud_aria_spell_bar: '法术快捷栏',
+  hud_aria_spell_slot_1: '法术 1',
+  hud_aria_spell_slot_2: '法术 2',
+  hud_aria_spell_slot_3: '法术 3',
+  hud_aria_spell_slot_4: '法术 4',
+  hud_aria_charge: '蓄力进度',
+  hud_aria_collapse: '折叠/展开',
+  hud_aria_compass: '罗盘',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

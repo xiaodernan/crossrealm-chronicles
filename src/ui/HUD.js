@@ -92,7 +92,7 @@ buildHUD() {
           <div class="stat-item" id="input-device-display">—</div>
         </div>
       </div>
-      <div id="quest-panel" class="quest-panel" role="region" aria-label="当前任务">
+      <div id="quest-panel" class="quest-panel" role="region" data-i18n-aria="hud_quest_label">
         <div class="quest-header">
           <span class="quest-icon" aria-hidden="true">📜</span>
           <span class="quest-label" data-i18n="hud_quest_label"></span>
@@ -101,7 +101,7 @@ buildHUD() {
         <div class="quest-progress" id="quest-progress" aria-live="polite"></div>
         <div class="quest-guide" id="quest-guide" aria-live="polite"></div>
       </div>
-      <div id="boss-bar-wrap" class="boss-bar-wrap hidden" role="region" aria-label="Boss 血量">
+      <div id="boss-bar-wrap" class="boss-bar-wrap hidden" role="region" data-i18n-aria="hud_aria_boss_hp">
         <div class="boss-header">
           <div class="boss-name" id="boss-name">影界守护者</div>
           <div class="boss-phase" id="boss-phase">阶段 I</div>
@@ -111,7 +111,7 @@ buildHUD() {
           <div class="boss-bar-fill po" id="boss-poise-bar" style="width:0%"></div>
         </div>
       </div>
-      <div class="status-bars" role="region" aria-label="状态条">
+      <div class="status-bars" role="region" data-i18n-aria="hud_aria_status_bars">
         <div class="bar-row hp-row">
           <span class="bar-label" data-i18n="hud_hp"></span>
           <div class="bar-track">
@@ -142,29 +142,29 @@ buildHUD() {
           <span class="bar-value" id="posture-value" aria-live="off">0/60</span>
         </div>
       </div>
-      <div id="spell-bar" class="spell-bar" role="region" aria-label="法术快捷栏">
-        <div class="spell-slot" data-slot="1" role="button" tabindex="0" aria-label="法术 1">
+      <div id="spell-bar" class="spell-bar" role="region" data-i18n-aria="hud_aria_spell_bar">
+        <div class="spell-slot" data-slot="1" role="button" tabindex="0" data-i18n-aria="hud_aria_spell_slot_1">
           <span class="spell-key" data-keys="spell1"></span>
           <span class="spell-name">真火</span>
           <span class="spell-cooldown" aria-hidden="true"></span>
         </div>
-        <div class="spell-slot" data-slot="2" role="button" tabindex="0" aria-label="法术 2">
+        <div class="spell-slot" data-slot="2" role="button" tabindex="0" data-i18n-aria="hud_aria_spell_slot_2">
           <span class="spell-key" data-keys="spell2"></span>
           <span class="spell-name">玄冰</span>
           <span class="spell-cooldown" aria-hidden="true"></span>
         </div>
-        <div class="spell-slot" data-slot="3" role="button" tabindex="0" aria-label="法术 3">
+        <div class="spell-slot" data-slot="3" role="button" tabindex="0" data-i18n-aria="hud_aria_spell_slot_3">
           <span class="spell-key" data-keys="spell3"></span>
           <span class="spell-name">引力</span>
           <span class="spell-cooldown" aria-hidden="true"></span>
         </div>
-        <div class="spell-slot" data-slot="4" role="button" tabindex="0" aria-label="法术 4">
+        <div class="spell-slot" data-slot="4" role="button" tabindex="0" data-i18n-aria="hud_aria_spell_slot_4">
           <span class="spell-key" data-keys="spell4"></span>
           <span class="spell-name">化身</span>
           <span class="spell-cooldown" aria-hidden="true"></span>
         </div>
       </div>
-      <div id="charge-wrap" class="charge-wrap hidden" role="progressbar" aria-label="蓄力进度" aria-valuemin="0" aria-valuemax="100">
+      <div id="charge-wrap" class="charge-wrap hidden" role="progressbar" data-i18n-aria="hud_aria_charge" aria-valuemin="0" aria-valuemax="100">
         <div id="charge-indicator" class="charge-fill"></div>
       </div>
       <div id="lock-target" class="lock-target hidden" aria-hidden="true"></div>
@@ -175,7 +175,7 @@ buildHUD() {
           <span class="panel-drag-icon" aria-hidden="true">⋮⋮</span>
           <span class="panel-title" data-i18n="hud_controls_title"></span>
           <span class="panel-shortcut" id="controls-shortcut">${keyText(t('hud_help_full'))}</span>
-          <button class="panel-collapse-btn" aria-label="折叠/展开" aria-expanded="true">▼</button>
+          <button class="panel-collapse-btn" data-i18n-aria="hud_aria_collapse" aria-expanded="true">▼</button>
         </div>
         <div class="panel-body">
           <div class="ctrl-grid">
@@ -204,7 +204,7 @@ buildHUD() {
           <div id="hint-combat">${keyText(t('hud_hint_combat'))}</div>
           <div id="hint-system">${keyText(t('hud_hint_system'))}</div>
         </div>
-        <div class="compass" id="compass" aria-label="罗盘">N</div>
+        <div class="compass" id="compass" data-i18n-aria="hud_aria_compass">N</div>
       </div>
     `;
     this.bossBarWrap = document.getElementById('boss-bar-wrap');
