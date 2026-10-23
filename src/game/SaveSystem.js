@@ -1,6 +1,7 @@
 import { SaveValidator } from './SaveValidator.js';
 import { CURRENT_VERSION, SAVE_KEYS, migrate, SaveVersionError } from './SaveMigrations.js';
 import { statsFromJSON, statsToJSON } from '../content/objectives.js';
+import { t } from '../engine/i18n.js';
 
 /** 当前写入键；其余历史键只读，迁移成功后保留 */
 const KEY = SAVE_KEYS[0].key;
@@ -95,7 +96,7 @@ export class SaveSystem {
     if (!data) return false;
     const issues = SaveValidator.validate(data);
     if (issues.length) {
-      report(game, `存档校验未通过，已跳过加载：${issues[0]}`);
+      report(game, t('save_apply_validation_failed_fmt', { issue: issues[0] }));
       return false;
     }
     game.stats.fromJSON(data.stats);
@@ -169,16 +170,16 @@ export class SaveSystem {
     const issues = SaveValidator.validate(data);
     if (issues.length) {
       // 结构不合法的档一旦落盘就会覆盖好档，宁可拒绝保存
-      report(game, `保存被拒绝：${issues[0]}`);
+      report(game, t('save_rejected_fmt', { issue: issues[0] }));
       return false;
     }
     try {
       localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
-      report(game, `保存失败：${e?.name ?? 'Error'} ${e?.message ?? ''}`.trim());
+      report(game, t('save_failed', { name: e?.name ?? 'Error', message: e?.message ?? '' }).trim());
       return false;
     }
-    game.dialog?.toast(slot === 0 ? '进度已保存' : `进度已保存 · 槽${slot + 1}`);
+    game.dialog?.toast(slot === 0 ? t('save_success') : t('save_success_slot_fmt', { slot: slot + 1 }));
     window.dispatchEvent(new CustomEvent('game-saved'));
     return true;
   }
@@ -190,9 +191,9 @@ export class SaveSystem {
     try {
       localStorage.setItem(`${key}:corrupt`, raw);
       localStorage.removeItem(key);
-      report(game, `存档 ${key} 已损坏（${err?.message ?? '解析失败'}），原文件转移到 ${key}:corrupt`);
+      report(game, t('save_corrupt_fmt', { key, reason: err?.message ?? t('save_parse_fallback') }));
     } catch (e) {
-      report(game, `存档 ${key} 损坏且无法隔离：${e?.message ?? ''}`);
+      report(game, t('save_corrupt_unquarantined_fmt', { key, message: e?.message ?? '' }));
     }
   }
 
@@ -207,19 +208,19 @@ export class SaveSystem {
       parsed = JSON.parse(raw);
     } catch (err) {
       if (sourceKey) SaveSystem.quarantine(game, sourceKey, raw, err);
-      return fail(`JSON 无法解析：${err.message}`);
+      return fail(t('save_json_parse_failed_fmt', { message: err.message }));
     }
     let result;
     try {
       result = migrate(parsed);
     } catch (err) {
       // 版本高于本构建时绝不改写文件，只提示换用更新版本
-      return fail(err instanceof SaveVersionError ? err.message : `迁移失败：${err?.message ?? err}`);
+      return fail(err instanceof SaveVersionError ? err.message : t('save_migrate_failed_fmt', { message: err?.message ?? err }));
     }
     if (result.applied.length) {
-      report(game, `旧存档 v${result.from} 已迁移到 v${CURRENT_VERSION}（跨 ${result.applied.length} 跳）`);
+      report(game, t('save_migrated_fmt', { from: result.from, to: CURRENT_VERSION, jumps: result.applied.length }));
     }
-    if (!SaveSystem.applyData(game, result.data)) return fail('存档校验未通过');
+    if (!SaveSystem.applyData(game, result.data)) return fail(t('save_validation_failed'));
     return { ok: true, data: result.data, from: result.from, migrated: result.applied.length > 0, reason: '' };
   }
 
@@ -234,16 +235,16 @@ export class SaveSystem {
       try {
         raw = localStorage.getItem(key);
       } catch (e) {
-        report(game, `无法访问浏览器存储：${e?.message ?? e}`);
+        report(game, t('save_storage_unavailable_fmt', { message: e?.message ?? e }));
         return false;
       }
       if (!raw) return false;
       const r = SaveSystem.ingest(game, raw, { sourceKey: key });
       if (!r.ok) {
-        if (r.reason) report(game, `${key} 读取失败：${r.reason}`);
+        if (r.reason) report(game, t('save_read_failed_fmt', { key, reason: r.reason }));
         return false;
       }
-      game.dialog?.toast('存档已加载');
+      game.dialog?.toast(t('load_success'));
       return true;
     }
     for (const { key, version } of SAVE_KEYS) {
@@ -251,18 +252,18 @@ export class SaveSystem {
       try {
         raw = localStorage.getItem(key);
       } catch (e) {
-        report(game, `无法访问浏览器存储：${e?.message ?? e}`);
+        report(game, t('save_storage_unavailable_fmt', { message: e?.message ?? e }));
         return false;
       }
       if (!raw) continue;
       const r = SaveSystem.ingest(game, raw, { sourceKey: key });
       if (!r.ok) {
-        if (r.reason) report(game, `${key} 读取失败：${r.reason}`);
+        if (r.reason) report(game, t('save_read_failed_fmt', { key, reason: r.reason }));
         continue;
       }
       // 迁移结果立即落到当前键；旧键保留一份，回滚到旧构建时仍可读取
       if (version !== CURRENT_VERSION) localStorage.setItem(KEY, JSON.stringify(r.data));
-      game.dialog?.toast('存档已加载');
+      game.dialog?.toast(t('load_success'));
       return true;
     }
     return false;
@@ -301,7 +302,7 @@ export class SaveSystem {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    game.dialog?.toast(`已导出 ${filename}`);
+    game.dialog?.toast(t('save_exported_fmt', { filename }));
   }
 
   static importFile(game, file, slot = 0) {
@@ -310,16 +311,16 @@ export class SaveSystem {
       reader.onload = () => {
         const r = SaveSystem.ingest(game, String(reader.result));
         if (!r.ok) {
-          report(game, `导入失败：${r.reason}`);
+          report(game, t('save_import_failed_fmt', { reason: r.reason }));
           resolve(false);
           return;
         }
         localStorage.setItem(slotKey(slot), JSON.stringify(r.data));
-        game.dialog?.toast('存档已导入并写入浏览器');
+        game.dialog?.toast(t('save_imported'));
         resolve(true);
       };
       reader.onerror = () => {
-        report(game, `导入失败：文件读取错误（${reader.error?.message ?? 'unknown'}）`);
+        report(game, t('save_import_read_failed_fmt', { message: reader.error?.message ?? 'unknown' }));
         resolve(false);
       };
       reader.readAsText(file);

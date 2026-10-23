@@ -1799,10 +1799,28 @@ export const STRINGS_EN = Object.freeze({
   autoplay_start: 'Start Auto Play',
   autoplay_stop: 'Stop Auto Play',
 
-  // Save/Load
-  save_success: 'Game saved',
-  load_success: 'Game loaded',
-  save_failed: 'Save failed',
+  // Save/Load (W-D2 slice 37: the save/load feedback chain enters the dual tables.
+  // save_success / load_success / save_failed were dead keys revived in this slice —
+  // their old values were never shown; they now carry what SaveSystem actually toasts)
+  save_success: 'Progress saved',
+  load_success: 'Save loaded',
+  save_failed: 'Save failed: ${name} ${message}',
+  save_success_slot_fmt: 'Progress saved · Slot ${slot}',
+  save_rejected_fmt: 'Save rejected: ${issue}',
+  save_corrupt_fmt: 'Save ${key} is corrupt (${reason}); the original file was moved to ${key}:corrupt',
+  save_corrupt_unquarantined_fmt: 'Save ${key} is corrupt and could not be quarantined: ${message}',
+  save_migrated_fmt: 'Old save v${from} migrated to v${to} (${jumps} jumps)',
+  save_validation_failed: 'Save validation failed',
+  save_apply_validation_failed_fmt: 'Validation failed, loading skipped: ${issue}',
+  save_json_parse_failed_fmt: 'JSON parse failed: ${message}',
+  save_parse_fallback: 'parse failed',
+  save_migrate_failed_fmt: 'Migration failed: ${message}',
+  save_storage_unavailable_fmt: 'Cannot access browser storage: ${message}',
+  save_read_failed_fmt: 'Failed to read ${key}: ${reason}',
+  save_exported_fmt: 'Exported ${filename}',
+  save_imported: 'Save imported and written to browser storage',
+  save_import_failed_fmt: 'Import failed: ${reason}',
+  save_import_read_failed_fmt: 'Import failed: file read error (${message})',
   settings_keybind_pad_invalid_reason_owner: '${button} belongs to ${owner} and that cell exits through the stick, so it cannot hand this button over',
   settings_keybind_pad_invalid_reason_unknown: '${button} is not a button this table recognizes',
 

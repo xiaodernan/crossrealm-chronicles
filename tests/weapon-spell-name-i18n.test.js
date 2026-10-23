@@ -161,7 +161,7 @@ describe('② 键登记：十二个键两表都在场，键数 2297 → 2304', (
 
   it('键数 2297 → 2304 → 2307，两表逐键对齐', () => {
     expect(ZH_KEYS.length).toBe(EN_KEYS.length);
-    expect(ZH_KEYS.length, '键数不是 2307 —— 双表被别处改过').toBe(2307);
+    expect(ZH_KEYS.length, '键数不是 2323 —— 双表被别处改过').toBe(2323);
   });
 
   it('新键不孤儿：每个新键都在 src 里被引用（死键计数只减不增）', () => {

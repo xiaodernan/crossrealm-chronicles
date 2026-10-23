@@ -1797,10 +1797,27 @@ export const STRINGS_ZH = Object.freeze({
   autoplay_start: '开始自动演示',
   autoplay_stop: '停止自动演示',
 
-  // 存档
-  save_success: '游戏已保存',
-  load_success: '游戏已加载',
-  save_failed: '保存失败',
+  // 存档（W-D2 切片37：存读反馈族整链进双表。save_success / load_success /
+  // save_failed 三枚死键同片复活 —— 原值从未露面，改成 SaveSystem 实际播出的那句）
+  save_success: '进度已保存',
+  load_success: '存档已加载',
+  save_failed: '保存失败：${name} ${message}',
+  save_success_slot_fmt: '进度已保存 · 槽${slot}',
+  save_rejected_fmt: '保存被拒绝：${issue}',
+  save_corrupt_fmt: '存档 ${key} 已损坏（${reason}），原文件转移到 ${key}:corrupt',
+  save_corrupt_unquarantined_fmt: '存档 ${key} 损坏且无法隔离：${message}',
+  save_migrated_fmt: '旧存档 v${from} 已迁移到 v${to}（跨 ${jumps} 跳）',
+  save_validation_failed: '存档校验未通过',
+  save_apply_validation_failed_fmt: '存档校验未通过，已跳过加载：${issue}',
+  save_json_parse_failed_fmt: 'JSON 无法解析：${message}',
+  save_parse_fallback: '解析失败',
+  save_migrate_failed_fmt: '迁移失败：${message}',
+  save_storage_unavailable_fmt: '无法访问浏览器存储：${message}',
+  save_read_failed_fmt: '${key} 读取失败：${reason}',
+  save_exported_fmt: '已导出 ${filename}',
+  save_imported: '存档已导入并写入浏览器',
+  save_import_failed_fmt: '导入失败：${reason}',
+  save_import_read_failed_fmt: '导入失败：文件读取错误（${message}）',
   settings_keybind_pad_invalid_reason_owner: '${button} 归${owner}，而那一格的出口挂在摇杆上，让不出这一枚按钮',
   settings_keybind_pad_invalid_reason_unknown: '${button} 不是这张表认得的按钮',
 
