@@ -7,6 +7,7 @@
  */
 import { SaveValidator, CURRENT_VERSION } from './SaveValidator.js';
 import { MAINLINE, OBJECTIVES } from '../content/objectives.js';
+import { t } from '../engine/i18n.js';
 
 export { CURRENT_VERSION };
 
@@ -34,7 +35,7 @@ export class SaveVersionError extends Error {}
 
 /** v1–v3 从未有过独立 schema，只是缺字段；按 v4 的必填集合补齐后再进入版本链 */
 function ensureV4Shape(d) {
-  if (!d || typeof d !== 'object') throw new SaveVersionError('存档根节点不是对象');
+  if (!d || typeof d !== 'object') throw new SaveVersionError(t('save_migrate_root_not_object'));
   d.player ??= {};
   d.stats ??= {};
   d.quests ??= {};
@@ -417,18 +418,18 @@ export const MIGRATIONS = {
  * @returns {{ data: object, from: number, applied: number[] }}
  */
 export function migrate(input) {
-  if (!input || typeof input !== 'object') throw new SaveVersionError('存档根节点不是对象');
+  if (!input || typeof input !== 'object') throw new SaveVersionError(t('save_migrate_root_not_object'));
   const data = input;
   const from = Number(data.version ?? 0);
   if (from > CURRENT_VERSION) {
-    throw new SaveVersionError(`存档版本 v${from} 高于当前构建支持的 v${CURRENT_VERSION}`);
+    throw new SaveVersionError(t('save_migrate_version_too_new_fmt', { from, supported: CURRENT_VERSION }));
   }
   const applied = [];
   // 无版本号的历史档按 v1 处理（早期构建未写 version 字段）
   data.version = from || 1;
   while (data.version < CURRENT_VERSION) {
     const step = MIGRATIONS[data.version];
-    if (!step) throw new SaveVersionError(`缺少 v${data.version} → v${data.version + 1} 的迁移`);
+    if (!step) throw new SaveVersionError(t('save_migrate_missing_step_fmt', { from: data.version, to: data.version + 1 }));
     step(data);
     applied.push(data.version);
     data.version += 1;
