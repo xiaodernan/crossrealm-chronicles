@@ -110,13 +110,21 @@ export const HUB_ZONE = Object.freeze({
 });
 
 /** 区际走廊 —— 不属于任何位面，中性大气；它同样要有身份，不能是 `null` */
-/** 幽暗林地 —— 迷雾缠绕的古老森林，介于幻想与虚空之间 */
-export const GLOOM_ZONE = Object.freeze({
+/**
+ * 幽暗林地 —— 迷雾缠绕的古老森林，介于幻想与虚空之间。
+ *
+ * **不导出**（2026-10-23 过导出决断）：外部（src + tests）零 import，真正的出口是
+ * `zoneDescriptor(id)`（本文件末尾）—— 它对本模块是可见的，对外是同一份对象。
+ * 描述对象与 `GloomZone` 实例是**两份声明**（实例侧的中心由 `WorldManager` 给字面量），
+ * 两份对齐由 `tests/zone-identity.test.js` 的"描述对象与实例同源"钉住。
+ */
+const GLOOM_ZONE = Object.freeze({
   id: ZONE_IDS.GLOOM,
   // `y: 0` 不是装饰：这座描述对象是 `resolveZone` 对 gloom 的返回值，
   // 于是它（不是 `GloomZone` 实例）就是玩家站在幽暗林地时的 `zone.center`。
   // 室内高度 = `center.y + baseHeight + floor * floorHeight`，缺 y 得到的是 NaN 而不是"差一点"（B120）。
-  // `BaseZone` 的实例侧是另一份同样的声明，两份必须由同一个门禁对着坐标与基准面钉住，否则搬区时烂掉一份。
+  // `BaseZone` 的实例侧是另一份同样的声明，两份由 `tests/zone-identity.test.js` 的
+  // 「描述对象与实例同源」对着坐标与基准面钉住，否则搬区时烂掉一份。
   center: Object.freeze({ x: 180, y: 0, z: 100 }),
   radius: 160,
   mapRadius: 145,
@@ -129,8 +137,8 @@ export const GLOOM_ZONE = Object.freeze({
   }),
 });
 
-/** 辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊 */
-export const RADIANT_ZONE = Object.freeze({
+/** 辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊（不导出，同 `GLOOM_ZONE`） */
+const RADIANT_ZONE = Object.freeze({
   id: ZONE_IDS.RADIANT,
   center: Object.freeze({ x: -180, y: 0, z: -160 }),  // 同 `GLOOM_ZONE`：这座描述对象在辉煌圣域里就是 `zone.center`，室内高度要读它的 `y`（B120）
   radius: 150,

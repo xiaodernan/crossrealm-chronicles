@@ -224,6 +224,59 @@ describe('WorldManager 的区域归属', () => {
     expect(data[1].name).toBe(ZONE_NAMES[ZONE_IDS.FANTASY]);
   });
 });
+/*
+ * ── 描述对象与实例同源（幽暗林地 / 辉煌圣域的双源门禁）──
+ *
+ * `ZoneIdentity.js` 里两座区的静态描述与 `WorldManager.build()` 递给 `GloomZone` /
+ * `RadiantZone` 构造器的字面量是**两份声明**。2026-10-23 过导出决断把描述对象收成模块
+ * 私有时，注释里承诺"两份由 zone-identity 的门禁对着坐标与基准面钉住"—— 承诺落地就在
+ * 这一片：任意一边搬了坐标或半径，玩家站在区里时 `zone.center`（实例侧）与氛围 / 地图
+ * 读的描述对象就会各说各话，而两处都不报错（B120 那一族：室内高度公式读 `center.y`，
+ * 烂掉时是 NaN 而不是异常）。
+ *
+ * 这里走生产路径建**真世界**（`WorldManager.build()`），不手搓实例 —— 手搓的那一份
+ * 字面量恰恰是可能漂的那一份。枢纽不在此列：它没有实例，描述对象就是唯一真源。
+ */
+describe('描述对象与实例同源（幽暗林地 / 辉煌圣域）', () => {
+  let world;
+
+  beforeEach(() => {
+    installWindowShim();
+    world = new WorldManager({ add() {}, remove() {} }, { show() {}, toast() {} });
+    world.build();
+  });
+
+  afterEach(() => { delete globalThis.window; });
+
+  it('幽暗林地：描述对象与实例的中心、半径逐字段相等', () => {
+    const 描述 = zoneDescriptor(ZONE_IDS.GLOOM);
+    const 实例 = world.zones.find((z) => z.id === ZONE_IDS.GLOOM);
+    expect(实例, 'build() 出来的世界里没有幽暗林地实例').toBeTruthy();
+    expect(描述.center.x).toBe(实例.center.x);
+    expect(描述.center.z).toBe(实例.center.z);
+    expect(描述.center.y, '描述对象的 y 必须是 0 —— 室内高度公式读它（B120）').toBe(0);
+    expect(实例.center.y, 'BaseZone 把 center.y 归一成 0').toBe(0);
+    expect(描述.radius).toBe(实例.radius);
+  });
+
+  it('辉煌圣域：同上', () => {
+    const 描述 = zoneDescriptor(ZONE_IDS.RADIANT);
+    const 实例 = world.zones.find((z) => z.id === ZONE_IDS.RADIANT);
+    expect(实例, 'build() 出来的世界里没有辉煌圣域实例').toBeTruthy();
+    expect(描述.center.x).toBe(实例.center.x);
+    expect(描述.center.z).toBe(实例.center.z);
+    expect(描述.center.y).toBe(0);
+    expect(实例.center.y).toBe(0);
+    expect(描述.radius).toBe(实例.radius);
+  });
+
+  it('今天对齐在哪儿：坐标与半径的具体值（将来搬区时这里会红，逼着两处一起改）', () => {
+    expect(zoneDescriptor(ZONE_IDS.GLOOM).center).toEqual({ x: 180, y: 0, z: 100 });
+    expect(zoneDescriptor(ZONE_IDS.GLOOM).radius).toBe(160);
+    expect(zoneDescriptor(ZONE_IDS.RADIANT).center).toEqual({ x: -180, y: 0, z: -160 });
+    expect(zoneDescriptor(ZONE_IDS.RADIANT).radius).toBe(150);
+  });
+});
 
 describe('战斗台词按 id 选池', () => {
   it('五个位面各走各的台词', () => {

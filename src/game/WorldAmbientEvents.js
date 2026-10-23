@@ -10,7 +10,12 @@ import { keyText } from '../content/keyHints.js';
  * 改前这里是裸中文 `'旅途见闻'` —— 日志里那一条的标题永远中文，
  * 切到英文语言时它不变，而同一条的正文会跟着变 —— 一条日志两个语种。
  */
-export const AMBIENT_JOURNAL_TITLE = 'ambient_journal_title';
+/**
+ * 氛围台词进日志时的那一行标题（i18n 键）。**不导出**（2026-10-23 过导出决断）：
+ * 只在本文件用一次，外部零 import；键本身登记在双语文案表里，解析路径由
+ * `tests/world-ambient-events.test.js` 的行为断言盯着（日志条目的标题真的展开成那句话）。
+ */
+const AMBIENT_JOURNAL_TITLE = 'ambient_journal_title';
 
 /**
  * 探索时随机氛围事件 — 区域台词 / 小惊喜。

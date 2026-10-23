@@ -96,8 +96,10 @@ export const ZONE_AMBIENCE = Object.freeze({
   ]),
 });
 
-/** 兜底：认不出的区 id 落这一份（"野外" —— 哪儿都不是时的中性环境声） */
-export const DEFAULT_AMBIENCE_KEY = 'wild';
+/** 兜底：认不出的区 id 落这一份（"野外" —— 哪儿都不是时的中性环境声）。
+ *  **不导出**（2026-10-23 过导出决断）：只在本文件内被 `ambienceOf` 读，外部零 import；
+ *  兜底行为由 `ambienceOf` 的行为断言盯着（见 `tests/dead-export-privatized2.test.js`）。 */
+const DEFAULT_AMBIENCE_KEY = 'wild';
 
 /**
  * 取某座位面的层表；认不出的 id 落 `DEFAULT_AMBIENCE_KEY` 那一档。
@@ -117,7 +119,7 @@ export function ambienceOf(zoneKey) {
 
 /** 每种配方**各自**要的参数。缺一个不会报错 —— 只会静默用兜底值（风没有中心频率就用 400 Hz），
  *  于是"这一层听着不对"没有任何报错可查。这里把每种配方要什么写明，缺一个当场点名。 */
-export const AMBIENCE_KIND_PARAMS = Object.freeze({
+const AMBIENCE_KIND_PARAMS = Object.freeze({
   wind: Object.freeze(['中心频率']),
   rumble: Object.freeze(['频率']),
   drip: Object.freeze(['间隔', '音高']),

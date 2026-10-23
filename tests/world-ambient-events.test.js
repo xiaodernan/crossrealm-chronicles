@@ -185,4 +185,27 @@ describe('世界氛围事件（W-B9 余项：每个真实区域都有自己的�
       expect(s, `seen 的一格"${s}"不是键的形状（应当含 ambient_ 前缀）`).toContain('ambient_');
     }
   });
-});
+  it('氛围条目进日志时，标题展开成「旅途见闻」（私有化标题键的行为腿）', () => {
+    // AMBIENT_JOURNAL_TITLE 于 2026-10-23 过导出决断收成模块内私有（外部零 import）。
+    // 私有化不许把行为带走：日志那一条的标题必须真的是展开后的那句话，
+    // 而不是键本身、更不是某个裸常量 —— 这条腿盯着的就是这个。
+    const journal = [];
+    const game = {
+      dialog: { open: false, toast: () => {} },
+      combatCamera: { blocksInput: () => false },
+      dungeons: { active: false },
+      quests: { chapter: 5 },
+      storyJournal: { add: (e) => journal.push(e) },
+      audio: { loreDiscover() {} },
+      zone: ZONE_IDS.HUB,
+    };
+    const amb = new WorldAmbientEvents(game);
+    amb.setZone(ZONE_IDS.HUB);
+    amb.timer = 0;
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    amb.update(1 / 60, { x: 0, z: 0 });
+    expect(journal.length, '弹了氛围台词却没有写进日志').toBe(1);
+    expect(journal[0].title, '标题还是没展开的键').toBe(keyText(t('ambient_journal_title')));
+    expect(journal[0].title, '标题不是文案表里那句话').toBe('旅途见闻');
+    expect(journal[0].title).not.toContain('ambient_journal_title');
+  });});
