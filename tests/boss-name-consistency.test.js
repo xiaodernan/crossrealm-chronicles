@@ -40,7 +40,10 @@ describe('Boss 显名单源（名册是"它叫什么"的唯一真源）', () => 
   it('过场标题：每只世界 Boss 都用名册全名', () => {
     for (const id of WORLD_IDS) {
       expect(BOSS_CINEMATICS[id]?.title, `${id} 没有过场配置`).toBeTruthy();
-      expect(BOSS_CINEMATICS[id].title, `${id} 过场标题 ≠ 名册全名`).toBe(bossById(id).name);
+      // W-D2 切片17：过场标题存的是名册的 nameKey（"它叫什么"仍只有一个出处），
+      // 展开后必须与名册全名逐字相等。
+      expect(BOSS_CINEMATICS[id].title, `${id} 过场标题没指向名册的 nameKey`).toBe(bossById(id).nameKey);
+      expect(t(BOSS_CINEMATICS[id].title), `${id} 过场标题展开后 ≠ 名册全名`).toBe(bossById(id).name);
     }
   });
 

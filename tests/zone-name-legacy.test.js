@@ -138,7 +138,8 @@ describe('改口之后：三处 label 接的是表，成段文案钉的是字面
     // W-D2 切片15：说明书正文进双表，`hm_body_dungeons` 那一句从 `HelpManual.js` 搬到中文表 ——
     // 钉的仍是"玩家读到的那几个字"，只是换了住址（与 CG 字幕同一处逻辑）。
     expect(srcText('src/content/strings.zh.js')).toContain('· 霍格沃兹遗境 — 禁忌图书馆');
-    expect(srcText('src/cinematic/CinematicManager.js')).toContain("'霍格沃兹遗境 · 位面试炼 II'");
+    // W-D2 切片17：过场文案进双表 —— 钉的仍是玩家读到的那几个字，住址从 CinematicManager 搬到中文表
+    expect(srcText('src/content/strings.zh.js')).toContain("cine_sub_mage: '霍格沃兹遗境 · 位面试炼 II'");
     // W-D2 切片13：CG 字幕进双表之后，这一句的字面从 `dialogueCgPresets.js`（那里现在存的是键）
     // 搬到了中文表 —— 钉的仍是"玩家读到的那几个字"，只是换了住址，不是把这一格删掉。
     expect(srcText('src/content/strings.zh.js')).toContain("cg_caption_magic_start: '霍格沃兹遗境倒影'");

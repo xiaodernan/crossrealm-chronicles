@@ -1443,6 +1443,24 @@ export const STRINGS_ZH = Object.freeze({
   boss_short_singularity: '奇点领主',
   boss_short_chaos: '裂隙领主',
 
+  // Boss 过场文案（W-D2 切片17）：副标题与正文。title 不在此列 —— 它指向名册/图鉴的既有键
+  cine_sub_shadow: '灰白森林 · 位面试炼 I',
+  cine_sub_mage: '霍格沃兹遗境 · 位面试炼 II',
+  cine_sub_singularity: '米勒荒原 · 位面试炼 III',
+  cine_sub_void: '破碎时线 · 隐藏试炼',
+  cine_sub_chaos: '混沌边境 · 终焉试炼',
+  cine_sub_ruin_crypt: '灰白遗城 · 迷宫守钥者',
+  cine_sub_forbidden_library: '禁书图书馆 · 迷宫守钥者',
+  cine_sub_five_dim_rift: '五维裂隙 · 迷宫守钥者',
+  cine_lines_shadow: '「踏入此域者，将承受影界之审判！」\n\n观察脚下红圈 · {parry} 弹反 · {skill} 位面斩',
+  cine_lines_mage: '「奥术的本质，是吞噬一切位面的光。」\n\n躲避紫色法球 · 靠近弹反 · {spell1}–{spell4} 法术牵制',
+  cine_lines_singularity: '「引力从不询问许可——它只索取。」\n\n三阶段引力拉扯 · 轨道弹幕 · 蓄力法术破盾',
+  cine_lines_void: '「时间不是河流——是可被撕裂的布。」\n\nChapter 4 隐藏 Boss · 蓄力真火可打断时停',
+  cine_lines_chaos: '「四界归一，裂隙仍存——唯有斩裂混沌本身。」\n\n三阶段混沌脉冲 · 武器技能树加成 · {swapWeapon} 切换剑/杖',
+  cine_lines_ruin_crypt: '「我只保管门，不询问来者去向。」\n\n45% 血二阶段 · {lockOn} 锁定 · 清空后可 [{interact}] 离开',
+  cine_lines_forbidden_library: '「最后一页，不允许被读到。」',
+  cine_lines_five_dim_rift: '「五维生物的投影 — 在此只有三维。」',
+
   // 位面助手演示步骤（W-D2 切片16i）
   demo_step_anchor: '枢纽 · 世界之锚',
   demo_step_touch_anchor: '触摸世界之锚',

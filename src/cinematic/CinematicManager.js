@@ -3,64 +3,76 @@ import { CAMERA_BLEND, DOF_PRESETS } from '../content/tuning.js';
 import { requestDof, cancelDof } from '../engine/DofManager.js';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const CINEMATIC_CINEMATICMANAGER = 'cinematic/CinematicManager';
 const cineOn = (name, handler) => on(name, handler, CINEMATIC_CINEMATICMANAGER);
 
+/**
+ * Boss 过场文案表（W-D2 切片17：值全部是**文案键**，中英两表各住一份）。
+ *
+ * `title` 刻意**不新起键**：五只世界 Boss 直接指向名册的 `nameKey`
+ * （`boss_name_*`），三只副本守钥者指向图鉴标题键（`boss_lore_*_title`）——
+ * "它叫什么"仍然只有一个出处（`tests/boss-name-consistency.test.js` 同帧核对）。
+ * `subtitle` / `lines` 是本表独有的两句，新登记 `cine_sub_*` / `cine_lines_*`。
+ *
+ * `lines` 里的 `{parry}` / `{lockOn}` 等占位符仍旧在 `Dialog.show` 里由
+ * `keyText()` 展开（键位改绑时过场文案跟着变），这里只负责 `t()` 换语言。
+ */
 export const BOSS_CINEMATICS = {
   'shadow-warden': {
-    title: '影界守护者',
-    subtitle: '灰白森林 · 位面试炼 I',
-    lines: '「踏入此域者，将承受影界之审判！」\n\n观察脚下红圈 · {parry} 弹反 · {skill} 位面斩',
+    title: 'boss_name_shadow',
+    subtitle: 'cine_sub_shadow',
+    lines: 'cine_lines_shadow',
     color: '#aa2222',
     duration: 5.5,
   },
   archmagus: {
-    title: '大奥术师·萨尔林',
-    subtitle: '霍格沃兹遗境 · 位面试炼 II',
-    lines: '「奥术的本质，是吞噬一切位面的光。」\n\n躲避紫色法球 · 靠近弹反 · {spell1}–{spell4} 法术牵制',
+    title: 'boss_name_mage',
+    subtitle: 'cine_sub_mage',
+    lines: 'cine_lines_mage',
     color: '#8844ff',
     duration: 6,
   },
   'singularity-herald': {
-    title: '引力化身·奇点领主',
-    subtitle: '米勒荒原 · 位面试炼 III',
-    lines: '「引力从不询问许可——它只索取。」\n\n三阶段引力拉扯 · 轨道弹幕 · 蓄力法术破盾',
+    title: 'boss_name_singularity',
+    subtitle: 'cine_sub_singularity',
+    lines: 'cine_lines_singularity',
     color: '#4488ff',
     duration: 6.5,
   },
   'void-chronarch': {
-    title: '时线执政官',
-    subtitle: '破碎时线 · 隐藏试炼',
-    lines: '「时间不是河流——是可被撕裂的布。」\n\nChapter 4 隐藏 Boss · 蓄力真火可打断时停',
+    title: 'boss_name_void',
+    subtitle: 'cine_sub_void',
+    lines: 'cine_lines_void',
     color: '#c9a962',
     duration: 5,
   },
   'chaos-overlord': {
-    title: '混沌裂隙领主',
-    subtitle: '混沌边境 · 终焉试炼',
-    lines: '「四界归一，裂隙仍存——唯有斩裂混沌本身。」\n\n三阶段混沌脉冲 · 武器技能树加成 · {swapWeapon} 切换剑/杖',
+    title: 'boss_name_chaos',
+    subtitle: 'cine_sub_chaos',
+    lines: 'cine_lines_chaos',
     color: '#ff2244',
     duration: 6,
   },
   'dungeon-ruin-crypt': {
-    title: '遗城守墓者',
-    subtitle: '灰白遗城 · 迷宫守钥者',
-    lines: '「我只保管门，不询问来者去向。」\n\n45% 血二阶段 · {lockOn} 锁定 · 清空后可 [{interact}] 离开',
+    title: 'boss_lore_ruin_crypt_title',
+    subtitle: 'cine_sub_ruin_crypt',
+    lines: 'cine_lines_ruin_crypt',
     color: '#889977',
     duration: 4.5,
   },
   'dungeon-forbidden-library': {
-    title: '禁书守页人',
-    subtitle: '禁书图书馆 · 迷宫守钥者',
-    lines: '「最后一页，不允许被读到。」',
+    title: 'boss_lore_forbidden_library_title',
+    subtitle: 'cine_sub_forbidden_library',
+    lines: 'cine_lines_forbidden_library',
     color: '#8866cc',
     duration: 4.5,
   },
   'dungeon-five-dim-rift': {
-    title: '裂隙监工',
-    subtitle: '五维裂隙 · 迷宫守钥者',
-    lines: '「五维生物的投影 — 在此只有三维。」',
+    title: 'boss_lore_five_dim_rift_title',
+    subtitle: 'cine_sub_five_dim_rift',
+    lines: 'cine_lines_five_dim_rift',
     color: '#4488cc',
     duration: 4.5,
   },
@@ -117,8 +129,8 @@ export class CinematicManager {
     this.game.cinematicActive = true;
     document.exitPointerLock?.();
 
-    document.getElementById('cine-title').textContent = cfg.title;
-    document.getElementById('cine-subtitle').textContent = cfg.subtitle;
+    document.getElementById('cine-title').textContent = t(cfg.title);
+    document.getElementById('cine-subtitle').textContent = t(cfg.subtitle);
     document.getElementById('cine-title').style.color = cfg.color;
     this.letterbox.classList.remove('hidden');
     this.game.audio.bossRoar();
@@ -156,7 +168,7 @@ export class CinematicManager {
     // cinematicIntro，中段的满模糊整整晚一帧才起步。
     if (this.phase === 'title' && this.timer > 2.2) {
       this.phase = 'dialog';
-      this.game.dialog.show(this.config.title, this.config.lines);
+      this.game.dialog.show(t(this.config.title), t(this.config.lines));
     }
 
     // 过场 DoF：使用预设表驱动，按 phase 自动切换淡入/保持/淡出 ——

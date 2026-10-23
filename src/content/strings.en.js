@@ -1443,6 +1443,25 @@ export const STRINGS_EN = Object.freeze({
   boss_short_singularity: 'Singularity Herald',
   boss_short_chaos: 'Rift Lord',
 
+  // Boss cinematic copy (W-D2 slice 17): subtitles and body lines. No title keys here —
+  // titles point at the existing roster / codex keys.
+  cine_sub_shadow: 'Gloomy Woodland · Plane Trial I',
+  cine_sub_mage: 'Hogwarts Ruins · Plane Trial II',
+  cine_sub_singularity: "Miller's Wastes · Plane Trial III",
+  cine_sub_void: 'Broken Timeline · Hidden Trial',
+  cine_sub_chaos: 'Chaos Border · Final Trial',
+  cine_sub_ruin_crypt: 'Greywhite Ruins · Maze Keywarden',
+  cine_sub_forbidden_library: 'Forbidden Library · Maze Keywarden',
+  cine_sub_five_dim_rift: 'Five-Dimensional Rift · Maze Keywarden',
+  cine_lines_shadow: '"All who enter this realm shall bear the judgment of the shadows!"\n\nWatch the red circle at your feet · {parry} to parry · {skill} Plane Slash',
+  cine_lines_mage: '"The essence of arcane is to devour the light of every plane."\n\nDodge the purple orbs · close in to parry · {spell1}–{spell4} spells to harass',
+  cine_lines_singularity: '"Gravity never asks permission — it only takes."\n\nThree-phase gravity pull · orbital barrage · charged true fire breaks the shield',
+  cine_lines_void: '"Time is not a river — it is cloth that can be torn."\n\nChapter 4 hidden boss · charged true fire can interrupt the time stop',
+  cine_lines_chaos: '"Four realms become one, yet the rifts remain — only cutting chaos itself will do."\n\nThree-phase chaos pulse · weapon skill tree bonuses · {swapWeapon} to swap sword/staff',
+  cine_lines_ruin_crypt: '"I only keep the door; I never ask where visitors go."\n\nSecond phase at 45% health · {lockOn} to lock on · [{interact}] to leave once cleared',
+  cine_lines_forbidden_library: '"The last page is not to be read."',
+  cine_lines_five_dim_rift: '"The projection of a five-dimensional being — here it is only three-dimensional."',
+
   // Plane assistant demo steps (W-D2 slice 16i)
   demo_step_anchor: 'Hub · World Anchor',
   demo_step_touch_anchor: 'Touch the World Anchor',

@@ -41,6 +41,7 @@ import { CUE_CATALOG } from '../src/content/captions.js';
 import { ZONE_NAMES } from '../src/content/ZoneIdentity.js';
 import { JOURNAL_CATEGORIES } from '../src/game/StoryJournal.js';
 import { JOURNAL_EXTRA_TABS } from '../src/ui/JournalTabRegistry.js';
+import { BOSS_CINEMATICS } from '../src/cinematic/CinematicManager.js';
 
 const ZH = new Set(ZH_KEYS);
 const EN = new Set(EN_KEYS);
@@ -59,6 +60,7 @@ const 行表 = [
   { 名: 'HELP_SECTIONS_EXTRA（说明书）', 行: HELP_SECTIONS_EXTRA, 字段: ['title', 'body'] },
   { 名: 'CG_GALLERY_BONUS_EXTRA（CG 画廊）', 行: CG_GALLERY_BONUS_EXTRA, 字段: ['caption', 'speaker'] },
   { 名: 'CUE_CATALOG（字幕）', 行: Object.values(CUE_CATALOG), 字段: ['key'] },
+  { 名: 'BOSS_CINEMATICS（Boss 过场）', 行: Object.values(BOSS_CINEMATICS), 字段: ['title', 'subtitle', 'lines'] },
 ];
 
 /** 映射表：整个对象就是"键 → 键" */
