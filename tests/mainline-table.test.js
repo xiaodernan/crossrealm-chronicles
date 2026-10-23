@@ -674,8 +674,9 @@ describe('③ 章节由门控行按位置说话（chapterGateAfter 与整表不�
   });
 
   it('双向：branchTo 指向不相邻的那一行 → 抓住', () => {
-    const issues = runWith((t) => { t[indexOf('finale')].branchTo = 'ch2-complete'; });
-    expect(issues.some((m) => m.includes('不是紧跟其后的那一行'))).toBe(true);
+    // 当前表：ch4-complete 的前一行是 true-end；改 true-end 的 branchTo 指错位置
+    const issues = runWith((t) => { t[indexOf('true-end')].branchTo = 'ch2-complete'; });
+    expect(issues.some((m) => m.includes('没指回这一格'))).toBe(true);
   });
 
   it('双向：门控行忘了 autoComplete → 主线在那一格断掉', () => {

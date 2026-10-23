@@ -293,7 +293,31 @@ export class QuestSystem {
     const finished = this.current;
     const finishedId = finished?.id;
     const oldChapter = this.chapter;
-    this.questIndex++;
+
+    // W-E3 切片23：分支树——抉择步基于玩家选的 flag 决定下一步；
+    // 非抉择步若声明 branchTo 也走分支（true-end 系列 → ch4-complete）
+    let 分支目标 = null;
+    if (finished?.type === 'choice' && finished.branch) {
+      const 选中的 = objectiveChosen(finished, this.stats);
+      if (选中的 && finished.branch[选中的.flag]) {
+        分支目标 = finished.branch[选中的.flag];
+      }
+    } else if (finished?.branchTo) {
+      分支目标 = finished.branchTo;
+    }
+
+    if (分支目标) {
+      const 目标索引 = MAINLINE.findIndex((r) => r.id === 分支目标);
+      if (目标索引 >= 0) {
+        this.questIndex = 目标索引;
+      } else {
+        // 注册表应已核过 branch 目标必存在；此处仅做防御性回退
+        this.questIndex++;
+      }
+    } else {
+      this.questIndex++;
+    }
+
     const gate = finished ? chapterGateAfter(finished.id) : null;
     if (gate && gate.chapter !== this.chapter) {
       this.chapter = gate.chapter;

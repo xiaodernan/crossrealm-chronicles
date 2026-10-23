@@ -1608,8 +1608,10 @@ export function checkObjectiveTable(table) {
     } else {
       if (row?.announce !== undefined) out.push(`${path}: announce 只有 chapter-gate 那一族才有`);
       if (row?.autoComplete !== undefined) out.push(`${path}: autoComplete 只有 chapter-gate 那一族才有`);
-      if (row?.branchTo && rows[i + 1]?.id !== row.branchTo) {
-        out.push(`${path}: branchTo "${row.branchTo}" 不是紧跟其后的那一行`
+      // W-E3 切片23：branchTo（非抉择步的分支目标）必须指向表里真实存在的一行；
+      // 分支树允许跳过中间步，所以不再强制“紧跟其后”。
+      if (row?.branchTo && !rows.some((r) => r?.id === row.branchTo)) {
+        out.push(`${path}: branchTo "${row.branchTo}" 指向的步在表里不存在 —— 分支目标缺失，玩家走到此处会卡在虚无`
           + (rows[i + 1]?.id ? `（下一行是 "${rows[i + 1].id}"）` : '（它已经是最后一行）'));
       }
       // 切片3a：地下城入口的路点不再由 `game/QuestSystem.js` 手抄，而是按 `dungeonId`

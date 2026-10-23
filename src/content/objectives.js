@@ -602,7 +602,9 @@ export const OBJECTIVES = [
       { id: 'seal', label: 'obj_choice_void_seal_label', flag: 'choice_void_sealed' },
       { id: 'study', label: 'obj_choice_void_study_label', flag: 'choice_void_studied' },
     ],
-  },
+    // W-E3 切片23：分支树——抉择后走不同的下一步
+    // 旗标名是引用（真源是 choices[].flag），注册表核它确有设过
+    },
   {
     id: 'true-end',
     title: 'obj_true_end_title',
