@@ -1844,6 +1844,11 @@ export const STRINGS_ZH = Object.freeze({
   save_migrate_root_not_object: '存档根节点不是对象',
   save_migrate_version_too_new_fmt: '存档版本 v${from} 高于当前构建支持的 v${supported}',
   save_migrate_missing_step_fmt: '缺少 v${from} → v${to} 的迁移',
+  // 面板 title 与暂停菜单槽位标签（W-D2 切片39）：JS 现算，换语言时显式重算
+  panel_drag_handle_title: '拖动移动面板',
+  panel_collapse_toggle_title: '折叠/展开',
+  pause_slot_filled_fmt: '槽${slot} · v${version} · ${time}',
+  pause_slot_empty_fmt: '槽${slot} · 空槽',
   settings_keybind_pad_invalid_reason_owner: '${button} 归${owner}，而那一格的出口挂在摇杆上，让不出这一枚按钮',
   settings_keybind_pad_invalid_reason_unknown: '${button} 不是这张表认得的按钮',
 

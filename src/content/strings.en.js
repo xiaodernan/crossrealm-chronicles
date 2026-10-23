@@ -1847,6 +1847,11 @@ export const STRINGS_EN = Object.freeze({
   save_migrate_root_not_object: 'Save root is not an object',
   save_migrate_version_too_new_fmt: 'Save version v${from} is newer than this build supports (v${supported})',
   save_migrate_missing_step_fmt: 'Missing migration from v${from} to v${to}',
+  // Panel titles and pause-menu slot labels (W-D2 slice 39): JS-rendered, explicitly refreshed on language change
+  panel_drag_handle_title: 'Drag to move panel',
+  panel_collapse_toggle_title: 'Collapse/Expand',
+  pause_slot_filled_fmt: 'Slot ${slot} · v${version} · ${time}',
+  pause_slot_empty_fmt: 'Slot ${slot} · Empty',
   settings_keybind_pad_invalid_reason_owner: '${button} belongs to ${owner} and that cell exits through the stick, so it cannot hand this button over',
   settings_keybind_pad_invalid_reason_unknown: '${button} is not a button this table recognizes',
 

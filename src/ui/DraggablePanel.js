@@ -1,4 +1,10 @@
+import { t } from '../engine/i18n.js';
+
 const STORAGE_PREFIX = 'crossrealm_drag_';
+
+/** 本模块写出去的 title 登记册（W-D2 切片39）：换语言时按册重算，没登记的既有 title 不碰 */
+const DRAG_HANDLES = new Set();
+const COLLAPSE_BTNS = new Set();
 
 /** 让 UI 面板可拖动，位置持久化到 localStorage */
 export function attachDraggable(el, options = {}) {
@@ -9,7 +15,11 @@ export function attachDraggable(el, options = {}) {
   const storageKey = `${STORAGE_PREFIX}${options.storageKey ?? el.id ?? 'panel'}`;
 
   handle.classList.add('panel-drag-handle');
-  handle.title = handle.title || '拖动移动面板';
+  // 只在没有 title 时写（HTML 自带 title 的面板不碰）；写过的登记在册，换语言时重算
+  if (!handle.title) {
+    handle.title = t('panel_drag_handle_title');
+    DRAG_HANDLES.add(handle);
+  }
 
   const saved = localStorage.getItem(storageKey);
   if (saved) {
@@ -97,7 +107,8 @@ export function attachCollapsible(el, options = {}) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'panel-collapse-btn';
-  btn.title = '折叠/展开';
+  btn.title = t('panel_collapse_toggle_title');
+  COLLAPSE_BTNS.add(btn);
   btn.textContent = el.classList.contains('panel-collapsed') ? '+' : '−';
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -107,4 +118,16 @@ export function attachCollapsible(el, options = {}) {
     localStorage.setItem(storageKey, collapsed ? '1' : '0');
   });
   handle.appendChild(btn);
+}
+
+/**
+ * 换语言时把本模块写出去的 title 重算（W-D2 切片39）。
+ *
+ * `attachDraggable` 的 title 是"没有才写"，HTML 自带 title 的面板不在册里、也不会被碰；
+ * 折叠钮是本模块建的，title 始终归本模块。SettingsManager.applyToGame 在
+ * `applyTranslations()` 之后调它 —— DOM 走查只认 `data-i18n`，够不到 title 属性。
+ */
+export function refreshPanelTitles() {
+  for (const h of DRAG_HANDLES) h.title = t('panel_drag_handle_title');
+  for (const b of COLLAPSE_BTNS) b.title = t('panel_collapse_toggle_title');
 }

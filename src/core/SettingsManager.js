@@ -5,6 +5,7 @@ import { DEFAULT_SSAO_QUALITY } from '../engine/ssaoSettings.js';
 import { setSsaoQuality } from '../engine/SsaoPass.js';
 import { DEFAULT_GRAPHICS_PRESET, getGraphicsPreset, normalizeGraphicsPreset } from '../engine/graphicsPresets.js';
 import { setLanguage, applyTranslations } from '../engine/i18n.js';
+import { refreshPanelTitles } from '../ui/DraggablePanel.js';
 import { DEFAULT_COLOR_MODE, setColorVision } from '../game/ColorVision.js';
 import { DEFAULT_DIFFICULTY, setDifficulty } from '../game/Difficulty.js';
 import { DEFAULT_LOOK_SENSITIVITY, applyLookSensitivity, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
@@ -252,6 +253,11 @@ export class SettingsManager {
     game?.restPoints?.refreshNames?.();
     game?.restPointEnhancer?.refreshLabels?.();
     game?.bossBeacons?.refreshLabels?.();
+    // W-D2 切片39：暂停菜单的槽位标签与可拖动/折叠面板的 title 是 JS 现算的 ——
+    // 前者是 <option> 的 textContent、后者是 title 属性，applyTranslations 的
+    // data-i18n 文档走查两者都够不到，只能在这里显式重算。
+    game?.pauseMenu?.refreshSlotOptions?.();
+    refreshPanelTitles();
     // 难度档（W-E1 切片2）：写入口只有这一处（与语言同一形状 —— 整局一份的模块级状态）。
     // `setDifficulty` 内部对脏值回落出厂不抛：存储是玩家可写的，一行手改的 localStorage
     // 不该把开机炸了（`padTuning` / `normalizeShadowQuality` 同一先例）。

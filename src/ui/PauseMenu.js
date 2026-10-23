@@ -1,5 +1,6 @@
 import { SaveSystem } from '../game/SaveSystem.js';
 import { focusFirstItem, parkFocus } from './FocusNav.js';
+import { t } from '../engine/i18n.js';
 
 export class PauseMenu {
   constructor(game) {
@@ -52,8 +53,8 @@ export class PauseMenu {
       const opt = document.createElement('option');
       opt.value = String(s.slot);
       opt.textContent = s.exists
-        ? `槽${s.slot + 1} · v${s.version ?? '?'} · ${this.时刻(s.time)}`
-        : `槽${s.slot + 1} · 空槽`;
+        ? t('pause_slot_filled_fmt', { slot: s.slot + 1, version: s.version ?? '?', time: this.时刻(s.time) })
+        : t('pause_slot_empty_fmt', { slot: s.slot + 1 });
       this.slotSelect.appendChild(opt);
     }
     if ([...this.slotSelect.options].some((o) => o.value === 之前)) this.slotSelect.value = 之前;
