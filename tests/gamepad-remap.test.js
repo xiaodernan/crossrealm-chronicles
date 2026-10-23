@@ -676,7 +676,8 @@ describe('设置面板：多出来的那一列', () => {
     panel.refresh();
     const row = host.innerHTML.split('<div class="keybind-row">').find((r) => r.includes('data-padbind="confirm"'));
     expect(row, '那一格在面板里根本没有行（玩家看不见 A 在界面里干什么）').toBeTruthy();
-    expect(row).toContain('界面确认（A）');
+    // W-D2 切片18：标签进双表，且按门禁去掉冗余的（A）—— 手柄列本来就显示 A
+    expect(row).toContain('界面确认');
     expect(row).not.toMatch(/data-keybind="confirm"/);
     expect(row).toContain('<button type="button" class="keybind-key-none" disabled>');
     // 用**禁用按钮**而不是 `<span>` 是真浏览器读数逼出来的：那一列的宽度挂在按钮上，
@@ -688,7 +689,8 @@ describe('设置面板：多出来的那一列', () => {
   it('切片25：手柄专属名单两头都查 —— 少一行是一格空白，多一行是两处起名', () => {
     expect(() => assertPadOnlyLabels()).not.toThrow();
     expect(() => assertPadOnlyLabels({}, ['confirm'])).toThrow(/没有显示名/);
-    expect(() => assertPadOnlyLabels({ confirm: '界面确认（A）', ghost: '幽灵格' }, ['confirm']))
+    // W-D2 切片18：标签表存键，这里喂的也应是键（ghost 那格照旧是多行起名的反面教材）
+    expect(() => assertPadOnlyLabels({ confirm: 'kb_label_confirm', ghost: '幽灵格' }, ['confirm']))
       .toThrow(/其实在键盘侧有行/);
     // 名单从表推：以后加一格"只有手柄有"的动作，这里会先红，而不是面板上静悄悄少一行
     expect(padOnlyPadActions()).toEqual(['confirm']);
@@ -1041,7 +1043,8 @@ describe('显示与静态门禁', () => {
     // 手柄那半：两份覆盖包都要递给同一个校验入口，只递一份就是"预览时把玩家改过的那几格当出厂"
     expect(src).toMatch(/ui \? this\._padOverrides\(\) : overrides,\s*ui \? overrides : this\._uiPadOverrides\(\)/);
     expect(src).not.toMatch(/resolveGamepadBindings\(/);                       // 绕过入口 = 第二真源
-    expect(src).toMatch(/import \{ keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS \} from '..\/content\/keyLabels\.js'/);
+    // W-D2 切片18：MOUSE_LABELS 的值改成键之后，鼠标那一格改走 mouseLabel（keyLabel 吃不进键）
+    expect(src).toMatch(/import \{ keyLabel, mouseLabel, padButtonLabel, padStickLabel \} from '..\/content\/keyLabels\.js'/);
     // 按钮序号/名字只能问表与标签，面板不许自己 import 进来拼字样
     expect(src).not.toMatch(/import[^;]*\bPAD_BUTTON\b[^;]*from/);
   });

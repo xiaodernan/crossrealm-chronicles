@@ -395,7 +395,7 @@ export const UI_GAMEPAD_BINDINGS = {
  * （切片23 的尾巴）。这张小表只登记"没有别处可问"的那几格，名单由 `padOnlyPadActions` 从表推 ——
  * 少一行是一格空白，多一行就是同一个动作在两处起名（B47 那一族），`assertPadOnlyLabels` 两头都查。
  */
-export const PAD_ONLY_ACTION_LABELS = { confirm: '界面确认（A）' };
+export const PAD_ONLY_ACTION_LABELS = { confirm: 'kb_label_confirm' };
 
 /**
  * 两张手柄表里"键盘侧没有行"的动作名（切片25）：行的匹配键取 `hotkey ?? action`，
@@ -719,16 +719,22 @@ export function bindingFor(action) {
 }
 
 /**
- * 面板上给人看的名字。缺一个就意味着有一行动作在界面上是空的 —— 校验器管这条。
+ * 面板上给人看的名字（W-D2 切片18：值全是文案键 `kb_label_*`，设置面板播出时 `t()` 展开）。
+ * 缺一个就意味着有一行动作在界面上是空的 —— 校验器管这条（键是 truthy 字符串，原校验不动）。
  */
 export const KEY_ACTION_LABELS = {
-  moveUp: '前进', moveDown: '后退', moveLeft: '左移', moveRight: '右移',
-  sprint: '冲刺', jump: '跳跃', roll: '翻滚', parry: '弹反',
-  skill: '战技', lockOn: '锁定', attackLight: '轻击', attackHeavy: '重击',
-  spell1: '法术一', spell2: '法术二', spell3: '法术三', spell4: '法术四',
-  swapWeapon: '换武器', interact: '交互', fastTravel: '快速旅行',
+  moveUp: 'kb_label_move_up', moveDown: 'kb_label_move_down',
+  moveLeft: 'kb_label_move_left', moveRight: 'kb_label_move_right',
+  sprint: 'kb_label_sprint', jump: 'kb_label_jump', roll: 'kb_label_roll', parry: 'style_label_parry',
+  skill: 'kb_label_skill', lockOn: 'kb_label_lock_on',
+  attackLight: 'kb_label_attack_light', attackHeavy: 'kb_label_attack_heavy',
+  spell1: 'kb_label_spell1', spell2: 'kb_label_spell2',
+  spell3: 'kb_label_spell3', spell4: 'kb_label_spell4',
+  swapWeapon: 'kb_label_swap_weapon', interact: 'kb_label_interact', fastTravel: 'fast_travel_title',
   // 编辑器动作（W-B11）
-  editorCycleTemplate: '切换模板', editorToggleGrid: '切换网格', editorDelete: '删除',
+  editorCycleTemplate: 'kb_label_editor_cycle_template',
+  editorToggleGrid: 'kb_label_editor_toggle_grid',
+  editorDelete: 'kb_label_editor_delete',
 };
 
 export function assertKeyActionLabels(labels = KEY_ACTION_LABELS, table = KEY_BINDINGS) {

@@ -3,7 +3,7 @@ import {
   GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, PAD_ONLY_ACTION_LABELS, UI_GAMEPAD_BINDINGS,
   buildBindingTables, padButtonOwner, padCellButtonName, padOnlyPadActions, padScopeOf,
 } from '../content/keybinds.js';
-import { keyLabel, padButtonLabel, padStickLabel, MOUSE_LABELS } from '../content/keyLabels.js';
+import { keyLabel, mouseLabel, padButtonLabel, padStickLabel } from '../content/keyLabels.js';
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
 import { SHADOW_QUALITY_SIZES, normalizeShadowQuality } from '../engine/shadowPolicy.js';
 import { MSAA_SAMPLES, normalizeMsaaSamples } from '../engine/aaPolicy.js';
@@ -32,7 +32,10 @@ export const padKnobId = (key) => `set-${key.replace(CAMEL_EDGE, (m) => `-${m.to
  * 两张都没有就老实退回动作名。toast 里点名"谁和谁换了"用的就是这个名字 ——
  * 给玩家看 `parry` 不等于给玩家看事实（B47 那一族：显示与行为分家）。
  */
-const actionLabel = (action) => KEY_ACTION_LABELS[action] ?? PAD_ONLY_ACTION_LABELS[action] ?? action;
+const actionLabel = (action) => {
+  const key = KEY_ACTION_LABELS[action] ?? PAD_ONLY_ACTION_LABELS[action];
+  return key ? t(key) : action;
+};
 
 export class SettingsPanel {
   constructor(game) {
@@ -172,6 +175,9 @@ export class SettingsPanel {
       lang.addEventListener('change', () => {
         s.set('language', lang.value);
         s.applyToGame(this.game);
+        // 键位区的动作名是 JS 现算的 t()（W-D2 切片18），applyTranslations 扫不到它们：
+        // 不重绘就是"换了语言，这一屏格子还说着旧语言"
+        this.refreshKeybinds();
       });
     }
     // 难度档（W-E1 切片2）：与语言档同一套纪律 —— 选项从名册现推（`difficultyOptions()`，
@@ -439,10 +445,10 @@ export class SettingsPanel {
     const ui = Object.values(this.game.uiPadTable ?? UI_GAMEPAD_BINDINGS).map((e) => ({ ...e, ui: true }));
     const pads = [...combat, ...ui];
     const padFor = (rowAction) => pads.filter((e) => (e.hotkey ?? e.action) === rowAction);
-    const rows = table.map((e) => this.keybindRow(e.action, UI_HOTKEY_LABELS[e.action] ?? e.action, e, padFor(e.action)));
+    const rows = table.map((e) => this.keybindRow(e.action, t(UI_HOTKEY_LABELS[e.action] ?? e.action), e, padFor(e.action)));
     rows.push(`<h4 class="keybind-group">${t('settings_keybind_group_movement_combat')}</h4>`);
     for (const [action, binding] of Object.entries(keys)) {
-      rows.push(this.keybindRow(action, KEY_ACTION_LABELS[action] ?? action, binding, padFor(action)));
+      rows.push(this.keybindRow(action, t(KEY_ACTION_LABELS[action] ?? action), binding, padFor(action)));
     }
     /* 只有手柄有的那几格（切片25）：`confirm` 不冒充任何键盘键，所以它既不在热键表也不在游戏键表里，
      * 过去在清单上根本没有位置 —— 玩家的 A 在界面里干什么，看板上是查无此格。名单从表推
@@ -451,7 +457,7 @@ export class SettingsPanel {
     if (only.length) {
       rows.push(`<h4 class="keybind-group">${t('settings_keybind_group_ui_controller')}</h4>`);
       for (const action of only) {
-        rows.push(this.keybindRow(action, PAD_ONLY_ACTION_LABELS[action], null, padFor(action)));
+        rows.push(this.keybindRow(action, t(PAD_ONLY_ACTION_LABELS[action]), null, padFor(action)));
       }
     }
     rows.push(`<button type="button" id="keybind-reset">${t('settings_keybind_reset')}</button>`);
@@ -486,7 +492,7 @@ export class SettingsPanel {
           ? (binding.aliases ?? []).map((c) => keyLabel(c)).join(' / ')
           : t('settings_keybind_confirm_hint_browser');
     const keyCell = binding
-      ? `<button type="button" data-keybind="${action}">${keyLabel(binding.code ?? MOUSE_LABELS[binding.mouse] ?? '未绑定')}</button>`
+      ? `<button type="button" data-keybind="${action}">${binding.code ? keyLabel(binding.code) : (binding.mouse ? mouseLabel(binding.mouse) : '未绑定')}</button>`
       // 禁用格而不是一个 `<span>`：这一列的宽度挂在按钮上（真浏览器读数里普通行的键盘格是 398px，
       // 而 span 只有 13px —— 手柄那一列会被撑到 294px，整行从此不与其它行对齐）。
       // `disabled` 又同时满足了另外两件事：`navItems` 的 `:not([disabled])` 不会把焦点交给它，

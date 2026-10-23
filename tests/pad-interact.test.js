@@ -17,6 +17,7 @@
  * `interact` 因为判"按过没有"吃 `edge`。
  */
 import { describe, it, expect, afterEach } from 'vitest';
+import { t } from '../src/engine/i18n.js';
 import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, PAD_BUTTON, KEY_BINDINGS,
   KEY_ACTION_LABELS, bindingFor, codeFor, resolveGamepadBindings,
@@ -86,7 +87,8 @@ describe('表里得有"交互"这一格，而且得是对的那一格', () => {
     const cell = Object.values(GAMEPAD_BINDINGS).find((e) => e.action === 'interact');
     expect(cell, '手柄表里还没有 interact 这一格（先补格子再谈标签归属）').toBeTruthy();
     expect(cell.label, '手柄条目自带标签就等于开了第二份名字表').toBeUndefined();
-    expect(KEY_ACTION_LABELS.interact).toBe('交互');
+    // W-D2 切片18：标签表存的是键，展开后才是玩家读到的那两个字
+    expect(t(KEY_ACTION_LABELS.interact)).toBe('交互');
     expect(KEY_BINDINGS.interact, '键盘侧那一格本来就有，手柄这格是补的第二条出口').toBeTruthy();
   });
 });

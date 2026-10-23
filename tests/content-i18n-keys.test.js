@@ -42,6 +42,9 @@ import { ZONE_NAMES } from '../src/content/ZoneIdentity.js';
 import { JOURNAL_CATEGORIES } from '../src/game/StoryJournal.js';
 import { JOURNAL_EXTRA_TABS } from '../src/ui/JournalTabRegistry.js';
 import { BOSS_CINEMATICS } from '../src/cinematic/CinematicManager.js';
+import { KEY_LABELS, MOUSE_LABELS, PAD_BUTTON_LABELS } from '../src/content/keyLabels.js';
+import { UI_HOTKEY_LABELS } from '../src/content/hotkeys.js';
+import { KEY_ACTION_LABELS, PAD_ONLY_ACTION_LABELS } from '../src/content/keybinds.js';
 
 const ZH = new Set(ZH_KEYS);
 const EN = new Set(EN_KEYS);
@@ -61,6 +64,12 @@ const 行表 = [
   { 名: 'CG_GALLERY_BONUS_EXTRA（CG 画廊）', 行: CG_GALLERY_BONUS_EXTRA, 字段: ['caption', 'speaker'] },
   { 名: 'CUE_CATALOG（字幕）', 行: Object.values(CUE_CATALOG), 字段: ['key'] },
   { 名: 'BOSS_CINEMATICS（Boss 过场）', 行: Object.values(BOSS_CINEMATICS), 字段: ['title', 'subtitle', 'lines'] },
+  { 名: 'KEY_LABELS（键码显示名）', 行: Object.values(KEY_LABELS).map((v) => ({ v })), 字段: ['v'] },
+  { 名: 'MOUSE_LABELS（鼠标显示名）', 行: Object.values(MOUSE_LABELS).map((v) => ({ v })), 字段: ['v'] },
+  { 名: 'PAD_BUTTON_LABELS（手柄按钮显示名）', 行: Object.values(PAD_BUTTON_LABELS).map((v) => ({ v })), 字段: ['v'] },
+  { 名: 'UI_HOTKEY_LABELS（热键动作名）', 行: Object.values(UI_HOTKEY_LABELS).map((v) => ({ v })), 字段: ['v'] },
+  { 名: 'KEY_ACTION_LABELS（游戏键动作名）', 行: Object.values(KEY_ACTION_LABELS).map((v) => ({ v })), 字段: ['v'] },
+  { 名: 'PAD_ONLY_ACTION_LABELS（手柄专属动作名）', 行: Object.values(PAD_ONLY_ACTION_LABELS).map((v) => ({ v })), 字段: ['v'] },
 ];
 
 /** 映射表：整个对象就是"键 → 键" */

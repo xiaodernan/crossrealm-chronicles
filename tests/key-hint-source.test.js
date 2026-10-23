@@ -383,6 +383,16 @@ const LEDGER = {
 };
 
 const LIT = /`(?:\\.|[^`\\])*`|'(?:\\.|[^'\n])*'|"(?:\\.|[^"\n])*"/g;
+
+/**
+ * W-D2 切片18：标签表的值搬进双表之后，`strings.*.js` 里多了一批发**显示名本身**的行
+ * （`key_label_control_left: '左 Ctrl'`、`pad_button_label_dpad_up: 'D-pad ↑'`）——
+ * 与四个标签源文件（`keybinds` / `hotkeys` / `keyLabels` / `keyHints`）同一条理由：
+ * 它们是"这一枚键叫什么"，不是"按这一枚键做什么"的操作文案。两把按形状猜的尺子都会
+ * 误报，所以按**行**豁免：只豁免标签键的行，同一文件里的正文一个不放（账本照算）。
+ */
+const LABEL_KEY_LINE = /^\s*(?:key_label_|mouse_label_|pad_button_label_|pad_stick_label|hotkey_label_|kb_label_)[A-Za-z0-9_]*:/;
+const 剥掉标签键行 = (source) => source.split('\n').filter((l) => !LABEL_KEY_LINE.test(l)).join('\n');
 const KEY_PROSE = new RegExp([
   '\\b(?:Esc|F2|F12|Tab|Ctrl|Shift|WASD)\\b',
   '按\\s*[\\[【(]?\\s*[A-Z0-9]\\b',
@@ -403,7 +413,7 @@ const KEY_PROSE = new RegExp([
 
 const proseCount = ({ name, source }) => {
   if (name === 'style.css') return (source.match(KEY_PROSE) || []).length;
-  const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+  const code = 剥掉标签键行(source).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
   return (code.match(LIT) || []).reduce((n, lit) => n + ((lit.match(KEY_PROSE) || []).length), 0);
 };
 
@@ -464,7 +474,7 @@ describe('界面上说出的键名只能从两张表来（字样尺子）', () =
   ];
 
   const labelHits = (source) => {
-    const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+    const code = 剥掉标签键行(source).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
     const out = [];
     for (const lit of code.matchAll(LIT)) {
       // 占位 `{journal}` 展开出来的字样是**问表得来的**，不算抄：先把占位挖掉再找

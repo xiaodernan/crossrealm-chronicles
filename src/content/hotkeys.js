@@ -42,29 +42,32 @@ export const UI_HOTKEYS = [
 
 export const UI_ACTIONS = UI_HOTKEYS.map((e) => e.action);
 
-/** 面板上给人看的名字。缺一个就意味着有一行动作在界面上是空的 —— 校验器管这条 */
+/**
+ * 面板上给人看的名字（W-D2 切片18：值全是文案键 `hotkey_label_*`，设置面板播出时 `t()` 展开）。
+ * 缺一个就意味着有一行动作在界面上是空的 —— 校验器管这条（键是 truthy 字符串，原校验不动）。
+ */
 export const UI_HOTKEY_LABELS = {
-  help: '帮助手册',
-  minimap: '小地图',
-  worldMap: '世界地图',
-  cameraMode: '视角切换',
-  mapMark: '放置路点',
-  mapUnmark: '移除路点',
-  zonePanel: '区域信息',
-  questTracker: '任务追踪',
-  autoPlay: '自动演示',
-  journal: '日志',
-  photoMode: '拍照模式',
-  perfHud: '性能面板',
-  sessionStats: '本局统计',
-  save: '保存',
-  load: '读取',
-  escape: '返回 / 暂停',
-  settings: '设置',
-  uiUp: '面板焦点上移',
-  uiDown: '面板焦点下移',
-  uiLeft: '面板数值调小',
-  uiRight: '面板数值调大',
+  help: 'hotkey_label_help',
+  minimap: 'hotkey_label_minimap',
+  worldMap: 'hotkey_label_world_map',
+  cameraMode: 'hotkey_label_camera_mode',
+  mapMark: 'hotkey_label_map_mark',
+  mapUnmark: 'hotkey_label_map_unmark',
+  zonePanel: 'hotkey_label_zone_panel',
+  questTracker: 'hotkey_label_quest_tracker',
+  autoPlay: 'hotkey_label_auto_play',
+  journal: 'journal_title',
+  photoMode: 'hotkey_label_photo_mode',
+  perfHud: 'start_perf',
+  sessionStats: 'hotkey_label_session_stats',
+  save: 'common_save',
+  load: 'hotkey_label_load',
+  escape: 'hotkey_label_escape',
+  settings: 'settings_title',
+  uiUp: 'hotkey_label_ui_up',
+  uiDown: 'hotkey_label_ui_down',
+  uiLeft: 'hotkey_label_ui_left',
+  uiRight: 'hotkey_label_ui_right',
 };
 
 /**

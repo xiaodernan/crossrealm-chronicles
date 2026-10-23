@@ -5,27 +5,31 @@
  * 于是 HUD 写 "F"、说明书写 "F 弹反"、提示条写 "[E]"，同一枚键在三个界面三种写法。
  * 挪到这里之后它是**显示名的唯一真源**；至于"这个动作现在绑的是哪枚键"，问 `keyHints.js`。
  */
+import { t } from '../engine/i18n.js';
 
-/** 只绑鼠标的动作在界面上的字样 */
-export const MOUSE_LABELS = { left: '鼠标左键', right: '鼠标右键' };
+/**
+ * 只绑鼠标的动作在界面上的字样（W-D2 切片18：值全是文案键，`mouseLabel` 展开）。
+ * 与 `KEY_LABELS` 同一条纪律：表里存的是"这句话住在哪一格"，不是那句话本身。
+ */
+export const MOUSE_LABELS = { left: 'mouse_label_left', right: 'mouse_label_right' };
 
 /**
  * `KeyboardEvent.code` → 看得懂的字样。没列到的原样显示（`Numpad5` 之类），
  * 因为"原样的键码"仍然可读，而"空白"不可读。
  */
 export const KEY_LABELS = {
-  Escape: 'Esc',
-  Tab: 'Tab',
-  Space: '空格',
-  Backquote: '`',
-  ControlLeft: '左 Ctrl',
-  ControlRight: '右 Ctrl',
-  ShiftLeft: '左 Shift',
-  ShiftRight: '右 Shift',
-  ArrowUp: '↑',
-  ArrowDown: '↓',
-  ArrowLeft: '←',
-  ArrowRight: '→',
+  Escape: 'key_label_escape',
+  Tab: 'key_label_tab',
+  Space: 'key_label_space',
+  Backquote: 'key_label_backquote',
+  ControlLeft: 'key_label_control_left',
+  ControlRight: 'key_label_control_right',
+  ShiftLeft: 'key_label_shift_left',
+  ShiftRight: 'key_label_shift_right',
+  ArrowUp: 'key_label_arrow_up',
+  ArrowDown: 'key_label_arrow_down',
+  ArrowLeft: 'key_label_arrow_left',
+  ArrowRight: 'key_label_arrow_right',
 };
 
 /**
@@ -35,14 +39,14 @@ export const KEY_LABELS = {
  * 不需要再 escape 一次 —— 那是切片4 就立好的界碑，别在这里放宽。
  */
 export function keyLabel(code) {
-  if (KEY_LABELS[code]) return KEY_LABELS[code];
+  if (KEY_LABELS[code]) return t(KEY_LABELS[code]);
   const m = /^(?:Key|Digit)([A-Z0-9])$/.exec(code);
   return m ? m[1] : code;
 }
 
 /** 鼠标出口的显示名；未知字样原样返回（校验层已经拦过非法值） */
 export function mouseLabel(which) {
-  return MOUSE_LABELS[which] ?? String(which);
+  return MOUSE_LABELS[which] ? t(MOUSE_LABELS[which]) : String(which);
 }
 
 /**
@@ -53,17 +57,18 @@ export function mouseLabel(which) {
  * 与键码标签同一纪律：**没列到的原样显示**，因为"原样的按钮名"仍可读而"空白"不可读。
  */
 export const PAD_BUTTON_LABELS = {
-  a: 'A', b: 'B', x: 'X', y: 'Y',
-  leftBumper: 'LB', rightBumper: 'RB',
-  leftTrigger: 'LT', rightTrigger: 'RT',
-  select: 'Back', start: 'Start',
-  leftStick: '左摇杆按下', rightStick: '右摇杆按下',
-  dpadUp: '十字键 ↑', dpadDown: '十字键 ↓', dpadLeft: '十字键 ←', dpadRight: '十字键 →',
+  a: 'pad_button_label_a', b: 'pad_button_label_b', x: 'pad_button_label_x', y: 'pad_button_label_y',
+  leftBumper: 'pad_button_label_left_bumper', rightBumper: 'pad_button_label_right_bumper',
+  leftTrigger: 'pad_button_label_left_trigger', rightTrigger: 'pad_button_label_right_trigger',
+  select: 'upgrade_back', start: 'pad_button_label_start',
+  leftStick: 'pad_button_label_left_stick', rightStick: 'pad_button_label_right_stick',
+  dpadUp: 'pad_button_label_dpad_up', dpadDown: 'pad_button_label_dpad_down',
+  dpadLeft: 'pad_button_label_dpad_left', dpadRight: 'pad_button_label_dpad_right',
 };
 
 /** 一枚手柄按钮的显示名 */
 export function padButtonLabel(name) {
-  return PAD_BUTTON_LABELS[name] ?? String(name);
+  return PAD_BUTTON_LABELS[name] ? t(PAD_BUTTON_LABELS[name]) : String(name);
 }
 
 /**
@@ -72,7 +77,8 @@ export function padButtonLabel(name) {
  */
 export function padStickLabel(direction) {
   const arrow = { up: '↑', down: '↓', left: '←', right: '→' }[direction] ?? '?';
-  return `左摇杆 ${arrow} + 十字键 ${arrow}`;
+  // 句式也进双表（切片18）：英文不是"左摇杆 + 十字键"这两个词能拼出来的
+  return t('pad_stick_label', { arrow });
 }
 
 /**
