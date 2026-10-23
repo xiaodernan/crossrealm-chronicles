@@ -115,9 +115,9 @@ export function setHotkeyTable(table) {
   return ACTIVE_HOTKEYS;
 }
 
-export function activeHotkeyTable() {
-  return ACTIVE_HOTKEYS;
-}
+// 曾有一枚 `activeHotkeyTable()`（只回整表 ACTIVE_HOTKEYS）—— 全仓零调用：镜像的真读路是
+// `hotkeyCodeFor`（单键），整表读是 `game.hotkeyTable`（与镜像同一次 setHotkeyTable 写入，
+// 同一个对象）。冗余 getter 已删（门禁 tests/hotkey-active-getter.test.js 钉住）。
 
 /** 生效表换过的次数：只读的消费方（提示文案缓存）拿它判"我手里这份是不是旧的" */
 export function hotkeyEpoch() {
