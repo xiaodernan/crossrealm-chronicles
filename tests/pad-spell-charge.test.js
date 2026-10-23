@@ -103,7 +103,7 @@ describe('按住那一秒真的要被按住：键盘与手柄走同一个判据'
     }
     r.keys[code] = false;
     r.step();
-    expect(r.casts).toEqual([{ id: 'fire', name: '真火咒', charged: true }]);
+    expect(r.casts).toEqual([{ id: 'fire', nameKey: 'spell_name_fire', charged: true }]);
   });
 
   it('手柄长按 LT 一秒 → 蓄力施法', () => {
@@ -114,7 +114,7 @@ describe('按住那一秒真的要被按住：键盘与手柄走同一个判据'
     }
     r.lt(0);
     r.step();
-    expect(r.casts).toEqual([{ id: 'fire', name: '真火咒', charged: true }]);
+    expect(r.casts).toEqual([{ id: 'fire', nameKey: 'spell_name_fire', charged: true }]);
   });
 
   it('手柄按住期间蓄力条在走（不是一帧的闪烁）', () => {
@@ -141,7 +141,7 @@ describe('按住那一秒真的要被按住：键盘与手柄走同一个判据'
     }
     r.lt(0);
     r.step();
-    expect(r.casts).toEqual([{ id: 'fire', name: '真火咒', charged: false }]);
+    expect(r.casts).toEqual([{ id: 'fire', nameKey: 'spell_name_fire', charged: false }]);
   });
 
   it('键盘轻点 {spell1} 同样不算蓄力：门限不许被任何一侧白送', () => {
@@ -153,7 +153,7 @@ describe('按住那一秒真的要被按住：键盘与手柄走同一个判据'
     }
     r.keys[code] = false;
     r.step();
-    expect(r.casts).toEqual([{ id: 'fire', name: '真火咒', charged: false }]);
+    expect(r.casts).toEqual([{ id: 'fire', nameKey: 'spell_name_fire', charged: false }]);
   });
 
   it('手柄按住两秒也只落一发：`level` 不许退成"每帧各一次"（W-A4 那一类）', () => {
