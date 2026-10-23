@@ -2567,6 +2567,18 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   upgrade_skill_cost_fmt: '${cost}点',
   upgrade_skill_lock_boss: '需击败 Boss',
   upgrade_skill_lock_chapter_fmt: '需 Chapter ${chapter}',
+  tutorial_toast_finisher: '连击终结：镜头绕轨锁定 — 此时无法移动/攻击',
+  tutorial_toast_riposte: '致命反击：慢镜头中输入已锁定',
+  tutorial_toast_boss_kill: 'Boss 击破：全屏演出期间输入锁定',
+  tutorial_toast_execution: '处决：短瞬间无法操作',
+  demo_toast_start: '观看模式已开始 — 金色小人将跑完全流程 · {escape} 退出',
+  demo_toast_complete: '小人已跑完全流程通关！按 {questTracker} 可自己继续探索',
+  demo_toast_stopped: '已退出观看模式',
+  demo_toast_step_error: '演示步骤出错：${label}',
+  autoplay_toast_start: '自动通关开始 — 你的角色将跑图并遭遇全部 Boss · {escape} 停止',
+  autoplay_toast_complete: '🎉 自动通关完成！任务已全部推进',
+  autoplay_toast_stopped: '已停止自动通关，可继续手动探索',
+  autoplay_toast_step_failed: '步骤失败：${label}',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

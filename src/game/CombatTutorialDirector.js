@@ -19,10 +19,10 @@ export class CombatTutorialDirector {
   }
 
   _bindEvents() {
-    tutorialOn('combo-finisher', () => this._once('finisher', '连击终结：镜头绕轨锁定 — 此时无法移动/攻击'));
-    tutorialOn('combat-riposte', () => this._once('riposte', '致命反击：慢镜头中输入已锁定'));
+    tutorialOn('combo-finisher', () => this._once('finisher', t('tutorial_toast_finisher')));
+    tutorialOn('combat-riposte', () => this._once('riposte', t('tutorial_toast_riposte')));
     tutorialOn('combat-execution', (e) => {
-      const msg = e.detail?.boss ? 'Boss 击破：全屏演出期间输入锁定' : '处决：短瞬间无法操作';
+      const msg = e.detail?.boss ? t('tutorial_toast_boss_kill') : t('tutorial_toast_execution');
       this._once(e.detail?.boss ? 'bossKill' : 'execution', msg);
     });
   }

@@ -63,7 +63,7 @@ export class PlayerAutoPlay {
       refreshKeyText(this.overlay);
     }
     this._updateBar();
-    this.game.dialog.toast(keyText('自动通关开始 — 你的角色将跑图并遭遇全部 Boss · {escape} 停止'));
+    this.game.dialog.toast(t('autoplay_toast_start'));
     return true;
   }
 
@@ -77,7 +77,7 @@ export class PlayerAutoPlay {
     this.game.autoPlayMode = false;
     if (this.game.questAssistant) this.game.questAssistant.autoPlayRunning = false;
     this.game.dialog.toast(
-      completed ? '🎉 自动通关完成！任务已全部推进' : '已停止自动通关，可继续手动探索'
+      completed ? t('autoplay_toast_complete') : t('autoplay_toast_stopped')
     );
   }
 
@@ -97,10 +97,10 @@ export class PlayerAutoPlay {
     }
     const step = this._currentStep();
     if (this.statusEl) {
-      this.statusEl.textContent = `${this._stepIndex + 1}/${this._steps.length} · ${step.label}`;
+      this.statusEl.textContent = `${this._stepIndex + 1}/${this._steps.length} · ${t(step.label, step.params)}`;
     }
     this._updateBar();
-    this.game.dialog.toast(step.label, 1800);
+    this.game.dialog.toast(t(step.label, step.params), 1800);
 
     if (step.x != null) {
       const p = this.game.player;
@@ -135,7 +135,7 @@ export class PlayerAutoPlay {
       .then(() => this.game.quests.syncProgress())
       .catch((err) => {
         console.error('[AutoPlay]', err);
-        this.game.dialog.toast(`步骤失败：${step.label}`);
+        this.game.dialog.toast(t('autoplay_toast_step_failed', { label: t(step.label, step.params) }));
       })
       .finally(() => { this._actionPending = false; });
   }

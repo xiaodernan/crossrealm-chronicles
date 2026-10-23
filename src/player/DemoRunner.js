@@ -119,7 +119,7 @@ export class DemoRunner {
     }
     this._followLight.visible = true;
 
-    this.game.dialog.toast('观看模式已开始 — 金色小人将跑完全流程 · {escape} 退出');
+    this.game.dialog.toast(t('demo_toast_start'));
     return true;
   }
 
@@ -139,7 +139,7 @@ export class DemoRunner {
       this.game.player.fpWeaponGroup.visible = true;
     }
     if (this.game.questAssistant) this.game.questAssistant.demoRunning = false;
-    this.game.dialog.toast(completed ? '小人已跑完全流程通关！按 {questTracker} 可自己继续探索' : '已退出观看模式');
+    this.game.dialog.toast(completed ? t('demo_toast_complete') : t('demo_toast_stopped'));
   }
 
   _beginStep() {
@@ -149,7 +149,7 @@ export class DemoRunner {
     }
     const step = this._steps[this._stepIndex];
     if (this.statusEl) {
-      this.statusEl.textContent = `${this._stepIndex + 1}/${this._steps.length} · ${step.label}`;
+      this.statusEl.textContent = `${this._stepIndex + 1}/${this._steps.length} · ${t(step.label, step.params)}`;
     }
     if (step.x != null) {
       const dx = step.x - this.position.x;
@@ -175,7 +175,8 @@ export class DemoRunner {
       })
       .catch((err) => {
         console.error('[DemoRunner]', err);
-        this.game.dialog.toast(`演示步骤出错：${this._steps[this._stepIndex]?.label ?? ''}`);
+        const step = this._steps[this._stepIndex];
+        this.game.dialog.toast(t('demo_toast_step_error', { label: step ? t(step.label, step.params) : '' }));
       })
       .finally(() => {
         this._actionPending = false;

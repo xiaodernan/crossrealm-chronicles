@@ -2570,6 +2570,18 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   upgrade_skill_cost_fmt: '${cost} pts',
   upgrade_skill_lock_boss: 'Defeat the Boss first',
   upgrade_skill_lock_chapter_fmt: 'Requires Chapter ${chapter}',
+  tutorial_toast_finisher: 'Combo finisher: camera orbit locked — you cannot move or attack',
+  tutorial_toast_riposte: 'Riposte: input is locked during the slow motion',
+  tutorial_toast_boss_kill: 'Boss defeated: input locked during the full-screen cinematic',
+  tutorial_toast_execution: 'Execution: a brief moment without control',
+  demo_toast_start: 'Watch mode started — the golden runner will clear the full game · {escape} to exit',
+  demo_toast_complete: 'The runner finished the full game! Press {questTracker} to keep exploring yourself',
+  demo_toast_stopped: 'Watch mode exited',
+  demo_toast_step_error: 'Demo step failed: ${label}',
+  autoplay_toast_start: 'Auto-play started — your character will run the map and face every Boss · {escape} to stop',
+  autoplay_toast_complete: '🎉 Auto-play complete! All quests advanced',
+  autoplay_toast_stopped: 'Auto-play stopped — you can keep exploring manually',
+  autoplay_toast_step_failed: 'Step failed: ${label}',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */
