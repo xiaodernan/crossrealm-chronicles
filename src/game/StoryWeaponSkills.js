@@ -18,6 +18,7 @@
  */
 import { BOSS_STAT_KEYS } from '../content/objectives.js';
 import { skillById } from '../content/skillTrees.js';
+import { t } from '../engine/i18n.js';
 
 /**
  * 这只 Boss 打过了吗。格子名问 `BOSS_STAT_KEYS`（未登记的怪 Boss 一律当作没打过 ——
@@ -37,64 +38,69 @@ export function bossDefeated(game, bossId) {
  * `quest`，且 `'spells'` 也不是任何一张任务表里的 id（那条任务叫 `learn-spell`）——
  * 于是那一格是"看起来有门、其实敞着"。现在换成 `spellCasts`（读 `stats.spellCasts`，
  * 正是 `learn-spell` 数的那本账）。
+ * 返回值全部走双表（W-D2 切片43）：每一句是一条 `skill_lock_*_fmt` 模板，
+ * `t()` 按当前语言展开；章节与"击败 Boss"两条**复用**营火升级面板既有的两枚键（同文不建第二键）。
+ * 中文逐字节未动 —— 既有按中文匹配的用例原样绿。插值里的 id（type / skill / bossId /
+ * questId / itemId / achievementId / zoneId / flagId）仍是裸 id：那是"显示名解析"
+ * 另一条线（journal 侧的 `weapon_skill_need_boss_fmt` 已开先例），不在本片范围。
  */
 export function getStoryLockReason(game, skillId) {
   const lock = skillById(skillId)?.lock;
   if (!lock || !game) return null;
   const q = game.quests;
-  if (lock.chapter && (q?.chapter ?? 1) < lock.chapter) return `需 Chapter ${lock.chapter}`;
+  if (lock.chapter && (q?.chapter ?? 1) < lock.chapter) return t('upgrade_skill_lock_chapter_fmt', { chapter: lock.chapter });
   if (lock.loreFragments) {
     const fr = game.storyJournal?.getCounts?.().fragment ?? 0;
-    if (fr < lock.loreFragments) return `需 ${lock.loreFragments} 条叙事碎片 (${fr}/${lock.loreFragments})`;
+    if (fr < lock.loreFragments) return t('skill_lock_fragments_fmt', { need: lock.loreFragments, have: fr });
   }
-if (lock.spellCasts) {
+  if (lock.spellCasts) {
     const n = q?.stats?.spellCasts ?? 0;
-    if (n < lock.spellCasts) return `需施放法术 ${lock.spellCasts} 次 (${n}/${lock.spellCasts})`;
+    if (n < lock.spellCasts) return t('skill_lock_spellcasts_fmt', { need: lock.spellCasts, have: n });
   }
   if (lock.kills) {
     const { type, count } = lock.kills;
     const n = q?.stats?.kills?.[type] ?? 0;
-    if (n < count) return `需击败 ${count} 只 ${type} (${n}/${count})`;
+    if (n < count) return t('skill_lock_kills_fmt', { count, type, have: n });
   }
   if (lock.skillUses) {
     const { skill, count } = lock.skillUses;
     const n = q?.stats?.skillUses?.[skill] ?? 0;
-    if (n < count) return `需使用 ${count} 次 ${skill} (${n}/${count})`;
+    if (n < count) return t('skill_lock_skilluses_fmt', { count, skill, have: n });
   }
   if (lock.bossDefeated) {
     const { bossId, count = 1 } = lock.bossDefeated;
     const defeated = q?.stats?.bossDefeated?.[bossId] ?? 0;
-    if (defeated < count) return `需击败 ${count} 次 ${bossId} (${defeated}/${count})`;
+    if (defeated < count) return t('skill_lock_bosskills_fmt', { count, boss: bossId, have: defeated });
   }
   if (lock.questComplete) {
     const { questId, count = 1 } = lock.questComplete;
     const completed = q?.stats?.questsCompleted?.[questId] ?? 0;
-    if (completed < count) return `需完成 ${count} 次支线 ${questId} (${completed}/${count})`;
+    if (completed < count) return t('skill_lock_quest_fmt', { count, quest: questId, have: completed });
   }
   if (lock.itemCollected) {
     const { itemId, count = 1 } = lock.itemCollected;
     const collected = q?.stats?.itemsCollected?.[itemId] ?? 0;
-    if (collected < count) return `需收集 ${count} 个 ${itemId} (${collected}/${count})`;
+    if (collected < count) return t('skill_lock_item_fmt', { count, item: itemId, have: collected });
   }
   if (lock.achievementUnlocked) {
     const { achievementId, count = 1 } = lock.achievementUnlocked;
     const unlocked = q?.stats?.achievementsUnlocked?.[achievementId] ?? 0;
-    if (unlocked < count) return `需解锁 ${count} 次成就 ${achievementId} (${unlocked}/${count})`;
+    if (unlocked < count) return t('skill_lock_achievement_fmt', { count, achievement: achievementId, have: unlocked });
   }
   if (lock.zoneReached) {
     const { zoneId, count = 1 } = lock.zoneReached;
     const reached = q?.stats?.zonesReached?.[zoneId] ?? 0;
-    if (reached < count) return `需到达 ${count} 次区域 ${zoneId} (${reached}/${count})`;
+    if (reached < count) return t('skill_lock_zone_fmt', { count, zone: zoneId, have: reached });
   }
   if (lock.storyFlag) {
     const { flagId, count = 1 } = lock.storyFlag;
     const flagged = q?.stats?.storyFlags?.[flagId] ?? 0;
-    if (flagged < count) return `需触发 ${count} 次剧情 ${flagId} (${flagged}/${count})`;
+    if (flagged < count) return t('skill_lock_flag_fmt', { count, flag: flagId, have: flagged });
   }
   if (lock.level) {
     const lvl = q?.stats?.level ?? 1;
-    if (lvl < lock.level) return `需 Lv.${lock.level} (当前 Lv.${lvl})`;
+    if (lvl < lock.level) return t('skill_lock_level_fmt', { need: lock.level, have: lvl });
   }
-  if (lock.boss && !bossDefeated(game, lock.boss)) return '需击败对应 Boss';
+  if (lock.boss && !bossDefeated(game, lock.boss)) return t('upgrade_skill_lock_boss');
   return null;
 }
