@@ -1,5 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
-import { refreshKeyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from '../content/keyHints.js';
 import { applyTranslations, t } from '../engine/i18n.js';
 import { BOSS_STAT_KEYS, objectiveDesc } from '../content/objectives.js';
 import { bossById } from '../content/bossRoster.js';
@@ -33,7 +33,7 @@ export class QuestAssistant {
         <strong data-i18n="qa_title">位面助手</strong>
         <button type="button" id="qa-close">×</button>
       </div>
-      <p id="qa-status" class="qa-status" data-ktext="按 {questTracker} 打开助手"></p>
+      <p id="qa-status" class="qa-status">${keyText(t('qa_open_hint'))}</p>
       <p id="qa-hint" class="qa-hint"></p>
       <!-- 抉择按钮（W-E3 切片18）：当前任务是 choice 类型时显示 -->
       <div id="qa-choices" class="qa-choices hidden"></div>
@@ -44,7 +44,7 @@ export class QuestAssistant {
         <button type="button" id="qa-tp" data-i18n="qa_btn_teleport">传送到 Boss/目标</button>
         <button type="button" id="qa-quick" data-i18n="qa_btn_demo">瞬间验收</button>
       </div>
-      <p class="qa-note" data-ktext="左下角「⚡自动通关」或按 {autoPlay} · 角色亲自跑图 · Boss 会现身 · {escape} 停止"></p>
+      <p class="qa-note">${keyText(t('qa_autoplay_note'))}</p>
     `;
     document.body.appendChild(this._panel);
     this._statusEl = this._panel.querySelector('#qa-status');
@@ -66,6 +66,9 @@ export class QuestAssistant {
     this.panelOpen = true;
     // 面板只在构造时建一次 DOM：每次显示前按生效表重算一遍键名（切片6）
     refreshKeyText(this._panel);
+    // W-D2 切片27：状态行与备注行是 JS 现算的带占位句子，每次显示按生效表重算
+    this._statusEl.textContent = keyText(t('qa_open_hint'));
+    this._panel.querySelector('.qa-note').textContent = keyText(t('qa_autoplay_note'));
     // 面板骨架的静态文字走 `data-i18n`（W-D2 切片16h）：换语言时整体重写，
     // 不用重建 DOM —— 重建会丢掉"用户正在看哪一行"的状态。
     applyTranslations(this._panel);

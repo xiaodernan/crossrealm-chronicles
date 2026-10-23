@@ -95,7 +95,7 @@ buildHUD() {
       <div id="quest-panel" class="quest-panel" role="region" aria-label="当前任务">
         <div class="quest-header">
           <span class="quest-icon" aria-hidden="true">📜</span>
-          <span class="quest-label" data-ktext="当前任务"></span>
+          <span class="quest-label" data-i18n="hud_quest_label"></span>
         </div>
         <div class="quest-title" id="quest-title" aria-live="polite"></div>
         <div class="quest-progress" id="quest-progress" aria-live="polite"></div>
@@ -113,14 +113,14 @@ buildHUD() {
       </div>
       <div class="status-bars" role="region" aria-label="状态条">
         <div class="bar-row hp-row">
-          <span class="bar-label" data-ktext="生命"></span>
+          <span class="bar-label" data-i18n="hud_hp"></span>
           <div class="bar-track">
             <div class="bar-fill hp" id="hp-bar" style="width:100%"></div>
           </div>
           <span class="bar-value" id="hp-value" aria-live="off">100/100</span>
         </div>
         <div class="bar-row stamina-row">
-          <span class="bar-label" data-ktext="精力"></span>
+          <span class="bar-label" data-i18n="hud_stamina"></span>
           <div class="bar-track bar-track-st">
             <div class="bar-fill st" id="stamina-bar" style="width:100%"></div>
             <div class="bar-fill roll-cd" id="roll-cd-bar" style="width:0%"></div>
@@ -128,14 +128,14 @@ buildHUD() {
           <span class="bar-value" id="stamina-value" aria-live="off">100/100</span>
         </div>
         <div class="bar-row mana-row">
-          <span class="bar-label" data-ktext="法力"></span>
+          <span class="bar-label" data-i18n="hud_mana"></span>
           <div class="bar-track">
             <div class="bar-fill mana" id="mana-bar" style="width:100%"></div>
           </div>
           <span class="bar-value" id="mana-value" aria-live="off">100/100</span>
         </div>
         <div class="bar-row posture-row hidden" id="lock-row">
-          <span class="bar-label" data-ktext="架势"></span>
+          <span class="bar-label" data-i18n="sem_label_posture"></span>
           <div class="bar-track">
             <div class="bar-fill po" id="posture-bar" style="width:0%"></div>
           </div>
@@ -173,36 +173,36 @@ buildHUD() {
       <div id="controls-teach" class="controls-teach panel-draggable">
         <div class="panel-header panel-drag-handle">
           <span class="panel-drag-icon" aria-hidden="true">⋮⋮</span>
-          <span class="panel-title" data-ktext="操作"></span>
-          <span class="panel-shortcut" data-ktext="{help} 完整说明"></span>
+          <span class="panel-title" data-i18n="hud_controls_title"></span>
+          <span class="panel-shortcut" id="controls-shortcut">${keyText(t('hud_help_full'))}</span>
           <button class="panel-collapse-btn" aria-label="折叠/展开" aria-expanded="true">▼</button>
         </div>
         <div class="panel-body">
           <div class="ctrl-grid">
-            <div class="ctrl-item"><kbd data-keys="moveUp moveLeft moveDown moveRight"></kbd><span data-ktext="移动"></span></div>
-            <div class="ctrl-item"><kbd data-keys="sprint"></kbd><span data-ktext="冲刺"></span></div>
-            <div class="ctrl-item"><kbd data-keys="attackLight"></kbd><span data-ktext="轻击"></span></div>
-            <div class="ctrl-item"><kbd data-keys="attackHeavy"></kbd><span data-ktext="重击"></span></div>
-            <div class="ctrl-item"><kbd data-keys="parry"></kbd><span data-ktext="弹反"></span></div>
-            <div class="ctrl-item"><kbd data-keys="roll"></kbd><span data-ktext="闪避"></span></div>
-            <div class="ctrl-item"><kbd data-keys="lockOn"></kbd><span data-ktext="锁定"></span></div>
-            <div class="ctrl-item"><kbd data-keys="spell1 spell2 spell3 spell4"></kbd><span data-ktext="法术"></span></div>
-            <div class="ctrl-item"><kbd data-keys="interact"></kbd><span data-ktext="交互"></span></div>
-            <div class="ctrl-item"><kbd data-keys="journal"></kbd><span data-ktext="日志/CG"></span></div>
-            <div class="ctrl-item"><kbd data-keys="photoMode"></kbd><span data-ktext="拍照"></span></div>
-            <div class="ctrl-item"><kbd data-keys="sessionStats"></kbd><span data-ktext="本局统计"></span></div>
-            <div class="ctrl-item"><kbd data-keys="questTracker"></kbd><span data-ktext="助手"></span></div>
-            <div class="ctrl-item"><kbd data-keys="cameraMode"></kbd><span data-ktext="视角"></span></div>
-            <div class="ctrl-item"><kbd data-keys="minimap"></kbd><span data-ktext="小地图"></span></div>
-            <div class="ctrl-item"><kbd data-keys="worldMap"></kbd><span data-ktext="全图/路点"></span></div>
-            <div class="ctrl-item"><kbd data-keys="save load"></kbd><span data-ktext="存读"></span></div>
+            <div class="ctrl-item"><kbd data-keys="moveUp moveLeft moveDown moveRight"></kbd><span data-i18n="start_move"></span></div>
+            <div class="ctrl-item"><kbd data-keys="sprint"></kbd><span data-i18n="kb_label_sprint"></span></div>
+            <div class="ctrl-item"><kbd data-keys="attackLight"></kbd><span data-i18n="kb_label_attack_light"></span></div>
+            <div class="ctrl-item"><kbd data-keys="attackHeavy"></kbd><span data-i18n="kb_label_attack_heavy"></span></div>
+            <div class="ctrl-item"><kbd data-keys="parry"></kbd><span data-i18n="style_label_parry"></span></div>
+            <div class="ctrl-item"><kbd data-keys="roll"></kbd><span data-i18n="hud_ctrl_roll"></span></div>
+            <div class="ctrl-item"><kbd data-keys="lockOn"></kbd><span data-i18n="kb_label_lock_on"></span></div>
+            <div class="ctrl-item"><kbd data-keys="spell1 spell2 spell3 spell4"></kbd><span data-i18n="hud_ctrl_spell"></span></div>
+            <div class="ctrl-item"><kbd data-keys="interact"></kbd><span data-i18n="kb_label_interact"></span></div>
+            <div class="ctrl-item"><kbd data-keys="journal"></kbd><span data-i18n="hud_ctrl_journal"></span></div>
+            <div class="ctrl-item"><kbd data-keys="photoMode"></kbd><span data-i18n="hud_ctrl_photo"></span></div>
+            <div class="ctrl-item"><kbd data-keys="sessionStats"></kbd><span data-i18n="hotkey_label_session_stats"></span></div>
+            <div class="ctrl-item"><kbd data-keys="questTracker"></kbd><span data-i18n="hud_ctrl_assistant"></span></div>
+            <div class="ctrl-item"><kbd data-keys="cameraMode"></kbd><span data-i18n="hud_ctrl_camera"></span></div>
+            <div class="ctrl-item"><kbd data-keys="minimap"></kbd><span data-i18n="hotkey_label_minimap"></span></div>
+            <div class="ctrl-item"><kbd data-keys="worldMap"></kbd><span data-i18n="hud_ctrl_world_map"></span></div>
+            <div class="ctrl-item"><kbd data-keys="save load"></kbd><span data-i18n="hud_ctrl_save_load"></span></div>
           </div>
         </div>
       </div>
       <div class="hud-bottom">
         <div class="controls-hint hidden" id="controls-hint" aria-live="polite">
-          <div data-ktext="{attackLight} 连击 · {attackHeavy} 重击/处决 · {parry} 弹反 · {skill} 位面斩 · {lockOn} 锁定 · {roll} 闪避"></div>
-          <div data-ktext="{spell1}~{spell4} 法术 · {swapWeapon} 切换武器 · {fastTravel} 快速旅行 · {help} 说明书 · {escape} 暂停"></div>
+          <div id="hint-combat">${keyText(t('hud_hint_combat'))}</div>
+          <div id="hint-system">${keyText(t('hud_hint_system'))}</div>
         </div>
         <div class="compass" id="compass" aria-label="罗盘">N</div>
       </div>
@@ -270,6 +270,20 @@ buildHUD() {
     // 也走这一条 —— 少了这一句，那两条路上的格子会按上一只手说话，而屏幕上没有一处看起来是错的。
     setHintDevice(this.game.inputDevice?.current() ?? null);
     refreshKeyText(document);
+    // W-D2 切片27：三句带 {动作} 的提示是 JS 现算的（data-i18n 扫不到它们），
+    // 改绑与换语言都从这里重算 —— 少了这一句，改绑之后那三句说的就是旧键名/旧语言
+    this.refreshLabels();
+  }
+
+  /** 三句 JS 现算的提示（W-D2 切片27）：纯标签走 data-i18n 由 applyTranslations 接管，
+   *  这三句带 {动作} 占位、只能 keyText(t(键)) 现算，所以自己有一遍重算 */
+  refreshLabels() {
+    const combat = document.getElementById('hint-combat');
+    if (combat) combat.textContent = keyText(t('hud_hint_combat'));
+    const system = document.getElementById('hint-system');
+    if (system) system.textContent = keyText(t('hud_hint_system'));
+    const shortcut = document.getElementById('controls-shortcut');
+    if (shortcut) shortcut.textContent = keyText(t('hud_help_full'));
   }
 
   setupListeners() {

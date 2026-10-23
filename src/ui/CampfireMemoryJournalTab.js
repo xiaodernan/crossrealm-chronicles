@@ -1,4 +1,5 @@
-import { refreshKeyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 
 /** [J] 营火记忆 Tab */
 export class CampfireMemoryJournalTab {
@@ -32,7 +33,7 @@ export class CampfireMemoryJournalTab {
     ).join('');
 
     panelEl.innerHTML = `
-      <h2 data-ktext="营火记忆 · {journal} 关闭"></h2>
+      <h2>${keyText(t('journal_tab_campfire_memory'))}</h2>
       <p class="cf-stats">共休息 ${stats.total} 次 · ${stats.zones} 处营火 · 对话节点 ${stats.nodeCount} 条</p>
       <div class="cf-section"><h3>休息次数</h3>${rests}</div>
       <div class="cf-filter">${filterBtns}</div>

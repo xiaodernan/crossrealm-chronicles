@@ -24,10 +24,10 @@ export class PlayerAutoPlay {
     this.overlay.className = 'autoplay-overlay hidden';
     this.overlay.innerHTML = `
       <div class="autoplay-screen-glow"></div>
-      <div class="autoplay-badge">⚡ 自动通关 — 请看你的角色移动</div>
-      <div id="autoplay-status" class="autoplay-status">准备…</div>
+      <div class="autoplay-badge">${t('autoplay_badge')}</div>
+      <div id="autoplay-status" class="autoplay-status">${t('autoplay_status_preparing')}</div>
       <div class="autoplay-bar-wrap"><div id="autoplay-bar" class="autoplay-bar"></div></div>
-      <div class="autoplay-hint" data-ktext="{escape} 停止 · {autoPlay} 也可开启"></div>
+      <div class="autoplay-hint">${keyText(t('autoplay_stop_hint'))}</div>
     `;
     document.body.appendChild(this.overlay);
     this.statusEl = this.overlay.querySelector('#autoplay-status');

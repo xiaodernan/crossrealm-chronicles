@@ -1,5 +1,5 @@
 import { CG_ZONE_LABELS } from '../game/CgGallerySystem.js';
-import { refreshKeyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from '../content/keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /**
@@ -103,7 +103,7 @@ export class CgJournalTab {
     ).join('');
 
     panelEl.innerHTML = `
-      <h2 data-ktext="CG 画廊 · {journal} 关闭"></h2>
+      <h2>${keyText(t('journal_tab_cg_gallery'))}</h2>
       <p class="cg-stats">已解锁 ${stats.unlocked} / ${stats.total}（${stats.percent}%）· 收藏 ${stats.favorites}</p>
       <div class="cg-zone-filter">${zones}</div>
       <div class="cg-grid">${grid || '<p class="cg-empty">此区域暂无已解锁 CG — 去营火对话或击败 Boss</p>'}</div>

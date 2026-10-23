@@ -15,7 +15,9 @@ import { join } from 'node:path';
 import { KEY_ACTIONS, KEY_BINDINGS } from '../src/content/keybinds.js';
 import { UI_ACTIONS, UI_HOTKEYS } from '../src/content/hotkeys.js';
 import { keyLabel, mouseLabel } from '../src/content/keyLabels.js';
-import { keyText, refreshKeyText } from '../src/content/keyHints.js';
+import { keyText } from '../src/content/keyHints.js';
+import { STRINGS_ZH } from '../src/content/strings.zh.js';
+import { STRINGS_EN } from '../src/content/strings.en.js';
 // 内容表本体（W-B2 切片4 起，它们的成段文案里带 `{动作}` 占位）
 import { REST_DIALOGUES } from '../src/content/restDialogues.js';
 import { HELP_SECTIONS_EXTRA } from '../src/content/helpManual.js';
@@ -87,35 +89,37 @@ describe('`{动作}` 占位必须是登记过的动作', () => {
   });
 });
 
-describe('开机那一步真的跑得通（W-D1 切片2 回归：HUD 把统计格写成了键名占位）', () => {
+describe('开机那一步真的跑得通（W-D2 切片27：data-ktext 族迁进双表后的开机腿）', () => {
   /**
-   * `Game.rebuildHotkeys()` → `hud.refreshKeyHints()` → `refreshKeyText(document)` 是**开机路径**。
-   * 静态扫描管"占位写得对不对"，这一组管"真展开会不会抛"：2026-10-11 的事故是 HUD 的
-   * 统计格被写成 `data-ktext="魂 {souls} · Lv.{level}"` —— `{souls}` 不是动作，
-   * `keyText` 当场抛 "不是任何已登记的动作"，玩家看到的是**游戏初始化失败**。
-   * 静态扫描当时被白名单压红了（TEMPLATE_VARS），于是绿灯照着一个开不了机的仓库。
+   * 2026-10-11 的事故是 HUD 的统计格被写成 `data-ktext="魂 {souls} · Lv.{level}"`，
+   * `keyText` 当场抛 "不是任何已登记的动作"，玩家看到的是**游戏初始化失败**（B105，已修）。
+   *
+   * W-D2 切片27 把 HUD 全部 26 条 data-ktext 迁进了双表：纯标签走 `data-i18n`
+   * （`applyTranslations` 接管，换语言自动刷新），带 `{动作}` 的三句走 JS 侧
+   * `keyText(t(键))`（`HUD.refreshLabels()` 重算）。开机腿跟着换主语：
+   * **每一条 data-i18n 都必须是两张表都登记的键** —— 少登一个，那一格在英文
+   * 界面下就永远停在中文原文（`applyTranslations` 对找不到的键保持原文不动）。
    */
-  const bootTemplates = () => {
+  const bootDecls = () => {
     const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
     const hud = FILES.find((f) => f.name === 'ui/HUD.js')?.source ?? '';
-    return [html, hud].flatMap((src) => [...src.matchAll(/data-ktext="([^"]*)"/g)].map((m) => m[1]));
+    return [html, hud].flatMap((src) => [...src.matchAll(/data-i18n="([^"]*)"/g)].map((m) => m[1]));
   };
+  const unregistered = (keys) => keys.filter((k) => !(k in STRINGS_ZH) || !(k in STRINGS_EN));
 
-  /** 极简宿主：只实现 refreshKeyText 认的那两个选择器 */
-  const rootOf = (els) => ({ querySelectorAll: (sel) => (sel === '[data-ktext]' ? els : []) });
-
-  it('HUD 与壳页的每一条 data-ktext 都能真的展开，不抛', () => {
-    const templates = bootTemplates();
-    expect(templates.length, '一条都没抓到，抓取本身坏了').toBeGreaterThan(10);
-    const els = templates.map((ktext) => ({ dataset: { ktext }, textContent: '' }));
-    expect(() => refreshKeyText(rootOf(els))).not.toThrow();
-    // 展开之后没有一条还是空的：空 = 那一格压根没被写到（等于开机时是白的）
-    expect(els.filter((el) => el.textContent === '').map((el) => el.dataset.ktext), '这几条没写进去').toEqual([]);
+  it('HUD 与壳页的每一条 data-i18n 都是双表登记的键', () => {
+    const decls = bootDecls();
+    expect(decls.length, '一条都没抓到，抓取本身坏了').toBeGreaterThan(20);
+    expect(unregistered(decls), '这些声明没进双表：英文界面下它们会是中文原文').toEqual([]);
   });
 
-  it('反向控制：写错字的占位当场抛（"不抛"不是因为分支根本没走）', () => {
-    const el = { dataset: { ktext: '按 {pray} 弹反' }, textContent: '' };
-    expect(() => refreshKeyText(rootOf([el]))).toThrow(/不是任何已登记的动作/);
+  it('反向控制：没登记的键必须被这道腿抓出来（防"全都登记"是因为压根没跑）', () => {
+    expect(unregistered(['hud_hp', 'no_such_key_xyz'])).toEqual(['no_such_key_xyz']);
+  });
+
+  it('HUD 模板里不再有带中文的 data-ktext（切片27 结构腿：族已迁完）', () => {
+    const hud = FILES.find((f) => f.name === 'ui/HUD.js').source;
+    expect(hud, 'HUD 里还有裸中文 data-ktext').not.toMatch(/data-ktext="[^"]*[\u4e00-\u9fff]/);
   });
 });
 

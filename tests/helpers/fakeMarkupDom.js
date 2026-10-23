@@ -103,6 +103,11 @@ export function node(tag, doc) {
     get: () => el._html,
     set: (v) => { el._html = String(v); el.children = []; el._text = ''; parse(el, String(v)); },
   });
+  /** 属性四件套（与浏览器对齐）：`applyTranslations` 等真代码路径读的是 getAttribute */
+  el.getAttribute = (name) => (name in el.attrs ? el.attrs[name] : null);
+  el.setAttribute = (name, value) => { el.attrs[name] = String(value); };
+  el.removeAttribute = (name) => { delete el.attrs[name]; };
+  el.hasAttribute = (name) => name in el.attrs;
   el.addEventListener = (type, fn) => { (el.listeners[type] ??= []).push(fn); };
   el.dispatch = (type) => { (el.listeners[type] ?? []).forEach((fn) => fn({ type, target: el })); };
   /** 「玩家点了这一格」= 记一次点击 + 走挂在这格上的 click 监听（浏览器里这本来就是同一件事） */

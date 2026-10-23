@@ -1,5 +1,5 @@
 import { SKILL_BRANCHES, nodesOf, skillById, skillBranchText } from '../content/skillTrees.js';
-import { refreshKeyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from '../content/keyHints.js';
 import { getLanguage, t } from '../engine/i18n.js';
 
 /**
@@ -52,11 +52,11 @@ export class WeaponSkillJournalTab {
     };
 
     panelEl.innerHTML = `
-      <h2 data-ktext="流派技能 · {journal} 关闭"></h2>
+      <h2>${keyText(t('journal_tab_weapon_skills'))}</h2>
       <p class="sk-stats">可用技能点 ${points} · 已解锁 ${unlocked.size} · 营火升级面板可加点</p>
       ${SKILL_BRANCHES.map(renderBranch).join('')}
       ${renderNarrative()}
-      <p class="hint" data-ktext="剧情节点会自动解锁叙事技 · {swapWeapon} 切换剑/杖影响加成"></p>
+      <p class="hint">${keyText(t('weapon_skill_narrative_hint'))}</p>
     `;
 
     refreshKeyText(panelEl);

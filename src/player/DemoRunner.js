@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { refreshKeyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from '../content/keyHints.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
+import { t } from '../engine/i18n.js';
 
 /** 演示行者 — 金色小人，自动跑完全流程，镜头跟随观看（由 update 驱动，不依赖 async 等待） */
 export class DemoRunner {
@@ -74,9 +75,9 @@ export class DemoRunner {
     this.overlay.id = 'spectator-overlay';
     this.overlay.className = 'spectator-overlay hidden';
     this.overlay.innerHTML = `
-      <div class="spectator-badge">🎬 观看小人通关</div>
-      <div id="spectator-status" class="spectator-status">准备中…</div>
-      <div class="spectator-hint" data-ktext="{escape} 退出观看 · 镜头自动跟随，无需转鼠标"></div>
+      <div class="spectator-badge">${t('spectator_badge')}</div>
+      <div id="spectator-status" class="spectator-status">${t('spectator_status_preparing')}</div>
+      <div class="spectator-hint">${keyText(t('spectator_exit_hint'))}</div>
     `;
     document.body.appendChild(this.overlay);
     // 这块遮罩是**开始观看那一刻**才进 DOM 的，赶在 `HUD.refreshKeyHints()` 之后 ——

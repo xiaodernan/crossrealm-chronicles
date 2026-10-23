@@ -241,6 +241,10 @@ export class SettingsManager {
       setLanguage('zh');
     }
     applyTranslations();
+    // W-D2 切片27：HUD 里三句带 {动作} 的提示是 JS 现算的（keyText(t(键))），
+    // applyTranslations 只扫 data-i18n —— 换语言后在这里把 HUD 重算一遍
+    //（改绑那条路走 Game.rebuildHotkeys → hud.refreshKeyHints）
+    game?.hud?.refreshKeyHints?.();
     // 难度档（W-E1 切片2）：写入口只有这一处（与语言同一形状 —— 整局一份的模块级状态）。
     // `setDifficulty` 内部对脏值回落出厂不抛：存储是玩家可写的，一行手改的 localStorage
     // 不该把开机炸了（`padTuning` / `normalizeShadowQuality` 同一先例）。

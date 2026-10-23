@@ -368,7 +368,10 @@ describe('这一手是哪套输入：手柄玩家的提示改说手柄那一格'
       querySelectorAll: (sel) => (sel === '[data-keys]' ? [cell] : []),
     };
     const d = new InputDevice();
-    const hud = { game: { inputDevice: d } };
+    // W-D2 切片27：refreshKeyHints 现在多一步 refreshLabels()（三句 JS 现算的提示），
+    // 桩上记一个数，断言"换手之后那一步也跑了"
+    let labelRounds = 0;
+    const hud = { game: { inputDevice: d }, refreshLabels: () => { labelRounds += 1; } };
     try {
       refreshKeyText(globalThis.document);
       expect(cell.textContent, '还没动过：格子说键盘那一套').toBe('E');
@@ -376,6 +379,7 @@ describe('这一手是哪套输入：手柄玩家的提示改说手柄那一格'
       d.note('gamepad');
       HUD.prototype.refreshKeyHints.call(hud);
       expect(hintDevice(), '换手要写进出口（生产里只有 HUD 那一处会写）').toBe('gamepad');
+      expect(labelRounds, '换手之后没人重算那三句 JS 现算的提示：它们说的还是旧键名').toBe(1);
       expect(cell.textContent, '重算要按新手那一套重写：先同步再重算，顺序反了这格还是旧键名').toBe('右摇杆按下');
 
       d.note('keyboard');

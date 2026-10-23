@@ -1,6 +1,7 @@
-import { refreshKeyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from '../content/keyHints.js';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const GAME_COMBATTUTORIALDIRECTOR = 'game/CombatTutorialDirector';
 const tutorialOn = (name, handler) => on(name, handler, GAME_COMBATTUTORIALDIRECTOR);
@@ -66,7 +67,7 @@ export class CombatInputLock {
       this._hint.className = 'combat-input-lock hidden';
       // 跳过那一枚键写在**声明**里而不是 CSS 的 `content` 上（W-B2 切片5）：伪元素吃不到
       // `data-ktext`，玩家改了返回键，CSS 里那句仍会说他该按 Esc。
-      this._hint.innerHTML = '<span>演出中…</span><span class="combat-input-lock-skip" data-ktext=" · {escape} 跳过"></span>';
+      this._hint.innerHTML = `<span>${t('cinematic_playing')}</span><span class="combat-input-lock-skip">${keyText(t('hint_skip_suffix'))}</span>`;
       document.body.appendChild(this._hint);
       // 这一条是**演出开始那一刻**才进 DOM 的，赶在 `HUD.refreshKeyHints()` 之后，
       // 所以建好就展开一次；之后每次改绑由整份 document 的扫描接住
