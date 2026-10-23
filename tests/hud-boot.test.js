@@ -68,7 +68,7 @@ function bootGame() {
     quests: {
       notifyUpdate() {
         window.dispatchEvent(new CustomEvent('quest-updated', {
-          detail: { chapter: 2, current: { title: '起点', progress: '0/1' } },
+          detail: { chapter: 2, current: { title: 'obj_anchor_title', progress: '0/1' } },
         }));
       },
       getProgressText: () => '0/1',
@@ -139,7 +139,8 @@ describe('HUD 开机构造', () => {
     // 这一格是切片9 收尾时漏的一处：曾经写成 data-i18n + data-params，而 refreshKeyText
     // 只认 data-ktext / data-keys —— 那个写法在运行期把"hud_journal_close_hint"当字面量摆出来。
     // 改走 t() + keyText 之后，这里断言落地的文案是解析过的、且不再含占位或键名。
-    hud.updateZonePanel({ name: '交汇枢纽', subtitle: '位面中心', description: '中心' });
+    // 区名/副标题/描述现在都是文案键（W-D2 切片16i）：夹具也得给键，否则 t() 只会摆出 [MISSING:]
+    hud.updateZonePanel({ name: 'zone_name_hub', subtitle: 'zone_subtitle_hub', description: 'zone_desc_hub' });
     const ps = hud.zonePanel.querySelectorAll('p');
     const closeHint = ps[ps.length - 1];
     expect(closeHint.textContent).toContain('关闭');

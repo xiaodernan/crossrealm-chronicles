@@ -2456,6 +2456,25 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   common_target: '目标',
   qa_toast_arrived_boss_fmt: '已到达 ${label} — 可点「${autoplay}」跑完全流程',
   qa_toast_arrived_fmt: '已到达 ${label} — ${progress}',
+  // Boss 名册显示文案（W-D2 切片24：MAP_BOSS_META / BOSS_DISPLAY / BOSS_APPROACH_INTEL）
+  map_boss_label_shadow: '影界',
+  map_boss_label_mage: '奥术',
+  map_boss_label_singularity: '奇点',
+  boss_waypoint_shadow: '影界守护者 Boss 区',
+  boss_waypoint_mage: '大奥术师 Boss 区',
+  boss_waypoint_singularity: '奇点领主 Boss 区',
+  boss_waypoint_void: '时线执政官 Boss 区',
+  boss_waypoint_chaos: '混沌领主 Boss 区',
+  boss_progress_shadow: '进入灰白森林 Boss 红圈 (X≈-250 Z≈-35)',
+  boss_progress_mage: '魔法 Boss 红圈 (X≈5 Z≈-220)',
+  boss_progress_singularity: '星际 Boss 红圈 (X≈235 Z≈155)',
+  boss_progress_void: '时线 Boss 红圈 (Z≈235 · Ch4+)',
+  boss_progress_chaos: '混沌 Boss 红圈 (X≈-200 Z≈285 · Ch5+)',
+  boss_approach_shadow: '影界守护者 — 灰林东侧。两阶段，红圈砸地前翻滚。',
+  boss_approach_mage: '大奥术师萨尔林 — 霍格沃兹遗境北侧。紫球追踪，弹反可打断。',
+  boss_approach_singularity: '奇点领主 — 米勒荒原。引力圈时向外滚。',
+  boss_approach_void: '时线执政官 — 隐藏试炼。蓄力法术打断时停。',
+  boss_approach_chaos: '混沌裂隙领主 — 终焉 Boss。闪电风暴，贴身穿刺。',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

@@ -11,6 +11,7 @@ import {
 } from '../src/content/objectives.js';
 import { checkObjectiveTable, checkTable, CONTENT_TABLES } from '../src/content/registry.js';
 import { MAP_BOSSES, QuestSystem } from '../src/game/QuestSystem.js';
+import { t } from '../src/engine/i18n.js';
 import { AchievementSystem } from '../src/game/AchievementSystem.js';
 import { attachAchievementExtras } from '../src/game/AchievementSystemExtras.js';
 import { ALL_ACHIEVEMENTS_EXTRA } from '../src/content/achievements.js';
@@ -753,10 +754,12 @@ describe('④ 派生出来的 MAP_BOSSES 喂得动它的六个消费者', () => 
     for (const b of MAP_BOSSES) d.update(99, { x: b.x, z: b.z });   // dt 顺带把 8 秒冷却走完
     expect(box.toasts).toHaveLength(MAP_BOSSES.length);
     expect(box.entries.map((e) => e.id)).toEqual(MAP_BOSSES.map((b) => `boss-beacon-${b.bossId}`));
-    // 播报的是给玩家看的那段 Boss 介绍，不是地图上那两个字的简称
+    // 播报的是给玩家看的那段 Boss 介绍，不是信标上那两个字的简称（W-D2 切片24：两者现在都是键）
     for (const [i, e] of box.entries.entries()) {
-      expect(e.text.length).toBeGreaterThan(MAP_BOSSES[i].label.length);
-      expect(e.text).toContain(MAP_BOSSES[i].label.slice(0, 1));
+      const 简称 = t(MAP_BOSSES[i].label);
+      expect(e.title, '日志标题是信标简称').toBe(简称);
+      expect(e.text.length).toBeGreaterThan(简称.length);
+      expect(e.text).not.toContain('[MISSING:');
     }
   });
 

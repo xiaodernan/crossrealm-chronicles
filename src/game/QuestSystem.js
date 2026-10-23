@@ -88,11 +88,11 @@ const dungeonWaypoint = (id) => {
  * 没有任何一处会红。如今按 `bossId` 从主线表取。
  */
 const MAP_BOSS_META = {
-  'shadow-warden': { label: '影界', short: 'B1', color: '#ff5555' },
-  'archmagus': { label: '奥术', short: 'B2', color: '#aa55ff' },
-  'singularity-herald': { label: '奇点', short: 'B3', color: '#5588ff' },
-  'void-chronarch': { label: '时线', short: 'B4', color: '#ddbb55' },
-  'chaos-overlord': { label: '混沌', short: 'B5', color: '#ff3366' },
+  'shadow-warden': { label: 'map_boss_label_shadow', short: 'B1', color: '#ff5555' },
+  'archmagus': { label: 'map_boss_label_mage', short: 'B2', color: '#aa55ff' },
+  'singularity-herald': { label: 'map_boss_label_singularity', short: 'B3', color: '#5588ff' },
+  'void-chronarch': { label: 'hud_map_anchor_timeline', short: 'B4', color: '#ddbb55' },
+  'chaos-overlord': { label: 'hud_map_anchor_chaos', short: 'B5', color: '#ff3366' },
 };
 
 /** 世界地图 Boss 标记（小地图骷髅），顺序 = 主线表里那五行 Boss 的表序 */
@@ -112,12 +112,12 @@ export const MAP_BOSSES = MAINLINE
  * 为什么不再按类型名（`boss` / `boss2` / …）各写一遍"读哪个计数器"：那是把
  * `BOSS_STAT_KEYS` 那份名册抄进显示层。这里的文本含坐标读数，由用例逐格对过主线表。
  */
-const BOSS_DISPLAY = {
-  'shadow-warden': { progress: '进入灰白森林 Boss 红圈 (X≈-250 Z≈-35)', waypoint: '影界守护者 Boss 区' },
-  'archmagus': { progress: '魔法 Boss 红圈 (X≈5 Z≈-220)', waypoint: '大奥术师 Boss 区' },
-  'singularity-herald': { progress: '星际 Boss 红圈 (X≈235 Z≈155)', waypoint: '奇点领主 Boss 区' },
-  'void-chronarch': { progress: '时线 Boss 红圈 (Z≈235 · Ch4+)', waypoint: '时线执政官 Boss 区' },
-  'chaos-overlord': { progress: '混沌 Boss 红圈 (X≈-200 Z≈285 · Ch5+)', waypoint: '混沌领主 Boss 区' },
+export const BOSS_DISPLAY = {
+  'shadow-warden': { progress: 'boss_progress_shadow', waypoint: 'boss_waypoint_shadow' },
+  'archmagus': { progress: 'boss_progress_mage', waypoint: 'boss_waypoint_mage' },
+  'singularity-herald': { progress: 'boss_progress_singularity', waypoint: 'boss_waypoint_singularity' },
+  'void-chronarch': { progress: 'boss_progress_void', waypoint: 'boss_waypoint_void' },
+  'chaos-overlord': { progress: 'boss_progress_chaos', waypoint: 'boss_waypoint_chaos' },
 };
 
 export class QuestSystem {
@@ -412,7 +412,7 @@ export class QuestSystem {
         return keyText(t(objectiveDesc(q, this.stats)));
       default: {
         const bossKey = BOSS_STAT_KEYS[q.bossId];
-        if (bossKey) return this.stats[bossKey] ? t('quest_progress_dungeon', { dungeon_done: t('quest_state_done') }) : BOSS_DISPLAY[q.bossId].progress;
+        if (bossKey) return this.stats[bossKey] ? t('quest_progress_dungeon', { dungeon_done: t('quest_state_done') }) : t(BOSS_DISPLAY[q.bossId].progress);
         return keyText(t(objectiveDesc(q, this.stats)));
       }
     }

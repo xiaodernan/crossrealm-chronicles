@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
-import { MAP_BOSSES, QuestSystem } from '../src/game/QuestSystem.js';
+import { MAP_BOSSES, BOSS_DISPLAY, QuestSystem } from '../src/game/QuestSystem.js';
+import { t } from '../src/engine/i18n.js';
 import { SaveSystem } from '../src/game/SaveSystem.js';
 import {
   MAINLINE, OBJECTIVES, STAT_EVENTS, BOSS_STAT_KEYS, STAT_READINGS,
@@ -173,12 +174,13 @@ describe('Boss：名册一次查表，位置对应由坐标反证', () => {
       probe.questIndex = MAINLINE.indexOf(row);
       const other = roster.find((id) => id !== row.bossId);
       probe.stats[BOSS_STAT_KEYS[other]] = true;      // 别的 Boss 死了
-      expect(probe.getProgressText()).toContain('Boss 红圈');
+      // 进度文案现在是键（W-D2 切片24）：断言的是“指向这一只”，即展开后等于这一只自己的那一格
+      expect(probe.getProgressText()).toBe(t(BOSS_DISPLAY[row.bossId].progress));
       const wp = probe.getQuestWaypoint();
       expect([wp.x, wp.z]).toEqual([MAP_BOSSES[roster.indexOf(row.bossId)].x, MAP_BOSSES[roster.indexOf(row.bossId)].z]);
-      expect(wp.label).toContain('Boss 区');
+      expect(wp.label).toBe(BOSS_DISPLAY[row.bossId].waypoint);
       probe.stats[BOSS_STAT_KEYS[row.bossId]] = true; // 它自己死了才算过
-      expect(probe.getProgressText()).toBe('完成');
+      expect(probe.getProgressText()).toBe(t('quest_state_done'));
     }
   });
 

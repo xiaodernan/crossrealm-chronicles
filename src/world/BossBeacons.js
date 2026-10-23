@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { MAP_BOSSES } from '../game/QuestSystem.js';
+import { t } from '../engine/i18n.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { releaseSubtree } from '../engine/releaseSubtree.js';
 
@@ -95,7 +96,7 @@ export class BossBeacons {
 
     const labelDiv = document.createElement('div');
     labelDiv.className = 'boss-beacon-label';
-    labelDiv.innerHTML = `<strong>💀 ${short}</strong><span>${name}</span>`;
+    labelDiv.innerHTML = `<strong>💀 ${short}</strong><span>${t(name)}</span>`;
     const label = new CSS2DObject(labelDiv);
     label.position.set(0, gy + 16, 0);
     g.add(label);

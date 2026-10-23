@@ -70,7 +70,7 @@ export class BossRematchDirector {
     const em = this.game.enemyManager;
     const active = em.enemies?.some((e) => e.bossId === beacon.bossId && e.alive);
     if (active) {
-      this.game.dialog.toast(t('boss_rematch_already_present', { name: beacon.label }));
+      this.game.dialog.toast(t('boss_rematch_already_present', { name: t(beacon.label) }));
       return;
     }
     const spawn = BOSS_SPAWN[beacon.bossId];
@@ -78,7 +78,7 @@ export class BossRematchDirector {
 
     spawn(em, beacon.x, beacon.z);
     this.cooldown = 12;
-    this.game.dialog.toast(t('boss_rematch_started', { name: beacon.label }), 2800);
+    this.game.dialog.toast(t('boss_rematch_started', { name: t(beacon.label) }), 2800);
     this.game.stats.addSouls(5);
     window.dispatchEvent(new CustomEvent('boss-rematch-started', { detail: { bossId: beacon.bossId } }));
     window.dispatchEvent(new CustomEvent('stats-changed', { detail: this.game.stats.toJSON() }));

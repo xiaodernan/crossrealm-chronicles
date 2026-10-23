@@ -14,7 +14,7 @@
  * 1. 结构腿：`TARGET_WAYPOINTS` 9 格的 label 全是双表键（表从源码里现抠，
  *    不手抄清单 —— 手抄一份就会和源码各自漂）。
  * 2. 钉文案腿：9 格键名 + 13 个新键的中英原值逐字钉死。
- * 3. 行为腿：主线每一行（Boss 行除外，归切片24）切中/切英重放
+ * 3. 行为腿：主线每一行切中/切英重放
  *    `getQuestDirectionText` / `getProgressText` / `getAssistantHint`：
  *    不许出现 `[MISSING:`，英文输出不许夹中文。
  * 4. 静态腿：`getProgressText` 与 `_tryAutoAction` 两个函数体里不许有中文串字面量。
@@ -24,7 +24,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { QuestSystem } from '../src/game/QuestSystem.js';
-import { MAINLINE, BOSS_STAT_KEYS } from '../src/content/objectives.js';
+import { MAINLINE } from '../src/content/objectives.js';
 import { STRINGS_ZH } from '../src/content/strings.zh.js';
 import { STRINGS_EN } from '../src/content/strings.en.js';
 import { setLanguage } from '../src/engine/i18n.js';
@@ -147,7 +147,6 @@ describe('任务指路族双表化（W-D2 切片23）', () => {
     const 漏网 = [];
     for (let i = 0; i < MAINLINE.length; i++) {
       const row = MAINLINE[i];
-      if (BOSS_STAT_KEYS[row.bossId]) continue; // Boss 行的 waypoint/progress 归切片24
       for (const lang of ['zh', 'en']) {
         setLanguage(lang);
         qs.questIndex = i;

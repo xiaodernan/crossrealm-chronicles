@@ -2459,6 +2459,25 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   common_target: 'Target',
   qa_toast_arrived_boss_fmt: 'Arrived at ${label} — click "${autoplay}" to run the full flow',
   qa_toast_arrived_fmt: 'Arrived at ${label} — ${progress}',
+  // Boss roster display copy (W-D2 slice 24: MAP_BOSS_META / BOSS_DISPLAY / BOSS_APPROACH_INTEL)
+  map_boss_label_shadow: 'Shadowrealm',
+  map_boss_label_mage: 'Arcane',
+  map_boss_label_singularity: 'Singularity',
+  boss_waypoint_shadow: 'Shadowrealm Warden — Boss area',
+  boss_waypoint_mage: 'Grand Arcanist — Boss area',
+  boss_waypoint_singularity: 'Singularity Herald — Boss area',
+  boss_waypoint_void: 'Chronarch — Boss area',
+  boss_waypoint_chaos: 'Chaos Overlord — Boss area',
+  boss_progress_shadow: 'Enter the red circle in Greywhite Forest (X≈-250 Z≈-35)',
+  boss_progress_mage: 'Magic Boss red circle (X≈5 Z≈-220)',
+  boss_progress_singularity: 'Star-field Boss red circle (X≈235 Z≈155)',
+  boss_progress_void: 'Timeline Boss red circle (Z≈235 · Ch4+)',
+  boss_progress_chaos: 'Chaos Boss red circle (X≈-200 Z≈285 · Ch5+)',
+  boss_approach_shadow: 'Shadowrealm Warden — east of the Greywhite Forest. Two phases; roll before the red circle slams down.',
+  boss_approach_mage: 'Grand Arcanist Salrin — north of the Hogwarts Ruins. The purple orbs track you; a parry can interrupt them.',
+  boss_approach_singularity: 'Singularity Herald — Miller\'s Wastes. Roll outward when the gravity ring pulls.',
+  boss_approach_void: 'Chronarch — hidden trial. Interrupt the time stop with a charged spell.',
+  boss_approach_chaos: 'Chaos Rift Overlord — the final Boss. Lightning storm; stay close for the thrust.',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */
