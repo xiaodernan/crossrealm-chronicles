@@ -635,18 +635,23 @@ buildHUD() {
    */
   ensureBackToList() {
     const panel = this.journalPanel;
-    if (!panel || panel.querySelector('.journal-back-btn')) return;
-    const back = document.createElement('button');
-    back.type = 'button';
-    back.className = 'journal-back-btn';
-    back.textContent = '← 返回日志清单';
-    back.addEventListener('click', () => {
-      this.journalTab = 'all';
-      this.updateJournal();
-    });
-    const h2 = panel.querySelector('h2');
-    if (h2) h2.after(back);
-    else panel.prepend(back);
+    if (!panel) return;
+    let back = panel.querySelector('.journal-back-btn');
+    if (!back) {
+      back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'journal-back-btn';
+      back.addEventListener('click', () => {
+        this.journalTab = 'all';
+        this.updateJournal();
+      });
+      const h2 = panel.querySelector('h2');
+      if (h2) h2.after(back);
+      else panel.prepend(back);
+    }
+    // W-D2 切片28：按钮只建一次（早退过的那个判断拆掉了），语言文字每次重设 ——
+    // 换语言之后再开日志，这一颗要说是新语言的那一句
+    back.textContent = t('hud_journal_back');
   }
 
   updateZonePanel(zone) {
@@ -744,7 +749,7 @@ buildHUD() {
     const dx = tx - px;
     const dz = tz - pz;
     const dist = Math.hypot(dx, dz);
-    const dirs = ['北', '东北', '东', '东南', '南', '西南', '西', '西北'];
+    const dirs = [t('dir_north'), t('dir_northeast'), t('dir_east'), t('dir_southeast'), t('dir_south'), t('dir_southwest'), t('dir_west'), t('dir_northwest')];
     const ang = Math.atan2(dx, dz);
     const idx = Math.round(ang / (Math.PI / 4)) & 7;
     return `▶ ${dirs[(idx + 8) % 8]} · ${Math.round(dist)}m · ${label}`;
@@ -783,12 +788,12 @@ buildHUD() {
     }
 
     const zoneLabels = [
-      { x: 0, z: 55, t: '枢纽' },
-      { x: -200, z: 0, t: '森林' },
-      { x: 0, z: -180, t: '魔法' },
-      { x: 200, z: 80, t: '星际' },
-      { x: 0, z: 220, t: '时线' },
-      { x: -200, z: 220, t: '混沌' },
+      { x: 0, z: 55, key: 'hud_map_anchor_hub' },
+      { x: -200, z: 0, key: 'hud_map_anchor_forest' },
+      { x: 0, z: -180, key: 'hud_map_anchor_magic' },
+      { x: 200, z: 80, key: 'hud_map_anchor_space' },
+      { x: 0, z: 220, key: 'hud_map_anchor_timeline' },
+      { x: -200, z: 220, key: 'hud_map_anchor_chaos' },
     ];
 
     const roads = WINDING_ROUTES.filter((r) => r.id !== 'hub-ring');
@@ -820,7 +825,7 @@ buildHUD() {
     for (const lb of zoneLabels) {
       ctx.fillStyle = 'rgba(255,255,255,0.55)';
       ctx.font = '9px sans-serif';
-      ctx.fillText(lb.t, cx + lb.x * scale - 10, cy + lb.z * scale + 3);
+      ctx.fillText(t(lb.key), cx + lb.x * scale - 10, cy + lb.z * scale + 3);
     }
 
     this._drawMapMarkers(ctx, cx, cy, scale, w, h, MAP_BOSSES);
@@ -844,11 +849,11 @@ buildHUD() {
     }
 
     for (const def of [
-      { x: -190, z: 25, t: '遗城' },
-      { x: -35, z: -200, t: '图书馆' },
-      { x: 175, z: 95, t: '裂隙' },
-      { x: -230, z: -15, t: '神龛' },
-      { x: 28, z: 72, t: '墓穴' },
+      { x: -190, z: 25, key: 'hud_map_anchor_ruin' },
+      { x: -35, z: -200, key: 'hud_map_anchor_library' },
+      { x: 175, z: 95, key: 'hud_map_anchor_rift' },
+      { x: -230, z: -15, key: 'hud_map_anchor_shrine' },
+      { x: 28, z: 72, key: 'hud_map_anchor_tomb' },
     ]) {
       ctx.fillStyle = '#bb77ff';
       ctx.beginPath();
@@ -856,7 +861,7 @@ buildHUD() {
       ctx.fill();
       ctx.fillStyle = 'rgba(200,160,255,0.8)';
       ctx.font = '7px sans-serif';
-      ctx.fillText(def.t, cx + def.x * scale + 5, cy + def.z * scale + 2);
+      ctx.fillText(t(def.key), cx + def.x * scale + 5, cy + def.z * scale + 2);
     }
 
     for (const rp of this.game.restPoints?.points ?? []) {
@@ -915,7 +920,7 @@ buildHUD() {
     if (isAuto) {
       ctx.fillStyle = 'rgba(102,204,255,0.9)';
       ctx.font = '8px sans-serif';
-      ctx.fillText('自动', cx + p.x * scale + 8, cy + p.z * scale + 3);
+      ctx.fillText(t('hud_map_player_auto'), cx + p.x * scale + 8, cy + p.z * scale + 3);
     }
   }
 
@@ -973,7 +978,7 @@ buildHUD() {
     const hint = this.game.dungeons.getExplorationHint();
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.font = '8px sans-serif';
-    ctx.fillText(`探索 ${hint?.visited}/${hint?.total} · 清空 ${hint?.cleared}/${hint?.total}`, 6, h - 8);
+    ctx.fillText(t('hud_map_explore_fmt', { visited: hint?.visited ?? 0, total: hint?.total ?? 0, cleared: hint?.cleared ?? 0 }), 6, h - 8);
   }
 }
 

@@ -71,6 +71,8 @@ export const STRINGS_ZH = Object.freeze({
   hud_hp: '生命',
   hud_mana: '法力',
   hud_quest_label: '当前任务',
+  hud_map_player_auto: '自动',
+  hud_map_explore_fmt: '探索 ${visited}/${total} · 清空 ${cleared}/${total}',
   hud_stamina: '精力',
   hud_controls_title: '操作',
   hud_ctrl_roll: '闪避',

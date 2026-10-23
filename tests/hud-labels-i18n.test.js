@@ -22,6 +22,10 @@
  * 4. 混合句腿：三句带占位的提示中英两语无 [MISSING:]、无残留花括号、含展开键名。
  * 5. 换语言腿：切英文后 data-i18n 格子与三句提示都跟着改口（这条是本片新拿到的）。
  * 6. 静态腿：HUD.js 不再有中文 data-ktext；其余七个文件同理。
+ *
+ * 切片28（小地图与返回链）的门禁在同文件末尾第二个 describe 块：
+ * zone/POI 标签与八方位复用既有键，'自动' 与探索页脚各开新键，
+ * 返回按钮改为只建一次、文本每次重设（换语言后重开日志即改口）。
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -262,10 +266,212 @@ describe('HUD 标签双表化（W-D2 切片27）', () => {
     expect(HUD源码, '找不到 refreshLabels 方法').toContain('refreshLabels() {');
   });
 
-  it('键数腿：双表对齐且键数只增不减（2232 → 更多或持平）', () => {
+  it('键数腿：双表对齐且键数只增不减（2234 → 更多或持平）', () => {
     const zhKeys = Object.keys(STRINGS_ZH);
     const enKeys = Object.keys(STRINGS_EN);
     expect(zhKeys.length).toBe(enKeys.length);
-    expect(zhKeys.length).toBeGreaterThanOrEqual(2232);
+    expect(zhKeys.length).toBeGreaterThanOrEqual(2234);
   });
 });
+
+/**
+ * HUD 小地图与返回链双表化（W-D2 切片28）。
+ *
+ * 背景：drawMinimap 一族（zone 标签 / POI 标签 / 自动跟跑标记 / 地牢探索页脚）、
+ * `_dirTo` 八方位、`ensureBackToList` 的返回按钮全是裸中文 —— 英玩看到的是中文地图。
+ * 修法：
+ * - zone/POI 标签与八方位**复用既有键**（双表原值与旧字面量逐字相同，不造新键）；
+ * - '自动' 与探索页脚各开一个新键（`hud_map_player_auto` / `hud_map_explore_fmt`）；
+ * - 返回按钮改为只建一次、文本每次重设 —— 换语言之后再开日志，按钮跟着改口。
+ *
+ * 腿：
+ * 1. 钉文案腿：2 个新键 + 19 个复用键的中英原值逐字钉死（防"顺手改口径"）。
+ * 2. 静态腿：五个方法体引号内无裸中文；`t: '中文'` 与 `fillText('自动')` 绝迹。
+ * 3. 行为腿·返回链：按钮只建一次；切英文后 ensureBackToList 重设文本。
+ * 4. 行为腿·世界小地图：canvas 桩录 fillText，中英两语 zone/POI/自动标签正确。
+ * 5. 行为腿·地牢小地图：探索页脚插值正确（探索 3/8 · 清空 1/8）。
+ * 6. 行为腿·_dirTo：正北目标返回 '北' / 'N'。
+ */
+describe('HUD 小地图与返回链双表化（W-D2 切片28）', () => {
+  /** 2 个新键 + 复用的 11 个锚点键 */
+  const NEW_KEYS = {
+    hud_map_player_auto: ['自动', 'Auto'],
+    hud_map_explore_fmt: ['探索 ${visited}/${total} · 清空 ${cleared}/${total}', 'Explored ${visited}/${total} · Cleared ${cleared}/${total}'],
+    hud_journal_back: ['← 返回日志清单', '← Back to journal list'],
+  };
+  const ANCHORS = {
+    hud_map_anchor_hub: ['枢纽', 'Hub'],
+    hud_map_anchor_forest: ['森林', 'Forest'],
+    hud_map_anchor_magic: ['魔法', 'Magic'],
+    hud_map_anchor_space: ['星际', 'Space'],
+    hud_map_anchor_timeline: ['时线', 'Timeline'],
+    hud_map_anchor_chaos: ['混沌', 'Chaos'],
+    hud_map_anchor_ruin: ['遗城', 'Ruins'],
+    hud_map_anchor_library: ['图书馆', 'Library'],
+    hud_map_anchor_rift: ['裂隙', 'Rift'],
+    hud_map_anchor_shrine: ['神龛', 'Shrine'],
+    hud_map_anchor_tomb: ['墓穴', 'Tomb'],
+  };
+  const DIRS = {
+    dir_north: ['北', 'N'],
+    dir_northeast: ['东北', 'NE'],
+    dir_east: ['东', 'E'],
+    dir_southeast: ['东南', 'SE'],
+    dir_south: ['南', 'S'],
+    dir_southwest: ['西南', 'SW'],
+    dir_west: ['西', 'W'],
+    dir_northwest: ['西北', 'NW'],
+  };
+
+  beforeAll(() => {
+    globalThis.localStorage = fakeStorage();
+    setLanguage('zh');
+  });
+
+  afterAll(() => {
+    offAll('ui/HUD');
+    delete globalThis.document;
+    delete globalThis.localStorage;
+    setLanguage('zh');
+  });
+
+  it('钉文案腿：2 个新键 + 19 个复用键的中英原值逐字钉死', () => {
+    const all = { ...NEW_KEYS, ...ANCHORS, ...DIRS };
+    expect(Object.keys(all)).toHaveLength(22);
+    for (const [key, [zh, en]] of Object.entries(all)) {
+      expect(STRINGS_ZH[key], `zh 表里 ${key} 的原值被改了`).toBe(zh);
+      expect(STRINGS_EN[key], `en 表里 ${key} 的原值被改了`).toBe(en);
+    }
+  });
+
+  it('静态腿：五个方法体引号内无裸中文，旧写法绝迹', () => {
+    for (const name of ['ensureBackToList', '_dirTo', 'drawMinimap', '_drawMapMarkers', '_drawDungeonMinimap']) {
+      const body = new RegExp(`\\n  ${name}\\([^)]*\\) \\{([\\s\\S]*?)\\n {2}\\}`).exec(HUD源码)?.[1];
+      expect(body, `${name} 方法体没抓到（门禁自己坏了）`).toBeTruthy();
+      expect(body, `${name} 里还有引号内裸中文`).not.toMatch(/['"`][^'"`\n]*[\u4e00-\u9fff][^'"`\n]*['"`]/);
+    }
+    expect(HUD源码, '小地图标签又写回 t 字段裸中文了').not.toMatch(/\bt:\s*'[^']*[\u4e00-\u9fff]/);
+    expect(HUD源码, '自动标记又写回裸中文了').not.toMatch(/fillText\('自动'/);
+  });
+
+  it('接线腿：ensureBackToList 每次重设按钮文本（反向控制：改回早退必须红）', () => {
+    const body = /\n {2}ensureBackToList\(\) \{([\s\S]*?)\n {2}\}/.exec(HUD源码)?.[1] ?? '';
+    expect(body, 'HUD 里抓不到 ensureBackToList 方法体（门禁自己坏了）').toContain("back.textContent = t('hud_journal_back')");
+    expect(body, '返回按钮不再是查了再建').toContain("panel.querySelector('.journal-back-btn')");
+  });
+
+  it('行为腿·返回链：按钮只建一次，切英文后重开日志按钮改口', () => {
+    setLanguage('zh');
+    const doc = bootDoc();
+    globalThis.document = doc;
+    const hud = new HUD(bootGame());
+    hud.ensureBackToList();
+    const btn = doc.querySelector('.journal-back-btn');
+    expect(btn, '返回按钮没建出来').toBeTruthy();
+    expect(btn.textContent).toBe('← 返回日志清单');
+    hud.ensureBackToList();
+    expect(doc.querySelectorAll('.journal-back-btn'), '按钮被重复创建').toHaveLength(1);
+    setLanguage('en');
+    hud.ensureBackToList();
+    expect(btn.textContent, '换语言后返回按钮没改口').toBe('← Back to journal list');
+    expect(doc.querySelectorAll('.journal-back-btn')).toHaveLength(1);
+    hud.dispose?.();
+    setLanguage('zh');
+  });
+
+  it('行为腿·世界小地图：中英两语 zone/POI/自动标签都走 t()，无 [MISSING:]', () => {
+    const want = {
+      zh: ['枢纽', '森林', '魔法', '星际', '时线', '混沌', '遗城', '图书馆', '裂隙', '神龛', '墓穴', '自动'],
+      en: ['Hub', 'Forest', 'Magic', 'Space', 'Timeline', 'Chaos', 'Ruins', 'Library', 'Rift', 'Shrine', 'Tomb', 'Auto'],
+    };
+    for (const lang of ['zh', 'en']) {
+      setLanguage(lang);
+      const doc = bootDoc();
+      globalThis.document = doc;
+      const rec = recordingCtx();
+      doc.hosts.minimap.getContext = () => rec.ctx;
+      const hud = new HUD(minimapGame({ autoPlayMode: true, playerAutoPlay: { active: true } }));
+      hud.drawMinimap();
+      for (const label of want[lang]) {
+        expect(rec.texts, `${lang}: 小地图上没画出 ${label}`).toContain(label);
+      }
+      for (const text of rec.texts) {
+        expect(text, `${lang}: 小地图夹 [MISSING:]`).not.toContain('[MISSING:');
+      }
+      hud.dispose?.();
+    }
+    setLanguage('zh');
+  });
+
+  it('行为腿·地牢小地图：探索页脚插值正确（探索 3/8 · 清空 1/8）', () => {
+    for (const [lang, expected] of [['zh', '探索 3/8 · 清空 1/8'], ['en', 'Explored 3/8 · Cleared 1/8']]) {
+      setLanguage(lang);
+      const doc = bootDoc();
+      globalThis.document = doc;
+      const rec = recordingCtx();
+      doc.hosts.minimap.getContext = () => rec.ctx;
+      const hud = new HUD(dungeonGame());
+      hud.drawMinimap();
+      expect(rec.texts, `${lang}: 探索页脚没画出来`).toContain(expected);
+      hud.dispose?.();
+    }
+    setLanguage('zh');
+  });
+
+  it('行为腿·_dirTo：八方位走双表，正北目标返回 北/N', () => {
+    setLanguage('zh');
+    const doc = bootDoc();
+    globalThis.document = doc;
+    const hud = new HUD(bootGame());
+    expect(hud._dirTo(0, 0, 0, 55, '路点')).toBe('▶ 北 · 55m · 路点');
+    setLanguage('en');
+    expect(hud._dirTo(0, 0, 0, 55, 'waypoint')).toBe('▶ N · 55m · waypoint');
+    hud.dispose?.();
+    setLanguage('zh');
+  });
+});
+
+/** canvas 2d 桩：只录 fillText，其余绘制调用全是空转 */
+function recordingCtx() {
+  const texts = [];
+  return {
+    texts,
+    ctx: {
+      fillStyle: '', strokeStyle: '', lineWidth: 1, font: '',
+      fillText: (s) => { texts.push(String(s)); },
+      fillRect() {}, strokeRect() {}, clearRect() {},
+      beginPath() {}, closePath() {}, moveTo() {}, lineTo() {},
+      stroke() {}, fill() {}, arc() {}, setLineDash() {},
+    },
+  };
+}
+
+/** 小地图世界路径的游戏桩：dungeons.active 为空 → 走世界地图那一支 */
+function minimapGame(extra = {}) {
+  const base = bootGame();
+  return {
+    ...base,
+    dungeons: { active: null },
+    world: { getZoneMapData: () => [] },
+    quests: { ...base.quests, getQuestWaypoint: () => null },
+    player: { position: { x: 0, z: 0 } },
+    autoPlayMode: false,
+    playerAutoPlay: { active: false },
+    ...extra,
+  };
+}
+
+/** 地牢小地图路径的游戏桩：一个房间 + 探索读数 3/8、清空 1/8 */
+function dungeonGame() {
+  return minimapGame({
+    dungeons: {
+      active: {
+        layout: { rooms: [{ x: 0, z: 0, w: 20, d: 20, id: 'r1', visited: true, cleared: false, isExit: false, isBossArena: false }] },
+        def: { name: 'dungeon_ruin_crypt_name' },
+      },
+      _worldToLocal: () => ({ x: 0, z: 0 }),
+      currentRoomId: 'r1',
+      getExplorationHint: () => ({ visited: 3, total: 8, cleared: 1 }),
+    },
+  });
+}

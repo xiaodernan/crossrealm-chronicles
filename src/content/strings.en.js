@@ -71,6 +71,8 @@ export const STRINGS_EN = Object.freeze({
   hud_hp: 'HP',
   hud_mana: 'Mana',
   hud_quest_label: 'Current Quest',
+  hud_map_player_auto: 'Auto',
+  hud_map_explore_fmt: 'Explored ${visited}/${total} · Cleared ${cleared}/${total}',
   hud_stamina: 'Stamina',
   hud_controls_title: 'Keybinds',
   hud_ctrl_roll: 'Dodge',
