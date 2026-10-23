@@ -1,4 +1,5 @@
 import { SKILL_BRANCHES, nodesOf, skillById, skillBranchText } from '../content/skillTrees.js';
+import { bossNameKeyOf } from '../content/bossRoster.js';
 import { refreshKeyText, keyText } from '../content/keyHints.js';
 import { getLanguage, t } from '../engine/i18n.js';
 
@@ -26,10 +27,10 @@ export class WeaponSkillJournalTab {
         const ok = unlocked.has(s.id);
         const lore = skillById(s.id)?.lore ? t(skillById(s.id).lore) : null;
         return `<div class="sk-card${ok ? ' sk-on' : ''}">
-          <div class="sk-name">${s.name}</div>
-          <div class="sk-desc">${s.desc}</div>
+          <div class="sk-name">${t(s.name)}</div>
+          <div class="sk-desc">${t(s.desc)}</div>
           ${lore ? `<span class="sk-lore">${ok ? lore : '—'}</span>` : ''}
-          <div class="sk-cost">${ok ? '已解锁' : `${s.cost} 点${s.reqs?.length ? ' · 需前置' : ''}`}</div>
+          <div class="sk-cost">${ok ? t('achievement_unlocked_label') : `${t('weapon_skill_cost_fmt', { cost: s.cost })}${s.reqs?.length ? t('weapon_skill_need_prereq') : ''}`}</div>
         </div>`;
       }).join('');
       return `<div class="sk-branch"><h3>${skillBranchText(branch, getLanguage()).name}</h3><div class="sk-grid">${cards}</div></div>`;
@@ -40,20 +41,20 @@ export class WeaponSkillJournalTab {
       const cards = narrative.map((s) => {
         const ok = unlocked.has(s.id);
         const lore = skillById(s.id)?.lore ? t(skillById(s.id).lore) : null;
-        const cond = s.grant ? (s.grant.boss ? `需击败 ${s.grant.boss}` : `需 Chapter ${s.grant.chapter}`) : '';
+        const cond = s.grant ? (s.grant.boss ? t('weapon_skill_need_boss_fmt', { boss: t(bossNameKeyOf(s.grant.boss)) }) : t('weapon_skill_need_chapter_fmt', { chapter: s.grant.chapter })) : '';
         return `<div class="sk-card${ok ? ' sk-on' : ''} sk-narrative">
-          <div class="sk-name">${s.name} <span class="sk-tag">叙事</span></div>
-          <div class="sk-desc">${s.desc}</div>
+          <div class="sk-name">${t(s.name)} <span class="sk-tag">${t('weapon_skill_tag_narrative')}</span></div>
+          <div class="sk-desc">${t(s.desc)}</div>
           ${lore ? `<span class="sk-lore">${ok ? lore : '—'}</span>` : ''}
-          <div class="sk-cost">${ok ? '已解锁' : cond}</div>
+          <div class="sk-cost">${ok ? t('achievement_unlocked_label') : cond}</div>
         </div>`;
       }).join('');
-      return `<div class="sk-branch"><h3>叙事技能 (击败 Boss / 推进章节自动解锁)</h3><div class="sk-grid">${cards}</div></div>`;
+      return `<div class="sk-branch"><h3>${t('weapon_skill_narrative_title')}</h3><div class="sk-grid">${cards}</div></div>`;
     };
 
     panelEl.innerHTML = `
       <h2>${keyText(t('journal_tab_weapon_skills'))}</h2>
-      <p class="sk-stats">可用技能点 ${points} · 已解锁 ${unlocked.size} · 营火升级面板可加点</p>
+      <p class="sk-stats">${t('weapon_skill_stats_fmt', { points, unlocked: unlocked.size })}</p>
       ${SKILL_BRANCHES.map(renderBranch).join('')}
       ${renderNarrative()}
       <p class="hint">${keyText(t('weapon_skill_narrative_hint'))}</p>
