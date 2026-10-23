@@ -39,6 +39,31 @@ export class WorldDecorations {
   }
 
   /**
+   * 这件摆件的**落脚点**该按哪个高度摆：中心 + 四个方向各 r 米共 5 个采样，
+   * 取最高与最低的**中点**。
+   *
+   * 为什么要问周围而不是问一个点：枢纽那一圈（摊、椅、幡、泉）以前整圈共用一次
+   * `getGroundHeight(0, 55)` 的采样。hub 中心实测 4.74 m，而半径 10–18 m 那一圈是
+   * 12.46–18.14 m —— 于是六个摊、十条椅、八面幡、一座喷泉整个埋进坡下
+   * （实测顶面低于当地地面 2.8~7.5 米）：玩家看不见它们，也就谈不上撞上它们。
+   *
+   * 为什么取中点：这些摆件是**平的方块**，坡地上不可能四面都贴地。压到最高点就留缝，
+   * 压到最低点就埋边 —— 取中点把两边的误差都封在"当地起伏的一半"以内。
+   * 真要贴死，得把 hub 那块广场整平（30 m 盘内起伏实测 20.11 m），那是另一片。
+   * 判据与读数在 `tests/decoration-ground-landing.test.js`。
+   */
+  _padGround(x, z, r) {
+    let lo = Infinity;
+    let hi = -Infinity;
+    for (const [ox, oz] of [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]]) {
+      const h = this.world.getGroundHeight(x + ox, z + oz);
+      if (h < lo) lo = h;
+      if (h > hi) hi = h;
+    }
+    return (lo + hi) / 2;
+  }
+
+  /**
    * 给树干换贴图。
    *
    * W-C1 切片3 修掉的是"循环里每棵树一份材质"：所有树干共用同一份 `trunkMat`，
@@ -244,14 +269,25 @@ export class WorldDecorations {
       const top = new THREE.Mesh(topGeo, mat);
       top.position.y = 5;
       arch.add(left, right, top);
-      arch.position.set(g.x, this.world.getGroundHeight(g.x, g.z), g.z);
+      // 拱脚落在**三处采样（中心 + 两根柱各自脚下）里最低的那一处**：以前只取拱中心一个
+      // 采样点，于是跨坡那一侧的柱脚悬在空中（钉死布局实测五座门里三座有一根柱脚
+      // 高出当地地面 0.32~0.60 米）。取最低点后每根柱脚都埋进自己那块地，代价是
+      // 上坡那根埋得更深 —— 柱高 5 米，顶仍然露在外面。
+      const cos = Math.cos(g.ry);
+      const sin = Math.sin(g.ry);
+      const 拱脚 = [
+        this.world.getGroundHeight(g.x, g.z),
+        this.world.getGroundHeight(g.x - 2.5 * cos, g.z + 2.5 * sin),
+        this.world.getGroundHeight(g.x + 2.5 * cos, g.z - 2.5 * sin),
+      ];
+      arch.position.set(g.x, Math.min(...拱脚), g.z);
       arch.rotation.y = g.ry;
+      arch.name = 'zoneGate';
       this.group.add(arch);
     }
   }
 
   _buildHubDetails() {
-    const gy = this.world.getGroundHeight(0, 55);
     // 八面幡同形同色（W-C2 切片2）：一个 InstancedMesh，朝向走每实例 lookAt
     const banners = new THREE.InstancedMesh(
       new THREE.PlaneGeometry(1.2, 2.5),
@@ -265,13 +301,19 @@ export class WorldDecorations {
     );
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2;
-      _dummy.position.set(Math.cos(a) * 14, gy + 3, 55 + Math.sin(a) * 14);
-      _dummy.lookAt(0, gy + 3, 55);
+      // 高度问**这一面幡站的那一点**：整圈共用一次 (0,55) 的采样把八面幡埋进山里
+      // （实测 hub 中心 4.74 m，半径 14 m 处 12.28–15.86 m ⇒ 幡顶低于当地地面 3.3~13.6 m）
+      const x = Math.cos(a) * 14;
+      const z = 55 + Math.sin(a) * 14;
+      const y = this.world.getGroundHeight(x, z) + 3;
+      _dummy.position.set(x, y, z);
+      _dummy.lookAt(0, y, 55);
       _dummy.scale.set(1, 1, 1);
       _dummy.updateMatrix();
       banners.setMatrixAt(i, _dummy.matrix);
     }
     sealBatch(banners);
+    banners.name = 'hubBanner';
     this.group.add(banners);
     // 喷泉只此一份，保持单网格
     const fountain = new THREE.Mesh(
@@ -285,7 +327,9 @@ export class WorldDecorations {
       })
     );
     fountain.rotation.x = Math.PI / 2;
-    fountain.position.set(0, gy + 0.15, 48);
+    // 泉池那一圈半径 3 米，落脚点按整圈起伏取中点（`_padGround`）
+    fountain.position.set(0, this._padGround(0, 48, 3) + 0.15, 48);
+    fountain.name = 'hubFountain';
     this.group.add(fountain);
   }
 
@@ -302,7 +346,6 @@ export class WorldDecorations {
   }
 
   _buildHubMarket() {
-    const gy = this.world.getGroundHeight(0, 55);
     const stallMat = new THREE.MeshStandardMaterial({ color: paletteOf('wood.bridge'), roughness: 0.85 });
     const awningColors = paletteOf('fabric.awning');
     // 六个摊位同形（W-C2 切片2）：底座一个 InstancedMesh；雨棚同几何、三色走 instanceColor
@@ -321,6 +364,9 @@ export class WorldDecorations {
       const r = 10 + (i % 2) * 2;
       const x = Math.cos(a) * r;
       const z = 55 + Math.sin(a) * r;
+      // 底座 2.2×1.8 → 外接半径 1.42；整圈共用一次 (0,55) 采样的旧写法把这些摊位移到
+      // 坡下面去了（实测该圈地面 12.46–18.14 m，而 hub 中心只有 4.74 m ⇒ 顶面低于地面）
+      const gy = this._padGround(x, z, 1.42);
       _dummy.rotation.set(0, -a + Math.PI, 0);
       _dummy.scale.set(1, 1, 1);
       _dummy.position.set(x, gy + 0.6, z);
@@ -333,6 +379,8 @@ export class WorldDecorations {
     }
     sealBatch(bases);
     sealBatch(awnings);
+    bases.name = 'hubStallBase';
+    awnings.name = 'hubStallAwning';
     if (awnings.instanceColor) awnings.instanceColor.needsUpdate = true;
     this.group.add(bases, awnings);
     // 十条长椅同形同色（W-C2 切片2）：一个 InstancedMesh
@@ -343,7 +391,10 @@ export class WorldDecorations {
     );
     for (let i = 0; i < 10; i++) {
       const a = (i / 10) * Math.PI * 2;
-      _dummy.position.set(Math.cos(a) * 18, gy + 0.2, 55 + Math.sin(a) * 18);
+      const x = Math.cos(a) * 18;
+      const z = 55 + Math.sin(a) * 18;
+      // 长椅 1.8×0.6 → 外接半径 0.95
+      _dummy.position.set(x, this._padGround(x, z, 0.95) + 0.2, z);
       _dummy.rotation.set(0, -a, 0);
       _dummy.scale.set(1, 1, 1);
       _dummy.updateMatrix();
@@ -351,6 +402,7 @@ export class WorldDecorations {
     }
     applyShadow(benches, 'castOnly');
     sealBatch(benches);
+    benches.name = 'hubBench';
     this.group.add(benches);
   }
 
