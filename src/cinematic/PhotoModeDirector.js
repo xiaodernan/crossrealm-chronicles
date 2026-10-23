@@ -1,4 +1,5 @@
 import { keyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 
 /** 拍照模式 — 隐藏 HUD 截屏（退出键名在每次显示时现问生效表） */
 export class PhotoModeDirector {
@@ -15,18 +16,18 @@ export class PhotoModeDirector {
     this.active = !this.active;
     const hud = document.getElementById('hud');
     const journal = document.getElementById('journal-panel');
-    this.el.textContent = keyText('拍照模式 · {photoMode} 退出 · 滚轮缩放');
+    this.el.textContent = keyText(t('photo_hint'));
     if (this.active) {
       hud?.classList.add('photo-hidden');
       journal?.classList.add('photo-hidden');
       this.el.classList.remove('hidden');
-      this.game.dialog?.toast('拍照模式 — UI 已隐藏', 2200);
+      this.game.dialog?.toast(t('photo_toast_hidden'), 2200);
       document.exitPointerLock?.();
     } else {
       hud?.classList.remove('photo-hidden');
       journal?.classList.remove('photo-hidden');
       this.el.classList.add('hidden');
-      this.game.dialog?.toast('已退出拍照模式');
+      this.game.dialog?.toast(t('photo_toast_exit'));
     }
     window.dispatchEvent(new CustomEvent('photo-mode-changed', { detail: { active: this.active } }));
   }

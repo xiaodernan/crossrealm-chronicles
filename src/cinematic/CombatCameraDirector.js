@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { addShake } from '../engine/Shake.js';
+import { t } from '../engine/i18n.js';
 import { emitCue } from '../engine/cues.js';
 import { EXECUTION_CAMERA } from '../content/tuning.js';
 import { requestDof, cancelDof } from '../engine/DofManager.js';
@@ -10,7 +11,17 @@ const CINEMATIC_COMBATCAMERADIRECTOR = 'cinematic/CombatCameraDirector';
 const camDirOn = (name, handler) => on(name, handler, CINEMATIC_COMBATCAMERADIRECTOR);
 import { FOV_LAYER_OVERRIDE as COMBAT_FOV_LAYER } from '../engine/CameraRig.js';
 
-/** Boss 战 / 连击处决 — 慢动作 + 轨道锁定镜头 + FOV 压缩 */
+/**
+ * Boss 战 / 连击处决 — 慢动作 + 轨道锁定镜头 + FOV 压缩
+ *
+ * `labelKey` 是**文案键**（W-D2 切片34），不是文案本身：那一行大字在播出那一刻
+ * `t()` 展开。改前三格是裸中文字面量 —— 英文玩家看到的是「连击终结 / 致命反击 /
+ * 处决 / Boss 击破」，而 `applyTranslations` 的文档走查够不到这个运行时新建的 div。
+ * 三格复用既有键（`tip_finisher_title` / `cg_gallery_riposte` / `caption_execution`）——
+ * 「连击终结」与「处决」在双表里都已占满「同文案最多两键」的上限（新开必红）；
+ * 「致命反击」虽还空着一个位，但同一个词不该有两个住址，仍复用。`bossKill` 没有同值键，
+ * 新开 `cine_label_boss_kill`。
+ */
 const PRESETS = {
   finisher: {
     duration: 0.62,
@@ -19,7 +30,7 @@ const PRESETS = {
     fovDelta: -7,
     shake: 0.11,
     letterbox: 0.35,
-    label: '连击终结',
+    labelKey: 'tip_finisher_title',
     orbitRadius: 4.2,
     orbitHeight: 1.55,
     orbitSweep: 0.42,
@@ -32,7 +43,7 @@ const PRESETS = {
     fovDelta: -9,
     shake: 0.09,
     letterbox: 0.4,
-    label: '致命反击',
+    labelKey: 'cg_gallery_riposte',
     orbitRadius: 3.8,
     orbitHeight: 1.35,
     orbitSweep: 0.28,
@@ -45,7 +56,7 @@ const PRESETS = {
     fovDelta: -11,
     shake: 0.13,
     letterbox: 0.55,
-    label: '处决',
+    labelKey: 'caption_execution',
     orbitRadius: 4.6,
     orbitHeight: 1.48,
     orbitSweep: 0.55,
@@ -58,7 +69,7 @@ const PRESETS = {
     fovDelta: -14,
     shake: 0.16,
     letterbox: 0.72,
-    label: 'Boss 击破',
+    labelKey: 'cine_label_boss_kill',
     orbitRadius: 5.4,
     orbitHeight: 1.75,
     orbitSweep: 0.72,
@@ -209,8 +220,8 @@ export class CombatCameraDirector {
     // rAF-EXCEPTION：闪光层的淡出需要一次绘制间隔（CSS 过渡），不参与世界时间缩放
     requestAnimationFrame(() => { this.flash.style.opacity = '0'; });
 
-    if (preset.label) {
-      this.label.textContent = preset.label;
+    if (preset.labelKey) {
+      this.label.textContent = t(preset.labelKey);
       this.label.classList.remove('hidden');
     }
 

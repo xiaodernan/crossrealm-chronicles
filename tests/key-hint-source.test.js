@@ -85,7 +85,9 @@ describe('`{动作}` 占位必须是登记过的动作', () => {
         + [...source.matchAll(DECL[2])].length,
       0,
     );
-    expect(count).toBeGreaterThan(30);
+    // W-D2 切片34：两条模板（跳过提示 / 拍照提示）搬进了双表，源码里的字面量因此少两条。
+        // 这条是"扫描本身没坏"的自证，不是业务不变量 —— 地板跟着降到 25，仍然远高于"扫到 0 条"。
+        expect(count).toBeGreaterThan(25);
   });
 });
 
@@ -198,7 +200,8 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     'ui/DungeonJournalTab.js': ['keyText('],
     'combat/CombatController.js': ["keyText(t('combat_lock_hint'))"],
     'game/FastTravelSystem.js': ["keyText(t('fast_travel_toast_unlocked'))"],
-    'cinematic/CombatCinematicSkip.js': ["keyText('按 {escape} 可跳过战斗演出')"],
+    // W-D2 切片34：模板搬进双表，于是出口从 keyText('中文模板') 变成 keyText(t(键))
+    'cinematic/CombatCinematicSkip.js': ["keyText(t('cine_skip_hint'))"],
     'ui/SettingsPanel.js': ["from '../content/keyLabels.js'"],
     // W-B2 切片4：成段的内容文案也走同一条链 —— 但**每一个显示出口**都要过，
     // 漏一处就是把字面的 `{parry}` 摆到玩家面前（说明书有正文与章节清单两处）

@@ -1,5 +1,6 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { keyText } from '../content/keyHints.js';
+import { t } from '../engine/i18n.js';
 import { on, offAll } from '../engine/EventBus.js';
 
 /** 首次提示的计时分组（与演出时长无关，只负责"演出进行中才提示"） */
@@ -57,7 +58,7 @@ export class CombatCinematicSkip {
     this.game.combatCamera?.skip?.();
     this.game.combatInputLock?.release?.();
     if (this.game.player) this.game.player.timeSlow = 1;
-    this.game.dialog?.toast?.('演出已跳过', 1400);
+    this.game.dialog?.toast?.(t('cine_skip_toast'), 1400);
     window.dispatchEvent(new CustomEvent('combat-cinematic-skipped', { detail: { count: this.skipped } }));
     this.game.executionSkipFx?.burst?.();
   }
@@ -67,7 +68,7 @@ export class CombatCinematicSkip {
     this._hintShown = true;
     scheduler.after(0.4, () => {
       if (this.canSkip()) {
-        this.game.dialog?.toast?.(keyText('按 {escape} 可跳过战斗演出'), 3200);
+        this.game.dialog?.toast?.(keyText(t('cine_skip_hint')), 3200);
       }
     }, HINT_TAG);
   }
