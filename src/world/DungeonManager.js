@@ -218,8 +218,8 @@ export class DungeonManager {
         detail: { name: boss.name, bossId: boss.bossId, position: boss.position.clone() },
       }));
       this.dialog.show(
-        BOSS_LORE[dungeon.def.id] ? keyText(t(BOSS_LORE[dungeon.def.id].title)) : '迷宫守钥者',
-        BOSS_LORE[dungeon.def.id] ? keyText(t(BOSS_LORE[dungeon.def.id].text)) : '击败守钥者以打开出口。',
+        BOSS_LORE[dungeon.def.id] ? keyText(t(BOSS_LORE[dungeon.def.id].title)) : t('boss_name_dungeon_warden'),
+        BOSS_LORE[dungeon.def.id] ? keyText(t(BOSS_LORE[dungeon.def.id].text)) : t('dungeon_boss_fallback_text'),
       );
       window.dispatchEvent(new CustomEvent('game-audio-mode', { detail: { mode: 'boss' } }));
     } else if (!room.isBossArena) {

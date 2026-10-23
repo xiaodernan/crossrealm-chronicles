@@ -1849,6 +1849,10 @@ export const STRINGS_ZH = Object.freeze({
   panel_collapse_toggle_title: '折叠/展开',
   pause_slot_filled_fmt: '槽${slot} · v${version} · ${time}',
   pause_slot_empty_fmt: '槽${slot} · 空槽',
+  // CG 画廊成就 toast 与副本守钥者兜底文案（W-D2 切片40）
+  cg_achieve_half_fmt: 'CG 收集过半 · +${souls} 魂火',
+  cg_achieve_full_fmt: 'CG 全收集！· +${souls} 魂火',
+  dungeon_boss_fallback_text: '击败守钥者以打开出口。',
   settings_keybind_pad_invalid_reason_owner: '${button} 归${owner}，而那一格的出口挂在摇杆上，让不出这一枚按钮',
   settings_keybind_pad_invalid_reason_unknown: '${button} 不是这张表认得的按钮',
 

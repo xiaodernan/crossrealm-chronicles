@@ -1,5 +1,6 @@
 /** CG 画廊成就 — 全收集奖励 */
 import { on, offAll } from '../engine/EventBus.js';
+import { t } from '../engine/i18n.js';
 
 const GAME_CGGALLERYACHIEVEMENTS = 'game/CgGalleryAchievements';
 const cgAchOn = (name, handler) => on(name, handler, GAME_CGGALLERYACHIEVEMENTS);
@@ -22,12 +23,12 @@ export class CgGalleryAchievements {
     if (s.percent >= 50 && !this.claimed.has('half')) {
       this.claimed.add('half');
       this.game.stats.addSouls(10);
-      this.game.dialog.toast('CG 收集过半 · +10 魂火', 3000);
+      this.game.dialog.toast(t('cg_achieve_half_fmt', { souls: 10 }), 3000);
     }
     if (s.percent >= 100 && !this.claimed.has('full')) {
       this.claimed.add('full');
       this.game.stats.addSouls(30);
-      this.game.dialog.toast('CG 全收集！· +30 魂火', 4000);
+      this.game.dialog.toast(t('cg_achieve_full_fmt', { souls: 30 }), 4000);
     }
   }
 

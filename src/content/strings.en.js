@@ -1852,6 +1852,10 @@ export const STRINGS_EN = Object.freeze({
   panel_collapse_toggle_title: 'Collapse/Expand',
   pause_slot_filled_fmt: 'Slot ${slot} · v${version} · ${time}',
   pause_slot_empty_fmt: 'Slot ${slot} · Empty',
+  // CG gallery achievement toasts and dungeon keywarden fallback copy (W-D2 slice 40)
+  cg_achieve_half_fmt: 'CG collection halfway · +${souls} souls',
+  cg_achieve_full_fmt: 'CG gallery complete! · +${souls} souls',
+  dungeon_boss_fallback_text: 'Defeat the keykeeper to open the exit.',
   settings_keybind_pad_invalid_reason_owner: '${button} belongs to ${owner} and that cell exits through the stick, so it cannot hand this button over',
   settings_keybind_pad_invalid_reason_unknown: '${button} is not a button this table recognizes',
 
