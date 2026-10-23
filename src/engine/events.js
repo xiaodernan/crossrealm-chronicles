@@ -40,7 +40,7 @@ export const GAME_EVENTS = Object.freeze({
     payload: '{ texLib }',
   },
   'realm-bleed': {
-    desc: '进入新区域 tint 真的变了才脉冲一次；HUD 拿它顶掉区副标题，音频拿它铺环境音',
+    desc: '进入新区域 tint 真的变了才脉冲一次；HUD 拿它顶掉区副标题（zone 是区名的文案键，W-D2 切片36 —— HUD 侧 t() 现展开，换语言时跟着重算），音频拿它铺环境音',
     payload: '{ zone, key }',
   },
   'discovery': {
@@ -142,8 +142,8 @@ export const GAME_EVENTS = Object.freeze({
     payload: '{ bossId, name, position }',
   },
   'boss-health': {
-    desc: 'Boss 血量/阶段变化，只喂 HUD 血条',
-    payload: '{ hp, maxHp, phase, name }',
+    desc: 'Boss 血量/阶段变化，只喂 HUD 血条。nameKey 是 Boss 显示名的文案键（W-D2 切片36）—— HUD 侧 t() 现展开，换语言时由 HUD.refreshLabels 重算（改前载荷带构造期展开好的 name）',
+    payload: '{ hp, maxHp, phase, nameKey }',
   },
   'boss-phase': {
     desc: 'Boss 进入新阶段：横幅由 BossPhaseDirector 弹，音频切阶段',

@@ -1879,6 +1879,10 @@ export const STRINGS_ZH = Object.freeze({
   hud_boss_phase_3: '阶段 III',
   hud_toast_rerun: '深渊再探 — 新随机布局已生成',
   hud_subtitle_time_stop: '⏳ 时停中 — 蓄力法术可打断',
+  // 输入设备指示（W-D2 切片36）：InputDevice.inputDeviceLabel 的三个名字
+  input_device_keyboard: '键盘',
+  input_device_mouse: '鼠标',
+  input_device_gamepad: '手柄',
   hud_map_anchor_hub: '枢纽',
   hud_map_anchor_forest: '森林',
   hud_map_anchor_magic: '魔法',

@@ -10,7 +10,6 @@ const ZONE_TINT = {
 };
 
 import { on, offAll } from '../engine/EventBus.js';
-import { t } from '../engine/i18n.js';
 
 const EFFECTS_REALMBLEED = 'effects/RealmBleed';
 const bleedOn = (name, handler) => on(name, handler, EFFECTS_REALMBLEED);
@@ -33,15 +32,17 @@ export class RealmBleed {
       const key = ZONE_TINT[e.detail.zoneId] ? e.detail.zoneId : 'wild';
       if (key === this.lastKey) return;
       this.lastKey = key;
-      this.pulse(key, e.detail.zone?.name ? t(e.detail.zone.name) : '');
+      // 带出去的是区名的**文案键**（W-D2 切片36）：HUD 的渗漏覆盖层要把区名插进
+      // 模板，拿展开后的文本就没法在换语言时重算了
+      this.pulse(key, e.detail.zone?.name ?? null);
     });
   }
 
-  pulse(key, zoneName) {
+  pulse(key, zoneKey) {
     this.overlay.style.setProperty('--bleed-color', ZONE_TINT[key] ?? ZONE_TINT.wild);
     this.overlay.classList.remove('active');
     void this.overlay.offsetWidth;
     this.overlay.classList.add('active');
-    window.dispatchEvent(new CustomEvent('realm-bleed', { detail: { zone: zoneName, key } }));
+    window.dispatchEvent(new CustomEvent('realm-bleed', { detail: { zone: zoneKey, key } }));
   }
 }

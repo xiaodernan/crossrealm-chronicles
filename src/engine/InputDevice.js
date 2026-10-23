@@ -17,14 +17,23 @@
  *   多挂一条同事件的监听就是"这一下有几处知道"的第二个答案。
  *
  * 显示文案也在这里：HUD 那一格只问 `inputDeviceLabel()`，不抄第二份"键盘 / 鼠标 / 手柄"。
+ * W-D2 切片36：这三个名字进双表（`input_device_*`）—— 改前是裸中文，英文玩家的输入
+ * 指示格从开机起就显示「键盘 / 鼠标 / 手柄」。
  */
+import { t } from './i18n.js';
 export const INPUT_DEVICE_KINDS = ['keyboard', 'mouse', 'gamepad'];
 
-const INPUT_DEVICE_LABELS = { keyboard: '键盘', mouse: '鼠标', gamepad: '手柄' };
+/** 一侧的名字 → 文案键（W-D2 切片36）；换语言由 HUD.refreshLabels 重算那一格 */
+const INPUT_DEVICE_KEYS = {
+  keyboard: 'input_device_keyboard',
+  mouse: 'input_device_mouse',
+  gamepad: 'input_device_gamepad',
+};
 
 /** 一侧的名字；没按动过（`null`）就是空串 —— 留白比"猜一个"诚实 */
 export function inputDeviceLabel(kind) {
-  return INPUT_DEVICE_LABELS[kind] ?? '';
+  const key = INPUT_DEVICE_KEYS[kind];
+  return key ? t(key) : '';
 }
 
 export class InputDevice {

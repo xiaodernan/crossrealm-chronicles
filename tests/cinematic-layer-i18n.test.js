@@ -189,9 +189,9 @@ describe('② 键登记：九个键两表都在场，键数只增不减', () => 
     }
   });
 
-  it('键数 2291 → 2297 → 2304，两表逐键对齐', () => {
+  it('键数 2291 → 2297 → 2304 → 2307，两表逐键对齐', () => {
     expect(ZH_KEYS.length).toBe(EN_KEYS.length);
-    expect(ZH_KEYS.length, '键数不是 2304 —— 双表被别处改过').toBe(2304);
+    expect(ZH_KEYS.length, '键数不是 2307 —— 双表被别处改过').toBe(2307);
   });
 
   it('新键的占位符与旧版逐字相同（{escape} / {photoMode} 没被改名字）', () => {

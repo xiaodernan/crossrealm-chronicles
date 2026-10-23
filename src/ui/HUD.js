@@ -57,9 +57,19 @@ export class HUD {
     /** 观测量退订函数（dispose 时必须调用） */
     this._offs = [];
     /* 区副标题只有一个 DOM 槽位、三个写者（区切换 / 位面渗漏 / 时停）。
-     * 权威文本与覆盖层分开存，覆盖层带来源 —— 谁开的谁才关得掉（修 B44）。 */
-    this._zoneSubtitle = '';
+     * 权威文本与覆盖层分开存，覆盖层带来源 —— 谁开的谁才关得掉（修 B44）。
+     * W-D2 切片36：区名 / 副标题 / 覆盖层存的全是**文案键**，展开只发生在写 DOM 的
+     * 那一刻 —— 改前存的是展开后的文本，换语言后那两格留着旧语言。 */
+    this._zoneNameKey = null;
+    this._zoneSubtitleKey = null;
     this._subtitleOverlay = null;
+    /* 常驻统计格的状态快照（切片36）：事件到来时"存值 + 渲染"，换语言时只按快照
+     * 重渲染 —— 事件不会因为换了语言再派发一遍，没有这份快照就只能留着旧语言。 */
+    this._souls = { souls: 0, level: 1 };
+    this._skillPoints = 0;
+    this._cameraMode = 'third';
+    this._boss = null;
+    this._refreshCombo = null;
 
     // 状态条配色按当前色觉档落地（W-D6 切片4）：只在构造与换档时写一次 CSS 变量，
     // 帧循环里只改 width 不碰颜色（见 ui/barTheme.js 文件头）。
@@ -75,20 +85,20 @@ buildHUD() {
         <div class="zone-badge" id="zone-badge">
           <div class="zone-icon" id="zone-icon" aria-hidden="true"></div>
           <div class="zone-info">
-            <div class="zone-name" id="zone-name">交汇枢纽</div>
-            <div class="zone-subtitle" id="zone-subtitle">位面中心</div>
+            <div class="zone-name" id="zone-name" data-i18n="hud_zone_name_default">交汇枢纽</div>
+            <div class="zone-subtitle" id="zone-subtitle" data-i18n="hud_zone_subtitle_default">位面中心</div>
           </div>
         </div>
         <div class="hud-stats" id="hud-stats">
-          <div class="stat-item" id="souls-display">魂 0 · Lv.1</div>
+          <div class="stat-item" id="souls-display"></div>
           <div class="stat-item" id="chapter-display">Chapter 1</div>
           <div class="stat-item" id="coord-display">X: 0 · Z: 0</div>
-          <div class="stat-item" id="discovery-count">日志 0 · 碎片 0/8 · 地图 0%</div>
-          <div class="stat-item" id="skill-points-display">技能点 0</div>
+          <div class="stat-item" id="discovery-count"></div>
+          <div class="stat-item" id="skill-points-display"></div>
           <div class="stat-item combo-display" id="combo-display"></div>
           <div class="stat-item" id="weapon-display" data-i18n="hud_weapon_default">⚔ 位面长剑</div>
           <div class="stat-item" id="fps-display">— FPS</div>
-          <div class="stat-item" id="camera-mode-display">第三人称</div>
+          <div class="stat-item" id="camera-mode-display"></div>
           <div class="stat-item" id="input-device-display">—</div>
         </div>
       </div>
@@ -103,8 +113,8 @@ buildHUD() {
       </div>
       <div id="boss-bar-wrap" class="boss-bar-wrap hidden" role="region" data-i18n-aria="hud_aria_boss_hp">
         <div class="boss-header">
-          <div class="boss-name" id="boss-name">影界守护者</div>
-          <div class="boss-phase" id="boss-phase">阶段 I</div>
+          <div class="boss-name" id="boss-name"></div>
+          <div class="boss-phase" id="boss-phase"></div>
         </div>
         <div class="boss-bar-track">
           <div class="boss-bar-fill hp" id="boss-hp-bar" style="width:100%"></div>
@@ -288,6 +298,18 @@ buildHUD() {
     // 换语言时 applyTranslations 会把它涂回默认武器，这里按当前武器重算一次
     const w = this.game.weapons;
     if (w?.weapon?.nameKey) this._renderWeaponDisplay(w.current, w.weapon.nameKey);
+    // W-D2 切片36：常驻格同理。下面每一格的值都是事件写进去的，而事件不会因为
+    // 换语言再派发一遍 —— 所以在这里按各自存下来的键 / 快照重算一次。
+    // 各写各的格子，先后无所谓；没有据可写的格子（还没来过事件）保持不动，
+    // 那是 data-i18n 的出厂文案在说话。
+    this._renderZone();
+    this._renderSouls();
+    this._renderSkillPoints();
+    this._renderCameraMode();
+    this._renderBoss();
+    this._renderInputDevice();
+    this.updateDiscoveryCount();
+    this._refreshCombo?.();
   }
 
   /** 武器显示格：图标按武器 id 现算 + 名字按文案键现展开（W-D2 切片35） */
@@ -297,19 +319,60 @@ buildHUD() {
     el.textContent = (weapon === 'staff' ? '✦ ' : '⚔ ') + t(nameKey);
   }
 
+  /** 区名与区副标题（切片36）：键存下来，写 DOM 的那一刻才展开 */
+  _renderZone() {
+    const nameEl = document.getElementById('zone-name');
+    if (nameEl && this._zoneNameKey) nameEl.textContent = t(this._zoneNameKey);
+    this._renderZoneSubtitle();
+  }
+
+  /** 魂 / 等级那一格（切片36）：快照 + 渲染；换语言走 refreshLabels 重算 */
+  _renderSouls() {
+    const el = document.getElementById('souls-display');
+    if (el) el.textContent = t('hud_souls_display_fmt', this._souls);
+  }
+
+  /** 技能点那一格（切片36）：同上 */
+  _renderSkillPoints() {
+    const el = document.getElementById('skill-points-display');
+    if (el) el.textContent = t('hud_skill_points_fmt', { points: this._skillPoints });
+  }
+
+  /** 镜头模式那一格（切片36）：同上 */
+  _renderCameraMode() {
+    const el = document.getElementById('camera-mode-display');
+    if (!el) return;
+    el.textContent = this._cameraMode === 'first' ? t('hud_camera_mode_first') : t('hud_camera_mode_third');
+  }
+
+  /** Boss 名与阶段（切片36）：载荷带的是文案键，这里 t() 现展开 */
+  _renderBoss() {
+    if (!this._boss?.nameKey) return;
+    const phaseLabels = [t('hud_boss_phase_1'), t('hud_boss_phase_2'), t('hud_boss_phase_3')];
+    const nameEl = document.getElementById('boss-name');
+    if (nameEl) nameEl.textContent = t(this._boss.nameKey);
+    const phaseEl = document.getElementById('boss-phase');
+    if (phaseEl) phaseEl.textContent = phaseLabels[this._boss.phase - 1] || t('hud_boss_phase_1');
+  }
+
+  /** 输入设备指示那一格（切片36）：没按动过就是破折号 */
+  _renderInputDevice() {
+    const el = document.getElementById('input-device-display');
+    if (el) el.textContent = this._inputDeviceShown ? inputDeviceLabel(this._inputDeviceShown) : '—';
+  }
+
   setupListeners() {
     on('zone-changed', (e) => {
       const z = e.detail.zone;
-      // 区域名与副标题现在存的是**文案键**（W-D2 切片16i），显示侧在这展开一次
-      const 区名 = t(z.name);
-      const 副标题 = t(z.subtitle);
-      document.getElementById('zone-name').textContent = 区名;
-      this._zoneSubtitle = 副标题;
+      // 区域名与副标题存的是**文案键**（W-D2 切片16i）；切片36 起把键存下来，
+      // 换语言时 refreshLabels 按键重算 —— 改前只存展开后的文本，那一格留着旧语言
+      this._zoneNameKey = z.name;
+      this._zoneSubtitleKey = z.subtitle;
       // 换区是一次权威的重写：任何覆盖层（渗漏提示、时停）到此作废
       this._subtitleOverlay = null;
-      this._renderZoneSubtitle();
+      this._renderZone();
       this.updateZonePanel(z);
-      if (!e.detail.initial) this.showZoneBanner(区名, 副标题);
+      if (!e.detail.initial) this.showZoneBanner(this._zoneNameKey, this._zoneSubtitleKey);
     }, EVENT_TAG);
 
     on('discovery', (e) => {
@@ -329,7 +392,8 @@ buildHUD() {
     }, EVENT_TAG);
 
     on('stats-changed', (e) => {
-      document.getElementById('souls-display').textContent = t('hud_souls_display_fmt', { souls: e.detail.souls, level: e.detail.level });
+      this._souls = { souls: e.detail.souls, level: e.detail.level };
+      this._renderSouls();
     }, EVENT_TAG);
 
     on('quest-updated', (e) => {
@@ -368,6 +432,7 @@ buildHUD() {
         const comboEl = document.getElementById('combo-display');
         if (comboEl) comboEl.textContent = v.parryable.value ? t('hud_combo_executable') : (this.combo > 1 ? t('hud_combo_count', { count: this.combo }) : '');
       };
+      this._refreshCombo = refreshStamina;
       this._offs.push(v.stamina.subscribe(refreshStamina));
       this._offs.push(v.combo.subscribe(refreshStamina));
       this._offs.push(v.parryable.subscribe(refreshStamina));
@@ -391,7 +456,7 @@ buildHUD() {
     }, EVENT_TAG);
 
     on('realm-bleed', (e) => {
-      this._setSubtitleOverlay('bleed', t('hud_subtitle_planar_bleed', { zone: e.detail.zone }));
+      this._setSubtitleOverlay('bleed', 'hud_subtitle_planar_bleed', { zone: e.detail.zone });
     }, EVENT_TAG);
 
     on('boss-start', () => {
@@ -401,11 +466,10 @@ buildHUD() {
 
     on('boss-health', (e) => {
       if (!this.bossVisible) return;
-      const { hp, maxHp, phase, name } = e.detail;
-      document.getElementById('boss-name').textContent = name;
+      const { hp, maxHp, phase, nameKey } = e.detail;
+      this._boss = { nameKey, phase };
       document.getElementById('boss-hp-bar').style.width = `${(hp / maxHp) * 100}%`;
-      const phaseLabels = [t('hud_boss_phase_1'), t('hud_boss_phase_2'), t('hud_boss_phase_3')];
-      document.getElementById('boss-phase').textContent = phaseLabels[phase - 1] || t('hud_boss_phase_1');
+      this._renderBoss();
     }, EVENT_TAG);
 
     on('boss-defeated', () => {
@@ -422,8 +486,8 @@ buildHUD() {
     }, EVENT_TAG);
 
     on('skill-points-changed', (e) => {
-      const el = document.getElementById('skill-points-display');
-      if (el) el.textContent = t('hud_skill_points_fmt', { points: e.detail.points ?? 0 });
+      this._skillPoints = e.detail.points ?? 0;
+      this._renderSkillPoints();
     }, EVENT_TAG);
 
     on('dungeon-enter', (e) => {
@@ -431,7 +495,7 @@ buildHUD() {
     }, EVENT_TAG);
 
     on('time-stop-start', () => {
-      this._setSubtitleOverlay('timeStop', t('hud_subtitle_time_stop'));
+      this._setSubtitleOverlay('timeStop', 'hud_subtitle_time_stop');
     }, EVENT_TAG);
 
     /* 修 B44：VoidBoss 到期与被打断两处都派发 time-stop-end，而修前全仓无人监听 ——
@@ -441,8 +505,8 @@ buildHUD() {
     }, EVENT_TAG);
 
     on('camera-mode-changed', (e) => {
-      const el = document.getElementById('camera-mode-display');
-      if (el) el.textContent = e.detail.mode === 'first' ? t('hud_camera_mode_first') : t('hud_camera_mode_third');
+      this._cameraMode = e.detail.mode;
+      this._renderCameraMode();
     }, EVENT_TAG);
 
     /* 开机那一格由那位唯一写手落一次。`quests` 比 HUD 早建（`core/Game.js`），
@@ -451,14 +515,24 @@ buildHUD() {
     this.game.quests?.notifyUpdate();
   }
 
-  /** 区副标题的唯一写入口：覆盖层优先于区域权威文本，撤掉后自动落回去 */
+  /** 区副标题的唯一写入口：覆盖层优先于区域权威文本，撤掉后自动落回去。
+   *  切片36：权威文本与覆盖层存的全是键，params 里的值也是键
+   *  （位面渗漏那一句要把区名插进去）—— 换语言时才拿得到原文重展开。 */
   _renderZoneSubtitle() {
     const el = document.getElementById('zone-subtitle');
-    if (el) el.textContent = this._subtitleOverlay?.text ?? this._zoneSubtitle;
+    if (!el) return;
+    const o = this._subtitleOverlay;
+    if (o) {
+      const params = {};
+      for (const [k, v] of Object.entries(o.params ?? {})) params[k] = v ? t(v) : v;
+      el.textContent = t(o.key, params);
+      return;
+    }
+    if (this._zoneSubtitleKey) el.textContent = t(this._zoneSubtitleKey);
   }
 
-  _setSubtitleOverlay(source, text) {
-    this._subtitleOverlay = { source, text };
+  _setSubtitleOverlay(source, key, params = {}) {
+    this._subtitleOverlay = { source, key, params };
     this._renderZoneSubtitle();
   }
 
@@ -500,8 +574,9 @@ buildHUD() {
     scheduler.clear(FINISHER_TAG);
   }
 
-  showZoneBanner(name, subtitle) {
-    this.zoneBanner.innerHTML = `<div class="banner-name">${name}</div><div class="banner-sub">${subtitle}</div>`;
+  /** 区横幅（切片36 起收的是文案键）：只活 3.2 秒，但键比展开后的文本便宜 */
+  showZoneBanner(nameKey, subtitleKey) {
+    this.zoneBanner.innerHTML = `<div class="banner-name">${t(nameKey)}</div><div class="banner-sub">${t(subtitleKey)}</div>`;
     this.zoneBanner.classList.remove('hidden');
     this.zoneBanner.classList.add('show');
     scheduler.clear(ZONE_BANNER_TAG);
@@ -567,8 +642,7 @@ buildHUD() {
     const kind = this.game.inputDevice?.current() ?? null;
     if (kind === this._inputDeviceShown) return;
     this._inputDeviceShown = kind;
-    const el = document.getElementById('input-device-display');
-    if (el) el.textContent = kind ? inputDeviceLabel(kind) : '—';
+    this._renderInputDevice();
     // 指示器那一格变了，意味着"这一手"换了 —— 提示文案跟着换一套说法（切片33）。
     // 声明式那批（HUD 键位行、起始屏、小地图标题）只在改动时重算，不每帧重写 DOM。
     this.refreshKeyHints();

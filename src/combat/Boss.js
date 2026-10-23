@@ -12,6 +12,9 @@ import { applyShadow } from '../engine/shadowPolicy.js';
 /** 影界守护者 — 首个 Boss，三阶段 */
 export class Boss extends Enemy {
   constructor(scene, world, config) {
+    // 显示名的文案键（W-D2 切片36）：`boss-health` 载荷带键不带字，HUD 侧 t() 现展开 ——
+    // 改前载荷带的是构造期展开好的 name，换语言后血条上那一行留着旧语言
+    const nameKey = bossNameKeyOf(config.bossId ?? 'shadow-warden');
     super(scene, world, {
       ...config,
       type: 'boss',
@@ -28,10 +31,11 @@ export class Boss extends Enemy {
       aggroRange: config.aggroRange ?? 40,
       attackRange: config.attackRange ?? 3.5,
       respawn: false,
-      name: config.name ?? t(bossNameKeyOf(config.bossId ?? 'shadow-warden')),
+      name: config.name ?? t(nameKey),
     });
 
     this.bossId = config.bossId ?? 'shadow-warden';
+    this.nameKey = nameKey;
     // 没有 `this.phase = 1`：阶段由状态机初始化（构造它的那几行在下面），
     // `phase` 是取/设值器（见类里那段注释）—— 在这一行 `this.sm` 还不存在
     this.arenaCenter = config.arenaCenter ?? this.position.clone();
@@ -144,7 +148,7 @@ export class Boss extends Enemy {
     if (sig === this._healthSig) return;
     this._healthSig = sig;
     window.dispatchEvent(new CustomEvent('boss-health', {
-      detail: { hp: this.hp, maxHp: this.maxHp, phase: this.phase, name: this.name },
+      detail: { hp: this.hp, maxHp: this.maxHp, phase: this.phase, nameKey: this.nameKey },
     }));
   }
 
