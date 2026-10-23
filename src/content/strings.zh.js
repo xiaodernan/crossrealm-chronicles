@@ -2442,6 +2442,20 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   toast_camera_third_fmt: '第三人称越肩 ${swap}',
   toast_void_boundary: '位面裂隙之外尚无世界 — 折返吧',
   toast_broken_timeline: '⟲ 破碎时线：重力反转 — 行走于时环之下',
+  // 任务进度/指路文案的状态词与提示（W-D2 切片23：getProgressText 参数字面量 + 到达 toast）
+  quest_state_done: '完成',
+  quest_state_done_already: '已完成',
+  quest_progress_dungeon_search: '寻找地下城入口（紫环）',
+  quest_progress_dungeon_rerun_again: '再次进入地下城（Chapter 5 后）',
+  quest_progress_gear_equipped: '已装备',
+  quest_progress_gear_unequipped: '装备一件再出发',
+  quest_progress_choice_pending: '做出抉择方能前行',
+  quest_progress_npc_search: '寻找 NPC（绿点）',
+  quest_progress_discovery_search_fmt: '寻找 ${label}',
+  quest_progress_discovery_marker: '标记点',
+  common_target: '目标',
+  qa_toast_arrived_boss_fmt: '已到达 ${label} — 可点「${autoplay}」跑完全流程',
+  qa_toast_arrived_fmt: '已到达 ${label} — ${progress}',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

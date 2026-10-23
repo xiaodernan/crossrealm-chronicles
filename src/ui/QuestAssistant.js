@@ -381,10 +381,10 @@ export class QuestAssistant {
       // 以前这里逐个数类型名（`boss` / `boss2` / `boss3` / `voidboss` / `chaosboss`），
       // 而主线表已经把所有 Boss 统一写成 `type: 'boss'` + 各自的 `bossId` ——
       // 那份抄本一多出来，"自动带路到了 Boss 区"这句话就对不上号（它落进最后的 else）。
-      this.game.dialog.toast(`已到达 ${wp?.label ?? 'Boss'} — 可点「自动通关」跑完全流程`);
+      this.game.dialog.toast(t('qa_toast_arrived_boss_fmt', { label: t(wp?.label ?? 'style_label_boss'), autoplay: t('autoplay_label') }));
       this.autoPilot = false;
     } else {
-      this.game.dialog.toast(`已到达 ${wp?.label ?? '目标'} — ${this.game.quests.getProgressText()}`);
+      this.game.dialog.toast(t('qa_toast_arrived_fmt', { label: t(wp?.label ?? 'common_target'), progress: this.game.quests.getProgressText() }));
     }
     this.game.quests.syncProgress();
     this.refresh();

@@ -59,15 +59,15 @@ const VOID_DISCOVERY_IDS = targetIdsByFlag('hasVoid');
  * 说的是"这一步让你去哪儿"。两者今天数值相同，职责不同。
  */
 const TARGET_WAYPOINTS = {
-  'hub-anchor': { x: 0, z: 55, label: '世界之锚' },
-  'fantasy-ring': { x: -200, z: -30, label: '至尊石环' },
-  'magic-castle': { x: 0, z: -195, label: '悬浮城堡' },
-  'space-tesseract': { x: 200, z: 80, label: '五维_tesseract' },
-  'void-rift': { x: 0, z: 220, label: '时线裂隙' },
-  'void-tablet': { x: 0, z: 225, label: '五维碑文' },
-  'chaos-core': { x: -200, z: 220, label: '混沌之核' },
-  wanderer: { x: -8, z: 45, label: '位面流浪者' },
-  'astronaut-echo': { x: 200, z: 90, label: '宇航员回声' },
+  'hub-anchor': { x: 0, z: 55, label: 'wp_label_anchor' },
+  'fantasy-ring': { x: -200, z: -30, label: 'wp_label_one_ring' },
+  'magic-castle': { x: 0, z: -195, label: 'demo_step_magic_castle' },
+  'space-tesseract': { x: 200, z: 80, label: 'echo_tesseract_title' },
+  'void-rift': { x: 0, z: 220, label: 'obj_void_rift_title' },
+  'void-tablet': { x: 0, z: 225, label: 'wp_label_void_tablet' },
+  'chaos-core': { x: -200, z: 220, label: 'wp_label_chaos_core' },
+  wanderer: { x: -8, z: 45, label: 'wp_label_wanderer' },
+  'astronaut-echo': { x: 200, z: 90, label: 'wp_label_astronaut_echo' },
 };
 
 /**
@@ -386,24 +386,24 @@ export class QuestSystem {
       case 'hits': return t('quest_progress_hits', { current: Math.min(this.stats.hits, q.target), target: q.target });
       case 'kills': return `${Math.min(this.stats.kills[q.enemyType] || 0, q.target)} / ${q.target}`;
       case 'spells': return t('quest_progress_spells', { current: Math.min(this.stats.spellCasts, q.target), target: q.target });
-      case 'dungeon': return this.stats.dungeonsCleared.has(q.dungeonId) ? t('quest_progress_dungeon', { dungeon_done: '完成' }) : t('quest_progress_dungeon', { dungeon_done: '寻找地下城入口（紫环）' });
+      case 'dungeon': return this.stats.dungeonsCleared.has(q.dungeonId) ? t('quest_progress_dungeon', { dungeon_done: t('quest_state_done') }) : t('quest_progress_dungeon', { dungeon_done: t('quest_progress_dungeon_search') });
       case 'mind': return t('quest_progress_mind', { target: q.target });
       case 'charged': return t('quest_progress_charged', { current: Math.min(this.stats.chargedCasts, q.target), target: q.target });
       case 'skills-unlocked': return t('quest_progress_skills', { current: Math.min(this.stats.skillsUnlocked, q.target), target: q.target });
-      case 'dungeon-rerun': return this.stats.dungeonRerun ? t('quest_progress_dungeon_rerun', { rerun_done: '完成' }) : t('quest_progress_dungeon_rerun', { rerun_done: '再次进入地下城（Chapter 5 后）' });
+      case 'dungeon-rerun': return this.stats.dungeonRerun ? t('quest_progress_dungeon_rerun', { rerun_done: t('quest_state_done') }) : t('quest_progress_dungeon_rerun', { rerun_done: t('quest_progress_dungeon_rerun_again') });
       case 'gear': return this.isQuestObjectiveDone(q)
-        ? t('quest_progress_gear', { slot_done: '已装备' })
-        : t('quest_progress_gear', { slot_done: '装备一件再出发' });
+        ? t('quest_progress_gear', { slot_done: t('quest_progress_gear_equipped') })
+        : t('quest_progress_gear', { slot_done: t('quest_progress_gear_unequipped') });
       case 'choice': {
         const 选中的 = objectiveChosen(q, this.stats);
         return 选中的
           ? t('quest_progress_choice', { choice_done: t(选中的.label) })
-          : t('quest_progress_choice', { choice_done: '做出抉择方能前行' });
+          : t('quest_progress_choice', { choice_done: t('quest_progress_choice_pending') });
       }
       case 'chests': return t('quest_progress_chests', { current: this.stats.chestsOpened, target: q.target });
-      case 'npc': return this.stats.npcTalked.has(q.targetId) ? t('quest_progress_npc', { npc_done: '完成' }) : t('quest_progress_npc', { npc_done: `寻找 NPC（绿点）` });
+      case 'npc': return this.stats.npcTalked.has(q.targetId) ? t('quest_progress_npc', { npc_done: t('quest_state_done') }) : t('quest_progress_npc', { npc_done: t('quest_progress_npc_search') });
       case 'level': return t('quest_progress_level', { target: q.target });
-      case 'discovery': return this.stats.discoveries.has(q.targetId) ? t('quest_progress_discovery', { discovery_done: '已完成' }) : t('quest_progress_discovery', { discovery_done: `寻找 ${TARGET_WAYPOINTS[q.targetId]?.label ?? '标记点'}` });
+      case 'discovery': return this.stats.discoveries.has(q.targetId) ? t('quest_progress_discovery', { discovery_done: t('quest_state_done_already') }) : t('quest_progress_discovery', { discovery_done: t('quest_progress_discovery_search_fmt', { label: t(TARGET_WAYPOINTS[q.targetId]?.label ?? 'quest_progress_discovery_marker') }) });
       case 'interact':
         // 门控那一格不许显示"已完成触摸"：摸过锚点不等于这一步过了（判据同一条口径）
         if (this.stats.discoveries.has(q.targetId) && !interactGateCondition(q)) {
@@ -412,7 +412,7 @@ export class QuestSystem {
         return keyText(t(objectiveDesc(q, this.stats)));
       default: {
         const bossKey = BOSS_STAT_KEYS[q.bossId];
-        if (bossKey) return this.stats[bossKey] ? t('quest_progress_dungeon', { dungeon_done: '完成' }) : BOSS_DISPLAY[q.bossId].progress;
+        if (bossKey) return this.stats[bossKey] ? t('quest_progress_dungeon', { dungeon_done: t('quest_state_done') }) : BOSS_DISPLAY[q.bossId].progress;
         return keyText(t(objectiveDesc(q, this.stats)));
       }
     }

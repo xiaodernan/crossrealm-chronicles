@@ -2445,6 +2445,20 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   toast_camera_third_fmt: 'Third-person over-the-shoulder ${swap}',
   toast_void_boundary: 'There is no world beyond the plane rift — turn back',
   toast_broken_timeline: '⟲ Broken timeline: gravity inverted — walking beneath the time ring',
+  // Quest progress/waypoint state words and toasts (W-D2 slice 23: getProgressText param literals + arrival toasts)
+  quest_state_done: 'Done',
+  quest_state_done_already: 'Completed',
+  quest_progress_dungeon_search: 'Find the dungeon entrance (purple ring)',
+  quest_progress_dungeon_rerun_again: 'Enter a dungeon again (after Chapter 5)',
+  quest_progress_gear_equipped: 'Equipped',
+  quest_progress_gear_unequipped: 'Equip one before setting out',
+  quest_progress_choice_pending: 'Make a choice to move on',
+  quest_progress_npc_search: 'Find the NPC (green dot)',
+  quest_progress_discovery_search_fmt: 'Find ${label}',
+  quest_progress_discovery_marker: 'marker',
+  common_target: 'Target',
+  qa_toast_arrived_boss_fmt: 'Arrived at ${label} — click "${autoplay}" to run the full flow',
+  qa_toast_arrived_fmt: 'Arrived at ${label} — ${progress}',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */
