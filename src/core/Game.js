@@ -490,7 +490,9 @@ export class Game {
       this.weaponSkills.tryNarrativeUnlocks(this);
     });
     gameOn('game-completed', () => {
-      this.dialog.show('无尽行者', 'Chapter 5 完成。你斩裂混沌，成为真正的位面行者。\n\n五区贯通、六位 Boss 倒下，这段旅程到此为止——愿下次重逢时，这个世界更加辽阔。');
+      // W-D2 切片26：说话人复用终局那一步的目标标题（同一个称号，且那一格已经占了两个键的上限）。
+      // 对话框只过 `keyText()`（把 `{动作}` 换成键名）而不过 `t()` —— 展开必须在这里做。
+      this.dialog.show(t('obj_infinity_title'), t('ending_dialog_text'));
       SaveSystem.save(this);
     });
     gameOn('spell-toast', (e) => this.dialog.toast(e.detail.message));
@@ -656,7 +658,7 @@ export class Game {
       this.settings.data.keybinds = {};
       this.settings.data.gamepadBinds = {};
       this.settings.data.gamepadUiBinds = {};
-      this.dialog?.toast('键位配置无效，已恢复默认键位');
+      this.dialog?.toast(t('toast_keybind_invalid'));
     }
     this.hotkeyTable = hotkeyTable;
     this.keybindTable = keyTable;

@@ -42,7 +42,8 @@ export class UpgradePanel {
   refresh(restName) {
     const s = this.game.stats;
     const ws = this.game.weaponSkills;
-    document.getElementById('upgrade-rest-name').textContent = restName ?? '营火';
+    // W-D2 切片26：兜底复用声期那一格（`index.html` 的 `data-i18n` 也是它）—— 「营火」这个词已经占了两个键的上限
+    document.getElementById('upgrade-rest-name').textContent = restName ?? t('upgrade_rest_default');
     document.getElementById('upgrade-souls').textContent = s.souls;
     document.getElementById('upgrade-cost').textContent = s.levelUpCost();
     document.getElementById('upgrade-level').textContent = s.level;
@@ -160,7 +161,10 @@ export class UpgradePanel {
       const can = sk.narrative ? false : ws.canUnlock(sk);
       const lock = !owned && !sk.narrative ? ws.getStoryLock(sk.id) : null;
       const narrative = sk.narrative;
-      const tag = narrative ? (owned ? '叙事✓' : '击败 Boss 解锁') : (sk.cost ? `${sk.cost}点` : '');
+      // W-D2 切片26：技能根邧上那三个小悬届也进双表
+      const tag = narrative
+        ? (owned ? t('upgrade_skill_tag_narrative_owned') : t('upgrade_skill_tag_narrative_locked'))
+        : (sk.cost ? t('upgrade_skill_cost_fmt', { cost: sk.cost }) : '');
       return `<button type="button" class="skill-btn ${owned ? 'owned' : ''} ${narrative ? 'narrative' : ''}" data-id="${sk.id}" data-branch="${branch}" ${owned || !can || narrative ? 'disabled' : ''}>
         ${t(sk.name)} ${tag ? `(${tag})` : ''}<br><span>${t(sk.desc)}</span>
         ${lock ? `<em class="skill-lock">${lock}</em>` : ''}
@@ -181,13 +185,15 @@ export class UpgradePanel {
     const fr = this.game.storyJournal?.getCounts?.().fragment ?? 0;
     const narrative = SKILL_BRANCHES.flatMap((b) => ws.getAllSkills(b.id)).filter((s) => s.narrative);
     const ownedN = narrative.filter((s) => ws.unlocked.has(s.id));
+    // W-D2 切片26：简介那一句拆成三段（前 / 加粗的词 / 后）—— 翻译表里不放 HTML，
+    // 而「剧情」这个词在别处已经有格子，不再第三次。
     el.innerHTML = `
-      <p class="lore-intro">营火不仅是休息点 — 位面行者的剑与杖在此与<strong>剧情</strong>共鸣。击败 Boss、推进章节、收集叙事碎片，都会解锁新技能。</p>
-      <p>当前 Chapter ${ch} · 叙事碎片 ${fr} 条 · 叙事技能 ${ownedN.length}/${narrative.length}</p>
+      <p class="lore-intro">${t('upgrade_lore_intro_a')}<strong>${t('upgrade_lore_intro_strong')}</strong>${t('upgrade_lore_intro_b')}</p>
+      <p>${t('upgrade_lore_status_fmt', { chapter: ch, fragments: fr, owned: ownedN.length, total: narrative.length })}</p>
       <ul class="lore-skill-list">
         ${narrative.map((s) => `<li class="${ws.unlocked.has(s.id) ? 'owned' : 'locked'}">
           <strong>${t(s.name)}</strong> — ${t(s.lore ?? s.desc)}
-          ${ws.unlocked.has(s.id) ? '' : `<br><span class="hint">${s.grant.boss ? '需击败 Boss' : `需 Chapter ${s.grant.chapter}`}</span>`}
+          ${ws.unlocked.has(s.id) ? '' : `<br><span class="hint">${s.grant.boss ? t('upgrade_skill_lock_boss') : t('upgrade_skill_lock_chapter_fmt', { chapter: s.grant.chapter })}</span>`}
         </li>`).join('')}
       </ul>
     `;

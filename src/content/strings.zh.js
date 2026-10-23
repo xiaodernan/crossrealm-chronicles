@@ -2481,6 +2481,27 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   journal_dungeon_cleared_text: '迷宫守钥者倒下，位面之门再次闭合。你带走的不只是战利品，还有被埋藏的记忆。',
   journal_boss_defeated_fmt: '击败 ${name}',
   journal_boss_defeated_text: '又一道位面枷锁被斩断。锚点的脉动在你胸口回响。',
+  // 结局对话 / 片屏字幕 / 升级面板剩余玩家可见中文（W-D2 切片26）
+
+  ending_dialog_text: 'Chapter 5 完成。你斩裂混沌，成为真正的位面行者。\n\n五区贯通、六位 Boss 倒下，这段旅程到此为止——愿下次重逢时，这个世界更加辽阔。',
+  toast_keybind_invalid: '键位配置无效，已恢复默认键位',
+  credits_line_title: '跨界纪元 · Crossrealm Chronicles',
+  credits_line_engine: '浏览器 Demo — Vite + Three.js',
+  credits_line_flavor: '你斩裂混沌，成为位面行者。',
+  credits_line_thanks: '感谢游玩',
+  credits_line_features: '{journal} 日志 · CG 画廊 · 秘典 · 成就',
+  credits_line_systems: '营火 NPC · Boss 再战 · 战斗风格',
+  credits_line_fin: '— fin —',
+  credits_toast: 'Chapter 5 完成 — 滚动字幕',
+  upgrade_lore_intro_a: '营火不仅是休息点 — 位面行者的剑与杖在此与',
+  upgrade_lore_intro_strong: '剧情',
+  upgrade_lore_intro_b: '共鸣。击败 Boss、推进章节、收集叙事碎片，都会解锁新技能。',
+  upgrade_lore_status_fmt: '当前 Chapter ${chapter} · 叙事碎片 ${fragments} 条 · 叙事技能 ${owned}/${total}',
+  upgrade_skill_tag_narrative_owned: '叙事✓',
+  upgrade_skill_tag_narrative_locked: '击败 Boss 解锁',
+  upgrade_skill_cost_fmt: '${cost}点',
+  upgrade_skill_lock_boss: '需击败 Boss',
+  upgrade_skill_lock_chapter_fmt: '需 Chapter ${chapter}',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

@@ -2484,6 +2484,27 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   journal_dungeon_cleared_text: 'The keywarden falls and the plane gate seals once more. You leave with more than loot - you carry the buried memories.',
   journal_boss_defeated_fmt: 'Defeated ${name}',
   journal_boss_defeated_text: 'Another planar shackle is cut. The pulse of the anchor echoes in your chest.',
+  // Ending dialog / end credits / remaining player-visible Chinese in the upgrade panel (W-D2 slice 26)
+
+  ending_dialog_text: 'Chapter 5 complete. You cut through chaos and became a true Plane Wanderer.\n\nFive realms joined, six Bosses fallen - the journey ends here. May the world be wider when we meet again.',
+  toast_keybind_invalid: 'Invalid keybind config - defaults restored',
+  credits_line_title: 'Crossrealm Chronicles',
+  credits_line_engine: 'Browser Demo - Vite + Three.js',
+  credits_line_flavor: 'You cut through chaos and became the Plane Wanderer.',
+  credits_line_thanks: 'Thanks for playing',
+  credits_line_features: '{journal} Journal · CG Gallery · Codex · Achievements',
+  credits_line_systems: 'Campfire NPCs · Boss rematch · Combat styles',
+  credits_line_fin: '— fin —',
+  credits_toast: 'Chapter 5 complete - rolling credits',
+  upgrade_lore_intro_a: "The campfire is more than a resting place - the Plane Wanderer's sword and staff resonate here with ",
+  upgrade_lore_intro_strong: 'the Narrative',
+  upgrade_lore_intro_b: '. Defeat Bosses, advance chapters and gather narrative fragments to unlock new skills.',
+  upgrade_lore_status_fmt: 'Chapter ${chapter} · ${fragments} narrative fragments · narrative skills ${owned}/${total}',
+  upgrade_skill_tag_narrative_owned: 'Narrative ✓',
+  upgrade_skill_tag_narrative_locked: 'Defeat a Boss to unlock',
+  upgrade_skill_cost_fmt: '${cost} pts',
+  upgrade_skill_lock_boss: 'Defeat the Boss first',
+  upgrade_skill_lock_chapter_fmt: 'Requires Chapter ${chapter}',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

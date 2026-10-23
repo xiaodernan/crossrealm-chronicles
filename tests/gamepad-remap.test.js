@@ -28,7 +28,7 @@ import { PAD_BUTTON_LABELS, padButtonLabel, padStickLabel } from '../src/content
 import { GamepadInput } from '../src/engine/GamepadInput.js';
 import { SettingsPanel } from '../src/ui/SettingsPanel.js';
 import { SettingsManager } from '../src/core/SettingsManager.js';
-import { setLanguage } from '../src/engine/i18n.js';
+import { setLanguage, t } from '../src/engine/i18n.js';
 
 const STORAGE_KEY = 'crossrealm_settings';
 
@@ -988,7 +988,8 @@ describe('存储与回落', () => {
       s.data.gamepadBinds = {};
       s.data.gamepadUiBinds = {};
       s.save();
-      toast.push('键位配置无效，已恢复默认键位');
+      // W-D2 切片26：那一句现在住在双表里，手抄的那份改成键名
+      toast.push(t('toast_keybind_invalid'));
     }
     expect(toast).toHaveLength(1);
     expect(padTable).toBeUndefined();
@@ -996,7 +997,7 @@ describe('存储与回落', () => {
     // 上面那段 catch 是**手抄**的 `Game.rebuildHotkeys` 形状，所以这里回头核一遍真源码：
     // 生产里少清一格 = 每次开机都"半复位 + 弹一句"，而这条用例照样绿
     const game = readFileSync(join(process.cwd(), 'src/core/Game.js'), 'utf8');
-    const catchBlock = game.slice(game.indexOf('键位配置无效') - 600, game.indexOf('键位配置无效'));
+    const catchBlock = game.slice(game.indexOf('toast_keybind_invalid') - 600, game.indexOf('toast_keybind_invalid'));
     for (const key of ['keybinds', 'gamepadBinds', 'gamepadUiBinds']) {
       expect(catchBlock, `回落时没清 ${key}：那一格的脏值会留着，下次开机再弹一次`)
         .toMatch(new RegExp(`this\\.settings\\.data\\.${key} = \\{\\}`));
