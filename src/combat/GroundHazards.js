@@ -22,12 +22,34 @@ import { GROUND_HAZARD, TIME_SCALE_LEASH } from '../content/tuning.js';
 /** 脉动频率（1/秒）：只影响透明度，不影响判定，所以不需要进内容表 */
 const PULSE = 14;
 
+/**
+ * 边缘环的厚度占半径比（W-A6 切片9，M5）：环是**单位环**按半径缩放，
+ * 所以厚度随半径等比变 —— 半径 4.5 的砸地圈环厚约 0.5 米，半径 3 的弹幕圈约 0.33 米。
+ * 与 `PULSE` 同一条纪律：纯表现常数，不进内容表。
+ */
+const RING_INNER = 0.88;
+/** 环比盘面再抬高这么多：同高度会 Z-fighting，玩家看到的是闪烁而不是边界 */
+const RING_LIFT = 0.02;
+
 export class GroundHazards {
-  constructor(scene, world) {
+  constructor(scene, world, audio = null) {
     this.world = world;
     /** 场景：拆的时候要把那一组摘下来（改前只在构造时用过一次场景，没存 ⇒ 拆不了） */
     this.scene = scene;
+    /**
+     * 落地前提示音的音效句柄（M6）。**可空**：node 用例与没有音频的场景不传，
+     * 调用点一律走可选链 —— 这一层不因为"没带喇叭"就抛。
+     */
+    this.audio = audio ?? null;
     this.geometry = new THREE.CircleGeometry(1, 48);
+    /**
+     * 边缘环（M5）：与圆盘**同生同灭**的另一件几何，共享一份单位环。
+     * 它回答的是圆盘回答不了的问题 —— "这一圈最终会盖到哪儿"：
+     * 填充盘从 25% 涨满，前摇前半段玩家看到的是**会继续长大**的圆；
+     * 环从第一帧就是判定半径，站不站得出圈从此一眼可判。
+     */
+    this.ringGeometry = new THREE.RingGeometry(RING_INNER, 1, 48);
+    this._ringPool = [];
     this.group = new THREE.Group();
     this.group.name = 'ground-hazards';
     scene.add(this.group);
@@ -55,9 +77,13 @@ export class GroundHazards {
    */
   spawn(spec) {
     const disc = this._acquire(spec.color);
+    const ring = this._acquireRing(spec.color);
     const y = (this.world?.getGroundHeight(spec.x, spec.z) ?? 0) + GROUND_HAZARD.yOffset;
     disc.position.set(spec.x, y, spec.z);
     disc.scale.setScalar(spec.radius * GROUND_HAZARD.growFrom);
+    // 环：真实半径、从第一帧就画满 —— 这正是它与填充盘的分工
+    ring.position.set(spec.x, y + RING_LIFT, spec.z);
+    ring.scale.setScalar(spec.radius);
     const item = {
       x: spec.x,
       z: spec.z,
@@ -97,6 +123,9 @@ export class GroundHazards {
       active: false,
       cancelled: false,
       disc,
+      ring,
+      /** 落地提示音响过了没有（M6：一个圈只响一次，落地后不补） */
+      warned: false,
     };
     // 一个"域"必须往地上留下点什么：按段掉血、拽人、或者改时标 —— 三者皆无就是铺了一块看不见的空地
     if (item.duration > 0 && !(item.tick > 0) && !item.slow && !item.pull) {
@@ -121,6 +150,20 @@ export class GroundHazards {
     return disc;
   }
 
+  /** 边缘环：与圆盘同一套池化纪律（借用 → 整体重设 → 归还） */
+  _acquireRing(color) {
+    const ring = this._ringPool.pop() ?? new THREE.Mesh(
+      this.ringGeometry,
+      new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide }),
+    );
+    ring.material.color.setHex(color);
+    ring.material.opacity = GROUND_HAZARD.opacity.edge;
+    ring.rotation.x = -Math.PI / 2;
+    ring.visible = true;
+    this.group.add(ring);
+    return ring;
+  }
+
   update(dt, playerPos, playerRef) {
     for (let i = this._items.length - 1; i >= 0; i--) {
       const it = this._items[i];
@@ -133,13 +176,22 @@ export class GroundHazards {
           it.z = playerPos.z;
           const gy = (this.world?.getGroundHeight(it.x, it.z) ?? 0) + GROUND_HAZARD.yOffset;
           it.disc.position.set(it.x, gy, it.z);
+          it.ring.position.set(it.x, gy + RING_LIFT, it.z);
         }
         const p = Math.min(1, it.t / it.telegraph);
         const g = GROUND_HAZARD.growFrom;
         it.disc.scale.setScalar(it.radius * (g + (1 - g) * p));
         // 脉动乘以前摇进度：刚画出来时几乎透明，越接近落点越实、也跳得越显眼
-        const { warn, pulse } = GROUND_HAZARD.opacity;
+        const { warn, pulse, edge } = GROUND_HAZARD.opacity;
         it.disc.material.opacity = (warn + pulse * Math.sin(it.t * PULSE)) * p;
+        // 环不参与"长大"：前摇全程按真实半径常显（M5）
+        it.ring.material.opacity = edge;
+        // M6：落地前 `warnLead` 秒给一声。只响一次；被 cancelFor 撤掉的圈走不到这
+        // （它当场离开 _items），所以"死了的圈"不会从坟里响。
+        if (!it.warned && it.telegraph - it.t <= GROUND_HAZARD.warnLead) {
+          it.warned = true;
+          this.audio?.hazardWarn?.();
+        }
         if (p < 1) continue;
         this._land(it, playerPos, playerRef);
         it.t = 0;
@@ -160,6 +212,7 @@ export class GroundHazards {
       }
       const q = Math.min(1, it.t / GROUND_HAZARD.linger);
       it.disc.material.opacity = GROUND_HAZARD.opacity.burst * (1 - q);
+      it.ring.material.opacity = GROUND_HAZARD.opacity.edge * (1 - q);
       if (q >= 1) this._release(i);
     }
   }
@@ -172,8 +225,10 @@ export class GroundHazards {
    * 下一段照样落在身上，这才是"站进引力井里"该有的代价。
    */
   _sustain(it, dt, playerPos, playerRef) {
-    const { warn, burst } = GROUND_HAZARD.opacity;
+    const { warn, burst, edge } = GROUND_HAZARD.opacity;
     it.disc.scale.setScalar(it.radius);
+    // 域的边界全程亮着：被拽的那几秒里，"再迈一步就出去"必须看得见
+    it.ring.material.opacity = edge;
     // 时停域的脉动按它自己的时标放慢：这块地"时间变厚"要在圈上读得出来（M5 的起点）
     it.disc.material.opacity = warn
       + (0.5 + 0.5 * Math.sin(it.t * PULSE * (it.slow || 1))) * (burst - warn);
@@ -261,6 +316,9 @@ export class GroundHazards {
     this.group.remove(it.disc);
     it.disc.visible = false;
     this._pool.push(it.disc);
+    this.group.remove(it.ring);
+    it.ring.visible = false;
+    this._ringPool.push(it.ring);
   }
 
   count() {
@@ -270,6 +328,11 @@ export class GroundHazards {
   /** 池里备用网格数：泄漏 watchdog（F3）与用例都看这个，不翻内部结构 */
   pooled() {
     return this._pool.length;
+  }
+
+  /** 边缘环的池（M5）：与 `pooled()` 同口径，环的泄漏单独看得见 */
+  ringPooled() {
+    return this._ringPool.length;
   }
 
   /**
@@ -287,8 +350,13 @@ export class GroundHazards {
     for (const disc of [...this._pool, ...this._items.map((it) => it.disc)]) {
       disc.material?.dispose?.();
     }
+    for (const ring of [...this._ringPool, ...this._items.map((it) => it.ring)]) {
+      ring.material?.dispose?.();
+    }
     this._pool.length = 0;
+    this._ringPool.length = 0;
     this._items.length = 0;
     this.geometry?.dispose?.();
+    this.ringGeometry?.dispose?.();
   }
 }

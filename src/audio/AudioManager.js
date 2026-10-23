@@ -637,6 +637,19 @@ export class AudioManager {
   pickup() { this.playTone(660, 0.1, 'sine', 0.1); this.playTone(990, 0.15, 'sine', 0.08); }
 
   /**
+   * 场地危险区落地前的那一声（W-A6 切片9，M6）。
+   *
+   * 为什么单独一个方法而不是塞进 `SFX_NAMES`：与 `gearDrop` / `pickup` 同一条口径 ——
+   * 这是**直接调用**的游戏音效，不走 `game-audio-sfx` 的远程请求面。圈本身看得见
+   * （边缘环 M5），这一声是给"视线在地图别处"的玩家的提前量，不是唯一信息通道，
+   * 所以也**不进字幕线索名册**（`content/captions.js`：字幕条是稀缺注意力资源）。
+   *
+   * 两声短上行方波（740 → 988Hz，各约 0.08 秒）：与 `doorOpen` 的正弦分开一个音色，
+   * 混在战斗里也辨得出"这是地面要落了"，不是门开了。
+   */
+  hazardWarn() { this.playTone(740, 0.07, 'square', 0.1); this.playTone(988, 0.09, 'square', 0.08); }
+
+  /**
    * 装备落地的一声（W-B5 切片7）：档位越高音越亮。与 `pickup` / `hit` 一样是**直接调用**的
    * 游戏音效 —— 不进 `SFX_NAMES`（那张表只管 `game-audio-sfx` 的远程请求面）。
    * `rank` 是稀有度序（0 起）。认不出的取值收进 0~3 而不是抛：声音不是账，

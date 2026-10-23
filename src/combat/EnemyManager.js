@@ -41,10 +41,12 @@ export function killRewardSouls(kind, growthStage = 0) {
 }
 
 export class EnemyManager {
-  constructor(scene, world, projectiles) {
+  constructor(scene, world, projectiles, audio = null) {
     this.scene = scene;
     this.world = world;
     this.projectiles = projectiles;
+    /** 音效句柄：目前只穿给场地危险区的落地提示音（M6）。与 ProjectileManager 同款可空 */
+    this.audio = audio ?? null;
     this.enemies = [];
     /** 围攻名额：整张地图的敌人共用一个仲裁器（Boss 不占名额） */
     this.squad = new SquadController();
@@ -52,7 +54,7 @@ export class EnemyManager {
      * 场地红圈：危险区不属于任何一只敌人，归管理器统一推进。
      * 与 `projectiles` 同一处理由 —— 远程招交出弹体、砸地招交出圈，二者都要活得比施法者久。
      */
-    this.hazards = new GroundHazards(scene, world);
+    this.hazards = new GroundHazards(scene, world, this.audio);
     /**
      * Boss 场的**两份共享几何**与**一份共享材质**（W-C1 切片3g）。
      *
