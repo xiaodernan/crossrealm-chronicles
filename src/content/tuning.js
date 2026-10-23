@@ -5,9 +5,11 @@
  * 两侧都不读对方内部字段，由 `combat/Resolution.js` 在命中那一帧合流。
  */
 
-/** 部位：y0/y1 是相对目标脚底（网格原点）的高度，mult=伤害倍率，posture=架势倍率 */
+/** 部位：y0/y1 是相对目标脚底（网格原点）的高度，mult=伤害倍率，posture=架势倍率；
+ * label 是**文案键**（W-D2 切片41），由 `combat/Resolution.js` 的 `hitSuffix` 展开进伤害飘字。
+ * 空串表示这个部位不出后缀（躯干/下盘是基线，没什么要解释的）。 */
 export const PARTS = {
-  head:  { mult: 1.6, posture: 1.35, y0: 1.62, y1: 2.20, label: '弱点' },
+  head:  { mult: 1.6, posture: 1.35, y0: 1.62, y1: 2.20, label: 'part_label_head' },
   torso: { mult: 1.0, posture: 1.00, y0: 0.72, y1: 1.62, label: '' },
   legs:  { mult: 0.8, posture: 0.90, y0: 0.00, y1: 0.72, label: '' },
 };

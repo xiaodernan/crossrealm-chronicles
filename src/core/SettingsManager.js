@@ -141,6 +141,26 @@ export function migrateLegacySettings(flat) {
   return out;
 }
 
+/**
+ * 启动早期读一次存储里的语言（W-D2 切片41）。
+ *
+ * `main.js` 的 boot 错误路径（file: 协议提示、`new Game` 抛错）发生在 `SettingsManager`
+ * 构造**之前** — 但报错也是给玩家看的，该按他选的语言报。这里不构造实例，
+ * 只把"存储里的语言"这一格读出来：v2 `{version, values.language}` 与 v1 扁平均认
+ * （与 `load()` 同一套形状），脏值/异常一律回 null（调用方回落 'zh'）。
+ */
+export function storedLanguage() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY) ?? '{}');
+    if (!raw || typeof raw !== 'object') return null;
+    const values = raw.version === VERSION ? (raw.values ?? {}) : migrateLegacySettings(raw);
+    const lang = values.language;
+    return lang === 'zh' || lang === 'en' ? lang : null;
+  } catch {
+    return null;
+  }
+}
+
 export class SettingsManager {
   constructor() {
     const loaded = this.load();

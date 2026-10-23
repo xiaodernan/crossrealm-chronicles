@@ -159,7 +159,8 @@ describe('敌人「格挡」：举着盾的那一段', () => {
 
   it('飘字把"为什么这么少"写在数字旁边', () => {
     expect(hitSuffix({ blocked: true })).toBe('格挡');
-    expect(hitSuffix({ blocked: true, part: { label: '弱点' }, crit: true })).toBe('格挡弱点会心');
+    // W-D2 切片41：part.label 存的是文案键（PARTS.head.label），hitSuffix 负责展开
+    expect(hitSuffix({ blocked: true, part: { label: 'part_label_head' }, crit: true })).toBe('格挡弱点会心');
   });
 
   it('举盾要占住进攻名额：整段防御期间这只敌人不再出手', () => {

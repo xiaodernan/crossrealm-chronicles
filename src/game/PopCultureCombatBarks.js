@@ -1,5 +1,10 @@
-/** 战斗/探索随机 bark — 致敬向（不占用主 UI） */
+/**
+ * 战斗/探索随机 bark — 致敬向（不占用主 UI）。
+ * W-D2 切片41：池子里存的是**文案键**，播出时经 `t()` 展开 — 英文玩家看到的
+ * 是致敬译句而不是中文原句。
+ */
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
+import { t } from '../engine/i18n.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -7,28 +12,28 @@ const GAME_POPCULTURECOMBATBARKS = 'game/PopCultureCombatBarks';
 const barksOn = (name, handler) => on(name, handler, GAME_POPCULTURECOMBATBARKS);
 export const COMBAT_BARKS_POP = {
   magic: [
-    '悬浮蜡烛被剑气吹歪 — 像某所学院的夜巡被打扰。',
-    '禁林树影里闪过银光 — 护念？还是魂火萤？',
+    'bark_pop_magic_candles',
+    'bark_pop_magic_forest',
   ],
   space: [
-    '米勒沙漏的沙子落得太快 — 这一刀可能已是七年后的回声。',
-    '对接舱金属环在远处旋转 — 别在这里恋战太久。',
+    'bark_pop_space_hourglass',
+    'bark_pop_space_dock',
   ],
   void: [
-    '红色孢子粘在刀锋上 — 逆相界的风从裂口渗出。',
-    '远处钟塔无声地指向 11:06 — 天花板感觉更远了。',
+    'bark_pop_void_spores',
+    'bark_pop_void_clocktower',
   ],
   fantasy: [
-    '沙龙镜墙裂镜一闪 — 倒影比你快半拍。',
-    '正午决斗圈的 chalk 线被踩乱 — 太阳不会等你。',
+    'bark_pop_fantasy_mirror',
+    'bark_pop_fantasy_duel',
   ],
   abyss: [
-    '禁酒窖门缝漏光 — 幽冥帮派在远处谈关税。',
-    '码头货箱碰撞 — 魂火走私线仍通。',
+    'bark_pop_abyss_cellar',
+    'bark_pop_abyss_docks',
   ],
   space_scifi: [
-    '跃迁门蓝光脉动 — 这一刀可能已是错相循环的第一秒。',
-    '休眠 AI 核心嗡鸣：「任务未完成。」',
+    'bark_pop_scifi_jumpgate',
+    'bark_pop_scifi_ai',
   ],
 };
 
@@ -57,7 +62,7 @@ export function attachPopCultureCombatBarks(game) {
     const list = COMBAT_BARKS_POP[key];
     if (!list?.length || Math.random() > 0.22) return;
     cd = 4;
-    game.dialog?.toast?.(list[Math.floor(Math.random() * list.length)], 2800);
+    game.dialog?.toast?.(t(list[Math.floor(Math.random() * list.length)]), 2800);
   });
   return { dispose() { offAll(GAME_POPCULTURECOMBATBARKS); } };
 }

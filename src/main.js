@@ -1,4 +1,6 @@
 import { Game } from './core/Game.js';
+import { setLanguage, t } from './engine/i18n.js';
+import { storedLanguage } from './core/SettingsManager.js';
 
 function showBootError(msg) {
   const loading = document.getElementById('loading');
@@ -22,7 +24,7 @@ function bindStartScreen(game) {
     const canvas = game.renderer?.domElement;
     if (canvas?.requestPointerLock) {
       canvas.requestPointerLock().catch(() => {
-        game.dialog?.toast?.('请点击画面中央再次锁定鼠标', 3500);
+        game.dialog?.toast?.(t('dialog_click_to_lock'), 3500);
       });
     }
   };
@@ -34,11 +36,15 @@ function bindStartScreen(game) {
 }
 
 async function boot() {
+  // W-D2 切片41：boot 的错误路径早于 Game 构造（SettingsManager 还没出生），
+  // 先按存储里的语言把表切好 — 报错也是给玩家看的，该按他选的语言报。
+  setLanguage(storedLanguage() ?? 'zh');
+
   const loading = document.getElementById('loading');
   const start = document.getElementById('start-screen');
 
   if (window.location.protocol === 'file:') {
-    showBootError('不能直接双击打开 HTML。\n请在项目目录运行 npm run dev，然后访问 http://localhost:5173');
+    showBootError(t('boot_error_direct_open'));
     return;
   }
 
@@ -62,13 +68,14 @@ async function boot() {
     game = new Game(document.body);
   } catch (e) {
     console.error(e);
-    showBootError(`游戏初始化失败：${e?.message ?? e}\n请按 F12 查看控制台详情。`);
+    showBootError(t('boot_error_init_failed_fmt', { message: e?.message ?? e }));
     return;
   }
 
   try {
     await game.player.modelReady;
   } catch (e) {
+    // 控制台诊断不走双表（切片37 口径：玩家看不到控制台）— 本文件其余玩家可见文案已全部键化
     console.warn('角色模型加载失败，使用占位体', e);
   }
 

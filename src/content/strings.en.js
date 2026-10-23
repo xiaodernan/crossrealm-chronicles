@@ -110,6 +110,26 @@ export const STRINGS_EN = Object.freeze({
   hit_suffix_blocked: 'Block',
   hit_suffix_backstab: 'Backstab',
   hit_suffix_crit: 'Critical',
+  part_label_head: 'Weak point',
+
+  // 战斗随机 bark（W-D2 切片41）：致敬向整句，按区域池随机播出（game/PopCultureCombatBarks.js）
+  bark_pop_magic_candles: "Floating candles tilt in the blade wind — some academy's night patrol, interrupted.",
+  bark_pop_magic_forest: "A silver glint darts through the Forbidden Forest's shadows — a Patronus? Or soul-fire?",
+  bark_pop_space_hourglass: "The sand in Miller's hourglass falls too fast — this slash may be an echo from seven years on.",
+  bark_pop_space_dock: 'Docking-ring gantries turn in the distance — do not linger here too long.',
+  bark_pop_void_spores: 'Red spores cling to the blade — the wind of the inverted realm seeps from the rift.',
+  bark_pop_void_clocktower: 'The distant clocktower silently points to 11:06 — the ceiling feels farther away.',
+  bark_pop_fantasy_mirror: 'A cracked mirror flashes along the salon wall — the reflection is half a beat faster than you.',
+  bark_pop_fantasy_duel: 'The chalk line of the noon duel circle is scuffed — the sun will not wait for you.',
+  bark_pop_abyss_cellar: 'Light leaks under the speakeasy cellar door — specter gangs haggle over tariffs in the distance.',
+  bark_pop_abyss_docks: 'Crates crash on the docks — the soul-fire smuggling line is still open.',
+  bark_pop_scifi_jumpgate: 'The jump gate pulses blue — this slash may be the first second of a skewed cycle.',
+  bark_pop_scifi_ai: 'A dormant AI core hums: "Objective incomplete."',
+
+  // 启动期提示（W-D2 切片41）：main.js 的 boot 错误路径早于 Game 构造 —— 开机先按存储语言
+  // setLanguage 再走这些路径；指针锁定那句复用 dialog_click_to_lock（同文不建第二键）
+  boot_error_direct_open: 'Do not open this HTML file directly.\nRun npm run dev in the project directory, then visit http://localhost:5173',
+  boot_error_init_failed_fmt: 'Game initialization failed: ${message}\nPress F12 for console details.',
   style_label_parry: 'Parry',
   style_label_finisher: 'Finisher',
   style_label_execution: 'Execution',

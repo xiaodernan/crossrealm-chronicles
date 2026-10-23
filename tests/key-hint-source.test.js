@@ -377,11 +377,13 @@ const LEDGER = {
   // W-D2 切片29：世界地图图例整块进双表，`鼠标：点击放置路点 · Shift+点击移除` 那句
   // 从 `ui/WorldMapPanel.js` 搬进 `world_map_legend_mouse_hint` —— 同样只是搬家
   // （zh 2 → 3 / en 3 → 4 / WorldMapPanel 1 → 0，总数一处没多）。
-  'content/strings.zh.js': 3,
-  'content/strings.en.js': 4,
-  // `请按 F12 查看控制台详情`：开机失败那一条错误里指的是**浏览器**的开发者工具，
-  // 不是任何一张表里的动作 —— 它没有可改绑的入口，也就没有"改绑之后说谎"这件事。
-  'main.js': 1,
+  // W-D2 切片41：开机失败那句（`请按 F12 查看控制台详情`）从 main.js 搬进
+  // `boot_error_init_failed_fmt`，这笔账跟着文案搬了家（zh 3 -> 4 / en 4 -> 5 / main.js 1 -> 0）。
+  'content/strings.zh.js': 4,
+  'content/strings.en.js': 5,
+  // W-D2 切片41：开机失败那一条错误整句搬进双表（`boot_error_init_failed_fmt`），
+  // 这笔账随之搬去 `content/strings.*.js`（见上），本文件归零。
+  'main.js': 0,
   // `自定义路点 Shift+点击`：这里说的是浏览器原生 `e.shiftKey`（`ui/WorldMapPanel.js` 读的就是它），
   // **不是任何一张表里的动作**。占位化它会显示成改绑后的那枚键，而行为仍然只认 Shift —— 那是假话。
   // 真要还这笔债，得先给"修饰键"登记成可改绑的动作，那是输入侧的事，不是文案侧的。

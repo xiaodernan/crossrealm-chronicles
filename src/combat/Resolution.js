@@ -112,10 +112,11 @@ export function resolveHit({
 /** 伤害飘字后缀：把结算结果里的"为什么这么多"直接写进数字旁边 */
 export function hitSuffix(hit) {
   let s = '';
-  // 三个后缀是**文案键**（W-D2 切片16d），在这里展开一次 —— 飘字是纯视觉文本，
+  // 后缀都是**文案键**（W-D2 切片16d），在这里展开一次 —— 飘字是纯视觉文本，
   // 不走 `keyText()`（它没有 `{动作}` 占位，只有字）。
+  // （W-D2 切片41：part.label 存的也是键 —— PARTS.head.label = part_label_head，Hurtbox 原样透传）
   if (hit.blocked) s += t('hit_suffix_blocked');
-  if (hit.part?.label) s += hit.part.label;
+  if (hit.part?.label) s += t(hit.part.label);
   if (hit.backstab) s += t('hit_suffix_backstab');
   if (hit.crit) s += t('hit_suffix_crit');
   return s;

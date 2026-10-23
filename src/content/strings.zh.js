@@ -110,6 +110,26 @@ export const STRINGS_ZH = Object.freeze({
   hit_suffix_blocked: '格挡',
   hit_suffix_backstab: '背刺',
   hit_suffix_crit: '会心',
+  part_label_head: '弱点',
+
+  // 战斗随机 bark（W-D2 切片41）：致敬向整句，按区域池随机播出（game/PopCultureCombatBarks.js）
+  bark_pop_magic_candles: '悬浮蜡烛被剑气吹歪 — 像某所学院的夜巡被打扰。',
+  bark_pop_magic_forest: '禁林树影里闪过银光 — 护念？还是魂火萤？',
+  bark_pop_space_hourglass: '米勒沙漏的沙子落得太快 — 这一刀可能已是七年后的回声。',
+  bark_pop_space_dock: '对接舱金属环在远处旋转 — 别在这里恋战太久。',
+  bark_pop_void_spores: '红色孢子粘在刀锋上 — 逆相界的风从裂口渗出。',
+  bark_pop_void_clocktower: '远处钟塔无声地指向 11:06 — 天花板感觉更远了。',
+  bark_pop_fantasy_mirror: '沙龙镜墙裂镜一闪 — 倒影比你快半拍。',
+  bark_pop_fantasy_duel: '正午决斗圈的 chalk 线被踩乱 — 太阳不会等你。',
+  bark_pop_abyss_cellar: '禁酒窖门缝漏光 — 幽冥帮派在远处谈关税。',
+  bark_pop_abyss_docks: '码头货箱碰撞 — 魂火走私线仍通。',
+  bark_pop_scifi_jumpgate: '跃迁门蓝光脉动 — 这一刀可能已是错相循环的第一秒。',
+  bark_pop_scifi_ai: '休眠 AI 核心嗡鸣：「任务未完成。」',
+
+  // 启动期提示（W-D2 切片41）：main.js 的 boot 错误路径早于 Game 构造 —— 开机先按存储语言
+  // setLanguage 再走这些路径；指针锁定那句复用 dialog_click_to_lock（同文不建第二键）
+  boot_error_direct_open: '不能直接双击打开 HTML。\n请在项目目录运行 npm run dev，然后访问 http://localhost:5173',
+  boot_error_init_failed_fmt: '游戏初始化失败：${message}\n请按 F12 查看控制台详情。',
   style_label_parry: '弹反',
   style_label_finisher: '终结',
   style_label_execution: '处决',
