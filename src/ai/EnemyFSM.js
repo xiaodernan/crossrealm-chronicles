@@ -160,7 +160,12 @@ const ENEMY_STATES = {
         sm.change('windup');                      // 连段：不换人、不交名额，下一段前摇自己收尾
         return;
       }
-      if (owner.activeMove) owner.attackCooldown = owner.activeMove.cooldown;
+      if (owner.activeMove) {
+        const baseCd = owner.activeMove.cooldown;
+        // W-B7 尾巴：急速加成缩短冷却
+        const hasteMult = (owner.hasteTimer > 0) ? (owner.hasteMult ?? 1.4) : 1;
+        owner.attackCooldown = baseCd / hasteMult;
+      }
       sm.change('recover');
     },
   },

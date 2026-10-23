@@ -126,6 +126,11 @@ export class Enemy {
     /** 质量：体型 scale 越大越推不动（Boss 与小兵吃到同样的重击不该跑一样远） */
     this.mass = config.mass ?? BODY_PLANS[this.type]?.scale ?? 1;
 
+    /** 急速加成：剩余毫秒数（W-B7 尾巴：士兵 formation） */
+    this.hasteTimer = 0;
+    /** 急速乘数（默认 1.4） */
+    this.hasteMult = 1.4;
+
     /* ---- 召唤：归属、配额与生命周期。三件事都由 EnemyManager 统一记账 ----
      * `summonQuota` 是管理器每帧盖下来的"你现在还能放出几只"（名额是全局资源，
      * 敌人自己无权决定）；仆从则拿着 `summoner` 的引用，召唤者一死就跟着消散。 */
@@ -543,6 +548,14 @@ export class Enemy {
           owner: this,
         });
       }
+    }
+    // W-B7 尾巴：formation → 周围同类得急速
+    if (move.haste) {
+      this.applyHasteToAllies(move.haste.radius, move.haste.duration * 1000, move.haste.mult);
+    }
+    // W-B7 尾巴：scan → 标记玩家（受伤害提升）
+    if (move.mark) {
+      ref.combat.markTarget(move.mark.duration * 1000, move.mark.damageMult);
     }
     if (ref.combat.isInvulnerable()) return false;
     // 竖直方向也要相交：横扫低段该被跳掉、重劈高段跳不掉、玩家站高台时近战全部落空
@@ -1001,6 +1014,8 @@ export class Enemy {
     }
 
     this.attackCooldown = Math.max(0, this.attackCooldown - dt);
+    // W-B7 尾巴：急速计时器
+    this.hasteTimer = Math.max(0, this.hasteTimer - dt);
     this.staggerTimer = Math.max(0, this.staggerTimer - dt);
     this._decayHitFlash(dt);
 
@@ -1023,6 +1038,28 @@ export class Enemy {
     this.animationAdapter?.update(dt);
     this.updateMeshY();
     this.updateWorldUi(ctx.camera);
+  }
+
+  /**
+   * 给周围同类施加急速（W-B7 尾巴：士兵 formation）。
+   * 在 `radius` 范围内找到同 `type` 的存活同伴，给它们加 `duration` 毫秒的急速。
+   * @param {number} radius 搜索半径（米）
+   * @param {number} durationMs 急速持续毫秒数
+   * @param {number} mult 急速乘数（默认 this.hasteMult）
+   */
+  applyHasteToAllies(radius, durationMs, mult = this.hasteMult) {
+    if (!this.scene || typeof this.scene.traverse !== 'function') return;
+    const r2 = radius * radius;
+    this.scene.traverse((obj) => {
+      if (obj !== this && obj.alive && obj.type === this.type && obj.hasteTimer !== undefined) {
+        const dx = obj.position.x - this.position.x;
+        const dz = obj.position.z - this.position.z;
+        if (dx * dx + dz * dz <= r2) {
+          obj.hasteTimer = Math.max(obj.hasteTimer, durationMs);
+          obj.hasteMult = Math.max(obj.hasteMult ?? 1, mult);
+        }
+      }
+    });
   }
 
   /** 受光闪：按 dt 衰减，死亡/重生都不会留下悬空的材质写入（B19） */

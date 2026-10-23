@@ -642,6 +642,48 @@ export const ENEMY_MOVES = {
     hazard: { radius: 3.0, telegraph: 0.8, damage: 0.45, duration: 6, tick: 1.0, color: 0x6a6a8a },
     telegraph: { color: 0x88aaff },
   },
+
+  /**
+   * 阵型打击（训练有素的士兵，W-B7 尾巴）。
+   *
+   * 普通近战招的强化版：命中段不只是砍一刀，而是**喊一声、周围 4 米内的同类
+   * 同步获得一次攻速加成**（`haste`，持续 3 秒、攻速 +40%）。这是表里第一条
+   * "给队友加状态"的招式 —— 此前只有召唤/光环类会影响别人，近战招全是只判自己。
+   * 机制上复用 `CombatController._applyHaste`（玩家侧已有同名逻辑），敌人侧新增
+   * `applyHasteToAllies(range, duration, mult)` 由这一招的命中段调用。
+   *
+   * 为什么要它：士兵是最基础的近战单位，"单打独斗弱、成群可怕"才是它的设计定位。
+   * 只有这一招能把"成群"变成真正的威胁，而不是单纯的数量堆砌。
+   */
+  formation: {
+    name: '阵型打击', windup: 0.65, strike: 0.28, recover: 0.45, reach: 0.9, cone: 0.15,
+    band: [0.05, 1.1],
+    damage: 1.1, cooldown: 4.5, weight: 2,
+    haste: { radius: 4.0, duration: 3.0, mult: 1.4 },
+    telegraph: { color: 0xffdd44 },
+  },
+
+  /**
+   * 战术扫描（无人机，W-B7 尾巴）。
+   *
+   * 远程非伤害招：发射一枚**不掉血的扫描脉冲**，命中玩家后给玩家打上
+   * `marked` 标记（持续 8 秒）。被标记期间，玩家受到**所有伤害 +25%**（含同类、
+   * Boss、环境伤害）。这是表里第一条"给玩家挂debuff"的远程招式 —— 此前只有
+   * `mark` 特性写在注释里从未实现，现在用已有的 `CombatController._markTarget`
+   * 最小落地（玩家侧已有同名标记系统，敌人侧只需在命中段 `e.markTarget(player)`）。
+   *
+   * 为什么要它：无人机的定位是"远程压制 + 信息战"，`shot` 只负责伤害，
+   * `scan` 负责"让后续伤害更疼"，配合同区哨炮的 `charge` 与 Boss 的 `volley`
+   * 形成真正的火力网。
+   */
+  scan: {
+    name: '战术扫描', windup: 0.7, strike: 0.15, recover: 0.5, cone: -2,
+    range: 18, minDist: 3.0,
+    damage: 0, cooldown: 12, weight: 1,
+    ranged: true,
+    mark: { duration: 8.0, damageMult: 1.25 },
+    telegraph: { color: 0x00ffff },
+  },
 };
 
 /**
@@ -948,10 +990,10 @@ export const PLAYER_KNOCK = {
 };
 
 export const ENEMY_MOVE_SETS = {
-  soldier: ['sweep', 'thrust', 'cleave', 'guard'],
+  soldier: ['formation', 'sweep', 'thrust', 'cleave', 'guard'],
   elite: ['sweep', 'flurry', 'cleave', 'guard', 'summon'],
   golem: ['cleave', 'slam', 'sweep', 'ram'],
-  drone: ['shot', 'dive', 'sweep'],
+  drone: ['scan', 'shot', 'dive', 'sweep'],
   dummy: [],
   boss: ['sweep', 'cleave', 'slam', 'shot'],
   default: ['sweep', 'thrust', 'cleave'],

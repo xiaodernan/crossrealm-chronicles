@@ -71,6 +71,10 @@ export class CombatController {
     this.maxStamina = 100;
     this.damageMult = 1;
     this.skillMult = 1;
+    /** 被标记到期时间（ms），过期则标记失效（W-B7 尾巴：无人机扫描） */
+    this.markedUntil = 0;
+    /** 标记期间的伤害乘数（默认 1.25） */
+    this.markDamageMult = 1.25;
 
     /* 战斗观测量（B41）：以前每帧派发一条 'stamina-changed' CustomEvent，
      * 60fps 下每秒 60 条、内容却常常与上一帧完全相同。改为"变化才通知"。
@@ -233,8 +237,10 @@ export class CombatController {
    */
   takeDamage(amount, element = null, part = null, impact = null) {
     if (this.isInvulnerable()) return;
+    // W-B7 尾巴：被标记期间受到伤害提升
+    const baseAmount = amount * (this._isMarked() ? this.markDamageMult : 1);
     const hit = resolveHit({
-      base: amount * difficultyMultiplier('damageTaken'), target: this, element, part, side: 'enemy', rng: this.rng,
+      base: baseAmount * difficultyMultiplier('damageTaken'), target: this, element, part, side: 'enemy', rng: this.rng,
     });
     this.hp = Math.max(0, this.hp - hit.damage);
     this.player.characterModel?.playHit?.();
@@ -277,6 +283,22 @@ export class CombatController {
     this.dialog.toast(t('combat_player_defeated'));
     window.dispatchEvent(new CustomEvent('player-respawn', { detail: {} }));
     this.publishVitals();
+  }
+
+  /**
+   * 给玩家打上标记（W-B7 尾巴：无人机 scan）。
+   * 标记期间受到的所有伤害乘以 `markDamageMult`（默认 1.25）。
+   * @param {number} durationMs 标记持续毫秒数
+   * @param {number} mult 伤害乘数（可选，默认取 this.markDamageMult）
+   */
+  markTarget(durationMs, mult = this.markDamageMult) {
+    this.markedUntil = Date.now() + durationMs;
+    this.markDamageMult = mult;
+  }
+
+  /** 内部：标记是否仍在生效 */
+  _isMarked() {
+    return Date.now() < this.markedUntil;
   }
 
   /**

@@ -477,6 +477,7 @@ export class EnemyManager {
     const ctx = this._aiCtx;
     ctx.target = playerPos;
     ctx.playerRef = playerRef;
+    ctx.combat = playerRef?.combat ?? null;
     // 碰撞世界会随区域重建换对象，每帧取当前值，不在构造期缓存
     ctx.collision = this.world?.collision ?? null;
     // 相机同理：观看模式/过场会换相机，每帧重取（W-A3 世界空间 UI 的朝向依据）
