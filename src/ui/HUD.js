@@ -586,14 +586,14 @@ buildHUD() {
       else if (k === 'side') suffix = ` (${this.game.sideQuests?.getProgress()?.done ?? 0}/${this.game.sideQuests?.getProgress()?.total ?? 0})`;
       else if (k === 'echoes') suffix = ` (${this.game.popCulture?.getStats()?.unlocked ?? 0})`;
       else if (k !== 'all') suffix = ` (${j.getCounts()[k] ?? 0})`;
-      return `<button type="button" class="journal-tab${tab === k ? ' active' : ''}" data-tab="${k}">${label}${suffix}</button>`;
+      return `<button type="button" class="journal-tab${tab === k ? ' active' : ''}" data-tab="${k}">${t(label)}${suffix}</button>`;
     }).join('');
     let questHtml = '';
     if (q.current) {
       questHtml = `<p class="quest-current"><strong>Ch${q.chapter} · ${t('hud_quest_in_progress')}</strong>${q.current.title}<br><span>${q.getProgressText()}</span></p>`;
     }
     const items = j.getFiltered(tab).map((d) =>
-      `<li><span class="journal-cat">${cats[d.category] ?? d.category}</span><strong>${d.title}</strong><span>${d.text}</span></li>`
+      `<li><span class="journal-cat">${cats[d.category] ? t(cats[d.category]) : d.category}</span><strong>${d.title}</strong><span>${d.text}</span></li>`
     ).join('');
     this.journalPanel.innerHTML = `
       <h2>${t('hud_journal_title', { journal: keyText('{journal}') })}</h2>

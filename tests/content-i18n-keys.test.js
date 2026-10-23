@@ -39,6 +39,8 @@ import { HELP_SECTIONS_EXTRA } from '../src/content/helpManual.js';
 import { CG_GALLERY_BONUS_EXTRA } from '../src/content/cgGallery.js';
 import { CUE_CATALOG } from '../src/content/captions.js';
 import { ZONE_NAMES } from '../src/content/ZoneIdentity.js';
+import { JOURNAL_CATEGORIES } from '../src/game/StoryJournal.js';
+import { JOURNAL_EXTRA_TABS } from '../src/ui/JournalTabRegistry.js';
 
 const ZH = new Set(ZH_KEYS);
 const EN = new Set(EN_KEYS);
@@ -63,6 +65,8 @@ const 行表 = [
 const 映射表 = [
   { 名: 'ZONE_NAMES（区名）', 映射: ZONE_NAMES },
   { 名: 'REST_POINT_NAMES（营火名）', 映射: REST_POINT_NAMES },
+  { 名: 'JOURNAL_CATEGORIES（日志页签·基础）', 映射: JOURNAL_CATEGORIES },
+  { 名: 'JOURNAL_EXTRA_TABS（日志页签·扩展）', 映射: JOURNAL_EXTRA_TABS },
 ];
 
 /** 取一行里那个字段的值（嵌套路径 / 数组都认） */

@@ -68,7 +68,6 @@ export const STRINGS_ZH = Object.freeze({
   hud_fps: 'FPS',
   hud_zone: '区域',
   hud_chapter: '章节',
-  hud_quest: '任务',
   hud_hp: '生命',
   hud_mana: '法力',
   hud_souls: '位面之魂',
@@ -1507,8 +1506,6 @@ export const STRINGS_ZH = Object.freeze({
 
   // 日志
   journal_title: '日志',
-  journal_quests: '任务',
-  journal_cg_gallery: 'CG 图鉴',
   journal_achievements: '成就',
   journal_lore: ' lore 百科',
   journal_dungeon_runs: '副本记录',
@@ -1635,6 +1632,20 @@ export const STRINGS_ZH = Object.freeze({
   // 补充：HUD 任务/日志标题（切片9 补全）
   hud_quest_in_progress: '进行中',
   hud_journal_title: '跨界日志 · ${journal} 关闭',
+
+  // 日志页签标签（W-D2 切片16b：数据层只存键，HUD 播出时 t() 展开）
+  journal_tab_quest: '任务',
+  journal_tab_fragment: '碎片',
+  journal_tab_poi: '探索',
+  journal_tab_npc: '人物',
+  journal_tab_dungeon: '地下城',
+  journal_tab_cg: 'CG画廊',
+  journal_tab_codex: '秘典',
+  journal_tab_memory: '营火记忆',
+  journal_tab_dungeons: '地下城通关',
+  journal_tab_skills: '流派',
+  journal_tab_side: '支线',
+  journal_tab_echoes: '次元回声',
 
   // 对话系统（W-D2 切片10）
   // Dialog.js 通用

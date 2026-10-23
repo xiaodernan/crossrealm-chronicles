@@ -68,7 +68,6 @@ export const STRINGS_EN = Object.freeze({
   hud_fps: 'FPS',
   hud_zone: 'Zone',
   hud_chapter: 'Chapter',
-  hud_quest: 'Quest',
   hud_hp: 'HP',
   hud_mana: 'Mana',
   hud_souls: 'Planar Souls',
@@ -1507,8 +1506,6 @@ export const STRINGS_EN = Object.freeze({
 
   // Journal
   journal_title: 'Journal',
-  journal_quests: 'Quests',
-  journal_cg_gallery: 'CG Gallery',
   journal_achievements: 'Achievements',
   journal_lore: 'Lore Codex',
   journal_dungeon_runs: 'Dungeon Runs',
@@ -1635,6 +1632,20 @@ export const STRINGS_EN = Object.freeze({
   // Additional: HUD quest/journal titles (slice 9 completion)
   hud_quest_in_progress: 'In Progress',
   hud_journal_title: 'Crossrealm Journal · ${journal} to close',
+
+  // Journal tab labels (W-D2 slice 16b: data layer stores keys, HUD expands with t())
+  journal_tab_quest: 'Quests',
+  journal_tab_fragment: 'Fragments',
+  journal_tab_poi: 'Exploration',
+  journal_tab_npc: 'Characters',
+  journal_tab_dungeon: 'Dungeons',
+  journal_tab_cg: 'CG Gallery',
+  journal_tab_codex: 'Codex',
+  journal_tab_memory: 'Campfire Memories',
+  journal_tab_dungeons: 'Dungeons Cleared',
+  journal_tab_skills: 'Schools',
+  journal_tab_side: 'Side Quests',
+  journal_tab_echoes: 'Plane Echoes',
 
   // Dialog System (W-D2 slice 10)
   // Dialog.js generic

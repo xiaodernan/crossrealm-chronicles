@@ -7,15 +7,26 @@ import { objectiveDesc } from '../content/objectives.js';
 
 const GAME_STORYJOURNAL = 'game/StoryJournal';
 const journalOn = (name, handler) => on(name, handler, GAME_STORYJOURNAL);
+/**
+ * 日志页签（基础表）。值是**文案键**（W-D2 切片16b）—— 改前是裸中文，
+ * 切到英文语言时页签条一半英文一半中文，而没有任何一处会报错。
+ * 键在中英两表的登记由 `tests/content-i18n-keys.test.js` 的映射表逐值核；
+ * 迁移时的中文原值由 `tests/journal-tab-registry.test.js` 一个不错地钉住。
+ * 显示侧在 `HUD.js` 播出那一刻 `t()` 展开（与氛围台词同一纪律）。
+ */
 export const JOURNAL_CATEGORIES = {
-  all: '全部',
-  quest: '任务',
-  fragment: '碎片',
-  poi: '探索',
-  npc: '人物',
-  campfire: '营火',
-  boss: 'Boss',
-  dungeon: '地下城',
+  // 三格复用已有键而不是新开：门禁"同一份文案最多两个键"（tests/i18n.test.js）——
+  // 这些词在别的功能里已有两把活键，再开一把就是第三个。仓库惯例是
+  // "新增的那格指向已有格"（见 §9 W-D2 切片12）。代价写明：那几把键改名时
+  // 本页签跟着变，tests/journal-tab-registry.test.js 的迁移原值钉住会发现。
+  all: 'franchise_all_label',      // 全部（秘典/图鉴筛选片同词）
+  boss: 'style_label_boss',        // Boss（战斗风格标签同词）
+  campfire: 'cg_speaker_campfire', // 营火（CG 讲述者同词）
+  quest: 'journal_tab_quest',
+  fragment: 'journal_tab_fragment',
+  poi: 'journal_tab_poi',
+  npc: 'journal_tab_npc',
+  dungeon: 'journal_tab_dungeon',
 };
 
 export const DISCOVERABLE_TOTAL = 28;
