@@ -5,6 +5,7 @@ import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { paletteOf } from '../../content/materialPalette.js';
 import { shouldUpdate as frameShouldUpdate } from '../../engine/FrameBudget.js';
 
+import { t } from '../../engine/i18n.js';
 /** 第四主题：破碎时线 — 指环王 + 星际穿越时间主题融合 */
 export class VoidZone extends BaseZone {
   constructor(scene, center, dialog) {
@@ -94,12 +95,9 @@ export class VoidZone extends BaseZone {
       { x: 0, y: 0, z: -15 },
       'zone_poi_void_rift_label',
       () => {
-        this.dialog.show(
-          '时线裂隙',
-          '第四枚位面碎片在时环中心闪烁。完成 Chapter 3 飞升后，时线执政官才会完全苏醒。\n\n蓄力法术（长按 {spell1}/{spell2}/{spell3}）可打断其「时停」攻击。'
-        );
+        this.dialog.show(t('obj_void_rift_title'), t('zone_dlg_void_rift_text'));
         window.dispatchEvent(new CustomEvent('discovery', {
-          detail: { id: 'void-rift', title: '时线裂隙', text: '隐藏的第四碎片。' },
+          detail: { id: 'void-rift', title: t('obj_void_rift_title'), text: t('zone_disc_void_rift_text') },
         }));
       },
       { id: 'void-rift', color: 0xc9a962 }
@@ -110,7 +108,7 @@ export class VoidZone extends BaseZone {
       'zone_poi_void_tablet_label',
       () => {
         window.dispatchEvent(new CustomEvent('discovery', {
-          detail: { id: 'void-tablet', title: '五维碑文', text: '「Love is the one thing that transcends time and space.」' },
+          detail: { id: 'void-tablet', title: t('obj_void_tablet_title'), text: t('zone_disc_void_tablet_text') },
         }));
       },
       { id: 'void-tablet', color: 0x6688aa }

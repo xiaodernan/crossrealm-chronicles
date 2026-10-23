@@ -19,6 +19,7 @@ import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from '../con
 import { paletteOf } from '../content/materialPalette.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
+import { t } from '../engine/i18n.js';
 /** 地形网格 520×620，可通行边界留 10 单位余量 */
 export const WORLD_BOUNDS = { minX: -250, maxX: 250, minZ: -300, maxZ: 300 };
 
@@ -282,11 +283,8 @@ export class WorldManager {
       label: 'hub_poi_anchor_label',
       type: 'main',
       onInteract: () => {
-        this.dialog.show(
-          '世界之锚',
-          '三块位面碎片在此交汇。穿越者的使命，是重铸锚点，阻止诸界崩塌。向西进入灰白森林，向南踏入霍格沃兹遗境，向东前往米勒荒原——每一处都藏有一枚位面碎片。'
-        );
-        window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'hub-anchor', title: '世界之锚', text: '三界交汇的核心。' } }));
+        this.dialog.show(t('wp_label_anchor'), t('zone_dlg_hub_anchor_text'));
+        window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'hub-anchor', title: t('wp_label_anchor'), text: t('zone_disc_hub_anchor_text') } }));
       },
     });
   }

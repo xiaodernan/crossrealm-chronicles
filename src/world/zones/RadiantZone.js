@@ -5,6 +5,7 @@ import { applyShadow } from '../../engine/shadowPolicy.js';
 import { makeUvConeGeometry } from '../../engine/uvGeometry.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
+import { t } from '../../engine/i18n.js';
 /** 新增：辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊 */
 export class RadiantZone extends BaseZone {
   constructor(scene, center, dialog) {
@@ -70,7 +71,7 @@ export class RadiantZone extends BaseZone {
       { x: 0, y: 0, z: 65 },
       'zone_poi_radiant_main_gate_label',
       () => {
-        this.dialog.show('辉煌圣域大门', '金光洗礼过的巨门，守护着圣域的核心。\n\n坐标：X≈-180, Z≈-95 · 需完成相关支线才能进入内殿。');
+        this.dialog.show(t('zone_poi_radiant_main_gate_label'), t('zone_dlg_radiant_main_gate_text'));
       },
       { id: 'radiant-main-gate', color: 0xffcc00 }
     );
@@ -79,9 +80,9 @@ export class RadiantZone extends BaseZone {
       'wp_label_radiant_altar',
       () => {
         window.dispatchEvent(new CustomEvent('discovery', {
-          detail: { id: 'radiant-altar', title: '晨曦祭坛', text: '晨曦初照时，祭坛会释放祝福之光。' },
+          detail: { id: 'radiant-altar', title: t('wp_label_radiant_altar'), text: t('zone_disc_radiant_altar_text') },
         }));
-        this.dialog.show('晨曦祭坛', '在晨曦时分（游戏内 5:00-7:00）祈祷可获得「晨曦祝福」。\n\n祝福效果：下一次营火休息恢复双倍体力。');
+        this.dialog.show(t('wp_label_radiant_altar'), t('zone_dlg_radiant_altar_text'));
       },
       { id: 'radiant-altar', color: 0xffee00 }
     );

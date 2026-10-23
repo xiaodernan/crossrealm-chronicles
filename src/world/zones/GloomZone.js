@@ -5,6 +5,7 @@ import { applyShadow } from '../../engine/shadowPolicy.js';
 import { makeUvFacetGeometry } from '../../engine/uvGeometry.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
+import { t } from '../../engine/i18n.js';
 /** 新增：幽暗林地 — 迷雾缠绕的古老森林，介于幻想与虚空之间 */
 export class GloomZone extends BaseZone {
   constructor(scene, center, dialog) {
@@ -70,7 +71,7 @@ export class GloomZone extends BaseZone {
       { x: 0, y: 0, z: 70 },
       'zone_poi_gloom_deep_entrance_label',
       () => {
-        this.dialog.show('幽暗林地深处', '迷雾最浓处藏着古老的秘密。\n\n坐标：X≈180, Z≈170 · 需完成相关支线才能进入核心区域。');
+        this.dialog.show(t('zone_poi_gloom_deep_entrance_label'), t('zone_dlg_gloom_deep_entrance_text'));
       },
       { id: 'gloom-deep-entrance', color: 0x4a4a6a }
     );
@@ -79,9 +80,9 @@ export class GloomZone extends BaseZone {
       'zone_poi_gloom_moss_label',
       () => {
         window.dispatchEvent(new CustomEvent('discovery', {
-          detail: { id: 'gloom-moss', title: '荧光苔藓', text: '只在幽暗林地生长的发光苔藓，能指引迷途者。' },
+          detail: { id: 'gloom-moss', title: t('wp_label_gloom_moss'), text: t('zone_disc_gloom_moss_text') },
         }));
-        this.dialog.show('荧光苔藓群落', '采集荧光苔藓可制作照明道具。\n\n在营火处可将其炼制为「迷雾灯笼」。');
+        this.dialog.show(t('zone_poi_gloom_moss_label'), t('zone_dlg_gloom_moss_text'));
       },
       { id: 'gloom-moss', color: 0x6a6a8a }
     );

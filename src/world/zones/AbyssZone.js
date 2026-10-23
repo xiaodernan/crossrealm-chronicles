@@ -4,6 +4,7 @@ import { makeUvBoxGeometry } from '../../engine/uvGeometry.js';
 import { ZONE_IDS, ZONE_NAMES } from '../../content/ZoneIdentity.js';
 import { paletteOf } from '../../content/materialPalette.js';
 
+import { t } from '../../engine/i18n.js';
 /** 第五主题：混沌边境 — 三界交汇后的不稳定位面 */
 export class AbyssZone extends BaseZone {
   constructor(scene, center, dialog) {
@@ -69,7 +70,7 @@ export class AbyssZone extends BaseZone {
       { x: 0, y: 0, z: 62 },
       'zone_poi_abyss_boss_gate_label',
       () => {
-        this.dialog.show('混沌裂隙竞技场', 'Chapter 5 解锁后，踏入红圈将唤醒「混沌裂隙领主」。\n\n坐标：X≈-200, Z≈285 · 建议先解锁 3 个武器技能。');
+        this.dialog.show(t('zone_poi_abyss_boss_gate_label'), t('zone_dlg_abyss_boss_gate_text'));
       },
       { id: 'abyss-boss-gate', color: 0xff2244 }
     );
@@ -78,9 +79,9 @@ export class AbyssZone extends BaseZone {
       'zone_poi_chaos_core_label',
       () => {
         window.dispatchEvent(new CustomEvent('discovery', {
-          detail: { id: 'chaos-core', title: '混沌之核', text: '第五位面的不稳定能量源。' },
+          detail: { id: 'chaos-core', title: t('obj_chaos_core_title'), text: t('zone_disc_chaos_core_text') },
         }));
-        this.dialog.show('混沌之核', '此处可感悟武器技能——在营火用「技能点」解锁剑/杖流派。\n\n完成 Chapter 4 后，边境会完全显现。');
+        this.dialog.show(t('obj_chaos_core_title'), t('zone_dlg_chaos_core_text'));
       },
       { id: 'chaos-core', color: 0xff2244 }
     );
