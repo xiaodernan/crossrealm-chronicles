@@ -26,4 +26,10 @@ describe('日志页签合并（JournalTabRegistry）', () => {
       ['achievements', 'cg', 'codex', 'dungeons', 'echoes', 'memory', 'side', 'skills'],
     );
   });
+
+  it('合并后的页签标签不重复（两个同名页签玩家分不出谁是谁）', () => {
+    const labels = Object.values(mergeJournalCategories(JOURNAL_CATEGORIES));
+    const dup = labels.filter((l, i) => labels.indexOf(l) !== i);
+    expect([...new Set(dup)], `重复的页签标签: ${[...new Set(dup)].join(' / ')}`).toEqual([]);
+  });
 });
