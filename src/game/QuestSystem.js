@@ -296,11 +296,21 @@ export class QuestSystem {
 
     // W-E3 切片23：分支树——抉择步基于玩家选的 flag 决定下一步；
     // 非抉择步若声明 branchTo 也走分支（true-end 系列 → ch4-complete）
+    // ⇒ 兼容：非 choice 步但有 `branch` 映射且 `stats.decisions` 有对应标志时，也走分支
     let 分支目标 = null;
     if (finished?.type === 'choice' && finished.branch) {
       const 选中的 = objectiveChosen(finished, this.stats);
       if (选中的 && finished.branch[选中的.flag]) {
         分支目标 = finished.branch[选中的.flag];
+      }
+    } else if (finished?.branchTo && finished?.branch && this.stats?.decisions) {
+      // W-E3 切片23：非 choice 步（如 true-end）有 branch 映射时，
+      // 依 stats.decisions 里记下的旗标查对应的目标行 id
+      const 匹配的Flag = Array.from(this.stats.decisions).find(
+        (f) => finished.branch[f]
+      );
+      if (匹配的Flag && finished.branch[匹配的Flag]) {
+        分支目标 = finished.branch[匹配的Flag];
       }
     } else if (finished?.branchTo) {
       分支目标 = finished.branchTo;

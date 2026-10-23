@@ -611,9 +611,17 @@ export const OBJECTIVES = [
     desc: 'obj_true_end_desc',
     // W-E3 切片22：真结局的**文案**随玩家在「封印 / 研习」里选的那条走
     // ⇒ 抉择不再只是一句被记下的话（旗标名在这里是**引用**，注册表核它确有 choices 设过）
+    // W-E3 切片23：真结局**分支**：抉择后走不同的下一步
+    // ⇒ `branch` 映射：flag → 目标行 id；QuestSystem 会在推进时检查
+    // ⇒ `descByChoice` 仍保留用于文案展开
     descByChoice: {
       choice_void_sealed: 'obj_true_end_desc_sealed',
       choice_void_studied: 'obj_true_end_desc_studied',
+    },
+    // W-E3 切片23：分支图——flag 名映射到下一步的行 id
+    branch: {
+      choice_void_sealed: 'ch4-complete',
+      choice_void_studied: 'ch4-complete',
     },
     type: 'interact',
     targetId: 'hub-anchor',
@@ -953,6 +961,19 @@ export const CONDITIONS = {
     && state.stats.discoveries?.has('magic-castle')
     && state.stats.discoveries?.has('space-tesseract')
     && state.stats.discoveries?.has('void-rift'),
+  // W-E3 切片23：真结局的条件随决择而异
+  checkTrueEndSealed: (state) => state.stats.voidBossDefeated
+    && state.stats.discoveries?.has('fantasy-ring')
+    && state.stats.discoveries?.has('magic-castle')
+    && state.stats.discoveries?.has('space-tesseract')
+    && state.stats.discoveries?.has('void-rift')
+    && state.stats.decisions?.has('choice_void_sealed'),
+  checkTrueEndStudied: (state) => state.stats.voidBossDefeated
+    && state.stats.discoveries?.has('fantasy-ring')
+    && state.stats.discoveries?.has('magic-castle')
+    && state.stats.discoveries?.has('space-tesseract')
+    && state.stats.discoveries?.has('void-rift')
+    && state.stats.decisions?.has('choice_void_studied'),
   checkChapter3Ready: (state) => state.stats.boss2Defeated,
   checkInfinity: (state) => state.stats.chaosBossDefeated && (state.stats.skillsUnlocked || 0) >= 3,
 };
