@@ -15,6 +15,7 @@ import { join } from 'node:path';
 import { BODY_PLANS, ENEMY_DEFENSE, ENEMY_RESIST, ENEMY_MOVES, ENEMY_MOVE_SETS } from '../src/content/tuning.js';
 import { installWindowShim, makeManager, makePlayerRef, makeWorld, spawn, v } from './helpers/enemyHarness.js';
 import { WorldManager } from '../src/world/WorldManager.js';
+import { buildSeededWorld } from './helpers/seededWorld.js';
 import { ZONE_ORDER, zoneIdAt } from '../src/content/ZoneIdentity.js';
 
 beforeAll(installWindowShim);
@@ -252,9 +253,12 @@ describe('W-B7 切片5：每个出生点都得醒得过来（B70 那一族）', 
    *
    * B125 给这条门禁补了两件事，因为它们各自掩盖过真故障：
    *
-   * 1. **门禁读的布局必须点名**（`钉死布局` / `建世界`）。各区装饰与 `addRandomObstacles`
+   * 1. **门禁读的布局必须点名**（`钉死布局` / `建世界`）。各区装饰与外野散石
    *    用未播种的 `Math.random()` 摆障碍 ⇒ 改前每一轮 `build()` 是另一份布局 ⇒ 同一张
    *    出生点表这轮全绿、下轮冒出一个闷点，全量套件轮换红。红率读数：300 轮 6 次。
+   *    钉死那一手从 B125 的余下那半起收进共享助手 `helpers/seededWorld.js`（本文件与
+   *    `dungeon-zone-coverage` 两个读者共用一份实现；"读者必须走助手"由
+   *    `tests/seeded-world-build.test.js` 静态盯着）。
    * 2. **闷点要报出挡住的那一块**（`挡事者`）。"这一格四向皆闷"修不动，
    *    "闷在 `cyl@160.45,69.72 r=2.01 y[-1.95,3.72]` 这块石头上"才修得动 ——
    *    这两条因（出生在实体里 / 视线高度不跟着站立面）就是靠报名加钉种子分开的。
@@ -270,24 +274,10 @@ describe('W-B7 切片5：每个出生点都得醒得过来（B70 那一族）', 
   const 钉死布局 = [1, 2, 3, 5, 12, 52];
 
   /**
-   * 建一份布局：只在 `build()` 这一段时间里把随机源换成 `seed` 的确定性序列，
-   * 建完立刻还原（`finally`：建图抛错也不把播种留在 `Math.random` 上，否则同一 worker
-   * 里后面的用例都在替身随机数上跑）。`seed = null` 表示不点名 —— 反向控制用它。
+   * 建一份钉死布局的世界：共享助手 `helpers/seededWorld.js`（B125 余下那半收编的）。
+   * 本地不再自己摆随机源 —— 两个读者各钉各的，种子含义迟早各自漂移。
    */
-  function 建世界(seed) {
-    const 原 = Math.random;
-    if (seed !== null) {
-      let s = (seed * 2654435761) >>> 0;
-      Math.random = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 0x100000000; };
-    }
-    const wm = new WorldManager({ add() {}, remove() {} }, { show() {}, toast() {} });
-    try {
-      wm.build();
-    } finally {
-      Math.random = 原;
-    }
-    return wm;
-  }
+  const 建世界 = buildSeededWorld;
 
   /** 把一份碰撞体写成能照着修的一句话 */
   const 挡事者 = (c) => {
@@ -341,7 +331,7 @@ describe('W-B7 切片5：每个出生点都得醒得过来（B70 那一族）', 
     expect(闷点, `这些出生点四面都醒不过来（玩家贴脸也不警觉）：\n${闷点.join('\n')}`).toEqual([]);
   });
 
-  it('钉子真的钉住了：同种子逐位相同、异种子各不相同、不播种就漂', () => {
+  it('钉子真的钉住了：同种子逐位相同、异种子各不相同', () => {
     /** 布局指纹：把每块碰撞体的形状/坐标/尺寸/高度带压成一个 32 位散列 */
     const 指纹 = (cs) => {
       let h = 0x811c9dc5;
@@ -362,9 +352,8 @@ describe('W-B7 切片5：每个出生点都得醒得过来（B70 那一族）', 
     const 六份 = 钉死布局.map(一次);
     expect(new Set(六份).size, '钉死的几颗种子建出了同一份布局 ⇒ 其中一颗是抄的')
       .toBe(钉死布局.length);
-    // 反向控制：随机源不点名时两份布局本来就不一样 —— 这正是改前那条门禁轮换红的因
-    expect(一次(null), '不播种两次建图竟逐位相同 ⇒ 障碍布局并不由随机源摆放，钉种子无从谈起')
-      .not.toBe(一次(null));
+    // "不播种两份布局本来就不一样"那条反向控制住进了 tests/seeded-world-build.test.js
+    // （它与具体读哪份布局无关，属钉子本身的性质；放那儿免得每个读者各抄一遍）。
   });
 
   /**

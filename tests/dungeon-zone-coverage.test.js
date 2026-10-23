@@ -17,38 +17,29 @@
  * 3. **两座副本不共用一个门口** —— 共用就等于一座进不去（后建的那座把前一座的圈盖住了）。
  */
 import { describe, it, expect, beforeAll } from 'vitest';
-import * as THREE from 'three';
 import { DUNGEON_DEFS } from '../src/content/dungeons.js';
 import { DUNGEON_ENCOUNTERS } from '../src/content/dungeonEncounters.js';
 import { DUNGEON_BOSS_LINES } from '../src/content/bossDialogue.js';
 import { ZONE_ORDER, ZONE_IDS, HUB_ZONE } from '../src/content/ZoneIdentity.js';
-import { WorldManager } from '../src/world/WorldManager.js';
+import { buildSeededWorld } from './helpers/seededWorld.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
 beforeAll(installWindowShim);
 
 let world = null;
 
-/** 真世界：区位要按**真的**区反推，碰撞体也要**真的**那些 */
-function 建世界() {
-  const handlers = new Map();
-  globalThis.window = {
-    addEventListener(type, fn) {
-      if (!handlers.has(type)) handlers.set(type, new Set());
-      handlers.get(type).add(fn);
-    },
-    dispatchEvent(event) { handlers.get(event.type)?.forEach((fn) => fn(event)); return true; },
-  };
-  globalThis.CustomEvent = class { constructor(type, init) { this.type = type; this.detail = init?.detail; } };
-  const w = new WorldManager(new THREE.Scene(), { show() {}, toast() {} });
-  w.build();
-  return w;
-}
+/**
+ * 钉死的几份布局（B125 余下那半）：这条门禁读的是**真的**碰撞体，而障碍是未播种的
+ * `Math.random()` 摆的 —— 不钉种子，"入口 5 米内站得住人"这一条就听命于运气
+ * （一块随机落下的散石理论上能盖住某个入口的采样点）。种子不必多：判据采样 16 向 ×
+ * 4 个半径共 64 点、只要一处空，三份布局已是同一判据的三种遮挡姿势。
+ */
+const 钉死布局 = [3, 7, 42];
 
 /** 点到碰撞体边缘的距离（负数 = 人在里面） */
-function 离碰撞体(x, z) {
+function 离碰撞体(x, z, w = world) {
   let 最近 = Infinity;
-  for (const c of world.collision.colliders ?? []) {
+  for (const c of w.collision.colliders ?? []) {
     let d;
     if (c.shape === 'cyl') {
       d = Math.hypot(x - c.x, z - c.z) - c.r;
@@ -106,17 +97,21 @@ describe('② 副本门口走得到', () => {
     // 所以要核的是"**走得到 5 米内**"，不是"入口那一点本身不在墙里"。
     // （真去核"那一点不在墙里"会误报：`five-dim-rift` 的入口本来就在一面墙的边缘内侧 1.2 厘米 ——
     //   标记环压在那面墙上，不影响玩家能不能走到。）
-    for (const def of DUNGEON_DEFS) {
-      let 走得到 = false;
-      for (let a = 0; a < 16 && !走得到; a++) {
-        const ang = (a / 16) * Math.PI * 2;
-        for (const r of [1.5, 2.5, 3.5, 4.5]) {
-          const x = def.entrance.x + Math.cos(ang) * r;
-          const z = def.entrance.z + Math.sin(ang) * r;
-          if (离碰撞体(x, z) > 0) { 走得到 = true; break; }
+    // 每份钉死布局各量一遍：不钉种子这一条就听命于运气（B125 那一族）。
+    for (const seed of 钉死布局) {
+      const 布局 = buildSeededWorld(seed);
+      for (const def of DUNGEON_DEFS) {
+        let 走得到 = false;
+        for (let a = 0; a < 16 && !走得到; a++) {
+          const ang = (a / 16) * Math.PI * 2;
+          for (const r of [1.5, 2.5, 3.5, 4.5]) {
+            const x = def.entrance.x + Math.cos(ang) * r;
+            const z = def.entrance.z + Math.sin(ang) * r;
+            if (离碰撞体(x, z, 布局) > 0) { 走得到 = true; break; }
+          }
         }
+        expect(走得到, `副本 "${def.id}" 的入口 5 米内没有一处站得住人的地方（布局种子 ${seed}）—— 玩家走不到，副本就进不去`).toBe(true);
       }
-      expect(走得到, `副本 "${def.id}" 的入口 5 米内没有一处站得住人的地方 —— 玩家走不到，副本就进不去`).toBe(true);
     }
   });
 
@@ -145,4 +140,4 @@ describe('③ 每一座副本都齐了那三样东西', () => {
   });
 });
 
-beforeAll(() => { world = 建世界(); });
+beforeAll(() => { world = buildSeededWorld(钉死布局[0]); });

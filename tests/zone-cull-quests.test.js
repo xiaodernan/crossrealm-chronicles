@@ -19,12 +19,11 @@
  *    复用它等于不多一次几何判断（`zoneIdAt` 的调用点被门禁钉着）。
  */
 import { describe, it, expect } from 'vitest';
-import * as THREE from 'three';
 import { SIDE_QUESTS_ZONE, SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
 import { emptyStats, applyStatEvent, statsToJSON, statsFromJSON } from '../src/content/objectives.js';
 import { ZONE_ORDER } from '../src/content/ZoneIdentity.js';
-import { WorldManager } from '../src/world/WorldManager.js';
 import { makeManager, installWindowShim } from './helpers/enemyHarness.js';
+import { buildSeededWorld } from './helpers/seededWorld.js';
 
 const 清剿支线 = SIDE_QUESTS_ZONE.filter((q) => q.id.startsWith('side-cull-'));
 
@@ -111,21 +110,13 @@ describe('③ 那一格真的有人写', () => {
 });
 
 describe('④ 区位记在出生那一刻', () => {
-  /** 真世界：区位要按**真的**区反推（夹具那个空世界没有 `zones` ⇒ 一律落 corridor） */
-  const 真世界 = () => {
-    const handlers = new Map();
-    globalThis.window = {
-      addEventListener(type, fn) {
-        if (!handlers.has(type)) handlers.set(type, new Set());
-        handlers.get(type).add(fn);
-      },
-      dispatchEvent(event) { handlers.get(event.type)?.forEach((fn) => fn(event)); return true; },
-    };
-    globalThis.CustomEvent = class { constructor(type, init) { this.type = type; this.detail = init?.detail; } };
-    const world = new WorldManager(new THREE.Scene(), { show() {}, toast() {} });
-    world.build();
-    return world;
-  };
+  /**
+   * 真世界：区位要按**真的**区反推（夹具那个空世界没有 `zones` ⇒ 一律落 corridor）。
+   * 走共享的钉死布局助手（B125 余下那半）：敌人出生会跑一次脱困，落点受随机散布的
+   * 障碍影响 —— 今天断言只读反推出来的 `zone`（与布局无关），但世界既然是真的，
+   * 就按真世界的纪律钉死种子，别给"以后有人断言 position"留运气。
+   */
+  const 真世界 = () => buildSeededWorld(7);
 
   it('敌人出生时记下它属于哪一座区（反推只做一次）', () => {
     installWindowShim();
