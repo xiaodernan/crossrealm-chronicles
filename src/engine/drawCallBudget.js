@@ -134,12 +134,30 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
  * （magic 本体 739 > 620、abyss 阴影 91 > 90、radiant 本体 648 > 640），那三条红是**表的功劳**：
  * 它量出了自己没量过的东西。今天同理：如果下一片把某站推回旧量级，这张表会当场喊。
  *
+ * ## 2026-10-23 #174：hub / fantasy 阴影列按"投影门已开"的新基线收紧（只收不放）
+ *
+ * 上一版阴影列量的是 W-C2 切片7（`2ea510d` 阴影投影门）**之前**的世界。切片7 给营火 NPC
+ * 一族落了投影门之后，hub 阴影 77→62、fantasy 68→54（同轮门开/门关反事实对账，见 §9），
+ * 上限却还钉着旧世界的数 —— 预算里留着一份已经不存在的开销。
+ *
+ * 今天用**同一把尺**复测（配方与 `scripts/perf-smoke.mjs` 逐字一致：timeOfDay 0.35 /
+ * yaw 0 / pitch −0.12 / settle 120 帧，取账序 update→钉时刻→reset→render，阴影列 =
+ * 整帧 − 关阴影帧；无头 Chrome + SwiftShader，探针 `.tmp-174/probe.mjs`）：
+ * **hub 阴影五轮全 64、fantasy 五轮全 54**。按"五轮最大 × 1.15 上取整到 10"：
+ * hub 73.6 → **80**（原 90）、fantasy 62.1 → **70**（原 80）—— 只收不放。
+ *
+ * **为什么只动这两格的阴影列**：① 其余六站今天只有 1 轮读数（探针先跑 hub/fantasy 的
+ * 五轮），按"数从同一把尺来"的纪律，不拿单轮读数改上限；② 整帧 / 本体两列今天没有
+ * 同配方读数，其上限仍出自 2026-10-21 那次扫描，成对不动。切片7 的复测日志里
+ * space（60）/ void（43）也低于现上限，但那是另一把尺的单轮数，不拿来改表 ——
+ * 六站五轮读数补齐后一起收，记在 §9 的尾巴里。
+ *
  * **键必须与 `DRAW_CALL_STATION_IDS` 完全一致** —— 多一格是"给一个没测过的站发通行证"，
  * 少一格是"这一站被静默放开"，两种都由 `tests/draw-call-budget.test.js` 当场拦。
  */
 export const DRAW_CALL_CEILINGS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 320, body: 240, shadow: 90 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 320, body: 240, shadow: 80 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 320, body: 240, shadow: 80 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 320, body: 240, shadow: 70 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 610, shadow: 50 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 250, body: 180, shadow: 80 }),
   [ZONE_IDS.VOID]: Object.freeze({ frame: 160, body: 110, shadow: 60 }),

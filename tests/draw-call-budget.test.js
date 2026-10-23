@@ -251,8 +251,12 @@ describe('反面控制：判定函数真的咬得住（喂坏数据必须红）'
   });
 
   it('真表本身也不越线：上限必须落在本配方实测值的两侧带里', () => {
-    // 2026-10-21 的**本配方**五轮最大值（`.tmp-wc2s5/perf-r{1,3,4,8,9}.log`，区域静态合批之后，
-    // 由 `.tmp-wc2s5/repin.mjs` 从日志算出）：三列各自一张表。
+    // 本配方实测最大值，**逐格注明出处**（"地板必须由量出上限的那同一把尺给"）：
+    // - shadow 的 hub / fantasy 两格：2026-10-23 五轮复测（`.tmp-174/probe.mjs`，投影门
+    //   已开的新基线，#174 按它把上限收到 80 / 70）；
+    // - 其余各格：2026-10-21 五轮最大值（`.tmp-wc2s5/perf-r{1,3,4,8,9}.log`，区域静态
+    //   合批之后，由 `.tmp-wc2s5/repin.mjs` 从日志算出）—— 那些格的上限今天没动，
+    //   地板就还跟着原来那次扫描。
     //
     // 为什么不能用 2026-10-18 那批数当下限：那是**合批之前**的世界、另一把尺子读出来的，
     // 把它钉成地板就等于宣布"以后任何优化都不许把上限压到 396 以下" —— 一条专门拦住
@@ -266,7 +270,7 @@ describe('反面控制：判定函数真的咬得住（喂坏数据必须红）'
     const 实测 = {
       frame: { hub: 278, fantasy: 273, magic: 567, space: 209, void: 133, abyss: 124, gloom: 177, radiant: 432 },
       body: { hub: 202, fantasy: 206, magic: 524, space: 149, void: 91, abyss: 77, gloom: 109, radiant: 387 },
-      shadow: { hub: 77, fantasy: 67, magic: 43, space: 61, void: 46, abyss: 47, gloom: 68, radiant: 49 },
+      shadow: { hub: 64, fantasy: 54, magic: 43, space: 61, void: 46, abyss: 47, gloom: 68, radiant: 49 },
     };
     for (const id of DRAW_CALL_STATION_IDS) {
       const 上 = DRAW_CALL_CEILINGS[id];
