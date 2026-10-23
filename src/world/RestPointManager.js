@@ -129,6 +129,27 @@ export class RestPointManager {
     return t(key, { zone: zoneKey ? t(zoneKey) : '' });
   }
 
+  /**
+   * 换语言时重算营火显示名（W-D2 切片33）。
+   *
+   * 名字在 `buildDefaults()` 那一刻展开成显示名存进 `point.name` —— 对话标题、
+   * 交互提示、快速旅行面板、图鉴条目读的都是这一格。换语言不重建世界，只能在这里
+   * 按**同一张表**（`REST_POINT_NAMES`，键就是营火 id）重新展开一遍。
+   * 表里没有的 id（将来手工 `addRestPoint` 加的营火）不动 —— 那些名字本就是
+   * 调用方递进来的定稿，不是键。
+   * @returns {number} 重算的营火数（供门禁的分母）
+   */
+  refreshNames() {
+    let n = 0;
+    for (const p of this.points) {
+      const key = REST_POINT_NAMES[p.id];
+      if (!key) continue;
+      p.name = this._expand(key, p.id);
+      n += 1;
+    }
+    return n;
+  }
+
   getNearest(pos, range = 4) {
     let best = null;
     let min = range;

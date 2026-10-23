@@ -34,6 +34,10 @@ beforeEach(() => {
     createElement: () => ({
       className: '', innerHTML: '', style: {},
       setAttribute: () => {}, removeAttribute: () => {}, appendChild: () => {},
+      // 信标标签要把语言键存下来（W-D2 切片33），于是要能问出里面那个 <span>。
+      // 真 DOM 元素本来就有这一族方法；这里测的是释放器，标签解析不在本题里，
+      // 给一个"没有 span"的诚实答案就够 —— 返回 null 时重算入口会跳过它。
+      querySelector: () => null, querySelectorAll: () => [],
     }),
   };
 });

@@ -101,6 +101,22 @@ export class RestPointEnhancer {
     point.zoneLabel = label;
   }
 
+  /**
+   * 换语言时重算木牌地名（W-D2 切片33）。
+   *
+   * `zoneLabel` 在构造期展开一次（`signLabelOf(id) ?? point.name`），首次发现提示与
+   * 图鉴条目的标题读的就是它。换语言不重建场景，由 `SettingsManager.applyToGame`
+   * 显式叫这一遍 —— 调用顺序在 `restPoints.refreshNames()` **之后**：回退分支读
+   * `point.name`，先 Name 后 label 才不会把旧语言的回退值写进去。
+   * @returns {number} 重算的地名数（供门禁的分母）
+   */
+  refreshLabels() {
+    for (const p of this.game.restPoints.points) {
+      p.zoneLabel = signLabelOf(p.id) ?? p.name;
+    }
+    return this.game.restPoints.points.length;
+  }
+
   update(dt, playerPos) {
     for (const p of this.game.restPoints.points) {
       const d = Math.hypot(playerPos.x - p.position.x, playerPos.z - p.position.z);

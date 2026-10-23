@@ -245,6 +245,13 @@ export class SettingsManager {
     // applyTranslations 只扫 data-i18n —— 换语言后在这里把 HUD 重算一遍
     //（改绑那条路走 Game.rebuildHotkeys → hud.refreshKeyHints）
     game?.hud?.refreshKeyHints?.();
+    // W-D2 切片33：世界层三处**构造期展开**的文案（Boss 信标标签 / 营火显示名 /
+    // 木牌地名）—— 它们建在世界构建期（早于本方法），换语言不会重建场景，
+    // applyTranslations 的文档走查也够不到 CSS2D 的容器，只能在这里显式重算。
+    // 顺序：先营火名（木牌地名的回退分支读 point.name），再木牌地名与信标标签。
+    game?.restPoints?.refreshNames?.();
+    game?.restPointEnhancer?.refreshLabels?.();
+    game?.bossBeacons?.refreshLabels?.();
     // 难度档（W-E1 切片2）：写入口只有这一处（与语言同一形状 —— 整局一份的模块级状态）。
     // `setDifficulty` 内部对脏值回落出厂不抛：存储是玩家可写的，一行手改的 localStorage
     // 不该把开机炸了（`padTuning` / `normalizeShadowQuality` 同一先例）。

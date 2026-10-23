@@ -13,6 +13,8 @@ export class BossBeacons {
     this.group = new THREE.Group();
     this.group.name = 'BossBeacons';
     scene.add(this.group);
+    /** 每枚信标的标签元素与它的文案键（W-D2 切片33：换语言重算用） */
+    this._labels = [];
   }
 
   build() {
@@ -100,9 +102,27 @@ export class BossBeacons {
     const label = new CSS2DObject(labelDiv);
     label.position.set(0, gy + 16, 0);
     g.add(label);
+    // 键跟着标签一起存（W-D2 切片33）：换语言不重建场景，靠它重算这一格
+    this._labels.push({ span: labelDiv.querySelector('span'), key: name });
 
     g.position.set(x, 0, z);
     this.group.add(g);
+  }
+
+  /**
+   * 换语言时重算信标标签（W-D2 切片33）。
+   *
+   * 标签是挂在场景里的 `CSS2DObject`（一片 DOM）—— 建的那一刻展开一次 `t(name)`，
+   * 之后换语言没有任何东西会重建它：场景不重建，`applyTranslations` 的文档走查
+   * 也够不到 CSS2D 的容器。所以键跟着元素一起存，由 `SettingsManager.applyToGame`
+   * 在换语言时显式叫这一遍。
+   * @returns {number} 重算的标签数（供门禁的分母）
+   */
+  refreshLabels() {
+    for (const { span, key } of this._labels) {
+      if (span) span.textContent = t(key);
+    }
+    return this._labels.length;
   }
 
   /**
