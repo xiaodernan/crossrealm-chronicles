@@ -955,6 +955,29 @@ export const STRINGS_ZH = Object.freeze({
   echo_holo_chart_title: "全息星图室",
   echo_holo_chart_desc: "星图每天变 — 领航员说：「航线是谈判出来的。」",
 
+  // POI 交互标签（W-D2 切片19：显示出口 PlayerController.updatePrompt 改走 t()，label 位存的全是键）
+  // 命名口径：致敬层 POI 复用回声条目的标题键（交互即解锁那条回声，本来就是同一个东西）；
+  // 区文件 POI 的提示语是指令式文案（调查/进入/阅读…），与路点标签不是一句口吻，单独建 zone_poi_* 族。
+  hub_poi_anchor_label: '触摸世界之锚',
+  pop_poi_fantasy_ring_echo_label: '至尊石环（回声）',
+  zone_poi_fantasy_ring_label: '调查至尊石环',
+  zone_poi_fantasy_ruins_label: '探索精灵遗迹',
+  zone_poi_fantasy_tower_label: '攀登守望塔',
+  zone_poi_fantasy_boss_gate_label: '进入 Boss 竞技场',
+  zone_poi_magic_castle_label: '进入悬浮城堡',
+  zone_poi_magic_forest_label: '禁林深处的低语',
+  zone_poi_magic_boss_gate_label: '进入奥术竞技场',
+  zone_poi_space_tesseract_label: '触碰五维_tesseract',
+  zone_poi_space_lens_label: '观测引力透镜',
+  zone_poi_space_wreck_label: '搜索 Endurance 号残骸',
+  zone_poi_void_rift_label: '调查时线裂隙',
+  zone_poi_void_tablet_label: '阅读五维碑文',
+  zone_poi_abyss_boss_gate_label: '混沌裂隙竞技场',
+  zone_poi_chaos_core_label: '触碰混沌之核',
+  zone_poi_gloom_deep_entrance_label: '幽暗林地深处',
+  zone_poi_gloom_moss_label: '荧光苔藓群落',
+  zone_poi_radiant_main_gate_label: '辉煌圣域大门',
+
   // 装备名（W-D2 切片16m：名表存键，内容层按语言展开）
   gear_slot_charm: '护符',
   gear_slot_sigil: '印记',

@@ -1112,7 +1112,7 @@ export class PlayerController {
 
       prompt.classList.remove('hidden');
 
-      prompt.textContent = `${interact} ${this.nearbyPoint.label}`;
+      prompt.textContent = `${interact} ${t(this.nearbyPoint.label)}`;
 
     } else {
 

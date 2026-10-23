@@ -56,7 +56,7 @@ export class MagicZone extends BaseZone {
     gate.add(portal);
     this.group.add(gate);
 
-    this.addPOI({ x: 0, y: 8, z: -25 }, '进入奥术竞技场', () => {
+    this.addPOI({ x: 0, y: 8, z: -25 }, 'zone_poi_magic_boss_gate_label', () => {
       this.dialog.show('奥术竞技场', '大奥术师·萨尔林 awaits。他的法球会追踪你——闪避，或用法术位面斩 ({skill}) 清理。');
     }, { id: 'magic-boss-gate', color: 0xaa44ff });
   }
@@ -153,7 +153,7 @@ export class MagicZone extends BaseZone {
   }
 
   buildLandmarks() {
-    this.addPOI({ x: 0, y: 8, z: 5 }, '进入悬浮城堡', () => {
+    this.addPOI({ x: 0, y: 8, z: 5 }, 'zone_poi_magic_castle_label', () => {
       this.dialog.show(
         '悬浮城堡',
         '魔法屏障闪烁…「只有被选中的穿越者才能踏入。」城堡内部的时间似乎静止了——第二枚位面碎片就藏在移动楼梯的顶端。'
@@ -161,7 +161,7 @@ export class MagicZone extends BaseZone {
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'magic-castle', title: '悬浮城堡', text: '第二枚位面碎片藏于楼梯顶端。' } }));
     }, { id: 'magic-castle', color: 0xaa66ff });
 
-    this.addPOI({ x: 55, y: 0, z: 30 }, '禁林深处的低语', () => {
+    this.addPOI({ x: 55, y: 0, z: 30 }, 'zone_poi_magic_forest_label', () => {
       this.dialog.show(
         '禁林低语',
         '独角兽的幻影一闪而过，留下一枚闪烁的羽毛。羽毛上的符文与霍格沃兹创始人的封印如出一辙——魔法与诸界本是一体。'

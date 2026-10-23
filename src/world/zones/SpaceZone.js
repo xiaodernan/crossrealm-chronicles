@@ -167,7 +167,7 @@ export class SpaceZone extends BaseZone {
   }
 
   buildLandmarks() {
-    this.addPOI({ x: -40, y: 5, z: -30 }, '触碰五维_tesseract', () => {
+    this.addPOI({ x: -40, y: 5, z: -30 }, 'zone_poi_space_tesseract_label', () => {
       this.dialog.show(
         '五维_tesseract',
         '无数时间线的画面涌入脑海…你看到了其他位面的自己。在 tesseract 的中心，第三枚位面碎片以引力波的形式震荡。'
@@ -175,7 +175,7 @@ export class SpaceZone extends BaseZone {
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'space-tesseract', title: '五维_tesseract', text: '第三枚碎片以引力波形式存在。' } }));
     }, { id: 'space-tesseract', color: 0x66ccff });
 
-    this.addPOI({ x: 20, y: 0, z: 40 }, '观测引力透镜', () => {
+    this.addPOI({ x: 20, y: 0, z: 40 }, 'zone_poi_space_lens_label', () => {
       this.dialog.show(
         '引力透镜',
         '黑洞的吸积盘在时空中弯曲…这里的时间流速与其他区域不同。每过一秒，外界或许已流逝一小时——这正是位面碎片的力量。'
@@ -207,7 +207,7 @@ export class SpaceZone extends BaseZone {
     this.group.add(wreck);
     this.addBoxCollider(50, -20, 6, 3, this.sampleHeight(50, -20) + 3.2, { base: this.sampleHeight(50, -20) - 1, rot: -0.6 });
 
-    this.addPOI({ x: 50, y: 0, z: -20 }, '搜索 Endurance 号残骸', () => {
+    this.addPOI({ x: 50, y: 0, z: -20 }, 'zone_poi_space_wreck_label', () => {
       this.dialog.show('Endurance 号', '飞船日志最后一条记录：「不要温和地走进那个良夜。」船载 AI 的数据核心里，藏着通往五维空间的密钥。');
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'space-wreck', title: 'Endurance 号', text: '残骸中藏有五维密钥。' } }));
     }, { id: 'space-wreck', color: 0x88aacc });

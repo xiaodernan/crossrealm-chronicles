@@ -955,6 +955,30 @@ export const STRINGS_EN = Object.freeze({
   echo_holo_chart_title: "Holographic Star Chart Room",
   echo_holo_chart_desc: "The chart changes every day — the navigator says: \"A route is something you negotiate.\"",
 
+  // POI interaction labels (W-D2 slice 19: the display exit in PlayerController.updatePrompt now
+  // goes through t(); the label slot holds keys. Homage POIs reuse the echo entry title keys
+  // (interacting unlocks that echo - same referent); zone POI prompts are instruction-style copy,
+  // so they get their own zone_poi_* family instead of borrowing waypoint labels)
+  hub_poi_anchor_label: 'Touch the World Anchor',
+  pop_poi_fantasy_ring_echo_label: 'One Ring (Echo)',
+  zone_poi_fantasy_ring_label: 'Investigate the One Ring',
+  zone_poi_fantasy_ruins_label: 'Explore the Elf Ruins',
+  zone_poi_fantasy_tower_label: 'Climb the Watchtower',
+  zone_poi_fantasy_boss_gate_label: 'Enter the Boss Arena',
+  zone_poi_magic_castle_label: 'Enter the Floating Castle',
+  zone_poi_magic_forest_label: 'Whispers from the Forbidden Forest Depths',
+  zone_poi_magic_boss_gate_label: 'Enter the Arcane Arena',
+  zone_poi_space_tesseract_label: 'Touch the Five-Dimensional Tesseract',
+  zone_poi_space_lens_label: 'Observe the Gravitational Lens',
+  zone_poi_space_wreck_label: 'Search the Endurance Wreck',
+  zone_poi_void_rift_label: 'Investigate the Timeline Rift',
+  zone_poi_void_tablet_label: 'Read the Five-Dimensional Stele',
+  zone_poi_abyss_boss_gate_label: 'Chaos Rift Arena',
+  zone_poi_chaos_core_label: 'Touch the Core of Chaos',
+  zone_poi_gloom_deep_entrance_label: 'Depths of the Gloomy Forest',
+  zone_poi_gloom_moss_label: 'Fluorescent Moss Colony',
+  zone_poi_radiant_main_gate_label: 'Gate of the Radiant Sanctuary',
+
   // Gear names (W-D2 slice 16m: the name tables hold keys; the content layer expands by language)
   gear_slot_charm: 'Charm',
   gear_slot_sigil: 'Sigil',

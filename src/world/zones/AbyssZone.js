@@ -67,7 +67,7 @@ export class AbyssZone extends BaseZone {
   buildLandmarks() {
     this.addPOI(
       { x: 0, y: 0, z: 62 },
-      '混沌裂隙竞技场',
+      'zone_poi_abyss_boss_gate_label',
       () => {
         this.dialog.show('混沌裂隙竞技场', 'Chapter 5 解锁后，踏入红圈将唤醒「混沌裂隙领主」。\n\n坐标：X≈-200, Z≈285 · 建议先解锁 3 个武器技能。');
       },
@@ -75,7 +75,7 @@ export class AbyssZone extends BaseZone {
     );
     this.addPOI(
       { x: -20, y: 0, z: 10 },
-      '触碰混沌之核',
+      'zone_poi_chaos_core_label',
       () => {
         window.dispatchEvent(new CustomEvent('discovery', {
           detail: { id: 'chaos-core', title: '混沌之核', text: '第五位面的不稳定能量源。' },

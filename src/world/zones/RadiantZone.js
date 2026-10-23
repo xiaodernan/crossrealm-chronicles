@@ -68,7 +68,7 @@ export class RadiantZone extends BaseZone {
   buildLandmarks() {
     this.addPOI(
       { x: 0, y: 0, z: 65 },
-      '辉煌圣域大门',
+      'zone_poi_radiant_main_gate_label',
       () => {
         this.dialog.show('辉煌圣域大门', '金光洗礼过的巨门，守护着圣域的核心。\n\n坐标：X≈-180, Z≈-95 · 需完成相关支线才能进入内殿。');
       },
@@ -76,7 +76,7 @@ export class RadiantZone extends BaseZone {
     );
     this.addPOI(
       { x: 25, y: 0, z: -15 },
-      '晨曦祭坛',
+      'wp_label_radiant_altar',
       () => {
         window.dispatchEvent(new CustomEvent('discovery', {
           detail: { id: 'radiant-altar', title: '晨曦祭坛', text: '晨曦初照时，祭坛会释放祝福之光。' },

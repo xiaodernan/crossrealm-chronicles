@@ -53,7 +53,7 @@ function attachCyber(zone, world, game) {
 
   zone.group.add(sign);
 
-  registerPoi(world, zone, { x: -30, y: 1, z: -55 }, '霓虹后巷', () => {
+  registerPoi(world, zone, { x: -30, y: 1, z: -55 }, 'echo_neon_alley_title', () => {
 
     game.dialog.show('霓虹后巷', '全息广告短路 — 义眼记录的不一定是真相。');
 
@@ -63,7 +63,7 @@ function attachCyber(zone, world, game) {
 
   }, { id: 'homage-neon-alley', color: 0xff22aa });
 
-  registerPoi(world, zone, { x: 50, y: 2, z: -20 }, '铬合金诊所', () => {
+  registerPoi(world, zone, { x: 50, y: 2, z: -20 }, 'echo_chrome_clinic_title', () => {
 
     game.dialog.show('铬合金诊所', '魔药与芯片同柜 — 升级有两种读音。');
 
@@ -71,7 +71,7 @@ function attachCyber(zone, world, game) {
 
   }, { id: 'homage-chrome-clinic', color: 0x44ffcc });
 
-  registerPoi(world, zone, { x: -10, y: 5, z: 60 }, '巨企尖塔投影', () => {
+  registerPoi(world, zone, { x: -10, y: 5, z: 60 }, 'echo_corp_spire_title', () => {
 
     game.dialog.show('巨企尖塔', 'Slogan 循环播放 — 魂火也算 KPI。');
 
@@ -99,7 +99,7 @@ function attachSamurai(zone, world, game) {
 
   zone.group.add(g);
 
-  registerPoi(world, zone, { x: -35, y: 0, z: 45 }, '鸟居残门', () => {
+  registerPoi(world, zone, { x: -35, y: 0, z: 45 }, 'echo_torii_gate_title', () => {
 
     game.dialog.show('鸟居残门', '门后不是神域，是未结束的决斗。');
 
@@ -109,7 +109,7 @@ function attachSamurai(zone, world, game) {
 
   }, { id: 'homage-torii-gate', color: 0xcc3322 });
 
-  registerPoi(world, zone, { x: 25, y: 0, z: -55 }, '道场废墟', () => {
+  registerPoi(world, zone, { x: 25, y: 0, z: -55 }, 'echo_dojo_ruins_title', () => {
 
     game.dialog.show('道场废墟', '木桩刀痕比树年轮密。');
 
@@ -117,7 +117,7 @@ function attachSamurai(zone, world, game) {
 
   }, { id: 'homage-dojo-ruins', color: 0x886644 });
 
-  registerPoi(world, zone, { x: -65, y: 0, z: -15 }, '樱落刃冢', () => {
+  registerPoi(world, zone, { x: -65, y: 0, z: -15 }, 'echo_sakura_blade_title', () => {
 
     game.dialog.show('樱落刃冢', '落樱盖住断刃 — 杀气像未散。');
 
@@ -131,7 +131,7 @@ function attachSamurai(zone, world, game) {
 
 function attachCosmic(zone, world, game) {
 
-  registerPoi(world, zone, { x: 40, y: 0, z: -55 }, '触须方尖碑', () => {
+  registerPoi(world, zone, { x: 40, y: 0, z: -55 }, 'echo_tentacle_obelisk_title', () => {
 
     game.dialog.show('触须方尖碑', '铭文是盯着你的角度。');
 
@@ -141,7 +141,7 @@ function attachCosmic(zone, world, game) {
 
   }, { id: 'homage-tentacle-obelisk', color: 0x224433 });
 
-  registerPoi(world, zone, { x: -55, y: 0, z: 15 }, '疯癫抄写室', () => {
+  registerPoi(world, zone, { x: -55, y: 0, z: 15 }, 'echo_mad_scribe_title', () => {
 
     game.dialog.show('疯癫抄写室', '羽毛笔自己写 — 墨水像海水与铁锈。');
 
@@ -149,7 +149,7 @@ function attachCosmic(zone, world, game) {
 
   }, { id: 'homage-mad-scribe', color: 0x445544 });
 
-  registerPoi(world, zone, { x: 15, y: 0, z: 65 }, '螺旋深井', () => {
+  registerPoi(world, zone, { x: 15, y: 0, z: 65 }, 'echo_spiral_well_title', () => {
 
     game.dialog.show('螺旋深井', '井底回声在数数 — 数到你。');
 
@@ -163,7 +163,7 @@ function attachCosmic(zone, world, game) {
 
 function attachStarport(zone, world, game) {
 
-  registerPoi(world, zone, { x: -45, y: 1, z: 45 }, '星港酒肆', () => {
+  registerPoi(world, zone, { x: -45, y: 1, z: 45 }, 'echo_star_cantina_title', () => {
 
     game.dialog.show('星港酒肆', '赏金、走私、跃迁合同在同一张桌。');
 
@@ -173,7 +173,7 @@ function attachStarport(zone, world, game) {
 
   }, { id: 'homage-star-cantina', color: 0xffaa44 });
 
-  registerPoi(world, zone, { x: 75, y: 0, z: 20 }, '走私码头', () => {
+  registerPoi(world, zone, { x: 75, y: 0, z: 20 }, 'echo_smuggler_dock_title', () => {
 
     game.dialog.show('走私码头', '集装箱编号是位面坐标。');
 
@@ -181,7 +181,7 @@ function attachStarport(zone, world, game) {
 
   }, { id: 'homage-smuggler-dock', color: 0x889944 });
 
-  registerPoi(world, zone, { x: -15, y: 2, z: -75 }, '全息星图室', () => {
+  registerPoi(world, zone, { x: -15, y: 2, z: -75 }, 'echo_holo_chart_title', () => {
 
     game.dialog.show('全息星图室', '航线是谈判出来的。');
 

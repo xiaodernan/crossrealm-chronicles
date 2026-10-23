@@ -92,7 +92,7 @@ export class VoidZone extends BaseZone {
 
     this.addPOI(
       { x: 0, y: 0, z: -15 },
-      '调查时线裂隙',
+      'zone_poi_void_rift_label',
       () => {
         this.dialog.show(
           '时线裂隙',
@@ -107,7 +107,7 @@ export class VoidZone extends BaseZone {
 
     this.addPOI(
       { x: 25, y: 0, z: 20 },
-      '阅读五维碑文',
+      'zone_poi_void_tablet_label',
       () => {
         window.dispatchEvent(new CustomEvent('discovery', {
           detail: { id: 'void-tablet', title: '五维碑文', text: '「Love is the one thing that transcends time and space.」' },

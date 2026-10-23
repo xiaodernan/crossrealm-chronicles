@@ -279,7 +279,7 @@ export class WorldManager {
     this.hubPOIs.push({
       id: 'hub-anchor',
       position: new THREE.Vector3(HUB_ZONE.center.x, anchorY, HUB_ZONE.center.z),
-      label: '触摸世界之锚',
+      label: 'hub_poi_anchor_label',
       type: 'main',
       onInteract: () => {
         this.dialog.show(

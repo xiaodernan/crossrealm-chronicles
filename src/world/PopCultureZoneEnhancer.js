@@ -36,7 +36,7 @@ function registerPoi(world, zone, pos, label, fn, opts = {}) {
 
 function attachMagicHomage(zone, world, game) {
   buildBroomRing(zone);
-  registerPoi(world, zone, { x: 35, y: 2, z: 40 }, '飞天环赛看台', () => {
+  registerPoi(world, zone, { x: 35, y: 2, z: 40 }, 'echo_broom_ring_title', () => {
     game.dialog.show(
       '飞天环赛',
       '三根悬浮金环是旧时代「扫帚竞速」的赛道。\n\n传说有学徒曾在这里追一颗会飞的鬼火 — 那其实是位面渗漏的魂火萤。'
@@ -45,12 +45,12 @@ function attachMagicHomage(zone, world, game) {
   }, { id: 'homage-broom-ring', color: 0xffdd44 });
 
   buildGreenhouseDome(zone);
-  registerPoi(world, zone, { x: -45, y: 1, z: 50 }, '魔药温室', () => {
+  registerPoi(world, zone, { x: -45, y: 1, z: 50 }, 'echo_potion_lab_title', () => {
     game.dialog.show('魔药温室', '玻璃下种着会尖叫的根 — 别在满月夜靠近。');
     fireEcho(game, 'echo:potion-lab');
   }, { id: 'homage-potion-lab', color: 0x88ff88 });
 
-  registerPoi(world, zone, { x: -15, y: 4, z: -10 }, '分院残厅', () => {
+  registerPoi(world, zone, { x: -15, y: 4, z: -10 }, 'echo_sorting_hall_title', () => {
     game.dialog.show('分院残厅', '四色横幅已褪色 — 分院帽低语：「去冒险，别回头。」');
     fireEcho(game, 'echo:sorting-hall');
   }, { id: 'homage-sorting-hall', color: 0xaa66ff });
@@ -58,19 +58,19 @@ function attachMagicHomage(zone, world, game) {
 
 function attachSpaceHomage(zone, world, game) {
   buildMurphyShelf(zone);
-  registerPoi(world, zone, { x: -20, y: 3, z: 55 }, '墨菲书架', () => {
+  registerPoi(world, zone, { x: -20, y: 3, z: 55 }, 'echo_murphy_title', () => {
     game.dialog.show('墨菲书架', '引力在书页间留下幽灵笔迹 — 像在说 Stay。');
     fireEcho(game, 'echo:murphy-shelf');
   }, { id: 'homage-murphy-shelf', color: 0xffccaa });
 
   buildHourglass(zone);
-  registerPoi(world, zone, { x: 70, y: 2, z: -40 }, '米勒沙漏', () => {
+  registerPoi(world, zone, { x: 70, y: 2, z: -40 }, 'echo_miller_title', () => {
     game.dialog.show('米勒沙漏', '这里的一小时，可能是枢纽的七年。');
     fireEcho(game, 'echo:miller-hourglass');
   }, { id: 'homage-miller-hourglass', color: 0x66ccff });
 
   buildDockingRing(zone);
-  registerPoi(world, zone, { x: -55, y: 6, z: -10 }, '对接舱旋转', () => {
+  registerPoi(world, zone, { x: -55, y: 6, z: -10 }, 'echo_docking_title', () => {
     game.dialog.show('对接舱旋转', '两艘船必须以相同转速相遇 — 否则就是金属的葬礼。');
     fireEcho(game, 'echo:docking-spin');
   }, { id: 'homage-docking-spin', color: 0x8899cc });
@@ -78,32 +78,32 @@ function attachSpaceHomage(zone, world, game) {
 
 function attachStrangerHomage(zone, world, game) {
   buildRadioTower(zone);
-  registerPoi(world, zone, { x: 50, y: 0, z: 30 }, '旧镇广播塔', () => {
+  registerPoi(world, zone, { x: 50, y: 0, z: 30 }, 'echo_radio_tower_title', () => {
     game.dialog.show('旧镇广播塔', '1983 年的电台仍在循环 — 你听见的是另一个维度的 SOS。');
     fireEcho(game, 'echo:radio-tower');
   }, { id: 'homage-radio-tower', color: 0xff4466 });
 
   buildUpsideRift(zone);
-  registerPoi(world, zone, { x: -35, y: 1, z: -40 }, '逆相裂口', () => {
+  registerPoi(world, zone, { x: -35, y: 1, z: -40 }, 'echo_upside_rift_title', () => {
     game.dialog.show('逆相裂口', '天空像被撕开，红色孢子飘落 — 逆相界的风是冷的。');
     fireEcho(game, 'echo:upside-rift');
     game.upsideDownFx?.enable?.();
   }, { id: 'homage-upside-rift', color: 0xcc2244 });
 
   buildNeonMall(zone);
-  registerPoi(world, zone, { x: 20, y: 0, z: 55 }, '霓虹商场残影', () => {
+  registerPoi(world, zone, { x: 20, y: 0, z: 55 }, 'echo_neon_mall_title', () => {
     game.dialog.show('霓虹商场', '粉色与青色霓虹 — 像从未关门的 80 年代。');
     fireEcho(game, 'echo:neon-mall');
   }, { id: 'homage-neon-mall', color: 0xff66cc });
 
-  registerPoi(world, zone, { x: -10, y: 0, z: 10 }, '裂隙猎犬足迹', () => {
+  registerPoi(world, zone, { x: -10, y: 0, z: 10 }, 'echo_rift_hound_title', () => {
     game.dialog.show('裂隙猎犬', '爪印通向没有星星的方向 — 别在夜里单独追。');
     fireEcho(game, 'echo:rift-hound');
   }, { id: 'homage-rift-hound', color: 0x882222 });
 }
 
 function attachFantasyHomage(zone, world, game) {
-  registerPoi(world, zone, { x: -30, y: 0, z: -50 }, '至尊石环（回声）', () => {
+  registerPoi(world, zone, { x: -30, y: 0, z: -50 }, 'pop_poi_fantasy_ring_echo_label', () => {
     game.dialog.show('至尊石环', 'One Realm to bind them all… 戒指已碎，石环仍在。');
     window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-ring', title: '至尊石环', text: '石环铭文。' } }));
   }, { id: 'fantasy-ring-echo', color: 0xc9a962 });
@@ -130,7 +130,7 @@ function attachHubPoster(world, game) {
   world.pointsOfInterest.push({
     id: 'hub-poster-wall',
     position: new THREE.Vector3(42, y, 48),
-    label: '位面海报墙',
+    label: 'echo_poster_wall_title',
     type: 'lore',
     onInteract: () => {
       game.dialog.show(

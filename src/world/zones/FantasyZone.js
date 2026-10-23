@@ -131,7 +131,7 @@ export class FantasyZone extends BaseZone {
     ringGroup.position.set(-30, this.sampleHeight(-30, 10), 10);
     this.group.add(ringGroup);
 
-    this.addPOI({ x: -30, y: 0, z: 10 }, '调查至尊石环', () => {
+    this.addPOI({ x: -30, y: 0, z: 10 }, 'zone_poi_fantasy_ring_label', () => {
       this.dialog.show(
         '至尊石环',
         '你发现了一枚古老的铭文：「One Realm to bind them all...」石环微微发热——这是第一枚位面碎片的回响。'
@@ -139,7 +139,7 @@ export class FantasyZone extends BaseZone {
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-ring', title: '至尊石环', text: '第一枚位面碎片的回响。' } }));
     }, { id: 'fantasy-ring', color: 0xc9a030 });
 
-    this.addPOI({ x: -20, y: 0, z: -15 }, '探索精灵遗迹', () => {
+    this.addPOI({ x: -20, y: 0, z: -15 }, 'zone_poi_fantasy_ruins_label', () => {
       this.dialog.show(
         '精灵遗迹',
         '残破的壁画描绘着跨位面旅行的场景。精灵们曾在此记录诸界交汇的坐标——其中一条路径指向星空深处。'
@@ -184,7 +184,7 @@ export class FantasyZone extends BaseZone {
     this.group.add(tower);
     this.addCylinderCollider(60, -50, 3.2, this.sampleHeight(60, -50) + 8, { base: this.sampleHeight(60, -50) - 0.5 });
 
-    this.addPOI({ x: 60, y: 0, z: -50 }, '攀登守望塔', () => {
+    this.addPOI({ x: 60, y: 0, z: -50 }, 'zone_poi_fantasy_tower_label', () => {
       this.dialog.show('灰白守望塔', '从塔顶望去，三条位面之路清晰可见。北方是霍格沃兹遗境的紫色光柱，东方是米勒荒原的引力透镜。');
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-tower', title: '灰白守望塔', text: '可俯瞰三界交汇。' } }));
     }, { id: 'fantasy-tower', color: 0xff6622 });
@@ -227,7 +227,7 @@ export class FantasyZone extends BaseZone {
     this.addBoxCollider(-59, -35, 0.75, 0.75, gy + 6, { base: gy - 0.5 });
     this.addBoxCollider(-51, -35, 0.75, 0.75, gy + 6, { base: gy - 0.5 });
 
-    this.addPOI({ x: -55, y: 0, z: -35 }, '进入 Boss 竞技场', () => {
+    this.addPOI({ x: -55, y: 0, z: -35 }, 'zone_poi_fantasy_boss_gate_label', () => {
       this.dialog.show('影界竞技场', '踏入此门，影界守护者将苏醒。确保已掌握：\n· 观察敌人脚下红圈，0.75 秒后攻击落地\n· {roll} 闪避可躲开\n· 重击快速打满架势条造成硬直');
     }, { id: 'fantasy-boss-gate', color: 0xff2244 });
   }

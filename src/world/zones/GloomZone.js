@@ -68,7 +68,7 @@ export class GloomZone extends BaseZone {
   buildLandmarks() {
     this.addPOI(
       { x: 0, y: 0, z: 70 },
-      '幽暗林地深处',
+      'zone_poi_gloom_deep_entrance_label',
       () => {
         this.dialog.show('幽暗林地深处', '迷雾最浓处藏着古老的秘密。\n\n坐标：X≈180, Z≈170 · 需完成相关支线才能进入核心区域。');
       },
@@ -76,7 +76,7 @@ export class GloomZone extends BaseZone {
     );
     this.addPOI(
       { x: -30, y: 0, z: 20 },
-      '荧光苔藓群落',
+      'zone_poi_gloom_moss_label',
       () => {
         window.dispatchEvent(new CustomEvent('discovery', {
           detail: { id: 'gloom-moss', title: '荧光苔藓', text: '只在幽暗林地生长的发光苔藓，能指引迷途者。' },
