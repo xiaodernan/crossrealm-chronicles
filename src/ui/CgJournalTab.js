@@ -73,7 +73,7 @@ export class CgJournalTab {
     this.lightbox.querySelector('.cg-lightbox-img').src = url;
     this.lightbox.querySelector('.cg-lightbox-caption').textContent = captionOf(entry);
     this.lightbox.querySelector('.cg-lightbox-meta').textContent =
-      `${speakerOf(entry)} · ${zoneLabelOf(entry.zone)} · 观看 ${(cg.viewCounts[entry.id] ?? 0) + 1} 次`;
+      `${speakerOf(entry)} · ${zoneLabelOf(entry.zone)} · ${t('cg_view_count_fmt', { n: (cg.viewCounts[entry.id] ?? 0) + 1 })}`;
     this.lightbox.classList.remove('hidden');
     cg.recordView(entry.id);
   }
@@ -82,7 +82,7 @@ export class CgJournalTab {
     const cg = this.game.cgGallery;
     const stats = cg.getStats();
     const zones = Object.entries(CG_ZONE_LABELS).map(([k, label]) =>
-      `<button type="button" class="cg-zone-btn${this.filterZone === k ? ' active' : ''}" data-zone="${k}">${label}</button>`
+      `<button type="button" class="cg-zone-btn${this.filterZone === k ? ' active' : ''}" data-zone="${k}">${t(label)}</button>`
     ).join('');
 
     const unlocked = cg.getEntries(this.filterZone, true);
@@ -93,23 +93,23 @@ export class CgJournalTab {
       return `<div class="cg-card" data-id="${e.id}">
         <button type="button" class="cg-card-thumb" data-id="${e.id}" aria-label="${captionOf(e)}"></button>
         <div class="cg-card-cap">${captionOf(e)}</div>
-        <div class="cg-card-sub">${e.speaker}</div>
+        <div class="cg-card-sub">${speakerOf(e)}</div>
         <button type="button" class="cg-fav-btn" data-id="${e.id}">${fav}</button>
       </div>`;
     }).join('');
 
     const lockedHtml = locked.slice(0, 8).map((e) =>
-      `<div class="cg-card cg-card-locked"><div class="cg-card-cap">???</div><div class="cg-card-sub">${CG_ZONE_LABELS[e.zone] ?? e.zone}</div></div>`
+      `<div class="cg-card cg-card-locked"><div class="cg-card-cap">???</div><div class="cg-card-sub">${zoneLabelOf(e.zone)}</div></div>`
     ).join('');
 
     panelEl.innerHTML = `
       <h2>${keyText(t('journal_tab_cg_gallery'))}</h2>
-      <p class="cg-stats">已解锁 ${stats.unlocked} / ${stats.total}（${stats.percent}%）· 收藏 ${stats.favorites}</p>
+      <p class="cg-stats">${t('cg_stats_fmt', { unlocked: stats.unlocked, total: stats.total, percent: stats.percent, favorites: stats.favorites })}</p>
       <div class="cg-zone-filter">${zones}</div>
-      <div class="cg-grid">${grid || '<p class="cg-empty">此区域暂无已解锁 CG — 去营火对话或击败 Boss</p>'}</div>
-      ${locked.length ? `<h3 class="cg-locked-title">未解锁</h3><div class="cg-grid cg-grid-locked">${lockedHtml}</div>` : ''}
-      <p class="hint">营火分支对话解锁插画 · Boss 击破解锁战斗 CG · 连击/处决解锁战斗记忆</p>
-      <button type="button" class="journal-back-btn" id="journal-back-all">← 返回日志</button>
+      <div class="cg-grid">${grid || '<p class="cg-empty">' + t('cg_empty_zone') + '</p>'}</div>
+      ${locked.length ? `<h3 class="cg-locked-title">${t('fast_travel_locked')}</h3><div class="cg-grid cg-grid-locked">${lockedHtml}</div>` : ''}
+      <p class="hint">${t('cg_hint')}</p>
+      <button type="button" class="journal-back-btn" id="journal-back-all">${t('journal_cg_back')}</button>
     `;
 
     refreshKeyText(panelEl);
