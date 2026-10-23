@@ -3,6 +3,7 @@ import { ZONE_IDS, findZoneById } from '../content/ZoneIdentity.js';
 
 
 
+import { t } from '../engine/i18n.js';
 export function attachPopCultureZonesWave4(game) {
 
   const world = game.world;
@@ -55,7 +56,7 @@ function attachCyber(zone, world, game) {
 
   registerPoi(world, zone, { x: -30, y: 1, z: -55 }, 'echo_neon_alley_title', () => {
 
-    game.dialog.show('霓虹后巷', '全息广告短路 — 义眼记录的不一定是真相。');
+    game.dialog.show(t('echo_neon_alley_title'), t('pop_dlg_neon_alley_text'));
 
     fireEcho(game, 'echo:neon-alley');
 
@@ -65,7 +66,7 @@ function attachCyber(zone, world, game) {
 
   registerPoi(world, zone, { x: 50, y: 2, z: -20 }, 'echo_chrome_clinic_title', () => {
 
-    game.dialog.show('铬合金诊所', '魔药与芯片同柜 — 升级有两种读音。');
+    game.dialog.show(t('echo_chrome_clinic_title'), t('pop_dlg_chrome_clinic_text'));
 
     fireEcho(game, 'echo:chrome-clinic');
 
@@ -73,7 +74,7 @@ function attachCyber(zone, world, game) {
 
   registerPoi(world, zone, { x: -10, y: 5, z: 60 }, 'echo_corp_spire_title', () => {
 
-    game.dialog.show('巨企尖塔', 'Slogan 循环播放 — 魂火也算 KPI。');
+    game.dialog.show(t('pop_dlg_corp_spire_title'), t('pop_dlg_corp_spire_text'));
 
     fireEcho(game, 'echo:corp-spire');
 
@@ -101,7 +102,7 @@ function attachSamurai(zone, world, game) {
 
   registerPoi(world, zone, { x: -35, y: 0, z: 45 }, 'echo_torii_gate_title', () => {
 
-    game.dialog.show('鸟居残门', '门后不是神域，是未结束的决斗。');
+    game.dialog.show(t('echo_torii_gate_title'), t('pop_dlg_torii_gate_text'));
 
     fireEcho(game, 'echo:torii-gate');
 
@@ -111,7 +112,7 @@ function attachSamurai(zone, world, game) {
 
   registerPoi(world, zone, { x: 25, y: 0, z: -55 }, 'echo_dojo_ruins_title', () => {
 
-    game.dialog.show('道场废墟', '木桩刀痕比树年轮密。');
+    game.dialog.show(t('echo_dojo_ruins_title'), t('pop_dlg_dojo_ruins_text'));
 
     fireEcho(game, 'echo:dojo-ruins');
 
@@ -119,7 +120,7 @@ function attachSamurai(zone, world, game) {
 
   registerPoi(world, zone, { x: -65, y: 0, z: -15 }, 'echo_sakura_blade_title', () => {
 
-    game.dialog.show('樱落刃冢', '落樱盖住断刃 — 杀气像未散。');
+    game.dialog.show(t('echo_sakura_blade_title'), t('pop_dlg_sakura_blade_text'));
 
     fireEcho(game, 'echo:sakura-blade');
 
@@ -133,7 +134,7 @@ function attachCosmic(zone, world, game) {
 
   registerPoi(world, zone, { x: 40, y: 0, z: -55 }, 'echo_tentacle_obelisk_title', () => {
 
-    game.dialog.show('触须方尖碑', '铭文是盯着你的角度。');
+    game.dialog.show(t('echo_tentacle_obelisk_title'), t('pop_dlg_tentacle_obelisk_text'));
 
     fireEcho(game, 'echo:tentacle-obelisk');
 
@@ -143,7 +144,7 @@ function attachCosmic(zone, world, game) {
 
   registerPoi(world, zone, { x: -55, y: 0, z: 15 }, 'echo_mad_scribe_title', () => {
 
-    game.dialog.show('疯癫抄写室', '羽毛笔自己写 — 墨水像海水与铁锈。');
+    game.dialog.show(t('echo_mad_scribe_title'), t('pop_dlg_mad_scribe_text'));
 
     fireEcho(game, 'echo:mad-scribe');
 
@@ -151,7 +152,7 @@ function attachCosmic(zone, world, game) {
 
   registerPoi(world, zone, { x: 15, y: 0, z: 65 }, 'echo_spiral_well_title', () => {
 
-    game.dialog.show('螺旋深井', '井底回声在数数 — 数到你。');
+    game.dialog.show(t('echo_spiral_well_title'), t('pop_dlg_spiral_well_text'));
 
     fireEcho(game, 'echo:spiral-well');
 
@@ -165,7 +166,7 @@ function attachStarport(zone, world, game) {
 
   registerPoi(world, zone, { x: -45, y: 1, z: 45 }, 'echo_star_cantina_title', () => {
 
-    game.dialog.show('星港酒肆', '赏金、走私、跃迁合同在同一张桌。');
+    game.dialog.show(t('echo_star_cantina_title'), t('pop_dlg_star_cantina_text'));
 
     fireEcho(game, 'echo:star-cantina');
 
@@ -175,7 +176,7 @@ function attachStarport(zone, world, game) {
 
   registerPoi(world, zone, { x: 75, y: 0, z: 20 }, 'echo_smuggler_dock_title', () => {
 
-    game.dialog.show('走私码头', '集装箱编号是位面坐标。');
+    game.dialog.show(t('echo_smuggler_dock_title'), t('pop_dlg_smuggler_dock_text'));
 
     fireEcho(game, 'echo:smuggler-dock');
 
@@ -183,7 +184,7 @@ function attachStarport(zone, world, game) {
 
   registerPoi(world, zone, { x: -15, y: 2, z: -75 }, 'echo_holo_chart_title', () => {
 
-    game.dialog.show('全息星图室', '航线是谈判出来的。');
+    game.dialog.show(t('echo_holo_chart_title'), t('pop_dlg_holo_chart_text'));
 
     fireEcho(game, 'echo:holo-chart');
 

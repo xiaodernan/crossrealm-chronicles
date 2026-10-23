@@ -4,6 +4,7 @@ import { attachPopCultureZonesWave3 } from './PopCultureZoneEnhancerWave3.js';
 import { attachPopCultureZonesWave4 } from './PopCultureZoneEnhancerWave4.js';
 import { ZONE_IDS, findZoneById } from '../content/ZoneIdentity.js';
 
+import { t } from '../engine/i18n.js';
 /** 各位面追加致敬 POI / 装饰 — 不修改 Zone 源文件 */
 export function attachPopCultureZones(game) {
   const world = game.world;
@@ -37,21 +38,18 @@ function registerPoi(world, zone, pos, label, fn, opts = {}) {
 function attachMagicHomage(zone, world, game) {
   buildBroomRing(zone);
   registerPoi(world, zone, { x: 35, y: 2, z: 40 }, 'echo_broom_ring_title', () => {
-    game.dialog.show(
-      '飞天环赛',
-      '三根悬浮金环是旧时代「扫帚竞速」的赛道。\n\n传说有学徒曾在这里追一颗会飞的鬼火 — 那其实是位面渗漏的魂火萤。'
-    );
+    game.dialog.show(t('pop_dlg_broom_ring_title'), t('pop_dlg_broom_ring_text'));
     fireEcho(game, 'echo:broom-ring');
   }, { id: 'homage-broom-ring', color: 0xffdd44 });
 
   buildGreenhouseDome(zone);
   registerPoi(world, zone, { x: -45, y: 1, z: 50 }, 'echo_potion_lab_title', () => {
-    game.dialog.show('魔药温室', '玻璃下种着会尖叫的根 — 别在满月夜靠近。');
+    game.dialog.show(t('echo_potion_lab_title'), t('pop_dlg_potion_lab_text'));
     fireEcho(game, 'echo:potion-lab');
   }, { id: 'homage-potion-lab', color: 0x88ff88 });
 
   registerPoi(world, zone, { x: -15, y: 4, z: -10 }, 'echo_sorting_hall_title', () => {
-    game.dialog.show('分院残厅', '四色横幅已褪色 — 分院帽低语：「去冒险，别回头。」');
+    game.dialog.show(t('echo_sorting_hall_title'), t('pop_dlg_sorting_hall_text'));
     fireEcho(game, 'echo:sorting-hall');
   }, { id: 'homage-sorting-hall', color: 0xaa66ff });
 }
@@ -59,19 +57,19 @@ function attachMagicHomage(zone, world, game) {
 function attachSpaceHomage(zone, world, game) {
   buildMurphyShelf(zone);
   registerPoi(world, zone, { x: -20, y: 3, z: 55 }, 'echo_murphy_title', () => {
-    game.dialog.show('墨菲书架', '引力在书页间留下幽灵笔迹 — 像在说 Stay。');
+    game.dialog.show(t('echo_murphy_title'), t('pop_dlg_murphy_shelf_text'));
     fireEcho(game, 'echo:murphy-shelf');
   }, { id: 'homage-murphy-shelf', color: 0xffccaa });
 
   buildHourglass(zone);
   registerPoi(world, zone, { x: 70, y: 2, z: -40 }, 'echo_miller_title', () => {
-    game.dialog.show('米勒沙漏', '这里的一小时，可能是枢纽的七年。');
+    game.dialog.show(t('echo_miller_title'), t('pop_dlg_miller_hourglass_text'));
     fireEcho(game, 'echo:miller-hourglass');
   }, { id: 'homage-miller-hourglass', color: 0x66ccff });
 
   buildDockingRing(zone);
   registerPoi(world, zone, { x: -55, y: 6, z: -10 }, 'echo_docking_title', () => {
-    game.dialog.show('对接舱旋转', '两艘船必须以相同转速相遇 — 否则就是金属的葬礼。');
+    game.dialog.show(t('echo_docking_title'), t('pop_dlg_docking_spin_text'));
     fireEcho(game, 'echo:docking-spin');
   }, { id: 'homage-docking-spin', color: 0x8899cc });
 }
@@ -79,33 +77,33 @@ function attachSpaceHomage(zone, world, game) {
 function attachStrangerHomage(zone, world, game) {
   buildRadioTower(zone);
   registerPoi(world, zone, { x: 50, y: 0, z: 30 }, 'echo_radio_tower_title', () => {
-    game.dialog.show('旧镇广播塔', '1983 年的电台仍在循环 — 你听见的是另一个维度的 SOS。');
+    game.dialog.show(t('echo_radio_tower_title'), t('pop_dlg_radio_tower_text'));
     fireEcho(game, 'echo:radio-tower');
   }, { id: 'homage-radio-tower', color: 0xff4466 });
 
   buildUpsideRift(zone);
   registerPoi(world, zone, { x: -35, y: 1, z: -40 }, 'echo_upside_rift_title', () => {
-    game.dialog.show('逆相裂口', '天空像被撕开，红色孢子飘落 — 逆相界的风是冷的。');
+    game.dialog.show(t('echo_upside_rift_title'), t('pop_dlg_upside_rift_text'));
     fireEcho(game, 'echo:upside-rift');
     game.upsideDownFx?.enable?.();
   }, { id: 'homage-upside-rift', color: 0xcc2244 });
 
   buildNeonMall(zone);
   registerPoi(world, zone, { x: 20, y: 0, z: 55 }, 'echo_neon_mall_title', () => {
-    game.dialog.show('霓虹商场', '粉色与青色霓虹 — 像从未关门的 80 年代。');
+    game.dialog.show(t('pop_dlg_neon_mall_title'), t('pop_dlg_neon_mall_text'));
     fireEcho(game, 'echo:neon-mall');
   }, { id: 'homage-neon-mall', color: 0xff66cc });
 
   registerPoi(world, zone, { x: -10, y: 0, z: 10 }, 'echo_rift_hound_title', () => {
-    game.dialog.show('裂隙猎犬', '爪印通向没有星星的方向 — 别在夜里单独追。');
+    game.dialog.show(t('pop_dlg_rift_hound_title'), t('pop_dlg_rift_hound_text'));
     fireEcho(game, 'echo:rift-hound');
   }, { id: 'homage-rift-hound', color: 0x882222 });
 }
 
 function attachFantasyHomage(zone, world, game) {
   registerPoi(world, zone, { x: -30, y: 0, z: -50 }, 'pop_poi_fantasy_ring_echo_label', () => {
-    game.dialog.show('至尊石环', 'One Realm to bind them all… 戒指已碎，石环仍在。');
-    window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-ring', title: '至尊石环', text: '石环铭文。' } }));
+    game.dialog.show(t('wp_label_one_ring'), t('echo_one_ring_desc'));
+    window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-ring', title: t('wp_label_one_ring'), text: t('pop_disc_fantasy_ring_text') } }));
   }, { id: 'fantasy-ring-echo', color: 0xc9a962 });
 }
 
@@ -133,10 +131,7 @@ function attachHubPoster(world, game) {
     label: 'echo_poster_wall_title',
     type: 'lore',
     onInteract: () => {
-      game.dialog.show(
-        '位面海报墙',
-        '九张褪色海报：咒术学院 · 米勒沙漏 · 逆相裂口 · 至尊石环 · 混沌边境 · 世界之锚 · 边境往事 · 幽冥帮派 · 深空纪元\n\nJ → 次元回声 按系列筛选已共鸣条目。'
-      );
+      game.dialog.show(t('echo_poster_wall_title'), t('pop_dlg_hub_poster_wall_text'));
       fireEcho(game, 'echo:poster-wall');
     },
   });

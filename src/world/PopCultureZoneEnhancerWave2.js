@@ -3,6 +3,7 @@ import { ZONE_IDS, findZoneById } from '../content/ZoneIdentity.js';
 
 
 
+import { t } from '../engine/i18n.js';
 /** Wave2 POI — 九分站台 / 虫洞 / 街机厅等 */
 
 export function attachPopCultureZonesWave2(game) {
@@ -57,7 +58,7 @@ function attachMagicWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: 58, y: 1, z: 52 }, 'echo_nine_platform_title', () => {
 
-    game.dialog.show('九分又四分三站台', '砖墙在月台中央裂开 — 魂火萤像列车汽笛一样掠过。\n\n「相信」不是咒语，是脚步。');
+    game.dialog.show(t('echo_nine_platform_title'), t('pop_dlg_nine_platform_text'));
 
     fireEcho(game, 'echo:nine-platform');
 
@@ -69,7 +70,7 @@ function attachMagicWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: -58, y: 0, z: -28 }, 'echo_patronus_lake_title', () => {
 
-    game.dialog.show('护念湖镜', '湖面映出的不是脸 — 是你最需要的勇气形状。');
+    game.dialog.show(t('echo_patronus_lake_title'), t('pop_dlg_patronus_lake_text'));
 
     fireEcho(game, 'echo:patronus-lake');
 
@@ -81,7 +82,7 @@ function attachMagicWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: 12, y: 2, z: -48 }, 'echo_triwizard_title', () => {
 
-    game.dialog.show('三强赛台', '三只高脚杯已空 — 龙息与迷宫的回声仍在石台打转。');
+    game.dialog.show(t('echo_triwizard_title'), t('pop_dlg_triwizard_cup_text'));
 
     fireEcho(game, 'echo:triwizard-cup');
 
@@ -97,7 +98,7 @@ function attachSpaceWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: 38, y: 2, z: 68 }, 'echo_brand_beacon_title', () => {
 
-    game.dialog.show('曼恩假信标', '信标在冰原上闪烁 — 日志写「完美」，脚印写「谎言」。');
+    game.dialog.show(t('echo_brand_beacon_title'), t('pop_dlg_brand_beacon_text'));
 
     fireEcho(game, 'echo:brand-beacon');
 
@@ -109,7 +110,7 @@ function attachSpaceWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: -68, y: 4, z: -48 }, 'echo_wormhole_title', () => {
 
-    game.dialog.show('虫洞拱门', '光在环中折叠 — 穿过它的人，年龄与记忆不同步。');
+    game.dialog.show(t('echo_wormhole_title'), t('echo_wormhole_desc'));
 
     fireEcho(game, 'echo:wormhole-arch');
 
@@ -121,7 +122,7 @@ function attachSpaceWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: 5, y: 3, z: -62 }, 'echo_love_signal_title', () => {
 
-    game.dialog.show('爱即坐标', '五维_tesseract 里，唯一不变的导航星是「不要放手」。');
+    game.dialog.show(t('echo_love_signal_title'), t('echo_love_signal_desc'));
 
     fireEcho(game, 'echo:love-signal');
 
@@ -137,7 +138,7 @@ function attachVoidWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: -48, y: 0, z: 38 }, 'echo_bike_trail_title', () => {
 
-    game.dialog.show('夜游单车灯串', '四盏车灯在雾中排成线 — 像有人还在找失踪的朋友。');
+    game.dialog.show(t('echo_bike_trail_title'), t('echo_bike_trail_desc'));
 
     fireEcho(game, 'echo:bike-trail');
 
@@ -149,7 +150,7 @@ function attachVoidWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: 32, y: 0, z: -22 }, 'echo_arcade_title', () => {
 
-    game.dialog.show('街机厅残影', '吃豆人与恶魔在 CRT 里循环 — 投币口塞满红色孢子。');
+    game.dialog.show(t('echo_arcade_title'), t('echo_arcade_desc'));
 
     fireEcho(game, 'echo:arcade');
 
@@ -161,7 +162,7 @@ function attachVoidWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: 8, y: 0, z: -38 }, 'echo_vecna_clock_title', () => {
 
-    game.dialog.show('裂相钟塔', '指针停在 11 点 6 分 — 每次钟声，天花板就远一点。');
+    game.dialog.show(t('echo_vecna_clock_title'), t('echo_vecna_clock_desc'));
 
     fireEcho(game, 'echo:vecna-clock');
 
@@ -175,7 +176,7 @@ function attachVoidWave2(zone, world, game) {
 
   registerPoi(world, zone, { x: -28, y: 0, z: 68 }, 'echo_underground_lab_title', () => {
 
-    game.dialog.show('地下实验室', '编号门牌 rusted shut — 门后仍有低频嗡鸣，像未关的实验。');
+    game.dialog.show(t('pop_dlg_underground_lab_title'), t('echo_underground_lab_desc'));
 
     fireEcho(game, 'echo:underground-lab');
 

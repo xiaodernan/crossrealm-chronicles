@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ZONE_IDS, findZoneById } from '../content/ZoneIdentity.js';
 
+import { t } from '../engine/i18n.js';
 /** Wave3 POI — 西部 / 黑帮 / 深空科幻 */
 export function attachPopCultureZonesWave3(game) {
   const world = game.world;
@@ -29,20 +30,20 @@ function fireEcho(game, trigger) {
 function attachWesternHomage(zone, world, game) {
   buildSaloon(zone);
   registerPoi(world, zone, { x: 48, y: 1, z: 32 }, 'echo_saloon_mirror_title', () => {
-    game.dialog.show('沙龙镜墙', '旋转门后是一面裂镜 — 决斗者的倒影永远比你快半拍。');
+    game.dialog.show(t('echo_saloon_mirror_title'), t('echo_saloon_mirror_desc'));
     fireEcho(game, 'echo:saloon-mirror');
     game.triadVisualFx?.flash?.('western');
   }, { id: 'homage-saloon-mirror', color: 0xcc8844 });
 
   buildDuelCircle(zone);
   registerPoi(world, zone, { x: -52, y: 0, z: 22 }, 'echo_duel_noon_title', () => {
-    game.dialog.show('正午决斗圈', ' chalk 圈里的太阳不会移动 — 直到有人拔剑。');
+    game.dialog.show(t('echo_duel_noon_title'), t('pop_dlg_duel_noon_text'));
     fireEcho(game, 'echo:duel-noon');
   }, { id: 'homage-duel-noon', color: 0xddaa55 });
 
   buildGhostRails(zone);
   registerPoi(world, zone, { x: 72, y: 0, z: -28 }, 'echo_ghost_rails_title', () => {
-    game.dialog.show('幽灵铁道', '铁轨通向已消失的镇 — 汽笛声在雾里，火车从不到站。');
+    game.dialog.show(t('echo_ghost_rails_title'), t('echo_ghost_rails_desc'));
     fireEcho(game, 'echo:ghost-rails');
   }, { id: 'homage-ghost-rails', color: 0x887766 });
 }
@@ -50,20 +51,20 @@ function attachWesternHomage(zone, world, game) {
 function attachGangsterHomage(zone, world, game) {
   buildSpeakeasyDoor(zone);
   registerPoi(world, zone, { x: 32, y: 1, z: 42 }, 'echo_speakeasy_title', () => {
-    game.dialog.show('禁酒窖门', '无标记的后巷入口 — 里面谈的不是酒，是界与界的关税。');
+    game.dialog.show(t('echo_speakeasy_title'), t('echo_speakeasy_desc'));
     fireEcho(game, 'echo:speakeasy');
     game.triadVisualFx?.flash?.('noir');
   }, { id: 'homage-speakeasy', color: 0x442233 });
 
   buildFamilyShrine(zone);
   registerPoi(world, zone, { x: -42, y: 0, z: -32 }, 'echo_family_shrine_title', () => {
-    game.dialog.show('家族圣龛', '三支蜡烛照一面黑镜 — 镜里映出上一任引路人。');
+    game.dialog.show(t('echo_family_shrine_title'), t('pop_dlg_family_shrine_text'));
     fireEcho(game, 'echo:family-shrine');
   }, { id: 'homage-family-shrine', color: 0x661122 });
 
   buildDockCrates(zone);
   registerPoi(world, zone, { x: 58, y: 0, z: -48 }, 'echo_dock_crates_title', () => {
-    game.dialog.show('码头货仓', '木箱烙着旧家族纹章 — 打开全是位面走私的魂火。');
+    game.dialog.show(t('echo_dock_crates_title'), t('pop_dlg_dock_crates_text'));
     fireEcho(game, 'echo:dock-crates');
   }, { id: 'homage-dock-crates', color: 0x553344 });
 }
@@ -71,20 +72,20 @@ function attachGangsterHomage(zone, world, game) {
 function attachSciFiHomage(zone, world, game) {
   buildColonyDome(zone);
   registerPoi(world, zone, { x: -32, y: 2, z: -72 }, 'echo_colony_dome_title', () => {
-    game.dialog.show('殖民穹顶', '穹顶内是人工黄昏 — 外面是荒原，里面是另一个天空。');
+    game.dialog.show(t('echo_colony_dome_title'), t('pop_dlg_colony_dome_text'));
     fireEcho(game, 'echo:colony-dome');
     game.triadVisualFx?.flash?.('scifi');
   }, { id: 'homage-colony-dome', color: 0x44aacc });
 
   buildAiCore(zone);
   registerPoi(world, zone, { x: 62, y: 1, z: 38 }, 'echo_ai_core_title', () => {
-    game.dialog.show('休眠 AI 核心', '核心低语：「任务未完成。」 — 它指的不是飞船，是你。');
+    game.dialog.show(t('echo_ai_core_title'), t('echo_ai_core_desc'));
     fireEcho(game, 'echo:ai-core');
   }, { id: 'homage-ai-core', color: 0x66ffcc });
 
   buildJumpGate(zone);
   registerPoi(world, zone, { x: 8, y: 3, z: 82 }, 'echo_jump_gate_title', () => {
-    game.dialog.show('跃迁门阵列', '三门同相才能跃迁 — 错相的人会在门里永远循环第一秒。');
+    game.dialog.show(t('echo_jump_gate_title'), t('pop_dlg_jump_gate_text'));
     fireEcho(game, 'echo:jump-gate');
   }, { id: 'homage-jump-gate', color: 0x4488ff });
 }
