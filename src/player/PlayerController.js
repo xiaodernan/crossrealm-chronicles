@@ -323,8 +323,8 @@ export class PlayerController {
     this.currentCameraPos.set(0, 0, 0);
     // 震屏的幅度与注视点权重按视角切换，切换处只在这里声明一次
     this.shake.setProfile(this.cameraMode);
-    const swap = keyText('({cameraMode} 切换)');
-    this.game.dialog?.toast(this.cameraMode === 'first' ? `第一人称视角 ${swap}` : `第三人称越肩 ${swap}`);
+    const swap = keyText(t('toast_camera_swap'));
+    this.game.dialog?.toast(this.cameraMode === 'first' ? t('toast_camera_first_fmt', { swap }) : t('toast_camera_third_fmt', { swap }));
 
     window.dispatchEvent(new CustomEvent('camera-mode-changed', { detail: { mode: this.cameraMode } }));
 
@@ -689,7 +689,7 @@ export class PlayerController {
       this.position.z > b.maxZ - 6;
     if (!near) return;
     this._boundaryHintTimer = 6;
-    this.game.dialog?.toast('位面裂隙之外尚无世界 — 折返吧');
+    this.game.dialog?.toast(t('toast_void_boundary'));
   }
 
 
@@ -753,7 +753,7 @@ export class PlayerController {
 
         this.game.audio?.voidGravityFlip?.();
 
-        this.game.dialog?.toast('⟲ 破碎时线：重力反转 — 行走于时环之下');
+        this.game.dialog?.toast(t('toast_broken_timeline'));
 
       }
 
@@ -1069,15 +1069,15 @@ export class PlayerController {
       const lore = this.game.dungeons.getNearbyLore?.(this.position);
       prompt.classList.remove('hidden');
       if (lore) {
-        prompt.textContent = `${interact} 阅读 — ${t(lore.title)}`;
+        prompt.textContent = t('prompt_dungeon_read_fmt', { interact, title: t(lore.title) });
       } else if (hint?.bossAlive) {
-        prompt.textContent = `${interact} 击败守钥者后离开 · Boss 二阶段留意`;
+        prompt.textContent = t('prompt_dungeon_boss_leave', { interact });
       } else if (hint?.enemies > 0) {
-        prompt.textContent = `${interact} 出口离开 · 本房 ${hint.enemies} 敌 · 清空后门开`;
+        prompt.textContent = t('prompt_dungeon_room_enemies_fmt', { interact, enemies: hint.enemies });
       } else if (hint?.isExit) {
-        prompt.textContent = `${interact} 离开 ${hint.name}`;
+        prompt.textContent = t('prompt_dungeon_leave_fmt', { interact, name: hint.name });
       } else {
-        prompt.textContent = `探索 ${hint?.visited}/${hint?.total} 房 · 找出口环 · ${interact} 出口处离开`;
+        prompt.textContent = t('prompt_dungeon_explore_fmt', { interact, visited: hint?.visited, total: hint?.total });
       }
     } else if (rest) {
 
@@ -1087,20 +1087,20 @@ export class PlayerController {
 
       // 营火名在 `RestPointManager.buildDefaults` 那一刻就展开好了（世界里存的是显示名）
       prompt.textContent = rn
-        ? `${interact} 与 ${rn.name} 交谈 · 休息 — ${rest.name}`
-        : `${interact} 休息 / 升级 — ${rest.name}`;
+        ? t('prompt_rest_npc_fmt', { interact, npc: rn.name, rest: rest.name })
+        : t('prompt_rest_plain_fmt', { interact, rest: rest.name });
 
     } else if (npc) {
 
       prompt.classList.remove('hidden');
 
-      prompt.textContent = `${interact} 对话 — ${npc.name}`;
+      prompt.textContent = t('prompt_npc_talk_fmt', { interact, name: npc.name });
 
     } else if (chest) {
 
       prompt.classList.remove('hidden');
 
-      prompt.textContent = `${interact} 开启宝箱`;
+      prompt.textContent = t('prompt_chest_open', { interact });
 
     } else if (dungeon) {
 

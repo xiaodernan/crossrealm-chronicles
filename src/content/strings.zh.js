@@ -2427,6 +2427,21 @@ Wave3 三巨头母题：
 进入对应位面有轻微视觉 overlay；POI 交互时短暂增强。
 
 Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低语（时线）· 星港商路（荒原）`,
+  // 交互提示与提示 toast 的运行期文案（W-D2 切片22：PlayerController 的 updatePrompt / 边界 / 视角切换）
+  prompt_dungeon_read_fmt: '${interact} 阅读 — ${title}',
+  prompt_dungeon_boss_leave: '${interact} 击败守钥者后离开 · Boss 二阶段留意',
+  prompt_dungeon_room_enemies_fmt: '${interact} 出口离开 · 本房 ${enemies} 敌 · 清空后门开',
+  prompt_dungeon_leave_fmt: '${interact} 离开 ${name}',
+  prompt_dungeon_explore_fmt: '探索 ${visited}/${total} 房 · 找出口环 · ${interact} 出口处离开',
+  prompt_rest_npc_fmt: '${interact} 与 ${npc} 交谈 · 休息 — ${rest}',
+  prompt_rest_plain_fmt: '${interact} 休息 / 升级 — ${rest}',
+  prompt_npc_talk_fmt: '${interact} 对话 — ${name}',
+  prompt_chest_open: '${interact} 开启宝箱',
+  toast_camera_swap: '({cameraMode} 切换)',
+  toast_camera_first_fmt: '第一人称视角 ${swap}',
+  toast_camera_third_fmt: '第三人称越肩 ${swap}',
+  toast_void_boundary: '位面裂隙之外尚无世界 — 折返吧',
+  toast_broken_timeline: '⟲ 破碎时线：重力反转 — 行走于时环之下',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

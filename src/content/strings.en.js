@@ -2430,6 +2430,21 @@ Wave3 three-franchise motifs:
 Entering the corresponding plane has slight visual overlay; POI interaction briefly enhances.
 
 Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (Timeline) · Star Port (Wastes)`,
+  // Interaction prompt and toast copy (W-D2 slice 22: PlayerController updatePrompt / boundary / camera switch)
+  prompt_dungeon_read_fmt: '${interact} Read — ${title}',
+  prompt_dungeon_boss_leave: '${interact} Defeat the keywarden to leave · Watch for the Boss phase two',
+  prompt_dungeon_room_enemies_fmt: '${interact} Leave by the exit · ${enemies} enemies in this room · the door opens once cleared',
+  prompt_dungeon_leave_fmt: '${interact} Leave ${name}',
+  prompt_dungeon_explore_fmt: 'Explored ${visited}/${total} rooms · find the exit ring · ${interact} at the exit to leave',
+  prompt_rest_npc_fmt: '${interact} Talk with ${npc} · Rest — ${rest}',
+  prompt_rest_plain_fmt: '${interact} Rest / Upgrade — ${rest}',
+  prompt_npc_talk_fmt: '${interact} Talk — ${name}',
+  prompt_chest_open: '${interact} Open chest',
+  toast_camera_swap: '({cameraMode} to switch)',
+  toast_camera_first_fmt: 'First-person view ${swap}',
+  toast_camera_third_fmt: 'Third-person over-the-shoulder ${swap}',
+  toast_void_boundary: 'There is no world beyond the plane rift — turn back',
+  toast_broken_timeline: '⟲ Broken timeline: gravity inverted — walking beneath the time ring',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */
