@@ -1225,6 +1225,8 @@ export const STRINGS_ZH = Object.freeze({
   ach_campfire_all_desc: '在全部 6 处营火休息',
   ach_photo_mode_title: '位面摄影师',
   ach_photo_mode_desc: '使用拍照模式',
+  ach_champion_of_hub_title: '枢纽冠军',
+  ach_champion_of_hub_desc: '击败全部五位首领',
   ach_echo_half_title: '半频共鸣',
   ach_echo_half_desc: '次元回声解锁 50%',
   ach_echo_full_title: '全频行者',

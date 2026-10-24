@@ -1,5 +1,5 @@
 /**
- * 元锁因账本接线（W-D2 切片48）。
+ * 元锁因账本接线（W-D2 切片48；切片49 增补 champion-of-hub 接驳用例）。
  *
  * ## 这一片防的是什么
  *
@@ -22,7 +22,8 @@
  * ① 形状腿：emptyStats 有四桶、STAT_READINGS 收录它们；
  * ② 镜像腿：stats-changed 把四格照搬进账本（函数级 + QuestSystem 事件级）；
  * ③ 端到端腿：真 AchievementSystem 解锁 -> PlayerStats 桶 -> 账本；四条元分支各造
- *    一条"桶满放行 / 桶空拦截"的读数；
+ *    一条"桶满放行 / 桶空拦截"的读数；另有一条 champion-of-hub 的接驳证明（五首领
+ *    击败 -> 成就解锁 -> 入账 -> s-champion 放行）；
  * ④ 静态钉腿：Game.js 反引与 unlock 入账两处焊点钉在源码里。
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -31,7 +32,7 @@ import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import { emptyStats, STAT_READINGS, applyStatEvent, statsToJSON } from '../src/content/objectives.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
-import { AchievementSystem } from '../src/game/AchievementSystem.js';
+import { ACHIEVEMENTS, AchievementSystem } from '../src/game/AchievementSystem.js';
 import { PlayerStats } from '../src/game/PlayerStats.js';
 import { getStoryLockReason } from '../src/game/StoryWeaponSkills.js';
 import { setLanguage } from '../src/engine/i18n.js';
@@ -142,6 +143,22 @@ describe('③ 端到端腿：成就解锁入账，四条元分支桶满放行、
 
   it('s-champion：成就桶空着时报锁因（裸 id），满了放行', () => {
     expect(getStoryLockReason(壳({}), 's-champion')).toMatch(/champion-of-hub/);
+    expect(getStoryLockReason(壳({ achievementsUnlocked: { 'champion-of-hub': 1 } }), 's-champion')).toBeNull();
+  });
+
+  it('champion-of-hub 接驳（切片49）：五首领击败 -> 成就解锁 -> 入账 -> s-champion 放行', () => {
+    const stats = new PlayerStats();
+    const ach = new AchievementSystem(dialog);
+    ach.game = { stats };
+    expect(ACHIEVEMENTS.some((a) => a.id === 'champion-of-hub'), '成就表里没有 champion-of-hub').toBe(true);
+    expect(ach.unlocked.has('champion-of-hub'), '出厂就该没解锁').toBe(false);
+    for (const bossId of ['shadow-warden', 'archmagus', 'singularity-herald', 'void-chronarch']) {
+      dispatch('enemy-defeated', { bossId });
+    }
+    expect(ach.unlocked.has('champion-of-hub'), '四位首领就放水了').toBe(false);
+    dispatch('enemy-defeated', { bossId: 'chaos-overlord' });
+    expect(ach.unlocked.has('champion-of-hub'), '五首领齐了却没解锁').toBe(true);
+    expect(stats.achievementsUnlocked['champion-of-hub'], '解锁没写进 PlayerStats 桶').toBe(1);
     expect(getStoryLockReason(壳({ achievementsUnlocked: { 'champion-of-hub': 1 } }), 's-champion')).toBeNull();
   });
 

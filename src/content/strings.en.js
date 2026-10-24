@@ -1226,6 +1226,8 @@ export const STRINGS_EN = Object.freeze({
   ach_campfire_all_desc: "Rest at all 6 campfires",
   ach_photo_mode_title: "Plane Photographer",
   ach_photo_mode_desc: "Use photo mode",
+  ach_champion_of_hub_title: "Champion of the Hub",
+  ach_champion_of_hub_desc: "Defeat all five lords",
   ach_echo_half_title: "Half-Frequency Resonance",
   ach_echo_half_desc: "Unlock 50% of the dimension echoes",
   ach_echo_full_title: "Full-Spectrum Walker",

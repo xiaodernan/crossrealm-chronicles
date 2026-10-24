@@ -8,25 +8,25 @@
  * 更深一层的根因已由切片48 修掉：四条元锁因读的 `quests.stats.{questsCompleted,
  * achievementsUnlocked,itemsCollected,storyFlags}` 四只桶原先**不在账本形状里**，现已进
  * `emptyStats()` 并经 `stats-changed` 从 PlayerStats 镜像（接线由
- * `tests/meta-lock-wiring.test.js` 钉着）。今天剩下的死锁全是**内容缺失**：
- * `champion-of-hub` 成就 / `side-lost-scholar` 支线 / `void-resonance-shard` 物品 /
- * `void-chronicle-read` 旗标都没有本体或生产者（成就族的生产者已接：解锁即入账）。
+ * `tests/meta-lock-wiring.test.js` 钉着）。切片49 补上 `champion-of-hub` 成就（生产者
+ * 随之接上：解锁即入账），今天剩下的死锁全是**内容缺失**：`side-lost-scholar` 支线 /
+ * `void-resonance-shard` 物品 / `void-chronicle-read` 旗标都没有本体或生产者。
  * 症状是 B36 那一族：**那一格看起来有门，其实永远敞不开** —— 玩家在升级面板看到
  * "需解锁 1 次成就 champion-of-hub (0/1)"直到关服。同类还有一处已修：`s-combo` 的
  * `kills: { type: 'normal' }`（名册里没有 `normal` 这一类，`stats.kills` 按敌人真实 type
  * 记账，`Enemy` 构造器把无 type 的敌人兜底成 `'soldier'`）—— 切片47 修成 `'soldier'`，
- * 死锁清单随之缩到四处。
+ * 死锁清单随之缩到四处；切片49 补上 `champion-of-hub` 成就后再缩到三处。
  *
  * ## 机制
  *
  * 不静默造内容（成就 / 支线 / 物品 / 旗标是设计决策，§9 ADR 留名），也不让新漂移再发生：
- * 本门禁把**当前四处死锁钉成一份清单**，计算集合与清单相等才算过 —— 新增一处悬空引用
+ * 本门禁把**当前三处死锁钉成一份清单**，计算集合与清单相等才算过 —— 新增一处悬空引用
  * 当场红；修掉一处也必须来改这份清单（刻意的动作，不是顺手）。
  *
  * ## 用例分四层
  * ① 结构腿：lock 的键集合与 getStoryLockReason 的分支集合双向对齐；
  * ② 活引用腿：有生产者宇宙的六族逐一核身份（Boss / 区域 / 击杀类型 / 效果 / 任务 / 成就）；
- * ③ 死锁清单腿：悬空引用计算集合 == 钉死的四处；
+ * ③ 死锁清单腿：悬空引用计算集合 == 钉死的三处；
  * ④ 账本生产腿：成就族生产者钉在源码里、物品/旗标两族仍零写入 + 尺子自证。
  */
 import { describe, it, expect } from 'vitest';
@@ -84,7 +84,6 @@ const 悬空引用 = (id, lock) => {
 
 /** 当前死锁清单（改这里 = 刻意动作：要么新内容接了产者，要么确认新漂移） */
 const 钉死的死锁 = [
-  's-champion|achievementUnlocked:champion-of-hub',
   'r-quest-master|questComplete:side-lost-scholar',
   'r-relic-hunter|itemCollected:void-resonance-shard',
   'r-archivist|storyFlag:void-chronicle-read',
@@ -170,7 +169,7 @@ describe('② 活引用腿：六族引用都指着真实存在的生产者', () 
  * ③ 死锁清单腿
  * ------------------------------------------------------------------ */
 
-describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的四处', () => {
+describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的三处', () => {
   it('一处不多（新增悬空引用当场红）', () => {
     const 算出 = 带锁节点().flatMap(({ id, lock }) => 悬空引用(id, lock)).sort();
     const 多出来的 = 算出.filter((x) => !钉死的死锁.includes(x));
@@ -189,9 +188,9 @@ describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的四处', ()
     expect(ENEMY_ROSTER_IDS).toContain('soldier');
   });
 
-  it('清单本身形状正确：四处，覆盖四个节点', () => {
-    expect(钉死的死锁.length).toBe(4);
-    expect(new Set(钉死的死锁.map((x) => x.split('|')[0])).size).toBe(4);
+  it('清单本身形状正确：三处，覆盖三个节点', () => {
+    expect(钉死的死锁.length).toBe(3);
+    expect(new Set(钉死的死锁.map((x) => x.split('|')[0])).size).toBe(3);
   });
 });
 

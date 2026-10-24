@@ -21,6 +21,7 @@ export const ACHIEVEMENTS_EXTRA = [
   { id: 'rematch-3', title: 'ach_rematch_3_title', desc: 'ach_rematch_3_desc', check: (s) => (s.rematches ?? 0) >= 3 },
   { id: 'campfire-all', title: 'sq_side_campfire_all_title', desc: 'ach_campfire_all_desc', check: (s) => (s.campfireZones ?? 0) >= 6 },
   { id: 'photo-mode', title: 'ach_photo_mode_title', desc: 'ach_photo_mode_desc', check: (s) => s.photoMode },
+  { id: 'champion-of-hub', title: 'ach_champion_of_hub_title', desc: 'ach_champion_of_hub_desc', check: (s) => s.boss1 && s.boss2 && s.boss3 && s.voidBoss && s.chaosBoss },
 ];
 
 export const ACHIEVEMENTS_POP_CULTURE = [
