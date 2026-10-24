@@ -2696,6 +2696,7 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   skill_lock_achievement_fmt: '需解锁 ${count} 次成就 ${achievement} (${have}/${count})',
   skill_lock_zone_fmt: '需到达 ${count} 次区域 ${zone} (${have}/${count})',
   skill_lock_flag_fmt: '需触发 ${count} 次剧情 ${flag} (${have}/${count})',
+  story_flag_void_chronicle_read: '读罢虚空编年史',
   skill_lock_level_fmt: '需 Lv.${need} (当前 Lv.${have})',
   skill_effect_melee: '近战',
   skill_effect_combo: '连击',

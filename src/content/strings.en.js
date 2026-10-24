@@ -2699,6 +2699,7 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   skill_lock_achievement_fmt: 'Unlock achievement ${achievement} ${count} times (${have}/${count})',
   skill_lock_zone_fmt: 'Reach zone ${zone} ${count} times (${have}/${count})',
   skill_lock_flag_fmt: 'Trigger story flag ${flag} ${count} times (${have}/${count})',
+  story_flag_void_chronicle_read: 'Read the Void Chronicle',
   skill_lock_level_fmt: 'Requires Lv.${need} (current Lv.${have})',
   skill_effect_melee: 'Melee',
   skill_effect_combo: 'Combo',

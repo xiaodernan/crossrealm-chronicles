@@ -41,6 +41,7 @@ import { CG_GALLERY_BONUS_EXTRA } from '../src/content/cgGallery.js';
 import { CUE_CATALOG } from '../src/content/captions.js';
 import { ZONE_NAMES } from '../src/content/ZoneIdentity.js';
 import { ITEM_NAMES } from '../src/content/items.js'; // W-D2 切片52
+import { STORY_FLAG_NAMES } from '../src/content/storyFlags.js'; // W-D2 切片55
 import { JOURNAL_CATEGORIES } from '../src/game/StoryJournal.js';
 import { JOURNAL_EXTRA_TABS } from '../src/ui/JournalTabRegistry.js';
 import { BOSS_CINEMATICS } from '../src/cinematic/CinematicManager.js';
@@ -82,6 +83,7 @@ const 映射表 = [
   { 名: 'JOURNAL_CATEGORIES（日志页签·基础）', 映射: JOURNAL_CATEGORIES },
   { 名: 'JOURNAL_EXTRA_TABS（日志页签·扩展）', 映射: JOURNAL_EXTRA_TABS },
   { 名: 'ITEM_NAMES（物品名）', 映射: ITEM_NAMES }, // W-D2 切片52
+  { 名: 'STORY_FLAG_NAMES（剧情旗标名）', 映射: STORY_FLAG_NAMES }, // W-D2 切片55
 ];
 
 /** 取一行里那个字段的值（嵌套路径 / 数组都认） */

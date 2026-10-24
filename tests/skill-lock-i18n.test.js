@@ -16,26 +16,25 @@
  * "需击败 Boss"，值仍被 ending-upgrade-i18n 门禁钉着）。其余 11 句**中文逐字节未动**，
  * 既有按中文匹配的用例原样绿；④ 用 13 条原值正向钉死这个兼容。
  *
- * 插值里的 id 由七支解析器翻成显示名（切片45 四族 + 切片53 三族）：Boss / 区域 / 击杀类型 /
- * 效果 / 支线 / 成就 / 物品查得到的翻成人话（"需击败 1 次 大奥术师·萨尔林 (0/1)" /
+ * 插值里的 id 由八支解析器翻成显示名（切片45 四族 + 切片53 三族 + 切片55 旗标族）：Boss / 区域 /
+ * 击杀类型 / 效果 / 支线 / 成就 / 物品 / 剧情旗标查得到的翻成人话（"需击败 1 次 大奥术师·萨尔林 (0/1)" /
  * "需完成 1 次支线 迷途学者 (0/1)" / "需收集 3 个 虚空共鸣碎片 (0/3)"），查不到的原样退回 id。
- * 剧情旗标一族仍是裸 id —— 唯一 id 由调用点推导、全仓没有旗标名册（§9 切片53 留名）。
  * 切片47 把 s-combo 的
  * `normal` 修成名册里的 `soldier` 之后，锁因表里已无名册外击杀类型（回退路径由 ⑦ 腿单测）。
  *
  * ## 用例分七层
  * ① 钉文案腿：16 个新键的中英原值逐字钉死；
- * ② 键登记腿：键数 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414，两表对齐，同文不建第二键，新键不孤儿；
+ * ② 键登记腿：键数 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2415，两表对齐，同文不建第二键，新键不孤儿；
  * ③ 静态腿：13 个调用点锚定、复用两键不新开、文件里再无中文字面量；
  * ④ 行为腿（zh）：14 种 lock 形状各造一条读数，等于改后中文；
  * ⑤ 行为腿（en）：同一批读数英文播出；
  * ⑥ 反面证据：尺子自证 + 任何分支都不出 [MISSING:]；
- * ⑦ 解析腿：七族 id → 显示名，映射表双向对齐、逐族正反向、句子真的用上了解析。
+ * ⑦ 解析腿：八族 id → 显示名，映射表双向对齐、逐族正反向、句子真的用上了解析。
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { bossLabel, enemyLabel, effectLabel, questLabel, achievementLabel, itemLabel, getStoryLockReason, zoneLabel } from '../src/game/StoryWeaponSkills.js';
+import { bossLabel, enemyLabel, effectLabel, questLabel, achievementLabel, itemLabel, flagLabel, getStoryLockReason, zoneLabel } from '../src/game/StoryWeaponSkills.js';
 import { SKILL_EFFECT_KEYS, SKILL_EFFECT_LABEL_KEYS } from '../src/content/skillTrees.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
@@ -87,7 +86,7 @@ const LOCK_CASES = [
   { id: 's-champion', why: '成就解锁', patch: {}, zh: '需解锁 1 次成就 枢纽冠军 (0/1)', en: 'Unlock achievement Champion of the Hub 1 times (0/1)' },
   { id: 'm-wanderer', why: '区域到达', patch: {}, zh: '需到达 1 次区域 破碎时线 (0/1)', en: 'Reach zone Broken Timeline 1 times (0/1)' },
   { id: 's-combo', why: '击杀数', patch: { chapter: 2, fragment: 1 }, zh: '需击败 20 只 影之战士 (0/20)', en: 'Defeat 20 Shadow Warrior (0/20)' },
-  { id: 'r-archivist', why: '剧情旗标', patch: {}, zh: '需触发 1 次剧情 void-chronicle-read (0/1)', en: 'Trigger story flag void-chronicle-read 1 times (0/1)' },
+  { id: 'r-archivist', why: '剧情旗标', patch: {}, zh: '需触发 1 次剧情 读罢虚空编年史 (0/1)', en: 'Trigger story flag Read the Void Chronicle 1 times (0/1)' },
   { id: 's-apotheosis', why: '等级', patch: { level: 10 }, zh: '需 Lv.12 (当前 Lv.10)', en: 'Requires Lv.12 (current Lv.10)' },
   { id: 's-riposte', why: 'Boss 未击败', patch: { chapter: 5 }, zh: '需击败 Boss', en: 'Defeat the Boss first' },
 ];
@@ -173,9 +172,9 @@ describe('① 钉文案腿：11 个新键的中英原值', () => {
  * ------------------------------------------------------------------ */
 
 describe('② 键登记腿：键数、对齐、同文、不孤儿', () => {
-  it('键数 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414，两表对齐', () => {
-    expect(ZH_KEYS.length).toBe(2414);
-    expect(EN_KEYS.length).toBe(2414);
+  it('键数 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2415，两表对齐', () => {
+    expect(ZH_KEYS.length).toBe(2415);
+    expect(EN_KEYS.length).toBe(2415);
     expect([...ZH_KEYS].sort()).toEqual([...EN_KEYS].sort());
   });
 
@@ -302,7 +301,7 @@ describe('⑥ 反面证据：尺子自证', () => {
  * ⑦ 解析腿（W-D2 切片45）：id → 显示名
  * ------------------------------------------------------------------ */
 
-describe('⑦ 解析腿：七族 id 翻成显示名，翻不出来原样退回', () => {
+describe('⑦ 解析腿：八族 id 翻成显示名，翻不出来原样退回', () => {
   beforeEach(() => {
     setLanguage('zh');
   });
@@ -361,7 +360,12 @@ describe('⑦ 解析腿：七族 id 翻成显示名，翻不出来原样退回',
     expect(itemLabel('no-such-item')).toBe('no-such-item');
   });
 
-  it('七条锁因分支真的把解析结果传进了插值（解析了却没用是最常见的假装修）', () => {
+  it('剧情旗标：STORY_FLAG_NAMES 里的翻显示名，表外原样退回', () => {
+    expect(flagLabel('void-chronicle-read')).toBe('读罢虚空编年史');
+    expect(flagLabel('no-such-flag')).toBe('no-such-flag');
+  });
+
+  it('八条锁因分支真的把解析结果传进了插值（解析了却没用是最常见的假装修）', () => {
     const SWS = 读('src/game/StoryWeaponSkills.js');
     expect(SWS).toContain("type: enemyLabel(type)");
     expect(SWS).toContain("skill: effectLabel(skill)");
@@ -370,6 +374,7 @@ describe('⑦ 解析腿：七族 id 翻成显示名，翻不出来原样退回',
     expect(SWS).toContain("quest: questLabel(questId)");
     expect(SWS).toContain("item: itemLabel(itemId)");
     expect(SWS).toContain("achievement: achievementLabel(achievementId)");
+    expect(SWS).toContain("flag: flagLabel(flagId)");
   });
 
   it('尺子自证：空串 / 非字符串也走回退，不抛', () => {
@@ -380,5 +385,6 @@ describe('⑦ 解析腿：七族 id 翻成显示名，翻不出来原样退回',
     expect(questLabel(undefined)).toBe(undefined);
     expect(achievementLabel(undefined)).toBe(undefined);
     expect(itemLabel(undefined)).toBe(undefined);
+    expect(flagLabel(undefined)).toBe(undefined);
   });
 });

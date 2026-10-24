@@ -177,7 +177,7 @@ describe('③ 端到端腿：成就解锁入账，四条元分支桶满放行、
   });
 
   it('r-archivist：剧情旗标桶满了放行', () => {
-    expect(getStoryLockReason(壳({}), 'r-archivist')).toMatch(/void-chronicle-read/);
+    expect(getStoryLockReason(壳({}), 'r-archivist')).toMatch(/读罢虚空编年史/);
     expect(getStoryLockReason(壳({ storyFlags: { 'void-chronicle-read': 1 } }), 'r-archivist')).toBeNull();
   });
 

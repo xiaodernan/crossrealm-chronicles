@@ -24,6 +24,7 @@ import { ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { SIDE_QUESTS_ALL } from '../content/sideQuests.js';
 import { ALL_ACHIEVEMENTS_EXTRA } from '../content/achievements.js';
 import { ITEM_NAMES } from '../content/items.js';
+import { STORY_FLAG_NAMES } from '../content/storyFlags.js';
 import { ACHIEVEMENTS } from './AchievementSystem.js';
 import { t } from '../engine/i18n.js';
 
@@ -38,7 +39,7 @@ export function bossDefeated(game, bossId) {
 }
 
 /**
- * 锁因插值里的七族 id → 玩家看见的那个词（W-D2 切片45 起四族，切片53 扩到七族）。
+ * 锁因插值里的八族 id → 玩家看见的那个词（W-D2 切片45 起四族，切片53 扩到七族，切片55 收旗标族）。
  *
  * 修前这里把 id 原样插进句子：玩家在升级面板读到的是"需击败 1 次 archmagus (0/1)"
  * / "需使用 30 次 combo (0/30)"，英文界面下连中文玩家都得猜那两个词是什么。
@@ -53,9 +54,9 @@ export function bossDefeated(game, bossId) {
  * 住在 game 层而不是 content：展开要 `t()`，而 content 不许向上够 engine
  * （`content-boundary` 门禁）—— 所以"键住在 content、展开住在 game"。
  *
- * 剧情旗标一族今天仍出裸 id：唯一的 id（`void-chronicle-read`）由 `LoreCodexSystem`
- * 的调用点推导，全仓没有旗标名册 —— 显示名是设计决策，§9 ADR 留名，等旗标族有名词表
- * 再补（与另外三族同一把尺）。
+ * 旗标族（切片55 起）：问 `STORY_FLAG_NAMES`（切片55 立的旗标名册）。注意名册只管
+ * **显示名** —— 旗标族的 id 宇宙仍由 `onStoryFlag 调用点` 调用点推导（④ 腿与
+ * `skill-lock-refs` 门禁）：没人落的旗标照样是悬空引用，不会因为进了名册就变活。
  */
 export const bossLabel = (bossId) => {
   if (!isKnownBossId(bossId)) return bossId;
@@ -92,6 +93,11 @@ export const itemLabel = (itemId) => {
   return key ? t(key) : itemId;
 };
 
+export const flagLabel = (flagId) => {
+  const key = STORY_FLAG_NAMES[flagId];
+  return key ? t(key) : flagId;
+};
+
 /**
  * 这一格现在为什么不能加点（`null` = 没有东西拦着）。
  *
@@ -102,9 +108,9 @@ export const itemLabel = (itemId) => {
  * 正是 `learn-spell` 数的那本账）。
  * 返回值全部走双表（W-D2 切片43）：每一句是一条 `skill_lock_*_fmt` 模板，
  * `t()` 按当前语言展开；章节与"击败 Boss"两条**复用**营火升级面板既有的两枚键（同文不建第二键）。
- * 插值里的 id 由本文件的解析器翻成显示名（W-D2 切片45 四族 + 切片53 三族）：Boss /
- * 区域 / 击杀类型 / 效果 / 支线 / 成就 / 物品七族有真源可查 —— 查得到的翻成人话，
- * 查不到的原样退回 id。剧情旗标一族仍出裸 id（为什么，见 `bossLabel` 上方的说明）。
+ * 插值里的 id 由本文件的解析器翻成显示名（W-D2 切片45 四族 + 切片53 三族 + 切片55
+ * 旗标族）：Boss / 区域 / 击杀类型 / 效果 / 支线 / 成就 / 物品 / 剧情旗标八族有真源可查
+ * —— 查得到的翻成人话，查不到的原样退回 id。
  */
 export function getStoryLockReason(game, skillId) {
   const lock = skillById(skillId)?.lock;
@@ -157,7 +163,7 @@ export function getStoryLockReason(game, skillId) {
   if (lock.storyFlag) {
     const { flagId, count = 1 } = lock.storyFlag;
     const flagged = q?.stats?.storyFlags?.[flagId] ?? 0;
-    if (flagged < count) return t('skill_lock_flag_fmt', { count, flag: flagId, have: flagged });
+    if (flagged < count) return t('skill_lock_flag_fmt', { count, flag: flagLabel(flagId), have: flagged });
   }
   if (lock.level) {
     const lvl = q?.stats?.level ?? 1;

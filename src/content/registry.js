@@ -43,6 +43,7 @@ import {
 } from './dialogueCgPresets.js';
 import { ACHIEVEMENTS_EXTRA, ACHIEVEMENTS_POP_CULTURE } from './achievements.js';
 import { ITEM_NAMES } from './items.js';
+import { STORY_FLAG_NAMES } from './storyFlags.js';
 import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
 import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
@@ -708,6 +709,15 @@ export const CONTENT_TABLES = [
       + ' content-i18n-keys 门禁的映射表清单核',
     shape: 'index',
     table: ITEM_NAMES,
+    value: { t: 'string' },
+  },
+  {
+    kind: 'storyFlagNames',
+    note: '剧情旗标名册（W-D2 切片55）：旗标 id → 那一个名字。名册只管显示名 ——'
+      + ' id 宇宙仍由 onStoryFlag 调用点 调用点推导（skill-lock-refs ④ 腿），'
+      + ' 没人落的旗标照样悬空；值是否两表登记由 content-i18n-keys 门禁的映射表清单核',
+    shape: 'index',
+    table: STORY_FLAG_NAMES,
     value: { t: 'string' },
   },
   {
