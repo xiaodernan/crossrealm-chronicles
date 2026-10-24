@@ -95,7 +95,9 @@ describe('账本形状：emptyStats 与判据/记账双向对齐', () => {
       'npc-talk': [{ id: 'wanderer' }],
       'discovery': [{ id: 'hub-anchor' }],
       'poi-interact': [{ id: 'fantasy-ring' }],
-      'stats-changed': [{ level: 7, mind: 3, gear: { charm: { base: 'ash-charm' } } }],
+      // 元账本四格（W-D2 切片48）：stats-changed 从 PlayerStats 快照镜像进来，探针要带上
+      'stats-changed': [{ level: 7, mind: 3, gear: { charm: { base: 'ash-charm' } },
+        questsCompleted: { p: 1 }, achievementsUnlocked: { p: 1 }, itemsCollected: { p: 1 }, storyFlags: { p: 1 } }],
       // 「抉择」那一格的生产者（W-E3 切片18）：少了它，`decisions` 就没人写
       'choice-made': [{ flag: 'choice_void_sealed' }],
     };

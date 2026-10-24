@@ -126,6 +126,12 @@ describe('③ 交叉证据：推导没有漏', () => {
       flag: 'choice_void_sealed',
       // 抉择旗标（W-E3 切片18）：由 QuestSystem 记录，探针也带上
       flags: ['choice_void_sealed'],
+      // 元账本四格（W-D2 切片48）：stats-changed 从 PlayerStats 快照镜像进来，
+      // 探针不带这四格，「实跑」那一半就看不到它们被写（同 gear 那条的理由）
+      questsCompleted: { 'probe-quest': 1 },
+      achievementsUnlocked: { 'probe-ach': 1 },
+      itemsCollected: { 'probe-item': 1 },
+      storyFlags: { 'probe-flag': 1 },
     };
     const 细节们 = (名) => (名 === 'enemy-defeated'
       ? [...Object.keys(BOSS_STAT_KEYS).map((bossId) => ({ ...通用, type: 'boss', bossId })), 通用]

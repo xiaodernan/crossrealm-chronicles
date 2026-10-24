@@ -407,6 +407,10 @@ export class Game {
     this.performance = new PerformanceManager();
     this.weapons = this._adopt('combat/WeaponSystem', new WeaponSystem(this.player, this.dialog, this.audio));
     this.achievements = this._adopt('game/AchievementSystem', new AchievementSystem(this.dialog));
+    // W-D2 切片48：反引 game —— AchievementSystemExtras / PopCultureAchievementExtras 读的
+    // `ach.game?.cgGallery / loreCodex / popCulture` 自仓库重建起从没被赋过值，那三族成就
+    // （cg / codex / echo 百分比）的统计监听全是死的；unlock() 入账 PlayerStats 也要走它。
+    this.achievements.game = this;
     this.fastTravel = new FastTravelSystem(this);
     this.settingsPanel = new SettingsPanel(this);
     this.pauseMenu = new PauseMenu(this);

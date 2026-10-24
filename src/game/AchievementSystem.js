@@ -121,6 +121,9 @@ export class AchievementSystem {
     this.unlocked.add(a.id);
     // W-D2 切片16l：成就的 title 是**文案键** —— 展开在播出的那一刻。
     this.dialog.toast(t('achievement_unlocked', { title: t(a.title) }));
+    // W-D2 切片48：解锁这一刻写进 PlayerStats 的 achievementsUnlocked 桶（经 stats-changed
+    // 镜像进任务账本）—— 技能树两族的成就锁因读的就是那一格，改前全仓零写入。
+    this.game?.stats?.onAchievementUnlocked(a.id);
     window.dispatchEvent(new CustomEvent('achievement-unlocked', { detail: a }));
   }
 

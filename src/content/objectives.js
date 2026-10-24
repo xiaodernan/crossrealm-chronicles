@@ -1082,6 +1082,26 @@ export function emptyStats() {
      * 落盘/读档由 `statsToJSON` / `statsFromJSON` 自动带上（不在 `STAT_READINGS` 里）。
      */
     objectiveFlags: {},
+    /**
+     * **元账本四格**（W-D2 切片48）：支线完成 / 成就解锁 / 物品收集 / 剧情旗标。
+     *
+     * `game/StoryWeaponSkills.js` 的四条元锁因（questComplete / achievementUnlocked /
+     * itemCollected / storyFlag）读的就是这四格 —— 改前它们**不在账本形状里**，四条分支
+     * 的 `q?.stats?.X?.[id] ?? 0` 恒等于 0：那四格锁因在真实游戏里永远不可达
+     * （refs 门禁 ③ 腿只核了 id 宇宙，没核账本形状，所以一直绿着）。
+     *
+     * 生产者在 `PlayerStats`（`onQuestCompleted` / `onAchievementUnlocked` /
+     * `onItemCollected` / `onStoryFlag`，W-B6 切片5 起就在），它每次写都派发
+     * `stats-changed` ⇒ 下面那条记账函数把快照里的四格镜像进来。
+     *
+     * 为什么进 `STAT_READINGS`（不落盘）：真源是 PlayerStats 自己那一份（它落盘），
+     * 账本这份只是投影；读档时 `SaveSystem` 复原 PlayerStats 之后再推一次
+     * `stats-changed`，投影自动回填 —— 与 `level` / `mind` 同一口径。
+     */
+    questsCompleted: {},
+    achievementsUnlocked: {},
+    itemsCollected: {},
+    storyFlags: {},
     ...Object.fromEntries(Object.values(BOSS_STAT_KEYS).map((k) => [k, false])),
   };
 }
@@ -1093,7 +1113,8 @@ export function emptyStats() {
  * `weaponSkills.unlocked` 的大小算，而这两处都发生在任务账本复原之后。
  * 存档校验把 `quests.stats.skillsUnlocked` 判成非法（v5 起），靠的就是这一格不落盘。
  */
-export const STAT_READINGS = ['level', 'mind', 'skillsUnlocked', 'gearSlots'];
+export const STAT_READINGS = ['level', 'mind', 'skillsUnlocked', 'gearSlots',
+  'questsCompleted', 'achievementsUnlocked', 'itemsCollected', 'storyFlags'];
 
 /**
  * 账本 → 存档。形状从 `emptyStats()` 推：Set 落数组、读数不落盘，
@@ -1165,6 +1186,13 @@ export const STAT_EVENTS = {
   'stats-changed': (s, d) => {
     if (Number.isFinite(d.level)) s.level = d.level;
     if (Number.isFinite(d.mind)) s.mind = d.mind;
+    // 元账本四格（W-D2 切片48）：PlayerStats 的四只桶每次写都经这里推快照，
+    // 镜像进账本 —— 技能锁因那四条元分支读的就是这四格（见 emptyStats 里的注释）。
+    // 浅拷贝：账本只读它们，别让两边握同一份对象。
+    if (d.questsCompleted) s.questsCompleted = { ...d.questsCompleted };
+    if (d.achievementsUnlocked) s.achievementsUnlocked = { ...d.achievementsUnlocked };
+    if (d.itemsCollected) s.itemsCollected = { ...d.itemsCollected };
+    if (d.storyFlags) s.storyFlags = { ...d.storyFlags };
     // 装备过的**槽位**（W-E3 切片17）：`PlayerStats.toJSON()` 里本来就带着 `gear`
     // （槽位 → 那件装备或 null）⇒ 这里直接问"哪些槽位上有东西"，
     // **不需要新事件、也不改存档形状**（它是一格**读数**，落盘时跳过 ⇒ 读档后由

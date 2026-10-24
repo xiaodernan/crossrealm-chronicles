@@ -4,14 +4,18 @@
  * ## 这一片解决什么
  *
  * 切片43 把 13 条锁因搬进双表时盘点出：`skillTrees.js` 的 `lock` 引用着**八族** id
- * （Boss / 区域 / 击杀类型 / 效果 / 支线 / 物品 / 成就 / 剧情旗标），其中四族**没有生产者** ——
- * `PlayerStats` 的 `achievementsUnlocked` / `itemsCollected` / `storyFlags` 三个账本格
- * 全仓**零写入**（`addAchievementUnlocked` / `addItemCollected` / `addStoryFlag` 没有任何
- * 调用点），`side-lost-scholar` 也不在 `MAINLINE` 与 `SIDE_QUESTS_ALL` 里。症状是 B36
- * 那一族：**那一格看起来有门，其实永远敞不开** —— 玩家在升级面板看到"需解锁 1 次成就
- * champion-of-hub (0/1)"直到关服。同类还有第五处：`s-combo` 的 `kills: { type: 'normal' }`
- * —— 名册里没有 `normal` 这一类，`stats.kills` 按敌人真实 type 记账（`Enemy` 构造器把
- * 无 type 的敌人兜底成 `'soldier'`）。切片47 把它修成 `'soldier'`，死锁清单缩到四处。
+ * （Boss / 区域 / 击杀类型 / 效果 / 支线 / 物品 / 成就 / 剧情旗标），其中四族**没有生产者**。
+ * 更深一层的根因已由切片48 修掉：四条元锁因读的 `quests.stats.{questsCompleted,
+ * achievementsUnlocked,itemsCollected,storyFlags}` 四只桶原先**不在账本形状里**，现已进
+ * `emptyStats()` 并经 `stats-changed` 从 PlayerStats 镜像（接线由
+ * `tests/meta-lock-wiring.test.js` 钉着）。今天剩下的死锁全是**内容缺失**：
+ * `champion-of-hub` 成就 / `side-lost-scholar` 支线 / `void-resonance-shard` 物品 /
+ * `void-chronicle-read` 旗标都没有本体或生产者（成就族的生产者已接：解锁即入账）。
+ * 症状是 B36 那一族：**那一格看起来有门，其实永远敞不开** —— 玩家在升级面板看到
+ * "需解锁 1 次成就 champion-of-hub (0/1)"直到关服。同类还有一处已修：`s-combo` 的
+ * `kills: { type: 'normal' }`（名册里没有 `normal` 这一类，`stats.kills` 按敌人真实 type
+ * 记账，`Enemy` 构造器把无 type 的敌人兜底成 `'soldier'`）—— 切片47 修成 `'soldier'`，
+ * 死锁清单随之缩到四处。
  *
  * ## 机制
  *
@@ -23,7 +27,7 @@
  * ① 结构腿：lock 的键集合与 getStoryLockReason 的分支集合双向对齐；
  * ② 活引用腿：有生产者宇宙的六族逐一核身份（Boss / 区域 / 击杀类型 / 效果 / 任务 / 成就）；
  * ③ 死锁清单腿：悬空引用计算集合 == 钉死的四处；
- * ④ 账本生产腿：三个零写入桶与 'normal' 不可达在源码里钉死 + 尺子自证。
+ * ④ 账本生产腿：成就族生产者钉在源码里、物品/旗标两族仍零写入 + 尺子自证。
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -195,7 +199,7 @@ describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的四处', ()
  * ④ 账本生产腿 + 尺子自证
  * ------------------------------------------------------------------ */
 
-describe('④ 账本生产腿：三个零写入桶与 normal 不可达钉死在源码里', () => {
+describe('④ 账本生产腿：成就族生产者与物品/旗标两族的零写入钉在源码里', () => {
   const 全部源码 = () => {
     const out = [];
     const walk = (dir) => {
@@ -209,15 +213,25 @@ describe('④ 账本生产腿：三个零写入桶与 normal 不可达钉死在�
     return out;
   };
 
-  it('achievementsUnlocked / itemsCollected / storyFlags 三个账本格全仓零写入', () => {
+  it('achievementsUnlocked 的生产者只能有一处：AchievementSystem.unlock（切片48 接上）', () => {
     const 调用点 = [];
     for (const [p, src] of 全部源码()) {
       if (p.endsWith('PlayerStats.js')) continue;
-      for (const m of ['addAchievementUnlocked', 'addItemCollected', 'addStoryFlag']) {
+      if (src.includes('onAchievementUnlocked(')) 调用点.push(p.replace(/\\/g, '/') + ' -> onAchievementUnlocked');
+    }
+    expect(调用点.length, 'achievementsUnlocked 的生产者只能有 unlock 这一处').toBe(1);
+    expect(调用点[0].replace(/\\/g, '/')).toMatch(/src\/game\/AchievementSystem\.js -> onAchievementUnlocked$/);
+  });
+
+  it('itemsCollected / storyFlags 仍零写入：两族死锁还没接生产者', () => {
+    const 调用点 = [];
+    for (const [p, src] of 全部源码()) {
+      if (p.endsWith('PlayerStats.js')) continue;
+      for (const m of ['onItemCollected(', 'onStoryFlag(']) {
         if (src.includes(m)) 调用点.push(p.replace(/\\/g, '/') + ' -> ' + m);
       }
     }
-    expect(调用点, '有人开始写这三个桶了 —— ③ 的死锁清单要跟着缩').toEqual([]);
+    expect(调用点, '有人开始写这两个桶了 —— ③ 的死锁清单要跟着缩').toEqual([]);
   });
 
   it("'normal' 不是任何敌人的 type：名册里没有， Enemy 兜底是 'soldier'", () => {
