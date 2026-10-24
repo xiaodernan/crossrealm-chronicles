@@ -38,11 +38,19 @@ export class LoreCodexSystem {
   }
 
   tryUnlock(key) {
+    let 有新 = false;
     for (const entry of LORE_CODEX) {
       if (entry.unlock !== key || this.unlocked.has(entry.id)) continue;
       this.unlocked.add(entry.id);
+      有新 = true;
       this.game.dialog?.toast(t('lore_codex_unlocked_toast', { title: t(entry.title) }), 3200);
       window.dispatchEvent(new CustomEvent('codex-unlocked', { detail: entry }));
+    }
+    // W-D2 切片51：读罢虚空编年史 —— 十二条全解锁那一刻落一次剧情旗标
+    // （r-archivist 的锁因读的就是这一格；落点去重靠 `_编年史已读`，读档后没有新解锁就不会再落）
+    if (有新 && !this._编年史已读 && this.getStats().percent >= 100) {
+      this._编年史已读 = true;
+      this.game?.stats?.onStoryFlag('void-chronicle-read');
     }
   }
 

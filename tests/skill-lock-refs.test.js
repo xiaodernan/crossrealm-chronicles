@@ -9,27 +9,27 @@
  * achievementsUnlocked,itemsCollected,storyFlags}` 四只桶原先**不在账本形状里**，现已进
  * `emptyStats()` 并经 `stats-changed` 从 PlayerStats 镜像（接线由
  * `tests/meta-lock-wiring.test.js` 钉着）。切片49 补上 `champion-of-hub` 成就（生产者
- * 随之接上：解锁即入账）、切片50 补上 `side-lost-scholar` 支线（完成即入账），今天剩下
- * 的死锁全是**内容缺失**：`void-resonance-shard` 物品 / `void-chronicle-read` 旗标都没有
- * 本体或生产者。
+ * 随之接上：解锁即入账）、切片50 补上 `side-lost-scholar` 支线（完成即入账）、切片51 接上
+ * `void-chronicle-read` 旗标的生产者（秘典全解锁即落旗标），今天剩下的死锁只剩一处：
+ * `void-resonance-shard` 物品 —— 全仓没有物品收集系统。
  * 症状是 B36 那一族：**那一格看起来有门，其实永远敞不开** —— 玩家在升级面板看到
  * "需收集 3 个 void-resonance-shard (0/3)"直到关服。同类已修的有三处：`s-combo` 的
  * `kills: { type: 'normal' }`（名册里没有 `normal` 这一类，`stats.kills` 按敌人真实 type
  * 记账，`Enemy` 构造器把无 type 的敌人兜底成 `'soldier'`）—— 切片47 修成 `'soldier'`，
  * 死锁清单随之缩到四处；切片49 补上 `champion-of-hub` 成就、切片50 补上
- * `side-lost-scholar` 支线，再缩到两处。
+ * `side-lost-scholar` 支线、切片51 接上旗标生产者，再缩到一处。
  *
  * ## 机制
  *
  * 不静默造内容（成就 / 支线 / 物品 / 旗标是设计决策，§9 ADR 留名），也不让新漂移再发生：
- * 本门禁把**当前两处死锁钉成一份清单**，计算集合与清单相等才算过 —— 新增一处悬空引用
+ * 本门禁把**当前一处死锁钉成一份清单**，计算集合与清单相等才算过 —— 新增一处悬空引用
  * 当场红；修掉一处也必须来改这份清单（刻意的动作，不是顺手）。
  *
  * ## 用例分四层
  * ① 结构腿：lock 的键集合与 getStoryLockReason 的分支集合双向对齐；
  * ② 活引用腿：有生产者宇宙的六族逐一核身份（Boss / 区域 / 击杀类型 / 效果 / 任务 / 成就）；
- * ③ 死锁清单腿：悬空引用计算集合 == 钉死的两处；
- * ④ 账本生产腿：成就族生产者钉在源码里、物品/旗标两族仍零写入 + 尺子自证。
+ * ③ 死锁清单腿：悬空引用计算集合 == 钉死的一处；
+ * ④ 账本生产腿：成就族与旗标族的生产者各钉唯一一处、物品族仍零写入 + 尺子自证。
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -68,6 +68,35 @@ const 成就宇宙 = new Set([
   ...ACHIEVEMENTS_POP_CULTURE.map((a) => a.id),
 ]);
 
+/** 全部 src 源码（门禁只核代码：注释里提一句方法名不算调用点） */
+const 全部源码 = () => {
+  const out = [];
+  const walk = (dir) => {
+    for (const name of readdirSync(dir)) {
+      const p = join(dir, name);
+      if (statSync(p).isDirectory()) walk(p);
+      else if (name.endsWith('.js')) out.push([p, readFileSync(p, 'utf8')]);
+    }
+  };
+  walk(join(ROOT, 'src'));
+  return out;
+};
+
+/**
+ * 物品 / 旗标两族的 id 宇宙：**推导**，不手抄 —— 源码里真的在调
+ * `onItemCollected('…')` / `onStoryFlag('…')` 的那些 id（切片51 起旗标族有了第一个
+ * 生产者；物品族今天仍为零）。口径与 ④ 腿同一把扫描：带调用括号，注释不算。
+ */
+const 写入宇宙 = (方法) => {
+  const 出 = new Set();
+  for (const [, src] of 全部源码()) {
+    for (const m of src.matchAll(new RegExp(方法 + "\\('([^']+)'\\)", 'g'))) 出.add(m[1]);
+  }
+  return 出;
+};
+const 物品宇宙 = 写入宇宙('onItemCollected');
+const 旗标宇宙 = 写入宇宙('onStoryFlag');
+
 /** 这个 lock 引用了哪些没有生产者的 id（`节点|族:id` 形状） */
 const 悬空引用 = (id, lock) => {
   const out = [];
@@ -78,16 +107,15 @@ const 悬空引用 = (id, lock) => {
   if (lock.kills && !击杀宇宙.has(lock.kills.type)) out.push(id + '|kills:' + lock.kills.type);
   if (lock.questComplete && !任务宇宙.has(lock.questComplete.questId)) out.push(id + '|questComplete:' + lock.questComplete.questId);
   if (lock.achievementUnlocked && !成就宇宙.has(lock.achievementUnlocked.achievementId)) out.push(id + '|achievementUnlocked:' + lock.achievementUnlocked.achievementId);
-  // 物品与剧情旗标两族：全仓没有 id 宇宙，也没有任何生产者 —— 一律计悬空
-  if (lock.itemCollected) out.push(id + '|itemCollected:' + lock.itemCollected.itemId);
-  if (lock.storyFlag) out.push(id + '|storyFlag:' + lock.storyFlag.flagId);
+  // 物品与剧情旗标两族没有名册：id 宇宙就是上面推导出来的那两份（没有生产者的 id 一律悬空）
+  if (lock.itemCollected && !物品宇宙.has(lock.itemCollected.itemId)) out.push(id + '|itemCollected:' + lock.itemCollected.itemId);
+  if (lock.storyFlag && !旗标宇宙.has(lock.storyFlag.flagId)) out.push(id + '|storyFlag:' + lock.storyFlag.flagId);
   return out;
 };
 
 /** 当前死锁清单（改这里 = 刻意动作：要么新内容接了产者，要么确认新漂移） */
 const 钉死的死锁 = [
   'r-relic-hunter|itemCollected:void-resonance-shard',
-  'r-archivist|storyFlag:void-chronicle-read',
 ];
 
 /** 这条引用不在钉死的死锁清单里（死锁由 ③ 自己管） */
@@ -170,7 +198,7 @@ describe('② 活引用腿：六族引用都指着真实存在的生产者', () 
  * ③ 死锁清单腿
  * ------------------------------------------------------------------ */
 
-describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的两处', () => {
+describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的一处', () => {
   it('一处不多（新增悬空引用当场红）', () => {
     const 算出 = 带锁节点().flatMap(({ id, lock }) => 悬空引用(id, lock)).sort();
     const 多出来的 = 算出.filter((x) => !钉死的死锁.includes(x));
@@ -189,9 +217,9 @@ describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的两处', ()
     expect(ENEMY_ROSTER_IDS).toContain('soldier');
   });
 
-  it('清单本身形状正确：两处，覆盖两个节点', () => {
-    expect(钉死的死锁.length).toBe(2);
-    expect(new Set(钉死的死锁.map((x) => x.split('|')[0])).size).toBe(2);
+  it('清单本身形状正确：一处，覆盖一个节点', () => {
+    expect(钉死的死锁.length).toBe(1);
+    expect(new Set(钉死的死锁.map((x) => x.split('|')[0])).size).toBe(1);
   });
 });
 
@@ -199,19 +227,7 @@ describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的两处', ()
  * ④ 账本生产腿 + 尺子自证
  * ------------------------------------------------------------------ */
 
-describe('④ 账本生产腿：成就族生产者与物品/旗标两族的零写入钉在源码里', () => {
-  const 全部源码 = () => {
-    const out = [];
-    const walk = (dir) => {
-      for (const name of readdirSync(dir)) {
-        const p = join(dir, name);
-        if (statSync(p).isDirectory()) walk(p);
-        else if (name.endsWith('.js')) out.push([p, readFileSync(p, 'utf8')]);
-      }
-    };
-    walk(join(ROOT, 'src'));
-    return out;
-  };
+describe('④ 账本生产腿：成就族与旗标族的生产者各钉唯一一处、物品族仍零写入', () => {
 
   it('achievementsUnlocked 的生产者只能有一处：AchievementSystem.unlock（切片48 接上）', () => {
     const 调用点 = [];
@@ -223,15 +239,17 @@ describe('④ 账本生产腿：成就族生产者与物品/旗标两族的零�
     expect(调用点[0].replace(/\\/g, '/')).toMatch(/src\/game\/AchievementSystem\.js -> onAchievementUnlocked$/);
   });
 
-  it('itemsCollected / storyFlags 仍零写入：两族死锁还没接生产者', () => {
-    const 调用点 = [];
+  it('itemsCollected 仍零写入；storyFlags 的生产者只能有一处：LoreCodexSystem（切片51 接上）', () => {
+    const 物品 = [];
+    const 旗标 = [];
     for (const [p, src] of 全部源码()) {
       if (p.endsWith('PlayerStats.js')) continue;
-      for (const m of ['onItemCollected(', 'onStoryFlag(']) {
-        if (src.includes(m)) 调用点.push(p.replace(/\\/g, '/') + ' -> ' + m);
-      }
+      if (src.includes('onItemCollected(')) 物品.push(p.replace(/\\/g, '/') + ' -> onItemCollected');
+      if (src.includes('onStoryFlag(')) 旗标.push(p.replace(/\\/g, '/') + ' -> onStoryFlag');
     }
-    expect(调用点, '有人开始写这两个桶了 —— ③ 的死锁清单要跟着缩').toEqual([]);
+    expect(物品, '有人开始写物品桶了 —— ③ 的死锁清单要跟着缩').toEqual([]);
+    expect(旗标.length, 'storyFlags 的生产者只能有 LoreCodexSystem 这一处').toBe(1);
+    expect(旗标[0].replace(/\\/g, '/')).toMatch(/src\/game\/LoreCodexSystem\.js -> onStoryFlag$/);
   });
 
   it("'normal' 不是任何敌人的 type：名册里没有， Enemy 兜底是 'soldier'", () => {
@@ -243,6 +261,7 @@ describe('④ 账本生产腿：成就族生产者与物品/旗标两族的零�
     expect(悬空引用('x', { boss: 'nobody' })).toEqual(['x|boss:nobody']);
     expect(悬空引用('x', { boss: 'shadow-warden', chapter: 2 })).toEqual([]);
     expect(悬空引用('x', { itemCollected: { itemId: 'anything' } })).toEqual(['x|itemCollected:anything']);
+    expect(悬空引用('x', { storyFlag: { flagId: 'void-chronicle-read' } })).toEqual([]);
     expect(悬空引用('x', { kills: { type: 'soldier', count: 1 } })).toEqual([]);
   });
 });

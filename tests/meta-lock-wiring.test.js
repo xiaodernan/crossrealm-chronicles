@@ -1,5 +1,5 @@
 /**
- * 元锁因账本接线（W-D2 切片48；切片49 增补 champion-of-hub 接驳用例）。
+ * 元锁因账本接线（W-D2 切片48；切片49/50/51 各增补一条死锁接驳证明）。
  *
  * ## 这一片防的是什么
  *
@@ -22,8 +22,8 @@
  * ① 形状腿：emptyStats 有四桶、STAT_READINGS 收录它们；
  * ② 镜像腿：stats-changed 把四格照搬进账本（函数级 + QuestSystem 事件级）；
  * ③ 端到端腿：真 AchievementSystem 解锁 -> PlayerStats 桶 -> 账本；四条元分支各造
- *    一条"桶满放行 / 桶空拦截"的读数；另有一条 champion-of-hub 的接驳证明（五首领
- *    击败 -> 成就解锁 -> 入账 -> s-champion 放行）；
+ *    一条"桶满放行 / 桶空拦截"的读数；另有三条接驳证明（champion-of-hub 五首领 /
+ *    side-lost-scholar 六条笔记 / void-chronicle-read 秘典全解锁 -> 各自入账 -> 锁因放行）；
  * ④ 静态钉腿：Game.js 反引与 unlock 入账两处焊点钉在源码里。
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -34,6 +34,7 @@ import { emptyStats, STAT_READINGS, applyStatEvent, statsToJSON } from '../src/c
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import { ACHIEVEMENTS, AchievementSystem } from '../src/game/AchievementSystem.js';
 import { PlayerStats } from '../src/game/PlayerStats.js';
+import { LoreCodexSystem } from '../src/game/LoreCodexSystem.js';
 import { getStoryLockReason } from '../src/game/StoryWeaponSkills.js';
 import { setLanguage } from '../src/engine/i18n.js';
 
@@ -174,6 +175,28 @@ describe('③ 端到端腿：成就解锁入账，四条元分支桶满放行、
 
   it('r-archivist：剧情旗标桶满了放行', () => {
     expect(getStoryLockReason(壳({}), 'r-archivist')).toMatch(/void-chronicle-read/);
+    expect(getStoryLockReason(壳({ storyFlags: { 'void-chronicle-read': 1 } }), 'r-archivist')).toBeNull();
+  });
+
+  it('void-chronicle-read 接驳（切片51）：秘典全解锁 -> 旗标入账 -> r-archivist 放行', () => {
+    const stats = new PlayerStats();
+    const codex = new LoreCodexSystem({ dialog, stats });
+    // 先解锁十一条（差 dungeon-clear 那条）：还没读罢编年史，旗标不落
+    for (const id of ['rest-hub-souls', 'rest-hub-gallery', 'rest-fantasy-boss1', 'rest-void-hidden', 'rest-hub-rematch']) {
+      dispatch('journal-entry', { id });
+    }
+    for (const bossId of ['archmagus', 'singularity-herald', 'chaos-overlord']) {
+      dispatch('boss-defeated', { bossId });
+    }
+    dispatch('combat-execution');
+    dispatch('combo-finisher');
+    dispatch('cg-unlocked', { id: 'bonus:world-anchor' });
+    expect(codex.getStats().unlocked, '用例少派了事件 —— 十一条都没凑齐').toBe(11);
+    expect(stats.storyFlags['void-chronicle-read'], '没读罢就落旗标了').toBeUndefined();
+
+    dispatch('dungeon-cleared');
+    expect(codex.getStats().percent).toBe(100);
+    expect(stats.storyFlags['void-chronicle-read'], '全解锁了却没落旗标').toBe(1);
     expect(getStoryLockReason(壳({ storyFlags: { 'void-chronicle-read': 1 } }), 'r-archivist')).toBeNull();
   });
 });
