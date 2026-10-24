@@ -80,3 +80,4 @@ node node_modules/vitest/vitest.mjs run tests/i18n-conventions.test.js tests/i18
 | 插值位置空白 | `_fmt` 键模板忘了写占位，或参数对象传成了标量 | i18n-conventions `_fmt` 腿 |
 | 切英文后某格不变 | 该格没走 `t()` / 没挂 `data-i18n` | 各面板行为腿 |
 | 新内容显示裸 id | 名册里没有这个 id（退回行为，不崩） | content-i18n-keys / 各解析器腿 |
+| 锁引了不存在的击杀类型（或 `boss`） | `kills.type` 不在敌族名册；boss 击杀不走 kills 族（走 `bossKills`） | skill-lock-refs ② / ③ 腿 |
