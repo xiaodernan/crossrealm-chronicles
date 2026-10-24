@@ -49,6 +49,14 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules/three')) return 'vendor-three';
+          // 共享显示工具：keyLabels / keyHints 被 core（Game / PlayerController / QuestSystem）、
+          // combat、cinematic、ui **同时读**，而它们只依赖 content/ 与 engine/i18n（都在 core）——
+          // 所以它们必须落在 core 这一层当叶子，不能进 chunk-ui，否则 chunk-core 回读 chunk-ui
+          // 成环（B37 那条"core 是叶子"）。W-D2 切片46 为收 content→engine 边界把它们从
+          // content/ 迁进了 ui/，本行按"谁读谁"（不是按目录名）把它们留回 core 块。
+          if (id.includes('/src/ui/keyLabels.js') || id.includes('/src/ui/keyHints.js')) {
+            return 'chunk-core';
+          }
           if (id.includes('/src/content/')
             || id.includes('/src/engine/')
             || id.includes('/src/assets/')
