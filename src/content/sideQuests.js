@@ -82,6 +82,15 @@ export const SIDE_QUESTS_BASE = [
     reward: 18,
     journal: 'sq_side_campfire_all_journal',
   },
+  {
+    id: 'side-lost-scholar',
+    zone: 'global',
+    title: 'sq_side_lost_scholar_title',
+    desc: 'sq_side_lost_scholar_desc',
+    check: (g) => (g.storyJournal?.getCounts()?.fragment ?? 0) >= 6,
+    reward: 15,
+    journal: 'sq_side_lost_scholar_journal',
+  },
 ];
 
 function countFranchise(game, franchise) {

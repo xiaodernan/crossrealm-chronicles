@@ -45,7 +45,7 @@ function makeGame(overrides = {}) {
       onQuestCompleted: (id) => 记.questsCompleted.push(id),
     },
     dialog: { toast: (t) => 记.toasts.push(t) },
-    storyJournal: { add: (e) => 记.journal.push(e) },
+    storyJournal: { add: (e) => 记.journal.push(e), getCounts: () => ({ fragment: 0 }) },
     quests: { chapter: 3 },
     achievements: { stats: {} },
     ...overrides,
@@ -145,6 +145,23 @@ describe('完成检测走 shipped 路径：致敬族与基础族同一条路', (
     expect(sq.getProgress().done).toBe(2);   // 集合就是存档那两份，不假称"重新推导"
     sq.checkAll();                            // 只要不抛，且不会把名单外的当成本次要完成的事
     expect(sq.completed.has('side-早已删除')).toBe(true);
+  });
+});
+
+describe('side-lost-scholar 接驳（W-D2 切片50）：笔记读数 -> 完成 -> questsCompleted 入账', () => {
+  it('6 条叙事碎片才完成，且入账的正是 r-quest-master 锁因读的那个 id', () => {
+    installWindowShim();
+    const { game, 记 } = makeGame();
+    game.storyJournal = { add: (e) => 记.journal.push(e), getCounts: () => ({ fragment: 5 }) };
+    const sq = new SideQuestSystem(game);
+    sq.checkAll();
+    expect(sq.completed.has('side-lost-scholar'), '5 条笔记就放水了').toBe(false);
+
+    game.storyJournal.getCounts = () => ({ fragment: 6 });
+    sq.checkAll();
+    expect(sq.completed.has('side-lost-scholar'), '6 条笔记却没完成 —— 这条支线永远完不成').toBe(true);
+    expect(记.questsCompleted, '完成没写进 questsCompleted —— r-quest-master 的锁读的就是这一格')
+      .toEqual(['side-lost-scholar']);
   });
 });
 
