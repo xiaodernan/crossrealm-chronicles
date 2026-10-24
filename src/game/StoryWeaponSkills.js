@@ -17,7 +17,10 @@
  * 共 4 份），而唯一真源是 `content/objectives.js` 的 `BOSS_STAT_KEYS`。现在一律读真源。
  */
 import { BOSS_STAT_KEYS } from '../content/objectives.js';
-import { skillById } from '../content/skillTrees.js';
+import { bossNameKeyOf, isKnownBossId } from '../content/bossRoster.js';
+import { ENEMY_ROSTER } from '../content/enemies.js';
+import { SKILL_EFFECT_LABEL_KEYS, skillById } from '../content/skillTrees.js';
+import { ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { t } from '../engine/i18n.js';
 
 /**
@@ -31,6 +34,45 @@ export function bossDefeated(game, bossId) {
 }
 
 /**
+ * 锁因插值里的四族 id → 玩家看见的那个词（W-D2 切片45）。
+ *
+ * 修前这里把 id 原样插进句子：玩家在升级面板读到的是"需击败 1 次 archmagus (0/1)"
+ * / "需使用 30 次 combo (0/30)"，英文界面下连中文玩家都得猜那两个词是什么。
+ * 这四支把 id 翻成显示名；**翻不出来原样退回 id** —— 不静默换成别的词，
+ * 那样"引用了不存在的东西"就被盖住了（B36 那一族正是这么烂起来的）。
+ *
+ * 解析源各是一处真源：Boss 问 `bossNameKeyOf`（journal 侧 `weapon_skill_need_boss_fmt`
+ * 同一套），区域问 `ZONE_NAMES`，敌人问名册的 `name`（那一列存的就是文案键），
+ * 效果问 `SKILL_EFFECT_LABEL_KEYS`。
+ *
+ * 住在 game 层而不是 content：展开要 `t()`，而 content 不许向上够 engine
+ * （`content-boundary` 门禁）—— 所以"键住在 content、展开住在 game"。
+ *
+ * 另外四族（支线 / 物品 / 成就 / 剧情旗标）今天仍出裸 id：支线与成就唯一引用处的 id
+ * 压根不在任何表里（`tests/skill-lock-refs.test.js` ③ 腿钉着那五处死锁），现在做解析器
+ * 就是死代码；物品与旗标两族全仓没有 id 宇宙。等死锁接驳时一起补（§9 ADR 留名）。
+ */
+export const bossLabel = (bossId) => {
+  if (!isKnownBossId(bossId)) return bossId;
+  return t(bossNameKeyOf(bossId));
+};
+
+export const zoneLabel = (zoneId) => {
+  const key = ZONE_NAMES[zoneId];
+  return key ? t(key) : zoneId;
+};
+
+export const enemyLabel = (type) => {
+  const key = ENEMY_ROSTER[type]?.name;
+  return key ? t(key) : type;
+};
+
+export const effectLabel = (effect) => {
+  const key = SKILL_EFFECT_LABEL_KEYS[effect];
+  return key ? t(key) : effect;
+};
+
+/**
  * 这一格现在为什么不能加点（`null` = 没有东西拦着）。
  *
  * 规则**全部**来自节点行自己的 `lock` —— 这里不再自带任何一张门槛表。
@@ -40,9 +82,9 @@ export function bossDefeated(game, bossId) {
  * 正是 `learn-spell` 数的那本账）。
  * 返回值全部走双表（W-D2 切片43）：每一句是一条 `skill_lock_*_fmt` 模板，
  * `t()` 按当前语言展开；章节与"击败 Boss"两条**复用**营火升级面板既有的两枚键（同文不建第二键）。
- * 中文逐字节未动 —— 既有按中文匹配的用例原样绿。插值里的 id（type / skill / bossId /
- * questId / itemId / achievementId / zoneId / flagId）仍是裸 id：那是"显示名解析"
- * 另一条线（journal 侧的 `weapon_skill_need_boss_fmt` 已开先例），不在本片范围。
+ * 插值里的 id 由本文件那四支解析器翻成显示名（W-D2 切片45）：Boss / 区域 / 击杀类型 /
+ * 效果四族有真源可查 —— 查得到的翻成人话，查不到的原样退回 id。支线 / 物品 / 成就 /
+ * 旗标四族今天仍是裸 id（为什么，见 `bossLabel` 上方的说明）。
  */
 export function getStoryLockReason(game, skillId) {
   const lock = skillById(skillId)?.lock;
@@ -60,17 +102,17 @@ export function getStoryLockReason(game, skillId) {
   if (lock.kills) {
     const { type, count } = lock.kills;
     const n = q?.stats?.kills?.[type] ?? 0;
-    if (n < count) return t('skill_lock_kills_fmt', { count, type, have: n });
+    if (n < count) return t('skill_lock_kills_fmt', { count, type: enemyLabel(type), have: n });
   }
   if (lock.skillUses) {
     const { skill, count } = lock.skillUses;
     const n = q?.stats?.skillUses?.[skill] ?? 0;
-    if (n < count) return t('skill_lock_skilluses_fmt', { count, skill, have: n });
+    if (n < count) return t('skill_lock_skilluses_fmt', { count, skill: effectLabel(skill), have: n });
   }
   if (lock.bossDefeated) {
     const { bossId, count = 1 } = lock.bossDefeated;
     const defeated = q?.stats?.bossDefeated?.[bossId] ?? 0;
-    if (defeated < count) return t('skill_lock_bosskills_fmt', { count, boss: bossId, have: defeated });
+    if (defeated < count) return t('skill_lock_bosskills_fmt', { count, boss: bossLabel(bossId), have: defeated });
   }
   if (lock.questComplete) {
     const { questId, count = 1 } = lock.questComplete;
@@ -90,7 +132,7 @@ export function getStoryLockReason(game, skillId) {
   if (lock.zoneReached) {
     const { zoneId, count = 1 } = lock.zoneReached;
     const reached = q?.stats?.zonesReached?.[zoneId] ?? 0;
-    if (reached < count) return t('skill_lock_zone_fmt', { count, zone: zoneId, have: reached });
+    if (reached < count) return t('skill_lock_zone_fmt', { count, zone: zoneLabel(zoneId), have: reached });
   }
   if (lock.storyFlag) {
     const { flagId, count = 1 } = lock.storyFlag;

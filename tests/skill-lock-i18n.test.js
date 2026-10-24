@@ -16,22 +16,25 @@
  * "需击败 Boss"，值仍被 ending-upgrade-i18n 门禁钉着）。其余 11 句**中文逐字节未动**，
  * 既有按中文匹配的用例原样绿；④ 用 13 条原值正向钉死这个兼容。
  *
- * 插值里的 id（type / skill / bossId / questId / itemId / achievementId / zoneId /
- * flagId）仍是裸 id：那是"显示名解析"另一条线（journal 侧 `weapon_skill_need_boss_fmt`
- * 已开先例），不在本片范围，§9 ADR 已留名。
+ * 插值里的 id 由切片45 的四支解析器翻成显示名：Boss / 区域 / 击杀类型 / 效果四族
+ * 查得到的翻成人话（"需击败 1 次 大奥术师·萨尔林 (0/1)"），查不到的原样退回 id
+ * （"需击败 20 只 normal (0/20)"）。支线 / 物品 / 成就 / 旗标四族仍是裸 id ——
+ * 前两族唯一引用处的 id 不在任何表里（做了就是死代码），后两族没有 id 宇宙。
  *
- * ## 用例分六层
- * ① 钉文案腿：11 个新键的中英原值逐字钉死；
- * ② 键登记腿：键数 2388 → 2399，两表对齐，同文不建第二键，新键不孤儿；
+ * ## 用例分七层
+ * ① 钉文案腿：16 个新键的中英原值逐字钉死；
+ * ② 键登记腿：键数 2388 → 2399 → 2404，两表对齐，同文不建第二键，新键不孤儿；
  * ③ 静态腿：13 个调用点锚定、复用两键不新开、文件里再无中文字面量；
- * ④ 行为腿（zh）：13 种 lock 形状各造一条读数，逐字节等于旧中文；
+ * ④ 行为腿（zh）：14 种 lock 形状各造一条读数，等于改后中文；
  * ⑤ 行为腿（en）：同一批读数英文播出；
- * ⑥ 反面证据：尺子自证 + 任何分支都不出 [MISSING:]。
+ * ⑥ 反面证据：尺子自证 + 任何分支都不出 [MISSING:]；
+ * ⑦ 解析腿：四族 id → 显示名，映射表双向对齐、逐族正反向、句子真的用上了解析。
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { getStoryLockReason } from '../src/game/StoryWeaponSkills.js';
+import { bossLabel, enemyLabel, effectLabel, getStoryLockReason, zoneLabel } from '../src/game/StoryWeaponSkills.js';
+import { SKILL_EFFECT_KEYS, SKILL_EFFECT_LABEL_KEYS } from '../src/content/skillTrees.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { setLanguage } from '../src/engine/i18n.js';
@@ -42,8 +45,8 @@ installWindowShim();
 const ROOT = process.cwd();
 const 读 = (p) => readFileSync(join(ROOT, p), 'utf8');
 
-/** 11 个新键：键 → [中文原值, 英文原值] */
-const NEW_KEYS = {
+/** 切片43 的 11 个模板键：键 → [中文原值, 英文原值] */
+const TEMPLATE_KEYS = {
   skill_lock_fragments_fmt: ['需 ${need} 条叙事碎片 (${have}/${need})', 'Requires ${need} lore fragments (${have}/${need})'],
   skill_lock_spellcasts_fmt: ['需施放法术 ${need} 次 (${have}/${need})', 'Cast spells ${need} times (${have}/${need})'],
   skill_lock_kills_fmt: ['需击败 ${count} 只 ${type} (${have}/${count})', 'Defeat ${count} ${type} (${have}/${count})'],
@@ -57,18 +60,31 @@ const NEW_KEYS = {
   skill_lock_level_fmt: ['需 Lv.${need} (当前 Lv.${have})', 'Requires Lv.${need} (current Lv.${have})'],
 };
 
+/** 切片45 的 5 个效果名键：键 → [中文原值, 英文原值] */
+const LABEL_KEYS = {
+  skill_effect_melee: ['近战', 'Melee'],
+  skill_effect_combo: ['连击', 'Combo'],
+  skill_effect_riposte: ['处决与弹反', 'Riposte'],
+  skill_effect_finisher: ['终结技', 'Finisher'],
+  skill_effect_charge: ['蓄力', 'Charge'],
+};
+
+/** 本门禁登记的新键 = 切片43 的 11 个模板键 + 切片45 的 5 个效果名键 */
+const NEW_KEYS = { ...TEMPLATE_KEYS, ...LABEL_KEYS };
+
 /** 13 种 lock 形状：节点 → 夹具改动 → 改前原句（zh）/ 改后英文 */
 const LOCK_CASES = [
   { id: 'm-transform', why: '章节', patch: { chapter: 1 }, zh: '需 Chapter 4', en: 'Requires Chapter 4' },
   { id: 's-combo', why: '叙事碎片', patch: { chapter: 2, fragment: 0 }, zh: '需 1 条叙事碎片 (0/1)', en: 'Requires 1 lore fragments (0/1)' },
   { id: 'm-mana', why: '施法次数', patch: { chapter: 2, spellCasts: 3 }, zh: '需施放法术 8 次 (3/8)', en: 'Cast spells 8 times (3/8)' },
-  { id: 'm-pierce', why: '击杀数', patch: {}, zh: '需击败 5 只 elite (0/5)', en: 'Defeat 5 elite (0/5)' },
-  { id: 's-tempo', why: '技能使用', patch: {}, zh: '需使用 30 次 combo (0/30)', en: 'Use combo 30 times (0/30)' },
-  { id: 's-realmedge', why: 'Boss 击杀', patch: {}, zh: '需击败 1 次 archmagus (0/1)', en: 'Defeat archmagus 1 times (0/1)' },
+  { id: 'm-pierce', why: '击杀数', patch: {}, zh: '需击败 5 只 精英·虚空骑士 (0/5)', en: 'Defeat 5 Elite · Void Knight (0/5)' },
+  { id: 's-tempo', why: '技能使用', patch: {}, zh: '需使用 30 次 连击 (0/30)', en: 'Use Combo 30 times (0/30)' },
+  { id: 's-realmedge', why: 'Boss 击杀', patch: {}, zh: '需击败 1 次 大奥术师·萨尔林 (0/1)', en: 'Defeat Archmagus Saloran 1 times (0/1)' },
   { id: 'r-quest-master', why: '支线完成', patch: {}, zh: '需完成 1 次支线 side-lost-scholar (0/1)', en: 'Complete side quest side-lost-scholar 1 times (0/1)' },
   { id: 'r-relic-hunter', why: '物品收集', patch: {}, zh: '需收集 3 个 void-resonance-shard (0/3)', en: 'Collect 3 void-resonance-shard (0/3)' },
   { id: 's-champion', why: '成就解锁', patch: {}, zh: '需解锁 1 次成就 champion-of-hub (0/1)', en: 'Unlock achievement champion-of-hub 1 times (0/1)' },
-  { id: 'm-wanderer', why: '区域到达', patch: {}, zh: '需到达 1 次区域 void (0/1)', en: 'Reach zone void 1 times (0/1)' },
+  { id: 'm-wanderer', why: '区域到达', patch: {}, zh: '需到达 1 次区域 破碎时线 (0/1)', en: 'Reach zone Broken Timeline 1 times (0/1)' },
+  { id: 's-combo', why: '击杀类型回退', patch: { chapter: 2, fragment: 1 }, zh: '需击败 20 只 normal (0/20)', en: 'Defeat 20 normal (0/20)' },
   { id: 'r-archivist', why: '剧情旗标', patch: {}, zh: '需触发 1 次剧情 void-chronicle-read (0/1)', en: 'Trigger story flag void-chronicle-read 1 times (0/1)' },
   { id: 's-apotheosis', why: '等级', patch: { level: 10 }, zh: '需 Lv.12 (当前 Lv.10)', en: 'Requires Lv.12 (current Lv.10)' },
   { id: 's-riposte', why: 'Boss 未击败', patch: { chapter: 5 }, zh: '需击败 Boss', en: 'Defeat the Boss first' },
@@ -155,13 +171,13 @@ describe('① 钉文案腿：11 个新键的中英原值', () => {
  * ------------------------------------------------------------------ */
 
 describe('② 键登记腿：键数、对齐、同文、不孤儿', () => {
-  it('键数 2388 → 2399，两表对齐', () => {
-    expect(ZH_KEYS.length).toBe(2399);
-    expect(EN_KEYS.length).toBe(2399);
+  it('键数 2388 → 2399 → 2404，两表对齐', () => {
+    expect(ZH_KEYS.length).toBe(2404);
+    expect(EN_KEYS.length).toBe(2404);
     expect([...ZH_KEYS].sort()).toEqual([...EN_KEYS].sort());
   });
 
-  it('11 个新键两表都在场', () => {
+  it('16 个新键两表都在场', () => {
     for (const k of Object.keys(NEW_KEYS)) {
       expect(ZH_KEYS, k).toContain(k);
       expect(EN_KEYS, k).toContain(k);
@@ -177,9 +193,11 @@ describe('② 键登记腿：键数、对齐、同文、不孤儿', () => {
     }
   });
 
-  it('新键不孤儿：11 键都在 StoryWeaponSkills.js 里被引用', () => {
+  it('新键不孤儿：11 个模板键在 StoryWeaponSkills.js 里，5 个效果名键在 skillTrees.js 的映射表里', () => {
     const src = 读('src/game/StoryWeaponSkills.js');
-    for (const k of Object.keys(NEW_KEYS)) expect(src, k + ' 建了键没人用').toContain(k);
+    for (const k of Object.keys(TEMPLATE_KEYS)) expect(src, k + ' 建了键没人用').toContain(k);
+    const st = 读('src/content/skillTrees.js');
+    for (const k of Object.keys(LABEL_KEYS)) expect(st, k + ' 建了键没人用').toContain(k);
   });
 });
 
@@ -190,10 +208,17 @@ describe('② 键登记腿：键数、对齐、同文、不孤儿', () => {
 describe('③ 静态腿：调用点锚定、复用不新开、文件中文字面量清零', () => {
   const SWS = 读('src/game/StoryWeaponSkills.js');
 
-  it('11 个新键各有一个 t() 调用点', () => {
-    for (const k of Object.keys(NEW_KEYS)) {
+  it('11 个模板键各有一个 t() 调用点', () => {
+    for (const k of Object.keys(TEMPLATE_KEYS)) {
       expect(SWS, k + ' 没有调用点').toContain("t('" + k + "'");
     }
+  });
+
+  it('5 个效果名键不走 t() 字面量：它们住在映射表里，由 effectLabel 展开', () => {
+    for (const k of Object.keys(LABEL_KEYS)) {
+      expect(SWS, k + ' 不该以 t() 字面量出现').not.toContain("t('" + k + "'");
+    }
+    expect(SWS).toContain('const key = SKILL_EFFECT_LABEL_KEYS[effect];');
   });
 
   it('章节与 Boss 两条复用旧键，没有为它们新开格子', () => {
@@ -220,7 +245,7 @@ describe('③ 静态腿：调用点锚定、复用不新开、文件中文字面
  * ④ 行为腿（zh）
  * ------------------------------------------------------------------ */
 
-describe('④ 行为腿（zh）：13 种 lock 形状逐字节等于旧中文', () => {
+describe('④ 行为腿（zh）：14 种 lock 形状逐字节等于改后中文', () => {
   for (const c of LOCK_CASES) {
     it(c.why + '：' + c.id, () => {
       expect(getStoryLockReason(game(c.patch), c.id)).toBe(c.zh);
@@ -268,5 +293,69 @@ describe('⑥ 反面证据：尺子自证', () => {
       'const b = `模板 ${x} 结尾`;',
     ].join('\n');
     expect(中文字面量(假源码)).toEqual(["'字'", '`模板  结尾`']);
+  });
+});
+
+/* ------------------------------------------------------------------
+ * ⑦ 解析腿（W-D2 切片45）：id → 显示名
+ * ------------------------------------------------------------------ */
+
+describe('⑦ 解析腿：四族 id 翻成显示名，翻不出来原样退回', () => {
+  beforeEach(() => {
+    setLanguage('zh');
+  });
+
+  it('SKILL_EFFECT_LABEL_KEYS 与 SKILL_EFFECT_KEYS 双向对齐（一种效果一句人话）', () => {
+    expect(Object.keys(SKILL_EFFECT_LABEL_KEYS).sort()).toEqual([...SKILL_EFFECT_KEYS].sort());
+  });
+
+  it('映射表每一格的值都在中英两表登记（缺一个 = 锁因里出 [MISSING:]）', () => {
+    for (const [effect, key] of Object.entries(SKILL_EFFECT_LABEL_KEYS)) {
+      expect(ZH_KEYS, effect + ' → ' + key + ' 中文表没登记').toContain(key);
+      expect(EN_KEYS, effect + ' → ' + key + ' 英文表没登记').toContain(key);
+    }
+  });
+
+  it('Boss：名册里的翻显示名，副本 Boss 走守钥者，认不出的原样退回', () => {
+    expect(bossLabel('archmagus')).toBe('大奥术师·萨尔林');
+    expect(bossLabel('shadow-warden')).toBe('影界守护者');
+    expect(bossLabel('dungeon-any')).toBe('迷宫守钥者');
+    expect(bossLabel('no-such-boss')).toBe('no-such-boss');
+    expect(bossLabel(undefined)).toBe(undefined);
+  });
+
+  it('区域：登记过的区翻显示名，认不出的原样退回', () => {
+    expect(zoneLabel('void')).toBe('破碎时线');
+    expect(zoneLabel('hub')).toBe(STRINGS_ZH.zone_name_hub);
+    expect(zoneLabel('nowhere')).toBe('nowhere');
+  });
+
+  it('敌人：名册里的翻显示名，名册外（normal / boss）原样退回', () => {
+    expect(enemyLabel('elite')).toBe('精英·虚空骑士');
+    expect(enemyLabel('soldier')).toBe(STRINGS_ZH.enemy_name_soldier);
+    expect(enemyLabel('normal')).toBe('normal');
+    expect(enemyLabel('boss')).toBe('boss');
+  });
+
+  it('效果：九种效果都翻得出人话，表外效果原样退回', () => {
+    for (const [effect, key] of Object.entries(SKILL_EFFECT_LABEL_KEYS)) {
+      expect(effectLabel(effect), effect + ' 翻不出来').toBe(STRINGS_ZH[key]);
+    }
+    expect(effectLabel('no-such-effect')).toBe('no-such-effect');
+  });
+
+  it('四条锁因分支真的把解析结果传进了插值（解析了却没用是最常见的假装修）', () => {
+    const SWS = 读('src/game/StoryWeaponSkills.js');
+    expect(SWS).toContain("type: enemyLabel(type)");
+    expect(SWS).toContain("skill: effectLabel(skill)");
+    expect(SWS).toContain("boss: bossLabel(bossId)");
+    expect(SWS).toContain("zone: zoneLabel(zoneId)");
+  });
+
+  it('尺子自证：空串 / 非字符串也走回退，不抛', () => {
+    expect(bossLabel('')).toBe('');
+    expect(zoneLabel(undefined)).toBe(undefined);
+    expect(enemyLabel(undefined)).toBe(undefined);
+    expect(effectLabel(null)).toBe(null);
   });
 });

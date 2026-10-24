@@ -102,6 +102,30 @@ export const SKILL_EFFECT_CONSUMERS = {
 /** `effect` 的允许键（由上面那份表推导 —— 不许再手抄第二份） */
 export const SKILL_EFFECT_KEYS = Object.keys(SKILL_EFFECT_CONSUMERS);
 
+/**
+ * `effect` → 显示名的**文案键**（W-D2 切片45）。
+ *
+ * 锁因里 effect 是当名词用的（"需使用 30 次 连击 (0/30)"）—— 那一格必须是玩家认识的词，
+ * 不是代码里的 `combo`。这张表就是"哪种效果 → 那句话住哪一格"：
+ * 五格（近战 / 连击 / 处决与弹反 / 终结技 / 蓄力）全表没有同文旧键，新开 `skill_effect_*`；
+ * 四格（战技 / 法术 / 法力 / 化身）在 HUD 与键位表里已有同文键，按"同文不建第二键"
+ * **复用**那些键，不新起住址（`tests/skill-lock-i18n.test.js` ⑦ 腿双向钉死）。
+ *
+ * 键集合必须与 `SKILL_EFFECT_KEYS` 逐一对齐：加一种效果就得给它一句人话，
+ * 漏一个的症状就是玩家在锁因里看见裸 id —— 本片修的就是这个。
+ */
+export const SKILL_EFFECT_LABEL_KEYS = {
+  melee: 'skill_effect_melee',
+  combo: 'skill_effect_combo',
+  riposte: 'skill_effect_riposte',
+  finisher: 'skill_effect_finisher',
+  skill: 'kb_label_skill',
+  spell: 'hud_ctrl_spell',
+  charge: 'skill_effect_charge',
+  mana: 'hud_mana',
+  transform: 'hud_spell_4',
+};
+
 /** cost 曲线倍率（切片5：数值曲线论证）
  * 1->1.0, 2->1.6, 3->2.4, 4->3.5, 5->5.5
  */
