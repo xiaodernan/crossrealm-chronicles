@@ -145,8 +145,8 @@ describe('③ 端到端腿：成就解锁入账，四条元分支桶满放行、
     storyJournal: { getCounts: () => ({ fragment: 99 }) },
   });
 
-  it('s-champion：成就桶空着时报锁因（裸 id），满了放行', () => {
-    expect(getStoryLockReason(壳({}), 's-champion')).toMatch(/champion-of-hub/);
+  it('s-champion：成就桶空着时报锁因（带显示名），满了放行', () => {
+    expect(getStoryLockReason(壳({}), 's-champion')).toMatch(/枢纽冠军/);
     expect(getStoryLockReason(壳({ achievementsUnlocked: { 'champion-of-hub': 1 } }), 's-champion')).toBeNull();
   });
 
@@ -167,29 +167,18 @@ describe('③ 端到端腿：成就解锁入账，四条元分支桶满放行、
   });
 
   it('r-quest-master：支线完成桶满了放行', () => {
-    expect(getStoryLockReason(壳({}), 'r-quest-master')).toMatch(/side-lost-scholar/);
+    expect(getStoryLockReason(壳({}), 'r-quest-master')).toMatch(/迷途学者/);
     expect(getStoryLockReason(壳({ questsCompleted: { 'side-lost-scholar': 1 } }), 'r-quest-master')).toBeNull();
   });
 
   it('r-relic-hunter：物品桶满 3 个才放行', () => {
-    expect(getStoryLockReason(壳({ itemsCollected: { 'void-resonance-shard': 2 } }), 'r-relic-hunter')).toMatch(/void-resonance-shard/);
+    expect(getStoryLockReason(壳({ itemsCollected: { 'void-resonance-shard': 2 } }), 'r-relic-hunter')).toMatch(/虚空共鸣碎片/);
     expect(getStoryLockReason(壳({ itemsCollected: { 'void-resonance-shard': 3 } }), 'r-relic-hunter')).toBeNull();
   });
 
   it('r-archivist：剧情旗标桶满了放行', () => {
     expect(getStoryLockReason(壳({}), 'r-archivist')).toMatch(/void-chronicle-read/);
     expect(getStoryLockReason(壳({ storyFlags: { 'void-chronicle-read': 1 } }), 'r-archivist')).toBeNull();
-  });
-
-  it('r-relic-hunter 接驳（切片52）：三座箱开出虚空共鸣碎片 -> 入账 -> 锁因放行；两座仍拦', () => {
-    const stats = new PlayerStats();
-    const mgr = new CollectibleManager(new THREE.Scene(), { getGroundHeight: () => 0 }, stats, dialog);
-    const 带碎片 = mgr.chests.filter((c) => (c.items ?? []).includes('void-resonance-shard'));
-    expect(带碎片.length, '带碎片的箱正好三座（fantasy2 / magic2 / space2）').toBe(3);
-    for (const c of 带碎片) mgr.open(c);
-    expect(stats.itemsCollected['void-resonance-shard'], '三座箱开完该入账 3 枚').toBe(3);
-    expect(getStoryLockReason(壳({ itemsCollected: { 'void-resonance-shard': 3 } }), 'r-relic-hunter')).toBeNull();
-    expect(getStoryLockReason(壳({ itemsCollected: { 'void-resonance-shard': 2 } }), 'r-relic-hunter')).toMatch(/void-resonance-shard/);
   });
 
   it('void-chronicle-read 接驳（切片51）：秘典全解锁 -> 旗标入账 -> r-archivist 放行', () => {
@@ -213,6 +202,17 @@ describe('③ 端到端腿：成就解锁入账，四条元分支桶满放行、
     expect(stats.storyFlags['void-chronicle-read'], '全解锁了却没落旗标').toBe(1);
     expect(getStoryLockReason(壳({ storyFlags: { 'void-chronicle-read': 1 } }), 'r-archivist')).toBeNull();
   });
+  it('r-relic-hunter 接驳（切片52）：三座箱开出虚空共鸣碎片 -> 入账 -> 锁因放行；两座仍拦', () => {
+    const stats = new PlayerStats();
+    const mgr = new CollectibleManager(new THREE.Scene(), { getGroundHeight: () => 0 }, stats, dialog);
+    const 带碎片 = mgr.chests.filter((c) => (c.items ?? []).includes('void-resonance-shard'));
+    expect(带碎片.length, '带碎片的箱正好三座（fantasy2 / magic2 / space2）').toBe(3);
+    for (const c of 带碎片) mgr.open(c);
+    expect(stats.itemsCollected['void-resonance-shard'], '三座箱开完该入账 3 枚').toBe(3);
+    expect(getStoryLockReason(壳({ itemsCollected: { 'void-resonance-shard': 3 } }), 'r-relic-hunter')).toBeNull();
+    expect(getStoryLockReason(壳({ itemsCollected: { 'void-resonance-shard': 2 } }), 'r-relic-hunter')).toMatch(/虚空共鸣碎片/);
+  });
+
 });
 
 /* ------------------------------------------------------------------

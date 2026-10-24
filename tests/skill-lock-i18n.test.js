@@ -16,11 +16,11 @@
  * "需击败 Boss"，值仍被 ending-upgrade-i18n 门禁钉着）。其余 11 句**中文逐字节未动**，
  * 既有按中文匹配的用例原样绿；④ 用 13 条原值正向钉死这个兼容。
  *
- * 插值里的 id 由切片45 的四支解析器翻成显示名：Boss / 区域 / 击杀类型 / 效果四族
- * 查得到的翻成人话（"需击败 1 次 大奥术师·萨尔林 (0/1)" / "需击败 20 只 影之战士 (0/20)"），
- * 查不到的原样退回 id。支线 / 物品 / 成就 / 旗标四族仍是裸 id —— 支线与物品唯一引用处的
- * id 不在任何表里（做了就是死代码），旗标没有 id 宇宙；成就族自切片49 起有了 id 宇宙
- * （`champion-of-hub` 已入成就表），显示名解析器留到支线族接驳后与支线一起补。切片47 把 s-combo 的
+ * 插值里的 id 由七支解析器翻成显示名（切片45 四族 + 切片53 三族）：Boss / 区域 / 击杀类型 /
+ * 效果 / 支线 / 成就 / 物品查得到的翻成人话（"需击败 1 次 大奥术师·萨尔林 (0/1)" /
+ * "需完成 1 次支线 迷途学者 (0/1)" / "需收集 3 个 虚空共鸣碎片 (0/3)"），查不到的原样退回 id。
+ * 剧情旗标一族仍是裸 id —— 唯一 id 由调用点推导、全仓没有旗标名册（§9 切片53 留名）。
+ * 切片47 把 s-combo 的
  * `normal` 修成名册里的 `soldier` 之后，锁因表里已无名册外击杀类型（回退路径由 ⑦ 腿单测）。
  *
  * ## 用例分七层
@@ -30,12 +30,12 @@
  * ④ 行为腿（zh）：14 种 lock 形状各造一条读数，等于改后中文；
  * ⑤ 行为腿（en）：同一批读数英文播出；
  * ⑥ 反面证据：尺子自证 + 任何分支都不出 [MISSING:]；
- * ⑦ 解析腿：四族 id → 显示名，映射表双向对齐、逐族正反向、句子真的用上了解析。
+ * ⑦ 解析腿：七族 id → 显示名，映射表双向对齐、逐族正反向、句子真的用上了解析。
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { bossLabel, enemyLabel, effectLabel, getStoryLockReason, zoneLabel } from '../src/game/StoryWeaponSkills.js';
+import { bossLabel, enemyLabel, effectLabel, questLabel, achievementLabel, itemLabel, getStoryLockReason, zoneLabel } from '../src/game/StoryWeaponSkills.js';
 import { SKILL_EFFECT_KEYS, SKILL_EFFECT_LABEL_KEYS } from '../src/content/skillTrees.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
@@ -82,9 +82,9 @@ const LOCK_CASES = [
   { id: 'm-pierce', why: '击杀数', patch: {}, zh: '需击败 5 只 精英·虚空骑士 (0/5)', en: 'Defeat 5 Elite · Void Knight (0/5)' },
   { id: 's-tempo', why: '技能使用', patch: {}, zh: '需使用 30 次 连击 (0/30)', en: 'Use Combo 30 times (0/30)' },
   { id: 's-realmedge', why: 'Boss 击杀', patch: {}, zh: '需击败 1 次 大奥术师·萨尔林 (0/1)', en: 'Defeat Archmagus Saloran 1 times (0/1)' },
-  { id: 'r-quest-master', why: '支线完成', patch: {}, zh: '需完成 1 次支线 side-lost-scholar (0/1)', en: 'Complete side quest side-lost-scholar 1 times (0/1)' },
-  { id: 'r-relic-hunter', why: '物品收集', patch: {}, zh: '需收集 3 个 void-resonance-shard (0/3)', en: 'Collect 3 void-resonance-shard (0/3)' },
-  { id: 's-champion', why: '成就解锁', patch: {}, zh: '需解锁 1 次成就 champion-of-hub (0/1)', en: 'Unlock achievement champion-of-hub 1 times (0/1)' },
+  { id: 'r-quest-master', why: '支线完成', patch: {}, zh: '需完成 1 次支线 迷途学者 (0/1)', en: 'Complete side quest The Lost Scholar 1 times (0/1)' },
+  { id: 'r-relic-hunter', why: '物品收集', patch: {}, zh: '需收集 3 个 虚空共鸣碎片 (0/3)', en: 'Collect 3 Void Resonance Shard (0/3)' },
+  { id: 's-champion', why: '成就解锁', patch: {}, zh: '需解锁 1 次成就 枢纽冠军 (0/1)', en: 'Unlock achievement Champion of the Hub 1 times (0/1)' },
   { id: 'm-wanderer', why: '区域到达', patch: {}, zh: '需到达 1 次区域 破碎时线 (0/1)', en: 'Reach zone Broken Timeline 1 times (0/1)' },
   { id: 's-combo', why: '击杀数', patch: { chapter: 2, fragment: 1 }, zh: '需击败 20 只 影之战士 (0/20)', en: 'Defeat 20 Shadow Warrior (0/20)' },
   { id: 'r-archivist', why: '剧情旗标', patch: {}, zh: '需触发 1 次剧情 void-chronicle-read (0/1)', en: 'Trigger story flag void-chronicle-read 1 times (0/1)' },
@@ -302,7 +302,7 @@ describe('⑥ 反面证据：尺子自证', () => {
  * ⑦ 解析腿（W-D2 切片45）：id → 显示名
  * ------------------------------------------------------------------ */
 
-describe('⑦ 解析腿：四族 id 翻成显示名，翻不出来原样退回', () => {
+describe('⑦ 解析腿：七族 id 翻成显示名，翻不出来原样退回', () => {
   beforeEach(() => {
     setLanguage('zh');
   });
@@ -346,12 +346,30 @@ describe('⑦ 解析腿：四族 id 翻成显示名，翻不出来原样退回',
     expect(effectLabel('no-such-effect')).toBe('no-such-effect');
   });
 
-  it('四条锁因分支真的把解析结果传进了插值（解析了却没用是最常见的假装修）', () => {
+  it('支线：任务表里的翻显示名，表外原样退回', () => {
+    expect(questLabel('side-lost-scholar')).toBe('迷途学者');
+    expect(questLabel('no-such-quest')).toBe('no-such-quest');
+  });
+
+  it('成就：三张成就表里的翻显示名，表外原样退回', () => {
+    expect(achievementLabel('champion-of-hub')).toBe('枢纽冠军');
+    expect(achievementLabel('no-such-achievement')).toBe('no-such-achievement');
+  });
+
+  it('物品：ITEM_NAMES 里的翻显示名，表外原样退回', () => {
+    expect(itemLabel('void-resonance-shard')).toBe('虚空共鸣碎片');
+    expect(itemLabel('no-such-item')).toBe('no-such-item');
+  });
+
+  it('七条锁因分支真的把解析结果传进了插值（解析了却没用是最常见的假装修）', () => {
     const SWS = 读('src/game/StoryWeaponSkills.js');
     expect(SWS).toContain("type: enemyLabel(type)");
     expect(SWS).toContain("skill: effectLabel(skill)");
     expect(SWS).toContain("boss: bossLabel(bossId)");
     expect(SWS).toContain("zone: zoneLabel(zoneId)");
+    expect(SWS).toContain("quest: questLabel(questId)");
+    expect(SWS).toContain("item: itemLabel(itemId)");
+    expect(SWS).toContain("achievement: achievementLabel(achievementId)");
   });
 
   it('尺子自证：空串 / 非字符串也走回退，不抛', () => {
@@ -359,5 +377,8 @@ describe('⑦ 解析腿：四族 id 翻成显示名，翻不出来原样退回',
     expect(zoneLabel(undefined)).toBe(undefined);
     expect(enemyLabel(undefined)).toBe(undefined);
     expect(effectLabel(null)).toBe(null);
+    expect(questLabel(undefined)).toBe(undefined);
+    expect(achievementLabel(undefined)).toBe(undefined);
+    expect(itemLabel(undefined)).toBe(undefined);
   });
 });
