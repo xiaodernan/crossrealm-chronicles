@@ -26,7 +26,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ZONE_IDS, ZONE_ORDER, ZONE_NAMES } from '../src/content/ZoneIdentity.js';
 import { t } from '../src/engine/i18n.js';
-import { keyText } from '../src/content/keyHints.js';
+import { keyText } from '../src/ui/keyHints.js';
 import {
   AMBIENT_ZONE_EVENTS,
   NO_AMBIENT_ZONES,

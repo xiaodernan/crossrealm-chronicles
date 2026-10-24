@@ -2,7 +2,7 @@ import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { mergeZoneEvents } from './WorldAmbientCatalog.js';
 import { mergePopCultureAmbient } from '../content/ambientLore.js';
 import { t } from '../engine/i18n.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 
 /**
  * 氛围事件进日志时的条目标题（**文案键**，W-D2 切片16a）。

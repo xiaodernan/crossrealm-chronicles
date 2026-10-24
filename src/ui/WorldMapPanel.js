@@ -1,5 +1,5 @@
 import { MAP_BOSSES } from '../game/QuestSystem.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from './keyHints.js';
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { DUNGEON_DEFS } from '../content/dungeons.js';
 import { t } from '../engine/i18n.js';

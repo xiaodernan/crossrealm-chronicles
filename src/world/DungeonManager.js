@@ -8,7 +8,7 @@ import { dungeonGrowthStage } from '../content/enemyGrowth.js';
 import { disposeDungeonSubtree } from './dungeonAssets.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { t } from '../engine/i18n.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 

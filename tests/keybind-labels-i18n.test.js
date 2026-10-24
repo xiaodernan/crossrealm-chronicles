@@ -19,7 +19,7 @@ import { join } from 'node:path';
 import {
   KEY_LABELS, MOUSE_LABELS, PAD_BUTTON_LABELS,
   keyLabel, mouseLabel, padButtonLabel, padStickLabel,
-} from '../src/content/keyLabels.js';
+} from '../src/ui/keyLabels.js';
 import { UI_HOTKEY_LABELS } from '../src/content/hotkeys.js';
 import { KEY_ACTION_LABELS, PAD_ONLY_ACTION_LABELS } from '../src/content/keybinds.js';
 import { STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
@@ -31,9 +31,9 @@ const EN = new Set(EN_KEYS);
 
 /** 六张表 → （文件，导出名）。表体从 `export const X = {` 取到第一个 `};` */
 const 六张表 = [
-  ['src/content/keyLabels.js', 'KEY_LABELS'],
-  ['src/content/keyLabels.js', 'MOUSE_LABELS'],
-  ['src/content/keyLabels.js', 'PAD_BUTTON_LABELS'],
+  ['src/ui/keyLabels.js', 'KEY_LABELS'],
+  ['src/ui/keyLabels.js', 'MOUSE_LABELS'],
+  ['src/ui/keyLabels.js', 'PAD_BUTTON_LABELS'],
   ['src/content/hotkeys.js', 'UI_HOTKEY_LABELS'],
   ['src/content/keybinds.js', 'KEY_ACTION_LABELS'],
   ['src/content/keybinds.js', 'PAD_ONLY_ACTION_LABELS'],

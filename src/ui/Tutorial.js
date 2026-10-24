@@ -1,5 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /** 首次进入的引导提示：整条链共用一个分组，重开引导时能整体撤销（B39） */

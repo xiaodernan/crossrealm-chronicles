@@ -16,11 +16,11 @@ import {
 import { UI_ACTIONS, UI_HOTKEYS, setHotkeyTable } from '../src/content/hotkeys.js';
 import {
   KEY_LABELS, MOUSE_LABELS, keyLabel, mouseLabel, padSourceLabel,
-} from '../src/content/keyLabels.js';
+} from '../src/ui/keyLabels.js';
 import {
   hintDevice, keyHint, keyStamp, keyText, keyTextCacheSize, refreshKeyText,
   setHintDevice, setHintPadOutlets,
-} from '../src/content/keyHints.js';
+} from '../src/ui/keyHints.js';
 import { INPUT_DEVICE_KINDS } from '../src/engine/InputDevice.js';
 import { scheduler } from '../src/engine/Scheduler.js';
 import { Tutorial } from '../src/ui/Tutorial.js';

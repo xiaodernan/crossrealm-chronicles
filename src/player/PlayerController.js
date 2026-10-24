@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { anyDown, codeFor } from '../content/keybinds.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 import { t } from '../engine/i18n.js';
 
 import { CharacterModel } from './CharacterModel.js';

@@ -24,7 +24,7 @@ import {
   resolveGamepadBindings,
 } from '../src/content/keybinds.js';
 import { UI_HOTKEYS } from '../src/content/hotkeys.js';
-import { PAD_BUTTON_LABELS, padButtonLabel, padStickLabel } from '../src/content/keyLabels.js';
+import { PAD_BUTTON_LABELS, padButtonLabel, padStickLabel } from '../src/ui/keyLabels.js';
 import { GamepadInput } from '../src/engine/GamepadInput.js';
 import { SettingsPanel } from '../src/ui/SettingsPanel.js';
 import { SettingsManager } from '../src/core/SettingsManager.js';
@@ -1045,7 +1045,7 @@ describe('显示与静态门禁', () => {
     expect(src).toMatch(/ui \? this\._padOverrides\(\) : overrides,\s*ui \? overrides : this\._uiPadOverrides\(\)/);
     expect(src).not.toMatch(/resolveGamepadBindings\(/);                       // 绕过入口 = 第二真源
     // W-D2 切片18：MOUSE_LABELS 的值改成键之后，鼠标那一格改走 mouseLabel（keyLabel 吃不进键）
-    expect(src).toMatch(/import \{ keyLabel, mouseLabel, padButtonLabel, padStickLabel \} from '..\/content\/keyLabels\.js'/);
+    expect(src).toMatch(/import \{ keyLabel, mouseLabel, padButtonLabel, padStickLabel \} from '\.\/keyLabels\.js'/);
     // 按钮序号/名字只能问表与标签，面板不许自己 import 进来拼字样
     expect(src).not.toMatch(/import[^;]*\bPAD_BUTTON\b[^;]*from/);
   });

@@ -10,7 +10,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { t } from '../src/engine/i18n.js';
-import { keyText } from '../src/content/keyHints.js';
+import { keyText } from '../src/ui/keyHints.js';
 import { SECTIONS } from '../src/ui/HelpManual.js';
 
 describe('说明书正文 i18n（W-D2 切片15）', () => {

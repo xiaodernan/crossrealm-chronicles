@@ -4,7 +4,7 @@ import { emit } from '../engine/EventBus.js';
 // 对话树本体在 `content/restDialogues.js`（W-B2）：本文件只管运行时，不再存文案，
 // 也不再把它转口一遍 —— 转口会让"这张表的真源在哪"重新变成两个答案。
 import { REST_DIALOGUES } from '../content/restDialogues.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 import { t } from '../engine/i18n.js';
 
 function highlightKeywords(text) {

@@ -1,6 +1,6 @@
 /** 游戏内说明书 — 由 UI 热键表的 `help` 动作打开（F12 是浏览器控制台，不是这里的键） */
 import { HELP_SECTIONS_EXTRA } from '../content/helpManual.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 import { focusFirstItem, parkFocus, restoreParkedFocus } from './FocusNav.js';
 

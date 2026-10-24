@@ -22,8 +22,8 @@ import {
 } from '../src/content/hotkeys.js';
 import { HotkeyRouter, hotkeyBlockedBy } from '../src/ui/HotkeyRouter.js';
 import { OVERLAY_LAYERS } from '../src/ui/OverlayStack.js';
-import { keyText } from '../src/content/keyHints.js';
-import { keyLabel } from '../src/content/keyLabels.js';
+import { keyText } from '../src/ui/keyHints.js';
+import { keyLabel } from '../src/ui/keyLabels.js';
 import { Dialog } from '../src/ui/Dialog.js';
 import { CombatCinematicSkip } from '../src/cinematic/CombatCinematicSkip.js';
 import { Game } from '../src/core/Game.js';

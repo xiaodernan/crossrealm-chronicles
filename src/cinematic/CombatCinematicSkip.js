@@ -1,5 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 import { t } from '../engine/i18n.js';
 import { on, offAll } from '../engine/EventBus.js';
 

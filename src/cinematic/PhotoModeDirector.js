@@ -1,4 +1,4 @@
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /** 拍照模式 — 隐藏 HUD 截屏（退出键名在每次显示时现问生效表） */

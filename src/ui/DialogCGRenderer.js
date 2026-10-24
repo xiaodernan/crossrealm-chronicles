@@ -1,5 +1,5 @@
 import { REST_DIALOGUE_CG } from '../content/dialogueCgPresets.js';
-import { keyText, keyStamp } from '../content/keyHints.js';
+import { keyText, keyStamp } from './keyHints.js';
 import { POP_CG_PAINTERS } from './DialogCGRendererPopCulture.js';
 import { t, getLanguage } from '../engine/i18n.js';
 

@@ -1,5 +1,5 @@
 import { codeFor } from '../content/keybinds.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /** 营火快速旅行 — Chapter 2 解锁，休息界面或 `fastTravel` 键（`content/keybinds.js`） */

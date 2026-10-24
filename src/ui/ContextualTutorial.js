@@ -1,5 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from './keyHints.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { isDungeonBossId } from '../content/bossRoster.js';
 import { t } from '../engine/i18n.js';

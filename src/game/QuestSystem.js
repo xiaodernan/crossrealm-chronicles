@@ -1,4 +1,4 @@
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 import { dungeonDefOf, TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,

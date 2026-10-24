@@ -1,4 +1,4 @@
-import { refreshKeyText, keyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /** [J] 营火记忆 Tab */

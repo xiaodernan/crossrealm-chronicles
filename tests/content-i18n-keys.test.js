@@ -43,7 +43,7 @@ import { ZONE_NAMES } from '../src/content/ZoneIdentity.js';
 import { JOURNAL_CATEGORIES } from '../src/game/StoryJournal.js';
 import { JOURNAL_EXTRA_TABS } from '../src/ui/JournalTabRegistry.js';
 import { BOSS_CINEMATICS } from '../src/cinematic/CinematicManager.js';
-import { KEY_LABELS, MOUSE_LABELS, PAD_BUTTON_LABELS } from '../src/content/keyLabels.js';
+import { KEY_LABELS, MOUSE_LABELS, PAD_BUTTON_LABELS } from '../src/ui/keyLabels.js';
 import { UI_HOTKEY_LABELS } from '../src/content/hotkeys.js';
 import { KEY_ACTION_LABELS, PAD_ONLY_ACTION_LABELS } from '../src/content/keybinds.js';
 

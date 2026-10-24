@@ -1,7 +1,7 @@
 import { CHAPTER_INTROS, ZONE_STORY_HOOKS, KEYWARDEN_CLEARED } from './LoreFragments.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { t } from '../engine/i18n.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 

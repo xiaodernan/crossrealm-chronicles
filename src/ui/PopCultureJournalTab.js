@@ -1,5 +1,5 @@
 import { FRANCHISE_LABELS, franchiseLabel } from '../content/franchises.js';
-import { keyText, refreshKeyText } from '../content/keyHints.js';
+import { keyText, refreshKeyText } from './keyHints.js';
 import { t, getLanguage } from '../engine/i18n.js';
 
 /** [J] 次元回声 Tab — HP / 星际 / 怪奇等致敬图鉴 */

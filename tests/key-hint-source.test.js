@@ -14,8 +14,8 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { KEY_ACTIONS, KEY_BINDINGS } from '../src/content/keybinds.js';
 import { UI_ACTIONS, UI_HOTKEYS } from '../src/content/hotkeys.js';
-import { keyLabel, mouseLabel } from '../src/content/keyLabels.js';
-import { keyText } from '../src/content/keyHints.js';
+import { keyLabel, mouseLabel } from '../src/ui/keyLabels.js';
+import { keyText } from '../src/ui/keyHints.js';
 import { STRINGS_ZH } from '../src/content/strings.zh.js';
 import { STRINGS_EN } from '../src/content/strings.en.js';
 // 内容表本体（W-B2 切片4 起，它们的成段文案里带 `{动作}` 占位）
@@ -61,7 +61,7 @@ describe('`{动作}` 占位必须是登记过的动作', () => {
   it('整仓扫一遍：没有一处占位写的是不存在的动作', () => {
     const offenders = [];
     for (const { name, source } of FILES) {
-      if (name === 'content/keyHints.js') continue; // 这里写的是文档示例
+      if (name === 'ui/keyHints.js') continue; // 这里写的是文档示例
       for (const re of DECL) {
         for (const m of source.matchAll(re)) {
           const decl = m[1];
@@ -145,7 +145,7 @@ describe('`keyText` 只吃静态字面量', () => {
 describe('声明了占位的界面必须有人刷它', () => {
   it('用了 `data-keys` / `data-ktext` 的文件也调用了 `refreshKeyText(...)`', () => {
     const offenders = FILES
-      .filter(({ name, source }) => name !== 'content/keyHints.js'
+      .filter(({ name, source }) => name !== 'ui/keyHints.js'
         && /data-(keys|ktext)=/.test(source)
         && !/refreshKeyText\(/.test(source))
       .map(({ name }) => name);
@@ -202,7 +202,7 @@ describe('迁移点点名：这些界面的键名是问出来的，不是抄的'
     'game/FastTravelSystem.js': ["keyText(t('fast_travel_toast_unlocked'))"],
     // W-D2 切片34：模板搬进双表，于是出口从 keyText('中文模板') 变成 keyText(t(键))
     'cinematic/CombatCinematicSkip.js': ["keyText(t('cine_skip_hint'))"],
-    'ui/SettingsPanel.js': ["from '../content/keyLabels.js'"],
+    'ui/SettingsPanel.js': ["from './keyLabels.js'"],
     // W-B2 切片4：成段的内容文案也走同一条链 —— 但**每一个显示出口**都要过，
     // 漏一处就是把字面的 `{parry}` 摆到玩家面前（说明书有正文与章节清单两处）
     'ui/HelpManual.js': ['keyText(t(sec.body))', 'keyText(t(s.title))', 'refreshKeyHints()'],
@@ -437,7 +437,7 @@ describe('还写死键名的地方：逐文件记账，只许变小', () => {
     const grew = FILES
       .map((f) => ({ name: f.name, n: proseCount(f) }))
       .filter(({ name, n }) => n > (LEDGER[name] ?? 0) && name !== 'content/keybinds.js'
-        && name !== 'content/hotkeys.js' && name !== 'content/keyLabels.js' && name !== 'content/keyHints.js')
+        && name !== 'content/hotkeys.js' && name !== 'ui/keyLabels.js' && name !== 'ui/keyHints.js')
       .map(({ name, n }) => `${name}: ${n} > ${LEDGER[name] ?? 0}`);
     expect(grew).toEqual([]);
   });
@@ -466,7 +466,7 @@ describe('还写死键名的地方：逐文件记账，只许变小', () => {
  */
 describe('界面上说出的键名只能从两张表来（字样尺子）', () => {
   const SKIP = new Set([
-    'content/keybinds.js', 'content/hotkeys.js', 'content/keyLabels.js', 'content/keyHints.js',
+    'content/keybinds.js', 'content/hotkeys.js', 'ui/keyLabels.js', 'ui/keyHints.js',
   ]);
   /** 反引号在热键表里确实是一格，但它同时是 JS 模板串的边界字符：拿它当字样会在每个模板字面量上误报 */
   const NOT_AS_LABEL = new Set(['`']);

@@ -77,7 +77,7 @@ import { CELL, WALL_H, WALL_T } from './dungeonDimensions.js';
 // 墙段口径（W-B11 切片3）：与副本的几何层共用这一份 —— 洞开在哪只有一处答案
 import { 房间墙面表, 建一面墙 } from './dungeonWalls.js';
 import { codeFor } from '../content/keybinds.js';
-import { keyLabel } from '../content/keyLabels.js';
+import { keyLabel } from '../ui/keyLabels.js';
 
 /** 编辑器里那间房的方块高度（米）。这是**视图**用的数，不是房间的尺寸事实 */
 const ROOM_BOX_H = 2;

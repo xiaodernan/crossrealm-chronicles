@@ -34,7 +34,7 @@ import { DUNGEON_DEFS } from '../src/content/dungeons.js';
 import { BOSS_LORE } from '../src/game/LoreFragments.js';
 import { emit } from '../src/engine/EventBus.js';
 import { makeManager, makeScene, installWindowShim } from './helpers/enemyHarness.js';
-import { keyText } from '../src/content/keyHints.js';
+import { keyText } from '../src/ui/keyHints.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { setLanguage, t } from '../src/engine/i18n.js';

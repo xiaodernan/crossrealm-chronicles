@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { NPC_CHAPTER_LINES } from '../game/LoreFragments.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 import { t } from '../engine/i18n.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 

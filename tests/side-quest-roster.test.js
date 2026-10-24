@@ -19,7 +19,7 @@ import { t } from '../src/engine/i18n.js';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP, SIDE_QUESTS_ALL, franchiseZone } from '../src/content/sideQuests.js';
-import { keyText } from '../src/content/keyHints.js';
+import { keyText } from '../src/ui/keyHints.js';
 import { ECHOES } from '../src/content/echoes.js';
 import { ZONE_IDS, ZONE_ORDER } from '../src/content/ZoneIdentity.js';
 import { SideQuestSystem } from '../src/game/SideQuestSystem.js';

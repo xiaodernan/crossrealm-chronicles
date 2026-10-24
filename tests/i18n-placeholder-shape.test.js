@@ -8,7 +8,7 @@
  * | 形状 | 谁展开 | 不认识它时 |
  * |---|---|---|
  * | `${name}` | `t(key, params)`（`engine/i18n.js` 的 `interpolate`） | 静默替换成空串 |
- * | `{name}` | `keyText(text)`（`content/keyHints.js`） | **当场抛**（"不是任何已登记的动作"） |
+ * | `{name}` | `keyText(text)`（`ui/keyHints.js`） | **当场抛**（"不是任何已登记的动作"） |
  *
  * ⇒ 于是把插值写成 `{name}` 的后果是：**玩家看到字面的 `{visited}`**，
  * 而**全套测试一路绿灯**（键在两表里、占位符两语一致、门禁都过）。

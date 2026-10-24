@@ -1,4 +1,4 @@
-import { refreshKeyText, keyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from '../ui/keyHints.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';

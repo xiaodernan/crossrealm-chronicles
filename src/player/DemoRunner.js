@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { refreshKeyText, keyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from '../ui/keyHints.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { t } from '../engine/i18n.js';
 

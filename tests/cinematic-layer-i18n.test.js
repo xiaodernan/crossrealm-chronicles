@@ -41,7 +41,7 @@ import { PhotoModeDirector } from '../src/cinematic/PhotoModeDirector.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { setLanguage } from '../src/engine/i18n.js';
-import { keyHint } from '../src/content/keyHints.js';
+import { keyHint } from '../src/ui/keyHints.js';
 import { scheduler } from '../src/engine/Scheduler.js';
 import { offAll } from '../src/engine/EventBus.js';
 

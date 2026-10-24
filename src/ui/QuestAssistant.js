@@ -1,5 +1,5 @@
 import { scheduler } from '../engine/Scheduler.js';
-import { refreshKeyText, keyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from './keyHints.js';
 import { applyTranslations, t } from '../engine/i18n.js';
 import { BOSS_STAT_KEYS, objectiveDesc } from '../content/objectives.js';
 import { bossById } from '../content/bossRoster.js';

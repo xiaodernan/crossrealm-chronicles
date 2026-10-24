@@ -30,7 +30,7 @@ import { DemoRunner } from '../src/player/DemoRunner.js';
 import { PlayerAutoPlay } from '../src/player/PlayerAutoPlay.js';
 import { setLanguage } from '../src/engine/i18n.js';
 import { emit, offAll } from '../src/engine/EventBus.js';
-import { keyText, keyHint } from '../src/content/keyHints.js';
+import { keyText, keyHint } from '../src/ui/keyHints.js';
 import { STRINGS_ZH } from '../src/content/strings.zh.js';
 import { STRINGS_EN } from '../src/content/strings.en.js';
 import { makeMarkupDom } from './helpers/fakeMarkupDom.js';

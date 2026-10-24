@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { MOVES, LOCKED_CONE } from './MoveTable.js';
 import { hitDirection, hitKindOf, hitSuffix, isBehind, isGuarded, resolveHit } from './Resolution.js';
 import { createHurtbox, pickPart } from './Hurtbox.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from '../ui/keyHints.js';
 import { COMBO, GUARD, HIT, INPUT, PLAYER_DEFENSE, PLAYER_KNOCK, PLAYER_MOVES, STAMINA_REGEN, AIM_ASSIST } from '../content/tuning.js';
 import { addShake } from '../engine/Shake.js';
 import { Observable } from '../engine/Observable.js';

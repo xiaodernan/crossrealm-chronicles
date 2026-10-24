@@ -1,6 +1,6 @@
 import { SKILL_BRANCHES, nodesOf, skillById, skillBranchText } from '../content/skillTrees.js';
 import { bossNameKeyOf } from '../content/bossRoster.js';
-import { refreshKeyText, keyText } from '../content/keyHints.js';
+import { refreshKeyText, keyText } from './keyHints.js';
 import { getLanguage, t } from '../engine/i18n.js';
 
 /**

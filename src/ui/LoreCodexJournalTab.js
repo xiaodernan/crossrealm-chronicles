@@ -1,5 +1,5 @@
 import { CODEX_ZONE_LABELS } from '../game/LoreCodexRegistry.js';
-import { keyText, refreshKeyText } from '../content/keyHints.js';
+import { keyText, refreshKeyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /** [J] 秘典 Tab */

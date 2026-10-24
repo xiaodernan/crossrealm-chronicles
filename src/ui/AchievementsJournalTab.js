@@ -1,5 +1,5 @@
 import { ACHIEVEMENTS } from '../game/AchievementSystem.js';
-import { keyText, refreshKeyText } from '../content/keyHints.js';
+import { keyText, refreshKeyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /** [J] 成就墙 Tab */

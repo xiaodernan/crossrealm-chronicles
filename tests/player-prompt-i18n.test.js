@@ -30,7 +30,7 @@ import { PlayerController } from '../src/player/PlayerController.js';
 import { STRINGS_ZH } from '../src/content/strings.zh.js';
 import { STRINGS_EN } from '../src/content/strings.en.js';
 import { setLanguage, t } from '../src/engine/i18n.js';
-import { keyText } from '../src/content/keyHints.js';
+import { keyText } from '../src/ui/keyHints.js';
 
 const SRC = 'src/player/PlayerController.js';
 const 源码 = readFileSync(join(process.cwd(), SRC), 'utf8');

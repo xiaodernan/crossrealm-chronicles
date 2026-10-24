@@ -1,4 +1,4 @@
-import { keyText, refreshKeyText } from '../content/keyHints.js';
+import { keyText, refreshKeyText } from '../ui/keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /** 自动通关 — 操控玩家角色跑图，Boss 步骤会强制现身后再推进任务 */

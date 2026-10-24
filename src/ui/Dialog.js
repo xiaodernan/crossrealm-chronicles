@@ -1,6 +1,6 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { focusFirstItem } from './FocusNav.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from './keyHints.js';
 
 /** toast 计时分组：toast 是最频繁的 UI 反馈，统一走主循环 dt（B39） */
 const TOAST_TAG = 'dialog-toast';

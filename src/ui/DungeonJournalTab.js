@@ -1,5 +1,5 @@
 /** [J] 地下城 Tab — 通关记录 */
-import { keyText } from '../content/keyHints.js';
+import { keyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
 export class DungeonJournalTab {

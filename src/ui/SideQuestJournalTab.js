@@ -1,6 +1,6 @@
 import { SIDE_QUESTS_ALL } from '../content/sideQuests.js';
 import { ZONE_NAMES } from '../content/ZoneIdentity.js';
-import { keyText, refreshKeyText } from '../content/keyHints.js';
+import { keyText, refreshKeyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /**

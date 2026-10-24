@@ -140,7 +140,7 @@ import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
   factoryGamepadBindings, padOutletsFor, setKeybindTable,
 } from '../content/keybinds.js';
-import { setHintPadOutlets } from '../content/keyHints.js';
+import { setHintPadOutlets } from '../ui/keyHints.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
 import { InputDevice } from '../engine/InputDevice.js';
 import { topNavLayer } from '../ui/OverlayStack.js';

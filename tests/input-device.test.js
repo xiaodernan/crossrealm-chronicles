@@ -168,7 +168,8 @@ describe('接线：注记只挂在既有监听器上，文案只问模块', () =
     expect(hud).toMatch(/this\.updateInputDevice\(\);/);
     expect(hud).toMatch(/const kind = this\.game\.inputDevice\?\.current\(\) \?\? null;/);
     expect(hud).toMatch(/if \(kind === this\._inputDeviceShown\) return;/);
-    expect(hud).toMatch(/inputDeviceLabel\(kind\)/);
+    // 渲染拆进了 `_renderInputDevice()`（切片36）：问的还是同一个标签函数，参数是状态快照
+    expect(hud).toMatch(/inputDeviceLabel\(this\._inputDeviceShown\)/);
     // 中文字样只住在模块里：HUD 再抄一份，改天两边就各说各话（B47 那一族）
     expect(hud).not.toMatch(/['"]键盘['"]|['"]鼠标['"]|['"]手柄['"]/);
   });
@@ -185,6 +186,6 @@ describe('接线：注记只挂在既有监听器上，文案只问模块', () =
     expect(game, 'Game 重新订阅了这本账').not.toMatch(/inputDevice\.onChange/);
     expect(game, '设备变化只许在 HUD 那一处喂给出口').not.toMatch(/setHintDevice\(/);
     // 提示出口自己不许去读 `navigator.getGamepads()`：读手柄只有桥那一处（切片1 的立片理由）
-    expect(read('content/keyHints.js')).not.toMatch(/getGamepads/);
+    expect(read('ui/keyHints.js')).not.toMatch(/getGamepads/);
   });
 });

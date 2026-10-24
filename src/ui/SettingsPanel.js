@@ -3,7 +3,7 @@ import {
   GAMEPAD_BINDINGS, KEY_BINDINGS, KEY_ACTION_LABELS, PAD_ONLY_ACTION_LABELS, UI_GAMEPAD_BINDINGS,
   buildBindingTables, padButtonOwner, padCellButtonName, padOnlyPadActions, padScopeOf,
 } from '../content/keybinds.js';
-import { keyLabel, mouseLabel, padButtonLabel, padStickLabel } from '../content/keyLabels.js';
+import { keyLabel, mouseLabel, padButtonLabel, padStickLabel } from './keyLabels.js';
 import { PAD_TUNING, padTuning } from '../content/keybinds.js';
 import { SHADOW_QUALITY_SIZES, normalizeShadowQuality } from '../engine/shadowPolicy.js';
 import { MSAA_SAMPLES, normalizeMsaaSamples } from '../engine/aaPolicy.js';

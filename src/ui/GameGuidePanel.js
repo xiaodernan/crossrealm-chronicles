@@ -1,5 +1,5 @@
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
-import { keyText } from '../content/keyHints.js';
+import { keyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
 /** 常驻游戏指引 — 告诉玩家现在该干什么 */

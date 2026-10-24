@@ -34,7 +34,7 @@ import {
 import { CG_PAINTERS, CG_DEFAULT_ACCENT, DialogCGRenderer } from '../src/ui/DialogCGRenderer.js';
 import { POP_CG_PAINTERS } from '../src/ui/DialogCGRendererPopCulture.js';
 import { CG_GALLERY_CATALOG } from '../src/game/CgGalleryRegistry.js';
-import { keyText } from '../src/content/keyHints.js';
+import { keyText } from '../src/ui/keyHints.js';
 import { t, setLanguage } from '../src/engine/i18n.js';
 import { CgJournalTab } from '../src/ui/CgJournalTab.js';
 import { Dialog } from '../src/ui/Dialog.js';

@@ -19,7 +19,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { makeMarkupDom, node } from './helpers/fakeMarkupDom.js';
-import { refreshKeyText, hintDevice } from '../src/content/keyHints.js';
+import { refreshKeyText, hintDevice } from '../src/ui/keyHints.js';
 import { offAll, listenerCount } from '../src/engine/EventBus.js';
 import { HUD } from '../src/ui/HUD.js';
 

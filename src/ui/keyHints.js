@@ -11,8 +11,8 @@
  * 两张表都不认识的动作 → 直接抛。这不是防御，是门禁：占位写错字（`{pray}`）
  * 会在渲染那一刻红，而不是让玩家看到一句"按 {pray} 弹反"。
  */
-import { bindingFor, keybindEpoch, padCellSource } from './keybinds.js';
-import { hotkeyCodeFor, hotkeyEpoch } from './hotkeys.js';
+import { bindingFor, keybindEpoch, padCellSource } from '../content/keybinds.js';
+import { hotkeyCodeFor, hotkeyEpoch } from '../content/hotkeys.js';
 import { keyLabel, mouseLabel, padSourceLabel } from './keyLabels.js';
 
 /**

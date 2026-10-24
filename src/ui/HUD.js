@@ -5,7 +5,7 @@ import { JOURNAL_CATEGORIES, DISCOVERABLE_TOTAL } from '../game/StoryJournal.js'
 import { mergeJournalCategories } from './JournalTabRegistry.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { on, offAll } from '../engine/EventBus.js';
-import { refreshKeyText, setHintDevice, keyText } from '../content/keyHints.js';
+import { refreshKeyText, setHintDevice, keyText } from './keyHints.js';
 import { focusFirstItem, parkFocus, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 import { inputDeviceLabel } from '../engine/InputDevice.js';
 import { t } from '../engine/i18n.js';
