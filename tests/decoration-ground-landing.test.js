@@ -17,10 +17,10 @@
  *
  * 1. **钉子是钉子**：同种子逐位相同、异种子不同。不钉，下面三条读的就是运气
  *    （树的散布、断柱的长宽高都是未播种的 `Math.random()`，与 B125 同口径）。
- * 2. **没有任何一件装饰整个埋在自己脚下的地面以下** —— 按**身份**豁免泉池，且豁免自带
- *    够得着的证据：它现在确实还埋着，读数写进断言。hub 广场 30 m 盘内起伏实测 20.11 m，
- *    一圈直径 6 米的扁平环带怎么坐都有一边埋着；那笔账在 #178C（广场整平），整平那天
- *    这一条会红着提醒删行。
+ * 2. **没有任何一件装饰整个埋在自己脚下的地面以下** —— 一条豁免都不留。曾经豁免过泉池：
+ *    枢纽广场整平（`HUB_PLAZA`，见 `TerrainHeight`）之前那一圈必然埋着，豁免条目自带
+ *    "现在确实还埋着、且只埋到登记的深度"的证据；广场落地的**当一轮**这条就红着提醒删行
+ *    （实测露出 +0.27 m），删行是本切片的收尾，不是把判据放宽。
  * 3. **替身坡地**（不读真地形，钉的是机制本身）：枢纽四族每件相对**自己脚下地面**的高差
  *    全等，且整族绝对高度不再一模一样 —— 整圈共用一次采样的旧写法同时违反这两半。
  *    线性坡 `gy=0.3x+0.2z` 钉"各问各的"（五点中点在纯线性坡上恰好等于中心值）；
@@ -28,10 +28,19 @@
  *    摆件的 x 漂出**米**级散差，而中点写法给出与位置无关的常数。
  * 4. **门拱的每根柱脚都埋进自己那块地**：替身斜坡与钉死真世界各一把（悬空 0.6 m 的柱脚
  *    是玩家看得见的美术事故，而它不体现在"整件埋没"里，所以第 2 条盖不住它）。
+ *
+ * ## 变异臂（装饰侧那两把，与 `terrain-height` 那批同一次跑）
+ *
+ * | 臂 | 刀 | 预测红 | 实测 | 归因 |
+ * | --- | --- | --- | --- | --- |
+ * | 臂6 | `_padGround` 中点 → **最低点** | 凸坡那条 | 1 红，无漏 | 线性坡那条**故意不红**：同族件尺寸一样，退回最低点只是整族一起沉，族内散差仍是 0 —— 它的活是"各问各的 + 不许整圈共用一次采样" |
+ * | 臂9 | `_padGround` 中点 → **最高点** | 凸坡那条 | 1 红，无漏 | 反方向同样红 ⇒ 凸坡那条钉的是"中点"而不是"某一个固定偏移" |
+ * | 臂1 | 摘掉广场混合项（地形侧） | 埋没清单 + 家具站在台面 | 2 红，无漏 | 切片A 删掉那行豁免之后，这两条就是"台面塌了"的第一现场 |
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as THREE from 'three';
 import { CollisionWorld } from '../src/engine/Collision.js';
+import { HUB_PLAZA } from '../src/world/TerrainHeight.js';
 import { buildSeededWorld, buildSeededDecorations } from './helpers/seededWorld.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
@@ -43,14 +52,12 @@ const 世界种子 = 7;
 const 摆件种子 = 8;
 
 /**
- * 第 2 条的身份豁免：仍埋着的件，等 #178C 广场整平后删行。
- * `埋到_` 是这条债务**当前的深度下限**（钉死布局实测泉池顶面 −1.47 m）：
- * 再深过它就不是"广场起伏"，而是落脚点又退回了整圈共用一次采样。
+ * 第 3 条要逐族验的枢纽四族（按 `.name` 认领，不按位置序号）；
+ * 泉池也在名单里 —— 它曾经有一行"广场没整平所以必然埋着"的豁免，`HUB_PLAZA` 落地后删掉了，
+ * 但族名认领不能跟着一起消失（`.name` 断了这里当场红）。
  */
-const 整平债务 = [{ 名: 'hubFountain', 埋到: -2 }];
-
-/** 第 3 条要逐族验的枢纽四族（按 `.name` 认领，不按位置序号） */
 const 枢纽四族 = ['hubBanner', 'hubStallBase', 'hubStallAwning', 'hubBench'];
+const 认族名单 = 枢纽四族.concat(['hubFountain', 'zoneGate']);
 
 let world = null;
 let deco = null;
@@ -167,7 +174,7 @@ describe('① 钉子是钉子：装饰层的布局由种子说了算', () => {
     const 件们 = 摊开(d);
     const 名字们 = new Set(件们.map((件) => 件.名));
     expect(件们.length, '装饰实例总数下穿').toBeGreaterThanOrEqual(800);
-    for (const 族 of 枢纽四族.concat(整平债务.map((债务) => 债务.名), 'zoneGate')) {
+    for (const 族 of 认族名单) {
       expect([...名字们], `一族也没扫到 ⇒ 认领身份的 .name 断了`).toContain(族);
     }
     const 有名字的 = 件们.filter((件) => !件.名.startsWith('未名')).length;
@@ -176,30 +183,40 @@ describe('① 钉子是钉子：装饰层的布局由种子说了算', () => {
 });
 
 describe('② 真世界（钉死布局）：没有任何一件装饰整个埋在自己脚下', () => {
-  it('埋没清单为空（豁免项另有条目自证）', () => {
+  it('埋没清单为空（一条豁免都不留）', () => {
     const { world: w, deco: d } = 准备();
     const 埋没 = 摊开(d)
       .map((件) => ({ 件, 露出: 顶出地面(w, 件) }))
       .filter((r) => r.露出 < 0)
       .sort((a, b) => a.露出 - b.露出);
-    const 豁免名 = new Set(整平债务.map((债务) => 债务.名));
-    const 意外 = 埋没.filter((r) => !豁免名.has(r.件.名));
     const 点名 = 埋没
       .slice(0, 8)
       .map((r) => `  ${r.件.名} 顶面低于地面 ${r.露出.toFixed(2)} m @(${((r.件.盒.min.x + r.件.盒.max.x) / 2).toFixed(1)},${((r.件.盒.min.z + r.件.盒.max.z) / 2).toFixed(1)})`)
       .join('\n');
-    expect(意外, `这些摆件整个埋在地底下（玩家看不见，也撞不上）：\n${点名 || '  （无）'}`).toEqual([]);
+    expect(埋没, `这些摆件整个埋在地底下（玩家看不见，也撞不上）：\n${点名 || '  （无）'}`).toEqual([]);
   });
 
-  it('豁免自带证据：债务项确实还埋着、且只埋到登记的深度（#178C 广场整平后请删这一行）', () => {
+  /**
+   * 广场落地后的正面判据（它顶掉的是原来那行"泉池必然埋着"的豁免）：
+   * 枢纽这几族**脚下那块地**必须是同一个数，且那个数就是 `HUB_PLAZA.level`。
+   * 选件按**族名**（结构账），不按"落在水位上"这一条被审的读数 —— 否则台面塌了、
+   * 空集合还能绿灯。高差用 1e-9：台面上任意两点采样本来就该逐位相同（`max` 之后的
+   * 混合项在盘内权重恒 1），冒出毫秒级散差说明有第二处地形写法在掺和。
+   */
+  it('枢纽家具全站在广场台面上，且台面就是 `HUB_PLAZA.level`', () => {
     const { world: w, deco: d } = 准备();
-    const 件们 = 摊开(d);
-    for (const 债务 of 整平债务) {
-      const 这一族 = 件们.filter((件) => 件.名 === 债务.名);
-      expect(这一族.length, `债务项 ${债务.名} 已经不在装饰层里了 ⇒ 这行豁免该删`).toBeGreaterThan(0);
-      const 露出最多 = Math.max(...这一族.map((件) => 顶出地面(w, 件)));
-      expect(露出最多, `债务项 ${债务.名} 的顶面已露出地面 ${露出最多.toFixed(2)} m ⇒ 广场已整平，删掉这行豁免`).toBeLessThan(0);
-      expect(露出最多, `债务项 ${债务.名} 埋得比登记的 ${债务.埋到} m 还深（顶面 ${露出最多.toFixed(2)} m）⇒ 落脚点不再是按整圈起伏取中点`).toBeGreaterThanOrEqual(债务.埋到);
+    const 件们 = 摊开(d).filter((件) => 枢纽四族.includes(件.名) || 件.名 === 'hubFountain');
+    expect(件们.length, '枢纽家具一族也没扫到 ⇒ 这一条在读空集合').toBeGreaterThan(20);
+    const 地面们 = 件们.map((件) => 当地地面(w, 件));
+    const lo = Math.min(...地面们);
+    const hi = Math.max(...地面们);
+    expect(hi - lo, `这几族脚下的地面高差 ${(hi - lo).toFixed(6)} m ⇒ 台面被揉皱了`).toBeLessThan(1e-9);
+    expect(
+      lo,
+      `台面读数 ${lo.toFixed(4)} 与生产侧水位 ${HUB_PLAZA.level.toFixed(4)} 不是同一个数 ⇒ 家具没跟着广场走`
+    ).toBeCloseTo(HUB_PLAZA.level, 6);
+    for (const 件 of 件们) {
+      expect(顶出地面(w, 件), `${件.名} 的顶面低于台面 ⇒ 埋没判据在这一族上是靠豁免过的`).toBeGreaterThanOrEqual(0);
     }
   });
 });

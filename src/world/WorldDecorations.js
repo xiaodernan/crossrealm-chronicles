@@ -2,6 +2,8 @@ import * as THREE from 'three';
 
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { paletteOf } from '../content/materialPalette.js';
+import { ENEMY_SPAWNS } from '../content/enemySpawns.js';
+import { HUB_PLAZA } from './TerrainHeight.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { releaseSubtree } from '../engine/releaseSubtree.js';
@@ -133,7 +135,8 @@ export class WorldDecorations {
    *
    * 为什么取中点：这些摆件是**平的方块**，坡地上不可能四面都贴地。压到最高点就留缝，
    * 压到最低点就埋边 —— 取中点把两边的误差都封在"当地起伏的一半"以内。
-   * 真要贴死，得把 hub 那块广场整平（30 m 盘内起伏实测 20.11 m），那是另一片。
+   * 枢纽那一圈如今另有广场台面（`HUB_PLAZA`，见 `TerrainHeight`）把起伏抹平：这几族的
+   * 五个采样点都落在同一张台面上，中点就是水位；坡地上其余的件仍靠中点折缝。
    * 判据与读数在 `tests/decoration-ground-landing.test.js`。
    */
   _padGround(x, z, r) {
@@ -148,6 +151,25 @@ export class WorldDecorations {
   }
 
   /**
+   * 摆装饰必须让开的格子：交互点（POI / 营火 / 门，`world.pointsOfInterest`）**加敌人出生点**。
+   *
+   * 出生点不在 `pointsOfInterest` 里，但它同样得站得下一个玩家。这两本账原本只有一本被读，
+   * 于是枢纽那圈长椅把训练木桩 @(15,45) 那格挤走了 0.54 m —— 而且这笔账是广场整平
+   * （`HUB_PLAZA`）才露出来的：以前木桩站在比长椅低十米的沟里，纵向差遮住了横向重叠，
+   * 台面把两者拉到同一层，人才第一次真的被椅子顶住。判据在
+   * `tests/decoration-collider-coverage.test.js` 第⑤条（差分量：只罚装饰**新**吃掉的点）。
+   */
+  _避让点们() {
+    if (!this._避让缓存) {
+      this._避让缓存 = [
+        ...(this.world.pointsOfInterest ?? []),
+        ...ENEMY_SPAWNS,
+      ];
+    }
+    return this._避让缓存;
+  }
+
+  /**
    * 把落点从交互点上让开：世界先建、这一层后摆，所以摆的时候 `pointsOfInterest` 已经知道了。
    *
    * 只改坐标、**不吃随机数** —— 往散布里插一次 `Math.random()` 会把后面每一族的布局都摇走，
@@ -155,7 +177,7 @@ export class WorldDecorations {
    * B 的格子上，一趟不够。半径由调用方给**这一族可能的最大值**（尺寸是稍后才摇出来的，不能等它）。
    */
   _clearOfInteractions(x, z, 半径) {
-    const 点们 = this.world.pointsOfInterest ?? [];
+    const 点们 = this._避让点们();
     const 让位 = 半径 + INTERACTION_CLEAR;
     let 出 = { x, z };
     for (let 轮 = 0; 轮 < 4; 轮++) {
@@ -455,11 +477,11 @@ export class WorldDecorations {
       const a = (i / 8) * Math.PI * 2;
       // 高度问**这一面幡站的那一点**：整圈共用一次 (0,55) 的采样把八面幡埋进山里
       // （实测 hub 中心 4.74 m，半径 14 m 处 12.28–15.86 m ⇒ 幡顶低于当地地面 3.3~13.6 m）
-      const x = Math.cos(a) * 14;
-      const z = 55 + Math.sin(a) * 14;
+      const x = HUB_PLAZA.x + Math.cos(a) * 14;
+      const z = HUB_PLAZA.z + Math.sin(a) * 14;
       const y = this.world.getGroundHeight(x, z) + 3;
       _dummy.position.set(x, y, z);
-      _dummy.lookAt(0, y, 55);
+      _dummy.lookAt(HUB_PLAZA.x, y, HUB_PLAZA.z);
       _dummy.scale.set(1, 1, 1);
       _dummy.updateMatrix();
       banners.setMatrixAt(i, _dummy.matrix);
@@ -479,8 +501,10 @@ export class WorldDecorations {
       })
     );
     fountain.rotation.x = Math.PI / 2;
-    // 泉池那一圈半径 3 米，落脚点按整圈起伏取中点（`_padGround`）
-    fountain.position.set(0, this._padGround(0, 48, 3) + 0.15, 48);
+    // 泉池那一圈半径 3 米，落脚点按整圈起伏取中点（`_padGround`）；偏心 7 米读的是盘心
+    const 泉x = HUB_PLAZA.x;
+    const 泉z = HUB_PLAZA.z - 7;
+    fountain.position.set(泉x, this._padGround(泉x, 泉z, 3) + 0.15, 泉z);
     fountain.name = 'hubFountain';
     this.group.add(fountain);
   }
@@ -514,10 +538,19 @@ export class WorldDecorations {
       6
     );
     for (let i = 0; i < 6; i++) {
-      const a = (i / 6) * Math.PI * 2 + 0.3;
-      const r = 10 + (i % 2) * 2;
-      const x = Math.cos(a) * r;
-      const z = 55 + Math.sin(a) * r;
+      const 圈 = (i / 6) * Math.PI * 2 + 0.3;
+      const 圈径 = 10 + (i % 2) * 2;
+      // 这一圈以前直接按极坐标落位，从不问"这一格有没有人要用"。让位半径取**这一族**
+      // 的外接（尺寸是写死的，不用等摇）。
+      const 落 = this._clearOfInteractions(
+        HUB_PLAZA.x + Math.cos(圈) * 圈径,
+        HUB_PLAZA.z + Math.sin(圈) * 圈径,
+        摊外接
+      );
+      const x = 落.x;
+      const z = 落.z;
+      // 让位后重新对着广场中心转：停在原来那个从未落地的角度上，摊口会朝歪
+      const a = Math.atan2(z - HUB_PLAZA.z, x - HUB_PLAZA.x);
       // 底座 2.2×1.8 → 外接半径 `摊外接`；整圈共用一次 (0,55) 采样的旧写法把这些摊位移到
       // 坡下面去了（实测该圈地面 12.46–18.14 m，而 hub 中心只有 4.74 m ⇒ 顶面低于地面）
       const gy = this._padGround(x, z, 摊外接);
@@ -555,9 +588,17 @@ export class WorldDecorations {
     /** 长椅在 XZ 上的外接半径（1.8×0.6 → 0.949）：`_padGround` 与障碍同读这一个数 */
     const 椅外接 = Math.hypot(BENCH.w / 2, BENCH.d / 2);
     for (let i = 0; i < 10; i++) {
-      const a = (i / 10) * Math.PI * 2;
-      const x = Math.cos(a) * 18;
-      const z = 55 + Math.sin(a) * 18;
+      const 圈 = (i / 10) * Math.PI * 2;
+      // 长椅外接 0.949 + 余量 1.0 ≈ 1.95 m 的让位圈，正好压在 @(15,45) 那个出生点上：
+      // 广场整平后台面把椅子和玩家拉到同一层，椅子第一次真的能顶住人（判据⑤）。
+      const 落 = this._clearOfInteractions(
+        HUB_PLAZA.x + Math.cos(圈) * 18,
+        HUB_PLAZA.z + Math.sin(圈) * 18,
+        椅外接
+      );
+      const x = 落.x;
+      const z = 落.z;
+      const a = Math.atan2(z - HUB_PLAZA.z, x - HUB_PLAZA.x);
       const gy = this._padGround(x, z, 椅外接);
       const 心 = gy + 0.2;
       _dummy.position.set(x, 心, z);
