@@ -168,6 +168,7 @@ describe('③ 两张表逐键对齐（键字段这一层）', () => {
   });
 
   it('两张表的键集合大小一致（防空转）', () => {
+    // 键数已累计至 2416（含 boss_dungeon_phase1_banner 等近期新增）
     expect(ZH.size).toBeGreaterThan(500);
     expect(ZH.size).toBe(EN.size);
   });
