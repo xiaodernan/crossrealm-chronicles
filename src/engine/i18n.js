@@ -26,17 +26,23 @@ const TABLES = Object.freeze({ zh: STRINGS_ZH, en: STRINGS_EN });
  */
 const warnedMissingKeys = new Set();
 
-/** 语言名册（切片2）：面板的下拉选项从这里现推，加一门语言只改这一处 */
+/**
+ * 语言名册（切片2）：面板的下拉选项从这里现推，加一门语言只改这一处。
+ * `htmlLang`（切片59）：切到该语言时写进 `document.documentElement.lang` 的 BCP47 标签
+ * —— 读屏软件按它选发音引擎，浏览器翻译与字体选择也看它（index.html 里的静态初值
+ * 只是首屏默认，运行时以这里为准）。
+ */
 export const LANGUAGES = Object.freeze([
-  { code: 'zh', label: '中文' },
-  { code: 'en', label: 'English' },
+  { code: 'zh', label: '中文', htmlLang: 'zh-CN' },
+  { code: 'en', label: 'English', htmlLang: 'en' },
 ]);
 
 /** 当前语言：'zh' | 'en'，默认中文 */
 let currentLang = 'zh';
 
 /**
- * 设置当前语言
+ * 设置当前语言。顺带把 `document.documentElement.lang` 切到该语言的 BCP47 标签
+ * （切片59：读屏软件按它选发音；无 DOM 环境静默跳过）。
  * @param {'zh' | 'en'} lang - 语言代码
  */
 export function setLanguage(lang) {
@@ -44,6 +50,12 @@ export function setLanguage(lang) {
     throw new Error(`i18n: 未知语言 "${lang}"，可用语言：${Object.keys(TABLES).join(', ')}`);
   }
   currentLang = lang;
+  // 文档语言声明跟着切（切片59）：读屏软件按 <html lang> 选发音引擎。
+  // 无 DOM 的环境（纯逻辑测试 / 早期启动）静默跳过 —— 与 applyTranslations 同一口径。
+  const entry = LANGUAGES.find((l) => l.code === lang);
+  if (entry?.htmlLang && typeof document !== 'undefined' && document.documentElement) {
+    document.documentElement.lang = entry.htmlLang;
+  }
 }
 
 /**

@@ -6,12 +6,12 @@
  * 本文件是「新内容接入规范」（docs/I18N_GUIDE.md）的门禁化：规范里写的每条约定，
  * 这里都有一条腿盯着，且每条静态腿都带反向控制（假钉子必须被点名，防"永远全过"）。
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
-import { t, setLanguage } from '../src/engine/i18n.js';
+import { t, setLanguage, LANGUAGES } from '../src/engine/i18n.js';
 
 describe('键名规范（W-D2 切片56：小写 snake_case，命名族不漂移）', () => {
   const NAME_RE = /^[a-z][a-z0-9_]*$/;
@@ -103,6 +103,32 @@ describe('英文复数标记（W-D2 切片58：${param|单数|复数} 计数名�
     setLanguage('zh');
     expect(t('cg_view_count_fmt', { n: 1 })).toBe('观看 1 次');
     setLanguage('en');
+  });
+});
+
+describe('文档语言声明（W-D2 切片59：<html lang> 跟着语言切）', () => {
+  afterEach(() => {
+    delete globalThis.document;
+  });
+
+  it('setLanguage 把 document.documentElement.lang 切成该语言的 BCP47 标签', () => {
+    globalThis.document = { documentElement: {} };
+    setLanguage('zh');
+    expect(document.documentElement.lang).toBe('zh-CN');
+    setLanguage('en');
+    expect(document.documentElement.lang).toBe('en');
+  });
+
+  it('LANGUAGES 每条都带 htmlLang：加语言只改名册这一处', () => {
+    for (const l of LANGUAGES) {
+      expect(l.htmlLang, l.code + ' 缺 htmlLang').toMatch(/^[a-z]{2}(-[A-Z]{2})?$/);
+    }
+  });
+
+  it('反向控制：缺 htmlLang 的假名册必须被点名（防扫描永远返回空）', () => {
+    const 假名册 = [{ code: 'zh', htmlLang: 'zh-CN' }, { code: 'en' }];
+    const 缺的 = 假名册.filter((l) => !/^[a-z]{2}(-[A-Z]{2})?$/.test(l.htmlLang ?? ''));
+    expect(缺的.map((l) => l.code)).toEqual(['en']);
   });
 });
 
