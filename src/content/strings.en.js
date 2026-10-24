@@ -187,6 +187,8 @@ export const STRINGS_EN = Object.freeze({
   upgrade_success: 'Upgraded: ${stat} — +1 skill point',
   upgrade_not_enough_souls: 'Not enough plane soulfire',
   chest_souls_gained: 'Chest: ${n} plane soulfire gained',
+  chest_item_gained: 'Chest: ${item} found',
+  item_void_resonance_shard: 'Void Resonance Shard',
   soul_wisp_absorb: 'Absorbed a plane echo +${n} soulfire',
   soul_wisp_title: 'Plane Echo',
   soul_wisp_desc: 'A memory fragment drifting in the seams between planes; it tracks whoever comes close.',

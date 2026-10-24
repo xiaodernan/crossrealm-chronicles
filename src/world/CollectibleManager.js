@@ -1,15 +1,16 @@
 import * as THREE from 'three';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { t } from '../engine/i18n.js';
+import { ITEM_NAMES } from '../content/items.js';
 
 const CHESTS = [
   { id: 'chest-hub', x: 25, z: 70, souls: 50 },
   { id: 'chest-fantasy', x: -170, z: 50, souls: 80 },
-  { id: 'chest-fantasy2', x: -240, z: -10, souls: 100 },
+  { id: 'chest-fantasy2', x: -240, z: -10, souls: 100, items: ['void-resonance-shard'] },
   { id: 'chest-magic', x: -40, z: -200, souls: 80 },
-  { id: 'chest-magic2', x: 50, z: -160, souls: 120 },
+  { id: 'chest-magic2', x: 50, z: -160, souls: 120, items: ['void-resonance-shard'] },
   { id: 'chest-space', x: 170, z: 50, souls: 80 },
-  { id: 'chest-space2', x: 210, z: 130, souls: 100 },
+  { id: 'chest-space2', x: 210, z: 130, souls: 100, items: ['void-resonance-shard'] },
   { id: 'chest-secret', x: -30, z: -30, souls: 200 },
 ];
 
@@ -80,6 +81,11 @@ export class CollectibleManager {
     this.stats.addSouls(chest.souls);
     chest.mesh.visible = false;
     this.dialog.toast(t('chest_souls_gained', { n: chest.souls }));
+    // W-D2 切片52：宝箱里的物品逐件入账（r-relic-hunter 的锁因读的就是 itemsCollected 那一格）
+    for (const item of chest.items ?? []) {
+      this.stats.onItemCollected(item);
+      this.dialog.toast(t('chest_item_gained', { item: t(ITEM_NAMES[item] ?? item) }), 3200);
+    }
     window.dispatchEvent(new CustomEvent('chest-opened', { detail: { id: chest.id } }));
   }
 

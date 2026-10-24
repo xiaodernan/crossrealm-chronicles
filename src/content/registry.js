@@ -42,6 +42,7 @@ import {
   REST_DIALOGUE_CG, REST_DIALOGUE_CG_BASE, REST_DIALOGUE_CG_EXTRA, REST_DIALOGUE_CG_POP,
 } from './dialogueCgPresets.js';
 import { ACHIEVEMENTS_EXTRA, ACHIEVEMENTS_POP_CULTURE } from './achievements.js';
+import { ITEM_NAMES } from './items.js';
 import { CG_GALLERY_BONUS_EXTRA } from './cgGallery.js';
 import { SIDE_QUESTS_BASE, SIDE_QUESTS_ZONE, SIDE_QUESTS_POP } from './sideQuests.js';
 import { HELP_SECTIONS_EXTRA } from './helpManual.js';
@@ -699,6 +700,15 @@ export const CONTENT_TABLES = [
       desc: { t: 'string' },
       // check 是运行时函数，不参与静态校验
     },
+  },
+  {
+    kind: 'itemNames',
+    note: '物品名册（W-D2 切片52）：物品 id → 那一个名字。生产者是宝箱层'
+      + '（CollectibleManager.open 逐件 onItemCollected 入账）；值是否两表登记由'
+      + ' content-i18n-keys 门禁的映射表清单核',
+    shape: 'index',
+    table: ITEM_NAMES,
+    value: { t: 'string' },
   },
   {
     kind: 'cgGalleryBonusExtra',

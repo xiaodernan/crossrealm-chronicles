@@ -21,6 +21,7 @@ import * as THREE from 'three';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { CollectibleManager } from '../src/world/CollectibleManager.js';
+import { ITEM_NAMES } from '../src/content/items.js';
 import { NPCManager } from '../src/world/NPCManager.js';
 
 const 读 = (rel) => readFileSync(join(process.cwd(), rel), 'utf8');
@@ -143,5 +144,19 @@ describe('③ 两处都在拆卸登记表里', () => {
     const { mgr: NPC } = 造NPC();
     expect(typeof 宝箱.dispose, '宝箱层没有 dispose()').toBe('function');
     expect(typeof NPC.dispose, 'NPC 层没有 dispose()').toBe('function');
+  });
+});
+
+describe('④ 箱子带的物品都在 ITEM_NAMES 名册里（W-D2 切片52 防漂移）', () => {
+  it('每座箱的 items 都是登记过的物品 id（名册外 id = 锁因悬空 + toast 显示裸 id）', () => {
+    const { mgr } = 造宝箱();
+    const 越界 = mgr.chests.flatMap((c) => (c.items ?? [])
+      .filter((i) => !Object.hasOwn(ITEM_NAMES, i))
+      .map((i) => c.id + ' -> ' + i));
+    expect(越界, '箱子带了名册外的物品').toEqual([]);
+    expect(
+      mgr.chests.some((c) => (c.items ?? []).includes('void-resonance-shard')),
+      '没有箱子带虚空共鸣碎片 —— r-relic-hunter 的死锁会复发',
+    ).toBe(true);
   });
 });

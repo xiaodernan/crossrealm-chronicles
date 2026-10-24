@@ -1,5 +1,5 @@
 /**
- * 元锁因账本接线（W-D2 切片48；切片49/50/51 各增补一条死锁接驳证明）。
+ * 元锁因账本接线（W-D2 切片48；切片49/50/51/52 各增补一条死锁接驳证明）。
  *
  * ## 这一片防的是什么
  *
@@ -22,8 +22,9 @@
  * ① 形状腿：emptyStats 有四桶、STAT_READINGS 收录它们；
  * ② 镜像腿：stats-changed 把四格照搬进账本（函数级 + QuestSystem 事件级）；
  * ③ 端到端腿：真 AchievementSystem 解锁 -> PlayerStats 桶 -> 账本；四条元分支各造
- *    一条"桶满放行 / 桶空拦截"的读数；另有三条接驳证明（champion-of-hub 五首领 /
- *    side-lost-scholar 六条笔记 / void-chronicle-read 秘典全解锁 -> 各自入账 -> 锁因放行）；
+ *    一条"桶满放行 / 桶空拦截"的读数；另有四条接驳证明（champion-of-hub 五首领 /
+ *    side-lost-scholar 六条笔记 / void-chronicle-read 秘典全解锁 / void-resonance-shard
+ *    三座宝箱 -> 各自入账 -> 锁因放行）；
  * ④ 静态钉腿：Game.js 反引与 unlock 入账两处焊点钉在源码里。
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -36,6 +37,8 @@ import { ACHIEVEMENTS, AchievementSystem } from '../src/game/AchievementSystem.j
 import { PlayerStats } from '../src/game/PlayerStats.js';
 import { LoreCodexSystem } from '../src/game/LoreCodexSystem.js';
 import { getStoryLockReason } from '../src/game/StoryWeaponSkills.js';
+import * as THREE from 'three';
+import { CollectibleManager } from '../src/world/CollectibleManager.js';
 import { setLanguage } from '../src/engine/i18n.js';
 
 installWindowShim();
@@ -176,6 +179,17 @@ describe('③ 端到端腿：成就解锁入账，四条元分支桶满放行、
   it('r-archivist：剧情旗标桶满了放行', () => {
     expect(getStoryLockReason(壳({}), 'r-archivist')).toMatch(/void-chronicle-read/);
     expect(getStoryLockReason(壳({ storyFlags: { 'void-chronicle-read': 1 } }), 'r-archivist')).toBeNull();
+  });
+
+  it('r-relic-hunter 接驳（切片52）：三座箱开出虚空共鸣碎片 -> 入账 -> 锁因放行；两座仍拦', () => {
+    const stats = new PlayerStats();
+    const mgr = new CollectibleManager(new THREE.Scene(), { getGroundHeight: () => 0 }, stats, dialog);
+    const 带碎片 = mgr.chests.filter((c) => (c.items ?? []).includes('void-resonance-shard'));
+    expect(带碎片.length, '带碎片的箱正好三座（fantasy2 / magic2 / space2）').toBe(3);
+    for (const c of 带碎片) mgr.open(c);
+    expect(stats.itemsCollected['void-resonance-shard'], '三座箱开完该入账 3 枚').toBe(3);
+    expect(getStoryLockReason(壳({ itemsCollected: { 'void-resonance-shard': 3 } }), 'r-relic-hunter')).toBeNull();
+    expect(getStoryLockReason(壳({ itemsCollected: { 'void-resonance-shard': 2 } }), 'r-relic-hunter')).toMatch(/void-resonance-shard/);
   });
 
   it('void-chronicle-read 接驳（切片51）：秘典全解锁 -> 旗标入账 -> r-archivist 放行', () => {

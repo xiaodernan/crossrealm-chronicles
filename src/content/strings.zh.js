@@ -187,6 +187,8 @@ export const STRINGS_ZH = Object.freeze({
   upgrade_success: '升级成功：${stat} · 获得 1 技能点',
   upgrade_not_enough_souls: '位面之魂不足',
   chest_souls_gained: '宝箱：获得 ${n} 位面之魂',
+  chest_item_gained: '宝箱：寻获 ${item}',
+  item_void_resonance_shard: '虚空共鸣碎片',
   soul_wisp_absorb: '吸收位面残响 +${n} 魂',
   soul_wisp_title: '位面残响',
   soul_wisp_desc: '游荡在位面缝中的记忆碎片，会追踪靠近的行者。',
