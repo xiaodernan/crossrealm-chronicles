@@ -3,12 +3,28 @@
  *
  * 提供 `t(key)` 函数，根据当前语言返回对应文案。
  * 语言切换通过 `setLanguage('zh' | 'en')` 完成，默认中文。
+ *
+ * 运行时口径（W-D2 切片56）：两张表在 import 期一次解析（源码合计约 354KB，对
+ * three.js 体量的工程可忽略），**不按语言懒加载** —— 全仓 1314 个 `t()` 调用点都是
+ * 同步取值，懒加载要把每个调用点改异步，收益（省一半表的解析）远小于成本。缺键
+ * 告警按键去重（`t()` 在每帧路径上，逐帧刷屏会埋掉真正的报错）。
  */
 
 import { STRINGS_ZH } from '../content/strings.zh.js';
 import { STRINGS_EN } from '../content/strings.en.js';
 
-const TABLES = { zh: STRINGS_ZH, en: STRINGS_EN };
+/** 语言 -> 文案表。两张表各自在 content 层已 Object.freeze，这里连映射一起冻上：
+ *  运行时没有任何正当理由换表（换语言走 setLanguage，不改这张映射）（W-D2 切片56）。 */
+const TABLES = Object.freeze({ zh: STRINGS_ZH, en: STRINGS_EN });
+
+/**
+ * 已经告过警的缺失键（W-D2 切片56）。
+ *
+ * `t()` 在每帧路径上（HUD 文本刷新、地图 canvas 的 fillText），一个拼错的键若每帧
+ * warn，一局下来几千条一模一样的话会把控制台冲垮 —— 真正想看的报错反而被埋掉。
+ * 同一个键整局只喊一次：**返回值不变**（每次仍返回 `[MISSING: key]`），变的只是噪音。
+ */
+const warnedMissingKeys = new Set();
 
 /** 语言名册（切片2）：面板的下拉选项从这里现推，加一门语言只改这一处 */
 export const LANGUAGES = Object.freeze([
@@ -48,8 +64,12 @@ export function t(key, params) {
   const table = TABLES[currentLang];
   const value = table[key];
   if (value === undefined) {
-    // 开发期：键不存在时返回 `[MISSING: key]` 而非静默失败
-    console.warn(`i18n: 未找到键名 "${key}"（语言: ${currentLang}）`);
+    // 开发期：键不存在时返回 `[MISSING: key]` 而非静默失败；同一个键只 warn 一次
+    // （切片56：t() 在每帧路径上，逐帧刷屏会埋掉真正的报错）
+    if (!warnedMissingKeys.has(key)) {
+      warnedMissingKeys.add(key);
+      console.warn(`i18n: 未找到键名 "${key}"（语言: ${currentLang}）`);
+    }
     return `[MISSING: ${key}]`;
   }
   return params ? interpolate(value, params) : value;
@@ -94,20 +114,25 @@ export function applyTranslations(root = typeof document !== 'undefined' ? docum
   if (!root?.querySelectorAll) return 0;
   const table = TABLES[currentLang];
   let count = 0;
-  for (const el of root.querySelectorAll('[data-i18n]')) {
-    const key = el.getAttribute('data-i18n');
-    const value = table[key];
-    if (value !== undefined) {
-      el.textContent = value;
-      count += 1;
+  // 切片56：两个属性合并成一次走查（原来是 `[data-i18n]` 与 `[data-i18n-aria]` 各
+  // querySelectorAll 一遍）。换语言是一次性的整树重写，两遍变一遍省一半遍历；
+  // 同时挂两个属性的元素（文本 + 读屏标签）在同一轮里各换各的，与拆分走查等价。
+  for (const el of root.querySelectorAll('[data-i18n], [data-i18n-aria]')) {
+    const textKey = el.getAttribute('data-i18n');
+    if (textKey !== null) {
+      const value = table[textKey];
+      if (value !== undefined) {
+        el.textContent = value;
+        count += 1;
+      }
     }
-  }
-  for (const el of root.querySelectorAll('[data-i18n-aria]')) {
-    const key = el.getAttribute('data-i18n-aria');
-    const value = table[key];
-    if (value !== undefined) {
-      el.setAttribute('aria-label', value);
-      count += 1;
+    const ariaKey = el.getAttribute('data-i18n-aria');
+    if (ariaKey !== null) {
+      const value = table[ariaKey];
+      if (value !== undefined) {
+        el.setAttribute('aria-label', value);
+        count += 1;
+      }
     }
   }
   return count;

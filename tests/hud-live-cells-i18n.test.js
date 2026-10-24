@@ -292,8 +292,8 @@ describe('③ 静态腿：模板六格无中文、InputDevice 退场、载荷与
 
   it('Boss.js：nameKey 构造期算好、存字段、载荷带键不带字', () => {
     const boss = 读('src/combat/Boss.js');
-    expect(boss).toContain('const nameKey = bossNameKeyOf(config.bossId ?? \'shadow-warden\');');
-    expect(boss).toContain('this.nameKey = nameKey;');
+    expect(boss).toContain('this.nameKey = bossNameKeyOf(this.bossId);');
+    expect(boss).toContain('name: config.name ?? t(bossNameKeyOf(config.bossId ?? \'shadow-warden\')),');
     expect(boss).toContain('detail: { hp: this.hp, maxHp: this.maxHp, phase: this.phase, nameKey: this.nameKey }');
     expect(boss).not.toContain('phase: this.phase, name: this.name');
   });
