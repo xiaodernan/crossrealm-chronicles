@@ -204,7 +204,7 @@ describe('① 钉文案腿：3 个新键 + 14 个复用键的中英原值逐字�
 
   it('四个带占位的键中英占位符一致（{souls}/{level}/{count}/{fr}/{pct}/{points}/{zone}）', () => {
     for (const key of ['hud_souls_display_fmt', 'hud_discovery_fmt', 'hud_skill_points_fmt', 'hud_subtitle_planar_bleed']) {
-      const 占位 = (s) => [...s.matchAll(/\$\{(\w+)\}/g)].map((m) => m[1]).sort();
+      const 占位 = (s) => [...s.matchAll(/\$\{(\w+)(?:\|[^}]*)?\}/g)].map((m) => m[1]).sort();
       expect(占位(STRINGS_EN[key]), `${key} 中英占位符不一致`).toEqual(占位(STRINGS_ZH[key]));
     }
   });

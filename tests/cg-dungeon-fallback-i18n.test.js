@@ -44,8 +44,8 @@ const 读 = (p) => readFileSync(join(ROOT, p), 'utf8');
 
 /** 3 个新键：键 → [中文原值, 英文原值] */
 const NEW_KEYS = {
-  cg_achieve_half_fmt: ['CG 收集过半 · +${souls} 魂火', 'CG collection halfway · +${souls} souls'],
-  cg_achieve_full_fmt: ['CG 全收集！· +${souls} 魂火', 'CG gallery complete! · +${souls} souls'],
+  cg_achieve_half_fmt: ['CG 收集过半 · +${souls} 魂火', 'CG collection halfway · +${souls} soulfire'],
+  cg_achieve_full_fmt: ['CG 全收集！· +${souls} 魂火', 'CG gallery complete! · +${souls} soulfire'],
   dungeon_boss_fallback_text: ['击败守钥者以打开出口。', 'Defeat the keykeeper to open the exit.'],
 };
 
@@ -159,7 +159,7 @@ describe('① 钉文案腿：3 个新键 + 1 枚复用键的中英原值逐字�
 
   it('fmt 键中英占位符一致（souls）', () => {
     for (const key of Object.keys(NEW_KEYS)) {
-      const 占位 = (s) => [...s.matchAll(/\$\{(\w+)\}/g)].map((m) => m[1]).sort();
+      const 占位 = (s) => [...s.matchAll(/\$\{(\w+)(?:\|[^}]*)?\}/g)].map((m) => m[1]).sort();
       expect(占位(STRINGS_EN[key]), `${key} 中英占位符不一致`).toEqual(占位(STRINGS_ZH[key]));
     }
   });
@@ -281,7 +281,7 @@ describe('⑤ 行为腿（en）：同两条链路英文播出，不夹 [MISSING:
     const host = makeAchHost(100);
     const ach = new CgGalleryAchievements(host);
     emit('cg-unlocked');
-    expect(host.toasts).toEqual(['CG collection halfway · +10 souls', 'CG gallery complete! · +30 souls']);
+    expect(host.toasts).toEqual(['CG collection halfway · +10 soulfire', 'CG gallery complete! · +30 soulfire']);
     ach.dispose();
   });
 
@@ -326,8 +326,8 @@ describe('⑥ 反面证据：尺子自证与插值双腿', () => {
     expect(t('cg_achieve_half_fmt', { souls: 10 })).toBe('CG 收集过半 · +10 魂火');
     expect(t('cg_achieve_full_fmt', { souls: 30 })).toBe('CG 全收集！· +30 魂火');
     setLanguage('en');
-    expect(t('cg_achieve_half_fmt', { souls: 10 })).toBe('CG collection halfway · +10 souls');
-    expect(t('cg_achieve_full_fmt', { souls: 30 })).toBe('CG gallery complete! · +30 souls');
+    expect(t('cg_achieve_half_fmt', { souls: 10 })).toBe('CG collection halfway · +10 soulfire');
+    expect(t('cg_achieve_full_fmt', { souls: 30 })).toBe('CG gallery complete! · +30 soulfire');
     setLanguage('zh');
   });
 
@@ -335,7 +335,7 @@ describe('⑥ 反面证据：尺子自证与插值双腿', () => {
     setLanguage('zh');
     expect(t('cg_achieve_half_fmt')).toBe('CG 收集过半 · +${souls} 魂火');
     setLanguage('en');
-    expect(t('cg_achieve_full_fmt')).toBe('CG gallery complete! · +${souls} souls');
+    expect(t('cg_achieve_full_fmt')).toBe('CG gallery complete! · +${souls} soulfire');
     setLanguage('zh');
   });
 });

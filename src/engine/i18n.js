@@ -77,12 +77,22 @@ export function t(key, params) {
 
 /**
  * 简单字符串插值：`"Hello ${name}"` + `{name: 'World'}` → `"Hello World"`
+ *
+ * 计数名词单元（W-D2 切片58）：`${count|time|times}` 按 `params.count` 选形态 ——
+ * 等于 1 渲染 `1 time`，否则渲染 `3 times`。英文表用它纠 "1 times" 这类语法错；
+ * **中文表不使用**（中文靠量词、不靠词形变化），`i18n-conventions` 门禁钉着中文表零标记。
+ * 约定：替代段必须是纯词（不含 `${` / `}` / `|`），参数名与普通占位符同名同义 ——
+ * 于是「这个模板消费哪些参数」的答案与普通占位符完全一致，占位符比对门禁认得它。
  * @param {string} template - 模板字符串
  * @param {object} params - 插值参数
  * @returns {string}
  */
 function interpolate(template, params) {
-  return template.replace(/\$\{(\w+)\}/g, (_, key) => params[key] ?? '');
+  const withPlurals = template.replace(/\$\{(\w+)\|([^|}]*)\|([^|}]*)\}/g, (_, key, one, other) => {
+    const value = params[key];
+    return `${value ?? ''} ${Number(value) === 1 ? one : other}`;
+  });
+  return withPlurals.replace(/\$\{(\w+)\}/g, (_, key) => params[key] ?? '');
 }
 
 /**

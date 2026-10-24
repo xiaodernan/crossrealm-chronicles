@@ -230,7 +230,7 @@ describe('① 钉文案腿：4 个新键的中英原值逐字钉死', () => {
 
   it('fmt 键中英占位符一致（slot / version / time）', () => {
     for (const key of Object.keys(NEW_KEYS)) {
-      const 占位 = (s) => [...s.matchAll(/\$\{(\w+)\}/g)].map((m) => m[1]).sort();
+      const 占位 = (s) => [...s.matchAll(/\$\{(\w+)(?:\|[^}]*)?\}/g)].map((m) => m[1]).sort();
       expect(占位(STRINGS_EN[key]), `${key} 中英占位符不一致`).toEqual(占位(STRINGS_ZH[key]));
     }
   });

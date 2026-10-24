@@ -194,7 +194,7 @@ describe('① 钉文案腿：3 枚复活键 + 16 个新键的中英原值逐字�
 
   it('带占位的键中英占位符一致（slot / issue / key / reason / message / from / to / jumps / filename / name）', () => {
     for (const key of [...Object.keys(NEW_KEYS), ...Object.keys(REVIVED)]) {
-      const 占位 = (s) => [...s.matchAll(/\$\{(\w+)\}/g)].map((m) => m[1]).sort();
+      const 占位 = (s) => [...s.matchAll(/\$\{(\w+)(?:\|[^}]*)?\}/g)].map((m) => m[1]).sort();
       expect(占位(STRINGS_EN[key]), `${key} 中英占位符不一致`).toEqual(占位(STRINGS_ZH[key]));
     }
   });

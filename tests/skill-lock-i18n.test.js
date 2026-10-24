@@ -48,16 +48,16 @@ const 读 = (p) => readFileSync(join(ROOT, p), 'utf8');
 
 /** 切片43 的 11 个模板键：键 → [中文原值, 英文原值] */
 const TEMPLATE_KEYS = {
-  skill_lock_fragments_fmt: ['需 ${need} 条叙事碎片 (${have}/${need})', 'Requires ${need} lore fragments (${have}/${need})'],
-  skill_lock_spellcasts_fmt: ['需施放法术 ${need} 次 (${have}/${need})', 'Cast spells ${need} times (${have}/${need})'],
+  skill_lock_fragments_fmt: ['需 ${need} 条叙事碎片 (${have}/${need})', 'Requires ${need|lore fragment|lore fragments} (${have}/${need})'],
+  skill_lock_spellcasts_fmt: ['需施放法术 ${need} 次 (${have}/${need})', 'Cast spells ${need|time|times} (${have}/${need})'],
   skill_lock_kills_fmt: ['需击败 ${count} 只 ${type} (${have}/${count})', 'Defeat ${count} ${type} (${have}/${count})'],
-  skill_lock_skilluses_fmt: ['需使用 ${count} 次 ${skill} (${have}/${count})', 'Use ${skill} ${count} times (${have}/${count})'],
-  skill_lock_bosskills_fmt: ['需击败 ${count} 次 ${boss} (${have}/${count})', 'Defeat ${boss} ${count} times (${have}/${count})'],
-  skill_lock_quest_fmt: ['需完成 ${count} 次支线 ${quest} (${have}/${count})', 'Complete side quest ${quest} ${count} times (${have}/${count})'],
+  skill_lock_skilluses_fmt: ['需使用 ${count} 次 ${skill} (${have}/${count})', 'Use ${skill} ${count|time|times} (${have}/${count})'],
+  skill_lock_bosskills_fmt: ['需击败 ${count} 次 ${boss} (${have}/${count})', 'Defeat ${boss} ${count|time|times} (${have}/${count})'],
+  skill_lock_quest_fmt: ['需完成 ${count} 次支线 ${quest} (${have}/${count})', 'Complete side quest ${quest} ${count|time|times} (${have}/${count})'],
   skill_lock_item_fmt: ['需收集 ${count} 个 ${item} (${have}/${count})', 'Collect ${count} ${item} (${have}/${count})'],
-  skill_lock_achievement_fmt: ['需解锁 ${count} 次成就 ${achievement} (${have}/${count})', 'Unlock achievement ${achievement} ${count} times (${have}/${count})'],
-  skill_lock_zone_fmt: ['需到达 ${count} 次区域 ${zone} (${have}/${count})', 'Reach zone ${zone} ${count} times (${have}/${count})'],
-  skill_lock_flag_fmt: ['需触发 ${count} 次剧情 ${flag} (${have}/${count})', 'Trigger story flag ${flag} ${count} times (${have}/${count})'],
+  skill_lock_achievement_fmt: ['需解锁 ${count} 次成就 ${achievement} (${have}/${count})', 'Unlock achievement ${achievement} ${count|time|times} (${have}/${count})'],
+  skill_lock_zone_fmt: ['需到达 ${count} 次区域 ${zone} (${have}/${count})', 'Reach zone ${zone} ${count|time|times} (${have}/${count})'],
+  skill_lock_flag_fmt: ['需触发 ${count} 次剧情 ${flag} (${have}/${count})', 'Trigger story flag ${flag} ${count|time|times} (${have}/${count})'],
   skill_lock_level_fmt: ['需 Lv.${need} (当前 Lv.${have})', 'Requires Lv.${need} (current Lv.${have})'],
 };
 
@@ -76,17 +76,17 @@ const NEW_KEYS = { ...TEMPLATE_KEYS, ...LABEL_KEYS };
 /** 13 种 lock 形状：节点 → 夹具改动 → 改前原句（zh）/ 改后英文 */
 const LOCK_CASES = [
   { id: 'm-transform', why: '章节', patch: { chapter: 1 }, zh: '需 Chapter 4', en: 'Requires Chapter 4' },
-  { id: 's-combo', why: '叙事碎片', patch: { chapter: 2, fragment: 0 }, zh: '需 1 条叙事碎片 (0/1)', en: 'Requires 1 lore fragments (0/1)' },
+  { id: 's-combo', why: '叙事碎片', patch: { chapter: 2, fragment: 0 }, zh: '需 1 条叙事碎片 (0/1)', en: 'Requires 1 lore fragment (0/1)' },
   { id: 'm-mana', why: '施法次数', patch: { chapter: 2, spellCasts: 3 }, zh: '需施放法术 8 次 (3/8)', en: 'Cast spells 8 times (3/8)' },
   { id: 'm-pierce', why: '击杀数', patch: {}, zh: '需击败 5 只 精英·虚空骑士 (0/5)', en: 'Defeat 5 Elite · Void Knight (0/5)' },
   { id: 's-tempo', why: '技能使用', patch: {}, zh: '需使用 30 次 连击 (0/30)', en: 'Use Combo 30 times (0/30)' },
-  { id: 's-realmedge', why: 'Boss 击杀', patch: {}, zh: '需击败 1 次 大奥术师·萨尔林 (0/1)', en: 'Defeat Archmagus Saloran 1 times (0/1)' },
-  { id: 'r-quest-master', why: '支线完成', patch: {}, zh: '需完成 1 次支线 迷途学者 (0/1)', en: 'Complete side quest The Lost Scholar 1 times (0/1)' },
+  { id: 's-realmedge', why: 'Boss 击杀', patch: {}, zh: '需击败 1 次 大奥术师·萨尔林 (0/1)', en: 'Defeat Archmagus Saloran 1 time (0/1)' },
+  { id: 'r-quest-master', why: '支线完成', patch: {}, zh: '需完成 1 次支线 迷途学者 (0/1)', en: 'Complete side quest The Lost Scholar 1 time (0/1)' },
   { id: 'r-relic-hunter', why: '物品收集', patch: {}, zh: '需收集 3 个 虚空共鸣碎片 (0/3)', en: 'Collect 3 Void Resonance Shard (0/3)' },
-  { id: 's-champion', why: '成就解锁', patch: {}, zh: '需解锁 1 次成就 枢纽冠军 (0/1)', en: 'Unlock achievement Champion of the Hub 1 times (0/1)' },
-  { id: 'm-wanderer', why: '区域到达', patch: {}, zh: '需到达 1 次区域 破碎时线 (0/1)', en: 'Reach zone Broken Timeline 1 times (0/1)' },
+  { id: 's-champion', why: '成就解锁', patch: {}, zh: '需解锁 1 次成就 枢纽冠军 (0/1)', en: 'Unlock achievement Champion of the Hub 1 time (0/1)' },
+  { id: 'm-wanderer', why: '区域到达', patch: {}, zh: '需到达 1 次区域 破碎时线 (0/1)', en: 'Reach zone Broken Timeline 1 time (0/1)' },
   { id: 's-combo', why: '击杀数', patch: { chapter: 2, fragment: 1 }, zh: '需击败 20 只 影之战士 (0/20)', en: 'Defeat 20 Shadow Warrior (0/20)' },
-  { id: 'r-archivist', why: '剧情旗标', patch: {}, zh: '需触发 1 次剧情 读罢虚空编年史 (0/1)', en: 'Trigger story flag Read the Void Chronicle 1 times (0/1)' },
+  { id: 'r-archivist', why: '剧情旗标', patch: {}, zh: '需触发 1 次剧情 读罢虚空编年史 (0/1)', en: 'Trigger story flag Read the Void Chronicle 1 time (0/1)' },
   { id: 's-apotheosis', why: '等级', patch: { level: 10 }, zh: '需 Lv.12 (当前 Lv.10)', en: 'Requires Lv.12 (current Lv.10)' },
   { id: 's-riposte', why: 'Boss 未击败', patch: { chapter: 5 }, zh: '需击败 Boss', en: 'Defeat the Boss first' },
 ];

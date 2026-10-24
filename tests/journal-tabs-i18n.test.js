@@ -45,7 +45,7 @@ const FILES = [
 
 /** 23 个新键 + 3 个复用键：键 → [中文原值, 英文原值] */
 const KEYS = {
-  journal_stat_count_fmt: ['${n} 次', '${n} times'],
+  journal_stat_count_fmt: ['${n} 次', '${n|time|times}'],
   journal_campfire_empty: ['尚未在任何营火休息', 'No campfire rests yet'],
   journal_campfire_stats_fmt: ['共休息 ${total} 次 · ${zones} 处营火 · 对话节点 ${nodes} 条', '${total} rests · ${zones} campfires · ${nodes} dialogue nodes'],
   journal_campfire_nodes_empty: ['选择营火对话后会在此记录', 'Campfire dialogue records will show up here'],
@@ -57,7 +57,7 @@ const KEYS = {
   weapon_skill_tag_narrative: ['叙事', 'Narrative'],
   weapon_skill_narrative_title: ['叙事技能 (击败 Boss / 推进章节自动解锁)', 'Narrative Skills (defeat Bosses / advance chapters to unlock)'],
   weapon_skill_stats_fmt: ['可用技能点 ${points} · 已解锁 ${unlocked} · 营火升级面板可加点', 'Skill points ${points} · Unlocked ${unlocked} · spend them at the campfire upgrade panel'],
-  cg_view_count_fmt: ['观看 ${n} 次', 'Viewed ${n} times'],
+  cg_view_count_fmt: ['观看 ${n} 次', 'Viewed ${n|time|times}'],
   cg_stats_fmt: ['已解锁 ${unlocked} / ${total}（${percent}%）· 收藏 ${favorites}', 'Unlocked ${unlocked} / ${total} (${percent}%) · Favorites ${favorites}'],
   cg_empty_zone: ['此区域暂无已解锁 CG — 去营火对话或击败 Boss', 'No unlocked CGs in this area — try campfire dialogues or defeating a Boss'],
   cg_hint: ['营火分支对话解锁插画 · Boss 击破解锁战斗 CG · 连击/处决解锁战斗记忆', 'Campfire dialogue branches unlock illustrations · Boss defeats unlock combat CGs · combos and executions unlock combat memories'],
@@ -187,7 +187,7 @@ describe('日志子页签双表化（W-D2 切片30）', () => {
       // 灯箱 meta：说话人 / 区域名 / 观看次数都走 t()
       tabs.cg.showLightbox({ id: 'x1', caption: 'cg_caption_fantasy_start', speaker: 'cg_speaker_campfire', zone: 'hub', scene: 'fantasy_start' });
       const meta = doc.body.querySelector('.cg-lightbox-meta').textContent;
-      const expectMeta = lang === 'zh' ? '营火 · 枢纽 · 观看 1 次' : 'Campfire · Hub · Viewed 1 times';
+      const expectMeta = lang === 'zh' ? '营火 · 枢纽 · 观看 1 次' : 'Campfire · Hub · Viewed 1 time';
       expect(meta, `${lang}: 灯箱 meta 不对`).toBe(expectMeta);
     }
     setLanguage('zh');

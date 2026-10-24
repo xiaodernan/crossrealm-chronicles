@@ -30,7 +30,7 @@ describe('键名规范（W-D2 切片56：小写 snake_case，命名族不漂移�
 });
 
 describe('_fmt 后缀与 ${} 占位的双向约定（W-D2 切片56）', () => {
-  const hasHolder = (v) => /\$\{\w+\}/.test(v);
+  const hasHolder = (v) => /\$\{\w+(?:\|[^}]*)?\}/.test(v);
 
   it('_fmt 后缀键：两表模板都带 ${} 占位（后缀承诺了插值，模板里就得有得可插）', () => {
     const fmtKeys = ZH_KEYS.filter((k) => k.endsWith('_fmt'));
@@ -65,6 +65,44 @@ describe('_fmt 后缀与 ${} 占位的双向约定（W-D2 切片56）', () => {
     expect(placeholderKeys.has('hud_souls_display_fmt'), '探针键 hud_souls_display_fmt 应含占位').toBe(true);
     const probeRefs = ['common_confirm', 'hud_souls_display_fmt'];
     expect(probeRefs.filter((k) => placeholderKeys.has(k))).toEqual(['hud_souls_display_fmt']);
+  });
+});
+
+describe('英文复数标记（W-D2 切片58：${param|单数|复数} 计数名词单元）', () => {
+  beforeEach(() => {
+    setLanguage('en');
+  });
+
+  it('英文表所有标记都是三段式，且替代段是纯词（不含 ${ } |）', () => {
+    const bad = [];
+    for (const [key, value] of Object.entries(STRINGS_EN)) {
+      for (const m of value.matchAll(/\$\{[^}]*\}/g)) {
+        if (!m[0].includes('|')) continue;
+        if (!/^\$\{\w+\|[^|}]*\|[^|}]*\}$/.test(m[0])) bad.push(key + ': ' + m[0]);
+      }
+    }
+    expect(bad, '这些标记不是三段式，或替代段里混了 ${ } |').toEqual([]);
+  });
+
+  it('中文表零标记：中文靠量词，不靠词形变化', () => {
+    const bad = Object.entries(STRINGS_ZH).filter(([, v]) => /\$\{\w+\|/.test(v)).map(([k]) => k);
+    expect(bad, '中文表不该出现复数标记').toEqual([]);
+  });
+
+  it('反向控制：二段式假标记与中文标记都必须被点名（防扫描永远返回空）', () => {
+    const segs = [...'x ${n|time} y'.matchAll(/\$\{[^}]*\}/g)].map((m) => m[0]).filter((s) => s.includes('|'));
+    expect(segs.every((s) => /^\$\{\w+\|[^|}]*\|[^|}]*\}$/.test(s))).toBe(false);
+    expect(/\$\{\w+\|/.test('中文 ${n|次|回}')).toBe(true);
+  });
+
+  it('运行时：计数 1 取单数、其余取复数（真键实测，中英落位一致）', () => {
+    expect(t('cg_view_count_fmt', { n: 1 })).toBe('Viewed 1 time');
+    expect(t('cg_view_count_fmt', { n: 3 })).toBe('Viewed 3 times');
+    expect(t('skill_lock_flag_fmt', { flag: 'X', count: 1, have: 0 })).toBe('Trigger story flag X 1 time (0/1)');
+    expect(t('skill_lock_flag_fmt', { flag: 'X', count: 2, have: 0 })).toBe('Trigger story flag X 2 times (0/2)');
+    setLanguage('zh');
+    expect(t('cg_view_count_fmt', { n: 1 })).toBe('观看 1 次');
+    setLanguage('en');
   });
 });
 

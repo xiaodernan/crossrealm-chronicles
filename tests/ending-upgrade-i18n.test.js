@@ -61,7 +61,7 @@ const PIN = {
   upgrade_lore_intro_a: ['营火不仅是休息点 — 位面行者的剑与杖在此与', "The campfire is more than a resting place - the Plane Wanderer's sword and staff resonate here with "],
   upgrade_lore_intro_strong: ['剧情', 'the Narrative'],
   upgrade_lore_intro_b: ['共鸣。击败 Boss、推进章节、收集叙事碎片，都会解锁新技能。', '. Defeat Bosses, advance chapters and gather narrative fragments to unlock new skills.'],
-  upgrade_lore_status_fmt: ['当前 Chapter ${chapter} · 叙事碎片 ${fragments} 条 · 叙事技能 ${owned}/${total}', 'Chapter ${chapter} · ${fragments} narrative fragments · narrative skills ${owned}/${total}'],
+  upgrade_lore_status_fmt: ['当前 Chapter ${chapter} · 叙事碎片 ${fragments} 条 · 叙事技能 ${owned}/${total}', 'Chapter ${chapter} · ${fragments|narrative fragment|narrative fragments} · narrative skills ${owned}/${total}'],
   upgrade_skill_tag_narrative_owned: ['叙事✓', 'Narrative ✓'],
   upgrade_skill_tag_narrative_locked: ['击败 Boss 解锁', 'Defeat a Boss to unlock'],
   upgrade_skill_cost_fmt: ['${cost}点', '${cost} pts'],
