@@ -68,6 +68,14 @@ export const zoneLabel = (zoneId) => {
   return key ? t(key) : zoneId;
 };
 
+/**
+ * 击杀类型 -> 显示名（切片45）：查 `ENEMY_ROSTER`（enemies.js）里的 name 文案键。
+ *
+ * **名册里为什么没有 boss**：`stats.kills` 按敌人 type 记账且显式排除 boss
+ * （objectives.js 的 STAT_EVENTS），Boss 击杀走独立的 `bossKills` 分支（bossLabel）——
+ * 所以 `kills.type: 'boss'` 是永远完不成的锁。skill-lock-refs 门禁（切片57）把
+ * 这一型直接堵在名册外：今天的锁只用 soldier / elite 两型。
+ */
 export const enemyLabel = (type) => {
   const key = ENEMY_ROSTER[type]?.name;
   return key ? t(key) : type;

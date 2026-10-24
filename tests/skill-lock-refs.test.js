@@ -61,8 +61,13 @@ const 带锁节点 = () => SKILL_BRANCH_IDS
 const BOSS宇宙 = new Set(BOSS_IDS);
 const 区域宇宙 = new Set(Object.values(ZONE_IDS));
 const 效果宇宙 = new Set(SKILL_EFFECT_KEYS);
-/** 击杀类型：名册十二余类 + Boss（`Enemy` 的 `type === 'boss'` 那一格） */
-const 击杀宇宙 = new Set([...ENEMY_ROSTER_IDS, 'boss']);
+/**
+ * 击杀类型宇宙 = 敌人名册的全部 id，**不含 'boss'**（切片57）：
+ * `stats.kills` 按敌人 type 记账且显式排除 boss（`objectives.js` 的 STAT_EVENTS：
+ * `if (d.type !== 'boss')`），Boss 击杀走独立的 `bossKills` 分支（bossLabel）——
+ * 写进 `kills.type` 的 boss 计数永不增长，是永远完不成的锁，不是显示名问题。
+ */
+const 击杀宇宙 = new Set(ENEMY_ROSTER_IDS);
 const 任务宇宙 = new Set([...MAINLINE.map((r) => r.id), ...SIDE_QUESTS_ALL.map((q) => q.id)]);
 const 成就宇宙 = new Set([
   ...ACHIEVEMENTS.map((a) => a.id),
@@ -177,10 +182,19 @@ describe('② 活引用腿：六族引用都指着真实存在的生产者', () 
     }
   });
 
-  it('击杀类型都在名册里（或 Boss 那一格）', () => {
+  it('击杀类型都在敌人名册里（boss 不走这一族，见下一条）', () => {
     for (const { id, lock } of 带锁节点()) {
       if (lock.kills && 活的(id, 'kills', lock.kills.type)) expect(击杀宇宙, id + ' 的 lock.kills.type').toContain(lock.kills.type);
     }
+  });
+
+  it("kills.type 不许写 'boss'：stats.kills 显式排除 boss，写进去就是永远完不成的锁", () => {
+    const 写了boss的 = 带锁节点()
+      .filter(({ lock }) => lock.kills?.type === 'boss')
+      .map(({ id }) => id);
+    expect(写了boss的, '这些节点把 boss 写进了 kills.type —— 计数永不增长，锁永远不开').toEqual([]);
+    // 反向控制：同一把尺子量一个假 lock 必须点名（防'扫描永远返回空'）
+    expect(悬空引用('probe', { kills: { type: 'boss', count: 1 } })).toEqual(['probe|kills:boss']);
   });
 
   it('支线引用都在主线或支线表里', () => {
