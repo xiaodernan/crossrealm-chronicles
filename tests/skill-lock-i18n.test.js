@@ -17,9 +17,10 @@
  * 既有按中文匹配的用例原样绿；④ 用 13 条原值正向钉死这个兼容。
  *
  * 插值里的 id 由切片45 的四支解析器翻成显示名：Boss / 区域 / 击杀类型 / 效果四族
- * 查得到的翻成人话（"需击败 1 次 大奥术师·萨尔林 (0/1)"），查不到的原样退回 id
- * （"需击败 20 只 normal (0/20)"）。支线 / 物品 / 成就 / 旗标四族仍是裸 id ——
- * 前两族唯一引用处的 id 不在任何表里（做了就是死代码），后两族没有 id 宇宙。
+ * 查得到的翻成人话（"需击败 1 次 大奥术师·萨尔林 (0/1)" / "需击败 20 只 影之战士 (0/20)"），
+ * 查不到的原样退回 id。支线 / 物品 / 成就 / 旗标四族仍是裸 id —— 前两族唯一引用处的
+ * id 不在任何表里（做了就是死代码），后两族没有 id 宇宙。切片47 把 s-combo 的
+ * `normal` 修成名册里的 `soldier` 之后，锁因表里已无名册外击杀类型（回退路径由 ⑦ 腿单测）。
  *
  * ## 用例分七层
  * ① 钉文案腿：16 个新键的中英原值逐字钉死；
@@ -84,7 +85,7 @@ const LOCK_CASES = [
   { id: 'r-relic-hunter', why: '物品收集', patch: {}, zh: '需收集 3 个 void-resonance-shard (0/3)', en: 'Collect 3 void-resonance-shard (0/3)' },
   { id: 's-champion', why: '成就解锁', patch: {}, zh: '需解锁 1 次成就 champion-of-hub (0/1)', en: 'Unlock achievement champion-of-hub 1 times (0/1)' },
   { id: 'm-wanderer', why: '区域到达', patch: {}, zh: '需到达 1 次区域 破碎时线 (0/1)', en: 'Reach zone Broken Timeline 1 times (0/1)' },
-  { id: 's-combo', why: '击杀类型回退', patch: { chapter: 2, fragment: 1 }, zh: '需击败 20 只 normal (0/20)', en: 'Defeat 20 normal (0/20)' },
+  { id: 's-combo', why: '击杀数', patch: { chapter: 2, fragment: 1 }, zh: '需击败 20 只 影之战士 (0/20)', en: 'Defeat 20 Shadow Warrior (0/20)' },
   { id: 'r-archivist', why: '剧情旗标', patch: {}, zh: '需触发 1 次剧情 void-chronicle-read (0/1)', en: 'Trigger story flag void-chronicle-read 1 times (0/1)' },
   { id: 's-apotheosis', why: '等级', patch: { level: 10 }, zh: '需 Lv.12 (当前 Lv.10)', en: 'Requires Lv.12 (current Lv.10)' },
   { id: 's-riposte', why: 'Boss 未击败', patch: { chapter: 5 }, zh: '需击败 Boss', en: 'Defeat the Boss first' },

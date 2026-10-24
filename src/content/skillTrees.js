@@ -167,7 +167,7 @@ export const SKILL_TREES = {
       reqs: [], lock: { chapter: 1 }, lore: 'skill_s_blade_lore' },
     { id: 's-edge', name: 'skill_s_edge_name', cost: 2, desc: 'skill_s_edge_desc', effect: { melee: 0.10 }, reqs: ['s-blade'] },
     { id: 's-combo', name: 'skill_s_combo_name', cost: 2, desc: 'skill_s_combo_desc', effect: { combo: 0.16 },
-      reqs: ['s-blade'], lock: { chapter: 2, loreFragments: 1, kills: { type: 'normal', count: 20 } }, lore: 'skill_s_combo_lore' },
+      reqs: ['s-blade'], lock: { chapter: 2, loreFragments: 1, kills: { type: 'soldier', count: 20 } }, lore: 'skill_s_combo_lore' },
     { id: 's-riposte', name: 'skill_s_riposte_name', cost: 2, desc: 'skill_s_riposte_desc', effect: { riposte: 0.40 },
       reqs: ['s-blade'], lock: { chapter: 2, boss: 'shadow-warden' },
       lore: 'skill_s_riposte_lore' },

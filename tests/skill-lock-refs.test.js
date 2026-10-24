@@ -9,20 +9,20 @@
  * 全仓**零写入**（`addAchievementUnlocked` / `addItemCollected` / `addStoryFlag` 没有任何
  * 调用点），`side-lost-scholar` 也不在 `MAINLINE` 与 `SIDE_QUESTS_ALL` 里。症状是 B36
  * 那一族：**那一格看起来有门，其实永远敞不开** —— 玩家在升级面板看到"需解锁 1 次成就
- * champion-of-hub (0/1)"直到关服。另有一处同类：`s-combo` 的 `kills: { type: 'normal' }`
- * —— 名册里没有 `normal` 这一类，`Enemy` 构造器把无 type 的敌人兜底成 `'soldier'`，
- * `addKill` 的 `?? 'normal'` 永远走不到。
+ * champion-of-hub (0/1)"直到关服。同类还有第五处：`s-combo` 的 `kills: { type: 'normal' }`
+ * —— 名册里没有 `normal` 这一类，`stats.kills` 按敌人真实 type 记账（`Enemy` 构造器把
+ * 无 type 的敌人兜底成 `'soldier'`）。切片47 把它修成 `'soldier'`，死锁清单缩到四处。
  *
  * ## 机制
  *
  * 不静默造内容（成就 / 支线 / 物品 / 旗标是设计决策，§9 ADR 留名），也不让新漂移再发生：
- * 本门禁把**当前五处死锁钉成一份清单**，计算集合与清单相等才算过 —— 新增一处悬空引用
+ * 本门禁把**当前四处死锁钉成一份清单**，计算集合与清单相等才算过 —— 新增一处悬空引用
  * 当场红；修掉一处也必须来改这份清单（刻意的动作，不是顺手）。
  *
  * ## 用例分四层
  * ① 结构腿：lock 的键集合与 getStoryLockReason 的分支集合双向对齐；
  * ② 活引用腿：有生产者宇宙的六族逐一核身份（Boss / 区域 / 击杀类型 / 效果 / 任务 / 成就）；
- * ③ 死锁清单腿：悬空引用计算集合 == 钉死的五处；
+ * ③ 死锁清单腿：悬空引用计算集合 == 钉死的四处；
  * ④ 账本生产腿：三个零写入桶与 'normal' 不可达在源码里钉死 + 尺子自证。
  */
 import { describe, it, expect } from 'vitest';
@@ -80,7 +80,6 @@ const 悬空引用 = (id, lock) => {
 
 /** 当前死锁清单（改这里 = 刻意动作：要么新内容接了产者，要么确认新漂移） */
 const 钉死的死锁 = [
-  's-combo|kills:normal',
   's-champion|achievementUnlocked:champion-of-hub',
   'r-quest-master|questComplete:side-lost-scholar',
   'r-relic-hunter|itemCollected:void-resonance-shard',
@@ -167,7 +166,7 @@ describe('② 活引用腿：六族引用都指着真实存在的生产者', () 
  * ③ 死锁清单腿
  * ------------------------------------------------------------------ */
 
-describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的五处', () => {
+describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的四处', () => {
   it('一处不多（新增悬空引用当场红）', () => {
     const 算出 = 带锁节点().flatMap(({ id, lock }) => 悬空引用(id, lock)).sort();
     const 多出来的 = 算出.filter((x) => !钉死的死锁.includes(x));
@@ -180,9 +179,15 @@ describe('③ 死锁清单腿：悬空引用计算集合 == 钉死的五处', ()
     expect(已修好, '清单里的死锁已不存在 —— 请更新钉死的死锁清单').toEqual([]);
   });
 
-  it('清单本身形状正确：五处，覆盖五个节点', () => {
-    expect(钉死的死锁.length).toBe(5);
-    expect(new Set(钉死的死锁.map((x) => x.split('|')[0])).size).toBe(5);
+  it('s-combo 的击杀类型是名册里的 soldier（切片47 修掉 normal 死锁）', () => {
+    const combo = 带锁节点().find((n) => n.id === 's-combo');
+    expect(combo.lock.kills).toEqual({ type: 'soldier', count: 20 });
+    expect(ENEMY_ROSTER_IDS).toContain('soldier');
+  });
+
+  it('清单本身形状正确：四处，覆盖四个节点', () => {
+    expect(钉死的死锁.length).toBe(4);
+    expect(new Set(钉死的死锁.map((x) => x.split('|')[0])).size).toBe(4);
   });
 });
 

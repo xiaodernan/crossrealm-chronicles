@@ -244,7 +244,7 @@ describe('W-B6 切片1：门槛是活的（m-mana 那格从"看起来有门"接�
 
 describe('W-B6 切片1：状态机（三分支 / reqs 数组 / 叙事技白送 / 存档往返）', () => {
   const 全通 = {
-    quests: { chapter: 5, stats: { bossDefeated: true, boss2Defeated: true, boss3Defeated: true, voidBossDefeated: true, chaosBossDefeated: true, spellCasts: 99, kills: { normal: 99, elite: 99 }, skillUses: { combo: 99, charge: 99 } } },
+    quests: { chapter: 5, stats: { bossDefeated: true, boss2Defeated: true, boss3Defeated: true, voidBossDefeated: true, chaosBossDefeated: true, spellCasts: 99, kills: { soldier: 99, elite: 99 }, skillUses: { combo: 99, charge: 99 } } },
     storyJournal: { getCounts: () => ({ fragment: 99 }), addSilent() {} },
   };
 
