@@ -468,6 +468,7 @@ export const STRINGS_ZH = Object.freeze({
   boss_dungeon_hub_catacombs_intro: "枢纽守钥者从墓穴最深处苏醒。",
   boss_dungeon_hub_catacombs_p2: "守钥者拔出枢纽之钥 — 迷宫震动。",
   boss_dungeon_hub_catacombs_defeat: "守钥者倒下。枢纽地下再次封闭。",
+  boss_dungeon_phase1_banner: '守钥者 · 第一阶段',
   boss_dungeon_phase2_banner: '守钥者 · 第二阶段',
   boss_dungeon_defeat_banner: '守钥者已倒',
   boss_dungeon_void_broken_casket_intro: '匣盖弹开的一瞬，里面那只钟仍在走。',

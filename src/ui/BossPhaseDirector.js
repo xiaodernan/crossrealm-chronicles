@@ -113,7 +113,9 @@ export class BossPhaseDirector {
       // W-E3 切片5：副本守钥者有**三个**阶段（门槛 0.5 / 0.25，与世界 Boss 同一套），
       // 改前这里只认 phase 2 —— 三阶段那一格从来没有台词也没有横幅，
       // 玩家看到血条掉到四分之一却什么也没发生（"写了但没生效"那一族）。
-      if (detail.phase === 2 && lines?.p2) {
+      if (detail.phase === 1 && lines?.p1) {
+        this.showBanner(t('boss_dungeon_phase1_banner'), t(lines.p1), '#ff8866');
+      } else if (detail.phase === 2 && lines?.p2) {
         this.showBanner(t('boss_dungeon_phase2_banner'), t(lines.p2), '#ff8866');
       } else if (detail.phase === 3 && lines?.p3) {
         this.showBanner(t('boss_dungeon_phase3_banner'), t(lines.p3), '#ff5544');

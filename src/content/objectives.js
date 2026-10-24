@@ -1257,7 +1257,8 @@ export function objectiveRequiresMet(def, stats) {
   const requires = def?.requires;
   if (!requires) return true;
   for (const [flag, want] of Object.entries(requires)) {
-    if (stats?.objectiveFlags?.[flag] !== want) return false;
+    const actual = stats?.objectiveFlags?.[flag];
+    if (actual !== want) return false;
   }
   return true;
 }

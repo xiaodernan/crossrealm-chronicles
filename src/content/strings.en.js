@@ -468,6 +468,7 @@ export const STRINGS_EN = Object.freeze({
   boss_dungeon_hub_catacombs_intro: "The hub key warden awakens from the deepest catacombs.",
   boss_dungeon_hub_catacombs_p2: "The warden draws the Key of the Hub — the maze trembles.",
   boss_dungeon_hub_catacombs_defeat: "The warden falls. The depths beneath the hub seal themselves again.",
+  boss_dungeon_phase1_banner: 'Key Warden · Phase I',
   boss_dungeon_phase2_banner: 'Key Warden · Phase II',
   boss_dungeon_defeat_banner: 'The Key Warden has fallen',
   boss_dungeon_void_broken_casket_intro: 'The casket lid flies open — the clock inside is still running.',
