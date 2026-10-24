@@ -19,6 +19,26 @@ function aabbOf(c) {
   return { minX: c.x - c.r, maxX: c.x + c.r, minZ: c.z - c.r, maxZ: c.z + c.r };
 }
 
+/**
+ * 把**盒局部系**里算出的推出法线转回世界系（深度是标量，跟着走）。
+ *
+ * 为什么要有这一格：上面的世界→局部只喂了几何查询，而 `nx/nz` 是局部系的向量 ——
+ * 直接把局部向量交出去，绕 X 之外的旋转盒就会沿**错的轴**推人。这条错误在装饰层之前
+ * 踩不到：`rot` 只有 `blocked()`/`supportAt()` 这些"读"路径用（它们各自就地转，向量不外传），
+ * 而"推"路径 `moveCircle`/`unpenetrate` 从来没遇到过带朝向的盒。装饰层一登记带朝向的摊/椅/断柱，
+ * 玩家就不再是"穿过摆件"，而是**被错轴的法线推进摆件里**（实测离摊面 1.67m 一帧后被送到 0.26m）。
+ *
+ * 顺带记一笔翻案：`tests/collision.test.js` 里旧的那条"旋转盒按其朝向阻挡"在漏转版上**恰好是绿的**
+ * —— 漏转把玩家原路顶回世界 −z，"z 没冲过去"当然成立。它现在钉的是切向滑行 + 局部系里的贴面距离，
+ * 那才是朝向的证据（臂1 = 把这里退回恒等变换，红的正是这几条）。
+ */
+function rotatedNormal(o, nx, nz, depth) {
+  if (!o.rot) return { nx, nz, depth };
+  const cos = Math.cos(o.rot);
+  const sin = Math.sin(o.rot);
+  return { nx: nx * cos - nz * sin, nz: nx * sin + nz * cos, depth };
+}
+
 /** 圆 c 与障碍求穿透深度与推出方向；无穿透返回 null */
 function contact(px, pz, pr, o) {
   if (o.shape === 'box') {
@@ -42,11 +62,11 @@ function contact(px, pz, pr, o) {
       // 圆心落在盒内：沿最浅退出轴推出
       const ex = o.hx - Math.abs(dx);
       const ez = o.hz - Math.abs(dz);
-      if (ex < ez) return { nx: dx >= 0 ? 1 : -1, nz: 0, depth: pr + ex };
-      return { nx: 0, nz: dz >= 0 ? 1 : -1, depth: pr + ez };
+      if (ex < ez) return rotatedNormal(o, dx >= 0 ? 1 : -1, 0, pr + ex);
+      return rotatedNormal(o, 0, dz >= 0 ? 1 : -1, pr + ez);
     }
     const inv = 1 / len;
-    return { nx: nx * inv, nz: nz * inv, depth: pr - len };
+    return rotatedNormal(o, nx * inv, nz * inv, pr - len);
   }
   const dx = px - o.x;
   const dz = pz - o.z;
@@ -66,14 +86,19 @@ export class CollisionWorld {
     this.built = false;
   }
 
-  addCylinder({ x, z, r, base = 0, top = 4, kind = SOLID }) {
+  /**
+   * `owner` 是**登记方留下的身份串**（如装饰层的家族名）。为什么要有这一格：`add()` 收整个对象、
+   * 而这两个便捷入口只认列出的几格 —— 早先 `_blockCyl` 传的 `owner` 就是这样被静默丢掉的，
+   * 于是"这一族登记了几块体"数出来永远是 0，按族认领的门禁整套空转（字段不会自己报错）。
+   */
+  addCylinder({ x, z, r, base = 0, top = 4, kind = SOLID, owner = null }) {
     if (!(r > 0)) return null;
-    return this.add({ shape: 'cyl', x, z, r, base, top, kind });
+    return this.add({ shape: 'cyl', x, z, r, base, top, kind, owner });
   }
 
-  addBox({ x, z, hx, hz, base = 0, top = 4, rot = 0, kind = SOLID }) {
+  addBox({ x, z, hx, hz, base = 0, top = 4, rot = 0, kind = SOLID, owner = null }) {
     if (!(hx > 0 && hz > 0)) return null;
-    return this.add({ shape: 'box', x, z, hx, hz, base, top, rot, rotated: !!rot, kind });
+    return this.add({ shape: 'box', x, z, hx, hz, base, top, rot, rotated: !!rot, kind, owner });
   }
 
   add(c) {
@@ -220,6 +245,17 @@ export class CollisionWorld {
    * 视线用途（两端距离通常远大于一步），已登记到计划里作为后续项。
    */
   blocksPoint(x, z, y, pad = 0) {
+    return this.blockersAt(x, z, y, pad) !== null;
+  }
+
+  /**
+   * 压住这一格、且挡得住这个高度的**那一份**碰撞体（没有则 null）—— `blocksPoint()` 的
+   * 同一件事，只是把答案交出来（与上面 `blockedBy()` 之于 `blocked()` 是一对同族）。
+   *
+   * 为什么要有这一格：门禁要说的不是"这里有问题"，而是"这一棵树没有认领到体、
+   * 而它被旁边那块区里的石头代挡着"。判据仍只有一份 —— 调用方不必复刻这段几何。
+   */
+  blockersAt(x, z, y, pad = 0) {
     for (const c of this.candidates(x, z, 0.6 + pad)) {
       if (!this.blocks(c, y)) continue;
       if (c.shape === 'box') {
@@ -227,12 +263,12 @@ export class CollisionWorld {
         const rz = z - c.z;
         const ax = c.rot ? rx * Math.cos(c.rot) + rz * Math.sin(c.rot) : rx;
         const az = c.rot ? rz * Math.cos(c.rot) - rx * Math.sin(c.rot) : rz;
-        if (Math.abs(ax) < c.hx + pad && Math.abs(az) < c.hz + pad) return true;
+        if (Math.abs(ax) < c.hx + pad && Math.abs(az) < c.hz + pad) return c;
       } else if (Math.hypot(x - c.x, z - c.z) < c.r + pad) {
-        return true;
+        return c;
       }
     }
-    return false;
+    return null;
   }
 
   /**
@@ -285,5 +321,20 @@ export class CollisionWorld {
     this.colliders.length = 0;
     this.grid.clear();
     this.built = false;
+  }
+
+  /**
+   * 摘掉一份障碍（子系统拆卸时用），并把空间哈希标脏。
+   *
+   * 为什么要有这一格：`clear()` 是"整份作废"，而**晚到**的登记方（装饰层在
+   * `world.build()` 之后才建）拆卸时只能取回自己那几块 —— 连别人的墙一起拆是事故，
+   * 只拆模型不拆障碍则是另一场事故（障碍活得比几何久，玩家撞在一团空气上）。
+   */
+  remove(c) {
+    const i = this.colliders.indexOf(c);
+    if (i < 0) return false;
+    this.colliders.splice(i, 1);
+    this.built = false;
+    return true;
   }
 }

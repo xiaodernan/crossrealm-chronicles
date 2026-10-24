@@ -134,13 +134,61 @@ describe('CollisionWorld', () => {
     expect(w.moveCircle(0, 0, R, 0, 20).z).toBeLessThan(3);
   });
 
-  it('旋转盒按其朝向阻挡', () => {
-    const w = new CollisionWorld();
-    // 45° 斜墙：从墙角正前方出发应被挡住
-    w.addBox({ x: 0, z: 6, hx: 8, hz: 0.4, top: 5, rot: Math.PI / 4 });
-    const r = w.moveCircle(0, 0, R, 0, 20);
-    expect(r.hit).toBe(true);
-    expect(r.z).toBeLessThan(5);
+  /**
+   * 斜墙的三个可观测面，一起构成"按朝向阻挡"这句话的意思。
+   *
+   * 为什么旧的那句 `expect(r.z).toBeLessThan(5)` 要撤掉：它在**法线漏转**时恰好成立。
+   * 漏转把盒局部系的 (0,−1) 当成世界系法线交出去，于是玩家被原路顶回世界 −z，z 当然过不去
+   * ——一条给错几何盖绿灯的断言，比没有断言更糟（实测：漏转版终点 (0, 5.15)，切向走了 0 米）。
+   * 真正的朝向证据是切向：45° 墙把 +z 的推力转成沿墙面的位移，而轴对齐的墙不该有这份位移。
+   */
+  describe('旋转盒按其朝向阻挡', () => {
+    /** 世界系 → 盒局部系：与 contact()/blockersAt() 同一套约定 R(−rot) */
+    const 局部 = (点, 中心, 转角) => ({
+      lx: (点.x - 中心.x) * Math.cos(转角) + (点.z - 中心.z) * Math.sin(转角),
+      lz: (点.z - 中心.z) * Math.cos(转角) - (点.x - 中心.x) * Math.sin(转角),
+    });
+
+    const 斜墙 = { x: 0, z: 6, hx: 40, hz: 0.4, rot: Math.PI / 4 };
+
+    it('斜墙前直冲：沿墙面被送走，且始终留在起始那一侧、没贴进实体里', () => {
+      const w = new CollisionWorld();
+      w.addBox({ ...斜墙, top: 5 });
+      const 起 = { x: 0, z: 0 };
+      const r = w.moveCircle(起.x, 起.z, R, 0, 20);
+      expect(r.hit).toBe(true);
+      const 起点局部 = 局部(起, 斜墙, 斜墙.rot);
+      const 终点局部 = 局部(r, 斜墙, 斜墙.rot);
+      // ① 没穿过墙面：起始在 lz<0 那一侧，结束仍在那一侧
+      expect(终点局部.lz).toBeLessThan(0);
+      // ② 没被埋：到盒最近点的距离 ≥ 玩家半径（贴着面站，而不是嵌在里面）
+      expect(Math.abs(终点局部.lz) - 斜墙.hz).toBeGreaterThanOrEqual(R - 1e-3);
+      // ③ 朝向的证据：+z 的 20 米推力里，沿墙切向占 sin45≈0.707；漏转法线时这一项是 0
+      expect(终点局部.lx - 起点局部.lx).toBeGreaterThan(8);
+    });
+
+    it('对照：轴对齐的墙把纯法向推力全部吃掉，不该冒出切向滑行', () => {
+      const w = new CollisionWorld();
+      const 墙 = { x: 0, z: 6, hx: 40, hz: 0.4, rot: 0 };
+      w.addBox({ ...墙, top: 5 });
+      const r = w.moveCircle(0, 0, R, 0, 20);
+      expect(r.hit).toBe(true);
+      expect(Math.abs(r.x)).toBeLessThan(1e-9);
+    });
+
+    it('已经嵌在斜墙里时脱困：出口在墙的法线上，而不是在世界坐标轴上', () => {
+      const w = new CollisionWorld();
+      w.addBox({ ...斜墙, top: 5 });
+      w.build();
+      const 出 = w.unpenetrate(斜墙.x, 斜墙.z, R);
+      const Δx = Math.abs(出.x - 斜墙.x);
+      const Δz = Math.abs(出.z - 斜墙.z);
+      // 45° 墙的浅出口 = 局部 ±z 轴，转回世界系后 x、z 位移必然等量；漏转版只有 z 在动
+      expect(Math.abs(Δx - Δz)).toBeLessThan(1e-6);
+      expect(Δx).toBeGreaterThan(0.1);
+      const 终点局部 = 局部(出, 斜墙, 斜墙.rot);
+      expect(Math.abs(终点局部.lz)).toBeGreaterThanOrEqual(斜墙.hz + R - 1e-3);
+    });
   });
 
   it('密林场景单帧碰撞开销低于 0.3ms', () => {
