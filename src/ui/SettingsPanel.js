@@ -464,9 +464,9 @@ export class SettingsPanel {
     // 重绘整张清单会销毁玩家正停着的那一格（切片28 / B58 的同一个形状）：
     // 点一颗手柄入口进入等待态、捕获回来之后清单就换了一批节点 —— 没有这一步，焦点掉回 `body`
     preserveFocus(host, () => {
-      host.innerHTML = `<div class="keybind-row keybind-head"><span class="keybind-name">动作</span>`
-        + '<span class="keybind-pad">键盘 / 鼠标</span><span class="keybind-pad">手柄</span>'
-        + '<span class="keybind-hint">等价键</span></div>' + rows.join('');
+      host.innerHTML = `<div class="keybind-row keybind-head"><span class="keybind-name">${t('settings_keybind_head_action')}</span>`
+        + `<span class="keybind-pad">${t('input_device_keyboard')} / ${t('input_device_mouse')}</span><span class="keybind-pad">${t('input_device_gamepad')}</span>`
+        + `<span class="keybind-hint">${t('settings_keybind_head_equivalent')}</span></div>` + rows.join('');
     });
   }
 

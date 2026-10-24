@@ -105,7 +105,7 @@ export class RestNpcManager {
 
     model.loadGlb().then((ok) => {
       if (!ok) return;
-      this.game.dialog?.toast?.(`${t(def.name)} 模型已加载`, 1800);
+      this.game.dialog?.toast?.(t('rest_npc_model_loaded_fmt', { name: t(def.name) }), 1800);
       // GLB 是**异步**落地的：它带进来的那批网格按 `prop` 类天生投影，而投影门可能早就
       // 把这一名判成"不投"了 —— 判据没翻转就不会重走树，新网格于是白留一份阴影。
       this._重落投影门(point.id);

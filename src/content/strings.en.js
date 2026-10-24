@@ -59,6 +59,8 @@ export const STRINGS_EN = Object.freeze({
   settings_keybind_pad_invalid: 'Gamepad button unavailable or already bound: ${why}',
   settings_keybind_group_movement_combat: 'Movement & Combat',
   settings_keybind_group_ui_controller: 'UI (Controller Only)',
+  settings_keybind_head_action: 'Action',
+  settings_keybind_head_equivalent: 'Equivalent key',
   settings_ssao_quality_off: 'Off',
   settings_ssao_quality_low: 'Low',
   settings_ssao_quality_medium: 'Medium',
@@ -2127,6 +2129,7 @@ export const STRINGS_EN = Object.freeze({
   rest_npc_radiant_bark_0: 'A soul washed in dawnlight does not fear the dark.',
   rest_npc_radiant_bark_1: 'The knight leaves the leg unarmored after a shield bash.',
   rest_npc_radiant_bark_2: 'The altar only opens at dawn.',
+  rest_npc_model_loaded_fmt: '${name} model loaded',
 
   // CG gallery: zone filter labels + bonus-row speakers (game/CgGalleryRegistry.js, W-D2 slice 15).
   // Same contract as the captions: the catalog stores keys, the UI expands at paint time

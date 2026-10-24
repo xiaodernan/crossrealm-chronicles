@@ -59,6 +59,8 @@ export const STRINGS_ZH = Object.freeze({
   settings_keybind_pad_invalid: '该手柄按键无效或已被别的动作占用：${why}',
   settings_keybind_group_movement_combat: '移动与战斗',
   settings_keybind_group_ui_controller: '界面（手柄专属）',
+  settings_keybind_head_action: '动作',
+  settings_keybind_head_equivalent: '等价键',
   settings_ssao_quality_off: '关',
   settings_ssao_quality_low: '低',
   settings_ssao_quality_medium: '中',
@@ -2124,6 +2126,7 @@ export const STRINGS_ZH = Object.freeze({
   rest_npc_radiant_bark_0: '晨曦洗礼过的灵魂不惧黑暗。',
   rest_npc_radiant_bark_1: '骑士盾击后腿部无甲。',
   rest_npc_radiant_bark_2: '祭坛只在晨曦时开放。',
+  rest_npc_model_loaded_fmt: '${name} 模型已加载',
 
   // CG 画廊：筛选行的区域名 + bonus 行的说话人（game/CgGalleryRegistry.js，W-D2 切片15）。
   // 与字幕同一条口径：目录里存键，界面在播出那一刻展开（营火行的说话人取自上面那份定义）。

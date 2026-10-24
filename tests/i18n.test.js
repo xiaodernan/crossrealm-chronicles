@@ -199,7 +199,7 @@ describe('开机那几屏接线（W-D2 切片5）', () => {
     '<span data-i18n="minimap_dungeon_hint">',
     '<span data-i18n="guide_head">',
     'id="guide-sync" data-i18n="guide_sync"',
-    'id="autoplay-fab" title="自动通关">⚡ <span data-i18n="autoplay_label"',
+    'id="autoplay-fab">⚡ <span data-i18n="autoplay_label"',
     '<h2 data-i18n="start_brand">',
     '<span data-i18n="start_click">',
     '<span data-i18n="start_move">',
@@ -420,5 +420,53 @@ describe('指南面板动态文案（W-D2 切片8）', () => {
       .filter((v) => v && v.length > 2)
       .filter((v) => reverted.includes(v));
     expect(missing.length).toBeLessThan(GUIDE_KEYS.length);
+  });
+});
+
+/* ------------------------------------------------------------------
+ * 玩家可见裸中文收口（W-D2 切片54）
+ * ------------------------------------------------------------------ */
+
+describe('玩家可见裸中文收口（W-D2 切片54）', () => {
+  const SRC = readFileSync(join(process.cwd(), 'src/ui/SettingsPanel.js'), 'utf8');
+  const RNM = readFileSync(join(process.cwd(), 'src/world/RestNpcManager.js'), 'utf8');
+  const HTML = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+
+  it('键位表头四个标签全走 t()（设备词复用 input_device_* 三键，不建新键）', () => {
+    expect(SRC).toContain("${t('settings_keybind_head_action')}");
+    expect(SRC).toContain("${t('settings_keybind_head_equivalent')}");
+    expect(SRC).toContain("${t('input_device_keyboard')} / ${t('input_device_mouse')}");
+    expect(SRC).toContain("${t('input_device_gamepad')}");
+  });
+
+  it('表头那段模板里再无中文字面量（注释除外）', () => {
+    const 段 = SRC.slice(SRC.indexOf('keybind-head'), SRC.indexOf("rows.join('')"));
+    const 裸 = 段.split('\n').filter((l) => /[\u4e00-\u9fff]/.test(l) && !l.trim().startsWith('//') && !l.trim().startsWith('*'));
+    expect(裸, '表头模板里还有裸中文').toEqual([]);
+  });
+
+  it('营火 NPC 模型加载 toast 走 t() 且带 name 插值', () => {
+    expect(RNM).toContain("t('rest_npc_model_loaded_fmt', { name: t(def.name) })");
+    expect(RNM).not.toContain('模型已加载');
+  });
+
+  it('index.html 没有中文 title 工具提示（Fab 的 title 与可见标签重复，已删）', () => {
+    const 中文title = [...HTML.matchAll(/title="([^"]*)"/g)].filter((m) => /[\u4e00-\u9fff]/.test(m[1]));
+    expect(中文title.map((m) => m[0])).toEqual([]);
+  });
+
+  it('反面控制：同一把 title 扫描咬得住中文标题（防"永远返回空"）', () => {
+    const 假 = '<a title="自动通关">x</a><a title="Auto">y</a>';
+    const 中文title = [...假.matchAll(/title="([^"]*)"/g)].filter((m) => /[\u4e00-\u9fff]/.test(m[1]));
+    expect(中文title.map((m) => m[0])).toEqual(['title="自动通关"']);
+  });
+
+  it('三个新键两表都有非空文案，且模板带 ${name} 占位', () => {
+    for (const k of ['settings_keybind_head_action', 'settings_keybind_head_equivalent', 'rest_npc_model_loaded_fmt']) {
+      expect(STRINGS_ZH[k], `中文表缺 ${k}`).toBeTypeOf('string');
+      expect(STRINGS_EN[k], `英文表缺 ${k}`).toBeTypeOf('string');
+    }
+    expect(STRINGS_ZH.rest_npc_model_loaded_fmt).toContain('${name}');
+    expect(STRINGS_EN.rest_npc_model_loaded_fmt).toContain('${name}');
   });
 });
