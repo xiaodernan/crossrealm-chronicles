@@ -31,6 +31,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as THREE from 'three';
+import { CollisionWorld } from '../src/engine/Collision.js';
 import { buildSeededWorld, buildSeededDecorations } from './helpers/seededWorld.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
@@ -123,7 +124,7 @@ function 布局指纹(件们) {
 /** 线性坡：gy = 0.3x + 0.2z。"周围 5 点取中点"在这种坡上**恰好等于中心值** */
 function 斜坡世界(kx = 0.3, kz = 0.2) {
   const scene = new THREE.Scene();
-  return { scene, getGroundHeight: (x, z) => kx * x + kz * z };
+  return { scene, collision: new CollisionWorld(16), getGroundHeight: (x, z) => kx * x + kz * z };
 }
 
 /**
@@ -134,7 +135,7 @@ function 斜坡世界(kx = 0.3, kz = 0.2) {
  */
 function 凸坡世界(k = 0.01) {
   const scene = new THREE.Scene();
-  return { scene, getGroundHeight: (x) => k * x * x };
+  return { scene, collision: new CollisionWorld(16), getGroundHeight: (x) => k * x * x };
 }
 
 function 准备() {

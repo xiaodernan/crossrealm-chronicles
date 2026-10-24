@@ -21,6 +21,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import * as THREE from 'three';
 import { WorldDecorations } from '../src/world/WorldDecorations.js';
+import { CollisionWorld } from '../src/engine/Collision.js';
 
 /** 线性同余替换 Math.random：同一种子同序列，build 结果可复现 */
 function seedRandom(seed = 42) {
@@ -31,7 +32,12 @@ function seedRandom(seed = 42) {
   });
 }
 
-const makeWorld = () => ({ getGroundHeight: () => 0 });
+/**
+ * 替身世界。**碰撞世界是真的**（`CollisionWorld`）：切片B 起装饰层边摆边登记障碍，
+ * 一个 `collision: null` 的替身会让 build 当场抛 —— 那不是这一片要测的事，而是替身
+ * 少给了一件生产一定给的东西。判据在 `tests/decoration-collider-coverage.test.js`。
+ */
+const makeWorld = () => ({ getGroundHeight: () => 0, collision: new CollisionWorld(16) });
 
 function buildDecorations() {
   const restore = seedRandom();

@@ -69,9 +69,10 @@ export function buildSeededWorld(seed) {
  * 未经旋转的原点（普查脚本踩过这个坑：五座门拱的读数一模一样，看着像"埋了 6 米"，
  * 其实是没刷矩阵）。判据要读世界空间，就得先把世界空间刷出来。
  *
- * @param {{ scene: THREE.Scene, getGroundHeight: (x: number, z: number) => number }} world
- *   已 build 的世界；装饰层只问 `getGroundHeight`，故替身世界（只需这两样）也能进来
- * @param {number} seed 摆件种子；同一颗种子 => 同一份装饰层布局
+ * @param {{ scene: THREE.Scene, getGroundHeight: (x, z) => number, collision: import('../../src/engine/Collision.js').CollisionWorld }} world
+ *   已 build 的世界；装饰层问两样：`getGroundHeight` 定落脚点、`collision` 登记本体
+ *   （切片B 起摆件有障碍，替身世界要把这两样都给 —— 只给前者会在 `_blockCyl` 当场抛）
+ * @param {number} seed 摆件种子；同一颗种子 => 同一份装饰层布局（碰撞体逐位同）
  * @returns {import('../../src/world/WorldDecorations.js').WorldDecorations}
  */
 export function buildSeededDecorations(world, seed) {
