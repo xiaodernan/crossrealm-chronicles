@@ -8,6 +8,13 @@
  *  盘内该起伏还是起伏 —— 于是泉池埋进地里、招牌柱与幡圈各站各的高度。"抹平"是
  *  另一种合成，只能落在 `sampleGlobalHeight` 取完最大值**之后**：`max` 只会往上抬，
  *  抬不平已经压在头顶的那座 hill。
+ *
+ *  室内那一层地板（`interiors`）走同一层理由、也落在这条链的最后 —— 它比广场更极端：
+ *  幽暗神殿那层地板在室外地面**之下** 20 米，星港瞭望塔那层在**之上** 20 米。
+ *  改前它由 `WorldManager.getGroundHeight` 里一道"占地内就整体替换"的分支回答，
+ *  占地边界就是一刀 21~23 米的竖直坎，而这张网格（眼睛）根本不认那一档：
+ *  脚踩的那层与看见的那层是两层（B126，走路穿模里最狠的一段落差）。
+ *  现在它按 `blendInterior` 的权重掺进来，腹地恒 1（读数一字未改），带外恒 0。
  */
 import { HUB_ZONE } from '../content/ZoneIdentity.js';
 
@@ -156,7 +163,26 @@ function zoneRimWeight(zone, x, z) {
   return 1 - t * t * (3 - 2 * t);
 }
 
-export function sampleGlobalHeight(x, z, zones = []) {
+/**
+ * 室内那一档往这块地里掺多少（W-B9 切片E，修 B126）。
+ *
+ * `interiors` 是宿主世界的 `InternalSpaceManager`（鸭子类型：只问 `groundBlendAt(x, z)`），
+ * 没递就等于"这块地上没有室内"。掺混落在**室外那整块地之后**，与广场同一层理由：
+ * `max` 只会往上抬，抬不平已经压在头顶的那座 hill，也压不下本该埋在地下的那层地板 ——
+ * 而室内是"这一格的地面就是这一层楼"，它必须能同时往下和往上改。带外权重恒 0，
+ * 于是这条掺混在世界上绝大多数点上根本发生不了。
+ *
+ * 过渡带里那点算**室外**：雾、层号、`currentSpace` 仍按占地认领（`spaceAtWorldPoint`），
+ * 只有地面在带里往室内那一档俯身 —— 玩家还没进屋，但脚下不再是平的。
+ */
+function blendInterior(室外, interiors, x, z) {
+  if (!interiors) return 室外;
+  const 室内 = interiors.groundBlendAt(x, z);
+  if (!室内) return 室外;
+  return 室外 + (室内.height - 室外) * 室内.weight;
+}
+
+export function sampleGlobalHeight(x, z, zones = [], interiors = null) {
   const nat = naturalTerrain(x, z);
   let maxH = nat;
 
@@ -169,28 +195,28 @@ export function sampleGlobalHeight(x, z, zones = []) {
   }
 
   const w = hubPlazaWeight(x, z);
-  if (w === 0) return maxH;
-  return maxH + (HUB_PLAZA.level - maxH) * w;
+  const 室外 = w === 0 ? maxH : maxH + (HUB_PLAZA.level - maxH) * w;
+  return blendInterior(室外, interiors, x, z);
 }
 
 /** 四角采样 — 减少陡坡穿模、移动更贴地 */
-export function sampleGlobalHeightSmooth(x, z, zones = []) {
+export function sampleGlobalHeightSmooth(x, z, zones = [], interiors = null) {
   const s = 0.5;
   return (
-    sampleGlobalHeight(x, z, zones)
-    + sampleGlobalHeight(x + s, z, zones)
-    + sampleGlobalHeight(x - s, z, zones)
-    + sampleGlobalHeight(x, z + s, zones)
-    + sampleGlobalHeight(x, z - s, zones)
+    sampleGlobalHeight(x, z, zones, interiors)
+    + sampleGlobalHeight(x + s, z, zones, interiors)
+    + sampleGlobalHeight(x - s, z, zones, interiors)
+    + sampleGlobalHeight(x, z + s, zones, interiors)
+    + sampleGlobalHeight(x, z - s, zones, interiors)
   ) / 5;
 }
 
-export function sampleGroundNormal(x, z, zones = []) {
+export function sampleGroundNormal(x, z, zones = [], interiors = null) {
   const e = 1.0;
-  const hL = sampleGlobalHeight(x - e, z, zones);
-  const hR = sampleGlobalHeight(x + e, z, zones);
-  const hD = sampleGlobalHeight(x, z - e, zones);
-  const hU = sampleGlobalHeight(x, z + e, zones);
+  const hL = sampleGlobalHeight(x - e, z, zones, interiors);
+  const hR = sampleGlobalHeight(x + e, z, zones, interiors);
+  const hD = sampleGlobalHeight(x, z - e, zones, interiors);
+  const hU = sampleGlobalHeight(x, z + e, zones, interiors);
   const nx = hL - hR;
   const nz = hD - hU;
   const len = Math.hypot(nx, nz, 2 * e) || 1;

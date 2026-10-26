@@ -18,6 +18,30 @@
  * 所以这里既要有"神殿中心的大气归属仍然是 space"（不许顺手把区几何改了），
  * 也要有"同一个点的室内归属是那座神殿"，还要有"把邻区半径这个旋钮拧来拧去，只有前者跟着动"。
  *
+ * ## 切片E（修 B126）在本片留下的三处口径
+ *
+ * 室内那一档从"占地内整体替换地面"变成了**全局高度场的一项**（占地外一条 smoothstep 过渡带
+ * 收到 0，见 `InternalSpace.groundWeightAt`）。这片门禁的命题一个字没改，改的是**怎么读**：
+ * - **精确**那一格挪给裸读数 `sampleGlobalHeight(…, 花名册)`：占地内权重恒 1，混合是原子的。
+ *   玩家脚下的 `getGroundHeight` 走的是五抽头平滑（±0.5 米），它与地板的口径差实测 0.12 米
+ *   —— 那是这座空间自己的**面形**（神殿中心凹陷、大厅中央微隆），不是"室内不认"，
+ *   所以对它用的尺是一阶上坎，而不是 1e-9。
+ * - ③ 那五档旋钮原来比"精确等于地板"，现在比两条结构关系：**五档互等**（差 < 1e-9）
+ *   且每一档都落在那层地板的一阶上坎内 —— 后者拦住"五档一起答了室外"那种自洽的错。
+ * - ⑤ 原来在代码里写着"占地内法向 = (0,1,0)"，所以法向与高度是两条口径。现在同源，
+ *   于是这一条改成量"四座空间心的场差分出来必须竖直，而同一地点的自然地那一份必须歪" ——
+ *   比原来那句字面量多咬得住"花名册没递进法向"这一族。
+ *
+ * ### 切片E 的落刀记录（本片吃到的）
+ *
+ * 整批五刀在 `tests/interior-ground-field.test.js` 头部那张表。这里只记本片：
+ * **臂12**（`blendInterior` 不再掺这一档，但占地认领照旧）⇒ ① 地板那一档、② 整座占地答室内、
+ * ③ 五档旋钮、⑤ 两条法向，共 **5 红，无漏无超出** —— 命题"室内归属与大气归属分家"没变，
+ * 变的是"地面这一档活在一条场里"，四组读法一起点名，正是这一片想要的形状。
+ * **臂9／臂10／臂11／臂13 本片 0 红**：①②③⑤ 问的都是**带室内的那条场**，
+ * 顺序刀与网格刀（臂9/10）打的是 `WorldTerrain` 那一张皮，带宽与形状刀（臂11/13）打的是过渡带，
+ * 都不落进"归属由占地认领"这个命题里 —— 让它们红的门禁另有其人。
+ *
  * ## 反空跑那条尺为什么不是"差 > 20 米"
  * 上面那 21.8 米是 B121 当时的现场读数，不是判据该有的形状：缺陷② 的切片把走廊谷底到肩峰接成
  * smoothstep 之后，神殿中心的全局裸读数从 10.80 掉到 9.77（走廊#2 那一项 1.985 → −0.005），
@@ -33,7 +57,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { WorldManager } from '../src/world/WorldManager.js';
 import { InternalSpaceManager, InternalSpaceTemplates } from '../src/world/InternalSpace.js';
-import { sampleGlobalHeightSmooth, sampleGroundNormal } from '../src/world/TerrainHeight.js';
+import { sampleGlobalHeight, sampleGlobalHeightSmooth, sampleGroundNormal } from '../src/world/TerrainHeight.js';
+import { playerStepUp } from './helpers/productionReadings.js';
 import { ZONE_IDS, resolveZone, zoneIdAt } from '../src/content/ZoneIdentity.js';
 
 const SRC = join(process.cwd(), 'src');
@@ -110,7 +135,15 @@ describe('B121：大气归属与室内归属分家', () => {
       /** 这座室内自己那一层的顶板：地板基准 + 一个层高 —— 两个数都取自模板，不是手打的实测 */
       const 顶板 = shrine.getWorldBaseHeight(载体.center) + shrine.floorHeight;
       expect(期望, '这座的地板在 -10 那一档').toBeCloseTo(-10, 6);
-      expect(world.getGroundHeight(心.x, 心.z)).toBeCloseTo(期望, 9);
+      // B126 之后室内那一档是高度场的一项：占地内权重恒 1，所以**裸读数**仍精确等于那一层；
+      // 玩家脚下的五抽头只许与它差不过一阶上坎（抽头够得着 ±0.5 米，神殿那点吃的是自己
+      // 室内面形的那 0.12 米，不是室外自然地）。
+      expect(sampleGlobalHeight(心.x, 心.z, world.zones, world.internalSpaceManager))
+        .toBeCloseTo(期望, 9);
+      const 脚 = world.getGroundHeight(心.x, 心.z);
+      expect(Math.abs(脚 - 期望), `站在那儿脚下比那一层地板高 ${Math.abs(脚 - 期望).toFixed(3)} 米 > 一阶上坎`)
+        .toBeLessThan(playerStepUp());
+      expect(脚, '改前这里答的是全局地形（差 21.8 米）').not.toBeCloseTo(全局, 6);
       // 反空跑：全局地面要把整座室内**压在下面**，而且比顶板还高出一整个层高 ——
       // 那样上一条"出口答的是室内"才不可能是两边恰好撞在同一个数上。
       // 阈值取自模板的层高，不取自某一次实测：切片D 把走廊谷底到肩峰那一段接成 smoothstep，
@@ -133,17 +166,23 @@ describe('B121：大气归属与室内归属分家', () => {
     it('四座空间的每个占地样本点都拿到自己那块地板，且答室内的比例是 100 %', () => {
       const 全部 = [...world.internalSpaceManager.spacesByZone.values()].flat();
       expect(全部.length, '四座模板都要注册进真世界').toBe(4);
+      const 上坎 = playerStepUp();
       const 读数 = {};
       for (const space of 全部) {
         const center = 区的载体(world, space.zoneId).center;
         const 样本 = 占地样本(space, center);
         let 答室内 = 0;
         let 与全局不同 = 0;
+        let 脚下漂 = 0;
         for (const p of 样本) {
           const 期望 = space.getInternalHeightAt(p.x, p.z, center);
-          const 实际 = world.getGroundHeight(p.x, p.z);
+          // 精确这一格归**裸读数**：占地内权重恒 1，混合是原子的，室内面形一个字不被掺。
+          // 脚下的那条是五抽头（±0.5 米），它吃的是这座空间自己的面形，不是"室内不认"。
+          const 实际 = sampleGlobalHeight(p.x, p.z, world.zones, world.internalSpaceManager);
+          const 脚 = world.getGroundHeight(p.x, p.z);
           if (Math.abs(实际 - 期望) < 1e-9) 答室内++;
-          if (Math.abs(实际 - sampleGlobalHeightSmooth(p.x, p.z, world.zones)) > 0.01) 与全局不同++;
+          if (Math.abs(脚 - 期望) > 脚下漂) 脚下漂 = Math.abs(脚 - 期望);
+          if (Math.abs(脚 - sampleGlobalHeightSmooth(p.x, p.z, world.zones)) > 0.01) 与全局不同++;
           if (world.internalSpaceManager.spaceAtWorldPoint(p.x, p.z)?.space.id !== space.id) {
             expect.fail(`${space.id} 的占地样本 (${p.x.toFixed(1)}, ${p.z.toFixed(1)}) 没被自己认领`);
           }
@@ -151,6 +190,8 @@ describe('B121：大气归属与室内归属分家', () => {
         读数[space.id] = { 样本: 样本.length, 答室内, 与全局不同 };
         expect(样本.length, `${space.id} 的样本下限`).toBeGreaterThanOrEqual(60);
         expect(答室内, `${space.id} 答室内的样本数（共 ${样本.length}）`).toBe(样本.length);
+        expect(脚下漂, `${space.id} 占地里脚下读数与那一层地板最差 ${脚下漂.toFixed(3)} 米 > 一阶上坎 ${上坎} `
+          + '⇒ 平滑把室内那一档掺出了台阶').toBeLessThan(上坎);
         // 这一条不许是"全局恰好等于室内"混过去的：至少九成样本的读数与全局差得开
         expect(与全局不同 / 样本.length, `${space.id} 与全局地形读得出差值的比例`).toBeGreaterThanOrEqual(0.9);
       }
@@ -188,9 +229,17 @@ describe('B121：大气归属与室内归属分家', () => {
       expect(new Set(读数.map((r) => r.大气)).size, '大气归属跟着半径变的档数').toBeGreaterThanOrEqual(3);
       expect(读数[1].大气, 'space 缩掉之后那点该判给 gloom').toBe(ZONE_IDS.GLOOM);
       expect(读数[4].大气, '两个区都盖不住时是走廊').toBe(ZONE_IDS.CORRIDOR);
-      // 而室内那条路一次也没跟着动
+      // 而室内那条路一次也没跟着动。B126 之后不再拿"精确等于地板"当尺（五抽头的口径差 0.12 米
+      // 是场的形状，不是归属漂了），改成两条结构关系：**五档读数互等**，且每一档都落在
+      // 那一层地板的一阶上坎之内 —— 后者防的是"五档一起答了室外"这种自洽的错。
+      let 档间 = 0;
+      for (const r of 读数) 档间 = Math.max(档间, Math.abs(r.地板 - 读数[0].地板));
+      expect(档间, `五档地板读数最大互差 ${档间.toExponential(2)} 米 ⇒ 大气半径的旋钮动了室内那一档的读数`)
+        .toBeLessThan(1e-9);
+      const 上坎 = playerStepUp();
       for (const r of 读数) {
-        expect(r.地板, `大气=${r.大气} 那一档的地板`).toBeCloseTo(期望, 9);
+        expect(Math.abs(r.地板 - 期望), `大气=${r.大气} 那一档的地板 ${r.地板.toFixed(3)} 与 ${期望.toFixed(3)} `
+          + `差 ${Math.abs(r.地板 - 期望).toFixed(3)} 米`).toBeLessThan(上坎);
       }
     });
   });
@@ -208,20 +257,51 @@ describe('B121：大气归属与室内归属分家', () => {
   });
 
   describe('⑤ 一条判据三处共用（高度、法向、每帧缓存）', () => {
-    it('站在神殿里法向朝上；走出占地 5 米就交还给全局，且那一帧不用跨区', () => {
+    // B126 之前 `getGroundNormal` 里另写了一格"占地内直接回 (0,1,0)"的特例 —— 那正是
+    // "高度问一条场、法向问另一条口径"的分家（斜坡上的室内地板会给出竖直法向）。
+    // 现在法向与高度同源：都由带花名册的那一条场差分出来。所以"站着是平的"这句话
+    // 不再由代码写死，而是由场自己量出来 —— 四座的空间心要么平顶、要么旋转对称，
+    // 差分出来的法向必须竖直；而**不带室内**的那一份在同一地点是歪的（自然地本来有坡度），
+    // 于是这一条比原来那句 `toEqual({x:0,y:1,z:0})` 咬得动更多东西。
+    it('四座的空间心：法向由**带室内的**那条场差分出来，且竖直（噪声位）', () => {
+      for (const space of [...world.internalSpaceManager.spacesByZone.values()].flat()) {
+        const 心 = 空间中心(world, space);
+        const 法向 = world.getGroundNormal(心.x, 心.z);
+        expect(法向, `${space.id} 心：法向与"带花名册的那条场"不是同一个数 —— 高度与法向又分家了`)
+          .toEqual(sampleGroundNormal(心.x, 心.z, world.zones, world.internalSpaceManager));
+        const 平 = Math.hypot(法向.x, 法向.z);
+        expect(平, `${space.id} 心：室内那一档的水平分量 ${平.toFixed(6)} 不为 0（心是平顶或旋转对称）`)
+          .toBeLessThan(1e-9);
+        expect(法向.y).toBeGreaterThan(0.999999);
+        // 反空跑：同一地点**不带室内**的那一份必须是歪的，否则上面那条"竖直"是撞上的
+        const 天然 = sampleGroundNormal(心.x, 心.z, world.zones);
+        expect(Math.hypot(天然.x, 天然.z), `${space.id} 心：自然地那一份本来就没坡 ⇒ 这条竖直判据量不到室内`)
+          .toBeGreaterThan(1e-3);
+      }
+    });
+
+    it('带内仍算室外归属，带外才把法向整个交还全局；那一帧不用跨区', () => {
       const shrine = 找(world, 神殿id);
       const 心 = 空间中心(world, shrine);
-      expect(world.getGroundNormal(心.x, 心.z)).toEqual({ x: 0, y: 1, z: 0 });
       world.update(1 / 60, 心);
       expect(world.internalSpaceManager.currentSpace?.id).toBe(神殿id);
 
-      const 外 = { x: 心.x + shrine.radius + 5, z: 心.z };
-      expect(zoneIdAt(外, world.zones), '那点还在同一个大气区里（否则这条测的是跨区）')
-        .toBe(zoneIdAt(心, world.zones));
-      expect(world.getGroundNormal(外.x, 外.z)).toEqual(sampleGroundNormal(外.x, 外.z, world.zones));
-      world.update(1 / 60, 外);
-      expect(world.internalSpaceManager.currentSpace, '走出去那一帧缓存必须归零').toBe(null);
+      // 半径外 5 米：B126 之后这一点落在地面过渡带里 —— 归属已经出门，地面/法向还掺着室内
+      const 带内 = { x: 心.x + shrine.radius + 5, z: 心.z };
+      expect(带内.x - 心.x, '那点应当在占地外、带宽内').toBeGreaterThan(shrine.radius);
+      expect(带内.x - 心.x, '那点应当在带宽内').toBeLessThan(shrine.radius + shrine.rimBand);
+      expect(world.getGroundNormal(带内.x, 带内.z))
+        .not.toEqual(sampleGroundNormal(带内.x, 带内.z, world.zones));
+      world.update(1 / 60, 带内);
+      expect(world.internalSpaceManager.currentSpace, '出了占地缓存就该归零（带宽不参与归属判据）').toBe(null);
       expect(world.currentInternalFog).toBe(null);
+
+      // 带宽之外：法向一字不差地交还给不带花名册的那条场
+      const 带外 = { x: 心.x + shrine.radius + shrine.rimBand + 5, z: 心.z };
+      expect(zoneIdAt(带外, world.zones), '那点还在同一个大气区里（否则这条测的是跨区）')
+        .toBe(zoneIdAt(心, world.zones));
+      expect(world.getGroundNormal(带外.x, 带外.z))
+        .toEqual(sampleGroundNormal(带外.x, 带外.z, world.zones));
     });
   });
 

@@ -20,10 +20,32 @@
  * 4. **处处有限**：整张可通行网格上 `getGroundHeight` 都是有限数。这一条是玩家侧那半条链的
  *    现场证据 —— NaN 地面 → 落不实地 → 任意一次以地面为基准的传送把 NaN 写进 `position` →
  *    阻尼相机从 NaN 出发再也回不来 → 视锥六个面全 NaN → 剔除整体失效。
+ *
+ * ## 切片E（修 B126）改了两条的**口径**，没削它们的牙口
+ *
+ * 室内那一档此前只在占地里整体替换地面，现在它是**全局高度场的一项**，占地外多出一条
+ * smoothstep 过渡带（`InternalSpace.rimBand`）。于是：
+ * - ② 原来一次比到底（`getGroundHeight(中心)` 精确等于那一层地板）。现在**精确**归**裸读数**
+ *   `sampleGlobalHeight`（占地内权重恒 1，混合是原子的），脚那条五抽头读数只许与地板差不过
+ *   一阶上坎 —— 抽头把带外的自然地掺进来一点是场的口径，不是"室内不认"。实测差 0.120 米。
+ * - ③ 原来的取样点写在"半径外 5 米"，那一格如今落在过渡带里。点挪到 `radius + rimBand + 5`，
+ *   比的仍是**不带花名册**的那一份：带外交回自然地这件事一个字没松。
+ * - ④ 反倒多了一个免费见证：占地外、带宽 40 % 那一点，**归属**已经归零（缓存 null、雾 null），
+ *   **地面**却还掺着室内那一档（差值非零）。两条判据各走各的，谁也没顺着谁放宽。
+ *   取样点按带宽的比例取、不按米取，并当场验一次"权重确实在 0 与 1 之间"——
+ *   写死"半径外 5 米"的话，带宽哪天改窄过 5 米，这一条会悄悄跑到带外去量（臂11 实测红过一回）。
+ *
+ * ## 切片E 的落刀记录（本片吃到的）
+ *
+ * 整批五刀在 `tests/interior-ground-field.test.js` 头部那张表。这里只记本片：
+ * 臂12（`blendInterior` 不再掺）⇒ ② 两条用例 ＋ ④ 那一句"带内还掺着"共 **3 红，无漏无超出**；
+ * 臂11（四条带统一砍半）修口径之前红在 ④，改成带宽比例取样之后 **0 红** ——
+ * 那一条量的从来不是带宽够不够宽，那是 `interior-ground-field` ③ 的活。
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { WorldManager, WORLD_BOUNDS } from '../src/world/WorldManager.js';
-import { sampleGlobalHeightSmooth } from '../src/world/TerrainHeight.js';
+import { sampleGlobalHeight, sampleGlobalHeightSmooth } from '../src/world/TerrainHeight.js';
+import { playerStepUp } from './helpers/productionReadings.js';
 import { HUB_ZONE, ZONE_IDS, resolveZone, zoneIdAt } from '../src/content/ZoneIdentity.js';
 
 const makeScene = () => ({ add() {}, remove() {} });
@@ -96,18 +118,29 @@ describe('B120：室内高度在生产形状下成立', () => {
   });
 
   describe('② 走进室内：高度由本层基准 + 局部采样推出来', () => {
-    it('每座空间**都认得出**，中心点高度 == 区域基准 y + baseHeight + floor*层高 + 局部采样(0,0)', () => {
+    it('每座空间**都认得出**：裸读数正是那一层地板，玩家那条五抽头读数与它差不过一阶上坎', () => {
       const 全部 = [...world.internalSpaceManager.spacesByZone.values()].flat();
       expect(全部.length, '四座模板都要注册进真世界').toBe(4);
+      const 上坎 = playerStepUp();
       let 认出 = 0;
       for (const space of 全部) {
         const wc = 空间中心(world, space);
         const 期望 = 室内地板(world, space);
+        // B126 之后室内那一档是**全局高度场的一项**，玩家脚下走的是五抽头平滑那一份：
+        // 平台中心精确等于地板这件事归**裸读数**管（weight 在占地内恒 1，混合是原子的），
+        // 抽头把带外的自然地掺进来一点，是场的口径，不是"室内不认"。
+        const 裸 = sampleGlobalHeight(wc.x, wc.z, world.zones, world.internalSpaceManager);
+        expect(裸, `${space.id} 中心点裸读数`).toBeCloseTo(期望, 9);
         const 实际 = world.getGroundHeight(wc.x, wc.z);
+        // 脚这条路的接线：玩家读的就是**带花名册的**那条平滑场，漏递一项这里当场分家
+        expect(实际, `${space.id} 中心点：getGroundHeight 没把室内递进高度场`)
+          .toBeCloseTo(sampleGlobalHeightSmooth(wc.x, wc.z, world.zones, world.internalSpaceManager), 9);
+        expect(Math.abs(实际 - 期望), `${space.id} 中心点：五抽头与那一层地板分了 ${Math.abs(实际 - 期望).toFixed(3)} 米 `
+          + `> 一阶上坎 ${上坎} ⇒ 平滑把过渡带自然地掺过了头，玩家站在室内地板上却飘着一阶台阶`)
+          .toBeLessThan(上坎);
         // B121 曾在这里留一格豁免：`gloom-ancient-shrine` 的世界中心 (200, 70) 离 space 心只有
         // 10.0 米、离 gloom 心 36.1 米，"先把点收敛成一个区"把它整片足迹判给了 space，
         // 于是那座神殿的地板永远不回答。豁免已随修复删除 —— 四座就是四座。
-        expect(实际, `${space.id} 中心点高度`).toBeCloseTo(期望, 9);
         认出++;
       }
       expect(认出, '认得出的室内空间数').toBe(全部.length);
@@ -122,10 +155,12 @@ describe('B120：室内高度在生产形状下成立', () => {
   });
 
   describe('③ 走到室外：立刻回到全球地形，玩家站过的缓存不回答别人的点', () => {
-    it('半径外 5 米那个点 == `sampleGlobalHeightSmooth`，同区内也不带室内地板', () => {
+    it('过渡带外 5 米那个点 == 不带花名册的 `sampleGlobalHeightSmooth`，同区内也不带室内地板', () => {
       const hall = 大厅(world);
       const wc = 空间中心(world, hall);
-      const 外 = { x: wc.x + hall.radius + 5, z: wc.z };
+      // B126 之前"半径外"就等于室外；现在半径外那一圈是**地面过渡带**，地上还掺着室内那一档。
+      // 这条要量的是"带外交回自然地"，所以取样点必须走到 `radius + rimBand` 之外。
+      const 外 = { x: wc.x + hall.radius + hall.rimBand + 5, z: wc.z };
       expect(区的载体(world, hall.zoneId).center, '室外那点仍在本区（否则这条测的是走廊）')
         .toBeTruthy();
       expect(world.getGroundHeight(外.x, 外.z))
@@ -152,12 +187,23 @@ describe('B120：室内高度在生产形状下成立', () => {
       expect(world.internalSpaceManager.currentSpace, '站在大厅里，缓存应当是那座大厅').toBe(hall);
       expect(world.currentInternalFog, '室内雾应当认得出').toBeTruthy();
 
-      const 外 = { x: wc.x + hall.radius + 5, z: wc.z };
+      const 外 = { x: wc.x + hall.radius + hall.rimBand * 0.4, z: wc.z };
+      // 这一点刻意留在**地面过渡带**里（占地半径之外、带宽之内，按带宽的比例取，不按米取 ——
+      // 写死"半径外 5 米"的话，带宽一旦改窄过 5 米这条就悄悄跑到带外去了）：
+      // 归属认的是占地，地面认的是 `[radius, radius + rimBand]` 那一段混合。两条判据分家这件事
+      // 要有人看着 —— 顺着带宽把归属也放宽，玩家站在厅外就还泡在室内雾里。
+      const 权重 = hall.groundWeightAt(外.x, 外.z, 区的载体(world, hall.zoneId).center);
+      expect(权重 > 0 && 权重 < 1, `${hall.id} 那个点应当真在过渡带中段（权重 ${权重}）：`
+        + '带外就退回"交回自然地"那一条，腹地则归属也还在室内').toBe(true);
       world.update(1 / 60, 外);
       // 改前：这一帧 `zoneIdAt` 还是 radiant、`zone === this.currentZone` 直接早退，
       // 缓存里留着玩家已经离开的那座大厅 —— 雾、层号、地面法向全按室内回答。
       expect(world.internalSpaceManager.currentSpace, '走出去了，缓存必须归零').toBe(null);
-      expect(world.currentInternalFog).toBe(null);
+      expect(world.currentInternalFog, '归属归零了，雾也必须归零（带宽不参与归属判据）').toBe(null);
+      // 同一帧的地面却**还掺着**室内那一档：把这一档从场上抹掉，下面这个差就变成 0
+      expect(Math.abs(world.getGroundHeight(外.x, 外.z)
+        - sampleGlobalHeightSmooth(外.x, 外.z, world.zones)),
+      '带内那一点的地面应当掺着室内那一档（归属与地面两条判据各走各的）').toBeGreaterThan(0);
     });
   });
 

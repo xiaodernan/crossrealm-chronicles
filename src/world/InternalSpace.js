@@ -12,7 +12,9 @@ import { SOLID } from '../engine/Collision.js';
  *   - 自定义高度采样（sampleHeightInternal）
  *   - 自己的碰撞体、POI、装饰物
  *   - 可选的垂直层级（floor），支持竖向日程
- * - WorldManager 按区域收集内部空间，玩家进入/离开时切换高度查询与碰撞检测。
+ * - WorldManager 按区域收集内部空间，玩家进入/离开时切换归属与碰撞检测；
+ *   **地面**则由 `groundBlendAt` 掺进那一条全局高度场（W-B9 切片E，修 B126 —— 以前室内
+ *   那一档只在占地里整体替换地面，占地外一刀交回室外，脚踩的那层与看见的那层是两层）。
  */
 
 export class InternalSpace {
@@ -26,6 +28,7 @@ export class InternalSpace {
    * @param {number} [config.floorHeight=4] - 层高（米）
    * @param {number} [config.baseHeight=0] - 基础高度偏移（相对区域地面）
    * @param {Function} [config.sampleHeightInternal] - 内部高度采样函数 (lx, lz) => y
+   * @param {number} [config.rimBand] - 地面过渡带宽（米，见 `groundWeightAt`；缺省取占地半径）
    * @param {THREE.Color|number} [config.fogColor] - 内部雾色
    * @param {number} [config.fogDensity] - 内部雾密度
    */
@@ -38,6 +41,8 @@ export class InternalSpace {
     this.floorHeight = config.floorHeight ?? 4;
     this.baseHeight = config.baseHeight ?? 0;
     this.sampleHeightInternal = config.sampleHeightInternal ?? (() => 0);
+    /** 没声明就按占地半径给一条够宽的下限：宁可过渡带宽一点，不许默认值是刀（B126 的本体） */
+    this.rimBand = config.rimBand ?? this.radius;
     this.fogColor = config.fogColor ?? 0x888888;
     this.fogDensity = config.fogDensity ?? 0.01;
     this.group = new THREE.Group();
@@ -69,6 +74,28 @@ export class InternalSpace {
     const dx = worldX - wc.x;
     const dz = worldZ - wc.z;
     return dx * dx + dz * dz < this.radius * this.radius;
+  }
+
+  /**
+   * 这个**世界点**上"室内那一档地面"占多少 —— 高度场里那一档的权重，与归属（`containsWorldPoint`）
+   * 是同一条判据的两种问法：占地内恒 1（边界用同一个 `<`，所以两条在 d = radius 上不会各说一头），
+   * `[radius, radius + rimBand]` 里走 smoothstep 收到 0，带外恒 0。
+   *
+   * 为什么必须有这一段（B126）：室内那一层地板此前只在"占地内"回答，占地外一刀交回室外地形 ——
+   * 实测最狠的一档是星港瞭望塔 **23.36 米**（占地里 24.00、外头 0.64），幽暗神殿反向 21.09 米。
+   * 玩家跨过去时 `walkY` 当场跳十几二十米，竖直阻尼只会把他**从山体里穿上去**，
+   * 而可见的那张地面网格根本不认这一档 —— 脚踩的那层与看见的那层是两层。
+   * 两端导数为 0 ⇒ 带内外那两条接痕不成折线（与区缘收口、枢纽广场同一条形状）。
+   * 带宽够不够由 `tests/interior-ground-field.test.js` 从实测落差反推的那条尺钉着，不由这里手打的数说了算。
+   */
+  groundWeightAt(worldX, worldZ, zoneCenter) {
+    const wc = this.getWorldCenter(zoneCenter);
+    const d = Math.hypot(worldX - wc.x, worldZ - wc.z);
+    if (d < this.radius) return 1;
+    if (this.rimBand <= 0) return 0;
+    const t = (d - this.radius) / this.rimBand;
+    if (t >= 1) return 0;
+    return 1 - t * t * (3 - 2 * t);
   }
 
   /** 本地坐标转世界坐标 */
@@ -325,9 +352,59 @@ export class InternalSpaceManager {
   }
 
   /**
+   * 这个**世界点**上室内那一档地面要往全局高度场里掺多少：`{ space, weight, height }`，
+   * 所有过渡带都够不着时返回 null（那点纯粹是室外地）。
+   *
+   * 这是"室内地面"进场的唯一一条路（W-B9 切片E，修 B126）。此前它走的是
+   * `WorldManager.getGroundHeight` 里那道"占地内就整体交回地板"的分支 —— 于是同一张世界上
+   * 并着两层地面：可见的场（`WorldTerrain` 那张网格按 `sampleGlobalHeight` 采样）不认室内，
+   * 脚下的场认。占地边界那一刀实测 21~23 米（见 `InternalSpace.groundWeightAt` 的注），
+   * 玩家跨过去就是"脚踩在二十米高的看台上、眼睛看着平地"，也就是走路穿模里与摆件无关的那一半。
+   *
+   * 三条口径写在这里，因为它们各是各的坑：
+   * - **归属与地面是两件事**：雾、层号、`currentSpace` 仍按**占地**认领（`spaceAtWorldPoint`），
+   *   过渡带是室外 —— 带里那点会往室内那一档俯身，但玩家没进屋。
+   * - **区中心向问手现问**（`_zoneCenterFor`）：抄一份坐标就是第二份真相，搬区时它会烂在原地（B120）。
+   * - **`zoneCenter.y` 必须有限**：这里缺 y 得到的不是"差一点"而是 NaN，而 NaN 现在会顺着高度场
+   *   流进整张可见网格（B120 那条硬拒绝同一条）。
+   *
+   * 两座空间的过渡带压住同一点时取权重最大的那座，不按登记表顺序 —— 今天四带两两分离
+   * （`tests/interior-ground-field.test.js` 的结构腿钉着），这条择优是给将来的口径，不是给今天的运气。
+   */
+  groundBlendAt(worldX, worldZ) {
+    let best = null;
+    for (const [zoneId, spaces] of this.spacesByZone) {
+      const zoneCenter = this._zoneCenterFor(zoneId);
+      for (const space of spaces) {
+        const weight = space.groundWeightAt(worldX, worldZ, zoneCenter);
+        if (weight <= 0) continue;
+        if (best && best.weight >= weight) continue;
+        best = { space, zoneId, weight };
+      }
+    }
+    if (!best) return null;
+    const { height, zoneCenter } = this._floorHeightAt(best.space, best.zoneId, worldX, worldZ);
+    return { ...best, zoneCenter, height };
+  }
+
+  /**
+   * 这座空间在那个世界点的地板高度 —— "区中心向问手现问 + 缺 y 硬拒绝 + 那一层加法"只写这一遍，
+   * 占地内（`getInternalHeightAtWorldPoint`）与过渡带（`groundBlendAt`）两条问法共用它。
+   * 分成两处写就是 B100/B120 那族的老形状：一处补了 y、另一处还在把 NaN 交给玩家。
+   */
+  _floorHeightAt(space, zoneId, worldX, worldZ) {
+    const zoneCenter = this._zoneCenterFor(zoneId);
+    this._requireFiniteZoneBase(zoneCenter, zoneId);
+    return { zoneCenter, height: space.getInternalHeightAt(worldX, worldZ, zoneCenter) };
+  }
+
+  /**
    * 某个**世界点**的室内地面高度；这个点不在任何室内空间里则返回 null。
    *
-   * 这是那条高度加法唯一的入口，三代契约都写在这里，因为它们各是各的坑：
+   * 问的是**占地内**那一档（`spaceAtWorldPoint` 的口径），一次掺混都不做 ——
+   * 地面进场走的是 `groundBlendAt`（占地外那条过渡带归它），归属与雾仍走 `spaceAtWorldPoint`。
+   *
+   * 这里是那条高度加法唯一的写法，三代契约都写在里面，因为它们各是各的坑：
    *
    * - **B100**：最早这里硬编码 `{ x: 0, y: 0, z: 0 }`，于是 `zoneCenter.y` 整个丢了、
    *   `worldToLocal` 也少减一次区域中心 —— 实测四座模板里两座的高度函数是非平凡的
@@ -348,8 +425,7 @@ export class InternalSpaceManager {
   getInternalHeightAtWorldPoint(worldX, worldZ) {
     const hit = this.spaceAtWorldPoint(worldX, worldZ);
     if (!hit) return null;
-    this._requireFiniteZoneBase(hit.zoneCenter, hit.zoneId);
-    return hit.space.getInternalHeightAt(worldX, worldZ, hit.zoneCenter);
+    return this._floorHeightAt(hit.space, hit.zoneId, worldX, worldZ).height;
   }
 
   /**
@@ -430,7 +506,15 @@ export class InternalSpaceManager {
   }
 }
 
-/** 预置内部空间模板（可被区域类实例化） */
+/**
+ * 预置内部空间模板（可被区域类实例化）
+ *
+ * `rimBand` 是**地面过渡带**宽（`groundWeightAt` 的那一段），不是美术尺寸。四座的数由
+ * `tests/interior-ground-field.test.js` 从"占地里室内地板与占地外室外场的实测最狠落差"反推的
+ * 那条尺兜住（带宽 ≥ Δ × 1.5 ÷ 斜率上限，两个数都取自生产：`colliderRadius × 0.5` 的取样步长、
+ * `stepUp` 的每步上限）—— 这里手打的数只是"够宽"的一份声明，改窄了会被那条尺当场点名。
+ * 幽暗神殿与星港瞭望塔那两座落差 20 米级，带就跟着宽到 22 / 24 米；晨曦大厅落差 4.65 米，5 米带够。
+ */
 export const InternalSpaceTemplates = {
   /** 幽暗林地：古老祭坛（地下室） */
   gloomAncientShrine: (zoneCenter) => new InternalSpace({
@@ -438,6 +522,7 @@ export const InternalSpaceTemplates = {
     zoneId: 'gloom',
     localCenter: { x: 20, z: -30 },
     radius: 12,
+    rimBand: 22,
     floor: -1,
     baseHeight: -3,
     floorHeight: 5,
@@ -455,6 +540,7 @@ export const InternalSpaceTemplates = {
     zoneId: 'gloom',
     localCenter: { x: -40, z: 50 },
     radius: 8,
+    rimBand: 8,
     floor: 1,
     baseHeight: 8,
     floorHeight: 3.5,
@@ -469,6 +555,7 @@ export const InternalSpaceTemplates = {
     zoneId: 'radiant',
     localCenter: { x: 0, z: 0 },
     radius: 25,
+    rimBand: 6,
     floor: 0,
     baseHeight: 1,
     floorHeight: 8,
@@ -486,6 +573,7 @@ export const InternalSpaceTemplates = {
     zoneId: 'radiant',
     localCenter: { x: -60, z: 40 },
     radius: 10,
+    rimBand: 24,
     floor: 2,
     baseHeight: 12,
     floorHeight: 6,

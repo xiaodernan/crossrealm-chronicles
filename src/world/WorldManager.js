@@ -110,6 +110,24 @@ export class WorldManager {
 
     this.zones = [fantasy, magic, space, voidZone, abyss, gloom, radiant];
 
+    // 注册内部空间（W-B9 切片2）—— 这一趟必须排在 `worldTerrain.build()` 之前，理由见下面那条
+    // 模板拿到 `zoneCenter` 但**并不存它**（空间只记 `localCenter`，摆位发生在查询时），
+    // 所以这里必须传区对象自己的那个 center —— 传手抄字面量就是第二份坐标，
+    // 搬区时它会烂在原地（B120 同族：契约在调用处看着成立，其实没人读）。
+    this.internalSpaceManager.register(InternalSpaceTemplates.gloomAncientShrine(gloom.center));
+    this.internalSpaceManager.register(InternalSpaceTemplates.gloomTreeHollow(gloom.center));
+    this.internalSpaceManager.register(InternalSpaceTemplates.radiantGrandHall(radiant.center));
+    this.internalSpaceManager.register(InternalSpaceTemplates.radiantStarwatchTower(radiant.center));
+
+    // W-B9 切片9（修 B121）：室内归属问的是**这座空间自己登记在谁名下**，所以要给它一个
+    // "按区 id 现问中心"的问手 —— 挂的是问手不是坐标（同一个 `resolveZone` 出口，大气归属与
+    // 室内归属拿到的是同一个载体，不会漂成两份）。
+    this.internalSpaceManager.attachZoneCenterResolver((zoneId) => resolveZone(this.zones, zoneId)?.center ?? null);
+
+    // 登记与问手**必须排在 `worldTerrain.build()` 之前**（W-B9 切片E，修 B126）：
+    // 室内那一档现在是高度场的一项，而这张网格读的就是同一条场 —— 先建网格再登记室内，
+    // 得到的就是"眼睛按没有室内的场铺地、脚按有室内的场落地"，正是本片要杀的那个分家。
+    // 判据的形状在这里，不在某一次的实测里。
     this.worldTerrain = new WorldTerrain(this.scene, this);
     this.worldTerrain.build();
     TextureLibrary.load().then((texLib) => {
@@ -126,20 +144,6 @@ export class WorldManager {
 
     this.buildHubLandmarks();
     this.buildCollision();
-
-    // 注册并构建内部空间（W-B9 切片2）
-    // 模板拿到 `zoneCenter` 但**并不存它**（空间只记 `localCenter`，摆位发生在查询时），
-    // 所以这里必须传区对象自己的那个 center —— 传手抄字面量就是第二份坐标，
-    // 搬区时它会烂在原地（B120 同族：契约在调用处看着成立，其实没人读）。
-    this.internalSpaceManager.register(InternalSpaceTemplates.gloomAncientShrine(gloom.center));
-    this.internalSpaceManager.register(InternalSpaceTemplates.gloomTreeHollow(gloom.center));
-    this.internalSpaceManager.register(InternalSpaceTemplates.radiantGrandHall(radiant.center));
-    this.internalSpaceManager.register(InternalSpaceTemplates.radiantStarwatchTower(radiant.center));
-
-    // W-B9 切片9（修 B121）：室内归属问的是**这座空间自己登记在谁名下**，所以要给它一个
-    // "按区 id 现问中心"的问手 —— 挂的是问手不是坐标（同一个 `resolveZone` 出口，大气归属与
-    // 室内归属拿到的是同一个载体，不会漂成两份）。
-    this.internalSpaceManager.attachZoneCenterResolver((zoneId) => resolveZone(this.zones, zoneId)?.center ?? null);
 
     // 为每个区域构建内部空间
     for (const zone of this.zones) {
@@ -346,37 +350,40 @@ export class WorldManager {
   }
 
   /**
-   * 室内归属**不再**经过"先把这个点收敛成一个区、再去那个区名下找空间"（W-B9 切片9，修 B121）。
-   * 改前那两步就是症状：区半径互相重叠（space × gloom 的重叠带宽实测 291.7 米），`zoneIdAt`
-   * 取最近 ⇒ `gloom-ancient-shrine` 整片足迹被判给 space，而 space 名下零座室内 ⇒ 那座神殿的
-   * 地板永远不回答。现在的判据只有一条：这个点落不落进**某座空间自己的范围**，
-   * 用登记它的那个区的中心换算 —— 由 `internalSpaceManager.spaceAtWorldPoint` 回答（问手在
-   * `build()` 里挂上，见 `attachZoneCenterResolver`）。
+   * 地面高度只有一条路：全局高度场（枢纽台地 → 各区 → 广场 → 室内那一档掺混）。
+   *
+   * 室内**不再**在这里另开一道分支（W-B9 切片E，修 B126）。改前的形状是"占地内就整体交回地板"：
+   * 那一档与看得见的那张网格（`WorldTerrain` 按同一个 `sampleGlobalHeight` 采样）分家，
+   * 占地边界实测一刀 21.09 米（幽暗神殿）到 23.36 米（星港瞭望塔）—— 玩家跨过去时
+   * `walkY` 当场跳二十米，竖直阻尼把他从山体里穿上去，也就是"走路穿模"里与摆件无关的最狠一段。
+   * 现在室内由 `TerrainHeight.blendInterior` 按权重掺进这条场：腹地恒 1（那一层地板一字未改），
+   * 过渡带收到 0，眼睛与脚读同一个数。
+   *
+   * 三代契约各归各的位置，都不许走回头路：
+   * - **B120**：按**这个点**回答，不问"玩家上一帧站的那座空间"那份缓存 —— 这条路径要回答的点
+   *   常常不是玩家站的地方（快速旅行的目的地、副本出口、敌人脚下、装饰落位、天气粒子）。
+   * - **B121**：室内归属由空间自己的范围认领，不先把点收敛成一个区（重叠的区半径会把整座空间
+   *   判给邻区，space × gloom 的带宽实测 291.7 米）。
+   * - **B126**：室内那一档是场里的**一项**，不是场之外的**另一层**（见 `attachZoneCenterResolver`
+   *   与 `InternalSpace.groundWeightAt` 的注）。
    */
   getGroundHeight(x, z) {
     if (this.dungeonManager?.isInside()) {
       return this.dungeonManager.getGroundHeight(x, z);
     }
-    // W-B9 切片7（修 B120）：室内高度按**这个点**回答。
-    // 改前问的是"玩家上一帧站的那座空间"那份缓存 —— 它只按玩家的上一帧位置刷新，而这条路径要回答的
-    // 点常常不是玩家站的地方：快速旅行的目的地、副本出口、敌人脚下、装饰落位、天气粒子。
-    // 于是"玩家刚站过晨曦大厅"会让几百米外那个点也拿到大厅的地板高度，
-    // 而生产的区域中心又不带 `y`，那个高度还是 NaN。两条叠在一起就是玩家侧的说法：
-    // NaN 地面 → 传送把 NaN 写进 `position` → 阻尼相机 `lerp` 从 NaN 出发再也回不来 →
-    // 视锥六个面全 NaN → 整场剔除失效。
-    const internalHeight = this.internalSpaceManager.getInternalHeightAtWorldPoint(x, z);
-    if (internalHeight !== null) return internalHeight;
-    return sampleGlobalHeightSmooth(x, z, this.zones);
+    return sampleGlobalHeightSmooth(x, z, this.zones, this.internalSpaceManager);
   }
 
+  /**
+   * 地面法向由同一条场差分出得出（切片E 之前它另开着一道"占地里就报 (0,1,0)"的分支 ——
+   * 于是法向答的是室内那一层的顶面，高度却答另一层，两条判据各说一头）。
+   * 现在室内有坡（神殿那块地板自己就是"中心凹陷 2 米"），法向跟着坡走才是贴地的姿态。
+   */
   getGroundNormal(x, z) {
     if (this.dungeonManager?.isInside()) {
       return { x: 0, y: 1, z: 0 };
     }
-    // 内部空间内地面法向暂时返回向上（可按需扩展）—— 按点问、不问玩家上一帧（B120），
-    // 且归属由空间自己的范围回答（B121，与 `getGroundHeight` 同一条判据）
-    if (this.internalSpaceManager?.spaceAtWorldPoint(x, z)) return { x: 0, y: 1, z: 0 };
-    return sampleGroundNormal(x, z, this.zones);
+    return sampleGroundNormal(x, z, this.zones, this.internalSpaceManager);
   }
 
   update(dt, playerPos) {

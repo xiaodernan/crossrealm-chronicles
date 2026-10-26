@@ -55,7 +55,10 @@ export class WorldTerrain {
   }
 
   heightAt(x, z) {
-    return sampleGlobalHeight(x, z, this.world.zones ?? []);
+    // 花名册一起递过去：这张网格与玩家脚下读的是**同一条**场，室内那一档掺不掺必须两边一致
+    // （W-B9 切片E，修 B126 —— 改前室内只活在 `WorldManager.getGroundHeight` 那道分支里，
+    // 于是占地边界里外两层地面，边界那一刀实测 21~23 米）
+    return sampleGlobalHeight(x, z, this.world.zones ?? [], this.world.internalSpaceManager ?? null);
   }
 
   _zoneTintAt(x, z) {

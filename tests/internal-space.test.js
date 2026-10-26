@@ -22,6 +22,17 @@
  * 5. 碰撞体的世界化：`x == 世界中心.x + 局部 x`。
  * 6. 竖向日程：`tryMove` 的每条拒绝理由、成功后三本账都记、往返存档一致。
  * 7. 样本下限：四座模板都在、每个有调度器的区都点名 —— 扫不到东西的"绝迹"会假绿。
+ * 8. `WorldManager` 那两条地面出口的**结构**契约（B100 → B120 → B126 三代同一条）：
+ *    高度与法向都必须答**同一条带花名册的全局场**，且方法体里不许再长出一格室内特例。
+ *
+ * ## 切片E（修 B126）的落刀记录（本片吃到的）
+ *
+ * 整批五刀在 `tests/interior-ground-field.test.js` 头部那张表。这里只记本片：**五臂全部 0 红**。
+ * 这不是缺陷，是结构门的**限度**，记下来免得日后把它当行为证据用：⑧ 那两条尺读的是
+ * `WorldManager.js` 的字节，臂9/10 改的是调用顺序与另一个文件、臂11/12/13 改的是数值与形状，
+ * 都不动那两行式子。反过来，把 `getGroundHeight` 重新拆回"先全局再问室内"那道分支，
+ * ⑧ 那条反面证据把两头都量过：六条坏高度写法 × 六条坏特例写法各自必须被点名，
+ * 两条跨行的规范写法必须放行 —— 那才是 ⑧ 的牙口所在，各张门禁各咬各的那一层。
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -344,7 +355,7 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
     });
   });
 
-  describe('⑧ WorldManager 那一侧的接线（B100 → B120）', () => {
+  describe('⑧ WorldManager 那一侧的接线（B100 → B120 → B126）', () => {
     // 这一层是变异臂 A2 逼出来的：把 `getGroundHeight` 传的 zoneCenter 改成丢 y 的版本，
     // 上面七层**全绿** —— 因为它们都直接驱动 Manager，**一次也没经过 WorldManager**。
     // "改对了调用点"与"调用点被门禁看着"是两件事。
@@ -365,10 +376,18 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
       return 去注释(src.slice(起, 止));
     };
 
-    // 判据：室内高度必须**按这个点自己**问。两条弯路都不许走回去 ——
-    // 读玩家缓存是 B120，先把点收敛成一个区、再去那个区名下找空间是 B121（重叠的区半径
-    // 会把整座空间判给邻区，实测 space × gloom 的重叠带宽 291.7 米）。
-    const ASKS_BY_POINT = /getInternalHeightAtWorldPoint\(\s*x,\s*z\s*,?\s*\)/;
+    // 判据随 B126 搬了家，但**命题没松**：室内那一档现在是全局高度场里的一项，
+    // 由 `TerrainHeight.blendInterior` 按这个点自己的权重掺进来 —— WorldManager 这一侧
+    // 只做一件事：把**区表与花名册一起**递给那一条场。所以这里量两条：
+    // ① 高度与法向的两个方法体里各有一次"带两份操作数"的采样调用。少递花名册就是回到
+    //    B126 那一刀（眼睛按没有室内的场铺地、脚按有室内的场落地）；少递区表则是覆盖层
+    //    从脚下消失（切片D2 的臂3 同族）。
+    // ② 这两个方法体里**不许再长出室内特例**：任何按占地/按缓存/按区收敛去"另问一次室内"
+    //    的形状都算分家 —— B120 读玩家缓存、B121 把点收敛成一个区、切片E 之前那格
+    //    "占地里法向写死 (0,1,0)" 全是同一族（第二份口径），字样一并禁掉。
+    const 高度同源 = /sampleGlobalHeightSmooth\(\s*x,\s*z,\s*this\.zones,\s*this\.internalSpaceManager\s*,?\s*\)/;
+    const 法向同源 = /sampleGroundNormal\(\s*x,\s*z,\s*this\.zones,\s*this\.internalSpaceManager\s*,?\s*\)/;
+    const 室内特例 = /getInternalHeightAt|spaceAtWorldPoint|groundBlendAt|currentSpace|getCurrentInternalHeight|zoneIdAt|this\.currentZone|zoneCenter|querySpaceAt/;
 
     /** 室内归属的刷新必须排在"区没变就早退"之前 */
     const 刷新早于早退 = (体) => {
@@ -377,16 +396,15 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
       return 刷新 >= 0 && 早退 >= 0 && 刷新 < 早退;
     };
 
-    it('getGroundHeight 按点问室内高度，且**不把这个点交给区半径去收敛**', () => {
-      const 体 = 切方法(wmSrc(), 'getGroundHeight(x, z) {');
-      expect(体, 'WorldManager 的高度分支里应当有 getInternalHeightAtWorldPoint 调用').toMatch(ASKS_BY_POINT);
-      // 反面：这条路上不许再读缓存、不许留着"按玩家问"的旧入口、
-      // 也不许把区 id / 区中心递进室内查询（那正是 B121 的那一步收敛）
-      for (const 坏字样 of [
-        'currentSpace', 'getCurrentInternalHeight', 'this.currentZone',
-        'zoneIdAt', 'zone.id', 'zoneCenter', 'querySpaceAt',
-      ]) {
-        expect(体.includes(坏字样), `getGroundHeight 的高度分支里不该出现 ${坏字样}`).toBe(false);
+    it('高度与法向都答**同一条带花名册的全局场**，且方法体里不另开室内特例', () => {
+      const 两把 = [['getGroundHeight(x, z) {', 高度同源], ['getGroundNormal(x, z) {', 法向同源]];
+      for (const [头, 尺] of 两把) {
+        const 体 = 切方法(wmSrc(), 头);
+        expect(体, `${头.slice(0, -2)} 的方法体里应当有"区表 + 花名册"那一次采样调用 —— `
+          + '少递花名册就是 B126（眼睛与脚两层），少递区表就是覆盖层从脚下消失').toMatch(尺);
+        const 命中 = 体.match(室内特例);
+        expect(命中, `${头.slice(0, -2)} 的方法体里出现了「${命中 && 命中[0]}」：`
+          + '室内那一档又变成了场之外的第二层 —— 归属、缓存、占地特例都不许在这条路上回答').toBe(null);
       }
     });
 
@@ -400,23 +418,41 @@ describe('内部空间与竖向日程的契约（B83 / B100）', () => {
 
     it('反面证据：两把尺子都量得出坏写法，也放得过好写法', () => {
       const 坏高度写法 = [
-        // B100 那一版的接线：按玩家缓存问
-        'getCurrentInternalHeight(x, z, this.currentZone?.center ?? { x: 0, y: 0, z: 0 })',
-        // 名字改对了、仍然拿"玩家所在的区"回答外部点（B120 的本体）
-        'getInternalHeightAtPoint(x, z, this.currentZone?.id, this.currentZone?.center)',
-        // B121 那一版：先按大气归属把点收敛成一个区，再去那个区名下找空间
-        'getInternalHeightAtPoint(x, z, zone.id, zone.center)',
-        // 新的按点入口又递回区 id：收敛那一步没拆掉，只是换了个函数名
-        'getInternalHeightAtWorldPoint(x, z, id)',
+        // B126 的本体：花名册没递进场里 —— 脚按有室内的场落地、眼睛按没有室内的场铺地
+        'sampleGlobalHeightSmooth(x, z, this.zones)',
+        // 两份操作数换了位置：区表当成花名册用，问不出地板
+        'sampleGlobalHeightSmooth(x, z, this.internalSpaceManager, this.zones)',
+        // 递的是"某个别的"室内管理器（手造的实例、副本那份）：认不出登记的这几座
+        'sampleGlobalHeightSmooth(x, z, this.zones, manager)',
+        // B120 的形状：量的不是这个点，是玩家上一帧那个点（参数位置写着 px/pz）
+        'sampleGlobalHeightSmooth(px, pz, this.zones, this.internalSpaceManager)',
+        // 场之外另问一次室内：混合又回到 WorldManager 手里，成第二层口径
+        'this.internalSpaceManager.getInternalHeightAtWorldPoint(x, z)',
         // 少了坐标：问不成这个点
-        'getInternalHeightAtWorldPoint(z, x)',
+        'sampleGlobalHeightSmooth(this.zones, this.internalSpaceManager)',
       ];
       for (const b of 坏高度写法) {
-        expect(ASKS_BY_POINT.test(b), `应当认出坏写法：${b.slice(0, 46)}…`).toBe(false);
+        expect(高度同源.test(b), `高度那把尺应当认不出坏写法：${b.slice(0, 46)}…`).toBe(false);
       }
-      // 好写法（跨行）要放行
-      const good = 'this.internalSpaceManager.getInternalHeightAtWorldPoint(\n        x, z,\n      )';
-      expect(ASKS_BY_POINT.test(good)).toBe(true);
+      // 好写法（跨行带尾逗号）要放行
+      const good = 'return sampleGlobalHeightSmooth(\n        x, z,\n        this.zones,\n        this.internalSpaceManager,\n      );';
+      expect(高度同源.test(good), '跨行的规范写法不该被判成坏写法').toBe(true);
+      const goodNormal = 'return sampleGroundNormal(\n        x, z,\n        this.zones,\n        this.internalSpaceManager,\n      );';
+      expect(法向同源.test(goodNormal), '法向那把尺也该读得进跨行写法').toBe(true);
+
+      // 特例那把尺两头都要量得出：每一格"另问一次室内"的写法都报，规范的那一行不报
+      const 坏特例写法 = [
+        'const hit = this.internalSpaceManager.spaceAtWorldPoint(x, z);',
+        'const h = this.internalSpaceManager.getInternalHeightAtWorldPoint(x, z);',
+        'const h = this.internalSpaceManager.groundBlendAt(x, z);',
+        'if (this.internalSpaceManager.currentSpace) return -10;',
+        'const zone = resolveZone(this.zones, zoneIdAt({ x, z }, this.zones));',
+        'return this.currentZone.sampleHeight(x, z);',
+      ];
+      for (const b of 坏特例写法) {
+        expect(b.match(室内特例), `特例那把尺应当点名坏写法：${b.slice(0, 46)}…`).toBeTruthy();
+      }
+      expect(good.match(室内特例), '规范写法里不许报出室内特例').toBe(null);
 
       const 晚刷新 = 'const zone = resolveZone(this.zones, id);\n    if (!zone || zone === this.currentZone) return;\n    this.internalSpaceManager.updateCurrent(playerPos.x, playerPos.z);';
       expect(刷新早于早退(晚刷新), '早退之后才刷新的写法应当被认出').toBe(false);
