@@ -12,7 +12,18 @@ import {
 } from '../src/world/TerrainHeight.js';
 import { HUB_ZONE } from '../src/content/ZoneIdentity.js';
 
-const fakeZone = (x, z, h) => ({ getHeightAt: (px, pz) => (px === x && pz === z ? h : 0) });
+/**
+ * 替身区按 `BaseZone` 的形状给：`center` / `radius` / `distanceToCenter` / 区外交 `-Infinity`。
+ * `sampleGlobalHeight` 的契约里 `zones` 就是 BaseZone 实例（区缘权重要读几何），
+ * 只给一个 `getHeightAt` 的替身会把这条契约糊过去。
+ */
+const fakeZone = (x, z, h) => ({
+  center: { x, z },
+  radius: 40,
+  distanceToCenter: (px, pz) => Math.hypot(px - x, pz - z),
+  getHeightAt: (px, pz) =>
+    (Math.hypot(px - x, pz - z) > 40 ? -Infinity : (px === x && pz === z ? h : 0)),
+});
 
 describe('TerrainHeight', () => {
   it('枢纽台地在中心最高、超出半径后归零', () => {
@@ -88,7 +99,7 @@ describe('TerrainHeight', () => {
  *    这一条），且 盘 + 带 整张还在枢纽的归属半径里 —— 出了那一圈，大气与镜头归属就换人，
  *    台面不能伸到别人的地里。
  *
- * ## 变异臂（`.tmp-hub-plaza/arms.mjs`，9 把刀 + 基线；红名由非 TTY 输出解析）
+ * ## 变异臂（切片C 的落刀记录；每一把都可按"刀"那一列改生产常数复现，红名由非 TTY 输出解析）
  *
  * | 臂 | 刀 | 预测红 | 实测 | 超出预测的红 ⇒ 归因 |
  * | --- | --- | --- | --- | --- |

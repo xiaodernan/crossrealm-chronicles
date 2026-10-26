@@ -4,6 +4,18 @@ import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { releaseSubtree } from '../engine/releaseSubtree.js';
 
+/**
+ * 主地面那一张平面。尺寸与细分只有这一处定义（门禁读 `geometry.parameters`，不抄）。
+ *
+ * 细分不是"看起来够细"：这张网格是**线性三角**，而玩家脚下的 `getGroundHeight` 读的是连续高度场。
+ * 一格之内的差（弦差）就是"看见的地面"与"脚踩的地面"分家的量 —— 网格粗到 5.4 米一格时，
+ * 广场裙带外缘与区缘那两道膝处量到一米级，人走到 hill 里去了。格边长缩一半，弦差缩到四分之一，
+ * 所以这一列由 `tests/world-terrain-ground-align.test.js` 按生产那把尺（`stepUp`）钉着：
+ * 逐点弦差不许超过一帧吸收的下的高度。加密只花顶点与一次建图，draw call 与阴影趟都不变
+ * （地面这一类 `cast` 本来就是关的）。
+ */
+export const GROUND_MESH = Object.freeze({ w: 520, d: 620, segW: 288, segD: 336 });
+
 /** sculpt 主地形 + 贴合地面的蜿蜒古径（贴图 + 法线） */
 export class WorldTerrain {
   constructor(scene, world) {
@@ -68,10 +80,7 @@ export class WorldTerrain {
   }
 
   _buildMainGround(texLib) {
-    const w = 520;
-    const d = 620;
-    const segW = 96;
-    const segD = 112;
+    const { w, d, segW, segD } = GROUND_MESH;
     const geo = new THREE.PlaneGeometry(w, d, segW, segD);
     const pos = geo.attributes.position;
     const uvs = geo.attributes.uv;
@@ -79,7 +88,7 @@ export class WorldTerrain {
     // 平面绕 X 轴转 -90° 摊平后，顶点局部 (lx, lz, h) 落到世界 (lx, h, -lz) —— 世界 z = -局部 y。
     // 高度与贴图坐标必须按**世界**坐标采样，否则这张地面网格在 z 上被镜像：物理侧（玩家
     // `getGroundHeight`、区域落点、蜿蜒路径带）全用世界 (x, z)，唯独这张网格用局部坐标 →
-    // 玩家 / 建筑相对可见地面整体陷进去或浮出来（探针实测平均错位 5.5 米、最坏 19 米）。
+    // 玩家 / 建筑相对可见地面整体陷进去或浮出来。
     for (let i = 0; i < pos.count; i++) {
       const lx = pos.getX(i);
       const wz = -pos.getY(i);   // 局部 y → 世界 -z
@@ -99,7 +108,9 @@ export class WorldTerrain {
         const lx = pos.getX(i);
         const wz = -pos.getY(i);   // 与几何同一约定：局部 y → 世界 -z
         const tint = this._zoneTintAt(lx, wz);
-        const slope = Math.min(1, Math.abs(this.heightAt(lx, wz)) / 14);
+        // 高度读几何里已经存好的那一份，不再第二次采样高度场：这一格加密到 3 倍，
+        // 抄一遍采样就是抄一遍开销，而且两处读数允许各自漂（顶点忠实那条会量不到）。
+        const slope = Math.min(1, Math.abs(pos.getZ(i)) / 14);
         const shade = 0.78 + slope * 0.12;
         colors.push(tint.r * shade, tint.g * shade, tint.b * shade);
       }

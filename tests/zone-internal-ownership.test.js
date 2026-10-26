@@ -17,6 +17,16 @@
  * 两问在同一个点上**同时成立且答案不同**，就是这一片的全部命题。
  * 所以这里既要有"神殿中心的大气归属仍然是 space"（不许顺手把区几何改了），
  * 也要有"同一个点的室内归属是那座神殿"，还要有"把邻区半径这个旋钮拧来拧去，只有前者跟着动"。
+ *
+ * ## 反空跑那条尺为什么不是"差 > 20 米"
+ * 上面那 21.8 米是 B121 当时的现场读数，不是判据该有的形状：缺陷② 的切片把走廊谷底到肩峰接成
+ * smoothstep 之后，神殿中心的全局裸读数从 10.80 掉到 9.77（走廊#2 那一项 1.985 → −0.005），
+ * 手打的 20 当场烂在原地，而"整座室内被压在地面之下"这件事一点没变。
+ * 现在 ① 最后一条量的是**结构关系**：全局地面比这座室内的**顶板**（地板基准 + 一个层高，两个数都取自模板）
+ * 还高出一整个层高；同一条判据顺手问 `gloom-tree-hollow`（树上的二层，顶板本就在地面之上）必须不成立，
+ * 免得它变成"室内永远在地下"那样的恒等式。
+ * 这条量的只是"埋得下去"这一侧（神殿实测 +12.76 米，树洞 −8.86 米）；当年那个"差 20 米"的量级
+ * 不再由本片钉住 —— 地形本身归缺陷② 那三张门禁（连续性、行走见证、地面对齐）管。
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -93,12 +103,29 @@ describe('B121：大气归属与室内归属分家', () => {
 
     it('地板答的是室内那一档，不是全局地形（改前差 21.8 米）', () => {
       const shrine = 找(world, 神殿id);
+      const 载体 = 区的载体(world, shrine.zoneId);
       const 心 = 空间中心(world, shrine);
-      const 期望 = shrine.getInternalHeightAt(心.x, 心.z, 区的载体(world, shrine.zoneId).center);
+      const 期望 = shrine.getInternalHeightAt(心.x, 心.z, 载体.center);
       const 全局 = sampleGlobalHeightSmooth(心.x, 心.z, world.zones);
+      /** 这座室内自己那一层的顶板：地板基准 + 一个层高 —— 两个数都取自模板，不是手打的实测 */
+      const 顶板 = shrine.getWorldBaseHeight(载体.center) + shrine.floorHeight;
       expect(期望, '这座的地板在 -10 那一档').toBeCloseTo(-10, 6);
       expect(world.getGroundHeight(心.x, 心.z)).toBeCloseTo(期望, 9);
-      expect(Math.abs(全局 - 期望), '全局与室内差多少 —— 差得越远这条越有说服力').toBeGreaterThan(20);
+      // 反空跑：全局地面要把整座室内**压在下面**，而且比顶板还高出一整个层高 ——
+      // 那样上一条"出口答的是室内"才不可能是两边恰好撞在同一个数上。
+      // 阈值取自模板的层高，不取自某一次实测：切片D 把走廊谷底到肩峰那一段接成 smoothstep，
+      // 这点的裸读数从 10.80 掉到 9.77（探针 .tmp 那批量的：走廊#2 那一项 1.985 → -0.005），
+      // 当年手打的"差 > 20 米"当场烂在原地 —— 而"室内被压在地面之下几层"这件事一点没变。
+      expect(全局 - 顶板, `全局地面只比室内顶板高 ${(全局 - 顶板).toFixed(2)} 米`
+        + `（层高 ${shrine.floorHeight}，与室内地板差 ${Math.abs(全局 - 期望).toFixed(2)} 米）`).toBeGreaterThan(shrine.floorHeight);
+      // 反向控制：同一条判据问树洞那一座（gloom 名下、树上的二层，本来就在地面之上）必须**不**成立 ——
+      // 只有神殿过、别的不过，"整座室内被压在地面之下"这句话才有牙口，而不是谁都能过的恒等式。
+      const 树洞 = 找(world, 'gloom-tree-hollow');
+      const 树洞心 = 空间中心(world, 树洞);
+      const 树洞顶板 = 树洞.getWorldBaseHeight(区的载体(world, 树洞.zoneId).center) + 树洞.floorHeight;
+      const 树洞全局 = sampleGlobalHeightSmooth(树洞心.x, 树洞心.z, world.zones);
+      expect(树洞全局 - 树洞顶板, `树洞的顶板竟也被压在地面下 ${(树洞全局 - 树洞顶板).toFixed(2)} 米`)
+        .toBeLessThan(树洞.floorHeight);
     });
   });
 

@@ -29,7 +29,23 @@ export function continentalNoise(x, z) {
   return h;
 }
 
-/** 区际走廊：路径附近略低，两侧隆起 */
+/** 谷底半宽占 halfWidth 的比例；谷底与肩峰之间必须接得上（见 corridorRidge 的注释） */
+const CORRIDOR_FLOOR_RATIO = 0.55;
+const CORRIDOR_FLOOR = -0.8;
+const CORRIDOR_CREST = 2.8;
+
+/** 区缘收口带宽的上限（再按区半径收窄，见 sampleGlobalHeight 的注释） */
+const ZONE_RIM_TAPER = 28;
+
+/**
+ * 区际走廊：路径附近略低，两侧隆起。
+ *
+ * 改前谷底（`dist ≤ 0.55×halfWidth`）在半径外那一刀直接切到肩部曲线，单步落差两米级
+ * （`dist = 6.6 → 7.0`）：玩家跨过去时 `walkY` 当场跳两米，竖直阻尼只会把他**从山坡里穿上去**
+ * 竖直阻尼只会把他**从山坡里穿上去** —— 那是"走路穿模"里与摆件无关的另一半。
+ * 现在谷底到肩峰走 smoothstep（两端导数 0 ⇒ 接痕不成折线），带外的形状一字未改。
+ * 这一段由 `tests/terrain-continuity.test.js` 的"走廊谷缘不成台阶"那条盯着。
+ */
 export function corridorRidge(x, z, x1, z1, x2, z2, halfWidth = 14) {
   const dx = x2 - x1;
   const dz = z2 - z1;
@@ -40,9 +56,13 @@ export function corridorRidge(x, z, x1, z1, x2, z2, halfWidth = 14) {
   const pz = z1 + dz * t;
   const dist = Math.sqrt((x - px) ** 2 + (z - pz) ** 2);
   if (dist > halfWidth * 2.2) return 0;
-  const edge = Math.abs(dist - halfWidth) / halfWidth;
-  if (dist < halfWidth * 0.55) return -0.8;
-  return Math.max(0, 1 - edge) * 2.8;
+  const crest = Math.max(0, 1 - Math.abs(dist - halfWidth) / halfWidth) * CORRIDOR_CREST;
+  const floorEdge = halfWidth * CORRIDOR_FLOOR_RATIO;
+  if (dist <= floorEdge) return CORRIDOR_FLOOR;
+  if (dist >= halfWidth) return crest;
+  const s = (dist - floorEdge) / (halfWidth - floorEdge);
+  const w = s * s * (3 - 2 * s);
+  return CORRIDOR_FLOOR + (crest - CORRIDOR_FLOOR) * w;
 }
 
 const CORRIDORS = [
@@ -116,12 +136,36 @@ export function hubPlazaWeight(x, z) {
   return 1 - t * t * (3 - 2 * t);
 }
 
+/**
+ * 区缘权重。
+ *
+ * `BaseZone.getHeightAt` 在半径外一刀交 `-Infinity`，而各区自己的 `sampleHeight` 到缘只归 **0**
+ * （`edgeFade`）—— 于是 `max` 在半径那一圈留下整段 `0 − 自然地` 的台阶（十几米级，最坏在
+ * magic 区南缘）。玩家跨圆周时 `walkY` 当场跳十几米，
+ * 竖直阻尼把他**从山体里穿上去**，这就是"走路穿模"里最大的一段落差。
+ *
+ * 权重在 `radius − 带` 之内恒 1（腹地读数一字未改），到 `radius` 收到 0 ⇒ 区高退回自然地，
+ * 圆周两侧接得上。带宽按半径收窄，永远不会把整区抹平。
+ * 这一段由 `tests/terrain-continuity.test.js` 的"区缘不是悬崖"和"区缘收口不动腹地"两条盯着。
+ */
+function zoneRimWeight(zone, x, z) {
+  const band = Math.min(ZONE_RIM_TAPER, zone.radius * 0.25);
+  const t = (zone.distanceToCenter(x, z) - (zone.radius - band)) / band;
+  if (t <= 0) return 1;
+  if (t >= 1) return 0;
+  return 1 - t * t * (3 - 2 * t);
+}
+
 export function sampleGlobalHeight(x, z, zones = []) {
-  let maxH = naturalTerrain(x, z);
+  const nat = naturalTerrain(x, z);
+  let maxH = nat;
 
   for (const zone of zones) {
     const zh = zone.getHeightAt(x, z);
-    if (zh > maxH) maxH = zh;
+    if (!Number.isFinite(zh)) continue;
+    const rim = zoneRimWeight(zone, x, z);
+    const h = rim === 1 ? zh : nat + (zh - nat) * rim;
+    if (h > maxH) maxH = h;
   }
 
   const w = hubPlazaWeight(x, z);
