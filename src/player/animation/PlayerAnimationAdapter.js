@@ -67,21 +67,34 @@ export class PlayerAnimationAdapter {
     const cm = this.model;
     if (!cm || !cm.mixer) return;
 
-    // locomotion + sprinting → run 状态
     const combatState = cm.combatState;
     const sprinting = cm.sprinting;
+
+    // locomotion + sprinting → run 状态
     const _controllerState = (combatState === 'locomotion' && sprinting) ? 'run' : combatState;
     const _action = this._resolveAction(combatState);
 
-    // 简单的状态同步：让当前动作与 combatState 保持一致
-    // 真实的动作切换逻辑在 playComboAttack / _playOnce / _playLoop 里
-    // 这里只做最小同步：确保当前动作大致匹配状态
+    // 同步 mixer 状态：如果当前动作与目标不符，尝试切换
+    // 实际播放逻辑委托给 CharacterModel 的专用方法（playComboAttack / playHit / playDodge 等）
+    // 这里只做状态标记，具体播放由 CharacterModel 的专用方法处理
+    if (cm.currentAction) {
+      const currentActionName = cm.currentAction.getClip?.()?.name;
+      const targetAction = this._resolveAction(combatState);
+      if (currentActionName !== targetAction && cm.actions[targetAction]) {
+        // 状态不匹配且目标动作存在，标记需要切换（实际切换由 CharacterModel 的专用方法触发）
+        cm._pendingAction = targetAction;
+      }
+    }
   }
 
   /** 每帧推进。 */
   update(dt) {
-    // 玩家的 mixer 在 CharacterModel.update(dt) 里由 PlayerController 调用
-    // 这里只做状态同步，不重复推进 mixer
+    // 推进 mixer（W-C6 玩家接入适配器：统一由适配器驱动 mixer）
+    const cm = this.model;
+    if (cm && cm.mixer) {
+      cm.mixer.update(dt);
+    }
+    // 同步状态
     this.syncFromEntity();
   }
 

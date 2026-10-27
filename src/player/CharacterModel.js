@@ -439,7 +439,7 @@ export class CharacterModel {
       // 于是任何挂进视觉层的非对称部件（剑）会被那半圈镜像到身体另一侧并甩出去一截（B110）。
       this.modelRoot.rotation.y = this.proc.yawOff;
     }
-    this.mixer?.update(dt);
+    // mixer 更新由 PlayerAnimationAdapter.update 统一驱动（W-C6 玩家接入适配器）
     if (this.actionLock <= 0 && this.currentAction?.loop === THREE.LoopOnce) {
       this.combatState = 'idle';
       const idle = this.catalog.idle || 'Idle';
