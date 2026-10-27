@@ -17,6 +17,17 @@ import { GROUND_HAZARD, TIME_SCALE_LEASH } from '../content/tuning.js';
  * （`Time.timeScale`）。域自己走主循环 `dt`，若它把世界调慢，就会连自己的 `duration` 一起
  * 在现实时间里拉长 —— 越慢越久、越久越慢，还要和 hitstop 互相咬住。这条写死在这里，
  * 免得下一位顺手接一个 `game.time.hitstop(...)` 上去。
+ *
+ * 「全场时停」（切片13）是切片5 那条禁令的**唯一**合法例外，走的是显式契约而不是就地默认：
+ * - 构造时必须传入 `time`（`TimeController`）通道 —— 没有通道的层当场在 `spawn()` 抛错，
+ *   世界时钟不允许被一个"只是想画个圈"的调用方顺手段持；
+ * - 持有只经 `Time.holdScale(id, scale)` 这一扇门，本层任何代码都**不直接写** `timeScale`，
+ *   也不碰 hitstop（两套语义在 Time 里互取更小）；
+ * - 世界减速项自己的账本（前摇 / tick / duration）吃 **`rawDt`**：它把世界调慢的那几秒里，
+ *   若自己的秒数也跟着缩水，"持续 3.6 秒"就会变成"持续到天荒地老" —— 越慢越久、越久越慢。
+ *   吃 rawDt 之后，"3.6 秒"说的就是**墙钟**的 3.6 秒，期间世界只走 3.6 × 0.35 的游戏秒；
+ * - 圈**不是**这一档的边界：世界时钟不归任何一块地管，走出圈照样慢。圈只是宣告
+ *   （"这一拍世界要厚了"）与**伤害**的边界 —— 这是位置能拥有的全部。
  */
 
 /** 脉动频率（1/秒）：只影响透明度，不影响判定，所以不需要进内容表 */
@@ -40,7 +51,7 @@ const RIPPLE_SPREAD = 1.35;
 const RIPPLE_LIFE = 0.55;
 
 export class GroundHazards {
-  constructor(scene, world, audio = null) {
+  constructor(scene, world, audio = null, time = null) {
     this.world = world;
     /** 场景：拆的时候要把那一组摘下来（改前只在构造时用过一次场景，没存 ⇒ 拆不了） */
     this.scene = scene;
@@ -49,6 +60,11 @@ export class GroundHazards {
      * 调用点一律走可选链 —— 这一层不因为"没带喇叭"就抛。
      */
     this.audio = audio ?? null;
+    /**
+     * 时间通道（切片13）：世界减速项（「全场时停」）经由 `Time.holdScale` 持有世界时标。
+     * **可空**：不传的层铺不了这一档 —— `spawn()` 当场抛（显式契约），其余档位不受影响。
+     */
+    this.time = time ?? null;
     this.geometry = new THREE.CircleGeometry(1, 48);
     /**
      * 边缘环（M5）：与圆盘**同生同灭**的另一件几何，共享一份单位环。
@@ -82,6 +98,12 @@ export class GroundHazards {
    * 域还可以**不掉血**：给了 `slow` 的那一档在玩家站在圈里时向 `playerRef.applyTimeScale()`
    * 续一格时标（`damage: 0` 的时停域）。这种"人身上的状态"必须由这一项活着期间持有，
    * 所以 `spawn()` 替它生成一个专属 key，出圈 / 到期 / 主人倒地三条路都当场还账。
+   *
+   * 域还可以改**世界**的时标：给了 `worldSlow` 的那一档（切片13 的「全场时停」）在落地后
+   * 经 `this.time.holdScale(worldKey, worldSlow)` 持有世界时钟，直到到期 / 主人倒地 / 拆层
+   * 三条路还账 —— **走出圈不还**（世界时钟不归任何一块地管，圈只是宣告与伤害的边界）。
+   * 与 `slow` 互斥（一个来源不许同时改两个时钟），且必须有正的 `duration` 与 time 通道，
+   * 四条守卫见下方；它的前摇 / tick / duration 吃 `rawDt`，不被自己的减速拖长。
    *
    * 返回的就是内部那一项：调用方拿它判 `done`（这一招落地了），不需要另一套句柄记账。
    */
@@ -121,6 +143,11 @@ export class GroundHazards {
       /** 玩家在圈内时的时标（0.45 = 只剩四成半速度）；0 = 不改时标 */
       slow: spec.slow ?? 0,
       /**
+       * 世界时标（切片13 的「全场时停」）：落地后全场一起慢到这个倍率；0 = 不动世界时钟。
+       * 与 `slow` 互斥 —— 一个来源不许同时改人的账本和世界的时钟。
+       */
+      worldSlow: spec.worldSlow ?? 0,
+      /**
        * 每 tick 给**施法者**回的血（敌方治疗域，W-E3 切片2）。
        *
        * 改前 `move.healZone` 只是数据表里的一格，`src/` 里没有任何人读它 ——
@@ -131,8 +158,12 @@ export class GroundHazards {
       heal: spec.heal ?? 0,
       /** 时标账本里属于这一项的 key（只有 `slow` 的才需要，一个项一格，两个域不互相顶账） */
       timeKey: spec.slow ? `hazard:${++this._spawnSeq}` : null,
+      /** 世界时标持有通道里属于这一项的 id（切片13；与 timeKey 共用一枚自增，互斥所以不撞） */
+      worldKey: spec.worldSlow ? `hazard-world:${++this._spawnSeq}` : null,
       /** 这一项此刻是否持有玩家那一格时标 */
       slowing: false,
+      /** 这一项此刻是否持有世界时标（切片13） */
+      holding: false,
       /** 挂过账的那个玩家（`_letGo` 由 `cancelFor` 调用时也拿得到，不必把 playerRef 一路传下来） */
       slave: null,
       tickT: 0,
@@ -149,9 +180,20 @@ export class GroundHazards {
       /** 落地提示音响过了没有（M6：一个圈只响一次，落地后不补） */
       warned: false,
     };
-    // 一个"域"必须往地上留下点什么：按段掉血、拽人、或者改时标 —— 三者皆无就是铺了一块看不见的空地
-    if (item.duration > 0 && !(item.tick > 0) && !item.slow && !item.pull) {
-      throw new Error('持续型危险区必须结算点什么：正的 tick、pull 或 slow');
+    // 全场时停的四条守卫（切片13 的显式契约 —— 少一条，世界时钟就会从别的口子漏走）：
+    // 互斥（一个来源一个时钟）、通道（没 time 的层不许持有）、有尽头（不许无限期持有）、开区间
+    if (item.worldSlow) {
+      if (item.slow) throw new Error('全场时停与玩家减速互斥：一个来源不许同时改两个时钟');
+      if (!this.time) throw new Error('全场时停需要时间通道：构造时传入 time 才许持有世界时标');
+      if (!(item.duration > 0)) throw new Error('全场时停必须有正的 duration：世界时标不许被无限期持有');
+      if (!(item.worldSlow > 0 && item.worldSlow < 1)) {
+        throw new Error('全场时停的 worldSlow 必须在 (0,1) 开区间内');
+      }
+    }
+    // 一个"域"必须往地上留下点什么：按段掉血、拽人、改时标，或者改世界的时标 ——
+    // 四者皆无就是铺了一块看不见的空地
+    if (item.duration > 0 && !(item.tick > 0) && !item.slow && !item.pull && !item.worldSlow) {
+      throw new Error('持续型危险区必须结算点什么：正的 tick、pull、slow 或 worldSlow');
     }
     // 一击定音的老圈子（`duration` 为 0）不走这条：它的伤害在落地那一拍结，与 tick 无关
     if (item.duration > 0 && item.damage > 0 && !(item.tick > 0)) {
@@ -220,11 +262,15 @@ export class GroundHazards {
   }
 
   update(dt, playerPos, playerRef) {
+    // 世界减速项（切片13）自己的账本吃 `rawDt`：它把世界调慢的那几秒里，若也跟着 dt 缩水，
+    // "持续 N 秒"就会自己把自己拉长 —— 越慢越久、越久越慢。其余项不受影响（own === dt）。
+    const rawDt = this.time ? this.time.rawDt : dt;
     for (let i = this._items.length - 1; i >= 0; i--) {
       const it = this._items[i];
-      it.t += dt;
+      const own = it.worldSlow ? rawDt : dt;
+      it.t += own;
       // 涟漪先于一切状态推进：它是一次性的出场宣告，圈落地与否都不欠它一帧
-      this._stepRipple(it, dt);
+      this._stepRipple(it, own);
       if (!it.done) {
         // 追踪落点（第五种场地招）：前摇的**前 `trackRatio` 段**跟着玩家走，之后锁死不再动。
         // 非追踪的圈 `trackRatio === 0`，这段整个跳过 —— 与修前逐字节一致。
@@ -254,14 +300,20 @@ export class GroundHazards {
         it.t = 0;
         it.tickT = 0;
         // `_land` 已把这一招标成落地：一击定音的到此转入余像，给了 `duration` 的再持续一段
-        if (it.duration > 0) it.active = true;
+        if (it.duration > 0) {
+          it.active = true;
+          // 全场时停在落地那一拍申领世界时标；`Time` 要到下一次 `tick` 才重算 timeScale，
+          // 慢下来晚一帧 —— 一帧之内世界照常走，这是持有语义的既定滞后，不是漏算
+          if (it.worldSlow) this._holdWorld(it);
+        }
         continue;
       }
       if (it.active) {
-        this._sustain(it, dt, playerPos, playerRef);
+        this._sustain(it, own, playerPos, playerRef);
         if (it.t >= it.duration) {
-          // 域到期那一帧就还账：余像只是给眼睛看的，不许留在玩家身上
+          // 域到期那一帧就还账：余像只是给眼睛看的，不许留在玩家身上；世界时钟同帧还
           this._letGo(it);
+          this._releaseWorld(it);
           it.active = false;
           it.t = 0;
         }
@@ -331,6 +383,22 @@ export class GroundHazards {
     it.slave = null;
   }
 
+  /**
+   * 申领世界时标（切片13）：只经 `Time.holdScale` 这一扇门，本层从不直接写 `timeScale`。
+   * 通道与区间在 `spawn()` 的四条守卫里验过，这里只需照办。
+   */
+  _holdWorld(it) {
+    it.holding = true;
+    this.time.holdScale(it.worldKey, it.worldSlow);
+  }
+
+  /** 还世界时标（幂等）。**走出圈不还** —— 位置不拥有世界时钟；还账的路只有到期 / 主人倒地 / 拆层 */
+  _releaseWorld(it) {
+    if (!it.holding) return;
+    it.holding = false;
+    this.time?.releaseScale(it.worldKey);
+  }
+
   /** 落地那一帧：只看水平距离（能不能跳过去是后续切片的题），一击定音、不重复扣血 */
   _land(it, playerPos, playerRef) {
     it.done = true;
@@ -361,6 +429,7 @@ export class GroundHazards {
       } else if (it.active) {
         it.cancelled = true;
         this._letGo(it);
+        this._releaseWorld(it);
         it.active = false;
         it.t = 0;
       }
@@ -415,6 +484,8 @@ export class GroundHazards {
    * 圈的**材质**逐圈一份（透明度与颜色各自推进）⇒ 逐个释放。
    */
   dispose() {
+    // 拆层也还世界时标（切片13）：层都没了，持有的"全场时停"不许悬在世界时钟上
+    for (const it of this._items) this._releaseWorld(it);
     this.scene.remove(this.group);
     for (const disc of [...this._pool, ...this._items.map((it) => it.disc)]) {
       disc.material?.dispose?.();

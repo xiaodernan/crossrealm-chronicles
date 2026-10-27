@@ -11,6 +11,9 @@
  *    最坏的失败从"永远慢着"降级成"多慢 0.12 秒"。
  * 3. **它不改世界时标**：域自己走主循环 `dt`，若它去拧 `Time.timeScale`，就会连自己的
  *    `duration` 一起在墙钟里拉长（越慢越久），还要和 hitstop 互相咬住。这条用静态门禁钉住。
+ *    （切片13 起世界时标有了**唯一**的合法例外 ——「全场时停」经 `Time.holdScale` 显式持有、
+ *    自己的账本吃 `rawDt`，契约与用例住在 `tests/world-time-stop.test.js`；"不许就地拧"
+ *    这一半仍然钉死在本文件。）
  * 4. **不掉血**：`damage: 0` 是这一档的定义 —— 落地那拍一次伤害数字都不该冒出来。
  *
  * 与切片4 同一套纪律：单位用例自己交数值，帧长取 2 的幂（1/64、1/128），
@@ -272,12 +275,15 @@ describe('时停域的生命周期：账跟着圈走', () => {
 });
 
 describe('时标归玩家，世界时标归世界', () => {
-  it('危险区不去拧世界时标：域自己走主循环 dt，拧了就自我反馈', () => {
+  it('危险区不就地拧世界时标：改世界只许走显式的 holdScale 通道（切片13 契约）', () => {
     // 只看代码：本文件的注释里正好在解释"为什么不许拧"，别提审成违规
     const code = src('combat/GroundHazards.js')
       .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
     expect(code).toMatch(/applyTimeScale\(/);
     expect(code).toMatch(/releaseTimeScale\(/);
+    // 世界侧只有显式的持有 / 还账两扇门（切片13），不许出现第三个写法
+    expect(code).toMatch(/holdScale\(/);
+    expect(code).toMatch(/releaseScale\(/);
     expect(code).not.toMatch(/timeScale\s*=/);
     expect(code).not.toMatch(/hitstop\s*\(/);
   });

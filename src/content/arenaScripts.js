@@ -21,6 +21,7 @@ export const ARENA_MOVES = {
   barrage: 'barrage',
   well: 'gravityWell',
   freeze: 'chronoField',
+  freezeAll: 'chronoFieldAll',
   homing: 'homingStrike',
 };
 
@@ -97,6 +98,11 @@ export const BOSS_ARENA_SCRIPTS = {
     // 锁死落地 —— 与上面那记时停域"开在脚下就钉死"是两种躲法：这一种提前跑开没用，得看圈
     // 不再动才闪。`range 20` 与 freeze 的 17 错开，别两招同帧都够条件、把节奏挤成一团。
     { move: 'homing', phase: 3, trigger: 'opportunity', cooldown: 10, range: 20 },
+    // 全场时停（切片13）：比脚下那片更响的一记 —— 落地后**全世界**慢到 0.35（玩家、
+    // 敌人、弹幕一起），圈只是宣告不是边界（世界时钟不归任何一块地管）。3.6 秒墙钟里
+    // 世界只走约 1.26 游戏秒。**刻意不标 entry**：招牌入场仍是脚下那片可躲的时停域
+    // （教学在先），这一记是节奏里 16 秒一次的大拍 —— 开场就全场慢会让第一眼读不懂。
+    { move: 'freezeAll', phase: 3, trigger: 'opportunity', cooldown: 16, range: 17 },
   ],
   'chaos-overlord': [
     { move: 'slam', phase: 2, trigger: 'melee', chance: 0.3, entry: true },

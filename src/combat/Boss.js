@@ -438,6 +438,8 @@ export class Boss extends Enemy {
       tick: spec.tick,
       pull: spec.pull,
       slow: spec.slow,
+      // 全场时停（切片13）：`chronoFieldAll` 档带 `worldSlow`，spawn 里四条守卫接住其余档的 undefined
+      worldSlow: spec.worldSlow,
       ripple: entry?.entry === true,
       owner: this,
     });

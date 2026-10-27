@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import { EnemyManager } from '../../src/combat/EnemyManager.js';
 import { createHurtbox } from '../../src/combat/Hurtbox.js';
 import { CollisionWorld } from '../../src/engine/Collision.js';
+import { TimeController } from '../../src/engine/Time.js';
 
 /** 没有真实 DOM：把 window 事件与 CustomEvent 换成最小可用替身 */
 export function installWindowShim() {
@@ -117,7 +118,10 @@ export const v = (x, z) => new THREE.Vector3(x, 0, z);
 /** 空地上的管理器；projectiles 必须在构造期交出，AI 上下文才拿得到 */
 export const makeManager = (over = {}) => {
   const { world = makeWorld(), projectiles = null } = over;
-  return new EnemyManager(makeScene(), world, projectiles);
+  // 时间通道（切片13）：管理器把 `time` 穿给危险区，全场时停（`worldSlow`）才有持有世界
+  // 时标的门。多数用例从不 tick 它 —— `rawDt` 停在 0，只对 worldSlow 项可见，其余档位零影响；
+  // 但通道在场意味着任何一层意外铺出全场时停也不会"当场抛错"污染与本切片无关的用例。
+  return new EnemyManager(makeScene(), world, projectiles, null, new TimeController());
 };
 
 export const run = (m, seconds, dt, playerPos, playerRef) => {

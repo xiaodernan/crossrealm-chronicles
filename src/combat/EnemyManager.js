@@ -41,7 +41,7 @@ export function killRewardSouls(kind, growthStage = 0) {
 }
 
 export class EnemyManager {
-  constructor(scene, world, projectiles, audio = null) {
+  constructor(scene, world, projectiles, audio = null, time = null) {
     this.scene = scene;
     this.world = world;
     this.projectiles = projectiles;
@@ -53,8 +53,9 @@ export class EnemyManager {
     /**
      * 场地红圈：危险区不属于任何一只敌人，归管理器统一推进。
      * 与 `projectiles` 同一处理由 —— 远程招交出弹体、砸地招交出圈，二者都要活得比施法者久。
+     * 第 4 参 `time`（切片13）：全场时停（`worldSlow`）要经它持有世界时标；不传的层铺不了那一档。
      */
-    this.hazards = new GroundHazards(scene, world, this.audio);
+    this.hazards = new GroundHazards(scene, world, this.audio, time);
     /**
      * Boss 场的**两份共享几何**与**一份共享材质**（W-C1 切片3g）。
      *
