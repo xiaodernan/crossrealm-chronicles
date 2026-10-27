@@ -124,6 +124,20 @@ export class WorldManager {
     // 室内归属拿到的是同一个载体，不会漂成两份）。
     this.internalSpaceManager.attachZoneCenterResolver((zoneId) => resolveZone(this.zones, zoneId)?.center ?? null);
 
+    // 缺陷② 切片F（修 B134）：**挂地面问手 → 建内容**，这一对必须在这里，且顺序不能反。
+    //
+    // 摆件落座要问"这块地在世界高度场上有多高"，而那张场（`sampleGlobalHeight`）要
+    // **七座区都在册**才答得出来：它取各区贡献的最大值，还按区几何算区缘收口。
+    // 构造器里建内容的那一刻 `this.zones` 还是空的 ⇒ 问手答不了 ⇒ 摆件只能退回按
+    // 本区自己的那份额度落座（B134 的现场：埋没 254 次、悬空 24 次，最狠一刀 −22.96 米）。
+    //
+    // 问手收世界坐标、交世界高度，落地走的是 `WorldManager.getGroundHeight` ——
+    // 与玩家脚下读的是**同一个出口**，于是"摆件站在哪"与"玩家踩在哪"从此同一张场。
+    for (const zone of this.zones) {
+      zone.attachGroundResolver((worldX, worldZ) => this.getGroundHeight(worldX, worldZ));
+    }
+    for (const zone of this.zones) zone.build();
+
     // 登记与问手**必须排在 `worldTerrain.build()` 之前**（W-B9 切片E，修 B126）：
     // 室内那一档现在是高度场的一项，而这张网格读的就是同一条场 —— 先建网格再登记室内，
     // 得到的就是"眼睛按没有室内的场铺地、脚按有室内的场落地"，正是本片要杀的那个分家。

@@ -102,7 +102,7 @@ function buildSaloon(zone) {
   );
   mirror.position.set(0, 1.6, 1.52);
   g.add(mirror);
-  g.position.set(48, zone.sampleHeight(48, 32), 32);
+  g.position.set(48, zone.groundYAt(48, 32), 32);
   zone.group.add(g);
 }
 
@@ -112,7 +112,7 @@ function buildDuelCircle(zone) {
     new THREE.MeshStandardMaterial({ color: 0xddaa55, transparent: true, opacity: 0.45 })
   );
   ring.rotation.x = -Math.PI / 2;
-  ring.position.set(-52, zone.sampleHeight(-52, 22) + 0.06, 22);
+  ring.position.set(-52, zone.groundYAt(-52, 22) + 0.06, 22);
   zone.group.add(ring);
 }
 
@@ -120,7 +120,7 @@ function buildGhostRails(zone) {
   const rail = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.7 });
   for (let i = 0; i < 8; i++) {
     const tie = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.1, 2.5), rail);
-    tie.position.set(72 + i * 2.5, zone.sampleHeight(72 + i * 2.5, -28) + 0.05, -28);
+    tie.position.set(72 + i * 2.5, zone.groundYAt(72 + i * 2.5, -28) + 0.05, -28);
     zone.group.add(tie);
   }
 }
@@ -130,7 +130,7 @@ function buildSpeakeasyDoor(zone) {
     new THREE.BoxGeometry(1.4, 2.4, 0.15),
     new THREE.MeshStandardMaterial({ color: 0x221118, roughness: 0.95 })
   );
-  door.position.set(32, zone.sampleHeight(32, 42) + 1.2, 42);
+  door.position.set(32, zone.groundYAt(32, 42) + 1.2, 42);
   zone.group.add(door);
 }
 
@@ -148,7 +148,7 @@ function buildFamilyShrine(zone) {
   );
   mirror.position.set(0, 1.2, 0.1);
   g.add(mirror);
-  g.position.set(-42, zone.sampleHeight(-42, -32), -32);
+  g.position.set(-42, zone.groundYAt(-42, -32), -32);
   zone.group.add(g);
 }
 
@@ -156,7 +156,7 @@ function buildDockCrates(zone) {
   const crateMat = new THREE.MeshStandardMaterial({ color: 0x4a3528, roughness: 0.9 });
   for (let i = 0; i < 3; i++) {
     const c = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.2, 1.5), crateMat);
-    c.position.set(58 + i * 1.6, zone.sampleHeight(58, -48) + 0.6, -48);
+    c.position.set(58 + i * 1.6, zone.groundYAt(58, -48) + 0.6, -48);
     zone.group.add(c);
   }
 }
@@ -166,7 +166,7 @@ function buildColonyDome(zone) {
     new THREE.SphereGeometry(5, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2),
     new THREE.MeshStandardMaterial({ color: 0x336688, transparent: true, opacity: 0.4 })
   );
-  dome.position.set(-32, zone.sampleHeight(-32, -72) + 0.2, -72);
+  dome.position.set(-32, zone.groundYAt(-32, -72) + 0.2, -72);
   zone.group.add(dome);
 }
 
@@ -175,7 +175,7 @@ function buildAiCore(zone) {
     new THREE.OctahedronGeometry(1.2),
     new THREE.MeshStandardMaterial({ color: 0x66ffcc, emissive: 0x228866, emissiveIntensity: 0.9 })
   );
-  core.position.set(62, zone.sampleHeight(62, 38) + 1.5, 38);
+  core.position.set(62, zone.groundYAt(62, 38) + 1.5, 38);
   zone.group.add(core);
 }
 
@@ -187,6 +187,6 @@ function buildJumpGate(zone) {
     gate.position.set(i * 4, 3, 0);
     g.add(gate);
   }
-  g.position.set(8, zone.sampleHeight(8, 82), 82);
+  g.position.set(8, zone.groundYAt(8, 82), 82);
   zone.group.add(g);
 }

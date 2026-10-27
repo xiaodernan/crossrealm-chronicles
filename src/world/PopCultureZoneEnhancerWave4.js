@@ -50,7 +50,7 @@ function attachCyber(zone, world, game) {
 
   const sign = new THREE.Mesh(new THREE.BoxGeometry(4, 0.8, 0.2), new THREE.MeshStandardMaterial({ color: 0xff22aa, emissive: 0xff0088, emissiveIntensity: 0.9 }));
 
-  sign.position.set(-30, zone.sampleHeight(-30, -55) + 2.5, -55);
+  sign.position.set(-30, zone.groundYAt(-30, -55) + 2.5, -55);
 
   zone.group.add(sign);
 
@@ -96,7 +96,7 @@ function attachSamurai(zone, world, game) {
 
   g.add(beam);
 
-  g.position.set(-35, zone.sampleHeight(-35, 45), 45);
+  g.position.set(-35, zone.groundYAt(-35, 45), 45);
 
   zone.group.add(g);
 

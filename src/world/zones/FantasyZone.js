@@ -22,6 +22,16 @@ export class FantasyZone extends BaseZone {
     });
 
     this.dialog = dialog;
+  }
+
+  /**
+   * 内容构建（缺陷② 切片F，修 B134）。
+   *
+   * 构造器只构造 —— 内容要问"这块地在世界高度场上有多高"，而世界场要七座区都在册
+   * 才答得出来（见 `BaseZone.build()` 的注）。这一段由 `WorldManager.build()` 在
+   * 挂好地面问手之后统一调用。
+   */
+  build() {
     this.buildTerrain();
     this.buildMountains();
     this.buildForest();
@@ -64,10 +74,10 @@ export class FantasyZone extends BaseZone {
 
     for (const [x, z, h, r] of peaks) {
       const m = new THREE.Mesh(new THREE.ConeGeometry(r, h, 6), mat);
-      m.position.set(x, this.sampleHeight(x, z) + h * 0.5 - 2, z);
+      m.position.set(x, this.groundYAt(x, z) + h * 0.5 - 2, z);
       applyShadow(m, 'castOnly');
       this.group.add(m);
-      this.addCylinderCollider(x, z, r * 0.78, this.sampleHeight(x, z) + h * 0.7, { base: this.sampleHeight(x, z) - 3 });
+      this.addCylinderCollider(x, z, r * 0.78, this.groundYAt(x, z) + h * 0.7, { base: this.groundYAt(x, z) - 3 });
     }
   }
 
@@ -93,11 +103,11 @@ export class FantasyZone extends BaseZone {
       const col = new THREE.Mesh(makeUvCylinderGeometry(0.6, 0.8, h, 8), stoneMat);
       const x = -20 + i * 8 + (Math.random() - 0.5) * 4;
       const z = -15 + (Math.random() - 0.5) * 10;
-      col.position.set(x, this.sampleHeight(x, z) + 2, z);
+      col.position.set(x, this.groundYAt(x, z) + 2, z);
       col.rotation.z = (Math.random() - 0.5) * 0.3;
       applyShadow(col, 'castOnly');
       this.group.add(col);
-      this.addCylinderCollider(x, z, 0.85, this.sampleHeight(x, z) + 2 + h * 0.5, { base: this.sampleHeight(x, z) - 0.5 });
+      this.addCylinderCollider(x, z, 0.85, this.groundYAt(x, z) + 2 + h * 0.5, { base: this.groundYAt(x, z) - 0.5 });
     }
 
     for (let i = 0; i < 12; i++) {
@@ -129,7 +139,7 @@ export class FantasyZone extends BaseZone {
     pillar.position.y = 3;
     ringGroup.add(pillar);
 
-    ringGroup.position.set(-30, this.sampleHeight(-30, 10), 10);
+    ringGroup.position.set(-30, this.groundYAt(-30, 10), 10);
     this.group.add(ringGroup);
 
     this.addPOI({ x: -30, y: 0, z: 10 }, 'zone_poi_fantasy_ring_label', () => {
@@ -153,7 +163,7 @@ export class FantasyZone extends BaseZone {
     });
     const river = new THREE.Mesh(new THREE.PlaneGeometry(6, 90, 1, 1), waterMat);
     river.rotation.x = -Math.PI / 2;
-    river.position.set(40, this.sampleHeight(40, 0) + 0.08, 0);
+    river.position.set(40, this.groundYAt(40, 0) + 0.08, 0);
     this.group.add(river);
 
     for (let i = 0; i < 8; i++) {
@@ -175,9 +185,9 @@ export class FantasyZone extends BaseZone {
     const fire = new THREE.PointLight(0xff6622, 0.8, 15);
     fire.position.y = 12;
     tower.add(fire);
-    tower.position.set(60, this.sampleHeight(60, -50), -50);
+    tower.position.set(60, this.groundYAt(60, -50), -50);
     this.group.add(tower);
-    this.addCylinderCollider(60, -50, 3.2, this.sampleHeight(60, -50) + 8, { base: this.sampleHeight(60, -50) - 0.5 });
+    this.addCylinderCollider(60, -50, 3.2, this.groundYAt(60, -50) + 8, { base: this.groundYAt(60, -50) - 0.5 });
 
     this.addPOI({ x: 60, y: 0, z: -50 }, 'zone_poi_fantasy_tower_label', () => {
       this.dialog.show(t('zone_dlg_fantasy_tower_title'), t('zone_dlg_fantasy_tower_text'));
@@ -201,7 +211,7 @@ export class FantasyZone extends BaseZone {
     const railR = railL.clone();
     railR.position.z = 1.2;
     bridge.add(railR);
-    bridge.position.set(-10, this.sampleHeight(-10, 35), 35);
+    bridge.position.set(-10, this.groundYAt(-10, 35), 35);
     bridge.rotation.y = 0.4;
     this.group.add(bridge);
   }
@@ -216,7 +226,7 @@ export class FantasyZone extends BaseZone {
     const top = new THREE.Mesh(new THREE.BoxGeometry(9, 1.2, 1.5), mat);
     top.position.y = 6;
     arch.add(left, right, top);
-    arch.position.set(-55, this.sampleHeight(-55, -35), -35);
+    arch.position.set(-55, this.groundYAt(-55, -35), -35);
     this.group.add(arch);
     const gy = arch.position.y;
     this.addBoxCollider(-59, -35, 0.75, 0.75, gy + 6, { base: gy - 0.5 });
@@ -235,13 +245,13 @@ export class FantasyZone extends BaseZone {
       const lx = Math.cos(angle) * r;
       const lz = Math.sin(angle) * r;
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.35, 4 + Math.random() * 3, 5), treeMat);
-      trunk.position.set(lx, this.sampleHeight(lx, lz) + 2, lz);
+      trunk.position.set(lx, this.groundYAt(lx, lz) + 2, lz);
       applyShadow(trunk, 'castOnly');
       this.group.add(trunk);
       const crown = new THREE.Mesh(new THREE.ConeGeometry(1.5 + Math.random(), 3, 6), treeMat);
       crown.position.set(lx, trunk.position.y + 3, lz);
       this.group.add(crown);
-      this.addCylinderCollider(lx, lz, 0.5, trunk.position.y + 2 + trunk.geometry.parameters.height * 0.5, { base: this.sampleHeight(lx, lz) - 0.5 });
+      this.addCylinderCollider(lx, lz, 0.5, trunk.position.y + 2 + trunk.geometry.parameters.height * 0.5, { base: this.groundYAt(lx, lz) - 0.5 });
     }
     const ruinMat = new THREE.MeshStandardMaterial({ color: paletteOf('stone.gray'), roughness: 0.9 });
     for (let i = 0; i < 8; i++) {
@@ -249,10 +259,10 @@ export class FantasyZone extends BaseZone {
       const lz = (Math.random() - 0.5) * this.radius * 1.6;
       if (Math.sqrt(lx * lx + lz * lz) < this.radius * 0.4) continue;
       const block = new THREE.Mesh(new THREE.BoxGeometry(2, 1 + Math.random(), 2), ruinMat);
-      block.position.set(lx, this.sampleHeight(lx, lz) + 0.5, lz);
+      block.position.set(lx, this.groundYAt(lx, lz) + 0.5, lz);
       block.rotation.y = Math.random() * Math.PI;
       this.group.add(block);
-      this.addBoxCollider(lx, lz, 1, 1, block.position.y + block.geometry.parameters.height * 0.5, { base: this.sampleHeight(lx, lz) - 0.4, rot: block.rotation.y });
+      this.addBoxCollider(lx, lz, 1, 1, block.position.y + block.geometry.parameters.height * 0.5, { base: this.groundYAt(lx, lz) - 0.4, rot: block.rotation.y });
     }
   }
 }

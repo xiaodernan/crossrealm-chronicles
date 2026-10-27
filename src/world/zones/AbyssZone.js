@@ -20,6 +20,13 @@ export class AbyssZone extends BaseZone {
       },
     });
     this.dialog = dialog;
+  }
+
+  /**
+   * 内容构建（缺陷② 切片F，修 B134）—— 构造器只构造，内容由 `WorldManager` 在挂好
+   * 地面问手之后统一调用（见 `BaseZone.build()` 的注）。
+   */
+  build() {
     this.buildTerrain();
     this.buildChaosRifts();
     this.buildLandmarks();
@@ -54,7 +61,7 @@ export class AbyssZone extends BaseZone {
       const lz = Math.sin(a) * r;
       pillar.position.set(lx, 3, lz);
       this.group.add(pillar);
-      this.addCylinderCollider(lx, lz, 0.55, this.sampleHeight(lx, lz) + h * 0.5 + 3, { base: this.sampleHeight(lx, lz) - 0.5 });
+      this.addCylinderCollider(lx, lz, 0.55, this.groundYAt(lx, lz) + h * 0.5 + 3, { base: this.groundYAt(lx, lz) - 0.5 });
     }
     const core = new THREE.Mesh(
       new THREE.IcosahedronGeometry(2, 0),
@@ -98,10 +105,10 @@ export class AbyssZone extends BaseZone {
       const lx = (Math.random() - 0.5) * this.radius * 1.6;
       const lz = (Math.random() - 0.5) * this.radius * 1.6;
       const rock = new THREE.Mesh(geo, mat);
-      rock.position.set(lx, this.sampleHeight(lx, lz) + 1, lz);
+      rock.position.set(lx, this.groundYAt(lx, lz) + 1, lz);
       rock.rotation.y = Math.random() * Math.PI;
       this.group.add(rock);
-      this.addBoxCollider(lx, lz, 0.75, 0.75, this.sampleHeight(lx, lz) + 2, { base: this.sampleHeight(lx, lz) - 0.5, rot: rock.rotation.y });
+      this.addBoxCollider(lx, lz, 0.75, 0.75, this.groundYAt(lx, lz) + 2, { base: this.groundYAt(lx, lz) - 0.5, rot: rock.rotation.y });
     }
   }
 

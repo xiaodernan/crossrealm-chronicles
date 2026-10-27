@@ -21,6 +21,13 @@ export class VoidZone extends BaseZone {
       },
     });
     this.dialog = dialog;
+  }
+
+  /**
+   * 内容构建（缺陷② 切片F，修 B134）—— 构造器只构造，内容由 `WorldManager` 在挂好
+   * 地面问手之后统一调用（见 `BaseZone.build()` 的注）。
+   */
+  build() {
     this.buildTerrain();
     this.buildTimeRings();
     this.buildShards();
@@ -87,9 +94,9 @@ export class VoidZone extends BaseZone {
     const cap = new THREE.Mesh(new THREE.OctahedronGeometry(1.5), new THREE.MeshStandardMaterial(退路));
     cap.position.y = 13;
     obelisk.add(cap);
-    obelisk.position.set(0, this.sampleHeight(0, 0), 0);
+    obelisk.position.set(0, this.groundYAt(0, 0), 0);
     this.group.add(obelisk);
-    this.addCylinderCollider(0, 0, 1.5, this.sampleHeight(0, 0) + 14.5, { base: this.sampleHeight(0, 0) - 0.5 });
+    this.addCylinderCollider(0, 0, 1.5, this.groundYAt(0, 0) + 14.5, { base: this.groundYAt(0, 0) - 0.5 });
 
     this.addPOI(
       { x: 0, y: 0, z: -15 },
@@ -125,7 +132,7 @@ export class VoidZone extends BaseZone {
       const lx = Math.cos(angle) * r;
       const lz = Math.sin(angle) * r;
       const rock = new THREE.Mesh(makeUvFacetGeometry(new THREE.DodecahedronGeometry(1 + Math.random(), 0)), mat);
-      rock.position.set(lx, this.sampleHeight(lx, lz) + 0.5, lz);
+      rock.position.set(lx, this.groundYAt(lx, lz) + 0.5, lz);
       this.group.add(rock);
     }
   }

@@ -24,6 +24,13 @@ export class SpaceZone extends BaseZone {
     });
 
     this.dialog = dialog;
+  }
+
+  /**
+   * 内容构建（缺陷② 切片F，修 B134）—— 构造器只构造，内容由 `WorldManager` 在挂好
+   * 地面问手之后统一调用（见 `BaseZone.build()` 的注）。
+   */
+  build() {
     this.buildTerrain();
     this.buildBlackHole();
     this.buildIceStructures();
@@ -130,11 +137,11 @@ export class SpaceZone extends BaseZone {
       const z = (Math.random() - 0.5) * 160;
       const h = 3 + Math.random() * 8;
       const crystal = new THREE.Mesh(makeUvConeGeometry(1 + Math.random(), h, 4), iceMat);
-      crystal.position.set(x, this.sampleHeight(x, z) + h * 0.5, z);
+      crystal.position.set(x, this.groundYAt(x, z) + h * 0.5, z);
       crystal.rotation.y = Math.random() * Math.PI;
       applyShadow(crystal, 'castOnly');
       this.group.add(crystal);
-      const gy = this.sampleHeight(x, z);
+      const gy = this.groundYAt(x, z);
       this.addCylinderCollider(x, z, 0.7, gy + h, { base: gy - 0.5 });
     }
   }
@@ -197,10 +204,10 @@ export class SpaceZone extends BaseZone {
     engine.position.set(5, 1, 0);
     engine.rotation.z = Math.PI / 2;
     wreck.add(engine);
-    wreck.position.set(50, this.sampleHeight(50, -20), -20);
+    wreck.position.set(50, this.groundYAt(50, -20), -20);
     wreck.rotation.y = -0.6;
     this.group.add(wreck);
-    this.addBoxCollider(50, -20, 6, 3, this.sampleHeight(50, -20) + 3.2, { base: this.sampleHeight(50, -20) - 1, rot: -0.6 });
+    this.addBoxCollider(50, -20, 6, 3, this.groundYAt(50, -20) + 3.2, { base: this.groundYAt(50, -20) - 1, rot: -0.6 });
 
     this.addPOI({ x: 50, y: 0, z: -20 }, 'zone_poi_space_wreck_label', () => {
       this.dialog.show(t('zone_dlg_space_wreck_title'), t('zone_dlg_space_wreck_text'));
@@ -218,11 +225,11 @@ export class SpaceZone extends BaseZone {
       const mono = new THREE.Mesh(new THREE.BoxGeometry(1.2, 6 + i, 0.4), mat);
       const x = -60 + i * 15;
       const z = 60;
-      mono.position.set(x, this.sampleHeight(x, z) + 3, z);
+      mono.position.set(x, this.groundYAt(x, z) + 3, z);
       mono.rotation.y = 0.2 * i;
       applyShadow(mono, 'castOnly');
       this.group.add(mono);
-      this.addBoxCollider(x, z, 0.6, 0.25, this.sampleHeight(x, z) + 6 + i, { base: this.sampleHeight(x, z) - 0.5, rot: 0.2 * i });
+      this.addBoxCollider(x, z, 0.6, 0.25, this.groundYAt(x, z) + 6 + i, { base: this.groundYAt(x, z) - 0.5, rot: 0.2 * i });
     }
   }
 
@@ -235,7 +242,7 @@ export class SpaceZone extends BaseZone {
     ring.position.set(0, 0.2, 0);
     const zone = new THREE.Group();
     zone.add(ring);
-    zone.position.set(10, this.sampleHeight(10, 0), 0);
+    zone.position.set(10, this.groundYAt(10, 0), 0);
     this.group.add(zone);
     // 今天它靠"半透明不合批"侥幸躲过；真正的事实是 `update` 每帧转它、还改它的
     // `material.opacity` —— 声明出来，别让它靠材质的偶然性保命。
@@ -271,10 +278,10 @@ export class SpaceZone extends BaseZone {
       const lx = Math.cos(angle) * r;
       const lz = Math.sin(angle) * r;
       const spike = new THREE.Mesh(makeUvConeGeometry(0.8, 3 + Math.random() * 4, 4), iceMat);
-      spike.position.set(lx, this.sampleHeight(lx, lz) + 1.5, lz);
+      spike.position.set(lx, this.groundYAt(lx, lz) + 1.5, lz);
       spike.rotation.y = Math.random() * Math.PI;
       this.group.add(spike);
-      const gy = this.sampleHeight(lx, lz);
+      const gy = this.groundYAt(lx, lz);
       this.addCylinderCollider(lx, lz, 0.6, gy + spike.geometry.parameters.height, { base: gy - 0.5 });
     }
     // W-C5 切片10：外野散岩上 crag 岩面（1 米一铺的无格多面体噪声），退路读数 0.95。
@@ -284,10 +291,10 @@ export class SpaceZone extends BaseZone {
       const lx = (Math.random() - 0.5) * this.radius * 1.4;
       const lz = (Math.random() - 0.5) * this.radius * 1.4;
       const rock = new THREE.Mesh(makeUvFacetGeometry(new THREE.DodecahedronGeometry(1.5 + Math.random(), 0)), rockMat);
-      rock.position.set(lx, this.sampleHeight(lx, lz) + 0.8, lz);
+      rock.position.set(lx, this.groundYAt(lx, lz) + 0.8, lz);
       this.group.add(rock);
       const s = rock.geometry.parameters.radius;
-      this.addCylinderCollider(lx, lz, s * 0.85, this.sampleHeight(lx, lz) + s * 1.4, { base: this.sampleHeight(lx, lz) - s });
+      this.addCylinderCollider(lx, lz, s * 0.85, this.groundYAt(lx, lz) + s * 1.4, { base: this.groundYAt(lx, lz) - s });
     }
   }
 }

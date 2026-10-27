@@ -193,7 +193,13 @@ const 雪 = {
 };
 const 魔法区 = {
   文件: 'src/world/zones/BaseZone.js', 名: 'POI 标记浮动（区域基类）',
-  造: () => ({ obj: new MagicZone(new THREE.Scene(), new THREE.Vector3(0, 0, -180), { toast() {} }) }),
+  造: () => {
+    // 构造器只构造（缺陷② 切片F）：内容由 `build()` 建 —— 生产里这一段由 `WorldManager`
+    // 在挂好地面问手之后调用，裸区在这里自己补上同一句。
+    const obj = new MagicZone(new THREE.Scene(), new THREE.Vector3(0, 0, -180), { toast() {} });
+    obj.build();
+    return { obj };
+  },
   读: (x) => {
     const m = x.obj.poiMarkers[0]?.marker;
     return [m ? m.position.y : 0, m ? m.rotation.y : 0];
@@ -204,6 +210,7 @@ const 漂浮书 = {
   文件: 'src/world/zones/MagicZone.js', 名: '魔法区漂浮书',
   造: () => {
     const obj = new MagicZone(new THREE.Scene(), new THREE.Vector3(0, 0, -180), { toast() {} });
+    obj.build(); // 构造器只构造（缺陷② 切片F）：内容由 build() 建
     // 把读的那几本书的**相位钉死**（生产里 `phase: Math.random()*2π`，这里只是把夹具选中
     // 那几本的相位改成已知值 —— 不改振幅、不改公式、不改其余本）。
     //
@@ -228,7 +235,11 @@ for (const 相 of 漂浮书相位) {
 }
 const 时环 = {
   文件: 'src/world/zones/SpaceZone.js', 名: '太空区时环透明度',
-  造: () => ({ obj: new SpaceZone(new THREE.Scene(), new THREE.Vector3(0, 0, 180), { toast() {} }) }),
+  造: () => {
+    const obj = new SpaceZone(new THREE.Scene(), new THREE.Vector3(0, 0, 180), { toast() {} });
+    obj.build(); // 构造器只构造（缺陷② 切片F）：内容由 build() 建
+    return { obj };
+  },
   读: (x) => [x.obj.timeRing.material.opacity],
 };
 const 内在空间 = {

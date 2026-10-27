@@ -23,6 +23,13 @@ export class MagicZone extends BaseZone {
 
     this.dialog = dialog;
     this.magicParticles = [];
+  }
+
+  /**
+   * 内容构建（缺陷② 切片F，修 B134）—— 构造器只构造，内容由 `WorldManager` 在挂好
+   * 地面问手之后统一调用（见 `BaseZone.build()` 的注）。
+   */
+  build() {
     this.buildTerrain();
     this.buildCastle();
     this.buildForbiddenForest();
@@ -199,10 +206,10 @@ export class MagicZone extends BaseZone {
       roof.position.y = 3.5;
       roof.rotation.y = Math.PI / 4;
       gh.add(roof);
-      gh.position.set(-50 + g * 12, this.sampleHeight(-50 + g * 12, 50), 50);
+      gh.position.set(-50 + g * 12, this.groundYAt(-50 + g * 12, 50), 50);
       this.group.add(gh);
       const gx = -50 + g * 12;
-      const gy = this.sampleHeight(gx, 50);
+      const gy = this.groundYAt(gx, 50);
       this.addBoxCollider(gx, 50, 4, 2.5, gy + 4.5, { base: gy - 0.5 });
     }
   }
@@ -258,9 +265,17 @@ export class MagicZone extends BaseZone {
       const lz = (Math.random() - 0.5) * this.radius * 1.5;
       if (Math.sqrt(lx * lx + lz * lz) < this.radius * 0.35) continue;
       const tree = new THREE.Mesh(new THREE.ConeGeometry(1.2, 5, 5), treeMat);
-      tree.position.set(lx, 2.5, lz);
+      // 缺陷② 切片F（修 B134）：这一段原来写的是绝对高度 `2.5` 与 `base: -0.5` ——
+      // 也就是"假定本区的地在 y=0 那一层"。魔法区外圈的地有高有低（实测最低 −9.87 米），
+      // 于是这 50 棵禁林树在洼地里**浮在地面之上近十米**，而它们那圈碰撞体
+      // （底 −0.5、顶 5，全是绝对数）就成了一道**悬在半空的看不见的墙** ——
+      // 玩家撞得到、看不见，正是 B130 那笔账里最难受的一种。
+      //
+      // 现在摆件与体都用同一组读数：离当地地面 0~5 米的锥体，体的底埋在地面下 0.5 米。
+      const gy = this.groundYAt(lx, lz);
+      tree.position.set(lx, gy + 2.5, lz);
       this.group.add(tree);
-      this.addCylinderCollider(lx, lz, 0.55, 5, { base: -0.5 });
+      this.addCylinderCollider(lx, lz, 0.55, gy + 5, { base: gy - 0.5 });
     }
   }
 }

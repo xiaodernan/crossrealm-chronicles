@@ -33,6 +33,12 @@ import { installWindowShim } from './helpers/enemyHarness.js';
 const makeScene = () => ({ add() {}, remove() {} });
 const makeDialog = () => ({ show() {}, toast() {} });
 
+/**
+ * 构造器只构造（缺陷② 切片F，修 B134）：内容由 `build()` 建 —— 生产里这一段由
+ * `WorldManager` 在挂好地面问手之后统一调用，裸区在这里自己补上同一句。
+ */
+const 建好 = (zone) => { zone.build(); return zone; };
+
 /** 区域 -> 该区这一片搬进调色板的格子（每个格子都必须在这一区的材质里真的出现） */
 const 期望格子 = {
   MagicZone: [
@@ -70,11 +76,11 @@ describe('五区表面底色：调色板真的涂到了世界上（W-C5 切片9�
   it('五座区域逐格到场：每个格子都出现在本区某个材质的 color 上', () => {
     installWindowShim();
     const 建 = {
-      MagicZone: () => new MagicZone(makeScene(), { x: 0, z: 0 }, makeDialog()),
-      SpaceZone: () => new SpaceZone(makeScene(), { x: 120, z: 0 }, makeDialog()),
-      AbyssZone: () => new AbyssZone(makeScene(), { x: 0, z: 220 }, makeDialog()),
-      GloomZone: () => new GloomZone(makeScene(), { x: 0, z: 220 }, makeDialog()),
-      RadiantZone: () => new RadiantZone(makeScene(), { x: 0, z: 220 }, makeDialog()),
+      MagicZone: () => 建好(new MagicZone(makeScene(), { x: 0, z: 0 }, makeDialog())),
+      SpaceZone: () => 建好(new SpaceZone(makeScene(), { x: 120, z: 0 }, makeDialog())),
+      AbyssZone: () => 建好(new AbyssZone(makeScene(), { x: 0, z: 220 }, makeDialog())),
+      GloomZone: () => 建好(new GloomZone(makeScene(), { x: 0, z: 220 }, makeDialog())),
+      RadiantZone: () => 建好(new RadiantZone(makeScene(), { x: 0, z: 220 }, makeDialog())),
     };
     for (const [名字, 造] of Object.entries(建)) {
       const zone = 造();

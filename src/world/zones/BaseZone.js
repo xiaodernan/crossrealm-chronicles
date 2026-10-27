@@ -59,7 +59,68 @@ export class BaseZone {
      * （同名同口径，见 `MagicZone` / `SpaceZone`），互不共享：两个区可以一个在戏一个不在。
      */
     this._时相 = 0;
+    /**
+     * 地面问手（缺陷② 切片F，修 B134）：问"这个本地坐标点在**世界高度场**上有多高"。
+     *
+     * 为什么要有它：各区自己的 `sampleHeight` 是**本区对高度场的贡献**，不是高度场本身。
+     * 全局场（`TerrainHeight.sampleGlobalHeight`）取的是 `max(自然地, 各区贡献…)`，
+     * 区缘还要按权重收口、枢纽广场要整平、室内那一档要掺混 —— 于是"摆件按 `sampleHeight`
+     * 落座"与"地面按全局场铺"是**两张读数**：前者埋进地里、后者浮在半空。
+     * 实测（B134 普查，641 次落座调用）：埋没 254 次、悬空 24 次，最狠一刀 **−22.96 米**
+     * （中洲外野）—— 树长在地下二十三米。
+     *
+     * 挂的是**问手**不是坐标：问手去问世界那张场，与玩家脚下读的是同一个出口
+     * （`WorldManager.getGroundHeight`），于是"摆件落座"与"玩家踩地"从此同一张场、
+     * 同一条读数口。抄一份高度值就是第二份真相，搬区时它会烂在原地（B120 那一族）。
+     */
+    this._groundResolver = null;
   }
+
+  /**
+   * 挂上"按世界点问地面高度"的问手（由 `WorldManager.build()` 在建内容之前挂）。
+   *
+   * 问手收**世界坐标**、交**世界高度**；本地↔世界的换算由本区自己负责（`groundYAt`）。
+   */
+  attachGroundResolver(resolve) {
+    if (typeof resolve !== 'function') {
+      throw new Error('BaseZone.attachGroundResolver: 问手必须是函数 —— 没有它，摆件就会退回按本区自己的那份额度落座（B134）');
+    }
+    this._groundResolver = resolve;
+    return this;
+  }
+
+  /**
+   * 这块地在**世界高度场**上的高度（本地坐标进、世界高度出）。
+   *
+   * 没挂问手时退回本区自己的 `sampleHeight`（裸区单测与"没进世界的区"用得住）——
+   * 那不是世界高度，只是本区对高度场的**贡献**；真世界里每一座区都挂着问手
+   * （`WorldManager.build()` 逐区挂上后才建内容），门禁盯着这件事。
+   *
+   * 非有限值当场抛：NaN 会顺着高度流进整张可见网格（B120 的教训），
+   * 静默地写进 `position.y` 只会在几百米外以"视锥全 NaN"的形式回来。
+   */
+  groundYAt(lx, lz) {
+    if (!this._groundResolver) return this.sampleHeight(lx, lz);
+    const y = this._groundResolver(this.center.x + lx, this.center.z + lz);
+    if (!Number.isFinite(y)) {
+      throw new Error(`BaseZone.groundYAt: 区域 ${this.id} 在本地 (${lx}, ${lz}) 上问到的地面高度不是有限数（${y}）—— `
+        + '高度场里有一处 NaN，摆件落座会把 NaN 写进场景');
+    }
+    return y;
+  }
+
+  /**
+   * 内容构建（子类覆写）。
+   *
+   * 为什么内容不在构造器里建（缺陷② 切片F，修 B134）：内容要问"这块地在世界场上有多高"，
+   * 而世界场要**七座区都在册**才答得出来（`sampleGlobalHeight` 取各区贡献的最大值，
+   * 区缘权重还按区几何算）。构造器里那一刻 `WorldManager.zones` 还是空的 ⇒ 问手答不了 ⇒
+   * 摆件只能退回按本区自己的那份额度落座，也就是 B134 那个埋地二十三米的现场。
+   *
+   * 于是拆成两段：**构造器只构造**（身份、材质表、碰撞表、POI 表这些"是什么"），
+   * **内容构建另起一段**（`build()`，由 `WorldManager` 在挂好地面问手之后统一调用）。
+   */
+  build() {}
 
   /** 登记一个本地坐标障碍；kind: solid | platform | ghost */
   addCollider(collider) {
@@ -111,6 +172,9 @@ export class BaseZone {
 
     const lx = worldX - this.center.x;
     const lz = worldZ - this.center.z;
+    // 这里问的是**本区对高度场的贡献**，不是高度场本身 —— 全局场（`sampleGlobalHeight`）
+    // 要拿它跟自然地、区缘权重、广场与室内那一档一起取最大值。
+    // 所以这里**必须**用 `sampleHeight`，换成 `groundYAt` 就成了"高度场里包含高度场"的自指。
     return this.sampleHeight(lx, lz);
   }
 
@@ -139,7 +203,8 @@ export class BaseZone {
 
     const lx = position.x;
     const lz = position.z;
-    const ly = position.y ?? this.sampleHeight(lx, lz);
+    // `y` 缺省 = 贴地（世界高度场的读数）；给了就是显式高度（悬浮的传送门之类）。
+    const ly = position.y ?? this.groundYAt(lx, lz);
 
     const poi = {
       id,
@@ -238,7 +303,7 @@ export class BaseZone {
     applyShadow(foliage, 'castOnly');
     group.add(foliage);
 
-    const groundY = this.sampleHeight(x, z);
+    const groundY = this.groundYAt(x, z);
     group.position.set(x, groundY, z);
     if (scale >= 0.6) {
       this.addCylinderCollider(x, z, Math.max(0.3, 0.42 * scale), groundY + 3 * scale, { base: groundY - 0.5 });
@@ -268,7 +333,7 @@ export class BaseZone {
     // 材质走 `addSurfaceMaterial` 两段式（世界构建早于贴图库就绪），退路读数仍是 0.95。
     const mat = this.rockSurfaceMaterial();
     const rock = new THREE.Mesh(makeUvFacetGeometry(new THREE.DodecahedronGeometry(size, 0)), mat);
-    rock.position.set(x, this.sampleHeight(x, z) + size * 0.4, z);
+    rock.position.set(x, this.groundYAt(x, z) + size * 0.4, z);
     rock.rotation.set(Math.random(), Math.random(), Math.random());
     rock.scale.set(1, 0.7 + Math.random() * 0.5, 1);
     applyShadow(rock, 'castOnly');

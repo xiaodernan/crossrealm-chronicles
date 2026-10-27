@@ -150,7 +150,7 @@ function buildBroomRing(zone) {
     ring.position.y = 8 + i * 3;
     g.add(ring);
   }
-  g.position.set(35, zone.sampleHeight(35, 40), 40);
+  g.position.set(35, zone.groundYAt(35, 40), 40);
   zone.group.add(g);
 }
 
@@ -159,7 +159,7 @@ function buildGreenhouseDome(zone) {
     new THREE.SphereGeometry(4, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2),
     new THREE.MeshStandardMaterial({ color: 0x448844, transparent: true, opacity: 0.35 })
   );
-  dome.position.set(-45, zone.sampleHeight(-45, 50) + 0.5, 50);
+  dome.position.set(-45, zone.groundYAt(-45, 50) + 0.5, 50);
   zone.group.add(dome);
 }
 
@@ -171,7 +171,7 @@ function buildMurphyShelf(zone) {
     plank.position.y = 1 + i * 0.6;
     shelf.add(plank);
   }
-  shelf.position.set(-20, zone.sampleHeight(-20, 55), 55);
+  shelf.position.set(-20, zone.groundYAt(-20, 55), 55);
   zone.group.add(shelf);
 }
 
@@ -185,7 +185,7 @@ function buildHourglass(zone) {
   bot.rotation.x = Math.PI;
   bot.position.y = 0.5;
   g.add(bot);
-  g.position.set(70, zone.sampleHeight(70, -40), -40);
+  g.position.set(70, zone.groundYAt(70, -40), -40);
   zone.group.add(g);
 }
 
@@ -195,7 +195,7 @@ function buildDockingRing(zone) {
     new THREE.MeshStandardMaterial({ color: 0x8899aa, emissive: 0x223344, emissiveIntensity: 0.5 })
   );
   ring.rotation.x = Math.PI / 2;
-  ring.position.set(-55, zone.sampleHeight(-55, -10) + 6, -10);
+  ring.position.set(-55, zone.groundYAt(-55, -10) + 6, -10);
   zone.group.add(ring);
 }
 
@@ -213,7 +213,7 @@ function buildRadioTower(zone) {
   );
   cap.position.set(0, 14, 0);
   tower.add(cap);
-  tower.position.set(50, zone.sampleHeight(50, 30), 30);
+  tower.position.set(50, zone.groundYAt(50, 30), 30);
   zone.group.add(tower);
 }
 
@@ -222,7 +222,7 @@ function buildUpsideRift(zone) {
     new THREE.PlaneGeometry(8, 12),
     new THREE.MeshBasicMaterial({ color: 0x440011, transparent: true, opacity: 0.55, side: THREE.DoubleSide })
   );
-  rift.position.set(-35, zone.sampleHeight(-35, -40) + 6, -40);
+  rift.position.set(-35, zone.groundYAt(-35, -40) + 6, -40);
   rift.rotation.y = 0.4;
   zone.group.add(rift);
 }
@@ -232,6 +232,6 @@ function buildNeonMall(zone) {
     new THREE.BoxGeometry(6, 1.2, 0.3),
     new THREE.MeshStandardMaterial({ color: 0xff66cc, emissive: 0xff2288, emissiveIntensity: 0.8 })
   );
-  sign.position.set(20, zone.sampleHeight(20, 55) + 3, 55);
+  sign.position.set(20, zone.groundYAt(20, 55) + 3, 55);
   zone.group.add(sign);
 }

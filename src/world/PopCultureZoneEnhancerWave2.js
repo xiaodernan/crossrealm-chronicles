@@ -206,7 +206,7 @@ function buildNinePlatform(zone) {
 
   g.add(arch);
 
-  g.position.set(58, zone.sampleHeight(58, 52), 52);
+  g.position.set(58, zone.groundYAt(58, 52), 52);
 
   zone.group.add(g);
 
@@ -226,7 +226,7 @@ function buildPatronusLake(zone) {
 
   water.rotation.x = -Math.PI / 2;
 
-  water.position.set(-58, zone.sampleHeight(-58, -28) + 0.05, -28);
+  water.position.set(-58, zone.groundYAt(-58, -28) + 0.05, -28);
 
   zone.group.add(water);
 
@@ -244,7 +244,7 @@ function buildTriwizardCup(zone) {
 
   );
 
-  cup.position.set(12, zone.sampleHeight(12, -48) + 1.2, -48);
+  cup.position.set(12, zone.groundYAt(12, -48) + 1.2, -48);
 
   zone.group.add(cup);
 
@@ -262,7 +262,7 @@ function buildBrandBeacon(zone) {
 
   );
 
-  pole.position.set(38, zone.sampleHeight(38, 68) + 2.5, 68);
+  pole.position.set(38, zone.groundYAt(38, 68) + 2.5, 68);
 
   zone.group.add(pole);
 
@@ -280,7 +280,7 @@ function buildWormholeArch(zone) {
 
   );
 
-  ring.position.set(-68, zone.sampleHeight(-68, -48) + 4, -48);
+  ring.position.set(-68, zone.groundYAt(-68, -48) + 4, -48);
 
   zone.group.add(ring);
 
@@ -298,7 +298,7 @@ function buildLoveSignal(zone) {
 
   );
 
-  star.position.set(5, zone.sampleHeight(5, -62) + 3, -62);
+  star.position.set(5, zone.groundYAt(5, -62) + 3, -62);
 
   zone.group.add(star);
 
@@ -322,7 +322,7 @@ function buildBikeLights(zone) {
 
   }
 
-  g.position.set(-48, zone.sampleHeight(-48, 38), 38);
+  g.position.set(-48, zone.groundYAt(-48, 38), 38);
 
   zone.group.add(g);
 
@@ -340,7 +340,7 @@ function buildArcadeCabinet(zone) {
 
   );
 
-  cab.position.set(32, zone.sampleHeight(32, -22) + 1, -22);
+  cab.position.set(32, zone.groundYAt(32, -22) + 1, -22);
 
   zone.group.add(cab);
 
@@ -376,7 +376,7 @@ function buildVecnaClock(zone) {
 
   tower.add(face);
 
-  tower.position.set(8, zone.sampleHeight(8, -38), -38);
+  tower.position.set(8, zone.groundYAt(8, -38), -38);
 
   zone.group.add(tower);
 
@@ -394,7 +394,7 @@ function buildUndergroundLab(zone) {
 
   );
 
-  door.position.set(-28, zone.sampleHeight(-28, 68) + 1.4, 68);
+  door.position.set(-28, zone.groundYAt(-28, 68) + 1.4, 68);
 
   zone.group.add(door);
 

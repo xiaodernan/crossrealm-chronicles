@@ -212,6 +212,7 @@ describe('② 同步支：库已就绪时构造区域 ⇒ 登记的石材出生�
     const 变体 = lib.uvVariant('drum', 砖, 砖);
 
     const fantasy = new FantasyZone(makeScene(), { x: -200, z: 0 }, makeDialog());
+    fantasy.build(); // 构造器只构造（缺陷② 切片F）：内容由 build() 建
     const drum们 = 本区表面(fantasy, 'drum');
     expect(drum们, '断柱 drum 只该登记一份').toHaveLength(1);
     const stoneMat = drum们[0];
@@ -221,6 +222,7 @@ describe('② 同步支：库已就绪时构造区域 ⇒ 登记的石材出生�
     expect(找材质网格(fantasy.group, stoneMat), '6 根断柱该共用同一份材质（GPU 与 draw 各只一份）').toHaveLength(6);
 
     const voidZone = new VoidZone(makeScene(), { x: 0, z: 220 }, makeDialog());
+    voidZone.build(); // 构造器只构造（缺陷② 切片F）：内容由 build() 建
     expect(本区表面(voidZone, 'drum'), '尖碑 drum 只该登记柱身一份（顶盖不是石段）').toHaveLength(1);
     expect(本区表面(voidZone, 'drum')[0].normalMap).toBe(变体.normalMap);
     const cap = [];
@@ -236,6 +238,7 @@ describe('③ 退路：sets.drum 没加载出来 ⇒ 旧读数，但几何仍是
     delete lib.sets.drum;
     try {
       const fantasy = new FantasyZone(makeScene(), { x: -200, z: 0 }, makeDialog());
+      fantasy.build(); // 构造器只构造（缺陷② 切片F）：内容由 build() 建
       const mat = 本区表面(fantasy, 'drum')[0];
       expect(mat.normalMap, 'drum 不在时不该有法线图').toBe(null);
       expect(mat.roughnessMap).toBe(null);

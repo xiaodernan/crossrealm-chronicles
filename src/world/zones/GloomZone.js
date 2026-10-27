@@ -21,6 +21,13 @@ export class GloomZone extends BaseZone {
       },
     });
     this.dialog = dialog;
+  }
+
+  /**
+   * 内容构建（缺陷② 切片F，修 B134）—— 构造器只构造，内容由 `WorldManager` 在挂好
+   * 地面问手之后统一调用（见 `BaseZone.build()` 的注）。
+   */
+  build() {
     this.buildTerrain();
     this.buildMistPillars();
     this.buildLandmarks();
@@ -55,7 +62,7 @@ export class GloomZone extends BaseZone {
       const lz = Math.sin(a) * r;
       pillar.position.set(lx, h * 0.5, lz);
       this.group.add(pillar);
-      this.addCylinderCollider(lx, lz, 0.7, this.sampleHeight(lx, lz) + h * 0.5 + 3, { base: this.sampleHeight(lx, lz) - 0.5 });
+      this.addCylinderCollider(lx, lz, 0.7, this.groundYAt(lx, lz) + h * 0.5 + 3, { base: this.groundYAt(lx, lz) - 0.5 });
     }
     const core = new THREE.Mesh(
       new THREE.IcosahedronGeometry(1.5, 0),
@@ -98,7 +105,7 @@ export class GloomZone extends BaseZone {
       const lz = (Math.random() - 0.5) * this.radius * 1.5;
       const 半径 = 1 + Math.random() * 0.8;
       const rock = new THREE.Mesh(makeUvFacetGeometry(new THREE.DodecahedronGeometry(半径, 0)), mat);
-      rock.position.set(lx, this.sampleHeight(lx, lz) + 1, lz);
+      rock.position.set(lx, this.groundYAt(lx, lz) + 1, lz);
       rock.rotation.set(Math.random(), Math.random(), Math.random());
       rock.scale.set(1, 0.7 + Math.random() * 0.5, 1);
       applyShadow(rock, 'castOnly');

@@ -48,7 +48,11 @@ const 对话桩 = () => ({ show() {}, toast() {} });
 /** 真 Scene：区域组靠 scene.add 挂上，`updateMatrixWorld` 才走生产那条路径 */
 function 建区(Zone, center = { x: -200, z: 0 }) {
   const scene = new THREE.Scene();
-  return { scene, zone: new Zone(scene, center, 对话桩()) };
+  const zone = new Zone(scene, center, 对话桩());
+  // 构造器只构造（缺陷② 切片F，修 B134）：内容由 `build()` 建 —— 生产里这一段由
+  // `WorldManager` 在挂好地面问手之后调用，裸区在这里自己补上同一句。
+  zone.build();
+  return { scene, zone };
 }
 
 const 七区 = [AbyssZone, FantasyZone, GloomZone, MagicZone, RadiantZone, SpaceZone, VoidZone];
@@ -254,6 +258,7 @@ describe('④ 材质身份：合并网格用的是原来那份材质', () => {
   it('混沌边境的 crag 材质：合批后仍是同一份对象，贴图晚到也上得了', () => {
     const scene = new THREE.Scene();
     const zone = new AbyssZone(scene, { x: 0, z: 0 }, 对话桩());
+    zone.build();
     const 登记的 = zone._surfaceMats.map((s) => s.mat);
     batchZoneStatics({ zones: [zone] });
     const 批 = 合批的(zone.group);
@@ -435,7 +440,11 @@ describe('⑦ 幂等与接线', () => {
 
   it('整个七区世界一次跑完：合计记账与逐区一致', () => {
     const scene = new THREE.Scene();
-    const zones = 七区.map((Z, i) => new Z(scene, { x: i * 300, z: 0 }, 对话桩()));
+    const zones = 七区.map((Z, i) => {
+      const z = new Z(scene, { x: i * 300, z: 0 }, 对话桩());
+      z.build(); // 构造器只构造（缺陷② 切片F）：内容由 build() 建
+      return z;
+    });
     const 前 = zones.reduce((n, z) => n + 三角形总数(z.group), 0);
     const 计 = batchZoneStatics({ zones });
     expect(三角形总数(scene)).toBe(前);

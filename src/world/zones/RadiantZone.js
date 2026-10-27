@@ -21,6 +21,13 @@ export class RadiantZone extends BaseZone {
       },
     });
     this.dialog = dialog;
+  }
+
+  /**
+   * 内容构建（缺陷② 切片F，修 B134）—— 构造器只构造，内容由 `WorldManager` 在挂好
+   * 地面问手之后统一调用（见 `BaseZone.build()` 的注）。
+   */
+  build() {
     this.buildTerrain();
     this.buildSunPillars();
     this.buildLandmarks();
@@ -55,7 +62,7 @@ export class RadiantZone extends BaseZone {
       const lz = Math.sin(a) * r;
       pillar.position.set(lx, h * 0.5, lz);
       this.group.add(pillar);
-      this.addCylinderCollider(lx, lz, 0.9, this.sampleHeight(lx, lz) + h * 0.5 + 3, { base: this.sampleHeight(lx, lz) - 0.5 });
+      this.addCylinderCollider(lx, lz, 0.9, this.groundYAt(lx, lz) + h * 0.5 + 3, { base: this.groundYAt(lx, lz) - 0.5 });
     }
     const core = new THREE.Mesh(
       new THREE.OctahedronGeometry(2, 0),
@@ -99,7 +106,7 @@ export class RadiantZone extends BaseZone {
         makeUvConeGeometry(1.5 + Math.random(), 3 + Math.random() * 2, 6),
         mat
       );
-      dune.position.set(lx, this.sampleHeight(lx, lz) + 1.5, lz);
+      dune.position.set(lx, this.groundYAt(lx, lz) + 1.5, lz);
       dune.rotation.y = Math.random() * Math.PI;
       applyShadow(dune, 'castOnly');
       this.group.add(dune);

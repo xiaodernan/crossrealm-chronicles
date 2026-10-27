@@ -59,7 +59,13 @@ const 装烘焙桩 = () => { TextureLibrary.prototype._loadSet = async function 
   return set;
 }; };
 
-const 建区 = (C, x = 0, z = 0) => new C(makeScene(), { x, z }, makeDialog());
+// 构造器只构造（缺陷② 切片F，修 B134）：内容由 `build()` 建 —— 生产里这一段由
+// `WorldManager` 在挂好地面问手之后调用，裸区在这里自己补上同一句。
+const 建区 = (C, x = 0, z = 0) => {
+  const zone = new C(makeScene(), { x, z }, makeDialog());
+  zone.build();
+  return zone;
+};
 
 /** 按表面名取本区登记过的材质（切片10 起一个区不止一种表面，下标会漂） */
 function 本区表面(zone, surface) {
