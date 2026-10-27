@@ -18,6 +18,7 @@ import { join } from 'node:path';
 import { HIT, PLAYER_KNOCK, GROUND_HAZARD } from '../src/content/tuning.js';
 import { installWindowShim, makePlayerRef, makeManager, v } from './helpers/enemyHarness.js';
 import { makePlayer, runFrames } from './helpers/playerHarness.js';
+import { FOV_LAYER_KNOCK } from '../src/engine/CameraRig.js';
 
 const realRandom = Math.random;
 const dt = 1 / 64;
@@ -255,5 +256,82 @@ describe('施法者一侧：井与引力化身都走这条通道', () => {
 
   it('两边的衰减同档：我推敌人一下与场拽我一下，衰减的是同一个钟', () => {
     expect(PLAYER_KNOCK.decay).toBe(HIT.decay);
+  });
+});
+
+describe('镜头提示：被顶开晃得到，被拽看得见（W-A6 切片10）', () => {
+  const cue = PLAYER_KNOCK.cue;
+  const stubShake = () => {
+    const calls = [];
+    return { calls, add(i) { calls.push(i); return this; } };
+  };
+  const stubRig = () => {
+    const claims = [];
+    return { claims, requestFov(id, delta) { claims.push([id, delta]); return this; } };
+  };
+
+  it('顶开震屏：过门槛的一记按速度晃，强度 = min(cap, speed × perSpeed)，真源是 cue 表', () => {
+    const p = makePlayer();
+    const s = stubShake();
+    p.shake = s;
+    expect(p.applyKnockback(1, 0, 6)).toBe(6);
+    expect(s.calls).toEqual([Math.min(cue.shakeCap, 6 * cue.shakePerSpeed)]);
+  });
+
+  it('小账不晃：门槛之下的记账照进账，相机不说这一声', () => {
+    const p = makePlayer();
+    const s = stubShake();
+    p.shake = s;
+    expect(cue.shakeFloor, '这条用例选的 1 米/秒必须真在门槛下').toBeGreaterThan(1);
+    expect(p.applyKnockback(1, 0, 1)).toBe(1);
+    expect(speedOf(p)).toBeCloseTo(1, 10);           // 账照记：提示缺阵不许连累位移
+    expect(s.calls).toEqual([]);
+  });
+
+  it('持续力场不震屏：井的每帧增量到不了门槛，站进井里不该把抖动顶满', () => {
+    const p = makePlayer();
+    const s = stubShake();
+    p.shake = s;
+    for (let i = 0; i < Math.round(1 / dt); i++) {
+      p._stepKnock(dt);
+      p.applySustainedForce(1, 0, 8, dt);
+    }
+    expect(speedOf(p), '力场全程都在干活，读到稳态才算数').toBeCloseTo(8 / PLAYER_KNOCK.decay, 2);
+    expect(s.calls).toEqual([]);
+  });
+
+  it('被拽收FOV：_stepKnock 按帧均外力速度申领收拢（负 delta = 吸进去），层 id 是 FOV_LAYER_KNOCK', () => {
+    const p = makePlayer();
+    const rig = stubRig();
+    const s = stubShake();
+    p.rig = rig;
+    p.shake = s;
+    p.applyKnockback(1, 0, 8 / PLAYER_KNOCK.decay);  // 井的稳态速度那一档（在震屏门槛下）
+    expect(s.calls).toEqual([]);
+    const kv = p._stepKnock(dt);
+    expect(rig.claims.length).toBe(1);
+    const [id, delta] = rig.claims[0];
+    expect(id).toBe(FOV_LAYER_KNOCK);
+    expect(delta).toBeLessThan(0);
+    expect(delta).toBeCloseTo(-Math.min(cue.fovCap, Math.hypot(kv.x, kv.z) * cue.fovPerSpeed), 10);
+  });
+
+  it('账空不申领：没有外力的一帧连 0 都不报 —— 收尾归 rig 的按帧契约，不归调用方', () => {
+    const p = makePlayer();
+    const rig = stubRig();
+    p.rig = rig;
+    p._stepKnock(dt);
+    expect(rig.claims).toEqual([]);
+  });
+
+  it('FOV 有封顶：maxSpeed 的账也只收到 fovCap，一记重击不会把视野收成望远镜', () => {
+    const p = makePlayer();
+    const rig = stubRig();
+    const s = stubShake();
+    p.rig = rig;
+    p.shake = s;
+    p.applyKnockback(1, 0, PLAYER_KNOCK.maxSpeed);
+    p._stepKnock(dt);
+    expect(rig.claims).toEqual([[FOV_LAYER_KNOCK, -cue.fovCap]]);
   });
 });

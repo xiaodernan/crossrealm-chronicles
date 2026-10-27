@@ -991,11 +991,32 @@ export const TIME_SCALE_LEASH = 0.12;
  *   招自己带 `knock` 的（盾击 7.5）按招的数，**它替掉通用档、不是相加** —— 一记至多一笔顶开。
  *   位移按这本账的积分 = `speed / decay`：小兵一刀 ≈ 0.24 米（有感但不打断），
  *   Boss 重击 ≈ 0.3~0.4 米，`cap 8` ≈ 0.73 米（与井的稳态速度同量级，不夺走控制权）。
+ * - `cue`：**镜头提示**（W-A6 切片10，M5/M6 的镜头半）—— 外力进账时玩家不该只看得见
+ *   血条在掉、脚在滑，相机也要说一声。两条提示都从这本账出发，收在通道一处，
+ *   谁往账上记账谁就免费得到提示，未来的拽/推来源不用各写一份表现层：
+ *   - `shakeFloor / shakePerSpeed / shakeCap`：**一记冲量**（顶开）走震屏。记账速度过了
+ *     `shakeFloor` 才晃，强度 = `min(shakeCap, speed × shakePerSpeed)`。门槛的存在不是
+ *     灵敏度旋钮：`applySustainedForce` 每帧记的增量只有 0.03~0.12 米/秒，没有门槛的话
+ *     站进井里的每一帧都在喂 trauma，一秒就把抖动顶满、把别处的提示全部淹没。
+ *     受击的**疼**（按血量份额那笔震屏，`CombatController.takeDamage`）保持原样 ——
+ *     两本账各说各的：疼按血量，位移按速度。
+ *   - `fovFloor / fovPerSpeed / fovCap`：**持续力场**（被拽）走 FOV 收拢。结算外力的
+ *     `_stepKnock` 每帧按帧均外力速度申领一次 `min(fovCap, speed × fovPerSpeed)` 的
+ *     收拢（负 delta = 吸进去的读法）；哪帧账空了哪帧不申领，按 rig 的契约自己消失。
+ *     井的稳态 0.73 米/秒 ≈ 收 1.8°，受击的 6 米/秒在衰减的 0.1 秒里短暂收到 5° 封顶。
  */
 export const PLAYER_KNOCK = {
   decay: 11,
   maxSpeed: 14,
   onHit: { base: 1, scale: 14, cap: 8 },
+  cue: {
+    shakeFloor: 2,
+    shakePerSpeed: 0.035,
+    shakeCap: 0.25,
+    fovFloor: 0.4,
+    fovPerSpeed: 2.5,
+    fovCap: 5,
+  },
 };
 
 export const ENEMY_MOVE_SETS = {

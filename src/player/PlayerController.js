@@ -12,7 +12,7 @@ import { PlayerAnimationAdapter } from './animation/PlayerAnimationAdapter.js';
 import { createPlayerFSM } from './PlayerFSM.js';
 
 import { shake } from '../engine/Shake.js';
-import { CameraRig, FOV_LAYER_OVERRIDE, CAMERA_OVERRIDES_NONE, isFiniteVec3 } from '../engine/CameraRig.js';
+import { CameraRig, FOV_LAYER_OVERRIDE, FOV_LAYER_KNOCK, CAMERA_OVERRIDES_NONE, isFiniteVec3 } from '../engine/CameraRig.js';
 import { LOOK_SENSITIVITY, DEFAULT_LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
 import { emitCue } from '../engine/cues.js';
 import { CAMERA_FOV, CAMERA_OCCLUSION, CAMERA_BLEND, LOCK_ON_CAMERA, PLAYER_KNOCK } from '../content/tuning.js';
@@ -522,6 +522,12 @@ export class PlayerController {
     }
     this.knock.x = kx;
     this.knock.z = kz;
+    // 顶开的镜头提示（W-A6 切片10）：位移的账按速度晃，受击的疼按血量晃（takeDamage），
+    // 两本账各说各的。门槛挡的是持续力场的每帧增量 —— 那条路每帧只记 0.03~0.12 米/秒，
+    // 到不了这条线；过了门槛的一记至少 0.18 米的位移，晃一声是它应得的
+    if (speed >= PLAYER_KNOCK.cue.shakeFloor) {
+      this.shake.add(Math.min(PLAYER_KNOCK.cue.shakeCap, speed * PLAYER_KNOCK.cue.shakePerSpeed));
+    }
     return speed;
   }
 
@@ -568,6 +574,12 @@ export class PlayerController {
     out.z = kz * km;
     this.knock.x = Math.abs(kx * kd) < 1e-3 ? 0 : kx * kd;
     this.knock.z = Math.abs(kz * kd) < 1e-3 ? 0 : kz * kd;
+    // 被拽的镜头提示（W-A6 切片10）：按帧均外力速度收一点视野，负 delta = 吸进去的读法。
+    // 账空走上面的早退、不申领 —— 这层没有"记得收尾"的义务，rig 的按帧契约让它自己消失
+    const cueSpeed = Math.hypot(out.x, out.z);
+    if (cueSpeed > PLAYER_KNOCK.cue.fovFloor) {
+      this.rig?.requestFov(FOV_LAYER_KNOCK, -Math.min(PLAYER_KNOCK.cue.fovCap, cueSpeed * PLAYER_KNOCK.cue.fovPerSpeed));
+    }
     return out;
   }
 

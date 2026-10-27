@@ -8,6 +8,13 @@ import { CAMERA_FOV } from '../content/tuning.js';
  */
 export const FOV_LAYER_OVERRIDE = 'camera-override';
 
+/**
+ * 「外力拽着玩家」这一层 FOV 偏移的唯一 id（W-A6 切片10）。
+ * 它与覆盖层刻意**不同 id**：拽不接管镜头（机位与谁在看都不变），只是每帧按外力速度
+ * 收一点视野，账一空这层自己消失 —— 混进覆盖层的 id 会让"拽"与"演出压视野"互相顶掉。
+ */
+export const FOV_LAYER_KNOCK = 'knock-cue';
+
 /** 没声明 owner 的机位写入归到这里：稳定、不会与任何具名所有者发生交接 */
 export const DEFAULT_VIEW_OWNER = 'default';
 
