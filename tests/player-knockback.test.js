@@ -335,3 +335,76 @@ describe('镜头提示：被顶开晃得到，被拽看得见（W-A6 切片10）
     expect(rig.claims).toEqual([[FOV_LAYER_KNOCK, -cue.fovCap]]);
   });
 });
+
+describe('音频这一半：顶开一声、拽住一沿、挣脱一收（W-A6 切片11）', () => {
+  const cue = PLAYER_KNOCK.cue;
+  /** 音效替身：只记录名字，不发声 —— 这一层测的是「谁在什么沿上喊哪一声」 */
+  const stubAudio = () => {
+    const calls = [];
+    const h = {};
+    for (const m of ['playerShoved', 'dragGrip', 'dragRelease']) h[m] = () => calls.push(m);
+    return { h, calls };
+  };
+  const withAudio = (p, h) => { p.game.audio = h; return p; };
+  /** 一口 `accel` 力的井拽 `frames` 帧：每帧先结算外力账、再记本帧增量（与稳态用例同形） */
+  const dragged = (p, accel, frames) => {
+    for (let i = 0; i < frames; i++) {
+      p._stepKnock(dt);
+      p.applySustainedForce(1, 0, accel, dt);
+    }
+  };
+
+  it('过门槛的一记同时有声：晃与响是同一记的两个出口，判据不另抄一份', () => {
+    const a = stubAudio();
+    const p = withAudio(makePlayer(), a.h);
+    expect(p.applyKnockback(1, 0, 6)).toBe(6);
+    expect(a.calls).toEqual(['playerShoved']);
+    const b = stubAudio();
+    const q = withAudio(makePlayer(), b.h);
+    expect(cue.shakeFloor, '这条用例选的 1 米/秒必须真在门槛下').toBeGreaterThan(1);
+    q.applyKnockback(1, 0, 1);                       // 门槛下：账照记，声音不说
+    expect(b.calls).toEqual([]);
+    expect(q.knock.x).toBe(1);
+  });
+
+  it('进圈的第一帧一声起音，稳态里不再响：持续状态有 FOV 在说', () => {
+    const a = stubAudio();
+    const p = withAudio(makePlayer(), a.h);
+    const pull = GROUND_HAZARD.gravityWell.pull;     // 8 → 稳态 8/11 ≈ 0.73，过 fovFloor
+    dragged(p, pull, 64);
+    expect(a.calls).toEqual(['dragGrip']);
+  });
+
+  it('拽力断供、账跌出迟滞带才一声挣脱：起音与收音各恰好一次', () => {
+    const a = stubAudio();
+    const p = withAudio(makePlayer(), a.h);
+    dragged(p, 8, 32);
+    expect(a.calls).toEqual(['dragGrip']);
+    for (let i = 0; i < 64; i++) p._stepKnock(dt);   // 断供：账指数衰减直到清零
+    expect(a.calls).toEqual(['dragGrip', 'dragRelease']);
+  });
+
+  it('迟滞带（dragExit ~ fovFloor）里维持原状：门槛附近的抖动不许打成机枪', () => {
+    const a = stubAudio();
+    const p = withAudio(makePlayer(), a.h);
+    dragged(p, 3.3, 48);                             // 3.3/11 ≈ 0.3，落在带里：半力的井不喊拽住
+    expect(a.calls).toEqual([]);
+    dragged(p, 8, 32);                               // 全力的井：进门、起音一次
+    expect(a.calls).toEqual(['dragGrip']);
+    dragged(p, 3.3, 48);                             // 退回半力：稳态 0.3 仍在出门门槛之上
+    expect(a.calls).toEqual(['dragGrip']);           // 不放挣脱，也不补第二声起音
+    for (let i = 0; i < 64; i++) p._stepKnock(dt);   // 断供：这才收音
+    expect(a.calls).toEqual(['dragGrip', 'dragRelease']);
+  });
+
+  it('传送把音效沿一并清掉：下一口井的起音不该被上一口的旧状态吞掉', () => {
+    const a = stubAudio();
+    const p = withAudio(makePlayer(), a.h);
+    dragged(p, 8, 32);
+    expect(a.calls).toEqual(['dragGrip']);
+    p.teleport(500, 2, 500, {});                     // 静默清账 + 清沿：不放挣脱
+    expect(a.calls).toEqual(['dragGrip']);
+    dragged(p, 8, 32);                               // 换一口井接着拽：起音要再喊得出来
+    expect(a.calls).toEqual(['dragGrip', 'dragGrip']);
+  });
+});

@@ -27,6 +27,8 @@ export const makePlayer = ({ stamina = 100, moveScale = 1, busy = false, lock = 
     // 外部冲量账（切片6）：`applyKnockback` 的落点与 `_stepKnock` 的复用槽，构造器里才建
     knock: { x: 0, z: 0 },
     _knockStep: { x: 0, z: 0 },
+    // 被拽音效的迟滞沿状态（切片11）：构造器里才建，原型宿主须同款字段
+    _dragCueOn: false,
     // 时标账本（切片5）：构造器里才建，原型宿主须同款字段（null = 当前没有来源在改时标）
     _timeScales: null,
     walkCycle: 0,

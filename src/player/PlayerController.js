@@ -160,6 +160,8 @@ export class PlayerController {
 
     /** `_stepKnock()` 的复用槽：本帧的外力速度，热路径不分配（M4） */
     this._knockStep = { x: 0, z: 0 };
+    /** 被拽音效的迟滞沿状态（W-A6 切片11）：true = 「拽住」已播、还没播「挣脱」 */
+    this._dragCueOn = false;
 
 
     /** 移动与碰撞参数（M1）：脚部圆半径、可迈上台阶、土狼时间与跳跃缓冲 */
@@ -522,11 +524,13 @@ export class PlayerController {
     }
     this.knock.x = kx;
     this.knock.z = kz;
-    // 顶开的镜头提示（W-A6 切片10）：位移的账按速度晃，受击的疼按血量晃（takeDamage），
-    // 两本账各说各的。门槛挡的是持续力场的每帧增量 —— 那条路每帧只记 0.03~0.12 米/秒，
-    // 到不了这条线；过了门槛的一记至少 0.18 米的位移，晃一声是它应得的
+    // 顶开的镜头提示（W-A6 切片10）与音效（切片11）：位移的账按速度晃、按速度响，
+    // 受击的疼按血量晃（takeDamage），各账各的。门槛挡的是持续力场的每帧增量 ——
+    // 那条路每帧只记 0.03~0.12 米/秒，到不了这条线；过了门槛的一记至少 0.18 米的位移，
+    // 晃一声是它应得的。晃与响共用同一道门槛：同一记位移的两个出口，判据不另抄一份
     if (speed >= PLAYER_KNOCK.cue.shakeFloor) {
       this.shake.add(Math.min(PLAYER_KNOCK.cue.shakeCap, speed * PLAYER_KNOCK.cue.shakePerSpeed));
+      this.game?.audio?.playerShoved?.();
     }
     return speed;
   }
@@ -548,6 +552,9 @@ export class PlayerController {
   clearKnockback() {
     this.knock.x = 0;
     this.knock.z = 0;
+    // 拽住的音效沿一并清（切片11）：这一下是**静默**的 —— 人走了，不放「挣脱」；
+    // 不清的话，下一次被拽的起音会被这条旧状态吞掉
+    this._dragCueOn = false;
   }
 
   /**
@@ -579,6 +586,18 @@ export class PlayerController {
     const cueSpeed = Math.hypot(out.x, out.z);
     if (cueSpeed > PLAYER_KNOCK.cue.fovFloor) {
       this.rig?.requestFov(FOV_LAYER_KNOCK, -Math.min(PLAYER_KNOCK.cue.fovCap, cueSpeed * PLAYER_KNOCK.cue.fovPerSpeed));
+    }
+    // 被拽的音效（切片11）：迟滞沿触发，不逐帧响 —— 持续状态有 FOV 在说，声音只管
+    // 「从现在起你被拽住了」。进门用 fovFloor（与收FOV同一个「明显被拽」的定义）；
+    // 出门要跌到 dragExit 以下才播挣脱，中间的迟滞带维持原状，门槛附近的抖动不打成机枪
+    if (cueSpeed > PLAYER_KNOCK.cue.fovFloor) {
+      if (!this._dragCueOn) {
+        this._dragCueOn = true;
+        this.game?.audio?.dragGrip?.();
+      }
+    } else if (this._dragCueOn && cueSpeed < PLAYER_KNOCK.cue.dragExit) {
+      this._dragCueOn = false;
+      this.game?.audio?.dragRelease?.();
     }
     return out;
   }

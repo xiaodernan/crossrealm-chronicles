@@ -650,6 +650,47 @@ export class AudioManager {
   hazardWarn() { this.playTone(740, 0.07, 'square', 0.1); this.playTone(988, 0.09, 'square', 0.08); }
 
   /**
+   * 被顶开的那一声（W-A6 切片11，M6）—— 与 `hazardWarn` 同一条口径：**直接调用**的游戏音效，
+   * 不进 `SFX_NAMES`（那张表只管 `game-audio-sfx` 的远程请求面），也不进字幕线索名册
+   * （字幕条是稀缺注意力资源，位移提示走震屏 + 声音两条感性通道就够）。
+   *
+   * 为什么不只是 `playerHurt`：疼的那一声按**血量**走（`CombatController` 的 takeDamage 顶它），
+   * 一记位移大、掉血少的推挤在旧账里是安静的。这一声归外力通道：`applyKnockback` 记账过
+   * 震屏同一道门槛（`PLAYER_KNOCK.cue.shakeFloor`）才响 —— 晃与响是同一记位移的两个出口，
+   * 判据只此一份，不另抄一档。
+   *
+   * 音色与 `heavyHit`（出手侧的重击）分家：噪声为主 + 一记短促的低方波，
+   * 混在战斗里辨得出「我被推了一下」，不是对面挨了重击。
+   */
+  playerShoved() { this._playNoise(0.09, 0.13, 240); this.playTone(85, 0.12, 'square', 0.09); }
+
+  /**
+   * 被拽住的那一声（W-A6 切片11）：下坠扫频 = 「吸进去」的读法，与被拽收FOV的负 delta 同一口径。
+   * 只在拽住的**起沿**响一次（`PlayerController._stepKnock` 的迟滞沿触发），不逐帧响 ——
+   * 持续状态有 FOV 在说，声音只负责告诉你「从现在起你被拽住了」。
+   * 进门门槛就是 fovFloor（与收FOV同一个「明显被拽」的定义），出门门槛在 `cue.dragExit`。
+   */
+  dragGrip() {
+    if (!this.ctx || !this.enabled) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(300, t);
+    o.frequency.exponentialRampToValueAtTime(120, t + 0.3);
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.linearRampToValueAtTime(0.08, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+    o.connect(g);
+    g.connect(this.sfx);
+    o.start(t);
+    o.stop(t + 0.35);
+  }
+
+  /** 挣脱 / 放开的那一声（W-A6 切片11）：两短上行，与 grip 的下坠读法相对 —— 拽力没了 */
+  dragRelease() { this.playTone(240, 0.07, 'triangle', 0.05); this.playTone(360, 0.1, 'triangle', 0.04); }
+
+  /**
    * 装备落地的一声（W-B5 切片7）：档位越高音越亮。与 `pickup` / `hit` 一样是**直接调用**的
    * 游戏音效 —— 不进 `SFX_NAMES`（那张表只管 `game-audio-sfx` 的远程请求面）。
    * `rank` 是稀有度序（0 起）。认不出的取值收进 0~3 而不是抛：声音不是账，
