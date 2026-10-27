@@ -31,7 +31,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { makeMarkupDom, node } from './helpers/fakeMarkupDom.js';
-import { HUD } from '../src/ui/HUD.js';
+import { HUD, RADAR_ZONE_LABELS, RADAR_POI_LABELS } from '../src/ui/HUD.js';
 import { setLanguage, applyTranslations } from '../src/engine/i18n.js';
 import { STRINGS_ZH } from '../src/content/strings.zh.js';
 import { STRINGS_EN } from '../src/content/strings.en.js';
@@ -345,7 +345,7 @@ describe('HUD 小地图与返回链双表化（W-D2 切片28）', () => {
   });
 
   it('静态腿：五个方法体引号内无裸中文，旧写法绝迹', () => {
-    for (const name of ['ensureBackToList', '_dirTo', 'drawMinimap', '_drawMapMarkers', '_drawDungeonMinimap']) {
+    for (const name of ['ensureBackToList', '_dirTo', 'drawMinimap', '_drawRadarMarkers', '_flushLabels', '_drawDungeonMinimap']) {
       const body = new RegExp(`\\n  ${name}\\([^)]*\\) \\{([\\s\\S]*?)\\n {2}\\}`).exec(HUD源码)?.[1];
       expect(body, `${name} 方法体没抓到（门禁自己坏了）`).toBeTruthy();
       expect(body, `${name} 里还有引号内裸中文`).not.toMatch(/['"`][^'"`\n]*[\u4e00-\u9fff][^'"`\n]*['"`]/);
@@ -379,25 +379,36 @@ describe('HUD 小地图与返回链双表化（W-D2 切片28）', () => {
     setLanguage('zh');
   });
 
-  it('行为腿·世界小地图：中英两语 zone/POI/自动标签都走 t()，无 [MISSING:]', () => {
-    const want = {
-      zh: ['枢纽', '森林', '魔法', '星际', '时线', '混沌', '遗城', '图书馆', '裂隙', '神龛', '墓穴', '自动'],
-      en: ['Hub', 'Forest', 'Magic', 'Space', 'Timeline', 'Chaos', 'Ruins', 'Library', 'Rift', 'Shrine', 'Tomb', 'Auto'],
-    };
+  it('行为腿·世界小地图：雷达把玩家挨个送到锚点，中英两语标签都走 t()，无 [MISSING:]', () => {
+    // 雷达只浮窗内的标签（切片B 的"区名沉浮"），所以逐个锚点把玩家送过去，各自验收 ——
+    // 比整世界那一版的"一次全画"更硬：窗外沉掉的标签想混过去都不行。
+    const anchors = [...RADAR_ZONE_LABELS, ...RADAR_POI_LABELS];
+    expect(anchors.length, '锚点表是空的：这条在空转').toBeGreaterThanOrEqual(11);
     for (const lang of ['zh', 'en']) {
       setLanguage(lang);
       const doc = bootDoc();
       globalThis.document = doc;
       const rec = recordingCtx();
       doc.hosts.minimap.getContext = () => rec.ctx;
-      const hud = new HUD(minimapGame({ autoPlayMode: true, playerAutoPlay: { active: true } }));
+      const hud = new HUD(minimapGame());
+      for (const lb of anchors) {
+        hud.game.player.position = { x: lb.x + 5, z: lb.z };
+        rec.texts.length = 0;
+        hud.drawMinimap();
+        const want = (lang === 'zh' ? STRINGS_ZH : STRINGS_EN)[lb.key];
+        expect(rec.texts, `${lang}: 玩家站在锚点旁却没画出 ${lb.key}`).toContain(want);
+        for (const text of rec.texts) {
+          expect(text, `${lang}: 小地图夹 [MISSING:]`).not.toContain('[MISSING:');
+        }
+      }
+      // "自动"是钉在玩家脚边的标记，它自己会跟锚点标签抢中心那块地（去堆叠按优先级
+      // 让位是**设计**）—— 所以单独在原点开自动模式验它，不掺进锚点巡访。
+      hud.game.autoPlayMode = true;
+      hud.game.playerAutoPlay = { active: true };
+      hud.game.player.position = { x: 0, z: 0 };
+      rec.texts.length = 0;
       hud.drawMinimap();
-      for (const label of want[lang]) {
-        expect(rec.texts, `${lang}: 小地图上没画出 ${label}`).toContain(label);
-      }
-      for (const text of rec.texts) {
-        expect(text, `${lang}: 小地图夹 [MISSING:]`).not.toContain('[MISSING:');
-      }
+      expect(rec.texts, `${lang}: 自动跟跑标记没画`).toContain(lang === 'zh' ? '自动' : 'Auto');
       hud.dispose?.();
     }
     setLanguage('zh');

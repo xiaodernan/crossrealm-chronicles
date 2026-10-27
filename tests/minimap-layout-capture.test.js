@@ -31,7 +31,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { HUD, MINIMAP_CSS_SIZE } from '../src/ui/HUD.js';
+import { HUD, MINIMAP_CSS_SIZE, RADAR_WINDOW_M, minimapSize, minimapFont } from '../src/ui/HUD.js';
 import { MAP_SPAN_M, ExplorationMap } from '../src/game/ExplorationMap.js';
 import { MAP_BOSSES } from '../src/game/QuestSystem.js';
 
@@ -228,81 +228,134 @@ describe('drawMinimap 量盒子画位图（缺陷①的果）', () => {
     const grid = new ExplorationMap({}).getGridSize();
     expect(MAP_SPAN_M, 'MAP_SPAN_M 不再等于格子跨度：两张图各画各的世界了').toBe(grid.max - grid.min);
     expect(readSrc('ui/HUD.js'), '手抄的像素/米又回来了').not.toMatch(/const scale = 0\.135/);
+    expect(RADAR_WINDOW_M * 3, '雷达窗口不再从 MAP_SPAN_M 推：两张图又各画各的了').toBeCloseTo(MAP_SPAN_M, 6);
   });
 });
 
 /**
- * 像素/米的三条腿（铺满度、不出盒、半径由跨度反推）都跑在役路径：
- * 名册里塞一座已知的圆，读回 `arc` 的实参。
+ * 雷达世界那一支的录笔桩：arc / fillText / stroke 全录，颜色在落笔那一刻盖章
+ * （`arc()` 在 `fillStyle` 之前落笔，只有 `fill()` 时读色才作数）。
  */
-function drawWithZone(overrides = {}) {
+function drawRadar(overrides = {}) {
   const arcs = [];
+  const texts = [];
+  const strokes = [];
   const transformCalls = [];
-  /**
-   * `arc()` 在 `fillStyle` 之前落笔（真代码的顺序），所以颜色只能在 `fill()` 那一刻盖章 ——
-   * 在 `arc()` 里读 `ctx.fillStyle` 会盖上一个与那一笔无关的颜色。
-   */
   let pending = null;
+  let pendingStroke = null;
   const ctx = {
     fillStyle: '', strokeStyle: '', lineWidth: 1, font: '',
-    fillText() {}, fillRect() {}, strokeRect() {}, clearRect() {},
-    beginPath() { pending = null; }, closePath() {}, moveTo(x, y) { pending = { x, y, path: true }; },
-    lineTo() {}, stroke() {},
-    fill() { if (pending && !pending.path) arcs.push({ ...pending, fillStyle: ctx.fillStyle }); pending = null; },
-    arc: (x, y, r) => { pending = { x, y, r }; }, setLineDash() {},
+    fillRect() {}, strokeRect() {}, clearRect() {},
+    beginPath() { pending = null; pendingStroke = null; }, closePath() {},
+    moveTo(x, y) { pendingStroke = { pts: [[x, y]] }; },
+    lineTo(x, y) { pendingStroke?.pts.push([x, y]); },
+    stroke() { if (pendingStroke) { strokes.push({ pts: pendingStroke.pts, strokeStyle: ctx.strokeStyle }); pendingStroke = null; } },
+    arc: (x, y, r) => { pending = { x, y, r }; },
+    fill() { if (pending) arcs.push({ ...pending, fillStyle: ctx.fillStyle }); pending = null; },
+    fillText(text, x, y) { texts.push({ text: String(text), x, y, font: ctx.font, fillStyle: ctx.fillStyle }); },
+    setLineDash() {},
     setTransform: (...a) => transformCalls.push(a),
   };
   const canvas = { clientWidth: 178, width: 0, height: 0, getContext: () => ctx };
   const hud = Object.create(HUD.prototype);
   hud.minimapVisible = true;
   hud.minimapCanvas = canvas;
-  hud.game = minimapStub();
-  const zone = { center: { x: 0, z: 0 }, radius: 100, color: '#ff0000', ...overrides };
-  hud.game.world.getZoneMapData = () => [zone];
+  hud.game = { ...minimapStub(), ...overrides };
   hud.drawMinimap();
-  return { arcs, canvas, transformCalls };
+  return { arcs, texts, strokes, transformCalls };
 }
 
-describe('小地图真的是一张看得清的雷达（跨度反推的 scale）', () => {
+describe('小地图真的是一张雷达（玩家居中 · 界外钳边 · 字号按边长推）', () => {
   const CSS = 178;
-  const scale = CSS / MAP_SPAN_M;
+  const scale = CSS / RADAR_WINDOW_M;
 
-  it('画出来的半径 = 米 × 由跨度反推的 scale，不是一份手抄的 0.135', () => {
-    const { arcs, transformCalls } = drawWithZone();
+  it('玩家居中：区圆 = 盒心 +（区心 − 玩家）× scale，半径 = 区半径 × scale（不是桩子空转）', () => {
+    const { arcs, transformCalls } = drawRadar({
+      player: { position: { x: 40, z: -60 } },
+      world: { getZoneMapData: () => [{ center: { x: 0, z: 0 }, radius: 100, color: '#ff0000' }] },
+    });
     expect(transformCalls.length, '这一帧没落笔：桩子空转').toBe(1);
     const zoneCircle = arcs.find((a) => a.fillStyle === '#ff000055');
     expect(zoneCircle, '区域圆没画出来').toBeTruthy();
-    expect(zoneCircle.r, '100 米该占 ' + (100 * scale).toFixed(1) + ' px').toBeCloseTo(100 * scale, 6);
-    expect(100 * 0.135, '旧口径把 100 米画成 13.5 px，比现在小一半').toBeLessThan(zoneCircle.r);
+    expect(zoneCircle.x, '区圆没跟着玩家挪：雷达没居中').toBeCloseTo(89 + (0 - 40) * scale, 6);
+    expect(zoneCircle.y).toBeCloseTo(89 + (0 - (-60)) * scale, 6);
+    expect(zoneCircle.r).toBeCloseTo(100 * scale, 6);
   });
 
-  it('内容铺满盒子：最远的名册点至少走到半径的八成（0.135 那一版在这里红）', () => {
-    const half = CSS / 2;
-    const coords = [...MAP_BOSSES.map((b) => Math.max(Math.abs(b.x), Math.abs(b.z)))];
-    const extent = Math.max(...coords);
+  it('区圆在区心溢出窗口：站进区里，你看得见"自己站在区里"（120 米圆 > 半窗）', () => {
+    expect(120 * scale, '区圆比半窗还小 ⇒ 站在区心却看不出自己在区里').toBeGreaterThan(CSS / 2);
+    expect(CSS / RADAR_WINDOW_M, '本地细节 = 整世界口径（0.278）的 3 倍').toBeCloseTo((CSS / MAP_SPAN_M) * 3, 6);
+  });
+
+  it('界外钳边：玩家在世界角落，画出的 Boss 短名全在盒内（同向的让位合并是设计）', () => {
+    const { texts } = drawRadar({ player: { position: { x: 300, z: 300 } } });
     expect(MAP_BOSSES.length, 'Boss 名册是空的：这条在空转').toBeGreaterThan(0);
-    expect(extent * scale, '世界只用了盒子里这么一小块 ⇒ 区名全叠在一起')
-      .toBeGreaterThanOrEqual(half * 0.8);
+    const shorts = texts.filter((tx) => /^B\d$/.test(tx.text));
+    expect(shorts.length, '一枚短名都没画：钳边那支空转').toBeGreaterThan(0);
+    const 出盒 = shorts.filter((tx) => tx.x < 0 || tx.x > CSS || tx.y < 0 || tx.y > CSS);
+    expect(出盒.map((tx) => `${tx.text}@${tx.x.toFixed(1)},${tx.y.toFixed(1)}`), '钳边失效：方向标跑出盒了').toEqual([]);
   });
 
-  it('内容不出盒子：每枚 Boss 圆（含 7px 描边）都在边内', () => {
-    const half = CSS / 2;
-    const outside = MAP_BOSSES
-      .map((b) => ({ b, reach: Math.max(Math.abs(b.x), Math.abs(b.z)) * scale + 7 }))
-      .filter((o) => o.reach > half)
-      .map((o) => `${o.b.short}:${o.reach.toFixed(1)}>>${half}`);
-    expect(outside, '被裁掉的名册点：' + outside.join(' | ')).toEqual([]);
+  it('字号按边长推：三档 9/8/7 全部来自 minimapFont，手抄字面量绝迹', () => {
+    const { texts } = drawRadar({});
+    const boss = texts.find((tx) => tx.text === 'B1');
+    expect(boss, 'Boss 短名没画出来（原点距离 ' + Math.hypot(-35, -200).toFixed(0) + 'm 应在窗内）').toBeTruthy();
+    expect(boss.font, 'Boss 短名字号没走 mark 档').toBe(minimapFont(CSS, 'mark'));
+    expect(minimapSize(CSS, 'mark'), 'mark 档该还原成 8px').toBe(8);
+    expect(minimapSize(CSS, 'zone'), 'zone 档该还原成 9px').toBe(9);
+    expect(minimapSize(CSS, 'poi'), 'poi 档该还原成 7px').toBe(7);
+    expect(readSrc('ui/HUD.js').match(/'\d+px sans-serif'/g), '手抄的字号字面量又回来了').toBeNull();
   });
 
-  it('这条也咬得住：把 scale 退回 0.135，铺满腿转红而不出盒腿仍绿（反向控制）', () => {
-    const half = CSS / 2;
-    const extent = Math.max(...MAP_BOSSES.map((b) => Math.max(Math.abs(b.x), Math.abs(b.z))));
-    const spread = (s) => extent * s >= half * 0.8;
-    const fits = (s) => MAP_BOSSES.every((b) => Math.max(Math.abs(b.x), Math.abs(b.z)) * s + 7 <= half);
-    expect(scale, '现口径该两条都绿').toBeGreaterThan(0);
-    expect(spread(scale)).toBe(true);
-    expect(fits(scale)).toBe(true);
-    expect(spread(0.135), '旧口径没让铺满腿红 ⇒ 这条测的是空气').toBe(false);
-    expect(fits(0.135), '旧口径不出盒是绿的：所以"不出盒"不能单独当验收').toBe(true);
+  it('区名沉浮：窗口内的区名浮着，窗口外的沉掉（雷达管脚下）', () => {
+    const 在原点 = drawRadar({});
+    expect(在原点.texts.some((tx) => tx.text === '枢纽'), '窗内（55m）的枢纽区名该浮着').toBe(true);
+    expect(在原点.texts.some((tx) => tx.text === '混沌'), '窗外（297m）的区名该沉掉').toBe(false);
+    const 在角落 = drawRadar({ player: { position: { x: 300, z: 300 } } });
+    expect(在角落.texts.some((tx) => tx.text === '枢纽'), '玩家挪走后原地标签还挂着').toBe(false);
+  });
+
+  it('朝向须：玩家 yaw 的前进向量画成了中心点外的短须（针尖指哪 = 人朝哪）', () => {
+    const { strokes } = drawRadar({ player: { position: { x: 0, z: 0 }, yaw: Math.PI / 2 } });
+    const fx = Math.sin(Math.PI / 2);
+    const fz = Math.cos(Math.PI / 2);
+    const tip = strokes.find((s) => s.pts.length === 2
+      && Math.abs(s.pts[0][0] - (89 + fx * 5)) < 1e-6
+      && Math.abs(s.pts[0][1] - (89 + fz * 5)) < 1e-6
+      && Math.abs(s.pts[1][0] - (89 + fx * 11)) < 1e-6
+      && Math.abs(s.pts[1][1] - (89 + fz * 11)) < 1e-6);
+    expect(tip, '朝向须没画出来（或方向错了）').toBeTruthy();
+  });
+
+  it('路点：界内画到脚边，界外钳到窗缘（half − 6），虚线从玩家出发', () => {
+    const 近 = drawRadar({ quests: { getQuestWaypoint: () => ({ x: 100, z: 0 }) } });
+    const 近线 = 近.strokes.find((s) => s.pts.length === 2
+      && Math.abs(s.pts[0][0] - 89) < 1e-6 && Math.abs(s.pts[0][1] - 89) < 1e-6);
+    expect(近线, '界内路点的虚线没从玩家出发').toBeTruthy();
+    expect(近线.pts[1][0], '界内路点该画在真实位置').toBeCloseTo(89 + 100 * scale, 6);
+    const 远 = drawRadar({ quests: { getQuestWaypoint: () => ({ x: 1000, z: 0 }) } });
+    const 远线 = 远.strokes.find((s) => s.pts.length === 2
+      && Math.abs(s.pts[0][0] - 89) < 1e-6 && Math.abs(s.pts[0][1] - 89) < 1e-6);
+    expect(远线, '界外路点的虚线没画').toBeTruthy();
+    expect(远线.pts[1][0], '界外路点该钳在窗缘（half − 6）').toBeCloseTo(89 + (CSS / 2 - 6), 6);
+  });
+
+  it('标签去堆叠：重叠的低优先级让出文字，位置不重叠的照画（直接打 _flushLabels）', () => {
+    const texts = [];
+    const ctx = { fillStyle: '', font: '', fillText: (s, x, y) => texts.push(`${s}@${x},${y}`) };
+    const hud = Object.create(HUD.prototype);
+    const 重叠对 = [
+      { x: 50, y: 50, text: '甲甲甲', tier: 'poi', color: '#000', priority: 1 },
+      { x: 52, y: 49, text: '乙乙', tier: 'poi', color: '#000', priority: 0 },
+    ];
+    hud._flushLabels(ctx, [...重叠对], 178);
+    expect(texts, '高优先级（0）的乙该活，低优先级的甲该让').toEqual(['乙乙@52,49']);
+    texts.length = 0;
+    hud._flushLabels(ctx, [{ x: 50, y: 50, text: '甲甲甲', tier: 'poi', color: '#000', priority: 1 },
+      { x: 120, y: 80, text: '乙乙', tier: 'poi', color: '#000', priority: 0 }]);
+    expect(texts.sort(), '不重叠的两份都该活着').toEqual(['乙乙@120,80', '甲甲甲@50,50']);
+    texts.length = 0;
+    hud._flushLabels(ctx, [...重叠对].reverse(), 178);
+    expect(texts, '只打乱入列顺序：幸存者不变（按优先级定，不按运气）').toEqual(['乙乙@52,49']);
   });
 });

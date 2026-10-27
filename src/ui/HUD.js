@@ -31,6 +31,43 @@ const EVENT_TAG = 'ui/HUD';
 export const MINIMAP_CSS_SIZE = 178;
 
 /**
+ * 雷达窗口的世界跨度（米）。小地图不再是"把整张世界压进一枚针尖"——那是世界地图的活；
+ * 它是玩家脚下这一圈：北朝上、玩家钉在中心，世界（区圆/道路/标记）从窗口里流过。
+ * 窗口从 `MAP_SPAN_M` 推（世界的三分之一），改世界跨度它跟着动。178px 盒子对 213 米
+ * ⇒ 0.83 px/米，是整世界口径（0.28）的 3 倍；区圆（120 米）在区心正好溢出窗口 ——
+ * 你看得见"自己站在区里"。
+ */
+export const RADAR_WINDOW_M = MAP_SPAN_M / 3;
+
+/**
+ * 字号按画布边长推的三档：区名 / 标记（Boss·自动）/ 兴趣点。ratio = 字号 ÷ 边长，
+ * 在 178px 的盒子上还原 9/8/7px；盒子将来变宽变窄（CSS 改了）字跟着走，不再各抄各的。
+ * 下限 7px：窗口退化到极小盒时字仍可辨，而不是缩成零。
+ */
+const MINIMAP_FONT_TIERS = { zone: 0.05, mark: 0.045, poi: 0.04 };
+export const minimapSize = (w, tier) => Math.max(7, Math.round(w * (MINIMAP_FONT_TIERS[tier] ?? MINIMAP_FONT_TIERS.poi)));
+export const minimapFont = (w, tier, weight = '') => `${weight ? weight + ' ' : ''}${minimapSize(w, tier)}px sans-serif`;
+
+/** 区名锚点（世界坐标）：只在窗口内浮字，出窗就沉 —— 区际归属由横幅与世界地图说 */
+export const RADAR_ZONE_LABELS = [
+  { x: 0, z: 55, key: 'hud_map_anchor_hub' },
+  { x: -200, z: 0, key: 'hud_map_anchor_forest' },
+  { x: 0, z: -180, key: 'hud_map_anchor_magic' },
+  { x: 200, z: 80, key: 'hud_map_anchor_space' },
+  { x: 0, z: 220, key: 'hud_map_anchor_timeline' },
+  { x: -200, z: 220, key: 'hud_map_anchor_chaos' },
+];
+
+/** 兴趣点锚点（世界坐标）：界内浮字 + 圆点，界外钳到窗口边缘当方向标 */
+export const RADAR_POI_LABELS = [
+  { x: -190, z: 25, key: 'hud_map_anchor_ruin' },
+  { x: -35, z: -200, key: 'hud_map_anchor_library' },
+  { x: 175, z: 95, key: 'hud_map_anchor_rift' },
+  { x: -230, z: -15, key: 'hud_map_anchor_shrine' },
+  { x: 28, z: 72, key: 'hud_map_anchor_tomb' },
+];
+
+/**
  * 日志抽屉里的"子页签"：这些格子不套清单模板，而是把整块 `#journal-panel` 换成自己的界面
  * （页签条也就一起没了）。列在这里 = 统一由 `ensureBackToList()` 保证回得去。
  */
@@ -887,12 +924,31 @@ buildHUD() {
       this._drawDungeonMinimap(ctx, w, h);
       return;
     }
-    // 一张雷达的口径：可见世界跨度 = 边长 / scale。0.135 是把**整个世界**（±320 米）
-    // 塞进 180 个像素（要 2370 才装得下），于是本地走一步针尖不动、区名全叠在一起 ——
-    // 跨度由 `ExplorationMap` 的格子说话（和世界地图量同一张纸），改地图不用改这里。
-    const scale = w / MAP_SPAN_M;
+    // 一张雷达的口径：玩家钉在中心，世界从窗口里流过。换算只有一份：
+    // 屏幕 = 盒心 +（世界 − 玩家）× scale，界内界外只看到玩家的距离这一条。
+    const p = this.game.player.position;
+    const scale = w / RADAR_WINDOW_M;
     const cx = w / 2;
     const cy = h / 2;
+    const half = w / 2;
+    const sx = (x) => cx + (x - p.x) * scale;
+    const sy = (z) => cy + (z - p.z) * scale;
+    const inWindow = (x, z) => Math.hypot(x - p.x, z - p.z) * scale <= half;
+    // 界外钳到窗口边缘（留 6px 让三角自己站在盒内），并带回单位朝向给方向标
+    const edge = (x, z) => {
+      const dx = (x - p.x) * scale;
+      const dz = (z - p.z) * scale;
+      const d = Math.hypot(dx, dz) || 1;
+      const ux = dx / d;
+      const uz = dz / d;
+      const r = half - 6;
+      return { x: cx + ux * r, z: cy + uz * r, ux, uz };
+    };
+    /** 去堆叠的候选：绘制现场只收文字，最后由 _flushLabels 按优先级落笔 */
+    const labels = [];
+    const offer = (x, y, text, tier, color, priority) => {
+      labels.push({ x, y, text, tier, color, priority });
+    };
 
     ctx.fillStyle = '#12141c';
     ctx.fillRect(0, 0, w, h);
@@ -910,14 +966,15 @@ buildHUD() {
       ctx.stroke();
     }
 
-    const zoneLabels = [
-      { x: 0, z: 55, key: 'hud_map_anchor_hub' },
-      { x: -200, z: 0, key: 'hud_map_anchor_forest' },
-      { x: 0, z: -180, key: 'hud_map_anchor_magic' },
-      { x: 200, z: 80, key: 'hud_map_anchor_space' },
-      { x: 0, z: 220, key: 'hud_map_anchor_timeline' },
-      { x: -200, z: 220, key: 'hud_map_anchor_chaos' },
-    ];
+    for (const zone of this.game.world.getZoneMapData()) {
+      ctx.beginPath();
+      ctx.arc(sx(zone.center.x), sy(zone.center.z), zone.radius * scale, 0, Math.PI * 2);
+      ctx.fillStyle = zone.color + '55';
+      ctx.fill();
+      ctx.strokeStyle = zone.color + 'cc';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
 
     const roads = WINDING_ROUTES.filter((r) => r.id !== 'hub-ring');
     ctx.strokeStyle = 'rgba(201, 169, 98, 0.4)';
@@ -926,8 +983,8 @@ buildHUD() {
     for (const route of roads) {
       ctx.beginPath();
       route.points.forEach(([x, z], i) => {
-        const px = cx + x * scale;
-        const pz = cy + z * scale;
+        const px = sx(x);
+        const pz = sy(z);
         if (i === 0) ctx.moveTo(px, pz);
         else ctx.lineTo(px, pz);
       });
@@ -935,96 +992,108 @@ buildHUD() {
     }
     ctx.setLineDash([]);
 
-    for (const zone of this.game.world.getZoneMapData()) {
-      ctx.beginPath();
-      ctx.arc(cx + zone.center.x * scale, cy + zone.center.z * scale, zone.radius * scale, 0, Math.PI * 2);
-      ctx.fillStyle = zone.color + '55';
-      ctx.fill();
-      ctx.strokeStyle = zone.color + 'cc';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+    for (const lb of RADAR_ZONE_LABELS) {
+      if (!inWindow(lb.x, lb.z)) continue;
+      offer(sx(lb.x) - 10, sy(lb.z) + 3, t(lb.key), 'zone', 'rgba(255,255,255,0.55)', 2);
     }
 
-    for (const lb of zoneLabels) {
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.font = '9px sans-serif';
-      ctx.fillText(t(lb.key), cx + lb.x * scale - 10, cy + lb.z * scale + 3);
-    }
-
-    this._drawMapMarkers(ctx, cx, cy, scale, w, h, MAP_BOSSES);
+    this._drawRadarMarkers(ctx, w, { cx, cy, sx, sy, inWindow, edge, offer });
+    this._flushLabels(ctx, labels, w);
   }
 
-  _drawMapMarkers(ctx, cx, cy, scale, w, h, mapBosses) {
-    for (const b of mapBosses) {
-      const bx = cx + b.x * scale;
-      const bz = cy + b.z * scale;
-      ctx.strokeStyle = b.color;
-      ctx.lineWidth = 2;
+  _drawRadarMarkers(ctx, w, m) {
+    const { cx, cy, sx, sy, inWindow, edge, offer } = m;
+    /** 界外方向标：小三角钉在钳边点上、尖朝目标方位 */
+    const blip = (e, color) => {
+      ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.arc(bx, bz, 7, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.fillStyle = b.color;
-      ctx.font = 'bold 8px sans-serif';
-      ctx.fillText('💀', bx - 5, bz + 3);
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.font = '8px sans-serif';
-      ctx.fillText(b.short, bx + 8, bz + 3);
+      ctx.moveTo(e.x + e.ux * 5, e.z + e.uz * 5);
+      ctx.lineTo(e.x - e.uz * 3 - e.ux * 2, e.z + e.ux * 3 - e.uz * 2);
+      ctx.lineTo(e.x + e.uz * 3 - e.ux * 2, e.z - e.ux * 3 - e.uz * 2);
+      ctx.closePath();
+      ctx.fill();
+    };
+
+    for (const b of MAP_BOSSES) {
+      const bx = sx(b.x);
+      const bz = sy(b.z);
+      if (inWindow(b.x, b.z)) {
+        ctx.strokeStyle = b.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(bx, bz, 7, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = b.color;
+        ctx.font = minimapFont(w, 'mark', 'bold');
+        ctx.fillText('💀', bx - 5, bz + 3);
+        offer(bx + 8, bz + 3, b.short, 'mark', 'rgba(255,255,255,0.7)', 0);
+      } else {
+        const e = edge(b.x, b.z);
+        blip(e, b.color);
+        offer(e.x + 6, e.z + 3, b.short, 'mark', 'rgba(255,255,255,0.7)', 0);
+      }
     }
 
-    for (const def of [
-      { x: -190, z: 25, key: 'hud_map_anchor_ruin' },
-      { x: -35, z: -200, key: 'hud_map_anchor_library' },
-      { x: 175, z: 95, key: 'hud_map_anchor_rift' },
-      { x: -230, z: -15, key: 'hud_map_anchor_shrine' },
-      { x: 28, z: 72, key: 'hud_map_anchor_tomb' },
-    ]) {
-      ctx.fillStyle = '#bb77ff';
-      ctx.beginPath();
-      ctx.arc(cx + def.x * scale, cy + def.z * scale, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(200,160,255,0.8)';
-      ctx.font = '7px sans-serif';
-      ctx.fillText(t(def.key), cx + def.x * scale + 5, cy + def.z * scale + 2);
+    for (const def of RADAR_POI_LABELS) {
+      if (inWindow(def.x, def.z)) {
+        ctx.fillStyle = '#bb77ff';
+        ctx.beginPath();
+        ctx.arc(sx(def.x), sy(def.z), 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        offer(sx(def.x) + 5, sy(def.z) + 2, t(def.key), 'poi', 'rgba(200,160,255,0.8)', 1);
+      } else {
+        const e = edge(def.x, def.z);
+        blip(e, '#bb77ff');
+        offer(e.x + 6, e.z + 3, t(def.key), 'poi', 'rgba(200,160,255,0.8)', 1);
+      }
     }
 
     for (const rp of this.game.restPoints?.points ?? []) {
-      ctx.fillStyle = '#ff9944';
-      ctx.beginPath();
-      ctx.arc(cx + rp.position.x * scale, cy + rp.position.z * scale, 3, 0, Math.PI * 2);
-      ctx.fill();
+      if (inWindow(rp.position.x, rp.position.z)) {
+        ctx.fillStyle = '#ff9944';
+        ctx.beginPath();
+        ctx.arc(sx(rp.position.x), sy(rp.position.z), 3, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        blip(edge(rp.position.x, rp.position.z), '#ff9944');
+      }
     }
 
     for (const mk of this.game.mapMarkers?.markers ?? []) {
-      ctx.fillStyle = mk.id === this.game.mapMarkers.activeId ? '#66ddff' : '#4488aa';
-      ctx.beginPath();
-      ctx.moveTo(cx + mk.x * scale, cy + mk.z * scale - 4);
-      ctx.lineTo(cx + mk.x * scale + 3, cy + mk.z * scale);
-      ctx.lineTo(cx + mk.x * scale, cy + mk.z * scale + 4);
-      ctx.lineTo(cx + mk.x * scale - 3, cy + mk.z * scale);
-      ctx.closePath();
-      ctx.fill();
+      const active = mk.id === this.game.mapMarkers.activeId;
+      if (inWindow(mk.x, mk.z)) {
+        ctx.fillStyle = active ? '#66ddff' : '#4488aa';
+        ctx.beginPath();
+        ctx.moveTo(sx(mk.x), sy(mk.z) - 4);
+        ctx.lineTo(sx(mk.x) + 3, sy(mk.z));
+        ctx.lineTo(sx(mk.x), sy(mk.z) + 4);
+        ctx.lineTo(sx(mk.x) - 3, sy(mk.z));
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        blip(edge(mk.x, mk.z), active ? '#66ddff' : '#4488aa');
+      }
     }
 
     const wp = this.game.quests.getQuestWaypoint();
-    const p = this.game.player.position;
     if (wp) {
-      const wx = cx + wp.x * scale;
-      const wz = cy + wp.z * scale;
+      const inside = inWindow(wp.x, wp.z);
+      const to = inside ? { x: sx(wp.x), z: sy(wp.z) } : edge(wp.x, wp.z);
       ctx.strokeStyle = 'rgba(255, 220, 80, 0.5)';
       ctx.lineWidth = 1.5;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
-      ctx.moveTo(cx + p.x * scale, cy + p.z * scale);
-      ctx.lineTo(wx, wz);
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(to.x, to.z);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = '#ffdd44';
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(wx, wz - 6);
-      ctx.lineTo(wx + 5, wz + 4);
-      ctx.lineTo(wx - 5, wz + 4);
+      ctx.moveTo(to.x, to.z - 6);
+      ctx.lineTo(to.x + 5, to.z + 4);
+      ctx.lineTo(to.x - 5, to.z + 4);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
@@ -1035,15 +1104,39 @@ buildHUD() {
     const dotR = isAuto ? 6 : 5;
     ctx.fillStyle = dotColor;
     ctx.beginPath();
-    ctx.arc(cx + p.x * scale, cy + p.z * scale, dotR, 0, Math.PI * 2);
+    ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = isAuto ? '#4488ff' : '#88ccff';
     ctx.lineWidth = 2;
     ctx.stroke();
+    // 朝向须：雷达不动、世界在动，针尖指哪 = 玩家自己的前进向量（sin yaw, cos yaw）
+    const yaw = this.game.player.yaw ?? 0;
+    const fx = Math.sin(yaw);
+    const fz = Math.cos(yaw);
+    ctx.strokeStyle = dotColor;
+    ctx.beginPath();
+    ctx.moveTo(cx + fx * dotR, cy + fz * dotR);
+    ctx.lineTo(cx + fx * (dotR + 6), cy + fz * (dotR + 6));
+    ctx.stroke();
     if (isAuto) {
-      ctx.fillStyle = 'rgba(102,204,255,0.9)';
-      ctx.font = '8px sans-serif';
-      ctx.fillText(t('hud_map_player_auto'), cx + p.x * scale + 8, cy + p.z * scale + 3);
+      offer(cx + 8, cy + 3, t('hud_map_player_auto'), 'mark', 'rgba(102,204,255,0.9)', 0);
+    }
+  }
+
+  /**
+   * 标签去堆叠：优先级高的先占位，盒子叠上的那份**让出文字**（标记本身照画 ——
+   * 位置信息不丢，丢的只是那行 7px 的字）。重叠的小字互相糊掉，正是"缩成一团"的另一半。
+   */
+  _flushLabels(ctx, labels, w) {
+    const taken = [];
+    for (const lb of labels.sort((a, b) => a.priority - b.priority)) {
+      const size = minimapSize(w, lb.tier);
+      const box = { x0: lb.x - 2, y0: lb.y - size, x1: lb.x + lb.text.length * size * 0.9 + 2, y1: lb.y + 3 };
+      if (taken.some((b) => box.x0 < b.x1 && box.x1 > b.x0 && box.y0 < b.y1 && box.y1 > b.y0)) continue;
+      ctx.fillStyle = lb.color;
+      ctx.font = minimapFont(w, lb.tier);
+      ctx.fillText(lb.text, lb.x, lb.y);
+      taken.push(box);
     }
   }
 
@@ -1072,7 +1165,7 @@ buildHUD() {
     ctx.fillStyle = '#0a0c14';
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = 'rgba(201,169,98,0.9)';
-    ctx.font = '9px sans-serif';
+    ctx.font = minimapFont(w, 'zone');
     ctx.fillText(t('hud_dungeon_title_fmt', { name: t(this.game.dungeons.active.def.name) }), 6, 14);
 
     for (const r of rooms) {
@@ -1100,7 +1193,7 @@ buildHUD() {
 
     const hint = this.game.dungeons.getExplorationHint();
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = '8px sans-serif';
+    ctx.font = minimapFont(w, 'mark');
     ctx.fillText(t('hud_map_explore_fmt', { visited: hint?.visited ?? 0, total: hint?.total ?? 0, cleared: hint?.cleared ?? 0 }), 6, h - 8);
   }
 }
