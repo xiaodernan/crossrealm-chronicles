@@ -257,7 +257,7 @@ export class Boss extends Enemy {
    * 返回 false 表示没能起手（已经有一圈在走 / 没有危险区系统 —— 例如用例直接 `new Boss`）。
    * 后者必须让调用方退回普通起手，而不是把 Boss 钉死在一个永远落地的 slam 态。
    */
-  startSlamTelegraph() {
+  startSlamTelegraph(entry) {
     if (this.slamHazard || !this.hazards) return false;
     const spec = GROUND_HAZARD.bossSlam;
     // 有墙的第三种"不起手"（B101）：这记的圆心就是 Boss 自己的脚，它不走 `clampIntoArena`，
@@ -273,6 +273,9 @@ export class Boss extends Enemy {
       telegraph: spec.telegraph,
       damage: spec.damage,
       color: spec.color,
+      // 出场涟漪（切片12）：只有阶段入场那一记才有 —— `entry` 是脚本行，
+      // 常规节奏的砸地（tryArenaMelee 的闸门轮）不传或行上没有 entry 标记，都不给涟漪
+      ripple: entry?.entry === true,
       owner: this,
     });
     this.state = 'slam';
@@ -308,7 +311,7 @@ export class Boss extends Enemy {
   /** 放出一招场地招。返回 false = 没放成（没有危险区系统 / 已有一圈在走），冷却也不该重置 */
   castArenaMove(entry, playerPos) {
     if (entry.move === 'barrage') return this.startBarrage(playerPos, entry);
-    if (entry.move === 'slam') return this.startSlamTelegraph();
+    if (entry.move === 'slam') return this.startSlamTelegraph(entry);
     if (entry.move === 'homing') return this.startHoming(playerPos, entry);
     return this.startDomain(playerPos, entry);
   }
@@ -405,6 +408,7 @@ export class Boss extends Enemy {
         telegraph: p.telegraph,
         damage: spec.damage,
         color: entry?.tint ?? spec.color,
+        ripple: entry?.entry === true,
         owner: this,
       });
     }
@@ -434,6 +438,7 @@ export class Boss extends Enemy {
       tick: spec.tick,
       pull: spec.pull,
       slow: spec.slow,
+      ripple: entry?.entry === true,
       owner: this,
     });
     return true;
@@ -456,6 +461,7 @@ export class Boss extends Enemy {
       damage: spec.damage,
       color: entry?.tint ?? spec.color,
       track: spec.track,
+      ripple: entry?.entry === true,
       owner: this,
     });
     return true;

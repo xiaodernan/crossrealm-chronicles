@@ -15,6 +15,13 @@ export const FOV_LAYER_OVERRIDE = 'camera-override';
  */
 export const FOV_LAYER_KNOCK = 'knock-cue';
 
+/**
+ * 「Boss 阶段演出」这一层 FOV 偏移的唯一 id（W-A6 切片12）。
+ * 与拽层同理不同 id：转阶段的镜头语言是一记自会衰减的 punch-in，拽是随外力持续的收拢，
+ * 两者同帧出现（拽着人打进二阶段）时是**相加**的读法，不是互相顶账。
+ */
+export const FOV_LAYER_PHASE = 'phase-cue';
+
 /** 没声明 owner 的机位写入归到这里：稳定、不会与任何具名所有者发生交接 */
 export const DEFAULT_VIEW_OWNER = 'default';
 

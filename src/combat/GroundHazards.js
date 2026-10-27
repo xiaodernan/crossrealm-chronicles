@@ -31,6 +31,14 @@ const RING_INNER = 0.88;
 /** 环比盘面再抬高这么多：同高度会 Z-fighting，玩家看到的是闪烁而不是边界 */
 const RING_LIFT = 0.02;
 
+/**
+ * 出场涟漪（W-A6 切片12）：`spec.ripple` 为真的圈（阶段入场招）在画下的那一刻，
+ * 从**真实半径**向外再扩出一圈会淡去的波 —— 圈不是"凭空出现"，是"砸进场地里"。
+ * 与 `RING_INNER` 同一条纪律：纯表现常数，不进内容表。
+ */
+const RIPPLE_SPREAD = 1.35;
+const RIPPLE_LIFE = 0.55;
+
 export class GroundHazards {
   constructor(scene, world, audio = null) {
     this.world = world;
@@ -50,6 +58,8 @@ export class GroundHazards {
      */
     this.ringGeometry = new THREE.RingGeometry(RING_INNER, 1, 48);
     this._ringPool = [];
+    /** 出场涟漪（切片12）的池：与边缘环同几何，但寿命与透明度各自推进，池也分家 */
+    this._ripplePool = [];
     this.group = new THREE.Group();
     this.group.name = 'ground-hazards';
     scene.add(this.group);
@@ -84,6 +94,15 @@ export class GroundHazards {
     // 环：真实半径、从第一帧就画满 —— 这正是它与填充盘的分工
     ring.position.set(spec.x, y + RING_LIFT, spec.z);
     ring.scale.setScalar(spec.radius);
+    // 出场涟漪（切片12）：阶段入场招（`spec.ripple`）画下的那一刻再起一圈会淡去的波，
+    // 从真实半径向外扩 —— "这一档开始铺场了"不光是圈亮起来，圈还要砸出动静。
+    // 常规铺场不给：涟漪是"阶段变了"的宣告，不是每个圈的心跳。
+    let rippleMesh = null;
+    if (spec.ripple) {
+      rippleMesh = this._acquireRipple(spec.color);
+      rippleMesh.position.set(spec.x, y + RING_LIFT * 2, spec.z);
+      rippleMesh.scale.setScalar(spec.radius);
+    }
     const item = {
       x: spec.x,
       z: spec.z,
@@ -124,6 +143,9 @@ export class GroundHazards {
       cancelled: false,
       disc,
       ring,
+      /** 出场涟漪（切片12）：动画走完自己回池；项被撤走时随 `_release` 一起回池 */
+      rippleMesh,
+      rippleT: 0,
       /** 落地提示音响过了没有（M6：一个圈只响一次，落地后不补） */
       warned: false,
     };
@@ -164,10 +186,45 @@ export class GroundHazards {
     return ring;
   }
 
+  /** 出场涟漪：与边缘环同一份单位环、同一套池化纪律，只是池分家（探针各看各的账） */
+  _acquireRipple(color) {
+    const ripple = this._ripplePool.pop() ?? new THREE.Mesh(
+      this.ringGeometry,
+      new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide }),
+    );
+    ripple.material.color.setHex(color);
+    ripple.material.opacity = GROUND_HAZARD.opacity.edge;
+    ripple.rotation.x = -Math.PI / 2;
+    ripple.visible = true;
+    this.group.add(ripple);
+    return ripple;
+  }
+
+  /**
+   * 出场涟漪的一帧：从真实半径向外扩到 `RIPPLE_SPREAD × radius`，浓度从 `edge` 线性到 0，
+   * 走完当场回池 —— 它是一次性的宣告，不该陪着圈过完整个前摇。dt 驱动（B39）。
+   */
+  _stepRipple(it, dt) {
+    if (!it.rippleMesh) return;
+    it.rippleT += dt;
+    const q = it.rippleT / RIPPLE_LIFE;
+    if (q >= 1) {
+      this.group.remove(it.rippleMesh);
+      it.rippleMesh.visible = false;
+      this._ripplePool.push(it.rippleMesh);
+      it.rippleMesh = null;
+      return;
+    }
+    it.rippleMesh.scale.setScalar(it.radius * (1 + (RIPPLE_SPREAD - 1) * q));
+    it.rippleMesh.material.opacity = GROUND_HAZARD.opacity.edge * (1 - q);
+  }
+
   update(dt, playerPos, playerRef) {
     for (let i = this._items.length - 1; i >= 0; i--) {
       const it = this._items[i];
       it.t += dt;
+      // 涟漪先于一切状态推进：它是一次性的出场宣告，圈落地与否都不欠它一帧
+      this._stepRipple(it, dt);
       if (!it.done) {
         // 追踪落点（第五种场地招）：前摇的**前 `trackRatio` 段**跟着玩家走，之后锁死不再动。
         // 非追踪的圈 `trackRatio === 0`，这段整个跳过 —— 与修前逐字节一致。
@@ -319,6 +376,13 @@ export class GroundHazards {
     this.group.remove(it.ring);
     it.ring.visible = false;
     this._ringPool.push(it.ring);
+    // 涟漪跟着项走：撤掉的圈不许留下还在扩散的波 —— "撤"就是把许诺收回去
+    if (it.rippleMesh) {
+      this.group.remove(it.rippleMesh);
+      it.rippleMesh.visible = false;
+      this._ripplePool.push(it.rippleMesh);
+      it.rippleMesh = null;
+    }
   }
 
   count() {
@@ -333,6 +397,11 @@ export class GroundHazards {
   /** 边缘环的池（M5）：与 `pooled()` 同口径，环的泄漏单独看得见 */
   ringPooled() {
     return this._ringPool.length;
+  }
+
+  /** 出场涟漪的池（切片12）：与 `ringPooled()` 同口径 */
+  ripplePooled() {
+    return this._ripplePool.length;
   }
 
   /**
@@ -353,8 +422,12 @@ export class GroundHazards {
     for (const ring of [...this._ringPool, ...this._items.map((it) => it.ring)]) {
       ring.material?.dispose?.();
     }
+    for (const ripple of [...this._ripplePool, ...this._items.map((it) => it.rippleMesh).filter(Boolean)]) {
+      ripple.material?.dispose?.();
+    }
     this._pool.length = 0;
     this._ringPool.length = 0;
+    this._ripplePool.length = 0;
     this._items.length = 0;
     this.geometry?.dispose?.();
     this.ringGeometry?.dispose?.();
