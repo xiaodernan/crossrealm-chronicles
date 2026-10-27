@@ -185,7 +185,8 @@ export class BaseZone {
   /**
    * 登记一个兴趣点。
    *
-   * @param {{x:number,y?:number,z:number}} position 区域本地坐标
+   * @param {{x:number,y?:number,z:number}} position 区域本地坐标；
+   *   **`y` 是"离当地地面多高"的偏移**（缺省 0 = 贴地），不是绝对高度
    * @param {string} label 交互提示文案 —— **只用于显示**
    * @param {() => void} onInteract
    * @param {{id?: string, type?: string, color?: number}} options 必须显式给 `id`
@@ -203,8 +204,14 @@ export class BaseZone {
 
     const lx = position.x;
     const lz = position.z;
-    // `y` 缺省 = 贴地（世界高度场的读数）；给了就是显式高度（悬浮的传送门之类）。
-    const ly = position.y ?? this.groundYAt(lx, lz);
+    // `y` 是**离当地地面多高**的偏移，不是绝对高度（缺陷② 切片G，修 B136）。
+    //
+    // 为什么改：全世界 52 个 POI 调用点写的都是 0／5／8 这样的小数 —— 那是"离地几米"的
+    // authored 值（悬浮的传送门 8 米、魁地奇球门 5 米…）。而这一格原来**按绝对高度收**，
+    // 于是标记全落在当地高度场的**下面**：实测 42 处标记离当地地面 0.9~13.5 米 ——
+    // 光柱插在坡里，玩家看不见也点不着。
+    // 改成偏移之后，52 个调用点**一处都不用改**，标记自己站到地上。
+    const ly = this.groundYAt(lx, lz) + (position.y ?? 0);
 
     const poi = {
       id,

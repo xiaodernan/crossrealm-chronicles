@@ -59,7 +59,7 @@ export class AbyssZone extends BaseZone {
       const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.5, h, 5), riftMat);
       const lx = Math.cos(a) * r;
       const lz = Math.sin(a) * r;
-      pillar.position.set(lx, 3, lz);
+      pillar.position.set(lx, this.groundYAt(lx, lz) + 3, lz);
       this.group.add(pillar);
       this.addCylinderCollider(lx, lz, 0.55, this.groundYAt(lx, lz) + h * 0.5 + 3, { base: this.groundYAt(lx, lz) - 0.5 });
     }
@@ -67,7 +67,7 @@ export class AbyssZone extends BaseZone {
       new THREE.IcosahedronGeometry(2, 0),
       new THREE.MeshStandardMaterial({ color: 0xff4488, emissive: 0xff0044, emissiveIntensity: 1, wireframe: true })
     );
-    core.position.set(0, 5, 0);
+    core.position.set(0, this.groundYAt(0, 0) + 5, 0);
     core.name = 'chaosCore';
     this.group.add(core);
   }

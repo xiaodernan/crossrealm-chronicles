@@ -106,7 +106,7 @@ export class SpaceZone extends BaseZone {
     );
     bhGroup.add(glow);
 
-    bhGroup.position.set(30, 80, -40);
+    bhGroup.position.set(30, this.groundYAt(30, -40) + 80, -40);
     this.group.add(bhGroup);
     this.blackHole = markNoBatch(bhGroup);
 
@@ -169,7 +169,7 @@ export class SpaceZone extends BaseZone {
       tesseract.add(new THREE.Line(geo, lineMat));
     }
 
-    tesseract.position.set(-40, 5, -30);
+    tesseract.position.set(-40, this.groundYAt(-40, -30) + 5, -30);
     this.group.add(tesseract);
     this.tesseract = tesseract;
   }

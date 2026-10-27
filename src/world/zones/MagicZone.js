@@ -60,7 +60,7 @@ export class MagicZone extends BaseZone {
       new THREE.CircleGeometry(3.5, 32),
       new THREE.MeshBasicMaterial({ color: 0x8844ff, transparent: true, opacity: 0.25, side: THREE.DoubleSide })
     );
-    gate.position.set(0, 8, -25);
+    gate.position.set(0, this.groundYAt(0, -25) + 8, -25);
     gate.add(portal);
     this.group.add(gate);
 
@@ -107,7 +107,7 @@ export class MagicZone extends BaseZone {
       castle.add(roof);
     }
 
-    castle.position.set(0, 8, 0);
+    castle.position.set(0, this.groundYAt(0, 0) + 8, 0);
     this.group.add(castle);
 
     for (let i = 0; i < 8; i++) {
@@ -143,7 +143,7 @@ export class MagicZone extends BaseZone {
       side: THREE.DoubleSide,
     });
     const beam = new THREE.Mesh(beamGeo, beamMat);
-    beam.position.set(0, 28, 0);
+    beam.position.set(0, this.groundYAt(0, 0) + 28, 0);
     this.group.add(beam);
 
     const count = 200;
@@ -177,14 +177,14 @@ export class MagicZone extends BaseZone {
       new THREE.TorusGeometry(8, 0.15, 8, 48),
       new THREE.MeshStandardMaterial({ color: paletteOf('metal.quidditchRing'), emissive: 0x443300, emissiveIntensity: 0.3, metalness: 0.6 })
     );
-    ring.position.set(-35, 18, -20);
+    ring.position.set(-35, this.groundYAt(-35, -20) + 18, -20);
     ring.rotation.x = Math.PI / 2.2;
     this.group.add(ring);
 
     const hoopMat = new THREE.MeshStandardMaterial({ color: paletteOf('metal.quidditchHoop'), metalness: 0.8, roughness: 0.3 });
     for (const x of [-35, -27]) {
       const hoop = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.08, 8, 24), hoopMat);
-      hoop.position.set(x, 16, -20);
+      hoop.position.set(x, this.groundYAt(x, -20) + 16, -20);
       this.group.add(hoop);
     }
   }
@@ -219,7 +219,9 @@ export class MagicZone extends BaseZone {
     const bookMat = new THREE.MeshStandardMaterial({ color: paletteOf('wood.book'), roughness: 0.8 });
     for (let i = 0; i < 15; i++) {
       const book = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.35), bookMat);
-      book.position.set((Math.random() - 0.5) * 60, 5 + Math.random() * 15, (Math.random() - 0.5) * 60);
+      const blx = (Math.random() - 0.5) * 60;
+      const blz = (Math.random() - 0.5) * 60;
+      book.position.set(blx, this.groundYAt(blx, blz) + 5 + Math.random() * 15, blz);
       book.rotation.set(Math.random(), Math.random(), Math.random());
       // 每帧浮 + 每帧转（`update` 里改 `mesh.position.y` / `rotation.y`）：合进批里
       // 顶点就被烘死了，`this.books` 里那些引用会变成"改了没人看"。
@@ -256,7 +258,7 @@ export class MagicZone extends BaseZone {
       const lx = Math.cos(angle) * r;
       const lz = Math.sin(angle) * r;
       const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.6 + Math.random() * 0.4), crystalMat);
-      crystal.position.set(lx, 2 + Math.sin(i) * 2, lz);
+      crystal.position.set(lx, this.groundYAt(lx, lz) + 2 + Math.sin(i) * 2, lz);
       this.group.add(crystal);
     }
     const treeMat = new THREE.MeshStandardMaterial({ color: paletteOf('foliage.magicWild'), roughness: 0.95 });

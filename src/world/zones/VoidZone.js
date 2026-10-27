@@ -57,7 +57,7 @@ export class VoidZone extends BaseZone {
     for (let i = 0; i < 5; i++) {
       const ring = new THREE.Mesh(new THREE.TorusGeometry(8 + i * 4, 0.08, 8, 64), gold);
       ring.rotation.x = Math.PI / 2 + i * 0.15;
-      ring.position.y = 6 + i * 2;
+      ring.position.y = this.groundYAt(0, 0) + 6 + i * 2;
       ring.name = `timeRing${i}`;
       this.group.add(ring);
     }
@@ -75,7 +75,9 @@ export class VoidZone extends BaseZone {
       const a = (i / 16) * Math.PI * 2;
       const r = 30 + (i % 4) * 8;
       const shard = new THREE.Mesh(new THREE.TetrahedronGeometry(1.2 + Math.random()), shardMat);
-      shard.position.set(Math.cos(a) * r, 3 + Math.sin(i) * 2, Math.sin(a) * r);
+      const lx = Math.cos(a) * r;
+      const lz = Math.sin(a) * r;
+      shard.position.set(lx, this.groundYAt(lx, lz) + 3 + Math.sin(i) * 2, lz);
       shard.rotation.set(Math.random(), Math.random(), Math.random());
       this.group.add(shard);
     }

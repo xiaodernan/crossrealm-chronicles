@@ -60,7 +60,7 @@ export class GloomZone extends BaseZone {
       const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.6, h, 6), mistMat);
       const lx = Math.cos(a) * r;
       const lz = Math.sin(a) * r;
-      pillar.position.set(lx, h * 0.5, lz);
+      pillar.position.set(lx, this.groundYAt(lx, lz) + h * 0.5, lz);
       this.group.add(pillar);
       this.addCylinderCollider(lx, lz, 0.7, this.groundYAt(lx, lz) + h * 0.5 + 3, { base: this.groundYAt(lx, lz) - 0.5 });
     }
@@ -68,7 +68,7 @@ export class GloomZone extends BaseZone {
       new THREE.IcosahedronGeometry(1.5, 0),
       new THREE.MeshStandardMaterial({ color: 0x4a4a6a, emissive: 0x2a2a4a, emissiveIntensity: 0.8, wireframe: true })
     );
-    core.position.set(0, 4, 0);
+    core.position.set(0, this.groundYAt(0, 0) + 4, 0);
     core.name = 'mistCore';
     this.group.add(core);
   }

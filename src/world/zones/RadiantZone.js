@@ -60,7 +60,7 @@ export class RadiantZone extends BaseZone {
       const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.8, h, 8), sunMat);
       const lx = Math.cos(a) * r;
       const lz = Math.sin(a) * r;
-      pillar.position.set(lx, h * 0.5, lz);
+      pillar.position.set(lx, this.groundYAt(lx, lz) + h * 0.5, lz);
       this.group.add(pillar);
       this.addCylinderCollider(lx, lz, 0.9, this.groundYAt(lx, lz) + h * 0.5 + 3, { base: this.groundYAt(lx, lz) - 0.5 });
     }
@@ -68,7 +68,7 @@ export class RadiantZone extends BaseZone {
       new THREE.OctahedronGeometry(2, 0),
       new THREE.MeshStandardMaterial({ color: 0xffee00, emissive: 0xffcc00, emissiveIntensity: 1, metalness: 0.8, roughness: 0.1 })
     );
-    core.position.set(0, 6, 0);
+    core.position.set(0, this.groundYAt(0, 0) + 6, 0);
     core.name = 'sunCore';
     this.group.add(core);
   }
