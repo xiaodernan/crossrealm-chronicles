@@ -7,6 +7,7 @@ import { HUB_PLAZA } from './TerrainHeight.js';
 import { TextureLibrary } from '../assets/TextureLibrary.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { releaseSubtree } from '../engine/releaseSubtree.js';
+import { 顶层, 挂于, 量落座 } from './decoLanding.js';
 
 /** 矩阵装配用的临时对象：build 一次性跑完，模块级一份就够 */
 const _dummy = new THREE.Object3D();
@@ -42,6 +43,36 @@ const INTERACTION_CLEAR = 1.0;
  * 还是穿模，只是换了个方向。
  */
 const BASE_SINK = 0.3;
+
+/**
+ * ## 落座声明：这一族是"自己站在地上的顶层件"，还是"挂在某一族顶上的子件"
+ *
+ * 诊断与门禁读**同一个字段** —— 与碰撞体的 `owner` 同一个套路：诊断要说出
+ * "是哪一族浮起来了"，门禁要按族算分母，两者读这一处，不各抄一份名单。
+ *
+ * - `'ground'`：自己站在地上。它的底边不许高于当地地面（容差见 `decoLanding.js`）。
+ * - `'on:<族名>'`：挂在那一族顶上（树冠挂树干、灯头挂灯柱、雨棚挂摊底、门梁挂门柱、
+ *   幡布挂幡杆）。它的底边可以离地，但**那一族必须存在**，而且必须是个顶层族。
+ *
+ * ## 为什么必须有这一份
+ *
+ * 装饰层一共 800 多件，其中约四成是**子件**（树冠 298、灯头 20、雨棚 6、门梁 5、
+ * 幡布 8）—— 它们本来就悬在半空（挂在父件顶上），"悬空"对它们不是缺陷。
+ * 不分父子就量，子件会把尺子的分母撑爆，真正的顶层件浮起来反而淹没在里面。
+ *
+ * 这一族里还藏着另一个坑（切片H 当场抓到的）：**心高写死、尺寸随机**。
+ * 水晶的心离地 0.8 米而半径在 0.5~0.9 米之间摇 ⇒ 大的一半埋进地里、小的一半
+ * 浮在半空（实测六颗水晶全部浮在地面之上 4~27 厘米）；断柱与长椅、泉池同病。
+ * 心高必须由件自己的半高推出来。
+ *
+ * 声明与判据住在 `./decoLanding.js`（读数与判据分家），这一层只负责**声明**。
+ */
+
+/** 给这一族登记落座身份。 */
+function 声明落座(mesh, 落座) {
+  mesh.userData.landing = 落座;
+  return mesh;
+}
 
 /** 合批收尾三件套：矩阵上传 + 整群包围球（不 compute 的话 three 用几何自身的小球，一转身整群被裁掉） */
 function sealBatch(inst) {
@@ -301,6 +332,9 @@ export class WorldDecorations {
     if (foliage.instanceColor) foliage.instanceColor.needsUpdate = true;
     trunks.name = 'wildTreeTrunk';
     foliage.name = 'wildTreeCrown';
+    // 树干自己站在地上，树冠挂在树顶上 —— 两者的落脚点是同一处（实例矩阵的平移列）
+    声明落座(trunks, 顶层);
+    声明落座(foliage, 挂于('wildTreeTrunk'));
     this.group.add(trunks, foliage);
     this._treeTrunk = trunks;
   }
@@ -351,6 +385,7 @@ export class WorldDecorations {
     applyShadow(inst, 'prop');
     sealBatch(inst);
     inst.name = 'wildRock';
+    声明落座(inst, 顶层);
     this.group.add(inst);
   }
 
@@ -397,6 +432,9 @@ export class WorldDecorations {
     sealBatch(lamps);
     posts.name = 'pathLanternPost';
     lamps.name = 'pathLanternLamp';
+    // 灯柱站在地上，灯头挂在柱顶（两者同 x/z，只差一个柱高）
+    声明落座(posts, 顶层);
+    声明落座(lamps, 挂于('pathLanternPost'));
     this.group.add(posts, lamps);
   }
 
@@ -431,6 +469,10 @@ export class WorldDecorations {
       top.position.y = GATE_POST_H;
       left.name = right.name = 'zoneGatePost';
       top.name = 'zoneGateBeam';
+      // 两根柱站在拱脚那一层地上，横梁搭在柱顶（梁悬在半空是设计，不是浮空）
+      声明落座(left, 顶层);
+      声明落座(right, 顶层);
+      声明落座(top, 挂于('zoneGatePost'));
       arch.add(left, right, top);
       // 拱脚落在**三处采样（中心 + 两根柱各自脚下）里最低的那一处**：以前只取拱中心一个
       // 采样点，于是跨坡那一侧的柱脚悬在空中（钉死布局实测五座门里三座有一根柱脚
@@ -473,6 +515,23 @@ export class WorldDecorations {
       }),
       8
     );
+    /**
+     * 幡杆 —— 切片H 补上的那一根。
+     *
+     * 八面幡本来是**一块悬在半空的布**：底边离当地地面 1.75 米，四周什么都没有
+     * （读源码与 `git log -S hubBanner` 都证明：从 W-C2 切片2 的合批改造之前就是
+     * 一块 `PlaneGeometry`，从来没有过杆）。而"幡"是挂在杆上的东西 —— 那 3 米的
+     * 高度差正是按"杆子的高度"写的。
+     *
+     * 杆立在幡布的**边上**（像真旗一样挂着，不从布中间穿过去），从当地地面一直
+     * 到幡顶之上一点。杆的落脚点用它自己那一格的地面算 —— 广场是平的，两处几乎同高。
+     */
+    const poles = new THREE.InstancedMesh(
+      new THREE.CylinderGeometry(0.07, 0.07, 1, 6),
+      new THREE.MeshStandardMaterial({ color: paletteOf('wood.door'), roughness: 0.9 }),
+      8
+    );
+    const 幡轴 = new THREE.Vector3();
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2;
       // 高度问**这一面幡站的那一点**：整圈共用一次 (0,55) 的采样把八面幡埋进山里
@@ -485,10 +544,33 @@ export class WorldDecorations {
       _dummy.scale.set(1, 1, 1);
       _dummy.updateMatrix();
       banners.setMatrixAt(i, _dummy.matrix);
+
+      // 杆：立在幡布的边上（局部 −X 那一侧），底边踩在当地地面上，顶端高过幡顶
+      幡轴.setFromMatrixColumn(_dummy.matrix, 0);
+      const 杆x = x - 幡轴.x * 0.6;
+      const 杆z = z - 幡轴.z * 0.6;
+      const 杆底 = this.world.getGroundHeight(杆x, 杆z);
+      const 杆高 = Math.max(0.5, y + 1.45 - 杆底);
+      _dummy.position.set(杆x, 杆底 + 杆高 / 2, 杆z);
+      _dummy.rotation.set(0, 0, 0);
+      _dummy.scale.set(1, 杆高, 1);
+      _dummy.updateMatrix();
+      poles.setMatrixAt(i, _dummy.matrix);
+      // 杆从地面一直立到幡顶 ⇒ 它**挡得住玩家的身体**（与灯柱同口径），
+      // 不登记体的话玩家能直接从旗杆里穿过去（`decoration-collider-coverage` 当场抓到）。
+      this._blockCyl({
+        x: 杆x, z: 杆z, r: 0.09, foot: 杆底, top: 杆底 + 杆高, ground: 杆底, owner: 'hubBannerPole',
+      });
     }
     sealBatch(banners);
+    sealBatch(poles);
+    applyShadow(poles, 'castOnly');
     banners.name = 'hubBanner';
-    this.group.add(banners);
+    poles.name = 'hubBannerPole';
+    // 幡布挂在幡杆上，幡杆自己站在地上
+    声明落座(banners, 挂于('hubBannerPole'));
+    声明落座(poles, 顶层);
+    this.group.add(banners, poles);
     // 喷泉只此一份，保持单网格
     const fountain = new THREE.Mesh(
       new THREE.TorusGeometry(3, 0.12, 8, 32),
@@ -504,8 +586,11 @@ export class WorldDecorations {
     // 泉池那一圈半径 3 米，落脚点按整圈起伏取中点（`_padGround`）；偏心 7 米读的是盘心
     const 泉x = HUB_PLAZA.x;
     const 泉z = HUB_PLAZA.z - 7;
-    fountain.position.set(泉x, this._padGround(泉x, 泉z, 3) + 0.15, 泉z);
+    // 心高 = **管半径**（0.12），于是环的底边正好落在当地地面上。
+    // 改前写死 +0.15 ⇒ 底边离地 3 厘米，环是浮着的（切片H 的尺子量到的）。
+    fountain.position.set(泉x, this._padGround(泉x, 泉z, 3) + 0.12, 泉z);
     fountain.name = 'hubFountain';
+    声明落座(fountain, 顶层);
     this.group.add(fountain);
   }
 
@@ -577,6 +662,9 @@ export class WorldDecorations {
     sealBatch(awnings);
     bases.name = 'hubStallBase';
     awnings.name = 'hubStallAwning';
+    // 摊底站在广场台面上，雨棚挂在摊底顶上
+    声明落座(bases, 顶层);
+    声明落座(awnings, 挂于('hubStallBase'));
     if (awnings.instanceColor) awnings.instanceColor.needsUpdate = true;
     this.group.add(bases, awnings);
     // 十条长椅同形同色（W-C2 切片2）：一个 InstancedMesh
@@ -600,7 +688,9 @@ export class WorldDecorations {
       const z = 落.z;
       const a = Math.atan2(z - HUB_PLAZA.z, x - HUB_PLAZA.x);
       const gy = this._padGround(x, z, 椅外接);
-      const 心 = gy + 0.2;
+      // 心高 = 椅自己的半高 ⇒ 底边正好落在当地地面上。
+      // 改前写死 +0.2（而椅高 0.35）⇒ 底边离地 2.5 厘米，长椅是浮着的。
+      const 心 = gy + BENCH.h / 2;
       _dummy.position.set(x, 心, z);
       _dummy.rotation.set(0, -a, 0);
       _dummy.scale.set(1, 1, 1);
@@ -615,6 +705,7 @@ export class WorldDecorations {
     applyShadow(benches, 'castOnly');
     sealBatch(benches);
     benches.name = 'hubBench';
+    声明落座(benches, 顶层);
     this.group.add(benches);
   }
 
@@ -645,7 +736,10 @@ export class WorldDecorations {
     }
     const inst = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), stoneMat, cols.length);
     cols.forEach((c, i) => {
-      const 心 = c.gy + 0.8;
+      // 心高 = 柱高的 30% ⇒ 底边恒定埋进地里 20% 的高度。
+      // 改前写死 +0.8（而柱高在 1.5~3.5 之间摇）⇒ 矮的那几根浮在半空、
+      // 高的那几根埋到只剩半截 —— 心与自己的尺寸脱钩了（切片H 的尺子量到的）。
+      const 心 = c.gy + c.h * 0.3;
       _dummy.position.set(c.x, 心, c.z);
       _dummy.rotation.set(0, c.rot, 0);
       _dummy.scale.set(c.w, c.h, c.d);
@@ -660,6 +754,7 @@ export class WorldDecorations {
     applyShadow(inst, 'castOnly');
     sealBatch(inst);
     inst.name = 'wildRuinColumn';
+    声明落座(inst, 顶层);
     this.group.add(inst);
   }
 
@@ -682,10 +777,13 @@ export class WorldDecorations {
       // 手摆的名册里 [-220,-15] 与 fantasy-ruins 那条 POI 同一格 —— 登记体之后这就是堵死交互口
       const { x, z } = this._clearOfInteractions(x0, z0, 0.9); // 0.9 = 摇得出的最大水晶半径
       const gy = this.world.getGroundHeight(x, z);
-      const 心 = gy + 0.8;
+      // **尺寸先摇出来，心高再由它推**：心高 = 半径的 80% ⇒ 底边恒定埋进地里 20%。
+      // 改前心高写死 +0.8（而半径在 0.5~0.9 之间摇）⇒ 六颗水晶**全部**浮在地面
+      // 之上 4~27 厘米（切片H 的尺子量到的）。
+      const s = 0.5 + Math.random() * 0.4;
+      const 心 = gy + s * 0.8;
       _dummy.position.set(x, 心, z);
       _dummy.rotation.set(0, Math.random() * Math.PI, 0);
-      const s = 0.5 + Math.random() * 0.4;
       _dummy.scale.setScalar(s);
       _dummy.updateMatrix();
       inst.setMatrixAt(i, _dummy.matrix);
@@ -696,7 +794,18 @@ export class WorldDecorations {
     });
     sealBatch(inst);
     inst.name = 'wildCrystal';
+    声明落座(inst, 顶层);
     this.group.add(inst);
+  }
+
+  /**
+   * 这一层逐件的**落座读数**（谁站在地上、谁的底边离当地地面多远）。
+   *
+   * 生产自己拥有这把尺子（读数与判据在 `./decoLanding.js`）：诊断与门禁读**同一份**
+   * 读数，不各量一遍 —— 各量一遍迟早分家，而分家之后有一半读数是假的。
+   */
+  落座读数() {
+    return 量落座(this, this.world);
   }
 
   /**

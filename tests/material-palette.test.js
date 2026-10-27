@@ -192,7 +192,9 @@ const 引用钉板 = {
   'world/zones/VoidZone.js': { 调用: 4, 提及: 4, import: 1 },
   'world/zones/BaseZone.js': { 调用: 3, 提及: 3, import: 1 },
   'world/WorldManager.js': { 调用: 4, 提及: 4, import: 1 },
-  'world/WorldDecorations.js': { 调用: 12, 提及: 12, import: 1 },
+  // 切片H 给八面幡补了幡杆（`hubBannerPole`），杆的材质走调色板的 `wood.door` ——
+  // 那是**已有的一条路径**（灯柱在用），所以路径集合不变，只有这一处的调用/提及各多 1。
+  'world/WorldDecorations.js': { 调用: 13, 提及: 13, import: 1 },
   'world/RestPointEnhancer.js': { 调用: 2, 提及: 2, import: 1 },
   'effects/SceneEnhancer.js': { 调用: 3, 提及: 3, import: 1 },
   'combat/Enemy.js': { 调用: 1, 提及: 1, import: 1 },
@@ -320,7 +322,7 @@ describe('W-C5 切片8 调色板', () => {
         expect(实.提及, `${文件}：提及数 ≠ 调用数 —— 只准传字面路径`).toBe(实.调用.length);
         expect(实.import, `${文件} 的 import 数`).toBe(期望.import);
       }
-      expect(调用总, '消费方调用合计').toBe(60);
+      expect(调用总, '消费方调用合计').toBe(61);
     });
 
     it('其余 src 文件 0 提及；定义文件自己 0 字面调用', () => {
