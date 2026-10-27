@@ -6,9 +6,9 @@
  * 正面案例）。机制片交付：冻结表 -> zoneGradeOf（认不出当场抛）-> ColorGrade
  * 控制器（指数平滑唯一写者）-> Game.js 接线。
  *
- * - **出厂全中性逐区钉死**：机制片不许夹带美术变更 —— 表里任何一格偏离
- *   saturation=1 / contrast=1 / warmth=0 都会红，分级数值必须走"美术调参切片
- *   一次一区 + 真页面验收"的流程改这张表；
+ * - **调参档逐区钉死**（切片7）：每格三数用**本地字面量**钉在这里 —— 改表必须连
+ *   本文件一起改，改这里也必须连真页面验收一起做；枢纽与兜底保持中性锚；
+ * - **合理带宽**：三数落在"看得出来但不越界"的区间，越界先过真页面再改带宽；
  * - **浮点积分不取整**：blendGrade 中途取整会让收敛末段卡死（ZoneFog 的教训）；
  * - **uniforms 写权限归控制器**：Game.js 只许驱动 update，不许摸 uniforms。
  */
@@ -47,11 +47,45 @@ describe('名册（content/zoneGrade.js）', () => {
     expect(Object.isFrozen(ZONE_GRADE)).toBe(true);
   });
 
-  it('出厂全中性逐区钉死：机制片不夹带美术变更，分级数值只能由美术切片改表', () => {
+  /**
+   * 切片7 调参落定的三数 —— **本地字面量**，不从表里读：
+   * 与表逐格对账，任何一格被静默改动当场红；有意调整时先过真页面验收，
+   * 再把这里（与表）一起改。每格的"为什么"写在 content/zoneGrade.js 的表注上。
+   */
+  const TUNED = {
+    hub: { saturation: 1, contrast: 1, warmth: 0 },
+    unknown: { saturation: 1, contrast: 1, warmth: 0 },
+    fantasy: { saturation: 1.05, contrast: 1.04, warmth: -0.15 },
+    magic: { saturation: 1.15, contrast: 1.06, warmth: -0.3 },
+    space: { saturation: 1.1, contrast: 1.12, warmth: -0.45 },
+    void: { saturation: 0.85, contrast: 1.05, warmth: -0.35 },
+    abyss: { saturation: 1.12, contrast: 1.1, warmth: 0.45 },
+    gloom: { saturation: 0.9, contrast: 1.03, warmth: -0.4 },
+    radiant: { saturation: 1.1, contrast: 1.0, warmth: 0.6 },
+    corridor: { saturation: 0.97, contrast: 1.0, warmth: -0.1 },
+  };
+
+  it('切片7 调参档逐区钉死：任何一格被静默改动当场红（有意调整须连真页面验收一起做）', () => {
     for (const [zoneId, grade] of Object.entries(ZONE_GRADE)) {
-      expect(grade, zoneId).toEqual(NEUTRAL_GRADE);
+      expect(grade, zoneId).toEqual(TUNED[zoneId]);
       expect(Object.isFrozen(grade), zoneId).toBe(true);
     }
+  });
+
+  it('调参带宽：三数落在"看得出来但不越界"的区间 —— 越界的先过真页面再改带宽', () => {
+    for (const [zoneId, grade] of Object.entries(ZONE_GRADE)) {
+      expect(grade.saturation, `${zoneId}.saturation`).toBeGreaterThanOrEqual(0.8);
+      expect(grade.saturation, `${zoneId}.saturation`).toBeLessThanOrEqual(1.2);
+      expect(grade.contrast, `${zoneId}.contrast`).toBeGreaterThanOrEqual(0.95);
+      expect(grade.contrast, `${zoneId}.contrast`).toBeLessThanOrEqual(1.15);
+      expect(grade.warmth, `${zoneId}.warmth`).toBeGreaterThanOrEqual(-0.6);
+      expect(grade.warmth, `${zoneId}.warmth`).toBeLessThanOrEqual(0.6);
+    }
+  });
+
+  it('锚点：枢纽与兜底保持中性 —— 第一屏与"没认出来的地方"不做风格化', () => {
+    expect(ZONE_GRADE[ZONE_IDS.HUB]).toEqual(NEUTRAL_GRADE);
+    expect(ZONE_GRADE[ZONE_IDS.UNKNOWN]).toEqual(NEUTRAL_GRADE);
   });
 
   it('算式常量与 shader 一一对应：WARMTH_GAIN / LUMA_WEIGHTS 冻结且出现在 ColorGrade 的 shader 里', () => {
