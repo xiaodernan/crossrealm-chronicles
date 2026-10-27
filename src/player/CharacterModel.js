@@ -21,6 +21,19 @@ export const ANIM_CATALOG = ANIM_MANIFEST;
  */
 export const PLAYER_VISUAL_ROOT_NAME = '__anim';
 
+/**
+ * 移动档三档的播放参数 —— **唯一一份**（语义键 / clip 兜底名 / 倍速 / 淡入）。
+ *
+ * 改前这三个数散在 `setMovementState` 的三个分支里，而"招式结束后回到哪一档"
+ * 那条路又自己写了一遍 Idle（0.12 淡入、1 倍速）—— 两份 Idle、两份倍速，
+ * 改一处另一处不跟着改（B135）。
+ */
+const LOCOMOTION_CLIPS = Object.freeze({
+  idle: Object.freeze({ clip: 'idle', fallback: 'Idle', timeScale: 1, fade: 0.12 }),
+  walk: Object.freeze({ clip: 'walk', fallback: 'Walk', timeScale: 1.08, fade: 0.1 }),
+  run: Object.freeze({ clip: 'run', fallback: 'Run', timeScale: 1.28, fade: 0.08 }),
+});
+
 /** 战斗动画状态机 — 支持 Mixamo 多 Clip GLB */
 export class CharacterModel {
   constructor() {
@@ -41,6 +54,11 @@ export class CharacterModel {
     // `catalog` 只说"GLB 素材自己提供了哪个 clip"，这里说"我们替这具骨架编出来了哪几招"。
     this.skeletal = {};
     this.combatState = 'idle';
+    // 移动档的**愿望**（B135）：玩家此刻想要 idle / walk / run。
+    // 这两个字段是这一档的唯一真源 —— 招式锁住身体时播不了，但愿望要记着，
+    // 招式一结束就按它认领（改前愿望没有载体 ⇒ 玩家一路滑行）。
+    this.moving = false;
+    this.sprinting = false;
     this.comboStep = 0;
     this.proc = { pitch: 0, roll: 0, yawOff: 0 };
     this._procDecay = 8;
@@ -412,12 +430,61 @@ export class CharacterModel {
   }
 
   setMovementState(moving, sprinting) {
-    if (!this.mixer || this.actionLock > 0) return;
-    if (this.combatState !== 'idle' && this.combatState !== 'locomotion') return;
+    // 愿望**先记**，后判能不能播（B135）。
+    //
+    // 改前这两句是一次性的：`PlayerController.setAnimState` 只在 (moving, sprinting)
+    // 变化时才调这里，而这里在招式锁住身体时（`actionLock > 0`）或状态是招式态时
+    // 直接 return —— 于是"玩家正在走"这件事被**丢掉**了：招式一结束，
+    // `update()` 硬回 Idle，而 `setAnimState` 因为"没变"再也不调这里 ⇒
+    // 玩家一路滑行（脚下在动、身体是站姿）。改前这一格只有 `combatState` 一处记忆，
+    // 愿望没有载体。
+    this.moving = !!moving;
+    this.sprinting = !!sprinting;
+    this.playLocomotion();
+  }
+
+  /**
+   * 移动档三档的播放参数 —— **唯一一份**（语义键 / clip 兜底名 / 倍速 / 淡入）。
+   *
+   * 改前这三个数散在 `setMovementState` 的三个分支里，而"招式结束后回到哪一档"
+   * 那条路又自己写了一遍 Idle（0.12 淡入、1 倍速）—— 两份 Idle、两份倍速，
+   * 改一处另一处不跟着改。
+   */
+  /**
+   * 此刻想要哪一档（`idle` / `walk` / `run`）—— **愿望字段是唯一真源**。
+   *
+   * @returns {'idle'|'walk'|'run'}
+   */
+  locomotionKind() {
+    if (!this.moving) return 'idle';
+    return this.sprinting ? 'run' : 'walk';
+  }
+
+  /**
+   * 按当前愿望把移动档真的播出来（身体被招式占着时不插手）。
+   *
+   * 这是**移动档的唯一写入口** —— `setMovementState`（FSM 那边）与"招式结束收招"
+   * （`update()` 那边）都走它，两边不会再各写一份。
+   *
+   * @param {{收招?: boolean}} [opts] `收招` = 从一次性招式切回来（骨骼片段要硬切，其余淡入）
+   * @returns {boolean} 真的播了没有
+   */
+  playLocomotion({ 收招 = false } = {}) {
+    if (!this.mixer || this.actionLock > 0) return false;
+    if (this.combatState !== 'idle' && this.combatState !== 'locomotion') return false;
+    const 档 = LOCOMOTION_CLIPS[this.locomotionKind()];
+    const name = this.catalog[档.clip] || 档.fallback;
+    const action = this.actions[name];
+    if (!action) return false;
+    // 已经在播这一档就不动它：`_playLoop` 会 `reset()` 重播，
+    // 于是"停一下又停一下"会把 Idle 从第 0 帧重放（画面上是一次可见的顿挫）。
+    if (this.currentAction === action && !收招) return false;
     this.combatState = 'locomotion';
-    if (!moving) this._playLoop(this.catalog.idle || 'Idle', 1, 0.12);
-    else if (sprinting) this._playLoop(this.catalog.run || 'Run', 1.28, 0.08);
-    else this._playLoop(this.catalog.walk || 'Walk', 1.08, 0.1);
+    // 收招那一跳的淡入沿用改前那条 Idle 分支的尺：骨骼片段硬切（它的末帧就是站姿），
+    // 其余淡 0.12 —— 两类轨道同时写那 11 根骨时，淡入会让姿势被平均掉。
+    const fade = 收招 ? (this._isSkeletal(this.currentAction) ? 0 : 0.12) : 档.fade;
+    this._playLoop(name, 档.timeScale, fade);
+    return true;
   }
 
   update(dt) {
@@ -439,16 +506,19 @@ export class CharacterModel {
       // 于是任何挂进视觉层的非对称部件（剑）会被那半圈镜像到身体另一侧并甩出去一截（B110）。
       this.modelRoot.rotation.y = this.proc.yawOff;
     }
-    // mixer 更新由 PlayerAnimationAdapter.update 统一驱动（W-C6 玩家接入适配器）
+    // mixer 推进**在这里**，不在 `PlayerAnimationAdapter`（B135）。
+    //
+    // mixer 是本类建的（`load()` 里 `new THREE.AnimationMixer(model)`）、`actions` /
+    // `currentAction` / `actionLock` 三本账也都在本类 ⇒ "谁建谁推进"。
+    // 改前有一阵子推进被挪去了适配器（`PlayerAnimationAdapter.update`），
+    // 于是"只调 `cm.update(dt)`"那条出货路径（`src/player/WeaponGrip.js` 头注与
+    // 四道门禁都按它写）不再推帧 ⇒ 骨头不动 ⇒ 行程读数塌掉（13 例红）。
+    this.mixer?.update(dt);
+    // 招式结束收招：按**愿望**认领移动档，而不是硬回 Idle（B135 —— 改前硬回 Idle，
+    // 玩家在移动时就会一路滑行）。上面那半句注释里"收招交回 Idle"的老账在这一行还清。
     if (this.actionLock <= 0 && this.currentAction?.loop === THREE.LoopOnce) {
       this.combatState = 'idle';
-      const idle = this.catalog.idle || 'Idle';
-      if (this.actions[idle] && this.currentAction !== this.actions[idle]) {
-        // 骨骼片段收在站姿上（末帧增量 0 ⇒ 加完 `SKELETON_REST` 就是 `Idle` 的第 0 帧那一档），
-        // 所以回到 `Idle` 时硬切即连续；留 0.12 的淡入淡出反而让两类轨道同时写那 11 根骨
-        // —— 与 `_playOnce` 里进招式那一侧是同一条理由，判据也共用 `_isSkeletal`。
-        this._playLoop(idle, 1, this._isSkeletal(this.currentAction) ? 0 : 0.12);
-      }
+      this.playLocomotion({ 收招: true });
     }
   }
 

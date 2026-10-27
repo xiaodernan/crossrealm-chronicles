@@ -67,34 +67,29 @@ export class PlayerAnimationAdapter {
     const cm = this.model;
     if (!cm || !cm.mixer) return;
 
-    const combatState = cm.combatState;
-    const sprinting = cm.sprinting;
-
-    // locomotion + sprinting → run 状态
-    const _controllerState = (combatState === 'locomotion' && sprinting) ? 'run' : combatState;
-    const _action = this._resolveAction(combatState);
-
-    // 同步 mixer 状态：如果当前动作与目标不符，尝试切换
-    // 实际播放逻辑委托给 CharacterModel 的专用方法（playComboAttack / playHit / playDodge 等）
-    // 这里只做状态标记，具体播放由 CharacterModel 的专用方法处理
-    if (cm.currentAction) {
-      const currentActionName = cm.currentAction.getClip?.()?.name;
-      const targetAction = this._resolveAction(combatState);
-      if (currentActionName !== targetAction && cm.actions[targetAction]) {
-        // 状态不匹配且目标动作存在，标记需要切换（实际切换由 CharacterModel 的专用方法触发）
-        cm._pendingAction = targetAction;
-      }
-    }
+    // 移动档（idle / walk / run）的"愿望 → 真的在播"由 CharacterModel 自己收口：
+    // 它是 mix 器的**所有者**（`load()` 里建的 mixer，`actions` / `currentAction` /
+    // `actionLock` 三本账都在它那儿），愿望字段（`moving` / `sprinting`）也跟它同在一家。
+    // 这里只走**公开接口**，不碰它的内部字段。
+    //
+    // 改前这一段是**空转**的：它把 `combatState` 映射成动作名（'walk' / 'idle' …），
+    // 再拿那个名字去问 `cm.actions[...]` —— 可 `actions` 的键是 **clip 名**
+    // （'Walk' / 'Idle' / '__sk:heavy'），不是语义名 ⇒ 那个判断**永远为假**，
+    // 于是它写出去的 `cm._pendingAction` 从来没被写出去过，也从来没有人读过。
+    // （命名空间错配这一族正是 B113 那条："招式表里写着的东西全仓没有一行读它"。）
+    cm.playLocomotion?.();
   }
 
   /** 每帧推进。 */
   update(dt) {
-    // 推进 mixer（W-C6 玩家接入适配器：统一由适配器驱动 mixer）
-    const cm = this.model;
-    if (cm && cm.mixer) {
-      cm.mixer.update(dt);
-    }
-    // 同步状态
+    // mixer 推进**不在这里**（B135）：mixer 是 CharacterModel 建的，推进它的是它自己
+    // （`CharacterModel.update(dt)`）。改前有一阵子推进被挪到了这里，于是
+    // "只调 `cm.update(dt)`"那条出货路径（`src/player/WeaponGrip.js` 头注与四道门禁
+    // 都按它写）不再推帧 ⇒ 骨头不动 ⇒ 行程读数塌掉（13 例红）。
+    //
+    // 敌方那边（`animation/AnimationEntityAdapter.js`）确实是适配器推进 mixer ——
+    // 但那是因为敌方的 mixer 归 `AnimationController` 所有，而 `AnimationController`
+    // 不是实体本身。玩家这一侧不一样：模型与 mixer 同属 CharacterModel。
     this.syncFromEntity();
   }
 
