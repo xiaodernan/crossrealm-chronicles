@@ -218,17 +218,15 @@ describe('与真实位移：站住、按住方向、翻滚', () => {
 });
 
 describe('施法者一侧：井与引力化身都走这条通道', () => {
-  it('SpaceBoss 那记凭空拖拽进的是冲量账，不是 `velocity`', () => {
+  it('SpaceBoss 不再有「凭空拽一下」（W-B8 切片6 裁决）：一记冲量除名，velocity 也没有第二条路', () => {
     const m = makeManager();
     const boss = m.spawnSpaceBoss({ x: 0, z: 0, respawn: false });
     boss.phase = 2;
-    boss.pullCooldown = 0;
+    boss.speed = 0;
     const player = v(10, 0);
     const ref = makePlayerRef();
-    boss.update(1 / 64, player, ref);
-    expect(ref.tugs.length).toBe(1);
-    expect(ref.tugs[0].speed).toBe(6);
-    expect(ref.tugs[0].dx).toBeLessThan(0);          // 玩家在 +x，方向朝心 = -x
+    for (let i = 0; i < 64; i++) boss.update(1 / 64, player, ref);   // 覆盖原 3.5 秒拽人周期的一部分
+    expect(ref.tugs).toEqual([]);
     expect(ref.velocity).toBeUndefined();            // 再没有第二条写速度的路
   });
 

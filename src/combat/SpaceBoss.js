@@ -17,7 +17,6 @@ export class SpaceBoss extends Boss {
       bossId: config.bossId ?? 'singularity-herald',
     });
     this.projectiles = config.projectiles;
-    this.pullCooldown = 0;
     this.orbitAngle = 0;
     this.shootCooldown = 0;
   }
@@ -67,18 +66,6 @@ export class SpaceBoss extends Boss {
 
     this.orbitAngle += dt;
     this.mesh.position.y = this.world.getGroundHeight(this.position.x, this.position.z) + Math.sin(this.orbitAngle * 2) * 0.5;
-
-    this.pullCooldown = Math.max(0, this.pullCooldown - dt);
-
-    if (t.canPull && this.pullCooldown <= 0 && this.distanceTo(playerPos) < 30) {
-      this.pullCooldown = t.pullCooldown;
-      if (playerRef) {
-        const dx = this.position.x - playerPos.x;
-        const dz = this.position.z - playerPos.z;
-        // 一记 6 米/秒的外部冲量：走玩家的冲量账，所以它按秒衰减、也不吃按键的整条改写
-        playerRef.applyKnockback(dx, dz, t.pullImpulse);
-      }
-    }
 
     if (t.canVolley && this.shootCooldown <= 0) {
       this.shootCooldown = t.volleyCooldown;

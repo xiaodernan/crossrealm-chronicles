@@ -16,7 +16,9 @@
  * 数值与原公式逐格相等（这是本片唯一说得过去的"行为没变"证据）：
  * - attackCooldown 原式：`phase >= 3 ? 0.9 : phase >= 2 ? 1.2 : 1.6`
  * - archmagus: volleyDamage = 12 + p * 4, volleySpeed = 10 + p * 2, volleyCooldown = p >= 3 ? 1.2 : 2.0, canVolley = p >= 2
- * - singularity-herald: diskSpin = 1 + p * 0.5, canPull = p >= 2, pullCooldown = 3.5, pullImpulse = 6, canVolley = p >= 3, volleyCooldown = 0.8
+ * - singularity-herald: diskSpin = 1 + p * 0.5, canVolley = p >= 3, volleyCooldown = 0.8
+ *   （「凭空拽一下」已由 W-B8 切片6 除名：拉力只归脚本表那口看得见的井，
+ *   canPull / pullCooldown / pullImpulse 三个键不许回来）
  * - void-chronarch: canTimeStop = p >= 2, timeStopCooldown = 4, timeStopDuration = 1.8, timeStopRange = 22
  * - chaos-overlord: canPulse = p >= 2, pulseInterval = 2.5, pulseDamage = 12, pulseRange = 9
  */
@@ -83,15 +85,13 @@ const BossPhaseTuning = {
   },
 
   // singularity-herald（奇点领主/引力化身）：引力井 + 弹幕 + 砸地
+  // 拉力只归脚本表的井（W-A6 切片4 起）—— 表里不再有 canPull/pullCooldown/pullImpulse
   'singularity-herald': {
     1: {
       speed: 5,
       damage: 20,
       attackCooldown: 1.6,
       diskSpin: 1.5,
-      canPull: false,
-      pullCooldown: 3.5,
-      pullImpulse: 6,
       canVolley: false,
       volleyCooldown: 0.8,
     },
@@ -100,9 +100,6 @@ const BossPhaseTuning = {
       damage: 22,
       attackCooldown: 1.2,
       diskSpin: 2.0,
-      canPull: true,
-      pullCooldown: 3.5,
-      pullImpulse: 6,
       canVolley: false,
       volleyCooldown: 0.8,
     },
@@ -111,9 +108,6 @@ const BossPhaseTuning = {
       damage: 26,
       attackCooldown: 0.9,
       diskSpin: 2.5,
-      canPull: true,
-      pullCooldown: 3.5,
-      pullImpulse: 6,
       canVolley: true,
       volleyCooldown: 0.8,
     },

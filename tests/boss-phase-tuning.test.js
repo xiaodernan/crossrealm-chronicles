@@ -64,15 +64,17 @@ describe('数值与原公式逐格相等（这一片唯一说得过去的"行为
     }
   });
 
-  it('引力化身：转盘原式 `1 + p * 0.5`；拉人 `p >= 2` 且冷却 3.5 / 冲量 6；弹幕 `p >= 3` 且冷却 0.8', () => {
+  it('引力化身：转盘原式 `1 + p * 0.5`；弹幕 `p >= 3` 且冷却 0.8；凭空拽一下已除名（W-B8 切片6）', () => {
     const t = BOSS_PHASE_TUNING['singularity-herald'];
     for (const p of [1, 2, 3]) {
       expect(t[p].diskSpin, `转盘 第 ${p} 阶段`).toBe(1 + p * 0.5);
-      expect(t[p].canPull, `拉人 第 ${p} 阶段`).toBe(p >= 2);
-      expect(t[p].pullCooldown).toBe(3.5);
-      expect(t[p].pullImpulse).toBe(6);
       expect(t[p].canVolley, `弹幕 第 ${p} 阶段`).toBe(p >= 3);
       expect(t[p].volleyCooldown).toBe(0.8);
+      // W-B8 切片6 裁决：拉力只归脚本表那口看得见的井（有前摇、能躲、有落地提示音），
+      // 内联的"凭空拽一下"（一记 6 米/秒的 applyKnockback）从表里除名 —— 三个键都不许回来。
+      expect(t[p].canPull, `拉人键 第 ${p} 阶段不许回来`).toBeUndefined();
+      expect(t[p].pullCooldown, `拉人冷却 第 ${p} 阶段不许回来`).toBeUndefined();
+      expect(t[p].pullImpulse, `拉人冲量 第 ${p} 阶段不许回来`).toBeUndefined();
     }
   });
 

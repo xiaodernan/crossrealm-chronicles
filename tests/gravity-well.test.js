@@ -5,7 +5,7 @@
  * 需要证明的是四件事：
  * 1. **段数只由经过的秒数决定**：30Hz 与 144Hz 在一口井里挨的段数必须一样（B39 的纪律），
  *    而且一帧跨过多段时要一次补齐 —— 卡帧不该等于免单。
- * 2. **拉力走玩家的冲量账**：与 `SpaceBoss` 那记一次性拖拽同一条通道（`applyKnockback`），
+ * 2. **拉力走玩家的持续力账**（`applySustainedForce`，W-A6 切片6 起不再是一次性冲量）：
  *    所以无敌帧吞得掉伤害段、吞不掉位移（"这一下不算" ≠ "这一下别把我拖进去"），
  *    而按住方向键同样抹不掉它 —— 切片6 之前恰恰抹得掉。
  * 3. **域跟着主人塌**：井还在 tick 时主人倒地，剩下的段数一笔勾销；
@@ -254,23 +254,22 @@ describe('引力井的拉力', () => {
   });
 });
 
+/** 引力化身的舞台：真表数值。「凭空拽一下」已除名（W-B8 切片6），不再需要替用例挡它 */
+function stage(over = {}) {
+  const m = makeManager();
+  const boss = m.spawnSpaceBoss({ x: 0, z: 0, respawn: false, ...over.config });
+  boss.phase = over.phase ?? 3;
+  boss.speed = 0;
+  return { m, boss, player: over.player ?? v(10, 0), ref: makePlayerRef() };
+}
+
+const tick = (m, seconds, player, ref) => {
+  for (let i = 0; i < Math.round(seconds * 64); i++) m.update(1 / 64, player, ref, null, null);
+};
+
+const wells = (hz) => hz._items.filter((it) => it.duration > 0);
+
 describe('引力化身开井（脚本表接线）', () => {
-  /** 引力化身的舞台：真表数值 + 关掉它自己那记一次性拖拽，免得污染速度断言 */
-  function stage(over = {}) {
-    const m = makeManager();
-    const boss = m.spawnSpaceBoss({ x: 0, z: 0, respawn: false, ...over.config });
-    boss.phase = over.phase ?? 3;
-    boss.speed = 0;
-    boss.pullCooldown = 1e9;
-    return { m, boss, player: over.player ?? v(10, 0), ref: makePlayerRef() };
-  }
-
-  const tick = (m, seconds, player, ref) => {
-    for (let i = 0; i < Math.round(seconds * 64); i++) m.update(1 / 64, player, ref, null, null);
-  };
-
-  const wells = (hz) => hz._items.filter((it) => it.duration > 0);
-
   it('井的形状与伤害读真表：duration/tick/pull 一路传进危险区', () => {
     const s = stage();
     s.boss.startDomain(s.player, cast);
@@ -378,6 +377,54 @@ describe('引力化身开井（脚本表接线）', () => {
     expect(lone.hazards).toBe(null);
     expect(() => lone.update(1 / 64, v(10, 0), makePlayerRef())).not.toThrow();
     expect(lone.startDomain(v(10, 0), cast)).toBe(false);
+  });
+});
+
+/**
+ * 「凭空拽一下」的除名（W-B8 切片6 裁决）。
+ *
+ * 切片4 的 ADR 把拉力改判给了井：有前摇、能躲、有落地提示。而 `SpaceBoss` 内联的那记
+ * 一次性 `applyKnockback`（首帧一拽、每 3.5 秒一发、速度 6）无前摇不可读，三阶段还会
+ * 与井**双份计费**。修普查时发现它其实活着（切片10 的普查只扫了 `content/tuning.js`，
+ * 没扫后来才建成的 `bossPhases.js`），本片把它从 `SpaceBoss.update` 与阶段表里一并
+ * 除名 —— 拉力只归井。
+ */
+describe('凭空拽一下已除名（W-B8 切片6）', () => {
+  const oneShots = (ref) => ref.tugs.filter((t) => t.speed !== undefined);
+  const sustained = (ref) => ref.tugs.filter((t) => t.accel !== undefined);
+
+  it('二阶段站 4 秒：一笔拽都没有（原 3.5 秒周期的隐式拖拽不复存在）', () => {
+    const s = stage({ phase: 2 });
+    tick(s.m, 4, s.player, s.ref);
+    expect(s.ref.tugs).toEqual([]);
+    expect(wells(s.m.hazards)).toHaveLength(0);   // 井本来就只挂三阶段
+  });
+
+  it('三阶段走出死区：持续力账只有井在记，一次性账空着', () => {
+    const s = stage();
+    s.m.update(1 / 64, s.player, s.ref, null, null);            // 井落在玩家脚下
+    // 前摇里走开 3 米：离开井心 0.4 米死区，井的持续拉力开始记账
+    const frames = Math.round(gravityWell.telegraph * 64);
+    for (let i = 0; i < frames; i++) {
+      s.player.x += 3 / frames;
+      s.m.update(1 / 64, s.player, s.ref, null, null);
+    }
+    tick(s.m, 0.5, s.player, s.ref);
+    expect(wells(s.m.hazards).length).toBeGreaterThanOrEqual(1);
+    expect(oneShots(s.ref)).toEqual([]);                        // 那记凭空的一拽没有回来
+    const pulls = sustained(s.ref);
+    expect(pulls.length).toBeGreaterThan(0);
+    for (const t of pulls) {
+      expect(t.accel).toBe(gravityWell.pull);                   // 只有井在拽，拽的也是井的力
+      expect(t.dx).toBeLessThan(0);                             // 井心在 -x：方向也归井
+    }
+  });
+
+  it('门禁自证：SpaceBoss 源码里三个拉人键一个都不许出现', () => {
+    const src = readFileSync(join(process.cwd(), 'src/combat/SpaceBoss.js'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/(^|[^:])\/\/.*$/gm, '$1');
+    expect(src).not.toMatch(/canPull|pullCooldown|pullImpulse/);
   });
 });
 
