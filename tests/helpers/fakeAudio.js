@@ -10,8 +10,9 @@
  * 1. `gain` 与 `frequency` 必须是**同一个形状**（`audioParam()`）。真设备上两者都是
  *    AudioParam，`AudioManager` 对 `frequency` 一样会 ramp；早期版本只给 `gain` 补了
  *    方法，两例红在 production 根本没做错的地方。
- * 2. 六条总线是**解锁那一刻**才存在的，标签只能在 `armAudio()` 里点击之后贴；
+ * 2. 五条总线是**解锁那一刻**才存在的，标签只能在 `armAudio()` 里点击之后贴；
  *    解锁自身会起常驻底噪（两条振荡器），那不是节拍，所以数音之前把这段记录丢掉。
+ *    （曾经的第六条 `bleed` 在 W-C7 切片5 除名 —— B139：gain 恒 0，扫频改接 sfx。）
  */
 import { scheduler } from '../../src/engine/Scheduler.js';
 import { AudioManager } from '../../src/audio/AudioManager.js';
@@ -91,7 +92,7 @@ export function makeFakeAudioContext() {
   };
 }
 
-export const BUSES = { master: 'master', sfx: 'sfx', ambient: 'ambient', bgm: 'bgm', combatLayer: 'combat', bleed: 'bleed' };
+export const BUSES = { master: 'master', sfx: 'sfx', ambient: 'ambient', bgm: 'bgm', combatLayer: 'combat' };
 
 /**
  * 走真实的上屏路径：装假环境 → 造 manager → 由"第一次点击"解锁出 ctx。

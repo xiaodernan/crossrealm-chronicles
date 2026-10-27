@@ -197,7 +197,9 @@ describe('一次性音效的偏移改成秒', () => {
     ctx.notes.length = 0;
 
     audio.playRealmBleed('void');
-    expect(countOn(ctx, 'bleed')).toBe(1); // 扫频当场起音，不等钟
+    // 扫频当场起音，不等钟。落点是 sfx（W-C7 切片5 的 B139：bleed 死总线除名，
+    // gain 恒 0 的 bleed 接进去等于静音）；这一刻 notes 刚清过，sfx 上就只有扫频这一声
+    expect(countOn(ctx, 'sfx')).toBe(1);
 
     run(ctx, 0.1); // 离 0.12 秒还差一点：回位那条还排在待办里
     expect(音乐链待办()).toBe(2); // 旋律链 + 还没到点的回位

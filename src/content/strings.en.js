@@ -30,6 +30,8 @@ export const STRINGS_EN = Object.freeze({
   settings_controls: 'Controls',
   settings_master_volume: 'Master Volume',
   settings_sfx_volume: 'SFX Volume',
+  settings_music_volume: 'Music Volume',
+  settings_ambient_volume: 'Ambient Volume',
   settings_bloom: 'Bloom',
   settings_pixel_ratio: 'Render Scale',
   settings_lod_distance: 'Enemy LOD Distance',

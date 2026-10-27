@@ -65,6 +65,8 @@ export class SettingsPanel {
     };
     bind('set-master-vol', 'masterVolume', Number);
     bind('set-sfx-vol', 'sfxVolume', Number);
+    bind('set-music-vol', 'musicVolume', Number);
+    bind('set-ambient-vol', 'ambientVolume', Number);
     bind('set-bloom', 'bloomStrength', Number);
     bind('set-pixel', 'pixelRatio', Number);
     bind('set-lod', 'enemyLodDistance', Number);
@@ -406,6 +408,8 @@ export class SettingsPanel {
     const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
     set('set-master-vol', d.masterVolume);
     set('set-sfx-vol', d.sfxVolume);
+    set('set-music-vol', d.musicVolume);
+    set('set-ambient-vol', d.ambientVolume);
     set('set-bloom', d.bloomStrength);
     set('set-pixel', d.pixelRatio);
     set('set-lod', d.enemyLodDistance);

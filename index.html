@@ -112,6 +112,10 @@
         <label><span data-i18n="settings_look_sensitivity">镜头灵敏度</span> <input id="set-look-sensitivity" type="range" /></label>
         <label><span data-i18n="settings_master_volume">主音量</span> <input id="set-master-vol" type="range" min="0" max="1" step="0.05" /></label>
         <label><span data-i18n="settings_sfx_volume">音效</span> <input id="set-sfx-vol" type="range" min="0" max="1" step="0.05" /></label>
+        <!-- 音乐 / 环境（W-C7 切片5）：两条子总线进面板，出厂值 = 切片5 前的内部混音字面量，默认档零听觉变更。
+             step=0.01（B140）：出厂 0.14/0.12 不是 0.05 的倍数 —— 页面腿实测滑杆一格就把出厂档吃成 0.15/0.10 -->
+        <label><span data-i18n="settings_music_volume">音乐音量</span> <input id="set-music-vol" type="range" min="0" max="1" step="0.01" /></label>
+        <label><span data-i18n="settings_ambient_volume">环境音量</span> <input id="set-ambient-vol" type="range" min="0" max="1" step="0.01" /></label>
         <label>Bloom <input id="set-bloom" type="range" min="0" max="1" step="0.05" /></label>
         <label><span data-i18n="settings_pixel_ratio">渲染精度</span> <input id="set-pixel" type="range" min="0.5" max="2" step="0.25" /></label>
         <label><span data-i18n="settings_lod_distance">敌人更新距离</span> <input id="set-lod" type="range" min="40" max="150" step="5" /></label>

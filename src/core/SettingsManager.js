@@ -16,12 +16,15 @@ const VERSION = 2;
 
 const DEFAULTS = {
   /**
-   * 音量两格从 `audio/AudioVolumes.js` 的名册取，不在这里手抄数（B103）：改前这一格抄的是
+   * 音量四格从 `audio/AudioVolumes.js` 的名册取，不在这里手抄数（B103）：改前这一格抄的是
    * 0.5、而 `AudioManager` 的解锁回调抄的是 0.55 —— 同一个量两处定义，已经漂了 0.05。
    * 存储里的脏值不在这里治，统一由 `setVolumes` 经 `normalizeVolume` 回落/钳住，不抛。
+   * music / ambient 两格是切片5 升格的子总线（出厂 = 切片5 前的内部字面量，零听觉变更）。
    */
   masterVolume: VOLUME_DEFAULTS.master,
   sfxVolume: VOLUME_DEFAULTS.sfx,
+  musicVolume: VOLUME_DEFAULTS.music,
+  ambientVolume: VOLUME_DEFAULTS.ambient,
   bloomStrength: 0.35,
   shadows: true,
   /**
@@ -226,7 +229,7 @@ export class SettingsManager {
   }
 
   applyToGame(game) {
-    if (game.audio) game.audio.setVolumes(this.get('masterVolume'), this.get('sfxVolume'));
+    if (game.audio) game.audio.setVolumes(this.get('masterVolume'), this.get('sfxVolume'), this.get('musicVolume'), this.get('ambientVolume'));
     if (game.bloomPass) game.bloomPass.strength = this.get('bloomStrength');
     if (game.renderer) {
       game.renderer.shadowMap.enabled = this.get('shadows');

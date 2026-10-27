@@ -1,9 +1,9 @@
 /**
- * 音量的唯一真源（W-C7 切片3，B103）。
+ * 音量的唯一真源（W-C7 切片3，B103；切片5 起扩成四条总线）。
  *
- * 这一份负责"玩家说的音量"这两个字到底是多少，全仓只有这里写得出数：
- * - `SettingsManager` 的出厂两格从这里取（改前它手抄 0.5，而 `AudioManager` 的解锁回调里
- *   手抄 0.55 —— 同一个量两处定义，已经漂了 0.05，见下面"迁移口径"）；
+ * 这一份负责"玩家说的音量"这几个字到底是多少，全仓只有这里写得出数：
+ * - `SettingsManager` 的出厂四格从这里取（切片3 时它手抄 0.5、而 `AudioManager` 的解锁
+ *   回调里手抄 0.55 —— 同一个量两处定义已经漂了 0.05，见下面"迁移口径"）；
  * - `AudioManager` 的增益节点从 `normalizeVolume` 之后唯一落笔，解锁那一刻落的是**当时那份档**，
  *   不再是自己的一套字面量（改前存了 0.9 的玩家第一次点击后听到的仍是 0.35）。
  *
@@ -21,10 +21,16 @@
 export const VOLUME_BOUNDS = Object.freeze({ min: 0, max: 1 });
 
 /**
- * 两条玩家可调的总线（`master` 之后还有 ambient/bgm/combat/bleed 那四条，但它们是
- * 内部混音比、不归玩家调，出厂数仍长在 `AudioManager` 里 —— 那一份的账见 §9 尾巴）。
+ * 四条玩家可调的总线（W-C7 切片5）：`master` 之下分三条子总线 —— `sfx`（音效与扫频）、
+ * `music`（BGM 旋律）、`ambient`（区域底噪与环境层）。`combatLayer` 仍是内部混音比、
+ * 不归玩家调（出厂数仍长在 `AudioManager` 里，那一份的账见 §9 尾巴）。
+ *
+ * music / ambient 的出厂值 0.14 / 0.12 就是切片5 前长在解锁回调里的两个字面量 ——
+ * 把内部混音档升格成玩家档时**默认档零听觉变更**：老玩家不碰新滑杆，听到的与昨天逐位相同。
+ * 曾经的第五条 `bleed` 总线在切片5 除名：它 gain 恒 0，界域渗透的扫频接进去等于把那声
+ * 效果整个静音（B139，发现即修）—— 扫频改接 sfx 后，这条总线再没有存在的理由。
  */
-export const VOLUME_DEFAULTS = Object.freeze({ master: 0.35, sfx: 0.5 });
+export const VOLUME_DEFAULTS = Object.freeze({ master: 0.35, sfx: 0.5, music: 0.14, ambient: 0.12 });
 
 /**
  * 把一格可能来自存储/网络的脏值收成能安全写进 `AudioParam.value` 的数。

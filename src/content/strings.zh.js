@@ -30,6 +30,8 @@ export const STRINGS_ZH = Object.freeze({
   settings_controls: '控制',
   settings_master_volume: '主音量',
   settings_sfx_volume: '音效音量',
+  settings_music_volume: '音乐音量',
+  settings_ambient_volume: '环境音量',
   settings_bloom: 'Bloom',
   settings_pixel_ratio: '渲染精度',
   settings_lod_distance: '敌人更新距离',

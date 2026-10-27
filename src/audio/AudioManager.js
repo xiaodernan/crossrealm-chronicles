@@ -50,6 +50,14 @@ const BOSS_BGM_MAP = {
 export const MODE_TEMPO = { zone: 520, dungeon: 680, boss: 380, 'boss-shadow': 360, 'boss-archmagus': 400, 'boss-singularity': 320, 'boss-void': 350, 'boss-chaos': 300, 'boss-dungeon': 420 };
 
 /**
+ * BGM 子总线的**混音比**名册（W-C7 切片5）：mode 换档时玩家音乐档之外的内部比例。
+ * 出数 = 切片5 前各处写的绝对字面量 ÷ 当时基础档 0.14（zone:1、dungeon:0.16/0.14、boss:0.22/0.14），
+ * 写成分式是为了让出处可见 —— 0.16/0.22 是旧字面量，不是拍脑袋的新数。浮点上与旧值可能差
+ * 一个 ulp：默认档零听觉变更，测试用 `toBeCloseTo` 对账。玩家档 × 比例在 `_applyBgmGain` 相乘。
+ */
+const BGM_TRIM = Object.freeze({ zone: 1, dungeon: 0.16 / 0.14, boss: 0.22 / 0.14 });
+
+/**
  * 允许"用名字远程请求"的音效 —— `game-audio-sfx` 事件里 `sfx` 那一格唯一的合法取值。
  *
  * 这张表加的是"哪些音可以被远程点"这一格信息，不是方法名单的拷贝。名单与实现的关系
@@ -81,7 +89,6 @@ export class AudioManager {
     this.ambient = null;
     this.bgm = null;
     this.combatLayer = null;
-    this.bleed = null;
     this.currentZone = 'hub';
     this.audioMode = 'zone';
     this.bossFightActive = false;
@@ -95,6 +102,11 @@ export class AudioManager {
      * `audio/AudioVolumes.js` 取，不在这里写字面量。
      */
     this.volumes = { ...VOLUME_DEFAULTS };
+    /**
+     * BGM 的当前混音比（W-C7 切片5）：mode / boss 阶段要的**相对响度**，与玩家音量分开记。
+     * 真正写进节点的增益只有 `_applyBgmGain()` 一个出口 = `volumes.music × _bgmTrim`。
+     */
+    this._bgmTrim = BGM_TRIM.zone;
     this._droneOsc = [];
     this._droneGain = null;
     this._melodyStep = 0;
@@ -150,17 +162,16 @@ export class AudioManager {
         this.sfx.gain.value = this.volumes.sfx;
         this.sfx.connect(this.master);
         this.ambient = this.ctx.createGain();
-        this.ambient.gain.value = 0.12;
+        // 环境层档落的是名册那份档（W-C7 切片5）：改前是字面量 0.12，玩家的环境音量档进不来
+        this.ambient.gain.value = this.volumes.ambient;
         this.ambient.connect(this.master);
         this.bgm = this.ctx.createGain();
-        this.bgm.gain.value = 0.14;
+        // 音乐档 × 混音比走唯一写笔（W-C7 切片5）：改前是字面量 0.14，玩家的音乐档进不来
+        this._applyBgmGain();
         this.bgm.connect(this.master);
         this.combatLayer = this.ctx.createGain();
         this.combatLayer.gain.value = 0;
         this.combatLayer.connect(this.master);
-        this.bleed = this.ctx.createGain();
-        this.bleed.gain.value = 0;
-        this.bleed.connect(this.master);
         this._noiseBuffer = this._createNoiseBuffer();
         this._startZoneDrone('hub');
         this._startMelody('hub');
@@ -286,6 +297,16 @@ export class AudioManager {
     o.stop(t + 0.6);
   }
 
+  /**
+   * BGM 子总线增益的唯一写笔（W-C7 切片5）：玩家音乐档 × 当前混音比。
+   * 改前 `bgm.gain.value` 在解锁 / setMode / startBossFight / setBossPhase 四处各写各的
+   * 字面量，玩家的音乐档一格都落不进去。四处收成这一个出口后，换档只改 `_bgmTrim`
+   * （相对响度），玩家档与混音比在落笔那一刻才相乘 —— 拧小音乐档，boss 战照旧"更响"。
+   */
+  _applyBgmGain() {
+    if (this.bgm) this.bgm.gain.value = this.volumes.music * this._bgmTrim;
+  }
+
   setMode(mode, zoneKey) {
     if (this.bossFightActive && mode !== 'boss' && !String(zoneKey).startsWith('boss')) return;
     this.audioMode = mode;
@@ -298,7 +319,8 @@ export class AudioManager {
     // 少一个入口就少一次"环境声没跟着换"的机会。
     this._换环境层(key);
     if (this.bgm) {
-      this.bgm.gain.value = mode === 'boss' || String(key).startsWith('boss') ? 0.22 : mode === 'dungeon' ? 0.16 : 0.14;
+      this._bgmTrim = mode === 'boss' || String(key).startsWith('boss') ? BGM_TRIM.boss : mode === 'dungeon' ? BGM_TRIM.dungeon : BGM_TRIM.zone;
+      this._applyBgmGain();
     }
   }
 
@@ -490,7 +512,8 @@ export class AudioManager {
     this._bossProfile = profile;
     this._startZoneDrone(profile);
     this._startMelody(profile);
-    if (this.bgm) this.bgm.gain.value = 0.22;
+    this._bgmTrim = BGM_TRIM.boss;
+    this._applyBgmGain();
     this._startCombatLayer(1);
     this.bossRoarSting();
   }
@@ -499,7 +522,10 @@ export class AudioManager {
     if (!this.bossFightActive) return;
     this._bossPhase = phase;
     const intensity = 1 + (phase - 1) * 0.35;
-    if (this.bgm) this.bgm.gain.value = 0.2 + phase * 0.04;
+    // 阶段档保旧字面量的账：0.2 + 0.04p 是切片5 前的绝对增益，除回 boss 档基准 0.22
+    // 折成相对混音比 —— 玩家的音乐档在 _applyBgmGain 里再乘回来，浮点差一个 ulp 以内
+    this._bgmTrim = BGM_TRIM.boss * ((0.2 + phase * 0.04) / 0.22);
+    this._applyBgmGain();
     if (this.combatLayer) this.combatLayer.gain.value = 0.06 * intensity;
     this._startCombatLayer(intensity);
     if (this._droneGain) this._droneGain.gain.value = 0.055 + phase * 0.012;
@@ -531,7 +557,10 @@ export class AudioManager {
     sg.gain.linearRampToValueAtTime(0.14, t + 0.06);
     sg.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
     sweep.connect(sg);
-    sg.connect(this.bleed);
+    // 接 sfx 总线（B139，切片5 发现即修）：改前接的是 bleed 总线，而那条 gain 恒 0 ——
+    // 扫频的账全做、一个原子都到不了 master，等于这声效果被静音了；只挂它在解锁回调里，
+    // 连"总线还在只是没声"都算不上。
+    sg.connect(this.sfx);
     sweep.start(t);
     sweep.stop(t + 0.95);
     // 余音罩住这一层之后，把该区的底噪与旋律接上（0.12 秒是给扫频留的位置）
@@ -716,7 +745,7 @@ export class AudioManager {
     if (this.audioMode === 'zone' && !this.bossFightActive) this.setMode('zone', zone);
   }
 
-  setVolumes(master, sfx) {
+  setVolumes(master, sfx, music, ambient) {
     /**
      * 先记账再落笔（B103 的修法）。改前这两行是 `if (this.master) …` 就完了：开机那次
      * `SettingsManager.applyToGame`（`core/Game.js:382`）跑在**任何用户手势之前**，那时
@@ -724,13 +753,20 @@ export class AudioManager {
      * `_initOnGesture` 又把自己的字面量写上去 —— 实测（`.tmp-20261010/wc7s3-probe2.mjs`）
      * 存 0.9/0.2 的档，解锁后实得 0.35/0.55，整条音量路径今天只有"去面板再拖一次滑杆"
      * 那一条能生效。存进 `this.volumes` 之后，解锁那一刻落的就是这份档。
+     *
+     * 切片5 起四条总线各有一档。老调用点只传前两参：music / ambient 走 `normalizeVolume`
+     * 的 undefined 分支回落名册出厂 —— 不炸、也不替玩家猜一个数。
      */
     this.volumes = {
       master: normalizeVolume(master, VOLUME_DEFAULTS.master),
       sfx: normalizeVolume(sfx, VOLUME_DEFAULTS.sfx),
+      music: normalizeVolume(music, VOLUME_DEFAULTS.music),
+      ambient: normalizeVolume(ambient, VOLUME_DEFAULTS.ambient),
     };
     if (this.master) this.master.gain.value = this.volumes.master;
     if (this.sfx) this.sfx.gain.value = this.volumes.sfx;
+    if (this.ambient) this.ambient.gain.value = this.volumes.ambient;
+    this._applyBgmGain();
   }
 
   spellCast() { this.playTone(520, 0.12, 'sine', 0.08); this.playTone(780, 0.08, 'triangle', 0.06); }
