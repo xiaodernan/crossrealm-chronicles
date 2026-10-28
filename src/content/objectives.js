@@ -2,7 +2,7 @@
  * 目标/任务定义表（W-B3 切片1 建的数据层；切片4 起在役读者只有 `game/QuestSystem.js`）。
  *
  * 结构：
- * - objectives: 目标定义数组，每个目标可包含分支、条件、标志、失败、重访逻辑
+ * - objectives: 目标定义数组，一行说的话只有这几种：怎么算完成、完成时落哪面旗、前置要哪几面旗、跳到哪一步、给多少魂火、日志与路点怎么写
  * - 字段：
  *   - id: kebab-case 唯一标识符
  *   - title: 显示标题
@@ -20,15 +20,19 @@
  *   - flags: 完成时设置的标志 { flagName: true/false }
  *   - requires: 前置标志要求 { flagName: true/false }（全部满足才可激活；
  *     W-E3 切片24 起由 `objectiveRequiresMet` 在运行时读，旗标账本是 `stats.objectiveFlags`）
- *   - failsOn: 失败条件函数名（可选）
- *   - failMessage: 失败时显示的文案
- *   - onFail: 失败时执行的动作（reset/restart/branch）
- *   - branchTo: 分支目标 id（满足分支条件时跳转）
- *   - branchCondition: 分支条件函数名
- *   - revisit: 是否允许重访（完成后可再次触发）
+ *   - branchTo: 分支目标 id。注意它**不是**"满足某条件才跳"——跳转的时机由表序与
+ *     `chapterGateAfter` 决定，这一格只被注册表的整表不变式用来核对"位置与指回去的
+ *     那一步对不对得上"（改序时它会红，运行时没人读它做决策）
  *   - reward: 完成奖励魂火
  *   - journal: 完成后日志文本
  *   - waypoint: 世界坐标指引 { x, z, label }
+ * - **没有的字段**（这一行存在的理由：从前 schema 答应过，没人实现）：
+ *   `failsOn` / `failMessage` / `onFail` / `branchCondition` / `revisit`。前三个是
+ *   `ObjectiveEngine`（W-B3 切片4 已删）留下的 schema 幽灵，`branchCondition` 五行写的
+ *   都是本行 `condition` 的逐字副本，`revisit` 全表只有一行写过 —— 全仓没有任何一处读它们，
+ *   写进行里不会有任何后果。要做任务失败或可重访目标，先从"哪一行的什么条件算失败"这张表
+ *   立起来，而不是让注册表先答应下来。这条由 `tests/content-schema-readers.test.js` 钉住
+ *   （"每一格都有读者"那一组，含七条变异臂）。
  */
 
 import { ZONE_IDS, ZONE_NAMES } from './ZoneIdentity.js';
@@ -215,7 +219,6 @@ export const OBJECTIVES = [
     reward: 30,
     journal: 'obj_finale_journal',
     branchTo: 'ch1-complete',
-    branchCondition: 'checkAllFragments',
   },
   {
     id: 'ch1-complete',
@@ -358,7 +361,6 @@ export const OBJECTIVES = [
     journal: 'obj_epilogue_journal',
     flags: { chapter3Ready: true },
     branchTo: 'ch2-complete',
-    branchCondition: 'checkChapter3Ready',
   },
   {
     id: 'ch2-complete',
@@ -479,7 +481,6 @@ export const OBJECTIVES = [
     journal: 'obj_ascension_journal',
     flags: { chapter3Done: true },
     branchTo: 'ch3-complete',
-    branchCondition: 'checkAllDungeons',
   },
   {
     id: 'ch3-complete',
@@ -634,7 +635,6 @@ export const OBJECTIVES = [
     journal: 'obj_true_end_journal',
     flags: { trueEndDone: true },
     branchTo: 'ch4-complete',
-    branchCondition: 'checkTrueEnd',
   },
   {
     id: 'ch4-complete',
@@ -885,9 +885,7 @@ export const OBJECTIVES = [
     reward: 100,
     journal: 'obj_infinity_journal',
     flags: { infinityDone: true },
-    revisit: true,
     branchTo: 'ch5-complete',
-    branchCondition: 'checkInfinity',
   },
   {
     id: 'ch5-complete',
@@ -962,7 +960,6 @@ export const CONDITIONS = {
     && state.stats.discoveries?.has('magic-castle')
     && state.stats.discoveries?.has('space-tesseract')
     && state.stats.discoveries?.has('void-rift'),
-  checkChapter3Ready: (state) => state.stats.boss2Defeated,
   checkInfinity: (state) => state.stats.chaosBossDefeated && (state.stats.skillsUnlocked || 0) >= 3,
 };
 

@@ -959,7 +959,7 @@ export const CONTENT_TABLES = [
   },
   {
     kind: 'objectives',
-    note: '主线/任务目标（W-B3 切片1 的数据层）—— 分支、条件、标志、重访；在役读者只有 `game/QuestSystem.js`（按表序走）',
+    note: '主线/任务目标（W-B3 切片1 的数据层）—— 分支、条件、标志；在役读者只有 `game/QuestSystem.js`（按表序走）。「失败」「重访」两族从前有个引擎读，那个引擎已在 W-B3 切片4 删掉，schema 里的幽灵格随之除名',
     shape: 'rows',
     table: OBJECTIVES,
     row: {
@@ -989,12 +989,7 @@ export const CONTENT_TABLES = [
       condition: { t: 'string', required: false },
       flags: { t: 'record', required: false },
       requires: { t: 'record', required: false },
-      failsOn: { t: 'string', required: false },
-      failMessage: { t: 'string', required: false },
-      onFail: { t: 'enum', of: ['reset', 'restart', 'branch'], required: false },
       branchTo: { t: 'id', required: false },
-      branchCondition: { t: 'string', required: false },
-      revisit: { t: 'bool', required: false },
       reward: { t: 'int', min: 0, required: false },
       journal: { t: 'string', required: false },
       waypoint: {
