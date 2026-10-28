@@ -5,6 +5,7 @@ import { installWindowShim } from './helpers/enemyHarness.js';
 import {
   V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS,
   V13_INSERT_POINTS, V14_INSERT_POINTS, V15_INSERT_POINTS, V16_INSERT_POINTS, V17_INSERT_POINTS,
+  V18_INSERT_POINTS,
 } from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
@@ -16,6 +17,7 @@ import { AchievementSystem } from '../src/game/AchievementSystem.js';
 import { attachAchievementExtras } from '../src/game/AchievementSystemExtras.js';
 import { ALL_ACHIEVEMENTS_EXTRA } from '../src/content/achievements.js';
 import { SIDE_QUESTS_ALL } from '../src/content/sideQuests.js';
+import { DUNGEON_DEFS } from '../src/content/dungeons.js';
 import { BossApproachDirector } from '../src/world/BossApproachDirector.js';
 import { BossRematchDirector } from '../src/world/BossRematchDirector.js';
 
@@ -269,8 +271,31 @@ const V17_ORDER = [
   'radiant-knight-hunt', 'radiant-dancer-hunt', 'radiant-brand-hunt',
   'dungeon-rerun', 'chests-all', 'infinity',
 ];
-const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 
+/**
+ * **v18 之后**在役的那条序列（W-E3 切片30 主线加长一步：名册上的第十座）。
+ *
+ * 相对 `V17_ORDER` 多了一处（**旧序列**的下标）：
+ * - 61 —— `sunless-oratory`（没有灯的祷堂 —— 下无灯祷堂），在 `infinity`（摸世界之锚）之前
+ *
+ * 这一步是切片29 建的那座副本的**指路人**：那片建的时候它两样都不占（主线没认领、也不是三界试炼），
+ * 由一枚逐名账本钉住中间状态；这一片把账本清空 ⇒ 主线最后那一处副本落在成长曲线的顶上
+ * （`stage: 6`），插在中间就是拿 6 档怪压玩家 3~4 档的装备。
+ */
+const V18_ORDER = [
+  'anchor', 'training', 'hub-catacombs', 'soldiers', 'fantasy-frag', 'fantasy-ruins', 'elf-scout', 'boss',
+  'magic-frag', 'golem', 'space-frag', 'finale', 'chests', 'forest-shrine', 'fantasy-tower', 'talk-wanderer',
+  'boss2', 'elite', 'hexer-hunt', 'magic-forest', 'gear-charm', 'level', 'epilogue', 'learn-spell',
+  'crypt', 'library', 'rift', 'space-lens', 'space-wreck', 'boss3', 'mind', 'ascension',
+  'gear-sigil', 'void-rift', 'charge-spell', 'void-hunt', 'crawler-hunt', 'void-casket', 'void-boss', 'void-tablet',
+  'choice-void', 'true-end', 'chaos-core', 'knight-hunt', 'skills', 'abyss-maw', 'gloom-mist-crypt', 'gloom-moss',
+  'warden-hunt', 'gloom-wraith-hunt', 'gloom-stalker-hunt', 'gloom-sentinel-hunt', 'chaos-boss',
+  'radiant-dawn-hall', 'radiant-altar', 'radiant-hunt',
+  'radiant-knight-hunt', 'radiant-dancer-hunt', 'radiant-brand-hunt',
+  'dungeon-rerun', 'chests-all', 'sunless-oratory', 'infinity',
+];
+
+const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 beforeEach(() => { installWindowShim(); });
 afterEach(() => {
   globalThis.window = undefined;
@@ -421,7 +446,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片21 之后：主线是 62 步，多六步"清剿"（两位面各三道守卫）', () => {
     expect(V17_ORDER).toHaveLength(62);
     expect(new Set(V17_ORDER).size, 'v17 序列里有重复 id').toBe(V17_ORDER.length);
-    expect(MAINLINE.map((r) => r.id)).toEqual(V17_ORDER);
+    // 这一份是**历史**冻结名单（在役序列由下面 v18 那一条比）——
     // 相对 v16 多的那六步：两处，**每处三步连续**
     const 新增 = ['gloom-wraith-hunt', 'gloom-stalker-hunt', 'gloom-sentinel-hunt',
       'radiant-knight-hunt', 'radiant-dancer-hunt', 'radiant-brand-hunt'];
@@ -431,6 +456,21 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V17_ORDER[51], '第 51 位不是 gloom-sentinel-hunt').toBe('gloom-sentinel-hunt');
     expect(V17_ORDER[56], '第 56 位不是 radiant-knight-hunt').toBe('radiant-knight-hunt');
     expect(V17_ORDER[58], '第 58 位不是 radiant-brand-hunt').toBe('radiant-brand-hunt');
+  });
+
+  it('W-E3 切片30 之后：主线是 63 步，多一步"副本"（名册上的第十座，插在摸锚点之前）', () => {
+    expect(V18_ORDER).toHaveLength(63);
+    expect(new Set(V18_ORDER).size, 'v18 序列里有重复 id').toBe(V18_ORDER.length);
+    expect(MAINLINE.map((r) => r.id), '在役序列与 v18 那份冻结名单不是同一条')
+      .toEqual(V18_ORDER);
+    // 只多了一步 ⇒ 去掉它逐字等于 v17 那条（"加长"不是"重排"）
+    const 旧 = V18_ORDER.filter((id) => id !== 'sunless-oratory');
+    expect(旧, '去掉无灯祷堂那一步后应当逐字等于 v17 那条序列').toEqual(V17_ORDER);
+    expect(V18_ORDER[61], '第 61 位不是 sunless-oratory').toBe('sunless-oratory');
+    expect(V18_ORDER[62], '第 62 位不是 infinity（新步插在它之前）').toBe('infinity');
+    // 认领口径跟着长：主线现在把名册上十座全走了一遍（切片29 那本未认领账本因此清空）
+    const 认领 = new Set(MAINLINE.filter((r) => r.dungeonId).map((r) => r.dungeonId));
+    expect(认领.size, `主线认领 ${认领.size} 座，名册有 ${DUNGEON_DEFS.length} 座`).toBe(DUNGEON_DEFS.length);
   });
 
   it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);
@@ -505,6 +545,14 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V16_ORDER[53], '旧序列第 53 位不是 dungeon-rerun').toBe('dungeon-rerun');
     expect(V17_ORDER[52], '老档的 49 号位（chaos-boss）没落到新表上').toBe('chaos-boss');
     expect(V17_ORDER[59], '老档的 53 号位（dungeon-rerun）没落到新表上').toBe('dungeon-rerun');
+    // v17 → v18 **不插行**（那一跳只补 `quests.stats.objectiveFlags`）⇒ 没有插点常量；
+    // v18 → v19：一处插点（**旧序列**口径）—— 新步插在 `infinity` 之前
+    expect(V18_INSERT_POINTS).toEqual([61]);
+    expect(V17_ORDER[60], '旧序列第 60 位不是 chests-all（它该原地不动）').toBe('chests-all');
+    expect(V17_ORDER[61], '旧序列第 61 位不是 infinity（sunless-oratory 插在它之前）').toBe('infinity');
+    expect(V18_ORDER[61], '新序列第 61 位不是 sunless-oratory').toBe('sunless-oratory');
+    expect(V18_ORDER[62], '老档的 61 号位（infinity）没落到新表上').toBe('infinity');
+    expect(V18_ORDER[60], '老档的 60 号位（chests-all）被挪走了').toBe('chests-all');
     // v14 → v15：两个插点（**旧序列**口径）
     expect(V15_INSERT_POINTS).toEqual([20, 31]);
     expect(V14_ORDER[20]).toBe('level');

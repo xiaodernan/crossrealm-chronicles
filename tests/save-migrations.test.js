@@ -39,18 +39,18 @@ describe('存档迁移链', () => {
     for (let v = 1; v < CURRENT_VERSION; v++) expect(MIGRATIONS[v], `v${v}`).toBeTypeOf('function');
   });
 
-  it('v4 档一路升到当前版本（v4 → v5 → v6 → v7 → v8 → v9 → v10 → v11 → v12 → v13 → v14 → v15 → v16 → v17 → v18）并通过校验', () => {
+  it('v4 档一路升到当前版本（v4 → v5 → v6 → v7 → v8 → v9 → v10 → v11 → v12 → v13 → v14 → v15 → v16 → v17 → v18 → v19）并通过校验', () => {
     const { data, from, applied } = migrate(clone(v4));
-    expect([from, applied]).toEqual([4, [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]]);
+    expect([from, applied]).toEqual([4, [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]]);
     expect(data.version).toBe(CURRENT_VERSION);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 
-  it('v5 档走 v6、v7、v8、v9、v10、v11、v12、v13、v14、v15、v16、v17、v18 十三跳：补出空的 stats.bag、restPointEnhancer、quests.stats.decisions 与 quests.stats.objectiveFlags，其余字段一个都不动', () => {
+  it('v5 档走 v6、v7、v8、v9、v10、v11、v12、v13、v14、v15、v16、v17、v18、v19 十四跳：补出空的 stats.bag、restPointEnhancer、quests.stats.decisions 与 quests.stats.objectiveFlags，其余字段一个都不动', () => {
     const legacy = clone(v5);
     const snapshot = clone(v5);
     const { from, data, applied } = migrate(legacy);
-    expect([from, applied]).toEqual([5, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]]);
+    expect([from, applied]).toEqual([5, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]]);
     expect(data.version).toBe(CURRENT_VERSION);
     expect(data.stats.bag).toEqual([]);
     // 迁移只该多出 bag 与 restPointEnhancer 这两格：别处被顺手改写 = 这一跳在偷偷做别的事
@@ -215,6 +215,40 @@ describe('存档迁移链', () => {
     const { data } = migrate(造v17());
     expect(data.version).toBe(CURRENT_VERSION);
     expect(SaveValidator.validate(data)).toEqual([]);
+  });
+
+  it('v18 → v19：主线加长一步（名册上的第十座），插点 61 ⇒ ≥61 的下标各往后挪一格（不插行的那一跳是 v17 → v18）', () => {
+    // 造一份 **v18** 的档（v4 一路升到 v18，不走 v19 那一跳）
+    const 造v18 = () => {
+      const d = MIGRATIONS[17](MIGRATIONS[16](MIGRATIONS[15](MIGRATIONS[14](MIGRATIONS[13](MIGRATIONS[12](MIGRATIONS[11](MIGRATIONS[10](MIGRATIONS[9](MIGRATIONS[8](MIGRATIONS[7](MIGRATIONS[6](MIGRATIONS[5](MIGRATIONS[4](clone(v4)))))))))))))));
+      d.version = 18;
+      return d;
+    };
+    const 落点 = (index) => {
+      const d = 造v18();
+      d.quests.index = index;
+      // **只跑这一跳** —— 混着量就分不清是哪一跳挪的；版本号由 `migrate` 那条循环负责
+      return MIGRATIONS[18](d).quests.index;
+    };
+    // 插点是 61（**旧序列**口径）：旧 61 是 `infinity`（摸世界之锚），新步插在它之前
+    expect(落点(0)).toBe(0);
+    expect(落点(59)).toBe(59);
+    expect(落点(60), '旧序列的 chests-all（60）在插点之前，该原地不动').toBe(60);
+    expect(落点(61), '旧序列的 infinity（61）该往后挪一格').toBe(62);
+    // 通关档：旧序列长度 62 ⇒ 新的 63 = `MAINLINE.length`，仍然读作"通关"，不许退回到锚点那一步
+    expect(落点(62)).toBe(63);
+    expect(落点(62), '通关档迁移后没有正好落在新的主线长度上 ⇒ 老档读进来会变成"还差最后一步"')
+      .toBe(MAINLINE.length);
+    expect(落点(999)).toBe(1000);
+    expect(落点('abc'), '不是整数的下标不参与偏移（它本来就不是位置）').toBe('abc');
+    // 这一跳**不改存档形状**：除 `quests.index` 之外一个字段都不动
+    const d = 造v18();
+    d.quests.index = 61;
+    const 前 = clone(d);
+    const 后 = MIGRATIONS[18](d);
+    expect({ ...后, quests: { ...后.quests, index: 前.quests.index } },
+      '这一跳除了下标还动了别的字段 ⇒ 它在偷偷做别的事').toEqual(前);
+    expect(后.quests.index, '迁移没把下标写回原对象（返回的是同一份档）').toBe(62);
   });
 
   it('v13 → v14：主线再加三步，三个插点各自往后挪（老档落回同一步）', () => {
@@ -449,7 +483,7 @@ it('v8 → v9：主线再长三步，三处插入点各自往后挪（老档落�
     const legacy = clone(v4);
     delete legacy.version;
     const { data, from, applied } = migrate(legacy);
-    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]]);
+    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]]);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 

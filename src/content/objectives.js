@@ -864,6 +864,17 @@ export const OBJECTIVES = [
     journal: 'obj_chests_all_journal',
   },
   {
+    // W-E3 切片30：主线最后一处副本 —— 名册上的第十座下完才去碰锚点（插步要带存档迁移 v18 → v19）。
+    id: 'sunless-oratory',
+    title: 'obj_sunless_oratory_title',
+    desc: 'obj_sunless_oratory_desc',
+    type: 'dungeon',
+    dungeonId: 'sunless-oratory',
+    chapter: 5,
+    reward: 34,
+    journal: 'obj_sunless_oratory_journal',
+  },
+  {
     id: 'infinity',
     title: 'obj_infinity_title',
     desc: 'obj_infinity_desc',

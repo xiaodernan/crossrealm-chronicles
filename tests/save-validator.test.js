@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { SaveValidator, CURRENT_VERSION } from '../src/game/SaveValidator.js';
 import v6 from '../tests/save_v6_fixture.json';
 import v18 from '../tests/save_v18_fixture.json';
+import v19 from '../tests/save_v19_fixture.json';
 import v17 from '../tests/save_v17_fixture.json';
 import v16 from '../tests/save_v16_fixture.json';
 import v13 from '../tests/save_v13_fixture.json';
@@ -14,31 +15,35 @@ import v7 from '../tests/save_v7_fixture.json';
 import v5 from '../tests/save_v5_fixture.json';
 import { migrate } from '../src/game/SaveMigrations.js';
 
-describe('SaveValidator v18', () => {
-  it('接受仓库内的 v17 fixture', () => {
-    expect(SaveValidator.validate(v18)).toEqual([]);
+describe('SaveValidator v19', () => {
+  it('接受仓库内的 v19 fixture', () => {
+    expect(SaveValidator.validate(v19)).toEqual([]);
+  });
+
+  it('v18 的档现在只差版本号一格 —— 这一跳不新增字段，所以其余判据一条都不该红', () => {
+    expect(SaveValidator.validate(structuredClone(v18))).toEqual([`version 必须为 ${CURRENT_VERSION}`]);
   });
 
   it('拒绝错误版本', () => {
-    const bad = structuredClone(v18);
+    const bad = structuredClone(v19);
     bad.version = 4;
     expect(SaveValidator.validate(bad)).toContain(`version 必须为 ${CURRENT_VERSION}`);
   });
 
   it('拒绝缺失 player 字段', () => {
-    const bad = structuredClone(v18);
+    const bad = structuredClone(v19);
     delete bad.player.hp;
     expect(SaveValidator.validate(bad).length).toBeGreaterThan(0);
   });
 
   it('要求镜头轨道角入档（v5 新增）', () => {
-    const bad = structuredClone(v18);
+    const bad = structuredClone(v19);
     delete bad.player.yaw;
     expect(SaveValidator.validate(bad)).toContain('player.yaw 必须是有限数');
   });
 
   it('要求 spells/settings 为必填（v5 收紧）', () => {
-    const bad = structuredClone(v18);
+    const bad = structuredClone(v19);
     delete bad.settings;
     delete bad.spells;
     const issues = SaveValidator.validate(bad);
@@ -47,16 +52,16 @@ describe('SaveValidator v18', () => {
   });
 
   it('拒绝仍带派生字段 skillsUnlocked 的档（说明未走迁移）', () => {
-    const bad = structuredClone(v18);
+    const bad = structuredClone(v19);
     bad.quests.stats.skillsUnlocked = 3;
     expect(SaveValidator.validate(bad)).toContain('quests.stats.skillsUnlocked 已在 v5 移除（派生值）');
   });
 
   it('要求 stats.bag 是数组（v6 新增：背包入档，读档侧不许 ?? [] 兜底）', () => {
-    const missing = structuredClone(v18);
+    const missing = structuredClone(v19);
     delete missing.stats.bag;
     expect(SaveValidator.validate(missing)).toContain('stats.bag 必须是数组');
-    const wrong = structuredClone(v18);
+    const wrong = structuredClone(v19);
     wrong.stats.bag = {};
     expect(SaveValidator.validate(wrong)).toContain('stats.bag 必须是数组');
   });
@@ -80,34 +85,34 @@ describe('SaveValidator v18', () => {
   });
 
   it('restPointEnhancer 的三种坏形状都要红（数组、类型、id）', () => {
-    const 缺字段 = structuredClone(v18);
+    const 缺字段 = structuredClone(v19);
     delete 缺字段.restPointEnhancer.discovered;
     expect(SaveValidator.validate(缺字段)).toContain('restPointEnhancer.discovered 必须是数组');
-    const 类型错 = structuredClone(v18);
+    const 类型错 = structuredClone(v19);
     类型错.restPointEnhancer.discovered = 'fantasy';
     expect(SaveValidator.validate(类型错)).toContain('restPointEnhancer.discovered 必须是数组');
-    const 混入对象 = structuredClone(v18);
+    const 混入对象 = structuredClone(v19);
     混入对象.restPointEnhancer.discovered = ['fantasy', { id: 'magic' }];
     expect(SaveValidator.validate(混入对象)).toContain('restPointEnhancer.discovered 里出现了非字符串的 id');
     // 控制组：这一族的三条判据不能是"什么都报"
-    expect(SaveValidator.validate(structuredClone(v18))).toEqual([]);
+    expect(SaveValidator.validate(structuredClone(v19))).toEqual([]);
   });
 
   it('抉择那一格（decisions）缺失 ⇒ 红（老档由迁移那一跳补上，不是"缺失就当默认值凑合读"）', () => {
-    const 缺 = structuredClone(v18);
+    const 缺 = structuredClone(v19);
     delete 缺.quests.stats.decisions;
     expect(SaveValidator.validate(缺)).toContain('quests.stats 缺少: decisions');
   });
 
   it('主线旗标那一格（objectiveFlags）缺失 ⇒ 红；形状不对也红（v18 新增）', () => {
-    const 缺 = structuredClone(v18);
+    const 缺 = structuredClone(v19);
     delete 缺.quests.stats.objectiveFlags;
     expect(SaveValidator.validate(缺)).toContain('quests.stats 缺少: objectiveFlags');
-    const 形状错 = structuredClone(v18);
+    const 形状错 = structuredClone(v19);
     形状错.quests.stats.objectiveFlags = [];
     expect(SaveValidator.validate(形状错)).toContain('quests.stats.objectiveFlags 必须是对象（旗标名 → 布尔）');
     // 控制组：好档照样全绿
-    expect(SaveValidator.validate(structuredClone(v18))).toEqual([]);
+    expect(SaveValidator.validate(structuredClone(v19))).toEqual([]);
   });
 
   it('v17 fixture 过不了当前校验：版本号旧 + 缺 objectiveFlags，两处各自红', () => {
@@ -133,7 +138,7 @@ describe('SaveValidator v18', () => {
   });
 
   it('把数字型 kills 规范化为对象（旧 Godot 导出兼容）', () => {
-    const legacy = structuredClone(v18);
+    const legacy = structuredClone(v19);
     legacy.quests.stats.kills = 12;
     expect(SaveValidator.validate(legacy).length).toBeGreaterThan(0);
     SaveValidator.normalize(legacy);

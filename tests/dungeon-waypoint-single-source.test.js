@@ -14,14 +14,15 @@
  * 而它留着的第 3 处读者只差一次表改动就会诞生 —— `QuestSystem.getQuestWaypoint()` 的副本分支
  * 原先带着 `&& !dungeonsCleared.has(...)`，"已经清了但这一行还没走完"（切片24 起 `requires`
  * 有运行时读者，完成与资格是两件事）会一路漏到函数最末那行，去读行上抄的那一份。
- * 今天主线九行都没写 `requires`，所以那条路走不到 —— 抄本是**潜伏的**第二口径，不是正在犯的错。
+ * 今天主线这些副本步都没写 `requires`，所以那条路走不到 —— 抄本是**潜伏的**第二口径，不是正在犯的错。
+ * （切片25 动手时主线是九处副本步；切片30 加了第十处 `sunless-oratory`，那一行从写下起就没有抄本。）
  *
  * 于是这一片三件事一起做：堵上那条漏路（副本分支不问清没清）、删掉九格抄本、
  * 让注册表当场拦住"再往副本行上抄一份入口"。随抄本成孤儿的 7 枚 `wp_label_*` 文案键从中英两表除名。
  *
  * ## 用例分三组
  *
- * 1. **行上没有抄本**：九行逐行没有 `waypoint`（先钉"抄本当年 == 名册 entrance"，
+ * 1. **行上没有抄本**：十行逐行没有 `waypoint`（先钉"抄本当年 == 名册 entrance"，
  *    证明删掉的是一份副本而不是第二个事实）；注册表拦得住塞回来的那一格，且不冤枉别的行。
  * 2. **指路只问名册**：未清 / 已清但资格未齐两种状态下的路点都等于 `entrance` + `name`。
  * 3. **孤儿键随抄本除名**：7 枚键全仓零出现、两表都不在场、两表逐键对齐。
@@ -76,11 +77,11 @@ const FILES = [...walk(join(process.cwd(), 'src')), ...walk(join(process.cwd(), 
   .filter((f) => /\.(js|mjs|html)$/.test(f));
 
 describe('① 主线副本行不再抄入口', () => {
-  it('钉子：副本步就是那九行，一行不多一行不少（防整族消失把下面几条变成空转）', () => {
-    expect(副本步.map((r) => r.id)).toEqual(Object.keys(抄本当年));
+  it('钉子：副本步就是那九行 + 切片30 新插的无灯祷堂，一行不多一行不少（防整族消失把下面几条变成空转）', () => {
+    expect(副本步.map((r) => r.id)).toEqual([...Object.keys(抄本当年), 'sunless-oratory']);
   });
 
-  it('结构腿：九行逐行没有 waypoint —— 认领只靠 dungeonId', () => {
+  it('结构腿：十行逐行没有 waypoint —— 认领只靠 dungeonId', () => {
     for (const row of 副本步) {
       expect(row.waypoint, `主线步 "${row.id}" 又抄了一份入口`).toBeUndefined();
       expect(row.dungeonId, `主线步 "${row.id}" 连 dungeonId 都没有，那它靠什么指路`).toBeTruthy();
@@ -108,7 +109,7 @@ describe('① 主线副本行不再抄入口', () => {
       : r));
     const 报错 = checkObjectiveTable(坏表);
     const 点名 = 报错.filter((e) => e.includes('不许写 waypoint'));
-    expect(点名.length, `九行都该被点名，实际 ${点名.length} 条：${点名.join(' | ') || '(零)'}`).toBe(9);
+    expect(点名.length, `十行都该被点名，实际 ${点名.length} 条：${点名.join(' | ') || '(零)'}`).toBe(10);
     expect(点名[0], '话里没说入口该由谁说话').toContain('content/dungeons.js');
     for (const row of 副本步) {
       expect(点名.some((e) => e.includes(`("${row.id}")`)), `没点名 "${row.id}" 那一行`).toBe(true);
@@ -196,15 +197,15 @@ describe('③ 孤儿键随抄本一起除名', () => {
     expect(文本.filter((s) => s.includes('wp_label_anchor')).length, '扫描范围空转').toBeGreaterThan(2);
   });
 
-  it('两表腿：7 枚键两张表都不在场，且两表逐键对齐、都是 2433', () => {
+  it('两表腿：7 枚键两张表都不在场，且两表逐键对齐、都是 2436', () => {
     const 中键 = Object.keys(STRINGS_ZH);
     const 英键 = Object.keys(STRINGS_EN);
     for (const 键 of 除名的键) {
       expect(键 in STRINGS_ZH, `中文表里还留着 "${键}"（孤儿键没删干净）`).toBe(false);
       expect(键 in STRINGS_EN, `英文表里还留着 "${键}"（只删了一张表）`).toBe(false);
     }
-    expect(中键.length, '键数不是 2433 —— 双表被别处改过').toBe(2433);
-    expect(英键.length, '键数不是 2433 —— 双表被别处改过').toBe(2433);
+    expect(中键.length, '键数不是 2436 —— 双表被别处改过').toBe(2436);
+    expect(英键.length, '键数不是 2436 —— 双表被别处改过').toBe(2436);
     expect(中键.filter((k) => !英键.includes(k)), '只在中文表里的键').toEqual([]);
     expect(英键.filter((k) => !中键.includes(k)), '只在英文表里的键').toEqual([]);
   });

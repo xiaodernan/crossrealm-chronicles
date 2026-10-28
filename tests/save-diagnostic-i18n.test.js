@@ -17,7 +17,7 @@
  *
  * ## 用例分六层
  * ① 钉文案腿：26 个新键的中英原值逐字钉死，fmt 键占位符中英一致；
- * ② 键登记腿：26 键两表都在场，键数 2323 → 2349 → 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411（W-E3 切片25：副本行入口抄本除名，带走 7 枚孤儿 wp_label_* 键）→ 2423 → 2433，不孤儿、同文案最多两键；
+ * ② 键登记腿：26 键两表都在场，键数 2323 → 2349 → 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411（W-E3 切片25：副本行入口抄本除名，带走 7 枚孤儿 wp_label_* 键）→ 2423 → 2433 → 2436，不孤儿、同文案最多两键；
  * ③ 静态腿：SaveValidator.js 与 SaveMigrations.js 的中文字面量清零；
  * ④ 行为腿（zh）：真跑 validate / migrate / save / load 全链路；
  * ⑤ 行为腿（en）：同一条链路英文播出，切片37 留的插值口整句闭合；
@@ -34,7 +34,7 @@ import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { setLanguage, t } from '../src/engine/i18n.js';
 import v4 from '../tests/save_v4_fixture.json';
-import v18 from '../tests/save_v18_fixture.json';
+import v19 from '../tests/save_v19_fixture.json';
 
 const ROOT = process.cwd();
 const 读 = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -195,7 +195,7 @@ describe('① 钉文案腿：26 个新键的中英原值逐字钉死', () => {
  * ② 键登记腿
  * ------------------------------------------------------------------ */
 
-describe('② 键登记：26 个新键两表都在场，键数 2323 → 2349 → 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411 → 2423 → 2433', () => {
+describe('② 键登记：26 个新键两表都在场，键数 2323 → 2349 → 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411 → 2423 → 2433 → 2436', () => {
   it('26 个新键中英两表一个不缺', () => {
     const zh = new Set(ZH_KEYS);
     const en = new Set(EN_KEYS);
@@ -205,9 +205,9 @@ describe('② 键登记：26 个新键两表都在场，键数 2323 → 2349 →
     }
   });
 
-  it('键数 2323 → 2349 → 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411 → 2423 → 2433，两表逐键对齐', () => {
+  it('键数 2323 → 2349 → 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411 → 2423 → 2433 → 2436，两表逐键对齐', () => {
     expect(ZH_KEYS.length).toBe(EN_KEYS.length);
-    expect(ZH_KEYS.length, '键数不是 2433 —— 双表被别处改过').toBe(2433);
+    expect(ZH_KEYS.length, '键数不是 2436 —— 双表被别处改过').toBe(2436);
   });
 
   it('新键不孤儿：save_issue_* 在 SaveValidator.js 被引用，save_migrate_* 在 SaveMigrations.js', () => {
@@ -258,7 +258,7 @@ describe('③ 静态腿：两个存档源文件的中文字面量清零', () => 
 
 describe('④ 行为腿（zh）：validate / migrate 的诊断与存读链路的 toast 都是展开句', () => {
   it('validate 的坏数据诊断：一批代表性中文原句一条不少', () => {
-    const bad = structuredClone(v18);
+    const bad = structuredClone(v19);
     bad.version = 4;
     delete bad.player.yaw;
     delete bad.quests.stats.kills;
@@ -283,7 +283,7 @@ describe('④ 行为腿（zh）：validate / migrate 的诊断与存读链路的
   });
 
   it('validate 的 fmt 诊断：player 缺字段 / quests.stats 缺账本键', () => {
-    const bad = structuredClone(v18);
+    const bad = structuredClone(v19);
     delete bad.player.hp;
     delete bad.quests.stats.npcTalked;
     const issues = SaveValidator.validate(bad);
@@ -314,10 +314,10 @@ describe('④ 行为腿（zh）：validate / migrate 的诊断与存读链路的
 
   it('闭环：SaveSystem.load 读到版本过高的档，"读取失败"的 reason 也是中文原句', () => {
     const g = makeHost();
-    localStorage.setItem(slotKey(1), JSON.stringify({ ...v18, version: CURRENT_VERSION + 1 }));
+    localStorage.setItem(slotKey(1), JSON.stringify({ ...v19, version: CURRENT_VERSION + 1 }));
     expect(SaveSystem.load(g, 1)).toBe(false);
     expect(g.dialog.toasts).toEqual([
-      `crossrealm_save_v18_slot1 读取失败：存档版本 v${CURRENT_VERSION + 1} 高于当前构建支持的 v${CURRENT_VERSION}`,
+      `crossrealm_save_v19_slot1 读取失败：存档版本 v${CURRENT_VERSION + 1} 高于当前构建支持的 v${CURRENT_VERSION}`,
     ]);
   });
 });
@@ -329,7 +329,7 @@ describe('④ 行为腿（zh）：validate / migrate 的诊断与存读链路的
 describe('⑤ 行为腿（en）：同一条链路英文播出，切片37 留的插值口整句闭合', () => {
   it('validate 的坏数据诊断：同一批坏数据全英文', () => {
     setLanguage('en');
-    const bad = structuredClone(v18);
+    const bad = structuredClone(v19);
     bad.version = 4;
     delete bad.player.yaw;
     delete bad.quests.stats.kills;
@@ -368,10 +368,10 @@ describe('⑤ 行为腿（en）：同一条链路英文播出，切片37 留的�
     expect(g.dialog.toasts).toEqual(['Save rejected: player.yaw must be a finite number']);
 
     const g2 = makeHost();
-    localStorage.setItem(slotKey(1), JSON.stringify({ ...v18, version: CURRENT_VERSION + 1 }));
+    localStorage.setItem(slotKey(1), JSON.stringify({ ...v19, version: CURRENT_VERSION + 1 }));
     expect(SaveSystem.load(g2, 1)).toBe(false);
     const toasts = [...g.dialog.toasts, ...g2.dialog.toasts];
-    expect(toasts).toContain(`Failed to read crossrealm_save_v18_slot1: Save version v${CURRENT_VERSION + 1} is newer than this build supports (v${CURRENT_VERSION})`);
+    expect(toasts).toContain(`Failed to read crossrealm_save_v19_slot1: Save version v${CURRENT_VERSION + 1} is newer than this build supports (v${CURRENT_VERSION})`);
     for (const toast of toasts) {
       expect(toast).not.toContain('[MISSING:');
       expect(toast).not.toMatch(/^[a-z][a-z0-9_]*$/);

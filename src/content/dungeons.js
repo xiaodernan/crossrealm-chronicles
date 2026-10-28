@@ -207,7 +207,8 @@ export const DUNGEON_DEFS = [
   },
   {
     // 幽暗位面的第二座（W-E3 切片29：名册上的第十座）。档位 6 是成长曲线的顶（`GROWTH_MAX_STAGE`），
-    // 所以这一座是"打完主线还想再往下钻"的那一座 —— 它**不在主线里**，主线认领与存档迁移 v18 → v19 是下一片。
+    // 所以它是主线**最后**那一处副本（切片30 把它插在摸锚点之前，并带了存档迁移 v18 → v19）——
+    // 插在中间就是拿 6 档怪压玩家 3~4 档的装备。
     id: 'sunless-oratory',
     zone: 'gloom',
     name: 'dungeon_sunless_oratory_name',

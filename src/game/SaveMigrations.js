@@ -14,6 +14,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v19', version: 19 },
   { key: 'crossrealm_save_v18', version: 18 },
   { key: 'crossrealm_save_v17', version: 17 },
   { key: 'crossrealm_save_v16', version: 16 },
@@ -395,6 +396,30 @@ function migrateV17toV18(d) {
   return d;
 }
 
+/**
+ * v18 → v19：**主线加长一步 —— 名册上的第十座（无灯祷堂）认领进主线**（W-E3 切片30）。
+ *
+ * 这一跳**不改存档形状**（与 v16 → v17 同一类）：加的那一步是 `type: 'dungeon'`，
+ * 判据读的 `stats.dungeonsCleared` 那一格早就在账上 ⇒ 老档缺的从来不是"没打过的副本"，
+ * 只是**主线的下标**。
+ *
+ * 插入点（**旧序列**的下标）：**61** —— 旧序列那一格是 `infinity`（摸世界之锚，全流程最后一步），
+ * 新步插在它**之前** ⇒ ≥61 的下标各往后挪一格：停在锚点那一步的 61 落到 62（还是锚点）✓，
+ * 通关档的 62 落到 63 = 新的 `MAINLINE.length`（仍然读作通关）✓，`chests-all` 的 60 不动 ✓。
+ *
+ * 为什么插在这里而不是更早：这一座是 `stage: 6`（成长曲线的顶），而主线里最晚的那座
+ * 是 `chaos-boss` 之前的深渊之颚（4 档）。把最深处那一间留在锚点仪式之前，
+ * 玩家是带着整条成长曲线下去的 —— 插在中间就是拿 6 档怪压 3~4 档装备。
+ */
+export const V18_INSERT_POINTS = [61];
+
+function migrateV18toV19(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V18_INSERT_POINTS);
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -411,6 +436,7 @@ export const MIGRATIONS = {
   15: migrateV15toV16,
   16: migrateV16toV17,
   17: migrateV17toV18,
+  18: migrateV18toV19,
 };
 
 /**
