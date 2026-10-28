@@ -21,6 +21,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import * as THREE from 'three';
 import { WorldDecorations } from '../src/world/WorldDecorations.js';
+import { WINDING_ROUTES } from '../src/content/windingRoutes.js';
 import { CollisionWorld } from '../src/engine/Collision.js';
 
 /** 线性同余替换 Math.random：同一种子同序列，build 结果可复现 */
@@ -82,7 +83,7 @@ describe('装饰层合批（W-C2 切片2）', () => {
     expect(trunks.count).toBeLessThanOrEqual(301);
   });
 
-  it('石 80 / 灯 20 对 / 幡 8 / 摊 6 对 / 椅 10 / 柱 48 / 晶 6 —— 实例数一个不少', () => {
+  it('石 80 / 灯 逐辐条现推 / 幡 8 / 摊 6 对 / 椅 10 / 柱 48 / 晶 6 —— 实例数一个不少', () => {
     const deco = buildDecorations();
     const { instanced } = inventory(deco);
     const sumOf = (type) => instanced.filter((m) => m.geometry.type === type).reduce((a, m) => a + m.count, 0);
@@ -90,7 +91,20 @@ describe('装饰层合批（W-C2 切片2）', () => {
     const rocks = instanced.find((m) => m.geometry.type === 'DodecahedronGeometry');
     expect(rocks.count).toBeGreaterThanOrEqual(70);
     expect(rocks.count).toBeLessThanOrEqual(80);
-    expect(sumOf('SphereGeometry')).toBe(20);            // 灯罩
+    /**
+     * 灯罩数**从 `WINDING_ROUTES` 现推**（点位取法与 `WorldDecorations._buildPathLanterns` 同一条：
+     * 非环辐条的奇数位折点）。这一格原本写死 20 = 5 条辐条 × 4，而 W-E3 切片33 把辐条补到 7 条
+     * ⇒ 全量套件红在这条与那片毫无关系的腿上（读到 28 对 20）。抄一个从表里数得出来的数，
+     * 表一变就是一次假红 —— 与 B134 / B136 / B143 / B150 同一族，只是这次抄在测试里。
+     */
+    const 灯位 = [];
+    for (const r of WINDING_ROUTES) {
+      if (r.id === 'hub-ring') continue;
+      const p = r.points;
+      for (let i = 1; i < p.length - 1; i += 2) 灯位.push(p[i]);
+    }
+    expect(灯位.length, '反向控制：点位表自己数出来是 0 ⇒ 这条腿在空跑').toBeGreaterThan(0);
+    expect(sumOf('SphereGeometry'), `灯罩 ${灯位.length} 盏（辐条 ${WINDING_ROUTES.filter((r) => r.id !== 'hub-ring').length} 条）`).toBe(灯位.length);
     expect(sumOf('PlaneGeometry')).toBe(8);              // 幡
     expect(sumOf('BoxGeometry')).toBe(70);               // 摊底6 + 雨棚6 + 长椅10 + 断柱48
     expect(sumOf('OctahedronGeometry')).toBe(6);         // 野生生物水晶
@@ -98,6 +112,12 @@ describe('装饰层合批（W-C2 切片2）', () => {
     const poles = instanced.find((m) => m.name === 'hubBannerPole');
     expect(poles, '幡杆合批网格不见了').toBeTruthy();
     expect(poles.count).toBe(8);
+    // 灯柱与灯罩必须同数（同一份点位表落两个合批网格；只涨一个就是"柱子有、灯头没了"）
+    const posts = instanced.find((m) => m.name === 'pathLanternPost');
+    const lamps = instanced.find((m) => m.name === 'pathLanternLamp');
+    expect(posts, '灯柱合批网格不见了').toBeTruthy();
+    expect(lamps, '灯罩合批网格不见了').toBeTruthy();
+    expect(posts.count, '灯柱与灯罩不同数').toBe(lamps.count);
   });
 
   it('整层只剩 12 个合批网格 + 16 个独立网格（门拱/喷泉），几何 15 份（上限 20）', () => {
