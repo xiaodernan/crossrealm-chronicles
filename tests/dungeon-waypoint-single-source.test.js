@@ -36,6 +36,7 @@ import { DUNGEON_DEFS, dungeonDefOf } from '../src/content/dungeons.js';
 import { checkObjectiveTable } from '../src/content/registry.js';
 import { STRINGS_ZH } from '../src/content/strings.zh.js';
 import { STRINGS_EN } from '../src/content/strings.en.js';
+import { 键数问题 } from './helpers/i18nKeyCount.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import { t } from '../src/engine/i18n.js';
 
@@ -204,8 +205,7 @@ describe('③ 孤儿键随抄本一起除名', () => {
       expect(键 in STRINGS_ZH, `中文表里还留着 "${键}"（孤儿键没删干净）`).toBe(false);
       expect(键 in STRINGS_EN, `英文表里还留着 "${键}"（只删了一张表）`).toBe(false);
     }
-    expect(中键.length, '键数不是 2436 —— 双表被别处改过').toBe(2436);
-    expect(英键.length, '键数不是 2436 —— 双表被别处改过').toBe(2436);
+    expect(键数问题(中键, 英键), '键数与登记值不符').toEqual([]);
     expect(中键.filter((k) => !英键.includes(k)), '只在中文表里的键').toEqual([]);
     expect(英键.filter((k) => !中键.includes(k)), '只在英文表里的键').toEqual([]);
   });

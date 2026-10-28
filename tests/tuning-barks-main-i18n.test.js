@@ -45,6 +45,7 @@ import { emit } from '../src/engine/EventBus.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
+import { 键数问题 } from './helpers/i18nKeyCount.js';
 import { setLanguage, t } from '../src/engine/i18n.js';
 
 const ROOT = process.cwd();
@@ -184,8 +185,7 @@ describe('① 钉文案腿：15 新键 + 1 复用键的中英原值', () => {
 
 describe('② 键登记腿：键数、对齐、复用、不孤儿', () => {
   it('键数 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411 → 2423 → 2433 → 2436，两表对齐', () => {
-    expect(ZH_KEYS.length).toBe(2436);
-    expect(EN_KEYS.length).toBe(2436);
+    expect(键数问题(ZH_KEYS, EN_KEYS), '键数与登记值不符').toEqual([]);
     expect([...ZH_KEYS].sort()).toEqual([...EN_KEYS].sort());
   });
 

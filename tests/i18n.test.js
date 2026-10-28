@@ -5,6 +5,7 @@ import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { t, setLanguage, getLanguage, getAllKeys, assertI18nParity } from '../src/engine/i18n.js';
 import { 动态接线键集 } from './helpers/i18nDynamicKeys.js';
+import { EXPECTED_KEY_COUNT, 键数问题 } from './helpers/i18nKeyCount.js';
 
 describe('i18n 文案表（W-D2 切片1）', () => {
   beforeEach(() => {
@@ -578,5 +579,35 @@ describe('玩家可见裸中文收口（W-D2 切片54）', () => {
     }
     expect(STRINGS_ZH.rest_npc_model_loaded_fmt).toContain('${name}');
     expect(STRINGS_EN.rest_npc_model_loaded_fmt).toContain('${name}');
+  });
+});
+
+describe('双表键数只有一个所有者（W-D2 欠账 · 2026-10-29）', () => {
+  const walk = (dir) => readdirSync(dir).flatMap((name) => {
+    const p = join(dir, name);
+    return statSync(p).isDirectory() ? walk(p) : [p];
+  });
+  const 测试源 = walk(join(process.cwd(), 'tests'))
+    .filter((file) => file.endsWith('.test.js'))
+    .map((file) => ({ file, s: readFileSync(file, 'utf8') }));
+
+  it('测试代码里没有第二份键数字面量（出现即红）', () => {
+    const 抄本 = 测试源
+      .filter(({ s: 源 }) => 源.includes(`.toBe(${EXPECTED_KEY_COUNT})`))
+      .map(({ file }) => file);
+    expect(抄本, '有人把键数抄回测试里了 —— 改键数应当只有一处').toEqual([]);
+  });
+
+  it('曾抄过键数的文件都改读同一个判据（防这道门自己空转）', () => {
+    const 读过 = 测试源.filter(({ s: 源 }) => 源.includes("helpers/i18nKeyCount.js"));
+    expect(读过.length, '一个文件都没读单一真源 —— 这条门禁量不到任何东西').toBeGreaterThanOrEqual(11);
+  });
+
+  it('判据两个方向都咬得住（反向控制）', () => {
+    const 齐 = new Array(EXPECTED_KEY_COUNT).fill('k');
+    expect(键数问题(齐, 齐), '齐的时候不该报问题').toEqual([]);
+    expect(键数问题(齐.slice(1), 齐).length, '两表不等必须报').toBeGreaterThan(0);
+    expect(键数问题(齐.slice(1), 齐.slice(1)).length, '与登记值不等必须报').toBeGreaterThan(0);
+    expect(键数问题(null, 齐).length, '非数组必须报').toBe(1);
   });
 });

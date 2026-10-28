@@ -43,6 +43,7 @@ import { HUD } from '../src/ui/HUD.js';
 import { inputDeviceLabel } from '../src/engine/InputDevice.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
+import { 键数问题 } from './helpers/i18nKeyCount.js';
 import { setLanguage, applyTranslations } from '../src/engine/i18n.js';
 import { makeMarkupDom, node } from './helpers/fakeMarkupDom.js';
 import { makeManager } from './helpers/enemyHarness.js';
@@ -226,7 +227,7 @@ describe('② 键登记：三个新键两表都在场，键数 2304 → 2307 →
 
   it('键数 2304 → 2307 → 2323 → 2349 → 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411 → 2423 → 2433 → 2436，两表逐键对齐', () => {
     expect(ZH_KEYS.length).toBe(EN_KEYS.length);
-    expect(ZH_KEYS.length, '键数不是 2436 —— 双表被别处改过').toBe(2436);
+    expect(键数问题(ZH_KEYS, EN_KEYS), '键数与登记值不符').toEqual([]);
   });
 
   it('新键不孤儿：每个新键都在 src 里被引用（死键计数只减不增）', () => {
