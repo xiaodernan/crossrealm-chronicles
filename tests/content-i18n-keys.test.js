@@ -168,7 +168,7 @@ describe('③ 两张表逐键对齐（键字段这一层）', () => {
   });
 
   it('两张表的键集合大小一致（防空转）', () => {
-    // 键数已累计至 2418（含 boss_dungeon_phase1_banner 等近期新增）
+    // 键数已累计至 2411（W-E3 切片25 删掉主线副本行上的入口抄本，7 枚孤儿 wp_label_* 键除名；此前 2418）
     expect(ZH.size).toBeGreaterThan(500);
     expect(ZH.size).toBe(EN.size);
   });

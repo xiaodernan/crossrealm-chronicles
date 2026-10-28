@@ -75,6 +75,10 @@ const TARGET_WAYPOINTS = {
  * 而副本表是同一件事的另一份说法 —— 表里挪一次入口，指路这一份不会跟着动，
  * 也没有任何一处会红。`dungeonDefOf` 认不出就抛：能走到这里的 id 只有主线
  * `type: 'dungeon'` 那几行，注册表已经拿 `ref: 'dungeons'` 钉住它们的 `dungeonId`。
+ *
+ * **W-E3 切片25**：主线那九行副本步各抄过一格 `waypoint`（x/z 逐格等于 `entrance`，label 却另开
+ * 一套 `wp_label_*` 文案键）。玩家看到的从来是这里问出来的那一份 ⇒ 抄本是第二套词汇，删了，
+ * 注册表现在禁止 `type: 'dungeon'` 的行写 `waypoint`。
  */
 const dungeonWaypoint = (id) => {
   const d = dungeonDefOf(id);
@@ -440,7 +444,12 @@ export class QuestSystem {
       return { ...MAP_BOSSES.find((b) => b.bossId === q.bossId), label: BOSS_DISPLAY[q.bossId].waypoint };
     }
 
-    if (q.type === 'dungeon' && !this.stats.dungeonsCleared.has(q.dungeonId)) {
+    // 副本步**不问清没清**：这一支要么指到那座副本的入口，要么这行就没有指路。
+    // 改前它带着 `&& !dungeonsCleared.has(...)`，于是"这座已经清了、但这一行还没走完"
+    // （切片24 起 `requires` 有运行时读者 ⇒ "完成"与"资格"从此是两件事）会一路漏到函数最末那行，
+    // 去读**主线行上自己抄的那一份** `waypoint`。今天九行副本步都没写 `requires`，那条路在役走不到
+    // ⇒ 抄本是一份零读者的潜伏口径；这里先堵路，行上那九格随之删除（B143）。
+    if (q.type === 'dungeon') {
       return dungeonWaypoint(q.dungeonId);
     }
 

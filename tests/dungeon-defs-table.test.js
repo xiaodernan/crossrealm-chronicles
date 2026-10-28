@@ -381,14 +381,16 @@ describe('④ 指路：路点由表推导，认不出就抛', () => {
     }
   });
 
-  it('主线指的那几座副本，入口都来自各自的定义表（认不出就抛）', () => {
+  it('主线指的那几座副本只认领 id，入口由各自的定义表说（认不出就抛）', () => {
     // W-E3 切片12 起主线指的不止那三座试炼（还有断时之匣 / 深渊之颚）⇒
-    // 这条不再拿"三座"当基准，改成"**每一座**主线指着的副本，它的路点必须等于它自己那格入口"
+    // 这条不再拿"三座"当基准，改成"**每一座**主线指着的副本"。
+    // W-E3 切片25：这一格原来核的是"行上抄的那份 waypoint == 表里的 entrance"——
+    // 抄本本身是零读者的死格（B143），删了。现在核的是**行上没有抄本**：
+    // 认领关系只剩 `dungeonId` 一条，坐标只由 `content/dungeons.js` 说。
     for (const row of 副本步) {
       const def = dungeonDefOf(row.dungeonId);
       expect(def, `主线步 "${row.id}" 指的副本 "${row.dungeonId}" 认不出来`).toBeTruthy();
-      expect([row.waypoint.x, row.waypoint.z], `${row.id} 指的入口与副本表对不上`)
-        .toEqual([def.entrance.x, def.entrance.z]);
+      expect(row.waypoint, `主线步 "${row.id}" 又抄了一份入口 —— 副本行的入口只由 dungeonId 问名册`).toBeUndefined();
     }
   });
 

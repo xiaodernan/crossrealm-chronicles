@@ -1639,6 +1639,13 @@ export function checkObjectiveTable(table) {
         out.push(`${path}: type 是 dungeon 却没写 dungeonId —— 地下城路点要按 id 问 \`content/dungeons.js\`，`
           + '缺这一格会在玩家走到这一步时当场抛（`DUNGEON_IDS` 也由这一格推导）');
       }
+      // W-E3 切片25：副本步的入口**只由 `content/dungeons.js` 说** —— `QuestSystem.dungeonWaypoint()` 现问名册。
+      // 这九行以前各抄一份 `{ x, z, label }`：坐标逐格等于 `entrance`，label 却另开一套 `wp_label_*` 文案键
+      // ⇒ 同一件事两套口径（表里挪一次入口，行上那一份不会跟着动；而玩家看到的从来是名册那一份，抄本零读者）。
+      if (row?.type === 'dungeon' && row.waypoint !== undefined) {
+        out.push(`${path}: type 是 dungeon 的行不许写 waypoint —— 入口的坐标与名字只由 \`content/dungeons.js\``
+          + ` 的 entrance / name 说（这一行认领的是 "${row.dungeonId}"），行上再写一份就是第二份口径`);
+      }
     }
     for (const [flag, want] of Object.entries(row?.requires ?? {})) {
       const p = producers.get(flag);
