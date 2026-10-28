@@ -294,22 +294,104 @@ describe('暂停/快速旅行/世界地图/说明书头/对话关闭（W-D2 切�
   });
 });
 
-describe('死键只减不增（W-D2 切片6 门槛）', () => {
+describe('死键只减不增（W-D2 切片6 门槛 · W-E3 切片26 修的是"这道门恒绿"，B144）', () => {
   const walk = (dir) => readdirSync(dir).flatMap((name) => {
     const p = join(dir, name);
     return statSync(p).isDirectory() ? walk(p) : [p];
   });
-  const FILES = [...walk(join(process.cwd(), 'src')).filter(f => !f.endsWith('.map')), join(process.cwd(), 'index.html')];
+  /**
+   * 读者名单：`src/` 全部代码 + `index.html`，**但不许算进两张定义表自己**。
+   *
+   * 改前没有这个排除，而每一个键的键名都以字面量写在 `strings.zh.js` 里 ⇒
+   * `FILES.some(f => 读(f).includes(key))` 对**任何**键都为真 ⇒ 死键计数恒 0、`≤ 48` 永远过。
+   * W-E3 切片25 里九行副本抄本被删掉、七枚 `wp_label_*` 同时变成孤儿，这道门一声没出
+   * （那七枚是人工发现的）—— 那就是 B144：门答应了，但它量不到任何东西。
+   */
+  const 是定义表 = (f) => /strings\.(zh|en)\.js$/.test(f);
+  const FILES = [
+    ...walk(join(process.cwd(), 'src')).filter((f) => !f.endsWith('.map') && !是定义表(f)),
+    join(process.cwd(), 'index.html'),
+  ];
+  /** 一次读完再逐键问（改前"逐键 × 逐文件"重读 2411 × 268 次 ⇒ 单这条用例 86 秒，是全量套件最慢的一条） */
+  const 读者文本 = FILES.map((f) => readFileSync(f, 'utf8'));
+  const 死集 = ZH_KEYS.filter((k) => !读者文本.some((s) => s.includes(k)));
 
-  it('字符串字面量可见的死键计数只许降不许升（今天 53 → 切片6 后 ≤ 48）', async () => {
-    const { STRING_KEYS } = await import('../src/content/strings.zh.js');
-    let dead = 0;
-    for (const key of STRING_KEYS) {
-      const ref = FILES.some((f) => readFileSync(f, 'utf8').includes(key));
-      if (!ref) dead++;
+  /**
+   * 修门那一刻（2411 键）的真实读数 —— **待查清单，不是可删清单**。
+   *
+   * "字面量看不见"只说到此：运行期拼出来的键名（`t('hud_' + 字段)`）在这把尺子下同样是死的。
+   * 所以名单里少一枚要问的是"它被接上了还是被删了"，多一枚则是有人建了格没接线。
+   */
+  const 死键名单 = [
+    'autoplay_start',
+    'combat_boss_defeated',
+    'combat_boss_start',
+    'combat_defeat',
+    'combat_victory',
+    'common_confirm',
+    'common_load',
+    'common_reset',
+    'dialog_choice_continue',
+    'dialog_title_unknown',
+    'fast_travel_unlocked',
+    'help_controls',
+    'help_gameplay',
+    'help_title',
+    'hud_boss_phase_fmt',
+    'hud_chapter',
+    'hud_fps',
+    'hud_level',
+    'journal_dungeon_runs',
+    'journal_lore',
+    'menu_quit',
+    'menu_resume',
+    'obj_true_end_sealed_desc',
+    'obj_true_end_sealed_journal',
+    'obj_true_end_sealed_title',
+    'obj_true_end_studied_desc',
+    'obj_true_end_studied_journal',
+    'obj_true_end_studied_title',
+    'quest_assistant_hint_near_wp',
+    'quest_get_assistant_hint',
+    'quest_waypoint_far',
+    'quest_waypoint_hint_chapter',
+    'quest_waypoint_hint_trials_done',
+    'rest_dialogue_journal_text',
+    'rest_dialogue_journal_title',
+    'settings_audio',
+    'settings_bloom',
+    'settings_controls',
+    'settings_ssao_quality_high',
+    'settings_ssao_quality_low',
+    'settings_ssao_quality_medium',
+    'settings_ssao_quality_off',
+    'toast_bag_full',
+    'toast_gear_equip',
+    'toast_gear_pickup',
+    'toast_invalid_keybind',
+    'upgrade_title',
+    'world_map_current_zone',
+  ];
+
+  it('扫描范围先把两张定义表排除掉（否则每个键都被自己的定义算成读者）', () => {
+    expect(FILES.filter(是定义表), '定义表又回到读者名单里了 —— 这道门将重新恒绿').toEqual([]);
+    expect(FILES.length, '读者名单塌了（扫描目录不对？）').toBeGreaterThan(120);
+  });
+
+  it('计数只许降不许升（修门那一刻的真实读数 48，正好压在名义上限上）', () => {
+    expect(死集.length, `死键 ${死集.length} 超过上限（应 ≤ 48）`).toBeLessThanOrEqual(48);
+    expect(死集.slice().sort()).toEqual(死键名单);
+  });
+
+  it('反向控制两头：在役的键不许进名单，凭空造一枚没接线的键必须进（防修完仍恒绿）', () => {
+    for (const 在役 of ['wp_label_anchor', 'quest_state_done', 'obj_anchor_title']) {
+      expect(ZH_KEYS, `钉子键 ${在役} 已不在表里 —— 这条控制成了空转`).toContain(在役);
+      expect(死集, `在役键 ${在役} 被判成死键 ⇒ 读者名单漏了它真正被读的那一处`).not.toContain(在役);
     }
-    // 基线 53（切片5 前）；切片6 新增 9 个键全接线，死键应减少
-    expect(dead, `死键计数 ${dead} 超过上限（应 ≤ 48）`).toBeLessThanOrEqual(48);
+    const 假键 = 'b144_probe_根本没接线';
+    expect(ZH_KEYS).not.toContain(假键);
+    const 带假键 = [...ZH_KEYS, 假键].filter((k) => !读者文本.some((s) => s.includes(k)));
+    expect(带假键.length, '加了一枚没人引用的键，计数却没动 —— 尺子是摆设').toBe(死集.length + 1);
   });
 });
 
