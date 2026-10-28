@@ -45,8 +45,12 @@ export class PopCultureEchoSystem {
         chapter: this.game.quests?.chapter ?? 1,
       });
       window.dispatchEvent(new CustomEvent('pop-culture-unlocked', { detail: echo }));
-      const stats = this.getStats();
-      if (stats.percent >= 100 && !this.unlocked.has('echo-full-resonance')) {
+      // 全位面共鸣是派生回声（无派发点）：其余回声都共鸣那一刻自己放出来。
+      // 改前用 `getStats().percent >= 100` 判定 —— 但 percent 的分母把共鸣本身也算进去
+      // （48/49 = 98），永远够不到 100 ⇒ 共鸣永远不解锁、`echoPercent` 也永远到不了 100
+      // （`echo-full` 成就连带锁死）。改成"除共鸣外全部解锁即放出"。
+      if (!this.unlocked.has('echo-full-resonance')
+        && ECHOES.every((e) => e.id === 'echo-full-resonance' || this.unlocked.has(e.id))) {
         this.tryUnlock('echo:full-resonance');
       }
     }
