@@ -20,6 +20,8 @@ export class RestNpcModel {
     this.group = new THREE.Group();
     this.modelRoot = null;
     this.mixer = null;
+    /** `loadGlb()` 那一次落地的那个 promise —— 给晚到的消费者等（见 `loadGlb()` 的注）。 */
+    this.glbLoad = null;
     this.actions = {};
     this.currentAction = null;
     this.loaded = false;
@@ -104,7 +106,22 @@ export class RestNpcModel {
     this.fallbackMeshes.length = 0;
   }
 
-  async loadGlb() {
+  /**
+   * 把这一轮 GLB 落地的那条 promise **留在实例上**。
+   *
+   * 混放器 `this.mixer` 与 `this.actions` 里那批片段是**异步**才有的，而营火的挂接
+   * （`RestNpcAnimDirector.attachRestNpcs()`）排在同一帧的同步段里 —— 挂接那一刻去问
+   * "有没有混放器"，答案永远是"没有"。手势那一层以前就是因此一个片段也没并进来过，
+   * 而症状（只有程序化手臂）与"玩家没导素材"完全同形，没有任何一处会红。
+   * 晚到的消费者不该猜时刻，该等这一格。
+   */
+  loadGlb() {
+    const p = this._loadGlbOnce();
+    this.glbLoad = p;
+    return p;
+  }
+
+  async _loadGlbOnce() {
     for (const url of this.config.glb) {
       try {
         const gltf = await _loader.loadAsync(url);
