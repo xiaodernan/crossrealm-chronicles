@@ -37,7 +37,7 @@ import { DUNGEON_DEFS } from '../src/content/dungeons.js';
 import { DUNGEON_ENCOUNTERS } from '../src/content/dungeonEncounters.js';
 import { ROOM_TEMPLATES } from '../src/world/RoomTemplates.js';
 import { WINDING_ROUTES } from '../src/content/windingRoutes.js';
-import { ZONE_ORDER, zoneDescriptor, HUB_ZONE } from '../src/content/ZoneIdentity.js';
+import { ZONE_ORDER, ZONE_CENTERS, HUB_ZONE } from '../src/content/ZoneIdentity.js';
 import { SHADOW_QUALITY_SIZES, DEFAULT_SHADOW_QUALITY } from '../src/engine/shadowPolicy.js';
 
 const DOC = 'docs/MASTER_PLAN.md';
@@ -284,22 +284,25 @@ describe('③ 残差写成数，不写成形容词', () => {
     }
   });
 
-  it('B6 的缺口：七座区对五条射线 = 2 座，且那两座的中心逐字不在任何终点上', () => {
+  it('B6 的缺口归零：七座区各有一条射线，且终点逐字落在 ZONE_CENTERS 上', () => {
     const { 证据 } = 取行('B6');
     const 缺 = ZONE_ORDER.length - 射线.length;
     expect(数(证据, /缺口 \*\*(\d+)\*\* 座/, '缺口座数'), 'B6 那行的缺口数与"区数 − 射线数"不符').toBe(缺);
-    expect(缺, '缺口不再是 2 座 —— 这一片的账要重算').toBe(2);
-    const 终点 = 射线.map((r) => r.points[r.points.length - 1]);
-    const 无名 = ZONE_ORDER.filter((id) => {
-      const d = zoneDescriptor(id);
-      if (!d) return false;
-      return !终点.some(([x, z]) => x === d.center.x && z === d.center.z);
-    });
-    // 只有 gloom / radiant 在 content 侧有描述对象（七座区的坐标自 B150 起统一在 ZONE_CENTERS，
-    // 但 `zoneDescriptor` 仍只答这两座 + 枢纽 / 走廊 —— 这条腿量的是描述对象，不是坐标表）
-    expect(无名, '文档点名的两座与"中心不在任何射线上"的那两座不是一批').toEqual(['gloom', 'radiant']);
+    expect(缺, '射线数变了 —— 这一片的账要重算').toBe(0);
+    // 文档里那两个数也要跟着表走：路条数与射线条数
+    expect(数(证据, /路 \*\*(\d+)\*\* 条/, '路条数')).toBe(WINDING_ROUTES.length);
+    expect(数(证据, /射线 \*\*(\d+)\*\* 条/, '射线条数')).toBe(射线.length);
+    for (const zone of ZONE_ORDER) {
+      const r = 射线.find((x) => x.id === `to-${zone}`);
+      expect(r, `这一行说缺口归零了，可 ${zone} 没有射线`).toBeTruthy();
+      const 终点 = r.points[r.points.length - 1];
+      expect(终点, `${r.id} 的终点不是 ${zone} 的中心`).toEqual([
+        ZONE_CENTERS[zone].x, ZONE_CENTERS[zone].z,
+      ]);
+    }
+    // 历史钉子：这两座正是当年"缺席"的那两座，文档仍要说出它们名字
     for (const id of ['gloom', 'radiant']) {
-      expect(证据.includes(`${id} `) || 证据.includes(id), `B6 那行没点名缺口里的 "${id}"`).toBe(true);
+      expect(证据.includes(id), `B6 那行没点名曾经缺席的 "${id}"`).toBe(true);
     }
   });
 

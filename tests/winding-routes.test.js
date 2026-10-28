@@ -10,13 +10,16 @@
  * - 每条路 `points` 是 [x,z] 数对数组、`color` 是数字、`id` 唯一非空；
  * - **恰有一条 `hub-ring`**（WorldTerrain 给它路面宽 5、其余 7；WorldDecorations
  *   沿路撒装饰时 `continue` 跳过它）—— 缺一条或多条都会让特判落空；
- * - 5 条辐条路（to-*）共用枢纽原点 [0,55]（道路在枢纽交汇）；
+ * - 7 条辐条路（to-*）共用枢纽原点 [0,55]（道路在枢纽交汇），且逐座区一条：
+ *   `to-<zoneId>` 的末点逐字等于 `ZONE_CENTERS[zoneId]`（旧版只有 5 条，gloom /
+ *   radiant 没有编排过的路 —— B6 的另一半，切片33 补齐）。
  * - hub-ring 是**闭合环**（首尾点重合）且每点在以 [0,55] 为心、半径 22 的圆上。
  *
  * 两枚变异探针走真数据（grep 确认落盘、预言命中、原字节还原）。
  */
 import { describe, it, expect } from 'vitest';
 import { WINDING_ROUTES } from '../src/content/windingRoutes.js';
+import { ZONE_CENTERS, ZONE_ORDER, HUB_ZONE } from '../src/content/ZoneIdentity.js';
 
 const isNum = (n) => typeof n === 'number' && Number.isFinite(n);
 
@@ -47,12 +50,32 @@ describe('WINDING_ROUTES 结构', () => {
 });
 
 describe('WINDING_ROUTES 拓扑', () => {
-  it('5 条辐条路（to-*）共用枢纽原点 [0,55]', () => {
+  it('7 条辐条路（to-*）共用枢纽原点 [0,55]', () => {
     const spokes = WINDING_ROUTES.filter((r) => r.id.startsWith('to-'));
-    expect(spokes.length).toBe(5);
+    expect(spokes.length).toBe(ZONE_ORDER.length);
     for (const r of spokes) {
-      expect(r.points[0], `${r.id} 起点`).toEqual([0, 55]);
+      expect(r.points[0], `${r.id} 起点`).toEqual([HUB_ZONE.center.x, HUB_ZONE.center.z]);
     }
+  });
+
+  it('逐座区一条：每座 ZONE_ORDER 都有 to-<id>，且终点逐字等于它的中心', () => {
+    for (const zone of ZONE_ORDER) {
+      const route = WINDING_ROUTES.find((r) => r.id === `to-${zone}`);
+      expect(route, `没有通往 ${zone} 的辐条路`).toBeTruthy();
+      expect(route.zone, `${route.id} 的 zone 字段与 id 不一致`).toBe(zone);
+      const end = route.points[route.points.length - 1];
+      expect(end, `${route.id} 的终点不是 ${zone} 的中心`).toEqual([
+        ZONE_CENTERS[zone].x, ZONE_CENTERS[zone].z,
+      ]);
+    }
+  });
+
+  it('辐条的 id 不再说别处：没有 to-forest 这种"名字与终点对不上"的旧名', () => {
+    const ids = WINDING_ROUTES.map((r) => r.id);
+    expect(ids).not.toContain('to-forest');
+    // 反向控制：名单里的每一枚 to-* 去掉前缀都得是 ZONE_ORDER 的成员
+    const 陌生 = ids.filter((id) => id.startsWith('to-') && !ZONE_ORDER.includes(id.slice(3)));
+    expect(陌生, '这些辐射路指向的不是一座真实区域').toEqual([]);
   });
 
   it('hub-ring 是闭合环：首尾点重合', () => {
