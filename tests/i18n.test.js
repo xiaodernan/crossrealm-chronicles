@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { t, setLanguage, getLanguage, getAllKeys, assertI18nParity } from '../src/engine/i18n.js';
+import { 动态接线键集 } from './helpers/i18nDynamicKeys.js';
 
 describe('i18n 文案表（W-D2 切片1）', () => {
   beforeEach(() => {
@@ -294,7 +295,7 @@ describe('暂停/快速旅行/世界地图/说明书头/对话关闭（W-D2 切�
   });
 });
 
-describe('死键只减不增（W-D2 切片6 门槛 · W-E3 切片26 修的是"这道门恒绿"，B144）', () => {
+describe('死键只减不增（W-D2 切片6 门槛 · 切片26 修"这道门恒绿"B144 · 切片27 把运行期拼键单列）', () => {
   const walk = (dir) => readdirSync(dir).flatMap((name) => {
     const p = join(dir, name);
     return statSync(p).isDirectory() ? walk(p) : [p];
@@ -314,13 +315,26 @@ describe('死键只减不增（W-D2 切片6 门槛 · W-E3 切片26 修的是"�
   ];
   /** 一次读完再逐键问（改前"逐键 × 逐文件"重读 2411 × 268 次 ⇒ 单这条用例 86 秒，是全量套件最慢的一条） */
   const 读者文本 = FILES.map((f) => readFileSync(f, 'utf8'));
-  const 死集 = ZH_KEYS.filter((k) => !读者文本.some((s) => s.includes(k)));
+  /**
+   * 两件事分开：**字面量有没有整名出现** 与 **是不是真的没人读**。
+   *
+   * 切片26 只量了前者，于是 `t(\`settings_ssao_quality_${name}\`)` 这种**运行期拼出来的键名**
+   * 一律被判成死键 —— B142 / B143 / B144 三条片的「限度」都记了这同一句，记了三次没人修。
+   * 切片27 把它变成被检查的性质：谁拼键谁在 `拼键名册` 登记前缀与代入域，展开出来的每一枚
+   * 必须有定义（`tests/i18n-dynamic-key-coverage.test.js`）。这一处账本因此只减掉**登记过**的那些，
+   * 而不是往尺子里塞一个"看起来像前缀"的猜测。
+   */
+  const 字面零读者 = ZH_KEYS.filter((k) => !读者文本.some((s) => s.includes(k)));
+  const 动态 = 动态接线键集();
+  const 死集 = 字面零读者.filter((k) => !动态.has(k));
 
   /**
-   * 修门那一刻（2411 键）的真实读数 —— **待查清单，不是可删清单**。
+   * 修门那一刻（2411 键）的真实读数 —— **待查清单，不是可删清单**。共 44 枚。
    *
-   * "字面量看不见"只说到此：运行期拼出来的键名（`t('hud_' + 字段)`）在这把尺子下同样是死的。
-   * 所以名单里少一枚要问的是"它被接上了还是被删了"，多一枚则是有人建了格没接线。
+   * 名单里少一枚要问的是"它被接上了还是被删了"，多一枚则是有人建了格没接线。
+   * 运行期拼出来的那一族（`settings_ssao_quality_*` 四枚）**不在这里** —— 它们有读者，
+   * 只是键名从来没整局地写过；那张账在 `tests/helpers/i18nDynamicKeys.js` 的名册里，
+   * 由 `tests/i18n-dynamic-key-coverage.test.js` 逐枚核定义（切片27）。
    */
   const 死键名单 = [
     'autoplay_start',
@@ -361,10 +375,6 @@ describe('死键只减不增（W-D2 切片6 门槛 · W-E3 切片26 修的是"�
     'settings_audio',
     'settings_bloom',
     'settings_controls',
-    'settings_ssao_quality_high',
-    'settings_ssao_quality_low',
-    'settings_ssao_quality_medium',
-    'settings_ssao_quality_off',
     'toast_bag_full',
     'toast_gear_equip',
     'toast_gear_pickup',
@@ -378,9 +388,27 @@ describe('死键只减不增（W-D2 切片6 门槛 · W-E3 切片26 修的是"�
     expect(FILES.length, '读者名单塌了（扫描目录不对？）').toBeGreaterThan(120);
   });
 
-  it('计数只许降不许升（修门那一刻的真实读数 48，正好压在名义上限上）', () => {
-    expect(死集.length, `死键 ${死集.length} 超过上限（应 ≤ 48）`).toBeLessThanOrEqual(48);
+  it('计数只许降不许升（账本 44 枚，正好压在名义上限上）', () => {
+    expect(死集.length, `死键 ${死集.length} 超过上限（应 ≤ 44）`).toBeLessThanOrEqual(44);
     expect(死集.slice().sort()).toEqual(死键名单);
+  });
+
+  it('盲区那一族单列：登记过的运行期键不许混进待查账本，也不许漂走', () => {
+    // 名册说"这些键是运行期读的"⇒ 它们必须在表里、必须真的没有整名读者（否则该回字面量那一族记账）
+    expect([...动态].sort(), '名册登记的键集漂了（今天应当是 SSAO 四档）').toEqual([
+      'settings_ssao_quality_high',
+      'settings_ssao_quality_low',
+      'settings_ssao_quality_medium',
+      'settings_ssao_quality_off',
+    ]);
+    for (const 键 of 动态) {
+      expect(ZH_KEYS, `运行期拼出来的「${键}」不在中文表里 —— 面板那一档会显示 [MISSING: ${键}]`).toContain(键);
+      expect(字面零读者, `「${键}」已经有人整名写过了 —— 它不再是盲区，名册要减一行`).toContain(键);
+      expect(死集, `「${键}」又被当成孤儿了 —— 删掉它，SSAO 下拉那一档就没有字`).not.toContain(键);
+    }
+    // 尺子不许只看见登记的那一族：没登记的运行期拼键仍然会落进待查账本（这是限度，写进读数）
+    expect(字面零读者.length, '字面量零读者的总数不是 48 了 —— 那四枚运行期接线之外的账也变了，两处要一起判')
+      .toBe(48);
   });
 
   it('反向控制两头：在役的键不许进名单，凭空造一枚没接线的键必须进（防修完仍恒绿）', () => {
@@ -390,7 +418,7 @@ describe('死键只减不增（W-D2 切片6 门槛 · W-E3 切片26 修的是"�
     }
     const 假键 = 'b144_probe_根本没接线';
     expect(ZH_KEYS).not.toContain(假键);
-    const 带假键 = [...ZH_KEYS, 假键].filter((k) => !读者文本.some((s) => s.includes(k)));
+    const 带假键 = [...ZH_KEYS, 假键].filter((k) => !读者文本.some((s) => s.includes(k)) && !动态.has(k));
     expect(带假键.length, '加了一枚没人引用的键，计数却没动 —— 尺子是摆设').toBe(死集.length + 1);
   });
 });
