@@ -29,6 +29,15 @@ export const BOSS_LORE = {
   'five-dim-rift': { title: 'boss_lore_five_dim_rift_title', text: 'boss_lore_five_dim_rift_text' },
   'forest-shrine': { title: 'boss_lore_forest_shrine_title', text: 'boss_lore_forest_shrine_text' },
   'hub-catacombs': { title: 'boss_lore_hub_catacombs_title', text: 'boss_lore_hub_catacombs_text' },
+  // W-E3 切片28：后四座（幽暗 / 辉煌 / 时线 / 边境）建的时候只配了战斗里的四句台词
+  // （`bossDialogue.js` 的 intro/p2/p3/defeat），这两张开场表里一格都没写 ⇒ 玩家进那四座
+  // 副本看到的是兜底名「迷宫守钥者」和一句通用正文，而同一场战斗的第三句已经是特写。
+  // 兜底不是 bug（缺登记时它就该接着），**恒走兜底才是** —— 覆盖率由
+  // `tests/dungeon-narrative-coverage.test.js` 逐座钉住，缺一座当场点名。
+  'gloom-mist-crypt': { title: 'boss_lore_gloom_mist_crypt_title', text: 'boss_lore_gloom_mist_crypt_text' },
+  'radiant-dawn-hall': { title: 'boss_lore_radiant_dawn_hall_title', text: 'boss_lore_radiant_dawn_hall_text' },
+  'void-broken-casket': { title: 'boss_lore_void_broken_casket_title', text: 'boss_lore_void_broken_casket_text' },
+  'abyss-deep-maw': { title: 'boss_lore_abyss_deep_maw_title', text: 'boss_lore_abyss_deep_maw_text' },
 };
 
 
@@ -146,6 +155,12 @@ export const DUNGEON_ENTER_LINES = {
   'five-dim-rift': 'dungeon_enter_five_dim_rift',
   'forest-shrine': 'dungeon_enter_forest_shrine',
   'hub-catacombs': 'dungeon_enter_hub_catacombs',
+  // W-E3 切片28：后四座补上自己的那一句 —— 缺登记时 `DungeonManager` 走的是**空串**
+  // （进入对话框只剩那行迷宫统计），既不报错也不留痕，所以只能由覆盖率门禁说话。
+  'gloom-mist-crypt': 'dungeon_enter_gloom_mist_crypt',
+  'radiant-dawn-hall': 'dungeon_enter_radiant_dawn_hall',
+  'void-broken-casket': 'dungeon_enter_void_broken_casket',
+  'abyss-deep-maw': 'dungeon_enter_abyss_deep_maw',
 };
 
 

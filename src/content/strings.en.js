@@ -346,7 +346,7 @@ export const STRINGS_EN = Object.freeze({
 
   // 副本守钥者第三阶段（补两座）
   boss_dungeon_gloom_mist_crypt_p3: "The mist swallows the lamps — the warden's outline shifts behind the fog.",
-  boss_dungeon_radiant_dawn_hall_p3: "The hall's golden light turns white — the warden raises the Key of the Hub.",
+  boss_dungeon_radiant_dawn_hall_p3: "The hall's gold compresses into a single white line — this time its shadow stands taller than it does.",
 
   // 副本守钥者第三阶段（W-D2 / W-E3 切片5）
   boss_dungeon_ruin_crypt_p3: "The tomb warden calls up every dead soul — the gravestones begin to move.",
@@ -2424,6 +2424,14 @@ export const STRINGS_EN = Object.freeze({
   boss_lore_forest_shrine_text: 'The roots entwine more than stone — they entwine the memory of a previous era.',
   boss_lore_hub_catacombs_title: 'Hub Keywarden',
   boss_lore_hub_catacombs_text: 'At the deepest point of the catacombs, the keywarden waits for the one who can walk every maze.',
+  boss_lore_gloom_mist_crypt_title: 'Mist Keywarden',
+  boss_lore_gloom_mist_crypt_text: 'The lamp in the fog was not lit for you. The warden waits for you to take the fourth wrong turning; it need not move.',
+  boss_lore_radiant_dawn_hall_title: 'Dawn Keywarden',
+  boss_lore_radiant_dawn_hall_text: 'The vault divides the dawn into eight, and the same silhouette stands in every share of it. It holds the key and will not blink first.',
+  boss_lore_void_broken_casket_title: 'The Clock Inside',
+  boss_lore_void_broken_casket_text: 'The timeline snaps here. It guards no door — it guards the marks that have not finished running.',
+  boss_lore_abyss_deep_maw_title: 'Warden at the Jaw',
+  boss_lore_abyss_deep_maw_text: 'The lowest mouth of the rift can no longer close. It has swallowed much; it has not yet swallowed a plea.',
 
   // Chapter intros (W-D2 slice 16c)
   chapter_intro_2_title: 'Chapter 2 · Endless Planes',
@@ -2463,6 +2471,10 @@ After the Rift Lord falls, the old dungeons return with a random layout for the 
   dungeon_enter_five_dim_rift: 'Rift Maze: geometry is not trustworthy here.',
   dungeon_enter_forest_shrine: 'Shrine Maze: the roots breathe underfoot.',
   dungeon_enter_hub_catacombs: 'Hub Catacombs: the shortest maze, the deepest keywarden.',
+  dungeon_enter_gloom_mist_crypt: 'Mist Crypt: the fog has moved the walls half a step closer.',
+  dungeon_enter_radiant_dawn_hall: 'Dawn Hall: too much light for a shadow to hide in.',
+  dungeon_enter_void_broken_casket: 'Broken Casket: the clock inside still runs, and nobody winds it.',
+  dungeon_enter_abyss_deep_maw: 'Deep Maw: the ground under you is slowly swallowing itself.',
   dungeon_enter_stats: 'Maze ${w}×${h} · ${rooms} rooms · ${doors} doors.\nClear a room\'s enemies and its door opens; glowing stelae [{interact}] read the lore; the roundest room holds the keywarden.',
   keywarden_cleared_title: 'The Keywarden Has Fallen',
   keywarden_cleared_text: 'The exit ring lights up. You hear a sigh from deep in the hub — as if some plane finally exhaled.\n\n[{interact}] Leave the maze and continue the main line.',

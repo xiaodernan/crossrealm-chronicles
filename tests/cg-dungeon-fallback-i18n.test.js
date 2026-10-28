@@ -6,8 +6,12 @@
  * ① `CgGalleryAchievements` 的两句全收集奖励 toast（`CG 收集过半 · +10 魂火` /
  * `CG 全收集！· +30 魂火`）是裸中文字面量 —— 英文玩家拿到全收集奖励时看到中文。
  * ② `DungeonManager._spawnRoomEnemies` 的 Boss 开场对话框兜底（`迷宫守钥者` /
- * `击败守钥者以打开出口。`）同样是裸中文 —— 九座副本里四座的 id 不在 `BOSS_LORE`
+ * `击败守钥者以打开出口。`）同样是裸中文 —— 当时九座副本里四座的 id 不在 `BOSS_LORE`
  * 里，走的就是这条兜底，英文玩家进那四座副本看到的是中文开场白。
+ *
+ * > **W-E3 切片28 之后的现状**：那四座补上了自己的开场白与进入语，真实副本一座都不走兜底了；
+ * > 覆盖率与进场行为的两条腿搬进 `tests/dungeon-narrative-coverage.test.js`。
+ * > 本文件的主题不变 —— 兜底那两句进了双表，键值、在场、不孤儿由这里钉。
  *
  * ## 机制
  *
@@ -18,23 +22,18 @@
  *
  * ## 用例分六层
  * ① 钉文案腿：3 个新键 + 1 枚复用键的中英原值逐字钉死；
- * ② 键登记腿：3 键两表都在场，键数 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411（W-E3 切片25：副本行入口抄本除名，带走 7 枚孤儿 wp_label_* 键），不孤儿、复用不新开、同文案最多两键；
+ * ② 键登记腿：3 键两表都在场，键数 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411（W-E3 切片25：副本行入口抄本除名，带走 7 枚孤儿 wp_label_* 键）→ 2423，不孤儿、复用不新开、同文案最多两键；
  * ③ 静态腿：CgGalleryAchievements.js 与 DungeonManager.js 的中文字面量清零；
- * ④ 行为腿（zh）：真跑 cg-unlocked 全收集两档 + 九座副本逐一进场抓 dialog.show；
- * ⑤ 行为腿（en）：同两条链路英文播出，不夹 [MISSING:] 与键名；
+ * ④ 行为腿（zh）：真跑 cg-unlocked 过半/全收两档的 toast 与魂火到账；
+ * ⑤ 行为腿（en）：同一条链路英文播出，不夹 [MISSING:] 与键名；
  * ⑥ 反面证据：尺子自证 + 插值双腿 + 无参时模板原样返回。
  */
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import * as THREE from 'three';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { CgGalleryAchievements } from '../src/game/CgGalleryAchievements.js';
-import { DungeonManager } from '../src/world/DungeonManager.js';
-import { DUNGEON_DEFS } from '../src/content/dungeons.js';
-import { BOSS_LORE } from '../src/game/LoreFragments.js';
 import { emit } from '../src/engine/EventBus.js';
-import { makeManager, makeScene, installWindowShim } from './helpers/enemyHarness.js';
-import { keyText } from '../src/ui/keyHints.js';
+import { installWindowShim } from './helpers/enemyHarness.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { setLanguage, t } from '../src/engine/i18n.js';
@@ -114,30 +113,11 @@ function makeAchHost(percent) {
   return host;
 }
 
-/**
- * 九座副本逐一进场，把每座 **Boss 开场对话框**的 (标题, 正文) 收回来。
- *
- * 每座副本会弹两次 dialog：先进副本名（enter 的那句），再是守钥者开场 —— 
- *  Boss 开场永远在后（出生发生在进场之后），取每座的最后一条。
- */
-function collectBossDialogs() {
-  const perDungeon = [];
-  const dm = new DungeonManager(makeScene(), { getGroundHeight: () => 0 },
-    { show(title, text) { perDungeon[perDungeon.length - 1].push({ title, text }); }, toast() {} },
-    makeManager(), null);
-  const player = { position: new THREE.Vector3(), teleport(x, y, z) { this.position.set(x, y, z); } };
-  for (const def of DUNGEON_DEFS) {
-    perDungeon.push([]);
-    const dungeon = dm.dungeons.get(def.id);
-    dm.enter(dungeon, player);
-    const arena = dungeon.layout.rooms.find((r) => r.isBossArena);
-    player.teleport(def.origin.x + arena.x, 0, def.origin.z + arena.z);
-    dm.updatePlayerRoom(player.position);
-    dm.abandonRun();
-  }
-  dm.dispose?.();
-  return perDungeon.map((list) => list[list.length - 1]);
-}
+/* 逐座进场收 Boss 开场对话框的那个 helper 随 W-E3 切片28 搬走了：
+ * 这一片当年钉的是"四座走兜底也要播出展开句"，而兜底今天一座真实副本都不走 ——
+ * 进场行为与覆盖率两条腿都在 `tests/dungeon-narrative-coverage.test.js`（①④），
+ * 两处各跑一遍 DungeonManager 就是第二份口径。本文件留下的是它自己的主题：
+ * 那三枚键 + 一枚复用键的**值**、在场、不孤儿、同文不新开。 */
 /* ------------------------------------------------------------------ *
  * ① 钉文案腿
  * ------------------------------------------------------------------ */
@@ -169,7 +149,7 @@ describe('① 钉文案腿：3 个新键 + 1 枚复用键的中英原值逐字�
  * ② 键登记腿
  * ------------------------------------------------------------------ */
 
-describe('② 键登记：3 个新键两表都在场，键数 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411，两表逐键对齐', () => {
+describe('② 键登记：3 个新键两表都在场，键数 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411 → 2423，两表逐键对齐', () => {
   it('3 个新键中英两表一个不缺', () => {
     const zh = new Set(ZH_KEYS);
     const en = new Set(EN_KEYS);
@@ -179,9 +159,9 @@ describe('② 键登记：3 个新键两表都在场，键数 2353 → 2356 → 
     }
   });
 
-  it('键数 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411，两表逐键对齐', () => {
+  it('键数 2353 → 2356 → 2371 → 2388 → 2399 → 2404 → 2406 → 2409 → 2411 → 2414 → 2416 → 2418 → 2411 → 2423，两表逐键对齐', () => {
     expect(ZH_KEYS.length).toBe(EN_KEYS.length);
-    expect(ZH_KEYS.length, '键数不是 2411 —— 双表被别处改过').toBe(2411);
+    expect(ZH_KEYS.length, '键数不是 2423 —— 双表被别处改过').toBe(2423);
   });
 
   it('新键不孤儿：cg_achieve_* 在 CgGalleryAchievements.js、dungeon_boss_fallback_text 在 DungeonManager.js', () => {
@@ -250,25 +230,6 @@ describe('④ 行为腿（zh）：成就 toast 与守钥者兜底对话框都是
     expect(host.toasts).toEqual(['CG 收集过半 · +10 魂火', 'CG 全收集！· +30 魂火']);
     ach.dispose();
   });
-
-  it('九座副本逐一进场：五座走 BOSS_LORE 键化路径，四座走守钥者兜底', () => {
-    const dialogs = collectBossDialogs();
-    expect(dialogs.length, '九座副本应有九场 Boss 开场').toBe(DUNGEON_DEFS.length);
-    const 有Lore的 = DUNGEON_DEFS.filter((d) => BOSS_LORE[d.id]);
-    const 没Lore的 = DUNGEON_DEFS.filter((d) => !BOSS_LORE[d.id]);
-    expect(有Lore的.length, 'BOSS_LORE 覆盖的副本数变了').toBe(5);
-    expect(没Lore的.length, '走兜底的副本数变了').toBe(4);
-    DUNGEON_DEFS.forEach((def, i) => {
-      const lore = BOSS_LORE[def.id];
-      if (lore) {
-        expect(dialogs[i].title, `${def.id} 应走 BOSS_LORE 标题键`).toBe(keyText(t(lore.title)));
-        expect(dialogs[i].text, `${def.id} 应走 BOSS_LORE 正文键`).toBe(keyText(t(lore.text)));
-      } else {
-        expect(dialogs[i].title, `${def.id} 应走守钥者兜底名`).toBe('迷宫守钥者');
-        expect(dialogs[i].text, `${def.id} 应走守钥者兜底正文`).toBe('击败守钥者以打开出口。');
-      }
-    });
-  });
 });
 
 /* ------------------------------------------------------------------ *
@@ -283,25 +244,6 @@ describe('⑤ 行为腿（en）：同两条链路英文播出，不夹 [MISSING:
     emit('cg-unlocked');
     expect(host.toasts).toEqual(['CG collection halfway · +10 soulfire', 'CG gallery complete! · +30 soulfire']);
     ach.dispose();
-  });
-
-  it('守钥者兜底对话框全英文（有 Lore 的五座也一起换语言）', () => {
-    setLanguage('en');
-    const dialogs = collectBossDialogs();
-    DUNGEON_DEFS.forEach((def, i) => {
-      const lore = BOSS_LORE[def.id];
-      if (lore) {
-        expect(dialogs[i].title, `${def.id} 英文应走 BOSS_LORE 标题键`).toBe(keyText(t(lore.title)));
-        expect(dialogs[i].text, `${def.id} 英文应走 BOSS_LORE 正文键`).toBe(keyText(t(lore.text)));
-      } else {
-        expect(dialogs[i].title, `${def.id} 英文兜底名`).toBe('Maze Keywarden');
-        expect(dialogs[i].text, `${def.id} 英文兜底正文`).toBe('Defeat the keykeeper to open the exit.');
-      }
-      for (const v of [dialogs[i].title, dialogs[i].text]) {
-        expect(v).not.toContain('[MISSING:');
-        expect(v).not.toMatch(/[\u4e00-\u9fff]/);
-      }
-    });
   });
 });
 

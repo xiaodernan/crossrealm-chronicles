@@ -346,7 +346,7 @@ export const STRINGS_ZH = Object.freeze({
 
   // 副本守钥者第三阶段（补两座）
   boss_dungeon_gloom_mist_crypt_p3: "迷雾吞没了灯火 — 守钥者的轮廓在雾里换了几次。",
-  boss_dungeon_radiant_dawn_hall_p3: "圣殿的金光骤然变白 — 守钥者举起枢纽之钥。",
+  boss_dungeon_radiant_dawn_hall_p3: "圣殿的光压成一道白线 — 这一次它的影子站得比它高。",
 
   // 副本守钥者第三阶段（W-D2 / W-E3 切片5）
   boss_dungeon_ruin_crypt_p3: "守墓者唤起全部亡魂 — 墓碑开始移动。",
@@ -2419,6 +2419,17 @@ export const STRINGS_ZH = Object.freeze({
   boss_lore_forest_shrine_text: '根须缠绕的不仅是石头，还有上一个纪元的记忆。',
   boss_lore_hub_catacombs_title: '枢纽守钥者',
   boss_lore_hub_catacombs_text: '墓穴最深处，守钥者等待能走完全部迷宫的人。',
+  // 后四座副本的守钥者（W-E3 切片28）—— 这四枚 id 原先不在 `BOSS_LORE` 里，
+  // 玩家进那四座看到的是通用兜底名「迷宫守钥者」+ 一句"击败守钥者以打开出口"，
+  // 而同一条战斗里 `_intro/_p2/_p3/_defeat` 四句早就逐座写过了。
+  boss_lore_gloom_mist_crypt_title: '迷雾守钥者',
+  boss_lore_gloom_mist_crypt_text: '雾里那盏灯不是你点亮的。守钥者等你走错第四个岔口，它自己不用动。',
+  boss_lore_radiant_dawn_hall_title: '晨曦守钥者',
+  boss_lore_radiant_dawn_hall_text: '穹顶把晨光分成八份，每一份里都站着同一个影子。它举着钥匙，不肯先眨眼。',
+  boss_lore_void_broken_casket_title: '匣中之钟',
+  boss_lore_void_broken_casket_text: '时线在这里断了一截。它不守门，它守那段还没走完的刻度。',
+  boss_lore_abyss_deep_maw_title: '颚底守钥者',
+  boss_lore_abyss_deep_maw_text: '边境裂口最下面那张嘴合不上了。它咽过很多东西，还没咽下一句求饶。',
 
   // 章节导语（W-D2 切片16c）
   chapter_intro_2_title: 'Chapter 2 · 无尽位面',
@@ -2458,6 +2469,10 @@ export const STRINGS_ZH = Object.freeze({
   dungeon_enter_five_dim_rift: '裂隙迷宫：几何在这里不可信。',
   dungeon_enter_forest_shrine: '神龛迷宫：根须在脚下呼吸。',
   dungeon_enter_hub_catacombs: '枢纽墓穴：最短的迷宫，最深的守钥者。',
+  dungeon_enter_gloom_mist_crypt: '迷雾墓穴：雾把墙挪近了半步。',
+  dungeon_enter_radiant_dawn_hall: '晨曦圣殿：光太满，影子藏不住。',
+  dungeon_enter_void_broken_casket: '断时之匣：里面的钟还在走，没人给它上弦。',
+  dungeon_enter_abyss_deep_maw: '深渊之颚：脚下的地正慢慢往下咽。',
   dungeon_enter_stats: '迷宫 ${w}×${h} · ${rooms} 个房间 · ${doors} 扇门。\n清剿房间敌人后门会打开；发光石碑 [{interact}] 读叙事；最远圆房有守钥者。',
   keywarden_cleared_title: '守钥者已倒',
   keywarden_cleared_text: '出口环亮起。你听见枢纽深处传来一声叹息——像是某个位面终于松了一口气。\n\n[{interact}] 离开迷宫，继续主线。',
