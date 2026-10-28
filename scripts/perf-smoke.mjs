@@ -22,6 +22,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings } from './perf-budgets.mjs';
 import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
+import { WORLD_SEED, worldSeedSource } from './world-seed.mjs';
 
 /**
  * 预算表在 `./perf-budgets.mjs` —— **判据与执行分家**（W-D4 切片3 修）。
@@ -283,6 +284,12 @@ try {
 
   await send('Runtime.enable');
   await send('Page.enable');
+  /**
+   * 世界种子先于任何页面模块注入（W-C2 尾巴 / B125 同源）：否则每次重载都换一份
+   * 碎石与障碍的散布，draw call 上限表里那块"跨世界噪声"永远收不掉。见 `./world-seed.mjs`。
+   */
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: worldSeedSource(WORLD_SEED) });
+  console.log(`perf-smoke：世界种子 ${WORLD_SEED}（这一轮的散布可复现）`);
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
   let ready = false;
