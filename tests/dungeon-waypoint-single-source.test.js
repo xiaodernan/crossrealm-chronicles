@@ -196,15 +196,15 @@ describe('③ 孤儿键随抄本一起除名', () => {
     expect(文本.filter((s) => s.includes('wp_label_anchor')).length, '扫描范围空转').toBeGreaterThan(2);
   });
 
-  it('两表腿：7 枚键两张表都不在场，且两表逐键对齐、都是 2423', () => {
+  it('两表腿：7 枚键两张表都不在场，且两表逐键对齐、都是 2433', () => {
     const 中键 = Object.keys(STRINGS_ZH);
     const 英键 = Object.keys(STRINGS_EN);
     for (const 键 of 除名的键) {
       expect(键 in STRINGS_ZH, `中文表里还留着 "${键}"（孤儿键没删干净）`).toBe(false);
       expect(键 in STRINGS_EN, `英文表里还留着 "${键}"（只删了一张表）`).toBe(false);
     }
-    expect(中键.length, '键数不是 2423 —— 双表被别处改过').toBe(2423);
-    expect(英键.length, '键数不是 2423 —— 双表被别处改过').toBe(2423);
+    expect(中键.length, '键数不是 2433 —— 双表被别处改过').toBe(2433);
+    expect(英键.length, '键数不是 2433 —— 双表被别处改过').toBe(2433);
     expect(中键.filter((k) => !英键.includes(k)), '只在中文表里的键').toEqual([]);
     expect(英键.filter((k) => !中键.includes(k)), '只在英文表里的键').toEqual([]);
   });

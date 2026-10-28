@@ -98,6 +98,13 @@ export const DUNGEON_BOSS_LINES = {
     p3: 'boss_dungeon_abyss_deep_maw_p3',
     defeat: 'boss_dungeon_abyss_deep_maw_defeat',
   },
+  // 幽暗位面第二座：无灯祷堂（W-E3 切片29）—— 守夜人不举钥匙，它吹灯
+  'sunless-oratory': {
+    intro: 'boss_dungeon_sunless_oratory_intro',
+    p2: 'boss_dungeon_sunless_oratory_p2',
+    p3: 'boss_dungeon_sunless_oratory_p3',
+    defeat: 'boss_dungeon_sunless_oratory_defeat',
+  },
 };
 
 /**

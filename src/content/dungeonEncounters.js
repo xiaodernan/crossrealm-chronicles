@@ -126,6 +126,16 @@ export const DUNGEON_ENCOUNTERS = {
     ],
     group: { min: 2, max: 3 },
   },
+  // 无灯祷堂（6×6，可选，W-E3 切片29）：主类是 `gloom_warden` —— 幽暗那一族里唯一"站着不动也守"的那一位，
+  // 配上 `juggernaut` 当那排倒不下的灯架（`gloom-mist-crypt` 用的是全四类，这座偏守，那座偏猎）
+  'sunless-oratory': {
+    pool: [
+      { type: 'gloom_warden', weight: 6 },
+      { type: 'juggernaut', weight: 3 },
+      { type: 'gloom_stalker', weight: 2 },
+    ],
+    group: { min: 2, max: 3 },
+  },
 };
 
 /** 已经登记遭遇的副本（注册表与用例都问这一份；它是推导，不是第二份名单） */

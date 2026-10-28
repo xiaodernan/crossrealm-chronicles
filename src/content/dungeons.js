@@ -205,6 +205,23 @@ export const DUNGEON_DEFS = [
     entrance: { x: -140, z: 175 },
     exterior: { x: -140, z: 175, label: 'dungeon_abyss_deep_maw_exterior_label' },
   },
+  {
+    // 幽暗位面的第二座（W-E3 切片29：名册上的第十座）。档位 6 是成长曲线的顶（`GROWTH_MAX_STAGE`），
+    // 所以这一座是"打完主线还想再往下钻"的那一座 —— 它**不在主线里**，主线认领与存档迁移 v18 → v19 是下一片。
+    id: 'sunless-oratory',
+    zone: 'gloom',
+    name: 'dungeon_sunless_oratory_name',
+    trial: false,
+    stage: 6,
+    mapLabel: 'dungeon_sunless_oratory_map_label',
+    theme: 0x10181f,
+    accent: 0xb8a0d8,
+    gridW: 6,
+    gridH: 6,
+    origin: { x: 5000, y: 120, z: 18500 },
+    entrance: { x: 76, z: 132 },
+    exterior: { x: 76, z: 132, label: 'dungeon_sunless_oratory_exterior_label' },
+  },
 ];
 
 /** 副本 id 的名册（注册表的 `keyRef` 与各处 `ref` 都问这一份；由表推导，不是第二份手抄清单） */

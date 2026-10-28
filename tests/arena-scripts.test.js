@@ -118,6 +118,8 @@ describe('脚本表自证', () => {
       // W-B10 切片7：破碎时线 / 混沌边境那两座副本守钥者也各有一枚入场招
       'dungeon-void-broken-casket[0]:slam@p2',
       'dungeon-abyss-deep-maw[0]:barrage@p2',
+      // W-E3 切片29：第十座（无灯祷堂）—— 入场招是横扫，不给它 default 那张脸
+      'dungeon-sunless-oratory[0]:slam@p2',
     ]);
     // 井刻意不列入场：标了它，转阶段那一帧会无条件破掉引力化身的距离博弈
     expect(marks.some((m) => m.includes(':well@'))).toBe(false);

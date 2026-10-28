@@ -329,8 +329,9 @@ describe('⑤ 世界地图真渲染：点位与文字都来自副本表', () => 
     }
     const 新增 = DUNGEON_DEFS.filter((d) => !旧面板表.some((r) => r.id === d.id));
     // 抄本里没有的那些：W-B9 加过两座（gloom-mist-crypt / radiant-dawn-hall），
-    // W-B10 切片7 又加了两座（破碎时线 / 混沌边境 —— 那两位面原先一座副本都没有）。
-    expect(新增.map((d) => d.id)).toEqual(['gloom-mist-crypt', 'radiant-dawn-hall', 'void-broken-casket', 'abyss-deep-maw']);
+    // W-B10 切片7 又加了两座（破碎时线 / 混沌边境 —— 那两位面原先一座副本都没有），
+    // W-E3 切片29 是第十座（无灯祷堂 —— 幽暗位面的第二座）。
+    expect(新增.map((d) => d.id)).toEqual(['gloom-mist-crypt', 'radiant-dawn-hall', 'void-broken-casket', 'abyss-deep-maw', 'sunless-oratory']);
     expect(标签.length - 旧面板表.length, '抄本那五行之外并没有多出那几座：新增的座还是没点上').toBe(新增.length);
     for (const d of 新增) {
       expect(标签.map((l) => l.t), `名册里的 "${d.id}" 在地图上仍然没有标签`).toContain(t(d.mapLabel));

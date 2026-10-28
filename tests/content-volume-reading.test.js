@@ -42,7 +42,7 @@ describe('① 读数里的数 = 内容表的实数', () => {
     const 实数 = {
       '主线 62 步': MAINLINE.length === 62,
       '分区专属支线 38': 分区支线 === 38,
-      '副本 9': DUNGEON_DEFS.length === 9,
+      '副本 10': DUNGEON_DEFS.length === 10,
       '回声 49': ECHOES.length === 49,
     };
     for (const [片段, 对] of Object.entries(实数)) {

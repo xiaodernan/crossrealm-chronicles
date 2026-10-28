@@ -162,6 +162,12 @@ export const BOSS_ARENA_SCRIPTS = {
     { move: 'barrage', phase: 2, trigger: 'opportunity', cooldown: 7, range: 17, tint: 0xd05a7a, entry: true },
     { move: 'well', phase: 3, trigger: 'opportunity', cooldown: 12, range: 14 },
   ],
+  'dungeon-sunless-oratory': [
+    // 无灯祷堂（W-E3 切片29）：一整排没人点的灯 —— 招牌是**横扫**（守夜人的手臂扫过每一座灯架），
+    // 入场那一招就用它；第三阶段补一发弹幕，压住中殿那条长轴线
+    { move: 'slam', phase: 2, trigger: 'melee', chance: 0.45, tint: 0xb8a0d8, entry: true },
+    { move: 'barrage', phase: 3, trigger: 'opportunity', cooldown: 10, range: 15, tint: 0xb8a0d8 },
+  ],
 };
 
 /**

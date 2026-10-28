@@ -38,6 +38,9 @@ export const BOSS_LORE = {
   'radiant-dawn-hall': { title: 'boss_lore_radiant_dawn_hall_title', text: 'boss_lore_radiant_dawn_hall_text' },
   'void-broken-casket': { title: 'boss_lore_void_broken_casket_title', text: 'boss_lore_void_broken_casket_text' },
   'abyss-deep-maw': { title: 'boss_lore_abyss_deep_maw_title', text: 'boss_lore_abyss_deep_maw_text' },
+  // W-E3 切片29：第十座（幽暗位面的第二座）建的时候就按这张表登记 —— 上一片立的覆盖率门
+  // 会在少写这一行时当场点名，所以"建了座忘了写文案"这个形状这一片起不再是静默的。
+  'sunless-oratory': { title: 'boss_lore_sunless_oratory_title', text: 'boss_lore_sunless_oratory_text' },
 };
 
 
@@ -161,6 +164,7 @@ export const DUNGEON_ENTER_LINES = {
   'radiant-dawn-hall': 'dungeon_enter_radiant_dawn_hall',
   'void-broken-casket': 'dungeon_enter_void_broken_casket',
   'abyss-deep-maw': 'dungeon_enter_abyss_deep_maw',
+  'sunless-oratory': 'dungeon_enter_sunless_oratory',
 };
 
 

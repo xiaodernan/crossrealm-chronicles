@@ -3,7 +3,7 @@
  *
  * ## 这一片查的是哪件事
  *
- * `content/dungeons.js` 的名册长到九座，而 `game/LoreFragments.js` 的 `BOSS_LORE` 与
+ * `content/dungeons.js` 的名册长到九座（切片29 又添成十座），而 `game/LoreFragments.js` 的 `BOSS_LORE` 与
  * `DUNGEON_ENTER_LINES` 停在五座。剩下四座（幽暗迷雾墓穴 / 晨曦圣殿 / 断时之匣 / 深渊之颚）
  * 走进 `DungeonManager` 的两条兜底：
  * - Boss 开场 ⇒ 通用名「迷宫守钥者」+ 通用正文「击败守钥者以打开出口。」；
@@ -15,6 +15,10 @@
  * `Object.entries(BOSS_LORE)` —— **登记了什么**，不是**该登记的有没有登记**；
  * `tests/cg-dungeon-fallback-i18n.test.js` ④ 甚至把"四座走兜底"当成了读数钉住。
  * 缺的是从名册出发的那一方向。
+ *
+ * 切片29 添第十座时补了**门面三键**那一条腿（②）：探索臂把英表的
+ * `dungeon_sunless_oratory_map_label` 改成空串，原有几条一条都不响 —— 开场两键与进入语
+ * 都钉了"双表非空"，面板名 / 地图标签 / 门口牌子却没钉。症状是地图上点照立、牌子一片空白。
  *
  * ## 三条判据的形状
  *
@@ -60,7 +64,7 @@ const 展开 = (键, 表) => {
 const 缺登记的 = (表) => DUNGEON_IDS.filter((id) => !表[id]);
 
 describe('① 覆盖率双向对齐：名册每一座都要有自己的那两句', () => {
-  it('九座逐座点名：`BOSS_LORE` 与 `DUNGEON_ENTER_LINES` 都不许缺行', () => {
+  it('十座逐座点名：`BOSS_LORE` 与 `DUNGEON_ENTER_LINES` 都不许缺行', () => {
     expect(缺登记的(BOSS_LORE), `这些副本没有自己的守钥者开场白：${缺登记的(BOSS_LORE).join(' / ')}`).toEqual([]);
     expect(缺登记的(DUNGEON_ENTER_LINES), `这些副本没有自己的进入语：${缺登记的(DUNGEON_ENTER_LINES).join(' / ')}`).toEqual([]);
   });
@@ -113,7 +117,34 @@ describe('② 双表都有定义，中英各自播出干净', () => {
     expect(坏.join(' / '), `这些叙事键缺定义或是空句：${坏.join('、')}`).toBe('');
   });
 
-  it('切到英文播出：九座都不夹 [MISSING:]，也不夹一个汉字', () => {
+  /**
+   * 门面三键（面板名 / 地图标签 / 门口牌子）—— 切片29 的探索臂量出来的洞：
+   * 把英表里 `dungeon_sunless_oratory_map_label` 改成空串，上面那两条腿一条都不响，
+   * 因为①②只覆盖开场两键与进入语。后果是地图上点还立着、牌子上一片空白。
+   */
+  it('门面三键双表非空，而且逐座互不相同（名 / 地图标签 / 门口牌子各比各的）', () => {
+    const 枚 = (d) => ({ name: d.name, mapLabel: d.mapLabel, exterior: d.exterior.label });
+    const 坏 = [];
+    for (const d of DUNGEON_DEFS) {
+      for (const [字段, 键] of Object.entries(枚(d))) {
+        for (const [语言, 表] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
+          const { 值 } = 展开(键, 表);
+          if (值 === null || 值.trim() === '') 坏.push(`${语言} ${d.id}.${字段} = ${键}`);
+        }
+      }
+    }
+    expect(坏.join(' / '), `这些门面键缺定义或是空句：${坏.join('、')}`).toBe('');
+    // 逐座互不相同：同一块牌子挂两座，玩家在地图上要靠近了才分得出（比的是**文案**，键名由注册表比）
+    for (const [语言, 表] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
+      for (const 字段 of ['name', 'mapLabel', 'exterior']) {
+        const 值 = DUNGEON_DEFS.map((d) => 表[枚(d)[字段]] ?? `[缺 ${枚(d)[字段]}]`);
+        const 重 = [...new Set(值.filter((v, i) => 值.indexOf(v) !== i))];
+        expect(重.join(' / '), `${语言}的${字段}有两座共用同一块牌子：${重.join('、')}`).toBe('');
+      }
+    }
+  });
+
+  it('切到英文播出：十座都不夹 [MISSING:]，也不夹一个汉字', () => {
     setLanguage('en');
     const 坏 = [];
     for (const id of DUNGEON_IDS) {
@@ -165,7 +196,7 @@ function 找复读(四句) {
 }
 
 describe('③ 阶段台词不复述开场句（晨曦圣殿那枚是真凭据）', () => {
-  it('九座逐座量：`intro` 的每一段都不许在 `p2/p3/defeat` 里原样出现', () => {
+  it('十座逐座量：`intro` 的每一段都不许在 `p2/p3/defeat` 里原样出现', () => {
     const 坏 = [];
     for (const id of DUNGEON_IDS) {
       const 行 = DUNGEON_BOSS_LINES[id];

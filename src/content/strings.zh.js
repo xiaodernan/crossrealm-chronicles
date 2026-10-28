@@ -409,6 +409,10 @@ export const STRINGS_ZH = Object.freeze({
   dungeon_abyss_deep_maw_name: '深渊之颚',
   dungeon_abyss_deep_maw_map_label: '深渊之颚',
   dungeon_abyss_deep_maw_exterior_label: '深渊之颚入口',
+  // 无灯祷堂（W-E3 切片29：幽暗位面的第二座，也是名册上的第十座）
+  dungeon_sunless_oratory_name: '无灯祷堂',
+  dungeon_sunless_oratory_map_label: '无灯祷堂',
+  dungeon_sunless_oratory_exterior_label: '无灯祷堂入口',
   difficulty_story_label: "叙事",
   difficulty_story_desc: "敌人更脆、你挨得更轻、魂更多 —— 想先把故事走完的选这档",
   difficulty_standard_label: "标准",
@@ -481,6 +485,10 @@ export const STRINGS_ZH = Object.freeze({
   boss_dungeon_abyss_deep_maw_p2: '颚合了一半 — 守钥者的牙在磨。',
   boss_dungeon_abyss_deep_maw_p3: '整条边境在往里塌 — 守钥者咽下了最后一口气。',
   boss_dungeon_abyss_deep_maw_defeat: '地底安静了。颚骨卡在岩层里，没合上。',
+  boss_dungeon_sunless_oratory_intro: '长椅空着 — 守夜人从最后一排走过来。',
+  boss_dungeon_sunless_oratory_p2: '灯架倒了一半 — 它把灭掉的烛芯挨个吹亮。',
+  boss_dungeon_sunless_oratory_p3: '中殿穹顶裂开一道缝，光进不来 — 守夜人站到了缝底下。',
+  boss_dungeon_sunless_oratory_defeat: '守夜人跪回最后一排。灯还是没点，但祷堂安静了。',
   boss_phase_fallback_banner: '阶段 ${phase}',
   boss_phase_fallback_toast: 'Boss 第 ${phase} 阶段！',
 
@@ -2430,6 +2438,8 @@ export const STRINGS_ZH = Object.freeze({
   boss_lore_void_broken_casket_text: '时线在这里断了一截。它不守门，它守那段还没走完的刻度。',
   boss_lore_abyss_deep_maw_title: '颚底守钥者',
   boss_lore_abyss_deep_maw_text: '边境裂口最下面那张嘴合不上了。它咽过很多东西，还没咽下一句求饶。',
+  boss_lore_sunless_oratory_title: '无灯守夜人',
+  boss_lore_sunless_oratory_text: '它不守门，它守一整排没人点亮的灯。你手里那一点火，是它今晚唯一看见的东西。',
 
   // 章节导语（W-D2 切片16c）
   chapter_intro_2_title: 'Chapter 2 · 无尽位面',
@@ -2473,6 +2483,7 @@ export const STRINGS_ZH = Object.freeze({
   dungeon_enter_radiant_dawn_hall: '晨曦圣殿：光太满，影子藏不住。',
   dungeon_enter_void_broken_casket: '断时之匣：里面的钟还在走，没人给它上弦。',
   dungeon_enter_abyss_deep_maw: '深渊之颚：脚下的地正慢慢往下咽。',
+  dungeon_enter_sunless_oratory: '无灯祷堂：这里没有一盏灯是灭的 —— 因为它们从来没被点过。',
   dungeon_enter_stats: '迷宫 ${w}×${h} · ${rooms} 个房间 · ${doors} 扇门。\n清剿房间敌人后门会打开；发光石碑 [{interact}] 读叙事；最远圆房有守钥者。',
   keywarden_cleared_title: '守钥者已倒',
   keywarden_cleared_text: '出口环亮起。你听见枢纽深处传来一声叹息——像是某个位面终于松了一口气。\n\n[{interact}] 离开迷宫，继续主线。',

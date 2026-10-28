@@ -409,6 +409,10 @@ export const STRINGS_EN = Object.freeze({
   dungeon_abyss_deep_maw_name: 'Deep Maw',
   dungeon_abyss_deep_maw_map_label: 'Deep Maw',
   dungeon_abyss_deep_maw_exterior_label: 'Deep Maw Entrance',
+  // 无灯祷堂（W-E3 切片29：幽暗位面的第二座，也是名册上的第十座）
+  dungeon_sunless_oratory_name: 'Sunless Oratory',
+  dungeon_sunless_oratory_map_label: 'Sunless Oratory',
+  dungeon_sunless_oratory_exterior_label: 'Sunless Oratory Entrance',
   difficulty_story_label: "Story",
   difficulty_story_desc: "Enemies are frailer, you take less damage and soulfire flows faster — pick this if you want to finish the story first",
   difficulty_standard_label: "Standard",
@@ -481,6 +485,10 @@ export const STRINGS_EN = Object.freeze({
   boss_dungeon_abyss_deep_maw_p2: "The maw closes halfway — the warden's teeth grind.",
   boss_dungeon_abyss_deep_maw_p3: 'The whole border caves inward — the warden swallows its last breath.',
   boss_dungeon_abyss_deep_maw_defeat: 'Silence below. The jaw-bone is wedged in the rock, still open.',
+  boss_dungeon_sunless_oratory_intro: 'The pews are empty — the vigil walks up from the last row.',
+  boss_dungeon_sunless_oratory_p2: 'Half the lamp-stands topple — it blows each dead wick alight.',
+  boss_dungeon_sunless_oratory_p3: "The nave's vault cracks and no light comes in — the vigil steps beneath the crack.",
+  boss_dungeon_sunless_oratory_defeat: 'The vigil kneels back in the last row. The lamps stay unlit, but the oratory is quiet.',
   boss_phase_fallback_banner: 'Phase ${phase}',
   boss_phase_fallback_toast: 'Boss phase ${phase}!',
 
@@ -2432,6 +2440,8 @@ export const STRINGS_EN = Object.freeze({
   boss_lore_void_broken_casket_text: 'The timeline snaps here. It guards no door — it guards the marks that have not finished running.',
   boss_lore_abyss_deep_maw_title: 'Warden at the Jaw',
   boss_lore_abyss_deep_maw_text: 'The lowest mouth of the rift can no longer close. It has swallowed much; it has not yet swallowed a plea.',
+  boss_lore_sunless_oratory_title: 'The Lamplightless Vigil',
+  boss_lore_sunless_oratory_text: 'It keeps no door — it keeps a row of lamps nobody lit. The flame in your hand is the only one it has seen tonight.',
 
   // Chapter intros (W-D2 slice 16c)
   chapter_intro_2_title: 'Chapter 2 · Endless Planes',
@@ -2475,6 +2485,7 @@ After the Rift Lord falls, the old dungeons return with a random layout for the 
   dungeon_enter_radiant_dawn_hall: 'Dawn Hall: too much light for a shadow to hide in.',
   dungeon_enter_void_broken_casket: 'Broken Casket: the clock inside still runs, and nobody winds it.',
   dungeon_enter_abyss_deep_maw: 'Deep Maw: the ground under you is slowly swallowing itself.',
+  dungeon_enter_sunless_oratory: 'Sunless Oratory: not one lamp here is unlit — none of them was ever lit.',
   dungeon_enter_stats: 'Maze ${w}×${h} · ${rooms} rooms · ${doors} doors.\nClear a room\'s enemies and its door opens; glowing stelae [{interact}] read the lore; the roundest room holds the keywarden.',
   keywarden_cleared_title: 'The Keywarden Has Fallen',
   keywarden_cleared_text: 'The exit ring lights up. You hear a sigh from deep in the hub — as if some plane finally exhaled.\n\n[{interact}] Leave the maze and continue the main line.',
