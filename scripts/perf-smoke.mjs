@@ -21,7 +21,7 @@ import { existsSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings } from './perf-budgets.mjs';
-import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
+import { draw读数问题, 普查读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
 import { WORLD_SEED, worldSeedSource } from './world-seed.mjs';
 
 /**
@@ -408,13 +408,18 @@ try {
    * ③ `timeOfDay` 没钉住；④ **阴影趟为 0**（说明那个开关根本没改变这帧 —— 三列账就是假的）。
    * 另有一条**世界侧的对账**：世界里有的区不在站点名单里 ⇒ 当场抛
    * （加了新区域却没进 `ZONE_ORDER`，那一站会被静默跳过 = 静默放开）。
+   *
+   * 切片10 加上**第五拒**：阴影趟另有第二把尺 —— 按 three 的阴影趟规则**数**出来的笔数
+   * （`src/engine/shadowCensus.js`）。它必须等于"冻结对"（中间不 `update()` 的两趟）减出来的那个数；
+   * 不等 ⇒ 这一站的阴影列不可解释，作废。老口径那三列与上限表**照旧不动**（口径一换，
+   * 历史读数全成废纸），报告列与数出来的差只打印、不红 —— 那是这一列的抖动，见 B152。
    */
   const 名册 = PERF_BUDGETS.drawCalls;
   const 配方串 = JSON.stringify(名册.recipe);
   const 枢纽中心 = JSON.stringify(名册.hubCenter);
   const draw读数 = [];
   for (const 站id of 名册.stationIds) {
-    const 源 = `(() => {
+    const 源 = `(async () => {
       const g = window.__game, i = g.renderer.info;
       const 站id = ${JSON.stringify(站id)};
       const 配方 = ${配方串};
@@ -461,9 +466,38 @@ try {
       if (g.renderer.shadowMap.enabled !== true) {
         throw new Error('阴影开关没拧回来（回读 ' + g.renderer.shadowMap.enabled + '）—— 后面的站都会带着这把坏尺子');
       }
+      // 阴影普查（切片10，B151）：数出来的那一趟必须等于「中间不 update()」的两趟减出来的那一趟。
+      // 冻结对只钉时刻 + 渲染，两趟之间唯一变的东西是 shadowMap.enabled，所以差值就是阴影趟本身。
+      // 普查必须在拧着「开」的那一帧之后做：关着数会 0 == 0 空对空。判据在 ./harness-readings.mjs。
+      const 普查源 = await import('/src/engine/shadowCensus.js');
+      const 不推 = () => {
+        钉();
+        const 钉住的 = g.timeOfDay;
+        i.reset();
+        g.render();
+        if (g.timeOfDay !== 钉住的) {
+          throw new Error('timeOfDay 在"只渲染不推帧"的趟里被改掉了（' + 钉住的 + ' → ' + g.timeOfDay + '）—— 冻结对的前提不成立，阴影普查作废');
+        }
+        return i.render.calls;
+      };
+      const 冻结开 = 不推();
+      const 普查 = 普查源.阴影件普查(g.scene, g.camera, g.renderer);
+      g.renderer.shadowMap.enabled = false;
+      const 冻结关 = 不推();
+      g.renderer.shadowMap.enabled = true;
+      if (g.renderer.shadowMap.enabled !== true) {
+        throw new Error('阴影开关在冻结对之后没拧回来（回读 ' + g.renderer.shadowMap.enabled + '）—— 后面的站会带着这把坏尺子');
+      }
       const 区 = g.world.currentZone && g.world.currentZone.id;
       if (区 !== 站id) throw new Error('站点 ' + 站id + ' 现在落在 "' + 区 + '" 区里 —— 坐标与世界分家了，这批读数作废');
-      return { 区, 整帧: 整帧.calls, 本体: 本体.calls, 阴影: 整帧.calls - 本体.calls, 三角面: 整帧.triangles };
+      return {
+        区, 整帧: 整帧.calls, 本体: 本体.calls, 阴影: 整帧.calls - 本体.calls, 三角面: 整帧.triangles,
+        冻结阴影: 冻结开 - 冻结关,
+        普查: {
+          预测: 普查.预测, 框内件数: 普查.框内件数, 可投件数: 普查.可投件数,
+          榜: 普查.榜.slice(0, 40), 光源: 普查.光源, 问题: 普查.问题,
+        },
+      };
     })()`;
     const r = await evalJs(源);
     /**
@@ -473,10 +507,24 @@ try {
      */
     const 问 = draw读数问题(站id, r);
     if (问.length) throw new Error(`站点 ${站id} 的 draw call 腿不是一次测量：\n - ` + 问.join('\n - '));
+    /**
+     * 阴影列的第二把尺（切片10）：**数出来的**必须等于**冻结对减出来的**，否则这一站的阴影列
+     * 不可解释 —— 要么模型漏了 three 的一条规则，要么渲染本身在动世界。判据在 `./harness-readings.mjs`。
+     */
+    const 普问 = 普查读数问题(站id, r.普查, r.冻结阴影);
+    if (普问.length) throw new Error(`站点 ${站id} 的阴影普查对不上账：\n - ` + 普问.join('\n - '));
     draw读数.push({ 站: 站id, ...r });
     const 上 = 名册.ceilings[站id];
     const 上串 = 上 ? `（上限 ${上.frame}/${上.body}/${上.shadow}）` : '（名册里**没有这一站**）';
     console.log(`perf-smoke [draw call|${站id}] 整帧=${r.整帧} 本体=${r.本体} 阴影=${r.阴影} tri=${r.三角面} ${上串}`);
+    console.log(`perf-smoke [阴影普查|${站id}] 数出来=${r.普查.预测} 冻结减出来=${r.冻结阴影} 报告减出来=${r.阴影}`
+      + ` 框内 ${r.普查.框内件数} 件 / 可见可投 ${r.普查.可投件数} 件 光源=${r.普查.光源.map((L) => L.名 + '→' + L.绘 + (L.跳过 ? '(跳过:' + L.跳过 + ')' : '')).join(',')}`);
+    if (r.阴影 !== r.普查.预测) {
+      // 报告列与数出来的不等 **不是**坏读数：报告列的两趟之间隔了一次 update()，主趟的剔除集合跟着动，
+      // 那 4 个 call 的差就在本体趟里（B152）。这里只点名、不放宽上限、也不作废 —— 作废会把"世界在动"记到代码头上。
+      console.log(`perf-smoke [阴影普查|${站id}] ⚠ 报告列比数出来的多/少 ${r.阴影 - r.普查.预测} 个 call —— 差在**本体趟**（两趟之间那次 update() 让主趟剔除集合变了），不在阴影趟。上限比的是报告列（B152）。`);
+    }
+    console.log(`perf-smoke [阴影归属|${站id}] ${r.普查.榜.slice(0, 10).map(([k, v]) => k + '×' + v).join('  ')}`);
   }
 
   /**
