@@ -295,7 +295,8 @@ describe('③ 残差写成数，不写成形容词', () => {
       if (!d) return false;
       return !终点.some(([x, z]) => x === d.center.x && z === d.center.z);
     });
-    // 只有 gloom / radiant 的中心在 content 侧有声明（其余五座的中心写在 WorldManager 的字面量里）
+    // 只有 gloom / radiant 在 content 侧有描述对象（七座区的坐标自 B150 起统一在 ZONE_CENTERS，
+    // 但 `zoneDescriptor` 仍只答这两座 + 枢纽 / 走廊 —— 这条腿量的是描述对象，不是坐标表）
     expect(无名, '文档点名的两座与"中心不在任何射线上"的那两座不是一批').toEqual(['gloom', 'radiant']);
     for (const id of ['gloom', 'radiant']) {
       expect(证据.includes(`${id} `) || 证据.includes(id), `B6 那行没点名缺口里的 "${id}"`).toBe(true);
