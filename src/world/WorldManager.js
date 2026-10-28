@@ -15,7 +15,9 @@ import { CollisionWorld } from '../engine/Collision.js';
 import { releaseSubtree } from '../engine/releaseSubtree.js';
 import { makeUvCylinderGeometry } from '../engine/uvGeometry.js';
 import { makeRegionSurfaceMaterial, applyRegionSurface } from './regionSurfaces.js';
-import { ZONE_IDS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone } from '../content/ZoneIdentity.js';
+import {
+  ZONE_IDS, ZONE_CENTERS, HUB_ZONE, CORRIDOR_ZONE, zoneIdAt, resolveZone,
+} from '../content/ZoneIdentity.js';
 import { paletteOf } from '../content/materialPalette.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
@@ -100,13 +102,14 @@ export class WorldManager {
   }
 
   build() {
-    const fantasy = new FantasyZone(this.scene, { x: -200, z: 0 }, this.dialog);
-    const magic = new MagicZone(this.scene, { x: 0, z: -180 }, this.dialog);
-    const space = new SpaceZone(this.scene, { x: 200, z: 80 }, this.dialog);
-    const voidZone = new VoidZone(this.scene, { x: 0, z: 220 }, this.dialog);
-    const abyss = new AbyssZone(this.scene, { x: -200, z: 220 }, this.dialog);
-    const gloom = new GloomZone(this.scene, { x: 180, z: 100 }, this.dialog);
-    const radiant = new RadiantZone(this.scene, { x: -180, z: -160 }, this.dialog);
+    // 坐标不在这里手抄：`ZONE_CENTERS` 是装配侧与地图侧共用的唯一一份（B150）。
+    const fantasy = new FantasyZone(this.scene, ZONE_CENTERS[ZONE_IDS.FANTASY], this.dialog);
+    const magic = new MagicZone(this.scene, ZONE_CENTERS[ZONE_IDS.MAGIC], this.dialog);
+    const space = new SpaceZone(this.scene, ZONE_CENTERS[ZONE_IDS.SPACE], this.dialog);
+    const voidZone = new VoidZone(this.scene, ZONE_CENTERS[ZONE_IDS.VOID], this.dialog);
+    const abyss = new AbyssZone(this.scene, ZONE_CENTERS[ZONE_IDS.ABYSS], this.dialog);
+    const gloom = new GloomZone(this.scene, ZONE_CENTERS[ZONE_IDS.GLOOM], this.dialog);
+    const radiant = new RadiantZone(this.scene, ZONE_CENTERS[ZONE_IDS.RADIANT], this.dialog);
 
     this.zones = [fantasy, magic, space, voidZone, abyss, gloom, radiant];
 

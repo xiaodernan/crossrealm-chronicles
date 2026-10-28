@@ -48,6 +48,28 @@ export const ZONE_ORDER = [
 ];
 
 /**
+ * 七座真实区域的平面中心 —— **全仓唯一一份区域坐标**（修 B150）。
+ *
+ * 改前 `WorldManager.build()` 里七个 `{ x, z }` 字面量是装配侧的唯一来源，而
+ * `ExplorationMap.revealZone()` 另抄了一张六格的表（漏了 gloom / radiant）。两张表
+ * 各说各话时谁也不报错：走进那两座区时迷雾**整片静默跳过**，另五座一次揭开 ——
+ * 玩家看得见，代码里没有任何一处能说出"这里少了一行"。
+ *
+ * 现在装配侧与迷雾侧都从这一份读；`GLOOM_ZONE` / `RADIANT_ZONE` 的 `center` 也
+ * 指向同一条记录，于是"描述对象与实例同源"那条门禁量的是同一份对象，而不是两份
+ * 碰巧相等的字面量。`y` 恒为 0：室内高度公式读它（B120），缺了是 NaN。
+ */
+export const ZONE_CENTERS = Object.freeze({
+  [ZONE_IDS.FANTASY]: Object.freeze({ x: -200, y: 0, z: 0 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ x: 0, y: 0, z: -180 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ x: 200, y: 0, z: 80 }),
+  [ZONE_IDS.VOID]: Object.freeze({ x: 0, y: 0, z: 220 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ x: -200, y: 0, z: 220 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ x: 180, y: 0, z: 100 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ x: -180, y: 0, z: -160 }),
+});
+
+/**
  * 中文显示名 → id。**只用于迁移期与存档兼容**，新代码不得使用。
  *
  * 导出它**不是**为了让谁拿去做判定（那正是 B36 的病），而是让门禁能从两张表**推导**
@@ -123,9 +145,9 @@ const GLOOM_ZONE = Object.freeze({
   // `y: 0` 不是装饰：这座描述对象是 `resolveZone` 对 gloom 的返回值，
   // 于是它（不是 `GloomZone` 实例）就是玩家站在幽暗林地时的 `zone.center`。
   // 室内高度 = `center.y + baseHeight + floor * floorHeight`，缺 y 得到的是 NaN 而不是"差一点"（B120）。
-  // `BaseZone` 的实例侧是另一份同样的声明，两份由 `tests/zone-identity.test.js` 的
-  // 「描述对象与实例同源」对着坐标与基准面钉住，否则搬区时烂掉一份。
-  center: Object.freeze({ x: 180, y: 0, z: 100 }),
+  // `BaseZone` 的实例侧由 `WorldManager.build()` 从 `ZONE_CENTERS` 递进来，
+  // 于是描述对象与实例读的是同一条记录（B150 之后没有第二份坐标）。
+  center: ZONE_CENTERS[ZONE_IDS.GLOOM],
   radius: 160,
   mapRadius: 145,
   mapColor: '#3a3a4a',
@@ -140,7 +162,7 @@ const GLOOM_ZONE = Object.freeze({
 /** 辉煌圣域 — 金色沙海中的光辉神殿，连接魔法与深渊（不导出，同 `GLOOM_ZONE`） */
 const RADIANT_ZONE = Object.freeze({
   id: ZONE_IDS.RADIANT,
-  center: Object.freeze({ x: -180, y: 0, z: -160 }),  // 同 `GLOOM_ZONE`：这座描述对象在辉煌圣域里就是 `zone.center`，室内高度要读它的 `y`（B120）
+  center: ZONE_CENTERS[ZONE_IDS.RADIANT],  // 同 `GLOOM_ZONE`：描述对象在辉煌圣域里就是 `zone.center`，室内高度要读它的 `y`（B120）
   radius: 150,
   mapRadius: 135,
   mapColor: '#ffd700',

@@ -1,5 +1,6 @@
 import { MAP_BOSSES } from './QuestSystem.js';
 import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
+import { ZONE_IDS, ZONE_CENTERS, HUB_ZONE, zoneDescriptor } from '../content/ZoneIdentity.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -10,6 +11,16 @@ const MIN = -320;
 const MAX = 320;
 const GW = Math.ceil((MAX - MIN) / CELL);
 const GH = GW;
+
+/**
+ * 一次"到过这座区"要揭开的半径（米）。
+ *
+ * 旧实现把六座区的中心与半径抄成一张私有表（hub 50 / fantasy 90 / 其余 85），
+ * 漏了 gloom 与 radiant —— 走进那两座区时迷雾**整片静默跳过**（B150）。半径本身
+ * 从来不是每座区各自的账，而是一条统一的"到过就揭开核心一圈"策略，所以收成
+ * 一个常数，再以该区自己的地图圈为上限（枢纽只有 50 米，不能被 90 米涂掉半张图）。
+ */
+const ZONE_REVEAL_RADIUS = 90;
 
 /**
  * 地图覆盖的世界跨度（米）。`getGridSize()` 把它藏成 min/max 两个数，而画两张图
@@ -68,16 +79,24 @@ export class ExplorationMap {
   revealZone(zoneId) {
     if (this.zoneRevealed.has(zoneId)) return;
     this.zoneRevealed.add(zoneId);
-    const centers = {
-      hub: { x: 0, z: 55, r: 50 },
-      fantasy: { x: -200, z: 0, r: 90 },
-      magic: { x: 0, z: -180, r: 85 },
-      space: { x: 200, z: 80, r: 90 },
-      void: { x: 0, z: 220, r: 85 },
-      abyss: { x: -200, z: 220, r: 85 },
-    };
-    const c = centers[zoneId];
-    if (c) this.revealAt(c.x, c.z, c.r);
+    const circle = this._revealCircle(zoneId);
+    if (!circle) return;
+    this.revealAt(circle.center.x, circle.center.z, Math.min(ZONE_REVEAL_RADIUS, circle.cap));
+  }
+
+  /**
+   * 区域中心只问真源：世界实例（由 `ZONE_CENTERS` 装配）→ `ZONE_CENTERS` 本身。
+   * 枢纽没有 Zone 实例，读 `HUB_ZONE`。`cap` 是该区自己的圈半径。
+   *
+   * 不在这里列 id 表 —— 那张表正是 B150 的形状：加一座区时它不会跟着长。
+   */
+  _revealCircle(zoneId) {
+    const live = this.game.world?.zones?.find?.((z) => (z.id ?? z.info?.id) === zoneId);
+    if (live?.center) return { center: live.center, cap: live.radius ?? ZONE_REVEAL_RADIUS };
+    if (zoneId === ZONE_IDS.HUB) return { center: HUB_ZONE.center, cap: HUB_ZONE.radius };
+    const center = ZONE_CENTERS[zoneId];
+    if (!center) return null;
+    return { center, cap: zoneDescriptor(zoneId)?.mapRadius ?? ZONE_REVEAL_RADIUS };
   }
 
   revealPoi(id, x, z) {
