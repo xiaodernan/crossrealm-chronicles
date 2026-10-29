@@ -189,7 +189,11 @@ const 残留钉板 = {
 const 引用钉板 = {
   'world/ProceduralDungeonGenerator.js': { 调用: 1, 提及: 1, import: 1 },
   'world/zones/FantasyZone.js': { 调用: 11, 提及: 11, import: 1 },
-  'world/zones/VoidZone.js': { 调用: 4, 提及: 4, import: 1 },
+  // W-E3 切片35 之后 W-C2/W-D2 归位（2026-10-30）：seal-stone / echo-pages 两座 POI 的标记色
+  // 一开始写的是裸字面量（0x9fd8ff、0xd8b46a），④ 残留层当场红 —— 这两格改走调色板
+  // （`crystal.ice` / `metal.gilt`：与原有桶同族，不为它们新开一格）。残留层因此一格没涨，
+  // 涨的是这里：VoidZone 4 → 5、MagicZone 10 → 11。
+  'world/zones/VoidZone.js': { 调用: 5, 提及: 5, import: 1 },
   'world/zones/BaseZone.js': { 调用: 3, 提及: 3, import: 1 },
   'world/WorldManager.js': { 调用: 4, 提及: 4, import: 1 },
   // 切片H 给八面幡补了幡杆（`hubBannerPole`），杆的材质走调色板的 `wood.door` ——
@@ -199,7 +203,7 @@ const 引用钉板 = {
   'effects/SceneEnhancer.js': { 调用: 3, 提及: 3, import: 1 },
   'combat/Enemy.js': { 调用: 1, 提及: 1, import: 1 },
   'player/PlayerController.js': { 调用: 1, 提及: 1, import: 1 },
-  'world/zones/MagicZone.js': { 调用: 10, 提及: 10, import: 1 },
+  'world/zones/MagicZone.js': { 调用: 11, 提及: 11, import: 1 },
   'world/zones/SpaceZone.js': { 调用: 5, 提及: 5, import: 1 },
   'world/zones/AbyssZone.js': { 调用: 1, 提及: 1, import: 1 },
   'world/zones/GloomZone.js': { 调用: 1, 提及: 1, import: 1 },
@@ -322,7 +326,7 @@ describe('W-C5 切片8 调色板', () => {
         expect(实.提及, `${文件}：提及数 ≠ 调用数 —— 只准传字面路径`).toBe(实.调用.length);
         expect(实.import, `${文件} 的 import 数`).toBe(期望.import);
       }
-      expect(调用总, '消费方调用合计').toBe(61);
+      expect(调用总, '消费方调用合计').toBe(63);
     });
 
     it('其余 src 文件 0 提及；定义文件自己 0 字面调用', () => {

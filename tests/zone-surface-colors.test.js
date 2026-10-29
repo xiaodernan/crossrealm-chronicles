@@ -110,7 +110,12 @@ describe('五区表面底色：调色板真的涂到了世界上（W-C5 切片9�
 
   it('三 座区域的调色板格子数：搬进来的站点一条不多一条不少', () => {
     const 站点 = {
-      MagicZone: 10,
+      // W-E3 切片35 的两座仪式落点（echo-pages / seal-stone）把标记色从裸十六进制改成了
+      // `paletteOf('metal.gilt')` ⇒ MagicZone 10 → 11。VoidZone 不在这张表里（它只有
+      // crag / 光柱两类表面，POI 标记从来不算表面底色），所以这一格只挪 MagicZone 一处。
+      // 反向对照那一条仍然成立：**身份色的值**没被收进表（`metal.gilt` / `crystal.ice`
+      // 是本来就有的桶），被搬的只是"从哪里取一个已有的颜色"。
+      MagicZone: 11,
       SpaceZone: 5,
       // W-C5 切片10：冰材质合成一份 ⇒ 少一处 paletteOf 站点（6 → 5）
       // SpaceZone 上有 crag（1）+ ice（1）两种表面，但都只从调色板读一次颜色。
