@@ -14,7 +14,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { PERF_BUDGETS } from '../scripts/perf-budgets.mjs';
-import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题, DRAW列, DRAW附列, CPU列 } from '../scripts/harness-readings.mjs';
+import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题, DRAW列, DRAW附列, DRAW对照列, CPU列 } from '../scripts/harness-readings.mjs';
 
 const ROOT = process.cwd();
 const 脚本源 = existsSync(join(ROOT, 'scripts', 'perf-smoke.mjs'))
@@ -231,7 +231,8 @@ describe('性能冒烟（W-D4 切片2）', () => {
  * **真的把坏读数喂给生产判定**，而不是在本文件里再复刻一遍判断。
  * 另有一组"调用点"腿钉住脚本确实问了这三个判 —— 只 import 不调用，等于没有这条门禁。
  */
-const 好draw = { 整帧: 278, 本体: 201, 阴影: 77, 三角面: 120000, 掉落: 6, 可画件: 741 };
+// 对照列（切片14）：6 件掉落在这个机位差不多就是 6 个 call（每件三年套，一部分在视锥外）
+const 好draw = { 整帧: 278, 本体: 201, 阴影: 77, 三角面: 120000, 掉落: 6, 可画件: 741, 掉落call: 6, 掉落call关: 6 };
 const 好cpu = { frames: 240, updateAvgMs: 4.33, updateP95Ms: 6.2, frameAvgMs: 108.1 };
 const 名单 = ['hub', 'fantasy', 'magic'];
 
@@ -374,6 +375,34 @@ describe('读数完整性（切片6b）：每一站每一列都得是数', () =>
     }
     // 打印里也得带着它们：归因靠的是日志，读数只进 JSON 的话下一次没人看得见那份见证
     expect(脚本源, '日志那行没打附列').toMatch(/掉落=\$\{r\.掉落\} 可画=\$\{r\.可画件\}/);
+  });
+
+  it('掉落不进读数（切片14）：取账前藏起，占多少 call 另记一列', () => {
+    /**
+     * B157 的形状：切片13 那条“地板过期”腿点名的五格里，四格所在的区什么都没加
+     * —— 差的那几个 call 是地上剩几件掉落。所以主列取的是**藏掉掉落**的一趟，
+     * 掉落自己占多少另记成对照列（开 / 关阴影各一份）。
+     */
+    // 行为腿：对照列必须是非负整数
+    expect(draw读数问题('hub', { ...好draw, 掉落call: -1 }).join('\n'), '负数的掉落占比没被拒')
+      .toMatch(/只能是非负整数/);
+    // 地上一件没有 ⇒ 0 是合法值（与主列“0 = 没量到”不同）
+    expect(draw读数问题('hub', { ...好draw, 掉落call: 0, 掉落call关: 0 })).toEqual([]);
+    // 前提腿：“掉落不投影” ⇒ 开关阴影时它占的 call 数必须一样
+    expect(draw读数问题('hub', { ...好draw, 掉落call: 6, 掉落call关: 4 }).join('\n'),
+      '两个冻结对里掉落占比不一样却没作废').toMatch(/掉落本来不投影/);
+    // 接线腿：脚本真的在取账之前把掉落藏了，并且**逐件**按原样放回
+    expect(脚本源, '脚本没有在取账前藏起掉落').toMatch(/for \(const d of 掉落名册\) d\.mesh\.visible = false;/);
+    // 指向**放回那一行**而不是存起来那一行：只存不用（全置 true）时内存里的那份变成死代码，
+    // 而门禁只瞥"存了一份"的话，这一条会是假绿（切片14 第一版睡觉臂乙就是这么跑的）。
+    expect(脚本源, '放回掉落时没有按原样（全置 true 会把池里那些藏着的点亮）')
+      .toMatch(/掉落名册\.forEach\(\(d, k\) => \{ d\.mesh\.visible = 掉落原可见\[k\]; \}\);/);
+    // 对照必须走**冻结对**：中间一步不推 —— 第一版用两个一趟() 去比，void 那站当场读出 122 < 123
+    expect(脚本源, '掉落占比取的不是冻结对（两趟之间会又推一步）')
+      .toMatch(/const 掉落call = 冻结开有 - 冻结开无;/);
+    for (const 列 of DRAW对照列) {
+      expect(脚本源, `对照列 "${列}" 只在判据里，脚本没交（两处各列一份 = 分家）`).toContain(列);
+    }
   });
 
   it('判据模块不许带副作用（它是给门禁 import 的那一半）', () => {

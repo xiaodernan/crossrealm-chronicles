@@ -433,7 +433,8 @@ describe('阴影普查（切片10，B151）', () => {
     const 普查调用 = 脚本源.indexOf('阴影件普查(g.scene');
     expect(脚本源.slice(脚本源.lastIndexOf('shadowMap.enabled = true;', 普查调用), 普查调用))
       .not.toContain('shadowMap.enabled = false;');
-    const 冻结关 = 脚本源.indexOf('const 冻结关 = 不推();');
+    // 切片14 起这一对在“掉落藏着”的状态下取（主列不带掉落），名字加了一个“无”
+    const 冻结关 = 脚本源.indexOf('const 冻结关无 = 不推();');
     expect(冻结关, '冻结对没有第二趟').toBeGreaterThan(普查调用);
     expect(脚本源.slice(普查调用, 冻结关)).toContain('shadowMap.enabled = false;');
     const 拧回开 = 脚本源.indexOf('shadowMap.enabled = true;', 冻结关);

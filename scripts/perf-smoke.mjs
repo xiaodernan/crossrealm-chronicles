@@ -445,6 +445,30 @@ try {
       const 钉 = () => { g.timeOfDay = 配方.timeOfDay; };
       钉(); g.update();
       for (let k = 0; k < 配方.settleFrames; k += 1) { 钉(); g.update(); }
+
+      /**
+       * 第六个自由度（W-C2 切片14，B157）：**地上那几件掉落**。
+       *
+       * 切片12/13 把“页龄”记成了第五个自由度并留了见证，可见证只让人**看见**噪声，没把它
+       * 从读数里拿掉 —— 于是切片13 那条“地板过期”腿第一次真跑就点了 5 格（hub 整帧 289>288、
+       * 本体 231>226、space 219>218 / 157>152、void 阴影 46>45），而这 5 格里**四格所在的区这一片
+       * 什么都没加**。归因（.tmp-20261030-s14：同一棵树连跑两次逐字同值；退回切片35 之前
+       * 的树再跑一次读 hub 286/224）把这份差指到掉落三件套上：它们**不投影**（数出来的
+       * 阴影列一动不动，把掉落藏起来也不变），却占整帧 / 本体两列，而寿命走真实时间
+       * ⇒ 同配方两页能差 5–25 个 call。
+       *
+       * 所以读数改成**藏起掉落再取**：掉落是玩法（落地、拾取、光柱），不是内容体积；
+       * 拿它进尺子等于让“这一刻地上还剩几件”决定门禁红绿。取完立刻按原样放回（逐件存
+       * visible，不是全置 true —— 池里复用的那几件本来就有藏着的）。含掉落的读数仍然交出去
+       * （整帧含掉落 / 本体含掉落 两列），判据要求它**不小于**不含那一档。
+       */
+      if (!g.loot || !Array.isArray(g.loot.drops)) {
+        throw new Error('页面上没有 g.loot.drops —— 掉落这份见证没处取（这一列是页龄的尺子，缺了它下一次归因只能重跑探针）');
+      }
+      const 掉落名册 = g.loot.drops;
+      const 掉落原可见 = 掉落名册.map((d) => d.mesh.visible);
+      for (const d of 掉落名册) d.mesh.visible = false;
+      const 放回掉落 = () => { 掉落名册.forEach((d, k) => { d.mesh.visible = 掉落原可见[k]; }); };
       // 每一趟的取账顺序：update() → 钉时刻 → info.reset() → render()。
       // 钉时刻必须放在 update **之后**、render **之前**：update() 每帧都把昼夜往前推一步
       // （updateDayNight 里 timeOfDay + dt * 0.005，Game.js:1115），所以"钉完再 update"之后
@@ -487,23 +511,39 @@ try {
         }
         return i.render.calls;
       };
-      const 冻结开 = 不推();
+      const 冻结开无 = 不推();
       const 普查 = 普查源.阴影件普查(g.scene, g.camera, g.renderer);
       g.renderer.shadowMap.enabled = false;
-      const 冻结关 = 不推();
+      const 冻结关无 = 不推();
       g.renderer.shadowMap.enabled = true;
       if (g.renderer.shadowMap.enabled !== true) {
         throw new Error('阴影开关在冻结对之后没拧回来（回读 ' + g.renderer.shadowMap.enabled + '）—— 后面的站会带着这把坏尺子');
       }
+
+      /**
+       * 掉落占多少个 call（W-C2 切片14，B157）—— **冻结对口径**：只翻掉落的可见性，
+       * 中间一次 update() 都不推。两趟之间除掉落之外什么都没动 ⇒ 差就是它们在这个机位上
+       * 的 call 数，不带“隔着一次 update”那种噪声（第一版用两个 一趟() 去比，void 那站就读出
+       * “含掉落 122 < 不含 123”——不是尺子坏了，是两趟之间世界又走了一步）。
+       */
+      放回掉落();
+      const 冻结开有 = 不推();
+      g.renderer.shadowMap.enabled = false;
+      const 冻结关有 = 不推();
+      g.renderer.shadowMap.enabled = true;
+      if (g.renderer.shadowMap.enabled !== true) {
+        throw new Error('阴影开关在掉落对照那一对之后没拧回来（回读 ' + g.renderer.shadowMap.enabled + '）—— 后面的站会带着这把坏尺子');
+      }
+      // 两边都量：**掉落不投影**（整个切片的前提）⇒ 开关阴影时它占的 call 数必须一样。
+      // 不一样就说明那几件东西跟阴影这一轮搅在一起了，“把它从读数里拿掉”这个前提就不成立。
+      const 掉落call = 冻结开有 - 冻结开无;
+      const 掉落call关 = 冻结关有 - 冻结关无;
       const 区 = g.world.currentZone && g.world.currentZone.id;
       if (区 !== 站id) throw new Error('站点 ' + 站id + ' 现在落在 "' + 区 + '" 区里 —— 坐标与世界分家了，这批读数作废');
       // 页龄见证（切片12，B154）：地上此刻有几件掉落、场景里有多少可画件。
       // 掉落三件套的寿命 DROP_LIFE 走的是 dt（真实时间）而不是钉住的 timeOfDay ⇒ 同一份世界
       // 随页龄能少画 20–40 个 call，而数出来的阴影列一个都不少（那些件本来就不投影）。
       // 这两份数不参与达标，只当见证：下一轮读数再差 25 个 call，看这一行就知道是内容涨了还是这一页耗尽了。
-      if (!g.loot || !Array.isArray(g.loot.drops)) {
-        throw new Error('页面上没有 g.loot.drops —— 掉落这份见证没处取（这一列是页龄的尺子，缺了它下一次归因只能重跑探针）');
-      }
       let 可画件 = 0;
       const 数可见 = (o) => {
         if (o.visible === false) return;
@@ -513,11 +553,13 @@ try {
       数可见(g.scene);
       return {
         区, 整帧: 整帧.calls, 本体: 本体.calls, 阴影: 整帧.calls - 本体.calls, 三角面: 整帧.triangles,
+        // 掉落在这个机位占多少个 call（切片14）：冻结对口径，见上面那段。
+        掉落call, 掉落call关,
         掉落: g.loot.drops.length, 可画件,
         // 越预算的那一列（B152）：上限吃的是**数出来的笔数**，不是上面那个差。
         // 差仍然交出去 —— 三列自洽那条判据（阴影 = 整帧 − 本体）问的是它，账本也记它。
         阴影趟: 普查.预测,
-        冻结阴影: 冻结开 - 冻结关,
+        冻结阴影: 冻结开无 - 冻结关无,
         普查: {
           预测: 普查.预测, 框内件数: 普查.框内件数, 可投件数: 普查.可投件数,
           榜: 普查.榜.slice(0, 40), 光源: 普查.光源, 问题: 普查.问题,
@@ -542,7 +584,7 @@ try {
     draw读数.push(读数);
     const 上 = 名册.ceilings[站id];
     const 上串 = 上 ? `（上限 ${上.frame}/${上.body}/${上.shadow}）` : '（名册里**没有这一站**）';
-    console.log(`perf-smoke [draw call|${站id}] 整帧=${r.整帧} 本体=${r.本体} 阴影=${r.阴影} 阴影趟=${r.阴影趟} tri=${r.三角面} 掉落=${r.掉落} 可画=${r.可画件} ${上串}`);
+    console.log(`perf-smoke [draw call|${站id}] 整帧=${r.整帧} 本体=${r.本体} 阴影=${r.阴影} 阴影趟=${r.阴影趟} tri=${r.三角面} 掉落=${r.掉落} 可画=${r.可画件} 掉落call=${r.掉落call} ${上串}`);
     /**
      * **地板逐格对照**（W-C2 切片13，B156）：这一轮的读数里哪几格读出了新高。
      *
