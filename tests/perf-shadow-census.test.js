@@ -454,7 +454,12 @@ describe('阴影普查（切片10，B151）', () => {
     expect(脚本源, '报告列的算法被改了：阴影列必须还是 整帧 − 本体').toContain('阴影: 整帧.calls - 本体.calls');
     expect(脚本源, '逐站上限不再从名册里取').toContain('名册.ceilings[站id]');
     expect(脚本源, '交给上限的阴影那一列不是数出来的笔数').toMatch(/阴影趟:\s*普查\.预测/);
-    expect(脚本源, '数出来的笔数没并进读数记录（spread 断了 ⇒ 上限吃不到它）').toMatch(/draw读数\.push\(\{ 站: 站id, \.\.\.r \}\)/);
+    /**
+     * 切片13 把这一行拆成两步（同一份记录从此有**两个读者**：上限与地板）。两条都得钉：
+     * 只构造不入桶 ⇒ 覆盖对账看不见这一站；只 `push(读数)` 不构造 ⇒ 上限与地板都吃不到数出来的那一列。
+     */
+    expect(脚本源, '数出来的笔数没并进读数记录（spread 断了 ⇒ 上限与地板都吃不到它）').toMatch(/const 读数 = \{ 站: 站id, \.\.\.r \};/);
+    expect(脚本源, '那份读数记录没被交进 draw读数 桶').toMatch(/draw读数\.push\(读数\)/);
     expect(脚本源).toMatch(/for \(const r of draw读数\)[\s\S]{0,400}overCeiling\(r, 预算\.drawCalls\.ceilings\)/);
     // 判定那一侧也得写明吃的是哪一列（两头同名才算换到位；只改脚本不改判定 = 两处定义）
     expect(预算源, 'overCeiling 的读数形状里第三列不再叫 阴影趟').toMatch(/阴影趟:\s*number/);

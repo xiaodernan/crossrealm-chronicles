@@ -20,7 +20,7 @@ import { spawn, spawnSync } from 'child_process';
 import { existsSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings } from './perf-budgets.mjs';
+import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings, 过期格 } from './perf-budgets.mjs';
 import { draw读数问题, 普查读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
 import { WORLD_SEED, worldSeedSource } from './world-seed.mjs';
 
@@ -423,6 +423,8 @@ try {
   const 配方串 = JSON.stringify(名册.recipe);
   const 枢纽中心 = JSON.stringify(名册.hubCenter);
   const draw读数 = [];
+  /** 地板过期的点名（切片13，B156）：只进这一轮的日志，**不进退出码** —— 理由见循环里那一段 */
+  const 地板过期 = [];
   for (const 站id of 名册.stationIds) {
     const 源 = `(async () => {
       const g = window.__game, i = g.renderer.info;
@@ -536,10 +538,26 @@ try {
      */
     const 普问 = 普查读数问题(站id, r.普查, r.冻结阴影);
     if (普问.length) throw new Error(`站点 ${站id} 的阴影普查对不上账：\n - ` + 普问.join('\n - '));
-    draw读数.push({ 站: 站id, ...r });
+    const 读数 = { 站: 站id, ...r };
+    draw读数.push(读数);
     const 上 = 名册.ceilings[站id];
     const 上串 = 上 ? `（上限 ${上.frame}/${上.body}/${上.shadow}）` : '（名册里**没有这一站**）';
     console.log(`perf-smoke [draw call|${站id}] 整帧=${r.整帧} 本体=${r.本体} 阴影=${r.阴影} 阴影趟=${r.阴影趟} tri=${r.三角面} 掉落=${r.掉落} 可画=${r.可画件} ${上串}`);
+    /**
+     * **地板逐格对照**（W-C2 切片13，B156）：这一轮的读数里哪几格读出了新高。
+     *
+     * 这一句以前**没有人问**。地板只活在测试文件的一份局部常量里，于是"地板过期"这件事只能靠
+     * 人读注释发现 —— B154 就是这么从 10-24 烂到 10-29 的（十格超地板，套件全绿）。
+     * 现在门自己比：读数 > 地板 ⇒ 当场点名那一格。
+     *
+     * **不改退出码**（判据在 `src/engine/drawCallBudget.js` 的 `过期格`，与上限的 `overCeiling` 分家）：
+     * 越线那一半才是性能回归；这里说的是**这张表的出处**需要重钉。世界在动不是代码的红 ——
+     * 把它记成红，下一轮就有人学会把红当噪声跳过；记成日志里一行带站点与那一格读数/地板的⚠，
+     * 这一轮的输出（本仓那一族一直叫它"账本"）里就留得住。
+     */
+    const 过 = 过期格(读数, 名册.floors);
+    地板过期.push(...过);
+    for (const 句 of 过) console.log(`perf-smoke ⚠ ${句}`);
     console.log(`perf-smoke [阴影普查|${站id}] 数出来=${r.普查.预测} 冻结减出来=${r.冻结阴影} 报告减出来=${r.阴影}`
       + ` 框内 ${r.普查.框内件数} 件 / 可见可投 ${r.普查.可投件数} 件 光源=${r.普查.光源.map((L) => L.名 + '→' + L.绘 + (L.跳过 ? '(跳过:' + L.跳过 + ')' : '')).join(',')}`);
     if (r.阴影 !== r.普查.预测) {
@@ -576,6 +594,19 @@ try {
   if (多站.length) {
     throw new Error(`draw call 上限表多站：${多站.join(', ')} —— 给一个没测过的站发通行证，与漏一站同罪`);
   }
+  /**
+   * **地板表与名册同样要一一对应**（切片13，B156）。少一站 ⇒ `过期格` 只能报"地板表里没有这一站"，
+   * 那一站的新高就永远没人知道；多一站 ⇒ 那张表里躺着一个已经不测的站，读起来像"有出处"其实是抄本。
+   * 对账函数是通用的（吃一张表，不比上限），所以这里复用同一份判，不另写一条。
+   */
+  const 地板缺站 = missingCeilings(名册.stationIds, 名册.floors);
+  if (地板缺站.length) {
+    throw new Error(`draw call 地板表缺站：${地板缺站.join(', ')} —— 那一站的"读出新高"没人能判，地板对它等于不存在`);
+  }
+  const 地板多站 = extraCeilings(名册.stationIds, 名册.floors);
+  if (地板多站.length) {
+    throw new Error(`draw call 地板表多站：${地板多站.join(', ')} —— 给一个不在名册里的站留着一行出处，与多一格上限同罪`);
+  }
 
   const heapMb = await evalJs('performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : -1');
   console.log(`perf-smoke [堆] usedJSHeap=${heapMb}MB exceptions=${exceptions.length}`);
@@ -597,6 +628,14 @@ try {
   }
 
   const 预算 = PERF_BUDGETS;
+  /**
+   * **地板过期的总结行**（切片13，B156）：写在越线判定**之前**，让"退出码为什么是 1"仍然是日志最后一句
+   * （CI 里看红的人只看末尾）。这一行**不参与 `failures`** —— 它说的是这张表的出处要重钉，
+   * 不是这一轮的代码变慢了；两件事各有一行，谁也不许替谁红。
+   */
+  if (地板过期.length) {
+    console.log(`perf-smoke 地板过期 ${地板过期.length} 格（**不改退出码**：越线那一半由上限守着，这里要的是把这张表的出处重钉一遍）：\n - ` + 地板过期.join('\n - '));
+  }
   const 越线 = [];
   for (const r of draw读数) {
     越线.push(...overCeiling(r, 预算.drawCalls.ceilings));

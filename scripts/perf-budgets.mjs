@@ -30,10 +30,13 @@
  * 三个**判定函数**也一起转发（`overCeiling` / `missingCeilings` / `extraCeilings`）：
  * 脚本端与门禁端必须问同一个"判"，各判一次迟早漂开 —— 这是 W-D4 切片3
  * "判据与执行分家"的同一条纪律在 draw call 这一格上的延伸。
+ *
+ * `过期格` 是同一条纪律的第二位客人（W-C2 切片13，B156）：**地板**以前只活在测试文件里，
+ * 门一句都不问，所以"地板过期"这件事只能靠人读注释发现。现在门自己逐格对照，判据仍然只有一份。
  */
-import { DRAW_CALL_BUDGETS, overCeiling, missingCeilings, extraCeilings } from '../src/engine/drawCallBudget.js';
+import { DRAW_CALL_BUDGETS, overCeiling, missingCeilings, extraCeilings, 过期格 } from '../src/engine/drawCallBudget.js';
 
-export { overCeiling, missingCeilings, extraCeilings };
+export { overCeiling, missingCeilings, extraCeilings, 过期格 };
 
 export const PERF_BUDGETS = {
   /** update() 平均耗时上限（ms）：内容膨胀拖垮的第一个数（12 类敌人的 AI、分离、感知都在这里面）
@@ -51,7 +54,7 @@ export const PERF_BUDGETS = {
   /** 未捕获异常：0 条，性能门禁顺手兼做稳定性门禁 */
   exceptions: 0,
   /**
-   * draw call 名册（站点 / 配方 / 逐站三列上限 / 验收线）—— 唯一所有者在
+   * draw call 名册（站点 / 配方 / 逐站三列上限 / 逐站三列地板 / 验收线）—— 唯一所有者在
    * `src/engine/drawCallBudget.js`，PerfHUD 读同一份。见那个文件的头部：
    * **读数只有在配方钉死时才是数**（朝向 237↔476、首帧 289 vs 结算后 402）。
    */

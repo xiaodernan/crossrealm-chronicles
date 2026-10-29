@@ -351,13 +351,91 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
   [ZONE_IDS.RADIANT]: Object.freeze({ frame: 500, body: 450, shadow: 60 }),
 });
 
-/** 把三样东西收成一个对象，方便读者一次拿全（HUD 只取 `acceptLine`，门禁取整份） */
+/**
+ * 地板（同配方**年轻页**读数的历史最大，逐格）—— W-C2 切片13（B156）从判据的抄本搬进真源。
+ *
+ * ## 为什么它必须住在 `src` 而不是测试里
+ *
+ * 切片12 之前它是 `tests/draw-call-budget.test.js` 里的一份局部常量，于是它有**两个读者都没有守**：
+ * 判据只拿它算带子（上限 > 地板 且 上限 ≤ 地板 × 1.6），门拿它做的事是零。臂壬（切片12，十条臂里
+ * 唯一一条**预期绿**的）把这个洞量了出来：把 hub 整帧的地板悄悄退回过期前的 267，`310` 仍然落在
+ * `(267, 267 × 1.6]` 里 ⇒ 全量套件照常绿。**"地板过期"这件事只能靠人读注释发现**，而 B154 正是
+ * 这么烂了五天的（10-24 钉下、10-29 才发现十格超地板 —— 中间过了 174 个提交）。
+ *
+ * 搬进真源之后有两件事才做得成：
+ * - **门自己逐格对照**（`过期格`）：读数高于地板 ⇒ 当场点名那一格"地板过期，需重钉"。
+ *   这不是性能回归（越线那一半由 `DRAW_CALL_CEILINGS` 守着），是**这张表的出处**需要重钉 —— 所以
+ *   它只进日志，**不改退出码**：把"世界在动"记成代码的红，下一轮就会被当成噪声跳过。
+ * - **判据换成更严的那条**（`规则上限`）：`上限 ≤ 规则(地板)`（规则 = ×1.15 上取整到 10）。
+ *   旧的 1.6× 上界比它松，且对"地板被悄悄改低"完全无感；新这条把推导规则本身钉进了生产代码 ——
+ *   改规则要动这里，动这里就有臂咬。
+ *
+ * ## 每一格的出处（切片12 判完 B154 之后重钉，推导脚本 `.tmp-20261029-s16/floors.mjs`）
+ *
+ * 定义：**同配方（时刻 0.35 / yaw 0 / pitch −0.12 / 结算 120 帧、世界种子 20261028）全部年轻页读数的最大**，
+ * 逐格再并上 2026-10-24 那批的历史最大（只收不放 ⇒ fantasy 267/213、gloom 184/120 保持旧数）。
+ * 残局读数（同一页第 3 次之后 —— 页龄耗尽的那一档）**不进地板**，理由见头部"口径"一节的第五个自由度。
+ * `shadow` 那一行是**数出来的笔数**（`shadowCensus().预测`），口径出自切片11（B152）。
+ * 细节出处（哪个日志、哪一档页龄）逐格写在 `tests/draw-call-budget.test.js` 的带子腿注释里 ——
+ * 那份注释是**判据的说明**，这张表是**判据的数据**，两者不再各存一份数。
+ */
+export const DRAW_CALL_FLOORS = Object.freeze({
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 288, body: 226, shadow: 62 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 267, body: 213, shadow: 55 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 593, body: 551, shadow: 39 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 218, body: 152, shadow: 62 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 139, body: 94, shadow: 45 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 123, body: 77, shadow: 45 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 184, body: 120, shadow: 66 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 455, body: 410, shadow: 45 }),
+});
+
+/**
+ * 上限的**推导规则**：地板 × 1.15，上取整到 10（B156 之前这句话只活在注释和一次性推导脚本里）。
+ *
+ * 非有限正数一律拒绝 —— 规则一旦被喂了 `undefined`，`Math.ceil(NaN/10)*10` 是 `NaN`，
+ * 而 `上限 ≤ NaN` 恒 false ⇒ "凭空放宽"那一半会红得像是地板的错。
+ */
+export function 规则上限(地板值) {
+  if (!Number.isFinite(地板值) || !(地板值 > 0)) {
+    throw new TypeError(`规则上限要的是一个有限正数的地板，读到的是 ${String(地板值)}`);
+  }
+  return Math.ceil(地板值 * 1.15 / 10) * 10;
+}
+
+/**
+ * 这一轮的读数里，哪几格**读出了新高**（= 地板过期）。返回点名的字符串数组，空 = 地板还是那张地板。
+ *
+ * 与 `overCeiling` 同一套列名映射（`整帧 / 本体 / 阴影趟` ↔ `frame / body / shadow`），
+ * 第三列同样吃**数出来的**那一列 —— 差值列随页龄抖，拿它比地板每天都会假报新高。
+ *
+ * 读数缺列 / 非整数这里**不判**（那是 `draw读数问题` 的活：坏读数在到达这里之前就被作废了），
+ * 只比整数 —— 两条判据各问一件事，合在一处就会让"没量到"和"量到新高"读出同一句话。
+ */
+export function 过期格(读数, 地板) {
+  const 地面 = 地板?.[读数?.站];
+  if (!地面) return [`地板表里没有这一站 "${读数?.站}" —— 与上限缺站同罪（那一站没人守）`];
+  const 高 = [];
+  const 比 = (列名, 值, 限) => {
+    if (Number.isInteger(值) && Number.isInteger(限) && 值 > 限) {
+      高.push(`地板过期[${读数.站}.${列名}] 读数 ${值} > 地板 ${限} ⇒ 这一格的出处需要重钉（不是性能回归；`
+        + '上限那一半由 overCeiling 守着）');
+    }
+  };
+  比('frame', 读数.整帧, 地面.frame);
+  比('body', 读数.本体, 地面.body);
+  比('shadow', 读数.阴影趟, 地面.shadow);
+  return 高;
+}
+
+/** 名册的总入口：HUD 只取 `acceptLine`，门禁取整份（站点 / 配方 / 坐标 / 上限 / 地板 / 验收线） */
 export const DRAW_CALL_BUDGETS = Object.freeze({
   acceptLine: DRAW_CALL_ACCEPT_LINE,
   recipe: DRAW_CALL_RECIPE,
   stationIds: DRAW_CALL_STATION_IDS,
   hubCenter: DRAW_CALL_HUB_CENTER,
   ceilings: DRAW_CALL_CEILINGS,
+  floors: DRAW_CALL_FLOORS,
 });
 
 /**

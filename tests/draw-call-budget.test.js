@@ -30,6 +30,13 @@
  * 纯函数，`scripts/perf-smoke.mjs` 与本文件问的是**同一个判**。各写一份判迟早漂开
  * （W-D4 切片3"判据与执行分家"的同一条纪律）。所以下面每条"反面控制"都是真的
  * 喂一份坏数据给生产判定，而不是在用例里复刻一遍判断。
+ *
+ * ## 第三条题眼（切片13，B156）：地板也是判据的客人，不是注释
+ *
+ * 同一条纪律的第二位客人是 `规则上限` / `过期格` + `DRAW_CALL_FLOORS`。切片12 之前"地板"只有
+ * 本文件里的一份抄本，而它守的是带子的**下边**：读数高于地板没有任何判据看过，全靠人读注释发现
+ * （臂壬量出来的洞）。搬进真源之后本文件改读同一份，"抄本"这一格由下面那条"不许再出现字面量表"
+ * 的腿守着。
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -37,6 +44,7 @@ import { join } from 'node:path';
 import {
   DRAW_CALL_BUDGETS,
   DRAW_CALL_CEILINGS,
+  DRAW_CALL_FLOORS,
   DRAW_CALL_STATION_IDS,
   DRAW_CALL_HUB_CENTER,
   DRAW_CALL_RECIPE,
@@ -44,6 +52,8 @@ import {
   overCeiling,
   missingCeilings,
   extraCeilings,
+  规则上限,
+  过期格,
 } from '../src/engine/drawCallBudget.js';
 import { ZONE_IDS, ZONE_ORDER, HUB_ZONE } from '../src/content/ZoneIdentity.js';
 import { PERF_BUDGETS } from '../scripts/perf-budgets.mjs';
@@ -58,6 +68,11 @@ describe('单一真源："达标"不许有两处定义', () => {
     expect(PERF_BUDGETS.drawCalls).toBe(DRAW_CALL_BUDGETS);
     expect(PERF_BUDGETS.drawCalls.ceilings).toBe(DRAW_CALL_CEILINGS);
     expect(PERF_BUDGETS.drawCalls.stationIds).toBe(DRAW_CALL_STATION_IDS);
+    /**
+     * 地板也挂同一份（切片13，B156）。上限有 `toBe` 而地板没有，就会长出
+     * "门读 `src` 那份、测试读本地抄本"这种两边各自成立的样子 —— B156 的形状正是这个。
+     */
+    expect(PERF_BUDGETS.drawCalls.floors).toBe(DRAW_CALL_FLOORS);
   });
 
   it('HUD 的 draw call 阈值来自名册，不是硬编码', () => {
@@ -300,8 +315,9 @@ describe('反面控制：判定函数真的咬得住（喂坏数据必须红）'
     expect(extraCeilings(['a'], 上限)).toEqual([]);
   });
 
-  it('真表本身也不越线：上限必须落在本配方实测值的两侧带里', () => {
-    // 本配方实测最大值，**逐格注明出处**（"地板必须由量出上限的那同一把尺给"）：
+  it('真表本身也不越线：上限必须落在地板的两侧带里（地板读真源，这里不留抄本）', () => {
+    // 地板的**逐格出处**（"地板必须由量出上限的那同一把尺给"）。数本身在 `DRAW_CALL_FLOORS`
+    // （`src/engine/drawCallBudget.js`，切片13 / B156 之前这三行抄本住在本文件里）—— 下面只讲来历：
     //
     // **三行都在 2026-10-29 W-C2 切片12（B154）重钉过**，推导脚本 `.tmp-20261029-s16/floors.mjs`
     // —— 它扫今天散在各处的同配方日志（11 个文件、134 条读数，每条自带出处）算地板，不手抄数。
@@ -314,7 +330,8 @@ describe('反面控制：判定函数真的咬得住（喂坏数据必须红）'
     //   （frame：hub 267→288、magic 584→593、space 211→218、void 134→139、abyss 122→123、
     //   radiant 440→455；body 同向 +1～+15），两格保持旧数（fantasy 267 / 213、gloom 184 / 120 ——
     //   今天年轻页只读到 260/205、161/95）。把旧行改低**不是**"收紧"：那等于用"今天没读到"
-    //   冒充"今天读不到"，而地板往下挪一寸，上面那条 1.6× 上界就跟着松一寸。
+    //   冒充"今天读不到"，而地板往下挪一寸，`规则上限(地板)` 就跟着松一档 —— hub 整帧挪到 **260**
+    //   及以下（260 × 1.15 = 299 ⇒ 规则上限 300），现值 `310` 就当场红：看着像优化，其实是尺子被锯短。
     // - **年轻页的出处**：门内腿后 `.tmp-20261029-b151/perf-s35b.log`（hub 288/226）与
     //   `perf-run2.log`（gloom 161/95）；同页首访 `.tmp-20261029-s16/spread-head-pinned.log`
     //   （四页 × 八站，一页一读）；同页首访/首轮 `.tmp-20261029-s14/counted{,2}.log`、
@@ -364,25 +381,116 @@ describe('反面控制：判定函数真的咬得住（喂坏数据必须红）'
     // 把它钉成地板就等于宣布"以后任何优化都不许把上限压到 396 以下" —— 一条专门拦住
     // 优化的门禁。地板必须由**量出上限的那同一把尺**给（"floor 要来自同一次扫描"）。
     //
-    // 于是这条是**双向**的：
-    // - 下界：上限必须大于实测最大值，否则 `npm run perf` 永远红，护栏失去意义（旧版只查这半边）。
-    // - 上界：上限不许超过实测值的 1.6 倍（推导规则是 ×1.15 上取整到 10 ⇒ 正常最松也远在此内）。
-    //   没有这半边，谁都能把某格悄悄改回"合批前的 510"还说自己在收紧预算 —— 表只会被放宽，
-    //   永远不会被压紧。
-    const 实测 = {
-      frame: { hub: 288, fantasy: 267, magic: 593, space: 218, void: 139, abyss: 123, gloom: 184, radiant: 455 },
-      body: { hub: 226, fantasy: 213, magic: 551, space: 152, void: 94, abyss: 77, gloom: 120, radiant: 410 },
-      shadow: { hub: 62, fantasy: 55, magic: 39, space: 62, void: 45, abyss: 45, gloom: 66, radiant: 45 },
-    };
+    // 于是这条是**双向**的，两半吃的都是 `DRAW_CALL_FLOORS` 这一份（切片13，B156：地板从这份
+    // 注释旁边搬进了 `src/engine/drawCallBudget.js`，测试里不再有抄本 —— 注释只讲出处，数只有一处）：
+    // - 下界：上限必须大于地板，否则 `npm run perf` 永远红，护栏失去意义（旧版只查这半边）。
+    // - 上界：上限不许超过 `规则上限(地板)`（= 地板 × 1.15 上取整到 10 —— **推导规则本身**搬进了生产代码）。
+    //   旧的那半边是 `地板 × 1.6`，比规则松出一截，而且对"地板被改低"完全无感：切片12 的臂壬把
+    //   hub 整帧的地板悄悄退回过期前的 267，`310` 既落在 `(267, 267 × 1.6]` 里、也恰好等于
+    //   `规则上限(267) = 310` ⇒ **两条上界都拦不住它**。这不是规则的锅，是"地板没人读"的锅：
+    //   真正咬住这一条的是门自己（`过期格`：读数 288 > 地板 267 ⇒ 当场点名），所以本文件下面
+    //   为它配了一条**接线腿**（门必须真的逐格比）与一条**行为腿**（判据吃一份更低的地板会红）。
     for (const id of DRAW_CALL_STATION_IDS) {
       const 上 = DRAW_CALL_CEILINGS[id];
+      const 地 = DRAW_CALL_FLOORS[id];
       expect(上, `站点 "${id}" 没有上限`).toBeTruthy();
+      expect(地, `站点 "${id}" 没有地板 ⇒ 这一格的出处不在真源里（抄本会烂在原地）`).toBeTruthy();
       for (const 列 of ['frame', 'body', 'shadow']) {
-        const 读数 = 实测[列][id];
-        expect(读数, `站点 "${id}" 缺 ${列} 列的实测值（地板不是从这次扫描来的）`).toBeTruthy();
-        expect(上[列], `站点 "${id}" 的 ${列} 上限 ${上[列]} 低于本配方实测 ${读数} ⇒ 门禁会永远红`).toBeGreaterThan(读数);
-        expect(上[列], `站点 "${id}" 的 ${列} 上限 ${上[列]} 超过本配方实测 ${读数} 的 1.6 倍 ⇒ 这一格被凭空放宽`).toBeLessThanOrEqual(读数 * 1.6);
+        const 读数 = 地[列];
+        expect(Number.isInteger(读数) && 读数 > 0, `站点 "${id}" 的 ${列} 地板 ${String(读数)} 不是正整数`).toBe(true);
+        expect(上[列], `站点 "${id}" 的 ${列} 上限 ${上[列]} 低于本配方地板 ${读数} ⇒ 门禁会永远红`).toBeGreaterThan(读数);
+        expect(上[列], `站点 "${id}" 的 ${列} 上限 ${上[列]} 超过规则上限 ${规则上限(读数)}（地板 ${读数} × 1.15 上取整到 10）⇒ 这一格被凭空放宽`)
+          .toBeLessThanOrEqual(规则上限(读数));
       }
     }
+  });
+});
+
+describe('地板有了判据（W-C2 切片13，B156）', () => {
+  /**
+   * B156 问的不是"地板对不对"，是**"地板错了有没有人知道"**。
+   * 切片12 之前那张表只活在 `tests/draw-call-budget.test.js` 里，判据只有"上限落在它上下两侧带里"
+   * 一条 —— 于是把地板改低，带子跟着一起挪，套件照常绿（臂壬量过这件事）。
+   * 搬进 `src/engine/drawCallBudget.js` 之后多了两个读者：门（`过期格`，逐格对照本轮读数）
+   * 与本文件（`规则上限`，逐格核对推导规则）。下面每条都是**真喂坏数据给生产判定**，不在测试里复刻判断。
+   */
+  it('地板表与站点名单一一对应，并且整张冻结', () => {
+    expect(missingCeilings(DRAW_CALL_STATION_IDS, DRAW_CALL_FLOORS)).toEqual([]);
+    expect(extraCeilings(DRAW_CALL_STATION_IDS, DRAW_CALL_FLOORS)).toEqual([]);
+    expect(Object.keys(DRAW_CALL_FLOORS).sort()).toEqual([...DRAW_CALL_STATION_IDS].sort());
+    expect(Object.isFrozen(DRAW_CALL_FLOORS), '地板表没冻结（运行中被改一个数 = 出处当场失效）').toBe(true);
+    for (const id of DRAW_CALL_STATION_IDS) {
+      expect(Object.isFrozen(DRAW_CALL_FLOORS[id]), `站点 "${id}" 的地板行没冻结`).toBe(true);
+    }
+  });
+
+  it('规则上限 = 地板 × 1.15 之后上取整到 10（规则只在这一处）', () => {
+    // 四格是表里真用得到的数（切片12 的推导就是这几个算式），两格问规则的边界
+    expect(规则上限(288)).toBe(340);
+    expect(规则上限(267)).toBe(310);
+    expect(规则上限(62)).toBe(80);
+    expect(规则上限(39)).toBe(50);
+    // 已经整十的地板不许再进一格：200 × 1.15 = 230 ⇒ 230，不是 240
+    expect(规则上限(200)).toBe(230);
+    // 260 × 1.15 = 299 —— 上取整发生在**除以 10 之后**，所以 299 顶到 300（规则会给出比现上限 310 更松的数）
+    expect(规则上限(260)).toBe(300);
+    /**
+     * 非有限正数一律拒。放进 `NaN` 会算出 `NaN`，而 `上限 ≤ NaN` 恒 false ⇒
+     * "凭空放宽"那一半会红，红的地方还指着地板 —— 真实原因是一个根本没读到的数。
+     */
+    for (const 坏 of [undefined, null, NaN, 0, -4, '267', Infinity]) {
+      expect(() => 规则上限(坏), `规则上限吃了 ${String(坏)} 没拒`).toThrow(TypeError);
+    }
+  });
+
+  it('过期格：高出地板 ⇒ 点名那一格；相等、更低或吃错列 ⇒ 空', () => {
+    const 地板 = { a: { frame: 100, body: 60, shadow: 40 } };
+    const 高 = 过期格({ 站: 'a', 整帧: 101, 本体: 59, 阴影趟: 40 }, 地板);
+    expect(高, `读数 101 对地板 100 没点名：${JSON.stringify(高)}`).toHaveLength(1);
+    expect(高[0]).toMatch(/^地板过期\[a\.frame\] 读数 101 > 地板 100/);
+    // **相等不算新高**：地板的定义是"历史最大"，同值正是它被钉住的那一帧读出来的。
+    // 把 `>` 写成 `>=` 会让每一轮正常读数都喊过期 ⇒ 这条判的就是那个边界。
+    expect(过期格({ 站: 'a', 整帧: 100, 本体: 60, 阴影趟: 40 }, 地板)).toEqual([]);
+    // 第三列必须是**数出来的**那一列（`阴影趟`），不是报告列的差（`阴影`）——
+    // 差值列随页龄与剔除顺序抖，拿它比地板每天都会假报新高（B152 同一条口径）。
+    expect(过期格({ 站: 'a', 整帧: 100, 本体: 60, 阴影: 120 }, 地板)).toEqual([]);
+    // 非整数读数**不在这里判**：坏读数在 `draw读数问题` 那一层就被作废了，
+    // 两条判据各问一件事，合在一起会让"没量到"和"量到新高"读出同一句话。
+    expect(过期格({ 站: 'a', 整帧: undefined, 本体: NaN, 阴影趟: 40.5 }, 地板)).toEqual([]);
+    // 表里没有这一站 ⇒ 点名（与 `overCeiling` 同罪：那一站没人守）
+    expect(过期格({ 站: 'b', 整帧: 1, 本体: 1, 阴影趟: 1 }, 地板).join('\n')).toMatch(/地板表里没有这一站 "b"/);
+    expect(过期格({ 站: 'a', 整帧: 1, 本体: 1, 阴影趟: 1 }, undefined).join('\n')).toMatch(/地板表里没有这一站 "a"/);
+  });
+
+  it('反面控制：B154 那个形状（288 对过期地板 267）用真表喂得出来，控制臂不恒红', () => {
+    const 读数 = { 站: ZONE_IDS.HUB, 整帧: 288, 本体: 226, 阴影趟: DRAW_CALL_FLOORS[ZONE_IDS.HUB].shadow };
+    const 过期地板 = { ...DRAW_CALL_FLOORS, [ZONE_IDS.HUB]: { ...DRAW_CALL_FLOORS[ZONE_IDS.HUB], frame: 267 } };
+    expect(过期格(读数, 过期地板).join('\n'), 'hub 整帧 288 对地板 267 没点名 ⇒ 这条判据是恒绿的')
+      .toMatch(/地板过期\[hub\.frame\] 读数 288 > 地板 267/);
+    // 控制臂：地板换回真源那份（288），同一批读数一条都不报 ⇒ 上面那条不是恒红
+    expect(过期格(读数, DRAW_CALL_FLOORS), `真地板下不该有新高：${JSON.stringify(过期格(读数, DRAW_CALL_FLOORS))}`).toEqual([]);
+  });
+
+  it('门自己逐格比（接线腿：调用点、打印、与**不进退出码**）', () => {
+    // 调用点，不是词面 —— 一句 `import { 过期格 }` 或一段注释都能骗过 toContain
+    expect(脚本源, '脚本没真的逐格比本轮读数与地板').toMatch(/= 过期格\(读数, 名册\.floors\)/);
+    expect(脚本源, '逐格的结果没打出来（只进桶不进日志 = 下一次还是没人看见）').toMatch(/console\.log\(`perf-smoke ⚠ \$\{句\}`\)/);
+    expect(脚本源, '少了末尾那句总结（不带"不改退出码"这句话，⚠ 会被读成红）').toMatch(/perf-smoke 地板过期/);
+    /**
+     * **地板过期不许进退出码**，这条也得钉：桶只喂日志。
+     * 有人想"把出处问题也记成红"，只要加一行 `越线.push(...地板过期)` —— 没有这条腿它就是绿的。
+     * 而那一行的后果不是红本身，是**学会把红当噪声跳过**（切片12 头部那句"世界在动不是代码的红"）。
+     */
+    expect(脚本源, '地板过期被并进了越线或退出码（把出处问题记成了性能回归的红）')
+      .not.toMatch(/越线\.push\(\.\.\.地板过期\)|failures\s*=[^;\n]*地板过期/);
+    // 地板表与名册也要对账（缺站 / 多站两条都问，复用那两条通用判定）
+    expect(脚本源, '脚本没有对账地板表的缺站').toMatch(/missingCeilings\(名册\.stationIds, 名册\.floors\)/);
+    expect(脚本源, '脚本没有对账地板表的多站').toMatch(/extraCeilings\(名册\.stationIds, 名册\.floors\)/);
+  });
+
+  it('本文件不再留地板抄本（B156 的形状就是"两份各自成立"）', () => {
+    const 本文 = readFileSync(join(process.cwd(), 'tests', 'draw-call-budget.test.js'), 'utf8');
+    expect(本文, '本文件里又长出一份逐站地板表（数必须在 src 那一处）').not.toMatch(/frame:\s*\{\s*hub:\s*\d+,/);
+    expect(本文, '本文件里又出现了一份 body 逐站表').not.toMatch(/body:\s*\{\s*hub:\s*\d+,/);
   });
 });
