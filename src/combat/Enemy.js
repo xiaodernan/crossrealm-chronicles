@@ -146,6 +146,10 @@ export class Enemy {
 
     this.mesh = this.createMesh(config);
     this.mesh.userData.enemy = this;
+    // 本体组直接挂 `scene` 根，所以榜（`shadowCensus` 的 `归属标签`）以前一律读 `(直属scene) / body`
+    // —— space 站实测 67 笔挤在一格，问不出是哪一类怪。名取传进来的 `bossId ?? type`（不另立名册），
+    // 且**按类聚合、不逐只点名**：榜是按标签数笔数的，一只一格会把前十格刷成流水号。
+    this.mesh.name = `enemy:${config.bossId ?? config.type}`;
     this.updateMeshY();
     scene.add(this.mesh);
 

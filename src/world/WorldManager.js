@@ -227,6 +227,9 @@ export class WorldManager {
 
   buildHubLandmarks() {
     const hub = new THREE.Group();
+    // 顶层组要有名（榜读「顶层组名 / 件名」，没名一律 `(直属scene)`）：这一族不归 BaseZone 管，
+    // 所以切片17 的 `zone:` 前缀盖不到它 —— 中央石柱那一笔在榜上以前问不出是谁家的。
+    hub.name = 'hub:landmarks';
     // 枢纽组挂在 `this` 上：`dispose()` 要拆得到它 —— 改前它是这一处的局部变量，
     // 外面谁也拿不到（"造了没人能拆"的一种）。
     this.hubGroup = hub;

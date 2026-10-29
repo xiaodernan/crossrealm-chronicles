@@ -54,6 +54,8 @@ export class CollectibleManager {
 
       const y = this.world.getGroundHeight(c.x, c.z);
       group.position.set(c.x, y, c.z);
+      // 逐个点名：`c.id` 就是开没开的那把钥匙（`stats.chestsOpened` 存它），榜上因此能问出"是哪一口箱"
+      group.name = `chest:${c.id}`;
       this.scene.add(group);
 
       this.chests.push({

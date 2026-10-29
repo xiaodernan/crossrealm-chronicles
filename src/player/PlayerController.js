@@ -130,6 +130,10 @@ export class PlayerController {
 
     this.mesh.position.copy(this.position);
 
+    // 玩家自己也是顶层组：榜上那两笔（GLB 节点名 `vanguard_Mesh` / `vanguard_visor`）以前读成
+    // `(直属scene)`，看不出是玩家 —— 节点名是资产带来的，不是我们的归属键。
+    this.mesh.name = 'player';
+
     scene.add(this.mesh);
 
 

@@ -102,6 +102,8 @@ export class NPCManager {
 
       const y = this.world.getGroundHeight(data.x, data.z);
       group.position.set(data.x, y, data.z);
+      // 逐个点名（id 是内容表里的唯一键）：NPC 只有几个，榜上分开不炸行
+      group.name = `npc:${data.id}`;
       this.scene.add(group);
 
       // `material` 挂在这一条上：`dispose()` 要逐个释放它（身体材质是逐人一份的）
