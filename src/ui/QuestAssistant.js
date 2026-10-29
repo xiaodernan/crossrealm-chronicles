@@ -1,7 +1,7 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText, keyText } from './keyHints.js';
 import { applyTranslations, t } from '../engine/i18n.js';
-import { BOSS_STAT_KEYS, objectiveDesc } from '../content/objectives.js';
+import { BOSS_STAT_KEYS, objectiveDesc, objectiveTitle } from '../content/objectives.js';
 import { bossById } from '../content/bossRoster.js';
 import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
@@ -91,7 +91,7 @@ export class QuestAssistant {
       } else if (!q) {
         this._statusEl.textContent = t('qa_status_all_done');
       } else {
-        this._statusEl.textContent = t('qa_status_quest', { ch: this.game.quests.chapter, title: t(q.title) });
+        this._statusEl.textContent = t('qa_status_quest', { ch: this.game.quests.chapter, title: t(objectiveTitle(q, this.game.quests.stats)) });
       }
     }
     if (this._hintEl) {
@@ -376,7 +376,8 @@ export class QuestAssistant {
       // 现在与下面的 discovery 分支同构 —— 只认任务自己的 `targetId`。
       window.dispatchEvent(new CustomEvent('poi-interact', { detail: { id: q.targetId } }));
     } else if (q.type === 'discovery' && q.targetId) {
-      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: q.targetId, title: t(q.title), text: t(objectiveDesc(q, this.game.quests.stats)) } }));
+      // W-E3 切片36：发现卡的标题也问那处算式（真结局那一步按选中的结局报名）
+      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: q.targetId, title: t(objectiveTitle(q, this.game.quests.stats)), text: t(objectiveDesc(q, this.game.quests.stats)) } }));
     } else if (q.type === 'hits') {
       window.dispatchEvent(new CustomEvent('combat-hit'));
     } else if (BOSS_STAT_KEYS[q.bossId]) {

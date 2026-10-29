@@ -16,14 +16,27 @@
  * ③ **旗标是真的引用**：变体里的旗标名必须**有抉择步设过** ⇒
  *    注册表的不变式核它（否则这一格永远换不了文案，且没有任何报错）；
  * ④ **玩家的那一路真的被兑现**：选了封印与选了研习 ⇒ 同一行的文案不同。
+ *
+ * ## 切片36 补的第二层（同一处算式，三格名册）
+ *
+ * 切片22 只让**进度句**随抉择变；真结局的两个名字与两段结局日志建了格却没人读
+ * （死键账本最后 4 枚）。现在 `descByChoice` / `titleByChoice` / `journalByChoice`
+ * 三格共用一个查法，显示侧一律问它 —— 谁自己读 `q.title`，谁就可能在真结局那一步把名字说错。
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { MAINLINE, objectiveDesc, objectiveRequiresMet, emptyStats, applyStatEvent } from '../src/content/objectives.js';
+import {
+  MAINLINE, objectiveDesc, objectiveJournalByChoice, objectiveRequiresMet, objectiveTitle,
+  emptyStats, applyStatEvent,
+} from '../src/content/objectives.js';
 import { checkObjectiveTable } from '../src/content/registry.js';
 
 const 有变体的行 = MAINLINE.filter((r) => r.descByChoice);
+const 有标题变体的行 = MAINLINE.filter((r) => r.titleByChoice);
+const 有日志变体的行 = MAINLINE.filter((r) => r.journalByChoice);
+/** 三格名册：一处算式（`按抉择取`）服务的全部格子 */
+const 变体格 = ['descByChoice', 'titleByChoice', 'journalByChoice'];
 
 describe('① 一步算式：objectiveDesc', () => {
   it('表里确实有随抉择而变的那一格（口径没空转）', () => {
@@ -49,6 +62,15 @@ describe('② 显示侧都问那处算式', () => {
     for (const rel of ['src/game/QuestSystem.js', 'src/game/StoryJournal.js', 'src/ui/QuestAssistant.js']) {
       const s = 读(rel);
       expect(s, `${rel} 没有问那处算式`).toContain('objectiveDesc');
+    }
+  });
+
+  it('六处显示侧都问 `objectiveTitle`（HUD 两格 / 日志 / 助手 / 指路 / 营火 / 完成提示）', () => {
+    for (const rel of [
+      'src/ui/HUD.js', 'src/game/StoryJournal.js', 'src/ui/QuestAssistant.js',
+      'src/ui/GameGuidePanel.js', 'src/game/RestDialogue.js', 'src/game/QuestSystem.js',
+    ]) {
+      expect(读(rel), `${rel} 没有问标题那处算式`).toContain('objectiveTitle');
     }
   });
 
@@ -79,17 +101,26 @@ describe('② 显示侧都问那处算式', () => {
 });
 
 describe('③ 旗标是真的引用（注册表核它确有抉择步设过）', () => {
-  it('表里每一处变体的旗标都有抉择步设过', () => {
-    const 毛病 = checkObjectiveTable(MAINLINE).filter((s) => s.includes('descByChoice'));
-    expect(毛病, '这些变体引用的旗标没有任何抉择步设过 ⇒ 这一格永远换不了文案').toEqual([]);
+  it('表里每一处变体（三格逐格）的旗标都有抉择步设过', () => {
+    const 毛病 = checkObjectiveTable(MAINLINE).filter((s) => 变体格.some((g) => s.includes(g)));
+    expect(毛病, '这些变体引用的旗标没有任何抉择步设过 ⇒ 这一格永远不会变').toEqual([]);
   });
 
-  it('写一个不存在的旗标 ⇒ 注册表当场点名（控制组）', () => {
-    const 假 = MAINLINE.map((r) => (r.descByChoice
-      ? { ...r, descByChoice: { ...r.descByChoice, choice_never_set: 'obj_true_end_desc_sealed' } }
-      : r));
-    const 毛病 = checkObjectiveTable(假).filter((s) => s.includes('choice_never_set'));
-    expect(毛病.length, '写了一个不存在的旗标却没人报错').toBeGreaterThan(0);
+  it('三格名册没有空转：标题 / 日志两格今天各有一行真写了', () => {
+    expect(有标题变体的行.length, '没有一行带 titleByChoice ⇒ 标题那一格是摆设').toBeGreaterThan(0);
+    expect(有日志变体的行.length, '没有一行带 journalByChoice ⇒ 日志那一格是摆设').toBeGreaterThan(0);
+  });
+
+  it('写一个不存在的旗标 ⇒ 注册表当场点名（控制组，三格各来一次）', () => {
+    for (const [格, 键] of [
+      ['descByChoice', 'obj_true_end_desc_sealed'],
+      ['titleByChoice', 'obj_true_end_sealed_title'],
+      ['journalByChoice', 'obj_true_end_sealed_journal'],
+    ]) {
+      const 假 = MAINLINE.map((r) => (r[格] ? { ...r, [格]: { ...r[格], choice_never_set: 键 } } : r));
+      const 毛病 = checkObjectiveTable(假).filter((s) => s.includes(`${格}.choice_never_set`));
+      expect(毛病.length, `${格} 里写了一个不存在的旗标却没人报错`).toBeGreaterThan(0);
+    }
   });
 });
 
@@ -136,6 +167,71 @@ describe('④ 玩家的那一路真的被兑现', () => {
         expect(ZH_KEYS, `步 "${row.id}" 的变体（${旗标}）在中文表里没有 ${键}`).toContain(键);
         expect(EN_KEYS, `步 "${row.id}" 的变体（${旗标}）在英文表里没有 ${键}`).toContain(键);
         expect(STRINGS_ZH[键], `键 ${键} 在中文表里是空的`).toBeTruthy();
+      }
+    }
+  });
+});
+describe('⑤ 标题与日志也分岔（W-E3 切片36）', () => {
+  const 走 = (row, flag) => {
+    const stats = emptyStats();
+    applyStatEvent(stats, 'choice-made', { flag });
+    return { title: objectiveTitle(row, stats), journal: objectiveJournalByChoice(row, stats) };
+  };
+
+  it('没做过相关抉择 ⇒ 标题回原样、分支日志为空（别把结局提前说出口）', () => {
+    for (const row of 有标题变体的行) {
+      expect(objectiveTitle(row, emptyStats()), `步 "${row.id}" 没抉择却换了名字`).toBe(row.title);
+    }
+    for (const row of 有日志变体的行) {
+      expect(objectiveJournalByChoice(row, emptyStats()), `步 "${row.id}" 没抉择却写下了结局`).toBeUndefined();
+    }
+  });
+
+  it('两个结局的名字与日志各不相同（同一行，选了哪条读哪条）', () => {
+    const row = 有标题变体的行[0];
+    const 旗标们 = Object.keys(row.titleByChoice);
+    expect(旗标们.length, '这一格只写了一条变体').toBeGreaterThanOrEqual(2);
+    const 标题们 = 旗标们.map((f) => 走(row, f).title);
+    const 日志们 = 旗标们.map((f) => 走(row, f).journal);
+    expect(new Set(标题们).size, '两条路给的是同一个名字 ⇒ 标题没有分岔').toBe(标题们.length);
+    expect(new Set(日志们).size, '两条路给的是同一段日志 ⇒ 日志没有分岔').toBe(日志们.length);
+    for (const v of [...标题们, ...日志们]) expect(v, '变体键是空的 ⇒ 显示侧会渲染出 undefined').toBeTruthy();
+  });
+
+  it('只认写了变体的行：没写的行不许回落成 row.journal（那是支线那套读者的字段）', () => {
+    const 普通 = MAINLINE.find((r) => !r.journalByChoice && r.journal);
+    expect(普通, '表里没有「带 journal 但不带 journalByChoice」的行 ⇒ 这条腿量不到回落').toBeTruthy();
+    const stats = emptyStats();
+    for (const flag of Object.keys(普通.requires ?? {})) stats.objectiveFlags[flag] = true;
+    expect(objectiveJournalByChoice(普通, stats), '没写变体的行也吐了日志 ⇒ 一夜之间换掉 56 条正文').toBeUndefined();
+  });
+
+  it('资格没齐也照样分岔：名字不随 requires 收回去（B155 同一条口径）', () => {
+    for (const 格 of ['titleByChoice', 'journalByChoice']) {
+      const row = MAINLINE.filter((r) => r[格])[0];
+      expect(Object.keys(row.requires ?? {}).length, '这一行没有 requires ⇒ 量不到资格门').toBeGreaterThan(0);
+      const stats = emptyStats();
+      const [旗标, 键] = Object.entries(row[格])[0];
+      applyStatEvent(stats, 'choice-made', { flag: 旗标 });
+      expect(objectiveRequiresMet(row, stats), '夹具失效：没出门就已经够格了').toBe(false);
+      const got = 格 === 'titleByChoice' ? objectiveTitle(row, stats) : objectiveJournalByChoice(row, stats);
+      expect(got, `资格没齐时把「${旗标}」的 ${格} 收回去 ⇒ 玩家拿到的名字不是自己选的那条`).toBe(键);
+    }
+  });
+});
+describe('⑥ 三格变体指向的键都在双表里（切片36 补的那一半）', () => {
+  it('titleByChoice / journalByChoice 的每个键两张表都登记且非空', async () => {
+    const { STRINGS_ZH, STRING_KEYS: ZH_KEYS } = await import('../src/content/strings.zh.js');
+    const { STRING_KEYS: EN_KEYS } = await import('../src/content/strings.en.js');
+    for (const 格 of ['titleByChoice', 'journalByChoice']) {
+      const 行们 = MAINLINE.filter((r) => r[格]);
+      expect(行们.length, `没有一行带 ${格} ⇒ 这条腿空转`).toBeGreaterThan(0);
+      for (const row of 行们) {
+        for (const [旗标, 键] of Object.entries(row[格])) {
+          expect(ZH_KEYS, `步 "${row.id}" 的 ${格}（${旗标}）在中文表里没有 ${键}`).toContain(键);
+          expect(EN_KEYS, `步 "${row.id}" 的 ${格}（${旗标}）在英文表里没有 ${键}`).toContain(键);
+          expect(STRINGS_ZH[键], `键 ${键} 在中文表里是空的`).toBeTruthy();
+        }
       }
     }
   });

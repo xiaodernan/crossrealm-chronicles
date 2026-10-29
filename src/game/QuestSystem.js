@@ -3,7 +3,7 @@ import { dungeonDefOf, TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
-  objectiveChosen, objectiveReward, objectiveDesc, applyObjectiveFlags,
+  objectiveChosen, objectiveReward, objectiveDesc, objectiveTitle, applyObjectiveFlags,
 } from '../content/objectives.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';
@@ -354,7 +354,8 @@ export class QuestSystem {
     if (finished && 回报 > 0) this.game?.stats?.addSouls(回报);
     // 提示里那个 title 是**文案键** ⇒ 展开在播出的那一刻（改前直接传了键，
     // 玩家看到的是 "任务完成：obj_anchor_title"）。
-    if (finished) this.dialog.toast(t('quest_toast_task_complete', { title: t(finished.title), reward: 回报 }));
+    // W-E3 切片36：标题问那处算式 —— 真结局那一步按玩家选的结局报名（封印 / 研习）
+    if (finished) this.dialog.toast(t('quest_toast_task_complete', { title: t(objectiveTitle(finished, this.stats)), reward: 回报 }));
     // W-B6 切片4：记录任务完成
     if (finishedId) this.game?.stats?.onQuestCompleted(finishedId);
     if (this.questIndex >= MAINLINE.length) {

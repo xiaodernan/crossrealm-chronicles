@@ -1,6 +1,7 @@
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 import { keyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
+import { objectiveTitle } from '../content/objectives.js';
 
 /** 常驻游戏指引 — 告诉玩家现在该干什么 */
 export class GameGuidePanel {
@@ -55,7 +56,7 @@ export class GameGuidePanel {
       if (this.hintEl) this.hintEl.textContent = keyText(t('guide_hint_complete'));
       return;
     }
-    if (this.titleEl) this.titleEl.textContent = t('guide_title_chapter_prefix', { chapter: this.game.quests.chapter }) + t(q.title);
+    if (this.titleEl) this.titleEl.textContent = t('guide_title_chapter_prefix', { chapter: this.game.quests.chapter }) + t(objectiveTitle(q, this.game.quests.stats));
     if (this.stepEl) this.stepEl.textContent = this.game.quests.getProgressText();
     const wp = this.game.quests.getQuestWaypoint();
     if (this.hintEl) {

@@ -3,7 +3,7 @@ import { isDungeonBossId, bossById } from '../content/bossRoster.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';
-import { objectiveDesc } from '../content/objectives.js';
+import { objectiveDesc, objectiveJournalByChoice, objectiveTitle } from '../content/objectives.js';
 
 const GAME_STORYJOURNAL = 'game/StoryJournal';
 const journalOn = (name, handler) => on(name, handler, GAME_STORYJOURNAL);
@@ -150,12 +150,16 @@ export class StoryJournal {
       this._lastQuestIndex = idx;
       const q = e.detail.current;
       if (!q) return;
+      const stats = this.game?.quests?.stats;
       this.addSilent({
         id: `quest-active-${idx}`,
         category: 'quest',
-        title: t(q.title),
+        // W-E3 切片36：标题也问那处算式 —— 真结局的两个名字（封印 / 研习）在这里分开
+        title: t(objectiveTitle(q, stats)),
         // W-E3 切片22：日志的正文也问那处算式（抉择那一步之后的真结局会按选中的那条走）
-        text: t(objectiveDesc(q, this.game?.quests?.stats) ?? q.hint ?? 'quest_journal_default_text'),
+        // 切片36：写了 `journalByChoice` 的行（今天只有真结局）用**结局自己的那一句**简报，
+        // 其余各行仍沿用进度句（主线 56 步的 `journal` 格归支线那套读者，不在这里回落）。
+        text: t(objectiveJournalByChoice(q, stats) ?? objectiveDesc(q, stats) ?? q.hint ?? 'quest_journal_default_text'),
         chapter: e.detail.chapter,
       });
     });

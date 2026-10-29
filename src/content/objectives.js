@@ -649,6 +649,16 @@ export const OBJECTIVES = [
       choice_void_sealed: 'obj_true_end_desc_sealed',
       choice_void_studied: 'obj_true_end_desc_studied',
     },
+    // W-E3 切片36：两个结局**各有各的名字与日志** —— 死键账本最后 4 枚在这里接线。
+    // 标题进 HUD / 日志条目 / 完成提示 / 发现卡；日志进暂存日志的那一条正文。
+    titleByChoice: {
+      choice_void_sealed: 'obj_true_end_sealed_title',
+      choice_void_studied: 'obj_true_end_studied_title',
+    },
+    journalByChoice: {
+      choice_void_sealed: 'obj_true_end_sealed_journal',
+      choice_void_studied: 'obj_true_end_studied_journal',
+    },
     // W-E3 切片23：分支图——flag 名映射到下一步的行 id
     branch: {
       choice_void_sealed: 'ch4-complete',
@@ -1324,21 +1334,26 @@ export function objectiveReward(row, stats) {
 }
 
 /**
- * 这一步的**文案键**（W-E3 切片22）：若有「随抉择而变」的变体，
- * 按玩家**已经记下**的那个旗标取那一条；没有变体、或玩家还没做过相关抉择 ⇒ 回原样。
+ * 「随抉择而变」的那一层：按玩家**已经记下**的那个旗标取对应文案键；
+ * 没有这一族的变体、或玩家还没做过相关抉择 ⇒ `undefined`（调用方各自回自己的原值）。
  *
  * 为什么要这样：抉择那一族（W-E3 切片18）只把"玩家选了哪条"**记下来**，
  * 后面的内容完全不看它 ⇒ 抉择成了一句没兑现的话。
- * 而"哪一条被选中"这件事**只能有一处算式** —— 显示侧（进度行 / 日志 / 自动通关）
- * 各自去读 `row.desc` 就成了四份各说各话的真相（改一处另三处不动时不报错，
+ * 而"哪一条被选中"这件事**只能有一处算式** —— 显示侧（进度行 / 标题 / 日志 / 播报）
+ * 各自去读 `row.desc` / `row.title` 就成了几份各说各话的真相（改一处另几处不动时不报错，
  * 只是玩家看到的文案与实际选的那条对不上）。
  *
  * 旗标名在别处（抉择那一步的 `choices[].flag`）出现时是**引用**而不是第二份真相：
  * 注册表的不变式核"这个旗标确实有某一步的 choices 设过它"（与 `requires` 同一套口径）。
+ *
+ * W-E3 切片36：这一处从前只认 `descByChoice`（切片22），真结局的两个名字
+ * （`obj_true_end_sealed_title` / `obj_true_end_studied_title`）与两段结局日志
+ * 建了格却没接线 —— 死键账本最后 4 枚就是它们。现在"哪一格随抉择变"是一张
+ * 三格名册（`descByChoice` / `titleByChoice` / `journalByChoice`），查法仍然只有这一处。
  */
-export function objectiveDesc(row, stats) {
-  const 变体 = row?.descByChoice;
-  if (!变体) return row?.desc;
+function 按抉择取(row, 变体格, stats) {
+  const 变体 = row?.[变体格];
+  if (!变体) return undefined;
   // B155：这一格**不许**再问 `objectiveRequiresMet(row, stats)`（切片25 曾加过、已摘掉）。
   // 抉择是既成事实 —— `decisions` 只在玩家真的点了按钮那一刻被写；这句话说的是
   // "玩家选了哪条"。而 `requires` 管的是"这一步够不够格**完成 / 推进**"（切片24：
@@ -1350,7 +1365,34 @@ export function objectiveDesc(row, stats) {
   for (const [旗标, 键] of Object.entries(变体)) {
     if (stats?.decisions?.has(旗标)) return 键;
   }
-  return row?.desc;
+  return undefined;
+}
+
+/** 进度句（`desc`）：有变体且玩家选过 ⇒ 那一条；否则原样。 */
+export function objectiveDesc(row, stats) {
+  return 按抉择取(row, 'descByChoice', stats) ?? row?.desc;
+}
+
+/**
+ * 这一步的**标题**（W-E3 切片36）：真结局有两个名字 ——
+ * 封印那条叫「真结局：封印虚空」，研习那条叫「真结局：研习虚空」。
+ * 显示侧（HUD 任务格 / 日志条目 / 日志面板 / 完成提示 / 发现卡 / 指路助手 / 营火进度）
+ * 一律问这一格 —— 谁自己读 `q.title`，谁就可能在真结局那一步把名字说错。
+ */
+export function objectiveTitle(row, stats) {
+  return 按抉择取(row, 'titleByChoice', stats) ?? row?.title;
+}
+
+/**
+ * 这一步的**分支日志**（W-E3 切片36）：**只有**写了 `journalByChoice` 的行才有
+ * ⇒ 没写就回 `undefined`，调用方沿用进度句。
+ *
+ * 为什么不回落到 `row.journal`：主线 56 步都带 `journal` 格，但那一格今天是
+ * 支线那套读者（`SideQuestSystem`）的字段，主线日志正文历来是进度句 ——
+ * 在这里顺手回落，等于一夜之间把 56 条日志的正文全换掉（那是另一片的事）。
+ */
+export function objectiveJournalByChoice(row, stats) {
+  return 按抉择取(row, 'journalByChoice', stats);
 }
 
 export function objectiveDone(def, stats) {

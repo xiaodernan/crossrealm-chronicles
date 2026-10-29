@@ -6,6 +6,7 @@ import { emit } from '../engine/EventBus.js';
 import { REST_DIALOGUES } from '../content/restDialogues.js';
 import { keyText } from '../ui/keyHints.js';
 import { t } from '../engine/i18n.js';
+import { objectiveTitle } from '../content/objectives.js';
 
 function highlightKeywords(text) {
   if (!text) return '';
@@ -96,7 +97,9 @@ export class RestDialogue {
     if (nodeId === 'quest' && tree === REST_DIALOGUES.hub) {
       const q = this.game.quests;
       text = q.current
-        ? t('rest_dialogue_progress_fmt', { title: q.current.title, progress: q.getProgressText(), hint: q.getAssistantHint() })
+        // W-E3 切片36：营火那句进度也问那处算式 —— 改前这里递的是**键名**（玩家读到
+        // "obj_anchor_title"），只是中文表里谁都把它当成一个词。
+        ? t('rest_dialogue_progress_fmt', { title: t(objectiveTitle(q.current, q.stats)), progress: q.getProgressText(), hint: q.getAssistantHint() })
         : t('rest_dialogue_main_complete', { autoPlay: keyText('{autoPlay}') });
     }
 

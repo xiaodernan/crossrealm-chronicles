@@ -9,6 +9,7 @@ import { refreshKeyText, setHintDevice, keyText } from './keyHints.js';
 import { focusFirstItem, parkFocus, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 import { inputDeviceLabel } from '../engine/InputDevice.js';
 import { t } from '../engine/i18n.js';
+import { objectiveTitle } from '../content/objectives.js';
 
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 import { applyBarTheme } from './barTheme.js';
@@ -450,7 +451,8 @@ buildHUD() {
       const q = e.detail.current;
       document.getElementById('chapter-display').textContent = `Chapter ${e.detail.chapter ?? 1}`;
       if (q) {
-        document.getElementById('quest-title').textContent = t(q.title);
+        // W-E3 切片36：标题问那处算式（真结局那一步按选中的结局报名）
+        document.getElementById('quest-title').textContent = t(objectiveTitle(q, this.game.quests?.stats));
         document.getElementById('quest-progress').textContent = this.game.quests.getProgressText();
       } else {
         document.getElementById('quest-title').textContent = t('hud_quest_empty_title');
@@ -739,7 +741,9 @@ buildHUD() {
     }).join('');
     let questHtml = '';
     if (q.current) {
-      questHtml = `<p class="quest-current"><strong>Ch${q.chapter} · ${t('hud_quest_in_progress')}</strong>${q.current.title}<br><span>${q.getProgressText()}</span></p>`;
+      // W-E3 切片36：这一格从前直接把**键名**摆进日志面板（玩家读到 "obj_anchor_title"），
+      // 与 HUD 任务格是同一处算式；截图与走查都没点出来，因为中文表里那个形状太像一个词了。
+      questHtml = `<p class="quest-current"><strong>Ch${q.chapter} · ${t('hud_quest_in_progress')}</strong>${t(objectiveTitle(q.current, q.stats))}<br><span>${q.getProgressText()}</span></p>`;
     }
     const items = j.getFiltered(tab).map((d) =>
       `<li><span class="journal-cat">${cats[d.category] ? t(cats[d.category]) : d.category}</span><strong>${d.title}</strong><span>${d.text}</span></li>`
