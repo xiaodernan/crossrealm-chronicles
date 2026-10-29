@@ -14,6 +14,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v21', version: 21 },
   { key: 'crossrealm_save_v20', version: 20 },
   { key: 'crossrealm_save_v19', version: 19 },
   { key: 'crossrealm_save_v18', version: 18 },
@@ -447,6 +448,22 @@ function migrateV19toV20(d) {
   return d;
 }
 
+/**
+ * v20 → v21：**存档记住"走到哪一步"的 id**（W-E3 切片38）。
+ *
+ * 这一跳不改下标语义：它只是把"今天这个下标是哪一步"抄成 id 写进档里。
+ * 从这一版起，主线插步**不必再配迁移** —— 读档先认 id，认不出才回落下标
+ * （`QuestSystem.restoreFromSave`）。老档（v ≤ 20）仍然按各自的插入点迁移，
+ * 那些跳不能删：它们校的是当年那张表的下标。
+ */
+function migrateV20toV21(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  // v20 的表 = 今天的表（这一跳没动内容），所以下标直接查得到那一步的 id
+  quests.currentId = Number.isInteger(idx) ? (MAINLINE[idx]?.id ?? null) : null;
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -465,6 +482,7 @@ export const MIGRATIONS = {
   17: migrateV17toV18,
   18: migrateV18toV19,
   19: migrateV19toV20,
+  20: migrateV20toV21,
 };
 
 /**

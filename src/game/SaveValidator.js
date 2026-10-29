@@ -1,7 +1,7 @@
 /** 存档结构校验 — 版本号为 schema 的唯一权威，迁移链从这里取目标版本 */
 import { t } from '../engine/i18n.js';
 
-export const CURRENT_VERSION = 20;
+export const CURRENT_VERSION = 21;
 
 const VERSION = CURRENT_VERSION;
 
@@ -42,6 +42,13 @@ export class SaveValidator {
       issues.push(t('save_issue_missing_quests'));
     } else {
       if (data.quests.index === undefined) issues.push(t('save_issue_quests_missing_index'));
+      // v21（W-E3 切片38）：「走到哪一步」的 **id** 入档。必填 —— 缺了由迁移链补
+      // （v20 → v21 按旧表的下标填），读档侧不兜底：兜底会让"没迁移的档"看起来像好档。
+      // 通关档没有"当前步" ⇒ 合法值是字符串或 null。
+      if (data.quests.currentId === undefined) issues.push(t('save_issue_quests_missing_current_id'));
+      else if (data.quests.currentId !== null && typeof data.quests.currentId !== 'string') {
+        issues.push(t('save_issue_quests_current_id_not_string'));
+      }
       if (!data.quests.stats) issues.push(t('save_issue_quests_missing_stats'));
       else SaveValidator.validateQuestStats(data.quests.stats, issues);
     }

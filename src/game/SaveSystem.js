@@ -78,6 +78,10 @@ export class SaveSystem {
       fastTravel: game.fastTravel?.unlocked ?? false,
       quests: {
         index: game.quests.questIndex,
+        // W-E3 切片38：**这一步的 id** 也入档 —— 下标只是**今天这张表**里的位置，
+        // 表里插一步，同一个下标就指向另一件事（于是每一次插步都得配一条迁移去挪老档）。
+        // 记下 id 之后，读档先认 id、认不出才回落下标 ⇒ 以后插步不必再写迁移。
+        currentId: game.quests.current?.id ?? null,
         completed: game.quests.completed,
         chapter: game.quests.chapter,
         // 账本形状由 `content/objectives.js` 推（W-B3 切片2）：这里以前逐格手抄十四行，

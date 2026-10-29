@@ -99,7 +99,8 @@ describe('② 读档以表为准：落点、章节、以及坏档要留下理由
     probe.questIndex = 12;
     probe.chapter = chapterAt(12);
     const { out, got } = restore(q, { index: probe.questIndex, chapter: probe.chapter, completed: false });
-    expect(out).toEqual({ index: 12, chapter: chapterAt(12), 采纳的: { index: true, chapter: true } });
+    // 切片38：老档没有 `currentId` ⇒ `采纳的.id` 是 false（回落下标），其余照旧
+    expect(out).toEqual({ index: 12, chapter: chapterAt(12), 采纳的: { id: false, index: true, chapter: true } });
     expect(got, '合法的档不该喊话').toEqual([]);
     expect(q.current.id).toBe(MAINLINE[12].id);
   });
@@ -257,5 +258,66 @@ describe('③ `requires` 今天的地位：被全表序保证，被 MAINLINE 漏
     const issues = checkObjectiveTable(表);
     expect(issues.some((m) => m.includes(需要的flag) && m.includes('没有任何一行'
       .replace('一行', '一步的 flags 设过它'))), `移走 "${需要的flag}" 的生产者，不变式没意见？`).toBe(true);
+  });
+});
+
+describe('③ 存档记住"走到哪一步"的 id（W-E3 切片38）', () => {
+  const 真结局 = MAINLINE.find((r) => r.id === 'true-end');
+  const 锚点 = MAINLINE.find((r) => r.id === 'anchor');
+
+  it('写档带上 currentId：就是当前那一步的 id（通关档是 null）', () => {
+    const q = newQuests();
+    q.questIndex = MAINLINE.indexOf(真结局);
+    // `toData` 要的是一份够用的宿主（这里只要它走到 quests 那一格，别的格子给最小形状）
+    const host = {
+      player: { position: { x: 0, y: 0, z: 0 }, yaw: 0, pitch: 0, combat: { hp: 1, stamina: 1 } },
+      stats: { toJSON: () => ({}) },
+      spells: { mana: 1 },
+      settings: { data: {} },
+      quests: q,
+    };
+    const data = SaveSystem.toData(host);
+    expect(data.quests.currentId, '写档没记这一步的 id ⇒ 插步之后老档会被送到另一步').toBe('true-end');
+
+    q.questIndex = MAINLINE.length;
+    q.completed = true;
+    const 通关 = SaveSystem.toData(host);
+    expect(通关.quests.currentId, '通关档没有"当前步" ⇒ 必须是 null（不是 undefined、不是空串）').toBeNull();
+  });
+
+  it('id 与下标打架时以 id 为准（正文里插了步：同一步的下标变了，id 没变）', () => {
+    const q = newQuests();
+    const 真下标 = MAINLINE.indexOf(真结局);
+    // 造一份 **插步之后** 的档：id 说"真结局"，下标还停在插步之前的那一格
+    const { out, got } = restore(q, { index: 3, currentId: 'true-end', chapter: 1 });
+    expect(q.questIndex, '以 index 为准了 —— 玩家会被送到第 3 步').toBe(真下标);
+    expect(out.index).toBe(真下标);
+    expect(out.采纳的.id, '采纳的是 id（不是下标）').toBe(true);
+    expect(got.join('\n'), '表变动过却没留一句理由').toContain('true-end');
+  });
+
+  it('id 认不出来（那一步被删了）⇒ 回落下标，并留一句能读懂的话', () => {
+    const q = newQuests();
+    const { out, got } = restore(q, { index: MAINLINE.indexOf(锚点), currentId: 'a-step-that-no-longer-exists', chapter: 1 });
+    expect(q.questIndex).toBe(MAINLINE.indexOf(锚点));
+    expect(out.采纳的.id).toBe(false);
+    expect(got.join('\n'), 'id 认不出却什么都不说').toContain('a-step-that-no-longer-exists');
+  });
+
+  it('两个都没有 ⇒ 从头开始（不许因为"没 id"就把玩家送回第 0 步之外的地方）', () => {
+    const q = newQuests();
+    const { out } = restore(q, {});
+    expect(q.questIndex).toBe(0);
+    expect(out.采纳的.id).toBe(false);
+    expect(out.采纳的.index).toBe(false);
+  });
+
+  it('反向控制：把 id 换成**下一步**的，落点必须跟着 id 走（不是恒等于下标）', () => {
+    const q = newQuests();
+    const 下标 = MAINLINE.indexOf(锚点);
+    const 下一步 = MAINLINE[下标 + 1];
+    const { out } = restore(q, { index: 下标, currentId: 下一步.id, chapter: 1 });
+    expect(q.questIndex, '这条腿没在量 id —— 落点一直等于下标').toBe(下标 + 1);
+    expect(out.采纳的.id).toBe(true);
   });
 });

@@ -39,18 +39,18 @@ describe('存档迁移链', () => {
     for (let v = 1; v < CURRENT_VERSION; v++) expect(MIGRATIONS[v], `v${v}`).toBeTypeOf('function');
   });
 
-  it('v4 档一路升到当前版本（v4 → … → v19 → v20）并通过校验', () => {
+  it('v4 档一路升到当前版本（v4 → … → v20 → v21）并通过校验', () => {
     const { data, from, applied } = migrate(clone(v4));
-    expect([from, applied]).toEqual([4, [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]]);
+    expect([from, applied]).toEqual([4, [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]]);
     expect(data.version).toBe(CURRENT_VERSION);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 
-  it('v5 档走 v6 … v20 十五跳：补出空的 stats.bag、restPointEnhancer、quests.stats.decisions 与 quests.stats.objectiveFlags，其余字段一个都不动', () => {
+  it('v5 档走 v6 … v21 十六跳：补出空的 stats.bag、restPointEnhancer、quests.stats.decisions、objectiveFlags 与 currentId，其余字段一个都不动', () => {
     const legacy = clone(v5);
     const snapshot = clone(v5);
     const { from, data, applied } = migrate(legacy);
-    expect([from, applied]).toEqual([5, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]]);
+    expect([from, applied]).toEqual([5, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]]);
     expect(data.version).toBe(CURRENT_VERSION);
     expect(data.stats.bag).toEqual([]);
     // 迁移只该多出 bag 与 restPointEnhancer 这两格：别处被顺手改写 = 这一跳在偷偷做别的事
@@ -64,9 +64,12 @@ describe('存档迁移链', () => {
     const { restPointEnhancer: _新补的, stats: { bag: _bag, ...没有bag的stats }, ...restRoot } = data;
     // 把这一跳补的那几格去掉之后，其余字段一个都不动
     const 去掉decisions = (o) => { const { decisions: _d, objectiveFlags: _f, ...r } = o; return r; };
+    // v20 → v21 那一跳补的是 quests.currentId（"走到哪一步"的 id）
+    const { currentId: _走到的步, ...没有currentId的quests } = data.quests;
+    expect(_走到的步, 'v20 → v21 那一跳没有补出 currentId').toBe('anchor');
     expect({
       ...restRoot,
-      quests: { ...data.quests, stats: 去掉decisions(data.quests.stats) },
+      quests: { ...没有currentId的quests, stats: 去掉decisions(data.quests.stats) },
       stats: 没有bag的stats,
     }).toEqual({
       ...snapshot,
@@ -516,7 +519,7 @@ it('v8 → v9：主线再长三步，三处插入点各自往后挪（老档落�
     const legacy = clone(v4);
     delete legacy.version;
     const { data, from, applied } = migrate(legacy);
-    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]]);
+    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]]);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 

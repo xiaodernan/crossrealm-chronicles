@@ -1860,6 +1860,8 @@ export const STRINGS_ZH = Object.freeze({
   save_issue_player_not_finite_fmt: 'player.${key} 必须是有限数',
   save_issue_missing_quests: '缺少 quests 对象',
   save_issue_quests_missing_index: 'quests 缺少 index',
+  save_issue_quests_missing_current_id: 'quests 缺少 currentId（走上哪一步的 id）',
+  save_issue_quests_current_id_not_string: 'quests.currentId 必须是字符串或 null',
   save_issue_quests_missing_stats: 'quests 缺少 stats',
   save_issue_quest_stats_not_object: 'quests.stats 必须是对象',
   save_issue_quest_stats_missing_fmt: 'quests.stats 缺少: ${key}',

@@ -1863,6 +1863,8 @@ export const STRINGS_EN = Object.freeze({
   save_issue_player_not_finite_fmt: 'player.${key} must be a finite number',
   save_issue_missing_quests: 'Missing quests object',
   save_issue_quests_missing_index: 'quests is missing index',
+  save_issue_quests_missing_current_id: 'quests is missing currentId (the id of the step you are on)',
+  save_issue_quests_current_id_not_string: 'quests.currentId must be a string or null',
   save_issue_quests_missing_stats: 'quests is missing stats',
   save_issue_quest_stats_not_object: 'quests.stats must be an object',
   save_issue_quest_stats_missing_fmt: 'quests.stats is missing: ${key}',

@@ -163,16 +163,36 @@ export class QuestSystem {
    * 现在这两件事都由表说话，盘上的值只在**与表一致**时被采纳；不一致就是坏档，
    * 当场留下一条能读懂的理由，而不是静默地把玩家放进一个表说不可能存在的位置。
    *
-   * @param {{ index?: unknown, completed?: unknown, chapter?: unknown }} saved `data.quests`
-   * @returns {{ index: number, chapter: number, 采纳的: { index: boolean, chapter: boolean } }}
+   * W-E3 切片38：**先认 id，再认下标**。下标说的是"今天这张表里的第几格"——表里插一步，
+   * 同一个下标就指向另一件事；id 说的是"哪一步"，插步挪不动它。
+   * （老档没有这一格，读档侧不兜底：缺格由迁移链补，v20 → v21 那一跳就是干这个的。）
+   *
+   * @param {{ index?: unknown, currentId?: unknown, completed?: unknown, chapter?: unknown }} saved `data.quests`
+   * @returns {{ index: number, chapter: number, 采纳的: { id: boolean, index: boolean, chapter: boolean } }}
    */
   restoreFromSave(saved = {}) {
     const 上限 = MAINLINE.length - 1;
     const raw = saved?.index;
     const 是整数 = Number.isInteger(raw);
-    const 落点 = 是整数 ? Math.min(Math.max(raw, 0), 上限) : 0;
-    const 采纳了index = 是整数 && raw >= 0 && raw <= 上限;
-    if (!采纳了index) {
+    const 按下标 = 是整数 ? Math.min(Math.max(raw, 0), 上限) : 0;
+    const 采纳了下标 = 是整数 && raw >= 0 && raw <= 上限;
+    // 按 id 认：认得出来就以它为准（插步之后同一步的 id 不变、下标变了）
+    const 按id = typeof saved?.currentId === 'string'
+      ? MAINLINE.findIndex((r) => r.id === saved.currentId)
+      : -1;
+    const 采纳了id = 按id >= 0;
+    if (采纳了id && 按id !== 按下标) {
+      console.info(`[quests] 存档里的 id "${saved.currentId}" 在表上第 ${按id} 格，`
+        + `下标说第 ${按下标} 格 —— 表变动过，以 id 为准`);
+    }
+    // id 在场却在表上找不到 = 那一步被删/改名了。静默回落下标是最难查的一种坏档形状
+    // （玩家被送到相近的一步，看起来一切正常）⇒ 留一句能读懂的话。
+    if (!采纳了id && typeof saved?.currentId === 'string') {
+      console.warn(`[quests] 存档里的 id "${saved.currentId}" 在表上找不到（那一步可能改名或删掉了），`
+        + `已按下标 ${按下标} 继续`);
+    }
+    const 落点 = 采纳了id ? 按id : 按下标;
+    if (!采纳了id && !采纳了下标) {
       console.warn(`[quests] 存档里的 index ${JSON.stringify(raw)} 不能落在这条 ${MAINLINE.length} 步的主线上，`
         + `已按第 ${落点} 步（"${MAINLINE[落点]?.id}"）继续`);
     }
@@ -185,7 +205,7 @@ export class QuestSystem {
         + `（"${MAINLINE[落点]?.id}"）在表上属于第 ${该在哪章} 章 —— 以表为准`);
     }
     this.chapter = 该在哪章;
-    return { index: 落点, chapter: 该在哪章, 采纳的: { index: 采纳了index, chapter: 采纳了章节 } };
+    return { index: 落点, chapter: 该在哪章, 采纳的: { id: 采纳了id, index: 采纳了下标, chapter: 采纳了章节 } };
   }
 
   /**
