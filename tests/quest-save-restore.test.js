@@ -165,14 +165,22 @@ describe('② 读档以表为准：落点、章节、以及坏档要留下理由
     expect(收话.join(' ; ')).toMatch(/不能落在这条/);
   });
 
-  it('play 与 load 用同一把尺：一路走完 32 步，每一步的 chapter 都等于位置算出来的那一个', () => {
+  it('play 与 load 用同一把尺：走完主线时每一步的 chapter 都等于位置算出来的那一个（分支只跳过没选的那条路）', () => {
     const q = newQuests();
     const 走过 = [];
     while (q.current && !q.completed) {
-      走过.push({ i: q.questIndex, 系统章: q.chapter, 位置章: chapterAt(q.questIndex) });
+      走过.push({ i: q.questIndex, id: q.current.id, 系统章: q.chapter, 位置章: chapterAt(q.questIndex) });
       q.advance();
     }
-    expect(走过.length, '一步都没走 —— 这条断言不能算通过').toBe(MAINLINE.length);
+    /**
+     * W-E3 切片35：抉择之后**真的分岔** ⇒ 一个周目只走两条路里的一条，
+     * 没选的那一步仪式被 `branch` 跳过 ⇒ 走过的行数 = 表长 − 1。
+     * 这一条同时是那条分支的**行为见证**：被跳过的必须是"没选的那条"，不能是别的行。
+     */
+    expect(走过.length, '一步都没走 —— 这条断言不能算通过').toBe(MAINLINE.length - 1);
+    const 到过 = new Set(走过.map((s) => s.id));
+    const 没到 = MAINLINE.filter((r) => !到过.has(r.id)).map((r) => r.id);
+    expect(没到, '被跳过的不是「没选的那条仪式」—— 分支跳错了格子').toEqual(['study-rite']);
     const 不一致 = 走过.filter((s) => s.系统章 !== s.位置章);
     expect(不一致, `这些步上系统自报的章节与表上位置不符：\n${JSON.stringify(不一致)}`).toEqual([]);
     expect(new Set(走过.map((s) => s.系统章)).size, '整条主线只出现过一章 —— 门控没生效').toBeGreaterThan(1);

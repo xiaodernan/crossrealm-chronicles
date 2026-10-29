@@ -97,6 +97,28 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     expect(qs.stats.decisions.has(旗标), '派发了却没记到账 ⇒ 那条监听被摘掉或不再调 `applyStatEvent`').toBe(true);
   });
 
+  it('抉择之后真的走到不同的下一步（W-E3 切片35：分支不是"文案不同"，是"去哪儿不同"）', () => {
+    const 抉择 = MAINLINE.findIndex((r) => r.id === 'choice-void');
+    expect(抉择, '主线里找不到抉择步').toBeGreaterThan(0);
+    const 走一步 = (flag) => {
+      // 每次从干净的抉择账开始：真流程里抉择步只过一次，账上不可能同时有两条
+      qs.stats.decisions.clear();
+      qs.questIndex = 抉择;
+      // 抉择步自己的门槛：Boss 打完 + 碑文读过（与表上那两枚 requires 同值）
+      qs.stats.objectiveFlags = { voidBossDefeated: true, hasVoidTablet: true };
+      qs.recordChoice(flag);        // 走真实那条路：派发 choice-made ⇒ 记账 ⇒ 判进度
+      return qs.current?.id;
+    };
+    expect(走一步('choice_void_sealed'), '选了封印，下一步却不是封印仪式').toBe('seal-rite');
+    expect(走一步('choice_void_studied'), '选了研习，下一步却不是研习仪式').toBe('study-rite');
+    // 两条路各自汇回同一格：仪式走完（那一枚 POI 被发现）就回到世界之锚
+    const 仪式 = MAINLINE.findIndex((r) => r.id === 'seal-rite');
+    qs.questIndex = 仪式;
+    qs.stats.discoveries.add('seal-stone');
+    qs.checkProgress();
+    expect(qs.current?.id, '封印仪式走完没汇回 true-end').toBe('true-end');
+  });
+
   it('Chapter 1 八步走完就接上第二档（在役表是线性的，章节号只跟着四格门控翻）', () => {
     const titles = [qs.current.title];
     const step = (name, detail) => {

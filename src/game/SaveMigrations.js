@@ -14,6 +14,7 @@ export { CURRENT_VERSION };
 /** 浏览器存储键，从新到旧；旧键迁移成功后保留一份，便于回滚到旧构建 */
 /** 约定：SAVE_KEYS 首项即当前写入键（tests/save-migrations.test.js 断言此不变量） */
 export const SAVE_KEYS = [
+  { key: 'crossrealm_save_v20', version: 20 },
   { key: 'crossrealm_save_v19', version: 19 },
   { key: 'crossrealm_save_v18', version: 18 },
   { key: 'crossrealm_save_v17', version: 17 },
@@ -420,6 +421,32 @@ function migrateV18toV19(d) {
   return d;
 }
 
+/**
+ * v19 → v20：**抉择真的分岔**（W-E3 切片35，B3 的"零分支"那一半）。
+ *
+ * 这一跳**不改存档形状**（与 v16 → v17、v18 → v19 同一类）：加的两步是 `type: 'discovery'`，
+ * 判据读的 `stats.discoveries` 早就在账上 ⇒ 老档缺的只是**主线的下标**。
+ *
+ * 插入点（**旧序列**的下标）：**41** —— 旧 41 是 `true-end`（摸世界之锚）。两步仪式
+ * （`seal-rite` / `study-rite`）插在它与抉择步之间 ⇒ ≥41 的下标各往后挪**两格**：
+ * 停在锚点那一步的 41 落到 43（还是锚点）✓，通关档的 62 落到 64 = 新的 `MAINLINE.length`（仍读作通关）✓，
+ * 抉择步的 40 不动 ✓。
+ *
+ * **老档会跳过这两步仪式**（它们只落在"抉择之后、摸锚点之前"那段窗口里），这是刻意的：
+ * 把已经走到锚点的玩家**拽回**某一步仪式需要按 `stats.decisions` 猜他当年选了哪条，
+ * 猜错就是把玩家送到他没选的那条路上。宁可让老档少看两步新内容，也不替他重写抉择。
+ *
+ * 两处插入同在下标 41 ⇒ 名单里写两次（`偏移后` 按"≤ 旧下标"逐点计数，写一次只挪一格）。
+ */
+export const V19_INSERT_POINTS = [41, 41];
+
+function migrateV19toV20(d) {
+  const quests = d.quests ?? {};
+  const idx = Number(quests.index);
+  if (Number.isInteger(idx)) quests.index = 偏移后(idx, V19_INSERT_POINTS);
+  return d;
+}
+
 export const MIGRATIONS = {
   1: ensureV4Shape, 2: ensureV4Shape, 3: ensureV4Shape,
   4: migrateV4toV5,
@@ -437,6 +464,7 @@ export const MIGRATIONS = {
   16: migrateV16toV17,
   17: migrateV17toV18,
   18: migrateV18toV19,
+  19: migrateV19toV20,
 };
 
 /**

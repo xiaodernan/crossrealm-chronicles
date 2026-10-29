@@ -122,6 +122,19 @@ export class VoidZone extends BaseZone {
       },
       { id: 'void-tablet', color: 0x6688aa }
     );
+
+    // W-E3 切片35：封印之路的落点。与石碑隔开近三十米 ——
+    // 玩家在抉择之后**真的要走一段路**，而不是原地再摸一下。
+    this.addPOI(
+      { x: -28, y: 0, z: 12 },
+      'zone_poi_seal_stone_label',
+      () => {
+        window.dispatchEvent(new CustomEvent('discovery', {
+          detail: { id: 'seal-stone', title: t('obj_seal_rite_title'), text: t('zone_disc_seal_stone_text') },
+        }));
+      },
+      { id: 'seal-stone', color: 0x9fd8ff }
+    );
   }
 
   buildOuterWilds() {

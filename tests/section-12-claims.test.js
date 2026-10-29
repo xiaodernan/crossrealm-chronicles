@@ -276,10 +276,20 @@ describe('③ 残差写成数，不写成形容词', () => {
     expect(段, 'B3 那行没写"本章末步 → 本章门"那串逐对').not.toBeNull();
     expect(段[1].split('、').map((s) => s.trim()), 'B3 那行列的跳转对与 objectives 表不符')
       .toEqual(OBJECTIVES.filter((r) => r.branchTo).map((r) => `${r.id}→${r.branchTo}`));
-    // 而且这五对真的只往"本章门"跳：一条路都没跳出主线
+    /**
+     * 而且每一个跳转去向只有两种合法落点（W-E3 切片35 之后）：
+     * **章节门**（"本章末步 → 本章门"），或者**汇合点**（一步仪式 `branchTo` 回 `true-end`，
+     * 由那一行自己再决定开哪一章）。除此之外一律算"跳进了主线之外的虚无"。
+     *
+     * 切片35 之前这里只认章节门 —— 那时确实只有那五对；分支树真的分岔之后，
+     * "两条路各走一步再汇合"必然产生第二种落点，判据跟着放宽**一格**（不是放开）：
+     * 汇合点必须是**自己也带 `branch` 的行**，所以它一定会继续往下指。
+     */
     const 门 = new Set(OBJECTIVES.filter((r) => r.type === 'chapter-gate').map((r) => r.id));
+    const 汇合点 = new Set(OBJECTIVES.filter((r) => r.branch).map((r) => r.id));
     for (const r of OBJECTIVES.filter((x) => x.branchTo)) {
-      expect(门.has(r.branchTo), `跳转行 "${r.id}" 的去向 ${r.branchTo} 不是章节门 —— 文档那句"本章末步 → 本章门"是假的`)
+      expect(门.has(r.branchTo) || 汇合点.has(r.branchTo),
+        `跳转行 "${r.id}" 的去向 ${r.branchTo} 既不是章节门、也不是带 branch 的汇合点 —— 它跳进了一条死路`)
         .toBe(true);
     }
   });

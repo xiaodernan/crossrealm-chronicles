@@ -318,7 +318,7 @@ describe('④ 行为腿（zh）：validate / migrate 的诊断与存读链路的
     localStorage.setItem(slotKey(1), JSON.stringify({ ...v19, version: CURRENT_VERSION + 1 }));
     expect(SaveSystem.load(g, 1)).toBe(false);
     expect(g.dialog.toasts).toEqual([
-      `crossrealm_save_v19_slot1 读取失败：存档版本 v${CURRENT_VERSION + 1} 高于当前构建支持的 v${CURRENT_VERSION}`,
+      `${slotKey(1)} 读取失败：存档版本 v${CURRENT_VERSION + 1} 高于当前构建支持的 v${CURRENT_VERSION}`,
     ]);
   });
 });
@@ -372,7 +372,7 @@ describe('⑤ 行为腿（en）：同一条链路英文播出，切片37 留的�
     localStorage.setItem(slotKey(1), JSON.stringify({ ...v19, version: CURRENT_VERSION + 1 }));
     expect(SaveSystem.load(g2, 1)).toBe(false);
     const toasts = [...g.dialog.toasts, ...g2.dialog.toasts];
-    expect(toasts).toContain(`Failed to read crossrealm_save_v19_slot1: Save version v${CURRENT_VERSION + 1} is newer than this build supports (v${CURRENT_VERSION})`);
+    expect(toasts).toContain(`Failed to read ${slotKey(1)}: Save version v${CURRENT_VERSION + 1} is newer than this build supports (v${CURRENT_VERSION})`);
     for (const toast of toasts) {
       expect(toast).not.toContain('[MISSING:');
       expect(toast).not.toMatch(/^[a-z][a-z0-9_]*$/);

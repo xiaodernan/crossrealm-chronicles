@@ -39,18 +39,18 @@ describe('存档迁移链', () => {
     for (let v = 1; v < CURRENT_VERSION; v++) expect(MIGRATIONS[v], `v${v}`).toBeTypeOf('function');
   });
 
-  it('v4 档一路升到当前版本（v4 → v5 → v6 → v7 → v8 → v9 → v10 → v11 → v12 → v13 → v14 → v15 → v16 → v17 → v18 → v19）并通过校验', () => {
+  it('v4 档一路升到当前版本（v4 → … → v19 → v20）并通过校验', () => {
     const { data, from, applied } = migrate(clone(v4));
-    expect([from, applied]).toEqual([4, [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]]);
+    expect([from, applied]).toEqual([4, [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]]);
     expect(data.version).toBe(CURRENT_VERSION);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 
-  it('v5 档走 v6、v7、v8、v9、v10、v11、v12、v13、v14、v15、v16、v17、v18、v19 十四跳：补出空的 stats.bag、restPointEnhancer、quests.stats.decisions 与 quests.stats.objectiveFlags，其余字段一个都不动', () => {
+  it('v5 档走 v6 … v20 十五跳：补出空的 stats.bag、restPointEnhancer、quests.stats.decisions 与 quests.stats.objectiveFlags，其余字段一个都不动', () => {
     const legacy = clone(v5);
     const snapshot = clone(v5);
     const { from, data, applied } = migrate(legacy);
-    expect([from, applied]).toEqual([5, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]]);
+    expect([from, applied]).toEqual([5, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]]);
     expect(data.version).toBe(CURRENT_VERSION);
     expect(data.stats.bag).toEqual([]);
     // 迁移只该多出 bag 与 restPointEnhancer 这两格：别处被顺手改写 = 这一跳在偷偷做别的事
@@ -237,8 +237,9 @@ describe('存档迁移链', () => {
     expect(落点(61), '旧序列的 infinity（61）该往后挪一格').toBe(62);
     // 通关档：旧序列长度 62 ⇒ 新的 63 = `MAINLINE.length`，仍然读作"通关"，不许退回到锚点那一步
     expect(落点(62)).toBe(63);
-    expect(落点(62), '通关档迁移后没有正好落在新的主线长度上 ⇒ 老档读进来会变成"还差最后一步"')
-      .toBe(MAINLINE.length);
+    // 这一跳的"新的主线长度"是 **v19 的 63**，不是今天的 `MAINLINE.length`（65）——
+    // 每一跳只负责它自己那一版；v20 那两步由下一跳挪，拿今天的长度量这一跳是把两跳混在一起
+    expect(落点(62), 'v19 的通关档没落在 v19 那条序列的长度上').toBe(63);
     expect(落点(999)).toBe(1000);
     expect(落点('abc'), '不是整数的下标不参与偏移（它本来就不是位置）').toBe('abc');
     // 这一跳**不改存档形状**：除 `quests.index` 之外一个字段都不动
@@ -479,11 +480,43 @@ it('v8 → v9：主线再长三步，三处插入点各自往后挪（老档落�
     expect('skillsUnlocked' in migrate(legacy).data.quests.stats).toBe(false);
   });
 
+  it('v19 → v20：抉择真的分岔，两步仪式插在 true-end 之前，插点 41 写两次 ⇒ ≥41 的下标各往后挪两格', () => {
+    // 造一份 **v19** 的档（v4 一路升到 v19，不走 v20 那一跳）
+    const 造v19 = () => {
+      // 逐跳调用而不是一条嵌套链：多一跳时只改循环上界，不必数括号
+      let d = clone(v4);
+      for (let v = 4; v <= 18; v += 1) d = MIGRATIONS[v](d);
+      d.version = 19;
+      return d;
+    };
+    const 落点 = (index) => {
+      const d = 造v19();
+      d.quests.index = index;
+      return MIGRATIONS[19](d).quests.index;
+    };
+    // 插点是 41（**旧序列**口径）：旧 41 是 `true-end`（摸世界之锚），两步仪式插在它之前
+    expect(落点(0)).toBe(0);
+    expect(落点(40), '旧序列的 choice-void（40）在插点之前，该原地不动').toBe(40);
+    expect(落点(41), '旧序列的 true-end（41）该往后挪**两格**（两处插入）').toBe(43);
+    // 通关档：旧序列长度 63 ⇒ 新的 65，仍然读作"通关"，不许退回到锚点那一步
+    expect(落点(63)).toBe(65);
+    expect(落点(999)).toBe(1001);
+    expect(落点('abc'), '不是整数的下标不参与偏移（它本来就不是位置）').toBe('abc');
+    // 这一跳**不改存档形状**：除 `quests.index` 之外一个字段都不动
+    const 前 = 造v19();
+    前.quests.index = 41;
+    const 后 = MIGRATIONS[19](clone(前));
+    expect({ ...后, quests: { ...后.quests, index: 41 } }, '这一跳动了 `quests.index` 之外的字段').toEqual(前);
+    // 新序列里那两格确实是两步仪式，`true-end` 落在 43
+    expect(MAINLINE[41].id).toBe('seal-rite');
+    expect(MAINLINE[42].id).toBe('study-rite');
+    expect(MAINLINE[43].id).toBe('true-end');
+  });
   it('无版本号的历史档按 v1 起跳，最终仍可通过校验', () => {
     const legacy = clone(v4);
     delete legacy.version;
     const { data, from, applied } = migrate(legacy);
-    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]]);
+    expect([from, data.version, applied]).toEqual([0, CURRENT_VERSION, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]]);
     expect(SaveValidator.validate(data)).toEqual([]);
   });
 

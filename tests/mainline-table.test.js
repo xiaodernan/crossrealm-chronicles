@@ -5,7 +5,7 @@ import { installWindowShim } from './helpers/enemyHarness.js';
 import {
   V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS,
   V13_INSERT_POINTS, V14_INSERT_POINTS, V15_INSERT_POINTS, V16_INSERT_POINTS, V17_INSERT_POINTS,
-  V18_INSERT_POINTS,
+  V18_INSERT_POINTS, V19_INSERT_POINTS,
 } from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
@@ -295,6 +295,19 @@ const V18_ORDER = [
   'dungeon-rerun', 'chests-all', 'sunless-oratory', 'infinity',
 ];
 
+/**
+ * v19 序列（W-E3 切片35）：**抉择真的分岔** —— `choice-void` 之后不再直接进 `true-end`，
+ * 而是按玩家选的那条各走一步仪式（`seal-rite` / `study-rite`），两步再 `branchTo` 汇回 `true-end`。
+ *
+ * 为什么两步都写进这份**线性**冻结名单：这份名单说的是"表里有哪些行、第几位"，
+ * 不是"某一周目会走哪几行"—— 每个周目只走其中**一步**（另一格被 branch 跳过）。
+ * 真正钉"哪条路去哪"的是下面那条分支腿（`branch` 的两个目标逐对与表一致）。
+ */
+const V19_ORDER = [
+  ...V18_ORDER.slice(0, 41),
+  'seal-rite', 'study-rite',
+  ...V18_ORDER.slice(41),
+];
 const gates = OBJECTIVES.filter((r) => r.type === 'chapter-gate');
 beforeEach(() => { installWindowShim(); });
 afterEach(() => {
@@ -461,8 +474,6 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片30 之后：主线是 63 步，多一步"副本"（名册上的第十座，插在摸锚点之前）', () => {
     expect(V18_ORDER).toHaveLength(63);
     expect(new Set(V18_ORDER).size, 'v18 序列里有重复 id').toBe(V18_ORDER.length);
-    expect(MAINLINE.map((r) => r.id), '在役序列与 v18 那份冻结名单不是同一条')
-      .toEqual(V18_ORDER);
     // 只多了一步 ⇒ 去掉它逐字等于 v17 那条（"加长"不是"重排"）
     const 旧 = V18_ORDER.filter((id) => id !== 'sunless-oratory');
     expect(旧, '去掉无灯祷堂那一步后应当逐字等于 v17 那条序列').toEqual(V17_ORDER);
@@ -473,6 +484,38 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(认领.size, `主线认领 ${认领.size} 座，名册有 ${DUNGEON_DEFS.length} 座`).toBe(DUNGEON_DEFS.length);
   });
 
+  it('W-E3 切片35 之后：主线是 65 步，多两步"仪式"（抉择之后真分成两路，再在摸锚点汇合）', () => {
+    expect(V19_ORDER).toHaveLength(65);
+    expect(new Set(V19_ORDER).size, 'v19 序列里有重复 id').toBe(V19_ORDER.length);
+    expect(MAINLINE.map((r) => r.id), '在役序列与 v19 那份冻结名单不是同一条')
+      .toEqual(V19_ORDER);
+    // 只多两步 ⇒ 去掉它们逐字等于 v18 那条（"加长"不是"重排"）
+    const 旧 = V19_ORDER.filter((id) => id !== 'seal-rite' && id !== 'study-rite');
+    expect(旧, '去掉那两步仪式后应当逐字等于 v18 那条序列').toEqual(V18_ORDER);
+    expect(V19_ORDER[41], '第 41 位不是 seal-rite（封印之路的第一步）').toBe('seal-rite');
+    expect(V19_ORDER[42], '第 42 位不是 study-rite（研习之路的第一步）').toBe('study-rite');
+    expect(V19_ORDER[43], '第 43 位不是 true-end（两路在它汇合）').toBe('true-end');
+    /**
+     * **分支腿**：抉择步的两个 flag 各自指向一步仪式，两步各 `branchTo` 回 `true-end`。
+     * 这是 B3「零分支」那一半的判据 —— 之前两个目标都是 `ch4-complete`（= 走的路一样），
+     * 那时这条腿会红在"两条路指向同一格"上。
+     */
+    const 抉择 = MAINLINE.find((r) => r.id === 'choice-void');
+    expect(Object.keys(抉择?.branch ?? {}).sort(), '抉择步没写分支表')
+      .toEqual(抉择.choices.map((c) => c.flag).sort());
+    const 目标们 = 抉择.choices.map((c) => 抉择.branch[c.flag]);
+    expect(new Set(目标们).size, `两条路指向同一格「${目标们[0]}」⇒ 抉择没有改变路线`).toBe(目标们.length);
+    expect(目标们.every((id) => MAINLINE.some((r) => r.id === id)), '分支目标不在主线表里').toBe(true);
+    for (const id of 目标们) {
+      expect(MAINLINE.find((r) => r.id === id)?.branchTo, `"${id}" 没有汇回 true-end`)
+        .toBe('true-end');
+      // 两步仪式各认领一处**真实存在**的 POI 目标：判据读 discoveries ⇒ 到达即完成的是 interact
+      // 那一族，discovery 必须靠区里那枚 POI 派发 `discovery` 事件才算数
+      const row = MAINLINE.find((r) => r.id === id);
+      expect(row?.type, `"${id}" 不是 discovery`).toBe('discovery');
+      expect(row?.targetId, `"${id}" 没有 targetId`).toBeTruthy();
+    }
+  });
   it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);
     // v7 → v8：旧序列的 24 号位是 `void-boss`，新步插在它**之前**
     expect(HEAD_ORDER[24]).toBe('void-boss');
@@ -553,6 +596,15 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V18_ORDER[61], '新序列第 61 位不是 sunless-oratory').toBe('sunless-oratory');
     expect(V18_ORDER[62], '老档的 61 号位（infinity）没落到新表上').toBe('infinity');
     expect(V18_ORDER[60], '老档的 60 号位（chests-all）被挪走了').toBe('chests-all');
+    // v19 → v20：**两处**插点，都写在下标 41（两步仪式分插在 true-end 之前）——
+    // `偏移后` 按"≤ 旧下标"逐点计数，所以同一处插两步就要写两次
+    expect(V19_INSERT_POINTS).toEqual([41, 41]);
+    expect(V18_ORDER[40], '旧序列第 40 位不是 choice-void').toBe('choice-void');
+    expect(V18_ORDER[41], '旧序列第 41 位不是 true-end（两步仪式插在它之前）').toBe('true-end');
+    expect(V19_ORDER[41], '新序列第 41 位不是 seal-rite').toBe('seal-rite');
+    expect(V19_ORDER[42], '新序列第 42 位不是 study-rite').toBe('study-rite');
+    expect(V19_ORDER[43], '老档的 41 号位（true-end）没落到新表的 true-end 上').toBe('true-end');
+    expect(V19_ORDER[40], '老档的 40 号位（choice-void）被挪走了').toBe('choice-void');
     // v14 → v15：两个插点（**旧序列**口径）
     expect(V15_INSERT_POINTS).toEqual([20, 31]);
     expect(V14_ORDER[20]).toBe('level');

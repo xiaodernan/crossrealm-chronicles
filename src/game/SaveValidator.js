@@ -1,7 +1,7 @@
 /** 存档结构校验 — 版本号为 schema 的唯一权威，迁移链从这里取目标版本 */
 import { t } from '../engine/i18n.js';
 
-export const CURRENT_VERSION = 19;
+export const CURRENT_VERSION = 20;
 
 const VERSION = CURRENT_VERSION;
 

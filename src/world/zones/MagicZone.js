@@ -170,6 +170,14 @@ export class MagicZone extends BaseZone {
       this.dialog.show(t('obj_magic_forest_title'), t('zone_dlg_magic_forest_text'));
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'magic-forest', title: t('obj_magic_forest_title'), text: t('zone_disc_magic_forest_text') } }));
     }, { id: 'magic-forest', color: 0x44aa66 });
+
+    // W-E3 切片35：研习之路的落点 —— 城堡西侧那堆没熄的灰烬里压着半页虚空文字
+    this.addPOI({ x: -30, y: 0, z: 25 }, 'zone_poi_echo_pages_label', () => {
+      this.dialog.show(t('obj_study_rite_title'), t('zone_disc_echo_pages_text'));
+      window.dispatchEvent(new CustomEvent('discovery', {
+        detail: { id: 'echo-pages', title: t('obj_study_rite_title'), text: t('zone_disc_echo_pages_text') },
+      }));
+    }, { id: 'echo-pages', color: 0xd8b46a });
   }
 
   buildQuidditchRing() {

@@ -40,7 +40,7 @@ describe('① 读数里的数 = 内容表的实数', () => {
     const 行 = c3行();
     const 分区支线 = SIDE_QUESTS_ALL.filter((q) => ZONE_ORDER.includes(q.zone)).length;
     const 实数 = {
-      '主线 63 步': MAINLINE.length === 63,
+      '主线 65 步': MAINLINE.length === 65,
       '分区专属支线 38': 分区支线 === 38,
       '副本 10': DUNGEON_DEFS.length === 10,
       '回声 49': ECHOES.length === 49,

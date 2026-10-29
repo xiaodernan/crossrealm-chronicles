@@ -32,7 +32,7 @@ import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SaveSystem, slotKey } from '../src/game/SaveSystem.js';
-import { SAVE_KEYS } from '../src/game/SaveMigrations.js';
+import { SAVE_KEYS, CURRENT_VERSION } from '../src/game/SaveMigrations.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
@@ -289,9 +289,11 @@ describe('④ 行为腿（zh）：存读全链路的 toast 都是展开句', () 
 
   it('坏档隔离：改名保留 + 一句人话', () => {
     const g = makeHost();
-    SaveSystem.quarantine(g, 'crossrealm_save_v19', 'raw', new Error('boom'));
-    expect(g.dialog.toasts).toEqual(['存档 crossrealm_save_v19 已损坏（boom），原文件转移到 crossrealm_save_v19:corrupt']);
-    expect(localStorage.getItem('crossrealm_save_v19:corrupt')).toBe('raw');
+    // 存档键跟着版本走 ⇒ 这两处从 `CURRENT_VERSION` 现推，升级那一片不必回来改字面量
+    const 键 = `crossrealm_save_v${CURRENT_VERSION}`;
+    SaveSystem.quarantine(g, 键, 'raw', new Error('boom'));
+    expect(g.dialog.toasts).toEqual([`存档 ${键} 已损坏（boom），原文件转移到 ${键}:corrupt`]);
+    expect(localStorage.getItem(`${键}:corrupt`)).toBe('raw');
   });
 
   it('读不到浏览器存储：一句话说清楚，不吞', () => {
@@ -310,8 +312,8 @@ describe('④ 行为腿（zh）：存读全链路的 toast 都是展开句', () 
     const g = makeHost();
     localStorage.setItem(slotKey(1), 'not json');
     expect(SaveSystem.load(g, 1)).toBe(false);
-    expect(g.dialog.toasts[0]).toMatch(/^存档 crossrealm_save_v19_slot1 已损坏（/);
-    expect(g.dialog.toasts[1]).toMatch(/^crossrealm_save_v19_slot1 读取失败：JSON 无法解析：/);
+    expect(g.dialog.toasts[0]).toMatch(new RegExp(`^存档 ${slotKey(1)} 已损坏（`));
+    expect(g.dialog.toasts[1]).toMatch(new RegExp(`^${slotKey(1)} 读取失败：JSON 无法解析：`));
   });
 
   it('旧档迁移：先报迁移跳数，再报加载成功', () => {
@@ -321,7 +323,7 @@ describe('④ 行为腿（zh）：存读全链路的 toast 都是展开句', () 
     localStorage.setItem(SAVE_KEYS[0].key, JSON.stringify({ ...JSON.parse(raw), version: 17 }));
     const g2 = makeHost(0);
     expect(SaveSystem.load(g2, 0)).toBe(true);
-    expect(g2.dialog.toasts).toEqual(['旧存档 v17 已迁移到 v19（跨 2 跳）', '存档已加载']);
+    expect(g2.dialog.toasts).toEqual([`旧存档 v17 已迁移到 v${CURRENT_VERSION}（跨 ${CURRENT_VERSION - 17} 跳）`, '存档已加载']);
   });
 
   it('导出 / 导入：文件名与导入结果都是展开句', async () => {
@@ -360,8 +362,9 @@ describe('⑤ 行为腿（en）：同一条链路英文播出，不夹 [MISSING:
     expect(g2.dialog.toasts).toEqual(['Progress saved · Slot 3']);
 
     const gq = makeHost();
-    SaveSystem.quarantine(gq, 'crossrealm_save_v19', 'raw', new Error('boom'));
-    expect(gq.dialog.toasts).toEqual(['Save crossrealm_save_v19 is corrupt (boom); the original file was moved to crossrealm_save_v19:corrupt']);
+    const key = `crossrealm_save_v${CURRENT_VERSION}`;
+    SaveSystem.quarantine(gq, key, 'raw', new Error('boom'));
+    expect(gq.dialog.toasts).toEqual([`Save ${key} is corrupt (boom); the original file was moved to ${key}:corrupt`]);
 
     const gm = makeHost(10);
     expect(SaveSystem.save(gm, 0)).toBe(true);
@@ -369,7 +372,7 @@ describe('⑤ 行为腿（en）：同一条链路英文播出，不夹 [MISSING:
     localStorage.setItem(SAVE_KEYS[0].key, JSON.stringify({ ...JSON.parse(raw), version: 17 }));
     const gm2 = makeHost(0);
     expect(SaveSystem.load(gm2, 0)).toBe(true);
-    expect(gm2.dialog.toasts).toEqual(['Old save v17 migrated to v19 (2 jumps)', 'Save loaded']);
+    expect(gm2.dialog.toasts).toEqual([`Old save v17 migrated to v${CURRENT_VERSION} (${CURRENT_VERSION - 17} jumps)`, 'Save loaded']);
 
     const ge = makeHost();
     expect(SaveSystem.save(ge, 0)).toBe(true);
@@ -395,7 +398,7 @@ describe('⑤ 行为腿（en）：同一条链路英文播出，不夹 [MISSING:
     const g2 = makeHost();
     localStorage.setItem(slotKey(1), 'not json');
     expect(SaveSystem.load(g2, 1)).toBe(false);
-    expect(g2.dialog.toasts[1]).toMatch(/^Failed to read crossrealm_save_v19_slot1: /);
+    expect(g2.dialog.toasts[1]).toMatch(new RegExp(`^Failed to read ${slotKey(1)}: `));
   });
 });
 

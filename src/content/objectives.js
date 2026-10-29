@@ -598,9 +598,44 @@ export const OBJECTIVES = [
       { id: 'seal', label: 'obj_choice_void_seal_label', flag: 'choice_void_sealed' },
       { id: 'study', label: 'obj_choice_void_study_label', flag: 'choice_void_studied' },
     ],
-    // W-E3 切片23：分支树——抉择后走不同的下一步
-    // 旗标名是引用（真源是 choices[].flag），注册表核它确有设过
+    // W-E3 切片35：分支树**真的分岔**（B3 的"零分支"那一半）。
+    // 切片23 把机器造好了，但两条路都指回同一格 ⇒ 玩家读到的文案不同、走的路一样。
+    // 现在各走一步自己的仪式（封印之路去虚空裂隙的石座，研习之路回魔法城堡抄一页），
+    // 再在 `true-end` 汇合 —— "选了什么"第一次改变**去哪儿**，而不只是改变一句话。
+    branch: {
+      choice_void_sealed: 'seal-rite',
+      choice_void_studied: 'study-rite',
     },
+  },
+  {
+    // 封印之路：把碎裂的虚空压回石座（世界坐标 = 虚空区中心 + (-28, 12)）
+    id: 'seal-rite',
+    title: 'obj_seal_rite_title',
+    desc: 'obj_seal_rite_desc',
+    type: 'discovery',
+    targetId: 'seal-stone',
+    chapter: 4,
+    // 抉择步那两枚前置由 `choice-void` 自己声明；这一步只要求碑文已读
+    requires: { hasVoidTablet: true },
+    waypoint: { x: -28, z: 232, label: ZONE_NAMES[ZONE_IDS.VOID] },
+    reward: 22,
+    journal: 'obj_seal_rite_journal',
+    branchTo: 'true-end',
+  },
+  {
+    // 研习之路：回魔法城堡的余烬里抄一页虚空文字（世界坐标 = 魔法区中心 + (-30, 25)）
+    id: 'study-rite',
+    title: 'obj_study_rite_title',
+    desc: 'obj_study_rite_desc',
+    type: 'discovery',
+    targetId: 'echo-pages',
+    chapter: 4,
+    requires: { hasVoidTablet: true },
+    waypoint: { x: -30, z: -155, label: ZONE_NAMES[ZONE_IDS.MAGIC] },
+    reward: 22,
+    journal: 'obj_study_rite_journal',
+    branchTo: 'true-end',
+  },
   {
     id: 'true-end',
     title: 'obj_true_end_title',
