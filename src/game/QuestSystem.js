@@ -29,7 +29,21 @@ const questsOn = (name, handler) => on(name, handler, QUEST_EVENT_TAG);
  * ------------------------------------------------------------------ */
 
 const ROW_BY_ID = new Map(MAINLINE.map((r) => [r.id, r]));
-const rowWaypoint = (id) => ROW_BY_ID.get(id)?.waypoint ?? null;
+/**
+ * 行上的路点（W-E3 切片37）：两种形态。
+ *
+ * - 自己的坐标（绝大多数行）：原样交出去；
+ * - "指一座副本"（`chests` / `dungeon-rerun` 这两行）：坐标从副本名册**现问** `entrance`，
+ *   行上只留那一句提示标签。改前这两行各抄了一份碎石墓穴的入口坐标 ——
+ *   名册挪一次门，行上那一份不会跟着动，也没有任何一处会红。
+ */
+const rowWaypoint = (id) => {
+  const wp = ROW_BY_ID.get(id)?.waypoint;
+  if (!wp) return null;
+  if (!wp.dungeonId) return wp;
+  const def = dungeonDefOf(wp.dungeonId);
+  return { x: def.entrance.x, z: def.entrance.z, label: wp.label };
+};
 
 /**
  * 表里那些"拿到某样东西"的步，按 `flags` 的前缀认领。

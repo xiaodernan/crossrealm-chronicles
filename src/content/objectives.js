@@ -238,7 +238,10 @@ export const OBJECTIVES = [
     type: 'chests',
     target: 5,
     chapter: 2,
-    waypoint: { x: -190, z: 25, label: 'wp_label_chests_dungeon' },
+    // W-E3 切片37：这一格从前把碎石墓穴的 entrance 又抄了一遍（坐标逐格相同、名字另开一句）。
+    // 现在只写"指哪一座"—— 坐标从 `content/dungeons.js` 现问，行上留的是那句**提示语**
+    // （"宝箱/地下城"说的是"为什么指这儿"，不是第二份门名）。
+    waypoint: { dungeonId: 'ruin-crypt', label: 'wp_label_chests_dungeon' },
     reward: 20,
     journal: 'obj_chests_journal',
   },
@@ -892,7 +895,8 @@ export const OBJECTIVES = [
     desc: 'obj_dungeon_rerun_desc',
     type: 'dungeon-rerun',
     chapter: 5,
-    waypoint: { x: -190, z: 25, label: 'wp_label_dungeon_entrance' },
+    // W-E3 切片37：同上 —— 再战一步指的就是那座最近的门，坐标问名册，行上只留提示语
+    waypoint: { dungeonId: 'ruin-crypt', label: 'wp_label_dungeon_entrance' },
     reward: 25,
     journal: 'obj_dungeon_rerun_journal',
     flags: { dungeonRerunDone: true },

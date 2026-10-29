@@ -995,10 +995,18 @@ export const CONTENT_TABLES = [
       branchTo: { t: 'id', required: false },
       reward: { t: 'int', min: 0, required: false },
       journal: { t: 'string', required: false },
+      // 行上的路点有两种形态（W-E3 切片37）：自己的坐标 `{ x, z, label }`，
+      // 或"指一座副本" `{ dungeonId, label }` —— 后者的坐标从 `content/dungeons.js` 现问。
+      // 两种形态的互斥由 `checkObjectiveTable` 核（schema 只核每一格自己的类型）
       waypoint: {
         t: 'row',
         required: false,
-        of: { x: { t: 'int' }, z: { t: 'int' }, label: { t: 'string' } },
+        of: {
+          x: { t: 'int', required: false },
+          z: { t: 'int', required: false },
+          label: { t: 'string' },
+          dungeonId: { t: 'ref', of: 'dungeons', required: false },
+        },
       },
     },
     invariant: checkObjectivesTable,
@@ -1648,6 +1656,19 @@ export function checkObjectiveTable(table) {
       if (row?.type === 'dungeon' && row.waypoint !== undefined) {
         out.push(`${path}: type 是 dungeon 的行不许写 waypoint —— 入口的坐标与名字只由 \`content/dungeons.js\``
           + ` 的 entrance / name 说（这一行认领的是 "${row.dungeonId}"），行上再写一份就是第二份口径`);
+      }
+    }
+    // W-E3 切片37：行上的 waypoint 只许是两种形态之一 —— 自己的坐标，或"指一座副本"。
+    // 混写 = 行上又长出一份入口坐标（切片25 才删掉的那一族）；两样都缺 = 这一行指不到任何地方。
+    if (row?.waypoint) {
+      const wp = row.waypoint;
+      const 有坐标 = Number.isFinite(wp.x) && Number.isFinite(wp.z);
+      if (wp.dungeonId) {
+        if (wp.x !== undefined || wp.z !== undefined) {
+          out.push(`${path}: waypoint 同时写了 dungeonId 与坐标 —— 副本入口的坐标只由 content/dungeons.js 说`);
+        }
+      } else if (!有坐标) {
+        out.push(`${path}: waypoint 既没有坐标也没有 dungeonId —— 这一行指不到任何地方（箭头会静默消失）`);
       }
     }
     for (const [flag, want] of Object.entries(row?.requires ?? {})) {

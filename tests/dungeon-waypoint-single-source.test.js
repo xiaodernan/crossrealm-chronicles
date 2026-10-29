@@ -26,6 +26,10 @@
  *    证明删掉的是一份副本而不是第二个事实）；注册表拦得住塞回来的那一格，且不冤枉别的行。
  * 2. **指路只问名册**：未清 / 已清但资格未齐两种状态下的路点都等于 `entrance` + `name`。
  * 3. **孤儿键随抄本除名**：7 枚键全仓零出现、两表都不在场、两表逐键对齐。
+ * 4. **指一座副本的路点**（W-E3 切片37）：`chests` / `dungeon-rerun` 两行的 waypoint
+ *    是 `{ dungeonId, label }` —— 坐标现问名册，行上只留一句提示语；全表不许再有
+ *    第二行把坐标抄成某座副本的 entrance，混写与两缺由注册表当场点名。
+ *    （切片25 把"chests 那格 waypoint 的归属"留成了待判项，这一组就是它的判决。）
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -215,5 +219,70 @@ describe('③ 孤儿键随抄本一起除名', () => {
       expect(typeof STRINGS_ZH[键], `中文表里没有 ${键}`).toBe('string');
       expect(typeof STRINGS_EN[键], `英文表里没有 ${键}`).toBe('string');
     }
+  });
+});
+
+describe('④ 指一座副本的路点（W-E3 切片37 · 切片25 留下的那一格归属判完了）', () => {
+  /** 坐标逐格等于某座副本 entrance 的行 —— 除了"指副本"那一型，这一族**不许**存在 */
+  const 抄入口的行 = (rows) => rows.filter((r) => r.waypoint && !r.waypoint.dungeonId
+    && DUNGEON_DEFS.some((d) => d.entrance.x === r.waypoint.x && d.entrance.z === r.waypoint.z));
+  const 指副本的行 = MAINLINE.filter((r) => r.waypoint?.dungeonId);
+
+  it('钉子：今天就是指副本的两行（chests / dungeon-rerun）—— 一行不多一行不少', () => {
+    expect(指副本的行.map((r) => r.id)).toEqual(['chests', 'dungeon-rerun']);
+    for (const row of 指副本的行) {
+      expect(row.waypoint.dungeonId, `${row.id} 指的副本不在名册里`).toBe('ruin-crypt');
+      expect(row.waypoint.label, `${row.id} 只剩一句提示语都不留了 —— 箭头会没有字`).toBeTruthy();
+      expect(row.waypoint.x, `${row.id} 又长回了坐标`).toBeUndefined();
+    }
+  });
+
+  it('全表腿：除了这两行，再没有谁把路点坐标抄成某座副本的入口', () => {
+    const 命中 = 抄入口的行(MAINLINE);
+    expect(命中.map((r) => [r.id, r.waypoint]), '这些行又抄了一份副本入口 —— 名册挪门时它们不会跟着动')
+      .toEqual([]);
+  });
+
+  it('反向控制：把两行之一改回坐标形态，上面那条腿必须点名（防它恒绿）', () => {
+    const 假 = MAINLINE.map((r) => (r.id === 'chests'
+      ? { ...r, waypoint: { x: -190, z: 25, label: 'wp_label_chests_dungeon' } }
+      : r));
+    const 命中 = 抄入口的行(假);
+    expect(命中.map((r) => r.id)).toEqual(['chests']);
+  });
+
+  it('行为腿：这两行指到的是名册的 entrance，展开的仍是自己那句提示语（不是第二份门名）', () => {
+    const def = dungeonDefOf('ruin-crypt');
+    for (const row of 指副本的行) {
+      const probe = 造();
+      probe.questIndex = MAINLINE.indexOf(row);
+      const wp = probe.getQuestWaypoint();
+      expect(wp, `${row.id} 没有路点了`).toBeTruthy();
+      expect([wp.x, wp.z], `${row.id} 指错了地方`).toEqual([def.entrance.x, def.entrance.z]);
+      expect(t(wp.label), `${row.id} 的标签展开后与副本名一样 —— 那就是第二份门名了`).not.toBe(t(def.name));
+    }
+  });
+
+  it('每个 dungeonId 都在名册里（控制组：换成一个不存在的 id，同一条判据必须点名）', () => {
+    const 坏 = 指副本的行.map((r) => ({ ...r, waypoint: { ...r.waypoint, dungeonId: 'no-such-dungeon' } }));
+    const 缺 = 坏.filter((r) => !DUNGEON_DEFS.some((d) => d.id === r.waypoint.dungeonId));
+    expect(缺.length, '判据恒 0 —— 它根本没在核 id').toBe(坏.length);
+    expect(指副本的行.filter((r) => !DUNGEON_DEFS.some((d) => d.id === r.waypoint.dungeonId)), '在役表里有指向不存在副本的路点')
+      .toEqual([]);
+  });
+
+  it('注册表腿：两种形态混写 / 两样都缺，都当场点名', () => {
+    const 混写 = OBJECTIVES.map((r) => (r.id === 'chests'
+      ? { ...r, waypoint: { x: -190, z: 25, dungeonId: 'ruin-crypt', label: 'wp_label_chests_dungeon' } }
+      : r));
+    const 混写报错 = checkObjectiveTable(混写).filter((e) => e.includes('同时写了 dungeonId 与坐标'));
+    expect(混写报错.length, '混写没人管 ⇒ 行上又长出一份坐标').toBe(1);
+    expect(混写报错[0]).toContain('("chests")');
+
+    const 缺格 = OBJECTIVES.map((r) => (r.id === 'chests'
+      ? { ...r, waypoint: { label: 'wp_label_chests_dungeon' } }
+      : r));
+    const 缺格报错 = checkObjectiveTable(缺格).filter((e) => e.includes('既没有坐标也没有 dungeonId'));
+    expect(缺格报错.length, '两样都缺没人管 ⇒ 那一行静默没有箭头').toBe(1);
   });
 });
