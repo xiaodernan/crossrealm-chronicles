@@ -116,8 +116,6 @@ export const STRINGS_ZH = Object.freeze({
   dialog_click_to_lock: '请点击画面中央再次锁定鼠标',
   toast_gear_equip: '换上',
   toast_gear_pickup: '拾取',
-  toast_bag_full: '背包已满',
-  toast_invalid_keybind: '该键位无效或已被别的动作占用',
 
   // 战斗
   combat_defeat: '击败',
@@ -1555,10 +1553,8 @@ export const STRINGS_ZH = Object.freeze({
   obj_true_end_desc_sealed: '你把虚空封回石里。锚点沉了一寸，时线重新绷紧 —— 世界照旧，只是没人再听见那声叹息。',
   obj_true_end_desc_studied: '你把虚空读完了。禁忌留在掌心里发烫，锚点却不再回应 —— 门开了，只是开向的东西已经认得你。',
   obj_true_end_sealed_title: '真结局：封印虚空',
-  obj_true_end_sealed_desc: '你把虚空封回石里。锚点沉了一寸，时线重新绷紧。',
   obj_true_end_sealed_journal: '封印结局：虚空被封，世界照旧。',
   obj_true_end_studied_title: '真结局：研习虚空',
-  obj_true_end_studied_desc: '你把虚空读完了。禁忌留在掌心里发烫，门开了。',
   obj_true_end_studied_journal: '研习结局：虚空被读，门开了，东西认得你。',
   obj_ch4_complete_title: 'Chapter 4 完成',
   obj_ch4_complete_desc: '真·位面行者觉醒，混沌边境开启。',
@@ -1824,7 +1820,6 @@ export const STRINGS_ZH = Object.freeze({
   journal_dungeon_runs: '副本记录',
 
   // 升级面板
-  upgrade_title: '营火升级',
   upgrade_continue: '继续探索',
   upgrade_back: '返回',
 
@@ -1961,7 +1956,6 @@ export const STRINGS_ZH = Object.freeze({
   hud_weapon_default: '⚔ 位面长剑',
   hud_camera_mode_first: '第一人称',
   hud_camera_mode_third: '第三人称',
-  hud_boss_phase_fmt: '阶段 ${phase}',
   hud_spell_1: '真火',
   hud_spell_2: '玄冰',
   hud_spell_3: '引力',
@@ -2030,7 +2024,6 @@ export const STRINGS_ZH = Object.freeze({
   dialog_toast_chapter_required: '需要 Chapter ${chapter} 后再来问这个。',
   dialog_toast_rest_heal: '营火余温 +5 魂火',
   dialog_toast_npc_farewell: '${name}：「愿火护佑下一程。」',
-  dialog_choice_continue: '继续探索',
 
   // RestDialogue.js
   rest_dialogue_main_complete: '主线已完成 — 自由探索，或按 ${autoPlay} 自动通关。',
@@ -2175,11 +2168,9 @@ export const STRINGS_ZH = Object.freeze({
   quest_assistant_hint_step_done: '本步已完成，点击助手「同步任务进度」',
   quest_assistant_hint_boss_dist: '走进地图骷髅标记的红圈激活 Boss · ${progress}',
   quest_assistant_hint_step_done_2: '本步已完成 — 点 U → 同步任务进度',
-  quest_assistant_hint_near_wp: '已接近 · ${label}',
   quest_waypoint_hint_chapter: '需要 Chapter ${chapter} 后再来触摸。',
   quest_waypoint_hint_boss3: '先击败奇点领主',
   quest_waypoint_hint_dungeon: '清空地下城',
-  quest_waypoint_hint_trials_done: '三界试炼完成后触摸锚点',
   quest_waypoint_hint_void_boss: '击败时线执政官',
   quest_waypoint_hint_skills: '营火解锁3个武器技能',
   quest_waypoint_hint_chaos_boss: '击败混沌领主',
@@ -2188,9 +2179,7 @@ export const STRINGS_ZH = Object.freeze({
   quest_waypoint_hint_touch_anchor_3: '三界试炼完成后触摸锚点',
   quest_toast_chapter_announce: '${announce}',
   quest_toast_task_complete: '任务完成：${title} · +${reward} 魂火',
-  quest_get_assistant_hint: '位面助手：${hint}',
   quest_title_all_done: '全部通关。按 ${questTracker} 打开助手可重跑全流程演示。',
-  quest_waypoint_far: '走进地图骷髅标记的红圈激活 Boss · ${progress}',
   quest_waypoint_near: '已接近 · ${label}',
 
   // 方位词（QuestSystem.js getWaypointHint 里的 dirs）

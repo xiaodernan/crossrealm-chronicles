@@ -381,6 +381,11 @@ export class QuestSystem {
    */
   recordChoice(flag) {
     window.dispatchEvent(new CustomEvent('choice-made', { detail: { flag } }));
+    // W-E3 切片25：将抉择旗标写入 stats.decisions 账本，供 objectiveDesc 读取变体文案。
+    if (this.stats) {
+      if (!this.stats.decisions) this.stats.decisions = new Set();
+      this.stats.decisions.add(flag);
+    }
   }
 
   getProgressText() {

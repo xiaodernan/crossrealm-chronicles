@@ -40,6 +40,8 @@ const 脚本路径 = join(ROOT, 'scripts', 'perf-smoke.mjs');
 const 脚本源 = existsSync(脚本路径) ? readFileSync(脚本路径, 'utf8') : '';
 const 尺路径 = join(ROOT, 'src', 'engine', 'shadowCensus.js');
 const 尺源 = existsSync(尺路径) ? readFileSync(尺路径, 'utf8') : '';
+const 预算路径 = join(ROOT, 'src', 'engine', 'drawCallBudget.js');
+const 预算源 = existsSync(预算路径) ? readFileSync(预算路径, 'utf8') : '';
 const three路径 = join(ROOT, 'node_modules', 'three', 'build', 'three.module.js');
 const three源 = existsSync(three路径) ? readFileSync(three路径, 'utf8') : '';
 
@@ -439,10 +441,23 @@ describe('阴影普查（切片10，B151）', () => {
     expect(脚本源.slice(拧回开, 脚本源.indexOf('const 区 =', 拧回开))).toContain('没拧回来');
   });
 
-  it('上限表与三列口径没被这一片改动（阴影列仍然比报告列，不是比数出来的）', () => {
+  /**
+   * 切片11（B152）把切片10 留下的那半步走完了：**越预算的阴影那一格改吃数出来的那一列**。
+   *
+   * 这一条同时钉两件**相反**的事，缺任何一件都只是半个口径：
+   * - 报告列还在被算（`阴影 = 整帧 − 本体`）：`draw读数问题` 的三列自洽问的是它，账本也记它；
+   * - 报告列不再决定红绿：交给上限的那一列叫 `阴影趟`，值 = `普查.预测`。字段名与报告列**不同名**
+   *   是有意的 —— 脚本少交一个字段就会被 `overCeiling` 的"不是整数"那一拒点出来，
+   *   而不是把 `undefined > 上限`（恒 false）读成"这一站很干净"。
+   */
+  it('阴影那一格越预算吃的是数出来的那一列（B152），报告列降级成对账', () => {
     expect(脚本源, '报告列的算法被改了：阴影列必须还是 整帧 − 本体').toContain('阴影: 整帧.calls - 本体.calls');
     expect(脚本源, '逐站上限不再从名册里取').toContain('名册.ceilings[站id]');
-    // 比上限的那一份读数里，阴影必须是报告列（数出来的那一把只负责解释，不参与越线）
+    expect(脚本源, '交给上限的阴影那一列不是数出来的笔数').toMatch(/阴影趟:\s*普查\.预测/);
+    expect(脚本源, '数出来的笔数没并进读数记录（spread 断了 ⇒ 上限吃不到它）').toMatch(/draw读数\.push\(\{ 站: 站id, \.\.\.r \}\)/);
     expect(脚本源).toMatch(/for \(const r of draw读数\)[\s\S]{0,400}overCeiling\(r, 预算\.drawCalls\.ceilings\)/);
+    // 判定那一侧也得写明吃的是哪一列（两头同名才算换到位；只改脚本不改判定 = 两处定义）
+    expect(预算源, 'overCeiling 的读数形状里第三列不再叫 阴影趟').toMatch(/阴影趟:\s*number/);
+    expect(预算源, '阴影那一格又比回差值了').toMatch(/比\('阴影趟', 读数\.阴影趟, 上\.shadow\)/);
   });
 });

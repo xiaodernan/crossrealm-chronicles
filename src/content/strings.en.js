@@ -116,8 +116,6 @@ export const STRINGS_EN = Object.freeze({
   dialog_click_to_lock: 'Click center of screen to lock mouse',
   toast_gear_equip: 'Equip',
   toast_gear_pickup: 'Pick up',
-  toast_bag_full: 'Bag full',
-  toast_invalid_keybind: 'Invalid keybind or already in use',
 
   // Combat
   combat_defeat: 'Defeat',
@@ -1556,10 +1554,8 @@ export const STRINGS_EN = Object.freeze({
   obj_true_end_desc_sealed: 'You sealed the void back into the stone. The anchor sank an inch and the timeline tightened again — the world goes on, and nobody hears that sigh any more.',
   obj_true_end_desc_studied: 'You read the void to the end. The forbidden thing burns in your palm and the anchor no longer answers — the gate is open, and what waits behind it knows your face.',
   obj_true_end_sealed_title: 'True Ending: Seal the Void',
-  obj_true_end_sealed_desc: 'You sealed the void back into the stone. The anchor sank an inch and the timeline tightened again.',
   obj_true_end_sealed_journal: 'Sealed ending: the void is sealed, the world goes on.',
   obj_true_end_studied_title: 'True Ending: Study the Void',
-  obj_true_end_studied_desc: 'You read the void to the end. The gate is open, and what waits behind it knows your face.',
   obj_true_end_studied_journal: 'Studied ending: the void is read, the gate is open.',
   obj_ch4_complete_title: "Chapter 4 Complete",
   obj_ch4_complete_desc: "The true Plane Walker awakens; the Chaos Border opens.",
@@ -1826,7 +1822,6 @@ export const STRINGS_EN = Object.freeze({
   journal_dungeon_runs: 'Dungeon Runs',
 
   // Upgrade Panel
-  upgrade_title: 'Campfire Upgrade',
   upgrade_continue: 'Continue Exploring',
   upgrade_back: 'Back',
 
@@ -1964,7 +1959,6 @@ export const STRINGS_EN = Object.freeze({
   hud_weapon_default: '⚔ Plane Longsword',
   hud_camera_mode_first: 'First Person',
   hud_camera_mode_third: 'Third Person',
-  hud_boss_phase_fmt: 'Phase ${phase}',
   hud_spell_1: 'True Fire',
   hud_spell_2: 'Xuan Ice',
   hud_spell_3: 'Gravity',
@@ -2032,7 +2026,6 @@ export const STRINGS_EN = Object.freeze({
   dialog_toast_chapter_required: 'Chapter ${chapter} required to ask this.',
   dialog_toast_rest_heal: 'Campfire warmth +5 souls',
   dialog_toast_npc_farewell: '${name}: "May fire guide your path."',
-  dialog_choice_continue: 'Continue Exploring',
 
   // RestDialogue.js
   rest_dialogue_main_complete: 'Main quest complete — freely explore, or press ${autoPlay} for auto-run.',
@@ -2179,11 +2172,9 @@ export const STRINGS_EN = Object.freeze({
   quest_assistant_hint_step_done: 'Step done, click assistant "Sync Quest Progress"',
   quest_assistant_hint_boss_dist: 'Enter the red circle on map skull to activate Boss · ${progress}',
   quest_assistant_hint_step_done_2: 'Step done — press U → Sync Quest Progress',
-  quest_assistant_hint_near_wp: 'Approaching · ${label}',
   quest_waypoint_hint_chapter: 'Chapter ${chapter} required to touch anchor.',
   quest_waypoint_hint_boss3: 'Defeat Singularity Herald first',
   quest_waypoint_hint_dungeon: 'Clear the dungeon',
-  quest_waypoint_hint_trials_done: 'Touch anchor after three trials done',
   quest_waypoint_hint_void_boss: 'Defeat Void Chronarch',
   quest_waypoint_hint_skills: 'Unlock 3 weapon skills at campfire',
   quest_waypoint_hint_chaos_boss: 'Defeat Chaos Overlord',
@@ -2192,9 +2183,7 @@ export const STRINGS_EN = Object.freeze({
   quest_waypoint_hint_touch_anchor_3: 'Touch anchor after trials complete',
   quest_toast_chapter_announce: '${announce}',
   quest_toast_task_complete: 'Quest complete: ${title} · +${reward} soulfire',
-  quest_get_assistant_hint: 'Plane Assistant: ${hint}',
   quest_title_all_done: 'All clear. Press ${questTracker} to open assistant for full auto-run demo.',
-  quest_waypoint_far: 'Enter red circle on map skull to activate Boss · ${progress}',
   quest_waypoint_near: 'Approaching · ${label}',
 
   // Directions (QuestSystem.js getWaypointHint)

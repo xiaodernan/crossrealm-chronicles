@@ -1304,8 +1304,10 @@ export function objectiveReward(row, stats) {
 export function objectiveDesc(row, stats) {
   const 变体 = row?.descByChoice;
   if (!变体) return row?.desc;
+  // W-E3 切片25：抉择机制完善——在展示变体文案前先检查资格。
+  // 若玩家未满足该选项的前置 requires，回退到默认 desc。
   for (const [旗标, 键] of Object.entries(变体)) {
-    if (stats?.decisions?.has(旗标)) return 键;
+    if (stats?.decisions?.has(旗标) && objectiveRequiresMet(row, stats)) return 键;
   }
   return row?.desc;
 }

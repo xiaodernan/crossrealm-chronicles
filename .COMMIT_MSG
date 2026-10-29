@@ -1,0 +1,5 @@
+W-E3 slice25 choice refinement
+
+recordChoice now writes chosen flag into stats.decisions account
+objectiveDesc checks objectiveRequiresMet before showing variant text
+This completes W-E3 slice25 (抉择机制完善)
