@@ -54,8 +54,8 @@ describe('① 拼键扫描尺子自己不是摆设', () => {
 
   it('反向控制二：字面量写的 `t(\'…\')` 与不带插值的 `t(`…`)` 都不许被当成拼键', () => {
     const 根 = 假仓([
-      ['src/A.js', "import { t } from './i18n.js';\nexport const a = t('hud_fps');\n"],
-      ['src/B.js', "const b = t(`settings_audio`);\nexport default b;\n"],
+      ['src/A.js', "import { t } from './i18n.js';\nexport const a = t('pause_resume');\n"],
+      ['src/B.js', "const b = t(`settings_master_volume`);\nexport default b;\n"],
     ]);
     try {
       expect(扫描拼键模板(根), '字面量键被算成拼键 ⇒ 死键账本会把"已接线"错认成"盲区"').toEqual([]);

@@ -63,7 +63,7 @@ describe('_fmt 后缀与 ${} 占位的双向约定（W-D2 切片56）', () => {
     expect(leaks, '占位键被挂上 DOM 走查，换语言后玩家会看到字面量 ${...}').toEqual([]);
     // 反向控制：探针键必须真的在占位集合里，且过滤器点名它
     expect(placeholderKeys.has('hud_souls_display_fmt'), '探针键 hud_souls_display_fmt 应含占位').toBe(true);
-    const probeRefs = ['common_confirm', 'hud_souls_display_fmt'];
+    const probeRefs = ['common_cancel', 'hud_souls_display_fmt'];
     expect(probeRefs.filter((k) => placeholderKeys.has(k))).toEqual(['hud_souls_display_fmt']);
   });
 });
