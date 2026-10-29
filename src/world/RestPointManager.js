@@ -45,6 +45,9 @@ export class RestPointManager {
       throw new Error(`RestPointManager: 营火 ${id} 缺少显示名（对话标题与交互提示要说它叫什么）`);
     }
     const group = new THREE.Group();
+    // 营火要有名（W-C2 切片17）：这一族的底座与石圈没名，组再没名就并进 `(直属scene) / (无名)`，
+    // 榜上问不出"是哪一座营火在投影"。id 上面已经核过非空且不重复 ⇒ 名字天生唯一。
+    group.name = `rest:${id}`;
     const base = new THREE.Mesh(
       this._底座几何,
       this._底座材质,

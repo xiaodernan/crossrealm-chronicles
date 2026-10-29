@@ -40,6 +40,10 @@ export class BaseZone {
      */
     this.id = this.info?.id ?? null;
     if (!this.id) console.warn(`[zone] ${this.constructor.name} 没有 info.id —— 逻辑将无法按区域分支（修 B36）`);
+    // 区根要有名：`shadowCensus` 的 `归属标签()` 印的是「顶层组名 / 件名」，顶层组没名就一律读
+    // `(直属scene)` —— 区里没并进批的散件（单件的圆柱、markNoBatch 留给动画的水晶）在榜上分不清是哪座区。
+    // 命名**不动合批**：`被动过()` 先判 `p === root` 再看名字，区根自己的名字进不了那条判定。
+    this.group.name = `zone:${this.id}`;
     this.skyColor = config.skyColor ?? 0x87a8c4;
     this.mapColor = config.mapColor ?? '#4488aa';
     this.poiMarkers = [];

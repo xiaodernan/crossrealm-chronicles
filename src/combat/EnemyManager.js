@@ -312,6 +312,10 @@ export class EnemyManager {
 
   buildBossArena(center, color = 0x442244) {
     const group = new THREE.Group();
+    // 场要有名（W-C2 切片17）：榜的归属标签取"顶层组名 / 件名"，八根场柱与圆盘自己都没名，
+    // 组没名时这一族就并进 `(直属scene) / (无名)` 那一大格。名字带**中心坐标** ⇒ 五座场各占一格，
+    // 榜上能问出是哪一座（坐标由世界种子定死，读数可复现）。
+    group.name = `boss-arena@${Math.round(center.x)},${Math.round(center.z)}`;
     const mat = new THREE.MeshStandardMaterial({
       color,
       emissive: color,
