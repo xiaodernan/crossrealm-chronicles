@@ -390,6 +390,9 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  * 逐格再并上 2026-10-24 那批的历史最大（只收不放 ⇒ fantasy 267/213、gloom 184/120 保持旧数）。
  * 残局读数（同一页第 3 次之后 —— 页龄耗尽的那一档）**不进地板**，理由见头部"口径"一节的第五个自由度。
  * `shadow` 那一行是**数出来的笔数**（`shadowCensus().预测`），口径出自切片11（B152）。
+ * **2026-10-30 切片15 单格重钉 `void.shadow` 45 → 46**：三次真门逐字读 46，而两棵树的投影件清单**逐行相同**
+ * （198 件，按链与几何/材质签名聚合）⇒ 差不在“多了什么”，在**阴影框内那一件的边界判定**。这也修正了
+ * 数出来那一列“免疫”的说法：它对**页龄**免疫（掉落不投影），但框边界上的动态件仍有 **±1**。
  * 细节出处（哪个日志、哪一档页龄）逐格写在 `tests/draw-call-budget.test.js` 的带子腿注释里 ——
  * 那份注释是**判据的说明**，这张表是**判据的数据**，两者不再各存一份数。
  */
@@ -398,7 +401,7 @@ export const DRAW_CALL_FLOORS = Object.freeze({
   [ZONE_IDS.FANTASY]: Object.freeze({ frame: 267, body: 213, shadow: 55 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 593, body: 551, shadow: 39 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 218, body: 152, shadow: 62 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 139, body: 94, shadow: 45 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 139, body: 94, shadow: 46 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 123, body: 77, shadow: 45 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 184, body: 120, shadow: 66 }),
   [ZONE_IDS.RADIANT]: Object.freeze({ frame: 455, body: 410, shadow: 45 }),
