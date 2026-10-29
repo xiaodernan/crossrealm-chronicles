@@ -6,12 +6,9 @@
  */
 export const STRINGS_ZH = Object.freeze({
   // 通用
-  common_confirm: '确认',
   common_cancel: '取消',
   common_close: '关闭',
   common_save: '保存',
-  common_load: '加载',
-  common_reset: '重置',
   common_ui: '界面',
 
   // 设置面板
@@ -26,13 +23,10 @@ export const STRINGS_ZH = Object.freeze({
   caption_execution: '处决',
   settings_look_sensitivity: '镜头灵敏度',
   settings_graphics: '画面',
-  settings_audio: '音频',
-  settings_controls: '控制',
   settings_master_volume: '主音量',
   settings_sfx_volume: '音效音量',
   settings_music_volume: '音乐音量',
   settings_ambient_volume: '环境音量',
-  settings_bloom: 'Bloom',
   settings_pixel_ratio: '渲染精度',
   settings_lod_distance: '敌人更新距离',
   settings_shadows: '阴影',
@@ -69,9 +63,7 @@ export const STRINGS_ZH = Object.freeze({
   settings_ssao_quality_high: '高',
 
   // HUD
-  hud_fps: 'FPS',
   hud_zone: '区域',
-  hud_chapter: '章节',
   hud_hp: '生命',
   hud_mana: '法力',
   hud_quest_label: '当前任务',
@@ -91,7 +83,6 @@ export const STRINGS_ZH = Object.freeze({
   hud_hint_combat: '{attackLight} 连击 · {attackHeavy} 重击/处决 · {parry} 弹反 · {skill} 位面斩 · {lockOn} 锁定 · {roll} 闪避',
   hud_hint_system: '{spell1}~{spell4} 法术 · {swapWeapon} 切换武器 · {fastTravel} 快速旅行 · {help} 说明书 · {escape} 暂停',
   hud_souls: '位面之魂',
-  hud_level: '等级',
   // 性能 HUD 与泄漏 watchdog 标签（W-D2 切片42）：PerfHUD._lines() 内建行 + perfGauges 清单。
   // label 仍兼作 stats().leaks 的键（改名等于改门禁的键），显示层经 t(key) 展开。
   perf_hud_frame_ms: '帧耗时',
@@ -114,14 +105,8 @@ export const STRINGS_ZH = Object.freeze({
 
   // 对话与提示
   dialog_click_to_lock: '请点击画面中央再次锁定鼠标',
-  toast_gear_equip: '换上',
-  toast_gear_pickup: '拾取',
 
   // 战斗
-  combat_defeat: '击败',
-  combat_victory: '胜利',
-  combat_boss_start: 'Boss 战开始',
-  combat_boss_defeated: 'Boss 已击败',
 
   // 战斗反馈（W-D2 切片16d）
   damage_kind_normal: '普通',
@@ -1775,9 +1760,7 @@ export const STRINGS_ZH = Object.freeze({
 
   // 菜单
   menu_pause: '暂停',
-  menu_resume: '继续',
   menu_settings: '设置',
-  menu_quit: '退出',
 
   // 暂停菜单（W-D2 切片6）
   pause_resume: '继续游戏',
@@ -1791,12 +1774,10 @@ export const STRINGS_ZH = Object.freeze({
 
   // 快速旅行
   fast_travel_title: '快速旅行',
-  fast_travel_unlocked: '已解锁路点',
   fast_travel_locked: '未解锁',
 
   // 世界地图
   world_map_title: '位面全图 · 迷雾探索',
-  world_map_current_zone: '当前位置',
   world_map_not_explored: '该区域尚未探索 — 靠近揭开迷雾',
   world_map_marker_removed_fmt: '已移除：${label}',
   world_map_no_marker_nearby: '附近没有路点',
@@ -1809,15 +1790,10 @@ export const STRINGS_ZH = Object.freeze({
 
   // 说明书
   manual_title: '跨界纪元 · 说明书',
-  help_title: '帮助',
-  help_controls: '操作说明',
-  help_gameplay: '游戏机制',
 
   // 日志
   journal_title: '日志',
   journal_achievements: '成就',
-  journal_lore: ' lore 百科',
-  journal_dungeon_runs: '副本记录',
 
   // 升级面板
   upgrade_continue: '继续探索',
@@ -1844,7 +1820,6 @@ export const STRINGS_ZH = Object.freeze({
   upgrade_rest_default: '营火',
 
   // 自动演示
-  autoplay_start: '开始自动演示',
   autoplay_stop: '停止自动演示',
 
   // 存档（W-D2 切片37：存读反馈族整链进双表。save_success / load_success /
@@ -2020,7 +1995,6 @@ export const STRINGS_ZH = Object.freeze({
 
   // 对话系统（W-D2 切片10）
   // Dialog.js 通用
-  dialog_title_unknown: '未知',
   dialog_toast_chapter_required: '需要 Chapter ${chapter} 后再来问这个。',
   dialog_toast_rest_heal: '营火余温 +5 魂火',
   dialog_toast_npc_farewell: '${name}：「愿火护佑下一程。」',
@@ -2028,8 +2002,6 @@ export const STRINGS_ZH = Object.freeze({
   // RestDialogue.js
   rest_dialogue_main_complete: '主线已完成 — 自由探索，或按 ${autoPlay} 自动通关。',
   rest_dialogue_progress_fmt: '当前：${title}\n${progress}\n\n${hint}',
-  rest_dialogue_journal_title: '${title}',
-  rest_dialogue_journal_text: '${text}',
 
   // NPCManager.js 台词池（每条单独一键，按 NPC 分组）
   npc_wanderer_0: '穿越者…你闻到了吗？三个位面的气息正在融合。',
@@ -2168,7 +2140,6 @@ export const STRINGS_ZH = Object.freeze({
   quest_assistant_hint_step_done: '本步已完成，点击助手「同步任务进度」',
   quest_assistant_hint_boss_dist: '走进地图骷髅标记的红圈激活 Boss · ${progress}',
   quest_assistant_hint_step_done_2: '本步已完成 — 点 U → 同步任务进度',
-  quest_waypoint_hint_chapter: '需要 Chapter ${chapter} 后再来触摸。',
   quest_waypoint_hint_boss3: '先击败奇点领主',
   quest_waypoint_hint_dungeon: '清空地下城',
   quest_waypoint_hint_void_boss: '击败时线执政官',

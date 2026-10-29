@@ -6,12 +6,9 @@
  */
 export const STRINGS_EN = Object.freeze({
   // Common
-  common_confirm: 'Confirm',
   common_cancel: 'Cancel',
   common_close: 'Close',
   common_save: 'Save',
-  common_load: 'Load',
-  common_reset: 'Reset',
   common_ui: 'UI',
 
   // Settings panel
@@ -26,13 +23,10 @@ export const STRINGS_EN = Object.freeze({
   caption_execution: 'Execution',
   settings_look_sensitivity: 'Look Sensitivity',
   settings_graphics: 'Graphics',
-  settings_audio: 'Audio',
-  settings_controls: 'Controls',
   settings_master_volume: 'Master Volume',
   settings_sfx_volume: 'SFX Volume',
   settings_music_volume: 'Music Volume',
   settings_ambient_volume: 'Ambient Volume',
-  settings_bloom: 'Bloom',
   settings_pixel_ratio: 'Render Scale',
   settings_lod_distance: 'Enemy LOD Distance',
   settings_shadows: 'Shadows',
@@ -69,9 +63,7 @@ export const STRINGS_EN = Object.freeze({
   settings_ssao_quality_high: 'High',
 
   // HUD
-  hud_fps: 'FPS',
   hud_zone: 'Zone',
-  hud_chapter: 'Chapter',
   hud_hp: 'HP',
   hud_mana: 'Mana',
   hud_quest_label: 'Current Quest',
@@ -91,7 +83,6 @@ export const STRINGS_EN = Object.freeze({
   hud_hint_combat: '{attackLight} Combo · {attackHeavy} Heavy/Execute · {parry} Parry · {skill} Planar Slash · {lockOn} Lock-on · {roll} Dodge',
   hud_hint_system: '{spell1}~{spell4} Spells · {swapWeapon} Swap Weapon · {fastTravel} Fast Travel · {help} Manual · {escape} Pause',
   hud_souls: 'Planar Souls',
-  hud_level: 'Level',
   // 性能 HUD 与泄漏 watchdog 标签（W-D2 切片42）：PerfHUD._lines() 内建行 + perfGauges 清单。
   // label 仍兼作 stats().leaks 的键（改名等于改门禁的键），显示层经 t(key) 展开。
   perf_hud_frame_ms: 'Frame time',
@@ -114,14 +105,8 @@ export const STRINGS_EN = Object.freeze({
 
   // Dialog & Toasts
   dialog_click_to_lock: 'Click center of screen to lock mouse',
-  toast_gear_equip: 'Equip',
-  toast_gear_pickup: 'Pick up',
 
   // Combat
-  combat_defeat: 'Defeat',
-  combat_victory: 'Victory',
-  combat_boss_start: 'Boss Fight Start',
-  combat_boss_defeated: 'Boss Defeated',
 
   // Combat feedback (W-D2 slice 16d)
   damage_kind_normal: 'Normal',
@@ -1777,9 +1762,7 @@ export const STRINGS_EN = Object.freeze({
 
   // Menu
   menu_pause: 'Pause',
-  menu_resume: 'Resume',
   menu_settings: 'Settings',
-  menu_quit: 'Quit',
 
   // Pause Menu (W-D2 slice 6)
   pause_resume: 'Resume Game',
@@ -1793,12 +1776,10 @@ export const STRINGS_EN = Object.freeze({
 
   // Fast Travel
   fast_travel_title: 'Fast Travel',
-  fast_travel_unlocked: 'Unlocked Waypoints',
   fast_travel_locked: 'Locked',
 
   // World Map
   world_map_title: 'World Map · Fog of War',
-  world_map_current_zone: 'Current Location',
   world_map_not_explored: 'Area not explored yet — approach to reveal the fog',
   world_map_marker_removed_fmt: 'Removed: ${label}',
   world_map_no_marker_nearby: 'No waypoint nearby',
@@ -1811,15 +1792,10 @@ export const STRINGS_EN = Object.freeze({
 
   // Manual
   manual_title: 'Crossrealm Chronicles · Manual',
-  help_title: 'Help',
-  help_controls: 'Controls',
-  help_gameplay: 'Gameplay',
 
   // Journal
   journal_title: 'Journal',
   journal_achievements: 'Achievements',
-  journal_lore: 'Lore Codex',
-  journal_dungeon_runs: 'Dungeon Runs',
 
   // Upgrade Panel
   upgrade_continue: 'Continue Exploring',
@@ -1846,7 +1822,6 @@ export const STRINGS_EN = Object.freeze({
   upgrade_rest_default: 'Campfire',
 
   // Auto Play
-  autoplay_start: 'Start Auto Play',
   autoplay_stop: 'Stop Auto Play',
 
   // Save/Load (W-D2 slice 37: the save/load feedback chain enters the dual tables.
@@ -2022,7 +1997,6 @@ export const STRINGS_EN = Object.freeze({
 
   // Dialog System (W-D2 slice 10)
   // Dialog.js generic
-  dialog_title_unknown: 'Unknown',
   dialog_toast_chapter_required: 'Chapter ${chapter} required to ask this.',
   dialog_toast_rest_heal: 'Campfire warmth +5 souls',
   dialog_toast_npc_farewell: '${name}: "May fire guide your path."',
@@ -2030,8 +2004,6 @@ export const STRINGS_EN = Object.freeze({
   // RestDialogue.js
   rest_dialogue_main_complete: 'Main quest complete — freely explore, or press ${autoPlay} for auto-run.',
   rest_dialogue_progress_fmt: 'Current: ${title}\n${progress}\n\n${hint}',
-  rest_dialogue_journal_title: '${title}',
-  rest_dialogue_journal_text: '${text}',
 
   // NPCManager.js lines (per NPC)
   npc_wanderer_0: 'Traveler... do you smell it? Three planes\' breaths are converging.',
@@ -2172,7 +2144,6 @@ export const STRINGS_EN = Object.freeze({
   quest_assistant_hint_step_done: 'Step done, click assistant "Sync Quest Progress"',
   quest_assistant_hint_boss_dist: 'Enter the red circle on map skull to activate Boss · ${progress}',
   quest_assistant_hint_step_done_2: 'Step done — press U → Sync Quest Progress',
-  quest_waypoint_hint_chapter: 'Chapter ${chapter} required to touch anchor.',
   quest_waypoint_hint_boss3: 'Defeat Singularity Herald first',
   quest_waypoint_hint_dungeon: 'Clear the dungeon',
   quest_waypoint_hint_void_boss: 'Defeat Void Chronarch',

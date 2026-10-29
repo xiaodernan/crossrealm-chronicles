@@ -16,7 +16,7 @@
  * 加键/删键的同一片里改这里；`tests/i18n.test.js` 有一条结构门禁：测试代码里
  * 出现 `.toBe(<这个数>)` 的字面量就红 —— 防止下一个抄本悄悄长回来。
  */
-export const EXPECTED_KEY_COUNT = 2425;
+export const EXPECTED_KEY_COUNT = 2396;
 
 /**
  * 键数判据：两表相等，且等于登记值。

@@ -64,10 +64,15 @@ describe('i18n 文案表（W-D2 切片1）', () => {
   it('t() 支持 \\${name} 插值', () => {
     // 用现有键拼一个带插值的场景：直接调 t 的第二参数
     // 先确认无参数时不插值
-    const plain = t('toast_gear_equip');
+    // 样键必须是在役的：2026-10-29 清理死键时这里原来取的键被删了，
+    // 两条断言于是拿两个同样的 [MISSING: …] 互相比，绿得毫无意义。
+    const 样键 = 'pause_resume';
+    expect(ZH_KEYS, '样键不在表里 —— 下面的断言会拿两个 [MISSING] 互相比').toContain(样键);
+    const plain = t(样键);
+    expect(plain).not.toContain('[MISSING:');
     expect(plain).not.toContain('${');
     // 插值路径：键值里没有 \${} 时原样返回
-    expect(t('toast_gear_equip', { name: 'X' })).toBe(plain);
+    expect(t(样键, { name: 'X' })).toBe(plain);
   });
 
   it('getAllKeys 返回中文表的键名', () => {
@@ -330,7 +335,7 @@ describe('死键只减不增（W-D2 切片6 门槛 · 切片26 修"这道门恒�
   const 死集 = 字面零读者.filter((k) => !动态.has(k));
 
   /**
-   * 修门那一刻（2411 键）的真实读数 —— **待查清单，不是可删清单**。共 33 枚（2026-10-29 清掉 11 枚：9 枚被同文/近文键取代，2 枚是词序颠倒的重复；见文末「清理过的死键」一节的替换表）。
+   * 修门那一刻（2411 键）的真实读数 —— **待查清单，不是可删清单**。共 4 枚（2026-10-29 分两批清掉 40 枚：14 枚被同文/近文键取代、26 枚从未接线；见文末「清理过的死键」一节的两张表。剩下的 4 枚是两结局的标题/日志，等结局日志真正接线时再用）。
    *
    * 名单里少一枚要问的是"它被接上了还是被删了"，多一枚则是有人建了格没接线。
    * 运行期拼出来的那一族（`settings_ssao_quality_*` 四枚）**不在这里** —— 它们有读者，
@@ -338,39 +343,10 @@ describe('死键只减不增（W-D2 切片6 门槛 · 切片26 修"这道门恒�
    * 由 `tests/i18n-dynamic-key-coverage.test.js` 逐枚核定义（切片27）。
    */
   const 死键名单 = [
-    'autoplay_start',
-    'combat_boss_defeated',
-    'combat_boss_start',
-    'combat_defeat',
-    'combat_victory',
-    'common_confirm',
-    'common_load',
-    'common_reset',
-    'dialog_title_unknown',
-    'fast_travel_unlocked',
-    'help_controls',
-    'help_gameplay',
-    'help_title',
-    'hud_chapter',
-    'hud_fps',
-    'hud_level',
-    'journal_dungeon_runs',
-    'journal_lore',
-    'menu_quit',
-    'menu_resume',
     'obj_true_end_sealed_journal',
     'obj_true_end_sealed_title',
     'obj_true_end_studied_journal',
     'obj_true_end_studied_title',
-    'quest_waypoint_hint_chapter',
-    'rest_dialogue_journal_text',
-    'rest_dialogue_journal_title',
-    'settings_audio',
-    'settings_bloom',
-    'settings_controls',
-    'toast_gear_equip',
-    'toast_gear_pickup',
-    'world_map_current_zone',
   ];
 
   it('扫描范围先把两张定义表排除掉（否则每个键都被自己的定义算成读者）', () => {
@@ -379,7 +355,7 @@ describe('死键只减不增（W-D2 切片6 门槛 · 切片26 修"这道门恒�
   });
 
   it('计数只许降不许升（账本 44 枚，正好压在名义上限上）', () => {
-    expect(死集.length, `死键 ${死集.length} 超过上限（应 ≤ 33）`).toBeLessThanOrEqual(33);
+    expect(死集.length, `死键 ${死集.length} 超过上限（应 ≤ 4）`).toBeLessThanOrEqual(4);
     expect(死集.slice().sort()).toEqual(死键名单);
   });
 
@@ -397,8 +373,8 @@ describe('死键只减不增（W-D2 切片6 门槛 · 切片26 修"这道门恒�
       expect(死集, `「${键}」又被当成孤儿了 —— 删掉它，SSAO 下拉那一档就没有字`).not.toContain(键);
     }
     // 尺子不许只看见登记的那一族：没登记的运行期拼键仍然会落进待查账本（这是限度，写进读数）
-    expect(字面零读者.length, '字面量零读者的总数不是 37 了 —— 那四枚运行期接线之外的账也变了，两处要一起判')
-      .toBe(37);
+    expect(字面零读者.length, '字面量零读者的总数不是 8 了 —— 那四枚运行期接线之外的账也变了，两处要一起判')
+      .toBe(8);
   });
 
   it('反向控制两头：在役的键不许进名单，凭空造一枚没接线的键必须进（防修完仍恒绿）', () => {
@@ -600,14 +576,19 @@ describe('双表键数只有一个所有者（W-D2 欠账 · 2026-10-29）', () 
     expect(键数问题(null, 齐).length, '非数组必须报').toBe(1);
   });
 });
-
 describe('清理过的死键不留后门（2026-10-29）', () => {
+  const walk = (dir) => readdirSync(dir).flatMap((name) => {
+    const p = join(dir, name);
+    return statSync(p).isDirectory() ? walk(p) : [p];
+  });
   /**
-   * 删掉的 11 枚 → 取代它的在役键。
+   * 删掉的 40 枚 → 凭据。两张表分开，因为"凭据"不是一回事：
    *
-   * 这张表是**删除的凭据**：每一行都要能回答"为什么删它不会丢字"。
-   * 判据有三条：① 替代键两张表都在场；② src/ 或 index.html 里真有读者；
-   * ③ 删掉的键两张表都不许再出现（否则下一个会话照着旧记忆加回来，账本又长回去）。
+   * - `被取代`：同一个意思已有一个在役键在写。判据是**替代键两表都在场且真的有人读**。
+   * - `从未接线`：这个界面/提示根本没有（或换了别的写法）。没有替代键，只有一句原因；
+   *   判据是**这句原因不许是空话**（非空、且长度够描述一个去向/现状）。
+   *
+   * 两张表合起来必须覆盖**全部**删除，且不许重叠 —— 否则"删了却没说为什么"会从这个口子溜回来。
    */
   const 被取代 = {
     dialog_choice_continue: 'upgrade_continue',
@@ -621,30 +602,70 @@ describe('清理过的死键不留后门（2026-10-29）', () => {
     upgrade_title: 'wp_label_campfire_upgrade',
     obj_true_end_sealed_desc: 'obj_true_end_desc_sealed',
     obj_true_end_studied_desc: 'obj_true_end_desc_studied',
+    autoplay_start: 'autoplay_toast_start',
+    fast_travel_unlocked: 'fast_travel_toast_unlocked',
+    menu_resume: 'pause_resume',
   };
+  const 从未接线 = {
+    combat_boss_defeated: 'Boss 击败横幅走 boss_dungeon_defeat_banner',
+    combat_boss_start: 'Boss 开始没有独立提示，阶段横幅走 boss_phase_fallback_banner',
+    combat_defeat: '击杀计数与伤害数字都不读它',
+    combat_victory: '胜利没有独立提示',
+    common_confirm: '壳页没有确认按钮',
+    common_load: '读档按钮走 pause_load_slot',
+    common_reset: '设置面板没有"重置"按钮',
+    dialog_title_unknown: '对话标题由调用方传入，没有未知说话人这条兜底',
+    help_controls: '说明书走 hm_title_* / hm_body_*',
+    help_gameplay: '同上（说明书分区 title/body）',
+    help_title: '面板标题走 manual_title',
+    hud_chapter: 'HUD 自己画 Chapter 数字',
+    hud_fps: '性能面板与 HUD 自己画 FPS',
+    hud_level: '魂/等级格走 hud_souls_display_fmt',
+    journal_dungeon_runs: '日志页签走 journal_tab_*',
+    journal_lore: 'lore 走 LoreCodex，日志页签不单列',
+    menu_quit: '壳页没有退出按钮',
+    quest_waypoint_hint_chapter: '章节门提示走 quest_waypoint_hint_touch_anchor_3',
+    rest_dialogue_journal_text: '值是 ${text} 占位符，本身不含信息',
+    rest_dialogue_journal_title: '值是 ${title} 占位符，本身不含信息',
+    settings_audio: '设置按具体项列（master/sfx/music/ambient）',
+    settings_bloom: '画质预设里没有单列 Bloom 开关',
+    settings_controls: '控制分区没有这个标题',
+    toast_gear_equip: '装备提示走 captions / gear_* 文案',
+    toast_gear_pickup: '拾取提示走 captions',
+    world_map_current_zone: '地图面板不显示"当前位置"标题',
+  };
+
+  it('两张表不许重叠，也不许有谁只删不记账', () => {
+    const 交 = Object.keys(被取代).filter((k) => k in 从未接线);
+    expect(交, '同一枚键在两个分类里各记了一次 —— 凭据有歧义').toEqual([]);
+    expect(Object.keys(被取代).length + Object.keys(从未接线).length, '删除账本条数不是 40 —— 漏记了一枚').toBe(40);
+  });
 
   it('替代键两表都在场，而且真的有人读（删字之前先确认字有去处）', () => {
     const 读者 = [
-      ...readdirSync(join(process.cwd(), 'src'))
-        .flatMap(function 走(name) {
-          const p = join(join(process.cwd(), 'src'), name);
-          return statSync(p).isDirectory() ? readdirSync(p).flatMap(function 再(x) { return 走(join(name, x)); }) : [p];
-        })
+      ...walk(join(process.cwd(), 'src'))
         .filter((f) => f.endsWith('.js') && !/strings\.(zh|en)\.js$/.test(f))
         .map((f) => readFileSync(f, 'utf8')),
       readFileSync(join(process.cwd(), 'index.html'), 'utf8'),
     ];
-    for (const [旧, 新] of Object.entries(被取代)) {
-      expect(ZH_KEYS, `替代键 ${新} 不在中文表里 —— ${旧} 删了就是真丢字`).toContain(新);
-      expect(EN_KEYS, `替代键 ${新} 不在英文表里`).toContain(新);
-      expect(读者.some((s) => s.includes(`'${新}'`) || s.includes(`"${新}"`)), `替代键 ${新} 全仓没人读 —— 它也不是活键`).toBe(true);
+    for (const [旧键, 新键] of Object.entries(被取代)) {
+      expect(ZH_KEYS, `替代键 ${新键} 不在中文表里 —— ${旧键} 删了就是真丢字`).toContain(新键);
+      expect(EN_KEYS, `替代键 ${新键} 不在英文表里`).toContain(新键);
+      expect(读者.some((s) => s.includes(`'${新键}'`) || s.includes(`"${新键}"`)), `替代键 ${新键} 全仓没人读 —— 它也不是活键`).toBe(true);
+    }
+  });
+
+  it('从未接线的那些，每一条都说得出为什么（空话不算凭据）', () => {
+    for (const [k, 理由] of Object.entries(从未接线)) {
+      expect(typeof 理由, `${k} 的凭据不是字符串`).toBe('string');
+      expect(理由.trim().length, `${k} 的凭据是空话`).toBeGreaterThanOrEqual(6);
     }
   });
 
   it('删掉的键不许偷偷回来（两表都零出现）', () => {
-    for (const 旧 of Object.keys(被取代)) {
-      expect(ZH_KEYS, `${旧} 又回到中文表了 —— 它已被 ${被取代[旧]} 取代`).not.toContain(旧);
-      expect(EN_KEYS, `${旧} 又回到英文表了`).not.toContain(旧);
+    for (const 旧键 of [...Object.keys(被取代), ...Object.keys(从未接线)]) {
+      expect(ZH_KEYS, `${旧键} 又回到中文表了`).not.toContain(旧键);
+      expect(EN_KEYS, `${旧键} 又回到英文表了`).not.toContain(旧键);
     }
   });
 });
