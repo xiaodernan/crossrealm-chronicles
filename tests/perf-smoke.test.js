@@ -14,7 +14,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { PERF_BUDGETS } from '../scripts/perf-budgets.mjs';
-import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题, DRAW列, CPU列 } from '../scripts/harness-readings.mjs';
+import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题, DRAW列, DRAW附列, CPU列 } from '../scripts/harness-readings.mjs';
 
 const ROOT = process.cwd();
 const 脚本源 = existsSync(join(ROOT, 'scripts', 'perf-smoke.mjs'))
@@ -231,7 +231,7 @@ describe('性能冒烟（W-D4 切片2）', () => {
  * **真的把坏读数喂给生产判定**，而不是在本文件里再复刻一遍判断。
  * 另有一组"调用点"腿钉住脚本确实问了这三个判 —— 只 import 不调用，等于没有这条门禁。
  */
-const 好draw = { 整帧: 278, 本体: 201, 阴影: 77, 三角面: 120000 };
+const 好draw = { 整帧: 278, 本体: 201, 阴影: 77, 三角面: 120000, 掉落: 6, 可画件: 741 };
 const 好cpu = { frames: 240, updateAvgMs: 4.33, updateP95Ms: 6.2, frameAvgMs: 108.1 };
 const 名单 = ['hub', 'fantasy', 'magic'];
 
@@ -271,6 +271,32 @@ describe('读数完整性（切片6b）：每一站每一列都得是数', () =>
   it('tri 读到 0 ⇒ 画了 call 却没画面（取账落在空场景上）', () => {
     expect(draw读数问题('abyss', { ...好draw, 三角面: 0 }).join('\n')).toMatch(/空场景/);
     expect(draw读数问题('abyss', { ...好draw, 三角面: NaN }).join('\n')).toMatch(/tri 读到 NaN/);
+  });
+
+  /**
+   * 附列（W-C2 切片12，B154）：**页龄**是这把尺没钉的第五个自由度。
+   *
+   * 配方钉了时刻 / 朝向 / 俯角 / 结算帧，站点钉了世界种子，可 `整帧 / 本体` 两列同期仍差 20–40 个
+   * call（hub 283 → 288 → 258），而**数出来的那一列一个都不动** —— 三刀探针（`mech.mjs` /
+   * `mech2.mjs` / `spread.mjs`）切出来的结论是：少的全是**不投影的瞬态件**，形状对上
+   * `LootSystem` 的掉落三件套（八面体本体 + 作为孩子的地面环与光柱），寿命 `DROP_LIFE = 30`
+   * 走 `dt`（真实时间）而不是钉住的 `timeOfDay`。
+   *
+   * 这两列**不参与达标**（0 是合法见证），但必须每读都有：下一轮再差 25 个 call，
+   * 看这一行就知道是"内容涨了"还是"这一页已经耗尽"，不必再花几分钟跑探针去归因。
+   */
+  it('附列少一份见证 ⇒ 点名那一列（判据在，脚本没取也要能红）', () => {
+    for (const 列 of DRAW附列) {
+      const 没交 = draw读数问题('hub', { ...好draw, [列]: undefined });
+      expect(没交.join('\n'), `附列 "${列}" 没交出来却没有点名`).toMatch(new RegExp(`附列 "${列}" 读到 undefined`));
+      const 负 = draw读数问题('hub', { ...好draw, [列]: -1 });
+      expect(负.join('\n'), `附列 "${列}" 读到 -1 没有点名`).toMatch(new RegExp(`附列 "${列}" 读到 -1`));
+      const 小 = draw读数问题('hub', { ...好draw, [列]: 3.5 });
+      expect(小.join('\n'), `附列 "${列}" 读到小数没有点名`).toMatch(new RegExp(`附列 "${列}" 读到 3.5`));
+    }
+    // 控制臂：0 在附列里是**合法**的（地上确实可以一件掉落都没有）。
+    // 这条防的是"把见证当尺子"那种改法 —— 那样下一次真门会因为一页干净的世界而红。
+    expect(draw读数问题('hub', { ...好draw, 掉落: 0, 可画件: 0 }), '附列读到 0 被判坏（附列不是尺子）').toEqual([]);
   });
 
   it('差值列不再等于两列之差 ⇒ 咬住"阴影改成第三趟取账"那种改法', () => {
@@ -330,6 +356,24 @@ describe('读数完整性（切片6b）：每一站每一列都得是数', () =>
     // "应有帧数"必须由脚本里的批数×每批帧推出来，不许另抄一个 240
     expect(脚本源, '应有帧数不是从批数×每批帧推的').toMatch(/const 应有帧数 = 计时批数 \* 每批帧数;/);
     expect(脚本源, '页面里那句话的帧数没有跟着推导走').toMatch(/for \(let i = 0; i < \$\{每批帧数\}; i \+= 1\)/);
+  });
+
+  it('页龄那两份见证是脚本自己取的，字段名与判据的附列名册对齐（切片12）', () => {
+    // 只 import 判据不取数 = 判据永远在同一份缺数上复检；这几条问的是"页面里真去数了"
+    expect(脚本源, '脚本没数地上的掉落件数').toMatch(/掉落: g\.loot\.drops\.length/);
+    expect(脚本源, '脚本没走场景树数可画件').toMatch(/数可见\(g\.scene\)/);
+    // 取到了还得**没处取就红**：少了那句 throw，页面改版把 loot 挪走时会读到 undefined，
+    // 而 undefined 只被附列那条抓住 —— 抓住的是"没交见证"，不是"这一页没有掉落"。
+    // 咬**语句形状**（门 + 那句红成对出现），不咬字面词：臂丁把守卫改成 `if (false)`，
+    // 那句话还在文件里、只找词面的腿照常绿（切片12 第一遍跑就是这么被自己骗过去的）。
+    expect(脚本源, '取不到掉落名册时没点名，或那句红被钉在一个恒假的门上').toMatch(
+      /if \(!g\.loot \|\| !Array\.isArray\(g\.loot\.drops\)\) \{\s*\n\s*throw new Error\('页面上没有 g\.loot\.drops/,
+    );
+    for (const 列 of DRAW附列) {
+      expect(脚本源, `判据的附列名册里有 "${列}"，脚本的读数里却没这个字段（两处各列一份 = 分家）`).toContain(列);
+    }
+    // 打印里也得带着它们：归因靠的是日志，读数只进 JSON 的话下一次没人看得见那份见证
+    expect(脚本源, '日志那行没打附列').toMatch(/掉落=\$\{r\.掉落\} 可画=\$\{r\.可画件\}/);
   });
 
   it('判据模块不许带副作用（它是给门禁 import 的那一半）', () => {

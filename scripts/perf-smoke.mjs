@@ -495,8 +495,23 @@ try {
       }
       const 区 = g.world.currentZone && g.world.currentZone.id;
       if (区 !== 站id) throw new Error('站点 ' + 站id + ' 现在落在 "' + 区 + '" 区里 —— 坐标与世界分家了，这批读数作废');
+      // 页龄见证（切片12，B154）：地上此刻有几件掉落、场景里有多少可画件。
+      // 掉落三件套的寿命 DROP_LIFE 走的是 dt（真实时间）而不是钉住的 timeOfDay ⇒ 同一份世界
+      // 随页龄能少画 20–40 个 call，而数出来的阴影列一个都不少（那些件本来就不投影）。
+      // 这两份数不参与达标，只当见证：下一轮读数再差 25 个 call，看这一行就知道是内容涨了还是这一页耗尽了。
+      if (!g.loot || !Array.isArray(g.loot.drops)) {
+        throw new Error('页面上没有 g.loot.drops —— 掉落这份见证没处取（这一列是页龄的尺子，缺了它下一次归因只能重跑探针）');
+      }
+      let 可画件 = 0;
+      const 数可见 = (o) => {
+        if (o.visible === false) return;
+        if (o.isMesh || o.isLine || o.isPoints || o.isSprite) 可画件 += 1;
+        for (const c of o.children) 数可见(c);
+      };
+      数可见(g.scene);
       return {
         区, 整帧: 整帧.calls, 本体: 本体.calls, 阴影: 整帧.calls - 本体.calls, 三角面: 整帧.triangles,
+        掉落: g.loot.drops.length, 可画件,
         // 越预算的那一列（B152）：上限吃的是**数出来的笔数**，不是上面那个差。
         // 差仍然交出去 —— 三列自洽那条判据（阴影 = 整帧 − 本体）问的是它，账本也记它。
         阴影趟: 普查.预测,
@@ -524,7 +539,7 @@ try {
     draw读数.push({ 站: 站id, ...r });
     const 上 = 名册.ceilings[站id];
     const 上串 = 上 ? `（上限 ${上.frame}/${上.body}/${上.shadow}）` : '（名册里**没有这一站**）';
-    console.log(`perf-smoke [draw call|${站id}] 整帧=${r.整帧} 本体=${r.本体} 阴影=${r.阴影} 阴影趟=${r.阴影趟} tri=${r.三角面} ${上串}`);
+    console.log(`perf-smoke [draw call|${站id}] 整帧=${r.整帧} 本体=${r.本体} 阴影=${r.阴影} 阴影趟=${r.阴影趟} tri=${r.三角面} 掉落=${r.掉落} 可画=${r.可画件} ${上串}`);
     console.log(`perf-smoke [阴影普查|${站id}] 数出来=${r.普查.预测} 冻结减出来=${r.冻结阴影} 报告减出来=${r.阴影}`
       + ` 框内 ${r.普查.框内件数} 件 / 可见可投 ${r.普查.可投件数} 件 光源=${r.普查.光源.map((L) => L.名 + '→' + L.绘 + (L.跳过 ? '(跳过:' + L.跳过 + ')' : '')).join(',')}`);
     if (r.阴影 !== r.普查.预测) {
