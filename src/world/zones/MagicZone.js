@@ -177,7 +177,7 @@ export class MagicZone extends BaseZone {
       window.dispatchEvent(new CustomEvent('discovery', {
         detail: { id: 'echo-pages', title: t('obj_study_rite_title'), text: t('zone_disc_echo_pages_text') },
       }));
-    }, { id: 'echo-pages', color: 0xd8b46a });
+    }, { id: 'echo-pages', color: paletteOf('metal.gilt') });
   }
 
   buildQuidditchRing() {

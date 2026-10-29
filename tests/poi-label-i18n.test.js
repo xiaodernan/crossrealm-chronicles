@@ -13,7 +13,7 @@
  *
  * 1. **结构腿**：每个 label 都是中英两表里的键；钉死的表覆盖真世界每一个 POI
  *    （多一个少一个都算漂移 —— 分母自证，防"清单永远全过"）。
- * 2. **钉文案腿**：62 处的双语文案逐字钉死。改文案必须来改这里，不允许静默漂移。
+ * 2. **钉文案腿**：64 处的双语文案逐字钉死。改文案必须来改这里，不允许静默漂移。
  * 3. **接线腿**：显示出口那一行真的把 label 交给了 `t()`（源码钉死 + 拼串模拟）。
  * 4. **静态腿**：11 个 POI 来源文件的 label 位上不许再有中文字面量
  *    （`'中文', () => {` 与 `label: '中文'` 两个形状各扫一遍）。
@@ -68,7 +68,7 @@ function 扫标签位(src) {
 
 /**
  * 钉死表：POI id → [label 键, 中文文案, 英文文案]。
- * 62 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
+ * 64 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
  */
 const POI_LABELS = {
 'hub-anchor': ['hub_poi_anchor_label', '触摸世界之锚', 'Touch the World Anchor'],
@@ -78,12 +78,14 @@ const POI_LABELS = {
   'fantasy-boss-gate': ['zone_poi_fantasy_boss_gate_label', '进入 Boss 竞技场', 'Enter the Boss Arena'],
   'magic-castle': ['zone_poi_magic_castle_label', '进入悬浮城堡', 'Enter the Floating Castle'],
   'magic-forest': ['zone_poi_magic_forest_label', '禁林深处的低语', 'Whispers from the Forbidden Forest Depths'],
+  'echo-pages': ['zone_poi_echo_pages_label', '余烬书页', 'Ember Page'],
   'magic-boss-gate': ['zone_poi_magic_boss_gate_label', '进入奥术竞技场', 'Enter the Arcane Arena'],
   'space-tesseract': ['zone_poi_space_tesseract_label', '触碰五维_tesseract', 'Touch the Five-Dimensional Tesseract'],
   'space-lens': ['zone_poi_space_lens_label', '观测引力透镜', 'Observe the Gravitational Lens'],
   'space-wreck': ['zone_poi_space_wreck_label', '搜索 Endurance 号残骸', 'Search the Endurance Wreck'],
   'void-rift': ['zone_poi_void_rift_label', '调查时线裂隙', 'Investigate the Timeline Rift'],
   'void-tablet': ['zone_poi_void_tablet_label', '阅读五维碑文', 'Read the Five-Dimensional Stele'],
+  'seal-stone': ['zone_poi_seal_stone_label', '封印石座', 'Stone Seat of Sealing'],
   'abyss-boss-gate': ['zone_poi_abyss_boss_gate_label', '混沌裂隙竞技场', 'Chaos Rift Arena'],
   'chaos-core': ['zone_poi_chaos_core_label', '触碰混沌之核', 'Touch the Core of Chaos'],
   'gloom-deep-entrance': ['zone_poi_gloom_deep_entrance_label', '幽暗林地深处', 'Depths of the Gloomy Forest'],
@@ -165,7 +167,7 @@ describe('POI 交互标签双表化（W-D2 切片19）', () => {
     setLanguage('zh');
   });
 
-  it('每个 POI 的 label 都是中英两表里的键（分母自证：62 处一个不落）', () => {
+  it('每个 POI 的 label 都是中英两表里的键（分母自证：64 处一个不落）', () => {
     const pois = world.pointsOfInterest;
     expect(pois.length, 'POI 总数对不上 —— 世界构建坏了').toBeGreaterThanOrEqual(60);
     const 缺 = [];
@@ -241,7 +243,7 @@ describe('POI 交互标签双表化（W-D2 切片19）', () => {
   it('本片新建的 19 个键：同一文案在两表里最多两个键（全局规矩的本地复查）', () => {
     const 新建 = [...new Set(Object.values(POI_LABELS).map(([键]) => 键))]
       .filter((k) => k.startsWith('zone_poi_') || k.startsWith('pop_poi_') || k === 'hub_poi_anchor_label');
-    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(19);
+    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(21);
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
       const 计数 = new Map();
       for (const v of Object.values(table)) 计数.set(v, (计数.get(v) ?? 0) + 1);

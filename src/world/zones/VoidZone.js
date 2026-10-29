@@ -133,7 +133,7 @@ export class VoidZone extends BaseZone {
           detail: { id: 'seal-stone', title: t('obj_seal_rite_title'), text: t('zone_disc_seal_stone_text') },
         }));
       },
-      { id: 'seal-stone', color: 0x9fd8ff }
+      { id: 'seal-stone', color: paletteOf('crystal.ice') }
     );
   }
 
