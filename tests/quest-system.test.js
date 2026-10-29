@@ -85,6 +85,18 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     }
   });
 
+  it('`recordChoice` 派发的那条事件真的把旗标记进账（记账只有监听那一条路）', () => {
+    const 旗标 = 'choice_void_studied';
+    expect(qs.stats.decisions.has(旗标), '夹具失效：这条旗标开局就在账上').toBe(false);
+    const 派发 = [];
+    const 监听 = (e) => 派发.push(e.detail?.flag);
+    win.addEventListener('choice-made', 监听);
+    qs.recordChoice(旗标);
+    win.removeEventListener('choice-made', 监听);
+    expect(派发, '`recordChoice` 没有派发 `choice-made`').toEqual([旗标]);
+    expect(qs.stats.decisions.has(旗标), '派发了却没记到账 ⇒ 那条监听被摘掉或不再调 `applyStatEvent`').toBe(true);
+  });
+
   it('Chapter 1 八步走完就接上第二档（在役表是线性的，章节号只跟着四格门控翻）', () => {
     const titles = [qs.current.title];
     const step = (name, detail) => {

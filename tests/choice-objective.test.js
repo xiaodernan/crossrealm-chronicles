@@ -88,8 +88,8 @@ describe('③ 生产者是一条事件（闭包门禁要扫得到）', () => {
   });
 });
 
-describe('④ 这一族的判据在**全仓只有一份**', () => {
-  it('`objectiveDone` 之外没有第二处问"这个 flag 记下了没有"', async () => {
+describe('④ 这一族的判据与写入在**全仓各只有一份**', () => {
+  it('`objectiveDone` 之外没有第二处问、也没有第二处写"这个 flag 记下了没有"', async () => {
     const { readFileSync, readdirSync } = await import('node:fs');
     const { join } = await import('node:path');
     const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
@@ -109,12 +109,15 @@ describe('④ 这一族的判据在**全仓只有一份**', () => {
         .map((l) => l.replace(/\/\/.*$/, ''))
         .join('\n');
       for (const l of 代码.split('\n')) {
-        // **问句**才是判据：`decisions.has(...)` / `decisions?.has(...)`
-        // （存档层与事件登记表只是**提到**那一格 —— 那是另一件事，不是判据）
-        if (/decisions\??\.has\s*\(/.test(l)) 命中.push(`${相对}: ${l.trim().slice(0, 90)}`);
+        // **问句**才是判据、**`add` 才是写**：`decisions.has(...)` / `decisions?.has(...)`
+        // / `decisions.add(...)`（存档层与事件登记表只是**提到**那一格 —— 那是另一件事）
+        // 写入的第二处正是切片25 在 `QuestSystem.recordChoice` 里补的那一刀（B155 顺手收的）：
+        // 账本那一格的生产者只能有 `STAT_EVENTS['choice-made']` 一条，两处写的时候
+        // 改一处的语义另一处不动不会报错，只会让"玩家选过什么"有两个说法。
+        if (/decisions\??\.(has|add)\s*\(/.test(l)) 命中.push(`${相对}: ${l.trim().slice(0, 90)}`);
       }
     }
-    expect(命中, '抉择的判据在别处被自己算了一遍 ⇒ 判据就有两份').toEqual([]);
+    expect(命中, '抉择的判据 / 写入在别处被自己做了一遍 ⇒ 那一格就有两份说法').toEqual([]);
   });
 });
 

@@ -20,7 +20,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { MAINLINE, objectiveDesc, emptyStats, applyStatEvent } from '../src/content/objectives.js';
+import { MAINLINE, objectiveDesc, objectiveRequiresMet, emptyStats, applyStatEvent } from '../src/content/objectives.js';
 import { checkObjectiveTable } from '../src/content/registry.js';
 
 const 有变体的行 = MAINLINE.filter((r) => r.descByChoice);
@@ -106,6 +106,26 @@ describe('④ 玩家的那一路真的被兑现', () => {
     });
     expect(new Set(文案们).size, '两条路给出的是同一句文案 ⇒ 抉择没有兑现').toBe(文案们.length);
     for (const 文案 of 文案们) expect(文案).toBeTruthy();
+  });
+
+  it('资格没齐也要兑现文案：`requires` 管完成，不管这句话怎么说（B155 的复现）', () => {
+    const row = 有变体的行[0];
+    // 只做过抉择、还没走到这一步 —— 正是切片25 那道 ON 的时候两边都回退成同一句的形状
+    expect(Object.keys(row.requires ?? {}).length, '这一行没有 requires ⇒ 这条腿量不到「资格门」').toBeGreaterThan(0);
+    expect(objectiveRequiresMet(row, emptyStats()), '夹具失效：没出门就已经够格了').toBe(false);
+    for (const [旗标, 键] of Object.entries(row.descByChoice)) {
+      const stats = emptyStats();
+      applyStatEvent(stats, 'choice-made', { flag: 旗标 });
+      expect(objectiveDesc(row, stats), `资格没齐时把「${旗标}」的文案收回去 ⇒ 报酬照付、话却不说`).toBe(键);
+    }
+  });
+
+  it('控制组：同一行、资格齐了但还没抉择 ⇒ 仍是通用文案（别把变体全放出来）', () => {
+    const row = 有变体的行[0];
+    const stats = emptyStats();
+    for (const [flag, want] of Object.entries(row.requires ?? {})) stats.objectiveFlags[flag] = want;
+    expect(objectiveRequiresMet(row, stats), '控制组失效：夹具没把资格喂齐').toBe(true);
+    expect(objectiveDesc(row, stats), '还没选就给变体 ⇒ 玩家读到的不是自己做的事').toBe(row.desc);
   });
 
   it('变体指向的文案键在两表里都登记（缺一个键 ⇒ 玩家看到 [MISSING: …]）', async () => {

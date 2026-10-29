@@ -1304,10 +1304,16 @@ export function objectiveReward(row, stats) {
 export function objectiveDesc(row, stats) {
   const 变体 = row?.descByChoice;
   if (!变体) return row?.desc;
-  // W-E3 切片25：抉择机制完善——在展示变体文案前先检查资格。
-  // 若玩家未满足该选项的前置 requires，回退到默认 desc。
+  // B155：这一格**不许**再问 `objectiveRequiresMet(row, stats)`（切片25 曾加过、已摘掉）。
+  // 抉择是既成事实 —— `decisions` 只在玩家真的点了按钮那一刻被写；这句话说的是
+  // "玩家选了哪条"。而 `requires` 管的是"这一步够不够格**完成 / 推进**"（切片24：
+  // 完成与资格是两件事）。两件事混在一处会让同一行的两个兑现口互相打架：
+  // `objectiveReward` 只看 `decisions` 照付报酬，这里却因为资格没齐把话收回去
+  // ⇒ 玩家拿了那条路的奖励，读到的还是通用文案（`tests/choice-consequence.test.js` ④）。
+  // 另：那个条件**不随 `旗标` 变**，写在 `for` 里等于常量条件 ⇒ 循环坍缩成
+  // "取第一个已决策的旗标"，读起来像逐条判定、实际一条都不判。
   for (const [旗标, 键] of Object.entries(变体)) {
-    if (stats?.decisions?.has(旗标) && objectiveRequiresMet(row, stats)) return 键;
+    if (stats?.decisions?.has(旗标)) return 键;
   }
   return row?.desc;
 }

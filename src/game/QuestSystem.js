@@ -380,12 +380,10 @@ export class QuestSystem {
    * 记账与判进度都由那条通用路完成（`applyStatEvent` → `checkProgress`）。
    */
   recordChoice(flag) {
+    // 只派发、不自己写账（切片25 曾在这里补过一次直接写、已摘掉）：那条 `choice-made`
+    // 监听（`setupListeners` 按 `STAT_EVENTS` 接线）先 `applyStatEvent` 写 `decisions`，
+    // 再 `checkProgress` ⇒ 同一格有两个写入方时，改动其中一处的语义另一处不动也不会报错。
     window.dispatchEvent(new CustomEvent('choice-made', { detail: { flag } }));
-    // W-E3 切片25：将抉择旗标写入 stats.decisions 账本，供 objectiveDesc 读取变体文案。
-    if (this.stats) {
-      if (!this.stats.decisions) this.stats.decisions = new Set();
-      this.stats.decisions.add(flag);
-    }
   }
 
   getProgressText() {
