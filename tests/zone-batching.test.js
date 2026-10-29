@@ -27,6 +27,16 @@
  *
  * ⑦ 接线次序（`Game` 里必须在 `attachPopCultureZones` **之后**）单独立一条：
  *    致敬层是最后往 `zone.group` 写东西的一方，早一步合批等于把它追加的装饰全留下当散件。
+ *
+ * ⑧ **合批产物有名可查**（切片16）：`shadowCensus.js` 的 `归属标签()` 沿父链往上是**就近**
+ *    找名字，一族里认不出某一件就写 `(无名)` —— 合并网格原本只带 `userData.zoneBatch`、
+ *    没有 `.name`，而区根 `zone.group` 自己也没名，于是 magic 站 23 笔、void 站 24 笔在阴影
+ *    归属榜上全挤进 `(直属scene) / (无名)` 那一格，想问"阴影框边界上那一笔是谁"连把手都没有。
+ *    名字由手里已有的两格推（区 id + 桶序）。这里钉的五条都是**能不能拿它找回那一件**：
+ *    形状与区内不撞号（那一条只是其余四条的下限，不是目的）、`getObjectByName` 指回同一件、
+ *    那位真读者 `归属标签` 开了口（附反面控制：没名的野件照样读 `(无名)`，否则"不含 (无名)"
+ *    可能只是榜换了别的说法）、同树两次构建逐字同名、以及号钉在**桶序**而不是"第几个成功"
+ *    （前面回退一桶，后面的号不许挪 —— 这一条需要一次真回退，见下面那段 mock）。
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -40,8 +50,28 @@ import { RadiantZone } from '../src/world/zones/RadiantZone.js';
 import { SpaceZone } from '../src/world/zones/SpaceZone.js';
 import { VoidZone } from '../src/world/zones/VoidZone.js';
 import { batchZoneStatics, markNoBatch } from '../src/world/zoneBatching.js';
+import { 归属标签 } from '../src/engine/shadowCensus.js';
 import { makeUvFacetGeometry } from '../src/engine/uvGeometry.js';
 import { resetForTest as 帧归零, tick } from '../src/engine/FrameBudget.js';
+
+/**
+ * ⑧ 那条"前面一批回退、后面那批的号不跟着挪"需要一个**真回退**（`mergeGeometries` 返回 null）。
+ * 生产里这一条路的入口是"布局对不上 / 三角形对不上"，而布局对不上会**先把分桶键岔开** ——
+ * 摆不出"同一区里第一桶失败、后面两桶成功"这个形状，所以只能在模块层拦一刀：
+ * `globalThis.__合批回退 = N` 令第 N 次调用返回 null（`__合批次` 在用例里归零）；
+ * 没设就**逐字委托**给原实现，因此这个 mock 对本文件其余各条腿是惰性的 —— 它们照旧绿就是自证。
+ */
+vi.mock('three/addons/utils/BufferGeometryUtils.js', async (importOriginal) => {
+  const 原 = await importOriginal();
+  return {
+    ...原,
+    mergeGeometries(几何们, 用组) {
+      globalThis.__合批次 = (globalThis.__合批次 ?? 0) + 1;
+      if (globalThis.__合批回退 === globalThis.__合批次) return null;
+      return 原.mergeGeometries(几何们, 用组);
+    },
+  };
+});
 
 const 对话桩 = () => ({ show() {}, toast() {} });
 
@@ -106,6 +136,10 @@ function 假区(scene, 位置 = { x: 0, z: 0 }) {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  // 回退开关是一次性的：漏在这里清，下一条腿会继承"第 N 次合并返回 null"，
+  // 红得莫名其妙，而且红的还是与它无关的那条。
+  delete globalThis.__合批回退;
+  delete globalThis.__合批次;
 });
 
 describe('① 守恒：合批不许丢面、不许串类', () => {
@@ -464,5 +498,91 @@ describe('⑦ 幂等与接线', () => {
     expect(引入, 'Game 没引入合批出口').toBeGreaterThan(-1);
     expect(追加).toBeGreaterThan(-1);
     expect(合批, 'Game 没调用 batchZoneStatics(this.world)').toBeGreaterThan(追加);
+  });
+});
+
+describe('⑧ 有名可查：合批产物不许在阴影归属榜上读成 (无名)', () => {
+  /** 建一座真区、合一次批，带回场景与产物（榜的读者要拿场景当根，两样都得给） */
+  function 产物(Zone) {
+    const { scene, zone } = 建区(Zone);
+    batchZoneStatics({ zones: [zone] });
+    return { scene, zone, 批: 合批的(zone.group) };
+  }
+
+  it('每一批都叫 `合批-<区 id>-<桶序>`，同一区内不撞号', () => {
+    for (const Zone of 七区) {
+      const { zone, 批 } = 产物(Zone);
+      expect(批.length, `${zone.id} 一批都没合 —— 这条腿什么都没量到`).toBeGreaterThan(0);
+      const 名们 = 批.map((m) => m.name);
+      for (const 名 of 名们) {
+        expect(名, `${zone.id} 有一批没起名 —— 归属榜会把它读成 (无名)`).toMatch(new RegExp(`^合批-${zone.id}-\\d+$`));
+      }
+      expect(new Set(名们).size, `${zone.id} 的批名撞号了 —— 榜上点到一个名字，找回两件`).toBe(名们.length);
+    }
+  });
+
+  it('榜上写出这个名字，就真能顺着名字找回那一件（行为腿，不是只看字符串）', () => {
+    const { scene, zone } = 产物(FantasyZone);
+    const 批 = 合批的(zone.group);
+    expect(批.length, 'fantasy 一批都没合').toBeGreaterThan(1);
+    for (const m of 批) {
+      const 找回 = scene.getObjectByName(m.name);
+      expect(找回, `${m.name} 在场景里找不回来`).toBe(m);
+      expect(找回.userData.zoneBatch.区, `${m.name} 指到了别的区`).toBe(zone.id);
+    }
+  });
+
+  it('那位真读者（`shadowCensus` 的归属标签）看着名字开口 —— 附反面控制', () => {
+    const { scene, zone } = 产物(VoidZone);
+    const 批 = 合批的(zone.group);
+    expect(批.length, 'void 一批都没合').toBeGreaterThan(0);
+    for (const m of 批) {
+      const 条 = 归属标签(m, scene);
+      expect(条, `${m.name} 仍被读成 (无名)`).not.toContain('(无名)');
+      expect(条, `${m.name} 没出现在榜的那一格里`).toContain(m.name);
+    }
+    // 反面控制：这条腿不是恒真。一件没名、又不挂在任何有名祖先下的东西照样读 (无名) ——
+    // 没有这一句，上面那两条"不含 (无名)"可能只是因为榜换了别的说法。
+    const 野件 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
+    野件.castShadow = true;
+    scene.add(野件);
+    expect(归属标签(野件, scene)).toBe('(直属scene) / (无名)');
+  });
+
+  it('同一座区建两次，桶序与件数逐格对上 —— 名字能当把手（掺进 uuid 或按成功计数就红）', () => {
+    const a = 产物(VoidZone);
+    const b = 产物(VoidZone);
+    expect(b.批.map((m) => m.name), '两次构建的批名不一致').toEqual(a.批.map((m) => m.name));
+    a.批.forEach((m, i) => {
+      expect(b.批[i].userData.zoneBatch.件数, `${m.name} 在第二次构建里指到了另一桶`).toBe(m.userData.zoneBatch.件数);
+    });
+  });
+
+  it('号钉在**桶序**而不是"第几个成功"：前面一桶回退，后面的号不许挪', () => {
+    // 三桶 × 各两件、材质互不相同 ⇒ 桶序由 `traverse` 定死。令第 1 次 `mergeGeometries`
+    // 返回 null（文件头那段 mock），也就是第一桶真的回退。若号按"成功才 +1"发，后两批
+    // 会读成 `…-1`、`…-2` —— 同一棵树在"有没有回退"两种情况下给出不同的名字，
+    // 榜上抄下来的那个把手换个构建就指到别处，名字等于白起。
+    const scene = new THREE.Scene();
+    const zone = 假区(scene);
+    const 原件 = [];
+    for (let 桶 = 0; 桶 < 3; 桶++) {
+      const mat = new THREE.MeshStandardMaterial();
+      for (let i = 0; i < 2; i++) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat);
+        m.position.set(桶 * 10 + i * 3, 0, 0);
+        zone.group.add(m);
+        原件.push(m);
+      }
+    }
+    globalThis.__合批次 = 0;
+    globalThis.__合批回退 = 1;
+    const 计 = batchZoneStatics({ zones: [zone] });
+    expect(计.区[0].回退, '第一桶没真的回退 —— 这条腿什么都没量到').toBe(1);
+    expect(计.区[0].批数, '回退一桶后应剩两批').toBe(2);
+    expect(合批的(zone.group).map((m) => m.name)).toEqual(['合批-synthetic-2', '合批-synthetic-3']);
+    // 回退那一桶的原件还在原地（回退 = 场景未被改动），而且没人替它起名
+    expect(原件.slice(0, 2).filter((m) => m.parent === zone.group)).toHaveLength(2);
+    expect(scene.getObjectByName('合批-synthetic-1'), '回退的那一桶被起了名 —— 榜上会多一笔不存在的批').toBeUndefined();
   });
 });

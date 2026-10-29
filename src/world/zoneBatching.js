@@ -126,8 +126,11 @@ function 阴影类别(cast, receive) {
  * 合一批：把 `件` 烘进 `区.group` 的本地坐标，合成一件挂回区根。
  * 成功返回合并网格，失败（三角形对不上 / `mergeGeometries` 返回 null）返回 `null`
  * 且**场景未被改动** —— 原件从头到尾没被搬走，克隆几何当场 dispose。
+ *
+ * `序` 是这一桶在区内的**桶序**（不是"第几个成功的批"）：名字要能在两次构建里指同一件，
+ * 而"成功才有号"会让前面一桶回退时把后面所有批都挪一格。
  */
-function 合一批(zone, root, 件, mat) {
+function 合一批(zone, root, 件, mat, 序) {
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
   const 克隆 = [];
   const 应得三角形 = 件.reduce((n, o) => n + 三角形数(o.geometry), 0);
@@ -159,6 +162,11 @@ function 合一批(zone, root, 件, mat) {
   const 类别 = 阴影类别(件[0].castShadow, 件[0].receiveShadow);
   if (类别) applyShadow(mesh, 类别);
   mesh.layers.mask = 件[0].layers.mask;
+  // 产物**必须有名**：`shadowCensus.js` 的 `归属标签()` 沿父链往上是就近找名字，
+  // 一族里认不出某一件就写 `(无名)` —— 2026-10-29 magic 站 23 笔、切片15 void 站 24 笔
+  // 全是这么点不出名的（想问"框边界上那一笔是谁"都无从下手）。名只用手里已有的两格推：
+  // 区 id + 桶序，不抄第二个数；区根的 `traverse` 走法定了桶序，同一棵树两次构建逐字同序。
+  mesh.name = `合批-${zone.id}-${序}`;
   mesh.userData[合批记账] = { 区: zone.id, 件数: 件.length, 三角形: 应得三角形 };
   root.add(mesh);
 
@@ -185,9 +193,11 @@ function 合一批一区(zone) {
   });
 
   const 结果 = { 区: zone.id, 批数: 0, 合入件数: 0, 省下绘制: 0, 三角形: 0, 回退: 0 };
+  let 序 = 0;
   for (const { mat, 件 } of 桶.values()) {
+    序 += 1;
     if (件.length < 2) continue;
-    const mesh = 合一批(zone, root, 件, mat);
+    const mesh = 合一批(zone, root, 件, mat, 序);
     if (!mesh) {
       结果.回退++;
       continue;
