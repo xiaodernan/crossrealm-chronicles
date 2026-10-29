@@ -15,6 +15,7 @@ import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SaveSystem } from '../src/game/SaveSystem.js';
+import { SAVE_KEYS } from '../src/game/SaveMigrations.js';
 import { SaveValidator, CURRENT_VERSION } from '../src/game/SaveValidator.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
@@ -24,7 +25,8 @@ const readSrc = (rel) => readFileSync(join(ROOT, 'src', rel), 'utf8').replace(/\
 /** 判据口径与门禁一致：只数代码行（史料注释里提到某个键名不算读写） */
 const codeLines = (text) => text.split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l));
 
-const 存档键 = 'crossrealm_save_v19';
+/** 当前版本写档落在哪个键上 —— 从 `CURRENT_VERSION` 现推，下一次升版本不必回来改这里 */
+const 存档键 = SAVE_KEYS.find((k) => k.version === CURRENT_VERSION).key;
 const 存储 = new Map();
 
 beforeAll(() => {
