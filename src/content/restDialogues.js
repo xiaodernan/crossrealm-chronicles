@@ -32,6 +32,8 @@ export const REST_DIALOGUES = {
           { label: 'rest_dlg_hub_start_c10', next: "echoes" },
           { label: 'rest_dlg_hub_start_c11', next: "triad" },
           { label: 'rest_dlg_hub_start_c12', next: "wave4" },
+          { label: 'rest_dlg_hub_start_c13', next: "ending-keep", requiresDecision: 'choice_final_keep' },
+          { label: 'rest_dlg_hub_start_c14', next: "ending-quiet", requiresDecision: 'choice_final_quiet' },
         ],
       },
       origin: {
@@ -120,6 +122,22 @@ export const REST_DIALOGUES = {
       },
       wave4: {
         text: 'rest_dlg_hub_wave4_text',
+        choices: [
+          { label: 'rest_dlg_label_rest', action: "rest" },
+          { label: 'rest_dlg_label_back', next: "start" },
+        ],
+      },
+      'ending-keep': {
+        text: 'rest_dlg_hub_ending_keep_text',
+        journal: { id: "rest-hub-ending-keep", title: 'rest_dlg_hub_ending_keep_jt', text: 'rest_dlg_hub_ending_keep_jx' },
+        choices: [
+          { label: 'rest_dlg_label_rest', action: "rest" },
+          { label: 'rest_dlg_label_back', next: "start" },
+        ],
+      },
+      'ending-quiet': {
+        text: 'rest_dlg_hub_ending_quiet_text',
+        journal: { id: "rest-hub-ending-quiet", title: 'rest_dlg_hub_ending_quiet_jt', text: 'rest_dlg_hub_ending_quiet_jx' },
         choices: [
           { label: 'rest_dlg_label_rest', action: "rest" },
           { label: 'rest_dlg_label_back', next: "start" },

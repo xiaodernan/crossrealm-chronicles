@@ -1379,6 +1379,9 @@ export function checkRestPointNames(table) {
  */
 export function checkRestDialogueTree(table) {
   const out = [];
+  // W-E3 切片51：`requiresDecision` 是**引用**抉择旗标 —— 写错一个字母，那一格会永远不出现，
+  // 而运行时只会安静地少一个选项。旗标全集从主线抉择步现推，不另抄名单。
+  const 抉择旗标 = new Set(OBJECTIVES.flatMap((row) => (row.choices ?? []).map((c) => c.flag)).filter(Boolean));
   for (const [zone, tree] of Object.entries(table ?? {})) {
     // 第六条（W-B4 切片2）：树上不许再带名字。这一格曾经是对话标题的真源，而营火名在
     // `restPointNames` 只有一份 —— 抄回来不报错，只会让同一座火在同一个界面上有两个名字
@@ -1404,6 +1407,13 @@ export function checkRestDialogueTree(table) {
           out.push(`${path}: next 指向 "${c.next}"，但 ${zone} 这棵树里没有这个节点（可用：${[...ids].sort().join(' / ')}）`);
         }
         if (has) referenced.add(c.next);
+        if (Object.hasOwn(c ?? {}, 'requiresDecision')) {
+          if (typeof c.requiresDecision !== 'string' || !c.requiresDecision) {
+            out.push(`${path}: requiresDecision 不是非空字符串`);
+          } else if (!抉择旗标.has(c.requiresDecision)) {
+            out.push(`${path}: requiresDecision "${c.requiresDecision}" 不是任何主线抉择的旗标 —— 这一格永远不出现`);
+          }
+        }
       });
     }
     for (const id of ids) {

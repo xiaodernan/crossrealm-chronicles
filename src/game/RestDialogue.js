@@ -104,7 +104,11 @@ export class RestDialogue {
     }
 
     const def = REST_NPC_DEFS[this.activeRest?.id];
-    const filteredChoices = node.choices.filter((c) => !c.minChapter || chapter >= c.minChapter);
+    // W-E3 切片51：选项可以只在做过某个抉择之后出现（枢纽营火的「终局余波」）。
+    // 判据读任务账的 `decisions`，不在营火树里另存一份状态 —— 读档后选择过什么仍由那一格说了算。
+    const 抉择 = this.game.quests?.stats?.decisions;
+    const filteredChoices = node.choices.filter((c) => (!c.minChapter || chapter >= c.minChapter)
+      && (!c.requiresDecision || 抉择?.has(c.requiresDecision)));
 
     const choices = filteredChoices.map((c, i) => ({
       id: String(i),
