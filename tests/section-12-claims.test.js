@@ -286,12 +286,19 @@ describe('③ 残差写成数，不写成形容词', () => {
      * 落点必须是**自己还会继续往下指**的行 —— 带 `branch` 的汇合点（`true-end`），
      * 或者带 `branchTo` 的门前一步（切片41 的第 3 章汇合点 `ascension`：它是 interact 门控步，
      * 自己 `branchTo: 'ch3-complete'`，所以同样不会把玩家留在死路上）。
+     * 切片45 加了第三种：**两条分支路落回同一步**的普通格（第 1 章的 `fantasy-frag`）——
+     * 它自己不带 `branch` 也不带 `branchTo`，但它是两条跳转的目标，接住玩家之后按表序
+     * 继续往下走。判据因此认"落进来至少两条线"这一步，而不是"这一步必须自己带跳转"。
      * 真正的判据只有一句：**去向不许是一条死路**。
      */
     const 门 = new Set(OBJECTIVES.filter((r) => r.type === 'chapter-gate').map((r) => r.id));
     const 续行 = new Set(OBJECTIVES.filter((r) => r.branch || r.branchTo).map((r) => r.id));
+    const 汇合 = new Set();
     for (const r of OBJECTIVES.filter((x) => x.branchTo)) {
-      expect(门.has(r.branchTo) || 续行.has(r.branchTo),
+      if (OBJECTIVES.filter((x) => x.branchTo === r.branchTo).length > 1) 汇合.add(r.branchTo);
+    }
+    for (const r of OBJECTIVES.filter((x) => x.branchTo)) {
+      expect(门.has(r.branchTo) || 续行.has(r.branchTo) || 汇合.has(r.branchTo),
         `跳转行 "${r.id}" 的去向 ${r.branchTo} 既不是章节门、也不是自己还会往下指的行 —— 它跳进了一条死路`)
         .toBe(true);
     }

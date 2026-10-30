@@ -164,28 +164,56 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     }
   });
 
-  it('Chapter 1 八步走完就接上第二档（在役表是线性的，章节号只跟着四格门控翻）', () => {
-    const titles = [qs.current.title];
+  it('第 1 章的线索抉择也是真分岔（W-E3 切片45：断箭 / 旧营地各认领一处 POI，各回石环）', () => {
+    const 抉择 = MAINLINE.findIndex((r) => r.id === 'choice-first');
+    expect(抉择, '主线里找不到线索抉择').toBeGreaterThan(0);
+    const 走一步 = (flag) => {
+      qs.stats.decisions.clear();
+      qs.questIndex = 抉择;
+      qs.stats.objectiveFlags = { soldiersScattered: true };
+      qs.recordChoice(flag);
+      return qs.current?.id;
+    };
+    expect(走一步('choice_first_arrow'), '选了断箭，下一步却不是断箭之路').toBe('first-arrow');
+    expect(走一步('choice_first_camp'), '选了旧营地，下一步却不是旧营地之路').toBe('first-camp');
+    for (const [id, poi] of [['first-arrow', 'first-arrow'], ['first-camp', 'first-camp']]) {
+      qs.questIndex = MAINLINE.findIndex((r) => r.id === id);
+      dispatch('discovery', D.discover(poi));
+      expect(qs.current?.id, `"${id}" 走完没汇回 fantasy-frag`).toBe('fantasy-frag');
+    }
+  });
+
+  it('第 1 章一路走到影之战士面前（教学段之后先走一处线索分岔，章节号仍只跟着门控翻）', () => {
+    // 断箭 / 旧营地这一步是**抉择**：它的推进不是某条事件打中的，而是 recordChoice 派出的
+    // 'choice-made' 让 checkProgress 认下这一格。所以这里跟步骤号（id），不跟文案 ——
+    // 抉择格自己的标题会随选择换成 titleByChoice 的那一句，按文案比会把"换名"当成"多走一格"。
+    const ids = [qs.current.id];
     const step = (name, detail) => {
       dispatch(name, detail);
-      if (qs.current && qs.current.title !== titles[titles.length - 1]) titles.push(qs.current.title);
+      if (qs.current && qs.current.id !== ids[ids.length - 1]) ids.push(qs.current.id);
     };
     step('poi-interact', D.interact('hub-anchor'));
     for (let i = 0; i < 8; i += 1) step('combat-hit', D.hit);
     // W-E3 切片13：第 1 章里多了一步「枢纽之下的墓穴」（副本步）⇒ 走完它才轮到影之战士
     step('dungeon-cleared', D.dungeon('hub-catacombs'));
     for (let i = 0; i < 2; i += 1) step('enemy-defeated', D.kill('soldier'));
+    // W-E3 切片45：遭遇战之后先选一条线索（默认走第一条：断箭）
+    qs.recordChoice('choice_first_arrow');
+    if (qs.current && qs.current.id !== ids[ids.length - 1]) ids.push(qs.current.id);
+    step('discovery', D.discover('first-arrow'));
     step('discovery', D.discover('fantasy-ring'));
     // W-E3 切片14：第 1 章多了一步「废墟里的回声」（发现步）⇒ 走完它才轮到影之战士
     step('discovery', D.discover('fantasy-ruins'));
     // W-E3 切片15：第 1 章多了一步「暗夜斥候」（对话步）⇒ 走完它才轮到影之战士
     step('npc-talk', D.npcTalk('elf-scout'));
-    step('enemy-defeated', D.bossKill('shadow-warden'));
-    // 前八格各推进一步，第九次读数落在下一档的第一步上
-    expect(titles).toEqual(MAINLINE.slice(0, 9).map((q) => q.title));
-    expect(qs.questIndex).toBe(8);
+    // 走到影之战士面前一共 11 格（含刚站上去的那一格 Boss 步）
+    // 走了断箭那一路 ⇒ 表里紧挨着的「旧营地」那一格这一趟不该出现（两条腿各自汇回 fantasy-frag）
+    const 应走 = MAINLINE.slice(0, 11).filter((q) => q.id !== 'first-camp').map((q) => q.id);
+    expect(ids).toEqual(应走);
+    expect(qs.current.id).toBe('boss');
+    expect(qs.questIndex).toBe(10);
     expect(qs.chapter).toBe(1);
-    expect(toasts.filter((t) => t.startsWith('任务完成：'))).toHaveLength(8);
+    expect(toasts.filter((t) => t.startsWith('任务完成：'))).toHaveLength(9);
   });
 
   it('账本里没有的那一下交互不改任务也不抛（载荷少一个 id 是常态）', () => {

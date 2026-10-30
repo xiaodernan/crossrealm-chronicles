@@ -19,8 +19,8 @@
  * 2. 钉文案腿：21 × 12 格逐字钉死。
  * 3. 行为腿：切中/切英逐个 POI 重放交互，dialog 与 discovery 收到的都是展开句。
  * 4. 静态腿：8 个文件的 `.dialog.show` 与 `discovery` 派发必须走 `t()`（附反向控制）。
- * 5. 新键不孤儿：48 个新键都得在 8 个文件里被 `t()` 引用。
- * 6. 键数腿：48 个新键的文案在两表里最多各两个键。
+ * 5. 新键不孤儿：52 个新键都得在 8 个文件里被 `t()` 引用。
+ * 6. 键数腿：52 个新键的文案在两表里最多各两个键。
  *
  * 复用口径（ADR 见 `docs/MASTER_PLAN.md` §9）：标题只借**同指称**的键 ——
  * 主线目标题（`obj_*_title`）、回声标题（`echo_tesseract_title`）、路点标签
@@ -57,7 +57,7 @@ const 是致敬层 = (id) => id.startsWith('homage-') || id === 'hub-poster-wall
  * 钉死表：POI id → [对话标题键, 题中, 题英, 对话正文键, 文中, 文英,
  *                   发现标题键, 题中, 题英, 发现正文键, 文中, 文英]。
  * 没有对话/没有发现的那一侧是 null（void-tablet 无对话；Boss 门无发现）。
- * 26 行与真世界逐 id 对齐（结构腿互证）—— 切片35 之后 19 + 两座仪式落点（echo-pages、seal-stone）。
+ * 28 行与真世界逐 id 对齐（结构腿互证）—— 切片35 之后 19 + 两座仪式落点（echo-pages、seal-stone）。
  */
 const ZONE_POI_COPY = {
 'hub-anchor': ['wp_label_anchor', '世界之锚', 'World Anchor', 'zone_dlg_hub_anchor_text', '三块位面碎片在此交汇。穿越者的使命，是重铸锚点，阻止诸界崩塌。向西进入灰白森林，向南踏入霍格沃兹遗境，向东前往米勒荒原——每一处都藏有一枚位面碎片。', 'Three plane fragments meet here. The traveler\'s mission is to reforge the anchor and stop the collapse of every realm. West into the Greywhite Forest, south into the Hogwarts Ruins, east to Miller\'s Wastes — each hides one fragment.', 'wp_label_anchor', '世界之锚', 'World Anchor', 'zone_disc_hub_anchor_text', '三界交汇的核心。', 'The heart where three realms meet.'],
@@ -66,6 +66,8 @@ const ZONE_POI_COPY = {
   'fantasy-tower': ['zone_dlg_fantasy_tower_title', '灰白守望塔', 'Ashen Watchtower', 'zone_dlg_fantasy_tower_text', '从塔顶望去，三条位面之路清晰可见。北方是霍格沃兹遗境的紫色光柱，东方是米勒荒原的引力透镜。', 'From the tower top the three plane roads are clear: the violet pillar of the Hogwarts Ruins to the north, the gravitational lens of Miller\'s Wastes to the east.', 'zone_dlg_fantasy_tower_title', '灰白守望塔', 'Ashen Watchtower', 'zone_disc_fantasy_tower_text', '可俯瞰三界交汇。', 'Overlooks the meeting of three realms.'],
   'fantasy-boss-gate': ['zone_dlg_fantasy_boss_gate_title', '影界竞技场', 'Shadowrealm Arena', 'zone_dlg_fantasy_boss_gate_text', '踏入此门，影界守护者将苏醒。确保已掌握：\n· 观察敌人脚下红圈，0.75 秒后攻击落地\n· {roll} 闪避可躲开\n· 重击快速打满架势条造成硬直', 'Step through and the Shadowrealm Warden will wake. Make sure you have mastered:\n· Watch the red circle under enemies — attacks land 0.75s later\n· {roll} dodge gets you out of the way\n· Heavy attacks fill the posture bar fast and cause a stagger', null, null, null, null, null, null],
   'magic-castle': ['demo_step_magic_castle', '悬浮城堡', 'Floating Castle', 'zone_dlg_magic_castle_text', '魔法屏障闪烁…「只有被选中的穿越者才能踏入。」城堡内部的时间似乎静止了——第二枚位面碎片就藏在移动楼梯的顶端。', 'The magic barrier flickers... "Only the chosen traveler may enter." Time inside the castle seems frozen — the second plane fragment hides at the top of the moving staircase.', 'demo_step_magic_castle', '悬浮城堡', 'Floating Castle', 'zone_disc_magic_castle_text', '第二枚位面碎片藏于楼梯顶端。', 'The second plane fragment hides at the top of the staircase.'],
+  'first-arrow': ['obj_first_arrow_title', '石缝里的断箭', 'The Arrow in the Seam', 'zone_dlg_first_arrow_text', '箭卡在两块石头中间，箭杆上的刻痕被磨得只剩方向：一条指向守望塔，一条指向更深的林子。你把箭拔下来，塔那边有风穿过，像有人在等。', 'The arrow is wedged between two rocks, its notches worn down to direction only: one points at the Watchtower, one at deeper woods. You pull it free; wind moves through the tower, as if someone is waiting.', 'obj_first_arrow_title', '石缝里的断箭', 'The Arrow in the Seam', 'zone_disc_first_arrow_text', '箭杆上刻着守望塔的记号。', 'The shaft bears the Watchtower mark.'],
+  'first-camp': ['obj_first_camp_title', '没熄的营地', 'The Camp That Never Went Out', 'zone_dlg_first_camp_text', '火堆还温着，三只行囊有两只被翻空。剩下那只里压着半张地图：守望塔与至尊石环被同一条线连着，线的尽头画了一个问号。', 'The fire is still warm; two of three packs have been emptied. In the last lies half a map: one line joins the Watchtower and the One Ring, and at its end someone drew a question mark.', 'obj_first_camp_title', '没熄的营地', 'The Camp That Never Went Out', 'zone_disc_first_camp_text', '半张地图把塔与石环连成一条线。', 'Half a map joins the tower and the stone ring with one line.'],
   'second-ember': ['obj_second_ember_title', '守夜人的火盆', "The Warden's Brazier", 'zone_dlg_second_ember_text', '火盆里的炭还是温的。你拨了一下，火苗立起来，照亮塔基上一排刻痕——每一道都是一个守夜人的最后一夜。最下面那道还新，刻到一半就停了。', "The coals in the brazier are still warm. You stir them and the flame stands up, lighting a row of scratches on the tower base — each one a warden's last night. The lowest is still fresh, and stops halfway.", 'obj_second_ember_title', '守夜人的火盆', "The Warden's Brazier", 'zone_disc_second_ember_text', '火盆亮了，守夜人的最后一班岗还在。', "The brazier burns; the warden's last watch still stands."],
   'ascend-founder-belfry': ['obj_ascend_retrace_title', '创始人的钟楼', 'The Founder Belfry', 'zone_dlg_ascend_founder_belfry_text', '钟楼只剩半边，钟还在。台阶上留着创始人的脚印，一级一级往上；走到钟下只响了一声闷响——不是钟响，是脚下的路认了你。', 'Half the belfry is gone; the bell is not. The founder left footprints on the stairs, one step at a time up to the bell, and when you reach it there is a dull note — not the bell, but the road under your feet accepting you.', 'obj_ascend_retrace_title', '创始人的钟楼', 'The Founder Belfry', 'zone_disc_ascend_founder_belfry_text', '钟只响了一声，路认了你。', 'The bell rang once; the road accepted you.'],
   'magic-forest': ['obj_magic_forest_title', '禁林低语', 'Whispers in the Forest', 'zone_dlg_magic_forest_text', '独角兽的幻影一闪而过，留下一枚闪烁的羽毛。羽毛上的符文与霍格沃兹创始人的封印如出一辙——魔法与诸界本是一体。', 'A unicorn\'s phantom flashes past, leaving a shimmering feather. The runes on it match the Hogwarts founders\' seals exactly — magic and all realms were always one.', 'obj_magic_forest_title', '禁林低语', 'Whispers in the Forest', 'zone_disc_magic_forest_text', '独角兽留下了位面线索。', 'A unicorn left a clue about the planes.'],
@@ -144,7 +146,7 @@ describe('区文件 POI 对话/发现文案双表化（W-D2 切片21）', () => 
     return { dlg: shown.length ? shown[0] : null, disc: discovered.length ? discovered[0] : null };
   }
 
-  it('结构腿：26 个区/枢纽 POI 的对话与发现参数全是双表键（分母自证）', () => {
+  it('结构腿：28 个区/枢纽 POI 的对话与发现参数全是双表键（分母自证）', () => {
     const 本片 = world.pointsOfInterest.filter((p) => !是致敬层(p.id));
     expect(本片.length, '区/枢纽 POI 数对不上').toBeGreaterThanOrEqual(18);
     const 缺 = [];
@@ -226,16 +228,16 @@ describe('区文件 POI 对话/发现文案双表化（W-D2 切片21）', () => 
     ]);
   });
 
-  it('新键不孤儿：48 个新键都在 8 个文件里被 t() 引用', () => {
+  it('新键不孤儿：52 个新键都在 8 个文件里被 t() 引用', () => {
     const 新键 = [...new Set(Object.values(ZONE_POI_COPY).flat())]
       .filter((k) => typeof k === 'string' && (k.startsWith('zone_dlg_') || k.startsWith('zone_disc_')));
-    expect(新键.length, '新键数对不上 —— 切片范围变了？').toBe(48);
+    expect(新键.length, '新键数对不上 —— 切片范围变了？').toBe(52);
     const 源码 = ZONE_FILES.map((rel) => readFileSync(join(process.cwd(), rel), 'utf8')).join('\n');
     const 没人用 = 新键.filter((k) => !源码.includes("t('" + k + "')"));
     expect(没人用, '这些新键建了却没人引用（死键）').toEqual([]);
   });
 
-  it('键数腿：48 个新键的文案在两表里最多两个键（全局规矩的本地复查）', () => {
+  it('键数腿：52 个新键的文案在两表里最多两个键（全局规矩的本地复查）', () => {
     const 新键 = [...new Set(Object.values(ZONE_POI_COPY).flat())]
       .filter((k) => typeof k === 'string' && (k.startsWith('zone_dlg_') || k.startsWith('zone_disc_')));
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {

@@ -151,6 +151,15 @@ export class FantasyZone extends BaseZone {
       this.dialog.show(t('wp_label_fantasy_ruins'), t('zone_dlg_fantasy_ruins_text'));
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-ruins', title: t('wp_label_fantasy_ruins'), text: t('zone_disc_fantasy_ruins_text') } }));
     }, { id: 'fantasy-ruins', color: 0x88aa88 });
+    // W-E3 切片45：第 1 章线索分岔的两处落点 —— 断箭（本地 (30, 35)）与旧营地（本地 (-80, -60)）。
+    this.addPOI({ x: 30, y: 0, z: 35 }, 'zone_poi_first_arrow_label', () => {
+      this.dialog.show(t('obj_first_arrow_title'), t('zone_dlg_first_arrow_text'));
+      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'first-arrow', title: t('obj_first_arrow_title'), text: t('zone_disc_first_arrow_text') } }));
+    }, { id: 'first-arrow', color: 0xa8c8e0 });
+    this.addPOI({ x: -80, y: 0, z: -60 }, 'zone_poi_first_camp_label', () => {
+      this.dialog.show(t('obj_first_camp_title'), t('zone_dlg_first_camp_text'));
+      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'first-camp', title: t('obj_first_camp_title'), text: t('zone_disc_first_camp_text') } }));
+    }, { id: 'first-camp', color: 0x8a6a4a });
     // W-E3 切片42：火盆之路的落点 —— 守望塔下那盆没熄的火（本地 (-45, 40)）。
     this.addPOI({ x: -45, y: 0, z: 40 }, 'zone_poi_second_ember_label', () => {
       this.dialog.show(t('obj_second_ember_title'), t('zone_dlg_second_ember_text'));

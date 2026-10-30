@@ -119,6 +119,65 @@ export const OBJECTIVES = [
     waypoint: { x: -200, z: 0, label: ZONE_NAMES[ZONE_IDS.FANTASY] },
     reward: 10,
     journal: 'obj_soldiers_journal',
+    // W-E3 切片45：这一场遭遇战之后的两条线索，由下一步的抉择读它
+    flags: { soldiersScattered: true },
+  },
+  {
+    // W-E3 切片45：第 1 章教学段之后的第一处线索分岔 —— 追断箭，还是回旧营地。
+    id: 'choice-first',
+    title: 'obj_choice_first_title',
+    desc: 'obj_choice_first_desc',
+    type: 'choice',
+    chapter: 1,
+    requires: { soldiersScattered: true },
+    waypoint: { x: -200, z: 0, label: 'wp_label_one_ring' },
+    reward: 8,
+    journal: 'obj_choice_first_journal',
+    choices: [
+      { id: 'arrow', label: 'obj_choice_first_arrow_label', flag: 'choice_first_arrow' },
+      { id: 'camp', label: 'obj_choice_first_camp_label', flag: 'choice_first_camp' },
+    ],
+    // 两处线索都在灰白森林里，各走一步再汇合到「至尊石环」那一步。
+    branch: {
+      choice_first_arrow: 'first-arrow',
+      choice_first_camp: 'first-camp',
+    },
+    titleByChoice: {
+      choice_first_arrow: 'obj_choice_first_title_arrow',
+      choice_first_camp: 'obj_choice_first_title_camp',
+    },
+    descByChoice: {
+      choice_first_arrow: 'obj_choice_first_desc_arrow',
+      choice_first_camp: 'obj_choice_first_desc_camp',
+    },
+    journalByChoice: {
+      choice_first_arrow: 'obj_choice_first_journal_arrow',
+      choice_first_camp: 'obj_choice_first_journal_camp',
+    },
+  },
+  {
+    id: 'first-arrow',
+    title: 'obj_first_arrow_title',
+    desc: 'obj_first_arrow_desc',
+    type: 'discovery',
+    targetId: 'first-arrow',
+    chapter: 1,
+    waypoint: { x: -170, z: 35, label: 'zone_poi_first_arrow_label' },
+    reward: 12,
+    journal: 'obj_first_arrow_journal',
+    branchTo: 'fantasy-frag',
+  },
+  {
+    id: 'first-camp',
+    title: 'obj_first_camp_title',
+    desc: 'obj_first_camp_desc',
+    type: 'discovery',
+    targetId: 'first-camp',
+    chapter: 1,
+    waypoint: { x: -280, z: -60, label: 'zone_poi_first_camp_label' },
+    reward: 12,
+    journal: 'obj_first_camp_journal',
+    branchTo: 'fantasy-frag',
   },
   {
     id: 'fantasy-frag',
