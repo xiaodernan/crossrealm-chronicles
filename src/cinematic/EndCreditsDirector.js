@@ -31,6 +31,17 @@ const CREDITS = [
 ];
 
 /**
+ * 片尾主题（W-E3 切片52）：留灯偏高、偏亮；熄灯偏低、偏慢；老档回通用主题。
+ * 只回一个音色键名，真正的合成在 `audio/AudioManager` 的 `ZONE_DRONES` / `MODE_TEMPO`。
+ */
+export function creditsAudioMode(stats) {
+  const 结局 = endingDialogKey(stats);
+  if (结局 === 'ending_dialog_text_keep') return 'credits-keep';
+  if (结局 === 'ending_dialog_text_quiet') return 'credits-quiet';
+  return 'credits';
+}
+
+/**
  * 按结局取字幕行（W-E3 切片48）。
  *
  * 只换 flavor 那一行，行数 / 空行布局 / 其余项目名单都不动 —— 片尾是玩家
@@ -73,6 +84,7 @@ export class EndCreditsDirector {
     const skip = this.el.querySelector('.end-credits-skip');
     skip.dataset.ktext = t('cg_caption_void_skip');
     const 行 = creditsLines(this.game?.quests?.stats);
+    this.game.audio?.setMode('credits', creditsAudioMode(this.game?.quests?.stats));
     scroll.innerHTML = 行.map((l) => (l === '' ? '' : `<p>${keyText(t(l))}</p>`)).join('');
     this.el.classList.remove('hidden');
     // DOM 建一次、演出可能很久之后才放：键名到播放这一刻才问生效表
@@ -83,6 +95,9 @@ export class EndCreditsDirector {
   hide() {
     this.active = false;
     this.el.classList.add('hidden');
+    // 字幕结束（或跳过）把 BGM 还给当前区域；`setZone` 在 audioMode 已不是 zone 时会静默不动，
+    // 所以这里直接点名 `setMode('zone', …)`，不用那条早退分支。
+    this.game.audio?.setMode('zone', this.game.audio.currentZone);
   }
 
   trySkip() {

@@ -35,6 +35,9 @@ const ZONE_DRONES = {
   'boss-void': { base: 42, harm: 63, type: 'triangle', scale: [0, 1, 5, 8, 10, 12] },
   'boss-chaos': { base: 36, harm: 54, type: 'sawtooth', scale: [0, 3, 6, 9, 12, 15, 18] },
   'boss-dungeon': { base: 44, harm: 66, type: 'triangle', scale: [0, 2, 4, 7, 9, 11] },
+  credits: { base: 52, harm: 78, type: 'sine', scale: [0, 2, 4, 7, 9] },
+  'credits-keep': { base: 60, harm: 90, type: 'sine', scale: [0, 4, 7, 11, 14, 19] },
+  'credits-quiet': { base: 46, harm: 69, type: 'triangle', scale: [0, 3, 5, 10, 12, 15] },
 };
 
 const BOSS_BGM_MAP = {
@@ -47,7 +50,7 @@ const BOSS_BGM_MAP = {
 };
 
 /** 每层 BGM 的旋律间隔（毫秒）：读它的是 `_startMelody`，单位换算在那里做一次。 */
-export const MODE_TEMPO = { zone: 520, dungeon: 680, boss: 380, 'boss-shadow': 360, 'boss-archmagus': 400, 'boss-singularity': 320, 'boss-void': 350, 'boss-chaos': 300, 'boss-dungeon': 420 };
+export const MODE_TEMPO = { zone: 520, dungeon: 680, boss: 380, 'boss-shadow': 360, 'boss-archmagus': 400, 'boss-singularity': 320, 'boss-void': 350, 'boss-chaos': 300, 'boss-dungeon': 420, credits: 760, 'credits-keep': 720, 'credits-quiet': 820 };
 
 /**
  * BGM 子总线的**混音比**名册（W-C7 切片5）：mode 换档时玩家音乐档之外的内部比例。
