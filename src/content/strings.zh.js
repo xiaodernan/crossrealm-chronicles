@@ -2775,6 +2775,8 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   credits_line_title: '跨界纪元 · Crossrealm Chronicles',
   credits_line_engine: '浏览器 Demo — Vite + Three.js',
   credits_line_flavor: '你斩裂混沌，成为位面行者。',
+  credits_line_flavor_keep: '你斩裂混沌，成为位面行者 —— 而锚点仍亮着。',
+  credits_line_flavor_quiet: '你斩裂混沌，成为位面行者 —— 然后亲手熄掉了锚点。',
   credits_line_thanks: '感谢游玩',
   credits_line_features: '{journal} 日志 · CG 画廊 · 秘典 · 成就',
   credits_line_systems: '营火 NPC · Boss 再战 · 战斗风格',

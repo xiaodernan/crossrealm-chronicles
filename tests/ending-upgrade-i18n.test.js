@@ -29,7 +29,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect, afterEach } from 'vitest';
-import { EndCreditsDirector } from '../src/cinematic/EndCreditsDirector.js';
+import { EndCreditsDirector, creditsLines } from '../src/cinematic/EndCreditsDirector.js';
 import { UpgradePanel } from '../src/ui/UpgradePanel.js';
 import { makeMarkupDom } from './helpers/fakeMarkupDom.js';
 import { STRINGS_ZH } from '../src/content/strings.zh.js';
@@ -48,7 +48,7 @@ const Panel源码 = 读('src/ui/UpgradePanel.js');
 // W-E3 切片46：终局正文的两个变体键写在抉择行上（`endingByChoice`），由 `endingDialogKey()` 取名
 const Objectives源码 = 读('src/content/objectives.js');
 
-/** 本片新建的 19 个键 → [中文原值, 英文原值]（改文案必须来改这里） */
+/** 本片新建的 21 个键 → [中文原值, 英文原值]（改文案必须来改这里） */
 const PIN = {
   ending_dialog_text: ['Chapter 5 完成。你斩裂混沌，成为真正的位面行者。\n\n五区贯通、六位 Boss 倒下，这段旅程到此为止——愿下次重逢时，这个世界更加辽阔。',
     'Chapter 5 complete. You cut through chaos and became a true Plane Wanderer.\n\nFive realms joined, six Bosses fallen - the journey ends here. May the world be wider when we meet again.'],
@@ -56,6 +56,8 @@ const PIN = {
   credits_line_title: ['跨界纪元 · Crossrealm Chronicles', 'Crossrealm Chronicles'],
   credits_line_engine: ['浏览器 Demo — Vite + Three.js', 'Browser Demo - Vite + Three.js'],
   credits_line_flavor: ['你斩裂混沌，成为位面行者。', 'You cut through chaos and became the Plane Wanderer.'],
+  credits_line_flavor_keep: ['你斩裂混沌，成为位面行者 —— 而锚点仍亮着。', 'You cut through chaos and became the Plane Wanderer - and the anchor is still lit.'],
+  credits_line_flavor_quiet: ['你斩裂混沌，成为位面行者 —— 然后亲手熄掉了锚点。', 'You cut through chaos, became the Plane Wanderer, and put out the anchor yourself.'],
   credits_line_thanks: ['感谢游玩', 'Thanks for playing'],
   credits_line_features: ['{journal} 日志 · CG 画廊 · 秘典 · 成就', '{journal} Journal · CG Gallery · Codex · Achievements'],
   credits_line_systems: ['营火 NPC · Boss 再战 · 战斗风格', 'Campfire NPCs · Boss rematch · Combat styles'],
@@ -146,12 +148,12 @@ describe('结局对话 / 片尾字幕 / 升级面板双表化（W-D2 切片26）
     expect(假键, '改回中文的那一行必须是双表里没有的值').toEqual(['感谢游玩']);
   });
 
-  it('钉文案腿：19 个新键的中英原值逐字钉死', () => {
+  it('钉文案腿：21 个新键的中英原值逐字钉死', () => {
     for (const [键, [中, 英]] of Object.entries(PIN)) {
       expect(STRINGS_ZH[键], `中文表里没有 ${键}`).toBe(中);
       expect(STRINGS_EN[键], `英文表里没有 ${键}`).toBe(英);
     }
-    expect(NEW_KEYS.length, '新键数对不上 —— 切片范围变了？').toBe(19);
+    expect(NEW_KEYS.length, '新键数对不上 —— 切片范围变了？').toBe(21);
   });
 
   it('行为腿：片尾字幕真播一遍，中英两语都出展开句、{journal} 换成当前键名', () => {
@@ -247,7 +249,8 @@ describe('结局对话 / 片尾字幕 / 升级面板双表化（W-D2 切片26）
     行含(Game源码, "this.dialog.show(", "t('obj_infinity_title')");
     行含(Game源码, 'endingDialogKey(this.quests.stats)', 't(endingDialogKey(');
     行含(Game源码, 'this.dialog?.toast(', "t('toast_keybind_invalid')");
-    行含(Credits源码, 'scroll.innerHTML = CREDITS.map', 'keyText(t(l))');
+    行含(Credits源码, 'scroll.innerHTML = 行.map', 'keyText(t(l))');
+    行含(Credits源码, 'const 行 = creditsLines', 'this.game?.quests?.stats');
     行含(Credits源码, 'skip.dataset.ktext', "t('cg_caption_void_skip')");
     行含(Credits源码, 'this.game.dialog?.toast(', "t('credits_toast')");
     行含(Panel源码, 'upgrade-rest-name', "t('upgrade_rest_default')");
@@ -266,11 +269,43 @@ describe('结局对话 / 片尾字幕 / 升级面板双表化（W-D2 切片26）
     expect(旧字幕行.includes('keyText(t(l))'), '人造的旧写法必须被点名').toBe(false);
   });
 
-  it('新键不孤儿：19 个新键都在源文件里被引用（切片46 起含抉择行）', () => {
+  it('新键不孤儿：21 个新键都在源文件里被引用（切片46/48 起含抉择行与结局字幕）', () => {
     const 没人用 = NEW_KEYS.filter((k) =>
       !Game源码.includes("'" + k + "'") && !Credits源码.includes("'" + k + "'")
       && !Panel源码.includes("'" + k + "'") && !Objectives源码.includes("'" + k + "'"));
     expect(没人用, '这些新键建了却没人引用（死键）').toEqual([]);
+  });
+
+  it('行为腿：片尾 flavor 跟着终局抉择走，老档回通用句（W-E3 切片48）', () => {
+    setKeybindTable(factoryKeybindings());
+    setHotkeyTable(UI_HOTKEYS.map((e) => ({ ...e })));
+    const 通用 = creditsLines(undefined);
+    const 留灯 = creditsLines({ decisions: new Set(['choice_final_keep']) });
+    const 熄灯 = creditsLines({ decisions: new Set(['choice_final_quiet']) });
+    expect(留灯.length, '分支不许改变字幕行数').toBe(通用.length);
+    expect(熄灯.length, '分支不许改变字幕行数').toBe(通用.length);
+    expect(留灯.indexOf('credits_line_flavor_keep'), '留灯档没有换成留灯句').toBeGreaterThanOrEqual(0);
+    expect(熄灯.indexOf('credits_line_flavor_quiet'), '熄灯档没有换成熄灯句').toBeGreaterThanOrEqual(0);
+    expect(留灯.includes('credits_line_flavor'), '留灯档还留着通用句').toBe(false);
+    expect(熄灯.includes('credits_line_flavor'), '熄灯档还留着通用句').toBe(false);
+    expect(通用.includes('credits_line_flavor'), '老档不再回通用句').toBe(true);
+
+    for (const lang of ['zh', 'en']) {
+      setLanguage(lang);
+      for (const [flag, 键] of [['choice_final_keep', 'credits_line_flavor_keep'], ['choice_final_quiet', 'credits_line_flavor_quiet']]) {
+        装窗();
+        const doc = makeMarkupDom();
+        globalThis.document = doc;
+        const dir = new EndCreditsDirector({
+          quests: { stats: { decisions: new Set([flag]) } },
+          dialog: { toast() {} },
+        });
+        dir.play();
+        const 表 = lang === 'zh' ? STRINGS_ZH : STRINGS_EN;
+        expect(dir.el.querySelector('.end-credits-scroll').innerHTML, `${lang}/${flag} 片尾`).toContain('<p>' + 表[键] + '</p>');
+        expect(dir.el.querySelector('.end-credits-scroll').innerHTML, `${lang}/${flag} 片尾还夹着另一句`).not.toContain(表[键 === 'credits_line_flavor_keep' ? 'credits_line_flavor_quiet' : 'credits_line_flavor_keep']);
+      }
+    }
   });
 
   it('终局两段正文逐字钉死，且各自对应自己做的那件事（W-E3 切片46）', () => {

@@ -2775,6 +2775,8 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   credits_line_title: 'Crossrealm Chronicles',
   credits_line_engine: 'Browser Demo - Vite + Three.js',
   credits_line_flavor: 'You cut through chaos and became the Plane Wanderer.',
+  credits_line_flavor_keep: 'You cut through chaos and became the Plane Wanderer - and the anchor is still lit.',
+  credits_line_flavor_quiet: 'You cut through chaos, became the Plane Wanderer, and put out the anchor yourself.',
   credits_line_thanks: 'Thanks for playing',
   credits_line_features: '{journal} Journal · CG Gallery · Codex · Achievements',
   credits_line_systems: 'Campfire NPCs · Boss rematch · Combat styles',
