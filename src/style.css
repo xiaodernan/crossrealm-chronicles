@@ -2242,7 +2242,7 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 
 .end-credits { position: fixed; inset: 0; z-index: 900; background: rgba(0,0,0,0.92); overflow: hidden; }
 .end-credits.hidden { display: none; }
-.end-credits-scroll { position: absolute; bottom: -20%; left: 50%; transform: translateX(-50%); width: max-content; max-width: min(90vw, 40rem); text-align: center; animation: credits-roll 28s linear forwards; color: #c9a962; font-size: 1.1rem; line-height: 2; white-space: normal; }
+.end-credits-scroll { position: absolute; bottom: -20%; left: 50%; transform: translateX(-50%); width: max-content; max-width: min(90vw, 44rem); text-align: center; animation: credits-roll 28s linear forwards; color: #c9a962; font-size: 1.1rem; line-height: 2; white-space: normal; }
 .end-credits-scroll p { margin: 0.4em 0; }
 .end-credits-skip { position: fixed; bottom: 24px; right: 24px; z-index: 901; background: transparent; border: 1px solid rgba(201,169,98,0.5); color: #c9a962; padding: 6px 14px; cursor: pointer; }
 @keyframes credits-roll { from { bottom: -30%; } to { bottom: 110%; } }
