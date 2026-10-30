@@ -20,9 +20,11 @@
  *   - flags: 完成时设置的标志 { flagName: true/false }
  *   - requires: 前置标志要求 { flagName: true/false }（全部满足才可激活；
  *     W-E3 切片24 起由 `objectiveRequiresMet` 在运行时读，旗标账本是 `stats.objectiveFlags`）
- *   - branchTo: 分支目标 id。注意它**不是**"满足某条件才跳"——跳转的时机由表序与
- *     `chapterGateAfter` 决定，这一格只被注册表的整表不变式用来核对"位置与指回去的
- *     那一步对不对得上"（改序时它会红，运行时没人读它做决策）
+ *   - branchTo: 分支目标 id。**运行时真读**（W-E3 切片46 核过）：非抉择步走完时
+ *     `QuestSystem.advance()` 直接跳到这里（`second-ember` / `final-keep` 那一族）；
+ *     目标若是章节门（门不在 `MAINLINE` 里），落点由 `mainlineIndexAfterGate` 算成
+ *     "门后第一步"，门自己的旗标与翻章由 `chapterGateById` 补上。注册表另有一条整表
+ *     不变式拿它核对"门的前一行是不是指回这道门"（改序时它会红）
  *   - reward: 完成奖励魂火
  *   - journal: 完成后日志文本
  *   - waypoint: 世界坐标指引 { x, z, label }
