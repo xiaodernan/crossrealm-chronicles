@@ -49,6 +49,21 @@ export class WeatherSystem {
     /** 世界时累计（秒）—— 雪的横向摆动相位源（B118）。改前摆动**幅值**乘了 dt、方向却取墙钟：
      *  定帧那一档（世界时 0.08 秒）实测仍走出正常档 **76.9%** 的路径，等于雪在定格里满速乱摆 */
     this._时相 = 0;
+    /**
+     * 每颗粒子**脚下那一格**的地面高度，连同采样时它自己的 (x, z)（W-C2 切片20）。
+     *
+     * 包围盒判定问的只是"这颗穿到地面以下 2 米没有"，可 `getGroundHeight` 每问一次就把整张
+     * 高度场**四角各算一遍**（`sampleGlobalHeightSmooth`：自然地 + 七区 + 广场 + 室内）。
+     * 900 颗每帧各问一次 ⇒ 探针 patch-out 量到 `weather.update` 那 5.68ms 里 **98.8% 是这一问**
+     * （`.tmp-20261030-s22/probe-w2.log`）。而雨滴下落时 x/z 不动，问十次还是同一格。
+     *
+     * 缓存只有一种情况会读错答案：`getGroundHeight` **换了答题的人**（室内 / 野外那两条分支，
+     * 见 `WorldManager.getGroundHeight` 的 B120 注）。所以每帧比对那一条分支，一跳就整张作废 ——
+     * 付一帧的重问（约 5.6ms，进出副本各一次），换掉"雨落在错高度上"这种没人能复现的症状。
+     */
+    this._gy = null;
+    this._gxy = null;
+    this._室内 = null;
     this._buildParticles(this.preset);
   }
 
@@ -79,6 +94,10 @@ export class WeatherSystem {
     });
     this.particles = new THREE.Points(geo, mat);
     this.velocities = vel;
+    // 粒子数一变，旧的"这颗脚下多高"就认不得这颗了：整张重开。
+    // NaN 是"还没问过"的记号 —— 它与任何数比都不等，所以第一帧逐颗各问一次。
+    this._gy = new Float32Array(n);
+    this._gxy = new Float32Array(n * 2).fill(NaN);
     this.group.add(this.particles);
   }
 
@@ -138,13 +157,29 @@ export class WeatherSystem {
     const vel = this.velocities;
     const preset = this.preset;
     const groundBase = this.world.getGroundHeight(playerPos.x, playerPos.z);
+    const 缓存 = this._gxy;
 
-    for (let i = 0; i < arr.length / 3; i++) {
+    // 答题的人换了吗？（`getGroundHeight` 在室内 / 野外之间换源头）换了就整张作废，
+    // 下一帧逐颗重问 —— 那一帧贵 5ms，但它值的是"雨别再落在错的高度上"。
+    const 室内 = !!this.world.dungeonManager?.isInside?.();
+    if (室内 !== this._室内) { 缓存.fill(NaN); this._室内 = 室内; }
+
+    const 粒子数 = arr.length / 3;
+    for (let i = 0; i < 粒子数; i++) {
       // 包围盒检测每帧做，防止粒子逃逸；位置积分仅在几何帧推进。
       const px = arr[i * 3];
       const py = arr[i * 3 + 1];
       const pz = arr[i * 3 + 2];
-      const gy = this.world.getGroundHeight(px, pz) + 0.5;
+
+      // 这一颗自己挪没挪：水平位移过 1 米才重问地面（NaN 的比较恒假 ⇒ 没问过的必问）。
+      // 判据的容差是"低于地面 2 米"，而 1 米水平位移内的地面差不超过 0.1 米量级 ——
+      // 省掉的是整张高度场四次角点采样，换来的是同一格的第二十次回答。
+      if (!(Math.abs(px - 缓存[i * 2]) <= 1 && Math.abs(pz - 缓存[i * 2 + 1]) <= 1)) {
+        this._gy[i] = this.world.getGroundHeight(px, pz);
+        缓存[i * 2] = px;
+        缓存[i * 2 + 1] = pz;
+      }
+      const gy = this._gy[i] + 0.5;
 
       const outOfBox =
         Math.abs(px - this._follow.x) > this._box.x
