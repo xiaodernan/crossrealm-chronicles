@@ -6,7 +6,7 @@
  * 不允许"字段缺失就当默认值凑合读"——那正是 v4 之前丢进度而无人察觉的原因。
  */
 import { SaveValidator, CURRENT_VERSION } from './SaveValidator.js';
-import { MAINLINE, OBJECTIVES } from '../content/objectives.js';
+import { OBJECTIVES } from '../content/objectives.js';
 import { t } from '../engine/i18n.js';
 
 export { CURRENT_VERSION };
@@ -106,6 +106,110 @@ function migrateV6toV7(d) {
  */
 function 偏移后(旧下标, 插入点) {
   return 旧下标 + 插入点.filter((p) => p <= 旧下标).length;
+}
+
+/**
+ * 主线表的**作者账本**（W-E3 切片39）—— 每一步是"哪一版存档的表里第一次出现它"。
+ *
+ * ## 为什么迁移链需要这张账
+ *
+ * 迁移的每一跳说的都是**当年那张表**：`quests.index` 是位置，而"第 44 位是谁"这件事
+ * 每一版都可能不一样。可有两处曾经直接查**今天的** `MAINLINE`：
+ *
+ * - `v17 → v18` 重放旗标：拿 v17 的下标去查今天的表 ⇒ 停在**另一行**上。
+ *   症状不是报错，是会**漏放** `requires` 要的那面旗 —— 玩家走到 `chaos-boss`
+ *   （要 `hasChaosCore`）时那一步永远判不完成 ⇒ **软锁**。今天实测：v17 档停在
+ *   第 44 位（`skills`，意味着 `chaos-core` 早就做完了）迁上来，
+ *   `hasChaosCore` 是 `undefined`（`tests/mainline-authoring-ledger.test.js` 钉住）。
+ * - `v20 → v21` 抄 id：今天查得到，**是因为今天还没插步**。v21 的全部意义是
+ *   "以后插步不必再配迁移"—— 而这一跳按今天的表查 id，插一步就把老档认成相邻那一步，
+ *   正好把那条承诺作废。这是一枚**定时炸弹**，不是当前故障。
+ *
+ * 所以这张账把"历史"从"现状"里切出来：迁移只许查 `mainlineAt(版本)`，不许再查
+ * `MAINLINE`。兑现在两处读者：`migrateV17toV18`（era 17）与
+ * `migrateV20toV21`（era 20）。
+ *
+ * ## 维护纪律（门禁在 `tests/mainline-authoring-ledger.test.js`）
+ *
+ * - `addedIn` **≤ 20**：这张账是 v21 那一刻的**冻结快照**，不是"每一步的出生记录"。
+ *   v21 之后新增的步**不进这张账** —— 它们不改变任何老版本的表（这正是 v21 换来的东西）。
+ * - 顺序 = 今天的顺序；今天的主线必须是这张账的**超序列**（允许往后插步，不许删/改序）。
+ * - 某一步**改名**时，老 id 必须写进迁移做映射 —— 否则账上那一格会在今天的表里找不到，
+ *   门禁当场点名（这条纪律与 W-E3 切片38 留的尾巴同源）。
+ * - 每一跳的 `Vn_INSERT_POINTS` 与这张账互为见证：测试会按插入点把 era(n) 拼成
+ *   era(n+1)，拼出来必须逐字等于账本里的下一版。
+ */
+export const MAINLINE_HISTORY = [
+  { id: 'anchor', addedIn: 0 },
+  { id: 'training', addedIn: 0 },
+  { id: 'hub-catacombs', addedIn: 12 },
+  { id: 'soldiers', addedIn: 0 },
+  { id: 'fantasy-frag', addedIn: 0 },
+  { id: 'fantasy-ruins', addedIn: 13 },
+  { id: 'elf-scout', addedIn: 14 },
+  { id: 'boss', addedIn: 0 },
+  { id: 'magic-frag', addedIn: 0 },
+  { id: 'golem', addedIn: 0 },
+  { id: 'space-frag', addedIn: 0 },
+  { id: 'finale', addedIn: 0 },
+  { id: 'chests', addedIn: 0 },
+  { id: 'forest-shrine', addedIn: 12 },
+  { id: 'fantasy-tower', addedIn: 15 },
+  { id: 'talk-wanderer', addedIn: 0 },
+  { id: 'boss2', addedIn: 0 },
+  { id: 'elite', addedIn: 0 },
+  { id: 'hexer-hunt', addedIn: 10 },
+  { id: 'magic-forest', addedIn: 13 },
+  { id: 'gear-charm', addedIn: 16 },
+  { id: 'level', addedIn: 0 },
+  { id: 'epilogue', addedIn: 0 },
+  { id: 'learn-spell', addedIn: 0 },
+  { id: 'crypt', addedIn: 0 },
+  { id: 'library', addedIn: 0 },
+  { id: 'rift', addedIn: 0 },
+  { id: 'space-lens', addedIn: 15 },
+  { id: 'space-wreck', addedIn: 13 },
+  { id: 'boss3', addedIn: 0 },
+  { id: 'mind', addedIn: 0 },
+  { id: 'ascension', addedIn: 0 },
+  { id: 'gear-sigil', addedIn: 16 },
+  { id: 'void-rift', addedIn: 0 },
+  { id: 'charge-spell', addedIn: 0 },
+  { id: 'void-hunt', addedIn: 9 },
+  { id: 'crawler-hunt', addedIn: 10 },
+  { id: 'void-casket', addedIn: 11 },
+  { id: 'void-boss', addedIn: 0 },
+  { id: 'void-tablet', addedIn: 0 },
+  { id: 'choice-void', addedIn: 17 },
+  { id: 'seal-rite', addedIn: 20 },
+  { id: 'study-rite', addedIn: 20 },
+  { id: 'true-end', addedIn: 0 },
+  { id: 'chaos-core', addedIn: 0 },
+  { id: 'knight-hunt', addedIn: 10 },
+  { id: 'skills', addedIn: 0 },
+  { id: 'abyss-maw', addedIn: 11 },
+  { id: 'gloom-mist-crypt', addedIn: 12 },
+  { id: 'gloom-moss', addedIn: 13 },
+  { id: 'warden-hunt', addedIn: 15 },
+  { id: 'gloom-wraith-hunt', addedIn: 18 },
+  { id: 'gloom-stalker-hunt', addedIn: 18 },
+  { id: 'gloom-sentinel-hunt', addedIn: 18 },
+  { id: 'chaos-boss', addedIn: 0 },
+  { id: 'radiant-dawn-hall', addedIn: 12 },
+  { id: 'radiant-altar', addedIn: 13 },
+  { id: 'radiant-hunt', addedIn: 14 },
+  { id: 'radiant-knight-hunt', addedIn: 18 },
+  { id: 'radiant-dancer-hunt', addedIn: 18 },
+  { id: 'radiant-brand-hunt', addedIn: 18 },
+  { id: 'dungeon-rerun', addedIn: 0 },
+  { id: 'chests-all', addedIn: 14 },
+  { id: 'sunless-oratory', addedIn: 19 },
+  { id: 'infinity', addedIn: 0 },
+];
+
+/** era(n)：第 n 版存档那一刻的主线表（id 顺序）。只给迁移用。 */
+export function mainlineAt(version) {
+  return MAINLINE_HISTORY.filter((e) => e.addedIn <= version).map((e) => e.id);
 }
 
 /**
@@ -373,7 +477,11 @@ function migrateV16toV17(d) {
  * 为什么重放是安全的：注册表不变式钉着"`requires` 的生产者必须在前头"，
  * 且 v17 及以前的主线严格线性（分支只落在紧跟的章节门上，不跳步）
  * ⇒ `questIndex` 之前的每一行都确确实实走完了 ⇒ 它们的 `flags` 是事实。
- * 通关档（`index >= MAINLINE.length`）整表走完。
+ * 通关档（`index >= era17.length`）整表走完。
+ *
+ * **era 17 从哪来**：`mainlineAt(17)`（本文件顶部的作者账本）。这一跳收到的下标是 **v17 坐标**，
+ * 而今天的表已经多出 9 步 ⇒ 直接查今天的表会停在另一行上（W-E3 切片39 修的就是这个：
+ * v17 档停在第 44 位迁上来时漏放 `hasChaosCore`，玩家走到 `chaos-boss` 那一步永远判不完成）。
  *
  * 注意这一跳**不插行**（主线没加步）⇒ `index` 原样不动。
  * v18 及以后的新档由 `QuestSystem.advance()` 边走边写，不再需要重放。
@@ -385,11 +493,18 @@ function migrateV17toV18(d) {
     const flags = {};
     const idx = Number(quests.index);
     if (Number.isInteger(idx)) {
-      const 落点 = Math.min(Math.max(idx, 0), MAINLINE.length);
+      // **era 17 那张表**（W-E3 切片39）—— 不许查今天的 `MAINLINE`：下标是 v17 的，
+      // 拿它查今天的表会停在另一行上（实测漏放 `hasChaosCore` ⇒ 走到 chaos-boss 软锁）。
+      const 表 = mainlineAt(17);
+      const 落点 = Math.min(Math.max(idx, 0), 表.length);
       // 落点越界（通关档）⇒ 不停，整表走完；否则停在当前步之前（它还没完成）
-      const 停在 = 落点 >= MAINLINE.length ? null : MAINLINE[落点]?.id;
+      const 停在 = 落点 >= 表.length ? null : 表[落点];
+      // 走的是 OBJECTIVES 的表序（章节门控行也在这张表里、也要重放），但**跳过**
+      // 当年还不存在的步（它们的 id 不在 era 17 里）—— 这一条让"以后插步"不影响这一跳。
+      const 当年有 = new Set(表);
       for (const row of OBJECTIVES) {
         if (row.id === 停在) break;
+        if (row.type !== 'chapter-gate' && !当年有.has(row.id)) continue;
         for (const [flag, value] of Object.entries(row.flags ?? {})) flags[flag] = value;
       }
     }
@@ -459,8 +574,10 @@ function migrateV19toV20(d) {
 function migrateV20toV21(d) {
   const quests = d.quests ?? {};
   const idx = Number(quests.index);
-  // v20 的表 = 今天的表（这一跳没动内容），所以下标直接查得到那一步的 id
-  quests.currentId = Number.isInteger(idx) ? (MAINLINE[idx]?.id ?? null) : null;
+  // **era 20 那张表**（W-E3 切片39）：这一跳没动内容，但"当年的第 N 位是谁"必须问账本
+  // —— 查今天的表会在**下一次插步**之后把老档认成相邻那一步（v21 的承诺当场作废）。
+  const 表 = mainlineAt(20);
+  quests.currentId = Number.isInteger(idx) ? (表[idx] ?? null) : null;
   return d;
 }
 

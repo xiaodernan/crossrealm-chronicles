@@ -1,0 +1,160 @@
+/**
+ * 迁移链只许查**当年的表**（W-E3 切片39）。
+ *
+ * ## 这一片修的是什么
+ *
+ * 存档里的 `quests.index` 是**位置**。迁移的每一跳收到的都是**那一版**坐标，
+ * 可有两处直接查了今天的 `MAINLINE`：
+ *
+ * - `v17 → v18` 重放旗标 —— 这是**当前故障**，不是理论风险。v17 档停在第 44 位
+ *   （era 17 里是 `skills`）时，旧写法拿 44 去查今天的表，停在今天的第 44 位
+ *   （`chaos-core`）上 ⇒ 重放范围少了一段 ⇒ `hasChaosCore` 没点亮。
+ *   而这个旗标是 `chaos-boss` 的 `requires` ⇒ 那一步永远判不完成
+ *   ⇒ **主线软锁**（同一份档里 `infinity` 还要 `chaosBossDefeated`，游戏通不了）。
+ * - `v20 → v21` 抄 `currentId` —— 这是**定时炸弹**：今天查得对，只是因为
+ *   今天还没在 v21 之后插过步；插一步之后这跳就会把老档认成相邻那一步。
+ *
+ * 修法不是"再算一遍偏移"，而是把历史从现状里切出来：一张**冻结的作者账本**
+ * （`MAINLINE_HISTORY`）记"每一步是哪一版表里第一次出现的"，迁移问 `mainlineAt(版本)`。
+ *
+ * ## 门禁四条腿
+ *
+ * ① 账本是今天主线的**超序列**（允许往后插步，不许删/改序；某格消失要点名要求写映射）；
+ * ② 每一版的长度是**历史事实**（era 7 = 32 步 … era 20/21 = 65 步）；
+ * ③ `Vn_INSERT_POINTS` 与账本**互为见证** —— 按插入点把 era(n) 拼成 era(n+1)，
+ *    拼出来的位置与 id 必须逐字等于账本里的下一版；
+ * ④ 两处迁移体里**不许出现** `MAINLINE`（静态扫描 + 反向控制）。
+ */
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { MAINLINE } from '../src/content/objectives.js';
+import {
+  MAINLINE_HISTORY, mainlineAt, MIGRATIONS, V8_INSERT_POINTS, V9_INSERT_POINTS,
+  V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS, V13_INSERT_POINTS,
+  V14_INSERT_POINTS, V15_INSERT_POINTS, V16_INSERT_POINTS, V17_INSERT_POINTS,
+  V18_INSERT_POINTS, V19_INSERT_POINTS,
+} from '../src/game/SaveMigrations.js';
+
+const 今天 = MAINLINE.map((r) => r.id);
+const 账上 = MAINLINE_HISTORY.map((e) => e.id);
+
+describe('① 账本描述今天的主线：是超序列，不是"另一条线"', () => {
+  it('账上每一步今天都还在，且顺序一致（允许往后插步）', () => {
+    const 缺 = 账上.filter((id) => !今天.includes(id));
+    expect(缺,
+      '账本里这些步今天的表上找不到 —— 改名必须写一条迁移把老 id 映射到新 id（W-E3 切片38 的尾巴）. ' + 缺.join('、')).toEqual([]);
+    // 顺序：账上的 id 在今天的表里必须按下标递增出现（删/改序会让老档落到别的步上）
+    let 上 = -1;
+    const 乱序 = [];
+    for (const id of 账上) {
+      const i = 今天.indexOf(id);
+      if (i <= 上) 乱序.push(id);
+      上 = i;
+    }
+    expect(乱序, '账本顺序与今天的主线顺序打架 —— 老档的下标会落到别的步上').toEqual([]);
+  });
+
+  it('账本每一条都是 { id, addedIn }，addedIn 是 ≤ 20 的整数（v21 之后的新步不进这张账）', () => {
+    expect(MAINLINE_HISTORY.length, '账本是 v21 那一刻的快照，今天它应当是 65 步').toBe(65);
+    const 坏 = MAINLINE_HISTORY.filter((e) => !Number.isInteger(e.addedIn) || e.addedIn < 0 || e.addedIn > 20);
+    expect(坏, '这些条目的 addedIn 越界 —— v21 之后新增的步不许进这张账（它们不改变任何老版本的表）').toEqual([]);
+    expect(new Set(账上).size, '账上 id 重复').toBe(账上.length);
+  });
+});
+
+describe('② 每一版的长度是历史事实', () => {
+  it('era 7 = 32 步（原始表），era 20 / 21 = 65 步（v21 冻结时）', () => {
+    expect(mainlineAt(7).length, '原始那 32 步').toBe(32);
+    expect(mainlineAt(17).length).toBe(56);
+    expect(mainlineAt(18).length).toBe(62);
+    expect(mainlineAt(19).length).toBe(63);
+    expect(mainlineAt(20).length, 'v20 与 v21 的表相同（最后一跳不插行）').toBe(65);
+    expect(mainlineAt(21)).toEqual(mainlineAt(20));
+    expect(mainlineAt(4)).toEqual(mainlineAt(7));
+  });
+
+  it('era 20 是冻结的：今天的表往后长，它不动', () => {
+    expect(mainlineAt(20)).toEqual(账上);
+  });
+});
+
+describe('③ 插入点与账本互为见证', () => {
+  const 跳 = {
+    8: V8_INSERT_POINTS, 9: V9_INSERT_POINTS, 10: V10_INSERT_POINTS, 11: V11_INSERT_POINTS,
+    12: V12_INSERT_POINTS, 13: V13_INSERT_POINTS, 14: V14_INSERT_POINTS, 15: V15_INSERT_POINTS,
+    16: V16_INSERT_POINTS, 17: V17_INSERT_POINTS, 18: V18_INSERT_POINTS, 19: V19_INSERT_POINTS,
+  };
+  it('按 era(n) 的插入点拼出来的 era(n+1)，逐格等于账本', () => {
+    for (const [版本, 插点] of Object.entries(跳)) {
+      const 前 = mainlineAt(Number(版本));
+      const 后 = mainlineAt(Number(版本) + 1);
+      // 旧下标 → 新下标的映射（与迁移里那条算式同形）
+      const 像 = new Set(前.map((_, i) => i + 插点.filter((p) => p <= i).length));
+      const 插进去的位置 = [];
+      for (let i = 0; i < 后.length; i++) if (!像.has(i)) 插进去的位置.push(i);
+      expect(插进去的位置.length, 'v' + 版本 + ' 的插入点说插 ' + 插点.length + ' 步').toBe(插点.length);
+      // 拼回：把插进去的那些格子摘掉，剩下的应当逐字等于 era(n)
+      const 摘掉 = 后.filter((_, i) => !插进去的位置.includes(i));
+      expect(摘掉, '摘掉 v' + 版本 + '→v' + (Number(版本) + 1) + ' 新插的步之后，应当正好是 era ' + 版本).toEqual(前);
+      // 插进去的 id，正好是账上 addedIn === 版本+1 的那些
+      const 应插 = MAINLINE_HISTORY.filter((e) => e.addedIn === Number(版本) + 1).map((e) => e.id);
+      expect(插进去的位置.map((i) => 后[i]), 'v' + (Number(版本) + 1) + ' 新插的步与账本的 addedIn 对不上').toEqual(应插);
+    }
+  });
+});
+
+describe('④ 迁移体里不许再出现 MAINLINE（静态扫描 + 反向控制）', () => {
+  const 源 = readFileSync(join(process.cwd(), 'src/game/SaveMigrations.js'), 'utf8');
+  /** 摘出一个函数体（到下一个顶层的右花括号 + 换行） */
+  const 函数体 = (名) => {
+    const i = 源.indexOf('function ' + 名 + '(');
+    expect(i, '找不到 ' + 名 + ' => 名字改了？这条腿要跟着改').toBeGreaterThan(-1);
+    const j = 源.indexOf('\n}\n', i);
+    // 只判**代码**：注释里提到这个名字是在说"不许查它"，那不是违规；
+    // 判据与 quest-save-restore 那处同口径（剥掉行注释与块注释行）。
+    return 源.slice(i, j).split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
+  };
+  it('v17 → v18 与 v20 → v21 两处都问账本，不问现状', () => {
+    for (const 名 of ['migrateV17toV18', 'migrateV20toV21']) {
+      const 体 = 函数体(名);
+      expect(体, 名 + ' 还在查今天的 MAINLINE ⇒ 下一次插步就把老档认成相邻那一步').not.toMatch(/\bMAINLINE\b/);
+      expect(体, 名 + ' 没有问账本（mainlineAt）').toMatch(/mainlineAt\(/);
+    }
+  });
+  it('反向控制：文件里确实还有 MAINLINE_HISTORY，且顶层不再 import MAINLINE', () => {
+    expect(源).toMatch(/MAINLINE_HISTORY/);
+    expect(源, '顶层 import 还在把 MAINLINE 拉进来 ⇒ 说明还有别处在查现状').not.toMatch(/import \{ MAINLINE, OBJECTIVES \}/);
+  });
+});
+
+describe('⑤ 行为腿：老档（v20）抄 id 用的是当年那张表', () => {
+  const 造v20 = () => ({ version: 20, quests: { index: 0, completed: false, stats: {} } });
+  it('下标 40 抄成 era 20 的第 40 步（choice-void），而不是"今天第 40 步"', () => {
+    const d = 造v20();
+    d.quests.index = 40;
+    MIGRATIONS[20](d);
+    expect(d.quests.currentId).toBe(mainlineAt(20)[40]);
+    expect(d.quests.currentId, '这一格是 v21 冻结时的表：choice-void').toBe('choice-void');
+  });
+  it('通关档（下标越界）抄成 null，不抄成最后一步', () => {
+    const d = 造v20();
+    d.quests.index = mainlineAt(20).length;
+    MIGRATIONS[20](d);
+    expect(d.quests.currentId).toBeNull();
+  });
+  it('不是数字的下标抄成 null（数字字符串按数字读，沿用既有口径）', () => {
+    const d = 造v20();
+    d.quests.index = 'abc';
+    MIGRATIONS[20](d);
+    expect(d.quests.currentId).toBeNull();
+  });
+});
+
+describe('⑥ 反向控制：桩件自证 ① 那条腿不是恒真', () => {
+  it('账上多一格今天的表里没有的 ⇒ 缺的那一格被点名', () => {
+    const 假账 = [...账上.slice(0, 5), 'a-step-that-was-removed', ...账上.slice(5)];
+    const 缺 = 假账.filter((id) => !今天.includes(id));
+    expect(缺).toEqual(['a-step-that-was-removed']);
+  });
+});

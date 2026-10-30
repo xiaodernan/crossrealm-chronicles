@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import { migrate, MIGRATIONS, SAVE_KEYS, SaveVersionError } from '../src/game/SaveMigrations.js';
+import { migrate, MIGRATIONS, SAVE_KEYS, SaveVersionError, mainlineAt } from '../src/game/SaveMigrations.js';
 import { SaveValidator, CURRENT_VERSION } from '../src/game/SaveValidator.js';
 import { SaveSystem } from '../src/game/SaveSystem.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
@@ -178,12 +178,18 @@ describe('存档迁移链', () => {
       d.version = 17;
       return d;
     };
+    // W-E3 切片39：重放问的是 **era 17 那张表**，不是今天的 `MAINLINE`。
+    // 这一条同时是回归腿：旧写法拿 v17 的下标查今天的表，停在第 44 位（`skills`）时
+    // 会停在今天的 `chaos-core` 上 ⇒ 漏放 `hasChaosCore` ⇒ 走到 `chaos-boss` 软锁。
+    const era17 = mainlineAt(17);
     /** 重放口径（与迁移同源）：停在当前步**之前**（它还没完成）；通关档整表走完 */
     const 期望旗标 = (index) => {
       const flags = {};
-      const 停在 = index >= MAINLINE.length ? null : MAINLINE[index]?.id;
+      const 停在 = index >= era17.length ? null : era17[index];
+      const 当年有 = new Set(era17);
       for (const row of OBJECTIVES) {
         if (row.id === 停在) break;
+        if (row.type !== 'chapter-gate' && !当年有.has(row.id)) continue;
         for (const [flag, value] of Object.entries(row.flags ?? {})) flags[flag] = value;
       }
       return flags;
@@ -202,13 +208,18 @@ describe('存档迁移链', () => {
       expect(跑(index).quests.stats.objectiveFlags, `落点 ${index}`).toEqual(期望旗标(index));
     }
     // 跨章节门的落点：门控行的 flags 也点亮（`chaos-core` 的 requires 等的就是 chapter4Done）
-    const 门后 = MAINLINE.findIndex((r) => r.id === 'chaos-core');
+    const 门后 = era17.indexOf('chaos-core');
+    expect(门后, 'era 17 里没有 chaos-core？这份桩件不成立').toBeGreaterThan(0);
     expect(跑(门后).quests.stats.objectiveFlags.chapter4Done).toBe(true);
     // 当前步自己的旗标不点亮 —— 它还没完成（`hasChaosCore` 是 chaos-core 自己的 flags）
     expect(跑(门后).quests.stats.objectiveFlags.hasChaosCore).toBeUndefined();
+    // **回归腿（W-E3 切片39 的软锁）**：v17 停在第 44 位 = `skills`（意味着 chaos-core 早做完了）
+    // ⇒ `hasChaosCore` 必须点亮；点不亮的话玩家走到 `chaos-boss`（requires 它）永远判不完成。
+    expect(跑(era17.indexOf('skills')).quests.stats.objectiveFlags.hasChaosCore,
+      'v17 档停在第 44 位迁上来时漏放 hasChaosCore —— chaos-boss 从此永远过不去（软锁）').toBe(true);
     // 通关档（index 越界）：整表点亮，含最后一行
     const 通关 = 跑(999);
-    expect(通关.quests.stats.objectiveFlags).toEqual(期望旗标(MAINLINE.length));
+    expect(通关.quests.stats.objectiveFlags).toEqual(期望旗标(era17.length));
     expect(通关.quests.stats.objectiveFlags.gameCompleted).toBe(true);
     // 不是整数的下标不重放（读档侧按 0 落点继续，旗标也该是空的）
     const 坏 = 造v17();
