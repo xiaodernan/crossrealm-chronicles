@@ -982,6 +982,8 @@ export const CONTENT_TABLES = [
       // W-E3 切片36：同一行的**标题**与**分支日志**也可以按抉择变（真结局的两个名字）
       titleByChoice: { t: 'record', required: false },
       journalByChoice: { t: 'record', required: false },
+      // W-E3 切片46：终局正文的两段（`ending-dialog` 读它）
+      endingByChoice: { t: 'record', required: false },
       bossId: { t: 'ref', of: 'bosses', required: false },
       // 副本 id 现在有一张表了（切片3a）：写错的字母以前只会让那条任务没有路点，
       // 如今开机就红 —— 与 `zone: { t: 'ref', of: 'zones' }` 同一口径
@@ -1685,7 +1687,7 @@ export function checkObjectiveTable(table) {
     // ⇒ 否则这一格永远换不了文案（玩家选了也是原来那一句，且没有任何报错）。
     // W-E3 切片36：同一套口径覆盖标题 / 分支日志两格 —— 三格的查法在
     // `content/objectives.js` 的 `按抉择取()` 里只有一处，这里逐格核它的旗标。
-    for (const 格 of ['descByChoice', 'titleByChoice', 'journalByChoice']) {
+    for (const 格 of ['descByChoice', 'titleByChoice', 'journalByChoice', 'endingByChoice']) {
       for (const 旗标 of Object.keys(row?.[格] ?? {})) {
         if (!抉择旗标.has(旗标)) {
           out.push(`${path}: ${格}.${旗标} 没有任何一步的 choices 设过它 —— 这一格永远不会变`);

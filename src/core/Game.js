@@ -135,6 +135,7 @@ import { GamepadInput } from '../engine/GamepadInput.js';
 import { Rumble } from '../engine/Rumble.js';
 import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
 import { gearLabel, pickupChoice } from '../content/gear.js';
+import { endingDialogKey } from '../content/objectives.js';
 import { getLanguage } from '../engine/i18n.js';
 import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
@@ -499,7 +500,9 @@ export class Game {
     gameOn('game-completed', () => {
       // W-D2 切片26：说话人复用终局那一步的目标标题（同一个称号，且那一格已经占了两个键的上限）。
       // 对话框只过 `keyText()`（把 `{动作}` 换成键名）而不过 `t()` —— 展开必须在这里做。
-      this.dialog.show(t('obj_infinity_title'), t('ending_dialog_text'));
+      // W-E3 切片46：正文按最后一次终局抉择换段（"把火留给后来人" / "亲手熄掉锚点"），
+      // 取名只走 `endingDialogKey()` 一处 —— 这里不自己读 `decisions` 里的旗标名。
+      this.dialog.show(t('obj_infinity_title'), t(endingDialogKey(this.quests.stats)));
       SaveSystem.save(this);
     });
     gameOn('spell-toast', (e) => this.dialog.toast(e.detail.message));

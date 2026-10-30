@@ -68,10 +68,13 @@ function 扫标签位(src) {
 
 /**
  * 钉死表：POI id → [label 键, 中文文案, 英文文案]。
- * 71 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
+ * 73 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
  */
 const POI_LABELS = {
 'hub-anchor': ['hub_poi_anchor_label', '触摸世界之锚', 'Touch the World Anchor'],
+  // W-E3 切片46：终局抉择的两处收尾落点
+  'final-keep': ['zone_poi_final_keep_label', '锚点东侧的石阶', 'Steps East of the Anchor'],
+  'final-quiet': ['zone_poi_final_quiet_label', '锚座下的熄火环', 'Snuffer Ring Beneath the Anchor'],
   'fantasy-ring': ['zone_poi_fantasy_ring_label', '调查至尊石环', 'Investigate the One Ring'],
   'fantasy-ruins': ['zone_poi_fantasy_ruins_label', '探索精灵遗迹', 'Explore the Elf Ruins'],
   'first-arrow': ['zone_poi_first_arrow_label', '石缝里的断箭', 'The Arrow in the Seam'],
@@ -174,7 +177,7 @@ describe('POI 交互标签双表化（W-D2 切片19）', () => {
     setLanguage('zh');
   });
 
-  it('每个 POI 的 label 都是中英两表里的键（分母自证：71 处一个不落）', () => {
+  it('每个 POI 的 label 都是中英两表里的键（分母自证：73 处一个不落）', () => {
     const pois = world.pointsOfInterest;
     expect(pois.length, 'POI 总数对不上 —— 世界构建坏了').toBeGreaterThanOrEqual(60);
     const 缺 = [];
@@ -247,10 +250,10 @@ describe('POI 交互标签双表化（W-D2 切片19）', () => {
     expect(扫标签位("registerPoi(world, zone, { x: 0, y: 0, z: 0 }, 'echo_broom_ring_title', () => {});")).toEqual([]);
   });
 
-  it('本片新建的 19 个键：同一文案在两表里最多两个键（全局规矩的本地复查）', () => {
+  it('本片新建的 POI 标签键：同一文案在两表里最多两个键（全局规矩的本地复查）', () => {
     const 新建 = [...new Set(Object.values(POI_LABELS).map(([键]) => 键))]
       .filter((k) => k.startsWith('zone_poi_') || k.startsWith('pop_poi_') || k === 'hub_poi_anchor_label');
-    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(28);
+    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(30);
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
       const 计数 = new Map();
       for (const v of Object.values(table)) 计数.set(v, (计数.get(v) ?? 0) + 1);

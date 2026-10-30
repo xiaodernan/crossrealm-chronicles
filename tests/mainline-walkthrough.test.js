@@ -142,19 +142,19 @@ afterEach(() => {
 });
 
 describe('主线通关巡游（W-E3 切片44）', () => {
-  it('第一遍（全选第一个选项）：72 行走到通关，跳过的是三条「没选的路」', () => {
+  it('第一遍（全选第一个选项）：73 行走到通关，跳过的是四条「没选的路」', () => {
     const { 走过, 到过 } = 巡游一遍(0);
-    expect(走过.length, '走过的行数与表长 − 四条没选的路对不上').toBe(MAINLINE.length - 4);
+    expect(走过.length, '走过的行数与表长 − 五条没选的路对不上').toBe(MAINLINE.length - 5);
     expect(到过.size, '有行被走了两次').toBe(走过.length);
     const 没到 = MAINLINE.filter((r) => !到过.has(r.id)).map((r) => r.id);
-    expect(没到, '被跳过的不是四条「没选的路」').toEqual(['first-camp', 'second-stone', 'ascend-retrace', 'study-rite']);
+    expect(没到, '被跳过的不是五条「没选的路」').toEqual(['first-camp', 'second-stone', 'ascend-retrace', 'study-rite', 'final-quiet']);
   });
 
-  it('第二遍（全选第二个选项）：同样走到通关，跳过的是另外三条路', () => {
+  it('第二遍（全选第二个选项）：同样走到通关，跳过的是另外四条路', () => {
     const { 走过, 到过 } = 巡游一遍(1);
-    expect(走过.length).toBe(MAINLINE.length - 4);
+    expect(走过.length).toBe(MAINLINE.length - 5);
     const 没到 = MAINLINE.filter((r) => !到过.has(r.id)).map((r) => r.id);
-    expect(没到, '选了另一条之后，被跳过的不是对側那四条').toEqual(['first-arrow', 'second-ember', 'ascend-observe', 'seal-rite']);
+    expect(没到, '选了另一条之后，被跳过的不是对側那五条').toEqual(['first-arrow', 'second-ember', 'ascend-observe', 'seal-rite', 'final-keep']);
   });
 
   it('两遍合起来，主线每一行都至少被真的走过一次（没有一行是纸面摆设）', () => {

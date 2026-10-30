@@ -1,7 +1,8 @@
 import { keyText } from '../ui/keyHints.js';
 import { dungeonDefOf, TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 import {
-  BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter,
+  BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter, chapterGateById,
+  mainlineIndexAfterGate,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
   objectiveChosen, objectiveReward, objectiveDesc, objectiveTitle, applyObjectiveFlags,
 } from '../content/objectives.js';
@@ -359,14 +360,20 @@ export class QuestSystem {
       if (目标索引 >= 0) {
         this.questIndex = 目标索引;
       } else {
-        // 注册表应已核过 branch 目标必存在；此处仅做防御性回退
-        this.questIndex++;
+        // 分支直接指向一道章节门（W-E3 切片46：终局那两条收尾路）：门不在 MAINLINE 里，
+        // 落点是「门后第一步」；门后没有步（最后那道门）⇒ 表尾 = 通关。
+        // 改前这里一律 `questIndex++`：从 `final-keep` 加一格正好落到没选的那条 `final-quiet`。
+        const 门后 = mainlineIndexAfterGate(分支目标);
+        this.questIndex = 门后 ?? this.questIndex + 1;
       }
     } else {
       this.questIndex++;
     }
 
-    const gate = finished ? chapterGateAfter(finished.id) : null;
+    // 分支直指门时（切片46），位置那条路查不到门 ⇒ 按分支目标补一次，门自己的旗标才不会漏。
+    const gate = finished
+      ? (chapterGateAfter(finished.id) ?? (分支目标 ? chapterGateById(分支目标) : null))
+      : null;
     // W-E3 切片24：表上每一行的 `flags`（"这一步完成就点亮哪几格"）从此有运行时读者。
     // 写完这一步，再写它身后那道章节门 —— 门控行不在 `MAINLINE` 里、不随 `questIndex`
     // 推进，但"跨过这一刻"同样是一个事实（`chaos-core` 们的 `requires` 等的就是它）。

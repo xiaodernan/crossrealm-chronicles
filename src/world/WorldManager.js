@@ -311,6 +311,30 @@ export class WorldManager {
         window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'hub-anchor', title: t('wp_label_anchor'), text: t('zone_disc_hub_anchor_text') } }));
       },
     });
+    // W-E3 切片46：终局抉择的两处收尾落点 —— 锚点东侧的石阶（留灯）与锚座下的熄火环（熄灯）。
+    // 两处都落在枢纽里、离锚座十来米 ⇒ 玩家选完只需走几步，收尾不会变成又一趟跑图。
+    const 石阶 = { x: HUB_ZONE.center.x + 16, z: HUB_ZONE.center.z + 10 };
+    this.hubPOIs.push({
+      id: 'final-keep',
+      position: new THREE.Vector3(石阶.x, this.getGroundHeight(石阶.x, 石阶.z), 石阶.z),
+      label: 'zone_poi_final_keep_label',
+      type: 'main',
+      onInteract: () => {
+        this.dialog.show(t('obj_final_keep_title'), t('zone_dlg_final_keep_text'));
+        window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'final-keep', title: t('obj_final_keep_title'), text: t('zone_disc_final_keep_text') } }));
+      },
+    });
+    const 熄火环 = { x: HUB_ZONE.center.x - 16, z: HUB_ZONE.center.z + 10 };
+    this.hubPOIs.push({
+      id: 'final-quiet',
+      position: new THREE.Vector3(熄火环.x, this.getGroundHeight(熄火环.x, 熄火环.z), 熄火环.z),
+      label: 'zone_poi_final_quiet_label',
+      type: 'main',
+      onInteract: () => {
+        this.dialog.show(t('obj_final_quiet_title'), t('zone_dlg_final_quiet_text'));
+        window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'final-quiet', title: t('obj_final_quiet_title'), text: t('zone_disc_final_quiet_text') } }));
+      },
+    });
   }
 
   /**

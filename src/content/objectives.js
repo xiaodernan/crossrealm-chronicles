@@ -1150,6 +1150,71 @@ export const OBJECTIVES = [
     reward: 100,
     journal: 'obj_infinity_journal',
     flags: { infinityDone: true },
+  },
+  {
+    // W-E3 切片46：最后的那一次抉择 —— 走进无限之后，锚点还亮着。
+    // 前四处抉择都在「去哪儿」上分岔；这一处在「最后留下什么」上分岔：
+    // 把火留给后来人，还是亲手熄掉这盏灯。两条收尾路各走一步、各自指回本章门。
+    id: 'choice-final',
+    title: 'obj_choice_final_title',
+    desc: 'obj_choice_final_desc',
+    type: 'choice',
+    chapter: 5,
+    requires: { infinityDone: true },
+    waypoint: { x: 0, z: 55, label: 'wp_label_anchor' },
+    reward: 30,
+    journal: 'obj_choice_final_journal',
+    titleByChoice: {
+      choice_final_keep: 'obj_choice_final_title_keep',
+      choice_final_quiet: 'obj_choice_final_title_quiet',
+    },
+    descByChoice: {
+      choice_final_keep: 'obj_choice_final_desc_keep',
+      choice_final_quiet: 'obj_choice_final_desc_quiet',
+    },
+    journalByChoice: {
+      choice_final_keep: 'obj_choice_final_journal_keep',
+      choice_final_quiet: 'obj_choice_final_journal_quiet',
+    },
+    // 终局正文（W-E3 切片46）：`game-completed` 那一刻玩家读到的那两段，按最后一次抉择取名。
+    // 与上面三格分开：那三格说的是"这一步你在做什么"，这两段说的是"世界最后成了什么样"。
+    endingByChoice: {
+      choice_final_keep: 'ending_dialog_text_keep',
+      choice_final_quiet: 'ending_dialog_text_quiet',
+    },
+    choices: [
+      { id: 'keep', label: 'obj_choice_final_keep_label', flag: 'choice_final_keep' },
+      { id: 'quiet', label: 'obj_choice_final_quiet_label', flag: 'choice_final_quiet' },
+    ],
+    branch: {
+      choice_final_keep: 'final-keep',
+      choice_final_quiet: 'final-quiet',
+    },
+  },
+  {
+    // 留灯那条：走上锚点东侧的石阶，把火种压回凹槽（世界坐标 = 枢纽中心 + (16, 10)）
+    id: 'final-keep',
+    title: 'obj_final_keep_title',
+    desc: 'obj_final_keep_desc',
+    type: 'discovery',
+    targetId: 'final-keep',
+    chapter: 5,
+    waypoint: { x: 16, z: 65, label: 'zone_poi_final_keep_label' },
+    reward: 20,
+    journal: 'obj_final_keep_journal',
+    branchTo: 'ch5-complete',
+  },
+  {
+    // 熄灯那条：走到锚座下合上熄火环（世界坐标 = 枢纽中心 + (-16, 10)）
+    id: 'final-quiet',
+    title: 'obj_final_quiet_title',
+    desc: 'obj_final_quiet_desc',
+    type: 'discovery',
+    targetId: 'final-quiet',
+    chapter: 5,
+    waypoint: { x: -16, z: 65, label: 'zone_poi_final_quiet_label' },
+    reward: 20,
+    journal: 'obj_final_quiet_journal',
     branchTo: 'ch5-complete',
   },
   {
@@ -1207,6 +1272,36 @@ export function chapterGateAfter(id) {
   if (i < 0) return null;
   const next = OBJECTIVES[i + 1];
   return next?.type === 'chapter-gate' ? next : null;
+}
+
+/**
+ * 按 id 找一道章节门（W-E3 切片46）。
+ *
+ * `chapterGateAfter` 认的是**位置**（"这一步后面紧跟着的那一格是不是门"）。终局那两条收尾路
+ * 不满足这个形状：它们和门之间还隔着另一条路（`final-keep` 后面是 `final-quiet`），
+ * 但两条路都 `branchTo: 'ch5-complete'` —— 门是它们**跳过去**的，不是"排在后面"的。
+ * 于是这里补一支按 id 的查法：推进时若分支目标本身是一道门，就用它来翻章 / 落门的旗标。
+ */
+export function chapterGateById(id) {
+  const row = OBJECTIVES.find((r) => r.id === id);
+  return row?.type === 'chapter-gate' ? row : null;
+}
+
+/**
+ * 分支直接指向章节门时：跨过这道门之后，玩家序列该走到第几步？
+ *
+ * - 门后还有主线步（`ch4-complete` 之后是第 5 章）⇒ 那一步的下标；
+ * - 门后没有了（`ch5-complete` 是最后一道门）⇒ `MAINLINE.length`（= 通关）。
+ *
+ * 改前这条路是 `questIndex++`：对 `true-end` 碰巧对（它就排在门前一格），
+ * 对终局那两条路却是错的 —— 从 `final-keep` 加一格正好落到**没选的那条** `final-quiet`，
+ * 玩家选了"留灯"还会被送去熄灯。
+ */
+export function mainlineIndexAfterGate(gateId) {
+  const i = OBJECTIVES.findIndex((r) => r.id === gateId);
+  if (i < 0 || OBJECTIVES[i].type !== 'chapter-gate') return undefined;
+  const next = OBJECTIVES.slice(i + 1).find((r) => r.type !== 'chapter-gate');
+  return next ? MAINLINE.findIndex((r) => r.id === next.id) : MAINLINE.length;
 }
 
 // 条件函数表（在役的 `QuestSystem` 与已删除的 `ObjectiveEngine` 过去各写一份，这里是一份）
@@ -1611,6 +1706,19 @@ export function objectiveTitle(row, stats) {
  */
 export function objectiveJournalByChoice(row, stats) {
   return 按抉择取(row, 'journalByChoice', stats);
+}
+
+/**
+ * 终局正文（W-E3 切片46）：通关那一刻 `ending-dialog` 读哪一段。
+ *
+ * 为什么要有这一处：结局正文只该有一条取名路径 —— 与标题 / 进度句 / 日志同一套 `按抉择取`。
+ * 谁自己在别处读 `stats.decisions` 拼旗标名，就等于把"最后选了哪条"记成第二份真相：改一处、
+ * 另一处不动时不报错，只是通关那段话与玩家真正做过的事对不上。
+ * 没做过终局抉择（老档 / 直接跳关）⇒ 回旧的通用段，玩家不会读到空白。
+ */
+export function endingDialogKey(stats) {
+  const 终局 = MAINLINE.find((r) => r.id === 'choice-final');
+  return 按抉择取(终局, 'endingByChoice', stats) ?? 'ending_dialog_text';
 }
 
 export function objectiveDone(def, stats) {

@@ -177,14 +177,14 @@ describe('② 读档以表为准：落点、章节、以及坏档要留下理由
     /**
      * W-E3 切片35/41/42/45：主线现在**四处**真分岔（第 1 章断箭 / 旧营地，第 2 章火盆 / 界碑，
      * 第 3 章观测 / 回溯，第 4 章封印 / 研习），一个周目每处只走一条 ⇒ 走过 = 表长 − 4，
-     * 被跳过的恰好是四处「没选的那条」。
+     * 被跳过的恰好是**五处**「没选的那条」。
      * `advance()` 在没有抉择旗标时按表序往下走（先撞上的那条），所以跳过的是第二路。
      */
-    expect(走过.length, '一步都没走 —— 这条断言不能算通过').toBe(MAINLINE.length - 4);
+    expect(走过.length, '一步都没走 —— 这条断言不能算通过').toBe(MAINLINE.length - 5);
     const 到过 = new Set(走过.map((s) => s.id));
     const 没到 = MAINLINE.filter((r) => !到过.has(r.id)).map((r) => r.id);
-    expect(没到, '被跳过的不是四处「没选的那条路」—— 分支跳错了格子')
-      .toEqual(['first-camp', 'second-stone', 'ascend-retrace', 'study-rite']);
+    expect(没到, '被跳过的不是五处「没选的那条路」—— 分支跳错了格子')
+      .toEqual(['first-camp', 'second-stone', 'ascend-retrace', 'study-rite', 'final-quiet']);
     const 不一致 = 走过.filter((s) => s.系统章 !== s.位置章);
     expect(不一致, `这些步上系统自报的章节与表上位置不符：\n${JSON.stringify(不一致)}`).toEqual([]);
     expect(new Set(走过.map((s) => s.系统章)).size, '整条主线只出现过一章 —— 门控没生效').toBeGreaterThan(1);
@@ -348,8 +348,8 @@ describe('④ 插步之后老档落回同一步 —— v21 那句承诺的第一
     expect(mainlineAt(20)).not.toContain('void-oath');
     expect(MAINLINE.some((r) => r.id === 'void-oath'), '表上没有新步？这一片的桩件不成立').toBe(true);
     expect(mainlineAt(20)).toHaveLength(65);
-    // 切片41 在第 3 章插了三步、切片42 在第 2 章插了三步、切片45 又在第 1 章插了三步 ⇒ 今天 75
-    expect(MAINLINE).toHaveLength(75);
+    // 切片41/42/45 各插三步，切片46 又在终局插了三步 ⇒ 今天 78
+    expect(MAINLINE).toHaveLength(78);
   });
 });
 

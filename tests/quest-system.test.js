@@ -183,6 +183,33 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     }
   });
 
+  it('终局也是真分岔（W-E3 切片46：留灯 / 熄灯各一处收尾，走完即通关）', () => {
+    const 抉择 = MAINLINE.findIndex((r) => r.id === 'choice-final');
+    expect(抉择, '主线里找不到终局抉择').toBeGreaterThan(0);
+    const 走一步 = (flag) => {
+      qs.stats.decisions.clear();
+      qs.questIndex = 抉择;
+      qs.stats.objectiveFlags = { infinityDone: true };
+      qs.recordChoice(flag);
+      return qs.current?.id;
+    };
+    expect(走一步('choice_final_keep'), '选了留灯，下一步却不是石阶').toBe('final-keep');
+    expect(走一步('choice_final_quiet'), '选了熄灯，下一步却不是熄火环').toBe('final-quiet');
+    // 两条收尾路各自走完都要**通关**（不是落到隔壁那条路）—— 切片46 修的就是这一格
+    for (const [id, poi, flag] of [
+      ['final-keep', 'final-keep', 'choice_final_keep'],
+      ['final-quiet', 'final-quiet', 'choice_final_quiet'],
+    ]) {
+      qs.completed = false;
+      qs.stats.decisions.clear();
+      qs.stats.decisions.add(flag);
+      qs.questIndex = MAINLINE.findIndex((r) => r.id === id);
+      dispatch('discovery', D.discover(poi));
+      expect(qs.completed, `"${id}" 走完没通关（多半是落到了隔壁那条路）`).toBe(true);
+      expect(qs.stats.objectiveFlags?.gameCompleted, '通关了却没落 gameCompleted 旗标（章节门的旗标漏了）').toBe(true);
+    }
+  });
+
   it('第 1 章一路走到影之战士面前（教学段之后先走一处线索分岔，章节号仍只跟着门控翻）', () => {
     // 断箭 / 旧营地这一步是**抉择**：它的推进不是某条事件打中的，而是 recordChoice 派出的
     // 'choice-made' 让 checkProgress 认下这一格。所以这里跟步骤号（id），不跟文案 ——

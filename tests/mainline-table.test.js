@@ -488,7 +488,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V19_ORDER).toHaveLength(65);
     expect(new Set(V19_ORDER).size, 'v19 序列里有重复 id').toBe(V19_ORDER.length);
     // W-E3 切片40 之后：v19 那份名单仍是在役序列**去掉 v21 之后新插的步**（插步不改老名单）。
-    const v21之后 = ['void-oath', 'choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp'];
+    const v21之后 = ['void-oath', 'choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet'];
     expect(MAINLINE.map((r) => r.id).filter((id) => !v21之后.includes(id)),
       '去掉 v21 之后新插的步，在役序列与 v19 那份冻结名单不是同一条')
       .toEqual(V19_ORDER);
@@ -522,7 +522,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片40 之后（历史腿）：剔掉切片41 那三步，主线是 66 步，断誓插在碑文与抉择之间', () => {
     // 这一片之后第 3 章又分过一次岔（切片41），所以这条腿先剔掉那三步再看当年的样子：
     // 历史腿只验「插一步不动老名单」，今天 69 步的长相由下面切片41 那一条钉。
-    const 切片41新增 = ['choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp'];
+    const 切片41新增 = ['choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet'];
     const 当年 = MAINLINE.map((r) => r.id).filter((id) => !切片41新增.includes(id));
     expect(当年).toHaveLength(66);
     expect(当年[40], '第 40 位不是 void-oath').toBe('void-oath');
@@ -540,7 +540,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(SAVE_KEYS[0].key, '插一步却换了写档键').toBe('crossrealm_save_v21');
   });
   it('W-E3 切片41 之后（历史腿）：剔掉切片42 那三步，主线是 69 步，第 3 章真分岔', () => {
-    const 切片42新增 = ['choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp'];
+    const 切片42新增 = ['choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet'];
     const 序 = MAINLINE.map((r) => r.id).filter((id) => !切片42新增.includes(id));
     expect(序).toHaveLength(69);
     expect(序[30], '第 30 位不是 mind').toBe('mind');
@@ -583,7 +583,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21], 'MIGRATIONS[21] 被凭空写出来了').toBeUndefined();
   });
   it('W-E3 切片42 之后（历史腿）：剔掉切片45 那三步，主线是 72 步，第 2 章收尾分岔', () => {
-    const 切片45新增 = ['choice-first', 'first-arrow', 'first-camp'];
+    const 切片45新增 = ['choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet'];
     const 序 = MAINLINE.map((r) => r.id).filter((id) => !切片45新增.includes(id));
     expect(序).toHaveLength(72);
     expect(序[21], '第 21 位不是 level').toBe('level');
@@ -620,9 +620,11 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(SAVE_KEYS[0].key).toBe('crossrealm_save_v21');
     expect(MIGRATIONS[21]).toBeUndefined();
   });
-  it('W-E3 切片45 之后：主线是 75 步，第 1 章教学段也有线索分岔（断箭 / 旧营地两路，各回石环）', () => {
-    expect(MAINLINE).toHaveLength(75);
-    const 序 = MAINLINE.map((r) => r.id);
+  it('W-E3 切片45 之后（历史腿）：剔掉终局那三步，主线是 75 步，第 1 章教学段也有线索分岔（断箭 / 旧营地两路，各回石环）', () => {
+    // 切片46 又在终局插了三步 ⇒ 这条腿先剔掉它们再看当年的样子；今天 78 步的长相由下面切片46 那一条钉。
+    const 切片46新增 = ['choice-final', 'final-keep', 'final-quiet'];
+    const 序 = MAINLINE.map((r) => r.id).filter((id) => !切片46新增.includes(id));
+    expect(序).toHaveLength(75);
     expect(序[3], '第 3 位不是 soldiers').toBe('soldiers');
     expect(序[4], '第 4 位不是 choice-first').toBe('choice-first');
     expect(序[5], '第 5 位不是 first-arrow').toBe('first-arrow');
@@ -654,6 +656,54 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
       expect(row?.branchTo, `"${id}" 没有汇回 fantasy-frag`).toBe('fantasy-frag');
     }
     expect(目标们[0]).not.toBe(目标们[1]);
+    // 仍是「插步不写迁移」
+    expect(CURRENT_VERSION, '插三步却动了存档版本').toBe(21);
+    expect(SAVE_KEYS[0].key).toBe('crossrealm_save_v21');
+    expect(MIGRATIONS[21]).toBeUndefined();
+  });
+  it('W-E3 切片46 之后：主线是 78 步，终局也分岔（留灯 / 熄灯两路，各回本章门）', () => {
+    expect(MAINLINE).toHaveLength(78);
+    const 序 = MAINLINE.map((r) => r.id);
+    expect(序[73], '第 73 位不是 sunless-oratory').toBe('sunless-oratory');
+    expect(序[74], '第 74 位不是 infinity（摸锚点那一步）').toBe('infinity');
+    expect(序[75], '第 75 位不是 choice-final（终局抉择）').toBe('choice-final');
+    expect(序[76], '第 76 位不是 final-keep（留灯那条路）').toBe('final-keep');
+    expect(序[77], '第 77 位不是 final-quiet（熄灯那条路）').toBe('final-quiet');
+    // 摸锚点那一步不再自己指门：主角换成终局抉择（否则两条腿被跳过）
+    expect(MAINLINE.find((r) => r.id === 'infinity')?.branchTo, 'infinity 还自己指着门 ⇒ 终局分岔无从发生')
+      .toBeUndefined();
+    expect(MAINLINE.find((r) => r.id === 'infinity')?.flags, '无尽行者的旗标被分岔顺手改了')
+      .toEqual({ infinityDone: true });
+    const 抉择 = MAINLINE.find((r) => r.id === 'choice-final');
+    expect(抉择?.type, 'choice-final 不是 choice').toBe('choice');
+    expect(抉择?.chapter, '终局抉择不在第 5 章').toBe(5);
+    expect(抉择?.requires, '终局抉择没读摸锚点那一步的旗标').toEqual({ infinityDone: true });
+    expect(Object.keys(抉择?.branch ?? {}).sort(), '终局抉择没写分支表')
+      .toEqual(抉择.choices.map((c) => c.flag).sort());
+    // 四格名册（含切片46 新增的结局正文）都要与自己的选项对得上
+    for (const 格 of ['titleByChoice', 'descByChoice', 'journalByChoice', 'endingByChoice']) {
+      expect(Object.keys(抉择[格] ?? {}).sort(), `choice-final 的 ${格} 与自己的选项对不上`)
+        .toEqual(抉择.choices.map((c) => c.flag).sort());
+    }
+    const 目标们 = 抉择.choices.map((c) => 抉择.branch[c.flag]);
+    expect(new Set(目标们).size, `两条路指向同一格「${目标们[0]}」⇒ 抉择没有改变路线`).toBe(目标们.length);
+    for (const id of 目标们) {
+      const row = MAINLINE.find((r) => r.id === id);
+      expect(row?.type, `"${id}" 不是 discovery`).toBe('discovery');
+      expect(row?.targetId, `"${id}" 没有 targetId`).toBe(id);
+      expect(row?.chapter, `"${id}" 不在第 5 章`).toBe(5);
+      expect(row?.branchTo, `"${id}" 没有汇回 ch5-complete`).toBe('ch5-complete');
+    }
+    const [留灯, 熄灯] = 目标们.map((id) => MAINLINE.find((r) => r.id === id));
+    expect(留灯.waypoint, '留灯那条没写路点').toBeTruthy();
+    expect(熄灯.waypoint, '熄灯那条没写路点').toBeTruthy();
+    expect(留灯.waypoint).not.toEqual(熄灯.waypoint);
+    // 两处收尾都在枢纽里（锚点在 (0, 55)）—— 选完只需走几步，不把终局变成又一趟跑图
+    for (const row of [留灯, 熄灯]) {
+      expect(Math.hypot(row.waypoint.x - 0, row.waypoint.z - 55), `"${row.id}" 的路点离锚点太远`).toBeLessThan(30);
+    }
+    // 结局正文两段各指一段，且都不是通用那一段
+    expect(Object.values(抉择.endingByChoice).sort()).toEqual(['ending_dialog_text_keep', 'ending_dialog_text_quiet']);
     // 仍是「插步不写迁移」
     expect(CURRENT_VERSION, '插三步却动了存档版本').toBe(21);
     expect(SAVE_KEYS[0].key).toBe('crossrealm_save_v21');

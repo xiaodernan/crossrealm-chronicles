@@ -19,8 +19,8 @@
  * 2. 钉文案腿：21 × 12 格逐字钉死。
  * 3. 行为腿：切中/切英逐个 POI 重放交互，dialog 与 discovery 收到的都是展开句。
  * 4. 静态腿：8 个文件的 `.dialog.show` 与 `discovery` 派发必须走 `t()`（附反向控制）。
- * 5. 新键不孤儿：52 个新键都得在 8 个文件里被 `t()` 引用。
- * 6. 键数腿：52 个新键的文案在两表里最多各两个键。
+ * 5. 新键不孤儿：56 个新键都得在 8 个文件里被 `t()` 引用。
+ * 6. 键数腿：56 个新键的文案在两表里最多各两个键。
  *
  * 复用口径（ADR 见 `docs/MASTER_PLAN.md` §9）：标题只借**同指称**的键 ——
  * 主线目标题（`obj_*_title`）、回声标题（`echo_tesseract_title`）、路点标签
@@ -57,10 +57,13 @@ const 是致敬层 = (id) => id.startsWith('homage-') || id === 'hub-poster-wall
  * 钉死表：POI id → [对话标题键, 题中, 题英, 对话正文键, 文中, 文英,
  *                   发现标题键, 题中, 题英, 发现正文键, 文中, 文英]。
  * 没有对话/没有发现的那一侧是 null（void-tablet 无对话；Boss 门无发现）。
- * 28 行与真世界逐 id 对齐（结构腿互证）—— 切片35 之后 19 + 两座仪式落点（echo-pages、seal-stone）。
+ * 30 行与真世界逐 id 对齐（结构腿互证）—— 切片35 之后 19 + 两座仪式落点（echo-pages、seal-stone）+ 切片46 的终局两处。
  */
 const ZONE_POI_COPY = {
 'hub-anchor': ['wp_label_anchor', '世界之锚', 'World Anchor', 'zone_dlg_hub_anchor_text', '三块位面碎片在此交汇。穿越者的使命，是重铸锚点，阻止诸界崩塌。向西进入灰白森林，向南踏入霍格沃兹遗境，向东前往米勒荒原——每一处都藏有一枚位面碎片。', 'Three plane fragments meet here. The traveler\'s mission is to reforge the anchor and stop the collapse of every realm. West into the Greywhite Forest, south into the Hogwarts Ruins, east to Miller\'s Wastes — each hides one fragment.', 'wp_label_anchor', '世界之锚', 'World Anchor', 'zone_disc_hub_anchor_text', '三界交汇的核心。', 'The heart where three realms meet.'],
+  // W-E3 切片46：终局抉择的两处收尾落点（都在枢纽里）
+  'final-keep': ['obj_final_keep_title', '石阶上的火种', 'Ember on the Steps', 'zone_dlg_final_keep_text', '石阶从锚座一直铺到广场边缘，每一级都被人磨得发亮。尽头有一处凹槽，大小正好放得下一枚火种。凹槽边缘刻着一行小字：给下一个走到这里的人。', 'The steps run from the anchor out to the edge of the plaza, worn bright by feet. At the end there is a socket just the size of an ember, and a line cut into its rim: for whoever comes next.', 'obj_final_keep_title', '石阶上的火种', 'Ember on the Steps', 'zone_disc_final_keep_text', '你把火种压进凹槽。它没有立刻亮起来，只是慢慢地、稳稳地烧 —— 像有人在替你看路。', 'You press the ember into the socket. It does not flare; it simply burns, slow and steady — like someone keeping watch for you.'],
+  'final-quiet': ['obj_final_quiet_title', '锚座下的熄火环', 'Snuffer Ring Beneath the Anchor', 'zone_dlg_final_quiet_text', '锚座底下藏着一圈铁环，环上缠着早已枯死的藤。你摸到环扣 —— 它是松的，像是专门留给最后一个走到这里的人。', 'A ring of iron is set beneath the anchor, wrapped in long-dead vine. You find the clasp — loose, as if it had been left for the last one to arrive.', 'obj_final_quiet_title', '锚座下的熄火环', 'Snuffer Ring Beneath the Anchor', 'zone_disc_final_quiet_text', '熄火环合拢。锚点的光一寸一寸退回去，最后一缕从你脚边掠过，往灰白森林的方向去了。', 'The ring closes. The light of the anchor withdraws inch by inch, the last thread slipping past your feet and away toward the pale forest.'],
   'fantasy-ring': ['wp_label_one_ring', '至尊石环', 'One Ring', 'zone_dlg_fantasy_ring_text', '你发现了一枚古老的铭文：「One Realm to bind them all...」石环微微发热——这是第一枚位面碎片的回响。', 'You find an ancient inscription: "One Realm to bind them all..." The stone ring grows warm — this is the echo of the first plane fragment.', 'wp_label_one_ring', '至尊石环', 'One Ring', 'zone_disc_fantasy_ring_text', '第一枚位面碎片的回响。', 'The echo of the first plane fragment.'],
   'fantasy-ruins': ['wp_label_fantasy_ruins', '精灵遗迹', 'Elf Ruins', 'zone_dlg_fantasy_ruins_text', '残破的壁画描绘着跨位面旅行的场景。精灵们曾在此记录诸界交汇的坐标——其中一条路径指向星空深处。', 'Crumbling murals depict travel between planes. The elves once recorded the coordinates where realms meet — one of those paths points deep into the starfield.', 'wp_label_fantasy_ruins', '精灵遗迹', 'Elf Ruins', 'zone_disc_fantasy_ruins_text', '壁画记录了跨位面坐标。', 'The murals record cross-plane coordinates.'],
   'fantasy-tower': ['zone_dlg_fantasy_tower_title', '灰白守望塔', 'Ashen Watchtower', 'zone_dlg_fantasy_tower_text', '从塔顶望去，三条位面之路清晰可见。北方是霍格沃兹遗境的紫色光柱，东方是米勒荒原的引力透镜。', 'From the tower top the three plane roads are clear: the violet pillar of the Hogwarts Ruins to the north, the gravitational lens of Miller\'s Wastes to the east.', 'zone_dlg_fantasy_tower_title', '灰白守望塔', 'Ashen Watchtower', 'zone_disc_fantasy_tower_text', '可俯瞰三界交汇。', 'Overlooks the meeting of three realms.'],
@@ -146,7 +149,7 @@ describe('区文件 POI 对话/发现文案双表化（W-D2 切片21）', () => 
     return { dlg: shown.length ? shown[0] : null, disc: discovered.length ? discovered[0] : null };
   }
 
-  it('结构腿：28 个区/枢纽 POI 的对话与发现参数全是双表键（分母自证）', () => {
+  it('结构腿：30 个区/枢纽 POI 的对话与发现参数全是双表键（分母自证）', () => {
     const 本片 = world.pointsOfInterest.filter((p) => !是致敬层(p.id));
     expect(本片.length, '区/枢纽 POI 数对不上').toBeGreaterThanOrEqual(18);
     const 缺 = [];
@@ -228,16 +231,16 @@ describe('区文件 POI 对话/发现文案双表化（W-D2 切片21）', () => 
     ]);
   });
 
-  it('新键不孤儿：52 个新键都在 8 个文件里被 t() 引用', () => {
+  it('新键不孤儿：56 个新键都在 8 个文件里被 t() 引用', () => {
     const 新键 = [...new Set(Object.values(ZONE_POI_COPY).flat())]
       .filter((k) => typeof k === 'string' && (k.startsWith('zone_dlg_') || k.startsWith('zone_disc_')));
-    expect(新键.length, '新键数对不上 —— 切片范围变了？').toBe(52);
+    expect(新键.length, '新键数对不上 —— 切片范围变了？').toBe(56);
     const 源码 = ZONE_FILES.map((rel) => readFileSync(join(process.cwd(), rel), 'utf8')).join('\n');
     const 没人用 = 新键.filter((k) => !源码.includes("t('" + k + "')"));
     expect(没人用, '这些新键建了却没人引用（死键）').toEqual([]);
   });
 
-  it('键数腿：52 个新键的文案在两表里最多两个键（全局规矩的本地复查）', () => {
+  it('键数腿：56 个新键的文案在两表里最多两个键（全局规矩的本地复查）', () => {
     const 新键 = [...new Set(Object.values(ZONE_POI_COPY).flat())]
       .filter((k) => typeof k === 'string' && (k.startsWith('zone_dlg_') || k.startsWith('zone_disc_')));
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {

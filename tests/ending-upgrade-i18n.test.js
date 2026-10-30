@@ -38,12 +38,15 @@ import { setLanguage } from '../src/engine/i18n.js';
 import { factoryKeybindings, setKeybindTable } from '../src/content/keybinds.js';
 import { UI_HOTKEYS, setHotkeyTable } from '../src/content/hotkeys.js';
 import { WeaponSkillTree } from '../src/game/WeaponSkillTree.js';
+import { endingDialogKey } from '../src/content/objectives.js';
 import { offAll } from '../src/engine/EventBus.js';
 
 const 读 = (p) => readFileSync(join(process.cwd(), p), 'utf8');
 const Game源码 = 读('src/core/Game.js');
 const Credits源码 = 读('src/cinematic/EndCreditsDirector.js');
 const Panel源码 = 读('src/ui/UpgradePanel.js');
+// W-E3 切片46：终局正文的两个变体键写在抉择行上（`endingByChoice`），由 `endingDialogKey()` 取名
+const Objectives源码 = 读('src/content/objectives.js');
 
 /** 本片新建的 19 个键 → [中文原值, 英文原值]（改文案必须来改这里） */
 const PIN = {
@@ -242,7 +245,7 @@ describe('结局对话 / 片尾字幕 / 升级面板双表化（W-D2 切片26）
       expect(行, `那一行没有把该交出去的交给 t(): ${行.trim()}`).toContain(必须);
     };
     行含(Game源码, "this.dialog.show(", "t('obj_infinity_title')");
-    行含(Game源码, 'ending_dialog_text', "t('ending_dialog_text')");
+    行含(Game源码, 'endingDialogKey(this.quests.stats)', 't(endingDialogKey(');
     行含(Game源码, 'this.dialog?.toast(', "t('toast_keybind_invalid')");
     行含(Credits源码, 'scroll.innerHTML = CREDITS.map', 'keyText(t(l))');
     行含(Credits源码, 'skip.dataset.ktext', "t('cg_caption_void_skip')");
@@ -255,20 +258,37 @@ describe('结局对话 / 片尾字幕 / 升级面板双表化（W-D2 切片26）
 
   it('接线腿反向控制：把 t() 摘掉必须被点名（防恒绿）', () => {
     const 摘掉 = (源码, 从, 到) => 源码.split('\n').map((l) => (l.includes(从) ? l.replace(从, 到) : l)).join('\n');
-    const 旧对话 = 摘掉(Game源码, "t('ending_dialog_text')", "'ending_dialog_text'");
+    const 旧对话 = 摘掉(Game源码, 't(endingDialogKey(this.quests.stats))', 'endingDialogKey(this.quests.stats)');
     const 旧行 = 旧对话.split('\n').find((l) => l.includes('this.dialog.show('));
-    expect(旧行.includes("t('ending_dialog_text')"), '人造的旧写法必须被点名').toBe(false);
+    expect(旧行.includes('t(endingDialogKey('), '人造的旧写法必须被点名').toBe(false);
     const 旧字幕 = 摘掉(Credits源码, 'keyText(t(l))', 'l');
     const 旧字幕行 = 旧字幕.split('\n').find((l) => l.includes('scroll.innerHTML'));
     expect(旧字幕行.includes('keyText(t(l))'), '人造的旧写法必须被点名').toBe(false);
   });
 
-  it('新键不孤儿：19 个新键都在三个源文件里被引用', () => {
+  it('新键不孤儿：19 个新键都在源文件里被引用（切片46 起含抉择行）', () => {
     const 没人用 = NEW_KEYS.filter((k) =>
-      !Game源码.includes("'" + k + "'") && !Credits源码.includes("'" + k + "'") && !Panel源码.includes("'" + k + "'"));
+      !Game源码.includes("'" + k + "'") && !Credits源码.includes("'" + k + "'")
+      && !Panel源码.includes("'" + k + "'") && !Objectives源码.includes("'" + k + "'"));
     expect(没人用, '这些新键建了却没人引用（死键）').toEqual([]);
   });
 
+  it('终局两段正文逐字钉死，且各自对应自己做的那件事（W-E3 切片46）', () => {
+    // 改前这两段没有一处读者之外的门禁：把「留灯」与「熄灯」的正文对调，全套测试仍然全绿。
+    // 结局段落是玩家**唯一无法重读**的一屏（通关那一刻只播一次），所以它必须被逐字钉住。
+    expect(STRINGS_ZH.ending_dialog_text_keep).toBe('Chapter 5 完成。你斩裂混沌，成为了真正的位面行者 —— 而锚点亮着。\n\n五区贯通、六位 Boss 倒下。你没有带走最后那盏灯：它留在石阶上，替你把路照给下一个走到这里的人。');
+    expect(STRINGS_EN.ending_dialog_text_keep).toBe('Chapter 5 complete. You broke the chaos and became a true Plane Walker — and the anchor is still lit.\n\nFive realms linked, six Bosses down. You did not take the last lamp with you: it stays on the steps, lighting the road for whoever comes next.');
+    expect(STRINGS_ZH.ending_dialog_text_quiet).toBe('Chapter 5 完成。你斩裂混沌，成为了真正的位面行者 —— 然后亲手熄掉了锚点。\n\n五区贯通、六位 Boss 倒下。灰白森林那头的灯一盏接一盏地暗下去，世界安静得像一页合上的书。');
+    expect(STRINGS_EN.ending_dialog_text_quiet).toBe('Chapter 5 complete. You broke the chaos and became a true Plane Walker — and then put out the anchor yourself.\n\nFive realms linked, six Bosses down. Out in the pale forest the lamps went dark one by one, and the world fell quiet as a closed book.');
+    for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
+      expect(table.ending_dialog_text_keep, 名 + ' 表里两段结局正文是同一段').not.toBe(table.ending_dialog_text_quiet);
+    }
+    // 取名那一处：两条 flag 各回各的段，没做过终局抉择的老档回通用那段
+    expect(endingDialogKey({ decisions: new Set(['choice_final_keep']) })).toBe('ending_dialog_text_keep');
+    expect(endingDialogKey({ decisions: new Set(['choice_final_quiet']) })).toBe('ending_dialog_text_quiet');
+    expect(endingDialogKey({ decisions: new Set() })).toBe('ending_dialog_text');
+    expect(STRINGS_ZH.ending_dialog_text).toBeTruthy();
+  });
   it('键数腿：19 个新键的文案在两表里最多两个键', () => {
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
       const 计数 = new Map();
