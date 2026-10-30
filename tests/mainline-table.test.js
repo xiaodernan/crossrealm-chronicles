@@ -5,7 +5,7 @@ import { installWindowShim } from './helpers/enemyHarness.js';
 import {
   V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS,
   V13_INSERT_POINTS, V14_INSERT_POINTS, V15_INSERT_POINTS, V16_INSERT_POINTS, V17_INSERT_POINTS,
-  V18_INSERT_POINTS, V19_INSERT_POINTS, CURRENT_VERSION, SAVE_KEYS,
+  V18_INSERT_POINTS, V19_INSERT_POINTS, CURRENT_VERSION, SAVE_KEYS, MIGRATIONS,
 } from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
@@ -488,8 +488,8 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V19_ORDER).toHaveLength(65);
     expect(new Set(V19_ORDER).size, 'v19 序列里有重复 id').toBe(V19_ORDER.length);
     // W-E3 切片40 之后：v19 那份名单仍是在役序列**去掉 v21 之后新插的步**（插步不改老名单）。
-    const 切片40后 = ['void-oath'];
-    expect(MAINLINE.map((r) => r.id).filter((id) => !切片40后.includes(id)),
+    const v21之后 = ['void-oath', 'choice-ascend', 'ascend-observe', 'ascend-retrace'];
+    expect(MAINLINE.map((r) => r.id).filter((id) => !v21之后.includes(id)),
       '去掉 v21 之后新插的步，在役序列与 v19 那份冻结名单不是同一条')
       .toEqual(V19_ORDER);
     // 只多两步 ⇒ 去掉它们逐字等于 v18 那条（"加长"不是"重排"）
@@ -519,13 +519,17 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
       expect(row?.targetId, `"${id}" 没有 targetId`).toBeTruthy();
     }
   });
-  it('W-E3 切片40 之后：主线是 66 步，多一步「断誓」（插在碑文与抉择之间，而且**没写迁移**）', () => {
-    expect(MAINLINE).toHaveLength(66);
-    expect(MAINLINE[40].id, '第 40 位不是 void-oath').toBe('void-oath');
-    expect(MAINLINE[39].id, '断誓碑之前应当是碑文那一步').toBe('void-tablet');
-    expect(MAINLINE[41].id, '断誓碑之后应当是抉择那一步').toBe('choice-void');
+  it('W-E3 切片40 之后（历史腿）：剔掉切片41 那三步，主线是 66 步，断誓插在碑文与抉择之间', () => {
+    // 这一片之后第 3 章又分过一次岔（切片41），所以这条腿先剔掉那三步再看当年的样子：
+    // 历史腿只验「插一步不动老名单」，今天 69 步的长相由下面切片41 那一条钉。
+    const 切片41新增 = ['choice-ascend', 'ascend-observe', 'ascend-retrace'];
+    const 当年 = MAINLINE.map((r) => r.id).filter((id) => !切片41新增.includes(id));
+    expect(当年).toHaveLength(66);
+    expect(当年[40], '第 40 位不是 void-oath').toBe('void-oath');
+    expect(当年[39], '断誓碑之前应当是碑文那一步').toBe('void-tablet');
+    expect(当年[41], '断誓碑之后应当是抉择那一步').toBe('choice-void');
     // "加长"不是"重排"：去掉新插的那一步，应当逐字回到 v19 那份冻结名单
-    const 去掉 = MAINLINE.map((r) => r.id).filter((id) => id !== 'void-oath');
+    const 去掉 = 当年.filter((id) => id !== 'void-oath');
     expect(去掉, '去掉 void-oath 后应当逐字等于 v19 那条序列').toEqual(V19_ORDER);
     /**
      * **这一片没写迁移**（W-E3 切片38 的承诺第一次兑现）：存档版本与迁移表都不动，
@@ -534,6 +538,48 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
      */
     expect(CURRENT_VERSION, '插一步却动了存档版本 ⇒ 这一片说了不做迁移').toBe(21);
     expect(SAVE_KEYS[0].key, '插一步却换了写档键').toBe('crossrealm_save_v21');
+  });
+  it('W-E3 切片41 之后：主线是 69 步，第 3 章第一次真分岔（观测 / 回溯两路，各回升格）', () => {
+    expect(MAINLINE).toHaveLength(69);
+    const 序 = MAINLINE.map((r) => r.id);
+    expect(序[30], '第 30 位不是 mind').toBe('mind');
+    expect(序[31], '第 31 位不是 choice-ascend').toBe('choice-ascend');
+    expect(序[32], '第 32 位不是 ascend-observe').toBe('ascend-observe');
+    expect(序[33], '第 33 位不是 ascend-retrace').toBe('ascend-retrace');
+    expect(序[34], '第 34 位不是 ascension（两路在它汇合）').toBe('ascension');
+    expect(MAINLINE.find((r) => r.id === 'ascension')?.requires, '升格的门槛被分岔顺手改了')
+      .toEqual({ boss3Defeated: true });
+    /**
+     * **分支腿**（与切片35 那条同款判据，但换到第 3 章）：
+     * 抉择步的两个 flag 各指一步 discovery，两步各 branchTo 回 ascension。
+     * 之前第 3 章只有一行 `mind`，这一步是第一个真分岔。
+     */
+    const 抉择 = MAINLINE.find((r) => r.id === 'choice-ascend');
+    expect(抉择?.type, 'choice-ascend 不是 choice').toBe('choice');
+    expect(抉择?.chapter, '抉择步不在第 3 章').toBe(3);
+    expect(Object.keys(抉择?.branch ?? {}).sort(), '抉择步没写分支表')
+      .toEqual(抉择.choices.map((c) => c.flag).sort());
+    const 目标们 = 抉择.choices.map((c) => 抉择.branch[c.flag]);
+    expect(new Set(目标们).size, `两条路指向同一格「${目标们[0]}」⇒ 抉择没有改变路线`).toBe(目标们.length);
+    expect(目标们.every((id) => MAINLINE.some((r) => r.id === id)), '分支目标不在主线表里').toBe(true);
+    for (const id of 目标们) {
+      const row = MAINLINE.find((r) => r.id === id);
+      expect(row?.type, `"${id}" 不是 discovery`).toBe('discovery');
+      expect(row?.targetId, `"${id}" 没有 targetId`).toBeTruthy();
+      expect(row?.branchTo, `"${id}" 没有汇回 ascension`).toBe('ascension');
+    }
+    const [观测, 回溯] = 目标们.map((id) => MAINLINE.find((r) => r.id === id));
+    expect(观测.targetId, '观测 / 回溯认领了同一处 POI ⇒ 两条路没有区别').not.toBe(回溯.targetId);
+    expect(观测.waypoint, '观测路的路点没写').toBeTruthy();
+    expect(回溯.waypoint, '回溯路的路点没写').toBeTruthy();
+    expect(观测.waypoint).not.toEqual(回溯.waypoint);
+    /**
+     * **还是没写迁移**（切片41 与切片40 同款）：版本 21、写档键、MIGRATIONS[21] 全不动。
+     * 老档靠 `currentId` 找回来 —— 这条行为腿在 quest-save-restore 里实测。
+     */
+    expect(CURRENT_VERSION, '插三步却动了存档版本 ⇒ 这一片说了不做迁移').toBe(21);
+    expect(SAVE_KEYS[0].key, '插三步却换了写档键').toBe('crossrealm_save_v21');
+    expect(MIGRATIONS[21], 'MIGRATIONS[21] 被凭空写出来了').toBeUndefined();
   });
   it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);
     // v7 → v8：旧序列的 24 号位是 `void-boss`，新步插在它**之前**

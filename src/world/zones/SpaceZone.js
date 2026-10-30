@@ -184,6 +184,11 @@ export class SpaceZone extends BaseZone {
       this.dialog.show(t('obj_space_lens_title'), t('zone_dlg_space_lens_text'));
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'space-lens', title: t('obj_space_lens_title'), text: t('zone_disc_space_lens_text') } }));
     }, { id: 'space-lens', color: 0xff8844 });
+    // W-E3 切片41：观测之路的落点 —— 透镜旁那圈校准环（本地 (-20, 20)，与透镜隔开一段路）。
+    this.addPOI({ x: -20, y: 0, z: 20 }, 'zone_poi_ascend_calibration_ring_label', () => {
+      this.dialog.show(t('obj_ascend_observe_title'), t('zone_dlg_ascend_calibration_ring_text'));
+      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'ascend-calibration-ring', title: t('obj_ascend_observe_title'), text: t('zone_disc_ascend_calibration_ring_text') } }));
+    }, { id: 'ascend-calibration-ring', color: 0x66ccff });
   }
 
   buildWreckage() {

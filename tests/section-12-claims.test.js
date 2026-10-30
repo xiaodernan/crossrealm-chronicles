@@ -283,13 +283,16 @@ describe('③ 残差写成数，不写成形容词', () => {
      *
      * 切片35 之前这里只认章节门 —— 那时确实只有那五对；分支树真的分岔之后，
      * "两条路各走一步再汇合"必然产生第二种落点，判据跟着放宽**一格**（不是放开）：
-     * 汇合点必须是**自己也带 `branch` 的行**，所以它一定会继续往下指。
+     * 落点必须是**自己还会继续往下指**的行 —— 带 `branch` 的汇合点（`true-end`），
+     * 或者带 `branchTo` 的门前一步（切片41 的第 3 章汇合点 `ascension`：它是 interact 门控步，
+     * 自己 `branchTo: 'ch3-complete'`，所以同样不会把玩家留在死路上）。
+     * 真正的判据只有一句：**去向不许是一条死路**。
      */
     const 门 = new Set(OBJECTIVES.filter((r) => r.type === 'chapter-gate').map((r) => r.id));
-    const 汇合点 = new Set(OBJECTIVES.filter((r) => r.branch).map((r) => r.id));
+    const 续行 = new Set(OBJECTIVES.filter((r) => r.branch || r.branchTo).map((r) => r.id));
     for (const r of OBJECTIVES.filter((x) => x.branchTo)) {
-      expect(门.has(r.branchTo) || 汇合点.has(r.branchTo),
-        `跳转行 "${r.id}" 的去向 ${r.branchTo} 既不是章节门、也不是带 branch 的汇合点 —— 它跳进了一条死路`)
+      expect(门.has(r.branchTo) || 续行.has(r.branchTo),
+        `跳转行 "${r.id}" 的去向 ${r.branchTo} 既不是章节门、也不是自己还会往下指的行 —— 它跳进了一条死路`)
         .toBe(true);
     }
   });

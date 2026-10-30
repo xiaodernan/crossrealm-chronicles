@@ -68,7 +68,7 @@ function 扫标签位(src) {
 
 /**
  * 钉死表：POI id → [label 键, 中文文案, 英文文案]。
- * 65 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
+ * 67 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
  */
 const POI_LABELS = {
 'hub-anchor': ['hub_poi_anchor_label', '触摸世界之锚', 'Touch the World Anchor'],
@@ -77,11 +77,13 @@ const POI_LABELS = {
   'fantasy-tower': ['zone_poi_fantasy_tower_label', '攀登守望塔', 'Climb the Watchtower'],
   'fantasy-boss-gate': ['zone_poi_fantasy_boss_gate_label', '进入 Boss 竞技场', 'Enter the Boss Arena'],
   'magic-castle': ['zone_poi_magic_castle_label', '进入悬浮城堡', 'Enter the Floating Castle'],
+  'ascend-founder-belfry': ['zone_poi_ascend_founder_belfry_label', '创始人的钟楼', 'The Founder Belfry'],
   'magic-forest': ['zone_poi_magic_forest_label', '禁林深处的低语', 'Whispers from the Forbidden Forest Depths'],
   'echo-pages': ['zone_poi_echo_pages_label', '余烬书页', 'Ember Page'],
   'magic-boss-gate': ['zone_poi_magic_boss_gate_label', '进入奥术竞技场', 'Enter the Arcane Arena'],
   'space-tesseract': ['zone_poi_space_tesseract_label', '触碰五维_tesseract', 'Touch the Five-Dimensional Tesseract'],
   'space-lens': ['zone_poi_space_lens_label', '观测引力透镜', 'Observe the Gravitational Lens'],
+  'ascend-calibration-ring': ['zone_poi_ascend_calibration_ring_label', '校准环', 'Alignment Ring'],
   'space-wreck': ['zone_poi_space_wreck_label', '搜索 Endurance 号残骸', 'Search the Endurance Wreck'],
   'void-rift': ['zone_poi_void_rift_label', '调查时线裂隙', 'Investigate the Timeline Rift'],
   'void-tablet': ['zone_poi_void_tablet_label', '阅读五维碑文', 'Read the Five-Dimensional Stele'],
@@ -168,7 +170,7 @@ describe('POI 交互标签双表化（W-D2 切片19）', () => {
     setLanguage('zh');
   });
 
-  it('每个 POI 的 label 都是中英两表里的键（分母自证：65 处一个不落）', () => {
+  it('每个 POI 的 label 都是中英两表里的键（分母自证：67 处一个不落）', () => {
     const pois = world.pointsOfInterest;
     expect(pois.length, 'POI 总数对不上 —— 世界构建坏了').toBeGreaterThanOrEqual(60);
     const 缺 = [];
@@ -244,7 +246,7 @@ describe('POI 交互标签双表化（W-D2 切片19）', () => {
   it('本片新建的 19 个键：同一文案在两表里最多两个键（全局规矩的本地复查）', () => {
     const 新建 = [...new Set(Object.values(POI_LABELS).map(([键]) => 键))]
       .filter((k) => k.startsWith('zone_poi_') || k.startsWith('pop_poi_') || k === 'hub_poi_anchor_label');
-    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(22);
+    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(24);
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
       const 计数 = new Map();
       for (const v of Object.values(table)) 计数.set(v, (计数.get(v) ?? 0) + 1);

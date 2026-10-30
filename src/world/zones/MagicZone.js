@@ -178,6 +178,11 @@ export class MagicZone extends BaseZone {
         detail: { id: 'echo-pages', title: t('obj_study_rite_title'), text: t('zone_disc_echo_pages_text') },
       }));
     }, { id: 'echo-pages', color: paletteOf('metal.gilt') });
+    // W-E3 切片41：回溯之路的落点 —— 城堡东北那半座创始人钟楼（本地 (15, -35)）。
+    this.addPOI({ x: 15, y: 0, z: -35 }, 'zone_poi_ascend_founder_belfry_label', () => {
+      this.dialog.show(t('obj_ascend_retrace_title'), t('zone_dlg_ascend_founder_belfry_text'));
+      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'ascend-founder-belfry', title: t('obj_ascend_retrace_title'), text: t('zone_disc_ascend_founder_belfry_text') } }));
+    }, { id: 'ascend-founder-belfry', color: paletteOf('metal.gilt') });
   }
 
   buildQuidditchRing() {

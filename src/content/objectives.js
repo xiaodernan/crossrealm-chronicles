@@ -466,6 +466,55 @@ export const OBJECTIVES = [
     journal: 'obj_mind_journal',
   },
   {
+    // W-E3 切片41：第三章的**第一处分岔**（剩余四章单线里的第一条）。
+    // 影界守护者倒下之后，玩家自己选"怎么上去"：观测（去引力透镜校准）或回溯（回钟楼走旧路）。
+    // 两条路各走一步自己的落点，再在 `ascension`（摸世界之锚）汇合 ——
+    // 与第四章 `choice-void` 同一套机器（`branch` / `branchTo`），只是这一次**不写迁移**。
+    id: 'choice-ascend',
+    title: 'obj_choice_ascend_title',
+    desc: 'obj_choice_ascend_desc',
+    type: 'choice',
+    chapter: 3,
+    requires: { boss3Defeated: true },
+    waypoint: { x: 0, z: 55, label: 'wp_label_anchor' },
+    reward: 10,
+    journal: 'obj_choice_ascend_journal',
+    choices: [
+      { id: 'observe', label: 'obj_choice_ascend_observe_label', flag: 'choice_ascend_observed' },
+      { id: 'retrace', label: 'obj_choice_ascend_retrace_label', flag: 'choice_ascend_retraced' },
+    ],
+    branch: {
+      choice_ascend_observed: 'ascend-observe',
+      choice_ascend_retraced: 'ascend-retrace',
+    },
+  },
+  {
+    // 观测之路：引力透镜旁的校准环（世界坐标 = 空间区中心 + (-20, 20)）
+    id: 'ascend-observe',
+    title: 'obj_ascend_observe_title',
+    desc: 'obj_ascend_observe_desc',
+    type: 'discovery',
+    targetId: 'ascend-calibration-ring',
+    chapter: 3,
+    waypoint: { x: 180, z: 100, label: 'zone_poi_ascend_calibration_ring_label' },
+    reward: 18,
+    journal: 'obj_ascend_observe_journal',
+    branchTo: 'ascension',
+  },
+  {
+    // 回溯之路：霍格沃兹遗址的创始人钟楼（世界坐标 = 魔法区中心 + (15, -35)）
+    id: 'ascend-retrace',
+    title: 'obj_ascend_retrace_title',
+    desc: 'obj_ascend_retrace_desc',
+    type: 'discovery',
+    targetId: 'ascend-founder-belfry',
+    chapter: 3,
+    waypoint: { x: 15, z: -215, label: 'zone_poi_ascend_founder_belfry_label' },
+    reward: 18,
+    journal: 'obj_ascend_retrace_journal',
+    branchTo: 'ascension',
+  },
+  {
     id: 'ascension',
     title: 'obj_ascension_title',
     desc: 'obj_ascension_desc',

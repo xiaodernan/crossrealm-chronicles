@@ -119,6 +119,32 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     expect(qs.current?.id, '封印仪式走完没汇回 true-end').toBe('true-end');
   });
 
+  it('第 3 章的抉择也是真分岔（W-E3 切片41：观测 / 回溯各认领一处 POI，各回升格）', () => {
+    const 抉择 = MAINLINE.findIndex((r) => r.id === 'choice-ascend');
+    expect(抉择, '主线里找不到第 3 章的抉择步').toBeGreaterThan(0);
+    const 走一步 = (flag) => {
+      // 每次从干净的抉择账开始：真流程里这一步只过一次
+      qs.stats.decisions.clear();
+      qs.questIndex = 抉择;
+      // 抉择步的门槛：第三只 Boss 打完（与表上 requires 同值）
+      qs.stats.objectiveFlags = { boss3Defeated: true };
+      qs.recordChoice(flag);        // 走真实那条路：派发 choice-made ⇒ 记账 ⇒ 判进度
+      return qs.current?.id;
+    };
+    expect(走一步('choice_ascend_observed'), '选了观测，下一步却不是观测之路').toBe('ascend-observe');
+    expect(走一步('choice_ascend_retraced'), '选了回溯，下一步却不是回溯之路').toBe('ascend-retrace');
+    // 两路各自汇回同一格：那处 POI 被发现（discovery 事件记账）就轮到升格
+    const 路 = [
+      ['ascend-observe', 'ascend-calibration-ring'],
+      ['ascend-retrace', 'ascend-founder-belfry'],
+    ];
+    for (const [id, poi] of 路) {
+      qs.questIndex = MAINLINE.findIndex((r) => r.id === id);
+      dispatch('discovery', D.discover(poi));
+      expect(qs.current?.id, `"${id}" 走完没汇回 ascension`).toBe('ascension');
+    }
+  });
+
   it('Chapter 1 八步走完就接上第二档（在役表是线性的，章节号只跟着四格门控翻）', () => {
     const titles = [qs.current.title];
     const step = (name, detail) => {
