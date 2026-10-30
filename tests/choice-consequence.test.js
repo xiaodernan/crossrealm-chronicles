@@ -236,3 +236,48 @@ describe('⑥ 三格变体指向的键都在双表里（切片36 补的那一半
     }
   });
 });
+
+describe('⑦ 三处抉择都带自己的名字 / 进度句 / 日志（W-E3 切片43）', () => {
+  const 抉择行们 = MAINLINE.filter((r) => r.type === 'choice');
+
+  it('每一行三格变体的旗标集合 = 它自己的选项旗标集合（不漏、不多、不串到别行）', () => {
+    expect(抉择行们.length, '主线里没有抉择步？').toBeGreaterThanOrEqual(3);
+    for (const row of 抉择行们) {
+      const 自己的 = row.choices.map((c) => c.flag).sort();
+      for (const 格 of ['titleByChoice', 'descByChoice', 'journalByChoice']) {
+        expect(Object.keys(row[格] ?? {}).sort(), `步 "${row.id}" 的 ${格} 与自己的选项对不上`)
+          .toEqual(自己的);
+      }
+    }
+  });
+
+  it('逐行逐旗标：三格都真的给出不同的文本（不是只第一行做了样子）', () => {
+    for (const row of 抉择行们) {
+      const 标题 = new Set();
+      const 进度 = new Set();
+      const 日志 = new Set();
+      for (const { flag } of row.choices) {
+        const stats = emptyStats();
+        applyStatEvent(stats, 'choice-made', { flag });
+        标题.add(objectiveTitle(row, stats));
+        进度.add(objectiveDesc(row, stats));
+        日志.add(objectiveJournalByChoice(row, stats));
+      }
+      expect(标题.size, `步 "${row.id}" 的两条路给出同一个名字`).toBe(row.choices.length);
+      expect(进度.size, `步 "${row.id}" 的两条路给出同一句进度`).toBe(row.choices.length);
+      expect(日志.size, `步 "${row.id}" 的两条路给出同一段日志`).toBe(row.choices.length);
+      for (const v of [...标题, ...进度, ...日志]) expect(v, `步 "${row.id}" 有空的变体`).toBeTruthy();
+    }
+  });
+
+  it('走真实那条路：`recordChoice` 之后，同一行的名字 / 进度 / 日志一起换', () => {
+    const row = MAINLINE.find((r) => r.id === 'choice-second');
+    const stats = emptyStats();
+    expect(objectiveTitle(row, stats)).toBe(row.title);
+    expect(objectiveJournalByChoice(row, stats)).toBeUndefined();
+    applyStatEvent(stats, 'choice-made', { flag: 'choice_second_stone' });
+    expect(objectiveTitle(row, stats)).toBe(row.titleByChoice.choice_second_stone);
+    expect(objectiveDesc(row, stats)).toBe(row.descByChoice.choice_second_stone);
+    expect(objectiveJournalByChoice(row, stats)).toBe(row.journalByChoice.choice_second_stone);
+  });
+});

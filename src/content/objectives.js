@@ -360,6 +360,19 @@ export const OBJECTIVES = [
     waypoint: { x: 0, z: 55, label: 'wp_label_campfire_upgrade' },
     reward: 12,
     journal: 'obj_choice_second_journal',
+    // W-E3 切片43：与第 3 章那处同款 —— 抉择后这一步的名字 / 进度句 / 日志跟着变。
+    titleByChoice: {
+      choice_second_ember: 'obj_choice_second_title_ember',
+      choice_second_stone: 'obj_choice_second_title_stone',
+    },
+    descByChoice: {
+      choice_second_ember: 'obj_choice_second_desc_ember',
+      choice_second_stone: 'obj_choice_second_desc_stone',
+    },
+    journalByChoice: {
+      choice_second_ember: 'obj_choice_second_journal_ember',
+      choice_second_stone: 'obj_choice_second_journal_stone',
+    },
     choices: [
       { id: 'ember', label: 'obj_choice_second_ember_label', flag: 'choice_second_ember' },
       { id: 'stone', label: 'obj_choice_second_stone_label', flag: 'choice_second_stone' },
@@ -527,6 +540,20 @@ export const OBJECTIVES = [
     waypoint: { x: 0, z: 55, label: 'wp_label_anchor' },
     reward: 10,
     journal: 'obj_choice_ascend_journal',
+    // W-E3 切片43：这一步自己的名字 / 进度句 / 日志也随玩家选的那条路变
+    // （切片36 的三格名册在真结局上立的口径，搬到两处新抉择上）。
+    titleByChoice: {
+      choice_ascend_observed: 'obj_choice_ascend_title_observed',
+      choice_ascend_retraced: 'obj_choice_ascend_title_retraced',
+    },
+    descByChoice: {
+      choice_ascend_observed: 'obj_choice_ascend_desc_observed',
+      choice_ascend_retraced: 'obj_choice_ascend_desc_retraced',
+    },
+    journalByChoice: {
+      choice_ascend_observed: 'obj_choice_ascend_journal_observed',
+      choice_ascend_retraced: 'obj_choice_ascend_journal_retraced',
+    },
     choices: [
       { id: 'observe', label: 'obj_choice_ascend_observe_label', flag: 'choice_ascend_observed' },
       { id: 'retrace', label: 'obj_choice_ascend_retrace_label', flag: 'choice_ascend_retraced' },
@@ -711,6 +738,20 @@ export const OBJECTIVES = [
     waypoint: { x: 0, z: 225, label: 'wp_label_void_tablet' },
     reward: 15,
     journal: 'obj_choice_void_journal',
+    // W-E3 切片43：抉择这一步自己的名字 / 进度句 / 日志也记下玩家选的那条
+    // （`true-end` 那三格说的是**结局**；这一格说的是**你在这里做了什么选择**）。
+    titleByChoice: {
+      choice_void_sealed: 'obj_choice_void_title_sealed',
+      choice_void_studied: 'obj_choice_void_title_studied',
+    },
+    descByChoice: {
+      choice_void_sealed: 'obj_choice_void_desc_sealed',
+      choice_void_studied: 'obj_choice_void_desc_studied',
+    },
+    journalByChoice: {
+      choice_void_sealed: 'obj_choice_void_journal_sealed',
+      choice_void_studied: 'obj_choice_void_journal_studied',
+    },
     choices: [
       { id: 'seal', label: 'obj_choice_void_seal_label', flag: 'choice_void_sealed' },
       { id: 'study', label: 'obj_choice_void_study_label', flag: 'choice_void_studied' },
