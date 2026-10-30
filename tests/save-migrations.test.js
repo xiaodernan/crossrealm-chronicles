@@ -3,7 +3,7 @@ import { migrate, MIGRATIONS, SAVE_KEYS, SaveVersionError, mainlineAt } from '..
 import { SaveValidator, CURRENT_VERSION } from '../src/game/SaveValidator.js';
 import { SaveSystem } from '../src/game/SaveSystem.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
-import { MAINLINE, OBJECTIVES } from '../src/content/objectives.js';
+import { OBJECTIVES } from '../src/content/objectives.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import v4 from '../tests/save_v4_fixture.json';
 import v5 from '../tests/save_v5_fixture.json';
@@ -251,7 +251,7 @@ describe('存档迁移链', () => {
     expect(落点(61), '旧序列的 infinity（61）该往后挪一格').toBe(62);
     // 通关档：旧序列长度 62 ⇒ 新的 63 = `MAINLINE.length`，仍然读作"通关"，不许退回到锚点那一步
     expect(落点(62)).toBe(63);
-    // 这一跳的"新的主线长度"是 **v19 的 63**，不是今天的 `MAINLINE.length`（65）——
+    // 这一跳的"新的主线长度"是 **v19 的 63**，不是今天的 `MAINLINE.length`（66）——
     // 每一跳只负责它自己那一版；v20 那两步由下一跳挪，拿今天的长度量这一跳是把两跳混在一起
     expect(落点(62), 'v19 的通关档没落在 v19 那条序列的长度上').toBe(63);
     expect(落点(999)).toBe(1000);
@@ -521,10 +521,11 @@ it('v8 → v9：主线再长三步，三处插入点各自往后挪（老档落�
     前.quests.index = 41;
     const 后 = MIGRATIONS[19](clone(前));
     expect({ ...后, quests: { ...后.quests, index: 41 } }, '这一跳动了 `quests.index` 之外的字段').toEqual(前);
-    // 新序列里那两格确实是两步仪式，`true-end` 落在 43
-    expect(MAINLINE[41].id).toBe('seal-rite');
-    expect(MAINLINE[42].id).toBe('study-rite');
-    expect(MAINLINE[43].id).toBe('true-end');
+    // 新序列（era 20）里那两格确实是两步仪式，`true-end` 落在 43 ——
+    // 查的是**账本**那一版，不是今天的表：W-E3 切片40 又在它前面插了一步（`void-oath`）
+    expect(mainlineAt(20)[41].id ?? mainlineAt(20)[41]).toBe('seal-rite');
+    expect(mainlineAt(20)[42]).toBe('study-rite');
+    expect(mainlineAt(20)[43]).toBe('true-end');
   });
   it('无版本号的历史档按 v1 起跳，最终仍可通过校验', () => {
     const legacy = clone(v4);

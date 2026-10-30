@@ -19,8 +19,8 @@
  * 2. 钉文案腿：21 × 12 格逐字钉死。
  * 3. 行为腿：切中/切英逐个 POI 重放交互，dialog 与 discovery 收到的都是展开句。
  * 4. 静态腿：8 个文件的 `.dialog.show` 与 `discovery` 派发必须走 `t()`（附反向控制）。
- * 5. 新键不孤儿：38 个新键都得在 8 个文件里被 `t()` 引用。
- * 6. 键数腿：38 个新键的文案在两表里最多各两个键。
+ * 5. 新键不孤儿：40 个新键都得在 8 个文件里被 `t()` 引用。
+ * 6. 键数腿：40 个新键的文案在两表里最多各两个键。
  *
  * 复用口径（ADR 见 `docs/MASTER_PLAN.md` §9）：标题只借**同指称**的键 ——
  * 主线目标题（`obj_*_title`）、回声标题（`echo_tesseract_title`）、路点标签
@@ -57,7 +57,7 @@ const 是致敬层 = (id) => id.startsWith('homage-') || id === 'hub-poster-wall
  * 钉死表：POI id → [对话标题键, 题中, 题英, 对话正文键, 文中, 文英,
  *                   发现标题键, 题中, 题英, 发现正文键, 文中, 文英]。
  * 没有对话/没有发现的那一侧是 null（void-tablet 无对话；Boss 门无发现）。
- * 21 行与真世界逐 id 对齐（结构腿互证）—— 切片35 之后 19 + 两座仪式落点（echo-pages、seal-stone）。
+ * 22 行与真世界逐 id 对齐（结构腿互证）—— 切片35 之后 19 + 两座仪式落点（echo-pages、seal-stone）。
  */
 const ZONE_POI_COPY = {
 'hub-anchor': ['wp_label_anchor', '世界之锚', 'World Anchor', 'zone_dlg_hub_anchor_text', '三块位面碎片在此交汇。穿越者的使命，是重铸锚点，阻止诸界崩塌。向西进入灰白森林，向南踏入霍格沃兹遗境，向东前往米勒荒原——每一处都藏有一枚位面碎片。', 'Three plane fragments meet here. The traveler\'s mission is to reforge the anchor and stop the collapse of every realm. West into the Greywhite Forest, south into the Hogwarts Ruins, east to Miller\'s Wastes — each hides one fragment.', 'wp_label_anchor', '世界之锚', 'World Anchor', 'zone_disc_hub_anchor_text', '三界交汇的核心。', 'The heart where three realms meet.'],
@@ -75,6 +75,7 @@ const ZONE_POI_COPY = {
   'void-rift': ['obj_void_rift_title', '时线裂隙', 'Timeline Rift', 'zone_dlg_void_rift_text', '第四枚位面碎片在时环中心闪烁。完成 Chapter 3 飞升后，时线执政官才会完全苏醒。\n\n蓄力法术（长按 {spell1}/{spell2}/{spell3}）可打断其「时停」攻击。', 'The fourth plane fragment flickers at the center of the time ring. Only after the Chapter 3 ascension will the Chronarch fully awaken.\n\nCharged spells (hold {spell1}/{spell2}/{spell3}) can interrupt its "time stop" attack.', 'obj_void_rift_title', '时线裂隙', 'Timeline Rift', 'zone_disc_void_rift_text', '隐藏的第四碎片。', 'The hidden fourth fragment.'],
   'void-tablet': [null, null, null, null, null, null, 'obj_void_tablet_title', '五维碑文', 'Five-Dimensional Stele', 'zone_disc_void_tablet_text', '「Love is the one thing that transcends time and space.」', '"Love is the one thing that transcends time and space."'],
   'seal-stone': [null, null, null, null, null, null, 'obj_seal_rite_title', '封印仪式', 'Rite of Sealing', 'zone_disc_seal_stone_text', '石座上有一道刚合拢的缝，缝里还透出一点冷光。', 'A seam has just closed on the stone seat; a little cold light still leaks through.'],
+  'void-oath-stele': ['obj_void_oath_title', '残碑上的断誓', 'The Broken Oath', 'zone_dlg_void_oath_text', '半块石碑立在裂隙边：正面是守望者的誓词，背面被人从中间凿断。可辨认的只剩一句——「我们立誓不为任何人动用位面之力——」，后半截落在碎屑里。断口很新，像是有人赶在你之前来读过。', 'Half a stele stands at the rift edge: the warden oath on the face, chiselled through from the back. What can still be read is one line — "We swear never to wield the plane power for any soul—" — and the rest fell into the rubble. The break looks fresh, as if someone reached it before you.', 'obj_void_oath_title', '残碑上的断誓', 'The Broken Oath', 'zone_disc_void_oath_text', '誓词被凿断在「不为任何人」之后——断口很新。', 'The oath is cut off after "for any soul" — and the break is fresh.'],
   'abyss-boss-gate': ['zone_poi_abyss_boss_gate_label', '混沌裂隙竞技场', 'Chaos Rift Arena', 'zone_dlg_abyss_boss_gate_text', 'Chapter 5 解锁后，踏入红圈将唤醒「混沌裂隙领主」。\n\n坐标：X≈-200, Z≈285 · 建议先解锁 3 个武器技能。', 'After Chapter 5 unlocks, stepping into the red circle will wake the "Chaos Rift Overlord".\n\nCoordinates: X≈-200, Z≈285 · Unlock 3 weapon skills first.', null, null, null, null, null, null],
   'chaos-core': ['obj_chaos_core_title', '混沌之核', 'Chaos Core', 'zone_dlg_chaos_core_text', '此处可感悟武器技能——在营火用「技能点」解锁剑/杖流派。\n\n完成 Chapter 4 后，边境会完全显现。', 'Here you can attune to weapon skills — spend skill points at the campfire to unlock the sword/staff styles.\n\nAfter Chapter 4, the Border will fully reveal itself.', 'obj_chaos_core_title', '混沌之核', 'Chaos Core', 'zone_disc_chaos_core_text', '第五位面的不稳定能量源。', 'The unstable energy source of the fifth plane.'],
   'gloom-deep-entrance': ['zone_poi_gloom_deep_entrance_label', '幽暗林地深处', 'Depths of the Gloomy Forest', 'zone_dlg_gloom_deep_entrance_text', '迷雾最浓处藏着古老的秘密。\n\n坐标：X≈180, Z≈170 · 需完成相关支线才能进入核心区域。', 'Where the fog is thickest lies an ancient secret.\n\nCoordinates: X≈180, Z≈170 · Complete the relevant side quest to enter the core area.', null, null, null, null, null, null],
@@ -139,7 +140,7 @@ describe('区文件 POI 对话/发现文案双表化（W-D2 切片21）', () => 
     return { dlg: shown.length ? shown[0] : null, disc: discovered.length ? discovered[0] : null };
   }
 
-  it('结构腿：21 个区/枢纽 POI 的对话与发现参数全是双表键（分母自证）', () => {
+  it('结构腿：22 个区/枢纽 POI 的对话与发现参数全是双表键（分母自证）', () => {
     const 本片 = world.pointsOfInterest.filter((p) => !是致敬层(p.id));
     expect(本片.length, '区/枢纽 POI 数对不上').toBeGreaterThanOrEqual(18);
     const 缺 = [];
@@ -221,16 +222,16 @@ describe('区文件 POI 对话/发现文案双表化（W-D2 切片21）', () => 
     ]);
   });
 
-  it('新键不孤儿：38 个新键都在 8 个文件里被 t() 引用', () => {
+  it('新键不孤儿：40 个新键都在 8 个文件里被 t() 引用', () => {
     const 新键 = [...new Set(Object.values(ZONE_POI_COPY).flat())]
       .filter((k) => typeof k === 'string' && (k.startsWith('zone_dlg_') || k.startsWith('zone_disc_')));
-    expect(新键.length, '新键数对不上 —— 切片范围变了？').toBe(38);
+    expect(新键.length, '新键数对不上 —— 切片范围变了？').toBe(40);
     const 源码 = ZONE_FILES.map((rel) => readFileSync(join(process.cwd(), rel), 'utf8')).join('\n');
     const 没人用 = 新键.filter((k) => !源码.includes("t('" + k + "')"));
     expect(没人用, '这些新键建了却没人引用（死键）').toEqual([]);
   });
 
-  it('键数腿：38 个新键的文案在两表里最多两个键（全局规矩的本地复查）', () => {
+  it('键数腿：40 个新键的文案在两表里最多两个键（全局规矩的本地复查）', () => {
     const 新键 = [...new Set(Object.values(ZONE_POI_COPY).flat())]
       .filter((k) => typeof k === 'string' && (k.startsWith('zone_dlg_') || k.startsWith('zone_disc_')));
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
@@ -248,3 +249,4 @@ describe('区文件 POI 对话/发现文案双表化（W-D2 切片21）', () => 
     expect(缺).toEqual(假);
   });
 });
+

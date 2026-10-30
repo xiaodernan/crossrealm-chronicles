@@ -588,6 +588,23 @@ export const OBJECTIVES = [
     flags: { hasVoidTablet: true },
   },
   {
+    // W-E3 切片40：**主线真的插了一步，而且这一片没写迁移**。
+    // 存档从 v21 起同时记 `quests.currentId` ⇒ 插步只挪下标、挪不动 id；
+    // 老档读进来按 id 找回它原来那一步（第一次兑现那条承诺的读数在
+    // `tests/quest-save-restore.test.js` 的"插步之后老档落回同一步"那条腿里）。
+    id: 'void-oath',
+    title: 'obj_void_oath_title',
+    desc: 'obj_void_oath_desc',
+    type: 'discovery',
+    targetId: 'void-oath-stele',
+    chapter: 4,
+    // 碑文读完才看得懂这道断口（生产者在紧挨着的上一行，注册表核得着）。
+    requires: { hasVoidTablet: true },
+    waypoint: { x: -18, z: 196, label: 'zone_poi_void_oath_stele_label' },
+    reward: 12,
+    journal: 'obj_void_oath_journal',
+  },
+  {
     id: 'choice-void',
     title: 'obj_choice_void_title',
     desc: 'obj_choice_void_desc',

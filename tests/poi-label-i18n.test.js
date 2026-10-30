@@ -68,7 +68,7 @@ function 扫标签位(src) {
 
 /**
  * 钉死表：POI id → [label 键, 中文文案, 英文文案]。
- * 64 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
+ * 65 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
  */
 const POI_LABELS = {
 'hub-anchor': ['hub_poi_anchor_label', '触摸世界之锚', 'Touch the World Anchor'],
@@ -86,6 +86,7 @@ const POI_LABELS = {
   'void-rift': ['zone_poi_void_rift_label', '调查时线裂隙', 'Investigate the Timeline Rift'],
   'void-tablet': ['zone_poi_void_tablet_label', '阅读五维碑文', 'Read the Five-Dimensional Stele'],
   'seal-stone': ['zone_poi_seal_stone_label', '封印石座', 'Stone Seat of Sealing'],
+  'void-oath-stele': ['zone_poi_void_oath_stele_label', '断誓碑', 'Broken Oath Stele'],
   'abyss-boss-gate': ['zone_poi_abyss_boss_gate_label', '混沌裂隙竞技场', 'Chaos Rift Arena'],
   'chaos-core': ['zone_poi_chaos_core_label', '触碰混沌之核', 'Touch the Core of Chaos'],
   'gloom-deep-entrance': ['zone_poi_gloom_deep_entrance_label', '幽暗林地深处', 'Depths of the Gloomy Forest'],
@@ -167,7 +168,7 @@ describe('POI 交互标签双表化（W-D2 切片19）', () => {
     setLanguage('zh');
   });
 
-  it('每个 POI 的 label 都是中英两表里的键（分母自证：64 处一个不落）', () => {
+  it('每个 POI 的 label 都是中英两表里的键（分母自证：65 处一个不落）', () => {
     const pois = world.pointsOfInterest;
     expect(pois.length, 'POI 总数对不上 —— 世界构建坏了').toBeGreaterThanOrEqual(60);
     const 缺 = [];
@@ -243,7 +244,7 @@ describe('POI 交互标签双表化（W-D2 切片19）', () => {
   it('本片新建的 19 个键：同一文案在两表里最多两个键（全局规矩的本地复查）', () => {
     const 新建 = [...new Set(Object.values(POI_LABELS).map(([键]) => 键))]
       .filter((k) => k.startsWith('zone_poi_') || k.startsWith('pop_poi_') || k === 'hub_poi_anchor_label');
-    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(21);
+    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(22);
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
       const 计数 = new Map();
       for (const v of Object.values(table)) 计数.set(v, (计数.get(v) ?? 0) + 1);

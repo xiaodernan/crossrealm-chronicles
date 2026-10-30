@@ -135,6 +135,21 @@ export class VoidZone extends BaseZone {
       },
       { id: 'seal-stone', color: paletteOf('crystal.ice') }
     );
+
+    // W-E3 切片40：断誓碑 —— 碑正面是守望者的誓词，背面被凿断。
+    // 位置挑在裂隙与石座之间：玩家读完碑文（`void-tablet`）往抉择走的路上会先撞见它，
+    // 于是"他们发过誓、却先动了手"这一句落在玩家做选择**之前**。
+    this.addPOI(
+      { x: -18, y: 0, z: -24 },
+      'zone_poi_void_oath_stele_label',
+      () => {
+        this.dialog.show(t('obj_void_oath_title'), t('zone_dlg_void_oath_text'));
+        window.dispatchEvent(new CustomEvent('discovery', {
+          detail: { id: 'void-oath-stele', title: t('obj_void_oath_title'), text: t('zone_disc_void_oath_text') },
+        }));
+      },
+      { id: 'void-oath-stele', color: paletteOf('stone.voidPillar') }
+    );
   }
 
   buildOuterWilds() {

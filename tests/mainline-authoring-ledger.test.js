@@ -74,6 +74,12 @@ describe('② 每一版的长度是历史事实', () => {
     expect(mainlineAt(4)).toEqual(mainlineAt(7));
   });
 
+  it('v21 之后插进来的步**不进这张账**（它不改变任何老版本的表）', () => {
+    expect(账上, 'v21 之后新插的步进了账 —— 那会让 era 20 凭空长一步').not.toContain('void-oath');
+    expect(今天, '今天的主线里没有这一步？这条腿要跟着内容走').toContain('void-oath');
+    expect(mainlineAt(20)).toHaveLength(65);
+    expect(MAINLINE, 'v21 之后插了一步（W-E3 切片40）—— 账本不该跟着长').toHaveLength(66);
+  });
   it('era 20 是冻结的：今天的表往后长，它不动', () => {
     expect(mainlineAt(20)).toEqual(账上);
   });

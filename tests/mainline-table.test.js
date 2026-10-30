@@ -5,7 +5,7 @@ import { installWindowShim } from './helpers/enemyHarness.js';
 import {
   V8_INSERT_POINTS, V9_INSERT_POINTS, V10_INSERT_POINTS, V11_INSERT_POINTS, V12_INSERT_POINTS,
   V13_INSERT_POINTS, V14_INSERT_POINTS, V15_INSERT_POINTS, V16_INSERT_POINTS, V17_INSERT_POINTS,
-  V18_INSERT_POINTS, V19_INSERT_POINTS,
+  V18_INSERT_POINTS, V19_INSERT_POINTS, CURRENT_VERSION, SAVE_KEYS,
 } from '../src/game/SaveMigrations.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, OBJECTIVES, chapterGateAfter, interactGateCondition,
@@ -487,7 +487,10 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片35 之后：主线是 65 步，多两步"仪式"（抉择之后真分成两路，再在摸锚点汇合）', () => {
     expect(V19_ORDER).toHaveLength(65);
     expect(new Set(V19_ORDER).size, 'v19 序列里有重复 id').toBe(V19_ORDER.length);
-    expect(MAINLINE.map((r) => r.id), '在役序列与 v19 那份冻结名单不是同一条')
+    // W-E3 切片40 之后：v19 那份名单仍是在役序列**去掉 v21 之后新插的步**（插步不改老名单）。
+    const 切片40后 = ['void-oath'];
+    expect(MAINLINE.map((r) => r.id).filter((id) => !切片40后.includes(id)),
+      '去掉 v21 之后新插的步，在役序列与 v19 那份冻结名单不是同一条')
       .toEqual(V19_ORDER);
     // 只多两步 ⇒ 去掉它们逐字等于 v18 那条（"加长"不是"重排"）
     const 旧 = V19_ORDER.filter((id) => id !== 'seal-rite' && id !== 'study-rite');
@@ -515,6 +518,22 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
       expect(row?.type, `"${id}" 不是 discovery`).toBe('discovery');
       expect(row?.targetId, `"${id}" 没有 targetId`).toBeTruthy();
     }
+  });
+  it('W-E3 切片40 之后：主线是 66 步，多一步「断誓」（插在碑文与抉择之间，而且**没写迁移**）', () => {
+    expect(MAINLINE).toHaveLength(66);
+    expect(MAINLINE[40].id, '第 40 位不是 void-oath').toBe('void-oath');
+    expect(MAINLINE[39].id, '断誓碑之前应当是碑文那一步').toBe('void-tablet');
+    expect(MAINLINE[41].id, '断誓碑之后应当是抉择那一步').toBe('choice-void');
+    // "加长"不是"重排"：去掉新插的那一步，应当逐字回到 v19 那份冻结名单
+    const 去掉 = MAINLINE.map((r) => r.id).filter((id) => id !== 'void-oath');
+    expect(去掉, '去掉 void-oath 后应当逐字等于 v19 那条序列').toEqual(V19_ORDER);
+    /**
+     * **这一片没写迁移**（W-E3 切片38 的承诺第一次兑现）：存档版本与迁移表都不动，
+     * 老档靠 `quests.currentId` 找回原来那一步。
+     * 迁移链那本账停在 v21 的 65 步 —— 新插的这一步**不许**混进去（它是 v21 之后的事）。
+     */
+    expect(CURRENT_VERSION, '插一步却动了存档版本 ⇒ 这一片说了不做迁移').toBe(21);
+    expect(SAVE_KEYS[0].key, '插一步却换了写档键').toBe('crossrealm_save_v21');
   });
   it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);
     // v7 → v8：旧序列的 24 号位是 `void-boss`，新步插在它**之前**

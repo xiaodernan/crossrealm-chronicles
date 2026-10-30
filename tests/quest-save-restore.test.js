@@ -22,6 +22,7 @@ import { GAME_EVENTS } from '../src/engine/events.js';
 import { checkObjectiveTable } from '../src/content/registry.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
 import { SaveSystem } from '../src/game/SaveSystem.js';
+import { CURRENT_VERSION, MIGRATIONS, mainlineAt, SAVE_KEYS } from '../src/game/SaveMigrations.js';
 import { installWindowShim } from './helpers/enemyHarness.js';
 
 const ROOT = process.cwd();
@@ -319,5 +320,31 @@ describe('③ 存档记住"走到哪一步"的 id（W-E3 切片38）', () => {
     const { out } = restore(q, { index: 下标, currentId: 下一步.id, chapter: 1 });
     expect(q.questIndex, '这条腿没在量 id —— 落点一直等于下标').toBe(下标 + 1);
     expect(out.采纳的.id).toBe(true);
+  });
+});
+
+describe('④ 插步之后老档落回同一步 —— v21 那句承诺的第一次兑现（W-E3 切片40）', () => {
+  it('v21 档里第 40 位是 choice-void；今天它在第 41 位 —— 落点必须跟着 id 走', () => {
+    // 这份档的坐标是 **v21 冻结时**那张表（`mainlineAt(20)` 与它相同）。
+    expect(mainlineAt(20)[40], 'v21 那张表第 40 位不是 choice-void —— 这份桩件不成立').toBe('choice-void');
+    expect(MAINLINE.findIndex((r) => r.id === 'choice-void'), '今天它在第 41 位（前面插了断誓碑）').toBe(41);
+    const q = newQuests();
+    const { out } = restore(q, { index: 40, currentId: 'choice-void', chapter: 4 });
+    expect(q.current?.id, '老档被送到了相邻那一步 —— id 方案没兑现').toBe('choice-void');
+    expect(q.questIndex).toBe(41);
+    expect(out.采纳的.id, '采纳的是 id（不是下标）').toBe(true);
+  });
+
+  it('而且这一片真的没写迁移：版本还是 21，链上没有 v21 → v22', () => {
+    expect(CURRENT_VERSION, '插了一步却动了存档版本').toBe(21);
+    expect(MIGRATIONS[21], '为一次插步写了一条新迁移 —— 那正是 v21 要免掉的那笔税').toBeUndefined();
+    expect(SAVE_KEYS[0].key, '写档键换了 ⇒ 等于换了版本').toBe('crossrealm_save_v21');
+  });
+
+  it('新插的那一步在 v21 老档的坐标里根本不存在（这是插步，不是改名）', () => {
+    expect(mainlineAt(20)).not.toContain('void-oath');
+    expect(MAINLINE.some((r) => r.id === 'void-oath'), '表上没有新步？这一片的桩件不成立').toBe(true);
+    expect(mainlineAt(20)).toHaveLength(65);
+    expect(MAINLINE).toHaveLength(66);
   });
 });
