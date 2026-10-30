@@ -65,6 +65,8 @@ export class AchievementSystem {
       echoSamurai: 0,
       echoCosmic: 0,
       echoStarport: 0,
+      endingKeep: false,
+      endingQuiet: false,
     };
     this.setupListeners();
   }
@@ -106,6 +108,12 @@ export class AchievementSystem {
     achieveOn('journal-entry', (e) => {
       if (e.detail.category === 'fragment') this.stats.loreFragments++;
       this.stats.journalEntries++;
+      this.checkAll();
+    });
+    achieveOn('game-completed', () => {
+      const 抉择 = this.game?.quests?.stats?.decisions;
+      this.stats.endingKeep = !!抉择?.has('choice_final_keep');
+      this.stats.endingQuiet = !!抉择?.has('choice_final_quiet');
       this.checkAll();
     });
   }

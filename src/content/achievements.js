@@ -22,6 +22,8 @@ export const ACHIEVEMENTS_EXTRA = [
   { id: 'campfire-all', title: 'sq_side_campfire_all_title', desc: 'ach_campfire_all_desc', check: (s) => (s.campfireZones ?? 0) >= 6 },
   { id: 'photo-mode', title: 'ach_photo_mode_title', desc: 'ach_photo_mode_desc', check: (s) => s.photoMode },
   { id: 'champion-of-hub', title: 'ach_champion_of_hub_title', desc: 'ach_champion_of_hub_desc', check: (s) => s.boss1 && s.boss2 && s.boss3 && s.voidBoss && s.chaosBoss },
+  { id: 'ending-keep', title: 'ach_ending_keep_title', desc: 'ach_ending_keep_desc', check: (s) => s.endingKeep },
+  { id: 'ending-quiet', title: 'ach_ending_quiet_title', desc: 'ach_ending_quiet_desc', check: (s) => s.endingQuiet },
 ];
 
 export const ACHIEVEMENTS_POP_CULTURE = [
