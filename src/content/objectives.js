@@ -350,6 +350,54 @@ export const OBJECTIVES = [
     journal: 'obj_level_journal',
   },
   {
+    // W-E3 切片42：第 2 章的收尾抉择 —— 临行前只能带走一样东西。
+    id: 'choice-second',
+    title: 'obj_choice_second_title',
+    desc: 'obj_choice_second_desc',
+    type: 'choice',
+    chapter: 2,
+    requires: { boss2Defeated: true },
+    waypoint: { x: 0, z: 55, label: 'wp_label_campfire_upgrade' },
+    reward: 12,
+    journal: 'obj_choice_second_journal',
+    choices: [
+      { id: 'ember', label: 'obj_choice_second_ember_label', flag: 'choice_second_ember' },
+      { id: 'stone', label: 'obj_choice_second_stone_label', flag: 'choice_second_stone' },
+    ],
+    // 两条路各去一处 POI，再在「尾声」汇合 —— 与第 3 / 4 章同一条机器，
+    // 但这一处是**第 2 章的收尾**：选完就走，不引入新的一章。
+    branch: {
+      choice_second_ember: 'second-ember',
+      choice_second_stone: 'second-stone',
+    },
+  },
+  {
+    // 火盆之路：守望塔下那盆没熄的火（世界坐标 = 奇幻区中心 + (-45, 40)）
+    id: 'second-ember',
+    title: 'obj_second_ember_title',
+    desc: 'obj_second_ember_desc',
+    type: 'discovery',
+    targetId: 'second-ember',
+    chapter: 2,
+    waypoint: { x: -245, z: 40, label: 'zone_poi_second_ember_label' },
+    reward: 18,
+    journal: 'obj_second_ember_journal',
+    branchTo: 'epilogue',
+  },
+  {
+    // 界碑之路：禁林边缘那块被磨浅的界碑（世界坐标 = 魔法区中心 + (-60, -45)）
+    id: 'second-stone',
+    title: 'obj_second_stone_title',
+    desc: 'obj_second_stone_desc',
+    type: 'discovery',
+    targetId: 'second-stone',
+    chapter: 2,
+    waypoint: { x: -60, z: -225, label: 'zone_poi_second_stone_label' },
+    reward: 18,
+    journal: 'obj_second_stone_journal',
+    branchTo: 'epilogue',
+  },
+  {
     id: 'epilogue',
     title: 'obj_epilogue_title',
     desc: 'obj_epilogue_desc',

@@ -75,14 +75,14 @@ describe('② 每一版的长度是历史事实', () => {
   });
 
   it('v21 之后插进来的步**不进这张账**（它不改变任何老版本的表）', () => {
-    // 切片40 插了断誓碑一步，切片41 又在第 3 章插了抉择 + 两条路三步：
+    // 切片40 插了断誓碑一步，切片41 在第 3 章插了抉择 + 两条路三步，切片42 又在第 2 章插了三步：
     // 它们都是 v21 之后的事，账本必须一动不动。
-    for (const id of ['void-oath', 'choice-ascend', 'ascend-observe', 'ascend-retrace']) {
+    for (const id of ['void-oath', 'choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone']) {
       expect(账上, `v21 之后新插的步 "${id}" 进了账 —— 那会让 era 20 凭空长一步`).not.toContain(id);
       expect(今天, `今天的主线里没有 "${id}"？这条腿要跟着内容走`).toContain(id);
     }
     expect(mainlineAt(20)).toHaveLength(65);
-    expect(MAINLINE, 'v21 之后插了四步（切片40 一步、切片41 三步）—— 账本不该跟着长').toHaveLength(69);
+    expect(MAINLINE, 'v21 之后插了七步（切片40 一步、切片41 三步、切片42 三步）—— 账本不该跟着长').toHaveLength(72);
   });
   it('era 20 是冻结的：今天的表往后长，它不动', () => {
     expect(mainlineAt(20)).toEqual(账上);

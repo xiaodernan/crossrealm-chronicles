@@ -145,6 +145,25 @@ describe('监听：十件事各记各的账，并推动当前这一步', () => {
     }
   });
 
+  it('第 2 章的收尾抉择也是真分岔（W-E3 切片42：火盆 / 界碑各认领一处 POI，各回尾声）', () => {
+    const 抉择 = MAINLINE.findIndex((r) => r.id === 'choice-second');
+    expect(抉择, '主线里找不到第 2 章的收尾抉择').toBeGreaterThan(0);
+    const 走一步 = (flag) => {
+      qs.stats.decisions.clear();
+      qs.questIndex = 抉择;
+      qs.stats.objectiveFlags = { boss2Defeated: true };
+      qs.recordChoice(flag);
+      return qs.current?.id;
+    };
+    expect(走一步('choice_second_ember'), '选了火盆，下一步却不是火盆之路').toBe('second-ember');
+    expect(走一步('choice_second_stone'), '选了界碑，下一步却不是界碑之路').toBe('second-stone');
+    for (const [id, poi] of [['second-ember', 'second-ember'], ['second-stone', 'second-stone']]) {
+      qs.questIndex = MAINLINE.findIndex((r) => r.id === id);
+      dispatch('discovery', D.discover(poi));
+      expect(qs.current?.id, `"${id}" 走完没汇回 epilogue`).toBe('epilogue');
+    }
+  });
+
   it('Chapter 1 八步走完就接上第二档（在役表是线性的，章节号只跟着四格门控翻）', () => {
     const titles = [qs.current.title];
     const step = (name, detail) => {

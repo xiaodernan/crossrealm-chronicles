@@ -183,6 +183,11 @@ export class MagicZone extends BaseZone {
       this.dialog.show(t('obj_ascend_retrace_title'), t('zone_dlg_ascend_founder_belfry_text'));
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'ascend-founder-belfry', title: t('obj_ascend_retrace_title'), text: t('zone_disc_ascend_founder_belfry_text') } }));
     }, { id: 'ascend-founder-belfry', color: paletteOf('metal.gilt') });
+    // W-E3 切片42：界碑之路的落点 —— 禁林边缘那块被磨浅的界碑（本地 (-60, -45)）。
+    this.addPOI({ x: -60, y: 0, z: -45 }, 'zone_poi_second_stone_label', () => {
+      this.dialog.show(t('obj_second_stone_title'), t('zone_dlg_second_stone_text'));
+      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'second-stone', title: t('obj_second_stone_title'), text: t('zone_disc_second_stone_text') } }));
+    }, { id: 'second-stone', color: 0x8a7a6a });
   }
 
   buildQuidditchRing() {

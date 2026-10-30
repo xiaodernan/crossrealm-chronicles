@@ -488,7 +488,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V19_ORDER).toHaveLength(65);
     expect(new Set(V19_ORDER).size, 'v19 序列里有重复 id').toBe(V19_ORDER.length);
     // W-E3 切片40 之后：v19 那份名单仍是在役序列**去掉 v21 之后新插的步**（插步不改老名单）。
-    const v21之后 = ['void-oath', 'choice-ascend', 'ascend-observe', 'ascend-retrace'];
+    const v21之后 = ['void-oath', 'choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone'];
     expect(MAINLINE.map((r) => r.id).filter((id) => !v21之后.includes(id)),
       '去掉 v21 之后新插的步，在役序列与 v19 那份冻结名单不是同一条')
       .toEqual(V19_ORDER);
@@ -522,7 +522,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片40 之后（历史腿）：剔掉切片41 那三步，主线是 66 步，断誓插在碑文与抉择之间', () => {
     // 这一片之后第 3 章又分过一次岔（切片41），所以这条腿先剔掉那三步再看当年的样子：
     // 历史腿只验「插一步不动老名单」，今天 69 步的长相由下面切片41 那一条钉。
-    const 切片41新增 = ['choice-ascend', 'ascend-observe', 'ascend-retrace'];
+    const 切片41新增 = ['choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone'];
     const 当年 = MAINLINE.map((r) => r.id).filter((id) => !切片41新增.includes(id));
     expect(当年).toHaveLength(66);
     expect(当年[40], '第 40 位不是 void-oath').toBe('void-oath');
@@ -539,9 +539,10 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(CURRENT_VERSION, '插一步却动了存档版本 ⇒ 这一片说了不做迁移').toBe(21);
     expect(SAVE_KEYS[0].key, '插一步却换了写档键').toBe('crossrealm_save_v21');
   });
-  it('W-E3 切片41 之后：主线是 69 步，第 3 章第一次真分岔（观测 / 回溯两路，各回升格）', () => {
-    expect(MAINLINE).toHaveLength(69);
-    const 序 = MAINLINE.map((r) => r.id);
+  it('W-E3 切片41 之后（历史腿）：剔掉切片42 那三步，主线是 69 步，第 3 章真分岔', () => {
+    const 切片42新增 = ['choice-second', 'second-ember', 'second-stone'];
+    const 序 = MAINLINE.map((r) => r.id).filter((id) => !切片42新增.includes(id));
+    expect(序).toHaveLength(69);
     expect(序[30], '第 30 位不是 mind').toBe('mind');
     expect(序[31], '第 31 位不是 choice-ascend').toBe('choice-ascend');
     expect(序[32], '第 32 位不是 ascend-observe').toBe('ascend-observe');
@@ -580,6 +581,43 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(CURRENT_VERSION, '插三步却动了存档版本 ⇒ 这一片说了不做迁移').toBe(21);
     expect(SAVE_KEYS[0].key, '插三步却换了写档键').toBe('crossrealm_save_v21');
     expect(MIGRATIONS[21], 'MIGRATIONS[21] 被凭空写出来了').toBeUndefined();
+  });
+  it('W-E3 切片42 之后：主线是 72 步，第 2 章收尾也分岔（火盆 / 界碑两路，各回尾声）', () => {
+    expect(MAINLINE).toHaveLength(72);
+    const 序 = MAINLINE.map((r) => r.id);
+    expect(序[21], '第 21 位不是 level').toBe('level');
+    expect(序[22], '第 22 位不是 choice-second').toBe('choice-second');
+    expect(序[23], '第 23 位不是 second-ember').toBe('second-ember');
+    expect(序[24], '第 24 位不是 second-stone').toBe('second-stone');
+    expect(序[25], '第 25 位不是 epilogue（两路在它汇合）').toBe('epilogue');
+    // 尾声自己的门槛与旗标不许被这次分岔顺手改掉
+    const 尾声 = MAINLINE.find((r) => r.id === 'epilogue');
+    expect(尾声?.requires, '尾声的门槛被分岔顺手改了').toEqual({ boss2Defeated: true });
+    expect(尾声?.flags, '尾声的旗标被分岔顺手改了').toEqual({ chapter3Ready: true });
+    const 抉择 = MAINLINE.find((r) => r.id === 'choice-second');
+    expect(抉择?.type, 'choice-second 不是 choice').toBe('choice');
+    expect(抉择?.chapter, '收尾抉择不在第 2 章').toBe(2);
+    expect(Object.keys(抉择?.branch ?? {}).sort(), '收尾抉择没写分支表')
+      .toEqual(抉择.choices.map((c) => c.flag).sort());
+    const 目标们 = 抉择.choices.map((c) => 抉择.branch[c.flag]);
+    expect(new Set(目标们).size, `两条路指向同一格「${目标们[0]}」⇒ 抉择没有改变路线`).toBe(目标们.length);
+    for (const id of 目标们) {
+      const row = MAINLINE.find((r) => r.id === id);
+      expect(row?.type, `"${id}" 不是 discovery`).toBe('discovery');
+      expect(row?.chapter, `"${id}" 不在第 2 章`).toBe(2);
+      expect(row?.targetId, `"${id}" 没有 targetId`).toBe(id);
+      expect(row?.branchTo, `"${id}" 没有汇回 epilogue`).toBe('epilogue');
+    }
+    const [火盆, 界碑] = 目标们.map((id) => MAINLINE.find((r) => r.id === id));
+    expect(火盆.targetId, '火盆 / 界碑认领了同一处 POI').not.toBe(界碑.targetId);
+    expect(火盆.waypoint).not.toEqual(界碑.waypoint);
+    // 两处路点各落在自己那一区（奇幻区原点 (-200, 0)、魔法区原点 (0, -180)）
+    expect(火盆.waypoint.x, '火盆路点不在奇幻区').toBeLessThan(-200);
+    expect(界碑.waypoint.z, '界碑路点不在魔法区').toBeLessThan(-180);
+    // 与切片40/41 同款：版本 21、写档键、MIGRATIONS[21] 全不动
+    expect(CURRENT_VERSION, '插三步却动了存档版本').toBe(21);
+    expect(SAVE_KEYS[0].key).toBe('crossrealm_save_v21');
+    expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('迁移的插入点与那份冻结名单一致（插入点算错位置当场红）', () => {    expect(V8_INSERT_POINTS).toEqual([24]);
     // v7 → v8：旧序列的 24 号位是 `void-boss`，新步插在它**之前**

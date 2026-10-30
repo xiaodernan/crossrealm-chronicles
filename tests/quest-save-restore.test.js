@@ -175,15 +175,15 @@ describe('② 读档以表为准：落点、章节、以及坏档要留下理由
       q.advance();
     }
     /**
-     * W-E3 切片35 / 切片41：主线现在**两处**真分岔（第 3 章观测 / 回溯，第 4 章封印 / 研习），
-     * 一个周目每处只走一条 ⇒ 走过 = 表长 − 2，被跳过的恰好是两处「没选的那条」。
+     * W-E3 切片35 / 切片41 / 切片42：主线现在**三处**真分岔（第 2 章火盆 / 界碑，第 3 章观测 / 回溯，
+     * 第 4 章封印 / 研习），一个周目每处只走一条 ⇒ 走过 = 表长 − 3，被跳过的恰好是三处「没选的那条」。
      * `advance()` 在没有抉择旗标时按表序往下走（先撞上的那条），所以跳过的是第二路。
      */
-    expect(走过.length, '一步都没走 —— 这条断言不能算通过').toBe(MAINLINE.length - 2);
+    expect(走过.length, '一步都没走 —— 这条断言不能算通过').toBe(MAINLINE.length - 3);
     const 到过 = new Set(走过.map((s) => s.id));
     const 没到 = MAINLINE.filter((r) => !到过.has(r.id)).map((r) => r.id);
-    expect(没到, '被跳过的不是两处「没选的那条路」—— 分支跳错了格子')
-      .toEqual(['ascend-retrace', 'study-rite']);
+    expect(没到, '被跳过的不是三处「没选的那条路」—— 分支跳错了格子')
+      .toEqual(['second-stone', 'ascend-retrace', 'study-rite']);
     const 不一致 = 走过.filter((s) => s.系统章 !== s.位置章);
     expect(不一致, `这些步上系统自报的章节与表上位置不符：\n${JSON.stringify(不一致)}`).toEqual([]);
     expect(new Set(走过.map((s) => s.系统章)).size, '整条主线只出现过一章 —— 门控没生效').toBeGreaterThan(1);
@@ -328,12 +328,12 @@ describe('④ 插步之后老档落回同一步 —— v21 那句承诺的第一
   it('v21 档里第 40 位是 choice-void；今天它在第 41 位 —— 落点必须跟着 id 走', () => {
     // 这份档的坐标是 **v21 冻结时**那张表（`mainlineAt(20)` 与它相同）。
     expect(mainlineAt(20)[40], 'v21 那张表第 40 位不是 choice-void —— 这份桩件不成立').toBe('choice-void');
-    // 今天它在第 44 位：前面插了断誓碑一步，切片41 又在更前面插了第 3 章那三步
-    expect(MAINLINE.findIndex((r) => r.id === 'choice-void'), '今天它在第 44 位').toBe(44);
+    // 今天它在第 47 位：前面插了断誓碑一步、第 3 章那三步，切片42 又在更前面插了第 2 章那三步
+    expect(MAINLINE.findIndex((r) => r.id === 'choice-void'), '今天它在第 47 位').toBe(47);
     const q = newQuests();
     const { out } = restore(q, { index: 40, currentId: 'choice-void', chapter: 4 });
     expect(q.current?.id, '老档被送到了相邻那一步 —— id 方案没兑现').toBe('choice-void');
-    expect(q.questIndex).toBe(44);
+    expect(q.questIndex).toBe(47);
     expect(out.采纳的.id, '采纳的是 id（不是下标）').toBe(true);
   });
 
@@ -347,25 +347,47 @@ describe('④ 插步之后老档落回同一步 —— v21 那句承诺的第一
     expect(mainlineAt(20)).not.toContain('void-oath');
     expect(MAINLINE.some((r) => r.id === 'void-oath'), '表上没有新步？这一片的桩件不成立').toBe(true);
     expect(mainlineAt(20)).toHaveLength(65);
-    // 切片41 又在前面插了三步（第 3 章的分岔）⇒ 今天 69
-    expect(MAINLINE).toHaveLength(69);
+    // 切片41 在第 3 章插了三步、切片42 又在第 2 章插了三步 ⇒ 今天 72
+    expect(MAINLINE).toHaveLength(72);
   });
 });
 
 describe('⑤ 第 3 章分岔插步之后老档落回同一步（W-E3 切片41，同样不写迁移）', () => {
   it('v21 档里第 31 位是 ascension；今天第 31 位是 choice-ascend —— 落点必须跟着 id 走', () => {
     expect(mainlineAt(20)[31], 'v21 那张表第 31 位不是 ascension —— 这份桩件不成立').toBe('ascension');
-    expect(MAINLINE[31].id, '今天第 31 位不是新插的抉择步').toBe('choice-ascend');
+    expect(MAINLINE[34].id, '今天第 34 位不是新插的抉择步（前面多了第 2 章那三步）').toBe('choice-ascend');
     const q = newQuests();
     const { out } = restore(q, { index: 31, currentId: 'ascension', chapter: 3 });
     expect(q.current?.id, '老档被第 3 章的抉择步接走了 —— 同一个下标，不同的一步').toBe('ascension');
     expect(q.questIndex).toBe(MAINLINE.findIndex((r) => r.id === 'ascension'));
-    expect(q.questIndex, '升格今天应当退到第 34 位').toBe(34);
+    expect(q.questIndex, '升格今天应当退到第 37 位').toBe(37);
     expect(out.采纳的.id, '采纳的是 id（不是下标）').toBe(true);
   });
 
   it('三条新步在 v21 老档的坐标里根本不存在；版本仍是 21，链上仍没有 v21 → v22', () => {
     for (const id of ['choice-ascend', 'ascend-observe', 'ascend-retrace']) {
+      expect(mainlineAt(20), `账本里出现了 v21 之后才有的 "${id}"`).not.toContain(id);
+      expect(MAINLINE.some((r) => r.id === id), `表上没有 "${id}"？这一片的桩件不成立`).toBe(true);
+    }
+    expect(CURRENT_VERSION).toBe(21);
+    expect(MIGRATIONS[21]).toBeUndefined();
+    expect(SAVE_KEYS[0].key).toBe('crossrealm_save_v21');
+  });
+});
+
+describe('⑥ 第 2 章收尾分岔插步之后老档落回同一步（W-E3 切片42，仍不写迁移）', () => {
+  it('v21 档里第 22 位是 epilogue；今天第 22 位是 choice-second —— 落点必须跟着 id 走', () => {
+    expect(mainlineAt(20)[22], 'v21 那张表第 22 位不是 epilogue —— 这份桩件不成立').toBe('epilogue');
+    expect(MAINLINE[22].id, '今天第 22 位不是新插的收尾抉择').toBe('choice-second');
+    const q = newQuests();
+    const { out } = restore(q, { index: 22, currentId: 'epilogue', chapter: 2 });
+    expect(q.current?.id, '老档被第 2 章的收尾抉择接走了 —— 同一个下标，不同的一步').toBe('epilogue');
+    expect(q.questIndex, '尾声今天应当退到第 25 位').toBe(25);
+    expect(out.采纳的.id, '采纳的是 id（不是下标）').toBe(true);
+  });
+
+  it('三条新步在 v21 老档的坐标里根本不存在；版本仍是 21，链上仍没有 v21 → v22', () => {
+    for (const id of ['choice-second', 'second-ember', 'second-stone']) {
       expect(mainlineAt(20), `账本里出现了 v21 之后才有的 "${id}"`).not.toContain(id);
       expect(MAINLINE.some((r) => r.id === id), `表上没有 "${id}"？这一片的桩件不成立`).toBe(true);
     }

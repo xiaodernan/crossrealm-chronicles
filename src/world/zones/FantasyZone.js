@@ -151,6 +151,11 @@ export class FantasyZone extends BaseZone {
       this.dialog.show(t('wp_label_fantasy_ruins'), t('zone_dlg_fantasy_ruins_text'));
       window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'fantasy-ruins', title: t('wp_label_fantasy_ruins'), text: t('zone_disc_fantasy_ruins_text') } }));
     }, { id: 'fantasy-ruins', color: 0x88aa88 });
+    // W-E3 切片42：火盆之路的落点 —— 守望塔下那盆没熄的火（本地 (-45, 40)）。
+    this.addPOI({ x: -45, y: 0, z: 40 }, 'zone_poi_second_ember_label', () => {
+      this.dialog.show(t('obj_second_ember_title'), t('zone_dlg_second_ember_text'));
+      window.dispatchEvent(new CustomEvent('discovery', { detail: { id: 'second-ember', title: t('obj_second_ember_title'), text: t('zone_disc_second_ember_text') } }));
+    }, { id: 'second-ember', color: 0xd08040 });
   }
 
   buildRiver() {
