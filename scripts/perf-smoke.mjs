@@ -21,7 +21,7 @@ import { existsSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings, 过期格 } from './perf-budgets.mjs';
-import { draw读数问题, 普查读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
+import { draw读数问题, 普查读数问题, cpu读数问题, 帧普查读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
 import { WORLD_SEED, worldSeedSource } from './world-seed.mjs';
 
 /**
@@ -34,6 +34,19 @@ import { WORLD_SEED, worldSeedSource } from './world-seed.mjs';
  */
 
 const VITE_PORT = 5321;
+
+/**
+ * `--census`：**在常规一轮之后多加一条"每帧调用点"的腿**（W-C2 切片19，#15）。
+ *
+ * 常规 `npm run perf` 的行为逐字不变（这条腿一步都不走）—— 它会在每个站点多推 240 帧
+ * `update()`，而 draw call 那几列的地板表是按"没有额外推帧"的页龄钉的；把它放进默认路径
+ * 等于悄悄改了所有站的测量条件。要榜的时候明说：`npm run perf:census`。
+ *
+ * 这一腿**不参与退出码里的预算判定**（它不是预算，是归因工具），但它自己有几条硬拒：
+ * 尺子接不上对象、榜比整帧还大、卸完没还清 ⇒ 当场抛（退出码 2）。
+ * "榜有没有解释这一帧"（归属率）先只打进日志 —— 下界要等第一份真读数给出出处。
+ */
+const 开普查 = process.argv.includes('--census');
 /**
  * CDP 口交给 **Chrome 自己挑**（W-C2 切片6b，#165）。
  *
@@ -697,6 +710,107 @@ try {
   } else {
     console.log('perf-smoke: 全部预算内');
   }
+
+  /**
+   * ## 每帧调用点普查腿（W-C2 切片19，#15）—— 只有 `--census` 才走，放在所有预算判定之后
+   *
+   * 到这里为止，这一轮交出的 CPU 数只有三格（avg / p95 / 全帧），而"这一口 15ms 里住着谁"
+   * 一直没人能量 —— `update()` 里那七十来处调用点在计时上是同一格。这一腿把每一处单独记账，
+   * 交一张按耗时降序的榜。尺子在 `src/engine/frameCensus.js`，它的性质由
+   * `tests/frame-census.test.js` 钉；这一腿只负责**把它架到真游戏上**并对读数本身把关
+   * （判据在 `./harness-readings.mjs` 的 `帧普查读数问题`，可单测）。
+   *
+   * 三处与 draw call 腿同一口径：**坐标不抄**（从 `world.zones` 那一实例的 `center` 读）、
+   * **站点不另立**（用 `名册.stationIds`，十站全跑）、**推帧不分给渲染**（只 `update()`，
+   * 与 `站()` 那两批"只更新"的账可比）。
+   *
+   * 分批泵帧：一帧 ~15ms × 240 帧 = 单句 evalJs 要 3.6 秒以上，CDP 那条腿历史上就是按
+   * 每批 60 帧切的（见 `站()` 上面那段）。普查句柄因此挂在 `window.__普查` 上跨 evalJs 存活，
+   * 取完账立刻卸掉并把句柄置空 —— 榜必须是**还完补丁**之后的一张榜。
+   */
+  if (开普查) {
+    const 普查站点 = [];
+    for (const 站id of 名册.stationIds) {
+      const 装 = `(async () => {
+        const g = window.__game;
+        const 站id = ${JSON.stringify(站id)};
+        const 配方 = ${配方串};
+        const 枢纽 = ${枢纽中心};
+        let x, z;
+        if (站id === 'hub') { x = 枢纽.x; z = 枢纽.z; }
+        else {
+          const 找 = (g.world.zones || []).find((Z) => Z.id === 站id);
+          if (!找) throw new Error('世界里没有 id 为 "' + 站id + '" 的区 —— 站点名单与世界分家了');
+          x = 找.center.x; z = 找.center.z;
+        }
+        const y = g.world.getGroundHeight(x, z);
+        if (!Number.isFinite(y)) throw new Error('站点 ' + 站id + ' 的地面高度非有限：' + y);
+        g.player.teleport(x, y + 0.1, z, { yaw: 配方.yaw, pitch: 配方.pitch });
+        await new Promise((r) => setTimeout(r, 800));
+        for (let k = 0; k < 20; k += 1) g.update();
+        const 源 = await import('/src/engine/frameCensus.js');
+        // 文本必须在**装之前**取好：装完之后 g.update 已经是包装层，String() 扫到的是尺子自己的
+        // 那句 帧源.apply / 帧.总.push —— 第一次真跑就把"够不着"读成了这两格，名字看着对，
+        // 出处一个都不是游戏的。（这里不能写反引号：这一整段是模板字符串，反引号会把它剪断。）
+        const 文本 = String(g.update);
+        const 站点们 = 源.扫站点(文本);
+        const 手 = 源.装普查(g, 站点们);
+        const 先 = 手.读数();
+        if (先.坏站点.length) {
+          手.卸载();
+          throw new Error('站点 ' + 站id + ' 的普查接不上对象：' + 先.坏站点.join(' / ')
+            + ' —— 站点是从 update() 的函数体扫出来的，接不上就是尺子坏了，不许读成"这一格 0 毫秒"');
+        }
+        window.__普查 = 手;
+        return { 站点总数: 站点们.length, 装好数: 手.装好数, 站点数: 手.站点数, 够不着: 源.扫够不着(文本) };
+      })()`;
+      const 头 = await evalJs(装);
+      for (let b = 0; b < 计时批数; b += 1) {
+        const 交 = await evalJs(`(() => {
+          const 手 = window.__普查;
+          if (!手) throw new Error('普查句柄不在（站点 ${站id} 的第 ${b} 批）—— 页在站与站之间被重建了，这一轮的榜不是同一页的账');
+          for (let i = 0; i < ${每批帧数}; i += 1) 手.一帧();
+          return 手.读数().泵帧数;
+        })()`);
+        if (交 !== (b + 1) * 每批帧数) {
+          throw new Error(`站点 ${站id} 第 ${b + 1} 批泵完应到 ${(b + 1) * 每批帧数} 帧，实到 ${交} —— 有一批没走完，榜上的合计是缺样`);
+        }
+      }
+      const 出 = await evalJs(`(() => {
+        const 手 = window.__普查;
+        if (!手) throw new Error('普查句柄在取账前就没了（站点 ${站id}）');
+        const 出 = 手.读数();
+        const 卸 = 手.卸载();
+        window.__普查 = null;
+        return Object.assign(出, { 装好数: ${头.装好数}, 站点总数: ${头.站点总数}, 站点数: ${头.站点数},
+          够不着: ${JSON.stringify(头.够不着)}, 被人改过: 卸.被人改过, 还原数: 卸.还原数 });
+      })()`);
+      const 问 = 帧普查读数问题(站id, 出, 应有帧数);
+      if (问.length) throw new Error(`站点「${站id}」的每帧普查腿不是一次测量：\n - ` + 问.join('\n - '));
+      普查站点.push({ 站: 站id, 出 });
+      /**
+       * 分母是 `帧数` 而不是 `泵帧数`：整帧账（`update` 那层自己记的）和每一格的 `次数`
+       * 吃的是**同一批帧**，页自己跑的那几帧两边都算进去了。混着除就露出假形状 ——
+       * 每帧一次的 `weather.update` 会读成 1.02次/帧，让人去查一个根本不存在的重复调用。
+       * `泵帧数` 仍然照打：那一格是"我要求了几帧"，与"账上有几帧"是两个数，差值就是见证。
+       */
+      const 每帧 = (v) => (v / 出.帧数).toFixed(2);
+      console.log(`perf-smoke [普查|${站id}] 泵=${出.泵帧数} 页外帧=${出.帧数 - 出.泵帧数} 整帧合计=${出.总耗时ms.toFixed(1)}ms（每帧 ${每帧(出.总耗时ms)}ms）`
+        + ` 已点名=${出.已点名ms.toFixed(1)} 其余=${出.其余ms.toFixed(1)} 归属率=${((出.已点名ms / 出.总耗时ms) * 100).toFixed(1)}%`
+        + ` 装上=${出.站点数}/${出.站点总数} 够不着=${出.够不着.length} 嵌套=${出.嵌套次数} 帧外=${出.帧外次数}次/${出.帧外ms.toFixed(1)}ms`);
+      for (const 一 of 出.行.slice(0, 15)) {
+        console.log(`perf-smoke   ${String(每帧(一.合计ms)).padStart(6)}ms/帧  ${String(每帧(一.次数)).padStart(5)}次/帧  p95=${一.p95ms.toFixed(2)}  ${一.名}`);
+      }
+      console.log(`perf-smoke [普查见证|${站id}] 未接到=${出.未接到.join(',') || '-'} 零调用=${出.零调用.length ? `${出.零调用.length}格(${出.零调用.join(',')})` : '-'} 够不着=${出.够不着.join(',')}`);
+    }
+    /**
+     * 十站的榜必须**一站不落**：少一站就是那一站被静默跳过（与"上限表缺站"同罪），
+     * 而这一腿的全部意义是"每一站都有人看过"。判据与 draw 腿共用 `覆盖问题`。
+     */
+    const 覆 = 覆盖问题(名册.stationIds, 普查站点);
+    if (覆.length) throw new Error(`每帧普查腿的站点覆盖不成立：\n - ` + 覆.join('\n - '));
+  }
+
   ws.close();
 } catch (err) {
   console.error('perf-smoke 失败：', err?.message ?? err);

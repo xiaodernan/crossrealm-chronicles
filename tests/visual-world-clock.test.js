@@ -486,6 +486,7 @@ const 玩法侧墙钟 = {
   'cinematic/CombatCameraDirector.js': 'blocksInputUntil = 墙钟 + duration×1000，而它守的那段演出每帧吃 rawDt（Game.update 里 combatCamera.update(rawDt)）—— 同支钟才对得上，见 gameplay-clock-semantics 的配对腿',
   'cinematic/CombatCameraDirectorExtensions.js': '跳过路径读同一个 blocksInputUntil 截止时间（不另起一支钟）',
   'cinematic/CombatCinematicSkip.js': 'canSkip 读同一个 blocksInputUntil 截止时间（不另起一支钟）',
+  'engine/frameCensus.js': '仪器不是玩法：它量的就是"这一帧真实花了多少毫秒"，换成世界时这把尺根本量不到东西（世界时正是被量的这一帧算出来的）。它进不了游戏状态 —— src/ 里没有第二个模块提到它，那是一条被下面那条腿核对的性质，不是一句承诺',
 };
 
 function stripNonCode(source) {
@@ -526,6 +527,27 @@ describe('结构普查：谁还在读墙钟（B118② 名单由扫描推导，�
     for (const [rel, 理由] of Object.entries(玩法侧墙钟)) {
       expect(集合.has(rel), `${rel} 已登记（${理由}），但代码里已经读不到了 ⇒ 从名单删掉`).toBe(true);
     }
+  });
+
+  /*
+   * 名单里那一行 `engine/frameCensus.js` 的理由是"仪器进不了玩法"。这句话不能只是我写的说明——
+   * 它得是能被核对的性质，否则下一次有人把尺子 import 进游戏循环，理由还留着，性质已经没了。
+   * 那条边一旦接上，坏两件事：墙钟顺着它喂进游戏状态（就是 B118 本体的病），而且尺子开始量自己
+   * （它包装的正是被它计时的东西）。
+   *
+   * 这里扫的是**原文**而不是 `stripNonCode` 的结果：`import … from '…/frameCensus.js'` 的那个路径
+   * 是个字符串字面量，被 `stripNonCode` 抹成 `''` 以后这条边就查不到了。宁可让注释里的提及算一次命中
+   * （那样只会红得多、不会漏），也不要一把只看不见 import 的尺。
+   */
+  it('读墙钟的那把尺进不了玩法：src/ 里没有第二个模块提到它', () => {
+    const 提到 = [];
+    for (const file of walk(SRC)) {
+      const rel = relative(SRC, file).replace(/\\/g, '/');
+      if (rel === 'engine/frameCensus.js') continue;
+      if (/frameCensus|装普查|每帧普查/.test(readFileSync(file, 'utf8'))) 提到.push(rel);
+    }
+    expect(提到, '上面那条边一旦接上，墙钟就进了游戏状态，尺子也开始量自己').toEqual([]);
+    expect(玩法侧墙钟['engine/frameCensus.js'], '这一行还挂在名单上 ⇒ 上面那条腿必须还在扫它').toContain('src/ 里没有第二个模块');
   });
 
   it('名册里的每一处视觉都不再读墙钟，且相位来自 `_时相` 的积分', () => {
