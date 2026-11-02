@@ -4,8 +4,10 @@
  * `npm run e2e:combat` 起真游戏、贴脸一只影之战士、给真输入把整条战斗链跑通
  * （感知 → 追击 → 互殴 → 击杀 → 魂火入账 → 击杀账本 +1）。这条门禁守六样：
  *
- * ① **阈值不许被放松**（`E2E_COMBAT_BUDGETS` 按值钉）：把 `maxKillFrames` 从 2400 抬到 24000，
- *    门禁还在跑，但它已经改成"总有一天打得死"；把 `aiProbeFrames` 调大是同一件事的慢版本。
+ * ① **阈值不许被放松**（`E2E_COMBAT_BUDGETS` 按值钉，上限钉在**实测值**上）：把 `maxKillFrames`
+ *    抬回 2400 就是抬回"切片7 之前那个没测过的猜测"，抬到 24000 则是"总有一天打得死"；
+ *    把 `aiProbeFrames` 调大是同一件事的慢版本。同一批钉子也有**下限**：预算收到实测帧数以下是
+ *    把每一轮都判红，那不是更严而是坏尺（切片7e 两头一起钉）。
  * ② **不许走白盒捷径**：这条门禁的全部价值在于结算由 `CombatController` 的打击窗口
  *    **自己撞出来**。脚本里一旦出现 `兵.hp = 0` / `takeDamage(` 这种直接扣血，
  *    "打得死"就退化成"赋值能执行"，链条断在任何一环（感知、追击、打击窗口、结算、账本）都读不出来。
@@ -175,7 +177,7 @@ const 判据 = {
    * 钉步长。`Game.update()` 读 `clock.getDelta()`，手动推帧时那个 dt = 上一帧的**真实耗时**：
    * 无头页一帧两秒 ⇒ 每帧推进两秒的世界 ⇒ 下一帧更贵。探针读到"贴脸纯 update 1152 ms/帧"，
    * 而 perf 榜上同一台机器的 `updateP95` 是 12~16 ms —— 差的一百倍是 dt，不是机器。
-   * 不钉住就没有"2400 帧"这个预算可言：那个数此前测的是这台机器当时多忙。
+   * 不钉住就没有"帧预算"这个数可言：那个数此前测的是这台机器当时多忙。
    */
   步长钉住: (s) => s.includes("evalJs('window.__game.clock.getDelta = () => 1 / 60; true')"),
   /**
@@ -309,8 +311,17 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
   });
 
   it('阈值按值钉死：只许收紧，不许放松', () => {
-    expect(E2E_COMBAT_BUDGETS.maxKillFrames, '击杀帧预算被放松（2400 → 更大就是"总有一天打得死"）')
-      .toBeLessThanOrEqual(2400);
+    /**
+     * 上限按**当前实测值**钉（切片7e）。原来那道 `<= 2400` 拦不住"退回旧猜测"：
+     * 2400 是切片7 之前写下的数，那时这条门禁**一次都没跑完过**，它不是读数。
+     * 现在这条门禁跑完整轮三次，`帧数` 是 833（r7）/ 827（r8）/ 855（r9）—— 散布 3.4%，
+     * 1600 留 ≈1.9 倍余量。**同一条腿也有下限**：预算收到实测最大值以下是把每一轮都判红，
+     * 那是"收紧过头"，与放松一样坏（同 `renderEvery >= 60` 那条的方向）。
+     */
+    expect(E2E_COMBAT_BUDGETS.maxKillFrames, '击杀帧预算被放松（1600 = 三轮实测 833/827/855 的 ≈1.9 倍；更大就退成"总有一天打得死"）')
+      .toBeLessThanOrEqual(1600);
+    expect(E2E_COMBAT_BUDGETS.maxKillFrames, '击杀帧预算收到实测最大值（855）以下 —— 这一轮必红，收紧过头不是更严')
+      .toBeGreaterThanOrEqual(855);
     expect(E2E_COMBAT_BUDGETS.maxKillFrames).toBeGreaterThan(0);
     expect(E2E_COMBAT_BUDGETS.aiProbeFrames, 'AI 观察帧被放松').toBeGreaterThanOrEqual(60);
     expect(E2E_COMBAT_BUDGETS.aiProbeFrames).toBeLessThan(E2E_COMBAT_BUDGETS.maxKillFrames);
@@ -538,7 +549,14 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     expect(接腿.通道只有一份(坏), '6d 那批坏法没碰计数器，"只有一份"却不过').toBe(true);
     expect(接腿.调了判据(坏), '6d 那批坏法没碰作废判据，腿却不过').toBe(true);
     // 预算表按值判的两条：坏脚本改的是源码文本，所以另拿改过的值来验
-    expect({ ...E2E_COMBAT_BUDGETS, maxKillFrames: 24000 }.maxKillFrames <= 2400, '把帧预算抬到 24000 却仍判为"没放松"').toBe(false);
+    expect({ ...E2E_COMBAT_BUDGETS, maxKillFrames: 24000 }.maxKillFrames <= 1600, '把帧预算抬到 24000 却仍判为"没放松"').toBe(false);
+    // 反向控制：钉子**真的移动了**。切片7e 把上限从 2400（没测过的猜测）挪到 1600（三轮实测的 ≈1.9 倍），
+    // 那旧上限 2400 在新口径下必须判为"放松" —— 否则这条腿只是在念旧数字，重导没有落地。
+    expect({ ...E2E_COMBAT_BUDGETS, maxKillFrames: 2400 }.maxKillFrames <= 1600, '帧预算的钉子还停在旧上限（2400 又能过了）').toBe(false);
+    expect({ ...E2E_COMBAT_BUDGETS, lootProbeFrames: 600 }.lootProbeFrames <= 300, '收尸窗的钉子还停在旧上限（600 又能过了）').toBe(false);
+    // 下限那一侧（收紧过头）：预算低于实测最大值 = 每一轮必红，那不是严判据而是坏尺
+    expect({ ...E2E_COMBAT_BUDGETS, maxKillFrames: 600 }.maxKillFrames >= 855, '把帧预算收到实测（855 帧）以下却仍判为"更严"').toBe(false);
+    expect({ ...E2E_COMBAT_BUDGETS, lootProbeFrames: 60 }.lootProbeFrames >= 110, '把收尸窗收到实测两倍以内却仍判为"更严"').toBe(false);
     expect({ ...E2E_COMBAT_BUDGETS, exceptions: 3 }.exceptions, '把"异常 0 条"放开却仍判为 0').toBe(3);
   });
 
@@ -554,7 +572,8 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
    * - 每帧真绘制：无头 Chrome 走软件 GL，`render()` 一帧 ~2.1 秒（2271.5 vs 171.6 ms/帧）。
    *
    * 为什么不干脆取消绘制：三站的断言全是逻辑的，但"打击特效的 material 在打斗中途炸掉"
-   * 只有 `render()` 撞得出来。按节拍画 = 一整场仍有真绘制，代价从 2400 次降到个位数。
+   * 只有 `render()` 撞得出来。按节拍画 = 一整场仍有真绘制，代价从"每帧一次"降到个位数。
+
    */
   it('钉住步长、绘制有节拍、墙钟有读数 —— 这一条门禁得跑得完（切片7b）', () => {
     expect(判据.步长钉住(源文), '步长没钉住：dt = 上一帧的真实耗时，帧预算测的是这台机器当时多忙').toBe(true);
@@ -639,9 +658,9 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     expect(战斗越线({ ...过, 击杀: { ...过.击杀, 击杀账: {} } }, E2E_COMBAT_BUDGETS, []).length, '击杀账本空着却仍判为记到了').toBeGreaterThan(0);
 
     // —— 收尸窗不是逃生门：窗尽头仍是 0 照红，而且那句红要带得走下一步该看的数 ——
-    const 够不着 = 战斗越线({ ...过, 击杀: { ...过.击杀, 魂入账: 0, 认领距: 6.2, 收尸帧: 600 } }, E2E_COMBAT_BUDGETS, []);
-    expect(够不着.some((条) => 条.includes('认领距 6.2') && 条.includes('收尸用了 600')),
-      `魂火没入账时的红话要报出认领距与用了多少帧，否则下一次红还是同一轮考古：${够不着.join(' / ')}`).toBe(true);
+    const 够不着 = 战斗越线({ ...过, 击杀: { ...过.击杀, 魂入账: 0, 认领距: 6.2, 收尸帧: 300 } }, E2E_COMBAT_BUDGETS, []);
+    expect(够不着.some((条) => 条.includes('认领距 6.2') && 条.includes('收尸用了 300')),
+      `魂火没入账时的红话要报出认领距与用了多少帧（窗尽头 = 预算 300），否则下一次红还是同一轮考古：${够不着.join(' / ')}`).toBe(true);
 
     /**
      * —— 切片7d：认不出"这一只兵自己的那一枚" ⇒ 后面那句"入账了"没有依据 ——
@@ -658,7 +677,7 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     expect(踩错[0]).toContain('断气后新增 3 份掉落');
     expect(踩错[1], '第二条该说"这笔账不是那一枚带来的"').toContain('还躺在场上');
     // 认得出、就是没走过去：只红入账那一格，且不许把"没认领"的话说出来
-    const 没走到 = 战斗越线({ ...过, 击杀: { ...过.击杀, 魂入账: 0, 魂火离场: false, 收尸帧: 600 } }, E2E_COMBAT_BUDGETS, []);
+    const 没走到 = 战斗越线({ ...过, 击杀: { ...过.击杀, 魂入账: 0, 魂火离场: false, 收尸帧: 300 } }, E2E_COMBAT_BUDGETS, []);
     expect(没走到.length, `认得出那一枚、只是没踩上去，应当只红入账一格，实际：${没走到.join(' / ')}`).toBe(1);
     expect(没走到[0]).not.toContain('认不出');
     /**
@@ -698,10 +717,15 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     // 前摇与等待各不算"出手"：windup 单列出现正是要抓的形状，orbit 是没抢到围攻名额
     expect(E2E_COMBAT_BUDGETS.aiEngagedStates, '`windup` 进了出手名单 = 卡在承诺态也能绿').not.toContain('windup');
     expect(E2E_COMBAT_BUDGETS.aiEngagedStates, '`orbit` 只是绕外圈等名额，不算出手').not.toContain('orbit');
-    // 收尸窗按值钉：它只许在"够得着"的量级里，抬到几千帧就是把这一站改成等着看
-    expect(E2E_COMBAT_BUDGETS.lootProbeFrames, '收尸窗为 0 = 这一站又回到断气那一帧读账').toBeGreaterThan(0);
-    expect(E2E_COMBAT_BUDGETS.lootProbeFrames, '收尸窗大于一千帧 = 把"没踩到"改成"多等一会儿"')
-      .toBeLessThanOrEqual(1000);
+    // 收尸窗同样按实测重导（切片7e）：认出**自己那一枚**之后真机两轮各走 54 / 55 帧（认领距 3.29 / 3.33 米）。
+    // 300 帧 = 5 秒模拟 ≈ 18 米步行余量；同时它是 `DROP_LIFE = 30 秒`（钉步长下 1800 帧）的六分之一 ——
+    // 这一窗里那一枚不可能因过期离场，"离场 + 入账"就不会被"过期"冒充成"被捡起"。
+    // 下限取实测两倍（110）：收到两倍以内就是每一轮都在赌掉落点周围的几何，与放松一样坏。
+    expect(E2E_COMBAT_BUDGETS.lootProbeFrames, '收尸窗为 0 = 这一站又回到断气那一帧读账（r7 那条假红的原样）').toBeGreaterThan(0);
+    expect(E2E_COMBAT_BUDGETS.lootProbeFrames, '收尸窗超过 300 帧 = 把"没踩到"改成"多等一会儿"（实测 54 / 55）')
+      .toBeLessThanOrEqual(300);
+    expect(E2E_COMBAT_BUDGETS.lootProbeFrames, '收尸窗收到实测（55 帧）两倍以内 = 每一轮都在赌几何')
+      .toBeGreaterThanOrEqual(110);
   });
 
   it('接线：站 1 每帧采、站 2 断气后朝**自己那一枚**收尸、越线表住在 harness 里（切片7c/7d）', () => {
