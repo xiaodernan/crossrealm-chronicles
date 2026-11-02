@@ -9,6 +9,21 @@ import { BossStateMachine, BossPhase, PhaseTransitionCondition } from './BossSta
 import { phaseTuningFor } from '../content/bossPhases.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 
+/* 预警圈几何（W-E2 稳定性浸泡）：
+ * 五只 Boss 的首个预警各建一份一模一样的 RingGeometry —— `renderer.info.memory.geometries`
+ * 记的是**上传缓存**，每只 Boss 第一次预警都把账推 +1（2026-10-31 校准10：游玩段残留的
+ * 两条几何正是两只 Boss 的预警圈）。形状与个体无关，跟敌人预警圈（`enemyGeo`）同一口径：
+ * 几何共一份、`userData.shared` 让 `Enemy.dispose` 跳过它；材质仍逐实例（各自释放）。
+ */
+let _预警圈几何 = null;
+const 预警圈几何 = () => {
+  if (!_预警圈几何) {
+    _预警圈几何 = new THREE.RingGeometry(0.3, 1.2, 16);
+    _预警圈几何.userData.shared = true;
+  }
+  return _预警圈几何;
+};
+
 /** 影界守护者 — 首个 Boss，三阶段 */
 export class Boss extends Enemy {
   constructor(scene, world, config) {
@@ -564,7 +579,7 @@ export class Boss extends Enemy {
   showTelegraph() {
     if (!this.telegraphRing) {
       const ring = new THREE.Mesh(
-        new THREE.RingGeometry(0.3, 1.2, 16),
+        预警圈几何(),
         new THREE.MeshBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.7, side: THREE.DoubleSide })
       );
       ring.rotation.x = -Math.PI / 2;

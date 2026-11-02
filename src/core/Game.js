@@ -333,7 +333,7 @@ export class Game {
   _buildPlayerCombat() {
     this.player = this._adopt('player/PlayerController', new PlayerController(this.scene, this.camera, this.world, this));
     this.player.combat = new CombatController(
-      this.player, this.enemyManager, this.dialog, this.damageNumbers, this.audio, this.stats
+      this.player, this.enemyManager, this.dialog, this.damageNumbers, this.audio, this.stats, this
     );
     this.player.combat.feedback = this.combatFeedback;
     this.player.combat.setTimeController(this.time);

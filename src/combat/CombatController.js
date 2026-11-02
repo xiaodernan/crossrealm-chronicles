@@ -57,13 +57,22 @@ export function pickAimAssistTarget(origin, forward, enemies, { range, swingMinD
 }
 
 export class CombatController {
-  constructor(player, enemyManager, dialog, damageNumbers, audio, stats) {
+  /**
+   * @param {object} [game] 整局的所有者。击杀 / Boss 击败 / 技能使用三本**门槛账**
+   *   （W-B6 切片3/4 的 `stats.addKill` / `addBossDefeated` / `addSkillUse`）都从这一格读；
+   *   2026-10-28 之前这个字段**从来没有被赋值过**（`Game._buildPlayerCombat` 建它时只给 6 个参数），
+   *   四处 `this.game?.stats?.…` 全是静默空转 —— 玩家击杀不进 `stats.kills/totalKills`，
+   *   叙事技那条"击杀 N 只解锁"的门槛因此永远不亮。浸泡门禁首跑时用 `enemy-defeated`
+   *   事件与任务账本对出了这个缺口（死亡事件到了、任务账 +1、统计账仍是 0）。
+   */
+  constructor(player, enemyManager, dialog, damageNumbers, audio, stats, game = null) {
     this.player = player;
     this.enemies = enemyManager;
     this.dialog = dialog;
     this.damageNumbers = damageNumbers;
     this.audio = audio;
     this.stats = stats;
+    this.game = game;
 
     this.hp = 100;
     this.maxHp = 100;

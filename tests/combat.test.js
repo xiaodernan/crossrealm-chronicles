@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import * as THREE from 'three';
 import { CombatController } from '../src/combat/CombatController.js';
 import { SpellSystem } from '../src/combat/SpellSystem.js';
@@ -278,5 +280,36 @@ describe('法术弹体的生命周期', () => {
     runTo((dt) => spells.update(dt, {}), 1.0, 1 / 60);
     expect(ahead.hits).toHaveLength(1);
     expect(behind.hits).toHaveLength(0);
+  });
+});
+
+/**
+ * 击杀账本的接线（2026-10-28，浸泡门禁首跑抓到的第二条）。
+ *
+ * `_dispatchExecution` 里四处 `this.game?.stats?.…` 写得很像"少一层也不炸"，
+ * 而 `Game._buildPlayerCombat` 建 CombatController 时**只给了 6 个参数** ——
+ * `this.game` 自始至终是 undefined，四本账（击杀 / Boss 击败 / 战技使用 / 连段使用）
+ * 全部静默空转。任务账（`quests.stats.kills`）由 `enemy-defeated` 事件独立记账，
+ * 所以症状不是"击杀没记"，而是"**技能门槛永远差一只**"：页面探针读数里
+ * 死亡事件到了、任务账 +1、`stats.kills` 与 `totalKills` 仍是 0。
+ */
+describe('击杀账本挂在 Game 上（W-B6 门槛账的接线）', () => {
+  it('构造器收下 game，_dispatchExecution 真的记进 stats.addKill / addBossDefeated', () => {
+    const 账 = [];
+    const game = { stats: { addKill: (t) => 账.push(t), addBossDefeated: (id) => 账.push(`boss:${id}`) } };
+    const manager = { enemies: [], getAliveEnemies: () => [] };
+    const c = new CombatController(makePlayer(), manager, { toast() {} }, null, makeAudio(), null, game);
+    expect(c.game, '构造器没有收下 game —— 四处 this.game?.stats 又是静默空转').toBe(game);
+    const 兵 = { ...makeEnemy(0, -2), type: 'soldier' };
+    c._dispatchExecution(兵);
+    expect(账, '击杀没有进 stats.addKill').toEqual(['soldier']);
+    c._dispatchExecution({ ...兵, type: 'boss', bossId: 'boss3' });
+    expect(账).toEqual(['soldier', 'boss', 'boss:boss3']);
+  });
+
+  it('接线源头：Game 把 this 交给 CombatController（没有第 7 个参数，账本永远是死的）', () => {
+    const 源 = readFileSync(join(process.cwd(), 'src', 'core', 'Game.js'), 'utf8');
+    expect(源, 'Game 没有把 this 交给 CombatController').toMatch(
+      /new CombatController\(\s*this\.player, this\.enemyManager, this\.dialog, this\.damageNumbers, this\.audio, this\.stats, this\s*,?\s*\)/);
   });
 });

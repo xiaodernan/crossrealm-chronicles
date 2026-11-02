@@ -23,7 +23,8 @@
     "perf:census": "node scripts/perf-smoke.mjs --census",
     "e2e": "node scripts/e2e-clear.mjs",
     "size": "node scripts/check-bundle-size.mjs",
-    "e2e:combat": "node scripts/e2e-combat.mjs"
+    "e2e:combat": "node scripts/e2e-combat.mjs",
+    "soak": "node scripts/soak.mjs"
   },
   "dependencies": {
     "three": "^0.172.0"
