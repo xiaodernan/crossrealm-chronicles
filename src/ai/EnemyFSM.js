@@ -207,6 +207,14 @@ const ENEMY_STATES = {
   },
 };
 
+/**
+ * 这份名册的**读者不止本文件**：战斗门禁要判"兵有没有真走进追击/出手"，
+ * 它手里那份态名清单必须是从这里数的，不是抄的 —— 抄的那份会把玩家态
+ * （`attack` / `light` / `heavy` 在 `CombatController` 那边）混进敌人的词汇表里，
+ * 于是那条判据永远对不上，还看起来像 AI 没出手。
+ */
+export const ENEMY_STATE_NAMES = Object.keys(ENEMY_STATES);
+
 export function createEnemyFSM(enemy) {
   const sm = new StateMachine(enemy, ENEMY_STATES, 'idle');
   sm.isCommitted = () => COMMITTED.has(sm.current);

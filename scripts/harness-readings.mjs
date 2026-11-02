@@ -1,14 +1,18 @@
 /**
- * 无头 harness 的读数完整性判定（W-C2 切片6b，#165）—— `npm run perf` 与 `npm run e2e` 共用的
- * "这一轮的数到底是不是数"。
+ * 无头 harness 的读数完整性判定（W-C2 切片6b，#165）—— `npm run perf`、`npm run e2e`
+ * 与 `npm run e2e:combat` 共用的"这一轮的数到底是不是数"。
  *
  * ## 为什么单独一个文件（以及为什么它不叫 perf-*）
  *
- * `perf-smoke.mjs` 与 `e2e-clear.mjs` 都是**导入即执行**的（顶层就起 vite 与 Chrome），门禁不能
+ * `perf-smoke.mjs`、`e2e-clear.mjs`、`e2e-combat.mjs` 三个都是**导入即执行**的（顶层就起 vite 与 Chrome），门禁不能
  * import 它们 —— 那是 W-D4 切片3 立下的分家。所以"什么算一个交出来的读数"这条判据住在这里，
  * 两个脚本与门禁问的是**同一个判**（`src/engine/drawCallBudget.js` 之于上限表是同一条纪律）。
  * 切片6c 把 e2e-clear 也接进来之后，名字里的 `perf-` 就成了谎话 —— 它守的是"任何一条用 CDP
  * 驱动无头页的门禁"，两把尺一旦分家，下一次红的就是其中一把。
+ * 切片7c 把战斗门禁的那张**越线表**也搬进来，理由比"省一份 import"具体：这一族判据第一次
+ * 真跑（r7）红了两条，两条都是判据自己踩空（首末态相等当成卡死、在断气那一帧读魂火账），
+ * 而这种东西在脚本里**没法被演示** —— 搬成纯函数之后，"卡住的轨迹必须红"与"走完连段的轨迹
+ * 必须绿"两条都能在合成读数上当场跑给门禁看。
  *
  * ## 这一片在补的那半个洞
  *
@@ -437,3 +441,57 @@ export function 原话尾巴(全文, 条数 = 3) {
   const 剥色 = String(全文 ?? '').replace(/\u001b\[[0-9;]*m/g, '');
   return 剥色.split(/\r?\n/).map((行) => 行.trim()).filter(Boolean).slice(-条数);
 }
+
+/**
+ * 战斗门禁的**越线表**（W-D4 切片7c）：把 `e2e-combat` 那五条"这轮算不算过"从脚本里搬出来。
+ *
+ * ## 为什么搬（不是因为想复用，是因为前两条写错了而写错了没法被演示）
+ *
+ * 2026-11-02 这一条门禁第一次跑完整轮（r7），红了两条，两条都是判据自己踩空：
+ * - **站 1 拿首末两点当轨迹**：夹具把玩家扔到兵跟前时，那只兵已经在 `windup` 里，
+ *   120 帧（2 秒模拟）打完一套连段又回到 `windup` —— `后 === 前`，报的是"没有追击/出手"，
+ *   而同一个读数里 `我掉血` 是 `true`。判据把"正在打"读成了"卡住"。
+ * - **站 2 在断气那一帧读魂火账**：击杀的魂魄是 `loot.spawnKill()` 掉在地上的一件掉落物，
+ *   要玩家走进拾取半径才 `addSouls`；`while (兵.alive)` 一退出就读账，读到的 0 是"还没踩上去"。
+ *
+ * 这两条在脚本里是改不了的：脚本要么真起浏览器，要么什么都不测。搬成纯函数之后
+ * `tests/e2e-combat.test.js` 能拿**合成读数**把两个形状各跑一遍 —— 卡在单一态的轨迹必须红、
+ * 走完 windup→strike→recover 的轨迹必须绿、断气时掉距 6 米且窗尽头仍是 0 必须红。
+ *
+ * ## 失败闭合
+ *
+ * 每一格都按"读不出来就是越线"写：`轨迹` 不是数组就红（采样那行被删了不该表现为"没卡死"），
+ * `魂入账` 用 `> 0` 而不是 `!== 0`（`undefined`、`NaN`、负数都不算入账），`杀掉` 只认真值。
+ * 这条门禁的红话必须比数字多说一点（掉距、用了多少帧），否则下一次红还是同一轮考古。
+ *
+ * @param {{ai: {轨迹?: unknown, 我掉血?: boolean}, 击杀: {杀掉?: boolean, 魂入账?: number, 掉距?: number|null, 收尸帧?: number, 击杀账?: Record<string, number>}}} R 三站读数
+ * @param {{aiProbeFrames: number, aiEngagedStates: string[], lootProbeFrames: number, maxKillFrames: number, playerHp: number, minKillLedger: number, exceptions: number}} 预算
+ * @param {string[]} [异常] 页面里未捕获的异常文本
+ * @returns {string[]} 越线的话，空数组 = 这一轮过
+ */
+export function 战斗越线(R, 预算, 异常 = []) {
+  const out = [];
+  const 轨迹 = R?.ai?.轨迹;
+  if (!Array.isArray(轨迹) || 轨迹.length === 0) {
+    out.push(`AI 通路：这一轮没交出状态轨迹（读到 ${JSON.stringify(轨迹)}）—— 采样那一行断了，此时"没卡死"这句话没有依据`);
+  } else {
+    const 出手过 = 轨迹.filter((s) => 预算.aiEngagedStates.includes(s));
+    if (出手过.length === 0) {
+      out.push(`AI 通路：${预算.aiProbeFrames} 帧里只走过 ${轨迹.join('→')}，没进 ${预算.aiEngagedStates.join('/')} 任何一档`);
+    }
+  }
+  if (!R?.ai?.我掉血) {
+    out.push(`AI 通路：${预算.aiProbeFrames} 帧后玩家血量仍等于基线 ${预算.playerHp} ⇒ 那兵根本没打到我（状态名对上也不算出手）`);
+  }
+  if (!R?.击杀?.杀掉) out.push(`${预算.maxKillFrames} 帧真输入没打死一只兵（敌血没走完）`);
+  const 入账 = R?.击杀?.魂入账;
+  if (!(typeof 入账 === 'number' && 入账 > 0)) {
+    out.push(`击杀后 ${预算.lootProbeFrames} 帧内没踩到那堆掉落：魂火 +${JSON.stringify(入账)}`
+      + `｜断气时掉距 ${JSON.stringify(R?.击杀?.掉距)} 米｜收尸用了 ${JSON.stringify(R?.击杀?.收尸帧)}/${预算.lootProbeFrames} 帧`);
+  }
+  const 击杀数 = Object.values(R?.击杀?.击杀账 ?? {}).reduce((s, n) => s + (Number(n) || 0), 0);
+  if (击杀数 < 预算.minKillLedger) out.push(`击杀账本是空的：quest stats.kills 没记 ${JSON.stringify(R?.击杀?.击杀账 ?? {})}`);
+  if (异常.length > 预算.exceptions) out.push(`页面异常 ${异常.length} 条 > ${预算.exceptions}：${异常[0] ?? ''}`);
+  return out;
+}
+

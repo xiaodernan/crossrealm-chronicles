@@ -61,7 +61,7 @@ import { createServer } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { E2E_COMBAT_BUDGETS } from './e2e-budgets.mjs';
-import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴 } from './harness-readings.mjs';
+import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴, 战斗越线 } from './harness-readings.mjs';
 
 /**
  * 预算与阈值住在 `./e2e-budgets.mjs` —— **判据与执行分家**（与 `e2e-clear` 同一条纪律）：
@@ -378,13 +378,17 @@ try {
     return { 兵名: 兵.name, 敌血: 兵.hp, 我魂: g.stats.souls, 击杀账: { ...(g.quests.stats.kills ?? {}) } };
   })()`);
 
-  // 站1：AI 通路——玩家贴脸后推帧，兵必须从 idle 走进追击/出手
+  // 站1：AI 通路——玩家贴脸后推帧，**每帧**采一次状态，交出去的是走过的那条轨迹
+  // （r7 之前采的是"第一帧的态"与"最后一帧的态"两个点，于是"打完一套连段又回到 windup"
+  //  与"卡在 windup 里出不来"读出来一模一样 —— 见 `harness-readings.mjs` 的 `战斗越线`）
   R.ai = await evalJs(`(async () => {
     const g = window.__game;
     const 兵 = g.enemyManager.enemies.find(e => e.type === 'soldier' && e.alive);
-    const 前 = 兵.state;
-    for (let i = 0; i < ${预算.aiProbeFrames}; i += 1) { g.update(); if (i % ${预算.renderEvery} === 0) g.render(); await new Promise(r => setTimeout(r, 0)); }
-    return { 前, 后: 兵.state, 我掉血: g.player.combat.hp < ${预算.playerHp} };
+    const 轨迹 = [];
+    const 记一笔 = () => { const s = String(兵.state); if (轨迹[轨迹.length - 1] !== s) 轨迹.push(s); };
+    记一笔();
+    for (let i = 0; i < ${预算.aiProbeFrames}; i += 1) { g.update(); if (i % ${预算.renderEvery} === 0) g.render(); 记一笔(); await new Promise(r => setTimeout(r, 0)); }
+    return { 轨迹: 轨迹.slice(0, 40), 后: 兵.state, 我掉血: g.player.combat.hp < ${预算.playerHp} };
   })()`);
   R.墙钟秒.站1 = 秒表.读();
 
@@ -393,6 +397,15 @@ try {
     const g = window.__game;
     const 兵 = g.enemyManager.enemies.find(e => e.type === 'soldier' && e.alive);
     const 旧魂 = g.stats.souls;
+    const 最近掉落 = () => {
+      const p = g.player.position;
+      let 最 = null, 最距 = Infinity;
+      for (const d of (g.loot?.drops ?? [])) {
+        const 距 = Math.hypot(p.x - d.mesh.position.x, p.z - d.mesh.position.z);
+        if (距 < 最距) { 最距 = 距; 最 = d; }
+      }
+      return 最 ? { 距: 最距, x: 最.mesh.position.x, z: 最.mesh.position.z } : null;
+    };
     let 帧 = 0;
     let 掉过血 = false;
     while (兵.alive && 帧 < ${预算.maxKillFrames}) {
@@ -404,8 +417,27 @@ try {
       if (g.player.combat.hp < ${预算.playerHp}) 掉过血 = true;
       if (帧 % 120 === 0) await new Promise(r => setTimeout(r, 0));
     }
+    // 收尸：魂火是**掉在地上的那一份**（EnemyManager 只在断气那一帧 spawnKill，
+    // 入账要等玩家走进拾取半径），所以在断气那一帧读账读到的 0 不是"没结算"。
+    // 这一窗用真输入走路（KeyW + 面向最近掉落），不 teleport —— 玩家做得到才算通路。
+    const 断气时 = 最近掉落();
+    let 收尸帧 = 0;
+    while (收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {
+      const 目标 = 最近掉落();
+      if (!目标) break;
+      const p = g.player.position;
+      const 向 = Math.atan2(目标.x - p.x, 目标.z - p.z);
+      g.player.yaw = 向; g.player.targetYaw = 向;
+      g.keys['KeyW'] = true;
+      g.update();
+      if (收尸帧 % ${预算.renderEvery} === 0) g.render();
+      收尸帧 += 1;
+      if (收尸帧 % 120 === 0) await new Promise(r => setTimeout(r, 0));
+    }
+    g.keys['KeyW'] = false;
     return { 帧数: 帧, 杀掉: !兵.alive, 掉过血,
-             魂入账: g.stats.souls - 旧魂,
+             魂入账: g.stats.souls - 旧魂, 掉距: 断气时 ? Number(断气时.距.toFixed(2)) : null,
+             收尸帧, 掉落在场: (g.loot?.drops ?? []).length,
              击杀账: { ...(g.quests.stats.kills ?? {}) } };
   })()`);
   R.墙钟秒.站2 = 秒表.读();
@@ -426,15 +458,7 @@ try {
     throw 废;
   }
 
-  const 越线 = [];
-  if (!['pursue', 'attack', 'light', 'heavy', 'strike'].some((s) => R.ai.后.includes(s)) && R.ai.后 === R.ai.前) {
-    越线.push(`AI 通路：兵 ${预算.aiProbeFrames} 帧后仍停在 "${R.ai.后}"，没有追击/出手`);
-  }
-  if (!R.击杀.杀掉) 越线.push(`${预算.maxKillFrames} 帧真输入没打死一只兵（敌血没走完）`);
-  if (R.击杀.魂入账 <= 0) 越线.push(`击杀后魂火没入账（+${R.击杀.魂入账}）`);
-  const 击杀数 = Object.values(R.击杀.击杀账).reduce((s, n) => s + n, 0);
-  if (击杀数 < 预算.minKillLedger) 越线.push(`击杀账本是空的：quest stats.kills 没记 ${JSON.stringify(R.击杀.击杀账)}`);
-  if (exceptions.length > 预算.exceptions) 越线.push(`页面异常 ${exceptions.length} 条 > ${预算.exceptions}：${exceptions[0] ?? ''}`);
+  const 越线 = 战斗越线(R, 预算, exceptions);
 
   if (越线.length) {
     console.error('e2e-combat 越线：\n - ' + 越线.join('\n - '));

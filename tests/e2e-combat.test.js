@@ -2,7 +2,7 @@
  * 战斗 E2E 冒烟的门禁 —— W-D4 切片7。
  *
  * `npm run e2e:combat` 起真游戏、贴脸一只影之战士、给真输入把整条战斗链跑通
- * （感知 → 追击 → 互殴 → 击杀 → 魂火入账 → 击杀账本 +1）。这条门禁守四样：
+ * （感知 → 追击 → 互殴 → 击杀 → 魂火入账 → 击杀账本 +1）。这条门禁守六样：
  *
  * ① **阈值不许被放松**（`E2E_COMBAT_BUDGETS` 按值钉）：把 `maxKillFrames` 从 2400 抬到 24000，
  *    门禁还在跑，但它已经改成"总有一天打得死"；把 `aiProbeFrames` 调大是同一件事的慢版本。
@@ -26,6 +26,15 @@
  *    推进好几秒的世界 ⇒ 越跑越贵），绘制要按 `renderEvery` 的节拍走（无头页是软件 GL，
  *    实测一帧 `render()` ~2.1 秒 ⇒ 每帧都画就是四十分钟）。方向与①相反的那一条：
  *    这里**收紧**节拍（收到 1）才是坏事 —— 一条没人跑得动的门禁等于没有门禁。
+ * ⑥ **判据问的必须是它以为自己问的那件事**（切片7c，①~⑤ 全部接上之后第一次跑完整轮才红出来的）：
+ *    r7 交回两条越线，两条都是判据踩空 —— 站 1 拿首末两个 state 点当"卡死"（那只兵打完一套
+ *    连段又回到 `windup`，而 `我掉血` 明明是 `true`），站 2 在敌人断气那一帧读 `stats.souls`
+ *    （魂火是掉在地上的一件掉落物，要玩家走进拾取半径才入账）。这一族在脚本里改不动：
+ *    脚本要么真起浏览器要么什么都不测，所以越线表搬进 `scripts/harness-readings.mjs` 的
+ *    `战斗越线`，本文件拿**合成读数**把"走完连段必须绿 / 卡在单一态必须红 / 空尺必须红"逐格演一遍。
+ *    同一条还管词汇表：`aiEngagedStates` 逐格与 `EnemyFSM` 的真名册对账 —— r7 手抄那份里
+ *    `attack` / `light` / `heavy` 三格是**玩家**的态，敌人永远不可能等于它们。
+ *
  *
  * 归属三判（`解析CDP口` / `页地址问题` / `通道问题`）住在 `scripts/harness-readings.mjs`，
  * **它们的正反行为在那里测**。这里只钉接线：调了没、不合格抛了没、顺序对不对、旧写法回潮了没。
@@ -39,12 +48,24 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { E2E_COMBAT_BUDGETS } from '../scripts/e2e-budgets.mjs';
+import { 战斗越线 } from '../scripts/harness-readings.mjs';
+import { ENEMY_STATE_NAMES } from '../src/ai/EnemyFSM.js';
 
 const ROOT = process.cwd();
 const SCRIPT = join(ROOT, 'scripts', 'e2e-combat.mjs');
 const 源文 = existsSync(SCRIPT) ? readFileSync(SCRIPT, 'utf8') : '';
 /** 页内那句"按下左键"要贴在**游戏自己的**那个锁存对象上，所以对象路径从这里现取而不是在门禁里抄第二份 */
 const 游戏 = readFileSync(join(ROOT, 'src', 'core', 'Game.js'), 'utf8');
+
+/**
+ * 站 2 那一段（到墙钟交账为止）。
+ *
+ * 为什么要切出来：`g.player.teleport(...)` 在**站 0 是正当的**（摆夹具：把玩家扔到兵跟前），
+ * 在站 2 的收尸窗口里就是作弊（用传送踩上掉落，等于不证"玩家走得过去"）。
+ * 全文级 `!s.includes('teleport')` 会连站 0 一起禁掉，写的人只好把传送改名 —— 那是把判据
+ * 改成障碍赛。按站切段之后，同一条禁令只咬它该咬的那一段。
+ */
+const 站2段 = (s) => (s.split('  // 站2')[1] ?? '').split('R.墙钟秒.站2')[0];
 
 /**
  * 判据写成函数 —— 这样它们能同时喂给真源码（必须全过）与一份**人造坏脚本**（必须全挂）。
@@ -73,6 +94,37 @@ const 判据 = {
   不白盒扣血: (s) => !/\.takeDamage\(/.test(s) && !/兵\.hp\s*=[^=]/.test(s) && !/\.die\(\)/.test(s),
   推的是真帧: (s) => s.includes('g.update();') && s.includes('g.render();'),
   击杀要见魂火与账本: (s) => s.includes('魂入账') && s.includes('击杀账') && s.includes('g.stats.souls'),
+  /**
+   * 站 1 交的是**走过的那条轨迹**，不是"第一帧的态 + 最后一帧的态"两个点（切片7c）。
+   *
+   * r7 那次假红就是这么来的：夹具把玩家扔到兵跟前时它已经在 `windup`，120 帧打完一套连段
+   * 又回到 `windup` ⇒ `后 === 前` ⇒ 报"没有追击/出手"，而同一份读数里 `我掉血` 是 `true`。
+   * 三个锚各判一件事：采样的位置（循环里，不是循环外）、交回来的字段、旧的两点写法不许回潮。
+   */
+  站1交轨迹: (s) => {
+    const 段 = s.split('  // 站2')[0] ?? '';
+    return (段.match(/记一笔\(\)/g) ?? []).length >= 2 && /return \{ 轨迹:/.test(段)
+      && !段.includes('const 前 = 兵.state');
+  },
+  /**
+   * 站 2 断气之后还有一段**收尸**：魂火是掉在地上的一件掉落物，要玩家走进去才入账
+   * （`EnemyManager.js:516` 掉 → `LootSystem.js:388` 捡），在断气那一帧读账读到的 0 不是断链。
+   * 走路用真输入（`KeyW` + 面向最近掉落），不 `teleport`：站 0 传送是**摆夹具**，
+   * 收尸那一段要证的正是"玩家自己走得过去"，用传送踩点等于把这一站改成赋值能执行。
+   */
+  站2收尸走真输入: (s) => {
+    const 段 = 站2段(s);
+    // 三样各判一件事：真输入在、帧数从表里取、窗口**自己会走**（`while` 且带"账动了就停"那个逃生条件）。
+    // 最后一样是被变异臂逼出来的：只查三个 token 在不在的话，`while (…)` 换成 `if (false && …)`
+    // 三个 token 一个不少，腿照绿，而窗口已经永远不会走一步。
+    return 段.includes("g.keys['KeyW'] = true") && 段.includes('收尸帧')
+      && /while \(收尸帧 < \$\{预算\.lootProbeFrames\} && g\.stats\.souls === 旧魂\)/.test(段);
+  },
+  收尸不抄近路: (s) => !站2段(s).includes('.teleport('),
+  /** 越线表搬进 `harness-readings`；手抄那份态名单里躺着三个玩家态，不许回潮 */
+  越线表搬进判据: (s) => s.includes('战斗越线(R, 预算, exceptions)')
+    && /import \{[^}]*战斗越线[^}]*\} from '\.\/harness-readings\.mjs';/.test(s)
+    && !s.includes("'attack', 'light', 'heavy'"),
   断言不许静默: (s) => s.includes('if (越线.length) {') && s.includes('failures = 1;')
     && s.includes('process.exit(failures)'),
   阈值走表: (s) => s.includes('const 预算 = E2E_COMBAT_BUDGETS;')
@@ -174,7 +226,7 @@ const 接腿 = {
   },
   作废在算越线之前: (s) => {
     const 作 = s.indexOf('const 重问 = 重载问题(');
-    const 越 = s.indexOf('const 越线 = []');
+    const 越 = s.indexOf('const 越线 = 战斗越线(');
     return 作 >= 0 && 越 >= 0 && 作 < 越;
   },
   归因在catch里: (s) => s.includes('if (!err?.读数作废) {')
@@ -211,7 +263,7 @@ const 静置腿 = {
     && !/evalJs\('!!window\.__game/.test(s),
 };
 
-describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口径 / 切片7b 钉步长与绘制节拍）', () => {
+describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口径 / 切片7b 钉步长与绘制节拍 / 切片7c 判据不再踩空）', () => {
   it('脚本在，npm script 接上了（没接线的门禁只有写它的人会跑）', () => {
     expect(existsSync(SCRIPT), 'scripts/e2e-combat.mjs 不在了').toBe(true);
     const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -422,7 +474,7 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
       // 帧预算回潮成字面量：要**两处一起**换（页面里那一句 + 越线话术里那一句），
       // 只换第一处的话，`includes('${预算.maxKillFrames}')` 会靠第二处蒙过这一臂。
       .replace(/\$\{预算\.maxKillFrames\}/g, '24000')
-      .replace('import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴 } from', 'import { 页地址问题, 通道问题, 重载问题 } from')
+      .replace('import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴, 战斗越线 } from', 'import { 页地址问题, 通道问题, 重载问题 } from')
       .replace('  g.player.combat.hp = ${预算.playerHp};', '  g.player.combat.hp = 99999;');
     expect(判据.端口动态(坏), 'dev 口写死却仍判为"动态"').toBe(false);
     expect(判据.口由Chrome自报(坏), '口回潮成自己定却仍判为"Chrome 自报"').toBe(false);
@@ -499,5 +551,113 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     expect(判据.墙钟有读数(坏.节拍写死), '节拍写死不该把墙钟读数也带走').toBe(true);
     // 预算表按值判：把节拍收到每帧都画，值腿必须咬住（文本腿按不到值，这一条是另一半）
     expect({ ...E2E_COMBAT_BUDGETS, renderEvery: 1 }.renderEvery >= 60, '把绘制节拍收到每帧都画，值腿却仍判为"够宽"').toBe(false);
+  });
+
+  /**
+   * 切片7c —— r7（2026-11-02，这条门禁**第一次跑完整轮**）红的那两条。
+   *
+   * 两条都不是战斗链断了，是**判据自己踩空**：
+   * - 站 1 只交首末两个点。夹具把玩家扔到兵跟前时那只兵已经在 `windup` 里，120 帧（2 秒）打完
+   *   一套连段又回到 `windup` ⇒ `后 === 前` ⇒ 报"没有追击/出手"，而同一份读数的 `我掉血` 是 `true`。
+   *   两个点分不开"在打"与"卡住"，这是形状问题，不是数值问题 —— 调帧数救不了它。
+   * - 站 2 在敌人断气那一帧就读 `stats.souls`。魂魄是 `loot.spawnKill()` 掉在地上的一件掉落物
+   *   （`src/combat/EnemyManager.js:516`），要玩家走进 `LootSystem` 的拾取半径才 `addSouls`
+   *   （`src/game/LootSystem.js:388-390`）⇒ 那个 0 是"还没踩上去"，不是"没结算"。
+   *
+   * 判据搬进 `harness-readings.战斗越线` 之后，这两个形状第一次能被**演示**而不是被叙述：
+   * 下面每一格都是合成读数，不起浏览器。
+   */
+  it('合成读数：同是"首末都在 windup"，走完连段必须绿、卡住必须红（切片7c）', () => {
+    const 过 = {
+      ai: { 轨迹: ['windup', 'strike', 'recover', 'windup'], 我掉血: true },
+      击杀: { 杀掉: true, 魂入账: 14, 掉距: 4.3, 收尸帧: 61, 击杀账: { soldier: 1 } },
+    };
+    expect(战斗越线(过, E2E_COMBAT_BUDGETS, []), `走过 strike 又回到 windup 就是 r7 的真读数，判红等于旧写法重犯`)
+      .toEqual([]);
+    // 同一对首末、只有中间不同：卡在半空出不来 ⇒ 轨迹与掉血两个证人各咬一口（2 条红）
+    const 卡住 = { ...过, ai: { 轨迹: ['windup'], 我掉血: false } };
+    const 红 = 战斗越线(卡住, E2E_COMBAT_BUDGETS, []);
+    expect(红.length, `卡在单一态又没打到人，两条证人各该红一次，实际 ${红.length} 条：${红.join(' / ')}`).toBe(2);
+    expect(红[0], '第一条该说轨迹').toContain('只走过 windup');
+    expect(红[1], '第二条该说掉血').toContain('没打到我');
+    // 两个证人各判各的：只补掉血（轨迹仍是一条直线）⇒ 只剩轨迹那一条红
+    const 只掉血 = { ...过, ai: { 轨迹: ['windup'], 我掉血: true } };
+    const 一条 = 战斗越线(只掉血, E2E_COMBAT_BUDGETS, []);
+    expect(一条.length, `只该轨迹红一条，实际：${一条.join(' / ')}`).toBe(1);
+    expect(一条[0]).toContain('只走过 windup');
+
+    // —— 空尺三格：读不出来必须红，不许把"没采到"读成"没问题" ——
+    const 没采 = 战斗越线({ ...过, ai: { 我掉血: true } }, E2E_COMBAT_BUDGETS, []);
+    expect(没采.some((条) => 条.includes('没交出状态轨迹')), `轨迹那一格整个缺席，红话却没点名：${没采.join(' / ')}`).toBe(true);
+    // 旧写法是 `魂入账 <= 0`：NaN 不参与大于 ⇒ 页面没交这个数时**它是绿的**。这一格钉的就是这个洞
+    // （变量而不是字面量：`use-isnan` 禁的是拿 NaN 直接比，这里要的正是"一个交不出来的数长什么样"）
+    const 空尺 = Number('页没交这个字段');
+    expect(空尺 <= 0, '这一句是旧写法为什么会绿的凭据；它若变了，下面那条腿的来历要跟着重写').toBe(false);
+    expect(战斗越线({ ...过, 击杀: { ...过.击杀, 魂入账: 空尺 } }, E2E_COMBAT_BUDGETS, []).length, '魂入账是 NaN 却仍判为已入账').toBeGreaterThan(0);
+    expect(战斗越线({ ...过, 击杀: { ...过.击杀, 击杀账: {} } }, E2E_COMBAT_BUDGETS, []).length, '击杀账本空着却仍判为记到了').toBeGreaterThan(0);
+
+    // —— 收尸窗不是逃生门：窗尽头仍是 0 照红，而且那句红要带得走下一步该看的数 ——
+    const 够不着 = 战斗越线({ ...过, 击杀: { ...过.击杀, 魂入账: 0, 掉距: 6.2, 收尸帧: 600 } }, E2E_COMBAT_BUDGETS, []);
+    expect(够不着.some((条) => 条.includes('掉距 6.2') && 条.includes('收尸用了 600')),
+      `魂火没入账时的红话要报出掉距与用了多少帧，否则下一次红还是同一轮考古：${够不着.join(' / ')}`).toBe(true);
+    // 异常那条也还在（搬进来的是一整张表，不是只搬两条新的）
+    expect(战斗越线(过, E2E_COMBAT_BUDGETS, ['boom']).length, '页面异常 1 条却仍判为过').toBe(1);
+  });
+
+  it('白名单里的每一格都得是敌人的态名（r7 手抄那份里躺着三个玩家态）', () => {
+    // 名册从真源数：`ENEMY_STATES` 的键就是敌人能处于的那些态
+    expect(ENEMY_STATE_NAMES, `敌人名册只有 ${ENEMY_STATE_NAMES.length} 档 —— 先去看 EnemyFSM 是不是被掏空了`)
+      .toEqual(expect.arrayContaining(['idle', 'pursue', 'windup', 'strike', 'recover']));
+    const 名册问题 = (名单) => 名单.filter((态) => !ENEMY_STATE_NAMES.includes(态));
+    for (const 态 of E2E_COMBAT_BUDGETS.aiEngagedStates) {
+      expect(ENEMY_STATE_NAMES, `"${态}" 不是敌人的一档，是抄错的词`).toContain(态);
+    }
+    // 反向控制：r7 那份手抄名单逐格过这把尺，玩家那三档必须被点名
+    expect(名册问题(['pursue', 'attack', 'light', 'heavy', 'strike']),
+      'attack/light/heavy 是 CombatController 的玩家态，敌人那一侧没有这三档，白名单里它们是死字')
+      .toEqual(['attack', 'light', 'heavy']);
+    // 前摇与等待各不算"出手"：windup 单列出现正是要抓的形状，orbit 是没抢到围攻名额
+    expect(E2E_COMBAT_BUDGETS.aiEngagedStates, '`windup` 进了出手名单 = 卡在承诺态也能绿').not.toContain('windup');
+    expect(E2E_COMBAT_BUDGETS.aiEngagedStates, '`orbit` 只是绕外圈等名额，不算出手').not.toContain('orbit');
+    // 收尸窗按值钉：它只许在"够得着"的量级里，抬到几千帧就是把这一站改成等着看
+    expect(E2E_COMBAT_BUDGETS.lootProbeFrames, '收尸窗为 0 = 这一站又回到断气那一帧读账').toBeGreaterThan(0);
+    expect(E2E_COMBAT_BUDGETS.lootProbeFrames, '收尸窗大于一千帧 = 把"没踩到"改成"多等一会儿"')
+      .toBeLessThanOrEqual(1000);
+  });
+
+  it('接线：站 1 每帧采、站 2 断气后用真输入收尸、越线表住在 harness 里（切片7c）', () => {
+    for (const [名, 尺] of Object.entries({ 站1交轨迹: 判据.站1交轨迹, 站2收尸走真输入: 判据.站2收尸走真输入, 收尸不抄近路: 判据.收尸不抄近路, 越线表搬进判据: 判据.越线表搬进判据 })) {
+      expect(尺(源文), `"${名}"在真源码上不过`).toBe(true);
+    }
+    const 坏 = {
+      循环里不采: 源文.replace('g.render(); 记一笔(); await', 'g.render(); await'),
+      不交轨迹: 源文.replace('return { 轨迹: 轨迹.slice(0, 40), 后: 兵.state,', 'return { 后: 兵.state,'),
+      不收尸: 源文.replace("      g.keys['KeyW'] = true;", '      /* 站着等 */;'),
+      窗口不走: 源文.replace('while (收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {',
+        'if (false && 收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {'),
+      传送踩点: 源文.replace("      g.keys['KeyW'] = true;", '      g.player.teleport(目标.x, p.y, 目标.z, { yaw: 0, pitch: 0 });'),
+      手抄名单回潮: 源文.replace('const 越线 = 战斗越线(R, 预算, exceptions);',
+        "const 越线 = !['pursue', 'attack', 'light', 'heavy', 'strike'].some((s) => R.ai.后.includes(s)) ? ['AI 没出手'] : [];"),
+    };
+    expect(判据.站1交轨迹(坏.循环里不采), '只在循环外采一次，腿却仍判为"每帧采"').toBe(false);
+    expect(判据.站1交轨迹(坏.不交轨迹), '轨迹不再交出去，腿却仍判为"交轨迹"').toBe(false);
+    expect(判据.站2收尸走真输入(坏.不收尸), '走路那一下没了，腿却仍判为"真输入收尸"').toBe(false);
+    expect(判据.站2收尸走真输入(坏.窗口不走), '窗口换成 if (false && …)：三个 token 一个没少，可它永远不会走一步').toBe(false);
+    expect(判据.收尸不抄近路(坏.窗口不走), '把窗口关掉不该顺带把"没用传送"这条也带走').toBe(true);
+    expect(判据.站2收尸走真输入(坏.传送踩点), '用 teleport 踩掉落也算"真输入"的话，这条腿就是装饰品').toBe(false);
+    expect(判据.收尸不抄近路(坏.传送踩点), '站 2 里出现 teleport 却仍判为"没抄近路"').toBe(false);
+    expect(判据.越线表搬进判据(坏.手抄名单回潮), '手抄那份含玩家态的名单回潮，腿却仍判为"搬进判据了"').toBe(false);
+    // 控制的控制：每一处只坏在自己那一格
+    expect(判据.站1交轨迹(坏.不收尸), '收尸那一处不该连累轨迹腿').toBe(true);
+    expect(判据.站2收尸走真输入(坏.循环里不采), '采样那一处不该连累收尸腿').toBe(true);
+    expect(判据.越线表搬进判据(坏.传送踩点), '传送那一处不该把"越线表搬走"也带走').toBe(true);
+    // 分段为什么是必须的：站 0 的传送夹具本来就存在，全文级禁令在**没被改坏的源码**上就是红的。
+    // 锚的是**调用形状**（`.teleport(`）不是光一个词：站 2 那三行注释里就写着"不 teleport"，
+    // 拿 `includes('teleport')` 判会把注释当代码 —— 与本文件 `口由Chrome自报` 同一条教训。
+    expect(源文.includes('g.player.teleport('), '站 0 的传送夹具不在了 —— 那这条"按站分段"的判据本身要重写').toBe(true);
+    expect(站2段(源文).includes('.teleport('), '站 2 里本来就不该有传送调用：全文级禁令会把站 0 的正当夹具一起抓走').toBe(false);
+    // 三站与白盒禁令都不该被这一片动到
+    expect(判据.三站都在(源文), '搬判据那一步把某一站搬没了').toBe(true);
+    expect(判据.不白盒扣血(源文), '收尸那一段顺手写了直接扣血/直接捡').toBe(true);
   });
 });

@@ -40,8 +40,10 @@ export const E2E_BUDGETS = {
  * 战斗 E2E 冒烟的阈值（门禁 `tests/e2e-combat.test.js` 钉住这几个数不许被悄悄放松）。
  *
  * 这几样各守一件事：
- * - `aiProbeFrames`：玩家贴脸后推这么多帧，兵必须从 idle 走进追击/出手。调大它 =
- *   "AI 不出手"这条越线变成"AI 出手得慢一点"。
+ * - `aiProbeFrames` + `aiEngagedStates`：玩家贴脸后推这么多帧，兵的**轨迹**里必须出现追击或出手。
+ *   "轨迹"是这一版的关键：r7 之前问的是"最后一帧的态和第一帧不同吗"，而那只兵起手就已经在
+ *   `windup` 里，两秒打完一套连段又回到 `windup` —— 首末相等，看着像卡死，其实是**在打**。
+ *   调大 `aiProbeFrames` = "AI 不出手"这条越线变成"AI 出手得慢一点"。
  * - `maxKillFrames`：真输入（每 12 帧一次左键边沿）打死一只兵最多允许这么多帧。
  *   它防的是"打击窗口与结算分家"那种断链 —— 把它从 2400 抬到 24000，
  *   门禁还在跑，但它已经改成"总有一天打得死"。
@@ -54,6 +56,32 @@ export const E2E_BUDGETS = {
 export const E2E_COMBAT_BUDGETS = {
   /** AI 通路的观察帧数（站 1 推帧数） */
   aiProbeFrames: 120,
+  /**
+   * 站 1 认可的"兵真的在打"那几档，**逐格必须是 `EnemyFSM` 里的态名**。
+   *
+   * 这一列第一次跑轮（2026-11-02 r7）抄的是 `['pursue','attack','light','heavy','strike']`
+   * —— 后三个是 `CombatController` 的**玩家**态，敌人那一侧压根没有这三档，
+   * 于是白名单里有两格是死字。现在由 `tests/e2e-combat.test.js` 拿
+   * `ENEMY_STATE_NAMES` 逐格核对，抄错当场红。
+   *
+   * 为什么不含 `windup`：前摇是"已经起手还没落"，它单列出现正是要抓的形状
+   * （承诺态走不完 = AI 卡在半空）；真出手的证据是 `strike` 与其后的 `recover`。
+   * 为什么不含 `orbit`：绕外圈是**没抢到围攻名额**的等待态，说明感知通了但没打，
+   * 拿它当证人会把"八只同时起手"那个老问题重新放过去。
+   */
+  aiEngagedStates: ['pursue', 'strike', 'recover'],
+  /**
+   * 击杀后再推这么多帧去**踩那堆掉落**（站 2 的收尸窗口）。
+   *
+   * 为什么要这一窗：魂火不是击杀那一行直接进 `stats.souls` 的 ——
+   * `EnemyManager` 在敌人断气那一帧调 `loot.spawnKill()` 把魂魄**掉在地上**
+   * （`src/combat/EnemyManager.js:516`），要等玩家走进 `LootSystem` 的拾取半径
+   * 才 `addSouls`（`src/game/LootSystem.js:388-390`）。r7 那句
+   * "击杀后魂火没入账（+0）"就是这么来的：`while (兵.alive)` 一退出就立刻读账，
+   * 读到的是"魂魄还躺在地上"的那个瞬间，不是结算链断了。
+   * 窗口的存在不等于放松 —— 窗尽头账仍是 0 就照红，而且红话里带着掉距。
+   */
+  lootProbeFrames: 600,
   /** 真输入击杀的帧预算：耗尽还没打死就是越线 */
   maxKillFrames: 2400,
   /**
