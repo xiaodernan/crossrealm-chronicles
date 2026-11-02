@@ -30,8 +30,8 @@
  * ① 表值层：48 格逐格同值（历史字面量）；族名册与 `MATERIAL_PATHS` 由表推导，与期望闭合。
  * ② 契约层：`paletteOf` 取值；族名/条目/深路径三处认不出各当场抛，且报错文本读得到可用键。
  * ③ 冻结层：表、族、族里的数组三层深冻结 —— 改不动（`Reflect.set` 为假、数组 push 抛）。
- * ④ 残留层：16 个文件逐一钉"残留字面量"的**集合与条数**（合计 100 处 / 77 种）；尺先在一段
- *    陈旧字面上认过 —— 否则"扫到 0 处"可能只是在读空集。
+ * ④ 残留层：16 个文件逐一钉"残留字面量"的**集合与条数**（合计 106 处 / 82 种，2026-10-31 重导）；
+ *    尺先在一段陈旧字面上认过 —— 否则"扫到 0 处"可能只是在读空集。
  * ⑤ 引用层：15 个消费方逐文件钉 `paletteOf('…')` 调用数 + 提及数 + import 数（提及=调用，
  *    动态传参会让两者不等）；其余 src 文件 0 提及；每个字面路径有效且并集恰是那 48 格（无死格）。
  *
@@ -132,8 +132,14 @@ const 期望值 = {
 const 残留钉板 = {
   'world/ProceduralDungeonGenerator.js': { 数: 0, 集: [] },
   'world/zones/FantasyZone.js': {
-    数: 8,
-    集: ['0x110022', '0x443300', '0x6a7a88', '0x88aa88', '0xc9a030', '0xff2244', '0xff6622'],
+    // W-E3 切片45 / 切片42（2026-10-30 夜里两笔 content 提交）新增三处 POI 身份色
+    // `first-arrow 0xa8c8e0` / `first-camp 0x8a6a4a` / `second-ember 0xd08040`。这一族按
+    // 表头的收录边界**不入调色板**（"标记与界面：POI 色…"），而 f8fb9bc 那种"借一条已有路径"
+    // 的前提是与原有桶同族（`0x9fd8ff` → `crystal.ice` 几乎同色）；这三格在表里找不到同族的桶，
+    // 硬借就是让机制片给三处地标换色 —— 调色是美术决定，不夹带。所以钉子照新值改，一格不借。
+    数: 11,
+    集: ['0x110022', '0x443300', '0x6a7a88', '0x88aa88', '0x8a6a4a', '0xa8c8e0', '0xc9a030',
+      '0xd08040', '0xff2244', '0xff6622'],
   },
   'world/zones/VoidZone.js': {
     数: 6,
@@ -162,12 +168,19 @@ const 残留钉板 = {
   'player/PlayerController.js': { 数: 1, 集: ['0x332200'] },
   'world/regionSurfaces.js': { 数: 0, 集: [] },
   'world/zones/MagicZone.js': {
-    数: 11,
-    集: ['0x1a1530', '0x220044', '0x443300', '0x44aa66', '0x6644cc', '0x8844ff', '0xaa44ff',
+    // W-E3 切片42（2026-10-30 夜）界碑之路的落点 `second-stone` 新铸了一格 `0x8a7a6a`。
+    // 同一晚同一区的 `ascend-founder-belfry` 走的是借色（下面 ⑤ 那一格）—— 两种写法出自同一批
+    // 提交，钉子这里按树收：身份色不入表，值由内容侧定，机制片不替它换色。
+    数: 12,
+    集: ['0x1a1530', '0x220044', '0x443300', '0x44aa66', '0x6644cc', '0x8844ff', '0x8a7a6a', '0xaa44ff',
       '0xaa66ff', '0xaa88ff', '0xffaa44'],
   },
   'world/zones/SpaceZone.js': {
-    数: 11,
+    // W-E3 切片41（2026-10-30 夜）`ascend-calibration-ring` 没有新铸值，而是把隔壁
+    // `space-tesseract` 那格 `0x66ccff` **再抄了一份**（同文件两处字面量，值相同）。
+    // 集合因此一格不涨、条数涨一格 —— 这一格是真正的抄本（改一处要记着改两处），
+    // 归内容侧收：要么提一个本文件的常量，要么借调色板里同族的那条路径。
+    数: 12,
     集: ['0x000000', '0x050810', '0x112244', '0x4488ff', '0x66aaff', '0x66ccff',
       '0x88aacc', '0x88ccff', '0xff8844', '0xffffff'],
   },
@@ -193,7 +206,10 @@ const 引用钉板 = {
   // 一开始写的是裸字面量（0x9fd8ff、0xd8b46a），④ 残留层当场红 —— 这两格改走调色板
   // （`crystal.ice` / `metal.gilt`：与原有桶同族，不为它们新开一格）。残留层因此一格没涨，
   // 涨的是这里：VoidZone 4 → 5、MagicZone 10 → 11。
-  'world/zones/VoidZone.js': { 调用: 5, 提及: 5, import: 1 },
+  // 82ad2ad（content(quest) 断誓碑，2026-10-30 22:45）照同一 recipe 办：第三座 POI
+  // `void-oath-stele` 的标记色借 `stone.voidPillar`（与它脚下那根柱同族），残留层仍一格没涨，
+  // 只有站点涨 —— 这一笔当时漏了改钉子，HEAD 上因此红着（本次归位）。VoidZone 5 → 6。
+  'world/zones/VoidZone.js': { 调用: 6, 提及: 6, import: 1 },
   'world/zones/BaseZone.js': { 调用: 3, 提及: 3, import: 1 },
   'world/WorldManager.js': { 调用: 4, 提及: 4, import: 1 },
   // 切片H 给八面幡补了幡杆（`hubBannerPole`），杆的材质走调色板的 `wood.door` ——
@@ -203,7 +219,9 @@ const 引用钉板 = {
   'effects/SceneEnhancer.js': { 调用: 3, 提及: 3, import: 1 },
   'combat/Enemy.js': { 调用: 1, 提及: 1, import: 1 },
   'player/PlayerController.js': { 调用: 1, 提及: 1, import: 1 },
-  'world/zones/MagicZone.js': { 调用: 11, 提及: 11, import: 1 },
+  // W-E3 切片42（2026-10-30 夜）：`ascend-founder-belfry` 的标记色借 `metal.gilt`（与旁边的
+  // 钟楼鎏金同族，不为它新开一格）—— 这一格是 ④ 希望的方向：站点涨、残留不涨。MagicZone 11 → 12。
+  'world/zones/MagicZone.js': { 调用: 12, 提及: 12, import: 1 },
   'world/zones/SpaceZone.js': { 调用: 5, 提及: 5, import: 1 },
   'world/zones/AbyssZone.js': { 调用: 1, 提及: 1, import: 1 },
   'world/zones/GloomZone.js': { 调用: 1, 提及: 1, import: 1 },
@@ -287,7 +305,7 @@ describe('W-C5 切片8 调色板', () => {
       );
     });
 
-    it('逐文件：集合与条数都不许漂（合计 100 处 / 77 种）', () => {
+    it('逐文件：集合与条数都不许漂（合计 106 处 / 82 种）', () => {
       let 总 = 0;
       const 全 = new Set();
       for (const [文件, 期望] of Object.entries(残留钉板)) {
@@ -298,8 +316,11 @@ describe('W-C5 切片8 调色板', () => {
         expect(命中.length, `${文件} 的残留字面量条数`).toBe(期望.数);
       }
       // W-E3 切片2：新增敌方治疗域的圈色（0x66ff99）—— 合计 100 → 101 处 / 77 → 78 种
-      expect(总, '残留字面量合计').toBe(101);
-      expect(全.size, '残留字面量不同值合计').toBe(78);
+      // W-E3 切片42 / 45：FantasyZone 三处 POI 身份色（见上面那块钉板的注）—— +3 处 / +3 种
+      // W-E3 切片42：MagicZone `second-stone` 新铸一格 —— +1 处 / +1 种
+      // W-E3 切片41：SpaceZone `ascend-calibration-ring` 抄了隔壁那格 —— +1 处 / 值不涨
+      expect(总, '残留字面量合计').toBe(106);
+      expect(全.size, '残留字面量不同值合计').toBe(82);
     });
   });
 
@@ -326,7 +347,9 @@ describe('W-C5 切片8 调色板', () => {
         expect(实.提及, `${文件}：提及数 ≠ 调用数 —— 只准传字面路径`).toBe(实.调用.length);
         expect(实.import, `${文件} 的 import 数`).toBe(期望.import);
       }
-      expect(调用总, '消费方调用合计').toBe(63);
+      // 82ad2ad 的第三座 POI 借色让 VoidZone 5 → 6、切片42 的钟楼借色让 MagicZone 11 → 12
+      // ⇒ 合计 63 → 65（同上面那块钉板的注）
+      expect(调用总, '消费方调用合计').toBe(65);
     });
 
     it('其余 src 文件 0 提及；定义文件自己 0 字面调用', () => {
