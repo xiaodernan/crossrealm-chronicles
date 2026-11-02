@@ -458,13 +458,21 @@ export function 原话尾巴(全文, 条数 = 3) {
  * `tests/e2e-combat.test.js` 能拿**合成读数**把两个形状各跑一遍 —— 卡在单一态的轨迹必须红、
  * 走完 windup→strike→recover 的轨迹必须绿、断气时掉距 6 米且窗尽头仍是 0 必须红。
  *
+ * ## 切片7d 补的第三格：入账 ≠ 这一只兵的账
+ *
+ * r8 绿了，可 `掉落在场 = 15` 暴露了收尸那一站的取值法：它朝**最近的一份**走，而竞技场里
+ * 躺着十几份别人的旧掉落。于是 `魂入账 = +25` 严格说的是"这片地上有一份被踩到了"，
+ * 不是"这一只兵掉的那一份被踩到了" —— 恰好是这条门禁本该证明的那件事。现在页那边按
+ * 对象身份 diff（断气前不在册）+ 断气点半米内 + `!gear && souls > 0` 认出那一枚，
+ * 判据多吃两个读数：认不出来红；入账了但那一枚还躺在场上也红（钱不是它带来的）。
+ *
  * ## 失败闭合
  *
  * 每一格都按"读不出来就是越线"写：`轨迹` 不是数组就红（采样那行被删了不该表现为"没卡死"），
  * `魂入账` 用 `> 0` 而不是 `!== 0`（`undefined`、`NaN`、负数都不算入账），`杀掉` 只认真值。
- * 这条门禁的红话必须比数字多说一点（掉距、用了多少帧），否则下一次红还是同一轮考古。
+ * 这条门禁的红话必须比数字多说一点（认领距、用了多少帧），否则下一次红还是同一轮考古。
  *
- * @param {{ai: {轨迹?: unknown, 我掉血?: boolean}, 击杀: {杀掉?: boolean, 魂入账?: number, 掉距?: number|null, 收尸帧?: number, 击杀账?: Record<string, number>}}} R 三站读数
+ * @param {{ai: {轨迹?: unknown, 我掉血?: boolean}, 击杀: {杀掉?: boolean, 魂入账?: number, 认领距?: number|null, 认领souls?: number, 新掉落数?: number, 魂火离场?: boolean, 收尸帧?: number, 击杀账?: Record<string, number>}}} R 三站读数
  * @param {{aiProbeFrames: number, aiEngagedStates: string[], lootProbeFrames: number, maxKillFrames: number, playerHp: number, minKillLedger: number, exceptions: number}} 预算
  * @param {string[]} [异常] 页面里未捕获的异常文本
  * @returns {string[]} 越线的话，空数组 = 这一轮过
@@ -484,10 +492,19 @@ export function 战斗越线(R, 预算, 异常 = []) {
     out.push(`AI 通路：${预算.aiProbeFrames} 帧后玩家血量仍等于基线 ${预算.playerHp} ⇒ 那兵根本没打到我（状态名对上也不算出手）`);
   }
   if (!R?.击杀?.杀掉) out.push(`${预算.maxKillFrames} 帧真输入没打死一只兵（敌血没走完）`);
+  // 「这一只兵自己的那枚魂火」认不出来 ⇒ 后面那句"入账了"证明不了任何东西（切片7d）
+  const 认领souls = R?.击杀?.认领souls;
+  if (!(typeof 认领souls === 'number' && 认领souls > 0)) {
+    out.push(`击杀后认不出这一只兵自己的那枚魂火：断气后新增 ${JSON.stringify(R?.击杀?.新掉落数)} 份掉落，`
+      + `里面没有"落在断气点半米内、且 !gear 而 souls>0"的那一枚（souls 读到 ${JSON.stringify(认领souls)}）`);
+  }
   const 入账 = R?.击杀?.魂入账;
   if (!(typeof 入账 === 'number' && 入账 > 0)) {
-    out.push(`击杀后 ${预算.lootProbeFrames} 帧内没踩到那堆掉落：魂火 +${JSON.stringify(入账)}`
-      + `｜断气时掉距 ${JSON.stringify(R?.击杀?.掉距)} 米｜收尸用了 ${JSON.stringify(R?.击杀?.收尸帧)}/${预算.lootProbeFrames} 帧`);
+    out.push(`击杀后 ${预算.lootProbeFrames} 帧内没踩到那一枚魂火：魂火 +${JSON.stringify(入账)}`
+      + `｜认领距 ${JSON.stringify(R?.击杀?.认领距)} 米｜收尸用了 ${JSON.stringify(R?.击杀?.收尸帧)}/${预算.lootProbeFrames} 帧`);
+  } else if (!R?.击杀?.魂火离场) {
+    out.push(`魂火 +${入账} 了，但认出来的那一枚（${JSON.stringify(认领souls)} 魂）还躺在场上`
+      + ` ⇒ 这笔账是别的东西入的，这一轮没证明"击杀→掉落→拾取"那条链`);
   }
   const 击杀数 = Object.values(R?.击杀?.击杀账 ?? {}).reduce((s, n) => s + (Number(n) || 0), 0);
   if (击杀数 < 预算.minKillLedger) out.push(`击杀账本是空的：quest stats.kills 没记 ${JSON.stringify(R?.击杀?.击杀账 ?? {})}`);

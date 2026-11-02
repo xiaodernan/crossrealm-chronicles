@@ -34,6 +34,11 @@
  *    `战斗越线`，本文件拿**合成读数**把"走完连段必须绿 / 卡在单一态必须红 / 空尺必须红"逐格演一遍。
  *    同一条还管词汇表：`aiEngagedStates` 逐格与 `EnemyFSM` 的真名册对账 —— r7 手抄那份里
  *    `attack` / `light` / `heavy` 三格是**玩家**的态，敌人永远不可能等于它们。
+ * ⑦ **"入账了"入账的是哪一枚**（切片7d，⑥ 修好之后第一轮绿暴露的）：r8 绿了，可同一份读数里
+ *    `掉落在场 = 15` —— 竞技场地上躺着十几份**别人**的旧掉落，而收尸那一站朝"最近的一份"走。
+ *    于是 `魂入账 > 0` 严格说的是"这片地上有一份被踩到了"，不是"这一只兵掉的那一枚被踩到了"。
+ *    现在页那边按**对象身份**认出那一枚（断气前不在册 + `!gear && souls > 0` + 断气点半米内），
+ *    判据多吃 `认领souls` / `魂火离场` 两格：认不出来红，入账了但那一枚还躺在场上也红。
  *
  *
  * 归属三判（`解析CDP口` / `页地址问题` / `通道问题`）住在 `scripts/harness-readings.mjs`，
@@ -46,6 +51,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { E2E_COMBAT_BUDGETS } from '../scripts/e2e-budgets.mjs';
 import { 战斗越线 } from '../scripts/harness-readings.mjs';
@@ -109,7 +115,7 @@ const 判据 = {
   /**
    * 站 2 断气之后还有一段**收尸**：魂火是掉在地上的一件掉落物，要玩家走进去才入账
    * （`EnemyManager.js:516` 掉 → `LootSystem.js:388` 捡），在断气那一帧读账读到的 0 不是断链。
-   * 走路用真输入（`KeyW` + 面向最近掉落），不 `teleport`：站 0 传送是**摆夹具**，
+   * 走路用真输入（`KeyW` + 面向**认出来的那一枚**），不 `teleport`：站 0 传送是**摆夹具**，
    * 收尸那一段要证的正是"玩家自己走得过去"，用传送踩点等于把这一站改成赋值能执行。
    */
   站2收尸走真输入: (s) => {
@@ -117,8 +123,39 @@ const 判据 = {
     // 三样各判一件事：真输入在、帧数从表里取、窗口**自己会走**（`while` 且带"账动了就停"那个逃生条件）。
     // 最后一样是被变异臂逼出来的：只查三个 token 在不在的话，`while (…)` 换成 `if (false && …)`
     // 三个 token 一个不少，腿照绿，而窗口已经永远不会走一步。
+    // 切口的形状（7d）：`魂火 &&` 是"认不出那一枚就根本不进窗"的守卫，删了它窗口会朝着 null 走。
     return 段.includes("g.keys['KeyW'] = true") && 段.includes('收尸帧')
-      && /while \(收尸帧 < \$\{预算\.lootProbeFrames\} && g\.stats\.souls === 旧魂\)/.test(段);
+      && /while \(魂火 && 收尸帧 < \$\{预算\.lootProbeFrames\} && g\.stats\.souls === 旧魂\)/.test(段);
+  },
+  /**
+   * 收尸认的是**这一只兵自己的那一枚**，不是"地上最近的那一份"（切片7d）。
+   *
+   * 由来是 r8 那份绿读数里的 `掉落在场 = 15`：按最近挑会挑到隔壁那堆旧掉落，`魂入账 > 0`
+   * 于是只证了"这片地上有东西被踩到"。三样合起来才叫"它自己的那一枚"：
+   * ① 断气前不在册 —— 对象身份 diff（`LootSystem._spawn` 每次新建一条记录，池化的只有
+   *    mesh/ring/beam 三件，所以身份可用）；② `!gear && souls > 0` —— 魂火那一份不带装备；
+   * ③ 落在断气点半米内 —— `EnemyManager.js:516` 把魂火下在 `enemy.position` 上。
+   * 再加"走路的方向指向 `魂火`"这一条，把"认出来了但朝别处走"那种半吊子也挡掉；
+   * 最后一条是禁令：旧的"最近的一份"那套取值法不许回潮。
+   */
+  收尸认身份: (s) => {
+    const 段 = 站2段(s);
+    return 段.includes('!断气前.has(d)') && 段.includes('!d.gear && d.souls > 0')
+      && 段.includes('Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5')
+      && 段.includes('Math.atan2(魂火.mesh.position.x - p.x')
+      && !/最近掉落|最距/.test(段);
+  },
+  /**
+   * 认出来还得**把身份交出去**（产侧，切片7d 的另一半）。
+   *
+   * 判据新吃的那三格（`认领souls` / `魂火离场` / `新掉落数`）全部是页那边读的。脚本停止返回它们时
+   * 真轮次会红 —— 那是 fail-closed 在设计上该有的表现，可它是"起了浏览器才发现"的形状问题；
+   * 而切片7c 把越线表搬出来的全部意义正是：形状问题在单测里就该红。这一条钉产侧，与上一条各管一头。
+   */
+  认身份交读数: (s) => {
+    const 段 = 站2段(s);
+    return /认领souls: 魂火\?\.souls \?\? 0/.test(段) && /魂火离场: 魂火 \?/.test(段)
+      && 段.includes('新掉落数: 新增.length');
   },
   收尸不抄近路: (s) => !站2段(s).includes('.teleport('),
   /** 越线表搬进 `harness-readings`；手抄那份态名单里躺着三个玩家态，不许回潮 */
@@ -566,11 +603,16 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
    *
    * 判据搬进 `harness-readings.战斗越线` 之后，这两个形状第一次能被**演示**而不是被叙述：
    * 下面每一格都是合成读数，不起浏览器。
+   *
+   * 切片7d 在同一格里补了第三个形状：r8 绿了，可那份读数里 `掉落在场 = 15` —— 收尸那一站朝
+   * **最近的一份**走，于是 `魂入账 > 0` 证的是"这片地上有东西被踩到"。踩到掉落 ≠ 踩到这一只兵掉的
+   * 那一枚，而这一站要证的正是后者；现在判据多吃 `认领souls` / `魂火离场` 两格，下面各演一遍。
    */
-  it('合成读数：同是"首末都在 windup"，走完连段必须绿、卡住必须红（切片7c）', () => {
+  it('合成读数：走完连段必须绿、卡在单一态必须红、认不出这一枚兵自己的那枚魂火必须红（切片7c/7d）', () => {
     const 过 = {
       ai: { 轨迹: ['windup', 'strike', 'recover', 'windup'], 我掉血: true },
-      击杀: { 杀掉: true, 魂入账: 14, 掉距: 4.3, 收尸帧: 61, 击杀账: { soldier: 1 } },
+      击杀: { 杀掉: true, 魂入账: 25, 认领距: 4.3, 认领souls: 25, 新掉落数: 2, 魂火离场: true,
+              收尸帧: 61, 击杀账: { soldier: 1 } },
     };
     expect(战斗越线(过, E2E_COMBAT_BUDGETS, []), `走过 strike 又回到 windup 就是 r7 的真读数，判红等于旧写法重犯`)
       .toEqual([]);
@@ -597,9 +639,46 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     expect(战斗越线({ ...过, 击杀: { ...过.击杀, 击杀账: {} } }, E2E_COMBAT_BUDGETS, []).length, '击杀账本空着却仍判为记到了').toBeGreaterThan(0);
 
     // —— 收尸窗不是逃生门：窗尽头仍是 0 照红，而且那句红要带得走下一步该看的数 ——
-    const 够不着 = 战斗越线({ ...过, 击杀: { ...过.击杀, 魂入账: 0, 掉距: 6.2, 收尸帧: 600 } }, E2E_COMBAT_BUDGETS, []);
-    expect(够不着.some((条) => 条.includes('掉距 6.2') && 条.includes('收尸用了 600')),
-      `魂火没入账时的红话要报出掉距与用了多少帧，否则下一次红还是同一轮考古：${够不着.join(' / ')}`).toBe(true);
+    const 够不着 = 战斗越线({ ...过, 击杀: { ...过.击杀, 魂入账: 0, 认领距: 6.2, 收尸帧: 600 } }, E2E_COMBAT_BUDGETS, []);
+    expect(够不着.some((条) => 条.includes('认领距 6.2') && 条.includes('收尸用了 600')),
+      `魂火没入账时的红话要报出认领距与用了多少帧，否则下一次红还是同一轮考古：${够不着.join(' / ')}`).toBe(true);
+
+    /**
+     * —— 切片7d：认不出"这一只兵自己的那一枚" ⇒ 后面那句"入账了"没有依据 ——
+     *
+     * 这三格合起来钉的是同一句话：`魂入账 > 0` 只有在**那一枚**被认出来、并且离场了的时候
+     * 才算证明了"击杀→掉落→拾取"这条链。少了任何一格，读起来都像过的其实是"地上有东西被踩到"。
+     */
+    // r8 的形状：场上 15 份旧掉落，朝最近的那份走，踩到了别人的账
+    const 踩错 = 战斗越线({ ...过, 击杀: { ...过.击杀, 认领souls: 0, 认领距: null, 新掉落数: 3, 魂火离场: false } },
+      E2E_COMBAT_BUDGETS, []);
+    expect(踩错.length, `认不出那一枚却踩着别的入了账，应当两格各红一次，实际 ${踩错.length} 条：${踩错.join(' / ')}`).toBe(2);
+    expect(踩错[0], '第一条该点名"认不出这一只兵自己的那枚魂火"，并带上新增几份掉落这个下一步该看的数')
+      .toContain('认不出这一只兵自己的那枚魂火');
+    expect(踩错[0]).toContain('断气后新增 3 份掉落');
+    expect(踩错[1], '第二条该说"这笔账不是那一枚带来的"').toContain('还躺在场上');
+    // 认得出、就是没走过去：只红入账那一格，且不许把"没认领"的话说出来
+    const 没走到 = 战斗越线({ ...过, 击杀: { ...过.击杀, 魂入账: 0, 魂火离场: false, 收尸帧: 600 } }, E2E_COMBAT_BUDGETS, []);
+    expect(没走到.length, `认得出那一枚、只是没踩上去，应当只红入账一格，实际：${没走到.join(' / ')}`).toBe(1);
+    expect(没走到[0]).not.toContain('认不出');
+    /**
+     * 空尺的第四格：页**根本没交** `认领souls`（脚本退回旧形状时就是这个样子）⇒ 必须红。
+     * 这一格与 7c 那格 `魂入账` 的 NaN 教训是同一把尺：判据若写成 `认领souls !== 0`，
+     * `undefined !== 0` 为真 ⇒ "认不出"这一句永远说不到，而读数明明是空的。
+     */
+    const 无认领 = { ...过.击杀 };
+    delete 无认领.认领souls;
+    const 缺字段 = 战斗越线({ ...过, 击杀: 无认领 }, E2E_COMBAT_BUDGETS, []);
+    expect(缺字段.filter((条) => 条.includes('认不出')).length,
+      `页没交 认领souls 却判为"认得出"：${缺字段.join(' / ')}`).toBe(1);
+    expect(缺字段[0], '数读不出来时红话要老实说读到的是 undefined，不许含糊成"没踩到"').toContain('souls 读到 undefined');
+    // 入账了、但那一枚还躺在场上 ⇒ 钱是别的东西给的
+    const 白捡 = 战斗越线({ ...过, 击杀: { ...过.击杀, 魂火离场: false } }, E2E_COMBAT_BUDGETS, []);
+    expect(白捡.length, '那一枚没离场而账却动了，说明入账的不是它').toBe(1);
+    expect(白捡[0], '红话要直接说这笔账是谁入的（不是它）').toContain('这笔账是别的东西入的');
+    // 反向控制：身份对上的那份（上面那张 `过`）必须还是绿的 —— 补洞不许把绿的判红
+    expect(战斗越线(过, E2E_COMBAT_BUDGETS, [])).toEqual([]);
+
     // 异常那条也还在（搬进来的是一整张表，不是只搬两条新的）
     expect(战斗越线(过, E2E_COMBAT_BUDGETS, ['boom']).length, '页面异常 1 条却仍判为过').toBe(1);
   });
@@ -625,25 +704,63 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
       .toBeLessThanOrEqual(1000);
   });
 
-  it('接线：站 1 每帧采、站 2 断气后用真输入收尸、越线表住在 harness 里（切片7c）', () => {
-    for (const [名, 尺] of Object.entries({ 站1交轨迹: 判据.站1交轨迹, 站2收尸走真输入: 判据.站2收尸走真输入, 收尸不抄近路: 判据.收尸不抄近路, 越线表搬进判据: 判据.越线表搬进判据 })) {
+  it('接线：站 1 每帧采、站 2 断气后朝**自己那一枚**收尸、越线表住在 harness 里（切片7c/7d）', () => {
+    for (const [名, 尺] of Object.entries({ 站1交轨迹: 判据.站1交轨迹, 站2收尸走真输入: 判据.站2收尸走真输入, 收尸认身份: 判据.收尸认身份, 认身份交读数: 判据.认身份交读数, 收尸不抄近路: 判据.收尸不抄近路, 越线表搬进判据: 判据.越线表搬进判据 })) {
       expect(尺(源文), `"${名}"在真源码上不过`).toBe(true);
     }
     const 坏 = {
       循环里不采: 源文.replace('g.render(); 记一笔(); await', 'g.render(); await'),
       不交轨迹: 源文.replace('return { 轨迹: 轨迹.slice(0, 40), 后: 兵.state,', 'return { 后: 兵.state,'),
       不收尸: 源文.replace("      g.keys['KeyW'] = true;", '      /* 站着等 */;'),
-      窗口不走: 源文.replace('while (收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {',
-        'if (false && 收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {'),
-      传送踩点: 源文.replace("      g.keys['KeyW'] = true;", '      g.player.teleport(目标.x, p.y, 目标.z, { yaw: 0, pitch: 0 });'),
-      手抄名单回潮: 源文.replace('const 越线 = 战斗越线(R, 预算, exceptions);',
-        "const 越线 = !['pursue', 'attack', 'light', 'heavy', 'strike'].some((s) => R.ai.后.includes(s)) ? ['AI 没出手'] : [];"),
+      窗口不走: 源文.replace('while (魂火 && 收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {',
+        'if (false && 魂火 && 收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {'),
+      // 认不出就不该进窗：把守卫摘掉，窗口会朝着 null 走（页里是一句 TypeError，不是一条红话）
+      窗口不认: 源文.replace('while (魂火 && 收尸帧 < ${预算.lootProbeFrames}', 'while (收尸帧 < ${预算.lootProbeFrames}'),
+      // 切片7d 的正主：把身份那三样换成 r8 的取值法（全场最近的一份，不管是谁掉的）
+      按最近挑: 源文.replace(`    const 新增 = (g.loot?.drops ?? []).filter((d) => !断气前.has(d));
+    const 魂火 = 新增.find((d) => !d.gear && d.souls > 0
+      && Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5) ?? null;`,
+        `    const 最近掉落 = () => {
+      let 最 = null, 最距 = Infinity;
+      for (const d of (g.loot?.drops ?? [])) {
+        const d距 = Math.hypot(g.player.position.x - d.mesh.position.x, g.player.position.z - d.mesh.position.z);
+        if (d距 < 最距) { 最距 = d距; 最 = d; }
+      }
+      return 最;
     };
+    const 魂火 = 最近掉落();`),
+      只丢身份diff: 源文.replace('.filter((d) => !断气前.has(d))', '.slice()'),
+      只丢魂火谓词: 源文.replace('find((d) => !d.gear && d.souls > 0', 'find((d) => d.souls > 0'),
+      只丢断气点容差: 源文.replace(' && Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5)', ')'),
+      // 认得出但不把身份交出去：判据会在真轮次里红在 fail-closed 那一格，可这条门禁从此只能靠浏览器发现
+      不交身份读数: 源文.replace(`             新掉落数: 新增.length, 认领距, 认领souls: 魂火?.souls ?? 0,
+             魂火离场: 魂火 ? !(g.loot?.drops ?? []).includes(魂火) : false,`, '             认领距,'),
+      传送踩点: 源文.replace("      g.keys['KeyW'] = true;", '      g.player.teleport(魂火.mesh.position.x, p.y, 魂火.mesh.position.z, { yaw: 0, pitch: 0 });'),
+      手抄名单回潮: 源文.replace('const 越线 = 战斗越线(R, 预算, exceptions);',
+        "const 越线 = !['pursue', 'attack', 'light', 'heavy', 'strike'].some((s) => R.ai.后.includes(s)) ? ['AI 没出手'] : []"),
+    };
+    // 反向控制的一条硬规矩：每一处拆法**必须真的把文本改了**，否则"腿不过"是假不过、
+    // "腿过"也可能是假过（拿不存在的锚点做 replace 是静默 no-op —— 见 #36）。
+    for (const [名, 变体] of Object.entries(坏)) {
+      expect(变体 !== 源文, `坏法"${名}"没改动任何文本（锚点抄错了？那条断言是在自证）`).toBe(true);
+    }
     expect(判据.站1交轨迹(坏.循环里不采), '只在循环外采一次，腿却仍判为"每帧采"').toBe(false);
     expect(判据.站1交轨迹(坏.不交轨迹), '轨迹不再交出去，腿却仍判为"交轨迹"').toBe(false);
     expect(判据.站2收尸走真输入(坏.不收尸), '走路那一下没了，腿却仍判为"真输入收尸"').toBe(false);
     expect(判据.站2收尸走真输入(坏.窗口不走), '窗口换成 if (false && …)：三个 token 一个没少，可它永远不会走一步').toBe(false);
     expect(判据.收尸不抄近路(坏.窗口不走), '把窗口关掉不该顺带把"没用传送"这条也带走').toBe(true);
+    expect(判据.站2收尸走真输入(坏.窗口不认), '守卫摘掉了，腿却仍判为"认得出才走"').toBe(false);
+    expect(判据.收尸认身份(坏.窗口不认), '摘守卫那一处只该红"会走"那条，不该连累身份腿').toBe(true);
+    expect(判据.收尸认身份(坏.按最近挑), '退回"全场最近的一份"，身份腿却仍判为认得出这一只兵的那一枚').toBe(false);
+    expect(判据.站2收尸走真输入(坏.按最近挑), '只换取值法不该把"真输入走路"也带走').toBe(true);
+    expect(判据.收尸不抄近路(坏.按最近挑), '只换取值法不该把"没用传送"也带走').toBe(true);
+    for (const 拆 of ['只丢身份diff', '只丢魂火谓词', '只丢断气点容差']) {
+      expect(判据.收尸认身份(坏[拆]), `${拆}：身份三样少了一样，腿却仍判为"认得出那一枚"`).toBe(false);
+      expect(判据.站2收尸走真输入(坏[拆]), `${拆}不该连累"真输入走路"那条`).toBe(true);
+    }
+    expect(判据.认身份交读数(坏.不交身份读数), '页不再交身份读数，产侧腿却仍判为"交了"').toBe(false);
+    expect(判据.收尸认身份(坏.不交身份读数), '只删返回字段不该把"怎么认"那条也带走（两头的洞要分开红）').toBe(true);
+    expect(判据.击杀要见魂火与账本(坏.不交身份读数), '魂火/账本仍在读数里，不该跟着红').toBe(true);
     expect(判据.站2收尸走真输入(坏.传送踩点), '用 teleport 踩掉落也算"真输入"的话，这条腿就是装饰品').toBe(false);
     expect(判据.收尸不抄近路(坏.传送踩点), '站 2 里出现 teleport 却仍判为"没抄近路"').toBe(false);
     expect(判据.越线表搬进判据(坏.手抄名单回潮), '手抄那份含玩家态的名单回潮，腿却仍判为"搬进判据了"').toBe(false);
@@ -651,6 +768,7 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     expect(判据.站1交轨迹(坏.不收尸), '收尸那一处不该连累轨迹腿').toBe(true);
     expect(判据.站2收尸走真输入(坏.循环里不采), '采样那一处不该连累收尸腿').toBe(true);
     expect(判据.越线表搬进判据(坏.传送踩点), '传送那一处不该把"越线表搬走"也带走').toBe(true);
+    expect(判据.收尸认身份(坏.手抄名单回潮), '名单回潮那一处不该连累身份腿').toBe(true);
     // 分段为什么是必须的：站 0 的传送夹具本来就存在，全文级禁令在**没被改坏的源码**上就是红的。
     // 锚的是**调用形状**（`.teleport(`）不是光一个词：站 2 那三行注释里就写着"不 teleport"，
     // 拿 `includes('teleport')` 判会把注释当代码 —— 与本文件 `口由Chrome自报` 同一条教训。
@@ -659,5 +777,26 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     // 三站与白盒禁令都不该被这一片动到
     expect(判据.三站都在(源文), '搬判据那一步把某一站搬没了').toBe(true);
     expect(判据.不白盒扣血(源文), '收尸那一段顺手写了直接扣血/直接捡').toBe(true);
+  });
+
+  /**
+   * 切片7d —— 这一条是本片**自己撞出来的**，不是补装饰。
+   *
+   * r9 那一轮浏览器根本没起：`node` 在 import 阶段报
+   * `SyntaxError: missing ) after argument list`（`scripts/e2e-combat.mjs:396`），
+   * 因是我在**页面驱动那一段模板字符串里面**的注释里写了反引号 —— 反引号当场把字符串截断，
+   * 剩下的 `)` 就没了配对。当时 18 条腿**全绿**：它们全部把脚本当**文本**读
+   * （readFileSync + includes/正则），没有一条真的解析过它。
+   *
+   * `tests/soak-readings.test.js` 早就为**同一件事**立过一条 `node --check` 腿，注释一字一字
+   * 写着"注释里出现一个反引号就会提前截断它"—— 可那条只钉 `soak.mjs` 一个文件，教训留在原地
+   * 没跟着搬进新写的 harness。所以这里一次钉三个文件，代价是一次子进程（~60ms）。
+   */
+  it('脚本本身要能被解析：反引号掉进页面模板字符串里 = 这一轮连浏览器都没起（切片7d）', () => {
+    for (const 名 of ['e2e-combat.mjs', 'harness-readings.mjs', 'e2e-budgets.mjs']) {
+      expect(() => execFileSync(process.execPath, ['--check', join(ROOT, 'scripts', 名)], { stdio: 'pipe' }),
+        `${名} 解析不过 —— 上面那些文本腿读的是字节，语法断了它们一句都不会红`)
+        .not.toThrow();
+    }
   });
 });

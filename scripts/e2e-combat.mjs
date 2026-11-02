@@ -397,15 +397,17 @@ try {
     const g = window.__game;
     const 兵 = g.enemyManager.enemies.find(e => e.type === 'soldier' && e.alive);
     const 旧魂 = g.stats.souls;
-    const 最近掉落 = () => {
-      const p = g.player.position;
-      let 最 = null, 最距 = Infinity;
-      for (const d of (g.loot?.drops ?? [])) {
-        const 距 = Math.hypot(p.x - d.mesh.position.x, p.z - d.mesh.position.z);
-        if (距 < 最距) { 最距 = 距; 最 = d; }
-      }
-      return 最 ? { 距: 最距, x: 最.mesh.position.x, z: 最.mesh.position.z } : null;
-    };
+    /**
+     * "这一只兵掉的那一份"用**对象身份 + 断气位置**认，不用"最近的一份"：
+     * 竞技场里躺着几十份别人的旧掉落（r8 读到 掉落在场 = 15），按最近挑会挑到隔壁那堆，
+     * 于是 魂入账 > 0 这句话只证明了"这片地上有东西被踩到"。
+     * EnemyManager.js:516 把魂火下在 enemy.position 上，而 _spawn 每次都新建一条
+     * 掉落记录（池化的只是 mesh/ring/beam 三件），所以断气前不在册、且落在断气点半米内的
+     * 那枚 !gear 而 souls > 0 的就是它自己的那一份。
+     * （这一段的注释里不许用反引号：它整片住在一个模板字符串里，反引号会当场把字符串断掉。）
+     */
+    const 在场 = () => new Set(g.loot?.drops ?? []);
+    const 断气前 = 在场();
     let 帧 = 0;
     let 掉过血 = false;
     while (兵.alive && 帧 < ${预算.maxKillFrames}) {
@@ -417,16 +419,18 @@ try {
       if (g.player.combat.hp < ${预算.playerHp}) 掉过血 = true;
       if (帧 % 120 === 0) await new Promise(r => setTimeout(r, 0));
     }
-    // 收尸：魂火是**掉在地上的那一份**（EnemyManager 只在断气那一帧 spawnKill，
-    // 入账要等玩家走进拾取半径），所以在断气那一帧读账读到的 0 不是"没结算"。
-    // 这一窗用真输入走路（KeyW + 面向最近掉落），不 teleport —— 玩家做得到才算通路。
-    const 断气时 = 最近掉落();
+    const 死点 = { x: 兵.position.x, z: 兵.position.z };
+    const 新增 = (g.loot?.drops ?? []).filter((d) => !断气前.has(d));
+    const 魂火 = 新增.find((d) => !d.gear && d.souls > 0
+      && Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5) ?? null;
+    const 距 = (d) => Number(Math.hypot(g.player.position.x - d.mesh.position.x,
+      g.player.position.z - d.mesh.position.z).toFixed(2));
+    // 收尸：这一窗只朝**那一枚**走，用真输入（KeyW + 面向它），不 teleport —— 玩家做得到才算通路。
     let 收尸帧 = 0;
-    while (收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {
-      const 目标 = 最近掉落();
-      if (!目标) break;
+    const 认领距 = 魂火 ? 距(魂火) : null;
+    while (魂火 && 收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {
       const p = g.player.position;
-      const 向 = Math.atan2(目标.x - p.x, 目标.z - p.z);
+      const 向 = Math.atan2(魂火.mesh.position.x - p.x, 魂火.mesh.position.z - p.z);
       g.player.yaw = 向; g.player.targetYaw = 向;
       g.keys['KeyW'] = true;
       g.update();
@@ -436,7 +440,9 @@ try {
     }
     g.keys['KeyW'] = false;
     return { 帧数: 帧, 杀掉: !兵.alive, 掉过血,
-             魂入账: g.stats.souls - 旧魂, 掉距: 断气时 ? Number(断气时.距.toFixed(2)) : null,
+             魂入账: g.stats.souls - 旧魂,
+             新掉落数: 新增.length, 认领距, 认领souls: 魂火?.souls ?? 0,
+             魂火离场: 魂火 ? !(g.loot?.drops ?? []).includes(魂火) : false,
              收尸帧, 掉落在场: (g.loot?.drops ?? []).length,
              击杀账: { ...(g.quests.stats.kills ?? {}) } };
   })()`);
