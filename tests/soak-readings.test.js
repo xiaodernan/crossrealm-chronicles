@@ -14,6 +14,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import {
   SOAK_COLUMNS, SOAK_FPS, SOAK_DEFAULTS, SOAK_BUDGETS,
@@ -597,5 +598,14 @@ describe('执行侧的确定性（脚本真的在跑游戏，不是在读常数�
     // 收尾必须拔整棵树：只 kill 主进程会留下 renderer 把 dev 口/临时目录钉住
     expect(脚本源).toMatch(/spawnSync\('taskkill', \['\/PID', String\(子进程\.pid\), '\/T', '\/F'\]/);
     expect(脚本源.indexOf('spawnSync'), '拔树排在删临时目录之后').toBeLessThan(脚本源.indexOf('rmSync(profileDir'));
+  });
+});
+
+describe('脚本本身必须可解析（导入即执行 ⇒ 语法坏了等于门禁根本没跑）', () => {
+  it('soak.mjs 通过 node --check', () => {
+    // 页面驱动整段包在模板字符串里：注释里出现一个反引号就会提前截断它，
+    // 而此前所有腿都只把脚本当**文本**读（readFileSync + toContain），没有一条真的解析过。
+    expect(() => execFileSync(process.execPath, ['--check', 脚本路径], { stdio: 'pipe' }))
+      .not.toThrow();
   });
 });

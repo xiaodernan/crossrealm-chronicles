@@ -976,7 +976,7 @@ try {
         袍程序 = 属 && 属.programs ? 属.programs.size : 0;
         if (属 && 属.programs) {
           // three r172 的 materialProperties.programs 是 Map（键 → program）；
-          // 直接 for...of 拿到的是 [键, program] 数组，`k.split` 会抛进下面的 catch（旧读数恒 −2）。
+          // 直接 for...of 拿到的是 [键, program] 数组，对它 split 会抛进下面的 catch（旧读数恒 −2）。
           for (const k of 属.programs.keys()) {
             const 段 = k.split(',');
             袍键.push('灯' + (段[36] ?? '?') + '/掩' + (段[52] ?? '?'));
