@@ -29,7 +29,7 @@
  * ① 推导账（`trial` → 清单，含"清单不许是空集"这条反身判据）
  * ② 飞升门的真值表（逐座清空/漏一座/多清非试炼座/没打第三 Boss）
  * ③ 开局点亮（新建图、读档兜底、存档优先）
- * ④ 指路读同一份（`QuestSystem` 那条 case）
+ * ④ 指路与演示步表都从表里读（`QuestSystem` 那条 case + W-D4 切片9 的推导步表）
  * ⑤ 世界地图**真渲染**（假 canvas 录 `fillText` / `arc`）
  * ⑥ 绝迹与反向对照（把旧写法贴回去，门禁必须点名）
  */
@@ -39,11 +39,11 @@ import { join } from 'node:path';
 import { installWindowShim } from './helpers/enemyHarness.js';
 import { fakeDoc } from './helpers/fakePanelDom.js';
 import { DUNGEON_DEFS, DUNGEON_IDS, TRIAL_DUNGEON_IDS } from '../src/content/dungeons.js';
-import { CONDITIONS, MAINLINE, emptyStats } from '../src/content/objectives.js';
+import { CONDITIONS, MAINLINE, emptyStats, objectiveTitle } from '../src/content/objectives.js';
 import { CONTENT_TABLES, checkDungeons, checkFields } from '../src/content/registry.js';
 import { ExplorationMap } from '../src/game/ExplorationMap.js';
 import { QuestSystem } from '../src/game/QuestSystem.js';
-import { QuestAssistant } from '../src/ui/QuestAssistant.js';
+import { buildDemoSteps } from '../src/ui/demoSteps.js';
 import { t } from '../src/engine/i18n.js';
 import { WorldMapPanel } from '../src/ui/WorldMapPanel.js';
 import { 串抄, 抄本表, 试炼三座, 旧面板表, 门抄, 滤抄 } from './helpers/wb10s3c-copies.js';
@@ -191,7 +191,7 @@ describe('③ 开局点亮：新建图 / 读档兜底 / 存档优先', () => {
   });
 });
 
-describe('④ 指路与助手清单读同一份', () => {
+describe('④ 指路与演示步表都从表里读', () => {
   const ascensionRow = MAINLINE.find((r) => r.condition === 'checkAllDungeons');
 
   it('试炼三座清了 + Boss3 已败 → 箭头指向世界之锚（不再要求清可选副本）', () => {
@@ -222,21 +222,30 @@ describe('④ 指路与助手清单读同一份', () => {
     expect(qs._resolveInteractWaypoint(ascensionRow).hint).toBe(基线);
   });
 
-  it('助手面板那一步的清单就是推导出来的那份（跑的是在役的 `_buildDemoSteps`，不是另抄的表）', () => {
-    // 这张步表是实例方法里的字面量数组；方法体只读模块级常量、不碰 `this`，
-    // 所以借原型调用就能拿到**被打包进游戏的那一份**（构造它要 DOM，那是另一件事）。
-    const steps = QuestAssistant.prototype._buildDemoSteps.call({});
-    expect(Array.isArray(steps), '_buildDemoSteps 不再返回数组：这条用例的落脚点变了').toBe(true);
-    const 步 = steps.find((s) => s.action === 'dungeons');
-    expect(步, `助手步表（共 ${steps.length} 步）里没有 action 为 'dungeons' 的那一步`).toBeTruthy();
-    expect(步.ids).toEqual(TRIAL_DUNGEON_IDS);
-    // 文案跟着清单走：以前写着"三座地下城"，名册长到第七座那天它也不会改口。
-    // 光比 `${length} 座地下城` 抓不到退回去写死的中文数词（三 == 3），所以另一条要认数字格式。
-    // W-D2 切片16i：标签是**文案键**，座数由 `params.n` 现取 —— 派生关系仍在。
-    expect(步.label).toBe('demo_step_dungeons');
-    expect(步.params?.n, '座数没有从清单现取（写死的话名册长到第七座那天就不改口了）').toBe(步.ids.length);
-    expect(t(步.label, 步.params)).toBe(`${步.ids.length} 座地下城`);
-    expect(t(步.label, 步.params).match(/^\d+ 座/), `「${t(步.label, 步.params)}」把座数写成了字，不再由清单说`).toBeTruthy();
+  it('助手/自动通关的步表不再自带副本清单（W-D4 切片9：一步认一行，id 从行上读）', () => {
+    // 改前这里断言的是"那一步的 `ids` 等于 `TRIAL_DUNGEON_IDS`"—— 也就是说，步表**自己抄了一份清单**，
+    // 只是抄的那一份恰好与推导同值。现在步表由 `MAINLINE` 推导，副本 id 来自行上的 `dungeonId`，
+    // 于是"试炼那几座"在步表里根本不再是一句话，而是每一行各说一次自己。
+    const steps = buildDemoSteps();
+    const 副本行 = MAINLINE.filter((r) => r.type === 'dungeon');
+    const 副本步 = steps.filter((s) => s.type === 'dungeon');
+    expect(副本步.map((s) => s.rowId), '副本行的演示步与主线对不上（少一步 = 那一座没人清）')
+      .toEqual(副本行.map((r) => r.id));
+    // 每一步清的那一座 = 它自己那一行指的那一座；没有一步带"一批 id"
+    副本步.forEach((s, i) => {
+      const 事件 = s.events.filter((e) => e.name === 'dungeon-cleared');
+      expect(事件.length, `${s.rowId} 的副本步不是「一座一次事件」的形状`).toBe(1);
+      expect(事件[0].detail.id, `${s.rowId} 清了别座（行上写的是 ${副本行[i].dungeonId}）`)
+        .toBe(副本行[i].dungeonId);
+    });
+    expect(steps.filter((s) => Array.isArray(s.ids) || Array.isArray(s.dungeonIds)), '步表又抄了一份清单').toEqual([]);
+    // 试炼那几座仍然被这次走查清到（这条腿原来靠 `ids` 断言，现在靠走一遍表断言）
+    const 清到的 = new Set(副本步.map((s) => s.events[0].detail.id));
+    for (const id of TRIAL_DUNGEON_IDS) expect(清到的, `演示走不到试炼座 "${id}"`).toContain(id);
+    // 文案跟着行走：标签是行自己的标题键，不再是 `demo_step_dungeons` 那种第二套词汇
+    expect(副本步.map((s) => s.label), '演示标签没读行上的标题')
+      .toEqual(副本行.map((r) => objectiveTitle(r)));
+    for (const s of 副本步) expect(t(s.label)).not.toBe(s.label);
   });
 });
 

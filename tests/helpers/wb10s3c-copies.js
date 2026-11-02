@@ -57,7 +57,10 @@ export const 抄本表 = [
   {
     标题: 'QuestAssistant 的助手清单',
     文件: 'ui/QuestAssistant.js',
-    认领: 'TRIAL_DUNGEON_IDS',
+    // W-D4 切片9：助手/自动通关的步表整个改成从主线推导，于是这一处**不再读试炼清单** ——
+    // 它读的是 `buildDemoSteps()`（每行各说自己那座 `dungeonId`，"试炼那几座"在步表里根本不成一句话）。
+    // `认领` 是"换了哪个读者"的当前陈述，跟着改；`尺` 与 `旧字节` 是冻结的历史读数，不许动。
+    认领: 'buildDemoSteps',
     尺: (s) => /action: 'dungeons', ids: \[/.test(s),
     旧字节: "      { label: '三座地下城', action: 'dungeons', ids: ['ruin-crypt', 'forbidden-library', 'five-dim-rift'] },",
   },

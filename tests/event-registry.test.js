@@ -22,7 +22,9 @@ import { t } from '../src/engine/i18n.js';
  *  - `payload: null` ⇔ 没有任何派发位点带 `detail`（双向都查，注册表不许骗人）；
  *  - `hook` ⇔ 仓库内没有监听者（并逐条写明"为什么没人听也不影响表现"）；
  *  - 注册表里的每个名字都必须在代码里真的被生产或被消费 —— 不许留死条目；
- *  - 动态拼出来的事件名只允许 `REST_DIALOGUE_EVENTS` 这一个来源。
+ *  - 动态拼出来的事件名只允许两个来源：`REST_DIALOGUE_EVENTS` 那张表，和 W-D4 切片9
+ *    之后演示步表交出的那几格（名字本身是 `demoSteps.js` 里的字面量，由 `demo-steps` ②
+ *    与 `demo-walkthrough` ① 两把尺钉住"既在记账表也在总线名册里"）。
  */
 
 const SRC = join(process.cwd(), 'src');
@@ -239,8 +241,8 @@ describe('事件登记表与代码双向对齐（B44）', () => {
     expect(thin).toEqual([]);
   });
 
-  it('动态事件名只有 REST_DIALOGUE_EVENTS 一个来源，且阶段合法', () => {
-    expect(dynamicDispatches.map((d) => d.file)).toEqual(['game/RestDialogue.js']);
+  it('动态事件名只有两处来源：REST_DIALOGUE_EVENTS 查表 与演示步表', () => {
+    expect([...dynamicDispatches.map((d) => d.file)].sort()).toEqual(['game/RestDialogue.js', 'ui/QuestAssistant.js']);
     /* 唯一允许的动态名必须是「查表」而不是「拼串」。
      * `rest-dialogue-${phase}` 同样会过上一条断言（还是这个文件里的动态位点），
      * 但它把 phase 拼错了就是一条无人监听、也无人报错的 CustomEvent —— B44 的原始病灶。
@@ -252,6 +254,17 @@ describe('事件登记表与代码双向对齐（B44）', () => {
     // 派生名族必须有人监听，否则它就是"静默消失"的下一个藏身处
     const deaf = derivedNames.filter((n) => consumersOf(n).size === 0);
     expect(deaf).toEqual([]);
+
+    /* 第二处是 W-D4 切片9 带来的：演示步表由主线推导，助手只做"把这一步的那几件事发出去"，
+     * 所以它派发的是 `事件.name`（变量）而不是字面量。这一处的"名字只能从表里取"由两把现成的尺
+     * 钉着，不在这里抄第三遍：`demo-steps` ②（每个名字 ∈ `STAT_EVENTS` 也 ∈ `GAME_EVENTS`，
+     * 打错当场红）+ `demo-walkthrough` ①（走查用真 `emit()`，名字不在总线上就抛）。
+     * 这里只钉形状：助手自己不许再写事件名字面量，且必须真的从 `demoSteps.js` 那一个出口拿。 */
+    const 助手 = stripComments(readFileSync(join(SRC, 'ui/QuestAssistant.js'), 'utf8'));
+    expect(助手).toMatch(/from '\.\/demoSteps\.js'/);
+    expect(助手.match(/emit\(\s*['"`]/g) ?? [], '助手又开始自己写事件名字面量了（那是第二份名册）').toEqual([]);
+    expect(助手, '演示派发没走步表交出的那几格 —— 上面那条"动态来源"就成了没人读的借口')
+      .toMatch(/for \(const 事件 of step\.events\)/);
   });
 
   it('登记表与其条目都是冻结的', () => {

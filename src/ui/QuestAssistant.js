@@ -1,13 +1,22 @@
 import { scheduler } from '../engine/Scheduler.js';
 import { refreshKeyText, keyText } from './keyHints.js';
 import { applyTranslations, t } from '../engine/i18n.js';
-import { BOSS_STAT_KEYS, objectiveDesc, objectiveTitle } from '../content/objectives.js';
-import { bossById } from '../content/bossRoster.js';
-import { ZONE_IDS, ZONE_NAMES } from '../content/ZoneIdentity.js';
-import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
+import { emit } from '../engine/EventBus.js';
+import { BOSS_STAT_KEYS, MAINLINE_BY_ID, objectiveDesc, objectiveTitle } from '../content/objectives.js';
+import { rollGear } from '../content/gear.js';
+import { buildDemoSteps } from './demoSteps.js';
 
 /** 自动通关/带路整条流程的计时分组，用户中途取消时整体撤销 */
 const AUTOPILOT_TAG = 'quest-autopilot';
+
+/**
+ * 演示要穿的那一件装备由一个**定值**的 rng 抽出来（W-D4 切片9）。
+ *
+ * 为什么不直接 `Math.random`：这两格（`gear-charm` / `gear-sigil`）走的是真生产者
+ * `PlayerStats.equip`，随机就等于"每一轮 e2e 的属性加成不一样" —— 而这一条门禁要的
+ * 是可重复的读数。0.5 落在哪一档由 `content/gear.js` 的权重表说，这里不抄那一格。
+ */
+const DEMO_ROLL = () => 0.5;
 
 /** 位面助手 — U：自动通关 / 带路 / 传送 */
 export class QuestAssistant {
@@ -176,7 +185,7 @@ export class QuestAssistant {
     this.autoPlayRunning = true;
     this.hide();
     this.refresh();
-    const steps = this._buildDemoSteps();
+    const steps = buildDemoSteps();
     const ok = this.game.playerAutoPlay.begin(steps, (step) => this._runDemoStep(step, false));
     if (!ok) {
       this.autoPlayRunning = false;
@@ -192,7 +201,7 @@ export class QuestAssistant {
     this.game.dialog.toast(t('qa_toast_demo_start'));
     this.refresh();
 
-    const steps = this._buildDemoSteps();
+    const steps = buildDemoSteps();
     for (let i = 0; i < steps.length; i++) {
       if (!this.demoRunning) break;
       this._demoStep = i + 1;
@@ -209,120 +218,46 @@ export class QuestAssistant {
     this.refresh();
   }
 
-  _buildDemoSteps() {
-    return [
-      { label: 'demo_step_anchor', action: 'tp', x: 0, z: 55 },
-      { label: 'demo_step_touch_anchor', action: 'poi', id: 'hub-anchor' },
-      { label: 'enemy_name_dummy', action: 'hits', x: 15, z: 45, count: 8 },
-      { label: ZONE_NAMES[ZONE_IDS.FANTASY], action: 'tp', x: -200, z: 0 },
-      { label: 'demo_step_kill_soldier', action: 'kills', type: 'soldier', count: 2 },
-      { label: 'wp_label_one_ring', action: 'discover', id: 'fantasy-ring', x: -200, z: -30 },
-      { label: 'demo_step_shadow_boss', action: 'tp', x: -250, z: -35 },
-      { label: 'demo_step_boss_shadow_defeat', action: 'boss', key: 'bossDefeated', bossId: 'shadow-warden' },
-      { label: ZONE_NAMES[ZONE_IDS.MAGIC], action: 'tp', x: 0, z: -180 },
-      { label: 'demo_step_magic_castle', action: 'discover', id: 'magic-castle', x: 0, z: -195 },
-      { label: 'wp_label_golem_patrol', action: 'kills', type: 'golem', count: 1 },
-      { label: ZONE_NAMES[ZONE_IDS.SPACE], action: 'tp', x: 200, z: 80 },
-      { label: 'demo_step_tesseract', action: 'discover', id: 'space-tesseract', x: 200, z: 80 },
-      { label: 'demo_step_reforge', action: 'poi', id: 'hub-anchor' },
-      { label: 'demo_step_chests', action: 'chests', count: 5 },
-      { label: 'demo_step_wanderer', action: 'npc', id: 'wanderer', x: -8, z: 45 },
-      { label: bossById('archmagus').shortNameKey, action: 'boss', key: 'boss2Defeated', bossId: 'archmagus', x: 5, z: -220 },
-      { label: 'demo_step_void_knight', action: 'kills', type: 'elite', count: 1 },
-      { label: 'demo_step_level5', action: 'level', level: 5 },
-      { label: 'demo_step_astronaut', action: 'npc', id: 'astronaut-echo', x: 200, z: 90 },
-      { label: 'demo_step_spells', action: 'spells', count: 8 },
-      { label: 'demo_step_dungeons', params: { n: TRIAL_DUNGEON_IDS.length }, action: 'dungeons', ids: TRIAL_DUNGEON_IDS },
-      { label: bossById('singularity-herald').shortNameKey, action: 'boss', key: 'boss3Defeated', bossId: 'singularity-herald', x: 235, z: 155 },
-      { label: 'demo_step_mind', action: 'mind', value: 2 },
-      { label: 'demo_step_ascend', action: 'poi', id: 'hub-anchor' },
-      { label: ZONE_NAMES[ZONE_IDS.VOID], action: 'tp', x: 0, z: 220 },
-      { label: 'demo_step_void_rift', action: 'discover', id: 'void-rift', x: 0, z: 220 },
-      { label: 'demo_step_charged', action: 'charged', count: 5 },
-      { label: bossById('void-chronarch').shortNameKey, action: 'boss', key: 'voidBossDefeated', bossId: 'void-chronarch', x: 0, z: 235 },
-      { label: 'wp_label_void_tablet', action: 'discover', id: 'void-tablet', x: 0, z: 225 },
-      { label: 'demo_step_true_walker', action: 'poi', id: 'hub-anchor' },
-      { label: ZONE_NAMES[ZONE_IDS.ABYSS], action: 'tp', x: -200, z: 220 },
-      { label: 'wp_label_chaos_core', action: 'discover', id: 'chaos-core', x: -200, z: 220 },
-      { label: 'demo_step_weapon_skills', action: 'skills', count: 3 },
-      { label: bossById('chaos-overlord').shortNameKey, action: 'boss', key: 'chaosBossDefeated', bossId: 'chaos-overlord', x: -200, z: 285 },
-      { label: 'demo_step_dungeon_rerun', action: 'dungeonRerun' },
-      { label: ZONE_NAMES[ZONE_IDS.GLOOM], action: 'tp', x: 180, z: 100 },
-      { label: 'demo_step_gloom_deep', action: 'discover', id: 'gloom-deep-entrance', x: 180, z: 170 },
-      { label: 'demo_step_gloom_moss', action: 'discover', id: 'gloom-moss', x: 150, z: 120 },
-      { label: ZONE_NAMES[ZONE_IDS.RADIANT], action: 'tp', x: -180, z: -160 },
-      { label: 'demo_step_radiant_gate', action: 'discover', id: 'radiant-main-gate', x: -180, z: -95 },
-      { label: 'demo_step_radiant_altar', action: 'discover', id: 'radiant-altar', x: -155, z: -175 },
-      { label: 'demo_step_endless_walker', action: 'poi', id: 'hub-anchor' },
-    ];
-  }
-
+  /**
+   * 走一步：到位 → 把这一行的**效果发出去** → 让真 `QuestSystem` 判与推。
+   *
+   * 效果只有两条出口（口径与"为什么"见 `ui/demoSteps.js` 文件头）：
+   * - `events` 一律是 `STAT_EVENTS` 里登记过的事件名，走 `emit()` ⇒ 名字抄错当场抛，
+   *   而不是"下游静默失踪"（`engine/EventBus.js` 那条登记咽喉）；
+   * - `producer` 是等级 / 心智 / 装备那三格的**真生产者**（`PlayerStats`）—— 它们在账本里
+   *   是**读数**（`STAT_READINGS`），赋值进账本就是造一个生产方永远不会发的快照。
+   *
+   * 改前这里是这六处最坏的形状：`qs.stats.kills[type] += n` / `qs.stats[step.key] = true` /
+   * `qs.stats.chestsOpened = Math.max(…)` / `qs.stats.skillsUnlocked = Math.max(…)` /
+   * `qs.stats.dungeonRerun = true` + 两处 `game.stats.* = 值` 之后自己 `checkProgress()`。
+   * 直接写账本 = 演示测的是"赋值能不能执行"，不是"那条链通不通"：记账表 `STAT_EVENTS`
+   * 改一格、或某个事件的派发位点整个没了，演示照样一路"通关"（clear-r1 查实的正是这一族）。
+   */
   async _runDemoStep(step, teleport = true) {
     const qs = this.game.quests;
     if (teleport && step.x != null) this._teleport(step.x, step.z);
     await this._wait(teleport ? 300 : 150);
 
-    switch (step.action) {
-      case 'poi':
-        window.dispatchEvent(new CustomEvent('discovery', { detail: { id: step.id, title: step.id, text: '' } }));
-        window.dispatchEvent(new CustomEvent('poi-interact', { detail: { id: step.id } }));
-        break;
-      case 'discover':
-        window.dispatchEvent(new CustomEvent('discovery', { detail: { id: step.id, title: step.id, text: '' } }));
-        qs.checkProgress();
-        break;
-      case 'hits':
-        for (let i = 0; i < (step.count ?? 8); i++) window.dispatchEvent(new CustomEvent('combat-hit'));
-        break;
-      case 'kills':
-        qs.stats.kills[step.type] = (qs.stats.kills[step.type] || 0) + (step.count ?? 1);
-        qs.checkProgress();
-        break;
-      case 'boss':
-        qs.stats[step.key] = true;
-        window.dispatchEvent(new CustomEvent('enemy-defeated', {
-          detail: { type: 'boss', bossId: step.bossId, name: step.bossId },
-        }));
-        break;
-      case 'chests':
-        qs.stats.chestsOpened = Math.max(qs.stats.chestsOpened, step.count ?? 5);
-        qs.checkProgress();
-        break;
-      case 'npc':
-        window.dispatchEvent(new CustomEvent('npc-talk', { detail: { id: step.id } }));
-        break;
-      case 'level':
-        this.game.stats.level = step.level ?? 5;
-        // 属性被 cheat 改了就要重推一次：战斗数值与蓝条上限都跟着这份读数走
-        this.game.stats.pushToConsumers();
-        qs.checkProgress();
-        break;
-      case 'spells':
-        for (let i = 0; i < (step.count ?? 8); i++) window.dispatchEvent(new CustomEvent('spell-cast', { detail: { charged: false } }));
-        break;
-      case 'dungeons':
-        for (const id of step.ids ?? []) {
-          window.dispatchEvent(new CustomEvent('dungeon-cleared', { detail: { id } }));
-        }
-        break;
-      case 'charged':
-        for (let i = 0; i < (step.count ?? 5); i++) window.dispatchEvent(new CustomEvent('spell-cast', { detail: { charged: true } }));
-        break;
-      case 'mind':
-        this.game.stats.mind = step.value ?? 2;
-        this.game.stats.pushToConsumers();
-        qs.checkProgress();
-        break;
-      case 'skills':
-        qs.stats.skillsUnlocked = Math.max(qs.stats.skillsUnlocked, step.count ?? 3);
-        qs.checkProgress();
-        break;
-      case 'dungeonRerun':
-        qs.stats.dungeonRerun = true;
-        qs.checkProgress();
-        break;
-      default:
-        break;
+    const 负载行 = MAINLINE_BY_ID.get(step.rowId);
+    for (const 事件 of step.events) {
+      // `discovery` 的负载按仓里的规矩带**已译好的**显示字段（派发方负责译，见下面
+      // `_tryAutoAction` 那一处与 `world/WorldManager` 那几处）：HUD 的"发现：{title}"
+      // 与日志条目直接取 `detail.title / .text`，不给它们就是空白。
+      // 正文现问 `objectiveDesc(行, 账本)`，不从步表里抄 —— 抉择行的正文随玩家选的那条变。
+      const 负载 = 事件.name === 'discovery'
+        ? { ...事件.detail, title: t(step.label), text: t(objectiveDesc(负载行, qs.stats)) }
+        : 事件.detail;
+      emit(事件.name, 负载);
+    }
+    const 生产 = step.producer;
+    if (生产?.kind === 'level') {
+      this.game.stats.level = 生产.value;
+      this.game.stats.pushToConsumers();
+    } else if (生产?.kind === 'mind') {
+      this.game.stats.mind = 生产.value;
+      this.game.stats.pushToConsumers();
+    } else if (生产?.kind === 'gear') {
+      this.game.stats.equip(生产.slot, rollGear(DEMO_ROLL));
     }
     qs.syncProgress();
   }

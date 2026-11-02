@@ -17,7 +17,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { ZONE_IDS, ZONE_ORDER, ZONE_NAMES, LEGACY_NAME_TO_ID, zoneIdOf } from '../src/content/ZoneIdentity.js';
+import { ZONE_IDS, ZONE_NAMES, LEGACY_NAME_TO_ID, zoneIdOf } from '../src/content/ZoneIdentity.js';
 import { t } from '../src/engine/i18n.js';
 
 const ROOT = process.cwd();
@@ -112,17 +112,33 @@ describe('豁免的可达性：那张旧名表确实有读者，不是留着当�
 });
 
 describe('改口之后：三处 label 接的是表，成段文案钉的是字面', () => {
-  it('任务助手那五行"去某位面"的 label 不再抄区名', () => {
-    const 源码 = srcText('src/ui/QuestAssistant.js');
-    // W-D2 切片16i：区名的**显示值**住在双表里，源码里出现的是键（`zone_name_*`）
-    // —— 所以这里查的是**展开后**的现行名，抄本仍然是抄本。
+  it('任务助手那五行"去某位面"的 label 随手抄表一起绝迹，接名字表的活搬到了主线行上', () => {
+    // W-D4 切片9 之前：助手里那七行 `{ label: ZONE_NAMES[...] , action: 'tp' }` 是**抄本**（它抄坐标），
+    // 这一片的判据只能要求"抄得对不对"。抄本删掉以后，判据改成两件更强的：
+    //   1. 演示侧两个文件里 `ZONE_NAMES` 一次都不许出现 —— 那七行不许长回来；
+    //   2. 仍然接名字表的那一处是**主线表的 `waypoint.label`**，它接的是键（不是展开后的字面）。
     const 现行名 = Object.values(ZONE_NAMES).map((k) => t(k));
-    const 抄来的 = 源码.split('\n').filter((l) => /label: '[^']*'/.test(l)
-      && 现行名.some((nm) => l.includes(nm)));
-    expect(抄来的, `这些行又把区名抄进面板行了：\n${抄来的.join('\n')}`).toEqual([]);
-    for (const zone of ZONE_ORDER) {
-      expect(源码, `助手里缺了去 ${zone} 那一格，或它没接名字表`).toContain(`ZONE_NAMES[ZONE_IDS.${zone.toUpperCase()}]`);
+    for (const rel of ['src/ui/QuestAssistant.js', 'src/ui/demoSteps.js']) {
+      const 源码 = srcText(rel);
+      const 抄来的 = 源码.split('\n').filter((l) => /label: '[^']*'/.test(l)
+        && 现行名.some((nm) => l.includes(nm)));
+      expect(抄来的, `${rel} 又把区名抄进面板行了：\n${抄来的.join('\n')}`).toEqual([]);
+      expect(源码.includes('ZONE_NAMES'), `${rel} 里又出现了 ZONE_NAMES —— 那七行手抄的位面 label 长回来了`).toBe(false);
+      // 两把尺各自的旧字节（`git show HEAD:src/ui/QuestAssistant.js` 里真有这两行）：
+      // 量不到旧形状的尺子是死的，而这一片的病恰好是"抄本看着无害"。
+      const 旧抄区名 = `      { label: '${t(ZONE_NAMES[ZONE_IDS.MAGIC])}', action: 'tp', x: 0, z: -180 },`;
+      const 旧接名字表 = "      { label: ZONE_NAMES[ZONE_IDS.FANTASY], action: 'tp', x: -200, z: 0 },";
+      const 量到 = 旧抄区名.split('\n').filter((l) => /label: '[^']*'/.test(l)
+        && 现行名.some((nm) => l.includes(nm)));
+      expect(量到.length, '这把尺量不到"把展开后的区名写进 label"那一行了：上面那条是恒绿').toBe(1);
+      expect(旧接名字表.includes('ZONE_NAMES'), '旧字节样本写坏了：`ZONE_NAMES` 绝迹那半边的对照失去意义').toBe(true);
     }
+    const 表源 = srcText('src/content/objectives.js');
+    const 表接的 = [...表源.matchAll(/ZONE_NAMES\[ZONE_IDS\.([A-Z]+)\]/g)].map((m) => m[1]);
+    expect(表接的.length, '主线表里一格接名字表的 label 都没有：位面名这一半在读空集').toBeGreaterThan(0);
+    const 没这名 = 表接的.filter((键名) => !(键名 in ZONE_IDS));
+    expect(没这名.join('、'), `主线表写了名册里没有的区名键：${没这名.join('、')}`).toBe('');
+    expect(new Set(表接的).size, '只有一个区接名字表：其余位面又变成字面了').toBeGreaterThan(1);
   });
 
   it('枢纽那五扇位面门与那圈指路牌：牌上没有文字，抄本删掉了（label 从来没人读）', () => {

@@ -1858,34 +1858,10 @@ export const STRINGS_EN = Object.freeze({
   kb_label_editor_delete: 'Delete',
   kb_label_confirm: 'UI Confirm',
 
-  // Plane assistant demo steps (W-D2 slice 16i)
-  demo_step_anchor: 'Hub · World Anchor',
-  demo_step_touch_anchor: 'Touch the World Anchor',
-  demo_step_kill_soldier: 'Defeat the Shadow Warriors',
-  demo_step_shadow_boss: 'Shadow Warden Boss',
-  demo_step_boss_shadow_defeat: 'Defeat the Shadow Warden',
+  // The 26 `demo_step_*` keys went with W-D4 slice 9: demo labels are now each mainline row's
+  // own title (`obj_*_title`), so the demo no longer keeps a second vocabulary for the same act.
+  // Only the `magic-castle` POI display name remains (read by MagicZone's dialogue and card).
   demo_step_magic_castle: 'Floating Castle',
-  demo_step_tesseract: 'Five-Dimensional Tesseract',
-  demo_step_reforge: 'Reforge the Anchor',
-  demo_step_chests: 'Ch2 Chests',
-  demo_step_wanderer: 'Wanderer',
-  demo_step_void_knight: 'Void Knight',
-  demo_step_level5: 'Reach Lv5',
-  demo_step_astronaut: 'Astronaut',
-  demo_step_spells: 'Spell Practice',
-  demo_step_dungeons: '${n|Dungeon|Dungeons}',
-  demo_step_mind: 'Mind Upgrade',
-  demo_step_ascend: 'Plane Ascension',
-  demo_step_void_rift: 'Timeline Rift',
-  demo_step_charged: 'Charged Spells',
-  demo_step_true_walker: 'True Plane Walker',
-  demo_step_weapon_skills: 'Weapon Skills ×3',
-  demo_step_dungeon_rerun: 'Abyss Redive',
-  demo_step_gloom_deep: 'Deep Glooms',
-  demo_step_gloom_moss: 'Glowing Moss',
-  demo_step_radiant_gate: 'Sanctuary Gate',
-  demo_step_radiant_altar: 'Dawn Altar',
-  demo_step_endless_walker: 'Endless Walker · Clear',
   campfire_memory_default_speaker: 'Plane Campfire',
 
   // Menu

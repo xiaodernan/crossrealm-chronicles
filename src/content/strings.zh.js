@@ -1856,34 +1856,10 @@ export const STRINGS_ZH = Object.freeze({
   kb_label_editor_delete: '删除',
   kb_label_confirm: '界面确认',
 
-  // 位面助手演示步骤（W-D2 切片16i）
-  demo_step_anchor: '枢纽 · 世界之锚',
-  demo_step_touch_anchor: '触摸世界之锚',
-  demo_step_kill_soldier: '击败影之战士',
-  demo_step_shadow_boss: '影界 Boss',
-  demo_step_boss_shadow_defeat: '击败影界守护者',
+  // 位面助手演示步骤的 `demo_step_*` 那一族 26 个键随 W-D4 切片9 删除：演示的标签改成
+  // 主线行自己的标题（`obj_*_title`），不再由演示另开一套词汇。这里只剩 POI `magic-castle`
+  // 的显示名（`MagicZone` 的对话与发现卡片在读它，见 `tests/zone-poi-dialogue-i18n.test.js`）。
   demo_step_magic_castle: '悬浮城堡',
-  demo_step_tesseract: '五维_tesseract',
-  demo_step_reforge: '重铸锚点',
-  demo_step_chests: 'Ch2 宝箱',
-  demo_step_wanderer: '流浪者',
-  demo_step_void_knight: '虚空骑士',
-  demo_step_level5: '升级 Lv5',
-  demo_step_astronaut: '宇航员',
-  demo_step_spells: '法术练习',
-  demo_step_dungeons: '${n} 座地下城',
-  demo_step_mind: '心智升级',
-  demo_step_ascend: '位面飞升',
-  demo_step_void_rift: '时线裂隙',
-  demo_step_charged: '蓄力法术',
-  demo_step_true_walker: '真·位面行者',
-  demo_step_weapon_skills: '武器技能×3',
-  demo_step_dungeon_rerun: '地下城再探',
-  demo_step_gloom_deep: '幽暗深处',
-  demo_step_gloom_moss: '荧光苔藓',
-  demo_step_radiant_gate: '圣域大门',
-  demo_step_radiant_altar: '晨曦祭坛',
-  demo_step_endless_walker: '无尽行者 · 通关',
   campfire_memory_default_speaker: '位面营火',
 
   // 菜单

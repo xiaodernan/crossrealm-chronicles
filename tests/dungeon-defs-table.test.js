@@ -442,7 +442,14 @@ describe('④ 指路：路点由表推导，认不出就抛', () => {
   it('QuestSystem 里那份手抄地下城路点表没了，改为现问副本表', () => {
     const 源码 = stripComments(readSrc('game/QuestSystem.js'));
     expect(源码, 'DUNGEON_WAYPOINTS 那份手抄表又回来了').not.toMatch(/\bDUNGEON_WAYPOINTS\b/);
-    expect(源码).toMatch(/dungeonDefOf\(/);
+    // 切片9 之后"现问副本表"多了一跳：QuestSystem 问 `dungeonWaypoint()`，那一函数自己问 `dungeonDefOf()`。
+    // 两跳都在，才算仍然读的是副本表 —— 只查 QuestSystem 里有没有 `dungeonDefOf(` 是把判据钉在调用形状上。
+    expect(源码).toMatch(/dungeonWaypoint\(/);
+    const 表源 = stripComments(readSrc('content/objectives.js'));
+    const 那一跳 = 表源.match(/export function dungeonWaypoint[\s\S]*?\n\}/);
+    expect(那一跳, '`dungeonWaypoint` 这一跳没了（副本入口坐标会在下一句变成第二份真相）').toBeTruthy();
+    expect(那一跳[0], '`dungeonWaypoint` 不再现问副本表 —— 那份入口坐标会重新变成抄本')
+      .toMatch(/dungeonDefOf\(/);
     expect(readSrc('game/QuestSystem.js')).toContain("from '../content/dungeons.js'");
     // 反面证据：这三行坐标在剥注释后的 QuestSystem 里只可能来自表，不该再以字面量出现
     const 抄回 = Object.values(OLD_WAYPOINTS)

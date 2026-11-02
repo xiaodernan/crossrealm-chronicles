@@ -117,7 +117,9 @@ export class PlayerAutoPlay {
 
   _afterArrive() {
     const step = this._currentStep();
-    if (step.action === 'boss' && step.bossId) {
+    // 认 `bossId` 这一格，不认 `action`：步表现在由主线推导，行上的 `bossId` 就是它自己那格
+    // （以前手抄表另写一个 `action: 'boss'`，等于"这一步是 Boss"说了两遍，改一遍另一遍不会红）。
+    if (step.bossId) {
       this._forceBossShow(step);
       this._state = 'bossShow';
       this._timer = 3;

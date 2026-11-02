@@ -38,7 +38,7 @@
  */
 
 import { ZONE_IDS, ZONE_NAMES } from './ZoneIdentity.js';
-import { TRIAL_DUNGEON_IDS } from './dungeons.js';
+import { TRIAL_DUNGEON_IDS, dungeonDefOf } from './dungeons.js';
 import { bossById } from './bossRoster.js';
 import { GEAR_SLOTS } from './gear.js';
 
@@ -1247,6 +1247,39 @@ export const OBJECTIVES = [
 /** 玩家序列：`OBJECTIVES` 里非门控的那些行，按表序 */
 export const MAINLINE = OBJECTIVES.filter((r) => r.type !== 'chapter-gate');
 
+/** 按 id 认行（路点与跳转都问这一份；`QuestSystem` 的"还缺哪几样"也读它） */
+export const MAINLINE_BY_ID = new Map(MAINLINE.map((r) => [r.id, r]));
+
+/**
+ * 主线行自己声明的"这一步让你去哪儿"（W-D4 切片9 从 `QuestSystem` 里搬下来）。
+ *
+ * 为什么搬到这一层：今天有**两个**消费者 —— 指路（`getQuestWaypoint` / 门控那四格的
+ * "还缺哪几样"）与演示步（`ui/demoSteps.js` 要按步走位）。留在 `QuestSystem` 里，
+ * 演示那侧要么自己再抄一份 `waypoint` / `entrance` 的读法（本仓最常见的那病灶），
+ * 要么反过来 import 一个系统模块（内容层反过来依赖运行层）。行上的 `waypoint` 本来就是
+ * 表数据，读它的算式跟着表走。
+ *
+ * 两种形态（W-E3 切片37）：行上带自己的坐标 ⇒ 原样交出；行"指一座副本"（`chests` /
+ * `dungeon-rerun`）⇒ 坐标现问副本名册的 `entrance`，行上只留那一句提示标签。
+ */
+export function rowWaypoint(id) {
+  const wp = MAINLINE_BY_ID.get(id)?.waypoint;
+  if (!wp) return null;
+  if (!wp.dungeonId) return wp;
+  const def = dungeonDefOf(wp.dungeonId);
+  return { x: def.entrance.x, z: def.entrance.z, label: wp.label };
+}
+
+/**
+ * 一座副本的入口（`type: 'dungeon'` 的行与"指一座副本"的行都用它）。
+ * `dungeonDefOf` 认不出就抛：能走到这里的 id 只有主线 `type: 'dungeon'` 那几行，
+ * 注册表已经拿 `ref: 'dungeons'` 钉住它们的 `dungeonId`。
+ */
+export function dungeonWaypoint(id) {
+  const d = dungeonDefOf(id);
+  return { x: d.entrance.x, z: d.entrance.z, label: d.name };
+}
+
 /**
  * 走到第 `index` 步时玩家在哪一章 —— 由那一行自己标的 `chapter` 说话（W-B3 切片4）。
  *
@@ -1304,6 +1337,54 @@ export function mainlineIndexAfterGate(gateId) {
   if (i < 0 || OBJECTIVES[i].type !== 'chapter-gate') return undefined;
   const next = OBJECTIVES.slice(i + 1).find((r) => r.type !== 'chapter-gate');
   return next ? MAINLINE.findIndex((r) => r.id === next.id) : MAINLINE.length;
+}
+
+/**
+ * 走完 `finished` 这一步，表上声明的**分支落点**是哪一行的 id；没有分支则 `null`。
+ *
+ * 三分支的口径一字未动（W-E3 切片23 / 切片46）：
+ * - 抉择步：看**玩家选的那条**在 `branch` 里指向哪一行；
+ * - 非抉择步同时带 `branchTo` 与 `branch`：拿 `decisions` 里第一个对得上的旗标查 `branch`（true-end 那一族）；
+ * - 只带 `branchTo`：直接跳过去。
+ *
+ * 为什么单独一个函数（而不是只留下面的 `mainlineIndexAfter`）：`QuestSystem.advance()` 拿到这个 id
+ * 还要问一件事 —— 它指的可能是一道**章节门**（门不在玩家序列里，`chapterGateById` 才认得），
+ * 于是"补翻章 / 部落旗"那一格也要读同一句分支结论。两处各算一遍就是两份"哪条路通向哪儿"。
+ */
+export function branchTargetOf(finished, stats) {
+  if (finished?.type === 'choice' && finished.branch) {
+    const 选中的 = objectiveChosen(finished, stats);
+    return (选中的 && finished.branch[选中的.flag]) || null;
+  }
+  if (finished?.branchTo && finished?.branch && stats?.decisions) {
+    const 匹配的Flag = Array.from(stats.decisions).find((f) => finished.branch[f]);
+    return (匹配的Flag && finished.branch[匹配的Flag]) || null;
+  }
+  return finished?.branchTo ?? null;
+}
+
+/**
+ * 走完 `finished` 这一步，玩家序列的**落点**是第几格（W-D4 切片9 从 `QuestSystem.advance()` 里搬出来）。
+ *
+ * 为什么这一处必须是函数而不是某一行赋值：今天有两个消费者要问同一句话 —— 在役的推进
+ * （`questIndex = …`）与演示/自动通关的步表（`ui/demoSteps.js` 要把 78 行走成一条不重不漏的序列）。
+ * 留在 `advance()` 里，步表那侧只有两种下场：自己抄一遍三分支（表改一次跳转，抄本不动，玩家看到的
+ * 是一个安静地少做几步或多做几步的演示 —— 正是本仓反复抓的"两份算式"），或者反过来 import 一个系统模块。
+ * 搬进内容层之后 `advance()` 与步表读的是同一条。
+ *
+ * 目标不在玩家序列里 ⇒ 它是一道章节门 ⇒ 落点是"门后第一步"（`mainlineIndexAfterGate`；
+ * 最后一道门后面没有步 = `MAINLINE.length` = 通关）；门也查不出来才退回 `fromIndex + 1`。
+ *
+ * @param {object|null} finished 刚走完的那一行（`null` ⇒ 原格 +1，与 `advance()` 的早退分支同口径）
+ * @param {{decisions?: Set<string>}} stats 账本（这里只读 `decisions` 那一格）
+ * @param {number} fromIndex `finished` 在 `MAINLINE` 上的下标
+ */
+export function mainlineIndexAfter(finished, stats, fromIndex) {
+  const 分支目标 = branchTargetOf(finished, stats);
+  if (!分支目标) return fromIndex + 1;
+  const 目标索引 = MAINLINE.findIndex((r) => r.id === 分支目标);
+  if (目标索引 >= 0) return 目标索引;
+  return mainlineIndexAfterGate(分支目标) ?? fromIndex + 1;
 }
 
 // 条件函数表（在役的 `QuestSystem` 与已删除的 `ObjectiveEngine` 过去各写一份，这里是一份）

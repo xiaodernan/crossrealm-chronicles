@@ -9,9 +9,10 @@
  * 每一次连击终结、每一次自动通关起停时读到的都是一屏中文，而没有任何门禁会响。
  *
  * 同片抓出的真 bug（与切片30 的 CG 卡片同族）：演示/自动通关的步骤标签 `step.label`
- * **本身就是 i18n 键**（`demo_step_*` / `zone_name_*` / Boss shortNameKey），但
+ * **本身就是 i18n 键**（W-D4 切片9 之前是 `demo_step_*`，现在是主线行自己的 `obj_*_title`
+ * / Boss shortNameKey / `zone_name_*`），但
  * DemoRunner 的状态行与 PlayerAutoPlay 的步骤 toast 都在**裸渲染键名** —— 英文玩家
- * 看到的是 `1/32 · demo_step_anchor`。修法：三处显示出口统一 `t(step.label, step.params)`。
+ * 看到的是 `1/32 · obj_anchor_title`。修法：三处显示出口统一 `t(step.label, step.params)`。
  *
  * ## 口径
  *
@@ -183,25 +184,25 @@ describe('演出层 toast 双表化（W-D2 切片31）', () => {
         setLanguage(lang);
         const toasts = [];
         const dr = 建演示(toasts);
-        dr.beginWatch([{ label: 'demo_step_anchor' }], () => {});
+        dr.beginWatch([{ label: 'obj_anchor_title' }], () => {});
         expect(toasts[0], `${lang}: 开始 toast 不对`).toBe(
           lang === 'zh'
             ? `观看模式已开始 — 金色小人将跑完全流程 · ${keyHint('escape')} 退出`
             : `Watch mode started — the golden runner will clear the full game · ${keyHint('escape')} to exit`,
         );
-        // 状态行：步骤标签是 i18n 键，必须过 t()（修前这里裸渲染 demo_step_anchor）
+        // 状态行：步骤标签是 i18n 键，必须过 t()（修前这里裸渲染 obj_anchor_title）
         dr._beginStep();
         expect(dr.statusEl.textContent, `${lang}: 状态行裸渲染键名`).toBe(
-          lang === 'zh' ? '1/1 · 枢纽 · 世界之锚' : '1/1 · Hub · World Anchor',
+          lang === 'zh' ? '1/1 · 觉醒：世界之锚' : '1/1 · Awakening: The World Anchor',
         );
         // 步骤出错臂：label 带插值参数
-        dr._steps = [{ label: 'demo_step_dungeons', params: { n: 4 } }];
+        dr._steps = [{ label: 'achievement_progress_dungeons', params: { n: 4, max: 9 } }];
         dr._stepIndex = 0;
         dr._onStepAction = () => Promise.reject(new Error('boom'));
         dr._startAction();
         await 冲刷();
         expect(toasts[toasts.length - 1], `${lang}: 步骤出错 toast 不对`).toBe(
-          lang === 'zh' ? '演示步骤出错：4 座地下城' : 'Demo step failed: 4 Dungeons',
+          lang === 'zh' ? '演示步骤出错：地下城 4/9' : 'Demo step failed: Dungeons 4/9',
         );
         // 完成臂
         dr.stop(true);
@@ -213,7 +214,7 @@ describe('演出层 toast 双表化（W-D2 切片31）', () => {
         // 退出臂（换一具实例：stop 之后 active 已落，第二次调用会被早退挡掉）
         const toasts2 = [];
         const dr2 = 建演示(toasts2);
-        dr2.beginWatch([{ label: 'demo_step_anchor' }], () => {});
+        dr2.beginWatch([{ label: 'obj_anchor_title' }], () => {});
         dr2.stop(false);
         expect(toasts2[toasts2.length - 1], `${lang}: 退出 toast 不对`).toBe(
           lang === 'zh' ? '已退出观看模式' : 'Watch mode exited',
@@ -235,7 +236,7 @@ describe('演出层 toast 双表化（W-D2 切片31）', () => {
         setLanguage(lang);
         const toasts = [];
         const pa = 建自动通关(toasts);
-        pa.begin([{ label: 'demo_step_anchor' }], () => {});
+        pa.begin([{ label: 'obj_anchor_title' }], () => {});
         expect(toasts[0], `${lang}: 开始 toast 不对`).toBe(
           lang === 'zh'
             ? `自动通关开始 — 你的角色将跑图并遭遇全部 Boss · ${keyHint('escape')} 停止`
@@ -244,19 +245,19 @@ describe('演出层 toast 双表化（W-D2 切片31）', () => {
         // 步骤推进：状态行与 toast 都必须是译过的标签（修前两处都是裸键名）
         pa._advanceStep();
         expect(pa.statusEl.textContent, `${lang}: 状态行裸渲染键名`).toBe(
-          lang === 'zh' ? '1/1 · 枢纽 · 世界之锚' : '1/1 · Hub · World Anchor',
+          lang === 'zh' ? '1/1 · 觉醒：世界之锚' : '1/1 · Awakening: The World Anchor',
         );
         expect(toasts[toasts.length - 1], `${lang}: 步骤 toast 裸渲染键名`).toBe(
-          lang === 'zh' ? '枢纽 · 世界之锚' : 'Hub · World Anchor',
+          lang === 'zh' ? '觉醒：世界之锚' : 'Awakening: The World Anchor',
         );
         // 步骤失败臂
-        pa._steps = [{ label: 'demo_step_kill_soldier' }];
+        pa._steps = [{ label: 'obj_soldiers_title' }];
         pa._stepIndex = 0;
         pa._onStepAction = () => Promise.reject(new Error('boom'));
         pa._runAction();
         await 冲刷();
         expect(toasts[toasts.length - 1], `${lang}: 步骤失败 toast 不对`).toBe(
-          lang === 'zh' ? '步骤失败：击败影之战士' : 'Step failed: Defeat the Shadow Warriors',
+          lang === 'zh' ? '步骤失败：影之试炼' : 'Step failed: Shadow Trial',
         );
         // 手动停止臂
         pa.stop(false);
@@ -266,7 +267,7 @@ describe('演出层 toast 双表化（W-D2 切片31）', () => {
         // 完成臂（换一具实例：stop 之后 active 已落）
         const toasts2 = [];
         const pa2 = 建自动通关(toasts2);
-        pa2.begin([{ label: 'demo_step_anchor' }], () => {});
+        pa2.begin([{ label: 'obj_anchor_title' }], () => {});
         pa2.stop(true);
         expect(toasts2[toasts2.length - 1], `${lang}: 完成 toast 不对`).toBe(
           lang === 'zh' ? '🎉 自动通关完成！任务已全部推进' : '🎉 Auto-play complete! All quests advanced',

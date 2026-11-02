@@ -1,10 +1,11 @@
 import { keyText } from '../ui/keyHints.js';
-import { dungeonDefOf, TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
+import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 import {
-  BOSS_STAT_KEYS, MAINLINE, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter, chapterGateById,
-  mainlineIndexAfterGate,
+  BOSS_STAT_KEYS, MAINLINE, MAINLINE_BY_ID, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter, chapterGateById,
+  mainlineIndexAfter, branchTargetOf,
   conditionHolds, emptyStats, interactGateCondition, objectiveDone,
   objectiveChosen, objectiveReward, objectiveDesc, objectiveTitle, applyObjectiveFlags,
+  rowWaypoint, dungeonWaypoint,
 } from '../content/objectives.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';
@@ -29,22 +30,10 @@ const questsOn = (name, handler) => on(name, handler, QUEST_EVENT_TAG);
  * 所以磁盘上的 `quests.questIndex` 语义不变，不需要存档迁移。
  * ------------------------------------------------------------------ */
 
-const ROW_BY_ID = new Map(MAINLINE.map((r) => [r.id, r]));
 /**
- * 行上的路点（W-E3 切片37）：两种形态。
- *
- * - 自己的坐标（绝大多数行）：原样交出去；
- * - "指一座副本"（`chests` / `dungeon-rerun` 这两行）：坐标从副本名册**现问** `entrance`，
- *   行上只留那一句提示标签。改前这两行各抄了一份碎石墓穴的入口坐标 ——
- *   名册挪一次门，行上那一份不会跟着动，也没有任何一处会红。
+ * 行上的路点（`rowWaypoint` / `dungeonWaypoint`）在 `content/objectives.js`（W-D4 切片9）：
+ * 演示步表指同一个地方，两处各写一份就是"哪一步去哪儿"的两套真相。
  */
-const rowWaypoint = (id) => {
-  const wp = ROW_BY_ID.get(id)?.waypoint;
-  if (!wp) return null;
-  if (!wp.dungeonId) return wp;
-  const def = dungeonDefOf(wp.dungeonId);
-  return { x: def.entrance.x, z: def.entrance.z, label: wp.label };
-};
 
 /**
  * 表里那些"拿到某样东西"的步，按 `flags` 的前缀认领。
@@ -86,19 +75,15 @@ const TARGET_WAYPOINTS = {
 };
 
 /**
- * 地下城入口的路点：坐标与名字现问 `content/dungeons.js`。这里以前手抄过三行，
- * 而副本表是同一件事的另一份说法 —— 表里挪一次入口，指路这一份不会跟着动，
- * 也没有任何一处会红。`dungeonDefOf` 认不出就抛：能走到这里的 id 只有主线
- * `type: 'dungeon'` 那几行，注册表已经拿 `ref: 'dungeons'` 钉住它们的 `dungeonId`。
+ * 地下城入口的路点（`dungeonWaypoint`）与行上路点（`rowWaypoint`）都在 `content/objectives.js`
+ * —— W-D4 切片9 搬过去的，演示步表是指同一个地方的第二个消费者。
+ * 这里以前手抄过三行副本入口，而副本表是同一件事的另一份说法：表里挪一次入口，
+ * 指路这一份不会跟着动，也没有任何一处会红。
  *
  * **W-E3 切片25**：主线那九行副本步各抄过一格 `waypoint`（x/z 逐格等于 `entrance`，label 却另开
- * 一套 `wp_label_*` 文案键）。玩家看到的从来是这里问出来的那一份 ⇒ 抄本是第二套词汇，删了，
+ * 一套 `wp_label_*` 文案键）。玩家看到的从来是问出来的那一份 ⇒ 抄本是第二套词汇，删了，
  * 注册表现在禁止 `type: 'dungeon'` 的行写 `waypoint`。
  */
-const dungeonWaypoint = (id) => {
-  const d = dungeonDefOf(id);
-  return { x: d.entrance.x, z: d.entrance.z, label: d.name };
-};
 
 /**
  * 地图骷髅自己的两个字段（简称与配色）。**坐标与章节不在这里** ——
@@ -303,7 +288,7 @@ export class QuestSystem {
       }
       case 'checkInfinity': {
         if (!this.stats.chaosBossDefeated) return { ...rowWaypoint('chaos-boss'), hint: t('quest_waypoint_hint_chaos_boss') };
-        if (this.stats.skillsUnlocked < ROW_BY_ID.get('skills').target) {
+        if (this.stats.skillsUnlocked < MAINLINE_BY_ID.get('skills').target) {
           return { ...rowWaypoint('skills'), hint: t('quest_waypoint_hint_skills') };
         }
         return { ...TARGET_WAYPOINTS['hub-anchor'], hint: t('quest_waypoint_hint_touch_anchor_3') };
@@ -336,39 +321,12 @@ export class QuestSystem {
     // W-E3 切片23：分支树——抉择步基于玩家选的 flag 决定下一步；
     // 非抉择步若声明 branchTo 也走分支（true-end 系列 → ch4-complete）
     // ⇒ 兼容：非 choice 步但有 `branch` 映射且 `stats.decisions` 有对应标志时，也走分支
-    let 分支目标 = null;
-    if (finished?.type === 'choice' && finished.branch) {
-      const 选中的 = objectiveChosen(finished, this.stats);
-      if (选中的 && finished.branch[选中的.flag]) {
-        分支目标 = finished.branch[选中的.flag];
-      }
-    } else if (finished?.branchTo && finished?.branch && this.stats?.decisions) {
-      // W-E3 切片23：非 choice 步（如 true-end）有 branch 映射时，
-      // 依 stats.decisions 里记下的旗标查对应的目标行 id
-      const 匹配的Flag = Array.from(this.stats.decisions).find(
-        (f) => finished.branch[f]
-      );
-      if (匹配的Flag && finished.branch[匹配的Flag]) {
-        分支目标 = finished.branch[匹配的Flag];
-      }
-    } else if (finished?.branchTo) {
-      分支目标 = finished.branchTo;
-    }
-
-    if (分支目标) {
-      const 目标索引 = MAINLINE.findIndex((r) => r.id === 分支目标);
-      if (目标索引 >= 0) {
-        this.questIndex = 目标索引;
-      } else {
-        // 分支直接指向一道章节门（W-E3 切片46：终局那两条收尾路）：门不在 MAINLINE 里，
-        // 落点是「门后第一步」；门后没有步（最后那道门）⇒ 表尾 = 通关。
-        // 改前这里一律 `questIndex++`：从 `final-keep` 加一格正好落到没选的那条 `final-quiet`。
-        const 门后 = mainlineIndexAfterGate(分支目标);
-        this.questIndex = 门后 ?? this.questIndex + 1;
-      }
-    } else {
-      this.questIndex++;
-    }
+    //
+    // W-D4 切片9：这一整块（含下面那段三分支落点）搬进 `content/objectives.js` 的
+    // `branchTargetOf` / `mainlineIndexAfter` —— 演示/自动通关的步表要走同一条序列，
+    // 留在方法里它就只能自己抄一遍，而抄本不动时玩家看到的是安静地少做几步的演示。
+    const 分支目标 = branchTargetOf(finished, this.stats);
+    this.questIndex = mainlineIndexAfter(finished, this.stats, this.questIndex);
 
     // 分支直指门时（切片46），位置那条路查不到门 ⇒ 按分支目标补一次，门自己的旗标才不会漏。
     const gate = finished
