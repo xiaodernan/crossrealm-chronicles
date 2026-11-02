@@ -95,7 +95,9 @@ import {
   defineSkeletonMove, isSkeletonClipName, listedBones, registerSkeletonClips, requiredBones, skeletonClipName,
 } from '../src/assets/SkeletonMotion.js';
 import { MOVES } from '../src/combat/MoveTable.js';
-import { PARTS } from '../src/content/tuning.js';
+import { COMBO, PARTS } from '../src/content/tuning.js';
+import { STATE_TO_ACTION } from '../src/animation/AnimationEntityAdapter.js';
+import { PlayerAnimationAdapter } from '../src/player/animation/PlayerAnimationAdapter.js';
 import { CharacterModel } from '../src/player/CharacterModel.js';
 import {
   PLAYER_GLB, buildRig, clipDuration, clipNames, fakeGltfFromGlb, readGlb,
@@ -674,6 +676,41 @@ describe('接线：`load()` 注册骨骼片段，出招挑到的是片段而不�
     expect(第一条.isRunning(), '同类切换被硬停了 ⇒ 连段没有插值').toBe(true);
     cm.mixer.update(0.1);
     expect(第一条.isRunning(), '淡出没在 0.06 秒里收干净').toBe(false);
+  });
+
+  /**
+   * **连段的段数有两本账**（B114，2026-10-31 战斗门禁第一次真跑撞到的那一下）。伤害那侧的段数
+   * 由 `content/tuning.js` 的 `COMBO.maxSteps` 决定，`CombatController.js:488` 把 `comboCount`
+   * **原样**递进 `playComboAttack`；动作这侧只有 `attack1..3` 三条 clip，两个适配器的
+   * `STATE_TO_ACTION` 也只认 `combo1..3`。改前这里直接 `sets[step - 1]` ⇒ 连段窗口（0.55 秒）内
+   * 连点第四下拿到 `undefined`，`pickAnim(undefined)` 当场 `TypeError: candidates is not iterable`，
+   * 主循环整帧死在出招那一刻。单测全绿是因为 `combat-cancel.test.js` 喂的是只计数的假模型。
+   *
+   * 三条反证先把腿本身的空转路堵掉：`maxSteps` 若收到 3（两本账并成一本）、或 `combo4` 若真进了
+   * 名册（溢出变成响的），这条就不再量到东西 —— 那时该改写判据，而不是让它恒绿。
+   */
+  it('连段第 4..6 下（伤害段数 > 动作档数）：不抛、状态在册、锁跟着真正在播的那档（B114）', () => {
+    const 档数 = 招式名.filter((招) => /^attack\d$/.test(招)).length;
+    expect(档数, '招式表里连段档数读成 0 ⇒ 这一条从头到尾在空转').toBeGreaterThan(0);
+    expect(COMBO.maxSteps, '伤害段数已收到与动作档数相同 ⇒ 溢出没了，这条判据该跟着改写').toBeGreaterThan(档数);
+    expect(STATE_TO_ACTION.combo4, '`combo4` 进了适配器名册 ⇒ 未知状态不再无声，判据要换').toBeUndefined();
+
+    const 玩家名册 = new PlayerAnimationAdapter(new CharacterModel());
+    for (let 下 = 1; 下 <= COMBO.maxSteps + 1; 下 += 1) {
+      const cm = new CharacterModel();
+      expect(() => cm.playComboAttack(下), `第 ${下} 下出招抛了 ⇒ 玩家连点会卡死主循环`).not.toThrow();
+      const 该是 = Math.min(下, 档数);
+      expect(cm.comboStep, `第 ${下} 下夹到 ${cm.comboStep}，该是 ${该是}`).toBe(该是);
+      expect(cm.combatState, `第 ${下} 下的状态名不在 enemy 适配器名册里（未知状态静默回落 idle）`)
+        .toBe(`combo${该是}`);
+      expect(STATE_TO_ACTION[cm.combatState], `${cm.combatState} 在 enemy 适配器名册里没登记`).toBeDefined();
+      expect(玩家名册._resolveAction(cm.combatState), `${cm.combatState} 在玩家适配器里没登记，回落成 idle`).not.toBe('idle');
+      // 状态锁跟着**真正在播的那一档**：溢出时若还按 `step` 加时长，锁会比 clip 长 ⇒ 收招那一帧被钉住
+      expect(cm.actionLock, `第 ${下} 下的状态锁跟着 step 走，与 clip ${SKELETON_MOTION[`attack${该是}`].duration} 脱钩`)
+        .toBeCloseTo(SKELETON_MOTION[`attack${该是}`].duration, 6);
+    }
+    // 接线：视觉下标只许从夹过的 `段` 来（回潮成 `[step - 1]` 就是把第 4 下重新交给 undefined）
+    expect(净源, '仍有一处用原始 step 当下标').not.toMatch(/\[step - 1\]/);
   });
 
   it('片段真的动出货场景里的模型，走完收回站姿并把 Idle 交回去', async () => {

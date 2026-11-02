@@ -316,9 +316,6 @@ export class CharacterModel {
   }
 
   playComboAttack(step) {
-    this.comboStep = step;
-    this.combatState = `combo${step}`;
-    const dur = 0.36 + step * 0.06;
     const sets = [
       // 优先级：素材真有攻击 clip（`catalog.attack1` / `ANIM_MANIFEST` 里的名字）> 我们替这具
       // 骨架编的骨骼片段 > 跑步/走路当替身。最后那一档就是 B111 的病根：出厂 GLB 一条攻击都没有，
@@ -333,9 +330,25 @@ export class CharacterModel {
       { pitch: -0.42, yawOff: 0.14 },
     ];
     const speeds = [1.12, 1.05, 0.95];
-    if (!this._playOnce(sets[step - 1], speeds[step - 1], dur, procs[step - 1])) {
-      this._playOnce([this.catalog.run, 'Run'], 2 + step * 0.4, dur, procs[step - 1]);
-      if (!this.hasMixamoClips) this._startProcCombat('attack', dur, 0.8 + step * 0.15);
+    /**
+     * **伤害段数 ≠ 动作段数**（B114，2026-10-31 战斗门禁第一次真跑撞出来的）。调用方
+     * `CombatController.js:488` 把 `comboCount` 原样递进来，而那一头的段数由
+     * `content/tuning.js` 的 `COMBO.maxSteps = 6` 决定；这一张表只有 3 档，`animation/AnimationEntityAdapter`
+     * 与 `player/animation/PlayerAnimationAdapter` 的 `STATE_TO_ACTION` 也只认 `combo1..3`。
+     * 先前这里直接拿 `step` 当下标：`0.55` 秒连段窗口内连点第四下 ⇒ `sets[3]` = undefined ⇒
+     * `pickAnim(undefined)` 当场 `TypeError: candidates is not iterable`，整帧更新崩在这一句里。
+     *
+     * 收口夹到 `sets.length`（不是取模）：三档的 `speeds` 是**递减**的（1.12 → 0.95），取模会让
+     * 第四下突然回到最快那一档、连段中途变奏；夹住则 4/5/6 下沿用三式那一档继续往下压伤害。
+     * 下标、`combatState`、状态锁时长一起走 `段` ⇒ `actionLock` 恒等于真正在播的那条 clip 的时长。
+     */
+    const 段 = Math.min(Math.max(1, Math.trunc(step) || 1), sets.length);
+    this.comboStep = 段;
+    this.combatState = `combo${段}`;
+    const dur = 0.36 + 段 * 0.06;
+    if (!this._playOnce(sets[段 - 1], speeds[段 - 1], dur, procs[段 - 1])) {
+      this._playOnce([this.catalog.run, 'Run'], 2 + 段 * 0.4, dur, procs[段 - 1]);
+      if (!this.hasMixamoClips) this._startProcCombat('attack', dur, 0.8 + 段 * 0.15);
     }
     return true;
   }
