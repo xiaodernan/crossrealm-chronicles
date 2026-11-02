@@ -114,8 +114,11 @@ export class SpellSystem {
     else if (spell.type === 'aoe') this.castGravity(spell, charged);
     else if (spell.type === 'buff') this.castTransform(spell);
 
-    // W-B6 切片3：蓄力施法计入 charge 使用
-    if (charged) this.game?.stats?.addSkillUse('charge');
+    // W-B6 切片3：蓄力施法计入 charge 使用。记进这一类**自己手里**的那份 stats
+    // （`Game` 构造本类时传进来的就是那个 PlayerStats 实例）—— 改前那句读的是"整局所有者"那一格，
+    // 而本类从头到尾没有那一格，可选链把"没有这个人"变成"静默不记账"，于是 `skillTrees.js` 里
+    // `r-harmonics` 那道 `charge × 20` 的门槛永远解不开（B160）。
+    if (charged) this.stats?.addSkillUse('charge');
 
     window.dispatchEvent(new CustomEvent('spell-cast', {
       detail: { id: spell.id, nameKey: spell.nameKey, charged },

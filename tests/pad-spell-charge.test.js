@@ -73,7 +73,9 @@ function rig() {
     null,
     { spawn: () => {} },
     { spellCast: () => {}, hit: () => {}, heavyHit: () => {} },
-    { arcane: 1, mind: 0 },
+    // 生产里这一格是 `PlayerStats`（B160：蓄力施法要往里记 `addSkillUse('charge')`），
+    // 所以替身得带上那个方法；arcane / mind 的数值与改前一致，法力与伤害不因这条改动而漂。
+    { arcane: 1, mind: 0, addSkillUse: () => {} },
   );
   const step = () => {
     bridge.poll();

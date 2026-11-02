@@ -7,6 +7,8 @@ import { SpellSystem } from '../src/combat/SpellSystem.js';
 import { MOVES } from '../src/combat/MoveTable.js';
 import { createHurtbox } from '../src/combat/Hurtbox.js';
 import { TimeController } from '../src/engine/Time.js';
+import { PlayerStats } from '../src/game/PlayerStats.js';
+import { getStoryLockReason } from '../src/game/StoryWeaponSkills.js';
 
 /** CombatController 通过 window 事件对外广播，node 环境下补一个最小派发器 */
 beforeAll(() => {
@@ -311,5 +313,56 @@ describe('击杀账本挂在 Game 上（W-B6 门槛账的接线）', () => {
     const 源 = readFileSync(join(process.cwd(), 'src', 'core', 'Game.js'), 'utf8');
     expect(源, 'Game 没有把 this 交给 CombatController').toMatch(
       /new CombatController\(\s*this\.player, this\.enemyManager, this\.dialog, this\.damageNumbers, this\.audio, this\.stats, this\s*,?\s*\)/);
+  });
+});
+
+/**
+ * 蓄力施法的使用账（B160 —— 浸泡那一片带出来的普查，与上面那组同一个形状的第二处）。
+ *
+ * `SpellSystem.cast()` 结尾原本写 `this.game?.stats?.addSkillUse('charge')`，而这个类的构造器
+ * 只收 7 个参数、全程没有 `this.game` ⇒ 可选链把"没有这一格"变成"静默不记账"。后果不是崩，是
+ * **整条符文系上层永远解不开**：`content/skillTrees.js` 里 `r-harmonics` 的锁因正是
+ * `{ skill: 'charge', count: 20 }`，由 `StoryWeaponSkills.getStoryLockReason()` 读；它自己加上
+ * 4 个下游节点（顶点 `r-convergence`）共 5 格因此不可达。
+ * 修法走这一类**手里本来就有的** `this.stats`（`Game` 传进来的与 `game.stats` 是同一个实例），
+ * 不再多接一条 game。
+ */
+describe('蓄力施法记进技能使用账（B160：又一处幻影 game）', () => {
+  const 造法术 = (stats) => {
+    const player = { ...makePlayer(), combat: { isBusy: () => false } };
+    const manager = { enemies: [], getAliveEnemies: () => [] };
+    return new SpellSystem(new THREE.Group(), player, manager, null, null, { spellCast() {} }, stats);
+  };
+
+  it('构造器把 stats 收进这一格：蓄力一发 ⇒ charge +1，普通一发不记', () => {
+    const 账 = [];
+    const 假stats = { addSkillUse: (s) => 账.push(s) };
+    const spells = 造法术(假stats);
+    expect(spells.stats, '构造器没有存 stats —— 这笔账没有落点').toBe(假stats);
+    expect(spells.cast(1, true), '蓄力施法没成功，这一腿根本没走到 charge 分支').toBe(true);
+    expect(账, '蓄力施法没有进 stats.addSkillUse("charge")').toEqual(['charge']);
+    expect(spells.cast(2, false), '普通施法没成功，这一腿没测到"不记"那一面').toBe(true);
+    expect(账, '普通施法也记了 charge —— 这一格该只认蓄力').toEqual(['charge']);
+  });
+
+  it('端到端：19 发蓄力还拦着 r-harmonics，喂满 20 发才放行（写者与读者是同一条链）', () => {
+    const 统计 = new PlayerStats();
+    const spells = 造法术(统计);
+    spells.mana = 1e9;
+    const 游戏 = { quests: { chapter: 5, stats: 统计 } };
+    const 放一发 = () => { spells.cooldowns[1] = 0; return spells.cast(1, true); };
+    expect(getStoryLockReason(游戏, 'r-harmonics'), '一发没放，门槛本该拦着').not.toBeNull();
+    for (let i = 0; i < 19; i++) expect(放一发(), `第 ${i + 1} 发蓄力没放出去 —— 这一腿没在测 charge`).toBe(true);
+    expect(统计.skillUses.charge, '19 发蓄力记进的不是 19').toBe(19);
+    expect(getStoryLockReason(游戏, 'r-harmonics'), '差一发就该继续拦着').not.toBeNull();
+    expect(放一发()).toBe(true);
+    expect(统计.skillUses.charge).toBe(20);
+    expect(getStoryLockReason(游戏, 'r-harmonics'), '喂满 20 发之后 r-harmonics 仍然打不开').toBeNull();
+  });
+
+  it('源里不再读 this.game：幻影字段读法一回来，这道门就又是死的', () => {
+    const 源 = readFileSync(join(process.cwd(), 'src', 'combat', 'SpellSystem.js'), 'utf8');
+    expect(源, 'SpellSystem 里没有 game 这一格，读 this.game 等于静默不做事').not.toMatch(/this\.game\b/);
+    expect(源, 'charge 那笔账不再走这一类自己的 stats').toMatch(/this\.stats\?\.addSkillUse\('charge'\)/);
   });
 });
