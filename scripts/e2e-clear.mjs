@@ -73,7 +73,7 @@ import { createServer } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { E2E_BUDGETS } from './e2e-budgets.mjs';
-import { 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
+import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴 } from './harness-readings.mjs';
 
 /**
  * 预算表在 `./e2e-budgets.mjs` —— **判据与执行分家**。
@@ -145,6 +145,29 @@ async function waitForHttp(url, tries = 40) {
 // vite 的口按当下空闲的取（见 `freePort` 的注释）；CDP 的口不取，等 Chrome 报。
 const VITE_PORT = await freePort();
 
+/**
+ * dev server 自己说的话（stdout + stderr 都收）—— W-D4 切片8 搬进这一族。
+ *
+ * 此前这里是 `stdio: 'ignore'`：这条门禁要跑几百次 `evalJs` 走 44 步，中途只要页被换掉，
+ * 最先红的就是一句 `TypeError: … reading 'quests'`，而**唯一能点名成因的东西正好在这条被扔掉
+ * 的流里**（`[vite] page reload src/core/Game.js` 说的是"谁动了"，`✨ new dependencies optimized`
+ * 说的是它自己的冷启动噪声 —— 两种红完全不同）。`e2e-combat` 切片7 量到过这件事：连着两轮死在
+ * 同一格，按 mtime 对过账那两百多秒里 `src/` 没写过，而红话指着"有人往 src/ 写了一下"。
+ * 收进来，红的时候带上它的原话。
+ */
+const dev输出 = [];
+const vite话 = () => {
+  const 全文 = dev输出.join('');
+  const 行 = 重载线索(全文);
+  if (行.length) return 行.join('\n - ');
+  // 判据交白卷不等于 dev server 没说话：把它的原话尾巴一起交出去，
+  // "过滤器写错了"就藏不进"没人说话"这句清白话里（2026-10-31 就是这么错了一轮）。
+  const 尾 = 原话尾巴(全文);
+  return 尾.length
+    ? `判据没收到带 [vite] 的行 —— 别读成"vite 没说话"，它最后说的 ${尾.length} 行：\n - ${尾.join('\n - ')}`
+    : '(dev server 一个字都没输出 —— 这一轮的重载不是它发的)';
+};
+
 // 直接用当前 node 调 vite.js：Windows 上 spawn .cmd 要开 shell（引号/quoting 风险），绕开它
 //
 // `--host 127.0.0.1` 是**必须**的：vite 缺省只听 `localhost`，而 Windows 上 `localhost`
@@ -152,7 +175,9 @@ const VITE_PORT = await freePort();
 // + 页面错误 0 条 —— 一次把责任错记到构建上的假红）。显式绑到 IPv4 回环，三者逐字对齐。
 const viteBin = join(process.cwd(), 'node_modules', 'vite', 'bin', 'vite.js');
 const vite = spawn(process.execPath, [viteBin, '--host', '127.0.0.1', '--port', String(VITE_PORT), '--strictPort'],
-  { stdio: 'ignore', cwd: process.cwd() });
+  { stdio: ['ignore', 'pipe', 'pipe'], cwd: process.cwd() });
+vite.stdout.on('data', (b) => dev输出.push(String(b)));
+vite.stderr.on('data', (b) => dev输出.push(String(b)));
 
 const chromePath = findChrome();
 if (!chromePath) {
@@ -240,7 +265,7 @@ let 基线上下文 = null;
 
 let failures = 0;
 try {
-  if (!await waitForHttp(`http://127.0.0.1:${VITE_PORT}/`)) throw new Error('dev 口 20 秒内没起来');
+  if (!await waitForHttp(`http://127.0.0.1:${VITE_PORT}/`)) throw new Error(`dev 口 20 秒内没起来。vite 的话：\n - ${vite话()}`);
   const { 口: CDP口, 浏览器ws } = await 读CDP口();
   console.log(`e2e-clear：Chrome 报出自己的口 ${CDP口}（${浏览器ws.slice(0, 46)}…）`);
 
@@ -292,12 +317,56 @@ try {
    * 开机窗口 120 秒（不是 30 秒），与 `perf-smoke` 同一把尺：vite 冷缓存要按需转译 ~300 个模块，
    * `.tmp-20261020-wc2s5/why-no-game.mjs` 在同一条 dev 口上量到过 `window.__game` 要 **57.5 秒**才出现。
    * 30 秒那一档红的是缓存而不是代码 —— 而 CI 的 `node_modules/.vite` 每轮都是冷的。
+   *
+   * 就绪表达式只有**一份**（切片8，与 `e2e-combat` 同一条纪律）：下面"页重建后再等一次"用的是同一个串。
+   * 两份各写各的时，开机等的是三件都在、重建后等的可能只剩 `__game` —— 于是静置腿认的形状与真跑的腿不是同一个。
    */
+  const 就绪 = '!!window.__game && !!window.__game.quests && !!window.__game.questAssistant';
   for (let i = 0; i < 240 && !ready; i += 1) {
     await sleep(500);
-    ready = await evalJs('!!window.__game && !!window.__game.quests && !!window.__game.questAssistant');
+    ready = await evalJs(就绪);
   }
-  if (!ready) throw new Error('游戏 120 秒内没起来');
+  if (!ready) throw new Error(`游戏 120 秒内没起来（页 http://127.0.0.1:${VITE_PORT}/）。vite 的话：\n - ${vite话()}`);
+
+  /**
+   * 等页面**静下来**，再认它（W-D4 切片8 —— 把 `e2e-combat` 切片7 量到的那一课搬过来）。
+   *
+   * 这一条门禁比战斗那条**更依赖**静置：它要跑 44 步、几百次 `evalJs`，而 vite 冷启动后自己会发
+   * 一次 reload（优化依赖、首次请求才转译的那批模块）。基线取在静置**之前**的话，那一次自发 reload
+   * 正好落在基线与第一步之间 ⇒ 每一轮都红在同一格，而红话说的是"有人往 src/ 写了一下"。
+   *
+   * "执行上下文条数不再动"是唯一可用的正面信号：页被重建会多一条上下文，而 `Runtime.enable`
+   * 会先把现存那条报给我们（所以开机阶段本来就会涨几下）。连续三拍（1.5 秒）不动才把这一刻
+   * 当成"测量开始"。条数又动了 = 页在这 1.5 秒里被换过 ⇒ 重新等它起来（`window.__game` 当场是
+   * undefined）再从头量。60 秒还静不下来就红，并带上 vite 的原话：那种红是"dev server 停不下来"，
+   * 不是"主线走不完"，不该被读成后者。
+   */
+  {
+    const 静拍需要 = 3;
+    const 截止 = Date.now() + 60000;
+    let 上次 = 通道.执行上下文;
+    let 静 = 0;
+    while (静 < 静拍需要) {
+      await sleep(500);
+      const 现 = 通道.执行上下文;
+      if (现 !== 上次) {
+        上次 = 现;
+        静 = 0;
+        let 起 = false;
+        for (let i = 0; i < 240 && !起; i += 1) {
+          起 = await evalJs(就绪);
+          if (起) break;
+          await sleep(500);
+        }
+        if (!起) throw new Error(`页面重建后 120 秒内没起来。vite 的话：\n - ${vite话()}`);
+      } else {
+        静 += 1;
+      }
+      if (Date.now() >= 截止) {
+        throw new Error(`静置失败：60 秒里页面的执行上下文一直在动（现 ${现} 条）—— dev server 停不下来。vite 的话：\n - ${vite话()}`);
+      }
+    }
+  }
 
   /**
    * **这一轮真的连到了这一轮起的那个页**，且事件通道在送东西（切片6c）。
@@ -313,7 +382,7 @@ try {
   const 通问 = 通道问题(通道);
   if (通问.length) throw new Error(`CDP 通道没有正面见证：\n - ${通问.join('\n - ')}`);
   console.log(`e2e-clear：页=${页地址.slice(0, 60)} 执行上下文=${通道.执行上下文} 加载完成=${通道.加载完成}`);
-  // 基线取在**见证之后、起跑之前**：此后上下文条数一旦变动，就是"页在中途被换过"的实锤
+  // 基线取在**静置 + 见证之后、起跑之前**：此后上下文条数一旦变动，就是"页在中途被换过"的实锤
   基线上下文 = 通道.执行上下文;
 
   // ① 换成固定步长：这一句是"读数与机器快慢无关"的全部依据（见头注"确定性"）
@@ -380,7 +449,7 @@ try {
   if (重问.length) {
     // 带个标记抛出：catch 里那条"归因"是给**别的原因**准备的（TypeError 那类），
     // 这一条自己已经说全了，不该再被复述一遍当成第二个结论
-    const 废 = new Error(`本轮读数作废：\n - ${重问.join('\n - ')}`);
+    const 废 = new Error(`本轮读数作废：\n - ${重问.join('\n - ')}\n谁动的：\n - ${vite话()}`);
     废.读数作废 = true;
     throw 废;
   }
@@ -409,7 +478,7 @@ try {
   // 它读起来像主线坏了。这一句把责任挪回它该在的地方：不是这一轮的代码，是这一轮的页。
   if (!err?.读数作废) {
     const 归因 = 重载问题(基线上下文, 通道.执行上下文);
-    if (归因.length) console.error('e2e-clear 归因：\n - ' + 归因.join('\n - '));
+    if (归因.length) console.error(`e2e-clear 归因：\n - ${归因.join('\n - ')}\n谁动的：\n - ${vite话()}`);
   }
   failures = 2;
 } finally {
