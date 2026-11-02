@@ -14,7 +14,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { PERF_BUDGETS } from '../scripts/perf-budgets.mjs';
-import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题, DRAW列, DRAW附列, DRAW对照列, CPU列 } from '../scripts/harness-readings.mjs';
+import { draw读数问题, cpu读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 重载线索上限, 原话尾巴, DRAW列, DRAW附列, DRAW对照列, CPU列 } from '../scripts/harness-readings.mjs';
 
 const ROOT = process.cwd();
 const 脚本源 = existsSync(join(ROOT, 'scripts', 'perf-smoke.mjs'))
@@ -539,4 +539,102 @@ describe('中途重载（切片6d）：读数作废并点名，而不是报成�
     expect(接腿.调了判据(坏.计数器遮蔽)).toBe(true);
   });
 });
+
+/**
+ * `重载线索` 的正反行为（W-D4 切片7）。判据本体只在这里测一遍：`e2e-combat.mjs`（本片接上）
+ * 与将来的 `e2e-clear` / `perf-smoke` 都调它，三个脚本各复刻一份"怎么从 vite 的话里挑行"
+ * 就会有三把尺各自漂（这一族的通用病，见 `harness-readings.mjs` 头注）。
+ *
+ * 为什么它值得存在：`重载问题` 的两个输入只是条数，说得出"页被重建过"，说不出**谁干的**。
+ * 2026-10-31 两次红就是被那句猜测误导的 —— 守卫句句都对，可它每一轮红在同一个位置，
+ * 因为那次 reload 是 vite 冷启动自己发的（按 mtime 对过账：那段时间 `src/` 没写过）。
+ * 带出原话之后 `[vite] page reload src/...` 与 `[vite] ✨ new dependencies optimized: ...`
+ * 一眼分得开：前者重来一轮，后者是启动噪声（修法是把基线往后挪到页面静下来）。
+ */
+describe('重载线索（切片7）：从 dev server 的原话里取出能点名成因的那几行', () => {
+  it('正面：vite 真的在说话的行都收下来', () => {
+    // 三行样本都照它自己的 `format()`：`${dim(HH:MM:SS)} ${cyan([vite])} ${msg}` ——
+    // **时间戳在 [vite] 之前**。切片7 第一版按"行首就是 [vite]"写过滤器，于是真轮次里一行都收不到，
+    // 红话说成"vite 一句都没说"（见 `原话尾巴` 那一腿）；样本按印象写的那条腿，当时是全绿的。
+    expect(重载线索('[vite] page reload src/core/Game.js'), '不带时间的裸前缀行被丢了')
+      .toEqual(['[vite] page reload src/core/Game.js']);
+    expect(重载线索('00:59:12 [vite] page reload src/content/objectives.js'), '真实格式（时间戳在前缀之前）的 reload 被丢了')
+      .toEqual(['00:59:12 [vite] page reload src/content/objectives.js']);
+    expect(重载线索('12:34:56 AM [vite] ✨ new dependencies optimized: three'), '英文 locale 的带 AM/PM 时间戳被丢了')
+      .toEqual(['12:34:56 AM [vite] ✨ new dependencies optimized: three']);
+    expect(重载线索('[vite] ✨ new dependencies optimized: three').join(''),
+      '冷启动那次预打包没被收下 —— 那正是"每一轮红在同一格"的成因').toMatch(/new dependencies optimized/);
+  });
+
+  it('横幅不是线索：它一句都没说的时候交空数组，而不是把启动噪声当成成因', () => {
+    const 只有横幅 = 'VITE v6.0.5  ready in 812 ms\n  ➜  Local:   http://127.0.0.1:5199/\n  ➜  Network: use --host to expose\n';
+    expect(重载线索(只有横幅), '开机横幅被当成了"页被换过"的成因（上限会被它占满）').toEqual([]);
+    expect(重载线索(''), '空串不交空数组').toEqual([]);
+    expect(重载线索(undefined), 'undefined 撞到一个裸 TypeError').toEqual([]);
+  });
+
+  it('锚在行首：正文里恰好含 "[vite]" 的那一行不算成因', () => {
+    expect(重载线索('some log: 有人在 [vite] 里改了东西'), '别人的话里引用了 [vite] 也被收下来').toEqual([]);
+    // 时间戳段是**可选且只有一段**：光"前面有个时间"不够，`[vite]` 得紧跟在它后面才算它自己那句话
+    expect(重载线索('00:59:12 有人在 [vite] 里改了东西'), '带时间的转述被当成了 vite 的原话（那成因就不是它说的了）').toEqual([]);
+  });
+
+  it('ANSI 色带先剥：带着色标的行既读不出文件名的边界，也没法喂字符串比对', () => {
+    const 得 = 重载线索('\u001b[1m\u001b[36m[vite]\u001b[39m\u001b[22m page reload src/world/WorldManager.js');
+    expect(得.length).toBe(1);
+    expect(得[0], '色标没剥干净：这一行拼进红话里是一串乱码，文件名问不出来').toBe('[vite] page reload src/world/WorldManager.js');
+    // 真轮次里这一行长这样：时间戳 dim、前缀 cyan+bold、消息 green、文件名 dim（照 format() 抄）。
+    // 不剥色时它以 `\u001b[2m` 开头 —— 连"是不是 vite 说的话"都判不出来，成因整条消失。
+    const 真行 = 重载线索('\u001b[2m00:59:12\u001b[22m \u001b[36m\u001b[1m[vite]\u001b[22m\u001b[39m \u001b[32mpage reload\u001b[39m \u001b[2msrc/core/Game.js\u001b[22m');
+    expect(真行, '带着色标的真格式一行都没收下来').toEqual(['00:59:12 [vite] page reload src/core/Game.js']);
+  });
+
+  it('只取尾部且有上限：跑几分钟的轮次里它能刷上百行，红的时候要看最后那几次动作', () => {
+    const 一百行 = Array.from({ length: 100 }, (_, i) => `[vite] page reload f${i}.js`).join('\n');
+    const 得 = 重载线索(一百行);
+    expect(得.length, '上限没生效（红话会被刷成一屏，没人读得完）').toBe(重载线索上限);
+    expect(得[得.length - 1], '取的不是尾部').toBe('[vite] page reload f99.js');
+    expect(得[0], '收下来的行顺序被打乱了').toBe(`[vite] page reload f${100 - 重载线索上限}.js`);
+    expect(重载线索上限, '上限小到装不下一行成因（那"带出原话"就是空的）').toBeGreaterThanOrEqual(3);
+  });
+
+  it('CRLF 切得开：Windows 上 dev server 打的就是 CRLF', () => {
+    const 文 = '[vite] page reload a.js\r\n[vite] hmr update /src/x.js\r\n';
+    expect(重载线索(文).length,
+      '按 \\n 切行时 \\r 会挂在行尾：两行读成一行的话，第二处成因就丢了').toBe(2);
+    // 只比条数不够：`\r` 挂在尾巴上时条数照样对，拼进红话里却是一行带一个孤立的回车。
+    // 真源里是 split(/\r?\n/) 与 trim() **两道**兜着 —— 这一句钉的是"交出来的行是干净的"，
+    // 少了 trim 那道（臂 寅 拆的正是这两句一起），这条才咬得住。
+    expect(重载线索(文), '交出来的成因行带着 \\r（红话会被切成两截）')
+      .toEqual(['[vite] page reload a.js', '[vite] hmr update /src/x.js']);
+    expect(重载线索('00:59:12 [vite] page reload a.js\r\n00:59:14 [vite] page reload b.js\r\n').length,
+      '真格式（时间戳在前）在 CRLF 下收不全').toBe(2);
+  });
+
+  it('判据交白卷时交的是原话尾巴：不许把"过滤器没匹配上"说成"dev server 没说话"', () => {
+    /**
+     * 这一条是上面那次错的**直接解毒**：`重载线索` 按行首 `[vite]` 认，而 vite 打的是
+     * `00:59:12 [vite] …` ⇒ 真轮次里恒空 ⇒ 红话说"vite 一句 `[vite]` 都没说 —— 那这次重载不是它发的"。
+     * 那句在当时的输入下**句句为真**，可它把"我们的过滤器写错了"报成了"没人动过手"，
+     * 于是下一轮还会朝同一个方向查错人。
+     *
+     * `原话尾巴` 不认前缀、只交尾部：判据空手时调用方手里得有原话，
+     * "真的一个字都没输出"只有在尾巴也是空的时候才允许说出口。
+     */
+    const 只有横幅 = '  VITE v6.0.5  ready in 812 ms\n  ➜  Local:   http://127.0.0.1:5199/\n';
+    expect(原话尾巴(只有横幅), '开机横幅也被丢掉 —— 那"空手"就分不出是没人说还是过滤器不对')
+      .toEqual(['VITE v6.0.5  ready in 812 ms', '➜  Local:   http://127.0.0.1:5199/']);
+    expect(原话尾巴(''), '空串不交空数组').toEqual([]);
+    expect(原话尾巴(undefined), 'undefined 撞到一个裸 TypeError').toEqual([]);
+    expect(原话尾巴('\n\n   \n'), '全是空行时交出来的不是空行').toEqual([]);
+    // 条数按参数走（默认三行：红话里塞得下，又不至于把一屏日志刷进结论）
+    const 十行 = Array.from({ length: 10 }, (_, i) => `line${i}`).join('\n');
+    expect(原话尾巴(十行)).toEqual(['line7', 'line8', 'line9']);
+    expect(原话尾巴(十行, 2)).toEqual(['line8', 'line9']);
+    expect(原话尾巴('\u001b[2m00:59:12\u001b[22m x'), '色标没剥：尾巴拼进红话是一串乱码').toEqual(['00:59:12 x']);
+    // 正反对照：这一段 vite 的话，判据该收（否则上面那条"白卷"永远在响）
+    expect(重载线索('00:59:12 [vite] page reload src/core/Game.js').length, '真格式仍不被判据收下').toBe(1);
+  });
+});
+
 
