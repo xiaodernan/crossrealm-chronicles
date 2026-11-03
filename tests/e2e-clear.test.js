@@ -13,7 +13,7 @@
  *    口不能靠探（Chrome 撞口时不报错、只是不开口，而探到别人的口就连进别人的浏览器），
  *    页地址必须落在本进程的 dev 口上，"异常 0 条"那句预算更是要先见证事件通道真的在送东西
  *    —— "通道断了"与"页面没抛错"读出来是同一个 0；
- * ④ **这一轮从头到尾是同一个页**（W-C2 切片6d）：这 44 步要靠几百次 `evalJs` 打在同一个页面上跑完，
+ * ④ **这一轮从头到尾是同一个页**（W-C2 切片6d）：这整张推导步表要靠几百次 `evalJs` 打在同一个页面上跑完，
  *    共用工作树里谁往 `src/` 写一下就是一次 vite 全量重载 —— `window.__game` 变回 undefined，
  *    最先红的是一句 `TypeError: … reading 'quests'`，读起来像主线坏了。
  *    作废判据 `重载问题` 的正反行为在 `tests/perf-smoke.test.js` 测（判据不抄两份），这里钉接线。
@@ -31,14 +31,15 @@
  *
  * 这里按**结构**断言（源码里有那几行），因为脚本跑一次要几十秒、要起浏览器 ——
  * 把它塞进 `npm test` 会让整个套件慢一个量级，那正是 W-D4 把它单列成 `npm run e2e` 的理由。
- * 真读数由 `npm run e2e` 出（实测：5160 帧 / 86 秒模拟 / questIndex=32 / 主线 33 步 / 0 异常，
- * 连跑三次逐帧相同）。
+ * 真读数由 `npm run e2e` 出（切片9b 重导：r2 / r4 / r5 三轮逐帧相同 —— **8760 帧 / 146 秒模拟 /
+ * questIndex=78 / 主线 79 步 / 0 异常**，全表 73 步清一色每步 120 帧；
+ * 老的"5160 帧 / 主线 33 步"是 44 步时代的读数，预算那一格正是被它拖过期的）。
  */
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { E2E_BUDGETS } from '../scripts/e2e-budgets.mjs';
+import { E2E_BUDGETS, E2E_DEMO_STEPS } from '../scripts/e2e-budgets.mjs';
 
 const ROOT = process.cwd();
 const SCRIPT = join(ROOT, 'scripts', 'e2e-clear.mjs');
@@ -115,7 +116,7 @@ const 判据 = {
   红话带vite: (s) => (s.match(/vite 的话：\\n - \$\{vite话\(\)\}/g) ?? []).length >= 4
     && (s.match(/谁动的：\\n - \$\{vite话\(\)\}/g) ?? []).length >= 2,
   /**
-   * 静置三拍。这一条门禁比战斗那条更依赖它：44 步要靠几百次 `evalJs` 打完，
+   * 静置三拍。这一条门禁比战斗那条更依赖它：整张表要靠几百次 `evalJs` 打完，
    * 而 vite 冷启动后自己会发一次 reload —— 基线取在它之前的话，每一轮都红在同一格，
    * 红话还指着"有人往 src/ 写了一下"。
    */
@@ -134,6 +135,83 @@ const 判据 = {
   就绪表达式一个真源: (s) => /const 就绪 = '!!window\.__game/.test(s)
     && (s.match(/evalJs\(就绪\)/g) ?? []).length >= 2
     && !/evalJs\('!!window\.__game/.test(s),
+
+  // —— 切片9b：没交账不许绿 / 通道断了要说得出成因 / 每一步吃了多少帧 ——
+  /**
+   * 交账闩的**三格都在**：旗子、改退出码的那一问、以及一只有界挂钟。
+   *
+   * 少了哪一格的后果各不相同，所以要一起钉：没旗子 = 无从问起；没 `process.on('exit')` =
+   * 走不到 `finally` 那一路（事件一空就以 0 退场）静悄悄；没挂钟 = 通道没断但推帧挂住时
+   * 永远不 `exit`，于是连"问一次"都不会发生。
+   */
+  交账闩在: (s) => s.includes('let 已交账 = false;')
+    && s.includes('const 不交账就红 = (为什么) => {')
+    && s.includes("process.on('exit', (码)")
+    // 问句本身也要在：`if (!已交账 && 码 === 0)` 换成 `if (false)` 之后，注册还在而闩已经不响
+    //（2026-10-22 那批变异臂抓的就是"只钉注册、不钉条件"的声明式腿）
+    && s.includes('if (!已交账 && 码 === 0) {')
+    && s.includes('process.exitCode = 2;')
+    && /setTimeout\(\(\) => 不交账就红\(/.test(s),
+  /**
+   * 挂钟必须有界，且界要**大于**一轮真读数（r2 / r4 / r5：8760 帧 / 146 秒模拟，墙上时间几十秒），
+   * 并且**只有一处**：时长是 `挂钟毫秒` 这一个常量，`setTimeout` 与红话里的"多少秒"都从它算。
+   * 先前那版把 `900000` 直接写在 `setTimeout` 上、又把手抄的 `15 分钟` 写进红话，改一处
+   * 另一处就说出一个不属于本体的数 —— 这一格钉的就是"不许再抄第二遍"。
+   */
+  挂钟有界: (s) => {
+    const 得 = /const 挂钟毫秒 = (\d+);/.exec(s);
+    return !!得 && Number(得[1]) >= 300000 && Number(得[1]) <= 1800000
+      && /setTimeout\(\(\) => 不交账就红\([^)]*\), 挂钟毫秒\);/.test(s)
+      && s.includes('${挂钟毫秒 / 1000} 秒没走到交账')
+      // 手抄的"多少分钟/多少秒"不许回到红话里（时长只从常量算）
+      && !/[('`"]\s*\d+\s*(分钟|秒)没走到交账/.test(s);
+  },
+  /** `已交账 = true` 只能出现在 `[读数]` 那行**之后**：搬前面去就是"还没读就认了账" */
+  交账在读数之后: (s) => {
+    const 读 = s.indexOf('e2e-clear [读数]');
+    // 认账的语句有两处（成功路径一处、`不交账就红` 里一处），钉的是**成功那处**：
+    // 拿 `indexOf('已交账 = true;')` 的话，先命中的是闩里那一处，它本来就在读数之前 —— 恒红。
+    const 交 = s.indexOf('已交账 = true; // [读数] 那行已经打出去了');
+    return 读 >= 0 && 交 >= 0 && 读 < 交;
+  },
+  /** 通道断了要把挂在 `pending` 上的 await **交回去**：不交就是顶层 await 不 settle（实测退出码 13） */
+  断线交回在等: (s) => s.includes('const 拆通道 = (为什么) => {')
+    && /for \(const \[, 交回\] of pending\) 交回\(\{ 断线/.test(s)
+    && s.includes('if (断线) { res({ 断线 }); return; }'),
+  /**
+   * 这里的是 **Node 自带的标准 `WebSocket`**（脚本不 import `ws`：实测 `WebSocket.prototype.on` 是 undefined），
+   * 写成 `ws.on('close', …)` 的后果就是 r3 那句 `ws.on is not a function` —— 退出码 2，
+   * 而浏览器、页面、主线都没错。这一格把那条 API 之误钉成文本判据。
+   *
+   * 反面那半**按行首**判（`^\s*ws\.on\('`）：脚本里解释 r3 的那段注释正写着 `ws.on('close', …)`
+   * 的字面量，不限行首就是注释自己走进门禁 —— 与上面 `口由Chrome自报` 那格同一个毛病
+   * （故意留下的历史不该被读成回潮）。
+   */
+  通道事件用标准API: (s) => /ws\.addEventListener\('close'/.test(s) && !/^\s*ws\.on\('/m.test(s),
+  /** 断线那两句话都带着 Chrome 自己的原话，且出口本体"交白卷也要交尾巴" */
+  断线带Chrome的话: (s) => (s.match(/Chrome 的话：\\n - \$\{浏览器话\(\)\}/g) ?? []).length >= 2
+    && s.includes('const 浏览器话 = () => {')
+    && s.includes('原话尾巴(浏览器输出.join')
+    && s.includes('浏览器一个字都没输出'),
+  /** 每步帧账：读的键是游戏里现成的 `_demoStep`，每换一步结一段账，跨几步就记几步 */
+  每步帧账在记: (s) => s.includes('const 步帧 = [];')
+    && s.includes('步: qa._demoStep')
+    && s.includes('帧: frames - 上一步帧, 跨: Math.max(1,')
+    && s.includes('步帧.push({ 步: 上一步, 帧: frames - 上一步帧, 跨: 1 });')
+    && s.includes('const 每步均 = (x) => Math.round(x.帧 / Math.max(1, x.跨));'),
+  /** `[每步]` 的分母来自表长（不是数出来的段数自己当分母），否则"合表"没人发现 */
+  每步分母是表长: (s) => s.includes('计段=${有账.length}/${E2E_DEMO_STEPS}')
+    && /from '\.\/e2e-budgets\.mjs'/.test(s) && s.includes('E2E_BUDGETS, E2E_DEMO_STEPS'),
+  /** `[每步]` 与 `[卡点]` 两行都得打，且卡点那行给得出**这一格的身份**（id/型/目标/前置） */
+  每步卡点都打出: (s) => s.includes('e2e-clear [每步]')
+    && s.includes('e2e-clear [卡点]')
+    && s.includes('行="${读数.卡.id}"') && s.includes('型=${读数.卡.type}')
+    && s.includes('目标=${JSON.stringify(读数.卡.target)}')
+    && s.includes('前置=${JSON.stringify(读数.卡.requires)}'),
+  /** 单步上限真的参与判决：只在红话里出现步号而没人比过这个数，等于没这条 */
+  单步上限在判: (s) => s.includes('if (最贵.length && 每步均(最贵[0]) > 预算.maxStepFrames) {'),
+  /** 卡点那格必须**取自任务系统自己**：`qs.current` 是"现在卡在哪个目标"的唯一真源 */
+  卡格取自任务系统: (s) => s.includes('const r = qs.current || null;') && /卡: r \? \{ id: r\.id/.test(s),
 };
 
 /**
@@ -177,16 +255,37 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     expect(pkg.scripts.e2e, 'package.json 里没有 "e2e" 脚本').toBe('node scripts/e2e-clear.mjs');
   });
 
-  it('预算表按值钉死：只许收紧，不许放松（实测 5160 帧 / 86 秒模拟，见脚本头注）', () => {
-    expect(E2E_BUDGETS.maxFrames, '推帧预算被放松（实测 5160，门禁值 12000）').toBeLessThanOrEqual(12000);
+  /**
+   * 帧预算从"手抄的绝对数"改成"每步 × 表长"（W-D4 切片9b）。
+   *
+   * 老的那一格写的是 `maxFrames: 12000`，注释里说"实测 5160，取 2.3 倍余量" —— 那个 5160 是
+   * **44 步时代**的读数，表长到 73 步之后一次都没重测；于是同一个数兼容两种红（"走不完"与"预算过期"）。
+   * 现在的三条按值断言各自防一件事：**同源**（总量仍是每步 × 表长）、**下限**（不许低到实测以下，
+   * 那等于把门禁钉成注定红）、**上限**（不许高过实测两倍，那等于把"走不完"改成"走得慢一点也算过"）。
+   *
+   * 实测的每一格都指向 `.tmp-20261031-s25/clear-r{2,4}.log`：两轮逐帧相同，总 8760，
+   * 全表 73 步清一色 120 帧（= 两批 × 60 帧；一批是这台量具的分辨率，见脚本里"批内微任务不排空"那段）。
+   */
+  it('帧预算是"每步 × 表长"推出来的，两侧都有钉（切片9b 取代手抄的 12000）', () => {
+    const 实测每步帧 = 120;
+    expect(E2E_DEMO_STEPS, '表长数出来是 0 —— 预算跟着变 0，而"走不完"会被读成"预算耗尽"').toBeGreaterThan(0);
+    expect(E2E_BUDGETS.maxFrames, '总量不再是"每步 × 表长"了 —— 抄成一个绝对数的话，表一动预算就过期（这就是 12000 的老毛病）')
+      .toBe(E2E_BUDGETS.framesPerStep * E2E_DEMO_STEPS);
+    expect(E2E_BUDGETS.framesPerStep, `每步预算低到实测（${实测每步帧}）以下 —— 门禁注定红`).toBeGreaterThanOrEqual(实测每步帧);
+    expect(E2E_BUDGETS.framesPerStep, '每步预算放松到实测两倍以上 —— "耗尽预算"不再是"有一步走不完"')
+      .toBeLessThanOrEqual(实测每步帧 * 2);
+    expect(E2E_BUDGETS.maxStepFrames, '单步上限低于实测每步 —— 每一步都越线').toBeGreaterThanOrEqual(实测每步帧);
+    expect(E2E_BUDGETS.maxStepFrames, '单步上限放松到实测两倍以上 —— 这一条就不再点名').toBeLessThanOrEqual(实测每步帧 * 2);
+    // 钉子真的移动了（与 `tests/e2e-combat.test.js` 那族同一条反向控制）：表长挪一格，同源那条必须跟着红。
+    // 抄死的绝对数在这一格现形 —— 它今天"对"，纯粹因为表长恰好还是这个数。
+    expect(E2E_BUDGETS.maxFrames, '抄死的绝对数：表长 +1 之后它却仍"相等"').not.toBe(E2E_BUDGETS.framesPerStep * (E2E_DEMO_STEPS + 1));
     expect(E2E_BUDGETS.exceptions).toBe(0);
     expect(E2E_BUDGETS.requireCompleted, '关掉"必须通关"这条，门禁就废了').toBe(true);
-    expect(E2E_BUDGETS.minMainlineSteps, '分母守卫被放松（实测主线 33 步）').toBeGreaterThanOrEqual(30);
+    expect(E2E_BUDGETS.minMainlineSteps, '分母守卫被放松（实测主线 79 步）').toBeGreaterThanOrEqual(30);
     // 每一项都得是正数 —— 写成 0，门禁就在空转
     expect(E2E_BUDGETS.maxFrames).toBeGreaterThan(0);
     expect(E2E_BUDGETS.minMainlineSteps).toBeGreaterThan(0);
   });
-
   it('三个让读数可信的装置都在（固定步长 / 手工推帧 / 动态端口）', () => {
     expect(判据.固定步长在(源文), '固定步长那一步不见了 —— 读数不再可复现').toBe(true);
     expect(判据.先换步长再起跑(源文), '先起跑后换步长 —— 前几步仍按真实 dt 走').toBe(true);
@@ -211,7 +310,7 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
 
   it('这一轮连的是自己那个页，且"异常 0 条"有通道正面见证', () => {
     expect(判据.页目标有守卫(源文), '没有 page 目标时裸 TypeError（reading webSocketDebuggerUrl）会把"缺页"报成脚本坏了').toBe(true);
-    expect(判据.页归属在(源文), '页归属见证不见了 —— 那 44 步可能走的是别人的构建').toBe(true);
+    expect(判据.页归属在(源文), '页归属见证不见了 —— 那整张表可能走的是别人的构建').toBe(true);
     expect(判据.通道见证在(源文), '通道正面见证不见了 —— 通道断了与页面没抛错读出来是同一个 0，那条预算就在空转').toBe(true);
     // 见证必须**在起跑之前**：跑完再看通道，中间那些异常是不是送进来了无从可证
     const 见证 = 源文.indexOf('const 通问 = 通道问题(通道)');
@@ -234,7 +333,7 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
 
   it('页在中途被重建 ⇒ 本轮读数作废并点名，而不是红成一句页面内 TypeError', () => {
     /**
-     * 这 44 步要靠几百次 `evalJs` 打在同一个页面上跑完。共用工作树里谁往 `src/` 写一下
+     * 这整张推导步表要靠几百次 `evalJs` 打在同一个页面上跑完。共用工作树里谁往 `src/` 写一下
      * ⇒ vite 发一次全量重载 ⇒ `window.__game` 变回 undefined ⇒ 最先红的是一句
      * `TypeError: Cannot read properties of undefined (reading 'quests')` ——
      * 那句红读起来像"主线第 N 步坏了"，而真实原因是"这一轮的页被换掉了"。
@@ -251,7 +350,7 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     expect(源文, '没有人在数执行上下文条数').toMatch(/通道\.执行上下文 \+= 1/);
   });
 
-  it('反向控制：6d 的四处拆法各自被对应的腿抓住', () => {
+  it('反向控制：6d 那批拆法各自被对应的腿抓住（标题不抄处数，名册自己会涨）', () => {
     // 与 perf 一侧同一批坏法 —— 两个 harness 要坏得一样红，否则"共用一把尺"只是话术
     const 坏 = {
       不调判据: 源文.replace('const 重问 = 重载问题(基线上下文, 通道.执行上下文);', 'const 重问 = [];'),
@@ -324,7 +423,7 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     }
     let 坏 = 源文;
     for (const [, 锚, 换成] of 拆法) 坏 = 坏.replace(锚, 换成);
-    expect(坏 !== 源文, '十四处拆法一处都没改动文本').toBe(true);
+    expect(坏 !== 源文, '这一串拆法一处都没改动文本').toBe(true);
     expect(判据.固定步长在(坏), '拆掉固定步长却仍判为"在"').toBe(false);
     expect(判据.先换步长再起跑(坏), '拆掉固定步长却仍判为"顺序对"').toBe(false);
     expect(判据.不用rAF(坏), '改回 rAF 却仍判为"没用"').toBe(false);
@@ -405,6 +504,119 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     expect(判据.基线在静置之后(坏.静拍退成一拍), '拍数改了不该把顺序腿也带走').toBe(true);
     expect(判据.静置三拍(坏.基线搬到静置之前), '基线搬家不该把三拍那条也带走').toBe(true);
     expect(判据.就绪表达式一个真源(坏.静置不循环), '静置不循环不该把表达式那份也带走').toBe(true);
+  });
+
+  /**
+   * 切片9b —— **没有读数就没有结论**。
+   *
+   * 由来（写在这里是因为它同时是一条**读日志的规矩**）：我先把 r2 读成了"这条门禁能绿着退场"——
+   * 当时那份日志只有 7 行、停在通道见证、没有 `[读数]`，而后台通知已经报了"完成 0"。
+   * 等进程真退完再读，`[读数] frames=8760 … completed=true` 就在第 7 行。
+   * **那份推断作废**，两条候选成因也各自被探针 `.tmp-20261031-s25/exit-probe.mjs` 打掉：
+   * 顶层 await 不 settle 时 Node 给的是 **13** 不是 0；Windows 上 stdout 接管道时
+   * `process.exit()` 没把 40000 行尾巴吞掉。**闩照立**，因为 `finally` 那句 `process.exit(failures)`
+   * 确实是唯一的结论出口，走不到它的路径本来就该响。教训是另一条：**没交账的日志是半成品，不是结论。**
+   */
+  it('没走到交账就不许是绿灯：旗子 + 会改退出码的那一问 + 一只有界挂钟（切片9b）', () => {
+    expect(判据.交账闩在(源文), '交账闩缺一格 —— 走不到 finally 那一轮就可能静悄悄以 0 退场').toBe(true);
+    expect(判据.挂钟有界(源文), '挂钟没界、太小（一轮真读数几十秒）或太大 —— 挂住与假红都读不出来').toBe(true);
+    expect(判据.交账在读数之后(源文), '"已交账"排在 [读数] 之前 —— 闩会被一句还没打出来的话提前认领').toBe(true);
+  });
+
+  it('通道断了要说得出成因，而且用的是标准 WebSocket 的 API（切片9b）', () => {
+    /**
+     * r3 真红过一次：`e2e-clear 失败： ws.on is not a function`，退出码 2。
+     * 这里没有 import `ws`（实测 `require('ws')` 在本仓 MODULE_NOT_FOUND），`WebSocket` 是 Node 自带的
+     * 全局实现（实测 `WebSocket.prototype.on` = undefined、`addEventListener` = function）——
+     * 那句红读的完全是"脚本自己写错了 API"，而它长得像"浏览器或页面出事了"。
+     */
+    expect(判据.通道事件用标准API(源文), 'ws.on(...) 回潮 —— 全局 WebSocket 没有 .on()，r3 就是这么红的').toBe(true);
+    expect(判据.断线交回在等(源文), '通道断了却不把 pending 的 await 交回去 —— 那一轮不是红，是挂住或 13').toBe(true);
+    expect(判据.断线带Chrome的话(源文), '断线红话没带 Chrome 自己的原话 —— 崩了 / OOM / 被 taskkill 全写成同一句"通道关闭"').toBe(true);
+  });
+
+  it('每一步吃了多少帧、卡住时是哪一格 —— 两行都点名（切片9b）', () => {
+    /**
+     * 红话里只有 `questIndex=2` 的时候，8a 那一轮我花了一整天从内容表反推出
+     * "停在 `hub-catacombs`，因为演示不认识那七座副本" —— 那个形状本来就在 `qs.current` 这一格里，
+     * 是读数没去问它。每步帧账同理：总量说"哪一步都不许多吃"，单步那条说"**哪一步**多吃了"。
+     */
+    expect(判据.每步帧账在记(源文), '每步帧账断了 —— 预算那两格（每步 / 单步）就没了出处').toBe(true);
+    expect(判据.每步分母是表长(源文), '[每步] 的分母又回退成自数的段数 —— 合表（一步一段变一步两段）没人发现').toBe(true);
+    expect(判据.每步卡点都打出(源文), '[每步] / [卡点] 少一行或给不出这一格的身份 —— 红了还是得考古').toBe(true);
+    expect(判据.卡格取自任务系统(源文), '卡点不再从 qs.current 读 —— 那是"现在卡在哪个目标"的唯一真源').toBe(true);
+    expect(判据.单步上限在判(源文), '单步上限只打在红话里、没参与判决 —— 这条越线是空的').toBe(true);
+  });
+
+  it('反向控制：切片9b 的拆法名册各自被对应的腿抓住（#36 同规）', () => {
+    const 交账句 = '  已交账 = true; // [读数] 那行已经打出去了 —— 这一轮从此有结论，两道闩就此闭嘴';
+    const Chrome话 = 'Chrome 的话：\\n - ${浏览器话()}';
+    const 坏 = {
+      闩改成不响: 源文.replace('if (!已交账 && 码 === 0) {', 'if (false) {'),
+      挂钟改成只warn: 源文.replace('setTimeout(() => 不交账就红(', 'setTimeout(() => console.warn('),
+      挂钟改成五秒: 源文.replace('const 挂钟毫秒 = 900000;', 'const 挂钟毫秒 = 5000;'),
+      红话手抄分钟: 源文.replace('${挂钟毫秒 / 1000} 秒没走到交账', '15 分钟没走到交账'),
+      挂钟传成字面量: 源文.replace('), 挂钟毫秒);', '), 900000);'),
+      旗子删掉: 源文.replace('let 已交账 = false;', ''),
+      断线不交回: 源文.replace('for (const [, 交回] of pending) 交回({ 断线: 为什么 });', '/* 不交回，让那些 await 挂着 */;'),
+      通道事件退回wsOn: 源文.replace("ws.addEventListener('close'", "ws.on('close'"),
+      断线不带原话: 源文.split(Chrome话).join(''),
+      浏览器话不交尾巴: 源文.replace("const 尾 = 原话尾巴(浏览器输出.join(''), 5);", 'const 尾 = [];'),
+      步号抄成常量: 源文.replace('步: qa._demoStep', '步: 0'),
+      最后一段不结: 源文.replace('步帧.push({ 步: 上一步, 帧: frames - 上一步帧, 跨: 1 });', '/* 最后一笔不结 */;'),
+      均帧不除步: 源文.replace('const 每步均 = (x) => Math.round(x.帧 / Math.max(1, x.跨));', 'const 每步均 = (x) => x.帧;'),
+      分母退回自数: 源文.replace('计段=${有账.length}/${E2E_DEMO_STEPS}', '计段=${有账.length}'),
+      卡点不报前置: 源文.replace('前置=${JSON.stringify(读数.卡.requires)}', "前置='不报'"),
+      卡格不从任务系统取: 源文.replace('const r = qs.current || null;', 'const r = null;'),
+      单步上限不参与判: 源文.replace('if (最贵.length && 每步均(最贵[0]) > 预算.maxStepFrames) {', 'if (false) {'),
+    };
+    // 基线搬家那类要靠"搬"不是"删"：认账语句真的挪到 [读数] 那行之前
+    坏.交账搬到读数之前 = 源文.replace(交账句, '')
+      .replace('  console.log(`e2e-clear [读数]', `${交账句}\n  console.log(\`e2e-clear [读数]`);
+
+    /** 每一处拆法**该红哪几条腿**；其余腿必须照绿 —— 一处坏带倒三条就说不清是谁咬住的 */
+    const 谁该红 = {
+      闩改成不响: ['交账闩在'],
+      // 挂钟改成只 warn 会同时打断两条腿，而且是同一只挂钟的两面，不是连累：
+      // `交账闩在` 问它绑的是不是那只会红的函数，`挂钟有界` 问它有没有一只**能认得出时长**的界。
+      挂钟改成只warn: ['交账闩在', '挂钟有界'],
+      挂钟改成五秒: ['挂钟有界'],
+      红话手抄分钟: ['挂钟有界'],
+      挂钟传成字面量: ['挂钟有界'],
+      旗子删掉: ['交账闩在'],
+      交账搬到读数之前: ['交账在读数之后'],
+      断线不交回: ['断线交回在等'],
+      通道事件退回wsOn: ['通道事件用标准API'],
+      断线不带原话: ['断线带Chrome的话'],
+      浏览器话不交尾巴: ['断线带Chrome的话'],
+      步号抄成常量: ['每步帧账在记'],
+      最后一段不结: ['每步帧账在记'],
+      均帧不除步: ['每步帧账在记'],
+      分母退回自数: ['每步分母是表长'],
+      卡点不报前置: ['每步卡点都打出'],
+      卡格不从任务系统取: ['卡格取自任务系统'],
+      单步上限不参与判: ['单步上限在判'],
+    };
+    const 九b腿 = {
+      交账闩在: 判据.交账闩在, 挂钟有界: 判据.挂钟有界, 交账在读数之后: 判据.交账在读数之后,
+      断线交回在等: 判据.断线交回在等, 通道事件用标准API: 判据.通道事件用标准API,
+      断线带Chrome的话: 判据.断线带Chrome的话, 每步帧账在记: 判据.每步帧账在记,
+      每步分母是表长: 判据.每步分母是表长, 每步卡点都打出: 判据.每步卡点都打出,
+      单步上限在判: 判据.单步上限在判, 卡格取自任务系统: 判据.卡格取自任务系统,
+    };
+    // 先自证：源文本身这一族腿全过（否则下面"该绿的腿"是在拿坏脚本比坏脚本）
+    for (const [名, 尺] of Object.entries(九b腿)) {
+      expect(尺(源文), `腿"${名}"在真源码上就不过 —— 反向控制失去参照`).toBe(true);
+    }
+    for (const [名, 变体] of Object.entries(坏)) {
+      // #36：锚点不在了就是静默 no-op，这一格会拿真源码喂自己 → 假绿
+      expect(变体 !== 源文, `坏法"${名}"没改动任何文本 —— 锚点已不在源码里，这一格是自证（#36）`).toBe(true);
+      expect(谁该红[名], `坏法"${名}"没登记该红哪条腿`).toBeTruthy();
+      for (const [腿, 尺] of Object.entries(九b腿)) {
+        const 该 = 谁该红[名].includes(腿);
+        expect(尺(变体), `坏法"${名}"对腿"${腿}"：该${该 ? '红' : '绿'}却${该 ? '绿' : '红'}`).toBe(!该);
+      }
+    }
   });
 
   /**

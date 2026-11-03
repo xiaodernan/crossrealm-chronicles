@@ -19,9 +19,13 @@
  * 那三样由 `npm run perf`（真推帧）与单元层（`tests/*combat*`、`tests/*dungeon*`）各自守着。
  *
  * 它覆盖的是**主线的骨架**：那张**由主线推导**的步表（`src/ui/demoSteps.js`），每一步都过**真的** `QuestSystem`
- * （`checkProgress` → `advance` → 章节门 → `game-completed`），事件全走真的总线，
- * 七个位面的发现点 / NPC / 四个 Boss / 三座试炼地下城 / 宝箱 / 法术 / 技能各一次。
+ * （`checkProgress` → `advance` → 章节门 → `game-completed`），事件全走真的总线。
  * 也就是说：**任务表、章节门、事件名、统计键**这几样任意一处对不上，这一步就红。
+ *
+ * **这一步覆盖了几样东西，本文件不抄**（切片9b）：步数 = `buildDemoSteps().length`，
+ * 每格是什么型（发现点 / NPC / Boss / 副本 / 宝箱 / 法术 / 技能）由 `src/content/objectives.js`
+ * 那一张表的 `type` 列说了算。这里曾写着"四个 Boss / 三座试炼地下城" —— 那份清单和当年的帧预算
+ * 是同一个病：表从 44 行走成 78 行，注释一个字没动，于是它成了一句听起来很具体的假话。
  *
  * ## 确定性（这一条是它敢当门禁的前提）
  *
@@ -32,7 +36,8 @@
  * "只有能被固定步长驱动的东西才是可验证的东西"同一条口径）。
  *
  * 推帧**只调 update()，不调 render()**：软渲染一帧 ~150ms（`perf-smoke` 实测），
- * 两千多帧会把这个门禁拖成五分钟。任务推进不经过渲染路径 —— 渲染价的回归归 perf-smoke。
+ * 八千多帧（实测 r2 / r4 逐帧相同）会把这个门禁拖成几十分钟。任务推进不经过渲染路径 ——
+ * 渲染价的回归归 perf-smoke。
  *
  * ## 这一轮连的是哪台浏览器、哪个页（W-C2 切片6c，与 `perf-smoke` 同一套口径）
  *
@@ -61,9 +66,12 @@
  *
  * ## 退出码
  *
- * `0` 通关且在预算内；`1` 没通关 / 超帧预算 / 有未捕获异常；`2` 环境问题（找不到 Chrome、
- * dev 口或游戏没起来、这一轮的页中途被重建）。与 `perf-smoke` 同一套约定 —— 将来接进 CI
- * （W-D4 切片4）时就是红绿的来源。
+ * `0` 通关且在预算内；`1` 没通关 / 超帧预算（总量或单步）/ 有未捕获异常；`2` 环境问题
+ * （找不到 Chrome、dev 口或游戏没起来、这一轮的页中途被重建、**这一轮没走到交账**）。
+ * 与 `perf-smoke` 同一套约定 —— 将来接进 CI（W-D4 切片4）时就是红绿的来源。
+ *
+ * 退出码这一族的前提是"**0 就说得出读数**"，所以切片9b 起多了一道闩：没打出 `[读数]` 那一行的
+ * 一轮**不许**是 0（见下面 `不交账就红`）。
  *
  * 用法：`npm run e2e`（自己起 dev 口与浏览器，结束自己收）。
  */
@@ -72,7 +80,7 @@ import { existsSync, rmSync } from 'fs';
 import { createServer } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { E2E_BUDGETS } from './e2e-budgets.mjs';
+import { E2E_BUDGETS, E2E_DEMO_STEPS } from './e2e-budgets.mjs';
 import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴 } from './harness-readings.mjs';
 
 /**
@@ -204,6 +212,18 @@ chrome.stderr.on('data', (b) => 浏览器输出.push(String(b)));
 chrome.stdout.on('data', (b) => 浏览器输出.push(String(b)));
 
 /**
+ * Chrome 自己说的话（W-D4 切片9b）。`vite话()` 那一族立的规矩在这里照用：**交白卷也要交尾巴**。
+ *
+ * 为什么这条门禁要它：**断线那句话点不出成因**。崩在渲染进程、显存不够、上一轮泄漏的浏览器被
+ * `taskkill` 打掉 —— 在 CDP 这一侧全都只写成同一句"通道关闭（码=1006）"。能点名的一样都在浏览器
+ * 这条流上（`# Crash` / out of memory / renderer gone）。**收了却不读**等于没收。
+ */
+const 浏览器话 = () => {
+  const 尾 = 原话尾巴(浏览器输出.join(''), 5);
+  return 尾.length ? 尾.join('\n - ') : '(浏览器一个字都没输出 —— 那句"通道断了"不是它说的)';
+};
+
+/**
  * 从 Chrome 自己的话里取回它挑中的口（有界等待，取不到就带上它说过的话红）。
  *
  * 这一句是整条腿的**来源证明**：口不是探来的，是**我 spawn 的那个进程**亲口报的。
@@ -264,6 +284,46 @@ const 通道 = { 执行上下文: 0, 加载完成: 0 };
 let 基线上下文 = null;
 
 let failures = 0;
+/**
+ * **本轮必须交账**（W-D4 切片9b）。
+ *
+ * 由来先说清楚，因为它自己就是这一片要记的一条教训：我先把 r2 读成了"绿着退场"——
+ * 当时那份日志只有 7 行、停在通道见证那一行、没有 `[读数]`，而后台任务通知已经报了"完成 0"。
+ * 等进程真退完再读，`[读数] frames=8760 … completed=true` 就在那里（`.tmp-20261031-s25/clear-r2.log` 第 7 行）。
+ * **那份推断作废**，两条候选成因也各自被探针打掉（`.tmp-20261031-s25/exit-probe.mjs`）：
+ * ① 顶层 `await` 永不 settle 时 Node 给的退出码是 **13**（还带一句 unsettled 警告），不是 0；
+ * ② Windows 上 stdout 接管道时 `process.exit()` **没有**把尾巴吞掉 —— 40000 行两种模式都收满。
+ * 教训归教训，**闩照立**，因为它守的形状与那次误读无关：`finally` 里那句 `process.exit(failures)`
+ * 是这一条门禁唯一的结论出口，任何走不到它的路径都该响，而不是留下一句没声音。
+ *
+ * 两道闩，各管一种挂法：
+ * ① `process.on('exit')` 问"交过账没有"，没交过就把退出码改成 2 —— 走不到 `finally` 也照样响
+ *   （实测两例：自然退出时监听看到 码=0，改完 exitCode 进程真的以 2 退出去；臂"甲"删掉成功路径那句
+ *   交账 ⇒ `finally` 走到了、`[读数]` 也打出来了，退出码仍是 2 —— 这一闩认的是**旗子**，不是那句打印）；
+ * ② 一只**不 `unref`** 的挂钟闩（时长见 `挂钟毫秒`）—— 通道没断、但推帧循环挂住的那种形状，① 是等不到的
+ *   （事件循环里还挂着活的 handle，进程就永远不 `exit`）。
+ * 两条说的都是同一句话：**没有读数就没有结论**。
+ */
+let 已交账 = false;
+/**
+ * 挂钟的时长（毫秒）。红话里那句"多少秒没走到交账"**由它自己算**，不再抄一遍 ——
+ * 原先 `15 分钟` 与 `900000` 两处各写一份，改一处就会让另一处说出一个不属于本体的数。
+ */
+const 挂钟毫秒 = 900000;
+const 不交账就红 = (为什么) => {
+  if (已交账) return;
+  console.error(`e2e-clear 未通过：${为什么} —— 本轮没打出 [读数] 那一行，没有结论就不许是绿灯`);
+  已交账 = true; // 认领这次结论，防 ①② 先后各喊一次
+  cleanup();
+  process.exit(2);
+};
+process.on('exit', (码) => {
+  if (!已交账 && 码 === 0) {
+    console.error('e2e-clear 未通过：本轮没走到交账就退出了（退出码 0 会被读成"这一轮过了"—— 信它之前先回看 [读数] 那一行在不在）');
+    process.exitCode = 2;
+  }
+});
+setTimeout(() => 不交账就红(`${挂钟毫秒 / 1000} 秒没走到交账（推帧循环挂住 / CDP 那边不再回来）`), 挂钟毫秒);
 try {
   if (!await waitForHttp(`http://127.0.0.1:${VITE_PORT}/`)) throw new Error(`dev 口 20 秒内没起来。vite 的话：\n - ${vite话()}`);
   const { 口: CDP口, 浏览器ws } = await 读CDP口();
@@ -292,11 +352,39 @@ try {
     else if (m.method === 'Runtime.executionContextCreated') 通道.执行上下文 += 1;
     else if (m.method === 'Page.loadEventFired') 通道.加载完成 += 1;
   };
+  /**
+   * **通道一断，就把所有在等的 `await` 交回去**（切片9b）。
+   *
+   * 不接这一刀时，`ws` 关闭是**静默**的：`send` 的 Promise 永远不 settle，`try` 走不到头。
+   * 实测那种收尾长这样：顶层 await 没 settle ⇒ Node 直接以 **13** 退出并甩一句
+   * "Detected unsettled top-level await"（`.tmp-20261031-s25/exit-probe.mjs`，与退出码约定 1/2 都对不上号）；
+   * 若当时还挂着别的活 handle，就更糟 —— 不是退出，是**挂住**。两种都问不出成因。
+   * 接了之后，断线当场变成一句带得出**成因**的抛错（环境问题 2）—— 而 Chrome 自己那条流里正有它
+   * （崩溃会打 `# Crash` / OOM / renderer gone，上一轮泄漏的浏览器被 `taskkill` 打掉也在这条流里）。
+   */
+  let 断线 = null;
+  const 拆通道 = (为什么) => {
+    断线 = 为什么;
+    for (const [, 交回] of pending) 交回({ 断线: 为什么 });
+    pending.clear();
+  };
   const send = (method, params = {}) => new Promise((res) => {
+    if (断线) { res({ 断线 }); return; } // 通道已经死了：别再往 ws 上写（那会抛成第二个结论）
     const id = ++msgId; pending.set(id, res); ws.send(JSON.stringify({ id, method, params }));
   });
+  // 事件用**标准 WebSocket 的 API**（`addEventListener`），不是 `ws` 包的 `.on()`：
+  // 这里没有 import 'ws'，`WebSocket` 是 Node 自带的全局实现，`.on` 在它身上不存在 ——
+  // 写成 `ws.on('close', …)` 的后果是 r3 那句 `e2e-clear 失败： ws.on is not a function`（退出码 2，
+  // 而它红的原因与浏览器、页面、主线都没关系）。`addEventListener` 也不顶掉上面
+  // 那句 `ws.onopen = res; ws.onerror = rej`（属性式handler与监听器各走各的）。
+  ws.addEventListener('close', (ev) => 拆通道(
+    `CDP 通道关闭（码=${ev?.code ?? '?'} 干净=${ev?.wasClean === true} 理由=${String(ev?.reason ?? '').slice(0, 120) || '无'}）`,
+  ));
+  ws.addEventListener('error', (ev) => 拆通道(`CDP 通道报错（${String(ev?.message ?? ev?.type ?? '?').slice(0, 200)}）`));
   const evalJs = async (expr) => {
+    if (断线) throw new Error(`${断线}\nChrome 的话：\n - ${浏览器话()}`);
     const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: false, returnByValue: true });
+    if (r.断线) throw new Error(`${r.断线}\nChrome 的话：\n - ${浏览器话()}`);
     if (r.result?.exceptionDetails) {
       // 把**页面里那句话**与位置带出来：抽 JSON 前 300 字会正好切掉 description，
       // 于是红只会说"页面内抛错"，责任落不到具体哪一句拒上（perf-smoke 2026-10-20 第一次真跑就这么瞎过一次）。
@@ -407,6 +495,28 @@ try {
   const BATCH = 60;
   let frames = 0;
   let 演示跑完 = false;
+  /**
+   * **每一步吃了多少帧**（W-D4 切片9b）。
+   *
+   * 这一列数是 `E2E_BUDGETS` 那两格帧预算的唯一合法出处：手抄的绝对数 `12000` 正是 8a 那条红的
+   * 另一半 —— 表从 44 行长到 78 行，预算一个字没动，于是"走不完"与"预算过期"两种红混在同一个数里。
+   * 读的键是现成的：`qa._demoStep` 是执行器每一步开头写下的序号（面板那句"演示进行中 N"读的也是它），
+   * 所以游戏侧不需要新增任何状态。
+   *
+   * **读数（r2 / r4 / r5 与变异臂的"空跑"四轮逐帧相同，`.tmp-20261031-s25/clear-r{2,4,5}.log`
+   * + `arms9b/空跑.log`）**：全表 73 步**清一色 120 帧**，总计 8760 = 73 × 120。
+   * 那个 120 里有这台量具的分辨率，不全是游戏的开销：一批 60 帧，
+   * 而演示正是"每批往前走一步"（见上面那段"批内微任务不排空"），所以单步开销只能读成 60 的整数倍，
+   * 地板是两批。**这就是把预算写成"每步 × 表长"而不是"一个绝对数"的理由** ——
+   * 表长一动，两个数的关系当场就看得见；有人往某一步里塞一个 `wait(3)`，红话点名到步号。
+   *
+   * `跨`：一步一批就走完时，两批之间步号会一次 +2，那一段就混了两步的账。
+   * 所以记的不是"这一步的帧"而是"这一段观察的帧 + 它覆盖了几步"，单步上限比的是**每步均帧**；
+   * 实测四轮都是 计段=73 / 表长=73（一步一段，跨全是 1）。
+   */
+  const 步帧 = [];
+  let 上一步 = 0;
+  let 上一步帧 = 0;
   while (frames < E2E_BUDGETS.maxFrames) {
     await evalJs(`(() => { for (let i = 0; i < ${BATCH}; i += 1) window.__game.update(); return true; })()`);
     frames += BATCH;
@@ -414,27 +524,56 @@ try {
       const qa = window.__game.questAssistant;
       const qs = window.__game.quests;
       return { running: !!qa.demoRunning, err: window.__e2e?.error ?? null,
-        index: qs.questIndex, completed: !!qs.completed };
+        index: qs.questIndex, completed: !!qs.completed, 步: qa._demoStep };
     })()`);
     if (st?.err) throw new Error('演示里抛错：' + String(st.err).slice(0, 400));
+    if ((st?.步 ?? 0) !== 上一步) {
+      // 记的是**这一段里在跑的那一步**吃了多少帧（第一段是起跑，步号还是 0），
+      // 以及这一段跨了几步（两批之间步号一次 +2 时，那一段是两个步的账）
+      步帧.push({ 步: 上一步, 帧: frames - 上一步帧, 跨: Math.max(1, (st?.步 ?? 0) - 上一步) });
+      上一步 = st?.步 ?? 0;
+      上一步帧 = frames;
+    }
     // 头一批不算数：起跑那个微任务要等本次 evaluate 返回才排空，
     // 所以"第一批之后 running 还是 false"是起跑还没发生，不是演示已经结束
     if (!st?.running && frames > BATCH) { 演示跑完 = true; break; }
   }
+  if (上一步) 步帧.push({ 步: 上一步, 帧: frames - 上一步帧, 跨: 1 });
 
-  // ④ 收尾读数：走到第几步、第几章、有没有通关
+  // ④ 收尾读数：走到第几步、第几章、有没有通关，以及**卡在哪一行**（切片9b）
   const 读数 = await evalJs('(() => {'
     + 'const qs = window.__game.quests;'
-    + 'return { index: qs.questIndex, completed: !!qs.completed, chapter: qs.chapter };'
+    + 'const r = qs.current || null;'
+    + 'return { index: qs.questIndex, completed: !!qs.completed, chapter: qs.chapter,'
+    + '  卡: r ? { id: r.id, type: r.type, target: (r.target === undefined ? null : r.target),'
+    + '    requires: (r.requires === undefined ? null : r.requires) } : null };'
     + '})()');
 
   // 主线步数 = 走到的下标 + （通关了再加一）。分母守卫：任务表被掏空时"通关"是空转
   const 主线步数 = 读数.index + (读数.completed ? 1 : 0);
 
   const 模拟秒 = Math.round(frames / 60 * 10) / 10;
+  /** 单步的账：跨了几步的那一段按**每步均帧**算，否则"两批走了三步"会被读成"某一步吃了 180 帧" */
+  const 有账 = 步帧.filter((x) => x.步 > 0);
+  const 每步均 = (x) => Math.round(x.帧 / Math.max(1, x.跨));
+  const 最贵 = 有账.sort((a, b) => 每步均(b) - 每步均(a)).slice(0, 3);
   console.log(`e2e-clear [读数] frames=${frames} 模拟时间=${模拟秒}s `
     + `questIndex=${读数.index} 主线步数=${主线步数} chapter=${读数.chapter} `
     + `completed=${读数.completed} 演示跑完=${演示跑完} exceptions=${exceptions.length}`);
+  /**
+   * 每步帧数与卡点身份**另起一行**（切片9b）。
+   *
+   * 为什么不能只塞进上面那一行：上面那行是"这轮算不算过"的证据，格式有人按子串读；
+   * 下面两行是"过不了的话该去查哪一格"的证据。红话里只有 `questIndex=2` 的时候，
+   * 8a 那一轮我花了整整一天才从内容表反推出"停在 `hub-catacombs`，因为演示不认识那七座副本" ——
+   * 那个形状本来就在 `qs.current` 这一格里，是读数没去问它。
+   */
+  console.log(`e2e-clear [每步] 走到第${上一步}步 计段=${有账.length}/${E2E_DEMO_STEPS} `
+    + `最贵三步=${最贵.map((x) => `${x.步}:${每步均(x)}帧${x.跨 > 1 ? `(跨${x.跨}步)` : ''}`).join(' ') || '(还没进第一步)'}`);
+  if (!读数.completed) {
+    console.log(`e2e-clear [卡点] ${读数.卡 ? `行="${读数.卡.id}" 型=${读数.卡.type} 目标=${JSON.stringify(读数.卡.target)} 前置=${JSON.stringify(读数.卡.requires)}` : '(任务系统没有当前行)'}`);
+  }
+  已交账 = true; // [读数] 那行已经打出去了 —— 这一轮从此有结论，两道闩就此闭嘴
   if (exceptions.length) console.log('e2e-clear [异常] ' + exceptions.slice(0, 5).join(' | '));
 
   /**
@@ -462,7 +601,17 @@ try {
   if (主线步数 < 预算.minMainlineSteps) {
     越线.push(`主线只有 ${主线步数} 步（下限 ${预算.minMainlineSteps}）—— "通关"是空转`);
   }
-  if (frames >= 预算.maxFrames) 越线.push(`推帧 ${frames} 耗尽预算 ${预算.maxFrames}（主线某一步走不完）`);
+  if (frames >= 预算.maxFrames) {
+    // 预算是"每步 × 表长"推出来的，所以这句话只剩一个含义：**有一步不往前走**。
+    // （老写法是一个手抄的 12000：表从 44 行长到 78 行时它同时兼容"走不完"与"预算过期"两种红。）
+    越线.push(`推帧 ${frames} 耗尽预算 ${预算.maxFrames}（= 每步 ${预算.framesPerStep} × 表长 ${E2E_DEMO_STEPS}）`
+      + ` —— 有一步不往前走，看上面 [每步] 那行最贵的是哪一步`);
+  }
+  // 单步上限：总量那条要等整表跑完才红，这一条点名到步号（切片9b）
+  if (最贵.length && 每步均(最贵[0]) > 预算.maxStepFrames) {
+    越线.push(`第 ${最贵[0].步} 步每步均 ${每步均(最贵[0])} 帧 > 单步上限 ${预算.maxStepFrames}`
+      + `（该段实测 ${最贵[0].帧} 帧 / 跨 ${最贵[0].跨} 步；实测全表清一色 120 = 两批，一批 60 帧）`);
+  }
   if (exceptions.length > 预算.exceptions) 越线.push(`页面异常 ${exceptions.length} 条 > ${预算.exceptions}`);
 
   if (越线.length) {
