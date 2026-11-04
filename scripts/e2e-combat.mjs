@@ -62,6 +62,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { E2E_COMBAT_BUDGETS } from './e2e-budgets.mjs';
 import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴, 战斗越线 } from './harness-readings.mjs';
+import { 开通道 } from './cdp-channel.mjs';
 
 /**
  * 预算与阈值住在 `./e2e-budgets.mjs` —— **判据与执行分家**（与 `e2e-clear` 同一条纪律）：
@@ -247,36 +248,19 @@ try {
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 
-  let msgId = 0;
-  const pending = new Map();
-  const exceptions = [];
-  // 计数的是**外层**那个 `通道` 对象：catch 也要读得到它（try 内再 const 一次 = 遮蔽 = 归因永远读到 0）
-  ws.onmessage = (ev) => {
-    const m = JSON.parse(ev.data);
-    if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); }
-    else if (m.method === 'Runtime.exceptionThrown') {
-      exceptions.push(m.params?.exceptionDetails?.exception?.description
-        ?? m.params?.exceptionDetails?.text ?? '?');
-    }
-    else if (m.method === 'Runtime.executionContextCreated') 通道.执行上下文 += 1;
-    else if (m.method === 'Page.loadEventFired') 通道.加载完成 += 1;
-  };
-  const send = (method, params = {}) => new Promise((res) => {
-    const id = ++msgId; pending.set(id, res); ws.send(JSON.stringify({ id, method, params }));
-  });
-  const evalJs = async (expr) => {
-    // `awaitPromise: true`：站 1 / 站 2 是页内的 async IIFE，要等它把真帧推完才交账
-    const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true });
-    if (r.result?.exceptionDetails) {
-      // 带出**页面里那句话**与位置：抽 JSON 前 300 字会正好切掉 description，
-      // 于是红只会说"页面内抛错"，责任落不到具体哪一句拒上。
-      const d = r.result.exceptionDetails;
-      const 原话 = d.exception?.description ?? d.exception?.value ?? d.text ?? '?';
-      const 位置 = `${d.url || '页内'}:${(d.lineNumber ?? -1) + 1}:${d.columnNumber ?? '?'}`;
-      throw new Error(`页面内抛错 @${位置}：${String(原话).split('\n')[0].slice(0, 400)}`);
-    }
-    return r.result?.result?.value;
-  };
+  /**
+   * CDP 管道住在 `./cdp-channel.mjs`（W-D4 切片10）—— 三个 harness 共用一份，这里不再自己抄。
+   *
+   * 被换掉的那一段只有 `pending.set(id, res)`：没有 `rej`、没有 close 监听、也没有每请求的钟。
+   * 那种形状下"Chrome 活着、`/json/list` 答话、`Runtime.evaluate` 一条都不回"（`soak.mjs:264`
+   * 在 2026-10-31 校准8 真撞上过一次）在本脚本里**不是红，是永远挂着** —— 这里没有 soak 那只
+   * 墙钟保险，只能靠人盯着 Ctrl-C，而留下的日志看不出是页不答话还是通道断了。
+   * 现在两种都是当场抛出的环境问题，话里带名义、带关闭码、带 Chrome 自己的原话尾巴。
+   *
+   * `等待页面Promise` 那一格开成"等"：站点的代码是页内 async IIFE（要等真帧推完才交账），
+   * 与 `e2e-clear` 那边推同步表达式（false）不是同一种形状，所以这一格由调用方说，不写在管道里。
+   */
+  const { send, evalJs, 异常: exceptions } = 开通道({ ws, 名义: 'e2e-combat', 通道, 浏览器输出, 等待页面Promise: true });
 
   await send('Runtime.enable');
   await send('Page.enable');

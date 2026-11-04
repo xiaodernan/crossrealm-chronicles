@@ -186,17 +186,23 @@ describe('性能冒烟（W-D4 切片2）', () => {
     expect(脚本源, '通道不合格没有作废（只算了一算就丢）').toMatch(/if \(通问\.length\) throw new Error\(/);
     expect(脚本源, '没有真的去页里读 location.href').toMatch(/evalJs\('location\.href'\)/);
     expect(脚本源, '/json/list 里没有 page 目标时没有拒（会先撞到一个裸 TypeError）').toMatch(/没有 page 目标/);
-    expect(脚本源, '事件计数没有正面来源（谁数的 executionContextCreated）').toMatch(/Runtime\.executionContextCreated/);
+    // 「谁在数执行上下文条数」自切片10 起的答案是：通道工厂数的是**我们交出去的那个对象**
+    // （`开通道({ … 通道 … })` 那一格由下面的 通道走真源 钉；计数本身在 `tests/cdp-channel.test.js` 验）。
     // 见证必须排在测量**之前**：量完三分钟才发现通道是断的，等于白跑
     expect(脚本源.indexOf('const 通问 = 通道问题(通道)'), '找不到通道见证').toBeGreaterThan(0);
     expect(脚本源.indexOf('const 通问 = 通道问题(通道)'), '通道见证排在站点测量之后').toBeLessThan(脚本源.indexOf("const 枢纽 = await 站('枢纽空载'"));
   });
 
 
-  it('页面里抛的那句话要原样带出来（截 JSON 会正好切掉异常自己的话）', () => {
-    // 第一次真跑红在 draw call 腿，但日志只有 `{"exceptionId":1,...` 300 字 —— 责任落不到那条拒上。
-    expect(脚本源, '页面异常没有取 description（异常原话）').toMatch(/exception\?\.description/);
-    expect(脚本源, '页面异常没有带行号').toMatch(/页面内抛错 @/);
+  it('通道走真源：CDP 那段管道不再自己抄（切片10；正反行为在 tests/cdp-channel.test.js）', () => {
+    /**
+     * 这一格原来钉的是"页面抛错要原样带出来"（`exception?.description` 与 `页面内抛错 @`）——
+     * 第一次真跑红在 draw call 腿上，而日志只有 `{"exceptionId":1,...` 300 字，责任落不到那条拒上。
+     * 那句话现在住在 `cdp-channel.mjs` 的 `evalJs` 里，测法也换了：给假的 `exceptionDetails`，
+     * 看抛出来的话带不带原话与 `@url:line:col`（`tests/cdp-channel.test.js`）。跑真代码比钉文本强，
+     * 而本文件继续钉的是**接线** —— 四格各挡什么坏，写在下面那个 `通道走真源` 头上。
+     */
+    expect(通道走真源(脚本源), '通道不是走 ./cdp-channel.mjs 那一份 —— 或者本地又长出了第二段抄本').toBe(true);
   });
 
   it('收尾拔的是自己那棵树（Windows 上 kill() 只终止一个 PID，Chrome 子进程把口占住）', () => {
@@ -454,6 +460,27 @@ describe('读数完整性（切片6b）：每一站每一列都得是数', () =>
  * 判据形状与 6b/6c 一致 —— 住在 `harness-readings.mjs`，正反两种输入都喂得进去；
  * 脚本那侧只钉"确实调用、不合格就作废、顺序对"。
  */
+/**
+ * 通道走真源（W-D4 切片10）：CDP 那段管道在 `perf-smoke.mjs` 里**只能有一份，而且是 import 来的**。
+ *
+ * 被换掉的那一份只有 `pending.set(id, res)` —— 没有 `rej`、没有 close 监听、没有每请求的钟，
+ * 所以"Chrome 活着、`/json/list` 答话、`Runtime.evaluate` 一条都不回"这种坏（`soak.mjs:264`
+ * 在 2026-10-31 校准8 真撞上过一次）在本脚本里**不是红，是永远挂着**：perf 没有 soak 那只墙钟保险，
+ * 一轮三分钟的量就此没有读数，而日志看不出是页不答话还是通道断了。
+ *
+ * 四格各挡一种坏：不 import 工厂（抄本还在）/ 不交 `名义`（三家共用一句"通道关闭"，红了分不清是谁家）
+ * / `异常` 不接成 `exceptions`（`[堆]` 与越线表读的不是通道收到的那份数组）/ 本地又长出
+ * `pending`·`ws.onmessage`·`ws.addEventListener`（第二份真源，改一份另一份不会红）。
+ *
+ * `等待页面Promise: true` 也钉在这一格上：钉的是**调用形状**而不是 `awaitPromise` 那个 token ——
+ * 后者已经进了工厂，而且它在注释里也会出现（切片10 在 combat 侧就因此被臂放过一次）。
+ */
+const 通道走真源 = (s) => /import \{ 开通道 \} from '\.\/cdp-channel\.mjs';/.test(s)
+  && /开通道\(\{ ws, 名义: 'perf-smoke', 通道, 浏览器输出, 等待页面Promise: true \}\)/.test(s)
+  && s.includes('异常: exceptions')
+  && !/const pending = new Map\(\)|ws\.onmessage|ws\.addEventListener\(/.test(s);
+
+
 const 接腿 = {
   调了判据: (s) => /const 重问 = 重载问题\(基线上下文, 通道\.执行上下文\);/.test(s),
   // 作废必须是**抛出**：把它降级成"push 进越线"就把环境问题写成了越预算（退出码 1 = 代码坏了）
@@ -513,18 +540,34 @@ describe('中途重载（切片6d）：读数作废并点名，而不是报成�
     for (const [名, 尺] of Object.entries(接腿)) {
       expect(尺(脚本源), `接线腿"${名}"在真源码上不过`).toBe(true);
     }
-    // 计数的正面来源：谁在数 executionContextCreated
-    expect(脚本源, '没有人在数执行上下文条数（那这一判读的是两个常数）').toMatch(/通道\.执行上下文 \+= 1/);
+    // 「谁在数执行上下文条数」自切片10 起住在 `cdp-channel.mjs`，由 `tests/cdp-channel.test.js`
+    // 直接喂事件验 `通道.执行上下文` 真的动；这里留下的是上面那圈接线腿与 `接腿.通道只有一份`。
   });
 
-  it('反向控制：五处拆法各自被对应的腿抓住（自证这些腿不是空转）', () => {
+  it('反向控制：这张名册的每一处拆法各自被对应的腿抓住（标题不抄处数，#36 同规）', () => {
     const 坏 = {
       不调判据: 脚本源.replace('const 重问 = 重载问题(基线上下文, 通道.执行上下文);', 'const 重问 = [];'),
       条件废掉: 脚本源.replace('if (重问.length) {', 'if (false) {'),
       基线不取: 脚本源.replace('  基线上下文 = 通道.执行上下文;', ''),
       归因删掉: 脚本源.replace('if (!err?.读数作废) {', 'if (false) {'),
-      计数器遮蔽: 脚本源.replace('  const exceptions = [];', '  const exceptions = [];\n  const 通道 = { 执行上下文: 0, 加载完成: 0 };'),
+      计数器遮蔽: 脚本源.replace("开通道({ ws, 名义: 'perf-smoke', 通道, 浏览器输出, 等待页面Promise: true });",
+        "开通道({ ws, 名义: 'perf-smoke', 通道, 浏览器输出, 等待页面Promise: true });\n  const 通道 = { 执行上下文: 0, 加载完成: 0 };"),
+      不接工厂: 脚本源.replace("import { 开通道 } from './cdp-channel.mjs';\n", ''),
+      通道抄本回潮: 脚本源.replace('  const { send, evalJs', '  const pending = new Map();\n  const { send, evalJs'),
+      工厂不交名义: 脚本源.replace("开通道({ ws, 名义: 'perf-smoke', 通道, 浏览器输出, 等待页面Promise: true })", "开通道({ ws, 通道, 浏览器输出, 等待页面Promise: true })"),
     };
+    // #36：每一处坏法都必须**真的改动文本** —— 锚点被上一片的改动挪走时 `replace` 是静默 no-op，
+    // 这一格就会拿真源码喂自己（假绿）。这一族的锚点会漂，所以这条规矩要挨着每一张名册写。
+    for (const [名, 变体] of Object.entries(坏)) {
+      expect(变体 !== 脚本源, `坏法"${名}"没改动任何文本 —— 锚点已不在源码里，这一格是自证（#36）`).toBe(true);
+    }
+    // 切片10 那四处各坏各的：都只该打在 `通道走真源` 这一格上，其余腿照过
+    for (const 名 of ['不接工厂', '通道抄本回潮', '工厂不交名义']) {
+      expect(通道走真源(坏[名]), `坏法"${名}"之后腿却仍判为"走了真源"`).toBe(false);
+      expect(接腿.通道只有一份(坏[名]), `坏法"${名}"不该把"计数器只有一份"也带走`).toBe(true);
+    }
+    // 遮蔽那一处坏的是**作用域**，不是"有没有接工厂"：工厂照样接了，腿照绿
+    expect(通道走真源(坏.计数器遮蔽), 'try 内再 const 一次不该把"接了工厂"这一格判没').toBe(true);
     expect(接腿.调了判据(坏.不调判据), '判据不调，腿却仍判为"调了"').toBe(false);
     expect(接腿.作废在算越线之前(坏.不调判据), '判据被换成常量，"作废排在越线之前"却仍判为真').toBe(false);
     expect(接腿.不合格就作废(坏.条件废掉), 'if 改成 if (false)，腿却仍判为"会抛"').toBe(false);

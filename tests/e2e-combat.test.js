@@ -230,19 +230,46 @@ const 判据 = {
   不探口: (s) => !/waitForHttp\([^)]*CDP/.test(s) && !s.includes('/json/version'),
   页归属在: (s) => s.includes('const 页问 = 页地址问题(页地址, VITE_PORT);')
     && s.includes('if (页问.length) throw new Error('),
+  /**
+   * 通道自证：判据调了、不合格就抛。
+   *
+   * 这里**不再钉那两个事件名**（`Runtime.executionContextCreated` / `Page.loadEventFired`）：
+   * 切片10 之后"收到事件就给 `通道` +1"住在 `cdp-channel.mjs`，它的正反行为由
+   * `tests/cdp-channel.test.js` 直接喂事件验 —— 在本文件再钉一遍源码文本就是判据抄两份。
+   * 被数的那个对象有没有交出去，由下面的 `通道走真源` 钉。
+   */
   通道见证在: (s) => s.includes('const 通问 = 通道问题(通道);')
-    && s.includes('if (通问.length) throw new Error(')
-    && s.includes('Runtime.executionContextCreated') && s.includes('Page.loadEventFired'),
+    && s.includes('if (通问.length) throw new Error('),
   页目标有守卫: (s) => s.includes('没有 page 目标') && s.includes("targets.find((t) => t.type === 'page')"),
   开机窗口按冷缓存: (s) => /for \(let i = 0; i < 240 && !ready; i \+= 1\)/.test(s),
-  // 锚的是**调用形状**（`awaitPromise: true` 与 `returnByValue: true` 同时出现），不是光一个 token：
-  // 脚本头注里写着"`evalJs` 这里用 `awaitPromise: true`"，那一句会让"把 token 删掉"的坏法
-  // 只改到注释 —— 第一版就是这么绿的（注释里的 token 自己进了门禁，同 `口由Chrome自报` 那条防的历史）。
-  异步站等得到账: (s) => s.includes('awaitPromise: true, returnByValue: true'),
+  /**
+   * 站点等得到账：钉的是**调用方说了这一格**，不是管道内部那两行。
+   *
+   * `awaitPromise: true, returnByValue: true` 自切片10 起写在 `cdp-channel.mjs`，由
+   * `tests/cdp-channel.test.js` 按工厂选项跑正反；三家共用一份管道，区别就在这一个开关 ——
+   * `e2e-clear` 推同步表达式（false），这里与 `perf-smoke` 的站点是页内 async IIFE（true）。
+   * 开关写错的后果不是红，是**读数换形状**：两个 async 站交出的是 Promise 对象，
+   * 于是每一条越线都读着像"战斗变慢了"。（锚的是调用形状，不是光一个 token：注释里也写着那个词。）
+   */
+  异步站等得到账: (s) => /开通道\(\{[^}]*等待页面Promise: true/.test(s),
   拔整棵树: (s) => s.includes("'/T', '/F'") && s.includes('function 拔树(')
     // 裸 kill() 的清理写法回潮 = Windows 上留下孤儿 Chrome = 下一轮假红
     && !/try \{ chrome\.kill\(\); \} catch/.test(s),
-  抛错带原话: (s) => s.includes('d.exception?.description') && s.includes('页面内抛错 @'),
+  /**
+   * 通道走真源（W-D4 切片10）：本文件**不许再有第二段管道**。
+   *
+   * 被换掉的那一份只有 `pending.set(id, res)`：没有 `rej`、没有 close 监听、没有每请求的钟，
+   * 于是"Chrome 活着但一条都不回"在这条门禁上不是红，是永远挂着。这一格挡四种坏，缺一格
+   * 就有一种坏能活下来：不 import 工厂（抄本还在）/ import 了却不交 `名义`（三家共用一句
+   * "通道关闭"，红了分不清是谁家）/ `异常` 不接成 `exceptions`（`[读数]` 与越线表读的不是
+   * 通道收到的那份数组）/ 本地又长出 `pending`·`ws.onmessage`·`ws.addEventListener`（第二份真源）。
+   */
+  通道走真源: (s) => s.includes("import { 开通道 } from './cdp-channel.mjs';")
+    && /开通道\(\{ ws, 名义: 'e2e-combat', 通道, 浏览器输出, 等待页面Promise: true \}\)/.test(s)
+    && s.includes('异常: exceptions')
+    && !/const pending = new Map\(\)/.test(s)
+    && !/ws\.onmessage/.test(s)
+    && !/ws\.addEventListener\(/.test(s),
 };
 
 /**
@@ -388,6 +415,7 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     expect(见证 >= 0 && 起跑 >= 0 && 见证 < 起跑, '先起跑再验通道 —— exceptions=0 那句已经失去依据').toBe(true);
     expect(判据.开机窗口按冷缓存(源文), '开机窗口回到 30 秒一档 —— vite 冷缓存要 ~57 秒，红的是缓存不是代码').toBe(true);
     expect(判据.异步站等得到账(源文), 'awaitPromise 关了 —— 两个 async 站交出的是 Promise 对象，不是读数').toBe(true);
+    expect(判据.通道走真源(源文), '通道不是走 ./cdp-channel.mjs 那一份 —— 或者本地又长出了第二段抄本').toBe(true);
   });
 
   it('页面静下来之后才认它，且"为什么被换掉"带得出 vite 的原话', () => {
@@ -411,7 +439,7 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     expect(判据.红话带成因(源文), '作废与归因两处红话都没带 vite 的原话').toBe(true);
   });
 
-  it('收尾拔的是整棵树，页面异常带得出原话', () => {
+  it('收尾拔的是整棵树（页面异常那半挪进 cdp-channel，切片10）', () => {
     // Windows 上 child.kill() 只终止那一个 PID，headless Chrome 的孤儿们把主进程钉住
     // ⇒ 上一轮的浏览器还活着 ⇒ 下一轮撞上占口，红成"CDP 口没起来"（责任落在没改过的代码上）
     expect(判据.拔整棵树(源文), '清理回潮成裸 kill() —— 占口假红的因还在').toBe(true);
@@ -419,7 +447,8 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     const 删 = 源文.indexOf('rmSync(profileDir');
     expect(拔 >= 0 && 删 >= 0 && 拔 < 删, '先删 profile 再拔树 —— 浏览器还活着时那目录删不动').toBe(true);
     // 只报"页面内抛错"的 JSON 前 300 字，会把 description 正好切掉：红得看不出是哪一句拒
-    expect(判据.抛错带原话(源文), '页面异常没带原话与位置').toBe(true);
+    // 「页面抛错要带原话与位置」自切片10 起住在 `cdp-channel.mjs` 的 `evalJs` 里：那一处测的是**行为**
+    // （假 exceptionDetails 进、看抛出的话带不带 `description` 与 `@url:line:col`），比在这里钉源码文本强。
   });
 
   it('页在中途被重建 ⇒ 本轮读数作废并点名，而不是红成一句页面内 TypeError', () => {
@@ -438,7 +467,9 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
       expect(尺(源文), `接线腿"${名}"在真源码上不过`).toBe(true);
     }
     // 计数的正面来源：谁在数执行上下文条数（没人数的话，这一判读的是两个常数）
-    expect(源文, '没有人在数执行上下文条数').toMatch(/通道\.执行上下文 \+= 1/);
+    // 「谁在数执行上下文条数」自切片10 起的答案是：通道工厂数的是**我们交出去的那个对象**。
+    // 那句 `通道.执行上下文 += 1` 现在在 `cdp-channel.mjs`，由 `tests/cdp-channel.test.js` 喂事件验它真的动；
+    // 本文件留下的是上面那圈接线腿与 `接腿.通道只有一份`（声明只有一处、且在 try 外）。
   });
 
   it('反向控制：6d 的四处拆法各自被对应的腿抓住', () => {
@@ -448,8 +479,15 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
       条件废掉: 源文.replace('if (重问.length) {', 'if (false) {'),
       基线不取: 源文.replace('  基线上下文 = 通道.执行上下文;', ''),
       归因删掉: 源文.replace('if (!err?.读数作废) {', 'if (false) {'),
-      计数器遮蔽: 源文.replace('  const exceptions = [];', '  const exceptions = [];\n  const 通道 = { 执行上下文: 0, 加载完成: 0 };'),
+      计数器遮蔽: 源文.replace("开通道({ ws, 名义: 'e2e-combat', 通道, 浏览器输出, 等待页面Promise: true });",
+        "开通道({ ws, 名义: 'e2e-combat', 通道, 浏览器输出, 等待页面Promise: true });\n  const 通道 = { 执行上下文: 0, 加载完成: 0 };"),
     };
+
+    // #36：每一处坏法都必须**真的改动文本**。锚点被上一片的改动挪走时 `replace` 是**静默 no-op**，
+    // 于是"判据在坏脚本上必须不过"那一串会拿真源码喂自己 —— 反向控制腿悄悄变成装饰品。
+    for (const [名, 变体] of Object.entries(坏)) {
+      expect(变体 !== 源文, `坏法"${名}"没改动任何文本 —— 锚点已不在源码里，这一格是自证（#36）`).toBe(true);
+    }
     expect(接腿.调了判据(坏.不调判据), '判据不调，腿却仍判为"调了"').toBe(false);
     expect(接腿.作废在算越线之前(坏.不调判据), '判据被换成常量，"作废排在越线之前"却仍判为真').toBe(false);
     expect(接腿.不合格就作废(坏.条件废掉), 'if 改成 if (false)，腿却仍判为"会抛"').toBe(false);
@@ -474,6 +512,12 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
       白卷不带尾巴: 源文.replace('  const 尾 = 原话尾巴(全文);', '  const 尾 = [];'),
       红话不带成因: 源文.replace(/谁动的：/g, '随手一写：'),
     };
+
+    // #36：每一处坏法都必须**真的改动文本**。锚点被上一片的改动挪走时 `replace` 是**静默 no-op**，
+    // 于是"判据在坏脚本上必须不过"那一串会拿真源码喂自己 —— 反向控制腿悄悄变成装饰品。
+    for (const [名, 变体] of Object.entries(坏)) {
+      expect(变体 !== 源文, `坏法"${名}"没改动任何文本 —— 锚点已不在源码里，这一格是自证（#36）`).toBe(true);
+    }
     expect(静置腿.基线取在静置之后(坏.静拍归零), '静置拍数归零（等于不静置）腿却仍判为"顺序对"').toBe(false);
     expect(静置腿.基线取在静置之后(坏.静置整段删掉), '静置整段搬走腿却仍判为"在基线之前"').toBe(false);
     expect(静置腿.静置有界且重建后重问(坏.重建后不重问), '重建后那句重问被摘掉腿却仍判为"会红"').toBe(false);
@@ -504,26 +548,41 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
   it('反向控制：同一批判据喂给人造坏脚本，必须全部报错（自证判据不是空转）', () => {
     // 坏法分两批。旧的那批是切片6c/6d 在另两个 harness 上真红过的形状（口、页、通道、清理）；
     // 新的一条 `白盒扣血` 是本片特有的：它红的时候源码看起来"更简单"，而那正是危险的地方。
-    const 坏 = 源文
-      .replace('const VITE_PORT = await freePort();', 'const VITE_PORT = 5322;')
-      .replace('const CDP_SPEC = 0;', 'const CDP_PORT = await freePort();')
-      .replace("--remote-debugging-port=${CDP_SPEC}", '--remote-debugging-port=${CDP_PORT}')
-      .replace("], { stdio: ['ignore', 'pipe', 'pipe'] });", "], { stdio: 'ignore' });")
-      .replace('const 得 = 解析CDP口(全文);', 'const 得 = /DevTools listening on ws/.test(全文) ? { 口: CDP_PORT } : null;')
-      .replace('  const targets = await', "  if (!await waitForHttp(`http://127.0.0.1:${CDP_PORT}/json/version`)) throw new Error('Chrome CDP 口没起来');\n  const targets = await")
-      .replace('const 页问 = 页地址问题(页地址, VITE_PORT);', 'const 页问 = [];')
-      .replace('if (通问.length) throw new Error(', 'if (通问.length) console.warn(')
-      .replace('CDP 口 ${CDP口} 通了但 /json/list 里没有 page 目标', '连不上页')
-      .replace('const 原话 = d.exception?.description ?? d.exception?.value ?? d.text', "const 原话 = '?'")
-      .replace("spawnSync('taskkill', ['/PID', String(子进程.pid), '/T', '/F'], { stdio: 'ignore' })", '子进程.kill()')
-      .replace('for (let i = 0; i < 240 && !ready; i += 1)', 'for (let i = 0; i < 60 && !ready; i += 1)')
-      .replace('awaitPromise: true, returnByValue: true', 'awaitPromise: false, returnByValue: true')
-      .replace("if (帧 % 12 === 0) g.player.combat.mouseDown['left'] = true;", '兵.takeDamage(99999);')
-      // 帧预算回潮成字面量：要**两处一起**换（页面里那一句 + 越线话术里那一句），
-      // 只换第一处的话，`includes('${预算.maxKillFrames}')` 会靠第二处蒙过这一臂。
-      .replace(/\$\{预算\.maxKillFrames\}/g, '24000')
-      .replace('import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴, 战斗越线 } from', 'import { 页地址问题, 通道问题, 重载问题 } from')
-      .replace('  g.player.combat.hp = ${预算.playerHp};', '  g.player.combat.hp = 99999;');
+    /**
+     * 坏法列成**带锚点的清单**而不是链式 `replace`（#36，与 `tests/e2e-clear.test.js` 同规）。
+     *
+     * 链式写法的老毛病：锚点已经不存在的 `replace` 是静默 no-op，整批坏法少了一处而没人报。
+     * 这一片恰好搬走了它里面的两处（`const 原话 = …` 与 `awaitPromise: true, returnByValue: true`
+     * 都进了 `cdp-channel.mjs`）—— 没有这条规矩，那一轮之后这两臂会安静消失，而屏幕仍然全绿。
+     */
+    const 拆法 = [
+      ['dev 口写死', 'const VITE_PORT = await freePort();', 'const VITE_PORT = 5322;'],
+      ['CDP 口回潮成自己定', 'const CDP_SPEC = 0;', 'const CDP_PORT = await freePort();'],
+      ['启动参数跟着改口', '--remote-debugging-port=${CDP_SPEC}', '--remote-debugging-port=${CDP_PORT}'],
+      ['不收 Chrome 的话', "], { stdio: ['ignore', 'pipe', 'pipe'] });", "], { stdio: 'ignore' });"],
+      ['解析判据搬回本地', 'const 得 = 解析CDP口(全文);', 'const 得 = /DevTools listening on ws/.test(全文) ? { 口: CDP_PORT } : null;'],
+      ['探 CDP 口回潮', '  const targets = await', "  if (!await waitForHttp(`http://127.0.0.1:${CDP_PORT}/json/version`)) throw new Error('Chrome CDP 口没起来');\n  const targets = await"],
+      ['页归属不调判据', 'const 页问 = 页地址问题(页地址, VITE_PORT);', 'const 页问 = [];'],
+      ['通道见证降级成 warn', 'if (通问.length) throw new Error(', 'if (通问.length) console.warn('],
+      ['缺页的话改写成含糊', 'CDP 口 ${CDP口} 通了但 /json/list 里没有 page 目标', '连不上页'],
+      ['清理退回裸 kill()', "spawnSync('taskkill', ['/PID', String(子进程.pid), '/T', '/F'], { stdio: 'ignore' })", '子进程.kill()'],
+      ['开机窗口缩回 30 秒', 'for (let i = 0; i < 240 && !ready; i += 1)', 'for (let i = 0; i < 60 && !ready; i += 1)'],
+      ['async 站不等 Promise', '等待页面Promise: true', '等待页面Promise: false'],
+      ['白盒扣血', "if (帧 % 12 === 0) g.player.combat.mouseDown['left'] = true;", '兵.takeDamage(99999);'],
+      // 帧预算回潮成字面量要**两处一起**换（页内那一句 + 越线话术里那一句），只换第一处的话
+      // `includes('${预算.maxKillFrames}')` 会靠第二处蒙过这一臂 —— 所以这里是两条各带锚点的拆法。
+      ['页内循环的预算抄成字面量', 'while (兵.alive && 帧 < ${预算.maxKillFrames})', 'while (兵.alive && 帧 < 24000)'],
+      ['越线话术里的预算抄成字面量', '｜${预算.maxKillFrames} 帧预算用了', '｜24000 帧预算用了'],
+      ['判据 import 搬回本地', 'import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴, 战斗越线 } from', 'import { 页地址问题, 通道问题, 重载问题 } from'],
+      ['厚血抄成第二份字面量', '  g.player.combat.hp = ${预算.playerHp};', '  g.player.combat.hp = 99999;'],
+      ['通道不接工厂', "import { 开通道 } from './cdp-channel.mjs';\n", ''],
+    ];
+    for (const [名, 锚] of 拆法) {
+      expect(源文.includes(锚), `锚点"${名}"已不在源码里：那一处坏法是静默 no-op，整条腿变成自证（#36）`).toBe(true);
+    }
+    let 坏 = 源文;
+    for (const [, 锚, 换成] of 拆法) 坏 = 坏.replace(锚, 换成);
+    expect(坏 !== 源文, '这一串拆法一处都没改动文本').toBe(true);
     expect(判据.端口动态(坏), 'dev 口写死却仍判为"动态"').toBe(false);
     expect(判据.口由Chrome自报(坏), '口回潮成自己定却仍判为"Chrome 自报"').toBe(false);
     expect(判据.收浏览器说的话(坏), '不收 Chrome 的话却仍判为"收了"').toBe(false);
@@ -533,7 +592,7 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     expect(判据.页归属在(坏), '页归属不调判据却仍判为"在"').toBe(false);
     expect(判据.通道见证在(坏), '通道见证降级成 console.warn 却仍判为"会抛"').toBe(false);
     expect(判据.页目标有守卫(坏), '缺页的话术被换掉却仍判为"有守卫"').toBe(false);
-    expect(判据.抛错带原话(坏), '页面异常没带原话却仍判为"带了"').toBe(false);
+    expect(判据.通道走真源(坏), '通道那段搬回本地抄本却仍判为"走了真源"').toBe(false);
     expect(判据.拔整棵树(坏), '清理退回裸 kill() 却仍判为"拔整棵树"').toBe(false);
     expect(判据.开机窗口按冷缓存(坏), '开机窗口缩回 30 秒却仍判为"按冷缓存"').toBe(false);
     expect(判据.异步站等得到账(坏), 'awaitPromise 关掉却仍判为"等得到账"').toBe(false);
