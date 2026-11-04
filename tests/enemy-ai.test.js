@@ -213,7 +213,7 @@ describe('围攻名额与分离', () => {
    * 两个设定点原先压在一条线上（等待环 `orbitKeep × holdRange` 与追击的停脚边界 `holdRange`
    * 之间没有一方认账的间隙），而分离推力会把等待中的那只**推出**这条线：顶着坑的那只处于
    * 前摇/命中段，`Enemy._advance` 按 `rooted` 不推它 ⇒ 它不动，另一只的向内权限却只有
-   * 厘米每秒的量级（实测 −2.51 m/s 对流 vs 0.91 m/s，`.tmp-20261031-s25/s11-trace2.log`
+   * 厘米每秒的量级（实测第 234 帧 `沿径推` −2.518 对流 `沿径wish` 0.916，`.tmp-20261031-s25/s11-trace2.log`
    * f226–f241）。单阈值因此成了一场接力振荡：`pursue` 与 `orbit` 每帧互换，画面是原地抽搐。
    *
    * 这一节钉三件事：① 死区是**迟滞**而不是当帧读数（写成后者时 `dist > 门 + (dist<=门 ? band : 0)`
@@ -375,7 +375,7 @@ describe('围攻名额与分离', () => {
       /\['pursue',[\s\S]*?pursueCutoff\(e\)[\s\S]*?slotOpenFor\(e\)\]/);
     expect(fsm, 'orbit 的设定点必须走 holdRadius：两处各写一遍就是这两条线重合的成因')
       .toMatch(/const keep = holdRadius\(owner, len\);/);
-    expect(fsm, '死区记账写成"当帧重算"就是惰性死区（本片踩过一次，见 §9 切片11 与 #46）')
+    expect(fsm, '死区记账写成"当帧重算"就是惰性死区（本片踩过一次，见 §9 的 W-B7 切片8 与 #46）')
       .not.toMatch(/heldIn = enemy\.sense\.dist <= enemy\.holdRange\s*[;,]/);
     const claim体 = squad.match(/claim\(enemy\) \{[\s\S]*?\n {2}\}/)?.[0] ?? '';
     expect(claim体, '找不到 `claim` 的函数体：判据搬家了，这条腿要跟着搬').not.toBe('');
