@@ -80,14 +80,20 @@ const 判据 = {
   不探口: (s) => !/waitForHttp\([^)]*CDP/.test(s) && !s.includes('/json/version'),
   页归属在: (s) => s.includes('const 页问 = 页地址问题(页地址, VITE_PORT);')
     && s.includes('if (页问.length) throw new Error('),
+  /**
+   * 通道自证：判据调了、不合格就抛。
+   *
+   * 这里**不再钉那两个事件名**（`Runtime.executionContextCreated` / `Page.loadEventFired`）：
+   * 切片10 之后"收到事件就给 `通道` +1"住在 `cdp-channel.mjs`，它的正反行为由
+   * `tests/cdp-channel.test.js` 直接喂事件验 —— 在本文件再钉一遍源码文本就是判据抄两份，
+   * 而抄本正是这一片要消灭的东西。被数的那个对象交没交出去，由 `通道走真源` 钉。
+   */
   通道见证在: (s) => s.includes('const 通问 = 通道问题(通道);')
-    && s.includes('if (通问.length) throw new Error(')
-    && s.includes('Runtime.executionContextCreated') && s.includes('Page.loadEventFired'),
+    && s.includes('if (通问.length) throw new Error('),
   页目标有守卫: (s) => s.includes('没有 page 目标') && s.includes("targets.find((t) => t.type === 'page')"),
   拔整棵树: (s) => s.includes("'/T', '/F'") && s.includes('function 拔树(')
     // 裸 kill() 的清理写法回潮 = Windows 上留下孤儿 Chrome = 下一轮假红
     && !/try \{ chrome\.kill\(\); \} catch/.test(s),
-  抛错带原话: (s) => s.includes('d.exception?.description') && s.includes('页面内抛错 @'),
 
   // —— 切片8：dev server 的话要收进来，红的时候要说得出是谁动的，页要先静下来再认 ——
   /**
@@ -136,7 +142,7 @@ const 判据 = {
     && (s.match(/evalJs\(就绪\)/g) ?? []).length >= 2
     && !/evalJs\('!!window\.__game/.test(s),
 
-  // —— 切片9b：没交账不许绿 / 通道断了要说得出成因 / 每一步吃了多少帧 ——
+  // —— 切片9b：没交账不许绿 / 每一步吃了多少帧；切片10：通道那段管道换成一份真源 ——
   /**
    * 交账闩的**三格都在**：旗子、改退出码的那一问、以及一只有界挂钟。
    *
@@ -174,25 +180,29 @@ const 判据 = {
     const 交 = s.indexOf('已交账 = true; // [读数] 那行已经打出去了');
     return 读 >= 0 && 交 >= 0 && 读 < 交;
   },
-  /** 通道断了要把挂在 `pending` 上的 await **交回去**：不交就是顶层 await 不 settle（实测退出码 13） */
-  断线交回在等: (s) => s.includes('const 拆通道 = (为什么) => {')
-    && /for \(const \[, 交回\] of pending\) 交回\(\{ 断线/.test(s)
-    && s.includes('if (断线) { res({ 断线 }); return; }'),
   /**
-   * 这里的是 **Node 自带的标准 `WebSocket`**（脚本不 import `ws`：实测 `WebSocket.prototype.on` 是 undefined），
-   * 写成 `ws.on('close', …)` 的后果就是 r3 那句 `ws.on is not a function` —— 退出码 2，
-   * 而浏览器、页面、主线都没错。这一格把那条 API 之误钉成文本判据。
+   * 通道走真源（W-D4 切片10）：本文件**不许再有第二段管道**。
    *
-   * 反面那半**按行首**判（`^\s*ws\.on\('`）：脚本里解释 r3 的那段注释正写着 `ws.on('close', …)`
-   * 的字面量，不限行首就是注释自己走进门禁 —— 与上面 `口由Chrome自报` 那格同一个毛病
-   * （故意留下的历史不该被读成回潮）。
+   * 这四格各挡一种坏，缺一格就有一种坏能活下来：
+   * - 不 import 工厂 ⇒ 本地那 60 行抄本还在。抄本才是这一片要消灭的东西：`e2e-combat.mjs` 与
+   *   `perf-smoke.mjs` 各有一份同样形状的抄本，而那两份**没有钟、没有 rej** —— "Chrome 活着但
+   *   一条都不回"在那两条门禁上不是红，是永远挂着；
+   * - import 了却不交 `名义` ⇒ 三个 harness 共用一句"CDP 通道关闭（码=1006）"，红了分不清是谁家；
+   * - `异常` 不接成 `exceptions` ⇒ 下面几处判据（`[读数]` / `[异常]` / 越线表）读的不是通道收到的那份数组；
+   * - 本地又出现 `pending` / `拆通道` / `ws.onmessage` / `ws.addEventListener` ⇒ 第二份真源，
+   *   改一份另一份不会红。
+   *
+   * 断线交回、每请求那只钟、标准 `addEventListener` 而不是 `ws.on`、页面抛错带原话与位置 ——
+   * 这四件事的**正反行为**在 `tests/cdp-channel.test.js` 里测（判据不抄两份）：那一族拿假 ws，
+   * 毫秒级就能把"通道死了而 await 不交回"演出来，不再靠一百多秒的真机轮次去赌它会不会响。
    */
-  通道事件用标准API: (s) => /ws\.addEventListener\('close'/.test(s) && !/^\s*ws\.on\('/m.test(s),
-  /** 断线那两句话都带着 Chrome 自己的原话，且出口本体"交白卷也要交尾巴" */
-  断线带Chrome的话: (s) => (s.match(/Chrome 的话：\\n - \$\{浏览器话\(\)\}/g) ?? []).length >= 2
-    && s.includes('const 浏览器话 = () => {')
-    && s.includes('原话尾巴(浏览器输出.join')
-    && s.includes('浏览器一个字都没输出'),
+  通道走真源: (s) => s.includes("import { 开通道 } from './cdp-channel.mjs';")
+    && /开通道\(\{ ws, 名义: 'e2e-clear', 通道, 浏览器输出 \}\)/.test(s)
+    && s.includes('异常: exceptions')
+    && !/const pending = new Map\(\)/.test(s)
+    && !/const 拆通道 =/.test(s)
+    && !/ws\.onmessage/.test(s)
+    && !/ws\.addEventListener\(/.test(s),
   /** 每步帧账：读的键是游戏里现成的 `_demoStep`，每换一步结一段账，跨几步就记几步 */
   每步帧账在记: (s) => s.includes('const 步帧 = [];')
     && s.includes('步: qa._demoStep')
@@ -320,7 +330,7 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     expect(判据.端口动态(源文), 'dev 口不再是取自当下空闲 —— 页归属那条就没有可比的口').toBe(true);
   });
 
-  it('收尾拔的是整棵树，页面异常带得出原话', () => {
+  it('收尾拔的是整棵树（页面异常那半挪进 cdp-channel，切片10）', () => {
     // Windows 上 child.kill() 只终止那一个 PID，headless Chrome 的孤儿们把主进程钉住
     // ⇒ 上一轮的浏览器还活着 ⇒ 下一轮撞上占口，红成"CDP 口没起来"（责任落在没改过的代码上）
     expect(判据.拔整棵树(源文), '清理回潮成裸 kill() —— 占口假红的因还在').toBe(true);
@@ -328,7 +338,8 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     const 删 = 源文.indexOf('rmSync(profileDir');
     expect(拔 >= 0 && 删 >= 0 && 拔 < 删, '先删 profile 再拔树 —— 浏览器还活着时那目录删不动').toBe(true);
     // 只报"页面内抛错"的 JSON 前 300 字，会把 description 正好切掉：红得看不出是哪一句拒
-    expect(判据.抛错带原话(源文), '页面异常没带原话与位置').toBe(true);
+    // 「页面抛错要带原话与位置」自切片10 起住在 `cdp-channel.mjs` 的 `evalJs` 里。那一处测的是**行为**
+    // （假的 exceptionDetails 进、看抛错信息带不带 `description` 与 `@url:line:col`），比在这里钉源码文本强。
   });
 
   it('页在中途被重建 ⇒ 本轮读数作废并点名，而不是红成一句页面内 TypeError', () => {
@@ -347,7 +358,9 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
       expect(尺(源文), `接线腿"${名}"在真源码上不过`).toBe(true);
     }
     // 计数的正面来源：谁在数执行上下文条数（没人数的话，这一判读的是两个常数）
-    expect(源文, '没有人在数执行上下文条数').toMatch(/通道\.执行上下文 \+= 1/);
+    // 「谁在数执行上下文条数」自切片10 起的答案是：通道工厂数的是**我们交出去的那个对象**。
+    // 那句 `通道.执行上下文 += 1` 现在在 `cdp-channel.mjs`，由 `tests/cdp-channel.test.js` 喂事件验它真的动；
+    // 本文件留下的两道是上面那圈接线腿与 `接腿.通道只有一份`（声明只有一处、且在 try 外）。
   });
 
   it('反向控制：6d 那批拆法各自被对应的腿抓住（标题不抄处数，名册自己会涨）', () => {
@@ -357,7 +370,8 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
       条件废掉: 源文.replace('if (重问.length) {', 'if (false) {'),
       基线不取: 源文.replace('  基线上下文 = 通道.执行上下文;', ''),
       归因删掉: 源文.replace('if (!err?.读数作废) {', 'if (false) {'),
-      计数器遮蔽: 源文.replace('  const exceptions = [];', '  const exceptions = [];\n  const 通道 = { 执行上下文: 0, 加载完成: 0 };'),
+      计数器遮蔽: 源文.replace("开通道({ ws, 名义: 'e2e-clear', 通道, 浏览器输出 });",
+        "开通道({ ws, 名义: 'e2e-clear', 通道, 浏览器输出 });\n  const 通道 = { 执行上下文: 0, 加载完成: 0 };"),
     };
     /**
      * 每一处坏法都必须**真的改动文本**（#36）。拿一个已经不存在的锚点做 `String.replace` 是
@@ -390,10 +404,12 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
   });
 
   it('反向控制：同一批判据喂给人造坏脚本，必须全部报错（自证判据不是空转）', () => {
-    // 坏的地方分两批。老的四条：拆掉固定步长、改回 rAF、dev 口写死、把"必须通关"关掉。
-    // 切片6c 新加的七处：口回潮成自己定、不收 Chrome 的话、探口回潮、两处见证拆成不抛、
-    // 页归属判据不调、清理退回裸 kill()。每一条都应当被对应的腿抓住 ——
+    // 坏的地方分两批：老的一批拆的是量具（固定步长 / rAF / 口写死 / 关掉"必须通关"），
+    // 切片6c 那一批拆的是归属（口自己定、不收浏览器或 dev 的话、探口回潮、两处见证降级、
+    // 页归属不调判据、缺页含糊、清理退回裸 kill()）。每一条都应当被对应的腿抓住 ——
     // 抓不住的那条就是空转的腿（2026-10-22 电池上 A4/A5 就是这么被发现的）。
+    // 「页面异常丢掉原话」那一处不在这张表里了：那句 `const 原话 = …` 搬进了 `cdp-channel.mjs`，
+    // 由 `tests/cdp-channel.test.js` 用真代码测（假 exceptionDetails 进、看抛出的话带不带原话）。
     /**
      * 坏法列成**带锚点的清单**而不是链式 `replace`（#36）。
      *
@@ -415,7 +431,6 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
       ['页归属不调判据', 'const 页问 = 页地址问题(页地址, VITE_PORT);', 'const 页问 = [];'],
       ['通道见证降级成 warn', 'if (通问.length) throw new Error(', 'if (通问.length) console.warn('],
       ['缺页的话改写成含糊', 'CDP 口 ${CDP口} 通了但 /json/list 里没有 page 目标', '连不上页'],
-      ['页面异常丢掉原话', 'const 原话 = d.exception?.description ?? d.exception?.value ?? d.text', "const 原话 = '?'"],
       ['清理退回裸 kill()', "spawnSync('taskkill', ['/PID', String(子进程.pid), '/T', '/F'], { stdio: 'ignore' })", '子进程.kill()'],
     ];
     for (const [名, 锚] of 拆法) {
@@ -523,16 +538,17 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     expect(判据.交账在读数之后(源文), '"已交账"排在 [读数] 之前 —— 闩会被一句还没打出来的话提前认领').toBe(true);
   });
 
-  it('通道断了要说得出成因，而且用的是标准 WebSocket 的 API（切片9b）', () => {
+  it('通道走真源：这一段管道不再自己抄（切片10；正反行为在 tests/cdp-channel.test.js）', () => {
     /**
-     * r3 真红过一次：`e2e-clear 失败： ws.on is not a function`，退出码 2。
-     * 这里没有 import `ws`（实测 `require('ws')` 在本仓 MODULE_NOT_FOUND），`WebSocket` 是 Node 自带的
-     * 全局实现（实测 `WebSocket.prototype.on` = undefined、`addEventListener` = function）——
-     * 那句红读的完全是"脚本自己写错了 API"，而它长得像"浏览器或页面出事了"。
+     * r3 真红过一次：`e2e-clear 失败： ws.on is not a function`，退出码 2 —— 而它红的原因与浏览器、
+     * 页面、主线都没关系。那句话现在住在 `cdp-channel.mjs`，它的正反行为由假 ws 当场跑：
+     * `tests/cdp-channel.test.js` 里那个假通道**没有 `.on` 这个成员**（Node 全局 `WebSocket` 也没有），
+     * 谁把 `addEventListener` 改回去就是 TypeError，不用等真机一轮一百多秒。
+     *
+     * 这一格于是只问一件事：**本文件里不许再留第二段管道**。留了就是两份真源，
+     * 而"两份真源"这个形状，正是同一天里另外两条门禁挂着不红的病根。
      */
-    expect(判据.通道事件用标准API(源文), 'ws.on(...) 回潮 —— 全局 WebSocket 没有 .on()，r3 就是这么红的').toBe(true);
-    expect(判据.断线交回在等(源文), '通道断了却不把 pending 的 await 交回去 —— 那一轮不是红，是挂住或 13').toBe(true);
-    expect(判据.断线带Chrome的话(源文), '断线红话没带 Chrome 自己的原话 —— 崩了 / OOM / 被 taskkill 全写成同一句"通道关闭"').toBe(true);
+    expect(判据.通道走真源(源文), '通道不是走 ./cdp-channel.mjs 那一份 —— 或者本地又长出了第二段抄本').toBe(true);
   });
 
   it('每一步吃了多少帧、卡住时是哪一格 —— 两行都点名（切片9b）', () => {
@@ -548,9 +564,8 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     expect(判据.单步上限在判(源文), '单步上限只打在红话里、没参与判决 —— 这条越线是空的').toBe(true);
   });
 
-  it('反向控制：切片9b 的拆法名册各自被对应的腿抓住（#36 同规）', () => {
+  it('反向控制：切片9b/10 的拆法名册各自被对应的腿抓住（#36 同规）', () => {
     const 交账句 = '  已交账 = true; // [读数] 那行已经打出去了 —— 这一轮从此有结论，两道闩就此闭嘴';
-    const Chrome话 = 'Chrome 的话：\\n - ${浏览器话()}';
     const 坏 = {
       闩改成不响: 源文.replace('if (!已交账 && 码 === 0) {', 'if (false) {'),
       挂钟改成只warn: 源文.replace('setTimeout(() => 不交账就红(', 'setTimeout(() => console.warn('),
@@ -558,10 +573,10 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
       红话手抄分钟: 源文.replace('${挂钟毫秒 / 1000} 秒没走到交账', '15 分钟没走到交账'),
       挂钟传成字面量: 源文.replace('), 挂钟毫秒);', '), 900000);'),
       旗子删掉: 源文.replace('let 已交账 = false;', ''),
-      断线不交回: 源文.replace('for (const [, 交回] of pending) 交回({ 断线: 为什么 });', '/* 不交回，让那些 await 挂着 */;'),
-      通道事件退回wsOn: 源文.replace("ws.addEventListener('close'", "ws.on('close'"),
-      断线不带原话: 源文.split(Chrome话).join(''),
-      浏览器话不交尾巴: 源文.replace("const 尾 = 原话尾巴(浏览器输出.join(''), 5);", 'const 尾 = [];'),
+      不接工厂: 源文.replace("import { 开通道 } from './cdp-channel.mjs';\n", ''),
+      工厂不交名义: 源文.replace("开通道({ ws, 名义: 'e2e-clear', 通道, 浏览器输出 })", "开通道({ ws, 通道, 浏览器输出 })"),
+      异常换个名字接: 源文.replace('const { send, evalJs, 异常: exceptions } = 开通道', 'const { send, evalJs } = 开通道'),
+      通道抄本回潮: 源文.replace('  const { send, evalJs', '  const pending = new Map();\n  const { send, evalJs'),
       步号抄成常量: 源文.replace('步: qa._demoStep', '步: 0'),
       最后一段不结: 源文.replace('步帧.push({ 步: 上一步, 帧: frames - 上一步帧, 跨: 1 });', '/* 最后一笔不结 */;'),
       均帧不除步: 源文.replace('const 每步均 = (x) => Math.round(x.帧 / Math.max(1, x.跨));', 'const 每步均 = (x) => x.帧;'),
@@ -585,10 +600,10 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
       挂钟传成字面量: ['挂钟有界'],
       旗子删掉: ['交账闩在'],
       交账搬到读数之前: ['交账在读数之后'],
-      断线不交回: ['断线交回在等'],
-      通道事件退回wsOn: ['通道事件用标准API'],
-      断线不带原话: ['断线带Chrome的话'],
-      浏览器话不交尾巴: ['断线带Chrome的话'],
+      不接工厂: ['通道走真源'],
+      工厂不交名义: ['通道走真源'],
+      异常换个名字接: ['通道走真源'],
+      通道抄本回潮: ['通道走真源'],
       步号抄成常量: ['每步帧账在记'],
       最后一段不结: ['每步帧账在记'],
       均帧不除步: ['每步帧账在记'],
@@ -599,8 +614,7 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     };
     const 九b腿 = {
       交账闩在: 判据.交账闩在, 挂钟有界: 判据.挂钟有界, 交账在读数之后: 判据.交账在读数之后,
-      断线交回在等: 判据.断线交回在等, 通道事件用标准API: 判据.通道事件用标准API,
-      断线带Chrome的话: 判据.断线带Chrome的话, 每步帧账在记: 判据.每步帧账在记,
+      通道走真源: 判据.通道走真源, 每步帧账在记: 判据.每步帧账在记,
       每步分母是表长: 判据.每步分母是表长, 每步卡点都打出: 判据.每步卡点都打出,
       单步上限在判: 判据.单步上限在判, 卡格取自任务系统: 判据.卡格取自任务系统,
     };

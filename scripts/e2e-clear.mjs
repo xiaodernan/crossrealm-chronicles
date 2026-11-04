@@ -81,6 +81,7 @@ import { createServer } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { E2E_BUDGETS, E2E_DEMO_STEPS } from './e2e-budgets.mjs';
+import { 开通道 } from './cdp-channel.mjs';
 import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴 } from './harness-readings.mjs';
 
 /**
@@ -212,18 +213,6 @@ chrome.stderr.on('data', (b) => 浏览器输出.push(String(b)));
 chrome.stdout.on('data', (b) => 浏览器输出.push(String(b)));
 
 /**
- * Chrome 自己说的话（W-D4 切片9b）。`vite话()` 那一族立的规矩在这里照用：**交白卷也要交尾巴**。
- *
- * 为什么这条门禁要它：**断线那句话点不出成因**。崩在渲染进程、显存不够、上一轮泄漏的浏览器被
- * `taskkill` 打掉 —— 在 CDP 这一侧全都只写成同一句"通道关闭（码=1006）"。能点名的一样都在浏览器
- * 这条流上（`# Crash` / out of memory / renderer gone）。**收了却不读**等于没收。
- */
-const 浏览器话 = () => {
-  const 尾 = 原话尾巴(浏览器输出.join(''), 5);
-  return 尾.length ? 尾.join('\n - ') : '(浏览器一个字都没输出 —— 那句"通道断了"不是它说的)';
-};
-
-/**
  * 从 Chrome 自己的话里取回它挑中的口（有界等待，取不到就带上它说过的话红）。
  *
  * 这一句是整条腿的**来源证明**：口不是探来的，是**我 spawn 的那个进程**亲口报的。
@@ -337,64 +326,23 @@ try {
   }
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
-
-  let msgId = 0;
-  const pending = new Map();
-  const exceptions = [];
-  // 计数的是**外层**那个 `通道` 对象（声明在 try 外面，见那里的注释）：catch 也要读得到它。
-  ws.onmessage = (ev) => {
-    const m = JSON.parse(ev.data);
-    if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); }
-    else if (m.method === 'Runtime.exceptionThrown') {
-      exceptions.push(m.params?.exceptionDetails?.exception?.description
-        ?? m.params?.exceptionDetails?.text ?? '?');
-    }
-    else if (m.method === 'Runtime.executionContextCreated') 通道.执行上下文 += 1;
-    else if (m.method === 'Page.loadEventFired') 通道.加载完成 += 1;
-  };
   /**
-   * **通道一断，就把所有在等的 `await` 交回去**（切片9b）。
+   * CDP 管道住在 `./cdp-channel.mjs`（W-D4 切片10）—— **一份真源，三个 harness**。
    *
-   * 不接这一刀时，`ws` 关闭是**静默**的：`send` 的 Promise 永远不 settle，`try` 走不到头。
-   * 实测那种收尾长这样：顶层 await 没 settle ⇒ Node 直接以 **13** 退出并甩一句
-   * "Detected unsettled top-level await"（`.tmp-20261031-s25/exit-probe.mjs`，与退出码约定 1/2 都对不上号）；
-   * 若当时还挂着别的活 handle，就更糟 —— 不是退出，是**挂住**。两种都问不出成因。
-   * 接了之后，断线当场变成一句带得出**成因**的抛错（环境问题 2）—— 而 Chrome 自己那条流里正有它
-   * （崩溃会打 `# Crash` / OOM / renderer gone，上一轮泄漏的浏览器被 `taskkill` 打掉也在这条流里）。
+   * 抽之前这一段是本文件里的 60 行，而 `e2e-combat.mjs` 与 `perf-smoke.mjs` 各有一份**没有钟、
+   * 没有 rej** 的抄本：那种形状下"Chrome 活着但一条都不回"不是红，是永远挂着（两家都没有
+   * `soak.mjs:198` 那只墙钟保险）。断线交回、每请求那只钟、`addEventListener` 而不是 `ws.on`、
+   * 页面抛错要带原话与位置 —— 这四件事现在在 `tests/cdp-channel.test.js` 里毫秒级地跑正反两面，
+   * 不再靠真机轮次去赌它们会不会响。
+   *
+   * 交回走 **reject** 而不是"Resolve 一个带 `{ 断线 }` 标记的对象"（切片9b 的老形状）：本文件下面
+   * 有裸的 `await send('Runtime.enable')`，交回标记等于"通道死了还算成功"，得等下一个 `evalJs`
+   * 才炸。现在每一处 `await` 自己就是红的，退出码仍是环境问题的 2。
+   *
+   * `异常` 接成 `exceptions` 这个名字：下面三处判据（`[读数]` / `[异常]` / 越线表）读的就是它，
+   * 名字换了会让"这一轮一条异常都没收到"与"数组换人了"两种事混在一起。
    */
-  let 断线 = null;
-  const 拆通道 = (为什么) => {
-    断线 = 为什么;
-    for (const [, 交回] of pending) 交回({ 断线: 为什么 });
-    pending.clear();
-  };
-  const send = (method, params = {}) => new Promise((res) => {
-    if (断线) { res({ 断线 }); return; } // 通道已经死了：别再往 ws 上写（那会抛成第二个结论）
-    const id = ++msgId; pending.set(id, res); ws.send(JSON.stringify({ id, method, params }));
-  });
-  // 事件用**标准 WebSocket 的 API**（`addEventListener`），不是 `ws` 包的 `.on()`：
-  // 这里没有 import 'ws'，`WebSocket` 是 Node 自带的全局实现，`.on` 在它身上不存在 ——
-  // 写成 `ws.on('close', …)` 的后果是 r3 那句 `e2e-clear 失败： ws.on is not a function`（退出码 2，
-  // 而它红的原因与浏览器、页面、主线都没关系）。`addEventListener` 也不顶掉上面
-  // 那句 `ws.onopen = res; ws.onerror = rej`（属性式handler与监听器各走各的）。
-  ws.addEventListener('close', (ev) => 拆通道(
-    `CDP 通道关闭（码=${ev?.code ?? '?'} 干净=${ev?.wasClean === true} 理由=${String(ev?.reason ?? '').slice(0, 120) || '无'}）`,
-  ));
-  ws.addEventListener('error', (ev) => 拆通道(`CDP 通道报错（${String(ev?.message ?? ev?.type ?? '?').slice(0, 200)}）`));
-  const evalJs = async (expr) => {
-    if (断线) throw new Error(`${断线}\nChrome 的话：\n - ${浏览器话()}`);
-    const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: false, returnByValue: true });
-    if (r.断线) throw new Error(`${r.断线}\nChrome 的话：\n - ${浏览器话()}`);
-    if (r.result?.exceptionDetails) {
-      // 把**页面里那句话**与位置带出来：抽 JSON 前 300 字会正好切掉 description，
-      // 于是红只会说"页面内抛错"，责任落不到具体哪一句拒上（perf-smoke 2026-10-20 第一次真跑就这么瞎过一次）。
-      const d = r.result.exceptionDetails;
-      const 原话 = d.exception?.description ?? d.exception?.value ?? d.text ?? '?';
-      const 位置 = `${d.url || '页内'}:${(d.lineNumber ?? -1) + 1}:${d.columnNumber ?? '?'}`;
-      throw new Error(`页面内抛错 @${位置}：${String(原话).split('\n')[0].slice(0, 400)}`);
-    }
-    return r.result?.result?.value;
-  };
+  const { send, evalJs, 异常: exceptions } = 开通道({ ws, 名义: 'e2e-clear', 通道, 浏览器输出 });
 
   await send('Runtime.enable');
   await send('Page.enable');
