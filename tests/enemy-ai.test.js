@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { AI } from '../src/content/tuning.js';
 import { SquadController } from '../src/ai/Squad.js';
+import { 抖动度, 走位地板帧 } from './helpers/enemyJitter.js';
 import {
   installWindowShim, makeWorld, makePlayerRef, v, run, NEVER_LEAVES, spawn,
   encircle, duel, makeManager,
@@ -202,6 +205,183 @@ describe('围攻名额与分离', () => {
     // 下限取两具身体相切：允许蹭行，不允许同点重叠
     expect(minToPlayer).toBeGreaterThan(AI.playerRadius + list[0].separationRadius());
     expect(minPair).toBeGreaterThan(list[0].separationRadius());
+  });
+
+  /**
+   * #33：抢不到坑的那只该待在哪一侧。
+   *
+   * 两个设定点原先压在一条线上（等待环 `orbitKeep × holdRange` 与追击的停脚边界 `holdRange`
+   * 之间没有一方认账的间隙），而分离推力会把等待中的那只**推出**这条线：顶着坑的那只处于
+   * 前摇/命中段，`Enemy._advance` 按 `rooted` 不推它 ⇒ 它不动，另一只的向内权限却只有
+   * 厘米每秒的量级（实测 −2.51 m/s 对流 vs 0.91 m/s，`.tmp-20261031-s25/s11-trace2.log`
+   * f226–f241）。单阈值因此成了一场接力振荡：`pursue` 与 `orbit` 每帧互换，画面是原地抽搐。
+   *
+   * 这一节钉三件事：① 死区是**迟滞**而不是当帧读数（写成后者时 `dist > 门 + (dist<=门 ? band : 0)`
+   * 恒等于 `dist > 门`，那条死区从头就没参与 —— `s11-latch.log` 量到的就是它）；
+   * ② 三档设定点不许重合；③ 死区压的是"同一条回路来回"，不砍出手（同种子两臂，聚合读数）。
+   *
+   * 两臂必须钉 `aiSeed`：`Enemy.js` 默认按构造顺序发号，同一个进程里后跑的场景拿到的是
+   * 另一串随机流，于是"单变量对照"比的其实是种子（这条把本片的 辛 臂作废过一回，见 #46）。
+   */
+  const DT = 1 / 60;
+  const 场景表 = { 三只两坑: [3, 9], 六只推进: [6, 9], 六只贴脸: [6, 2] };
+
+  /** 把敌人钉在某个距离上跑一帧：被顶着坑的同伴推过停脚边界是几何结果，这里直接把那个几何摆出来 */
+  function 钉一帧(m, e, player, ref, 距离) {
+    e.position.set(距离, 0, 0);
+    e.attackCooldown = 999;                  // 这一格只留走位判定：出手不参与
+    m.update(DT, player, ref, null, null);
+    return e.state;
+  }
+
+  function 死区读数(band) {
+    const { m, player, ref, e } = duel({
+      x: 9, z: 0, aiSeed: 5, ai: { ...NEVER_LEAVES, pursueBand: band },
+    });
+    const 门 = e.holdRange;
+    const 接近 = 钉一帧(m, e, player, ref, 门 + 0.3);        // 从未贴过脸：B69 的"该贴脸就贴脸"
+    钉一帧(m, e, player, ref, 门 - 0.3);                     // 贴进去：记账置真
+    钉一帧(m, e, player, ref, 门 - 0.3);
+    const 顶出 = 钉一帧(m, e, player, ref, 门 + 0.3);        // 关键一帧：被顶出 0.3 米
+    const 顶出记账 = e.heldIn;
+    const 越带 = 钉一帧(m, e, player, ref, 门 + AI.pursueBand + 0.1);
+    return { 门, 接近, 顶出, 顶出记账, 越带, 越带记账: e.heldIn };
+  }
+
+  /** 同一场景、同一批钉死种子，两臂只差 band —— 返回聚合读数 */
+  function 围攻读数(名, band, 组) {
+    const [n, 半径] = 场景表[名];
+    const m = makeManager();
+    const player = v(0, 0);
+    const ref = makePlayerRef();
+    const list = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      list.push(spawn(m, {
+        x: Math.sin(a) * 半径, z: Math.cos(a) * 半径,
+        ai: { ...NEVER_LEAVES, pursueBand: band },
+        aiSeed: 1 + 组 * 100 + i,
+      }));
+    }
+    const 序列 = list.map(() => []);
+    const 起手 = list.map(() => 0);
+    const 上次 = list.map(() => null);
+    for (let i = 0; i < Math.round(14 / DT); i++) {
+      m.update(DT, player, ref, null, null);
+      list.forEach((e, k) => {
+        序列[k].push(e.state);
+        if (e.state === 'windup' && 上次[k] !== 'windup') 起手[k] += 1;
+        上次[k] = e.state;
+      });
+    }
+    const 尺 = 序列.map(抖动度);
+    const 有链 = 尺.filter((x) => x.同窗连换 > 0);
+    return {
+      连换: 尺.reduce((s, x) => s + x.同窗连换, 0),
+      起手: 起手.reduce((a, b) => a + b, 0),
+      最短: 有链.length ? Math.min(...有链.map((x) => x.同窗最短)) : Infinity,
+    };
+  }
+
+  it('死区是迟滞：贴过脸之后被顶出半米不重冲，从未贴过脸的照旧全速扑（含 band=0 反向对照）', () => {
+    expect(AI.pursueBand, '锚点不在：`AI.pursueBand` 没配就等于死区恒为 0，下面两条对照都在空转')
+      .toBeGreaterThan(0);
+    const 有 = 死区读数(AI.pursueBand);
+    const 无 = 死区读数(0);
+    expect(有.接近, '从远处第一次扑上来的那一只被死区拦住了：B69 那一族"该贴脸"必须一字不动')
+      .toBe('pursue');
+    expect(有.顶出, `贴过脸又被顶出 ${(有.门 + 0.3 - 有.门).toFixed(2)} 米就重新全速冲 —— 死区没生效（记账 ${有.顶出记账}）`)
+      .toBe('orbit');
+    expect(有.越带, '越过带宽还不许重冲：那是把死区写成了 leash').toBe('pursue');
+    // 反向对照（#36）：坏-变体必须既撞上锚点、又真的改出别的读数
+    expect(无.顶出, 'band 写回 0 还读数相同 ⇒ 这一格根本没有读者')
+      .toBe('pursue');
+    expect(无.接近).toBe('pursue');
+    expect(无.越带).toBe('pursue');
+  });
+
+  it('三档设定点互不重合：贴环 < 停脚线 < 越过线 < 外圈（写重了就是一条自相矛盾的回路）', () => {
+    const { e } = duel({ x: 1.8, z: 0, ai: NEVER_LEAVES });
+    const 贴 = e.holdRange * AI.orbitHug;
+    const 停 = e.holdRange;
+    const 越 = e.holdRange + e.ai.pursueBand;
+    const 外 = e.holdRange * AI.orbitKeep;
+    expect(AI.orbitHug, '贴着等的那一档必须落在停脚线**内侧**：写成 ≥1 就与追击抢同一条线').toBeLessThan(1);
+    expect(AI.orbitKeep, '外圈必须落在停脚线**外侧**').toBeGreaterThan(1);
+    expect(贴, `贴环 ${贴.toFixed(3)} 不小于停脚线 ${停.toFixed(3)}：#33 的互顶回来了`).toBeLessThan(停);
+    expect(越, `越过线 ${越.toFixed(3)} 不高于外圈 ${外.toFixed(3)}：等待环与死区合并成一段`).toBeLessThan(外);
+  });
+
+  it('钉住 aiSeed 才叫单变量：同种子同场景在同进程里跑两遍读数逐字相同（#46）', () => {
+    expect(围攻读数('三只两坑', 0.6, 0)).toEqual(围攻读数('三只两坑', 0.6, 0));
+  });
+
+  it('死区压住的是"同一条回路来回"，不是出手：三场景 × 三组同种子两臂', () => {
+    let 连换有 = 0; let 连换无 = 0; let 起手有 = 0; let 起手无 = 0;
+    const 明细 = [];
+    const 组数 = 3;
+    for (const 名 of Object.keys(场景表)) {
+      for (let 组 = 0; 组 < 组数; 组++) {
+        const 有 = 围攻读数(名, 0.6, 组);
+        const 无 = 围攻读数(名, 0, 组);
+        连换有 += 有.连换; 连换无 += 无.连换; 起手有 += 有.起手; 起手无 += 无.起手;
+        明细.push(`${名}#${组} 连换 ${有.连换}/${无.连换} 起手 ${有.起手}/${无.起手}`);
+      }
+    }
+    const 账 = 明细.join(' | ');
+    expect(连换有, `死区没压住同窗连换：${账}`).toBeLessThan(连换无);
+    // 读数交账（2026-11-05 钉种子量出来的两臂合计，`.tmp-20261031-s25/s11-交账.txt`）：
+    // 这一格钉的是"改了调校就要重新看一眼"，有意重调时跟着改这里并说明是哪一档变了。
+    // 逐组（连换 有/无 · 起手 有/无）：三只两坑 6/27·13/13，8/20·13/13，9/53·11/11；
+    // 六只推进 55/59·23/23，44/65·20/20，50/89·20/20；六只贴脸 65/99·23/22，47/76·18/19，49/64·19/19。
+    // 起手两臂互有高低（合计同为 160）：死区换来的是走位不再抽搐，不是少打或多打。
+    expect([连换有, 连换无, 起手有, 起手无], `聚合读数漂了：${账}`)
+      .toEqual([333, 552, 160, 160]);
+    // 出手不许被砍。容差取"每组至多一次"：一次起手是一个离散事件，18 组实测两臂最多差 1
+    expect(起手有, `死区把该出手的也拦住了：${账}`).toBeGreaterThanOrEqual(起手无 - Object.keys(场景表).length * 组数);
+    expect(起手无, `死区反过来把出手抬高了（${起手有} → ${起手无}）？两臂必须同量级`).toBeGreaterThanOrEqual(起手有 - Object.keys(场景表).length * 组数);
+  });
+
+  it('欠账腿（#45）：六只围殴仍有短于一次步态淡化的档 —— 这条红了就是名额排队做好了', () => {
+    const 地板 = 走位地板帧(DT);
+    expect(地板, '一步淡化不足一帧：尺子自己失效，这条腿在空转').toBeGreaterThan(1);
+    const 读 = 围攻读数('六只贴脸', 0.6, 0);
+    expect(读.最短, `最短档 ${读.最短} 已经 ≥ 地板 ${地板} 帧：#45 做完了，删掉这条腿并回填 §9`)
+      .toBeLessThan(地板);
+  });
+
+  it('roomFor 是只读的名额读数：不续期、持有者永远认、Boss 不占坑', () => {
+    const squad = new SquadController(2, 1.0);
+    const a = { name: 'a' };
+    const b = { name: 'b' };
+    const boss = { name: 'boss', isBoss: true };
+    expect(squad.claim(a)).toBe(true);
+    expect(squad.claim(b)).toBe(true);
+    expect(squad.roomFor(boss), 'Boss 不该被自己的随从挡住').toBe(true);
+    expect(squad.claim(boss)).toBe(true);
+    expect(squad.busy, 'Boss 拿到的是资格，不是账本上的一格').toBe(2);
+    expect(squad.roomFor(a), '持有者永远认得自己的坑：否则它会被自己的读数踢出去').toBe(true);
+    for (let i = 0; i < 5; i++) expect(squad.roomFor(boss)).toBe(true);
+    expect(squad.tick(1.1), 'roomFor 读得再多也不能把租约读成活期').toBe(2);
+    expect(squad.roomFor({ name: 'c' })).toBe(true);
+    expect(squad.roomFor(null), '没有敌人就没有名额可问，别把空对象当成持有者').toBe(false);
+  });
+
+  it('接线：停脚线只有一份、等待设定点走 holdRadius、名额判据不抄第二份', () => {
+    const SRC = join(process.cwd(), 'src');
+    const fsm = readFileSync(join(SRC, 'ai', 'EnemyFSM.js'), 'utf8');
+    const squad = readFileSync(join(SRC, 'ai', 'Squad.js'), 'utf8');
+    expect(fsm, '追击的判据不再同时带死区与名额读数：#33 的两半都退化了').toMatch(
+      /\['pursue',[\s\S]*?pursueCutoff\(e\)[\s\S]*?slotOpenFor\(e\)\]/);
+    expect(fsm, 'orbit 的设定点必须走 holdRadius：两处各写一遍就是这两条线重合的成因')
+      .toMatch(/const keep = holdRadius\(owner, len\);/);
+    expect(fsm, '死区记账写成"当帧重算"就是惰性死区（本片踩过一次，见 §9 切片11 与 #46）')
+      .not.toMatch(/heldIn = enemy\.sense\.dist <= enemy\.holdRange\s*[;,]/);
+    const claim体 = squad.match(/claim\(enemy\) \{[\s\S]*?\n {2}\}/)?.[0] ?? '';
+    expect(claim体, '找不到 `claim` 的函数体：判据搬家了，这条腿要跟着搬').not.toBe('');
+    expect(claim体, '`claim` 必须走 `roomFor`：坑满没满与谁是 Boss 只许判一次')
+      .toContain('this.roomFor(enemy)');
+    expect(claim体, '`claim` 里自己又数了一遍账 ⇒ 两处判据分叉').not.toMatch(/leases\.size\s*</);
   });
 });
 

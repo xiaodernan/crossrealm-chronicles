@@ -28,8 +28,11 @@ const PRIORITY = [
   // 追击跑到本招的"甜点位"才停：停在最远招的够得着边缘上，招式表里其余的招就永远轮不到。
   // 带站位诉求的招（`standoff`）是这条的例外：它在这个距离就够用，逼它先贴脸等于让那一招
   // 在实战里从不发生（B69：裂隙的 7 米抛掷距离，实测起手点被两招近战顶到 3.25 米）。
-  ['pursue', (e) => e.sense.alerted && e.sense.dist > e.holdRange
-    && !readyStandoffMove(e, e.sense.dist, e.aimDot())],
+  // 第三条"坑里还有没有它的位置"是 #33：坑被同伴占满时往里冲换不到一次出手，
+  // 只会与 `orbit` 的设定点互顶（两个控制器各全速对着同一条线）。冷却不算在这条里，见 `slotOpenFor`。
+  // 第四条"刚贴过脸的要越过死区才重冲"是 #33 剩下的那一半，见 `pursueCutoff`。
+  ['pursue', (e) => e.sense.alerted && e.sense.dist > pursueCutoff(e)
+    && !readyStandoffMove(e, e.sense.dist, e.aimDot()) && slotOpenFor(e)],
   ['windup', (e, ctx) => ctx.canStrike],
   ['orbit', (e) => e.sense.alerted],
   ['idle', () => true],
@@ -45,6 +48,54 @@ export function tryClaimStrikeSlot(enemy, squad) {
   if (!hasUsableMove(enemy, enemy.sense.dist, enemy.aimDot())) return false;
   if (enemy.attackCooldown > 0) return false;
   return squad.claim(enemy);
+}
+
+/**
+ * 围攻名额现在**有没有它的位置**（自己持有也算）—— 只看坑，不看冷却、距离与朝向。
+ *
+ * 追击与等待环的分工全靠这一格。坑被同伴占满时还一路往里冲，既挤掉持有者的位置，
+ * 也与 `orbit` 的设定点互顶：`orbit` 停在 `orbitKeep × holdRange`（外圈），追击的停脚边界是
+ * `holdRange`，两者之间没有任何一方认账的间隙 ⇒ 一个全速往里、一个往外推，换档每 1–2 帧一次
+ * （#33，实测数字与后果写在 `AI.orbitHug` 那条注释里）。
+ *
+ * **冷却不算在这里**：B69 立的规矩是"手上没牌就往前压，有牌才站在原地打牌"，
+ * 冷却期间停在圈外干等会把近战那半条命整条挤掉（`enemy-field-moves.test.js` 三条用例钉着）。
+ * 不抖的关键因此不在追击这一侧，而在 `holdRadius` 那一格：压进来之后就**贴着**边界内侧等，
+ * 而不是被外圈的设定点再推出去。
+ */
+export function slotOpenFor(enemy) {
+  return !enemy.squad || enemy.squad.roomFor(enemy);
+}
+
+/**
+ * 等待时的设定点。两个值都从 `holdRange` 乘出来，且**与追击的停脚边界同源**：
+ * 有坑、又没有"想站的带"（`standoff`）就贴着甜点位等冷却走完或锥形对齐，坑被占满就退到外圈。
+ * 贴着的那一档必须落在边界**内侧**（`AI.orbitHug < 1`）：写成 1 就与 `pursue` 抢同一条线，
+ * 两个控制器各全速对着它，玩家看到的是敌人站在原地以 60Hz 抖 run/walk。
+ *
+ * 试过"没坑但人还在门内就守门口（×1）"：量下来更糟（六只贴脸 75 → 177 次往返，
+ * `.tmp-20261031-s25/s11-census-after12.log`）—— 设定点落在切换线上本身就是抖源，
+ * 分离推力一碰就翻页。剩下的整群残留另开一条（名额要按排队分，不是靠抢），见 §9 与 #45。
+ */
+function holdRadius(enemy, len) {
+  const 贴着等 = slotOpenFor(enemy) && !readyStandoffMove(enemy, len, enemy.aimDot());
+  return enemy.holdRange * (贴着等 ? enemy.ai.orbitHug : enemy.ai.orbitKeep);
+}
+
+/**
+ * 追击这一帧要从多远的距离上才成立。
+ *
+ * 停脚边界（`holdRange`）与等待设定点（`holdRadius`）已经不再压在一条线上（`AI.orbitHug`），
+ * 但排队的那只仍会被顶着坑的那只**推**过这条线：前摇/命中段冻结分离（`Enemy._advance` 的
+ * `rooted`），它不动，另一只的向内权限却只有厘米每秒的量级 ⇒ 单阈值成了一场接力振荡，
+ * 玩家看到的是每帧换一次 run/walk。这里给线加一段死区，且只对**刚在甜点位里贴过脸**的敌人有效：
+ * 从远处第一次扑上来的照旧按原边界全速冲（B69 那一族"该贴脸"的行为一字不动）。
+ *
+ * 记账在 `createEnemyFSM` 的 `resolve` 里：贴进甜点位就置真，走出带宽才置假（迟滞，不是当帧读数）。
+ * 承诺态（前摇/命中/收招）不改判，因此这一格在招式进行中冻结。
+ */
+function pursueCutoff(enemy) {
+  return enemy.holdRange + (enemy.heldIn ? enemy.ai.pursueBand : 0);
 }
 
 export function resolveEnemyState(enemy, ctx) {
@@ -105,7 +156,8 @@ const ENEMY_STATES = {
       const dz = t.z - owner.position.z;
       const len = Math.hypot(dx, dz) || 1;
       // 径向符号朝向目标：远了进、近了退。写成反号会把外圈等待变成"撞进玩家怀里"。
-      const keep = owner.holdRange * owner.ai.orbitKeep;
+      // 设定点与追击的停脚边界同出一处（`holdRadius`），两家对着同一条线互顶就是 #33。
+      const keep = holdRadius(owner, len);
       const raw = (len - keep) * 2.2;
       const radial = Math.max(-owner.speed, Math.min(owner.speed, raw));
       const nx = dx / len;
@@ -221,6 +273,11 @@ export function createEnemyFSM(enemy) {
   sm.resolve = (ctx) => {
     // 承诺态由自己的计时推进；期间外部判定一律不改判
     if (sm.isCommitted()) return;
+    // 死区记账（`pursueCutoff`）：**粘**的。进去过就认，直到真的走出带宽才不认。
+    // 写成每帧重算（`heldIn = dist <= holdRange`）等于没有死区 —— 守线那一帧 `heldIn` 已经是 false，
+    // 判据化简回 `dist > holdRange`，带宽从头到尾没参与（`.tmp-20261031-s25/s11-latch.log` 量到的就是这个）。
+    if (enemy.sense.dist <= enemy.holdRange) enemy.heldIn = true;
+    else if (enemy.sense.dist > enemy.holdRange + enemy.ai.pursueBand) enemy.heldIn = false;
     const next = resolveEnemyState(enemy, ctx);
     if (next !== sm.current) sm.change(next);
   };

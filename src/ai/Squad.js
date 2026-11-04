@@ -18,16 +18,24 @@ export class SquadController {
     this.leases = new Map();
   }
 
-  /** 抢占或续期进攻名额；已满则返回 false */
-  claim(enemy) {
+  /**
+   * 这只敌人现在**能不能**拿到坑 —— 只看名额，不看距离、冷却与朝向。
+   *
+   * 单列成一枚**无副作用**的读数是给走位判定用的（`EnemyFSM` 要问"现在压上去有没有意义"）：
+   * `claim` 会续期租约，把"读"写成"每帧都改账本"就让优先级判断成了副作用的来源。
+   * Boss 那一格与 `claim` 共用，两处不许各抄一份"谁是 Boss"。
+   */
+  roomFor(enemy) {
     if (!enemy) return false;
     // Boss 不占名额：围攻上限是给小怪讲理用的，主角不该被自己的随从挡住
     if (enemy.isBoss) return true;
-    if (this.leases.has(enemy)) {
-      this.leases.set(enemy, this.timeout);
-      return true;
-    }
-    if (this.leases.size >= this.slots) return false;
+    return this.leases.has(enemy) || this.leases.size < this.slots;
+  }
+
+  /** 抢占或续期进攻名额；已满则返回 false */
+  claim(enemy) {
+    if (!this.roomFor(enemy)) return false;
+    if (enemy.isBoss) return true;                 // Boss 拿到的是资格，不是账本上的一格
     this.leases.set(enemy, this.timeout);
     return true;
   }

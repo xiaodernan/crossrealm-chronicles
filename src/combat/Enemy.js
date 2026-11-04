@@ -53,7 +53,13 @@ export class Enemy {
   constructor(scene, world, config) {
     this.scene = scene;
     this.world = world;
-    this.aiSeed = ++aiSeq;
+    /**
+     * 选招随机流的身份。默认按构造顺序发号（下面那行 `++aiSeq`），但**可以按只钉死**：
+     * `aiSeq` 是模块级计数器，同一个进程里后建的场景会拿到另一串流，于是"同一场景跑两臂"
+     * 比的其实是种子而不是被试的那一格 —— #33 的 辛 臂就是这样把惰性的死区读成了有效
+     * （`.tmp-20261031-s25/s11-census-after14.log` 的 癸/子/丑 三格是证物）。
+     */
+    this.aiSeed = config.aiSeed ?? ++aiSeq;
     this.name = config.name ?? t('enemy_name_default');
     this.type = config.type ?? 'soldier';
     /**
@@ -121,6 +127,8 @@ export class Enemy {
     this.orbitSide = (Math.round((this.spawnPoint.x + this.spawnPoint.z) / 3) % 2) ? 1 : -1;
     /** 本帧位移意图，由状态机写入，`_advance()` 统一积分 */
     this.wish = { x: 0, z: 0 };
+    /** 死区记账（`EnemyFSM.pursueCutoff`）：贴过脸为真，走出 `ai.pursueBand` 才翻假 —— 迟滞位，不是当帧读数 */
+    this.heldIn = false;
     /** 外部冲量（击退）：由结算侧 `applyKnockback()` 请求，与 AI 意图分开积分、按秒衰减 */
     this.knock = { x: 0, z: 0 };
     /** 质量：体型 scale 越大越推不动（Boss 与小兵吃到同样的重击不该跑一样远） */

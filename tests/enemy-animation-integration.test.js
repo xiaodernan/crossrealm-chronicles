@@ -15,6 +15,7 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { Enemy } from '../src/combat/Enemy.js';
+import { SquadController } from '../src/ai/Squad.js';
 import { createEntityAdapter } from '../src/animation/AnimationEntityAdapter.js';
 // World 类型仅用于类型提示，运行时用 mock
 
@@ -110,9 +111,9 @@ describe('Enemy + AnimationAdapter 集成（W-C6 切片4）', () => {
 
   it('无适配器时 update 不崩（防御性：entry chunk 未挂载也能跑）', () => {
     const enemy = new Enemy(scene, world, { x: 0, z: 0, type: 'soldier' });
-    // 故意不挂 adapter，提供完整的 mock（含 squad.claim）
-    const mockSquad = { claim: () => false, release: () => {} };
-    enemy.squad = mockSquad;
+    // 故意不挂 adapter。名额用**真的** `SquadController(0)`：空账本谁都抢不到，
+    // 与这一片要走的"打不出"同形 —— 手抄的鸭子类型 mock 会在 Squad 加一枚方法时就这样过期。
+    enemy.squad = new SquadController(0);
     expect(() => enemy.update(1 / 60, new THREE.Vector3(), { 
       combat: { isInvulnerable: () => false, takeDamage: () => {} } 
     }, {
