@@ -178,6 +178,7 @@ export const STRINGS_ZH = Object.freeze({
   gear_unequip_to_bag: '卸下：${item} —— 放进背包（${n}/${cap}）',
   gear_wear_this: '穿上这一件',
   gear_bag_empty: '背包是空的 —— 捡到不穿的装备会先放在这里。',
+  gear_compare_vs_equipped: '对比当前装备',
   upgrade_success: '升级成功：${stat} · 获得 1 技能点',
   upgrade_not_enough_souls: '位面之魂不足',
   chest_souls_gained: '宝箱：获得 ${n} 位面之魂',

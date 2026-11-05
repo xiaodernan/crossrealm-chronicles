@@ -1487,6 +1487,18 @@ body {
 .gear-row-btn { padding: 4px 10px; background: rgba(255,255,255,0.05); border: 1px solid #444; color: #ccc; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-family: inherit; }
 .gear-row-btn:hover:not(:disabled) { border-color: #c9a962; }
 .gear-row-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* 装备属性行（W-E3 切片62）：槽名 / 件名+属性 / 按钮 三段；属性行在主行之下，字号更小 */
+.gear-row .gear-cell { flex: 1; min-width: 0; text-align: left; }
+.gear-cell .gear-item { display: block; }
+.gear-mods { display: block; margin-top: 3px; font-size: 0.72rem; color: #999; }
+.skill-btn .gear-mods { margin-top: 4px; }
+.gear-mod { display: inline-block; margin-right: 10px; white-space: nowrap; }
+/* 差值靠文本括号（+1 / -1）表达，颜色只是次要提示 —— 色觉档下也读得懂 */
+.gear-delta { margin-left: 3px; font-variant-numeric: tabular-nums; }
+.gear-delta.up { color: #8fb88a; }
+.gear-delta.down { color: #c98b8b; }
+.skill-btn .gear-bag-name { display: block; color: #ddd; font-size: 0.8rem; }
+.skill-btn .gear-bag-action { display: block; margin-top: 3px; color: #888; font-size: 0.72rem; }
 .gear-bag-count { color: #888; font-size: 0.75rem; font-weight: normal; }
 .gear-bag-empty { color: #888; font-size: 0.78rem; text-align: left; margin: 4px 0 0; }
 

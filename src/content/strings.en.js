@@ -176,6 +176,7 @@ export const STRINGS_EN = Object.freeze({
   gear_unequip_to_bag: 'Unequipped: ${item} — into the bag (${n}/${cap})',
   gear_wear_this: 'Wear this',
   gear_bag_empty: 'The bag is empty — gear you pick up but do not wear lands here first.',
+  gear_compare_vs_equipped: 'Compare with equipped',
   upgrade_success: 'Upgraded: ${stat} — +1 skill point',
   upgrade_not_enough_souls: 'Not enough plane soulfire',
   chest_souls_gained: 'Chest: ${n} plane soulfire gained',

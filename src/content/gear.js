@@ -194,6 +194,46 @@ export function gearMods(instance) {
   return out;
 }
 
+/** 属性点的显示名键：与升级面板同一批词 —— 同一个属性在全仓只有一个名字 */
+export const GEAR_STAT_LABEL = Object.freeze({
+  vigor: 'upgrade_stat_vigor',
+  endurance: 'upgrade_stat_endurance',
+  strength: 'upgrade_stat_strength',
+  arcane: 'upgrade_stat_arcane',
+  mind: 'upgrade_stat_mind',
+});
+
+/**
+ * 一件装备的属性行（W-E3 切片62）—— 面板上"这件到底给什么"的唯一换算。
+ *
+ * 返回结构化行而不是拼好的字符串：面板、日志、对比三处要的排版不同（面板是"活力 +2"，
+ * 对比还要"(+1)"），把格式化留给各自那一层；换算与**顺序**留在这里。
+ *
+ * - 顺序固定按 `GEAR_STATS`，不按对象键序 —— 同一件装备在面板与日志里读出来的次序必须一样；
+ * - `against` 给了就逐格算差值（背包里的那件 vs 同槽已装备的那件）。**只在一侧出现的属性也要出行**：
+ *   "穿上会失去 1 点力量"正是玩家要看见的那一句，按"本件非零"过滤会把它藏掉；
+ * - 认不出的实例返回空数组、不抛 —— 存档可被手写；判据走 `isGearInstance`（缺 rarity / affixes
+ *   的半件也算认不出：只显示底座那几点会让玩家以为它能穿，读档时它其实会被整件丢掉）。
+ */
+export function gearStatLines(instance, { against = null, lang = 'zh' } = {}) {
+  if (!isGearInstance(instance)) return [];
+  const mods = gearMods(instance);
+  if (!mods) return [];
+  const cur = against ? gearMods(against) : null;
+  const T = 表(lang);
+  return GEAR_STATS
+    .filter((stat) => (mods[stat] ?? 0) !== 0 || (cur?.[stat] ?? 0) !== 0)
+    .map((stat) => {
+      const value = mods[stat] ?? 0;
+      return {
+        stat,
+        label: T[GEAR_STAT_LABEL[stat]] ?? stat,
+        value,
+        delta: cur ? value - (cur[stat] ?? 0) : null,
+      };
+    });
+}
+
 /**
  * 认一件"实例"是否合这张表的规矩。存档读进来时问这里：坏的那一件当件丢掉，而不是整包回默认 ——
  * 与 `padTuning()` 逐项回落是同一条纪律（一格坏不连累别的格子）。
