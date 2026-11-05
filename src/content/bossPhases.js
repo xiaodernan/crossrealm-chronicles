@@ -72,6 +72,8 @@ const BossPhaseTuning = {
       volleySpeed: 14,
       volleyCooldown: 2.0,
       canVolley: true,
+      // 进入二阶段时重置蓄力冷却，避免从一阶段残留的计时值导致首发过早。
+      onEnter: (boss) => { boss.shootCooldown = 0; },
     },
     3: {
       speed: 4,
@@ -81,6 +83,7 @@ const BossPhaseTuning = {
       volleySpeed: 16,
       volleyCooldown: 1.2,
       canVolley: true,
+      onEnter: (boss) => { boss.shootCooldown = 0; },
     },
   },
 
@@ -102,6 +105,7 @@ const BossPhaseTuning = {
       diskSpin: 2.0,
       canVolley: false,
       volleyCooldown: 0.8,
+      onEnter: (boss) => { boss.shootCooldown = 0; },
     },
     3: {
       speed: 5.5,
@@ -110,6 +114,7 @@ const BossPhaseTuning = {
       diskSpin: 2.5,
       canVolley: true,
       volleyCooldown: 0.8,
+      onEnter: (boss) => { boss.shootCooldown = 0; },
     },
   },
 
@@ -132,6 +137,8 @@ const BossPhaseTuning = {
       timeStopCooldown: 4,
       timeStopDuration: 1.8,
       timeStopRange: 22,
+      // 进入二阶段时重置时停冷却，避免从一阶段残留的计时值导致首次时停过早。
+      onEnter: (boss) => { boss.timeStopCooldown = 0; },
     },
     3: {
       speed: 5.8,
@@ -141,6 +148,7 @@ const BossPhaseTuning = {
       timeStopCooldown: 4,
       timeStopDuration: 1.8,
       timeStopRange: 22,
+      onEnter: (boss) => { boss.timeStopCooldown = 0; },
     },
   },
 
@@ -163,6 +171,8 @@ const BossPhaseTuning = {
       pulseInterval: 2.5,
       pulseDamage: 12,
       pulseRange: 9,
+      // P2 开启混沌脉动：进入二阶段时重置脉冲计时器，避免从一阶段残留的计时值导致首发过早。
+      onEnter: (boss) => { boss.chaosPulse = 0; },
     },
     3: {
       speed: 6,
@@ -173,6 +183,7 @@ const BossPhaseTuning = {
       pulseDamage: 12,
       pulseRange: 9,
       // P3：timed slam rate 0.06，barrage cooldown 8s，范围 20m，红色 tint
+      onEnter: (boss) => { boss.chaosPulse = 0; },
     },
   },
 };

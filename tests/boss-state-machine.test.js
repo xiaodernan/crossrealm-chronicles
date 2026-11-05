@@ -26,6 +26,7 @@ import {
   BossStateMachine, BossPhase, PhaseTransitionCondition,
 } from '../src/combat/BossStateMachine.js';
 import { DungeonBoss } from '../src/combat/DungeonBoss.js';
+import { BOSS_PHASE_TUNING } from '../src/content/bossPhases.js';
 
 const SRC = join(process.cwd(), 'src');
 
@@ -146,6 +147,34 @@ describe('阶段行为表：跟着当前阶段走', () => {
     expect(seen).toEqual(['enter-2']);
     sm.transitionTo(3);
     expect(seen).toEqual(['enter-2', 'leave-2']);
+  });
+
+  it('真阶段表的 onEnter 会收到 boss 实例并能改它（W-B8 切片9：阶段行为表接入真行为）', () => {
+    // chaos-overlord P2：onEnter 重置 chaosPulse，避免从 P1 残留的计时值导致首发过早
+    const boss = { bossId: 'chaos-overlord', name: '混沌裂隙领主', hp: 820, maxHp: 820, chaosPulse: 999 };
+    const sm = new BossStateMachine(boss);
+    sm.registerPhaseBehavior(2, BOSS_PHASE_TUNING['chaos-overlord'][2]);
+    sm.transitionTo(2);
+    expect(boss.chaosPulse).toBe(0);
+  });
+
+  it('真阶段表的 onEnter 在 P3 也会被调（W-B8 切片9：跨阶段重置计时器）', () => {
+    const boss = { bossId: 'void-chronarch', name: '时线执政官', hp: 700, maxHp: 700, timeStopCooldown: 999 };
+    const sm = new BossStateMachine(boss);
+    sm.registerPhaseBehavior(2, BOSS_PHASE_TUNING['void-chronarch'][2]);
+    sm.registerPhaseBehavior(3, BOSS_PHASE_TUNING['void-chronarch'][3]);
+    sm.transitionTo(2);
+    expect(boss.timeStopCooldown).toBe(0);
+    sm.transitionTo(3);
+    expect(boss.timeStopCooldown).toBe(0);
+  });
+
+  it('没有 onEnter 的阶段表不会抛（shadow-warden 纯数据表）', () => {
+    const boss = { bossId: 'shadow-warden', name: '影界守护者', hp: 600, maxHp: 600 };
+    const sm = new BossStateMachine(boss);
+    sm.registerPhaseBehavior(3, BOSS_PHASE_TUNING['shadow-warden'][3]);
+    expect(() => sm.transitionTo(3)).not.toThrow();
+    expect(sm.phase).toBe(3);
   });
 });
 
