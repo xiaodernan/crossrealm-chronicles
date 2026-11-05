@@ -166,7 +166,7 @@ describe('围攻名额与分离', () => {
     expect(squad.claim(a)).toBe(true);
     expect(squad.claim(b), '没轮到的不许出手：走位与出手读同一张表').toBe(false);
     expect(squad.tick(0.6)).toBe(0);
-    expect(squad.claim(a)).toBe(true);             // 活跃持有者每帧续期
+    expect(squad.claim(a)).toBe(true);             // 已有租约的不再每帧续期（#45），只返回 true
     expect(squad.tick(1.1)).toBe(1);
     expect(squad.busy).toBe(0);
     expect(squad.roomFor(b), '租约超时让位：排队的下一位补上').toBe(true);

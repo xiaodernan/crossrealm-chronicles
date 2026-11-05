@@ -64,7 +64,8 @@ export class SquadController {
    * 这只敌人现在**是不是**被轮到进内圈的那一只 —— 只看名单，不看距离、冷却与朝向。
    *
    * 单列成一枚**无副作用**的读数是给走位判定用的（`EnemyFSM` 要问"现在压上去有没有意义"）：
-   * `claim` 会续期租约，把"读"写成"每帧都改账本"就让优先级判断成了副作用的来源。
+   * `claim` 只在首次拿座时建租约，之后不再每帧续期（#45），把"读"保持为纯读数，
+   * 优先级判断不再是副作用的来源。
    * Boss 那一格与 `claim` 共用，两处不许各抄一份"谁是 Boss"。
    */
   roomFor(enemy) {
@@ -74,12 +75,16 @@ export class SquadController {
     return this.seats.has(enemy);
   }
 
-  /** 抢占或续期进攻名额；没轮到（不在座上）则返回 false */
+  /** 抢占或续期进攻名额；没轮到（不在座上）则返回 false。只在没租约时才新建，已有租约的不每帧续期（#45），否则“读”就变成“每帧改账本”。 */
   claim(enemy) {
     if (!enemy) return false;
     if (enemy.isBoss) return true;                  // Boss 拿到的是资格，不是账本上的一格
     if (!this.roomFor(enemy)) return false;         // 走位与出手共用这一枚读数，不许各数一遍账
-    this.leases.set(enemy, this.timeout);
+    // #45：只有第一次拿座才建租约，之后tick按dt自然衰减，冷却/够不着的敌人会超时让位，
+    // 而不是每帧被claim续上永远占着坑。
+    if (!this.leases.has(enemy)) {
+      this.leases.set(enemy, this.timeout);
+    }
     return true;
   }
 
