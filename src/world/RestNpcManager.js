@@ -11,6 +11,30 @@ const npcOn = (name, handler) => on(name, handler, WORLD_RESTNPCMANAGER);
 /** 营火常驻 NPC — Mixamo 模型 + RestDialogue 联动高亮 */
 
 
+/**
+ * 远景 NPC 动画降频（W-E3 切片65）。
+ *
+ * 分系统计时：森林站 240 帧里 8 名营火 NPC 的 `model.update()` 合计 **0.679ms/帧**，
+ * 而其中 7 名在 160~407 米外 —— 玩家在灰白森林，枢纽那几位仍在按 60Hz 跑 GLB 混合器。
+ * 远处那点呼吸 / 手势肉眼不可辨，5Hz 足够；近处（< 40 米）与对话中一律全速。
+ *
+ * `npcAnimStep` 是纯函数：返回这一步要不要跑模型、以及累计的 dt。远景点每 `0.2s` 跑一次
+ * 并把这 0.2s 原样递给混合器 —— 动画时间不会漏，只是采样变稀（0.2s 对关键帧插值无影响）。
+ */
+export const NPC_ANIM_NEAR_M = 40;
+export const NPC_ANIM_FAR_STEP_S = 0.2;
+
+export function npcAnimStep({ distance, dialogue = false, speaking = false, acc = 0, dt = 0 }) {
+  if (dialogue || speaking || !Number.isFinite(distance) || distance < NPC_ANIM_NEAR_M) {
+    return { 跑: true, acc: 0, 步: dt };
+  }
+  const 累计 = acc + dt;
+  // ε：60 × (1/60) 的浮点累计是 0.9999…，strict `>=` 会让一秒只跑 4 次（实测）；
+  // 1e-9 远小于一帧，不会把"差半帧"提前放行。
+  if (累计 >= NPC_ANIM_FAR_STEP_S - 1e-9) return { 跑: true, acc: 0, 步: 累计 };
+  return { 跑: false, acc: 累计, 步: 0 };
+}
+
 export class RestNpcManager {
   /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第九处） */
   dispose() {
@@ -198,12 +222,16 @@ export class RestNpcManager {
     }
 
     for (const n of this.npcs) {
-      n.model?.update(dt);
       const m = n.mesh;
       m.getWorldPosition(this._tmp);
       const d = Math.hypot(playerPos.x - this._tmp.x, playerPos.z - this._tmp.z);
       const inDialogue = n.state === 'dialogue';
       const speaking = this.speakingId === n.id;
+      // 模型动画按距离降频（切片65）：远处 5Hz、近处与对话中全速；累计 dt 原样递进去，
+      // 混合器的时间轴一秒都不少，只是采样变稀。
+      const 步 = npcAnimStep({ distance: d, dialogue: inDialogue, speaking, acc: n.animAcc ?? 0, dt });
+      n.animAcc = 步.acc;
+      if (步.跑) n.model?.update(步.步);
 
       // 玩家位非有限时**保持上一次判定**：`NaN <= 框半宽` 永远是 false，顺着走就等于
       // "量不到 ⇒ 关投影"，而 B120 那一课说的是另一种下场 —— 让坏值自己说出口。
