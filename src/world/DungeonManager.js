@@ -9,6 +9,7 @@ import { disposeDungeonSubtree } from './dungeonAssets.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { t } from '../engine/i18n.js';
 import { keyText } from '../ui/keyHints.js';
+import { batchStaticsOf } from './zoneBatching.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -291,6 +292,11 @@ export class DungeonManager {
       for (const door of dungeon.layout.doors) {
         ProceduralDungeonGenerator.setDoorOpen(dungeon.layout, door, false);
       }
+      // 静态装饰按材质合批（W-E3 切片63）：切片57 量到副本的代价在 draw call 不在三角形
+      // （16~32 间副本 214~399 calls / 只有 1.4~1.6 万三角），因为每件摆设各算一次。
+      // 规则与野外区那一遍同源（zoneBatching.js）：动的件靠名字认领（门板 door_* / 出口 exit /
+      // 经文 lore_shard），其余按 材质 × 阴影 × 属性布局 合并；门先关好再合批只是把顺序写死。
+      dungeon.batchStats = batchStaticsOf(dungeon.group, { id: `dungeon-${dungeon.def.id}` });
     }
 
     const spawn = dungeon.layout.spawn;

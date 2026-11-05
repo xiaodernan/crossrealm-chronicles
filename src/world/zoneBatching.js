@@ -130,7 +130,7 @@ function 阴影类别(cast, receive) {
  * `序` 是这一桶在区内的**桶序**（不是"第几个成功的批"）：名字要能在两次构建里指同一件，
  * 而"成功才有号"会让前面一桶回退时把后面所有批都挪一格。
  */
-function 合一批(zone, root, 件, mat, 序) {
+function 合一批(id, root, 件, mat, 序) {
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
   const 克隆 = [];
   const 应得三角形 = 件.reduce((n, o) => n + 三角形数(o.geometry), 0);
@@ -166,8 +166,8 @@ function 合一批(zone, root, 件, mat, 序) {
   // 一族里认不出某一件就写 `(无名)` —— 2026-10-29 magic 站 23 笔、切片15 void 站 24 笔
   // 全是这么点不出名的（想问"框边界上那一笔是谁"都无从下手）。名只用手里已有的两格推：
   // 区 id + 桶序，不抄第二个数；区根的 `traverse` 走法定了桶序，同一棵树两次构建逐字同序。
-  mesh.name = `合批-${zone.id}-${序}`;
-  mesh.userData[合批记账] = { 区: zone.id, 件数: 件.length, 三角形: 应得三角形 };
+  mesh.name = `合批-${id}-${序}`;
+  mesh.userData[合批记账] = { 区: id, 件数: 件.length, 三角形: 应得三角形 };
   root.add(mesh);
 
   for (const o of 件) {
@@ -178,8 +178,17 @@ function 合一批(zone, root, 件, mat, 序) {
   return mesh;
 }
 
-function 合一批一区(zone) {
-  const root = zone?.group;
+/**
+ * 对一个**根组**里的静态网格合批（W-E3 切片63：从「每座野外区」抽出来，副本也能用）。
+ *
+ * 抽出来的理由与 `Game.js` 那处调用无关：副本 dungeon.group 与野外区 zone.group 是
+ * 同一种形状 —— 一棵挂满静态 mesh 的树，动的那几件靠**名字**认领（门板 door_*、
+ * 出口 exit、经文 lore_shard）。规则一条不改，只是根换了；id 只用于产物命名与
+ * 记账（合批-id-序），不参与任何选件判断。
+ *
+ * 返回 null 表示「这个根不是 Object3D」；其余情况即使一件都没合也返回记账（批数 0）。
+ */
+export function batchStaticsOf(root, { id = 'group' } = {}) {
   if (!root?.isObject3D) return null;
   root.updateMatrixWorld(true);
 
@@ -192,12 +201,12 @@ function 合一批一区(zone) {
     else 桶.set(k, { mat: o.material, 件: [o] });
   });
 
-  const 结果 = { 区: zone.id, 批数: 0, 合入件数: 0, 省下绘制: 0, 三角形: 0, 回退: 0 };
+  const 结果 = { 区: id, 批数: 0, 合入件数: 0, 省下绘制: 0, 三角形: 0, 回退: 0 };
   let 序 = 0;
   for (const { mat, 件 } of 桶.values()) {
     序 += 1;
     if (件.length < 2) continue;
-    const mesh = 合一批(zone, root, 件, mat, 序);
+    const mesh = 合一批(id, root, 件, mat, 序);
     if (!mesh) {
       结果.回退++;
       continue;
@@ -224,7 +233,7 @@ function 合一批一区(zone) {
 export function batchZoneStatics(world) {
   const 合计 = { 区数: 0, 批数: 0, 合入件数: 0, 省下绘制: 0, 三角形: 0, 回退: 0, 区: [] };
   for (const zone of world?.zones ?? []) {
-    const r = 合一批一区(zone);
+    const r = batchStaticsOf(zone?.group, { id: zone.id });
     if (!r) continue;
     合计.区.push(r);
     合计.区数++;
