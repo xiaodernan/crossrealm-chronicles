@@ -393,11 +393,14 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  * **2026-10-30 切片15 单格重钉 `void.shadow` 45 → 46**：三次真门逐字读 46，而两棵树的投影件清单**逐行相同**
  * （198 件，按链与几何/材质签名聚合）⇒ 差不在“多了什么”，在**阴影框内那一件的边界判定**。这也修正了
  * 数出来那一列“免疫”的说法：它对**页龄**免疫（掉落不投影），但框边界上的动态件仍有 **±1**。
+ * **2026-11-06 W-E3 切片66 单格重钉 `hub.shadow` 62 → 64**：真门（种子 20261028，`npm run perf`）
+ * 读出 64、日志自己点名「地板过期」，而当日其余 23 格全部 ≤ 地板。它守的那一格（上限 70）不动 ——
+ * 规则给 74（×1.15 上取整到 10），比现值更松 ⇒ 按“只收不放”保持 70，余量 9.4% 记在这里。
  * 细节出处（哪个日志、哪一档页龄）逐格写在 `tests/draw-call-budget.test.js` 的带子腿注释里 ——
  * 那份注释是**判据的说明**，这张表是**判据的数据**，两者不再各存一份数。
  */
 export const DRAW_CALL_FLOORS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 288, body: 226, shadow: 62 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 288, body: 226, shadow: 64 }),
   [ZONE_IDS.FANTASY]: Object.freeze({ frame: 267, body: 213, shadow: 55 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 593, body: 551, shadow: 39 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 218, body: 152, shadow: 62 }),
