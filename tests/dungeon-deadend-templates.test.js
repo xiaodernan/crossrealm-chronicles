@@ -177,6 +177,31 @@ describe('死路房与四向 T 口（W-E3 切片53）', () => {
     expect(房, '一间房都没扫到').toBeGreaterThan(1800);
     expect(件, `室内件数 ${件} 超过 ${房} 间 × 4 的总闸`).toBeLessThanOrEqual(房 * 4);
   });
+  it('整座副本的网格预算：每间房 ≤ 14 件（真机 40 座量到 11.89~12.96）', () => {
+    // 真机读数（2026-11-05，headless Chrome 1280×800，页面内 `dungeons.enter()` 后读 `renderer.info`）：
+    // ruin-crypt 32 间 / 414 网格 / 399 calls；forbidden-library 26 / 329 / 322；
+    // five-dim-rift 21 / 272 / 270；forest-shrine 16 / 209 / 214。三角形只有 1.4~1.6 万
+    // （野外区是 27~42 万）—— 副本的代价在**调用次数**，而调用次数跟着网格数走，
+    // 所以这条闸守的是"每间房摆几件"，不是"三角形多少"。
+    // 40 座（10 座 × 4 颗种子）量到的每间值 11.89~12.96：14 留约 8% 余量，
+    // 足以容纳一款新模板的 1~2 件摆设，但接不住"整族房间各多摆三件"。
+    const 每间 = [];
+    for (const def of DUNGEON_DEFS) {
+      for (let i = 1; i <= 4; i++) {
+        const layout = ProceduralDungeonGenerator.generate(def, i * 7919);
+        const g = new THREE.Group();
+        ProceduralDungeonGenerator.buildGeometry(g, layout, def);
+        let 网格 = 0;
+        g.traverse((o) => { if (o.isMesh) 网格++; });
+        每间.push({ id: def.id, seed: i, 房: layout.rooms.length, 网格, 值: 网格 / layout.rooms.length });
+      }
+    }
+    expect(每间.length).toBe(40);
+    const 超 = 每间.filter((r) => r.值 > 14);
+    expect(超.map((r) => `${r.id}/${r.seed} ${r.值.toFixed(2)}`), '这些副本每间网格超过 14').toEqual([]);
+    const 少 = 每间.filter((r) => r.值 < 8);
+    expect(少.map((r) => `${r.id}/${r.seed} ${r.值.toFixed(2)}`), '这些副本每间网格少得不正常（墙或门没建？）').toEqual([]);
+  });
   it('真迷宫读数：80 座里兜底房 0 间，八款新模板各至少被选中一次', () => {
     const 用量 = new Map();
     let 总 = 0;
