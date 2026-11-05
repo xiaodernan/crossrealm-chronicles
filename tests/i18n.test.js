@@ -4,7 +4,9 @@ import { join } from 'node:path';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { t, setLanguage, getLanguage, getAllKeys, assertI18nParity } from '../src/engine/i18n.js';
-import { 动态接线键集 } from './helpers/i18nDynamicKeys.js';
+import { 动态接线键集, 拼键名册 } from './helpers/i18nDynamicKeys.js';
+import { SSAO_QUALITY_NAMES } from '../src/engine/ssaoSettings.js';
+import { SHAKE_STRENGTH_IDS } from '../src/engine/shakeStrength.js';
 import { EXPECTED_KEY_COUNT, 键数问题 } from './helpers/i18nKeyCount.js';
 
 describe('i18n 文案表（W-D2 切片1）', () => {
@@ -361,20 +363,23 @@ describe('死键只减不增（W-D2 切片6 门槛 · 切片26 修"这道门恒�
 
   it('盲区那一族单列：登记过的运行期键不许混进待查账本，也不许漂走', () => {
     // 名册说"这些键是运行期读的"⇒ 它们必须在表里、必须真的没有整名读者（否则该回字面量那一族记账）
-    expect([...动态].sort(), '名册登记的键集漂了（今天应当是 SSAO 四档）').toEqual([
-      'settings_ssao_quality_high',
-      'settings_ssao_quality_low',
-      'settings_ssao_quality_medium',
-      'settings_ssao_quality_off',
-    ]);
+    // 今天名册恰好两族：SSAO 四档（切片27）+ 震屏三档（切片58）。期望从**出处**现推，
+    // 不抄第二份字面量；名册少一行、域少一档、或有人多拼一族，这条腿都会红。
+    const 应登记 = [
+      { 前缀: 'settings_ssao_quality_', 域: [...SSAO_QUALITY_NAMES], 拼键处文件: 'src/ui/SettingsPanel.js' },
+      { 前缀: 'settings_shake_', 域: [...SHAKE_STRENGTH_IDS], 拼键处文件: 'src/ui/SettingsPanel.js' },
+    ];
+    expect(拼键名册, '拼键名册漂了（今天应当恰好两族：SSAO 四档 + 震屏三档）').toEqual(应登记);
     for (const 键 of 动态) {
       expect(ZH_KEYS, `运行期拼出来的「${键}」不在中文表里 —— 面板那一档会显示 [MISSING: ${键}]`).toContain(键);
       expect(字面零读者, `「${键}」已经有人整名写过了 —— 它不再是盲区，名册要减一行`).toContain(键);
       expect(死集, `「${键}」又被当成孤儿了 —— 删掉它，SSAO 下拉那一档就没有字`).not.toContain(键);
     }
     // 尺子不许只看见登记的那一族：没登记的运行期拼键仍然会落进待查账本（这是限度，写进读数）
-    expect(字面零读者.length, '字面量零读者的总数不是 4 了 —— 除 SSAO 四档之外又有人建了没人整名读的键')
-      .toBe(4);
+    // 总数从名册现推（今天是 4 + 3 = 7），不写死数字：名册再长一族时这条腿跟着长，
+    // 但"多出没登记的键"仍然会红。用整集比对而不是只比数量，免得一族涨一档、另一族掉一档互相抵消。
+    expect(字面零读者.slice().sort(), '字面量零读者应当恰好等于名册展开的那两族 —— 又有人建了没人整名读的键')
+      .toEqual([...动态].sort());
   });
 
   it('反向控制两头：在役的键不许进名单，凭空造一枚没接线的键必须进（防修完仍恒绿）', () => {

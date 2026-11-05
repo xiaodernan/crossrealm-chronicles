@@ -18,6 +18,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { SSAO_QUALITY_NAMES } from '../../src/engine/ssaoSettings.js';
+import { SHAKE_STRENGTH_IDS } from '../../src/engine/shakeStrength.js';
 
 const walk = (dir) => readdirSync(dir).flatMap((name) => {
   const p = join(dir, name);
@@ -58,6 +59,11 @@ export const 拼键名册 = [
   {
     前缀: 'settings_ssao_quality_',
     域: [...SSAO_QUALITY_NAMES],
+    拼键处文件: 'src/ui/SettingsPanel.js',
+  },
+  {
+    前缀: 'settings_shake_',
+    域: [...SHAKE_STRENGTH_IDS],
     拼键处文件: 'src/ui/SettingsPanel.js',
   },
 ];

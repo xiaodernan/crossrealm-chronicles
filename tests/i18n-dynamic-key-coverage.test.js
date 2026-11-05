@@ -16,6 +16,7 @@ import { tmpdir } from 'node:os';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { SSAO_QUALITY_NAMES, SSAO_QUALITY_PRESETS } from '../src/engine/ssaoSettings.js';
+import { SHAKE_STRENGTHS, SHAKE_STRENGTH_IDS } from '../src/engine/shakeStrength.js';
 import { 扫描拼键模板, 前缀Of, 拼键名册, 动态接线键集 } from './helpers/i18nDynamicKeys.js';
 
 const SEP = process.platform === 'win32' ? '\\' : '/';
@@ -36,6 +37,7 @@ describe('① 拼键扫描尺子自己不是摆设', () => {
     const 扫到 = 扫描拼键模板();
     expect(扫到.map((条) => `${条.文件} t(\`${条.模板}\`)`).sort(),
       '拼键的位置变了 —— 名册 `拼键名册` 要跟着动：这一族的键名从来不是字面量写出来的').toEqual([
+      'src/ui/SettingsPanel.js t(`settings_shake_${id}`)',
       'src/ui/SettingsPanel.js t(`settings_ssao_quality_${name}`)',
     ]);
   });
@@ -84,13 +86,25 @@ describe('② 拼键名册与真实拼键处双向对齐', () => {
     }
   });
 
+  /**
+   * 每一族的"域出处"：名册那份 == 模块导出的名册，且那个名册 == 参数表的键。
+   * 今天两族都是这个形状；将来加第三族，这里也得加一行（否则那一族的抄本没人核）。
+   */
+  const 域出处 = {
+    'settings_ssao_quality_': { 域: SSAO_QUALITY_NAMES, 参数表: Object.keys(SSAO_QUALITY_PRESETS) },
+    'settings_shake_': { 域: SHAKE_STRENGTH_IDS, 参数表: Object.keys(SHAKE_STRENGTHS) },
+  };
+
   it('代入域不许是抄本：名册那份 == 运行期名册 == 参数表的键', () => {
+    expect(Object.keys(域出处).sort(), '域出处少了一族 —— 那一族的抄本没人核')
+      .toEqual(拼键名册.map((册) => 册.前缀).sort());
     for (const 册 of 拼键名册) {
+      const 出处 = 域出处[册.前缀];
       expect(册.域.join(','), `前缀「${册.前缀}」的域是手抄的 —— 插一行参数表面板选项跟着动，名册不会`)
-        .toBe(SSAO_QUALITY_NAMES.join(','));
+        .toBe(出处.域.join(','));
+      expect(出处.域.join(','), `「${册.前缀}」的名册与参数表已经不是同一张表了`)
+        .toBe(出处.参数表.join(','));
     }
-    expect(SSAO_QUALITY_NAMES.join(','), '名册与参数表已经不是同一张表了')
-      .toBe(Object.keys(SSAO_QUALITY_PRESETS).join(','));
   });
 });
 
@@ -98,14 +112,14 @@ describe('③ 拼键展开出来的键必须有定义', () => {
   const 展开 = [...动态接线键集()].sort();
 
   it('两张表逐枚都有这一格（缺一枚 = 面板那一档显示 [MISSING: …]）', () => {
-    expect(展开, '名册展开出来的键集不对').toEqual([
-      'settings_ssao_quality_high',
-      'settings_ssao_quality_low',
-      'settings_ssao_quality_medium',
-      'settings_ssao_quality_off',
-    ]);
+    // 从两族的出处现推（今天：SSAO 四档 + 震屏三档），不抄字面量；名册少一族/多一族都会红
+    const 应展开 = [
+      ...SSAO_QUALITY_NAMES.map((名) => `settings_ssao_quality_${名}`),
+      ...SHAKE_STRENGTH_IDS.map((名) => `settings_shake_${名}`),
+    ].sort();
+    expect(展开, '名册展开出来的键集不对（应当恰好两族：SSAO 四档 + 震屏三档）').toEqual(应展开);
     for (const 键 of 展开) {
-      expect(ZH_KEYS, `中文表没有「${键}」—— SSAO 下拉那一档会显示 [MISSING: ${键}]`).toContain(键);
+      expect(ZH_KEYS, `中文表没有「${键}」—— 面板那一档会显示 [MISSING: ${键}]`).toContain(键);
       expect(EN_KEYS, `英文表没有「${键}」—— 切英文时那一档显示 [MISSING: ${键}]`).toContain(键);
       expect(STRINGS_ZH[键].length, `「${键}」在中文表里是空串`).toBeGreaterThan(0);
       expect(STRINGS_EN[键].length, `「${键}」在英文表里是空串`).toBeGreaterThan(0);
@@ -119,7 +133,7 @@ describe('③ 拼键展开出来的键必须有定义', () => {
       '加了一档没配文案的假想档却什么都没缺 —— 展开闭合那条腿是摆设').toEqual(['settings_ssao_quality_ultra']);
   });
 
-  it('与死键账本的接缝：这四枚整名在读者范围里确实零出现，所以只能靠这一片接线', () => {
+  it('与死键账本的接缝：这几枚整名在读者范围里确实零出现，所以只能靠这一片接线', () => {
     const walk = (dir) => readdirSync(dir).flatMap((名) => {
       const p = join(dir, 名);
       return statSync(p).isDirectory() ? walk(p) : [p];

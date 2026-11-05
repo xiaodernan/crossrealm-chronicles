@@ -13,6 +13,7 @@ import { LANGUAGES, t } from '../engine/i18n.js';
 import { colorVisionOptions } from '../game/ColorVision.js';
 import { difficultyOptions } from '../game/Difficulty.js';
 import { LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
+import { normalizeShakeStrength, shakeStrengthOptions } from '../engine/shakeStrength.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -214,6 +215,22 @@ export class SettingsPanel {
       cv.value = s.get('colorVision');
       cv.addEventListener('change', () => {
         s.set('colorVision', cv.value);
+        s.applyToGame(this.game);
+      });
+    }
+    // 震屏强度（W-E3 切片58）：与色觉档同一套纪律 —— 选项从名册现推，落地只走 applyToGame。
+    // 三档（全开 / 减弱 / 关闭）而不是滑杆：这一格要的是"关得掉"，不是微调手感（那是 tuning 的事）。
+    const shakeSel = document.getElementById('set-shake');
+    if (shakeSel) {
+      for (const id of shakeStrengthOptions()) {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = t(`settings_shake_${id}`);
+        shakeSel.appendChild(opt);
+      }
+      shakeSel.value = s.get('shakeStrength');
+      shakeSel.addEventListener('change', () => {
+        s.set('shakeStrength', shakeSel.value);
         s.applyToGame(this.game);
       });
     }
@@ -427,6 +444,8 @@ export class SettingsPanel {
     set('set-shadow-quality', normalizeShadowQuality(d.shadowQuality));
     set('set-msaa', normalizeMsaaSamples(d.msaaSamples));
     set('set-ssao', normalizeSsaoQuality(d.ssaoQuality));
+    // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 padTuning 的回显同一纪律）
+    set('set-shake', normalizeShakeStrength(d.shakeStrength));
     /* 震动那一格问的是 `settings.get()`，与 `applyToGame` 用的是同一个判据（同一个取值口）：
      * 若这里改成看 `d.vibration === true`，那么一格存成 `null` 时会出现"框没勾、手柄还在震" ——
      * 显示与行为分家正是 B47 那一族的入口。 */

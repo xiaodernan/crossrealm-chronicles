@@ -22,6 +22,11 @@ export const STRINGS_ZH = Object.freeze({
   caption_pickup: '已拾取',
   caption_execution: '处决',
   settings_look_sensitivity: '镜头灵敏度',
+  // 震屏强度（W-E3 切片58）：`vibration` 管手柄马达，这一格管画面 —— 两路各一格
+  settings_shake: '震屏强度',
+  settings_shake_full: '全开',
+  settings_shake_reduced: '减弱',
+  settings_shake_off: '关闭',
   settings_graphics: '画面',
   settings_master_volume: '主音量',
   settings_sfx_volume: '音效音量',

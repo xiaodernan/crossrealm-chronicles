@@ -25,6 +25,11 @@ export class Shake {
     /** 自动演示与截图路径不需要抖动，由主循环每帧声明 */
     this.muted = false;
     /**
+     * 玩家档位倍率（W-E3 切片58）：1 = 出厂。乘在 `add()` 的强度上，不是乘在偏移上 ——
+     * trauma 记的是"这一下有多重"，乘在请求处，衰减曲线就与档位无关（关掉之后不会有残留尾巴）。
+     */
+    this.scale = 1;
+    /**
      * 同一次请求的第二个消费者（手柄震动），由 `core/Game.js` 在桥建好之后登记一次。
      * 没登记就是只有相机抖 —— 键盘玩家与不支持震动的设备走的都是这条路，不需要额外的开关。
      */
@@ -46,10 +51,21 @@ export class Shake {
     this.profile = profile === 'first' ? 'first' : 'third';
   }
 
+  /**
+   * 玩家档位（0~1）。换档当场清残留：从"全开"切到"关闭"时，正在衰减的那一下
+   * 不该继续晃完 —— 玩家按下去要的是立刻安静。
+   * 非法值按出厂 1 处理，不抛（存储是玩家可写的）。
+   */
+  setScale(scale) {
+    this.scale = Number.isFinite(scale) ? Math.min(1, Math.max(0, scale)) : 1;
+    if (this.scale === 0) this.reset();
+    return this;
+  }
+
   /** 请求一次震动：`intensity` 沿用各系统原有的小数值（轻击 0.03 ~ 蓄力法术 0.35） */
   add(intensity) {
     if (this.muted || !(intensity > 0)) return this;
-    this.trauma = Math.min(1, this.trauma + intensity / this.cfg.ref);
+    this.trauma = Math.min(1, this.trauma + (intensity * this.scale) / this.cfg.ref);
     // 相机先记账，马达后听：`muted` 那道闸对两者同源（自动演示要出干净的截图，也不该震手柄）
     this.impactSink?.(intensity);
     return this;

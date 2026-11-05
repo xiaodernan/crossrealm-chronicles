@@ -10,6 +10,7 @@ import { DEFAULT_COLOR_MODE, setColorVision } from '../game/ColorVision.js';
 import { DEFAULT_DIFFICULTY, setDifficulty } from '../game/Difficulty.js';
 import { DEFAULT_LOOK_SENSITIVITY, applyLookSensitivity, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
 import { VOLUME_DEFAULTS } from '../audio/AudioVolumes.js';
+import { DEFAULT_SHAKE_STRENGTH, shakeScaleOf } from '../engine/shakeStrength.js';
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
 const VERSION = 2;
@@ -106,6 +107,13 @@ const DEFAULTS = {
    * 打击反馈有两路输出，玩家只想关其中一路（例如有人在夜里玩）。
    */
   vibration: true,
+  /**
+   * 震屏强度（W-E3 切片58）：full / reduced / off 三档，名册在 `engine/shakeStrength.js`。
+   * 出厂 `full` = 倍率 1，逐帧与"没有这一格"相同。这一格补的是 `vibration` 的另一半：
+   * 那时能关的只有马达，画面抖动没有开关，而"看晃动会晕"的玩家要关的恰恰是画面。
+   * 脏值在 `shakeScaleOf` 里回落出厂，不抛。
+   */
+  shakeStrength: DEFAULT_SHAKE_STRENGTH,
   /**
    * 界面语言（W-D2 切片2）：'zh' / 'en' 两档，名册在 `engine/i18n.js` 的 TABLES。
    * 出厂中文 —— 这是游戏的主语言。存储里的脏值在 `applyToGame` 落地前经 `setLanguage`
@@ -298,6 +306,10 @@ export class SettingsManager {
     // （没有"场上已有的字幕"要重算，到期自然退场）。放在色觉档之后纯属分组方便，
     // 两者互不相干。
     game.captions?.setEnabled(this.get('captions') === true);
+    // 震屏强度（W-E3 切片58）：写入口只有这一处（与震动开关同一族）。生效时机：下一记
+    // `addShake` 即生效；换到 off 当场清残留（`setScale` 里 reset），不会"关了还在晃两秒"。
+    // 只乘相机 —— 马达那一半由 `vibration` 管，两格各管一路，互不代偿。
+    game.shake?.setScale(shakeScaleOf(this.get('shakeStrength')));
     // HUD 状态条按当前色觉档重写一次（W-D6 切片4）：写颜色的地方只有 ui/barTheme.js 一处，
     // HUD 只负责转发。放在 setColorVision 之后 —— 先落档位再取色，顺序反了会涂上一档的颜色。
     game.hud?.refreshBarColors?.();
