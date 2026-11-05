@@ -18,11 +18,11 @@ import { setLanguage } from '../src/engine/i18n.js';
 const 留灯标签 = '那盏留在石阶上的灯';
 const 熄灯标签 = '被你熄掉的锚点';
 
-function 开火(decisions) {
+function 开火(decisions, chapter = 5) {
   const calls = [];
   const journal = [];
   const game = {
-    quests: { chapter: 5, stats: { decisions } },
+    quests: { chapter, stats: { decisions } },
     dialog: {
       showChoices: (title, text, choices, meta) => calls.push({ title, text, choices, meta }),
       toast: vi.fn(),
@@ -75,6 +75,25 @@ describe('营火终局余波（W-E3 切片51）', () => {
     expect(labels).not.toContain(留灯标签);
     expect(labels).not.toContain(熄灯标签);
     expect(calls[0].choices).toHaveLength(12);
+  });
+
+  it('第一道章节门与第二道抉择门同时生效：第 1 章只列得到本章能问的，抉择那格照进', () => {
+    // 真机读数（2026-11-05，headless Chrome，页面内真调 restDialogue.start(hub)）：
+    // 第 1 章无抉择 **10 格**、留灯档 **11 格**、熄灯档 **11 格**、两句都做过 **12 格**；
+    // 切片51 的 12 格是**第 5 章**口径（两格章节门在低章被挡掉），两个数都对，别混读。
+    const 一章 = 开火(new Set(), 1);
+    const 一章标签 = 一章.calls[0].choices.map((c) => c.label);
+    expect(一章.calls[0].choices).toHaveLength(10);
+    expect(一章标签).not.toContain(留灯标签);
+    expect(一章标签).not.toContain(熄灯标签);
+
+    const 一章留灯 = 开火(new Set(['choice_final_keep']), 1);
+    expect(一章留灯.calls[0].choices).toHaveLength(11);
+    expect(一章留灯.calls[0].choices.map((c) => c.label)).toContain(留灯标签);
+
+    // 两道门各管各的：第 1 章挡掉两格、抉择加回一格，互不抵消（10 → 11 是 +1）
+    const 五章 = 开火(new Set());
+    expect(五章.calls[0].choices.length - 一章.calls[0].choices.length).toBe(2);
   });
 
   it('真表通过结构校验，且 requiresDecision 都是主线抉择旗标', () => {
