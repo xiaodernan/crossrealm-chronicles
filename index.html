@@ -110,6 +110,8 @@
         <label><input id="set-captions" type="checkbox" /> <span data-i18n="settings_captions">字幕</span></label>
         <!-- 震屏强度（W-E3 切片58）：选项由 SettingsPanel 从 shakeStrengthOptions() 现推 -->
         <label><span data-i18n="settings_shake">震屏强度</span> <select id="set-shake"></select></label>
+        <!-- 画面亮度（W-E3 切片61）：曝光倍率，min/max/step 由 SettingsPanel 从 BRIGHTNESS 灌进来；右侧回显百分比 -->
+        <label><span data-i18n="settings_brightness">画面亮度</span> <input id="set-brightness" type="range" /> <span id="set-brightness-value" class="setting-value"></span></label>
         <!-- 鼠标镜头灵敏度（W-D6 切片7）：倍率不是绝对值，min/max/step 由 SettingsPanel 从 LOOK_SENSITIVITY 灌进来 -->
         <label><span data-i18n="settings_look_sensitivity">镜头灵敏度</span> <input id="set-look-sensitivity" type="range" /></label>
         <label><span data-i18n="settings_master_volume">主音量</span> <input id="set-master-vol" type="range" min="0" max="1" step="0.05" /></label>

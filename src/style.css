@@ -1654,6 +1654,8 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 }
 
 .settings-box input[type="range"] { width: 100%; margin-top: 4px; }
+/* 滑杆右侧的回显（W-E3 切片61）：百分比贴在轨道右端，不与下一行挤在一起 */
+.settings-box .setting-value { display: block; margin-top: 2px; text-align: right; font-size: 0.78rem; color: #c9a962; }
 
 .keybind-list { max-height: 42vh; overflow-y: auto; text-align: left; }
 /* 键位表四列：一份轨道钉死（切片26）。

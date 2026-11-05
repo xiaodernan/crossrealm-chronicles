@@ -14,6 +14,7 @@ import { colorVisionOptions } from '../game/ColorVision.js';
 import { difficultyOptions } from '../game/Difficulty.js';
 import { LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
 import { normalizeShakeStrength, shakeStrengthOptions } from '../engine/shakeStrength.js';
+import { BRIGHTNESS, brightnessPercent, normalizeBrightness } from '../engine/brightness.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -234,6 +235,23 @@ export class SettingsPanel {
         s.applyToGame(this.game);
       });
     }
+    // 画面亮度（W-E3 切片61）：一根倍率滑杆，量程从 BRIGHTNESS 灌进来（与镜头灵敏度同一纪律），
+    // 落地只走 applyToGame —— 曝光基线的写权限在 Game.setExposureScale。
+    const bri = document.getElementById('set-brightness');
+    const briValue = document.getElementById('set-brightness-value');
+    if (bri) {
+      bri.min = String(BRIGHTNESS.min);
+      bri.max = String(BRIGHTNESS.max);
+      bri.step = String(BRIGHTNESS.step);
+      const 回显 = () => { if (briValue) briValue.textContent = brightnessPercent(s.get('brightness')); };
+      bri.value = String(normalizeBrightness(s.get('brightness')));
+      回显();
+      bri.addEventListener('input', () => {
+        s.set('brightness', normalizeBrightness(Number(bri.value)));
+        s.applyToGame(this.game);
+        回显();
+      });
+    }
     // SSAO 档（W-C4 切片5）：与抗锯齿档同一套纪律 —— 选项从名册现推（HTML 不抄第二份），
     // 落地只走 applyToGame（挂/摘/换档收口在 setSsaoQuality），面板不直接碰 composer
     const ssao = document.getElementById('set-ssao');
@@ -432,6 +450,11 @@ export class SettingsPanel {
     set('set-lod', d.enemyLodDistance);
     // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 padTuning 的回显同一纪律）
     set('set-look-sensitivity', normalizeLookSensitivity(d.lookSensitivity));
+    set('set-brightness', normalizeBrightness(d.brightness));
+    {
+      const briValue = document.getElementById('set-brightness-value');
+      if (briValue) briValue.textContent = brightnessPercent(d.brightness);
+    }
     const t = padTuning(d.padTuning);      // 回显的也是清洗过的值：脏档会显示成出厂那一格
     for (const key of Object.keys(PAD_TUNING)) set(padKnobId(key), t[key]);
     const sh = document.getElementById('set-shadows');

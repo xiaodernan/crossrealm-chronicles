@@ -22,6 +22,8 @@ export const STRINGS_ZH = Object.freeze({
   caption_pickup: '已拾取',
   caption_execution: '处决',
   settings_look_sensitivity: '镜头灵敏度',
+  // 画面亮度（W-E3 切片61）：曝光倍率，不是显示器亮度 —— 管的是游戏内明暗
+  settings_brightness: '画面亮度',
   // 震屏强度（W-E3 切片58）：`vibration` 管手柄马达，这一格管画面 —— 两路各一格
   settings_shake: '震屏强度',
   settings_shake_full: '全开',

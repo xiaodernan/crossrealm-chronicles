@@ -22,6 +22,7 @@ export const STRINGS_EN = Object.freeze({
   caption_pickup: 'Picked up',
   caption_execution: 'Execution',
   settings_look_sensitivity: 'Look Sensitivity',
+  settings_brightness: 'Brightness',
   settings_shake: 'Screen Shake',
   settings_shake_full: 'Full',
   settings_shake_reduced: 'Reduced',

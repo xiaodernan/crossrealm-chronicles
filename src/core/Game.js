@@ -16,6 +16,7 @@ import { WorldManager } from '../world/WorldManager.js';
 import { TimeController } from '../engine/Time.js';
 import { DEFAULT_SHADOW_QUALITY, applySunShadowQuality } from '../engine/shadowPolicy.js';
 import { DEFAULT_MSAA_SAMPLES, applyMsaaSamples } from '../engine/aaPolicy.js';
+import { DEFAULT_BRIGHTNESS, normalizeBrightness } from '../engine/brightness.js';
 import { shake } from '../engine/Shake.js';
 import { ZoneFog } from '../effects/ZoneFog.js';
 import { scheduler } from '../engine/Scheduler.js';
@@ -217,7 +218,11 @@ export class Game {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.28;
+    // 画面亮度（W-E3 切片61）：昼夜基线乘玩家倍率。出厂 1 = 与改前逐帧相同；
+    // 写入口只有下面的 setExposureScale 一处（面板 / 存档 / 开机都汇到它）。
+    this.daylight = 0.55;
+    this.exposureScale = DEFAULT_BRIGHTNESS;
+    this.setExposureScale(DEFAULT_BRIGHTNESS);
     // W-D2 之后 HUD 里有了第二、第三块 canvas（小地图 / 世界地图 / CG），
     // "铺满视口"这条规则必须只认这一块 —— 它靠 `.gl-canvas` 认领，不再靠元素类型。
     this.renderer.domElement.classList.add('gl-canvas');
@@ -1132,6 +1137,20 @@ export class Game {
     this.performance.updateSunShadow(this.sun, this.player.position, this.settings.get('shadows'));
   }
 
+  /**
+   * 画面亮度倍率（W-E3 切片61）—— `renderer.toneMappingExposure` 的唯一写入口。
+   *
+   * 真正的每帧落笔仍在 `updateDayNight`（曝光基线随昼夜走），这里写倍率并**当场重算一次**：
+   * 面板拖滑杆时若等下一帧才变，玩家会看到"松手才亮"的延迟感。
+   * 脏值在 `normalizeBrightness` 里夹回量程、不抛（存储是玩家可写的）。
+   */
+  setExposureScale(scale) {
+    this.exposureScale = normalizeBrightness(scale);
+    const daylight = this.daylight ?? 0.55;
+    this.renderer.toneMappingExposure = (1.08 + daylight * 0.38) * this.exposureScale;
+    return this;
+  }
+
   updateBloom() {
     const base = this.settings.get('bloomStrength');
     const zoneId = this.world.zoneId;
@@ -1145,7 +1164,9 @@ export class Game {
     const daylight = 0.55 + Math.max(0, Math.sin(this.timeOfDay * Math.PI * 2)) * 0.45;
     this.sun.intensity = 0.9 + daylight * 0.85;
     this.ambient.intensity = 0.58 + daylight * 0.22;
-    this.renderer.toneMappingExposure = 1.08 + daylight * 0.38;
+    // 曝光 = 昼夜基线 × 玩家倍率（W-E3 切片61）：基线仍归昼夜，倍率只改整体明暗
+    this.daylight = daylight;
+    this.renderer.toneMappingExposure = (1.08 + daylight * 0.38) * this.exposureScale;
     // 区域雾跟昼夜同一个算式源：明度由 daylight 调制（正午原色），跨区由
     // zoneFog 自己的指数平滑收敛 —— fog 的写权限在这里面，别处不许碰
     this.zoneFog.update(dt, this.world.zoneId, daylight);

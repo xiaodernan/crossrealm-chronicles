@@ -11,6 +11,7 @@ import { DEFAULT_DIFFICULTY, setDifficulty } from '../game/Difficulty.js';
 import { DEFAULT_LOOK_SENSITIVITY, applyLookSensitivity, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
 import { VOLUME_DEFAULTS } from '../audio/AudioVolumes.js';
 import { DEFAULT_SHAKE_STRENGTH, shakeScaleOf } from '../engine/shakeStrength.js';
+import { DEFAULT_BRIGHTNESS, normalizeBrightness } from '../engine/brightness.js';
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
 const VERSION = 2;
@@ -107,6 +108,12 @@ const DEFAULTS = {
    * 打击反馈有两路输出，玩家只想关其中一路（例如有人在夜里玩）。
    */
   vibration: true,
+  /**
+   * 画面亮度（W-E3 切片61）：曝光倍率 0.7~1.4，出厂 1 = 与"没有这一格"逐帧相同。
+   * 只乘在昼夜曝光基线上（见 `Game.setExposureScale`）—— 存绝对值会把昼夜曲线整条抹平。
+   * 脏值在 `normalizeBrightness` 里夹回量程，不抛。
+   */
+  brightness: DEFAULT_BRIGHTNESS,
   /**
    * 震屏强度（W-E3 切片58）：full / reduced / off 三档，名册在 `engine/shakeStrength.js`。
    * 出厂 `full` = 倍率 1，逐帧与"没有这一格"相同。这一格补的是 `vibration` 的另一半：
@@ -310,6 +317,9 @@ export class SettingsManager {
     // `addShake` 即生效；换到 off 当场清残留（`setScale` 里 reset），不会"关了还在晃两秒"。
     // 只乘相机 —— 马达那一半由 `vibration` 管，两格各管一路，互不代偿。
     game.shake?.setScale(shakeScaleOf(this.get('shakeStrength')));
+    // 画面亮度（W-E3 切片61）：写入口只有 `Game.setExposureScale` 一处，
+    // 它把倍率乘回昼夜基线；`normalizeBrightness` 对脏值夹回量程、不抛。
+    game.setExposureScale?.(normalizeBrightness(this.get('brightness')));
     // HUD 状态条按当前色觉档重写一次（W-D6 切片4）：写颜色的地方只有 ui/barTheme.js 一处，
     // HUD 只负责转发。放在 setColorVision 之后 —— 先落档位再取色，顺序反了会涂上一档的颜色。
     game.hud?.refreshBarColors?.();
