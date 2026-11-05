@@ -142,6 +142,41 @@ describe('死路房与四向 T 口（W-E3 切片53）', () => {
     }
   });
 
+  it('室内网格预算：每间房最多 4 件摆设，副本总数不许超过房间数 × 4', () => {
+    // 摆设是**独立 mesh**（共享几何但各算一次 draw call），所以模板层的件数就是副本的绘制预算。
+    // 改前/改后读数（10 座 × 8 颗种子 1896 间）：旧库 6959 件 → 新库 7119 件（+160，+2.3%，
+    // 平均每间 +0.08）—— 其中 +36 是 s 死路从宝藏房分出去（2→4 件），+124 是三种 T 口
+    // 从「宝藏房（只要 s 必开就贴合）」换成 T 口（2→3 件）。**顺带修掉一个既有毛病**：
+    // 改前 `enw`/`nsw` 这类房间会摆成宝藏房 —— 壁龛与宝箱立在路口中间。
+    const 件数 = new Map();
+    for (const [key, tpl] of Object.entries(ROOM_TEMPLATES)) {
+      const { 盒 } = collidersOf(tpl);
+      const g = new THREE.Group();
+      tpl.buildInterior(g, roomOf('probe', openDirsOf(tpl)), { wallH: 5, wallT: 0.6 }, { accent: 0xffffff }, {
+        wallMat: new THREE.MeshBasicMaterial(), accentMat: new THREE.MeshBasicMaterial(),
+        addCollider: () => {},
+      });
+      件数.set(key, g.children.length);
+      expect(g.children.length, `${key} 一件摆设都没有`).toBeGreaterThan(0);
+      expect(g.children.length, `${key} 摆了 ${g.children.length} 件 —— 超过每间 4 件的预算，要重读帧时`).toBeLessThanOrEqual(4);
+      // 碰撞体不许比网格还多（每个盒子都得对应一件看得见的东西，否则玩家会撞到空气）
+      expect(盒.length, `${key} 的碰撞体比网格多`).toBeLessThanOrEqual(g.children.length);
+    }
+    // 真读数：整座副本的室内件数不许超过「房间数 × 4」这条总闸
+    let 房 = 0; let 件 = 0;
+    for (const def of DUNGEON_DEFS) {
+      for (let i = 1; i <= 8; i++) {
+        const layout = ProceduralDungeonGenerator.generate(def, i * 7919);
+        ProceduralDungeonGenerator.buildGeometry(new THREE.Group(), layout, def);
+        for (const r of layout.rooms) {
+          if (r.isBossArena) continue;
+          房++; 件 += 件数.get(r.template?.key) ?? 0;
+        }
+      }
+    }
+    expect(房, '一间房都没扫到').toBeGreaterThan(1800);
+    expect(件, `室内件数 ${件} 超过 ${房} 间 × 4 的总闸`).toBeLessThanOrEqual(房 * 4);
+  });
   it('真迷宫读数：80 座里兜底房 0 间，八款新模板各至少被选中一次', () => {
     const 用量 = new Map();
     let 总 = 0;
