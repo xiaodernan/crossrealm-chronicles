@@ -1353,12 +1353,24 @@ body {
   display: none;
 }
 
+/*
+ * 对话框自己滚（W-E3 切片59）：390×844 下枢纽营火的「两句都做过」12 格把盒子撑到 925px，
+ * 而 #dialog-overlay 是 position:fixed 的 flex 居中容器 —— 盒子比视口高时**上下一起被裁**，
+ * 文档本身没有可滚高度（scrollHeight == clientHeight），于是「继续探索」那一键落在视口外、
+ * 玩家连滚都滚不到。max-height + overflow-y 让盒子成为滚动容器：选项再多也只是内部滚动，
+ * 焦点移到下方按钮时浏览器会把它带进可视区（原生行为，不需要额外代码）。
+ * 88vh 留出上下各 6% —— 盒子自带边框与阴影，贴边会显得被切掉。
+ * 静态契约由 tests/dialog-layout.test.js 钉住。
+ */
 .dialog-box {
   width: min(520px, 90vw);
   padding: 32px 36px;
   background: rgba(10, 10, 20, 0.95);
   border: 1px solid rgba(201, 169, 98, 0.55);
   border-radius: 8px;
+  max-height: 88vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .dialog-box h2 {
