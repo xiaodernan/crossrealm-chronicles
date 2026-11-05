@@ -11,6 +11,15 @@
  *
  * 这一条是静态腿：真机读数记在 §9。反向控制把旧规则还原，
  * 断言同一把尺必须点名 —— 防它退化成恒真。
+ *
+ * ## W-E3 切片54：整段滚动的契约（真机量过，静态钉住）
+ * 真机（headless Chrome，390×844，页面内真调 `EndCreditsDirector.play()`）读数：
+ * 动画在 **28000 ms** 走到 `finished`，此时字幕块底边 **−84.4 px**、最后一行底边
+ * **−91.4 px**、仍在屏上的行 **0** —— 即"整段滚完真的滚出去了"，不是滚到一半停住。
+ * 同一轮平板两档（768×1024 / 1024×768）块宽均 379.25、越界 0、多行段落 0。
+ *
+ * 这条契约里能静态守的三件事：时长 28s（改短就是"字幕没滚完就没了"）、
+ * `linear`（匀速，避免结尾突然加速）、`forwards`（滚完不许回弹到 `bottom: -20%` 重新露出）。
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -47,5 +56,27 @@ describe('片尾字幕布局（W-E3 切片50）', () => {
       '字幕仍是 nowrap',
       '字幕没有随视口收缩的 max-width',
     ]);
+  });
+
+  /** 关键帧：从视口下方 30% 滚到上方 110%（滚完全出屏） */
+  function 关键帧问题(源) {
+    const 问 = [];
+    // 关键帧里有嵌套花括号（`from { … } to { … }`），按**整行**取，别在第一个 `}` 停下
+    const m = 源.match(/@keyframes credits-roll \{([^\n]*)\}/);
+    if (!m) { 问.push('没有 credits-roll 关键帧'); return 问; }
+    if (!/from\s*\{\s*bottom:\s*-30%/.test(m[1])) 问.push('起点不是视口下方 30%');
+    if (!/to\s*\{\s*bottom:\s*110%/.test(m[1])) 问.push('终点没有滚出视口顶');
+    return 问;
+  }
+
+  it('整段滚动 28 秒匀速、滚完停在上面不回弹（真机 28000ms 走到 finished）', () => {
+    const 规则 = 字幕规则(样式);
+    expect(规则, '动画不是 28 秒 —— 改时长要重写真机读数').toContain('animation: credits-roll 28s linear forwards');
+    expect(关键帧问题(样式)).toEqual([]);
+    // 反向控制：去掉 forwards 必须点名（回弹会让字幕在结尾重新露出）
+    const 回弹 = 规则.replace('forwards', '');
+    const 问 = [];
+    if (!/forwards/.test(回弹)) 问.push('滚完没有 forwards，会回弹');
+    expect(问).toEqual(['滚完没有 forwards，会回弹']);
   });
 });
