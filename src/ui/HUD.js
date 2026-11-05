@@ -32,6 +32,57 @@ const EVENT_TAG = 'ui/HUD';
 export const MINIMAP_CSS_SIZE = 178;
 
 /**
+ * 小地图重绘节流（W-E3 切片64）。
+ *
+ * 改前 `update()` 每帧末尾无条件 `drawMinimap()`：网格、七座区圆、七条道路、
+ * Boss / POI / 营火 / 标记 / 任务箭头全部重画一遍，无头真机分系统计时读到
+ * **约 1.15ms/帧**（HUD 整格 1.30ms 的 88%），而玩家站着不动、地图内容一帧都没变。
+ *
+ * 现在三条闸：
+ * 1. **最短间隔** `MINIMAP_MIN_INTERVAL_MS` —— 15 Hz 足够"看方向"，雷达不是动画；
+ * 2. **内容签名**（`minimapSignature`）—— 位置按 0.25 米量化、朝向按 11.25° 量化，
+ *    签名没变就不画；站着不动时这一格归零；
+ * 3. **保活** `MINIMAP_KEEPALIVE_MS` —— 内容没变也每秒重画一次：换语言 / 换主题 /
+ *    别的系统改了标记不会派发小地图事件，保活是那条兜底。
+ *
+ * 强制刷新仍然可用：`drawMinimap()` 本身没变，任何需要立刻重画的调用方直接调它。
+ */
+export const MINIMAP_MIN_INTERVAL_MS = 66;
+export const MINIMAP_KEEPALIVE_MS = 1000;
+
+/** 位置量化步长（米）：0.25 米在 178px / 213 米的窗口上约 0.2 像素，肉眼分不出 */
+const MINIMAP_POS_QUANTUM_M = 0.25;
+
+/**
+ * "这一帧要画的东西变没变"的签名 —— 纯函数，便于门禁直接钉住量化与字段集。
+ *
+ * 字段就是这个雷达的全部动态输入：玩家位置（钉在中心）、朝向（那根针）、区域
+ * （区圆与底色）、副本当前房间（副本小地图换了张图）、任务路点、当前标记、自动演示
+ * （中心点的颜色与半径）。**没进签名的东西**（区圆 / 道路 / POI / 营火 / Boss）
+ * 都是建好就不再动的静态表。
+ */
+export function minimapSignature(game) {
+  const p = game?.player?.position;
+  const q = (v) => Math.round((v ?? 0) / MINIMAP_POS_QUANTUM_M) * MINIMAP_POS_QUANTUM_M;
+  const yawSteps = Math.round((game?.player?.yaw ?? 0) / (Math.PI / 16));
+  const wp = game?.quests?.getQuestWaypoint?.() ?? null;
+  const room = game?.dungeons?.active?.layout ? (game.dungeons.currentRoomId ?? '') : '';
+  return [
+    q(p?.x), q(p?.z), yawSteps,
+    game?.world?.zoneId ?? '', room,
+    wp ? q(wp.x) + ',' + q(wp.z) : '',
+    game?.mapMarkers?.activeId ?? '',
+    game?.autoPlayMode ? 1 : 0,
+  ].join('|');
+}
+
+/** 节流判据（纯函数）：签名变了且过了最短间隔，或到了保活时刻 */
+export function minimapRedrawDecision({ 现在, 上次, 签名, 上次签名 }) {
+  if (签名 !== 上次签名 && 现在 - 上次 >= MINIMAP_MIN_INTERVAL_MS) return true;
+  return 现在 - 上次 >= MINIMAP_KEEPALIVE_MS;
+}
+
+/**
  * 雷达窗口的世界跨度（米）。小地图不再是"把整张世界压进一枚针尖"——那是世界地图的活；
  * 它是玩家脚下这一圈：北朝上、玩家钉在中心，世界（区圆/道路/标记）从窗口里流过。
  * 窗口从 `MAP_SPAN_M` 推（世界的三分之一），改世界跨度它跟着动。178px 盒子对 213 米
@@ -95,6 +146,9 @@ export class HUD {
     this.questPanel = document.getElementById('quest-panel');
     this.bossBarWrap = document.getElementById('boss-bar-wrap');
     this.minimapVisible = true;
+    // 小地图节流状态（切片64）：初值让第一帧必定画一次
+    this._minimapAt = -Infinity;
+    this._minimapSig = null;
     this.journalOpen = false;
     this.journalTab = 'all';
     this.killCount = 0;
@@ -881,7 +935,22 @@ buildHUD() {
       arrowEl.classList.add('hidden');
     }
 
+    this.maybeDrawMinimap();
+  }
+
+  /**
+   * 按节流规则决定这一帧画不画小地图（切片64）。返回 true = 真的重画了。
+   * 时间由调用方递（测试不需要装全局时钟）；缺省取 `performance.now()`。
+   */
+  maybeDrawMinimap(现在 = performance.now()) {
+    if (!this.minimapVisible || !this.minimapCanvas) return false;
+    const 签名 = minimapSignature(this.game);
+    const 上次 = this._minimapAt ?? -Infinity;
+    if (!minimapRedrawDecision({ 现在, 上次, 签名, 上次签名: this._minimapSig })) return false;
+    this._minimapAt = 现在;
+    this._minimapSig = 签名;
     this.drawMinimap();
+    return true;
   }
 
   _dirTo(px, pz, tx, tz, label) {
