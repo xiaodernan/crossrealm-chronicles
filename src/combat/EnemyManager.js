@@ -139,7 +139,7 @@ export class EnemyManager {
    * （`Enemy.dispose()` 在 M2 第一切片就为这条准备好了）。
    */
   despawn(enemy) {
-    this.squad.release(enemy);
+    this.squad.drop(enemy);
     const i = this.enemies.indexOf(enemy);
     if (i >= 0) this.enemies.splice(i, 1);
     this._summons.delete(enemy);

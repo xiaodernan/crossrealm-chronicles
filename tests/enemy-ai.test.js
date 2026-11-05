@@ -154,15 +154,23 @@ describe('围攻名额与分离', () => {
   });
 
   it('名额是租约：持有者失联会被超时回收，续期则不会被踢', () => {
+    // 切片9 的新契约：坑来自**名单**（`note` 报名 → 轮转补座），不再是"账本还没满"这一格容量读数。
+    // 于是这两格都必须先报名再问 —— 直接 `claim` 一只没报名的，读的就不止 claim 自身了（#45）。
     const squad = new SquadController(1, 1.0);
     const a = { name: 'a' };
     const b = { name: 'b' };
+    squad.note(a, true);
+    squad.note(b, true);
+    expect(squad.roomFor(a), '一格坑按名次给第一个报名的').toBe(true);
+    expect(squad.roomFor(b), '坑被占着：B 只能排队，不许跟着一起冲进来').toBe(false);
     expect(squad.claim(a)).toBe(true);
-    expect(squad.claim(b)).toBe(false);
+    expect(squad.claim(b), '没轮到的不许出手：走位与出手读同一张表').toBe(false);
     expect(squad.tick(0.6)).toBe(0);
     expect(squad.claim(a)).toBe(true);             // 活跃持有者每帧续期
     expect(squad.tick(1.1)).toBe(1);
     expect(squad.busy).toBe(0);
+    expect(squad.roomFor(b), '租约超时让位：排队的下一位补上').toBe(true);
+    expect(squad.roomFor(a), '失联的那只排回队尾，不再认得自己的坑').toBe(false);
     expect(squad.claim(b)).toBe(true);
   });
 
@@ -266,12 +274,18 @@ describe('围攻名额与分离', () => {
     const 序列 = list.map(() => []);
     const 起手 = list.map(() => 0);
     const 上次 = list.map(() => null);
+    // 坑的翻页次数（#45）：读数只该随事件翻，一轮围攻是"一进一出"两页
+    const 坑翻 = list.map(() => 0);
+    const 上坑 = list.map(() => null);
     for (let i = 0; i < Math.round(14 / DT); i++) {
       m.update(DT, player, ref, null, null);
       list.forEach((e, k) => {
         序列[k].push(e.state);
         if (e.state === 'windup' && 上次[k] !== 'windup') 起手[k] += 1;
         上次[k] = e.state;
+        const 坑 = e.squad.roomFor(e);
+        if (上坑[k] !== null && 坑 !== 上坑[k]) 坑翻[k] += 1;
+        上坑[k] = 坑;
       });
     }
     const 尺 = 序列.map(抖动度);
@@ -279,8 +293,29 @@ describe('围攻名额与分离', () => {
     return {
       连换: 尺.reduce((s, x) => s + x.同窗连换, 0),
       起手: 起手.reduce((a, b) => a + b, 0),
-      最短: 有链.length ? Math.min(...有链.map((x) => x.同窗最短)) : Infinity,
+      每只起手: 起手,
+      每只坑翻: 坑翻,
+      中间最短: 有链.length ? Math.min(...有链.map((x) => x.中间最短 || Infinity)) : Infinity,
     };
+  }
+
+  /**
+   * 九组（三场景 × 三种子）一次跑完，几条腿共用同一批读数。
+   *
+   * 每组 840 帧，重跑一遍等于把这一节的时间翻倍；更要紧的是**同一批读数**才能互相对得上账 ——
+   * 两条腿各跑各的，随机流一旦被别的用例插队，两条腿看到的就不是同一个世界。
+   */
+  const 读数Cache = new Map();
+  function 九组读数(band) {
+    const key = String(band);
+    if (!读数Cache.has(key)) {
+      const 出 = [];
+      for (const 名 of Object.keys(场景表)) {
+        for (let 组 = 0; 组 < 3; 组++) 出.push({ 名, 组, ...围攻读数(名, band, 组) });
+      }
+      读数Cache.set(key, 出);
+    }
+    return 读数Cache.get(key);
   }
 
   it('死区是迟滞：贴过脸之后被顶出半米不重冲，从未贴过脸的照旧全速扑（含 band=0 反向对照）', () => {
@@ -330,47 +365,120 @@ describe('围攻名额与分离', () => {
     }
     const 账 = 明细.join(' | ');
     expect(连换有, `死区没压住同窗连换：${账}`).toBeLessThan(连换无);
-    // 读数交账（2026-11-05 钉种子量出来的两臂合计，`.tmp-20261031-s25/s11-交账.txt`）：
-    // 这一格钉的是"改了调校就要重新看一眼"，有意重调时跟着改这里并说明是哪一档变了。
-    // 逐组（连换 有/无 · 起手 有/无）：三只两坑 6/27·13/13，8/20·13/13，9/53·11/11；
-    // 六只推进 55/59·23/23，44/65·20/20，50/89·20/20；六只贴脸 65/99·23/22，47/76·18/19，49/64·19/19。
-    // 起手两臂互有高低（合计同为 160）：死区换来的是走位不再抽搐，不是少打或多打。
+    // 读数交账（2026-11-05 重跑，切片9 把名额改成轮转之后；`.tmp-20261031-s25/wb7-9-ab2-band06.log`
+    // 与 `wb7-9-ab2-band0.log`）：这一格钉的是"改了调校就要重新看一眼"，有意重调时跟着改这里并说明是哪一档变了。
+    // 逐组（连换 有/无 · 起手 有/无）：三只两坑 4/15·13/13，6/6·11/11，6/18·10/10；
+    // 六只推进 4/4·19/19，6/6·18/18，8/8·17/17；六只贴脸 9/9·18/18，8/8·13/13，9/9·16/16。
+    // **只有三只两坑两臂不同**：六只的两组逐字节相同 —— 轮转把死区原来管的那部分人潮拥挤接过去了，
+    // 于是死区现在只在"坑比人少得不多"的场景里还有活干。起手两臂完全相同：改的是走位不是火力。
     expect([连换有, 连换无, 起手有, 起手无], `聚合读数漂了：${账}`)
-      .toEqual([333, 552, 160, 160]);
+      .toEqual([60, 83, 135, 135]);
     // 出手不许被砍。容差取"每组至多一次"：一次起手是一个离散事件，18 组实测两臂最多差 1
     expect(起手有, `死区把该出手的也拦住了：${账}`).toBeGreaterThanOrEqual(起手无 - Object.keys(场景表).length * 组数);
     expect(起手无, `死区反过来把出手抬高了（${起手有} → ${起手无}）？两臂必须同量级`).toBeGreaterThanOrEqual(起手有 - Object.keys(场景表).length * 组数);
   });
 
-  it('欠账腿（#45）：六只围殴仍有短于一次步态淡化的档 —— 这条红了就是名额排队做好了', () => {
+  /**
+   * #45 的正腿（替换掉原来那条欠账腿）。
+   *
+   * 判据从 `最短` 换成 `中间最短` **不是放宽**：一条走位链的首尾两档是被 windup/idle 切开的，
+   * 画面是"跨一步就挥出去"，那是到了；只有左右两边都还是走位态的**中间档**才是走到一半又翻回来。
+   * 这条换法的证据不靠回退 `src/`（#40 的纪律）：拿 `.tmp-20261031-s25/wb7-9-metric-ab.log` 里
+   * **已记录的 形态 串**重新打分档 —— 改前 45 只有 29 只的中间档短于地板（最短 1 帧），
+   * 改后 0 只（最短 14 帧）。同一个尺子，同一个世界，两个答案。
+   */
+  it('轮转之后没有打不进淡化的中间档：九组每档 ≥ 一次步态淡化（含 band=0 反向对照）', () => {
     const 地板 = 走位地板帧(DT);
     expect(地板, '一步淡化不足一帧：尺子自己失效，这条腿在空转').toBeGreaterThan(1);
-    const 读 = 围攻读数('六只贴脸', 0.6, 0);
-    expect(读.最短, `最短档 ${读.最短} 已经 ≥ 地板 ${地板} 帧：#45 做完了，删掉这条腿并回填 §9`)
+    for (const 读 of 九组读数(AI.pursueBand)) {
+      expect(读.中间最短,
+        `${读.名}#${读.组} 有一段 ${读.中间最短} 帧的中间档 < 地板 ${地板} 帧：名额又变回每帧可翻的读数了（#45）`)
+        .toBeGreaterThanOrEqual(地板);
+    }
+    // 反向对照（#36）：band 写回 0，三只两坑立刻回到原地对流 —— 说明这把尺子真的在量这件事
+    const 无 = 九组读数(0).map((x) => x.中间最短);
+    expect(Math.min(...无),
+      `band=0 的九组中间档也全部 ≥ 地板 ${地板} ⇒ 这一格根本没有读者（同批读数实测最短 ${Math.min(...无)}）`)
       .toBeLessThan(地板);
   });
 
-  it('roomFor 是只读的名额读数：不续期、持有者永远认、Boss 不占坑', () => {
+  /**
+   * 名额读数的**翻页代数**：一轮围攻是"一进一出"，所以每只每起手至多两页，
+   * 加上窗口边界截断留给每只至多一页（起手那一刻的坑态没被记到）。
+   *
+   * 这条把 #45 的成因钉死在源码形状上：改前 `roomFor` 读的是 `leases.size < slots`，一枚**任何
+   * 同伴 claim 都会改**的容量读数 ⇒ 六只推进#0 实测每只坑翻合计 156 页，上限 23×2+6 = 52
+   * （`.tmp-20261031-s25/wb7-9-census-before.log`）。改后同一组 36 页 vs 上限 19×2+6 = 44。
+   */
+  it('坑只随事件翻页：每组 每只坑翻合计 ≤ 起手×2 + 只数（旧容量读数在这一格必红）', () => {
+    for (const 读 of 九组读数(AI.pursueBand)) {
+      const [n] = 场景表[读.名];
+      const 上限 = 读.起手 * 2 + n;
+      const 实 = 读.每只坑翻.reduce((a, b) => a + b, 0);
+      expect(实, `${读.名}#${读.组} 坑翻 ${实} 页 > 上限 ${上限} 页（起手 ${读.起手} × 2 + 只数 ${n}，` +
+        `逐只 ${读.每只坑翻.join(',')}）：名额被写成邻居能改的容量读数 = #45 的成因`)
+        .toBeLessThanOrEqual(上限);
+    }
+  });
+
+  /** 轮转的公平性：读数不能只说明"不抖了"，还得说明没人被排到永远补不上坑的位置 */
+  it('排队不看运气：六只的每组每只都出过手，最多与最少只差 2 次', () => {
+    for (const 读 of 九组读数(AI.pursueBand)) {
+      if (场景表[读.名][0] < 6) continue;
+      for (const 次 of 读.每只起手) {
+        expect(次, `${读.名}#${读.组} 有一只全程 0 次起手（逐只 ${读.每只起手.join(',')}）：轮转把它排在补不上坑的位置`)
+          .toBeGreaterThan(0);
+      }
+      const 差 = Math.max(...读.每只起手) - Math.min(...读.每只起手);
+      expect(差, `${读.名}#${读.组} 每只起手 ${读.每只起手.join(',')} 极差 ${差}：轮转退化成"排队看运气"（实测极差 ≤ 2）`)
+        .toBeLessThanOrEqual(2);
+    }
+  });
+
+  it('名单是轮转唯一认的依据：报名幂等、退报当场交座、坐着不打超时让位', () => {
+    const squad = new SquadController(2, 1.0);
+    const a = { name: 'a' }; const b = { name: 'b' }; const c = { name: 'c' };
+    squad.note(a, true); squad.note(b, true); squad.note(c, true);
+    expect(squad.line.length, '三只报名就在名单里三只').toBe(3);
+    expect(squad.seated, '坑只有两个：第三只能排队，不许一起挤进来').toBe(2);
+    squad.note(a, true); squad.note(a, true);
+    expect([squad.line.length, squad.line[0]], '重复报名重排了名次 = 回到"每帧抢"')
+      .toEqual([3, a]);
+    squad.note(b, false);
+    expect(squad.roomFor(c), '脱战的那只当场交座：老实现要等租约超时才撒手，中间那几秒整群少一个进攻位')
+      .toBe(true);
+    expect(squad.line.indexOf(b), '退报彻底退出名单：留在里面会让它白占一个轮次').toBe(-1);
+    // 坐着却出手不了（够不着、被溜出锥面、冷却没完）超过一个回收时长：让给排队的下一位
+    const 单坑 = new SquadController(1, 1.0);
+    const x = { name: 'x' }; const y = { name: 'y' };
+    单坑.note(x, true); 单坑.note(y, true);
+    expect(单坑.tick(1.1), '让位不是租约回收：这两件事在判据里不是一格，别混成一个数').toBe(0);
+    expect([单坑.roomFor(x), 单坑.roomFor(y)], '坐着不打超时让位，下一位当场补上').toEqual([false, true]);
+  });
+
+  it('roomFor 是只读的名额读数：不续期、没报名的不认、Boss 不占坑', () => {
     const squad = new SquadController(2, 1.0);
     const a = { name: 'a' };
     const b = { name: 'b' };
     const boss = { name: 'boss', isBoss: true };
-    expect(squad.claim(a)).toBe(true);
-    expect(squad.claim(b)).toBe(true);
+    squad.note(a, true);
+    squad.note(b, true);
     expect(squad.roomFor(boss), 'Boss 不该被自己的随从挡住').toBe(true);
     expect(squad.claim(boss)).toBe(true);
-    expect(squad.busy, 'Boss 拿到的是资格，不是账本上的一格').toBe(2);
-    expect(squad.roomFor(a), '持有者永远认得自己的坑：否则它会被自己的读数踢出去').toBe(true);
-    for (let i = 0; i < 5; i++) expect(squad.roomFor(boss)).toBe(true);
-    expect(squad.tick(1.1), 'roomFor 读得再多也不能把租约读成活期').toBe(2);
-    expect(squad.roomFor({ name: 'c' })).toBe(true);
+    expect(squad.busy, 'Boss 拿到的是资格，不是账本上的一格').toBe(0);
+    for (let i = 0; i < 5; i++) expect(squad.roomFor(a)).toBe(true);
+    expect(squad.busy, 'roomFor 读得再多也不能把租约读成活期：走位判定每帧都要问它').toBe(0);
+    expect(squad.roomFor({ name: 'c' }), '没报名的敌人没有座：问一个陌生人不能答"有空位你来"').toBe(false);
     expect(squad.roomFor(null), '没有敌人就没有名额可问，别把空对象当成持有者').toBe(false);
+    expect(squad.tick(1.1), '两只都只读不 claim：没有租约可回收').toBe(0);
   });
 
   it('接线：停脚线只有一份、等待设定点走 holdRadius、名额判据不抄第二份', () => {
     const SRC = join(process.cwd(), 'src');
     const fsm = readFileSync(join(SRC, 'ai', 'EnemyFSM.js'), 'utf8');
     const squad = readFileSync(join(SRC, 'ai', 'Squad.js'), 'utf8');
+    const enemy = readFileSync(join(SRC, 'combat', 'Enemy.js'), 'utf8');
+    const mgr = readFileSync(join(SRC, 'combat', 'EnemyManager.js'), 'utf8');
     expect(fsm, '追击的判据不再同时带死区与名额读数：#33 的两半都退化了').toMatch(
       /\['pursue',[\s\S]*?pursueCutoff\(e\)[\s\S]*?slotOpenFor\(e\)\]/);
     expect(fsm, 'orbit 的设定点必须走 holdRadius：两处各写一遍就是这两条线重合的成因')
@@ -382,6 +490,15 @@ describe('围攻名额与分离', () => {
     expect(claim体, '`claim` 必须走 `roomFor`：坑满没满与谁是 Boss 只许判一次')
       .toContain('this.roomFor(enemy)');
     expect(claim体, '`claim` 里自己又数了一遍账 ⇒ 两处判据分叉').not.toMatch(/leases\.size\s*</);
+    const room体 = squad.match(/roomFor\(enemy\) \{[\s\S]*?\n {2}\}/)?.[0] ?? '';
+    expect(room体, '找不到 `roomFor` 的函数体：走位判据的读者还在，源主搬家了').not.toBe('');
+    expect(room体, '名额读数回到"账本还没满"这一格容量 ⇒ #45 的振荡原样回来（邻居每 claim 一次它就翻页）')
+      .not.toMatch(/leases\.size\s*</);
+    expect(enemy, '每帧不进名单，轮转就没有依据可读（#45 的坑只随名单翻页）')
+      .toMatch(/this\.squad\?\.note\(this,/);
+    expect(enemy, '死亡必须**退出名单**，只 release 会让尸体占着一个轮次')
+      .toMatch(/die\(\) \{[\s\S]*?this\.squad\?\.(drop)\(this\)/);
+    expect(mgr, '移除同样要退出名单：同上').toMatch(/despawn\(enemy\) \{[\s\S]*?this\.squad\.drop\(enemy\)/);
   });
 });
 

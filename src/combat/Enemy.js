@@ -890,8 +890,8 @@ export class Enemy {
     this.setWish(0, 0);
     // 倒地不该继续滑行：冲量与连段一样，不跨生命保留
     this.clearKnockback();
-    // 死亡必须交出进攻名额，否则一个占位者能让整群敌人永远不再起手
-    this.squad?.release(this);
+    // 死亡必须退出围攻：交出进攻名额与坑、离开名单，否则一个占位者能让整群敌人永远不再起手
+    this.squad?.drop(this);
     // 连段不跨生命：重生后的第一招要重新选，不能接着打完前世的一半
     this.endMove();
     this.deathTimer = this.respawnTime;
@@ -1034,6 +1034,8 @@ export class Enemy {
     ctx.target = playerPos;
     ctx.playerRef = playerRef;
     this.sense.update(dt, playerPos, ctx.collision);
+    // 报名进围攻轮转（`Squad.note`）：坑归谁只随名单与事件翻页，不再每帧现抢（#45）
+    this.squad?.note(this, this.sense.alerted === true);
     ctx.canStrike = tryClaimStrikeSlot(this, this.squad);
 
     // 意图每帧重新决定：状态没写就代表"这一帧不动"，不会残留上一态的冲量

@@ -23,6 +23,10 @@ export function 分段(序列) {
  * 链里换 1 次是正常交接（贴进去就出手，那一帧 'run' 立刻被 windup 的淡化盖掉）；
  * **换 ≥2 次**才是同一条回路来回 —— 玩家看到的抖是这个签名，不是换档总数。
  * `idle` 与承诺态（windup/strike/recover/stagger）都断开链：第三套动作插在中间说明它已被切开。
+ *
+ * 链里**首尾两档**不算抖：它们是被一次出手或一个承诺态切开的，画面是"跨一步就挥出去"，
+ * 不是原地对流。只有**中间档**（左边和右边都还是走位态）才是"走到一半又翻回来"——
+ * #45 判的就是这一档短不短得过一次淡化。
  */
 export function 抖动度(序列) {
   const 段 = 分段(序列);
@@ -36,18 +40,20 @@ export function 抖动度(序列) {
     链.push(s);
   }
   if (链.length > 1) 链们.push(链);
-  let 同窗连换 = 0; let 同窗最短 = Infinity;
+  let 同窗连换 = 0; let 同窗最短 = Infinity; let 中间最短 = Infinity;
   for (const 串 of 链们) {
     const 连 = 串.length - 1;
     if (连 < 2) continue;                        // 单次交接不记账
     同窗连换 = Math.max(同窗连换, 连);
     for (const s of 串) 同窗最短 = Math.min(同窗最短, s.长);
+    for (const s of 串.slice(1, -1)) 中间最短 = Math.min(中间最短, s.长);
   }
   return {
     段数: 段.length,
     pursueOrbit往返: 换.length,
     同窗连换,
     同窗最短: 同窗最短 === Infinity ? 0 : 同窗最短,
+    中间最短: 中间最短 === Infinity ? 0 : 中间最短,
     最短段: 段长.length ? Math.min(...段长) : 0,
     中位段: 段长.length ? [...段长].sort((a, b) => a - b)[Math.floor(段长.length / 2)] : 0,
     形态: 段.slice(0, 14).map((s) => `${s.态}:${s.长}`).join(' '),

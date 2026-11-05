@@ -482,6 +482,11 @@ describe('B69：站位诉求（`standoff`）不让近战敌人的远招被自己
   it('诉求带之外照旧先贴脸：甜点位与带子之间那一小段仍然是 pursue', () => {
     const { e } = duel({ type: 'crawler', x: 5, z: 0, ai: NEVER_LEAVES });
     e.sense.alerted = true;
+    // 直接调 `resolveEnemyState` 绕过了 `Enemy._advance`，于是这一帧没人替它报名。
+    // #45 之后"能不能压进内圈"读的是围攻名单上的座位（`slotOpenFor` → `Squad.roomFor`），
+    // 没报名的陌生人不给座 —— 不 note 就等于把它锁在 orbit，下面两条 pursue 必红。
+    e.squad.note(e, true);
+    expect(e.squad.roomFor(e), '一格独苗必有座：否则这条用例测的是名额，不是带子').toBe(true);
     expect(e.holdRange, '爬兽的甜点位（近战那两招定的）').toBeCloseTo(3.3, 5);
     e.attackCooldown = 0;
     e.sense.dist = 5;
