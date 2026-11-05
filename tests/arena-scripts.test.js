@@ -94,7 +94,7 @@ describe('脚本表自证', () => {
     expect(() => assertArenaScript({ x: [p2, { ...p3, phase: 2 }] })).toThrow(/entry/);
   });
 
-  it('入场标记集钉死：十八枚 entry 的落点（动它必须来这里改，不许悄悄漂）', () => {
+  it('入场标记集钉死：十九枚 entry 的落点（动它必须来这里改，不许悄悄漂）', () => {
     const marks = Object.entries(BOSS_ARENA_SCRIPTS).flatMap(([id, script]) =>
       script.flatMap((e, i) => (e.entry === true ? [`${id}[${i}]:${e.move}@p${e.phase}`] : [])));
     expect(marks).toEqual([
@@ -160,6 +160,28 @@ describe('脚本表自证', () => {
       expect(JSON.stringify(script),
         `副本 "${id}" 的编排与 default 兜底完全一致——等于没给这座守钥者写专属遭遇`).not.toBe(def);
     }
+  });
+
+  /**
+   * W-B8 结账（W-E3 切片60）：上面两条腿只管"名册 → 表"，表里多出来的脚本没人查 ——
+   * 改过名的 Boss、删掉的副本会留下一页永远读不到的死脚本，读起来像"还有一场仗"。
+   * 这里把两个方向补齐，表与名册必须**互为镜像**。
+   */
+  it('表里不许有名册外的脚本（改过名 / 删掉的 Boss 留下的死页）', () => {
+    const 名册 = ['default', ...BOSS_IDS, ...DUNGEON_IDS.map((id) => `dungeon-${id}`)];
+    const 表里 = Object.keys(BOSS_ARENA_SCRIPTS);
+    expect(表里.slice().sort(), '这些脚本没有任何 Boss 会读到 —— 要么补名册，要么删掉')
+      .toEqual(名册.slice().sort());
+    // 反向控制：凭空塞一页必须被点名（这一条防上面的比对退化成恒真）
+    expect([...表里, 'dungeon-removed'].filter((k) => !名册.includes(k))).toEqual(['dungeon-removed']);
+  });
+
+  it('ARENA_MOVES 的每一枚都有人用（死招式：名册里有、脚本里从不点）', () => {
+    const 用过 = new Set(Object.values(BOSS_ARENA_SCRIPTS).flat().map((e) => e.move));
+    const 从未 = Object.keys(ARENA_MOVES).filter((m) => !用过.has(m));
+    expect(从未, '这些场地招没有任何脚本会点 —— 加过的圈不会出现在任何一场 Boss 战里').toEqual([]);
+    // 反向控制：多一枚假招式必须被点名
+    expect([...Object.keys(ARENA_MOVES), 'ghostMove'].filter((m) => !用过.has(m))).toEqual(['ghostMove']);
   });
 
   it('EnemyManager 生成的每个 bossId 都被表点了名', () => {
