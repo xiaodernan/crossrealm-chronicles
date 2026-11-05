@@ -344,12 +344,13 @@ describe('房间模板层的几何契约与可重现性（B80/B81/B82）', () =>
       expect(bad.slice(0, 5)).toEqual([]);
     });
 
-    it('六种模板各有一间按规则造出来的房点名拿到它', () => {
+    it('每种形状都有一款按规则造出来的房点名拿到它', () => {
       // 四门路口在真迷宫里 71600 间才出 16 间（`.tmp-20261004/wb10s4e-port-degree.mjs`），
       // 所以可达性用**构造**而不是扫种子：按模板自己的 required/solid 造一间一定贴合的房。
       const 拿到 = new Map();
-      拿到.set('chamber:square', assignOnly(roomOf('r1', ['n'])));          // 只北门，谁都不要实墙/必开门 → 方厅兜底
-      拿到.set('treasure:small', assignOnly(roomOf('r2', ['s'])));          // 只南门 → 宝藏房（必开门 1 > 方厅 0）
+      // 只北门：W-E3 切片53 之前这里落方厅（谁都不要实墙/必开门），现在由死路房接住
+      拿到.set('deadend:n', assignOnly(roomOf('r1', ['n'])));
+
       拿到.set('junction:tee', assignOnly(roomOf('r3', ['n', 'e', 's'])));  // 西墙实着，壁龛贴它
       拿到.set('junction:cross', assignOnly(roomOf('r4', ['n', 'e', 's', 'w'])));
       // hall 与 lore 都要求"南北开门、其余不限/为墙"，必开门数同为 2 → 并列，由种子定
@@ -364,9 +365,20 @@ describe('房间模板层的几何契约与可重现性（B80/B81/B82）', () =>
         .toEqual(['hall:straight', 'lore:double-door']);
 
       for (const [key, got] of 拿到) expect(got?.key, `${key} 没被拿到`).toBe(key);
-      // 单候选时不该靠运气：兜底那一档确实只有方厅贴合
-      const 候选 = Object.values(ROOM_TEMPLATES).filter((t) => templateFitsRoom(t, roomOf('r1', ['n'])));
-      expect(候选.map((t) => t.key)).toEqual(['chamber:square']);
+      // 只南门那间房是**真并列**：`treasure:small`（必开门 1）与 `deadend:s`（必开门 1）都贴合，
+      // 由种子定 —— 两个都要在读数里出现，只出一个说明某个模板被另一个挤死了
+      const 南门 = new Set();
+      for (let s = 1; s <= 24; s++) 南门.add(assignOnly(roomOf('r2', ['s']), s)?.key);
+      expect([...南门].sort()).toEqual(['deadend:s', 'treasure:small']);
+      // 单候选时不该靠运气：只北门那间房今天**只有**死路房是"必开门 1"的那一款
+      const 候选 = Object.values(ROOM_TEMPLATES)
+        .filter((t) => templateFitsRoom(t, roomOf('r1', ['n'])) && requiredPortCount(t) === 1);
+      expect(候选.map((t) => t.key)).toEqual(['deadend:n']);
+      // 方厅没有退场，只是退成了**安全网**：零开口房（真迷宫里不会长出来）仍然只有它贴合，
+      // 分配不会因为"没有任何模板贴合"而当场抛（`_assignRoomTemplates` 那条 throw 还在）
+      const 零开口 = Object.values(ROOM_TEMPLATES).filter((t) => templateFitsRoom(t, roomOf('r1b', [])));
+      expect(零开口.map((t) => t.key)).toEqual(['chamber:square']);
+      expect(assignOnly(roomOf('r1b', [])).key).toBe('chamber:square');
     });
 
     it('尺寸不贴合的房间当场抛错，消息点名房间与它的尺寸', () => {
@@ -408,12 +420,14 @@ describe('房间模板层的几何契约与可重现性（B80/B81/B82）', () =>
   });
 
   describe('④ B82 的账：零消费者的 API 与只写不读的字段不再存在', () => {
-    it('注册表恰好是这十一款模板（切片6 补了转角四款与东西向走廊一款）', () => {
+    it('注册表恰好是这十八款模板（切片6 转角四款 + 东西向走廊；W-E3 切片53 死路四款 + T 口另三向）', () => {
       // 这一条钉的是"库里有哪些款"这件事本身 —— 加一款就要在这里加一个名字，
       // 顺带逼着加的人回答"它在迷宫里什么时候会被选中"（见 ⑤ 那两条读数门禁）。
       expect(Object.keys(ROOM_TEMPLATES).sort()).toEqual([
         'chamber:square', 'corner:en', 'corner:es', 'corner:nw', 'corner:sw',
-        'hall:crosswise', 'hall:straight', 'junction:cross', 'junction:tee',
+        'deadend:e', 'deadend:n', 'deadend:s', 'deadend:w',
+        'hall:crosswise', 'hall:straight', 'junction:cross',
+        'junction:tee', 'junction:tee-e', 'junction:tee-n', 'junction:tee-s',
         'lore:double-door', 'treasure:small',
       ]);
     });
@@ -447,7 +461,7 @@ describe('房间模板层的几何契约与可重现性（B80/B81/B82）', () =>
       })).toThrow(/既是门又必须是墙|不可能/);
 
       // 三个拒绝都不该留下半个模板
-      expect(Object.keys(ROOM_TEMPLATES).length).toBe(11);
+      expect(Object.keys(ROOM_TEMPLATES).length).toBe(18);
     });
   });
 
@@ -473,15 +487,16 @@ describe('房间模板层的几何契约与可重现性（B80/B81/B82）', () =>
       return { 用量, 形状, 总 };
     };
 
-    it('通用兜底房不再是主旋律：`chamber:square` 占比从 51% 降到 20% 以内', () => {
-      // 改前读数（`.tmp-20261010/room-template-census.mjs`，6880 间）：
-      // chamber:square **3512 间 = 51.05%** —— 因为转角（49.6%）与东西向走廊（15.5%）
-      // 两款形状**一款模板都没有**，全落回它。玩家侧的说法是"每间房长得一样"。
+    it('通用兜底房退成安全网：`chamber:square` 在真迷宫里占比 0%（W-E3 切片53 之后）', () => {
+      // 读数三段：切片6 之前 **51.05%**（转角 + 东西向走廊两款形状一款模板都没有）；
+      // 切片6 之后 ~18.7%（剩下一开口 11.3% 与三开口三向 7.4%）；
+      // 切片53 之后 **0 间**（10 座 × 8 颗种子 1816 间普通房，死路四款 + T 口四向把它们全接住）。
+      // 玩家侧的说法从"每间房长得一样"变成"每间房都对自己那几扇门负责"。
       const { 用量, 总 } = sweep();
       const 兜底 = 用量.get('chamber:square') ?? 0;
       expect(总, '一间房都没扫到，这条是空转').toBeGreaterThan(3000);
       expect(兜底 / 总, `通用兜底房占 ${(兜底 / 总 * 100).toFixed(1)}% —— 模板库又跟不上迷宫了`)
-        .toBeLessThan(0.20);
+        .toBeLessThan(0.02);
     });
 
     it('两款最常见的两开口形状都有专属模板（转角四款 + 东西向走廊一款）', () => {
@@ -498,9 +513,11 @@ describe('房间模板层的几何契约与可重现性（B80/B81/B82）', () =>
       expect(未覆盖, `这两开口形状没有专属模板：${未覆盖.join(' / ')}`).toEqual([]);
     });
 
-    it('每一款注册的模板都真的被选中过（写了没人读的模板 = 死内容）', () => {
+    it('每一款注册的模板都真的被选中过（`chamber:square` 除外 —— 它是零开口房的安全网）', () => {
       const { 用量 } = sweep();
-      const 零 = Object.keys(ROOM_TEMPLATES).filter((k) => !(用量.get(k) > 0));
+      // 方厅不进这条判据不是放水：切片53 之后它**按设计**在真迷宫里 0 次出场（上一条钉着这一点），
+      // 它存在的理由是"分配永远有兜底、不会因为没模板贴合而抛"。它是否还贴合由 ③ 的零开口腿证明。
+      const 零 = Object.keys(ROOM_TEMPLATES).filter((k) => !(用量.get(k) > 0) && k !== 'chamber:square');
       expect(零, `这些模板在 7 座 × 40 颗种子里一次都没被选中：${零.join(' / ')}`).toEqual([]);
       // `junction:cross` 是天然稀有（四开口房 6880 间里 1 间）—— 它的读数一并钉住，
       // 免得哪天它真的掉到 0 而没人发现（"稀有"与"死掉"在读数上必须分得开）。

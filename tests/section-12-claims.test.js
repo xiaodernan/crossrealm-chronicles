@@ -337,7 +337,10 @@ describe('③ 残差写成数，不写成形容词', () => {
     const { 证据 } = 取行('B4');
     const 漏 = Object.keys(ROOM_TEMPLATES).filter((k) => {
       if (证据.includes(`\`${k}\``)) return false;
-      return !(k.startsWith('corner:') && 证据.includes('`corner:*`'));
+      // `x:*` 是对"同族多款"的合法简写（corner 四款、deadend 四款）：只要那一族在证据里
+      // 以 `x:*` 出现过就算提过。**款数**由另一条腿（18）钉着，简写不会漏掉新增。
+      const 族 = k.split(':')[0];
+      return !证据.includes('`' + 族 + ':*`');
     });
     expect(漏, '这些模板没在 B4 那行出现过').toEqual([]);
   });

@@ -85,6 +85,9 @@ export function templateFitsRoom(tpl, room) {
 export const requiredPortCount = (tpl) =>
   ['n', 'e', 's', 'w'].filter((d) => tpl.ports[d]?.required).length;
 
+/** 四个方向的单位步（n 是 −z）：端口推导与室内摆设共用这一格，不再各抄一份 */
+const DIR_VEC = { n: [0, -1], e: [1, 0], s: [0, 1], w: [-1, 0] };
+
 /* ===== 室内装饰 ===== */
 
 /** 一件装饰：摆进房间，并把 footprint 交给生成器那一份碰撞表 */
@@ -128,13 +131,52 @@ function buildJunctionCross(group, room, layout, def, ctx) {
   }
 }
 
-function buildJunctionTee(group, room, layout, def, ctx) {
-  // T 口：n/e/s 三面开门，唯一那堵实墙在西侧 —— 壁龛就靠它，两只火盆摆在北门口两侧
-  decor(ctx, group, uvBox(1.6, 2.4, 0.6), ctx.wallMat,
-    room.x - (room.w / 2 - 0.6), room.z, 1.2, 0.6, 1.6);
-  for (const sx of [-1, 1]) {
+/**
+ * T 口（W-B10 切片6 起一款，W-E3 切片53 扩到四个朝向）：三面开门、一面实墙。
+ *
+ * 壁龛贴**那面唯一的实墙**；两只火盆摆在**按 n/e/s/w 序第一个开着的门**两侧 ——
+ * 旧版写死"北门口 + 西墙壁龛"，在此规则下 `solid: 'w'` 得到的位置与尺寸逐位相同
+ * （`w` 时开着的门依次是 n、e、s，第一个是 n），所以扩族不改既有房间的样子。
+ */
+function buildJunctionTee(group, room, layout, def, ctx, solid) {
+  const 开着的 = ['n', 'e', 's', 'w'].filter((d) => d !== solid);
+  const [svx, svz] = DIR_VEC[solid];
+  const 龛沿东西 = svx !== 0; // 实墙在东西 ⇒ 壁龛薄在 x、长在 z
+  decor(ctx, group, 龛沿东西 ? uvBox(1.6, 2.4, 0.6) : uvBox(0.6, 2.4, 1.6), ctx.wallMat,
+    room.x + svx * (room.w / 2 - 0.6), room.z + svz * (room.d / 2 - 0.6), 1.2,
+    龛沿东西 ? 0.6 : 1.6, 龛沿东西 ? 1.6 : 0.6);
+  const 火盆门 = 开着的[0];
+  const [dx, dz] = DIR_VEC[火盆门];
+  const [px, pz] = [-dz, dx]; // 门轴的法线
+  for (const s of [-1, 1]) {
     decor(ctx, group, sharedCylinder(0.5, 0.35, 1.1, 8), ctx.accentMat,
-      room.x + sx * 3, room.z - (room.d / 2 - 1.6), 0.55, 1, 1);
+      room.x + dx * (room.w / 2 - 1.6) + px * 3 * s,
+      room.z + dz * (room.d / 2 - 1.6) + pz * 3 * s, 0.55, 1, 1);
+  }
+}
+
+/**
+ * 死路房（W-E3 切片53）：只有一扇门、三面实墙。
+ *
+ * 普查（10 座 × 8 颗种子，1896 间普通房）：一开口房占 **11.3%**（s 1.7 / e 4.0 / n 3.6 / w 2.0），
+ * 而模板库里一款死路都没有 —— 全落回 `chamber:square`。死路是迷宫最容易被记住的位置
+ * （"那条走不通的路尽头有东西"），拿通用四角柱打发，等于每次探到尽头都白跑。
+ *
+ * 摆法：供台贴**开门那一面的对面墙**，正对入口 —— 走进来一眼看到它，而不是背对着；
+ * 两侧各一只香炉。所有摆设都在房间后半，入口那条通道（宽 = 门洞）一个字不占。
+ */
+function buildDeadEnd(group, room, layout, def, ctx, open) {
+  const [vx, vz] = DIR_VEC[open];
+  const 沿东西 = vx !== 0; // 门在东西 ⇒ 台子贴东西墙，长边沿 z
+  const ax = room.x - vx * (room.w / 2 - 0.85);
+  const az = room.z - vz * (room.d / 2 - 0.85);
+  decor(ctx, group, 沿东西 ? uvBox(0.9, 1.0, 2.4) : uvBox(2.4, 1.0, 0.9), ctx.wallMat,
+    ax, az, 0.5, 沿东西 ? 0.9 : 2.4, 沿东西 ? 2.4 : 0.9);
+  decor(ctx, group, 沿东西 ? uvBox(0.6, 1.6, 1.5) : uvBox(1.5, 1.6, 0.6), ctx.wallMat,
+    ax, az, 1.8, 0, 0);
+  for (const s of [-1, 1]) {
+    decor(ctx, group, sharedCylinder(0.3, 0.22, 0.7, 8), ctx.accentMat,
+      沿东西 ? ax : ax + s * 1.9, 沿东西 ? az + s * 1.9 : az, 0.35, 0.6, 0.6);
   }
 }
 
@@ -211,13 +253,38 @@ function registerBaseTemplates() {
     ports: { n: { required: true }, e: { required: true }, s: { required: true }, w: { required: true } },
     buildInterior: buildJunctionCross,
   });
-  registerRoomTemplate({
-    id: 'junction', variant: 'tee', width: CELL, depth: CELL,
-    tags: ['junction', 'connector'],
-    // 三面开门、西侧那堵实墙 —— 壁龛就贴它，所以 w 必须是墙
-    ports: { n: { required: true }, e: { required: true }, s: { required: true }, w: { solid: true } },
-    buildInterior: buildJunctionTee,
-  });
+  /* ---- W-E3 切片53：T 口四个朝向 + 死路四款 ----
+   *
+   * 切到这一片之前的普查（10 座 × 8 颗种子 1896 间普通房）：三开口房 10.7%，其中
+   * `enw`/`nsw`/`ens` 三族（7.4%）没有模板贴合，死路房（一开口）11.3% 更是一款都没有 ——
+   * 两者合计 18.7% 全落回方厅。四款 T 除"哪一面实墙"外完全同形、四款死路除"哪一面开门"
+   * 外完全同形，都由一格数据推出来（手抄四份的下场是四份各漂一次，B36/B45 那一族）。
+   *
+   * 旧名 `junction:tee` 保留给 `solid: 'w'` 那一款：关卡编辑器导出的布局把房间的
+   * `templateKey` 字面量一起存了，改名会让那些布局在再导入时找不到模板。
+   */
+  for (const solid of ['w', 'n', 'e', 's']) {
+    registerRoomTemplate({
+      id: 'junction',
+      variant: solid === 'w' ? 'tee' : `tee-${solid}`,
+      width: CELL, depth: CELL,
+      tags: ['junction', 'connector'],
+      ports: Object.fromEntries(['n', 'e', 's', 'w'].map((d) => [
+        d, d === solid ? { solid: true } : { required: true },
+      ])),
+      buildInterior: (group, room, layout, def, ctx) => buildJunctionTee(group, room, layout, def, ctx, solid),
+    });
+  }
+  for (const dir of ['n', 'e', 's', 'w']) {
+    registerRoomTemplate({
+      id: 'deadend', variant: dir, width: CELL, depth: CELL,
+      tags: ['deadend', 'reward'],
+      ports: Object.fromEntries(['n', 'e', 's', 'w'].map((d) => [
+        d, d === dir ? { required: true } : { solid: true },
+      ])),
+      buildInterior: (group, room, layout, def, ctx) => buildDeadEnd(group, room, layout, def, ctx, dir),
+    });
+  }
   registerRoomTemplate({
     id: 'treasure', variant: 'small', width: CELL, depth: CELL,
     tags: ['treasure', 'reward'],
