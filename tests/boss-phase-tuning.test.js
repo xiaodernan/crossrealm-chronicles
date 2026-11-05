@@ -129,7 +129,17 @@ describe('`phaseTuningFor`：永远给得出一张表', () => {
 
 describe('注册表的整表规则：好表过、坏表红', () => {
   const entry = CONTENT_TABLES.find((t) => t.kind === 'bossPhaseTuning');
-  const checkWith = (mutate) => checkBossPhaseTuning(mutate(structuredClone(BOSS_PHASE_TUNING)));
+  // 阶段表里装有 `onEnter` 函数（W-B8 切片9），原生 structuredClone 克隆不动函数：
+  // 改成自定义深克隆，函数按引用保留（测试只改数据字段，不动函数）。
+  const cloneWithFn = (v) => {
+    if (typeof v === 'function') return v;
+    if (v === null || typeof v !== 'object') return v;
+    if (Array.isArray(v)) return v.map(cloneWithFn);
+    const r = {};
+    for (const k of Object.keys(v)) r[k] = cloneWithFn(v[k]);
+    return r;
+  };
+  const checkWith = (mutate) => checkBossPhaseTuning(mutate(cloneWithFn(BOSS_PHASE_TUNING)));
 
   it('出厂表零错误（`registry.js` 加载期已经断言过一次）', () => {
     expect(entry).toBeTruthy();
