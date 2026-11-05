@@ -18,6 +18,11 @@ export const STRINGS_ZH = Object.freeze({
   settings_accessibility: '辅助功能',
   settings_colorvision: '色觉模式',
   settings_captions: '字幕（音频线索可视化）',
+  // 字幕字号档（W-D6 切片67）：小 / 中 / 大三档，中 = 出厂
+  settings_caption_size: '字幕大小',
+  settings_caption_small: '小',
+  settings_caption_medium: '中',
+  settings_caption_large: '大',
   caption_gear_drop: '掉落：${rarity}',
   caption_pickup: '已拾取',
   caption_execution: '处决',

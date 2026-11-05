@@ -1305,6 +1305,9 @@ body {
   align-items: center;
   pointer-events: none;
   z-index: 20;
+  /* 字幕字号倍率（W-D6 切片67）：由 Captions.setScale 写在容器上，子行继承。
+     出厂 1 = 逐像素与"没有这一格"相同；缺变量时也按 1 算（纯 CSS 兜底）。 */
+  --caption-scale: 1;
 }
 
 .caption {
@@ -1312,7 +1315,7 @@ body {
   background: rgba(0, 0, 0, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 3px;
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--caption-scale, 1));
   letter-spacing: 0.06em;
   color: rgba(255, 255, 255, 0.92);
   white-space: nowrap;
@@ -1323,7 +1326,7 @@ body {
 .caption-critical {
   border-color: rgba(201, 169, 98, 0.65);
   color: #e8d9b0;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--caption-scale, 1));
   letter-spacing: 0.12em;
 }
 

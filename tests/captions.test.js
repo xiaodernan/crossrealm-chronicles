@@ -356,7 +356,7 @@ describe('⑥ 接线：applyToGame 推进去、主循环每帧收', () => {
     const mgr = new SettingsManager();
     mgr.data = { ...mgr.data, captions: true };
     const  Calls = [];
-    const game = { captions: { setEnabled: (v) => Calls.push(v) } };
+    const game = { captions: { setEnabled: (v) => Calls.push(v), setScale: () => {} } };
     mgr.applyToGame(game);
     expect(Calls, 'applyToGame 没有推 captions').toEqual([true]);
   });
@@ -365,7 +365,7 @@ describe('⑥ 接线：applyToGame 推进去、主循环每帧收', () => {
     const mgr = new SettingsManager();
     mgr.data = { ...mgr.data, captions: '1' };
     const Calls = [];
-    mgr.applyToGame({ captions: { setEnabled: (v) => Calls.push(v) } });
+    mgr.applyToGame({ captions: { setEnabled: (v) => Calls.push(v), setScale: () => {} } });
     expect(Calls).toEqual([false]);
   });
 

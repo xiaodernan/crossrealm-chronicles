@@ -15,6 +15,7 @@ import { difficultyOptions } from '../game/Difficulty.js';
 import { LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensitivity.js';
 import { normalizeShakeStrength, shakeStrengthOptions } from '../engine/shakeStrength.js';
 import { BRIGHTNESS, brightnessPercent, normalizeBrightness } from '../engine/brightness.js';
+import { captionScaleOptions, normalizeCaptionScale } from '../engine/captionScale.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -116,6 +117,22 @@ export class SettingsPanel {
       s.set('captions', cap.checked === true);
       s.applyToGame(this.game);
     });
+    // 字幕字号档（W-D6 切片67）：与震屏强度同一副骨架 —— 选项从名册现推，
+    // 落地只走 applyToGame（写入口在 SettingsManager，面板不直接摸 captions）。
+    const capSize = document.getElementById('set-caption-size');
+    if (capSize) {
+      for (const id of captionScaleOptions()) {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = t(`settings_caption_${id}`);
+        capSize.appendChild(opt);
+      }
+      capSize.value = normalizeCaptionScale(s.get('captionScale'));
+      capSize.addEventListener('change', () => {
+        s.set('captionScale', capSize.value);
+        s.applyToGame(this.game);
+      });
+    }
     // 阴影精度档（W-C3 切片2）：三档下拉。选项**从名册现推**而不是在 HTML 里抄一份 ——
     // 抄了就会漏：名册加一档，面板上没有那一格，玩家永远选不到，也没有任何报错。
     const sq = document.getElementById('set-shadow-quality');
@@ -463,6 +480,8 @@ export class SettingsPanel {
     // 若这里改成看 `d.captions === true` 之外的形状，就会出现"框没勾、字幕却在弹"（B47 那一族）。
     const cap = document.getElementById('set-captions');
     if (cap) cap.checked = this.game.settings.get('captions') === true;
+    // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 padTuning 的回显同一纪律）
+    set('set-caption-size', normalizeCaptionScale(d.captionScale));
     // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 `padTuning` 的回显同一纪律）
     set('set-shadow-quality', normalizeShadowQuality(d.shadowQuality));
     set('set-msaa', normalizeMsaaSamples(d.msaaSamples));

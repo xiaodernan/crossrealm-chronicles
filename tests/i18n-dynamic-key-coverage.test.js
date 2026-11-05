@@ -17,6 +17,7 @@ import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { SSAO_QUALITY_NAMES, SSAO_QUALITY_PRESETS } from '../src/engine/ssaoSettings.js';
 import { SHAKE_STRENGTHS, SHAKE_STRENGTH_IDS } from '../src/engine/shakeStrength.js';
+import { CAPTION_SCALES, CAPTION_SCALE_IDS } from '../src/engine/captionScale.js';
 import { 扫描拼键模板, 前缀Of, 拼键名册, 动态接线键集 } from './helpers/i18nDynamicKeys.js';
 
 const SEP = process.platform === 'win32' ? '\\' : '/';
@@ -37,6 +38,7 @@ describe('① 拼键扫描尺子自己不是摆设', () => {
     const 扫到 = 扫描拼键模板();
     expect(扫到.map((条) => `${条.文件} t(\`${条.模板}\`)`).sort(),
       '拼键的位置变了 —— 名册 `拼键名册` 要跟着动：这一族的键名从来不是字面量写出来的').toEqual([
+      'src/ui/SettingsPanel.js t(`settings_caption_${id}`)',
       'src/ui/SettingsPanel.js t(`settings_shake_${id}`)',
       'src/ui/SettingsPanel.js t(`settings_ssao_quality_${name}`)',
     ]);
@@ -93,6 +95,7 @@ describe('② 拼键名册与真实拼键处双向对齐', () => {
   const 域出处 = {
     'settings_ssao_quality_': { 域: SSAO_QUALITY_NAMES, 参数表: Object.keys(SSAO_QUALITY_PRESETS) },
     'settings_shake_': { 域: SHAKE_STRENGTH_IDS, 参数表: Object.keys(SHAKE_STRENGTHS) },
+    'settings_caption_': { 域: CAPTION_SCALE_IDS, 参数表: Object.keys(CAPTION_SCALES) },
   };
 
   it('代入域不许是抄本：名册那份 == 运行期名册 == 参数表的键', () => {
@@ -116,8 +119,9 @@ describe('③ 拼键展开出来的键必须有定义', () => {
     const 应展开 = [
       ...SSAO_QUALITY_NAMES.map((名) => `settings_ssao_quality_${名}`),
       ...SHAKE_STRENGTH_IDS.map((名) => `settings_shake_${名}`),
+      ...CAPTION_SCALE_IDS.map((名) => `settings_caption_${名}`),
     ].sort();
-    expect(展开, '名册展开出来的键集不对（应当恰好两族：SSAO 四档 + 震屏三档）').toEqual(应展开);
+    expect(展开, '名册展开出来的键集不对（应当恰好三族：SSAO 四档 + 震屏三档 + 字幕字号三档）').toEqual(应展开);
     for (const 键 of 展开) {
       expect(ZH_KEYS, `中文表没有「${键}」—— 面板那一档会显示 [MISSING: ${键}]`).toContain(键);
       expect(EN_KEYS, `英文表没有「${键}」—— 切英文时那一档显示 [MISSING: ${键}]`).toContain(键);

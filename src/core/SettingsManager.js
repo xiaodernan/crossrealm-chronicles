@@ -12,6 +12,7 @@ import { DEFAULT_LOOK_SENSITIVITY, applyLookSensitivity, normalizeLookSensitivit
 import { VOLUME_DEFAULTS } from '../audio/AudioVolumes.js';
 import { DEFAULT_SHAKE_STRENGTH, shakeScaleOf } from '../engine/shakeStrength.js';
 import { DEFAULT_BRIGHTNESS, normalizeBrightness } from '../engine/brightness.js';
+import { DEFAULT_CAPTION_SCALE } from '../engine/captionScale.js';
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
 const VERSION = 2;
@@ -103,6 +104,13 @@ const DEFAULTS = {
    * 关掉时**不影响声音** —— `game-cue` 照旧派发，只是没有人把它画出来。
    */
   captions: false,
+  /**
+   * 字幕字号档（W-D6 切片67）：small / medium / large 三档，名册在
+   * `engine/captionScale.js`。出厂 `medium` = 倍率 1，逐像素与"没有这一格"相同。
+   * 这一格补的是字幕开关之后的另一半：写出来但看不清，等于没写。
+   * 脏值在 `normalizeCaptionScale` 里回落出厂，不抛。
+   */
+  captionScale: DEFAULT_CAPTION_SCALE,
   /**
    * 手柄震动（切片17）：只挡"要不要给马达下令"这一格，相机抖不抖仍然照旧 ——
    * 打击反馈有两路输出，玩家只想关其中一路（例如有人在夜里玩）。
@@ -313,6 +321,9 @@ export class SettingsManager {
     // （没有"场上已有的字幕"要重算，到期自然退场）。放在色觉档之后纯属分组方便，
     // 两者互不相干。
     game.captions?.setEnabled(this.get('captions') === true);
+    // 字幕字号档（W-D6 切片67）：与开关同一条纪律 —— 写入口只有这一处。
+    // 容器上的 CSS 变量当场改，场上已有的行与新画的行一起变；脏值回落 medium、不抛。
+    game.captions?.setScale(this.get('captionScale'));
     // 震屏强度（W-E3 切片58）：写入口只有这一处（与震动开关同一族）。生效时机：下一记
     // `addShake` 即生效；换到 off 当场清残留（`setScale` 里 reset），不会"关了还在晃两秒"。
     // 只乘相机 —— 马达那一半由 `vibration` 管，两格各管一路，互不代偿。

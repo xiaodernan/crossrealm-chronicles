@@ -26,6 +26,7 @@
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';
 import { cueOf, cueTtlOf } from '../content/captions.js';
+import { captionScaleOf, normalizeCaptionScale } from '../engine/captionScale.js';
 
 const UI_CAPTIONS = 'ui/Captions';
 const captionsOn = (name, handler) => on(name, handler, UI_CAPTIONS);
@@ -49,6 +50,9 @@ export class Captions {
     this.el.setAttribute('role', 'status');
     this.el.setAttribute('aria-live', 'polite');
     document.body.appendChild(this.el);
+    /** 当前字号档（W-D6 切片67）：先按出厂落地，真实档位由 SettingsManager 经 setScale 写入 */
+    this.scale = normalizeCaptionScale(game?.settings?.get?.('captionScale'));
+    this._applyScale();
     /** 在场上的字幕行：`{ id, ttl }`，按出现顺序（老的在前面） */
     this.lines = [];
     this.enabled = game?.settings?.get?.('captions') === true;
@@ -64,6 +68,27 @@ export class Captions {
     this.enabled = on === true;
     if (!this.enabled) this.clear();
     return this.enabled;
+  }
+
+  /**
+   * 字幕字号档（W-D6 切片67）：小 / 中 / 大三档，名册在 `engine/captionScale.js`。
+   *
+   * 只改容器上的 CSS 变量 `--caption-scale`，不逐行改 `font-size`：
+   * 行是随时进出场的，变量挂在容器上，新画的那一行天然继承当前档位。
+   * 写入口只有 `SettingsManager.applyToGame` 一处（与 `setEnabled` 同一条纪律）。
+   *
+   * @param {string} value 档位 id
+   * @returns {string} 清洗后的档位 id（脏值回落 medium，不抛）
+   */
+  setScale(value) {
+    this.scale = normalizeCaptionScale(value);
+    this._applyScale();
+    return this.scale;
+  }
+
+  _applyScale() {
+    // 极简假 DOM（测试）没有 style 对象：跳过即可，真实浏览器一定有。
+    this.el?.style?.setProperty?.('--caption-scale', String(captionScaleOf(this.scale)));
   }
 
   /** 清掉场上所有行（关开关与读档重放时用） */

@@ -18,6 +18,11 @@ export const STRINGS_EN = Object.freeze({
   settings_accessibility: 'Accessibility',
   settings_colorvision: 'Color Vision',
   settings_captions: 'Captions (audio cues)',
+  // Caption size (W-D6 Slice 67): small / medium / large, medium is factory
+  settings_caption_size: 'Caption Size',
+  settings_caption_small: 'Small',
+  settings_caption_medium: 'Medium',
+  settings_caption_large: 'Large',
   caption_gear_drop: 'Drop: ${rarity}',
   caption_pickup: 'Picked up',
   caption_execution: 'Execution',
