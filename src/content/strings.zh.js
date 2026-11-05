@@ -34,6 +34,11 @@ export const STRINGS_ZH = Object.freeze({
   settings_shake_full: '全开',
   settings_shake_reduced: '减弱',
   settings_shake_off: '关闭',
+  // 闪光强度（W-D6 切片68）：`shake` 管画面晃，这一格管画面闪
+  settings_flash: '闪光强度',
+  settings_flash_full: '全开',
+  settings_flash_reduced: '减弱',
+  settings_flash_off: '无闪光',
   settings_graphics: '画面',
   settings_master_volume: '主音量',
   settings_sfx_volume: '音效音量',

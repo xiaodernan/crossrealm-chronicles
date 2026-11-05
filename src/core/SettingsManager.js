@@ -13,6 +13,7 @@ import { VOLUME_DEFAULTS } from '../audio/AudioVolumes.js';
 import { DEFAULT_SHAKE_STRENGTH, shakeScaleOf } from '../engine/shakeStrength.js';
 import { DEFAULT_BRIGHTNESS, normalizeBrightness } from '../engine/brightness.js';
 import { DEFAULT_CAPTION_SCALE } from '../engine/captionScale.js';
+import { DEFAULT_FLASH_STRENGTH, setFlashStrength } from '../engine/flashStrength.js';
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
 const VERSION = 2;
@@ -129,6 +130,14 @@ const DEFAULTS = {
    * 脏值在 `shakeScaleOf` 里回落出厂，不抛。
    */
   shakeStrength: DEFAULT_SHAKE_STRENGTH,
+  /**
+   * 闪光强度（W-D6 切片68）：full / reduced / off 三档，名册在 `engine/flashStrength.js`。
+   * 出厂 `full` = 倍率 1，逐像素与"没有这一格"相同。这一格补的是光敏玩家的出口：
+   * 处决 / Boss 转阶段 / 闪电的整屏闪光此前各自写死，玩家只能一起吞下。
+   * 只乘玩家看得见的闪光，不碰敌人受击的自发光小闪（那是命中反馈的一部分）。
+   * 脏值在 `normalizeFlashStrength` 里回落出厂，不抛。
+   */
+  flashStrength: DEFAULT_FLASH_STRENGTH,
   /**
    * 界面语言（W-D2 切片2）：'zh' / 'en' 两档，名册在 `engine/i18n.js` 的 TABLES。
    * 出厂中文 —— 这是游戏的主语言。存储里的脏值在 `applyToGame` 落地前经 `setLanguage`
@@ -328,6 +337,9 @@ export class SettingsManager {
     // `addShake` 即生效；换到 off 当场清残留（`setScale` 里 reset），不会"关了还在晃两秒"。
     // 只乘相机 —— 马达那一半由 `vibration` 管，两格各管一路，互不代偿。
     game.shake?.setScale(shakeScaleOf(this.get('shakeStrength')));
+    // 闪光强度（W-D6 切片68）：与震屏同一族，但走模块级当前档（消费者散在三棵子树）。
+    // 写入口只有这一处；生效时机：下一记闪光即生效，不需要"场上已有的闪光"重算。
+    setFlashStrength(this.get('flashStrength'));
     // 画面亮度（W-E3 切片61）：写入口只有 `Game.setExposureScale` 一处，
     // 它把倍率乘回昼夜基线；`normalizeBrightness` 对脏值夹回量程、不抛。
     game.setExposureScale?.(normalizeBrightness(this.get('brightness')));

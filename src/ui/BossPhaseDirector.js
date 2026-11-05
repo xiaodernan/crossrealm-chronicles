@@ -7,6 +7,7 @@ import {
 import { addShake } from '../engine/Shake.js';
 import { FOV_LAYER_PHASE } from '../engine/CameraRig.js';
 import { scheduler } from '../engine/Scheduler.js';
+import { screenFlashOpacity } from '../engine/flashStrength.js';
 import { t } from '../engine/i18n.js';
 import * as THREE from 'three';
 
@@ -171,7 +172,8 @@ export class BossPhaseDirector {
   _playPhaseTransitionFX(color, shakeIntensity, phase = 2) {
     if (this.phaseFlashEl) {
       this.phaseFlashEl.classList.remove('hidden');
-      this.phaseFlashEl.style.opacity = '0.6';
+      // 闪光强度（W-D6 切片68）：出厂 1 时仍读 0.6，与改前逐位相同
+      this.phaseFlashEl.style.opacity = String(screenFlashOpacity(0.6));
       this.phaseFlashEl.style.background = `radial-gradient(circle at 50% 50%, ${color} 0%, transparent 70%)`;
       scheduler.clear(PHASE_FX_TAG);
       scheduler.after(0, () => {

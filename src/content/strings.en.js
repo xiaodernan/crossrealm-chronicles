@@ -32,6 +32,11 @@ export const STRINGS_EN = Object.freeze({
   settings_shake_full: 'Full',
   settings_shake_reduced: 'Reduced',
   settings_shake_off: 'None',
+  // Flash intensity (W-D6 Slice 68): shake is motion, this is brightness
+  settings_flash: 'Flash Intensity',
+  settings_flash_full: 'Full',
+  settings_flash_reduced: 'Reduced',
+  settings_flash_off: 'No Flash',
   settings_graphics: 'Graphics',
   settings_master_volume: 'Master Volume',
   settings_sfx_volume: 'SFX Volume',

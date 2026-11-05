@@ -2,6 +2,7 @@
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
+import { triadFlashOpacity } from '../engine/flashStrength.js';
 
 const EFFECTS_POPCULTURETRIADVISUALPASS = 'effects/PopCultureTriadVisualPass';
 const triadOn = (name, handler) => on(name, handler, EFFECTS_POPCULTURETRIADVISUALPASS);
@@ -61,7 +62,8 @@ export class PopCultureTriadVisualPass {
     this.pulse += dt;
     const el = this.layers[this.mode];
     if (!el) return;
-    const base = this.flashTimer > 0 ? 0.14 : 0.08;
+    // 闪光强度（W-D6 切片68）：常驻 0.08 不动，只把闪光额外那 0.06 按档缩放
+    const base = this.flashTimer > 0 ? triadFlashOpacity() : 0.08;
     if (this.flashTimer > 0) this.flashTimer -= dt;
     el.style.opacity = String(base + Math.sin(this.pulse * 1.5) * 0.03);
   }

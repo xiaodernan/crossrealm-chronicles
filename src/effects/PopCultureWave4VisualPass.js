@@ -1,5 +1,6 @@
 /** Wave4 视觉 — POI 交互时 flash overlay（不与 Triad 位面 overlay 冲突） */
 import { shouldUpdate as frameShouldUpdate } from '../engine/FrameBudget.js';
+import { wave4FlashOpacity } from '../engine/flashStrength.js';
 export class PopCultureWave4VisualPass {
   constructor(game) {
     this.game = game;
@@ -45,7 +46,8 @@ export class PopCultureWave4VisualPass {
       this.setMode(null);
       return;
     }
-    const o = 0.1 + Math.sin(this.pulse * 2) * 0.04;
+    // 闪光强度（W-D6 切片68）：整层乘倍率；出厂 1 时算式与改前逐位相同
+    const o = wave4FlashOpacity(this.pulse);
     el.style.opacity = String(o);
   }
 }

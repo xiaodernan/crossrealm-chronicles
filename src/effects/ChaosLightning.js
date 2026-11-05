@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { addShake } from '../engine/Shake.js';
 import { scheduler } from '../engine/Scheduler.js';
+import { flashScale } from '../engine/flashStrength.js';
 
 /** 单次闪电的收尾计时（新雷劈下时先撤旧的） */
 const STRIKE_TAG = 'chaos-lightning';
@@ -67,7 +68,8 @@ export class ChaosLightning {
     pos.needsUpdate = true;
     this.bolt.visible = true;
     this.flash.position.set(x, 20, z);
-    this.flash.intensity = 2.8;
+    // 闪光强度（W-D6 切片68）：只压点光那一记；雷线本身照画（它同时是落点信息）
+    this.flash.intensity = 2.8 * flashScale();
     addShake(0.08);
     // 一次闪电的收尾走主循环（B39）：暂停时不该在后台偷偷放完，也不该被 hitstop 拉长
     scheduler.clear(STRIKE_TAG);

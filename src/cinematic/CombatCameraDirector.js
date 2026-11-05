@@ -4,6 +4,7 @@ import { t } from '../engine/i18n.js';
 import { emitCue } from '../engine/cues.js';
 import { EXECUTION_CAMERA } from '../content/tuning.js';
 import { requestDof, cancelDof } from '../engine/DofManager.js';
+import { screenFlashOpacity } from '../engine/flashStrength.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -216,7 +217,9 @@ export class CombatCameraDirector {
     this.game.combatInputLock?.lock(preset.duration * lockRatio, { allowCamera: kind === 'finisher' });
 
     this.flash.classList.remove('hidden');
-    this.flash.style.opacity = kind === 'bossKill' ? '0.55' : '0.38';
+    // 闪光强度（W-D6 切片68）：只乘这一层，出厂 = 1 时与改前逐位相同；
+    // off 时透明为 0，层仍按原节奏收尾（不另起一套生命周期）。
+    this.flash.style.opacity = String(screenFlashOpacity(kind === 'bossKill' ? 0.55 : 0.38));
     // rAF-EXCEPTION：闪光层的淡出需要一次绘制间隔（CSS 过渡），不参与世界时间缩放
     requestAnimationFrame(() => { this.flash.style.opacity = '0'; });
 

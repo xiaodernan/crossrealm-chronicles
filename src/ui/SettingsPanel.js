@@ -16,6 +16,7 @@ import { LOOK_SENSITIVITY, normalizeLookSensitivity } from '../engine/lookSensit
 import { normalizeShakeStrength, shakeStrengthOptions } from '../engine/shakeStrength.js';
 import { BRIGHTNESS, brightnessPercent, normalizeBrightness } from '../engine/brightness.js';
 import { captionScaleOptions, normalizeCaptionScale } from '../engine/captionScale.js';
+import { flashStrengthOptions, normalizeFlashStrength } from '../engine/flashStrength.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -249,6 +250,22 @@ export class SettingsPanel {
       shakeSel.value = s.get('shakeStrength');
       shakeSel.addEventListener('change', () => {
         s.set('shakeStrength', shakeSel.value);
+        s.applyToGame(this.game);
+      });
+    }
+    // 闪光强度（W-D6 切片68）：与震屏同一副骨架 —— 震撼管"画面晃"，这一格管"画面闪"，
+    // 两路各一格、互不代偿。选项从名册现推，落地只走 applyToGame。
+    const flashSel = document.getElementById('set-flash');
+    if (flashSel) {
+      for (const id of flashStrengthOptions()) {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = t(`settings_flash_${id}`);
+        flashSel.appendChild(opt);
+      }
+      flashSel.value = normalizeFlashStrength(s.get('flashStrength'));
+      flashSel.addEventListener('change', () => {
+        s.set('flashStrength', flashSel.value);
         s.applyToGame(this.game);
       });
     }
@@ -488,6 +505,8 @@ export class SettingsPanel {
     set('set-ssao', normalizeSsaoQuality(d.ssaoQuality));
     // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 padTuning 的回显同一纪律）
     set('set-shake', normalizeShakeStrength(d.shakeStrength));
+    // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 padTuning 的回显同一纪律）
+    set('set-flash', normalizeFlashStrength(d.flashStrength));
     /* 震动那一格问的是 `settings.get()`，与 `applyToGame` 用的是同一个判据（同一个取值口）：
      * 若这里改成看 `d.vibration === true`，那么一格存成 `null` 时会出现"框没勾、手柄还在震" ——
      * 显示与行为分家正是 B47 那一族的入口。 */
