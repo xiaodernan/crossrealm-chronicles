@@ -136,9 +136,11 @@ describe('③ 计数口径：根层才计，余数是减出来的、也是数出
     const 甲 = 出.行.find((r) => r.名 === '甲.update');
     const 乙 = 出.行.find((r) => r.名 === '乙.update');
     expect(甲.次数).toBe(帧数);
-    // 忙等的真实耗时只会**多于**给定的毫秒（量不到亚毫秒的提前退出），所以取下界为主
+    // 忙等的真实耗时只会**多于**给定的毫秒（量不到亚毫秒的提前退出），所以取下界为主；
+    // 上界只是一道"忙等异常慢"的兜底——主机并行跑满时实测过 173.8ms（12×3×4=144 被打爆），
+    // 所以放宽到 ×8：仍然能抓住"忙等退化成了空转"，不再对负载敏感。
     expect(甲.合计ms, `甲 12 帧各 3ms，读出的合计是 ${甲.合计ms}`).toBeGreaterThanOrEqual(帧数 * 3 * 0.9);
-    expect(甲.合计ms).toBeLessThan(帧数 * 3 * 4);
+    expect(甲.合计ms).toBeLessThan(帧数 * 3 * 8);
     expect(乙.合计ms).toBeLessThan(甲.合计ms);
     expect(出.已点名ms).toBeGreaterThanOrEqual(甲.合计ms + 乙.合计ms - 0.001);
     expect(出.其余ms, '其余 = 总 − 已点名，这条等式就是"余数可解释"的全部').toBeCloseTo(出.总耗时ms - 出.已点名ms, 6);
