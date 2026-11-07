@@ -774,4 +774,99 @@ export class AudioManager {
 
   spellCast() { this.playTone(520, 0.12, 'sine', 0.08); this.playTone(780, 0.08, 'triangle', 0.06); }
   weaponSwitch() { this.playTone(330, 0.1, 'sine', 0.1); }
+
+  /**
+   * 脚步声（W-C7 程序化音效）：不同表面不同音色。
+   * surface: 'stone' | 'wood' | 'grass' | 'metal'
+   */
+  footstep(surface = 'stone') {
+    const base = { stone: 120, wood: 180, grass: 220, metal: 300 }[surface] ?? 120;
+    this._playNoise(0.05, 0.04, base);
+    this.playTone(base * 0.7, 0.03, 'sine', 0.03);
+  }
+
+  /**
+   * 法术施法音效：上行正弦三和弦，带轻微泛音。
+   */
+  spell_magic() {
+    const t = this.ctx.currentTime;
+    [440, 554, 659].forEach((f, i) => {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.05, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      o.connect(g);
+      g.connect(this.sfx);
+      o.start(t);
+      o.stop(t + 0.4);
+    });
+  }
+
+  /**
+   * 物品掉落：短促的“叮”一声，带轻微噪声。
+   */
+  item_drop() {
+    this.playTone(880, 0.1, 'sine', 0.06);
+    this._playNoise(0.03, 0.02, 1500);
+  }
+
+  /**
+   * 宝箱开启：上行三和弦，喜庆感。
+   */
+  chest_open() {
+    const t = this.ctx.currentTime;
+    [523, 659, 784].forEach((f, i) => {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = f;
+      const start = t + i * 0.08;
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.linearRampToValueAtTime(0.08, start + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, start + 0.5);
+      o.connect(g);
+      g.connect(this.sfx);
+      o.start(start);
+      o.stop(start + 0.6);
+    });
+  }
+
+  /**
+   * 杠杆拉动：低沉的机械声。
+   */
+  lever_pull() {
+    this.playTone(150, 0.15, 'square', 0.08);
+    this._playNoise(0.04, 0.03, 400);
+  }
+
+  /**
+   * 大门开启：缓慢上行的金属声。
+   */
+  gate_open() {
+    const t = this.ctx.currentTime;
+    [220, 330, 440].forEach((f, i) => {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = 'square';
+      o.frequency.value = f;
+      const start = t + i * 0.15;
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.linearRampToValueAtTime(0.1, start + 0.1);
+      g.gain.exponentialRampToValueAtTime(0.001, start + 0.8);
+      o.connect(g);
+      g.connect(this.sfx);
+      o.start(start);
+      o.stop(start + 0.9);
+    });
+  }
+
+  /**
+   * 陷阱触发：尖锐的噪声脉冲。
+   */
+  trap_trigger() {
+    this._playNoise(0.1, 0.15, 3000);
+    this.playTone(100, 0.2, 'sawtooth', 0.15);
+  }
 }
