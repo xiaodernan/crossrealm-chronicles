@@ -618,3 +618,45 @@ export function 战斗越线(R, 预算, 异常 = []) {
   return out;
 }
 
+/**
+ * 走查越线 —— UI 走查（`scripts/ui-walkthrough.mjs`）的判据。
+ *
+ * 一份"页内量尺"的结果按三种红分：
+ *   ① 页面级横向溢出（`document.documentElement.scrollWidth > innerWidth`，说明有元素把整页撑宽了）；
+ *   ② 可见元素自己的 `getBoundingClientRect` 越出视口左/右沿（x 轴；页内量尺已替你挑过最坏 8 个）；
+ *   ③ y 轴挤叠（HUD 顶栏换行之后，stats 第二行的底压进 `.quest-panel` 的顶）。
+ *
+ * 三种都按**组合**记（视口 × 语言 × 文字档 × 面板）——话里必须带上是哪一格，
+ * 否则下一次红还得靠人猜「是在哪个档位上」。空组合不是全绿，是没量（fail-closed）。
+ *
+ * @param {{ 组合: Array<{ label?: string, viewport?: string, lang?: string, scale?: string,
+ *                          页溢出?: boolean, 越界?: Array<{ tag: string, id?: string, cls?: string,
+ *                          right: number, left: number, w: number, text?: string }>,
+ *                          hud挤叠?: { hudStatsBottom?: number|null, questPanelTop?: number|null, overlap?: number|null } }> }} R
+ * @returns {string[]} 红线（空 = 全绿；非空 = 必须修，不许放水）
+ */
+export function 走查越线(R) {
+  if (!Array.isArray(R?.组合) || R.组合.length === 0) {
+    return ['走查没有任何一格——不是全绿，是没量（fail-closed）'];
+  }
+  const out = [];
+  for (const 格 of R.组合) {
+    const 记号 = `${格?.viewport} lang=${格?.lang} scale=${格?.scale} ${格?.label}`;
+    if (格?.页溢出 === true) {
+      out.push(`页面横向溢出：scrollWidth 超过 innerWidth（${记号}）`);
+    }
+    const 越界 = Array.isArray(格?.越界) ? 格.越界 : [];
+    if (越界.length > 0) {
+      const 头 = 越界.slice(0, 3).map((o) =>
+        `<${o?.tag ?? '?'} id=${o?.id || '-'} class=${String(o?.cls ?? '').slice(0, 40)}> [${o?.left}, ${o?.right}] w=${o?.w}"${(o?.text ?? '').slice(0, 40)}"`).join('；');
+      out.push(`${越界.length} 个可见元素越出视口左右沿（${记号}）：${头}${越界.length > 3 ? ` … 共 ${越界.length} 个` : ''}`);
+    }
+    const 挤 = 格?.hud挤叠;
+    if (挤 && Number.isFinite(挤?.overlap) && 挤.overlap > 0) {
+      out.push(`HUD 顶栏第二行压进 quest-panel 顶 ${挤.overlap}px（${记号}）`
+        + `：stats 底 ${JSON.stringify(挤.hudStatsBottom)} ≥ quest-panel 顶 ${JSON.stringify(挤.questPanelTop)}`);
+    }
+  }
+  return out;
+}
+
