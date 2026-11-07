@@ -77,6 +77,9 @@ export class WorldEffects {
 
   updateMeteors(dt) {
     if (!this.starField?.visible) return;
+    // 流星是纯装饰性视觉，降频到 1/2 帧（W-C2 切片4 余项）
+    const 几何帧 = frameShouldUpdate(2);
+    if (!几何帧) return;
     this.meteorTimer -= dt;
     if (this.meteorTimer <= 0) {
       this.meteorTimer = 1.5 + Math.random() * 3;

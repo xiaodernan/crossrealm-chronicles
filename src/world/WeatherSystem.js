@@ -143,73 +143,74 @@ export class WeatherSystem {
   }
 
   update(dt, playerPos) {
-    // 涟漪独立于粒子推进：粒子缺位时它也得把寿命走完，否则网格会挂在场景里
-    this._updateSplashes(dt);
-    if (!this.particles || !this.velocities) return;
-
-    // 相位每帧累积（B118：慢动作里不传送）；粒子位置更新降频到 1/2 帧（W-C2 切片4 余项）。
-    const 几何帧 = frameShouldUpdate(2);
+    // 相位每帧累积（B118：慢动作里不传送）；跟随玩家每帧做（视觉平滑，不降频）。
     this._时相 += dt;
     this._follow.lerp(playerPos, dt * 2.5);
     this.group.position.set(this._follow.x, 0, this._follow.z);
+    // 纯装饰性视觉：粒子位置更新降频到 1/2 帧（W-C2 切片4 余项）。
+    // 涟漪寿命每帧递减（不降频），且粒子缺位时它也得把寿命走完，否则网格会挂在场景里。
+    this._updateSplashes(dt);
+    const 几何帧 = frameShouldUpdate(2);
+    if (!this.particles || !this.velocities) return;
+    if (几何帧) {
+      const arr = this.particles.geometry.attributes.position.array;
+      const vel = this.velocities;
+      const preset = this.preset;
+      const groundBase = this.world.getGroundHeight(playerPos.x, playerPos.z);
+      const 缓存 = this._gxy;
 
-    const arr = this.particles.geometry.attributes.position.array;
-    const vel = this.velocities;
-    const preset = this.preset;
-    const groundBase = this.world.getGroundHeight(playerPos.x, playerPos.z);
-    const 缓存 = this._gxy;
+      // 答题的人换了吗？（`getGroundHeight` 在室内 / 野外之间换源头）换了就整张作废，
+      // 下一帧逐颗重问 —— 那一帧贵 5ms，但它值的是"雨别再落在错的高度上"。
+      const 室内 = !!this.world.dungeonManager?.isInside?.();
+      if (室内 !== this._室内) { 缓存.fill(NaN); this._室内 = 室内; }
 
-    // 答题的人换了吗？（`getGroundHeight` 在室内 / 野外之间换源头）换了就整张作废，
-    // 下一帧逐颗重问 —— 那一帧贵 5ms，但它值的是"雨别再落在错的高度上"。
-    const 室内 = !!this.world.dungeonManager?.isInside?.();
-    if (室内 !== this._室内) { 缓存.fill(NaN); this._室内 = 室内; }
+      const 粒子数 = arr.length / 3;
+      for (let i = 0; i < 粒子数; i++) {
+        // 包围盒检测与位置积分同在几何帧推进（非几何帧整段跳过）
+        const px = arr[i * 3];
+        const py = arr[i * 3 + 1];
+        const pz = arr[i * 3 + 2];
 
-    const 粒子数 = arr.length / 3;
-    for (let i = 0; i < 粒子数; i++) {
-      // 包围盒检测每帧做，防止粒子逃逸；位置积分仅在几何帧推进。
-      const px = arr[i * 3];
-      const py = arr[i * 3 + 1];
-      const pz = arr[i * 3 + 2];
+        // 这一颗自己挪没挪：水平位移过 1 米才重问地面（NaN 的比较恒假 ⇒ 没问过的必问）。
+        // 判据的容差是"低于地面 2 米"，而 1 米水平位移内的地面差不超过 0.1 米量级 ——
+        // 省掉的是整张高度场四次角点采样，换来的是同一格的第二十次回答。
+        if (!(Math.abs(px - 缓存[i * 2]) <= 1 && Math.abs(pz - 缓存[i * 2 + 1]) <= 1)) {
+          this._gy[i] = this.world.getGroundHeight(px, pz);
+          缓存[i * 2] = px;
+          缓存[i * 2 + 1] = pz;
+        }
+        const gy = this._gy[i] + 0.5;
 
-      // 这一颗自己挪没挪：水平位移过 1 米才重问地面（NaN 的比较恒假 ⇒ 没问过的必问）。
-      // 判据的容差是"低于地面 2 米"，而 1 米水平位移内的地面差不超过 0.1 米量级 ——
-      // 省掉的是整张高度场四次角点采样，换来的是同一格的第二十次回答。
-      if (!(Math.abs(px - 缓存[i * 2]) <= 1 && Math.abs(pz - 缓存[i * 2 + 1]) <= 1)) {
-        this._gy[i] = this.world.getGroundHeight(px, pz);
-        缓存[i * 2] = px;
-        缓存[i * 2 + 1] = pz;
+        const outOfBox =
+          Math.abs(px - this._follow.x) > this._box.x
+          || Math.abs(pz - this._follow.z) > this._box.z
+          || py < gy - 2
+          || py > this._box.y + 8;
+
+        if (outOfBox) {
+          this._randomizeParticle(arr, vel, i, preset, false);
+          arr[i * 3 + 1] = this._box.y + Math.random() * 6;
+        } else {
+          arr[i * 3] += vel[i * 3] * dt;
+          arr[i * 3 + 1] += vel[i * 3 + 1] * dt;
+          arr[i * 3 + 2] += vel[i * 3 + 2] * dt;
+        }
+
+        if (preset.kind === 'snow') {
+          // 雪的横向摆动与粒子同在几何帧推进，相位源仍是 _时相
+          vel[i * 3] += Math.sin(this._时相 + i) * dt * 0.4;
+        }
       }
-      const gy = this._gy[i] + 0.5;
 
-      const outOfBox =
-        Math.abs(px - this._follow.x) > this._box.x
-        || Math.abs(pz - this._follow.z) > this._box.z
-        || py < gy - 2
-        || py > this._box.y + 8;
+      this.particles.geometry.attributes.position.needsUpdate = true;
 
-      if (outOfBox) {
-        this._randomizeParticle(arr, vel, i, preset, false);
-        arr[i * 3 + 1] = this._box.y + Math.random() * 6;
-      } else if (几何帧) {
-        arr[i * 3] += vel[i * 3] * dt;
-        arr[i * 3 + 1] += vel[i * 3 + 1] * dt;
-        arr[i * 3 + 2] += vel[i * 3 + 2] * dt;
+      if (preset.kind === 'rain' && Math.random() < dt * 18) {
+        this._spawnSplash(
+          playerPos.x + (Math.random() - 0.5) * 20,
+          playerPos.z + (Math.random() - 0.5) * 20,
+          groundBase
+        );
       }
-
-      if (preset.kind === 'snow') {
-        // 雪的横向摆动每帧做（幅值小，不降频影响不大），相位源仍是 _时相
-        vel[i * 3] += Math.sin(this._时相 + i) * dt * 0.4;
-      }
-    }
-
-    if (几何帧) this.particles.geometry.attributes.position.needsUpdate = true;
-
-    if (preset.kind === 'rain' && Math.random() < dt * 18) {
-      this._spawnSplash(
-        playerPos.x + (Math.random() - 0.5) * 20,
-        playerPos.z + (Math.random() - 0.5) * 20,
-        groundBase
-      );
     }
   }
 
