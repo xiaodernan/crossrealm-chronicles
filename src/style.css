@@ -252,6 +252,27 @@ body {
   max-width: 60%;
 }
 
+/* 小屏（≤480px）：十枚 chip 一行摆不下，60% 的桌面夹子反而把
+   nowrap 的长 chip（如 discovery-count）整条推出视口。
+   这里解开夹子、让整行换行，并先砍掉三个纯桌面诊断格（FPS / 输入设备 / 镜头模式）。
+   这是走查（390×844 + 大档界面文字）实测出来的（W-D6 切片70）。 */
+@media (max-width: 480px) {
+  /* 根因：badge147 + gap16 + 最宽 nowrap chip（en "Logs 1 · Fragments 0/8 · Map 9%" ≈224px）
+     超过可用宽 358px，row 在 flex-shrink 之下卡在 min-content，把整行顶出父容器 29px。
+     让 hud-top 自己换行：stats 独占第二行，223px 的 chip 在 358px 里松松放下。 */
+  .hud-top {
+    flex-wrap: wrap;
+  }
+  .hud-stats {
+    max-width: none;
+  }
+  #fps-display,
+  #input-device-display,
+  #camera-mode-display {
+    display: none;
+  }
+}
+
 .stat-item {
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.65);
