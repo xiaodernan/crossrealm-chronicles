@@ -93,21 +93,21 @@ export class UpgradePanel {
     if (countEl) countEl.textContent = `${s.bagCount}/${s.bagCapacity}`;
     // 属性行（W-E3 切片62）：换算与顺序问 `gearStatLines`，这一层只管排版。
     // 差值的正负号是**文本**（+1 / -1），不靠颜色 —— 与伤害飘字那条非颜色冗余同一纪律。
-    const 属性行 = (inst, against = null) => gearStatLines(inst, { against, lang: getLanguage() })
+    const statLine = (inst, against = null) => gearStatLines(inst, { against, lang: getLanguage() })
       .map((l) => {
-        const 值 = l.value > 0 ? `+${l.value}` : String(l.value);
-        const 差 = l.delta == null || l.delta === 0 ? ''
+        const val = l.value > 0 ? `+${l.value}` : String(l.value);
+        const diff = l.delta == null || l.delta === 0 ? ''
           : `<span class="gear-delta ${l.delta > 0 ? 'up' : 'down'}">(${l.delta > 0 ? '+' : ''}${l.delta})</span>`;
-        return `<span class="gear-mod">${l.label} ${值}${差}</span>`;
+        return `<span class="gear-mod">${l.label} ${val}${diff}</span>`;
       }).join('');
     slotsEl.innerHTML = GEAR_SLOTS.map((slot) => {
       const inst = s.gear[slot];
-      const 内容 = inst
-        ? `<span class="gear-item">${gearLabel(inst, getLanguage())}</span><span class="gear-mods">${属性行(inst)}</span>`
+      const content = inst
+        ? `<span class="gear-item">${gearLabel(inst, getLanguage())}</span><span class="gear-mods">${statLine(inst)}</span>`
         : `<span class="gear-item">${t('gear_slot_empty')}</span>`;
       return `<div class="gear-row">
         <span class="gear-slot-name">${gearSlotName(slot, getLanguage())}</span>
-        <span class="gear-cell">${内容}</span>
+        <span class="gear-cell">${content}</span>
         ${inst ? `<button type="button" class="gear-row-btn" data-store="${slot}"${s.bagFull ? ' disabled' : ''}>${s.bagFull ? t('gear_bag_full') : t('gear_unequip')}</button>` : ''}
       </div>`;
     }).join('');
@@ -128,8 +128,8 @@ export class UpgradePanel {
       ? s.bag.map((inst, i) => {
         // 对比的同槽那一件：槽由**底座**决定（不是按钮猜的），与 `wearFromBag` 读同一处
         const slot = baseOf(inst.base)?.slot;
-        const 当前 = slot ? s.gear[slot] : null;
-        return `<button type="button" class="skill-btn" data-wear="${i}"><span class="gear-bag-name">${gearLabel(inst, getLanguage())}</span><span class="gear-mods">${属性行(inst, 当前)}</span><span class="gear-bag-action">${当前 ? t('gear_compare_vs_equipped') : t('gear_wear_this')}</span></button>`;
+        const current = slot ? s.gear[slot] : null;
+        return `<button type="button" class="skill-btn" data-wear="${i}"><span class="gear-bag-name">${gearLabel(inst, getLanguage())}</span><span class="gear-mods">${statLine(inst, current)}</span><span class="gear-bag-action">${current ? t('gear_compare_vs_equipped') : t('gear_wear_this')}</span></button>`;
       }).join('')
       : `<p class="gear-bag-empty">${t('gear_bag_empty')}</p>`;
     bagEl.querySelectorAll('[data-wear]').forEach((btn) => {

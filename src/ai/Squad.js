@@ -145,7 +145,8 @@ export class SquadController {
       if (held === undefined) continue;         // 已被 `release` 摘座
       const s = held + dt;
       // 坐着却出手不了（够不着、被溜出锥面、冷却没完）超过一个回收时长：让给排队的下一位。
-      // 正在出手的（有租约）不受这条管 —— 它的租约每帧续期，前摇不该被半路撤座。
+      // 正在出手的（手里还有租约）不受这条管 —— 租约是 `claim` 首次拿座时建下的，之后只按 dt
+      // 自然衰减（#45），它还在就说明这一只正处在起手/出手那一档，前摇不该被半路撤座。
       if (s > this.timeout && !this.leases.has(enemy)) this._rotateOut(enemy);
       else this.seats.set(enemy, s);
     }

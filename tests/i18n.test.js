@@ -9,6 +9,7 @@ import { SSAO_QUALITY_NAMES } from '../src/engine/ssaoSettings.js';
 import { SHAKE_STRENGTH_IDS } from '../src/engine/shakeStrength.js';
 import { CAPTION_SCALE_IDS } from '../src/engine/captionScale.js';
 import { FLASH_STRENGTH_IDS } from '../src/engine/flashStrength.js';
+import { UI_TEXT_SCALE_IDS } from '../src/engine/uiTextScale.js';
 import { EXPECTED_KEY_COUNT, 键数问题 } from './helpers/i18nKeyCount.js';
 
 describe('i18n 文案表（W-D2 切片1）', () => {
@@ -365,15 +366,16 @@ describe('死键只减不增（W-D2 切片6 门槛 · 切片26 修"这道门恒�
 
   it('盲区那一族单列：登记过的运行期键不许混进待查账本，也不许漂走', () => {
     // 名册说"这些键是运行期读的"⇒ 它们必须在表里、必须真的没有整名读者（否则该回字面量那一族记账）
-    // 今天名册恰好四族：SSAO 四档（切片27）+ 震屏三档（切片58）+ 字幕字号三档（切片67）+ 闪光强度三档（切片68）。期望从**出处**现推，
+    // 今天名册恰好五族：SSAO 四档（切片27）+ 震屏三档（切片58）+ 字幕字号三档（切片67）+ 闪光强度三档（切片68）+ 界面文字三档（切片69）。期望从**出处**现推，
     // 不抄第二份字面量；名册少一行、域少一档、或有人多拼一族，这条腿都会红。
     const 应登记 = [
       { 前缀: 'settings_ssao_quality_', 域: [...SSAO_QUALITY_NAMES], 拼键处文件: 'src/ui/SettingsPanel.js' },
       { 前缀: 'settings_shake_', 域: [...SHAKE_STRENGTH_IDS], 拼键处文件: 'src/ui/SettingsPanel.js' },
       { 前缀: 'settings_caption_', 域: [...CAPTION_SCALE_IDS], 拼键处文件: 'src/ui/SettingsPanel.js' },
       { 前缀: 'settings_flash_', 域: [...FLASH_STRENGTH_IDS], 拼键处文件: 'src/ui/SettingsPanel.js' },
+      { 前缀: 'settings_ui_text_', 域: [...UI_TEXT_SCALE_IDS], 拼键处文件: 'src/ui/SettingsPanel.js' },
     ];
-    expect(拼键名册, '拼键名册漂了（今天应当恰好四族：SSAO 四档 + 震屏三档 + 字幕字号三档 + 闪光强度三档）').toEqual(应登记);
+    expect(拼键名册, '拼键名册漂了（今天应当恰好五族：SSAO 四档 + 震屏三档 + 字幕字号三档 + 闪光强度三档 + 界面文字三档）').toEqual(应登记);
     for (const 键 of 动态) {
       expect(ZH_KEYS, `运行期拼出来的「${键}」不在中文表里 —— 面板那一档会显示 [MISSING: ${键}]`).toContain(键);
       expect(字面零读者, `「${键}」已经有人整名写过了 —— 它不再是盲区，名册要减一行`).toContain(键);

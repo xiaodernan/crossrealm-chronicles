@@ -352,34 +352,115 @@ try {
   const R = { 墙钟秒: {} };
 
   // 站0：E2E 前置——冒烟不是平衡测试，给玩家厚血免得兵把它打死打乱序列
+  //
+  // **这一站顺手把那枚兵认下来**（切片11）。原先三站各自 `find(e => e.type === 'soldier' && e.alive)`，
+  // 于是"站 0 把玩家搬到它旁边"与"站 1 观察的那条轨迹"之间的等号**没人守**：那枚兵在两次 CDP 请求之间
+  // 从 `enemies` 里被摘掉（`EnemyManager.js:144` 的 splice 有 despawn 与死亡两条路）时，站 1 的
+  // `find` 会安静地递上**另一只兵** —— 而那只兵离玩家几十米，理应当场 idle。
+  // 2026-11-06 那一轮红就是这个形状（轨迹只有 idle、我掉血却为真、1600 帧打不死、新增掉落 0），
+  // 日志里没有任何一格能说出"看的不是同一枚"，只能靠页内探针重跑一遍才把两条读数分开。
+  // 标记是**对象身份**（不是名字、不是序号）：`Enemy` 没有 id 字段，而 `name` 全竞技场都一样。
   R.前置 = await evalJs(`(() => {
     const g = window.__game;
-    g.player.combat.hp = ${预算.playerHp};
-    g.player.combat.maxHp = ${预算.playerHp};
+    // 厚血不是一句赋值就完事（r11 / r12 两轮 死距 226 米的正主）：游戏自己会把它顶掉 ——
+    // PlayerStats.applyToCombat() 里那句 hp = Math.min(hp, maxHp) 在升级/换装那一步都会走，
+    // 探针读到 99957 → 118（同一格里 我魂 从 0 变 15，就是那次重算）。玩家当场变成凡人，
+    // 被场上那几十只围死就走 CombatController.respawn() ⇒ player.teleport(0, 2, 55)，
+    // 于是后半程砍的是空气：死距 225.89 = 从兵跟前（-213,-20）回世界出生点（0,55）的直线，
+    // 而那枚兵 兵离家 只有 4.5 米 —— 走掉的是玩家，不是兵。
+    // 这一站要证的是"玩家的招打得死这只兵"，不是"玩家扛得住"，所以把夹具的意图**每帧续回**，
+    // 并装两枚游戏自己派的计数器：中招（player-damaged）与复活（player-respawn）。
+    // 掉血从此不拿 hp 比基线（那会被重算冒充），复活过 = 这一站后半程的读数全部作废。
+    // 这一句是厚血的**唯一一处赋值**：站 1、站 2 只调它，不再各自写一遍基线。
+    window.__e2c中 = 0; window.__e2c活 = 0; window.__e2c挨 = 0; window.__e2c毙 = 0;
+    if (!window.__e2c挂过) {
+      window.__e2c挂过 = true;
+      window.addEventListener('player-damaged', () => { window.__e2c中 += 1; });
+      window.addEventListener('player-respawn', () => { window.__e2c活 += 1; });
+      /* 打中证人的两枚（切片11b）。combat-hit 有**两个派法**，长得一样而意思差一层：
+       * Enemy.takeDamage 派带 detail 的那一枚 = "某只兵挨了一下"（Enemy.js:871），
+       * CombatController 派裸的那一枚 = "这一刀落到了至少一只兵"（CombatController.js:718）。
+       * 裸的那一枚**会被冒充**：QuestAssistant.js:317 在任务自动带路时也代派一枚裸 combat-hit，
+       * 所以这里只数带 detail 的那条 —— 它只有兵自己的掉血会派。击倒走 enemy-defeated（Enemy.js:898）。 */
+      window.addEventListener('combat-hit', (e) => { if (e.detail) window.__e2c挨 += 1; });
+      window.addEventListener('enemy-defeated', () => { window.__e2c毙 += 1; });
+    }
+    window.__e2c厚血 = (c) => {
+      let 顶 = 0;
+      if (c.maxHp < ${预算.playerHp}) { c.maxHp = ${预算.playerHp}; 顶 += 1; }
+      if (c.hp < ${预算.playerHp}) { c.hp = ${预算.playerHp}; }
+      return 顶;
+    };
+    window.__e2c厚血(g.player.combat);
     const 兵 = g.enemyManager.enemies.find(e => e.type === 'soldier' && e.alive);
     if (!兵) throw new Error('没有活着的影之战士');
+    for (const 别 of g.enemyManager.enemies) if (别.__e2c) delete 别.__e2c;
+    兵.__e2c = 1;
     g.player.teleport(兵.position.x + 2.2, 0, 兵.position.z, { yaw: 0, pitch: 0 });
-    return { 兵名: 兵.name, 敌血: 兵.hp, 我魂: g.stats.souls, 击杀账: { ...(g.quests.stats.kills ?? {}) } };
+    return { 兵名: 兵.name, 敌血: 兵.hp, 我魂: g.stats.souls, 击杀账: { ...(g.quests.stats.kills ?? {}) },
+      标记在: 兵.__e2c === 1,
+      兵距: +Math.hypot(g.player.position.x - 兵.position.x, g.player.position.z - 兵.position.z).toFixed(2),
+      // 两侧坐标 + 那枚兵离自己出生点多远：r11 读到 死距 225.93 而这一格里没有任何一格说得出
+      // 是**谁**走了 226 米（兵归巢？玩家被推走？），光有一个相对距离只能推出"分开了"。
+      兵坐标: [+兵.position.x.toFixed(1), +兵.position.z.toFixed(1)],
+      玩家坐标: [+g.player.position.x.toFixed(1), +g.player.position.z.toFixed(1)],
+      兵离家: +兵.distanceTo(兵.spawnPoint).toFixed(1) };
   })()`);
 
   // 站1：AI 通路——玩家贴脸后推帧，**每帧**采一次状态，交出去的是走过的那条轨迹
   // （r7 之前采的是"第一帧的态"与"最后一帧的态"两个点，于是"打完一套连段又回到 windup"
   //  与"卡在 windup 里出不来"读出来一模一样 —— 见 `harness-readings.mjs` 的 `战斗越线`）
+  //
+  // 取兵走站 0 那枚标记，不再重数一遍"第一只活着的兵"。另外交回三格**归因**用的数：
+  // `没推进`（这一窗口里 `sense.dist` 始终读不出数 = `EnemyManager.update` 根本没跑到它，
+  // 世界被界面/暂停冻住或这一格被剔除 —— 此时"轨迹"与"掉血"都不是证据）、
+  // `首帧距` / `末帧距`（人还在不在它旁边）。"全程 idle"这一条红有了这两格才分得开
+  // "AI 真回归"与"玩家已经不在场"。
+  //
+  // **掉血的证人换成游戏自己派的 `player-damaged`**（切片11 尾巴）。旧写法是
+  // `g.player.combat.hp < 基线` 且在循环**之前**取一次 —— 它量的其实是"两次 CDP 请求之间那半秒"，
+  // 而夹具每帧被顶回 99999 之后那个比较永远为假。另外每帧续回一次厚血、并把顶回/复活计数交出去：
+  // 顶回次数 = 游戏自己把 maxHp 写回基础值的次数（升级/换装那条重算），复活次数 > 0 = 这一站后半程
+  // 的玩家已经死过一回，`玩家坐标` 会变成世界出生点，此时"打不死"读的是空气。
   R.ai = await evalJs(`(async () => {
     const g = window.__game;
-    const 兵 = g.enemyManager.enemies.find(e => e.type === 'soldier' && e.alive);
+    const 兵 = g.enemyManager.enemies.find(e => e.__e2c === 1);
+    const 中0 = window.__e2c中; const 活0 = window.__e2c活;
+    if (!兵) return { 标记丢了: true, 轨迹: [], 后: null, 我掉血: window.__e2c中 > 中0, 复活: 0 };
+    const 距 = () => +Math.hypot(g.player.position.x - 兵.position.x,
+      g.player.position.z - 兵.position.z).toFixed(2);
     const 轨迹 = [];
     const 记一笔 = () => { const s = String(兵.state); if (轨迹[轨迹.length - 1] !== s) 轨迹.push(s); };
     记一笔();
-    for (let i = 0; i < ${预算.aiProbeFrames}; i += 1) { g.update(); if (i % ${预算.renderEvery} === 0) g.render(); 记一笔(); await new Promise(r => setTimeout(r, 0)); }
-    return { 轨迹: 轨迹.slice(0, 40), 后: 兵.state, 我掉血: g.player.combat.hp < ${预算.playerHp} };
+    let 首帧距 = null;
+    let 顶次数 = 0;
+    for (let i = 0; i < ${预算.aiProbeFrames}; i += 1) {
+      g.update();
+      顶次数 += window.__e2c厚血(g.player.combat);
+      if (首帧距 === null && Number.isFinite(兵.sense.dist)) 首帧距 = 距();
+      if (i % ${预算.renderEvery} === 0) g.render();
+      记一笔();
+      await new Promise(r => setTimeout(r, 0));
+    }
+    return { 轨迹: 轨迹.slice(0, 40), 后: 兵.state, 我掉血: window.__e2c中 > 中0, 顶次数, 复活: window.__e2c活 - 活0,
+      没推进: 首帧距 === null, 首帧距, 末帧距: 距(), 玩家y: +g.player.position.y.toFixed(2),
+      // 这一格读得到才算"厚血夹具还在"：r12 的 118 就是夹具丢了的样子（现在由 复活/顶次数 点名）。
+      我hp: g.player.combat.hp,
+      兵坐标: [+兵.position.x.toFixed(1), +兵.position.z.toFixed(1)],
+      玩家坐标: [+g.player.position.x.toFixed(1), +g.player.position.z.toFixed(1)] };
   })()`);
   R.墙钟秒.站1 = 秒表.读();
 
   // 站2：真输入击杀——mouseDown 锁存一帧（与真实 mousedown 监听同一把锁存），主循环自己出招
+  // （取的也是站 0 那枚标记：这一站的"打不死"如果其实是"打的是空气"，那要说得出是谁不在场）
+  //
+  // 这一站的每一段循环都续一次厚血（含收尸那一段）：r12 那 226 米是玩家死过一次之后被送回
+  // 世界出生点走出来的，而 `复活` 那一格旧读数里没有 —— 只有游戏自己派的 player-respawn 数得出死过几次。
   R.击杀 = await evalJs(`(async () => {
     const g = window.__game;
-    const 兵 = g.enemyManager.enemies.find(e => e.type === 'soldier' && e.alive);
+    const 兵 = g.enemyManager.enemies.find(e => e.__e2c === 1);
+    const 中0 = window.__e2c中; const 活0 = window.__e2c活;
+    if (!兵) return { 标记丢了: true, 帧数: 0, 杀掉: false, 掉过血: window.__e2c中 > 中0, 复活: 0 };
     const 旧魂 = g.stats.souls;
     /**
      * "这一只兵掉的那一份"用**对象身份 + 断气位置**认，不用"最近的一份"：
@@ -392,18 +473,103 @@ try {
      */
     const 在场 = () => new Set(g.loot?.drops ?? []);
     const 断气前 = 在场();
+    const 人距 = () => Math.hypot(g.player.position.x - 兵.position.x,
+      g.player.position.z - 兵.position.z);
+    // r11 读到 死距 225.93 而 帧数 = 1600 整：这一窗里两侧分开了，但"从第几帧开始分开"没人记。
+    // 界取**这只兵自己的 aggroRange**（它连自己的仇恨圈都走出来了 ⇒ 这一帧之后玩家砍的是空气），
+    // 不抄一个米数 —— 抄的那个数字会变成第二份没人认账的几何。
+    const 远界 = 兵.aggroRange;
+    /* 三把尺（切片11b）：出招 → 打中 → 打的谁。
+     * r13 那一轮夹具续住了（我hp 99999、复活 0、死距 2.58），1600 帧真输入却只让兵掉了 38 血，
+     * 而读数里只有"没打死"那一句 —— 探针（.tmp-20261031-s25/wb7-13-hitprobe.log，14 批 × 120 帧）
+     * 量到的是**我态一路 light/combo、combat-hit 两枚证人全程为 0**：招一直在出，一刀没落到任何兵身上，
+     * 而那枚兵 2.2 米、最近、身边三米内只有它一只。病灶是几何：站 0 把玩家放在它旁边却把 yaw 钉成 0，
+     * 于是玩家**侧对着**它挥刀 —— 轻击锥是 acos(0.12)≈83°，正垂直的那一个差几度正好溜在锥沿外。
+     * 从此这一站按玩家真会做的两件事补：转身面向它，再按锁定把它锁住（锁定时命中朝向直接取目标位置，
+     * 见 PlayerController.getCombatForwardXZ），被击退推开了就按 W 跟上（刃长读游戏自己的 _strike.range，
+     * 不在这里抄一个米数）。旧的形状只交"没打死"，新的形状把断在哪一环交出来：
+     * 起手（_setStrike 登记了一招）→ 判定（processHitWindow 结算过那一刀）→ 有人挨刀（带 detail 的 combat-hit）
+     * → 兵掉血（那一枚自己的账）→ 击倒（enemy-defeated）。每一环都是游戏自己的字段或事件，不另数一遍。 */
+    const 起始血 = 兵.hp;
+    const 挨0 = window.__e2c挨; const 毙0 = window.__e2c毙;
+    let 起手 = 0;
+    let 判定 = 0;
+    let 判定过 = g.player.combat.attackHitDone;
+    let 补锁 = 0;
+    /** 把那一枚锁住：先按游戏自己的 Q 分支（clearLock 再 toggleLock = 玩家松手重按），
+     *  而锁定候选按 dot 打分（EnemyManager.getLockCandidates），所以必须**先转身面向它**才轮得到它。
+     *  交回"这一帧锁没锁在它身上"，掉一次锁就补一次并记账 —— 补锁 > 1 即这一窗里锁丢过。 */
+    const 锁上它 = () => {
+      if (g.player.combat.lockTarget === 兵) return;
+      g.player.combat.clearLock();
+      const p = g.player.position;
+      const 向 = Math.atan2(兵.position.x - p.x, 兵.position.z - p.z);
+      g.player.yaw = 向; g.player.targetYaw = 向;
+      g.player.combat.toggleLock();
+      补锁 += 1;
+    };
+    /* r14 撞出来的那一档（切片11c）：**出招的兑现**。四档链（起手/判定/挨刀/掉血）在 r14 一档都没断在 0，
+     * 可 1600 帧里只起了 2 招 —— 探针（.tmp-20261031-s25/wb7-14-whyprobe.log）量到的是
+     * **体力全程够（够力帧 200/200、轻击耗 10、体力 107/108），而 combat.canStart('light') 从第 110 帧起恒假**：
+     * 连段处决派了 combo-finisher ⇒ ContextualTutorial 在 200ms 后弹出一枚**模态**教学，
+     * 而 Game.js:1041-1056 的 playing 一关就把 player.update（含 combat.update，那枚读锁存、
+     * 缓冲按下、推进招式的那一条）整条冻住。于是 1400 帧里玩家既动不了也打不出招，而读数只会说
+     * "1600 帧没打死一只兵"—— 那句话是假的。
+     * soak.mjs 早就为同一件事每 30 帧点一次 #dialog-close，教训写在 tests/soak-readings.test.js 里
+     * （要点那枚按钮，不要绕过界面去调它自己的隐藏方法：教学的 onClose 挂在按钮上，
+     * 绕过按钮 = 队列永远卡在第一条）——
+     * 这一片把那条已经付过学费的做法搬进战斗门禁（与 #36 同族的"教训留在原地没跟着搬"）。
+     * 同时把三格**兑现读数**交回来：按下几次、游戏允许出招的有几帧、被哪一道闸冻住各多少帧。 */
+    let 按下 = 0;
+    let 可起帧 = 0;
+    let 冻帧 = 0;
+    const 冻因 = {};
+    let 关弹窗 = 0;
+    // 逐帧只问游戏自己的闸门（Game.js:1041-1050 那一串），不另数一遍
+    const 问冻 = (名, 是) => { if (是) { 冻帧 += 1; 冻因[名] = (冻因[名] ?? 0) + 1; } };
     let 帧 = 0;
     let 掉过血 = false;
+    let 顶次数 = 0;
+    let 分开首帧 = null;
     while (兵.alive && 帧 < ${预算.maxKillFrames}) {
+      锁上它();
       // 每隔几帧给一次"按下左键"的边沿（锁存每帧被主循环清掉，模拟真点）
-      if (帧 % 12 === 0) g.player.combat.mouseDown['left'] = true;
+      if (帧 % 12 === 0) { g.player.combat.mouseDown['left'] = true; 按下 += 1; }
+      // 被击退推开了就跟上去：刃长读**这一招自己登记的** range，没招过之前（null）先贴过去
+      const 刃 = g.player.combat._strike?.range;
+      g.keys['KeyW'] = 刃 === undefined ? true : 人距() > 刃 * 0.75;
+      // 问在 update 之前：这一帧游戏自己允不允许转进轻击、玩家的手在不在他自己那里
+      if (g.player.combat.canStart('light')) 可起帧 += 1;
+      问冻('对话', !!g.dialog?.open);
+      问冻('电影', !!g.cinematicActive);
+      问冻('相机锁', !!g.combatCamera?.blocksInput?.());
+      问冻('输入锁', !!g.combatInputLock?.blocksInput?.());
+      // 玩家看得见的模态由他自己点掉：点 #dialog-close 这枚按钮，而不是绕过界面调那个隐藏方法，
+      // 每 30 帧一次 —— 与 soak.mjs 同一个做法，教学自己的 onClose 挂在这枚按钮上
+      if (帧 % 30 === 0 && g.dialog?.open) { document.getElementById('dialog-close')?.click(); 关弹窗 += 1; }
       g.update();
+      顶次数 += window.__e2c厚血(g.player.combat);
+      const 抬 = g.player.combat.attackHitDone;
+      if (判定过 && !抬) 起手 += 1;
+      if (!判定过 && 抬) 判定 += 1;
+      判定过 = 抬;
       if (帧 % ${预算.renderEvery} === 0) g.render();
       帧 += 1;
-      if (g.player.combat.hp < ${预算.playerHp}) 掉过血 = true;
+      if (分开首帧 === null && 人距() > 远界) 分开首帧 = 帧;
+      // 中招证人 = 游戏自己派的事件，不是 hp 与基线的比较（那一句在每帧顶回之后恒假）
+      if (window.__e2c中 > 中0) 掉过血 = true;
       if (帧 % 120 === 0) await new Promise(r => setTimeout(r, 0));
     }
+    // 点号写法（不是方括号那一行）：判据站2交账 拿那句字面量当起点，两处一样就会把起点提前
+    g.keys.KeyW = false;
     const 死点 = { x: 兵.position.x, z: 兵.position.z };
+    const 刀 = g.player.getCombatForwardXZ();
+    const 指向 = { x: 兵.position.x - g.player.position.x, z: 兵.position.z - g.player.position.z };
+    const 指向长 = Math.hypot(指向.x, 指向.z) || 1;
+    // 面向偏差：命中朝向与"玩家→那一枚"这两条线夹了多少度。锥是 83°，所以这一格 > 83 就是
+    // 每一刀都从它脸边擦过去 —— r13 那句话（"1600 帧没打死"）真正的意思在这里有了数。
+    const 偏差 = +(Math.acos(Math.max(-1, Math.min(1,
+      (刀.x * 指向.x + 刀.z * 指向.z) / 指向长))) * 180 / Math.PI).toFixed(1);
     const 新增 = (g.loot?.drops ?? []).filter((d) => !断气前.has(d));
     const 魂火 = 新增.find((d) => !d.gear && d.souls > 0
       && Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5) ?? null;
@@ -418,12 +584,29 @@ try {
       g.player.yaw = 向; g.player.targetYaw = 向;
       g.keys['KeyW'] = true;
       g.update();
+      顶次数 += window.__e2c厚血(g.player.combat);
       if (收尸帧 % ${预算.renderEvery} === 0) g.render();
       收尸帧 += 1;
       if (收尸帧 % 120 === 0) await new Promise(r => setTimeout(r, 0));
     }
     g.keys['KeyW'] = false;
     return { 帧数: 帧, 杀掉: !兵.alive, 掉过血,
+             兵血: 兵.hp,
+             死距: +Math.hypot(g.player.position.x - 兵.position.x,
+               g.player.position.z - 兵.position.z).toFixed(2),
+             // 分开是谁走的、从第几帧开始走、厚血夹具还在不在 —— r11 只有 死距 一个数，
+             // 说不出口"兵归巢 / 玩家被推走 / 玩家成了凡人"这三条里是哪一条。
+             // 夹具那一条现在由 顶次数 / 复活 直接说：死过一次的话 玩家坐标 会是 teleport 的目标。
+             兵坐标: [+兵.position.x.toFixed(1), +兵.position.z.toFixed(1)],
+             玩家坐标: [+g.player.position.x.toFixed(1), +g.player.position.z.toFixed(1)],
+             兵离家: +兵.distanceTo(兵.spawnPoint).toFixed(1), 仇恨圈: +远界.toFixed(1),
+             分开首帧, 我hp: g.player.combat.hp, 顶次数, 复活: window.__e2c活 - 活0, 场上敌数: g.enemyManager.enemies.length,
+             // 三把尺的读数（切片11b）：断在哪一环，红话里就有哪一环的名字，不用再起探针。
+             起手, 判定, 有人挨刀: window.__e2c挨 - 挨0, 击倒: window.__e2c毙 - 毙0,
+             兵掉血: 起始血 - 兵.hp, 补锁, 偏差, 刃长: g.player.combat._strike?.range ?? null,
+             // 兑现那一档的读数（切片11c）：按下 vs 起招 vs 游戏允许的帧数 vs 哪一道闸冻住了几帧
+             按下, 可起帧, 冻帧, 冻因, 关弹窗, 我招: g.player.combat.state,
+             三米内: g.enemyManager.enemies.filter((e) => e.alive && e.distanceTo(g.player.position) < 3).length,
              魂入账: g.stats.souls - 旧魂,
              新掉落数: 新增.length, 认领距, 认领souls: 魂火?.souls ?? 0,
              魂火离场: 魂火 ? !(g.loot?.drops ?? []).includes(魂火) : false,

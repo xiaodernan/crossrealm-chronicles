@@ -23,6 +23,11 @@ export const STRINGS_ZH = Object.freeze({
   settings_caption_small: '小',
   settings_caption_medium: '中',
   settings_caption_large: '大',
+  // 界面文字档（W-D6 切片69）：改根字号，所有 rem 文本等比缩放
+  settings_ui_text: '界面文字',
+  settings_ui_text_small: '小',
+  settings_ui_text_medium: '标准',
+  settings_ui_text_large: '大',
   caption_gear_drop: '掉落：${rarity}',
   caption_pickup: '已拾取',
   caption_execution: '处决',

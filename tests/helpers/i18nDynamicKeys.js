@@ -21,6 +21,7 @@ import { SSAO_QUALITY_NAMES } from '../../src/engine/ssaoSettings.js';
 import { SHAKE_STRENGTH_IDS } from '../../src/engine/shakeStrength.js';
 import { CAPTION_SCALE_IDS } from '../../src/engine/captionScale.js';
 import { FLASH_STRENGTH_IDS } from '../../src/engine/flashStrength.js';
+import { UI_TEXT_SCALE_IDS } from '../../src/engine/uiTextScale.js';
 
 const walk = (dir) => readdirSync(dir).flatMap((name) => {
   const p = join(dir, name);
@@ -76,6 +77,11 @@ export const 拼键名册 = [
   {
     前缀: 'settings_flash_',
     域: [...FLASH_STRENGTH_IDS],
+    拼键处文件: 'src/ui/SettingsPanel.js',
+  },
+  {
+    前缀: 'settings_ui_text_',
+    域: [...UI_TEXT_SCALE_IDS],
     拼键处文件: 'src/ui/SettingsPanel.js',
   },
 ];

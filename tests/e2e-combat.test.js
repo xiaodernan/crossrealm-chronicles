@@ -568,13 +568,13 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
       ['清理退回裸 kill()', "spawnSync('taskkill', ['/PID', String(子进程.pid), '/T', '/F'], { stdio: 'ignore' })", '子进程.kill()'],
       ['开机窗口缩回 30 秒', 'for (let i = 0; i < 240 && !ready; i += 1)', 'for (let i = 0; i < 60 && !ready; i += 1)'],
       ['async 站不等 Promise', '等待页面Promise: true', '等待页面Promise: false'],
-      ['白盒扣血', "if (帧 % 12 === 0) g.player.combat.mouseDown['left'] = true;", '兵.takeDamage(99999);'],
+      ['白盒扣血', "if (帧 % 12 === 0) { g.player.combat.mouseDown['left'] = true; 按下 += 1; }", '兵.takeDamage(99999);'],
       // 帧预算回潮成字面量要**两处一起**换（页内那一句 + 越线话术里那一句），只换第一处的话
       // `includes('${预算.maxKillFrames}')` 会靠第二处蒙过这一臂 —— 所以这里是两条各带锚点的拆法。
       ['页内循环的预算抄成字面量', 'while (兵.alive && 帧 < ${预算.maxKillFrames})', 'while (兵.alive && 帧 < 24000)'],
       ['越线话术里的预算抄成字面量', '｜${预算.maxKillFrames} 帧预算用了', '｜24000 帧预算用了'],
       ['判据 import 搬回本地', 'import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴, 战斗越线 } from', 'import { 页地址问题, 通道问题, 重载问题 } from'],
-      ['厚血抄成第二份字面量', '  g.player.combat.hp = ${预算.playerHp};', '  g.player.combat.hp = 99999;'],
+      ['厚血抄成第二份字面量', 'if (c.hp < ${预算.playerHp}) { c.hp = ${预算.playerHp}; }', 'if (c.hp < ${预算.playerHp}) { c.hp = 99999; }'],
       ['通道不接工厂', "import { 开通道 } from './cdp-channel.mjs';\n", ''],
     ];
     for (const [名, 锚] of 拆法) {
@@ -792,7 +792,7 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
       expect(尺(源文), `"${名}"在真源码上不过`).toBe(true);
     }
     const 坏 = {
-      循环里不采: 源文.replace('g.render(); 记一笔(); await', 'g.render(); await'),
+      循环里不采: 源文.replace('g.render();\n      记一笔();\n      await', 'g.render();\n      await'),
       不交轨迹: 源文.replace('return { 轨迹: 轨迹.slice(0, 40), 后: 兵.state,', 'return { 后: 兵.state,'),
       不收尸: 源文.replace("      g.keys['KeyW'] = true;", '      /* 站着等 */;'),
       窗口不走: 源文.replace('while (魂火 && 收尸帧 < ${预算.lootProbeFrames} && g.stats.souls === 旧魂) {',

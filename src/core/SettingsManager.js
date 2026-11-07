@@ -14,6 +14,7 @@ import { DEFAULT_SHAKE_STRENGTH, shakeScaleOf } from '../engine/shakeStrength.js
 import { DEFAULT_BRIGHTNESS, normalizeBrightness } from '../engine/brightness.js';
 import { DEFAULT_CAPTION_SCALE } from '../engine/captionScale.js';
 import { DEFAULT_FLASH_STRENGTH, setFlashStrength } from '../engine/flashStrength.js';
+import { DEFAULT_UI_TEXT_SCALE, applyUiTextScale } from '../engine/uiTextScale.js';
 const KEY = 'crossrealm_settings';
 /** v1 是"整包扁平、没有版本字段"；v2 起是 `{ version, values }` */
 const VERSION = 2;
@@ -112,6 +113,13 @@ const DEFAULTS = {
    * 脏值在 `normalizeCaptionScale` 里回落出厂，不抛。
    */
   captionScale: DEFAULT_CAPTION_SCALE,
+  /**
+   * 界面文字档（W-D6 切片69）：small / medium / large 三档，名册在
+   * `engine/uiTextScale.js`。出厂 `medium` = 根字号 16px，逐像素与"没有这一格"相同。
+   * 只改根字号，所有 rem 文本等比缩放（层次不抹平）；存的是档位而不是像素值。
+   * 脏值在 `normalizeUiTextScale` 里回落出厂，不抛。
+   */
+  uiTextScale: DEFAULT_UI_TEXT_SCALE,
   /**
    * 手柄震动（切片17）：只挡"要不要给马达下令"这一格，相机抖不抖仍然照旧 ——
    * 打击反馈有两路输出，玩家只想关其中一路（例如有人在夜里玩）。
@@ -333,6 +341,9 @@ export class SettingsManager {
     // 字幕字号档（W-D6 切片67）：与开关同一条纪律 —— 写入口只有这一处。
     // 容器上的 CSS 变量当场改，场上已有的行与新画的行一起变；脏值回落 medium、不抛。
     game.captions?.setScale(this.get('captionScale'));
+    // 界面文字档（W-D6 切片69）：写入口只有这一处（与字幕字号同一条纪律）。
+    // 只写根元素上的 CSS 变量；无 DOM 环境静默跳过，返回值仍是清洗后的倍率。
+    applyUiTextScale(this.get('uiTextScale'));
     // 震屏强度（W-E3 切片58）：写入口只有这一处（与震动开关同一族）。生效时机：下一记
     // `addShake` 即生效；换到 off 当场清残留（`setScale` 里 reset），不会"关了还在晃两秒"。
     // 只乘相机 —— 马达那一半由 `vibration` 管，两格各管一路，互不代偿。

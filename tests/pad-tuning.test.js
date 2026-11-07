@@ -810,7 +810,7 @@ describe('静态门禁：一处范围、一处写入口、桥只读自己的手�
  * 否则"壳页里多一个没人认的旋钮"就不再报错 —— 而那正是这条不变式要防的事
  * （漏一格 = 拖不动，多一格 = 没人认，两者都不会抛，只会静静地不合预期）。
  */
-const TABLE_FED_SLIDERS = Object.freeze(['set-look-sensitivity']);
+const TABLE_FED_SLIDERS = Object.freeze(['set-look-sensitivity', 'set-brightness']);
 
   it('滑杆的范围只写在 `PAD_TUNING`：壳页里那些"旋钮格"不许带 min/max/step，而且与表**双向**对上', () => {
     const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');

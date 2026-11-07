@@ -17,6 +17,7 @@ import { normalizeShakeStrength, shakeStrengthOptions } from '../engine/shakeStr
 import { BRIGHTNESS, brightnessPercent, normalizeBrightness } from '../engine/brightness.js';
 import { captionScaleOptions, normalizeCaptionScale } from '../engine/captionScale.js';
 import { flashStrengthOptions, normalizeFlashStrength } from '../engine/flashStrength.js';
+import { uiTextScaleOptions, normalizeUiTextScale } from '../engine/uiTextScale.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
@@ -131,6 +132,22 @@ export class SettingsPanel {
       capSize.value = normalizeCaptionScale(s.get('captionScale'));
       capSize.addEventListener('change', () => {
         s.set('captionScale', capSize.value);
+        s.applyToGame(this.game);
+      });
+    }
+    // 界面文字档（W-D6 切片69）：与字幕字号同一副骨架，但这一格管整份 UI 的根字号。
+    // 选项从名册现推，落地只走 applyToGame —— 面板不直接摸 documentElement。
+    const uiText = document.getElementById('set-ui-text');
+    if (uiText) {
+      for (const id of uiTextScaleOptions()) {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = t(`settings_ui_text_${id}`);
+        uiText.appendChild(opt);
+      }
+      uiText.value = normalizeUiTextScale(s.get('uiTextScale'));
+      uiText.addEventListener('change', () => {
+        s.set('uiTextScale', uiText.value);
         s.applyToGame(this.game);
       });
     }
@@ -499,6 +516,8 @@ export class SettingsPanel {
     if (cap) cap.checked = this.game.settings.get('captions') === true;
     // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 padTuning 的回显同一纪律）
     set('set-caption-size', normalizeCaptionScale(d.captionScale));
+    // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 padTuning 的回显同一纪律）
+    set('set-ui-text', normalizeUiTextScale(d.uiTextScale));
     // 回显的也是清洗过的值：脏档会显示成出厂那一格（与 `padTuning` 的回显同一纪律）
     set('set-shadow-quality', normalizeShadowQuality(d.shadowQuality));
     set('set-msaa', normalizeMsaaSamples(d.msaaSamples));

@@ -4,6 +4,13 @@
   box-sizing: border-box;
 }
 
+/* 界面文字三档（W-D6 切片69）：整份 UI 的 rem 层次乘这一格。
+   出厂 medium = 1，根字号仍是 16px，逐像素与"没有这一格"相同；
+   变量缺省也按 1 算（纯 CSS 兜底）。 */
+html {
+  font-size: calc(16px * var(--ui-text-scale, 1));
+}
+
 html,
 body {
   width: 100%;

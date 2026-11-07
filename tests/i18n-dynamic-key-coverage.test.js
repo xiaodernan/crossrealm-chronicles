@@ -19,6 +19,7 @@ import { SSAO_QUALITY_NAMES, SSAO_QUALITY_PRESETS } from '../src/engine/ssaoSett
 import { SHAKE_STRENGTHS, SHAKE_STRENGTH_IDS } from '../src/engine/shakeStrength.js';
 import { CAPTION_SCALES, CAPTION_SCALE_IDS } from '../src/engine/captionScale.js';
 import { FLASH_STRENGTHS, FLASH_STRENGTH_IDS } from '../src/engine/flashStrength.js';
+import { UI_TEXT_SCALES, UI_TEXT_SCALE_IDS } from '../src/engine/uiTextScale.js';
 import { 扫描拼键模板, 前缀Of, 拼键名册, 动态接线键集 } from './helpers/i18nDynamicKeys.js';
 
 const SEP = process.platform === 'win32' ? '\\' : '/';
@@ -43,6 +44,7 @@ describe('① 拼键扫描尺子自己不是摆设', () => {
       'src/ui/SettingsPanel.js t(`settings_flash_${id}`)',
       'src/ui/SettingsPanel.js t(`settings_shake_${id}`)',
       'src/ui/SettingsPanel.js t(`settings_ssao_quality_${name}`)',
+      'src/ui/SettingsPanel.js t(`settings_ui_text_${id}`)',
     ]);
   });
 
@@ -99,6 +101,7 @@ describe('② 拼键名册与真实拼键处双向对齐', () => {
     'settings_shake_': { 域: SHAKE_STRENGTH_IDS, 参数表: Object.keys(SHAKE_STRENGTHS) },
     'settings_caption_': { 域: CAPTION_SCALE_IDS, 参数表: Object.keys(CAPTION_SCALES) },
     'settings_flash_': { 域: FLASH_STRENGTH_IDS, 参数表: Object.keys(FLASH_STRENGTHS) },
+    'settings_ui_text_': { 域: UI_TEXT_SCALE_IDS, 参数表: Object.keys(UI_TEXT_SCALES) },
   };
 
   it('代入域不许是抄本：名册那份 == 运行期名册 == 参数表的键', () => {
@@ -124,8 +127,9 @@ describe('③ 拼键展开出来的键必须有定义', () => {
       ...SHAKE_STRENGTH_IDS.map((名) => `settings_shake_${名}`),
       ...CAPTION_SCALE_IDS.map((名) => `settings_caption_${名}`),
       ...FLASH_STRENGTH_IDS.map((名) => `settings_flash_${名}`),
+      ...UI_TEXT_SCALE_IDS.map((名) => `settings_ui_text_${名}`),
     ].sort();
-    expect(展开, '名册展开出来的键集不对（应当恰好四族：SSAO 四档 + 震屏三档 + 字幕字号三档 + 闪光强度三档）').toEqual(应展开);
+    expect(展开, '名册展开出来的键集不对（应当恰好五族：SSAO 四档 + 震屏三档 + 字幕字号三档 + 闪光强度三档 + 界面文字三档）').toEqual(应展开);
     for (const 键 of 展开) {
       expect(ZH_KEYS, `中文表没有「${键}」—— 面板那一档会显示 [MISSING: ${键}]`).toContain(键);
       expect(EN_KEYS, `英文表没有「${键}」—— 切英文时那一档显示 [MISSING: ${键}]`).toContain(键);

@@ -472,26 +472,132 @@ export function 原话尾巴(全文, 条数 = 3) {
  * `魂入账` 用 `> 0` 而不是 `!== 0`（`undefined`、`NaN`、负数都不算入账），`杀掉` 只认真值。
  * 这条门禁的红话必须比数字多说一点（认领距、用了多少帧），否则下一次红还是同一轮考古。
  *
- * @param {{ai: {轨迹?: unknown, 我掉血?: boolean}, 击杀: {杀掉?: boolean, 魂入账?: number, 认领距?: number|null, 认领souls?: number, 新掉落数?: number, 魂火离场?: boolean, 收尸帧?: number, 击杀账?: Record<string, number>}}} R 三站读数
+ * @param {{ai: {轨迹?: unknown, 我掉血?: boolean, 复活?: number, 顶次数?: number}, 击杀: {杀掉?: boolean, 魂入账?: number, 认领距?: number|null, 认领souls?: number, 新掉落数?: number, 魂火离场?: boolean, 收尸帧?: number, 击杀账?: Record<string, number>, 复活?: number, 顶次数?: number, 起手?: number, 判定?: number, 有人挨刀?: number, 兵掉血?: number, 击倒?: number, 偏差?: number, 刃长?: number|null, 三米内?: number, 补锁?: number, 按下?: number, 可起帧?: number, 冻帧?: number, 冻因?: Record<string, number>, 关弹窗?: number}}} R 三站读数
  * @param {{aiProbeFrames: number, aiEngagedStates: string[], lootProbeFrames: number, maxKillFrames: number, playerHp: number, minKillLedger: number, exceptions: number}} 预算
  * @param {string[]} [异常] 页面里未捕获的异常文本
  * @returns {string[]} 越线的话，空数组 = 这一轮过
  */
 export function 战斗越线(R, 预算, 异常 = []) {
   const out = [];
+  /**
+   * —— 切片11：三站认的是不是**同一枚兵** ——
+   *
+   * 旧形状里站 0 把玩家搬到"第一只活着的兵"旁边，站 1 与站 2 再各自数一遍同一个表达式。
+   * 中间只要那只兵被摘出 `enemies`（`EnemyManager` 的 despawn 与死亡两条路都 splice），
+   * 后两站的 `find` 就安静地递上**另一只** —— 而日志里"轨迹只有 idle"与"看的不是同一只"
+   * 长得一模一样。这一格把等号变成读数：标记是对象身份，丢了就点名，不再靠事后探针考古。
+   */
+  const 站1丢 = R?.ai?.标记丢了 === true;
+  const 站2丢 = R?.击杀?.标记丢了 === true;
+  if (站1丢 || 站2丢) {
+    out.push(`三站认的不是同一枚兵：站 1 ${站1丢 ? '认不出' : '认得出'}、站 2 ${站2丢 ? '认不出' : '认得出'}站 0 那枚标记`
+      + ' ⇒ 名单在两次 CDP 请求之间被换过，这一轮的"轨迹"与"打不死"都不是那枚兵的读数');
+  }
+  /**
+   * —— 切片11 尾巴：厚血夹具**这一窗里有没有一直保住玩家** ——
+   *
+   * r11 / r12 那两轮的红（1600 帧打不死、认不出自己那枚魂火、击杀账本空）不是三个 bug，是**一个**：
+   * 夹具那句 `hp = 99999` 被游戏自己的结算重算顶回基础值（探针读到 99957 → 118，同一格里 我魂 从 0 变 15），
+   * 玩家当场变成凡人，被围死之后走 `CombatController.respawn()` ⇒ `player.teleport(0, 2, 55)` ——
+   * 于是 `死距 225.89` 而 `兵离家 4.5`：走掉的是玩家。现在脚本每帧把夹具续回来，并把游戏自己派的
+   * `player-respawn` 数交回来。**这一条红是"续不住"的哨兵**：复活过 > 0 就说明这一站后半程两侧量的
+   * 不是同一场战斗，此时下面每一格都只该当噪音读。
+   */
+  const 复活 = (Number(R?.ai?.复活) || 0) + (Number(R?.击杀?.复活) || 0);
+  if (复活 > 0) {
+    out.push(`厚血夹具没保住玩家：站 1 复活 ${Number(R?.ai?.复活) || 0} 次、站 2 复活 ${Number(R?.击杀?.复活) || 0} 次`
+      + `（每帧顶回 ${JSON.stringify(R?.ai?.顶次数)}/${JSON.stringify(R?.击杀?.顶次数)} 次）`
+      + ' ⇒ 死过一次就走 respawn() 的 teleport，此后"轨迹""打不死""没入账"量的都不是那枚兵'
+      + `｜站 2 末 玩家 ${JSON.stringify(R?.击杀?.玩家坐标)} 兵 ${JSON.stringify(R?.击杀?.兵坐标)}`);
+  }
+  /**
+   * 这一窗里世界**有没有在推进**：`sense.dist` 是 `EnemyManager.update → Enemy.update → Sense.update`
+   * 那条链的必经产物，它一路读不出数就说明这一页根本没跑到这只兵（暂停/界面层挡在 `playing` 那一格，
+   * 或这一格被剔除）。此时下面每一条读数都只是"没动"，不是"没问题"，也不是"AI 坏了"。
+   */
+  if (R?.ai?.没推进 === true) {
+    out.push(`站 1 的 ${预算.aiProbeFrames} 帧里那枚兵的 sense.dist 始终读不出数`
+      + ' ⇒ 世界没在推进（暂停/界面层挡住，或这一格被剔除）—— 此时"轨迹"与"掉血"都不算证据');
+  }
   const 轨迹 = R?.ai?.轨迹;
   if (!Array.isArray(轨迹) || 轨迹.length === 0) {
     out.push(`AI 通路：这一轮没交出状态轨迹（读到 ${JSON.stringify(轨迹)}）—— 采样那一行断了，此时"没卡死"这句话没有依据`);
   } else {
     const 出手过 = 轨迹.filter((s) => 预算.aiEngagedStates.includes(s));
     if (出手过.length === 0) {
-      out.push(`AI 通路：${预算.aiProbeFrames} 帧里只走过 ${轨迹.join('→')}，没进 ${预算.aiEngagedStates.join('/')} 任何一档`);
+      // 带得上"人还在不在它旁边"：同样是全程 idle，2.2 米是 AI 回归，几十米是夹具/几何
+      out.push(`AI 通路：${预算.aiProbeFrames} 帧里只走过 ${轨迹.join('→')}，没进 ${预算.aiEngagedStates.join('/')} 任何一档`
+        + `｜首帧距 ${JSON.stringify(R?.ai?.首帧距)} 米｜末帧距 ${JSON.stringify(R?.ai?.末帧距)} 米`);
     }
   }
   if (!R?.ai?.我掉血) {
-    out.push(`AI 通路：${预算.aiProbeFrames} 帧后玩家血量仍等于基线 ${预算.playerHp} ⇒ 那兵根本没打到我（状态名对上也不算出手）`);
+    // 同样带距离：轨迹里有 windup/strike 却一点血没掉，2.4 米是"打空了"（AI/命中那一侧的事），
+    // 几十米是"人早就不在场"（夹具那一侧的事）—— 旧红话只有前半句，两件事只能靠探针分。
+    // 证人换成游戏自己派的事件计数（切片11 尾巴）：旧那句"血量仍等于基线"量的其实是
+    // "两次 CDP 请求之间那半秒"，而且夹具每帧顶回之后它永远为真 —— 那是一条会说谎的红。
+    out.push(`AI 通路：${预算.aiProbeFrames} 帧里一次 player-damaged 都没有 ⇒ 那兵根本没打到我`
+      + `（状态名对上也不算出手）｜首帧距 ${JSON.stringify(R?.ai?.首帧距)} 米｜末帧距 ${JSON.stringify(R?.ai?.末帧距)} 米`);
   }
-  if (!R?.击杀?.杀掉) out.push(`${预算.maxKillFrames} 帧真输入没打死一只兵（敌血没走完）`);
+  /**
+   * —— 切片11b：打不死要说得出**断在哪一环**（兑现 → 出招 → 判定 → 挨刀 → 那一枚掉血 → 击倒）——
+   *
+   * r13 夹具续住了（我hp 99999、复活 0、死距 2.58、兵离家 4.6），红话却只有一句"1600 帧没打死一只兵"。
+   * 那一轮的探针（wb7-13-hitprobe.log）读的是**出招全通、一刀没落**：我态一路 light/combo，
+   * 两枚 combat-hit 证人 1680 帧全是 0，而那枚兵就在 2.2 米、最近、身边三米内只有它 ——
+   * 玩家侧对着它挥刀（轻击锥 acos(0.12)≈83°，垂直那一个正好溜在锥沿外）。
+   * 这一族红把那一句话拆成四档，并且只报**第一处断的**那一环：环是链，全报会把"没出招"和
+   * "砍错人"混成同一片噪音。四格读数**缺任何一格就不演这一出**（与 复活 / 我hp 同一套分工：
+   * 数有没有交回来归产侧腿 打中证人在 钉，这里只管"数说的事"，一条会说谎的红比没有红更坏）。
+   *
+   * r14 把这根链再往上游接了一档，因为那一轮四档**没有一档断在 0**（偏差 0°、挨刀 3、那一枚掉血 88、
+   * 死距 2.67）却依然"1600 帧没打死"：探针 wb7-14-whyprobe.log 读到的真相是**体力全程够
+   * （够力帧 200/200）而 combat.canStart('light') 从第 110 帧起恒假**，因为连段处决派了
+   * combo-finisher ⇒ ContextualTutorial 弹出一枚**模态**教学，而 Game.js:1041-1056 的 playing 一关
+   * 把 player.update（含 combat.update）整条冻住 1400 帧。那句话的主语从此不是"刀"，是"手"：
+   * **兑现**那一档问的是"游戏有没有允许这一招打出来"，排在出招之前。判据用 可起帧 === 0
+   * 这个**性质**（一帧都没允许过），不立"按下/起招 至少要几比几"的比值 —— 比值是抄进来的常数，
+   * 而这一格是游戏自己那张 cancel 表的答案。
+   */
+  if (R?.击杀?.杀掉 !== true
+    && ['起手', '判定', '有人挨刀', '兵掉血'].every((k) => typeof R?.击杀?.[k] === 'number')) {
+    const 数 = (k) => R?.击杀?.[k];
+    const 尾 = () => `｜起手 ${JSON.stringify(数('起手'))} 招｜判定 ${JSON.stringify(数('判定'))} 次`
+      + `｜有人挨刀 ${JSON.stringify(数('有人挨刀'))} 下｜那一枚掉血 ${JSON.stringify(数('兵掉血'))}`
+      + `｜偏差 ${JSON.stringify(R?.击杀?.偏差)}°｜刃长 ${JSON.stringify(R?.击杀?.刃长)}`
+      + `｜三米内 ${JSON.stringify(R?.击杀?.三米内)} 只｜补锁 ${JSON.stringify(R?.击杀?.补锁)} 次`
+      + `｜玩家停在 ${JSON.stringify(R?.击杀?.我招)} 那一档`;
+    const 起手 = 数('起手'); const 判定 = 数('判定');
+    const 挨刀 = 数('有人挨刀'); const 掉血 = 数('兵掉血');
+    if (数('可起帧') === 0) {
+      out.push(`${预算.maxKillFrames} 帧里 combat.canStart('light') 一次都没开过`
+        + `（按下 ${JSON.stringify(数('按下'))} 次、只登记了 ${起手} 招）`
+        + ` ⇒ 断在**兑现**：游戏根本没允许出招，体力与命中几何都轮不到说话`
+        + `｜输入被冻 ${JSON.stringify(数('冻帧'))} 帧 ${JSON.stringify(R?.击杀?.冻因)}`
+        + `｜驱动代点掉弹窗 ${JSON.stringify(数('关弹窗'))} 次${尾()}`);
+    } else if (起手 === 0) {
+      out.push(`${预算.maxKillFrames} 帧里 combat 一次都没登记新招（_setStrike 的边沿为 0）`
+        + ` ⇒ 断在**出招**：左键边沿没进缓冲、体力不够或被取消窗口挡住，与命中几何无关${尾()}`);
+    } else if (判定 === 0) {
+      out.push(`登记了 ${起手} 招而命中窗口一次都没结算（attackHitDone 从没翻成真）`
+        + ` ⇒ 断在**判定**：每一招都在 move.at 之前被打断（翻滚/受击/时间缩放），与兵在哪无关${尾()}`);
+    } else if (挨刀 === 0) {
+      out.push(`${判定} 刀全部落空：没有任何一只兵挨到一下（带 detail 的 combat-hit 为 0）`
+        + ` ⇒ 断在**打中**：锥/刃长/竖直带里都没有它，玩家根本没朝它挥${尾()}`);
+    } else if (掉血 <= 0) {
+      out.push(`砍到的是别的兵：场上有人挨刀 ${挨刀} 下、倒下 ${JSON.stringify(数('击倒')) ?? '—'} 只，`
+        + `而标记那一枚一滴血没掉 ⇒ 断在**打的谁**：锁定/身份没落在那枚兵身上${尾()}`);
+    }
+  }
+  if (!R?.击杀?.杀掉) {
+    // r11 只有 死距 一个数，于是"1600 帧没打死"有三种完全不同的读法（兵归巢 / 玩家被推走 /
+    // 厚血夹具被顶掉），而它们在这句话里长得一模一样。把两侧坐标与"从第几帧走出自己的仇恨圈"
+    // 一起交出来，归因就不用再靠事后探针考古 —— 这一格是**读数**，不是新的判据。
+    out.push(`${预算.maxKillFrames} 帧真输入没打死一只兵（敌血没走完）`
+      + `｜兵血 ${JSON.stringify(R?.击杀?.兵血)}｜死距 ${JSON.stringify(R?.击杀?.死距)} 米`
+      + `｜分开首帧 ${JSON.stringify(R?.击杀?.分开首帧)}（出 仇恨圈 ${JSON.stringify(R?.击杀?.仇恨圈)} 米）`
+      + `｜兵离家 ${JSON.stringify(R?.击杀?.兵离家)} 米｜我hp ${JSON.stringify(R?.击杀?.我hp)}`
+      + `｜玩家 ${JSON.stringify(R?.击杀?.玩家坐标)} 兵 ${JSON.stringify(R?.击杀?.兵坐标)}`);
+  }
   // 「这一只兵自己的那枚魂火」认不出来 ⇒ 后面那句"入账了"证明不了任何东西（切片7d）
   const 认领souls = R?.击杀?.认领souls;
   if (!(typeof 认领souls === 'number' && 认领souls > 0)) {

@@ -35,6 +35,7 @@ import {
   createEntityAdapter, ensureAnimRoot, STATE_TO_ACTION, ANIM_ROOT_NAME,
 } from '../src/animation/AnimationEntityAdapter.js';
 import { AnimationLibrary, ANIM_MOTION, MOTION_CHANNELS } from '../src/animation/AnimationLibrary.js';
+import { ENEMY_STATE_NAMES } from '../src/ai/EnemyFSM.js';
 import { AnimationClipLoader } from '../src/animation/AnimationClipLoader.js';
 import * as animIndex from '../src/animation/index.js';
 import { makeManager, spawn, run, makePlayerRef, installWindowShim, v } from './helpers/enemyHarness.js';
@@ -220,6 +221,37 @@ describe('视觉层根节点：动画不接管实体变换（W-C6 切片5）', (
     }
     expect(adapter._resolveAction('locomotion', true)).toBe('run');
     expect(adapter._resolveAction('没有这个状态')).toBe('idle');
+  });
+
+  it('敌人能取到的每一档态都有动作读者：名册从行为与声明两边数，不抄第三份（#32）', () => {
+    const 对账 = (名单) => [...new Set(名单)].filter((态) => !(态 in STATE_TO_ACTION));
+
+    // 走过的那几档：真接缝里跑 600 帧，采 `Enemy.state` 这个**字段**的实际取值范围。
+    // 为什么采字段而不是采 FSM：`Enemy.state` 有三处写主（`update` 里镜像 `fsm.current`、
+    // `:290` 的 stagger、`die()` 的 'dead'），而适配器读的就是这一格字段。
+    const m = makeManager();
+    const player = v(3.2, 0);
+    const ref = makePlayerRef();
+    const e = spawn(m, { x: 0, z: 0 });
+    const 走过 = new Set();
+    for (let i = 0; i < 600; i += 1) {
+      run(m, 1, 1 / 60, player, ref);
+      走过.add(String(e.state));
+    }
+    expect(走过.size, `600 帧只走过 ${[...走过].join('/')} ⇒ 采样那一格没动，下面的名册就成了声明的抄本`)
+      .toBeGreaterThanOrEqual(3);
+    expect(走过.has('strike') || 走过.has('windup'), `没走过出手段（${[...走过].join('/')}）：这一格只证明了一半`).toBe(true);
+    e.die();
+    const 走过死 = String(e.state);
+
+    const 缺 = 对账([...ENEMY_STATE_NAMES, ...走过, 走过死]);
+    expect(缺, `这些敌人态在状态映射里没有读者 ⇒ 动画静默回落 idle 而不报错（切片5 那条症状）：${缺.join(', ')}`)
+      .toEqual([]);
+
+    // 反向控制：种一档映射里没有的敌人态，判据必须点名它 —— "没找到违规"不等于"什么都没找"
+    const 种子 = 'charge';
+    expect(种子 in STATE_TO_ACTION, '判据本身失灵：种的那一档其实有映射').toBe(false);
+    expect(对账(['pursue', 种子, 'recover']), '种了一档没动作的敌人态，对账却没抓到').toEqual([种子]);
   });
 
   it('crossFade 的目标真的在跑（three 的 crossFadeTo 从不 play，混音器必须自己补）', () => {

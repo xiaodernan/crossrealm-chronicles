@@ -23,6 +23,11 @@ export const STRINGS_EN = Object.freeze({
   settings_caption_small: 'Small',
   settings_caption_medium: 'Medium',
   settings_caption_large: 'Large',
+  // UI text size (W-D6 Slice 69): root font-size, all rem text scales together
+  settings_ui_text: 'UI Text',
+  settings_ui_text_small: 'Small',
+  settings_ui_text_medium: 'Standard',
+  settings_ui_text_large: 'Large',
   caption_gear_drop: 'Drop: ${rarity}',
   caption_pickup: 'Picked up',
   caption_execution: 'Execution',
