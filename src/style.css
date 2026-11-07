@@ -2331,3 +2331,20 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .wave4-samurai { background: radial-gradient(ellipse at 50% 90%, rgba(180,60,40,0.12), transparent 55%); mix-blend-mode: soft-light; }
 .wave4-cosmic { background: radial-gradient(ellipse at 30% 40%, rgba(20,60,40,0.2), transparent 50%); filter: contrast(1.1); mix-blend-mode: multiply; }
 .wave4-starport { background: radial-gradient(circle at 70% 30%, rgba(255,180,60,0.1), transparent 40%); mix-blend-mode: screen; }
+
+
+/* 小屏让位（消费 .quest-panel 的桌面 top:90px，必须写在它之后）：
+   stats 独占第二行之后 HUD 顶部自然长高——390×844 实测大档 en 底=187px（换行第二行），
+   平板 481–768px 换行第二行底≈106px（所有 chip 放不下 badge 同一行）。
+   走查见 W-D6 切片71（390×844/768×1024，六件套 × 中英双语 × 中/大档）。 */
+@media (max-width: 480px) {
+  .quest-panel {
+    top: 192px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .quest-panel {
+    top: 118px;
+  }
+}
