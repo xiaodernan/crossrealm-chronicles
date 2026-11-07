@@ -94,9 +94,11 @@ export function checkZoneFactProducers(questTable = SIDE_QUESTS_ZONE, 表 = {}) 
 /**
  * 清剿数那一格有没有人写 —— **从记账函数的源码里抠**（与 `questFacts.js` 同一套口径：
  * 事实是**推导**出来的，不是手抄一份名单）。
+ * 按字面量找：minify 会改局部变量名（`s` → 别的），但属性名和字面量不动，
+ * 2026-11-07（生产构建 `chunk-core` 实锤）记住这条。
  */
 function 清剿数有生产者() {
   const 记账 = STAT_EVENTS?.['enemy-defeated'];
   if (typeof 记账 !== 'function') return false;
-  return /(?<![\w$.])s\.zoneKills\b/.test(记账.toString());
+  return String(记账).includes('zoneKills');
 }

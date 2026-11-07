@@ -116,9 +116,12 @@ export function questFactsWritten() {
   for (const k of STAT_READINGS) out.add(k);
   // ④ `applyObjectiveFlags`（W-E3 切片24）：旗标账本（`objectiveFlags`）的唯一写入出口。
   //    它的形参叫 `stats`（不叫 `s`），且写的是 `stats.objectiveFlags[flag]`（计算写，
-  //    键在运行时才知道）⇒ 拿读侧那条正则扫它的源码：出现即生产者。这样"改了账本格名
-  //    却忘了改写入方"照样红在闭包规则上，而不是等玩家遇到一步永远完不成的主线。
-  for (const k of 抠格名(applyObjectiveFlags.toString(), 读正则)) out.add(k);
+  //    键在运行时才知道）。**源码正则 `stats.objectiveFlags` 会在生产构建被压缩吃掉**
+  //    （`vite build` 默认 esbuild minify；`stats` 被改成 `s`，2026-11-07 实锤：
+  //    `chunk-core-*.js` 里是 `Ms(s,e){…s.objectiveFlags[a]=o…}`，于是 boot 白屏、
+  //    `#boot-error` 空、`loading` 永远转圈）。属性名和字符串字面量不参与压缩 ——
+  //    直接在函数源码里找 `objectiveFlags` 这个字面量即可。
+  if (applyObjectiveFlags.toString().includes('objectiveFlags')) out.add('objectiveFlags');
   return out;
 }
 
