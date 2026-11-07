@@ -1943,6 +1943,10 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 
 .help-header button {
   flex-shrink: 0;
+  /* `.panel-box button { width:100% }` 是给菜单项按钮做满幅的（暂停/快速旅行/设置那几格）；
+     头部横向条（space-between）里的关闭键要随内容即可。走查 390×844 实测不撤的话，
+     它 = 头部整行宽，会顶出屏幕右沿 132px */
+  width: auto;
   padding: 6px 14px;
   font-size: 0.85rem;
 }
