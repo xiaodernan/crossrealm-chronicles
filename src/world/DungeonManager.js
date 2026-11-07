@@ -485,6 +485,39 @@ export class DungeonManager {
     return true;
   }
 
+  /**
+   * 热重载：把关卡编辑器的布局推给正在跑的那局，重建副本几何。
+   * 调用方负责确保布局与当前副本定义（gridW/gridH/遭遇表）兼容。
+   * 重建后会从出生点开门并把玩家传回出生点（与 enter() 一致）。
+   */
+  reloadLayout(layout) {
+    if (!this.active) throw new TypeError('No active dungeon');
+    const dungeon = this.active;
+    // 释放旧几何（共享材质不被误杀，由 disposeDungeonSubtree 问归属）
+    disposeSubtree(dungeon.group);
+    // 替换布局并重建几何
+    dungeon.layout = layout;
+    ProceduralDungeonGenerator.buildGeometry(dungeon.group, layout, dungeon.def);
+    // 从出生点开门
+    const spawn = layout.spawn;
+    if (spawn) {
+      for (const door of layout.doors) {
+        if (door.fromRoomId === spawn.id || door.toRoomId === spawn.id) {
+          ProceduralDungeonGenerator.setDoorOpen(layout, door, true);
+        }
+      }
+      // 传送玩家到出生点
+      if (this.game?.player) {
+        this.game.player.teleport(
+          dungeon.def.origin.x + spawn.x,
+          dungeon.def.origin.y,
+          dungeon.def.origin.z + spawn.z,
+        );
+      }
+    }
+    this.currentRoomId = layout.spawn?.id;
+  }
+
   getExplorationHint() {
     if (!this.active?.layout) return null;
     const layout = this.active.layout;

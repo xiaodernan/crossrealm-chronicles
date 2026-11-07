@@ -48,6 +48,7 @@ import { LootSystem } from '../game/LootSystem.js';
 import { RestPointManager } from '../world/RestPointManager.js';
 import { CollectibleManager } from '../world/CollectibleManager.js';
 import { WorldEffects } from '../world/WorldEffects.js';
+import { LevelEditor } from '../world/LevelEditor.js';
 import { NPCManager } from '../world/NPCManager.js';
 import { AudioManager } from '../audio/AudioManager.js';
 import { DungeonManager } from '../world/DungeonManager.js';
@@ -345,6 +346,8 @@ export class Game {
 
     this.dungeons = this._adopt('world/DungeonManager', new DungeonManager(this.scene, this.world, this.dialog, this.enemyManager, this));
     this.world.setDungeonManager(this.dungeons);
+    // 关卡编辑器（仅开发环境）：热重载时把布局推给正在跑的那局
+    this.levelEditor = new LevelEditor(this.scene, this.camera, this.renderer, this.renderer.domElement);
     this.spells = this._adopt('combat/SpellSystem', new SpellSystem(
       this.scene, this.player, this.enemyManager, this.projectiles, this.damageNumbers, this.audio, this.stats
     ));

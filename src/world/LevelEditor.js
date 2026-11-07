@@ -807,6 +807,12 @@ export class LevelEditor {
     };
   }
 
+  /** 把当前布局作为对象直接导出（不走文件下载），供热重载把载荷推给正在跑的那局 */
+  getLayout() {
+    if (!this.layout) return null;
+    return this._导出载荷();
+  }
+
   exportLayout() {
     const data = this._导出载荷();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
