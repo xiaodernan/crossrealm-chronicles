@@ -800,20 +800,19 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
       // 认不出就不该进窗：把守卫摘掉，窗口会朝着 null 走（页里是一句 TypeError，不是一条红话）
       窗口不认: 源文.replace('while (魂火 && 收尸帧 < ${预算.lootProbeFrames}', 'while (收尸帧 < ${预算.lootProbeFrames}'),
       // 切片7d 的正主：把身份那三样换成 r8 的取值法（全场最近的一份，不管是谁掉的）
-      按最近挑: 源文.replace(`    const 新增 = (g.loot?.drops ?? []).filter((d) => !断气前.has(d));
+      按最近挑: 源文.replace(`    const 掉落探针 = window.__e2c魂火探针 ? [...(window.__e2c魂火掉落 ?? [])] : null;
+    const 新增 = 掉落探针 ?? (g.loot?.drops ?? []).filter((d) => !断气前.has(d));
     const 魂火 = 新增.find((d) => !d.gear && d.souls > 0
-      && Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5) ?? null;`,
-        `    const 最近掉落 = () => {
-      let 最 = null, 最距 = Infinity;
-      for (const d of (g.loot?.drops ?? [])) {
-        const d距 = Math.hypot(g.player.position.x - d.mesh.position.x, g.player.position.z - d.mesh.position.z);
-        if (d距 < 最距) { 最距 = d距; 最 = d; }
-      }
-      return 最;
-    };
-    const 魂火 = 最近掉落();`),
+      && Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5)
+      ?? 新增.find((d) => !d.gear && d.souls > 0) ?? null;`,
+        `    let 最 = null, 最距 = Infinity;
+    for (const d of (g.loot?.drops ?? [])) {
+      const d距 = Math.hypot(g.player.position.x - d.mesh.position.x, g.player.position.z - d.mesh.position.z);
+      if (d距 < 最距) { 最距 = d距; 最 = d; }
+    }
+    const 魂火 = 最;`),
       只丢身份diff: 源文.replace('.filter((d) => !断气前.has(d))', '.slice()'),
-      只丢魂火谓词: 源文.replace('find((d) => !d.gear && d.souls > 0', 'find((d) => d.souls > 0'),
+      只丢魂火谓词: 源文.replaceAll('find((d) => !d.gear && d.souls > 0', 'find((d) => d.souls > 0'),
       只丢断气点容差: 源文.replace(' && Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5)', ')'),
       // 认得出但不把身份交出去：判据会在真轮次里红在 fail-closed 那一格，可这条门禁从此只能靠浏览器发现
       不交身份读数: 源文.replace(`             新掉落数: 新增.length, 认领距, 认领souls: 魂火?.souls ?? 0,

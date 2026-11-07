@@ -384,6 +384,25 @@ try {
        * 所以这里只数带 detail 的那条 —— 它只有兵自己的掉血会派。击倒走 enemy-defeated（Enemy.js:898）。 */
       window.addEventListener('combat-hit', (e) => { if (e.detail) window.__e2c挨 += 1; });
       window.addEventListener('enemy-defeated', () => { window.__e2c毙 += 1; });
+      /* Track loot where it is created (same family as the hit counters). The kill drop is
+       * released by LootSystem._spawn, which pools only mesh/ring/beam - records are fresh.
+       * Motivation (2026-11-07): when 死距 < 拾取半径 (2.5m), the soul drop is consumed inside
+       * LootSystem.update on the very frame it spawns (same update step, enemies -> loot order),
+       * so "find the new record after the kill loop" always returns 0 drops - the chain worked,
+       * the judgment looked at an empty field and read it as "no drop was created".
+       * Wrap once per page: every spawnKill call gets logged with its own return value. */
+      window.__e2c魂火掉落 = [];
+      window.__e2c魂火探针 = false;
+      const 目标loot = g.loot;
+      const 原spawnKill = 目标loot?.spawnKill?.bind(目标loot);
+      if (原spawnKill) {
+        window.__e2c魂火探针 = true;
+        目标loot.spawnKill = (...args) => {
+          const out = 原spawnKill(...args);
+          if (Array.isArray(out)) window.__e2c魂火掉落.push(...out);
+          return out;
+        };
+      }
     }
     window.__e2c厚血 = (c) => {
       let 顶 = 0;
@@ -462,13 +481,16 @@ try {
     const 中0 = window.__e2c中; const 活0 = window.__e2c活;
     if (!兵) return { 标记丢了: true, 帧数: 0, 杀掉: false, 掉过血: window.__e2c中 > 中0, 复活: 0 };
     const 旧魂 = g.stats.souls;
+    // 出处探针清零：本站要认的是"这一只兵掉的那一份"，站 0 那批不许串进来
+    window.__e2c魂火掉落 = [];
     /**
      * "这一只兵掉的那一份"用**对象身份 + 断气位置**认，不用"最近的一份"：
      * 竞技场里躺着几十份别人的旧掉落（r8 读到 掉落在场 = 15），按最近挑会挑到隔壁那堆，
      * 于是 魂入账 > 0 这句话只证明了"这片地上有东西被踩到"。
-     * EnemyManager.js:516 把魂火下在 enemy.position 上，而 _spawn 每次都新建一条
-     * 掉落记录（池化的只是 mesh/ring/beam 三件），所以断气前不在册、且落在断气点半米内的
-     * 那枚 !gear 而 souls > 0 的就是它自己的那一份。
+     * 认领顺序：① 出处探针（window.__e2c魂火掉落 —— spawnKill 的返回值）—— 它按**出处**认人，
+     *   同一帧就被吸走也认得（2026-11-07 首撞：死距 2.21m < 拾取半径 2.5m，魂火在
+     *   击杀那一帧的 LootSystem.update 里被吃掉，帧末再找就永远 新掉落数 0）；
+     *   ② 断气前不在册 diff（探针没装上时的 fallback）—— 两皆要求 !gear 而 souls > 0。
      * （这一段的注释里不许用反引号：它整片住在一个模板字符串里，反引号会当场把字符串断掉。）
      */
     const 在场 = () => new Set(g.loot?.drops ?? []);
@@ -570,9 +592,12 @@ try {
     // 每一刀都从它脸边擦过去 —— r13 那句话（"1600 帧没打死"）真正的意思在这里有了数。
     const 偏差 = +(Math.acos(Math.max(-1, Math.min(1,
       (刀.x * 指向.x + 刀.z * 指向.z) / 指向长))) * 180 / Math.PI).toFixed(1);
-    const 新增 = (g.loot?.drops ?? []).filter((d) => !断气前.has(d));
+    // 掉落认领：优先问出处探针（同一帧即使被吸走也认得），未装探针时退回"断气前不在册" diff。
+    const 掉落探针 = window.__e2c魂火探针 ? [...(window.__e2c魂火掉落 ?? [])] : null;
+    const 新增 = 掉落探针 ?? (g.loot?.drops ?? []).filter((d) => !断气前.has(d));
     const 魂火 = 新增.find((d) => !d.gear && d.souls > 0
-      && Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5) ?? null;
+      && Math.hypot(d.mesh.position.x - 死点.x, d.mesh.position.z - 死点.z) < 0.5)
+      ?? 新增.find((d) => !d.gear && d.souls > 0) ?? null;
     const 距 = (d) => Number(Math.hypot(g.player.position.x - d.mesh.position.x,
       g.player.position.z - d.mesh.position.z).toFixed(2));
     // 收尸：这一窗只朝**那一枚**走，用真输入（KeyW + 面向它），不 teleport —— 玩家做得到才算通路。
