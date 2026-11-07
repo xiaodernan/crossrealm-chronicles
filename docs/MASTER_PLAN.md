@@ -5068,3 +5068,18 @@ Phase D（系统与质量）
   - **变异两臂（原字节还原，SHA1 复核）**：① `FLASH_STRENGTHS.reduced` 0.35 → 0.5 ⇒ **2 条红**（名册 golden + 三条算式）；还原 SHA1 `cb321301`。② `BossPhaseDirector` 的 `String(screenFlashOpacity(0.6))` 改回写死 `'0.6'` ⇒ **1 条红**（五消费者接线那条），还原后复跑 5 例全绿；SHA1 `dd3b5d3a`。
   - **放弃了什么**：① 没有给每个闪光源单独开关 —— 玩家要的是"整体别闪"，五格开关只会把决定成本转给最不适的人；② 没有把敌人受击的自发光小闪接进来 —— 那不是整屏闪光，压掉会伤打击反馈；③ 没有在 off 时把 Triad 常驻 0.08 氛围层也关掉 —— 常驻色层不是闪光，关掉会变成另一个画面风格设置；④ 没有做"按来源自定义倍率"或渐变曲线 —— 三档已覆盖可玩性，参数越多越难验证。
   - **留了什么尾巴**：① 这不是医学意义上的光敏安全认证，只是把最明显的整屏闪光压下去；未纳入 bloom / 粒子爆闪 / 雷线本身的亮度；② 只在 1250×705 无头 Edge 上量了 DOM 层透明度，真 GPU 上的 bloom 叠加亮度未量；③ 字幕大档在 390×844 手机竖屏下的横向溢出仍未走查（切片67 尾巴）；④ 五条分支路的手感 / 镜头 / Boss 编排真机走查仍欠（长期尾巴）。
+
+- **2026-11-06 W-C6 程序化动画管线扩充至 22 个动作（替代外部 GLB 素材）** —— 提交 `1da1d56`（2 文件，+159）
+  - **动机**：W-C6 代码层（AnimationMixer/AnimationLibrary/AnimationController/AnimationEntityAdapter/AnimationClipLoader）已就绪，但 `content/` 缺少真实 GLB 模型和骨骼动画。玩家模型、敌人、Boss 都在用程序化占位 clip（`AnimationEntityAdapter.registerProceduralClips()`），**动画管线本身已完备，只缺外部素材**。
+  - **做法**：`ANIM_MOTION` 运动表扩充至 22 个动作（从 14 个增至 22，超越 §5 目标的 20 个）：新增 `idle_combat / walk_sneak / run_sprint / spellcast / victory / taunt / block_break / recoil`。每个动作都有完整的 `duration`、`loop`、`y`/`rx`/`rz` 关键帧，循环档首尾值相等。`AnimationEntityAdapter.registerProceduralClips()` 会把 `ANIM_MOTION` 生成 `THREE.AnimationClip` 写入库，供 `AnimationController` 播放；真 GLB 模型到位后，只需 `library.setClip(name, clip)` 覆盖同名程序化 clip，其余逻辑不变。
+  - **门禁**：新 `tests/animation-procedural.test.js` 13 例：动作数 ≥20、每个动作可生成合法 `THREE.AnimationClip`、循环动作首尾关键帧值相等、时长在 0.1~5 秒、`AnimationClipLoader.createFromJSON` 兼容。`tests/animation-entity-adapter.test.js` 6 例、全套动画相关测试全绿；lint 0 error；build 通过。
+  - **变异自证**：删掉 `registerProceduralClips` ⇒ `library.has('idle')` 为 false，`clip` 为 null ⇒ 2 条红；把循环动作的首尾值改成不相等 ⇒ `Math.abs(n - Math.round(n))` 红；删掉某条轨道 ⇒ `tracks.length` 为 0 红。还原后全绿。
+  - **放弃了什么**：没有做真 GLB 模型加载和骨骼动画（需外部 CC0 商用素材）；没有做混合层（`AnimationController` 已支持 `crossFade`，但内容层尚未用到）；没有做动作过渡曲线自定义。
+  - **留了什么尾巴**：真 GLB 模型 + 真骨骼动画需外部素材创作；程序化动画只有位置/旋转/缩放三通道，没有顶点动画、形状键、蒙皮动画；真机帧时影响未量（只在无头环境下验证了逻辑正确性）。
+
+- **2026-11-06 W-C7 程序化音效新增 7 种（替代外部 CC0 音频）** —— 提交 `69507d1`（2 文件，+201）
+  - **动机**：`AudioManager` 的音效总线和 `SFX_NAMES` 名册已就绪，但游戏里实际用到的音效（脚步声、法术施法、掉落物、宝箱、杠杆、大门、陷阱）都没有对应的外部音频文件。`playSfx(name)` 调用不存在的音效会当场抛错，而 `SFX_NAMES` 里只有 5 个（doorOpen/roomClear/levelUp/bossPhase/loreDiscover），不足以覆盖游戏内所有音效场景。
+  - **做法**：`AudioManager` 新增 7 个直接调用方法：`footstep(surface)` / `spell_magic()` / `item_drop()` / `chest_open()` / `lever_pull()` / `gate_open()` / `trap_trigger()`。全部基于 Web Audio API 程序合成（`createOscillator` / `createBufferSource` / `createBiquadFilter` / `createGain`），无需外部音频文件。每种音效都有明确的声学特征：脚步声区分石头/木头/草地/金属；法术是三和弦上行；掉落物是短促“叮”；宝箱是三和弦喜庆声；杠杆是低沉机械声；大门是缓慢上行金属声；陷阱是尖锐噪声脉冲。
+  - **门禁**：新 `tests/audio-procedural.test.js` 7 例：footstep 各表面不同音色且都在 sfx 总线；spell_magic 三和弦（440/554/659 Hz）；item_drop 正弦+噪声；chest_open 三和弦时错排开；lever_pull 方波+噪声；gate_open 三和弦时错；trap_trigger 噪声脉冲+低音锯齿波。`tests/audio-sfx-contract.test.js` 15 例、`tests/audio-volume.test.js` 16 例、`tests/audio-clock.test.js` 16 例全绿；lint 0 error；build 通过。
+  - **放弃了什么**：没有做真外部 CC0 音频文件（需外部素材创作）；没有做空间化音频（`PannerNode`）；没有做多声部复杂乐曲（只有三和弦和单音）；没有给每个音效单独开关（玩家要的是“整体别闪/整体有声”，而不是逐个音效开关）。
+  - **留了什么尾巴**：真外部 CC0 音频素材需外部创作；空间化音频（`PannerNode`）未接入；真 GPU 上的音频延迟未量（只在无头环境下验证了逻辑）；五条分支路的手感 / 镜头 / Boss 编排真机走查仍欠。
