@@ -24,11 +24,13 @@ export const UI_TEXT_SCALE_IDS = Object.freeze(Object.keys(UI_TEXT_SCALE_MULTIPL
 // 兼容别名：名册用于 i18n 动态键扫描
 export const UI_TEXT_SCALES = UI_TEXT_SCALE_MULTIPLIER;
 
-export const uiTextScaleOptions = [
-  { value: UI_TEXT_SCALE_SMALL, label: '小' },
-  { value: UI_TEXT_SCALE_MEDIUM, label: '中' },
-  { value: UI_TEXT_SCALE_LARGE, label: '大' },
-];
+/**
+ * 面板用的选项：只给档位 id（与 captionScaleOptions 同一副骨架）。
+ * 文案键由面板现场拼（`settings_ui_text_${id}`），拼键在 t() 现场才能被扫描器量到。
+ * 曾经这里导出的是 `{ value, label }` 对象数组，而面板按 `uiTextScaleOptions()`
+ * 函数调用 ⇒ 开机即 TypeError（真实启动页白屏，单测里假 DOM 缺 set-ui-text 所以全绿）。
+ */
+export const uiTextScaleOptions = () => [...UI_TEXT_SCALE_IDS];
 
 /**
  * 归一化：脏值回落出厂，不抛。
