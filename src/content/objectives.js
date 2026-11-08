@@ -847,6 +847,19 @@ export const OBJECTIVES = [
     journal: 'obj_void_revenant_hunt_journal',
   },
   {
+    // W-E3 切片86：虚空汲魂者进主线 —— 第九独占，插在残魂后、断口副本前（ch4，v21 不写迁移；右移 choice-void）。
+    id: 'void-siphoner-hunt',
+    title: 'obj_void_siphoner_hunt_title',
+    desc: 'obj_void_siphoner_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_siphoner',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 85, z: 255, label: 'enemy_name_void_siphoner' },
+    reward: 22,
+    journal: 'obj_void_siphoner_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',

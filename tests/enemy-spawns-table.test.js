@@ -66,6 +66,8 @@ const 冻结 = [
   ['void_chasmer', 120, 275], ['void_chasmer', 80, 250], ['void_chasmer', 155, 270],
   // W-E3 切片84：虚空残魂（三点野外出生点）
   ['void_revenant', 105, 235], ['void_revenant', 60, 265], ['void_revenant', 140, 245],
+  // W-E3 切片86：虚空汲魂者（三点野外出生点）
+  ['void_siphoner', 85, 255], ['void_siphoner', 125, 280], ['void_siphoner', 45, 240],
   // W-E3 切片70：深渊撕掠者（三点野外出生点）
   ['abyss_reaver', -180, 240], ['abyss_reaver', -230, 200], ['abyss_reaver', -260, 230],
   // W-E3 切片71：深渊凝视者（三点野外出生点）
