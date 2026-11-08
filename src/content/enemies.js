@@ -120,6 +120,10 @@ export const ENEMY_ROSTER = {
    */
   void_rendclaw: { name: 'enemy_name_void_rendclaw', hp: 165, posture: 58, damage: 18, speed: 4.7, aggroRange: 27, color: 0x9955bb },
   /**
+   * W-E3 切片91：虚空号哭者 —— 虚空断口飘忽的远压施术者。
+   */
+  void_howler: { name: 'enemy_name_void_howler', hp: 140, posture: 48, damage: 15, speed: 5.0, aggroRange: 31, color: 0xaa77cc },
+  /**
    * W-E3 切片70：深渊撕掠者 —— 深渊之颚边缘的贴地猎手。
    * 比掠行兽更壮（hp165/架势60）、出手更重（19），靠深渊撕裂控距顶开，
    * 与 stalker（轻快乱爪扑击）、knight（重甲横扫守势）分工不同。

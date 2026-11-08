@@ -178,6 +178,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'void_rendclaw', x: 100, z: 275 },
   { type: 'void_rendclaw', x: 65, z: 290 },
   { type: 'void_rendclaw', x: 135, z: 260 },
+  // 虚空号哭者（三点，W-E3 切片91）—— 远压施术者，与裂爪兽/汲魂者错开。
+  { type: 'void_howler', x: 90, z: 245 },
+  { type: 'void_howler', x: 115, z: 290 },
+  { type: 'void_howler', x: 55, z: 275 },
 
   // ── 深渊之颚（abyss，中心 ~-200,220，半径 130）── W-E3 切片70
   // 深渊撕掠者（三点）—— 贴地猎手，分散在颚区边缘，与 stalker/sentinel 出生带错开。

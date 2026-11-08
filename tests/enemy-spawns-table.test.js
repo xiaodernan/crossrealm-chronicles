@@ -70,6 +70,8 @@ const 冻结 = [
   ['void_siphoner', 85, 255], ['void_siphoner', 125, 280], ['void_siphoner', 45, 240],
   // W-E3 切片89：虚空裂爪兽（三点野外出生点）
   ['void_rendclaw', 100, 275], ['void_rendclaw', 65, 290], ['void_rendclaw', 135, 260],
+  // W-E3 切片91：虚空号哭者（三点野外出生点）
+  ['void_howler', 90, 245], ['void_howler', 115, 290], ['void_howler', 55, 275],
   // W-E3 切片70：深渊撕掠者（三点野外出生点）
   ['abyss_reaver', -180, 240], ['abyss_reaver', -230, 200], ['abyss_reaver', -260, 230],
   // W-E3 切片71：深渊凝视者（三点野外出生点）

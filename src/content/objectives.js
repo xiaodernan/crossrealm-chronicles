@@ -873,6 +873,19 @@ export const OBJECTIVES = [
     journal: 'obj_void_rendclaw_hunt_journal',
   },
   {
+    // W-E3 切片91：虚空号哭者进主线 —— 第十一独占，插在裂爪兽后、断口副本前（ch4，v21 不写迁移；右移 choice-void）。
+    id: 'void-howler-hunt',
+    title: 'obj_void_howler_hunt_title',
+    desc: 'obj_void_howler_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_howler',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 90, z: 245, label: 'enemy_name_void_howler' },
+    reward: 23,
+    journal: 'obj_void_howler_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',
