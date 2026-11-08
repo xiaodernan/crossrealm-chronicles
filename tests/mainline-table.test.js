@@ -662,14 +662,14 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(SAVE_KEYS[0].key).toBe('crossrealm_save_v21');
     expect(MIGRATIONS[21]).toBeUndefined();
   });
-  it('W-E3 切片46 之后（加切片67/68/69/70/71/72/73 那七步）：主线是 85 步，终局也分岔（留灯 / 熄灯两路，各回本章门）', () => {
+  it('W-E3 切片46 之后（当前态，含后续 v21 插步）：主线终局也分岔（留灯 / 熄灯两路，各回本章门），且终局尾序位于主线末尾', () => {
     expect(MAINLINE).toHaveLength(85);
     const 序 = MAINLINE.map((r) => r.id);
-    expect(序[80], '第 80 位不是 sunless-oratory').toBe('sunless-oratory');
-    expect(序[81], '第 81 位不是 infinity（摸锚点那一步）').toBe('infinity');
-    expect(序[82], '第 82 位不是 choice-final（终局抉择）').toBe('choice-final');
-    expect(序[83], '第 83 位不是 final-keep（留灯那条路）').toBe('final-keep');
-    expect(序[84], '第 84 位不是 final-quiet（熄灯那条路）').toBe('final-quiet');
+    const 终局尾 = ['sunless-oratory', 'infinity', 'choice-final', 'final-keep', 'final-quiet'];
+    const 起 = 序.indexOf(终局尾[0]);
+    expect(起, '终局尾首步 sunless-oratory 不在主线里').toBeGreaterThan(-1);
+    expect(序.slice(起, 起 + 终局尾.length), '终局尾序不对（应为 祷堂→锚点→终局抉择→留灯→熄灯）').toEqual(终局尾);
+    expect(起 + 终局尾.length, '终局尾不是主线末尾').toBe(序.length);
     // 摸锚点那一步不再自己指门：主角换成终局抉择（否则两条腿被跳过）
     expect(MAINLINE.find((r) => r.id === 'infinity')?.branchTo, 'infinity 还自己指着门 ⇒ 终局分岔无从发生')
       .toBeUndefined();
