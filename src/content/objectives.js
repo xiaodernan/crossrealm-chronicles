@@ -1085,6 +1085,19 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_hound_hunt_journal',
   },
   {
+    // W-E3 切片79：深渊沼兽进主线 —— 第六独占，插在猎犬后、深渊副本前（ch5，v21 不写迁移）。
+    id: 'abyss-mire-hunt',
+    title: 'obj_abyss_mire_hunt_title',
+    desc: 'obj_abyss_mire_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_mire',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -215, z: 250, label: 'enemy_name_abyss_mire' },
+    reward: 23,
+    journal: 'obj_abyss_mire_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',

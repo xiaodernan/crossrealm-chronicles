@@ -148,6 +148,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'abyss_shade', weight: 1 },
       // W-E3 切片77：深渊猎犬 —— 快速追击者，权重低（点缀压迫感，不抢主编组）
       { type: 'abyss_hound', weight: 1 },
+      // W-E3 切片79：深渊沼兽 —— 区域封锁者，权重低
+      { type: 'abyss_mire', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

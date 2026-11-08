@@ -129,6 +129,10 @@ export const ENEMY_ROSTER = {
    * 与 abyss_shade（相位伏击）、abyss_reaver（重撕控距）、abyss_brute（慢重逼退）、abyss_watcher（远距凝视）分工不同。
    */
   abyss_hound: { name: 'enemy_name_abyss_hound', hp: 145, posture: 50, damage: 16, speed: 6.6, aggroRange: 28, color: 0x662244 },
+  /**
+   * W-E3 切片79：深渊沼兽 —— 沉重缓慢的区域封锁者。
+   */
+  abyss_mire: { name: 'enemy_name_abyss_mire', hp: 160, posture: 58, damage: 14, speed: 4.2, aggroRange: 24, color: 0x553366 },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },

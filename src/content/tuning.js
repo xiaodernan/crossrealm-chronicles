@@ -90,6 +90,8 @@ export const BODY_PLANS = {
   abyss_shade:    { scale: 0.98, parts: ['head', 'torso', 'legs'], radius: 0.43 },
   /** W-E3 切片77：深渊猎犬 —— 贴地迅捷的追击猎兽体格。 */
   abyss_hound:    { scale: 0.96, parts: ['head', 'torso', 'legs'], radius: 0.41 },
+  /** W-E3 切片79：深渊沼兽 —— 沉重贴地的区域封锁者体格。 */
+  abyss_mire:     { scale: 1.06, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -162,6 +164,8 @@ export const ENEMY_RESIST = {
   abyss_shade:    { fire: -0.15, gravity: 0.3 },
   /** W-E3 切片77：深渊猎犬 —— 快速追击者 */
   abyss_hound:    { fire: -0.15, gravity: 0.2 },
+  /** W-E3 切片79：深渊沼兽 —— 缓慢区域封锁者 */
+  abyss_mire:     { fire: -0.1, gravity: 0.35 },
   /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** 虚空潜伏者：贴着裂隙潜行的实影，怕火；引力能干扰它的扑袭落点 */
@@ -339,6 +343,8 @@ export const ENEMY_DEFENSE = {
   abyss_shade: 5,
   /** W-E3 切片77：深渊猎犬 */
   abyss_hound: 4,
+  /** W-E3 切片79：深渊沼兽 */
+  abyss_mire: 5,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -799,6 +805,16 @@ export const ENEMY_MOVES = {
     damage: 1.1, cooldown: 2.8, weight: 2, knock: 3.5,
     standoff: [1.2, 2.8], travel: 'lunge', travelSpeed: 5.5,
     telegraph: { color: 0x663355 },
+  },
+  /**
+   * 深渊沼泽（深渊沼兽专属招）—— W-E3 切片79。
+   * 地面危险区：与 `rift` 同为 hazard 机制，但更慢更黏、范围略大，强调区域封锁。
+   */
+  abyss_mire: {
+    name: '深渊沼泽', windup: 1.1, strike: 0.28, recover: 0.7, cone: -2,
+    damage: 0, cooldown: 8.0, weight: 2, range: 7, standoff: [4, 7],
+    hazard: { radius: 2.8, telegraph: 1.2, damage: 0.55, duration: 4.5, tick: 0.9, color: 0x552277 },
+    telegraph: { color: 0x552277 },
   },
   /**
    * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
@@ -1346,6 +1362,8 @@ export const ENEMY_MOVE_SETS = {
   abyss_shade:    ['abyss_veil', 'thrust', 'sweep'],
   /** W-E3 切片77：深渊猎犬 —— 深渊扑袭（快速追击）+ 连爪 + 刺击 */
   abyss_hound:    ['abyss_pounce', 'flurry', 'thrust'],
+  /** W-E3 切片79：深渊沼兽 —— 深渊沼泽（区域封锁）+ 猛砸 + 横扫 */
+  abyss_mire:     ['abyss_mire', 'slam', 'sweep'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

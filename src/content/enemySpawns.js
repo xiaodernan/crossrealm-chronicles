@@ -180,6 +180,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_hound', x: -205, z: 235 },
   { type: 'abyss_hound', x: -165, z: 240 },
   { type: 'abyss_hound', x: -245, z: 235 },
+  // 深渊沼兽（三点，W-E3 切片79）—— 区域封锁者，与猎犬/幽影/蛮兽出生带错开。
+  { type: 'abyss_mire', x: -215, z: 250 },
+  { type: 'abyss_mire', x: -175, z: 260 },
+  { type: 'abyss_mire', x: -235, z: 265 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },
