@@ -5257,4 +5257,4 @@ Phase D（系统与质量）
 
   - **放弃了什么**：① 不写 v21→v22 迁移；② 不新增第五名 abyss_ 成员；③ `abyss_veil` 复用既有 phase+strike 结算；④ 通用 normal 魂价不动；⑤ mainline-table 仍以手工排除名单/历史腿维护（全面 ID 辅助待后续）。
 
-  - **留了什么尾巴**：① 相位伏击与深渊三独占混编手感未真机走查；② abyss-deep-maw 池四名独占均为 weight 1；③ mainline-table 历史腿维护成本持续累积——高频插步下应考虑 ID 派生辅助层；④ E2E 待读数确认并回填 `e2e-clear` 注释。
+  - **留了什么尾巴**：① 相位伏击与深渊三独占混编手感未真机走查；② abyss-deep-maw 池四名独占均为 weight 1；③ mainline-table 历史腿维护成本持续累积——高频插步下应考虑 ID 派生辅助层；④ E2E 已确认并回填（9840帧/164s/q=87/主线88/completed=true/0异常）。
