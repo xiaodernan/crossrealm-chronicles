@@ -82,7 +82,10 @@ describe('② 每一版的长度是历史事实', () => {
       expect(今天, `今天的主线里没有 "${id}"？这条腿要跟着内容走`).toContain(id);
     }
     expect(mainlineAt(20)).toHaveLength(65);
-    expect(MAINLINE, 'v21 之后插了十三步（切片40 一步、切片41/42/45/46 各三步）—— 账本不该跟着长').toHaveLength(78);
+    expect(MAINLINE, 'v21 之后插了十四步（切片40 一步、切片41/42/45/46 各三步、切片67 一步大主教）—— 账本不该跟着长').toHaveLength(79);
+    // 切片67 那一步（`archon-hunt`）也要落在"今天的表里、era 20 账本里没有"这一格
+    expect(今天, '今天的主线里没有 archon-hunt —— 插步没上表').toContain('archon-hunt');
+    expect(账上, 'archon-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('archon-hunt');
   });
   it('era 20 是冻结的：今天的表往后长，它不动', () => {
     expect(mainlineAt(20)).toEqual(账上);

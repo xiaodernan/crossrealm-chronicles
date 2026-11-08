@@ -103,6 +103,9 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'radiant_dancer', weight: 2 },
       // W-E3 切片3 新增的圣印者：远距标点的那一类，权重最低（少但每次都准）
       { type: 'radiant_brand', weight: 1 },
+      // W-E3 切片67 新增的大主教：敕命区域封锁，权重最低（大主教要靠"走完圣殿才撞见"，
+      // 不是常驻——池子里它是添头，不是主菜；圣域的主菜仍是爬兽）
+      { type: 'radiant_archon', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

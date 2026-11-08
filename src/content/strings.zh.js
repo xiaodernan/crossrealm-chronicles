@@ -537,6 +537,7 @@ export const STRINGS_ZH = Object.freeze({
   enemy_name_radiant_knight: '辉煌骑士',
   enemy_name_radiant_dancer: '辉煌舞者',
   enemy_name_radiant_brand: '辉煌圣印者',
+  enemy_name_radiant_archon: '辉煌大主教',
 
   // 玩家可见的残余文案（W-D2 切片16r）
   enemy_name_default: '敌人',
@@ -1238,6 +1239,9 @@ export const STRINGS_ZH = Object.freeze({
   gear_name_iron_vow: '铁誓',
   gear_name_void_tide: '虚空潮汐',
   gear_name_chaos_core: '混沌核心',
+  // W-E3 切片67：晨曦护符与晨曦赐福
+  gear_name_dawn_charm: '晨曦护符',
+  gear_name_dawn_blessed: '晨曦赐福',
 
 
   // 成就文案（W-D2 切片16l：标题/描述全是键）
@@ -1723,6 +1727,9 @@ export const STRINGS_ZH = Object.freeze({
   obj_radiant_brand_hunt_title: '圣印者',
   obj_radiant_brand_hunt_desc: '圣印者远站着，把地标成灼场。清掉三只，别再踩进别人画好的圈。',
   obj_radiant_brand_hunt_journal: '灼场熄了。圣域的地面凉下来，像终于能踩。',
+  obj_archon_hunt_title: '晨曦大主教',
+  obj_archon_hunt_desc: '大主教站在圣域最深处，把整片地点成一圈白火。清掉他，金沙才真正是你的。',
+  obj_archon_hunt_journal: '晨曦的敕命散了。圣域上空只剩一轮太阳，不再有人替它说话。',
   obj_dungeon_rerun_title: '深渊再探',
   obj_dungeon_rerun_desc: '再次清空一座地下城。',
   obj_dungeon_rerun_journal: '深渊再探完成，循环再启。',

@@ -76,6 +76,8 @@ export const BODY_PLANS = {
   radiant_dancer:  { scale: 0.92, parts: ['head', 'torso', 'legs'], radius: 0.40 },
   /** W-E3 切片3：辉煌圣印者 —— 施法者身量轻（它是远距那一类） */
   radiant_brand:   { scale: 0.95, parts: ['head', 'torso', 'legs'], radius: 0.46 },
+  /** W-E3 切片67：辉煌大主教 —— 施法者里最高的一档：不贴脸，站在远处把整片地点亮 */
+  radiant_archon:  { scale: 1.10, parts: ['head', 'torso'], radius: 0.50, hover: 0.35 },
 };
 
 /**
@@ -131,6 +133,8 @@ export const ENEMY_RESIST = {
   radiant_dancer: { gravity: -0.2, ice: -0.1 },
   /** 辉煌圣印者：怕火（更多吃这一系），冰系削得动 */
   radiant_brand:   { fire: -0.2, ice: 0.1 },
+  /** 辉煌大主教：长袍术士，怕火；冰系打在他自己的护体咒上不痛不痒 */
+  radiant_archon:  { fire: -0.2, ice: 0.15 },
 };
 
 export const CRIT = {
@@ -278,6 +282,7 @@ export const ENEMY_DEFENSE = {
   hexer: 8, juggernaut: 24,
   gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
+  radiant_archon: 12,
 };
 
 /** 玩家自身防御由装备/属性提供，M2 阶段基线为 0（先用闪避与弹反防御） */
@@ -675,6 +680,21 @@ export const ENEMY_MOVES = {
     ranged: { speed: 12, color: 0x6a6a8a },
     hazard: { radius: 3.0, telegraph: 0.8, damage: 0.45, duration: 6, tick: 1.0, color: 0x6a6a8a },
     telegraph: { color: 0x88aaff },
+  },
+  /**
+   * W-E3 切片67：晨曦敕命（辉煌大主教专属招）。
+   *
+   * 不是再来一个灼场：`brand` 是印在**玩家脚下**的一小块地，`flare` 是贴脸自爆留下的粘着光环。
+   * 敕命是**大主教自己立在那里，把一整片地点亮**——半径 3.2、不粘人、只有 4.5 秒，
+   * 但它是全表法最宽的一圈，而且没有 `sticky`：走出去就没事，继续站着就一直烧。
+   * 前摇 1.6 秒是给玩家的窗口：敕命的伤害不是没法躲，是**跟着他一起站住了**时才致命的。
+   * `damage: 0`：伤害由 `GroundHazards` 结算（`hazard` 型），与 `flare` 同一条链路。
+   */
+  edict: {
+    name: '晨曦敕命', windup: 1.6, strike: 0.3, recover: 0.8, cone: -2,
+    damage: 0, cooldown: 11.0, weight: 2, range: 9, standoff: [5.5, 9],
+    hazard: { radius: 3.2, telegraph: 1.6, damage: 0.65, duration: 4.5, tick: 1.5, color: 0xffffff, sticky: false },
+    telegraph: { color: 0xffffff },
   },
 
   /**
@@ -1103,5 +1123,7 @@ export const ENEMY_MOVE_SETS = {
   radiant_dancer: ['gleam', 'flurry', 'thrust'],
   /** W-E3 切片3：辉煌圣印者 —— 圣印灼场（远距标点） + 远程与守势 */
   radiant_brand:   ['brand', 'shot', 'guard', 'thrust'],
+  /** W-E3 切片67：辉煌大主教 —— 敕命（区域封锁）+ 灼场（补刀）+ 远程与守势 */
+  radiant_archon:  ['edict', 'brand', 'shot', 'guard'],
 };
 

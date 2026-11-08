@@ -1106,6 +1106,20 @@ export const OBJECTIVES = [
     journal: 'obj_radiant_brand_hunt_journal',
   },
   {
+    // W-E3 切片67：辉煌大主教进主线 —— 圣域四类清剿（骑士/舞者/圣印者之外，最后一类）。
+    // 插在圣印者之后、dungeon-rerun 之前；v21 起存档记 currentId，插步不必配迁移。
+    id: 'archon-hunt',
+    title: 'obj_archon_hunt_title',
+    desc: 'obj_archon_hunt_desc',
+    type: 'kills',
+    enemyType: 'radiant_archon',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -260, z: -230, label: 'enemy_name_radiant_archon' },
+    reward: 20,
+    journal: 'obj_archon_hunt_journal',
+  },
+  {
     id: 'dungeon-rerun',
     title: 'obj_dungeon_rerun_title',
     desc: 'obj_dungeon_rerun_desc',

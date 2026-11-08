@@ -74,6 +74,12 @@ export const ENEMY_ROSTER = {
    * 与同区的爬兽（贴地乱爪）、骑士（重装近战）、舞者（连段旋舞）都不重叠。
    */
   radiant_brand: { name: 'enemy_name_radiant_brand', hp: 155, posture: 60, damage: 16, speed: 4.6, aggroRange: 26, color: 0xffe066 },
+  /**
+   * W-E3 切片67：辉煌大主教 —— 辉煌圣域最深处的施法者。
+   * 血不多（175）但架势中等偏上（68），**整片地都是他的火线**（aggroRange 28、敕命 3.2 米）。
+   * 与同区的圣印者（印玩家脚下一小块、sticky）分岔：圣印者是"打你那条地"，大主教是"点一整片地"。
+   */
+  radiant_archon: { name: 'enemy_name_radiant_archon', hp: 175, posture: 68, damage: 17, speed: 4.3, aggroRange: 28, color: 0xfff4b0 },
 };
 
 /**

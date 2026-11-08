@@ -87,6 +87,9 @@ export const GEAR_BASES = [
   { id: 'glass-charm', slot: 'charm', weight: 5, mods: { mind: 1, endurance: 1 } },
   { id: 'eclipse-sigil', slot: 'sigil', weight: 5, mods: { arcane: 1, mind: 1 } },
   { id: 'void-sigil', slot: 'sigil', weight: 6, mods: { strength: 1, mind: 1 } },
+  // W-E3 切片67：晨曦护符（vigor × arcane 的配对此前没有任何一件底座用过）。
+  // 只从辉煌圣域池掉，是"走到金色沙海尽头才见得到"的那一件。
+  { id: 'dawn-charm', slot: 'charm', weight: 6, mods: { vigor: 1, arcane: 1 } },
 ];
 
 /**
@@ -115,6 +118,9 @@ export const GEAR_AFFIXES = [
   { id: 'iron-vow', weight: 7, minRarity: 'rare', mods: { vigor: 2, endurance: 1 } },
   { id: 'void-tide', weight: 4, minRarity: 'epic', mods: { arcane: 1, endurance: 1, mind: 1 } },
   { id: 'chaos-core', weight: 2, minRarity: 'epic', mods: { strength: 1, vigor: 1, endurance: 1 } },
+  // W-E3 切片67：晨曦赐福（vigor × mind）—— 表里唯一没被占过的双点配对。
+  // 稀有度档刻意落在 rare：dawn-charm 是底座里偏后期的那一档，配它的词缀不该 rare 不起。
+  { id: 'dawn-blessed', weight: 8, minRarity: 'rare', mods: { vigor: 1, mind: 1 } },
 ];
 
 /** 表内查表用的索引：`id` 是数据里的钥匙，重复的 id 由注册表在加载期算红 */
@@ -306,6 +312,8 @@ export const GEAR_NAMES = {
   'flame-guard': 'gear_name_flame_guard', 'tide-mind': 'gear_name_tide_mind',
   'starsight': 'gear_name_starsight', 'iron-vow': 'gear_name_iron_vow',
   'void-tide': 'gear_name_void_tide', 'chaos-core': 'gear_name_chaos_core',
+  // W-E3 切片67：新底座与新词缀的名字
+  'dawn-charm': 'gear_name_dawn_charm', 'dawn-blessed': 'gear_name_dawn_blessed',
 };
 
 /**
@@ -346,7 +354,8 @@ export const GEAR_POOLS = {
   gloom: [{ base: 'storm-charm', weight: 4 }, { base: 'ash-charm', weight: 3 },
     { base: 'ember-charm', weight: 2 }, { base: 'war-sigil', weight: 2 }],
   radiant: [{ base: 'glass-charm', weight: 4 }, { base: 'eclipse-sigil', weight: 3 },
-    { base: 'void-sigil', weight: 2 }, { base: 'ring-sigil', weight: 3 }],
+    { base: 'void-sigil', weight: 2 }, { base: 'ring-sigil', weight: 3 },
+    { base: 'dawn-charm', weight: 2 }],
 };
 
 /** 这一片的兜底档名（`corridor` / `unknown` / 名单外的新区域都落这里） */

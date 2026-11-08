@@ -535,6 +535,7 @@ export const STRINGS_EN = Object.freeze({
   enemy_name_radiant_knight: 'Radiant Knight',
   enemy_name_radiant_dancer: 'Radiant Dancer',
   enemy_name_radiant_brand: 'Radiant Brander',
+  enemy_name_radiant_archon: 'Radiant Archon',
 
   // Player-facing leftovers (W-D2 slice 16r)
   enemy_name_default: 'Enemy',
@@ -1237,6 +1238,9 @@ export const STRINGS_EN = Object.freeze({
   gear_name_iron_vow: 'Ironvow',
   gear_name_void_tide: 'Voidtide',
   gear_name_chaos_core: 'Chaosheart',
+  // W-E3 slice 67: Dawn Charm and Dawn-Blessed affix
+  gear_name_dawn_charm: 'Dawn Charm',
+  gear_name_dawn_blessed: 'Dawn-Blessed',
 
 
   // 成就文案（W-D2 切片16l：标题/描述全是键）
@@ -1722,6 +1726,9 @@ export const STRINGS_EN = Object.freeze({
   obj_radiant_brand_hunt_title: 'Radiant Branders',
   obj_radiant_brand_hunt_desc: 'The branders stand far off and mark the ground as a burning field. Clear three of them, and stop stepping into circles someone else drew.',
   obj_radiant_brand_hunt_journal: 'The burning fields died down. The ground of the Sanctum turned cool, finally walkable.',
+  obj_archon_hunt_title: 'The Radiant Archon',
+  obj_archon_hunt_desc: 'The Archon stands at the deepest reach of the Sanctum and turns whole stretches of ground to white fire. Clear him, and the golden sands are truly yours.',
+  obj_archon_hunt_journal: 'The dawn edict faded. Only the sun remains over the Sanctum — and no one speaks for it now.',
   obj_dungeon_rerun_title: "Abyss Redive",
   obj_dungeon_rerun_desc: "Clear a dungeon one more time.",
   obj_dungeon_rerun_journal: "The abyss redive is done; the cycle restarts.",

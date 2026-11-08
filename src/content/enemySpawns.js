@@ -147,4 +147,9 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'radiant_brand', x: -320, z: -120 },
   { type: 'radiant_brand', x: -300, z: -240 },
   { type: 'radiant_brand', x: -240, z: -280 },
+  // 辉煌大主教（三点，W-E3 切片67）—— 施法者沉默地飘在金沙上方，前摇给得很长，
+  // 但他的敕命落下时半径比灼场宽得多：三点铺开，逼玩家换位置而不是躲进圈里打他。
+  { type: 'radiant_archon', x: -260, z: -230 },
+  { type: 'radiant_archon', x: -150, z: -270 },
+  { type: 'radiant_archon', x: -130, z: -190 },
 ]);
