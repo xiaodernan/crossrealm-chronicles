@@ -129,6 +129,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'void_marauder', weight: 1 },
       // W-E3 切片78：虚空刺蜇者 —— 远程骚扰者，权重低
       { type: 'void_stinger', weight: 1 },
+      // W-E3 切片80：虚空裂隙使 —— 远程布陷者，权重低
+      { type: 'void_ruptor', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

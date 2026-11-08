@@ -80,6 +80,8 @@ export const BODY_PLANS = {
 
   /** W-E3 切片78：虚空刺蜇者 —— 保持距离的轻快骚扰者体格。 */
   void_stinger:   { scale: 0.94, parts: ['head', 'torso', 'legs'], radius: 0.40 },
+  /** W-E3 切片80：虚空裂隙使 —— 远距布陷的施压者体格。 */
+  void_ruptor:    { scale: 1.0, parts: ['head', 'torso', 'legs'], radius: 0.43 },
   /** W-E3 切片70：深渊撕掠者 —— 深渊里的贴地猎手，比掠行兽更壮、靠撕裂而不是乱爪 */
   abyss_reaver:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片71：深渊凝视者 —— 悬浮的暗目，远距凝视施压，与撕掠者的贴身撕裂分工 */
@@ -174,6 +176,8 @@ export const ENEMY_RESIST = {
   void_marauder:  { fire: -0.15, gravity: 0.2 },
   /** W-E3 切片78：虚空刺蜇者 —— 远程骚扰者 */
   void_stinger:   { fire: -0.1, gravity: 0.15 },
+  /** W-E3 切片80：虚空裂隙使 */
+  void_ruptor:    { fire: -0.1, gravity: 0.2 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -337,6 +341,8 @@ export const ENEMY_DEFENSE = {
   void_marauder: 6,
   /** W-E3 切片78：虚空刺蜇者 */
   void_stinger: 3,
+  /** W-E3 切片80：虚空裂隙使 */
+  void_ruptor: 4,
   abyss_reaver: 6,
   abyss_watcher: 5,
   abyss_brute: 8,
@@ -868,6 +874,19 @@ export const ENEMY_MOVES = {
     telegraph: { color: 0x5522aa },
   },
   /**
+   * 虚空裂隙（虚空裂隙使专属招）—— W-E3 切片80。
+   * 远程投射落点生成危险区（ranged+hazard）：与 `brand` 同机制不同参数，
+   * 与 `void_sting`（纯直射骚扰）、`abyss_mire`（近身布置）分岔。
+   */
+  void_breach: {
+    name: '虚空裂隙', windup: 0.95, strike: 0.24, recover: 0.62, cone: -2,
+    range: 11, minDist: 4,
+    damage: 0, cooldown: 7.8, weight: 2, standoff: [5, 10],
+    ranged: { speed: 12, color: 0x7744dd },
+    hazard: { radius: 2.5, telegraph: 1.1, damage: 0.55, duration: 3.8, tick: 0.9, color: 0x7744dd },
+    telegraph: { color: 0x6633bb },
+  },
+  /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
    *
    * **远距标点**：站位诉求要求它自己待在 6~11 米外（`standoff`），射出一枚慢速圣印弹，
@@ -1352,6 +1371,8 @@ export const ENEMY_MOVE_SETS = {
   void_marauder:  ['void_rend', 'cleave', 'sweep'],
   /** W-E3 切片78：虚空刺蜇者 —— 虚空刺蜇（远程骚扰）+ 刺击 + 横扫 */
   void_stinger:   ['void_sting', 'thrust', 'sweep'],
+  /** W-E3 切片80：虚空裂隙使 —— 虚空裂隙（远程布陷）+ 刺击 + 横扫 */
+  void_ruptor:    ['void_breach', 'thrust', 'sweep'],
   /** W-E3 切片70：深渊撕掠者 —— 深渊撕裂（重撕控距）+ 劈砍 + 刺击 + 连爪 */
   abyss_reaver:   ['maw_rend', 'cleave', 'thrust', 'flurry'],
   /** W-E3 切片71：深渊凝视者 —— 深渊凝视（远距凝视弹）+ 虚能弹 + 刺击 */

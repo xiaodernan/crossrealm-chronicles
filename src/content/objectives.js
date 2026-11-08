@@ -808,6 +808,19 @@ export const OBJECTIVES = [
     journal: 'obj_void_stinger_hunt_journal',
   },
   {
+    // W-E3 切片80：虚空裂隙使进主线 —— 第六独占，插在刺蜇者后、断口副本前（ch4，v21 不写迁移；右移 choice-void）。
+    id: 'void-ruptor-hunt',
+    title: 'obj_void_ruptor_hunt_title',
+    desc: 'obj_void_ruptor_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_ruptor',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 95, z: 260, label: 'enemy_name_void_ruptor' },
+    reward: 22,
+    journal: 'obj_void_ruptor_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',

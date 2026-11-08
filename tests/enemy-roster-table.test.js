@@ -94,6 +94,8 @@ const OLD_BIRTH = {
   void_marauder: { name: '虚空掠夺者', hp: 170, posture: 62, damage: 19, speed: 5.0, aggroRange: 26, color: 0x553377 },
   // W-E3 切片78：虚空刺蜇者
   void_stinger: { name: '虚空刺蜇者', hp: 140, posture: 48, damage: 15, speed: 5.4, aggroRange: 30, color: 0x6644cc },
+  // W-E3 切片80：虚空裂隙使
+  void_ruptor: { name: '虚空裂隙使', hp: 145, posture: 50, damage: 14, speed: 4.8, aggroRange: 28, color: 0x7755bb },
   // W-E3 切片70：深渊撕掠者
   abyss_reaver: { name: '深渊撕掠者', hp: 165, posture: 60, damage: 19, speed: 6.2, aggroRange: 26, color: 0x882244 },
   // W-E3 切片71：深渊凝视者
