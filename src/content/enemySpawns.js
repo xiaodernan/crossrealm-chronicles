@@ -156,6 +156,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_watcher', x: -210, z: 260 },
   { type: 'abyss_watcher', x: -150, z: 225 },
   { type: 'abyss_watcher', x: -250, z: 255 },
+  // 深渊蛮兽（三点，W-E3 切片73）—— 重躯压迫者，与撕掠者/凝视者出生带错开。
+  { type: 'abyss_brute', x: -195, z: 270 },
+  { type: 'abyss_brute', x: -240, z: 245 },
+  { type: 'abyss_brute', x: -170, z: 215 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

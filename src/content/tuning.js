@@ -77,6 +77,8 @@ export const BODY_PLANS = {
   abyss_reaver:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片71：深渊凝视者 —— 悬浮的暗目，远距凝视施压，与撕掠者的贴身撕裂分工 */
   abyss_watcher:  { scale: 0.94, parts: ['head', 'torso'], radius: 0.42, hover: 0.5 },
+  /** W-E3 切片73：深渊蛮兽 —— 深渊颚底的重躯，比撕掠者更壮，靠重踏逼退 */
+  abyss_brute:    { scale: 1.12, parts: ['head', 'torso', 'legs'], radius: 0.52 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -143,6 +145,8 @@ export const ENEMY_RESIST = {
   abyss_reaver:   { fire: -0.1, ice: 0.15 },
   /** 深渊凝视者：悬浮的暗目，怕火；引力拽不稳虚浮之躯 */
   abyss_watcher:  { fire: -0.15, gravity: 0.2 },
+  /** 深渊蛮兽：深渊颚底的重躯，怕火；厚皮对寒意不敏感 */
+  abyss_brute:    { fire: -0.1, ice: 0.1 },
   /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
@@ -305,6 +309,7 @@ export const ENEMY_DEFENSE = {
   void_riftwalker: 5,
   abyss_reaver: 6,
   abyss_watcher: 5,
+  abyss_brute: 8,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -721,6 +726,19 @@ export const ENEMY_MOVES = {
     damage: 1.05, cooldown: 3.4, weight: 2,
     ranged: { speed: 12, color: 0x774488 },
     telegraph: { color: 0x553366 },
+  },
+  /**
+   * 深渊重踏（深渊蛮兽专属招）—— W-E3 切片73。
+   *
+   * 慢速重踏：长前摇后向前砸出一片，伤害高、击退重，逼玩家拉开或侧闪。
+   * 与 `maw_rend`（中速撕裂、击退 5）分岔——重踏更慢更狠，换取更大的逼退与惩罚窗口；
+   * 与 `slam`（通用重击）分岔——重踏锥面更宽、击退更强，是蛮兽的身份招。
+   */
+  abyss_slam: {
+    name: '深渊重踏', windup: 0.95, strike: 0.26, recover: 0.6, reach: 1.15, cone: 0.65,
+    band: [0.0, 1.0],
+    damage: 1.45, cooldown: 4.5, weight: 2, knock: 7,
+    telegraph: { color: 0x551133 },
   },
   /**
    * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
@@ -1218,6 +1236,8 @@ export const ENEMY_MOVE_SETS = {
   abyss_reaver:   ['maw_rend', 'cleave', 'thrust', 'flurry'],
   /** W-E3 切片71：深渊凝视者 —— 深渊凝视（远距凝视弹）+ 虚能弹 + 刺击 */
   abyss_watcher:  ['abyss_gaze', 'shot', 'thrust'],
+  /** W-E3 切片73：深渊蛮兽 —— 深渊重踏（慢速重逼退）+ 劈砍 + 重击 */
+  abyss_brute:    ['abyss_slam', 'cleave', 'slam'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

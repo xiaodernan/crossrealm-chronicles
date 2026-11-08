@@ -136,6 +136,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'abyss_reaver', weight: 1 },
       // W-E3 切片71：深渊凝视者 —— 悬浮暗目，权重低（远距点缀，不抢主编组）
       { type: 'abyss_watcher', weight: 1 },
+      // W-E3 切片73：深渊蛮兽 —— 重躯压迫者，权重低（点缀压迫感，不抢主编组）
+      { type: 'abyss_brute', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

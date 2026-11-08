@@ -1001,6 +1001,20 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_watcher_hunt_journal',
   },
   {
+    // W-E3 切片73：深渊蛮兽进主线 —— 深渊之颚的重躯压迫者，插在凝视者清剿后、深渊副本前。
+    // v21 起存档记 currentId，插步不必配迁移。
+    id: 'abyss-brute-hunt',
+    title: 'obj_abyss_brute_hunt_title',
+    desc: 'obj_abyss_brute_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_brute',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -195, z: 270, label: 'enemy_name_abyss_brute' },
+    reward: 22,
+    journal: 'obj_abyss_brute_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',

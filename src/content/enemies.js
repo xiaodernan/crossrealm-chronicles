@@ -95,6 +95,12 @@ export const ENEMY_ROSTER = {
    * 与 abyss_reaver（贴身重撕）、sentinel（通用远程炮台）分工不同。
    */
   abyss_watcher: { name: 'enemy_name_abyss_watcher', hp: 155, posture: 56, damage: 16, speed: 4.8, aggroRange: 30, color: 0x553366 },
+  /**
+   * W-E3 切片73：深渊蛮兽 —— 深渊之颚底部的重躯压迫者。
+   * 比撕掠者更厚更慢（hp175/架势66/伤害20），靠深渊重踏逼退与惩罚贪刀；
+   * 与 abyss_reaver（中速撕裂猎手）、abyss_watcher（远距凝视）分工不同。
+   */
+  abyss_brute: { name: 'enemy_name_abyss_brute', hp: 175, posture: 66, damage: 20, speed: 4.4, aggroRange: 24, color: 0x661133 },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },
