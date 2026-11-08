@@ -780,6 +780,20 @@ export const OBJECTIVES = [
     journal: 'obj_void_lurker_hunt_journal',
   },
   {
+    // W-E3 切片76：虚空掠夺者进主线 —— 虚空断口第四独占，插在潜伏者清剿后、破棺副本前。
+    // v21 起存档记 currentId，插步不必配迁移。
+    id: 'void-marauder-hunt',
+    title: 'obj_void_marauder_hunt_title',
+    desc: 'obj_void_marauder_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_marauder',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 5, z: 255, label: 'enemy_name_void_marauder' },
+    reward: 18,
+    journal: 'obj_void_marauder_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',

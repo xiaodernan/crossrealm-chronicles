@@ -75,6 +75,8 @@ export const BODY_PLANS = {
   void_riftwalker:{ scale: 0.96, parts: ['head', 'torso', 'legs'], radius: 0.44 },
   /** W-E3 切片74：虚空潜伏者 —— 贴裂隙潜行的伏击者，靠短距扑袭贴身 */
   void_lurker:    { scale: 0.94, parts: ['head', 'torso', 'legs'], radius: 0.42 },
+  /** W-E3 切片76：虚空掠夺者 —— 贴地中重型虚空掠食体格。 */
+  void_marauder:  { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.47 },
   /** W-E3 切片70：深渊撕掠者 —— 深渊里的贴地猎手，比掠行兽更壮、靠撕裂而不是乱爪 */
   abyss_reaver:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片71：深渊凝视者 —— 悬浮的暗目，远距凝视施压，与撕掠者的贴身撕裂分工 */
@@ -157,6 +159,8 @@ export const ENEMY_RESIST = {
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** 虚空潜伏者：贴着裂隙潜行的实影，怕火；引力能干扰它的扑袭落点 */
   void_lurker:    { fire: -0.15, gravity: 0.2 },
+  /** W-E3 切片76：虚空掠夺者 —— 中重型虚空掠食者 */
+  void_marauder:  { fire: -0.15, gravity: 0.2 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -316,6 +320,8 @@ export const ENEMY_DEFENSE = {
   void_phantom: 4,
   void_riftwalker: 5,
   void_lurker: 4,
+  /** W-E3 切片76：虚空掠夺者 */
+  void_marauder: 6,
   abyss_reaver: 6,
   abyss_watcher: 5,
   abyss_brute: 8,
@@ -791,6 +797,21 @@ export const ENEMY_MOVES = {
     damage: 1.15, cooldown: 3.0, weight: 2, knock: 2.5,
     standoff: [1.5, 3.0], travel: 'lunge', travelSpeed: 5.0,
     telegraph: { color: 0x6633aa },
+  },
+  /**
+   * 虚空撕扯（虚空掠夺者专属招）—— W-E3 切片76。
+   *
+   * 近身重型横撕：宽扇面（cone 0.7）+ 较长前摇 0.75s，给出清晰惩罚窗口，
+   * 命中后击退 5、伤害 1.35。非相位、无位移，是 void_ 家族里缺的"重压"招。
+   * 与 `void_lunge`（travel 短冲、0.5s/knock2.5，快伏击）分岔——撕扯更慢更重、更宽；
+   * 与 `abyss_slam`（0.95s/knock7/reach1.15，蛮兽级逼退）分岔——撕扯更快一档、击退较轻，
+   * 是中重压迫而非重躯碾压。
+   */
+  void_rend: {
+    name: '虚空撕扯', windup: 0.75, strike: 0.22, recover: 0.5, reach: 1.05, cone: 0.7,
+    band: [0.0, 1.1],
+    damage: 1.35, cooldown: 4.2, weight: 2, knock: 5,
+    telegraph: { color: 0x7744cc },
   },
   /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
@@ -1273,6 +1294,8 @@ export const ENEMY_MOVE_SETS = {
   void_riftwalker:['rift_step', 'cleave', 'sweep'],
   /** W-E3 切片74：虚空潜伏者 —— 虚空扑袭（短距 travel 伏击）+ 连爪 + 刺击 */
   void_lurker:    ['void_lunge', 'flurry', 'thrust'],
+  /** W-E3 切片76：虚空掠夺者 —— 虚空撕扯（重型宽撕）+ 劈砍 + 横扫 */
+  void_marauder:  ['void_rend', 'cleave', 'sweep'],
   /** W-E3 切片70：深渊撕掠者 —— 深渊撕裂（重撕控距）+ 劈砍 + 刺击 + 连爪 */
   abyss_reaver:   ['maw_rend', 'cleave', 'thrust', 'flurry'],
   /** W-E3 切片71：深渊凝视者 —— 深渊凝视（远距凝视弹）+ 虚能弹 + 刺击 */

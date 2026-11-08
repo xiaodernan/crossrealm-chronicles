@@ -150,6 +150,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'void_lurker', x: -25, z: 210 },
   { type: 'void_lurker', x: 55, z: 245 },
   { type: 'void_lurker', x: -75, z: 200 },
+  // 虚空掠夺者（三点，W-E3 切片76）—— 中重型掠食压迫者，与潜伏者/裂隙行者/幻影出生带错开。
+  { type: 'void_marauder', x: 15, z: 225 },
+  { type: 'void_marauder', x: -55, z: 235 },
+  { type: 'void_marauder', x: 40, z: 205 },
 
   // ── 深渊之颚（abyss，中心 ~-200,220，半径 130）── W-E3 切片70
   // 深渊撕掠者（三点）—— 贴地猎手，分散在颚区边缘，与 stalker/sentinel 出生带错开。

@@ -90,6 +90,12 @@ export const ENEMY_ROSTER = {
    */
   void_lurker: { name: 'enemy_name_void_lurker', hp: 155, posture: 55, damage: 17, speed: 6.0, aggroRange: 26, color: 0x552288 },
   /**
+   * W-E3 切片76：虚空掠夺者 —— 虚空断口里中重型的掠食压迫者。
+   * 比潜伏者更厚更重（hp170/架势62/伤害19/速5.0），靠虚空撕扯的宽扇重压惩罚贴脸；
+   * 与 void_phantom（悬浮相位切）、void_riftwalker（长距裂隙突入）、void_lurker（快伏击）分工不同。
+   */
+  void_marauder: { name: 'enemy_name_void_marauder', hp: 170, posture: 62, damage: 19, speed: 5.0, aggroRange: 26, color: 0x553377 },
+  /**
    * W-E3 切片70：深渊撕掠者 —— 深渊之颚边缘的贴地猎手。
    * 比掠行兽更壮（hp165/架势60）、出手更重（19），靠深渊撕裂控距顶开，
    * 与 stalker（轻快乱爪扑击）、knight（重甲横扫守势）分工不同。

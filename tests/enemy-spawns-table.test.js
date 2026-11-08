@@ -56,6 +56,8 @@ const 冻结 = [
   ['void_riftwalker', 20, 200], ['void_riftwalker', -45, 245], ['void_riftwalker', 65, 215],
   // W-E3 切片74：虚空潜伏者（三点野外出生点）
   ['void_lurker', -25, 210], ['void_lurker', 55, 245], ['void_lurker', -75, 200],
+  // W-E3 切片76：虚空掠夺者（三点野外出生点）
+  ['void_marauder', 15, 225], ['void_marauder', -55, 235], ['void_marauder', 40, 205],
   // W-E3 切片70：深渊撕掠者（三点野外出生点）
   ['abyss_reaver', -180, 240], ['abyss_reaver', -230, 200], ['abyss_reaver', -260, 230],
   // W-E3 切片71：深渊凝视者（三点野外出生点）

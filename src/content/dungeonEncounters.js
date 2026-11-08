@@ -125,6 +125,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'void_riftwalker', weight: 1 },
       // W-E3 切片74：虚空潜伏者 —— 贴裂隙伏击的实影，权重低（点缀压迫感，不抢主编组）
       { type: 'void_lurker', weight: 1 },
+      // W-E3 切片76：虚空掠夺者 —— 中重型掠食压迫者，权重低（点缀压迫感，不抢主编组）
+      { type: 'void_marauder', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },
