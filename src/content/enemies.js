@@ -83,6 +83,12 @@ export const ENEMY_ROSTER = {
    * 与 stalker（轻快乱爪扑击）、knight（重甲横扫守势）分工不同。
    */
   abyss_reaver: { name: 'enemy_name_abyss_reaver', hp: 165, posture: 60, damage: 19, speed: 6.2, aggroRange: 26, color: 0x882244 },
+  /**
+   * W-E3 切片71：深渊凝视者 —— 深渊之颚上空的悬浮暗目。
+   * 中远距凝视弹施压（hp155/架势56/伤害16），迫使玩家横移；
+   * 与 abyss_reaver（贴身重撕）、sentinel（通用远程炮台）分工不同。
+   */
+  abyss_watcher: { name: 'enemy_name_abyss_watcher', hp: 155, posture: 56, damage: 16, speed: 4.8, aggroRange: 30, color: 0x553366 },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },

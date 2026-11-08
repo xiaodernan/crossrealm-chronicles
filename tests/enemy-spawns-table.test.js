@@ -54,6 +54,8 @@ const 冻结 = [
   ['void_phantom', -10, 190], ['void_phantom', 50, 230], ['void_phantom', -60, 220],
   // W-E3 切片70：深渊撕掠者（三点野外出生点）
   ['abyss_reaver', -180, 240], ['abyss_reaver', -230, 200], ['abyss_reaver', -260, 230],
+  // W-E3 切片71：深渊凝视者（三点野外出生点）
+  ['abyss_watcher', -210, 260], ['abyss_watcher', -150, 225], ['abyss_watcher', -250, 255],
   ['radiant_crawler', -240, -200], ['radiant_crawler', -120, -100], ['radiant_crawler', -300, -180],
   ['radiant_knight', -80, -220], ['radiant_knight', -200, -80], ['radiant_knight', -240, -100],
   ['radiant_dancer', -160, -240], ['radiant_dancer', -220, -200], ['radiant_dancer', -100, -140],

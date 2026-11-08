@@ -973,6 +973,20 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_reaver_hunt_journal',
   },
   {
+    // W-E3 切片71：深渊凝视者进主线 —— 深渊之颚的悬浮暗目，插在撕掠者清剿后、深渊副本前。
+    // v21 起存档记 currentId，插步不必配迁移。
+    id: 'abyss-watcher-hunt',
+    title: 'obj_abyss_watcher_hunt_title',
+    desc: 'obj_abyss_watcher_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_watcher',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -210, z: 260, label: 'enemy_name_abyss_watcher' },
+    reward: 22,
+    journal: 'obj_abyss_watcher_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',

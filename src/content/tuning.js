@@ -73,6 +73,8 @@ export const BODY_PLANS = {
   void_phantom:   { scale: 0.92, parts: ['head', 'torso'], radius: 0.40, hover: 0.6 },
   /** W-E3 切片70：深渊撕掠者 —— 深渊里的贴地猎手，比掠行兽更壮、靠撕裂而不是乱爪 */
   abyss_reaver:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.46 },
+  /** W-E3 切片71：深渊凝视者 —— 悬浮的暗目，远距凝视施压，与撕掠者的贴身撕裂分工 */
+  abyss_watcher:  { scale: 0.94, parts: ['head', 'torso'], radius: 0.42, hover: 0.5 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -137,6 +139,8 @@ export const ENEMY_RESIST = {
   void_phantom:   { fire: -0.2, gravity: 0.3 },
   /** 深渊撕掠者：深渊热流里长出的猎手，怕火；寒意反而啃得慢 */
   abyss_reaver:   { fire: -0.1, ice: 0.15 },
+  /** 深渊凝视者：悬浮的暗目，怕火；引力拽不稳虚浮之躯 */
+  abyss_watcher:  { fire: -0.15, gravity: 0.2 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -295,6 +299,7 @@ export const ENEMY_DEFENSE = {
   gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16, gloom_shade: 5,
   void_phantom: 4,
   abyss_reaver: 6,
+  abyss_watcher: 5,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -698,6 +703,19 @@ export const ENEMY_MOVES = {
     band: [0.0, 1.1],
     damage: 1.35, cooldown: 3.6, weight: 2, knock: 5,
     telegraph: { color: 0x662244 },
+  },
+  /**
+   * 深渊凝视（深渊凝视者专属招）—— W-E3 切片71。
+   *
+   * 悬浮暗目的远距凝视弹：比通用 `shot` 更慢、更重，逼玩家在中远距横移而不是贴身硬换血。
+   * 与撕掠者的 `maw_rend`（贴身重撕控距）分工；与 `brand`（落地灼场 sticky）分岔——凝视是直射弹，不留地面。
+   */
+  abyss_gaze: {
+    name: '深渊凝视', windup: 0.85, strike: 0.18, recover: 0.55, cone: -2,
+    range: 12, minDist: 4.5,
+    damage: 1.05, cooldown: 3.4, weight: 2,
+    ranged: { speed: 12, color: 0x774488 },
+    telegraph: { color: 0x553366 },
   },
   /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
@@ -1178,6 +1196,8 @@ export const ENEMY_MOVE_SETS = {
   void_phantom:   ['phase_cut', 'thrust', 'sweep'],
   /** W-E3 切片70：深渊撕掠者 —— 深渊撕裂（重撕控距）+ 劈砍 + 刺击 + 连爪 */
   abyss_reaver:   ['maw_rend', 'cleave', 'thrust', 'flurry'],
+  /** W-E3 切片71：深渊凝视者 —— 深渊凝视（远距凝视弹）+ 虚能弹 + 刺击 */
+  abyss_watcher:  ['abyss_gaze', 'shot', 'thrust'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

@@ -82,7 +82,7 @@ describe('② 每一版的长度是历史事实', () => {
       expect(今天, `今天的主线里没有 "${id}"？这条腿要跟着内容走`).toContain(id);
     }
     expect(mainlineAt(20)).toHaveLength(65);
-    expect(MAINLINE, 'v21 之后插了十七步（切片40 一步、切片41/42/45/46 各三步、切片67 大主教、切片68 影煞、切片69 幻影、切片70 撕掠者）—— 账本不该跟着长').toHaveLength(82);
+    expect(MAINLINE, 'v21 之后插了十八步（切片40 一步、切片41/42/45/46 各三步、切片67 大主教、切片68 影煞、切片69 幻影、切片70 撕掠者、切片71 凝视者）—— 账本不该跟着长').toHaveLength(83);
     // 切片67/68/69 那三步也要落在"今天的表里、era 20 账本里没有"这一格
     expect(今天, '今天的主线里没有 archon-hunt —— 插步没上表').toContain('archon-hunt');
     expect(账上, 'archon-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('archon-hunt');
@@ -92,6 +92,8 @@ describe('② 每一版的长度是历史事实', () => {
     expect(账上, 'void-phantom-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('void-phantom-hunt');
     expect(今天, '今天的主线里没有 abyss-reaver-hunt —— 插步没上表').toContain('abyss-reaver-hunt');
     expect(账上, 'abyss-reaver-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('abyss-reaver-hunt');
+    expect(今天, '今天的主线里没有 abyss-watcher-hunt —— 插步没上表').toContain('abyss-watcher-hunt');
+    expect(账上, 'abyss-watcher-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('abyss-watcher-hunt');
   });
   it('era 20 是冻结的：今天的表往后长，它不动', () => {
     expect(mainlineAt(20)).toEqual(账上);

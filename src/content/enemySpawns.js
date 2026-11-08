@@ -148,6 +148,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_reaver', x: -180, z: 240 },
   { type: 'abyss_reaver', x: -230, z: 200 },
   { type: 'abyss_reaver', x: -260, z: 230 },
+  // 深渊凝视者（三点，W-E3 切片71）—— 悬浮暗目，远距施压，与撕掠者/哨卫出生带错开。
+  { type: 'abyss_watcher', x: -210, z: 260 },
+  { type: 'abyss_watcher', x: -150, z: 225 },
+  { type: 'abyss_watcher', x: -250, z: 255 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },
