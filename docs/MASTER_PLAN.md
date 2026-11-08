@@ -5371,7 +5371,15 @@ Phase D（系统与质量）
 
 
 
-- **2026-11-08 W-E3 切片91 —— 虚空号哭者入主线与副本：虚空断口第十一独占，主线 102 步，v21 插步不写迁移** —— 提交 `dc8eb93`（17 文件，+161 −36）
+
+
+- **2026-11-08 W-E3 切片92 —— test(maint)：quest-save-restore choice-void 今日下标派生断言** —— 提交 `5ae0cdf`（1 文件，+6 −4）
+
+  - **动机**：S89/S91 等 ch4 插步后，`quest-save-restore.test.js` ④ 的“今日 choice-void 下标”快照值/文案多次靠 regex 维护遗漏，需手修。
+
+  - **做法**：该用例改为 `todayChoice = MAINLINE.findIndex(...)` 派生并断言 `> 40`/恢复落点等于 `todayChoice`；保留 v21 锚点（`mainlineAt(20)[40]==choice-void`）与 `currentId` 恢复语义契约。
+
+  - **验证**：lint 0/0，test 全绿（385 文件 / 5748 项），build ✓。纯测试降债，无运行时/E2E 行为变化。- **2026-11-08 W-E3 切片91 —— 虚空号哭者入主线与副本：虚空断口第十一独占，主线 102 步，v21 插步不写迁移** —— 提交 `dc8eb93`（17 文件，+161 −36）
 
   - **动机**：void_ 与 abyss_ 第十一独占对称，补齐虚空侧远压施术者。复用既有 ranged（非 hazard）机制（无新系统）。
 
