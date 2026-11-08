@@ -326,15 +326,17 @@ describe('③ 存档记住"走到哪一步"的 id（W-E3 切片38）', () => {
 });
 
 describe('④ 插步之后老档落回同一步 —— v21 那句承诺的第一次兑现（W-E3 切片40）', () => {
-  it('v21 档里第 40 位是 choice-void；今天它在第 61 位 —— 落点必须跟着 id 走', () => {
+  it('v21 档里第 40 位是 choice-void；后续 ch4 插步右移其下标，但落点必须跟着 id 走', () => {
     // 这份档的坐标是 **v21 冻结时**那张表（`mainlineAt(20)` 与它相同）。
     expect(mainlineAt(20)[40], 'v21 那张表第 40 位不是 choice-void —— 这份桩件不成立').toBe('choice-void');
-    // 今天它在第 61 位：前面插了断誓碑一步、第 3/2/1 章各三步、终局三步与 67/68/69/72/74/75 各一步（69、72、74 在 ch4 使 choice-void 后移一位，75 在 ch5 不移）
-    expect(MAINLINE.findIndex((r) => r.id === 'choice-void'), '今天它在第 61 位').toBe(61);
+    // 当前下标随 ch4 插步右移：由 MAINLINE 派生，避免每片手改快照数（S92 降债，语义不变）。
+    const todayChoice = MAINLINE.findIndex((r) => r.id === 'choice-void');
+    expect(todayChoice, 'choice-void 不在当前主线里').toBeGreaterThanOrEqual(0);
+    expect(todayChoice, 'ch4 插步后 choice-void 应已右移过 v21 下标').toBeGreaterThan(40);
     const q = newQuests();
     const { out } = restore(q, { index: 40, currentId: 'choice-void', chapter: 4 });
     expect(q.current?.id, '老档被送到了相邻那一步 —— id 方案没兑现').toBe('choice-void');
-    expect(q.questIndex).toBe(61);
+    expect(q.questIndex, `应落到当前 choice-void 下标 ${todayChoice}`).toBe(todayChoice);
     expect(out.采纳的.id, '采纳的是 id（不是下标）').toBe(true);
   });
 
