@@ -119,6 +119,12 @@ export const ENEMY_ROSTER = {
    * 与 abyss_brute（重躯逼退）、abyss_watcher（远距凝视）、abyss_reaver（贴身撕裂）分工不同。
    */
   abyss_shade: { name: 'enemy_name_abyss_shade', hp: 150, posture: 54, damage: 17, speed: 5.6, aggroRange: 28, color: 0x441155 },
+  /**
+   * W-E3 切片77：深渊猎犬 —— 深渊之颚里贴地追击的迅捷猎兽。
+   * 比幽影更轻更快（hp145/架势50/伤害16/速6.6），靠深渊扑袭持续追咬；
+   * 与 abyss_shade（相位伏击）、abyss_reaver（重撕控距）、abyss_brute（慢重逼退）、abyss_watcher（远距凝视）分工不同。
+   */
+  abyss_hound: { name: 'enemy_name_abyss_hound', hp: 145, posture: 50, damage: 16, speed: 6.6, aggroRange: 28, color: 0x662244 },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },

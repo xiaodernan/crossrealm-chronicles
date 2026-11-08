@@ -144,6 +144,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'abyss_brute', weight: 1 },
       // W-E3 切片75：深渊幽影 —— 相位伏击者，权重低（点缀压迫感，不抢主编组）
       { type: 'abyss_shade', weight: 1 },
+      // W-E3 切片77：深渊猎犬 —— 快速追击者，权重低（点缀压迫感，不抢主编组）
+      { type: 'abyss_hound', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

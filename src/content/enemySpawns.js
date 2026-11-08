@@ -172,6 +172,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_shade', x: -225, z: 225 },
   { type: 'abyss_shade', x: -185, z: 255 },
   { type: 'abyss_shade', x: -255, z: 215 },
+  // 深渊猎犬（三点，W-E3 切片77）—— 快速追击者，与幽影/蛮兽/撕掠者出生带错开。
+  { type: 'abyss_hound', x: -205, z: 235 },
+  { type: 'abyss_hound', x: -165, z: 240 },
+  { type: 'abyss_hound', x: -245, z: 235 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

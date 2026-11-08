@@ -1057,6 +1057,20 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_shade_hunt_journal',
   },
   {
+    // W-E3 切片77：深渊猎犬进主线 —— 深渊之颚第五独占，插在幽影清剿后、深渊副本前。
+    // v21 起存档记 currentId，插步不必配迁移。
+    id: 'abyss-hound-hunt',
+    title: 'obj_abyss_hound_hunt_title',
+    desc: 'obj_abyss_hound_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_hound',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -205, z: 235, label: 'enemy_name_abyss_hound' },
+    reward: 22,
+    journal: 'obj_abyss_hound_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',

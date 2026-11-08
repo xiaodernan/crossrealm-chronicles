@@ -85,6 +85,8 @@ export const BODY_PLANS = {
   abyss_brute:    { scale: 1.12, parts: ['head', 'torso', 'legs'], radius: 0.52 },
   /** W-E3 切片75：深渊幽影 —— 深渊暗隙里的相位伏击者，贴地错位突袭 */
   abyss_shade:    { scale: 0.98, parts: ['head', 'torso', 'legs'], radius: 0.43 },
+  /** W-E3 切片77：深渊猎犬 —— 贴地迅捷的追击猎兽体格。 */
+  abyss_hound:    { scale: 0.96, parts: ['head', 'torso', 'legs'], radius: 0.41 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -155,6 +157,8 @@ export const ENEMY_RESIST = {
   abyss_brute:    { fire: -0.1, ice: 0.1 },
   /** 深渊幽影：深渊暗隙里的伏击者，怕火；引力拽不稳它的错位 */
   abyss_shade:    { fire: -0.15, gravity: 0.3 },
+  /** W-E3 切片77：深渊猎犬 —— 快速追击者 */
+  abyss_hound:    { fire: -0.15, gravity: 0.2 },
   /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** 虚空潜伏者：贴着裂隙潜行的实影，怕火；引力能干扰它的扑袭落点 */
@@ -326,6 +330,8 @@ export const ENEMY_DEFENSE = {
   abyss_watcher: 5,
   abyss_brute: 8,
   abyss_shade: 5,
+  /** W-E3 切片77：深渊猎犬 */
+  abyss_hound: 4,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -770,6 +776,22 @@ export const ENEMY_MOVES = {
     band: [0.0, 1.05], phase: true, blink: 7,
     damage: 1.15, cooldown: 3.6, weight: 2, knock: 3,
     telegraph: { color: 0x442266 },
+  },
+  /**
+   * 深渊扑袭（深渊猎犬专属招）—— W-E3 切片77。
+   *
+   * 快速追击扑击：短 travel（lunge，travelSpeed 5.5）贴身一击，前摇 0.45s、
+   * 击退 3.5，强调“追上来咬住”而非相位错位或重压。
+   * 与 `void_lunge`（0.5s/knock2.5/travelSpeed5.0，断口伏击）分岔——扑袭更快更凶、追击感更强；
+   * 与 `abyss_veil`（phase blink 7m，中距相位伏击）分岔——扑袭不相位，靠位移追击；
+   * 与 `prowl`（damage 0/cd12 的起手标记式突进）分岔——扑袭是明确伤害的追击招。
+   */
+  abyss_pounce: {
+    name: '深渊扑袭', windup: 0.45, strike: 0.16, recover: 0.36, reach: 0.95, cone: 0.48,
+    band: [0.0, 0.9],
+    damage: 1.1, cooldown: 2.8, weight: 2, knock: 3.5,
+    standoff: [1.2, 2.8], travel: 'lunge', travelSpeed: 5.5,
+    telegraph: { color: 0x663355 },
   },
   /**
    * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
@@ -1304,6 +1326,8 @@ export const ENEMY_MOVE_SETS = {
   abyss_brute:    ['abyss_slam', 'cleave', 'slam'],
   /** W-E3 切片75：深渊幽影 —— 深渊隐袭（中距相位伏击）+ 刺击 + 横扫 */
   abyss_shade:    ['abyss_veil', 'thrust', 'sweep'],
+  /** W-E3 切片77：深渊猎犬 —— 深渊扑袭（快速追击）+ 连爪 + 刺击 */
+  abyss_hound:    ['abyss_pounce', 'flurry', 'thrust'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],
