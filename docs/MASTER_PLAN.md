@@ -5160,3 +5160,12 @@ Phase D（系统与质量）
   - **放弃了什么**：① 没有写 v21→v22 迁移（v21 就为此而立——插步不该缴「存档迁移」那笔税）；② 没有把大主教做成世界 Boss / 守钥者（它是圣域纵深里的压迫性守卫，W-B8 世界 Boss 场地机制归位不变）；③ 没有给大主教加专属 loot 池（走通用 normal 档，dawn-charm 从世界池掉，不动 Solo/Duo 掉落经济）；④ 没有改 CI/e2e 脚本的统计口径（`e2e-clear` 的逐步 120 帧核对对 79 步照旧成立）。
 
   - **留了什么尾巴**：① edict 的 GroundHazards 伤害结算复用 `flare` 那条链路（tick/duration/sticky=false），大主教的 DPS 平衡没有单独配（两个变量一起动没法归因；W-E3 一贯做法）；② 大主教还没有自己的魂价档（`KILL_SOULS` normal 25），要精调先得量魂经济线；③ 野外的 archon 路点与 `archon-hunt` 路点同坐标（-260,-230）——路点指向首枚出生点是本切片的设计（玩家看到指路即打法），不是抄本。
+- **2026-11-08 validate:save 工具修复 —— v4 夹具先走 migrate() 再验；Godot 分支缺工程目录按跳过记账** —— 提交 `d7b2666`（1 文件）
+
+  - **动机**：`npm run validate:save` 在 v21 构建上必然红——它直接拿 v4 夹具喂 `SaveValidator.validate()`，而该函数的前置条件就是「已通过 migrate() 升到 CURRENT_VERSION」（见其注释）。v4 夹具永远过不了 v21 的闸；`quests.currentId` / `objectiveFlags` / `decisions` / `restPointEnhancer` 等一水项全是它该红的地方。此外在检出里缺 `godot/` 工程目录时直接报 "Invalid project path"，fail 的位置在分支判断之前。
+
+  - **做法**：夹具先 `migrate()` 升到 v21（v4→v21 跨 17 跳，实测 issues 为空）再验；Godot 二进制在但 `godot/` 缺失时改为 warn + 跳过（与「Godot not found — skip」同一口径），parity 只对浏览器侧负责；有 `godot/` 的检出仍然真跑。
+
+  - **放弃了什么**：没有让 v4 夹具自己补 version/字段（那正是 migrate() 的职责——夹具少写一格不能算工具失败）；没有把 godotParity 做成可选治理项（它对浏览器主线构建永远跳过；需要它的检出自带 `godot/` 即真跑）。
+
+  - **留了什么尾巴**：① 夹具本身（`tests/save_v4_fixture.json`）是 2026 上半年 Godot 移植期留下的 v4 形状——是否该新增一份 v21 直造的「当前档」夹具，留待下一次动 SaveValidator 时决定；② 这一片没有补对应测试（scripts/ 无现成的夹具级测试先例；该脚本的红线本来就是 CI 之外的手动闸）。
