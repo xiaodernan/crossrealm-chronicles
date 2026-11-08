@@ -64,6 +64,13 @@ export const ENEMY_ROSTER = {
    * 哨卫（浮空远程）都不重叠：它是**站在那里等你走过来**的那一种。
    */
   gloom_warden: { name: 'enemy_name_gloom_warden', hp: 215, posture: 84, damage: 19, speed: 4.2, aggroRange: 26, color: 0x3a3a6a },
+  /**
+   * W-E3 切片68：幽暗影煞 —— 迷雾里最快的那一道影。
+   * 血薄（140）、架势低（52）、攻高（18）且移速全 gloom 族最快（5.8）：
+   * 它不硬扛，靠影袭（短距相位错位）先手贴脸，打完就退。与怨影（悬浮远距相位）、
+   * 掠行兽（贴地冲锋）、守夜人（重装慢速）分工不同。
+   */
+  gloom_shade: { name: 'enemy_name_gloom_shade', hp: 140, posture: 52, damage: 18, speed: 5.8, aggroRange: 24, color: 0x2a2a44 },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },

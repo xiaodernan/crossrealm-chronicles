@@ -92,6 +92,8 @@ export const DUNGEON_ENCOUNTERS = {
       // W-E3 切片3 新增的守夜人：它最沉（hp 215 / 架势 84），但**权重最低** ——
       // 池子的"最重"指的是**谁打头**，不是谁最耐打；守夜人要靠"撞见"而不是"常驻"。
       { type: 'gloom_warden', weight: 1 },
+      // W-E3 切片68：幽暗影煞 —— 迷雾里最快的伏击者，权重最低（遭遇要靠"突然"而不是"常驻"）
+      { type: 'gloom_shade', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

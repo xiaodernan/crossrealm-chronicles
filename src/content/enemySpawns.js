@@ -131,6 +131,11 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'gloom_warden', x: 60, z: 0 },
   { type: 'gloom_warden', x: 60, z: 80 },
   { type: 'gloom_warden', x: 240, z: 240 },
+  // 幽暗影煞（三点，W-E3 切片68）—— 快影伏击者，三点分散在林地深处，
+  // 与守夜人/怨影的出生带错开，逼玩家在不同雾区各清一只。
+  { type: 'gloom_shade', x: 100, z: 60 },
+  { type: 'gloom_shade', x: 180, z: 160 },
+  { type: 'gloom_shade', x: 260, z: 140 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

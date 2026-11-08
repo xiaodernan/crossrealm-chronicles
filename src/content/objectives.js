@@ -1024,6 +1024,20 @@ export const OBJECTIVES = [
     journal: 'obj_gloom_sentinel_hunt_journal',
   },
   {
+    // W-E3 切片68：幽暗影煞进主线 —— 幽暗五类清剿（怨影/掠行兽/哨卫/守夜人之外，最后一类）。
+    // 插在哨卫之后、chaos-boss 之前；v21 起存档记 currentId，插步不必配迁移。
+    id: 'gloom-shade-hunt',
+    title: 'obj_gloom_shade_hunt_title',
+    desc: 'obj_gloom_shade_hunt_desc',
+    type: 'kills',
+    enemyType: 'gloom_shade',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: 100, z: 60, label: 'enemy_name_gloom_shade' },
+    reward: 20,
+    journal: 'obj_gloom_shade_hunt_journal',
+  },
+  {
     id: 'chaos-boss',
     title: bossById('chaos-overlord').shortNameKey,
     desc: 'obj_chaos_boss_desc',

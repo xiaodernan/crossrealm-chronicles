@@ -67,6 +67,8 @@ export const BODY_PLANS = {
   gloom_sentinel: { scale: 1.02, parts: ['head', 'torso'], radius: 0.52, hover: 0.35 },
   /** W-E3 切片3：幽暗守夜人 —— 守夜人比哨卫更重更大（那是它"站在那里"的手感来源） */
   gloom_warden:   { scale: 1.16, parts: ['head', 'torso', 'legs'], radius: 0.56 },
+  /** W-E3 切片68：幽暗影煞 —— 贴地的快影，比掠行兽更轻（它靠的是"先到"而不是"更重"） */
+  gloom_shade:    { scale: 0.88, parts: ['head', 'torso', 'legs'], radius: 0.38 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -125,6 +127,8 @@ export const ENEMY_RESIST = {
   gloom_sentinel: { fire: 0.25, gravity: 0.15 },
   /** 幽暗守夜人：披甲，冰与引力都啃不动多少 —— 撬它靠的是架势与走位 */
   gloom_warden:   { ice: 0.2, gravity: 0.1 },
+  /** 幽暗影煞：快影怕火（影子见不得光）；引力拽不住它那一身轻 */
+  gloom_shade:    { fire: -0.2, gravity: 0.25 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -280,7 +284,7 @@ export const ENEMY_DEFENSE = {
   wraith: 4, stalker: 3, sentinel: 14,
   crawler: 8, knight: 22, dancer: 6,
   hexer: 8, juggernaut: 24,
-  gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16,
+  gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16, gloom_shade: 5,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -643,6 +647,21 @@ export const ENEMY_MOVES = {
     damage: 1.5, cooldown: 5.0, weight: 2, knock: 7.0,
     travel: 'lunge', travelSpeed: 6.5, standoff: [1.5, 3],
     telegraph: { color: 0x8855ff },
+  },
+  /**
+   * 影袭（幽暗影煞专属招）—— W-E3 切片68。
+   *
+   * 短距相位突袭：不是怨影那种"从十米外闪到背后再慢慢劈"（`haunt` blink 10 / windup 0.75），
+   * 影煞的影袭是**贴身六米内**的快速错位——前摇只给 0.55 秒读，落地就一刀、刀后把人顶开
+   * 半步（knock 4）。与 `lurk`（守夜人的长前摇冲锋、travel lunge、不换位）分岔：
+   * 影袭换位但不远冲，lurk 冲锋但不瞬移。
+   * `damage: 1.15`：影煞本体血薄（140）攻高（18），这一招是它"先手"的兑现，不是坦克的重击。
+   */
+  shadowstep: {
+    name: '影袭', windup: 0.55, strike: 0.22, recover: 0.38, reach: 1.0, cone: 0.4,
+    band: [0.05, 1.0], phase: true, blink: 6,
+    damage: 1.15, cooldown: 3.8, weight: 2, knock: 4,
+    telegraph: { color: 0x553388 },
   },
   /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
@@ -1117,6 +1136,8 @@ export const ENEMY_MOVE_SETS = {
   gloom_sentinel: ['beacon', 'shot', 'guard', 'cleave'],
   /** W-E3 切片3：幽暗守夜人 —— 潜行扑杀（超长前摇的窄角度扑杀） + 近战三板斧 */
   gloom_warden:   ['lurk', 'sweep', 'cleave', 'guard'],
+  /** W-E3 切片68：幽暗影煞 —— 影袭（短距相位错位）+ 快刺 + 横扫 */
+  gloom_shade:    ['shadowstep', 'thrust', 'sweep', 'flurry'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

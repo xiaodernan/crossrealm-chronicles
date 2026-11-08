@@ -82,6 +82,8 @@ const OLD_BIRTH = {
    * 而不是"改了也没人知道那老账对不上了"。
    */
   gloom_warden: { name: '幽暗守夜人', hp: 215, posture: 84, damage: 19, speed: 4.2, aggroRange: 26, color: 0x3a3a6a },
+  // W-E3 切片68：幽暗影煞（追加在黄金名单上，保持"两边清单一模一样"）
+  gloom_shade: { name: '幽暗影煞', hp: 140, posture: 52, damage: 18, speed: 5.8, aggroRange: 24, color: 0x2a2a44 },
   radiant_brand: { name: '辉煌圣印者', hp: 155, posture: 60, damage: 16, speed: 4.6, aggroRange: 26, color: 0xffe066 },
   // W-E3 切片67：辉煌大主教（追加在切片2 的黄金名单上，保持"两边清单一模一样"）
   radiant_archon: { name: '辉煌大主教', hp: 175, posture: 68, damage: 17, speed: 4.3, aggroRange: 28, color: 0xfff4b0 },
