@@ -212,6 +212,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_hollow', x: -230, z: 195 },
   { type: 'abyss_hollow', x: -175, z: 285 },
   { type: 'abyss_hollow', x: -255, z: 245 },
+  // 深渊撕裂者（三点，W-E3 切片88）—— 重压者，与空壳/噬颚兽错开。
+  { type: 'abyss_ravager', x: -210, z: 230 },
+  { type: 'abyss_ravager', x: -245, z: 295 },
+  { type: 'abyss_ravager', x: -170, z: 275 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

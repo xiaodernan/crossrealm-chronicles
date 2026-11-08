@@ -1189,6 +1189,19 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_hollow_hunt_journal',
   },
   {
+    // W-E3 切片88：深渊撕裂者进主线 —— 第十独占，插在空壳后、深渊副本前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'abyss-ravager-hunt',
+    title: 'obj_abyss_ravager_hunt_title',
+    desc: 'obj_abyss_ravager_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_ravager',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -210, z: 230, label: 'enemy_name_abyss_ravager' },
+    reward: 24,
+    journal: 'obj_abyss_ravager_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',

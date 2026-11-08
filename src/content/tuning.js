@@ -106,6 +106,8 @@ export const BODY_PLANS = {
   abyss_gnasher:  { scale: 1.0, parts: ['head', 'torso', 'legs'], radius: 0.43 },
   /** W-E3 切片85：深渊空壳 —— 轻盈的汲取施压者体格。 */
   abyss_hollow:   { scale: 0.96, parts: ['head', 'torso', 'legs'], radius: 0.41 },
+  /** W-E3 切片88：深渊撕裂者 —— 魁梧的近身压迫者体格。 */
+  abyss_ravager:  { scale: 1.06, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -186,6 +188,8 @@ export const ENEMY_RESIST = {
   abyss_gnasher:  { fire: -0.15, gravity: 0.25 },
   /** W-E3 切片85：深渊空壳 */
   abyss_hollow:   { fire: -0.1, gravity: 0.2 },
+  /** W-E3 切片88：深渊撕裂者 */
+  abyss_ravager:  { fire: -0.18, gravity: 0.28 },
   /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** 虚空潜伏者：贴着裂隙潜行的实影，怕火；引力能干扰它的扑袭落点 */
@@ -387,6 +391,8 @@ export const ENEMY_DEFENSE = {
   abyss_gnasher: 4,
   /** W-E3 切片85：深渊空壳 */
   abyss_hollow: 3,
+  /** W-E3 切片88：深渊撕裂者 */
+  abyss_ravager: 5,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -893,6 +899,18 @@ export const ENEMY_MOVES = {
     range: 10, minDist: 3,
     damage: 1.0, cooldown: 2.9, weight: 2, ranged: { speed: 16, color: 0x9966bb },
     telegraph: { color: 0x664488 },
+  },
+  /**
+   * 深渊撕裂击（深渊撕裂者专属招）—— W-E3 切片88。
+   * 重型近身撕裂：慢前摇高伤高击退，强调贴身压迫；
+   * 与 `abyss_gnash`（travel 重咬）、`maw_rend` 分岔。
+   */
+  abyss_ravage: {
+    name: '深渊撕裂击', windup: 0.72, strike: 0.2, recover: 0.5, reach: 1.15, cone: 0.52,
+    band: [0.0, 1.1],
+    damage: 1.35, cooldown: 3.8, weight: 2, knock: 5.0,
+    standoff: [1.4, 3.2],
+    telegraph: { color: 0x883366 },
   },
   /**
    * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
@@ -1502,6 +1520,8 @@ export const ENEMY_MOVE_SETS = {
   abyss_gnasher:  ['abyss_gnash', 'flurry', 'thrust'],
   /** W-E3 切片85：深渊空壳 —— 深渊汲取（远程压迫）+ 刺击 + 横扫 */
   abyss_hollow:   ['abyss_drain', 'thrust', 'sweep'],
+  /** W-E3 切片88：深渊撕裂者 —— 深渊撕裂击（重压）+ 横扫 + 突刺 */
+  abyss_ravager:  ['abyss_ravage', 'sweep', 'thrust'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],
