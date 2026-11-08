@@ -5089,7 +5089,7 @@ Phase D（系统与质量）
   - **动机**：W-E2 切片1 交付 `FrameBudget` 后，§3 尾注仍挂着"引入真帧计数消费者（W-C2 余项降频档）"。切片2（`0ac2828`）接上了视觉通道类消费者（1/4 帧），但 `WeatherSystem` 与 `WorldEffects` 还有两处**每帧推进**：`WeatherSystem.update` 的粒子位置积分实际已被 `几何帧` 挡住（切片4 时期落下的半成品），但包围盒检测 / 重问地面高度 / `needsUpdate` 仍每帧跑；`WorldEffects.updateMeteors` 完全每帧跑。纯装饰性视觉没有玩法判定，不该吃每帧的预算。
   - **做法**：`WeatherSystem.update` 把"粒子位置 / 包围盒 / 重问地面高度"整段移入 `if (几何帧)`（`frameShouldUpdate(2)`，偶数帧）；**涟漪寿命 `_updateSplashes(dt)` 保持每帧递减**，且在粒子判空之前——粒子缺位时涟漪也要把寿命走完（保留 B43 口径，改前/改后同一处）。`WorldEffects.updateMeteors` 顶部加 `frameShouldUpdate(2)` 判据。满足"降频的是计算，不是相位"：`_时相` 每帧累积（B118 口径不变）。
   - **门禁**：新 `tests/frame-budget-consumers.test.js` 4 例：非几何帧粒子/魔法球/余烬位置数组**逐字节不变**、几何帧有推进、流星寿命仅在几何帧递减。`tests/effect-timing.test.js`（涟漪 dt 口径）回归全绿——第一版把 `_updateSplashes` 误放进几何帧块，涟漪寿命减半速率，被 `effect-timing` 当场抓红（预期 0.25 ≠ 0.233），修回每帧后绿。三门禁：lint 0/0 · test **5548/5548**（357 文件）· build 通过。
-  - **变异自证**：去掉 `if (几何帧)` 包整段 ⇒ 非几何帧位置断言红；把 `_updateSplashes` 挪回几何帧块 ⇒ effect-timing 红；去掉 updateMeteors 的判据 ⇒ 流星寿命断言红。
+  - **变异自证**：去掉 `if (几何帧)` 包整段 ⇒ 非几何帧位置断言红；把 `_updateSplashes` 挪回几何帧块 ⇒ effect-timing 红；去掉 updateMeteors 的判据 ⇒ 流星寿命断言红。另：**frame-census 同一族两轮假红按先后记**——① 2026-11-07 upper-bound ×4→×8（主机并行跑满，12×3ms 桩读 173.8ms）；② 2026-11-07 relative-order inversion，`甲.合计ms > 乙.合计ms` 假设在 1ms vs 3ms 的计时里排不住（i7 满载 + vitest 全量并行时 102.5 vs 56.1），改成慢桩 8ms、乙/甲 = 1/8，并保留 p95 ≤ 最慢 那一腿不变（12 样本下 p95 === max，构造成立，不需要放宽）。两次都是"环境负载"假红，不是断言错，但都不靠"再放宽"解决。
   - **放弃了什么**：没有把雪的横向摆动单独降频（它已随粒子同在几何帧，幅值小）；没有动极光/萤火虫（已在切片2/4 接过）；没有引入 1/4 帧（天气是近景主视觉，1/2 帧足够）；没有做 LOD 距离切档（那是 W-C2 的活）。
   - **留了什么尾巴**：真 GPU 上的帧时收益未量（无头环境验证的是逻辑正确性）；流星降频后雨里落雨的视觉密度未做主观走查；五条分支路的真机走查仍欠（长期尾巴）。
 
