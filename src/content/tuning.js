@@ -71,6 +71,8 @@ export const BODY_PLANS = {
   gloom_shade:    { scale: 0.88, parts: ['head', 'torso', 'legs'], radius: 0.38 },
   /** W-E3 切片69：虚空幻影 —— 悬浮的裂隙残影，比怨影更实在一点，靠相位错位贴身 */
   void_phantom:   { scale: 0.92, parts: ['head', 'torso'], radius: 0.40, hover: 0.6 },
+  /** W-E3 切片70：深渊撕掠者 —— 深渊里的贴地猎手，比掠行兽更壮、靠撕裂而不是乱爪 */
+  abyss_reaver:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -133,6 +135,8 @@ export const ENEMY_RESIST = {
   gloom_shade:    { fire: -0.2, gravity: 0.25 },
   /** 虚空幻影：裂隙里扯出来的残影，怕火；引力抓不稳虚体 */
   void_phantom:   { fire: -0.2, gravity: 0.3 },
+  /** 深渊撕掠者：深渊热流里长出的猎手，怕火；寒意反而啃得慢 */
+  abyss_reaver:   { fire: -0.1, ice: 0.15 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -290,6 +294,7 @@ export const ENEMY_DEFENSE = {
   hexer: 8, juggernaut: 24,
   gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16, gloom_shade: 5,
   void_phantom: 4,
+  abyss_reaver: 6,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -680,6 +685,19 @@ export const ENEMY_MOVES = {
     band: [0.3, 1.4], phase: true, blink: 5,
     damage: 1.1, cooldown: 3.2, weight: 2, knock: 1.5,
     telegraph: { color: 0x8844cc },
+  },
+  /**
+   * 深渊撕裂（深渊撕掠者专属招）—— W-E3 切片70。
+   *
+   * 贴地重撕：中等前摇后向前撕裂一大片，带明显击退把人从深渊边缘顶开。
+   * 与掠行兽的 `prowl`（travel pounce，位移扑击）分岔——撕裂不远冲，靠面与击退控距；
+   * 与骑士的 `sweep`（宽慢横扫）分岔——撕裂更快更狠，伤害更高但范围稍窄。
+   */
+  maw_rend: {
+    name: '深渊撕裂', windup: 0.7, strike: 0.24, recover: 0.52, reach: 1.35, cone: 0.55,
+    band: [0.0, 1.1],
+    damage: 1.35, cooldown: 3.6, weight: 2, knock: 5,
+    telegraph: { color: 0x662244 },
   },
   /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
@@ -1158,6 +1176,8 @@ export const ENEMY_MOVE_SETS = {
   gloom_shade:    ['shadowstep', 'thrust', 'sweep', 'flurry'],
   /** W-E3 切片69：虚空幻影 —— 相位斩（短距相位切入）+ 刺击 + 横扫 */
   void_phantom:   ['phase_cut', 'thrust', 'sweep'],
+  /** W-E3 切片70：深渊撕掠者 —— 深渊撕裂（重撕控距）+ 劈砍 + 刺击 + 连爪 */
+  abyss_reaver:   ['maw_rend', 'cleave', 'thrust', 'flurry'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

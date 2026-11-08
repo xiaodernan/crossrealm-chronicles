@@ -959,6 +959,20 @@ export const OBJECTIVES = [
     flags: { skillsUnlocked3: true },
   },
   {
+    // W-E3 切片70：深渊撕掠者进主线 —— 深渊之颚的独占猎手，插在技能解锁后、深渊副本前。
+    // v21 起存档记 currentId，插步不必配迁移。
+    id: 'abyss-reaver-hunt',
+    title: 'obj_abyss_reaver_hunt_title',
+    desc: 'obj_abyss_reaver_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_reaver',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -180, z: 240, label: 'enemy_name_abyss_reaver' },
+    reward: 22,
+    journal: 'obj_abyss_reaver_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',

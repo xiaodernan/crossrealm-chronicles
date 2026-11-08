@@ -77,6 +77,12 @@ export const ENEMY_ROSTER = {
    * 不像怨影那样从 10 米外慢慢背刺。与 sentinel（远程炮台）、crawler（贴地快爪）分工不同。
    */
   void_phantom: { name: 'enemy_name_void_phantom', hp: 150, posture: 54, damage: 17, speed: 5.4, aggroRange: 26, color: 0x7744aa },
+  /**
+   * W-E3 切片70：深渊撕掠者 —— 深渊之颚边缘的贴地猎手。
+   * 比掠行兽更壮（hp165/架势60）、出手更重（19），靠深渊撕裂控距顶开，
+   * 与 stalker（轻快乱爪扑击）、knight（重甲横扫守势）分工不同。
+   */
+  abyss_reaver: { name: 'enemy_name_abyss_reaver', hp: 165, posture: 60, damage: 19, speed: 6.2, aggroRange: 26, color: 0x882244 },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },

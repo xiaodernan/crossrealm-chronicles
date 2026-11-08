@@ -86,6 +86,8 @@ const OLD_BIRTH = {
   gloom_shade: { name: '幽暗影煞', hp: 140, posture: 52, damage: 18, speed: 5.8, aggroRange: 24, color: 0x2a2a44 },
   // W-E3 切片69：虚空幻影
   void_phantom: { name: '虚空幻影', hp: 150, posture: 54, damage: 17, speed: 5.4, aggroRange: 26, color: 0x7744aa },
+  // W-E3 切片70：深渊撕掠者
+  abyss_reaver: { name: '深渊撕掠者', hp: 165, posture: 60, damage: 19, speed: 6.2, aggroRange: 26, color: 0x882244 },
   radiant_brand: { name: '辉煌圣印者', hp: 155, posture: 60, damage: 16, speed: 4.6, aggroRange: 26, color: 0xffe066 },
   // W-E3 切片67：辉煌大主教（追加在切片2 的黄金名单上，保持"两边清单一模一样"）
   radiant_archon: { name: '辉煌大主教', hp: 175, posture: 68, damage: 17, speed: 4.3, aggroRange: 28, color: 0xfff4b0 },

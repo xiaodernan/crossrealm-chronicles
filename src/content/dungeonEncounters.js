@@ -130,6 +130,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'stalker', weight: 5 },
       { type: 'knight', weight: 3 },
       { type: 'sentinel', weight: 2 },
+      // W-E3 切片70：深渊撕掠者 —— 深渊猎手，权重低（点缀压迫感，不抢主编组）
+      { type: 'abyss_reaver', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },
