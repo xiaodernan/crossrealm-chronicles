@@ -132,21 +132,63 @@ describe('③ 插入点与账本互为见证', () => {
 });
 
 describe('④ 迁移体里不许再出现 MAINLINE（静态扫描 + 反向控制）', () => {
-  const 源 = readFileSync(join(process.cwd(), 'src/game/SaveMigrations.js'), 'utf8');
-  /** 摘出一个函数体（到下一个顶层的右花括号 + 换行） */
-  const 函数体 = (名) => {
-    const i = 源.indexOf('function ' + 名 + '(');
+  /*
+   * B162：读进来先归一次 EOL。
+   *
+   * 下面那把尺找的是 `'\n}\n'` —— 字符串里的 `\n` 是转义出来的 LF，而 `readFileSync` 交回的是
+   * **检出环境的字节**。在 CRLF 的检出上它一次也找不到：`indexOf` 交回 −1，`slice(i, -1)` 于是
+   * 把**从函数头到文件尾**整段当成"函数体"。实测（`src/game/SaveMigrations.js`，CRLF 平面）：
+   *   migrateV17toV18  体长 2661（归一后 719），尾里还带着后面三个迁移函数；
+   *   migrateV20toV21  体长 1440（归一后 208）。
+   * 两个方向的后果不一样：`not.toMatch(/\bMAINLINE\b/)` 是**过宽**（目标函数真违规仍抓得到，
+   * 但后文任何一处无关提及都会把它染红）；`toMatch(/mainlineAt\(/)` 是**空转** —— 目标函数
+   * 不再问账本、只要文件里后面任何一个函数还在问，这一格照样绿。它是"绿着的瞎腿"，不是红。
+   * 与 B161 同族（那一处是跨行反引号锚点被 vite 归一化吃掉），载体换成 `\n` 转义。
+   */
+  const 源 = readFileSync(join(process.cwd(), 'src/game/SaveMigrations.js'), 'utf8').replace(/\r\n/g, '\n');
+  const 两处 = ['migrateV17toV18', 'migrateV20toV21'];
+  /** 摘出一个函数体（到下一个顶层的右花括号 + 换行）；抽不出边界就交回 null，不许悄悄取到文件尾 */
+  const 摘 = (文本, 名) => {
+    const i = 文本.indexOf('function ' + 名 + '(');
     expect(i, '找不到 ' + 名 + ' => 名字改了？这条腿要跟着改').toBeGreaterThan(-1);
-    const j = 源.indexOf('\n}\n', i);
+    const j = 文本.indexOf('\n}\n', i);
     // 只判**代码**：注释里提到这个名字是在说"不许查它"，那不是违规；
     // 判据与 quest-save-restore 那处同口径（剥掉行注释与块注释行）。
-    return 源.slice(i, j).split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
+    const 体 = j < 0 ? null : 文本.slice(i, j).split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
+    return { i, j, 体 };
   };
   it('v17 → v18 与 v20 → v21 两处都问账本，不问现状', () => {
-    for (const 名 of ['migrateV17toV18', 'migrateV20toV21']) {
-      const 体 = 函数体(名);
+    for (const 名 of 两处) {
+      const { 体 } = 摘(源, 名);
+      expect(体, 名 + ' 的函数体抽不出边界（找不到 "\\n}\\n"）⇒ 再判下去就是拿文件尾当函数体，见 B162').not.toBeNull();
       expect(体, 名 + ' 还在查今天的 MAINLINE ⇒ 下一次插步就把老档认成相邻那一步').not.toMatch(/\bMAINLINE\b/);
       expect(体, 名 + ' 没有问账本（mainlineAt）').toMatch(/mainlineAt\(/);
+    }
+  });
+  it('边界见证：函数体里不许有顶格的右花括号行（B162 —— 越过自己的右花括号就是取多了）', () => {
+    for (const 名 of 两处) {
+      const { j, i, 体 } = 摘(源, 名);
+      expect(j, 名 + ' 的终止符没找到').toBeGreaterThan(i);
+      expect(体, 名 + ' 的"函数体"里有顶格 } ⇒ 抽取越过了它自己的右花括号').not.toMatch(/^\}$/m);
+    }
+  });
+  it('反向控制：CRLF 字节抽不出边界，而旧写法取到的那条尾巴正好被边界见证咬住（B162）', () => {
+    // 这里**故意**再裸读一次磁盘：控制要自己造出两种平面，不能依赖上面那把尺已经归一过
+    // （否则摘掉归一化的那一臂会把控制一起改绿，控制就见证不了任何东西）。
+    const 盘 = readFileSync(join(process.cwd(), 'src/game/SaveMigrations.js'), 'utf8');
+    const LF = 盘.replace(/\r\n/g, '\n');
+    const CRLF = LF.replace(/\n/g, '\r\n');
+    for (const 名 of 两处) {
+      const 坏 = 摘(CRLF, 名);
+      expect(坏.j, 名 + '：CRLF 字节上 "\\n}\\n" 本该一次也找不到').toBe(-1);
+      expect(坏.体, 名 + '：抽不出边界就必须交回 null，不许悄悄取到文件尾').toBeNull();
+      // 旧写法（j = -1 时 slice(i, -1)）取到的那条尾巴：边界见证必须咬得住它
+      const 尾 = CRLF.slice(坏.i, -1).split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
+      expect(尾, 名 + '：旧写法那条尾巴里没有顶格 } ⇒ 上面那条边界见证是装饰').toMatch(/^\}$/m);
+      // 同一份字节归一之后必须抽得出来，且边界见证放行
+      const 好 = 摘(CRLF.replace(/\r\n/g, '\n'), 名);
+      expect(好.j, 名 + '：归一之后终止符还是找不到 ⇒ 病不在 EOL').toBeGreaterThan(好.i);
+      expect(好.体, 名 + '：归一之后边界见证反而红了 ⇒ 见证咬的是不该咬的东西').not.toMatch(/^\}$/m);
     }
   });
   it('反向控制：文件里确实还有 MAINLINE_HISTORY，且顶层不再 import MAINLINE', () => {

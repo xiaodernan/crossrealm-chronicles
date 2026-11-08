@@ -60,10 +60,14 @@ import { 战斗越线 } from '../scripts/harness-readings.mjs';
 import { ENEMY_STATE_NAMES } from '../src/ai/EnemyFSM.js';
 
 const ROOT = process.cwd();
+/**
+ * 读源码只有这一把尺。为什么要在这里归一次 EOL，理由写在文件末尾那条 B161 普查的注释里。
+ */
+const 读源 = (p) => readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
 const SCRIPT = join(ROOT, 'scripts', 'e2e-combat.mjs');
-const 源文 = existsSync(SCRIPT) ? readFileSync(SCRIPT, 'utf8') : '';
+const 源文 = existsSync(SCRIPT) ? 读源(SCRIPT) : '';
 /** 页内那句"按下左键"要贴在**游戏自己的**那个锁存对象上，所以对象路径从这里现取而不是在门禁里抄第二份 */
-const 游戏 = readFileSync(join(ROOT, 'src', 'core', 'Game.js'), 'utf8');
+const 游戏 = 读源(join(ROOT, 'src', 'core', 'Game.js'));
 
 /**
  * 站 2 那一段（到墙钟交账为止）。
@@ -332,7 +336,7 @@ const 静置腿 = {
 describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口径 / 切片7b 钉步长与绘制节拍 / 切片7c 判据不再踩空）', () => {
   it('脚本在，npm script 接上了（没接线的门禁只有写它的人会跑）', () => {
     expect(existsSync(SCRIPT), 'scripts/e2e-combat.mjs 不在了').toBe(true);
-    const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+    const pkg = JSON.parse(读源(join(ROOT, 'package.json')));
     expect(pkg.scripts['e2e:combat'], 'package.json 里没有 "e2e:combat" 脚本')
       .toBe('node scripts/e2e-combat.mjs');
   });
@@ -540,7 +544,7 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
     // `import` 它 = 在 `npm test` 里真起一个浏览器把 E2E 跑一遍。
     expect(源文, 'e2e-combat.mjs 又导出了东西 —— 下一个人会 import 它，然后单测里跑起浏览器')
       .not.toMatch(/^export /m);
-    const 表 = readFileSync(join(ROOT, 'scripts', 'e2e-budgets.mjs'), 'utf8');
+    const 表 = 读源(join(ROOT, 'scripts', 'e2e-budgets.mjs'));
     expect(表, 'E2E_COMBAT_BUDGETS 不在 e2e-budgets.mjs 里').toMatch(/export const E2E_COMBAT_BUDGETS/);
     expect(表, '预算表自己成了导入即执行的东西（它必须只导出常量）').not.toMatch(/^\s*(spawn|new WebSocket|process\.exit)/m);
   });
@@ -880,5 +884,41 @@ describe('战斗 E2E 冒烟（W-D4 切片3 立 / 切片7 上共用 harness 口�
         `${名} 解析不过 —— 上面那些文本腿读的是字节，语法断了它们一句都不会红`)
         .not.toThrow();
     }
+  });
+});
+
+/**
+ * B161：这道门禁此前只在自己的那个检出环境里成立过。
+ *
+ * `readFileSync` 交回的是**检出环境的字节**，而 vite 的 transform 把本文件自己的多行字面量归成
+ * LF ⇒ 在 CRLF 检出的平面上，拿多行锚点做 replace 是静默 no-op：臂没有改到文本，判据却照样读到
+ * "好源码"。这条腿先在 CRLF 平面上红过一次（红话 `坏法"按最近挑"没改动任何文本`），LF 平面上它
+ * 一直是绿的。与 B104 同族，只是方向相反。
+ *
+ * 归一化只放在 `读源` 那一把尺里，然后用下面这条普查钉住"不许再有人裸读磁盘字节"。
+ * 每条腿都配了反面控制：普查认得出裸读的写法（不是空转）、归一化不许退回。
+ */
+describe('读源码的 EOL 只许归一次（B161：多行锚点在 CRLF 检出的平面上会静默 no-op）', () => {
+  const 裸读 = (行文) => /(^|[^.\w])readFileSync\(/.test(行文);
+
+  it('本文件里读源码只许走 读源（普查的载体是自己，不是编出来的字符串）', () => {
+    const 自 = 读源(join(ROOT, 'tests', 'e2e-combat.test.js'));
+    const 违例 = 自.split('\n')
+      .map((行文, i) => [行文, i + 1])
+      .filter(([行文]) => 裸读(行文) && !行文.startsWith('const 读源'))
+      .map(([行文, i]) => `${i}: ${行文.trim()}`);
+    expect(违例, `这些行绕过 读源 直接读磁盘字节 —— 多行锚点又会变成静默 no-op:\n${违例.join('\n')}`).toEqual([]);
+  });
+
+  it('反向控制：裸读的写法要被谓词认出来，归一化的写法不要误伤', () => {
+    // 桩按原语拼出来，免得这一行自己成了上面那条普查的违例
+    const 桩 = 'const 别处 = readFile' + 'Sync(join(ROOT, "x.mjs"), "utf8");';
+    expect(裸读(桩), '谓词认不出裸读 ⇒ 上面那条普查拦不住任何东西').toBe(true);
+    expect(裸读('const 别处 = 读源(join(ROOT, "x.mjs"));'), '不该拦的写法被拦了').toBe(false);
+  });
+
+  it('归一化不是装饰品：两处源读进来都不许带 CR（退回裸读，这一格当场红）', () => {
+    expect(源文.includes('\r'), '读源 没有把 CRLF 归掉 ⇒ 本文件那些多行锚点又是静默 no-op').toBe(false);
+    expect(游戏.includes('\r'), 'Game.js 没归一 —— 同一把尺不许只量一处：它今天只贴单行锚点，将来贴跨行的那条不许再踩一次空').toBe(false);
   });
 });
