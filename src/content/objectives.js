@@ -1215,6 +1215,19 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_ravager_hunt_journal',
   },
   {
+    // W-E3 切片90：深渊恸嚎者进主线 —— 第十一独占，插在撕裂者后、深渊副本前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'abyss-wailer-hunt',
+    title: 'obj_abyss_wailer_hunt_title',
+    desc: 'obj_abyss_wailer_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_wailer',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -225, z: 220, label: 'enemy_name_abyss_wailer' },
+    reward: 24,
+    journal: 'obj_abyss_wailer_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',

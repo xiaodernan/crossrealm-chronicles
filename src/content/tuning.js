@@ -110,6 +110,8 @@ export const BODY_PLANS = {
   abyss_hollow:   { scale: 0.96, parts: ['head', 'torso', 'legs'], radius: 0.41 },
   /** W-E3 切片88：深渊撕裂者 —— 魁梧的近身压迫者体格。 */
   abyss_ravager:  { scale: 1.06, parts: ['head', 'torso', 'legs'], radius: 0.46 },
+  /** W-E3 切片90：深渊恸嚎者 —— 飘忽的远压施术者体格。 */
+  abyss_wailer:   { scale: 0.97, parts: ['head', 'torso', 'legs'], radius: 0.41 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -192,6 +194,8 @@ export const ENEMY_RESIST = {
   abyss_hollow:   { fire: -0.1, gravity: 0.2 },
   /** W-E3 切片88：深渊撕裂者 */
   abyss_ravager:  { fire: -0.18, gravity: 0.28 },
+  /** W-E3 切片90：深渊恸嚎者 */
+  abyss_wailer:   { fire: -0.12, gravity: 0.21 },
   /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** 虚空潜伏者：贴着裂隙潜行的实影，怕火；引力能干扰它的扑袭落点 */
@@ -399,6 +403,8 @@ export const ENEMY_DEFENSE = {
   abyss_hollow: 3,
   /** W-E3 切片88：深渊撕裂者 */
   abyss_ravager: 5,
+  /** W-E3 切片90：深渊恸嚎者 */
+  abyss_wailer: 3,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -917,6 +923,17 @@ export const ENEMY_MOVES = {
     damage: 1.35, cooldown: 3.8, weight: 2, knock: 5.0,
     standoff: [1.4, 3.2],
     telegraph: { color: 0x883366 },
+  },
+  /**
+   * 深渊恸嚎（深渊恸嚎者专属招）—— W-E3 切片90。
+   * 中距恸嚎弹：介于 `abyss_drain` 与 `abyss_gaze` 之间，强调持续远压；
+   * 与 `abyss_scar`（ranged+hazard）分岔。
+   */
+  abyss_wail: {
+    name: '深渊恸嚎', windup: 0.64, strike: 0.16, recover: 0.44, cone: -2,
+    range: 11, minDist: 3.2,
+    damage: 1.04, cooldown: 3.1, weight: 2, ranged: { speed: 15.5, color: 0x8866aa },
+    telegraph: { color: 0x553377 },
   },
   /**
    * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
@@ -1542,6 +1559,8 @@ export const ENEMY_MOVE_SETS = {
   abyss_hollow:   ['abyss_drain', 'thrust', 'sweep'],
   /** W-E3 切片88：深渊撕裂者 —— 深渊撕裂击（重压）+ 横扫 + 突刺 */
   abyss_ravager:  ['abyss_ravage', 'sweep', 'thrust'],
+  /** W-E3 切片90：深渊恸嚎者 —— 深渊恸嚎（远压）+ 刺击 + 横扫 */
+  abyss_wailer:   ['abyss_wail', 'thrust', 'sweep'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

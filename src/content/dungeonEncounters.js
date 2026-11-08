@@ -168,6 +168,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'abyss_hollow', weight: 1 },
       // W-E3 切片88：深渊撕裂者 —— 重压者，权重低
       { type: 'abyss_ravager', weight: 1 },
+      // W-E3 切片90：深渊恸嚎者 —— 远压施术者，权重低
+      { type: 'abyss_wailer', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

@@ -220,6 +220,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_ravager', x: -210, z: 230 },
   { type: 'abyss_ravager', x: -245, z: 295 },
   { type: 'abyss_ravager', x: -170, z: 275 },
+  // 深渊恸嚎者（三点，W-E3 切片90）—— 远压施术者，与撕裂者/空壳错开。
+  { type: 'abyss_wailer', x: -225, z: 220 },
+  { type: 'abyss_wailer', x: -185, z: 295 },
+  { type: 'abyss_wailer', x: -250, z: 260 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

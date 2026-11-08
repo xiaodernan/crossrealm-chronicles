@@ -90,6 +90,8 @@ const 冻结 = [
   ['abyss_hollow', -230, 195], ['abyss_hollow', -175, 285], ['abyss_hollow', -255, 245],
   // W-E3 切片88：深渊撕裂者（三点野外出生点）
   ['abyss_ravager', -210, 230], ['abyss_ravager', -245, 295], ['abyss_ravager', -170, 275],
+  // W-E3 切片90：深渊恸嚎者（三点野外出生点）
+  ['abyss_wailer', -225, 220], ['abyss_wailer', -185, 295], ['abyss_wailer', -250, 260],
   ['radiant_crawler', -240, -200], ['radiant_crawler', -120, -100], ['radiant_crawler', -300, -180],
   ['radiant_knight', -80, -220], ['radiant_knight', -200, -80], ['radiant_knight', -240, -100],
   ['radiant_dancer', -160, -240], ['radiant_dancer', -220, -200], ['radiant_dancer', -100, -140],
