@@ -166,6 +166,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'void_chasmer', x: 120, z: 275 },
   { type: 'void_chasmer', x: 80, z: 250 },
   { type: 'void_chasmer', x: 155, z: 270 },
+  // 虚空残魂（三点，W-E3 切片84）—— 相位游猎者，与裂渊者/裂隙使错开。
+  { type: 'void_revenant', x: 105, z: 235 },
+  { type: 'void_revenant', x: 60, z: 265 },
+  { type: 'void_revenant', x: 140, z: 245 },
 
   // ── 深渊之颚（abyss，中心 ~-200,220，半径 130）── W-E3 切片70
   // 深渊撕掠者（三点）—— 贴地猎手，分散在颚区边缘，与 stalker/sentinel 出生带错开。

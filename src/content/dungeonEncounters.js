@@ -133,6 +133,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'void_ruptor', weight: 1 },
       // W-E3 切片82：虚空裂渊者 —— 区域封锁者，权重低
       { type: 'void_chasmer', weight: 1 },
+      // W-E3 切片84：虚空残魂 —— 相位游猎者，权重低
+      { type: 'void_revenant', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

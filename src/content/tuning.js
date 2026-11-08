@@ -84,6 +84,8 @@ export const BODY_PLANS = {
   void_ruptor:    { scale: 1.0, parts: ['head', 'torso', 'legs'], radius: 0.43 },
   /** W-E3 切片82：虚空裂渊者 —— 沉重的区域封锁者体格。 */
   void_chasmer:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.45 },
+  /** W-E3 切片84：虚空残魂 —— 相位游猎的残影体格。 */
+  void_revenant:  { scale: 0.98, parts: ['head', 'torso', 'legs'], radius: 0.42 },
   /** W-E3 切片70：深渊撕掠者 —— 深渊里的贴地猎手，比掠行兽更壮、靠撕裂而不是乱爪 */
   abyss_reaver:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片71：深渊凝视者 —— 悬浮的暗目，远距凝视施压，与撕掠者的贴身撕裂分工 */
@@ -190,6 +192,8 @@ export const ENEMY_RESIST = {
   void_ruptor:    { fire: -0.1, gravity: 0.2 },
   /** W-E3 切片82：虚空裂渊者 */
   void_chasmer:   { fire: -0.1, gravity: 0.3 },
+  /** W-E3 切片84：虚空残魂 */
+  void_revenant:  { fire: -0.12, gravity: 0.2 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -357,6 +361,8 @@ export const ENEMY_DEFENSE = {
   void_ruptor: 4,
   /** W-E3 切片82：虚空裂渊者 */
   void_chasmer: 5,
+  /** W-E3 切片84：虚空残魂 */
+  void_revenant: 4,
   abyss_reaver: 6,
   abyss_watcher: 5,
   abyss_brute: 8,
@@ -941,6 +947,17 @@ export const ENEMY_MOVES = {
     telegraph: { color: 0x663399 },
   },
   /**
+   * 虚空相噬（虚空残魂专属招）—— W-E3 切片84。
+   * 相位近斩：与 `phase_cut`（blink5/较轻快）、`rift_step`（blink8/长距突入）分岔，
+   * 强调中距相位撕咬与压迫。
+   */
+  void_phase_rend: {
+    name: '虚空相噬', windup: 0.55, strike: 0.2, recover: 0.44, reach: 1.0, cone: 0.46,
+    band: [0.2, 1.3], phase: true, blink: 6,
+    damage: 1.2, cooldown: 3.6, weight: 2, knock: 2.8,
+    telegraph: { color: 0x9955cc },
+  },
+  /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
    *
    * **远距标点**：站位诉求要求它自己待在 6~11 米外（`standoff`），射出一枚慢速圣印弹，
@@ -1429,6 +1446,8 @@ export const ENEMY_MOVE_SETS = {
   void_ruptor:    ['void_breach', 'thrust', 'sweep'],
   /** W-E3 切片82：虚空裂渊者 —— 虚空裂渊（区域封锁）+ 猛砸 + 横扫 */
   void_chasmer:   ['void_chasm', 'slam', 'sweep'],
+  /** W-E3 切片84：虚空残魂 —— 虚空相噬（相位）+ 连刺 + 突刺 */
+  void_revenant:  ['void_phase_rend', 'flurry', 'thrust'],
   /** W-E3 切片70：深渊撕掠者 —— 深渊撕裂（重撕控距）+ 劈砍 + 刺击 + 连爪 */
   abyss_reaver:   ['maw_rend', 'cleave', 'thrust', 'flurry'],
   /** W-E3 切片71：深渊凝视者 —— 深渊凝视（远距凝视弹）+ 虚能弹 + 刺击 */
