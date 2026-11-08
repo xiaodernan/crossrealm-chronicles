@@ -62,6 +62,8 @@ const 冻结 = [
   ['void_stinger', 110, 250], ['void_stinger', 150, 255], ['void_stinger', 145, 215],
   // W-E3 切片80：虚空裂隙使（三点野外出生点）
   ['void_ruptor', 95, 260], ['void_ruptor', 135, 265], ['void_ruptor', 70, 235],
+  // W-E3 切片82：虚空裂渊者（三点野外出生点）
+  ['void_chasmer', 120, 275], ['void_chasmer', 80, 250], ['void_chasmer', 155, 270],
   // W-E3 切片70：深渊撕掠者（三点野外出生点）
   ['abyss_reaver', -180, 240], ['abyss_reaver', -230, 200], ['abyss_reaver', -260, 230],
   // W-E3 切片71：深渊凝视者（三点野外出生点）

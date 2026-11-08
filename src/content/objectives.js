@@ -821,6 +821,19 @@ export const OBJECTIVES = [
     journal: 'obj_void_ruptor_hunt_journal',
   },
   {
+    // W-E3 切片82：虚空裂渊者进主线 —— 第七独占，插在裂隙使后、断口副本前（ch4，v21 不写迁移；右移 choice-void）。
+    id: 'void-chasmer-hunt',
+    title: 'obj_void_chasmer_hunt_title',
+    desc: 'obj_void_chasmer_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_chasmer',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 120, z: 275, label: 'enemy_name_void_chasmer' },
+    reward: 22,
+    journal: 'obj_void_chasmer_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',

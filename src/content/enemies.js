@@ -104,6 +104,10 @@ export const ENEMY_ROSTER = {
    */
   void_ruptor: { name: 'enemy_name_void_ruptor', hp: 145, posture: 50, damage: 14, speed: 4.8, aggroRange: 28, color: 0x7755bb },
   /**
+   * W-E3 切片82：虚空裂渊者 —— 虚空断口里沉重的区域封锁者。
+   */
+  void_chasmer: { name: 'enemy_name_void_chasmer', hp: 155, posture: 54, damage: 13, speed: 4.4, aggroRange: 25, color: 0x553388 },
+  /**
    * W-E3 切片70：深渊撕掠者 —— 深渊之颚边缘的贴地猎手。
    * 比掠行兽更壮（hp165/架势60）、出手更重（19），靠深渊撕裂控距顶开，
    * 与 stalker（轻快乱爪扑击）、knight（重甲横扫守势）分工不同。

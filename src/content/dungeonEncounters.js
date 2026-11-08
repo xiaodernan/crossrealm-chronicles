@@ -131,6 +131,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'void_stinger', weight: 1 },
       // W-E3 切片80：虚空裂隙使 —— 远程布陷者，权重低
       { type: 'void_ruptor', weight: 1 },
+      // W-E3 切片82：虚空裂渊者 —— 区域封锁者，权重低
+      { type: 'void_chasmer', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },
