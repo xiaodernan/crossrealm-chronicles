@@ -127,6 +127,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'void_lurker', weight: 1 },
       // W-E3 切片76：虚空掠夺者 —— 中重型掠食压迫者，权重低（点缀压迫感，不抢主编组）
       { type: 'void_marauder', weight: 1 },
+      // W-E3 切片78：虚空刺蜇者 —— 远程骚扰者，权重低
+      { type: 'void_stinger', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

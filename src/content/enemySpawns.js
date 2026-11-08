@@ -154,6 +154,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'void_marauder', x: 15, z: 225 },
   { type: 'void_marauder', x: -55, z: 235 },
   { type: 'void_marauder', x: 40, z: 205 },
+  // 虚空刺蜇者（三点，W-E3 切片78）—— 远程骚扰者，与掠夺者/潜伏者出生带错开。
+  { type: 'void_stinger', x: 110, z: 250 },
+  { type: 'void_stinger', x: 150, z: 255 },
+  { type: 'void_stinger', x: 145, z: 215 },
 
   // ── 深渊之颚（abyss，中心 ~-200,220，半径 130）── W-E3 切片70
   // 深渊撕掠者（三点）—— 贴地猎手，分散在颚区边缘，与 stalker/sentinel 出生带错开。

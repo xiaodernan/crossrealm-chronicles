@@ -794,6 +794,20 @@ export const OBJECTIVES = [
     journal: 'obj_void_marauder_hunt_journal',
   },
   {
+    // W-E3 切片78：虚空刺蜇者进主线 —— 虚空断口第五独占，插在掠夺者后、断口副本前。
+    // v21 起存档记 currentId，插步不必配迁移（但 ch4 插步会右移 void-casket 及之后下标）。
+    id: 'void-stinger-hunt',
+    title: 'obj_void_stinger_hunt_title',
+    desc: 'obj_void_stinger_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_stinger',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 110, z: 250, label: 'enemy_name_void_stinger' },
+    reward: 21,
+    journal: 'obj_void_stinger_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',

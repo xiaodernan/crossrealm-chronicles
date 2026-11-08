@@ -329,12 +329,12 @@ describe('④ 插步之后老档落回同一步 —— v21 那句承诺的第一
   it('v21 档里第 40 位是 choice-void；今天它在第 53 位 —— 落点必须跟着 id 走', () => {
     // 这份档的坐标是 **v21 冻结时**那张表（`mainlineAt(20)` 与它相同）。
     expect(mainlineAt(20)[40], 'v21 那张表第 40 位不是 choice-void —— 这份桩件不成立').toBe('choice-void');
-    // 今天它在第 54 位：前面插了断誓碑一步、第 3/2/1 章各三步、终局三步与 67/68/69/72/74/75 各一步（69、72、74 在 ch4 使 choice-void 后移一位，75 在 ch5 不移）
-    expect(MAINLINE.findIndex((r) => r.id === 'choice-void'), '今天它在第 54 位').toBe(54);
+    // 今天它在第 55 位：前面插了断誓碑一步、第 3/2/1 章各三步、终局三步与 67/68/69/72/74/75 各一步（69、72、74 在 ch4 使 choice-void 后移一位，75 在 ch5 不移）
+    expect(MAINLINE.findIndex((r) => r.id === 'choice-void'), '今天它在第 55 位').toBe(55);
     const q = newQuests();
     const { out } = restore(q, { index: 40, currentId: 'choice-void', chapter: 4 });
     expect(q.current?.id, '老档被送到了相邻那一步 —— id 方案没兑现').toBe('choice-void');
-    expect(q.questIndex).toBe(54);
+    expect(q.questIndex).toBe(55);
     expect(out.采纳的.id, '采纳的是 id（不是下标）').toBe(true);
   });
 
@@ -348,8 +348,8 @@ describe('④ 插步之后老档落回同一步 —— v21 那句承诺的第一
     expect(mainlineAt(20)).not.toContain('void-oath');
     expect(MAINLINE.some((r) => r.id === 'void-oath'), '表上没有新步？这一片的桩件不成立').toBe(true);
     expect(mainlineAt(20)).toHaveLength(65);
-    // 切片41/42/45 各插三步，切片46 又在终局插了三步，切片67-77 各插一步 ⇒ 今天 89
-    expect(MAINLINE).toHaveLength(89);
+    // 切片41/42/45 各插三步，切片46 又在终局插了三步，切片67-78 各插一步 ⇒ 今天 90
+    expect(MAINLINE).toHaveLength(90);
   });
 });
 

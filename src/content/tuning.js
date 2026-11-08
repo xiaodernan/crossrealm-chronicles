@@ -77,6 +77,9 @@ export const BODY_PLANS = {
   void_lurker:    { scale: 0.94, parts: ['head', 'torso', 'legs'], radius: 0.42 },
   /** W-E3 切片76：虚空掠夺者 —— 贴地中重型虚空掠食体格。 */
   void_marauder:  { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.47 },
+
+  /** W-E3 切片78：虚空刺蜇者 —— 保持距离的轻快骚扰者体格。 */
+  void_stinger:   { scale: 0.94, parts: ['head', 'torso', 'legs'], radius: 0.40 },
   /** W-E3 切片70：深渊撕掠者 —— 深渊里的贴地猎手，比掠行兽更壮、靠撕裂而不是乱爪 */
   abyss_reaver:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片71：深渊凝视者 —— 悬浮的暗目，远距凝视施压，与撕掠者的贴身撕裂分工 */
@@ -165,6 +168,8 @@ export const ENEMY_RESIST = {
   void_lurker:    { fire: -0.15, gravity: 0.2 },
   /** W-E3 切片76：虚空掠夺者 —— 中重型虚空掠食者 */
   void_marauder:  { fire: -0.15, gravity: 0.2 },
+  /** W-E3 切片78：虚空刺蜇者 —— 远程骚扰者 */
+  void_stinger:   { fire: -0.1, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -326,6 +331,8 @@ export const ENEMY_DEFENSE = {
   void_lurker: 4,
   /** W-E3 切片76：虚空掠夺者 */
   void_marauder: 6,
+  /** W-E3 切片78：虚空刺蜇者 */
+  void_stinger: 3,
   abyss_reaver: 6,
   abyss_watcher: 5,
   abyss_brute: 8,
@@ -836,6 +843,15 @@ export const ENEMY_MOVES = {
     telegraph: { color: 0x7744cc },
   },
   /**
+   * 虚空刺蜇（虚空刺蜇者专属招）—— W-E3 切片78。
+   */
+  void_sting: {
+    name: '虚空刺蜇', windup: 0.7, strike: 0.18, recover: 0.48, cone: -2,
+    range: 11, minDist: 3.5,
+    damage: 1.0, cooldown: 2.6, weight: 2, ranged: { speed: 18, color: 0x8855ff },
+    telegraph: { color: 0x5522aa },
+  },
+  /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
    *
    * **远距标点**：站位诉求要求它自己待在 6~11 米外（`standoff`），射出一枚慢速圣印弹，
@@ -1318,6 +1334,8 @@ export const ENEMY_MOVE_SETS = {
   void_lurker:    ['void_lunge', 'flurry', 'thrust'],
   /** W-E3 切片76：虚空掠夺者 —— 虚空撕扯（重型宽撕）+ 劈砍 + 横扫 */
   void_marauder:  ['void_rend', 'cleave', 'sweep'],
+  /** W-E3 切片78：虚空刺蜇者 —— 虚空刺蜇（远程骚扰）+ 刺击 + 横扫 */
+  void_stinger:   ['void_sting', 'thrust', 'sweep'],
   /** W-E3 切片70：深渊撕掠者 —— 深渊撕裂（重撕控距）+ 劈砍 + 刺击 + 连爪 */
   abyss_reaver:   ['maw_rend', 'cleave', 'thrust', 'flurry'],
   /** W-E3 切片71：深渊凝视者 —— 深渊凝视（远距凝视弹）+ 虚能弹 + 刺击 */
