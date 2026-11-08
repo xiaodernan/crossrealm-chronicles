@@ -21,6 +21,7 @@ export const POST_V21 = [
   'void-chasmer-hunt', 'abyss-gnasher-hunt', 'void-revenant-hunt',
   'abyss-hollow-hunt', 'void-siphoner-hunt',
   'abyss-ravager-hunt',
+  'void-rendclaw-hunt',
 ];
 
 /** 切片41 之后仍需从 v21 投影中排除的 id（不含 void-oath）。 */

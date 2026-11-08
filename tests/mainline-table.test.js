@@ -664,7 +664,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片46 之后（当前态，含后续 v21 插步）：主线终局也分岔（留灯 / 熄灯两路，各回本章门），且终局尾序位于主线末尾', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     const 序 = MAINLINE.map((r) => r.id);
     const 终局尾 = ['sunless-oratory', 'infinity', 'choice-final', 'final-keep', 'final-quiet'];
     const 起 = 序.indexOf(终局尾[0]);
@@ -712,7 +712,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片67：大主教入主线 —— 圣域四类清剿到齐（爬兽里先清圣印者、再清大主教），插在圣印者之后、dungeon-rerun 之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     const 序 = MAINLINE.map((r) => r.id);
     const archon = 序.indexOf('archon-hunt');
     expect(archon, 'archon-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -731,7 +731,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片68：幽暗影煞入主线 —— 幽暗五类清剿到齐，插在哨卫之后、chaos-boss 之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     const 序 = MAINLINE.map((r) => r.id);
     const shade = 序.indexOf('gloom-shade-hunt');
     expect(shade, 'gloom-shade-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -749,7 +749,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片69：虚空幻影入主线 —— 虚空断口独占残影，插在爬兽之后、破棺副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     const 序 = MAINLINE.map((r) => r.id);
     const ph = 序.indexOf('void-phantom-hunt');
     expect(ph, 'void-phantom-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -767,7 +767,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片70：深渊撕掠者入主线 —— 深渊之颚独占猎手，插在技能解锁之后，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     const 序 = MAINLINE.map((r) => r.id);
     const ar = 序.indexOf('abyss-reaver-hunt');
     expect(ar, 'abyss-reaver-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -785,7 +785,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片71：深渊凝视者入主线 —— 深渊之颚独占暗目，插在撕掠者之后、深渊副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     const 序 = MAINLINE.map((r) => r.id);
     const aw = 序.indexOf('abyss-watcher-hunt');
     expect(aw, 'abyss-watcher-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -803,7 +803,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片72：虚空裂隙行者入主线 —— 虚空断口第二独占，插在幻影之后、破棺副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     const 序 = MAINLINE.map((r) => r.id);
     const rw = 序.indexOf('void-riftwalker-hunt');
     expect(rw, 'void-riftwalker-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -821,7 +821,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片73：深渊蛮兽入主线 —— 深渊之颚第三独占，插在凝视者之后、深渊副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     const 序 = MAINLINE.map((r) => r.id);
     const ab = 序.indexOf('abyss-brute-hunt');
     expect(ab, 'abyss-brute-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -839,7 +839,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片74：虚空潜伏者入主线 —— 虚空断口第三独占，插在裂隙行者之后、破棺副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     const 序 = MAINLINE.map((r) => r.id);
     const vl = 序.indexOf('void-lurker-hunt');
     expect(vl, 'void-lurker-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -857,7 +857,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片75：深渊幽影入主线 —— 深渊之颚第四独占，插在蛮兽之后、深渊副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
 
@@ -873,7 +873,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(row.chapter, 'abyss-shade-hunt 不在第 5 章').toBe(5);
   });
   it('W-E3 切片76：虚空掠夺者入主线 —— 虚空断口第四独占，插在潜伏者之后、破棺副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
 
@@ -889,7 +889,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(row.chapter, 'void-marauder-hunt 不在第 4 章').toBe(4);
   });
   it('W-E3 切片77：深渊猎犬入主线 —— 深渊之颚第五独占，插在幽影之后、深渊副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
 
@@ -905,7 +905,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(row.chapter, 'abyss-hound-hunt 不在第 5 章').toBe(5);
   });
   it('W-E3 切片78：虚空刺蜇者入主线 —— 虚空断口第五独占，插在掠夺者之后、断口副本之前，ch4 插步', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
 
@@ -921,7 +921,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(row.chapter, 'void-stinger-hunt 不在第 4 章').toBe(4);
   });
   it('W-E3 切片79：深渊沼兽入主线 —— 深渊之颚第六独占，插在猎犬之后、深渊副本之前（ch5，不写迁移）', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
     const 序 = MAINLINE.map((r) => r.id);
@@ -936,7 +936,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(row.chapter).toBe(5);
   });
     it('W-E3 切片80：虚空裂隙使入主线 —— 第六独占，插在刺蜇者后、断口副本前（ch4，右移 choice-void）', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
     const 序 = MAINLINE.map((r) => r.id);
@@ -952,7 +952,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   });
 
   it('W-E3 切片82：虚空裂渊者入主线 —— 第七独占，插在裂隙使后、断口副本前（ch4，右移 choice-void）', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
     const 序 = MAINLINE.map((r) => r.id);
@@ -967,7 +967,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(row.chapter).toBe(4);
   });
   it('W-E3 切片84：虚空残魂入主线 —— 第八独占，插在裂渊者后、断口副本前（ch4，右移 choice-void）', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
     const 序 = MAINLINE.map((r) => r.id);
@@ -982,22 +982,37 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(row.chapter).toBe(4);
   });
   it('W-E3 切片86：虚空汲魂者入主线 —— 第九独占，插在残魂后、断口副本前（ch4，右移 choice-void）', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
     const 序 = MAINLINE.map((r) => r.id);
     const vs = 序.indexOf('void-siphoner-hunt');
     expect(vs).toBeGreaterThanOrEqual(0);
     expect(序[vs - 1]).toBe('void-revenant-hunt');
-    expect(序[vs + 1]).toBe('void-casket');
+    expect(序[vs + 1]).toBe('void-rendclaw-hunt');
     const row = MAINLINE.find((r) => r.id === 'void-siphoner-hunt');
     expect(row.type).toBe('kills');
     expect(row.enemyType).toBe('void_siphoner');
     expect(row.target).toBe(3);
     expect(row.chapter).toBe(4);
   });
+  it('W-E3 切片89：虚空裂爪兽入主线 —— 第十独占，插在汲魂者后、断口副本前（ch4，右移 choice-void）', () => {
+    expect(MAINLINE).toHaveLength(100);
+    expect(CURRENT_VERSION).toBe(21);
+    expect(MIGRATIONS[21]).toBeUndefined();
+    const 序 = MAINLINE.map((r) => r.id);
+    const vr = 序.indexOf('void-rendclaw-hunt');
+    expect(vr).toBeGreaterThanOrEqual(0);
+    expect(序[vr - 1]).toBe('void-siphoner-hunt');
+    expect(序[vr + 1]).toBe('void-casket');
+    const row = MAINLINE.find((r) => r.id === 'void-rendclaw-hunt');
+    expect(row.type).toBe('kills');
+    expect(row.enemyType).toBe('void_rendclaw');
+    expect(row.target).toBe(3);
+    expect(row.chapter).toBe(4);
+  });
 it('W-E3 切片81：深渊裂痕使入主线 —— 第七独占，插在沼兽后、深渊副本前（ch5，不移 choice-void）', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
     const 序 = MAINLINE.map((r) => r.id);
@@ -1012,7 +1027,7 @@ it('W-E3 切片81：深渊裂痕使入主线 —— 第七独占，插在沼兽�
     expect(row.chapter).toBe(5);
   });
   it('W-E3 切片83：深渊噬颚兽入主线 —— 第八独占，插在裂痕使后、深渊副本前（ch5，不移 choice-void）', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
     const 序 = MAINLINE.map((r) => r.id);
@@ -1027,7 +1042,7 @@ it('W-E3 切片81：深渊裂痕使入主线 —— 第七独占，插在沼兽�
     expect(row.chapter).toBe(5);
   });
   it('W-E3 切片85：深渊空壳入主线 —— 第九独占，插在噬颚兽后、深渊副本前（ch5，不移 choice-void）', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
     const 序 = MAINLINE.map((r) => r.id);
@@ -1042,7 +1057,7 @@ it('W-E3 切片81：深渊裂痕使入主线 —— 第七独占，插在沼兽�
     expect(row.chapter).toBe(5);
   });
   it('W-E3 切片88：深渊撕裂者入主线 —— 第十独占，插在空壳后、深渊副本前（ch5，不移 choice-void）', () => {
-    expect(MAINLINE).toHaveLength(99);
+    expect(MAINLINE).toHaveLength(100);
     expect(CURRENT_VERSION).toBe(21);
     expect(MIGRATIONS[21]).toBeUndefined();
     const 序 = MAINLINE.map((r) => r.id);

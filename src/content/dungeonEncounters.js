@@ -137,6 +137,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'void_revenant', weight: 1 },
       // W-E3 切片86：虚空汲魂者 —— 汲魂施压者，权重低
       { type: 'void_siphoner', weight: 1 },
+      // W-E3 切片89：虚空裂爪兽 —— 重压者，权重低
+      { type: 'void_rendclaw', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

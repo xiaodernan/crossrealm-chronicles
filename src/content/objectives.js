@@ -860,6 +860,19 @@ export const OBJECTIVES = [
     journal: 'obj_void_siphoner_hunt_journal',
   },
   {
+    // W-E3 切片89：虚空裂爪兽进主线 —— 第十独占，插在汲魂者后、断口副本前（ch4，v21 不写迁移；右移 choice-void）。
+    id: 'void-rendclaw-hunt',
+    title: 'obj_void_rendclaw_hunt_title',
+    desc: 'obj_void_rendclaw_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_rendclaw',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 100, z: 275, label: 'enemy_name_void_rendclaw' },
+    reward: 23,
+    journal: 'obj_void_rendclaw_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',
