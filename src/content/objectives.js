@@ -1111,6 +1111,19 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_mire_hunt_journal',
   },
   {
+    // W-E3 切片81：深渊裂痕使进主线 —— 第七独占，插在沼兽后、深渊副本前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'abyss-scarbearer-hunt',
+    title: 'obj_abyss_scarbearer_hunt_title',
+    desc: 'obj_abyss_scarbearer_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_scarbearer',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -190, z: 280, label: 'enemy_name_abyss_scarbearer' },
+    reward: 23,
+    journal: 'obj_abyss_scarbearer_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',

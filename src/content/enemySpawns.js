@@ -188,6 +188,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_mire', x: -215, z: 250 },
   { type: 'abyss_mire', x: -175, z: 260 },
   { type: 'abyss_mire', x: -235, z: 265 },
+  // 深渊裂痕使（三点，W-E3 切片81）—— 远程布陷者，与沼兽/猎犬错开。
+  { type: 'abyss_scarbearer', x: -190, z: 280 },
+  { type: 'abyss_scarbearer', x: -220, z: 210 },
+  { type: 'abyss_scarbearer', x: -260, z: 270 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

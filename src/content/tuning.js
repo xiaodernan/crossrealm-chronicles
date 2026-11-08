@@ -94,6 +94,8 @@ export const BODY_PLANS = {
   abyss_hound:    { scale: 0.96, parts: ['head', 'torso', 'legs'], radius: 0.41 },
   /** W-E3 切片79：深渊沼兽 —— 沉重贴地的区域封锁者体格。 */
   abyss_mire:     { scale: 1.06, parts: ['head', 'torso', 'legs'], radius: 0.46 },
+  /** W-E3 切片81：深渊裂痕使 —— 远距布陷施压者体格。 */
+  abyss_scarbearer: { scale: 1.02, parts: ['head', 'torso', 'legs'], radius: 0.44 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -168,6 +170,8 @@ export const ENEMY_RESIST = {
   abyss_hound:    { fire: -0.15, gravity: 0.2 },
   /** W-E3 切片79：深渊沼兽 —— 缓慢区域封锁者 */
   abyss_mire:     { fire: -0.1, gravity: 0.35 },
+  /** W-E3 切片81：深渊裂痕使 */
+  abyss_scarbearer: { fire: -0.1, gravity: 0.25 },
   /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** 虚空潜伏者：贴着裂隙潜行的实影，怕火；引力能干扰它的扑袭落点 */
@@ -351,6 +355,8 @@ export const ENEMY_DEFENSE = {
   abyss_hound: 4,
   /** W-E3 切片79：深渊沼兽 */
   abyss_mire: 5,
+  /** W-E3 切片81：深渊裂痕使 */
+  abyss_scarbearer: 4,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -821,6 +827,19 @@ export const ENEMY_MOVES = {
     damage: 0, cooldown: 8.0, weight: 2, range: 7, standoff: [4, 7],
     hazard: { radius: 2.8, telegraph: 1.2, damage: 0.55, duration: 4.5, tick: 0.9, color: 0x552277 },
     telegraph: { color: 0x552277 },
+  },
+  /**
+   * 深渊裂痕（深渊裂痕使专属招）—— W-E3 切片81。
+   * 远程投射落点生成危险区（ranged+hazard）：与 `void_breach/brand` 同机制不同参数，
+   * 与 `abyss_gaze`（纯远压）、`abyss_mire`（近身布置）分岔。
+   */
+  abyss_scar: {
+    name: '深渊裂痕', windup: 0.98, strike: 0.24, recover: 0.62, cone: -2,
+    range: 11.5, minDist: 4,
+    damage: 0, cooldown: 8.2, weight: 2, standoff: [5, 10.5],
+    ranged: { speed: 11.5, color: 0x8844aa },
+    hazard: { radius: 2.6, telegraph: 1.15, damage: 0.55, duration: 4.0, tick: 0.9, color: 0x8844aa },
+    telegraph: { color: 0x662288 },
   },
   /**
    * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
@@ -1385,6 +1404,8 @@ export const ENEMY_MOVE_SETS = {
   abyss_hound:    ['abyss_pounce', 'flurry', 'thrust'],
   /** W-E3 切片79：深渊沼兽 —— 深渊沼泽（区域封锁）+ 猛砸 + 横扫 */
   abyss_mire:     ['abyss_mire', 'slam', 'sweep'],
+  /** W-E3 切片81：深渊裂痕使 —— 深渊裂痕（远程布陷）+ 刺击 + 横扫 */
+  abyss_scarbearer: ['abyss_scar', 'thrust', 'sweep'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],
