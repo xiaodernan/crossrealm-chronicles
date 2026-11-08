@@ -1137,6 +1137,19 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_scarbearer_hunt_journal',
   },
   {
+    // W-E3 切片83：深渊噬颚兽进主线 —— 第八独占，插在裂痕使后、深渊副本前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'abyss-gnasher-hunt',
+    title: 'obj_abyss_gnasher_hunt_title',
+    desc: 'obj_abyss_gnasher_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_gnasher',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -200, z: 205, label: 'enemy_name_abyss_gnasher' },
+    reward: 23,
+    journal: 'obj_abyss_gnasher_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',

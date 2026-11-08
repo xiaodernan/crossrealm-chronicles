@@ -156,6 +156,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'abyss_mire', weight: 1 },
       // W-E3 切片81：深渊裂痕使 —— 远程布陷者，权重低
       { type: 'abyss_scarbearer', weight: 1 },
+      // W-E3 切片83：深渊噬颚兽 —— 重咬追击者，权重低
+      { type: 'abyss_gnasher', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

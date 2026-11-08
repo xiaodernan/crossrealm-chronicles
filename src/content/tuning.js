@@ -98,6 +98,8 @@ export const BODY_PLANS = {
   abyss_mire:     { scale: 1.06, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片81：深渊裂痕使 —— 远距布陷施压者体格。 */
   abyss_scarbearer: { scale: 1.02, parts: ['head', 'torso', 'legs'], radius: 0.44 },
+  /** W-E3 切片83：深渊噬颚兽 —— 凶猛的追咬猎兽体格。 */
+  abyss_gnasher:  { scale: 1.0, parts: ['head', 'torso', 'legs'], radius: 0.43 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -174,6 +176,8 @@ export const ENEMY_RESIST = {
   abyss_mire:     { fire: -0.1, gravity: 0.35 },
   /** W-E3 切片81：深渊裂痕使 */
   abyss_scarbearer: { fire: -0.1, gravity: 0.25 },
+  /** W-E3 切片83：深渊噬颚兽 */
+  abyss_gnasher:  { fire: -0.15, gravity: 0.25 },
   /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** 虚空潜伏者：贴着裂隙潜行的实影，怕火；引力能干扰它的扑袭落点 */
@@ -363,6 +367,8 @@ export const ENEMY_DEFENSE = {
   abyss_mire: 5,
   /** W-E3 切片81：深渊裂痕使 */
   abyss_scarbearer: 4,
+  /** W-E3 切片83：深渊噬颚兽 */
+  abyss_gnasher: 4,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -846,6 +852,18 @@ export const ENEMY_MOVES = {
     ranged: { speed: 11.5, color: 0x8844aa },
     hazard: { radius: 2.6, telegraph: 1.15, damage: 0.55, duration: 4.0, tick: 0.9, color: 0x8844aa },
     telegraph: { color: 0x662288 },
+  },
+  /**
+   * 深渊噬咬（深渊噬颚兽专属招）—— W-E3 切片83。
+   * 短距 travel 重咬：比 `abyss_pounce` 更重、更慢、更高击退，强调噬咬压迫。
+   * 与 `void_lunge`（快伏击）、`abyss_scar`（远程布陷）分岔。
+   */
+  abyss_gnash: {
+    name: '深渊噬咬', windup: 0.55, strike: 0.18, recover: 0.42, reach: 1.0, cone: 0.5,
+    band: [0.0, 1.0],
+    damage: 1.25, cooldown: 3.4, weight: 2, knock: 4.5,
+    standoff: [1.3, 3.0], travel: 'lunge', travelSpeed: 5.8,
+    telegraph: { color: 0x773355 },
   },
   /**
    * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
@@ -1425,6 +1443,8 @@ export const ENEMY_MOVE_SETS = {
   abyss_mire:     ['abyss_mire', 'slam', 'sweep'],
   /** W-E3 切片81：深渊裂痕使 —— 深渊裂痕（远程布陷）+ 刺击 + 横扫 */
   abyss_scarbearer: ['abyss_scar', 'thrust', 'sweep'],
+  /** W-E3 切片83：深渊噬颚兽 —— 深渊噬咬（重咬）+ 连刺 + 突刺 */
+  abyss_gnasher:  ['abyss_gnash', 'flurry', 'thrust'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

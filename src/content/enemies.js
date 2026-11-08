@@ -145,6 +145,10 @@ export const ENEMY_ROSTER = {
    * W-E3 切片81：深渊裂痕使 —— 深渊之颚里远距投射危险区的施压者。
    */
   abyss_scarbearer: { name: 'enemy_name_abyss_scarbearer', hp: 150, posture: 52, damage: 14, speed: 4.9, aggroRange: 29, color: 0x774488 },
+  /**
+   * W-E3 切片83：深渊噬颚兽 —— 凶猛追咬的深渊猎兽。
+   */
+  abyss_gnasher: { name: 'enemy_name_abyss_gnasher', hp: 155, posture: 56, damage: 18, speed: 6.0, aggroRange: 27, color: 0x884455 },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },

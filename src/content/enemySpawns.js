@@ -196,6 +196,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_scarbearer', x: -190, z: 280 },
   { type: 'abyss_scarbearer', x: -220, z: 210 },
   { type: 'abyss_scarbearer', x: -260, z: 270 },
+  // 深渊噬颚兽（三点，W-E3 切片83）—— 重咬追击者，与裂痕使/沼兽错开。
+  { type: 'abyss_gnasher', x: -200, z: 205 },
+  { type: 'abyss_gnasher', x: -240, z: 280 },
+  { type: 'abyss_gnasher', x: -160, z: 250 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

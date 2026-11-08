@@ -78,6 +78,8 @@ const 冻结 = [
   ['abyss_mire', -215, 250], ['abyss_mire', -175, 260], ['abyss_mire', -235, 265],
   // W-E3 切片81：深渊裂痕使（三点野外出生点）
   ['abyss_scarbearer', -190, 280], ['abyss_scarbearer', -220, 210], ['abyss_scarbearer', -260, 270],
+  // W-E3 切片83：深渊噬颚兽（三点野外出生点）
+  ['abyss_gnasher', -200, 205], ['abyss_gnasher', -240, 280], ['abyss_gnasher', -160, 250],
   ['radiant_crawler', -240, -200], ['radiant_crawler', -120, -100], ['radiant_crawler', -300, -180],
   ['radiant_knight', -80, -220], ['radiant_knight', -200, -80], ['radiant_knight', -240, -100],
   ['radiant_dancer', -160, -240], ['radiant_dancer', -220, -200], ['radiant_dancer', -100, -140],
