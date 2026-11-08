@@ -937,8 +937,8 @@ try {
     /* 营火余点：RestCampfireAmbient 的 8 座 Points（每座一组）在构造期就造好了，
      * 上传却要等"玩家走近那座火"才首绘。索克的站著序让它们在游玩段才第一次入画
      * （帧 5826/5848 定位到 rest:space / rest:void 的两枚）， geometries 因此 +2。
-     * 这些 Points 被 update() 的 visible=near 钉成 false，需在所有 update() 之后
-     * 统一翻正（否则 g.update() 会把它们重新藏起来）。 */
+      * 这些 Points 被每帧的可见性判定钉成 false（玩家不在火边），需在所有帧推进之后
+      * 统一翻正（否则它们会被重新藏起来）。 */
     const 火星组 = (() => {
       const 找到 = [];
       g.scene.traverse((o) => { if (o.isPoints) 找到.push(o); });
