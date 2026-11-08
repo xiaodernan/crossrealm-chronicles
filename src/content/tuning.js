@@ -71,6 +71,8 @@ export const BODY_PLANS = {
   gloom_shade:    { scale: 0.88, parts: ['head', 'torso', 'legs'], radius: 0.38 },
   /** W-E3 切片69：虚空幻影 —— 悬浮的裂隙残影，比怨影更实在一点，靠相位错位贴身 */
   void_phantom:   { scale: 0.92, parts: ['head', 'torso'], radius: 0.40, hover: 0.6 },
+  /** W-E3 切片72：虚空裂隙行者 —— 贴地的裂隙穿行者，比幻影更实在，靠长距裂隙步突入 */
+  void_riftwalker:{ scale: 0.96, parts: ['head', 'torso', 'legs'], radius: 0.44 },
   /** W-E3 切片70：深渊撕掠者 —— 深渊里的贴地猎手，比掠行兽更壮、靠撕裂而不是乱爪 */
   abyss_reaver:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片71：深渊凝视者 —— 悬浮的暗目，远距凝视施压，与撕掠者的贴身撕裂分工 */
@@ -141,6 +143,8 @@ export const ENEMY_RESIST = {
   abyss_reaver:   { fire: -0.1, ice: 0.15 },
   /** 深渊凝视者：悬浮的暗目，怕火；引力拽不稳虚浮之躯 */
   abyss_watcher:  { fire: -0.15, gravity: 0.2 },
+  /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
+  void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -298,6 +302,7 @@ export const ENEMY_DEFENSE = {
   hexer: 8, juggernaut: 24,
   gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16, gloom_shade: 5,
   void_phantom: 4,
+  void_riftwalker: 5,
   abyss_reaver: 6,
   abyss_watcher: 5,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
@@ -716,6 +721,19 @@ export const ENEMY_MOVES = {
     damage: 1.05, cooldown: 3.4, weight: 2,
     ranged: { speed: 12, color: 0x774488 },
     telegraph: { color: 0x553366 },
+  },
+  /**
+   * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
+   *
+   * 贴地裂隙穿行：比幻影的 `phase_cut`（5m/0.5s，悬浮短切）更远（8m）、前摇略长，
+   * 落地一记重击后带中等击退。与怨影 `haunt`（10m/0.75s 远距背刺、悬浮）分岔——
+   * 裂隙步是贴地实影的突入，不追求背后落点而追求正面破位。
+   */
+  rift_step: {
+    name: '裂隙步', windup: 0.65, strike: 0.2, recover: 0.45, reach: 1.1, cone: 0.4,
+    band: [0.0, 1.2], phase: true, blink: 8,
+    damage: 1.2, cooldown: 3.5, weight: 2, knock: 3.5,
+    telegraph: { color: 0x7744bb },
   },
   /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
@@ -1194,6 +1212,8 @@ export const ENEMY_MOVE_SETS = {
   gloom_shade:    ['shadowstep', 'thrust', 'sweep', 'flurry'],
   /** W-E3 切片69：虚空幻影 —— 相位斩（短距相位切入）+ 刺击 + 横扫 */
   void_phantom:   ['phase_cut', 'thrust', 'sweep'],
+  /** W-E3 切片72：虚空裂隙行者 —— 裂隙步（长距相位突入）+ 劈砍 + 横扫 */
+  void_riftwalker:['rift_step', 'cleave', 'sweep'],
   /** W-E3 切片70：深渊撕掠者 —— 深渊撕裂（重撕控距）+ 劈砍 + 刺击 + 连爪 */
   abyss_reaver:   ['maw_rend', 'cleave', 'thrust', 'flurry'],
   /** W-E3 切片71：深渊凝视者 —— 深渊凝视（远距凝视弹）+ 虚能弹 + 刺击 */

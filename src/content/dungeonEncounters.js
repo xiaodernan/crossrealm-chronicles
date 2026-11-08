@@ -121,6 +121,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'crawler', weight: 2 },
       // W-E3 切片69：虚空幻影 —— 断口里游荡的残影，权重低（点缀压迫感，不抢主编组）
       { type: 'void_phantom', weight: 1 },
+      // W-E3 切片72：虚空裂隙行者 —— 穿行裂隙的实影，权重低（点缀压迫感，不抢主编组）
+      { type: 'void_riftwalker', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

@@ -52,6 +52,8 @@ const 冻结 = [
   ['gloom_shade', 100, 60], ['gloom_shade', 180, 160], ['gloom_shade', 260, 140],
   // W-E3 切片69：虚空幻影（三点野外出生点）
   ['void_phantom', -10, 190], ['void_phantom', 50, 230], ['void_phantom', -60, 220],
+  // W-E3 切片72：虚空裂隙行者（三点野外出生点）
+  ['void_riftwalker', 20, 200], ['void_riftwalker', -45, 245], ['void_riftwalker', 65, 215],
   // W-E3 切片70：深渊撕掠者（三点野外出生点）
   ['abyss_reaver', -180, 240], ['abyss_reaver', -230, 200], ['abyss_reaver', -260, 230],
   // W-E3 切片71：深渊凝视者（三点野外出生点）

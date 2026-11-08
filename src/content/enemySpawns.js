@@ -142,6 +142,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'void_phantom', x: -10, z: 190 },
   { type: 'void_phantom', x: 50, z: 230 },
   { type: 'void_phantom', x: -60, z: 220 },
+  // 虚空裂隙行者（三点，W-E3 切片72）—— 贴地裂隙穿行者，与幻影/wraith 出生带错开。
+  { type: 'void_riftwalker', x: 20, z: 200 },
+  { type: 'void_riftwalker', x: -45, z: 245 },
+  { type: 'void_riftwalker', x: 65, z: 215 },
 
   // ── 深渊之颚（abyss，中心 ~-200,220，半径 130）── W-E3 切片70
   // 深渊撕掠者（三点）—— 贴地猎手，分散在颚区边缘，与 stalker/sentinel 出生带错开。

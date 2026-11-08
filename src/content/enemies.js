@@ -78,6 +78,12 @@ export const ENEMY_ROSTER = {
    */
   void_phantom: { name: 'enemy_name_void_phantom', hp: 150, posture: 54, damage: 17, speed: 5.4, aggroRange: 26, color: 0x7744aa },
   /**
+   * W-E3 切片72：虚空裂隙行者 —— 虚空断口里穿行裂隙的贴地实影。
+   * 比幻影更实在（hp160/架势58/伤害18），靠裂隙步（8m 相位突入）正面破位，
+   * 与 void_phantom（悬浮短切连击）、wraith（10m 远距背刺）分工不同。
+   */
+  void_riftwalker: { name: 'enemy_name_void_riftwalker', hp: 160, posture: 58, damage: 18, speed: 5.8, aggroRange: 28, color: 0x663399 },
+  /**
    * W-E3 切片70：深渊撕掠者 —— 深渊之颚边缘的贴地猎手。
    * 比掠行兽更壮（hp165/架势60）、出手更重（19），靠深渊撕裂控距顶开，
    * 与 stalker（轻快乱爪扑击）、knight（重甲横扫守势）分工不同。

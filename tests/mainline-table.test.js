@@ -488,7 +488,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(V19_ORDER).toHaveLength(65);
     expect(new Set(V19_ORDER).size, 'v19 序列里有重复 id').toBe(V19_ORDER.length);
     // W-E3 切片40 之后：v19 那份名单仍是在役序列**去掉 v21 之后新插的步**（插步不改老名单）。
-    const v21之后 = ['void-oath', 'choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt'];
+    const v21之后 = ['void-oath', 'choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt', 'void-riftwalker-hunt'];
     expect(MAINLINE.map((r) => r.id).filter((id) => !v21之后.includes(id)),
       '去掉 v21 之后新插的步，在役序列与 v19 那份冻结名单不是同一条')
       .toEqual(V19_ORDER);
@@ -522,7 +522,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
   it('W-E3 切片40 之后（历史腿）：剔掉切片41 那三步，主线是 66 步，断誓插在碑文与抉择之间', () => {
     // 这一片之后第 3 章又分过一次岔（切片41），所以这条腿先剔掉那三步再看当年的样子：
     // 历史腿只验「插一步不动老名单」，今天 69 步的长相由下面切片41 那一条钉。
-    const 切片41新增 = ['choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt'];
+    const 切片41新增 = ['choice-ascend', 'ascend-observe', 'ascend-retrace', 'choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt', 'void-riftwalker-hunt'];
     const 当年 = MAINLINE.map((r) => r.id).filter((id) => !切片41新增.includes(id));
     expect(当年).toHaveLength(66);
     expect(当年[40], '第 40 位不是 void-oath').toBe('void-oath');
@@ -540,7 +540,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(SAVE_KEYS[0].key, '插一步却换了写档键').toBe('crossrealm_save_v21');
   });
   it('W-E3 切片41 之后（历史腿）：剔掉切片42 那三步，主线是 69 步，第 3 章真分岔', () => {
-    const 切片42新增 = ['choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt'];
+    const 切片42新增 = ['choice-second', 'second-ember', 'second-stone', 'choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt', 'void-riftwalker-hunt'];
     const 序 = MAINLINE.map((r) => r.id).filter((id) => !切片42新增.includes(id));
     expect(序).toHaveLength(69);
     expect(序[30], '第 30 位不是 mind').toBe('mind');
@@ -583,7 +583,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21], 'MIGRATIONS[21] 被凭空写出来了').toBeUndefined();
   });
   it('W-E3 切片42 之后（历史腿）：剔掉切片45 那三步，主线是 72 步，第 2 章收尾分岔', () => {
-    const 切片45新增 = ['choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt'];
+    const 切片45新增 = ['choice-first', 'first-arrow', 'first-camp', 'choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt', 'void-riftwalker-hunt'];
     const 序 = MAINLINE.map((r) => r.id).filter((id) => !切片45新增.includes(id));
     expect(序).toHaveLength(72);
     expect(序[21], '第 21 位不是 level').toBe('level');
@@ -621,9 +621,9 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片45 之后（历史腿）：剔掉终局那三步与切片67 那一步，主线是 75 步，第 1 章教学段也有线索分岔（断箭 / 旧营地两路，各回石环）', () => {
-    // 切片46 又在终局插了三步、切片67 在圣印者后插了一步、切片68 在哨卫后插了一步、切片69 在爬兽后插了一步、切片70 在技能后插了一步、切片71 在撕掠者后插了一步 ⇒ 这条腿先剔掉它们再看当年的样子；
-    // 今天 83 步的长相由下面切片46/67/68/69/70/71 那几条钉。
-    const 切片46新增 = ['choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt'];
+    // 切片46 又在终局插了三步、切片67 在圣印者后插了一步、切片68 在哨卫后插了一步、切片69 在爬兽后插了一步、切片70 在技能后插了一步、切片71 在撕掠者后插了一步、切片72 在幻影后插了一步 ⇒ 这条腿先剔掉它们再看当年的样子；
+    // 今天 84 步的长相由下面切片46/67/68/69/70/71/72 那几条钉。
+    const 切片46新增 = ['choice-final', 'final-keep', 'final-quiet', 'archon-hunt', 'gloom-shade-hunt', 'void-phantom-hunt', 'abyss-reaver-hunt', 'abyss-watcher-hunt', 'void-riftwalker-hunt'];
     const 序 = MAINLINE.map((r) => r.id).filter((id) => !切片46新增.includes(id));
     expect(序).toHaveLength(75);
     expect(序[3], '第 3 位不是 soldiers').toBe('soldiers');
@@ -662,14 +662,14 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(SAVE_KEYS[0].key).toBe('crossrealm_save_v21');
     expect(MIGRATIONS[21]).toBeUndefined();
   });
-  it('W-E3 切片46 之后（加切片67/68/69/70/71 那五步）：主线是 83 步，终局也分岔（留灯 / 熄灯两路，各回本章门）', () => {
-    expect(MAINLINE).toHaveLength(83);
+  it('W-E3 切片46 之后（加切片67/68/69/70/71/72 那六步）：主线是 84 步，终局也分岔（留灯 / 熄灯两路，各回本章门）', () => {
+    expect(MAINLINE).toHaveLength(84);
     const 序 = MAINLINE.map((r) => r.id);
-    expect(序[78], '第 78 位不是 sunless-oratory').toBe('sunless-oratory');
-    expect(序[79], '第 79 位不是 infinity（摸锚点那一步）').toBe('infinity');
-    expect(序[80], '第 80 位不是 choice-final（终局抉择）').toBe('choice-final');
-    expect(序[81], '第 81 位不是 final-keep（留灯那条路）').toBe('final-keep');
-    expect(序[82], '第 82 位不是 final-quiet（熄灯那条路）').toBe('final-quiet');
+    expect(序[79], '第 79 位不是 sunless-oratory').toBe('sunless-oratory');
+    expect(序[80], '第 80 位不是 infinity（摸锚点那一步）').toBe('infinity');
+    expect(序[81], '第 81 位不是 choice-final（终局抉择）').toBe('choice-final');
+    expect(序[82], '第 82 位不是 final-keep（留灯那条路）').toBe('final-keep');
+    expect(序[83], '第 83 位不是 final-quiet（熄灯那条路）').toBe('final-quiet');
     // 摸锚点那一步不再自己指门：主角换成终局抉择（否则两条腿被跳过）
     expect(MAINLINE.find((r) => r.id === 'infinity')?.branchTo, 'infinity 还自己指着门 ⇒ 终局分岔无从发生')
       .toBeUndefined();
@@ -711,7 +711,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片67：大主教入主线 —— 圣域四类清剿到齐（爬兽里先清圣印者、再清大主教），插在圣印者之后、dungeon-rerun 之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(83);
+    expect(MAINLINE).toHaveLength(84);
     const 序 = MAINLINE.map((r) => r.id);
     const archon = 序.indexOf('archon-hunt');
     expect(archon, 'archon-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -730,7 +730,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片68：幽暗影煞入主线 —— 幽暗五类清剿到齐，插在哨卫之后、chaos-boss 之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(83);
+    expect(MAINLINE).toHaveLength(84);
     const 序 = MAINLINE.map((r) => r.id);
     const shade = 序.indexOf('gloom-shade-hunt');
     expect(shade, 'gloom-shade-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -748,12 +748,12 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片69：虚空幻影入主线 —— 虚空断口独占残影，插在爬兽之后、破棺副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(83);
+    expect(MAINLINE).toHaveLength(84);
     const 序 = MAINLINE.map((r) => r.id);
     const ph = 序.indexOf('void-phantom-hunt');
     expect(ph, 'void-phantom-hunt 不在主线里').toBeGreaterThanOrEqual(0);
     expect(序[ph - 1], 'void-phantom-hunt 前面那一步不是爬兽').toBe('crawler-hunt');
-    expect(序[ph + 1], 'void-phantom-hunt 后面那一步不是 void-casket').toBe('void-casket');
+    expect(序[ph + 1], 'void-phantom-hunt 后面那一步不是 void-riftwalker-hunt').toBe('void-riftwalker-hunt');
     const row = MAINLINE[ph];
     expect(row.type, 'void-phantom-hunt 不是清剿步').toBe('kills');
     expect(row.enemyType, 'void-phantom-hunt 清的不是幻影').toBe('void_phantom');
@@ -766,7 +766,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片70：深渊撕掠者入主线 —— 深渊之颚独占猎手，插在技能解锁之后，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(83);
+    expect(MAINLINE).toHaveLength(84);
     const 序 = MAINLINE.map((r) => r.id);
     const ar = 序.indexOf('abyss-reaver-hunt');
     expect(ar, 'abyss-reaver-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -784,7 +784,7 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(MIGRATIONS[21]).toBeUndefined();
   });
   it('W-E3 切片71：深渊凝视者入主线 —— 深渊之颚独占暗目，插在撕掠者之后、深渊副本之前，仍不写迁移', () => {
-    expect(MAINLINE).toHaveLength(83);
+    expect(MAINLINE).toHaveLength(84);
     const 序 = MAINLINE.map((r) => r.id);
     const aw = 序.indexOf('abyss-watcher-hunt');
     expect(aw, 'abyss-watcher-hunt 不在主线里').toBeGreaterThanOrEqual(0);
@@ -796,6 +796,24 @@ describe('① 玩家序列 = 表的投影，且与旧抄本同序同行', () => 
     expect(row.target, 'abyss-watcher-hunt 清三只').toBe(3);
     expect(row.chapter, 'abyss-watcher-hunt 不在第 5 章').toBe(5);
     expect(row.waypoint.label).toBe('enemy_name_abyss_watcher');
+    // 仍是「插步不写迁移」
+    expect(CURRENT_VERSION, '插一步却动了存档版本').toBe(21);
+    expect(SAVE_KEYS[0].key).toBe('crossrealm_save_v21');
+    expect(MIGRATIONS[21]).toBeUndefined();
+  });
+  it('W-E3 切片72：虚空裂隙行者入主线 —— 虚空断口第二独占，插在幻影之后、破棺副本之前，仍不写迁移', () => {
+    expect(MAINLINE).toHaveLength(84);
+    const 序 = MAINLINE.map((r) => r.id);
+    const rw = 序.indexOf('void-riftwalker-hunt');
+    expect(rw, 'void-riftwalker-hunt 不在主线里').toBeGreaterThanOrEqual(0);
+    expect(序[rw - 1], 'void-riftwalker-hunt 前面那一步不是 void-phantom-hunt').toBe('void-phantom-hunt');
+    expect(序[rw + 1], 'void-riftwalker-hunt 后面那一步不是 void-casket').toBe('void-casket');
+    const row = MAINLINE[rw];
+    expect(row.type, 'void-riftwalker-hunt 不是清剿步').toBe('kills');
+    expect(row.enemyType, 'void-riftwalker-hunt 清的不是裂隙行者').toBe('void_riftwalker');
+    expect(row.target, 'void-riftwalker-hunt 清三只').toBe(3);
+    expect(row.chapter, 'void-riftwalker-hunt 不在第 4 章').toBe(4);
+    expect(row.waypoint.label).toBe('enemy_name_void_riftwalker');
     // 仍是「插步不写迁移」
     expect(CURRENT_VERSION, '插一步却动了存档版本').toBe(21);
     expect(SAVE_KEYS[0].key).toBe('crossrealm_save_v21');

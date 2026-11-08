@@ -752,6 +752,20 @@ export const OBJECTIVES = [
     journal: 'obj_void_phantom_hunt_journal',
   },
   {
+    // W-E3 切片72：虚空裂隙行者进主线 —— 虚空断口的第二独占，插在幻影清剿后、破棺副本前。
+    // v21 起存档记 currentId，插步不必配迁移。
+    id: 'void-riftwalker-hunt',
+    title: 'obj_void_riftwalker_hunt_title',
+    desc: 'obj_void_riftwalker_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_riftwalker',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 20, z: 200, label: 'enemy_name_void_riftwalker' },
+    reward: 18,
+    journal: 'obj_void_riftwalker_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',
