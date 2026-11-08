@@ -164,6 +164,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_brute', x: -195, z: 270 },
   { type: 'abyss_brute', x: -240, z: 245 },
   { type: 'abyss_brute', x: -170, z: 215 },
+  // 深渊幽影（三点，W-E3 切片75）—— 相位伏击者，与蛮兽/凝视者/撕掠者出生带错开。
+  { type: 'abyss_shade', x: -225, z: 225 },
+  { type: 'abyss_shade', x: -185, z: 255 },
+  { type: 'abyss_shade', x: -255, z: 215 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

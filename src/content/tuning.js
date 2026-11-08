@@ -81,6 +81,8 @@ export const BODY_PLANS = {
   abyss_watcher:  { scale: 0.94, parts: ['head', 'torso'], radius: 0.42, hover: 0.5 },
   /** W-E3 切片73：深渊蛮兽 —— 深渊颚底的重躯，比撕掠者更壮，靠重踏逼退 */
   abyss_brute:    { scale: 1.12, parts: ['head', 'torso', 'legs'], radius: 0.52 },
+  /** W-E3 切片75：深渊幽影 —— 深渊暗隙里的相位伏击者，贴地错位突袭 */
+  abyss_shade:    { scale: 0.98, parts: ['head', 'torso', 'legs'], radius: 0.43 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -149,6 +151,8 @@ export const ENEMY_RESIST = {
   abyss_watcher:  { fire: -0.15, gravity: 0.2 },
   /** 深渊蛮兽：深渊颚底的重躯，怕火；厚皮对寒意不敏感 */
   abyss_brute:    { fire: -0.1, ice: 0.1 },
+  /** 深渊幽影：深渊暗隙里的伏击者，怕火；引力拽不稳它的错位 */
+  abyss_shade:    { fire: -0.15, gravity: 0.3 },
   /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** 虚空潜伏者：贴着裂隙潜行的实影，怕火；引力能干扰它的扑袭落点 */
@@ -315,6 +319,7 @@ export const ENEMY_DEFENSE = {
   abyss_reaver: 6,
   abyss_watcher: 5,
   abyss_brute: 8,
+  abyss_shade: 5,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -744,6 +749,21 @@ export const ENEMY_MOVES = {
     band: [0.0, 1.0],
     damage: 1.45, cooldown: 4.5, weight: 2, knock: 7,
     telegraph: { color: 0x551133 },
+  },
+  /**
+   * 深渊隐袭（深渊幽影专属招）—— W-E3 切片75。
+   *
+   * 贴地相位伏击：中距 7m 的裂隙错位后贴身一击，前摇 0.6s、击退 3。
+   * 与 `shadowstep`（6m/0.55s/knock4，贴地快影的急促错位）分岔——隐袭更远一档、
+   * 前摇略长、击退更轻，偏"贴上来缠住"而不是"错位后顶开"；
+   * 与 `rift_step`（8m/0.65s/knock3.5，实影正面破位突入）分岔——隐袭更近、出手更快，
+   * 是伏击手感而非长距破位。三者同为 phase blink，但距离/节奏/击退各自成族。
+   */
+  abyss_veil: {
+    name: '深渊隐袭', windup: 0.6, strike: 0.2, recover: 0.42, reach: 1.0, cone: 0.42,
+    band: [0.0, 1.05], phase: true, blink: 7,
+    damage: 1.15, cooldown: 3.6, weight: 2, knock: 3,
+    telegraph: { color: 0x442266 },
   },
   /**
    * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
@@ -1259,6 +1279,8 @@ export const ENEMY_MOVE_SETS = {
   abyss_watcher:  ['abyss_gaze', 'shot', 'thrust'],
   /** W-E3 切片73：深渊蛮兽 —— 深渊重踏（慢速重逼退）+ 劈砍 + 重击 */
   abyss_brute:    ['abyss_slam', 'cleave', 'slam'],
+  /** W-E3 切片75：深渊幽影 —— 深渊隐袭（中距相位伏击）+ 刺击 + 横扫 */
+  abyss_shade:    ['abyss_veil', 'thrust', 'sweep'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

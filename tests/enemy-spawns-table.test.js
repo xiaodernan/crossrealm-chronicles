@@ -62,6 +62,8 @@ const 冻结 = [
   ['abyss_watcher', -210, 260], ['abyss_watcher', -150, 225], ['abyss_watcher', -250, 255],
   // W-E3 切片73：深渊蛮兽（三点野外出生点）
   ['abyss_brute', -195, 270], ['abyss_brute', -240, 245], ['abyss_brute', -170, 215],
+  // W-E3 切片75：深渊幽影（三点野外出生点）
+  ['abyss_shade', -225, 225], ['abyss_shade', -185, 255], ['abyss_shade', -255, 215],
   ['radiant_crawler', -240, -200], ['radiant_crawler', -120, -100], ['radiant_crawler', -300, -180],
   ['radiant_knight', -80, -220], ['radiant_knight', -200, -80], ['radiant_knight', -240, -100],
   ['radiant_dancer', -160, -240], ['radiant_dancer', -220, -200], ['radiant_dancer', -100, -140],

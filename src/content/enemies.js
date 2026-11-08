@@ -107,6 +107,12 @@ export const ENEMY_ROSTER = {
    * 与 abyss_reaver（中速撕裂猎手）、abyss_watcher（远距凝视）分工不同。
    */
   abyss_brute: { name: 'enemy_name_abyss_brute', hp: 175, posture: 66, damage: 20, speed: 4.4, aggroRange: 24, color: 0x661133 },
+  /**
+   * W-E3 切片75：深渊幽影 —— 深渊暗隙里的相位伏击者。
+   * 血薄偏快（hp150/架势54/伤害17/速5.6），靠深渊隐袭（7m 中距相位错位）贴身，
+   * 与 abyss_brute（重躯逼退）、abyss_watcher（远距凝视）、abyss_reaver（贴身撕裂）分工不同。
+   */
+  abyss_shade: { name: 'enemy_name_abyss_shade', hp: 150, posture: 54, damage: 17, speed: 5.6, aggroRange: 28, color: 0x441155 },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },
