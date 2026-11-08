@@ -204,6 +204,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_gnasher', x: -200, z: 205 },
   { type: 'abyss_gnasher', x: -240, z: 280 },
   { type: 'abyss_gnasher', x: -160, z: 250 },
+  // 深渊空壳（三点，W-E3 切片85）—— 汲取施压者，与噬颚兽/裂痕使错开。
+  { type: 'abyss_hollow', x: -230, z: 195 },
+  { type: 'abyss_hollow', x: -175, z: 285 },
+  { type: 'abyss_hollow', x: -255, z: 245 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

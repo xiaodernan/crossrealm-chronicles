@@ -1163,6 +1163,19 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_gnasher_hunt_journal',
   },
   {
+    // W-E3 切片85：深渊空壳进主线 —— 第九独占，插在噬颚兽后、深渊副本前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'abyss-hollow-hunt',
+    title: 'obj_abyss_hollow_hunt_title',
+    desc: 'obj_abyss_hollow_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_hollow',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -230, z: 195, label: 'enemy_name_abyss_hollow' },
+    reward: 23,
+    journal: 'obj_abyss_hollow_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',
