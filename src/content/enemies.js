@@ -84,6 +84,12 @@ export const ENEMY_ROSTER = {
    */
   void_riftwalker: { name: 'enemy_name_void_riftwalker', hp: 160, posture: 58, damage: 18, speed: 5.8, aggroRange: 28, color: 0x663399 },
   /**
+   * W-E3 切片74：虚空潜伏者 —— 虚空断口里贴裂隙伏击的贴地实影。
+   * 速度较快（hp155/架势55/伤害17/速6.0），靠虚空扑袭（短距 travel）贴身，
+   * 与 void_riftwalker（8m 相位突入）、void_phantom（悬浮短切）分工不同。
+   */
+  void_lurker: { name: 'enemy_name_void_lurker', hp: 155, posture: 55, damage: 17, speed: 6.0, aggroRange: 26, color: 0x552288 },
+  /**
    * W-E3 切片70：深渊撕掠者 —— 深渊之颚边缘的贴地猎手。
    * 比掠行兽更壮（hp165/架势60）、出手更重（19），靠深渊撕裂控距顶开，
    * 与 stalker（轻快乱爪扑击）、knight（重甲横扫守势）分工不同。

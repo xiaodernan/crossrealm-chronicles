@@ -766,6 +766,20 @@ export const OBJECTIVES = [
     journal: 'obj_void_riftwalker_hunt_journal',
   },
   {
+    // W-E3 切片74：虚空潜伏者进主线 —— 虚空断口的第三独占，插在裂隙行者清剿后、破棺副本前。
+    // v21 起存档记 currentId，插步不必配迁移。
+    id: 'void-lurker-hunt',
+    title: 'obj_void_lurker_hunt_title',
+    desc: 'obj_void_lurker_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_lurker',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: -25, z: 210, label: 'enemy_name_void_lurker' },
+    reward: 18,
+    journal: 'obj_void_lurker_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',
