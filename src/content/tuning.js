@@ -69,6 +69,8 @@ export const BODY_PLANS = {
   gloom_warden:   { scale: 1.16, parts: ['head', 'torso', 'legs'], radius: 0.56 },
   /** W-E3 切片68：幽暗影煞 —— 贴地的快影，比掠行兽更轻（它靠的是"先到"而不是"更重"） */
   gloom_shade:    { scale: 0.88, parts: ['head', 'torso', 'legs'], radius: 0.38 },
+  /** W-E3 切片69：虚空幻影 —— 悬浮的裂隙残影，比怨影更实在一点，靠相位错位贴身 */
+  void_phantom:   { scale: 0.92, parts: ['head', 'torso'], radius: 0.40, hover: 0.6 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -129,6 +131,8 @@ export const ENEMY_RESIST = {
   gloom_warden:   { ice: 0.2, gravity: 0.1 },
   /** 幽暗影煞：快影怕火（影子见不得光）；引力拽不住它那一身轻 */
   gloom_shade:    { fire: -0.2, gravity: 0.25 },
+  /** 虚空幻影：裂隙里扯出来的残影，怕火；引力抓不稳虚体 */
+  void_phantom:   { fire: -0.2, gravity: 0.3 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -285,6 +289,7 @@ export const ENEMY_DEFENSE = {
   crawler: 8, knight: 22, dancer: 6,
   hexer: 8, juggernaut: 24,
   gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16, gloom_shade: 5,
+  void_phantom: 4,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -662,6 +667,19 @@ export const ENEMY_MOVES = {
     band: [0.05, 1.0], phase: true, blink: 6,
     damage: 1.15, cooldown: 3.8, weight: 2, knock: 4,
     telegraph: { color: 0x553388 },
+  },
+  /**
+   * 相位斩（虚空幻影专属招）—— W-E3 切片69。
+   *
+   * 悬浮残影的短距相位切入：blink 5m、前摇 0.5s，落点比 `haunt`（10m/0.75s，怨影的远距背刺）
+   * 近、比 `shadowstep`（6m，贴地快影）更贴身且不带击退——幻影靠"连着切"而不是"打一刀顶开"。
+   * `band` 抬到中段（悬浮体 hover 0.6），与贴地的 sweep/thrust 错开高度口。
+   */
+  phase_cut: {
+    name: '相位斩', windup: 0.5, strike: 0.18, recover: 0.42, reach: 0.9, cone: 0.45,
+    band: [0.3, 1.4], phase: true, blink: 5,
+    damage: 1.1, cooldown: 3.2, weight: 2, knock: 1.5,
+    telegraph: { color: 0x8844cc },
   },
   /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
@@ -1138,6 +1156,8 @@ export const ENEMY_MOVE_SETS = {
   gloom_warden:   ['lurk', 'sweep', 'cleave', 'guard'],
   /** W-E3 切片68：幽暗影煞 —— 影袭（短距相位错位）+ 快刺 + 横扫 */
   gloom_shade:    ['shadowstep', 'thrust', 'sweep', 'flurry'],
+  /** W-E3 切片69：虚空幻影 —— 相位斩（短距相位切入）+ 刺击 + 横扫 */
+  void_phantom:   ['phase_cut', 'thrust', 'sweep'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

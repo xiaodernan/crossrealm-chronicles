@@ -71,6 +71,12 @@ export const ENEMY_ROSTER = {
    * 掠行兽（贴地冲锋）、守夜人（重装慢速）分工不同。
    */
   gloom_shade: { name: 'enemy_name_gloom_shade', hp: 140, posture: 52, damage: 18, speed: 5.8, aggroRange: 24, color: 0x2a2a44 },
+  /**
+   * W-E3 切片69：虚空幻影 —— 虚空断口里扯出来的悬浮残影。
+   * 比怨影更实在（hp150/架势54）、攻更重（17），靠相位斩（5m 短距错位）贴身连切，
+   * 不像怨影那样从 10 米外慢慢背刺。与 sentinel（远程炮台）、crawler（贴地快爪）分工不同。
+   */
+  void_phantom: { name: 'enemy_name_void_phantom', hp: 150, posture: 54, damage: 17, speed: 5.4, aggroRange: 26, color: 0x7744aa },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },

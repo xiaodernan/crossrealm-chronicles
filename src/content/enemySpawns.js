@@ -137,6 +137,12 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'gloom_shade', x: 180, z: 160 },
   { type: 'gloom_shade', x: 260, z: 140 },
 
+  // ── 虚空断口（void，中心 ~0,220，半径 130）── W-E3 切片69
+  // 虚空幻影（三点）—— 悬浮残影，分散在断口周边，与 wraith/crawler 出生带错开。
+  { type: 'void_phantom', x: -10, z: 190 },
+  { type: 'void_phantom', x: 50, z: 230 },
+  { type: 'void_phantom', x: -60, z: 220 },
+
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },
   { type: 'radiant_crawler', x: -120, z: -100 },

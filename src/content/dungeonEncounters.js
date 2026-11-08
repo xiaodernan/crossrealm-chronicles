@@ -119,6 +119,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'sentinel', weight: 5 },
       { type: 'wraith', weight: 3 },
       { type: 'crawler', weight: 2 },
+      // W-E3 切片69：虚空幻影 —— 断口里游荡的残影，权重低（点缀压迫感，不抢主编组）
+      { type: 'void_phantom', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

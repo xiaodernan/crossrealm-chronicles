@@ -738,6 +738,20 @@ export const OBJECTIVES = [
     journal: 'obj_crawler_hunt_journal',
   },
   {
+    // W-E3 切片69：虚空幻影进主线 —— 虚空断口的独占残影，插在爬兽清剿后、破棺副本前。
+    // v21 起存档记 currentId，插步不必配迁移。
+    id: 'void-phantom-hunt',
+    title: 'obj_void_phantom_hunt_title',
+    desc: 'obj_void_phantom_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_phantom',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: -10, z: 190, label: 'enemy_name_void_phantom' },
+    reward: 18,
+    journal: 'obj_void_phantom_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',
