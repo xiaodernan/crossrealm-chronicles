@@ -487,6 +487,7 @@ const 玩法侧墙钟 = {
   'cinematic/CombatCameraDirectorExtensions.js': '跳过路径读同一个 blocksInputUntil 截止时间（不另起一支钟）',
   'cinematic/CombatCinematicSkip.js': 'canSkip 读同一个 blocksInputUntil 截止时间（不另起一支钟）',
   'engine/frameCensus.js': '仪器不是玩法：它量的就是"这一帧真实花了多少毫秒"，换成世界时这把尺根本量不到东西（世界时正是被量的这一帧算出来的）。它进不了游戏状态 —— src/ 里没有第二个模块提到它，那是一条被下面那条腿核对的性质，不是一句承诺',
+  'platform/tracing.js': '仪器不是玩法（同族）：追踪器量的也是"这一帧真实花了多少毫秒"—— span 的时间戳与 duration 都必须是真实时间，世界时量不到"这一帧慢在哪"。它进不了游戏状态：只有性能面板（F3 开发期工具）读它',
   'ui/HUD.js': '小地图刷新间隔 maybeDrawMinimap(现在 = performance.now())，本身不是游戏状态，只是UI刷新节拍，不入游戏状态，故登记',
 };
 

@@ -113,13 +113,17 @@ export function 建舱壁(名, { 失败阈值 = 默认失败阈值, 冷却秒 = 
  * @param {object} 舱壁 `建舱壁()` 的产物
  * @param {Function} fn 要跑的下游
  * @param {number} dt **基建时钟**的帧间隔（秒）
+ * @param {object} [追踪] 链路追踪器（`platform/tracing.js`）。给了就记 span：
+ *   调用发生 ⇒ 一个 span（耗时、成没成）；熔断短路 ⇒ 一个 0 毫秒的"跳过"span。
+ *   **不记也不影响本函数的行为** —— 追踪是仪器，不是判据。
  * @returns {{成: boolean, 值: any, 错误: Error|null, 短路: boolean, 熔断: boolean}}
  */
-export function 舱壁调用(舱壁, fn, dt = 0) {
+export function 舱壁调用(舱壁, fn, dt = 0, 追踪 = null) {
   if (舱壁.态 === 打开) {
     舱壁.剩余冷却 -= Number.isFinite(dt) ? dt : 0;
     if (舱壁.剩余冷却 > 0) {
       舱壁.短路数 += 1;
+      追踪?.记(舱壁.名, 0, false, true);
       return { 成: false, 值: 舱壁.降级, 错误: null, 短路: true, 熔断: false };
     }
     // 冷却走完 —— 放一次探测
@@ -128,7 +132,7 @@ export function 舱壁调用(舱壁, fn, dt = 0) {
 
   舱壁.调用数 += 1;
   try {
-    const 值 = fn();
+    const 值 = 追踪 ? 追踪.包(舱壁.名, fn) : fn();
     舱壁.连续失败 = 0;
     if (舱壁.态 === 半开) 舱壁.态 = 闭合;
     return { 成: true, 值, 错误: null, 短路: false, 熔断: false };
@@ -171,8 +175,14 @@ export function 舱壁账(舱壁) {
  *
  * 一个子系统**被跑过一次**就在名册里；名册双向可查：跑过的都登记、登记的都跑过。
  * 组的另一头是"健康"：全部闭合且零未清错误 ⇒ 健康。
+ *
+ * @param {object} 选
+ * @param {number} 选.失败阈值
+ * @param {number} 选.冷却秒
+ * @param {any} 选.降级
+ * @param {object} [选.追踪] 链路追踪器（`platform/tracing.js`）。给了就把每次调用记成 span。
  */
-export function 建舱壁组({ 失败阈值 = 默认失败阈值, 冷却秒 = 默认冷却秒, 降级 = undefined } = {}) {
+export function 建舱壁组({ 失败阈值 = 默认失败阈值, 冷却秒 = 默认冷却秒, 降级 = undefined, 追踪 = null } = {}) {
   const 册 = new Map();
 
   /** 取（或现建）一条舱壁。降级值只在这一条**第一次**建的时候登记 —— 名字重复不许改账。 */
@@ -194,7 +204,7 @@ export function 建舱壁组({ 失败阈值 = 默认失败阈值, 冷却秒 = �
      * @param {number} dt 基建时钟的帧间隔
      */
     跑(名, fn, dt = 0) {
-      return 舱壁调用(取(名), fn, dt);
+      return 舱壁调用(取(名), fn, dt, 追踪);
     },
     /** 名册（注册表读数） */
     名册() {

@@ -112,6 +112,7 @@ export const STRINGS_EN = Object.freeze({
   perf_hud_textures: 'Textures',
   perf_hud_shaders: 'Shaders',
   perf_hud_scene_nodes: 'Scene nodes',
+  perf_hud_slowest_span: 'Slowest span',
   perf_hud_js_heap: 'JS heap',
   gauge_alive_enemies: 'Alive enemies',
   gauge_enemy_projectiles: 'Enemy projectiles',

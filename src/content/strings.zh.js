@@ -114,6 +114,7 @@ export const STRINGS_ZH = Object.freeze({
   perf_hud_textures: '纹理',
   perf_hud_shaders: '着色器',
   perf_hud_scene_nodes: '场景节点',
+  perf_hud_slowest_span: '最慢 span',
   perf_hud_js_heap: 'JS 堆',
   gauge_alive_enemies: '存活敌人',
   gauge_enemy_projectiles: '敌方弹体',

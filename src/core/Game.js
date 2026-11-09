@@ -27,6 +27,7 @@ import { createErrorReporter, 子系统故障描述, 帧级故障描述 } from '
 import { adoptSubsystem, runTeardowns } from '../engine/teardown.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { 建舱壁组 } from '../platform/bulkhead.js';
+import { 建追踪 } from '../platform/tracing.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
  *  DOM 事件（resize / keydown / keyup）不走这里 —— 它们不在事件登记表里，EventBus 管不着。 */
 const GAME_EVENT_TAG = 'core/Game';
@@ -482,11 +483,16 @@ export class Game {
     this.weaponSkills.tryNarrativeUnlocks(this);
     this.settings.applyToGame(this);
 
+    // B163 切片2 链路追踪：一帧 = 一条 trace，一次子系统调用 = 一个 span。
+    // 仪器**默认关**（开着才有开销），F3 打开性能 HUD 时一起开 —— 两者都是开发期工具。
+    // 它挂在舱壁那条路上（span 就是舱壁调用），所以接线只有这一处。
+    this.追踪 = 建追踪();
+
     // F3：GPU 对象与场景规模只增不减 = 泄漏；数值全部经公开接口取，不翻系统内部字段。
     // 清单搬进 `game/perfGauges.js`（W-C1 切片4）—— 修前这六行都没带 `leak: true`，
     // 于是 `stats().leaks` 恒空、watchdog 从没可能报过警；搬出来之后用例能拿假 game 跑
     // `registerPerfGauges` 并断言"注册完 leaks 不是空的"，那正是修前会红的那一条。
-    this.perfHud = this._adopt('engine/PerfHUD', registerPerfGauges(new PerfHUD({ renderer: this.renderer, scene: this.scene }), this));
+    this.perfHud = this._adopt('engine/PerfHUD', registerPerfGauges(new PerfHUD({ renderer: this.renderer, scene: this.scene, trace: this.追踪 }), this));
 
     // W-D5 切片2：把未捕获异常与未处理的 Promise 拒绝收进一个可读账本。
     // 尽早装（在 setupLights / setupInput 之前）—— 启动期的错最值得留现场。
@@ -497,7 +503,8 @@ export class Game {
     // B163 舱壁与熔断：主循环里每个子系统都有自己的一条舱壁 ——
     // 一个子系统抛异常只停它自己，其余照跑；画面不再整帧冻住。
     // 失败阈值 3 / 冷却 2 秒是**生产侧**的数，判据在 `platform/bulkhead.js` 里。
-    this.舱壁 = 建舱壁组({ 失败阈值: 3, 冷却秒: 2 });
+    // 追踪器挂在同一条路上（span = 舱壁调用），所以"谁被调了、调了多久"只有一处真源。
+    this.舱壁 = 建舱壁组({ 失败阈值: 3, 冷却秒: 2, 追踪: this.追踪 });
 
     this.setupLights();
     this.ambientPass = this._adopt('effects/AmbientScenePass', new AmbientScenePass(this));
@@ -846,7 +853,13 @@ export class Game {
       case 'autoPlay': return this.questAssistant.startAutoPlay();
       case 'journal': return this.hud.toggleJournal();
       case 'photoMode': return this.photoMode?.toggle();
-      case 'perfHud': return this.perfHud?.toggle();
+      case 'perfHud': {
+        // 追踪器与性能 HUD 一起开/关：两者都是开发期工具，**开着才有开销**
+        // （追踪器关着时包调用直接透传，连时钟都不读）。
+        const 开 = this.perfHud?.toggle();
+        this.追踪?.设开着(开);
+        return 开;
+      }
       case 'sessionStats': return this.sessionStats?.toggle();
       case 'save': return SaveSystem.save(this);
       case 'load': return SaveSystem.load(this);
@@ -1042,6 +1055,10 @@ export class Game {
     // W-E2 切片1：帧计数出口。每帧 +1，供"按 1/2、1/4 帧率更新"的视觉系统统一分母；
     // 不碰 dt / timeScale / hitstop（与 B118 口径一致：慢动作里帧照数，不传送）。
     frameTick();
+    // 追踪器的帧号取 `FrameBudget.currentFrame()` —— 上面那一 tick 刚把本帧的号发下来，
+    // 所以追踪**不另起一本帧计数器**（另起一本就是"帧号有两份真相"那一族）。
+    // 仪器关着时 开帧() 直接返回 null，零开销。
+    this.追踪?.开帧();
     走舱壁(this, 'perfHud', () => this.perfHud?.update(rawDt));
     /* 演出与 UI 节奏走 rawDt：不受命中停顿/慢动作影响（B39）。
      * 放在最前面，让"这一帧该弹的横幅"在本帧的渲染里就位，而不是拖到下一帧。 */
@@ -1291,6 +1308,9 @@ export class Game {
       // 舱壁之外的异常不许掀桌：掀了就是"这一帧不渲染" ⇒ 画面永久冻结。
       try { this.update(); } catch (err) { this._帧级兜底('update', err); }
       try { this.render(); } catch (err) { this._帧级兜底('render', err); }
+      // 收这一帧的 trace：根 span 的耗时覆盖 update + render（渲染也在这一帧里）。
+      // 放在两个 try/catch 之后 —— render() 炸了也要收帧，否则那一帧的账永远没收。
+      this.追踪?.收帧();
     };
     loop();
   }

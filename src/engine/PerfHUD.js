@@ -17,11 +17,14 @@ export class PerfHUD {
    * @param renderer THREE.WebGLRenderer（读取 renderer.info）
    * @param scene    THREE.Object3D 根节点
    * @param refreshEvery 两次 DOM 写入之间的现实秒数
+   * @param trace    链路追踪器（`platform/tracing.js`，可选）。给了且开着时，
+   *                 面板多一行"这一帧最慢的子系统" —— 聚合帧耗时答不了"是谁吃掉的"。
    */
-  constructor({ renderer, scene, refreshEvery = 0.25 } = {}) {
+  constructor({ renderer, scene, refreshEvery = 0.25, trace = null } = {}) {
     this.renderer = renderer;
     this.scene = scene;
     this.refreshEvery = refreshEvery;
+    this.trace = trace;
     this.visible = false;
     this._gauges = [];
     this._accum = 0;
@@ -113,6 +116,12 @@ export class PerfHUD {
       let nodes = 0;
       this.scene.traverse(() => { nodes++; });
       rows.push({ label: '场景节点', key: 'perf_hud_scene_nodes', value: nodes, leak: true, tolerance: 200 });
+    }
+    // 追踪器开着时多一行：这一帧**最慢的子系统**是谁 —— 上面那三行都是聚合数，
+    // 答不了"这一帧是谁吃掉的"（追踪器关着就没有这一行：仪器关着等于不存在）。
+    const 慢 = this.trace?.开着 ? this.trace.最慢(1) : [];
+    if (慢.length) {
+      rows.push({ label: '最慢 span', key: 'perf_hud_slowest_span', value: `${慢[0].名} ${慢[0].毫秒.toFixed(2)}ms` });
     }
     if (performance.memory) {
       rows.push({ label: 'JS 堆', key: 'perf_hud_js_heap', value: `${(performance.memory.usedJSHeapSize / 1048576).toFixed(0)}MB` });
