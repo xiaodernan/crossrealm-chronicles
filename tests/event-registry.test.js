@@ -44,6 +44,9 @@ const DOM_EVENT_NAMES = new Set([
   // （不是游戏事件、不需要进登记表），加进来是让"代码里出现的每个自定义事件名都已登记"
   // 那条判据继续只盯游戏事件。
   'error', 'unhandledrejection',
+  // B167：BroadcastChannel 不可用时的第二档传输 —— `storage` 也是浏览器**原生**事件
+  // （别的标签页写了 localStorage 就派发到本页），与上面那批同类，不进游戏事件登记表。
+  'storage',
 ]);
 
 function walk(dir) {

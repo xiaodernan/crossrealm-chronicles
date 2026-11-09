@@ -23,6 +23,46 @@ export function slotKey(slot) {
   return slot === 0 ? KEY : `${KEY}_slot${slot}`;
 }
 
+/** 存档写入那道题的名字（ASCII：它进总线、进账、进门禁判据，不进文案表） */
+export const 存档题 = 'save-written';
+
+/**
+ * 存档系统递给自己的题名册条目（B167）—— 与 `配置总线题` 同一个分工：题在这里报名，
+ * `bus.js` 一份都不抄。
+ *
+ * **载荷里没有存档内容**：别的实例要的是"这一格刚被人写过，我屏幕上那份读数已经不新鲜了"，
+ * 不是那一份档本身。把档搬进总线等于把玩家的全部进度复制进另一条通道，
+ * 而它换来的信息只有"该重新读一次了"。
+ */
+export const 存档总线题 = {
+  题: 存档题,
+  校验: (载荷) => Number.isInteger(载荷?.slot)
+    && 载荷.slot >= 0 && 载荷.slot < SAVE_SLOTS
+    && Number.isInteger(载荷?.version) && 载荷.version >= 1
+    && Number.isInteger(载荷?.time) && 载荷.time >= 0,
+  说明: `载荷要带 { slot: 0..${SAVE_SLOTS - 1} 的整数, version: 存档版本号, time: 落盘毫秒 }（三格都是写档那一步本来就有的数）`,
+};
+
+/**
+ * 把"这一格刚被写过"广播出去。
+ *
+ * 包一层 try/catch 是因为**主次不能颠倒**：存档落盘已经成功了，附带的那一句通知不能反过来
+ * 把保存判成失败（总线已关、题没登记、对端名册漂了 —— 都是通知的事，不是玩家进度的事）。
+ * 失败也不是静默的：交给错误账，`kind: 'bus'`。
+ */
+function 广播存档(game, 载荷) {
+  try {
+    game.总线?.发布?.(存档题, 载荷);
+  } catch (错) {
+    game.errorReporter?.record?.({
+      kind: 'bus',
+      message: String(错?.message ?? 错),
+      stack: 错?.stack ?? null,
+      source: 'game/SaveSystem.js',
+    });
+  }
+}
+
 /** 把迁移/校验结果说成人话，交给 toast 与 console 两处 */
 function report(game, message) {
   console.warn(`[save] ${message}`);
@@ -184,6 +224,8 @@ export class SaveSystem {
       return false;
     }
     game.dialog?.toast(slot === 0 ? t('save_success') : t('save_success_slot_fmt', { slot: slot + 1 }));
+    // B167：别的标签页此刻正拿着同一格存档的旧读数 —— 通知它们，但不搬存档内容本身。
+    广播存档(game, { slot, version: data.version, time: data.time });
     window.dispatchEvent(new CustomEvent('game-saved'));
     return true;
   }
@@ -320,6 +362,7 @@ export class SaveSystem {
           return;
         }
         localStorage.setItem(slotKey(slot), JSON.stringify(r.data));
+        广播存档(game, { slot, version: r.data.version, time: r.data.time });
         game.dialog?.toast(t('save_imported'));
         resolve(true);
       };

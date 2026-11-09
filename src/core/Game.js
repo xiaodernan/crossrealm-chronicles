@@ -28,7 +28,8 @@ import { adoptSubsystem, runTeardowns } from '../engine/teardown.js';
 import { on, offAll, 接监听, 推进监听时钟, 监听可调项 } from '../engine/EventBus.js';
 import { 建舱壁组, 舱壁可调项 } from '../platform/bulkhead.js';
 import { 建追踪, 追踪可调项 } from '../platform/tracing.js';
-import { 建配置 } from '../platform/config.js';
+import { 建配置, 配置总线题, 刷新题 } from '../platform/config.js';
+import { 建总线 } from '../platform/bus.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
  *  DOM 事件（resize / keydown / keyup）不走这里 —— 它们不在事件登记表里，EventBus 管不着。 */
 const GAME_EVENT_TAG = 'core/Game';
@@ -46,7 +47,7 @@ import { ProjectileManager } from '../combat/ProjectileManager.js';
 import { createEntityAdapter } from '../animation/index.js';
 import { QuestSystem } from '../game/QuestSystem.js';
 import { PlayerStats } from '../game/PlayerStats.js';
-import { SaveSystem } from '../game/SaveSystem.js';
+import { SaveSystem, 存档总线题, 存档题 } from '../game/SaveSystem.js';
 import { LootSystem } from '../game/LootSystem.js';
 import { RestPointManager } from '../world/RestPointManager.js';
 import { CollectibleManager } from '../world/CollectibleManager.js';
@@ -532,6 +533,51 @@ export class Game {
         });
       },
       提示: () => { this.dialog?.toast(t('sys_subsystem_degraded')); },
+    });
+
+    // B167 跨实例总线（Spring Cloud Bus）：同一个页面开两遍 = 同一台"服务"的两个实例共用
+    // 一块 localStorage，而改前两边互相不知道对方存在（普查：全仓 `BroadcastChannel` 0 处、
+    // `storage` 监听 0 处，写同一批键的位点 8 处）。题名册由两个主人各自递进来
+    // （配置刷新归 `platform/config.js`、存档写入归 `game/SaveSystem.js`），总线一份都不抄 ——
+    // 与 B165 的旋钮名册是同一分工：谁的概念谁报名。
+    this.总线 = this._adopt('platform/CrossInstanceBus', 建总线({
+      名册: [配置总线题, 存档总线题],
+      上报: (条) => {
+        this.errorReporter?.record?.({
+          kind: 'bus',
+          message: 条.描述,
+          stack: 条.错误?.stack ?? null,
+          source: 'platform/bus.js',
+        });
+      },
+    }));
+
+    // 配置 ↔ 总线：**只有 local 那一次下发往外广播**，收进来的那份按 remote 吃、不再发出去。
+    // 这一格分家就是 Spring 把 RefreshEvent 与 RefreshRemoteApplicationEvent 分成两个类的理由：
+    // 合在一起，两个实例会拿着同一份文档来回广播，配置版本每轮 +1，而没有人改过任何东西。
+    this.配置.订阅((配置, 事件) => {
+      if (事件?.来源 === 'remote') return;
+      this.总线?.发布(刷新题, { 文档: 配置.导出() });
+    });
+    this.总线.订阅(刷新题, (消息) => {
+      const 回 = this.配置.下发(消息.载荷.文档, { 来源: 'remote' });
+      if (!回.成) {
+        // 名册比对面新（或旧）时文档会在这里被拒：那是两台构建不一致，值得留一行账，
+        // 但不能把接收方搞崩 —— 拒了就照旧跑自己这一份。
+        this.errorReporter?.record?.({
+          kind: 'bus',
+          message: 回.原因 ?? '',
+          stack: null,
+          source: 'platform/config.js',
+        });
+      }
+    });
+
+    // 存档 → 别的标签页：对面写了这一格，本地那句"进度已保存"说的是别人的事，
+    // 所以这里给另一句实话。载荷只有"哪一格 / 哪一版 / 什么时候"，**没有存档内容** ——
+    // 对端要的是"该重新读一次了"，不是把玩家的整份进度再搬一趟。
+    this.总线.订阅(存档题, (消息) => {
+      this.dialog?.toast(t('save_written_by_other_fmt', { slot: 消息.载荷.slot + 1 }));
     });
 
     this.setupLights();
