@@ -12,7 +12,8 @@ export class PauseMenu {
     // 存 / 读 / 导出 / 导入都作用于**所选槽**（缺省槽0 = 快捷键与老玩家的旧路）。
     // 槽位的编址与隔离在 SaveSystem（W-D3 切片2），这里只负责"玩家选了哪一格"。
     document.getElementById('pause-save')?.addEventListener('click', () => {
-      SaveSystem.save(this.game, this.selectedSlot());
+      // B168：面板上这一下是玩家当面的动作 ⇒ `手动`（被租约拦住要说一句、同一份冲突再按一次就让路）
+      SaveSystem.save(this.game, this.selectedSlot(), { 手动: true });
       this.refreshSlotOptions();
     });
     document.getElementById('pause-load-slot')?.addEventListener('click', () => {
@@ -24,7 +25,7 @@ export class PauseMenu {
     document.getElementById('pause-import')?.addEventListener('click', () => fileInput?.click());
     fileInput?.addEventListener('change', () => {
       const file = fileInput.files?.[0];
-      if (file) SaveSystem.importFile(this.game, file, this.selectedSlot());
+      if (file) SaveSystem.importFile(this.game, file, this.selectedSlot(), { 手动: true });
       fileInput.value = '';
     });
     document.getElementById('pause-settings')?.addEventListener('click', () => {

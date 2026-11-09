@@ -30,6 +30,7 @@ import { 建舱壁组, 舱壁可调项 } from '../platform/bulkhead.js';
 import { 建追踪, 追踪可调项 } from '../platform/tracing.js';
 import { 建配置, 配置总线题, 刷新题 } from '../platform/config.js';
 import { 建总线 } from '../platform/bus.js';
+import { 建写者租约, 租约可调项 } from '../platform/lease.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
  *  DOM 事件（resize / keydown / keyup）不走这里 —— 它们不在事件登记表里，EventBus 管不着。 */
 const GAME_EVENT_TAG = 'core/Game';
@@ -493,7 +494,7 @@ export class Game {
     // （舱壁的阈值与冷却、追踪器的保留帧与每帧上限），这里只把两份名册登记进去 ——
     // 配置中心自己一份值都不抄（抄一份就是"两份真源"，值早晚会分家）。
     // 它必须建在追踪器与舱壁组**之前**：那两位拿它当旋钮的读数口。
-    this.配置 = 建配置({ 名册: [...舱壁可调项, ...追踪可调项, ...监听可调项] });
+    this.配置 = 建配置({ 名册: [...舱壁可调项, ...追踪可调项, ...监听可调项, ...租约可调项] });
 
     // B163 切片2 链路追踪：一帧 = 一条 trace，一次子系统调用 = 一个 span。
     // 仪器**默认关**（开着才有开销），F3 打开性能 HUD 时一起开 —— 两者都是开发期工具。
@@ -579,6 +580,24 @@ export class Game {
     this.总线.订阅(存档题, (消息) => {
       this.dialog?.toast(t('save_written_by_other_fmt', { slot: 消息.载荷.slot + 1 }));
     });
+
+    // B168 写者租约与栅栏令牌（Spring Cloud Zookeeper / Consul 的锁语义）：切片5 让"被别人写了"
+    // 看得见，看得见之后照样丢 —— 两个标签页各存一次同一格，后一次把前一次整体退回。
+    // 这里只建"谁写得动哪一格"这一本账；**是哪几个资源**由 `game/SaveSystem.js` 在调用点
+    // 递进来（就是那条存储键），租约自己一个槽位名都不认识（与 B165/B167 的名册同一分工）。
+    // 必须在开机 `SaveSystem.load` **之前**建好：读档那一步是视图的唯一来源，
+    // 晚了第一次保存就不知道自己那份读数是几点钟的。
+    this.租约 = this._adopt('platform/SaveWriterLease', 建写者租约({
+      配置: this.配置,
+      上报: (条) => {
+        this.errorReporter?.record?.({
+          kind: 'lease',
+          message: 条.描述,
+          stack: null,
+          source: 'platform/lease.js',
+        });
+      },
+    }));
 
     this.setupLights();
     this.ambientPass = this._adopt('effects/AmbientScenePass', new AmbientScenePass(this));
@@ -935,7 +954,10 @@ export class Game {
         return 开;
       }
       case 'sessionStats': return this.sessionStats?.toggle();
-      case 'save': return SaveSystem.save(this);
+      // B168：快捷键那一下是**玩家当面**按的，所以带 `手动` —— 被租约拦住时要说出那一句，
+      // 而同一份冲突再按一次就让路（"我就要用这一份盖掉那一格"是玩家的权力，不是 bug）。
+      // 自动保存走的是另一个调用点，不带这一格：那一路每秒都可能撞一次，说不得。
+      case 'save': return SaveSystem.save(this, 0, { 手动: true });
       case 'load': return SaveSystem.load(this);
       case 'settings': return this.settingsPanel.show();
       case 'escape': return this.runEscape();

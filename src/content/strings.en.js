@@ -2059,6 +2059,7 @@ export const STRINGS_EN = Object.freeze({
   save_failed: 'Save failed: ${name} ${message}',
   save_success_slot_fmt: 'Progress saved · Slot ${slot}',
   save_written_by_other_fmt: 'Another tab wrote Slot ${slot} — what this screen shows is no longer current',
+  save_fenced_fmt: 'Another tab already wrote Slot ${slot} — this save was not applied. Press save again to overwrite it with this copy.',
   save_rejected_fmt: 'Save rejected: ${issue}',
   save_corrupt_fmt: 'Save ${key} is corrupt (${reason}); the original file was moved to ${key}:corrupt',
   save_corrupt_unquarantined_fmt: 'Save ${key} is corrupt and could not be quarantined: ${message}',

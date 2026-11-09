@@ -2058,6 +2058,7 @@ export const STRINGS_ZH = Object.freeze({
   save_failed: '保存失败：${name} ${message}',
   save_success_slot_fmt: '进度已保存 · 槽${slot}',
   save_written_by_other_fmt: '另一个标签页写了槽${slot}的存档 · 这一份读数已经不新鲜',
+  save_fenced_fmt: '槽${slot}已被另一个标签页写过 · 这一次保存没有落盘：再按一次就用这一份盖掉那一格',
   save_rejected_fmt: '保存被拒绝：${issue}',
   save_corrupt_fmt: '存档 ${key} 已损坏（${reason}），原文件转移到 ${key}:corrupt',
   save_corrupt_unquarantined_fmt: '存档 ${key} 损坏且无法隔离：${message}',

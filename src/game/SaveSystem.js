@@ -69,6 +69,66 @@ function report(game, message) {
   game.dialog?.toast(message);
 }
 
+/**
+ * B168：被栅栏令牌拦下来那一条路 —— **不写内容、不广播**，只留一行账；玩家当面按的那一次
+ * （`手动`）才说一句。自动保存不许吭声：对面要是每秒刷同一格，toast 就变成刷屏，
+ * 而刷屏的提示和没有提示是同一件事。
+ *
+ * 诊断句是 ASCII：它进错误账、进门禁判据，不进文案表（与 `存档题` 同一个规矩）。
+ */
+function 拒绝落盘(game, slot, 判, 手动) {
+  try {
+    game.errorReporter?.record?.({
+      kind: 'lease',
+      message: `save slot=${slot} not written: lease=${判?.因 ?? 'no-lease'} view=${判?.视图} record=${判?.令牌}`,
+      stack: null,
+      source: 'game/SaveSystem.js',
+    });
+  } catch { /* 诊断出口自己炸了不许把"没写"变成"抛异常" */ }
+  if (手动) game.dialog?.toast(t('save_fenced_fmt', { slot: slot + 1 }));
+  return false;
+}
+
+/**
+ * 落盘前的第一问（纪律 2 的前半）：这一格此刻轮到我写吗。
+ * 没有租约 = 单实例页或最小宿主（测试里那种），直接放行，行为与 B168 之前一字不差。
+ *
+ * 分成"问"和"占坑"两步而不是一个整块，是因为**导入那一路在两步之间还有一次 ingest**：
+ * 顺序反了（先 ingest 再问），一次被拦下的导入就已经把文件内容写进了内存 ——
+ * 屏幕上放着新档、盘上还是别人那一份，比拒得狠更糟。
+ */
+function 问门(game, key, 手动) {
+  if (!game.租约) return { 成: true, 判: null };
+  const 判 = game.租约.可写(key, { 手动 });
+  return { 成: 判.成, 判 };
+}
+
+/**
+ * 落盘前的第二问（纪律 2 的后半）：占坑（**比较后写**）→ 写内容。
+ * `期望` 用 `问门` 那一次读到的记录令牌，把"读了再写"变成"对得上号才写"：
+ * 两步之间真被别的标签页插了一笔（纪律 6 那个窗口），这里当场让路，而不是把一个
+ * 从没核对过的读数盖下去。
+ * `no-storage` 不拦内容那一步：记录写不上，落盘大概率也写不上，而那一堵墙自有调用方的
+ * try/catch 与 `save_failed` 那句接住（纪律 3）。
+ */
+function 占坑并落盘(game, key, 判, 时刻, 手动, slot, 写) {
+  if (!game.租约) return 写();
+  const 坑 = game.租约.抢占(key, 时刻, { 期望: 判?.令牌 });
+  if (!坑.成 && 坑.因 === 'contended') return 拒绝落盘(game, slot, 坑, 手动);
+  return 写();
+}
+
+/**
+ * 迁移回写也是**写**：改前它是整条读档路上唯一一处不问"这一格此刻在谁手上"就落盘的写。
+ * 拦住就**只跳过回写**，读档本身照成 —— 内存里那份已经是迁移后的好档，下次开机再迁一遍是
+ * 幂等的（旧键保留一份本来就是设计）。把"回写被拦"升成"读档失败"才是真的坏事。
+ */
+function 迁移回写(game, key, data) {
+  const 门 = 问门(game, key, false);
+  if (!门.成) { 拒绝落盘(game, 0, 门.判, false); return; }
+  占坑并落盘(game, key, 门.判, data?.time ?? null, false, 0, () => localStorage.setItem(key, JSON.stringify(data)));
+}
+
 export class SaveSystem {
   static toData(game) {
     return {
@@ -208,7 +268,11 @@ export class SaveSystem {
     return true;
   }
 
-  static save(game, slot = 0) {
+  /**
+   * 落盘。`手动` = 玩家当面按的那一下（快捷键 / 暂停菜单）：被租约拦住要说一句，
+   * 而同一份冲突再按一次就让路。自动保存不带它 —— 那一路只管写，不说话。
+   */
+  static save(game, slot = 0, { 手动 = false } = {}) {
     const key = slotKey(slot);
     const data = SaveSystem.toData(game);
     const issues = SaveValidator.validate(data);
@@ -217,17 +281,21 @@ export class SaveSystem {
       report(game, t('save_rejected_fmt', { issue: issues[0] }));
       return false;
     }
-    try {
-      localStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
-      report(game, t('save_failed', { name: e?.name ?? 'Error', message: e?.message ?? '' }).trim());
-      return false;
-    }
-    game.dialog?.toast(slot === 0 ? t('save_success') : t('save_success_slot_fmt', { slot: slot + 1 }));
-    // B167：别的标签页此刻正拿着同一格存档的旧读数 —— 通知它们，但不搬存档内容本身。
-    广播存档(game, { slot, version: data.version, time: data.time });
-    window.dispatchEvent(new CustomEvent('game-saved'));
-    return true;
+    const 门 = 问门(game, key, 手动);
+    if (!门.成) return 拒绝落盘(game, slot, 门.判, 手动);
+    return 占坑并落盘(game, key, 门.判, data.time, 手动, slot, () => {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch (e) {
+        report(game, t('save_failed', { name: e?.name ?? 'Error', message: e?.message ?? '' }).trim());
+        return false;
+      }
+      game.dialog?.toast(slot === 0 ? t('save_success') : t('save_success_slot_fmt', { slot: slot + 1 }));
+      // B167：别的标签页此刻正拿着同一格存档的旧读数 —— 通知它们，但不搬存档内容本身。
+      广播存档(game, { slot, version: data.version, time: data.time });
+      window.dispatchEvent(new CustomEvent('game-saved'));
+      return true;
+    });
   }
 
   /**
@@ -290,6 +358,10 @@ export class SaveSystem {
         if (r.reason) report(game, t('save_read_failed_fmt', { key, reason: r.reason }));
         return false;
       }
+      // B168 纪律 1：读档成功那一刻 = 本实例的内存状态**就是**这一格 ⇒ 记下视图。
+      // 少了这一步，下一次保存只会读到 `never-seen`（"这份内容不是从那格推出来的"）而放行，
+      // 可那一格明明是刚从那里读出来的 —— 拦不住的正是要拦的那一种写。
+      game.租约?.观测?.(key);
       game.dialog?.toast(t('load_success'));
       return true;
     }
@@ -307,8 +379,9 @@ export class SaveSystem {
         if (r.reason) report(game, t('save_read_failed_fmt', { key, reason: r.reason }));
         continue;
       }
+      game.租约?.观测?.(key);
       // 迁移结果立即落到当前键；旧键保留一份，回滚到旧构建时仍可读取
-      if (version !== CURRENT_VERSION) localStorage.setItem(KEY, JSON.stringify(r.data));
+      if (version !== CURRENT_VERSION) 迁移回写(game, KEY, r.data);
       game.dialog?.toast(t('load_success'));
       return true;
     }
@@ -351,20 +424,33 @@ export class SaveSystem {
     game.dialog?.toast(t('save_exported_fmt', { filename }));
   }
 
-  static importFile(game, file, slot = 0) {
+  static importFile(game, file, slot = 0, { 手动 = false } = {}) {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = () => {
+        const key = slotKey(slot);
+        // B168：**先问门，再 ingest**。顺序反了（先 ingest 再问）就把"要写的内容"当成
+        // "这一格的最新读数"，门永远开得下来；更糟的是一次被拦下的导入已经把文件写进了
+        // 内存 —— 屏幕上放着新档、盘上还是别人那一份。
+        const 门 = 问门(game, key, 手动);
+        if (!门.成) {
+          拒绝落盘(game, slot, 门.判, 手动);
+          resolve(false);
+          return;
+        }
         const r = SaveSystem.ingest(game, String(reader.result));
         if (!r.ok) {
           report(game, t('save_import_failed_fmt', { reason: r.reason }));
           resolve(false);
           return;
         }
-        localStorage.setItem(slotKey(slot), JSON.stringify(r.data));
-        广播存档(game, { slot, version: r.data.version, time: r.data.time });
-        game.dialog?.toast(t('save_imported'));
-        resolve(true);
+        // 视图由 `抢占` 自己推到新令牌，这里不需要额外的 `观测`。
+        占坑并落盘(game, key, 门.判, r.data?.time ?? null, 手动, slot, () => {
+          localStorage.setItem(key, JSON.stringify(r.data));
+          广播存档(game, { slot, version: r.data.version, time: r.data.time });
+          game.dialog?.toast(t('save_imported'));
+          resolve(true);
+        });
       };
       reader.onerror = () => {
         report(game, t('save_import_read_failed_fmt', { message: reader.error?.message ?? 'unknown' }));

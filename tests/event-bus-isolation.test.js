@@ -481,7 +481,7 @@ describe('监听器隔离与死信账（B166）', () => {
       for (const 名 of ['on', 'offAll', '接监听', '推进监听时钟', '监听可调项']) {
         expect(名字, `Game 的 EventBus 导入里少了 ${名}`).toContain(名);
       }
-      expect(游戏源文).toMatch(/名册:\s*\[\s*\.\.\.舱壁可调项,\s*\.\.\.追踪可调项,\s*\.\.\.监听可调项\s*\]/);
+      expect(游戏源文).toMatch(/名册:\s*\[\s*\.\.\.舱壁可调项,\s*\.\.\.追踪可调项,\s*\.\.\.监听可调项,\s*\.\.\.租约可调项\s*\]/);
       const 接线 = 取块(游戏源文, '接监听({');
       expect(接线).toContain("kind: 'listener'");
       expect(接线).toContain('this.errorReporter?.record?.(');
