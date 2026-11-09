@@ -71,6 +71,40 @@ function 造天气(世界, 区 = ZONE_IDS.FANTASY) {
 }
 
 const 粒子数 = (天气) => 天气.particles.geometry.attributes.position.count;
+
+/**
+ * 把第 0 颗粒子钉成"一个只听位移的证人"。
+ *
+ * ## 为什么必须钉（2026-11-09，B163 的 S3 变异臂里量到）
+ *
+ * 粒子的初始位置是**未播种的 `Math.random()`** 撒的（`WeatherSystem._randomizeParticle`），
+ * 于是第 0 颗有 **3.3%** 的概率初始 y 就落在地面以下（`outOfBox` 的 `py < gy - 2`）
+ * ⇒ **第一帧就重生** ⇒ 它的 z 跳到另一个随机位置 ⇒ 下一帧"水平位移过 1 米"那条
+ * 重问条件**被重生触发**，而不是被位移触发。
+ *
+ * 后果不是"偶尔红一次"，是**那条腿量到的不是它声称的东西**：位移那条腿有时是靠重生
+ * 过的（"挪过 1 米 ⇒ 重问"），有时是靠没重生过的（"没挪过 1 米 ⇒ 不重问"）——
+ * 同一个实现两条腿时而红时而不红。实测（`.tmp-weather-flake.mjs`，复刻本文件那条腿
+ * 连跑 300 轮）：第 0 颗第一帧重生 **10 次（3.3%）**，"没挪过 1 米却触发了重问"
+ * **10 次（3.3%）** —— 一次 CI 跑出假红的概率约三十分之一。
+ *
+ * ## 钉法
+ *
+ * 把第 0 颗放到跟随点正上方、离地足够远（**不会重生**），并把它的速度清零
+ * （**风不许把它吹走** ⇒ 位移只可能来自判据自己），账的记号保持 NaN
+ * （"没问过" ⇒ 第一帧照常问它一次，判据读的还是同一条路）。
+ *
+ * 这不是"把判据放松"：判据一个字没改，改的是**证人**。原来证人的位置是随机的，
+ * 现在是钉死的。
+ */
+function 钉住首颗粒(天气) {
+  const arr = 天气.particles.geometry.attributes.position.array;
+  const vel = 天气.velocities;
+  arr[0] = 0; arr[1] = 天气._box.y; arr[2] = 0;
+  vel[0] = 0; vel[1] = 0; vel[2] = 0;
+  天气._gxy[0] = NaN; 天气._gxy[1] = NaN;
+  return 天气;
+}
 /**
  * 只看"为粒子问的"那一半：每帧另有**一次** `groundBase`（玩家脚下，涟漪落点用），要按帧数扣。
  *
@@ -146,9 +180,21 @@ describe('① 账本身：第一帧必逐颗问，之后按位移问', () => {
 });
 
 describe('② 重问的触发条件：位移过线、答题的人换了', () => {
+  it('证人钉住了：第 0 颗不会被重生（否则下面两条腿量的是重生，不是位移）', () => {
+    const { world } = 造世界({ 地面: (x) => x * 0.1 });
+    const 天气 = 造天气(world);
+    钉住首颗粒(天气);
+    const arr = 天气.particles.geometry.attributes.position.array;
+    const 初始 = [arr[0], arr[1], arr[2]];
+    天气.update(dt, 玩家);
+    expect([arr[0], arr[1], arr[2]], '钉住的第 0 颗还是被换了位置 ⇒ 它重生了').toEqual(初始);
+    expect(天气._gxy[0], '钉住不等于不问：第一帧仍该问它一次').toBe(0);
+  });
+
   it('水平挪过 1 米 ⇒ 这颗重问（账里的坐标跟着换成它现在站的这一格）', () => {
     const { world, 问 } = 造世界({ 地面: (x) => x * 0.1 });
     const 天气 = 造天气(world);
+    钉住首颗粒(天气);
     天气.update(dt, 玩家);
     const arr = 天气.particles.geometry.attributes.position.array;
     const 旧基准 = 天气._gxy[0];
@@ -166,6 +212,7 @@ describe('② 重问的触发条件：位移过线、答题的人换了', () => 
   it('没挪过 1 米 ⇒ 不重问（这就是省下来的那一大截）', () => {
     const { world, 问 } = 造世界({ 地面: (x) => x * 0.1 });
     const 天气 = 造天气(world);
+    钉住首颗粒(天气);
     天气.update(dt, 玩家);
     const arr = 天气.particles.geometry.attributes.position.array;
     const 基准 = 天气._gxy[0];
