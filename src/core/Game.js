@@ -26,8 +26,9 @@ import { registerPerfGauges } from '../game/perfGauges.js';
 import { createErrorReporter, 子系统故障描述, 帧级故障描述 } from '../engine/errorReporter.js';
 import { adoptSubsystem, runTeardowns } from '../engine/teardown.js';
 import { on, offAll } from '../engine/EventBus.js';
-import { 建舱壁组 } from '../platform/bulkhead.js';
-import { 建追踪 } from '../platform/tracing.js';
+import { 建舱壁组, 舱壁可调项 } from '../platform/bulkhead.js';
+import { 建追踪, 追踪可调项 } from '../platform/tracing.js';
+import { 建配置 } from '../platform/config.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
  *  DOM 事件（resize / keydown / keyup）不走这里 —— 它们不在事件登记表里，EventBus 管不着。 */
 const GAME_EVENT_TAG = 'core/Game';
@@ -483,10 +484,16 @@ export class Game {
     this.weaponSkills.tryNarrativeUnlocks(this);
     this.settings.applyToGame(this);
 
+    // B165 配置中心（Spring Cloud Config 协议面）：旋钮的**缺省与校验住在各自的主人模块**
+    // （舱壁的阈值与冷却、追踪器的保留帧与每帧上限），这里只把两份名册登记进去 ——
+    // 配置中心自己一份值都不抄（抄一份就是"两份真源"，值早晚会分家）。
+    // 它必须建在追踪器与舱壁组**之前**：那两位拿它当旋钮的读数口。
+    this.配置 = 建配置({ 名册: [...舱壁可调项, ...追踪可调项] });
+
     // B163 切片2 链路追踪：一帧 = 一条 trace，一次子系统调用 = 一个 span。
     // 仪器**默认关**（开着才有开销），F3 打开性能 HUD 时一起开 —— 两者都是开发期工具。
     // 它挂在舱壁那条路上（span 就是舱壁调用），所以接线只有这一处。
-    this.追踪 = 建追踪();
+    this.追踪 = 建追踪({ 配置: this.配置 });
 
     // F3：GPU 对象与场景规模只增不减 = 泄漏；数值全部经公开接口取，不翻系统内部字段。
     // 清单搬进 `game/perfGauges.js`（W-C1 切片4）—— 修前这六行都没带 `leak: true`，
@@ -502,9 +509,10 @@ export class Game {
 
     // B163 舱壁与熔断：主循环里每个子系统都有自己的一条舱壁 ——
     // 一个子系统抛异常只停它自己，其余照跑；画面不再整帧冻住。
-    // 失败阈值 3 / 冷却 2 秒是**生产侧**的数，判据在 `platform/bulkhead.js` 里。
+    // 失败阈值 3 / 冷却 2 秒是**生产侧**的数，判据在 `platform/bulkhead.js` 里；
+    // B165 起这两个数改由**配置中心**下发（构造参数只当兜底），所以这里不再手写。
     // 追踪器挂在同一条路上（span = 舱壁调用），所以"谁被调了、调了多久"只有一处真源。
-    this.舱壁 = 建舱壁组({ 失败阈值: 3, 冷却秒: 2, 追踪: this.追踪 });
+    this.舱壁 = 建舱壁组({ 追踪: this.追踪, 配置: this.配置 });
 
     this.setupLights();
     this.ambientPass = this._adopt('effects/AmbientScenePass', new AmbientScenePass(this));

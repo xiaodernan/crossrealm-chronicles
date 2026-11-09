@@ -234,7 +234,7 @@ describe('③ 按需开：关着就零开销', () => {
 
 describe('④ 接线：追踪器挂在舱壁那条路上', () => {
   it('Game 把同一个追踪器交给舱壁组与性能面板', () => {
-    expect(游戏源文).toMatch(/this\.追踪 = 建追踪\(\)/);
+    expect(游戏源文).toMatch(/this\.追踪 = 建追踪\(/);
     expect(游戏源文).toMatch(/建舱壁组\(\{[^}]*追踪: this\.追踪/);
     expect(游戏源文).toMatch(/new PerfHUD\(\{[^}]*trace: this\.追踪/);
   });

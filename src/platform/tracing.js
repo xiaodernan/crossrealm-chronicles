@@ -41,9 +41,50 @@
  */
 
 import { currentFrame } from '../engine/FrameBudget.js';
+import { 正整数至少一 } from './config.js';
 
 /** Zipkin 的 traceId / spanId 是 16 位十六进制 —— 这里照那个形状 */
 const 十六 = (n) => n.toString(16).padStart(16, '0');
+
+/** 默认保留帧数：最近保留几帧的 span */
+export const 默认保留帧 = 60;
+/** 默认每帧跨度上限：一帧最多记多少条 span */
+export const 默认每帧上限 = 256;
+
+/**
+ * span id 的跨距 —— **固定 2²⁰，不随"每帧上限"变**。
+ *
+ * id 的算法是 `帧号 × 跨距 + 序号`（根占 0，子从 1 起）。跨距固定 ⇒ 帧与帧的 id 空间
+ * 永不相撞。**早先它是"每帧上限 + 1"** —— 那样一来上限旋钮一动，整个 id 空间就跟着移，
+ * 于是两帧的 span id 会撞上（帧号 1 用上限 256、帧号 52 用上限 4，两边的 id 会撞）。
+ * 跨距固定 + 上限有硬顶（< 跨距）之后，这个撞车就不可能了。
+ */
+const 跨距 = 1 << 20;
+
+/** 旋钮的键（Config Server 的键形状：ASCII 点号路径） */
+export const 保留帧键 = 'crossrealm.tracing.retained-frames';
+export const 每帧上限键 = 'crossrealm.tracing.max-spans-per-frame';
+
+/** 每帧上限的合格线：整数、至少 1、且必须小于跨距（否则 id 会撞） */
+const 每帧上限合格 = (值) => 正整数至少一(值) && 值 < 跨距;
+
+/**
+ * 追踪器自己的旋钮名册 —— **缺省与校验住在主人模块里**，配置中心只拿这份名册去认键。
+ */
+export const 追踪可调项 = [
+  {
+    键: 保留帧键,
+    缺省: 默认保留帧,
+    校验: 正整数至少一,
+    说明: '最近保留几帧的 span（整数，至少 1）',
+  },
+  {
+    键: 每帧上限键,
+    缺省: 默认每帧上限,
+    校验: 每帧上限合格,
+    说明: `一帧最多记多少条 span（整数，至少 1，小于 ${跨距}）`,
+  },
+];
 
 /**
  * 校验一批导出 span 的父子关系 —— **判据住生产代码**，测试只喂坏数据。
@@ -80,16 +121,25 @@ export function 校验导出(出) {
  * @param {object} 选
  * @param {number} 选.保留帧 最近保留几帧的 span（环形档，满了挤掉最老的一帧）
  * @param {number} 选.每帧上限 一帧最多记多少条 span（超出的记溢出，不许无限长）
+ * @param {object} [选.配置] 配置客户端（`platform/config.js`）。给了就**动态读**两个旋钮：
+ *   下发即刻生效（构造参数只当兜底）。
  */
-export function 建追踪({ 保留帧 = 60, 每帧上限 = 256 } = {}) {
+export function 建追踪({ 保留帧 = 默认保留帧, 每帧上限 = 默认每帧上限, 配置 = null } = {}) {
   if (!Number.isInteger(保留帧) || 保留帧 < 1) {
     throw new Error(`追踪器要保留至少 1 帧，读到 ${保留帧}`);
   }
   if (!Number.isInteger(每帧上限) || 每帧上限 < 1) {
     throw new Error(`追踪器每帧上限要至少 1 条，读到 ${每帧上限}`);
   }
-  /** 同一帧内 span id 不打架：根占 0，子从 1 起；跨距 = 每帧上限 + 1 */
-  const 跨距 = 每帧上限 + 1;
+  if (每帧上限 >= 跨距) {
+    throw new Error(`追踪器每帧上限要小于 ${跨距}（超了 span id 会撞），读到 ${每帧上限}`);
+  }
+
+  /**
+   * 当前生效的两个旋钮。优先级：**配置里下发的值 > 构造参数 > 主人的缺省**。
+   */
+  const 现保留 = () => (配置 ? 配置.取(保留帧键, 保留帧) : 保留帧);
+  const 现上限 = () => (配置 ? 配置.取(每帧上限键, 每帧上限) : 每帧上限);
 
   const 帧档 = []; // 最近若干帧（新的在后）
   let 当前 = null; // 当前帧
@@ -143,7 +193,7 @@ export function 建追踪({ 保留帧 = 60, 每帧上限 = 256 } = {}) {
       if (!开着 || !当前) return null;
       当前.耗时 = performance.now() - 当前.开始;
       帧档.push(当前);
-      while (帧档.length > 保留帧) 帧档.shift();
+      while (帧档.length > 现保留()) 帧档.shift();
       当前 = null;
       return 帧档[帧档.length - 1];
     },
@@ -157,7 +207,7 @@ export function 建追踪({ 保留帧 = 60, 每帧上限 = 256 } = {}) {
      */
     记(名, 毫秒, 成, 短路 = false) {
       if (!开着 || !当前) return null;
-      if (当前.跨度.length >= 每帧上限) {
+      if (当前.跨度.length >= 现上限()) {
         当前.溢出 += 1;
         return null;
       }
@@ -220,6 +270,11 @@ export function 建追踪({ 保留帧 = 60, 每帧上限 = 256 } = {}) {
       return [...帧.跨度].sort((a, b) => b.毫秒 - a.毫秒).slice(0, Math.max(0, 条数));
     },
 
+    /** 当前生效的两个旋钮（诊断用：旋钮真的生效了吗） */
+    旋钮() {
+      return { 保留帧: 现保留(), 每帧上限: 现上限() };
+    },
+
     /** 导出：Zipkin v2 span 形状（根 span + 子 span） */
     导出() {
       const 出 = [];
@@ -253,6 +308,15 @@ export function 建追踪({ 保留帧 = 60, 每帧上限 = 256 } = {}) {
       当前 = null;
     },
   };
+
+  // 下发即刻生效：每帧上限变了，下一条 span 就按新上限记（超出的记溢出）；
+  // 保留帧变小了，档**立刻**挤掉超出的老帧（不用等下一帧收帧）。
+  if (配置) {
+    配置.订阅(() => {
+      const 保留 = 现保留();
+      while (帧档.length > 保留) 帧档.shift();
+    });
+  }
 
   return 自己;
 }
