@@ -25,7 +25,7 @@ import { PerfHUD } from '../engine/PerfHUD.js';
 import { registerPerfGauges } from '../game/perfGauges.js';
 import { createErrorReporter, 子系统故障描述, 帧级故障描述 } from '../engine/errorReporter.js';
 import { adoptSubsystem, runTeardowns } from '../engine/teardown.js';
-import { on, offAll } from '../engine/EventBus.js';
+import { on, offAll, 接监听, 推进监听时钟, 监听可调项 } from '../engine/EventBus.js';
 import { 建舱壁组, 舱壁可调项 } from '../platform/bulkhead.js';
 import { 建追踪, 追踪可调项 } from '../platform/tracing.js';
 import { 建配置 } from '../platform/config.js';
@@ -189,6 +189,10 @@ function 走舱壁(游戏, 名, fn) {
   const r = 游戏.舱壁.跑(名, fn, 游戏._基建dt);
   if (r.成) return r.值;
   if (r.错误) {
+    // B163 的 ADR 写着"控制台照旧打印"，但这一支以前只记账不打印：
+    // 现场只活在 errorReporter 那本账里，没打开面板就等于没发生。补上打印，
+    // 让"子系统炸了"在控制台有一个可直接读的落点（soak 只收集控制台 error，不判红）。
+    console.error(子系统故障描述(名, r.错误), r.错误);
     游戏.errorReporter?.record?.({
       kind: 'subsystem',
       message: 子系统故障描述(名, r.错误),
@@ -488,7 +492,7 @@ export class Game {
     // （舱壁的阈值与冷却、追踪器的保留帧与每帧上限），这里只把两份名册登记进去 ——
     // 配置中心自己一份值都不抄（抄一份就是"两份真源"，值早晚会分家）。
     // 它必须建在追踪器与舱壁组**之前**：那两位拿它当旋钮的读数口。
-    this.配置 = 建配置({ 名册: [...舱壁可调项, ...追踪可调项] });
+    this.配置 = 建配置({ 名册: [...舱壁可调项, ...追踪可调项, ...监听可调项] });
 
     // B163 切片2 链路追踪：一帧 = 一条 trace，一次子系统调用 = 一个 span。
     // 仪器**默认关**（开着才有开销），F3 打开性能 HUD 时一起开 —— 两者都是开发期工具。
@@ -513,6 +517,22 @@ export class Game {
     // B165 起这两个数改由**配置中心**下发（构造参数只当兜底），所以这里不再手写。
     // 追踪器挂在同一条路上（span = 舱壁调用），所以"谁被调了、调了多久"只有一处真源。
     this.舱壁 = 建舱壁组({ 追踪: this.追踪, 配置: this.配置 });
+
+    // B166 监听器隔离：把事件总线的消费者也挂上各自的舱壁，并给它一本死信账。
+    // 为什么要在这里接线：EventBus 自己不认识配置中心、错误账和 toast（它是引擎层，
+    // 这三样是游戏层的），所以它把三个洞留出来让宿主填 —— 填了就有账，不填也照样跑。
+    接监听({
+      配置: this.配置,
+      上报: (条) => {
+        this.errorReporter?.record?.({
+          kind: 'listener',
+          message: 条.描述,
+          stack: 条.错误?.stack ?? null,
+          source: 'engine/EventBus.js',
+        });
+      },
+      提示: () => { this.dialog?.toast(t('sys_subsystem_degraded')); },
+    });
 
     this.setupLights();
     this.ambientPass = this._adopt('effects/AmbientScenePass', new AmbientScenePass(this));
@@ -1060,6 +1080,9 @@ export class Game {
     // 舱壁的冷却计时吃**基建时钟**（真实帧间隔）：玩法的 dt 会被慢动作与命中停顿拉到 0，
     // 拿它计时 ⇒ 熔断冷却永远走不完 ⇒ 那条子系统再也回不来。
     this._基建dt = rawDt;
+    // 同理推给事件总线的监听器舱壁：它自己不许开计时器（引擎层读了 `performance.now()`
+    // 就上了可视化时钟的墙钟名单），所以这一帧的真实秒数由这里喂进去。
+    推进监听时钟(rawDt);
     // W-E2 切片1：帧计数出口。每帧 +1，供"按 1/2、1/4 帧率更新"的视觉系统统一分母；
     // 不碰 dt / timeScale / hitstop（与 B118 口径一致：慢动作里帧照数，不传送）。
     frameTick();

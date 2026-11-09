@@ -19,6 +19,10 @@ import { contentCheckPlugin } from './scripts/vite-plugin-content-check.mjs';
  *   本来就是这一定义的样板；`assets/`（资源清单）、`game/`（任务 / 存档 / 成就等被
  *   ui 与 world 同时读的系统）、`effects/`、`player/` 也满足"被多方读、不回读特性块"，
  *   所以一并收进来。
+ *   `platform/`（舱壁 / 配置中心 / 链路追踪）同属这一层：它只读 `engine/FrameBudget.js`
+ *   和它自己，被 `core/Game.js` 与 `engine/EventBus.js` 同时读（B166 把监听器隔离挂在
+ *   舱壁上，于是地基开始读它）。按目录名把它留在 `index` 会立刻造出
+ *   `chunk-core → index → chunk-core` 那条被禁的边 —— 目录叫什么不算数，谁读谁才算。
  * - `chunk-combat` —— 战斗与 AI（`ai/` 只服务战斗，同块以免跨块循环）。
  * - `chunk-world` —— 世界构建与区域。
  * - `chunk-ui` —— 界面与过场。
@@ -60,6 +64,7 @@ export default defineConfig({
           if (id.includes('/src/content/')
             || id.includes('/src/engine/')
             || id.includes('/src/assets/')
+            || id.includes('/src/platform/')
             || id.includes('/src/game/')
             || id.includes('/src/effects/')
             || id.includes('/src/player/')) {

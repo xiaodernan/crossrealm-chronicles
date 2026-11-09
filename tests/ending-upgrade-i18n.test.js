@@ -241,10 +241,15 @@ describe('结局对话 / 片尾字幕 / 升级面板双表化（W-D2 切片26）
   });
 
   it('接线腿：七个该包 t() 的点逐个钉形状', () => {
+    /* **同一行**里既要有那个调用点，又要把文案交给 t()。
+     * 不是"第一处含片段的行"：`this.dialog?.toast(` 这类调用点在 Game.js 里本来就不止一处
+     * （B166 给监听器熔断也接了一句 toast），取第一处就会量到别人那一行去 ——
+     * 那种红看起来像"新代码没走 i18n"，其实是指错了对象。 */
     const 行含 = (源码, 片段, 必须) => {
-      const 行 = 源码.split('\n').find((l) => l.includes(片段)) ?? '';
-      expect(行, `找不到含 "${片段}" 的那一行`).not.toBe('');
-      expect(行, `那一行没有把该交出去的交给 t(): ${行.trim()}`).toContain(必须);
+      const 有片段 = 源码.split('\n').filter((l) => l.includes(片段));
+      expect(有片段.length, `找不到含 "${片段}" 的那一行`).toBeGreaterThan(0);
+      const 中 = 有片段.some((l) => l.includes(必须));
+      expect(中, `没有一行把 "${片段}" 和 ${必须} 写在一起：\n${有片段.map((l) => `  ${l.trim()}`).join('\n')}`).toBe(true);
     };
     行含(Game源码, "this.dialog.show(", "t('obj_infinity_title')");
     行含(Game源码, 'endingDialogKey(this.quests.stats)', 't(endingDialogKey(');
