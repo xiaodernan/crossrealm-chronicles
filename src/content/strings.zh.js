@@ -304,6 +304,8 @@ export const STRINGS_ZH = Object.freeze({
   qa_toast_pilot_off: '自动带路已关闭',
   qa_toast_no_waypoint: '当前任务无固定坐标，已尝试同步',
   qa_toast_teleported: '已传送至：${label}',
+  // B163 舱壁与熔断：某个子系统连续失败已断开，游戏降级继续跑
+  sys_subsystem_degraded: '部分功能暂时不可用（已自动降级），游戏继续运行',
   qa_toast_autoplay_running: '自动通关已在进行中',
   qa_toast_autoplay_failed: '无法启动自动通关',
   qa_toast_demo_start: '瞬间验收 — 直接推进全部任务',

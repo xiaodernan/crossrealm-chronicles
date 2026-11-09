@@ -505,7 +505,11 @@ describe('Game：上下文判定与换表都只有一条路', () => {
     expect(body, '找不到 applyPadBindings 的方法体').toBeTruthy();
     expect(body[0]).toContain('UI_GAMEPAD_BINDINGS');
     expect(body[0]).toContain('this.padTable');
-    expect((game.match(/applyPadBindings\(\);/g) || []).length, '换表的调用点').toBe(2);
+    // 换表的调用点：B163 起 update() 里那一处包在舱壁闭包里
+    // （`走舱壁(this, 'padBindings', () => this.applyPadBindings())`），
+    // 针脚量的是**调用点**不是整条语句 —— 语句形态变了，调用点没变，
+    // 而这条门禁量的本来就是"换表发生了几处"。
+    expect((game.match(/this\.applyPadBindings\(/g) || []).length, '换表的调用点').toBe(2);
   });
 
   it('界面态换的是**生效**那张界面表（切片23）：改过"返回"之后不必重启，出厂那枚 B 就不再返回', () => {
@@ -542,8 +546,11 @@ describe('Game：上下文判定与换表都只有一条路', () => {
     const at = (needle) => body[0].indexOf(needle);
     expect(/padUi\s*=\s*this\.padUiMode\(\)/.test(body[0]),
       '每帧没真的问层表：换了上下文也看不出来').toBe(true);
-    const switchAt = at('this.applyPadBindings();');
-    const pollAt = at('this.padInput?.poll();');
+    const switchAt = at('this.applyPadBindings(');
+    // 针脚量的是**调用点**（`this.padInput?.poll(`），不是整条语句 ——
+    // B163 起这一行包在舱壁闭包里（`走舱壁('padInput', () => this.padInput?.poll())`），
+    // 语句形态变了，调用点没变，而这条门禁量的本来就是"谁在前谁在后"。
+    const pollAt = at('this.padInput?.poll(');
     const confirmAt = at('activateFocused(document)');
     expect(switchAt, '帧首没换表：这一帧的按下会用上一帧的表').toBeGreaterThanOrEqual(0);
     expect(pollAt).toBeGreaterThanOrEqual(0);

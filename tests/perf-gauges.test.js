@@ -163,6 +163,9 @@ describe('接线不许分叉：`Game` 必须走这份清单', () => {
     const src = readFileSync(join(SRC, 'core/Game.js'), 'utf8');
     expect(src).toMatch(/this\.renderer\.info\.autoReset\s*=\s*false/);
     // reset 必须紧贴在 composer.render() 之前（帧界在 render() 里，不是构造时清一次就完）
-    expect(src).toMatch(/info\.reset\(\);\s*\n\s*this\.composer\.render\(\)/);
+    // 针脚量的是**调用点**的先后：B163 起这两条各自包在舱壁闭包里
+    // （`走舱壁(this, 'rendererInfo', …)` / `走舱壁(this, 'composer', …)`），
+    // 语句形态变了，"紧贴"这件事没变 —— 这条门禁量的就是紧贴。
+    expect(src).toMatch(/info\.reset\([^)]*\)[^\n]*\n[^\n]*composer\.render\(/);
   });
 });

@@ -23,9 +23,10 @@ import { scheduler } from '../engine/Scheduler.js';
 import { tick as frameTick } from '../engine/FrameBudget.js';
 import { PerfHUD } from '../engine/PerfHUD.js';
 import { registerPerfGauges } from '../game/perfGauges.js';
-import { createErrorReporter } from '../engine/errorReporter.js';
+import { createErrorReporter, 子系统故障描述, 帧级故障描述 } from '../engine/errorReporter.js';
 import { adoptSubsystem, runTeardowns } from '../engine/teardown.js';
 import { on, offAll } from '../engine/EventBus.js';
+import { 建舱壁组 } from '../platform/bulkhead.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
  *  DOM 事件（resize / keydown / keyup）不走这里 —— 它们不在事件登记表里，EventBus 管不着。 */
 const GAME_EVENT_TAG = 'core/Game';
@@ -159,6 +160,47 @@ import { moveFocusWithin, activateFocused, adjustFocused, trapTabFocus } from '.
 const CURSOR_STEP = Object.freeze({
   up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0],
 });
+
+/**
+ * 跑一个子系统 —— 走舱壁（B163 舱壁与熔断）。
+ *
+ * 舱壁管三件事：① 一个子系统抛异常只停它自己，其余照跑；② 连续失败到阈值就断开，
+ * 断开期间**不再调用下游**，交降级值；③ 冷却到放一次探测，好了自动回闭合。
+ *
+ * 失败**不吞**：异常照旧进 `游戏.errorReporter` 的运行时错误账（那份账是仓里唯一
+ * 的错误台账，不另开一本），控制台也照旧打印 —— 熔断是"降级运行"，不是"假装没出错"。
+ *
+ * ## 为什么它是**自由函数**而不是 Game 的方法
+ *
+ * 每帧 CPU 普查的站点规则是"`this.…(…)` 形式的调用点"，记账规则是"根调用记自己的耗时、
+ * 嵌套调用只记次数"。它若是方法，包装器自己就成了站点，那一格吞掉全部子系统的耗时，
+ * 里面的 `hud.update` / `world.update` 全变成 0ms —— 普查存在的理由（"哪个调用点值多少"）
+ * 整个没了。作为自由函数，普查看不见它（它不是 `this.` 形式），子系统各自仍是根调用，
+ * 逐条耗时恢复；包装器自己的开销落进普查的"其余"那一格，`扫够不着` 会点名它 —— 那是诚实的：
+ * 它不是子系统。
+ *
+ * （这条不变量由 `tests/platform-bulkhead.test.js` 的"包装器不许是 Game 的方法"钉住；
+ *  普查模块本身按 B118② 的门禁不许被 `src/` 里的第二个模块提到，所以这里只说"普查"，
+ *  不写它的路径 —— 那条边的性质由那个门禁量，不由这句话承诺。）
+ */
+function 走舱壁(游戏, 名, fn) {
+  const r = 游戏.舱壁.跑(名, fn, 游戏._基建dt);
+  if (r.成) return r.值;
+  if (r.错误) {
+    游戏.errorReporter?.record?.({
+      kind: 'subsystem',
+      message: 子系统故障描述(名, r.错误),
+      stack: r.错误?.stack ?? null,
+      source: 'core/Game.js',
+    });
+  }
+  if (r.熔断) {
+    // 熔断（不是单次失败）才告诉玩家：单次失败玩家察觉不到，
+    // 而"这个功能暂停了"必须让玩家知道，否则他会以为是自己按错了。
+    游戏.dialog?.toast(t('sys_subsystem_degraded'));
+  }
+  return r.值;
+}
 
 export class Game {
   constructor(container) {
@@ -451,6 +493,11 @@ export class Game {
     // **它不吞异常**：处理器不返回 true、也不调 preventDefault，控制台照常打印。
     this.errorReporter = createErrorReporter();
     this.errorReporter.install();
+
+    // B163 舱壁与熔断：主循环里每个子系统都有自己的一条舱壁 ——
+    // 一个子系统抛异常只停它自己，其余照跑；画面不再整帧冻住。
+    // 失败阈值 3 / 冷却 2 秒是**生产侧**的数，判据在 `platform/bulkhead.js` 里。
+    this.舱壁 = 建舱壁组({ 失败阈值: 3, 冷却秒: 2 });
 
     this.setupLights();
     this.ambientPass = this._adopt('effects/AmbientScenePass', new AmbientScenePass(this));
@@ -985,15 +1032,20 @@ export class Game {
   }
 
   update() {
+    // 时钟**不进舱壁**：它是这一帧的地基 —— 它的 rawDt 决定了其余所有 dt，
+    // 也决定舱壁自己的冷却计时。把它包进去等于"地基坏了就假装还站在地上"。
     this.time.tick(this.clock.getDelta(), performance.now() / 1000);
     const rawDt = this.time.rawDt;
+    // 舱壁的冷却计时吃**基建时钟**（真实帧间隔）：玩法的 dt 会被慢动作与命中停顿拉到 0，
+    // 拿它计时 ⇒ 熔断冷却永远走不完 ⇒ 那条子系统再也回不来。
+    this._基建dt = rawDt;
     // W-E2 切片1：帧计数出口。每帧 +1，供"按 1/2、1/4 帧率更新"的视觉系统统一分母；
     // 不碰 dt / timeScale / hitstop（与 B118 口径一致：慢动作里帧照数，不传送）。
     frameTick();
-    this.perfHud?.update(rawDt);
+    走舱壁(this, 'perfHud', () => this.perfHud?.update(rawDt));
     /* 演出与 UI 节奏走 rawDt：不受命中停顿/慢动作影响（B39）。
      * 放在最前面，让"这一帧该弹的横幅"在本帧的渲染里就位，而不是拖到下一帧。 */
-    scheduler.update(rawDt);
+    走舱壁(this, 'scheduler', () => scheduler.update(rawDt));
     // W-D1 切片1：模态栈开着时自动释放指针锁 —— 面板里的鼠标点击不再被游戏收走。
     // 判据吃同一份现状（`overlayState()`），所以"返回键关掉的层"与"释放指针锁的层"是同一个；
     // 不要求立刻重获锁定，等玩家点回 canvas 再要（`canvas.requestPointerLock()` 在 click 守卫里）。
@@ -1001,8 +1053,8 @@ export class Game {
     if (this.pointerLocked && topNavLayer(overlay)) {
       document.exitPointerLock();
     }
-    this.combatCamera.update(rawDt);
-    this.combatInputLock.update(rawDt);
+    走舱壁(this, 'combatCamera', () => this.combatCamera.update(rawDt));
+    走舱壁(this, 'combatInputLock', () => this.combatInputLock.update(rawDt));
     const dt = rawDt * this.time.timeScale * this.combatCamera.getTimeScale();
     // 手柄每帧轮询一次（B39 同一条纪律：输入状态是"这一帧的样子"，不是事件瞬间的样子）。
     // 它把按钮/摇杆合成进 `this.keys` 的同一形状，所以键盘路径与所有消费者不必认识手柄。
@@ -1012,11 +1064,11 @@ export class Game {
       this._padUi = padUi;
       // 换表走的是切片9 那条结转：按动作名接边沿与借键账本，所以进界面那一刻
       // 战斗侧借走的键会被原样还掉 —— 不退菜单就永远朝前走，那一类事故就是这么挡住的
-      this.applyPadBindings();
+      走舱壁(this, 'padBindings', () => this.applyPadBindings());
     }
-    this.padInput?.poll();
+    走舱壁(this, 'padInput', () => this.padInput?.poll());
     // 手柄只在**被按动**那一帧才算这一侧在用（桥在同一趟轮询里算好的 `touched`）
-    if (this.padInput?.touched) this.inputDevice.note('gamepad');
+    if (this.padInput?.touched) 走舱壁(this, 'inputDevice', () => this.inputDevice.note('gamepad'));
     // 界面里 A 那一下：桥只报了个边沿（它不冒充键盘，否则就是第二个 Enter 消费者），
     // 激活仍然交回浏览器 —— 点的是"当前聚焦的那一格"
     if (this.padInput?.ui.confirm) activateFocused(document);
@@ -1024,23 +1076,23 @@ export class Game {
     // （鼠标事件本来就不经时间倍率）。守卫与鼠标共用 `cameraInputAllowed`，只是不要求指针锁。
     const padLook = this.padInput?.look;
     if (padLook && (padLook.x !== 0 || padLook.y !== 0) && this.cameraInputAllowed(false)) {
-      this.player.addCameraInput(padLook.x * rawDt, padLook.y * rawDt);
+      走舱壁(this, 'playerCameraInput', () => this.player.addCameraInput(padLook.x * rawDt, padLook.y * rawDt));
     }
     // UI 热键每帧派发一次：键盘与手柄共用同一个出口（暂停菜单从此不必"只有键盘能开"）。
     // `rawDt` 是给自动重复用的（切片18）：走焦/调值按住要连着走，而节奏按秒算不按帧算，
     // 且与右摇杆同一道理 —— 命中停顿冻住的是世界，不该冻住玩家的手。
-    this.hotkeys.poll(this.keys, rawDt);
-    this.combatStyle?.update(dt);
-    this.combatStyleOverlay?.update(dt);
-    this.captions?.update(dt);
-    this.zoneTransitionFx?.update(dt);
-    this.soulStreak?.update(dt);
-    this.sideQuests?.update(dt);
-    this.upsideDownFx?.update(dt);
-    this.triadVisualFx?.update(dt);
-    this.wave4VisualFx?.update(dt);
-    this.restScene?.update(dt);
-    this.cinematics.update(dt);
+    走舱壁(this, 'hotkeys', () => this.hotkeys.poll(this.keys, rawDt));
+    走舱壁(this, 'combatStyle', () => this.combatStyle?.update(dt));
+    走舱壁(this, 'combatStyleOverlay', () => this.combatStyleOverlay?.update(dt));
+    走舱壁(this, 'captions', () => this.captions?.update(dt));
+    走舱壁(this, 'zoneTransitionFx', () => this.zoneTransitionFx?.update(dt));
+    走舱壁(this, 'soulStreak', () => this.soulStreak?.update(dt));
+    走舱壁(this, 'sideQuests', () => this.sideQuests?.update(dt));
+    走舱壁(this, 'upsideDownFx', () => this.upsideDownFx?.update(dt));
+    走舱壁(this, 'triadVisualFx', () => this.triadVisualFx?.update(dt));
+    走舱壁(this, 'wave4VisualFx', () => this.wave4VisualFx?.update(dt));
+    走舱壁(this, 'restScene', () => this.restScene?.update(dt));
+    走舱壁(this, 'cinematics', () => this.cinematics.update(dt));
     const inputLocked = this.combatInputLock?.blocksInput?.() || this.combatCamera?.blocksInput?.();
     const canPlay = !this.dialog.open && !this.upgrade.open && !this.cinematicActive
       && !this.paused && !this.settingsPanel.open && !this.fastTravelPanel.open && !this.helpManual.open
@@ -1053,13 +1105,13 @@ export class Game {
       && !this.autoPlayMode;
 
     if (this.autoPlayMode && this.playerAutoPlay?.active) {
-      this.playerAutoPlay.update(dt);
+      走舱壁(this, 'playerAutoPlay', () => this.playerAutoPlay.update(dt));
     }
 
     const playing = canPlay || this.autoPlayMode;
 
     if (playing) {
-      this.weapons.update(dt, this.keys);
+      走舱壁(this, 'weapons', () => this.weapons.update(dt, this.keys));
       const sk = this.weaponSkills.getModifiers();
       this.player.combat.weaponMeleeMult = this.weapons.meleeMult * (1 + sk.melee);
       this.player.combat.weaponSkillMult = this.weapons.skillMult * (1 + sk.spell * 0.5);
@@ -1070,74 +1122,73 @@ export class Game {
       this.spells.transformBonus = sk.transform ?? 0;
       // 左摇杆的模拟量与 `keys` 同帧喂进去（`padInput.poll()` 在本帧更早处已算好 `move` 那枚复用槽）；
       // 没有手柄时 `move.mag` 为 0，走八向码的满速路径，键盘手感逐字不变
-      this.player.update(
+      走舱壁(this, 'player', () => this.player.update(
         dt,
         this.autoPlayMode ? {} : this.keys,
         this.autoPlayMode ? null : this.padInput?.move ?? null,
-      );
-      this.spells.update(dt, this.keys);
-      this.fastTravel.tryOpen(this.keys);
+      ));
+      走舱壁(this, 'spells', () => this.spells.update(dt, this.keys));
+      走舱壁(this, 'fastTravel', () => this.fastTravel.tryOpen(this.keys));
       // 为新生成的敌人（召唤物、重生）挂载动画适配器
-      this._attachEnemyAnimAdapters();
-      this.enemyManager.update(dt, this.player.position, this.player, this.loot, this);
-      this.projectiles.update(dt, this.player.position, this.player);
+      走舱壁(this, 'enemyAnimAdapters', () => this._attachEnemyAnimAdapters());
+      走舱壁(this, 'enemyManager', () => this.enemyManager.update(dt, this.player.position, this.player, this.loot, this));
+      走舱壁(this, 'projectiles', () => this.projectiles.update(dt, this.player.position, this.player));
       // 副本「用时」只在这种帧里走账（W-A1 切片8 / B118②）：暂停、过场、开着面板的那些帧
       // 一秒都不记 —— 这一条腿必须和「玩家真的在副本里活动」同一个闸，否则日志那行又是一笔假账
-      this.dungeonRuns?.update(dt);
+      走舱壁(this, 'dungeonRuns', () => this.dungeonRuns?.update(dt));
     }
-    this.dungeons.update(dt);
-    this.loot.update(dt, this.player.position);
+    走舱壁(this, 'dungeons', () => this.dungeons.update(dt));
+    走舱壁(this, 'loot', () => this.loot.update(dt, this.player.position));
     // 自动演示要出干净的截图：静帧时不接收新请求，但已起的抖按 dt 走完
     this.shake.muted = this.autoPlayMode;
-    this.shake.update(dt);
+    走舱壁(this, 'shake', () => this.shake.update(dt));
     /* 震动按 `rawDt` 结账（切片17）：马达是物理设备，命中停顿/慢动作把那 120 毫秒拉成半秒
      * 不是手感，是把手掌震麻。`muted` 已经在 `Shake.add` 那道闸上把自动演示一起挡掉了 */
-    this.rumble.update(rawDt);
-    this.damageNumbers.update(dt);
-    this.combatFeedback.update(dt);
+    走舱壁(this, 'rumble', () => this.rumble.update(rawDt));
+    走舱壁(this, 'damageNumbers', () => this.damageNumbers.update(dt));
+    走舱壁(this, 'combatFeedback', () => this.combatFeedback.update(dt));
     // 处决特效跟着 dt 走：hitstop 期间那一圈冲击环必须一起变慢（修 B43）
-    this.executionFx.update(dt);
-    this.world.update(dt, this.player.position);
-    this.explorationMap?.update(this.player.position);
-    this.ambientPass?.update(dt, this.player.position);
-    if (this.worldMapPanel?.open) this.worldMapPanel.draw();
-    this.worldEffects.update(dt, this.player.position);
-    this.weather.update(dt, this.player.position);
-    this.restNpcs.update(dt, this.player.position);
-    this.restNpcAnimDirector?.update(dt, this.player.position);
-    this.restNpcIdle?.update(dt, this.player.position);
-    this.restCampfireAmbient?.update(dt, this.player.position);
-    this.restPointEnhancer?.update(dt, this.player.position);
-    this.soulWisps.update(dt, this.player.position);
+    走舱壁(this, 'executionFx', () => this.executionFx.update(dt));
+    走舱壁(this, 'world', () => this.world.update(dt, this.player.position));
+    走舱壁(this, 'explorationMap', () => this.explorationMap?.update(this.player.position));
+    走舱壁(this, 'ambientPass', () => this.ambientPass?.update(dt, this.player.position));
+    if (this.worldMapPanel?.open) 走舱壁(this, 'worldMapPanel', () => this.worldMapPanel.draw());
+    走舱壁(this, 'worldEffects', () => this.worldEffects.update(dt, this.player.position));
+    走舱壁(this, 'weather', () => this.weather.update(dt, this.player.position));
+    走舱壁(this, 'restNpcs', () => this.restNpcs.update(dt, this.player.position));
+    走舱壁(this, 'restNpcAnimDirector', () => this.restNpcAnimDirector?.update(dt, this.player.position));
+    走舱壁(this, 'restNpcIdle', () => this.restNpcIdle?.update(dt, this.player.position));
+    走舱壁(this, 'restCampfireAmbient', () => this.restCampfireAmbient?.update(dt, this.player.position));
+    走舱壁(this, 'restPointEnhancer', () => this.restPointEnhancer?.update(dt, this.player.position));
+    走舱壁(this, 'soulWisps', () => this.soulWisps.update(dt, this.player.position));
     const zoneId = this.world.zoneId;
-    this.voidEcho.update(dt, this.player.position, this.player.yaw, zoneId === ZONE_IDS.VOID);
-    this.chaosLightning.update(dt, this.player.position, zoneId === ZONE_IDS.ABYSS);
-    this.restPoints.update(dt);
-    this.npcs.update(dt);
-    this.hud.update(dt);
-    this.gameGuide?.update();
-    this.questAssistant.update(dt);
-    this.worldAmbient?.update(dt, this.player.position);
+    走舱壁(this, 'voidEcho', () => this.voidEcho.update(dt, this.player.position, this.player.yaw, zoneId === ZONE_IDS.VOID));
+    走舱壁(this, 'chaosLightning', () => this.chaosLightning.update(dt, this.player.position, zoneId === ZONE_IDS.ABYSS));
+    走舱壁(this, 'restPoints', () => this.restPoints.update(dt));
+    走舱壁(this, 'npcs', () => this.npcs.update(dt));
+    走舱壁(this, 'hud', () => this.hud.update(dt));
+    走舱壁(this, 'gameGuide', () => this.gameGuide?.update());
+    走舱壁(this, 'questAssistant', () => this.questAssistant.update(dt));
+    走舱壁(this, 'worldAmbient', () => this.worldAmbient?.update(dt, this.player.position));
     if (playing) {
-      this.bossRematch?.update(dt, this.player.position);
-      this.bossApproach?.update(dt, this.player.position);
-      this.bossPhaseDirector?.update(dt);
+      走舱壁(this, 'bossRematch', () => this.bossRematch?.update(dt, this.player.position));
+      走舱壁(this, 'bossApproach', () => this.bossApproach?.update(dt, this.player.position));
+      走舱壁(this, 'bossPhaseDirector', () => this.bossPhaseDirector?.update(dt));
     }
     // W-C4 切片6 余量：DoF 统一驱动（CombatCameraDirector / CinematicManager 只声明参数，
     // 这里每帧按有无请求开关 pass 与写 uniform，零遗漏关灯）。
     // 走 rawDt：淡入淡出是镜头节奏，和 commitView / 震动同一个口径（B39）——
     // 命中停顿/慢动作不该把一次处决演出的景深拉长；漏传 dt 会让计时器变成 NaN，永远淡不完。
-    updateDof(this.dofPass, rawDt);
+    走舱壁(this, 'dof', () => updateDof(this.dofPass, rawDt));
     /* 相机所有者的收尾：FOV 增量按帧申领，这一笔落下之后本帧的申领就清零 ——
      * 没有任何系统需要"记得恢复基准"（M3：相机唯一写入者）。
      * commitView 用 rawDt 推进一次"所有权交接补间"（进出过场/观看模式的软接，W-A5 切片1，短板 A4）：
      * 走过场和 UI 节奏同一口径，hitstop / 慢动作不该把一次镜头交接拉长。 */
-    this.player.rig.commitFov();
-    this.player.rig.commitView(rawDt);
-    this.updateDayNight(dt);
-    this.updateSunFollow();
-    this.updateBloom();
-    this.performance.updateSunShadow(this.sun, this.player.position, this.settings.get('shadows'));
+    走舱壁(this, 'cameraRig', () => { this.player.rig.commitFov(); this.player.rig.commitView(rawDt); });
+    走舱壁(this, 'dayNight', () => this.updateDayNight(dt));
+    走舱壁(this, 'sunFollow', () => this.updateSunFollow());
+    走舱壁(this, 'bloom', () => this.updateBloom());
+    走舱壁(this, 'performance', () => this.performance.updateSunShadow(this.sun, this.player.position, this.settings.get('shadows')));
   }
 
   /**
@@ -1192,11 +1243,34 @@ export class Game {
     this.sun.position.set(p.x + Math.cos(a) * 100, 55 + Math.sin(a) * 85, p.z + Math.sin(a) * 60);
   }
 
+  /**
+   * 帧级兜底 —— 舱壁管的是**子系统**，这一层兜的是舱壁之外的东西
+   * （时钟、层表、模态判定、面板开关…）。
+   *
+   * 没有它：一次异常 ⇒ `this.render()` 这一帧不执行 ⇒ 画面停在上一帧 ⇒
+   * 玩家看到的就是"整局卡死"。有它：画面照渲染，其余子系统照跑。
+   */
+  _帧级兜底(处, 错) {
+    const 描述 = 帧级故障描述(处, 错);
+    this.errorReporter?.record?.({
+      kind: 'frame',
+      message: 描述,
+      stack: 错?.stack ?? null,
+      source: 'core/Game.js',
+    });
+    console.error(描述, 错);
+  }
+
   render() {
     // 帧界：清零后 composer.render() 里所有趟都记进本帧（autoReset 已关，见构造函数）
-    this.renderer.info.reset();
-    this.composer.render();
-    this.labelRenderer.render(this.scene, this.camera);
+    //
+    // 渲染管线**也进舱壁**：这片治的病是"一个子系统抛异常 ⇒ 画面永久冻结"。渲染器是
+    // 最靠后的一环 —— 它每帧都炸的话，后面的舱壁再健康也画不出东西，一样是冻结。
+    // 所以这里逐条隔离：帧界清零、后处理合成、DOM 标签层，三条各自独立，
+    // 一条坏了不许带走另外两条（CSS2D 层不依赖 composer，两者互不牵连）。
+    走舱壁(this, 'rendererInfo', () => this.renderer.info.reset());
+    走舱壁(this, 'composer', () => this.composer.render());
+    走舱壁(this, 'labelRenderer', () => this.labelRenderer.render(this.scene, this.camera));
   }
 
   /** 为所有现有敌人挂载动画适配器（entry chunk 独有 import animation） */
@@ -1211,7 +1285,13 @@ export class Game {
   run() {
     // rAF-EXCEPTION：全仓唯一的时间源。所有游戏逻辑计时都必须从这里派生的 dt 走，
     // 别处再开一条 rAF 就是在私造时间轴（B43 的成因）。
-    const loop = () => { requestAnimationFrame(loop); this.update(); this.render(); };
+    const loop = () => {
+      requestAnimationFrame(loop);
+      // 两层兜底：子系统级走舱壁（`走舱壁`），帧级走这里 ——
+      // 舱壁之外的异常不许掀桌：掀了就是"这一帧不渲染" ⇒ 画面永久冻结。
+      try { this.update(); } catch (err) { this._帧级兜底('update', err); }
+      try { this.render(); } catch (err) { this._帧级兜底('render', err); }
+    };
     loop();
   }
 

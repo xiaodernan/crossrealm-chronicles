@@ -180,3 +180,26 @@ function defaultDispatch(detail) {
 /** 这个名字登记在 events.js（引擎启动时会校验未登记的名字） */
 export const ERROR_EVENT_NAME = 'error-captured';
 export const errorEventRegistered = () => Object.prototype.hasOwnProperty.call(GAME_EVENTS, ERROR_EVENT_NAME);
+
+/**
+ * 故障描述的措辞 —— 住在**账本模块**里，不住 `core/Game.js`。
+ *
+ * ## 为什么不住 Game.js
+ *
+ * `core/Game.js` 受"不许出现裸中文串字面量"的门禁（`tests/ending-upgrade-i18n.test.js`
+ * 的静态腿）：玩家会看到的文案必须走 i18n 双表。而这两句是**给开发者看的诊断**，
+ * 进双表是错的（双表是玩家文案的真源），留在 Game.js 又会被门禁判死。
+ *
+ * 放这里三方都对：Game.js 里一行 `子系统故障描述(名, 错)`，门禁只看见函数名；
+ * 账本里的措辞与账本住在一起；玩家看不到它们。
+ */
+
+/** 某个子系统抛了 —— 往账本里记的那一句 */
+export function 子系统故障描述(名, 错) {
+  return `子系统「${名}」抛出：${错?.message ?? 错}`;
+}
+
+/** 帧级兜底接住了什么 —— 账本与控制台共用这一句 */
+export function 帧级故障描述(处, 错) {
+  return `[${处}] 主循环兜底，画面继续渲染：${错?.message ?? 错}`;
+}

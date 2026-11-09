@@ -302,6 +302,8 @@ export const STRINGS_EN = Object.freeze({
   qa_toast_pilot_off: 'Auto-pilot off',
   qa_toast_no_waypoint: 'This quest has no fixed position — sync attempted',
   qa_toast_teleported: 'Teleported to: ${label}',
+  // B163 bulkhead & circuit breaker: a subsystem tripped its breaker; the game keeps running degraded
+  sys_subsystem_degraded: 'Some features are temporarily unavailable (auto-degraded) — the game keeps running',
   qa_toast_autoplay_running: 'Auto-play is already running',
   qa_toast_autoplay_failed: 'Could not start auto-play',
   qa_toast_demo_start: 'Instant verify — pushing every quest forward',

@@ -155,9 +155,14 @@ describe('接线：注记只挂在既有监听器上，文案只问模块', () =
     const mouseAt = game.indexOf("note('mouse')");
     expect(mouseAt).toBeGreaterThan(-1);
     expect(game.slice(mouseAt, mouseAt + 220)).toContain('!this.pointerLocked');
-    expect(game).toMatch(/if \(this\.padInput\?\.touched\) this\.inputDevice\.note\('gamepad'\)/);
+    // 针脚量的是**调用点**与**守卫**：B163 起这条包在舱壁闭包里
+    // （`if (this.padInput?.touched) 走舱壁(this, 'inputDevice', () => this.inputDevice.note('gamepad'))`），
+    // 语句形态变了，"在守卫之内"这件事没变。
+    expect(game).toMatch(/if \(this\.padInput\?\.touched\)[^\n]*this\.inputDevice\.note\('gamepad'\)/);
     // 手柄那条挂在 `poll()` 之后：判断在桥里算，这里只是转述
-    expect(game.indexOf("this.padInput?.poll();")).toBeLessThan(game.indexOf("note('gamepad')"));
+    // （针脚同样是**调用点**：B163 起 poll 那行包在舱壁闭包里，整条语句的形态变了）
+    expect(game.indexOf("this.padInput?.poll(")).toBeGreaterThan(-1);
+    expect(game.indexOf("this.padInput?.poll(")).toBeLessThan(game.indexOf("note('gamepad')"));
     expect((game.match(/addEventListener\('keydown'/g) ?? [])).toHaveLength(1);
   });
 
