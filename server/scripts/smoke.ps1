@@ -108,9 +108,11 @@ try {
     if (-not (Wait-Healthy 28161 'discovery-server')) { exit 1 }
 
     # 只有 config-server 需要这个 search-locations；discovery/game-service/gateway 拿不到它。
-    # file: URI 里的反斜杠会被 Java URI 解析器悄悄吃掉一部分，统一换成正斜杠：file:/D:/path/to/dir
+    # file: URI 里的反斜杠会被 Java URI 解析器悄悄吃掉一部分，统一换成正斜杠；
+    # Windows 上 = file:/D:/path，Linux 上 = file:///home/path（file: + 绝对路径）。
     $tmpConfigDirFs = $tmpConfigDir -replace '\\','/'
-    $env:SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS = "file:/$tmpConfigDirFs"
+    $fileUri = if ($tmpConfigDirFs.StartsWith('/')) { "file:$tmpConfigDirFs" } else { "file:/$tmpConfigDirFs" }
+    $env:SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS = $fileUri
     $procs += Start-Server 'config-server' 'config-server-0.1.0-SNAPSHOT.jar' 28888
     Remove-Item Env:SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS -ErrorAction SilentlyContinue
     if (-not (Wait-Healthy 28888 'config-server')) { exit 1 }
