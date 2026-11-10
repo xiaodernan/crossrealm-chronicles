@@ -27,6 +27,8 @@ export const FRANCHISE = {
   CROSSOVER: 'crossover',
   GLOOM: 'gloom',
   RADIANT: 'radiant',
+  VOIDMAW: 'voidmaw',
+  ABYSSSALT: 'abysssalt',
 };
 
 /**
@@ -49,6 +51,8 @@ export const FRANCHISE_LABELS = {
   [FRANCHISE.CROSSOVER]: 'franchise_crossover_label',
   [FRANCHISE.GLOOM]: 'franchise_gloom_label',
   [FRANCHISE.RADIANT]: 'franchise_radiant_label',
+  [FRANCHISE.VOIDMAW]: 'franchise_voidmaw_label',
+  [FRANCHISE.ABYSSSALT]: 'franchise_abysssalt_label',
 };
 
 /** 母题显示名（按语言展开；键找不到就退回 id） */

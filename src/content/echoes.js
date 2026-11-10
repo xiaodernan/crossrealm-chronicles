@@ -100,4 +100,8 @@ export const ECHOES = [
   // ── Wave5（幽暗/圣域）──
   { id: 'echo-gloom-nine-stones', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_stones_title', desc: 'echo_gloom_stones_desc', trigger: 'echo:gloom-nine-stones' },
   { id: 'echo-radiant-torii', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_torii_title', desc: 'echo_radiant_torii_desc', trigger: 'echo:radiant-torii' },
+
+  // ── Wave6（虚空/深渊）──
+  { id: 'echo-void-astrolabe', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_astrolabe_title', desc: 'echo_void_astrolabe_desc', trigger: 'echo:void-astrolabe' },
+  { id: 'echo-abyss-stele', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_stele_title', desc: 'echo_abyss_stele_desc', trigger: 'echo:abyss-stele' },
 ];

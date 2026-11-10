@@ -148,6 +148,9 @@ const POI_LABELS = {
   // W-E3 切片99：幽暗林地 · 薄暮石陪席 + 辉煌圣域 · 圣曜武士之门
   'homage-gloom-stones': ['echo_gloom_stones_title', '薄暮石陪座席', 'The Gloomstones'],
   'homage-radiant-torii': ['echo_radiant_torii_title', '圣曜武士之门', 'Gate of the Radiant Samurai'],
+  // W-E3 切片102：虚空断口 · 断口星盘 + 深渊之颚 · 深颚盐碑
+  'homage-void-astrolabe': ['echo_void_astrolabe_title', '断口星盘', 'The Rift Astrolabe'],
+  'homage-abyss-stele': ['echo_abyss_stele_title', '深颚盐碑', 'The Salt Steles'],
 };
 
 describe('POI 交互标签双表化（W-D2 切片19）', () => {

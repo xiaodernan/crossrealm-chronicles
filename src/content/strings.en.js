@@ -1023,6 +1023,8 @@ export const STRINGS_EN = Object.freeze({
   franchise_crossover_label: 'Crossover',
   franchise_gloom_label: 'Gloom Whispers',
   franchise_radiant_label: 'Radiant Echoes',
+  franchise_voidmaw_label: 'Echo of the Maw',
+  franchise_abysssalt_label: 'Brine Echo of the Deep',
   skill_branch_sword_name: '⚔ Plane Longsword',
   skill_branch_sword_note: 'Melee style: combos, parries, finishers and the plane slash',
   skill_branch_staff_name: '✦ Arcane Staff',
@@ -1136,6 +1138,10 @@ export const STRINGS_EN = Object.freeze({
   echo_gloom_stones_desc: 'The ring of stones in the Gloomwood whispers - step into the circle and hear what the mist remembers.',
   echo_radiant_torii_title: 'Gate of the Radiant Samurai',
   echo_radiant_torii_desc: 'A vermilion gate at the far end of the Radiant Sanctum - pass under it and catch the whisper of light itself.',
+  echo_void_astrolabe_title: 'The Rift Astrolabe',
+  echo_void_astrolabe_desc: 'A broken astrolabe lies at the edge of the Void Rift — those who turn it hear the echo of a falling star.',
+  echo_abyss_stele_title: 'The Salt Steles',
+  echo_abyss_stele_desc: 'Salt-carved steles older than the deep jaws — whoever reads them holds their breath.',
 
   // POI interaction labels (W-D2 slice 19: the display exit in PlayerController.updatePrompt now
   // goes through t(); the label slot holds keys. Homage POIs reuse the echo entry title keys

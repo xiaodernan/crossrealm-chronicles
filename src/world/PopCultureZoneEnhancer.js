@@ -3,6 +3,7 @@ import { attachPopCultureZonesWave2 } from './PopCultureZoneEnhancerWave2.js';
 import { attachPopCultureZonesWave3 } from './PopCultureZoneEnhancerWave3.js';
 import { attachPopCultureZonesWave4 } from './PopCultureZoneEnhancerWave4.js';
 import { attachPopCultureZonesWave5 } from './PopCultureZoneEnhancerWave5.js';
+import { attachPopCultureZonesWave6 } from './PopCultureZoneEnhancerWave6.js';
 import { ZONE_IDS, findZoneById } from '../content/ZoneIdentity.js';
 
 import { t } from '../engine/i18n.js';
@@ -27,6 +28,7 @@ export function attachPopCultureZones(game) {
   attachPopCultureZonesWave3(game);
   attachPopCultureZonesWave4(game);
   attachPopCultureZonesWave5(game);
+  attachPopCultureZonesWave6(game);
   // 致敬层是最后写入 pointsOfInterest 的一方，所以身份自检在这里再跑一次（修 B45）
   world.assertPoiIdentity();
 }

@@ -90,6 +90,7 @@ describe('① 「造了资源又没有销毁路径」的那几处，每一处都
     ['src/world/PopCultureZoneEnhancerWave3.js', '同上（函数 + 网格挂在位面那一组上）'],
     ['src/world/PopCultureZoneEnhancerWave4.js', '同上（函数 + 网格挂在位面那一组上）'],
     ['src/world/PopCultureZoneEnhancerWave5.js', '同上（函数 + 网格挂在位面那一组上）—— 切片99 的幽暗/圣域致敬'],
+    ['src/world/PopCultureZoneEnhancerWave6.js', '同上（函数 + 网格挂在位面那一组上）—— 切片102 的断口/深颚致敬'],
     ['src/world/ProceduralDungeonGenerator.js', '静态类 —— 它只往**共享库**里取资源（副本可进出，库是进程生命周期）'],
     ['src/world/regionSurfaces.js', '材质工厂（纯构造）—— 造出来的材质归**调用方**所有'],
   ]);

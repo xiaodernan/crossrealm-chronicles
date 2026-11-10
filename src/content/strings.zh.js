@@ -1025,6 +1025,8 @@ export const STRINGS_ZH = Object.freeze({
   franchise_crossover_label: '跨界',
   franchise_gloom_label: '薄暮回响',
   franchise_radiant_label: '辉煌残响',
+  franchise_voidmaw_label: '断口残响',
+  franchise_abysssalt_label: '深颚咸响',
   skill_branch_sword_name: '⚔ 位面长剑',
   skill_branch_sword_note: '近战流派：连段、弹反、终结技与位面斩',
   skill_branch_staff_name: '✦ 奥术法杖',
@@ -1138,6 +1140,10 @@ export const STRINGS_ZH = Object.freeze({
   echo_gloom_stones_desc: '幽暗林雾气里那圈立石似有回声——站在石环中央，草鞋在苔藓上无声挪移。',
   echo_radiant_torii_title: '圣曜武士之门',
   echo_radiant_torii_desc: '辉煌圣域尽头那一道绯红武士门——穿过它的人都会听见光的回声。',
+  echo_void_astrolabe_title: '断口星盘',
+  echo_void_astrolabe_desc: '虚空断口边缘卧着一座断了的星盘——转动它的人都会听见星星坠落的回声。',
+  echo_abyss_stele_title: '深颚盐碑',
+  echo_abyss_stele_desc: '盐蚀成碑、久不见日——深渊之底最古老的图腾，读它的人都会屏住呼吸。',
 
   // POI 交互标签（W-D2 切片19：显示出口 PlayerController.updatePrompt 改走 t()，label 位存的全是键）
   // 命名口径：致敬层 POI 复用回声条目的标题键（交互即解锁那条回声，本来就是同一个东西）；
