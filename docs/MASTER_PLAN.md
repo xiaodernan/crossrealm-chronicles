@@ -5409,6 +5409,16 @@ Phase D（系统与质量）
   - **风险与后续**：① 三连鞭影手感未实测校准；② 下一步 S94：void 第十二独占（ch4，`choice-void` 61→62）保持对称。
 
 
+- **2026-11-10 W-X2 —— 在线伙伴服务接入游戏（可选，默认关闭）：客户端落地 + Boss 遥测挂钩** —— 提交 `db7c857`（3 文件，+181）
+
+  - **动机**：W-X1 把 `server/`（Spring Cloud 伙伴）跑通后，需要一个游戏侧的可选接点——但游戏本体是离线优先，不许把在线依赖做成默认项，也不许把网络错误变成玩家看到的故障。
+
+  - **做法**：① `src/online/OnlineServices.js`：`OnlineServices` 类 + `onlineServices` 单例；**默认关闭**（无 localStorage 标志/URL 参数/window 标志时 enabled()=false，零网络请求）；网关地址＝`crossrealm_online_base_url` 或同源 origin，本地默认 `http://localhost:8080`；所有方法吞错兜底（`console.warn` 后返回 false/null），超时用 `AbortSignal.timeout(1500)`（刻意避开 setTimeout —— B39 计时门禁禁止 src/ 出现 `setTimeout(`）；② `src/core/Game.js`：`setupEvents()` 里新增一条 `gameOn('boss-defeated', …)` → `onlineServices.postTelemetry('boss_defeated', bossId)`（与既有监听同事务挂在 GAME_EVENT_TAG 下，dispose 自动解绑）；③ `tests/online-services.test.js`（6 项，注入 fetch 桩：默认关闭时 fetch 零调用 / POST 契约 / GET 解析 / 三条失败路径全吞错不抛）。
+
+  - **验证**：lint 0/0（含 B39 计时门禁），test 全绿（394 文件 / 5973 项），build ✓。E2E 待回填（行为不变：默认关闭零请求）。
+
+  - **风险与后续**：① 排行榜提交（submitRun）已提供客户端方法但**未**在游戏里调用——需要先定"玩家何时提交通关记录"（强制 cheer/静默齐射/从不），留给后续切片；② 排行榜 UI 面板未做；③ 开启开关的 UI（设置里的可选开关 + i18n）未做。
+
 - **2026-11-10 W-X1 —— 在线伙伴服务（Spring Cloud 微服务，可选）：5 模块 Maven 工程 + 冒烟真跑通 + 独立 CI** —— 提交 `0ea29d8`
 
   - **动机**：用户要求"看看能不能在项目里加一些 Spring Cloud 微服务的元素"。本体是纯前端离线游戏，不能把运行时耦合进去；做法是新增**完全独立、可选**的 `server/` 在线伙伴服务：服务发现（Eureka）→ 配置中心（Config）→ 网关（Gateway, lb://）→ 业务 REST（排行榜 / 遥测 / 版本），仅作联机场景的可选扩展，本体离线可玩、`npm run build` 不感知。

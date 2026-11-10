@@ -75,6 +75,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 - **注册名**：本地联调建议 `EUREKA_INSTANCE_HOSTNAME=localhost` + `EUREKA_INSTANCE_PREFERIPADDRESS=false`
   （否则注册成 `host.docker.internal`，网关从本机访问路由失败）。
 
+## 与游戏的对接（W-X2）
+
+游戏侧已有可选客户端（默认关闭）：`src/online/OnlineServices.js`。
+
+- 开启：`localStorage['crossrealm_online'] = '1'`（或 URL 参数 `?online=1`）；
+- 网关：`localStorage['crossrealm_online_base_url']`，缺省同源 origin，本地默认 `http://localhost:8080`；
+- 当前挂钩：击杀 Boss → 静默上报 `boss_defeated` 遥测（`postTelemetry`，不阻塞、网络差吞错）；
+- 未做（留给后续）：排行榜提交 UI、排行榜面板、设置里的可选开关。
+
 ## 与游戏的对接（后续）
 
 当前无前端对接：游戏仍完全离线可玩。接入时最小改动方案：

@@ -53,6 +53,7 @@ src/
   world/      地形、区域、地下城、NPC、采集物、天气
   game/       任务、成长、存档、成就、叙事等系统
   ui/         HUD、日志、面板
+  online/     在线伙伴服务客户端（可选，默认关闭，对接 server/ 的 Spring Cloud 网关）
   content/    数据驱动内容（敌人/任务/对话/物品/技能）— M7 引入
   audio/      音频
   effects/    特效与画面 pass
