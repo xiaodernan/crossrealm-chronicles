@@ -302,10 +302,13 @@ let 已交账 = false;
  * 挂钟的时长（毫秒）。红话里那句"多少秒没走到交账"**由它自己算**，不再抄一遍 ——
  * 原先 `15 分钟` 与 `900000` 两处各写一份，改一处就会让另一处说出一个不属于本体的数。
  */
-const 挂钟毫秒 = 900000;
+/** CI 的远端（windows-latest + SwiftShader）推帧循环比本机慢一个量级（实测本轮 15 分钟没走到交账）；与 READY_ITERS 同一条尺放宽，本机口径不动 */
+const 挂钟毫秒 = process.env.CI ? 1800000 : 900000;
+/** 模块级：推帧循环每批更新一次，供挂钟超时时交代"到底跑到哪一步" */
+let 已知推进帧 = 0;
 const 不交账就红 = (为什么) => {
   if (已交账) return;
-  console.error(`e2e-clear 未通过：${为什么} —— 本轮没打出 [读数] 那一行，没有结论就不许是绿灯`);
+  console.error(`e2e-clear 未通过：${为什么} —— 本轮没打出 [读数] 那一行，没有结论就不许是绿灯；已知推进帧 ${已知推进帧}`);
   已交账 = true; // 认领这次结论，防 ①② 先后各喊一次
   cleanup();
   process.exit(2);
@@ -480,6 +483,8 @@ try {
       return { running: !!qa.demoRunning, err: window.__e2e?.error ?? null,
         index: qs.questIndex, completed: !!qs.completed, 步: qa._demoStep };
     })()`);
+    已知推进帧 = frames;
+    if (process.env.CI && frames % 600 === 0) console.log(`e2e-clear 推进 frames=${frames} step≈${st?.步 ?? '?'} quest=${st?.index ?? '?'}`);
     if (st?.err) throw new Error('演示里抛错：' + String(st.err).slice(0, 400));
     if ((st?.步 ?? 0) !== 上一步) {
       // 记的是**这一段里在跑的那一步**吃了多少帧（第一段是起跑，步号还是 0），
