@@ -9,9 +9,16 @@
  * ## 用例分五层
  * 1. **解析**：三种引用形态都认得出；去重；不认 icon / preconnect / 外部 URL。
  * 2. **求和**：真造文件算得对（含 modulepreload）。
- * 3. **判定**：超预算、缺文件、缺 module、缺 stylesheet 各红各的。
+ * 3. **判定**：超绝对上限、只超环比容差、缺文件、缺 module、缺 stylesheet 各红各的。
  * 4. **反面证据**：只认一种形态的坏尺子会漏掉另外两种 —— 尺子自己要被量过。
- * 5. **真 dist**（存在时才算）：当前首屏在预算内，并把读数钉下来。
+ * 5. **真 dist**（存在时才算）：当前首屏在两条线之内，并把读数钉下来。
+ *
+ * ## 两条线（W-D5 切片4）
+ * 切片1 只有一个 `2 MiB`，而它是对着 1.37 MiB 的实测写的 —— 里面躺着 0.63 MiB
+ * **不会发出任何信号**的余量，于是一路长到顶线才第一次报警。现在拆成
+ * **环比**（上次审阅刻度 × 1.03，约 61 KB 的容差）与**绝对上限**（2.25 MiB）两条，
+ * 两条都要过。第 4 组里那条"刻度 × 容差必须仍在上限内"是给这套结构的自检：
+ * 容差若被抬到越过上限，环比这条线就永远轮不到说话，等于又回到切片1 的老毛病。
  *
  * **缺文件按失败算**是这一片最重要的口径：静默跳过等于"删掉一个文件 = 首屏变小了"，
  * 那是最容易骗过体积门禁的一种做法。
@@ -22,7 +29,7 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   parseIndexReferences, computeFirstScreenBytes, checkFirstScreen,
-  hrefToPath, FIRST_SCREEN_BUDGET, fmt,
+  hrefToPath, FIRST_SCREEN_BUDGET, FIRST_SCREEN_READING, FIRST_SCREEN_GROWTH_RATIO, fmt,
 } from '../scripts/check-bundle-size.mjs';
 
 /** 造一个假 dist */
@@ -129,13 +136,37 @@ describe('首屏体积门禁（W-D5 切片1）', () => {
       expect(checkFirstScreen(computeFirstScreenBytes(dir))).toEqual([]);
     });
 
-    it('超预算 → 红，且说得出超了多少', () => {
+    it('超绝对上限 → 红，且说得出超了多少', () => {
       const dir = makeDist({
         'assets/index.js': FIRST_SCREEN_BUDGET, 'assets/index.css': 100,
       }, HTML_OK);
       dirs.push(dir);
       const problems = checkFirstScreen(computeFirstScreenBytes(dir));
-      expect(problems.some((p) => /超预算/.test(p))).toBe(true);
+      expect(problems.some((p) => /超绝对上限/.test(p))).toBe(true);
+    });
+
+    it('**只超环比容差、没到上限 → 也红**（W-D5 切片4：顶到线才报警等于不报警）', () => {
+      // 造一个"比刻度长 5%、但离 2.25 MiB 上限还远"的首屏
+      const total = Math.floor(FIRST_SCREEN_READING * 1.05);
+      const dir = makeDist({
+        'assets/index.js': total - 100, 'assets/index.css': 100,
+        'assets/vendor.js': 0, 'assets/chunk-core.js': 0,
+      }, HTML_OK);
+      dirs.push(dir);
+      const problems = checkFirstScreen(computeFirstScreenBytes(dir));
+      expect(total).toBeLessThan(FIRST_SCREEN_BUDGET);        // 上限那条没被碰
+      expect(problems.some((p) => /环比容差/.test(p))).toBe(true);
+      expect(problems.some((p) => /超绝对上限/.test(p))).toBe(false);
+    });
+
+    it('刻度是读数不是预算：它严格小于上限，且容差是"几成"不是"几倍"', () => {
+      expect(FIRST_SCREEN_READING).toBeGreaterThan(0);
+      expect(FIRST_SCREEN_READING).toBeLessThan(FIRST_SCREEN_BUDGET);
+      expect(FIRST_SCREEN_GROWTH_RATIO).toBeGreaterThan(1);
+      expect(FIRST_SCREEN_GROWTH_RATIO).toBeLessThan(1.5);
+      // 刻度 × 容差必须仍在上限内 —— 否则"环比"这条线根本轮不到说话
+      expect(Math.floor(FIRST_SCREEN_READING * FIRST_SCREEN_GROWTH_RATIO))
+        .toBeLessThan(FIRST_SCREEN_BUDGET);
     });
 
     it('**缺文件 → 红**（不许静默跳过：删掉一个文件不能等于首屏变小）', () => {
@@ -186,10 +217,12 @@ describe('首屏体积门禁（W-D5 切片1）', () => {
     const distDir = resolve(process.cwd(), 'dist');
     const has = existsSync(join(distDir, 'index.html'));
 
-    it.skipIf(!has)('当前首屏在 2 MiB 预算内', () => {
+    it.skipIf(!has)('当前首屏在两条线之内（环比刻度 + 绝对上限）', () => {
       const res = computeFirstScreenBytes(distDir);
       // 把读数打出来，回填 ADR 时直接用
-      console.log(`首屏读数：${res.total} 字节 = ${fmt(res.total)} / 预算 ${fmt(FIRST_SCREEN_BUDGET)}`);
+      console.log(`首屏读数：${res.total} 字节 = ${fmt(res.total)}`
+        + ` / 刻度 ${fmt(FIRST_SCREEN_READING)} × ${FIRST_SCREEN_GROWTH_RATIO}`
+        + ` / 上限 ${fmt(FIRST_SCREEN_BUDGET)}`);
       for (const e of [...res.entries].sort((a, b) => b.bytes - a.bytes)) {
         console.log(`  ${String(e.bytes).padStart(9)}  ${e.kind.padEnd(14)} ${e.href}`);
       }

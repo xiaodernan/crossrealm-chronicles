@@ -10,7 +10,13 @@
 - **Eureka 注册中心**（`discovery-server`，:8761）——各服务向它注册；
 - **Spring Cloud Config 配置中心**（`config-server`，:8888）——`game-service` 的运行参数从这里下发（本地 native profile，内置 `config/game-service.yml`）；
 - **Spring Cloud Gateway**（:8080）——对外唯一入口，`/api/**` 按服务名 `lb://` 负载均衡转发； **W-X5 熔断**（CircuitBreaker + orward:/fallback/503：路由链抛异常时快速 503 兜底，不是空响应、不是上游错误页） **W-X11 Retry**（`GET /api/version` 幂等可重试 的小路由带 backoff.Retry；主路由 `/api/**` 刻意不带——POST 提交 leaderboard 不能双写）；
-- **game-service**（:8081）——排行榜 / 遥测事件 / 版本号，纯内存零数据库。
+- **game-service**（:8081）——排行榜 / 遥测事件 / 版本号 / 运维聚合视图，纯内存零数据库；
+- **season-service**（:8082，W-X14）——**赛季主题与词缀**：名册四套（灰烬 / 深颚 / 薄暮 / 辉煌），
+  周期由 `season-service.cycle-days`（默认 14 天）配，当前赛季**算出来**而不是存下来
+  （`epochDay / cycleDays`，多实例/重启/时区都不会给出两个答案）；`override` 可在配置中心强制指定，
+  写错一个字母服务**拒绝启动**。gateway 路由 `/api/seasons/**`（`lb://season-service`，order=-1，带熔断）；
+  `game-service` 用 **OpenFeign**（`SeasonClient` + `fallbackFactory` + Resilience4j 熔断）读它，
+  在 `/api/ops/season` 聚合成一格运维视图 —— 下游没起时回 `available:false`，不 500。
 
 游戏侧对应的是 `src/online/OnlineServices.js`（W-X2，默认关闭）：
 
@@ -18,6 +24,9 @@
 - 网关地址：`localStorage['crossrealm_online_base_url']`，缺省同源 origin，本地默认 `http://localhost:8080`；
 - 当前接线：**击杀 Boss → 静默上报名 `boss_defeated` 遥测**（吞错、1.5s 超时，零打扰）；
 - 排行榜提交（`submitRun`）**已接入：Boss 击杀时即提交通关记录**（W-X8，与遥测同一默认关闭/吞错曲线）；**设置页里的"在线服务"开关已落地（W-X6）**：默认关闭、独立于 SettingsStore，写 localStorage `crossrealm_online` 并翻运行时 `onlineServices` 单例（开关一翻即生效，不需重载）；**设置页里"在线服务"区的只读排行榜也已落地（W-X7）**：设置页内「刷新排行榜」按钮按下才拉一次 `/api/leaderboard?limit=10`，行文本走 `textContent`（服务端数据当不可信），拉不到/空榜走一句兜底提示；排行榜提交（`submitRun`）**已接入：Boss 击杀时即提交通关记录**（W-X8：record = `{runner:'adventurer', bossId, clearTimeMs, chapter}`；`clearTimeMs` = 本次页面进入到此刻的毫秒数，演示榜仅供排序，**不声称是通关时长**——全主线没有计时器）；遥测同路径同开关；
+- **赛季（W-X14/W-F2）**：客户端 `fetchActiveSeason()` 打 `/api/seasons/active`；拿不到就用本地轮转
+  （同一条 `epochDay / cycleDays` 规则），于是**离线也有赛季、在线只是确认**。赛季给的是词缀 id 列表，
+  具体含义在客户端内容表里（服务端不认识游戏机制，加词缀不需要改服务端）。
 - 生产化路径（Redis ZSET 排行榜 / Kafka 遥测 / 真集群）在 `server/README.md` 有说明。
 
 ## 快速验证（5 分钟）
@@ -31,9 +40,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 冒烟脚本会：
 
 1. 先确认 28xxx 端口段空闲（避免与开发机上同机的其它 Spring Cloud 项目抢端口）；
-2. 依次拉起 discovery → config → game-service → gateway（**日志落在临时目录 `crossrealm-server-smoke\`**）；
-3. 逐一验证配置下发 → 服务注册 → 网关 `lb://` 转发 → 遥测计数；
-4. 跑完自动关闭它拉起的四个进程（含 **warm-up 轮询等 `lb://` 注册表暖起来**，约 30 秒，之后每一步都是确定性断言）；网关熔断诊断见 `scripts/verify-breaker.ps1`（baseline 200 → 停掉 game-service 后 6 次 503 → 重新拉起后自愈 200）。
+2. 依次拉起 discovery → config → game-service → season-service → gateway（**日志落在临时目录 `crossrealm-server-smoke\`**）；
+3. 逐一验证配置下发 → 服务注册 → 网关 `lb://` 转发 → 遥测计数 → **赛季直连**（`/api/seasons/active`）→ **Feign 聚合**（`/api/ops/season` 必须 `available:true`）；
+4. 跑完自动关闭它拉起的五个进程（含 **warm-up 轮询等 `lb://` 注册表暖起来**，约 30 秒，之后每一步都是确定性断言）；网关熔断诊断见 `scripts/verify-breaker.ps1`（baseline 200 → 停掉 game-service 后 6 次 503 → 重新拉起后自愈 200）。
 5. **配置热刷新（W-X9）**：脚本创建一个**临时 config 目录**（`target/smoke-config/`），给 config-server 设置 `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS=file:/…`，先让 game-service 拉到 `max-limit=4 / version-note=v1`；然后改写该目录的 `game-service.yml` 为 `max-limit=3, v2`，调 **`POST /actuator/refresh`** ——**不重启 game-service**，`/api/version` 立刻回显 `note=smoke-reload-note-v2`、排行榜 `maxLimit` 立刻变成 3。`/actuator/refresh` 的 `Content-Type` 必须是 `application/json`（空 body 也要），否则直接 415。
 
 2026-11-10 实测全绿（配置下发、version 经网关、排行榜、遥测 POST+count、Eureka 3 应用注册、配置热刷新生效）。
@@ -68,7 +77,7 @@ docker compose down
 | `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE` | 注册中心地址 | `http://localhost:8761/eureka/` |
 | `EUREKA_INSTANCE_HOSTNAME` | 注册名（本机联调建议 `localhost`） | 机器名 |
 | `EUREKA_INSTANCE_PREFERIPADDRESS` | 用 IP 注册 | `false` |
-| `SPRING_CONFIG_IMPORT` | 从配置中心拉配置（**只给 game-service 设**） | `optional:configserver:http://localhost:8888` |
+| `SPRING_CONFIG_IMPORT` | 从配置中心拉配置（**只给 game-service / season-service 设**，绝不导给 config-server 自己） | `optional:configserver:http://localhost:8888` |
 | `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS` | native profile 下 config-server 服务的配置仓库 —— 临时 smoke 用，把它指向 temp 目录以改写 game-service.yml | （classpath:/config） |
 | `CROSSREALM_ONLINE_BASE_URL`（前端侧：`crossrealm_online_base_url`） | 前端网关地址 | 同源 origin |
 
@@ -90,4 +99,5 @@ Gateway 4.x 起路由配置前缀是 `spring.cloud.gateway.server.webflux.*`（�
 - `server/scripts/verify-breaker.ps1` —— W-X5 网关熔断验证（手动诊断）
 - `.github/workflows/server.yml` — CI（编译 + 单测 + 全链路冒烟）
 - `src/online/OnlineServices.js` — 游戏侧客户端（默认关闭）
-- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）/ W-X6（设置页开关）/ W-X7（只读排行榜面板）/ W-X9（配置热刷新）/ W-X11（/api/version Retry 滤镜）/ W-X12（IP 限流）/ W-X13（/api/ops/health 复合视图）/ W-X13（/api/ops/health 复合视图）
+- `server/season-service/` — 赛季服务（名册 / 周期轮转 / 词缀契约）
+- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）/ W-X6（设置页开关）/ W-X7（只读排行榜面板）/ W-X9（配置热刷新）/ W-X11（/api/version Retry 滤镜）/ W-X12（IP 限流）/ W-X13（/api/ops/health 复合视图）/ W-X14（season-service：赛季名册 + 周期轮转 + Feign 熔断聚合）
