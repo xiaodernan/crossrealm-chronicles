@@ -1,0 +1,5 @@
+# W-D4 切片5 补拍：`src/content/tuning.js` 是**唯一**被门禁钉成 LF-only 的源文件
+# （`overlay-stack`：内容表里混 CRLF 时，解析出的招式表/数值表字节对不上）。
+# 不在这次扩成全仓 LF 规范化（约 207 个纯 LF 文件会被整个检出翻面，工作面并发会话在手里，
+# 无法逐文件复核）——只把这一格钉死。
+src/content/tuning.js text eol=lf
