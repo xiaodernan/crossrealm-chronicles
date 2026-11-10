@@ -179,6 +179,10 @@ const chrome = spawn(chromePath, [
   `--user-data-dir=${profileDir}`,
   '--no-first-run',
   '--disable-gpu',
+  // Chrome 128+ 起软件 WebGL 不再由 --disable-gpu 隐含带上，headless 无 SwiftShader 时 WebGLRenderer 构造直接抛错——这是 GH runner 上一致复现的 boot-error=游戏初始化失败：Error creating WebGL context
+  // 见 https://issues.chromium.org/issues/41404983 （chrome headless 软件渲染需显式 unsafe-swiftshader），不能拿环境当条件，是正确性问题不是放宽门槛
+  '--enable-unsafe-swiftshader',
+  '--use-angle=swiftshader',
   // 无头页被当后台页时 rAF 会被节流到几乎不跑（实测出现过 18 秒的帧距）——三连禁用
   '--disable-background-timer-throttling',
   '--disable-backgrounding-occluded-windows',
