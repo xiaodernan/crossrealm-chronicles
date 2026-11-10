@@ -12,7 +12,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $logDir = Join-Path ([System.IO.Path]::GetTempPath()) 'crossrealm-server-smoke'
 New-Item -ItemType Directory -Force $logDir | Out-Null
 
-$ports = @{ 'discovery-server' = 28161; 'config-server' = 28888; 'game-service' = 28081; 'gateway' = 28080 }
+$ports = @{ 'discovery-server' = 28161; 'config-server' = 28888; 'game-service' = 28081; 'season-service' = 28082; 'gateway' = 28080 }
 
 # Preflight: refuse to start if any target port is taken (a stray instance would fail its own health check and hide behind a false "ready").
 # Cross-platform port check: try a TCP connect; it succeeds iff something listens. Works on Windows PowerShell 5.1 and pwsh on Linux CI.
@@ -102,6 +102,13 @@ game-service:
   version-note: "smoke-reload-note-v1"
 '@ | Set-Content -Encoding UTF8 $configFile
 
+$seasonConfigFile = Join-Path $tmpConfigDir 'season-service.yml'
+@'
+season-service:
+  cycle-days: 14
+  override: ""
+'@ | Set-Content -Encoding UTF8 $seasonConfigFile
+
 $procs = @()
 try {
     $procs += Start-Server 'discovery-server' 'discovery-server-0.1.0-SNAPSHOT.jar' 28161
@@ -122,6 +129,12 @@ try {
     $procs += Start-Server 'game-service' 'game-service-0.1.0-SNAPSHOT.jar' 28081
     Remove-Item Env:SPRING_CONFIG_IMPORT -ErrorAction SilentlyContinue
     if (-not (Wait-Healthy 28081 'game-service')) { exit 1 }
+
+    # W-X14：赛季服务同样只从配置中心拉配置（它也是"客户端"，不是 config-server 自己）
+    $env:SPRING_CONFIG_IMPORT = 'optional:configserver:http://localhost:28888'
+    $procs += Start-Server 'season-service' 'season-service-0.1.0-SNAPSHOT.jar' 28082
+    Remove-Item Env:SPRING_CONFIG_IMPORT -ErrorAction SilentlyContinue
+    if (-not (Wait-Healthy 28082 'season-service')) { exit 1 }
 
     $procs += Start-Server 'gateway' 'gateway-0.1.0-SNAPSHOT.jar' 28080
     if (-not (Wait-Healthy 28080 'gateway')) { exit 1 }
@@ -165,6 +178,20 @@ try {
     (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/telemetry/events' `
         -ContentType 'application/json' -Body '{"type":"boss_defeated","detail":"void-chronarch"}' -TimeoutSec 15).Content
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/telemetry/events/count' -TimeoutSec 15).Content
+
+    Write-Host ""
+    Write-Host "=== 4b) via gateway: season-service active season (lb://season-service) ==="
+    $season = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/seasons/active' -TimeoutSec 20).Content
+    Write-Host $season
+    # 只断言形状与"某个合法赛季"，不断言具体是哪一季 —— 那个答案随时钟走，钉死会让冒烟隔两周就红一次
+    if (-not ($season -match '"id":"(ember|tide|gloom|radiant)"')) { Write-Error "gateway did NOT route to season-service: $season"; exit 1 }
+    if (-not ($season -match '"daysRemaining":[0-9]+')) { Write-Error "season payload missing countdown: $season"; exit 1 }
+
+    Write-Host ""
+    Write-Host "=== 4c) via gateway: ops aggregate (Feign from game-service to season-service) ==="
+    $opsSeason = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/season' -TimeoutSec 20).Content
+    Write-Host $opsSeason
+    if (-not ($opsSeason -match '"available":true')) { Write-Error "game-service could NOT reach season-service via Feign: $opsSeason"; exit 1 }
 
     Write-Host ""
     Write-Host "=== 5) hot refresh: edit served config (max-limit 4 -> 3, note v1 -> v2) WITHOUT restarting game-service ==="

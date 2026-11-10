@@ -59,4 +59,26 @@ class GatewayConfigWiringTest {
         assertTrue(mainSection.contains("name: CircuitBreaker"), "主路由应有 CircuitBreaker");
         assertTrue(mainSection.contains("fallbackUri: forward:/fallback/503"), "主路由兜底向 \u2192 /fallback/503");
     }
+
+    /**
+     * W-X14：赛季路由必须存在、必须走 lb://、必须 order=-1（先于 Path=/api/** 的主路由），
+     * 而且**不许**带 Retry —— 赛季读数不会因为重试变对，重试只会把"服务没起来"藏起来。
+     */
+    @Test
+    void seasonRouteIsExplicitAndCircuitBroken() throws Exception {
+        String yml = readYml();
+
+        assertTrue(yml.contains("id: season-service"), "必须存在 season-service 显式路由");
+        assertTrue(yml.contains("uri: lb://season-service"), "season 路由要走服务名负载均衡");
+        assertTrue(yml.contains("Path=/api/seasons,/api/seasons/**"), "season 路由要同时匹配根与子路径");
+
+        int idx = yml.indexOf("id: season-service");
+        int end = yml.indexOf("id: game-service\n", idx);
+        String section = yml.substring(idx, end > idx ? end : yml.length());
+
+        assertTrue(section.contains("order: -1"), "season 路由必须 order=-1 才抢得过 Path=/api/**");
+        assertTrue(section.contains("name: CircuitBreaker"), "season 路由应挂 CircuitBreaker");
+        assertTrue(section.contains("fallbackUri: forward:/fallback/503"), "season 路由应有 503 兜底");
+        assertFalse(section.contains("name: Retry"), "season 路由不该带 Retry");
+    }
 }

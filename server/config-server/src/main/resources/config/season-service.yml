@@ -1,0 +1,10 @@
+# season-service 的集中下发配置（config-server 的 native 仓库里那一份）。
+# 服务启动时通过 spring.config.import 拉取；下线 config-server 也能起（optional: 前缀）。
+season-service:
+  # 一个赛季持续多少天。改这里会让所有实例在下一轮同时换季 ——
+  # 这是"赛季长度"唯一的旋钮，代码里没有第二个默认值。
+  cycle-days: 14
+  # 强制指定当前赛季（ember / tide / gloom / radiant），留空表示按周期轮转。
+  # 写错一个字母服务会**拒绝启动**（SeasonCatalog#validate），这是刻意的：
+  # 静默回落会让"运维改了配置却没生效"变成一件看不见的事。
+  override: ""

@@ -4,6 +4,7 @@ import com.crossrealm.chronicles.game.GameServiceProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * 《Crossrealm Chronicles》在线伙伴服务（game-service）。
@@ -18,6 +19,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
  */
 @SpringBootApplication
 @EnableConfigurationProperties(GameServiceProperties.class)
+// W-X14：声明式调用 season-service。扫描范围限定在本服务的包内 ——
+// 不写 basePackages 时 Feign 会从本类所在包往下扫，恰好就是我们要的那一棵。
+@EnableFeignClients
 public class GameServiceApplication {
 
     public static void main(String[] args) {

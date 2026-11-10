@@ -30,6 +30,20 @@ spring:
                     backoff:
                       firstBackoff: 50ms
                       maxBackoff: 200ms
+            # 赛季服务（W-X14）：赛季主题 / 词缀。order=-1 让它先于 Path=/api/** 的主路由命中。
+            # 不给 Retry：赛季是 GET，但重试在这里没有收益（周期读数不会因为重试变对），
+            # 而 Retry 会掩盖"服务根本没起来"这件事 —— 熔断兜底已经够用。
+            - id: season-service
+              uri: lb://season-service
+              order: -1
+              predicates:
+                - Path=/api/seasons,/api/seasons/**
+              filters:
+                - AddRequestHeader=X-Gateway-Source, crossrealm-chronicles-gateway
+                - name: CircuitBreaker
+                  args:
+                    name: seasonServiceBreaker
+                    fallbackUri: forward:/fallback/503
             # 游戏伙伴服务：排行榜 / 遥测 / 版本信息
             - id: game-service
               uri: lb://game-service

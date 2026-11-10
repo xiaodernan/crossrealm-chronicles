@@ -4,6 +4,17 @@ server:
 spring:
   application:
     name: game-service
+  cloud:
+    openfeign:
+      # 不开这一条，Feign 会**静默忽略** fallbackFactory —— 失败时把异常直接抛给调用方
+      circuitbreaker:
+        enabled: true
+      client:
+        config:
+          default:
+            # 在线伙伴服务是可选的：下游没起时不该让运维端点等 10 秒
+            connectTimeout: 800
+            readTimeout: 1200
   config:
     # 从 config-server 拉集中配置；config-server 不在线时静默回退到本地默认值
     import: "optional:configserver:http://localhost:8888"

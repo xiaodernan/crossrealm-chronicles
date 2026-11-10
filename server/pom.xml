@@ -23,6 +23,7 @@
     <module>discovery-server</module>
     <module>config-server</module>
     <module>game-service</module>
+    <module>season-service</module>
     <module>gateway</module>
   </modules>
 

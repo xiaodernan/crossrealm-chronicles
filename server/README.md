@@ -9,6 +9,7 @@
 | 统一配置中心 | Spring Cloud Config（`config-server`，native profile 内置 classpath 配置仓库） | 8888 |
 | API 网关 | Spring Cloud Gateway 4.3（reactive），按服务名 `lb://` 负载均衡转发 | 8080 |
 | 在线伙伴业务 API | `game-service`：排行榜 / 遥测事件 / 版本号（纯内存实现、零数据库） | 8081 |
+| 赛季服务（W-X14） | `season-service`：赛季主题 / 词缀 / 周期倒计时（按 epochDay 算，不存状态） | 8082 |
 
 > 与游戏本体**完全解耦**：`npm run build` 不感知它；不接它时游戏功能不受任何影响。
 
@@ -19,11 +20,12 @@ server/
   pom.xml                # 父 POM（Boot 3.5.16 + Spring Cloud 2025.0.3 BOM）
   discovery-server/      # Eureka 注册中心（+ Dockerfile）
   config-server/         # Spring Cloud Config Server（classpath:/config 仓库，+ Dockerfile）
-  game-service/          # REST API（排行榜 / 遥测 / 版本），9 项单测（+ Dockerfile）
-  gateway/               # Spring Cloud Gateway（/api/** → lb://game-service，+ Dockerfile）
+  game-service/          # REST API（排行榜 / 遥测 / 版本 / 运维视图），OpenFeign 调 season-service
+  season-service/        # 赛季主题与词缀（周期轮转 + 配置中心 override），独立单测（+ Dockerfile）
+  gateway/               # Spring Cloud Gateway（/api/** → lb://game-service，/api/seasons/** → lb://season-service）
   scripts/smoke.ps1      # 冒烟脚本：四个实例真起真打，跑完自动关闭
    scripts/verify-breaker.ps1 # W-X5 网关熔断验证（手动诊断）：200 → 503 → 自愈 200
-  docker-compose.yml     # 四容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
+  docker-compose.yml     # 五容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
 ```
 
 ## 快速开始
@@ -34,10 +36,11 @@ mvn -B verify                       # 编译 + 跑全部 9 项单测
 java -jar discovery-server/target/discovery-server-0.1.0-SNAPSHOT.jar   # :8761
 java -jar config-server/target/config-server-0.1.0-SNAPSHOT.jar          # :8888
 java -jar game-service/target/game-service-0.1.0-SNAPSHOT.jar            # :8081
+java -jar season-service/target/season-service-0.1.0-SNAPSHOT.jar        # :8082
 java -jar gateway/target/gateway-0.1.0-SNAPSHOT.jar                      # :8080
 ```
 
-然后访问 `http://localhost:8080/api/leaderboard`。
+然后访问 `http://localhost:8080/api/leaderboard`，或看这一轮的赛季：`http://localhost:8080/api/seasons/active`。
 
 一键验证（推荐）：
 
@@ -45,7 +48,7 @@ java -jar gateway/target/gateway-0.1.0-SNAPSHOT.jar                      # :8080
 powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 ```
 
-冒烟脚本把四个实例都拉起来，逐一验证
+冒烟脚本把五个实例都拉起来，逐一验证
 配置下发 → 服务注册 → 网关转发 → 遥测计数的完整链路，
 默认使用 **28xxx** 端口段且先确认端口空闲（避免与开发机上同机其它 Spring Cloud 项目抢端口），
 结束时自动关闭它拉起的进程，日志落在临时目录的 `crossrealm-server-smoke\` 子目录。
