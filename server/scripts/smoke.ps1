@@ -99,8 +99,16 @@ try {
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/version' -TimeoutSec 15).Content
 
     Write-Host ""
-    Write-Host "=== 3) via gateway: leaderboard ==="
+    Write-Host "=== 3a) via gateway: leaderboard (seeded, read-only) ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/leaderboard?limit=3' -TimeoutSec 15).Content
+
+    Write-Host ""
+    Write-Host "=== 3b) via gateway: submit a run record, then read it back (write→read path) ==="
+    $body = '{"runner":"smoke-test","bossId":"void-chronarch","clearTimeMs":123456,"chapter":5}'
+    $created = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/leaderboard' `
+        -ContentType 'application/json' -Body $body -TimeoutSec 15).Content
+    Write-Host "POST leaderboard -> $created"
+    (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/leaderboard?limit=4' -TimeoutSec 15).Content
 
     Write-Host ""
     Write-Host "=== 4) via gateway: post one telemetry event, then read the counter ==="
