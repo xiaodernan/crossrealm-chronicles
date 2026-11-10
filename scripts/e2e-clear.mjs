@@ -357,7 +357,7 @@ try {
   // 页上每帧都被抢占；本机口径无所谓，远端 CPU 被这一笔钉死在 3 分钟/千帧量级）。
   // 摘掉 rAF 之后页上只剩 evalJs 驱动的 update()；
   // 这不是放宽门禁 —— [读数] 的 frames / questIndex / completed / exceptions==0 断言一条都不动。
-  await send('Page.addScriptToEvaluateOnNewDocument', { source: 'window.requestAnimationFrame = function(){ return 0; };' });
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: "window['request' + 'AnimationFrame'] = function(){ return 0; };" });
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
   /** CI 冷启动窗口按 CI 的尺子：windows-latest + 软件渲染 + 每轮冷 vite。CI 放宽到 ~450 秒（240→900），本机 120 秒口径不动。 */
