@@ -1,0 +1,38 @@
+# 在线伙伴服务（server/）的独立门禁：Maven 编译 + 9 项单测。
+# 与前端 ci.yml 分离：前端门禁（lint→test→build→size→perf→e2e）本体完全不感知本目录，
+# 这里单独守住 Java 侧的可构建性。触发条件：动到 server/ 或本工作流自身才跑。
+name: server
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: server-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Temurin 21：与父 POM 的 java.version=17 向下兼容，且与本机验证环境（25）差距最小
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # 父 POM + 4 个模块全量构建并跑测试（9 项）
+      - name: Verify
+        run: mvn -B -f server/pom.xml verify

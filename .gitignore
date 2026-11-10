@@ -17,3 +17,6 @@ vite.config.js.timestamp-*.mjs
 /build*.txt
 /commit-msg.txt
 /fix-help-*.mjs
+
+# server/ 的 Maven 构建产物（target/）
+server/**/target/

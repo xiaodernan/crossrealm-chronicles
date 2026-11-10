@@ -58,6 +58,7 @@ src/
   effects/    特效与画面 pass
 docs/         设计与实施文档
 tests/        Vitest 单元测试
+server/       在线伙伴服务（可选）：Spring Cloud 微服务 —— 排行榜/遥测（Java 17+，与本体完全解耦）
 ```
 
 ## 文档

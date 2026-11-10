@@ -1,0 +1,12 @@
+# game-service 的集中下发配置（config-server 的 native 仓库里那一份）。
+# 服务启动时通过 spring.config.import 拉取；下线 config-server 也能起（optional: 前缀）。
+game-service:
+  leaderboard:
+    # 是否在启动时播种一批演示通关记录（方便离线联调排行榜）
+    seed-demo-data: true
+    # 排行榜默认展示的条数上限
+    max-limit: 10
+  telemetry:
+    # 内存里最多缓存多少条遥测事件（超出后丢弃最老的一条）
+    max-events: 500
+  version-note: "在线伙伴服务 —— 由 Spring Cloud 统一配置中心下发"

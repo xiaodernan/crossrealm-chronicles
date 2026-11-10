@@ -1,0 +1,31 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: game-service
+  config:
+    # 从 config-server 拉集中配置；config-server 不在线时静默回退到本地默认值
+    import: "optional:configserver:http://localhost:8888"
+
+# 本地默认（与 config-server 仓库里的 game-service.yml 保持一致）
+game-service:
+  leaderboard:
+    seed-demo-data: true
+    max-limit: 10
+  telemetry:
+    max-events: 500
+  version-note: "本地默认配置"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

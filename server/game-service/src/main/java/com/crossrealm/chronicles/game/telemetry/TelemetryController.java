@@ -1,0 +1,55 @@
+package com.crossrealm.chronicles.game.telemetry;
+
+import com.crossrealm.chronicles.game.GameServiceProperties;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+/** 遥测 API：/api/telemetry/events */
+@RestController
+public class TelemetryController {
+
+    private final TelemetryService service;
+    private final GameServiceProperties properties;
+
+    public TelemetryController(TelemetryService service, GameServiceProperties properties) {
+        this.service = service;
+        this.properties = properties;
+    }
+
+    @PostMapping("/api/telemetry/events")
+    public ResponseEntity<Map<String, Object>> record(@Valid @RequestBody SubmitEvent body) {
+        TelemetryEvent event = service.record(body.type().trim(),
+                body.detail() == null ? "" : body.detail().trim());
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "id", event.id(),
+                "accepted", true));
+    }
+
+    @GetMapping("/api/telemetry/events/count")
+    public Map<String, Object> count() {
+        return Map.of(
+                "count", service.count(),
+                "maxEvents", properties.getTelemetry().getMaxEvents());
+    }
+
+    @GetMapping("/api/telemetry/events")
+    public Map<String, Object> snapshot() {
+        return Map.of(
+                "items", service.snapshot(),
+                "count", service.count());
+    }
+
+    public record SubmitEvent(
+            @NotBlank(message = "type 不能为空") @Size(max = 64) String type,
+            @Size(max = 256) String detail) {
+    }
+}

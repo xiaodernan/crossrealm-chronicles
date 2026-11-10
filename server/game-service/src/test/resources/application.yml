@@ -1,0 +1,17 @@
+# 测试专用：关掉 Eureka/Config 的网络依赖，保证 CI 离线可跑
+spring:
+  cloud:
+    config:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+game-service:
+  leaderboard:
+    seed-demo-data: true
+    max-limit: 10
+  telemetry:
+    max-events: 3
+  version-note: "测试配置"
