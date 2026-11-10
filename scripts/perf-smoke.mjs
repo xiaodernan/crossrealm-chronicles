@@ -308,7 +308,19 @@ try {
     await sleep(500);
     ready = await evalJs('!!window.__game && !!window.__game.enemyManager');
   }
-  if (!ready) throw new Error(`游戏 ${READY_ITERS / 2} 秒内没起来`);
+  if (!ready) {
+    // CI 首跑诊断：把"页上到底发生了什么"从沉默里捞出来——控制台异常、boot-error 文本、chrome 原话尾巴。
+    let 探针 = 'eval failed';
+    try {
+      探针 = await evalJs("document.readyState + ' | ' + (window.__game ? '__game set' : 'no __game') + ' | boot-error=' + (document.querySelector('#boot-error')?.textContent ?? '(none)') + ' | body=' + (document.body?.innerText ?? '(none)').slice(0, 200)");
+    } catch (e) {
+      探针 = 'probe threw: ' + (e?.message ?? e);
+    }
+    console.error('boot diagnostics: probe=' + 探针);
+    console.error('boot diagnostics: exceptions=' + JSON.stringify(exceptions));
+    console.error('boot diagnostics: chrome tail=\n' + 浏览器输出.join('').slice(-4000));
+    throw new Error(`游戏 ${READY_ITERS / 2} 秒内没起来`);
+  }
 
   /**
    * **这个页就是这一轮起的那个页**（切片6b）。
