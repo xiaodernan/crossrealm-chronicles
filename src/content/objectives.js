@@ -1399,6 +1399,19 @@ export const OBJECTIVES = [
     journal: 'obj_gloom_choir_hunt_journal',
   },
   {
+    // W-E3 切片100：幽暗丧钟进主线 — 幽暗第九独占，插在歌手后、chaos-boss 前（ch5，v21 不写迁移，不动 choice-void）
+    id: 'gloom-knell-hunt',
+    title: 'obj_gloom_knell_hunt_title',
+    desc: 'obj_gloom_knell_hunt_desc',
+    type: 'kills',
+    enemyType: 'gloom_knell',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: 230, z: 190, label: 'enemy_name_gloom_knell' },
+    reward: 20,
+    journal: 'obj_gloom_knell_hunt_journal',
+  },
+  {
     id: 'chaos-boss',
     title: bossById('chaos-overlord').shortNameKey,
     desc: 'obj_chaos_boss_desc',
@@ -1518,6 +1531,19 @@ export const OBJECTIVES = [
     waypoint: { x: -170, z: -230, label: 'enemy_name_radiant_bulwark' },
     reward: 20,
     journal: 'obj_radiant_bulwark_hunt_journal',
+  },
+  {
+    // W-E3 切片100：辉煌先驱进主线 — 圣域第九独占，插在壁垒后、大主教前（ch5，v21 不写迁移，不动 choice-void）
+    id: 'radiant-harbinger-hunt',
+    title: 'obj_radiant_harbinger_hunt_title',
+    desc: 'obj_radiant_harbinger_hunt_desc',
+    type: 'kills',
+    enemyType: 'radiant_harbinger',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -150, z: -120, label: 'enemy_name_radiant_harbinger' },
+    reward: 20,
+    journal: 'obj_radiant_harbinger_hunt_journal',
   },
   {
     // W-E3 切片67：辉煌大主教进主线 —— 圣域四类清剿（骑士/舞者/圣印者之外，最后一类）。

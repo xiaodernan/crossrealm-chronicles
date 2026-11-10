@@ -148,6 +148,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'gloom_choir', x: 210, z: 150 },
   { type: 'gloom_choir', x: 140, z: 210 },
   { type: 'gloom_choir', x: 250, z: 120 },
+  // 幽暗丧钟（W-E3 切片100）—— 迷雾里的远压重炮，与恐惧者/歌手/鬼火错开
+  { type: 'gloom_knell', x: 230, z: 190 },
+  { type: 'gloom_knell', x: 150, z: 125 },
+  { type: 'gloom_knell', x: 295, z: 145 },
 
   // ── 虚空断口（void，中心 ~0,220，半径 130）── W-E3 切片69
   // 虚空幻影（三点）—— 悬浮残影，分散在断口周边，与 wraith/crawler 出生带错开。
@@ -281,4 +285,8 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'radiant_bulwark', x: -170, z: -230 },
   { type: 'radiant_bulwark', x: -260, z: -180 },
   { type: 'radiant_bulwark', x: -310, z: -280 },
+  // 辉煌先驱（W-E3 切片100）—— 圣道上的裂光先锋，与天使/壁垒/誓守者错开
+  { type: 'radiant_harbinger', x: -150, z: -120 },
+  { type: 'radiant_harbinger', x: -230, z: -255 },
+  { type: 'radiant_harbinger', x: -300, z: -150 },
 ]);

@@ -579,6 +579,8 @@ export const STRINGS_EN = Object.freeze({
   enemy_name_radiant_vowkeeper: 'Radiant Vowkeeper',
   enemy_name_radiant_seraph: 'Radiant Seraph',
   enemy_name_radiant_bulwark: 'Radiant Bulwark',
+  enemy_name_gloom_knell: 'Gloom Knell',
+  enemy_name_radiant_harbinger: 'Radiant Harbinger',
 
   // Player-facing leftovers (W-D2 slice 16r)
   enemy_name_default: 'Enemy',
@@ -1838,6 +1840,12 @@ export const STRINGS_EN = Object.freeze({
   obj_gloom_choir_hunt_title: 'Hunt the Gloom Choirs',
   obj_gloom_choir_hunt_desc: 'Defeat 3 Gloom Choirs haunting the Gloomwood.',
   obj_gloom_choir_hunt_journal: 'The song in the mist has finally stopped.',
+  obj_gloom_knell_hunt_title: 'Hunt the Gloom Knells',
+  obj_gloom_knell_hunt_desc: 'Defeat 3 Gloom Knells haunting the Gloomwood.',
+  obj_gloom_knell_hunt_journal: 'The heavy bell in the mist has fallen silent.',
+  obj_radiant_harbinger_hunt_title: 'Hunt the Radiant Harbingers',
+  obj_radiant_harbinger_hunt_desc: 'Defeat 3 Radiant Harbingers haunting the Sanctum.',
+  obj_radiant_harbinger_hunt_journal: 'The torch fell first. The light followed after.',
   obj_chaos_boss_desc: "Defeat the boss of the Chaos Border.",
   obj_chaos_boss_journal: "Rift Lord has fallen; the endgame begins.",
   obj_radiant_dawn_hall_title: 'Morning in the Hall',

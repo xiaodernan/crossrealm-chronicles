@@ -100,6 +100,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'gloom_horror', weight: 1 },
       // W-E3 切片98：幽暗歌手 —— 歌诀布陷者，权重低
       { type: 'gloom_choir', weight: 1 },
+      // W-E3 切片100：幽暗丧钟 —— 迷雾里敲钟的远压者，权重低（要靠“突然”而不是常驻）
+      { type: 'gloom_knell', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },
@@ -120,6 +122,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'radiant_seraph', weight: 1 },
       // W-E3 切片98：辉煌壁垒 —— 圣盾猛冲者，权重低
       { type: 'radiant_bulwark', weight: 1 },
+      // W-E3 切片100：辉煌先驱 —— 圣道上劈光的前驱，权重低
+      { type: 'radiant_harbinger', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

@@ -32,6 +32,8 @@ export const POST_V21 = [
   'radiant-seraph-hunt',
   'gloom-choir-hunt',
   'radiant-bulwark-hunt',
+  'gloom-knell-hunt',
+  'radiant-harbinger-hunt',
 ];
 
 /** 切片41 之后仍需从 v21 投影中排除的 id（不含 void-oath）。 */

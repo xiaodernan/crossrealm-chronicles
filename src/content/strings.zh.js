@@ -581,6 +581,8 @@ export const STRINGS_ZH = Object.freeze({
   enemy_name_radiant_vowkeeper: '辉煌誓守者',
   enemy_name_radiant_seraph: '辉煌天使',
   enemy_name_radiant_bulwark: '辉煌壁垒',
+  enemy_name_gloom_knell: '幽暗丧钟',
+  enemy_name_radiant_harbinger: '辉煌先驱',
 
   // 玩家可见的残余文案（W-D2 切片16r）
   enemy_name_default: '敌人',
@@ -1839,6 +1841,12 @@ export const STRINGS_ZH = Object.freeze({
   obj_gloom_choir_hunt_title: '清剿幽暗歌手',
   obj_gloom_choir_hunt_desc: '击败幽暗林地游荡的 3 只幽暗歌手。',
   obj_gloom_choir_hunt_journal: '雾里那曲歌终于停下了。',
+  obj_gloom_knell_hunt_title: '清剿幽暗丧钟',
+  obj_gloom_knell_hunt_desc: '击败幽暗林地游荡的 3 只幽暗丧钟。',
+  obj_gloom_knell_hunt_journal: '雾里那记震胸口的钟终于哑了。',
+  obj_radiant_harbinger_hunt_title: '清剿辉煌先驱',
+  obj_radiant_harbinger_hunt_desc: '击败辉煌圣域游荡的 3 只辉煌先驱。',
+  obj_radiant_harbinger_hunt_journal: '火把落了，身后的光才慢慢跟上来。',
   obj_chaos_boss_desc: '击败混沌边境 Boss。',
   obj_chaos_boss_journal: '裂隙领主陨落，终局开启。',
   obj_radiant_dawn_hall_title: '圣殿的清晨',

@@ -84,6 +84,11 @@ export const ENEMY_ROSTER = {
    */
   gloom_choir: { name: 'enemy_name_gloom_choir', hp: 108, posture: 38, damage: 12, speed: 5.2, aggroRange: 26, color: 0x5a4a7a },
   /**
+   * W-E3 切片100：幽暗丧钟 —— 迷雾里高举丧钟沉立的远压者。
+   * 它不贴近，也布场 —— 它只站在雾里敲一记让人胸口发紧的钟。
+   */
+  gloom_knell: { name: 'enemy_name_gloom_knell', hp: 116, posture: 40, damage: 13, speed: 5.1, aggroRange: 33, color: 0x36264f },
+  /**
    * W-E3 切片69：虚空幻影 —— 虚空断口里扯出来的悬浮残影。
    * 比怨影更实在（hp150/架势54）、攻更重（17），靠相位斩（5m 短距错位）贴身连切，
    * 不像怨影那样从 10 米外慢慢背刺。与 sentinel（远程炮台）、crawler（贴地快爪）分工不同。
@@ -225,6 +230,11 @@ export const ENEMY_ROSTER = {
    * W-E3 切片98：辉煌壁垒 —— 厚皮圣骑士（圣盾猛冲）。
    */
   radiant_bulwark: { name: 'enemy_name_radiant_bulwark', hp: 172, posture: 66, damage: 18, speed: 4.4, aggroRange: 29, color: 0xf0d478 },
+  /**
+   * W-E3 切片100：辉煌先驱 —— 举着火把冲在队伍最前的裂光者。
+   * 光还没到、它先把人劈开。
+   */
+  radiant_harbinger: { name: 'enemy_name_radiant_harbinger', hp: 152, posture: 58, damage: 17, speed: 5.6, aggroRange: 26, color: 0xffe9a8 },
 };
 
 /**

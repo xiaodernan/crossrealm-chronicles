@@ -82,7 +82,7 @@ describe('② 每一版的长度是历史事实', () => {
       expect(今天, `今天的主线里没有 "${id}"？这条腿要跟着内容走`).toContain(id);
     }
     expect(mainlineAt(20)).toHaveLength(65);
-    expect(MAINLINE, 'v21 之后插了四十四步（切片40 一步、切片41/42/45/46 各三步、切片67 大主教、切片68 影煞、切片69 幻影、切片70 撕掠者、切片71 凝视者、切片72 裂隙行者、切片73 蛮兽、切片74 潜伏者、切片75 幽影、切片76 掠夺者、切片77 猎犬、切片78 刺蜇者、切片79 沼兽、切片80 裂隙使、切片81 裂痕使、切片82 裂渊者、切片83 噬颚兽、切片84 残魂、切片85 空壳、切片86 汲魂者、切片88 撕裂者、切片89 裂爪兽、切片90 恸嚎者、切片91 号哭者、切片93 缚影者、切片94 缚裂者、切片95 誓守者、切片96 鬼火、切片97 恐惧者/天使、切片98 歌手/壁垒）—— 账本不该跟着长').toHaveLength(110);
+    expect(MAINLINE, 'v21 之后插进来的步不进这张账（它不改变任何老版本的表）—— 四十六步（在切片98 的基础上切片100 加一对：丧钟 / 先驱）—— 账本不该跟着长').toHaveLength(112);
     // 切片67/68/69 那三步也要落在"今天的表里、era 20 账本里没有"这一格
     expect(今天, '今天的主线里没有 archon-hunt —— 插步没上表').toContain('archon-hunt');
     expect(账上, 'archon-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('archon-hunt');
@@ -100,6 +100,14 @@ describe('② 每一版的长度是历史事实', () => {
     expect(账上, 'abyss-brute-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('abyss-brute-hunt');
     expect(今天, '今天的主线里没有 void-lurker-hunt —— 插步没上表').toContain('void-lurker-hunt');
     expect(账上, 'void-lurker-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('void-lurker-hunt');
+    expect(今天, '今天的主线里没有 gloom-choir-hunt —— 插步没上表').toContain('gloom-choir-hunt');
+    expect(账上, 'gloom-choir-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('gloom-choir-hunt');
+    expect(今天, '今天的主线里没有 radiant-bulwark-hunt —— 插步没上表').toContain('radiant-bulwark-hunt');
+    expect(账上, 'radiant-bulwark-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('radiant-bulwark-hunt');
+    expect(今天, '今天的主线里没有 gloom-knell-hunt —— 插步没上表').toContain('gloom-knell-hunt');
+    expect(账上, 'gloom-knell-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('gloom-knell-hunt');
+    expect(今天, '今天的主线里没有 radiant-harbinger-hunt —— 插步没上表').toContain('radiant-harbinger-hunt');
+    expect(账上, 'radiant-harbinger-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('radiant-harbinger-hunt');
   });
   it('era 20 是冻结的：今天的表往后长，它不动', () => {
     expect(mainlineAt(20)).toEqual(账上);

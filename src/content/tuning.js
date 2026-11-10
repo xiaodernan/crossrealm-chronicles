@@ -72,6 +72,8 @@ export const BODY_PLANS = {
   /** W-E3 切片97：幽暗恐惧者 —— 潜行的伏击者体格。 */
   gloom_horror:    { scale: 0.88, parts: ['head', 'torso', 'legs'], radius: 0.40 },
   /** W-E3 切片98：幽暗歌手 —— 歌唱布道体格（hover）。 */
+  /** S100 gloom_knell: hanging bell frame (hover) */
+  gloom_knell:     { scale: 1.0, parts: ['head', 'torso'], radius: 0.44, hover: 0.5 },
   gloom_choir:     { scale: 0.86, parts: ['head', 'torso'], radius: 0.38, hover: 0.55 },
   /** W-E3 切片96：幽暗鬼火 —— 幽暗林地飘忽的鬼火体格。 */
   gloom_wisp:     { scale: 0.82, parts: ['head', 'torso'], radius: 0.36, hover: 0.6 },
@@ -140,6 +142,7 @@ export const BODY_PLANS = {
   /** W-E3 切片97：辉煌天使 —— 天使体格（hover，光翼可见）。 */
   radiant_seraph:   { scale: 1.08, parts: ['head', 'torso'], radius: 0.50, hover: 0.4 },
   /** W-E3 切片98：辉煌壁垒 —— 厚皮圣盾体格（贴地威土）。 */
+  radiant_harbinger:   { scale: 1.02, parts: ['head', 'torso', 'legs'], radius: 0.44 },
   radiant_bulwark:   { scale: 1.12, parts: ['head', 'torso', 'legs'], radius: 0.48 },
 };
 
@@ -195,6 +198,7 @@ export const ENEMY_RESIST = {
   /** W-E3 切片97：幽暗恐惧者 —— 怕光，怕引力扰 */
   gloom_horror:    { fire: -0.25, gravity: 0.25 },
   /** W-E3 切片98：幽暗歌手 —— 怕火（歌声被火压）、怕引力扰 */
+  gloom_knell:     { fire: -0.22, gravity: 0.22 },
   gloom_choir:     { fire: -0.28, gravity: 0.28 },
   /** 虚空幻影：裂隙里扯出来的残影，怕火；引力抓不稳虚体 */
   void_phantom:   { fire: -0.2, gravity: 0.3 },
@@ -259,6 +263,7 @@ export const ENEMY_RESIST = {
   /** W-E3 切片97：辉煌天使 —— 圣洁属性，怕火但抗击冰扰 */
   radiant_seraph:   { fire: -0.18, ice: 0.18 },
   /** W-E3 切片98：辉煌壁垒 —— 不怕火灼，抗寒 */
+  radiant_harbinger:   { fire: -0.15, ice: 0.12 },
   radiant_bulwark:   { fire: -0.12, ice: 0.15 },
 };
 
@@ -410,6 +415,8 @@ export const ENEMY_DEFENSE = {
   gloom_wisp: 6,
   /** W-E3 切片97：幽暗恐惧者 */
   gloom_horror:     5,
+  /** W-E3 S100：gloom_knell */
+  gloom_knell:      5,
   /** W-E3 切片98：幽暗歌手 */
   gloom_choir:      4,
   void_phantom: 4,
@@ -459,6 +466,8 @@ export const ENEMY_DEFENSE = {
   radiant_vowkeeper: 8,
   /** W-E3 切片97：辉煌天使 */
   radiant_seraph:   9,
+  /** W-E3 S100：radiant_harbinger */
+  radiant_harbinger: 8,
   /** W-E3 切片98：辉煌壁垒 */
   radiant_bulwark:   10,
 };
@@ -728,6 +737,18 @@ export const ENEMY_MOVES = {
     ranged: { speed: 11.5, color: 0x9966dd },
     hazard: { radius: 2.4, telegraph: 1.2, damage: 0.5, duration: 3.6, tick: 0.9, color: 0x8855cc },
     telegraph: { color: 0x553388 },
+  },
+  /**
+   * Gloom Knell's exclusive signature — W-E3 slice 100.
+   * A single far-range heavy toll: very long windup, then one direct hit.
+   * Unlike gloom_lament (damage 0, lays a hazard field) and gloom_whisper (light harass),
+   * this one punishes standing still — it is the answer the gloom demands loudly.
+   */
+  gloom_toll: {
+    name: '幽暗丧钟', windup: 1.05, strike: 0.22, recover: 0.55, cone: -2,
+    range: 13.5, minDist: 6, damage: 1.75, cooldown: 5.5, weight: 2, standoff: [6.5, 13.5],
+    ranged: { speed: 15, color: 0x8877dd },
+    telegraph: { color: 0x554077 },
   },
   ram: {
     // 践踏冲撞（魔法构装体，W-B7 切片6）：构装体的第一条专属招 —— 大块头整具撞上来，`knock` 推玩家。
@@ -1249,6 +1270,18 @@ export const ENEMY_MOVES = {
     damage: 1.45, cooldown: 3.4, weight: 2, standoff: [1.3, 2.9], travel: 'lunge', travelSpeed: 6.0,
     telegraph: { color: 0xd4b040 },
   },
+  /**
+   * Radiant Harbinger's exclusive signature — W-E3 slice 100.
+   * A single overhead heavy cleave: wide arc, big knockback, no travel / no hazard / no projectile.
+   * Unlike radiant_bulwark (travel lunge), radiant_dancer (multi-hit flurry) and radiant_brand (ranged),
+   * this is the close-quarters splitter that arrives before the light does.
+   */
+  radiant_cleave: {
+    name: '辉煌裂光', windup: 0.7, strike: 0.2, recover: 0.5, reach: 1.2, cone: 0.75,
+    band: [0.0, 1.25],
+    damage: 1.6, cooldown: 4.4, weight: 2, knock: 6.5,
+    telegraph: { color: 0xe0b050 },
+  },
 /**
    * 阵型打击（训练有素的士兵，W-B7 尾巴）。
    *
@@ -1676,6 +1709,8 @@ export const ENEMY_MOVE_SETS = {
   /** W-E3 切片97：幽暗恐惧者 —— 幽暗鬼爪（轻网）+ 射击 + 刺击 */
   gloom_horror:    ['gloom_grasp', 'shot', 'thrust'],
   /** W-E3 切片98：幽暗歌手 —— 幽暗挽歌（歌诀场封锁）+ 射击 + 刺击 */
+  /** W-E3 切片100：幽暗丧钟 —— 幽暗丧钟（远压重炮）+ 射击 + 刺击 */
+  gloom_knell:     ['gloom_toll', 'shot', 'thrust'],
   gloom_choir:     ['gloom_lament', 'shot', 'thrust'],
   /** W-E3 切片69：虚空幻影 —— 相位斩（短距相位切入）+ 刺击 + 横扫 */
   void_phantom:   ['phase_cut', 'thrust', 'sweep'],
@@ -1738,6 +1773,8 @@ export const ENEMY_MOVE_SETS = {
   /** W-E3 切片97：辉煌天使 —— 辉煌天使之吟（圣弹）+ 射击 + 守势 + 刺击 */
   radiant_seraph:   ['radiant_cry', 'shot', 'guard', 'thrust'],
   /** W-E3 切片98：辉煌壁垒 —— 辉煌冲锋（圣盾撞击）+ 刺击 + 守势 */
+  /** W-E3 切片100：辉煌先驱 —— 辉煌裂光（重劈）+ 连劈 + 刺击 */
+  radiant_harbinger: ['radiant_cleave', 'flurry', 'thrust'],
   radiant_bulwark:   ['radiant_charge', 'thrust', 'guard'],
 };
 
