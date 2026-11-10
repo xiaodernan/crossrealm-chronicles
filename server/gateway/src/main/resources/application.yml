@@ -9,6 +9,27 @@ spring:
       server:
         webflux:
           routes:
+            # 版本信息路由（优先）：/api/version 是个可重试的 GET 端点，给它专用的 Retry 滤镜 —— 顺便把
+            # 轮询 / bootstrap 场景从 "一次 503 之后没救" 改成 "最多两次重试，间隔 ≤200ms"。
+            - id: game-service-version
+              uri: lb://game-service
+              order: -1
+              predicates:
+                - Path=/api/version
+              filters:
+                - AddRequestHeader=X-Gateway-Source, crossrealm-chronicles-gateway
+                - name: CircuitBreaker
+                  args:
+                    name: gameServiceVersionBreaker
+                    fallbackUri: forward:/fallback/503
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                    methods: GET
+                    backoff:
+                      firstBackoff: 50ms
+                      maxBackoff: 200ms
             # 游戏伙伴服务：排行榜 / 遥测 / 版本信息
             - id: game-service
               uri: lb://game-service

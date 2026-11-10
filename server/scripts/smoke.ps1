@@ -107,9 +107,9 @@ try {
     $procs += Start-Server 'discovery-server' 'discovery-server-0.1.0-SNAPSHOT.jar' 28161
     if (-not (Wait-Healthy 28161 'discovery-server')) { exit 1 }
 
-    # 只有 config-server 需要这个 search-locations；discovery/game-service/gateway 拿不到它。
-    # file: URI 里的反斜杠会被 Java URI 解析器悄悄吃掉一部分，统一换成正斜杠；
-    # Windows 上 = file:/D:/path，Linux 上 = file:///home/path（file: + 绝对路径）。
+    # only config-server needs the search-locations; discovery/game-service/gateway do not get it.
+    # file: URIs with backslashes get silently mangled by the Java URI parser; normalize to forward slashes;
+    # Windows: file:/D:/path   Linux: file:///home/path   (file: + absolute path)
     $tmpConfigDirFs = $tmpConfigDir -replace '\\','/'
     $fileUri = if ($tmpConfigDirFs.StartsWith('/')) { "file:$tmpConfigDirFs" } else { "file:/$tmpConfigDirFs" }
     $env:SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS = $fileUri
@@ -117,7 +117,7 @@ try {
     Remove-Item Env:SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS -ErrorAction SilentlyContinue
     if (-not (Wait-Healthy 28888 'config-server')) { exit 1 }
 
-    # 只有 game-service 需要从配置中心拉配置（配置中心自己绝不能回拉自己）
+    # only game-service pulls config from the config center; config-server must not become a client of itself
     $env:SPRING_CONFIG_IMPORT = 'optional:configserver:http://localhost:28888'
     $procs += Start-Server 'game-service' 'game-service-0.1.0-SNAPSHOT.jar' 28081
     Remove-Item Env:SPRING_CONFIG_IMPORT -ErrorAction SilentlyContinue
@@ -126,8 +126,8 @@ try {
     $procs += Start-Server 'gateway' 'gateway-0.1.0-SNAPSHOT.jar' 28080
     if (-not (Wait-Healthy 28080 'gateway')) { exit 1 }
 
-    # 冷启动保护：gateway 的 lb:// 注册表缓存需要一点时间暖起来（本机实测可达 30 秒才解析到 game-service），
-    # 先轮询 /api/version 到 200（最多 90s）再执行断言步骤 —— 等的是 lb:// 就绪，不是业务本身。
+    # Cold-start protection: gateway lb:// registry cache takes a moment to warm up (30s on this dev box).
+    # Poll /api/version until 200 (up to 90s) before the asserts; we are waiting for lb:// readiness, not the config itself.
     Write-Host ""
     Write-Host "=== 0) warm-up: poll gateway /api/version until lb:// routing resolves game-service ==="
     $warmupOk = $false
@@ -153,7 +153,7 @@ try {
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/leaderboard?limit=3' -TimeoutSec 15).Content
 
     Write-Host ""
-    Write-Host "=== 3b) via gateway: submit a run record, then read it back (write→read path) ==="
+    Write-Host "=== 3b) via gateway: submit a run record, then read it back (write to read round-trip) ==="
     $body = '{"runner":"smoke-test","bossId":"void-chronarch","clearTimeMs":123456,"chapter":5}'
     $created = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/leaderboard' `
         -ContentType 'application/json' -Body $body -TimeoutSec 15).Content
