@@ -836,6 +836,47 @@ describe('⑤ 接线与性质：真的接在落盘那一步前面', () => {
     expect(A.errorReporter.条.every((条) => 条.kind === 'lease')).toBe(true);
   });
 
+  it('自动保存那几问不算"当面说过"：玩家第一次按仍然拦住并说话，第二次才让路', () => {
+    // 这一条钉的是 `可写` 里那句"提示过只由当面那一下记"：自动保存每 5 秒问一次，
+    // 要是它也能把提示记上，玩家第一次当面按下就会被当成"第二次"直接放行 ——
+    // 警告一次没说过，别人的档已经被盖下去了。
+    const [租A, 租B] = 接租约('tab-A', 'tab-B');
+    const A = 建宿主();
+    A.租约 = 租A;
+    const B = 建宿主();
+    B.租约 = 租B;
+    SaveSystem.save(A, 0);
+    SaveSystem.load(B, 0);
+    SaveSystem.save(B, 0);
+    for (let i = 0; i < 3; i += 1) expect(SaveSystem.save(A, 0)).toBe(false);
+    expect(A.dialog.toasts).toHaveLength(1);
+    expect(SaveSystem.save(A, 0, { 手动: true }), '第一次当面按就放行了 —— 警告一次没说过').toBe(false);
+    expect(A.dialog.toasts).toHaveLength(2);
+    expect(SaveSystem.save(A, 0, { 手动: true })).toBe(true);
+  });
+
+  it('读档过的那一格才拦得住：B 读了，之后 C 写了一笔，B 再存必须让路（两个槽都钉）', () => {
+    // 这一条补的是 M16 变异臂露出来的空档：把槽0 读档里的 `观测` 摘掉，整套 61 例全绿 ——
+    // 因为端到端那条钉的是"**没读过**的那位被拦"，而"读过的那位被后写者挡住"没有一条腿。
+    // 少了 `观测`，读档的实例下一次保存会被当成 never-seen（"这份内容不是从那格推出来的"），
+    // 于是它拿着旧读数把别人的新进度整体盖掉 —— 正是这一片要防的那一种丢失。
+    for (const 槽 of [0, 1]) {
+      const [租A, 租B, 租C] = 接租约(`tab-A${槽}`, `tab-B${槽}`, `tab-C${槽}`);
+      const A = 建宿主();
+      A.租约 = 租A;
+      expect(SaveSystem.save(A, 槽)).toBe(true);
+      const B = 建宿主();
+      B.租约 = 租B;
+      expect(SaveSystem.load(B, 槽)).toBe(true);
+      expect(租B.视图令牌(slotKey(槽)), `槽${槽}读档没记视图`).toBe(1);
+      const C = 建宿主(777);
+      C.租约 = 租C;
+      expect(SaveSystem.save(C, 槽), 'C 没读过这一格：主动写新的一份，不拦').toBe(true);
+      expect(SaveSystem.save(B, 槽), 'B 读档之后别人写了一笔，B 的旧读数不许落盘').toBe(false);
+      expect(JSON.parse(localStorage.getItem(slotKey(槽))).stats.souls).toBe(777);
+    }
+  });
+
   it('比较后写：可写 与 抢占 之间被插一笔 ⇒ contended 让位，不写记录、不推视图', () => {
     const 存 = 假存储();
     const A = 建写者租约({ 身份: 'tab-A', 存储: 存 });
