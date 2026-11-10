@@ -72,6 +72,8 @@ export const BODY_PLANS = {
   /** W-E3 切片97：幽暗恐惧者 —— 潜行的伏击者体格。 */
   gloom_horror:    { scale: 0.88, parts: ['head', 'torso', 'legs'], radius: 0.40 },
   /** W-E3 切片98：幽暗歌手 —— 歌唱布道体格（hover）。 */
+  /** S101 gloom_snuffer: candle-bearing snuffer frame */
+  gloom_snuffer:   { scale: 1.0, parts: ['head', 'torso', 'legs'], radius: 0.44 },
   /** S100 gloom_knell: hanging bell frame (hover) */
   gloom_knell:     { scale: 1.0, parts: ['head', 'torso'], radius: 0.44, hover: 0.5 },
   gloom_choir:     { scale: 0.86, parts: ['head', 'torso'], radius: 0.38, hover: 0.55 },
@@ -142,6 +144,7 @@ export const BODY_PLANS = {
   /** W-E3 切片97：辉煌天使 —— 天使体格（hover，光翼可见）。 */
   radiant_seraph:   { scale: 1.08, parts: ['head', 'torso'], radius: 0.50, hover: 0.4 },
   /** W-E3 切片98：辉煌壁垒 —— 厚皮圣盾体格（贴地威土）。 */
+  radiant_duelist:     { scale: 0.98, parts: ['head', 'torso', 'legs'], radius: 0.42 },
   radiant_harbinger:   { scale: 1.02, parts: ['head', 'torso', 'legs'], radius: 0.44 },
   radiant_bulwark:   { scale: 1.12, parts: ['head', 'torso', 'legs'], radius: 0.48 },
 };
@@ -198,6 +201,7 @@ export const ENEMY_RESIST = {
   /** W-E3 切片97：幽暗恐惧者 —— 怕光，怕引力扰 */
   gloom_horror:    { fire: -0.25, gravity: 0.25 },
   /** W-E3 切片98：幽暗歌手 —— 怕火（歌声被火压）、怕引力扰 */
+  gloom_snuffer:   { fire: -0.2, gravity: 0.2 },
   gloom_knell:     { fire: -0.22, gravity: 0.22 },
   gloom_choir:     { fire: -0.28, gravity: 0.28 },
   /** 虚空幻影：裂隙里扯出来的残影，怕火；引力抓不稳虚体 */
@@ -263,6 +267,7 @@ export const ENEMY_RESIST = {
   /** W-E3 切片97：辉煌天使 —— 圣洁属性，怕火但抗击冰扰 */
   radiant_seraph:   { fire: -0.18, ice: 0.18 },
   /** W-E3 切片98：辉煌壁垒 —— 不怕火灼，抗寒 */
+  radiant_duelist:     { fire: -0.17, ice: 0.14 },
   radiant_harbinger:   { fire: -0.15, ice: 0.12 },
   radiant_bulwark:   { fire: -0.12, ice: 0.15 },
 };
@@ -415,6 +420,8 @@ export const ENEMY_DEFENSE = {
   gloom_wisp: 6,
   /** W-E3 切片97：幽暗恐惧者 */
   gloom_horror:     5,
+  /** W-E3 S101：gloom_snuffer */
+  gloom_snuffer:    5,
   /** W-E3 S100：gloom_knell */
   gloom_knell:      5,
   /** W-E3 切片98：幽暗歌手 */
@@ -466,6 +473,8 @@ export const ENEMY_DEFENSE = {
   radiant_vowkeeper: 8,
   /** W-E3 切片97：辉煌天使 */
   radiant_seraph:   9,
+  /** W-E3 S101：radiant_duelist */
+  radiant_duelist:   8,
   /** W-E3 S100：radiant_harbinger */
   radiant_harbinger: 8,
   /** W-E3 切片98：辉煌壁垒 */
@@ -749,6 +758,18 @@ export const ENEMY_MOVES = {
     range: 13.5, minDist: 6, damage: 1.75, cooldown: 5.5, weight: 2, standoff: [6.5, 13.5],
     ranged: { speed: 15, color: 0x8877dd },
     telegraph: { color: 0x554077 },
+  },
+  /**
+   * Gloom Snuffer's exclusive signature — W-E3 slice 101.
+   * A wide smothering fan: close-quarters cone sweep with real knockback.
+   * Unlike gloom_toll (far-range single toll), gloom_lament (hazard field) and gloom_whisper (harass),
+   * this is the "blows out the lights at close range" answer.
+   */
+  gloom_snuff: {
+    name: '幽暗熄焰', windup: 0.62, strike: 0.18, recover: 0.46, reach: 1.5, cone: 1.0,
+    band: [0.0, 1.5],
+    damage: 1.45, cooldown: 4.6, weight: 2, knock: 6.0,
+    telegraph: { color: 0x5a5030 },
   },
   ram: {
     // 践踏冲撞（魔法构装体，W-B7 切片6）：构装体的第一条专属招 —— 大块头整具撞上来，`knock` 推玩家。
@@ -1282,6 +1303,18 @@ export const ENEMY_MOVES = {
     damage: 1.6, cooldown: 4.4, weight: 2, knock: 6.5,
     telegraph: { color: 0xe0b050 },
   },
+  /**
+   * Radiant Duelist's exclusive signature — W-E3 slice 101.
+   * A long-reach single piercing thrust: narrow cone, double meet of distance.
+   * Unlike radiant_cleave (wide heavy arc), radiant_charge (travel lunge) and radiant_cry (ranged),
+   * this is the one that commits you to its lane and wins it with reach.
+   */
+  radiant_pierce: {
+    name: '辉煌贯决', windup: 0.6, strike: 0.16, recover: 0.42, reach: 1.9, cone: 0.3,
+    band: [0.0, 1.65],
+    damage: 1.7, cooldown: 4.1, weight: 2, knock: 3.2,
+    telegraph: { color: 0xd8c878 },
+  },
 /**
    * 阵型打击（训练有素的士兵，W-B7 尾巴）。
    *
@@ -1709,6 +1742,8 @@ export const ENEMY_MOVE_SETS = {
   /** W-E3 切片97：幽暗恐惧者 —— 幽暗鬼爪（轻网）+ 射击 + 刺击 */
   gloom_horror:    ['gloom_grasp', 'shot', 'thrust'],
   /** W-E3 切片98：幽暗歌手 —— 幽暗挽歌（歌诀场封锁）+ 射击 + 刺击 */
+  /** W-E3 切片101：幽暗熄灯人 —— 幽暗熄焰（贴身扇形）+ 连劈 + 扑刺 */
+  gloom_snuffer:   ['gloom_snuff', 'flurry', 'thrust'],
   /** W-E3 切片100：幽暗丧钟 —— 幽暗丧钟（远压重炮）+ 射击 + 刺击 */
   gloom_knell:     ['gloom_toll', 'shot', 'thrust'],
   gloom_choir:     ['gloom_lament', 'shot', 'thrust'],
@@ -1773,6 +1808,8 @@ export const ENEMY_MOVE_SETS = {
   /** W-E3 切片97：辉煌天使 —— 辉煌天使之吟（圣弹）+ 射击 + 守势 + 刺击 */
   radiant_seraph:   ['radiant_cry', 'shot', 'guard', 'thrust'],
   /** W-E3 切片98：辉煌壁垒 —— 辉煌冲锋（圣盾撞击）+ 刺击 + 守势 */
+  /** W-E3 切片101：辉煌决斗者 —— 辉煌贯决（长枪刺杀）+ 刺击 + 连劈 */
+  radiant_duelist: ['radiant_pierce', 'thrust', 'flurry'],
   /** W-E3 切片100：辉煌先驱 —— 辉煌裂光（重劈）+ 连劈 + 刺击 */
   radiant_harbinger: ['radiant_cleave', 'flurry', 'thrust'],
   radiant_bulwark:   ['radiant_charge', 'thrust', 'guard'],

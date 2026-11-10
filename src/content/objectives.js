@@ -1412,6 +1412,19 @@ export const OBJECTIVES = [
     journal: 'obj_gloom_knell_hunt_journal',
   },
   {
+    // W-E3 切片101：幽暗熄灯人进主线 — 幽暗第十独占，插在丧钟后、chaos-boss 前（ch5，v21 不写迁移，不动 choice-void）
+    id: 'gloom-snuffer-hunt',
+    title: 'obj_gloom_snuffer_hunt_title',
+    desc: 'obj_gloom_snuffer_hunt_desc',
+    type: 'kills',
+    enemyType: 'gloom_snuffer',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: 285, z: 220, label: 'enemy_name_gloom_snuffer' },
+    reward: 20,
+    journal: 'obj_gloom_snuffer_hunt_journal',
+  },
+  {
     id: 'chaos-boss',
     title: bossById('chaos-overlord').shortNameKey,
     desc: 'obj_chaos_boss_desc',
@@ -1544,6 +1557,19 @@ export const OBJECTIVES = [
     waypoint: { x: -150, z: -120, label: 'enemy_name_radiant_harbinger' },
     reward: 20,
     journal: 'obj_radiant_harbinger_hunt_journal',
+  },
+  {
+    // W-E3 切片101：辉煌决斗者进主线 — 圣域第十独占，插在先驱后、大主教前（ch5，v21 不写迁移，不动 choice-void）
+    id: 'radiant-duelist-hunt',
+    title: 'obj_radiant_duelist_hunt_title',
+    desc: 'obj_radiant_duelist_hunt_desc',
+    type: 'kills',
+    enemyType: 'radiant_duelist',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -285, z: -135, label: 'enemy_name_radiant_duelist' },
+    reward: 20,
+    journal: 'obj_radiant_duelist_hunt_journal',
   },
   {
     // W-E3 切片67：辉煌大主教进主线 —— 圣域四类清剿（骑士/舞者/圣印者之外，最后一类）。

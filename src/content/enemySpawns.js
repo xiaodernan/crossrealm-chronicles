@@ -152,6 +152,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'gloom_knell', x: 230, z: 190 },
   { type: 'gloom_knell', x: 150, z: 125 },
   { type: 'gloom_knell', x: 295, z: 145 },
+  // 幽暗熄灯人（W-E3 切片101）—— 贴身扇形熄焰者，与丧钟/恐惧者/歌手错开
+  { type: 'gloom_snuffer', x: 285, z: 220 },
+  { type: 'gloom_snuffer', x: 190, z: 110 },
+  { type: 'gloom_snuffer', x: 130, z: 235 },
 
   // ── 虚空断口（void，中心 ~0,220，半径 130）── W-E3 切片69
   // 虚空幻影（三点）—— 悬浮残影，分散在断口周边，与 wraith/crawler 出生带错开。
@@ -289,4 +293,8 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'radiant_harbinger', x: -150, z: -120 },
   { type: 'radiant_harbinger', x: -230, z: -255 },
   { type: 'radiant_harbinger', x: -300, z: -150 },
+  // 辉煌决斗者（W-E3 切片101）—— 长枪决斗者，与先驱/天使/壁垒错开
+  { type: 'radiant_duelist', x: -285, z: -135 },
+  { type: 'radiant_duelist', x: -175, z: -140 },
+  { type: 'radiant_duelist', x: -245, z: -150 },
 ]);

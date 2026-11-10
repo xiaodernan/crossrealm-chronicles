@@ -89,6 +89,11 @@ export const ENEMY_ROSTER = {
    */
   gloom_knell: { name: 'enemy_name_gloom_knell', hp: 116, posture: 40, damage: 13, speed: 5.1, aggroRange: 33, color: 0x36264f },
   /**
+   * W-E3 切片101：幽暗熄灯人 —— 举起掌灯幽步入的熄焰者。
+   * 它不远射也不布场 —— 它把贴脸的东西一次扇灭。
+   */
+  gloom_snuffer: { name: 'enemy_name_gloom_snuffer', hp: 124, posture: 44, damage: 13, speed: 5.3, aggroRange: 27, color: 0x40382a },
+  /**
    * W-E3 切片69：虚空幻影 —— 虚空断口里扯出来的悬浮残影。
    * 比怨影更实在（hp150/架势54）、攻更重（17），靠相位斩（5m 短距错位）贴身连切，
    * 不像怨影那样从 10 米外慢慢背刺。与 sentinel（远程炮台）、crawler（贴地快爪）分工不同。
@@ -235,6 +240,11 @@ export const ENEMY_ROSTER = {
    * 光还没到、它先把人劈开。
    */
   radiant_harbinger: { name: 'enemy_name_radiant_harbinger', hp: 152, posture: 58, damage: 17, speed: 5.6, aggroRange: 26, color: 0xffe9a8 },
+  /**
+   * W-E3 切片101：辉煌决斗者 —— 金穗长枪直指而来的剑圣。
+   * 它不乱劈，也不先劈 —— 它等你一开口，然后一枪穿喉。
+   */
+  radiant_duelist: { name: 'enemy_name_radiant_duelist', hp: 148, posture: 56, damage: 17, speed: 5.9, aggroRange: 26, color: 0xffdf9a },
 };
 
 /**
