@@ -17,7 +17,7 @@
 - 开启方式（任一种）：`localStorage['crossrealm_online'] = '1'`、网址参数 `?online=1`、`window.__CROSSREALM_ONLINE__ = true`；
 - 网关地址：`localStorage['crossrealm_online_base_url']`，缺省同源 origin，本地默认 `http://localhost:8080`；
 - 当前接线：**击杀 Boss → 静默上报名 `boss_defeated` 遥测**（吞错、1.5s 超时，零打扰）；
-- 排行榜提交（`submitRun`）已实现但**尚未接入调用点**（仍等后续切片）；**设置页里的"在线服务"开关已落地（W-X6）**：默认关闭、独立于 SettingsStore，写 localStorage `crossrealm_online` 并翻运行时 `onlineServices` 单例（开关一翻即生效，不需重载）；排行榜面板仍在后续切片；
+- 排行榜提交（`submitRun`）已实现但**尚未接入调用点**（仍等后续切片）；**设置页里的"在线服务"开关已落地（W-X6）**：默认关闭、独立于 SettingsStore，写 localStorage `crossrealm_online` 并翻运行时 `onlineServices` 单例（开关一翻即生效，不需重载）；**设置页里"在线服务"区的只读排行榜也已落地（W-X7）**：设置页内「刷新排行榜」按钮按下才拉一次 `/api/leaderboard?limit=10`，行文本走 `textContent`（服务端数据当不可信），拉不到/空榜走一句兜底提示；排行榜提交（`submitRun`）仍然**没有任何调用点**——提交真实跑分需要本次跑的计时，而全主线没有计时器，待 W-X8；
 - 生产化路径（Redis ZSET 排行榜 / Kafka 遥测 / 真集群）在 `server/README.md` 有说明。
 
 ## 快速验证（5 分钟）
@@ -81,8 +81,9 @@ docker compose down
 
 ## 文件索引
 
-- `server/` — Maven 多模块工程 + `scripts/smoke.ps1` + `docker-compose.yml`
+- `server/` — Maven 多模块工程 + `scripts/`（smoke.ps1 / verify-breaker.ps1）+ `docker-compose.yml`
+- `src/online/leaderboardFormat.js` —— 在线排行榜条目格式化（纯函数，W-X7）
 - `server/scripts/verify-breaker.ps1` —— W-X5 网关熔断验证（手动诊断）
 - `.github/workflows/server.yml` — CI（编译 + 单测 + 全链路冒烟）
 - `src/online/OnlineServices.js` — 游戏侧客户端（默认关闭）
-- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）
+- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）/ W-X6（设置页开关）/ W-X7（只读排行榜面板）

@@ -5396,6 +5396,15 @@ Phase D（系统与质量）
 
 
 
+- **2026-11-10 W-X7（在线伙伴服务）—— 设置页「在线排行榜」只读面板：按下才拉、行走 textContent** —— 提交 `d844a51`（7 文件，+142 −2）
+
+  - **起因**：W-X6（`b647c3b`）让玩家能亲手翻开开关，但翻过去之后**什么也看不见** —— 在线线闭环差最后一格：一个玩家能在游戏里看见的东西。在线伙伴服务自 W-X1 就有的排行榜（种子三条：影缚者 / 虚空 · 位面行者 · Ch4·5）一直只有 API 没有脸。
+
+  - **做法**：① `src/online/leaderboardFormat.js`（纯函数，新）：`formatClearTimeMs`（mm:ss，≥1h → h:mm:ss，非有限数 → 空串）、`formatLeaderboardEntry(entry, rank)` → `#n · runner · bossId · ChN · mm:ss`，缺格少格、runner 缺回 `—`；② 设置页「在线服务」区加 `<button id="set-online-lb">` + `<ol id="set-online-lb-list">`（`index.html`），`SettingsPanel` 按钮事件**按下才 `fetchLeaderboard(10)`**，拉不到（未开启 / 网关连不上 / 空榜）走**同一句**兜底 toast（`settings_online_lb_unavailable` / `_empty`），渲染行**只走 `textContent`**（服务端数据当不可信，**绝不**拼 innerHTML）；③ i18n +3（`settings_online_lb_btn` / `_unavailable` / `_empty`，zh/en）→ 2649→2652，`tests/helpers/i18nKeyCount.js` 连带改；④ 新增 `tests/leaderboard-panel.test.js`（9 项：格式化算式六条（含种子数据形状一条 happy-path 与空条/缺格/非有限数两 adversarial）+ index.html/面板源码接线四条 + zh/en 三键两条）；⑤ `ONLINE_SERVICES.md` 同步：排行榜面板落地、`submitRun` 仍无调用点（提交真实跑分需要全局计时器 —— 全主线没有，留 W-X8）。
+
+  - **验证**：lint 0/0，test 全绿（**400 文件 / 6016 项**；两条 content-registry bossId 扫描修了一个真隐患——`typeof entry.bossId === 'string'` 会被字面量扫描器抓来当未知 bossId，外提纯函数解决；i18n 门槛 → **2652**），build ✓（`chunk-core` 841→842 KB）。E2E：`12360帧/206s/q=108/主线109/completed=true/exceptions=0` —— 与 S97/W-X6 **同读数**：设置页又加两格，帧成本为零。
+
+  - **风险与后续**：① **排行榜提交（`submitRun`）仍是 W-X8**：提交真实跑分需要全局计时器（全主线没有），W-X8 要么引入计时器（新的模块边界/存档问题，不是本切片能偷渡的），要么明确"不做提交，只读展示"为最终形态；② 本片不引入任何新游戏状态/存档迁移，`choice-void` 仍 62；③ 榜拉取的失败口径 = 在线客户端一贯默认关闭、吞错、零打扰；④ bossId 展示未做本地化（原始 id 直接出现）——oid 英文 id 在在线场景里视为展示串，不是文案。
 - **2026-11-10 W-X6（在线伙伴服务）—— 设置页「在线服务」开关：默认关闭、不经 SettingsStore，翻运行时单例即生效** —— 提交 `b647c3b`（8 文件，+109 −2）
 
   - **起因**：W-X2（`db7c857`）接好 Boss 遥测后，**没有玩家能看见的开关** —— 唯一"开启"方式是 DevTools console 里敲 `localStorage['crossrealm_online']='1'`，这等于没有开。游戏侧最后一格在线闭环：让玩家在设置里亲手翻的那一格存在了。
