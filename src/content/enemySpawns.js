@@ -140,6 +140,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'gloom_wisp', x: 160, z: 150 },
   { type: 'gloom_wisp', x: 280, z: 200 },
   { type: 'gloom_wisp', x: 90, z: 90 },
+  // 幽暗恐惧者（三点，W-E3 切片97）—— 伏击者，与鬼火/怨影错开。
+  { type: 'gloom_horror', x: 170, z: 170 },
+  { type: 'gloom_horror', x: 300, z: 180 },
+  { type: 'gloom_horror', x: 110, z: 210 },
 
   // ── 虚空断口（void，中心 ~0,220，半径 130）── W-E3 切片69
   // 虚空幻影（三点）—— 悬浮残影，分散在断口周边，与 wraith/crawler 出生带错开。
@@ -265,4 +269,8 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'radiant_vowkeeper', x: -330, z: -190 },
   { type: 'radiant_vowkeeper', x: -95, z: -95 },
   { type: 'radiant_vowkeeper', x: -190, z: -290 },
+  // 辉煌天使（三点，W-E3 切片97）—— Hover 施术者，与誓守者/大主教错开。
+  { type: 'radiant_seraph', x: -340, z: -160 },
+  { type: 'radiant_seraph', x: -210, z: -95 },
+  { type: 'radiant_seraph', x: -260, z: -300 },
 ]);

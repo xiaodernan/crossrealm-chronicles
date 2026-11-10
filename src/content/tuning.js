@@ -69,6 +69,8 @@ export const BODY_PLANS = {
   gloom_warden:   { scale: 1.16, parts: ['head', 'torso', 'legs'], radius: 0.56 },
   /** W-E3 切片68：幽暗影煞 —— 贴地的快影，比掠行兽更轻（它靠的是"先到"而不是"更重"） */
   gloom_shade:    { scale: 0.88, parts: ['head', 'torso', 'legs'], radius: 0.38 },
+  /** W-E3 切片97：幽暗恐惧者 —— 潜行的伏击者体格。 */
+  gloom_horror:    { scale: 0.88, parts: ['head', 'torso', 'legs'], radius: 0.40 },
   /** W-E3 切片96：幽暗鬼火 —— 幽暗林地飘忽的鬼火体格。 */
   gloom_wisp:     { scale: 0.82, parts: ['head', 'torso'], radius: 0.36, hover: 0.6 },
   /** W-E3 切片69：虚空幻影 —— 悬浮的裂隙残影，比怨影更实在一点，靠相位错位贴身 */
@@ -133,6 +135,8 @@ export const BODY_PLANS = {
   radiant_archon:  { scale: 1.10, parts: ['head', 'torso'], radius: 0.50, hover: 0.35 },
   /** W-E3 切片95：辉煌誓守者 —— 端正的持誓辉使体格。 */
   radiant_vowkeeper:{ scale: 1.02, parts: ['head', 'torso'], radius: 0.46, hover: 0.28 },
+  /** W-E3 切片97：辉煌天使 —— 天使体格（hover，光翼可见）。 */
+  radiant_seraph:   { scale: 1.08, parts: ['head', 'torso'], radius: 0.50, hover: 0.4 },
 };
 
 /**
@@ -184,6 +188,8 @@ export const ENEMY_RESIST = {
   gloom_shade:    { fire: -0.2, gravity: 0.25 },
   /** W-E3 切片96：幽暗鬼火 —— 怕光，引力可扰 */
   gloom_wisp:     { fire: -0.2, gravity: 0.2 },
+  /** W-E3 切片97：幽暗恐惧者 —— 怕光，怕引力扰 */
+  gloom_horror:    { fire: -0.25, gravity: 0.25 },
   /** 虚空幻影：裂隙里扯出来的残影，怕火；引力抓不稳虚体 */
   void_phantom:   { fire: -0.2, gravity: 0.3 },
   /** 深渊撕掠者：深渊热流里长出的猎手，怕火；寒意反而啃得慢 */
@@ -244,6 +250,8 @@ export const ENEMY_RESIST = {
   radiant_archon:  { fire: -0.2, ice: 0.15 },
   /** W-E3 切片95：辉煌誓守者 —— 圣洁属性：微怕火、冰能安抚它的光环 */
   radiant_vowkeeper:{ fire: -0.16, ice: 0.1 },
+  /** W-E3 切片97：辉煌天使 —— 圣洁属性，怕火但抗击冰扰 */
+  radiant_seraph:   { fire: -0.18, ice: 0.18 },
 };
 
 export const CRIT = {
@@ -392,6 +400,8 @@ export const ENEMY_DEFENSE = {
   gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16, gloom_shade: 5,
   /** W-E3 切片96：幽暗鬼火 */
   gloom_wisp: 6,
+  /** W-E3 切片97：幽暗恐惧者 */
+  gloom_horror:     5,
   void_phantom: 4,
   void_riftwalker: 5,
   void_lurker: 4,
@@ -437,6 +447,8 @@ export const ENEMY_DEFENSE = {
   radiant_archon: 12,
   /** W-E3 切片95：辉煌誓守者 */
   radiant_vowkeeper: 8,
+  /** W-E3 切片97：辉煌天使 */
+  radiant_seraph:   9,
 };
 
 /** 玩家自身防御由装备/属性提供，M2 阶段基线为 0（先用闪避与弹反防御） */
@@ -682,6 +694,16 @@ export const ENEMY_MOVES = {
     name: '幽暗低语', windup: 0.55, strike: 0.15, recover: 0.4, cone: -2,
     range: 10.5, minDist: 2.2,
     damage: 0.88, cooldown: 2.7, weight: 2, ranged: { speed: 15, color: 0x7766aa },
+    telegraph: { color: 0x443355 },
+  },
+  /**
+   * 幽暗鬼爪（幽暗恐惧者专属招）—— W-E3 切片97。
+   * 轻快的抓取弹：攻速快、单发弱，强调持续骚扰；与 `prowl`/`lurk` 分岔。
+   */
+  gloom_grasp: {
+    name: '幽暗鬼爪', windup: 0.5, strike: 0.14, recover: 0.38, cone: -2,
+    range: 9.5, minDist: 2.5,
+    damage: 0.82, cooldown: 2.4, weight: 2, ranged: { speed: 14.5, color: 0x6655aa },
     telegraph: { color: 0x443355 },
   },
   ram: {
@@ -1183,6 +1205,16 @@ export const ENEMY_MOVES = {
     damage: 0.95, cooldown: 3.2, weight: 2, ranged: { speed: 16, color: 0xffe87a },
     telegraph: { color: 0xaa8844 },
   },
+  /**
+   * 辉煌天使之吟（辉煌天使专属招）—— W-E3 切片97。
+   * 圣光长矛：高单发、较慢 cast 的圣弹；与 `radiant_rebuke` 分岔（高爆 vs 稳压）。
+   */
+  radiant_cry: {
+    name: '辉煌天使之吟', windup: 0.78, strike: 0.18, recover: 0.52, cone: -2,
+    range: 12.5, minDist: 2.8,
+    damage: 1.32, cooldown: 3.6, weight: 2, ranged: { speed: 16.5, color: 0xffeeaa },
+    telegraph: { color: 0xaa8844 },
+  },
 
   /**
    * 阵型打击（训练有素的士兵，W-B7 尾巴）。
@@ -1608,6 +1640,8 @@ export const ENEMY_MOVE_SETS = {
   gloom_shade:    ['shadowstep', 'thrust', 'sweep', 'flurry'],
   /** W-E3 切片96：幽暗鬼火 —— 幽暗低语（远压）+ 射击 + 刺击 */
   gloom_wisp:     ['gloom_whisper', 'shot', 'thrust'],
+  /** W-E3 切片97：幽暗恐惧者 —— 幽暗鬼爪（轻网）+ 射击 + 刺击 */
+  gloom_horror:    ['gloom_grasp', 'shot', 'thrust'],
   /** W-E3 切片69：虚空幻影 —— 相位斩（短距相位切入）+ 刺击 + 横扫 */
   void_phantom:   ['phase_cut', 'thrust', 'sweep'],
   /** W-E3 切片72：虚空裂隙行者 —— 裂隙步（长距相位突入）+ 劈砍 + 横扫 */
@@ -1666,5 +1700,7 @@ export const ENEMY_MOVE_SETS = {
   radiant_archon:  ['edict', 'brand', 'shot', 'guard'],
   /** W-E3 切片95：辉煌誓守者 —— 辉煌斥罚（远压）+ 射击 + 守势 + 刺击 */
   radiant_vowkeeper:['radiant_rebuke', 'shot', 'guard', 'thrust'],
+  /** W-E3 切片97：辉煌天使 —— 辉煌天使之吟（圣弹）+ 射击 + 守势 + 刺击 */
+  radiant_seraph:   ['radiant_cry', 'shot', 'guard', 'thrust'],
 };
 

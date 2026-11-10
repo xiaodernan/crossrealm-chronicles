@@ -86,6 +86,8 @@ const OLD_BIRTH = {
   gloom_shade: { name: '幽暗影煞', hp: 140, posture: 52, damage: 18, speed: 5.8, aggroRange: 24, color: 0x2a2a44 },
   // W-E3 切片96：幽暗鬼火
   gloom_wisp: { name: '幽暗鬼火', hp: 110, posture: 40, damage: 13, speed: 5.6, aggroRange: 28, color: 0x6a5a9a },
+  // W-E3 切片97：幽暗恐惧者
+  gloom_horror: { name: '幽暗恐惧者', hp: 118, posture: 42, damage: 13, speed: 5.4, aggroRange: 30, color: 0x3a2a5a },
   // W-E3 切片69：虚空幻影
   void_phantom: { name: '虚空幻影', hp: 150, posture: 54, damage: 17, speed: 5.4, aggroRange: 26, color: 0x7744aa },
   // W-E3 切片72：虚空裂隙行者
@@ -139,6 +141,8 @@ const OLD_BIRTH = {
   radiant_archon: { name: '辉煌大主教', hp: 175, posture: 68, damage: 17, speed: 4.3, aggroRange: 28, color: 0xfff4b0 },
   // W-E3 切片95：辉煌誓守者
   radiant_vowkeeper: { name: '辉煌誓守者', hp: 128, posture: 42, damage: 14, speed: 5.0, aggroRange: 28, color: 0xddc86a },
+  // W-E3 切片97：辉煌天使
+  radiant_seraph: { name: '辉煌天使', hp: 150, posture: 54, damage: 17, speed: 4.6, aggroRange: 32, color: 0xfff8dc },
 };
 
 /** 出生时没写的那几格会落到 `Enemy` 构造器的默认值 —— 用例要按同一套默认说话，不许自己造数 */

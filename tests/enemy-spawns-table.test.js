@@ -52,6 +52,8 @@ const 冻结 = [
   ['gloom_shade', 100, 60], ['gloom_shade', 180, 160], ['gloom_shade', 260, 140],
   // W-E3 切片96：幽暗鬼火（三点野外出生点）
   ['gloom_wisp', 160, 150], ['gloom_wisp', 280, 200], ['gloom_wisp', 90, 90],
+  // W-E3 切片97：幽暗恐惧者（三点野外出生点）
+  ['gloom_horror', 170, 170], ['gloom_horror', 300, 180], ['gloom_horror', 110, 210],
   // W-E3 切片69：虚空幻影（三点野外出生点）
   ['void_phantom', -10, 190], ['void_phantom', 50, 230], ['void_phantom', -60, 220],
   // W-E3 切片72：虚空裂隙行者（三点野外出生点）
@@ -108,6 +110,8 @@ const 冻结 = [
   ['radiant_archon', -260, -230], ['radiant_archon', -150, -270], ['radiant_archon', -130, -190],
   // W-E3 切片95：辉煌誓守者（三点野外出生点）
   ['radiant_vowkeeper', -330, -190], ['radiant_vowkeeper', -95, -95], ['radiant_vowkeeper', -190, -290],
+  // W-E3 切片97：辉煌天使（三点野外出生点）
+  ['radiant_seraph', -340, -160], ['radiant_seraph', -210, -95], ['radiant_seraph', -260, -300],
 ];
 
 describe('① 搬家没搬错', () => {

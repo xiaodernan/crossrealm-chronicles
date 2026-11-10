@@ -76,6 +76,10 @@ export const ENEMY_ROSTER = {
    */
   gloom_wisp: { name: 'enemy_name_gloom_wisp', hp: 110, posture: 40, damage: 13, speed: 5.6, aggroRange: 28, color: 0x6a5a9a },
   /**
+   * W-E3 切片97：幽暗恐惧者 —— 潜行的伏击者（投弹手）。
+   */
+  gloom_horror: { name: 'enemy_name_gloom_horror', hp: 118, posture: 42, damage: 13, speed: 5.4, aggroRange: 30, color: 0x3a2a5a },
+  /**
    * W-E3 切片69：虚空幻影 —— 虚空断口里扯出来的悬浮残影。
    * 比怨影更实在（hp150/架势54）、攻更重（17），靠相位斩（5m 短距错位）贴身连切，
    * 不像怨影那样从 10 米外慢慢背刺。与 sentinel（远程炮台）、crawler（贴地快爪）分工不同。
@@ -209,6 +213,10 @@ export const ENEMY_ROSTER = {
    * W-E3 切片95：辉煌誓守者 —— 辉煌圣域端正的持誓辉使。
    */
   radiant_vowkeeper: { name: 'enemy_name_radiant_vowkeeper', hp: 128, posture: 42, damage: 14, speed: 5.0, aggroRange: 28, color: 0xddc86a },
+  /**
+   * W-E3 切片97：辉煌天使 —— 高单发远压（hover）。
+   */
+  radiant_seraph: { name: 'enemy_name_radiant_seraph', hp: 150, posture: 54, damage: 17, speed: 4.6, aggroRange: 32, color: 0xfff8dc },
 };
 
 /**

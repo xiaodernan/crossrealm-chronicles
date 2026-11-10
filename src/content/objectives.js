@@ -1373,6 +1373,19 @@ export const OBJECTIVES = [
     journal: 'obj_gloom_wisp_hunt_journal',
   },
   {
+    // W-E3 切片97：幽暗恐惧者进主线 —— 幽暗第七独占，插在鬼火后、chaos-boss 前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'gloom-horror-hunt',
+    title: 'obj_gloom_horror_hunt_title',
+    desc: 'obj_gloom_horror_hunt_desc',
+    type: 'kills',
+    enemyType: 'gloom_horror',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: 170, z: 170, label: 'enemy_name_gloom_horror' },
+    reward: 20,
+    journal: 'obj_gloom_horror_hunt_journal',
+  },
+  {
     id: 'chaos-boss',
     title: bossById('chaos-overlord').shortNameKey,
     desc: 'obj_chaos_boss_desc',
@@ -1466,6 +1479,19 @@ export const OBJECTIVES = [
     waypoint: { x: -330, z: -190, label: 'enemy_name_radiant_vowkeeper' },
     reward: 20,
     journal: 'obj_radiant_vowkeeper_hunt_journal',
+  },
+  {
+    // W-E3 切片97：辉煌天使进主线 —— 圣域第七独占，插在誓守者后、大主教前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'radiant-seraph-hunt',
+    title: 'obj_radiant_seraph_hunt_title',
+    desc: 'obj_radiant_seraph_hunt_desc',
+    type: 'kills',
+    enemyType: 'radiant_seraph',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -340, z: -160, label: 'enemy_name_radiant_seraph' },
+    reward: 20,
+    journal: 'obj_radiant_seraph_hunt_journal',
   },
   {
     // W-E3 切片67：辉煌大主教进主线 —— 圣域四类清剿（骑士/舞者/圣印者之外，最后一类）。
