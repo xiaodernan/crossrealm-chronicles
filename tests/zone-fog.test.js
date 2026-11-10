@@ -170,6 +170,33 @@ describe('ZoneFog（运行期载体）', () => {
     // 合成结果与改前 WeatherSystem 的覆盖写同值：改前 fantasy 密度 = 0.0038+0.0008
   });
 
+  it('密度倍率：setDensityScale 后收敛密度 = (区域 + 天气) × 倍率（第三笔账）', () => {
+    const fog = makeFog();
+    const zf = new ZoneFog(fog);
+    zf.setWeatherBoost(0.0008);        // 天气那笔
+    zf.setDensityScale(1.9);           // 试炼的 heavy-fog 那笔
+    // 2000 帧：指数尾残差 exp(-50) ≈ 2e-22，9 位精度断言才真的是在比目标值
+    for (let i = 0; i < 2000; i++) zf.update(1 / 60, ZONE_IDS.FANTASY, 1);
+    const snap = zf.update(1 / 60, ZONE_IDS.FANTASY, 1);
+    // 顺序固定为 (区域 + 天气) × 倍率：反过来会让加成在倍率变化时被抹掉
+    expect(snap.density).toBeCloseTo((0.0038 + 0.0008) * 1.9, 9);
+  });
+
+  it('密度倍率的脏值回落 1（坏值不该让整个世界的雾消失）', () => {
+    const fog = makeFog();
+    const zf = new ZoneFog(fog);
+    for (const bad of [0, -2, NaN, Infinity, 'x', undefined]) {
+      zf.setDensityScale(bad);
+      for (let i = 0; i < 2000; i++) zf.update(1 / 60, ZONE_IDS.HUB, 1);
+      const snap = zf.update(1 / 60, ZONE_IDS.HUB, 1);
+      expect(snap.density, `倍率 ${String(bad)} 没回落到 1`).toBeCloseTo(0.0038, 9);
+    }
+    // 再写一个正常值，确认它还能被改回来（上面那轮没把入口焊死）
+    zf.setDensityScale(1.2);
+    for (let i = 0; i < 2000; i++) zf.update(1 / 60, ZONE_IDS.HUB, 1);
+    expect(zf.update(1 / 60, ZONE_IDS.HUB, 1).density).toBeCloseTo(0.0038 * 1.2, 9);
+  });
+
   it('unknown / corridor 走兜底行（不抛、收敛到中性大气）', () => {
     const fog = makeFog();
     const zf = new ZoneFog(fog);

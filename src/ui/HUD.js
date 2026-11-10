@@ -32,6 +32,18 @@ const EVENT_TAG = 'ui/HUD';
 export const MINIMAP_CSS_SIZE = 178;
 
 /**
+ * 倒计时的显示格式：`m:ss`（W-F3 切片4）。
+ *
+ * 为什么不是 `t('trial_seconds_fmt')` 那句"剩余 N 秒"：HUD 上这块地方只有 40px 宽，
+ * 而"还剩 72 秒"要读三个字；`1:12` 是所有人对倒计时的肌肉记忆。
+ * 也**不做小时位** —— 试炼最长的一层是 120 秒，多一位永远用不上。
+ */
+function clockText(seconds) {
+  const s = Math.max(0, Math.floor(Number(seconds) || 0));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+/**
  * 小地图重绘节流（W-E3 切片64）。
  *
  * 改前 `update()` 每帧末尾无条件 `drawMinimap()`：网格、七座区圆、七条道路、
@@ -285,6 +297,17 @@ buildHUD() {
         <div id="charge-indicator" class="charge-fill"></div>
       </div>
       <div id="lock-target" class="lock-target hidden" aria-hidden="true"></div>
+      <!-- 位面试炼的随身读数（W-F3 切片4）：只在它跑着时露出来。
+           为什么要有：限时是这件事的全部压力，而"剩余多少秒"此前只能靠打开日志页看 ——
+           玩家在打架时不会去翻页。 -->
+      <div id="trial-hud" class="trial-hud hidden" role="status" aria-live="polite">
+        <div class="trial-hud-top">
+          <span id="trial-hud-layer" class="trial-hud-layer"></span>
+          <span id="trial-hud-clock" class="trial-hud-clock">0:00</span>
+        </div>
+        <div class="trial-hud-bar"><div id="trial-hud-fill" class="trial-hud-fill"></div></div>
+        <div id="trial-hud-kills" class="trial-hud-kills"></div>
+      </div>
       <div id="quest-arrow" class="quest-arrow hidden" aria-hidden="true">▶</div>
       <div class="crosshair" aria-hidden="true"></div>
       <div id="controls-teach" class="controls-teach panel-draggable">
@@ -865,11 +888,47 @@ buildHUD() {
     refreshKeyText(this.zonePanel);
   }
 
+  /**
+   * 试炼随身读数（W-F3 切片4）。
+   *
+   * 读的是 `trial.getState()` 的公开快照 —— 不碰它的内部字段（同一条纪律：UI 只读
+   * 系统交出来的东西）。所以这个方法是**纯拉取**的：状态不再是 running 就藏起来。
+   *
+   * 为什么最后 10 秒只改颜色、不额外弹 Toast：限时本身已经是压力，再弹一条提示
+   * 会跟战斗提示抢同一个位置；而"变红"这件事玩家一眼就懂，不需要一句话解释。
+   */
+  _renderTrialHud() {
+    const el = document.getElementById('trial-hud');
+    if (!el) return;
+    const st = this.game.trial?.getState?.();
+    if (!st || st.state !== 'running') {
+      el.classList.add('hidden');
+      return;
+    }
+    el.classList.remove('hidden');
+    const layer = document.getElementById('trial-hud-layer');
+    if (layer) layer.textContent = t('trial_layer_fmt', { layer: st.layer, max: st.maxLayers });
+    const clock = document.getElementById('trial-hud-clock');
+    if (clock) clock.textContent = clockText(st.secondsLeft);
+    const kills = document.getElementById('trial-hud-kills');
+    if (kills) kills.textContent = t('trial_kills_fmt', { kills: st.kills, quota: st.quota });
+    const fill = document.getElementById('trial-hud-fill');
+    if (fill) fill.style.width = `${st.quota > 0 ? Math.min(100, (st.kills / st.quota) * 100) : 0}%`;
+    el.classList.toggle('is-urgent', st.secondsLeft <= 10);
+  }
+
   update(_dt) {
     this.updateInputDevice();
     const p = this.game.player.position;
     document.getElementById('coord-display').textContent = `X: ${p.x.toFixed(0)} · Z: ${p.z.toFixed(0)}`;
     document.getElementById('stamina-bar').style.width = `${this.stamina}%`;
+
+    // 试炼读数：0.2 秒一刷（倒计时只显示到秒，逐帧刷 DOM 没有意义且会顶掉布局）
+    this._trialTick = (this._trialTick || 0) + _dt;
+    if (this._trialTick >= 0.2) {
+      this._trialTick = 0;
+      this._renderTrialHud();
+    }
 
     const combat = this.game.player.combat;
     const rollEl = document.getElementById('roll-cd-bar');

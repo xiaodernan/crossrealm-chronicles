@@ -1,18 +1,22 @@
 /**
- * 位面试炼（W-F3 切片1）。
+ * 位面试炼（W-F3 切片1 / 切片2 / 切片3）。
  *
- * 这一片真正要钉住的是**"词缀第一次改规则"这件事是真的**：
+ * 这一族要钉住的是**"词缀与试炼真的在改规则"这件事**：
  * ① 内容层八条词缀的 id 与 `content/seasons.js` 逐字对齐（不靠人肉复制）；
  * ② 折叠规则把加项相加、乘项相乘，未知 id 当场抛（悄悄忽略 = 玩家成绩与规则对不上）；
  * ③ 运行时按世界时走秒、超时/死亡/放弃三条结束路互斥、五层打完才算通关；
  * ④ 灼烧走玩家受伤的既有入口，且**按秒结算**（每帧打 0.04 点会把事件刷爆）；
- * ⑤ 接线三处（Game / 注册表 / HUD）静态钉住 —— 仓库有过"加了系统却打不开"的旧病。
+ * ⑤ 切片3：怪是它自己刷的（黄金角、有上限、不超配额），击杀口径收窄成"只算自己刷的"；
+ * ⑥ **清理必须延迟一帧**：`enemy-defeated` 的派发栈正走在 `EnemyManager` 遍历里，
+ *    此刻 `splice` 会跳过下一只敌人 —— 这一条是本片最贵的一课，用例单独钉；
+ * ⑦ 接线三处（Game / 注册表 / HUD）静态钉住 —— 仓库有过"加了系统却打不开"的旧病。
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   TRIAL_MAX_LAYERS, TRIAL_LAYERS, TRIAL_AFFIX_EFFECTS, TRIAL_BASE_EFFECT,
+  TRIAL_ORIGIN, TRIAL_ARENA, trialSpawnOffset,
   trialLayerOf, trialModifiers, layerSeconds, layerQuota, layerScale, trialScore,
 } from '../src/content/trial.js';
 import { SEASON_MODIFIERS } from '../src/content/seasons.js';
@@ -24,10 +28,41 @@ import { STRINGS_EN } from '../src/content/strings.en.js';
 
 const 源 = (rel) => readFileSync(join(process.cwd(), 'src', ...rel.split('/')), 'utf8');
 
-/** 造一个只记伤害的假 game：试炼只需要 `player.combat.takeDamage`（Game 上没有 `combat` 这一格） */
-function fakeGame() {
+/**
+ * 造一个假 game：玩家有位置与受伤入口，刷怪器只记账（不造真 Enemy —— 那是
+ * `spawn-tuning.test.js` 的活，那边有真的 EnemyManager 与真的世界）。
+ */
+function fakeGame({ withSpawner = true } = {}) {
   const hits = [];
-  return { hits, player: { combat: { takeDamage: (n, el) => hits.push([n, el]) } } };
+  const spawned = [];
+  const despawned = [];
+  const game = {
+    hits,
+    spawned,
+    despawned,
+    player: {
+      position: { x: 10, z: -4 },
+      combat: { takeDamage: (n, el) => hits.push([n, el]) },
+    },
+  };
+  if (withSpawner) {
+    game.enemyManager = {
+      spawnAt: (type, x, z, extra = {}) => {
+        const enemy = { type, x, z, ...extra, alive: true };
+        spawned.push(enemy);
+        return enemy;
+      },
+      despawn: (e) => { despawned.push(e); e.alive = false; },
+    };
+  }
+  return game;
+}
+
+/** 打死一只**在场上的**试炼怪：先把假敌人标死，再派一条带来源的事件（贴近真实顺序） */
+function 击杀一只(g) {
+  const target = g.spawned.find((e) => e.alive);
+  if (target) target.alive = false;
+  emit('enemy-defeated', { type: target?.type ?? 'soldier', origin: TRIAL_ORIGIN });
 }
 
 let sys = null;
@@ -69,6 +104,34 @@ describe('位面试炼 · 内容层', () => {
   it('八条词缀的 id 与赛季名册逐字相同（同一份 id 两处用）', () => {
     expect(Object.keys(TRIAL_AFFIX_EFFECTS).sort())
       .toEqual(SEASON_MODIFIERS.map((m) => m.id).sort());
+  });
+
+  it('场地三数都是正数，且同时在场数不超过每层最小配额', () => {
+    expect(TRIAL_ARENA.radius).toBeGreaterThan(0);
+    expect(TRIAL_ARENA.waveSize).toBeGreaterThan(0);
+    expect(TRIAL_ARENA.waveInterval).toBeGreaterThan(0);
+    // 场上的怪比配额还多的话，多出来的那几只过层后就没主人了
+    const 最小配额 = Math.min(...TRIAL_LAYERS.map((r) => r.quota));
+    expect(TRIAL_ARENA.waveSize).toBeLessThanOrEqual(最小配额);
+  });
+
+  it('落点纯函数：距离恒等于半径，相邻两只不重叠，脏参数回落', () => {
+    const r = 9;
+    for (let i = 0; i < 6; i += 1) {
+      const p = trialSpawnOffset(i, r);
+      expect(Math.hypot(p.x, p.z), `第 ${i} 只不在半径上`).toBeCloseTo(r, 6);
+      if (i > 0) {
+        const q = trialSpawnOffset(i - 1, r);
+        expect(Math.hypot(p.x - q.x, p.z - q.z), `第 ${i} 只与上一只重叠`).toBeGreaterThan(0.1);
+      }
+    }
+    // 脏参数：不抛，回落到默认半径
+    for (const 脏 of [NaN, undefined, -3]) {
+      const p = trialSpawnOffset(脏);
+      expect(Math.hypot(p.x, p.z)).toBeCloseTo(TRIAL_ARENA.radius, 6);
+    }
+    const 负半径 = trialSpawnOffset(0, -1);
+    expect(Math.hypot(负半径.x, 负半径.z)).toBeCloseTo(TRIAL_ARENA.radius, 6);
   });
 });
 
@@ -154,11 +217,12 @@ describe('位面试炼 · 运行时', () => {
   });
 
   it('击杀推进；打满配额进下一层并派一条 trial-layer-cleared', () => {
-    sys = new TrialSystem(fakeGame());
+    const g = fakeGame();
+    sys = new TrialSystem(g);
     const seen = [];
     window.addEventListener('trial-layer-cleared', (e) => seen.push(e.detail));
     sys.start([]);
-    for (let i = 0; i < TRIAL_LAYERS[0].quota; i += 1) emit('enemy-defeated', { type: 'soldier' });
+    for (let i = 0; i < TRIAL_LAYERS[0].quota; i += 1) 击杀一只(g);
     expect(seen.length).toBe(1);
     expect(seen[0].layer).toBe(1);
     expect(seen[0].quota).toBe(TRIAL_LAYERS[0].quota);
@@ -167,12 +231,13 @@ describe('位面试炼 · 运行时', () => {
   });
 
   it('五层打完 → finished，成绩 = 层数×100 + 剩余秒/10，并记进 best', () => {
-    sys = new TrialSystem(fakeGame());
+    const g = fakeGame();
+    sys = new TrialSystem(g);
     const done = [];
     window.addEventListener('trial-finished', (e) => done.push(e.detail));
     sys.start([]);
     for (const row of TRIAL_LAYERS) {
-      for (let i = 0; i < row.quota; i += 1) emit('enemy-defeated', { type: 'soldier' });
+      for (let i = 0; i < row.quota; i += 1) 击杀一只(g);
     }
     const st = sys.getState();
     expect(st.state).toBe('finished');
@@ -280,9 +345,154 @@ describe('位面试炼 · 运行时', () => {
     expect(账).toBeGreaterThanOrEqual(2);
     sys.dispose();
     expect(listenerCount('game/TrialSystem')).toBe(0);
-    emit('enemy-defeated', { type: 'soldier' });
+    emit('enemy-defeated', { type: 'soldier', origin: TRIAL_ORIGIN });
     expect(sys.getState().kills).toBe(0);
     sys = null;
+  });
+});
+
+describe('位面试炼 · 自己的刷怪节奏（切片3）', () => {
+  it('开层立刻刷一波，每只都带 origin: trial 且 respawn: false', () => {
+    const g = fakeGame();
+    sys = new TrialSystem(g);
+    sys.start([]);
+    expect(g.spawned.length).toBe(TRIAL_ARENA.waveSize);
+    for (const e of g.spawned) {
+      expect(e.origin).toBe(TRIAL_ORIGIN);
+      expect(e.respawn, '死了会重生的怪会让配额永远刷不满也永远清不完').toBe(false);
+      expect(TRIAL_LAYERS[0].pool, `刷出了池子外的 "${e.type}"`).toContain(e.type);
+    }
+  });
+
+  it('落点在场地半径上，场地中心是开局时玩家的位置', () => {
+    const g = fakeGame();
+    sys = new TrialSystem(g);
+    const st = sys.start([]);
+    expect(st.arena).toEqual({ x: 10, z: -4, radius: TRIAL_ARENA.radius });
+    expect(st.spawnerLive).toBe(true);
+    for (const e of g.spawned) {
+      expect(Math.hypot(e.x - 10, e.z + 4)).toBeCloseTo(TRIAL_ARENA.radius, 6);
+    }
+  });
+
+  it('满员不补刷；倒下一只并且过了间隔才补', () => {
+    const g = fakeGame();
+    sys = new TrialSystem(g);
+    sys.start([]);
+    expect(g.spawned.length).toBe(3);
+    sys.update(2);                              // 满员：即便计时器跨过间隔也不刷
+    expect(g.spawned.length).toBe(3);
+    g.spawned[0].alive = false;                 // 倒下一只（不派事件，测的是纯刷怪）
+    sys.update(0.5);
+    expect(g.spawned.length, '间隔没到就补了').toBe(3);
+    sys.update(1.0);
+    expect(g.spawned.length, '跨过间隔还没补').toBe(4);
+  });
+
+  it('本层刷出的总数不超过配额（多刷的过层后就成了没人管的野怪）', () => {
+    const g = fakeGame();
+    sys = new TrialSystem(g);
+    sys.start([]);
+    for (let i = 0; i < 10; i += 1) {
+      const t = g.spawned.find((e) => e.alive);
+      if (t) t.alive = false;
+      sys.update(TRIAL_ARENA.waveInterval + 0.1);
+    }
+    expect(g.spawned.length).toBe(TRIAL_LAYERS[0].quota);
+  });
+
+  it('场内击杀算数，世界里顺手杀的不算（口径收窄）', () => {
+    sys = new TrialSystem(fakeGame());
+    sys.start([]);
+    emit('enemy-defeated', { type: 'soldier' });
+    emit('enemy-defeated', { type: 'soldier', origin: null });
+    emit('enemy-defeated', { type: 'soldier', origin: 'world' });
+    expect(sys.getState().kills, '世界里的击杀被记进了试炼').toBe(0);
+    emit('enemy-defeated', { type: 'soldier', origin: TRIAL_ORIGIN });
+    expect(sys.getState().kills).toBe(1);
+  });
+
+  it('拿不到玩家位置 → 不刷怪，spawnerLive 如实为 false', () => {
+    const g = { enemyManager: { spawnAt: () => { throw new Error('不该被调用'); }, despawn() {} } };
+    sys = new TrialSystem(g);
+    const st = sys.start([]);
+    expect(st.spawnerLive).toBe(false);
+    expect(st.arena).toBe(null);
+    sys.update(1);
+    expect(st.spawnedThisLayer).toBe(0);
+  });
+
+  it('没有刷怪入口 → 不刷、不炸，spawnerLive 为 false', () => {
+    const g = fakeGame({ withSpawner: false });
+    sys = new TrialSystem(g);
+    const st = sys.start([]);
+    expect(st.spawnerLive).toBe(false);
+    sys.update(3);
+    expect(sys.getState().state).toBe('running');
+  });
+
+  it('刷怪入口返回 null 时不记进账、不炸', () => {
+    const g = fakeGame();
+    g.enemyManager.spawnAt = () => null;
+    sys = new TrialSystem(g);
+    const st = sys.start([]);
+    expect(st.spawnedThisLayer).toBe(0);
+    expect(st.aliveCount).toBe(0);
+  });
+
+  it('**击杀派发栈里不 despawn**：此刻 splice 正在遍历的数组会跳过下一只敌人', () => {
+    const g = fakeGame();
+    sys = new TrialSystem(g);
+    sys.start([]);
+    // 打满第 1 层 → 进第 2 层，上一层残余进待清理桶
+    for (let i = 0; i < TRIAL_LAYERS[0].quota; i += 1) 击杀一只(g);
+    expect(sys.getState().layer).toBe(2);
+    expect(g.despawned.length, '在事件栈里就 despawn 了 —— 会跳过一只敌人的那一帧更新').toBe(0);
+    sys.update(0.016);
+    expect(g.despawned.length, '下一帧没清').toBeGreaterThan(0);
+  });
+
+  it('通关 / 超时 / 死亡 / 放弃都清场（不清的话玩家被一堆残怪围着）', () => {
+    const 结束路 = [
+      ['通关', (g) => { for (const r of TRIAL_LAYERS) for (let i = 0; i < r.quota; i += 1) 击杀一只(g); }],
+      ['超时', (_g, s) => s.update(TRIAL_LAYERS[0].seconds + 1)],
+      ['死亡', () => emit('player-death-count', { count: 1 })],
+      ['放弃', (_g, s) => s.abandon()],
+    ];
+    for (const [名字, 结束] of 结束路) {
+      const g = fakeGame();
+      const s = new TrialSystem(g);
+      s.start([]);
+      expect(g.spawned.length).toBeGreaterThan(0);
+      结束(g, s);
+      s.update(0.016);
+      expect(g.despawned.length, `${名字} 之后没有清场`).toBe(g.spawned.length);
+      s.dispose();
+    }
+  });
+
+  it('dispose 同步清场（它不在 update 栈里，没有遍历冲突）', () => {
+    const g = fakeGame();
+    sys = new TrialSystem(g);
+    sys.start([]);
+    expect(g.despawned.length).toBe(0);
+    sys.dispose();
+    expect(g.despawned.length).toBe(g.spawned.length);
+    sys = null;
+  });
+
+  it('换层时上一层的残留进清理、本层的账从零开始', () => {
+    const g = fakeGame();
+    sys = new TrialSystem(g);
+    sys.start([]);
+    const 第一层刷的 = g.spawned.length;
+    for (let i = 0; i < TRIAL_LAYERS[0].quota; i += 1) 击杀一只(g);
+    const st = sys.getState();
+    expect(st.layer).toBe(2);
+    expect(st.spawnedThisLayer, '换层之后本层已刷数没归零').toBe(TRIAL_ARENA.waveSize);
+    expect(st.kills).toBe(0);
+    sys.update(0.016);
+    expect(g.despawned.length, '上一层的东西没清').toBe(第一层刷的);
   });
 });
 
@@ -301,15 +511,59 @@ describe('位面试炼 · 接线与文案', () => {
     expect(hud).toMatch(/k === 'trial'/);
   });
 
-  it('文案双表都登记了 33 个 trial_ 键，且中英都非空', () => {
+  it('敌人身上真的有 origin 这一格，死亡时随事件带出去', () => {
+    const enemy = 源('combat/Enemy.js');
+    expect(enemy).toMatch(/this\.origin = config\.origin \?\? null/);
+    expect(enemy).toMatch(/origin: this\.origin/);
+    // 出生咽喉把这个字段透传给 Enemy（`...rest` 展开），不许在中间丢掉
+    const mgr = 源('combat/EnemyManager.js');
+    expect(mgr).toMatch(/type, x, z, \.\.\.rest/);
+  });
+
+  it('文案双表都登记了 36 个 trial_ 键，且中英都非空', () => {
     const zh = Object.keys(STRINGS_ZH).filter((k) => k.startsWith('trial_') || k === 'journal_tab_trial');
     const en = Object.keys(STRINGS_EN).filter((k) => k.startsWith('trial_') || k === 'journal_tab_trial');
     expect(zh.sort()).toEqual(en.sort());
-    expect(zh.length).toBe(33);
+    expect(zh.length).toBe(36);
     for (const k of zh) {
       expect(STRINGS_ZH[k].length, `中文缺 ${k}`).toBeGreaterThan(0);
       expect(STRINGS_EN[k].length, `英文缺 ${k}`).toBeGreaterThan(0);
     }
+  });
+
+  it('雾词缀落到 ZoneFog 上，结束与销毁都归位', () => {
+    const g = fakeGame();
+    const 推过 = [];
+    g.zoneFog = { setDensityScale: (n) => 推过.push(n) };
+    const s = new TrialSystem(g);
+    s.start(['heavy-fog']);                 // fogMul 1.9
+    expect(推过.at(-1), '开层没把雾倍率推下去').toBe(1.9);
+    s.abandon();
+    expect(推过.at(-1), '放弃之后没有归位').toBe(1);
+    s.start(['gloom-veil']);                // fogMul 1.45
+    expect(推过.at(-1)).toBe(1.45);
+    s.dispose();
+    expect(推过.at(-1), 'dispose 之后没有归位').toBe(1);
+  });
+
+  it('没有 zoneFog 时不炸（单测 / 无渲染环境）', () => {
+    const g = fakeGame();
+    const s = new TrialSystem(g);
+    expect(() => s.start(['heavy-fog'])).not.toThrow();
+    expect(() => s.dispose()).not.toThrow();
+  });
+
+  it('HUD 有试炼随身读数：元素、0.2 秒节流、最后 10 秒变红、只读公开快照', () => {
+    const hud = 源('ui/HUD.js');
+    expect(hud).toMatch(/id="trial-hud"/);
+    expect(hud).toMatch(/_renderTrialHud\(\)/);
+    expect(hud).toMatch(/this\._trialTick >= 0\.2/);
+    expect(hud).toMatch(/is-urgent/);
+    // 读数走公开快照，不读系统内部字段（"UI 只读系统交出来的东西"）
+    expect(hud).toMatch(/this\.game\.trial\?\.getState\?\.\(\)/);
+    expect(hud).not.toMatch(/this\.game\.trial\._/);
+    // 倒计时是 m:ss，不是"剩余 N 秒"（40px 宽的地方塞不下三个字）
+    expect(hud).toMatch(/Math\.floor\(s \/ 60\)/);
   });
 
   it('UI 里没有裸中文（文案一律走 t()）', () => {

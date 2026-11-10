@@ -1,18 +1,18 @@
 /**
- * [J] 试炼 Tab（W-F3 切片1）。
+ * [J] 试炼 Tab（W-F3 切片1，切片3 起显示刷怪实况）。
  *
- * ## 这一页要回答的三个问题
+ * ## 这一页要回答的四个问题
  *
  * ① 现在什么状态（未开始 / 进行中 / 通关 / 结束）；
  * ② 本局**真的生效**的是哪几条词缀、各改了什么（数值在这里第一次露出来 ——
  *    赛季页刻意不写数值，因为那是"承诺"；这里写，因为它是"正在发生"）；
- * ③ 打完五层还是没打完，为什么结束。
+ * ③ 本层刷了几只、场上还剩几只（切片3：怪是试炼自己刷的，玩家要知道该往哪看）；
+ * ④ 打完五层还是没打完，为什么结束。
  *
- * ## 为什么把"出生缩放还没接"写在页面上
+ * ## 为什么把"只有试炼刷的才算"写在页面上
  *
- * `hp / damage / speed` 三个乘子这一片已经算得出（`layerScale()`），但刷怪那一侧
- * 还没接（W-F3 切片2）。页面照实写一行"已算出、未接入" —— 藏起来的话，玩家会以为
- * 词缀已经在改敌人血量，而实际上没有；这种"看起来在工作"比不做更糟。
+ * 这是一次**口径收窄**（切片1/2 是"任何击杀都算"）。收窄不写出来，玩家会按老规矩
+ * 去世界里拉一群怪来打，然后发现计数不动 —— 那不是难度，那是没说清规则。
  *
  * ## 读数为什么不在页面上走秒
  *
@@ -74,18 +74,27 @@ export class TrialJournalTab {
       }).join('')
       : `<li class="trial-affix is-none">${t('trial_affix_none')}</li>`;
 
-    const effectLine = running ? `
+    /* 生效规则逐条列：**只列真的不为零的那几条** —— 一串"时限 +0 秒 / 配额 +0 只"
+     * 会让玩家以为页面在敷衍他。纯净试炼就整块不出现。 */
+    const effectRows = [];
+    if (state.active.timeDelta) effectRows.push(t('trial_effect_time_fmt', { n: state.active.timeDelta }));
+    if (state.active.quotaDelta) effectRows.push(t('trial_effect_quota_fmt', { n: state.active.quotaDelta }));
+    if (state.active.burnDps) effectRows.push(t('trial_effect_burn_fmt', { n: state.active.burnDps }));
+    if (state.active.fogMul !== 1) effectRows.push(t('trial_effect_fog_fmt', { n: fmtMul(state.active.fogMul) }));
+
+    const effectLine = running && effectRows.length ? `
         <div class="trial-effect">
           <div class="trial-effect-label">${t('trial_effect_header')}</div>
-          <ul class="trial-effect-list">
-            <li>${t('trial_effect_time_fmt', { n: state.active.timeDelta })}</li>
-            <li>${t('trial_effect_quota_fmt', { n: state.active.quotaDelta })}</li>
-            <li>${t('trial_effect_burn_fmt', { n: state.active.burnDps })}</li>
-          </ul>
+          <ul class="trial-effect-list">${effectRows.map((row) => `<li>${row}</li>`).join('')}</ul>
           <div class="trial-spawn">${t('trial_spawn_live_fmt', {
     hp: fmtMul(state.spawnScale?.hp), damage: fmtMul(state.spawnScale?.damage), speed: fmtMul(state.spawnScale?.speed),
   })}</div>
-          <div class="trial-pending">${t('trial_spawn_note')}</div>
+          <div class="trial-wave">${state.spawnerLive
+    ? t('trial_wave_fmt', {
+      spawned: state.spawnedThisLayer, quota: state.quota, alive: state.aliveCount,
+    })
+    : t('trial_wave_off')}</div>
+          <div class="trial-pending">${t('trial_wave_note')}</div>
         </div>` : '';
 
     const reason = state.lastReason ? t(REASON_KEY[state.lastReason]) : '';

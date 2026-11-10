@@ -2302,6 +2302,44 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .trial-effect { margin-top: 6px; }
 .trial-effect-list li { font-size: 0.72rem; color: #b8a894; }
 .trial-spawn { font-size: 0.72rem; color: #c9a48a; margin-top: 4px; }
+.trial-wave { font-size: 0.72rem; color: #9fc4a8; margin-top: 3px; }
+
+/* —— 位面试炼的随身读数（W-F3 切片4）——
+   位置在右上：左上被坐标/属性占着，中下是技能栏与准星，右上这块只有任务追踪会来，
+   而任务追踪在试炼里通常是空的。指针事件一律放过（它压在画面上，不该挡点击）。 */
+.trial-hud {
+  position: absolute;
+  top: 92px;
+  right: 18px;
+  min-width: 170px;
+  padding: 8px 12px 9px;
+  background: rgba(14, 10, 8, 0.62);
+  border: 1px solid rgba(201, 164, 138, 0.45);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: #e6d6c4;
+  pointer-events: none;
+  z-index: 6;
+}
+.trial-hud-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.trial-hud-layer { color: #c9a48a; letter-spacing: 0.04em; }
+.trial-hud-clock { font-size: 1rem; color: #f0e2cf; font-variant-numeric: tabular-nums; }
+.trial-hud.is-urgent { border-color: rgba(226, 96, 74, 0.75); }
+.trial-hud.is-urgent .trial-hud-clock { color: #e2604a; }
+.trial-hud-bar {
+  height: 3px;
+  margin: 6px 0 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.trial-hud-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #8d6a4f, #d9b18c);
+  transition: width 0.15s linear;
+}
+.trial-hud-kills { font-size: 0.7rem; color: #a8988a; }
 .trial-pending { font-size: 0.68rem; color: #7a6f66; margin-top: 4px; line-height: 1.5; }
 .trial-layer { display: flex; justify-content: space-between; font-size: 0.72rem; color: #a89880; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .trial-layer-meta { color: #8a7d6e; }

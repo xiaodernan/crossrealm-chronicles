@@ -34,6 +34,26 @@ export class ZoneFog {
     this._current = { color: fog.color.getHex(), density: fog.density };
     /** 天气对雾密度的加成：`WeatherSystem` 换区时推给它（区域账与天气账分开记） */
     this._weatherBoost = 0;
+    /**
+     * 密度**倍率**（W-F3 切片4）：试炼的 `heavy-fog` / `gloom-veil` 推给它。
+     *
+     * 与 `_weatherBoost` 是两笔账：那个是"加多少"，这个是"乘多少"。合成顺序固定为
+     * `(区域 + 天气) × 倍率` —— 反过来会让加成在倍率为 0 时凭空消失，
+     * 而倍率来自词缀，不该有权力抹掉天气。
+     */
+    this._densityScale = 1;
+  }
+
+  /**
+   * 密度倍率的唯一入口（W-F3 切片4）。
+   *
+   * 脏值回落 1、**不抛**：这一格来自运行时状态（试炼的词缀折叠），一个坏值不该让
+   * 整个世界的雾消失 —— 那是一种"画面变亮"的症状，没有人会往词缀上想。
+   * @param {number} scale 倍率（1 = 不改）
+   */
+  setDensityScale(scale) {
+    const s = Number(scale);
+    this._densityScale = Number.isFinite(s) && s > 0 ? s : 1;
   }
 
   /**
@@ -53,7 +73,8 @@ export class ZoneFog {
     const target = zoneAtmosphereOf(zoneId);
     const next = {
       color: daylightTint(target.color, daylight ?? 1),
-      density: target.density + this._weatherBoost,
+      // 两笔账的合成顺序见构造器：先加天气、后乘倍率
+      density: (target.density + this._weatherBoost) * this._densityScale,
     };
     const k = 1 - Math.exp(-BLEND_RATE * dt);
     // 从当前值向目标走 k 比例 —— 跨区（跳变）时收敛，昼夜（微动）时跟随。

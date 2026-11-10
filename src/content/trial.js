@@ -25,6 +25,50 @@
 export const TRIAL_MAX_LAYERS = 5;
 
 /**
+ * 试炼刷出来的敌人带的来源标记（W-F3 切片3）。
+ *
+ * 为什么要有它：切片1/2 的击杀口径是"任何击杀都算"，玩家可以站在世界怪最多的地方
+ * 刷层数 —— 那不是试炼，那是收获季。这一片起**只有它自己刷的才算**，
+ * 而判断"谁刷的"必须由出生那一刻写死在敌人身上（`Enemy.origin`），
+ * 死亡时随 `enemy-defeated` 带出来。**不在死亡现场猜**：敌人可能追着玩家跑了很远。
+ */
+export const TRIAL_ORIGIN = 'trial';
+
+/**
+ * 试炼场（W-F3 切片3）。
+ *
+ * ## 为什么场以玩家为圆心，而不是一个固定坐标
+ *
+ * 试炼可以被任意位面里任意位置发起。写死一个坐标的后果是"点了开始，然后跑半个世界"——
+ * 而限时已经开始走了。"位面试炼"这个说法本来允诺的就是：**你在哪，试炼就在哪拉开**。
+ *
+ * ## 三个数为什么各自独立
+ *
+ * `radius` 是刷怪落点离玩家多远（太近会刷在脸上，太远玩家看不见）；
+ * `waveSize` 是同时在场几只（上限，不是总量 —— 总量是每层配额）；
+ * `waveInterval` 是补刷间隔。三个数分开是因为它们回答三个不同的问题，
+ * 合并成一个"密度"之后想单独调其中一个就得反解。
+ */
+export const TRIAL_ARENA = Object.freeze({
+  radius: 12,
+  waveSize: 3,
+  waveInterval: 1.2,
+});
+
+/**
+ * 第 `index` 只试炼怪的落点偏移（相对场地中心）。
+ *
+ * 用黄金角散开：连续刷出来的两只不会叠在同一个方向，也不会因为"每波都从头开始"
+ * 而永远刷在玩家的同一个侧面。纯函数，坐标系与调用方一致（x / z 平面）。
+ */
+export function trialSpawnOffset(index, radius = TRIAL_ARENA.radius) {
+  const i = Number.isFinite(index) ? index : 0;
+  const r = Number.isFinite(radius) && radius > 0 ? radius : TRIAL_ARENA.radius;
+  const a = i * 2.399963229728653;   // 黄金角（弧度）
+  return { x: Math.cos(a) * r, z: Math.sin(a) * r };
+}
+
+/**
  * 层数曲线。`quota` 是这一层要清掉多少只，`seconds` 是这一层的时限（秒，世界时）。
  *
  * `pool` 里的 id 必须都在 `ENEMY_ROSTER` 里 —— 这条由 `tests/trial.test.js` 直接对着

@@ -134,8 +134,8 @@ export const GAME_EVENTS = Object.freeze({
     payload: null,
   },
   'enemy-defeated': {
-    desc: '敌人倒下。type 是敌人类型符号（boss/soldier/…），任务与成就按它判定 —— 别再拿显示名猜。zone 是它**出生在**哪一座位面（W-B12 切片7：出生点那一次反推的结果，任务账里"该位面的清剿数"按它记）',
-    payload: '{ name, type, bossId, zone }',
+    desc: '敌人倒下。type 是敌人类型符号（boss/soldier/…），任务与成就按它判定 —— 别再拿显示名猜。zone 是它**出生在**哪一座位面（W-B12 切片7：出生点那一次反推的结果，任务账里"该位面的清剿数"按它记）。origin 是谁刷出来的（W-F3 切片3：缺省 = 世界原生，`trial` = 位面试炼刷的）—— 试炼按它收窄击杀口径，只认自己刷的那批。`combat/Boss.js` 那份 detail 只带 name/type/bossId（既没 zone 也没 origin）：Boss 永远不会是试炼刷出来的，缺省即世界原生',
+    payload: '{ name, type, bossId, zone, origin }',
   },
   'boss-start': {
     desc: 'Boss 战开始（野外与副本都走这条），镜头、HUD、教程、音频各自进场',

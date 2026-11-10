@@ -17,7 +17,7 @@ import { ENEMY_ROSTER } from '../src/content/enemies.js';
 import { getDifficultyId, setDifficulty } from '../src/game/Difficulty.js';
 import { growthAt, zoneGrowthStage } from '../src/content/enemyGrowth.js';
 import { TrialSystem } from '../src/game/TrialSystem.js';
-import { TRIAL_LAYERS } from '../src/content/trial.js';
+import { TRIAL_LAYERS, TRIAL_ORIGIN } from '../src/content/trial.js';
 import { emit } from '../src/engine/EventBus.js';
 
 /** 与 `enemy-growth.test.js` 同一套夹具：只借原型走真 spawnAt，spawn 原样收回 config */
@@ -106,6 +106,16 @@ describe('出生缩放 · spawnAt 那条咽喉', () => {
     expect(growthAt(zoneGrowthStage('fantasy')).hp).toBeGreaterThan(0);
   });
 
+  it('`origin` 与 `respawn` 原样透传到 config（试炼靠前者收窄击杀口径、靠后者不重生）', () => {
+    const cfg = 出生(假世界(), 'soldier', -200, 0, { origin: 'trial', respawn: false });
+    expect(cfg.origin).toBe('trial');
+    expect(cfg.respawn).toBe(false);
+    // 不带时不该凭空多出一个键（中性/世界原生那条路要逐字节等价）
+    const plain = 出生(假世界(), 'soldier', -200, 0);
+    expect('origin' in plain).toBe(false);
+    expect('respawn' in plain).toBe(false);
+  });
+
   it('没有 speed 的类别不会因为本档多出一个 NaN', () => {
     setSpawnScale({ hp: 1, damage: 1, speed: 2 });
     const cfg = 出生(假世界(), 'dummy', 0, 0);
@@ -115,10 +125,14 @@ describe('出生缩放 · spawnAt 那条咽喉', () => {
 });
 
 describe('出生缩放 · 试炼的写与收', () => {
+  /* 这一组的假 game **故意不给玩家位置**：没有场就没有刷怪，试炼只走状态机 ——
+   * 于是"归位"这件事能被单独测到，不被刷怪/清理干扰。击杀必须带 origin，
+   * 因为切片3 起口径收窄成"只算试炼自己刷的"（世界里顺手杀的不算）。 */
   const fakeGame = () => ({ player: { combat: { takeDamage: () => {} } } });
+  const 一只 = () => emit('enemy-defeated', { type: 'soldier', origin: TRIAL_ORIGIN });
   /** 清掉第 1 层（第 1 层的 scale 是恒等 —— 所以"非中性"要从第 2 层起看） */
   const 清第一层 = () => {
-    for (let i = 0; i < TRIAL_LAYERS[0].quota; i += 1) emit('enemy-defeated', { type: 'soldier' });
+    for (let i = 0; i < TRIAL_LAYERS[0].quota; i += 1) 一只();
   };
 
   it('第 1 层是恒等档（曲线如此），第 2 层起真的非中性', () => {
@@ -136,7 +150,7 @@ describe('出生缩放 · 试炼的写与收', () => {
     const sys = new TrialSystem(fakeGame());
     sys.start([]);
     for (const row of TRIAL_LAYERS) {
-      for (let i = 0; i < row.quota; i += 1) emit('enemy-defeated', { type: 'soldier' });
+      for (let i = 0; i < row.quota; i += 1) 一只();
     }
     expect(sys.getState().state).toBe('finished');
     expect(isNeutralSpawnScale(), '通关之后没有归位').toBe(true);

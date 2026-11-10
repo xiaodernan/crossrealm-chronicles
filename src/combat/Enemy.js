@@ -70,6 +70,15 @@ export class Enemy {
      * **这一区的原生敌人**，不是"它死的时候脚下是哪块地"（它可能追着玩家跑了很远）。
      */
     this.zone = config.zone ?? null;
+    /**
+     * 这只敌人是**谁刷出来的**（W-F3 切片3）。
+     *
+     * `null` = 世界原生（出生点表 / 副本刷的），`'trial'` = 位面试炼刷的。
+     * 记在出生那一刻而不是死的时候：敌人会追着玩家跑很远，死亡现场反推不出来；
+     * 而且"这一局算不算数"该由**出生**决定，不该由脚下那块地决定。
+     * 死亡时随 `enemy-defeated` 带出去（试炼按它收窄击杀口径）。
+     */
+    this.origin = config.origin ?? null;
     this.position = new THREE.Vector3(config.x, 0, config.z);
     this.maxHp = config.hp ?? 100;
     this.hp = this.maxHp;
@@ -896,7 +905,9 @@ export class Enemy {
     this.endMove();
     this.deathTimer = this.respawnTime;
     window.dispatchEvent(new CustomEvent('enemy-defeated', {
-      detail: { name: this.name, type: this.type, bossId: this.bossId, zone: this.zone },
+      detail: {
+        name: this.name, type: this.type, bossId: this.bossId, zone: this.zone, origin: this.origin,
+      },
     }));
   }
 
