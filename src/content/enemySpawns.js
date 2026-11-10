@@ -144,6 +144,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'gloom_horror', x: 170, z: 170 },
   { type: 'gloom_horror', x: 300, z: 180 },
   { type: 'gloom_horror', x: 110, z: 210 },
+  // 幽暗歌手（三点，W-E3 切片98）—— 歌诀布陷区，与恐惧者/鬼火错开。
+  { type: 'gloom_choir', x: 210, z: 150 },
+  { type: 'gloom_choir', x: 140, z: 210 },
+  { type: 'gloom_choir', x: 250, z: 120 },
 
   // ── 虚空断口（void，中心 ~0,220，半径 130）── W-E3 切片69
   // 虚空幻影（三点）—— 悬浮残影，分散在断口周边，与 wraith/crawler 出生带错开。
@@ -273,4 +277,8 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'radiant_seraph', x: -340, z: -160 },
   { type: 'radiant_seraph', x: -210, z: -95 },
   { type: 'radiant_seraph', x: -260, z: -300 },
+  // 辉煌壁垒（三点，W-E3 切片98）—— 厚皮猛冲者，与天使/誓守者/大主教错开。
+  { type: 'radiant_bulwark', x: -170, z: -230 },
+  { type: 'radiant_bulwark', x: -260, z: -180 },
+  { type: 'radiant_bulwark', x: -310, z: -280 },
 ]);

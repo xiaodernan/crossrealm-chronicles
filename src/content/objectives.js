@@ -1386,6 +1386,19 @@ export const OBJECTIVES = [
     journal: 'obj_gloom_horror_hunt_journal',
   },
   {
+    // W-E3 切片98：幽暗歌手进主线 —— 幽暗第八独占，插在恐惧者后、chaos-boss 前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'gloom-choir-hunt',
+    title: 'obj_gloom_choir_hunt_title',
+    desc: 'obj_gloom_choir_hunt_desc',
+    type: 'kills',
+    enemyType: 'gloom_choir',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: 210, z: 150, label: 'enemy_name_gloom_choir' },
+    reward: 20,
+    journal: 'obj_gloom_choir_hunt_journal',
+  },
+  {
     id: 'chaos-boss',
     title: bossById('chaos-overlord').shortNameKey,
     desc: 'obj_chaos_boss_desc',
@@ -1492,6 +1505,19 @@ export const OBJECTIVES = [
     waypoint: { x: -340, z: -160, label: 'enemy_name_radiant_seraph' },
     reward: 20,
     journal: 'obj_radiant_seraph_hunt_journal',
+  },
+  {
+    // W-E3 切片98：辉煌壁垒进主线 —— 圣域第八独占，插在天使后、大主教前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'radiant-bulwark-hunt',
+    title: 'obj_radiant_bulwark_hunt_title',
+    desc: 'obj_radiant_bulwark_hunt_desc',
+    type: 'kills',
+    enemyType: 'radiant_bulwark',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -170, z: -230, label: 'enemy_name_radiant_bulwark' },
+    reward: 20,
+    journal: 'obj_radiant_bulwark_hunt_journal',
   },
   {
     // W-E3 切片67：辉煌大主教进主线 —— 圣域四类清剿（骑士/舞者/圣印者之外，最后一类）。

@@ -98,6 +98,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'gloom_wisp', weight: 1 },
       // W-E3 切片97：幽暗恐惧者 —— 潜行伏击，权重低
       { type: 'gloom_horror', weight: 1 },
+      // W-E3 切片98：幽暗歌手 —— 歌诀布陷者，权重低
+      { type: 'gloom_choir', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },
@@ -116,6 +118,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'radiant_vowkeeper', weight: 1 },
       // W-E3 切片97：辉煌天使 —— 高单发远压，权重低
       { type: 'radiant_seraph', weight: 1 },
+      // W-E3 切片98：辉煌壁垒 —— 圣盾猛冲者，权重低
+      { type: 'radiant_bulwark', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },
