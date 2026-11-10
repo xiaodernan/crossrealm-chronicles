@@ -92,6 +92,8 @@ export const BODY_PLANS = {
   void_rendclaw:  { scale: 1.05, parts: ['head', 'torso', 'legs'], radius: 0.45 },
   /** W-E3 切片91：虚空号哭者 —— 飘忽的远压施术者体格。 */
   void_howler:    { scale: 0.97, parts: ['head', 'torso', 'legs'], radius: 0.41 },
+  /** W-E3 切片94：虚空缚裂者 —— 贴身的连舞体格。 */
+  void_riftbinder:{ scale: 0.98, parts: ['head', 'torso', 'legs'], radius: 0.42 },
   /** W-E3 切片70：深渊撕掠者 —— 深渊里的贴地猎手，比掠行兽更壮、靠撕裂而不是乱爪 */
   abyss_reaver:   { scale: 1.04, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片71：深渊凝视者 —— 悬浮的暗目，远距凝视施压，与撕掠者的贴身撕裂分工 */
@@ -222,6 +224,8 @@ export const ENEMY_RESIST = {
   void_rendclaw:  { fire: -0.14, gravity: 0.26 },
   /** W-E3 切片91：虚空号哭者 */
   void_howler:    { fire: -0.11, gravity: 0.22 },
+  /** W-E3 切片94：虚空缚裂者 —— 怕火，引力能打断舞步 */
+  void_riftbinder:{ fire: -0.13, gravity: 0.18 },
   /** W-B9 辉煌圣域：辉煌爬兽裂隙爬出的冷血东西，怕冰；硬壳挡一点引力 */
   radiant_crawler: { ice: -0.25, gravity: 0.15 },
   /** W-B9 辉煌圣域：辉煌骑士重甲，火与冰都啃不动 */
@@ -397,6 +401,8 @@ export const ENEMY_DEFENSE = {
   void_rendclaw: 5,
   /** W-E3 切片91：虚空号哭者 */
   void_howler: 3,
+  /** W-E3 切片94：虚空缚裂者 */
+  void_riftbinder: 4,
   abyss_reaver: 6,
   abyss_watcher: 5,
   abyss_brute: 8,
@@ -1080,6 +1086,18 @@ export const ENEMY_MOVES = {
     telegraph: { color: 0x8866bb },
   },
   /**
+   * 虚空绝斩（虚空缚裂者专属招）—— W-E3 切片94。
+   * 三段虚空能量连斩：复用既有 `combo`/`comboWindup` 机制（与 `abyss_gloomlash` 同族），
+   * 强调贴身持续压制而非单发重击；与 `void_rake`（单发重爪）、
+   * `void_gnash`/void-lunge（突进）三岔。
+   */
+  void_sever: {
+    name: '虚空绝斩', windup: 0.48, strike: 0.14, recover: 0.38, reach: 1.0, cone: 0.5,
+    band: [0, 1.15],
+    damage: 0.48, cooldown: 3.4, weight: 2, knock: 2.0, combo: 3, comboWindup: 0.16,
+    telegraph: { color: 0x443366 },
+  },
+  /**
    * 圣印灼场（辉煌圣印者）—— W-E3 切片3。
    *
    * **远距标点**：站位诉求要求它自己待在 6~11 米外（`standoff`），射出一枚慢速圣印弹，
@@ -1576,6 +1594,8 @@ export const ENEMY_MOVE_SETS = {
   void_rendclaw:  ['void_rake', 'sweep', 'thrust'],
   /** W-E3 切片91：虚空号哭者 —— 虚空号哭（远压）+ 刺击 + 横扫 */
   void_howler:    ['void_howl', 'thrust', 'sweep'],
+  /** W-E3 切片94：虚空缚裂者 —— 虚空绝斩（三连）+ 连击 + 刺击 */
+  void_riftbinder:['void_sever', 'flurry', 'thrust'],
   /** W-E3 切片70：深渊撕掠者 —— 深渊撕裂（重撕控距）+ 劈砍 + 刺击 + 连爪 */
   abyss_reaver:   ['maw_rend', 'cleave', 'thrust', 'flurry'],
   /** W-E3 切片71：深渊凝视者 —— 深渊凝视（远距凝视弹）+ 虚能弹 + 刺击 */

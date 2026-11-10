@@ -141,6 +141,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'void_rendclaw', weight: 1 },
       // W-E3 切片91：虚空号哭者 —— 远压施术者，权重低
       { type: 'void_howler', weight: 1 },
+      // W-E3 切片94：虚空缚裂者 —— 贴身连斩手，权重低
+      { type: 'void_riftbinder', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

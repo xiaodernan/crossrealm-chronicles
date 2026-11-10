@@ -182,6 +182,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'void_howler', x: 90, z: 245 },
   { type: 'void_howler', x: 115, z: 290 },
   { type: 'void_howler', x: 55, z: 275 },
+  // 虚空缚裂者（三点，W-E3 切片94）—— 贴身连斩手，与号哭者/裂爪兽错开。
+  { type: 'void_riftbinder', x: 60, z: 225 },
+  { type: 'void_riftbinder', x: 165, z: 285 },
+  { type: 'void_riftbinder', x: 115, z: 300 },
 
   // ── 深渊之颚（abyss，中心 ~-200,220，半径 130）── W-E3 切片70
   // 深渊撕掠者（三点）—— 贴地猎手，分散在颚区边缘，与 stalker/sentinel 出生带错开。

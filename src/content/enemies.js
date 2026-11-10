@@ -124,6 +124,10 @@ export const ENEMY_ROSTER = {
    */
   void_howler: { name: 'enemy_name_void_howler', hp: 140, posture: 48, damage: 15, speed: 5.0, aggroRange: 31, color: 0xaa77cc },
   /**
+   * W-E3 切片94：虚空缚裂者 —— 虚空断口贴身的连斩手。
+   */
+  void_riftbinder: { name: 'enemy_name_void_riftbinder', hp: 126, posture: 43, damage: 14, speed: 5.5, aggroRange: 29, color: 0x553388 },
+  /**
    * W-E3 切片70：深渊撕掠者 —— 深渊之颚边缘的贴地猎手。
    * 比掠行兽更壮（hp165/架势60）、出手更重（19），靠深渊撕裂控距顶开，
    * 与 stalker（轻快乱爪扑击）、knight（重甲横扫守势）分工不同。

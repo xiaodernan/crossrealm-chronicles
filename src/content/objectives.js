@@ -886,6 +886,19 @@ export const OBJECTIVES = [
     journal: 'obj_void_howler_hunt_journal',
   },
   {
+    // W-E3 切片94：虚空缚裂者进主线 —— 第十二独占，插在号哭者后、断口副本前（ch4，v21 不写迁移；右移 choice-void）。
+    id: 'void-riftbinder-hunt',
+    title: 'obj_void_riftbinder_hunt_title',
+    desc: 'obj_void_riftbinder_hunt_desc',
+    type: 'kills',
+    enemyType: 'void_riftbinder',
+    target: 3,
+    chapter: 4,
+    waypoint: { x: 60, z: 225, label: 'enemy_name_void_riftbinder' },
+    reward: 22,
+    journal: 'obj_void_riftbinder_hunt_journal',
+  },
+  {
     id: 'void-casket',
     title: 'obj_void_casket_title',
     desc: 'obj_void_casket_desc',

@@ -106,6 +106,8 @@ const OLD_BIRTH = {
   void_rendclaw: { name: '虚空裂爪兽', hp: 165, posture: 58, damage: 18, speed: 4.7, aggroRange: 27, color: 0x9955bb },
   // W-E3 切片91：虚空号哭者
   void_howler: { name: '虚空号哭者', hp: 140, posture: 48, damage: 15, speed: 5.0, aggroRange: 31, color: 0xaa77cc },
+  // W-E3 切片94：虚空缚裂者
+  void_riftbinder: { name: '虚空缚裂者', hp: 126, posture: 43, damage: 14, speed: 5.5, aggroRange: 29, color: 0x553388 },
   // W-E3 切片70：深渊撕掠者
   abyss_reaver: { name: '深渊撕掠者', hp: 165, posture: 60, damage: 19, speed: 6.2, aggroRange: 26, color: 0x882244 },
   // W-E3 切片71：深渊凝视者
