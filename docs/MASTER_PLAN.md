@@ -5438,7 +5438,17 @@ Phase D（系统与质量）
   - **风险与后续**：① 三连鞭影手感未实测校准；② 下一步 S94：void 第十二独占（ch4，`choice-void` 61→62）保持对称。
 
 
-- **2026-11-10 W-X3 —— 在线伙伴服务部署化：四容器 Dockerfile + compose 编排 + CI 全链路冒烟** —— 提交 `待提交`
+- **2026-11-10 W-X4 —— 在线伙伴服务手册定稿：把 W-X1/W-X2/W-X3 的东西收成一份可读的手册** —— 提交 `e523d7e`
+
+  - **动机**：W-X1/W-X2/W-X3 三片落完后，在线伙伴服务的知识散在 server/README、ADR 与代码注释里；冷启动接手（或玩家想自部署）要读三处才能拼出全貌。这一片把它收成 `docs/ONLINE_SERVICES.md`。
+
+  - **做法**：新 `docs/ONLINE_SERVICES.md`：它是什么 / 快速验证（smoke）/ 端到端开关（浏览器 console 五步）/ 部署（mvn verify → compose → verify 容器，本机实测状态如实标注）/ 环境变量速查 / 已知坑四条（SPRING_CONFIG_IMPORT  per-JVM、loopback 4s RST、localhost 注册、Gateway 4.x webflux 前缀）/ 文件索引；README 文档表 + `server/README.md` 互相引用。
+
+  - **验证**：纯文档；链接已核对（ONLINE_SERVICES.md、server/README.md、`.github/workflows/server.yml`、`src/online/OnlineServices.js` 均存在且可达）。
+
+  - **后续**：排行榜面板 UI、设置里的在线开关、`submitRun` 接线裁决（何时提交通关记录）仍在 backlog。
+
+- **2026-11-10 W-X3 —— 在线伙伴服务部署化：四容器 Dockerfile + compose 编排 + CI 全链路冒烟** —— 提交 `e523d7e`
 
   - **动机**：W-X1 把服务做到了"可跑"（smoke 真机验证五件套），但还不是"可部署"——没有镜像、没有编排、CI 只守编译与单测，不守"装配起来之后整条链是否真的通"。这一片把这三个缺口补上。
 
