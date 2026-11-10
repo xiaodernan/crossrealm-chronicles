@@ -5396,6 +5396,15 @@ Phase D（系统与质量）
 
 
 
+- **2026-11-10 W-X6（在线伙伴服务）—— 设置页「在线服务」开关：默认关闭、不经 SettingsStore，翻运行时单例即生效** —— 提交 `b647c3b`（8 文件，+109 −2）
+
+  - **起因**：W-X2（`db7c857`）接好 Boss 遥测后，**没有玩家能看见的开关** —— 唯一"开启"方式是 DevTools console 里敲 `localStorage['crossrealm_online']='1'`，这等于没有开。游戏侧最后一格在线闭环：让玩家在设置里亲手翻的那一格存在了。
+
+  - **做法**：① `OnlineServices.setEnabled(flag)` —— 纯翻转运行时单例，不经 SettingsStore（授权不是画面偏好，没有"重应用到场景"语义）；② `SettingsPanel` + `index.html` 加第三个 h3「在线服务」：`<input id="set-online" type="checkbox">` + 提示行，勾选写 `localStorage crossrealm_online=1|0` 并立刻 `onlineServices.setEnabled()`（当场生效/当场停止，**不需重载**）；③ i18n +3（`settings_online` / `_toggle` / `_hint`，zh/en 双表）→ 2646→2649，`tests/helpers/i18nKeyCount.js` 连带改；④ 顺手修分块：`vite.config.js` 把 `src/online/` 收进 **chunk-core**（W-B1 纪律：谁读谁才算 —— `Game.js` 与 `SettingsPanel` 同时读它，`online/` 自己零游戏导入；留在 `chunk-ui` 会造出 `chunk-ui → index → chunk-ui` 回环，`tests/chunk-graph.test.js` 当场红 —— 这一条不是设计意愿，是门禁结论）；⑤ 新增 `tests/online-settings-toggle.test.js`（6 项：setEnabled 双向翻转 / singleton 导出存在 / index.html 接线结构 / 面板源码真的读写 LS 与翻单例 / zh·en 三键齐）；⑥ `ONLINE_SERVICES.md` 更新开关状态说明。
+
+  - **验证**：lint 0/0，test 全绿（**399 文件 / 6007 项**；i18n 键数门槛从 2646 → **2649**），build ✓；`tests/chunk-graph.test.js` 6/6（manualChunks 加了 `online/` 后无环，`chunk-core` 是叶子不回读特性块）；E2E：`12360帧/206s/q=108/主线109/ch5/completed=true/exceptions=0` —— 与 S97 **同读数**：设置页加了三格，帧成本为零。
+
+  - **风险与后续**：① **排行榜面板与 `submitRun` 接入仍是 W-X7**：游戏到目前为止对外**只上报遥测、不提交排行榜**；在线线闭环（开关→排行榜→服务端）还差最后一格；② 本格不经 SettingsStore 是刻意的：若以后统一进 SettingsStore，`crossrealm_online` 的键和读写路径要一起迁；③ localStorage 写失败（隐私模式）时先翻运行时单例，关闭兜底吞掉 —— 失败口径与在线客户端一致（默认关闭、吞错、零打扰）；④ `chunk-core` 约 841 KB（W-X6 多收了 `online/`，+2 KB 左右）——真正的体积欠账仍是 `vendor-three`（683 KB），不是本条。
 - **2026-11-10 W-X5（在线伙伴服务）—— 网关熔断 + 冒烟跨平台/确定性化：server workflow 红灯复位、smoke 内建 warm-up** —— 提交 `a47b541` + `27c0cd0`
 
   - **起因**：① `server` workflow（run 42789399768）**首次全红**——`smoke.ps1` 的 preflight 用 `Get-NetTCPConnection`，pwsh on Linux 里该命令不存在，直接退出 1；② 本机复跑并发现 lb:// 路由有 **~30 秒级的注册表缓存暖起窗口**（eureka 刷新阈值），冷启动第一拨请求**必然落空（503）**，若断言直接跑会出确定失败/偶发失败——server CI 从"看起来能跑"到"每次推送真打全链路"之间还差这两道；③ 用户要求把 Spring Cloud 元素再做实一点。

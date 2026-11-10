@@ -17,7 +17,7 @@
 - 开启方式（任一种）：`localStorage['crossrealm_online'] = '1'`、网址参数 `?online=1`、`window.__CROSSREALM_ONLINE__ = true`；
 - 网关地址：`localStorage['crossrealm_online_base_url']`，缺省同源 origin，本地默认 `http://localhost:8080`；
 - 当前接线：**击杀 Boss → 静默上报名 `boss_defeated` 遥测**（吞错、1.5s 超时，零打扰）；
-- 排行榜提交（`submitRun`）已实现但**尚未接入调用点**；设置页里的"在线服务"开关与排行榜面板在后续切片里；
+- 排行榜提交（`submitRun`）已实现但**尚未接入调用点**（仍等后续切片）；**设置页里的"在线服务"开关已落地（W-X6）**：默认关闭、独立于 SettingsStore，写 localStorage `crossrealm_online` 并翻运行时 `onlineServices` 单例（开关一翻即生效，不需重载）；排行榜面板仍在后续切片；
 - 生产化路径（Redis ZSET 排行榜 / Kafka 遥测 / 真集群）在 `server/README.md` 有说明。
 
 ## 快速验证（5 分钟）
