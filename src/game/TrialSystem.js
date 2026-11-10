@@ -40,6 +40,7 @@
  */
 import { on, offAll, emit } from '../engine/EventBus.js';
 import { setSpawnScale, resetSpawnScale } from './SpawnTuning.js';
+import { TrialArena } from '../effects/TrialArena.js';
 import {
   TRIAL_MAX_LAYERS, TRIAL_ORIGIN, TRIAL_ARENA, trialSpawnOffset,
   trialModifiers, trialLayerOf, layerSeconds, layerQuota, layerScale, trialScore,
@@ -79,6 +80,11 @@ export class TrialSystem {
     this._spawnCursor = 0;
     /** 距离下一次补刷还有多久 */
     this._waveTimer = 0;
+    /**
+     * 场地边界的可视化（W-F3 切片5）。**首次开局面才造**，`dispose()` 才拆 ——
+     * 一局结束只 `hide()`，因为下一局还要用（拆了就是每局重建一次 GPU 资源）。
+     */
+    this._arenaFx = null;
 
     this._onKill = (e) => this._handleKill(e?.detail);
     this._onDeath = () => { if (this.state === 'running') this._fail('death'); };
@@ -108,6 +114,7 @@ export class TrialSystem {
     this._flushPendingClear();
     this._spawnCursor = 0;
     this._beginLayer(1);
+    this._showArena();
     emit('trial-started', { layer: 1, affixIds: this.affixIds });
     return this.getState();
   }
@@ -133,6 +140,18 @@ export class TrialSystem {
     this._setFog(this.mods.fogMul);
     // 开层立刻给一波：不然玩家要盯着空气等一个补刷间隔
     this._spawnWave();
+  }
+
+  /**
+   * 把场地边界摆出来（W-F3 切片5）。
+   *
+   * 三个前置都缺一不可：有场心、有场景、还有 `TrialArena` 自己 —— 单测里的
+   * 假 game 常常没有 `scene`，那时试炼照样要能跑（只是看不见边界）。
+   */
+  _showArena() {
+    if (!this._arena || !this.game?.scene) return;
+    if (!this._arenaFx) this._arenaFx = new TrialArena(this.game.scene);
+    this._arenaFx.show(this._arena, TRIAL_ARENA.radius);
   }
 
   /**
@@ -226,6 +245,7 @@ export class TrialSystem {
     // 收工归位：不归位，玩家离开试炼之后世界里的怪会一直按最后一层的强度长
     resetSpawnScale();
     this._setFog(1);
+    this._arenaFx?.hide();
     // 本层与积压的残留一起进待清理（下一帧真正 despawn）
     if (this._spawned.length) {
       this._pendingClear.push(...this._spawned);
@@ -248,6 +268,7 @@ export class TrialSystem {
     this.state = 'failed';
     resetSpawnScale();
     this._setFog(1);
+    this._arenaFx?.hide();
     // 失败时场上可能还有活着的：全部进待清理（不清的话玩家会被一堆残怪围着）
     if (this._spawned.length) {
       this._pendingClear.push(...this._spawned);
@@ -288,6 +309,7 @@ export class TrialSystem {
     }
     this._tickBurn(step);
     this._tickSpawn(step);
+    this._arenaFx?.update(step);
   }
 
   /** 灼烧：按秒结算，走玩家受伤的既有入口（不直接改血量字段） */
@@ -351,6 +373,9 @@ export class TrialSystem {
     // 销毁也要归位：`_adopt` 的 teardown 会在换档/重开时走到这里
     resetSpawnScale();
     this._setFog(1);
+    // 场地边界是**它造的**，也只能由它拆（`new THREE.*` 的创建者/销毁者纪律）
+    this._arenaFx?.dispose();
+    this._arenaFx = null;
     // dispose 不在 update 栈里，可以同步清（此时没有谁在遍历 enemies）
     if (this._spawned.length) {
       this._pendingClear.push(...this._spawned);
