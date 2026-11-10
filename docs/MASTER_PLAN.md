@@ -87,7 +87,7 @@
 | 事件登记 | 71 条 | **78 条** `GAME_EVENTS` + **2 条** `REST_DIALOGUE_EVENTS`（2026-11-11 实测） | 名字侧的账仍是"0 个未登记名、0 个死条目"（`tests/event-registry.test.js`） |
 | 游戏逻辑 `setTimeout` | src 内 0 处实际调用 | **0 处**（全仓仅 `engine/Scheduler.js` 注释里提到一次） | 保持 |
 | 中文显示名逻辑判定 | 0 处 | **0 处** | 保持（`tests/content-boundary.test.js` 静态门禁） |
-| 测试 | 409 例 / 30 文件 | **6236 例 / 417 文件**，全绿（2026-11-11 `npm run test:verify` 复核） | 单次全量 **35 秒**（本批修掉"判据与执行没分家"之前是 **285 秒** —— `tests/perf-smoke.test.js` 曾 import 可执行脚本，于是 `npm test` 里真跑了一遍性能冒烟，见 W-D4 切片3） |
+| 测试 | 409 例 / 30 文件 | **6257 例 / 419 文件**，全绿（2026-11-11 `npm run test:verify` 复核） | 单次全量 **35 秒**（本批修掉"判据与执行没分家"之前是 **285 秒** —— `tests/perf-smoke.test.js` 曾 import 可执行脚本，于是 `npm test` 里真跑了一遍性能冒烟，见 W-D4 切片3） |
 | Lint | 0 error / 10 warning | **0 error / 0 warning** | 那 10 条 `no-unused-vars` 也清了 |
 | 构建 | 通过，1 条 `chunk-ui ↔ chunk-world` 跨块环告警 | **通过 12.41s，0 条环告警** | 环已消；新出现的是一条"chunk > 600 KB"提示（`vendor-three` 677 KB，非环、非新增依赖）—— 分块仍归 W-B1 |
 | 首屏体积 | — | **2.02 MiB / 环比 2.06 MiB / 上限 2.25 MiB** | W-D5 切片4 拆成两条线（刻度 × 1.03 + 绝对上限），`npm run size` |
@@ -422,7 +422,7 @@
 |------|--------|------|----------|------|------|
 | W-F1 | **敌人图鉴**（60 类，读击杀账） | ✅ 切片1 | 2026-11-11 | `b5c7cb7` | 内容层只登记三档阈值 + 五个特征判据 + 三种元素名，条目全部从名册/抗性表/体型表现推；运行时只读 `PlayerStats.kills` ⇒ **零存档迁移**；日志新页签 + HUD 计数 + teardown 登记；i18n 2748 → 2770；`tests/bestiary.test.js` 26 例 |
 | W-F2 | **赛季**（本地轮转 + 在线确认） | ✅ 切片1 | 2026-11-11 | `f162e8d` | `content/seasons.js` 四套名册 + 八条词缀，id 与服务端 `season-service` 逐字对齐；`SeasonSystem` 默认信本地（离线也有赛季），在线服务开着才向 `/api/seasons/active` 确认；日志新页签如实标注 `本地轮转 / 在线赛季`；i18n 2770 → 2801；`tests/seasons.test.js` 28 例 |
-| W-F3 | **位面试炼**（词缀真正生效的终局挑战） | ✅ 切片1–4 | 2026-11-11 | `65a0daa` / `153b5cc` / `544e912` | `content/trial.js` 五层曲线 + 八条词缀数值（id 与 `SEASON_MODIFIERS` 逐字对齐）；`TrialSystem` 状态机（idle/running/finished/failed），限时按**世界时**走（暂停不扣）；**八条词缀全部真的生效**：时限 / 配额 / 灼烧由试炼自己执行，`hp/damage/speed` 走 `SpawnTuning` → `EnemyManager.spawnAt` 那条唯一出生咽喉，雾走 `ZoneFog.setDensityScale`（区域 + 天气 之后再乘的第三笔账）；**切片3 起试炼自己刷怪**（以玩家为圆心、黄金角散开、每层不超配额、`respawn:false`），击杀口径收窄成"只算 `origin === 'trial'`"，清理延迟一帧（避免在 `enemy-defeated` 的派发栈里 `splice` 掉正在遍历的数组）；**切片4 起 HUD 有随身读数**（第 N/M 层 + m:ss 倒计时 + 进度条 + 最后 10 秒变红）；日志页签 + HUD 计数 + 四条 Toast + `submitRun`（`bossId: trial-layer-N`）；**零存档迁移**；i18n 2801 → 2837；`tests/trial.test.js` 52 例 + `spawn-tuning` 13 例 |
+| W-F3 | **位面试炼**（词缀真正生效的终局挑战） | ✅ 切片1–6 | 2026-11-11 | `65a0daa` / `153b5cc` / `544e912` / `f7b58d3` / `14cb6bf` | `content/trial.js` 五层曲线 + 八条词缀数值（id 与 `SEASON_MODIFIERS` 逐字对齐）；`TrialSystem` 状态机（idle/running/finished/failed），限时按**世界时**走（暂停不扣）；**八条词缀全部真的生效**：时限 / 配额 / 灼烧由试炼自己执行，`hp/damage/speed` 走 `SpawnTuning` → `EnemyManager.spawnAt` 那条唯一出生咽喉，雾走 `ZoneFog.setDensityScale`（区域 + 天气 之后再乘的第三笔账）；**自己刷怪**（以玩家为圆心、黄金角散开、每层不超配额、`respawn:false`），击杀口径收窄成"只算 `origin === 'trial'`"，清理延迟一帧（避免在 `enemy-defeated` 的派发栈里 `splice` 正在遍历的数组）；**场地有视觉边界**（`effects/TrialArena`：地面光环 + 八根光柱，首次开局造、结束只 hide、dispose 才拆）；**HUD 随身读数**（第 N/M 层 + m:ss 倒计时 + 进度条 + 最后 10 秒变红）；**成绩进第二张榜**：服务端 `/api/trials/runs` + `/api/trials/leaderboard`（分数降序、赛季过滤、内存有界），替换掉切片1 那条把 `trial-layer-N` 冒充 bossId 的旧路；日志页签 + HUD 计数 + 四条 Toast；**零存档迁移**；i18n 2801 → 2837；客户端 `tests/trial.test.js` 52 例 + `trial-arena` 11 例 + `trial-online` 10 例 + `spawn-tuning` 13 例，服务端 13 例 Java |
 
 ---
 
@@ -5977,3 +5977,23 @@ Phase D（系统与质量）
   - **验证**：lint 0 error；`npm run test:verify` **417 文件 / 6236 例全绿**；`tests/trial.test.js` 49 → 52 例（雾倍率开层写/放弃归位/dispose 归位、无 `zoneFog` 时不炸、HUD 元素与节流与"只读公开快照"的静态断言）；`tests/zone-fog.test.js` 20 → 22 例（`(区域 + 天气) × 倍率` 的合成值、六种脏值回落 1 且入口没焊死）。i18n 2836 → 2837（只加 `trial_effect_fog_fmt` 一键 —— HUD 复用了既有的 `trial_layer_fmt` 与 `trial_kills_fmt`）。首屏 2120926 字节，环比余 0.04 MiB / 上限余 0.23 MiB。
 
   - **风险与后续**：① HUD 那块是**拉取式**的（每 0.2 秒问一次系统），而仓库里另一条路是事件驱动的（`trial-*` 四条 Toast）。两种并存是刻意的：Toast 负责"发生了什么"，读数负责"现在怎么样"；若以后要收成一种，读数的实时性会先丢。② `setDensityScale` 与 `setWeatherBoost` 现在是两个入口、两笔账，将来第三个来源（比如某个 Boss 的领域）进来时，正确动作是**再开一笔账**而不是把三个数乘在一起 —— 乘在一起的后果是"谁把谁盖掉了"查不出来。③ `heavy-fog` 的 1.9 倍雾在枢纽白天可能偏浓（那张表的基准密度是 0.0038）；这是**只有真机能定**的数，先记在这里，不预设调。④ 试炼目前仍然借用世界的场地，没有一个"围起来"的视觉边界 —— 玩家可能跑出刷怪圈。要不要造一圈光柱留给下一片（造了就要有人销毁，那是另一条 `new THREE.*` 的账）。
+
+- **2026-11-11 W-F3 切片5 —— 场地有边界了：一圈会呼吸的光**（提交 `f7b58d3`）
+
+  - **动机**：切片3 把试炼变成"以玩家为圆心的场"，但那个场**在画面上不存在**。玩家会一路追着怪跑出 12 米，然后奇怪为什么不再刷怪 —— **规则没说出口，就等于没有规则**。切片3 的风险栏里把这条写着，这一片来还。
+
+  - **做法**：① 新 `src/effects/TrialArena.js`：一圈地面光环 + 八根细光柱，`show(center, radius)` 摆位、`hide()` 收起、`update(dt)` 只做呼吸与极慢自转。② **不做成墙**：试炼允诺的是"限时清剿"，不是"关进笼子"。场是在已有世界里临时划出来的（可能压在一条路上、一座桥边），实心墙会把玩家真的关起来；一圈光说的是"这里是场"，不是"你出不去"。③ **单位的取法**：环是**单位半径**几何（0.985~1.0），半径靠 `scale` 拉 —— 造一个 12 米的环等于把半径焊死进几何；八根柱子反过来要各自的位置，所以位置在 `show()` 里按半径重算，几何只有一份（八根共用，逐个 dispose 会同一份释放八次）。④ **所有权**：造它的只有 `TrialSystem`（**首次开局面**才造），拆它的也只有 `TrialSystem.dispose()`；一局结束只 `hide()` —— 拆了就是每局重建一次 GPU 资源。
+
+  - **验证**：lint 0 error；`npm run test:verify` **418 文件 / 6247 例全绿**；新增 `tests/trial-arena.test.js` 11 例（构造即挂但不可见、show 摆位与八根等角、hide 只藏不拆且复用同一份资源、脏参数回落、update 热路径不新建任何对象且藏起来之后不动、dispose 四种共享资源各释放一次 + 幂等 + 拆完再 show 不抛、接线四条结束路、半径与内容层同源）。`asset-lifecycle-census` 通过（`TrialArena` 有自己的 `dispose`，不进"故意不释放"那张表）。
+
+  - **风险与后续**：① 光柱高 3.6 米、粗 0.1 米、半透明 —— 第三人称视角下不挡视线是**估的**，真机若挡，正确动作是降高度而不是降透明度（透明度低了就看不见边界，等于白造）。② 环贴地 0.06 米避 z-fighting，但**地形起伏处会切进坡里**；真要贴地形得按段采样高度，那是另一个量级的活，先不做。③ 边界是"提示"不是"约束"：玩家仍能跑出去，只是看得见自己跑出去了。要不要加"出界就计时暂停"是规则问题，不是渲染问题，留待有人真的抱怨时再定。
+
+- **2026-11-11 W-F3 切片6 —— 第二张榜：试炼成绩不再冒充 Boss**（提交 `14cb6bf`）
+
+  - **动机**：切片1 为了让成绩有地方去，把 `trial-layer-N` 冒充 `bossId` 塞进 Boss 榜，理由是"服务端契约不动"。代价写在当时的风险栏里：**服务端多出五个不存在的 Boss**，而两张榜仍然分不开（一个按用时排、一个按分数排的东西挤在同一张表里，排序只能选一种）。这一片把那条路彻底换掉。
+
+  - **做法**：① 服务端新包 `trial`：`TrialRun` / `TrialLeaderboardService` / `TrialController`，两条端点 `POST /api/trials/runs`、`GET /api/trials/leaderboard?season=&limit=`。**网关不用改** —— `/api/trials/**` 命中 `Path=/api/**` 主路由。② 次序四级：**分数降 → 层数降 → 剩余秒降 → 提交时间升**。为什么不合成一个"综合分"：合成之后就再也解释不清"为什么他排我前面"，而榜单唯一的正确性就是"谁在前"。③ **赛季 id 是过滤键**（不是展示字段）：轮换之后旧成绩不该混进新榜；缺省 = 跨季总榜（新玩家第一次打开时还没打任何一局，看总榜比看空榜有意思）。④ **内存有界**：`max-entries`，超出丢**最老**的一条 —— 不限容的内存榜是内存泄漏的一种，而它长得不像 bug。⑤ 客户端 `submitTrialRun` / `fetchTrialLeaderboard`；`Game` 的 `trial-finished` 改交 `{ runner, seasonId, score, layersCleared, secondsLeft }`，赛季 id 拿不到时兜 `'unknown'` 而不是让请求 400。
+
+  - **验证**：`game-service` **13 例 Java 全绿**（服务 7：播种降序 / 四级 tie-break / 赛季过滤 / limit 夹紧 / 丢最老不丢最差 / 关播种为空 / add 回新榜；控制器 6：形状与字段、赛季过滤、201+新榜、五种非法体各 400、空白裁掉、limit 越界 400）；全量 `npm run test:verify` **419 文件 / 6257 例全绿**（新增 `tests/trial-online.test.js` 10 例，含一条**反面断言**：`Game` 的试炼段里不许再出现 `submitRun(`，也不许再有 `trial-layer-${`）。控制器的手工 `LocalValidatorFactoryBean` 是必需的 —— `standaloneSetup` 默认不带 Bean Validation，不挂的话 `@Min/@Max` 全是摆设。
+
+  - **风险与后续**：① 服务端**没有身份校验**（`runner` 由客户端提交），任何人都能刷榜 —— 与 Boss 榜同一档次的演示实现，真要做正经榜要先有账号。② `submittedAt` 用 ISO-8601 字符串的字典序当时间序（同行长度一致），不解析成 `Instant`：解析失败会让一条脏记录把整次出榜打掉。③ 客户端还没有**看榜的地方** —— 拉取方法写了、测试写了，但试炼页上没有那一块。下一片接（那里会暴露一个真问题：榜是异步的，而日志页是同步渲染的快照）。
