@@ -134,6 +134,27 @@ export class OnlineServices {
       return null;
     }
   }
+
+  /**
+   * 拉取当前赛季（W-F2，`GET /api/seasons/active`）。
+   *
+   * 返回原始 JSON（`{ id, name, tagline, modifierIds, soulsBonusPct, dayInCycle, daysRemaining }`），
+   * 失败/未启用/超时 → null。**不做语义校验**：id 认不认识由 `SeasonSystem` 判 ——
+   * 这一层的职责只是"把服务端说的话原样带回来"，校验放在知道名册的那一层。
+   */
+  async fetchActiveSeason() {
+    if (!this._enabled) return null;
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/seasons/active`, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      console.warn('[online] 拉取赛季失败（已吞掉）', e?.message ?? e);
+      return null;
+    }
+  }
 }
 
 /** 全局单例（读当前 window 环境决定是否启用） */

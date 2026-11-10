@@ -128,6 +128,7 @@ const JOURNAL_SUB_TABS = {
   achievements: (game, panel) => game.achievementsJournalTab.render(panel),
   codex: (game, panel) => game.loreCodexTab.render(panel),
   bestiary: (game, panel) => game.bestiaryTab.render(panel),
+  season: (game, panel) => game.seasonTab.render(panel),
   memory: (game, panel) => game.campfireMemoryTab.render(panel),
   dungeons: (game, panel) => game.dungeonJournalTab.render(panel),
   skills: (game, panel) => game.weaponSkillJournalTab.render(panel),

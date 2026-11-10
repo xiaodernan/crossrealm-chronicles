@@ -113,6 +113,8 @@ import { LoreCodexSystem } from '../game/LoreCodexSystem.js';
 import { LoreCodexJournalTab } from '../ui/LoreCodexJournalTab.js';
 import { BestiarySystem } from '../game/BestiarySystem.js';
 import { BestiaryJournalTab } from '../ui/BestiaryJournalTab.js';
+import { SeasonSystem } from '../game/SeasonSystem.js';
+import { SeasonJournalTab } from '../ui/SeasonJournalTab.js';
 import { CombatStyleTracker } from '../game/CombatStyleTracker.js';
 import { Captions } from '../ui/Captions.js';
 import { CombatStyleOverlay } from '../ui/CombatStyleOverlay.js';
@@ -443,6 +445,11 @@ export class Game {
     // 才是被统一保证的，而不是靠"这个类看起来无害"。
     this.bestiary = this._adopt('game/BestiarySystem', new BestiarySystem(this));
     this.bestiaryTab = new BestiaryJournalTab(this);
+    // W-F2 切片1：赛季。本地轮转永远有答案；在线伙伴服务开着时再向 season-service 确认一次
+    // （`refreshFromOnline` 自己吞错，失败就保持本地那一季，不会把网络问题抛给开机流程）。
+    this.seasons = this._adopt('game/SeasonSystem', new SeasonSystem(this));
+    this.seasonTab = new SeasonJournalTab(this);
+    void this.seasons.refreshFromOnline();
     this.combatStyle = this._adopt('game/CombatStyleTracker', new CombatStyleTracker(this));
     this.combatStyleOverlay = this._adopt('ui/CombatStyleOverlay', new CombatStyleOverlay(this));
     this.bossRematch = this._adopt('world/BossRematchDirector', new BossRematchDirector(this));

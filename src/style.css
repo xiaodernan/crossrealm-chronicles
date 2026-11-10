@@ -2269,6 +2269,20 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .bestiary-hint { font-size: 0.7rem; color: #8a7a66; margin-top: 4px; }
 .bestiary-empty { font-size: 0.75rem; color: #888; }
 
+/* 赛季（W-F 段切片1）：一张卡，季节色偏金铜 */
+.season-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(201,169,98,0.25); border-radius: 6px; padding: 12px; }
+.season-name { font-size: 1rem; color: #e0b070; font-weight: 600; letter-spacing: 0.04em; }
+.season-tagline { font-size: 0.76rem; color: #a89a84; margin-top: 4px; line-height: 1.5; }
+.season-line { font-size: 0.75rem; color: #c9a962; margin-top: 8px; }
+.season-source { font-size: 0.68rem; color: #8a7a66; margin-top: 2px; }
+.season-source.is-online { color: #7fb0a0; }
+.season-mods-label { font-size: 0.72rem; color: #9a8a70; margin: 10px 0 4px; }
+.season-mods { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.season-mod { border-left: 2px solid rgba(201,169,98,0.35); padding-left: 8px; }
+.season-mod-name { display: block; font-size: 0.74rem; color: #d8c090; }
+.season-mod-desc { display: block; font-size: 0.7rem; color: #999; margin-top: 1px; }
+.season-empty { font-size: 0.75rem; color: #888; }
+
 .cf-section h3 { font-size: 0.8rem; color: #c9a962; margin: 8px 0 4px; }
 .cf-stat-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .cf-node-list { list-style: none; padding: 0; max-height: 28vh; overflow-y: auto; }
