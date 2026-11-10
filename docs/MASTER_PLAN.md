@@ -5280,7 +5280,7 @@ Phase D（系统与质量）
 
   - **放弃了什么**：① 不写 v21→v22 迁移；② 不新增第五名 abyss_ 成员；③ `abyss_veil` 复用既有 phase+strike 结算；④ 通用 normal 魂价不动；⑤ mainline-table 仍以手工排除名单/历史腿维护（全面 ID 辅助待后续）。
 
-  - **留了什么尾巴**：① 相位伏击与深渊三独占混编手感未真机走查；② abyss-deep-maw 池四名独占均为 weight 1；③ mainline-table 历史腿维护成本持续累积——高频插步下应考虑 ID 派生辅助层；④ E2E 已确认并回填（9960帧/166s/q=88/主线89/completed=true/0异常（切片75基线）；切片77实测12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0）。
+  - **留了什么尾巴**：① 相位伏击与深渊三独占混编手感未真机走查；② abyss-deep-maw 池四名独占均为 weight 1；③ mainline-table 历史腿维护成本持续累积——高频插步下应考虑 ID 派生辅助层；④ E2E 已确认并回填（9960帧/166s/q=88/主线89/completed=true/0异常（切片75基线）；切片77实测12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0）。
 - **2026-11-08 W-E3 切片76 —— 虚空掠夺者入主线与副本：虚空断口第四独占，主线 106 步，v21 插步不写迁移** —— 提交 `65c9f21`（17 文件，+216 −40）
 
   - **动机**：void_ 仅有三名独占（phantom 悬浮相位切 / riftwalker 长距裂隙突入 / lurker travel 快伏击），缺少中重型正面压迫者。补第四名贴地中重掠食者，让 void-broken-casket 遭遇在“相位/突入/伏击/重压”四层之间形成更完整节奏，并补齐 void_ 与 abyss_ 的成员规模平衡。
@@ -5303,7 +5303,7 @@ Phase D（系统与质量）
 
   - **做法**：① 新敌人 `void_stinger`「虚空刺蜇者」（hp140 / 架势48 / damage 15 / speed 5.4 / aggroRange 30，贴地远程骚扰者，parts head+torso+legs，radius 0.40）—— BODY_PLANS / ENEMY_RESIST / ENEMY_DEFENSE(3) / ENEMY_MOVE_SETS[`void_sting`,`thrust`,`sweep`] 全落盘；② 专属招 `void_sting`「虚空刺蜇」（ranged 非相位，windup 0.7s / strike 0.18s / recover 0.48s / range 11 / minDist 3.5 / speed 18 / damage 1.0 / cooldown 2.6s），与 `shot`、`abyss_gaze`、`void_lunge/void_rend` 分岔；③ `void-broken-casket` 遭遇池 +`void_stinger` w1；④ 野外 void 断口新增三处 `void_stinger` 出生点（110,250 / 150,255 / 145,215），与掠夺者/潜伏者错开；⑤ `void-stinger-hunt`（kills×3, ch4）插入 `void-marauder-hunt` 后、`void-casket` 前（v21 `currentId`，不写迁移；ch4 插步使 `choice-void` 54→55）；⑥ i18n +4（2566→2618，zh/en 各 4）；⑦ 新增 `tests/void-stinger.test.js`（7 项）+ 维护 mainline-table/qsr/cvr/ledger/roster/spawns/goldens。
 
-  - **验证**：lint 0/0，test 全绿（373 文件 / 5664 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（373 文件 / 5664 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① ch4 插步右移 `ch
 
@@ -5313,11 +5313,11 @@ Phase D（系统与质量）
 
   - **做法**：① `abyss_mire`「深渊沼兽」（hp160/架势58/damage14/speed4.2/aggro24，贴地慢速封锁者，parts head+torso+legs，radius 0.46）+ 四表；② 专属 `abyss_mire`「深渊沼泽」（hazard 非相位非 ranged，windup1.1s/range7/standoff[4,7]/hazard radius2.8 telegraph1.2 damage0.55 duration4.5 tick0.9 cd8s），与 `rift` 同机制不同参数；③ `abyss-deep-maw` 池 +w1；④ 野外 abyss 三处出生点（-215,250/-175,260/-235,265）；⑤ `abyss-mire-hunt`（kills×3,ch5,reward23）插 `abyss-hound-hunt` 后、`abyss-maw` 前（v21 不迁移，ch5 不移 `choice-void`=55）；⑥ i18n +4（2570→2618）；⑦ `tests/abyss-mire.test.js`（6 项）+ 维护。
 
-  - **验证**：lint 0/0，test 全绿（374 文件 / 5671 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（374 文件 / 5671 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① hazard 参数未做实机手感校准；② mainline-table 历史腿维护继续累积。oice-void` 及后续下标，qsr/mainline 历史腿维护成本继续累积；② `void-broken-casket` 池低权重点缀；③ 后续应优先 ID 派生辅助层减少脆断。7 项）+ 维护 mainline-table/qsr/cvr/ledger/roster/spawns/goldens。
 
-  - **验证**：lint 0/0，test 全绿（372 文件 / 5656 项），build ✓。E2E：`12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0`。
+  - **验证**：lint 0/0，test 全绿（372 文件 / 5656 项），build ✓。E2E：`12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0`。
 
   - **风险与后续**：① 未做 boss/编排级扩展，仅完成独占常规模块；② `abyss-dee
 
@@ -5327,7 +5327,7 @@ Phase D（系统与质量）
 
   - **做法**：① `void_ruptor`「虚空裂隙使」（hp145/架势50/damage14/speed4.8/aggro28，贴地远距布陷者，parts head+torso+legs，radius 0.43）+ BODY_PLANS/ENEMY_RESIST/ENEMY_DEFENSE(4)/ENEMY_MOVE_SETS[`void_breach`,`thrust`,`sweep`]；② 专属 `void_breach`「虚空裂隙」（ranged+hazard，windup0.95s/range11/minDist4/standoff[5,10]/ranged speed12/hazard radius2.5 telegraph1.1 damage0.55 duration3.8 tick0.9 cd7.8s），与 `brand`（同机制不同参数）、`void_sting`（纯直射）、`abyss_mire`（近身布置）分岔；③ `void-broken-casket` 池 +`void_ruptor` w1；④ 野外 void 断口三处出生点（95,260/135,265/70,235）；⑤ `void-ruptor-hunt`（kills×3,ch4,reward22）插 `void-stinger-hunt` 后、`void-casket` 前（v21 `currentId`，不写迁移；ch4 插步右移 `choice-void` 55→56）；⑥ i18n +4（2574→2618）；⑦ `tests/void-ruptor.test.js`（6 项）+ 维护 mainline-table/qsr/cvr/ledger/roster/spawns/goldens/section-12。
 
-  - **验证**：lint 0/0，test 全绿（375 文件 / 5677 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（375 文件 / 5677 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① ch4 插步继续右移 `choice-void`，mainline/qsr 历史腿维护成本累积；② ranged+haza
 
@@ -5337,7 +5337,7 @@ Phase D（系统与质量）
 
   - **做法**：① `abyss_scarbearer`「深渊裂痕使」（hp150/架势52/damage14/speed4.9/aggro29，贴地远距布陷者，parts head+torso+legs，radius 0.44）+ 四表；② 专属 `abyss_scar`「深渊裂痕」（ranged+hazard，windup0.98s/range11.5/minDist4/standoff[5,10.5]/ranged speed11.5/hazard radius2.6 telegraph1.15 damage0.55 duration4.0 tick0.9 cd8.2s），与 `void_breach/brand`（同机制不同参）、`abyss_gaze`（纯远压）、`abyss_mire`（近身布置）分岔；③ `abyss-deep-maw` 池 +w1；④ 野外 abyss 三处出生点（-190,280/-220,210/-260,270）；⑤ `abyss-scarbearer-hunt`（kills×3,ch5,reward23）插 `abyss-mire-hunt` 后、`abyss-maw` 前（v21 `currentId`，不写迁移；ch5 不移 `choice-void`=56）；⑥ i18n +4（2578→2618）；⑦ `tests/abyss-scarbearer.test.js`（6 项）+ 维护。
 
-  - **验证**：lint 0/0，test 全绿（376 文件 / 5684 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（376 文件 / 5684 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① ranged+hazard 参数未做实机手感校准；② mainline-table 历史腿维护成本持续累积。rd 参数未做实机手感校准；③ 后续优先考虑 ID 派生辅助层。p-maw` 池低权重点缀；③ mainline-table 历史腿维护成本高，后续应优先考虑 ID 派生辅助层减少脆断。 结算（无新机制）；④ 通用 normal 魂价不动；⑤ mainline-table 仍手工维护排除名单/历
 
@@ -5347,7 +5347,7 @@ Phase D（系统与质量）
 
   - **做法**：① `void_chasmer`「虚空裂渊者」（hp155/架势54/damage13/speed4.4/aggro25，贴地慢速封锁者，parts head+torso+legs，radius 0.45）+ 四表；② 专属 `void_chasm`「虚空裂渊」（hazard 非 ranged，windup1.0s/range7.5/standoff[4.5,7.5]/hazard radius2.7 telegraph1.0 damage0.6 duration4.2 tick0.85 cd8.3s），与 `rift/abyss_mire`（同机制不同参）、`void_breach`（远程布陷）分岔；③ `void-broken-casket` 池 +w1；④ 野外 void 三处出生点（120,275/80,250/155,270）；⑤ `void-chasmer-hunt`（kills×3,ch4,reward22）插 `void-ruptor-hunt` 后、`void-casket` 前（v21 `currentId`，不写迁移；ch4 插步右移 `choice-void` 56→57）；⑥ i18n +4（2582→2618）；⑦ `tests/void-chasmer.test.js`（6 项）+ 维护。
 
-  - **验证**：lint 0/0，test 全绿（377 文件 / 5692 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（377 文件 / 5692 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① ch4 插步继续右移 `choice-void`，历史腿维护成本累积；② hazard 参数未做实机手感校准。史腿（高频 ch4 插步持续放大维护成本）。
 
@@ -5359,7 +5359,7 @@ Phase D（系统与质量）
 
   - **做法**：① `abyss_gnasher`「深渊噬颚兽」（hp155/架势56/damage18/speed6.0/aggro27，贴地追咬猎兽，parts head+torso+legs，radius 0.43）+ 四表；② 专属 `abyss_gnash`「深渊噬咬」（travel lunge，windup0.55s/strike0.18s/recover0.42s/reach1.0/cone0.5/band[0,1.0]/dmg1.25/cd3.4s/knock4.5/standoff[1.3,3.0]/travelSpeed5.8），与 `abyss_pounce`（更轻快）、`void_lunge` 分岔；③ `abyss-deep-maw` 池 +w1；④ 野外 abyss 三处出生点（-200,205/-240,280/-160,250）；⑤ `abyss-gnasher-hunt`（kills×3,ch5,reward23）插 `abyss-scarbearer-hunt` 后、`abyss-maw` 前（v21 不写迁移；ch5 不移 `choice-void`=57）；⑥ i18n +4（2586→2618）；⑦ `tests/abyss-gnasher.test.js`（6 项）+ 维护。修复 S83 初版 `strings.en.js` 未转义 `maw\'s` 的语法问题。
 
-  - **验证**：lint 0/0，test 全绿（378 文件 / 5699 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（378 文件 / 5699 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① 追咬参数未做实机手感校准；② mainline-table 历史腿维护成本持续累积。8s/q=94/主线95/ch5/completed=true/exceptions=0）。
 
@@ -5370,7 +5370,7 @@ Phase D（系统与质量）
 
   - **做法**：① `void_revenant`「虚空残魂」（hp145/架势50/damage16/speed5.6/aggro29，贴地相位游猎者，parts head+torso+legs，radius 0.42）+ 四表；② 专属 `void_phase_rend`「虚空相噬」（phase，windup0.55s/strike0.2s/recover0.44s/reach1.0/cone0.46/band[0.2,1.3]/blink6/dmg1.2/cd3.6s/knock2.8），与 `phase_cut`（blink5）、`rift_step`（blink8）分岔；③ `void-broken-casket` 池 +w1；④ 野外 void 三处出生点（105,235/60,265/140,245）；⑤ `void-revenant-hunt`（kills×3,ch4,reward22）插 `void-chasmer-hunt` 后、`void-casket` 前（v21 不写迁移；ch4 插步右移 `choice-void` 57→58）；⑥ i18n +4（2590→2618）；⑦ `tests/void-revenant.test.js`（6 项）+ 维护。
 
-  - **验证**：lint 0/0，test 全绿（379 文件 / 5706 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（379 文件 / 5706 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① phase 参数未做实机手感校准；② `choice-void`/历史腿维护成本累积。
 
@@ -5380,7 +5380,7 @@ Phase D（系统与质量）
 
   - **做法**：① `abyss_hollow`「深渊空壳」（hp140/架势48/damage15/speed5.0/aggro30，轻盈汲取施压者，parts head+torso+legs，radius 0.41）+ 四表；② 专属 `abyss_drain`「深渊汲取」（ranged 非 hazard，windup0.6s/strike0.16s/recover0.42s/range10/minDist3/dmg1.0/cd2.9s/speed16），与 `abyss_gaze`（更远更重）、`abyss_scar`（ranged+hazard）分岔；③ `abyss-deep-maw` 池 +w1；④ 野外 abyss 三处出生点（-230,195/-175,285/-255,245）；⑤ `abyss-hollow-hunt`（kills×3,ch5,reward23）插 `abyss-gnasher-hunt` 后、`abyss-maw` 前（v21 不写迁移；ch5 不移 `choice-void`=61）；⑥ i18n +4（2594→2618）；⑦ `tests/abyss-hollow.test.js`（6 项）+ 维护。
 
-  - **验证**：lint 0/0，test 全绿（380 文件 / 5713 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（380 文件 / 5713 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① 汲取参数未做实机手感校准；② `mainline-table`/计数类历史腿维护成本累积，后续考虑 ID 派生辅助切片。
 
@@ -5402,7 +5402,7 @@ Phase D（系统与质量）
 
   - **做法**：① `gloom_wisp`「幽暗鬼火」（hp110/架势40/damage13/speed5.6/aggro28，飘忽的鬼火斥候，hover 0.6）+ 四表；② 专属 `gloom_whisper`「幽暗低语」（纯 ranged，windup0.55s/strike0.15s/recover0.4s/range10.5/minDist2.2/dmg0.88/cd2.7s/speed15），与 `beacon`（ranged+hazard）、`haunt`/`shadowstep`（blink 接近）分岔；③ `gloom-mist-crypt` 池 +w1；④ 野外出生点三处（160,150/280,200/90,90）；⑤ `gloom-wisp-hunt`（kills×3,ch5,reward20）插 `gloom-shade-hunt` 后、`chaos-boss` 前（v21 不写迁移；ch5 不移 `choice-void`=62）；⑥ i18n +4（2634→2638）；⑦ `tests/gloom-wisp.test.js`（6 项）+ 维护；⑧ S87 helper 追加 `gloom-wisp-hunt`。
 
-  - **验证**：lint 0/0，test 全绿（396 文件 / 5987 项），build ✓。E2E 待回填。
+  - **验证**：lint 0/0，test 全绿（396 文件 / 5987 项），build ✓。E2E：`12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0`。
 
   - **风险与后续**：① 低语手感未实测校准；② 四族独占对称齐平（gloom/radiant/void/abyss 各 6/6/12/12），下一阶段应该把质量做上去（独占改命盘/口径）而不是继续加数量。
 
@@ -5412,7 +5412,7 @@ Phase D（系统与质量）
 
   - **做法**：① `radiant_vowkeeper`「辉煌誓守者」（hp128/架势42/damage14/speed5.0/aggro28，持誓辉使，parts head+torso，hover 0.28）+ 四表；② 专属 `radiant_rebuke`「辉煌斥罚」（纯 ranged，windup0.6s/strike0.16s/recover0.42s/range11.5/minDist2.5/dmg0.95/cd3.2s/speed16），与 `radiant_brand`（ranged+hazard）、`radiant_flare`（hazard）、`edict`（hazard）分岔；③ `radiant-dawn-hall` 池 +w1；④ 野外出生点三处（-330,-190/-95,-95/-190,-290）；⑤ `radiant-vowkeeper-hunt`（kills×3,ch5,reward20）插 `radiant-brand-hunt` 后、`archon-hunt` 前（v21 不写迁移；ch5 不移 `choice-void`=62）；⑥ i18n +4（2630→2638）；⑦ `tests/radiant-vowkeeper.test.js`（6 项）+ 维护；⑧ S87 helper 追加 `radiant-vowkeeper-hunt`。
 
-  - **验证**：lint 0/0，test 全绿（395 文件 / 5980 项），build ✓。E2E：`12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0`。
+  - **验证**：lint 0/0，test 全绿（395 文件 / 5980 项），build ✓。E2E：`12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0`。
 
   - **风险与后续**：① 斥罚手感未实测校准；② radiant 六独占后，gloom/radiant 仍是 6 对 6（目标 6~8），abyss/void 已 12 —— 后续看板维持对称扩，不堆数量堆质量。
 
@@ -5422,7 +5422,7 @@ Phase D（系统与质量）
 
   - **做法**：① `void_riftbinder`「虚空缚裂者」（hp126/架势43/damage14/speed5.5/aggro29，贴身连斩手，parts head+torso+legs，radius 0.42）+ 四表；② 专属 `void_sever`「虚空绝斩」（melee，多段 combo=3/comboWindup0.16s，damage0.48/cd3.4s/reach1.0/cone0.5/band[0,1.15]/knock2.0），与 `void_rake`（单发重爪）、`void_lunge`/`void_rend`（突进/撕扯）三岔；③ `void-broken-casket` 池 +w1；④ 野外出生点三处（60,225/165,285/115,300）；⑤ `void-riftbinder-hunt`（kills×3,ch4,reward22）插 `void-howler-hunt` 后、`void-casket` 前（v21 不写迁移；ch4 插步右移 `choice-void` 61→62）；⑥ i18n +4（2626→2638）；⑦ `tests/void-riftbinder.test.js`（6 项）+ 维护；⑧ S87 helper 追加 `void-riftbinder-hunt`。
 
-  - **验证**：lint 0/0，test 全绿（393 文件 / 5967 项），build ✓。E2E：`12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0`。
+  - **验证**：lint 0/0，test 全绿（393 文件 / 5967 项），build ✓。E2E：`12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0`。
 
   - **风险与后续**：① 三连绝斩手感未实测校准；② abyss/void 两侧独占体系已各 12，下次应做降债/读数维护而非继续堆独占。
 
@@ -5433,7 +5433,7 @@ Phase D（系统与质量）
 
   - **做法**：① `abyss_gloombinder`「深渊缚影者」（hp128/架势44/damage14/speed5.4/aggro29，贴身舞影缚鞭手，parts head+torso+legs，radius 0.42）+ 四表；② 专属 `abyss_gloomlash`「深渊缚影鞭」（melee，多段 combo=3/comboWindup0.17s，damage0.5/cd3.6s/reach1.05/cone0.46/band[0,1.2]/knock2.2），与 `abyss_ravage`（单发重击）、`abyss_gnash`（突进连噬）、`abyss_wail`（ranged）三岔；③ `abyss-deep-maw` 池 +w1；④ 野外出生点三处（-148,233/-238,312/-193,263）；⑤ `abyss-gloombinder-hunt`（kills×3,ch5,reward22）插 `abyss-wailer-hunt` 后、`abyss-maw` 前（v21 不写迁移；ch5 不移 `choice-void`=61）；⑥ i18n +4（2622→2638）；⑦ `tests/abyss-gloombinder.test.js`（6 项）+ 维护；⑧ S87 helper 追加 `abyss-gloombinder-hunt`。
 
-  - **验证**：lint 0/0，test 全绿（392 文件 / 5960 项），build ✓。E2E：`12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0`。
+  - **验证**：lint 0/0，test 全绿（392 文件 / 5960 项），build ✓。E2E：`12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0`。
 
   - **风险与后续**：① 三连鞭影手感未实测校准；② 下一步 S94：void 第十二独占（ch4，`choice-void` 61→62）保持对称。
 
@@ -5454,7 +5454,7 @@ Phase D（系统与质量）
 
   - **做法**：① `src/online/OnlineServices.js`：`OnlineServices` 类 + `onlineServices` 单例；**默认关闭**（无 localStorage 标志/URL 参数/window 标志时 enabled()=false，零网络请求）；网关地址＝`crossrealm_online_base_url` 或同源 origin，本地默认 `http://localhost:8080`；所有方法吞错兜底（`console.warn` 后返回 false/null），超时用 `AbortSignal.timeout(1500)`（刻意避开 setTimeout —— B39 计时门禁禁止 src/ 出现 `setTimeout(`）；② `src/core/Game.js`：`setupEvents()` 里新增一条 `gameOn('boss-defeated', …)` → `onlineServices.postTelemetry('boss_defeated', bossId)`（与既有监听同事务挂在 GAME_EVENT_TAG 下，dispose 自动解绑）；③ `tests/online-services.test.js`（6 项，注入 fetch 桩：默认关闭时 fetch 零调用 / POST 契约 / GET 解析 / 三条失败路径全吞错不抛）。
 
-  - **验证**：lint 0/0（含 B39 计时门禁），test 全绿（394 文件 / 5973 项），build ✓。E2E：`12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0`（与切片94一致，默认关闭零网络行为）。
+  - **验证**：lint 0/0（含 B39 计时门禁），test 全绿（394 文件 / 5973 项），build ✓。E2E：`12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0`（与切片94一致，默认关闭零网络行为）。
 
   - **风险与后续**：① 排行榜提交（submitRun）已提供客户端方法但**未**在游戏里调用——需要先定"玩家何时提交通关记录"（强制 cheer/静默齐射/从不），留给后续切片；② 排行榜 UI 面板未做；③ 开启开关的 UI（设置里的可选开关 + i18n）未做。
 
@@ -5482,7 +5482,7 @@ Phase D（系统与质量）
 
   - **做法**：① `void_howler`「虚空号哭者」（hp140/架势48/damage15/speed5.0/aggro31，飘忽远压施术者，parts head+torso+legs，radius 0.41）+ 四表；② 专属 `void_howl`「虚空号哭」（ranged 非 hazard，windup0.66s/strike0.16s/recover0.46s/range12/minDist3.3/dmg1.05/cd3.0s/speed15.5），与 `void_sting`（更近更快）、`void_siphon`（更远更慢）、`void_breach`（ranged+hazard）分岔；③ `void-broken-casket` 池 +w1；④ 野外 void 三处出生点（90,245/115,290/55,275）；⑤ `void-howler-hunt`（kills×3,ch4,reward23）插 `void-rendclaw-hunt` 后、`void-casket` 前（v21 不写迁移；ch4 插步右移 `choice-void` 60→61）；⑥ i18n +4（2614→2618）；⑦ `tests/void-howler.test.js`（6 项）+ 维护；⑧ S87 helper 追加 `void-howler-hunt`。
 
-  - **验证**：lint 0/0，test 全绿（385 文件 / 5748 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（385 文件 / 5748 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① 号哭参数未做实机手感校准；② `choice-void`/历史腿维护成本累积；③ 下一步可做 S92 降债或继续对称扩容。- **2026-11-08 W-E3 切片90 —— 深渊恸嚎者入主线与副本：深渊之颚第十一独占，主线 106 步，v21 插步不写迁移** —— 提交 `83a4de2`（17 文件，+156 −31）
 
@@ -5490,7 +5490,7 @@ Phase D（系统与质量）
 
   - **做法**：① `abyss_wailer`「深渊恸嚎者」（hp142/架势49/damage16/speed5.1/aggro31，飘忽远压施术者，parts head+torso+legs，radius 0.41）+ 四表；② 专属 `abyss_wail`「深渊恸嚎」（ranged 非 hazard，windup0.64s/strike0.16s/recover0.44s/range11/minDist3.2/dmg1.04/cd3.1s/speed15.5），与 `abyss_gaze`（更远更重）、`abyss_drain`（更近更快）、`abyss_scar`（ranged+hazard）分岔；③ `abyss-deep-maw` 池 +w1；④ 野外 abyss 三处出生点（-225,220/-185,295/-250,260）；⑤ `abyss-wailer-hunt`（kills×3,ch5,reward24）插 `abyss-ravager-hunt` 后、`abyss-maw` 前（v21 不写迁移；ch5 不移 `choice-void`=61）；⑥ i18n +4（2610→2618）；⑦ `tests/abyss-wailer.test.js`（6 项）+ 维护；⑧ S87 helper 追加 `abyss-wailer-hunt`。
 
-  - **验证**：lint 0/0，test 全绿（384 文件 / 5741 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（384 文件 / 5741 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① 恸嚎参数未做实机手感校准；② 下一步 S91 拟做 void 第十一独占（ch4，右移 `choice-void` 60→61）保持对称。- **2026-11-08 W-E3 切片89 —— 虚空裂爪兽入主线与副本：虚空断口第十独占，主线 106 步，v21 插步不写迁移** —— 提交 `df38c43`（17 文件，+161 −34）
 
@@ -5498,7 +5498,7 @@ Phase D（系统与质量）
 
   - **做法**：① `void_rendclaw`「虚空裂爪兽」（hp165/架势58/damage18/speed4.7/aggro27，魁梧近身撕裂者，parts head+torso+legs，radius 0.45）+ 四表；② 专属 `void_rake`「虚空裂爪」（重型近战，windup0.68s/strike0.2s/recover0.48s/reach1.1/cone0.52/band[0,1.05]/dmg1.3/cd3.5s/knock4.8，非 travel/ranged/hazard/phase），与 `void_rend`（掠夺者）、`abyss_ravage` 分岔；③ `void-broken-casket` 池 +w1；④ 野外 void 三处出生点（100,275/65,290/135,260）；⑤ `void-rendclaw-hunt`（kills×3,ch4,reward23）插 `void-siphoner-hunt` 后、`void-casket` 前（v21 不写迁移；ch4 插步右移 `choice-void` 59→60）；⑥ i18n +4（2606→2618）；⑦ `tests/void-rendclaw.test.js`（6 项）+ 维护；⑧ 利用 S87 `tests/helpers/mainlineInsertions.js` 追加 `void-rendclaw-hunt`。
 
-  - **验证**：lint 0/0，test 全绿（383 文件 / 5734 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（383 文件 / 5734 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① 裂爪参数未做实机手感校准；② `choice-void`/历史腿维护成本累积；③ 下一步可做 S90 降债（quest-save-restore/mainline 计数辅助）或继续安全内容扩容。- **2026-11-08 W-E3 切片88 —— 深渊撕裂者入主线与副本：深渊之颚第十独占，主线 106 步，v21 插步不写迁移** —— 提交 `2aee8f7`（17 文件，+156 −29）
 
@@ -5506,7 +5506,7 @@ Phase D（系统与质量）
 
   - **做法**：① `abyss_ravager`「深渊撕裂者」（hp168/架势60/damage19/speed4.6/aggro26，魁梧近身压迫者，parts head+torso+legs，radius 0.46）+ 四表；② 专属 `abyss_ravage`「深渊撕裂击」（重型近战，windup0.72s/strike0.2s/recover0.5s/reach1.15/cone0.52/band[0,1.1]/dmg1.35/cd3.8s/knock5.0，非 travel/ranged/hazard/phase），与 `abyss_gnash`（travel）、`maw_rend` 分岔；③ `abyss-deep-maw` 池 +w1；④ 野外 abyss 三处出生点（-210,230/-245,295/-170,275）；⑤ `abyss-ravager-hunt`（kills×3,ch5,reward24）插 `abyss-hollow-hunt` 后、`abyss-maw` 前（v21 不写迁移；ch5 不移 `choice-void`=61）；⑥ i18n +4（2602→2618）；⑦ `tests/abyss-ravager.test.js`（6 项）+ 维护；⑧ 利用 S87 `tests/helpers/mainlineInsertions.js` 追加 `abyss-ravager-hunt`。
 
-  - **验证**：lint 0/0，test 全绿（382 文件 / 5727 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（382 文件 / 5727 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① 重压参数未做实机手感校准；② 下一步可做 void 第十独占（ch4，右移 choice-void）或继续降债/补内容缺口。- **2026-11-08 W-E3 切片87 —— test(maint)：集中维护 mainline-table 历史腿排除名单** —— 提交 `2abf35c`（2 文件，+50 −5）
 
@@ -5520,7 +5520,7 @@ Phase D（系统与质量）
 
   - **做法**：① `void_siphoner`「虚空汲魂者」（hp138/架势47/damage15/speed4.8/aggro31，漂游汲魂施压者，parts head+torso+legs，radius 0.41）+ 四表；② 专属 `void_siphon`「虚空汲魂」（ranged 非 hazard，windup0.68s/strike0.16s/recover0.44s/range13/minDist3.5/dmg1.08/cd3.1s/speed15），与 `void_sting`（更近更快）、`void_breach`（ranged+hazard）分岔；③ `void-broken-casket` 池 +w1；④ 野外 void 三处出生点（85,255/125,280/45,240）；⑤ `void-siphoner-hunt`（kills×3,ch4,reward22）插 `void-revenant-hunt` 后、`void-casket` 前（v21 不写迁移；ch4 插步右移 `choice-void` 58→59）；⑥ i18n +4（2598→2618）；⑦ `tests/void-siphoner.test.js`（6 项）+ 维护。
 
-  - **验证**：lint 0/0，test 全绿（381 文件 / 5720 项），build ✓。E2E：12000帧/200s/q=105/主线106/ch5/completed=true/exceptions=0。
+  - **验证**：lint 0/0，test 全绿（381 文件 / 5720 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
   - **风险与后续**：① 汲魂参数未做实机手感校准；② `choice-void`/历史腿维护成本累积，S87 拟做 mainline-table ID 派生辅助降债切片。
 
