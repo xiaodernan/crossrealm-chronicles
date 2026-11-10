@@ -31,6 +31,7 @@ import { 建追踪, 追踪可调项 } from '../platform/tracing.js';
 import { 建配置, 配置总线题, 刷新题 } from '../platform/config.js';
 import { 建总线 } from '../platform/bus.js';
 import { 建写者租约, 租约可调项 } from '../platform/lease.js';
+import { onlineServices } from '../online/OnlineServices.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
  *  DOM 事件（resize / keydown / keyup）不走这里 —— 它们不在事件登记表里，EventBus 管不着。 */
 const GAME_EVENT_TAG = 'core/Game';
@@ -679,6 +680,12 @@ export class Game {
     });
     gameOn('boss-start', (e) => {
       this.audio.startBossFight(e.detail.bossId);
+    });
+    // W-X2 在线伙伴服务（可选，默认关闭）：击杀 Boss 后上报一条遥测。
+    // localStorage['crossrealm_online']='1' / ?online=1 / window.__CROSSREALM_ONLINE__=true 才开启；
+    // 没开或网络差时 postTelemetry 永远不抛（1.5s 超时、吞错），对本地游戏零影响。
+    gameOn('boss-defeated', (e) => {
+      onlineServices.postTelemetry('boss_defeated', e?.detail?.bossId ?? '');
     });
     gameOn('boss-defeated', () => {
       this.audio.endBossFight();
