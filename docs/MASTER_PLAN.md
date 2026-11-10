@@ -5432,6 +5432,15 @@ Phase D（系统与质量）
   - **验证**：lint 0/0，test 全绿（**404 文件 / 6049 项**），build ✓。E2E：`12600帧/210s/q=110/主线111/ch5/completed=true/exceptions=0` —— 与 S98 **同读数**：两栋新建筑（静移态，无帧成本）只在 world build 造一次。
 
   - **风险与后续**：① 两个新母题目前各只有**一**条回声 —— 不满足"系列 tour"（`side-gloom-tour` 要 ≥ 3 条）的条件；想给它们办巡礼任务，得先各扩到 3 条回声；② 两处新母题的显示文案仍走既有 `franchiseLabel`，无 name-escape 样式风险；③ POI 几何为朴素构造盒/柱，未入**共享库**（与 Wave3/4 同口径，挂 zone.group、随位面释放）；④ Choice-void / 存档版本 / 主线步数**一样没动**。
+- **2026-11-10 W-X13（在线伙伴服务）—— GET /api/ops/health 复合健康视图** —— 提交 `1dee555`（4 文件，+99 −1）
+
+  - **起因**：`/actuator/health` 只判 liveness/dead (`UP`)，但 `Ops` 或自己想知道：当前这个 JVM 绑的是什么配置（seed + maxEvents + versionNote + maxLimit）、后端 refresh 后的实际值是什么、缓存里面落了几条记录（leaderboard / telemetry）——这些在既有 9 个测试覆盖之内看不见，运维需要一句命令。
+
+  - **做法**：`OpsController.java`（新）：只承载 `/api/ops/health` 一个端点 —— `@Value` + `properties` + `LeaderboardService.size()` + `TelemetryService.count()`。没有外呼、没有 eureka 依赖、不会被依赖反咬。响应含：`service` （名 + 版本）、`version`、`javaVersion`、`config{}` （leaderboardMaxLimit / seedDemoData / telemetryMaxEvents / versionNote）、`inMemory{}`（leaderboardRecords / telemetryEvents）。`OpsControllerTest` 1 项：打 `GET /api/ops/health` → 200 + 字段齐全 + inMemory 是数字。
+
+  - **验证**：`mvn -B verify` 全绿（game-service 11 项测试，2026-11-10 本机实测）；整个 `smoke.ps1` 跑完打印 "smoke test PASSED"。（CI 会在下次推送时完整跑 `mvn verify` + 全链路冒烟）。
+
+  - **风险与后续**：① 这路被调用不计入 telemetry（不打 leaderboard / telemetry 任何记录），仅作"运维查询"用；② 暴露 `versionNote` 等于把 config-server 的值吐出来——config-server 本身就是内网可访问，不算泄密；③ 如果以后给它加"返回 5 条 leaderboard 真实行"，那是另一片；④ **对外接口面上要谨慎**：正面玩家自己用；别暴露给第三方（Stackdriver/Datadog 不在这里接）。
 - **2026-11-10 W-X12（在线伙伴服务）—— 网关限流（rate-limit by IP）** —— 提交 `bb4d436`（5 文件，+264 −3）
 
   - **起因**：W-X9 / W-X11 把 Fallback + Retry 补齐之后，网关的"最后一道保命闸"再也没有别的短板 —— 但网关对**每个 IP** 没有流量纪律。这一片补一个"单 IP 每 10 秒最多 60 次"的 SlidingWindow 限流：既不挡住玩家正常玩（人打 boss 不到 10 次/秒），又能在单机脚本/批量抓取/leaderboard 刷子成堆的时候刹车。它不是身份认证，也不是分布式公平——它是单机、单进程的"caption"，但是有。
