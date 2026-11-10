@@ -110,4 +110,10 @@ export const ECHOES = [
   { id: 'echo-void-pearl', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_pearl_title', desc: 'echo_void_pearl_desc', trigger: 'echo:void-pearl' },
   { id: 'echo-abyss-conch', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_conch_title', desc: 'echo_abyss_conch_desc', trigger: 'echo:abyss-conch' },
   { id: 'echo-abyss-bonegate', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_bonegate_title', desc: 'echo_abyss_bonegate_desc', trigger: 'echo:abyss-bonegate' },
+
+  // ── Wave8（薄暮巡礼 / 辉煌巡礼）──
+  { id: 'echo-gloom-lanterns', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_lanterns_title', desc: 'echo_gloom_lanterns_desc', trigger: 'echo:gloom-lanterns' },
+  { id: 'echo-gloom-wishing-tree', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_wishing_tree_title', desc: 'echo_gloom_wishing_tree_desc', trigger: 'echo:gloom-wishing-tree' },
+  { id: 'echo-radiant-banner', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_banner_title', desc: 'echo_radiant_banner_desc', trigger: 'echo:radiant-banner' },
+  { id: 'echo-radiant-orb', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_orb_title', desc: 'echo_radiant_orb_desc', trigger: 'echo:radiant-orb' },
 ];

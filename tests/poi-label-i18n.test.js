@@ -156,6 +156,11 @@ const POI_LABELS = {
   'homage-void-pearl': ['echo_void_pearl_title', '断口珍珠', 'The Rift Pearl'],
   'homage-abyss-conch': ['echo_abyss_conch_title', '深颚海螺', 'The Deep Conch'],
   'homage-abyss-bonegate': ['echo_abyss_bonegate_title', '深颚骨门', 'The Bone Gate'],
+  // W-E3 切片104：薄暮巡礼 · 灯笼行/许愿树 + 辉煌巡礼 · 残旗/悬铃
+  'homage-gloom-lanterns': ['echo_gloom_lanterns_title', '幽暗灯笼行', 'The Lanterns Parade'],
+  'homage-gloom-wishing-tree': ['echo_gloom_wishing_tree_title', '幽暗许愿树', 'The Wishing Tree'],
+  'homage-radiant-banner': ['echo_radiant_banner_title', '辉煌残旗', 'The Faded Banners'],
+  'homage-radiant-orb': ['echo_radiant_orb_title', '辉煌悬铃', 'The Hanging Bell'],
 };
 
 describe('POI 交互标签双表化（W-D2 切片19）', () => {

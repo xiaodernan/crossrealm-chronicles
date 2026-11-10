@@ -1150,6 +1150,14 @@ export const STRINGS_EN = Object.freeze({
   echo_abyss_conch_desc: 'The brine hums inside — the deepest whisper in the Deep Jaws.',
   echo_abyss_bonegate_title: 'The Bone Gate',
   echo_abyss_bonegate_desc: 'The reef is good at swallowing bones — only walkers-through know the other side.',
+  echo_gloom_lanterns_title: 'The Lanterns Parade',
+  echo_gloom_lanterns_desc: 'A line of paper lanterns drifting deeper along the misty shore — no shadows, and not a single one out.',
+  echo_gloom_wishing_tree_title: 'The Wishing Tree',
+  echo_gloom_wishing_tree_desc: 'Cloth strips threaded deep into the bark — those who vanished in the mist all spoke to this tree.',
+  echo_radiant_banner_title: 'The Faded Banners',
+  echo_radiant_banner_desc: 'Gold thread unravelled, totems bleached away — you can still make out the arms woven by light.',
+  echo_radiant_orb_title: 'The Hanging Bell',
+  echo_radiant_orb_desc: 'The bell rings before the wind moves — on the day each archbishop dies, this bell sounds on its own.',
 
   // POI interaction labels (W-D2 slice 19: the display exit in PlayerController.updatePrompt now
   // goes through t(); the label slot holds keys. Homage POIs reuse the echo entry title keys
@@ -1452,6 +1460,12 @@ export const STRINGS_EN = Object.freeze({
   sq_side_abysssalt_tour_title: 'Deep Tour',
   sq_side_abysssalt_tour_desc: 'Resonate with 3 deep echoes',
   sq_side_abysssalt_tour_journal: 'The conch carried a word; the bone gate stands in salt.',
+  sq_side_gloom_tour_title: 'Mist Tour',
+  sq_side_gloom_tour_desc: 'Resonate with 3 gloom echoes',
+  sq_side_gloom_tour_journal: 'The lanterns still light themselves after dark.',
+  sq_side_radiant_tour_title: 'Radiant Tour',
+  sq_side_radiant_tour_desc: 'Resonate with 3 radiant echoes',
+  sq_side_radiant_tour_journal: 'The banners fade, the bell stays unhung - the light goes on.',
   sq_side_wave4_master_title: "Four-Series Walker",
   sq_side_wave4_master_desc: "Resonate with all four Wave4 series",
   sq_side_wave4_master_journal: "Cyber, samurai, old days, starport — the four series align on one echo line.",

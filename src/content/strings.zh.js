@@ -1152,6 +1152,14 @@ export const STRINGS_ZH = Object.freeze({
   echo_abyss_conch_desc: '盐霜里盘着风——深颚里最深的一句耳语。',
   echo_abyss_bonegate_title: '深颚骨门',
   echo_abyss_bonegate_desc: '礁石吞惯了骨头——只有走过去的人才知道门的另一边。',
+  echo_gloom_lanterns_title: '幽暗灯笼行',
+  echo_gloom_lanterns_desc: '沿雾岸更深处飘着一排纸灯笼——没有人影，一盏都没熄。',
+  echo_gloom_wishing_tree_title: '幽暗许愿树',
+  echo_gloom_wishing_tree_desc: '麻布缠进枯枝缝里——雾里失踪的人没有哪个没向这棵树说过话。',
+  echo_radiant_banner_title: '辉煌残旗',
+  echo_radiant_banner_desc: '金线织尽、图腾褪尽——残旗里仍能辨认出光织出的臂膀。',
+  echo_radiant_orb_title: '辉煌悬铃',
+  echo_radiant_orb_desc: '晨风未动，铃先鸣——圣殿里每一任主教死去的那一天，这只铃都自己响一声。',
 
   // POI 交互标签（W-D2 切片19：显示出口 PlayerController.updatePrompt 改走 t()，label 位存的全是键）
   // 命名口径：致敬层 POI 复用回声条目的标题键（交互即解锁那条回声，本来就是同一个东西）；
@@ -1453,6 +1461,12 @@ export const STRINGS_ZH = Object.freeze({
   sq_side_abysssalt_tour_title: '深颚巡礼',
   sq_side_abysssalt_tour_desc: '共鸣 3 条深颚咸响',
   sq_side_abysssalt_tour_journal: '海螺递了一句言，骨门立了一道影。',
+  sq_side_gloom_tour_title: '雾林巡礼',
+  sq_side_gloom_tour_desc: '共鸣 3 条薄暮回响',
+  sq_side_gloom_tour_journal: '雾里的灯笼行到哪一盏都还自己亮着。',
+  sq_side_radiant_tour_title: '辉煌巡礼',
+  sq_side_radiant_tour_desc: '共鸣 3 条辉煌残响',
+  sq_side_radiant_tour_journal: '残旗旧了、悬铃哑了，光还是把它们举着。',
   sq_side_wave4_master_title: '四系行者',
   sq_side_wave4_master_desc: 'Wave4 四系列全共鸣',
   sq_side_wave4_master_journal: '赛博、武士、旧日、星港 — 四系在同一条回声线上对齐。',
