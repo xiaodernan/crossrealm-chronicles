@@ -51,7 +51,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 结束时自动关闭它拉起的进程，日志落在临时目录的 `crossrealm-server-smoke\` 子目录。
 （本仓库 CI（`.github/workflows/server.yml`）也跑这一步——ubuntu runner 上每次推送都会真起真打全链路。）
 
-网关带 **W-X5 熔断**（`spring-cloud-circuitbreaker-reactor-resilience4j`，语义与边界见下）：
+网关带 **W-X5 熔断**（`spring-cloud-circuitbreaker-reactor-resilience4j`，语义与边界见下）；**W-X11 Retry 滤镜**：`GET /api/version` 幂等路径专用路由（`game-service-version`, order=-1）带 backoff retry（≤ 2 次、50→200ms，502/503 only），`POST` 绝不重试。 
 game-service 路由上 `CircuitBreaker` 滤镜（滑动窗口 10 / 最少 5 次 / 50% 失败率 / 开闸 5 秒 / 半开 3 个请求），
 路由链抛异常时快速走 `forward:/fallback/503` → `FallbackController` 返回
 `503 + upstream-unavailable`（不是空响应、不是上游错误页）。

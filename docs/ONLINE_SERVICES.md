@@ -9,7 +9,7 @@
 
 - **Eureka 注册中心**（`discovery-server`，:8761）——各服务向它注册；
 - **Spring Cloud Config 配置中心**（`config-server`，:8888）——`game-service` 的运行参数从这里下发（本地 native profile，内置 `config/game-service.yml`）；
-- **Spring Cloud Gateway**（:8080）——对外唯一入口，`/api/**` 按服务名 `lb://` 负载均衡转发； **W-X5 熔断**（CircuitBreaker + orward:/fallback/503：路由链抛异常时快速 503 兜底，不是空响应、不是上游错误页）；
+- **Spring Cloud Gateway**（:8080）——对外唯一入口，`/api/**` 按服务名 `lb://` 负载均衡转发； **W-X5 熔断**（CircuitBreaker + orward:/fallback/503：路由链抛异常时快速 503 兜底，不是空响应、不是上游错误页） **W-X11 Retry**（`GET /api/version` 幂等可重试 的小路由带 backoff.Retry；主路由 `/api/**` 刻意不带——POST 提交 leaderboard 不能双写）；
 - **game-service**（:8081）——排行榜 / 遥测事件 / 版本号，纯内存零数据库。
 
 游戏侧对应的是 `src/online/OnlineServices.js`（W-X2，默认关闭）：
@@ -79,6 +79,7 @@ docker compose down
 - 注册名用 LAN/`host.docker.internal` 会让网关 `lb://` 解析后连不上，须 `EUREKA_INSTANCE_HOSTNAME=localhost` + `PREFERIPADDRESS=false`；
 - `lb://` 冷启动有 **30 秒级** 的注册表缓存暖起窗口（eureka 刷新阈值）：游戏/网关刚起时第一拨请求**会落空（503）**，属预期；smoke 与 `verify-breaker.ps1` 都先轮询等到 200 再执行断言；
 - 网关熔断（W-X5）**只截路由链抛出的异常**（比如 eureka 缓存里实例还活着时的连接拒绝/超时）；**无实例 short-circuit 是 LB 直接出的空 503、不经过熔断器**——两条路径都是 503，只有 body 形态不同；
+- **`GET /api/version` 走专用优先路由（order=-1），带 `Retry` 滤镜**——冷启动 / 一次 502 不再把边端打回去；主路由刻意不带 `Retry`（避免 POST 双写）；
 - Gateway 4.x 起路由配置前缀是 `spring.cloud.gateway.server.webflux.*`（旧的 `spring.cloud.gateway.routes` 只是迁移监听器警告）。
 
 ## 文件索引
@@ -88,4 +89,4 @@ docker compose down
 - `server/scripts/verify-breaker.ps1` —— W-X5 网关熔断验证（手动诊断）
 - `.github/workflows/server.yml` — CI（编译 + 单测 + 全链路冒烟）
 - `src/online/OnlineServices.js` — 游戏侧客户端（默认关闭）
-- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）/ W-X6（设置页开关）/ W-X7（只读排行榜面板）/ W-X9（配置热刷新）
+- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）/ W-X6（设置页开关）/ W-X7（只读排行榜面板）/ W-X9（配置热刷新）/ W-X11（/api/version Retry 滤镜）
