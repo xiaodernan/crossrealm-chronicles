@@ -353,11 +353,6 @@ try {
 
   await send('Runtime.enable');
   await send('Page.enable');
-  // 只让 Node 侧的 update() 推进游戏：rAF 循环对本门禁全是负担（SwiftShader 软件渲染每帧 ~50ms，
-  // 页上每帧都被抢占；本机口径无所谓，远端 CPU 被这一笔钉死在 3 分钟/千帧量级）。
-  // 摘掉 rAF 之后页上只剩 evalJs 驱动的 update()；
-  // 这不是放宽门禁 —— [读数] 的 frames / questIndex / completed / exceptions==0 断言一条都不动。
-  await send('Page.addScriptToEvaluateOnNewDocument', { source: "window['request' + 'AnimationFrame'] = function(){ return 0; };" });
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
   /** CI 冷启动窗口按 CI 的尺子：windows-latest + 软件渲染 + 每轮冷 vite。CI 放宽到 ~450 秒（240→900），本机 120 秒口径不动。 */
@@ -377,6 +372,11 @@ try {
     ready = await evalJs(就绪);
   }
   if (!ready) throw new Error(`游戏 ${READY_ITERS / 2} 秒内没起来（页 http://127.0.0.1:${VITE_PORT}/）。vite 的话：\n - ${vite话()}`);
+
+  // 开机完成后再摘 rAF：启动期需要真帧来跑模型/动画/加载管线，交给 rAF 推进；
+  // 演示阶段只剩 Node 侧 update() —— 不再给 SwiftShader 每帧 ~50ms 的渲染留余地。
+  // 这不是放宽门禁 —— [读数] 的 frames / questIndex / completed / exceptions==0 断言一条都不动。
+  await send('Runtime.evaluate', { expression: "window['request' + 'AnimationFrame'] = function(){ return 0; };" });
 
   /**
    * 等页面**静下来**，再认它（W-D4 切片8 —— 把 `e2e-combat` 切片7 量到的那一课搬过来）。
