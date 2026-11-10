@@ -104,6 +104,8 @@ const 冻结 = [
   ['radiant_brand', -320, -120], ['radiant_brand', -300, -240], ['radiant_brand', -240, -280],
   // W-E3 切片67：辉煌大主教（三点野外出生点）
   ['radiant_archon', -260, -230], ['radiant_archon', -150, -270], ['radiant_archon', -130, -190],
+  // W-E3 切片95：辉煌誓守者（三点野外出生点）
+  ['radiant_vowkeeper', -330, -190], ['radiant_vowkeeper', -95, -95], ['radiant_vowkeeper', -190, -290],
 ];
 
 describe('① 搬家没搬错', () => {

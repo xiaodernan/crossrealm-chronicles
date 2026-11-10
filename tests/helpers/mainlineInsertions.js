@@ -26,6 +26,7 @@ export const POST_V21 = [
   'abyss-gloombinder-hunt',
   'void-howler-hunt',
   'void-riftbinder-hunt',
+  'radiant-vowkeeper-hunt',
 ];
 
 /** 切片41 之后仍需从 v21 投影中排除的 id（不含 void-oath）。 */

@@ -257,4 +257,8 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'radiant_archon', x: -260, z: -230 },
   { type: 'radiant_archon', x: -150, z: -270 },
   { type: 'radiant_archon', x: -130, z: -190 },
+  // 辉煌誓守者（三点，W-E3 切片95）—— 持誓辉使，与圣印者/大主教错开。
+  { type: 'radiant_vowkeeper', x: -330, z: -190 },
+  { type: 'radiant_vowkeeper', x: -95, z: -95 },
+  { type: 'radiant_vowkeeper', x: -190, z: -290 },
 ]);

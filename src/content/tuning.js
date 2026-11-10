@@ -129,6 +129,8 @@ export const BODY_PLANS = {
   radiant_brand:   { scale: 0.95, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片67：辉煌大主教 —— 施法者里最高的一档：不贴脸，站在远处把整片地点亮 */
   radiant_archon:  { scale: 1.10, parts: ['head', 'torso'], radius: 0.50, hover: 0.35 },
+  /** W-E3 切片95：辉煌誓守者 —— 端正的持誓辉使体格。 */
+  radiant_vowkeeper:{ scale: 1.02, parts: ['head', 'torso'], radius: 0.46, hover: 0.28 },
 };
 
 /**
@@ -236,6 +238,8 @@ export const ENEMY_RESIST = {
   radiant_brand:   { fire: -0.2, ice: 0.1 },
   /** 辉煌大主教：长袍术士，怕火；冰系打在他自己的护体咒上不痛不痒 */
   radiant_archon:  { fire: -0.2, ice: 0.15 },
+  /** W-E3 切片95：辉煌誓守者 —— 圣洁属性：微怕火、冰能安抚它的光环 */
+  radiant_vowkeeper:{ fire: -0.16, ice: 0.1 },
 };
 
 export const CRIT = {
@@ -425,6 +429,8 @@ export const ENEMY_DEFENSE = {
   abyss_gloombinder: 4,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
+  /** W-E3 切片95：辉煌誓守者 */
+  radiant_vowkeeper: 8,
 };
 
 /** 玩家自身防御由装备/属性提供，M2 阶段基线为 0（先用闪避与弹反防御） */
@@ -1149,6 +1155,17 @@ export const ENEMY_MOVES = {
     hazard: { radius: 3.2, telegraph: 1.6, damage: 0.65, duration: 4.5, tick: 1.5, color: 0xffffff, sticky: false },
     telegraph: { color: 0xffffff },
   },
+  /**
+   * 辉煌斥罚（辉煌誓守者专属招）—— W-E3 切片95。
+   * 纯光弹：圣域里唯一的"无 hazard 预警的普通 ranged"，与 `radiant_brand`（ranged+hazard）、
+   * `radiant_flare`（hazard）、`edict`（hazard）分岔——纯前摇、纯弹道。
+   */
+  radiant_rebuke: {
+    name: '辉煌斥罚', windup: 0.6, strike: 0.16, recover: 0.42, cone: -2,
+    range: 11.5, minDist: 2.5,
+    damage: 0.95, cooldown: 3.2, weight: 2, ranged: { speed: 16, color: 0xffe87a },
+    telegraph: { color: 0xaa8844 },
+  },
 
   /**
    * 阵型打击（训练有素的士兵，W-B7 尾巴）。
@@ -1628,5 +1645,7 @@ export const ENEMY_MOVE_SETS = {
   radiant_brand:   ['brand', 'shot', 'guard', 'thrust'],
   /** W-E3 切片67：辉煌大主教 —— 敕命（区域封锁）+ 灼场（补刀）+ 远程与守势 */
   radiant_archon:  ['edict', 'brand', 'shot', 'guard'],
+  /** W-E3 切片95：辉煌誓守者 —— 辉煌斥罚（远压）+ 射击 + 守势 + 刺击 */
+  radiant_vowkeeper:['radiant_rebuke', 'shot', 'guard', 'thrust'],
 };
 

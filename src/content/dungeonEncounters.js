@@ -108,6 +108,8 @@ export const DUNGEON_ENCOUNTERS = {
       // W-E3 切片67 新增的大主教：敕命区域封锁，权重最低（大主教要靠"走完圣殿才撞见"，
       // 不是常驻——池子里它是添头，不是主菜；圣域的主菜仍是爬兽）
       { type: 'radiant_archon', weight: 1 },
+      // W-E3 切片95：辉煌誓守者 —— 纯光弹远压，权重低
+      { type: 'radiant_vowkeeper', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

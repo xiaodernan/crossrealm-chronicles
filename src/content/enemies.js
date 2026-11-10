@@ -201,6 +201,10 @@ export const ENEMY_ROSTER = {
    * 与同区的圣印者（印玩家脚下一小块、sticky）分岔：圣印者是"打你那条地"，大主教是"点一整片地"。
    */
   radiant_archon: { name: 'enemy_name_radiant_archon', hp: 175, posture: 68, damage: 17, speed: 4.3, aggroRange: 28, color: 0xfff4b0 },
+  /**
+   * W-E3 切片95：辉煌誓守者 —— 辉煌圣域端正的持誓辉使。
+   */
+  radiant_vowkeeper: { name: 'enemy_name_radiant_vowkeeper', hp: 128, posture: 42, damage: 14, speed: 5.0, aggroRange: 28, color: 0xddc86a },
 };
 
 /**

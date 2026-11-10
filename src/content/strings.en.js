@@ -564,6 +564,7 @@ export const STRINGS_EN = Object.freeze({
   enemy_name_radiant_dancer: 'Radiant Dancer',
   enemy_name_radiant_brand: 'Radiant Brander',
   enemy_name_radiant_archon: 'Radiant Archon',
+  enemy_name_radiant_vowkeeper: 'Radiant Vowkeeper',
 
   // Player-facing leftovers (W-D2 slice 16r)
   enemy_name_default: 'Enemy',
@@ -1829,6 +1830,9 @@ export const STRINGS_EN = Object.freeze({
   obj_radiant_brand_hunt_title: 'Radiant Branders',
   obj_radiant_brand_hunt_desc: 'The branders stand far off and mark the ground as a burning field. Clear three of them, and stop stepping into circles someone else drew.',
   obj_radiant_brand_hunt_journal: 'The burning fields died down. The ground of the Sanctum turned cool, finally walkable.',
+  obj_radiant_vowkeeper_hunt_title: 'Hunt the Radiant Vowkeepers',
+  obj_radiant_vowkeeper_hunt_desc: 'Defeat 3 Radiant Vowkeepers haunting the Radiant Sanctum.',
+  obj_radiant_vowkeeper_hunt_journal: 'The vows of the sanctum went quiet, and no one held the watch anymore.',
   obj_archon_hunt_title: 'The Radiant Archon',
   obj_archon_hunt_desc: 'The Archon stands at the deepest reach of the Sanctum and turns whole stretches of ground to white fire. Clear him, and the golden sands are truly yours.',
   obj_archon_hunt_journal: 'The dawn edict faded. Only the sun remains over the Sanctum — and no one speaks for it now.',

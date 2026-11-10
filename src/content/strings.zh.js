@@ -566,6 +566,7 @@ export const STRINGS_ZH = Object.freeze({
   enemy_name_radiant_dancer: '辉煌舞者',
   enemy_name_radiant_brand: '辉煌圣印者',
   enemy_name_radiant_archon: '辉煌大主教',
+  enemy_name_radiant_vowkeeper: '辉煌誓守者',
 
   // 玩家可见的残余文案（W-D2 切片16r）
   enemy_name_default: '敌人',
@@ -1830,6 +1831,9 @@ export const STRINGS_ZH = Object.freeze({
   obj_radiant_brand_hunt_title: '圣印者',
   obj_radiant_brand_hunt_desc: '圣印者远站着，把地标成灼场。清掉三只，别再踩进别人画好的圈。',
   obj_radiant_brand_hunt_journal: '灼场熄了。圣域的地面凉下来，像终于能踩。',
+  obj_radiant_vowkeeper_hunt_title: '清剿辉煌誓守者',
+  obj_radiant_vowkeeper_hunt_desc: '击败辉煌圣域游荡的 3 只辉煌誓守者。',
+  obj_radiant_vowkeeper_hunt_journal: '辉煌的誓言落地，不再有人替它们守夜。',
   obj_archon_hunt_title: '晨曦大主教',
   obj_archon_hunt_desc: '大主教站在圣域最深处，把整片地点成一圈白火。清掉他，金沙才真正是你的。',
   obj_archon_hunt_journal: '晨曦的敕命散了。圣域上空只剩一轮太阳，不再有人替它说话。',

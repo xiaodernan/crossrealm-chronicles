@@ -1442,6 +1442,19 @@ export const OBJECTIVES = [
     journal: 'obj_radiant_brand_hunt_journal',
   },
   {
+    // W-E3 切片95：辉煌誓守者进主线 —— 圣域第六独占，插在圣印者后、大主教前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'radiant-vowkeeper-hunt',
+    title: 'obj_radiant_vowkeeper_hunt_title',
+    desc: 'obj_radiant_vowkeeper_hunt_desc',
+    type: 'kills',
+    enemyType: 'radiant_vowkeeper',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -330, z: -190, label: 'enemy_name_radiant_vowkeeper' },
+    reward: 20,
+    journal: 'obj_radiant_vowkeeper_hunt_journal',
+  },
+  {
     // W-E3 切片67：辉煌大主教进主线 —— 圣域四类清剿（骑士/舞者/圣印者之外，最后一类）。
     // 插在圣印者之后、dungeon-rerun 之前；v21 起存档记 currentId，插步不必配迁移。
     id: 'archon-hunt',
