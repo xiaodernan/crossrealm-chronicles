@@ -149,6 +149,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'gloom_choir', x: 140, z: 210 },
   { type: 'gloom_choir', x: 250, z: 120 },
   // 幽暗丧钟（W-E3 切片100）—— 迷雾里的远压重炮，与恐惧者/歌手/鬼火错开
+  // 幽暗扑影（W-E3 切片106）—— 影中扑击，与扑翼/丧钟/熄灯人错开
+  { type: 'gloom_lunger', x: 150, z: 95 },
+  { type: 'gloom_lunger', x: 265, z: 235 },
+  { type: 'gloom_lunger', x: 205, z: 240 },
   { type: 'gloom_knell', x: 230, z: 190 },
   { type: 'gloom_knell', x: 150, z: 125 },
   { type: 'gloom_knell', x: 295, z: 145 },
@@ -294,6 +298,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'radiant_harbinger', x: -230, z: -255 },
   { type: 'radiant_harbinger', x: -300, z: -150 },
   // 辉煌决斗者（W-E3 切片101）—— 长枪决斗者，与先驱/天使/壁垒错开
+  // 辉煌铁锤人（W-E3 切片106）—— 重锤破阵者，与决斗者/先驱/壁垒错开
+  { type: 'radiant_hammer', x: -215, z: -225 },
+  { type: 'radiant_hammer', x: -290, z: -220 },
+  { type: 'radiant_hammer', x: -130, z: -245 },
   { type: 'radiant_duelist', x: -285, z: -135 },
   { type: 'radiant_duelist', x: -175, z: -140 },
   { type: 'radiant_duelist', x: -245, z: -150 },

@@ -102,6 +102,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'gloom_choir', weight: 1 },
       // W-E3 切片100：幽暗丧钟 —— 迷雾里敲钟的远压者，权重低（要靠“突然”而不是常驻）
       // W-E3 切片101：幽暗熄灯人 —— 贴身熄焰扇形，权重低
+      // W-E3 切片106：幽暗扑影 —— 影中扑击 travel lunge，权重低
+      { type: 'gloom_lunger', weight: 1 },
       { type: 'gloom_snuffer', weight: 1 },
       { type: 'gloom_knell', weight: 1 },
     ],
@@ -126,6 +128,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'radiant_bulwark', weight: 1 },
       // W-E3 切片100：辉煌先驱 —— 圣道上劈光的前驱，权重低
       // W-E3 切片101：辉煌决斗者 —— 长枪决斗者，权重低
+      // W-E3 切片106：辉煌铁锤人 —— 重锤破阵，权重低
+      { type: 'radiant_hammer', weight: 1 },
       { type: 'radiant_duelist', weight: 1 },
       { type: 'radiant_harbinger', weight: 1 },
     ],

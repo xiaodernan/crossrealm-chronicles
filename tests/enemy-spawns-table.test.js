@@ -56,6 +56,8 @@ const 冻结 = [
   ['gloom_horror', 170, 170], ['gloom_horror', 300, 180], ['gloom_horror', 110, 210],
   // W-E3 切片98：幽暗歌手（三点野外出生点）
   ['gloom_choir', 210, 150], ['gloom_choir', 140, 210], ['gloom_choir', 250, 120],
+  // W-E3 切片106：幽暗扑影（三点野外出生点）
+  ['gloom_lunger', 150, 95], ['gloom_lunger', 265, 235], ['gloom_lunger', 205, 240],
   // W-E3 切片100：幽暗丧钟（三点野外出生点）
   ['gloom_knell', 230, 190], ['gloom_knell', 150, 125], ['gloom_knell', 295, 145],
   // W-E3 切片101：幽暗熄灯人（三点野外出生点）
@@ -122,6 +124,8 @@ const 冻结 = [
   ['radiant_bulwark', -170, -230], ['radiant_bulwark', -260, -180], ['radiant_bulwark', -310, -280],
   // W-E3 切片100：辉煌先驱（三点野外出生点）
   ['radiant_harbinger', -150, -120], ['radiant_harbinger', -230, -255], ['radiant_harbinger', -300, -150],
+  // W-E3 切片106：辉煌铁锤人（三点野外出生点）
+  ['radiant_hammer', -215, -225], ['radiant_hammer', -290, -220], ['radiant_hammer', -130, -245],
   // W-E3 切片101：辉煌决斗者（三点野外出生点）
   ['radiant_duelist', -285, -135], ['radiant_duelist', -175, -140], ['radiant_duelist', -245, -150],
 ];

@@ -585,6 +585,8 @@ export const STRINGS_ZH = Object.freeze({
   enemy_name_radiant_harbinger: '辉煌先驱',
   enemy_name_gloom_snuffer: '幽暗熄灯人',
   enemy_name_radiant_duelist: '辉煌决斗者',
+  enemy_name_gloom_lunger: '幽暗扑影',
+  enemy_name_radiant_hammer: '辉煌铁锤人',
 
   // 玩家可见的残余文案（W-D2 切片16r）
   enemy_name_default: '敌人',
@@ -1899,6 +1901,12 @@ export const STRINGS_ZH = Object.freeze({
   obj_radiant_duelist_hunt_title: '清剿辉煌决斗者',
   obj_radiant_duelist_hunt_desc: '击败辉煌圣域游荡的 3 只辉煌决斗者。',
   obj_radiant_duelist_hunt_journal: '长枪还是见了血，只是没能见你的。',
+  obj_gloom_lunger_hunt_title: '清剿幽暗扑影',
+  obj_gloom_lunger_hunt_desc: '击败幽暗林地游荡的 3 只幽暗扑影。',
+  obj_gloom_lunger_hunt_journal: '影子扑了影子，雾里少了一道长影。',
+  obj_radiant_hammer_hunt_title: '清剿辉煌铁锤人',
+  obj_radiant_hammer_hunt_desc: '击败辉煌圣域游荡的 3 只辉煌铁锤人。',
+  obj_radiant_hammer_hunt_journal: '锤声落了，圣道上少了一道漫天金芒。',
   obj_chaos_boss_desc: '击败混沌边境 Boss。',
   obj_chaos_boss_journal: '裂隙领主陨落，终局开启。',
   obj_radiant_dawn_hall_title: '圣殿的清晨',

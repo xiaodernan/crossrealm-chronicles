@@ -94,6 +94,11 @@ export const ENEMY_ROSTER = {
    */
   gloom_snuffer: { name: 'enemy_name_gloom_snuffer', hp: 124, posture: 44, damage: 13, speed: 5.3, aggroRange: 27, color: 0x40382a },
   /**
+   * W-E3 切片106：幽暗扑影 —— 迷雾里贴近影子跃扑的撕裂者。
+   * 它不盘三圈、不敲钟——它抓住你睁眼之前的那个瞬间。
+   */
+  gloom_lunger: { name: 'enemy_name_gloom_lunger', hp: 128, posture: 46, damage: 13, speed: 5.4, aggroRange: 27, color: 0x2a2338 },
+  /**
    * W-E3 切片69：虚空幻影 —— 虚空断口里扯出来的悬浮残影。
    * 比怨影更实在（hp150/架势54）、攻更重（17），靠相位斩（5m 短距错位）贴身连切，
    * 不像怨影那样从 10 米外慢慢背刺。与 sentinel（远程炮台）、crawler（贴地快爪）分工不同。
@@ -245,6 +250,11 @@ export const ENEMY_ROSTER = {
    * 它不乱劈，也不先劈 —— 它等你一开口，然后一枪穿喉。
    */
   radiant_duelist: { name: 'enemy_name_radiant_duelist', hp: 148, posture: 56, damage: 17, speed: 5.9, aggroRange: 26, color: 0xffdf9a },
+  /**
+   * W-E3 切片106：辉煌铁锤人 —— 抡起铁锤踏过来的破阵者。
+   * 它不讲究剑诀——它只问你扛不扛得住这一锤。
+   */
+  radiant_hammer: { name: 'enemy_name_radiant_hammer', hp: 170, posture: 70, damage: 17, speed: 4.5, aggroRange: 25, color: 0xe8c455 },
 };
 
 /**

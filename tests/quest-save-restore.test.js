@@ -350,8 +350,8 @@ describe('④ 插步之后老档落回同一步 —— v21 那句承诺的第一
     expect(mainlineAt(20)).not.toContain('void-oath');
     expect(MAINLINE.some((r) => r.id === 'void-oath'), '表上没有新步？这一片的桩件不成立').toBe(true);
     expect(mainlineAt(20)).toHaveLength(65);
-    // 切片41/42/45 各插三步，切片46 又在终局插了三步，切片67-98 各插一步 ⇒ 112（切片100 之上再插两步 S101）
-    expect(MAINLINE).toHaveLength(114);
+    // 切片41/42/45 各插三步，切片46 又在终局插了三步，切片67-98 各插一步 ⇒ 112（切片100 之上再插两对 S101+S106）
+    expect(MAINLINE).toHaveLength(116);
   });
 });
 

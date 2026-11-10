@@ -583,6 +583,8 @@ export const STRINGS_EN = Object.freeze({
   enemy_name_radiant_harbinger: 'Radiant Harbinger',
   enemy_name_gloom_snuffer: 'Gloom Snuffer',
   enemy_name_radiant_duelist: 'Radiant Duelist',
+  enemy_name_gloom_lunger: 'Gloom Lunger',
+  enemy_name_radiant_hammer: 'Radiant Hammer',
 
   // Player-facing leftovers (W-D2 slice 16r)
   enemy_name_default: 'Enemy',
@@ -1898,6 +1900,12 @@ export const STRINGS_EN = Object.freeze({
   obj_radiant_duelist_hunt_title: 'Hunt the Radiant Duelists',
   obj_radiant_duelist_hunt_desc: 'Defeat 3 Radiant Duelists haunting the Sanctum.',
   obj_radiant_duelist_hunt_journal: 'The long spear found its mark — just never you.',
+  obj_gloom_lunger_hunt_title: 'Hunt the Gloom Lungers',
+  obj_gloom_lunger_hunt_desc: 'Defeat 3 Gloom Lungers haunting the Gloomwood.',
+  obj_gloom_lunger_hunt_journal: 'The shadow lunged onto a shadow, and the mist keeps one less shape.',
+  obj_radiant_hammer_hunt_title: 'Hunt the Radiant Hammers',
+  obj_radiant_hammer_hunt_desc: 'Defeat 3 Radiant Hammers haunting the Sanctum.',
+  obj_radiant_hammer_hunt_journal: 'The hammer has fallen; the Sanctum keeps fewer sparks.',
   obj_chaos_boss_desc: "Defeat the boss of the Chaos Border.",
   obj_chaos_boss_journal: "Rift Lord has fallen; the endgame begins.",
   obj_radiant_dawn_hall_title: 'Morning in the Hall',

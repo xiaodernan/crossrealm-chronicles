@@ -82,7 +82,7 @@ describe('② 每一版的长度是历史事实', () => {
       expect(今天, `今天的主线里没有 "${id}"？这条腿要跟着内容走`).toContain(id);
     }
     expect(mainlineAt(20)).toHaveLength(65);
-    expect(MAINLINE, 'v21 之后插进来的步不进这张账（它不改变任何老版本的表）—— 四十八步（切片100 之上再插两步：熄灯人 / 决斗者）—— 账本不该跟着长').toHaveLength(114);
+    expect(MAINLINE, 'v21 之后插进来的步不进这张账（它不改变任何老版本的表）—— 五十步（切片101 之上再插两步：扑影 / 铁锤人）—— 账本不该跟着长').toHaveLength(116);
     // 切片67/68/69 那三步也要落在"今天的表里、era 20 账本里没有"这一格
     expect(今天, '今天的主线里没有 archon-hunt —— 插步没上表').toContain('archon-hunt');
     expect(账上, 'archon-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('archon-hunt');
@@ -112,6 +112,10 @@ describe('② 每一版的长度是历史事实', () => {
     expect(账上, 'gloom-snuffer-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('gloom-snuffer-hunt');
     expect(今天, '今天的主线里没有 radiant-duelist-hunt —— 插步没上表').toContain('radiant-duelist-hunt');
     expect(账上, 'radiant-duelist-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('radiant-duelist-hunt');
+    expect(今天, '今天的主线里没有 gloom-lunger-hunt —— 插步没上表').toContain('gloom-lunger-hunt');
+    expect(账上, 'gloom-lunger-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('gloom-lunger-hunt');
+    expect(今天, '今天的主线里没有 radiant-hammer-hunt —— 插步没上表').toContain('radiant-hammer-hunt');
+    expect(账上, 'radiant-hammer-hunt 进了 v20 账本 —— 那会让 era 20 凭空长一步').not.toContain('radiant-hammer-hunt');
   });
   it('era 20 是冻结的：今天的表往后长，它不动', () => {
     expect(mainlineAt(20)).toEqual(账上);
