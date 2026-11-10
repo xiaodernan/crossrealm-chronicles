@@ -5432,6 +5432,15 @@ Phase D（系统与质量）
   - **验证**：lint 0/0，test 全绿（**404 文件 / 6049 项**），build ✓。E2E：`12600帧/210s/q=110/主线111/ch5/completed=true/exceptions=0` —— 与 S98 **同读数**：两栋新建筑（静移态，无帧成本）只在 world build 造一次。
 
   - **风险与后续**：① 两个新母题目前各只有**一**条回声 —— 不满足"系列 tour"（`side-gloom-tour` 要 ≥ 3 条）的条件；想给它们办巡礼任务，得先各扩到 3 条回声；② 两处新母题的显示文案仍走既有 `franchiseLabel`，无 name-escape 样式风险；③ POI 几何为朴素构造盒/柱，未入**共享库**（与 Wave3/4 同口径，挂 zone.group、随位面释放）；④ Choice-void / 存档版本 / 主线步数**一样没动**。
+- **2026-11-10 W-X9（在线伙伴服务）—— 配置热刷新：/actuator/refresh 真改真生效** —— 提交 `48a130c`（7 文件，+101 −4）
+
+  - **起因**：之前教义说"改配置不用重启"，但 W-X1 到 W-X8 没有一条用例证明它真能动 —— config-server 一直按启动期绑定读 `classpath:/config/game-service.yml`，refresh 端点没开，话术就是空的。这条线把"config-server 上线改一个 yml 值"→"game-service 当场生效"，在 smoke 里真打一遍。
+
+  - **做法**：① `game-service` 的 `GameServiceProperties`（`game-service` 前缀）挂 `@RefreshScope` —— Spring Cloud 把配置中心和后端绑起来的最常见用法；`/actuator/refresh` 在 `application.yml` 的 `management.endpoints.web.exposure` 里开了出来（`test/resources/application.yml` 也开了）；② 新测试 `RefreshEndpointTest`：POST `/actuator/refresh` 必须 200 + 返回 JSON 数组（可空），`Content-Type` 必须 `application/json`（空 `ContentType` 会被吞成 415）；③ `server/scripts/smoke.ps1` 补充：config-server 指向 **临时 config 目录** `target/smoke-config/`（`game-service.yml` = `max-limit=4 / version-note=smoke-reload-note-v1`），`search-locations` 指向 `file:/<绝对路径>/`：**Windows 上必须统一正斜杠**（原生反斜杠被 Java URI 解析器悄悄吃掉一部分、config-server 不报错、静默退回 classpath，原地症状亲见）；④ 改写 temp yml 为 `max-limit=3 / v2`，POST `/actuator/refresh` ——**不重启 game-service**，`/api/version` 的 `note` 当场回 v2、排行榜 `maxLimit` 当场变成 3；⑤ 断言两句：`$ver -match smoke-reload-note-v2`、`$lb -match "count":3`，否则 `exit 1`；⑥ smoke 临时目录在 `finally` 里自动收掉，不留痕。
+
+  - **验证**：`mvn -B verify` 4 模块全绿（discovery / config / game-service（10 项，含新 `RefreshEndpointTest`）/ gateway 3 项，2026-11-10 17:52 本机实测）；`smoke.ps1` 完整跑完打印 "smoke test PASSED"（`config → register → lb://` 转发 → 排行榜写→读回 → 遥测 POST+count → 配置热刷新）。 CI（`.github/workflows/server.yml`）每次推送真 boot 并跑 `mvn verify` + 全链路冒烟。
+
+  - **风险与后续**：① native profile 下改 `application.yml` **只能**启动绑——refresh 只盖得住 `@ConfigurationProperties` 类上的字段（我绑的 `game-service.*` 就行；再多一个 `@Value` 读别的键，会漏在刷新窗外——在线线别另开新键不挂 `@RefreshScope`）；② 如果真要对接 Redis/Kafka 之类外部存储，那已经超出"纯内存演示后端"的初衷，另一组在线片才轮得上；③ 前端 `fetchLeaderboard` 本地循环拉不是 refresh ——refresh 面、不该用来刷数据，用来改本地逻辑阈值（如 max-limit）；④ `file:` URI 跨平台问题的教训值得记：永远先确认 `File.toURI()` 一类 API 之后的路径格式和解析器的预期一致，否则空实现会把配置"悄悄不刷新"。
 - **2026-11-10 W-X7（在线伙伴服务）—— 设置页「在线排行榜」只读面板：按下才拉、行走 textContent** —— 提交 `d844a51`（7 文件，+142 −2）
 
   - **起因**：W-X6（`b647c3b`）让玩家能亲手翻开开关，但翻过去之后**什么也看不见** —— 在线线闭环差最后一格：一个玩家能在游戏里看见的东西。在线伙伴服务自 W-X1 就有的排行榜（种子三条：影缚者 / 虚空 · 位面行者 · Ch4·5）一直只有 API 没有脸。
