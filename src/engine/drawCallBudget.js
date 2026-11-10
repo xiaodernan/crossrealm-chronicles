@@ -359,8 +359,8 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
   [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 240, shadow: 70 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 610, shadow: 50 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 250, body: 180, shadow: 80 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 160, body: 110, shadow: 60 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 150, body: 90, shadow: 60 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 160, body: 110, shadow: 70 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 190, body: 110, shadow: 90 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 210, body: 130, shadow: 80 }),
   [ZONE_IDS.RADIANT]: Object.freeze({ frame: 500, body: 450, shadow: 60 }),
 });
@@ -396,6 +396,15 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  * **2026-11-06 W-E3 切片66 单格重钉 `hub.shadow` 62 → 64**：真门（种子 20261028，`npm run perf`）
  * 读出 64、日志自己点名「地板过期」，而当日其余 23 格全部 ≤ 地板。它守的那一格（上限 70）不动 ——
  * 规则给 74（×1.15 上取整到 10），比现值更松 ⇒ 按“只收不放”保持 70，余量 9.4% 记在这里。
+ *
+ * **2026-11-10 八格重钉（W-X3 附带）**：真门真机读数（种子 20261028；本次 CI 两轮 05:41/06:14 逐字读出）：
+ *   void.frame 139→145、void.shadow 46→64、abyss.frame 123→177、abyss.body 77→98、abyss.shadow 45→79、
+ *   space.shadow 62→65、gloom.shadow 66→69、radiant.shadow 45→46。
+ * 上限随规则升到最低合法值（只收不放）：abyss.frame 150→190（177<190≤210）、abyss.body 90→110
+ *   （98<110≤120）、abyss.shadow 60→90（79<90≤100）、void.shadow 60→70（64<70≤80）；
+ *   space.shadow/void.frame/gloom.shadow/radiant.shadow 现值仍落在（新 floor, rule(floor)] 内不动。
+ * 升高原因：W-E3 切片85–96 往 void/abyss/gloom/radiant 各加了 1–2 只独占敌人（12 只、+36 个野外出生点），
+ * 相应站点年轻页读数自然上涨——这正是 floor 的存在意义：量到什么就把地板钉到什么，护栏只拦灾难级退化。
  * 细节出处（哪个日志、哪一档页龄）逐格写在 `tests/draw-call-budget.test.js` 的带子腿注释里 ——
  * 那份注释是**判据的说明**，这张表是**判据的数据**，两者不再各存一份数。
  */
@@ -403,11 +412,11 @@ export const DRAW_CALL_FLOORS = Object.freeze({
   [ZONE_IDS.HUB]: Object.freeze({ frame: 288, body: 226, shadow: 64 }),
   [ZONE_IDS.FANTASY]: Object.freeze({ frame: 267, body: 213, shadow: 55 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 593, body: 551, shadow: 39 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 218, body: 152, shadow: 62 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 139, body: 94, shadow: 46 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 123, body: 77, shadow: 45 }),
-  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 184, body: 120, shadow: 66 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 455, body: 410, shadow: 45 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 218, body: 152, shadow: 65 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 145, body: 94, shadow: 64 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 177, body: 98, shadow: 79 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 184, body: 120, shadow: 69 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 455, body: 410, shadow: 46 }),
 });
 
 /**
