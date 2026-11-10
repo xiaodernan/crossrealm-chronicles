@@ -62,6 +62,15 @@ export class OnlineServices {
     return this._enabled;
   }
 
+  /**
+   * 运行时翻转启用状态（W-X6 设置页开关专用）。
+   * 只翻运行时单例；持久化由调用方负责（面板直接写 localStorage）。
+   * 不经过 SettingsStore——在线服务不是"画面偏好"，而是一项独立授权。
+   */
+  setEnabled(flag) {
+    this._enabled = !!flag;
+  }
+
   async #post(path, body) {
     if (!this._enabled) return false;
     try {

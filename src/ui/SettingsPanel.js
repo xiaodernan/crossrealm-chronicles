@@ -19,6 +19,7 @@ import { captionScaleOptions, normalizeCaptionScale } from '../engine/captionSca
 import { flashStrengthOptions, normalizeFlashStrength } from '../engine/flashStrength.js';
 import { uiTextScaleOptions, normalizeUiTextScale } from '../engine/uiTextScale.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
+import { OnlineServices, onlineServices } from '../online/OnlineServices.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
 const CAMEL_EDGE = /[A-Z]/g;
@@ -324,6 +325,23 @@ export class SettingsPanel {
       s.set('vibration', vib.checked);
       s.applyToGame(this.game);
     });
+    // 在线伙伴服务（W-X6）：默认关闭，独立于 SettingsStore 的一格开关。
+    // 这一格不是"画面偏好"，而是一项**授权**：写了才可以发请求出去。
+    // 面板只写 localStorage（`crossrealm_online`）+ 翻运行时单例（`onlineServices`），
+    // 不经 SettingsStore、不经 applyToGame —— 没有"换档要重应用到场景"的语义；
+    // 开关一翻，后续 Boss 击杀的遥测当场生效/当场停止（不需要重载）。
+    const setOnline = document.getElementById('set-online');
+    if (setOnline) {
+      setOnline.checked = OnlineServices.resolveEnabled();
+      setOnline.addEventListener('change', () => {
+        try {
+          localStorage.setItem('crossrealm_online', setOnline.checked ? '1' : '0');
+        } catch {
+          /* 隐私模式：localStorage 可能写不进——先翻运行时单例，关闭本来就兜底吞掉 */
+        }
+        onlineServices.setEnabled(setOnline.checked);
+      });
+    }
   }
 
   /**

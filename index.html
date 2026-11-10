@@ -150,6 +150,10 @@
         <label><input id="set-vibration" type="checkbox" /> <span data-i18n="settings_vibration">手柄震动</span></label>
         <h3 data-i18n="settings_keybinds">键位</h3>
         <div id="set-keybinds" class="keybind-list"></div>
+        <!-- 在线伙伴服务（W-X6）：默认关闭；面板直接写 localStorage crossrealm_online + 翻运行时单例（不经 SettingsStore） -->
+        <h3 data-i18n="settings_online">在线服务</h3>
+        <label><input id="set-online" type="checkbox" /> <span data-i18n="settings_online_toggle">启用在线服务（排行榜 / 遥测）</span></label>
+        <p data-i18n="settings_online_hint">默认关闭。开启后击杀 Boss 会向网关上报遥测；关掉网络也不会影响本地游戏。</p>
         <button id="settings-close" data-i18n="common_close">关闭</button>
       </div>
     </div>
