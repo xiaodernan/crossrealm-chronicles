@@ -145,6 +145,9 @@ const POI_LABELS = {
   'homage-star-cantina': ['echo_star_cantina_title', '星港酒肆', 'Starport Cantina'],
   'homage-smuggler-dock': ['echo_smuggler_dock_title', '走私码头', 'Smuggler Dock'],
   'homage-holo-chart': ['echo_holo_chart_title', '全息星图室', 'Holographic Star Chart Room'],
+  // W-E3 切片99：幽暗林地 · 薄暮石陪席 + 辉煌圣域 · 圣曜武士之门
+  'homage-gloom-stones': ['echo_gloom_stones_title', '薄暮石陪座席', 'The Gloomstones'],
+  'homage-radiant-torii': ['echo_radiant_torii_title', '圣曜武士之门', 'Gate of the Radiant Samurai'],
 };
 
 describe('POI 交互标签双表化（W-D2 切片19）', () => {

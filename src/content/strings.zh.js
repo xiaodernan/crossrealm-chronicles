@@ -1016,6 +1016,8 @@ export const STRINGS_ZH = Object.freeze({
   franchise_cosmic_label: '旧日低语',
   franchise_starport_label: '星港商路',
   franchise_crossover_label: '跨界',
+  franchise_gloom_label: '薄暮回响',
+  franchise_radiant_label: '辉煌残响',
   skill_branch_sword_name: '⚔ 位面长剑',
   skill_branch_sword_note: '近战流派：连段、弹反、终结技与位面斩',
   skill_branch_staff_name: '✦ 奥术法杖',
@@ -1125,6 +1127,10 @@ export const STRINGS_ZH = Object.freeze({
   echo_smuggler_dock_desc: "集装箱编号是位面坐标 — 开错箱的人再没回来。",
   echo_holo_chart_title: "全息星图室",
   echo_holo_chart_desc: "星图每天变 — 领航员说：「航线是谈判出来的。」",
+  echo_gloom_stones_title: '薄暮石陪座席',
+  echo_gloom_stones_desc: '幽暗林雾气里那圈立石似有回声——站在石环中央，草鞋在苔藓上无声挪移。',
+  echo_radiant_torii_title: '圣曜武士之门',
+  echo_radiant_torii_desc: '辉煌圣域尽头那一道绯红武士门——穿过它的人都会听见光的回声。',
 
   // POI 交互标签（W-D2 切片19：显示出口 PlayerController.updatePrompt 改走 t()，label 位存的全是键）
   // 命名口径：致敬层 POI 复用回声条目的标题键（交互即解锁那条回声，本来就是同一个东西）；

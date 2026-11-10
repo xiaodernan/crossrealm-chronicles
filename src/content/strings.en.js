@@ -1014,6 +1014,8 @@ export const STRINGS_EN = Object.freeze({
   franchise_cosmic_label: 'Old Days Whisper',
   franchise_starport_label: 'Starport Trade Route',
   franchise_crossover_label: 'Crossover',
+  franchise_gloom_label: 'Gloom Whispers',
+  franchise_radiant_label: 'Radiant Echoes',
   skill_branch_sword_name: '⚔ Plane Longsword',
   skill_branch_sword_note: 'Melee style: combos, parries, finishers and the plane slash',
   skill_branch_staff_name: '✦ Arcane Staff',
@@ -1123,6 +1125,10 @@ export const STRINGS_EN = Object.freeze({
   echo_smuggler_dock_desc: "The container numbers are plane coordinates — those who open the wrong one never came back.",
   echo_holo_chart_title: "Holographic Star Chart Room",
   echo_holo_chart_desc: "The chart changes every day — the navigator says: \"A route is something you negotiate.\"",
+  echo_gloom_stones_title: 'The Gloomstones',
+  echo_gloom_stones_desc: 'The ring of stones in the Gloomwood whispers - step into the circle and hear what the mist remembers.',
+  echo_radiant_torii_title: 'Gate of the Radiant Samurai',
+  echo_radiant_torii_desc: 'A vermilion gate at the far end of the Radiant Sanctum - pass under it and catch the whisper of light itself.',
 
   // POI interaction labels (W-D2 slice 19: the display exit in PlayerController.updatePrompt now
   // goes through t(); the label slot holds keys. Homage POIs reuse the echo entry title keys

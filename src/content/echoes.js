@@ -96,4 +96,8 @@ export const ECHOES = [
   { id: 'echo-star-cantina', franchise: FRANCHISE.STARPORT, zone: 'space', title: 'echo_star_cantina_title', desc: 'echo_star_cantina_desc', trigger: 'echo:star-cantina' },
   { id: 'echo-smuggler-dock', franchise: FRANCHISE.STARPORT, zone: 'space', title: 'echo_smuggler_dock_title', desc: 'echo_smuggler_dock_desc', trigger: 'echo:smuggler-dock' },
   { id: 'echo-holo-chart', franchise: FRANCHISE.STARPORT, zone: 'space', title: 'echo_holo_chart_title', desc: 'echo_holo_chart_desc', trigger: 'echo:holo-chart' },
+
+  // ── Wave5（幽暗/圣域）──
+  { id: 'echo-gloom-nine-stones', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_stones_title', desc: 'echo_gloom_stones_desc', trigger: 'echo:gloom-nine-stones' },
+  { id: 'echo-radiant-torii', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_torii_title', desc: 'echo_radiant_torii_desc', trigger: 'echo:radiant-torii' },
 ];

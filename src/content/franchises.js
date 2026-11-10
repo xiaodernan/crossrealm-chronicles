@@ -25,6 +25,8 @@ export const FRANCHISE = {
   COSMIC: 'cosmic',
   STARPORT: 'starport',
   CROSSOVER: 'crossover',
+  GLOOM: 'gloom',
+  RADIANT: 'radiant',
 };
 
 /**
@@ -45,6 +47,8 @@ export const FRANCHISE_LABELS = {
   [FRANCHISE.COSMIC]: 'franchise_cosmic_label',
   [FRANCHISE.STARPORT]: 'franchise_starport_label',
   [FRANCHISE.CROSSOVER]: 'franchise_crossover_label',
+  [FRANCHISE.GLOOM]: 'franchise_gloom_label',
+  [FRANCHISE.RADIANT]: 'franchise_radiant_label',
 };
 
 /** 母题显示名（按语言展开；键找不到就退回 id） */
