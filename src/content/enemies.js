@@ -177,6 +177,10 @@ export const ENEMY_ROSTER = {
    * W-E3 切片90：深渊恸嚎者 —— 深渊之颚飘忽的远压施术者。
    */
   abyss_wailer: { name: 'enemy_name_abyss_wailer', hp: 142, posture: 49, damage: 16, speed: 5.1, aggroRange: 31, color: 0x7766aa },
+  /**
+   * W-E3 切片93：深渊缚影者 —— 深渊之颚贴身舞影的缚鞭手。
+   */
+  abyss_gloombinder: { name: 'enemy_name_abyss_gloombinder', hp: 128, posture: 44, damage: 14, speed: 5.4, aggroRange: 29, color: 0x4a4a8e },
   /** W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿 */
   radiant_crawler: { name: 'enemy_name_radiant_crawler', hp: 160, posture: 62, damage: 17, speed: 6.0, aggroRange: 24, color: 0xffd700 },
   radiant_knight: { name: 'enemy_name_radiant_knight', hp: 270, posture: 92, damage: 22, speed: 4.2, aggroRange: 24, color: 0xffcc00 },

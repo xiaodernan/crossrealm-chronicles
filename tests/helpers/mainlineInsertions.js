@@ -23,6 +23,7 @@ export const POST_V21 = [
   'abyss-ravager-hunt',
   'void-rendclaw-hunt',
   'abyss-wailer-hunt',
+  'abyss-gloombinder-hunt',
   'void-howler-hunt',
 ];
 

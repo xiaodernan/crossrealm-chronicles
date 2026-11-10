@@ -114,6 +114,8 @@ export const BODY_PLANS = {
   abyss_ravager:  { scale: 1.06, parts: ['head', 'torso', 'legs'], radius: 0.46 },
   /** W-E3 切片90：深渊恸嚎者 —— 飘忽的远压施术者体格。 */
   abyss_wailer:   { scale: 0.97, parts: ['head', 'torso', 'legs'], radius: 0.41 },
+  /** W-E3 切片93：深渊缚影者 —— 贴身的连舞体格。 */
+  abyss_gloombinder:{ scale: 0.98, parts: ['head', 'torso', 'legs'], radius: 0.42 },
   /**
    * W-B9 切片1 新增：辉煌圣域 — 金色沙海中的光辉神殿
    * 爬兽贴地、骑士最重、舞者最轻
@@ -198,6 +200,8 @@ export const ENEMY_RESIST = {
   abyss_ravager:  { fire: -0.18, gravity: 0.28 },
   /** W-E3 切片90：深渊恸嚎者 */
   abyss_wailer:   { fire: -0.12, gravity: 0.21 },
+  /** W-E3 切片93：深渊缚影者 —— 怕火，引力能打断它的舞步 */
+  abyss_gloombinder:{ fire: -0.13, gravity: 0.19 },
   /** 虚空裂隙行者：在裂隙间穿行的实影，怕火；引力能短暂扯住它的落点 */
   void_riftwalker:{ fire: -0.15, gravity: 0.25 },
   /** 虚空潜伏者：贴着裂隙潜行的实影，怕火；引力能干扰它的扑袭落点 */
@@ -411,6 +415,8 @@ export const ENEMY_DEFENSE = {
   abyss_ravager: 5,
   /** W-E3 切片90：深渊恸嚎者 */
   abyss_wailer: 3,
+  /** W-E3 切片93：深渊缚影者 */
+  abyss_gloombinder: 4,
   radiant_crawler: 8, radiant_knight: 22, radiant_dancer: 6, radiant_brand: 10,
   radiant_archon: 12,
 };
@@ -940,6 +946,18 @@ export const ENEMY_MOVES = {
     range: 11, minDist: 3.2,
     damage: 1.04, cooldown: 3.1, weight: 2, ranged: { speed: 15.5, color: 0x8866aa },
     telegraph: { color: 0x553377 },
+  },
+  /**
+   * 深渊缚影鞭（深渊缚影者专属招）—— W-E3 切片93。
+   * 三连鞭影：复用既有 `combo`/`comboWindup` 机制（与 `riot`/`mauler` 同族），
+   * 强调贴身持续撕扯压制而非单发重击；与 `abyss_ravage`（单发重击）、
+   * `abyss_gnash`（突进连噬）三岔。
+   */
+  abyss_gloomlash: {
+    name: '深渊缚影鞭', windup: 0.5, strike: 0.15, recover: 0.4, reach: 1.05, cone: 0.46,
+    band: [0, 1.2],
+    damage: 0.5, cooldown: 3.6, weight: 2, knock: 2.2, combo: 3, comboWindup: 0.17,
+    telegraph: { color: 0x333366 },
   },
   /**
    * 裂隙步（虚空裂隙行者专属招）—— W-E3 切片72。
@@ -1580,6 +1598,8 @@ export const ENEMY_MOVE_SETS = {
   abyss_ravager:  ['abyss_ravage', 'sweep', 'thrust'],
   /** W-E3 切片90：深渊恸嚎者 —— 深渊恸嚎（远压）+ 刺击 + 横扫 */
   abyss_wailer:   ['abyss_wail', 'thrust', 'sweep'],
+  /** W-E3 切片93：深渊缚影者 —— 深渊缚影鞭（三连）+ 连击 + 刺击 */
+  abyss_gloombinder:['abyss_gloomlash', 'flurry', 'thrust'],
   /** W-B9 切片1：辉煌圣域三类敌人 */
   radiant_crawler: ['flare', 'flurry', 'thrust'],
   radiant_knight: ['sanctify', 'sweep', 'guard', 'cleave'],

@@ -128,6 +128,8 @@ const OLD_BIRTH = {
   abyss_ravager: { name: '深渊撕裂者', hp: 168, posture: 60, damage: 19, speed: 4.6, aggroRange: 26, color: 0x994466 },
   // W-E3 切片90：深渊恸嚎者
   abyss_wailer: { name: '深渊恸嚎者', hp: 142, posture: 49, damage: 16, speed: 5.1, aggroRange: 31, color: 0x7766aa },
+  // W-E3 切片93：深渊缚影者
+  abyss_gloombinder: { name: '深渊缚影者', hp: 128, posture: 44, damage: 14, speed: 5.4, aggroRange: 29, color: 0x4a4a8e },
   radiant_brand: { name: '辉煌圣印者', hp: 155, posture: 60, damage: 16, speed: 4.6, aggroRange: 26, color: 0xffe066 },
   // W-E3 切片67：辉煌大主教（追加在切片2 的黄金名单上，保持"两边清单一模一样"）
   radiant_archon: { name: '辉煌大主教', hp: 175, posture: 68, damage: 17, speed: 4.3, aggroRange: 28, color: 0xfff4b0 },

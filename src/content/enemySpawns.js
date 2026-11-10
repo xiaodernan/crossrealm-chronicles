@@ -228,6 +228,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'abyss_wailer', x: -225, z: 220 },
   { type: 'abyss_wailer', x: -185, z: 295 },
   { type: 'abyss_wailer', x: -250, z: 260 },
+  // 深渊缚影者（三点，W-E3 切片93）—— 贴身舞影手，与恸嚎者/撕裂者错开。
+  { type: 'abyss_gloombinder', x: -148, z: 233 },
+  { type: 'abyss_gloombinder', x: -238, z: 312 },
+  { type: 'abyss_gloombinder', x: -193, z: 263 },
 
   // ── 辉煌圣域（radiant，中心 ~-180,-160，半径 150）──
   { type: 'radiant_crawler', x: -240, z: -200 },

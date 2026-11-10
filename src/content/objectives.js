@@ -1241,6 +1241,19 @@ export const OBJECTIVES = [
     journal: 'obj_abyss_wailer_hunt_journal',
   },
   {
+    // W-E3 切片93：深渊缚影者进主线 —— 第十二独占，插在恸嚎者后、深渊副本前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'abyss-gloombinder-hunt',
+    title: 'obj_abyss_gloombinder_hunt_title',
+    desc: 'obj_abyss_gloombinder_hunt_desc',
+    type: 'kills',
+    enemyType: 'abyss_gloombinder',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -148, z: 233, label: 'enemy_name_abyss_gloombinder' },
+    reward: 22,
+    journal: 'obj_abyss_gloombinder_hunt_journal',
+  },
+  {
     id: 'abyss-maw',
     title: 'obj_abyss_maw_title',
     desc: 'obj_abyss_maw_desc',
