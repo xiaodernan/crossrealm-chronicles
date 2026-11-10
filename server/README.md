@@ -66,6 +66,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\verify-breaker.ps1
 （29xxx 端口段；验证：baseline 200 → 停掉 game-service 后连打 503 → 重新拉起后自动恢复 200）
 
 配置中心支持 
+**W-X13 深度健康视图**（`OpsController`，无外呼）：`GET /api/ops/health` —— 一次调用答出：service name / version / javaVersion / 当前 bind 的 `game-service.*` 配置（seed / max events / version note）以及 `inMemory.*`（leaderboard 记录数 / telemetry 事件数）。互补 /acactuator/health 只判 liveness、不出别的信息。
 **W-X12 限流（rate-limit by IP）**：网关新增 `RateLimitByIpFilter`（Spring Cloud Gateway `GlobalFilter`，order=-100，独立于 circuitbreaker / retry）—— `X-Forwarded-For`（信任代理后）或连接 `remoteAddress`（fallback）为 key，同 IP 10 秒最多 60 次，超出返回 `429 + {"error":"rate-limited","retryAfterMs":…}`。
 - 正常玩家与 smoke 不会撞上（smoke 全链路 ~15 次）
 - 60 req / 10s 足以挡住单 IP 高频抓取 / 刷榜

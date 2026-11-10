@@ -90,4 +90,4 @@ Gateway 4.x 起路由配置前缀是 `spring.cloud.gateway.server.webflux.*`（�
 - `server/scripts/verify-breaker.ps1` —— W-X5 网关熔断验证（手动诊断）
 - `.github/workflows/server.yml` — CI（编译 + 单测 + 全链路冒烟）
 - `src/online/OnlineServices.js` — 游戏侧客户端（默认关闭）
-- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）/ W-X6（设置页开关）/ W-X7（只读排行榜面板）/ W-X9（配置热刷新）/ W-X11（/api/version Retry 滤镜）/ W-X12（IP 限流）
+- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）/ W-X6（设置页开关）/ W-X7（只读排行榜面板）/ W-X9（配置热刷新）/ W-X11（/api/version Retry 滤镜）/ W-X12（IP 限流）/ W-X13（/api/ops/health 复合视图）/ W-X13（/api/ops/health 复合视图）
