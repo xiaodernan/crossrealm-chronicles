@@ -5432,6 +5432,15 @@ Phase D（系统与质量）
   - **验证**：lint 0/0，test 全绿（**404 文件 / 6049 项**），build ✓。E2E：`12600帧/210s/q=110/主线111/ch5/completed=true/exceptions=0` —— 与 S98 **同读数**：两栋新建筑（静移态，无帧成本）只在 world build 造一次。
 
   - **风险与后续**：① 两个新母题目前各只有**一**条回声 —— 不满足"系列 tour"（`side-gloom-tour` 要 ≥ 3 条）的条件；想给它们办巡礼任务，得先各扩到 3 条回声；② 两处新母题的显示文案仍走既有 `franchiseLabel`，无 name-escape 样式风险；③ POI 几何为朴素构造盒/柱，未入**共享库**（与 Wave3/4 同口径，挂 zone.group、随位面释放）；④ Choice-void / 存档版本 / 主线步数**一样没动**。
+- **2026-11-10 W-X11（在线伙伴服务）—— GET /api/version 走专用 Retry 路由（order=-1）；主 /api/** 不带 Retry** —— 提交 `cd944b7` + `c465a19`（4 文件）
+
+  - **起因**：`/api/version` 是 bootstrap/轮询场景（bootstrap 高频探活 + 边端可能先连上 lb 缓存 30 秒窗口），但 gateway 把它混在主 `lb://game-service` 路由里 —— lb 不选实例时 Java 网关直接吐空 503，那面对 502 就真的写脏了路。修 smoke.ps1 对 CJK 注释（PowerShell 5.1 按 ANSI 读 BOM-less 文件，CJK 字节会错位让行号与行内容对不上——像 code page 拐弯一样把后面的赋值句吃掉）；顺便把 gateway 路由划分去重：`/api/version` 升级为专用水源路由（order=-1），挂 `CircuitBreaker` + `Retry`（≤ 2 次、GET only、502/503 only、50ms→200ms），把偶发 503 从会打断玩家的游戏回路变成"轮询最多多等几十毫秒"。主 `/api/**` 路由**不带** `Retry` —— 它投送 `POST /api/leaderboard`，带 `Retry` 等于双重写入。
+
+  - **做法**：① `gateway/application.yml` 新增 `game-service-version` 优先路由（`Path=/api/version`，`order: -1`），`CircuitBreaker` + `Retry` 两滤镜叠加；② 主 `game-service` 路由保留 `CircuitBreaker` 只去 `/fallback/503`（不再挂 `Retry`）；③ `GatewayConfigWiringTest` 拆成三条断言：新版本路由必须有 Retry（含 `methods: GET`、`retries: 2`、`statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE`）；主路由**绝不**有 Retry（不变式：带重试 = 双写）；`/api/version` 兜底路径是 `/fallback/503`；④ `server` / `docs/ONLINE_SERVICES.md` 同步说明 Retry 语义 + 主路由禁用原因；⑤ 冒烟 CJK 清洗 —— `scripts/smoke.ps1` 全程 ASCII，消除 GBK 代码页下 PowerShell 5.1 把 CJK 字节读成 `"` 的风险，两平台执行路径对齐。
+
+  - **验证**：gateway 模块 `mvn -B verify` 5 项测试全绿（2026-11-10 12:50 本机实测，`Tests run: 5, Failures: 0`）；`smoke.ps1` 完整全链路 PASS（含配置热刷新 + 版号轮询）；server CI（`.github/workflows/server.yml`，run 42819048942）**success**，1m33s 端到端全通，Linux runner 也绿。
+
+  - **风险与后续**：① `Retry` 只对 `lb://` 上游抛出的 502/503、且仅限 GET —— 不能放大 POST 写流量；② Linux CI 不再依赖 GBK 代码页的 CJK 解码行为，smoke 在 Windows PowerShell 5.1 与 pwsh Linux 双端对齐；③ 如果以后要给其它幂等端点（如 `/api/telemetry/events/count`）加 Retry，新开一个专用优先路由，不要去吃掉 POST 主路由；④ `verify-breaker.ps1` 不变 —— 它已经够诚实（503 vs Fallback 本来就是两条不同路径；Retry 只盖 `/api/version` 这一条）。
 - **2026-11-10 W-X10（在线伙伴服务）—— 设置页「在线服务连通性自检」一键 ping /api/version** —— 提交 `11a9727`（7 文件，+113 −2）
 
   - **起因**：W-X6 给了设置页「在线服务」开关，但用户打开后对"这个 toggle 背后到底通了什么"依然一头雾水；开关是一格布尔，连不通也不说一声。这一片加一键 ping：让玩家自己点一下就知道配置/网关/路由是好是坏。
