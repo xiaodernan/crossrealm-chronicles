@@ -5432,6 +5432,15 @@ Phase D（系统与质量）
   - **验证**：lint 0/0，test 全绿（**404 文件 / 6049 项**），build ✓。E2E：`12600帧/210s/q=110/主线111/ch5/completed=true/exceptions=0` —— 与 S98 **同读数**：两栋新建筑（静移态，无帧成本）只在 world build 造一次。
 
   - **风险与后续**：① 两个新母题目前各只有**一**条回声 —— 不满足"系列 tour"（`side-gloom-tour` 要 ≥ 3 条）的条件；想给它们办巡礼任务，得先各扩到 3 条回声；② 两处新母题的显示文案仍走既有 `franchiseLabel`，无 name-escape 样式风险；③ POI 几何为朴素构造盒/柱，未入**共享库**（与 Wave3/4 同口径，挂 zone.group、随位面释放）；④ Choice-void / 存档版本 / 主线步数**一样没动**。
+- **2026-11-10 W-X12（在线伙伴服务）—— 网关限流（rate-limit by IP）** —— 提交 `bb4d436`（5 文件，+264 −3）
+
+  - **起因**：W-X9 / W-X11 把 Fallback + Retry 补齐之后，网关的"最后一道保命闸"再也没有别的短板 —— 但网关对**每个 IP** 没有流量纪律。这一片补一个"单 IP 每 10 秒最多 60 次"的 SlidingWindow 限流：既不挡住玩家正常玩（人打 boss 不到 10 次/秒），又能在单机脚本/批量抓取/leaderboard 刷子成堆的时候刹车。它不是身份认证，也不是分布式公平——它是单机、单进程的"caption"，但是有。
+
+  - **做法**：① 纯函数 `RateLimitTokenBucket`（构造器可接受 `LongSupplier` 时钟以喂给单元测试）：`allow(window, now)` 先 expire 已过期条再判断窗口内是否已达上限，达到上限拒绝并**不**回填当前时间戳，否则放行；`retryAfterMs(window)` 用于 `429` 响应里下一次可重试时间；两个非法参数的构造直接 `IllegalArgumentException`；② `RateLimitByIpFilter extends GlobalFilter, Ordered`（order = -100——比 CircuitBreaker 还早）：`X-Forwarded-For` 优先（信任代理后服务的 XFF 首段），没有就退到 `exchange.getRequest().getRemoteAddress().getHostString()`，再兜 `"unknown"`；窗口 `ConcurrentHashMap<String, Deque<Long>>` 每个 IP 一条 deque，`peekFirst ≤ now-10000` 即惰性淘汰；③ 超出返回 `429 + JSON{"error":"rate-limited","retryAfterMs":<n>}`，并附带 `X-RateLimit-Limit` / `X-RateLimit-Window-Ms` header；**不**走 CircuitBreaker、不进 Fallback、不记 fallback 事件；④ `RateLimitTokenBucketTest` 8 项：满 throttling / 未到满 / 只记合法条目 / 过期惰性清理 / retryAfterMs 边界 / 非法构造参数 / 常数。
+
+  - **验证**：`mvn -B verify` 全绿（gateway 13 项测试，2026-11-10 20:57 本机实测，`Tests run: 13, Failures: 0`）；`smoke.ps1` 完整跑完打印 "smoke test PASSED"。CI：server workflow 会在下次 push 之后真 boot 并跑完整冒烟。
+
+  - **风险与后续**：① 号段攻击（整个子网 / 24 一换一批 IP）绕过，对真正攻击的防线还是 `iptables` / WAF，别指望这个；② 没接 Redis / 不跨节点同步——现在网关单实例单进程，足够；③ 不给 player 端做限流会打得更流畅（每秒几发 ping）；④ 如果以后想要"读放行、写限速"（GET 流多、POST 流贵），把 filter 拆出"只限 POST"分支就行——现在稳得很，不用抢。
 - **2026-11-10 W-X11（在线伙伴服务）—— GET /api/version 走专用 Retry 路由（order=-1）；主 /api/** 不带 Retry** —— 提交 `cd944b7` + `c465a19`（4 文件）
 
   - **起因**：`/api/version` 是 bootstrap/轮询场景（bootstrap 高频探活 + 边端可能先连上 lb 缓存 30 秒窗口），但 gateway 把它混在主 `lb://game-service` 路由里 —— lb 不选实例时 Java 网关直接吐空 503，那面对 502 就真的写脏了路。修 smoke.ps1 对 CJK 注释（PowerShell 5.1 按 ANSI 读 BOM-less 文件，CJK 字节会错位让行号与行内容对不上——像 code page 拐弯一样把后面的赋值句吃掉）；顺便把 gateway 路由划分去重：`/api/version` 升级为专用水源路由（order=-1），挂 `CircuitBreaker` + `Retry`（≤ 2 次、GET only、502/503 only、50ms→200ms），把偶发 503 从会打断玩家的游戏回路变成"轮询最多多等几十毫秒"。主 `/api/**` 路由**不带** `Retry` —— 它投送 `POST /api/leaderboard`，带 `Retry` 等于双重写入。
