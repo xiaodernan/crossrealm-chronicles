@@ -42,6 +42,12 @@ const REASON_KEY = {
   abandon: 'trial_reason_abandon',
 };
 
+/** 乘子显示成两位小数，整数值不写 `.00`（×1.15 / ×1 / ×1.60 → ×1.6，玩家读得舒服） */
+function fmtMul(v) {
+  if (!Number.isFinite(v)) return '1';
+  return String(Math.round(v * 100) / 100);
+}
+
 export class TrialJournalTab {
   constructor(game) {
     this.game = game;
@@ -76,7 +82,10 @@ export class TrialJournalTab {
             <li>${t('trial_effect_quota_fmt', { n: state.active.quotaDelta })}</li>
             <li>${t('trial_effect_burn_fmt', { n: state.active.burnDps })}</li>
           </ul>
-          <div class="trial-pending">${t('trial_spawn_pending')}</div>
+          <div class="trial-spawn">${t('trial_spawn_live_fmt', {
+    hp: fmtMul(state.spawnScale?.hp), damage: fmtMul(state.spawnScale?.damage), speed: fmtMul(state.spawnScale?.speed),
+  })}</div>
+          <div class="trial-pending">${t('trial_spawn_note')}</div>
         </div>` : '';
 
     const reason = state.lastReason ? t(REASON_KEY[state.lastReason]) : '';

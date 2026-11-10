@@ -4,6 +4,7 @@ import { SquadController } from '../ai/Squad.js';
 import { bodyOf } from '../ai/Separation.js';
 import { AI, SUMMON } from '../content/tuning.js';
 import { enemyRosterOf, KILL_SOULS } from '../content/enemies.js';
+import { getSpawnScale, isNeutralSpawnScale } from '../game/SpawnTuning.js';
 import { Boss } from './Boss.js';
 import { GroundHazards } from './GroundHazards.js';
 import { MagicBoss } from './MagicBoss.js';
@@ -379,16 +380,23 @@ export class EnemyManager {
     const 区位 = zoneIdAt({ x, z }, this.world?.zones);
     const stage = growthStage ?? zoneGrowthStage(区位);
     const growth = growthAt(stage);
+    /* 试炼给的第三档乘子（W-F3 切片2）：与难度、成长一起乘在同一条咽喉上。
+     * 中性时 `isNeutralSpawnScale` 为真，产出的 config 与改动前逐字节相同 ——
+     * `speed` 那一格刻意**只在非中性时**写（写 1 会多出一个键）。 */
+    const spawnScale = getSpawnScale();
+    const neutralScale = isNeutralSpawnScale(spawnScale);
     const enemy = this.spawn({
       ...roster,
       // 名字是**文案键**（W-D2 切片16s）：展开在出生这一刻 ——
       // 于是"它叫什么"在事件负载里仍然是那句人看的话（锁定提示 / 击败横幅 / 字幕都读它）。
       name: t(roster.name),
-      hp: Math.round(roster.hp * difficultyMultiplier('enemyHp') * growth.hp),
+      hp: Math.round(roster.hp * difficultyMultiplier('enemyHp') * growth.hp * spawnScale.hp),
       // damage 是可缺的（`dummy` 没有）：缺格不缩放，交给 Enemy 构造器的 `?? 12`
-      ...(roster.damage == null ? {} : { damage: Math.round(roster.damage * growth.damage) }),
+      ...(roster.damage == null ? {} : { damage: Math.round(roster.damage * growth.damage * spawnScale.damage) }),
       // souls 收入倍率：只对收入生效（W-E1 切片1）
       ...(roster.souls == null ? {} : { souls: Math.round(roster.souls * growth.souls) }),
+      // speed 只在非中性时覆盖（见上）
+      ...(neutralScale || roster.speed == null ? {} : { speed: roster.speed * spawnScale.speed }),
       type, x, z, ...rest,
     });
     // 档位记在敌人身上（W-E1 切片4）：仆从按**召唤者**的档位长，而副本里的召唤者

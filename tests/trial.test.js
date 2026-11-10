@@ -253,11 +253,11 @@ describe('位面试炼 · 运行时', () => {
     expect(g.hits.length).toBe(0);
   });
 
-  it('getState 如实标出"出生缩放已算出、还没接"', () => {
+  it('getState 如实标出"出生缩放已在生效"（W-F3 切片2 起接进 spawnAt）', () => {
     sys = new TrialSystem(fakeGame());
     sys.start(['swift-shades']);
     const st = sys.getState();
-    expect(st.spawnScaleLive).toBe(false);
+    expect(st.spawnScaleLive).toBe(true);
     expect(st.spawnScale.speed).toBeGreaterThan(0);
     expect(st.active.burnDps).toBe(0);
     expect(st.affixIds).toEqual(['swift-shades']);
@@ -301,11 +301,11 @@ describe('位面试炼 · 接线与文案', () => {
     expect(hud).toMatch(/k === 'trial'/);
   });
 
-  it('文案双表都登记了 32 个 trial_ 键，且中英都非空', () => {
+  it('文案双表都登记了 33 个 trial_ 键，且中英都非空', () => {
     const zh = Object.keys(STRINGS_ZH).filter((k) => k.startsWith('trial_') || k === 'journal_tab_trial');
     const en = Object.keys(STRINGS_EN).filter((k) => k.startsWith('trial_') || k === 'journal_tab_trial');
     expect(zh.sort()).toEqual(en.sort());
-    expect(zh.length).toBe(32);
+    expect(zh.length).toBe(33);
     for (const k of zh) {
       expect(STRINGS_ZH[k].length, `中文缺 ${k}`).toBeGreaterThan(0);
       expect(STRINGS_EN[k].length, `英文缺 ${k}`).toBeGreaterThan(0);

@@ -2301,6 +2301,7 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .trial-affix.is-none { border-left-color: rgba(255,255,255,0.12); color: #888; }
 .trial-effect { margin-top: 6px; }
 .trial-effect-list li { font-size: 0.72rem; color: #b8a894; }
+.trial-spawn { font-size: 0.72rem; color: #c9a48a; margin-top: 4px; }
 .trial-pending { font-size: 0.68rem; color: #7a6f66; margin-top: 4px; line-height: 1.5; }
 .trial-layer { display: flex; justify-content: space-between; font-size: 0.72rem; color: #a89880; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .trial-layer-meta { color: #8a7d6e; }

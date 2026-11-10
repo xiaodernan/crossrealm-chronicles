@@ -26,6 +26,7 @@
  * 口径是"任何击杀都算" —— 这一片不刷自己的怪，玩家要去世界里打。
  */
 import { on, offAll, emit } from '../engine/EventBus.js';
+import { setSpawnScale, resetSpawnScale } from './SpawnTuning.js';
 import {
   TRIAL_MAX_LAYERS, trialModifiers, layerSeconds, layerQuota, layerScale, trialScore,
 } from '../content/trial.js';
@@ -73,13 +74,16 @@ export class TrialSystem {
     return this.getState();
   }
 
-  /** 进入某一层：配额、时限、剩余击杀清零 */
+  /** 进入某一层：配额、时限、剩余击杀清零，并把这一层的出生缩放下发给 spawnAt */
   _beginLayer(layer) {
     this.layer = layer;
     this.quota = layerQuota(layer, this.mods);
     this.secondsLeft = layerSeconds(layer, this.mods);
     this.kills = 0;
     this._burnDebt = 0;
+    /* W-F3 切片2：词缀的 hp/damage/speed 从这一行起真的落地 —— 写的是模块级那一格，
+     * 读它的是 `EnemyManager.spawnAt` 那条唯一的出生咽喉（不另开刷怪路）。 */
+    setSpawnScale(layerScale(layer, this.mods));
   }
 
   _handleKill() {
@@ -96,6 +100,8 @@ export class TrialSystem {
 
   _finish() {
     this.state = 'finished';
+    // 收工归位：不归位，玩家离开试炼之后世界里的怪会一直按最后一层的强度长
+    resetSpawnScale();
     this.score = trialScore(this.layersCleared, this.secondsLeft);
     if (this.score > this.best.score) {
       this.best = {
@@ -111,6 +117,7 @@ export class TrialSystem {
 
   _fail(reason) {
     this.state = 'failed';
+    resetSpawnScale();
     this.lastReason = reason;
     this.score = trialScore(this.layersCleared, 0);
     emit('trial-failed', {
@@ -180,15 +187,17 @@ export class TrialSystem {
         quotaDelta: this.mods.quotaDelta,
         burnDps: this.mods.burnDps,
       },
-      /** 出生缩放：本片算得出、还没人用（切片2 接出生咽喉），面板据此如实标注 */
+      /** 出生缩放：跑着的时候就是 `spawnAt` 正在乘的那一份 */
       spawnScale: scale,
-      /** 出生缩放是否已经在生效（切片1 一律 false —— 面板不许写成"已生效"） */
-      spawnScaleLive: false,
+      /** 出生缩放是否已经在生效（W-F3 切片2 起为真：已接进 `EnemyManager.spawnAt`） */
+      spawnScaleLive: this.state === 'running',
       best: { ...this.best },
     };
   }
 
   dispose() {
     offAll(OWNER);
+    // 销毁也要归位：`_adopt` 的 teardown 会在换档/重开时走到这里
+    resetSpawnScale();
   }
 }
