@@ -104,4 +104,10 @@ export const ECHOES = [
   // ── Wave6（虚空/深渊）──
   { id: 'echo-void-astrolabe', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_astrolabe_title', desc: 'echo_void_astrolabe_desc', trigger: 'echo:void-astrolabe' },
   { id: 'echo-abyss-stele', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_stele_title', desc: 'echo_abyss_stele_desc', trigger: 'echo:abyss-stele' },
+
+  // ── Wave7（断口巡礼 / 深颚巡礼）──
+  { id: 'echo-void-sundial', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_sundial_title', desc: 'echo_void_sundial_desc', trigger: 'echo:void-sundial' },
+  { id: 'echo-void-pearl', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_pearl_title', desc: 'echo_void_pearl_desc', trigger: 'echo:void-pearl' },
+  { id: 'echo-abyss-conch', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_conch_title', desc: 'echo_abyss_conch_desc', trigger: 'echo:abyss-conch' },
+  { id: 'echo-abyss-bonegate', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_bonegate_title', desc: 'echo_abyss_bonegate_desc', trigger: 'echo:abyss-bonegate' },
 ];

@@ -1142,6 +1142,14 @@ export const STRINGS_EN = Object.freeze({
   echo_void_astrolabe_desc: 'A broken astrolabe lies at the edge of the Void Rift — those who turn it hear the echo of a falling star.',
   echo_abyss_stele_title: 'The Salt Steles',
   echo_abyss_stele_desc: 'Salt-carved steles older than the deep jaws — whoever reads them holds their breath.',
+  echo_void_sundial_title: 'The Rift Sundial',
+  echo_void_sundial_desc: 'A sundial that never agrees with itself — its shadow rests on the seventh mark, always.',
+  echo_void_pearl_title: 'The Rift Pearl',
+  echo_void_pearl_desc: "A pale pearl hangs over the rift — a falling star's tear, not fallen yet.",
+  echo_abyss_conch_title: 'The Deep Conch',
+  echo_abyss_conch_desc: 'The brine hums inside — the deepest whisper in the Deep Jaws.',
+  echo_abyss_bonegate_title: 'The Bone Gate',
+  echo_abyss_bonegate_desc: 'The reef is good at swallowing bones — only walkers-through know the other side.',
 
   // POI interaction labels (W-D2 slice 19: the display exit in PlayerController.updatePrompt now
   // goes through t(); the label slot holds keys. Homage POIs reuse the echo entry title keys
@@ -1438,6 +1446,12 @@ export const STRINGS_EN = Object.freeze({
   sq_side_starport_tour_title: "Starport Regular",
   sq_side_starport_tour_desc: "Resonate with 3 starport trade-route echoes",
   sq_side_starport_tour_journal: "Tavern, dock, star chart — the route is negotiated through.",
+  sq_side_voidmaw_tour_title: 'Maw Tour',
+  sq_side_voidmaw_tour_desc: 'Resonate with 3 maw echoes',
+  sq_side_voidmaw_tour_journal: 'The sundial rests on seven; the pearl neither falls nor stops.',
+  sq_side_abysssalt_tour_title: 'Deep Tour',
+  sq_side_abysssalt_tour_desc: 'Resonate with 3 deep echoes',
+  sq_side_abysssalt_tour_journal: 'The conch carried a word; the bone gate stands in salt.',
   sq_side_wave4_master_title: "Four-Series Walker",
   sq_side_wave4_master_desc: "Resonate with all four Wave4 series",
   sq_side_wave4_master_journal: "Cyber, samurai, old days, starport — the four series align on one echo line.",

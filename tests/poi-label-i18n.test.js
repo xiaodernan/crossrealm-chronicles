@@ -151,6 +151,11 @@ const POI_LABELS = {
   // W-E3 切片102：虚空断口 · 断口星盘 + 深渊之颚 · 深颚盐碑
   'homage-void-astrolabe': ['echo_void_astrolabe_title', '断口星盘', 'The Rift Astrolabe'],
   'homage-abyss-stele': ['echo_abyss_stele_title', '深颚盐碑', 'The Salt Steles'],
+  // W-E3 切片103：空口巡礼 · 日晷/珍珠 + 深颚巡礼 · 海螺/骨门
+  'homage-void-sundial': ['echo_void_sundial_title', '断口日晷', 'The Rift Sundial'],
+  'homage-void-pearl': ['echo_void_pearl_title', '断口珍珠', 'The Rift Pearl'],
+  'homage-abyss-conch': ['echo_abyss_conch_title', '深颚海螺', 'The Deep Conch'],
+  'homage-abyss-bonegate': ['echo_abyss_bonegate_title', '深颚骨门', 'The Bone Gate'],
 };
 
 describe('POI 交互标签双表化（W-D2 切片19）', () => {

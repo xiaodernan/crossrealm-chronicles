@@ -1144,6 +1144,14 @@ export const STRINGS_ZH = Object.freeze({
   echo_void_astrolabe_desc: '虚空断口边缘卧着一座断了的星盘——转动它的人都会听见星星坠落的回声。',
   echo_abyss_stele_title: '深颚盐碑',
   echo_abyss_stele_desc: '盐蚀成碑、久不见日——深渊之底最古老的图腾，读它的人都会屏住呼吸。',
+  echo_void_sundial_title: '断口日晷',
+  echo_void_sundial_desc: '一块不对不准的日晷——弧影永远停在第七刻。',
+  echo_void_pearl_title: '断口珍珠',
+  echo_void_pearl_desc: '苍白珍珠悬在裂口上——落星的眼泪，还没落完。',
+  echo_abyss_conch_title: '深颚海螺',
+  echo_abyss_conch_desc: '盐霜里盘着风——深颚里最深的一句耳语。',
+  echo_abyss_bonegate_title: '深颚骨门',
+  echo_abyss_bonegate_desc: '礁石吞惯了骨头——只有走过去的人才知道门的另一边。',
 
   // POI 交互标签（W-D2 切片19：显示出口 PlayerController.updatePrompt 改走 t()，label 位存的全是键）
   // 命名口径：致敬层 POI 复用回声条目的标题键（交互即解锁那条回声，本来就是同一个东西）；
@@ -1439,6 +1447,12 @@ export const STRINGS_ZH = Object.freeze({
   sq_side_starport_tour_title: '星港常客',
   sq_side_starport_tour_desc: '共鸣 3 个星港商路回声',
   sq_side_starport_tour_journal: '酒肆、码头、星图 — 航线已谈判通过。',
+  sq_side_voidmaw_tour_title: '断口巡礼',
+  sq_side_voidmaw_tour_desc: '共鸣 3 条断口残响',
+  sq_side_voidmaw_tour_journal: '日晷停在第七刻，珍珠悬着不落。',
+  sq_side_abysssalt_tour_title: '深颚巡礼',
+  sq_side_abysssalt_tour_desc: '共鸣 3 条深颚咸响',
+  sq_side_abysssalt_tour_journal: '海螺递了一句言，骨门立了一道影。',
   sq_side_wave4_master_title: '四系行者',
   sq_side_wave4_master_desc: 'Wave4 四系列全共鸣',
   sq_side_wave4_master_journal: '赛博、武士、旧日、星港 — 四系在同一条回声线上对齐。',

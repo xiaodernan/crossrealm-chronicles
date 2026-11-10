@@ -209,6 +209,8 @@ export const SIDE_QUESTS_POP = [
   { id: 'side-samurai-tour', zone: franchiseZone(FRANCHISE.SAMURAI), title: 'sq_side_samurai_tour_title', desc: 'sq_side_samurai_tour_desc', check: (g) => countFranchise(g, FRANCHISE.SAMURAI) >= 3, reward: 18, journal: 'sq_side_samurai_tour_journal' },
   { id: 'side-cosmic-tour', zone: franchiseZone(FRANCHISE.COSMIC), title: 'sq_side_cosmic_tour_title', desc: 'sq_side_cosmic_tour_desc', check: (g) => countFranchise(g, FRANCHISE.COSMIC) >= 3, reward: 22, journal: 'sq_side_cosmic_tour_journal' },
   { id: 'side-starport-tour', zone: franchiseZone(FRANCHISE.STARPORT), title: 'sq_side_starport_tour_title', desc: 'sq_side_starport_tour_desc', check: (g) => countFranchise(g, FRANCHISE.STARPORT) >= 3, reward: 18, journal: 'sq_side_starport_tour_journal' },
+  { id: 'side-voidmaw-tour', zone: franchiseZone(FRANCHISE.VOIDMAW), title: 'sq_side_voidmaw_tour_title', desc: 'sq_side_voidmaw_tour_desc', check: (g) => countFranchise(g, FRANCHISE.VOIDMAW) >= 3, reward: 20, journal: 'sq_side_voidmaw_tour_journal' },
+  { id: 'side-abysssalt-tour', zone: franchiseZone(FRANCHISE.ABYSSSALT), title: 'sq_side_abysssalt_tour_title', desc: 'sq_side_abysssalt_tour_desc', check: (g) => countFranchise(g, FRANCHISE.ABYSSSALT) >= 3, reward: 20, journal: 'sq_side_abysssalt_tour_journal' },
   { id: 'side-wave4-master', zone: 'global', title: 'sq_side_wave4_master_title', desc: 'sq_side_wave4_master_desc', check: (g) => [FRANCHISE.CYBER, FRANCHISE.SAMURAI, FRANCHISE.COSMIC, FRANCHISE.STARPORT].every((f) => countFranchise(g, f) >= 3), reward: 45, journal: 'sq_side_wave4_master_journal' },
 ];
 

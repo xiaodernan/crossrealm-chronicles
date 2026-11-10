@@ -393,11 +393,11 @@ describe('W-B12 切片3：单系列致敬支线的 zone 由回声表推，不再
   };
   const 单系列条目 = SIDE_QUESTS_POP.filter((q) => q.id.endsWith('-tour'));
 
-  it('十条单系列致敬支线的 zone 与回声表一致（边写死边漂的情况不存在）', () => {
-    expect(单系列条目.length).toBe(10);
+  it('十二条单系列致敬支线的 zone 与回声表一致（边写死边漂的情况不存在）', () => {
+    expect(单系列条目.length).toBe(12);
     for (const q of 单系列条目) {
       expect(q.zone, `${q.id} 的 zone 不是回声表推出来的那座`)
-        .toBe(复算({ 'side-wizard-tour': 'wizard', 'side-space-tour': 'interstellar', 'side-upside-tour': 'upside', 'side-western-tour': 'border', 'side-gangster-tour': 'family', 'side-scifi-tour': 'deepspace', 'side-cyber-tour': 'cyber', 'side-samurai-tour': 'samurai', 'side-cosmic-tour': 'cosmic', 'side-starport-tour': 'starport' }[q.id]));
+        .toBe(复算({ 'side-wizard-tour': 'wizard', 'side-space-tour': 'interstellar', 'side-upside-tour': 'upside', 'side-western-tour': 'border', 'side-gangster-tour': 'family', 'side-scifi-tour': 'deepspace', 'side-cyber-tour': 'cyber', 'side-samurai-tour': 'samurai', 'side-cosmic-tour': 'cosmic', 'side-starport-tour': 'starport', 'side-voidmaw-tour': 'voidmaw', 'side-abysssalt-tour': 'abysssalt' }[q.id]));
     }
   });
 

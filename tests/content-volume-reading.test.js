@@ -41,9 +41,9 @@ describe('① 读数里的数 = 内容表的实数', () => {
     const 分区支线 = SIDE_QUESTS_ALL.filter((q) => ZONE_ORDER.includes(q.zone)).length;
     const 实数 = {
       '主线 114 步': MAINLINE.length === 114,
-      '分区专属支线 38': 分区支线 === 38,
+      '分区专属支线 40': 分区支线 === 40,
       '副本 10': DUNGEON_DEFS.length === 10,
-      '回声 53': ECHOES.length === 53,
+      '回声 57': ECHOES.length === 57,
     };
     for (const [片段, 对] of Object.entries(实数)) {
       expect(对, `内容表变了，但 §1.2 的 C3 读数里那个数没跟着改（找 "${片段}"）`).toBe(true);
