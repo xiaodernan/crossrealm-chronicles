@@ -17,11 +17,12 @@
 ```
 server/
   pom.xml                # 父 POM（Boot 3.5.16 + Spring Cloud 2025.0.3 BOM）
-  discovery-server/      # Eureka 注册中心
-  config-server/         # Spring Cloud Config Server（classpath:/config 仓库）
-  game-service/          # REST API（排行榜 / 遥测 / 版本），9 项单测
-  gateway/               # Spring Cloud Gateway（/api/** → lb://game-service）
+  discovery-server/      # Eureka 注册中心（+ Dockerfile）
+  config-server/         # Spring Cloud Config Server（classpath:/config 仓库，+ Dockerfile）
+  game-service/          # REST API（排行榜 / 遥测 / 版本），9 项单测（+ Dockerfile）
+  gateway/               # Spring Cloud Gateway（/api/** → lb://game-service，+ Dockerfile）
   scripts/smoke.ps1      # 冒烟脚本：四个实例真起真打，跑完自动关闭
+  docker-compose.yml     # 四容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
 ```
 
 ## 快速开始
@@ -46,7 +47,26 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 冒烟脚本把四个实例都拉起来，逐一验证
 配置下发 → 服务注册 → 网关转发 → 遥测计数的完整链路，
 默认使用 **28xxx** 端口段且先确认端口空闲（避免与开发机上同机其它 Spring Cloud 项目抢端口），
-结束时自动关闭它拉起的进程，日志落在 `%TEMP%\crossrealm-server-smoke\`。
+结束时自动关闭它拉起的进程，日志落在临时目录的 `crossrealm-server-smoke\` 子目录。
+（本仓库 CI（`.github/workflows/server.yml`）也跑这一步——ubuntu runner 上每次推送都会真起真打全链路。）
+
+## 用 Docker 部署
+
+每个模块一个 Dockerfile（打 `mvn verify` 产出的 `*.jar`，**构建期不下载依赖**，最适合离线/受限网络）：
+
+```powershell
+cd server
+mvn -B verify                       # 先产出各模块 target/*.jar
+docker compose build                 # 四个镜像，无需联网
+docker compose up -d                 # 起栈（discovery → config → game-service → gateway，按健康检查顺序）
+docker compose run --rm verify       # 一次性验证容器：version/leaderboard/telemetry 三连
+docker compose down
+```
+
+> **实测状态**：本仓库开发机上 Docker 守护进程长期被另一个活跃项目占用，**本机未能完成镜像构建与起栈验证**；
+> `docker compose config` 校验通过，Dockerfile 六行静态可验（wget 装进运行时镜像用于健康检查）。
+> 真机验证口径以 `scripts/smoke.ps1` 为准（CI 每次推送跑）。容器网络里服务间用服务名互寻（`discovery`/`config`/`game-service`），
+> 与单机 smoke 的 `localhost` 是两套世界，不要混。
 
 ## game-service API
 

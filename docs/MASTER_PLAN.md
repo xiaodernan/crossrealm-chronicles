@@ -5418,6 +5418,16 @@ Phase D（系统与质量）
   - **风险与后续**：① 三连鞭影手感未实测校准；② 下一步 S94：void 第十二独占（ch4，`choice-void` 61→62）保持对称。
 
 
+- **2026-11-10 W-X3 —— 在线伙伴服务部署化：四容器 Dockerfile + compose 编排 + CI 全链路冒烟** —— 提交 `待提交`
+
+  - **动机**：W-X1 把服务做到了"可跑"（smoke 真机验证五件套），但还不是"可部署"——没有镜像、没有编排、CI 只守编译与单测，不守"装配起来之后整条链是否真的通"。这一片把这三个缺口补上。
+
+  - **做法**：① 4 个 Dockerfile（每个模块各一个，直接打 `mvn verify` 产出的 `*.jar`，**构建期零网络下载**，适配受限网络；运行时 `eclipse-temurin:21-jre` + apt 装 wget 供健康检查）；② `server/docker-compose.yml`：docker compose 按健康检查顺序编排 discovery → config → game-service → gateway，外加一次性 `verify` 服务（curl 三连后退出，exit 0 = 全绿）；③ `server/.dockerignore`（仅 .git / node_modules / *.log —— **刻意不排除 target/**，与镜像直接打 jar 一致）；④ `smoke.ps1` 日志目录改 `[System.IO.Path]::GetTempPath()`（Linux/macOS 没有 %TEMP%，CI 的 pwsh 才能跑）；⑤ `.github/workflows/server.yml` 在 `mvn -B -f server/pom.xml verify` 之后追加 **Smoke（full stack boot + gateway routing + config delivery）** 步骤（pwsh on ubuntu-latest，每次推送真起真打四实例 28xxx 段）；⑥ `server/README.md` 增补「用 Docker 部署」一节 + 实测状态声明。
+
+  - **验证**：`docker compose config` 通过；`mvn -B verify` 全绿（5 模块 / 9 项单测）；`scripts/smoke.ps1` **2026-11-10 复跑 PASSED**（配置下发带 config 中心 version-note → `/api/version`/`/api/leaderboard`/telemetry POST+count 经网关全 200 → Eureka 3 应用注册）。**Docker 镜像构建本机未实测**——开发机上 Docker 守护进程被同机另一个活跃项目占用（eureka-server 并行构建 + pgvector + SpecProof 容器），构建在此机 500/超时；镜像与编排以 CI 冒烟为守装配的权威口径，README 已如实标注。
+
+  - **风险与后续**：① 受限网络下无法在镜像内跑 mvn 构建，部署路径明确为"先 mvn verify 再 compose"——README 已写明；② GH runner 上 smoke 首跑需要"每个推送都跑 4 个 JVM"的实测时长与稳定性，若抖动可降级为 manual workflow_dispatch；③ 集群化（k8s / 真·多实例 + 共享寄存器持久化）未做，属生产化范畴。
+
 - **2026-11-10 W-X2 —— 在线伙伴服务接入游戏（可选，默认关闭）：客户端落地 + Boss 遥测挂钩** —— 提交 `db7c857`（3 文件，+181）
 
   - **动机**：W-X1 把 `server/`（Spring Cloud 伙伴）跑通后，需要一个游戏侧的可选接点——但游戏本体是离线优先，不许把在线依赖做成默认项，也不许把网络错误变成玩家看到的故障。
