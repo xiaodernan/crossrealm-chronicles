@@ -5432,6 +5432,15 @@ Phase D（系统与质量）
   - **验证**：lint 0/0，test 全绿（**404 文件 / 6049 项**），build ✓。E2E：`12600帧/210s/q=110/主线111/ch5/completed=true/exceptions=0` —— 与 S98 **同读数**：两栋新建筑（静移态，无帧成本）只在 world build 造一次。
 
   - **风险与后续**：① 两个新母题目前各只有**一**条回声 —— 不满足"系列 tour"（`side-gloom-tour` 要 ≥ 3 条）的条件；想给它们办巡礼任务，得先各扩到 3 条回声；② 两处新母题的显示文案仍走既有 `franchiseLabel`，无 name-escape 样式风险；③ POI 几何为朴素构造盒/柱，未入**共享库**（与 Wave3/4 同口径，挂 zone.group、随位面释放）；④ Choice-void / 存档版本 / 主线步数**一样没动**。
+- **2026-11-10 W-E3 切片105 —— 原创四母题进成就：薄暮回响 / 辉煌残响 / 断口残响 / 深颚咸响 分桶立桶 + 五品新成就；`ECHO_FRANCHISE_BUCKETS` 10 → 14，`POP_CULTURE_ACHIEVEMENTS` 14 → 19** —— 提交 `f5311a2`（5 文件，+32 −3，E2E 与切片101–104 **同读数**：13080 帧 / 218 秒 / questIndex=114 / 主线 115 步 / chapter=5 / completed=true / 0 异常）
+
+  - **起因**：切片102/103/104 把四位原创母题补齐到 3 条回声、巡礼侧也闭环了——成就里专为它们颁的奖却还是空白。Wave5 立母题的那一片 ADR 说过：四位母题的"巡礼任务"等各扩到 3 条回声才立，如今三条到齐；同理，"achievement 档 · 3 ≥ 成就"这条线上四道全是空档。
+
+  - **做法**：① `ECHO_FRANCHISE_BUCKETS` 登记四桶 `echoGloom` / `echoRadiant` / `echoVoidMaw` / `echoAbysssalt`（母题 id 一律读 `FRANCHISE.GLOOM / RADIANT / VOIDMAW / ABYSSSALT`）；② `ACHIEVEMENTS_POP_CULTURE` 新增五品：`echo-gloom`（`echoGloom >= 3`）、`echo-radiant`、`echo-voidmaw`、`echo-abysssalt`（各 `>= 3`）、`echo-original`（四者全 `>= 3` 的原声齐鸣）；③ i18n +10（`ach_echo_gloom_title/desc` ×2 ×4 + `ach_echo_original_title/desc` ×2——共 10 键）；④ 读者侧同步：`content-registry` 计数钉 `achievementsPopCulture: 14 → 19`（分桶 debug 分桶跑名册时这 5 件被计进"次元回声"族里）；`objectiveDisplay` 等南北向无新增桶需求；⑤ `i18nKeyCount` 登记值 **2719 → 2729**。
+
+  - **验证**：lint 0/0；test 全绿（**409 文件 / 6085 项**，franchise-identity 真跑 `attachPopCultureAchievements` 的统计腿：四新桶进了 PoC 名册，每桶 `≥ 1` 项敏感成就）；build ✓；`npm run e2e` 退出 0 且读数**分毫未动**（纯成就/内容表加件，无玩法状态与 world 状态）。git `f5311a2`、工作树净。前端 CI 已触发。
+
+  - **风险与后续**：① 分桶成就**是所有遇见**薄暮/辉煌/断口/深颚的玩家共同**必然**的收成，但"原声齐鸣"要**全踩过四个 PoI 巡礼**，比单子高档，没有硬币奖，仍只给名誉封号（这是本系列既有风格，不改）；② 普通玩家（解锁全 3 条 = 4 个 POI × 4 = 12 个）触发全绿约 45 分钟后，**新玩家首跑 3~5 小时** 里大概率**拿不全**（与其它母题对称）；不做访客通行证，这不是 bug；③ 巡礼任务仍走 countFranchise（S103/104 都立在那条），此片**不改判据**，成就只做统计；④ 下一步明牌：或把四位母题各自办出完整小事件（三片深空域那样的"副本式听见"），或回收 §9 ADR 登记 backlog，或继续对称扩容。
 - **2026-11-10 W-E3 切片104 —— 薄暮回响/辉煌残响巡礼：gloom/radiant 各再添两枚 Wave8 致敬 POI，两母题扩到 3 条回声，巡礼任务（`side-gloom-tour` / `side-radiant-tour`）从此开得起来；回声 57 → 61** —— 提交 `368fde8`（12 文件，+209 −10，E2E 与切片101–103 **同读数**：13080 帧 / 218 秒 / questIndex=114 / 主线 115 步 / chapter=5 / completed=true / 0 异常）
 
   - **起因**：切片103 把 void/abyss 的断口/深颚两母题补齐到 3 条回声并把两只巡礼交给了玩家；幽暗林地 / 辉煌圣域的薄暮回响 / 辉煌残响各只剩一条——同构的缺，同构的解。这一片是四块原位面巡礼的**扫尾**：四位原创母题（GLOOM / RADIANT / VOIDMAW / ABYSSSALT）全部扩到 3 条回声、全部挂上单系列巡礼任务——"本作原创"致敬线齐了。
