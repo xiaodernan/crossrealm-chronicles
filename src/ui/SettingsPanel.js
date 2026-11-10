@@ -20,6 +20,7 @@ import { flashStrengthOptions, normalizeFlashStrength } from '../engine/flashStr
 import { uiTextScaleOptions, normalizeUiTextScale } from '../engine/uiTextScale.js';
 import { focusFirstItem, preserveFocus, restoreParkedFocus } from './FocusNav.js';
 import { OnlineServices, onlineServices } from '../online/OnlineServices.js';
+import { formatLeaderboardEntry } from '../online/leaderboardFormat.js';
 
 /** 驼峰边界：`analogRange` → `analog-range`（滑杆 id 的连字符写法就从键名推） */
 const CAMEL_EDGE = /[A-Z]/g;
@@ -340,6 +341,25 @@ export class SettingsPanel {
           /* 隐私模式：localStorage 可能写不进——先翻运行时单例，关闭本来就兜底吞掉 */
         }
         onlineServices.setEnabled(setOnline.checked);
+      });
+    }
+    // 在线排行榜（W-X7）：只读，不提交；按钮按下才拉一次。拉不到（服务未开启 / 网关连不上）
+    // 与榜没内容走同一句兜底提示 —— toast 一条就够，不在面板里留第二份“错误文案表”。
+    const lbBtn = document.getElementById('set-online-lb');
+    if (lbBtn) {
+      lbBtn.addEventListener('click', async () => {
+        if (!onlineServices.enabled()) { this.game?.dialog?.toast?.(t('settings_online_lb_unavailable')); return; }
+        const data = await onlineServices.fetchLeaderboard(10);
+        if (!data || !Array.isArray(data.items)) { this.game?.dialog?.toast?.(t('settings_online_lb_unavailable')); return; }
+        const list = document.getElementById('set-online-lb-list');
+        if (list) list.textContent = '';
+        if (data.items.length === 0) { this.game?.dialog?.toast?.(t('settings_online_lb_empty')); return; }
+        data.items.slice(0, 10).forEach((entry, i) => {
+          const li = document.createElement('li');
+          // 服务端数据当不可信：行内容只走 textContent（**绝不** innerHTML）
+          li.textContent = formatLeaderboardEntry(entry, i + 1);
+          list?.appendChild(li);
+        });
       });
     }
   }

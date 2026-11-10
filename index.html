@@ -154,6 +154,9 @@
         <h3 data-i18n="settings_online">在线服务</h3>
         <label><input id="set-online" type="checkbox" /> <span data-i18n="settings_online_toggle">启用在线服务（排行榜 / 遥测）</span></label>
         <p data-i18n="settings_online_hint">默认关闭。开启后击杀 Boss 会向网关上报遥测；关掉网络也不会影响本地游戏。</p>
+        <!-- 在线排行榜（W-X7）：只读；按钮拉取一次、行文本走 textContent（服务端数据当不可信） -->
+        <button id="set-online-lb" type="button" data-i18n="settings_online_lb_btn">刷新排行榜</button>
+        <ol id="set-online-lb-list" class="online-lb-list"></ol>
         <button id="settings-close" data-i18n="common_close">关闭</button>
       </div>
     </div>
