@@ -70,6 +70,7 @@ server/       在线伙伴服务（可选）：Spring Cloud 微服务 —— 排
 | [`OVERHAUL_PLAN.md`](docs/OVERHAUL_PLAN.md) | 工程重构详录：B1–B34 缺陷台账与 M0–M3 逐切片验收证据（历史，不再排期） |
 | [`COMBAT_DESIGN.md`](docs/COMBAT_DESIGN.md) | 战斗设计 |
 | [`MIXAMO_PIPELINE.md`](docs/MIXAMO_PIPELINE.md) | 动画导入管线 |
+| [`ONLINE_SERVICES.md`](docs/ONLINE_SERVICES.md) | 在线伙伴服务手册：Spring Cloud 微服务（Eureka/Config/Gateway/game-service）部署与 `src/online/OnlineServices.js` 接线、冒烟与 CI 验证 |
 
 ## 三条硬性约束（来自总计划）
 
