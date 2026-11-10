@@ -585,6 +585,8 @@ export const STRINGS_EN = Object.freeze({
   enemy_name_radiant_duelist: 'Radiant Duelist',
   enemy_name_gloom_lunger: 'Gloom Lunger',
   enemy_name_radiant_hammer: 'Radiant Hammer',
+  enemy_name_gloom_twilight: 'Gloom Twilight',
+  enemy_name_radiant_chancel: 'Radiant Chancel',
 
   // Player-facing leftovers (W-D2 slice 16r)
   enemy_name_default: 'Enemy',
@@ -1906,6 +1908,13 @@ export const STRINGS_EN = Object.freeze({
   obj_radiant_hammer_hunt_title: 'Hunt the Radiant Hammers',
   obj_radiant_hammer_hunt_desc: 'Defeat 3 Radiant Hammers haunting the Sanctum.',
   obj_radiant_hammer_hunt_journal: 'The hammer has fallen; the Sanctum keeps fewer sparks.',
+  obj_gloom_twilight_hunt_title: 'Hunt the Gloom Twilights',
+  obj_gloom_twilight_hunt_desc: 'Defeat 3 Gloom Twilights haunting the Gloomwood.',
+  obj_gloom_twilight_hunt_journal: 'The mist keeps one fewer passing shape.',
+  obj_radiant_chancel_hunt_title: 'Hunt the Radiant Chancels',
+  obj_radiant_chancel_hunt_desc: 'Defeat 3 Radiant Chancels haunting the Sanctum.',
+  obj_radiant_chancel_hunt_journal: 'The solemn rite at the farthest end of the cloister has stopped.',
+
   obj_chaos_boss_desc: "Defeat the boss of the Chaos Border.",
   obj_chaos_boss_journal: "Rift Lord has fallen; the endgame begins.",
   obj_radiant_dawn_hall_title: 'Morning in the Hall',

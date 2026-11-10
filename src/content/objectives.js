@@ -1438,6 +1438,19 @@ export const OBJECTIVES = [
     journal: 'obj_gloom_lunger_hunt_journal',
   },
   {
+    // W-E3 切片107：幽暗宵影进主线 — 幽暗第十二独占，插在扑影后、chaos-boss 前（ch5，v21 不写迁移，不动 choice-void）
+    id: 'gloom-twilight-hunt',
+    title: 'obj_gloom_twilight_hunt_title',
+    desc: 'obj_gloom_twilight_hunt_desc',
+    type: 'kills',
+    enemyType: 'gloom_twilight',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: 255, z: 88, label: 'enemy_name_gloom_twilight' },
+    reward: 20,
+    journal: 'obj_gloom_twilight_hunt_journal',
+  },
+  {
     id: 'chaos-boss',
     title: bossById('chaos-overlord').shortNameKey,
     desc: 'obj_chaos_boss_desc',
@@ -1596,6 +1609,19 @@ export const OBJECTIVES = [
     waypoint: { x: -215, z: -225, label: 'enemy_name_radiant_hammer' },
     reward: 20,
     journal: 'obj_radiant_hammer_hunt_journal',
+  },
+  {
+    // W-E3 切片107：辉煌回廊卫进主线 — 圣域第十二独占，插在铁锤人后、大主教前（ch5，v21 不写迁移，不动 choice-void）
+    id: 'radiant-chancel-hunt',
+    title: 'obj_radiant_chancel_hunt_title',
+    desc: 'obj_radiant_chancel_hunt_desc',
+    type: 'kills',
+    enemyType: 'radiant_chancel',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: -310, z: -95, label: 'enemy_name_radiant_chancel' },
+    reward: 20,
+    journal: 'obj_radiant_chancel_hunt_journal',
   },
   {
     // W-E3 切片67：辉煌大主教进主线 —— 圣域四类清剿（骑士/舞者/圣印者之外，最后一类）。

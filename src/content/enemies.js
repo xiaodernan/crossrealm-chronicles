@@ -99,6 +99,11 @@ export const ENEMY_ROSTER = {
    */
   gloom_lunger: { name: 'enemy_name_gloom_lunger', hp: 128, posture: 46, damage: 13, speed: 5.4, aggroRange: 27, color: 0x2a2338 },
   /**
+   * W-E3 切片107：幽暗宵影 —— 雾里最快移动的一道掠影。
+   * 它不布阵不退后——它只有在决定出手的时候才动。
+   */
+  gloom_twilight: { name: 'enemy_name_gloom_twilight', hp: 134, posture: 47, damage: 13, speed: 5.7, aggroRange: 24, color: 0x38304a },
+  /**
    * W-E3 切片69：虚空幻影 —— 虚空断口里扯出来的悬浮残影。
    * 比怨影更实在（hp150/架势54）、攻更重（17），靠相位斩（5m 短距错位）贴身连切，
    * 不像怨影那样从 10 米外慢慢背刺。与 sentinel（远程炮台）、crawler（贴地快爪）分工不同。
@@ -255,6 +260,11 @@ export const ENEMY_ROSTER = {
    * 它不讲究剑诀——它只问你扛不扛得住这一锤。
    */
   radiant_hammer: { name: 'enemy_name_radiant_hammer', hp: 170, posture: 70, damage: 17, speed: 4.5, aggroRange: 25, color: 0xe8c455 },
+  /**
+   * W-E3 切片107：辉煌回廊卫 —— 晨曦朝礼里最后一名老护卫。
+   * 它不疾行不回头——它只走完属于自己的巡礼。
+   */
+  radiant_chancel: { name: 'enemy_name_radiant_chancel', hp: 175, posture: 62, damage: 17, speed: 4.7, aggroRange: 27, color: 0xd8bd80 },
 };
 
 /**

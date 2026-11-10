@@ -38,6 +38,8 @@ export const POST_V21 = [
   'radiant-duelist-hunt',
   'gloom-lunger-hunt',
   'radiant-hammer-hunt',
+  'gloom-twilight-hunt',
+  'radiant-chancel-hunt',
 ];
 
 /** 切片41 之后仍需从 v21 投影中排除的 id（不含 void-oath）。 */

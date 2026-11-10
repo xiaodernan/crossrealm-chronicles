@@ -94,6 +94,8 @@ const OLD_BIRTH = {
   gloom_knell: { name: '幽暗丧钟', hp: 116, posture: 40, damage: 13, speed: 5.1, aggroRange: 33, color: 0x36264f },
   // W-E3 切片101：幽暗熄灯人
   gloom_snuffer: { name: '幽暗熄灯人', hp: 124, posture: 44, damage: 13, speed: 5.3, aggroRange: 27, color: 0x40382a },
+  // W-E3 切片107：幽暗宵影
+  gloom_twilight: { name: '幽暗宵影', hp: 134, posture: 47, damage: 13, speed: 5.7, aggroRange: 24, color: 0x38304a },
   // W-E3 切片106：幽暗扑影
   gloom_lunger: { name: '幽暗扑影', hp: 128, posture: 46, damage: 13, speed: 5.4, aggroRange: 27, color: 0x2a2338 },
   // W-E3 切片69：虚空幻影
@@ -159,6 +161,8 @@ const OLD_BIRTH = {
   radiant_duelist: { name: '辉煌决斗者', hp: 148, posture: 56, damage: 17, speed: 5.9, aggroRange: 26, color: 0xffdf9a },
   // W-E3 切片106：辉煌铁锤人
   radiant_hammer: { name: '辉煌铁锤人', hp: 170, posture: 70, damage: 17, speed: 4.5, aggroRange: 25, color: 0xe8c455 },
+  // W-E3 切片107：辉煌回廊卫
+  radiant_chancel: { name: '辉煌回廊卫', hp: 175, posture: 62, damage: 17, speed: 4.7, aggroRange: 27, color: 0xd8bd80 },
 };
 
 /** 出生时没写的那几格会落到 `Enemy` 构造器的默认值 —— 用例要按同一套默认说话，不许自己造数 */
