@@ -8,6 +8,7 @@ export const JOURNAL_EXTRA_TABS = {
   codex: 'journal_tab_codex',
   bestiary: 'journal_tab_bestiary',
   season: 'journal_tab_season',
+  trial: 'journal_tab_trial',
   memory: 'journal_tab_memory',
   // 这座页签显示的是 totalClears（清空次数统计），与基础表里的 'dungeon'（清空记录日志，
   // rest 对话点名它是"记清空记录"的那一页）是两个不同的东西 —— 早先两处都写 '地下城'，

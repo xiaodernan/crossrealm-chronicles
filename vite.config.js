@@ -84,6 +84,29 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
   },
   test: {
+    /**
+     * **必须用 `forks` 池（W-F3 切片1 现场量出来的）。**
+     *
+     * 2026-11-11 的实测：同一份代码连跑六次全量，`vitest` 每次都**少跑一个文件**，
+     * 而且少的那个次次不同（`material-surfaces` 118 例 / `platform-lease` 62 例 /
+     * `content-registry` 55 例……），汇总行只给出一个小一点的绿灯：
+     * `414 文件 / 6127 例`、`414 / 6114`、`415 / 6141`、`415 / 6085`。
+     * 单独跑那几个"消失"的文件都是全绿（`material-surfaces` 118/118）。
+     *
+     * 根因不在测试：默认池会把每个模块的转译结果**写成一个临时文件**
+     * （`project.tmpDir/<transformMode>/<sha1>`），再让子进程去 require 它。
+     * 这台机器上 `fs.writeFile` 经过一层工程化的 fs 代理，极偶发地拒绝一次写 ——
+     * 于是那个模块取不到，用到它的那个文件的结果被整份丢掉，而 vitest 只在收尾时
+     * 留一条 `Unhandled Error: EPERM`。**"一次写失败"与"少一个文件"是同一件事。**
+     *
+     * 显式 `forks` 之后：`416 文件 / 6203 例 / 6203 通过 / 0 失败`，连跑不再掉文件，
+     * 那条 EPERM 也不再出现。这不是"换个池碰运气"—— 是那个池不写临时模块文件。
+     *
+     * 分母本身另有一道账：`npm run test:verify`（`scripts/test-count.mjs`）把 JSON
+     * 报告的文件集合与磁盘逐个对账，少跑一个文件就点名并**以非 0 退出** ——
+     * 因为汇总行永远不会把"少了一个文件"当作失败，而读记录的人只看得到绿。
+     */
+    pool: 'forks',
     // 全局夹具：给 node 补一枚最小 ProgressEvent，消掉 three 纹理流式加载器在用例结束后
     // 抛出的未处理 rejection（详见 tests/setup.js 头注）。见 M4 测试夹具账。
     setupFiles: './tests/setup.js',

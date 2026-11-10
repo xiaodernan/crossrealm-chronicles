@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint src tests",
     "test": "vitest run",
+    "test:verify": "node scripts/test-count.mjs",
     "test:watch": "vitest",
     "download:model": "powershell -ExecutionPolicy Bypass -File scripts/download-player-model.ps1",
     "import:mixamo": "powershell -ExecutionPolicy Bypass -File scripts/import-mixamo.ps1",

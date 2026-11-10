@@ -84,10 +84,10 @@
 | `Game` 构造函数子系统 | 104 个 `new` | **3 个 `new` + 5 个 `_build*` builder** | **M7 已收口（`2e77f07`）**：构造函数体内 112 个 `new` → 3（Clock / TimeController / InputDevice），其余按子系统搬进 `_buildRenderStack` / `_buildWorldAndCombat` / `_buildPlayerCombat` / `_buildUiAndSystems` / `_buildSettingsAndFinalize`。**纯移动**（脚本变换，行为逐字不变；块内代码/顺序/副作用一字未改，仅 `container.` → `this.container.`）。门禁 `tests/game-constructor-decoupled.test.js`（≤40 + builder 非空壳 + 反面对照） |
 | 全局事件（监听） | 136 处 `window.addEventListener`，其中 **129 处是登记游戏事件的裸监听**（欠账） | **4 处**，且**全部是 DOM 事件**（`Game.js` 3：`resize`/`keydown`/`keyup`；`ui/SettingsPanel.js` 1：`keydown` 捕获）—— **游戏事件的裸监听归零** | `tests/event-bus.test.js` 的 `BARE_WINDOW_LISTENERS` 台账已清空（整文件迁完就删行，不是改成 0）。**上一版"129 处裸监听是收缩中的欠账"这句话现在不成立**，§2.3 与 W-A1 行已同步更正 |
 | 全局事件（派发） | 137 处 | **136 处** | 派发侧早就是登记表 + `emit()` 两条路，数量稳定 |
-| 事件登记 | 71 条 | **73 条** `GAME_EVENTS` + **2 条** `REST_DIALOGUE_EVENTS` | 名字侧的账仍是"0 个未登记名、0 个死条目"（`tests/event-registry.test.js`） |
+| 事件登记 | 71 条 | **78 条** `GAME_EVENTS` + **2 条** `REST_DIALOGUE_EVENTS`（2026-11-11 实测） | 名字侧的账仍是"0 个未登记名、0 个死条目"（`tests/event-registry.test.js`） |
 | 游戏逻辑 `setTimeout` | src 内 0 处实际调用 | **0 处**（全仓仅 `engine/Scheduler.js` 注释里提到一次） | 保持 |
 | 中文显示名逻辑判定 | 0 处 | **0 处** | 保持（`tests/content-boundary.test.js` 静态门禁） |
-| 测试 | 409 例 / 30 文件 | **3234 例 / 167 文件**，全绿 | 单次全量 **35 秒**（本批修掉"判据与执行没分家"之前是 **285 秒** —— `tests/perf-smoke.test.js` 曾 import 可执行脚本，于是 `npm test` 里真跑了一遍性能冒烟，见 W-D4 切片3） |
+| 测试 | 409 例 / 30 文件 | **6203 例 / 416 文件**，全绿（2026-11-11 复核，JSON 报告为准） | 单次全量 **35 秒**（本批修掉"判据与执行没分家"之前是 **285 秒** —— `tests/perf-smoke.test.js` 曾 import 可执行脚本，于是 `npm test` 里真跑了一遍性能冒烟，见 W-D4 切片3） |
 | Lint | 0 error / 10 warning | **0 error / 0 warning** | 那 10 条 `no-unused-vars` 也清了 |
 | 构建 | 通过，1 条 `chunk-ui ↔ chunk-world` 跨块环告警 | **通过 12.41s，0 条环告警** | 环已消；新出现的是一条"chunk > 600 KB"提示（`vendor-three` 677 KB，非环、非新增依赖）—— 分块仍归 W-B1 |
 | 首屏体积 | — | **2.00 MiB / 环比 2.06 MiB / 上限 2.25 MiB** | W-D5 切片4 拆成两条线（刻度 × 1.03 + 绝对上限），`npm run size` |
@@ -422,7 +422,7 @@
 |------|--------|------|----------|------|------|
 | W-F1 | **敌人图鉴**（60 类，读击杀账） | ✅ 切片1 | 2026-11-11 | `b5c7cb7` | 内容层只登记三档阈值 + 五个特征判据 + 三种元素名，条目全部从名册/抗性表/体型表现推；运行时只读 `PlayerStats.kills` ⇒ **零存档迁移**；日志新页签 + HUD 计数 + teardown 登记；i18n 2748 → 2770；`tests/bestiary.test.js` 26 例 |
 | W-F2 | **赛季**（本地轮转 + 在线确认） | ✅ 切片1 | 2026-11-11 | 本片 | `content/seasons.js` 四套名册 + 八条词缀，id 与服务端 `season-service` 逐字对齐；`SeasonSystem` 默认信本地（离线也有赛季），在线服务开着才向 `/api/seasons/active` 确认；日志新页签如实标注 `本地轮转 / 在线赛季`；i18n 2770 → 2801；`tests/seasons.test.js` 28 例 |
-| W-F3 | **位面试炼**（词缀真正生效的终局挑战） | ⬜ 未开始 | — | — | 设计已定：试炼从赛季词缀里取词缀（`burning-ground` 等八条），按"层数 + 限时 + 死亡即结束"跑，成绩进排行榜（复用 `submitRun`）；**不新增存档版本**，进度只记在本局内存 + 排行榜上 —— 理由与 W-F1 相同：能算出来的东西不存 |
+| W-F3 | **位面试炼**（词缀真正生效的终局挑战） | ✅ 切片1 | 2026-11-11 | 本片 | `content/trial.js` 五层曲线 + 八条词缀数值（id 与 `SEASON_MODIFIERS` 逐字对齐）；`TrialSystem` 状态机（idle/running/finished/failed），限时按**世界时**走（暂停不扣），灼烧按秒结算走 `player.combat.takeDamage`；**时限/配额/灼烧三条词缀已经真的在改规则**，血量/伤害/速度三条算得出但还没接刷怪（页面如实标 `spawnScaleLive:false`）；日志新页签 + HUD 计数 + 四条 Toast；成绩走 `submitRun`（`bossId: trial-layer-N`，服务端契约不动）；**零存档迁移**；i18n 2801 → 2833；`tests/trial.test.js` 34 例。余：出生缩放接进 `spawnAt` 咽喉（切片2）|
 
 ---
 
@@ -5933,3 +5933,15 @@ Phase D（系统与质量）
   - **验证**：`npm run size` 通过并打印两条线的余量（环比余 0.06 MiB / 上限余 0.25 MiB）；读数明细七行（`chunk-core` 880446 + `vendor-three` 682986 + `chunk-world` 192782 + `chunk-ui` 148673 + `chunk-combat` 84654 + 入口 63595 + 样式 45720 = 2098856）。`tests/bundle-size-budget.test.js` **17 → 19 例**：新增"只超环比、未到上限 → 也红"（造 刻度×1.05 的假 dist，断言它低于上限、环比那条必须红）与"刻度 × 容差 < 上限"自检；原"超预算"那例改名为"超绝对上限"。lint 0 error。
 
   - **风险与后续**：① 上限由 2.00 抬到 2.25 MiB 是一次**放宽**，写在这里而不是藏在提交里 —— 抵账的是环比容差把日常警戒线收到 61 KB，净效果是**更紧**；② 61 KB 这个数是按本仓近 200 个切片的实测定的（绝大多数一片 10 KB 以内，最大一片 60 KB 出头）；若某片真需要 100 KB，正确动作是改刻度并在提交里说明，**不是把容差调大**；③ 结构性杠杆仍是按语言分包，前置是那四个内容模块；它一旦落地首屏大约能掉 190 KB，届时刻度要**重测**，不是"顺手抬回去"。
+
+- **2026-11-11 W-F3 切片1 —— 位面试炼：词缀第一次真的改规则**（提交 `本片`）
+
+  - **动机**：W-F2 把赛季词缀**显示**出来了，但页面刻意不写数值 —— 因为"词缀影响什么"属于试炼。这一片把那个承诺兑现：词缀第一次真的改规则。它同时补上 Phase F 的第三件事 —— 玩完之后还有一个**可重复**的去处。
+
+  - **做法**：① `content/trial.js`：五层曲线（配额 / 时限 / 池子 / 缩放）、八条词缀数值、折叠函数、层派生、计分口径。词缀 id 与 `SEASON_MODIFIERS` **逐字对齐**由用例直接对赛季名册断言（B45 那一族：稳定身份靠人肉复制必漂）。② **折叠规则**：加项相加、乘项相乘、同一条 id 只算一次、**未知 id 当场抛**（悄悄忽略会让页面写的规则与实际执行不一致，而且没人看得出来）、乘子必须正有限（乘出 0 的症状是"敌人没有血量"，报错栈里不会有任何一行指向它）。③ `game/TrialSystem.js`：`idle / running / finished / failed` 四态；`timeout / death / abandon` 三条结束路**互斥** —— `trial-finished` 与 `trial-failed` 不会同时发（两条都发等于排行榜上一局记两次）。④ **时间是世界时**：只由 `update(dt)` 前进，而 `Game` 只在"在玩的帧"里喂它（与 `DungeonRunTracker` 同一个闸）—— 暂停、过场、开着面板的那些帧一秒都不扣。⑤ **词缀真的生效**：时限（−15s）、配额（+1）、灼烧（2.5/s）三条由试炼自己执行；灼烧走 `game.player.combat.takeDamage(dps, 'fire')` 并按秒结算（不足一秒的零头累加）—— 每帧打 0.04 点会把受伤事件刷爆。血量 / 伤害 / 速度三条**算得出但还没接刷怪**，`getState().spawnScaleLive` 如实返回 `false`，页面上也照实写一行"已算出、未接入"。⑥ **接线四处**：日志新页签 `trial`（开始 / 放弃两个按钮 + 本局词缀 + 生效规则 + 层曲线）、HUD 计数 `x/5`、四条 Toast、以及 `submitRun` 提交成绩（`bossId: trial-layer-N` 让试炼榜与 Boss 榜天然分组，**服务端契约一字不动**）。⑦ **零存档迁移**：进度只在内存 —— "最好成绩"重开一局就是零；要跨会话，正确的位置是排行榜，而不是存档里再长一个版本号（与 W-F1 同一条纪律）。
+
+  - **验证**：lint 0 error；全量 **416 文件 / 6203 例全绿**；build ✓，首屏 **2113859 字节 = 2.02 MiB**（环比刻度 2.06 / 上限 2.25 双线通过，本片净增 15003 字节）；i18n 2801 → 2833（32 键，中英双表齐全）；`tests/trial.test.js` 34 例；`journal-tab-registry` 扩到 11 页签 / 19 键。
+
+  - **三条门禁在写的路上抓到我三次，全是真问题**：① `event-registry` —— 新登记的四条事件在 `src/` 里**没人听**，而门禁要求"有 hook 说明"或"真有人听"。我选后者：补四条 Toast 与 `submitRun`（顺带把成绩真的接了上去），并把 `player-death-count` 的 `hook` 摘掉（试炼开始听它了）。② `game-field-contract` —— 灼烧写的 `this.game?.combat` 在 Game 上不存在（真名是 `player.combat`）；这个点号路径写错**不会报错**，只会让灼烧永远打不到人，正是那条门禁存在的理由。③ `trial-failed` 的文案键一开始用模板串拼（`trial_reason_${x}`），改成显式映射表，并加一条静态用例禁止模板拼键（拼出来的键没有任何静态门禁看得见）。
+
+  - **风险与后续**：① **切片2 的正事是把 `layerScale()` 接进 `EnemyManager.spawnAt` 那条咽喉**（`spawnAt(type, x, z, { scale })`），而不是另起一条刷怪路 —— 那条咽喉是难度的唯一入口，绕开它就是在制造第二份真源。② 试炼目前**不刷自己的怪**，击杀算的是世界里的任意击杀（本片刻意不碰出生咽喉）；代价是玩家可以站在怪多的地方刷层数。接上出生之后要不要把判据收窄成"只算试炼刷出来的"待定 —— 收窄的代价是击杀事件要带来源标记。③ 排行榜里 `trial-layer-5` 这类值会让服务端多出五个"Boss"，只影响演示榜的分组观感；真要做正经榜要另开 `/api/runs/trial`。④ **顺带修掉了本仓一条老病：全量跑每次都少一个文件。** 实测同一份代码连跑六次，分母给出 `6203 / 6141 / 6127 / 6114 / 6085`，少的文件次次不同（`material-surfaces` 118 例 / `platform-lease` 62 例 / `content-registry` 55 例），而单独跑那些文件全绿 —— 也就是说**测试没红，但有一个文件没跑，汇总行看不出来**。根因不在测试：默认池把每个模块的转译结果写成一个临时模块文件（`project.tmpDir/<mode>/<sha1>`）再让子进程 require，这台机器上 `fs.writeFile` 经一层 fs 代理会极偶发地拒一次写，于是那个模块取不到、用到它的文件结果被整份丢掉，收尾只留一条 `Unhandled Error: EPERM`。**"一次写失败"与"少一个文件"是同一件事。** 两处修：① `vite.config.js` 显式 `pool: 'forks'`（那个池不写临时模块文件）—— 之后 416 文件 / 6203 例全绿、连跑不再掉文件、EPERM 也不再出现；② 新增 `npm run test:verify`（`scripts/test-count.mjs`）把 JSON 报告的文件集合与磁盘逐个**对账**，少跑一个就点名并以非 0 退出。**这条比这一片本身更要紧**：它管的正是 §8 那句"读的人没法判断红绿是不是同一件事"。

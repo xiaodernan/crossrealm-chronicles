@@ -26,6 +26,8 @@ const 迁移前中文 = {
   // W-F1 切片1：敌人图鉴。加在这里而不是另开一份名单 —— 页签的唯一性靠这张表量。
   bestiary: '图鉴',
   season: '赛季',
+  // W-F3 切片1：位面试炼
+  trial: '试炼',
 };
 
 describe('日志页签合并（JournalTabRegistry）', () => {
@@ -42,9 +44,9 @@ describe('日志页签合并（JournalTabRegistry）', () => {
     expect(JSON.stringify(base)).toBe(snapshot);
   });
 
-  it('扩展页签的键集合是 HUD 计数分支认得的那 10 个（加/改页签时这里会红，提醒同步 HUD）', () => {
+  it('扩展页签的键集合是 HUD 计数分支认得的那 11 个（加/改页签时这里会红，提醒同步 HUD）', () => {
     expect(Object.keys(JOURNAL_EXTRA_TABS).sort()).toEqual(
-      ['achievements', 'bestiary', 'cg', 'codex', 'dungeons', 'echoes', 'memory', 'season', 'side', 'skills'],
+      ['achievements', 'bestiary', 'cg', 'codex', 'dungeons', 'echoes', 'memory', 'season', 'side', 'skills', 'trial'],
     );
   });
 
@@ -57,7 +59,7 @@ describe('日志页签合并（JournalTabRegistry）', () => {
     expect([...new Set(dup)], `重复的页签标签: ${[...new Set(dup)].join(' / ')}`).toEqual([]);
   });
 
-  it('迁移原值钉死：十八个键展开后逐字等于迁移前的中文（一个都没换）', () => {
+  it('迁移原值钉死：十九个键展开后逐字等于迁移前的中文（一个都没换）', () => {
     const cats = mergeJournalCategories(JOURNAL_CATEGORIES);
     expect(Object.keys(cats).sort()).toEqual(Object.keys(迁移前中文).sort());
     for (const [k, 原值] of Object.entries(迁移前中文)) {

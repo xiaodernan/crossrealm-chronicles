@@ -2283,6 +2283,29 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .season-mod-desc { display: block; font-size: 0.7rem; color: #999; margin-top: 1px; }
 .season-empty { font-size: 0.75rem; color: #888; }
 
+/* 位面试炼（W-F 段）：赤铜偏冷，与赛季页的金铜分开 —— 两页并排时一眼能分清 */
+.trial-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(178,120,96,0.28); border-radius: 6px; padding: 12px; }
+.trial-state { display: inline-block; font-size: 0.68rem; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 3px; border: 1px solid rgba(178,120,96,0.4); color: #c08a70; }
+.trial-state-running { color: #e0a060; border-color: rgba(224,160,96,0.55); }
+.trial-state-finished { color: #8fc09a; border-color: rgba(143,192,154,0.5); }
+.trial-state-failed { color: #b07070; border-color: rgba(176,112,112,0.5); }
+.trial-intro { font-size: 0.74rem; color: #a89a84; line-height: 1.6; margin: 8px 0 6px; }
+.trial-line { font-size: 0.75rem; color: #c9a48a; margin-top: 4px; }
+.trial-reason { font-size: 0.72rem; color: #b07070; margin-top: 4px; }
+.trial-actions { display: flex; gap: 8px; margin: 10px 0 4px; }
+.trial-btn { font: inherit; font-size: 0.72rem; padding: 4px 12px; color: #e0c0a0; background: rgba(178,120,96,0.16); border: 1px solid rgba(178,120,96,0.45); border-radius: 4px; cursor: pointer; }
+.trial-btn:disabled { opacity: 0.4; cursor: default; }
+.trial-affix-label, .trial-effect-label, .trial-layers-label { font-size: 0.72rem; color: #9a8a70; margin: 10px 0 4px; }
+.trial-affix-list, .trial-effect-list, .trial-layers { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+.trial-affix { border-left: 2px solid rgba(178,120,96,0.4); padding-left: 8px; font-size: 0.74rem; color: #d8b8a0; }
+.trial-affix.is-none { border-left-color: rgba(255,255,255,0.12); color: #888; }
+.trial-effect { margin-top: 6px; }
+.trial-effect-list li { font-size: 0.72rem; color: #b8a894; }
+.trial-pending { font-size: 0.68rem; color: #7a6f66; margin-top: 4px; line-height: 1.5; }
+.trial-layer { display: flex; justify-content: space-between; font-size: 0.72rem; color: #a89880; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.trial-layer-meta { color: #8a7d6e; }
+.trial-empty { font-size: 0.75rem; color: #888; }
+
 .cf-section h3 { font-size: 0.8rem; color: #c9a962; margin: 8px 0 4px; }
 .cf-stat-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .cf-node-list { list-style: none; padding: 0; max-height: 28vh; overflow-y: auto; }

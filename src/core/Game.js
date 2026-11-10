@@ -114,7 +114,9 @@ import { LoreCodexJournalTab } from '../ui/LoreCodexJournalTab.js';
 import { BestiarySystem } from '../game/BestiarySystem.js';
 import { BestiaryJournalTab } from '../ui/BestiaryJournalTab.js';
 import { SeasonSystem } from '../game/SeasonSystem.js';
+import { TrialSystem } from '../game/TrialSystem.js';
 import { SeasonJournalTab } from '../ui/SeasonJournalTab.js';
+import { TrialJournalTab } from '../ui/TrialJournalTab.js';
 import { CombatStyleTracker } from '../game/CombatStyleTracker.js';
 import { Captions } from '../ui/Captions.js';
 import { CombatStyleOverlay } from '../ui/CombatStyleOverlay.js';
@@ -449,6 +451,9 @@ export class Game {
     // （`refreshFromOnline` 自己吞错，失败就保持本地那一季，不会把网络问题抛给开机流程）。
     this.seasons = this._adopt('game/SeasonSystem', new SeasonSystem(this));
     this.seasonTab = new SeasonJournalTab(this);
+    // W-F3 切片1：位面试炼。状态只在内存（不写存档），时间只由"在玩的帧"喂
+    this.trial = this._adopt('game/TrialSystem', new TrialSystem(this));
+    this.trialTab = new TrialJournalTab(this);
     void this.seasons.refreshFromOnline();
     this.combatStyle = this._adopt('game/CombatStyleTracker', new CombatStyleTracker(this));
     this.combatStyleOverlay = this._adopt('ui/CombatStyleOverlay', new CombatStyleOverlay(this));
@@ -724,6 +729,32 @@ export class Game {
     });
     gameOn('boss-phase', (e) => {
       this.audio.setBossPhase(e.detail.phase ?? 2);
+    });
+    /* 位面试炼（W-F3 切片1）：四条反馈都走 Toast —— 试炼是"你正在被打断"的事，
+     * 提示不见了玩家就不知道该去清怪。文案全键化（双表登记在 strings.*.js）。 */
+    gameOn('trial-started', (e) => {
+      this.dialog?.toast?.(t('trial_toast_started_fmt', { layer: e.detail?.layer ?? 1 }), 2600);
+    });
+    gameOn('trial-layer-cleared', (e) => {
+      this.dialog?.toast?.(t('trial_toast_layer_fmt', { layer: e.detail?.layer ?? 1 }), 2200);
+    });
+    gameOn('trial-failed', (e) => {
+      const key = e.detail?.reason === 'death' ? 'trial_toast_died'
+        : e.detail?.reason === 'timeout' ? 'trial_toast_timeout' : 'trial_toast_abandon';
+      this.dialog?.toast?.(t(key), 3000);
+    });
+    gameOn('trial-finished', (e) => {
+      this.dialog?.toast?.(t('trial_toast_finished_fmt', { score: e.detail?.score ?? 0 }), 3200);
+      /* 成绩进排行榜（与 Boss 通关同一条出口、同一个吞错曲线）：
+       * bossId 这一格放的是 `trial-layer-N` —— 排行榜按它分组，试炼与 Boss 榜天然分开，
+       * 而不用给 submitRun 加字段（服务端契约不动）。 */
+      const now = typeof performance !== 'undefined' ? performance.now() : 0;
+      onlineServices.submitRun({
+        runner: 'adventurer',
+        bossId: `trial-layer-${e.detail?.layersCleared ?? 0}`,
+        clearTimeMs: Math.max(0, Math.round(now - (this.runStartedAt ?? now))),
+        chapter: this.quests?.chapter ?? 1,
+      });
     });
     gameOn('game-audio-mode', (e) => {
       const mode = e.detail.mode;
@@ -1286,6 +1317,8 @@ export class Game {
       // 副本「用时」只在这种帧里走账（W-A1 切片8 / B118②）：暂停、过场、开着面板的那些帧
       // 一秒都不记 —— 这一条腿必须和「玩家真的在副本里活动」同一个闸，否则日志那行又是一笔假账
       走舱壁(this, 'dungeonRuns', () => this.dungeonRuns?.update(dt));
+      // 试炼的限时与灼烧同属"世界时"：暂停/面板期间一帧都不扣（W-F3 切片1）
+      走舱壁(this, 'trial', () => this.trial?.update(dt));
     }
     走舱壁(this, 'dungeons', () => this.dungeons.update(dt));
     走舱壁(this, 'loot', () => this.loot.update(dt, this.player.position));

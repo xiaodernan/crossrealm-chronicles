@@ -157,6 +157,23 @@ export const GAME_EVENTS = Object.freeze({
     desc: '营火重战 Boss 开场（成就与 CG 的"重战"来源标记）',
     payload: '{ bossId }',
   },
+  /* ———— 位面试炼（W-F3） ———— */
+  'trial-started': {
+    desc: '试炼开跑。affixIds 是本局真正生效的词缀 id（赛季页显示的那几条），UI 据此把标题与规则写成人话 —— 不写"这一季的词缀"而写"本局的词缀"，因为玩家可能带着上一季的规则开一局',
+    payload: '{ layer, affixIds }',
+  },
+  'trial-layer-cleared': {
+    desc: '清完一层（配额打满）。secondsLeft 是这一层**还剩下**的秒数，进下一层时会被重置 —— 它不是总分的一部分，只是给"这一层打了多快"留一个可看的值',
+    payload: '{ layer, quota, secondsLeft }',
+  },
+  'trial-finished': {
+    desc: '五层打完。score 是最终成绩（口径在 content/trial.js 的 trialScore），排行榜只认这一条；与 trial-failed 互斥',
+    payload: '{ score, layersCleared, secondsLeft }',
+  },
+  'trial-failed': {
+    desc: '试炼结束但没打完：reason 为 timeout（限时到）/ death（人死了）/ abandon（玩家自己退）。与 trial-finished 互斥 —— 两条都发等于排行榜上一局记两次',
+    payload: '{ reason, layer, kills, quota }',
+  },
   'time-stop-start': {
     desc: '时线执政官展开时停。HUD 把区副标题顶成时停提示',
     payload: null,
@@ -200,9 +217,8 @@ export const GAME_EVENTS = Object.freeze({
     payload: '{}',
   },
   'player-death-count': {
-    desc: '死亡计数递增，日志已补',
+    desc: '死亡计数递增，日志已补。W-F3 起试炼也听这一条（人要是在试炼里倒下，这一局就结束）—— 所以它不再是无监听的事件，`hook` 那格随之摘掉',
     payload: '{ count }',
-    hook: '派发方（DeathHintDirector）自己写了死亡日志并弹提示；这条给统计出口，仓库内无监听点',
   },
   'soul-streak': {
     desc: '连杀魂火奖励结算',
