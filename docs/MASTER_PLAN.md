@@ -421,7 +421,7 @@
 | 编号 | 工作包 | 状态 | 完成日期 | 提交 | 备注 |
 |------|--------|------|----------|------|------|
 | W-F1 | **敌人图鉴**（60 类，读击杀账） | ✅ 切片1 | 2026-11-11 | `b5c7cb7` | 内容层只登记三档阈值 + 五个特征判据 + 三种元素名，条目全部从名册/抗性表/体型表现推；运行时只读 `PlayerStats.kills` ⇒ **零存档迁移**；日志新页签 + HUD 计数 + teardown 登记；i18n 2748 → 2770；`tests/bestiary.test.js` 26 例 |
-| W-F2 | **赛季**（本地轮转 + 在线确认） | ✅ 切片1 | 2026-11-11 | 本片 | `content/seasons.js` 四套名册 + 八条词缀，id 与服务端 `season-service` 逐字对齐；`SeasonSystem` 默认信本地（离线也有赛季），在线服务开着才向 `/api/seasons/active` 确认；日志新页签如实标注 `本地轮转 / 在线赛季`；i18n 2770 → 2801；`tests/seasons.test.js` 28 例 |
+| W-F2 | **赛季**（本地轮转 + 在线确认） | ✅ 切片1 | 2026-11-11 | `f162e8d` | `content/seasons.js` 四套名册 + 八条词缀，id 与服务端 `season-service` 逐字对齐；`SeasonSystem` 默认信本地（离线也有赛季），在线服务开着才向 `/api/seasons/active` 确认；日志新页签如实标注 `本地轮转 / 在线赛季`；i18n 2770 → 2801；`tests/seasons.test.js` 28 例 |
 | W-F3 | **位面试炼**（词缀真正生效的终局挑战） | ✅ 切片1 | 2026-11-11 | `65a0daa` | `content/trial.js` 五层曲线 + 八条词缀数值（id 与 `SEASON_MODIFIERS` 逐字对齐）；`TrialSystem` 状态机（idle/running/finished/failed），限时按**世界时**走（暂停不扣），灼烧按秒结算走 `player.combat.takeDamage`；**时限/配额/灼烧三条词缀已经真的在改规则**，血量/伤害/速度三条算得出但还没接刷怪（页面如实标 `spawnScaleLive:false`）；日志新页签 + HUD 计数 + 四条 Toast；成绩走 `submitRun`（`bossId: trial-layer-N`，服务端契约不动）；**零存档迁移**；i18n 2801 → 2833；`tests/trial.test.js` 34 例。余：出生缩放接进 `spawnAt` 咽喉（切片2）|
 
 ---
