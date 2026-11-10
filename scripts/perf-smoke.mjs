@@ -294,6 +294,8 @@ try {
   console.log(`perf-smoke：世界种子 ${WORLD_SEED}（这一轮的散布可复现）`);
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
+  /** CI 冷启动窗口要按 CI 的尺子：windows-latest + 软件渲染 + 每轮冷 vite，本机 120 秒够用、CI 不够。CI 放宽到 ~450 秒（240→900），本机口径不动。 */
+  const READY_ITERS = process.env.CI ? 900 : 240;
   let ready = false;
   /**
    * 开机窗口 120 秒（不是 30 秒）：`.tmp-20261020-wc2s5/why-no-game.mjs` 在同一条 dev 口上量到过
@@ -302,11 +304,11 @@ try {
    * CI 的 node_modules/.vite 每轮都是冷的。普查侧（`.tmp-wc2s5/census.mjs`）早就放宽到 120 秒，
    * 两边同一把尺。
    */
-  for (let i = 0; i < 240 && !ready; i += 1) {
+  for (let i = 0; i < READY_ITERS && !ready; i += 1) {
     await sleep(500);
     ready = await evalJs('!!window.__game && !!window.__game.enemyManager');
   }
-  if (!ready) throw new Error('游戏 120 秒内没起来');
+  if (!ready) throw new Error(`游戏 ${READY_ITERS / 2} 秒内没起来`);
 
   /**
    * **这个页就是这一轮起的那个页**（切片6b）。

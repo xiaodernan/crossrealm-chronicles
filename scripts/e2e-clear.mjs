@@ -348,6 +348,8 @@ try {
   await send('Page.enable');
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
+  /** CI 冷启动窗口按 CI 的尺子：windows-latest + 软件渲染 + 每轮冷 vite。CI 放宽到 ~450 秒（240→900），本机 120 秒口径不动。 */
+  const READY_ITERS = process.env.CI ? 900 : 240;
   let ready = false;
   /**
    * 开机窗口 120 秒（不是 30 秒），与 `perf-smoke` 同一把尺：vite 冷缓存要按需转译 ~300 个模块，
@@ -358,11 +360,11 @@ try {
    * 两份各写各的时，开机等的是三件都在、重建后等的可能只剩 `__game` —— 于是静置腿认的形状与真跑的腿不是同一个。
    */
   const 就绪 = '!!window.__game && !!window.__game.quests && !!window.__game.questAssistant';
-  for (let i = 0; i < 240 && !ready; i += 1) {
+  for (let i = 0; i < READY_ITERS && !ready; i += 1) {
     await sleep(500);
     ready = await evalJs(就绪);
   }
-  if (!ready) throw new Error(`游戏 120 秒内没起来（页 http://127.0.0.1:${VITE_PORT}/）。vite 的话：\n - ${vite话()}`);
+  if (!ready) throw new Error(`游戏 ${READY_ITERS / 2} 秒内没起来（页 http://127.0.0.1:${VITE_PORT}/）。vite 的话：\n - ${vite话()}`);
 
   /**
    * 等页面**静下来**，再认它（W-D4 切片8 —— 把 `e2e-combat` 切片7 量到的那一课搬过来）。
@@ -389,12 +391,12 @@ try {
         上次 = 现;
         静 = 0;
         let 起 = false;
-        for (let i = 0; i < 240 && !起; i += 1) {
+        for (let i = 0; i < READY_ITERS && !起; i += 1) {
           起 = await evalJs(就绪);
           if (起) break;
           await sleep(500);
         }
-        if (!起) throw new Error(`页面重建后 120 秒内没起来。vite 的话：\n - ${vite话()}`);
+        if (!起) throw new Error(`页面重建后 ${READY_ITERS / 2} 秒内没起来。vite 的话：\n - ${vite话()}`);
       } else {
         静 += 1;
       }
