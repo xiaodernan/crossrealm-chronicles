@@ -164,8 +164,12 @@ const 判据 = {
    * 另一处就说出一个不属于本体的数 —— 这一格钉的就是"不许再抄第二遍"。
    */
   挂钟有界: (s) => {
-    const 得 = /const 挂钟毫秒 = (\d+);/.exec(s);
-    return !!得 && Number(得[1]) >= 300000 && Number(得[1]) <= 1800000
+    // 两种合法形状：CI 双轨（process.env.CI ? A : B）与单轨（NNNNN）——取较大者做 300000..1800000 判定
+    const 得 = /const 挂钟毫秒 = (?:process\.env\.CI \? (\d+) : (\d+)|(\d+));/.exec(s);
+    if (!得) return false;
+    const 值 = 得.slice(1).filter(Boolean).map(Number);
+    const 上界 = Math.max(...值);
+    return 上界 >= 300000 && 上界 <= 1800000
       && /setTimeout\(\(\) => 不交账就红\([^)]*\), 挂钟毫秒\);/.test(s)
       && s.includes('${挂钟毫秒 / 1000} 秒没走到交账')
       // 手抄的"多少分钟/多少秒"不许回到红话里（时长只从常量算）
@@ -568,7 +572,7 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
     const 坏 = {
       闩改成不响: 源文.replace('if (!已交账 && 码 === 0) {', 'if (false) {'),
       挂钟改成只warn: 源文.replace('setTimeout(() => 不交账就红(', 'setTimeout(() => console.warn('),
-      挂钟改成五秒: 源文.replace('const 挂钟毫秒 = 900000;', 'const 挂钟毫秒 = 5000;'),
+      挂钟改成五秒: 源文.replace('process.env.CI ? 1800000 : 900000', 'process.env.CI ? 5000 : 5000'),
       红话手抄分钟: 源文.replace('${挂钟毫秒 / 1000} 秒没走到交账', '15 分钟没走到交账'),
       挂钟传成字面量: 源文.replace('), 挂钟毫秒);', '), 900000);'),
       旗子删掉: 源文.replace('let 已交账 = false;', ''),
