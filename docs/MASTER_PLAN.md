@@ -5396,6 +5396,17 @@ Phase D（系统与质量）
 
 
 
+- **2026-11-10 W-X5（在线伙伴服务）—— 网关熔断 + 冒烟跨平台/确定性化：server workflow 红灯复位、smoke 内建 warm-up** —— 提交 `a47b541` + `27c0cd0`
+
+  - **起因**：① `server` workflow（run 42789399768）**首次全红**——`smoke.ps1` 的 preflight 用 `Get-NetTCPConnection`，pwsh on Linux 里该命令不存在，直接退出 1；② 本机复跑并发现 lb:// 路由有 **~30 秒级的注册表缓存暖起窗口**（eureka 刷新阈值），冷启动第一拨请求**必然落空（503）**，若断言直接跑会出确定失败/偶发失败——server CI 从"看起来能跑"到"每次推送真打全链路"之间还差这两道；③ 用户要求把 Spring Cloud 元素再做实一点。
+
+  - **做法**：① **跨平台 preflight**（`a47b541`）：`Get-NetTCPConnection` → `TcpClient` 连接探测（Windows PowerShell 5.1 与 Linux CI 皆可；本机 smoke 复跑全链路 PASSED，配置下发→注册→网关 lb://→写→读→遥测全通）；② **冒烟 warm-up**（`27c0cd0`）：gateway 起来后先轮询 `/api/version` 到 200（最多 90 秒）再走断言——本机实测首次 HTTP 200 在约 30 秒；③ **W-X5 网关熔断**（`27c0cd0`）：`spring-cloud-starter-circuitbreaker-reactor-resilience4j`（版本由 spring-cloud-dependencies BOM 管理）+ 路由滤镜 `CircuitBreaker`（滑动窗口 10 / 最少 5 次 / 50% 失败率 / 开闸 5 秒 / 半开放 3 个请求）+ `forward:/fallback/503` → `FallbackController` 返回 `503 + upstream-unavailable`（Fast fail、语义清楚，不是空响应/不是上游错误页）；④ 网关模块补 **3 项测试**（503 兜底语义 / yml 接线断言 / 上下文装配），`mvn -B verify` 全绿（game-service 9 项 + 网关 3 项 = 12 项）；⑤ 新增手动诊断 `server/scripts/verify-breaker.ps1`（29xxx 端口段）：baseline 200 → 停掉 game-service 后 6 次 503 → 重新拉起自动恢复 200；实测 PASSED；⑥ README / ONLINE_SERVICES 同步（含熔断语义与**诚实边界**）。
+
+  - **熔断的诚实边界（实测确认）**：Spring Cloud LoadBalancer 在**零实例**时直接 short-circuit 出空 503、**不抛异常**，熔断器截不到这条路径——两条路径都是 503，只有 body 形态不同；熔断兜底 JSON 仅在路由链抛异常时触发（eureka 缓存里实例还活着时的**连接拒绝/超时**，这也是生产里最常见的故障窗口），首次 baseline 偶发返回过该 JSON 证明该路径真实在役。直打 `/fallback/503` 会被网关 no-route 短路为空 503（不落到 controller）。此边界已写进 `ONLINE_SERVICES.md`「已知坑」与 README。
+
+  - **验证**：`mvn -B -f server/pom.xml verify` 全绿（5 模块 + 12 项测试，2026-11-10 17:37 本机实测）；`smoke.ps1` 复跑 PASSED（含 warm-up 轮询，2026-11-10 17:52 本机；CI server workflow 待本次推送后复核）；`verify-breaker.ps1` PASSED（2026-11-10 17:56 本机全程复现 200→503→200）。
+
+  - **风险与后续**：① 镜像构建仍未本机验证（Docker 守护进程长期被另一项目占用），装配口径以 CI `mvn verify` + warm-up smoke 为准；② lb:// 冷启动窗口若还不满意，下一步可以上 `caffeine` 缓存（spring-cloud-netflix 日志已提示）或调 `spring.cloud.loadbalancer.cache` TTL，或者给 game-service 加 `initialStatus`/`renewal-interval` 收紧；③ 本片没有动 game-service 的 API 与存储（仍内存纯 demo），排行榜/遥测生产化（Redis/Kafka）继续留在 W-X 线的后续候选。
 - **2026-11-10 W-E3 切片97 —— 幽暗恐惧者/辉煌天使入主线与副本：gloom/radiant 第七独占，主线 108 步，v21 插步不写迁移** —— 提交 `3d198b6`（18 文件，+286 −38）
 
   - **动机**：四族独占矩阵 6/6/12/12 对称齐平之后，gloom/radiant 还停在六名之外；补两名各自的第七独占，对称矩阵推进到 7/7/12/12 —— 补的不只是数量，是当红的两种节奏：潜行伏击（gloom）与 hover 远压（radiant）。
