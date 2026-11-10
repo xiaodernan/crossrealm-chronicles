@@ -10,6 +10,7 @@ import { attachToHand, GRIP } from './WeaponGrip.js';
 import { PlayerAnimationAdapter } from './animation/PlayerAnimationAdapter.js';
 
 import { createPlayerFSM } from './PlayerFSM.js';
+import { nextShoulderSide, dampShoulderSide } from './shoulderSide.js';
 
 import { shake } from '../engine/Shake.js';
 import { CameraRig, FOV_LAYER_OVERRIDE, FOV_LAYER_KNOCK, CAMERA_OVERRIDES_NONE, isFiniteVec3 } from '../engine/CameraRig.js';
@@ -92,6 +93,9 @@ export class PlayerController {
     this.lookSensitivityScale = DEFAULT_LOOK_SENSITIVITY;
     /** 震屏不归玩家所有：`engine/Shake.js` 的共享实例是唯一写入者，相机只读它的偏移 */
     this.shake = shake;
+    // 越肩换边（W-A5 切片4）：当前换手连续系数；+1 = 右肩 → -1 = 左肩（中间态 = 过渡中）
+    this._shoulderSide = 1;
+    this._shoulderSmooth = undefined;
 
     this._camTmp = new THREE.Vector3();
 
@@ -1283,7 +1287,24 @@ export class PlayerController {
       pivot.z - Math.cos(yaw) * cosP * dist
     );
 
-    const shoulder = lockTarget ? this.shoulderOffset : this.shoulderOffset * 0.5;
+    // 过肩换边（W-A5 切片4 —— "越肩左右换边"，A4 欠账里暂缓最久的一格）：
+    // 锁定态下按目标侧向把过肩镜头往背对那侧挪（目标落在"空出来"的一侧，不被自己的头挡住）；
+    // 带迟滞（贴身横移不翻边）与按秒逼近（不一帧 0.7 米瞬移）。非锁定态**原行为逐字不变**。
+    let shoulderSide = 1;
+    if (lockTarget) {
+      const tp = lockTarget.position;
+      const right = this.getRightXZ(this._camTmpRight);
+      const lateral = tp && Number.isFinite(tp.x) && Number.isFinite(tp.z)
+        ? (tp.x - pivot.x) * right.x + (tp.z - pivot.z) * right.z
+        : NaN;
+      this._shoulderSide = nextShoulderSide(this._shoulderSide, lateral);
+      this._shoulderSmooth = dampShoulderSide(this._shoulderSmooth, this._shoulderSide, dt);
+      shoulderSide = Number.isFinite(this._shoulderSmooth) ? this._shoulderSmooth : this._shoulderSide;
+    } else {
+      this._shoulderSide = 1;
+      this._shoulderSmooth = undefined;
+    }
+    const shoulder = (lockTarget ? this.shoulderOffset : this.shoulderOffset * 0.5) * shoulderSide;
     desired.addScaledVector(this.getRightXZ(this._camTmpRight), shoulder);
 
     if (camDir.lockOrbit && camDir.orbit?.position) {
