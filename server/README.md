@@ -22,6 +22,7 @@ server/
   game-service/          # REST API（排行榜 / 遥测 / 版本），9 项单测（+ Dockerfile）
   gateway/               # Spring Cloud Gateway（/api/** → lb://game-service，+ Dockerfile）
   scripts/smoke.ps1      # 冒烟脚本：四个实例真起真打，跑完自动关闭
+   scripts/verify-breaker.ps1 # W-X5 网关熔断验证（手动诊断）：200 → 503 → 自愈 200
   docker-compose.yml     # 四容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
 ```
 
@@ -49,6 +50,20 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 默认使用 **28xxx** 端口段且先确认端口空闲（避免与开发机上同机其它 Spring Cloud 项目抢端口），
 结束时自动关闭它拉起的进程，日志落在临时目录的 `crossrealm-server-smoke\` 子目录。
 （本仓库 CI（`.github/workflows/server.yml`）也跑这一步——ubuntu runner 上每次推送都会真起真打全链路。）
+
+网关带 **W-X5 熔断**（`spring-cloud-circuitbreaker-reactor-resilience4j`，语义与边界见下）：
+game-service 路由上 `CircuitBreaker` 滤镜（滑动窗口 10 / 最少 5 次 / 50% 失败率 / 开闸 5 秒 / 半开 3 个请求），
+路由链抛异常时快速走 `forward:/fallback/503` → `FallbackController` 返回
+`503 + upstream-unavailable`（不是空响应、不是上游错误页）。
+注意一个诚实边界：**负载均衡无实例时**（eureka 缓存刷新前可见零实例），
+Spring Cloud LoadBalancer 直接 short-circuit 出空 503、不经过异常路径，熔断器不介入——
+两条路径都返回 503，只有 body 形态不同。诊断脚本：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\verify-breaker.ps1
+```
+
+（29xxx 端口段；验证：baseline 200 → 停掉 game-service 后连打 503 → 重新拉起后自动恢复 200）
 
 ## 用 Docker 部署
 

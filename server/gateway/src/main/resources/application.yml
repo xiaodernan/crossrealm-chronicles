@@ -16,6 +16,12 @@ spring:
                 - Path=/api/**
               filters:
                 - AddRequestHeader=X-Gateway-Source, crossrealm-chronicles-gateway
+                # W-X5 熔断：game-service 连续失败达到阈值时快速 503 兜底（FallbackController），
+                # 不让错误的上游响应漏给调用方；本地正常跑时熔断器保持 closed。
+                - name: CircuitBreaker
+                  args:
+                    name: gameServiceBreaker
+                    fallbackUri: forward:/fallback/503
           discovery:
             locator:
               # 调试用：自动生成 /<service-id>/** 路由（小写服务名）。生产可关掉只走上面显式路由。

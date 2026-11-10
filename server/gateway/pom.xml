@@ -25,6 +25,17 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
     </dependency>
+    <!-- 网关熔断：lb 路由后端挂掉时返回 503 兜底而不是把空响应漏给调用方
+         （spring-cloud-starter-circuitbreaker-reactor-resilience4j，版本由 spring-cloud-dependencies BOM 管理） -->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

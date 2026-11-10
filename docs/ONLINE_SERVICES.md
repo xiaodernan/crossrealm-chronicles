@@ -9,7 +9,7 @@
 
 - **Eureka 注册中心**（`discovery-server`，:8761）——各服务向它注册；
 - **Spring Cloud Config 配置中心**（`config-server`，:8888）——`game-service` 的运行参数从这里下发（本地 native profile，内置 `config/game-service.yml`）；
-- **Spring Cloud Gateway**（:8080）——对外唯一入口，`/api/**` 按服务名 `lb://` 负载均衡转发；
+- **Spring Cloud Gateway**（:8080）——对外唯一入口，`/api/**` 按服务名 `lb://` 负载均衡转发； **W-X5 熔断**（CircuitBreaker + orward:/fallback/503：路由链抛异常时快速 503 兜底，不是空响应、不是上游错误页）；
 - **game-service**（:8081）——排行榜 / 遥测事件 / 版本号，纯内存零数据库。
 
 游戏侧对应的是 `src/online/OnlineServices.js`（W-X2，默认关闭）：
@@ -33,7 +33,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 1. 先确认 28xxx 端口段空闲（避免与开发机上同机的其它 Spring Cloud 项目抢端口）；
 2. 依次拉起 discovery → config → game-service → gateway（**日志落在临时目录 `crossrealm-server-smoke\`**）；
 3. 逐一验证配置下发 → 服务注册 → 网关 `lb://` 转发 → 遥测计数；
-4. 跑完自动关闭它拉起的四个进程。
+4. 跑完自动关闭它拉起的四个进程（含 **warm-up 轮询等 `lb://` 注册表暖起来**，约 30 秒，之后每一步都是确定性断言）；网关熔断诊断见 `scripts/verify-breaker.ps1`（baseline 200 → 停掉 game-service 后 6 次 503 → 重新拉起后自愈 200）。
 
 2026-11-10 实测全绿（配置下发、version 经网关、排行榜、遥测 POST+count、Eureka 3 应用注册）。
 
@@ -75,11 +75,14 @@ docker compose down
 - `SPRING_CONFIG_IMPORT` 按 JVM 生效：把它导给 config-server 会让它从自己拉配置，HTTP 工作线程写满，**健康检查假死**（日志 0 字节的经典症状）；
 - 本机 loopback 对**未监听**端口的连接 ~2–4 秒才 RST（疑似环回被过滤驱动接管），health poll 的 `-TimeoutSec` 必须 ≥ 25s；
 - 注册名用 LAN/`host.docker.internal` 会让网关 `lb://` 解析后连不上，须 `EUREKA_INSTANCE_HOSTNAME=localhost` + `PREFERIPADDRESS=false`；
+- `lb://` 冷启动有 **30 秒级** 的注册表缓存暖起窗口（eureka 刷新阈值）：游戏/网关刚起时第一拨请求**会落空（503）**，属预期；smoke 与 `verify-breaker.ps1` 都先轮询等到 200 再执行断言；
+- 网关熔断（W-X5）**只截路由链抛出的异常**（比如 eureka 缓存里实例还活着时的连接拒绝/超时）；**无实例 short-circuit 是 LB 直接出的空 503、不经过熔断器**——两条路径都是 503，只有 body 形态不同；
 - Gateway 4.x 起路由配置前缀是 `spring.cloud.gateway.server.webflux.*`（旧的 `spring.cloud.gateway.routes` 只是迁移监听器警告）。
 
 ## 文件索引
 
 - `server/` — Maven 多模块工程 + `scripts/smoke.ps1` + `docker-compose.yml`
+- `server/scripts/verify-breaker.ps1` —— W-X5 网关熔断验证（手动诊断）
 - `.github/workflows/server.yml` — CI（编译 + 单测 + 全链路冒烟）
 - `src/online/OnlineServices.js` — 游戏侧客户端（默认关闭）
-- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）
+- `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）

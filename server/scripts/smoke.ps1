@@ -103,6 +103,20 @@ try {
     $procs += Start-Server 'gateway' 'gateway-0.1.0-SNAPSHOT.jar' 28080
     if (-not (Wait-Healthy 28080 'gateway')) { exit 1 }
 
+    # 冷启动保护：gateway 的 lb:// 注册表缓存需要一点时间暖起来（本机实测可达 30 秒才解析到 game-service），
+    # 先轮询 /api/version 到 200（最多 90s）再执行断言步骤 —— 等的是 lb:// 就绪，不是业务本身。
+    Write-Host ""
+    Write-Host "=== 0) warm-up: poll gateway /api/version until lb:// routing resolves game-service ==="
+    $warmupOk = $false
+    for ($i = 0; $i -lt 90; $i++) {
+        try {
+            $r = Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/version' -TimeoutSec 10
+            if ($r.StatusCode -eq 200) { $warmupOk = $true; Write-Host "lb:// routing warm (try $i) -> HTTP 200"; break }
+        } catch {}
+        Start-Sleep -Milliseconds 1000
+    }
+    if (-not $warmupOk) { Write-Error 'warm-up failed: gateway never resolved game-service within 90s'; exit 1 }
+
     Write-Host ""
     Write-Host "=== 1) config-server: the config it serves for game-service ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28888/game-service/default' -TimeoutSec 15).Content
