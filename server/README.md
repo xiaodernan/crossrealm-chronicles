@@ -65,7 +65,11 @@ powershell -ExecutionPolicy Bypass -File .\scripts\verify-breaker.ps1
 
 （29xxx 端口段；验证：baseline 200 → 停掉 game-service 后连打 503 → 重新拉起后自动恢复 200）
 
-配置中心支持 **W-X9 配置热刷新**：`game-service` 的 `GameServiceProperties` 挂 `@RefreshScope`，`/actuator/refresh` 端点已暴露（`application/json`，空 body 也要）。改写 `game-service.yml`（本地跑的是 classpath，想演练就把 smoke 临时 config 目录挂进 `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS`——**`file:` URI 必须统一正斜杠**），然后 `POST /actuator/refresh`：`/api/version` 的备注和排行榜 `maxLimit` —— 全不重启进程、当场生效。smoke.ps1 已内置这一步。
+配置中心支持 
+**W-X12 限流（rate-limit by IP）**：网关新增 `RateLimitByIpFilter`（Spring Cloud Gateway `GlobalFilter`，order=-100，独立于 circuitbreaker / retry）—— `X-Forwarded-For`（信任代理后）或连接 `remoteAddress`（fallback）为 key，同 IP 10 秒最多 60 次，超出返回 `429 + {"error":"rate-limited","retryAfterMs":…}`。
+- 正常玩家与 smoke 不会撞上（smoke 全链路 ~15 次）
+- 60 req / 10s 足以挡住单 IP 高频抓取 / 刷榜
+- 注意：号段攻击（一整网段一个 IP 换了来一批）会绕过——生产需要 Redis + 集群级 ratelimit；这里只把本地开发/单机网关的第一道闸补上：`game-service` 的 `GameServiceProperties` 挂 `@RefreshScope`，`/actuator/refresh` 端点已暴露（`application/json`，空 body 也要）。改写 `game-service.yml`（本地跑的是 classpath，想演练就把 smoke 临时 config 目录挂进 `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS`——**`file:` URI 必须统一正斜杠**），然后 `POST /actuator/refresh`：`/api/version` 的备注和排行榜 `maxLimit` —— 全不重启进程、当场生效。smoke.ps1 已内置这一步。
 
 ## 用 Docker 部署
 
