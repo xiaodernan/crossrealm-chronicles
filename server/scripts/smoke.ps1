@@ -15,11 +15,24 @@ New-Item -ItemType Directory -Force $logDir | Out-Null
 $ports = @{ 'discovery-server' = 28161; 'config-server' = 28888; 'game-service' = 28081; 'gateway' = 28080 }
 
 # Preflight: refuse to start if any target port is taken (a stray instance would fail its own health check and hide behind a false "ready").
+# Cross-platform port check: try a TCP connect; it succeeds iff something listens. Works on Windows PowerShell 5.1 and pwsh on Linux CI.
+function Test-PortListening([int]$port) {
+    try {
+        $client = [System.Net.Sockets.TcpClient]::new()
+        $iar = $client.BeginConnect('127.0.0.1', $port, $null, $null)
+        $connected = $iar.AsyncWaitHandle.WaitOne(1500)
+        if ($connected) {
+            try { $client.EndConnect($iar); $client.Close(); return $true }
+            catch { $client.Close(); return $false }
+        }
+        $client.Close()
+        return $false
+    } catch { return $false }
+}
 foreach ($name in $ports.Keys) {
     $port = $ports[$name]
-    $conn = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
-    if ($conn) {
-        Write-Error "port $port ($name) is already in use by pid $($conn.OwningProcess) - refusing to start. Free it or change `$ports in this script."
+    if (Test-PortListening $port) {
+        Write-Error "port $port ($name) is already in use - refusing to start. Free it or change `$ports in this script."
         exit 1
     }
 }
