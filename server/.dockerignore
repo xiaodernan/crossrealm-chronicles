@@ -1,0 +1,4 @@
+# 部署镜像直接打包 mvn verify 产出的 target/*.jar，不需要再排除构建产物
+.git
+node_modules
+*.log

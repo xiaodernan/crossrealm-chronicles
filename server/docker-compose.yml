@@ -1,0 +1,104 @@
+# 跨服王冠 · 在线伙伴服务 —— 一键部署（四容器）
+# 用法（仓库根目录 server/ 下）：
+#   docker compose up --build
+# 全栈起来之后：
+#   curl http://localhost:8080/api/version
+#   curl http://localhost:8080/api/leaderboard
+#
+# 注册名刻意不用 localhost：容器间网络用服务名（discovery / config / game-service / gateway），
+# 与单机 smoke 脚本的 localhost 配置是两个世界，不要混。
+
+name: crossrealm-chronicles-server
+
+services:
+  discovery:
+    build:
+      context: .
+      dockerfile: discovery-server/Dockerfile
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8761/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+  config:
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    ports:
+      - "8888:8888"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: config
+      EUREKA_INSTANCE_PREFERIPADDRESS: "false"
+    depends_on:
+      discovery:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8888/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+  game-service:
+    build:
+      context: .
+      dockerfile: game-service/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: game-service
+      EUREKA_INSTANCE_PREFERIPADDRESS: "false"
+      # 只有 game-service 拉配置；config-server 自己绝不回拉自己（见 scripts/smoke.ps1 注释）
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config:8888
+    depends_on:
+      config:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8081/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 25s
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: gateway
+      EUREKA_INSTANCE_PREFERIPADDRESS: "false"
+    depends_on:
+      game-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 25s
+
+  # 一次性验证容器：全栈健康后把版本/排行榜/遥测跑一遍并退出（exit 0 = 全绿）
+  verify:
+    image: curlimages/curl:8.10.1
+    depends_on:
+      gateway:
+        condition: service_healthy
+    command: >
+      sh -c "set -e;
+      echo '== /api/version ==';
+      curl -fsS http://gateway:8080/api/version;
+      echo; echo '== /api/leaderboard ==';
+      curl -fsS http://gateway:8080/api/leaderboard?limit=2;
+      echo; echo '== telemetry ==';
+      curl -fsS -X POST http://gateway:8080/api/telemetry/events -H 'content-type: application/json' -d '{\"type\":\"smoke\",\"detail\":\"compose\"}';
+      echo; curl -fsS http://gateway:8080/api/telemetry/events/count;
+      echo"

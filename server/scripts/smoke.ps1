@@ -9,7 +9,7 @@
 # ASCII-only on purpose: Windows PowerShell 5.1 reads BOM-less scripts as ANSI, and CJK bytes can masquerade as quotes/braces.
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$logDir = Join-Path $env:TEMP 'crossrealm-server-smoke'
+$logDir = Join-Path ([System.IO.Path]::GetTempPath()) 'crossrealm-server-smoke'
 New-Item -ItemType Directory -Force $logDir | Out-Null
 
 $ports = @{ 'discovery-server' = 28161; 'config-server' = 28888; 'game-service' = 28081; 'gateway' = 28080 }

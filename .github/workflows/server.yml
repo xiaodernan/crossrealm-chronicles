@@ -1,6 +1,6 @@
-# 在线伙伴服务（server/）的独立门禁：Maven 编译 + 9 项单测。
+# 在线伙伴服务（server/）的独立门禁：Maven 编译 + 9 项单测 + 全链路冒烟。
 # 与前端 ci.yml 分离：前端门禁（lint→test→build→size→perf→e2e）本体完全不感知本目录，
-# 这里单独守住 Java 侧的可构建性。触发条件：动到 server/ 或本工作流自身才跑。
+# 这里单独守住 Java 侧的可构建性与整链装配。触发条件：动到 server/ 或本工作流自身才跑。
 name: server
 
 on:
@@ -33,6 +33,10 @@ jobs:
           java-version: '21'
           cache: maven
 
-      # 父 POM + 4 个模块全量构建并跑测试（9 项）
-      - name: Verify
+      - name: Verify (compile + tests)
         run: mvn -B -f server/pom.xml verify
+
+      # 冒烟：四个实例真起真打，逐一验证"配置下发 → 服务注册 → 网关 lb:// 转发 → 遥测计数"。
+      # 脚本使用 28xxx 端口段、跑完自动关停；ubuntu  runner 上 127.0.0.1 秒连秒拒，不会像开发机那样慢等。
+      - name: Smoke (full stack boot + gateway routing + config delivery)
+        run: pwsh -File "${{ github.workspace }}/server/scripts/smoke.ps1"
