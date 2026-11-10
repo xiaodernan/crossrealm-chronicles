@@ -5387,6 +5387,18 @@ Phase D（系统与质量）
 
 
 
+- **2026-11-10 W-X1 —— 在线伙伴服务（Spring Cloud 微服务，可选）：5 模块 Maven 工程 + 冒烟真跑通 + 独立 CI** —— 提交 `0ea29d8`
+
+  - **动机**：用户要求"看看能不能在项目里加一些 Spring Cloud 微服务的元素"。本体是纯前端离线游戏，不能把运行时耦合进去；做法是新增**完全独立、可选**的 `server/` 在线伙伴服务：服务发现（Eureka）→ 配置中心（Config）→ 网关（Gateway, lb://）→ 业务 REST（排行榜 / 遥测 / 版本），仅作联机场景的可选扩展，本体离线可玩、`npm run build` 不感知。
+
+  - **做法**：① `server/` 父 POM（Spring Boot 3.5.16 + Spring Cloud 2025.0.3 BOM，Java 17+）；② `discovery-server`（Eureka :8761）；③ `config-server`（Config native profile，classpath:/config 内置 game-service.yml，:8888）；④ `gateway`（Spring Cloud Gateway 4.3， reactive，`spring.cloud.gateway.server.webflux` 前缀，`/api/**` → `lb://game-service`，:8080）；⑤ `game-service`（排行榜/遥测/版本，纯内存零依赖，9 项单测：LeaderboardService 3 + TelemetryService 2 + ApiSmokeTest 4）；⑥ `scripts/smoke.ps1`——四个实例真起来、逐一验证"配置下发→注册→网关转发→遥测计数"全链路后自动关闭（28xxx 段端口，防与本开发机同机的其它 Spring Cloud 项目抢端口）；⑦ `.github/workflows/server.yml`（Temurin 21，`mvn -B -f server/pom.xml verify`，仅 `server/**` 变更触发）；⑧ `.gitignore` 收 `server/**/target/`；README/目录表/server/README.md 同步。
+
+  - **踩坑（踩实了才写的）**：① `SPRING_CONFIG_IMPORT` 按 JVM 生效——把它导给 config-server 自己，它会从自己拉配置形成无限回拉，HTTP 工作线程写满、health 假死、服务在写任何日志之前就饿死（日志 0 字节的经典症状）；env 只能给需要它的 `game-service`。② 本机 loopback 对**未监听**端口的连接要约 2–4 秒才 RST（疑似环回被过滤驱动接管），health poll 的 `-TimeoutSec` 必须 ≥ 25s，否则永远轮询不到 200。③ 注册地址：开发机主网卡出的 instance `host.docker.internal`/LAN IP 让网关 lb:// 解析后连不上，须 `EUREKA_INSTANCE_HOSTNAME=localhost` + `EUREKA_INSTANCE_PREFERIPADDRESS=false`。
+
+  - **验证**：`mvn -B verify` 全绿（5 模块 SUCCESS，game-service Tests run: 9, Failures: 0）；`powershell -ExecutionPolicy Bypass -File ./scripts/smoke.ps1` 真实跑通：配置下发（version-note 为配置中心那份 ✅）→ `/api/version`/`/api/leaderboard`/telemetry POST+count 经网关 200 ✅ → Eureka 3 个应用注册 ✅，冒烟通过。前端门禁（lint 0/0、385 文件 / 5748 项、build ✓）零影响。
+
+  - **风险与后续**：① 纯内存实现，生产化路径（Redis ZSET 排行榜 / Kafka 遥测）在 server/README.md 已写；② 前端尚未接线（本体离线可玩），接入时按"可选配置开关 + POST /api/telemetry/events + GET /api/leaderboard"三步即可；③ 注册名/端口按本机 28xxx 冒烟固化，正式部署改回标准端口并用 k8s/eureka 真集群替换。
+
 - **2026-11-08 W-E3 切片92 —— test(maint)：quest-save-restore choice-void 今日下标派生断言** —— 提交 `5ae0cdf`（1 文件，+6 −4）
 
   - **动机**：S89/S91 等 ch4 插步后，`quest-save-restore.test.js` ④ 的“今日 choice-void 下标”快照值/文案多次靠 regex 维护遗漏，需手修。
