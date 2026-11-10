@@ -231,6 +231,8 @@ export class Game {
     this.cinematicActive = false;
     this.spectatorMode = false;
     this.autoPlayMode = false;
+    /** 本次页面进入时间 —— 在线排行榜提交 `clearTimeMs` 用（W-X8）；不声称是"通关时长"（全主线没有计时器），仅供演示榜排序 */
+    this.runStartedAt = typeof performance !== 'undefined' ? performance.now() : 0;
 
     this._buildRenderStack();
 
@@ -686,6 +688,17 @@ export class Game {
     // 没开或网络差时 postTelemetry 永远不抛（1.5s 超时、吞错），对本地游戏零影响。
     gameOn('boss-defeated', (e) => {
       onlineServices.postTelemetry('boss_defeated', e?.detail?.bossId ?? '');
+      // W-X8：击杀 Boss 时提交通关记录 —— 走同一个开关、同一条吞错曲线（默认关闭 / 1.5s 超时 /
+      // 失败不打扰本地游戏）。clearTimeMs = 本次页面进入到此刻的毫秒数（演示榜用来排序即可，
+      // 不声称是"通关时长"——全主线没有计时器）。runner 用固定的 'adventurer'
+      // （游戏里没有玩家姓名输入；演示榜对姓名无要求）。
+      const now = typeof performance !== 'undefined' ? performance.now() : 0;
+      onlineServices.submitRun({
+        runner: 'adventurer',
+        bossId: e?.detail?.bossId ?? '',
+        clearTimeMs: Math.max(0, Math.round(now - (this.runStartedAt ?? now))),
+        chapter: this.quests?.chapter ?? 1,
+      });
     });
     gameOn('boss-defeated', () => {
       this.audio.endBossFight();

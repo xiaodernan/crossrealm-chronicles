@@ -17,7 +17,7 @@
 - 开启方式（任一种）：`localStorage['crossrealm_online'] = '1'`、网址参数 `?online=1`、`window.__CROSSREALM_ONLINE__ = true`；
 - 网关地址：`localStorage['crossrealm_online_base_url']`，缺省同源 origin，本地默认 `http://localhost:8080`；
 - 当前接线：**击杀 Boss → 静默上报名 `boss_defeated` 遥测**（吞错、1.5s 超时，零打扰）；
-- 排行榜提交（`submitRun`）已实现但**尚未接入调用点**（仍等后续切片）；**设置页里的"在线服务"开关已落地（W-X6）**：默认关闭、独立于 SettingsStore，写 localStorage `crossrealm_online` 并翻运行时 `onlineServices` 单例（开关一翻即生效，不需重载）；**设置页里"在线服务"区的只读排行榜也已落地（W-X7）**：设置页内「刷新排行榜」按钮按下才拉一次 `/api/leaderboard?limit=10`，行文本走 `textContent`（服务端数据当不可信），拉不到/空榜走一句兜底提示；排行榜提交（`submitRun`）仍然**没有任何调用点**——提交真实跑分需要本次跑的计时，而全主线没有计时器，待 W-X8；
+- 排行榜提交（`submitRun`）**已接入：Boss 击杀时即提交通关记录**（W-X8，与遥测同一默认关闭/吞错曲线）；**设置页里的"在线服务"开关已落地（W-X6）**：默认关闭、独立于 SettingsStore，写 localStorage `crossrealm_online` 并翻运行时 `onlineServices` 单例（开关一翻即生效，不需重载）；**设置页里"在线服务"区的只读排行榜也已落地（W-X7）**：设置页内「刷新排行榜」按钮按下才拉一次 `/api/leaderboard?limit=10`，行文本走 `textContent`（服务端数据当不可信），拉不到/空榜走一句兜底提示；排行榜提交（`submitRun`）**已接入：Boss 击杀时即提交通关记录**（W-X8：record = `{runner:'adventurer', bossId, clearTimeMs, chapter}`；`clearTimeMs` = 本次页面进入到此刻的毫秒数，演示榜仅供排序，**不声称是通关时长**——全主线没有计时器）；遥测同路径同开关；
 - 生产化路径（Redis ZSET 排行榜 / Kafka 遥测 / 真集群）在 `server/README.md` 有说明。
 
 ## 快速验证（5 分钟）
