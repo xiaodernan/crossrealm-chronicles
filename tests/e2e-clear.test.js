@@ -572,7 +572,7 @@ describe('无头 E2E 自动通关（W-D4 切片3）', () => {
       红话手抄分钟: 源文.replace('${挂钟毫秒 / 1000} 秒没走到交账', '15 分钟没走到交账'),
       挂钟传成字面量: 源文.replace('), 挂钟毫秒);', '), 900000);'),
       旗子删掉: 源文.replace('let 已交账 = false;', ''),
-      不接工厂: 源文.replace("import { 开通道 } from './cdp-channel.mjs';\n", ''),
+      不接工厂: 源文.replace(/import \{ 开通道 \} from '\.\/cdp-channel\.mjs';\r?\n/, ''),
       工厂不交名义: 源文.replace("开通道({ ws, 名义: 'e2e-clear', 通道, 浏览器输出 })", "开通道({ ws, 通道, 浏览器输出 })"),
       异常换个名字接: 源文.replace('const { send, evalJs, 异常: exceptions } = 开通道', 'const { send, evalJs } = 开通道'),
       通道抄本回潮: 源文.replace('  const { send, evalJs', '  const pending = new Map();\n  const { send, evalJs'),

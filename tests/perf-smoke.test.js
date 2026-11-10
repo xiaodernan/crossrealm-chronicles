@@ -552,7 +552,7 @@ describe('中途重载（切片6d）：读数作废并点名，而不是报成�
       归因删掉: 脚本源.replace('if (!err?.读数作废) {', 'if (false) {'),
       计数器遮蔽: 脚本源.replace("开通道({ ws, 名义: 'perf-smoke', 通道, 浏览器输出, 等待页面Promise: true });",
         "开通道({ ws, 名义: 'perf-smoke', 通道, 浏览器输出, 等待页面Promise: true });\n  const 通道 = { 执行上下文: 0, 加载完成: 0 };"),
-      不接工厂: 脚本源.replace("import { 开通道 } from './cdp-channel.mjs';\n", ''),
+      不接工厂: 脚本源.replace(/import \{ 开通道 \} from '\.\/cdp-channel\.mjs';\r?\n/, ''),
       通道抄本回潮: 脚本源.replace('  const { send, evalJs', '  const pending = new Map();\n  const { send, evalJs'),
       工厂不交名义: 脚本源.replace("开通道({ ws, 名义: 'perf-smoke', 通道, 浏览器输出, 等待页面Promise: true })", "开通道({ ws, 通道, 浏览器输出, 等待页面Promise: true })"),
     };
