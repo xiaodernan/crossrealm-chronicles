@@ -422,7 +422,7 @@
 |------|--------|------|----------|------|------|
 | W-F1 | **敌人图鉴**（60 类，读击杀账） | ✅ 切片1 | 2026-11-11 | `b5c7cb7` | 内容层只登记三档阈值 + 五个特征判据 + 三种元素名，条目全部从名册/抗性表/体型表现推；运行时只读 `PlayerStats.kills` ⇒ **零存档迁移**；日志新页签 + HUD 计数 + teardown 登记；i18n 2748 → 2770；`tests/bestiary.test.js` 26 例 |
 | W-F2 | **赛季**（本地轮转 + 在线确认） | ✅ 切片1 | 2026-11-11 | `f162e8d` | `content/seasons.js` 四套名册 + 八条词缀，id 与服务端 `season-service` 逐字对齐；`SeasonSystem` 默认信本地（离线也有赛季），在线服务开着才向 `/api/seasons/active` 确认；日志新页签如实标注 `本地轮转 / 在线赛季`；i18n 2770 → 2801；`tests/seasons.test.js` 28 例 |
-| W-F3 | **位面试炼**（词缀真正生效的终局挑战） | ✅ 切片1 + 切片2 | 2026-11-11 | `65a0daa` / 本片 | `content/trial.js` 五层曲线 + 八条词缀数值（id 与 `SEASON_MODIFIERS` 逐字对齐）；`TrialSystem` 状态机（idle/running/finished/failed），限时按**世界时**走（暂停不扣），灼烧按秒结算走 `player.combat.takeDamage`；**时限/配额/灼烧三条词缀已经真的在改规则**，血量/伤害/速度三条算得出但还没接刷怪（页面如实标 `spawnScaleLive:false`）；日志新页签 + HUD 计数 + 四条 Toast；成绩走 `submitRun`（`bossId: trial-layer-N`，服务端契约不动）；**零存档迁移**；i18n 2801 → 2834；`tests/trial.test.js` 34 例。**切片2**：`game/SpawnTuning.js` 把 `hp/damage/speed` 三档接进 `EnemyManager.spawnAt` 那条唯一出生咽喉（中性时 config 逐字节等价、`speed` 只在非中性时写），试炼开层写、通关/超时/死亡/放弃/销毁五条路全归位；`tests/spawn-tuning.test.js` 12 例 |
+| W-F3 | **位面试炼**（词缀真正生效的终局挑战） | ✅ 切片1 + 切片2 | 2026-11-11 | `65a0daa` / `153b5cc` | `content/trial.js` 五层曲线 + 八条词缀数值（id 与 `SEASON_MODIFIERS` 逐字对齐）；`TrialSystem` 状态机（idle/running/finished/failed），限时按**世界时**走（暂停不扣），灼烧按秒结算走 `player.combat.takeDamage`；**时限/配额/灼烧三条词缀已经真的在改规则**，血量/伤害/速度三条算得出但还没接刷怪（页面如实标 `spawnScaleLive:false`）；日志新页签 + HUD 计数 + 四条 Toast；成绩走 `submitRun`（`bossId: trial-layer-N`，服务端契约不动）；**零存档迁移**；i18n 2801 → 2834；`tests/trial.test.js` 34 例。**切片2**：`game/SpawnTuning.js` 把 `hp/damage/speed` 三档接进 `EnemyManager.spawnAt` 那条唯一出生咽喉（中性时 config 逐字节等价、`speed` 只在非中性时写），试炼开层写、通关/超时/死亡/放弃/销毁五条路全归位；`tests/spawn-tuning.test.js` 12 例 |
 
 ---
 
@@ -5946,7 +5946,7 @@ Phase D（系统与质量）
 
   - **风险与后续**：① **切片2 的正事是把 `layerScale()` 接进 `EnemyManager.spawnAt` 那条咽喉**（`spawnAt(type, x, z, { scale })`），而不是另起一条刷怪路 —— 那条咽喉是难度的唯一入口，绕开它就是在制造第二份真源。② 试炼目前**不刷自己的怪**，击杀算的是世界里的任意击杀（本片刻意不碰出生咽喉）；代价是玩家可以站在怪多的地方刷层数。接上出生之后要不要把判据收窄成"只算试炼刷出来的"待定 —— 收窄的代价是击杀事件要带来源标记。③ 排行榜里 `trial-layer-5` 这类值会让服务端多出五个"Boss"，只影响演示榜的分组观感；真要做正经榜要另开 `/api/runs/trial`。④ **顺带修掉了本仓一条老病：全量跑每次都少一个文件。** 实测同一份代码连跑六次，分母给出 `6203 / 6141 / 6127 / 6114 / 6085`，少的文件次次不同（`material-surfaces` 118 例 / `platform-lease` 62 例 / `content-registry` 55 例），而单独跑那些文件全绿 —— 也就是说**测试没红，但有一个文件没跑，汇总行看不出来**。根因不在测试：默认池把每个模块的转译结果写成一个临时模块文件（`project.tmpDir/<mode>/<sha1>`）再让子进程 require，这台机器上 `fs.writeFile` 经一层 fs 代理会极偶发地拒一次写，于是那个模块取不到、用到它的文件结果被整份丢掉，收尾只留一条 `Unhandled Error: EPERM`。**"一次写失败"与"少一个文件"是同一件事。** 两处修：① `vite.config.js` 显式 `pool: 'forks'`（那个池不写临时模块文件）—— **频率降了一个量级但没有根除**：改前三跑三掉，改后三跑只掉一次（`e2e-clear` 19 例），另两跑 `416 / 6203` 与 `417 / 6215` 全绿；② 新增 `npm run test:verify`（`scripts/test-count.mjs`）把 JSON 报告的文件集合与磁盘逐个**对账**，少跑一个就点名并以非 0 退出 —— **记数此后只认它**。**这条比这一片本身更要紧**：它管的正是 §8 那句"读的人没法判断红绿是不是同一件事"。
 
-- **2026-11-11 W-F3 切片2 —— 出生缩放接进那条唯一的出生咽喉**（提交 `本片`）
+- **2026-11-11 W-F3 切片2 —— 出生缩放接进那条唯一的出生咽喉**（提交 `153b5cc`）
 
   - **动机**：切片1 把词缀的时限 / 配额 / 灼烧三条真做成了规则，但 `hp / damage / speed` 三条只算得出、没人用 —— 页面上如实写着"已算出、未接入"。这一片把那三个乘子落地，且**只落在那一条咽喉上**。
 
