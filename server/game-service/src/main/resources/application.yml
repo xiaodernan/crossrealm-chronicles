@@ -24,6 +24,10 @@ game-service:
   leaderboard:
     seed-demo-data: true
     max-limit: 10
+  trial:
+    seed-demo-data: true
+    max-limit: 10
+    max-entries: 500
   telemetry:
     max-events: 500
   version-note: "本地默认配置"

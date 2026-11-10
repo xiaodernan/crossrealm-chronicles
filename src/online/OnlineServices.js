@@ -102,6 +102,40 @@ export class OnlineServices {
   }
 
   /**
+   * 提交一条位面试炼成绩（W-F3 切片6，`POST /api/trials/runs`）。
+   *
+   * 与 `submitRun` 是**两条路**：Boss 榜按用时排，试炼榜按分数排 —— "更好"的方向相反，
+   * 合并在同一张表里就只能靠排序字段猜。早先试炼借 `submitRun` 把 `trial-layer-N`
+   * 冒充 `bossId` 塞进 Boss 榜，那让服务端多出五个不存在的 Boss，而两张榜仍然分不开。
+   */
+  submitTrialRun(run) {
+    return this.#post('/api/trials/runs', run);
+  }
+
+  /**
+   * 拉取位面试炼榜（W-F3 切片6，`GET /api/trials/leaderboard`）。
+   *
+   * `seasonId` 省略 = 跨季总榜。返回 `{ items, count, season, maxLimit }`；
+   * 未启用 / 失败 / 超时 → null（这一层不做语义校验，与 `fetchActiveSeason` 同一条边界）。
+   */
+  async fetchTrialLeaderboard(seasonId = '', limit = 10) {
+    if (!this._enabled) return null;
+    const qs = new URLSearchParams();
+    if (seasonId) qs.set('season', seasonId);
+    qs.set('limit', String(limit));
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/trials/leaderboard?${qs}`, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      console.warn('[online] 拉取试炼榜失败（已吞掉）', e?.message ?? e);
+      return null;
+    }
+  }
+
+  /**
    * 探活：GET /api/version。
    * 成功返回 `{ service, version, javaVersion, note }`；离线 / 未启用 / 超时 / 非 2xx → null。
    * 不打遥测、不写模块外任何东西 — 只是问一句"在线服务还活着吗"。

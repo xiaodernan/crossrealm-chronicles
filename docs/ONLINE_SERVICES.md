@@ -27,6 +27,12 @@
 - **赛季（W-X14/W-F2）**：客户端 `fetchActiveSeason()` 打 `/api/seasons/active`；拿不到就用本地轮转
   （同一条 `epochDay / cycleDays` 规则），于是**离线也有赛季、在线只是确认**。赛季给的是词缀 id 列表，
   具体含义在客户端内容表里（服务端不认识游戏机制，加词缀不需要改服务端）。
+- **位面试炼榜（W-F3 切片6）**：`POST /api/trials/runs` 提交、`GET /api/trials/leaderboard?season=&limit=`
+  出榜。**这是第二张榜，不是 Boss 榜的一个分组** —— Boss 榜按**用时升序**排，试炼榜按**分数降序**排，
+  "更好"的方向相反，合在一张表里只能靠猜。提交体是 `{ runner, seasonId, score, layersCleared, secondsLeft }`；
+  赛季 id 参与**过滤**（轮换之后旧成绩不混进新榜），缺省 = 跨季总榜。内存有界（`max-entries`，超出丢最老的一条）。
+  > 历史：切片1 曾经把 `trial-layer-N` 冒充 `bossId` 塞进 Boss 榜，代价是服务端多出五个不存在的 Boss
+  > 而两张榜仍然分不开。切片6 把那条路彻底换掉了（`tests/trial-online.test.js` 有一条反面断言盯着）。
 - 生产化路径（Redis ZSET 排行榜 / Kafka 遥测 / 真集群）在 `server/README.md` 有说明。
 
 ## 快速验证（5 分钟）

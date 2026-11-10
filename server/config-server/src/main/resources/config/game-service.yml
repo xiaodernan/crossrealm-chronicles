@@ -6,6 +6,14 @@ game-service:
     seed-demo-data: true
     # 排行榜默认展示的条数上限
     max-limit: 10
+  trial:
+    # 位面试炼榜（W-F3 切片6）：分数降序，与 Boss 榜那张"用时升序"的表是两回事
+    # 是否在启动时播种一批演示成绩
+    seed-demo-data: true
+    # 出榜条数上限
+    max-limit: 10
+    # 内存里最多留多少条（超出后丢最老的一条 —— 不限容的内存榜就是内存泄漏）
+    max-entries: 500
   telemetry:
     # 内存里最多缓存多少条遥测事件（超出后丢弃最老的一条）
     max-events: 500

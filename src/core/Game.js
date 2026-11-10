@@ -745,15 +745,19 @@ export class Game {
     });
     gameOn('trial-finished', (e) => {
       this.dialog?.toast?.(t('trial_toast_finished_fmt', { score: e.detail?.score ?? 0 }), 3200);
-      /* 成绩进排行榜（与 Boss 通关同一条出口、同一个吞错曲线）：
-       * bossId 这一格放的是 `trial-layer-N` —— 排行榜按它分组，试炼与 Boss 榜天然分开，
-       * 而不用给 submitRun 加字段（服务端契约不动）。 */
-      const now = typeof performance !== 'undefined' ? performance.now() : 0;
-      onlineServices.submitRun({
+      /* 成绩进**试炼榜**（W-F3 切片6）：`/api/trials/runs` 是另一张表 ——
+       * 它按分数排，Boss 榜按用时排，"更好"的方向相反。
+       * 切片1 曾经把 `trial-layer-N` 冒充 bossId 塞进 Boss 榜：那让服务端多出五个
+       * 不存在的 Boss，而两张榜仍然分不开。赛季 id 随成绩一起交，
+       * 于是赛季轮换之后旧成绩不会混进新榜。 */
+      const seasonId = this.seasons?.getState?.()?.id;
+      onlineServices.submitTrialRun({
         runner: 'adventurer',
-        bossId: `trial-layer-${e.detail?.layersCleared ?? 0}`,
-        clearTimeMs: Math.max(0, Math.round(now - (this.runStartedAt ?? now))),
-        chapter: this.quests?.chapter ?? 1,
+        // 服务端要求非空：拿不到赛季（理论上不会）时兜一个 'unknown' 而不是让请求 400
+        seasonId: seasonId || 'unknown',
+        score: e.detail?.score ?? 0,
+        layersCleared: e.detail?.layersCleared ?? 0,
+        secondsLeft: e.detail?.secondsLeft ?? 0,
       });
     });
     gameOn('game-audio-mode', (e) => {

@@ -97,15 +97,18 @@ docker compose down
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/leaderboard?limit=10` | 排行榜（按用时升序，启动时播种演示数据） |
+| GET | `/api/leaderboard?limit=10` | Boss 榜（按**用时升序**，启动时播种演示数据） |
 | POST | `/api/leaderboard` | 提交通关记录 `{runner,bossId,clearTimeMs,chapter}` |
+| GET | `/api/trials/leaderboard?season=&limit=10` | 位面试炼榜（按**分数降序**；`season` 缺省 = 跨季总榜） |
+| POST | `/api/trials/runs` | 提交试炼成绩 `{runner,seasonId,score,layersCleared,secondsLeft}` |
 | POST | `/api/telemetry/events` | 上报玩家事件 `{type,detail}`，限容缓存 |
 | GET | `/api/telemetry/events/count` | 当前缓存事件数 |
 | GET | `/api/telemetry/events` | 查看缓存事件（调试） |
 | GET | `/api/version` | 服务版本（含配置中心下发的 `version-note`） |
 
 配置经 `game-service` 的 `spring.config.import=optional:configserver:…` 从配置中心拉取：
-`game-service.leaderboard.seed-demo-data` / `max-limit` / `telemetry.max-events` / `version-note`。
+`game-service.leaderboard.seed-demo-data` / `max-limit` / `game-service.trial.seed-demo-data` /
+`max-limit` / `max-entries` / `telemetry.max-events` / `version-note`。
 配置中心离线时回退到本地默认值，互不影响。
 
 ## 设计说明

@@ -16,11 +16,16 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 public class GameServiceProperties {
 
     private final Leaderboard leaderboard = new Leaderboard();
+    private final Trial trial = new Trial();
     private final Telemetry telemetry = new Telemetry();
     private String versionNote = "本地默认配置";
 
     public Leaderboard getLeaderboard() {
         return leaderboard;
+    }
+
+    public Trial getTrial() {
+        return trial;
     }
 
     public Telemetry getTelemetry() {
@@ -55,6 +60,43 @@ public class GameServiceProperties {
 
         public void setMaxLimit(int maxLimit) {
             this.maxLimit = maxLimit;
+        }
+    }
+
+    /**
+     * 位面试炼榜（W-F3 切片6）。与 {@link Leaderboard} 是两张表、两套次序：
+     * 这里**分数降序**，那边用时升序 —— 合并不了，因为它们的"更好"不是同一个方向。
+     */
+    public static class Trial {
+        /** 启动时播种一批演示成绩（离线联调试炼榜用） */
+        private boolean seedDemoData = true;
+        /** 出榜条数上限 */
+        private int maxLimit = 10;
+        /** 内存里最多留多少条（超出后丢最老的一条 —— 不限容的内存榜是内存泄漏） */
+        private int maxEntries = 500;
+
+        public boolean isSeedDemoData() {
+            return seedDemoData;
+        }
+
+        public void setSeedDemoData(boolean seedDemoData) {
+            this.seedDemoData = seedDemoData;
+        }
+
+        public int getMaxLimit() {
+            return maxLimit;
+        }
+
+        public void setMaxLimit(int maxLimit) {
+            this.maxLimit = maxLimit;
+        }
+
+        public int getMaxEntries() {
+            return maxEntries;
+        }
+
+        public void setMaxEntries(int maxEntries) {
+            this.maxEntries = maxEntries;
         }
     }
 
