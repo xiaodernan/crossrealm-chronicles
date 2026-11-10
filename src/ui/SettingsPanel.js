@@ -362,6 +362,19 @@ export class SettingsPanel {
         });
       });
     }
+    // 在线服务连通性自检（W-X10）：ping /api/version；不打遥测、不写存档。
+    // 显示行复用 pingResult 预置节点，文案走 i18n，失败/未开都说一句可执行建议。
+    const pingBtn = document.getElementById('set-online-ping');
+    if (pingBtn) {
+      pingBtn.addEventListener('click', async () => {
+        const out = document.getElementById('set-online-ping-result');
+        if (!out) return;
+        const data = await onlineServices.ping();
+        out.textContent = data
+          ? t('settings_online_ping_ok', { service: data.service ?? '', version: data.javaVersion ?? data.version ?? '', note: data.note ?? '' })
+          : t('settings_online_ping_fail');
+      });
+    }
   }
 
   /**

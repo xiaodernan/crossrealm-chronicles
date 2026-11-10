@@ -101,6 +101,25 @@ export class OnlineServices {
     return this.#post('/api/leaderboard', record);
   }
 
+  /**
+   * 探活：GET /api/version。
+   * 成功返回 `{ service, version, javaVersion, note }`；离线 / 未启用 / 超时 / 非 2xx → null。
+   * 不打遥测、不写模块外任何东西 — 只是问一句"在线服务还活着吗"。
+   */
+  async ping() {
+    if (!this._enabled) return null;
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/version`, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      console.warn('[online] ping 失败（已吞掉）', e?.message ?? e);
+      return null;
+    }
+  }
+
   /** 拉取排行榜；失败返回 null */
   async fetchLeaderboard(limit = 10) {
     if (!this._enabled) return null;

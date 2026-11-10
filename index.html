@@ -157,6 +157,9 @@
         <!-- 在线排行榜（W-X7）：只读；按钮拉取一次、行文本走 textContent（服务端数据当不可信） -->
         <button id="set-online-lb" type="button" data-i18n="settings_online_lb_btn">刷新排行榜</button>
         <ol id="set-online-lb-list" class="online-lb-list"></ol>
+        <!-- 在线服务连通性自检（W-X10）：ping 一次 GET /api/version；null / 不通就一句话提示，常态不占版面 -->
+        <button id="set-online-ping" type="button" data-i18n="settings_online_ping">在线服务连通性自检</button>
+        <p id="set-online-ping-result" class="setting-hint"></p>
         <button id="settings-close" data-i18n="common_close">关闭</button>
       </div>
     </div>
