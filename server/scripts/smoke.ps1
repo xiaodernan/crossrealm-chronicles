@@ -86,12 +86,33 @@ $env:EUREKA_CLIENT_SERVICEURL_DEFAULTZONE = 'http://localhost:28161/eureka/'
 $env:EUREKA_INSTANCE_HOSTNAME = 'localhost'
 $env:EUREKA_INSTANCE_PREFERIPADDRESS = 'false'
 
+# W-X9 (config hot reload): config-server points at a temp dir instead of classpath, so this script
+# can flip game-service.yml mid-run (max-limit 4 -> 3, note v1 -> v2) without restarting game-service,
+# proving the chain config-server -> @RefreshScope -> /actuator/refresh applied live.
+$tmpConfigDir = Join-Path (Join-Path $repoRoot 'target') 'smoke-config'
+New-Item -ItemType Directory -Force $tmpConfigDir | Out-Null
+$configFile = Join-Path $tmpConfigDir 'game-service.yml'
+@'
+game-service:
+  leaderboard:
+    seed-demo-data: true
+    max-limit: 4
+  telemetry:
+    max-events: 500
+  version-note: "smoke-reload-note-v1"
+'@ | Set-Content -Encoding UTF8 $configFile
+
 $procs = @()
 try {
     $procs += Start-Server 'discovery-server' 'discovery-server-0.1.0-SNAPSHOT.jar' 28161
     if (-not (Wait-Healthy 28161 'discovery-server')) { exit 1 }
 
+    # 只有 config-server 需要这个 search-locations；discovery/game-service/gateway 拿不到它。
+    # file: URI 里的反斜杠会被 Java URI 解析器悄悄吃掉一部分，统一换成正斜杠：file:/D:/path/to/dir
+    $tmpConfigDirFs = $tmpConfigDir -replace '\\','/'
+    $env:SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS = "file:/$tmpConfigDirFs"
     $procs += Start-Server 'config-server' 'config-server-0.1.0-SNAPSHOT.jar' 28888
+    Remove-Item Env:SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS -ErrorAction SilentlyContinue
     if (-not (Wait-Healthy 28888 'config-server')) { exit 1 }
 
     # 只有 game-service 需要从配置中心拉配置（配置中心自己绝不能回拉自己）
@@ -144,7 +165,28 @@ try {
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/telemetry/events/count' -TimeoutSec 15).Content
 
     Write-Host ""
-    Write-Host "=== 5) discovery: applications currently registered ==="
+    Write-Host "=== 5) hot refresh: edit served config (max-limit 4 -> 3, note v1 -> v2) WITHOUT restarting game-service ==="
+    @'
+game-service:
+  leaderboard:
+    seed-demo-data: true
+    max-limit: 3
+  telemetry:
+    max-events: 500
+  version-note: "smoke-reload-note-v2"
+'@ | Set-Content -Encoding UTF8 $configFile
+    $refresh = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28081/actuator/refresh' -ContentType 'application/json' -Body '{}' -TimeoutSec 15).Content
+    Write-Host "POST /actuator/refresh -> $refresh"
+    Start-Sleep -Milliseconds 500
+    $ver = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/version' -TimeoutSec 15).Content
+    Write-Host "version after refresh: $ver"
+    $lb = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/leaderboard?limit=10' -TimeoutSec 15).Content
+    Write-Host "leaderboard after refresh: $lb"
+    if (-not ($ver -match 'smoke-reload-note-v2')) { Write-Error "refresh did NOT rebind versionNote to v2: $ver"; exit 1 }
+    if (-not ($lb -match '"count":3')) { Write-Error "refresh did NOT rebind max-limit to 3 (leaderboard count stayed above 3): $lb"; exit 1 }
+
+    Write-Host ""
+    Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content
 
     Write-Host ""
@@ -152,5 +194,9 @@ try {
 } finally {
     foreach ($p in $procs) {
         try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue; Write-Host "stopped $($p.ProcessName) pid $($p.Id)" } catch {}
+    }
+    if ($tmpConfigDir -and (Test-Path $tmpConfigDir)) {
+        Remove-Item -Recurse -Force $tmpConfigDir -ErrorAction SilentlyContinue
+        Write-Host "cleaned up $tmpConfigDir"
     }
 }

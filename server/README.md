@@ -65,6 +65,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\verify-breaker.ps1
 
 （29xxx 端口段；验证：baseline 200 → 停掉 game-service 后连打 503 → 重新拉起后自动恢复 200）
 
+配置中心支持 **W-X9 配置热刷新**：`game-service` 的 `GameServiceProperties` 挂 `@RefreshScope`，`/actuator/refresh` 端点已暴露（`application/json`，空 body 也要）。改写 `game-service.yml`（本地跑的是 classpath，想演练就把 smoke 临时 config 目录挂进 `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS`——**`file:` URI 必须统一正斜杠**），然后 `POST /actuator/refresh`：`/api/version` 的备注和排行榜 `maxLimit` —— 全不重启进程、当场生效。smoke.ps1 已内置这一步。
+
 ## 用 Docker 部署
 
 每个模块一个 Dockerfile（打 `mvn verify` 产出的 `*.jar`，**构建期不下载依赖**，最适合离线/受限网络）：

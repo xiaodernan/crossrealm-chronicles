@@ -15,3 +15,9 @@ game-service:
   telemetry:
     max-events: 3
   version-note: "测试配置"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health,info
