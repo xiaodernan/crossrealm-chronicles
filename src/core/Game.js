@@ -111,6 +111,8 @@ import { CampfireMemoryJournalTab } from '../ui/CampfireMemoryJournalTab.js';
 import { AchievementsJournalTab } from '../ui/AchievementsJournalTab.js';
 import { LoreCodexSystem } from '../game/LoreCodexSystem.js';
 import { LoreCodexJournalTab } from '../ui/LoreCodexJournalTab.js';
+import { BestiarySystem } from '../game/BestiarySystem.js';
+import { BestiaryJournalTab } from '../ui/BestiaryJournalTab.js';
 import { CombatStyleTracker } from '../game/CombatStyleTracker.js';
 import { Captions } from '../ui/Captions.js';
 import { CombatStyleOverlay } from '../ui/CombatStyleOverlay.js';
@@ -436,6 +438,11 @@ export class Game {
     this.achievementsJournalTab = new AchievementsJournalTab(this);
     this.loreCodex = this._adopt('game/LoreCodexSystem', new LoreCodexSystem(this));
     this.loreCodexTab = new LoreCodexJournalTab(this);
+    // W-F1 切片1：敌人图鉴。它没有监听、没有 THREE 资源、不持有状态（读的是 `stats.kills`），
+    // 但照样进 teardown 登记表：`dispose()` 把 game 置空，收编之后"没有孤儿引用"这件事
+    // 才是被统一保证的，而不是靠"这个类看起来无害"。
+    this.bestiary = this._adopt('game/BestiarySystem', new BestiarySystem(this));
+    this.bestiaryTab = new BestiaryJournalTab(this);
     this.combatStyle = this._adopt('game/CombatStyleTracker', new CombatStyleTracker(this));
     this.combatStyleOverlay = this._adopt('ui/CombatStyleOverlay', new CombatStyleOverlay(this));
     this.bossRematch = this._adopt('world/BossRematchDirector', new BossRematchDirector(this));

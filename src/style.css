@@ -2250,6 +2250,25 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .codex-title { color: #bb99ff; font-size: 0.85rem; font-weight: 600; }
 .codex-text { font-size: 0.72rem; color: #999; margin-top: 4px; line-height: 1.45; }
 
+/* 敌人图鉴（W-F1 切片1）：与秘典同一套骨架，配色偏赤铜 —— 它记的是活物，不是碑文 */
+.bestiary-stats { font-size: 0.75rem; color: #c9a962; margin: 0 0 10px; }
+.bestiary-filter { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.bestiary-filter-btn { padding: 4px 10px; font-size: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(201,169,98,0.3); color: #aaa; border-radius: 4px; cursor: pointer; }
+.bestiary-filter-btn.active { color: #e0b070; border-color: rgba(224,176,112,0.7); }
+.bestiary-grid { display: grid; gap: 8px; max-height: 44vh; overflow-y: auto; }
+.bestiary-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(201,140,90,0.22); border-radius: 6px; padding: 10px; }
+.bestiary-card.bestiary-locked { opacity: 0.5; filter: grayscale(0.6); }
+.bestiary-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.bestiary-name { color: #e0b070; font-size: 0.85rem; font-weight: 600; }
+.bestiary-tier { font-size: 0.66rem; color: #c9a962; border: 1px solid rgba(201,169,98,0.35); border-radius: 3px; padding: 1px 5px; }
+.bestiary-kills { font-size: 0.7rem; color: #9a8a70; margin-top: 3px; }
+.bestiary-line { font-size: 0.72rem; color: #bbb; margin-top: 4px; }
+.bestiary-traits { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.bestiary-trait { font-size: 0.64rem; color: #d8c090; background: rgba(201,169,98,0.12); border-radius: 3px; padding: 1px 5px; }
+.bestiary-affinity { font-size: 0.7rem; color: #999; margin-top: 5px; }
+.bestiary-hint { font-size: 0.7rem; color: #8a7a66; margin-top: 4px; }
+.bestiary-empty { font-size: 0.75rem; color: #888; }
+
 .cf-section h3 { font-size: 0.8rem; color: #c9a962; margin: 8px 0 4px; }
 .cf-stat-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .cf-node-list { list-style: none; padding: 0; max-height: 28vh; overflow-y: auto; }

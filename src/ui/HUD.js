@@ -127,6 +127,7 @@ const JOURNAL_SUB_TABS = {
   cg: (game, panel) => game.cgJournalTab.render(panel),
   achievements: (game, panel) => game.achievementsJournalTab.render(panel),
   codex: (game, panel) => game.loreCodexTab.render(panel),
+  bestiary: (game, panel) => game.bestiaryTab.render(panel),
   memory: (game, panel) => game.campfireMemoryTab.render(panel),
   dungeons: (game, panel) => game.dungeonJournalTab.render(panel),
   skills: (game, panel) => game.weaponSkillJournalTab.render(panel),
@@ -785,6 +786,7 @@ buildHUD() {
       if (k === 'cg') suffix = ` (${this.game.cgGallery?.getStats()?.unlocked ?? 0})`;
       else if (k === 'achievements') suffix = ` (${this.game.achievements?.unlocked?.size ?? 0})`;
       else if (k === 'codex') suffix = ` (${this.game.loreCodex?.getStats()?.unlocked ?? 0})`;
+      else if (k === 'bestiary') suffix = ` (${this.game.bestiary?.getStats()?.seen ?? 0}/${this.game.bestiary?.getStats()?.total ?? 0})`;
       else if (k === 'memory') suffix = ` (${this.game.campfireMemory?.getStats()?.total ?? 0})`;
       else if (k === 'dungeons') suffix = ` (${this.game.dungeonRuns?.getStats()?.totalClears ?? 0})`;
       else if (k === 'skills') suffix = ` (${this.game.weaponSkills?.unlocked?.size ?? 0})`;

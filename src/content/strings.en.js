@@ -399,6 +399,30 @@ export const STRINGS_EN = Object.freeze({
   codex_stats: "Collected ${unlocked} / ${total} (${percent}%)",
   codex_locked_hint: "Keep exploring, talk at campfires and defeat bosses to unlock",
 
+  // Bestiary (W-F1 slice 1) — entries are derived from the roster/resist table/kill ledger;
+  // only the reading layer lives here.
+  bestiary_stats_fmt: "Recorded ${seen} / ${total} kinds · ${mastered} mastered",
+  bestiary_kills_fmt: "Defeated ${n}",
+  bestiary_stats_line_fmt: "HP ${hp} · Poise ${posture} · Damage ${damage} · Speed ${speed}",
+  bestiary_weak_fmt: "Weak to ${elem}",
+  bestiary_resist_fmt: "Resists ${elem}",
+  bestiary_no_affinity: "No elemental leaning",
+  bestiary_locked_name: "???",
+  bestiary_locked_hint: "Defeat one to record it",
+  bestiary_empty: "Nothing recorded in this section yet",
+  bestiary_zone_shared: "Shared wildlife",
+  bestiary_tier_sighted: "Sighted",
+  bestiary_tier_studied: "Studied",
+  bestiary_tier_mastered: "Mastered",
+  bestiary_trait_swift: "Swift",
+  bestiary_trait_heavy: "Heavy",
+  bestiary_trait_sturdy: "Sturdy poise",
+  bestiary_trait_far: "Far sentry",
+  bestiary_trait_hover: "Hovering",
+  bestiary_elem_fire: "fire",
+  bestiary_elem_ice: "ice",
+  bestiary_elem_gravity: "gravity",
+
   // 副本名与难度档名（W-D2 切片16v）
   dungeon_ruin_crypt_name: "Greywhite Ruins",
   dungeon_ruin_crypt_map_label: "Ruins",
@@ -2347,6 +2371,7 @@ export const STRINGS_EN = Object.freeze({
   journal_tab_dungeon: 'Dungeons',
   journal_tab_cg: 'CG Gallery',
   journal_tab_codex: 'Codex',
+  journal_tab_bestiary: 'Bestiary',
   journal_tab_memory: 'Campfire Memories',
   journal_tab_dungeons: 'Dungeons Cleared',
   journal_tab_skills: 'Schools',
