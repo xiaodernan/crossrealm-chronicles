@@ -114,7 +114,7 @@
 |---|------|------|
 | B1 | **没有装备系统**。掉落只有一个八面体给"位面之魂"，无装备/词缀/稀有度 | ✅ 已消（W-B9 那一族）：装备是 `content/gear.js` 的一张表 + `Game` 的一条链——稀有度 **4** 档（common / uncommon / rare / epic，权重 62 / 26 / 9 / 3，各带 0 / 1 / 2 / 3 条词缀）、基座 **13** 件、词缀 **15** 条、掉落池 **9** 个（default + hub + 七座区）、背包 **20** 格（`GEAR_BAG.capacity`）。链一条不断：`LootSystem.spawnGear` → `rollGear`（Boss 走 `rollBossGear`）→ `onGear` → `Game.pickUpGear` → `PlayerStats.equip` → `_rebuildBonus` → `applyToCombat` → `combat.maxHp / damageMult / skillMult`。剩的两格是表现层、不是"没有系统"：面板那一行只有文字（`UpgradePanel` 现问 `gearLabel`，档位名前置），稀有度的**色**只出现在 3D 掉落（`rarityTint`）与字幕（`emitCue('gearDrop')`）；仓里没有独立装备面板——那 20 格住在 `UpgradePanel.renderGear()` 里，`src/ui/` 没有 `InventoryPanel.js`。门禁 `gear-model` / `gear-pools` / `gear-drop` / `gear-bag` / `gear-boss-drops` / `color-vision` |
 | B2 | 技能树只有 **8 个节点**（剑系 4 + 杖系 4） | ✅ W-B6 切片1（`f214a36`）—— 8 → **36 可加点 + 9 叙事技**（三条流派各 12 + 3）；节点表与门槛搬进 `content/skillTrees.js`，"有哪些流派"从此只有一份名单 |
-| B3 | 支线只有 **7 条**；主线 32 步是硬编码线性数组，**零分支** | ✅ 两半已消（条数与分支）：支线 **50** 条、其中分区专属 **38** 条（挂在 `ZONE_ORDER` 那七座区上）、目标行 **111** 行、由它投影出的主线 **106** 步（这两个数归 `content-volume-reading` 管，本片只核它们与代码一致）。**"零分支"那一半关在 W-E3 切片35**：门槛行 **19** 行（`requires`，运行时真读）、选项步 **5** 步（`type: 'choice'`：第 1 章的 `choice-first`、第 2 章收尾的 `choice-second`、第 3 章的 `choice-ascend`、第 4 章的 `choice-void` 与终局的 `choice-final`）、分支步 **6** 步（写 `branch` 的有 `choice-first`、`choice-second`、`choice-ascend`、`choice-void`、`choice-final` 与 `true-end` —— 前五个按玩家选的 flag 各指向 **两步不同的路**（`first-arrow` / `first-camp`；`second-ember` / `second-stone`；`ascend-observe` / `ascend-retrace`；`seal-rite` / `study-rite`；`final-keep` / `final-quiet`），`true-end` 把两条路汇回 `ch4-complete`）、跳转行 **14** 行（`branchTo`；其中十对是"分支路 → 汇合点"——两对落在 `fantasy-frag`、两对落在 `epilogue`、两对落在 `ascension`、两对落在 `true-end`、两对落在 `ch5-complete`，其余四对是"本章末步 → 本章门"：first-arrow→fantasy-frag、first-camp→fantasy-frag、finale→ch1-complete、second-ember→epilogue、second-stone→epilogue、epilogue→ch2-complete、ascend-observe→ascension、ascend-retrace→ascension、ascension→ch3-complete、seal-rite→true-end、study-rite→true-end、true-end→ch4-complete、final-keep→ch5-complete、final-quiet→ch5-complete）、章节门 **5** 行 ⇒ 玩家在**第 1 章教学段之后**（灰白森林里顺着那支断箭追出去 / 回旧营地去翻那堆余烬）、**第 2 章末尾**（拨亮奇幻区的守夜人火盆 / 拓下魔法区禁林界碑的名字）、**第 3 章末尾**（去空间区的校准环 / 回魔法区的创始人钟楼）、**第 4 章末尾**（去虚空裂隙的石座 / 回魔法城堡抄一页）与**第 5 章末尾**（走上锚点东侧的石阶把火种留给后来人 / 走到锚座下合上熄火环）**各**真的分成两路，走完各自那一步再汇合（第 1 章汇回 `fantasy-frag`、第 2 章汇回 `epilogue`、第 3 章汇回 `ascension`、第 4 章汇回 `true-end`、第 5 章汇回 `ch5-complete`）—— 主线现在有**五处**"选了哪条就走到哪"，五章各一处，再没有单线章。门禁 `mainline-table` / `content-schema-readers` + `tests/section-12-claims.test.js` ③ |
+| B3 | 支线只有 **7 条**；主线 32 步是硬编码线性数组，**零分支** | ✅ 两半已消（条数与分支）：支线 **50** 条、其中分区专属 **38** 条（挂在 `ZONE_ORDER` 那七座区上）、目标行 **113** 行、由它投影出的主线 **108** 步（这两个数归 `content-volume-reading` 管，本片只核它们与代码一致）。**"零分支"那一半关在 W-E3 切片35**：门槛行 **19** 行（`requires`，运行时真读）、选项步 **5** 步（`type: 'choice'`：第 1 章的 `choice-first`、第 2 章收尾的 `choice-second`、第 3 章的 `choice-ascend`、第 4 章的 `choice-void` 与终局的 `choice-final`）、分支步 **6** 步（写 `branch` 的有 `choice-first`、`choice-second`、`choice-ascend`、`choice-void`、`choice-final` 与 `true-end` —— 前五个按玩家选的 flag 各指向 **两步不同的路**（`first-arrow` / `first-camp`；`second-ember` / `second-stone`；`ascend-observe` / `ascend-retrace`；`seal-rite` / `study-rite`；`final-keep` / `final-quiet`），`true-end` 把两条路汇回 `ch4-complete`）、跳转行 **14** 行（`branchTo`；其中十对是"分支路 → 汇合点"——两对落在 `fantasy-frag`、两对落在 `epilogue`、两对落在 `ascension`、两对落在 `true-end`、两对落在 `ch5-complete`，其余四对是"本章末步 → 本章门"：first-arrow→fantasy-frag、first-camp→fantasy-frag、finale→ch1-complete、second-ember→epilogue、second-stone→epilogue、epilogue→ch2-complete、ascend-observe→ascension、ascend-retrace→ascension、ascension→ch3-complete、seal-rite→true-end、study-rite→true-end、true-end→ch4-complete、final-keep→ch5-complete、final-quiet→ch5-complete）、章节门 **5** 行 ⇒ 玩家在**第 1 章教学段之后**（灰白森林里顺着那支断箭追出去 / 回旧营地去翻那堆余烬）、**第 2 章末尾**（拨亮奇幻区的守夜人火盆 / 拓下魔法区禁林界碑的名字）、**第 3 章末尾**（去空间区的校准环 / 回魔法区的创始人钟楼）、**第 4 章末尾**（去虚空裂隙的石座 / 回魔法城堡抄一页）与**第 5 章末尾**（走上锚点东侧的石阶把火种留给后来人 / 走到锚座下合上熄火环）**各**真的分成两路，走完各自那一步再汇合（第 1 章汇回 `fantasy-frag`、第 2 章汇回 `epilogue`、第 3 章汇回 `ascension`、第 4 章汇回 `true-end`、第 5 章汇回 `ch5-complete`）—— 主线现在有**五处**"选了哪条就走到哪"，五章各一处，再没有单线章。门禁 `mainline-table` / `content-schema-readers` + `tests/section-12-claims.test.js` ③ |
 | B4 | 地下城是 4×6 随机迷宫，房间只差配色，没有房间模板与遭遇表 | ✅ 已消：模板有，而且不是"只差配色"——`world/RoomTemplates.js` 注册模板 **18** 款（`hall:straight` / `hall:crosswise` / `chamber:square` / `junction:cross` / `junction:tee` / `treasure:small` / `lore:double-door` / 四款 `corner:*` / 四款 `deadend:*`（W-E3 切片53）/ `junction:tee-n` / `junction:tee-e` / `junction:tee-s`），每款带自己的 `buildInterior` 摆件**与端口约束**（`requiredPortCount` / `templateFitsRoom`），由 `ProceduralDungeonGenerator._assignRoomTemplates()` 逐房挑、`room.template.buildInterior` 消费，Boss 房豁免。"4×6"也不是今天的事实：格子 gridW 最窄 **4** 最宽 **6**、gridH 最窄 **5** 最宽 **6**（十座各有各的尺寸，不是同一个数）。遭遇表同样存在：`content/dungeonEncounters.js` 的 `DUNGEON_ENCOUNTERS` 有遭遇 **10** 座，与 `DUNGEON_DEFS` 一样多，每座有自己的怪池与编组规模。门禁 `tests/dungeon-template-geometry.test.js`（18 键名册 + "每一款注册的模板都真的被选中过"，7 座 × 40 颗种子）+ `tests/dungeon-encounters-table.test.js` + `tests/dungeon-deadend-templates.test.js`（死路四款 / T 口四向：端口、门洞通道不被摆设压住、全形状覆盖、真迷宫兜底 0 间） |
 | B5 | Boss 有 6 个类，但**没有场地机制**（红圈/弹幕/引力/时停），阶段只是数值与速度变化 | ✅ W-A6 切片1（`2043968`）落地"红圈"底座：`combat/GroundHazards.js` 危险区生命周期（前摇画圈→落地结算一次→余像淡出，圈与施法者解耦、按峰值池化），三个会砸地的 Boss 共用同一份实现（原先各自手抄，且预警圈涨到判定半径的四倍 = 说谎）。切片2（`3474fb0`）落地"弹幕"这一档：`BarragePattern.barrageLayout` 纯几何铺落点（黄金角 + 面积均匀 + 由内向外错时），大奥术师二阶段近身铺场，落点夹回竞技场内，站住连吃、外跑脱身。切片3（`9daa748`）把"什么时候铺场"收进 `content/arenaScripts.js` 脚本表：按 `bossId` 声明 `phase` + 三种闸门（近战位抢刀 / 按秒期望 / 冷却加距离），加载期整表校验，`Boss` 只留一条通用驱动；四份手抄闸门（守护者 0.35、引力化身 `dt*0.08`、混沌领主 `dt*0.06`、大奥术师弹幕整段）删除，引力化身与混沌领主第三阶段各得一次弹幕。切片4（`ccff4f2`）把危险区扩出**第四种生命周期：域**（前摇 → 落地 → 持续段 → 淡出），`spawn()` 从此有时长、每 tick 结算一次、可对玩家施加向心拉力；引力化身的"每 3.5 秒凭空拽一下速度"换成第三阶段在玩家脚下开一口看得见边界的引力井（半径 5.5 米、3 秒、每 0.6 秒 6 点、拉力 8），主人倒地时井跟着塌。切片5（`e039202`）落 B5 最后一档"时停域"：`spawn()` 多收 `slow`，危险区的结算器从此是三选一（**伤害 / 拉力 / 时标**），时停域 `damage: 0` 只收机动；玩家侧新增**按来源记账、每帧续绳（`TIME_SCALE_LEASH 0.12` 秒）的时标账本**（`applyTimeScale/releaseTimeScale/updateTimeScales`），多来源取最狠的一份、断供自动还账，`timeSlow` 降格成算出来的缓存。顺带修掉真正的软锁：时线执政官那记无场时停从前只有"自然到期"一条还原路径，**被打断**与**死在时停里**两条都会把玩家永久留在 0.35 倍速（无提示、只能重开关卡），现在它走同一本账、不再直接写 `timeSlow`。四档原型至此全部落地，**B5 关闭**；仍在前面的不是本条缺陷而是新工作：逐 Boss 遭遇编排（现在只有三只有场地脚本，其余走 `default` —— W-B8 与 B4 的副本遭遇表）、把圈接进阶段演出（`BossPhaseDirector.js`）、圈/井/场的表现层可读性（M5/M6，**已由切片9 `3248cf2` 落地：边缘环从第一帧按真实半径常显 + 落地前 0.2 秒提示音**） |
 | B6 | 区域只有 5 个，区域之间是空白地形走廊 | ✅ 已消（"**5 个**"早已过期、走廊不再空白、缺口已在切片33 归零）：`ZONE_ORDER` 有分区 **7** 座（fantasy / magic / space / void / abyss / gloom / radiant），`ZONE_IDS` 另登记 hub / corridor / unknown 三种"不是一处地方"的身份。路上有东西：`content/windingRoutes.js` 有路 **8** 条（射线 **7** 条从枢纽 (0, 55) 出发、各 9 个折点 + 一环 `hub-ring` 17 个折点），`WorldTerrain` 沿路压路面、`TerrainHeight.connectionTerrain` 给走廊起脊、`WorldDecorations._buildPathLanterns` 每隔一个折点撒一盏路灯（两条 InstancedMesh，`hub-ring` 除外）。缺口 **0** 座（从"2 座"降下来）：七座区各有 `to-<id>`，末点逐字对着 `ZONE_CENTERS` —— 幽冥 gloom (180, 100) 与圣域 radiant (−180, −160) 这两座曾经缺席的区，切片33 各补了一条从枢纽出发的射线；`to-forest` 同时改名 `to-fantasy`（旧名走到的其实是 fantasy，id 与终点第一次说的是同一件事）。而"走廊上没有环境台词"**不是缺口**，是从 W-C 起写下来的取舍（`NO_AMBIENT_ZONES = [corridor, unknown]`，理由是通路不是目的地），由 `tests/world-ambient-events.test.js` 双向钉住。门禁 `tests/section-12-claims.test.js` ③（七对五那笔账）+ `winding-routes` / `zone-identity` / `world-ambient-events` |
@@ -125,7 +125,7 @@
 |---|------|------|
 | C1 | 视听：真实美术资产 **1 个 GLB（Soldier 占位）+ 8 张贴图**；音频 **全部 Web Audio 合成，0 个音频素材**，无配音 | 🔶 部分已消（贴图那半过期，GLB 与音频那两句**仍为真**）：`public/` 下模型 GLB **1** 枚（`assets/models/Soldier.glb`）；营火 NPC 与手势只有导入脚本（`scripts/import-rest-npcs.ps1` / `import-rest-gestures.ps1` / `download-player-model.ps1`）加 README，`assets/models/rest/` 里是 0 枚 GLB —— 素材要玩家自己放，缺素材时按 W-C6 切片12 走程序化手臂并**分档说话**（404 判 absent、解析失败判 broken）。音频 **0** 个（`public/` 下 mp3 / ogg / wav 为零），全部 Web Audio 合成、无配音。过期的是贴图：贴图 **24** 张（根目录 **8** 张 + `textures/gen` **16** 张，由 `scripts/bake-textures.mjs` 烘）。门禁 `texture-shared` / `rest-npc-gesture-loader` + 本片新增 `tests/section-12-claims.test.js` ①（三个数现扫文件系统，不抄清单） |
 | C2 | 渲染：只有 UnrealBloomPass；**0 个 InstancedMesh**；一张 4096² 阴影图覆盖全场 | ✅ 已消（三句今天全过期）：`core/Game.js` 的 composer 上有通道 **5** 处 `addPass`（RenderPass → bloomPass → colorGrade.pass → dofPass（按设置条件插）→ OutputPass），另有一条 SSAO 按 `setSsaoQuality` 接档位；`new THREE.InstancedMesh` 全仓有实例网格 **12** 处，全在 `world/WorldDecorations.js`（`decoLanding.js` / `zoneBatching.js` 是同一族的落座与批量纪律）；阴影不再是一张图覆盖全场——`engine/shadowPolicy.js` 有档位 **3** 档（1024 / 2048 / 4096），出厂档 **4096**，视锥跟着档位收。门禁 `shadow-policy` / `ssao-policy` / `aa-policy` / `dof-cinematic-focus` / `dof-combat-focus` / `decoration-batching` / `zone-batching` / `shadow-cast-gate` |
-| C3 | 通关时长：**主线**约 3.5 小时（主线 106 步，含主线里那十座副本）；**全清**（再加分区专属支线 38 + 回声 49）约 4.8 小时 ⇒ 缺口在**主线**（已从 1 小时缩到 3.5 小时，**已经踩进"正常通关 3~5 小时"的下沿**，下一段是往上加分而不是补缺口），而主线那 91 步的**下标**是存档语义（`quests.index`）—— 但 **v21 起存档同时记 `quests.currentId`**（W-E3 切片38：读档先认 id、认不出才回落下标）⇒ **插步不必再配「存档迁移」**（切片40/41/42/45/46/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/93/94/95/96 已各兑现一次：`void-oath`、第 3/2/1 章那九步、终局那三步与大主教、影煞、虚空幻影、深渊撕掠者、深渊凝视者、虚空裂隙行者、深渊蛮兽、虚空潜伏者、深渊幽影、虚空掠夺者、深渊猎犬、虚空刺蜇者、深渊沼兽、虚空裂隙使、深渊裂痕使、虚空裂渊者、深渊噬颚兽、虚空残魂、深渊空壳、虚空汲魂者、深渊撕裂者、虚空裂爪兽、深渊恸嚎者、虚空号哭者、深渊缚影者、虚空缚裂者、辉煌誓守者、幽暗鬼火都没写迁移就上了表）；v7 → v20 那十三次示范的是旧口径（老档的 `index` 要按插入点偏移，否则会**静默跳过**新插的那一步），那条链对老档仍然在役 | 内容量推算：主线 106 步 ×1.5 分 + 副本 10 座 ×8 分 + 分区专属支线 38 条 ×1.5 分 + 回声 49 条 ×0.5 分 ≈ 291 分（主线那部分 209 分 ≈ 3.48 小时） |
+| C3 | 通关时长：**主线**约 3.5 小时（主线 108 步，含主线里那十座副本）；**全清**（再加分区专属支线 38 + 回声 49）约 4.8 小时 ⇒ 缺口在**主线**（已从 1 小时缩到 3.5 小时，**已经踩进"正常通关 3~5 小时"的下沿**，下一段是往上加分而不是补缺口），而主线那 91 步的**下标**是存档语义（`quests.index`）—— 但 **v21 起存档同时记 `quests.currentId`**（W-E3 切片38：读档先认 id、认不出才回落下标）⇒ **插步不必再配「存档迁移」**（切片40/41/42/45/46/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/93/94/95/96/97 已各兑现一次：`void-oath`、第 3/2/1 章那九步、终局那三步与大主教、影煞、虚空幻影、深渊撕掠者、深渊凝视者、虚空裂隙行者、深渊蛮兽、虚空潜伏者、深渊幽影、虚空掠夺者、深渊猎犬、虚空刺蜇者、深渊沼兽、虚空裂隙使、深渊裂痕使、虚空裂渊者、深渊噬颚兽、虚空残魂、深渊空壳、虚空汲魂者、深渊撕裂者、虚空裂爪兽、深渊恸嚎者、虚空号哭者、深渊缚影者、虚空缚裂者、辉煌誓守者、幽暗鬼火、辉煌天使、幽暗恐惧者都没写迁移就上了表）；v7 → v20 那十三次示范的是旧口径（老档的 `index` 要按插入点偏移，否则会**静默跳过**新插的那一步），那条链对老档仍然在役 | 内容量推算：主线 108 步 ×1.5 分 + 副本 10 座 ×8 分 + 分区专属支线 38 条 ×1.5 分 + 回声 49 条 ×0.5 分 ≈ 291 分（主线那部分 209 分 ≈ 3.48 小时） |
 
 ### 1.3 已经具备的能力（**不要重做**）
 
@@ -5259,7 +5259,7 @@ Phase D（系统与质量）
   - **放弃了什么**：① 不写 v21→v22 迁移；② 不新增第四名 abyss_ 成员；③ `abyss_slam` 复用既有 strike 结算；④ 通用 normal 魂价不动；⑤ 仍未抽出 mainline-table 的派生辅助（见尾巴）。
 
   - **留了什么尾巴**：① 蛮兽慢速重踏（knock 7）的逼退感与深渊三独占混编手感未真机走查；② abyss-deep-maw 池里三名独占都为 weight 1（点缀）；③ mainline-table 维护成本持续累积（每次 ch4/ch5 插步都要改排除名单、多个历史"now"索引、相邻断言）——slice 71/72 已预警，本片再次手工修补；若继续高频插步，应先在测试层引入基于 `id` 的相邻/索引派生辅助，避免硬编码漂移（后续单独切片处理，不在内容片混入重构）；④ E2E 待读数确认。
-- **2026-11-08 W-E3 切片74 —— 虚空潜伏者入主线与副本：虚空断口第三独占，主线 106 步，v21 插步不写迁移** —— 提交 `2331248`（17 文件，+189 −29）
+- **2026-11-08 W-E3 切片74 —— 虚空潜伏者入主线与副本：虚空断口第三独占，主线 108 步，v21 插步不写迁移** —— 提交 `2331248`（17 文件，+189 −29）
 
   - **动机**：切片69/72 为 void_ 建立了「悬浮短切 + 贴地长距相位突入」的分工，但缺少贴地伏击/扑袭型。补一名短距 travel 扑袭者，让虚空遭遇形成三角节奏（短切连击 / 中远距相位突入 / 近距伏击扑袭），并继续对称深化 void_ 前缀族。
 
@@ -5270,7 +5270,7 @@ Phase D（系统与质量）
   - **放弃了什么**：① 不写 v21→v22 迁移；② 不新增第四名 void_ 成员；③ `void_lunge` 复用既有 travel/strike 结算；④ 通用 normal 魂价不动；⑤ mainline-table 派生辅助仅对切片46 当前态腿做了局部 ID 化（`d68ee14`），未全面重构历史腿/patch 模式。
 
   - **留了什么尾巴**：① travel 扑袭与相位突入/悬浮短切的混编手感未真机走查；② void-broken-casket 池里三名 void_ 独占都为 weight 1（点缀）；③ mainline-table 历史腿的排除名单与相邻断言仍随插步手工维护（局部改善已落地，全面辅助待后续切片）；④ E2E 待读数确认。
-- **2026-11-08 W-E3 切片75 —— 深渊幽影入主线与副本：深渊之颚第四独占，主线 106 步，v21 插步不写迁移** —— 提交 `cc59e2a`（17 文件，+198 −24）
+- **2026-11-08 W-E3 切片75 —— 深渊幽影入主线与副本：深渊之颚第四独占，主线 108 步，v21 插步不写迁移** —— 提交 `cc59e2a`（17 文件，+198 −24）
 
   - **动机**：切片70/71/73 为 abyss_ 建立了「近战撕裂猎手 + 悬浮远距凝视 + 重躯逼退」的分工，但缺少相位伏击型。补一名中距相位伏击者，让深渊遭遇形成更完整的节奏层（撕裂控距 / 远压 / 重踏逼退 / 相位贴身伏击），并继续验证 abyss_ 多成员与 ch5 频繁插步下的主线门禁稳定性。
 
@@ -5281,7 +5281,7 @@ Phase D（系统与质量）
   - **放弃了什么**：① 不写 v21→v22 迁移；② 不新增第五名 abyss_ 成员；③ `abyss_veil` 复用既有 phase+strike 结算；④ 通用 normal 魂价不动；⑤ mainline-table 仍以手工排除名单/历史腿维护（全面 ID 辅助待后续）。
 
   - **留了什么尾巴**：① 相位伏击与深渊三独占混编手感未真机走查；② abyss-deep-maw 池四名独占均为 weight 1；③ mainline-table 历史腿维护成本持续累积——高频插步下应考虑 ID 派生辅助层；④ E2E 已确认并回填（9960帧/166s/q=88/主线89/completed=true/0异常（切片75基线）；切片77实测12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0）。
-- **2026-11-08 W-E3 切片76 —— 虚空掠夺者入主线与副本：虚空断口第四独占，主线 106 步，v21 插步不写迁移** —— 提交 `65c9f21`（17 文件，+216 −40）
+- **2026-11-08 W-E3 切片76 —— 虚空掠夺者入主线与副本：虚空断口第四独占，主线 108 步，v21 插步不写迁移** —— 提交 `65c9f21`（17 文件，+216 −40）
 
   - **动机**：void_ 仅有三名独占（phantom 悬浮相位切 / riftwalker 长距裂隙突入 / lurker travel 快伏击），缺少中重型正面压迫者。补第四名贴地中重掠食者，让 void-broken-casket 遭遇在“相位/突入/伏击/重压”四层之间形成更完整节奏，并补齐 void_ 与 abyss_ 的成员规模平衡。
 
@@ -5291,13 +5291,13 @@ Phase D（系统与质量）
 
   - **放弃了什么**：① 不写 v21→v22 迁移；② 不新增第五名 void_ 成员；③ `void_rend` 复用既有 strike
 
-- **2026-11-08 W-E3 切片77 —— 深渊猎犬入主线与副本：深渊之颚第五独占，主线 106 步，v21 插步不写迁移** —— 提交 `3485cfb`（16 文件，+200 −26）
+- **2026-11-08 W-E3 切片77 —— 深渊猎犬入主线与副本：深渊之颚第五独占，主线 108 步，v21 插步不写迁移** —— 提交 `3485cfb`（16 文件，+200 −26）
 
   - **动机**：abyss_ 仅有四名独占（reaver 重撕控距 / watcher 远距凝视 / brute 慢重逼退 / shade 相位伏击），缺少贴地快速追击者。补第五名迅捷猎兽，让 abyss-deep-maw 遭遇在“重压/远压/相位/追击”之间形成更完整节奏，提升深渊段追咬压力但不引入新机制。
 
   - **做法**：① 新敌人 `abyss_hound`「深渊猎犬」（hp145 / 架势50 / damage 16 / speed 6.6 / aggroRange 28，贴地快速追击者，parts head+torso+legs，radius 0.41）—— BODY_PLANS / ENEMY_RESIST（fire -0.15 / gravity 0.2）/ ENEMY_DEFENSE(4) / ENEMY_MOVE_SETS[`abyss_pounce`,`flurry`,`thrust`] 全落盘；② 专属招 `abyss_pounce`「深渊扑袭」（非相位 travel lunge，windup 0.45s / strike 0.16s / recover 0.36s / reach 0.95 / cone 0.48 / band [0,0.9] / knock 3.5 / damage 1.1 / cooldown 2.8s / standoff [1.2,2.8] / travelSpeed 5.5），与 `void_lunge`（0.5s/knock2.5/travelSpeed5.0）、`abyss_veil`（phase blink 7m 相位伏击）、`prowl`（damage 0/cd12 标记式突进）分岔；③ `abyss-deep-maw` 遭遇池 +`abyss_hound` w1（不抢 stalker 打头）；④ 野外 abyss-maw 区新增三处 `abyss_hound` 出生点（-205,235 / -165,240 / -245,235），与幽影/蛮兽/撕掠者错开；⑤ `abyss-hound-hunt`（kills×3, ch5, waypoint -205,235, reward 22）插入 `abyss-shade-hunt` 后、`abyss-maw` 前（v21 `currentId`，不写迁移；`choice-void` 仍为 54）；⑥ i18n +4（2562→2618，zh/en 各 4：敌名 + 清剿三键）；⑦ 新增 `tests/abyss-hound.test.js`（
 
-- **2026-11-08 W-E3 切片78 —— 虚空刺蜇者入主线与副本：虚空断口第五独占，主线 106 步，v21 插步不写迁移** —— 提交 `8544e13`（16 文件，+192 −30）
+- **2026-11-08 W-E3 切片78 —— 虚空刺蜇者入主线与副本：虚空断口第五独占，主线 108 步，v21 插步不写迁移** —— 提交 `8544e13`（16 文件，+192 −30）
 
   - **动机**：void_ 仅有四名独占（phantom/riftwalker/lurker/marauder），缺少远程骚扰层。补第五名轻快远程刺蜇者，让 void-broken-casket 遭遇在“相位/突入/伏击/重压/远程骚扰”之间形成更完整节奏，与 abyss_ 五独占规模对齐。
 
@@ -5307,7 +5307,7 @@ Phase D（系统与质量）
 
   - **风险与后续**：① ch4 插步右移 `ch
 
-- **2026-11-08 W-E3 切片79 —— 深渊沼兽入主线与副本：深渊之颚第六独占，主线 106 步，v21 插步不写迁移** —— 提交 `7b0cd9b`（16 文件，+151 −28）
+- **2026-11-08 W-E3 切片79 —— 深渊沼兽入主线与副本：深渊之颚第六独占，主线 108 步，v21 插步不写迁移** —— 提交 `7b0cd9b`（16 文件，+151 −28）
 
   - **动机**：abyss_ 缺少区域封锁/地面否决角色。补第六名沉重缓慢的沼兽，用现成 hazard 机制制造持续危险区，与重压/远压/相位/追击形成互补。
 
@@ -5321,7 +5321,7 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 未做 boss/编排级扩展，仅完成独占常规模块；② `abyss-dee
 
-- **2026-11-08 W-E3 切片80 —— 虚空裂隙使入主线与副本：虚空断口第六独占，主线 106 步，v21 插步不写迁移** —— 提交 `aa80943`（16 文件，+140 −31）
+- **2026-11-08 W-E3 切片80 —— 虚空裂隙使入主线与副本：虚空断口第六独占，主线 108 步，v21 插步不写迁移** —— 提交 `aa80943`（16 文件，+140 −31）
 
   - **动机**：void_ 缺少“远程投射落点生成危险区”的布陷施压者。补第六名裂隙使，复用现成 ranged+hazard 机制（与 `brand` 同型不同参），让 void-broken-casket 在相位/突入/伏击/重压/远程骚扰之外增加区域否决层。
 
@@ -5331,7 +5331,7 @@ Phase D（系统与质量）
 
   - **风险与后续**：① ch4 插步继续右移 `choice-void`，mainline/qsr 历史腿维护成本累积；② ranged+haza
 
-- **2026-11-08 W-E3 切片81 —— 深渊裂痕使入主线与副本：深渊之颚第七独占，主线 106 步，v21 插步不写迁移** —— 提交 `7680bcf`（16 文件，+154 −27）
+- **2026-11-08 W-E3 切片81 —— 深渊裂痕使入主线与副本：深渊之颚第七独占，主线 108 步，v21 插步不写迁移** —— 提交 `7680bcf`（16 文件，+154 −27）
 
   - **动机**：abyss_ 缺少与 `void_ruptor` 对称的“远程投射落点生成危险区”施压者。补第七名裂痕使，复用现成 ranged+hazard 机制，让 abyss-deep-maw 增加远程区域否决层，与重压/远压/相位/追击/地面封锁互补。
 
@@ -5341,7 +5341,7 @@ Phase D（系统与质量）
 
   - **风险与后续**：① ranged+hazard 参数未做实机手感校准；② mainline-table 历史腿维护成本持续累积。rd 参数未做实机手感校准；③ 后续优先考虑 ID 派生辅助层。p-maw` 池低权重点缀；③ mainline-table 历史腿维护成本高，后续应优先考虑 ID 派生辅助层减少脆断。 结算（无新机制）；④ 通用 normal 魂价不动；⑤ mainline-table 仍手工维护排除名单/历
 
-- **2026-11-08 W-E3 切片82 —— 虚空裂渊者入主线与副本：虚空断口第七独占，主线 106 步，v21 插步不写迁移** —— 提交 `53cf3a1`（16 文件，+173 −32）
+- **2026-11-08 W-E3 切片82 —— 虚空裂渊者入主线与副本：虚空断口第七独占，主线 108 步，v21 插步不写迁移** —— 提交 `53cf3a1`（16 文件，+173 −32）
 
   - **动机**：void_ 缺少与 `abyss_mire` 对称的近身地面危险区封锁者。补第七名裂渊者，复用现成 hazard 机制（非 ranged/非相位），让 void-broken-casket 在远程布陷之外增加近身区域否决层，与 abyss_ 七独占规模对齐。
 
@@ -5353,7 +5353,7 @@ Phase D（系统与质量）
 
   - **留了什么尾巴**：① ch4 插步再次移动 `choice-void`，脆弱索引断言需持续维护（后续应优先转为基于 ID 的派生断言）；② 重压宽撕与幻影/裂隙行者/潜伏者混编手感未真机走查；③ void-broken-casket 池四名独占均为 weight 1（点缀）；④ E2E 已确认并回填（10680帧/17
 
-- **2026-11-08 W-E3 切片83 —— 深渊噬颚兽入主线与副本：深渊之颚第八独占，主线 106 步，v21 插步不写迁移** —— 提交 `ee91681`（16 文件，+156 −30）
+- **2026-11-08 W-E3 切片83 —— 深渊噬颚兽入主线与副本：深渊之颚第八独占，主线 108 步，v21 插步不写迁移** —— 提交 `ee91681`（16 文件，+156 −30）
 
   - **动机**：abyss_ 需要更强的近身追咬压迫角色，与 ranged/hazard/phase/重压层互补。补第八名噬颚兽，使用现成短距 travel lunge 机制（无新系统）。
 
@@ -5364,7 +5364,7 @@ Phase D（系统与质量）
   - **风险与后续**：① 追咬参数未做实机手感校准；② mainline-table 历史腿维护成本持续累积。8s/q=94/主线95/ch5/completed=true/exceptions=0）。
 
 
-- **2026-11-08 W-E3 切片84 —— 虚空残魂入主线与副本：虚空断口第八独占，主线 106 步，v21 插步不写迁移** —— 提交 `6a54634`（16 文件，+158 −35）
+- **2026-11-08 W-E3 切片84 —— 虚空残魂入主线与副本：虚空断口第八独占，主线 108 步，v21 插步不写迁移** —— 提交 `6a54634`（16 文件，+158 −35）
 
   - **动机**：void_ 需要与 `abyss_shade` 对称的相位游猎压迫角色。补第八名残魂，复用现成 `phase` 机制（无新系统），与 abyss_ 八独占规模对齐。
 
@@ -5374,7 +5374,7 @@ Phase D（系统与质量）
 
   - **风险与后续**：① phase 参数未做实机手感校准；② `choice-void`/历史腿维护成本累积。
 
-- **2026-11-08 W-E3 切片85 —— 深渊空壳入主线与副本：深渊之颚第九独占，主线 106 步，v21 插步不写迁移** —— 提交 `3ced821`（16 文件，+155 −32）
+- **2026-11-08 W-E3 切片85 —— 深渊空壳入主线与副本：深渊之颚第九独占，主线 108 步，v21 插步不写迁移** —— 提交 `3ced821`（16 文件，+155 −32）
 
   - **动机**：abyss_ 在第八独占（噬颚兽/travel 重咬）后仍缺少轻型远程汲取压迫角色。补第九名空壳，复用既有 ranged（非 hazard）机制（无新系统），与 `abyss_gaze`/近战追咬层分岔。
 
@@ -5396,7 +5396,17 @@ Phase D（系统与质量）
 
 
 
-- **2026-11-10 W-E3 切片96 —— 幽暗鬼火入主线与副本：幽暗林地第六独占，主线 106 步，v21 插步不写迁移** —— 提交 `932f48b`（17 文件，+161 −35）
+- **2026-11-10 W-E3 切片97 —— 幽暗恐惧者/辉煌天使入主线与副本：gloom/radiant 第七独占，主线 108 步，v21 插步不写迁移** —— 提交 `3d198b6`（18 文件，+286 −38）
+
+  - **动机**：四族独占矩阵 6/6/12/12 对称齐平之后，gloom/radiant 还停在六名之外；补两名各自的第七独占，对称矩阵推进到 7/7/12/12 —— 补的不只是数量，是当红的两种节奏：潜行伏击（gloom）与 hover 远压（radiant）。
+
+  - **做法**：① `gloom_horror`「幽暗恐惧者」（hp118/架势42/damage13/speed5.4/aggro30，parts head+torso+legs，radius 0.40，厚腿形伏击者而非 hover）+ 四表（BODY_PLANS scale 0.88 legs 形；ENEMY_DEFENSE 5；ENEMY_RESIST fire −0.25 / gravity 0.25（怕光、怕引力扰）；ENEMY_MOVE_SETS `gloom_grasp` / `shot` / `thrust`）；② 专属 `gloom_grasp`「幽暗鬼爪」（纯 ranged，windup0.5s/strike0.14s/recover0.38s/range9.5/minDist2.5/dmg0.82/cd2.4s/speed14.5），与 `gloom_whisper`（长距稳压）、`prowl` / `lurk` / `shadowstep`（travel 突进）分岔；③ `gloom-mist-crypt` 池 +w1（不抢 `gloom_wraith` 打头）；④ 野外出生点三处（170,170/300,180/110,210）；⑤ `gloom-horror-hunt`（kills×3,ch5,reward20）插 `gloom-wisp-hunt` 后、`chaos-boss` 前（v21 不写迁移；ch5 不移 `choice-void`=62）；⑥ `radiant_seraph`「辉煌天使」（hp150/架势54/damage17/speed4.6/aggro32，hover 0.4，parts head+torso，radius 0.50）+ 四表（ENEMY_DEFENSE 9；ENEMY_RESIST fire −0.18 / ice 0.18；ENEMY_MOVE_SETS `radiant_cry` / `shot` / `guard` / `thrust`）；⑦ 专属 `radiant_cry`「辉煌天使之吟」（圣光长矛，windup0.78s/strike0.18s/recover0.52s/range12.5/minDist2.8/dmg1.32/cd3.6s/speed16.5），与 `radiant_rebuke`（递增稳压）/ `radiant_flare` / `edict`（hazard）分岔；⑧ `radiant-dawn-hall` 池 +w1（不抢 `radiant_crawler` 打头）；⑨ 野外出生点三处（-340,-160/-210,-95/-260,-300）；⑩ `radiant-seraph-hunt`（kills×3,ch5,reward20）插 `radiant-vowkeeper-hunt` 后、`archon-hunt` 前（v21 不写迁移；ch5 不移 `choice-void`=62）；⑪ i18n +8（2638→2646）；⑫ `tests/gloom-horror.test.js` + `tests/radiant-seraph.test.js`（各 6 项）+ 维护（mainline-table 两腿与两处邻居断言、enemy-spawns-table 冻结名单、enemy-roster 对照、i18nKeyCount 2646、mainlineInsertions 两格、authoring-ledger 四十二步、quest-save-restore 108、content-volume-reading 108/113、tuning-barks 两名字）。
+
+  - **验证**：lint 0/0，test 全绿（398 文件 / 6001 项），build ✓。E2E：`12360帧/206s/q=108/主线109/ch5/completed=true/exceptions=0`。
+
+  - **风险与后续**：① 鬼爪/天使吟手感未实测校准；② 四族矩阵现在是 7/7/12/12 —— 继续横向加数量没有意义，下一阶段该把质量做上去（独占改命盘/口径），与 S96 的观察一致；③ 两名独占副本池均 w1 点缀；④ 历史 ADR 计数按仓库惯例整体抬升（106→108、111→113 行），i18n 历史键数注释保持原样不动。
+
+- **2026-11-10 W-E3 切片96 —— 幽暗鬼火入主线与副本：幽暗林地第六独占，主线 108 步，v21 插步不写迁移** —— 提交 `932f48b`（17 文件，+161 −35）
 
   - **动机**：radiant 6/6 对齐之后，幽暗林地仍停在五独占；补一个纯 ranged 无 hazard 的鬼火斥候，把 gloom 也抬到 6 —— 四族独占矩阵（gloom/radiant/void/abyss）全部 6+，对称不再欠账。
 
@@ -5406,7 +5416,7 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 低语手感未实测校准；② 四族独占对称齐平（gloom/radiant/void/abyss 各 6/6/12/12），下一阶段应该把质量做上去（独占改命盘/口径）而不是继续加数量。
 
-- **2026-11-10 W-E3 切片95 —— 辉煌誓守者入主线与副本：辉煌圣域第六独占，主线 106 步，v21 插步不写迁移** —— 提交 `c620536`（17 文件，+159 −34）
+- **2026-11-10 W-E3 切片95 —— 辉煌誓守者入主线与副本：辉煌圣域第六独占，主线 108 步，v21 插步不写迁移** —— 提交 `c620536`（17 文件，+159 −34）
 
   - **动机**：radiant_ 五独占（圣印者/大主教侧重 hazard）缺"纯远压施术者"——补一个纯 ranged 无 hazard 的持誓辉使，与 gloom/radiant 侧既有五只对齐到六。
 
@@ -5416,7 +5426,7 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 斥罚手感未实测校准；② radiant 六独占后，gloom/radiant 仍是 6 对 6（目标 6~8），abyss/void 已 12 —— 后续看板维持对称扩，不堆数量堆质量。
 
-- **2026-11-10 W-E3 切片94 —— 虚空缚裂者入主线与副本：虚空断口第十二独占，主线 106 步，v21 插步不写迁移** —— 提交 `a623907`（17 文件，+159 −33）
+- **2026-11-10 W-E3 切片94 —— 虚空缚裂者入主线与副本：虚空断口第十二独占，主线 108 步，v21 插步不写迁移** —— 提交 `a623907`（17 文件，+159 −33）
 
   - **动机**：abyss_ 第十二（深渊缚影者）之后，void_ 侧对称补齐：补齐"贴身连舞"流派——与 abyss_gloombinder 同族（`combo`/`comboWindup`），无新系统。
 
@@ -5427,7 +5437,7 @@ Phase D（系统与质量）
   - **风险与后续**：① 三连绝斩手感未实测校准；② abyss/void 两侧独占体系已各 12，下次应做降债/读数维护而非继续堆独占。
 
 
-- **2026-11-10 W-E3 切片93 —— 深渊缚影者入主线与副本：深渊之颚第十二独占，主线 106 步，v21 插步不写迁移** —— 提交 `a668c34`（17 文件，+158 −32）
+- **2026-11-10 W-E3 切片93 —— 深渊缚影者入主线与副本：深渊之颚第十二独占，主线 108 步，v21 插步不写迁移** —— 提交 `a668c34`（17 文件，+158 −32）
 
   - **动机**：void_ 第十一/abyss_ 第十二侧补齐，对称扩容不引入新系统；深渊侧从"重近战（撕裂者）/远压施术者（恸嚎者）"补齐"贴身连舞缚鞭手"。复用既有 `combo`/`comboWindup` 多段机制（与 `riot`/`mauler` 同族），无新系统。
 
@@ -5497,7 +5507,7 @@ Phase D（系统与质量）
 
   - **做法**：该用例改为 `todayChoice = MAINLINE.findIndex(...)` 派生并断言 `> 40`/恢复落点等于 `todayChoice`；保留 v21 锚点（`mainlineAt(20)[40]==choice-void`）与 `currentId` 恢复语义契约。
 
-  - **验证**：lint 0/0，test 全绿（385 文件 / 5748 项），build ✓。纯测试降债，无运行时/E2E 行为变化。- **2026-11-08 W-E3 切片91 —— 虚空号哭者入主线与副本：虚空断口第十一独占，主线 106 步，v21 插步不写迁移** —— 提交 `dc8eb93`（17 文件，+161 −36）
+  - **验证**：lint 0/0，test 全绿（385 文件 / 5748 项），build ✓。纯测试降债，无运行时/E2E 行为变化。- **2026-11-08 W-E3 切片91 —— 虚空号哭者入主线与副本：虚空断口第十一独占，主线 108 步，v21 插步不写迁移** —— 提交 `dc8eb93`（17 文件，+161 −36）
 
   - **动机**：void_ 与 abyss_ 第十一独占对称，补齐虚空侧远压施术者。复用既有 ranged（非 hazard）机制（无新系统）。
 
@@ -5505,7 +5515,7 @@ Phase D（系统与质量）
 
   - **验证**：lint 0/0，test 全绿（385 文件 / 5748 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
-  - **风险与后续**：① 号哭参数未做实机手感校准；② `choice-void`/历史腿维护成本累积；③ 下一步可做 S92 降债或继续对称扩容。- **2026-11-08 W-E3 切片90 —— 深渊恸嚎者入主线与副本：深渊之颚第十一独占，主线 106 步，v21 插步不写迁移** —— 提交 `83a4de2`（17 文件，+156 −31）
+  - **风险与后续**：① 号哭参数未做实机手感校准；② `choice-void`/历史腿维护成本累积；③ 下一步可做 S92 降债或继续对称扩容。- **2026-11-08 W-E3 切片90 —— 深渊恸嚎者入主线与副本：深渊之颚第十一独占，主线 108 步，v21 插步不写迁移** —— 提交 `83a4de2`（17 文件，+156 −31）
 
   - **动机**：abyss_ 第十独占（撕裂者/重近战）后补齐第十一名远压施术者，与 `abyss_gaze`/`abyss_drain` 形成分层 ranged 压迫。复用既有 ranged（非 hazard）机制（无新系统）。
 
@@ -5513,7 +5523,7 @@ Phase D（系统与质量）
 
   - **验证**：lint 0/0，test 全绿（384 文件 / 5741 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
-  - **风险与后续**：① 恸嚎参数未做实机手感校准；② 下一步 S91 拟做 void 第十一独占（ch4，右移 `choice-void` 60→61）保持对称。- **2026-11-08 W-E3 切片89 —— 虚空裂爪兽入主线与副本：虚空断口第十独占，主线 106 步，v21 插步不写迁移** —— 提交 `df38c43`（17 文件，+161 −34）
+  - **风险与后续**：① 恸嚎参数未做实机手感校准；② 下一步 S91 拟做 void 第十一独占（ch4，右移 `choice-void` 60→61）保持对称。- **2026-11-08 W-E3 切片89 —— 虚空裂爪兽入主线与副本：虚空断口第十独占，主线 108 步，v21 插步不写迁移** —— 提交 `df38c43`（17 文件，+161 −34）
 
   - **动机**：void_ 与 abyss_ 在第十独占上对称，补齐虚空侧重型近身撕裂压迫者。复用既有近战机制（无新系统）。
 
@@ -5521,7 +5531,7 @@ Phase D（系统与质量）
 
   - **验证**：lint 0/0，test 全绿（383 文件 / 5734 项），build ✓。E2E：12120帧/202s/q=106/主线107/ch5/completed=true/exceptions=0。
 
-  - **风险与后续**：① 裂爪参数未做实机手感校准；② `choice-void`/历史腿维护成本累积；③ 下一步可做 S90 降债（quest-save-restore/mainline 计数辅助）或继续安全内容扩容。- **2026-11-08 W-E3 切片88 —— 深渊撕裂者入主线与副本：深渊之颚第十独占，主线 106 步，v21 插步不写迁移** —— 提交 `2aee8f7`（17 文件，+156 −29）
+  - **风险与后续**：① 裂爪参数未做实机手感校准；② `choice-void`/历史腿维护成本累积；③ 下一步可做 S90 降债（quest-save-restore/mainline 计数辅助）或继续安全内容扩容。- **2026-11-08 W-E3 切片88 —— 深渊撕裂者入主线与副本：深渊之颚第十独占，主线 108 步，v21 插步不写迁移** —— 提交 `2aee8f7`（17 文件，+156 −29）
 
   - **动机**：abyss_ 在第九独占（空壳/ranged 汲取）后补齐第十名重型近身压迫者，形成 travel/ranged/hazard/phase/近战重压的更完整层次。复用既有近战机制（无新系统）。
 
@@ -5535,7 +5545,7 @@ Phase D（系统与质量）
 
   - **做法**：新增 `tests/helpers/mainlineInsertions.js` 集中导出 `POST_V21` 及派生排除名单（`AFTER_SLICE_40/41/42/45`），`mainline-table.test.js` 改为引用共享常量；行为/断言语义不变。后续插步在 helper 追加 id，并按需补齐 slice-specific 历史腿。
 
-  - **验证**：lint 0/0，test 全绿（381 文件 / 5720 项），build ✓。纯测试重构，无运行时/E2E 行为变化。- **2026-11-08 W-E3 切片86 —— 虚空汲魂者入主线与副本：虚空断口第九独占，主线 106 步，v21 插步不写迁移** —— 提交 `543c1dc`（16 文件，+160 −37）
+  - **验证**：lint 0/0，test 全绿（381 文件 / 5720 项），build ✓。纯测试重构，无运行时/E2E 行为变化。- **2026-11-08 W-E3 切片86 —— 虚空汲魂者入主线与副本：虚空断口第九独占，主线 108 步，v21 插步不写迁移** —— 提交 `543c1dc`（16 文件，+160 −37）
 
   - **动机**：void_ 在第八独占（残魂/phase）后仍缺少轻型远程汲魂压迫角色，与 abyss_ 第九独占（空壳/ranged）形成对称。补第九名汲魂者，复用既有 ranged（非 hazard）机制（无新系统）。
 
@@ -5559,7 +5569,7 @@ Phase D（系统与质量）
 
   - **动机**：用户授权"把项目的多个工作分支 / 各种 worktree 合并起来、综合集大成、合并到一个主分支；并轨的内容可能那边没有在做了，可以直接接手帮他把剩下的内容做完，不要等他了，即使他锁住了一些内容，你也不要管，直接帮他把那部分做完"。开工普查的结果与担心的不一样：**仓库里没有第二个分支**（`git branch -a` 只有 `main` / `origin` / `origin/main`），但挂着 **8 个游离 worktree**（全是 detached HEAD），其中 **5 个带未提交改动** —— 看上去就是"有一批活卡在那儿没人收尾"。
 
-  - **普查（逐件裁决，不靠"看着像已合并"就下结论）**：① **HEAD 归属**：7 个的 HEAD 是 `main` 的祖先（`git merge-base --is-ancestor` 为真）；只有 `3a-plane-wc2s9` 的 `71ce3e2`（B161 EOL 尺子）不在 main 的祖先链上 —— 但 main 上已有**等价且更完整**的实现（`tests/e2e-combat.test.js` 的 `读源` 尺子 + 同一道 "B161 普查" describe 块，886 行）。② **未提交改动**：逐文件比对 worktree 工作区与 main 的**内容**（不是看 diff 是否为空），再按**符号粒度**核对"这个行为在 main 上有没有" —— 结论是**每一件在 main 上都已有演进版**：`src/world/zoneBatching.js`（未跟踪新文件，229 行）→ main 248 行且导出是**严格超集**（多 `batchStaticsOf`）；`tests/zone-batching.test.js`（460 行）→ 589 行；`src/engine/drawCallBudget.js` 195 → 511 行（"上限落在**实测值**两侧带" → "上限落在**地板**两侧带"）；`scripts/perf-smoke.mjs` 415 → 817 行；`tests/arena-scripts.test.js`"入场标记集钉死：**九枚** entry 的落点" → main"**十九枚**"；`src/effects/PopCultureWave4VisualPass.js` 的内联算式 → main 抽成 `wave4FlashOpacity(this.pulse)`；`src/combat/Boss.js` 的 `startSlamTelegraph()` → main `startSlamTelegraph(entry)`；`tests/mainline-authoring-ledger.test.js` 的"78 步"断言早已过期（main 主线 106 步），其"边界见证"也已被 main 的 B162 版取代。⇒ **没有一件是 main 缺的**，用户担心的"并轨内容被锁住"在这批 worktree 上**并不存在**。③ **垃圾**：`3a-plane-b154` 的 `pb.txt`（`drawCallBudget.js` 头的乱码副本）、`.vite-b154/`（39 项 vite 缓存）、`cacheDir: '.vite-b154'`（本地缓存目录改写）—— 全是临时物。
+  - **普查（逐件裁决，不靠"看着像已合并"就下结论）**：① **HEAD 归属**：7 个的 HEAD 是 `main` 的祖先（`git merge-base --is-ancestor` 为真）；只有 `3a-plane-wc2s9` 的 `71ce3e2`（B161 EOL 尺子）不在 main 的祖先链上 —— 但 main 上已有**等价且更完整**的实现（`tests/e2e-combat.test.js` 的 `读源` 尺子 + 同一道 "B161 普查" describe 块，886 行）。② **未提交改动**：逐文件比对 worktree 工作区与 main 的**内容**（不是看 diff 是否为空），再按**符号粒度**核对"这个行为在 main 上有没有" —— 结论是**每一件在 main 上都已有演进版**：`src/world/zoneBatching.js`（未跟踪新文件，229 行）→ main 248 行且导出是**严格超集**（多 `batchStaticsOf`）；`tests/zone-batching.test.js`（460 行）→ 589 行；`src/engine/drawCallBudget.js` 195 → 511 行（"上限落在**实测值**两侧带" → "上限落在**地板**两侧带"）；`scripts/perf-smoke.mjs` 415 → 817 行；`tests/arena-scripts.test.js`"入场标记集钉死：**九枚** entry 的落点" → main"**十九枚**"；`src/effects/PopCultureWave4VisualPass.js` 的内联算式 → main 抽成 `wave4FlashOpacity(this.pulse)`；`src/combat/Boss.js` 的 `startSlamTelegraph()` → main `startSlamTelegraph(entry)`；`tests/mainline-authoring-ledger.test.js` 的"78 步"断言早已过期（main 主线 108 步），其"边界见证"也已被 main 的 B162 版取代。⇒ **没有一件是 main 缺的**，用户担心的"并轨内容被锁住"在这批 worktree 上**并不存在**。③ **垃圾**：`3a-plane-b154` 的 `pb.txt`（`drawCallBudget.js` 头的乱码副本）、`.vite-b154/`（39 项 vite 缓存）、`cacheDir: '.vite-b154'`（本地缓存目录改写）—— 全是临时物。
 
   - **做法**：① **先归档再删**：8 个 worktree 的 HEAD / diff / 未跟踪文件全文落盘到 `.tmp-archive/planes-2026-11-09/`（含 `MANIFEST.json`），逐个核对非空后才动手 —— 删之前留一份可回放的证据；② `git worktree remove --force` 逐个移除 + `git worktree prune`；③ `D:/3a-scratch-wa6s8`（W-A6 切片8 的变异臂证据目录，指针指向已移除的 worktree）同样先归档再清理 —— 工作区外目录的删除被安全策略拦下，保留（已完整归档，且它在仓库外，不影响收敛）。
 
