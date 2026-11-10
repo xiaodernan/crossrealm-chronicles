@@ -1151,10 +1151,51 @@ body {
   border-radius: 4px;
   font-size: 0.82rem;
   color: #ffcc44;
+  /* 名字与情报两行（W-G1 切片1）：情报行只在研究过之后才出现，
+     所以这里不能用固定高度 —— 让盒子按行数自己长 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
 }
 
 .lock-target.hidden {
   display: none;
+}
+
+.lock-name {
+  line-height: 1.2;
+}
+
+/* 情报行的三档：怕（暖）/ 抗（冷）/ 未解锁（暗）。
+   颜色不承担信息 —— 每一格都自带文字（"怕"/"抗"），色只是加速辨认 */
+.lock-intel {
+  display: flex;
+  gap: 8px;
+  font-size: 0.72rem;
+  line-height: 1.15;
+}
+
+.lock-intel.hidden {
+  display: none;
+}
+
+.lock-intel-chip.is-weak {
+  color: #ff9a6b;
+}
+
+.lock-intel-chip.is-resist {
+  color: #7fd4ff;
+}
+
+.lock-intel-chip.is-flat {
+  color: #9aa3b2;
+}
+
+.lock-intel-chip.is-locked {
+  color: #7b818c;
+  font-style: italic;
 }
 
 #zone-banner {

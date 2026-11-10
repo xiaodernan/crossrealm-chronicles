@@ -423,6 +423,11 @@ export const STRINGS_ZH = Object.freeze({
   bestiary_elem_fire: "火",
   bestiary_elem_ice: "冰",
   bestiary_elem_gravity: "引力",
+  // 锁定条上的战斗情报（W-G1 切片1）—— 只有"熟悉"档及以上才给，句式比图鉴页更短：
+  // 这三句是打架时瞥一眼的，不是翻书时读的
+  bestiary_intel_weak_fmt: "怕${elem} ${pct}%",
+  bestiary_intel_resist_fmt: "抗${elem} ${pct}%",
+  bestiary_intel_locked_fmt: "属性未知 · 熟悉需 ${n} 次",
 
   // 赛季（W-F2 切片1）—— 名册与词缀 id 与服务端 season-service 逐字对齐，这里只有读法
   season_ember_name: "灰烬回响",

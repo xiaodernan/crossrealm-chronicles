@@ -422,6 +422,11 @@ export const STRINGS_EN = Object.freeze({
   bestiary_elem_fire: "fire",
   bestiary_elem_ice: "ice",
   bestiary_elem_gravity: "gravity",
+  // Lock-on combat intel (W-G1 slice 1) — only "studied" and above reveal it; shorter than
+  // the journal's phrasing on purpose: this is glanced at mid-fight, not read.
+  bestiary_intel_weak_fmt: "weak ${elem} ${pct}%",
+  bestiary_intel_resist_fmt: "resists ${elem} ${pct}%",
+  bestiary_intel_locked_fmt: "traits unknown · study ${n} kills",
 
   // Seasons (W-F2 slice 1) — ids mirror server/season-service verbatim; only the reading layer lives here.
   season_ember_name: "Ember Echo",

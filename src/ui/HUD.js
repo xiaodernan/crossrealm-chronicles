@@ -13,6 +13,7 @@ import { objectiveTitle } from '../content/objectives.js';
 
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 import { applyBarTheme } from './barTheme.js';
+import { lockIntelOf, INTEL_KILLS } from './lockIntel.js';
 /** 区域横幅计时分组（连播两个区域时先撤旧的） */
 const ZONE_BANNER_TAG = 'hud-zone-banner';
 /** 连击终结闪光的分组 */
@@ -296,7 +297,11 @@ buildHUD() {
       <div id="charge-wrap" class="charge-wrap hidden" role="progressbar" data-i18n-aria="hud_aria_charge" aria-valuemin="0" aria-valuemax="100">
         <div id="charge-indicator" class="charge-fill"></div>
       </div>
-      <div id="lock-target" class="lock-target hidden" aria-hidden="true"></div>
+      <div id="lock-target" class="lock-target hidden" aria-hidden="true">
+        <span id="lock-name" class="lock-name"></span>
+        <!-- 战斗情报（W-G1 切片1）：只有图鉴研究过的那一类才给，见 lockIntel.js -->
+        <span id="lock-intel" class="lock-intel hidden"></span>
+      </div>
       <!-- 位面试炼的随身读数（W-F3 切片4）：只在它跑着时露出来。
            为什么要有：限时是这件事的全部压力，而"剩余多少秒"此前只能靠打开日志页看 ——
            玩家在打架时不会去翻页。 -->
@@ -440,6 +445,10 @@ buildHUD() {
     this._renderInputDevice();
     this.updateDiscoveryCount();
     this._refreshCombo?.();
+    // W-G1 切片1：情报行里的元素名与"还差几次"都是 t() 现展开的 ——
+    // 换语言不会派发事件，所以在这里把签名作废再重画一遍
+    this._lockInfoSig = null;
+    this._renderLockInfo(this.game.player?.combat?.lockTarget);
   }
 
   /** 武器显示格：图标按武器 id 现算 + 名字按文案键现展开（W-D2 切片35） */
@@ -917,6 +926,66 @@ buildHUD() {
     el.classList.toggle('is-urgent', st.secondsLeft <= 10);
   }
 
+  /**
+   * 锁定条的名字 + 战斗情报（W-G1 切片1）。
+   *
+   * ## 为什么名字和情报挤在一个方法里
+   *
+   * 它们是**同一个盒子里的两行**，而且情报的显隐决定了盒子的行数 ——
+   * 拆成两个方法就得分两次碰 DOM，还得各自维持一份"上次画的是谁"。
+   * 一个签名（类型 + 名字 + 情报内容）就够描述这一整块，所以只留一份缓存。
+   *
+   * ## 为什么每帧调用却不每帧写
+   *
+   * `update()` 是逐帧跑的，而这一块的内容**只在换目标 / 目标升级 / 换语言时变**：
+   * 名字是出生时定死的，情报来自图鉴击杀账。签名没变就直接返回 ——
+   * 否则每帧 `textContent =` 一次会让浏览器白白重排这一格 60 次/秒。
+   *
+   * ## 为什么没有目标时也要走一遍
+   *
+   * 解锁后的那一格是"没有就不显示"，而 `lock` 变 null 的那一帧必须把上一只的情报
+   * 擦掉 —— 否则放开锁定之后，屏幕上还挂着刚才那只的弱点。
+   */
+  _renderLockInfo(lock) {
+    const nameEl = document.getElementById('lock-name');
+    const intelEl = document.getElementById('lock-intel');
+    if (!nameEl || !intelEl) return;
+    const target = lock?.alive ? lock : null;
+    const entry = target ? this.game.bestiary?.entryOf?.(target.type) : null;
+    const intel = lockIntelOf(entry);
+    const sig = target
+      ? `${target.type}|${target.name}|${intel.known}|${intel.weak?.id ?? ''}|${intel.resist?.id ?? ''}`
+      : '';
+    if (sig === this._lockInfoSig) return;
+    this._lockInfoSig = sig;
+
+    nameEl.textContent = target ? `🔒 ${target.name}` : '';
+    intelEl.textContent = '';
+    if (!entry) {
+      intelEl.classList.add('hidden');
+      return;
+    }
+    intelEl.classList.remove('hidden');
+    if (!intel.known) {
+      // 没研究过就只说"还差多少"，不剧透任何一系 —— 情报本身就是图鉴的回报
+      const span = document.createElement('span');
+      span.className = 'lock-intel-chip is-locked';
+      span.textContent = t('bestiary_intel_locked_fmt', { n: INTEL_KILLS });
+      intelEl.appendChild(span);
+      return;
+    }
+    const chips = [];
+    if (intel.weak) chips.push({ kind: 'weak', text: t('bestiary_intel_weak_fmt', { elem: t(intel.weak.label), pct: intel.weak.pct }) });
+    if (intel.resist) chips.push({ kind: 'resist', text: t('bestiary_intel_resist_fmt', { elem: t(intel.resist.label), pct: intel.resist.pct }) });
+    if (chips.length === 0) chips.push({ kind: 'flat', text: t('bestiary_no_affinity') });
+    for (const chip of chips) {
+      const span = document.createElement('span');
+      span.className = `lock-intel-chip is-${chip.kind}`;
+      span.textContent = chip.text;
+      intelEl.appendChild(span);
+    }
+  }
+
   update(_dt) {
     this.updateInputDevice();
     const p = this.game.player.position;
@@ -943,13 +1012,13 @@ buildHUD() {
     const lockRow = document.getElementById('lock-row');
     if (lock?.alive) {
       lockEl.classList.remove('hidden');
-      lockEl.textContent = `🔒 ${lock.name}`;
       lockRow.classList.remove('hidden');
       document.getElementById('posture-bar').style.width = `${(lock.posture / lock.maxPosture) * 100}%`;
     } else {
       lockEl.classList.add('hidden');
       lockRow.classList.add('hidden');
     }
+    this._renderLockInfo(lock);
 
     this.frameCount = (this.frameCount || 0) + 1;
     this.fpsTimer = (this.fpsTimer || 0) + _dt;
