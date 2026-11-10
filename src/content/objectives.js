@@ -1360,6 +1360,19 @@ export const OBJECTIVES = [
     journal: 'obj_gloom_shade_hunt_journal',
   },
   {
+    // W-E3 切片96：幽暗鬼火进主线 —— 幽暗第六独占，插在影煞后、chaos-boss 前（ch5，v21 不写迁移，不移 choice-void）。
+    id: 'gloom-wisp-hunt',
+    title: 'obj_gloom_wisp_hunt_title',
+    desc: 'obj_gloom_wisp_hunt_desc',
+    type: 'kills',
+    enemyType: 'gloom_wisp',
+    target: 3,
+    chapter: 5,
+    waypoint: { x: 160, z: 150, label: 'enemy_name_gloom_wisp' },
+    reward: 20,
+    journal: 'obj_gloom_wisp_hunt_journal',
+  },
+  {
     id: 'chaos-boss',
     title: bossById('chaos-overlord').shortNameKey,
     desc: 'obj_chaos_boss_desc',

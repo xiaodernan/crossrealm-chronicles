@@ -69,6 +69,8 @@ export const BODY_PLANS = {
   gloom_warden:   { scale: 1.16, parts: ['head', 'torso', 'legs'], radius: 0.56 },
   /** W-E3 切片68：幽暗影煞 —— 贴地的快影，比掠行兽更轻（它靠的是"先到"而不是"更重"） */
   gloom_shade:    { scale: 0.88, parts: ['head', 'torso', 'legs'], radius: 0.38 },
+  /** W-E3 切片96：幽暗鬼火 —— 幽暗林地飘忽的鬼火体格。 */
+  gloom_wisp:     { scale: 0.82, parts: ['head', 'torso'], radius: 0.36, hover: 0.6 },
   /** W-E3 切片69：虚空幻影 —— 悬浮的裂隙残影，比怨影更实在一点，靠相位错位贴身 */
   void_phantom:   { scale: 0.92, parts: ['head', 'torso'], radius: 0.40, hover: 0.6 },
   /** W-E3 切片72：虚空裂隙行者 —— 贴地的裂隙穿行者，比幻影更实在，靠长距裂隙步突入 */
@@ -180,6 +182,8 @@ export const ENEMY_RESIST = {
   gloom_warden:   { ice: 0.2, gravity: 0.1 },
   /** 幽暗影煞：快影怕火（影子见不得光）；引力拽不住它那一身轻 */
   gloom_shade:    { fire: -0.2, gravity: 0.25 },
+  /** W-E3 切片96：幽暗鬼火 —— 怕光，引力可扰 */
+  gloom_wisp:     { fire: -0.2, gravity: 0.2 },
   /** 虚空幻影：裂隙里扯出来的残影，怕火；引力抓不稳虚体 */
   void_phantom:   { fire: -0.2, gravity: 0.3 },
   /** 深渊撕掠者：深渊热流里长出的猎手，怕火；寒意反而啃得慢 */
@@ -386,6 +390,8 @@ export const ENEMY_DEFENSE = {
   crawler: 8, knight: 22, dancer: 6,
   hexer: 8, juggernaut: 24,
   gloom_wraith: 4, gloom_stalker: 3, gloom_sentinel: 14, gloom_warden: 16, gloom_shade: 5,
+  /** W-E3 切片96：幽暗鬼火 */
+  gloom_wisp: 6,
   void_phantom: 4,
   void_riftwalker: 5,
   void_lurker: 4,
@@ -666,6 +672,17 @@ export const ENEMY_MOVES = {
     band: [0.05, 1.15],
     damage: 1.1, cooldown: 3.6, weight: 2, knock: 7.5,
     telegraph: { color: 0x88aaff },
+  },
+  /**
+   * 幽暗低语（幽暗鬼火专属招）—— W-E3 切片96。
+   * 纯暗弹：幽暗林地唯一的"无 hazard 预警的普通 ranged"，与 `beacon`（ranged+hazard）、
+   * `haunt`/`shadowstep`（blink 接近）分岔。
+   */
+  gloom_whisper: {
+    name: '幽暗低语', windup: 0.55, strike: 0.15, recover: 0.4, cone: -2,
+    range: 10.5, minDist: 2.2,
+    damage: 0.88, cooldown: 2.7, weight: 2, ranged: { speed: 15, color: 0x7766aa },
+    telegraph: { color: 0x443355 },
   },
   ram: {
     // 践踏冲撞（魔法构装体，W-B7 切片6）：构装体的第一条专属招 —— 大块头整具撞上来，`knock` 推玩家。
@@ -1589,6 +1606,8 @@ export const ENEMY_MOVE_SETS = {
   gloom_warden:   ['lurk', 'sweep', 'cleave', 'guard'],
   /** W-E3 切片68：幽暗影煞 —— 影袭（短距相位错位）+ 快刺 + 横扫 */
   gloom_shade:    ['shadowstep', 'thrust', 'sweep', 'flurry'],
+  /** W-E3 切片96：幽暗鬼火 —— 幽暗低语（远压）+ 射击 + 刺击 */
+  gloom_wisp:     ['gloom_whisper', 'shot', 'thrust'],
   /** W-E3 切片69：虚空幻影 —— 相位斩（短距相位切入）+ 刺击 + 横扫 */
   void_phantom:   ['phase_cut', 'thrust', 'sweep'],
   /** W-E3 切片72：虚空裂隙行者 —— 裂隙步（长距相位突入）+ 劈砍 + 横扫 */

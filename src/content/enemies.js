@@ -72,6 +72,10 @@ export const ENEMY_ROSTER = {
    */
   gloom_shade: { name: 'enemy_name_gloom_shade', hp: 140, posture: 52, damage: 18, speed: 5.8, aggroRange: 24, color: 0x2a2a44 },
   /**
+   * W-E3 切片96：幽暗鬼火 —— 幽暗林地飘忽的鬼火斥候。
+   */
+  gloom_wisp: { name: 'enemy_name_gloom_wisp', hp: 110, posture: 40, damage: 13, speed: 5.6, aggroRange: 28, color: 0x6a5a9a },
+  /**
    * W-E3 切片69：虚空幻影 —— 虚空断口里扯出来的悬浮残影。
    * 比怨影更实在（hp150/架势54）、攻更重（17），靠相位斩（5m 短距错位）贴身连切，
    * 不像怨影那样从 10 米外慢慢背刺。与 sentinel（远程炮台）、crawler（贴地快爪）分工不同。

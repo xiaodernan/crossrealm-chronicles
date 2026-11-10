@@ -136,6 +136,10 @@ export const ENEMY_SPAWNS = Object.freeze([
   { type: 'gloom_shade', x: 100, z: 60 },
   { type: 'gloom_shade', x: 180, z: 160 },
   { type: 'gloom_shade', x: 260, z: 140 },
+  // 幽暗鬼火（三点，W-E3 切片96）—— 飘忽的斥候，与萤火/掠行兽错开。
+  { type: 'gloom_wisp', x: 160, z: 150 },
+  { type: 'gloom_wisp', x: 280, z: 200 },
+  { type: 'gloom_wisp', x: 90, z: 90 },
 
   // ── 虚空断口（void，中心 ~0,220，半径 130）── W-E3 切片69
   // 虚空幻影（三点）—— 悬浮残影，分散在断口周边，与 wraith/crawler 出生带错开。

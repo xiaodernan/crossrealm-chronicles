@@ -94,6 +94,8 @@ export const DUNGEON_ENCOUNTERS = {
       { type: 'gloom_warden', weight: 1 },
       // W-E3 切片68：幽暗影煞 —— 迷雾里最快的伏击者，权重最低（遭遇要靠"突然"而不是"常驻"）
       { type: 'gloom_shade', weight: 1 },
+      // W-E3 切片96：幽暗鬼火 —— 飘忽斥候，权重低
+      { type: 'gloom_wisp', weight: 1 },
     ],
     group: { min: 2, max: 3 },
   },

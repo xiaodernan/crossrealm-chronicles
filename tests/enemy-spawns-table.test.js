@@ -50,6 +50,8 @@ const 冻结 = [
   ['gloom_warden', 60, 0], ['gloom_warden', 60, 80], ['gloom_warden', 240, 240],
   // W-E3 切片68：幽暗影煞（三点野外出生点）
   ['gloom_shade', 100, 60], ['gloom_shade', 180, 160], ['gloom_shade', 260, 140],
+  // W-E3 切片96：幽暗鬼火（三点野外出生点）
+  ['gloom_wisp', 160, 150], ['gloom_wisp', 280, 200], ['gloom_wisp', 90, 90],
   // W-E3 切片69：虚空幻影（三点野外出生点）
   ['void_phantom', -10, 190], ['void_phantom', 50, 230], ['void_phantom', -60, 220],
   // W-E3 切片72：虚空裂隙行者（三点野外出生点）
