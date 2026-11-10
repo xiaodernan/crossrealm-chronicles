@@ -5396,6 +5396,15 @@ Phase D（系统与质量）
 
 
 
+- **2026-11-10 W-X8（在线伙伴服务）—— 击杀 Boss 提交通关记录：Boss-defeated 双发（遥测 + 排行榜），W-X 线至此闭环** —— 提交 `a5f025c`（3 文件，+66 −1）
+
+  - **起因**：开关（`b647c3b`）和只读榜（`d844a51`）都通了，但**榜上永远只有种子** —— 没人写进来。在线伙伴服务整条线的最后一格：让每一场击杀都能留下自己那一笔记录。
+
+  - **做法**：① `Game.js` 构造函数压 `this.runStartedAt`（`typeof performance !== 'undefined'` 守卫，node 单测不炸）；② 在 W-X2 预留的 `boss-defeated` 遥测位上**同一个 handler 里**再走 `onlineServices.submitRun({runner:'adventurer', bossId, clearTimeMs, chapter})`：`clearTimeMs` = 本次 `runStartedAt` → 现在的毫秒数（`Math.max(0, …)` 夹下界），`chapter` = `this.quests?.chapter ?? 1`，`bossId` 读 `e?.detail?.bossId`，runner 固定 `'adventurer'`（游戏里没有玩家姓名输入 —— 演示榜对姓名无要求）；③ 走**同一套默认关闭 / 吞错 / 1.5s 超时**曲线（开关没开 = 零请求；网络差 = 失败吞掉、零打扰）；④ `ONLINE_SERVICES.md` 同步「已接入」；⑤ 新增 `tests/online-submit-run.test.js`（6 项 source 断言：构造函数压 `runStartedAt` / 遥测仍先发 / `submitRun` 四字段 / `clearTimeMs` 夹下界 + `Math.max(0,` 守卫 / `OnlineServices.submitRun` 存在）。
+
+  - **验证**：lint 0/0，test 全绿（**401 文件 / 6021 项**），build ✓。E2E：`12360帧/206s/q=108/主线109/ch5/completed=true/exceptions=0` —— 与 S97/W-X6/W-X7 **同读数**：开关默认关闭、e2e 不开网络，唯一增量是 boss-defeated 多了一个不发出去的调用构造，帧成本为零。
+
+  - **风险与后续**：① `clearTimeMs` 只是"本次页面进入到击杀"的毫秒数（演示榜仅供排序，**不声称是通关时长**）—— 要真通关时长得先立一个全主线计时器，那是模块边界 + 存档语义的独立切片；② 在线线（W-X1→W-X8）至此**收尾**：五模块 + Docker/compose + CI + 客户端 + 默认关闭遥测 + 开关 + 只读榜 + 提交 —— 入口（搭建 → 接入 → 部署 → 关闭 → 开关 → 面板 → 提交）全环打通，`ONLINE_SERVICES.md` 是这份线的使用/测试/部署/开关全档说明书；③ bossId 展示、runner 固定文本这些"演示 demo 语义"都是**刻意的**——在线伙伴服务是可选的演示后端，不是社交平台。
 - **2026-11-10 W-X7（在线伙伴服务）—— 设置页「在线排行榜」只读面板：按下才拉、行走 textContent** —— 提交 `d844a51`（7 文件，+142 −2）
 
   - **起因**：W-X6（`b647c3b`）让玩家能亲手翻开开关，但翻过去之后**什么也看不见** —— 在线线闭环差最后一格：一个玩家能在游戏里看见的东西。在线伙伴服务自 W-X1 就有的排行榜（种子三条：影缚者 / 虚空 · 位面行者 · Ch4·5）一直只有 API 没有脸。
