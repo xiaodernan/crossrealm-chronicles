@@ -7,15 +7,13 @@
  * formatLeaderboardEntry 的输出被面板放进 textContent（index.html 那一格也不含用户文本）。
  */
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readSrc } from './helpers/srcText.js';
 import { formatClearTimeMs, formatLeaderboardEntry } from '../src/online/leaderboardFormat.js';
 import { STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 
-const ROOT = process.cwd();
-const PANEL = readFileSync(join(ROOT, 'src/ui/SettingsPanel.js'), 'utf8');
-const INDEX_HTML = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const PANEL = readSrc('src/ui/SettingsPanel.js');
+const INDEX_HTML = readSrc('index.html');
 
 describe('formatClearTimeMs', () => {
   it('mm:ss under 1h, h:mm:ss above', () => {
