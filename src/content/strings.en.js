@@ -1390,6 +1390,16 @@ export const STRINGS_EN = Object.freeze({
   ach_echo_starport_desc: "Resonate with every starport trade-route echo",
   ach_echo_wave4_title: "Four Series Aligned",
   ach_echo_wave4_desc: "Resonate with all four Wave4 series",
+  ach_echo_gloom_title: "Mist Resonance",
+  ach_echo_gloom_desc: "Resonate with every gloom echo",
+  ach_echo_radiant_title: "Radiant Chorus",
+  ach_echo_radiant_desc: "Resonate with every radiant echo",
+  ach_echo_voidmaw_title: "Maw Whisper",
+  ach_echo_voidmaw_desc: "Resonate with every maw echo",
+  ach_echo_abysssalt_title: "Salt of the Deep",
+  ach_echo_abysssalt_desc: "Resonate with every deep-jaw echo",
+  ach_echo_original_title: "Original Voices",
+  ach_echo_original_desc: "Resonate with every gloom, radiant, maw and deep echo",
 
   // 支线任务文案（W-D2 切片16k：标题/描述/日志全是键）
   sq_side_wisp_12_title: "Soulfire Wisp Hunter",

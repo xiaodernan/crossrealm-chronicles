@@ -41,6 +41,11 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-cosmic', title: 'ach_echo_cosmic_title', desc: 'ach_echo_cosmic_desc', check: (s) => (s.echoCosmic ?? 0) >= 3 },
   { id: 'echo-starport', title: 'ach_echo_starport_title', desc: 'ach_echo_starport_desc', check: (s) => (s.echoStarport ?? 0) >= 3 },
   { id: 'echo-wave4', title: 'ach_echo_wave4_title', desc: 'ach_echo_wave4_desc', check: (s) => (s.echoCyber ?? 0) >= 3 && (s.echoSamurai ?? 0) >= 3 && (s.echoCosmic ?? 0) >= 3 && (s.echoStarport ?? 0) >= 3 },
+  { id: 'echo-gloom', title: 'ach_echo_gloom_title', desc: 'ach_echo_gloom_desc', check: (s) => (s.echoGloom ?? 0) >= 3 },
+  { id: 'echo-radiant', title: 'ach_echo_radiant_title', desc: 'ach_echo_radiant_desc', check: (s) => (s.echoRadiant ?? 0) >= 3 },
+  { id: 'echo-voidmaw', title: 'ach_echo_voidmaw_title', desc: 'ach_echo_voidmaw_desc', check: (s) => (s.echoVoidMaw ?? 0) >= 3 },
+  { id: 'echo-abysssalt', title: 'ach_echo_abysssalt_title', desc: 'ach_echo_abysssalt_desc', check: (s) => (s.echoAbysssalt ?? 0) >= 3 },
+  { id: 'echo-original', title: 'ach_echo_original_title', desc: 'ach_echo_original_desc', check: (s) => (s.echoGloom ?? 0) >= 3 && (s.echoRadiant ?? 0) >= 3 && (s.echoVoidMaw ?? 0) >= 3 && (s.echoAbysssalt ?? 0) >= 3 },
 ];
 
 /**
@@ -58,6 +63,10 @@ export const ECHO_FRANCHISE_BUCKETS = [
   ['echoSamurai', FRANCHISE.SAMURAI],
   ['echoCosmic', FRANCHISE.COSMIC],
   ['echoStarport', FRANCHISE.STARPORT],
+  ['echoGloom', FRANCHISE.GLOOM],
+  ['echoRadiant', FRANCHISE.RADIANT],
+  ['echoVoidMaw', FRANCHISE.VOIDMAW],
+  ['echoAbysssalt', FRANCHISE.ABYSSSALT],
 ];
 
 // 合并导出（供外部直接使用）

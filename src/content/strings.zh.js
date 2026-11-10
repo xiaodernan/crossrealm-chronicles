@@ -1391,6 +1391,16 @@ export const STRINGS_ZH = Object.freeze({
   ach_echo_starport_desc: '共鸣全部星港商路回声',
   ach_echo_wave4_title: '四系同频',
   ach_echo_wave4_desc: 'Wave4 四系列全共鸣',
+  ach_echo_gloom_title: '薄暮同频',
+  ach_echo_gloom_desc: '共鸣全部薄暮回响',
+  ach_echo_radiant_title: '辉煌齐鸣',
+  ach_echo_radiant_desc: '共鸣全部辉煌残响',
+  ach_echo_voidmaw_title: '断口耳语',
+  ach_echo_voidmaw_desc: '共鸣全部断口残响',
+  ach_echo_abysssalt_title: '深颚咸鸣',
+  ach_echo_abysssalt_desc: '共鸣全部深颚咸响',
+  ach_echo_original_title: '原声齐鸣',
+  ach_echo_original_desc: '共鸣全部薄暮回响 / 辉煌残响 / 断口残响 / 深颚咸响',
 
   // 支线任务文案（W-D2 切片16k：标题/描述/日志全是键）
   sq_side_wisp_12_title: '魂火萤猎人',
