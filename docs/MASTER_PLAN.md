@@ -5432,6 +5432,15 @@ Phase D（系统与质量）
   - **验证**：lint 0/0，test 全绿（**404 文件 / 6049 项**），build ✓。E2E：`12600帧/210s/q=110/主线111/ch5/completed=true/exceptions=0` —— 与 S98 **同读数**：两栋新建筑（静移态，无帧成本）只在 world build 造一次。
 
   - **风险与后续**：① 两个新母题目前各只有**一**条回声 —— 不满足"系列 tour"（`side-gloom-tour` 要 ≥ 3 条）的条件；想给它们办巡礼任务，得先各扩到 3 条回声；② 两处新母题的显示文案仍走既有 `franchiseLabel`，无 name-escape 样式风险；③ POI 几何为朴素构造盒/柱，未入**共享库**（与 Wave3/4 同口径，挂 zone.group、随位面释放）；④ Choice-void / 存档版本 / 主线步数**一样没动**。
+- **2026-11-10 W-X10（在线伙伴服务）—— 设置页「在线服务连通性自检」一键 ping /api/version** —— 提交 `11a9727`（7 文件，+113 −2）
+
+  - **起因**：W-X6 给了设置页「在线服务」开关，但用户打开后对"这个 toggle 背后到底通了什么"依然一头雾水；开关是一格布尔，连不通也不说一声。这一片加一键 ping：让玩家自己点一下就知道配置/网关/路由是好是坏。
+
+  - **做法**：① `OnlineServices.ping()` —— 成功返回 `{service, version, javaVersion, note}`；离线 / 未启用 / 超时 / 非 2xx → `null`（与 `submitRun` / `fetchLeaderboard` 同一吞错曲线：1.5s 超时、吞掉异常）；② `SettingsPanel` 里加 `「在线服务连通性自检」` 按钮（`set-online-ping`），点击后调 `onlineServices.ping()`，把结果直接写在 `<p id="set-online-ping-result">` 里——成功显示 `settings_online_ping_ok`（`${service} · ${version} · ${note}`），失败显示 `settings_online_ping_fail`（给"关了网关 / 没开开关"各一条可执行建议）；③ i18n zh/en 各 +3 → 2666→2669； `tests/online-ping-button.test.js`（8 项：enabled=false → null 且零 fetch / 启用 → 返回 JSON payload / 非 2xx → null / fetch 抛错 → null / 面板源码真挂按钮 + 监听 + t() / 双表三键齐）；⑤ `i18nKeyCount` 2646 → 2649 → 2652 → 2660 → 2664 → 2666 → **2669**。
+
+  - **验证**：lint 0/0，test 全绿（**405 文件 / 6057 项**）；E2E：`12600帧/210s/q=110/主线111/ch5/completed=true/exceptions=0` —— 与 S98/S99 逐帧同读数——在线自检按钮一版新增在面板上，帧面不可见。
+
+  - **风险与后续**：① `ping()` 只读 `/api/version`，不把结果写 localStorage / 存档；② 失败路径两条（"网关没起" vs "没开开关"）只给一句可操作建议，不做"自动 diagnose"；③ 自检文案 zh/en 三键同步两表，测试钉住；④ 想给 ping 结果做缓存（30s TTL 之类）得另一片；⑤ bootstrapping 这片不影响任何 `choice-void` / 存档版本下标。
 - **2026-11-10 W-X9（在线伙伴服务）—— 配置热刷新：/actuator/refresh 真改真生效** —— 提交 `48a130c`（7 文件，+101 −4）
 
   - **起因**：之前教义说"改配置不用重启"，但 W-X1 到 W-X8 没有一条用例证明它真能动 —— config-server 一直按启动期绑定读 `classpath:/config/game-service.yml`，refresh 端点没开，话术就是空的。这条线把"config-server 上线改一个 yml 值"→"game-service 当场生效"，在 smoke 里真打一遍。
