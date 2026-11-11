@@ -35,6 +35,9 @@
   > 而两张榜仍然分不开。切片6 把那条路彻底换掉了（`tests/trial-online.test.js` 有一条反面断言盯着）。
 - 生产化路径（Redis ZSET 排行榜 / Kafka 遥测 / 真集群）在 `server/README.md` 有说明。
 
+- **缓存（W-P1 → W-P6）**：game-service 的 Boss 榜 / 试炼榜都是**堆顶 K + 写穿惰性 memo**（O(n log k) 替代每次 O(n log n)），`/api/ops/health` 暴露 `hits/misses/entries`；season-service 接入 **Spring Cache 抽象**：三个只读端点 `@Cacheable`；默认 `ConcurrentMap`，切到 `SPRING_CACHE_TYPE=redis` 就用 `RedisCacheManager`（5min TTL、JSON 序列化），整个调用路径不重改；**网关按路径 `Cache-Control`**：`/api/seasons/active` 300s + `stale-while-revalidate`、`/api/version` 60s、leaderboard 15s；**任何运维只读（`/api/ops/**`）和失败的 4xx/5xx 一律 `no-store`**——避免"偶发 503 被共享 cache 放大"的雪崩场景；
+
+
 ## 快速验证（5 分钟）
 
 ```bash
