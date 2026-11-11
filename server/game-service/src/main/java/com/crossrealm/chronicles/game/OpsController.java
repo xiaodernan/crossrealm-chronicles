@@ -61,7 +61,8 @@ public class OpsController {
                 "versionNote", properties.getVersionNote()));
         result.put("inMemory", Map.of(
                 "leaderboardRecords", leaderboardService.size(),
-                "telemetryEvents", telemetryService.count()));
+                "telemetryEvents", telemetryService.count(),
+                "leaderboardCache", leaderboardService.cacheStats()));
         return result;
     }
 

@@ -153,6 +153,32 @@ try {
     }
     if (-not $warmupOk) { Write-Error 'warm-up failed: gateway never resolved game-service within 90s'; exit 1 }
 
+    # Cold-start protection for the season route too: the same lb cache needs to
+    # learn season-service separately. Without this, the first call after boot can
+    # hit an empty registry cache and 503 (this flake was observed once).
+    $seasonWarmupOk = $false
+    for ($i = 0; $i -lt 90; $i++) {
+        try {
+            $r = Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/seasons/active' -TimeoutSec 10
+            if ($r.StatusCode -eq 200) { $seasonWarmupOk = $true; Write-Host "season lb:// routing warm (try $i) -> HTTP 200"; break }
+        } catch {}
+        Start-Sleep -Milliseconds 1000
+    }
+    if (-not $seasonWarmupOk) { Write-Error 'warm-up failed: gateway never resolved season-service within 90s'; exit 1 }
+
+    # Cold-start protection for the Feign path too: game-service keeps its own Eureka cache
+    # (it refreshes separately from the gateway's), so the very first call to the ops view can
+    # still hit an empty registry and answer available:false. Poll until it answers true.
+    $feignWarmupOk = $false
+    for ($i = 0; $i -lt 90; $i++) {
+        try {
+            $r = Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/season' -TimeoutSec 10
+            if ($r.StatusCode -eq 200 -and $r.Content -match '"available":true') { $feignWarmupOk = $true; Write-Host "Feign path warm (try $i) -> available:true"; break }
+        } catch {}
+        Start-Sleep -Milliseconds 1000
+    }
+    if (-not $feignWarmupOk) { Write-Error 'warm-up failed: game-service never reached season-service via Feign within 90s'; exit 1 }
+
     Write-Host ""
     Write-Host "=== 1) config-server: the config it serves for game-service ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28888/game-service/default' -TimeoutSec 15).Content

@@ -34,6 +34,10 @@ class OpsControllerTest {
                 .andExpect(jsonPath("$.config.telemetryMaxEvents").isNumber())
                 .andExpect(jsonPath("$.config.versionNote").isNotEmpty())
                 .andExpect(jsonPath("$.inMemory.leaderboardRecords").isNumber())
-                .andExpect(jsonPath("$.inMemory.telemetryEvents").isNumber());
+                .andExpect(jsonPath("$.inMemory.telemetryEvents").isNumber())
+                // W-P1：缓存观测三件套（hits / misses / entries），全部整数
+                .andExpect(jsonPath("$.inMemory.leaderboardCache.hits").isNumber())
+                .andExpect(jsonPath("$.inMemory.leaderboardCache.misses").isNumber())
+                .andExpect(jsonPath("$.inMemory.leaderboardCache.entries").isNumber());
     }
 }
