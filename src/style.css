@@ -1661,8 +1661,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(4px);
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 45%, rgba(24, 20, 34, 0.45) 0%, rgba(5, 5, 8, 0.78) 100%),
+    rgba(5, 5, 8, 0.72);
+  backdrop-filter: blur(6px);
 }
 
 .overlay-panel.hidden { display: none; }
@@ -1775,19 +1777,31 @@ body.boss-victory::after {
 }
 
 .panel-box {
-  background: linear-gradient(145deg, #1a1520, #0e0c14);
-  border: 1px solid rgba(201, 169, 98, 0.35);
-  border-radius: 12px;
+  position: relative;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% -10%, rgba(255, 217, 138, 0.07), transparent 55%),
+    linear-gradient(145deg, #1e1826 0%, #14101c 55%, #0d0b12 100%);
+  border: 1px solid rgba(201, 169, 98, 0.4);
+  border-radius: 14px;
   padding: 28px 32px;
   min-width: 280px;
   text-align: center;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 217, 138, 0.18),
+    inset 0 0 0 1px rgba(255, 217, 138, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 12px 48px rgba(0, 0, 0, 0.65),
+    0 0 120px rgba(201, 169, 98, 0.06);
 }
 
 .panel-box h2 {
   margin-bottom: 20px;
   font-weight: 300;
-  letter-spacing: 0.2em;
-  color: #c9a962;
+  letter-spacing: 0.22em;
+  color: #ffd98a;
+  text-shadow:
+    0 0 18px rgba(255, 217, 138, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.8);
 }
 
 .panel-box button {
@@ -1795,15 +1809,25 @@ body.boss-victory::after {
   width: 100%;
   margin: 8px 0;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid #444;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035));
+  border: 1px solid #3d3a44;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   color: #eee;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
+  letter-spacing: 0.02em;
+  transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.18s ease, background 0.2s ease;
 }
 
-.panel-box button:hover { border-color: #c9a962; }
+.panel-box button:hover {
+  border-color: rgba(255, 217, 138, 0.55);
+  background: linear-gradient(180deg, rgba(255, 217, 138, 0.11), rgba(255, 217, 138, 0.05));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 217, 138, 0.22),
+    0 2px 14px rgba(255, 217, 138, 0.1);
+  transform: translateY(-1px);
+}
 
 /*
  * 存档槽选择（W-D3 切片3）：与按钮同一副骨架 —— 它是面板清单里的一格，
@@ -1821,15 +1845,20 @@ body.boss-victory::after {
   width: 100%;
   margin-top: 6px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid #444;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035));
+  border: 1px solid #3d3a44;
   color: #eee;
-  border-radius: 6px;
+  border-radius: 8px;
   font-family: inherit;
   cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.panel-box select:hover { border-color: #c9a962; }
+.panel-box select:hover {
+  border-color: rgba(255, 217, 138, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 217, 138, 0.18);
+}
 
 /*
  * 面板内移焦（切片11）：↑↓ 走到的那一格必须有肉眼看得见的差别，
