@@ -6045,6 +6045,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-11 网关 ops 诊断端点（W-P11）** —— 提交 `86a431e`
+
+  - **起因**：W-P8/W-P9 之后，网关多了 Retry / rate-limit / Cache-Control / X-Request-Id / Server-Timing 若干特性，但没有任何方式能读到这台网关**此刻**是谁在挡——是 memory 还是 redis 在限流、路由一共有几条、多久没重启。纯运维刚需。
+
+  - **做法**：`SpringCloudOpsEndpoint`（actuator endpoint `springcloud`）——只回答三组问题：**身份**（name/role/javaVersion/startedAt/uptimeSec）、**限流**（backend / maxRequests / windowMs / trackedSize——memory 真数、redis 返 -1）、**网关在场特性**（retryOnVersion / circuitBreakerEnabled / serverTimingEnabled / xRequestIdEcho + routesConfigured）。**不**泄露完整路由表/实例名/IP；不问 Eureka；不含 secret/IP。`application.yml` 的 `management.endpoints.web.exposure.include` 加 `springcloud`。
+
+  - **验证**：gateway `mvn verify` BUILD SUCCESS（44 tests 全绿——新端点不影响任何已有门禁）；`smoke.ps1` PASSED（5 services healthy）。
+
+  - **风险与后续**：① 该 endpoint 默认在 `/actuator/springcloud`——任何能到达网关的人都读得到，**不算敏感信息**（没有 IP、没有密钥、没有路由表），但如果面对公网暴露，建议用 `management.endpoints.web.exposure.include` 把它关掉，需要时再打开——ops 面始终按"越少公民越好"设计；② endpoint 不提供"阻止名单/限制名单/配置远程写入"等任何改变行为的操作——只读、无外呼、无副作用；③ 下一片：如果部署到 K8s 了，liveness probe 可直接打这个 endpoint，readiness probe 加 eureka 注册心跳。
+
 - **2026-11-11 网关 IP 限流双背板（W-P10）** —— 提交 `c81d98f`
 
   - **起因**：用户要求把"各种计网知识运用"继续压进网关防护层。旧版 `RateLimitByIpFilter` 是单实例内存 LRU——单机 OK，但一上多实例（当前只是未来蓝图，不是烟测承诺），每实例独立记 60/10s 配额，N 实例总放行上限被放大到 N×60，该闸等于白设。Redis 背板让全集群共享同一把配额；未配 Redis 时 fail-open 只放行不卡死。
