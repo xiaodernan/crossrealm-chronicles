@@ -1,4 +1,5 @@
 import { ALL_ACHIEVEMENTS_EXTRA } from '../content/achievements.js';
+import { MASTER_ACHIEVEMENT_IDS } from '../content/masterAchievements.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 import { t } from '../engine/i18n.js';
@@ -133,6 +134,11 @@ export class AchievementSystem {
     // 镜像进任务账本）—— 技能树两族的成就锁因读的就是那一格，改前全仓零写入。
     this.game?.stats?.onAchievementUnlocked(a.id);
     window.dispatchEvent(new CustomEvent('achievement-unlocked', { detail: a }));
+    /* W-V9：大成就那一下的金铃 —— 只对 master 名册（与 W-V5 金冕、W-V8 金迸同一份名册），
+     * 远程请求面走 SFX_NAMES（'masterChime'），普通成就一个音符也不响。 */
+    if (MASTER_ACHIEVEMENT_IDS.includes(a.id)) {
+      window.dispatchEvent(new CustomEvent('game-audio-sfx', { detail: { sfx: 'masterChime' } }));
+    }
   }
 
   toJSON() {

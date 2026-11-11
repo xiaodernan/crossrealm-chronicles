@@ -68,7 +68,7 @@ const BGM_TRIM = Object.freeze({ zone: 1, dungeon: 0.16 / 0.14, boss: 0.22 / 0.1
  * `src/` 里每一处 `sfx: '<字面量>'` 必须在这里、这里每一格必须至少有一个调用方。
  * 也就是说：加一格要么带一个真派发点，要么红。
  */
-export const SFX_NAMES = Object.freeze(['doorOpen', 'roomClear', 'levelUp', 'bossPhase', 'loreDiscover']);
+export const SFX_NAMES = Object.freeze(['doorOpen', 'roomClear', 'levelUp', 'bossPhase', 'loreDiscover', 'masterChime']);
 
 export class AudioManager {
   /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
@@ -735,6 +735,30 @@ export class AudioManager {
     this.playTone(base * 1.5, 0.16, 'triangle', 0.04 + r * 0.015);
   }
   loreDiscover() { this.playTone(440, 0.15, 'sine', 0.08); this.playTone(554, 0.2, 'triangle', 0.06); }
+  /**
+   * 大成就解锁的金铃（W-V9）：上行大调五音 + 低钟垫底。
+   * 只对 master 名册里的成就（echo-homecoming-master / echo-original / echo-wave4 / echo-triad）派发 ——
+   * 普通成就不响。铃声本身就是"这一碑不同"的听觉版本，与 W-V5 金冕、W-V8 金迸同一份名册。
+   */
+  masterChime() {
+    if (!this.ctx || !this.enabled) return;
+    const t = this.ctx.currentTime;
+    [659, 880, 1108, 1318, 1760].forEach((f, i) => {
+      const start = t + i * 0.09;
+      const o = this.ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.linearRampToValueAtTime(0.075, start + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, start + 1.15);
+      o.connect(g);
+      g.connect(this.sfx);
+      o.start(start);
+      o.stop(start + 1.2);
+    });
+    this.playTone(220, 1.3, 'sine', 0.045);
+  }
   restDialogueOpen() { this.playTone(392, 0.2, 'sine', 0.06); this.playTone(523, 0.25, 'triangle', 0.05); }
   executionSting() { this.playTone(55, 0.35, 'sawtooth', 0.14); this.playTone(110, 0.25, 'square', 0.1); this._playNoise(0.06, 0.08, 280); }
   wispChase() { this.playTone(520 + Math.random() * 30, 0.04, 'sine', 0.03); }
