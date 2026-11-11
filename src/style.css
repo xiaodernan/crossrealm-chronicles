@@ -2516,3 +2516,330 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
     top: 118px;
   }
 }
+/* ============================================================================
+ * 美术升级（W-V1 切片1）—— 加载页 / 出场页 / HUD 金框 / 区域横幅 / Boss 血条 / 面板鎏金
+ *
+ * 写在文件末尾，只**叠加**不修改早期规则：
+ * 早期一版一版积累下来的样式已经被门禁钉在那里（focus-nav / css-order 等），
+ * 这里只做覆盖（同样选择器后出现者胜出）+ 新增类。遵循全仓 CSS 纪律：
+ * 不引入动效默认开启的机制（全部挂在 prefers-reduced-motion: no-preference 里），
+ * 不使用外部资源（纯渐变 / 纯 box-shadow / 纯伪元素）。
+ * ========================================================================== */
+
+:root {
+  /* 鎏金核心色阶：亮金 → 暗金 → 炭 */
+  --gold-hi: #ffd98a;
+  --gold: #c9a962;
+  --gold-dim: #8b6914;
+  --gold-hot: #e7b955;
+  --abyss: #07060f;
+  --abyss-deep: #040308;
+  --panel: rgba(14, 11, 22, 0.94);
+  --panel-rim: rgba(201, 169, 98, 0.45);
+  --panel-rim-strong: rgba(255, 217, 138, 0.65);
+  --ink: #1a1526;
+  --danger: #ff5a3c;
+  --mana: #4a90d9;
+  --stamina: #5ad08a;
+}
+
+/* ============================================================
+ * 1) 加载页 —— "位面正在汇聚"
+ *    光芒从远方砸向玩家，不是平铺的"转圈"。标题带鎏金流动。
+ * ============================================================ */
+#loading {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 115%, rgba(255, 90, 60, 0.22), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 50% -15%, rgba(255, 217, 138, 0.12), transparent 55%),
+    radial-gradient(ellipse at center, #181320 0%, var(--abyss) 78%);
+}
+
+.loading-inner h1 {
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(115deg, #4a3a1a 0%, #c9a962 18%, #ffd98a 38%, #fff6d8 50%, #ffd98a 62%, #c9a962 82%, #4a3a1a 100%);
+  background-size: 280% 100%;
+  background-position: 50% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .loading-inner h1 {
+    /* 缓慢扫过的鎏金流光（只有标题在动，其余静止） */
+    animation: cr-gold-sweep 7s ease-in-out infinite;
+  }
+
+  @keyframes cr-gold-sweep {
+    0%, 100% { background-position: 120% 50%; }
+    50% { background-position: -20% 50%; }
+  }
+}
+
+.loading-inner p {
+  color: rgba(233, 226, 210, 0.55);
+  letter-spacing: 0.28em;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.bar {
+  width: min(320px, 60vw);
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  box-shadow: 0 0 18px rgba(255, 217, 138, 0.06) inset;
+}
+
+.bar-fill {
+  /* 出厂态保持原设计：一条加载进度慢慢填满（reduced-motion 用户仍能看清"是不是卡住了"） */
+  background: linear-gradient(90deg, #c9a962, #4a90d9);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* 动态偏好：镀层高光来回扫过（比"width 慢慢长"更能读出"正在工作"） */
+  .bar-fill {
+    background: linear-gradient(90deg, transparent, var(--gold-hot) 25%, #fff6d8 50%, var(--gold-hot) 75%, transparent);
+    background-size: 240px 100%;
+    animation: cr-sheen 1.6s linear infinite;
+  }
+
+  @keyframes cr-sheen {
+    from { background-position: -240px 0; }
+    to { background-position: 240px 0; }
+  }
+}
+
+/* ============================================================
+ * 2) 出场页 —— 深渊空降 + 一颗 ember 在虚空里亮
+ * ============================================================ */
+#start-screen {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 118%, rgba(255, 112, 67, 0.28), transparent 62%),
+    radial-gradient(ellipse 55% 45% at 50% -18%, rgba(154, 118, 255, 0.16), transparent 55%),
+    radial-gradient(ellipse at center, rgba(20, 16, 30, 0.92) 0%, rgba(2, 2, 4, 0.97) 82%);
+}
+
+.start-inner h2 {
+  font-size: clamp(1.5rem, 4.5vw, 2.3rem);
+  letter-spacing: 0.24em;
+  color: var(--gold-hi);
+  text-shadow: 0 0 36px rgba(255, 217, 138, 0.25), 0 2px 6px rgba(0, 0, 0, 0.8);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+.start-inner p {
+  color: rgba(233, 226, 210, 0.72);
+  line-height: 1.75;
+}
+
+#start-btn {
+  padding: 16px 44px;
+  font-size: 1rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #1a1526;
+  background: linear-gradient(180deg, #ffd98a 0%, #c9a962 35%, #8b6914 100%);
+  border: 1px solid rgba(255, 217, 138, 0.8);
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow:
+    0 8px 32px rgba(255, 183, 90, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.35);
+  font-weight: 600;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+#start-btn:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 38px rgba(255, 192, 110, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.35);
+}
+
+#start-btn:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #start-btn {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 一道窄窄的高光斜过按钮（一个周期 4.5s，不抢戏） */
+  #start-btn::after {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -30%;
+    width: 45%;
+    height: 240%;
+    transform: rotate(25deg);
+    background: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.75) 45%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.75) 55%, transparent 80%);
+    animation: cr-btn-sweep 4.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes cr-btn-sweep {
+    0%, 70%, 100% { left: -40%; opacity: 0; }
+    30% { opacity: 1; }
+    45% { left: 110%; opacity: 1; }
+  }
+}
+
+/* ============================================================
+ * 3) HUD 的 #zone-badge —— 从"一颗印"升级成"浮雕的徽记"
+ * ============================================================ */
+#zone-badge {
+  background: linear-gradient(135deg, rgba(22, 18, 34, 0.94), rgba(8, 7, 14, 0.96));
+  border: 1px solid rgba(255, 217, 138, 0.35);
+  box-shadow:
+    0 6px 26px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 217, 138, 0.14);
+}
+
+#zone-badge:hover {
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 217, 138, 0.25),
+    inset 0 1px 0 rgba(255, 217, 138, 0.2);
+}
+
+.zone-icon {
+  background: radial-gradient(circle at 35% 35%, #ffe9a3 0%, #c9a962 55%, #6d5a1a 100%);
+  box-shadow:
+    0 0 18px rgba(255, 217, 138, 0.55),
+    inset 0 0 6px rgba(0, 0, 0, 0.35);
+}
+
+.zone-name {
+  color: #f3ead9;
+  text-shadow: 0 0 12px rgba(255, 217, 138, 0.18);
+}
+
+.zone-subtitle {
+  color: rgba(255, 217, 138, 0.65);
+}
+
+/* ============================================================
+ * 4) 区域横幅 —— 名字慢慢烙进来的
+ * ============================================================ */
+.banner-name {
+  font-size: clamp(1.5rem, 4vw, 2.35rem);
+  letter-spacing: 0.3em;
+  color: var(--gold-hi);
+  text-shadow:
+    0 0 42px rgba(255, 217, 138, 0.32),
+    0 2px 10px rgba(0, 0, 0, 0.85);
+}
+
+.banner-sub {
+  color: rgba(233, 226, 210, 0.62);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #zone-banner.show .banner-name {
+    animation: cr-banner-in 1.6s ease-out;
+  }
+
+  @keyframes cr-banner-in {
+    from { opacity: 0; transform: translateY(10px); letter-spacing: 0.6em; }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ============================================================
+ * 5) Boss 血条 —— 从"红的"升级成"烧起来的"
+ * ============================================================ */
+.boss-bar-wrap {
+  background: linear-gradient(180deg, rgba(20, 8, 6, 0.9), rgba(10, 4, 3, 0.92));
+  border: 1px solid rgba(255, 90, 60, 0.4);
+  border-radius: 6px;
+  box-shadow:
+    0 4px 28px rgba(255, 70, 40, 0.18),
+    inset 0 1px 0 rgba(255, 150, 100, 0.15);
+}
+
+.bar-fill.boss-hp {
+  background: linear-gradient(90deg, #4d0c08 0%, #8b1e14 30%, #ff5a3c 65%, #ffd0a0 100%);
+  background-size: 100% 100%;
+}
+
+/* 流动的"炭火般余烬"（只有 no-preference 才跑） */
+@media (prefers-reduced-motion: no-preference) {
+  .bar-fill.boss-hp {
+    animation: cr-ember 1.4s linear infinite;
+  }
+
+  @keyframes cr-ember {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 140% 0%; }
+  }
+}
+
+/* ============================================================
+ * 6) 说明书 / 设置面板 / 营火平板 / 对话盒 —— 统一"鎏金镶边"玻璃
+ * ============================================================ */
+.help-box,
+#journal-panel,
+#quest-assistant,
+.upgrade-box {
+  /* 鎏金统一镶边 —— 全游戏所有"经典面板"一个气质 */
+  background: var(--panel);
+  border: 1px solid var(--panel-rim);
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 217, 138, 0.1);
+}
+
+#journal-panel h2,
+#quest-assistant h2 {
+  color: var(--gold-hi);
+  text-shadow: 0 0 16px rgba(255, 217, 138, 0.22);
+}
+
+/* ============================================================
+ * 6b) HUD 全局氛围层 —— 轻微的镜头暗角，让玩家永远在画面"中心"
+ * ============================================================ */
+#hud::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(2, 2, 4, 0.28) 100%);
+}
+
+/* ============================================================
+ * 7) 高危警示（body.cx-data-vitals）—— 不动 JS，纯 CSS 钩子，没标记就当没事
+ * ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  body[data-vitals="critical"]::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9;
+    background: radial-gradient(ellipse at center, transparent 58%, rgba(255, 40, 20, 0.22) 100%);
+    animation: cr-critical-pulse 1.3s ease-in-out infinite;
+  }
+
+  @keyframes cr-critical-pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+}
