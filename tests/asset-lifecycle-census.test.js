@@ -94,6 +94,7 @@ describe('① 「造了资源又没有销毁路径」的那几处，每一处都
     ['src/world/PopCultureZoneEnhancerWave7.js', '同上（函数 + 网格挂在位面那一组上）—— 切片103 的断口巡礼/深颚巡礼致敬'],
     ['src/world/PopCultureZoneEnhancerWave8.js', '同上（函数 + 网格挂在位面那一组上）—— 切片104 的薄暮巡礼/辉煌巡礼致敬'],
     ['src/world/PopCultureZoneEnhancerWave11.js', '同上（函数 + 网格挂在位面那一组上）——W-E4 切片1 的返乡/归航回声五枚'],
+['src/world/PopCultureZoneEnhancerWave12.js', '同上——星灯祭四枚（W-E5 切片1）：真世界常驻装饰位，与 Wave11 同族同理'],
     ['src/world/ProceduralDungeonGenerator.js', '静态类 —— 它只往**共享库**里取资源（副本可进出，库是进程生命周期）'],
     ['src/world/regionSurfaces.js', '材质工厂（纯构造）—— 造出来的材质归**调用方**所有'],
   ]);

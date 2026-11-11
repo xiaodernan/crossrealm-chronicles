@@ -43,6 +43,8 @@ const POI_SOURCE_FILES = [
   'src/world/PopCultureZoneEnhancerWave2.js',
   'src/world/PopCultureZoneEnhancerWave3.js',
   'src/world/PopCultureZoneEnhancerWave4.js',
+  'src/world/PopCultureZoneEnhancerWave11.js',
+  'src/world/PopCultureZoneEnhancerWave12.js',
   'src/world/zones/FantasyZone.js',
   'src/world/zones/MagicZone.js',
   'src/world/zones/SpaceZone.js',
@@ -166,6 +168,10 @@ const POI_LABELS = {
   'homage-homecoming-beacon': ['echo_homecoming_beacon_title', '第二信标', 'The Second Beacon'],
   'homage-homecoming-tide': ['echo_homecoming_tide_title', '盐海归潮', 'The Homecoming Tide'],
   'homage-homecoming-lantern': ['echo_homecoming_lantern_title', '旅人之灯', 'The Traveler Lantern'],
+  'homage-homecoming-sky-lantern': ['echo_homecoming_sky_lantern_title', '星灯祭·升空', 'Lantern Festival · Ascension'],
+  'homage-homecoming-river-lamp': ['echo_homecoming_river_lamp_title', '星灯祭·水灯', 'Lantern Festival · River Lamps'],
+  'homage-homecoming-paper-crane': ['echo_homecoming_paper_crane_title', '星灯祭·千羽', 'Lantern Festival · Thousand Cranes'],
+  'homage-homecoming-first-snow': ['echo_homecoming_first_snow_title', '星灯祭·初雪', 'Lantern Festival · First Snow'],
 };
 
 describe('POI 交互标签双表化（W-D2 切片19）', () => {

@@ -123,4 +123,10 @@ export const ECHOES = [
   { id: 'echo-homecoming-beacon', franchise: FRANCHISE.HOMECOMING, zone: 'space', title: 'echo_homecoming_beacon_title', desc: 'echo_homecoming_beacon_desc', trigger: 'echo:homecoming-beacon' },
   { id: 'echo-homecoming-tide', franchise: FRANCHISE.HOMECOMING, zone: 'abyss', title: 'echo_homecoming_tide_title', desc: 'echo_homecoming_tide_desc', trigger: 'echo:homecoming-tide' },
   { id: 'echo-homecoming-lantern', franchise: FRANCHISE.HOMECOMING, zone: 'hub', title: 'echo_homecoming_lantern_title', desc: 'echo_homecoming_lantern_desc', trigger: 'echo:homecoming-lantern' },
+
+  // ── Wave12（星灯祭 · 灯会放归航）──
+  { id: 'echo-homecoming-sky-lantern', franchise: FRANCHISE.HOMECOMING, zone: 'magic', title: 'echo_homecoming_sky_lantern_title', desc: 'echo_homecoming_sky_lantern_desc', trigger: 'echo:homecoming-sky-lantern' },
+  { id: 'echo-homecoming-river-lamp', franchise: FRANCHISE.HOMECOMING, zone: 'abyss', title: 'echo_homecoming_river_lamp_title', desc: 'echo_homecoming_river_lamp_desc', trigger: 'echo:homecoming-river-lamp' },
+  { id: 'echo-homecoming-paper-crane', franchise: FRANCHISE.HOMECOMING, zone: 'void', title: 'echo_homecoming_paper_crane_title', desc: 'echo_homecoming_paper_crane_desc', trigger: 'echo:homecoming-paper-crane' },
+  { id: 'echo-homecoming-first-snow', franchise: FRANCHISE.HOMECOMING, zone: 'fantasy', title: 'echo_homecoming_first_snow_title', desc: 'echo_homecoming_first_snow_desc', trigger: 'echo:homecoming-first-snow' },
 ];
