@@ -192,6 +192,12 @@ try {
         Write-Error "gateway did not generate a UUID X-Request-Id (got '$ridAutoVal')"; exit 1
     }
     Write-Host "request-id echo + generation ok ($ridIn / $ridAutoVal)"
+    # Server-Timing contract (RFC 9218): gateway emits its own dur, downstream's value survives (add, not set)
+    $stResp = Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/version' -TimeoutSec 10
+    if ($stResp.Headers['Server-Timing'] -notmatch 'gw;dur=') {
+        Write-Error "server-timing header missing or malformed: '$($stResp.Headers['Server-Timing'])'"; exit 1
+    }
+    Write-Host "server-timing ok ($($stResp.Headers['Server-Timing']))"
 
     Write-Host ""
     Write-Host "=== 1) config-server: the config it serves for game-service ==="
