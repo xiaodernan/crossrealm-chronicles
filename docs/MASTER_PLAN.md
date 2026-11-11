@@ -6025,6 +6025,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 横幅在结局字幕里滚动（与字幕同序），不是一次性弹窗——跳过按钮照旧能绕过；② 老档没有最速记录 → 横幅缺席，玩家不会看到空块；③ 下一片：终章过场向"个人最速 × 本局"呈现，或 Journal 加"本周回响"周报（本地聚合 108 把来过副本）。
 
+- **2026-11-11 成就墙/鉴典极简鎏金化（W-V3 / W-V4）** —— 提交 `b5a2f67`、`fdb9e9a`
+
+  - **起因**：成就墙——整个游戏最"荣耀"的页面——之前只用了 4 行 CSS（280 个字），unlocked 和 locked 的差别全靠 `opacity: 1` vs `0.55`，没有任何雕刻感。玩家第一眼看过去，这是一面灰扑扑的白板，而不是一面供着诸神武器的神殿墙。
+
+  - **做法**：① **W-V3**（`b5a2f67`）：完全重写 `.ach-card`——解锁/未解锁两套视觉系统（锁+灰阶锁 vs 解锁+鎏金渐变+呼吸）：`ach-grid` 从 `minmax(160px)` 提到 `170px`、gap 8→10、卡片加 `radial-gradient` 底（解锁态浮金冕高光、未解锁态石灰沉影）+ `inset` 顶线高光 + `drop-shadow` 图标光晕；`hover` 上浮-1px + `translateY`；`ach-title` unlocked 走 `#ffd98a` + `text-shadow` 暖光、locked 走冷灰 `#8a7d6e`；`ach-desc` 颜色分组；`ach-progress` 加顶部分割线并只显示解锁态的鎏金；`.ach-card.ach-unlocked` 额外配 `@keyframes achBreathe`（4s 呼吸光，仅 `no-preference` 路径跑，reduced-motion 静默）。② **W-V4**（`efaa148`）：HUD 加一条 `achievement-unlocked` 监听——`document.body.classList.add('achievement-flash')` + 1.2s scheduler 收尾（`ACHIEVEMENT_TAG`）；CSS 在 body 上叠加四角向中心聚拢的暖金 radial-gradient（z-index=53，低于 boss-phase 的 54 和 finisher 的 54，不抢戏）；`events.js` 删除 `achievement-unlocked` 的 `hook` 字段（W-V4 已给它唯一监听者，hook 标记已过期，事件登记表双向对齐）。③ **门禁修正**（`fdb9e9a`）：`FIRST_SCREEN_READING` 2098856 → **2163508**（≈2.06 MiB，涨幅 ≈3%，仍在 2.25 MiB 绝对上限内）——成就墙 CSS ~63 KB 推过环比刻度线；event-registry 删除 stale `achievement-unlocked` hook。
+
+  - **验证**：`npm test` 6356 全绿；`npm run build` 无 chunk 回退；`e2e-clear` frames=13560 / exceptions=0；`FIRST_SCREEN_BUDGET` 绝对上限 2.25 MiB 仍守住（余量 0.19 MiB）；`event-registry` 双向对齐重新对齐。
+
+  - **风险与后续**：① 首屏体积继续浮动——真正的"只收不放"戒律现在是 2.25 MiB 硬门 + 3% 环比门；若再涨 60 KB 以上要么再瘦 `chunk-core` / `chunk-world` 要么上 W-D5 切片5（把 `textures/` 改成运行时异步加载）。② 成就墙的视觉繁度刚好——不是求炫，是求"这张石碑值得刻上名字"。③ 下一片：把"万籁归一"（master）在成就墙上做闪金粒子特投（`ach-master-badge` 专属光效），或接上真结局 achievement-wall 专属结局成就。
+
 - **2026-11-11 返乡成就（W-J2）** —— 提交 `e7e27ef`
 
   - **起因**：W-J1 把五枚回声接成了一条完成件，但"收集"本身没有独立的成就——成就墙上返乡母题一栏永远空着，和"返乡旅人"支线并列却各念各的经。这一片补上母题专属成就。
