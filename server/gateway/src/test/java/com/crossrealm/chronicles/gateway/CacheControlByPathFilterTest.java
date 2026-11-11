@@ -59,8 +59,23 @@ class CacheControlByPathFilterTest {
     }
 
     @Test
+    void telemetryEndpointsAreCapped() {
+        assertEquals("public, max-age=5",
+                CacheControlByPathFilter.cacheControlFor("GET", "/api/telemetry/summary"));
+        assertEquals("public, max-age=5",
+                CacheControlByPathFilter.cacheControlFor("GET", "/api/telemetry/summary?topN=5"));
+        assertEquals("no-store",
+                CacheControlByPathFilter.cacheControlFor("GET", "/api/telemetry/events"));
+        assertEquals("no-store",
+                CacheControlByPathFilter.cacheControlFor("GET", "/api/telemetry/events/count"));
+        assertEquals("no-store",
+                CacheControlByPathFilter.cacheControlFor("HEAD", "/api/telemetry/events"));
+        // 摘要只读的是聚合值，POST 上报绝不进共享缓存
+        assertNull(CacheControlByPathFilter.cacheControlFor("POST", "/api/telemetry/events"));
+    }
+
+    @Test
     void unknownPathsReturnNull() {
-        assertNull(CacheControlByPathFilter.cacheControlFor("GET", "/api/telemetry/events"));
         assertNull(CacheControlByPathFilter.cacheControlFor("GET", "/api/echo/anything"));
         assertNull(CacheControlByPathFilter.cacheControlFor("GET", "/"));
         assertNull(CacheControlByPathFilter.cacheControlFor("GET", "/index.html"));

@@ -72,6 +72,14 @@ public class CacheControlByPathFilter implements GlobalFilter, Ordered {
         if (path.startsWith("/api/trials/leaderboard")) {
             return "public, max-age=10";
         }
+        // 遥测摘要——UI 足迹榜低频轮询，5 秒新鲜度足够
+        if (path.startsWith("/api/telemetry/summary")) {
+            return "public, max-age=5";
+        }
+        // 遥测原始尾巴（调试端点）——绝不进共享缓存
+        if (path.startsWith("/api/telemetry/events")) {
+            return NO_STORE;
+        }
         return null;
     }
 
