@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 大成就迸金（W-V8）** —— 提交 `72ccc30`
+
+  - **起因**：成就墙有了金冕牌匾（W-V5）、HUD 有了鎏金收束（W-V4），但**解锁那一刻世界本身没有任何反应**——第几块 Master 碑刻成，和旁边一只小兔子成就长得一模一样。大成就是"真正走通一条线"，值得让它在玩家身上炸开一场小型金雨。
+
+  - **做法**：① 新增 `content/masterAchievements.js`——`MASTER_ACHIEVEMENT_IDS` 冻结数组（`echo-homecoming-master` / `echo-original` / `echo-wave4` / `echo-triad`），与成就墙金冕牌匾**共用一份名册**（AchievementsJournalTab 改用共享模块，不再各抄一份）；② `ExecutionEffects._bindEvents` 增加 `achievement-unlocked` 监听——只对 master 名册里的成就迸发 `burst(null, 'master')`：暖金环（`_spawnRing` scale 6.0 / ttl 1.1s 慢扩）+ 42 枚金碎片（向上初速 ×1.75、横向 ×1.3、寿命 +0.22s 的金雨，从玩家体内涌出）；色值 `0xffd98a`（W-V3 金冕色系）；③ 不加 verticalSlash（竖斩是战斗语言，不属于成就语言）；④ 新增 `tests/execution-effects.test.js` 4 条运行期门禁：master 真迸（fx.group 增长 >10 件）/ 普通成就不迸 / 碎片完整生命周期（180 帧后 group 回到迸前）/ dispose 注销完整。
+
+  - **验证**：`npm test` 6365 全绿（429 files；新增 execution-effects.test.js）；`npm run lint` 0/0；`npm run build` 干净；`npm run size` 首屏 2174823 B（2.07 MiB，环比余量 0.05 MiB）；`npm run e2e` 通关 ✓（chapter=5 / exceptions=0）。
+
+  - **风险与后续**：① 金迸只在 client 本地触发（`achievement-unlocked` 由 AchievementSystem.unlock 本地派发），不产生网络流量、不写存档；② 与 finisher 迸发（16/28 碎片）共享同一 `_spawnShards` 池化口径——MASTER 金迸是最重的一次（43 件），但都是临时 Mesh、无几何/材质泄漏（`dispose` 里 `_add` 的都会被逐个 dispose）；③ 下一片：旅人之灯（homecoming-lantern POI）被触发时，若玩家已集齐全返乡，灯花多迸一次（把 W-V8 与 Wave11/12 联动），或 master 迸金的 shader 化（AdditiveBlending 顶点色羽化）。
 - **2026-11-12 perf 门禁重钉：发现运行间方差（W-C2）** —— 提交 `dbeea99`
 
   - **起因**：CI run 43084874184（W-E5 ADR docs 提交的整轮 CI）的 Perf smoke 红在 `draw call[hub] 本体 244 > 240`——首次（也是本轮）触发了上限越线。归因时先跑了两轮本地 `npm run perf`（同一 seed 20261028，仅间一格提交的差别），发现**同一台机器、同一 seed 连跑两轮，五格读数不同**（hub.frame 309→311、hub.body 245→247、magic.frame 611→614、void.frame 160→161/161→163、void.body 96→97、void.shadow 64→66、gloom.frame 196→198、gloom.body 120→121、space.frame 245→246、space.body 173→174、radiant.frame 490→492、radiant.body 437→439）。
