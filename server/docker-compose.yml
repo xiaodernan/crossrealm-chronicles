@@ -127,6 +127,8 @@ services:
       echo; curl -fsS http://gateway:8080/api/telemetry/events/count;
       echo; echo '== /api/seasons/active ==';
       curl -fsS http://gateway:8080/api/seasons/active;
+      echo; echo '== /api/seasons/stats ==';
+      curl -fsS http://gateway:8080/api/seasons/stats;
       echo; echo '== /api/ops/stats ==';
       curl -fsS http://gateway:8080/api/ops/stats;
       echo; echo '== /api/ops/season ==';

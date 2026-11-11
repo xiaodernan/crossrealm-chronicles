@@ -260,6 +260,17 @@ try {
     if (-not ($sc -match '"backend":"memory"')) { Write-Error "springcloud missing backend identity: $sc"; exit 1 }
 
     Write-Host ""
+    Write-Host "=== 4f) via gateway: season stats (counting cache + active season) ==="
+    # 先打两次 active 把缓存暖起来，再读 stats —— hits 必然 >= 1
+    Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/seasons/active' -TimeoutSec 15 | Out-Null
+    Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/seasons/active' -TimeoutSec 15 | Out-Null
+    $ss = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/seasons/stats' -TimeoutSec 15).Content
+    Write-Host $ss
+    if (-not ($ss -match '"active":\{' -and $ss -match '"id":"(ember|tide|gloom|radiant)"')) { Write-Error "season stats missing active season: $ss"; exit 1 }
+    if (-not ($ss -match '"hits":[1-9][0-9]*')) { Write-Error "season stats shows zero cache hits after two warm reads: $ss"; exit 1 }
+    if (-not ($ss -match '"type":"concurrent"')) { Write-Error "season stats missing cache type: $ss"; exit 1 }
+
+    Write-Host ""
     Write-Host "=== 5) hot refresh: edit served config (max-limit 4 -> 3, note v1 -> v2) WITHOUT restarting game-service ==="
     @'
 game-service:

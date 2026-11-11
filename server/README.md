@@ -84,7 +84,7 @@ cd server
 mvn -B verify                       # 先产出各模块 target/*.jar
 docker compose build                 # 四个镜像，无需联网
 docker compose up -d                 # 起栈（discovery → config → game-service → gateway，按健康检查顺序）
-docker compose run --rm verify       # 一次性验证容器：version/leaderboard/telemetry/season/ops/stats + /actuator/springcloud 七件套
+docker compose run --rm verify       # 一次性验证容器：version/leaderboard/telemetry/season/ops + seasons/stats + /api/ops/stats + /actuator/springcloud 八件套
 docker compose down
 ```
 

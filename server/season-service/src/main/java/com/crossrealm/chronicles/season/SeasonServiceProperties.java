@@ -17,6 +17,17 @@ public class SeasonServiceProperties {
     /** 强制指定当前赛季 id；留空表示按周期轮转 */
     private String override = "";
 
+    /** 缓存项保留多少秒（默认 300 = 5 分钟；Redis 与 concurrent 两个分支同一旋钮） */
+    private int cacheTtlSeconds = 300;
+
+    public int getCacheTtlSeconds() {
+        return cacheTtlSeconds;
+    }
+
+    public void setCacheTtlSeconds(int cacheTtlSeconds) {
+        this.cacheTtlSeconds = cacheTtlSeconds;
+    }
+
     public int getCycleDays() {
         return cycleDays;
     }
