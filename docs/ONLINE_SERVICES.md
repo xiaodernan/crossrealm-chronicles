@@ -36,7 +36,7 @@
 - **传说碑（W-G4 切片1）**：`GET /api/leaderboard?limit=` 终于有了消费者 —— 日志页【传说碑】页签（`src/ui/LegendsJournalTab.js`）：Boss 用时升序碑，成行、离线安静、bossId 过 `BOSS_ROSTER`（未登记走 `boss_name_unknown`）；`/api/telemetry/summary?topN=` 另由试炼页下半屏【行动风闻】画最近窗口频次 Top-N（`src/ui/TrialJournalTab.js`，W-G3）；
 - 生产化路径（Redis ZSET 排行榜 / Kafka 遥测 / 真集群）在 `server/README.md` 有说明。
 
-- **缓存（W-P1 → W-P6）**：game-service 的 Boss 榜 / 试炼榜都是**堆顶 K + 写穿惰性 memo**（O(n log k) 替代每次 O(n log n)），`/api/ops/health` 暴露 `hits/misses/entries`；season-service 接入 **Spring Cache 抽象**：三个只读端点 `@Cacheable`；默认 `spring.cache.type: simple`（ConcurrentMap，无 Redis 探活——`management.health.redis.enabled=false`），切到 `SPRING_CACHE_TYPE=redis` + `MANAGEMENT_HEALTH_REDIS_ENABLED=true` 就用 `RedisCacheManager`（5min TTL、JSON 序列化），整个调用路径不重改；**网关按路径 `Cache-Control`**：`/api/seasons/active` 300s + `stale-while-revalidate`、`/api/version` 60s、leaderboard 15s；**任何运维只读（`/api/ops/**`）和失败的 4xx/5xx 一律 `no-store`**——避免"偶发 503 被共享 cache 放大"的雪崩场景；
+- **缓存（W-P1 → W-P6）**：game-service 的 Boss 榜 / 试炼榜都是**堆顶 K + 写穿惰性 memo**（O(n log k) 替代每次 O(n log n)），`/api/ops/health` 暴露 `hits/misses/entries` + `startedAt`/`uptimeSec`；season-service 接入 **Spring Cache 抽象**：三个只读端点 `@Cacheable`；默认 `spring.cache.type: simple`（ConcurrentMap，无 Redis 探活——`management.health.redis.enabled=false`），切到 `SPRING_CACHE_TYPE=redis` + `MANAGEMENT_HEALTH_REDIS_ENABLED=true` 就用 `RedisCacheManager`（5min TTL、JSON 序列化），整个调用路径不重改；**网关按路径 `Cache-Control`**：`/api/seasons/active` 300s + `stale-while-revalidate`、`/api/version` 60s、leaderboard 15s、`telemetry/summary` 5s、`telemetry/events` 与 `/api/ops/**` 一律 `no-store`（任何 4xx/5xx 也是 `no-store`）；**`X-Request-Id` 关联契约**（W-P8）：入站合法 id（1–64 可见 ASCII，排除逗号/分号/空白）原样透传，缺失/非法由网关生成 UUID；出行侧无条件钉住——每一次调用从网关到下游只有一个名字，排障能对齐；
 
 
 ## 快速验证（5 分钟）
