@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 跨域聚合统计端点（W-P12）** —— 提交 `8ba4df4`
+
+  - **起因**：/api/ops/health 只回答"我活着没"，/api/ops/season 只回答"季是什么"——运维想知道**整台游戏服务眼下的成绩单长什么样**：榜上最快多少、试炼榜最高分多少、遥测里听到了什么频次。这三块数据本来就全在内存里（leaderboard / trials / telemetry），缺的只是一扇能一次读完的窗。
+
+  - **做法**：① game-service 新增 `GET /api/ops/stats`——leaderboard / trials / telemetry 三块聚合：leaderboard {total/fastestMs/slowestMs/avgMs/uniqueBosses}、trials {total/topScore/avgScore/uniqueRunners/uniqueSeasons}、telemetry 复用 W-X15 `summarize(5)` 输出 {windowSize/distinctTypes/topN/byType[]}；`since` 字段带 Controller 构造时刻——同一个实例的 stats 每次都是同一 epoch 锚点。② 两个 Service 各加 `stats()`（`LeaderboardService.stats()` / `TrialLeaderboardService.stats()`）——读路径零缓存、零外呼、全同步快照（runs 是 ArrayList，直接 synchronized 遍历）。③ `smoke.ps1` 4d 经网关断言 leaderboard.fastestMs / trials.topScore / telemetry.windowSize 三格都是数字；`docker-compose.yml` verify 六件套 → 七件套（新增 /api/ops/stats）。④ OpsControllerTest +2：形状断言 + seed 自洽断言（fastest ≤ avg ≤ slowest，别让运维读到一个反直觉的榜）；44/44 绿。
+
+  - **验证**：game-service `mvn verify` BUILD SUCCESS，44/44 测试全绿；`smoke.ps1` PASSED（4d 的网关路径断言全部命中：leaderboard.fastestMs=123456、trials.topScore=613、telemetry.windowSize=1）；docker-compose verify 七件套就绪。
+
+  - **风险与后续**：① stats 是全量遍历——leaderboard 上限 10、trials 上限 500、telemetry 上限 500，常数级代价，无需缓存；一旦 max-entries 被调到万级以上，需要把这一格换成增量预聚合（写侧顺手维护 min/max/sum/count + distinct HyperLogLog）；② `uniqueBosses` / `uniqueRunners` 直接 `distinct().count()`，也是常数级；③ 下一片：`/api/ops/stats` 的 window 化（?since=ISO）+ gateway 层 rate-limit 命中率暴露到同一页，让这扇窗一次看完"服务在干什么 + 网关挡了谁"。
 - **2026-11-11 网关 ops 诊断端点（W-P11）** —— 提交 `86a431e`
 
   - **起因**：W-P8/W-P9 之后，网关多了 Retry / rate-limit / Cache-Control / X-Request-Id / Server-Timing 若干特性，但没有任何方式能读到这台网关**此刻**是谁在挡——是 memory 还是 redis 在限流、路由一共有几条、多久没重启。纯运维刚需。
