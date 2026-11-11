@@ -165,4 +165,21 @@ public class TrialLeaderboardService {
             runs.remove(0);
         }
     }
+
+    /** 全量聚合（W-P12）：总数/最高/平均/去重跑者/去重赛季 */
+    public Map<String, Object> stats() {
+        synchronized (runs) {
+            long topScore = runs.stream().mapToLong(TrialRun::score).max().orElse(0);
+            double avgScore = runs.stream().mapToLong(TrialRun::score).average().orElse(0.0);
+            long uniqueRunners = runs.stream().map(TrialRun::runner).distinct().count();
+            long uniqueSeasons = runs.stream().map(TrialRun::seasonId)
+                    .filter(s -> s != null && !s.isEmpty()).distinct().count();
+            return Map.of(
+                    "total", runs.size(),
+                    "topScore", topScore,
+                    "avgScore", Math.round(avgScore),
+                    "uniqueRunners", uniqueRunners,
+                    "uniqueSeasons", uniqueSeasons);
+        }
+    }
 }

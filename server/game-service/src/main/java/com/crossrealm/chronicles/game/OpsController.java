@@ -130,4 +130,27 @@ public class OpsController {
         }
         return result;
     }
+
+    /**
+     * 跨域聚合统计（W-P12）：/api/ops/stats
+     *
+     * 把 leaderboard / trial / telemetry 三块内存数据聚合一眼能读完。
+     * 零外呼、零缓存（总量 O(n)，n = 三块各自小到可以遍历），全量快照式读取。
+     */
+    @GetMapping("/api/ops/stats")
+    public Map<String, Object> stats() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("since", startedAt.toString());
+
+        /* --- leaderboard --- */
+        result.put("leaderboard", leaderboardService.stats());
+
+        /* --- trials --- */
+        result.put("trials", trialService.stats());
+
+        /* --- telemetry --- */
+        result.put("telemetry", telemetryService.summarize(5));
+
+        return result;
+    }
 }

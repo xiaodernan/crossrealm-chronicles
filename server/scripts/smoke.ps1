@@ -240,6 +240,16 @@ try {
     if (-not ($opsSeason -match '"available":true')) { Write-Error "game-service could NOT reach season-service via Feign: $opsSeason"; exit 1 }
 
     Write-Host ""
+    Write-Host "=== 4d) via gateway: ops stats (leaderboard + trials + telemetry aggregates) ==="
+    $opsStats = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/stats' -TimeoutSec 15).Content
+    Write-Host $opsStats
+    if (-not ($opsStats -match '"leaderboard":\{[^}]*"total":[0-9]+')) { Write-Error "ops stats missing leaderboard.total: $opsStats"; exit 1 }
+    if (-not ($opsStats -match '"leaderboard":\{[^}]*"fastestMs":[0-9]+')) { Write-Error "ops stats missing leaderboard.fastestMs: $opsStats"; exit 1 }
+    if (-not ($opsStats -match '"trials":\{[^}]*"total":[0-9]+')) { Write-Error "ops stats missing trials.total: $opsStats"; exit 1 }
+    if (-not ($opsStats -match '"trials":\{[^}]*"topScore":[0-9]+')) { Write-Error "ops stats missing trials.topScore: $opsStats"; exit 1 }
+    if (-not ($opsStats -match '"telemetry":\{.*"windowSize":[0-9]+')) { Write-Error "ops stats missing telemetry.windowSize: $opsStats"; exit 1 }
+
+    Write-Host ""
     Write-Host "=== 5) hot refresh: edit served config (max-limit 4 -> 3, note v1 -> v2) WITHOUT restarting game-service ==="
     @'
 game-service:

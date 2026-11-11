@@ -60,4 +60,43 @@ class OpsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.requestId").value("trace-abc-123"));
     }
+
+    @Test
+    void opsStatsReturnsAggregateView() throws Exception {
+        // W-P12：跨域聚合——leaderboard / trials / telemetry 三块全量快照，字段对齐
+        mockMvc.perform(get("/api/ops/stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.since").isNotEmpty())
+                .andExpect(jsonPath("$.leaderboard.total").isNumber())
+                .andExpect(jsonPath("$.leaderboard.fastestMs").isNumber())
+                .andExpect(jsonPath("$.leaderboard.slowestMs").isNumber())
+                .andExpect(jsonPath("$.leaderboard.avgMs").isNumber())
+                .andExpect(jsonPath("$.leaderboard.uniqueBosses").isNumber())
+                .andExpect(jsonPath("$.trials.total").isNumber())
+                .andExpect(jsonPath("$.trials.topScore").isNumber())
+                .andExpect(jsonPath("$.trials.avgScore").isNumber())
+                .andExpect(jsonPath("$.trials.uniqueRunners").isNumber())
+                .andExpect(jsonPath("$.trials.uniqueSeasons").isNumber())
+                .andExpect(jsonPath("$.telemetry.windowSize").isNumber())
+                .andExpect(jsonPath("$.telemetry.distinctTypes").isNumber())
+                .andExpect(jsonPath("$.telemetry.byType").isArray());
+    }
+
+    @Test
+    void opsStatsWithSeedDataIsSelfConsistent() throws Exception {
+        // W-P12：seedDemoData=true 时 leaderboard 至少有一条 seed 记录，
+        // 且 fastest ≤ avg ≤ slowest（统计口径自洽——别让运维读到一个反直觉的榜）
+        String body = mockMvc.perform(get("/api/ops/stats"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        Number total = com.jayway.jsonpath.JsonPath.read(body, "$.leaderboard.total");
+        Number fastest = com.jayway.jsonpath.JsonPath.read(body, "$.leaderboard.fastestMs");
+        Number avg = com.jayway.jsonpath.JsonPath.read(body, "$.leaderboard.avgMs");
+        Number slowest = com.jayway.jsonpath.JsonPath.read(body, "$.leaderboard.slowestMs");
+        org.junit.jupiter.api.Assertions.assertTrue(total.intValue() >= 1,
+                "seed 数据应保证 leaderboard 至少一条");
+        org.junit.jupiter.api.Assertions.assertTrue(fastest.longValue() <= avg.longValue()
+                        && avg.longValue() <= slowest.longValue(),
+                "fastest ≤ avg ≤ slowest 必须成立，实际 fastest=" + fastest + " avg=" + avg + " slowest=" + slowest);
+    }
 }

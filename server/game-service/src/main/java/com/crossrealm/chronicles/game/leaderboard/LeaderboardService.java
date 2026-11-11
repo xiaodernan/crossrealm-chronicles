@@ -121,4 +121,20 @@ public class LeaderboardService {
                 "misses", cacheMisses.get(),
                 "entries", topCache.size());
     }
+
+    /** 全量聚合（W-P12）：总数/最快/最慢/平均，只读不排序、不写缓存 */
+    public Map<String, Object> stats() {
+        synchronized (runs) {
+            long fastest = runs.stream().mapToLong(RunRecord::clearTimeMs).min().orElse(0);
+            long slowest = runs.stream().mapToLong(RunRecord::clearTimeMs).max().orElse(0);
+            double avg = runs.stream().mapToLong(RunRecord::clearTimeMs).average().orElse(0.0);
+            long uniqueBosses = runs.stream().map(RunRecord::bossId).distinct().count();
+            return Map.of(
+                    "total", runs.size(),
+                    "fastestMs", fastest,
+                    "slowestMs", slowest,
+                    "avgMs", Math.round(avg),
+                    "uniqueBosses", uniqueBosses);
+        }
+    }
 }
