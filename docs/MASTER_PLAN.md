@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 旅人之灯·通关变色（W-V11）** —— 提交 `fccecb8`
+
+  - **起因**：W-E6 给了通关一枚派生回声（文字层），W-V8/W-V9 给了 master 视觉听觉金迸（反馈层），但**HUB 那盏等玩家归来的灯**——所有返乡线的母题本体——从深渊走到终章一直是同一团暖纸琥珀。通关的人回到枢纽，灯不知道他走完了回家的路。
+
+  - **做法**：`hubLanternFlameColors(completed)` 纯函数钉死两档焰色——未通关 `#e8d6a8 / #d8a850 / 0.9`（与 Wave11 刚落地时逐字一致），通关 `#fff3c4 / #ffd98a / 1.75`（金阳白，W-V5 金冕 / W-V8 金迸同族暖金）。建造期（`attachHubLanternHomage`）按 `game.quests?.completed`（存档已持久化的完成标记）选档；world 建造发生在 game-completed 之前的正常节奏里，所以还挂了一个 `game-completed` 监听器**原地改 `paperMat`（color/emissive/intensity）**——通关那一刻不重建世界，下一帧灯就金了。`tests/hub-lantern-flame.test.js` ×3（两档逐字、金＞琥珀序）。
+
+  - **验证**：`npm test` 6372 全绿（431 files）；`npm run lint` 0/0；`npm run build` 干净；`npm run size` 首屏 2177253 B（余量 0.05 MiB）；`npm run e2e` 通关 ✓（exceptions=0）。
+
+  - **风险与后续**：① `hubLanternFlameColors` 是导出纯函数——焰色两档被门禁钉死，随手改会红；② 直播换焰改的是 `paperMat` 一个材质实例——灯房 `lampRoom` 用的是 `paperMat`（同族组件 cap/post 各自材质不动），换焰不影响石柱；③ 存档迁移不涉及这一格（完成标记早已持久化 `quests.completed`）；④ 下一片：credits 滚动期间 HUB 方向地平线上升一扇金亮平面（credits-keep 结局专署），或旅人之灯在通关后每天首次到 HUB 时额外飘一句"灯已经为你调到了金阳"（rest-dialogue 一格）。
 - **2026-11-12 终曲·最后一盏灯（W-E6）** —— 提交 `fd3dbe5`
 
   - **起因**：返乡系列（Wave11 画卷 + Wave12 星灯祭）一直是"玩家在路上捡到"的回声——九枚都钉在位面里，等着人去发现。但通关本身（第五章结束、片尾字幕升起）从未给过一枚回声。集大成者不该让最后一页空着：通关的人，最该被记住。
