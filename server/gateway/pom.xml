@@ -36,6 +36,14 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Redis IP 限流（W-P10）：Spring Boot 自动配 LettuceConnectionFactory + ReactiveStringRedisTemplate；
+         但端用默认 gateway.ratelimit.backend=memory，就不会真的连接 Redis —— 和 season-service 同一套纪律。
+         激活 Redis 限流：SPRING_DATA_REDIS_HOST=… + gateway.ratelimit.backend=redis 。
+         若 Redis 连不上：永不抛 — 记录 WARN 后退回内存计数，网关继续放行（限流 fail-open）。 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

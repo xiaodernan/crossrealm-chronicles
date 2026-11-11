@@ -75,7 +75,16 @@ eureka:
     prefer-ip-address: true
 
 management:
+  # Redis 只在 gateway.ratelimit.backend=redis 时使用；默认不探活（否则 smoke 里没 Redis，health 会一直 DOWN）。
+  # 上线切 Redis 限流时：MANAGEMENT_HEALTH_REDIS_ENABLED=true + SPRING_DATA_REDIS_HOST=… + gateway.ratelimit.backend=redis
+  health:
+    redis:
+      enabled: false
   endpoints:
     web:
       exposure:
         include: health,info,gateway
+gateway:
+  ratelimit:
+    # memory = 内存滑动窗口（默认，smoke/CI 用）；redis = Redis 集群共享窗口（多实例生产用）
+    backend: memory
