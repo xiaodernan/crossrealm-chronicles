@@ -360,7 +360,7 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 610, shadow: 50 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 250, body: 180, shadow: 80 }),
   [ZONE_IDS.VOID]: Object.freeze({ frame: 190, body: 110, shadow: 70 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 115, shadow: 90 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 120, shadow: 90 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 210, body: 130, shadow: 80 }),
   [ZONE_IDS.RADIANT]: Object.freeze({ frame: 500, body: 450, shadow: 60 }),
 });
@@ -410,14 +410,29 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  */
 export const DRAW_CALL_FLOORS = Object.freeze({
   [ZONE_IDS.HUB]: Object.freeze({ frame: 299, body: 234, shadow: 64 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 267, body: 217, shadow: 55 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 593, body: 555, shadow: 40 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 272, body: 224, shadow: 55 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 598, body: 561, shadow: 40 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 245, body: 173, shadow: 72 }),
   [ZONE_IDS.VOID]: Object.freeze({ frame: 160, body: 96, shadow: 64 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 190, body: 111, shadow: 79 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 195, body: 116, shadow: 79 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 196, body: 120, shadow: 77 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 470, body: 417, shadow: 53 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 475, body: 422, shadow: 53 }),
 });
+
+/**
+ * ## 2026-11-11（W-E4 后 CI run 43032930532 的八格重钉，seed 20261028）
+ *
+ * Wave11 返乡回声落地后，CI 的 `npm run perf` 量到六格超出旧地板（真门 `43032930532`：
+ * fantasy.frame 272 > 267 / fantasy.body 224 > 217；magic.frame 598 > 593 / magic.body 561 > 555；
+ * abyss.frame 195 > 190 / abyss.body 116 > 111；radiant.frame 475 > 470 / radiant.body 422 > 417）
+ * —— **只升不降**，全部按真门读数原样钉。
+ *
+ * 上限（ceiling）只有 **abyss.body 115 → 120** 动了：真门红在 `116 > 115`——
+ * Wave11 切片1 的深颚盐海搁浅旧船壳 POI（hull / bow / mast / sail 四件）让 abyss.body
+ * 从 W-V1 后的基线涨了约 4 格，超出旧护栏 1 格。
+ * 抬 5 格（比保守抬 2 格宽 3 格，比 floor×1.15=134 的推导线还低 14 格），其余上限未动。
+ * 其余六格只是**地板过期**（⚠️ 不红、不改退出码），这次一并钉到当前真门读数。
+ */
 
 /**
  * 上限的**推导规则**：地板 × 1.15，上取整到 10（B156 之前这句话只活在注释和一次性推导脚本里）。
