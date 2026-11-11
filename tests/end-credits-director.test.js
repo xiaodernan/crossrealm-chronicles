@@ -182,3 +182,31 @@ describe('EndCreditsDirector · W-E6 最后一盏灯（终局专赠）', () => {
     }
   });
 });
+
+describe('EndCreditsDirector · W-V12 最后一盏灯谢幕行', () => {
+  function playWithPopCulture(unlockedIds) {
+    const popCulture = { unlocked: new Set(unlockedIds) };
+    const g = { ...game, popCulture };
+    director.game = g;
+    director.play();
+    return parts.scroll.innerHTML;
+  }
+
+  it('解锁了最后一盏灯：字幕末尾多出专属谢幕行', () => {
+    const html = playWithPopCulture(['echo-homecoming-last-light']);
+    expect(html).toContain('end-credits-last-light');
+    expect(html).toContain('那盏灯');
+  });
+
+  it('没解锁最后一盏灯：谢幕行不出现（这一行不是给所有人看的）', () => {
+    const html = playWithPopCulture([]);
+    expect(html).not.toContain('end-credits-last-light');
+  });
+
+  it('popCulture 缺省（老档/直构造）：谢幕行不出现，播片不炸', () => {
+    const g = { ...game, popCulture: undefined };
+    director.game = g;
+    expect(() => director.play()).not.toThrow();
+    expect(parts.scroll.innerHTML).not.toContain('end-credits-last-light');
+  });
+});

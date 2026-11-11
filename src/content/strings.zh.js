@@ -3086,6 +3086,7 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   credits_line_features: '{journal} 日志 · CG 画廊 · 秘典 · 成就',
   credits_line_systems: '营火 NPC · Boss 再战 · 战斗风格',
   credits_line_fin: '— fin —',
+  credits_line_last_light: '而最后那盏灯，是为你留的。',
   credits_toast: 'Chapter 5 完成 — 滚动字幕',
   upgrade_lore_intro_a: '营火不仅是休息点 — 位面行者的剑与杖在此与',
   upgrade_lore_intro_strong: '剧情',

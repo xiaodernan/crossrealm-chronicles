@@ -89,6 +89,10 @@ export class EndCreditsDirector {
     const 行 = creditsLines(this.game?.quests?.stats);
     this.game.audio?.setMode('credits', creditsAudioMode(this.game?.quests?.stats));
     scroll.innerHTML = 行.map((l) => (l === '' ? '' : `<p>${keyText(t(l))}</p>`)).join('');
+    /* W-V12：只有走到最后一盏灯的人，片尾才会多这一行 —— 完成的回报，也是全剧的答复。 */
+    if (this.game?.popCulture?.unlocked?.has('echo-homecoming-last-light')) {
+      scroll.innerHTML += `<p class="end-credits-last-light">${t('credits_line_last_light')}</p>`;
+    }
     // W-G6：个人最速横幅——有的话挂在字幕最后一块，没有就整块不渲染（老档/没打过的档不受影响）。
     // 顺序与传说碑同一口径：用时升序，只取五条。名册解析、注入防护与碑同一套纪律。
     const store = this.game?.bossBestTimes ?? bossBestTimes;

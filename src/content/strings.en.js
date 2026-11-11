@@ -3086,6 +3086,7 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   credits_line_features: '{journal} Journal · CG Gallery · Codex · Achievements',
   credits_line_systems: 'Campfire NPCs · Boss rematch · Combat styles',
   credits_line_fin: '— fin —',
+  credits_line_last_light: 'And the last light — held for you.',
   credits_toast: 'Chapter 5 complete - rolling credits',
   upgrade_lore_intro_a: "The campfire is more than a resting place - the Plane Wanderer's sword and staff resonate here with ",
   upgrade_lore_intro_strong: 'the Narrative',

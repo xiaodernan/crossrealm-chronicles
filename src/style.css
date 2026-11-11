@@ -2915,6 +2915,29 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   opacity: 0.92;
 }
 .end-credits-best-row:first-of-type { color: #ffd98a; }
+
+/* 终章谢幕 · 最后一盏灯（W-V12）：只有解锁了「最后一盏灯」回声的人会看见这一行。
+   比 fin 更暖一档、比最速横幅更轻一档 —— 是谢幕里的耳语，不是颁奖。 */
+.end-credits-last-light {
+  margin-top: 6vh;
+  color: #ffe9ad;
+  font-size: 1.05rem;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-shadow:
+    0 0 24px rgba(255, 217, 138, 0.55),
+    0 0 60px rgba(255, 183, 90, 0.3);
+  opacity: 0.9;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .end-credits-last-light {
+    animation: endCreditsLastLight 3.5s ease-in-out infinite alternate;
+  }
+  @keyframes endCreditsLastLight {
+    from { opacity: 0.72; }
+    to { opacity: 1; }
+  }
+}
 .end-credits-skip { position: fixed; bottom: 24px; right: 24px; z-index: 901; background: transparent; border: 1px solid rgba(201,169,98,0.5); color: #c9a962; padding: 6px 14px; cursor: pointer; }
 @keyframes credits-roll { from { bottom: -30%; } to { bottom: 110%; } }
 
