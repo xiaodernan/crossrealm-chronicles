@@ -43,7 +43,7 @@ describe('① 读数里的数 = 内容表的实数', () => {
       '主线 118 步': MAINLINE.length === 118,
       '分区专属支线 42': 分区支线 === 42,
       '副本 10': DUNGEON_DEFS.length === 10,
-      '回声 70': ECHOES.length === 70,
+      '回声 71': ECHOES.length === 71,
     };
     for (const [片段, 对] of Object.entries(实数)) {
       expect(对, `内容表变了，但 §1.2 的 C3 读数里那个数没跟着改（找 "${片段}"）`).toBe(true);

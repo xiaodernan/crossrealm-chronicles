@@ -151,3 +151,34 @@ describe('EndCreditsDirector dispose', () => {
     expect(() => director.dispose()).not.toThrow();
   });
 });
+
+describe('EndCreditsDirector · W-E6 最后一盏灯（终局专赠）', () => {
+  function installWindow() {
+    const handlers = new Map();
+    globalThis.window = {
+      addEventListener(type, fn) {
+        if (!handlers.has(type)) handlers.set(type, new Set());
+        handlers.get(type).add(fn);
+      },
+      removeEventListener(type, fn) { handlers.get(type)?.delete(fn); },
+      dispatchEvent(event) { handlers.get(event.type)?.forEach((fn) => fn(event)); return true; },
+    };
+    globalThis.CustomEvent = class {
+      constructor(type, init) { this.type = type; this.detail = init?.detail; }
+    };
+    return handlers;
+  }
+
+  it('play 派发 pop-culture-echo(echo:homecoming-last-light)——终局回声由本类自己放出', () => {
+    const received = [];
+    installWindow();
+    try {
+      globalThis.window.addEventListener('pop-culture-echo', (e) => received.push(e.detail?.trigger));
+      director.play();
+      expect(received).toEqual(['echo:homecoming-last-light']);
+    } finally {
+      delete globalThis.window;
+      delete globalThis.CustomEvent;
+    }
+  });
+});

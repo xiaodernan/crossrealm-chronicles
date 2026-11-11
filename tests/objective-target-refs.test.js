@@ -52,13 +52,15 @@ const 发现id = new Set(
 /**
  * `pop-culture-echo` 事件的 trigger 键（`echo:*`）—— **两个派发形状**：
  * - `fireEcho(game, 'echo:xxx')`：世界层的派发点（致敬层的那些回声）
+ * - `emit('pop-culture-echo', { trigger: 'echo:xxx' })`：EventBus 派发点（`cinematic/EndCreditsDirector` 的终局专赠）
  * - `tryUnlock('echo:xxx')`：系统层的**派生**解锁（`echo:full-resonance` 是
  *   "全部回声都共鸣了" —— 它没有派发点，由 `PopCultureEchoSystem.tryUnlock` 的
  *   `stats.percent >= 100` 分支自己放出来）
  */
 const 回声触发 = new Set([
   ...[...全源码.matchAll(/fireEcho\(\s*[^,]+,\s*'(echo:[^']+)'/g)].map((m) => m[1]),
-  ...[...全源码.matchAll(/tryUnlock\(\s*'(echo:[^']+)'/g)].map((m) => m[1]),
+    ...[...全源码.matchAll(/emit\(\s*'pop-culture-echo'\s*,\s*\{\s*trigger:\s*'(echo:[^']+)'/g)].map((m) => m[1]),
+...[...全源码.matchAll(/tryUnlock\(\s*'(echo:[^']+)'/g)].map((m) => m[1]),
 ]);
 
 /** NPC 名单：`NPCManager.js` 的 `NPC_DATA` 块里的 `id` */

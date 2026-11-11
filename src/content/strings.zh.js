@@ -3199,7 +3199,7 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   ach_echo_homecoming_title: '归途回响',
   ach_echo_homecoming_desc: '集齐三个返乡回声',
   ach_echo_homecoming_master_title: '万籁归一',
-  ach_echo_homecoming_master_desc: '集齐全部五个返乡回声',
+  ach_echo_homecoming_master_desc: '集齐全部返乡回声',
   franchise_homecoming_label: '返乡',
   echo_homecoming_cairn_title: '归烬之碑',
   echo_homecoming_cairn_desc: '幽暗里有人堆了没烧尽的炭与旧姓石——它想找到回家的路。',
@@ -3219,6 +3219,8 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   echo_homecoming_paper_crane_desc: "虚空裂缝边坐着一个折千羽的女孩，她说折满一千只，迷路的人就能找到回家的路。",
   echo_homecoming_first_snow_title: "星灯祭·初雪",
   echo_homecoming_first_snow_desc: "灰烬里飘下第一场雪，雪的味道是很多很多年前的一顿饭——灶膛里的火、窗台上的醋。",
+  echo_homecoming_last_light_title: "星灯祭·最后一盏灯",
+  echo_homecoming_last_light_desc: "终章里有人把碎星灯举到头顶——走完所有位面的人，没有一盏灯是为别人留的。",
 
   trial_toast_started_fmt: '试炼开始：第 ${layer} 层',
   trial_toast_layer_fmt: '第 ${layer} 层清完了',

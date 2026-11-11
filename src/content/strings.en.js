@@ -3219,6 +3219,8 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   echo_homecoming_paper_crane_desc: "By the rift sits a girl folding cranes — a thousand made whole, and the lost will find their way home.",
   echo_homecoming_first_snow_title: "Lantern Festival · First Snow",
   echo_homecoming_first_snow_desc: "The first snow fell on the ashes, and it smelled like a meal from long ago — the hearth-fire, the vinegar on the sill.",
+  echo_homecoming_last_light_title: "Lantern Festival · The Last Light",
+  echo_homecoming_last_light_desc: "In the finale, someone lifts a shattered star-lamp overhead — no light along every plane was ever lit for anyone but you.",
 
   trial_toast_started_fmt: 'Trial started: layer ${layer}',
   trial_toast_layer_fmt: 'Layer ${layer} cleared',

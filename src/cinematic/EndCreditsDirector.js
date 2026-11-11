@@ -1,7 +1,7 @@
 import { refreshKeyText, keyText } from '../ui/keyHints.js';
 import { t } from '../engine/i18n.js';
 
-import { on, offAll } from '../engine/EventBus.js';
+import { on, offAll, emit } from '../engine/EventBus.js';
 import { endingDialogKey } from '../content/objectives.js';
 import { bossNameKeyOf } from '../content/bossRoster.js';
 import { bossBestTimes } from '../game/BossBestTimes.js';
@@ -100,6 +100,10 @@ export class EndCreditsDirector {
       scroll.innerHTML += `<div class="end-credits-best"><p class="end-credits-best-title">${t('credits_best_title')}</p>${rows}</div>`;
     }
     this.el.classList.remove('hidden');
+    /* W-E6：终局专赠 —— 通关那一刻，返乡系列收尾一枚「最后一盏灯」。
+     * 与 echo-full-resonance 同类：派生式回声，trigger 由本类自己放出（pop-culture-echo），
+     * 老客户端收到未知 trigger 会静默忽略（PopCultureEchoSystem.tryUnlock 不认识就 no-op），不炸。 */
+    emit('pop-culture-echo', { trigger: 'echo:homecoming-last-light' });
     // DOM 建一次、演出可能很久之后才放：键名到播放这一刻才问生效表
     refreshKeyText(this.el);
     this.game.dialog?.toast(t('credits_toast'), 3000);

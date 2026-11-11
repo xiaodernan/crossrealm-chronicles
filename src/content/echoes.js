@@ -129,4 +129,7 @@ export const ECHOES = [
   { id: 'echo-homecoming-river-lamp', franchise: FRANCHISE.HOMECOMING, zone: 'abyss', title: 'echo_homecoming_river_lamp_title', desc: 'echo_homecoming_river_lamp_desc', trigger: 'echo:homecoming-river-lamp' },
   { id: 'echo-homecoming-paper-crane', franchise: FRANCHISE.HOMECOMING, zone: 'void', title: 'echo_homecoming_paper_crane_title', desc: 'echo_homecoming_paper_crane_desc', trigger: 'echo:homecoming-paper-crane' },
   { id: 'echo-homecoming-first-snow', franchise: FRANCHISE.HOMECOMING, zone: 'fantasy', title: 'echo_homecoming_first_snow_title', desc: 'echo_homecoming_first_snow_desc', trigger: 'echo:homecoming-first-snow' },
+
+  // ── Wave12 尾声 · 最后一盏灯（终局专赠：与 full-resonance 同类派生式回声）──
+  { id: 'echo-homecoming-last-light', franchise: FRANCHISE.HOMECOMING, zone: 'hub', title: 'echo_homecoming_last_light_title', desc: 'echo_homecoming_last_light_desc', trigger: 'echo:homecoming-last-light' },
 ];
