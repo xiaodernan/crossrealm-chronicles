@@ -68,7 +68,7 @@ function 扫标签位(src) {
 
 /**
  * 钉死表：POI id → [label 键, 中文文案, 英文文案]。
- * 73 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
+ * 77 行与真世界逐 id 对齐（结构腿互证），改任何一处文案都必须来改这里。
  */
 const POI_LABELS = {
 'hub-anchor': ['hub_poi_anchor_label', '触摸世界之锚', 'Touch the World Anchor'],
@@ -161,6 +161,10 @@ const POI_LABELS = {
   'homage-gloom-wishing-tree': ['echo_gloom_wishing_tree_title', '幽暗许愿树', 'The Wishing Tree'],
   'homage-radiant-banner': ['echo_radiant_banner_title', '辉煌残旗', 'The Faded Banners'],
   'homage-radiant-orb': ['echo_radiant_orb_title', '辉煌悬铃', 'The Hanging Bell'],
+  'homage-homecoming-cairn': ['echo_homecoming_cairn_title', '归烬之碑', 'Cairn of Embers'],
+  'homage-homecoming-bell': ['echo_homecoming_bell_title', '晨曦回铃', 'The Dawn Bell'],
+  'homage-homecoming-beacon': ['echo_homecoming_beacon_title', '第二信标', 'The Second Beacon'],
+  'homage-homecoming-tide': ['echo_homecoming_tide_title', '盐海归潮', 'The Homecoming Tide'],
 };
 
 describe('POI 交互标签双表化（W-D2 切片19）', () => {

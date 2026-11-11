@@ -29,6 +29,7 @@ export const FRANCHISE = {
   RADIANT: 'radiant',
   VOIDMAW: 'voidmaw',
   ABYSSSALT: 'abysssalt',
+  HOMECOMING: 'homecoming',
 };
 
 /**
@@ -53,6 +54,7 @@ export const FRANCHISE_LABELS = {
   [FRANCHISE.RADIANT]: 'franchise_radiant_label',
   [FRANCHISE.VOIDMAW]: 'franchise_voidmaw_label',
   [FRANCHISE.ABYSSSALT]: 'franchise_abysssalt_label',
+  [FRANCHISE.HOMECOMING]: 'franchise_homecoming_label',
 };
 
 /** 母题显示名（按语言展开；键找不到就退回 id） */

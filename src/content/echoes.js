@@ -116,4 +116,10 @@ export const ECHOES = [
   { id: 'echo-gloom-wishing-tree', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_wishing_tree_title', desc: 'echo_gloom_wishing_tree_desc', trigger: 'echo:gloom-wishing-tree' },
   { id: 'echo-radiant-banner', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_banner_title', desc: 'echo_radiant_banner_desc', trigger: 'echo:radiant-banner' },
   { id: 'echo-radiant-orb', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_orb_title', desc: 'echo_radiant_orb_desc', trigger: 'echo:radiant-orb' },
+
+  // ── Wave11（返乡 / 归航）──
+  { id: 'echo-homecoming-cairn', franchise: FRANCHISE.HOMECOMING, zone: 'gloom', title: 'echo_homecoming_cairn_title', desc: 'echo_homecoming_cairn_desc', trigger: 'echo:homecoming-cairn' },
+  { id: 'echo-homecoming-bell', franchise: FRANCHISE.HOMECOMING, zone: 'radiant', title: 'echo_homecoming_bell_title', desc: 'echo_homecoming_bell_desc', trigger: 'echo:homecoming-bell' },
+  { id: 'echo-homecoming-beacon', franchise: FRANCHISE.HOMECOMING, zone: 'space', title: 'echo_homecoming_beacon_title', desc: 'echo_homecoming_beacon_desc', trigger: 'echo:homecoming-beacon' },
+  { id: 'echo-homecoming-tide', franchise: FRANCHISE.HOMECOMING, zone: 'abyss', title: 'echo_homecoming_tide_title', desc: 'echo_homecoming_tide_desc', trigger: 'echo:homecoming-tide' },
 ];
