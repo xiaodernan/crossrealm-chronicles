@@ -6025,6 +6025,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 横幅在结局字幕里滚动（与字幕同序），不是一次性弹窗——跳过按钮照旧能绕过；② 老档没有最速记录 → 横幅缺席，玩家不会看到空块；③ 下一片：终章过场向"个人最速 × 本局"呈现，或 Journal 加"本周回响"周报（本地聚合 108 把来过副本）。
 
+- **2026-11-11 网关 Server-Timing（W-P9）** —— 提交 `c4f29bc`、`8b8a1f6`
+
+  - **起因**：W-P8 给链路钉了一个名字（X-Request-Id），但**慢**这件事还没人量——玩家说"怎么总卡一下"，curl 至少要能拆开"是网关慢还是下游慢"。RFC 9218 早有答案：`Server-Timing`。
+
+  - **做法**：`ServerTimingFilter`（顺位 **−80**：限流 −100 之后、Cache-Control −50 之前）：入口记 `System.nanoTime()`，`beforeCommit` 计算 `dur` 并以 **add** 落头（`gw;dur=<整数毫秒>`，亚毫秒 → 0）——**不覆盖**下游自己发的同名指标（RFC 允许多个值逗号拼接）；`System.nanoTime()` 是单调钟（不被 NTP 回拨）。**smoke 0b 段加一条回声**（`8b8a1f6`）：`Server-Timing` 含 `gw;dur=` 断言。`ServerTimingFilterTest` 4 例（格式化三格 / commit 落头 / 下游同名保留 / 顺位断言），gateway **36** 全绿。与 W-P8 一起：`curl -w "%{time_total}" -i` 一次就能把"客户端总耗时 / 网关耗时"拆开。
+
+  - **验证**：gateway `mvn verify` BUILD SUCCESS（36 例）；`scripts/smoke.ps1` PASSED（request-id echo + generation + server-timing 三断言均绿）；CJK 0 行。**诚实记录**：W-G7/W-X18 docs CI `43027296929` 前端 SUCCESS（23m）；W-E4 切片1/切片2 两次 CI（`43032930532`/`43036832583`）均红在 **perf-smoke 真门：abyss body 116 > 115**（Wave11 深颚盐海 POI +4 件）；两次修复以 perf 提交 `e0fe9a5` 承载（上限 abyss.body 115→**120**；八格地板只升不降钉到真门读数）——`e0fe9a5` 的 CI `43042323544` 被后续 push 取消、`af748d7` 的 `43042441439` 也被 cancel，最新 `c4f29bc` 的 `43043524897` 是下一次答案。
+
+  - **风险与后续**：① `gw;dur` 是**信号不是门禁**，不计入 perf 预算；② 下游若也想报耗时，自己发一个 `Server-Timing` 头即可——会按 RFC 逗号拼接，两边各自可读；③ W-P8+W-P9 现在让每个出站响应头上都有 `X-Request-Id` + `Server-Timing`，排障链完整。
+
 - **2026-11-11 枢纽·旅人之灯（W-E4 切片2）+ perf 真门红七格重钉（W-C2 切片轨）** —— 提交 `51c9122`、`e0fe9a5`
 
   - **起因**：W-E4 切片1 后第一个完整跑的前端门禁（run `43032930532`）把我漏掉的一格打了出来——**perf 真门红：abyss.body 116 > 115（上限）**，外加六格"地板过期"警告（不退出码但出处过期）。这不是性能回归，是内容落地的真实成本；但该重钉的格子要当场重钉，而不是等下一次被人踩到。同片把返乡母题第五枚（枢纽·旅人之灯）带上。
