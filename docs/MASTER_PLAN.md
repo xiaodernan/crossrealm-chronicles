@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 大成就金铃（W-V9）** —— 提交 `ddb7003`
+
+  - **起因**：W-V8 给了金迸（视觉），W-V5 给了金冕（牌匾），成就墙有了鎏金收束（W-V4）——但**耳朵里什么都没有**。master 碑刻成那一刻，玩家闭着眼睛听不出任何区别；而大成就是整条线路的终点，它值得一记听得见的金铃。
+
+  - **做法**：`SFX_NAMES`（远程请求面名册，`playSfx` 咽喉 + 静态契约扫描俱在）+1 → `masterChime`；`AudioManager.masterChime()`——上行大调五音（659 / 880 / 1108 / 1318 / 1760，E5→A5→C#6→E6→A6）各隔 0.09s 掠过，然后一记 220Hz 低钟垫底 1.3s（master 铜的回声）；`AchievementSystem.unlock` 仅对 `MASTER_ACHIEVEMENT_IDS`（与 W-V8 金迸、W-V5 金冕共享 `content/masterAchievements.js`）派发 `game-audio-sfx`；普通成就一个音符也不响。`tests/audio-master-chime.test.js` ×3（名册在册+方法在册 / sfx 总线 ≥6 条音符 / playSfx 不抛）+ 契约套件 15 条自然覆盖新名册项。
+
+  - **验证**：`npm test` 6368 全绿（430 files）；audio-sfx-contract 15 条绿（远程名册无越界派发、无僵尸条目）；audio-procedural 7 条绿；`npm run lint` 0/0；`npm run build` 干净；`npm run e2e` 通关 ✓（exceptions=0）。
+
+  - **风险与后续**：① 金铃走的是远程请求面（`game-audio-sfx` → Game.js → playSfx），与 doorOpen/bossPhase 同一条契约链，不新开第二条音频路径；② 与 W-V8 金迸的先后：toast → stats → achievement-unlocked（HUD 闪 + 金迸）→ game-audio-sfx（金铃）——音画同一帧，顺序由事件派发顺序保证；③ 下一片：master 名册里再加一块碑时，三个地方零改——名册一行、牌匾自动生效、金铃自动生效（W-V8/W-V9 的设计目标是"加一块碑只改一个文件"）；④ 若要让普通成就也有一记极轻的 tick，那是新的设计决策，不在本片范围。
 - **2026-11-12 大成就迸金（W-V8）** —— 提交 `72ccc30`
 
   - **起因**：成就墙有了金冕牌匾（W-V5）、HUD 有了鎏金收束（W-V4），但**解锁那一刻世界本身没有任何反应**——第几块 Master 碑刻成，和旁边一只小兔子成就长得一模一样。大成就是"真正走通一条线"，值得让它在玩家身上炸开一场小型金雨。
