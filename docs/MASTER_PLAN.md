@@ -6015,6 +6015,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 服务端**没有身份校验**（`runner` 由客户端提交），任何人都能刷榜 —— 与 Boss 榜同一档次的演示实现，真要做正经榜要先有账号。② `submittedAt` 用 ISO-8601 字符串的字典序当时间序（同行长度一致），不解析成 `Instant`：解析失败会让一条脏记录把整次出榜打掉。③ 客户端还没有**看榜的地方** —— 拉取方法写了、测试写了，但试炼页上没有那一块。下一片接（那里会暴露一个真问题：榜是异步的，而日志页是同步渲染的快照）。
 
+- **2026-11-11 性能线续：试炼榜堆顶 K + 惰性 memo（W-P5）· season-service Spring Cache 抽象（W-P6）· Redis 探活坑位回填** —— 提交 `c46c8bc`、`469dca8`、`9ea5aa2`、`fce6ec8`
+
+  - **起因**：用户授权继续深挖项目效率、Spring Cloud 与缓存。上一片把 Boss 榜做了堆顶 K 之后，试炼榜（`TrialLeaderboardService`）还是每读一次全表 sorted；而 season-service 的只读端点零缓存，每请求都重算周期轮转。这两处是同一类问题：**读多写少的热路径上却做着 O(n log n) 的排序 / 零缓存的重算**。
+
+  - **做法**：① **W-P5**（`c46c8bc`）：`TrialLeaderboardService` 对齐 Boss 榜——按 `season:limit` 键缓存 `top()` 结果（`add` 时整表失效；理由同 W-P1：榜上任意一条新纪录都可能影响任意 limit 档的头部，分档失效无法保证一致）；大库时最小堆 cap=maxLimit（O(n log cap)）代替全表排序。`/api/ops/health` 追加 `trialRecords` / `trialCache(hits/misses/entries)`，运维可以直接读到试炼榜侧的缓存行为。**两处同类缺陷修正**：`OpsController` 收敛到单一六参构造 + `@Autowired`（多构造时 Spring 无法选择，全 Context 起不来，ApiSmokeTest/OpsControllerTest 全红）；`TrialLeaderboardTopKTest` 3 例 + 既有 7 例次序门禁全绿；全 reactor BUILD SUCCESS + smoke PASSED。② **W-P6**（`469dca8`）：season-service 接入 **Spring Cache 抽象**：`@EnableCaching` + `CacheConfig`——设定 `spring.cache.type` 时的分支：**simple（本地默认）**走 Boot 自动 `ConcurrentMapCacheManager`；**redis** 时走本类注册的 `RedisCacheManager`（JSON 序列化、5min TTL、不要求 Serializable、`seasons` 缓存名空间）。三个只读端点 `@Cacheable`：`/api/seasons`、`/api/seasons/active`、`/api/seasons/{id}`；`spring-boot-starter-cache` 常规依赖，`spring-boot-starter-data-redis` 上 classpath 供激活用。③ **W-P6 热修**（`fce6ec8`）：data-redis 上 classpath 之后，Boot 的自动配置会**成片登记** Redis 相关 bean：`RedisCacheManager`（因未显式 `spring.cache.type` 被自选）与 **`RedisReactiveHealthIndicator`**——本机和 CI 没有 Redis，health 一直 DOWN，smoke 的 240s 健康门禁超时（CI run `42998629430` 红 → 本地复现同样报错）。修法：`application.yml` 显式 `spring.cache.type: simple` + `management.health.redis.enabled: false`；上线切 Redis 用环境变量 `SPRING_CACHE_TYPE=redis` + `MANAGEMENT_HEALTH_REDIS_ENABLED=true`。
+
+  - **验证**：season-service `mvn -pl season-service verify` 全绿（13 例）；全 reactor `mvn -B verify` BUILD SUCCESS；`scripts/smoke.ps1` 本地复测 **PASSED**（发现/配置/网关/Feign/降级/热更全绿）。**教训（诚实记录）**：① 往 classpath 加 starter 不只是"多了一个库"——Boot 会围绕它成片登记 bean，激活语义必须与你的默认 Profile 对齐；② smoke 复用 `target/*.jar`，改完源码必须先 `mvn package` 再 smoke，否则你核对的是旧 jar；③ `42998629430` 这次红，本质是"本地当时只跑了 verify 没跑 smoke"——这正好说明 smoke 门禁不可替代。
+
+  - **风险与后续**：① redis 切换是激活语义而非编译语义，真切 Redis 前应在预发跑一遍 smoke 拿掉探活 + 缓存双保险；② `OpsController` 构造函数纪律——以后加依赖必须并入唯一六参构造；③ 前端 `boss-phase` 事件线（Game.js / BossPhaseDirector）已有现成 Boss 阶段 UI，本轮未动——下一片可做"阶段演出史诗化"。
+
 - **2026-11-11 性能线 + 在线可观测性 + 网关防护三连** —— 提交 `fe14029`、`40f34ca`
 
   - **起因**：用户授权继续深挖项目效率与后端/全栈能力 — 包括算法复杂度、Spring Cloud、网络协议、可观测性。以下六项处置了项真实痛点，而不是为了加而加。
