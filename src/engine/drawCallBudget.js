@@ -359,8 +359,8 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
   [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 240, shadow: 70 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 610, shadow: 50 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 250, body: 180, shadow: 80 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 160, body: 110, shadow: 70 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 190, body: 115, shadow: 90 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 190, body: 110, shadow: 70 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 115, shadow: 90 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 210, body: 130, shadow: 80 }),
   [ZONE_IDS.RADIANT]: Object.freeze({ frame: 500, body: 450, shadow: 60 }),
 });
