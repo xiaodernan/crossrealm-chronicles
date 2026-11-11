@@ -3187,6 +3187,9 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   legends_offline: '取不到碑铭 · 在线服务未开启，或网关连不上',
   legends_row_fmt: '#${rank} ${runner} · ${boss} · ${clock} · 第${chapter}章',
   legends_note: '顺序：用时升序。通关时自动提交，这里是只读快照',
+  legends_personal_title: '你的最速',
+  legends_personal_empty: '尚无个人最速 —— 诸神哪天倒下，便刻在这里',
+  legends_personal_row_fmt: '${boss} · ${clock}',
 
   trial_toast_started_fmt: '试炼开始：第 ${layer} 层',
   trial_toast_layer_fmt: '第 ${layer} 层清完了',

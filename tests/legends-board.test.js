@@ -16,6 +16,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { LegendsJournalTab } from '../src/ui/LegendsJournalTab.js';
+import { BossBestTimes } from '../src/game/BossBestTimes.js';
 import { STRINGS_ZH, STRING_KEYS as ZH_KEYS } from '../src/content/strings.zh.js';
 import { STRINGS_EN, STRING_KEYS as EN_KEYS } from '../src/content/strings.en.js';
 import { 键数问题 } from './helpers/i18nKeyCount.js';
@@ -53,12 +54,13 @@ function onlineHarness({ enabled = true } = {}) {
   };
 }
 
-function boot({ online = onlineHarness() } = {}) {
+function boot({ online = onlineHarness(), bossBestTimes = null } = {}) {
   const doc = makeMarkupDom();
   globalThis.document = doc;
   const panel = node('div', doc);
   doc.body.appendChild(panel);
   const game = { onlineServices: online };
+  if (bossBestTimes) game.bossBestTimes = bossBestTimes;
   const tab = new LegendsJournalTab(game);
   return { doc, panel, game, tab, online };
 }
@@ -258,3 +260,65 @@ describe('W-G4 坏包与发号：抛错也不停在叩石，乱序只认最后�
     expect(tab._board.state).toBe('ready');
   });
 });
+
+/* ------------------------------------------------------------------ *
+ * 个人最速腿（W-G5）：纯本地，与在线开关无关；在线关着也照常显示
+ * ------------------------------------------------------------------ */
+
+describe('W-G5 个人最速腿：你的最速与碑并排', () => {
+  const personalBox = (panel) => panel.querySelector('.legends-personal');
+  const personalRows = (panel) => [...(personalBox(panel)?.querySelector('.legends-personal-list')?.children ?? [])]
+    .map((li) => li.textContent);
+  const personalMsg = (panel) => personalBox(panel)?.querySelector('.legends-personal-msg')?.textContent ?? '';
+
+  it('有记录的先渲染，且按用时升序排在本地（与碑同一口径）；在线关着也照常显示', () => {
+    setLanguage('zh');
+    const bossBestTimes = new BossBestTimes(new MapStub());
+    bossBestTimes.consider('chaos-overlord', 120_000);
+    bossBestTimes.consider('shadow-warden', 60_000);
+    const { panel, tab } = boot({ online: onlineHarness({ enabled: false }), bossBestTimes });
+    tab.render(panel);
+    const rows = personalRows(panel);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toContain(STRINGS_ZH.boss_name_shadow);
+    expect(rows[0]).toContain('1:00');
+    expect(rows[1]).toContain(STRINGS_ZH.boss_name_chaos);
+    expect(rows[1]).toContain('2:00');
+  });
+
+  it('没有记录 → 一句"尚无个人最速"，且不挡在线榜', async () => {
+    setLanguage('zh');
+    const bossBestTimes = new BossBestTimes(new MapStub());
+    const online = onlineHarness();
+    const { panel, tab } = boot({ online, bossBestTimes });
+    tab.render(panel);
+    expect(personalMsg(panel)).toBe('尚无个人最速 —— 诸神哪天倒下，便刻在这里');
+    // 在线榜照旧工作：resolve 后成行
+    online.pending[0].resolve({
+      items: [{ runner: '阿岚', bossId: 'archmagus', clearTimeMs: 61_000, chapter: 2, submittedAt: 't' }],
+      count: 1,
+      maxLimit: 10,
+    });
+    await flush();
+    expect(rowsOf(panel)).toHaveLength(1);
+  });
+
+  it('未登记的 dungeon- Boss 最速也走守钥长格（与碑同一名册口径）', () => {
+    setLanguage('zh');
+    const bossBestTimes = new BossBestTimes(new MapStub());
+    bossBestTimes.consider('dungeon-ancient-archives', 45_000);
+    const { panel, tab } = boot({ online: onlineHarness({ enabled: false }), bossBestTimes });
+    tab.render(panel);
+    const rows = personalRows(panel);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toContain(STRINGS_ZH.boss_name_dungeon_warden);
+  });
+});
+
+/** 内存版 Storage，给个人最速当后端 */
+class MapStub {
+  constructor() { this._m = new Map(); }
+  getItem(k) { return this._m.has(k) ? this._m.get(k) : null; }
+  setItem(k, v) { this._m.set(k, String(v)); }
+  removeItem(k) { this._m.delete(k); }
+}

@@ -3187,6 +3187,9 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   legends_offline: 'Steles unavailable · online service off or gateway unreachable',
   legends_row_fmt: '#${rank} ${runner} · ${boss} · ${clock} · Ch.${chapter}',
   legends_note: 'Order: fastest first. Runs are submitted when a boss falls; this is a read-only stele',
+  legends_personal_title: 'Your fastest',
+  legends_personal_empty: 'No personal bests yet — they are inscribed when a boss falls',
+  legends_personal_row_fmt: '${boss} · ${clock}',
 
   trial_toast_started_fmt: 'Trial started: layer ${layer}',
   trial_toast_layer_fmt: 'Layer ${layer} cleared',

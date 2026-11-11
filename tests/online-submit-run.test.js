@@ -6,7 +6,7 @@
  * 1) 构造函数压了 runStartedAt（缺了它 clearTimeMs 就是 NaN/undefined —— 榜上会出现脏值）；
  * 2) boss-defeated 里仍然先走 telemetry（W-X2 的接线这次不许被切错）；
  * 3) submitRun 拿到的是四字段 record（runner/bossId/clearTimeMs/chapter），
- *    且 clearTimeMs 用 Math.max(0, …) 夹住（时钟倒挂不上传负数）；
+ *    且 clearTimeMs 用 Math.max(1, …) 夹住（时钟倒挂不上传负数）；
  * 4) online-services.submitRun 在 OnlineServices 里确实存在（悬空的话 import 也过、测试会更先红）。
  */
 import { describe, expect, it } from 'vitest';
@@ -34,13 +34,13 @@ describe('boss-defeated 监听器', () => {
   it('提交 submitRun，四字段 record（bossId 读事件真 payload）', () => {
     expect(body).toContain('onlineServices.submitRun({');
     expect(body).toContain('runner:');
-    expect(body).toContain("bossId: e?.detail?.bossId ?? ''");
-    expect(body).toContain('clearTimeMs:');
+    expect(body).toContain("const bossId = e?.detail?.bossId ?? ''");
+    expect(body).toContain('clearTimeMs,');
     expect(body).toContain('chapter:');
   });
   it('clearTimeMs 夹下界（时钟倒挂不传负数），从 runStartedAt 推', () => {
-    expect(body).toContain('Math.max(0,');
-    expect(body).toContain('now - (this.runStartedAt');
+    expect(body).toContain('Math.max(1,');
+    expect(body).toContain('fightStart ?? this.runStartedAt ?? now');
   });
 });
 

@@ -32,6 +32,7 @@ import { 建配置, 配置总线题, 刷新题 } from '../platform/config.js';
 import { 建总线 } from '../platform/bus.js';
 import { 建写者租约, 租约可调项 } from '../platform/lease.js';
 import { onlineServices } from '../online/OnlineServices.js';
+import { bossBestTimes } from '../game/BossBestTimes.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
  *  DOM 事件（resize / keydown / keyup）不走这里 —— 它们不在事件登记表里，EventBus 管不着。 */
 const GAME_EVENT_TAG = 'core/Game';
@@ -240,6 +241,9 @@ export class Game {
     this.autoPlayMode = false;
     /** 本次页面进入时间 —— 在线排行榜提交 `clearTimeMs` 用（W-X8）；不声称是"通关时长"（全主线没有计时器），仅供演示榜排序 */
     this.runStartedAt = typeof performance !== 'undefined' ? performance.now() : 0;
+    // W-G5：个人最速账本（纯本地 localStorage）—— boss-defeated 时登记一笔，
+    // 传说碑页签直接读（game.bossBestTimes 是表面字段，契约测试钉住）
+    this.bossBestTimes = bossBestTimes;
 
     this._buildRenderStack();
 
@@ -706,21 +710,33 @@ export class Game {
     });
     gameOn('boss-start', (e) => {
       this.audio.startBossFight(e.detail.bossId);
+      // W-G5：记下每场 Boss 战的开始时刻——击杀时算一格真正的"用时"，
+      // 而不是"页面打开到现在"（后者根本不是战斗用时）。
+      const bossId = e?.detail?.bossId;
+      if (bossId) {
+        this._bossFightStart = this._bossFightStart || new Map();
+        this._bossFightStart.set(bossId, typeof performance !== 'undefined' ? performance.now() : 0);
+      }
     });
     // W-X2 在线伙伴服务（可选，默认关闭）：击杀 Boss 后上报一条遥测。
     // localStorage['crossrealm_online']='1' / ?online=1 / window.__CROSSREALM_ONLINE__=true 才开启；
     // 没开或网络差时 postTelemetry 永远不抛（1.5s 超时、吞错），对本地游戏零影响。
     gameOn('boss-defeated', (e) => {
-      onlineServices.postTelemetry('boss_defeated', e?.detail?.bossId ?? '');
-      // W-X8：击杀 Boss 时提交通关记录 —— 走同一个开关、同一条吞错曲线（默认关闭 / 1.5s 超时 /
-      // 失败不打扰本地游戏）。clearTimeMs = 本次页面进入到此刻的毫秒数（演示榜用来排序即可，
-      // 不声称是"通关时长"——全主线没有计时器）。runner 用固定的 'adventurer'
+      const bossId = e?.detail?.bossId ?? '';
+      onlineServices.postTelemetry('boss_defeated', bossId);
+      // W-X8（W-G5 修订）：击杀 Boss 时提交通关记录 —— 走同一个开关、同一条吞错曲线（默认关闭 / 1.5s 超时 /
+      // 失败不打扰本地游戏）。clearTimeMs 现在是**这一场 Boss 战的用时**（boss-start → boss-defeated），
+      // 没有对应 start 时回退到页面生命周期（旧口径）。runner 用固定的 'adventurer'
       // （游戏里没有玩家姓名输入；演示榜对姓名无要求）。
       const now = typeof performance !== 'undefined' ? performance.now() : 0;
+      const fightStart = this._bossFightStart?.get(bossId);
+      const clearTimeMs = Math.max(1, Math.round(now - (fightStart ?? this.runStartedAt ?? now)));
+      this._bossFightStart?.delete(bossId);
+      bossBestTimes.consider(bossId, clearTimeMs);
       onlineServices.submitRun({
         runner: 'adventurer',
-        bossId: e?.detail?.bossId ?? '',
-        clearTimeMs: Math.max(0, Math.round(now - (this.runStartedAt ?? now))),
+        bossId,
+        clearTimeMs,
         chapter: this.quests?.chapter ?? 1,
       });
     });

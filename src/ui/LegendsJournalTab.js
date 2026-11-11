@@ -19,6 +19,7 @@
 import { keyText, refreshKeyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 import { bossNameKeyOf } from '../content/bossRoster.js';
+import { bossBestTimes } from '../game/BossBestTimes.js';
 
 /** 拉几条。服务端 maxLimit ≤ 50，这里取十条 —— 一块随身碑看得完的量 */
 const BOARD_LIMIT = 10;
@@ -59,12 +60,56 @@ export class LegendsJournalTab {
       <h2>${keyText(t('journal_tab_legends'))}</h2>
       <div class="trial-card">
         <p class="trial-intro">${t('legends_intro')}</p>
+        <div class="legends-personal" data-legends-personal></div>
         <div class="trial-board" data-legends-board></div>
       </div>
     `;
     refreshKeyText(panelEl);
+    // 个人最速：纯本地 localStorage —— 在线关着也照常显示
+    this._paintPersonal(panelEl);
     // 每次打开都拉一次：刚刚那局被镌刻上没，重进这一页即见真章（不靠跨打开的失效标记）
     this._loadBoard(panelEl);
+  }
+
+  /**
+   * 画"你的最速"那一格。数据源完全本地（`game.bossBestTimes`，缺省走单例），
+   * 不碰网络、不看在线开关 —— 诸神哪天倒下，账本就在这一刻记下。
+   */
+  _paintPersonal(panelEl) {
+    const box = panelEl?.querySelector?.('[data-legends-personal]');
+    if (!box) return;
+    box.textContent = '';
+
+    const head = document.createElement('div');
+    head.className = 'legends-personal-head';
+    const title = document.createElement('span');
+    title.className = 'legends-personal-title';
+    title.textContent = t('legends_personal_title');
+    head.appendChild(title);
+    box.appendChild(head);
+
+    const store = this.game.bossBestTimes ?? bossBestTimes;
+    const rows = typeof store?.top === 'function' ? store.top(BOARD_LIMIT) : [];
+    if (!rows.length) {
+      const msg = document.createElement('div');
+      msg.className = 'legends-personal-msg';
+      msg.textContent = t('legends_personal_empty');
+      box.appendChild(msg);
+      return;
+    }
+
+    const ul = document.createElement('ul');
+    ul.className = 'legends-personal-list';
+    for (const { bossId, bestMs } of rows) {
+      const li = document.createElement('li');
+      li.className = 'legends-personal-row';
+      li.textContent = t('legends_personal_row_fmt', {
+        boss: t(bossNameKeyOf(bossId)),
+        clock: fmtClock(bestMs),
+      });
+      ul.appendChild(li);
+    }
+    box.appendChild(ul);
   }
 
   /**

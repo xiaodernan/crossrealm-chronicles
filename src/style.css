@@ -2510,6 +2510,21 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .trial-board-msg { font-size: 0.72rem; color: #8a7d6e; margin-top: 6px; }
 .trial-board-note { font-size: 0.66rem; color: #7a6f66; margin-top: 6px; line-height: 1.5; }
 
+/* 你的最速（W-G5 切片1）：传说碑最上一扇——纯本地 localStorage，离线照常 */
+.legends-personal { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(201,169,98,0.18); }
+.legends-personal-head { display: flex; align-items: baseline; gap: 8px; }
+.legends-personal-title { font-size: 0.72rem; color: #cbb26a; letter-spacing: 0.1em; }
+.legends-personal-list { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 3px; }
+.legends-personal-row {
+  font-size: 0.72rem;
+  color: #d8c49a;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-variant-numeric: tabular-nums;
+}
+.legends-personal-row:first-child { color: #ffd98a; }
+.legends-personal-msg { font-size: 0.72rem; color: #8a7d6e; margin-top: 6px; }
+
 /* 行动风闻（W-G3 切片1）：试炼页下半屏的第二条异步块 — 最近 windowSize 次
    行动的频次条形图。与榜同门：离线一句"取不到"，绝不停在"聆听中" */
 .trial-summary { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(178,120,96,0.14); }
