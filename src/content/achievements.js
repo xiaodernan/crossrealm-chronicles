@@ -46,6 +46,8 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-voidmaw', title: 'ach_echo_voidmaw_title', desc: 'ach_echo_voidmaw_desc', check: (s) => (s.echoVoidMaw ?? 0) >= 3 },
   { id: 'echo-abysssalt', title: 'ach_echo_abysssalt_title', desc: 'ach_echo_abysssalt_desc', check: (s) => (s.echoAbysssalt ?? 0) >= 3 },
   { id: 'echo-original', title: 'ach_echo_original_title', desc: 'ach_echo_original_desc', check: (s) => (s.echoGloom ?? 0) >= 3 && (s.echoRadiant ?? 0) >= 3 && (s.echoVoidMaw ?? 0) >= 3 && (s.echoAbysssalt ?? 0) >= 3 },
+  { id: 'echo-homecoming', title: 'ach_echo_homecoming_title', desc: 'ach_echo_homecoming_desc', check: (s) => (s.echoHomecoming ?? 0) >= 3 },
+  { id: 'echo-homecoming-master', title: 'ach_echo_homecoming_master_title', desc: 'ach_echo_homecoming_master_desc', check: (s) => (s.echoHomecoming ?? 0) >= 5 },
 ];
 
 /**
@@ -67,6 +69,7 @@ export const ECHO_FRANCHISE_BUCKETS = [
   ['echoRadiant', FRANCHISE.RADIANT],
   ['echoVoidMaw', FRANCHISE.VOIDMAW],
   ['echoAbysssalt', FRANCHISE.ABYSSSALT],
+  ['echoHomecoming', FRANCHISE.HOMECOMING],
 ];
 
 // 合并导出（供外部直接使用）
