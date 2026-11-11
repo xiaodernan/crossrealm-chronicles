@@ -271,6 +271,13 @@ try {
     if (-not ($ss -match '"type":"concurrent"')) { Write-Error "season stats missing cache type: $ss"; exit 1 }
 
     Write-Host ""
+    Write-Host "=== 4g) via gateway: ops stats carries request counters (W-P14) ==="
+    $gs = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/stats' -TimeoutSec 15).Content
+    Write-Host $gs
+    if (-not ($gs -match '"requests":\{')) { Write-Error "ops stats missing requests section: $gs"; exit 1 }
+    if (-not ($gs -match '"total":[0-9]+')) { Write-Error "ops stats missing requests.total: $gs"; exit 1 }
+
+    Write-Host ""
     Write-Host "=== 5) hot refresh: edit served config (max-limit 4 -> 3, note v1 -> v2) WITHOUT restarting game-service ==="
     @'
 game-service:

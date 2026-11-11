@@ -37,12 +37,13 @@ public class OpsController {
     private final TrialLeaderboardService trialService;
     private final TelemetryService telemetryService;
     private final SeasonClient seasonClient;
+    private final RequestCountFilter requestCountFilter;
     private final String applicationName;
 
     /** 下游 season-service 的外呼结果走一层 30s TTL，避免运维页轮询把上游打爆 */
     private final TtlCache seasonCache = new TtlCache();
 
-    /** @Autowired: 与 W-X13 起的契约一致 — 单一六参构造供 Spring 注入 */
+    /** @Autowired: 与 W-X13 起的契约一致 — 单一构造供 Spring 注入（W-P14 起七参） */
     @org.springframework.beans.factory.annotation.Autowired
     public OpsController(
             GameServiceProperties properties,
@@ -50,12 +51,14 @@ public class OpsController {
             TrialLeaderboardService trialService,
             TelemetryService telemetryService,
             SeasonClient seasonClient,
+            RequestCountFilter requestCountFilter,
             @Value("${spring.application.name:game-service}") String applicationName) {
         this.properties = properties;
         this.leaderboardService = leaderboardService;
         this.trialService = trialService;
         this.telemetryService = telemetryService;
         this.seasonClient = seasonClient;
+        this.requestCountFilter = requestCountFilter;
         this.applicationName = applicationName;
     }
 
@@ -150,6 +153,12 @@ public class OpsController {
 
         /* --- telemetry --- */
         result.put("telemetry", telemetryService.summarize(5));
+
+        /* --- 请求计数（W-P14：本实例从启动到现在吃了多少业务流量） --- */
+        Map<String, Object> req = new LinkedHashMap<>();
+        req.putAll(requestCountFilter.counters());
+        req.put("note", "actuator 与 /api/ops 不计入（运维/探活不是业务流量）");
+        result.put("requests", req);
 
         return result;
     }

@@ -31,6 +31,7 @@ class OpsSeasonEndpointTest {
                 new TrialLeaderboardService(properties),
                 new TelemetryService(properties),
                 client,
+                new RequestCountFilter(),
                 "game-service");
     }
 

@@ -79,7 +79,11 @@ class OpsControllerTest {
                 .andExpect(jsonPath("$.trials.uniqueSeasons").isNumber())
                 .andExpect(jsonPath("$.telemetry.windowSize").isNumber())
                 .andExpect(jsonPath("$.telemetry.distinctTypes").isNumber())
-                .andExpect(jsonPath("$.telemetry.byType").isArray());
+                .andExpect(jsonPath("$.telemetry.byType").isArray())
+                // W-P14：请求计数三条
+                .andExpect(jsonPath("$.requests.total").isNumber())
+                .andExpect(jsonPath("$.requests.rejected4xx").isNumber())
+                .andExpect(jsonPath("$.requests.serverError5xx").isNumber());
     }
 
     @Test
