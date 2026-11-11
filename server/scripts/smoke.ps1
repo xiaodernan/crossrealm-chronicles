@@ -179,6 +179,20 @@ try {
     }
     if (-not $feignWarmupOk) { Write-Error 'warm-up failed: game-service never reached season-service via Feign within 90s'; exit 1 }
 
+    # Request-id contract: caller-supplied id is echoed verbatim; missing id gets a UUID from the gateway.
+    Write-Host "=== 0b) request id: gateway echoes X-Request-Id, generates UUID when absent ==="
+    $ridIn = "smoke-req-$(Get-Random)"
+    $ridResp = Invoke-WebRequest -UseBasicParsing -Headers @{ 'X-Request-Id' = $ridIn } 'http://localhost:28080/api/version' -TimeoutSec 10
+    if ($ridResp.Headers['X-Request-Id'] -ne $ridIn) {
+        Write-Error "request id not echoed: got '$($ridResp.Headers['X-Request-Id'])', want '$ridIn'"; exit 1
+    }
+    $ridAuto = Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/version' -TimeoutSec 10
+    $ridAutoVal = $ridAuto.Headers['X-Request-Id']
+    if ($ridAutoVal -notmatch '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$') {
+        Write-Error "gateway did not generate a UUID X-Request-Id (got '$ridAutoVal')"; exit 1
+    }
+    Write-Host "request-id echo + generation ok ($ridIn / $ridAutoVal)"
+
     Write-Host ""
     Write-Host "=== 1) config-server: the config it serves for game-service ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28888/game-service/default' -TimeoutSec 15).Content
