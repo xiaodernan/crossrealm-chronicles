@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 telemetry 异步摄取（W-M1）** —— 提交 `ec35725`
+
+  - **起因**：遥测摄取一直是同步写——POST /api/telemetry/events 在请求线程内 `synchronized(events)` 直接落 deque，请求线程与 count/summarize 读抢同一把锁。burst 一打过来，要么排队、要么丢。而且 `TelemetryService` 自己的 javadoc 早就写着"生产环境应换成消息队列；这里刻意保持零依赖"——这一片就是把那半句话落成真。
+
+  - **做法**：`TelemetryService` 内嵌有界 inbox 模式（零新依赖、零中间件）：① `ArrayBlockingQueue(1024)` 有界缓冲（maxEvents=500 的 2× 余量）；② 单消费者守护线程 `telemetry-drainer`（250ms poll → take → 落 deque）；③ **背压度量** `capacity / depth / enqueued / dropped / processed`；④ 满则**丢最老一格**并记 dropped（与现有"超 maxEvents 丢弃最老"一字同口径），本条照样进——请求线程永不阻塞；⑤ **单消费者保序**（id 单调 == 写入顺序，与改前 synchronized 口径一致）；⑥ **at-most-once**（崩溃丢在途事件——影子数据不是账本）；⑦ 读侧（count/snapshot/summarize）先 `drainPending()`（inbox 现存全部搬进 deque）再读——**写完就能读到**，对调用方与测试而言与改前同语义。请求线程不再摸 deque 锁。`/api/ops/stats` 新增 `telemetryQueue` 段。`TelemetryQueueTest` ×4（满 1024 drop-oldest / drainPending 原子 / 保序 / at-most-once 记账）；smoke 4h 经网关断言 `telemetryQueue` 三格。
+
+  - **验证**：game-service `mvn verify` BUILD SUCCESS（**52/52** 绿）；`smoke.ps1` PASSED（4h：`telemetryQueue { capacity:1024, depth:0, enqueued:1, dropped:0, processed:1 }`）。
+
+  - **风险与后续**：① inbox 是进程内有界缓冲——**不是**跨实例消息队列（多实例部署时各实例各自缓冲，遥测聚合各计各的）；跨实例广播要 RabbitMQ/Redis pub/sub，本仓库刻意不引中间件，如未来确实需要，Spring Cloud Bus（`spring-cloud-starter-bus-redis` + `/actuator/busrefresh`）是最小改动面；② `record()` 的返回 id 由 `sequence` 原子序号分配，与落 deque 顺序一致（单消费者），id 空洞只在 inbox 满丢最老时出现（可接受）；③ 与 W-P14（requests 计数）互补：P14 看流量量级，M1 看摄取健康——`dropped > 0` 是 inbox 长期满载的第一信号（说明 burst 持续超过 1024，需要扩容或降低 producer 频率）；④ 下一片：把 leaderboard POST 也走同款异步（写入落地走队列、top() drain 读——与 M1 同构），或 frontend telemetry 批量发送（每 5 秒 flush 一次小包而不是每击杀一条）。
 - **2026-11-12 谢幕·最后一盏灯（W-V12）** —— 提交 `259ce94`
 
   - **起因**：W-E6 给了通关一枚派生回声（journal 里的一条记录），W-V8/W-V9 给了 master 视听反馈（金迸+金铃），W-V11 给了旅人之灯的金焰——但**片尾字幕**（玩家在这个游戏里看到的最后一屏）对"他集齐了"仍然一无所知。走完最后一盏灯的人，该在 credits 上多看一眼。
