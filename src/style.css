@@ -1727,6 +1727,42 @@ body.achievement-flash::after {
   100% { opacity: 0; filter: brightness(1) saturate(1); }
 }
 
+/* ===== Boss 胜利金潮（W-V7） =====
+   不是成就的四角收束，也不是 finisher 的正中炸开——
+   这是"地平线升起的日出"：金潮从屏幕底部涨上来，漫过半屏，再退回去。
+   z-index 54 与 finisher 平级，但语气最慢最暖：2.4s 涌起 → 退去。 */
+body.boss-victory::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 54;
+  background:
+    radial-gradient(ellipse 140% 100% at 50% 118%, rgba(255, 226, 150, 0.55) 0%, rgba(255, 196, 100, 0.28) 32%, rgba(255, 170, 80, 0.08) 55%, transparent 75%),
+    linear-gradient(180deg, transparent 55%, rgba(255, 217, 138, 0.08) 82%, rgba(255, 226, 150, 0.18) 100%);
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 不做涌动，只给一层静默的暖纱——胜利是确定的事实，不需要运动来证明 */
+  body.boss-victory::after {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body.boss-victory::after {
+    animation: bossVictoryTide 2.4s cubic-bezier(0.22, 0.61, 0.21, 1) forwards;
+  }
+
+  @keyframes bossVictoryTide {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+}
+
 #camera-mode-display {
   color: #88bbdd;
   font-size: 0.75rem;

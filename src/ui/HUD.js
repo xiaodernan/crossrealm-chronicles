@@ -20,6 +20,8 @@ const ZONE_BANNER_TAG = 'hud-zone-banner';
 const FINISHER_TAG = 'hud-finisher-flash';
 /** 成就解锁鎏金收束的调度组（W-V4） */
 const ACHIEVEMENT_TAG = 'hud-achievement-flash';
+/** Boss 胜利金潮的调度组（W-V7）——2.4s 金色涌潮从底部涨上来又退去 */
+const VICTORY_TAG = 'hud-boss-victory';
 /** Boss 血条转阶段闪白的分组（W-V2 切片2） */
 const BOSS_BAR_FLASH_TAG = 'hud-boss-bar-phase-flash';
 /** 本类全部监听的所有权标识：dispose() 按它一次性注销（B44 剩余半区） */
@@ -659,6 +661,11 @@ buildHUD() {
       this.bossBarWrap.classList.add('hidden');
       // Boss 死在时停里就不会再派发 time-stop-end（update 直接早退），这条是唯一的收口路径
       this._clearSubtitleOverlay('timeStop');
+      /* W-V7：胜利金潮 —— 金色的潮从屏幕底部涨上来再退去，
+       * 比 achievement-flash（四角收束）更像"地平线升起的日出"——Boss 倒下的那一刻，天地同色。 */
+      document.body.classList.add('boss-victory');
+      scheduler.clear(VICTORY_TAG);
+      scheduler.after(2.4, () => document.body.classList.remove('boss-victory'), VICTORY_TAG);
     }, EVENT_TAG);
 
     on('weapon-changed', (e) => {
@@ -756,6 +763,9 @@ buildHUD() {
     scheduler.clear(FINISHER_TAG);
     scheduler.clear(BOSS_BAR_FLASH_TAG);
     scheduler.clear(ACHIEVEMENT_TAG);
+    // 销毁就地收掉胜利金潮残留 —— 测试文档复用 body，残留会污染下一个用例
+    document.body?.classList?.remove('boss-victory');
+    scheduler.clear(VICTORY_TAG);
   }
 
   /** 区横幅（切片36 起收的是文案键）：只活 3.2 秒，但键比展开后的文本便宜 */
