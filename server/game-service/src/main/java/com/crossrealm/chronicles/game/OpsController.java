@@ -59,12 +59,18 @@ public class OpsController {
         this.applicationName = applicationName;
     }
 
+    /** Controller 构造时刻 ≈ 应用启动时刻（容器装配完才创建），足够当 uptime 的起点 */
+    private final java.time.Instant startedAt = java.time.Instant.now();
+
     @GetMapping("/api/ops/health")
     public Map<String, Object> health() {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("service", applicationName);
         result.put("version", "0.1.0-SNAPSHOT");
         result.put("javaVersion", System.getProperty("java.version"));
+        // W-X17：可用性面的两格 uptime —— 重启过没、活了多久，运维一眼分得清"实例刚起"和"成熟实例"
+        result.put("startedAt", startedAt.toString());
+        result.put("uptimeSec", java.time.Duration.between(startedAt, java.time.Instant.now()).getSeconds());
         result.put("config", Map.of(
                 "leaderboardMaxLimit", properties.getLeaderboard().getMaxLimit(),
                 "seedDemoData", properties.getLeaderboard().isSeedDemoData(),

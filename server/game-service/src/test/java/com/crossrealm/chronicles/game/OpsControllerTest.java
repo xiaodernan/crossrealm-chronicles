@@ -30,6 +30,9 @@ class OpsControllerTest {
                 .andExpect(jsonPath("$.service").value("game-service"))
                 .andExpect(jsonPath("$.version").value("0.1.0-SNAPSHOT"))
                 .andExpect(jsonPath("$.javaVersion").isNotEmpty())
+                // W-X17：uptime 两格（起点 ISO-8601 + 已活秒数 ≥0）
+                .andExpect(jsonPath("$.startedAt").isNotEmpty())
+                .andExpect(jsonPath("$.uptimeSec").isNumber())
                 .andExpect(jsonPath("$.config.leaderboardMaxLimit").isNumber())
                 .andExpect(jsonPath("$.config.telemetryMaxEvents").isNumber())
                 .andExpect(jsonPath("$.config.versionNote").isNotEmpty())
