@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 game-service 请求计数器（W-P14）** —— 提交 `2820117`
+
+  - **起因**：网关有限流计数（W-P13），season-service 有缓存计数（W-S1），game-service 有榜/遥测聚合（W-P12）——唯一没有的格子是"这个实例从启动到现在一共吃了多少业务请求、漏了多少 4xx/5xx"。运维看 game-service 只能看排行榜，看不见流量本身。
+
+  - **做法**：新增 `RequestCountFilter`（`OncePerRequestFilter`）——`chain.doFilter` 之后按 `response.getStatus()` 计数：total / rejected4xx / serverError5xx；**排除 `/actuator` 与 `/api/ops`**（探活/运维轮询不是业务流量，否则 smoke 自己就能把计数器刷满）；只记累计计数、不记路径/IP（计数器不是访问日志）。`/api/ops/stats` 新增 `requests` 段（`total` / `rejected4xx` / `serverError5xx` / `note`，与 `telemetry`/`leaderboard`/`trials` 同一页）。构造六参 → 七参。`RequestCountFilterTest` ×4：业务计入 / ops+actuator 不计入 / 404 计入 / 口径自洽（total ≥ 4xx + 5xx）。`OpsSeasonEndpointTest` 直构造改七参。smoke 4g 经网关断言（实测 `requests.total=10, rejected4xx=0, serverError5xx=0`）。
+
+  - **验证**：game-service `mvn verify` BUILD SUCCESS（48/48 绿）；`smoke.ps1` PASSED（4g 断言 `requests` 段三字段全部为数字）。
+
+  - **风险与后续**：① 只统计同步请求（本服务全部 @RestController 同步路径；Feign 下游调用不在此计）；② 排除运维面是本片最关键的一笔——不然每次 smoke 跑完 `total` 都被探活污染，指标毫无可比性；③ 与 W-P13 口径对称但不重复：网关数的是"挡了谁"，本片数的是"放了谁"，两者拼起来就是"总流量 − 网关挡掉的 = 落到 game-service 的"；④ 下一片：game-service 的 4xx/5xx 各按 path-group（`/api/leaderboard`、`/api/trials`、`/api/telemetry`）拆计数（要引 path 标签，面太大、这一片不动）。
 - **2026-11-12 旅人之灯·通关变色（W-V11）** —— 提交 `fccecb8`
 
   - **起因**：W-E6 给了通关一枚派生回声（文字层），W-V8/W-V9 给了 master 视觉听觉金迸（反馈层），但**HUB 那盏等玩家归来的灯**——所有返乡线的母题本体——从深渊走到终章一直是同一团暖纸琥珀。通关的人回到枢纽，灯不知道他走完了回家的路。
