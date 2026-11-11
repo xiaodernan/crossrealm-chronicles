@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 Boss 胜利金潮（W-V7）** —— 提交 `58bf8f5`
+
+  - **起因**：Boss 倒下的那一刻，画面上只有血条消失和几行击杀结算——没有"天地为之变色"的一记留白。成就有鎏金收束（W-V4）、finisher 有正中炸开、Boss 转阶段有白金震屏，唯独"胜利本身"缺一个专属的收束动作。胜利是玩家整场战斗的报酬，值得一层从地平线涨上来的暖金。
+
+  - **做法**：HUD 复用既有 `boss-defeated` 监听（不加事件、不加监听数——事件总线账本 22 不动）：派发时 `document.body` 挂 `boss-victory`，`scheduler.after(2.4s)` 撤；新常量 `VICTORY_TAG` 管调度；dispose 顺手 `body.classList.remove`（测试文档复用 body，残留会污染下一个用例）。CSS：暖金 `radial-gradient(ellipse 140% 100% at 50% 118% …)` 从屏底涨起 + 底部线性渐变助推，`z-index 54`（与 finisher 平级、低于/等同于现有完成潮流家族不抢戏）；`@media (prefers-reduced-motion: no-preference)` 跑 2.4s 涌起→退去 keyframes；`reduce` 给一层静默暖纱 `opacity: 0.5`（胜利是事实，不需要运动证明）。新增 `tests/hud-boss-victory.test.js` 1 条运行期门禁（派发→挂潮起；dispose→收潮落）。
+
+  - **验证**：`npm test` 6361 全绿（428 files）；`npm run lint` 0/0；`npm run size` 首屏 2168322 B（2.07 MiB，环比线内余量 0.06 MiB、绝对上限余量 0.18 MiB）；`npm run e2e` 通关 ✓（frames=13560 / chapter=5 / exceptions=0）。
+
+  - **风险与后续**：① `boss-victory::after` 与 `finisher-flash::after` 都占 `::after` 位——二者不会同时活跃（finisher 是连杀收尾 0.42s，boss-defeated 发生在 Boss 死亡瞬间；同时挂上是合法的：两层都是 body 伪元素？不——同一元素只有一层 `::after`，后者的 content 会盖掉前者的 background。当前 `.boss-victory` 与 `.finisher-flash` 同时挂上时 boss-victory 的渐变会替换 finisher 的径向光——视觉上反而成立（金潮盖住金闪、保留暖金），但这是 CSS 最后声明者胜出的偶然，不是契约，记于此备查；要彻底分层就得把胜利潮挪到独立元素，这次不动；② 与 `ach-master` 粒子迸发的排期：这枚金潮是"地平线级"的泛光，成就是"碑级"的聚首，两者正交，后续若加 ach-master 迸金，建议走 `::before` 或独立 canvas 层；③ 下一片：胜利金潮期间 caps lock 的低速镜头推移（CombatCameraDirector bossKill 分支已有 0.55 flash，可叠加 fov 微收）。
 - **2026-11-12 HUD 赛季金印（W-V6）** —— 提交 `c3efc40`
 
   - **起因**：在线伙伴服务一路（Eureka/Config/Gateway/game-service/season-service + 赛季 Feign 确认 + SeasonSystem 前端 `refreshFromOnline`）一直默默确认"这一季是不是服务端说的"，但**玩家在 HUD 上看不见任何痕迹**——赛季页藏在 [J] 图鉴里，Soulfire 加成、词缀、剩余天数全要开面板才看得到。前端说"魅力登峰造极"，后端说"集大成者"，协同在屏幕上却没有一个常驻证据。
