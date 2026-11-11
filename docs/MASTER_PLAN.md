@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 HUD 赛季金印（W-V6）** —— 提交 `c3efc40`
+
+  - **起因**：在线伙伴服务一路（Eureka/Config/Gateway/game-service/season-service + 赛季 Feign 确认 + SeasonSystem 前端 `refreshFromOnline`）一直默默确认"这一季是不是服务端说的"，但**玩家在 HUD 上看不见任何痕迹**——赛季页藏在 [J] 图鉴里，Soulfire 加成、词缀、剩余天数全要开面板才看得到。前端说"魅力登峰造极"，后端说"集大成者"，协同在屏幕上却没有一个常驻证据。
+
+  - **做法**：① `buildHUD()` 的 `.hud-stats` 第一格加 `#season-pill`（季节图标 🔥/🌊/🌒/✨ + 季名 + 剩余天数 + 魂火加成 + 来源金点）；② `_renderSeasonPill()`——0.5s 节流问 `game.seasons.getState()`，签名 `id|daysRemaining|soulsBonusPct|source` 不变就不碰 DOM；在线金点 `.is-online` 亮 `#ffd98a` 暖光，本地保持灰暗；hover `title` 写清来源（` season_source_online / season_source_local`）+ 剩余天数 + 加成；四季边框色温（ember 暖橙 / tide 青 / gloom 紫 / radiant 金）；③ 一个新键 `hud_season_days_short`（zh 还剩 ${days} 天 / en ${days}d left），键数登记 2883→2884（`i18nKeyCount.js`）；④ 新增 `tests/hud-season-pill.test.js` 4 条运行期门禁：无 seasons 保持 hidden / 在线 radiant 全字段落地 / 来源翻 local 金点熄灭 / 签名不变不重写 name 节点（`__sentinel__` 陷阱）；⑤ 赛季 Tab 不动——金印是"瞄一眼"，面板是"读全书"。
+
+  - **验证**：`npm test` 6360 全绿（427 files）；`npm run lint` 0/0；`npm run build` 干净；`npm run size` 首屏 2167466 B（2.07 MiB ≤ 2.13 MiB 环比线 / 2.25 MiB 绝对上限，余量 0.18 MiB）；`npm run e2e` 通关 ✓（frames=13560 / chapter=5 / exceptions=0）。
+
+  - **风险与后续**：① `season-pill` 在窄屏（≤某个断点）暂未单独隐藏——`.hud-stats` 本身 flex-wrap，四格在 375px 宽会换行成两行，视觉上尚可接受；若后续要收窄布局，把金印并入第二行即可；② 金点的"在线"不代表低延迟在线（只是一台服务确认过）——文案用的是 existing `season_source_online`，口径一致；③ 下一片：Boss 胜利收尾金潮（kill → 全屏金色 radial 淡入淡出 + 王座 CG 衔接）或 Water elemental 专属胜利曲。
 - **2026-11-12 跨域聚合统计端点（W-P12）** —— 提交 `8ba4df4`
 
   - **起因**：/api/ops/health 只回答"我活着没"，/api/ops/season 只回答"季是什么"——运维想知道**整台游戏服务眼下的成绩单长什么样**：榜上最快多少、试炼榜最高分多少、遥测里听到了什么频次。这三块数据本来就全在内存里（leaderboard / trials / telemetry），缺的只是一扇能一次读完的窗。
