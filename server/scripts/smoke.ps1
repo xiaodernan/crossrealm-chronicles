@@ -278,6 +278,14 @@ try {
     if (-not ($gs -match '"total":[0-9]+')) { Write-Error "ops stats missing requests.total: $gs"; exit 1 }
 
     Write-Host ""
+    Write-Host "=== 4h) via gateway: telemetry queue carries backpressure stats (W-M1) ==="
+    $tq = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/stats' -TimeoutSec 15).Content
+    if (-not ($tq -match '"telemetryQueue":\{')) { Write-Error "ops stats missing telemetryQueue: $tq"; exit 1 }
+    if (-not ($tq -match '"enqueued":[0-9]+')) { Write-Error "ops stats missing telemetryQueue.enqueued: $tq"; exit 1 }
+    if (-not ($tq -match '"processed":[0-9]+')) { Write-Error "ops stats missing telemetryQueue.processed: $tq"; exit 1 }
+    if (-not ($tq -match '"depth":[0-9]+')) { Write-Error "ops stats missing telemetryQueue.depth: $tq"; exit 1 }
+
+    Write-Host ""
     Write-Host "=== 5) hot refresh: edit served config (max-limit 4 -> 3, note v1 -> v2) WITHOUT restarting game-service ==="
     @'
 game-service:

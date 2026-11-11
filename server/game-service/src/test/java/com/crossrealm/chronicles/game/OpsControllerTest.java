@@ -83,7 +83,13 @@ class OpsControllerTest {
                 // W-P14：请求计数三条
                 .andExpect(jsonPath("$.requests.total").isNumber())
                 .andExpect(jsonPath("$.requests.rejected4xx").isNumber())
-                .andExpect(jsonPath("$.requests.serverError5xx").isNumber());
+                .andExpect(jsonPath("$.requests.serverError5xx").isNumber())
+                // W-M1：遥测队列背压
+                .andExpect(jsonPath("$.telemetryQueue.capacity").isNumber())
+                .andExpect(jsonPath("$.telemetryQueue.enqueued").isNumber())
+                .andExpect(jsonPath("$.telemetryQueue.depth").isNumber())
+                .andExpect(jsonPath("$.telemetryQueue.dropped").isNumber())
+                .andExpect(jsonPath("$.telemetryQueue.processed").isNumber());
     }
 
     @Test

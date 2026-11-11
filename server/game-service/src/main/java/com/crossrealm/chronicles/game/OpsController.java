@@ -154,6 +154,9 @@ public class OpsController {
         /* --- telemetry --- */
         result.put("telemetry", telemetryService.summarize(5));
 
+        /* --- telemetry 队列背压（W-M1：capacity / depth / enqueued / dropped / processed） --- */
+        result.put("telemetryQueue", new LinkedHashMap<>(telemetryService.queueStats()));
+
         /* --- 请求计数（W-P14：本实例从启动到现在吃了多少业务流量） --- */
         Map<String, Object> req = new LinkedHashMap<>();
         req.putAll(requestCountFilter.counters());
