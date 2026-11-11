@@ -33,6 +33,8 @@ class OpsControllerTest {
                 // W-X17：uptime 两格（起点 ISO-8601 + 已活秒数 ≥0）
                 .andExpect(jsonPath("$.startedAt").isNotEmpty())
                 .andExpect(jsonPath("$.uptimeSec").isNumber())
+                // W-X18：没带 X-Request-Id 时回 null（不编造）
+                .andExpect(jsonPath("$.requestId").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.config.leaderboardMaxLimit").isNumber())
                 .andExpect(jsonPath("$.config.telemetryMaxEvents").isNumber())
                 .andExpect(jsonPath("$.config.versionNote").isNotEmpty())
@@ -49,5 +51,13 @@ class OpsControllerTest {
                 .andExpect(jsonPath("$.inMemory.seasonCache.hits").isNumber())
                 .andExpect(jsonPath("$.inMemory.seasonCache.misses").isNumber())
                 .andExpect(jsonPath("$.inMemory.seasonCache.entries").isNumber());
+    }
+
+    @Test
+    void requestIdIsEchoedVerbatimWhenProvided() throws Exception {
+        // W-X18：带 id 进来就原样带回去——整条链只有一个名字
+        mockMvc.perform(get("/api/ops/health").header("X-Request-Id", "trace-abc-123"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestId").value("trace-abc-123"));
     }
 }

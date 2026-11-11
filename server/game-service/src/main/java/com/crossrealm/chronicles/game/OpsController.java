@@ -63,11 +63,16 @@ public class OpsController {
     private final java.time.Instant startedAt = java.time.Instant.now();
 
     @GetMapping("/api/ops/health")
-    public Map<String, Object> health() {
+    public Map<String, Object> health(
+            @org.springframework.web.bind.annotation.RequestHeader(value = "X-Request-Id", required = false)
+            String requestId) {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("service", applicationName);
         result.put("version", "0.1.0-SNAPSHOT");
         result.put("javaVersion", System.getProperty("java.version"));
+        // W-X18：网关注入的 X-Request-Id 原样回显——curl 带了 id 整条链就只有一个名字；
+        // 没带就给 null（不编造：空就是空，运维一眼看见这扇门有没有被贴上名字）。
+        result.put("requestId", requestId);
         // W-X17：可用性面的两格 uptime —— 重启过没、活了多久，运维一眼分得清"实例刚起"和"成熟实例"
         result.put("startedAt", startedAt.toString());
         result.put("uptimeSec", java.time.Duration.between(startedAt, java.time.Instant.now()).getSeconds());
