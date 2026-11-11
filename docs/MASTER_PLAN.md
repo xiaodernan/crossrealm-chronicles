@@ -6025,6 +6025,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 横幅在结局字幕里滚动（与字幕同序），不是一次性弹窗——跳过按钮照旧能绕过；② 老档没有最速记录 → 横幅缺席，玩家不会看到空块；③ 下一片：终章过场向"个人最速 × 本局"呈现，或 Journal 加"本周回响"周报（本地聚合 108 把来过副本）。
 
+- **2026-11-11 返乡旅人支线（W-J1）** —— 提交 `5c6aa5e`
+
+  - **起因**：W-E4 落了返乡母题五枚回声，但"集齐它们"本身没有任何回报——玩家走完全部返乡之路却劳而无功，这是对他注意力的不诚实。零批新 POI、零新键，只是把五枚回声接成一条可完成的支线。
+
+  - **做法**：`side-homecoming-wayfare`（zone: global，reward 22；check `countFranchise(FRANCHISE.HOMECOMING) >= 3`）——五枚返乡回声里任意三条即完成（与巡礼同三条门槛口径，但**不是 tour**：返乡回声分挂五座位面，`franchiseZone` 当场抛"跨多个世界"；命名为 wayfare 也同 master 派同形：跨面横切）。i18n 3 键（`sq_side_homecoming_wayfare_*`：归途者/Wayfarer，title+desc+journal）；**B3 支线 **55** → **56** 条（分区专属 42 不变，wayfare 是全局）**；`tests/side-quest-roster.test.js` 仍全局名册五 → 六（按字典序插在 `side-echo-half` 与 `side-original-master` 之间）；`tests/content-registry.test.js` POP 普查 19 → 20；键数 2876→**2879**。
+
+  - **验证**：`npm test` 6356 全绿；build 无 chunk 回退；`e2e-clear` frames=13560 / exceptions=0；**`43043895674` 前端 CI SUCCESS（22m37s，含 **Perf smoke** 全绿——W-E4 切片2 + perf 重钉的上一次 CI 红已被这一格收口**。前端门禁 43043524897（W-P9 code push）cancel、基础 docs push 被 43042323544 cancel，但最新树全绿。**诚实记录**：W-J1 推送后仓的 CI 是 `43043895674` 之后 `5c6aa5e` 的下一次答案（不再有替补推送取消窗口）。
+
+  - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
+
 - **2026-11-11 网关 Server-Timing（W-P9）** —— 提交 `c4f29bc`、`8b8a1f6`
 
   - **起因**：W-P8 给链路钉了一个名字（X-Request-Id），但**慢**这件事还没人量——玩家说"怎么总卡一下"，curl 至少要能拆开"是网关慢还是下游慢"。RFC 9218 早有答案：`Server-Timing`。
