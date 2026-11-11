@@ -664,7 +664,7 @@ describe('`ref` 能查 `index` 形状的表：收的是键，不是行里的 id 
       : t));
     const errs = checkContent(tables);
     expect(errs.filter((e) => /magicc/.test(e))).toHaveLength(1);
-    expect(errs[0]).toMatch(/echoes\[65\]\.zone/);
+    expect(errs[0]).toMatch(/echoes\[66\]\.zone/);
   });
 });
 
@@ -680,7 +680,7 @@ describe('`ref` 能查 `index` 形状的表：收的是键，不是行里的 id 
 describe('W-B2 内容普查：条数钉死', () => {
   it('每张表的条数 = 与 HEAD 深比对那天实测的数', () => {
     expect(contentSummary()).toMatchObject({
-      echoes: 65,
+      echoes: 66,
       ambientZoneEvents: 6,
       loreFragments: 18,
       npcLines: 3,

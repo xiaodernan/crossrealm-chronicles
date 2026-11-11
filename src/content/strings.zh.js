@@ -3201,6 +3201,8 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   echo_homecoming_beacon_desc: '星海深处多了一枚信标，它发出的代码念的是你的名字——归途从不是一个人。',
   echo_homecoming_tide_title: '盐海归潮',
   echo_homecoming_tide_desc: '盐海退潮，露出搁浅多年的旧船壳，船头指着位面枢纽的方向。',
+  echo_homecoming_lantern_title: '旅人之灯',
+  echo_homecoming_lantern_desc: '枢纽路口常亮着一盏不灭的灯——走完所有位面还想回家的人，看见它就知道自己回来了。',
 
   trial_toast_started_fmt: '试炼开始：第 ${layer} 层',
   trial_toast_layer_fmt: '第 ${layer} 层清完了',

@@ -3201,6 +3201,8 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   echo_homecoming_beacon_desc: 'A second beacon blinks out in the deep starsea, broadcasting your name — the road home is never walked alone.',
   echo_homecoming_tide_title: 'The Homecoming Tide',
   echo_homecoming_tide_desc: 'At one low tide the salt sea uncovered a hull beached for years, bow pointed at the planar hub.',
+  echo_homecoming_lantern_title: 'The Traveler Lantern',
+  echo_homecoming_lantern_desc: 'A lantern that never dies burns at the hub crossroads — those who walked every plane and still long to come home see it, and know they made it back.',
 
   trial_toast_started_fmt: 'Trial started: layer ${layer}',
   trial_toast_layer_fmt: 'Layer ${layer} cleared',

@@ -27,6 +27,8 @@ export function attachPopCultureZonesWave11(game) {
   if (radiant) attachDawnBellHomage(radiant, world, game);
   if (space) attachSecondBeaconHomage(space, world, game);
   if (abyss) attachHomeTideHomage(abyss, world, game);
+  // Hub 不参与 addPOI 体系（它的 POI 是对象字面量直插 pointsOfInterest），单独钉一枚
+  attachHubLanternHomage(world, game);
 }
 
 function registerPoi(world, zone, pos, label, fn, opts = {}) {
@@ -36,6 +38,46 @@ function registerPoi(world, zone, pos, label, fn, opts = {}) {
 }
 function fireEcho(game, trigger) {
   window.dispatchEvent(new CustomEvent('pop-culture-echo', { detail: { trigger } }));
+}
+
+// ── 枢纽 · 旅人之灯（返乡母题第五枚：回家的方向） ──
+function attachHubLanternHomage(world, game) {
+  // Hub 不经 zone.addPOI——它自己的 POI 是对象字面量直插 pointsOfInterest（同 attachHubPoster）
+  // 与 attachHubPoster 同一套：子件按局部坐标建，组再整体落到世界坐标
+  const g = new THREE.Group();
+  const stoneMat = new THREE.MeshStandardMaterial({ color: 0x3a3630, roughness: 0.9 });
+  const paperMat = new THREE.MeshStandardMaterial({
+    color: 0xe8d6a8,
+    emissive: 0xd8a850,
+    emissiveIntensity: 0.9,
+    roughness: 0.5,
+    side: THREE.DoubleSide,
+  });
+  const y = world.getGroundHeight(56, 6);
+
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.19, 2.6, 8), stoneMat);
+  post.position.set(0, 1.3, 0);
+  g.add(post);
+  const lampRoom = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.66, 0.62), paperMat);
+  lampRoom.position.set(0, 2.85, 0);
+  g.add(lampRoom);
+  const cap = new THREE.Mesh(new THREE.ConeGeometry(0.52, 0.4, 8), stoneMat);
+  cap.position.set(0, 3.35, 0);
+  g.add(cap);
+
+  g.position.set(56, y, 6);
+  game.scene.add(g);
+
+  world.pointsOfInterest.push({
+    id: 'homage-homecoming-lantern',
+    position: new THREE.Vector3(56, y, 6),
+    label: 'echo_homecoming_lantern_title',
+    type: 'lore',
+    onInteract: () => {
+      game.dialog.show(t('echo_homecoming_lantern_title'), t('echo_homecoming_lantern_desc'));
+      fireEcho(game, 'echo:homecoming-lantern');
+    },
+  });
 }
 
 // ── 幽暗林地：归烬之碑（没烧尽的炭 + 旧姓石碑） ──

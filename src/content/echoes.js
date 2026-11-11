@@ -122,4 +122,5 @@ export const ECHOES = [
   { id: 'echo-homecoming-bell', franchise: FRANCHISE.HOMECOMING, zone: 'radiant', title: 'echo_homecoming_bell_title', desc: 'echo_homecoming_bell_desc', trigger: 'echo:homecoming-bell' },
   { id: 'echo-homecoming-beacon', franchise: FRANCHISE.HOMECOMING, zone: 'space', title: 'echo_homecoming_beacon_title', desc: 'echo_homecoming_beacon_desc', trigger: 'echo:homecoming-beacon' },
   { id: 'echo-homecoming-tide', franchise: FRANCHISE.HOMECOMING, zone: 'abyss', title: 'echo_homecoming_tide_title', desc: 'echo_homecoming_tide_desc', trigger: 'echo:homecoming-tide' },
+  { id: 'echo-homecoming-lantern', franchise: FRANCHISE.HOMECOMING, zone: 'hub', title: 'echo_homecoming_lantern_title', desc: 'echo_homecoming_lantern_desc', trigger: 'echo:homecoming-lantern' },
 ];
