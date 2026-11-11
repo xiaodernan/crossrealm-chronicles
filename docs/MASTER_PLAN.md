@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 谢幕·最后一盏灯（W-V12）** —— 提交 `259ce94`
+
+  - **起因**：W-E6 给了通关一枚派生回声（journal 里的一条记录），W-V8/W-V9 给了 master 视听反馈（金迸+金铃），W-V11 给了旅人之灯的金焰——但**片尾字幕**（玩家在这个游戏里看到的最后一屏）对"他集齐了"仍然一无所知。走完最后一盏灯的人，该在 credits 上多看一眼。
+
+  - **做法**：`EndCreditsDirector.play()` 在 `lines.map(...)` 之后、`end-credits-best` 横幅之前——`if (this.game?.popCulture?.unlocked?.has('echo-homecoming-last-light'))` 追加 `<p class="end-credits-last-light">`。新键 `credits_line_last_light`（zh："而最后那盏灯，是为你留的。" / en："And the last light — held for you."）一键，键数 2894 → **2895**。CSS：`.end-credits-last-light`——暖金 `#ffe9ad`、letter-spacing 0.18em、0 0 24px 暖金辉光（比 fin 暖一档、比最速横幅轻一档；无线框、无按钮、无点击——它是谢幕里的耳语不是颁奖）；`no-preference` 下 3.5s 呼吸，`reduce` 静音。`end-credits-director` +3 测试（解锁可见 / 未解锁不可见 / popCulture 缺省不炸）。
+
+  - **验证**：`npm test` 6375 全绿（431 files）；`npm run lint` 0/0；`npm run build` 干净；`npm run size` 首屏 2177926 B（余量 0.05 MiB）；`npm run e2e` 通关 ✓（exceptions=0）。
+
+  - **风险与后续**：① 该行只在 credits 里出现——解锁 echo 之后**再通一遍**/重看 credits 才能看见（片尾不会因为解锁了新回声而重播）；② `credits_line_last_light` 为谢幕族一族键，若日后要给 quiet 结局一条平行线索（`credits_line_last_light_quiet`，灯熄那一族的语气），加一键、在此分支判断 `endingDialogKey` 即可；③ 下一片：把 `end-credits-best` 首位的名字闪一下金（最速碑主人专属光效），或 fontFace 把谢幕行换成手写斜体（Georgia italic，纯 CSS）。
 - **2026-11-12 game-service 请求计数器（W-P14）** —— 提交 `2820117`
 
   - **起因**：网关有限流计数（W-P13），season-service 有缓存计数（W-S1），game-service 有榜/遥测聚合（W-P12）——唯一没有的格子是"这个实例从启动到现在一共吃了多少业务请求、漏了多少 4xx/5xx"。运维看 game-service 只能看排行榜，看不见流量本身。
