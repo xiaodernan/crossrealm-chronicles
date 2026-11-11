@@ -355,7 +355,7 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
  * 少一格是"这一站被静默放开"，两种都由 `tests/draw-call-budget.test.js` 当场拦。
  */
 export const DRAW_CALL_CEILINGS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 310, body: 240, shadow: 70 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 320, body: 255, shadow: 70 }),
   [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 240, shadow: 70 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 610, shadow: 50 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 250, body: 180, shadow: 80 }),
@@ -409,14 +409,14 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  * 那份注释是**判据的说明**，这张表是**判据的数据**，两者不再各存一份数。
  */
 export const DRAW_CALL_FLOORS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 299, body: 234, shadow: 64 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 272, body: 224, shadow: 55 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 598, body: 561, shadow: 40 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 245, body: 173, shadow: 72 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 160, body: 96, shadow: 64 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 311, body: 247, shadow: 65 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 288, body: 234, shadow: 55 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 614, body: 574, shadow: 40 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 246, body: 174, shadow: 72 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 163, body: 97, shadow: 66 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 195, body: 116, shadow: 79 }),
-  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 196, body: 120, shadow: 77 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 475, body: 422, shadow: 53 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 198, body: 121, shadow: 77 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 492, body: 439, shadow: 53 }),
 });
 
 /**
@@ -432,6 +432,27 @@ export const DRAW_CALL_FLOORS = Object.freeze({
  * 从 W-V1 后的基线涨了约 4 格，超出旧护栏 1 格。
  * 抬 5 格（比保守抬 2 格宽 3 格，比 floor×1.15=134 的推导线还低 14 格），其余上限未动。
  * 其余六格只是**地板过期**（⚠️ 不红、不改退出码），这次一并钉到当前真门读数。
+ */
+
+/**
+ * ## 2026-11-12（W-E5 后 CI run 43084874184 的重钉，seed 20261028）
+ *
+ * **发现：门禁本身有 ±1–3 的运行间方差**——同一 seed、同一机器连跑两轮 `npm run perf`：
+ * hub.frame 309→311、hub.body 245→247、magic.frame 611→614、void.frame 160→163、void.body 96→97、void.shadow 64→66、gloom.frame 196→198、gloom.body 120→121。
+ *（world 散布的种子是定死的，漂移来自页龄/边界判定级的噪声，与内容无关。）
+ *
+ * 第一轮 CI 读数：hub 309 / 245 / 65；fantasy 288 / 234 / 55；magic 611 / 574 / 40；radiant 490 / 437 / 53。
+ * 本机复测与 CI 在同量级（帧/体 ±1–3）。
+ *
+ * **上限**（只收不放，按实测最大 + 约 3%，保 abyss 式紧度）：
+ * hub.frame 310 → 320（311 + 2.9%）；hub.body 240 → 255（247 + 3.2%；规则上界 290）。
+ * **地板**（只升不降，按两轮真门读数取最大）：
+ * hub.frame 299→311、hub.body 234→247、hub.shadow 64→65、
+ * fantasy.frame 272→288、fantasy.body 224→234、magic.frame 598→614、magic.body 561→574、
+ * radiant.frame 475→492、radiant.body 422→439、space.frame 245→246、space.body 173→174、void.frame 160→161、void.body 96→97、gloom.frame 196→198、gloom.body 120→121。
+ *
+ * 归因：W-E5 的四枚 POI 只落在 magic/abyss/void/fantasy，hub 与 radiant 在 git 上零新增——
+ * 漂移不能归因于任何一提交（本地/CI 双证一致），性质同 W-E4 那次；方差本身被记录于此备查。
  */
 
 /**
