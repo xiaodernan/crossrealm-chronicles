@@ -110,7 +110,7 @@ services:
       retries: 30
       start_period: 25s
 
-  # 一次性验证容器：全栈健康后把版本/排行榜/遥测跑一遍并退出（exit 0 = 全绿）
+  # 一次性验证容器：全栈健康后把版本/排行榜/遥测/赛季/ops 跑一遍并退出（exit 0 = 全绿）
   verify:
     image: curlimages/curl:8.10.1
     depends_on:
@@ -129,4 +129,6 @@ services:
       curl -fsS http://gateway:8080/api/seasons/active;
       echo; echo '== /api/ops/season ==';
       curl -fsS http://gateway:8080/api/ops/season;
+      echo; echo '== /actuator/springcloud ==';
+      curl -fsS http://gateway:8080/actuator/springcloud;
       echo"
