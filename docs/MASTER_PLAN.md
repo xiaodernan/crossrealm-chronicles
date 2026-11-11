@@ -6025,6 +6025,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 横幅在结局字幕里滚动（与字幕同序），不是一次性弹窗——跳过按钮照旧能绕过；② 老档没有最速记录 → 横幅缺席，玩家不会看到空块；③ 下一片：终章过场向"个人最速 × 本局"呈现，或 Journal 加"本周回响"周报（本地聚合 108 把来过副本）。
 
+- **2026-11-11 新纪录播报 + 网关关联 ID 回显（W-G7 / W-X18）** —— 提交 `91a75b0`、`a4ba95f`
+
+  - **起因**：W-G5 把个人最速记进了账本，但"这次赢了"与"这次是**新纪录**了"没有任何区别——而后者是诸神黄昏的素材。顺带把 W-P8 的关联 id 回显到 game-service 让 curl 端到端拿到"一次调用"。
+
+  - **做法**：① **W-G7**（`91a75b0`）：`Game.js` 的 `boss-defeated` 在 `consider` 拿到 `improved=true` 时当场 `toast(t('boss_best_time_new_record_fmt', { clock: fmtClock(clearTimeMs) }))`——先记账、再播报（同一块代码内固定顺序），只在 improved 时播（首次通关也是"新纪录"——合法语义：那是它**第一次**留下的数字）。1 枚新键（2864→**2865**）；`tests/boss-best-record.test.js` 6 例（接线 source 断言：consider 先于 toast / improved 守卫存在 / 时钟走共享出口；文案腿：逐字钉死 / 占位符对齐 / 键数 2865）；`boss-best-record` 是源码接线断言——W-X6/W-X8 同款纪律。② **W-X18**（`a4ba95f`）：`/api/ops/health` 增加 `requestId`——`@RequestHeader("X-Request-Id", required=false)` 原样回显；没带回 `null`（**不编造**——空就是空，运维一眼看见这扇门贴没贴名字）；`OpsControllerTest` 加 2 例（无 id → nullValue 断言 / 带 id → 原样断言），game-service 42 全绿；server CI `43024312594` SUCCESS。
+
+  - **验证**：`npm test` **6356** 全绿；build 无 chunk 回退；`e2e-clear` frames=13560 / exceptions=0；W-X18 server CI SUCCESS；e2e 同分不变（W-V2/W-G7 渲染层不动主循环）。
+
+  - **风险与后续**：① 新纪录 toast 是**裸 toast**，不是系统横幅——横幅留给真正值得阻塞画面的时刻（转阶段/终局抉择）；② 首次通关也算新纪录（第一版即纪录）——这是**语义**不是缺陷；③ 下一片：结局 CG 揭晓分层演出（真结局那一格），或日志页加"本周回响"（纯本地聚合）。
+
 - **2026-11-11 网关关联 ID 契约：X-Request-Id（W-P8）** —— 提交 `d8a86b3`、`5036087`
 
   - **起因**：用户授权继续深挖计网知识与运维效率。一次调用出问题时，"**哪一次**"是最贵的排障成本——没有关联 id，每个服务各说各的日志时间，对不齐就是没人对得齐。顺带把 smoke 的断言面也要扩到响应头这一层。
