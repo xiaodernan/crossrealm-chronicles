@@ -6025,6 +6025,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 横幅在结局字幕里滚动（与字幕同序），不是一次性弹窗——跳过按钮照旧能绕过；② 老档没有最速记录 → 横幅缺席，玩家不会看到空块；③ 下一片：终章过场向"个人最速 × 本局"呈现，或 Journal 加"本周回响"周报（本地聚合 108 把来过副本）。
 
+- **2026-11-11 返乡成就（W-J2）** —— 提交 `e7e27ef`
+
+  - **起因**：W-J1 把五枚回声接成了一条完成件，但"收集"本身没有独立的成就——成就墙上返乡母题一栏永远空着，和"返乡旅人"支线并列却各念各的经。这一片补上母题专属成就。
+
+  - **做法**：`ach_echo_homecoming`（≥3 回声，title/desc 中英、`ACHIEVEMENTS_POP_CULTURE`）+ `ach_echo_homecoming_master`（≥5 回声，title/desc 中英，对齐现有 `echo-original` 的横切对称 **×5** 形状）；`ECHO_FRANCHISE_BUCKETS` 加 `echoHomecoming`（runtime 成就检查把 echoCountByFranchise 映射到 `s.echoHomecoming`）。ACHIEVEMENTS_POP_CULTURE 19→**21**（census 同步钉）；键数 2879→**2883**。
+
+  - **验证**：`npm test` 6356 全绿；build 无 chunk 回退；`e2e-clear` frames=13560 / exceptions=0；game-cycle 契约（achievements data layer）一字不动。**诚实记录**：W-J2 push 之后仓内 `43048574396` 被后续 `e7e27ef` cancel；`43049862205` 是接下来唯一的答案；`43043895674`（含 perf 修复）的前端 SUCCESS（22m37s）已证明 abyss body 120 在真门里够用。
+
+  - **风险与后续**：① `echoHomecoming` 的 bucket 与 `ECHO_FRANCHISE_BUCKETS` 全表一致，`franchise-identity.test.js` 枚举式验证过；② `echo_homecoming_master` 是 `>= 5`——等于"收集完全部五枚"，与 side-homecoming-wayfare 的 `>= 3` **故意不同档**：wayfare 是支线，master 是成就；③ 下一片：返乡主题的 **final ending CG 变更分层**或干脆下线，转做性能专项。
+
 - **2026-11-11 返乡旅人支线（W-J1）** —— 提交 `5c6aa5e`
 
   - **起因**：W-E4 落了返乡母题五枚回声，但"集齐它们"本身没有任何回报——玩家走完全部返乡之路却劳而无功，这是对他注意力的不诚实。零批新 POI、零新键，只是把五枚回声接成一条可完成的支线。
