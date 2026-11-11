@@ -2161,6 +2161,102 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   display: none;
 }
 
+/* ===== Boss 阶段史诗演出（W-V2 切片1）=====
+   上下收拢的黑边 + 背后一枚巨大的罗马数字水印（装饰性字形，语言中立，不进 i18n）。
+   只在 phase ≥ 2 由 JS（isCinePhase）拉开；prefers-reduced-motion 下整体 display:none。
+   z-index 压在世界之上、横幅（55）之下；阶段闪光（60）依旧在最上层。 */
+.boss-phase-cine {
+  position: fixed;
+  inset: 0;
+  z-index: 54;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.boss-phase-cine .cine-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8.5vh;
+  background: linear-gradient(180deg, #05060a 0%, #0d0f18 100%);
+  opacity: 0;
+}
+
+.boss-phase-cine .cine-bar-top {
+  top: 0;
+  border-bottom: 1px solid rgba(201, 169, 98, 0.45);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+}
+
+.boss-phase-cine .cine-bar-bottom {
+  bottom: 0;
+  background: linear-gradient(0deg, #05060a 0%, #0d0f18 100%);
+  border-top: 1px solid rgba(201, 169, 98, 0.45);
+  box-shadow: 0 -8px 22px rgba(0, 0, 0, 0.55);
+}
+
+.boss-phase-cine .cine-numeral {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1.12);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 30vmin;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: rgba(201, 169, 98, 0.15);
+  text-shadow: 0 0 70px rgba(201, 169, 98, 0.4);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boss-phase-cine {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .boss-phase-cine.run .cine-bar-top {
+    animation: cineBarTop 2.15s cubic-bezier(0.22, 0.61, 0.21, 1) both;
+  }
+  .boss-phase-cine.run .cine-bar-bottom {
+    animation: cineBarBottom 2.15s cubic-bezier(0.22, 0.61, 0.21, 1) both;
+  }
+  .boss-phase-cine.run .cine-numeral {
+    animation: cineNumeral 2.15s ease-out both;
+  }
+  .boss-phase-banner.show .bp-text {
+    animation: bpGild 1.7s ease-in-out 1;
+  }
+}
+
+@keyframes cineBarTop {
+  0% { opacity: 0; transform: translateY(-100%); }
+  12% { opacity: 1; transform: translateY(0); }
+  76% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-26%); }
+}
+
+@keyframes cineBarBottom {
+  0% { opacity: 0; transform: translateY(100%); }
+  12% { opacity: 1; transform: translateY(0); }
+  76% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(26%); }
+}
+
+@keyframes cineNumeral {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(1.34); }
+  16% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+  70% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes bpGild {
+  0%, 100% { text-shadow: 0 0 20px rgba(201, 169, 98, 0.6); }
+  50% { text-shadow: 0 0 32px rgba(255, 228, 156, 0.95), 0 0 64px rgba(201, 169, 98, 0.7); }
+}
+
 /* 营火剧情技能 */
 .wm-legend-row .dot.marker { background: #66ddff; }
 

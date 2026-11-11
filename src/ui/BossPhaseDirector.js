@@ -12,6 +12,7 @@ import { t } from '../engine/i18n.js';
 import * as THREE from 'three';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { romanNumeral, isCinePhase } from './bossPhaseCine.js';
 
 const UI_BOSSPHASEDIRECTOR = 'ui/BossPhaseDirector';
 const phaseDirOn = (name, handler) => on(name, handler, UI_BOSSPHASEDIRECTOR);
@@ -19,6 +20,8 @@ const phaseDirOn = (name, handler) => on(name, handler, UI_BOSSPHASEDIRECTOR);
 const BANNER_TAG = 'boss-phase-banner';
 /** 相位特效标签分组：同一时刻只允许一个相位特效在跑 */
 const PHASE_FX_TAG = 'boss-phase-fx';
+/** 史诗黑边时序分组：重复转阶段先撤旧的，再排新的 */
+const CINE_TAG = 'boss-phase-cine';
 
 /**
  * 阶段入场的镜头语言（W-A6 切片12）：转阶段那一帧一记**收拢**的 FOV punch，
@@ -46,6 +49,8 @@ export class BossPhaseDirector {
     this.game = game;
     this.bannerEl = null;
     this.phaseFlashEl = null;
+    this.cineEl = null;
+    this.cineNumeralEl = null;
     this.phaseParticleGroup = null;
     this.phaseParticles = null;
     this.phaseParticleVelocities = null;
@@ -56,6 +61,7 @@ export class BossPhaseDirector {
     this._fovPunch = 0;
     this._phaseParticles = null;
     this._buildBanner();
+    this._buildCine();
     this._buildPhaseFlash();
     this._buildPhaseParticles();
     this.setupListeners();
@@ -67,6 +73,40 @@ export class BossPhaseDirector {
     this.bannerEl.className = 'boss-phase-banner hidden';
     this.bannerEl.innerHTML = '<div class="bp-text"></div><div class="bp-sub"></div>';
     document.body.appendChild(this.bannerEl);
+  }
+
+  /**
+   * 史诗黑边（W-V2 切片1）：两条上下收拢的黑边 + 背后一枚巨大的罗马数字水印。
+   * 纯装饰（aria-hidden），只在 phase ≥ 2 拉开；prefers-reduced-motion 下 CSS 直接
+   * 把整个元素 display:none，这里仍创建但不再排定时器——双保险里 CSS 是权威。
+   */
+  _buildCine() {
+    if (typeof document === 'undefined') return;
+    this.cineEl = document.createElement('div');
+    this.cineEl.id = 'boss-phase-cine';
+    this.cineEl.className = 'boss-phase-cine';
+    this.cineEl.setAttribute('aria-hidden', 'true');
+    this.cineEl.innerHTML =
+      '<div class="cine-bar cine-bar-top"></div>' +
+      '<div class="cine-bar cine-bar-bottom"></div>' +
+      '<div class="cine-numeral"></div>';
+    this.cineNumeralEl = this.cineEl.querySelector('.cine-numeral');
+    document.body.appendChild(this.cineEl);
+  }
+
+  /**
+   * 拉开黑边。重复转阶段先撤旧的（同一 tag 组），再排新的一轮；
+   * class 的 re-add 靠强制 reflow 让 CSS 动画重播。
+   */
+  _playCine(phase) {
+    if (!this.cineEl || !isCinePhase(phase)) return;
+    const numeral = romanNumeral(phase);
+    if (this.cineNumeralEl) this.cineNumeralEl.textContent = numeral;
+    this.cineEl.classList.remove('run');
+    void this.cineEl.offsetWidth; // 强制 reflow：同元素重播动画
+    this.cineEl.classList.add('run');
+    scheduler.clear(CINE_TAG);
+    scheduler.after(2.3, () => this.cineEl?.classList.remove('run'), CINE_TAG);
   }
 
   _buildPhaseFlash() {
@@ -128,6 +168,7 @@ export class BossPhaseDirector {
     // 镜头语言（切片12）：世界 Boss 与副本 Boss 的两个分支都吃这一记 ——
     // 派发在 transitionTo 的钩子之后同一 tick，圈（入场招）已经铺下，镜头与场地同一帧表态
     this._cueCameraPunch();
+    this._playCine(detail.phase);
     const bossId = detail.bossId ?? detail.name;
     const dungeonId = dungeonIdOf(bossId);
     if (dungeonId) {

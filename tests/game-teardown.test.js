@@ -290,6 +290,7 @@ describe('迁移第八/九处的系统：构造后监听在册、dispose() 后�
       textContent: '',
       className: '',
       id: '',
+      setAttribute() {},
       classList: { add() {}, remove() {} },
       querySelector: () => null,
       appendChild(c) { this.children.push(c); return c },
