@@ -3180,6 +3180,13 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   trial_summary_empty: '这扇窗里还没有任何回响',
   trial_summary_offline: '取不到风闻 · 在线服务未开启，或网关连不上',
   trial_summary_note_fmt: '最近 ${windowSize} 次行动的频次（内存窗口，不是全量历史）',
+  journal_tab_legends: '传说碑',
+  legends_intro: '诸神陨落之名与最速 —— 成绩在 Boss 倒下时自动镌刻，只读不改',
+  legends_loading: '正在叩石……',
+  legends_empty: '碑上还没有刻着名字',
+  legends_offline: '取不到碑铭 · 在线服务未开启，或网关连不上',
+  legends_row_fmt: '#${rank} ${runner} · ${boss} · ${clock} · 第${chapter}章',
+  legends_note: '顺序：用时升序。通关时自动提交，这里是只读快照',
 
   trial_toast_started_fmt: '试炼开始：第 ${layer} 层',
   trial_toast_layer_fmt: '第 ${layer} 层清完了',

@@ -153,6 +153,7 @@ const JOURNAL_SUB_TABS = {
   skills: (game, panel) => game.weaponSkillJournalTab.render(panel),
   side: (game, panel) => game.sideQuestJournalTab.render(panel),
   echoes: (game, panel) => game.popCultureTab.render(panel),
+  legends: (game, panel) => game.legendsTab.render(panel),
 };
 
 export class HUD {
