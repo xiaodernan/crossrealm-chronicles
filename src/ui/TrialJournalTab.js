@@ -61,6 +61,8 @@ const BOARD_MSG_KEY = {
 
 /** 拉几条。服务端 `max-limit` 是 50，这里只要前十条 —— 一块随身页面看得完的量 */
 const BOARD_LIMIT = 10;
+/** 足迹榜拉几条（服务端 topN 默认 5、夹到 [1,20]）— 五格是一屏最有辨识度的量 */
+const SUMMARY_LIMIT = 5;
 
 /** 乘子显示成两位小数，整数值不写 `.00`（×1.15 / ×1 / ×1.60 → ×1.6，玩家读得舒服） */
 function fmtMul(v) {
@@ -77,6 +79,9 @@ export class TrialJournalTab {
     this._scope = 'season';
     /** 发号器：连点两次范围按钮时，只认最后回来的那一份 */
     this._seq = 0;
+    /** 足迹榜（/api/telemetry/summary）的当前快照。独立发号：两条异步互不干扰 */
+    this._summary = { state: 'idle', windowSize: 0, distinctTypes: 0, items: [] };
+    this._summarySeq = 0;
   }
 
   /** 当前赛季 id；没有赛季系统时是空串（榜退化成"跨季总榜"） */
@@ -161,6 +166,7 @@ export class TrialJournalTab {
         <div class="trial-layers-label">${t('trial_layers_header')}</div>
         <ul class="trial-layers">${TRIAL_LAYERS.map(layerRow).join('')}</ul>
         <div class="trial-board" data-trial-board></div>
+        <div class="trial-summary" data-trial-summary></div>
       </div>
     `;
     refreshKeyText(panelEl);
@@ -168,6 +174,8 @@ export class TrialJournalTab {
     // 榜：每次打开都拉一次（不缓存跨打开的快照 —— 刚刚那局成绩要不要出现，
     // 靠"下次打开时重问"比靠一个失效标记可靠）。离线时这一句是零网络。
     this._loadBoard(panelEl);
+    // 足迹榜：与榜同一扇门——每次打开都拉一次；失败时这一格只说一句"取不到"
+    this._loadSummary(panelEl);
 
     const startBtn = panelEl.querySelector('[data-trial-start]');
     if (startBtn) {
@@ -221,6 +229,107 @@ export class TrialJournalTab {
       ? { key, state: items.length ? 'ready' : 'empty', items }
       : { key, state: 'off', items: [] };
     this._paintBoard(panelEl);
+  }
+
+  /**
+   * 足迹榜（W-X15 → W-G3）：最近 windowSize 次行动的频次 Top-N。
+   *
+   * 与榜完全同一扇门与同三条纪律（只画自己那一格 / 发号 / 服务端数据当不可信）。
+   * 这一块是**可选加分项**：失败 / 离线时只说一句"取不到"，板面上什么都不坏。
+   * 只用 DOM API：`type` 是任意客户端字符串，拼 innerHTML 就是注入口。
+   */
+  async _loadSummary(panelEl) {
+    const seq = (this._summarySeq += 1);
+    const online = this.game.onlineServices;
+    const canLoad = !!online?.enabled?.() && typeof online.fetchTelemetrySummary === 'function';
+    if (!canLoad) {
+      this._summary = { state: 'off', windowSize: 0, distinctTypes: 0, items: [] };
+      this._paintSummary(panelEl);
+      return;
+    }
+    this._summary = { state: 'loading', windowSize: 0, distinctTypes: 0, items: [] };
+    this._paintSummary(panelEl);
+
+    let payload = null;
+    try {
+      payload = await online.fetchTelemetrySummary(SUMMARY_LIMIT);
+    } catch (e) {
+      console.warn('[trial-summary] fetch failed; treating as summary unavailable', e?.message ?? e);
+    }
+    if (seq !== this._summarySeq) return;   // 又拉了一轮：这一份已经过期
+    const items = Array.isArray(payload?.byType) ? payload.byType : null;
+    this._summary = items
+      ? {
+        state: items.length ? 'ready' : 'empty',
+        windowSize: Number.isFinite(payload?.windowSize) ? payload.windowSize : 0,
+        distinctTypes: Number.isFinite(payload?.distinctTypes) ? payload.distinctTypes : items.length,
+        items: items
+          .filter((row) => row && typeof row.type === 'string' && Number.isFinite(row.count))
+          .slice(0, SUMMARY_LIMIT),
+      }
+      : { state: 'off', windowSize: 0, distinctTypes: 0, items: [] };
+    this._paintSummary(panelEl);
+  }
+
+  /** 画足迹榜那一格。找不到那一格就直接返回（页签切走 / 面板关了） */
+  _paintSummary(panelEl) {
+    const box = panelEl?.querySelector?.('[data-trial-summary]');
+    if (!box) return;
+    box.textContent = '';
+
+    const head = document.createElement('div');
+    head.className = 'trial-summary-head';
+    const title = document.createElement('span');
+    title.className = 'trial-summary-title';
+    title.textContent = t('trial_summary_title');
+    head.appendChild(title);
+    box.appendChild(head);
+
+    if (this._summary.state === 'ready') {
+      const max = Math.max(1, ...this._summary.items.map((row) => row.count));
+      const ul = document.createElement('ul');
+      ul.className = 'trial-summary-list';
+      for (const row of this._summary.items) {
+        const li = document.createElement('li');
+        li.className = 'trial-summary-row';
+
+        const typeEl = document.createElement('span');
+        typeEl.className = 'trial-summary-type';
+        typeEl.textContent = row.type;
+        li.appendChild(typeEl);
+
+        const barWrap = document.createElement('span');
+        barWrap.className = 'trial-summary-bar';
+        const bar = document.createElement('span');
+        bar.className = 'trial-summary-bar-fill';
+        bar.style.width = `${Math.round((row.count / max) * 100)}%`;
+        barWrap.appendChild(bar);
+        li.appendChild(barWrap);
+
+        const countEl = document.createElement('span');
+        countEl.className = 'trial-summary-count';
+        countEl.textContent = String(row.count);
+        li.appendChild(countEl);
+
+        ul.appendChild(li);
+      }
+      box.appendChild(ul);
+
+      const note = document.createElement('div');
+      note.className = 'trial-summary-note';
+      note.textContent = t('trial_summary_note_fmt', { windowSize: this._summary.windowSize });
+      box.appendChild(note);
+    } else {
+      const msg = document.createElement('div');
+      msg.className = 'trial-summary-msg';
+      const key = this._summary.state === 'empty'
+        ? 'trial_summary_empty'
+        : (this._summary.state === 'offline' || this._summary.state === 'off'
+          ? 'trial_summary_offline'
+          : 'trial_summary_loading');
+      msg.textContent = t(key);
+      box.appendChild(msg);
+    }
   }
 
   /**

@@ -3175,6 +3175,11 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   trial_board_offline: 'Board unavailable · online service off or gateway unreachable',
   trial_board_row_fmt: '#${rank} ${runner} · ${score} pts · ${layers} layers · ${clock} left',
   trial_board_note_fmt: 'Scope: ${scope} · runs are submitted automatically when a trial ends; this is a read-only snapshot',
+  trial_summary_title: 'Recent echoes',
+  trial_summary_loading: 'Listening…',
+  trial_summary_empty: 'No echoes in this window yet',
+  trial_summary_offline: 'Echoes unavailable · online service off or gateway unreachable',
+  trial_summary_note_fmt: 'Last ${windowSize} actions (in-memory window, not full history)',
 
   trial_toast_started_fmt: 'Trial started: layer ${layer}',
   trial_toast_layer_fmt: 'Layer ${layer} cleared',

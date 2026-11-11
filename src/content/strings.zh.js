@@ -3175,6 +3175,11 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   trial_board_offline: '取不到榜 · 在线服务未开启，或网关连不上',
   trial_board_row_fmt: '#${rank} ${runner} · ${score} 分 · ${layers} 层 · 余 ${clock}',
   trial_board_note_fmt: '范围：${scope} · 成绩在通关或失败时自动提交，这里是只读快照',
+  trial_summary_title: '行动风闻',
+  trial_summary_loading: '正在聆听…',
+  trial_summary_empty: '这扇窗里还没有任何回响',
+  trial_summary_offline: '取不到风闻 · 在线服务未开启，或网关连不上',
+  trial_summary_note_fmt: '最近 ${windowSize} 次行动的频次（内存窗口，不是全量历史）',
 
   trial_toast_started_fmt: '试炼开始：第 ${layer} 层',
   trial_toast_layer_fmt: '第 ${layer} 层清完了',

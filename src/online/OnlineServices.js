@@ -170,6 +170,29 @@ export class OnlineServices {
   }
 
   /**
+   * 拉取窗口频次摘要（W-X15，`GET /api/telemetry/summary`）。
+   *
+   * 返回原始 JSON（`{ windowSize, distinctTypes, topN, byType:[{type,count}...] }`）。
+   * 未启用 / 失败 / 超时 → null。**不做语义校验** — 与 fetchActiveSeason 同一条边界：
+   * 这一层只负责"把服务端说的话原样带回来"，够不够格画出来由渲染层决定。
+   */
+  async fetchTelemetrySummary(topN = 5) {
+    if (!this._enabled) return null;
+    const qs = new URLSearchParams();
+    qs.set('topN', String(topN));
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/telemetry/summary?${qs}`, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      console.warn('[online] 拉取遥测摘要失败（已吞掉）', e?.message ?? e);
+      return null;
+    }
+  }
+
+  /**
    * 拉取当前赛季（W-F2，`GET /api/seasons/active`）。
    *
    * 返回原始 JSON（`{ id, name, tagline, modifierIds, soulsBonusPct, dayInCycle, daysRemaining }`），

@@ -2510,6 +2510,40 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .trial-board-msg { font-size: 0.72rem; color: #8a7d6e; margin-top: 6px; }
 .trial-board-note { font-size: 0.66rem; color: #7a6f66; margin-top: 6px; line-height: 1.5; }
 
+/* 行动风闻（W-G3 切片1）：试炼页下半屏的第二条异步块 — 最近 windowSize 次
+   行动的频次条形图。与榜同门：离线一句"取不到"，绝不停在"聆听中" */
+.trial-summary { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(178,120,96,0.14); }
+.trial-summary-head { display: flex; align-items: baseline; gap: 8px; }
+.trial-summary-title { font-size: 0.72rem; color: #9a8a70; letter-spacing: 0.1em; }
+.trial-summary-list { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 4px; }
+.trial-summary-row { display: flex; align-items: center; gap: 8px; font-size: 0.68rem; }
+.trial-summary-type {
+  flex: 0 0 auto;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.62rem;
+  color: #d8c6a8;
+  background: rgba(201,169,98,0.1);
+  border: 1px solid rgba(201,169,98,0.28);
+  border-radius: 3px;
+  padding: 1px 6px;
+  max-width: 46%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trial-summary-bar { flex: 1 1 auto; height: 8px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.trial-summary-bar-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #6b4a1e 0%, #a97b34 55%, #ffd98a 100%);
+  box-shadow: 0 0 6px rgba(255,217,138,0.35);
+  border-radius: 2px;
+  transition: width 0.5s ease-out;
+}
+.trial-summary-count { flex: 0 0 auto; min-width: 3ch; text-align: right; color: #c9a962; font-variant-numeric: tabular-nums; }
+.trial-summary-msg { font-size: 0.72rem; color: #8a7d6e; margin-top: 6px; }
+.trial-summary-note { font-size: 0.62rem; color: #7a6f66; margin-top: 6px; line-height: 1.5; }
+
 .cf-section h3 { font-size: 0.8rem; color: #c9a962; margin: 8px 0 4px; }
 .cf-stat-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .cf-node-list { list-style: none; padding: 0; max-height: 28vh; overflow-y: auto; }
