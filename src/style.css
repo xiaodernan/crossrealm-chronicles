@@ -2495,6 +2495,28 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   color: #c9a962;
 }
 
+/* === 大成就牌匾（W-V5）===
+   金冕+幽烬边——只奖给真正把整条线路走通的几块石头。
+   与上面 unlocked 那套呼吸共享，但边界是三层叠的，底是烫金不是炭色。 */
+.ach-card.ach-master {
+  background:
+    radial-gradient(ellipse 110% 80% at 50% 115%, rgba(255, 217, 138, 0.28), transparent 72%),
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(255, 217, 138, 0.14), transparent 60%),
+    linear-gradient(180deg, rgba(40, 24, 6, 0.92), rgba(28, 18, 4, 0.95));
+  border-color: rgba(255, 217, 138, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 217, 138, 0.4),
+    0 3px 18px rgba(255, 217, 138, 0.14),
+    0 0 0 1px rgba(255, 217, 138, 0.12) inset;
+}
+.ach-card.ach-master.ach-unlocked {
+  border-color: rgba(255, 255, 150, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 180, 0.45),
+    0 4px 26px rgba(255, 217, 138, 0.22),
+    0 0 0 1px rgba(255, 255, 180, 0.18) inset;
+}
+
 .codex-zone-filter, .cf-filter { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .codex-zone-btn, .cf-filter-btn { padding: 4px 10px; font-size: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(201,169,98,0.3); color: #aaa; border-radius: 4px; cursor: pointer; }
 .codex-zone-btn.active, .cf-filter-btn.active { color: #c9a962; border-color: rgba(201,169,98,0.65); }

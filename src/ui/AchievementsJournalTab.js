@@ -2,6 +2,9 @@ import { ACHIEVEMENTS } from '../game/AchievementSystem.js';
 import { keyText, refreshKeyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
+/** 大成就（master）牌匾——金冕+幽烬边，得专属视觉。与普通成就同一数据口径，仅多一层样式。 */
+const MASTER_ACHIEVEMENTS = new Set(['echo-homecoming-master', 'echo-original', 'echo-wave4', 'echo-triad']);
+
 /** [J] 成就墙 Tab */
 export class AchievementsJournalTab {
   constructor(game) {
@@ -18,7 +21,8 @@ export class AchievementsJournalTab {
     const cards = ACHIEVEMENTS.map((a) => {
       const ok = unlocked.has(a.id);
       const progress = ok ? t('achievement_unlocked_label') : this._hint(a, ach?.stats ?? {});
-      return `<div class="ach-card${ok ? ' ach-unlocked' : ''}">
+      const legend = MASTER_ACHIEVEMENTS.has(a.id) ? ' ach-master' : '';
+      return `<div class="ach-card${ok ? ' ach-unlocked' : ''}${legend}">
         <div class="ach-icon">${ok ? '🏆' : '🔒'}</div>
         <div class="ach-title">${t(a.title)}</div>
         <div class="ach-desc">${t(a.desc)}</div>
