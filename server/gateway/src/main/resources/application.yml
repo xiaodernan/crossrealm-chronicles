@@ -1,7 +1,11 @@
 server:
   port: 8080
+  shutdown: graceful
 
 spring:
+  lifecycle:
+    # 关停时先停止接收新请求，再给在途请求最多 15 秒慢慢收尾（Linux/systemd 下生效）
+    timeout-per-shutdown-phase: 15s
   application:
     name: gateway
   cloud:
