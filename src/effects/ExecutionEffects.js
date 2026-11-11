@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 import { on, offAll } from '../engine/EventBus.js';
+import { MASTER_ACHIEVEMENT_IDS } from '../content/masterAchievements.js';
 
 const EFFECTS_EXECUTIONEFFECTS = 'effects/ExecutionEffects';
 const execFxOn = (name, handler) => on(name, handler, EFFECTS_EXECUTIONEFFECTS);
@@ -42,6 +43,12 @@ export class ExecutionEffects {
       const v = pos instanceof THREE.Vector3 ? pos : pos ? new THREE.Vector3(pos.x, pos.y, pos.z) : null;
       this.burst(v, e.detail?.boss ? 'bossKill' : 'execution');
     });
+    /* W-V8：大成就解锁那一刻 —— 金迸。只奖给走通整条线路的碑（content/masterAchievements.js），
+     * 与成就墙的 ach-master 牌匾共用一份名册；普通成就只给 W-V4 的鎏金收束，不在这里迸。 */
+    execFxOn('achievement-unlocked', (e) => {
+      const id = e?.detail?.id;
+      if (id && MASTER_ACHIEVEMENT_IDS.includes(id)) this.burst(null, 'master');
+    });
   }
 
   /**
@@ -73,12 +80,14 @@ export class ExecutionEffects {
       riposte: 0xff8866,
       execution: 0xff4422,
       bossKill: 0xc9a962,
+      master: 0xffd98a,
     };
     const color = colors[kind] ?? 0xffaa44;
-    const scale = kind === 'bossKill' ? 5.5 : kind === 'finisher' ? 3.2 : 4.0;
+    const scale = kind === 'bossKill' ? 5.5 : kind === 'master' ? 6.0 : kind === 'finisher' ? 3.2 : 4.0;
+    const shardCount = kind === 'master' ? 42 : kind === 'bossKill' ? 28 : 16;
 
-    this._spawnRing(pos, color, scale, kind === 'bossKill' ? 0.55 : 0.38);
-    this._spawnShards(pos, color, kind === 'bossKill' ? 28 : 16);
+    this._spawnRing(pos, color, scale, kind === 'bossKill' ? 0.55 : kind === 'master' ? 1.1 : 0.38);
+    this._spawnShards(pos, color, shardCount, kind === 'master' ? 1.75 : 1);
     if (kind === 'bossKill' || kind === 'execution') {
       this._spawnVerticalSlash(pos, color);
     }
@@ -101,17 +110,18 @@ export class ExecutionEffects {
     });
   }
 
-  _spawnShards(pos, color, count) {
+  _spawnShards(pos, color, count, upness = 1) {
     for (let i = 0; i < count; i++) {
       const mesh = new THREE.Mesh(
         new THREE.BoxGeometry(0.06, 0.06, 0.06),
         new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 })
       );
       mesh.position.set(pos.x, pos.y + 1.2, pos.z);
-      const vx = (Math.random() - 0.5) * 8;
-      const vz = (Math.random() - 0.5) * 8;
-      let vy = 2 + Math.random() * 5;
-      let life = 0.35 + Math.random() * 0.25;
+      const vx = (Math.random() - 0.5) * 8 * (upness > 1 ? 1.3 : 1);
+      const vz = (Math.random() - 0.5) * 8 * (upness > 1 ? 1.3 : 1);
+      // 大成就：向上的初速 ×1.75、寿命更长 —— 金雨从身体里涌出来再落回去，不是平铺散开
+      let vy = (2 + Math.random() * 5) * upness;
+      let life = 0.35 + Math.random() * 0.25 + (upness > 1 ? 0.22 : 0);
       this._add(mesh, (dt) => {
         life -= dt;
         mesh.position.x += vx * dt;

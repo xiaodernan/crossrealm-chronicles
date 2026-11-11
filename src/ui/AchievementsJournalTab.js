@@ -1,9 +1,10 @@
 import { ACHIEVEMENTS } from '../game/AchievementSystem.js';
+import { MASTER_ACHIEVEMENT_IDS } from '../content/masterAchievements.js';
 import { keyText, refreshKeyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
-/** 大成就（master）牌匾——金冕+幽烬边，得专属视觉。与普通成就同一数据口径，仅多一层样式。 */
-const MASTER_ACHIEVEMENTS = new Set(['echo-homecoming-master', 'echo-original', 'echo-wave4', 'echo-triad']);
+/** 大成就（master）牌匾——金冕+幽烬边，得专属视觉。与金迸特效共用一份名册（content/masterAchievements.js）。 */
+const MASTER_ACHIEVEMENTS = new Set(MASTER_ACHIEVEMENT_IDS);
 
 /** [J] 成就墙 Tab */
 export class AchievementsJournalTab {
