@@ -688,7 +688,7 @@ describe('W-B2 内容普查：条数钉死', () => {
       achievementsExtra: 10,
       achievementsPopCulture: 19,
       cgGalleryBonusExtra: 5,
-      sideQuestsPop: 19,
+      sideQuestsPop: 20,
       helpSectionsExtra: 3,
     });
   });

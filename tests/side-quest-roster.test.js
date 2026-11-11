@@ -401,12 +401,13 @@ describe('W-B12 切片3：单系列致敬支线的 zone 由回声表推，不再
     }
   });
 
-  it('多系列 / 全局百分比那五条仍标 global —— 任何一座位面都装不下它们', () => {
+  it('多系列 / 全局百分比那六条仍标 global —— 任何一座位面都装不下它们', () => {
     const 仍全局 = SIDE_QUESTS_POP.filter((q) => !q.id.endsWith('-tour'));
     // 第五位是 W-E3 切片108 的 `side-original-master`：四位原创母题的横切账，
     // 与 `side-wave4-master` 同形（四位面各 3 回声），同样一座位面装不下。
+    // 第六位是 W-J1 的 `side-homecoming-wayfare`：返乡母题回声散在五座位面上，同一条规则也装不下。
     expect(仍全局.map((q) => q.id).sort()).toEqual(
-      ['side-echo-full', 'side-echo-half', 'side-original-master', 'side-triad-master', 'side-wave4-master'],
+      ['side-echo-full', 'side-echo-half', 'side-homecoming-wayfare', 'side-original-master', 'side-triad-master', 'side-wave4-master'],
     );
     expect(仍全局.every((q) => q.zone === 'global')).toBe(true);
   });

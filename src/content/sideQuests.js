@@ -215,6 +215,7 @@ export const SIDE_QUESTS_POP = [
   { id: 'side-radiant-tour', zone: franchiseZone(FRANCHISE.RADIANT), title: 'sq_side_radiant_tour_title', desc: 'sq_side_radiant_tour_desc', check: (g) => countFranchise(g, FRANCHISE.RADIANT) >= 3, reward: 20, journal: 'sq_side_radiant_tour_journal' },
   { id: 'side-wave4-master', zone: 'global', title: 'sq_side_wave4_master_title', desc: 'sq_side_wave4_master_desc', check: (g) => [FRANCHISE.CYBER, FRANCHISE.SAMURAI, FRANCHISE.COSMIC, FRANCHISE.STARPORT].every((f) => countFranchise(g, f) >= 3), reward: 45, journal: 'sq_side_wave4_master_journal' },
   { id: 'side-original-master', zone: 'global', title: 'sq_side_original_master_title', desc: 'sq_side_original_master_desc', check: (g) => [FRANCHISE.GLOOM, FRANCHISE.RADIANT, FRANCHISE.VOIDMAW, FRANCHISE.ABYSSSALT].every((f) => countFranchise(g, f) >= 3), reward: 45, journal: 'sq_side_original_master_journal' },
+  { id: 'side-homecoming-wayfare', zone: 'global', title: 'sq_side_homecoming_wayfare_title', desc: 'sq_side_homecoming_wayfare_desc', check: (g) => countFranchise(g, FRANCHISE.HOMECOMING) >= 3, reward: 22, journal: 'sq_side_homecoming_wayfare_journal' },
 ];
 
 // 导出辅助函数供运行时使用
