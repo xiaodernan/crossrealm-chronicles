@@ -24,6 +24,16 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
+    <!-- Spring Cache abstraction：本地 simple 默认，Redis 按需走 spring.cache.type=redis 上线 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+      <!-- 上线时把 spring.cache.type=redis 打开；不开就走 ConcurrentMap 默认（与本项目策略一致） -->
+    </dependency>
     <!-- 与 game-service 同一条路：可选地从 config-server 拉集中配置 -->
     <dependency>
       <groupId>org.springframework.cloud</groupId>
