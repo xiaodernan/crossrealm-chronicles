@@ -6,6 +6,7 @@ import com.crossrealm.chronicles.game.leaderboard.LeaderboardService;
 import com.crossrealm.chronicles.game.season.SeasonClient;
 import com.crossrealm.chronicles.game.season.SeasonSnapshot;
 import com.crossrealm.chronicles.game.telemetry.TelemetryService;
+import com.crossrealm.chronicles.game.trial.TrialLeaderboardService;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,6 +34,7 @@ public class OpsController {
 
     private final GameServiceProperties properties;
     private final LeaderboardService leaderboardService;
+    private final TrialLeaderboardService trialService;
     private final TelemetryService telemetryService;
     private final SeasonClient seasonClient;
     private final String applicationName;
@@ -40,14 +42,18 @@ public class OpsController {
     /** 下游 season-service 的外呼结果走一层 30s TTL，避免运维页轮询把上游打爆 */
     private final TtlCache seasonCache = new TtlCache();
 
+    /** @Autowired: 与 W-X13 起的契约一致 — 单一六参构造供 Spring 注入 */
+    @org.springframework.beans.factory.annotation.Autowired
     public OpsController(
             GameServiceProperties properties,
             LeaderboardService leaderboardService,
+            TrialLeaderboardService trialService,
             TelemetryService telemetryService,
             SeasonClient seasonClient,
             @Value("${spring.application.name:game-service}") String applicationName) {
         this.properties = properties;
         this.leaderboardService = leaderboardService;
+        this.trialService = trialService;
         this.telemetryService = telemetryService;
         this.seasonClient = seasonClient;
         this.applicationName = applicationName;
@@ -66,8 +72,10 @@ public class OpsController {
                 "versionNote", properties.getVersionNote()));
         result.put("inMemory", Map.of(
                 "leaderboardRecords", leaderboardService.size(),
+                "trialRecords", trialService.size(),
                 "telemetryEvents", telemetryService.count(),
                 "leaderboardCache", leaderboardService.cacheStats(),
+                "trialCache", trialService.cacheStats(),
                 "seasonCache", seasonCache.stats()));
         return result;
     }

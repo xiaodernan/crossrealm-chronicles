@@ -4,6 +4,7 @@ import com.crossrealm.chronicles.game.leaderboard.LeaderboardService;
 import com.crossrealm.chronicles.game.season.SeasonClient;
 import com.crossrealm.chronicles.game.season.SeasonSnapshot;
 import com.crossrealm.chronicles.game.telemetry.TelemetryService;
+import com.crossrealm.chronicles.game.trial.TrialLeaderboardService;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +28,7 @@ class OpsSeasonEndpointTest {
         return new OpsController(
                 properties,
                 new LeaderboardService(properties),
+                new TrialLeaderboardService(properties),
                 new TelemetryService(properties),
                 client,
                 "game-service");
