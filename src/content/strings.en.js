@@ -3165,6 +3165,16 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   trial_layers_header: 'Layer curve',
   trial_layer_no_fmt: 'Layer ${n}',
   trial_layer_meta_fmt: '${s}s · clear ${n}',
+  // Trial board (W-G2 slice 1) — the only async block on this page. Scores are scoped to a
+  // season, so the note line has to say which one, or the table quietly lies.
+  trial_board_title: 'Trial board',
+  trial_board_scope_season: 'This season',
+  trial_board_scope_all: 'All seasons',
+  trial_board_loading: 'Reading…',
+  trial_board_empty: 'No runs on this board yet',
+  trial_board_offline: 'Board unavailable · online service off or gateway unreachable',
+  trial_board_row_fmt: '#${rank} ${runner} · ${score} pts · ${layers} layers · ${clock} left',
+  trial_board_note_fmt: 'Scope: ${scope} · runs are submitted automatically when a trial ends; this is a read-only snapshot',
 
   trial_toast_started_fmt: 'Trial started: layer ${layer}',
   trial_toast_layer_fmt: 'Layer ${layer} cleared',

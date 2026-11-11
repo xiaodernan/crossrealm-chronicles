@@ -454,6 +454,9 @@ export class Game {
     // W-F3 切片1：位面试炼。状态只在内存（不写存档），时间只由"在玩的帧"喂
     this.trial = this._adopt('game/TrialSystem', new TrialSystem(this));
     this.trialTab = new TrialJournalTab(this);
+    // 在线伙伴服务的客户端挂在实例上（W-G2 切片1：试炼榜直接从 this.game 读，不去 import 单例 ——
+    // 与其它 JournalTab 的口径一致）。模块单例本来就是全局唯一那一份，这里只是暴露它。
+    this.onlineServices = onlineServices;
     void this.seasons.refreshFromOnline();
     this.combatStyle = this._adopt('game/CombatStyleTracker', new CombatStyleTracker(this));
     this.combatStyleOverlay = this._adopt('ui/CombatStyleOverlay', new CombatStyleOverlay(this));

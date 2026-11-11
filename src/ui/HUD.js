@@ -38,8 +38,11 @@ export const MINIMAP_CSS_SIZE = 178;
  * 为什么不是 `t('trial_seconds_fmt')` 那句"剩余 N 秒"：HUD 上这块地方只有 40px 宽，
  * 而"还剩 72 秒"要读三个字；`1:12` 是所有人对倒计时的肌肉记忆。
  * 也**不做小时位** —— 试炼最长的一层是 120 秒，多一位永远用不上。
+ *
+ * 导出是给试炼榜用的（W-G2 切片1）：榜上的"剩余秒"与 HUD 上的倒计时是同一个读数，
+ * 两处各写一份 `m:ss` 的后果是它们迟早对不上（一处补零一处不补）。
  */
-function clockText(seconds) {
+export function clockText(seconds) {
   const s = Math.max(0, Math.floor(Number(seconds) || 0));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }

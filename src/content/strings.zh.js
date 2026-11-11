@@ -3165,6 +3165,16 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   trial_layers_header: '层数曲线',
   trial_layer_no_fmt: '第 ${n} 层',
   trial_layer_meta_fmt: '${s} 秒 · 清 ${n} 只',
+  // 试炼榜（W-G2 切片1）—— 这一页唯一的异步块；两句范围说明是它能被看懂的前提：
+  // 榜上的分数**带赛季**，不写清就是一张会骗人的表
+  trial_board_title: '试炼榜',
+  trial_board_scope_season: '本赛季',
+  trial_board_scope_all: '跨季总榜',
+  trial_board_loading: '正在读取…',
+  trial_board_empty: '这一张榜还是空的',
+  trial_board_offline: '取不到榜 · 在线服务未开启，或网关连不上',
+  trial_board_row_fmt: '#${rank} ${runner} · ${score} 分 · ${layers} 层 · 余 ${clock}',
+  trial_board_note_fmt: '范围：${scope} · 成绩在通关或失败时自动提交，这里是只读快照',
 
   trial_toast_started_fmt: '试炼开始：第 ${layer} 层',
   trial_toast_layer_fmt: '第 ${layer} 层清完了',

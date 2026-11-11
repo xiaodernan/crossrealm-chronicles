@@ -2386,6 +2386,34 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .trial-layer-meta { color: #8a7d6e; }
 .trial-empty { font-size: 0.75rem; color: #888; }
 
+/* 试炼榜（W-G2 切片1）：这一页唯一的异步块。三种状态各一组样式 ——
+   "正在读取"与"取不到"必须一眼分得开，否则玩家会把网络问题当成榜是空的 */
+.trial-board { margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(178,120,96,0.18); }
+.trial-board-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.trial-board-title { font-size: 0.72rem; color: #9a8a70; }
+.trial-board-scope {
+  font: inherit;
+  font-size: 0.66rem;
+  padding: 1px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: #a8988a;
+  background: transparent;
+  border: 1px solid rgba(178,120,96,0.28);
+}
+.trial-board-scope.is-active { color: #e0c0a0; background: rgba(178,120,96,0.18); border-color: rgba(178,120,96,0.5); }
+.trial-board-list { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 3px; }
+.trial-board-row {
+  font-size: 0.72rem;
+  color: #c9a48a;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-variant-numeric: tabular-nums;
+}
+.trial-board-list .trial-board-row:first-child { color: #e0c0a0; }
+.trial-board-msg { font-size: 0.72rem; color: #8a7d6e; margin-top: 6px; }
+.trial-board-note { font-size: 0.66rem; color: #7a6f66; margin-top: 6px; line-height: 1.5; }
+
 .cf-section h3 { font-size: 0.8rem; color: #c9a962; margin: 8px 0 4px; }
 .cf-stat-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .cf-node-list { list-style: none; padding: 0; max-height: 28vh; overflow-y: auto; }

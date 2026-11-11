@@ -520,11 +520,11 @@ describe('位面试炼 · 接线与文案', () => {
     expect(mgr).toMatch(/type, x, z, \.\.\.rest/);
   });
 
-  it('文案双表都登记了 36 个 trial_ 键，且中英都非空', () => {
+  it('文案双表都登记了 44 个 trial_ 键，且中英都非空', () => {
     const zh = Object.keys(STRINGS_ZH).filter((k) => k.startsWith('trial_') || k === 'journal_tab_trial');
     const en = Object.keys(STRINGS_EN).filter((k) => k.startsWith('trial_') || k === 'journal_tab_trial');
     expect(zh.sort()).toEqual(en.sort());
-    expect(zh.length).toBe(36);
+    expect(zh.length).toBe(44);
     for (const k of zh) {
       expect(STRINGS_ZH[k].length, `中文缺 ${k}`).toBeGreaterThan(0);
       expect(STRINGS_EN[k].length, `英文缺 ${k}`).toBeGreaterThan(0);
