@@ -6015,6 +6015,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 服务端**没有身份校验**（`runner` 由客户端提交），任何人都能刷榜 —— 与 Boss 榜同一档次的演示实现，真要做正经榜要先有账号。② `submittedAt` 用 ISO-8601 字符串的字典序当时间序（同行长度一致），不解析成 `Instant`：解析失败会让一条脏记录把整次出榜打掉。③ 客户端还没有**看榜的地方** —— 拉取方法写了、测试写了，但试炼页上没有那一块。下一片接（那里会暴露一个真问题：榜是异步的，而日志页是同步渲染的快照）。
 
+- **2026-11-11 运维一致性 + 前端最后一扇门：优雅停机（W-X16）· 网关 Cache-Control 两条（W-P7）· 传说碑（W-G4）** —— 提交 `2cc064a`、`6333ead`、`8c3d6f5`
+
+  - **起因**：用户授权继续深挖 Spring Cloud 与前后端协同。本批把"关停要体面"补上、把足迹榜素材的缓存门收了、把 `fetchLeaderboard` 一直没有人读的黑洞补上（写了端点没人来读 = 这一步跟没写一样）。
+
+  - **做法**：① **W-X16**（`2cc064a`）：五个模块统一 `server.shutdown=graceful` + `spring.lifecycle.timeout-per-shutdown-phase=15s` —— Linux/systemd 下 SIGTERM 先停止接收新请求、再排空在途；Windows `TerminateProcess` 无副作用。全 reactor BUILD SUCCESS + smoke PASSED。② **W-P7**（`6333ead`）：网关 `Cache-Control` 补两条——`/api/telemetry/summary` → `public max-age=5`（UI 低频轮询的 5 秒新鲜度足够）、`/api/telemetry/events` → `no-store`（调试尾巴绝不进共享缓存）；单测一例穷举 6 支（含 POST 上报绝不进共享缓存），gateway 25 全绿。③ **W-G4 切片1**（`8c3d6f5`）：日志页新增【传说碑】——世界 Boss 最速通关碑；`OnlineServices.fetchLeaderboard` 终于有了消费者；`LegendsJournalTab` 与试炼榜/足迹榜同一扇门（只画自己那格 / 发号 / 脏行过滤 / 离线与抛错一句话）；bossId 过 `BOSS_ROSTER`（未登记走 `boss_name_unknown`，副本 Boss 走守钥长格，不泄原始字符串）；时钟 `m:ss`，≥1h 出时辰位补零；7 枚新键中英（2848→2853→**2860**）；13 例新测；**零新 CSS**（复用 trial-card / trial-board-*）。修复了两个机械门禁初犯（`BOARD_MSG_KEY` 与试炼榜表重名 → `MSG_KEY_BY_STATE`；`bossId === 'string'` 触发字面量台账扫描 → 字面量收进 `TYPEOF_STRING` 常量）。
+
+  - **验证**：`npm test` **6336** 全绿；build 无 chunk 回退；`e2e-clear` frames=13560 / chapter=5 / exceptions=0；server reactor + smoke PASSED；W-P7 / W-X16 server CI 双绿（`43010896154`、`43011611057`）。**诚实记录**：W-P7 push 取消的前端 CI `43010896278` 未等完；W-X16 的 `43011610979` 在观察中——仓的 CI 政策同分支后入 push 取消在飞旧跑。
+
+  - **风险与后续**：① 传说碑离线时安静降级，板面其余部分不受影响；② 碑上行只读，没有排序切换（榜本就按用时升序）；③ 下一片：挑战页把"最快通关"写进存档（`best.clearTimeMs` 按 bossId 记账），或试炼板面与足迹榜的英文装饰分层。
+
 - **2026-11-11 前后端协同续：Boss 阶段演出史诗化 + Boss 血条全套补齐（W-V2）· 遥测摘要端点（W-X15）· 行动风闻足迹榜（W-G3）** —— 提交 `3334a56`、`a44365f`、`f23433a`、`3859a43`（→ rebase `d52e01e`）、`9d4d4aa`
 
   - **起因**：用户授权继续深挖——前端魅力登峰造极、前后端协同发展。本批把"转阶段"做成真正的史诗 moment、把新 `/api/telemetry/summary` 从服务端一路画到试炼页，并顺手补上 W-V1 留下的一个真缺陷。
