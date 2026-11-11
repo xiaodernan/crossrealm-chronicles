@@ -43,6 +43,7 @@ export default defineConfig({
    * 把错误列表变成一次构建失败（见 `scripts/vite-plugin-content-check.mjs` 的文件头）。
    */
   plugins: [contentCheckPlugin()],
+  base: process.env.BASE_PATH || '/',
   server: {
     port: 5173,
     open: true,
