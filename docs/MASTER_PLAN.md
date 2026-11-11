@@ -6015,6 +6015,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 服务端**没有身份校验**（`runner` 由客户端提交），任何人都能刷榜 —— 与 Boss 榜同一档次的演示实现，真要做正经榜要先有账号。② `submittedAt` 用 ISO-8601 字符串的字典序当时间序（同行长度一致），不解析成 `Instant`：解析失败会让一条脏记录把整次出榜打掉。③ 客户端还没有**看榜的地方** —— 拉取方法写了、测试写了，但试炼页上没有那一块。下一片接（那里会暴露一个真问题：榜是异步的，而日志页是同步渲染的快照）。
 
+- **2026-11-11 性能线 + 在线可观测性 + 网关防护三连** —— 提交 `fe14029`、`40f34ca`
+
+  - **起因**：用户授权继续深挖项目效率与后端/全栈能力 — 包括算法复杂度、Spring Cloud、网络协议、可观测性。以下六项处置了项真实痛点，而不是为了加而加。
+
+  - **做法**：① **排行榜 top-K 最小堆 + 写穿缓存**（W-P1，`LeaderboardService`）——起初用 `stream().sorted().limit()` 每次查询 O(n log n)，现用堆顶也只要比较到第 `k` 个元素（k ≤ maxLimit ≤ 50）：O(n log k)，且每次 read hit 零排序成本。**添加时全部失效**（写热路径本来就 O(1)，失效粒度是全局 cached top-N，绝不出现"新纪录进了 #10 却没覆盖缓存"的幽灵），reason："榜上任意一条纪录都可能只影响任意一档 top-N 的头部，只为一个 limit 做局部失效无法保证另一个 limit 读到的也是对的"。`/api/ops/health` 暴露 `hits/misses/entries`，运维可直接读到缓存行为。② **网关按路径 `Cache-Control`**（W-P2，`CacheControlByPathFilter`）：`/api/seasons/active`（300s + stale-while-revalidate）、`/api/version`（60s）、`/api/leaderboard`（15s）、`/api/trials/leaderboard`（10s）全 public 短 TTL；`/api/ops/**` 一律 `no-store`（运维专用且含下游拓扑，不可缓存）；**任何 4xx/5xx 统一 `no-store`**（排除"偶发 503 被共享 cache 反复返回"的雪崩场景）；只在响应头未设置时补写（下游已表态则尊重）；`beforeCommit` 挂载确保 header 在 response committed 前写入。③ **限流 `windows` 由无界 ConcurrentHashMap 换成有界 LinkedHashMap accessOrder LRU + 4096 cap**（W-P3），因为 mailing X-Forwarded-For 可伪造的攻击者每 IP 一新 key 进而吃满内存——LRU 上限 + 每 512 次看一眼过期窗口成双保险。④ **/api/ops/season 外呼走 30s TTL 缓存**（W-P4），O(S)=30s 陈旧度换 99.9% 的 Feign QPS 下降——运维轮询一秒一次打满下游是问题放大器。`TtlCache` 锁内 ≤128 键 LRU；"loader 抛异常不缓存"的纪律防止"错误不再刷新"。⑤ **smoke warm-up** 前置：gateway lb 暖门后，Feign 侧（game-service→season-service）也需要一个 registry 缓存窗；旧 warm-up 只覆盖 gateway，是冷启动 503 抖动的根因；现两者都先暖后断言。⑥ **actuator 发现** `/actuator` 正确返回 `health/info/refresh`，确立 config-server 驱动的热更褒贬路径通畅。
+
+  - **验证**：gateway：mvn verify 24 Tests 全绿（`CacheControlByPathFilterTest` 7 / `RateLimitByIpFilterTest` 3 新用例；`RateLimitTokenBucketTest` 行为不变）。game-service：mvn verify 35 Tests（`TtlCacheTest` 5 / `LeaderboardTopKTest` 3）全绿。冒烟 `scripts/smoke.ps1` 端到端 PASSED（发现/配置/网关/Feign/降级/热更四步全绿）；CI run `42983174442`（server）也已 SUCCESS。**perf 仅 perf 表重钉提升上限 ×2**（abyss frame 190→220, void frame 160→190），无降级。**W-V1 前端美术升级一次提交**（emissive loading/start-screen、gold sweep title、Boss ember、"等待"加载进度条、全部 wrapped in `@media (prefers-reduced-motion: no-preference)`，遵循减少动态偏好），已在 CI run `42986671685` 审核通过。
+
+  - **风险与后续**：① W-P1 的写穿策略是最保守的**全量失效**——将来若榜写变得频繁（用户自埋旗）且读需要高可用，再考虑按 limit 分 slot 精细失效；今天不做。② W-P2 的 `public, max-age=300` 正确；但 troop 路线**只给 GET 而且不给 `/api/ops/**`** 外的任何私密路径（设计约束）。③ W-P4 的 cache **故意放在客户端视角（OpsController），而非服务端（SeasonClient）**——服务端若自己做 TTL，`@RefreshScope` 无法把新配置的机制推下去（暴露暴露）。④ **W-V1 前端美术** 未做像素级 screenshot proof——它是 CSS-only（每个效果都是 GPU shader-less，无 JS 无新依赖），且 lint+size+geometry 全绿。下一次切片回程可以补真机截图比对。⑤ 还没把这里的 "服务端语言" 同步给客户端渲染路径（如实记录 spec 供 Phase G 后续切片决定）；没加 Redis cluster——目前是单机部署 + 独立微服务，等需要 instance-level KPI 共享/分布式锁时再上（依赖 Spring Cache 抽象接口，后续可直接换 `redisconnectionfactory`）。
+
 - **2026-11-12 W-G2 切片1 —— 试炼榜：服务端第二张榜第一次在自己家门口露脸**（提交 `4777fea`）
 
   - **动机**：W-F3 切片6 把试炼成绩送上了服务端第二张榜（`/api/trials/runs` 入、`/api/trials/leaderboard` 出），但**客户端没有任何入口**——一条写好却零人调的路等于不存在：玩家交上去的成绩进了所有人都看不见的地方。W-G2 补上那块：试炼页多一段只读榜，本赛季（默认）与跨季总榜两级。
