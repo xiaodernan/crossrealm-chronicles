@@ -360,7 +360,7 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 610, shadow: 50 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 250, body: 180, shadow: 80 }),
   [ZONE_IDS.VOID]: Object.freeze({ frame: 160, body: 110, shadow: 70 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 190, body: 110, shadow: 90 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 190, body: 115, shadow: 90 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 210, body: 130, shadow: 80 }),
   [ZONE_IDS.RADIANT]: Object.freeze({ frame: 500, body: 450, shadow: 60 }),
 });
@@ -409,14 +409,14 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  * 那份注释是**判据的说明**，这张表是**判据的数据**，两者不再各存一份数。
  */
 export const DRAW_CALL_FLOORS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 288, body: 226, shadow: 64 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 267, body: 213, shadow: 55 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 593, body: 551, shadow: 39 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 218, body: 152, shadow: 65 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 145, body: 94, shadow: 64 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 177, body: 98, shadow: 79 }),
-  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 184, body: 120, shadow: 69 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 455, body: 410, shadow: 46 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 299, body: 234, shadow: 64 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 267, body: 217, shadow: 55 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 593, body: 555, shadow: 40 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 245, body: 173, shadow: 72 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 160, body: 96, shadow: 64 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 190, body: 111, shadow: 79 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 196, body: 120, shadow: 77 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 470, body: 417, shadow: 53 }),
 });
 
 /**
