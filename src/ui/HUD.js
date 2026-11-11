@@ -18,6 +18,8 @@ import { lockIntelOf, INTEL_KILLS } from './lockIntel.js';
 const ZONE_BANNER_TAG = 'hud-zone-banner';
 /** 连击终结闪光的分组 */
 const FINISHER_TAG = 'hud-finisher-flash';
+/** 成就解锁鎏金收束的调度组（W-V4） */
+const ACHIEVEMENT_TAG = 'hud-achievement-flash';
 /** Boss 血条转阶段闪白的分组（W-V2 切片2） */
 const BOSS_BAR_FLASH_TAG = 'hud-boss-bar-phase-flash';
 /** 本类全部监听的所有权标识：dispose() 按它一次性注销（B44 剩余半区） */
@@ -614,6 +616,15 @@ buildHUD() {
       scheduler.after(0.42, () => document.body.classList.remove('finisher-flash'), FINISHER_TAG);
     }, EVENT_TAG);
 
+    on('achievement-unlocked', () => {
+      /* W-V4：成就「解锁」那一刻——鎏金光从屏幕四角向中心聚拢，与 boss 阶段白金闪光同族
+       * 但语气更舒缓（成就是慢火炖，不是雷劈）。纯 CSS + scheduler 组，
+       * 1.2 秒收完，不卡任何已有的事件派发链 */
+      document.body.classList.add('achievement-flash');
+      scheduler.clear(ACHIEVEMENT_TAG);
+      scheduler.after(1.2, () => document.body.classList.remove('achievement-flash'), ACHIEVEMENT_TAG);
+    }, EVENT_TAG);
+
     on('realm-bleed', (e) => {
       this._setSubtitleOverlay('bleed', 'hud_subtitle_planar_bleed', { zone: e.detail.zone });
     }, EVENT_TAG);
@@ -732,6 +743,7 @@ buildHUD() {
     scheduler.clear(ZONE_BANNER_TAG);
     scheduler.clear(FINISHER_TAG);
     scheduler.clear(BOSS_BAR_FLASH_TAG);
+    scheduler.clear(ACHIEVEMENT_TAG);
   }
 
   /** 区横幅（切片36 起收的是文案键）：只活 3.2 秒，但键比展开后的文本便宜 */

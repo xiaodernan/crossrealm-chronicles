@@ -1625,6 +1625,28 @@ body.finisher-flash::after {
   to { opacity: 0; }
 }
 
+/* ===== 成就解锁鎏金收束（W-V4） =====
+   成就是"慢火炖"不是雷劈——光从四角向中心聚拢，金色比 finisher 更暖更柔。 */
+body.achievement-flash::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 53;
+  background:
+    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(255, 217, 138, 0.35) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(255, 217, 138, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 0% 100%, rgba(255, 217, 138, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 100% 100%, rgba(255, 217, 138, 0.35) 0%, transparent 55%);
+  animation: achievementFlashIn 1.2s ease-out forwards;
+}
+
+@keyframes achievementFlashIn {
+  0% { opacity: 0; filter: brightness(1.6) saturate(1.3); }
+  25% { opacity: 1; filter: brightness(1.3) saturate(1.15); }
+  100% { opacity: 0; filter: brightness(1) saturate(1); }
+}
+
 #camera-mode-display {
   color: #88bbdd;
   font-size: 0.75rem;

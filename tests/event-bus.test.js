@@ -302,7 +302,8 @@ describe('监听注销门禁（B44 剩余半区）', () => {
     // HUD 是切片6 迁掉的那一个：它必须从台账里消失，并且改用总线
     expect(bare['ui/HUD.js']).toBeUndefined();
     // W-V2 切片2（Boss 转阶段血条闪白）：+1 条 boss-phase 监听 — 每加一条，这笔账显式跟上
-    expect(busUsers.get('ui/HUD.js')).toMatchObject({ on: 21, offAll: 1 });
+    // W-V4（成就解锁鎏金收束）：+1 条 achievement-unlocked 监听 — 每加一条，这笔账显式跟上
+    expect(busUsers.get('ui/HUD.js')).toMatchObject({ on: 22, offAll: 1 });
   });
 
   it('用 on() 的文件必须同时有 offAll()：打了 tag 不注销比不打更糟', () => {
