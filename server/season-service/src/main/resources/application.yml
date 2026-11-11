@@ -7,6 +7,12 @@ spring:
   config:
     # 从 config-server 拉集中配置；config-server 不在线时静默回退到本地默认值
     import: "optional:configserver:http://localhost:8888"
+  cache:
+    # 显式默认：ConcurrentMap（不碰 Redis）。classpath 有 redis 时若不写这个，
+    # Spring Boot 会自选 RedisCacheManager 并登记 RedisHealthIndicator ——
+    # 本地/CI 无 Redis，健康检查一直 DOWN（smoke 门禁因此卡死）。
+    # 上线切 Redis：SPRING_CACHE_TYPE=redis + SPRING_DATA_REDIS_HOST=... 。
+    type: simple
 
 # 本地默认（与 config-server 仓库里的 season-service.yml 保持一致）
 season-service:
@@ -23,6 +29,12 @@ eureka:
     prefer-ip-address: true
 
 management:
+  # classpath 有 spring-boot-starter-data-redis 时，Boot 会登记 RedisHealthIndicator；
+  # 没有 Redis 时它会让 health 一直 DOWN。默认关闭探活，上线切 Redis 时
+  # MANAGEMENT_HEALTH_REDIS_ENABLED=true 打开。
+  health:
+    redis:
+      enabled: false
   endpoints:
     web:
       exposure:
