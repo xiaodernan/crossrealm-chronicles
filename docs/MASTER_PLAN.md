@@ -6045,6 +6045,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-11 网关 IP 限流双背板（W-P10）** —— 提交 `c81d98f`
+
+  - **起因**：用户要求把"各种计网知识运用"继续压进网关防护层。旧版 `RateLimitByIpFilter` 是单实例内存 LRU——单机 OK，但一上多实例（当前只是未来蓝图，不是烟测承诺），每实例独立记 60/10s 配额，N 实例总放行上限被放大到 N×60，该闸等于白设。Redis 背板让全集群共享同一把配额；未配 Redis 时 fail-open 只放行不卡死。
+
+  - **做法**：① 新增 `IpRateLimiter` 接口（`tryAcquire(ip, nowMs) → Mono<Boolean>` / `retryAfterMs() / maxRequests() / windowMs() / trackedSize() / snapshotWindowSizes()`）。② `InMemoryIpRateLimiter`（W-X12+W-P3 等价：LRU cap 4096 + 每 512 次主动 purge 过期窗口）。③ `RedisIpRateLimiter`：条件装配（`gateway.ratelimit.backend=redis`）——ZSET + Lua 原子脚本滑动窗口；成员 `now:random`（同毫秒多条不重合），score = 时间戳；`ZREMRANGEBYSCORE` 惰性删除过期、`ZADD` + `PEXPIRE window*2`；fail-open（Redis 挂了 log WARN 并放行）。④ `RateLimiterConfig`：`memory` 背板默认 `@ConditionalOnProperty(havingValue="memory", matchIfMissing=true)`；`redis` 背板由 `RedisIpRateLimiter` 自己带条件装配。⑤ `RateLimitByIpFilter` 退成薄适配层：解析 X-Forwarded-For + 问 `IpRateLimiter`。⑥ `application.yml`：`spring.config.redis.enabled=false`（不探活 RedisHealthIndicator）+ `gateway.ratelimit.backend=memory`。⑦ `spring-boot-starter-data-redis` 进 gateway classpath（按需激活）。
+
+  - **验证**：gateway compile + tests 44 例全绿（InMemoryIpRateLimiterTest 8 例写死窗口语义；RateLimitByIpFilterTest 3 例薄适配形态）；`mvn verify` BUILD SUCCESS；smoke test PASSED（两次真跑：第一次 warm-up 撞了老朋友"lb 注册表还没暖"，第二次 PASSED）；CJK 0 行。
+
+  - **风险与后续**：① Redis 背板启用条件：`gateway.ratelimit.backend=redis` + `SPRING_DATA_REDIS_HOST=…`，本地手测前必须先 `docker run redis:7 -d` 或 `docker compose up -d redis`；② Redis 不可达时 fail-open，不因此把整个网关打死；③ **目前烟测跑的是 memory 背板，Redis 背板没有 smoke 级覆盖**——要补"多实例共享计数"的烟测需先在本机/CI 起真 Redis；④ 下一片：W-P11——真正的"双实例共享配额"验证脚本（起两份网关连同一 Redis，看累计 60 条后两边的第 61 条都 429）。
+
 - **2026-11-11 网关 Server-Timing（W-P9）** —— 提交 `c4f29bc`、`8b8a1f6`
 
   - **起因**：W-P8 给链路钉了一个名字（X-Request-Id），但**慢**这件事还没人量——玩家说"怎么总卡一下"，curl 至少要能拆开"是网关慢还是下游慢"。RFC 9218 早有答案：`Server-Timing`。
