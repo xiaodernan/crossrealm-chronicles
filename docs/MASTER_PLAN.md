@@ -6015,6 +6015,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 服务端**没有身份校验**（`runner` 由客户端提交），任何人都能刷榜 —— 与 Boss 榜同一档次的演示实现，真要做正经榜要先有账号。② `submittedAt` 用 ISO-8601 字符串的字典序当时间序（同行长度一致），不解析成 `Instant`：解析失败会让一条脏记录把整次出榜打掉。③ 客户端还没有**看榜的地方** —— 拉取方法写了、测试写了，但试炼页上没有那一块。下一片接（那里会暴露一个真问题：榜是异步的，而日志页是同步渲染的快照）。
 
+- **2026-11-11 个人最速 + 运维两格 uptime（W-G5 / W-X17）** —— 提交 `ff3141e`、`737bbf7`
+
+  - **起因**：W-G4 把传说碑补上之后，榜的语义有一个硬伤——服务端 `clearTimeMs` 其实是**页面生命周期**（W-X8 提交时 `performance.now() - runStartedAt`），根本不是战斗用时；而且客户端一直没有**个人最速**。这一片两头一起修：个人最速可读、提交数据不说谎。
+
+  - **做法**：① **W-G5 切片1**（`ff3141e`）：新建 `BossBestTimes`（纯本地 localStorage `crossrealm_boss_best_v1`：坏档自愈 / 非有限与非正数一律不收 / 单调收紧 `<` 同分不覆盖 / `top(limit)` 按用时升序）；Game.js 在 `boss-start` 记每场开始时刻、`boss-defeated` 用 `boss-start→boss-defeated` 算真战斗用时（无 start 回退 runStartedAt，旧口径兜底），同时记账本、`submitRun` 用同一个数字——**榜上终于是"这场 Boss 战多久"**；`game.bossBestTimes` 面上字段（`game-field-contract` 钉住不许漂走）；传说碑页签最上扇【你的最速】（按用时升序、纯本地、在线关着照常，dungeon- 走守钥长格，未登记 bossId 走 `boss_name_unknown`）；3 枚新键（2860→**2863**）；`online-submit-run` source 断言同步对齐（`Math.max(1,` / `fightStart ?? this.runStartedAt ?? now` / 新 bossId 提取行）。修复了一组经典碰撞：个人最速行一度复用 `.trial-board-*` 类 → 榜查询按文档序先吃到它（假 DOM 不支持后代选择器）→ 个人最速改独立类族 `.legends-personal-*`。② **W-X17**（`737bbf7`）：`/api/ops/health` 追加 `startedAt`（ISO-8601）与 `uptimeSec`（Controller 构造时刻起算）——运维一眼分得清"实例刚起"与"成熟实例"；零外呼约束不变；测试 +2 断言，game-service 41 全绿。
+
+  - **验证**：`npm test` **6347** 全绿；build 无 chunk 回退；`e2e-clear` frames=13560 / chapter=5 / exceptions=0；W-X17 server CI `43015056125` SUCCESS；W-P7/W-X16 server CI 双绿（`43010896154`、`43011611057`）；`3b40cba`（docs）server CI `43010447574` SUCCESS。前端 CI 的 `43014651708`/`43014803574` 被连续 push 取消——仓的 CI 政策同分支后入 push 取消在飞旧跑，绿的是最新树 `ff3141e`。
+
+  - **风险与后续**：① 传说碑提交数据语义已修，**但历史脏数据仍在榜上**——演示榜没有后端工具去清账（内存榜重启即清零，天然刷新）；② 个人最速与碑并排但互不替换——一个是"你 vs 你"，一个是"你 vs 大家"，两个都留；③ 下一片：终章 CG 揭晓分层演出，或把"个人最速"接进结局结算页。
+
 - **2026-11-11 运维一致性 + 前端最后一扇门：优雅停机（W-X16）· 网关 Cache-Control 两条（W-P7）· 传说碑（W-G4）** —— 提交 `2cc064a`、`6333ead`、`8c3d6f5`
 
   - **起因**：用户授权继续深挖 Spring Cloud 与前后端协同。本批把"关停要体面"补上、把足迹榜素材的缓存门收了、把 `fetchLeaderboard` 一直没有人读的黑洞补上（写了端点没人来读 = 这一步跟没写一样）。
