@@ -1,10 +1,12 @@
 package com.crossrealm.chronicles.game;
 
 import com.crossrealm.chronicles.game.GameServiceProperties;
+import com.crossrealm.chronicles.game.cache.TtlCache;
 import com.crossrealm.chronicles.game.leaderboard.LeaderboardService;
 import com.crossrealm.chronicles.game.season.SeasonClient;
 import com.crossrealm.chronicles.game.season.SeasonSnapshot;
 import com.crossrealm.chronicles.game.telemetry.TelemetryService;
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +37,9 @@ public class OpsController {
     private final SeasonClient seasonClient;
     private final String applicationName;
 
+    /** 下游 season-service 的外呼结果走一层 30s TTL，避免运维页轮询把上游打爆 */
+    private final TtlCache seasonCache = new TtlCache();
+
     public OpsController(
             GameServiceProperties properties,
             LeaderboardService leaderboardService,
@@ -62,12 +67,13 @@ public class OpsController {
         result.put("inMemory", Map.of(
                 "leaderboardRecords", leaderboardService.size(),
                 "telemetryEvents", telemetryService.count(),
-                "leaderboardCache", leaderboardService.cacheStats()));
+                "leaderboardCache", leaderboardService.cacheStats(),
+                "seasonCache", seasonCache.stats()));
         return result;
     }
 
     /**
-     * 下游 season-service 的当前赛季（W-X14）。
+     * 下游 season-service 的当前赛季（W-X14；W-P4 起走 30s TTL 缓存）。
      *
      * 两层保底：
      * 1. Feign 的 `fallbackFactory` 在熔断/连不上时返回 `unavailable()`；
@@ -76,12 +82,19 @@ public class OpsController {
      *
      * 两层的顺序不能反：先靠契约降级，再靠本地兜底。只有第二层的话，
      * 每次失败都要等 Feign 抛完才知道，而 Feign 的异常里没有"这一季是什么"。
+     *
+     * 缓存策略（W-P4）：loader 抛的异常不存；一次成功过的"不可用"也存——TTL 30s 自恢复；
+     * 这保证 5xx 时 ops 页面的轮询不打死下游，而不是每次请求都重新闯一遍熔断。
+     * 30 秒的陈旧度对"现在是什么赛季"是可接受的（赛季每天都在跑）。
      */
     @GetMapping("/api/ops/season")
     public Map<String, Object> season() {
         Map<String, Object> result = new LinkedHashMap<>();
         try {
-            SeasonSnapshot snapshot = seasonClient.active();
+            SeasonSnapshot snapshot = seasonCache.get(
+                    "season.active",
+                    () -> seasonClient.active(),
+                    Duration.ofSeconds(30));
             result.put("available", snapshot.available());
             if (snapshot.available()) {
                 result.put("id", snapshot.id());
