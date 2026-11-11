@@ -104,6 +104,7 @@ docker compose down
 | POST | `/api/telemetry/events` | 上报玩家事件 `{type,detail}`，限容缓存 |
 | GET | `/api/telemetry/events/count` | 当前缓存事件数 |
 | GET | `/api/telemetry/events` | 查看缓存事件（调试） |
+| GET | `/api/telemetry/summary?topN=5` | 窗口频次摘要 `{windowSize,distinctTypes,byType:[{type,count}]}`（topN 夹到 [1,20]） |
 | GET | `/api/version` | 服务版本（含配置中心下发的 `version-note`） |
 
 配置经 `game-service` 的 `spring.config.import=optional:configserver:…` 从配置中心拉取：

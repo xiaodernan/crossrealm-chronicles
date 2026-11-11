@@ -6015,6 +6015,16 @@ Phase D（系统与质量）
 
   - **风险与后续**：① 服务端**没有身份校验**（`runner` 由客户端提交），任何人都能刷榜 —— 与 Boss 榜同一档次的演示实现，真要做正经榜要先有账号。② `submittedAt` 用 ISO-8601 字符串的字典序当时间序（同行长度一致），不解析成 `Instant`：解析失败会让一条脏记录把整次出榜打掉。③ 客户端还没有**看榜的地方** —— 拉取方法写了、测试写了，但试炼页上没有那一块。下一片接（那里会暴露一个真问题：榜是异步的，而日志页是同步渲染的快照）。
 
+- **2026-11-11 前后端协同续：Boss 阶段演出史诗化 + Boss 血条全套补齐（W-V2）· 遥测摘要端点（W-X15）· 行动风闻足迹榜（W-G3）** —— 提交 `3334a56`、`a44365f`、`f23433a`、`3859a43`（→ rebase `d52e01e`）、`9d4d4aa`
+
+  - **起因**：用户授权继续深挖——前端魅力登峰造极、前后端协同发展。本批把"转阶段"做成真正的史诗 moment、把新 `/api/telemetry/summary` 从服务端一路画到试炼页，并顺手补上 W-V1 留下的一个真缺陷。
+
+  - **做法**：① **W-V2 切片1**（`3334a56`）：上下收拢的史诗黑边（8.5vh、金线镶边；`prefers-reduced-motion: reduce` 下整体 display:none）+ 背后 30vmin 罗马数字水印（Georgia 衬线；语言中立纯装饰，不进 i18n；**只在 phase ≥ 2 拉开**——门槛阶段不惊动观众）；横幅鎏金呼吸光（bpGild）；纯逻辑抽离 `bossPhaseCine.js`（`romanNumeral` / `isCinePhase`，7 例单测）；`CINE_PHASES` 冻结断言。② **W-V2 切片2**（`a44365f`）：**修复 W-V1 真缺陷**——`#boss-hp-bar` / `#boss-poise-bar` / `.boss-bar-track` 从没有任何样式命中（ember 玻璃框里装着一条不可见的血条）；补齐底轨 / ember 260% 宽背景流动（cr-boss-ember）/ 钢灰 poise 细带（下缘 4px）/ 转阶段 `phase-flash` 白金闪光（HUD 在 `boss-phase` 事件上切 class，双路径 reduced-motion）/ width transition；dispose 同步清 `hud-boss-bar-phase-flash` 分组。③ **W-X15**（`f23433a`）：`GET /api/telemetry/summary`——HashMap 计数 O(n) + 最小堆只留 k 最高频 O(m log k)；**刻意不做缓存**（遥测是持续写入的流，冷数据现算更诚实——与 W-P1 的"榜读重排"场景不同，此处没有值得换新鲜度的读成本）；topN 夹 [1,20]，同频按类型名升序；3 例新测，game-service 41 例全绿；server CI `43007086324` SUCCESS。④ **W-G3 切片1**（`3859a43`，rebase 为 `d52e01e`）：试炼页新增"行动风闻"足迹榜——`OnlineServices.fetchTelemetrySummary`（topN 默认 5）→ `TrialJournalTab._loadSummary` / `_paintSummary`，与试炼榜同一扇门（只画自己那格 / 发号只认最后一份 / 脏行上屏前过滤 / 离线与抛错只落一句"取不到"）；条形宽度按最大频次归一；5 枚新键中英（2848→**2853**，trial_ 44→49）；11 例单测。⑤ **门禁修账**（`9d4d4aa`）：切片2 本地漏跑 `npm test`，CI `43006280945` 红（`event-bus.test.js` 台账 HUD 20→21）；回填并另记——**src 变更的每片必须跑 npm test，不能只 lint/build/e2e**。
+
+  - **验证**：`npm test` 6323 全绿；build 无 chunk 回退；`scripts/e2e-clear.mjs` 双复测 `frames=13560` / 模拟 226s / `chapter=5` / `exceptions=0`（与 W-V1 同门）；server reactor BUILD SUCCESS + smoke PASSED；W-X15 server CI SUCCESS。**诚实记录**：`9d4d4aa` 的前端 CI 被后续 push 取消；Pages 部署已由 `zhaoxt` 合入（`26e765c`），本片 rebase 于其上；`43010247792`（W-G3 push）在观察中——仓的 CI 政策是同一分支后入 push 取消在飞旧跑，绿的那一个就是最新树。
+
+  - **风险与后续**：① 足迹榜离线时整块安静降级，不影响板面可读；② 黑边只在 phase≥2 出现（世界 Boss 与副本守钥者同吃）；③ 下一片：结局 CG 揭晓分层演出分层、或服务端窗口分位（p50/p95）统计。
+
 - **2026-11-11 性能线续：试炼榜堆顶 K + 惰性 memo（W-P5）· season-service Spring Cache 抽象（W-P6）· Redis 探活坑位回填** —— 提交 `c46c8bc`、`469dca8`、`9ea5aa2`、`fce6ec8`
 
   - **起因**：用户授权继续深挖项目效率、Spring Cloud 与缓存。上一片把 Boss 榜做了堆顶 K 之后，试炼榜（`TrialLeaderboardService`）还是每读一次全表 sorted；而 season-service 的只读端点零缓存，每请求都重算周期轮转。这两处是同一类问题：**读多写少的热路径上却做着 O(n log n) 的排序 / 零缓存的重算**。
