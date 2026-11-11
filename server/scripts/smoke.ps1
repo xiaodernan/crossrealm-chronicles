@@ -130,7 +130,7 @@ try {
     Remove-Item Env:SPRING_CONFIG_IMPORT -ErrorAction SilentlyContinue
     if (-not (Wait-Healthy 28081 'game-service')) { exit 1 }
 
-    # W-X14：赛季服务同样只从配置中心拉配置（它也是"客户端"，不是 config-server 自己）
+    # season-service pulls config from config-server too (it is a client, NOT config-server itself)
     $env:SPRING_CONFIG_IMPORT = 'optional:configserver:http://localhost:28888'
     $procs += Start-Server 'season-service' 'season-service-0.1.0-SNAPSHOT.jar' 28082
     Remove-Item Env:SPRING_CONFIG_IMPORT -ErrorAction SilentlyContinue
@@ -209,7 +209,7 @@ try {
     Write-Host "=== 4b) via gateway: season-service active season (lb://season-service) ==="
     $season = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/seasons/active' -TimeoutSec 20).Content
     Write-Host $season
-    # 只断言形状与"某个合法赛季"，不断言具体是哪一季 —— 那个答案随时钟走，钉死会让冒烟隔两周就红一次
+    # assert the *shape* is a valid season, do not assert WHICH season -- it rotates with the clock, so pinning would red-wall this smoke over time
     if (-not ($season -match '"id":"(ember|tide|gloom|radiant)"')) { Write-Error "gateway did NOT route to season-service: $season"; exit 1 }
     if (-not ($season -match '"daysRemaining":[0-9]+')) { Write-Error "season payload missing countdown: $season"; exit 1 }
 
