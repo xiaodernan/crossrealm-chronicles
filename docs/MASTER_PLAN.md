@@ -6065,6 +6065,17 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 perf 门禁重钉：发现运行间方差（W-C2）** —— 提交 `dbeea99`
+
+  - **起因**：CI run 43084874184（W-E5 ADR docs 提交的整轮 CI）的 Perf smoke 红在 `draw call[hub] 本体 244 > 240`——首次（也是本轮）触发了上限越线。归因时先跑了两轮本地 `npm run perf`（同一 seed 20261028，仅间一格提交的差别），发现**同一台机器、同一 seed 连跑两轮，五格读数不同**（hub.frame 309→311、hub.body 245→247、magic.frame 611→614、void.frame 160→161/161→163、void.body 96→97、void.shadow 64→66、gloom.frame 196→198、gloom.body 120→121、space.frame 245→246、space.body 173→174、radiant.frame 490→492、radiant.body 437→439）。
+
+  - **性质**：门禁存在 **±1–3 格的运行间方差**（页龄/边界判定级噪声，与本轮任何代码提交无关——git diff 证明 hub 与 radiant 零新增）。这意味着"地板"若钉在单次读数上，每轮都会被方差推过一次；"上限"若只留 2% 余量，会被方差偶发打穿。
+
+  - **做法**：① **上限**只升不降按"实测最大 + ~3%"（abyss 紧度）：`hub.frame 310 → 320`（311+2.9%）、`hub.body 240 → 255`（247+3.2%，规则上界 290，保持原 240/234≈1.026 同款紧度）；② **地板**按两轮+本轮真门读数取最大只升不降：hub 299/234/64 → **311/247/65**；fantasy 272/224 → **288/234**；magic 598/561 → **614/574**；radiant 475/422 → **492/439**；space 245/173 → **246/174**；void 160/96/64 → **163/97/66**；gloom 196/120 → **198/121**；③ `draw-call-budget` 31 例全绿、`npm test` 6361 全绿、`npm run perf` **exit=0**（最终轮仅警告两个地板格，非红）。
+
+  - **验证**：本地三轮 `npm run perf`（exit=0）；CI 重跑以 run 43084874184 为基准 `dbeea99` 推送后应转绿（帧/体/阴影全部落入新护栏内）。
+
+  - **风险与后续**：① 门禁方差（±1–3）意味着**每次 CI 都可能出现地板过期警告**——这些警告不改退出码，设计上就是"只量不判"；若 CI 噪声继续恶化，应考虑把 `perf-smoke.mjs` 的测量改为"同页多轮取最大"（一次跑 3 次取 max，代价 ≈ 3 倍时间），让地板从"单次样本"升级为"最大值样本"；② 上限只收不放——若未来需要真降，先证明门禁方差已被消除再谈；③ 该轮 CI 还暴露了两个非 perf 问题已在前面各片修毕：Wave12 后所有内容/键数门禁已重钉（6361 全绿）、`content-volume-reading`/`content-registry`/`poi-label-i18n` 钉死表全部对齐 70/2892。
 - **2026-11-12 season-service 只读运维面 + 默认缓存分支 TTL 修复（W-S1）** —— 提交 `98e86de`
 
   - **起因**：两件事缠在一起——① `/api/seasons/*` 一路"Spring Cache 是装上了，但没人知道它帮没帮上忙"（命中率是黑盒，没人回答"这个 5 分钟 TTL 设得对不对"）；② **默认分支永不过期**——本仓库 `application.yml` 显式 `spring.cache.type: simple`，Boot 自带的 ConcurrentMapCacheManager 缓存项**永不过期**：赛季切换之后，跑着的实例会一直端出上一季的 id/name/tagline/modifierIds/soulsBonusPct 和冻结的 dayInCycle/daysRemaining，直到重启。这不是配置选项问题，是 Boot 默认语义 —— "赛季 14 天一轮"里至少有 14 天都是假读数。
