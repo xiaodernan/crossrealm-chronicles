@@ -20,20 +20,10 @@ import { keyText, refreshKeyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 import { bossNameKeyOf } from '../content/bossRoster.js';
 import { bossBestTimes } from '../game/BossBestTimes.js';
+import { fmtClock } from './msClock.js';
 
 /** 拉几条。服务端 maxLimit ≤ 50，这里取十条 —— 一块随身碑看得完的量 */
 const BOARD_LIMIT = 10;
-
-/** 毫秒 → `h:mm:ss` / `m:ss`。Boss 战没到一小时的，时辰位一律省略 */
-function fmtClock(ms) {
-  const totalSec = Math.max(0, Math.floor(Number(ms) / 1000));
-  const h = Math.floor(totalSec / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-  const s = totalSec % 60;
-  const ss = String(s).padStart(2, '0');
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${ss}`;
-  return `${m}:${ss}`;
-}
 
 /** 榜消息态 → 文案键（`ready` 不走这张表——它要画行） */
 const MSG_KEY_BY_STATE = {

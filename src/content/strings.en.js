@@ -3190,6 +3190,7 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   legends_personal_title: 'Your fastest',
   legends_personal_empty: 'No personal bests yet — they are inscribed when a boss falls',
   legends_personal_row_fmt: '${boss} · ${clock}',
+  credits_best_title: 'Your fastest battles',
 
   trial_toast_started_fmt: 'Trial started: layer ${layer}',
   trial_toast_layer_fmt: 'Layer ${layer} cleared',

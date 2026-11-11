@@ -3190,6 +3190,7 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   legends_personal_title: '你的最速',
   legends_personal_empty: '尚无个人最速 —— 诸神哪天倒下，便刻在这里',
   legends_personal_row_fmt: '${boss} · ${clock}',
+  credits_best_title: '你的最速之战',
 
   trial_toast_started_fmt: '试炼开始：第 ${layer} 层',
   trial_toast_layer_fmt: '第 ${layer} 层清完了',

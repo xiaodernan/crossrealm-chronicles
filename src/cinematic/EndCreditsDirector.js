@@ -3,6 +3,9 @@ import { t } from '../engine/i18n.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 import { endingDialogKey } from '../content/objectives.js';
+import { bossNameKeyOf } from '../content/bossRoster.js';
+import { bossBestTimes } from '../game/BossBestTimes.js';
+import { fmtClock } from '../ui/msClock.js';
 
 const CINEMATIC_ENDCREDITSDIRECTOR = 'cinematic/EndCreditsDirector';
 const creditsOn = (name, handler) => on(name, handler, CINEMATIC_ENDCREDITSDIRECTOR);
@@ -86,6 +89,16 @@ export class EndCreditsDirector {
     const 行 = creditsLines(this.game?.quests?.stats);
     this.game.audio?.setMode('credits', creditsAudioMode(this.game?.quests?.stats));
     scroll.innerHTML = 行.map((l) => (l === '' ? '' : `<p>${keyText(t(l))}</p>`)).join('');
+    // W-G6：个人最速横幅——有的话挂在字幕最后一块，没有就整块不渲染（老档/没打过的档不受影响）。
+    // 顺序与传说碑同一口径：用时升序，只取五条。名册解析、注入防护与碑同一套纪律。
+    const store = this.game?.bossBestTimes ?? bossBestTimes;
+    const best = typeof store?.top === 'function' ? store.top(5) : [];
+    if (best.length > 0) {
+      const rows = best
+        .map(({ bossId, bestMs }) => `<p class="end-credits-best-row">${t('legends_personal_row_fmt', { boss: t(bossNameKeyOf(bossId)), clock: fmtClock(bestMs) })}</p>`)
+        .join('');
+      scroll.innerHTML += `<div class="end-credits-best"><p class="end-credits-best-title">${t('credits_best_title')}</p>${rows}</div>`;
+    }
     this.el.classList.remove('hidden');
     // DOM 建一次、演出可能很久之后才放：键名到播放这一刻才问生效表
     refreshKeyText(this.el);
