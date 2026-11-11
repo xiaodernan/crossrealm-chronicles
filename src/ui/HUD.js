@@ -18,6 +18,8 @@ import { lockIntelOf, INTEL_KILLS } from './lockIntel.js';
 const ZONE_BANNER_TAG = 'hud-zone-banner';
 /** 连击终结闪光的分组 */
 const FINISHER_TAG = 'hud-finisher-flash';
+/** Boss 血条转阶段闪白的分组（W-V2 切片2） */
+const BOSS_BAR_FLASH_TAG = 'hud-boss-bar-phase-flash';
 /** 本类全部监听的所有权标识：dispose() 按它一次性注销（B44 剩余半区） */
 const EVENT_TAG = 'ui/HUD';
 
@@ -592,6 +594,19 @@ buildHUD() {
       this.killCount = (this.killCount || 0) + 1;
     }, EVENT_TAG);
 
+    on('boss-phase', () => {
+      /* W-V2 切片2：转阶段瞬间血条本身闪一记白金光——世界 Boss 与副本守钥者
+       * 两条分支都会派这个事件，不必关心 bossId，也不重复处理（W-V2 切片1
+       * 的黑边已经拉开，这里是"血条会不会跟着呼吸"这半件事）。 */
+      const bar = document.getElementById('boss-hp-bar');
+      if (!bar) return;
+      bar.classList.remove('phase-flash');
+      void bar.offsetWidth; // 强制 reflow：同元素重播动画
+      bar.classList.add('phase-flash');
+      scheduler.clear(BOSS_BAR_FLASH_TAG);
+      scheduler.after(0.62, () => bar.classList.remove('phase-flash'), BOSS_BAR_FLASH_TAG);
+    }, EVENT_TAG);
+
     on('combo-finisher', () => {
       document.body.classList.add('finisher-flash');
       scheduler.clear(FINISHER_TAG);
@@ -715,6 +730,7 @@ buildHUD() {
     offAll(EVENT_TAG);
     scheduler.clear(ZONE_BANNER_TAG);
     scheduler.clear(FINISHER_TAG);
+    scheduler.clear(BOSS_BAR_FLASH_TAG);
   }
 
   /** 区横幅（切片36 起收的是文案键）：只活 3.2 秒，但键比展开后的文本便宜 */

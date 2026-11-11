@@ -2887,6 +2887,71 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   }
 }
 
+/* ===== Boss 血条主体（W-V2 切片2）=====
+   修复：此前 #boss-hp-bar / #boss-poise-bar / .boss-bar-track 没有任何样式——
+   W-V1 的 ember 玻璃框里装着一条不可见的血条。这里把血条全套补齐：
+   底轨 + 鎏金 ember 血色流动 + poise 细带（覆盖轨道下缘）。 */
+.boss-bar-wrap {
+  padding: 8px 14px 10px;
+  box-sizing: border-box;
+}
+
+.boss-bar-track {
+  position: relative;
+  width: 100%;
+  height: 16px;
+  margin: 4px auto 0;
+  background: rgba(8, 4, 3, 0.85);
+  border: 1px solid rgba(255, 120, 70, 0.35);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.boss-bar-fill {
+  position: absolute;
+  left: 0;
+  border-radius: 2px;
+}
+
+.boss-bar-fill.hp {
+  top: 0;
+  height: 10px;
+  background: linear-gradient(90deg, #4d0c08 0%, #8b1e14 30%, #ff5a3c 65%, #ffd0a0 100%);
+  background-size: 260% 100%;
+  box-shadow: 0 0 8px rgba(255, 90, 60, 0.45);
+  transition: width 0.18s ease-out;
+}
+
+.boss-bar-fill.po {
+  bottom: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2c3844 0%, #5c7186 45%, #a8bccf 100%);
+  box-shadow: 0 0 6px rgba(150, 190, 230, 0.35);
+  opacity: 0.95;
+  transition: width 0.12s linear;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .boss-bar-fill.hp {
+    animation: cr-boss-ember 1.4s linear infinite;
+  }
+
+  @keyframes cr-boss-ember {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 130% 0%; }
+  }
+
+  .boss-bar-fill.hp.phase-flash {
+    animation: bossBarPhaseFlash 0.6s ease-out 1;
+  }
+
+  @keyframes bossBarPhaseFlash {
+    0% { filter: brightness(2.6) saturate(0.5); }
+    100% { filter: brightness(1) saturate(1); }
+  }
+}
+
 /* ============================================================
  * 6) 说明书 / 设置面板 / 营火平板 / 对话盒 —— 统一"鎏金镶边"玻璃
  * ============================================================ */
