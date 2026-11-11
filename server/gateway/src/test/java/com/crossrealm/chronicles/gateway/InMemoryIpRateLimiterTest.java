@@ -46,6 +46,22 @@ class InMemoryIpRateLimiterTest {
     }
 
     @Test
+    @DisplayName("计数器：放行与拒绝各自累加，且跨 IP 不互相污染")
+    void countersAccumulateAllowedAndRejected() {
+        String ip = "10.9.0.1";
+        long now = 9_000_000L;
+        for (int i = 0; i < 60; i++) {
+            limiter.tryAcquire(ip, now).block();
+        }
+        limiter.tryAcquire(ip, now).block();       // 第 61 次：拒绝
+        limiter.tryAcquire(ip, now).block();       // 第 62 次：拒绝
+        limiter.tryAcquire("10.9.0.2", now).block(); // 别的 IP：放行（不受前者影响）
+
+        assertEquals(61L, limiter.allowedCount(), "60 + 1 个新 IP 都应计入放行");
+        assertEquals(2L, limiter.rejectedCount(), "超额的两次应计入拒绝");
+    }
+
+    @Test
     @DisplayName("过期窗口被清掉后，IP 又能刷了")
     void expiredWindowAllowsAgain() {
         String ip = "10.0.0.2";

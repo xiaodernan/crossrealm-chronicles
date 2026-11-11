@@ -40,6 +40,21 @@ public interface IpRateLimiter {
     /** 滑动窗口长度（毫秒） */
     int windowMs();
 
+    /**
+     * 本进程累计放行次数（W-P13，运维可观测性）。
+     *
+     * <p>红限各自实例各自数——多实例部署下每个 pod 的数是"本实例的放行/拒绝次数"，
+     * 不是集群全量。读数为 -1 = 该背板没有埋点（接口默认）。
+     */
+    default long allowedCount() {
+        return -1L;
+    }
+
+    /** 本进程累计拒绝次数（429 次数）。见 {@link #allowedCount()} 的口径说明。 */
+    default long rejectedCount() {
+        return -1L;
+    }
+
     /** 当前实现里追踪的 IP 数量（测试/运维用） */
     int trackedSize();
 

@@ -250,6 +250,16 @@ try {
     if (-not ($opsStats -match '"telemetry":\{.*"windowSize":[0-9]+')) { Write-Error "ops stats missing telemetry.windowSize: $opsStats"; exit 1 }
 
     Write-Host ""
+    Write-Host "=== 4e) via gateway: springcloud ops endpoint carries rate-limit counters (W-P13) ==="
+    $scResp = Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/actuator/springcloud' -TimeoutSec 15
+    # PS 5.1 对 actuator 的 vnd.spring-boot.actuator+json 不认作文本，Content 会是 byte[] —— 手动解一次
+    $sc = if ($scResp.Content -is [byte[]]) { [System.Text.Encoding]::UTF8.GetString($scResp.Content) } else { [string]$scResp.Content }
+    Write-Host $sc
+    if (-not ($sc -match '"allowed":[0-9]+')) { Write-Error "springcloud missing allowed counter: $sc"; exit 1 }
+    if (-not ($sc -match '"rejected":[0-9]+')) { Write-Error "springcloud missing rejected counter: $sc"; exit 1 }
+    if (-not ($sc -match '"backend":"memory"')) { Write-Error "springcloud missing backend identity: $sc"; exit 1 }
+
+    Write-Host ""
     Write-Host "=== 5) hot refresh: edit served config (max-limit 4 -> 3, note v1 -> v2) WITHOUT restarting game-service ==="
     @'
 game-service:

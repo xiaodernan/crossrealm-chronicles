@@ -37,6 +37,10 @@ public class InMemoryIpRateLimiter implements IpRateLimiter {
 
     private long callsSinceSweep = 0;
 
+    /** W-P13：本进程放行/拒绝累计（运维可观测性——限流真的生效了没、挡了多少） */
+    private final java.util.concurrent.atomic.AtomicLong allowedTotal = new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.atomic.AtomicLong rejectedTotal = new java.util.concurrent.atomic.AtomicLong();
+
     @Override
     public Mono<Boolean> tryAcquire(String ip, long nowMs) {
         String key = (ip == null || ip.isBlank()) ? "unknown" : ip;
@@ -45,7 +49,13 @@ public class InMemoryIpRateLimiter implements IpRateLimiter {
             sweepIfDue(nowMs);
             window = windows.computeIfAbsent(key, k -> new ArrayDeque<>());
         }
-        return Mono.just(bucket.allow(window, nowMs));
+        boolean allowed = bucket.allow(window, nowMs);
+        if (allowed) {
+            allowedTotal.incrementAndGet();
+        } else {
+            rejectedTotal.incrementAndGet();
+        }
+        return Mono.just(allowed);
     }
 
     /** 外层调度判断用：被明确拒时计算客户端 retryAfterMs */
@@ -116,5 +126,15 @@ public class InMemoryIpRateLimiter implements IpRateLimiter {
             windows.forEach((key, value) -> snapshot.put(key, value.size()));
             return snapshot;
         }
+    }
+
+    @Override
+    public long allowedCount() {
+        return allowedTotal.get();
+    }
+
+    @Override
+    public long rejectedCount() {
+        return rejectedTotal.get();
     }
 }

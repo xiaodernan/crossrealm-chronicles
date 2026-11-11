@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
  *   <li>不泄露完整路由表、不泄露 registry 里的实例名列表；</li>
  *   <li>不问 Eureka（同 game-service {@code /actuator/health} 纪律）；</li>
  *   <li>ratelimit 的 live tracked size 只在内存背板上数出来；Redis 背板返 -1（不适用）；</li>
+ *   <li>allowed/rejected 是<b>本实例</b>的累计计数（原子自增，零额外 RTT、零外呼）；</li>
  *   <li>返回 JSON 里不含 IP / ID / secret / 路径。</li>
  * </ul>
  *
@@ -51,7 +52,10 @@ public class SpringCloudOpsEndpoint {
                 "backend", env.getProperty("gateway.ratelimit.backend", "memory"),
                 "maxRequests", rateLimiter.maxRequests(),
                 "windowMs", rateLimiter.windowMs(),
-                "trackedSize", rateLimiter.trackedSize()));
+                "trackedSize", rateLimiter.trackedSize(),
+                // W-P13：本实例累计的放行/拒绝次数（限流真的生效了没、挡了多少）
+                "allowed", rateLimiter.allowedCount(),
+                "rejected", rateLimiter.rejectedCount()));
         result.put("gateway", Map.of(
                 "routesConfigured", countRoutes(),
                 "retryOnVersion", true,

@@ -68,6 +68,10 @@ public class RedisIpRateLimiter implements IpRateLimiter {
     @Value("${spring.redis.port:6379}")
     private int redisPort;
 
+    /** W-P13：本进程放行/拒绝累计——各实例各自数，不跨实例聚合（那需要 Redis 计数器，会给热路径加 RTT） */
+    private final java.util.concurrent.atomic.AtomicLong allowedTotal = new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.atomic.AtomicLong rejectedTotal = new java.util.concurrent.atomic.AtomicLong();
+
     public RedisIpRateLimiter(ReactiveStringRedisTemplate redis) {
         this.redis = redis;
     }
@@ -82,11 +86,18 @@ public class RedisIpRateLimiter implements IpRateLimiter {
                 .map(list -> {
                     @SuppressWarnings("unchecked")
                     List<Long> nums = (List<Long>) list;
-                    return nums != null && !nums.isEmpty() && nums.get(0) == 1L;
+                    boolean allowed = nums != null && !nums.isEmpty() && nums.get(0) == 1L;
+                    if (allowed) {
+                        allowedTotal.incrementAndGet();
+                    } else {
+                        rejectedTotal.incrementAndGet();
+                    }
+                    return allowed;
                 })
                 .onErrorResume(e -> {
                     org.slf4j.LoggerFactory.getLogger(RedisIpRateLimiter.class)
                             .warn("[W-P10] Redis rate-limit backend error, allowing by default: {}", e.toString());
+                    allowedTotal.incrementAndGet(); // fail-open 的放行也算放行
                     return Mono.just(true); // fail-open
                 });
     }
@@ -127,5 +138,15 @@ public class RedisIpRateLimiter implements IpRateLimiter {
     /** ops 运维用：暴露真实连的 Redis（不含密码） */
     public String diagnosticRedisHost() {
         return redisHost + ":" + redisPort;
+    }
+
+    @Override
+    public long allowedCount() {
+        return allowedTotal.get();
+    }
+
+    @Override
+    public long rejectedCount() {
+        return rejectedTotal.get();
     }
 }
