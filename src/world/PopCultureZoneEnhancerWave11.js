@@ -41,15 +41,29 @@ function fireEcho(game, trigger) {
 }
 
 // ── 枢纽 · 旅人之灯（返乡母题第五枚：回家的方向） ──
+/**
+ * W-V11：旅人之灯的焰色 —— 通关后从"暖纸琥珀"换成"金阳白"。
+ * 与 W-E6（最后一盏灯）、W-V5/W-V9/W-V8 同一条谢幕线的灯。
+ * 纯函数：便于门禁钉死两种焰色，不让它漂移。
+ */
+export function hubLanternFlameColors(completed) {
+  return completed
+    ? { color: 0xfff3c4, emissive: 0xffd98a, intensity: 1.75 }
+    : { color: 0xe8d6a8, emissive: 0xd8a850, intensity: 0.9 };
+}
+
 function attachHubLanternHomage(world, game) {
   // Hub 不经 zone.addPOI——它自己的 POI 是对象字面量直插 pointsOfInterest（同 attachHubPoster）
   // 与 attachHubPoster 同一套：子件按局部坐标建，组再整体落到世界坐标
   const g = new THREE.Group();
   const stoneMat = new THREE.MeshStandardMaterial({ color: 0x3a3630, roughness: 0.9 });
+  /* W-V11：焰色在建造期就定死——老档/通关档第一眼看到的就是金焰；新档是暖纸琥珀 */
+  const completedAtBuild = Boolean(game?.quests?.completed);
+  let flame = hubLanternFlameColors(completedAtBuild);
   const paperMat = new THREE.MeshStandardMaterial({
-    color: 0xe8d6a8,
-    emissive: 0xd8a850,
-    emissiveIntensity: 0.9,
+    color: flame.color,
+    emissive: flame.emissive,
+    emissiveIntensity: flame.intensity,
     roughness: 0.5,
     side: THREE.DoubleSide,
   });
@@ -67,6 +81,19 @@ function attachHubLanternHomage(world, game) {
 
   g.position.set(56, y, 6);
   game.scene.add(g);
+
+  /* W-V11：活的焰变 —— 通关那一刻（game-completed）不重建世界，当场把纸灯焰换成金阳。
+   * 与 W-E6/W-V5/W-V9 同族收尾；材料是 const 引用，原地改即可，下一帧就可见。 */
+  try {
+    globalThis.window?.addEventListener('game-completed', () => {
+      const done = hubLanternFlameColors(true);
+      paperMat.color.setHex(done.color);
+      paperMat.emissive.setHex(done.emissive);
+      paperMat.emissiveIntensity = done.intensity;
+    });
+  } catch {
+    /* 没有 window 就等下次开档（建造期分支照样是金的） */
+  }
 
   world.pointsOfInterest.push({
     id: 'homage-homecoming-lantern',
