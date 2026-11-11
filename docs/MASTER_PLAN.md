@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 season-service 只读运维面 + 默认缓存分支 TTL 修复（W-S1）** —— 提交 `98e86de`
+
+  - **起因**：两件事缠在一起——① `/api/seasons/*` 一路"Spring Cache 是装上了，但没人知道它帮没帮上忙"（命中率是黑盒，没人回答"这个 5 分钟 TTL 设得对不对"）；② **默认分支永不过期**——本仓库 `application.yml` 显式 `spring.cache.type: simple`，Boot 自带的 ConcurrentMapCacheManager 缓存项**永不过期**：赛季切换之后，跑着的实例会一直端出上一季的 id/name/tagline/modifierIds/soulsBonusPct 和冻结的 dayInCycle/daysRemaining，直到重启。这不是配置选项问题，是 Boot 默认语义 —— "赛季 14 天一轮"里至少有 14 天都是假读数。
+
+  - **做法**：① `CountingCache extends ConcurrentMapCache` —— `lookup()` 汇聚点计数（@Cacheable 所有读变体先查缓存必经 lookup：hits / misses；TTL 过期计 miss、不计 invalidation），`put/evictIfPresent/clear` 各计一格，**300s 惰性 TTL**（`season-service.cache-ttl-seconds`，Redis 分支同一旋钮，单源）。② `CacheConfig`：concurrent 分支改为 SimpleCacheManager + CountingCache（`havingValue=simple` 对齐仓库 application.yml 的显式默认，`matchIfMissing=true` 兼容外部部署），与 Redis 分支语义对齐（5 分钟口径）。③ `SeasonStatsController` `GET /api/seasons/stats`（挂 `/api/seasons/**`，网关 lb 直达 season-service，不与 game-service 的 `/api/ops/**` 冲突）：`active{id/dayInCycle/daysRemaining/soulsBonusPct}` + `catalog{size/cycleDays/overrideActive}` + `cache{name/cacheManager/type/entries/hits/misses/puts/invalidations/hitRate}`；Redis 分支计数如实返 -1（"不适用"），不编造。④ `SeasonStatsEndpointTest` ×3（形状 + hits≥1 契约 + 假 TTL 过期腿）；`smoke.ps1` 4f 经网关断言（先暖两次 active，再断言 `type=concurrent` 与 `hits>=1`）；`docker-compose.yml` verify 七→八件套（新增 `/api/seasons/stats`）。
+
+  - **验证**：season-service `mvn verify` BUILD SUCCESS（16/16 绿）；`smoke.ps1` PASSED（4f：缓存 `entries=1 hits=4 misses=1 hitRate=0.8`）；compose verify 八件套就绪。e2e 不受影响（无前端改动）。
+
+  - **风险与后续**：① `lookup()` 计数 = 每次缓存探测计一次，命中率口径是"探测级"不是"业务请求级"——够看"缓存帮没帮上忙"，不够精确到 per-endpoint（那是 Micrometer 的领地，暂不引）；② 过期项惰性逐出（只有读到时才消失）——内存占用恒定（赛季缓存只有几个 key），无泄漏；③ override 变化期间 hits/misses 不重置，invalidations 初始 0——若要观察"换季那一刻的命中塌方"，看 hitRate 的时间序列即可；④ 下一片：game-service 的 leaderboard/trial 缓存也接同款 CountingCache（那边是整表失效，invalidations 会有真数），或 season-service 上 Redis 后把 /api/seasons/stats 的 `hits=-1` 换成 INFO commandstat（Redis 自带统计，不算编造）。
 - **2026-11-12 星灯祭回声（W-E5）** —— 提交 `4dc522e`
 
   - **起因**：Wave11 是"走完所有位面之后，有人还记得回家的路"。返乡母题（homecoming）从"等待归航"讲到"余烬/钟声/信标/潮声/灯笼"之后，还差一遍中国人年节最具体的画面：**灯会**——孔明灯升空（许的愿）、水灯顺水而下（中元的焰口）、千羽鹤折满千只（伤口愈合的仪式）、灰烬里下的第一场雪（老家味道）。四枚是返乡的续篇，也是图鉴里少有的"集体仪式"母题。
