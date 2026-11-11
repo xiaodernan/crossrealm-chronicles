@@ -198,11 +198,15 @@ export class HUD {
     this._cameraMode = 'third';
     this._boss = null;
     this._refreshCombo = null;
+    /** 赛季徽章渲染签名与节流（W-V6）——0.5s 问一次 game.seasons，文本没变就不碰 DOM */
+    this._seasonPillSig = null;
+    this._seasonPillTick = 0;
 
     // 状态条配色按当前色觉档落地（W-D6 切片4）：只在构造与换档时写一次 CSS 变量，
     // 帧循环里只改 width 不碰颜色（见 ui/barTheme.js 文件头）。
     this.refreshBarColors();
     this.buildHUD();
+    this._renderSeasonPill();   // 开机就落一枚；之后靠 update() 的 0.5s 节流续刷
     this.setupListeners();
     this.bindJournalEntry();
   }
@@ -218,6 +222,14 @@ buildHUD() {
           </div>
         </div>
         <div class="hud-stats" id="hud-stats">
+          <div class="stat-item season-pill hidden" id="season-pill" data-season="radiant" role="status">
+            <span class="season-pill-icon" aria-hidden="true">🌌</span>
+            <span class="season-pill-body">
+              <span class="season-pill-name" id="season-pill-name"></span>
+              <span class="season-pill-meta"><span id="season-pill-days"></span> · <span id="season-pill-bonus"></span></span>
+            </span>
+            <span class="season-pill-dot" id="season-pill-dot" aria-hidden="true"></span>
+          </div>
           <div class="stat-item" id="souls-display"></div>
           <div class="stat-item" id="chapter-display">Chapter 1</div>
           <div class="stat-item" id="coord-display">X: 0 · Z: 0</div>
@@ -959,6 +971,60 @@ buildHUD() {
   }
 
   /**
+   * 赛季金印（W-V6）——本地轮转还是在线服务确认过的，都摆在 HUD 上常驻。
+   *
+   * ## 为什么常驻而不是只进赛季页
+   *
+   * 赛季在玩家的每个决定里都起作用（词缀、魂火加成、剩余天数），但赛季 Tab 藏得深。
+   * 这枚徽章只占一格：赛季名 + 剩余天数 + 魂火加成 + 一个金点（在线＝赛季服务确认过 / 灰＝本地轮转）。
+   * hover 上去 title 说清来源与读数口径——"还剩 8 天"到底谁说的，不必靠猜。
+   *
+   * ## 为什么签名没变就不碰 DOM
+   *
+   * `update()` 里 0.5s 问一次 `game.seasons.getState()`，赛季按天变——同一天内签名
+   * （`id|daysLeft|bonusPct|source`）完全不动，只在日界线或换季那一刻写一次 DOM。
+   */
+  _renderSeasonPill() {
+    const pill = document.getElementById('season-pill');
+    if (!pill) return;
+    const state = this.game?.seasons?.getState?.();
+    const season = state?.season;
+    if (!state || !season) {
+      pill.classList.add('hidden');
+      return;
+    }
+    const sig = [season.id, state.daysRemaining, state.soulsBonusPct, state.source].join('|');
+    if (this._seasonPillSig === sig) {
+      pill.classList.remove('hidden');
+      return;
+    }
+    this._seasonPillSig = sig;
+    const SEASON_ICONS = { ember: '🔥', tide: '🌊', gloom: '🌒', radiant: '✨' };
+    const sourceText = state.source === 'online' ? t('season_source_online') : t('season_source_local');
+    pill.dataset.season = season.id;
+    pill.classList.remove('hidden');
+    const iconEl = pill.querySelector('.season-pill-icon');
+    if (iconEl) iconEl.textContent = SEASON_ICONS[season.id] ?? '🌌';
+    const nameEl = pill.querySelector('.season-pill-name');
+    if (nameEl) nameEl.textContent = t(season.name);
+    const daysEl = document.getElementById('season-pill-days');
+    if (daysEl) daysEl.textContent = t('hud_season_days_short', { days: state.daysRemaining });
+    const bonusEl = document.getElementById('season-pill-bonus');
+    if (bonusEl) bonusEl.textContent = t('season_bonus_fmt', { pct: state.soulsBonusPct });
+    const dotEl = document.getElementById('season-pill-dot');
+    if (dotEl) {
+      dotEl.classList.toggle('is-online', state.source === 'online');
+      dotEl.setAttribute('title', sourceText);
+    }
+    pill.setAttribute('title', [
+      t(season.name),
+      t('season_days_left_fmt', { days: state.daysRemaining }),
+      t('season_bonus_fmt', { pct: state.soulsBonusPct }),
+      sourceText,
+    ].join(' · '));
+  }
+
+  /**
    * 锁定条的名字 + 战斗情报（W-G1 切片1）。
    *
    * ## 为什么名字和情报挤在一个方法里
@@ -1029,6 +1095,13 @@ buildHUD() {
     if (this._trialTick >= 0.2) {
       this._trialTick = 0;
       this._renderTrialHud();
+    }
+
+    // 赛季徽章：0.5 秒一刷（赛季按天变，比试炼更不需要逐帧）
+    this._seasonPillTick += _dt;
+    if (this._seasonPillTick >= 0.5) {
+      this._seasonPillTick = 0;
+      this._renderSeasonPill();
     }
 
     const combat = this.game.player.combat;

@@ -460,6 +460,7 @@ export const STRINGS_ZH = Object.freeze({
   season_source_local: "本地轮转 · 未连接在线服务",
   season_modifiers_label: "本赛季词缀",
   season_unavailable: "赛季名册不可用",
+  hud_season_days_short: "还剩 ${days} 天",
 
 
   // 副本名与难度档名（W-D2 切片16v）

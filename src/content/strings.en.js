@@ -459,6 +459,7 @@ export const STRINGS_EN = Object.freeze({
   season_source_local: "Local rotation · online service not connected",
   season_modifiers_label: "Season modifiers",
   season_unavailable: "Season roster unavailable",
+  hud_season_days_short: "${days}d left",
 
 
   // 副本名与难度档名（W-D2 切片16v）

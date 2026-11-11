@@ -297,6 +297,86 @@ body {
   border-radius: 999px;
 }
 
+/* === 赛季金印（W-V6）——HUD 常驻一枚季节徽章 ===
+   与 stat-item 同一族，但多一条竖排双行与一颗来源金点；四季各带自己的鎏金色温。 */
+.season-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px 3px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(20, 14, 8, 0.72), rgba(10, 8, 5, 0.78));
+  border: 1px solid rgba(201, 169, 98, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 217, 138, 0.12), 0 1px 4px rgba(0, 0, 0, 0.4);
+  cursor: default;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+}
+.season-pill.hidden {
+  display: none;
+}
+.season-pill:hover {
+  border-color: rgba(255, 217, 138, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 217, 138, 0.2), 0 2px 10px rgba(201, 169, 98, 0.15);
+}
+.season-pill-icon {
+  font-size: 1rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 4px rgba(255, 217, 138, 0.35));
+}
+.season-pill-body {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+.season-pill-name {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: #e9e2d2;
+}
+.season-pill-meta {
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(233, 226, 210, 0.55);
+  white-space: nowrap;
+}
+.season-pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5a554e;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.season-pill-dot.is-online {
+  background: #ffd98a;
+  box-shadow: 0 0 6px rgba(255, 217, 138, 0.8);
+}
+.season-pill[data-season='ember'] {
+  border-color: rgba(255, 140, 70, 0.42);
+}
+.season-pill[data-season='ember'] .season-pill-name {
+  color: #ffc9a3;
+}
+.season-pill[data-season='tide'] {
+  border-color: rgba(96, 210, 226, 0.4);
+}
+.season-pill[data-season='tide'] .season-pill-name {
+  color: #b8e8ef;
+}
+.season-pill[data-season='gloom'] {
+  border-color: rgba(186, 132, 255, 0.38);
+}
+.season-pill[data-season='gloom'] .season-pill-name {
+  color: #dcc6ff;
+}
+.season-pill[data-season='radiant'] {
+  border-color: rgba(255, 217, 138, 0.48);
+}
+.season-pill[data-season='radiant'] .season-pill-name {
+  color: #ffe9ad;
+}
+
 .hud-bottom {
   position: absolute;
   bottom: 16px;
