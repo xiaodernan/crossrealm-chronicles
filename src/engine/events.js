@@ -277,7 +277,6 @@ export const GAME_EVENTS = Object.freeze({
   'achievement-unlocked': {
     desc: '成就解锁，整体转发成就定义',
     payload: '（整体转发成就对象：id/title/desc）',
-    hook: '派发方（AchievementSystem.unlock）自己弹「🏆 成就」提示；这条给通知层/统计出口，仓库内无监听点',
   },
   'codex-unlocked': {
     desc: '图鉴条目解锁，整体转发条目定义',

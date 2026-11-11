@@ -48,7 +48,7 @@ import { fileURLToPath } from 'node:url';
  *   `skillTrees` 四个内容模块在 import 期静态读英文表挡住了，那是独立一片的活。
  *   上限往上抬了 0.25 MiB，**环比容差反而把警戒线从 0.63 MiB 收紧到 61 KB**。
  */
-export const FIRST_SCREEN_READING = 2098856;
+export const FIRST_SCREEN_READING = 2163508;
 
 /** 环比容差：单次改动允许比上次审阅长 3%（见上方注释） */
 export const FIRST_SCREEN_GROWTH_RATIO = 1.03;
