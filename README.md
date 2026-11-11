@@ -52,11 +52,23 @@ src/
   combat/     战斗、敌人、Boss、法术、弹体
   world/      地形、区域、地下城、NPC、采集物、天气
   game/       任务、成长、存档、成就、叙事等系统
-  ui/         HUD、日志、面板
+  ui/         HUD、日志、面板（含**传说碑**个人最速 + Boss 阶段史诗演出）
   online/     在线伙伴服务客户端（可选，默认关闭，对接 server/ 的 Spring Cloud 网关）
   content/    数据驱动内容（敌人/任务/对话/物品/技能）— M7 引入
   audio/      音频
   effects/    特效与画面 pass
+docs/         设计与实施文档
+
+## 近期增强（2026-11）
+
+- **在线伙伴服务**：五个 Spring Cloud 微服务（Eureka / Config / Gateway / game-service / season-service），默认离线可玩；
+  Boss 榜 / 试炼榜 / 遥测摘要 / X-Request-Id（`curl -i` 可见）/ Server-Timing 可在 `docs/ONLINE_SERVICES.md` 查阅。
+- **日志页**：试炼页签（W-G3）、**传说碑**页签（W-G4/W-G5：世界 Boss 最速通关 + 个人最速两条账本，可选在线对比）。
+- **结局结算**：个人最速前五名在字幕最后一屏挂成金榜（W-G6，"你的最速之战"）。
+- **Boss 阶段演出**（W-V2）：上下黑边 + 罗马数字水印（相位≥2 触发）、血条 ember 流动 + 转阶段白金闪光。
+- **回声体系**：Wave2→Wave11 共 **66** 枚回声（新枚「返乡」母题：归烬之碑 / 晨曦回铃 / 第二信标 / 盐海归潮 / 旅人之灯；集齐三枚得成就「归途回响」，集齐五枚得「万籁归一」）。
+- **画质守门**：draw-call 上限与地板逐站钉死（W-C2 切片轨），只收上限、绝不回收地板；CI 真门实测。
+
 docs/         设计与实施文档
 tests/        Vitest 单元测试
 server/       在线伙伴服务（可选）：Spring Cloud 微服务 —— 排行榜/遥测（Java 17+，与本体完全解耦）
