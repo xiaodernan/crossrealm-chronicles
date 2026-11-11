@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 网关限流计数器（W-P13）** —— 提交 `23b03fc`
+
+  - **起因**：`/actuator/springcloud`（W-P11）答得出"谁在用哪种背板"，答不出"限流到底挡了多少"——运维无法从数据上分清"流量正常/从没触发过限流"和"限流正在狂挡但无人察觉"。计数器是对这扇窗最便宜也最该补的一格。
+
+  - **做法**：`IpRateLimiter` 接口新增 `allowedCount()/rejectedCount()`，**默认 -1**（第三方背板无需改造即兼容）；`InMemoryIpRateLimiter`（`bucket.allow` 判定点）与 `RedisIpRateLimiter`（Lua 脚本返回的 `{0|1, retryAfter}` 映射点 + fail-open 放行路径）各埋一个 `AtomicLong`；`SpringCloudOpsEndpoint.ratelimit` 增加 `allowed`/`rejected` 两格（本实例口径——跨实例聚合要在 Redis 里写计数器，给限流热路径加 RTT，得不偿失）。`InMemoryIpRateLimiterTest` +1：60 次放行 + 2 次拒绝 + 另一 IP 放行 → `allowed=61, rejected=2`。`smoke.ps1` 4e 经网关断言（PS 5.1 对 actuator `vnd.spring-boot.actuator+json` 的 Content 会解成 `byte[]`，手动 UTF8 解码后 -match 三条：`allowed`/`rejected` 存在且为数字、`backend=memory`）。
+
+  - **验证**：gateway `mvn verify` BUILD SUCCESS（45/45 绿）；`smoke.ps1` PASSED（4e 三条断言命中）。
+
+  - **风险与后续**：① 计数器只增不减——没有滑动窗口或衰减，所以它回答的是"自启动以来"的累计量；要每 10s 的速率视图得靠外部采样（Prometheus 抓取 `springcloud` 两次求差即可）；② Redis 背板的计数也是本实例的（实例 A 的挡不到实例 B 的数）——这是**刻意**的取舍（见上），窗口说明书已写进 javadoc；③ 下一片：season-service 的 Spring Cache 命中率接入 `/actuator/springcloud` 同款模式（`hits/misses` 已有 `cacheStats()`，只是没暴露——把网关也变成"缓存一眼"）。
 - **2026-11-12 Boss 胜利金潮（W-V7）** —— 提交 `58bf8f5`
 
   - **起因**：Boss 倒下的那一刻，画面上只有血条消失和几行击杀结算——没有"天地为之变色"的一记留白。成就有鎏金收束（W-V4）、finisher 有正中炸开、Boss 转阶段有白金震屏，唯独"胜利本身"缺一个专属的收束动作。胜利是玩家整场战斗的报酬，值得一层从地平线涨上来的暖金。
