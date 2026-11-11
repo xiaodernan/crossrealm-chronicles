@@ -33,6 +33,7 @@ import { 建总线 } from '../platform/bus.js';
 import { 建写者租约, 租约可调项 } from '../platform/lease.js';
 import { onlineServices } from '../online/OnlineServices.js';
 import { bossBestTimes } from '../game/BossBestTimes.js';
+import { fmtClock } from '../ui/msClock.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
  *  DOM 事件（resize / keydown / keyup）不走这里 —— 它们不在事件登记表里，EventBus 管不着。 */
 const GAME_EVENT_TAG = 'core/Game';
@@ -732,7 +733,11 @@ export class Game {
       const fightStart = this._bossFightStart?.get(bossId);
       const clearTimeMs = Math.max(1, Math.round(now - (fightStart ?? this.runStartedAt ?? now)));
       this._bossFightStart?.delete(bossId);
-      bossBestTimes.consider(bossId, clearTimeMs);
+      const { improved } = bossBestTimes.consider(bossId, clearTimeMs);
+      // W-G7：新纪录就地播报 —— 诸神哪天倒下，记住的是"这一架"的用时
+      if (improved) {
+        this.dialog?.toast?.(t('boss_best_time_new_record_fmt', { clock: fmtClock(clearTimeMs) }));
+      }
       onlineServices.submitRun({
         runner: 'adventurer',
         bossId,
