@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -46,6 +47,16 @@ public class TelemetryController {
         return Map.of(
                 "items", service.snapshot(),
                 "count", service.count());
+    }
+
+    /**
+     * 窗口内事件频次摘要（W-X15）——按 type 聚合的次数榜（默认 Top-5，最多 20）。
+     * 生产意义：运维/联调不必拉全量事件就能看到"这轮测试里大家都在干什么"。
+     * 注意：窗口是 maxEvents 条内存尾巴，不是全量历史。
+     */
+    @GetMapping("/api/telemetry/summary")
+    public Map<String, Object> summary(@RequestParam(name = "topN", defaultValue = "5") int topN) {
+        return service.summarize(topN);
     }
 
     public record SubmitEvent(
