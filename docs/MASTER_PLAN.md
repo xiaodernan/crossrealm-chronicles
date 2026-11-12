@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 X-Request-Id 全链路透传（W-M4）** —— 提交 `9c56484`
+
+  - **起因**：X-Request-Id 在 W-P8 时网关注入/回显写好了，game-service 也 echo了它；但这条链在 game-service → season-service 这一跳就断了——Feign 出站默认不带入站头，于是 season-service 日志里看不到游戏客户端传来的 id，game-service 与 season-service 之间无法关联同一次请求。W-P8 的"整条链一个名字"到这一跳是空的承诺。
+
+  - **做法**：① `SeasonStatsController`（season-service）：`stats()` 增加 `@RequestHeader("X-Request-Id", required = false) String requestId` 参数，echo 到 response（"requestId" 字段）——direct 路由（gateway → season-service）+ Feign 路由（game-service → season-service）都经过这一出口。② `FeignPropagationConfig`（game-service）：`@Configuration` + `@ConditionalOnWebApplication(type = SERVLET)` 的 `RequestInterceptor`——从 `RequestContextHolder` 取入站 `HttpServletRequest`，读 `X-Request-Id`，注入 Feign 模板 header；条件限定 Servlet 环境，保持 Spring Cloud Gateway（WebFlux）自身不受影响。③ smoke 4i：dual-path 断言——① game-service 直连 season-service（`/api/ops/season` 返回 `"available":true`，确认整条链可用）；② 全链路自定义 id（`trace-prop-002` → `/api/seasons/stats` → `"requestId":"trace-prop-002"`，确认 header 不丢）。
+
+  - **验证**：season-service 16/16 绿；game-service 52/52 绿；`smoke.ps1` PASSED（4i 断言 echo ok）；FullVerify（mvn reactor）BUILD SUCCESS。
+
+  - **风险与后续**：① Feign 透传在 WebFlux 路径不生效（`@ConditionalOnWebApplication SERVLET`——gateway 不走 Feign，安全隔离）；② 不透传的话下一次 smoke 会先红在 `/api/seasons/stats` 缺 `requestId`，CI 会拦下——好事情；③ 下一片：网关注入 `X-Trace-Id`（B3 风格，与 X-Request-Id 正交，配合 gateway 端 header 日志覆盖后可以在同一个 curl 命中 game + season 双侧日志），或 SeasonClient 加 request-size/response-time 分布（Micrometer），或 spring.cloud.bus 配置热更广播（需 AMQP 中间件，暂不可行）。
 - **2026-11-12 设置页在线服务旗舰化（W-V15）** —— 提交 `8565fe7`
 
   - **起因**：长期以来在线设置段是设置面板里一块孤零零的荒原——在线服务 h3 上方毫无分隔，下方的排行榜刷新按钮和榜单行没有任何视觉层次。整个设置面板在 W-V10 之后已经审视过一遍，但在线服务这一段的质感停在十二年前。
