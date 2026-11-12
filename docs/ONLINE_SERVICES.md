@@ -11,6 +11,7 @@
 - **Spring Cloud Config 配置中心**（`config-server`，:8888）——`game-service` 的运行参数从这里下发（本地 native profile，内置 `config/game-service.yml`）；
 - **Spring Cloud Gateway**（:8080）——对外唯一入口，`/api/**` 按服务名 `lb://` 负载均衡转发； **W-X5 熔断**（CircuitBreaker + orward:/fallback/503：路由链抛异常时快速 503 兜底，不是空响应、不是上游错误页） **W-X11 Retry**（`GET /api/version` 幂等可重试 的小路由带 backoff.Retry；主路由 `/api/**` 刻意不带——POST 提交 leaderboard 不能双写）；
 - **game-service**（:8081）——排行榜 / 遥测事件 / 版本号 / 运维聚合视图，纯内存零数据库；
+- **ai-service**（8083，W-Y1）— **星轨顾问 / 回声灯**：本仓**唯一持大模型密钥**的进程（OpenAI 兼容 `/v1` 上游，10s 连接 + 20s 整体读超、只重试 timeout/429/5xx、SHA-256(模型+system+问题) TTL 缓存、三态熔断）。密钥**只从进程环境变量** `LLM_API_KEY` 进，不进配置中心、不进镜像、不进日志、不进响应体。网关路由 `/api/ai/**`（`lb://ai-service`，order=-1，带 Resilience4j 熔断；**POST 刻意不给 Retry**——非幂等，重试只会把一次提问放大成两次扣费）。游戏侧对应**星轨顾问面板**（`src/ui/AdvisorPanel.js`，W-Y2）：F7 唤出、跟随「在线伙伴服务」开关、模型回答只按 `textContent` 渲染（不可信文本绝不拼进 `innerHTML`）、断网/熔断/超时各自一句玩家文案；
 - **season-service**（:8082，W-X14）——**赛季主题与词缀**：名册四套（灰烬 / 深颚 / 薄暮 / 辉煌），
   周期由 `season-service.cycle-days`（默认 14 天）配，当前赛季**算出来**而不是存下来
   （`epochDay / cycleDays`，多实例/重启/时区都不会给出两个答案）；`override` 可在配置中心强制指定，
@@ -52,11 +53,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 冒烟脚本会：
 
 1. 先确认 28xxx 端口段空闲（避免与开发机上同机的其它 Spring Cloud 项目抢端口）；
-2. 依次拉起 discovery → config → game-service → season-service → gateway（**日志落在临时目录 `crossrealm-server-smoke\`**）；
-3. 逐一验证配置下发 → 服务注册 → 网关 `lb://` 转发 → 遥测计数 → **赛季直连**（`/api/seasons/active`）→ **Feign 聚合**（`/api/ops/season` 必须 `available:true`）；
-4. 跑完自动关闭它拉起的五个进程（含 **warm-up 轮询等 `lb://` 注册表暖起来**，约 30 秒，之后每一步都是确定性断言）；网关熔断诊断见 `scripts/verify-breaker.ps1`（baseline 200 → 停掉 game-service 后 6 次 503 → 重新拉起后自愈 200）。
+2. 依次拉起 discovery → config → game-service → season-service → ai-service → gateway（**日志落在临时目录 `crossrealm-server-smoke\`**）；
+3. 逐一验证配置下发 → 服务注册 → 网关 `lb://` 转发 → 遥测计数 → **赛季直连**（`/api/seasons/active`）→ **Feign 聚合**（`/api/ops/season` 必须 `available:true`）→ **ai-service 健康经网关**（`/api/ai/health`：`model`/`circuit` 上报、响应体不含密钥；环境变量有 `LLM_API_KEY` 时**真实外呼** `/api/ai/echo-hint` 一轮，无 key 时跳过并注明）；
+4. 跑完自动关闭它拉起的六个进程（含 **warm-up 轮询等 `lb://` 注册表暖起来**，约 30 秒，之后每一步都是确定性断言）；网关熔断诊断见 `scripts/verify-breaker.ps1`（baseline 200 → 停掉 game-service 后 6 次 503 → 重新拉起后自愈 200）。
 5. **配置热刷新（W-X9）**：脚本创建一个**临时 config 目录**（`target/smoke-config/`），给 config-server 设置 `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS=file:/…`，先让 game-service 拉到 `max-limit=4 / version-note=v1`；然后改写该目录的 `game-service.yml` 为 `max-limit=3, v2`，调 **`POST /actuator/refresh`** ——**不重启 game-service**，`/api/version` 立刻回显 `note=smoke-reload-note-v2`、排行榜 `maxLimit` 立刻变成 3。`/actuator/refresh` 的 `Content-Type` 必须是 `application/json`（空 body 也要），否则直接 415。
 
+2026-11-12 实测全绿（本机带 `LLM_API_KEY`：gateway→ai-service→wkapi.pro/v1 真实往返，回声提示正常返回；CI 无 key 时只断言启动/路由/健康）。
 2026-11-10 实测全绿（配置下发、version 经网关、排行榜、遥测 POST+count、Eureka 3 应用注册、配置热刷新生效）。
 
 ## 端到端开关（浏览器里）
@@ -67,12 +69,29 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 
 关掉：`localStorage.removeItem('crossrealm_online')`（或 `?online=0` 不生效——必须用 false/删除）。
 
+## 星轨顾问链路（W-Y1 / W-Y2）
+
+玩家侧入口：**F7**（或右下角常驻「星轨顾问」FAB）唤出面板；面板跟随**「在线伙伴服务」开关**——开关关着不发任何请求，也不渲染「问一句」控件。提问 → `POST /api/ai/chat`（{ question ≤400 字, context ≤8 条标量 }）；芯片上那句话就是真的发出去的问题（不另存一份）。答案只按 `textContent` 呈现，顶部状态胶囊四档（观星中 / 星图已连 / 顾问离线 / 星图不稳），失败按 `reason` 枚举分八句（未启用 / 超时 / 断网 / 坏 JSON / 空问题 / 已取消 / HTTP 拒绝 / 兜底）。
+
+链式拓扑：
+
+`前端 AdvisorPanel → OnlineServices（默认关闭；AbortController 真取消） → 网关 /api/ai/** (lb://ai-service, order=-1, aiServiceBreaker) → ai-service(:8083) → wkapi.pro/v1`
+
+运维要点：
+
+- **密钥只注入 ai-service 这一个 JVM**（`LLM_API_KEY`）；config-server 下发的 `ai-service.yml` 刻意不写密钥（仓库会被多人读、被 refresh 下发）；`env.example` 只有占位符；`.env` 已 gitignore；`.env` 从不入库（密钥走环境变量注入）；
+- **网关 POST 无 Retry**：`forward:/fallback/advisor` 迎下游挂掉/超熔断（GET/POST 双映射，回 503 advisor-unavailable，不是 405）；
+- 前端 Advisor 面板不做客户端重试（停止按钮 = 真 AbortController.abort，不是把按钮变灰继续烧钱）；
+- **ai-service 自愈路径**：同一提问 120s 内命中 SHA-256 缓存（换模型/换 system 自动 miss）；熔断 OPEN 30s 后半开放行一次探测；`/api/ai/health` 上报 `configured/model/circuit/cache/upstreamCalls`，**白名单字段，不回声任何密钥或上游地址**；
+- **回声灯**（`POST /api/ai/echo-hint`）与顾问共用同一条「摘要 → 缓存 → 熔断 → 选择性重试 → 解析」链路，只是 system prompt 不同（篝火边的旅人 ≠ 梦话先知）；
+- 上线侧联调：`mvn -o -pl ai-service -am package -DskipTests` 后 `powershell -File .\scripts\verify-ai-service.ps1`（带 `LLM_API_KEY` 真打 chat + echo-hint 且答案非空；不带 key 则断言结构化 503 降级，零外呼）。
+
 ## 部署
 
 ```powershell
 cd server
 mvn -B verify                       # 先产出各模块 target/*.jar
-docker compose build                 # 四个镜像（直接打 verify 产物，构建期零联网）
+docker compose build                 # 六个服务镜像（直接打 verify 产物，构建期零联网）
 docker compose up -d                 # 起栈（健康检查顺序编排）
 docker compose run --rm verify       # 一次性 curl 三连验证
 docker compose down
@@ -92,6 +111,10 @@ docker compose down
 | `SPRING_CONFIG_IMPORT` | 从配置中心拉配置（**只给 game-service / season-service 设**，绝不导给 config-server 自己） | `optional:configserver:http://localhost:8888` |
 | `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS` | native profile 下 config-server 服务的配置仓库 —— 临时 smoke 用，把它指向 temp 目录以改写 game-service.yml | （classpath:/config） |
 | `CROSSREALM_ONLINE_BASE_URL`（前端侧：`crossrealm_online_base_url`） | 前端网关地址 | 同源 origin |
+| `LLM_API_KEY` | **ai-service 独占**的大模型密钥（不进配置中心 / 镜像 / 日志 / 响应体） | （空 = ai-service 以未配置模式启动，`/api/ai/health.configured=false`） |
+| `LLM_BASE_URL` | OpenAI 兼容上游地址 | `https://wkapi.pro/v1` |
+| `LLM_MODEL` | 模型 id（`/v1/models` 列出 `gpt-6-sol` 等） | `gpt-6-sol` |
+| `CROSSREALM_ONLINE_BASE_URL`（前端侧：`crossrealm_online_base_url`） | 前端网关地址 | 同源 origin |
 
 ## 已知坑（都被踩过并写进 `server/README.md` 与 ADR）
 
@@ -101,6 +124,9 @@ docker compose down
 - `lb://` 冷启动有 **30 秒级** 的注册表缓存暖起窗口（eureka 刷新阈值）：游戏/网关刚起时第一拨请求**会落空（503）**，属预期；smoke 与 `verify-breaker.ps1` 都先轮询等到 200 再执行断言；
 - 网关熔断（W-X5）**只截路由链抛出的异常**（比如 eureka 缓存里实例还活着时的连接拒绝/超时）；**无实例 short-circuit 是 LB 直接出的空 503、不经过熔断器**——两条路径都是 503，只有 body 形态不同；
 - **`GET /api/version` 走专用优先路由（order=-1），带 `Retry` 滤镜**——冷启动 / 一次 502 不再把边端打回去；主路由刻意不带 `Retry`（避免 POST 双写）；
+- **reactive circuit breaker 的缺省 `TimeLimiter` 是 1 秒**（不是 Resilience4j 文档里常见的「无超时」口径）：LLM 一轮调用常态 2~30 秒——缺省会把每个 POST 都判「超时」打回熔断兜底。网关 `aiServiceBreaker` 已显式 `timeout-duration: 75s`（覆盖 ai-service 自身 20s timeout + 2 次重试 + 抖动），game/season/version 三条仍用缺省 1s（毫秒级端点，缺省是对的）；
+- **`@Service` 有多个构造器时必须标 `@Autowired`**：Spring 找不到 `@Autowired` 的构造器会回退找缺省构造器——不存在 → 上下文整体启动失败，但站 mock 的单测照旧全绿、真 jar 起不来（本仓 2026-11-12 真撞上：ai-service 因此从未能 boot）。回归由 `AiServiceApplicationContextTest`（真 Spring 上下文 boot）接住；
+- **smoke 默认无 `LLM_API_KEY`**：六服务启动 + `lb://` 路由 + `/api/ai/health` 字段断言在 CI 恒成立；只有进程环境变量里有 `LLM_API_KEY` 才走真实 echo-hint 往返（密钥永远不落文件）；
 - **W-X12 限流（rate-limit by IP）**：`RateLimitByIpFilter`——`同 IP 10 秒内 60 次，超出返回 429 + JSON`；
 Gateway 4.x 起路由配置前缀是 `spring.cloud.gateway.server.webflux.*`（旧的 `spring.cloud.gateway.routes` 只是迁移监听器警告）。
 
@@ -112,4 +138,7 @@ Gateway 4.x 起路由配置前缀是 `spring.cloud.gateway.server.webflux.*`（�
 - `.github/workflows/server.yml` — CI（编译 + 单测 + 全链路冒烟）
 - `src/online/OnlineServices.js` — 游戏侧客户端（默认关闭）
 - `server/season-service/` — 赛季服务（名册 / 周期轮转 / 词缀契约）
+- `server/ai-service/` — 星轨顾问 / 回声灯（唯一持有密钥；`verify-ai-service.ps1` 真调用验证）
+- `src/online/OnlineServices.js` 的 `askAdvisor / fetchAdvisorHealth / fetchEchoHint` — 顾问链路的客户端出口（默认关闭、AbortController 真取消）
+- `src/ui/AdvisorPanel.js` + `src/content/advisor.js` — 星轨顾问面板与客户端契约（一处线协议：原因枚举 / 限长 / 建议名册）
 - `docs/MASTER_PLAN.md` — §9 ADR：W-X1（服务搭建）/ W-X2（游戏接线）/ W-X3（部署与 CI）/ W-X5（网关熔断）/ W-X6（设置页开关）/ W-X7（只读排行榜面板）/ W-X9（配置热刷新）/ W-X11（/api/version Retry 滤镜）/ W-X12（IP 限流）/ W-X13（/api/ops/health 复合视图）/ W-X14（season-service：赛季名册 + 周期轮转 + Feign 熔断聚合）/ W-X15（/api/telemetry/summary 窗口频次摘要）/ W-X16（graceful shutdown 五模块统一）/ W-X17（ops/health 加 uptime 两格）/ W-X18（ops/health 回显 X-Request-Id）/ W-P1..W-P6（缓存线七连：堆顶K / Cache-Control / LRU / TTL / Spring Cache）/ W-P7（telemetry Cache-Control 两条）/ W-P8（X-Request-Id 关联契约 + smoke 回声）/ W-P9（Server-Timing RFC 9218 + smoke 回声）/ W-P10（网关 IP 限流双背板 memory+Redis ZSET/Lua + fail-open）/ W-P11（/actuator/springcloud 网关诊断）/ W-P12（game-service /api/ops/stats 跨域聚合）/ W-P13（限流 allowed/rejected 计数）/ W-S1（season-service /api/seasons/stats + 默认缓存 TTL 修复 CountingCache）
