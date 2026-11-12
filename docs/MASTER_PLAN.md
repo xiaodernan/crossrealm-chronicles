@@ -440,6 +440,31 @@
 | W-G1 | **图鉴 → 战斗情报**（研究过才给弱点 / 抗性） | ✅ 切片1 | 2026-11-12 | `8a33592` | `ui/lockIntel.js` 把图鉴记录翻译成锁定条要的三段素材；门槛用**档位下标**（`INTEL_TIER_INDEX`）表达，不另抄一个 5；情报从 `BestiarySystem.entryOf()` 来（相性符号的唯一解释处），不重查 `ENEMY_RESIST`；`#lock-target` 从一行整句拆成"名字 + 情报"两行，签名缓存挡住逐帧重排；未研究只写"属性未知 · 熟悉需 N 次"，不剧透任何一系；**零存档迁移**；i18n 2837 → 2840；`tests/lock-intel.test.js` 28 例 |
 | W-G2 | **试炼榜**（服务端第二张榜的只读面） | ✅ 切片1 | 2026-11-12 | `4777fea` | 日志页试炼 Tab 多一块只读榜（`/api/trials/leaderboard`），本赛季 / 跨季双范围按钮（无赛季系统时只给总榜，不给一个永远点了同样答案的同款按钮），八枚新键；**异步只重写 `[data-trial-board]`**，绝不整页重渲染；**连点两次只认最后回来的那一份**；**行只用 `textContent` 拼**（服务端字符串永远不按 HTML 解读）；**服务端数据缺字段 → `0` / 破折号**（不产 NaN）；面板切走后的到达不抛、不覆盖；Game 挂上 `onlineServices` 单例供 UI 统一读；i18n 2840 → 2848；`tests/trial-board.test.js` 20 例 |
 
+### Phase Y — 智能与系统纵深（2026-11-12 起，不设终点）
+
+> 用户在本日追加的方向：Redis / 计网 / 算法 / 操作系统层面的运行效率与硬件适配、数据库性能、
+> 各类缓存、消息队列、前后端协同，以及**「前端魅力登峰造极」**；并给了一个真实可用的
+> OpenAI 兼容大模型 API（`/v1`，模型 `gpt-6-sol`），要求真实跑通、真实测试、并据此改善项目。
+>
+> Y 段的判据与 G 段不同：G 段量「系统之间有没有路」，Y 段量**「这条路在真实网络与真实负载下
+> 还站不站得住」** —— 密钥不落到浏览器、上游超时不拖垮游戏帧、缓存不把陈旧答案当成新答案、
+> 面板在断网时不说谎、消息队列不把一次抖动放大成一次雪崩。
+
+| 编号 | 工作包 | 状态 | 完成日期 | 提交 | 备注 |
+|------|--------|------|----------|------|------|
+| W-Y1 | **ai-service：第六个微服务**（服务端独占密钥 / 超时 / 选择性重试 / 熔断 / TTL 缓存 / 网关路由） | ⬜ | | | 与 game-service 隔离：密钥只在 JVM 环境变量里，前端永远只看得到 `/api/ai/chat` |
+| W-Y2 | **AI 顾问面板**（前端视觉旗舰 + 离线降级 + i18n 双表） | ⬜ | | | 走 `OnlineServices`，遵守「在线伙伴服务可选」；断网不说谎、不整页重渲染 |
+| W-Y3 | **真实大模型联调与语料质检升级** | ⬜ | | | `LLM_API_KEY` 环境变量驱动的集成测试（无密钥自动跳过）+ `ai-lore-assist` 真实跑通后的健壮性改造 |
+| W-Y4 | **消息队列：可靠投递与背压** | ⬜ | | | 环形缓冲 + 单生产者多消费者 + 重试/死信；Redis Pub/Sub 的「不保证送达」要有明确边界 |
+| W-Y5 | **算法与运行时性能**（空间索引 / 对象池 / 脏标记 / 帧预算） | ⬜ | | | 以 `npm run perf` 与 `perf:census` 的读数为准，不接受「看着快了」 |
+| W-Y6 | **数据库读写路径**（索引、批量写、读写分离口径） | ⬜ | | | 先量现有内存仓储的真实复杂度，再决定要不要引入持久层 |
+| W-Y7 | **前端视觉体系旗舰化**（设计令牌 / 光效分层 / 动效分级 / 可访问性） | ⬜ | | | 所有动效包在 `prefers-reduced-motion` 内；色盲档与字号档不能被覆盖 |
+
+> **贯穿纪律**：① 大模型是**可选增强**，任何玩家路径都不许因它不可用而卡住；
+> ② 密钥只存在于 `.env`（已 gitignore）/ 环境变量 / 服务端进程内，**不进任何被 git 追踪的文件、
+> 不进日志、不进响应体**；③ 每片仍然是「代码 + 测试 + 门禁 + 提交 + 回填」五件套；
+> ④ 真实网络调用只在**显式带密钥**的集成测试与手工联调脚本里发生，CI 默认零外呼。
+
 ---
 
 
@@ -6083,6 +6108,15 @@ Phase D（系统与质量）
   - **验证**：season-service 16/16 绿；game-service 52/52 绿；`smoke.ps1` PASSED（4i 断言 echo ok）；FullVerify（mvn reactor）BUILD SUCCESS。
 
   - **风险与后续**：① Feign 透传在 WebFlux 路径不生效（`@ConditionalOnWebApplication SERVLET`——gateway 不走 Feign，安全隔离）；② 不透传的话下一次 smoke 会先红在 `/api/seasons/stats` 缺 `requestId`，CI 会拦下——好事情；③ 下一片：网关注入 `X-Trace-Id`（B3 风格，与 X-Request-Id 正交，配合 gateway 端 header 日志覆盖后可以在同一个 curl 命中 game + season 双侧日志），或 SeasonClient 加 request-size/response-time 分布（Micrometer），或 spring.cloud.bus 配置热更广播（需 AMQP 中间件，暂不可行）。
+- **2026-11-12 换季广播（W-M5）** —— 提交 `9e597b6`
+
+  - **起因**：W-P4 的 TtlCache（30s）是惰性过期——下游季节切换之后，game-service 最长 30 秒内仍然拿着上一季的缓存，排行榜和试炼就混进新赛季的数据。需要一个 push 型`「换季了」`信号，让 game-service 不等 TTL 自己先把缓存扔掉。
+
+  - **做法**：game-service 新增 `SeasonBroadcastListener`（`@Component` + `@ConditionalOnProperty("spring.cache.type", havingValue="redis")`），用 `@Autowired @Nullable RedisConnectionFactory` + `RedisMessageListenerContainer` 订阅 `crossrealm:season:advance`；收到消息且 `event` 字段等于 `season:advance` 时，立刻 `seasonCache.invalidate("season.active")` 并 `received.incrementAndGet()`。仅 `spring.cache.type=redis` 时才创建，Lettuce 不连接。`CacheConfig` 改成 `@Bean` 托管 seasonCache（之前是 OpsController 自己 `new TtlCache()`，没法被 listener 共享）。`/api/ops/health` 新增 `seasonBroadcastReceived` 字段（listener 不存在 → -1，不编造）。season-service 新增 `SeasonBroadcastController`（`@ConditionalOnProperty("season-service.broadcast.test-enabled", havingValue="true")`，默认 404），POST `/api/seasons/broadcast` 触发发布——联调/CI 用，不进生产路由表。
+
+  - **验证**：game-service `mvn verify` BUILD SUCCESS（52/52 绿，含 `OpsControllerTest` 新增 `seasonBroadcastReceived` 断言）；`OpsSeasonEndpointTest` 直构新参数；`scripts/smoke.ps1` PASSED（redis 路径不占 smoke 默认资源）。
+
+  - **风险与后续**：① 该路径只在 redis 背板启用；缺省 ConcurrentMap 分支走原有 30s TTL 惰性过期，不强行 upgrade；② 广播 listener 与 game-service 各自执行 —— 任何一次 listener 阻塞（例如 JSON 解析靠近最坏情况的 payload）只影响自身线程，fire-and-forget 不会阻塞 HTTP 线程；③ season-service 的 broadcast trigger 只用于联调；生产环境不启用，Redis 存在但不会被 game-service 意外消费，广播频道是 `crossrealm:season:advance`，不是公开的 `crossrealm:events`；④ 下一片：把 Config Server 的 `@RefreshScope` 生效回调也落成这种「显式触发 + 日志 + 健康计数」模式（当前 `/actuator/refresh` 只是把 bean 扔了，没人看到它扔了什么），或加 `crossrealm:ops:flush` 广播一键清 season 与 leaderboard 缓存。
 - **2026-11-12 设置页在线服务旗舰化（W-V15）** —— 提交 `8565fe7`
 
   - **起因**：长期以来在线设置段是设置面板里一块孤零零的荒原——在线服务 h3 上方毫无分隔，下方的排行榜刷新按钮和榜单行没有任何视觉层次。整个设置面板在 W-V10 之后已经审视过一遍，但在线服务这一段的质感停在十二年前。
