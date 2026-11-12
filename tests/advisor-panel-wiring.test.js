@@ -241,7 +241,7 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
     h.cleanup();
   });
 
-  it('七种失败各有各的一句话；取消不改离线态、HTTP 改不稳态', async () => {
+  it('每一种失败各有各的一句话；取消/HTTP/队列忙不改离线态', async () => {
     for (const reason of ADVISOR_ERROR_REASONS) {
       const h = panelHarness();
       h.panel.show();
@@ -252,10 +252,16 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
         : t(ERROR_KEYS[reason]);
       expect(lastBubble(h.doc).textContent, reason).toBe(want);
       expect(lastBubble(h.doc).getAttribute('data-advisor-role'), reason).toBe('error');
-      if (reason === ADVISOR_REASONS.HTTP || reason === ADVISOR_REASONS.CANCELLED) {
+      if (reason === ADVISOR_REASONS.HTTP
+          || reason === ADVISOR_REASONS.BUSY
+          || reason === ADVISOR_REASONS.CANCELLED) {
         expect(h.panel._status, reason).not.toBe('offline');
       } else {
         expect(h.panel._status, reason).toBe('offline');
+      }
+      if (reason === ADVISOR_REASONS.BUSY) {
+        expect(h.panel._status).toBe('degraded', '429 是"忙"，不是"不在线"');
+        expect(lastBubble(h.doc).textContent).toBe(t(ERROR_KEYS[ADVISOR_REASONS.BUSY]));
       }
       h.cleanup();
     }
@@ -267,6 +273,18 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
     await flush();
     h.panel._handleResult({ ok: false, reason: ADVISOR_REASONS.HTTP, status: 503, data: { error: 'advisor-unavailable' } });
     expect(lastBubble(h.doc).textContent).toBe(STRINGS_ZH.advisor_error_unavailable);
+    expect(h.panel._status).toBe('degraded');
+    h.cleanup();
+  });
+
+  it('纯文本 500（data=null）不许把失败分支炸掉：仍给出 HTTP 那句话', async () => {
+    const h = panelHarness();
+    h.panel.show();
+    await flush();
+    expect(() => h.panel._handleResult({
+      ok: false, reason: ADVISOR_REASONS.HTTP, status: 500, data: null,
+    })).not.toThrow();
+    expect(lastBubble(h.doc).textContent).toBe(t(ERROR_KEYS[ADVISOR_REASONS.HTTP], { status: 500 }));
     expect(h.panel._status).toBe('degraded');
     h.cleanup();
   });

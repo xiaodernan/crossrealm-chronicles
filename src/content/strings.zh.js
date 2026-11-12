@@ -3273,6 +3273,7 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   advisor_error_cancelled: '这一问已停下。',
   advisor_error_unavailable: '顾问暂时不在（熔断中），过一会儿再来。',
   advisor_error_http_fmt: '星图拒了这一问（HTTP ${status}）。',
+  advisor_error_busy: '问星图的人有点多，队列暂时满了。稍等一下再问，这一句没有丢。',
   advisor_meta_fmt: '${model} · ${ms} ms',
   advisor_cached: '缓存',
   advisor_char_count_fmt: '${n}/${max}',

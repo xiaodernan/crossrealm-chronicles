@@ -11,6 +11,7 @@
 | 在线伙伴业务 API | `game-service`：排行榜 / 遥测事件 / 版本号（纯内存实现、零数据库） | 8081 |
 | 赛季服务（W-X14） | `season-service`：赛季主题 / 词缀 / 周期倒计时（按 epochDay 算，不存状态） | 8082 |
 | AI 顾问（W-Y1） | `ai-service`：星轨顾问（服务端独占密钥 / 选择性重试 / 熔断 / TTL 缓存） | 8083 |
+| 可靠任务队列（W-Y4） | `ai-service`：`/api/ai/chat/async` 提交 → `/api/ai/jobs/{id}` 轮询；有界队列 / 2 worker / 幂等键 / 选择性重试 / 死信 / 背压 429 | 8083 |
 
 > 与游戏本体**完全解耦**：`npm run build` 不感知它；不接它时游戏功能不受任何影响。
 
@@ -26,7 +27,7 @@ server/
   ai-service/            # 星轨顾问：唯一持有 LLM_API_KEY 的进程（+ Dockerfile / system-prompt.txt）
   gateway/               # Spring Cloud Gateway（/api/** → game-service，/api/seasons/** → season-service，/api/ai/** → ai-service）
   env.example            # 环境变量样例（**不含真值**）：复制成 server/.env 后填 LLM_API_KEY
-  scripts/smoke.ps1      # 冒烟脚本：四个实例真起真打，跑完自动关闭
+  scripts/smoke.ps1      # 冒烟脚本：六个实例真起真打（含 4j AI 健康 / 4k 异步队列契约），跑完自动关闭
    scripts/verify-breaker.ps1 # W-X5 网关熔断验证（手动诊断）：200 → 503 → 自愈 200
   scripts/verify-redis-rate-limit.ps1 # W-P10 Redis 限流背板实证（throwaway redis + 70 条 burst；第 61 条 429；停 redis 看 fail-open；CI 每次 server 变更真跑）
   scripts/verify-redis-season-cache.ps1 # W-S2 Redis 赛季缓存实证（cache.type=redis：两次返回相同、键存在、TTL~300s、停 redis 报错、起 redis 恢复；CI 真跑）
@@ -118,6 +119,56 @@ docker compose down
 `max-limit` / `max-entries` / `telemetry.max-events` / `version-note`。
 配置中心离线时回退到本地默认值，互不影响。
 
+## AI 顾问与可靠任务队列（W-Y1 / W-Y2 / W-Y4）
+
+浏览器**永远只认识网关**：`POST /api/ai/chat` 与 `POST /api/ai/chat/async`。上游地址、
+`LLM_API_KEY`、Authorization 头全部只在 `ai-service` 进程内；配置中心里没有密钥，
+health 与任何响应体都不回显它。游戏侧 W-Y2 的「星轨顾问」面板（F7）走
+`OnlineServices.askAdvisor()`，断网/熔断/429 各自有玩家可读的一句话，不阻塞本地游戏。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/ai/chat` | 同步一问一答 `{question,context?}` → `{answer,model,cached,latencyMs}` |
+| POST | `/api/ai/chat/async` | 提交任务 `{question,context?,requestId?}` → `202 {jobId,status:queued,duplicate,pollAfterMs}`；队列满 → `429 + Retry-After` |
+| GET | `/api/ai/jobs/{jobId}` | 轮询 `QUEUED/RUNNING/DONE/DEAD`；DONE 带答案，DEAD 带机器码原因；**不回显玩家输入** |
+| GET | `/api/ai/jobs/stats` | 队列读数：capacity / depth / inFlight / rejected / dedupHits / retried / deadLettered |
+| GET | `/api/ai/health` | configured / model / circuit / cache / upstreamCalls（白名单，无密钥） |
+| POST | `/api/ai/echo-hint` | 回声灯一句暗示（与顾问共用缓存/熔断，人格提示不同） |
+
+**为什么要队列**：一轮真实上游 2~30 秒，同步端点会把 Tomcat 工作线程钉在慢 I/O 上。
+W-Y4 用有界队列 + 2 个 worker 做资源隔离：满则明确 429（不静默丢、不让请求线程等空位），
+`requestId` 幂等（重连不会重复扣费），只对 `upstream-*` / `circuit-open` 做指数退避重试，
+耗尽进可见的死信。默认旋钮在 `ai-service.jobs.*`（`AI_JOB_*` 环境变量可覆盖）。
+
+**边界（别误读）**：这是**进程内**队列 —— 进程重启丢在途任务，多实例不共享 jobId。
+跨实例可靠应换 Redis Streams（消费者组 + XACK + pending 重投），而不是给 HashMap 加分布式锁；
+W-M5 的 Redis Pub/Sub 是 broadcast（掉线永久丢），两者互补。
+
+真实上游联调（只有存在密钥时才跑，CI 默认零外呼、零花费）：
+
+```bash
+cd server
+set -a; . ../.env; set +a
+mvn -o -pl ai-service test -Dtest=AiLiveIntegrationTest,AdvisorJobLiveIntegrationTest
+```
+
+### 无头浏览器端到端（开发期，需真机 Chrome）
+
+并轨侧留下的三份草稿已收编成正式工具，且做了两处安全化：**启动脚本里不再写死密钥**
+（必须先导出 `LLM_API_KEY`，否则直接拒绝启动），也不再 `Stop-Process -Name java -Force`
+（那会杀掉开发机上其它 Java 项目，改为端口预检 + 只回收自己起的 PID）。
+
+```bash
+npm run build
+npm run serve:dist                         # 127.0.0.1:3000
+set -a; . ./.env; set +a                   # 仓根 .env（gitignore）
+powershell -ExecutionPolicy Bypass -File server/scripts/e2e-advisor-boot.ps1
+npm run e2e:advisor                        # 无头 Chrome → F7 面板 → 真网关 → 真模型
+```
+
+`server/scripts/e2e-advisor-boot.ps1` 把六件套起到 28xxx 段；`scripts/e2e-advisor.mjs`
+用 CDP 打开 dist、开面板、送出问题并等一个非空回答气泡。CI 不跑这条（零外呼纪律）。
+
 ## 设计说明
 
 - **纯内存实现**：刻意零数据库/零消息队列，避免引入运维负担；遥测队列超限丢弃最老事件。
@@ -139,12 +190,16 @@ docker compose down
 - 当前挂钩：击杀 Boss → 静默上报 `boss_defeated` 遥测（`postTelemetry`，不阻塞、网络差吞错）；
 - 未做（留给后续）：排行榜提交 UI、排行榜面板、设置里的可选开关。
 
-## 与游戏的对接（后续）
+## 与游戏的对接（现状，W-Y2 / W-Y4 更新）
 
-当前无前端对接：游戏仍完全离线可玩。接入时最小改动方案：
-游戏端增加一个可选的"在线服务客户端"（配置开关控制），把
-`POST {GATEWAY}/api/telemetry/events` 与 `GET {GATEWAY}/api/leaderboard` 接上即可；
-开发期可先用 `npm run e2e` 的演示流程压测遥测接口。
+游戏本体仍**完全离线可玩**，在线能力全部可选。`OnlineServices` 当前已接：
+Boss 击杀遥测、两张榜 + 足迹摘要（W-G2/G3/G4）、赛季词缀、以及星轨顾问
+（F7 面板 / `askAdvisor` / `fetchAdvisorHealth` / `fetchEchoHint`）。
+W-Y4 的 429 背压在面板里是「问星图的人有点多，队列暂时满了」，并落到 degraded 档
+而不是 offline —— 服务活着、只是这一刻接不下，不该让玩家去检查网关。
+
+剩余可扩展面：把 `/api/ai/chat/async` 的提交→轮询接成面板里的「后台继续问」路径
+（当前面板仍走同步端点，异步端点供需要立刻拿回控制权的客户端使用）。
 
 ## 版本与兼容
 

@@ -27,6 +27,15 @@ ai-service:
   max-tokens: 320
   breaker-threshold: 4
   breaker-cooldown-ms: 15000
+  # W-Y4：慢速 LLM 调用的独立车道（有界队列 + 2 worker + 重试/死信）。
+  # 容量与并发都远小于 Tomcat 线程池：上游是慢资源，排队比抢线程更诚实。
+  jobs:
+    capacity: "${AI_JOB_CAPACITY:64}"
+    workers: "${AI_JOB_WORKERS:2}"
+    max-attempts: "${AI_JOB_MAX_ATTEMPTS:3}"
+    retry-base-ms: "${AI_JOB_RETRY_BASE_MS:200}"
+    poll-after-ms: "${AI_JOB_POLL_AFTER_MS:500}"
+    max-tracked: "${AI_JOB_MAX_TRACKED:512}"
 
 eureka:
   client:

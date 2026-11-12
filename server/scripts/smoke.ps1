@@ -358,6 +358,33 @@ game-service:
         Write-Host 'LLM_API_KEY not in environment - skipping live LLM round trip (ai-service boot + route + health asserted)'
     }
 
+    Write-Host "=== 4k) via gateway: reliable advisor job queue (W-Y4) ==="
+    $jobStats = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ai/jobs/stats' -TimeoutSec 15).Content
+    if ($jobStats -is [byte[]]) { $jobStats = [System.Text.Encoding]::UTF8.GetString($jobStats) }
+    Write-Host "jobs/stats -> $jobStats"
+    if (-not ($jobStats -match '"capacity":64')) { Write-Error "job queue capacity missing: $jobStats"; exit 1 }
+    if (-not ($jobStats -match '"workers":2')) { Write-Error "job queue workers missing: $jobStats"; exit 1 }
+    $jobBody = '{"question":"smoke async ping","requestId":"smoke-async-1"}'
+    $jobSubmit = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/ai/chat/async' -ContentType 'application/json' -Body $jobBody -TimeoutSec 15).Content
+    if ($jobSubmit -is [byte[]]) { $jobSubmit = [System.Text.Encoding]::UTF8.GetString($jobSubmit) }
+    Write-Host "chat/async -> $jobSubmit"
+    if (-not ($jobSubmit -match '"status":"queued"')) { Write-Error "async submit did not return queued: $jobSubmit"; exit 1 }
+    $jobId = [regex]::Match($jobSubmit, '"jobId":"([^"]+)"').Groups[1].Value
+    if (-not $jobId) { Write-Error "async submit missing jobId: $jobSubmit"; exit 1 }
+    $dup = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/ai/chat/async' -ContentType 'application/json' -Body $jobBody -TimeoutSec 15).Content
+    if ($dup -is [byte[]]) { $dup = [System.Text.Encoding]::UTF8.GetString($dup) }
+    if (-not ($dup -match '"duplicate":true')) { Write-Error "same requestId was NOT deduplicated: $dup"; exit 1 }
+    if (-not ($dup -match $jobId)) { Write-Error "dedup returned a different jobId: $dup"; exit 1 }
+    $view = (Invoke-WebRequest -UseBasicParsing "http://localhost:28080/api/ai/jobs/$jobId" -TimeoutSec 15).Content
+    if ($view -is [byte[]]) { $view = [System.Text.Encoding]::UTF8.GetString($view) }
+    Write-Host "jobs/$jobId -> $view"
+    # No key in CI: the worker fails fast with not-configured -> DEAD (a visible dead letter, not a silent 503).
+    # With a key it may still be QUEUED/RUNNING or already DONE. All four are valid; a missing status is not.
+    if (-not ($view -match '"status":"(QUEUED|RUNNING|DONE|DEAD)"')) { Write-Error "job view missing a status: $view"; exit 1 }
+    if ($view -match 'sk-') { Write-Error 'job view leaks an api key'; exit 1 }
+    if ($view -match 'smoke async ping') { Write-Error 'job view must not echo the player question back'; exit 1 }
+    Write-Host 'async advisor queue ok (submit / dedup / poll / no secret echo)'
+
     Write-Host ""
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content

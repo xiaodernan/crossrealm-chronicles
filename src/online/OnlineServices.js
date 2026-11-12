@@ -178,7 +178,14 @@ export class OnlineServices {
       } catch {
         /* 非 JSON（网关的纯文本 503 等）：留给下面的 status 分支说清楚 */
       }
-      if (!res.ok) return { ok: false, reason: ADVISOR_REASONS.HTTP, status: res.status, data };
+      // 429 是服务端**主动**说的「队列/限流满了，等一下」；把它和 5xx 混成一句
+      // 「连不上网关」会让玩家去检查一个好端端的网关（W-Y4 背压的客户端这一半）。
+      if (!res.ok) return {
+        ok: false,
+        reason: res.status === 429 ? ADVISOR_REASONS.BUSY : ADVISOR_REASONS.HTTP,
+        status: res.status,
+        data,
+      };
       if (!data || typeof data !== 'object') {
         return { ok: false, reason: ADVISOR_REASONS.BAD_JSON, status: res.status, data: null };
       }

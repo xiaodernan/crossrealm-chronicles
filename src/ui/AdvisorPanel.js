@@ -51,6 +51,7 @@ export const ERROR_KEYS = Object.freeze({
   [ADVISOR_REASONS.BLANK]: 'advisor_error_blank',
   [ADVISOR_REASONS.CANCELLED]: 'advisor_error_cancelled',
   [ADVISOR_REASONS.HTTP]: 'advisor_error_http_fmt',
+  [ADVISOR_REASONS.BUSY]: 'advisor_error_busy',
 });
 
 const STATUS_CLASSES = ['is-checking', 'is-ready', 'is-offline', 'is-degraded'];
@@ -286,12 +287,20 @@ export class AdvisorPanel {
     }
 
     const reason = res?.reason ?? ADVISOR_REASONS.NETWORK;
-    if (reason === ADVISOR_REASONS.HTTP && (res.status === 503 || data.error === 'advisor-unavailable')) {
+    // data 可能是 null（网关返回纯文本错误页时 json() 抛过）；写 data.error 会在
+    // 一次普通的 500 上把整个失败分支炸掉，玩家连"出了什么事"都看不到。
+    if (reason === ADVISOR_REASONS.HTTP && (res.status === 503 || data?.error === 'advisor-unavailable')) {
       this._appendMessage('error', t('advisor_error_unavailable'), { key: 'advisor_error_unavailable' });
       this._setStatus('degraded');
     } else if (reason === ADVISOR_REASONS.HTTP) {
       this._appendMessage('error', t(ERROR_KEYS[ADVISOR_REASONS.HTTP], { status: res.status }), {
         key: ERROR_KEYS[ADVISOR_REASONS.HTTP], params: { status: res.status },
+      });
+      this._setStatus('degraded');
+    } else if (reason === ADVISOR_REASONS.BUSY) {
+      // 队列满是「服务活着但这一刻接不下」——降级而不是离线，别把健康探针的结论推翻。
+      this._appendMessage('error', t(ERROR_KEYS[ADVISOR_REASONS.BUSY]), {
+        key: ERROR_KEYS[ADVISOR_REASONS.BUSY],
       });
       this._setStatus('degraded');
     } else {

@@ -37,7 +37,7 @@ const PANEL_KEYS = [
   'advisor_status_checking', 'advisor_status_ready', 'advisor_status_offline', 'advisor_status_degraded',
   'advisor_error_disabled', 'advisor_error_timeout', 'advisor_error_network',
   'advisor_error_bad_json', 'advisor_error_blank', 'advisor_error_cancelled',
-  'advisor_error_unavailable', 'advisor_error_http_fmt',
+  'advisor_error_unavailable', 'advisor_error_http_fmt', 'advisor_error_busy',
   'advisor_meta_fmt', 'advisor_cached', 'advisor_char_count_fmt',
 ];
 
@@ -170,6 +170,17 @@ describe('OnlineServices.askAdvisor / fetchAdvisorHealth：ok/reason 映射全�
     expect(r.ok).toBe(false);
     expect(r.reason).toBe(ADVISOR_REASONS.HTTP);
     expect(r.status).toBe(503);
+    expect(r.data).toEqual(body);
+  });
+
+  it('HTTP 429（W-Y4 队列背压）：reason=busy，不和 5xx 混成「连不上网关」', async () => {
+    const body = { error: 'advisor-queue-full', retryAfterMs: 500 };
+    const fetch = vi.fn().mockResolvedValue({ ok: false, status: 429, json: async () => body });
+    const svc = new OnlineServices({ baseUrl: BASE, fetchImpl: fetch, enabled: true });
+    const r = await svc.askAdvisor('还活着吗', {});
+    expect(r.ok).toBe(false);
+    expect(r.reason).toBe(ADVISOR_REASONS.BUSY);
+    expect(r.status).toBe(429);
     expect(r.data).toEqual(body);
   });
 

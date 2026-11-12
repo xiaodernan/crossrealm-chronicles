@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
  * 把 OpenAI 兼容接口直接放在前端调用，等于把密钥打包进每一个玩家的浏览器里。
  */
 @SpringBootApplication
-@EnableConfigurationProperties(AiProperties.class)
+@EnableConfigurationProperties({AiProperties.class, AdvisorJobProperties.class})
 public class AiServiceApplication {
 
     public static void main(String[] args) {

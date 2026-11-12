@@ -52,6 +52,8 @@ export const ADVISOR_REASONS = Object.freeze({
   BLANK: 'blank',
   CANCELLED: 'cancelled',
   HTTP: 'http',
+  /** 服务端明确 429（W-Y4 的队列背压 / 网关限流）：不是"连不上"，是"忙，稍后再来" */
+  BUSY: 'busy',
 });
 
 /** 会走到玩家面前的那些原因（成功不算） */

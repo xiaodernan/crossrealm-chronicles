@@ -15,10 +15,15 @@ vite.config.js.timestamp-*.mjs
 # 工作区记忆目（本机数据，不进仓库）
 .workbuddy/
 # 根目录的一次性构建/测试日志与补丁脚本（收尾时从索引里退出，本机文件保留）
+# 下划线开头的一次性脚本永不入库：曾有一份临时 boot 脚本把真实密钥写死在里面，
+# 收编成 scripts/ 下的正式工具后，这类草稿一律挡在索引外。
+/_*.mjs
+/_*.ps1
+/server/_*.ps1
 /test_*.txt
 /build*.txt
 /commit-msg.txt
 /fix-help-*.mjs
 
-# server/ �� Maven �������target/��
+# server/ �� Maven �������target/��
 server/**/target/
