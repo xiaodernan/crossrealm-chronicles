@@ -26,6 +26,7 @@ server/
   scripts/smoke.ps1      # 冒烟脚本：四个实例真起真打，跑完自动关闭
    scripts/verify-breaker.ps1 # W-X5 网关熔断验证（手动诊断）：200 → 503 → 自愈 200
   scripts/verify-redis-rate-limit.ps1 # W-P10 Redis 限流背板实证（throwaway redis + 70 条 burst；第 61 条 429；停 redis 看 fail-open；CI 每次 server 变更真跑）
+  scripts/verify-redis-season-cache.ps1 # W-S2 Redis 赛季缓存实证（cache.type=redis：两次返回相同、键存在、TTL~300s、停 redis 报错、起 redis 恢复；CI 真跑）
   docker-compose.yml     # 五容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
 ```
 

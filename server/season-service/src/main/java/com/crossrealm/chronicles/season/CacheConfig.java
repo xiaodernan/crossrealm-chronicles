@@ -39,11 +39,17 @@ public class CacheConfig {
     @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
     public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper,
                                           SeasonServiceProperties properties) {
+        /**
+         * W-S2 实证：NON_FINAL 曾是坏的——`SeasonView` 是 **final record**，序列化时不加类型标记，
+         * 反序列化时 `readValue(bytes, Object.class)` 又只能按 As.WRAPPER_ARRAY 读 →
+         * "Unexpected token (START_OBJECT), expected START_ARRAY" → 500。
+         * 改 EVERYTHING：final 类也带 `@class`，读侧按字段回家，零猜测。
+         */
         GenericJackson2JsonRedisSerializer valueSerializer =
                 new GenericJackson2JsonRedisSerializer(objectMapper.copy()
                         .activateDefaultTyping(
                                 new com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator(),
-                                com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping.NON_FINAL));
+                                com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping.EVERYTHING));
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofSeconds(properties.getCacheTtlSeconds()))
