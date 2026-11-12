@@ -45,6 +45,7 @@ const POI_SOURCE_FILES = [
   'src/world/PopCultureZoneEnhancerWave4.js',
   'src/world/PopCultureZoneEnhancerWave11.js',
   'src/world/PopCultureZoneEnhancerWave12.js',
+  'src/world/PopCultureZoneEnhancerWave13.js',
   'src/world/zones/FantasyZone.js',
   'src/world/zones/MagicZone.js',
   'src/world/zones/SpaceZone.js',
@@ -172,6 +173,9 @@ const POI_LABELS = {
   'homage-homecoming-river-lamp': ['echo_homecoming_river_lamp_title', '星灯祭·水灯', 'Lantern Festival · River Lamps'],
   'homage-homecoming-paper-crane': ['echo_homecoming_paper_crane_title', '星灯祭·千羽', 'Lantern Festival · Thousand Cranes'],
   'homage-homecoming-first-snow': ['echo_homecoming_first_snow_title', '星灯祭·初雪', 'Lantern Festival · First Snow'],
+  'homage-middle-earth-broken-sword': ['echo_broken_sword_title', '中洲回响·亡者之剑', 'Middle-earth Echo · The Broken Sword'],
+  'homage-middle-earth-elven-harp': ['echo_elven_harp_title', '中洲回响·幽谷竖琴', 'Middle-earth Echo · The Elven Harp'],
+  'homage-middle-earth-mithril-shard': ['echo_mithril_shard_title', '中洲回响·秘银矿', 'Middle-earth Echo · The Mithril Shard'],
 };
 
 describe('POI 交互标签双表化（W-D2 切片19）', () => {

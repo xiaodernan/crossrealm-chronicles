@@ -48,6 +48,7 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-original', title: 'ach_echo_original_title', desc: 'ach_echo_original_desc', check: (s) => (s.echoGloom ?? 0) >= 3 && (s.echoRadiant ?? 0) >= 3 && (s.echoVoidMaw ?? 0) >= 3 && (s.echoAbysssalt ?? 0) >= 3 },
   { id: 'echo-homecoming', title: 'ach_echo_homecoming_title', desc: 'ach_echo_homecoming_desc', check: (s) => (s.echoHomecoming ?? 0) >= 3 },
   { id: 'echo-homecoming-master', title: 'ach_echo_homecoming_master_title', desc: 'ach_echo_homecoming_master_desc', check: (s) => (s.echoHomecoming ?? 0) >= 10 },
+  { id: 'echo-middle-earth', title: 'ach_echo_middle_earth_title', desc: 'ach_echo_middle_earth_desc', check: (s) => (s.echoMiddleEarth ?? 0) >= 4 },
 ];
 
 /**
@@ -70,6 +71,7 @@ export const ECHO_FRANCHISE_BUCKETS = [
   ['echoVoidMaw', FRANCHISE.VOIDMAW],
   ['echoAbysssalt', FRANCHISE.ABYSSSALT],
   ['echoHomecoming', FRANCHISE.HOMECOMING],
+  ['echoMiddleEarth', FRANCHISE.MIDDLE_EARTH],
 ];
 
 // 合并导出（供外部直接使用）

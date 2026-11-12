@@ -132,4 +132,9 @@ export const ECHOES = [
 
   // ── Wave12 尾声 · 最后一盏灯（终局专赠：与 full-resonance 同类派生式回声）──
   { id: 'echo-homecoming-last-light', franchise: FRANCHISE.HOMECOMING, zone: 'hub', title: 'echo_homecoming_last_light_title', desc: 'echo_homecoming_last_light_desc', trigger: 'echo:homecoming-last-light' },
+
+  // ── Wave13（中洲回响 · 亡者之剑、幽谷竖琴、秘银矿）──
+  { id: 'echo-broken-sword', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_broken_sword_title', desc: 'echo_broken_sword_desc', trigger: 'echo:broken-sword' },
+  { id: 'echo-elven-harp', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_elven_harp_title', desc: 'echo_elven_harp_desc', trigger: 'echo:elven-harp' },
+  { id: 'echo-mithril-shard', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_mithril_shard_title', desc: 'echo_mithril_shard_desc', trigger: 'echo:mithril-shard' },
 ];
