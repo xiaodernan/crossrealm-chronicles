@@ -108,8 +108,12 @@ class SeasonBroadcastListenerTest {
     @Test
     void 可选依赖必须用Nullable标记() throws Exception {
         Constructor<?> ctor = OpsController.class.getDeclaredConstructors()[0];
-        // 第 8 个参数是 seasonBroadcastListener（0-based 7）
-        var param = ctor.getParameters()[7];
+        // 按类型定位 seasonBroadcastListener，不写死下标（构造器顺序会随切片增长而变）
+        var listenerParams = java.util.Arrays.stream(ctor.getParameters())
+                .filter(p -> p.getType() == SeasonBroadcastListener.class)
+                .toList();
+        assertEquals(1, listenerParams.size(), "OpsController 构造器里必须恰好有一个 SeasonBroadcastListener 参数");
+        var param = listenerParams.get(0);
         assertEquals(SeasonBroadcastListener.class, param.getType());
         assertNotNull(param.getAnnotation(org.springframework.lang.Nullable.class),
                 "@Autowired(required=false) 写在构造器参数上不生效：没有 listener bean 时上下文会启动失败");

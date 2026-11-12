@@ -1,5 +1,6 @@
 package com.crossrealm.chronicles.game;
 
+import com.crossrealm.chronicles.game.ai.AiServiceClient;
 import com.crossrealm.chronicles.game.leaderboard.LeaderboardService;
 import com.crossrealm.chronicles.game.season.SeasonClient;
 import com.crossrealm.chronicles.game.season.SeasonSnapshot;
@@ -31,10 +32,26 @@ class OpsSeasonEndpointTest {
                 new TrialLeaderboardService(properties),
                 new TelemetryService(properties),
                 client,
+                stubAdvisor(Map.of("configured", false), Map.of("capacity", 64L)),
                 new RequestCountFilter(),
                 new com.crossrealm.chronicles.game.cache.TtlCache(),
                 null,
                 "game-service");
+    }
+
+    /** 默认 stub：ai-service 视为"答得上但没配 key"，本套测试不关心 advisor 那一格 */
+    static AiServiceClient stubAdvisor(Map<String, Object> health, Map<String, Object> jobs) {
+        return new AiServiceClient() {
+            @Override
+            public Map<String, Object> health() {
+                return health;
+            }
+
+            @Override
+            public Map<String, Object> jobsStats() {
+                return jobs;
+            }
+        };
     }
 
     @Test

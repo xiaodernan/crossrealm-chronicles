@@ -400,6 +400,17 @@ game-service:
     Write-Host "jobs/$hdrJobId -> $hdrView"
     if (-not ($hdrView -match '"requestId":"smoke-trace-ai-001"')) { Write-Error "job view missing the gateway-carried requestId: $hdrView"; exit 1 }
 
+    Write-Host "=== 4m) via gateway: ops advisor cross-service read (W-Z8) ==="
+    $opsAdvisor = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/advisor' -TimeoutSec 20).Content
+    if ($opsAdvisor -is [byte[]]) { $opsAdvisor = [System.Text.Encoding]::UTF8.GetString($opsAdvisor) }
+    Write-Host $opsAdvisor
+    if (-not ($opsAdvisor -match '"health":\{')) { Write-Error "ops advisor missing health section: $opsAdvisor"; exit 1 }
+    if (-not ($opsAdvisor -match '"jobs":\{')) { Write-Error "ops advisor missing jobs section: $opsAdvisor"; exit 1 }
+    if (-not ($opsAdvisor -match '"available":true')) { Write-Error "game-service could NOT reach ai-service via Feign: $opsAdvisor"; exit 1 }
+    if (-not ($opsAdvisor -match '"upstreamCalls":[0-9]+')) { Write-Error "ops advisor health missing upstreamCalls: $opsAdvisor"; exit 1 }
+    if (-not ($opsAdvisor -match '"capacity":64')) { Write-Error "ops advisor jobs missing queue capacity: $opsAdvisor"; exit 1 }
+    Write-Host 'ops advisor cross-service read ok (health + job queue via Feign, cached 30s)'
+
     Write-Host ""
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content

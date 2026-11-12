@@ -1,6 +1,6 @@
 package com.crossrealm.chronicles.game;
 
-import com.crossrealm.chronicles.game.GameServiceProperties;
+import com.crossrealm.chronicles.game.ai.AiServiceClient;
 import com.crossrealm.chronicles.game.cache.TtlCache;
 import com.crossrealm.chronicles.game.leaderboard.LeaderboardService;
 import com.crossrealm.chronicles.game.season.SeasonClient;
@@ -10,6 +10,7 @@ import com.crossrealm.chronicles.game.trial.TrialLeaderboardService;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
  * W-X14 追加 `/api/ops/season`：把下游 season-service 的当前赛季**聚合**到同一个运维面。
  * 这是这一片唯一一处外呼 —— 所以它**单独一格**，不和 `/api/ops/health` 混在一起：
  * 健康视图必须永远零依赖、读即快；而"下游现在回答什么"天然可能慢或失败。
+ * W-Z8 切片1 追加 `/api/ops/advisor`：同一纪律的第二处外呼（Feign → ai-service 只读派生），
+ * 同样单独一格；`/api/ops/stats` 聚合自身内存数据，保持零外呼不变。
  */
 @RestController
 public class OpsController {
@@ -37,6 +40,7 @@ public class OpsController {
     private final TrialLeaderboardService trialService;
     private final TelemetryService telemetryService;
     private final SeasonClient seasonClient;
+    private final AiServiceClient aiServiceClient;
     private final RequestCountFilter requestCountFilter;
     private final String applicationName;
 
@@ -44,7 +48,7 @@ public class OpsController {
     /** 换季广播接收器（W-M5）——仅 spring.cache.type=redis 时存在；不存在则 health 报告 -1（不编造） */
     private final SeasonBroadcastListener seasonBroadcastListener;
 
-    /** @Autowired: 与 W-X13 起的契约一致 — 单一构造供 Spring 注入（W-P14 起七参） */
+    /** @Autowired: 与 W-X13 起的契约一致 — 单一构造供 Spring 注入（W-P14 起八参起；W-Z8 起九参） */
     @org.springframework.beans.factory.annotation.Autowired
     public OpsController(
             GameServiceProperties properties,
@@ -52,6 +56,7 @@ public class OpsController {
             TrialLeaderboardService trialService,
             TelemetryService telemetryService,
             SeasonClient seasonClient,
+            AiServiceClient aiServiceClient,
             RequestCountFilter requestCountFilter,
             TtlCache seasonCache,
             // 可选依赖要写 @Nullable，不能写 @Autowired(required=false)：后者放在**构造器参数**上
@@ -63,6 +68,7 @@ public class OpsController {
         this.trialService = trialService;
         this.telemetryService = telemetryService;
         this.seasonClient = seasonClient;
+        this.aiServiceClient = aiServiceClient;
         this.requestCountFilter = requestCountFilter;
         this.seasonCache = seasonCache;
         this.seasonBroadcastListener = seasonBroadcastListener;
@@ -145,6 +151,55 @@ public class OpsController {
             result.put("reason", error.getClass().getSimpleName());
         }
         return result;
+    }
+
+    /**
+     * ai-service 只读派生（W-Z8 切片1）：/api/ops/advisor
+     *
+     * 两条腿（与 /api/ops/season 同一口径，外加一条自己的腿）：
+     * 1. Feign 的 `fallbackFactory` 在熔断 / 连不上时返回**空 Map** —— 这一路据此回答
+     *    `available: false`，而不是抛 500 也不是拿到一个失真的对象；
+     * 2. 本地再包一层 try/catch —— 万一熔断没开（配置被改掉）导致异常直抛，仍然回答
+     *    `available: false` + `reason`，两条腿的顺序不能反（先靠契约降级，再靠本地兜底）。
+     *
+     * 为什么不进 /api/ops/stats：stats 聚合的是这一个实例的内存数据，零外呼、读即快；
+     * advisor 是 Feign 外呼（最长 800/1200ms、30s 缓存），混进 stats 就等于让 stats
+     * 继承外呼的所有失败模式 —— season 没有这么干，advisor 也不。
+     * 
+     * 30s TTL 的两格独立缓存：`advisor.health` / `advisor.jobs` 分别失效、分别降级 ——
+     * health 挂了 jobs 仍可能是好的（两个端点是两条独立的 HTTP 路径，熔断按方法粒度记录）。
+     * 空 Map = 没答上（fallback 或下游静默地给了个空体）——任何真实 ai-service 都不会给空 Map。
+     */
+    @GetMapping("/api/ops/advisor")
+    public Map<String, Object> advisor() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("health", cachedAdvisorPart("advisor.health", aiServiceClient::health));
+        result.put("jobs", cachedAdvisorPart("advisor.jobs", aiServiceClient::jobsStats));
+        return result;
+    }
+
+    private Map<String, Object> cachedAdvisorPart(String key, Supplier<Map<String, Object>> loader) {
+        try {
+            Map<String, Object> body = seasonCache.get(key, loader, Duration.ofSeconds(30));
+            if (body == null || body.isEmpty()) {
+                return unavailableAdvisorPart();
+            }
+            Map<String, Object> part = new LinkedHashMap<>(body);
+            part.put("available", true);
+            return part;
+        } catch (RuntimeException error) {
+            Map<String, Object> part = new LinkedHashMap<>();
+            part.put("available", false);
+            part.put("reason", error.getClass().getSimpleName());
+            return part;
+        }
+    }
+
+    private Map<String, Object> unavailableAdvisorPart() {
+        Map<String, Object> part = new LinkedHashMap<>();
+        part.put("available", false);
+        part.put("reason", "fallback");
+        return part;
     }
 
     /**
