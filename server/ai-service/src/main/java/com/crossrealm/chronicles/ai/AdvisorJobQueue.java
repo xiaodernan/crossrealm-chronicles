@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class AdvisorJobQueue implements AdvisorQueue {
 
-    public enum Status { QUEUED, RUNNING, DONE, DEAD }
+    public enum Status { QUEUED, RUNNING, DONE, DEAD, CANCELLED }
 
     /** 队列与 LlmClient 之间唯一的缝；测试注入 lambda，生产注入 {@code client::ask}。 */
     @FunctionalInterface
@@ -112,6 +112,7 @@ public class AdvisorJobQueue implements AdvisorQueue {
     private final AtomicLong retried = new AtomicLong();
     private final AtomicLong done = new AtomicLong();
     private final AtomicLong deadLettered = new AtomicLong();
+    private final AtomicLong cancelled = new AtomicLong();
     private final AtomicLong inFlight = new AtomicLong();
     /** 终态淘汰的次序：挂钟只有毫秒分辨率，同一毫秒完成的三个任务无法排序。 */
     private final AtomicLong completionSeq = new AtomicLong();
@@ -254,7 +255,7 @@ public class AdvisorJobQueue implements AdvisorQueue {
         if (overflow <= 0) return;
         List<Job> terminal = new ArrayList<>();
         for (Job j : jobs.values()) {
-            if (j.status == Status.DONE || j.status == Status.DEAD) terminal.add(j);
+            if (j.status == Status.DONE || j.status == Status.DEAD || j.status == Status.CANCELLED) terminal.add(j);
         }
         terminal.sort(Comparator.comparingLong(j -> j.completionOrder));
         for (int i = 0; i < Math.min(overflow, terminal.size()); i++) {
@@ -303,8 +304,47 @@ public class AdvisorJobQueue implements AdvisorQueue {
             body.put("latencyMs", job.answer.latencyMs());
         } else if (job.status == Status.DEAD) {
             body.put("reason", job.reason == null ? "unknown" : job.reason);
+        } else if (job.status == Status.CANCELLED) {
+            body.put("reason", job.reason == null ? "client-cancel" : job.reason);
         }
         return Optional.of(body);
+    }
+
+    /**
+     * 撤回一个还在排队的任务（W-Z7）。
+     *
+     * 排队中 → 从 inbox 拿掉、标 CANCELLED、`cancelled:true`——这一问从未被上游问到，
+     * 顺带释放幂等键：撤回后以同一 requestId 再问，该走一次新的受理流程（否则玩家手滑撤回后
+     * 原样再问，会被幂等判定静默指回一个已取消的任务，等于问了个寂寞）；
+     * 运行中 / 已终结 → `cancelled:false` + 原因（already-running / already-terminal）——不谎称撤得回；
+     * 未知 jobId → Optional.empty()。
+     */
+    public Optional<Map<String, Object>> cancel(String jobId) {
+        Job job = jobs.get(jobId);
+        if (job == null) return Optional.empty();
+        synchronized (job) {
+            if (job.status == Status.QUEUED) {
+                job.status = Status.CANCELLED;
+                job.reason = "client-cancel";
+                job.finishedAtMs = System.currentTimeMillis();
+                job.completionOrder = completionSeq.incrementAndGet();
+                inbox.remove(jobId);
+                if (job.requestId != null) requestIds.remove(job.requestId, job.id);
+                cancelled.incrementAndGet();
+                Map<String, Object> body = new LinkedHashMap<>();
+                body.put("jobId", jobId);
+                body.put("status", "CANCELLED");
+                body.put("cancelled", true);
+                body.put("reason", "queued");
+                return Optional.of(body);
+            }
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("jobId", jobId);
+            body.put("status", job.status.name());
+            body.put("cancelled", false);
+            body.put("reason", job.status == Status.RUNNING ? "already-running" : "already-terminal");
+            return Optional.of(body);
+        }
     }
 
     /** 给运维看的一眼读数：队列深度、背压拒绝、重试与死信。 */
@@ -325,6 +365,7 @@ public class AdvisorJobQueue implements AdvisorQueue {
         m.put("retried", retried.get());
         m.put("done", done.get());
         m.put("deadLettered", deadLettered.get());
+        m.put("cancelled", cancelled.get());
         return m;
     }
 

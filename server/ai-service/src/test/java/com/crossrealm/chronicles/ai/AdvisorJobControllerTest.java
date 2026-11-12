@@ -10,6 +10,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -139,6 +141,60 @@ class AdvisorJobControllerTest {
                         .content(body("   ", null)))
                 .andExpect(status().isBadRequest());
         assertEqualsDepth();
+    }
+
+    @Test
+    void 撤回排队任务_真撤回并释放幂等键() throws Exception {
+        String submitted = mvc.perform(post("/api/ai/chat/async")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("撤回我", "req-cancel-1")))
+                .andExpect(status().isAccepted())
+                .andReturn().getResponse().getContentAsString();
+        String jobId = MAPPER.readTree(submitted).path("jobId").asText();
+
+        mvc.perform(post("/api/ai/jobs/" + jobId + "/cancel"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.cancelled").value(true))
+                .andExpect(jsonPath("$.reason").value("queued"));
+
+        mvc.perform(get("/api/ai/jobs/" + jobId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.reason").value("client-cancel"));
+
+        Map<String, Object> stats = queue.stats();
+        assertEquals(1L, ((Number) stats.get("cancelled")).longValue());
+
+        // 撤回后同一 requestId 再问：应当受理一次新任务（幂等键已释放），而不是指回已取消的任务
+        mvc.perform(post("/api/ai/chat/async")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("换个问法", "req-cancel-1")))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.duplicate").value(false));
+    }
+
+    @Test
+    void 撤回后worker不上游() throws Exception {
+        String submitted = mvc.perform(post("/api/ai/chat/async")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("撤回我", null)))
+                .andReturn().getResponse().getContentAsString();
+        String jobId = MAPPER.readTree(submitted).path("jobId").asText();
+
+        mvc.perform(post("/api/ai/jobs/" + jobId + "/cancel"))
+                .andExpect(status().isOk());
+
+        assertFalse(queue.drainOne(), "已被撤回的任务不该被 worker 捞起来处理");
+        Map<String, Object> stats = queue.stats();
+        assertEquals(0L, ((Number) stats.get("done")).longValue());
+    }
+
+    @Test
+    void 未知任务_撤回404() throws Exception {
+        mvc.perform(post("/api/ai/jobs/does-not-exist/cancel"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("job-not-found"));
     }
 
     private void assertEqualsDepth() {

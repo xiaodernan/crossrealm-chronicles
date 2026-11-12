@@ -78,6 +78,20 @@ public class AdvisorJobController {
                         .body(Map.of("error", "job-not-found", "jobId", jobId)));
     }
 
+    /**
+     * 撤回一个还在排队的任务（W-Z7）。
+     * 200 + {status:"CANCELLED", cancelled:true} —— 真撤回；
+     * 200 + {status:"RUNNING"|已终结, cancelled:false} —— 不谎称撤得回；
+     * 404 —— 没有这个任务。
+     */
+    @PostMapping("/jobs/{jobId}/cancel")
+    public ResponseEntity<Map<String, Object>> cancel(@PathVariable String jobId) {
+        return queue.cancel(jobId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "job-not-found", "jobId", jobId)));
+    }
+
     /** 队列读数：容量/深度/在飞/拒绝/重试/死信，运维一眼看出是不是该扩容或限流。 */
     @GetMapping("/jobs/stats")
     public Map<String, Object> stats() {

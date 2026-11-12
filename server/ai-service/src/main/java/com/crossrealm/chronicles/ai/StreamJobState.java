@@ -13,10 +13,12 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * <p>状态流转：{@code QUEUED → RUNNING → DONE | DEAD}。只有瞬态失败（上游抖动）才
  * 该重试；达到 {@code maxAttempts} 仍失败 → {@code DEAD} 并进死信。
+ * {@code CANCELLED} 由外部（W-Z7「真取消」）直写：排队中的任务被客户端撤回时，
+ * worker 捞到即丢弃、不调上游——不进本类的判定链。
  */
 public final class StreamJobState {
 
-    public enum Status { QUEUED, RUNNING, DONE, DEAD }
+    public enum Status { QUEUED, RUNNING, DONE, DEAD, CANCELLED }
 
     private final int maxAttempts;
     private final AtomicInteger attempts = new AtomicInteger(0);
@@ -76,6 +78,6 @@ public final class StreamJobState {
 
     public boolean isTerminal() {
         Status s = status.get();
-        return s == Status.DONE || s == Status.DEAD;
+        return s == Status.DONE || s == Status.DEAD || s == Status.CANCELLED;
     }
 }

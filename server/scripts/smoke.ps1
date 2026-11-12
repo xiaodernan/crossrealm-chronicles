@@ -411,6 +411,27 @@ game-service:
     if (-not ($opsAdvisor -match '"capacity":64')) { Write-Error "ops advisor jobs missing queue capacity: $opsAdvisor"; exit 1 }
     Write-Host 'ops advisor cross-service read ok (health + job queue via Feign, cached 30s)'
 
+    Write-Host "=== 4n) via gateway: cancel a queued advisor job (W-Z7) ==="
+    # no-key CI: the worker fails fast, so this races the LLM-less worker. Tolerate any terminal state,
+    # but the cancel endpoint contract (shape + honest already-terminal/running) must hold either way.
+    $cancelBody = '{"question":"smoke cancel ping","requestId":"smoke-cancel-1"}'
+    $submitResp = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/ai/chat/async' -ContentType 'application/json' -Body $cancelBody -TimeoutSec 15).Content
+    if ($submitResp -is [byte[]]) { $submitResp = [System.Text.Encoding]::UTF8.GetString($submitResp) }
+    Write-Host "submit -> $submitResp"
+    $cancelJobId = [regex]::Match($submitResp, '"jobId":"([^"]+)"').Groups[1].Value
+    if (-not $cancelJobId) { Write-Error "cancel submit missing jobId: $submitResp"; exit 1 }
+    $cancelResp = (Invoke-WebRequest -UseBasicParsing -Method Post "http://localhost:28080/api/ai/jobs/$cancelJobId/cancel" -TimeoutSec 15).Content
+    if ($cancelResp -is [byte[]]) { $cancelResp = [System.Text.Encoding]::UTF8.GetString($cancelResp) }
+    Write-Host "cancel -> $cancelResp"
+    if (-not ($cancelResp -match '"cancelled":(true|false)')) { Write-Error "cancel response missing cancelled flag: $cancelResp"; exit 1 }
+    if (-not ($cancelResp -match '"status":"(CANCELLED|QUEUED|RUNNING|DONE|DEAD)"')) { Write-Error "cancel response missing a status: $cancelResp"; exit 1 }
+    if ($cancelResp -match '"cancelled":true' -and -not ($cancelResp -match '"status":"CANCELLED"')) { Write-Error "cancelled:true without CANCELLED status: $cancelResp"; exit 1 }
+    if ($cancelResp -match '"cancelled":false' -and -not ($cancelResp -match '"reason":"(already-running|already-terminal)"')) { Write-Error "cancelled:false without an honest reason: $cancelResp"; exit 1 }
+    $cancelStats = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ai/jobs/stats' -TimeoutSec 15).Content
+    if ($cancelStats -is [byte[]]) { $cancelStats = [System.Text.Encoding]::UTF8.GetString($cancelStats) }
+    if (-not ($cancelStats -match '"cancelled":[0-9]+')) { Write-Error "job stats missing cancelled counter: $cancelStats"; exit 1 }
+    Write-Host "cancel contract ok (endpoint shape + honest flag + stats counter)"
+
     Write-Host ""
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content

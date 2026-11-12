@@ -66,6 +66,7 @@ public class RedisStreamAdvisorQueue implements AdvisorQueue, AutoCloseable {
     private final AtomicLong dedupHits = new AtomicLong();
     private final AtomicLong done = new AtomicLong();
     private final AtomicLong deadLettered = new AtomicLong();
+    private final AtomicLong cancelled = new AtomicLong();
     private final AtomicLong inFlight = new AtomicLong();
 
     private final AtomicBoolean running = new AtomicBoolean(true);
@@ -152,6 +153,12 @@ public class RedisStreamAdvisorQueue implements AdvisorQueue, AutoCloseable {
 
     private void process(MapRecord<String, Object, Object> rec) {
         String id = String.valueOf(rec.getValue().get("id"));
+        // W-Z7：被客户端撤回的任务（state hash 已写 CANCELLED）——捞到即丢弃，不调上游。
+        String tombstone = String.valueOf(redis.opsForHash().get(statePrefix + id, "status"));
+        if ("CANCELLED".equals(tombstone)) {
+            redis.opsForStream().acknowledge(streamKey, group, rec.getId().getValue());
+            return;
+        }
         String requestId = String.valueOf(rec.getValue().get("requestId"));
         String question = String.valueOf(rec.getValue().get("question"));
         Map<String, Object> context;
@@ -314,7 +321,55 @@ public class RedisStreamAdvisorQueue implements AdvisorQueue, AutoCloseable {
         m.put("dedupHits", dedupHits.get());
         m.put("done", done.get());
         m.put("deadLettered", deadLettered.get());
+        m.put("cancelled", cancelled.get());
         return m;
+    }
+
+    /**
+     * 撤回一个还在排队的任务（W-Z7）——tombstone 语义：state hash 直写 CANCELLED。
+     * worker 下一次 claimOne 捞到这一条（fresh 或 pending 重投都走 process 的早退）后直接 XACK 丢弃。
+     * 已在飞 / 已终结 → cancelled:false + 原因，不谎称撤得回；未知 jobId → Optional.empty()。
+     */
+    @Override
+    public Optional<Map<String, Object>> cancel(String jobId) {
+        String stateKey = statePrefix + jobId;
+        Object raw = redis.opsForHash().entries(stateKey);
+        @SuppressWarnings("unchecked")
+        Map<Object, Object> h = (Map<Object, Object>) raw;
+        if (h == null || h.isEmpty()) return Optional.empty();
+
+        String current = h.get("status") == null ? "" : h.get("status").toString();
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("jobId", jobId);
+
+        if ("QUEUED".equals(current)) {
+            redis.opsForHash().put(stateKey, "status", StreamJobState.Status.CANCELLED.name());
+            redis.opsForHash().put(stateKey, "reason", "client-cancel");
+            redis.opsForHash().put(stateKey, "finishedAtMs", String.valueOf(System.currentTimeMillis()));
+            Object dedup = h.get("requestId");
+            String dedupKey = dedup == null ? "" : dedup.toString();
+            if (!dedupKey.isEmpty()) {
+                // 撤回后同一 requestId 再问，应走一次新的受理流程；不放这个键会被幂等指回已取消的任务。
+                try {
+                    redis.delete(dedupPrefix + dedupKey);
+                } catch (RuntimeException ignore) {
+                    // 幂等键清理失败不改变「这一问已被撤回」的事实；记一条静默，下次提交可能仍 dupe —— 不优雅但不致命。
+                }
+            }
+            cancelled.incrementAndGet();
+            body.put("status", "CANCELLED");
+            body.put("cancelled", true);
+            body.put("reason", "queued");
+            return Optional.of(body);
+        }
+        body.put("status", current.isEmpty() ? "UNKNOWN" : current);
+        body.put("cancelled", false);
+        if ("RUNNING".equals(current)) {
+            body.put("reason", "already-running");
+        } else {
+            body.put("reason", "already-terminal");
+        }
+        return Optional.of(body);
     }
 
     @Override
