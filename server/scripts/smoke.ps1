@@ -432,6 +432,18 @@ game-service:
     if (-not ($cancelStats -match '"cancelled":[0-9]+')) { Write-Error "job stats missing cancelled counter: $cancelStats"; exit 1 }
     Write-Host "cancel contract ok (endpoint shape + honest flag + stats counter)"
 
+    Write-Host "=== 4o) via gateway: dead-letter whitelist (no player input) (W-Z1) ==="
+    $dl = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ai/jobs/dead-letter?limit=5' -TimeoutSec 15).Content
+    if ($dl -is [byte[]]) { $dl = [System.Text.Encoding]::UTF8.GetString($dl) }
+    Write-Host $dl
+    if (-not ($dl -match '"items":\[')) { Write-Error "dead-letter missing items array: $dl"; exit 1 }
+    if (-not ($dl -match '"count":[0-9]+')) { Write-Error "dead-letter missing count: $dl"; exit 1 }
+    if (-not ($dl -match '"limit":5')) { Write-Error "dead-letter missing echoed limit: $dl"; exit 1 }
+    if ($dl -match 'smoke async ping|smoke cancel ping|smoke request-id ping') { Write-Error "dead-letter leaked player input: $dl"; exit 1 }
+    if ($dl -match 'sk-') { Write-Error 'dead-letter leaks an api key'; exit 1 }
+    if ($dl -match '"question"|"answer"|"context"') { Write-Error "dead-letter carries question/answer/context fields: $dl"; exit 1 }
+    Write-Host "dead-letter whitelist ok (items/count/limit present; no player text; no question/answer/context fields)"
+
     Write-Host ""
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content

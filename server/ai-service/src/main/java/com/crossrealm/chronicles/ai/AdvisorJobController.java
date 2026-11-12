@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -90,6 +91,22 @@ public class AdvisorJobController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "job-not-found", "jobId", jobId)));
+    }
+
+    /**
+     * 死信只读白名单（W-Z1 切片2）：GET /api/ai/jobs/dead-letter?limit=N。
+     * 默认 10 条、封顶 50；字段只含 id / requestId / reason / attempts——刻意不带 question/answer/context：
+     * 玩家输入与模型输出不该流进"运维列表"；排障要的是"同一类失败出现多少次"，不是看聊天记录。
+     */
+    @GetMapping("/jobs/dead-letter")
+    public Map<String, Object> deadLetters(@RequestParam(value = "limit", defaultValue = "10") int limit) {
+        int cap = Math.max(1, Math.min(50, limit));
+        java.util.List<Map<String, Object>> items = queue.deadLetters(cap);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("items", items);
+        body.put("count", (long) items.size());
+        body.put("limit", (long) cap);
+        return body;
     }
 
     /** 队列读数：容量/深度/在飞/拒绝/重试/死信，运维一眼看出是不是该扩容或限流。 */

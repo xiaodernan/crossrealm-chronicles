@@ -25,6 +25,13 @@ public interface AdvisorQueue {
     /** 撤回一个还在排队的任务（W-Z7）。终态 / 在飞 / 未知 jobId：cancelled=false 或 Optional.empty()。 */
     Optional<Map<String, Object>> cancel(String jobId);
 
+    /**
+     * 死信只读白名单（W-Z1 切片2）。最多返回 `limit` 条（1..50），字段只含
+     * id / requestId / reason / attempts —— 刻意不带 question / answer（玩家输入与模型输出
+     * 不该流进一个"运维列表"；排障要的是"同一类失败出现多少次"，不是看聊天记录）。
+     */
+    java.util.List<Map<String, Object>> deadLetters(int limit);
+
     /** 运维一眼读数：深度 / 背压 / 重试 / 死信。 */
     Map<String, Object> stats();
 

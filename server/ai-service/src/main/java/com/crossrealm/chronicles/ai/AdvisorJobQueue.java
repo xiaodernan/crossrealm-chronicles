@@ -310,6 +310,30 @@ public class AdvisorJobQueue implements AdvisorQueue {
         return Optional.of(body);
     }
 
+    /** 死信只读白名单（W-Z1 切片2）：deadLettered 报「多少次」，这里报「哪些」——没有玩家输入。 */
+    @Override
+    public java.util.List<Map<String, Object>> deadLetters(int limit) {
+        int cap = Math.max(1, Math.min(50, limit));
+        List<Job> dead = new ArrayList<>();
+        for (Job j : jobs.values()) {
+            if (j.status == Status.DEAD) dead.add(j);
+        }
+        dead.sort(Comparator.comparingLong((Job j) -> j.completionOrder).reversed());
+        List<Map<String, Object>> out = new ArrayList<>(Math.min(cap, dead.size()));
+        for (Job j : dead) {
+            if (out.size() >= cap) break;
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", j.id);
+            if (j.requestId != null) m.put("requestId", j.requestId);
+            m.put("reason", j.reason == null ? "unknown" : j.reason);
+            m.put("attempts", (long) j.attempts);
+            m.put("finishedAtMs", j.finishedAtMs);
+            // question / context / answer 刻意不带出（排障要的是同一类失败出现多少次，不是看聊天记录）
+            out.add(m);
+        }
+        return out;
+    }
+
     /**
      * 撤回一个还在排队的任务（W-Z7）。
      *

@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.data.domain.Range;
+import org.springframework.data.redis.connection.Limit;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -370,6 +371,43 @@ public class RedisStreamAdvisorQueue implements AdvisorQueue, AutoCloseable {
             body.put("reason", "already-terminal");
         }
         return Optional.of(body);
+    }
+
+    /** 死信只读白名单（W-Z1 切片2）：只回 {id, requestId, reason, attempts}，question/context 不出门。 */
+    @Override
+    public java.util.List<Map<String, Object>> deadLetters(int limit) {
+        int cap = Math.max(1, Math.min(50, limit));
+        List<Map<String, Object>> out = new ArrayList<>(cap);
+        try {
+            var records = redis.opsForStream().reverseRange(dlqKey, Range.unbounded(), Limit.limit().count(128));
+            if (records != null) {
+                for (var rec : records) {
+                    if (out.size() >= cap) break;
+                    var v = rec.getValue();
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    String id = String.valueOf(v.get("id"));
+                    m.put("id", id);
+                    Object rid = v.get("requestId");
+                    if (rid != null && !rid.toString().isEmpty()) m.put("requestId", rid.toString());
+                    Object reason = v.get("reason");
+                    m.put("reason", reason == null || reason.toString().isEmpty() ? "unknown" : reason.toString());
+                    m.put("attempts", parseLongField(v.get("attempts")));
+                    out.add(m);
+                }
+            }
+        } catch (RuntimeException ignore) {
+            // 死信读失败：空列表而不是 500 —— 运维视图永不砸
+        }
+        return out;
+    }
+
+    private static long parseLongField(Object v) {
+        if (v == null) return 0L;
+        try {
+            return Long.parseLong(v.toString());
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
     }
 
     @Override
