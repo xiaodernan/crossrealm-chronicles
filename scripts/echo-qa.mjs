@@ -54,7 +54,17 @@ const SYSTEM = `你是《跨界纪元》（史诗幻想 + 群像致敬「次元�
 
 返回且只返回 JSON 数组（不要 markdown 围栏，不要解释），元素：
 {"id":"<原样回声 id>","verdict":"ok|warn|bad","issues":["<=30 字的中文问题描述"]}
-— verdict=ok 时 issues 为空数组；warn=有可商榷之处；bad=确凿的错位/硬伤。`;
+— verdict=ok 时 issues 为空数组；warn=有可商榷之处；bad=确凿的错位/硬伤。
+
+## 次元回声机制笔记（判读上下文，别判错方向）
+- 母题名册（17 个，全部合法；绝不是全部，判官只需认得出"这母题存在"）：
+  wizard（魔法学院）/ interstellar（星际航行）/ upside（逆相世界）/ middle-earth（中洲之环）/ border（边境星门）/ family（家族黑帮）/ deepspace（深空航行）/ cyber（赛博深渊）/ samurai（武士残响）/ cosmic（深空孔径）/ starport（星港码头）/ crossover（跨界原创）/ gloom（薄暮母题）/ radiant（辉煌母题）/ voidmaw（虚空裂喉）/ abysssalt（深渊盐）/ homecoming（返乡母题）。
+- ECHOES 条目含 zone 字段（fantasy/magic/space/void/abyss/gLooM/radiant 之一）——母题与 zone 可以不同（例：COSMIC 回声落在 void 时表示「破碎时线」语境；SAMURAI 回声落在 fantasy 表示位面交错）。
+- 乐章只鉴文案不鉴玩法；"五维_tesseract" 等残留英文 key 片段属于 bad（W-Z5 切片1 已修回双表）。
+- **{word} 占位符**：文案里 {roll} / {parry} / {dodge} 这类花括号词是键位占位符——keyText() 在界面渲染时把它们展开成「玩家当前真实的键名」（例如「Space」），绝不是未渲染的漏洞。判官看到这类占位符**不许**判 bad/warn。
+- title 牌感：短、硬、允许复用母纲大纲意象（"石碑""深井""深渊"）而不必复述机制；desc 一行年鉴口吻，允许画外音——不求交代触发条件。
+- 142 上游调用次数请控制在 10 次以内（batch=10），否则上游 429 会打断整册扫描。
+`;
 
 async function askBatch(items) {
   const user = `以下是 ${items.length} 条回声（母题 id / 区域 / 标题 / 描述）：\n` +
