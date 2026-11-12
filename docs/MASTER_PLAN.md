@@ -477,7 +477,7 @@
 | W-Z3 | **设计令牌与动效分级** | ⬜ | CSS 自定义属性收敛色板/层级/时长；动效分三档且全包 `prefers-reduced-motion`；色盲档与字号档不许被覆盖 |
 | W-Z4 | **数据库读写路径** | ⬜ | 先量现有内存仓储复杂度，二级索引 + 批量写；读写分离口径写清，不为了上数据库而上 |
 | W-Z5 | **真实大模型语料质检** | ✅ 切片1 | 2026-11-12 | `0f114f3` + `4dcff91` | 星轨语料质检 `scripts/echo-qa.mjs`：77 条回声经真实 gpt-6-sol 判「母题×标题×描述」一致性 / 史实性 / 语气（batch=10，8 次上游调用，报告不入库）：ok 51 / warn 15 / **bad 11**。真问题修回 zh 双表 + 四份打钉测试（4dcff91）：`五维_tesseract`×10 → 既有译名「五维裂隙」/「五维超立方体」；chalk→粉笔、rusted shut→已锈死、frontier→边境、noir→黑色电影、rhythm→节奏、awaits→在此等你。致敬语境（1983 电台 / CRT / Walkman / Stay / One Realm）经复核保留 |
-| W-Z6 | **关联 ID 贯通 ai-service** | ⬜ | 网关 `X-Request-Id`（W-P8）一路带到 `/api/ai/jobs/**`，让一次慢调用在两端日志对得上 |
+| W-Z6 | **关联 ID 贯通 ai-service** | ✅ 切片1 | 2026-11-12 | `cf7c683` | `RequestCorrelation`（网关 W-P8 白名单逐字一致：1..64 可见 ASCII，排除空白/逗号/分号）：body 幂等键优先 > `X-Request-Id` header > 空（不编造）；202/429/`/jobs/{id}`/sync chat/echo-hint 全链回带 `requestId` —— 玩家浏览器看到的 id 与队列/死信/告警日志对得上；幂等永远客户端说了算（网关只补缺不夺权）；smoke 4l 段 + 3 单测 pin 住 3 契约 |
 | W-Z7 | **面板后台继续问** | ⬜ | 把 W-Y4 的提交→轮询接成 UI 路径：关掉面板后答案仍会落地，回来时可见；真取消要能撤销排队任务 |
 
 ---
@@ -6520,3 +6520,13 @@ Phase D（系统与质量）
   - **验证**：lint 0 / `vitest` 434 文件 6504 例全绿（图钉同步改：poi-label-i18n / zone-poi-dialogue-i18n / pop-culture-dialog-i18n / tuning-barks-main-i18n）；无新键，i18nKeyCount 与键面不受影响；e2e / perf 不受影响（scripts 改动 + strings.zh **值**替换）。
 
   - **风险与后续**：① 这一轮判官并没有识别出「反向母题错位」（floating-casino / rooftop-dojo / speakeasy / last-light 四条），判官按表面语气打了 warn/bad，复核后这些条的母题本意是**故意的错位**（赌自己·输灵魂即赛博霓虹的降临体、终章意象即归乡的完型）——LLM 判官的 judge 边界需要在下一轮交给真正懂赛博/怪奇语境的人再收一次。② 下一片：把同一判官接到 **POI 文案 + 成就文案 + NPC 主线台词**（回声之外三大文本池）。③ 报告不入库是刻意的：复查重跑 `node scripts/echo-qa.mjs` 即可，不存在「旧报告里找不到原文案」的问题。④ 与 W-Z6（关联 ID 贯通 ai-service）无争用。
+
+- **2026-11-12 W-Z6 关联 ID 贯通 ai-service（切片1）** —— 提交 `cf7c683`
+
+  - **起因**：网关对每个请求都盖 `X-Request-Id`（W-P8：白名单透传 / 否则铸 UUID / 出行无条件钉住），但 `ai-service` 的异步队列 `/api/ai/chat/async` 只认 **body 里的 requestId**（幂等键）——网关铸的/透传的 id 进了服务就被丢掉。一条慢查询从请求线程到 worker 线程到死信，玩家浏览器上看到的 id 与队列/死信/告警日志对不上，人工排障只能靠"问了没答"这句话猜。
+
+  - **做法**：新 `RequestCorrelation`（网关 W-P8 白名单逐字一致：1..64 个可见 ASCII，排除空白/逗号/分号）：解析口径 = **body requestId（幂等键，客户端说了算）> X-Request-Id header > null**，畸形 header 一律当没带不当幂等键。网关只补缺、不夺权：幂等永远由客户端说了算。落点：`/api/ai/chat`、`/api/ai/echo-hint`、`/api/ai/chat/async`（202 接受 & 429 队列满两路径）、`/api/ai/jobs/{id}` 轮询视图——全部回带 `requestId`（纯附加字段，老客户端无感）。一次慢调用于是从浏览器到队列到死信只有一个名字。
+
+  - **验证**：单测 3 例钉 3 契约（header-only 透传 / body 优先幂等 / 畸形 header 不当幂等键）；`mvn -pl ai-service verify` **52/52 全绿**；smoke 新增 **4l 段**（header-only 提交 → 202 echo + 轮询视图 echo + 429 路径也带 id，gateway 回声 `request-id` 整数断言存在）——本地实测 PASSED，含 4j 真实外呼。
+
+  - **风险与后续**：① correlation id 进了响应体而不是响应头——响应头已有网关钉住的真正那条 `X-Request-Id`（W-P8 出行无条件覆盖），body 里这条是「方便玩家/运维直接读、不必再调 header」的影子，两者始终同源；② 死信日志里的 print 没有改——ai-service 侧至今没有结构化日志层，id 进了任务视图本身也就进了任何 `jobs/{id}` 轮询端点与运维读数；③ 下一片：把 id 顺 Feign 那条线也贯通到 game-service 的 AI 侧出口（W-P8 只到 Feign 边界，没进 ai-service 的 HTTP 日志——但 ai-service 连结构化日志都没有，那是下一条独立的线）；④ 与 W-Z6 同族的 W-Z7 是它的 UI 半边（关掉面板后答案落地仍可见）。
