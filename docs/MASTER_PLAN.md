@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 设置页在线服务旗舰化（W-V15）** —— 提交 `8565fe7`
+
+  - **起因**：长期以来在线设置段是设置面板里一块孤零零的荒原——在线服务 h3 上方毫无分隔，下方的排行榜刷新按钮和榜单行没有任何视觉层次。整个设置面板在 W-V10 之后已经审视过一遍，但在线服务这一段的质感停在十二年前。
+
+  - **做法**：① index.html：在线设置段前加 `<hr class="online-divider" />`；② style.css：`.online-divider` 1px 暖金细线 + 纵向 16px 间距；`.online-lb-list` grid 布局 + counter 伪元素 `::before` 编号（counter-increment lb-rank + content counter(lb-rank)），无序号直接排出 1. 2. 3. 不用 JS 算；每一行 border-left 2px 暖金细边 + hover 底亮 + border-left 增亮；`#set-online-lb` 和 `#set-online-ping` 更小的字号、更紧的行距，与整体 panel-box 统一。纯 CSS、零 JS、零新键、6375 全绿。
+
+  - **验证**：`npm test` 6375 全绿；`npm run lint` 0/0；`npm run build` 干净；`npm run e2e` 通关 ✓（exceptions=0）。
+
+  - **风险与后续**：① 仅 W-V10/visual surface 未影响 focus-nav 焦点逻辑；② counter 伪元素在 CJK glyph fallback 时也工作（数字）；③ 下一片：settings-online h3 换成与 guide-title 同款的小型金色粗体 h3，或 fast-travel-panel 同步式升级。
 - **2026-11-12 leaderboard 聚合追加 P50/P95（W-M2）** —— 提交 `27e16b7`
 
   - **起因**：leaderboard 的聚合答得出"最快/最慢/平均"却答不出"典型成绩和 P95 尖峰"——运维想知道"这批通关里 50% 的人多快通关、5% 的人最慢需要等多久"，这两个数是给 SLA 和 leaderboard 展示用的。
