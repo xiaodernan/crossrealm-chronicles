@@ -54,8 +54,9 @@ public class OpsController {
             SeasonClient seasonClient,
             RequestCountFilter requestCountFilter,
             TtlCache seasonCache,
-            @org.springframework.beans.factory.annotation.Autowired(required = false)
-            SeasonBroadcastListener seasonBroadcastListener,
+            // 可选依赖要写 @Nullable，不能写 @Autowired(required=false)：后者放在**构造器参数**上
+            // 不生效（单构造器的依赖解析是原子的），没有 listener bean 时 Spring 会直接启动失败。
+            @org.springframework.lang.Nullable SeasonBroadcastListener seasonBroadcastListener,
             @Value("${spring.application.name:game-service}") String applicationName) {
         this.properties = properties;
         this.leaderboardService = leaderboardService;

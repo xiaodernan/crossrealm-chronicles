@@ -81,7 +81,15 @@ public class SeasonBroadcastListener {
     }
 
     private void onMessage(org.springframework.data.redis.connection.Message message, byte[] pattern) {
-        String payload = new String(message.getBody(), StandardCharsets.UTF_8);
+        handle(new String(message.getBody(), StandardCharsets.UTF_8));
+    }
+
+    /**
+     * 包内可见：把「解析 → 认事件 → 失效缓存 → 计数」与 Redis 传输层分开。
+     * 测试不必为了验这一段去造 {@code Message} / 起 Lettuce —— 广播最容易错的是口径
+     * （哪条消息该让缓存失效），不是字节怎么进来的。
+     */
+    void handle(String payload) {
         try {
             Map<String, Object> parsed = parse(payload);
             if ("season:advance".equals(parsed.get("event"))) {

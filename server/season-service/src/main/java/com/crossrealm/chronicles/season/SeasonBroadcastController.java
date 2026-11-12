@@ -28,6 +28,7 @@ public class SeasonBroadcastController {
     private final org.springframework.data.redis.core.StringRedisTemplate redis;
 
     public SeasonBroadcastController(SeasonCatalog catalog,
+                                      @org.springframework.lang.Nullable
                                       org.springframework.data.redis.core.StringRedisTemplate redis) {
         this.catalog = catalog;
         this.redis = redis;
@@ -42,7 +43,13 @@ public class SeasonBroadcastController {
         String payload = """
                 {"event":"season:advance","id":"%s","dayInCycle":%d}""".formatted(
                 active.id(), catalog.dayInCycle());
-        redis.convertAndSend(CHANNEL, payload);
+        try {
+            redis.convertAndSend(CHANNEL, payload);
+        } catch (RuntimeException e) {
+            // Pub/Sub 是 fire-and-forget：Redis 不可达时不能让这个端点把 500 抛给调用方，
+            // 更不能假装发布成功。503 明确表示「这次没发出去，订阅方仍会等 TTL 自然过期」。
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "redis publish failed", e);
+        }
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("published", true);
         result.put("channel", CHANNEL);
