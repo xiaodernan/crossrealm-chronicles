@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,21 +32,28 @@ public class AdvisorJobController {
         this.queue = queue;
     }
 
-    /** requestId 是可选的幂等键：网络重连/重复点击时用同一个值，不会让上游被问两次。 */
+    /** requestId 是可选的幂等键：网络重连/重复点击时用同一个值，不会让上游被问两次。
+     * 没写时由网关的 X-Request-Id 补（W-Z6）；body 写了就 body 优先——幂等键永远由客户端说了算。 */
     public record AsyncChatRequest(
             @NotBlank @Size(max = 400) String question,
             @Size(max = 8) Map<String, Object> context,
             @Size(max = 64) String requestId) {}
 
     @PostMapping("/chat/async")
-    public ResponseEntity<Map<String, Object>> submit(@Valid @RequestBody AsyncChatRequest request) {
+    public ResponseEntity<Map<String, Object>> submit(@Valid @RequestBody AsyncChatRequest request,
+            @RequestHeader(value = "X-Request-Id", required = false) String headerRequestId) {
+        String effectiveRequestId = RequestCorrelation.resolve(request.requestId(), headerRequestId);
         AdvisorJobQueue.SubmitResult result = queue.submit(
-                request.question().trim(), request.context(), request.requestId());
+                request.question().trim(), request.context(), effectiveRequestId);
         if (!result.accepted()) {
             // 背压要说清楚：429 + Retry-After，而不是 200 里塞一个"稍后再试"的字符串。
+            // 拒绝也要带上 correlation id —— 玩家拿着 id 来找人，运维才有线索。
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("error", "advisor-queue-full");
             body.put("retryAfterMs", queue.pollAfterMs());
+            if (effectiveRequestId != null) {
+                body.put("requestId", effectiveRequestId);
+            }
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .header("Retry-After", String.valueOf(Math.max(1, (queue.pollAfterMs() + 999) / 1000)))
                     .body(body);
@@ -55,6 +63,9 @@ public class AdvisorJobController {
         body.put("status", "queued");
         body.put("duplicate", result.duplicate());
         body.put("pollAfterMs", queue.pollAfterMs());
+        if (effectiveRequestId != null) {
+            body.put("requestId", effectiveRequestId);
+        }
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(body);
     }
 

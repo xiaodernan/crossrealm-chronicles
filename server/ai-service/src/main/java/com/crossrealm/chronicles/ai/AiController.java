@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,13 +34,18 @@ public class AiController {
             @Size(max = 8) Map<String, Object> context) {}
 
     @PostMapping("/chat")
-    public ResponseEntity<Map<String, Object>> chat(@Valid @RequestBody ChatRequest request) {
+    public ResponseEntity<Map<String, Object>> chat(@Valid @RequestBody ChatRequest request,
+            @RequestHeader(value = "X-Request-Id", required = false) String headerRequestId) {
         LlmClient.Answer answer = client.ask(request.question(), request.context());
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("answer", answer.answer());
         body.put("model", answer.model());
         body.put("cached", answer.cached());
         body.put("latencyMs", answer.latencyMs());
+        String effectiveRequestId = RequestCorrelation.sanitizeInbound(headerRequestId);
+        if (effectiveRequestId != null) {
+            body.put("requestId", effectiveRequestId);
+        }
         return ResponseEntity.ok(body);
     }
 

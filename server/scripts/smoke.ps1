@@ -385,6 +385,21 @@ game-service:
     if ($view -match 'smoke async ping') { Write-Error 'job view must not echo the player question back'; exit 1 }
     Write-Host 'async advisor queue ok (submit / dedup / poll / no secret echo)'
 
+    Write-Host "=== 4l) via gateway: X-Request-Id propagates into ai-service (W-Z6) ==="
+    $ridHdr = 'smoke-trace-ai-001'
+    $hdrResp = Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/ai/chat/async' -Headers @{ 'X-Request-Id' = $ridHdr } -ContentType 'application/json' -Body '{"question":"smoke request-id ping"}' -TimeoutSec 15
+    $hdrBody = if ($hdrResp.Content -is [byte[]]) { [System.Text.Encoding]::UTF8.GetString($hdrResp.Content) } else { [string]$hdrResp.Content }
+    Write-Host "chat/async (header only) -> $hdrBody"
+    if (-not ($hdrBody -match '"requestId":"smoke-trace-ai-001"')) { Write-Error "ai-service did not echo the gateway X-Request-Id: $hdrBody"; exit 1 }
+    $echoedHdr = $hdrResp.Headers['X-Request-Id']
+    if (-not $echoedHdr -or $echoedHdr -ne $ridHdr) { Write-Error "gateway response did not echo X-Request-Id for the ai route: '$echoedHdr'"; exit 1 }
+    $hdrJobId = [regex]::Match($hdrBody, '"jobId":"([^"]+)"').Groups[1].Value
+    if (-not $hdrJobId) { Write-Error "async submit missing jobId: $hdrBody"; exit 1 }
+    $hdrView = (Invoke-WebRequest -UseBasicParsing "http://localhost:28080/api/ai/jobs/$hdrJobId" -TimeoutSec 15).Content
+    if ($hdrView -is [byte[]]) { $hdrView = [System.Text.Encoding]::UTF8.GetString($hdrView) }
+    Write-Host "jobs/$hdrJobId -> $hdrView"
+    if (-not ($hdrView -match '"requestId":"smoke-trace-ai-001"')) { Write-Error "job view missing the gateway-carried requestId: $hdrView"; exit 1 }
+
     Write-Host ""
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content

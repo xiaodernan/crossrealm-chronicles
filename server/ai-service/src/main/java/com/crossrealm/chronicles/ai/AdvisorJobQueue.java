@@ -293,6 +293,9 @@ public class AdvisorJobQueue {
         body.put("status", job.status.name());
         body.put("attempts", job.attempts);
         body.put("createdAtMs", job.createdAtMs);
+        if (job.requestId != null) {
+            body.put("requestId", job.requestId);
+        }
         if (job.status == Status.DONE && job.answer != null) {
             body.put("answer", job.answer.answer());
             body.put("model", job.answer.model());

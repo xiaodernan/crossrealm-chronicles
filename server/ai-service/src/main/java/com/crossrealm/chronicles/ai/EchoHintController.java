@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,7 +45,8 @@ public class EchoHintController {
             @Size(max = 400) String desc) {}
 
     @PostMapping("/echo-hint")
-    public Map<String, Object> echoHint(@Valid @RequestBody EchoRequest request) {
+    public Map<String, Object> echoHint(@Valid @RequestBody EchoRequest request,
+            @RequestHeader(value = "X-Request-Id", required = false) String headerRequestId) {
         String user = "母题：%s%n回声名：%s%n回声描述：%s%n%n请给一个游戏内的暗示（只回一句，不超过 45 字）："
                 .formatted(request.franchise(), request.title(),
                         request.desc() == null || request.desc().isBlank() ? "（无描述）" : request.desc());
@@ -53,6 +55,10 @@ public class EchoHintController {
         body.put("available", true);
         body.put("hint", answer.answer());
         body.put("cached", answer.cached());
+        String effectiveRequestId = RequestCorrelation.sanitizeInbound(headerRequestId);
+        if (effectiveRequestId != null) {
+            body.put("requestId", effectiveRequestId);
+        }
         return body;
     }
 
