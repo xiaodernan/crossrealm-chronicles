@@ -6065,6 +6065,17 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 Redis 限流背板实证 + CI 门禁（W-P15）** —— 提交 `c637f41`
+
+  - **起因**：W-P10 的 Redis 背板从落地起**从未被真正跑通过**——manual 脚本写了一年没人跑，Gateway 的 Redis 限流路径在 CI 里零覆盖。这一片把它从"理论上能用"修成"CI 每次真验"。
+
+  - **挖出的三个根病**（按修的代价排序）：① **探测目标选错**——脚本 burst `/actuator/springcloud`，但 actuator 端点在 Spring Cloud Gateway 里由 WebFlux 直出、**不进 GlobalFilter 链**，RateLimitByIpFilter（order=-100）根本不被调用，`allowed` 计数恒为 0，70 条全 200、永远看不到 429（这也解释了为什么 W-P13 埋点的 `allowed` 计数器在真实 actuator 流量下永远读到 0）；② **裸逗号在 docker exec 下吞掉**——`redis-cli --eval t.lua key , args` 里未引号包裹的 `,` 被传输层吃掉，ARGV 全空、Lua 炸（`arithmetic on local 'now' (a nil value)`）→ 网关 fail-open → 永远放行；③ **脚本自己的两个 bug**（repoRoot 多算一层、Start-Process 行内参数拼接非法）+ **CI 无上游时 /api/version 返回 503 而非 200**——即使修好一切，naive 断言「200 之后有 429」也会在 CI 上红。
+
+  - **做法**：① `verify-redis-rate-limit.ps1` 重写——repoRoot 改为单亲、Start-Process 先拼 `$gatewayArgsAll` 再传参、burst 目标改 `/api/version`（lb://game-service 上游不在，503 也算放行；限流器先于 LB 计数，61 条必 429）、fail-open 断言改为「redis 停了之后不是 429」（503/超时都接受）、本地实证：throwaway redis × gateway redis backend，**70 条 burst = 60×允许 + 61 条 429**，停 redis fail-open PASSED；② `.github/workflows/server.yml` 新增 **Redis-backed rate limiter** 步骤——此后每次 server 变更都真验证 Redis 路径（GitHub ubuntu runner 自带 Docker）；③ README 文件索引登记。
+
+  - **验证**：本地实证全链 PASSED（redis container → gateway(redis backend) → 70×burst → 429 → 停 redis → fail-open）；Server CI 以 run `c637f41` 为候选见分晓（新增步骤若 ubuntu Docker 有坑会当场红，skill 里已知 Docker Works on ubuntu-latest）。
+
+  - **风险与后续**：① CI 首次跑这个步骤可能暴露 runner 环境差异（端口占用/内存）——失败语义是"这个门禁本身没跑通"，不是限流器坏了，处置同 smoke（先看日志再动）；② **Actuator 不经 Gateway 限流**这条目前只记在这个脚本的注释里——应在 W-P13 的 ADR 里也补一笔；③ 如果以后想给 actuator 也限流，需要在 `actuator` 暴露面加 Filter（WebFlux 层，不是 Gateway 层），另一片另一处；④ 下一片：Spring Cloud Bus 到 game-service（配置刷新广播），或把 season-service 的 RedisCacheManager 也接进 `verify-redis` 式门禁（目前 Redis 侧只有 gateway 限流有真验，缓存侧只有并发内存分支真读真算）。
 - **2026-11-12 telemetry 异步摄取（W-M1）** —— 提交 `ec35725`
 
   - **起因**：遥测摄取一直是同步写——POST /api/telemetry/events 在请求线程内 `synchronized(events)` 直接落 deque，请求线程与 count/summarize 读抢同一把锁。burst 一打过来，要么排队、要么丢。而且 `TelemetryService` 自己的 javadoc 早就写着"生产环境应换成消息队列；这里刻意保持零依赖"——这一片就是把那半句话落成真。
