@@ -476,7 +476,7 @@
 | W-Z2 | **帧内算法与硬件适配** | ✅ 切片1 | `SpatialGrid` 均匀网格把分离推力的邻居查询从 O(n²) 全遍历改成 O(邻域桶)；**逐只对拍** 3 组随机 × 200 只 + 密集重叠 + 自定义 pad，推力逐值相等；1000 只均匀分布时候选数 < 全量 10%；`npm run perf` 全部预算内（枢纽 updateAvg 1.52ms / 灰白森林 1.59ms / p95 2.5ms / exceptions=0）。切片2：对象池 / 脏标记 / 帧预算、draw-call 地板 8 格重钉 |
 | W-Z3 | **设计令牌与动效分级** | ✅ 切片1 | `:root` 收敛语义令牌：时长档（--dur-instant→--dur-cinematic 单调）+ 缓动 + 层级（--z-hud→--z-loading）+ 圆角/阴影/间距尺度；末尾新增**全局** reduced-motion 兜底网（`* { animation-duration:0.001ms; iteration:1 }` 让 forwards 动效瞬间到终态 + 档C 纯装饰元素 `animation:none`）；`advisor-enter` 接入 `--ease-out`/`--dur-base`；新增 `tests/design-tokens.test.js`（27 例钉令牌定义 + 全局网存在）。`W-Y7` 的「设计令牌/动效分级」半边由本片覆盖，剩「光效分层/可访问性（色盲档与字号档不被覆盖）」 |
 | W-Z4 | **数据库读写路径** | ✅ 切片1 | 2026-11-12 | `e7d378f` | 先量现有内存仓储复杂度：三个仓的结构/读写复杂度入册；`/api/ops/stats` 读数 O(n log n) 真实热路径判断——当前不上持久层；Redis 化留给 W-Z1 跨实例语境（已落地）；不为了上数据库而上 |
-| W-Z5 | **真实大模型语料质检** | ✅ 切片1 | 2026-11-12 | `0f114f3` + `4dcff91` | 星轨语料质检 `scripts/echo-qa.mjs`：77 条回声经真实 gpt-6-sol 判「母题×标题×描述」一致性 / 史实性 / 语气（batch=10，8 次上游调用，报告不入库）：ok 51 / warn 15 / **bad 11**。真问题修回 zh 双表 + 四份打钉测试（4dcff91）：`五维_tesseract`×10 → 既有译名「五维裂隙」/「五维超立方体」；chalk→粉笔、rusted shut→已锈死、frontier→边境、noir→黑色电影、rhythm→节奏、awaits→在此等你。致敬语境（1983 电台 / CRT / Walkman / Stay / One Realm）经复核保留 |
+| W-Z5 | **真实大模型语料质检** | ✅ 切片1+2+3 | 2026-11-12/13 | `0f114f3` + `4dcff91` + `c67b6da` + `a94dba6` | 星轨语料质检 `scripts/echo-qa.mjs`（77 回声，ok 51 / warn 15 / bad 11→修回双表四份打钉测试）；`scripts/ach-qa.mjs` 成就名册 44 条（ok 38 / warn 5 / bad 1「信标猎人」假阳）——切片3：SYSTEM 附录游戏机制笔记复扫：**bad 0**，rematch-3 → ok |
 | W-Z6 | **关联 ID 贯通 ai-service** | ✅ 切片1 | 2026-11-12 | `cf7c683` | `RequestCorrelation`（网关 W-P8 白名单逐字一致：1..64 可见 ASCII，排除空白/逗号/分号）：body 幂等键优先 > `X-Request-Id` header > 空（不编造）；202/429/`/jobs/{id}`/sync chat/echo-hint 全链回带 `requestId` —— 玩家浏览器看到的 id 与队列/死信/告警日志对得上；幂等永远客户端说了算（网关只补缺不夺权）；smoke 4l 段 + 3 单测 pin 住 3 契约 |
 | W-Z7 | **面板后台继续问** | ✅ 切片1+2 | 2026-11-13 | `a797b92` / `de1ab7d` | 异步队列（W-Y4 提交→轮询）接成 UI 路径：切片A ai-service 真撤回端点 `POST /api/ai/jobs/{id}/cancel`（双后端 tombstone；撤回同时释放幂等键；排队中→CANCELLED，在飞/终结→already-running/already-terminal，未知→404；smoke §4n）；切片B OnlineServices.askAdvisorBackground（requestId 幂等 → 202 → AbortSignal 轮询至终态；DEAD→503/unavailable 复用；429→busy；3 次连败→NETWORK；零裸计时器；停止=abort 轮询+cancel POST）；面板零改动契合（ERROR_KEYS 不变） |
 | W-Z8 | **运维面板聚合 advisor 派生** | ✅ 切片1+2 | 2026-11-13 | `ae11db3` / `a559632` | `/api/ops/advisor`：Feign → ai-service 只读派生（`/health` + `/jobs/stats`），30s 两格独立 TTL 缓存，双端点独立降级（空 Map ≈ `available:false` + `reason:fallback`，本地 try/catch 再保一层）；`map` 直通不丢字段；smoke §4m；**不进 `/api/ops/stats`**（零外呼纪律）；切片2：设置页「星轨诊断」按钮经同一网关读该端点 |
@@ -6617,3 +6617,14 @@ Phase D（系统与质量）
   - **取舍**：① 一条一行 JSON 而不是新日志框架/encoder 依赖——grep 起来不需要正则学位，也不加一格依赖；② gateway 不做这件事——gateway 本来就有 RequestIdFilter + ServerTimingFilter（已暴露 X-Response-Time），那里再叠一层访问日志会把链路里最吵的一环写得最满；③ 不记 remote-ip/user-agent——计数器不是访问日志，访问日志也不是画像库；④ response body 永不入日志（LLM 的回答哪一字节都不进文件）。
 
   - **风险与后续**：日志量 ≈ 每请求一行；ai-service 的异步 worker 不在 HTTP 链路内，队列侧的失败依然只能在 jobs/dead-letter 读到（W-Z1 切片2）。下一步若 Redis 在线，`jobs.backend=redis` 切换后本筛子的行为不变（HTTP 视角与后端无关）。
+- **2026-11-13 W-Z5 真实大模型语料质检（切片3：ach-qa 机制笔记复扫）** —— 提交 `a94dba6`
+
+  - **起因**：W-Z5 切片2 留下一条 false positive——`rematch-3`「信标猎人」被判 bad（title 对不上「Rematch a boss 3 times」），判官没读进游戏机制：这枚成就收的是再战链累计三枚「信标」，不是「重打某一 Boss 三次」。W-Z5 切片2 ADR ⑤ 明确挂了这条修复：把游戏机制笔记作为 judge prompt 的附件喂给语料质检。
+
+  - **做法**：`scripts/ach-qa.mjs` SYSTEM 附录新增「游戏机制笔记」六条参照（再战链信标语义 / 位面试炼分层 / 星轨赛季换季词缀 / 四大母题致敬回声 / 主线 118 步章节序列 / 成就三来源 + title 牌面表义可复用大纲用词 + desc 画外音口径），判官口径与批处理纪律不变（batch=12，gpt-6-sol，temperature 0.2）。LLM_API_KEY 只从环境变量进（本次运行为进程级注入，未落盘、未入库）。
+
+  - **真实复扫结果**：ok 38 / warn 6 / **bad 0** / error 0（44 条全量、4 批、真实上游）。`rematch-3` **bad → ok**——false positive 消解。warn 6 条（style-a / echo-gangster / echo-triad / echo-wave4 / echo-gloom / echo-middle-earth）全是商榷项，工具不替人改文案。
+
+  - **判据与经验**：LLM 的语料判官需要一段「机制说明书」才能不发明出"这是错的"——判官缺上下文时，它会把不知道的游戏事实判成文案事故。给判官喂机制笔记之后，false positive 的收益远大于 prompt 里多那一段 token 成本（4 批 × 44 条 ≈ 每条 +120 token）。
+
+  - **风险与后续**：① 机制笔记会随版本漂移——每次大版本（echo 波/位面新增）应同步翻新这一附件；② warn 6 条结论人工复核后再议；③ 报告仍不入库（$TEMP，本人复核后删），工具产物不是档案。
