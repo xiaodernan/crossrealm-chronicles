@@ -3252,6 +3252,15 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   echo_tea_ware_title: 'The Tea Wares Left Behind',
   echo_tea_ware_desc: 'The tea has cooled; the sword is not sheathed. Whose words filled this bowl?',
 
+  // W-E10 (Deep Sky Aperture Wave16): Obsidian Obelisk / Broken-Anchor Pilot / Dying Star Hulk
+  echo_grain_obelisk_title: 'The Obsidian Obelisk',
+  echo_grain_obelisk_desc: 'Nothing survived the crossing but the stone pillar — older than the civilization it fell near.',
+  echo_pilot_crash_title: 'Broken-Anchor Pilot',
+  echo_pilot_crash_desc: 'His gravity band is still falling in a nervous cycle — the period is right, but it never lands.',
+  echo_star_derelict_title: 'The Dying Star Hulk',
+  echo_star_derelict_desc: 'A star on its last breath, holding its light in, waiting for someone to read what it is saying.',
+
+
 
   // W-Y2 slice 1: Starpath Advisor. A chip's label IS the question sent upstream.
   advisor_fab: 'Starpath Advisor',

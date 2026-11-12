@@ -147,4 +147,9 @@ export const ECHOES = [
   { id: 'echo-ronin-bridge', franchise: FRANCHISE.SAMURAI, zone: 'fantasy', title: 'echo_ronin_bridge_title', desc: 'echo_ronin_bridge_desc', trigger: 'echo:ronin-bridge' },
   { id: 'echo-war-drum', franchise: FRANCHISE.SAMURAI, zone: 'fantasy', title: 'echo_war_drum_title', desc: 'echo_war_drum_desc', trigger: 'echo:war-drum' },
   { id: 'echo-tea-ware', franchise: FRANCHISE.SAMURAI, zone: 'fantasy', title: 'echo_tea_ware_title', desc: 'echo_tea_ware_desc', trigger: 'echo:tea-ware' },
+
+  // ── Wave16（深空孔径 · 黑砂石碑 / 碎锚飞行员 / 将熄的星骸）──
+  { id: 'echo-grain-obelisk', franchise: FRANCHISE.COSMIC, zone: 'void', title: 'echo_grain_obelisk_title', desc: 'echo_grain_obelisk_desc', trigger: 'echo:grain-obelisk' },
+  { id: 'echo-pilot-crash', franchise: FRANCHISE.COSMIC, zone: 'void', title: 'echo_pilot_crash_title', desc: 'echo_pilot_crash_desc', trigger: 'echo:pilot-crash' },
+  { id: 'echo-star-derelict', franchise: FRANCHISE.COSMIC, zone: 'void', title: 'echo_star_derelict_title', desc: 'echo_star_derelict_desc', trigger: 'echo:star-derelict' },
 ];

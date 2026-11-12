@@ -3252,6 +3252,14 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   echo_tea_ware_title: '残席茶器',
   echo_tea_ware_desc: '茶凉了，刀没放下。这碗里曾经倒满过谁的话？',
 
+  // W-E10（深空孔径 Wave16）：黑砂石碑 / 坠锚飞行员 / 将熄的星骸
+  echo_grain_obelisk_title: '黑砂石碑',
+  echo_grain_obelisk_desc: '太空中只有那块石碑留了下来——它比文明更早，比这块位面还要早。',
+  echo_pilot_crash_title: '坠锚飞行员',
+  echo_pilot_crash_desc: '他的引力带仍在以不安的周期降落，周期对了，却永远降不到该去的地方。',
+  echo_star_derelict_title: '将熄的星骸',
+  echo_star_derelict_desc: '只剩最后一次呼吸就要烧掉的星，忍着不亮下去，还在等有人读懂它。',
+
 
   // W-Y2 切片1：星轨顾问（AI Advisor）。芯片上那句话就是真的发出去的问题，不另存一份。
   advisor_fab: '星轨顾问',

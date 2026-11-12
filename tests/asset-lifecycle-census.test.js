@@ -98,6 +98,7 @@ describe('① 「造了资源又没有销毁路径」的那几处，每一处都
 ['src/world/PopCultureZoneEnhancerWave13.js', '同上——中洲回响三枚（W-E7 切片1）：真世界常驻装饰位'],
 ['src/world/PopCultureZoneEnhancerWave15.js', '同上——赛博深渊三枚（W-E8 切片1）：真世界常驻装饰位，FantasyZone 三件互不遮挡'],
 ['src/world/PopCultureZoneEnhancerWave16.js', '同上——武士残响三枚（W-E9 切片1）：真世界常驻装饰位，FantasyZone 三件互不遮挡'],
+['src/world/PopCultureZoneEnhancerWave17.js', '同上——深空孔径三枚（W-E10 切片1）：真世界常驻装饰位，VoidZone 三件互不遮挡'],
     ['src/world/ProceduralDungeonGenerator.js', '静态类 —— 它只往**共享库**里取资源（副本可进出，库是进程生命周期）'],
     ['src/world/regionSurfaces.js', '材质工厂（纯构造）—— 造出来的材质归**调用方**所有'],
   ]);
