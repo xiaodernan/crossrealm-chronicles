@@ -1,0 +1,18 @@
+# ai-service 的集中下发配置（native 配置仓库里那一份）。
+#
+# 这里**刻意不写 api-key**：配置仓库会被多人读、被镜像打包、被 refresh 端点整体下发，
+# 不是放密钥的地方。密钥只由进程环境变量 LLM_API_KEY 注入（见 ai-service/application.yml）。
+# 其余旋钮都可以在这里热更，且客户端与 game-service 都不需要跟着改。
+ai-service:
+  model: gpt-6-sol
+  timeout: 20s
+  # 只重试「超时 / 429 / 5xx」；401/400 是请求本身错，重试只会把钱再花一遍
+  max-retries: 2
+  retry-base-ms: 200
+  # 同一个问题 120 秒内复用答案：既省钱，也避免玩家连点两下拿到两种说法
+  cache-ttl-seconds: 120
+  cache-max-entries: 256
+  max-question-chars: 400
+  max-tokens: 320
+  breaker-threshold: 4
+  breaker-cooldown-ms: 15000

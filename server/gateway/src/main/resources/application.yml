@@ -34,6 +34,22 @@ spring:
                     backoff:
                       firstBackoff: 50ms
                       maxBackoff: 200ms
+            # AI 顾问服务（W-Y1）：唯一持有大模型密钥的进程。
+            # 刻意**不给网关层 Retry**：POST 不是幂等的，网关重试会把一次提问放大成两次计费；
+            # 重试只发生在 ai-service 内部 —— 那里知道哪些失败值得重试，且带指数退避 + 抖动。
+            # fallback 指向支持 POST 的端点（见 FallbackController），否则熔断时 forward 一个
+            # 只接 GET 的端点会拿到 405，而不是语义清楚的 503。
+            - id: ai-service
+              uri: lb://ai-service
+              order: -1
+              predicates:
+                - Path=/api/ai,/api/ai/**
+              filters:
+                - AddRequestHeader=X-Gateway-Source, crossrealm-chronicles-gateway
+                - name: CircuitBreaker
+                  args:
+                    name: aiServiceBreaker
+                    fallbackUri: forward:/fallback/advisor
             # 赛季服务（W-X14）：赛季主题 / 词缀。order=-1 让它先于 Path=/api/** 的主路由命中。
             # 不给 Retry：赛季是 GET，但重试在这里没有收益（周期读数不会因为重试变对），
             # 而 Retry 会掩盖"服务根本没起来"这件事 —— 熔断兜底已经够用。

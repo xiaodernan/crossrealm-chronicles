@@ -1,0 +1,42 @@
+server:
+  port: 8083
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
+  application:
+    name: ai-service
+  config:
+    # 与 game/season 同一口径：配置中心不在就静默用本地默认值
+    import: "optional:configserver:http://localhost:8888"
+
+# 星轨顾问的本地默认（config-server 的 ai-service.yml 是同一套旋钮的上线版本）。
+# 唯一不进配置中心的东西是 api-key：密钥只从进程环境变量进，
+# 绝不落到配置仓库、镜像层、日志或任何响应体里。
+ai-service:
+  base-url: "${LLM_BASE_URL:https://wkapi.pro/v1}"
+  model: "${LLM_MODEL:gpt-6-sol}"
+  api-key: "${LLM_API_KEY:}"
+  timeout: 20s
+  max-retries: 2
+  retry-base-ms: 200
+  cache-ttl-seconds: 120
+  cache-max-entries: 256
+  max-question-chars: 400
+  max-tokens: 320
+  breaker-threshold: 4
+  breaker-cooldown-ms: 15000
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh

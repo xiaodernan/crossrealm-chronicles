@@ -88,6 +88,30 @@ services:
       retries: 30
       start_period: 25s
 
+  # AI 顾问（W-Y1）：唯一持有大模型密钥的进程。密钥从宿主机环境注入，
+  # 镜像层、compose 文件、配置中心里都不写它（见 server/.env.example）。
+  ai-service:
+    build:
+      context: .
+      dockerfile: ai-service/Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: ai-service
+      EUREKA_INSTANCE_PREFERIPADDRESS: "false"
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config:8888
+      LLM_API_KEY: ${LLM_API_KEY:-}
+    depends_on:
+      config:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8083/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 25s
+
   gateway:
     build:
       context: .

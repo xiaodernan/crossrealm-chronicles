@@ -1,0 +1,18 @@
+# 测试专用：这一片的单测全是纯 Java / standalone MockMvc，不起 Spring 上下文，
+# 因此不会真的读 config-server、不会注册 Eureka、更不会连大模型。
+# 这里把开关写死，是给「将来有人加 @SpringBootTest」留一条不会外呼的底线。
+spring:
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+eureka:
+  client:
+    enabled: false
+ai-service:
+  api-key: ""
+  timeout: 2s
+  max-retries: 0
+  cache-ttl-seconds: 1
+  breaker-cooldown-ms: 50

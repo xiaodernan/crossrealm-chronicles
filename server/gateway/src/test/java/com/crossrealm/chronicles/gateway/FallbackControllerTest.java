@@ -28,4 +28,26 @@ class FallbackControllerTest {
         assertTrue(body.get("message") instanceof String && !body.toString().isEmpty(),
                 "兜底响应应带人类可读的说明");
     }
+
+    @Test
+    void advisorFallbackAcceptsPostAndReturnsStructured503() throws Exception {
+        // W-Y1：/api/ai/chat 是 POST，forward 到只接 GET 的 /fallback/503 会变成 405。
+        // 这一条把「POST 也在映射里」钉住，否则熔断时玩家拿到的是 405 而不是「顾问离线」。
+        var method = FallbackController.class.getDeclaredMethod("advisorUnavailable");
+        var mapping = method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+        assertTrue(mapping != null, "顾问兜底必须是 method 无关的 @RequestMapping");
+        assertTrue(java.util.Arrays.asList(mapping.method())
+                        .contains(org.springframework.web.bind.annotation.RequestMethod.POST),
+                "POST 必须在兜底映射里");
+        assertTrue(java.util.Arrays.asList(mapping.method())
+                        .contains(org.springframework.web.bind.annotation.RequestMethod.GET));
+
+        ResponseEntity<Map<String, Object>> response = new FallbackController().advisorUnavailable();
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+        Map<String, Object> body = response.getBody();
+        assertTrue(body != null);
+        assertEquals("advisor-unavailable", body.get("error"));
+        assertEquals("ai-service", body.get("service"));
+        assertEquals("gateway-circuit-open", body.get("reason"));
+    }
 }

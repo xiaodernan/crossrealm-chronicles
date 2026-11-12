@@ -10,6 +10,7 @@
 | API 网关 | Spring Cloud Gateway 4.3（reactive），按服务名 `lb://` 负载均衡转发 | 8080 |
 | 在线伙伴业务 API | `game-service`：排行榜 / 遥测事件 / 版本号（纯内存实现、零数据库） | 8081 |
 | 赛季服务（W-X14） | `season-service`：赛季主题 / 词缀 / 周期倒计时（按 epochDay 算，不存状态） | 8082 |
+| AI 顾问（W-Y1） | `ai-service`：星轨顾问（服务端独占密钥 / 选择性重试 / 熔断 / TTL 缓存） | 8083 |
 
 > 与游戏本体**完全解耦**：`npm run build` 不感知它；不接它时游戏功能不受任何影响。
 
@@ -22,12 +23,14 @@ server/
   config-server/         # Spring Cloud Config Server（classpath:/config 仓库，+ Dockerfile）
   game-service/          # REST API（排行榜 / 遥测 / 版本 / 运维视图），OpenFeign 调 season-service
   season-service/        # 赛季主题与词缀（周期轮转 + 配置中心 override），独立单测（+ Dockerfile）
-  gateway/               # Spring Cloud Gateway（/api/** → lb://game-service，/api/seasons/** → lb://season-service）
+  ai-service/            # 星轨顾问：唯一持有 LLM_API_KEY 的进程（+ Dockerfile / system-prompt.txt）
+  gateway/               # Spring Cloud Gateway（/api/** → game-service，/api/seasons/** → season-service，/api/ai/** → ai-service）
+  env.example            # 环境变量样例（**不含真值**）：复制成 server/.env 后填 LLM_API_KEY
   scripts/smoke.ps1      # 冒烟脚本：四个实例真起真打，跑完自动关闭
    scripts/verify-breaker.ps1 # W-X5 网关熔断验证（手动诊断）：200 → 503 → 自愈 200
   scripts/verify-redis-rate-limit.ps1 # W-P10 Redis 限流背板实证（throwaway redis + 70 条 burst；第 61 条 429；停 redis 看 fail-open；CI 每次 server 变更真跑）
   scripts/verify-redis-season-cache.ps1 # W-S2 Redis 赛季缓存实证（cache.type=redis：两次返回相同、键存在、TTL~300s、停 redis 报错、起 redis 恢复；CI 真跑）
-  docker-compose.yml     # 五容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
+  docker-compose.yml     # 六容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
 ```
 
 ## 快速开始
@@ -39,6 +42,7 @@ java -jar discovery-server/target/discovery-server-0.1.0-SNAPSHOT.jar   # :8761
 java -jar config-server/target/config-server-0.1.0-SNAPSHOT.jar          # :8888
 java -jar game-service/target/game-service-0.1.0-SNAPSHOT.jar            # :8081
 java -jar season-service/target/season-service-0.1.0-SNAPSHOT.jar        # :8082
+java -jar ai-service/target/ai-service-0.1.0-SNAPSHOT.jar                # :8083（LLM_API_KEY 不设则返回 503，游戏不受影响）
 java -jar gateway/target/gateway-0.1.0-SNAPSHOT.jar                      # :8080
 ```
 
