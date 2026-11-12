@@ -15,16 +15,10 @@
 #   * After stopping redis, a further request must NOT be 429 — the Lua path errors and
 #     RedisIpRateLimiter fail-opens into allow. Upstream is still down, so expect 503
 #     ("upstream-unavailable"), which is proof the limiter did NOT block.
-#
-# What it does:
-#   1. Starts a throwaway redis:7-alpine container on port 26379
-#   2. Boots the gateway with gateway.ratelimit.backend=redis + spring.data.redis.port=26379
-#   3. Polls /actuator/health until UP (or FAIL)
-#   4. Fires 70 sequential GET /api/version and checks that 429 appears after the 60th
-#   5. Stops redis, re-fires, and expects 503 (fail-open when backend is unreachable, NOT 429)
-#   6. Stops the gateway and cleans up the container
+#   * Exit codes are explicit: 0 = PASS, 1 = FAIL. Any uncaught error → exit 1.
 
-$ErrorActionPreference = 'Continue'
+$ErrorActionPreference = 'Stop'
+$ErrorView = 'NormalView'
 $redisContainer = "crossrealm-redis-rl-test"
 $redisPort = 26379
 $gatewayPid = $null
@@ -34,39 +28,35 @@ function Cleanup {
     try { docker rm -f $redisContainer *>$null } catch {}
     Write-Output "cleanup done"
 }
+
 try {
 
 # 1. redis
 docker rm -f $redisContainer *>$null
 docker run -d --name $redisContainer -p "${redisPort}:6379" redis:7-alpine | Out-Null
-if (-not $?) { Write-Error "redis container start failed"; return }
 Start-Sleep -Seconds 2
+$ping = docker exec $redisContainer redis-cli ping
+if ($ping -notmatch 'PONG') { Write-Error "redis container did not answer PING (got: $ping)"; exit 1 }
+Write-Output "redis up"
 
 # 2. gateway jar
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $gatewayJar = Join-Path $repoRoot 'gateway/target/gateway-0.1.0-SNAPSHOT.jar'
-if (-not (Test-Path $gatewayJar)) { Write-Error "gateway jar missing; run 'mvn -B -pl gateway package -DskipTests' first"; return }
-$env:SPRING_DATA_REDIS_HOST = 'localhost'
-$env:SPRING_DATA_REDIS_PORT = "$redisPort"
-$env:GATEWAY_RATELIMIT_BACKEND = 'redis'
+if (-not (Test-Path $gatewayJar)) { Write-Error "gateway jar missing; run 'mvn -B -pl gateway package -DskipTests' first"; exit 1 }
 $env:EUREKA_CLIENT_REGISTERWITHEUREKA = 'false'
 $env:EUREKA_CLIENT_FETCHREGISTRY = 'false'
 
-$gatewayArgs = @(
+$gatewayArgsAll = @('-jar', $gatewayJar,
     '--server.port=28080',
     '--spring.data.redis.host=localhost',
     "--spring.data.redis.port=$redisPort",
     '--gateway.ratelimit.backend=redis',
-    '--spring.cloud.gateway.enabled=true',
     '--eureka.client.register-with-eureka=false',
-    '--eureka.client.fetch-registry=false'
-)
-$gatewayArgsAll = @('-jar', $gatewayJar) + $gatewayArgs
-$gatewayPid = (Start-Process -FilePath 'java' `
-    -ArgumentList $gatewayArgsAll `
-    -PassThru -WindowStyle Hidden `
-    -RedirectStandardOutput (Join-Path ([System.IO.Path]::GetTempPath()) 'gateway-rl.out.log') `
-    -RedirectStandardError (Join-Path ([System.IO.Path]::GetTempPath()) 'gateway-rl.err.log')).Id
+    '--eureka.client.fetch-registry=false')
+$logOut = Join-Path ([System.IO.Path]::GetTempPath()) 'gateway-rl.out.log'
+$logErr = Join-Path ([System.IO.Path]::GetTempPath()) 'gateway-rl.err.log'
+$gatewayPid = (Start-Process -FilePath 'java' -ArgumentList $gatewayArgsAll -PassThru `
+    -RedirectStandardOutput $logOut -RedirectStandardError $logErr).Id
 Write-Output "gateway pid $gatewayPid"
 
 # 3. wait for health
@@ -76,16 +66,16 @@ while ($sw.Elapsed.TotalSeconds -lt 90) {
     try {
         $r = Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:28080/actuator/health' -TimeoutSec 5
         if ($r.StatusCode -eq 200) { $healthy = $true; break }
-    } catch {}
+    } catch { }
     Start-Sleep -Milliseconds 800
 }
-if (-not $healthy) { Write-Error "gateway health never came up"; return }
+if (-not $healthy) { Write-Error "gateway health never came up (see $logOut / $logErr)"; exit 1 }
 Write-Output "gateway healthy"
 
 # 4. burst until 429; count statuses
 Write-Output "=== 4) fire 70 sequential requests to /api/version; expect 429 after the 60-request window fills ==="
 $blocked = $false
-$countOk = 0   # 200 or 503 = allowed through the limiter (reached upstream)
+$countOk = 0
 $count429 = 0
 for ($i = 1; $i -le 70; $i++) {
     try {
@@ -95,17 +85,13 @@ for ($i = 1; $i -le 70; $i++) {
         $resp = $_.Exception.Response
         if ($resp) {
             $code = [int]$resp.StatusCode
-            if ($code -eq 429) {
-                $count429++
-                $blocked = $true
-                break
-            }
+            if ($code -eq 429) { $count429++; $blocked = $true; break }
             if ($code -eq 503) { $countOk++; continue }
         }
-        Write-Error "request $i threw unexpectedly: $_"; return
+        Write-Error "request $i threw unexpectedly: $_"; exit 1
     }
 }
-if (-not $blocked) { Write-Error "never hit the 429 (allowed=$countOk)"; return }
+if (-not $blocked) { Write-Error "never hit the 429 (allowed=$countOk)"; exit 1 }
 Write-Output "burst: $countOk allowed + $count429 rate-limited (>= the expected 61st+)"
 
 # 5. kill redis; backend should fail-open (warn once, allow)
@@ -118,14 +104,17 @@ try {
 } catch {
     $resp = $_.Exception.Response
     if ($resp -and [int]$resp.StatusCode -eq 429) {
-        Write-Error "fail-open FAILED: request was rate-limited (429) with redis down"; return
+        Write-Error "fail-open FAILED: request was rate-limited (429) with redis down"; exit 1
     }
     Write-Output "fail-open probe threw as expected (upstream down, limiter allowed): $_"
 }
 
 Write-Output "verify-redis-rate-limit PASSED"
+exit 0
 
-}
-finally {
+} catch {
+    Write-Output "FATAL: $_"
+    exit 1
+} finally {
     Cleanup
 }
