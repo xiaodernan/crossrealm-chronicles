@@ -1,5 +1,5 @@
 /**
- * 开发期静态服务器：把 `npm run build` 的 dist/ 挂到 127.0.0.1:3000。
+ * 开发期静态服务器：把 `npm run build` 的 dist/ 挂到 127.0.0.1:5321。
  * 只服务于无头浏览器 e2e（见 scripts/e2e-advisor.mjs），不是生产部署路径。
  * 路径从脚本自身位置解析，换机器/换盘符不用改这里。
  */
@@ -22,6 +22,6 @@ const server = http.createServer((req, res) => {
     res.writeHead(404); res.end('nf');
   }
 });
-server.listen(28199, '127.0.0.1', () => {
-  console.log('STATIC_PORT=28199');
+server.listen(5321, '127.0.0.1', () => {
+  console.log('STATIC_PORT=5321');
 });

@@ -5,7 +5,7 @@
  *
  * 前置（三条都只在**显式带密钥**的开发机上做，CI 永不跑这里）：
  *   1. npm run build
- *   2. npm run serve:dist                              # 127.0.0.1:3000
+ *   2. npm run serve:dist                              # 127.0.0.1:5321
  *   3. set -a; . ./.env; set +a                       # 导出 LLM_API_KEY
  *      powershell -ExecutionPolicy Bypass -File server/scripts/e2e-advisor-boot.ps1
  *   4. npm run e2e:advisor
@@ -18,7 +18,7 @@ import { existsSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-const STATIC_URL = 'http://127.0.0.1:3000/';
+const STATIC_URL = 'http://127.0.0.1:5321/';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const findChrome = () => [process.env.CHROME,
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',

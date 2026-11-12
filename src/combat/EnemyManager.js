@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Enemy } from './Enemy.js';
 import { SquadController } from '../ai/Squad.js';
 import { bodyOf } from '../ai/Separation.js';
+import { SpatialGrid } from '../ai/SpatialGrid.js';
 import { AI, SUMMON } from '../content/tuning.js';
 import { enemyRosterOf, KILL_SOULS } from '../content/enemies.js';
 import { getSpawnScale, isNeutralSpawnScale } from '../game/SpawnTuning.js';
@@ -81,6 +82,8 @@ export class EnemyManager {
       target: null,
       playerRef: null,
       neighbors: this.enemies,
+      /** W-Z2：按 self 取邻域候选的函数；为 null 时 Enemy._advance 退回 neighbors 全量数组 */
+      neighborsFor: null,
       collision: null,
       // 远程招式交出的弹体走同一个管理器（敌方弹体由这里更新）
       projectiles: this.projectiles ?? null,
@@ -505,6 +508,12 @@ export class EnemyManager {
     this._playerBody.position = playerPos;
     neighbors.push(this._playerBody);
     ctx.neighbors = neighbors;
+    // W-Z2：每帧按**当下位置**重建网格（敌人会动，缓存格子只会让邻居说谎），
+    // 玩家身体同样在册。本帧中途新生的仆从从下一帧起参与分离 —— 分离是软约束，
+    // 为一帧的精确性在循环里改表，比漏一帧更贵也更脆。
+    this._grid ??= new SpatialGrid();
+    this._grid.rebuild(neighbors);
+    ctx.neighborsFor = this._neighborsFor ??= (self, pad) => this._grid.query(self, pad);
     this._refreshSummonQuota();
 
     for (const enemy of this.enemies) {

@@ -621,7 +621,14 @@ export class Enemy {
 
   /** 意图 → 分离 → 限速 → 碰撞积分，一帧只在这里写一次位置 */
   _advance(dt, ctx) {
-    const push = separationPush(this, ctx.neighbors, this.ai);
+    // W-Z2：有空间网格时只取邻域候选（O(邻域)），没有时退回旧的全量数组 ——
+    // 老存档、测试桩、以及任何手工构造的 ctx 仍然按原语义跑。
+    // pad 必须传**自己这一只**的 ai：`repel` 里的 want 用的正是这份调参，
+    // 拿别人的 pad 去算查询半径就可能把恰好生效的一只怪漏在桶外。
+    const neighbors = typeof ctx.neighborsFor === 'function'
+      ? ctx.neighborsFor(this, this.ai?.separationPad ?? 0)
+      : (ctx.neighbors ?? []);
+    const push = separationPush(this, neighbors, this.ai);
     // 预警与命中段扎住脚跟：不受同伴推挤。起手时"这一招能够到哪"是当着玩家说出口的，
     // 中途被挤开 0.7 米就会必然打空（玩家站着不动反而躲掉了），预警圈就成了假话。
     // 后撤段（recover）不冻结，让打完的人顺势退出去、把坑让给排队的同伴。
