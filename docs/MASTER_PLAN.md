@@ -473,10 +473,10 @@
 | 编号 | 工作包 | 状态 | 备注 |
 |------|--------|------|------|
 | W-Z1 | **Redis Streams 跨实例可靠投递** | ⬜ | W-Y4 是进程内队列（重启丢在途）；消费者组 + XACK + pending 重投，与 W-M5 Pub/Sub 的 broadcast 互补 |
-| W-Z2 | **帧内算法与硬件适配** | ⬜ | 空间哈希网格 / 对象池 / 脏标记 / 帧预算；以 `npm run perf` 与 `perf:census` 读数为准 |
+| W-Z2 | **帧内算法与硬件适配** | ✅ 切片1 | `SpatialGrid` 均匀网格把分离推力的邻居查询从 O(n²) 全遍历改成 O(邻域桶)；**逐只对拍** 3 组随机 × 200 只 + 密集重叠 + 自定义 pad，推力逐值相等；1000 只均匀分布时候选数 < 全量 10%；`npm run perf` 全部预算内（枢纽 updateAvg 1.52ms / 灰白森林 1.59ms / p95 2.5ms / exceptions=0）。切片2：对象池 / 脏标记 / 帧预算、draw-call 地板 8 格重钉 |
 | W-Z3 | **设计令牌与动效分级** | ⬜ | CSS 自定义属性收敛色板/层级/时长；动效分三档且全包 `prefers-reduced-motion`；色盲档与字号档不许被覆盖 |
 | W-Z4 | **数据库读写路径** | ⬜ | 先量现有内存仓储复杂度，二级索引 + 批量写；读写分离口径写清，不为了上数据库而上 |
-| W-Z5 | **真实大模型语料质检** | ⬜ | 用真实 API 跑回声/POI 文案一致性检查，把发现的真问题改回内容层；开发期工具、非玩家路径 |
+| W-Z5 | **真实大模型语料质检** | ✅ 切片1 | 2026-11-12 | `0f114f3` + `4dcff91` | 星轨语料质检 `scripts/echo-qa.mjs`：77 条回声经真实 gpt-6-sol 判「母题×标题×描述」一致性 / 史实性 / 语气（batch=10，8 次上游调用，报告不入库）：ok 51 / warn 15 / **bad 11**。真问题修回 zh 双表 + 四份打钉测试（4dcff91）：`五维_tesseract`×10 → 既有译名「五维裂隙」/「五维超立方体」；chalk→粉笔、rusted shut→已锈死、frontier→边境、noir→黑色电影、rhythm→节奏、awaits→在此等你。致敬语境（1983 电台 / CRT / Walkman / Stay / One Realm）经复核保留 |
 | W-Z6 | **关联 ID 贯通 ai-service** | ⬜ | 网关 `X-Request-Id`（W-P8）一路带到 `/api/ai/jobs/**`，让一次慢调用在两端日志对得上 |
 | W-Z7 | **面板后台继续问** | ⬜ | 把 W-Y4 的提交→轮询接成 UI 路径：关掉面板后答案仍会落地，回来时可见；真取消要能撤销排队任务 |
 
@@ -6496,3 +6496,27 @@ Phase D（系统与质量）
   - **验证**：前端 lint 0 / `test:verify` **433 文件 6490 例全绿** / build 无 chunk 回退 / 首屏 **2.11 MiB**（环比 2.13、上限 2.25 双线过）；服务端 `mvn -o -q test` 全模块 ALL_RC=0，ai-service **49 例绿**（新增 `AdvisorJobQueueTest` 10 + `AdvisorJobControllerTest` 7 + 1 真联调 skip）；**真实 API 联调**：`AiLiveIntegrationTest`（18.3s 中文回答、缓存命中零二次外呼）与新增 `AdvisorJobLiveIntegrationTest`（真实上游 2 次外呼 / 3 任务 DONE / 幂等命中 1 次 / 缓存命中不涨外呼 / 死信 0）双双通过；`smoke.ps1` 新增 4k 段（提交 / 幂等 / 轮询 / 不回显问题 / 不泄密钥）。
 
   - **风险与后续**：① 这是**进程内**队列：重启丢在途任务、多实例不共享 jobId；跨实例可靠要换 Redis Streams（消费者组 + XACK + pending 重投），**不是**给 HashMap 加分布式锁 —— 记入 W-Z1。② 面板当前仍走同步端点，异步端点是给"要立刻拿回控制权"的客户端准备的；把提交→轮询接成 UI 路径记入 W-Z7。③ `retry` 在 worker 线程内 sleep，2 个 worker 时一次退避会占住一条车道；真要高并发应把重试改成延迟重投（DelayQueue），今天的上游并发上限本就小，不做过度设计。④ Windows PowerShell 5.1 宿主注入了 `Path/PATH/path` 三个同名键，`Start-Process` 会抛"已添加项"——冒烟脚本本身没错，本地跑之前先清理环境键；CI 的 ubuntu runner 不触发。
+
+- **2026-11-12 W-Z2 切片1 —— 空间哈希网格：把分离推力从 O(n²) 拉回 O(邻域)**
+
+  - **动机**：`EnemyManager.update()` 每帧把全部活敌人塞进 `ctx.neighbors`，`Enemy._advance()` 里每只怪都遍历一次这个数组。分离是**局部**作用（`repel` 在 `dist >= r_self + r_other + pad` 时严格返回 null），n 只怪却付 n² 次距离计算。敌人数量随内容扩充一直在涨，这是帧内最纯粹的一笔算法债。
+
+  - **为什么不是四叉树**：敌人是**均匀撒开且每帧都在动**的。四叉树每帧重建/重平衡的常数比几个 Map 桶更贵，而这里没有「大片空地 + 一个密团」那种值得自适应剖分的形状。均匀网格 O(n) 建表 + O(邻域桶) 查询，且不需要平衡、不需要递归、不需要每帧分配树节点。
+
+  - **做法**：① `src/ai/SpatialGrid.js`（纯数据结构，零 THREE / 零 DOM / 零计时器）：`rebuild()` 每帧按**当下位置**重建（缓存格子索引会让邻居说谎）；`query(self, pad)` 扫以 self 为中心、半径 `self.r + maxOtherRadius + pad` 的**外接方格**，AABB 包含圆 ⇒ 不漏，多出来的角落由 `repel` 判掉。② **不漏是唯一正确性口径**：网格只产候选，最终判定仍在 `repel`；`maxRadius` 取插入时的 max（偏大只多扫桶，不漏）。③ `pad` 传**self 自己**的 `ai.separationPad` —— `repel` 里的 want 用的正是这份调参，拿别人的 pad 算半径会漏掉恰好生效的一只。④ 防重复插入（同一身体进两次桶 ⇒ query 返回两次 ⇒ 推力翻倍）。⑤ `Enemy._advance` 有 `ctx.neighborsFor` 才走网格，否则退回 `ctx.neighbors` 全量数组 —— 老 ctx、测试桩、手工构造的上下文语义不变；`ctx` 初值显式声明 `neighborsFor: null`。⑥ 玩家身体和本帧活敌人一起进网格；本帧中途新生的仆从从下一帧起参与分离（分离是软约束，不值得为这一帧在循环里改表）。
+
+  - **验证**：`tests/spatial-grid.test.js` **14 例** —— 结构腿（有限坐标 / 重复插入 / 负坐标与格子边界 / 大半径上界 / out 数组复用）、**等价性腿**（3 个确定性 seed × 200 只、40 只挤在原点、`pad=5` 的自定义调参，逐只比较全遍历与网格候选的 `separationPush`，含 null 与浮点容差 1e-8）、**剪枝结构读数**（1000 只均匀分布时 `candidates < 100_000`，即全遍历的 1,000,000 次 repel 降到 10% 以下；平均每查 < 16 桶）、**接线 source 断言**。lint 0 / `test:verify` **434 文件 6504 例全绿** / build 无 chunk 回退 / 首屏 2.11 MiB（环比 2.13 余量 0.01 MiB、上限 2.25 双线过）。**真机读数**：`npm run perf` 全部预算内 —— 枢纽 `updateAvg=1.52ms / p95=2.5ms / frameAvg=22.9ms`、灰白森林 `1.59ms / 2.5ms / 22.6ms`、堆 108MB、`exceptions=0`（本机软渲染下一轮约 10 分钟）。诚实说明：这组是**改后**读数，历史 `_perf.log`（同日 03:57）是 2.43 / 2.33ms，机器状态不同，不能把差额全部归因给网格；能说的是「没有退化，且结构读数把复杂度降了一档」。**通关 e2e**：`npm run e2e` frames=13560 / 模拟 226s / questIndex=118 / chapter=5 / completed=true / **exceptions=0**，与改前逐项同读数 —— 分离是逐帧写位置的路径，这一条比任何单测都更能说明玩法没被优化改坏。
+
+  - **风险与后续**：① `cellSize=6` 是固定值：Boss 半径 8 时查询半径约 17，会多扫几格，但那只占一场里的一两只；真要按半径分档，代价是维护多张网格，今天不做。② 每帧 `rebuild` 仍是 O(n)，这是必要成本（建表 + 至少一次遍历），省的正是第二个 n。③ `query` 默认复用内部数组，**调用方必须同步消费**；已在类注释与 `Enemy._advance` 的接线里写清。④ 本轮 perf 报了 **8 格 draw-call 地板过期**（hub/fantasy/magic/radiant 的 frame/body）——不是性能回归（上限那一半全在预算内），是内容落地后地板表没重钉的既有债务，按纪律留到 W-Z2 切片2 用真门读数原样重钉。⑤ 下一片：对象池 / 脏标记 / 帧预算，以及把 `getNearestEnemy` / `getLockCandidates` 的全遍历也纳入同一套索引（它们调用频率低，优先级靠后）。
+
+- **2026-11-12 W-Z5 星轨语料质检（切片1）** —— 提交 `0f114f3` + `4dcff91`
+
+  - **起因**：次元回声这一百来条文案从未被任何人系统性地读过一遍——大部分是 W-D2 系列迁移，迁移本身把少数代码常量碎片也带进了正文（比如五维_tesseract 这种「key 拼了一半」的形状）。人肉逐条复核成本太高；而真实大模型恰好是现成的判官。
+
+  - **做法**：新工具 `scripts/echo-qa.mjs`（开发期工具、非玩家路径、CI 永远零外呼）：载入 `src/content/echoes.js` + `strings.zh.js`（判的是玩家真正看到的中文正文，不是 key），按 10 条/批交给真实 gpt-6-sol，要求只回 JSON 数组，逐条 judge 母题对应 / 时代与史实一致 / 语气（不得以「创意好不好」表态）。真实跑完一轮：`echo-qa: batch 1..8` 共 8 次上游调用，**ok 51 / warn 15 / bad 11**。报告打印到 stdout 或传参落文件，但不入库（W-X20 先例）。结论先人工复核，再由人改内容层——工具不替人改文案。
+
+  - **复核与修复**（提交 `4dcff91`）：**真问题 8 类**：① `五维_tesseract` × 10 → 既有译名「五维裂隙」（五维碑 / 五维碎 一并成词）；其中 `echo_tesseract_title` 描述的是次元空间本体而不是裂隙，改成 **五维超立方体**（与 EN `Five-Dimensional Tesseract` 对齐）——别名与 obj_rift_title / wp_label_five_dim_rift 两处重名的值对齐到最多两键的门；② `chalk` 4+1 处 → 粉笔线 / 粉笔圈；③ `rusted shut` 2 处 → 已锈死；④ `frontier` / `noir` / `rhythm` / `awaits` → 边境 / 黑色电影 / 节奏 / 在此等你；⑤ `不对不准的日晷` → `不大准的日晷`。**致敬语境留原样**（复核依据）：1983 电台 / CRT / Walkman / Stay / One Realm / 1983 字样 / 赛博霓虹——这些是母题本身，不是翻译残渣。整体口径：**画面对得上原作即正确；把时代错位判成母题错位是判官的越界，不构成改稿依据**。
+
+  - **验证**：lint 0 / `vitest` 434 文件 6504 例全绿（图钉同步改：poi-label-i18n / zone-poi-dialogue-i18n / pop-culture-dialog-i18n / tuning-barks-main-i18n）；无新键，i18nKeyCount 与键面不受影响；e2e / perf 不受影响（scripts 改动 + strings.zh **值**替换）。
+
+  - **风险与后续**：① 这一轮判官并没有识别出「反向母题错位」（floating-casino / rooftop-dojo / speakeasy / last-light 四条），判官按表面语气打了 warn/bad，复核后这些条的母题本意是**故意的错位**（赌自己·输灵魂即赛博霓虹的降临体、终章意象即归乡的完型）——LLM 判官的 judge 边界需要在下一轮交给真正懂赛博/怪奇语境的人再收一次。② 下一片：把同一判官接到 **POI 文案 + 成就文案 + NPC 主线台词**（回声之外三大文本池）。③ 报告不入库是刻意的：复查重跑 `node scripts/echo-qa.mjs` 即可，不存在「旧报告里找不到原文案」的问题。④ 与 W-Z6（关联 ID 贯通 ai-service）无争用。
