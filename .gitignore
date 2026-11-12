@@ -19,6 +19,8 @@ vite.config.js.timestamp-*.mjs
 # 收编成 scripts/ 下的正式工具后，这类草稿一律挡在索引外。
 /_*.mjs
 /_*.ps1
+/_*.log
+/_*.json
 /server/_*.ps1
 /test_*.txt
 /build*.txt
