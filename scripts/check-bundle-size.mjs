@@ -38,6 +38,10 @@ import { fileURLToPath } from 'node:url';
  *   2026-11-10 实测 2098856 字节（`chunk-core` 880446 + `vendor-three` 682986 +
  *   `chunk-world` 192782 + `chunk-ui` 148673 + `chunk-combat` 84654 + 入口 63595 +
  *   样式 45720）。**抬它必须改这一行**，改的那次提交里要写清为什么（ADR W-D5 切片4）。
+ *   2026-11-13 抬到 2228948 字节（ADR W-Z7 切片B 同提交：W-Y2 回声灯接真接口 + W-E10
+ *   深空孔径三枚（POI/石碑/坠环/星骸三片场景件 + 6 文案键） + W-Z8 切片2 设置页「星轨诊断」 +
+ *   W-Z7 切片B 后台提问路径，四片合计压掉刻度线后的真读数；build/e2e/tests 全绿，
+ *   2.25 MiB 绝对上限仍有 0.12 MiB 余量；结构性杠杆（按语言分包）仍是独立一片的活）。
  * - `FIRST_SCREEN_GROWTH_RATIO` —— 环比容差。单次改动允许比刻度长 3%（约 61 KB），
  *   超了当场红。61 KB 是"一次切片合理增重"的上限：本仓近 200 个切片的实测中位数在
  *   10 KB 以内，最大的一片（`chunk-world` 首次落地）也只有 60 KB 出头。
@@ -48,7 +52,7 @@ import { fileURLToPath } from 'node:url';
  *   `skillTrees` 四个内容模块在 import 期静态读英文表挡住了，那是独立一片的活。
  *   上限往上抬了 0.25 MiB，**环比容差反而把警戒线从 0.63 MiB 收紧到 61 KB**。
  */
-export const FIRST_SCREEN_READING = 2163508;
+export const FIRST_SCREEN_READING = 2228948; // 2026-11-13 真读数（见上方注释与 ADR W-Z7 切片B）
 
 /** 环比容差：单次改动允许比上次审阅长 3%（见上方注释） */
 export const FIRST_SCREEN_GROWTH_RATIO = 1.03;

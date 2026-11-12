@@ -50,6 +50,9 @@ const DOM_EVENT_NAMES = new Set([
   // B167：BroadcastChannel 不可用时的第二档传输 —— `storage` 也是浏览器**原生**事件
   // （别的标签页写了 localStorage 就派发到本页），与上面那批同类，不进游戏事件登记表。
   'storage',
+  // W-Z7 切片B：AbortSignal 自带原生 abort 事件（OnlineServices 轮询用它当一次性计时器/取消信号），
+  // 浏览器派发、不是游戏事件，不进登记表
+  'abort',
 ]);
 
 function walk(dir) {

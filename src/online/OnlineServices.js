@@ -36,6 +36,20 @@ function requestSignal(timeoutMs, external) {
   return timeout;
 }
 
+/**
+ * 「睡一下」—— 到点或被取消都醒（W-Z7 轮询循环用）。
+ * 用一次性 AbortSignal 当计时器：`AbortSignal.timeout` 本身就是按时触发的 abort 源，
+ * 不引入任何裸计时器（B39 门禁 / 全源件零自建计时器的口径）。
+ * 外部 signal 先醒时内层 timeout 到点后自我触发一次，resolve 幂等，无悬空监听。 */
+function sleepWithSignal(ms, external) {
+  const msSignal = AbortSignal.timeout(ms);
+  return new Promise((resolve) => {
+    const done = () => resolve();
+    msSignal.addEventListener('abort', done, { once: true });
+    if (external) external.addEventListener('abort', done, { once: true });
+  });
+}
+
 export class OnlineServices {
   constructor({ baseUrl, fetchImpl, enabled } = {}) {
     this._baseUrl = (baseUrl ?? OnlineServices.resolveBaseUrl()).replace(/\/+$/, '');
@@ -216,6 +230,114 @@ export class OnlineServices {
       timeoutMs: ADVISOR_LIMITS.requestTimeoutMs,
       signal,
     });
+  }
+
+  /**
+   * 提交异步顾问问题并轮询至终态（W-Z7 切片B，`POST /api/ai/chat/async` + 轮询 `/api/ai/jobs/{jobId}`）。
+   *
+   * 与 `askAdvisor` 的差异：**不阻塞在一次长请求上**——先拿 jobId（202），`pollAfterMs` 一拍一拍问，
+   * 终态 DONE 才带答案回来。面板「停止」按钮触发 `signal` 时：停止轮询 + 发一个不管的
+   * 撤回 POST（`cancelAdvisorJob`），真撤回排队中的任务；已经上游在跑的撤不回（服务端诚实回 already-running）。
+   *
+   * 幂等：每次提问客户端生成一个 `requestId` 随 body 走——重复/重连的同一次提问被服务端按幂等键指回同一任务。
+   * 轮询预算 `ADVISOR_LIMITS.backgroundBudgetMs`：超过即返 TIMEOUT，不让玩家对着一个转了三分钟的点等死。
+   * 轮询瞬时失败（断网/超时）容忍 3 次，连续第 3 次直接返 NETWORK——绝不在死网上空转到预算耗尽。
+   *
+   * 返回值与 `askAdvisor` 同一形状（`{ ok, reason, status, data }`）：
+   * DONE → `{ ok:true, reason:'ok', status:200, data:{answer, model, cached, latencyMs} }`；
+   * DEAD → 映射成 `{ ok:false, reason:'http', status:503, data:{error:'advisor-unavailable', detail} }`，
+   *         面板复用「503 + advisor-unavailable」那一格（与熔断姿态一致，不新造文案键）；
+   * CANCELLED → `{ ok:false, reason:'cancelled', status:0, data:null }`。
+   */
+  async askAdvisorBackground(question, context = {}, { signal } = {}) {
+    const q = normalizeAdvisorQuestion(question);
+    if (!q) return { ok: false, reason: ADVISOR_REASONS.BLANK, status: 0, data: null };
+    const requestId = globalThis.crypto?.randomUUID?.()
+      ?? `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    const submitted = await this.#jsonRequest('/api/ai/chat/async', {
+      method: 'POST',
+      body: { question: q, context: normalizeAdvisorContext(context), requestId },
+      timeoutMs: ADVISOR_LIMITS.requestTimeoutMs,
+      signal,
+    });
+    if (!submitted?.ok) return submitted;
+    const jobId = submitted?.data?.jobId;
+    if (typeof jobId !== 'string' || !jobId) {
+      return { ok: false, reason: ADVISOR_REASONS.BAD_JSON, status: submitted.status, data: submitted?.data ?? null };
+    }
+    const pollAfter = Math.max(200, Number(submitted?.data?.pollAfterMs) || 500);
+    const deadline = Date.now() + ADVISOR_LIMITS.backgroundBudgetMs;
+    let consecutiveMiss = 0;
+    while (Date.now() < deadline) {
+      if (signal?.aborted) {
+        void this.cancelAdvisorJob(jobId);
+        return { ok: false, reason: ADVISOR_REASONS.CANCELLED, status: 0, data: null };
+      }
+      // 一拍一拍问；先睡再问，避免到手 jobId 立刻连打一发
+      await sleepWithSignal(pollAfter, signal);
+      const view = await this.#jsonRequest(`/api/ai/jobs/${encodeURIComponent(jobId)}`, {
+        timeoutMs: ADVISOR_LIMITS.healthTimeoutMs * 2,
+        signal,
+      });
+      if (!view?.ok) {
+        if (view?.status === 404) {
+          return { ok: false, reason: ADVISOR_REASONS.BAD_JSON, status: 404, data: view?.data ?? null };
+        }
+        consecutiveMiss += 1;
+        if (consecutiveMiss >= 3) {
+          return { ok: false, reason: ADVISOR_REASONS.NETWORK, status: 0, data: null };
+        }
+        continue;
+      }
+      consecutiveMiss = 0;
+      const st = view?.data?.status;
+      if (st === 'DONE') {
+        return {
+          ok: true,
+          reason: ADVISOR_REASONS.OK,
+          status: 200,
+          data: {
+            answer: view.data.answer,
+            model: view.data.model,
+            cached: view.data.cached === true,
+            latencyMs: view.data.latencyMs,
+          },
+        };
+      }
+      if (st === 'DEAD') {
+        return {
+          ok: false,
+          reason: ADVISOR_REASONS.HTTP,
+          status: 503,
+          data: { error: 'advisor-unavailable', detail: view.data.reason ?? 'unknown' },
+        };
+      }
+      if (st === 'CANCELLED') {
+        return { ok: false, reason: ADVISOR_REASONS.CANCELLED, status: 0, data: null };
+      }
+      // QUEUED / RUNNING：下一拍
+    }
+    return { ok: false, reason: ADVISOR_REASONS.TIMEOUT, status: 0, data: null };
+  }
+
+  /**
+   * 撤回排队中的顾问任务（W-Z7 切片B，`POST /api/ai/jobs/{jobId}/cancel`）。
+   * 「停止」按钮触发（停止轮询的同时顺手发），结果不在这条路径上消费——失败静默返回 null，
+   * 任务的死活与玩家无关（正在上游跑的撤不回，服务端会诚实回 cancelled:false + already-running）。
+   */
+  async cancelAdvisorJob(jobId) {
+    if (!this._enabled) return null;
+    if (typeof jobId !== 'string' || !jobId) return null;
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/ai/jobs/${encodeURIComponent(jobId)}/cancel`, {
+        method: 'POST',
+        signal: requestSignal(5_000, null),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
   }
 
   /** 顾问健康快照（`GET /api/ai/health`）：configured / model / circuit / cache / upstreamCalls */

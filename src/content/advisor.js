@@ -26,6 +26,11 @@ export const ADVISOR_LIMITS = Object.freeze({
   requestTimeoutMs: 70_000,
   /** 健康探针是本地网关一次 GET，不该跟大模型同一档耐心 */
   healthTimeoutMs: 2_000,
+  /**
+   * 后台提问（W-Z7）的总预算：提交 → 轮询 → 终态。上游最坏约 60s +
+   * 排队等待，90s 盖得住；超过这条线宁可报「超时」，也不让玩家对着一个转了三分钟的点等死。
+   */
+  backgroundBudgetMs: 90_000,
   /** 一局里留多少条气泡；再多就让 DOM 无限长（每帧都在的 HUD 之外，仍要封顶） */
   historyMaxMessages: 24,
 });

@@ -7,7 +7,9 @@
  *    全文件没有一处把回答拼进 `innerHTML`。上游被提示注入、网关被换、返回里带
  *    `<script>` 都只会被当成一段字显示出来。
  * ② **取消是真的取消**。等待期间「停止」按钮 `AbortController.abort()`，
- *    `OnlineServices` 把它与超时信号合成后交给 `fetch`；不是「把按钮变灰但请求还在烧钱」。
+ *    这一路是**异步队列**：提交 → `pollAfterMs` 一拍一拍轮询（计时由 `AbortSignal` 管），
+ *    面板本身没有 `setTimeout` / 自建 rAF — 动效全在 CSS。停止时顺带发一个不管的
+ *    `POST /api/ai/jobs/{id}/cancel`，真撤回排队中的任务（LLM 已跑起来的撤不回，服务端诚实回 already-running）。
  *    全片没有 `setTimeout` / 自建 rAF —— 动效全在 CSS，计时只由 `AbortSignal.timeout` 管。
  * ③ **失败要分得清**。没开在线服务 / 网关 503 熔断 / 上游超时 / 断网 / 非 JSON /
  *    被取消，是六种不同的玩家动作；`#jsonRequest` 给 `reason`，这里按显式映射表展开，
@@ -251,7 +253,7 @@ export class AdvisorPanel {
     this._setPending(true);
     let res;
     try {
-      res = await this.game?.onlineServices?.askAdvisor?.(question, this._context(), {
+      res = await this.game?.onlineServices?.askAdvisorBackground?.(question, this._context(), {
         signal: this._controller.signal,
       });
     } catch (e) {

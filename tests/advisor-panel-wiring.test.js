@@ -116,7 +116,7 @@ function panelHarness({ health = { ok: true, data: { configured: true, circuit: 
     quests: { chapter: 2 },
     onlineServices: {
       fetchAdvisorHealth: async () => { healthCalls += 1; return health; },
-      askAdvisor: (q, ctx, opts) => {
+      askAdvisorBackground: (q, ctx, opts) => {
         asked.push({ q, ctx, signal: opts?.signal });
         if (answer) return Promise.resolve(answer(asked.length, opts));
         return new Promise((resolve) => { pendingResolve = resolve; });
