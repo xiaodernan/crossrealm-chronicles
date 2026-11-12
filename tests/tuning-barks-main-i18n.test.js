@@ -61,7 +61,7 @@ const NEW_KEYS = {
   bark_pop_void_spores: ['红色孢子粘在刀锋上 — 逆相界的风从裂口渗出。', 'Red spores cling to the blade — the wind of the inverted realm seeps from the rift.'],
   bark_pop_void_clocktower: ['远处钟塔无声地指向 11:06 — 天花板感觉更远了。', 'The distant clocktower silently points to 11:06 — the ceiling feels farther away.'],
   bark_pop_fantasy_mirror: ['沙龙镜墙裂镜一闪 — 倒影比你快半拍。', 'A cracked mirror flashes along the salon wall — the reflection is half a beat faster than you.'],
-  bark_pop_fantasy_duel: ['正午决斗圈的 chalk 线被踩乱 — 太阳不会等你。', 'The chalk line of the noon duel circle is scuffed — the sun will not wait for you.'],
+  bark_pop_fantasy_duel: ['正午决斗圈的粉笔线被踩乱 — 太阳不会等你。', 'The chalk line of the noon duel circle is scuffed — the sun will not wait for you.'],
   bark_pop_abyss_cellar: ['禁酒窖门缝漏光 — 幽冥帮派在远处谈关税。', 'Light leaks under the speakeasy cellar door — specter gangs haggle over tariffs in the distance.'],
   bark_pop_abyss_docks: ['码头货箱碰撞 — 魂火走私线仍通。', 'Crates crash on the docks — the soul-fire smuggling line is still open.'],
   bark_pop_scifi_jumpgate: ['跃迁门蓝光脉动 — 这一刀可能已是错相循环的第一秒。', 'The jump gate pulses blue — this slash may be the first second of a skewed cycle.'],

@@ -92,7 +92,7 @@ const POI_LABELS = {
   'second-stone': ['zone_poi_second_stone_label', '禁林的界碑', 'The Forest Boundary Stone'],
   'echo-pages': ['zone_poi_echo_pages_label', '余烬书页', 'Ember Page'],
   'magic-boss-gate': ['zone_poi_magic_boss_gate_label', '进入奥术竞技场', 'Enter the Arcane Arena'],
-  'space-tesseract': ['zone_poi_space_tesseract_label', '触碰五维_tesseract', 'Touch the Five-Dimensional Tesseract'],
+  'space-tesseract': ['zone_poi_space_tesseract_label', '触碰五维裂隙', 'Touch the Five-Dimensional Tesseract'],
   'space-lens': ['zone_poi_space_lens_label', '观测引力透镜', 'Observe the Gravitational Lens'],
   'ascend-calibration-ring': ['zone_poi_ascend_calibration_ring_label', '校准环', 'Alignment Ring'],
   'space-wreck': ['zone_poi_space_wreck_label', '搜索 Endurance 号残骸', 'Search the Endurance Wreck'],
