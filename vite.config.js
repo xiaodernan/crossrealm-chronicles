@@ -48,6 +48,19 @@ export default defineConfig({
     port: 5173,
     open: true,
     host: true,
+    /**
+     * W-Y2 并轨验收 / 前后端同环联调：开发服务器把 `/api` 转到本机 gateway（:28080）。
+     * 生产部署是同源单入口，线上不需要这一层；dev-server 也跟着走同源出入口，
+     * 免掉「跨端口 CORS」这一层永远不会被实现的问题（在线伙伴 / 排行榜 / 试炼榜 /
+     * 星轨顾问 F7 在 dev-server 下直接同源调用 gateway）。
+     * 没起本地 gateway 时 /api 一律 ECONNREFUSED——在线功能静默降级，和「在线伙伴服务」默认关闭的语义一致。
+     */
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:28080',
+        changeOrigin: true,
+      },
+    },
   },
   build: {
     target: 'esnext',

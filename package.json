@@ -26,8 +26,7 @@
     "size": "node scripts/check-bundle-size.mjs",
     "e2e:combat": "node scripts/e2e-combat.mjs",
     "e2e:advisor": "node scripts/e2e-advisor.mjs",
-    "serve:dist": "node scripts/serve-dist.mjs",
-    "soak": "node scripts/soak.mjs",
+      "soak": "node scripts/soak.mjs",
     "walkthrough:ui": "node scripts/ui-walkthrough.mjs",
     "preview:boot": "node scripts/preview-boot.mjs"
   },
