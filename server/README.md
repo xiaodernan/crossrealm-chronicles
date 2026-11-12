@@ -159,15 +159,16 @@ mvn -o -pl ai-service test -Dtest=AiLiveIntegrationTest,AdvisorJobLiveIntegratio
 （那会杀掉开发机上其它 Java 项目，改为端口预检 + 只回收自己起的 PID）。
 
 ```bash
-npm run build
-npm run serve:dist                         # 127.0.0.1:3000
 set -a; . ./.env; set +a                   # 仓根 .env（gitignore）
 powershell -ExecutionPolicy Bypass -File server/scripts/e2e-advisor-boot.ps1
 npm run e2e:advisor                        # 无头 Chrome → F7 面板 → 真网关 → 真模型
 ```
 
-`server/scripts/e2e-advisor-boot.ps1` 把六件套起到 28xxx 段；`scripts/e2e-advisor.mjs`
-用 CDP 打开 dist、开面板、送出问题并等一个非空回答气泡。CI 不跑这条（零外呼纪律）。
+**为什么不需要 `npm run build`**：`window.__game` 只在 dev 构建里赋值
+（`src/main.js` 的 `import.meta.env.DEV`），拿静态 dist 去等它是等一扇永不打开的门。
+`e2e-advisor.mjs` 自己起一个随机空闲口的 vite dev、跑完自己收；CDP 打开页面后用
+localStorage seed 打开在线伙伴、点 FAB、送出问题，再等一个非空回答气泡。
+`server/scripts/e2e-advisor-boot.ps1` 把六件套起到 28xxx 段。CI 不跑这条（零外呼纪律）。
 
 ## 设计说明
 

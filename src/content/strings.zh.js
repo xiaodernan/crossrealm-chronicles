@@ -3244,6 +3244,15 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   trial_toast_abandon: '你放弃了试炼。',
   trial_toast_finished_fmt: '试炼通关：${score} 分',
 
+  // W-E9（武士残响 Wave15）：浪人桥头 / 战鼓残腔 / 残席茶器
+  echo_ronin_bridge_title: '浪然桥头',
+  echo_ronin_bridge_desc: '流水不见了，桥还在。这座桥的主人做的唯一一件事，就是等。',
+  echo_war_drum_title: '战鼓残腔',
+  echo_war_drum_desc: '旗倒了，鼓还在敲。仓促到来的鼓点里，没人记得节奏。',
+  echo_tea_ware_title: '残席茶器',
+  echo_tea_ware_desc: '茶凉了，刀没放下。这碗里曾经倒满过谁的话？',
+
+
   // W-Y2 切片1：星轨顾问（AI Advisor）。芯片上那句话就是真的发出去的问题，不另存一份。
   advisor_fab: '星轨顾问',
   advisor_fab_aria: '打开星轨顾问',

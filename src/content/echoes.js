@@ -142,4 +142,9 @@ export const ECHOES = [
   { id: 'echo-floating-casino', franchise: FRANCHISE.CYBER, zone: 'magic', title: 'echo_floating_casino_title', desc: 'echo_floating_casino_desc', trigger: 'echo:floating-casino' },
   { id: 'echo-black-market-pod', franchise: FRANCHISE.CYBER, zone: 'magic', title: 'echo_black_market_pod_title', desc: 'echo_black_market_pod_desc', trigger: 'echo:black-market-pod' },
   { id: 'echo-rooftop-dojo', franchise: FRANCHISE.CYBER, zone: 'magic', title: 'echo_rooftop_dojo_title', desc: 'echo_rooftop_dojo_desc', trigger: 'echo:rooftop-dojo' },
+
+  // ── Wave15（武士残响 · 浪人桥头、战鼓残腔、残席茶器）──
+  { id: 'echo-ronin-bridge', franchise: FRANCHISE.SAMURAI, zone: 'fantasy', title: 'echo_ronin_bridge_title', desc: 'echo_ronin_bridge_desc', trigger: 'echo:ronin-bridge' },
+  { id: 'echo-war-drum', franchise: FRANCHISE.SAMURAI, zone: 'fantasy', title: 'echo_war_drum_title', desc: 'echo_war_drum_desc', trigger: 'echo:war-drum' },
+  { id: 'echo-tea-ware', franchise: FRANCHISE.SAMURAI, zone: 'fantasy', title: 'echo_tea_ware_title', desc: 'echo_tea_ware_desc', trigger: 'echo:tea-ware' },
 ];

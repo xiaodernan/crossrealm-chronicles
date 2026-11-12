@@ -3244,6 +3244,15 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   trial_toast_abandon: 'You abandoned the trial.',
   trial_toast_finished_fmt: 'Trial cleared: ${score}',
 
+  // W-E9 (Samurai Wave15): Bridge of the Ronin / The War Drum Ruins / The Tea Wares
+  echo_ronin_bridge_title: 'Bridge of the Ronin',
+  echo_ronin_bridge_desc: 'The water is gone; the bridge remains. Its keeper still waits in vain.',
+  echo_war_drum_title: 'The War Drum Ruins',
+  echo_war_drum_desc: 'The banner has fallen, yet the drum keeps beating. No one remembers the rhythm.',
+  echo_tea_ware_title: 'The Tea Wares Left Behind',
+  echo_tea_ware_desc: 'The tea has cooled; the sword is not sheathed. Whose words filled this bowl?',
+
+
   // W-Y2 slice 1: Starpath Advisor. A chip's label IS the question sent upstream.
   advisor_fab: 'Starpath Advisor',
   advisor_fab_aria: 'Open the Starpath Advisor',
