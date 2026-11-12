@@ -479,7 +479,7 @@
 | W-Z5 | **真实大模型语料质检** | ✅ 切片1 | 2026-11-12 | `0f114f3` + `4dcff91` | 星轨语料质检 `scripts/echo-qa.mjs`：77 条回声经真实 gpt-6-sol 判「母题×标题×描述」一致性 / 史实性 / 语气（batch=10，8 次上游调用，报告不入库）：ok 51 / warn 15 / **bad 11**。真问题修回 zh 双表 + 四份打钉测试（4dcff91）：`五维_tesseract`×10 → 既有译名「五维裂隙」/「五维超立方体」；chalk→粉笔、rusted shut→已锈死、frontier→边境、noir→黑色电影、rhythm→节奏、awaits→在此等你。致敬语境（1983 电台 / CRT / Walkman / Stay / One Realm）经复核保留 |
 | W-Z6 | **关联 ID 贯通 ai-service** | ✅ 切片1 | 2026-11-12 | `cf7c683` | `RequestCorrelation`（网关 W-P8 白名单逐字一致：1..64 可见 ASCII，排除空白/逗号/分号）：body 幂等键优先 > `X-Request-Id` header > 空（不编造）；202/429/`/jobs/{id}`/sync chat/echo-hint 全链回带 `requestId` —— 玩家浏览器看到的 id 与队列/死信/告警日志对得上；幂等永远客户端说了算（网关只补缺不夺权）；smoke 4l 段 + 3 单测 pin 住 3 契约 |
 | W-Z7 | **面板后台继续问** | ⬜ | 把 W-Y4 的提交→轮询接成 UI 路径：关掉面板后答案仍会落地，回来时可见；真取消要能撤销排队任务 |
-| W-Z8 | **运维面板聚合 advisor 派生** | ✅ 切片1 | 2026-11-13 | `ae11db3` | `/api/ops/advisor`：Feign → ai-service 只读派生（`/health` + `/jobs/stats`），30s 两格独立 TTL 缓存，双端点独立降级（空 Map ≈ `available:false` + `reason:fallback`，本地 try/catch 再保一层）；`map` 直通不丢字段；smoke §4m；**不进 `/api/ops/stats`**（零外呼纪律）——与 W-Z1 ADR ⑤ 的原案（曝到 ops/stats）有意偏离，见 ADR |
+| W-Z8 | **运维面板聚合 advisor 派生** | ✅ 切片1+2 | 2026-11-13 | `ae11db3` / `a559632` | `/api/ops/advisor`：Feign → ai-service 只读派生（`/health` + `/jobs/stats`），30s 两格独立 TTL 缓存，双端点独立降级（空 Map ≈ `available:false` + `reason:fallback`，本地 try/catch 再保一层）；`map` 直通不丢字段；smoke §4m；**不进 `/api/ops/stats`**（零外呼纪律）；切片2：设置页「星轨诊断」按钮经同一网关读该端点 |
 
 ---
 
@@ -6569,4 +6569,17 @@ Phase D（系统与质量）
 
   - **与 W-Z1 ADR ⑤ 的偏离（有意）**：死信可见性不走 `/api/ops/stats`，走 `/api/ops/advisor` 的 `jobs` 一格（内含 `deadLettered`/`rejected`/`dedupHits`），外加 health 的 `circuit` 与 `upstreamCalls` 给「硅还热不热」的另一半。**判据**：面板要的是「能安全轮询」，不是「键尽量多的聚合」——超时失败的聚合面不是面板是故障放大器。
 
-  - **风险与后续**：① 两个端点分两次 Feign 调用、两次 Redis/缓存命中；30s 陈旧度对「队列多深」可接受，对「熔断刚打开」不可接受——但这是运维视图不是玩家路径，可接受；② W-P16 已有运维面板的前端入口，下一片把 `/api/ops/advisor` 摆上去（W-Z8 切片2）；③ 死信流 `ai:advisor:dlq` 的**逐条明细**（而非计数）仍未曝出——需要 ai-service 侧加一个白名单 `/jobs/dead-letter?limit=N` 端点（内容含 question 但**不含**答案原文的残余风险评估先行）；④ XAUTOCLAIM 待 Spring Data Redis 封装，本服务不引社区扩展。
+  - **风险与后续**：① 两个端点分两次 Feign 调用、两次 Redis/缓存命中；30s 陈旧度对「队列多深」可接受，对「熔断刚打开」不可接受——但这是运维视图不是玩家路径，可接受；② ~~W-P16 已有运维面板的前端入口~~（勘误：W-P16 并不存在；前端当时没有任何运维面板入口，该句为本条 ADR 起草时的臆测，自证为假）——下一片把 `/api/ops/advisor` 摆上去（W-Z8 切片2，`a559632`）；③ 死信流 `ai:advisor:dlq` 的**逐条明细**（而非计数）仍未曝出——需要 ai-service 侧加一个白名单 `/jobs/dead-letter?limit=N` 端点（内容含 question 但**不含**答案原文的残余风险评估先行）；④ XAUTOCLAIM 待 Spring Data Redis 封装，本服务不引社区扩展。
+- **2026-11-13 W-Z8 运维面板聚合 advisor 派生（切片2）** —— 提交 `a559632`
+
+  - **起因**：切片1 的勘误——上一条 ADR 写「W-P16 已有运维面板的前端入口，下一片把 /api/ops/advisor 摆上去」，这句话里的 W-P16 并不存在（该编号只出现在那一句里）。前端当时**没有任何运维面板入口**。本片按真实情况补齐：设置页「在线服务」区已经有三件套（在线开关 / 排行榜 / ping 自检），「星轨诊断」作为同族的第四件入口，位置与口径完全对齐。
+
+  - **做法**：`OnlineServices.fetchOpsAdvisor()`（`GET /api/ops/advisor`，与 fetchTelemetrySummary 同一纪律：未启用/失败/超时/非 2xx → null，不做语义校验）；`index.html` 在 ping 行下方新增 `#set-online-diag` 按钮 + `#set-online-diag-result`（`.setting-hint`），zh/en 双表新增三键 `settings_online_diag_btn` / `_ok` / `_unavailable`；`SettingsPanel.js` 按下按钮才拉一次：`health` / `jobs` 任一格缺失或 `available:false` → 诚实一句「顾问侧未应答」；两格齐 → `_ok` 模板一句话（model · circuit · 真实调用次数；队列 depth / inFlight / rejected / deadLettered，逐字段 `?? —` 兜底）。结果行全程 `textContent`，绝不 `innerHTML`（服务端数据当不可信——这是 AdvisorPanel 同一条律）。
+
+  - **结构化取舍**：不单开一格「运维」页签、不放玩家首屏；与 ping 自检同级，「没开在线服务就得空着」在这一格里是正常态（null → 一句话提示），不是错误；`set-online-diag` 不进 SettingsStore（和在线开关一族，纯运行时授权，不写存档）。键数登记 2958 → 2961（每表 +3，两表逐键对齐）。
+
+  - **验证**：`npm run lint` 0 错 / `npm test` **6545 例 437 文件全绿**（含新增 `tests/online-ops-advisor.test.js` 7 例：缺键/启用路径/非 2xx/抛错/index.html+SettingsPanel 结构钉/双表齐全） / `npm run build` ✓ / `npm run size` 2.12 MiB ≤ 2.25 / `npm run e2e` 通关 ✓。
+
+  - **纠偏**：本片顺手修回 W-Z8 切片1 ADR 里「W-P16 已有入口」的臆测句——以删除线形式留痕，不抹改历史 ADR；自证为假的结论只能由提出它的人在下一片里自己拎出来。
+
+  - **风险与后续**：① 诊断按钮常显对普通玩家意义有限——留在 ping 同族是最小开销；若后续觉得噪音，隐藏门槛已具备（SettingsStore 或运行时能力探测即可）；② 死信流逐条明细（`/jobs/dead-letter?limit=N`）仍未曝出，需要 ai-service 侧白名单端点 + question 残余风险评估先行，才轮得到本页签；③ `fetchOpsAdvisor` 的空/半挂语义与 OnlineServices 其余方法一致，没有引入新依赖。
