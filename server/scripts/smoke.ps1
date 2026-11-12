@@ -288,7 +288,13 @@ try {
     if (-not ($tq -match '"depth":[0-9]+')) { Write-Error "ops stats missing telemetryQueue.depth: $tq"; exit 1 }
 
     Write-Host ""
-    Write-Host "=== 5) hot refresh: edit served config (max-limit 4 -> 3, note v1 -> v2) WITHOUT restarting game-service ==="
+    Write-Host "=== 4i) via gateway + Feign: X-Request-Id propagates end-to-end ==="
+    $seasonStats = (Invoke-WebRequest -UseBasicParsing -Headers @{ 'X-Request-Id' = 'trace-prop-001' } 'http://localhost:28080/api/ops/season' -TimeoutSec 15).Content
+    if (-not ($seasonStats -match '"available":true')) { Write-Error "season endpoint unavailable: $seasonStats"; exit 1 }
+    Write-Output "season via Feign up"
+    $trace = (Invoke-WebRequest -UseBasicParsing -Headers @{ 'X-Request-Id' = 'trace-prop-002' } 'http://localhost:28080/api/seasons/stats' -TimeoutSec 15).Content
+    if (-not ($trace -match '"requestId":"trace-prop-002"')) { Write-Error "season-service did not echo requestId: $trace"; exit 1 }
+    Write-Output "season-service echo ok"
     @'
 game-service:
   leaderboard:

@@ -36,13 +36,17 @@ public class SeasonStatsController {
     }
 
     @GetMapping("/api/seasons/stats")
-    public Map<String, Object> stats() {
+    public Map<String, Object> stats(
+            @org.springframework.web.bind.annotation.RequestHeader(value = "X-Request-Id", required = false)
+            String requestId) {
         Season active = catalog.active();
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("service", "season-service");
         result.put("startedAt", startedAt.toString());
         result.put("uptimeSec", Duration.between(startedAt, Instant.now()).getSeconds());
+        // W-M4: 原样回显入站 X-Request-Id——game-service Feign 透传了整条链就只有一个名字
+        result.put("requestId", requestId);
         result.put("active", Map.of(
                 "id", active.id(),
                 "dayInCycle", catalog.dayInCycle(),
