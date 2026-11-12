@@ -161,6 +161,9 @@
         <!-- 在线服务连通性自检（W-X10）：ping 一次 GET /api/version；null / 不通就一句话提示，常态不占版面 -->
         <button id="set-online-ping" type="button" data-i18n="settings_online_ping">在线服务连通性自检</button>
         <p id="set-online-ping-result" class="setting-hint"></p>
+        <!-- 星轨诊断（W-Z8 切片2）：只读 /api/ops/advisor —— 顾问服务健康 + 队列背压一句话；服务端数据不可信，结果行内 textContent 写 -->
+        <button id="set-online-diag" type="button" data-i18n="settings_online_diag_btn">星轨诊断（顾问 · 队列）</button>
+        <p id="set-online-diag-result" class="setting-hint"></p>
         <button id="settings-close" data-i18n="common_close">关闭</button>
       </div>
     </div>

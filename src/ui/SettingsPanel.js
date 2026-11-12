@@ -375,6 +375,34 @@ export class SettingsPanel {
           : t('settings_online_ping_fail');
       });
     }
+    // 星轨诊断（W-Z8 切片2）：按钮按下才拉一次 /api/ops/advisor；
+    // 服务端数据当不可信 —— 行内文本只走 textContent（绝不 innerHTML），字段逐个 ?? 兜底。
+    // 两格（health / jobs）各自独立可用——缺哪格就别叫整格消失：报"另一半还是好的"对运维没用，诚实报"拉不全"。
+    const diagBtn = document.getElementById('set-online-diag');
+    if (diagBtn) {
+      diagBtn.addEventListener('click', async () => {
+        const out = document.getElementById('set-online-diag-result');
+        if (!out) return;
+        const data = await onlineServices.fetchOpsAdvisor();
+        const h = data?.health;
+        const j = data?.jobs;
+        const okH = h && h.available !== false && typeof h === 'object';
+        const okJ = j && j.available !== false && typeof j === 'object';
+        if (!okH || !okJ) {
+          out.textContent = t('settings_online_diag_unavailable');
+          return;
+        }
+        out.textContent = t('settings_online_diag_ok', {
+          model: h.model ?? '—',
+          circuit: h.circuit ?? '—',
+          calls: h.upstreamCalls ?? '—',
+          depth: j.depth ?? '—',
+          inFlight: j.inFlight ?? '—',
+          rejected: j.rejected ?? '—',
+          dead: j.deadLettered ?? '—',
+        });
+      });
+    }
   }
 
   /**

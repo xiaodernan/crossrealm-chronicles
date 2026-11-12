@@ -297,6 +297,28 @@ export class OnlineServices {
   }
 
   /**
+   * 拉取运维派生（W-Z8，`GET /api/ops/advisor`）。
+   *
+   * 返回原始 JSON（`{ health: {...}, jobs: {...} }`，字段见 game-service 的 OpsController）。
+   * 未启用 / 失败 / 超时 / 非 2xx → null。**不做语义校验** — 与 fetchTelemetrySummary 同一条边界。
+   * 这一路是**运维视图不是玩家路径**：渲染层（设置页「星轨诊断」）只允许读这一格来画一句话，
+   * 不得回写任何东西，也不得把内容拼进 innerHTML。
+   */
+  async fetchOpsAdvisor() {
+    if (!this._enabled) return null;
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/ops/advisor`, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      console.warn('[online] 拉取顾问派生失败（已吞掉）', e?.message ?? e);
+      return null;
+    }
+  }
+
+  /**
    * 拉取当前赛季（W-F2，`GET /api/seasons/active`）。
    *
    * 返回原始 JSON（`{ id, name, tagline, modifierIds, soulsBonusPct, dayInCycle, daysRemaining }`），
