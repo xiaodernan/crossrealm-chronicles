@@ -476,7 +476,7 @@
 | W-Z2 | **帧内算法与硬件适配** | ✅ 切片1 | `SpatialGrid` 均匀网格把分离推力的邻居查询从 O(n²) 全遍历改成 O(邻域桶)；**逐只对拍** 3 组随机 × 200 只 + 密集重叠 + 自定义 pad，推力逐值相等；1000 只均匀分布时候选数 < 全量 10%；`npm run perf` 全部预算内（枢纽 updateAvg 1.52ms / 灰白森林 1.59ms / p95 2.5ms / exceptions=0）。切片2：对象池 / 脏标记 / 帧预算、draw-call 地板 8 格重钉 |
 | W-Z3 | **设计令牌与动效分级** | ✅ 切片1 | `:root` 收敛语义令牌：时长档（--dur-instant→--dur-cinematic 单调）+ 缓动 + 层级（--z-hud→--z-loading）+ 圆角/阴影/间距尺度；末尾新增**全局** reduced-motion 兜底网（`* { animation-duration:0.001ms; iteration:1 }` 让 forwards 动效瞬间到终态 + 档C 纯装饰元素 `animation:none`）；`advisor-enter` 接入 `--ease-out`/`--dur-base`；新增 `tests/design-tokens.test.js`（27 例钉令牌定义 + 全局网存在）。`W-Y7` 的「设计令牌/动效分级」半边由本片覆盖，剩「光效分层/可访问性（色盲档与字号档不被覆盖）」 |
 | W-Z4 | **数据库读写路径** | ✅ 切片1 | 2026-11-12 | `e7d378f` | 先量现有内存仓储复杂度：三个仓的结构/读写复杂度入册；`/api/ops/stats` 读数 O(n log n) 真实热路径判断——当前不上持久层；Redis 化留给 W-Z1 跨实例语境（已落地）；不为了上数据库而上 |
-| W-Z5 | **真实大模型语料质检** | ✅ 切片1+2+3 | 2026-11-12/13 | `0f114f3` + `4dcff91` + `c67b6da` + `a94dba6` | 星轨语料质检 `scripts/echo-qa.mjs`（77 回声，ok 51 / warn 15 / bad 11→修回双表四份打钉测试）；`scripts/ach-qa.mjs` 成就名册 44 条（ok 38 / warn 5 / bad 1「信标猎人」假阳）——切片3：SYSTEM 附录游戏机制笔记复扫：**bad 0**，rematch-3 → ok |
+| W-Z5 | **真实大模型语料质检** | ✅ 切片1+2+3+4 | 2026-11-12/13 | `0f114f3` + `4dcff91` + `c67b6da` + `a94dba6` + `57ad032` + `084127c` | 星轨语料质检 `scripts/echo-qa.mjs`（83 条回声）与成就 `ach-qa.mjs`（44 条）经真实 gpt-6-sol 判且已修回；机制笔记附录全量注入：echo-qa 首轮 bad 4 → 末轮仅余 echo-one-ring（致敬本意刻意保留）；ach-qa 全册复扫 **bad 0**（rematch-3 消解）；zh 双表 + 钉子测试同步 |
 | W-Z6 | **关联 ID 贯通 ai-service** | ✅ 切片1 | 2026-11-12 | `cf7c683` | `RequestCorrelation`（网关 W-P8 白名单逐字一致：1..64 可见 ASCII，排除空白/逗号/分号）：body 幂等键优先 > `X-Request-Id` header > 空（不编造）；202/429/`/jobs/{id}`/sync chat/echo-hint 全链回带 `requestId` —— 玩家浏览器看到的 id 与队列/死信/告警日志对得上；幂等永远客户端说了算（网关只补缺不夺权）；smoke 4l 段 + 3 单测 pin 住 3 契约 |
 | W-Z7 | **面板后台继续问** | ✅ 切片1+2 | 2026-11-13 | `a797b92` / `de1ab7d` | 异步队列（W-Y4 提交→轮询）接成 UI 路径：切片A ai-service 真撤回端点 `POST /api/ai/jobs/{id}/cancel`（双后端 tombstone；撤回同时释放幂等键；排队中→CANCELLED，在飞/终结→already-running/already-terminal，未知→404；smoke §4n）；切片B OnlineServices.askAdvisorBackground（requestId 幂等 → 202 → AbortSignal 轮询至终态；DEAD→503/unavailable 复用；429→busy；3 次连败→NETWORK；零裸计时器；停止=abort 轮询+cancel POST）；面板零改动契合（ERROR_KEYS 不变） |
 | W-Z8 | **运维面板聚合 advisor 派生** | ✅ 切片1+2+3 | 2026-11-13 | `ae11db3` / `a559632` / `8f688c6` | `/api/ops/advisor`：Feign → ai-service 只读派生（/health + /jobs/stats），30s 两格独立 TTL、空 Map 降级；`map` 直通不丢字段；smoke §4m；**不进 /api/ops/stats**。切片2：设置页「星轨诊断」按钮。切片3：`/api/ops/dead-letter`（Feign 中转 + `reasons` 直方图；不加工 items、不带玩家输入）+ 星轨诊断第二行 `；死信 N 条，高频：…×3`；smoke §4p |
@@ -6639,3 +6639,14 @@ Phase D（系统与质量）
   - **取舍**：① 不做 DLQ 清理（XTRIM）——超 W-Z8 切片3 的范围，单独命题；② 不做「按 requestId 反查网关日志」的联动按钮——索引不存在，伪联动不叫联通；③ 星轨诊断仍只一行文本，不新开页签；④ 空直方图原样输出 `{}`，与 count=0 自洽。
 
   - **副产物（剔除伪优化）**：主线 B79 设想的「迷宫布局缓存」经实测否决——`generateMaze` 5×5/10×10/12×12/16×16 分别 0.73/2.47/3.39/6.10 ms；每次 `Date.now()` 种子且 `setDoorOpen` 原地改 doors，缓存只会带来跨重试状态串扰，**零收益、负风险**。W-Y5 维持「先量后做」。结论记入 ADR，避免下一片重蹈。
+- **2026-11-13 W-Z5 回声语料质检复扫（切片4：附录补全 + 五处修回）** —— 提交 `57ad032` / `084127c`
+
+  - **起因**：W-Z5 切片1 的 echo-qa 当年判过 77 条 echo（now 83），zh 双表的真问题修回之后就没再扫 —— echo-qa 判官的机制笔记附录此前一直只有「母题交错」半句，没有把占位符与母题名册讲清楚。
+
+  - **做法**：新进去 SYSTEM 三条参照：① `{word}` 类花括号词是 `keyText()` 在界面渲染时展开的键位占位符（`{roll}` 是「Space」之类），判官不得判 bad/warn；② zone/母题允许交错（COSMIC 回声落在 void 等）；③ 母题名册全量 17 个（gloom / radiant / voidmaw / abysssalt / homecoming 都是合法母题——第一次复扫把「gloom 不是母题」判成了 bad，附录漏表导致）。
+
+  - **真实复扫结果（batch=10，3 轮）**：首轮 ok 67 / warn 12 / **bad 4**（speakeasy / floating-casino / rooftop-dojo / flip-gravity）；二轮 ok 74 / warn 8 / **bad 1**（gloom-nine-stones — 附录漏 gloom）；三轮补全名册后剩 echo-one-ring 与 echo-poster-wall —— poster-wall 已修（`084127c`）、one-ring「One Realm to bind them all…」保留（致敬本意，与 W-Z5 切片1 保留 1983/Walkman 口径一致）。文案修五处（speakeasy 补家族暗线 / floating-casino 补赛博意象 / rooftop-dojo 补赛博意象 / poster-wall 去现代媒介词 / nine-platform 错站台号「九分又四分三」→「九又四分之三」），zh+en 双表同步，钉子测试 pin 全部同步。
+
+  - **验证**：`npm test` **6556 例 438 文件全绿**；lint 0；build ✓；size 2.13 MiB（刻度余 0.06）；e2e 通关 ✓；报告不入库。
+
+  - **判据与经验**：LLM 判官判文案时，把游戏自己的「机制笔记」喂全了，bad 数会指数级塌缩（11 → 4 → 1 → 0（one-ring 除外，口径刻意保留））。**判官缺的是事实，不是创意**；下一波加 echo 波次（W-E11+）前，先把机制附录同步翻新，才轮得到「修文案」这一步。
