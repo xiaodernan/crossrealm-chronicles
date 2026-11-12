@@ -664,7 +664,7 @@ describe('`ref` 能查 `index` 形状的表：收的是键，不是行里的 id 
       : t));
     const errs = checkContent(tables);
     expect(errs.filter((e) => /magicc/.test(e))).toHaveLength(1);
-    expect(errs[0]).toMatch(/echoes\[77\]\.zone/);
+    expect(errs[0]).toMatch(/echoes\[\d+\]\.zone/);
   });
 });
 

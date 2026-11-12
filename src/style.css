@@ -3070,6 +3070,37 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   --danger: #ff5a3c;
   --mana: #4a90d9;
   --stamina: #5ad08a;
+
+  /* ── W-Z3 设计令牌：时长档（动效分三档的量化基准）──
+     所有 animation/transition 的时长都应取自这里，便于统一节奏与
+     reduced-motion 兜底（见文件末尾）一次性降到 0.001ms。 */
+  --dur-instant: 120ms;   /* 档A·功能性：状态点/进度，必须即时 */
+  --dur-fast: 220ms;      /* 档B·反馈：弹入/闪光/悬停 */
+  --dur-base: 380ms;      /* 档B·反馈：面板入场/气泡 */
+  --dur-slow: 700ms;      /* 档C·氛围：扫光/余烬，可降速 */
+  --dur-cinematic: 2100ms;/* 档C·氛围：过场/胜利潮 */
+  --ease-out: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --ease-inout: cubic-bezier(0.22, 0.61, 0.21, 1);
+
+  /* ── 层级令牌：杜绝魔法数字 z-index 漂移 ── */
+  --z-hud: 10;
+  --z-overlay: 100;
+  --z-modal: 200;
+  --z-advisor: 300;
+  --z-toast: 400;
+  --z-loading: 900;
+
+  /* ── 圆角 / 阴影 / 间距尺度 ── */
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --r-pill: 999px;
+  --shadow-panel: 0 18px 60px rgba(0, 0, 0, 0.55);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
 }
 
 /* ============================================================
@@ -3479,7 +3510,7 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   -webkit-backdrop-filter: blur(24px) saturate(155%);
   color: var(--adv-ink);
   font-family: inherit;
-  animation: advisor-enter 0.42s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  animation: advisor-enter var(--dur-base) var(--ease-out) both;
 }
 
 @keyframes advisor-enter {
@@ -3950,11 +3981,28 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   .advisor-subtitle, .advisor-disclaimer { display: none; }
 }
 
-/* 系统级「减少动态效果」：极光、星轨、气泡入场全部停，但不隐藏任何信息 */
+/* 系统级「减少动态效果」—— W-Z3 全局兜底网
+ * 设计意图（动效分三档）：
+ *   档A·功能性 (loading 进度 / 状态点 / 血条)：reduced-motion 下用
+ *     duration→0.001ms 把动画瞬间带到终态，信息不丢、不闪。
+ *   档B·反馈性 (弹入 / 闪光 / 悬停)：同样降到瞬时。
+ *   档C·氛围性 (极光 / 星轨 / 余烬 / 扫光)：纯装饰，直接 animation:none。
+ * 这张网覆盖 `*`，所以任何未来新增的 animation 只要没写进
+ * `no-preference` 门，也不会对减少动态用户造成持续运动——这是比逐块
+ * 门禁更稳的一道保险。 */
 @media (prefers-reduced-motion: reduce) {
-  .advisor-panel, .advisor-msg, .advisor-aurora, .advisor-sigil,
-  .advisor-orbit, .advisor-dot, .advisor-status.is-checking .advisor-status-dot {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* 档C：纯装饰元素没有"应保留的终态"，直接停掉最干净 */
+  .advisor-aurora, .advisor-orbit, .advisor-sigil, .advisor-dot,
+  .advisor-status.is-checking .advisor-status-dot,
+  .advisor-rise, .cr-ember, .cr-boss-ember, .cr-gold-sweep, .cr-btn-sweep,
+  .cr-sheen, .ztf-pulse, .bestRowGlow, .endCreditsLastLight, .achBreathe,
+  .autoplay-pulse, .pulse, .realmBleedPulse, .bossVictoryTide, .cr-critical-pulse {
     animation: none !important;
-    transition: none !important;
   }
 }
