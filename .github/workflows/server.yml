@@ -40,3 +40,9 @@ jobs:
       # 脚本使用 28xxx 端口段、跑完自动关停；ubuntu  runner 上 127.0.0.1 秒连秒拒，不会像开发机那样慢等。
       - name: Smoke (full stack boot + gateway routing + config delivery)
         run: pwsh -File "${{ github.workspace }}/server/scripts/smoke.ps1"
+
+      # Redis 背板的限流（W-P10）：起 throwaway redis + 网关注入 redis backend，
+      # 验证 70 条突发后 429 出现，再停 redis 验证 fail-open（永远放行）。
+      # 这是唯一一处真打 Redis 的门禁 —— 以前只能手动跑，现在每次 server 变更都真验。
+      - name: Redis-backed rate limiter (W-P10 verification)
+        run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-rate-limit.ps1"
