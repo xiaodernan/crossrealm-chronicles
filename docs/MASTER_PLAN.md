@@ -478,7 +478,7 @@
 | W-Z4 | **数据库读写路径** | ✅ 切片1 | 2026-11-12 | `e7d378f` | 先量现有内存仓储复杂度：三个仓的结构/读写复杂度入册；`/api/ops/stats` 读数 O(n log n) 真实热路径判断——当前不上持久层；Redis 化留给 W-Z1 跨实例语境（已落地）；不为了上数据库而上 |
 | W-Z5 | **真实大模型语料质检** | ✅ 切片1 | 2026-11-12 | `0f114f3` + `4dcff91` | 星轨语料质检 `scripts/echo-qa.mjs`：77 条回声经真实 gpt-6-sol 判「母题×标题×描述」一致性 / 史实性 / 语气（batch=10，8 次上游调用，报告不入库）：ok 51 / warn 15 / **bad 11**。真问题修回 zh 双表 + 四份打钉测试（4dcff91）：`五维_tesseract`×10 → 既有译名「五维裂隙」/「五维超立方体」；chalk→粉笔、rusted shut→已锈死、frontier→边境、noir→黑色电影、rhythm→节奏、awaits→在此等你。致敬语境（1983 电台 / CRT / Walkman / Stay / One Realm）经复核保留 |
 | W-Z6 | **关联 ID 贯通 ai-service** | ✅ 切片1 | 2026-11-12 | `cf7c683` | `RequestCorrelation`（网关 W-P8 白名单逐字一致：1..64 可见 ASCII，排除空白/逗号/分号）：body 幂等键优先 > `X-Request-Id` header > 空（不编造）；202/429/`/jobs/{id}`/sync chat/echo-hint 全链回带 `requestId` —— 玩家浏览器看到的 id 与队列/死信/告警日志对得上；幂等永远客户端说了算（网关只补缺不夺权）；smoke 4l 段 + 3 单测 pin 住 3 契约 |
-| W-Z7 | **面板后台继续问** | ⬜ | 把 W-Y4 的提交→轮询接成 UI 路径：关掉面板后答案仍会落地，回来时可见；真取消要能撤销排队任务 |
+| W-Z7 | **面板后台继续问** | ✅ 切片1+2 | 2026-11-13 | `a797b92` / `de1ab7d` | 异步队列（W-Y4 提交→轮询）接成 UI 路径：切片A ai-service 真撤回端点 `POST /api/ai/jobs/{id}/cancel`（双后端 tombstone；撤回同时释放幂等键；排队中→CANCELLED，在飞/终结→already-running/already-terminal，未知→404；smoke §4n）；切片B OnlineServices.askAdvisorBackground（requestId 幂等 → 202 → AbortSignal 轮询至终态；DEAD→503/unavailable 复用；429→busy；3 次连败→NETWORK；零裸计时器；停止=abort 轮询+cancel POST）；面板零改动契合（ERROR_KEYS 不变） |
 | W-Z8 | **运维面板聚合 advisor 派生** | ✅ 切片1+2 | 2026-11-13 | `ae11db3` / `a559632` | `/api/ops/advisor`：Feign → ai-service 只读派生（`/health` + `/jobs/stats`），30s 两格独立 TTL 缓存，双端点独立降级（空 Map ≈ `available:false` + `reason:fallback`，本地 try/catch 再保一层）；`map` 直通不丢字段；smoke §4m；**不进 `/api/ops/stats`**（零外呼纪律）；切片2：设置页「星轨诊断」按钮经同一网关读该端点 |
 
 ---
@@ -6583,3 +6583,16 @@ Phase D（系统与质量）
   - **纠偏**：本片顺手修回 W-Z8 切片1 ADR 里「W-P16 已有入口」的臆测句——以删除线形式留痕，不抹改历史 ADR；自证为假的结论只能由提出它的人在下一片里自己拎出来。
 
   - **风险与后续**：① 诊断按钮常显对普通玩家意义有限——留在 ping 同族是最小开销；若后续觉得噪音，隐藏门槛已具备（SettingsStore 或运行时能力探测即可）；② 死信流逐条明细（`/jobs/dead-letter?limit=N`）仍未曝出，需要 ai-service 侧白名单端点 + question 残余风险评估先行，才轮得到本页签；③ `fetchOpsAdvisor` 的空/半挂语义与 OnlineServices 其余方法一致，没有引入新依赖。
+- **2026-11-13 W-Z7 面板后台继续问（切片A：服务端真取消端点 / 切片B：前端异步队列接线）** —— 提交 `a797b92` / `de1ab7d`
+
+  - **起因**：W-Y4 的异步队列（W-Y4 提交→轮询）在前端没有任何消费者——星轨顾问走的是同步 `/api/ai/chat` 长请求；W-Z7 要把「提交→轮询」接成 UI 路径，并让「停止」真正能撤回一笔还在排队的提问，而不是只掐掉浏览器这一头的 fetch、任由队列里躺着一问没人领（钱白烧、玩家以为取消了）。
+
+  - **切片A（服务端 `a797b92`）——真取消端点**：`POST /api/ai/jobs/{jobId}/cancel`。排队中 → 从 inbox/流条目拆除 + state hash 直写 `CANCELLED`（reason=client-cancel）→ 200 + `cancelled:true`（这一问从未上游）；运行中/已终结 → 200 + `cancelled:false` + `reason:already-running|already-terminal`（不谎称撤得回）；未知 jobId → 404。双后端对称：内存版 `Status.CANCELLED` 直写 + `inbox.remove(jobId)`；Redis 版 tombstone（`ai:advisor:state:<id>` 直写 CANCELLED）+ `process()` 早退——捞到即 XACK 丢弃，不调上游（fresh 与 pending 重投两条路径都走这一处）。**撤回同时释放幂等键**（内存 `requestIds.remove` / Redis `DEL dedup:<key>`）：否则玩家手滑撤回后原样再问，会被幂等指回一个已取消的任务——问了个寂寞。`StreamJobState.Status` 增 CANCELLED（isTerminal 含之；由外部 tombstone 直写，不进状态机判定链）。
+
+  - **切片B（前端 `de1ab7d`）——异步队列接成 UI 路径**：`OnlineServices.askAdvisorBackground`（`POST /api/ai/chat/async`，客户端生成 `requestId` 幂等键 → 202{jobId,pollAfterMs}；`AbSignal` 一拍一拍轮询 `/api/ai/jobs/{id}`）——DONE → 同步路同形状 `{ok,reason,status,data}`；DEAD → 映射 http/503/advisor-unavailable（复用面板"503"那一格展示「顾问暂时答不出来了」，不新造文案键）；CANCELLED → cancelled；提交 429 → busy（队列背压不是连不上网关）；轮询连续 3 次失败 → NETWORK（不在死网上空转到预算耗尽）；预算 `backgroundBudgetMs=90s`。**计时零裸计时器**：新增 `sleepWithSignal`——一次性 `AbortSignal.timeout` 当计时器，B39 门禁口径全源件守住（该禁令原只禁 AdvisorPanel 本体与 `requestSignal` 段，本片一并守住 OnlineServices 全文件）。面板 `_run` 切到后台路，`_handleResult`/ERROR_KEYS 零改动；「停止」＝ abort 轮询 + 发一个火而不管的 cancel POST。面板注释更新（LLM 已跑起来的撤不回）。
+
+  - **验证**：切片A：`mvn -B -f server/pom.xml verify` BUILD SUCCESS（ai-service 68/68，新增 `AdvisorJobControllerTest` 三条：排队真撤回+释放幂等键+stats.cancelled 计数 / 撤回后 drainOne=false 且 done=0 / 404；同键重问受理新任务钉死）；smoke §4n 契约本机 PASSED（no-key 分支诚实 already-terminal）；Redis 后端无本地 Redis、未实机验证（process 早退与 view/stats 对称改动小，记此风险，待 Redis 在线复测）。切片B：lint 0 / 测试 **6553 例 438 文件全绿**（新增 `online-advisor-background.test.js` 10 例，含 submit 带 requestId 幂等键断言、DEAD→503 映射、abort→cancel POST 钉死、连续 3 次失败 NETWORK 的边界调用数=4 次）/ build ✓ / e2e 通关 ✓ / perf 全部预算内。
+
+  - **尺寸刻度重钉**：`FIRST_SCREEN_READING` 2163508 → 2228948（2026-11 真读数）。本次重钉覆盖它之后四片的真实功能增长：W-Y2 回声灯接真接口（OnlineServices.fetchEchoHint + 屏 CSS）+ W-E10 深空孔径三枚（POI/石碑/坠环/星骸三片场景件 + 6 文案键）+ W-Z8 切片2 设置页「星轨诊断」（3 文案键 + 面板接线）+ W-Z7 切片B（后台提问路径 ~5KB）。build/e2e/tests 全绿；**2.25 MiB 绝对上限仍有 0.12 MiB 余量**；`GROUP/franchises` 按语言分包仍是独立一片的结构性杠杆（文案表占首屏约 40%），不在此片解决。刻度只升不降，环比 3% 不放宽。
+
+  - **风险与后续**：① DEAD 映射 http/503 复用熔断文案——语义等价（服务端明确答不出来），没有为"not-configured vs upstream-500"细分文案，那是文案预算，非 bug；② 轮询预算 90s 对慢答案是截止线不是硬中断（服务端/LLM 会继续跑完并落库，只是玩家看不到）——DEAD 落定后再打开面板也看不到旧提问的终态（能力上没有「面板重开续流」，那是下一片）；③ 面板重开续流/作答完成徽章仍是 W-Z7 的未竟半边——异步队列接通后才有内容可续；④ 本片把 `advisor-panel-wiring` 的桩换成后台路径，同步 `askAdvisor` 保留在 OnlineServices 里（公共 API 不裁）；⑤ Redis 后端 cancel 待 Redis 在线复测（连 RedisStreamAdvisorQueueLiveTest 一起）。
