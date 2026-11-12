@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 leaderboard 聚合追加 P50/P95（W-M2）** —— 提交 `27e16b7`
+
+  - **起因**：leaderboard 的聚合答得出"最快/最慢/平均"却答不出"典型成绩和 P95 尖峰"——运维想知道"这批通关里 50% 的人多快通关、5% 的人最慢需要等多久"，这两个数是给 SLA 和 leaderboard 展示用的。
+
+  - **做法**：`LeaderboardService.stats()` 内 `long[] times = runs.stream().mapToLong(RunRecord::clearTimeMs).sorted().toArray();`——排一次 O(n log n)；maxEntries 常态 ≤ 1000，排得起（比 quickselect 烂两行，但清楚得多）。  `p50 = times[n/2]`、`p95 = times[min(n-1, ceil(n*0.95) - 1)]`。`LinkedHashMap` 保字段序。`OpsControllerTest` 加两条断言；smoke 4d 同步断言 `p50Ms`/`p95Ms` 字段（实测 {p50Ms:5700000, p95Ms:7200000}）。`/api/ops/stats` 现在答：total/fastestMs/slowestMs/avgMs/uniqueBosses/**p50Ms**/**p95Ms**。
+
+  - **验证**：game-service `mvn verify` BUILD SUCCESS（52/52 绿）；`smoke.ps1` PASSED（4d 实证 p50Ms=5700000、p95Ms=7200000）。
+
+  - **风险与后续**：① 当前 maxEntries ≤ 1000 的排序成本可以忽略；若配置被调到万级且这条路径变热，把排序换成 Floyd-Rivest quickselect（`Arrays.select` 或自己实现 Lomuto partition）即可，但调用点极少不值得过早优化；② 下一片：把 `avgMs` 改成 `sumMs`（运维想算总时长比率），或给 trials 加 `p50Score`/`p95Score`；③ 前端 legends 页面可以新增一行"世界碑 P50/P95"展示，但那涉及新增文案键+UI 布局，本次不碰。
 - **2026-11-12 中洲回响 Wave13（W-E7）** —— 提交 `795e22b`
 
   - **起因**：中洲（MIDDLE_EARTH）母题在回声图鉴里一直是**最单薄的一格**——只有一枚回声（至尊之戒），页签一角孤零零空着，而它是六大位面里最出名的一个 IP，玩家想碰的东西都得自己编。一整格空白，不配以"集大成者"自居。
