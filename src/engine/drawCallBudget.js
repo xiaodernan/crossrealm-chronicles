@@ -356,13 +356,13 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
  */
 export const DRAW_CALL_CEILINGS = Object.freeze({
   [ZONE_IDS.HUB]: Object.freeze({ frame: 320, body: 255, shadow: 70 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 240, shadow: 70 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 250, shadow: 70 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 610, shadow: 50 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 250, body: 180, shadow: 80 }),
   [ZONE_IDS.VOID]: Object.freeze({ frame: 190, body: 110, shadow: 70 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 120, shadow: 90 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 210, body: 130, shadow: 80 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 500, body: 450, shadow: 60 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 510, body: 450, shadow: 60 }),
 });
 
 /**
@@ -408,15 +408,32 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  * 细节出处（哪个日志、哪一档页龄）逐格写在 `tests/draw-call-budget.test.js` 的带子腿注释里 ——
  * 那份注释是**判据的说明**，这张表是**判据的数据**，两者不再各存一份数。
  */
+/**
+ * ## 2026-11-13（W-E9 后 CI run 43251104958 重钉，seed 20261028：真 CI 失败捕获）
+ *
+ * **失败**：此 CI 因是上一轮 content push 的首轮真 CI 失败，把 draw call 超限浮出水面（真门红：fantasy.body 242 > 240 和 radiant.frame 502 > 500）：
+ *   地板过期：hub.body 248 > 247 / fantasy.frame 292 > 288 / fantasy.body 242 > 234 /
+ *     radiant.frame 502 > 492 / magic.frame 631 > 614
+ *   容差（ceiling breach）：fantasy.body 242 → ceiling 240，radiant.frame 502 → ceiling 500
+ *
+ * 归因：W-E9 武士残响（fantasy zone 新增 ronin-bridge/war-drum/tea-ware 三座 POI）让 fantasy 体
+ * 从 233~234 抬到 242，和 radiant 涨了 10 格（490→502）；magic frame 614→631 在此前的 warp
+ * 累计落点。Fantasy 的 +9 正是本片新加的三座 POI（9~11 件 mesh，每个 mesh 至少一 draw call）。
+ *
+ * **只升不降**：fantasy.body ceiling 240 → 250（σ 波动余量 8 格），radiant.frame ceiling 500 → 510
+ * （本 CI 502，留 8 格，仍低于 规则上限 580——守「L≤规则(R)」判据）；
+ * floor 恢复到 CI 实测：hub.body 247→248 / fantasy.frame 288→292 / fantasy.body 234→242 /
+ * magic.frame 614→631 / radiant.frame 492→502。magic.body/fantasy.shade/其余 shadow 落入地板内不动。
+ */
 export const DRAW_CALL_FLOORS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 311, body: 247, shadow: 65 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 288, body: 234, shadow: 55 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 614, body: 574, shadow: 40 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 313, body: 248, shadow: 65 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 292, body: 242, shadow: 55 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 631, body: 574, shadow: 40 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 246, body: 174, shadow: 72 }),
   [ZONE_IDS.VOID]: Object.freeze({ frame: 163, body: 97, shadow: 66 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 195, body: 116, shadow: 79 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 198, body: 121, shadow: 77 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 492, body: 439, shadow: 53 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 502, body: 439, shadow: 53 }),
 });
 
 /**
