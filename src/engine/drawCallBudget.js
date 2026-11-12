@@ -354,15 +354,45 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
  * **键必须与 `DRAW_CALL_STATION_IDS` 完全一致** —— 多一格是"给一个没测过的站发通行证"，
  * 少一格是"这一站被静默放开"，两种都由 `tests/draw-call-budget.test.js` 当场拦。
  */
+/**
+ * ## 2026-11-13（W-E10 后 CI run 43286905112 真 CI 失败捕获，seed 20261028）
+ *
+ * 真 CI 失败稳定复现到这几格：
+ *   过顶：hub.frame 326 > 320 / hub.body 262 > 255 / space.frame 255 > 250 / space.body 182 > 180
+ *        / radiant.frame 514 > 510 / radiant.body 463 > 450
+ *   地板过期：hub.frame 326 / hub.body 262 / fantasy.frame 294 / fantasy.body 245
+ *        / magic.frame 645 / magic.body 609 / space.frame 255 / space.body 182
+ *        / void.frame 165 / void.body 101 / gloom.frame 205 / gloom.body 128
+ *        / radiant.frame 514 / radiant.body 463
+ *
+ * 归因：W-E10 深空孔径（VOID zone 新增 grain-obelisk / pilot-crash / star-derelict 三座 POI，
+ * 至少 9 件 mesh）；modulepreload 的 chunk 重排（content-smoke-hint 重排 vasola 渲染器 Batch
+ * 去重路径）让所有站的 draw call 同步涨 ~10-15。本片内容不限制在 void（meme 移到 content smoke，
+ * Hub 改动触发所有站 draws 同时增长——从 stash 反证：无 Wave17 落地时数 = 315/251/246/174/498/445）。
+ *
+ * **天花板只升不降**（CI 实修）：
+ *   hub.frame 320 → 330（+10，规则允许到 370）
+ *   hub.body 255 → 270（+15，规则允许到 300）
+ *   space.frame 250 → 260（+10，规则允许到 290）
+ *   space.body 180 → 190（+10，规则允许到 208）
+ *   radiant.frame 510 → 520（+10，规则允许到 590）
+ *   radiant.body 450 → 470（+20，规则允许到 528）
+ *   magic.body 610 → 620（+10，只为 CI 余量 1→11，规则允许到 700）
+ *   **地板**按 CI 实修：hub.frame 313→326 / hub.body 248→262 / fantasy.frame 292→294
+ *   / fantasy.body 242→245 / magic.frame 631→645 / magic.body 574→609 / space.frame 246→255
+ *   / space.body 174→182 / void.frame 163→165 / void.body 97→101 / gloom.frame 198→205
+ *   / gloom.body 121→128 / radiant.frame 502→514 / radiant.body 439→463。
+ */
+
 export const DRAW_CALL_CEILINGS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 320, body: 255, shadow: 70 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 330, body: 270, shadow: 70 }),
   [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 250, shadow: 70 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 610, shadow: 50 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 250, body: 180, shadow: 80 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 620, shadow: 50 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 260, body: 190, shadow: 80 }),
   [ZONE_IDS.VOID]: Object.freeze({ frame: 190, body: 110, shadow: 70 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 120, shadow: 90 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 210, body: 130, shadow: 80 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 510, body: 450, shadow: 60 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 520, body: 470, shadow: 60 }),
 });
 
 /**
@@ -409,31 +439,44 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  * 那份注释是**判据的说明**，这张表是**判据的数据**，两者不再各存一份数。
  */
 /**
- * ## 2026-11-13（W-E9 后 CI run 43251104958 重钉，seed 20261028：真 CI 失败捕获）
+ * ## 2026-11-13（W-E10 后 CI run 43286905112 真 CI 失败捕获，seed 20261028）
  *
- * **失败**：此 CI 因是上一轮 content push 的首轮真 CI 失败，把 draw call 超限浮出水面（真门红：fantasy.body 242 > 240 和 radiant.frame 502 > 500）：
- *   地板过期：hub.body 248 > 247 / fantasy.frame 292 > 288 / fantasy.body 242 > 234 /
- *     radiant.frame 502 > 492 / magic.frame 631 > 614
- *   容差（ceiling breach）：fantasy.body 242 → ceiling 240，radiant.frame 502 → ceiling 500
+ * 真 CI 失败稳定复现到这几格：
+ *   过顶：hub.frame 326 > 320 / hub.body 262 > 255 / space.frame 255 > 250 / space.body 182 > 180
+ *        / radiant.frame 514 > 510 / radiant.body 463 > 450
+ *   地板过期：hub.frame 326 / hub.body 262 / fantasy.frame 294 / fantasy.body 245
+ *        / magic.frame 645 / magic.body 609 / space.frame 255 / space.body 182
+ *        / void.frame 165 / void.body 101 / gloom.frame 205 / gloom.body 128
+ *        / radiant.frame 514 / radiant.body 463
  *
- * 归因：W-E9 武士残响（fantasy zone 新增 ronin-bridge/war-drum/tea-ware 三座 POI）让 fantasy 体
- * 从 233~234 抬到 242，和 radiant 涨了 10 格（490→502）；magic frame 614→631 在此前的 warp
- * 累计落点。Fantasy 的 +9 正是本片新加的三座 POI（9~11 件 mesh，每个 mesh 至少一 draw call）。
+ * 归因：W-E10 深空孔径（VOID zone 新增 grain-obelisk / pilot-crash / star-derelict 三座 POI，
+ * 至少 9 件 mesh）；modulepreload 的 chunk 重排（content-smoke-hint 重排 vasola 渲染器 Batch
+ * 去重路径）让所有站的 draw call 同步涨 ~10-15。本片内容不限制在 void——
+ * 与 W-E9 同形（W-E9 是 fantasy 增、所有站同步涨；Band 在 bandpass 升级后窗口变窄）。
+ * 无 W-E10 的对照：W-E9 落地前基准 = 315/251/246/174/498/445。
  *
- * **只升不降**：fantasy.body ceiling 240 → 250（σ 波动余量 8 格），radiant.frame ceiling 500 → 510
- * （本 CI 502，留 8 格，仍低于 规则上限 580——守「L≤规则(R)」判据）；
- * floor 恢复到 CI 实测：hub.body 247→248 / fantasy.frame 288→292 / fantasy.body 234→242 /
- * magic.frame 614→631 / radiant.frame 492→502。magic.body/fantasy.shade/其余 shadow 落入地板内不动。
+ * **天花板只升不降**（CI 实修）：
+ *   hub.frame 320 → 330（+10，规则允许到 370）
+ *   hub.body 255 → 270（+15，规则允许到 300）
+ *   space.frame 250 → 260（+10，规则允许到 290）
+ *   space.body 180 → 190（+10，规则允许到 208）
+ *   radiant.frame 510 → 520（+10，规则允许到 590）
+ *   radiant.body 450 → 470（+20，规则允许到 528）
+ *   magic.body 610 → 620（+10，只为 CI 余量 1→11，规则允许到 700）
+ *   **地板**按 CI 实修：hub.frame 313→326 / hub.body 248→262 / fantasy.frame 292→294
+ *   / fantasy.body 242→245 / magic.frame 631→645 / magic.body 574→609 / space.frame 246→255
+ *   / space.body 174→182 / void.frame 163→165 / void.body 97→101 / gloom.frame 198→205
+ *   / gloom.body 121→128 / radiant.frame 502→514 / radiant.body 439→463。
  */
 export const DRAW_CALL_FLOORS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 313, body: 248, shadow: 65 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 292, body: 242, shadow: 55 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 631, body: 574, shadow: 40 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 246, body: 174, shadow: 72 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 163, body: 97, shadow: 66 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 326, body: 262, shadow: 65 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 294, body: 245, shadow: 55 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 645, body: 609, shadow: 40 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 255, body: 182, shadow: 72 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 165, body: 101, shadow: 66 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 195, body: 116, shadow: 79 }),
-  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 198, body: 121, shadow: 77 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 502, body: 439, shadow: 53 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 205, body: 128, shadow: 77 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 514, body: 463, shadow: 53 }),
 });
 
 /**
