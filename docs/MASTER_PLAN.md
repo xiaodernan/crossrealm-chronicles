@@ -479,7 +479,7 @@
 | W-Z5 | **真实大模型语料质检** | ✅ 切片1+2+3 | 2026-11-12/13 | `0f114f3` + `4dcff91` + `c67b6da` + `a94dba6` | 星轨语料质检 `scripts/echo-qa.mjs`（77 回声，ok 51 / warn 15 / bad 11→修回双表四份打钉测试）；`scripts/ach-qa.mjs` 成就名册 44 条（ok 38 / warn 5 / bad 1「信标猎人」假阳）——切片3：SYSTEM 附录游戏机制笔记复扫：**bad 0**，rematch-3 → ok |
 | W-Z6 | **关联 ID 贯通 ai-service** | ✅ 切片1 | 2026-11-12 | `cf7c683` | `RequestCorrelation`（网关 W-P8 白名单逐字一致：1..64 可见 ASCII，排除空白/逗号/分号）：body 幂等键优先 > `X-Request-Id` header > 空（不编造）；202/429/`/jobs/{id}`/sync chat/echo-hint 全链回带 `requestId` —— 玩家浏览器看到的 id 与队列/死信/告警日志对得上；幂等永远客户端说了算（网关只补缺不夺权）；smoke 4l 段 + 3 单测 pin 住 3 契约 |
 | W-Z7 | **面板后台继续问** | ✅ 切片1+2 | 2026-11-13 | `a797b92` / `de1ab7d` | 异步队列（W-Y4 提交→轮询）接成 UI 路径：切片A ai-service 真撤回端点 `POST /api/ai/jobs/{id}/cancel`（双后端 tombstone；撤回同时释放幂等键；排队中→CANCELLED，在飞/终结→already-running/already-terminal，未知→404；smoke §4n）；切片B OnlineServices.askAdvisorBackground（requestId 幂等 → 202 → AbortSignal 轮询至终态；DEAD→503/unavailable 复用；429→busy；3 次连败→NETWORK；零裸计时器；停止=abort 轮询+cancel POST）；面板零改动契合（ERROR_KEYS 不变） |
-| W-Z8 | **运维面板聚合 advisor 派生** | ✅ 切片1+2 | 2026-11-13 | `ae11db3` / `a559632` | `/api/ops/advisor`：Feign → ai-service 只读派生（`/health` + `/jobs/stats`），30s 两格独立 TTL 缓存，双端点独立降级（空 Map ≈ `available:false` + `reason:fallback`，本地 try/catch 再保一层）；`map` 直通不丢字段；smoke §4m；**不进 `/api/ops/stats`**（零外呼纪律）；切片2：设置页「星轨诊断」按钮经同一网关读该端点 |
+| W-Z8 | **运维面板聚合 advisor 派生** | ✅ 切片1+2+3 | 2026-11-13 | `ae11db3` / `a559632` / `8f688c6` | `/api/ops/advisor`：Feign → ai-service 只读派生（/health + /jobs/stats），30s 两格独立 TTL、空 Map 降级；`map` 直通不丢字段；smoke §4m；**不进 /api/ops/stats**。切片2：设置页「星轨诊断」按钮。切片3：`/api/ops/dead-letter`（Feign 中转 + `reasons` 直方图；不加工 items、不带玩家输入）+ 星轨诊断第二行 `；死信 N 条，高频：…×3`；smoke §4p |
 | W-Z9 | **结构化访问日志** | ✅ 切片1 | 2026-11-13 | `849f1cd` | ai-service / game-service 各一个 `AccessLogFilter`：一次请求一条 JSON 行 `{ts, app, requestId, method, path（不含 query/body）, status, durationMs}`；/actuator 不记；X-Request-Id 原样透出；单测各 3 例钉 JSON 契约；smoke 期间 ai-service.out.log 真实落行 |
 
 ---
@@ -6628,3 +6628,14 @@ Phase D（系统与质量）
   - **判据与经验**：LLM 的语料判官需要一段「机制说明书」才能不发明出"这是错的"——判官缺上下文时，它会把不知道的游戏事实判成文案事故。给判官喂机制笔记之后，false positive 的收益远大于 prompt 里多那一段 token 成本（4 批 × 44 条 ≈ 每条 +120 token）。
 
   - **风险与后续**：① 机制笔记会随版本漂移——每次大版本（echo 波/位面新增）应同步翻新这一附件；② warn 6 条结论人工复核后再议；③ 报告仍不入库（$TEMP，本人复核后删），工具产物不是档案。
+- **2026-11-13 W-Z8 死信聚合 + 星轨诊断第二行（切片3）** —— 提交 `8f688c6`
+
+  - **起因**：切片1 把「有多少条死信」送到了运维，切片2 把它摆上设置页；但「哪一类失败在反复出现」——排障真正要的那一格——一直没送达。dead-letter 端点本身（W-Z1 切片2）已经白名单化，只差把它接成「聚合 + 直方图」再透出一层。
+
+  - **做法链**：game-service `AiServiceClient` 增加 `deadLetter()`（Feign path=/api/ai + params `limit=20`）→ `OpsController.GET /api/ops/dead-letter`：赛季缓存新 key `advisor.deadletter`（30s）+ 空 Map 降级（available:false/reason:fallback）+ 本地 try/catch 双保险（绝不 500）；items 原样透传白名单产物（这里不加二次过滤——上游已经不带 question/answer），额外挂 `reasons` 直方图（缺失/空 reason → unknown）。星轨诊断结果行尾追加「；死信 N 条，高频：…×3」（拉不到就安静空着，主句不受影响）。
+
+  - **验证**：`mvn -B -f server/pom.xml verify` BUILD SUCCESS（ai-service 73/73、game-service **74/74**——新增 `OpsDeadLetterEndpointTest` 4 例钉死「items 透传 + 直方图合并计数」「空 items 不是失败」「空 Map → reason:fallback」「stub 直抛仍 200 + available:false」；OpsAdvisorEndpointTest / OpsSeasonEndpointTest 桩同步加 `deadLetter()`）；前端 lint 0 / **6556 例 438 文件全绿**（`online-ops-advisor` 增 3 例 + `settings_online_diag_dlq_fmt` 新键，键数 2961 → 2962）/ build ✓ / e2e 通关 ✓ / size 2.13 MiB / smoke §4p PASSED（`/api/ops/dead-letter` 断 available/count/reasons、玩家输入文本与 question/answer/context 一律不得出现）。
+
+  - **取舍**：① 不做 DLQ 清理（XTRIM）——超 W-Z8 切片3 的范围，单独命题；② 不做「按 requestId 反查网关日志」的联动按钮——索引不存在，伪联动不叫联通；③ 星轨诊断仍只一行文本，不新开页签；④ 空直方图原样输出 `{}`，与 count=0 自洽。
+
+  - **副产物（剔除伪优化）**：主线 B79 设想的「迷宫布局缓存」经实测否决——`generateMaze` 5×5/10×10/12×12/16×16 分别 0.73/2.47/3.39/6.10 ms；每次 `Date.now()` 种子且 `setDoorOpen` 原地改 doors，缓存只会带来跨重试状态串扰，**零收益、负风险**。W-Y5 维持「先量后做」。结论记入 ADR，避免下一片重蹈。
