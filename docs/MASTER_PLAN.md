@@ -452,10 +452,10 @@
 
 | 编号 | 工作包 | 状态 | 完成日期 | 提交 | 备注 |
 |------|--------|------|----------|------|------|
-| W-Y1 | **ai-service：第六个微服务**（服务端独占密钥 / 超时 / 选择性重试 / 熔断 / TTL 缓存 / 网关路由） | ⬜ | | | 与 game-service 隔离：密钥只在 JVM 环境变量里，前端永远只看得到 `/api/ai/chat` |
-| W-Y2 | **AI 顾问面板**（前端视觉旗舰 + 离线降级 + i18n 双表） | ⬜ | | | 走 `OnlineServices`，遵守「在线伙伴服务可选」；断网不说谎、不整页重渲染 |
-| W-Y3 | **真实大模型联调与语料质检升级** | ⬜ | | | `LLM_API_KEY` 环境变量驱动的集成测试（无密钥自动跳过）+ `ai-lore-assist` 真实跑通后的健壮性改造 |
-| W-Y4 | **消息队列：可靠投递与背压** | ⬜ | | | 环形缓冲 + 单生产者多消费者 + 重试/死信；Redis Pub/Sub 的「不保证送达」要有明确边界 |
+| W-Y1 | **ai-service：第六个微服务**（服务端独占密钥 / 超时 / 选择性重试 / 熔断 / TTL 缓存 / 网关路由） | ✅ 切片1 | 2026-11-12 | `de7612c` | 第六个微服务（`:8083`）：`LlmClient` 只重试 timeout/429/5xx、401/400 立刻放弃；SHA-256(模型+系统提示+问题) 作答缓存；`LlmCircuitBreaker` 熔断；上下文限长防注入；`EchoHint` 收编进来；网关 `/api/ai/**` + POST fallback；smoke 加 4j 段（lb 路由 / 健康不泄密钥 / 有 key 才走真实外呼）；**真实 `/v1/models` 返回 `gpt-6-sol`、真实 chat 返回 PONG、`AiLiveIntegrationTest` 端到端通过**；密钥只在 `.env`（gitignore）/ 环境变量；33 例绿 |
+| W-Y2 | **AI 顾问面板**（前端视觉旗舰 + 离线降级 + i18n 双表） | ✅ 切片1 | 2026-11-12 | `b32b4ac` | `src/content/advisor.js` 把上限/原因枚举/建议名册收成**一处线协议**（`bad-json` 与 `bad_json` 分家被真实抓到）；`OnlineServices.askAdvisor/fetchAdvisorHealth`；`AdvisorPanel` 用 `textContent` 渲染不可信文本、`AbortController` 真取消、四档状态、建议芯片、缓存/耗时元信息；极光/星轨/气泡/chips/composer/FAB 全套 CSS，`prefers-reduced-motion` 降级；F7 热键 + OverlayStack 层 + `isTextLikeControl()` 让文本框里方向键交还浏览器；语言切换刷新；i18n 2840 → **2940**（100 键）；**并轨侧收编**：网关 `aiServiceBreaker` 75s TimeLimiter（缺省 1s 会把每次合法 LLM 调用判超时）、`LlmClient` 多构造 `@Autowired`、Spring 上下文测试、smoke 第六服务；验证：lint 0 / **433 文件 6486 例全绿** / build 无 chunk 回退 / 首屏 2.11 MiB（环比 2.13、上限 2.25 双线过）/ 全模块 `mvn -o -q test` ALL_RC=0 |
+| W-Y3 | **真实大模型联调与语料质检升级** | ✅ 切片1 | 2026-11-12 | `de7612c` / `b32b4ac` | `AiLiveIntegrationTest`（真实 `/v1/chat/completions`、中文回答 18.3s、同问缓存命中零二次外呼）+ **W-Y4 新增** `AdvisorJobLiveIntegrationTest`（真实上游 2 次外呼 / 3 任务 DONE / 幂等 1 次 / 缓存命中不打上游 / 死信 0）；两者都由 `LLM_API_KEY` 门控，CI 零外呼。切片2（语料质检健壮性）转 W-Z5 |
+| W-Y4 | **消息队列：可靠投递与背压** | ✅ 切片1 | 2026-11-12 | `ba7efd4` | `AdvisorJobQueue`：有界 `ArrayBlockingQueue` + 2 worker 把慢速 LLM 从 Tomcat 线程隔离；满 → 明确 429 + Retry-After（不静默丢）；`requestId` 幂等；只对 `upstream-*` / `circuit-open` 指数退避重试；耗尽进可见死信；终态按**单调完成序号** LRU 淘汰（毫秒时间戳会并列，实测抓到）；`POST /api/ai/chat/async` + `GET /api/ai/jobs/{id}` + `/jobs/stats`；前端 429 → `busy` 原因 + degraded 档（顺带修纯文本 500 时 `data.error` 抛异常的真缺陷）；真实联调通过；smoke 4k 段 |
 | W-Y5 | **算法与运行时性能**（空间索引 / 对象池 / 脏标记 / 帧预算） | ⬜ | | | 以 `npm run perf` 与 `perf:census` 的读数为准，不接受「看着快了」 |
 | W-Y6 | **数据库读写路径**（索引、批量写、读写分离口径） | ⬜ | | | 先量现有内存仓储的真实复杂度，再决定要不要引入持久层 |
 | W-Y7 | **前端视觉体系旗舰化**（设计令牌 / 光效分层 / 动效分级 / 可访问性） | ⬜ | | | 所有动效包在 `prefers-reduced-motion` 内；色盲档与字号档不能被覆盖 |
@@ -464,6 +464,21 @@
 > ② 密钥只存在于 `.env`（已 gitignore）/ 环境变量 / 服务端进程内，**不进任何被 git 追踪的文件、
 > 不进日志、不进响应体**；③ 每片仍然是「代码 + 测试 + 门禁 + 提交 + 回填」五件套；
 > ④ 真实网络调用只在**显式带密钥**的集成测试与手工联调脚本里发生，CI 默认零外呼。
+
+### Phase Z — 纵深续篇（2026-11-12 起，接在 Y 之后，仍不设终点）
+
+> Y 段把「密钥 / 慢调用 / 背压」这条链修通了。Z 段量的是**下一层**：跨实例的一致性、
+> 帧内的算法成本、玩家真正看得到的设计体系，以及把真实大模型用回内容生产而不是只用来聊天。
+
+| 编号 | 工作包 | 状态 | 备注 |
+|------|--------|------|------|
+| W-Z1 | **Redis Streams 跨实例可靠投递** | ⬜ | W-Y4 是进程内队列（重启丢在途）；消费者组 + XACK + pending 重投，与 W-M5 Pub/Sub 的 broadcast 互补 |
+| W-Z2 | **帧内算法与硬件适配** | ⬜ | 空间哈希网格 / 对象池 / 脏标记 / 帧预算；以 `npm run perf` 与 `perf:census` 读数为准 |
+| W-Z3 | **设计令牌与动效分级** | ⬜ | CSS 自定义属性收敛色板/层级/时长；动效分三档且全包 `prefers-reduced-motion`；色盲档与字号档不许被覆盖 |
+| W-Z4 | **数据库读写路径** | ⬜ | 先量现有内存仓储复杂度，二级索引 + 批量写；读写分离口径写清，不为了上数据库而上 |
+| W-Z5 | **真实大模型语料质检** | ⬜ | 用真实 API 跑回声/POI 文案一致性检查，把发现的真问题改回内容层；开发期工具、非玩家路径 |
+| W-Z6 | **关联 ID 贯通 ai-service** | ⬜ | 网关 `X-Request-Id`（W-P8）一路带到 `/api/ai/jobs/**`，让一次慢调用在两端日志对得上 |
+| W-Z7 | **面板后台继续问** | ⬜ | 把 W-Y4 的提交→轮询接成 UI 路径：关掉面板后答案仍会落地，回来时可见；真取消要能撤销排队任务 |
 
 ---
 
@@ -6467,3 +6482,17 @@ Phase D（系统与质量）
   - **验证**：`mvn -o -q test` 全模块全绿；新增 `SeasonBroadcastListenerTest` 7 例 + `SeasonBroadcastControllerTest` 3 例 —— 失效腿（先塞旧值，广播后 loader 必须重跑）、累计腿、无关事件腿、六种坏消息腿（并断言坏消息**不许顺手清缓存**，那是把一次噪声放大成一次回源）、缺字段腿、频道名字面量腿、`@Nullable` 反射腿；发布端钉死 payload 的 `event/id/dayInCycle` 形状（这是跨服务线协议，改名会让订阅方「收得到但认不出」而两端测试都还是绿的）、条件注解腿、503 腿。零存档迁移、零前端改动。
 
   - **风险与后续**：① Pub/Sub **不保证送达**：订阅者掉线期间的广播会永久丢失，那份缓存只能等 30s 自然过期。要严格一致得换 Redis Streams / 带版本号的轮询，但这条链路今天只是「早 30 秒看到新赛季」，用不着那个成本 —— 这条边界要写清楚，别让后来的人以为它是强一致。② 发布端点目前是「测试/联调开关」，**没有接进真正的换季动作**；生产里换季是 `SeasonCatalog` 按日历算出来的（W-X14），没有「推一次」的时刻。下一片要么把广播挂到 override 热更的路径上，要么老实承认它只是一块联调踏板。③ 广播计数 `received` 是进程内 `AtomicLong`，多实例时 `/api/ops/health` 只报自己那一份；要看全局得进 Redis 或指标系统。④ `RedisHealthIndicator` 在主 yml 里被显式关掉 —— 这是「健康检查不该比业务更脆」的取舍，但它同时意味着 **Redis 挂了 health 仍是 UP**，运维得靠 `seasonBroadcastReceived` 停滞来发现。
+
+- **2026-11-12 W-Y4 —— 可靠任务队列：把慢速 LLM 从请求线程里挪出去**
+
+  - **动机**：W-Y1/W-Y2 把「密钥关进服务端」「面板在断网时不说谎」都做到了，但 `/api/ai/chat` 仍是同步的：真实上游本轮实测 18.3 秒，一次提问就把一个 Tomcat 工作线程钉在慢 I/O 上。熔断解决的是"上游坏了"，不是"上游只是慢"；`ai-lore-assist` 那类离线工具也不需要抢线程，只有玩家路径需要。**队列解决的是资源隔离**，不是再包一层重试。
+
+  - **做法**：① `AdvisorJobQueue`（无 Spring 注解的纯并发结构 + `@PostConstruct/@PreDestroy` 生命周期）：有界 `ArrayBlockingQueue`（64）+ 2 个 daemon worker；`submit` 只 offer 一格立即返回，满则 `SubmitResult.rejected` → Controller 明确 `429 + Retry-After`（不静默丢、不让请求线程等空位）。② **幂等** `requestId`：`requestIds.putIfAbsent` 去重，重复提交回同一个 jobId；被拒时把 jobs 与幂等键**一起回滚**，否则玩家会拿着一个不存在的 jobId 去轮询。③ **选择性重试**：只有 `upstream-*` / `circuit-open` 退避重试；`not-configured` 是配置错误，再问一百次也不会长出密钥。④ **可见死信**：耗尽进 DEAD 并留机器码原因 —— "问了没答"和"问过、上游挂了"不是一件事。⑤ 三个新端点 `POST /api/ai/chat/async` / `GET /api/ai/jobs/{id}` / `GET /api/ai/jobs/stats`；轮询视图**不回显 question/context**（玩家输入不是轮询该拿的东西）。⑥ 前端协同：429 单独成 `busy` 原因 + `advisor_error_busy` 双语文案 + degraded 档（服务活着只是忙，别让玩家去检查网关）；i18n 2940 → **2941**。
+
+  - **两次真实抓到的东西**（都不是测试桩问题）：① **终态 LRU 不能用挂钟排序** —— 三个任务在同一毫秒完成，`finishedAtMs` 并列，淘汰谁取决于 HashMap 迭代顺序，测试会随机红。改成 `completionSeq` 单调序号，淘汰次序与时钟分辨率脱钩。② **纯文本 500 会把失败分支炸掉** —— `AdvisorPanel._handleResult` 写的是 `data.error`，而网关返回纯文本错误页时 `data === null`，一次普通 500 会让玩家连"出了什么事"都看不到；改 `data?.error` 并加回归用例。③ 指标里 `depth/tracked` 一度是 int、其余是 long，运维读数一半类型不一致；统一 long。
+
+  - **并轨收编与密钥安全**：工作区里躺着三份并轨侧草稿（`_e2e_advisor.mjs` / `_serve_dist.mjs` / `server/_e2e_boot.ps1`）。其中 boot 脚本**把真实 `sk-` 密钥写死在源码里**，且用 `Stop-Process -Name java -Force` 会杀掉开发机上所有 Java 进程。收编成 `scripts/e2e-advisor.mjs` / `scripts/serve-dist.mjs` / `server/scripts/e2e-advisor-boot.ps1`：密钥改为**必须先导出 `LLM_API_KEY` 否则拒绝启动**，停止逻辑改为端口预检 + 只回收自己起的 PID；`package.json` 加 `e2e:advisor` / `serve:dist`，`.gitignore` 加 `/_*.mjs` `/_*.ps1` `/server/_*.ps1` 把这类草稿永久挡在索引外。**密钥没有进入任何被 git 追踪的文件**。
+
+  - **验证**：前端 lint 0 / `test:verify` **433 文件 6490 例全绿** / build 无 chunk 回退 / 首屏 **2.11 MiB**（环比 2.13、上限 2.25 双线过）；服务端 `mvn -o -q test` 全模块 ALL_RC=0，ai-service **49 例绿**（新增 `AdvisorJobQueueTest` 10 + `AdvisorJobControllerTest` 7 + 1 真联调 skip）；**真实 API 联调**：`AiLiveIntegrationTest`（18.3s 中文回答、缓存命中零二次外呼）与新增 `AdvisorJobLiveIntegrationTest`（真实上游 2 次外呼 / 3 任务 DONE / 幂等命中 1 次 / 缓存命中不涨外呼 / 死信 0）双双通过；`smoke.ps1` 新增 4k 段（提交 / 幂等 / 轮询 / 不回显问题 / 不泄密钥）。
+
+  - **风险与后续**：① 这是**进程内**队列：重启丢在途任务、多实例不共享 jobId；跨实例可靠要换 Redis Streams（消费者组 + XACK + pending 重投），**不是**给 HashMap 加分布式锁 —— 记入 W-Z1。② 面板当前仍走同步端点，异步端点是给"要立刻拿回控制权"的客户端准备的；把提交→轮询接成 UI 路径记入 W-Z7。③ `retry` 在 worker 线程内 sleep，2 个 worker 时一次退避会占住一条车道；真要高并发应把重试改成延迟重投（DelayQueue），今天的上游并发上限本就小，不做过度设计。④ Windows PowerShell 5.1 宿主注入了 `Path/PATH/path` 三个同名键，`Start-Process` 会抛"已添加项"——冒烟脚本本身没错，本地跑之前先清理环境键；CI 的 ubuntu runner 不触发。
