@@ -3230,6 +3230,12 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   echo_mithril_shard_desc: "莫里亚深处散落的秘银碎片——比铁更轻、比银更白、比沉默更值钱。",
   ach_echo_middle_earth_title: "中洲低语",
   ach_echo_middle_earth_desc: "集齐全部四枚中洲回声",
+  echo_floating_casino_title: "赛博深渊·浮空赌场",
+  echo_floating_casino_desc: "悬浮在云层里的赌场没有牌桌，进来的人都赌自己，出去的人都输了灵魂。",
+  echo_black_market_pod_title: "赛博深渊·黑市舱",
+  echo_black_market_pod_desc: "半埋在商路荒地里的黑市舱。交易按字节计价，卖家永远看不清第二笔交易的内容。",
+  echo_rooftop_dojo_title: "赛博深渊·天台道场",
+  echo_rooftop_dojo_desc: "天台搭的木板平台，没老师、没道服、只有刀——凡来学的人，先学怎么不举刀。",
 
   trial_toast_started_fmt: '试炼开始：第 ${layer} 层',
   trial_toast_layer_fmt: '第 ${layer} 层清完了',

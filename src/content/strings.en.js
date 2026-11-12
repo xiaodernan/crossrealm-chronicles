@@ -3230,6 +3230,12 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   echo_mithril_shard_desc: "Scattered mithril from the deep mines of Moria — lighter than iron, whiter than silver, and dearer than silence.",
   ach_echo_middle_earth_title: "Whispers of Middle-earth",
   ach_echo_middle_earth_desc: "Collect all four Middle-earth echoes",
+  echo_floating_casino_title: "Cyber Neon · The Floating Casino",
+  echo_floating_casino_desc: "A casino hung from a cloud — no cards are dealt, yet everyone who enters wagers their soul and walks away lighter.",
+  echo_black_market_pod_title: "Cyber Neon · The Black Market Pod",
+  echo_black_market_pod_desc: "A half-buried trading pod on the trade road — sold by the byte, with the second transaction always unread.",
+  echo_rooftop_dojo_title: "Cyber Neon · The Rooftop Dojo",
+  echo_rooftop_dojo_desc: "A plank platform on a rooftop — no master, no uniforms, just a blade. Come to learn, leave without drawing it.",
 
   trial_toast_started_fmt: 'Trial started: layer ${layer}',
   trial_toast_layer_fmt: 'Layer ${layer} cleared',

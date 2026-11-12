@@ -137,4 +137,9 @@ export const ECHOES = [
   { id: 'echo-broken-sword', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_broken_sword_title', desc: 'echo_broken_sword_desc', trigger: 'echo:broken-sword' },
   { id: 'echo-elven-harp', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_elven_harp_title', desc: 'echo_elven_harp_desc', trigger: 'echo:elven-harp' },
   { id: 'echo-mithril-shard', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_mithril_shard_title', desc: 'echo_mithril_shard_desc', trigger: 'echo:mithril-shard' },
+
+  // ── Wave14（赛博深渊 · 浮空赌场、黑市舱、天台道场）──
+  { id: 'echo-floating-casino', franchise: FRANCHISE.CYBER, zone: 'magic', title: 'echo_floating_casino_title', desc: 'echo_floating_casino_desc', trigger: 'echo:floating-casino' },
+  { id: 'echo-black-market-pod', franchise: FRANCHISE.CYBER, zone: 'magic', title: 'echo_black_market_pod_title', desc: 'echo_black_market_pod_desc', trigger: 'echo:black-market-pod' },
+  { id: 'echo-rooftop-dojo', franchise: FRANCHISE.CYBER, zone: 'magic', title: 'echo_rooftop_dojo_title', desc: 'echo_rooftop_dojo_desc', trigger: 'echo:rooftop-dojo' },
 ];

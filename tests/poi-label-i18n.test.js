@@ -46,6 +46,7 @@ const POI_SOURCE_FILES = [
   'src/world/PopCultureZoneEnhancerWave11.js',
   'src/world/PopCultureZoneEnhancerWave12.js',
   'src/world/PopCultureZoneEnhancerWave13.js',
+  'src/world/PopCultureZoneEnhancerWave15.js',
   'src/world/zones/FantasyZone.js',
   'src/world/zones/MagicZone.js',
   'src/world/zones/SpaceZone.js',
@@ -176,6 +177,9 @@ const POI_LABELS = {
   'homage-middle-earth-broken-sword': ['echo_broken_sword_title', '中洲回响·亡者之剑', 'Middle-earth Echo · The Broken Sword'],
   'homage-middle-earth-elven-harp': ['echo_elven_harp_title', '中洲回响·幽谷竖琴', 'Middle-earth Echo · The Elven Harp'],
   'homage-middle-earth-mithril-shard': ['echo_mithril_shard_title', '中洲回响·秘银矿', 'Middle-earth Echo · The Mithril Shard'],
+  'homage-cyber-floating-casino': ['echo_floating_casino_title', '赛博深渊·浮空赌场', 'Cyber Neon · The Floating Casino'],
+  'homage-cyber-black-market-pod': ['echo_black_market_pod_title', '赛博深渊·黑市舱', 'Cyber Neon · The Black Market Pod'],
+  'homage-cyber-rooftop-dojo': ['echo_rooftop_dojo_title', '赛博深渊·天台道场', 'Cyber Neon · The Rooftop Dojo'],
 };
 
 describe('POI 交互标签双表化（W-D2 切片19）', () => {

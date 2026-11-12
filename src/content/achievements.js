@@ -36,11 +36,10 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-gangster', title: 'ach_echo_gangster_title', desc: 'ach_echo_gangster_desc', check: (s) => (s.echoGangster ?? 0) >= 3 },
   { id: 'echo-scifi', title: 'ach_echo_scifi_title', desc: 'ach_echo_scifi_desc', check: (s) => (s.echoSciFi ?? 0) >= 3 },
   { id: 'echo-triad', title: 'ach_echo_triad_title', desc: 'ach_echo_triad_desc', check: (s) => (s.echoWestern ?? 0) >= 3 && (s.echoGangster ?? 0) >= 3 && (s.echoSciFi ?? 0) >= 3 },
-  { id: 'echo-cyber', title: 'ach_echo_cyber_title', desc: 'ach_echo_cyber_desc', check: (s) => (s.echoCyber ?? 0) >= 3 },
   { id: 'echo-samurai', title: 'ach_echo_samurai_title', desc: 'ach_echo_samurai_desc', check: (s) => (s.echoSamurai ?? 0) >= 3 },
   { id: 'echo-cosmic', title: 'ach_echo_cosmic_title', desc: 'ach_echo_cosmic_desc', check: (s) => (s.echoCosmic ?? 0) >= 3 },
   { id: 'echo-starport', title: 'ach_echo_starport_title', desc: 'ach_echo_starport_desc', check: (s) => (s.echoStarport ?? 0) >= 3 },
-  { id: 'echo-wave4', title: 'ach_echo_wave4_title', desc: 'ach_echo_wave4_desc', check: (s) => (s.echoCyber ?? 0) >= 3 && (s.echoSamurai ?? 0) >= 3 && (s.echoCosmic ?? 0) >= 3 && (s.echoStarport ?? 0) >= 3 },
+  { id: 'echo-wave4', title: 'ach_echo_wave4_title', desc: 'ach_echo_wave4_desc', check: (s) => (s.echoCyber ?? 0) >= 6 && (s.echoSamurai ?? 0) >= 3 && (s.echoCosmic ?? 0) >= 3 && (s.echoStarport ?? 0) >= 3 },
   { id: 'echo-gloom', title: 'ach_echo_gloom_title', desc: 'ach_echo_gloom_desc', check: (s) => (s.echoGloom ?? 0) >= 3 },
   { id: 'echo-radiant', title: 'ach_echo_radiant_title', desc: 'ach_echo_radiant_desc', check: (s) => (s.echoRadiant ?? 0) >= 3 },
   { id: 'echo-voidmaw', title: 'ach_echo_voidmaw_title', desc: 'ach_echo_voidmaw_desc', check: (s) => (s.echoVoidMaw ?? 0) >= 3 },
@@ -49,6 +48,7 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-homecoming', title: 'ach_echo_homecoming_title', desc: 'ach_echo_homecoming_desc', check: (s) => (s.echoHomecoming ?? 0) >= 3 },
   { id: 'echo-homecoming-master', title: 'ach_echo_homecoming_master_title', desc: 'ach_echo_homecoming_master_desc', check: (s) => (s.echoHomecoming ?? 0) >= 10 },
   { id: 'echo-middle-earth', title: 'ach_echo_middle_earth_title', desc: 'ach_echo_middle_earth_desc', check: (s) => (s.echoMiddleEarth ?? 0) >= 4 },
+  { id: 'echo-cyber', title: 'ach_echo_cyber_title', desc: 'ach_echo_cyber_desc', check: (s) => (s.echoCyber ?? 0) >= 6 },
 ];
 
 /**
