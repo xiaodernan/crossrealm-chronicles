@@ -472,7 +472,7 @@
 
 | 编号 | 工作包 | 状态 | 备注 |
 |------|--------|------|------|
-| W-Z1 | **Redis Streams 跨实例可靠投递** | ✅ 切片1 | 2026-11-12 | `6202da4` | `AdvisorQueue` 接口 + 两个实现（`AdvisorJobQueue` 内存默认 / `RedisStreamAdvisorQueue`：XADD/XACK/XREADGROUP + XPENDING 重投 + `ai:advisor:dlq` + SETNX 幂等）；`StreamJobState` 纯判定类钉死重试/死信边界；fail-open 退回内存后端 |
+| W-Z1 | **Redis Streams 跨实例可靠投递** | ✅ 切片1+2 | 2026-11-13 | `6202da4` / `a9c1a24` | `AdvisorQueue` 接口 + 两个实现（`AdvisorJobQueue` 内存默认 / `RedisStreamAdvisorQueue`：XADD/XACK/XREADGROUP + XPENDING 重投 + `ai:advisor:dlq` + SETNX 幂等）；`StreamJobState` 纯判定类钉死重试/死信边界；fail-open 退回内存后端；切片2：`GET /api/ai/jobs/dead-letter?limit=N` 死信只读白名单（{id, requestId, reason, attempts}，零 question/answer/context） |
 | W-Z2 | **帧内算法与硬件适配** | ✅ 切片1 | `SpatialGrid` 均匀网格把分离推力的邻居查询从 O(n²) 全遍历改成 O(邻域桶)；**逐只对拍** 3 组随机 × 200 只 + 密集重叠 + 自定义 pad，推力逐值相等；1000 只均匀分布时候选数 < 全量 10%；`npm run perf` 全部预算内（枢纽 updateAvg 1.52ms / 灰白森林 1.59ms / p95 2.5ms / exceptions=0）。切片2：对象池 / 脏标记 / 帧预算、draw-call 地板 8 格重钉 |
 | W-Z3 | **设计令牌与动效分级** | ✅ 切片1 | `:root` 收敛语义令牌：时长档（--dur-instant→--dur-cinematic 单调）+ 缓动 + 层级（--z-hud→--z-loading）+ 圆角/阴影/间距尺度；末尾新增**全局** reduced-motion 兜底网（`* { animation-duration:0.001ms; iteration:1 }` 让 forwards 动效瞬间到终态 + 档C 纯装饰元素 `animation:none`）；`advisor-enter` 接入 `--ease-out`/`--dur-base`；新增 `tests/design-tokens.test.js`（27 例钉令牌定义 + 全局网存在）。`W-Y7` 的「设计令牌/动效分级」半边由本片覆盖，剩「光效分层/可访问性（色盲档与字号档不被覆盖）」 |
 | W-Z4 | **数据库读写路径** | ✅ 切片1 | 2026-11-12 | `e7d378f` | 先量现有内存仓储复杂度：三个仓的结构/读写复杂度入册；`/api/ops/stats` 读数 O(n log n) 真实热路径判断——当前不上持久层；Redis 化留给 W-Z1 跨实例语境（已落地）；不为了上数据库而上 |
@@ -6596,3 +6596,12 @@ Phase D（系统与质量）
   - **尺寸刻度重钉**：`FIRST_SCREEN_READING` 2163508 → 2228948（2026-11 真读数）。本次重钉覆盖它之后四片的真实功能增长：W-Y2 回声灯接真接口（OnlineServices.fetchEchoHint + 屏 CSS）+ W-E10 深空孔径三枚（POI/石碑/坠环/星骸三片场景件 + 6 文案键）+ W-Z8 切片2 设置页「星轨诊断」（3 文案键 + 面板接线）+ W-Z7 切片B（后台提问路径 ~5KB）。build/e2e/tests 全绿；**2.25 MiB 绝对上限仍有 0.12 MiB 余量**；`GROUP/franchises` 按语言分包仍是独立一片的结构性杠杆（文案表占首屏约 40%），不在此片解决。刻度只升不降，环比 3% 不放宽。
 
   - **风险与后续**：① DEAD 映射 http/503 复用熔断文案——语义等价（服务端明确答不出来），没有为"not-configured vs upstream-500"细分文案，那是文案预算，非 bug；② 轮询预算 90s 对慢答案是截止线不是硬中断（服务端/LLM 会继续跑完并落库，只是玩家看不到）——DEAD 落定后再打开面板也看不到旧提问的终态（能力上没有「面板重开续流」，那是下一片）；③ 面板重开续流/作答完成徽章仍是 W-Z7 的未竟半边——异步队列接通后才有内容可续；④ 本片把 `advisor-panel-wiring` 的桩换成后台路径，同步 `askAdvisor` 保留在 OnlineServices 里（公共 API 不裁）；⑤ Redis 后端 cancel 待 Redis 在线复测（连 RedisStreamAdvisorQueueLiveTest 一起）。
+- **2026-11-13 W-Z1 死信只读白名单（切片2）** —— 提交 `a9c1a24`
+
+  - **起因**：W-Z1 ADR ⑤（memento：把死信曝到面板）挂了两轮——W-Z8 把「多少条」（deadLettered 计数）送到了 `/api/ops/advisor`，却一直没有「哪些」。轮到这片时只做一件事，而且**先画边界**：死信明细会带玩家输入（DLQ 里就是 question 原文），任何把 question 原样透出的「明细端点」都是把玩家聊天记录公示给任何能 curl 到 `/api/ai/**` 的人（网关上这个路径不带鉴权）。所以这一片只做**白名单**：`{id, requestId, reason, attempts}`（内存后端附 finishedAtMs），question/answer/context **零出门**——排障要的是「同一类失败出现了多少次」，不是看聊天记录。
+
+  - **做法**：`AdvisorQueue.deadLetters(limit)`；内存后端扫 DEAD、按 completionOrder 倒序夹到 50；Redis 后端 `XREVRANGE ai:advisor:dlq - + LIMIT 128`（Spring Data Redis 的 `reverseRange(key, Range.unbounded(), Limit.limit().count(128))`）逐条白名单摘取，异常吞空列表（运维视图永不 500）。`GET /api/ai/jobs/dead-letter?limit=N`（默认 10，封顶 50）→ `{items, count, limit}`；Spring MVC 字面量路由优先于 `/jobs/{jobId}`，无歧义。
+
+  - **验证**：`mvn -B -f server/pom.xml verify` BUILD SUCCESS（ai-service **70/70**，`AdvisorJobControllerTest` 12/12：新注定-DEAD 队列钉「白名单只回可排障字段、问句零泄露、reason=handler-error、requestId 透出」与「limit=9999 夹到 50、空信件 items=[]」两条；game-service 64/64、gateway 46/46）；smoke §4o 本机 PASSED（形状 + 三种 smoke 提问文本/question/answer/context 字段/sk- 全部必须不出现在回包里）。
+
+  - **取舍**：① 不做 game-service → ai-service 的二跳聚合——curl 直读/前端直读 ai-service 足够，二跳只是把 Feign 配置表拉长一格；② 不做 question 的脱敏摘要（如「前 20 个字符 + …」）——截断仍是把 PII 的碎片交给无所谓的人看，要摘要得有 LLM 且得有授权口径，两者都不在这片；③ DLQ 只增不裁——128 条扫描上限意味着旧死信「读不到但不清除」；DLQ 清理（XTRIM + 保留期）是独立一整命题，等出现真实积压再谈；④ Redis 后端 dead-letter 与 cancel 同一风险：本地无 Redis 未实机验证。
