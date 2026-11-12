@@ -695,6 +695,13 @@ export const STRINGS_ZH = Object.freeze({
   journal_dungeon_summary_title: '累计',
   journal_dungeon_recent_title: '最近通关',
   pop_culture_stats: '已共鸣 ${unlocked} / ${total}（${percent}%）',
+  // 星轨顾问（Echo Lamp）——次元回声 Tab 的「问一句」按钮
+  pc_echo_ask_button: '问回声灯',
+  pc_echo_ask_loading: '正在观星…',
+  pc_echo_ask_done: '已经开问过',
+  pc_echo_ask_failed: '回声灯没有给出答案',
+  pc_echo_ask_off: '启用「在线伙伴」后可用',
+
   pop_culture_note: '致敬独立游戏常见做法：借母题与氛围，名称已做区分处理',
 
   // 营火对话树文案（W-D2 切片16q：台词/选项/日志条目全是键）

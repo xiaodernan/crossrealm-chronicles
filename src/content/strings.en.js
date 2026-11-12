@@ -694,6 +694,13 @@ export const STRINGS_EN = Object.freeze({
   journal_dungeon_summary_title: 'Totals',
   journal_dungeon_recent_title: 'Recent Clears',
   pop_culture_stats: 'Resonated ${unlocked} / ${total} (${percent}%)',
+  // Starpath Advisor (Echo Lamp) — Echo Tab 'Ask' button
+  pc_echo_ask_button: 'Ask the Echo Lamp',
+  pc_echo_ask_loading: 'Reading the stars…',
+  pc_echo_ask_done: 'Already asked',
+  pc_echo_ask_failed: 'The Echo Lamp is silent',
+  pc_echo_ask_off: 'Enable Online Companions to use',
+
   pop_culture_note: 'A nod to how indie games do it: borrow the motifs and the atmosphere, with the names clearly differentiated',
 
   // Campfire dialogue strings (W-D2 slice 16q: lines, choices and journal entries are all keys)
