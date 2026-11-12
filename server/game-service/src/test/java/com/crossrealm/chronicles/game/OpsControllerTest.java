@@ -48,6 +48,8 @@ class OpsControllerTest {
                 .andExpect(jsonPath("$.inMemory.trialCache.hits").isNumber())
                 .andExpect(jsonPath("$.inMemory.trialCache.misses").isNumber())
                 .andExpect(jsonPath("$.inMemory.trialCache.entries").isNumber())
+                // W-M5：广播接收计数——默认不激活（无 redis，listener 不存在）→ -1（不编造）
+                .andExpect(jsonPath("$.seasonBroadcastReceived").value(-1))
                 .andExpect(jsonPath("$.inMemory.seasonCache.hits").isNumber())
                 .andExpect(jsonPath("$.inMemory.seasonCache.misses").isNumber())
                 .andExpect(jsonPath("$.inMemory.seasonCache.entries").isNumber());

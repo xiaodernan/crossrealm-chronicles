@@ -8,6 +8,10 @@ spring:
     timeout-per-shutdown-phase: 15s
   application:
     name: game-service
+  # 显式默认：不用 Redis CacheManager 也不注册 RedisHealthIndicator（classpath 有 redis 时才生效）
+  # 要开 Redis：SPRING_CACHE_TYPE=redis + SPRING_DATA_REDIS_HOST=... 上线后开
+  cache:
+    type: simple
   cloud:
     openfeign:
       # 不开这一条，Feign 会**静默忽略** fallbackFactory —— 失败时把异常直接抛给调用方
@@ -44,7 +48,12 @@ eureka:
     prefer-ip-address: true
 
 management:
+  # 关闭 Redis 探活 — Spring Boot 会为 spring-boot-starter-data-redis 自动注册一个 RedisHealthIndicator；
+  # Redis 没起或不可达时 health 会当场 FAIL，CI 会挂——比不探更危险。
+  health:
+    redis:
+      enabled: false
   endpoints:
     web:
       exposure:
-        include: health,info,refresh
+        include: health,info,refresh,busrefresh

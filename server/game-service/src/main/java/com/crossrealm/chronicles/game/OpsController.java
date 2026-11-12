@@ -40,8 +40,9 @@ public class OpsController {
     private final RequestCountFilter requestCountFilter;
     private final String applicationName;
 
-    /** 下游 season-service 的外呼结果走一层 30s TTL，避免运维页轮询把上游打爆 */
-    private final TtlCache seasonCache = new TtlCache();
+    private final TtlCache seasonCache;
+    /** 换季广播接收器（W-M5）——仅 spring.cache.type=redis 时存在；不存在则 health 报告 -1（不编造） */
+    private final SeasonBroadcastListener seasonBroadcastListener;
 
     /** @Autowired: 与 W-X13 起的契约一致 — 单一构造供 Spring 注入（W-P14 起七参） */
     @org.springframework.beans.factory.annotation.Autowired
@@ -52,6 +53,9 @@ public class OpsController {
             TelemetryService telemetryService,
             SeasonClient seasonClient,
             RequestCountFilter requestCountFilter,
+            TtlCache seasonCache,
+            @org.springframework.beans.factory.annotation.Autowired(required = false)
+            SeasonBroadcastListener seasonBroadcastListener,
             @Value("${spring.application.name:game-service}") String applicationName) {
         this.properties = properties;
         this.leaderboardService = leaderboardService;
@@ -59,11 +63,17 @@ public class OpsController {
         this.telemetryService = telemetryService;
         this.seasonClient = seasonClient;
         this.requestCountFilter = requestCountFilter;
+        this.seasonCache = seasonCache;
+        this.seasonBroadcastListener = seasonBroadcastListener;
         this.applicationName = applicationName;
     }
 
     /** Controller 构造时刻 ≈ 应用启动时刻（容器装配完才创建），足够当 uptime 的起点 */
     private final java.time.Instant startedAt = java.time.Instant.now();
+
+    private long seasonBroadcastReceived() {
+        return seasonBroadcastListener != null ? seasonBroadcastListener.receivedCount() : -1L;
+    }
 
     @GetMapping("/api/ops/health")
     public Map<String, Object> health(
@@ -91,6 +101,8 @@ public class OpsController {
                 "leaderboardCache", leaderboardService.cacheStats(),
                 "trialCache", trialService.cacheStats(),
                 "seasonCache", seasonCache.stats()));
+        // W-M5：广播接收计数（没有监听器就返 -1 —— “不适用”，不编造）
+        result.put("seasonBroadcastReceived", seasonBroadcastReceived());
         return result;
     }
 

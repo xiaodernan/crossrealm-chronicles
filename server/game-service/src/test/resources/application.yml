@@ -1,5 +1,14 @@
-# 测试专用：关掉 Eureka/Config 的网络依赖，保证 CI 离线可跑
+# 测试专用：关闭 Eureka/Config/Redis 的网络依赖，保证 CI 离线可跑
 spring:
+  cache:
+    type: simple
+  autoconfigure:
+    # 测试 classpath 里没有 Redis，但 spring-boot-starter-data-redis 会自动注册 Lettuce + 探活 —
+    # 全关：健康探测、缓存管理器、Lettuce 的懒连接都不想要。
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.autoconfigure.health.RedisReactiveHealthIndicatorAutoConfiguration
   cloud:
     config:
       enabled: false

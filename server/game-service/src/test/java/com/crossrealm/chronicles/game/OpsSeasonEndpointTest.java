@@ -32,6 +32,8 @@ class OpsSeasonEndpointTest {
                 new TelemetryService(properties),
                 client,
                 new RequestCountFilter(),
+                new com.crossrealm.chronicles.game.cache.TtlCache(),
+                null,
                 "game-service");
     }
 

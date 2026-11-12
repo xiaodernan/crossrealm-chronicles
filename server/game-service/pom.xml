@@ -54,6 +54,12 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- W-M5：接收 season-service 经 Redis Pub/Sub 广播的「换季」事件，让 30s TTL 立刻失效 -->
+    <!-- 默认 spring.cache.type 不是 redis ⇒ listener 不会创建，Lettuce 也不会连接 localhost -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
