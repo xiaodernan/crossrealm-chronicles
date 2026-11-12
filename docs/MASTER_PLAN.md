@@ -6065,6 +6065,19 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 Redis 赛季缓存实证 + CI 门禁（W-S2）** —— 提交 `77f6d49`
+
+  - **起因**：Redis 缓存这一片从 W-P6（season-service 接入 Spring Cache）起从未被真正跑通过——`spring.cache.type=redis` 只在 W-P10 的限流背板身上得到验证（因为那是独立的 Lua 脚本），`RedisCacheManager` 里的 `@Cacheable` 路径一直是"配置看着对就没人怀疑"。这次专程写脚本去打它，结果**当场 500**。
+
+  - **根病**：`CacheConfig.redisCacheManager` 里的 `GenericJackson2JsonRedisSerializer` 用 `DefaultTyping.NON_FINAL`——NON_FINAL 只给**非 final** 类写类型标记；而 `SeasonView` 是 **final record**（final 类不带 `@class`）。反序列化走 `readValue(bytes, Object.class)` 时，Jackson 按"非 final 类型必须有 WRAPPER_ARRAY 类型信息"解 `Object` → 报 `Unexpected token (START_OBJECT), expected START_ARRAY` → 每次缓存命中都 500。**这条 Redis 缓存路径自 W-P6 落地起就从未工作过**，只是没有任何真实负载打到它，于是它一直"看起来没问题"。
+
+  - **修法**：`DefaultTyping.NON_FINAL` → `EVERYTHING`（final 类也带 `@class`，读侧按字段回家，零猜测；运维仍可 HGETALL 直接看内容）。
+
+  - **实证脚本** `scripts/verify-redis-season-cache.ps1`（本地 Docker 验证，全绿）：throwaway redis × `SPRING_CACHE_TYPE=redis` 启动 → 两次 `/api/seasons/active` body 逐字相同（第二次走缓存）→ `KEYS seasons*` 有 `seasons::active` → `PTTL ≈ 298275ms`（对齐 W-S1 的 300s TTL）→ `docker stop redis` 后端点报错（不静默吞掉）→ `docker start redis` 后端点立即恢复 200。`server.yml` 新增 **Redis-backed season cache** 步骤，W-P15（限流）+ W-S2（缓存）两条 Redis 门禁此后每个 server 变更都真跑。
+
+  - **验证**：本地实证 PASSED（redis up → cached 200 → keys/TTL 断言 → redis down fail → redis back 200）；season-service `mvn verify` 16/16 绿（concurrent 分支不受影响——本次只动 Redis 分支的序列化器）；server CI 以 run `77f6d49` 见分晓。
+
+  - **风险与后续**：① 该 bug 只在 Redis 后端暴露——ConcurrentMapCacheManager（默认 simple 分支）不序列化、无任何影响，这也是它能活到现在的原因；② 若以后要给所有 @Cacheable 的 value 换别的序列化器，**先跑这两个 verify 脚本**（rate-limit + season cache）——它们现在是 Redis 门禁的两根柱子；③ 下一片：`game-service` 的 Feign 响应若也上 Redis 缓存（目前只有 season-service），同一类 NON_FINAL/EVERYTHING 陷阱别再犯；④ 把 `verify-redis-season-cache.ps1` 的交互式健康轮询化（与 W-P15 的 readiness-style 对齐）。
 - **2026-11-12 Redis 限流背板实证 + CI 门禁（W-P15）** —— 提交 `c637f41`
 
   - **起因**：W-P10 的 Redis 背板从落地起**从未被真正跑通过**——manual 脚本写了一年没人跑，Gateway 的 Redis 限流路径在 CI 里零覆盖。这一片把它从"理论上能用"修成"CI 每次真验"。
