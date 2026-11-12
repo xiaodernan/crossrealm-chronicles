@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 终章谢幕两处打磨（W-V13）** —— 提交 `40e791d`
+
+  - **起因**：终章 credits 的两个角落还没呼吸——个人最速首位只有一个静态的金色，谢幕行的字体是直立的（不够"耳语"）。通关是玩家一辈子只看几次的画面，该值得每一个像素。
+
+  - **做法**：① `.end-credits-best-row:first-of-type` 加 2.8s `bestRowGlow` 呼吸辉光（text-shadow 6px→22px，`no-preference` 路径，reduced-motion 静音）——颁奖式高光，比谢幕尾行低一档亮度（0.9 不透明度不变）；② `.end-credits-last-light` 加 `font-style: italic`（Georgia 斜体族的中文字库自动走宋体斜体，听感更像私语）。纯 CSS、零新键、零行为变更。
+
+  - **验证**：`npm test` 6375 全绿；`npm run lint` 0/0；`npm run build` 干净；`npm run size` 首屏 2178192 B（余量 0.05 MiB）；`npm run e2e` 通关 ✓（exceptions=0）。
+
+  - **风险与后续**：① `.end-credits-best-row:first-of-type` 只匹配首行——若 bestTimes 为空（老档/新档）整块不渲染，CSS 无影响；② Georgia italic 中文斜体在各系统 Chinese serif 下差异可控（Noto Serif / 宋体皆可），听感差别不大；③ 下一片：最速首位文字加一小枚 ✦ glyph 悬浮（CSS 纯字），或 W-G8 传说碑"你 vs 世界碑"的差距列。
 - **2026-11-12 Redis 赛季缓存实证 + CI 门禁（W-S2）** —— 提交 `77f6d49`
 
   - **起因**：Redis 缓存这一片从 W-P6（season-service 接入 Spring Cache）起从未被真正跑通过——`spring.cache.type=redis` 只在 W-P10 的限流背板身上得到验证（因为那是独立的 Lua 脚本），`RedisCacheManager` 里的 `@Cacheable` 路径一直是"配置看着对就没人怀疑"。这次专程写脚本去打它，结果**当场 500**。
