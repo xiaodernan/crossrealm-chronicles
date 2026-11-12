@@ -2916,12 +2916,25 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 }
 .end-credits-best-row:first-of-type { color: #ffd98a; }
 
+/* 个人最速首位 · 呼吸鎏金（W-V13）：诸神谱上第一个名字，值得自己呼吸一下。
+   比收尾行更低亮度（它是颁奖不是谢幕），且仅 no-preference 路径跑。 */
+@media (prefers-reduced-motion: no-preference) {
+  .end-credits-best-row:first-of-type {
+    animation: bestRowGlow 2.8s ease-in-out infinite;
+  }
+  @keyframes bestRowGlow {
+    0%, 100% { text-shadow: 0 0 6px rgba(255, 217, 138, 0.35); }
+    50% { text-shadow: 0 0 22px rgba(255, 217, 138, 0.9); }
+  }
+}
+
 /* 终章谢幕 · 最后一盏灯（W-V12）：只有解锁了「最后一盏灯」回声的人会看见这一行。
    比 fin 更暖一档、比最速横幅更轻一档 —— 是谢幕里的耳语，不是颁奖。 */
 .end-credits-last-light {
   margin-top: 6vh;
   color: #ffe9ad;
   font-size: 1.05rem;
+  font-style: italic;
   letter-spacing: 0.18em;
   text-align: center;
   text-shadow:
