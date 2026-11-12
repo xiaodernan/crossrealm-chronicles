@@ -1829,6 +1829,53 @@ body.boss-victory::after {
   transform: translateY(-1px);
 }
 
+.online-divider {
+  border: none;
+  border-top: 1px solid rgba(201, 169, 98, 0.22);
+  margin: 16px 0;
+}
+
+/* 刷新排行榜 — 迷你榜（W-V15）：安静地待在在线设置段里，需要时呼吸一次 */
+.online-lb-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 4px;
+  counter-reset: lb-rank;
+}
+.online-lb-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 10px;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  color: #c9a962;
+  background: rgba(255, 255, 255, 0.025);
+  border-radius: 4px;
+  border-left: 2px solid rgba(201, 169, 98, 0.15);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.online-lb-list li::before {
+  counter-increment: lb-rank;
+  content: counter(lb-rank) '.';
+  color: #666;
+  font-size: 0.6rem;
+  min-width: 1.5ch;
+  text-align: right;
+}
+.online-lb-list li:hover {
+  background: rgba(201, 169, 98, 0.06);
+  border-left-color: rgba(255, 217, 138, 0.45);
+}
+#set-online-lb,
+#set-online-ping {
+  font-size: 0.78rem;
+  padding: 8px 16px;
+  letter-spacing: 0.06em;
+}
+
 /*
  * 存档槽选择（W-D3 切片3）：与按钮同一副骨架 —— 它是面板清单里的一格，
  * ↑↓ 移焦要能看见它落上来了（`.panel-box select:focus` 与按钮同一条 outline）。
