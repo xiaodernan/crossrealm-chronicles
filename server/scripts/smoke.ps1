@@ -444,6 +444,20 @@ game-service:
     if ($dl -match '"question"|"answer"|"context"') { Write-Error "dead-letter carries question/answer/context fields: $dl"; exit 1 }
     Write-Host "dead-letter whitelist ok (items/count/limit present; no player text; no question/answer/context fields)"
 
+    Write-Host "=== 4p) via gateway: dead-letter aggregation + reasons histogram (W-Z8) ==="
+    $ola = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/dead-letter' -TimeoutSec 20).Content
+    if ($ola -is [byte[]]) { $ola = [System.Text.Encoding]::UTF8.GetString($ola) }
+    Write-Host $ola
+    if (-not ($ola -match '"available":(true|false)')) { Write-Error "ops dead-letter missing available flag: $ola"; exit 1 }
+    if ($ola -match '"available":true') {
+        if (-not ($ola -match '"count":[0-9]+')) { Write-Error "ops dead-letter missing count: $ola"; exit 1 }
+        if (-not ($ola -match '"reasons":\{')) { Write-Error "ops dead-letter missing reasons histogram: $ola"; exit 1 }
+    }
+    if ($ola -match 'smoke async ping|smoke cancel ping|smoke request-id ping') { Write-Error "ops dead-letter leaked player input: $ola"; exit 1 }
+    if ($ola -match 'sk-') { Write-Error 'ops dead-letter leaks an api key'; exit 1 }
+    if ($ola -match '"question"|"answer"|"context"') { Write-Error "ops dead-letter carries question/answer/context fields: $ola"; exit 1 }
+    Write-Host "ops dead-letter aggregate ok (available flag + count + reasons histogram; no player text)"
+
     Write-Host ""
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content

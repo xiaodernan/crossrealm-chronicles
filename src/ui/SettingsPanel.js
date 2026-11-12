@@ -375,7 +375,8 @@ export class SettingsPanel {
           : t('settings_online_ping_fail');
       });
     }
-    // 星轨诊断（W-Z8 切片2）：按钮按下才拉一次 /api/ops/advisor；
+    // 星轨诊断（W-Z8 切片2 + 切片3）：按钮按下才拉一次 /api/ops/advisor（顾问 + 队列）；
+    // 若「死信有多少、高频哪一类」拉得到，捎一句进同一行——排障只需要这一格。
     // 服务端数据当不可信 —— 行内文本只走 textContent（绝不 innerHTML），字段逐个 ?? 兜底。
     // 两格（health / jobs）各自独立可用——缺哪格就别叫整格消失：报"另一半还是好的"对运维没用，诚实报"拉不全"。
     const diagBtn = document.getElementById('set-online-diag');
@@ -392,7 +393,7 @@ export class SettingsPanel {
           out.textContent = t('settings_online_diag_unavailable');
           return;
         }
-        out.textContent = t('settings_online_diag_ok', {
+        const mainLine = t('settings_online_diag_ok', {
           model: h.model ?? '—',
           circuit: h.circuit ?? '—',
           calls: h.upstreamCalls ?? '—',
@@ -401,6 +402,23 @@ export class SettingsPanel {
           rejected: j.rejected ?? '—',
           dead: j.deadLettered ?? '—',
         });
+        // 死信摘要（W-Z8 切片3）：拉不到就安静地空着，不影响主句
+        let dlqSuffix = '';
+        const dlq = await onlineServices.fetchDeadLetterSummary?.();
+        if (dlq && dlq.available !== false) {
+          const count = Number(dlq.count);
+          const reasonsObj = dlq.reasons && typeof dlq.reasons === 'object' ? dlq.reasons : {};
+          const top = Object.entries(reasonsObj)
+            .filter(([k, v]) => k)
+            .sort((a, b) => (Number(b[1]) || 0) - (Number(a[1]) || 0))
+            .slice(0, 3)
+            .map(([k, v]) => `${k}×${Number(v) || 0}`)
+            .join('、');
+          if (Number.isFinite(count) && count > 0) {
+            dlqSuffix = t('settings_online_diag_dlq_fmt', { count, reasons: top || '—' });
+          }
+        }
+        out.textContent = mainLine + dlqSuffix;
       });
     }
   }

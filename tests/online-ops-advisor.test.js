@@ -58,17 +58,53 @@ describe('面板接线存在（源码结构断言）', () => {
     expect(INDEX).toContain('id="set-online-diag-result"');
     expect(INDEX).toContain('data-i18n="settings_online_diag_btn"');
   });
-  it('SettingsPanel 里有对应监听器、调用 fetchOpsAdvisor、写 textContent 结果', () => {
+  it('SettingsPanel 里有对应监听器、调用 fetchOpsAdvisor / fetchDeadLetterSummary、写 textContent 结果', () => {
     expect(PANEL).toContain("getElementById('set-online-diag')");
     expect(PANEL).toContain('onlineServices.fetchOpsAdvisor()');
+    expect(PANEL).toContain('onlineServices.fetchDeadLetterSummary');
     expect(PANEL).toContain("t('settings_online_diag_ok'");
     expect(PANEL).toContain("t('settings_online_diag_unavailable'");
+    expect(PANEL).toContain("t('settings_online_diag_dlq_fmt'");
     expect(PANEL).not.toContain("diag-result').innerHTML");
   });
 });
 
+describe('fetchDeadLetterSummary 启用路径（W-Z8 切片3）', () => {
+  it('200 原样返回 { available, count, items, reasons }', async () => {
+    const payload = {
+      available: true,
+      count: 2,
+      limit: 20,
+      items: [
+        { id: 'j1', reason: 'not-configured', attempts: 1 },
+        { id: 'j2', reason: 'not-configured', attempts: 2 },
+      ],
+      reasons: { 'not-configured': 2 },
+    };
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true, json: async () => payload });
+    const o = new OnlineServices({ baseUrl: 'http://localhost:1', enabled: true, fetchImpl });
+    expect(await o.fetchDeadLetterSummary()).toEqual(payload);
+    expect(fetchImpl.mock.calls[0][0]).toBe('http://localhost:1/api/ops/dead-letter');
+  });
+
+  it('非 2xx / 抛错 → null（吞掉，不向上传）', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: false, status: 503, json: async () => ({}) });
+    const o = new OnlineServices({ baseUrl: 'http://localhost:1', enabled: true, fetchImpl });
+    expect(await o.fetchDeadLetterSummary()).toBeNull();
+    const boom = new OnlineServices({ baseUrl: 'http://localhost:1', enabled: true, fetchImpl: vi.fn().mockRejectedValue(new Error('ECONNREFUSED')) });
+    expect(await boom.fetchDeadLetterSummary()).toBeNull();
+  });
+
+  it('未启用 → null，fetchImpl 零调用', async () => {
+    const fetchImpl = vi.fn();
+    const o = new OnlineServices({ baseUrl: 'http://localhost:1', enabled: false, fetchImpl });
+    expect(await o.fetchDeadLetterSummary()).toBeNull();
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});
+
 describe('zh/en 双表三键', () => {
-  const keys = ['settings_online_diag_btn', 'settings_online_diag_ok', 'settings_online_diag_unavailable'];
+  const keys = ['settings_online_diag_btn', 'settings_online_diag_ok', 'settings_online_diag_unavailable', 'settings_online_diag_dlq_fmt'];
   it('zh', () => { const set = new Set(ZH_KEYS); for (const k of keys) expect(set).toContain(k); });
   it('en', () => { const set = new Set(EN_KEYS); for (const k of keys) expect(set).toContain(k); });
 });

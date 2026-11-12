@@ -9,6 +9,7 @@ import com.crossrealm.chronicles.game.telemetry.TelemetryService;
 import com.crossrealm.chronicles.game.trial.TrialLeaderboardService;
 import java.time.Duration;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 健康视图必须永远零依赖、读即快；而"下游现在回答什么"天然可能慢或失败。
  * W-Z8 切片1 追加 `/api/ops/advisor`：同一纪律的第二处外呼（Feign → ai-service 只读派生），
  * 同样单独一格；`/api/ops/stats` 聚合自身内存数据，保持零外呼不变。
+ * W-Z8 切片3 追加 `/api/ops/dead-letter`：死信只读白名单的再中转一格 + 一眼可读的 reason 直方图。
  */
 @RestController
 public class OpsController {
@@ -186,6 +188,45 @@ public class OpsController {
             }
             Map<String, Object> part = new LinkedHashMap<>(body);
             part.put("available", true);
+            return part;
+        } catch (RuntimeException error) {
+            Map<String, Object> part = new LinkedHashMap<>();
+            part.put("available", false);
+            part.put("reason", error.getClass().getSimpleName());
+            return part;
+        }
+    }
+
+    /**
+     * 死信只读白名单的中转一格（W-Z8 切片3）：Feign → ai-service `/jobs/dead-letter?limit=20`
+     * → 直方图一眼看懂「哪一类失败在反复出现」（如 not-configured ×7 / upstream-500 ×2）。
+     * items 本身就是白名单产物（无 question/answer），这里不再做二次过滤；
+     * 直方图只读 reason 字段，缺失/空一律归 unknown。
+     */
+    @GetMapping("/api/ops/dead-letter")
+    public Map<String, Object> deadLetter() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        try {
+            Map<String, Object> body = seasonCache.get(
+                    "advisor.deadletter", aiServiceClient::deadLetter, Duration.ofSeconds(30));
+            if (body == null || body.isEmpty()) {
+                return unavailableAdvisorPart();
+            }
+            Map<String, Object> part = new LinkedHashMap<>(body);
+            part.put("available", true);
+            Map<String, Long> histogram = new LinkedHashMap<>();
+            Object itemsObj = body.get("items");
+            if (itemsObj instanceof List<?> items) {
+                for (Object o : items) {
+                    if (o instanceof Map<?, ?> m) {
+                        Object r = m.get("reason");
+                        String reason = r == null ? "unknown" : String.valueOf(r).trim();
+                        if (reason.isEmpty()) reason = "unknown";
+                        histogram.merge(reason, 1L, Long::sum);
+                    }
+                }
+            }
+            part.put("reasons", histogram);
             return part;
         } catch (RuntimeException error) {
             Map<String, Object> part = new LinkedHashMap<>();

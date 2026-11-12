@@ -51,6 +51,11 @@ class OpsSeasonEndpointTest {
             public Map<String, Object> jobsStats() {
                 return jobs;
             }
+
+            @Override
+            public Map<String, Object> deadLetter() {
+                return Map.of("items", List.of(), "count", 0L, "limit", 20L);
+            }
         };
     }
 

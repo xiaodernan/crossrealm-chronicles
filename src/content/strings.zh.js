@@ -70,6 +70,7 @@ export const STRINGS_ZH = Object.freeze({
   settings_online_diag_btn: '星轨诊断（顾问 · 队列）',
   settings_online_diag_ok: '顾问 ${model} · 熔断 ${circuit} · 真实调用 ${calls} 次；队列深度 ${depth} · 在飞 ${inFlight} · 拒绝 ${rejected} · 死信 ${dead}',
   settings_online_diag_unavailable: '顾问侧未应答（ai-service 不可达或熔断打开——稍后再试）',
+  settings_online_diag_dlq_fmt: '；死信 ${count} 条，高频：${reasons}',
   settings_pad_tuning: '手柄手感',
   settings_deadzone: '摇杆死区',
   settings_analog_range: '外圈量程',

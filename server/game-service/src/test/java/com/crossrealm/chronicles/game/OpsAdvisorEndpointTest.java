@@ -6,6 +6,7 @@ import com.crossrealm.chronicles.game.season.SeasonClient;
 import com.crossrealm.chronicles.game.season.SeasonSnapshot;
 import com.crossrealm.chronicles.game.telemetry.TelemetryService;
 import com.crossrealm.chronicles.game.trial.TrialLeaderboardService;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,11 @@ class OpsAdvisorEndpointTest {
             @Override
             public Map<String, Object> jobsStats() {
                 return jobs;
+            }
+
+            @Override
+            public Map<String, Object> deadLetter() {
+                return Map.of("items", List.of(), "count", 0L, "limit", 20L);
             }
         };
     }
@@ -111,6 +117,11 @@ class OpsAdvisorEndpointTest {
             public Map<String, Object> jobsStats() {
                 return Map.of("capacity", 64L, "depth", 0L);
             }
+
+            @Override
+            public Map<String, Object> deadLetter() {
+                return Map.of("items", List.of(), "count", 0L, "limit", 20L);
+            }
         };
 
         Map<String, Object> result = controller(client).advisor();
@@ -137,6 +148,11 @@ class OpsAdvisorEndpointTest {
 
             @Override
             public Map<String, Object> jobsStats() {
+                throw new IllegalStateException("no instances available for ai-service");
+            }
+
+            @Override
+            public Map<String, Object> deadLetter() {
                 throw new IllegalStateException("no instances available for ai-service");
             }
         };
@@ -166,6 +182,11 @@ class OpsAdvisorEndpointTest {
 
             @Override
             public Map<String, Object> jobsStats() {
+                throw new IllegalStateException("must not be called");
+            }
+
+            @Override
+            public Map<String, Object> deadLetter() {
                 throw new IllegalStateException("must not be called");
             }
         };

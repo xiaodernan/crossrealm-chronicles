@@ -31,4 +31,8 @@ public interface AiServiceClient {
     /** ai-service 的异步队列读数（capacity / depth / pending / inFlight / enqueued / rejected / dedupHits / done / deadLettered …） */
     @GetMapping("/jobs/stats")
     Map<String, Object> jobsStats();
+
+    /** ai-service 的死信只读白名单（最近 20 条：{ items:[{id,requestId?,reason,attempts}], count, limit }）——绝无 question/answer */
+    @GetMapping(value = "/jobs/dead-letter", params = "limit=20")
+    Map<String, Object> deadLetter();
 }

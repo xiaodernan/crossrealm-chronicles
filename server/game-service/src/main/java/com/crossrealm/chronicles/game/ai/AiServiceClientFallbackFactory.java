@@ -40,6 +40,11 @@ public class AiServiceClientFallbackFactory implements FallbackFactory<AiService
             public Map<String, Object> jobsStats() {
                 return Map.of();
             }
+
+            @Override
+            public Map<String, Object> deadLetter() {
+                return Map.of();
+            }
         };
     }
 }

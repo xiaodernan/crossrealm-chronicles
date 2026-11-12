@@ -441,6 +441,26 @@ export class OnlineServices {
   }
 
   /**
+   * 死信只读摘要（`GET /api/ops/dead-letter`，W-Z8 切片3）。
+   * 白名单原样带回（`{available, count, items, reasons直方图}`），不做语义校验；
+   * 未启用 / 失败 / 超时 / 非 2xx → null。面向「星轨诊断」可读性：
+   * 「高频哪一类失败」是排障只需要的那一格，不带玩家输入。
+   */
+  async fetchDeadLetterSummary() {
+    if (!this._enabled) return null;
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/ops/dead-letter`, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      console.warn('[online] 拉取死信摘要失败（已吞掉）', e?.message ?? e);
+      return null;
+    }
+  }
+
+  /**
    * 拉取当前赛季（W-F2，`GET /api/seasons/active`）。
    *
    * 返回原始 JSON（`{ id, name, tagline, modifierIds, soulsBonusPct, dayInCycle, daysRemaining }`），
