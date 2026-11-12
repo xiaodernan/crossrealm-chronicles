@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Redis Streams（消费者组 + XACK + pending 列表重投），而不是给这个 HashMap 加分布式锁。
  * W-M5 的 Redis Pub/Sub 是 broadcast（掉线就永久丢），本队列与其互补而非替代。
  */
-public class AdvisorJobQueue {
+public class AdvisorJobQueue implements AdvisorQueue {
 
     public enum Status { QUEUED, RUNNING, DONE, DEAD }
 
@@ -133,7 +133,7 @@ public class AdvisorJobQueue {
     }
 
     @PostConstruct
-    void start() {
+    public void start() {
         for (int i = 0; i < workers; i++) {
             Thread t = new Thread(this::workerLoop, "advisor-job-worker-" + i);
             t.setDaemon(true);
@@ -143,7 +143,7 @@ public class AdvisorJobQueue {
     }
 
     @PreDestroy
-    void stop() {
+    public void stop() {
         running.set(false);
         for (Thread t : workerThreads) t.interrupt();
         for (Thread t : workerThreads) {

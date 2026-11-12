@@ -32,6 +32,11 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
     </dependency>
+    <!-- W-Z1：Redis Streams 消费者组（跨实例可靠投递）。Lettuce 作客户端。 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>

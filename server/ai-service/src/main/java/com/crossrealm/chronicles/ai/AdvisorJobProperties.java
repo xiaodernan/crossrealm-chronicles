@@ -36,6 +36,13 @@ public class AdvisorJobProperties {
      */
     private int maxTracked = 512;
 
+    /**
+     * W-Z1：任务队列后端。**默认 in-memory**（零额外基础设施，W-Y4 的进程内队列）；
+     * 配 {@code redis} 且 Spring 注入了 {@code StringRedisTemplate} 时，切换到
+     * Redis Streams 消费者组（跨实例可靠投递：崩溃的任务由其它实例 pending 重投）。
+     */
+    private String backend = "in-memory";
+
     public int getCapacity() { return capacity; }
     public void setCapacity(int capacity) { this.capacity = capacity; }
 
@@ -53,4 +60,7 @@ public class AdvisorJobProperties {
 
     public int getMaxTracked() { return maxTracked; }
     public void setMaxTracked(int maxTracked) { this.maxTracked = maxTracked; }
+
+    public String getBackend() { return backend; }
+    public void setBackend(String backend) { this.backend = backend; }
 }

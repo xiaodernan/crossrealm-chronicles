@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/ai")
 public class AdvisorJobController {
 
-    private final AdvisorJobQueue queue;
+    private final AdvisorQueue queue;
 
-    public AdvisorJobController(AdvisorJobQueue queue) {
+    public AdvisorJobController(AdvisorQueue queue) {
         this.queue = queue;
     }
 
