@@ -480,6 +480,7 @@
 | W-Z6 | **关联 ID 贯通 ai-service** | ✅ 切片1 | 2026-11-12 | `cf7c683` | `RequestCorrelation`（网关 W-P8 白名单逐字一致：1..64 可见 ASCII，排除空白/逗号/分号）：body 幂等键优先 > `X-Request-Id` header > 空（不编造）；202/429/`/jobs/{id}`/sync chat/echo-hint 全链回带 `requestId` —— 玩家浏览器看到的 id 与队列/死信/告警日志对得上；幂等永远客户端说了算（网关只补缺不夺权）；smoke 4l 段 + 3 单测 pin 住 3 契约 |
 | W-Z7 | **面板后台继续问** | ✅ 切片1+2 | 2026-11-13 | `a797b92` / `de1ab7d` | 异步队列（W-Y4 提交→轮询）接成 UI 路径：切片A ai-service 真撤回端点 `POST /api/ai/jobs/{id}/cancel`（双后端 tombstone；撤回同时释放幂等键；排队中→CANCELLED，在飞/终结→already-running/already-terminal，未知→404；smoke §4n）；切片B OnlineServices.askAdvisorBackground（requestId 幂等 → 202 → AbortSignal 轮询至终态；DEAD→503/unavailable 复用；429→busy；3 次连败→NETWORK；零裸计时器；停止=abort 轮询+cancel POST）；面板零改动契合（ERROR_KEYS 不变） |
 | W-Z8 | **运维面板聚合 advisor 派生** | ✅ 切片1+2 | 2026-11-13 | `ae11db3` / `a559632` | `/api/ops/advisor`：Feign → ai-service 只读派生（`/health` + `/jobs/stats`），30s 两格独立 TTL 缓存，双端点独立降级（空 Map ≈ `available:false` + `reason:fallback`，本地 try/catch 再保一层）；`map` 直通不丢字段；smoke §4m；**不进 `/api/ops/stats`**（零外呼纪律）；切片2：设置页「星轨诊断」按钮经同一网关读该端点 |
+| W-Z9 | **结构化访问日志** | ✅ 切片1 | 2026-11-13 | `849f1cd` | ai-service / game-service 各一个 `AccessLogFilter`：一次请求一条 JSON 行 `{ts, app, requestId, method, path（不含 query/body）, status, durationMs}`；/actuator 不记；X-Request-Id 原样透出；单测各 3 例钉 JSON 契约；smoke 期间 ai-service.out.log 真实落行 |
 
 ---
 
@@ -6605,3 +6606,14 @@ Phase D（系统与质量）
   - **验证**：`mvn -B -f server/pom.xml verify` BUILD SUCCESS（ai-service **70/70**，`AdvisorJobControllerTest` 12/12：新注定-DEAD 队列钉「白名单只回可排障字段、问句零泄露、reason=handler-error、requestId 透出」与「limit=9999 夹到 50、空信件 items=[]」两条；game-service 64/64、gateway 46/46）；smoke §4o 本机 PASSED（形状 + 三种 smoke 提问文本/question/answer/context 字段/sk- 全部必须不出现在回包里）。
 
   - **取舍**：① 不做 game-service → ai-service 的二跳聚合——curl 直读/前端直读 ai-service 足够，二跳只是把 Feign 配置表拉长一格；② 不做 question 的脱敏摘要（如「前 20 个字符 + …」）——截断仍是把 PII 的碎片交给无所谓的人看，要摘要得有 LLM 且得有授权口径，两者都不在这片；③ DLQ 只增不裁——128 条扫描上限意味着旧死信「读不到但不清除」；DLQ 清理（XTRIM + 保留期）是独立一整命题，等出现真实积压再谈；④ Redis 后端 dead-letter 与 cancel 同一风险：本地无 Redis 未实机验证。
+- **2026-11-13 W-Z9 结构化访问日志（ai-service / game-service）** —— 提交 `849f1cd`
+
+  - **起因**：W-Z6 ADR 留了一句「ai-service 连结构化日志都没有，那是下一条独立的线」。现状对运维真的是盲的：出问题时只能答「实例活着」（health）与「多少次 5xx」（game-service 的计数器），答不了「刚才这次请求走的是哪条路、多久、状态多少、对应哪一串 id」。W-Z3/W-Z6 把 X-Request-Id 盖进了 ai-service 的 202/429/任务视图里，**链路只差最后一步：把链路本身打出来**。
+
+  - **做法**：两服务各加一个 `AccessLogFilter`（OncePerRequestFilter，`access` 日志器）：一次请求一条 JSON 行 `{ts, app, requestId, method, path, status, durationMs}`。铁律三条：① `path` 用 `getRequestURI()`——**不含 query、不含 body**，玩家输入只活在 ResponseCache/队列状态里，不许活进日志；② `/actuator` 不记（探活噪音 100% 信息量 0%）；③ `X-Request-Id` 原样透出（没盖就落空字符串，不编造）。口径与 `RequestCountFilter` 的排除哲学一致，但这一路记路径与状态码。行构造器 `formatLine` 做成包内可见静态方法，单测直接量 JSON 形状，不碰过滤链。
+
+  - **验证**：`mvn -B -f server/pom.xml verify` BUILD SUCCESS（ai-service 73/73、game-service 67/67——各新增 AccessLogFilterTest 3 例：字段白名单/恶意路径 Jackson 转义/零换行前提）；smoke 期间 `ai-service.out.log` 真实落出 `access … {"app":"ai-service","requestId":"f5514fe1-…","method":"GET",…}` 行，网关盖的 id 原样在链路的最后一跳里；smoke 全段 PASSED。
+
+  - **取舍**：① 一条一行 JSON 而不是新日志框架/encoder 依赖——grep 起来不需要正则学位，也不加一格依赖；② gateway 不做这件事——gateway 本来就有 RequestIdFilter + ServerTimingFilter（已暴露 X-Response-Time），那里再叠一层访问日志会把链路里最吵的一环写得最满；③ 不记 remote-ip/user-agent——计数器不是访问日志，访问日志也不是画像库；④ response body 永不入日志（LLM 的回答哪一字节都不进文件）。
+
+  - **风险与后续**：日志量 ≈ 每请求一行；ai-service 的异步 worker 不在 HTTP 链路内，队列侧的失败依然只能在 jobs/dead-letter 读到（W-Z1 切片2）。下一步若 Redis 在线，`jobs.backend=redis` 切换后本筛子的行为不变（HTTP 视角与后端无关）。
