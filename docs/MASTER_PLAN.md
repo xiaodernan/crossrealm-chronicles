@@ -458,7 +458,7 @@
 | W-Y4 | **消息队列：可靠投递与背压** | ✅ 切片1 | 2026-11-12 | `ba7efd4` | `AdvisorJobQueue`：有界 `ArrayBlockingQueue` + 2 worker 把慢速 LLM 从 Tomcat 线程隔离；满 → 明确 429 + Retry-After（不静默丢）；`requestId` 幂等；只对 `upstream-*` / `circuit-open` 指数退避重试；耗尽进可见死信；终态按**单调完成序号** LRU 淘汰（毫秒时间戳会并列，实测抓到）；`POST /api/ai/chat/async` + `GET /api/ai/jobs/{id}` + `/jobs/stats`；前端 429 → `busy` 原因 + degraded 档（顺带修纯文本 500 时 `data.error` 抛异常的真缺陷）；真实联调通过；smoke 4k 段 |
 | W-Y5 | **算法与运行时性能**（空间索引 / 对象池 / 脏标记 / 帧预算） | ⬜ | | | 以 `npm run perf` 与 `perf:census` 的读数为准，不接受「看着快了」 |
 | W-Y6 | **数据库读写路径**（索引、批量写、读写分离口径） | ⬜ | | | 先量现有内存仓储的真实复杂度，再决定要不要引入持久层 |
-| W-Y7 | **前端视觉体系旗舰化**（设计令牌 / 光效分层 / 动效分级 / 可访问性） | 🚧 部分 | W-Z3 已收「设计令牌 + 动效分级（全局 reduced-motion 网）」；剩「光效分层 / 可访问性（色盲档与字号档不被覆盖）」待做 | | | 所有动效包在 `prefers-reduced-motion` 内；色盲档与字号档不能被覆盖 |
+| W-Y7 | **前端视觉体系旗舰化**（设计令牌 / 光效分层 / 动效分级 / 可访问性） | 🚧 部分 | a11y 半边**已全部落地**（字号档 W-D6 切片69 / 色觉模式 default·deuteranopia·protanopia·tritanopia W-D6 切片3/4 / HUD 状态条色觉回写 / 字幕 W-D6 切片8+67 / 闪光强度 W-D6 切片68 / 亮度 W-E3 切片61 / reduced-motion 全局兜底网 W-Z3 / 设计令牌 W-Z3）；剩「**光效分层**」——需要人眼对比或 screenshot 工具链才能验收，当前无此工具链，暂挂为阻塞（视觉评审后再拆） |
 
 > **贯穿纪律**：① 大模型是**可选增强**，任何玩家路径都不许因它不可用而卡住；
 > ② 密钥只存在于 `.env`（已 gitignore）/ 环境变量 / 服务端进程内，**不进任何被 git 追踪的文件、
