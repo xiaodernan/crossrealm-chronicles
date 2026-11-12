@@ -125,7 +125,7 @@
 |---|------|------|
 | C1 | 视听：真实美术资产 **1 个 GLB（Soldier 占位）+ 8 张贴图**；音频 **全部 Web Audio 合成，0 个音频素材**，无配音 | 🔶 部分已消（贴图那半过期，GLB 与音频那两句**仍为真**）：`public/` 下模型 GLB **1** 枚（`assets/models/Soldier.glb`）；营火 NPC 与手势只有导入脚本（`scripts/import-rest-npcs.ps1` / `import-rest-gestures.ps1` / `download-player-model.ps1`）加 README，`assets/models/rest/` 里是 0 枚 GLB —— 素材要玩家自己放，缺素材时按 W-C6 切片12 走程序化手臂并**分档说话**（404 判 absent、解析失败判 broken）。音频 **0** 个（`public/` 下 mp3 / ogg / wav 为零），全部 Web Audio 合成、无配音。过期的是贴图：贴图 **24** 张（根目录 **8** 张 + `textures/gen` **16** 张，由 `scripts/bake-textures.mjs` 烘）。门禁 `texture-shared` / `rest-npc-gesture-loader` + 本片新增 `tests/section-12-claims.test.js` ①（三个数现扫文件系统，不抄清单） |
 | C2 | 渲染：只有 UnrealBloomPass；**0 个 InstancedMesh**；一张 4096² 阴影图覆盖全场 | ✅ 已消（三句今天全过期）：`core/Game.js` 的 composer 上有通道 **5** 处 `addPass`（RenderPass → bloomPass → colorGrade.pass → dofPass（按设置条件插）→ OutputPass），另有一条 SSAO 按 `setSsaoQuality` 接档位；`new THREE.InstancedMesh` 全仓有实例网格 **12** 处，全在 `world/WorldDecorations.js`（`decoLanding.js` / `zoneBatching.js` 是同一族的落座与批量纪律）；阴影不再是一张图覆盖全场——`engine/shadowPolicy.js` 有档位 **3** 档（1024 / 2048 / 4096），出厂档 **4096**，视锥跟着档位收。门禁 `shadow-policy` / `ssao-policy` / `aa-policy` / `dof-cinematic-focus` / `dof-combat-focus` / `decoration-batching` / `zone-batching` / `shadow-cast-gate` |
-| C3 | 通关时长：**主线**约 4.3 小时（主线 118 步，含主线里那十座副本）；**全清**（再加分区专属支线 42 + 回声 74）约 5.9 小时 ⇒ 缺口在**主线**（已从 1 小时缩到 4.3 小时，**已经踩进"正常通关 3~5 小时"的中段**，下一段是往上加分而不是补缺口），而主线那 118 步的**下标**是存档语义（`quests.index`）—— 但 **v21 起存档同时记 `quests.currentId`**（W-E3 切片38：读档先认 id、认不出才回落下标）⇒ **插步不必再配「存档迁移」**（切片40/41/42/45/46/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/93/94/95/96/97/98/100/101/106/107 已各兑现一次：`void-oath`、第 3/2/1 章那九步、终局那三步与大主教、影煞、虚空幻影、深渊撕掠者、深渊凝视者、虚空裂隙行者、深渊蛮兽、虚空潜伏者、深渊幽影、虚空掠夺者、深渊猎犬、虚空刺蜇者、深渊沼兽、虚空裂隙使、深渊裂痕使、虚空裂渊者、深渊噬颚兽、虚空残魂、深渊空壳、虚空汲魂者、深渊撕裂者、虚空裂爪兽、深渊恸嚎者、虚空号哭者、深渊缚影者、虚空缚裂者、辉煌誓守者、幽暗鬼火、辉煌天使、幽暗恐惧者、幽暗歌手、辉煌壁垒、幽暗丧钟、辉煌先驱、幽暗熄灯人、辉煌决斗者、幽暗扑影、辉煌铁锤人、幽暗宵影、辉煌回廊卫都没写迁移就上了表）；v7 → v20 那十三次示范的是旧口径（老档的 `index` 要按插入点偏移，否则会**静默跳过**新插的那一步），那条链对老档仍然在役 | 内容量推算：主线 118 步 ×1.5 分 + 副本 10 座 ×8 分 + 分区专属支线 42 条 ×1.5 分 + 回声 74 条 ×0.5 分 ≈ 357.0 分（主线那部分 257 分 ≈ 4.28 小时） |
+| C3 | 通关时长：**主线**约 4.3 小时（主线 118 步，含主线里那十座副本）；**全清**（再加分区专属支线 42 + 回声 77）约 5.9 小时 ⇒ 缺口在**主线**（已从 1 小时缩到 4.3 小时，**已经踩进"正常通关 3~5 小时"的中段**，下一段是往上加分而不是补缺口），而主线那 118 步的**下标**是存档语义（`quests.index`）—— 但 **v21 起存档同时记 `quests.currentId`**（W-E3 切片38：读档先认 id、认不出才回落下标）⇒ **插步不必再配「存档迁移」**（切片40/41/42/45/46/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/93/94/95/96/97/98/100/101/106/107 已各兑现一次：`void-oath`、第 3/2/1 章那九步、终局那三步与大主教、影煞、虚空幻影、深渊撕掠者、深渊凝视者、虚空裂隙行者、深渊蛮兽、虚空潜伏者、深渊幽影、虚空掠夺者、深渊猎犬、虚空刺蜇者、深渊沼兽、虚空裂隙使、深渊裂痕使、虚空裂渊者、深渊噬颚兽、虚空残魂、深渊空壳、虚空汲魂者、深渊撕裂者、虚空裂爪兽、深渊恸嚎者、虚空号哭者、深渊缚影者、虚空缚裂者、辉煌誓守者、幽暗鬼火、辉煌天使、幽暗恐惧者、幽暗歌手、辉煌壁垒、幽暗丧钟、辉煌先驱、幽暗熄灯人、辉煌决斗者、幽暗扑影、辉煌铁锤人、幽暗宵影、辉煌回廊卫都没写迁移就上了表）；v7 → v20 那十三次示范的是旧口径（老档的 `index` 要按插入点偏移，否则会**静默跳过**新插的那一步），那条链对老档仍然在役 | 内容量推算：主线 118 步 ×1.5 分 + 副本 10 座 ×8 分 + 分区专属支线 42 条 ×1.5 分 + 回声 77 条 ×0.5 分 ≈ 358.5 分（主线那部分 257 分 ≈ 4.28 小时） |
 
 ### 1.3 已经具备的能力（**不要重做**）
 
@@ -6065,6 +6065,15 @@ Phase D（系统与质量）
 
   - **风险与后续**：① `countFranchise` 读的是 `popCulture.getStats().echoCountByFranchise`？不——它数的是"已触发的该母题回声条数"（`src/content/sideQuests.js` 同一函数，测试钉死）；② 支线 reward 22 低于 tour 的 20？不，高于 20——返乡母题是**结局方向**，补得多合理；③ 下一片：把"返乡旅人"完成时赠一枚专属称号/成就（"echo-homecoming-master"），或直接进 W-V3 终章揭晓分层演出。
 
+- **2026-11-12 赛博深渊 Wave14 增补（W-E8）** —— 提交 `14be97c`
+
+  - **起因**：CYBER 母题只有三枚（霓虹巷/镀铬诊所/公司尖塔），是十七个母题里少数的"≤3 收尾"梯队。魔法位面已经成为赛博三条回声的天堂——三是 POI 门槛、不是内容上限，再三枚机会很多。
+
+  - **做法**：① `echoes.js` 新增 Wave14 三枚（`echo-floating-casino` 浮空赌场 / `echo-black-market-pod` 黑市舱 / `echo-rooftop-dojo` 天台道场），全 `CYBER` + `zone: magic`；② 新增 `world/PopCultureZoneEnhancerWave15.js`——潮台三座 POI（六角浮空赌场+紫色霓虹过渡环+吊索；商路半埋的黑市舱+暗黄交易窗；铁板搭成的天台道场+刀插中央+straw 榻榻米），规模、低模数件一编即配；③ `ACHIEVEMENTS_POP_CULTURE` 加 `echo-cyber >= 6`（敏感档），`echo-wave4` 阈值从 cyber>=3 跟抬升到 >=6（cyber 系列增长时保持四系列并肩语义）；④ 键数 2903 → **2909**（per-table +8：三回声各 title/desc + ach title/desc +2）；⑤ `objective-target-refs` 无需更新（magic 位面，原同位面口径一致）；⑥ `sideQuests.franchiseZone()` 的 "CYBER 不能跨两个位面" 约束自动满足（三新三老全在 magic）；⑦ 内容普查：`echoes` 74→77 + `achievementsPopCulture` 21→22 + zone-typo 探针下标同步；C3 读数 77/358.5 分。
+
+  - **验证**：`npm test` 6375 全绿（431 files）；`npm run lint` 0/0；`npm run build` 干净；`npm run size` 首屏 2187999 B（余量 0.04 MiB）；`npm run e2e` 通关 ✓（exceptions=0）。
+
+  - **风险与后续**：① `achievementsPopCulture` 直接从 22 去重（删除原 duplicate list 中的 echo-cyber 条目、用单一阈值 ≥6 顶住），`franchise-identity` 门禁确认 CYBER bucket 在 n=6 敏感（3→6）；② POI 坐标确保不与原 CYBER 的三（-30,-55 / 50,-20 / -10,60）重叠且互不干扰；③ 下一片：把 CYBER 那两枚老回声（霓虹巷/镀铬诊所/公司尖塔）补全氛围 barks 或为 corp-spire 做一次 dialogue beat，或是把 FAMILY/BORDER/SAMURAI 等 3 枚的系列往 4-6 枚补——继续磨平"母题梯队"。
 - **2026-11-12 X-Request-Id 全链路透传（W-M4）** —— 提交 `9c56484`
 
   - **起因**：X-Request-Id 在 W-P8 时网关注入/回显写好了，game-service 也 echo了它；但这条链在 game-service → season-service 这一跳就断了——Feign 出站默认不带入站头，于是 season-service 日志里看不到游戏客户端传来的 id，game-service 与 season-service 之间无法关联同一次请求。W-P8 的"整条链一个名字"到这一跳是空的承诺。
