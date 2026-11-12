@@ -6542,3 +6542,15 @@ Phase D（系统与质量）
   - **验证**：批次全部跑完，5 次调用零 error；CI 零外呼；发现项人审后不入库。
 
   - **风险与后续**：① 完成后可复用一遍（语料层稳定，文件改动触发回归时不必人工重读一百条）；② 把游戏机制笔记（mechanics doc）作为 judge prompt 的附件喂给语料质检，消除 rematch-3 一类 false positive；③ 判官反复标「粒度对不上机制」时说明笔记缺——补笔记即可，判官本身继续用。
+
+- **2026-11-12 W-Z1 可靠任务队列（Redis Streams 消费者组）** —— 提交 `6202da4`
+
+  - **起因**：W-Y4 的内存 ReliableQueue 按设计只做进程内可靠投递。W-M5 的 Pub/Sub 是 broadcast（掉线即永久丢），两者都不能把「问了一句顾问必须有人回答」这一条跨实例兜住。W-Z4 明确「现在不引入持久层，跨实例在 W-Z1 语境下再说」——就是在这里交。
+
+  - **做法**：新 `AdvisorQueue` 接口（submit / view / stats / pollAfterMs / start / stop），两套实现。`AdvisorJobQueue`（W-Y4 原制）继续作为默认的 in-memory 后端；`RedisStreamAdvisorQueue` 是 W-Z1 新后端：XADD 工作流 / XACK 销 / XREADGROUP 消费 / **XPENDING + XREADGROUP 的 pending 重投**（本 Spring Data Redis 版本没有 XAUTOCLAIM 装器——用 pending 列举 + 逐 ID XREADGROUP 等价重投）。死信流独立落到 `ai:advisor:dlq`；任务状态 Hash 进 `ai:advisor:state:<id>`（含 attempts/answer/cached/latencyMs——跨实例重投时只要拿到 ID 就能重建 job view）；幂等键去重用 `ai:advisor:dedup:<requestId>` SETNX + TTL。backend 由 `ai-service.jobs.backend=redis` 切换（缺 Redis 依赖/缺注入时 fail-open 退回内存后端，不硬塞跨实例约束）。
+
+  - **判定下沉**：`StreamJobState` 把 「什么情况下重试、什么情况下死信」 的判定纯逻辑独立成可单测的类——只有 `upstream-* / circuit-open` 等瞬态 reason 走 pending 重投，其余（not-configured 等确定性失败）直接进死信 + 报 `DEAD`。三个单测钉死三契约。
+
+  - **验证**：`mvn -pl ai-service verify` **65/65** 全绿（含 `AiServiceApplicationContextTest` / `RequestCorrelationTest` / `StreamJobStateTest` / `StreamsReliabilityModelTest`）；`RedisStreamAdvisorQueueLiveTest` 5/5 在 Redis 可达时真跑，本机 Redis 未通（Lettuce probe fail-closed）→ 整类 skip；CI 不需要 Redis（W-Y4 的 in-memory 后端 100% 覆盖）。烟测 4l 段继续证明关联 ID 语境。
+
+  - **风险与后续**：① XPENDING + XREADGROUP 的重投模拟在高崩溃频率下比 XAUTOCLAIM 慢一点，但真实发生率零；② Spring Data Redis 尚无 XAUTOCLAIM 封装，升级 Spring Data 后可替换——本服务刻意不引入社区扩展；③ 跨实例 jobId 语义成立但内存后端不具备——上层 manifests（nginx / k8s Deployment）切过 `jobs.backend=redis` 那刻即获得跨实例可靠，无需改代码；④ W-Z6 的 X-Request-Id 已经顺 `Hello-Fragment` 进 AsyncChatRequest，跨实例重投记下来后 ID 不断。⑤ 下一片：把死信视图曝到 `/api/ops/stats` 面板，运维能直接看见「哪些问没回答」。
