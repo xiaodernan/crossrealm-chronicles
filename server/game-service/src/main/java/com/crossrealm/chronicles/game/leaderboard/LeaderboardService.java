@@ -122,19 +122,27 @@ public class LeaderboardService {
                 "entries", topCache.size());
     }
 
-    /** 全量聚合（W-P12）：总数/最快/最慢/平均，只读不排序、不写缓存 */
+    /** 全量聚合（W-P12 + W-M2）：总数/最快/最慢/平均/唯一 Boss/P50/P95。 */
     public Map<String, Object> stats() {
         synchronized (runs) {
             long fastest = runs.stream().mapToLong(RunRecord::clearTimeMs).min().orElse(0);
             long slowest = runs.stream().mapToLong(RunRecord::clearTimeMs).max().orElse(0);
             double avg = runs.stream().mapToLong(RunRecord::clearTimeMs).average().orElse(0.0);
             long uniqueBosses = runs.stream().map(RunRecord::bossId).distinct().count();
-            return Map.of(
-                    "total", runs.size(),
-                    "fastestMs", fastest,
-                    "slowestMs", slowest,
-                    "avgMs", Math.round(avg),
-                    "uniqueBosses", uniqueBosses);
+            // P50/P95 —— 排一次的 O(n log n)；maxEntries 常态 ≤ 1000，无需 quickselect。
+            long[] times = runs.stream().mapToLong(RunRecord::clearTimeMs).sorted().toArray();
+            int n = times.length;
+            long p50 = n == 0 ? 0 : times[n / 2];
+            long p95 = n == 0 ? 0 : times[Math.min(n - 1, (int) Math.ceil(n * 0.95) - 1)];
+            Map<String, Object> result = new java.util.LinkedHashMap<>();
+            result.put("total", runs.size());
+            result.put("fastestMs", fastest);
+            result.put("slowestMs", slowest);
+            result.put("avgMs", Math.round(avg));
+            result.put("uniqueBosses", uniqueBosses);
+            result.put("p50Ms", p50);
+            result.put("p95Ms", p95);
+            return result;
         }
     }
 }

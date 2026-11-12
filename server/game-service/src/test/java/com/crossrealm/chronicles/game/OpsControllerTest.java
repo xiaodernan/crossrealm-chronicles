@@ -72,6 +72,8 @@ class OpsControllerTest {
                 .andExpect(jsonPath("$.leaderboard.slowestMs").isNumber())
                 .andExpect(jsonPath("$.leaderboard.avgMs").isNumber())
                 .andExpect(jsonPath("$.leaderboard.uniqueBosses").isNumber())
+                .andExpect(jsonPath("$.leaderboard.p50Ms").isNumber())
+                .andExpect(jsonPath("$.leaderboard.p95Ms").isNumber())
                 .andExpect(jsonPath("$.trials.total").isNumber())
                 .andExpect(jsonPath("$.trials.topScore").isNumber())
                 .andExpect(jsonPath("$.trials.avgScore").isNumber())

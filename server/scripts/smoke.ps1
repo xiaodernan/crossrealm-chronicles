@@ -245,6 +245,8 @@ try {
     Write-Host $opsStats
     if (-not ($opsStats -match '"leaderboard":\{[^}]*"total":[0-9]+')) { Write-Error "ops stats missing leaderboard.total: $opsStats"; exit 1 }
     if (-not ($opsStats -match '"leaderboard":\{[^}]*"fastestMs":[0-9]+')) { Write-Error "ops stats missing leaderboard.fastestMs: $opsStats"; exit 1 }
+    if (-not ($opsStats -match '"leaderboard":\{[^}]*"p50Ms":[0-9]+')) { Write-Error "ops stats missing leaderboard.p50Ms: $opsStats"; exit 1 }
+    if (-not ($opsStats -match '"leaderboard":\{[^}]*"p95Ms":[0-9]+')) { Write-Error "ops stats missing leaderboard.p95Ms: $opsStats"; exit 1 }
     if (-not ($opsStats -match '"trials":\{[^}]*"total":[0-9]+')) { Write-Error "ops stats missing trials.total: $opsStats"; exit 1 }
     if (-not ($opsStats -match '"trials":\{[^}]*"topScore":[0-9]+')) { Write-Error "ops stats missing trials.topScore: $opsStats"; exit 1 }
     if (-not ($opsStats -match '"telemetry":\{.*"windowSize":[0-9]+')) { Write-Error "ops stats missing telemetry.windowSize: $opsStats"; exit 1 }
