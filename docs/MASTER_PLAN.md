@@ -472,13 +472,14 @@
 
 | 编号 | 工作包 | 状态 | 备注 |
 |------|--------|------|------|
-| W-Z1 | **Redis Streams 跨实例可靠投递** | ⬜ | W-Y4 是进程内队列（重启丢在途）；消费者组 + XACK + pending 重投，与 W-M5 Pub/Sub 的 broadcast 互补 |
+| W-Z1 | **Redis Streams 跨实例可靠投递** | ✅ 切片1 | 2026-11-12 | `6202da4` | `AdvisorQueue` 接口 + 两个实现（`AdvisorJobQueue` 内存默认 / `RedisStreamAdvisorQueue`：XADD/XACK/XREADGROUP + XPENDING 重投 + `ai:advisor:dlq` + SETNX 幂等）；`StreamJobState` 纯判定类钉死重试/死信边界；fail-open 退回内存后端 |
 | W-Z2 | **帧内算法与硬件适配** | ✅ 切片1 | `SpatialGrid` 均匀网格把分离推力的邻居查询从 O(n²) 全遍历改成 O(邻域桶)；**逐只对拍** 3 组随机 × 200 只 + 密集重叠 + 自定义 pad，推力逐值相等；1000 只均匀分布时候选数 < 全量 10%；`npm run perf` 全部预算内（枢纽 updateAvg 1.52ms / 灰白森林 1.59ms / p95 2.5ms / exceptions=0）。切片2：对象池 / 脏标记 / 帧预算、draw-call 地板 8 格重钉 |
 | W-Z3 | **设计令牌与动效分级** | ✅ 切片1 | `:root` 收敛语义令牌：时长档（--dur-instant→--dur-cinematic 单调）+ 缓动 + 层级（--z-hud→--z-loading）+ 圆角/阴影/间距尺度；末尾新增**全局** reduced-motion 兜底网（`* { animation-duration:0.001ms; iteration:1 }` 让 forwards 动效瞬间到终态 + 档C 纯装饰元素 `animation:none`）；`advisor-enter` 接入 `--ease-out`/`--dur-base`；新增 `tests/design-tokens.test.js`（27 例钉令牌定义 + 全局网存在）。`W-Y7` 的「设计令牌/动效分级」半边由本片覆盖，剩「光效分层/可访问性（色盲档与字号档不被覆盖）」 |
-| W-Z4 | **数据库读写路径** | ⬜ | 先量现有内存仓储复杂度，二级索引 + 批量写；读写分离口径写清，不为了上数据库而上 |
+| W-Z4 | **数据库读写路径** | ✅ 切片1 | 2026-11-12 | `e7d378f` | 先量现有内存仓储复杂度：三个仓的结构/读写复杂度入册；`/api/ops/stats` 读数 O(n log n) 真实热路径判断——当前不上持久层；Redis 化留给 W-Z1 跨实例语境（已落地）；不为了上数据库而上 |
 | W-Z5 | **真实大模型语料质检** | ✅ 切片1 | 2026-11-12 | `0f114f3` + `4dcff91` | 星轨语料质检 `scripts/echo-qa.mjs`：77 条回声经真实 gpt-6-sol 判「母题×标题×描述」一致性 / 史实性 / 语气（batch=10，8 次上游调用，报告不入库）：ok 51 / warn 15 / **bad 11**。真问题修回 zh 双表 + 四份打钉测试（4dcff91）：`五维_tesseract`×10 → 既有译名「五维裂隙」/「五维超立方体」；chalk→粉笔、rusted shut→已锈死、frontier→边境、noir→黑色电影、rhythm→节奏、awaits→在此等你。致敬语境（1983 电台 / CRT / Walkman / Stay / One Realm）经复核保留 |
 | W-Z6 | **关联 ID 贯通 ai-service** | ✅ 切片1 | 2026-11-12 | `cf7c683` | `RequestCorrelation`（网关 W-P8 白名单逐字一致：1..64 可见 ASCII，排除空白/逗号/分号）：body 幂等键优先 > `X-Request-Id` header > 空（不编造）；202/429/`/jobs/{id}`/sync chat/echo-hint 全链回带 `requestId` —— 玩家浏览器看到的 id 与队列/死信/告警日志对得上；幂等永远客户端说了算（网关只补缺不夺权）；smoke 4l 段 + 3 单测 pin 住 3 契约 |
 | W-Z7 | **面板后台继续问** | ⬜ | 把 W-Y4 的提交→轮询接成 UI 路径：关掉面板后答案仍会落地，回来时可见；真取消要能撤销排队任务 |
+| W-Z8 | **运维面板聚合 advisor 派生** | ✅ 切片1 | 2026-11-13 | `ae11db3` | `/api/ops/advisor`：Feign → ai-service 只读派生（`/health` + `/jobs/stats`），30s 两格独立 TTL 缓存，双端点独立降级（空 Map ≈ `available:false` + `reason:fallback`，本地 try/catch 再保一层）；`map` 直通不丢字段；smoke §4m；**不进 `/api/ops/stats`**（零外呼纪律）——与 W-Z1 ADR ⑤ 的原案（曝到 ops/stats）有意偏离，见 ADR |
 
 ---
 
@@ -6554,3 +6555,18 @@ Phase D（系统与质量）
   - **验证**：`mvn -pl ai-service verify` **65/65** 全绿（含 `AiServiceApplicationContextTest` / `RequestCorrelationTest` / `StreamJobStateTest` / `StreamsReliabilityModelTest`）；`RedisStreamAdvisorQueueLiveTest` 5/5 在 Redis 可达时真跑，本机 Redis 未通（Lettuce probe fail-closed）→ 整类 skip；CI 不需要 Redis（W-Y4 的 in-memory 后端 100% 覆盖）。烟测 4l 段继续证明关联 ID 语境。
 
   - **风险与后续**：① XPENDING + XREADGROUP 的重投模拟在高崩溃频率下比 XAUTOCLAIM 慢一点，但真实发生率零；② Spring Data Redis 尚无 XAUTOCLAIM 封装，升级 Spring Data 后可替换——本服务刻意不引入社区扩展；③ 跨实例 jobId 语义成立但内存后端不具备——上层 manifests（nginx / k8s Deployment）切过 `jobs.backend=redis` 那刻即获得跨实例可靠，无需改代码；④ W-Z6 的 X-Request-Id 已经顺 `Hello-Fragment` 进 AsyncChatRequest，跨实例重投记下来后 ID 不断。⑤ 下一片：把死信视图曝到 `/api/ops/stats` 面板，运维能直接看见「哪些问没回答」。
+- **2026-11-13 W-Z8 运维面板聚合 advisor 派生（切片1）** —— 提交 `ae11db3`
+
+  - **起因**：W-Z1 ADR（6546 行附近）⑤ 留了一句「把死信视图曝到 /api/ops/stats 面板，运维能直接看见哪些问没回答」。轮到这片时发现这句与既有分区纪律冲突：`/api/ops/stats` 聚合的是**本实例内存数据**，零外呼、读即快——它不能继承 Feign 外呼的全部失败模式（800/1200ms 超时、熔断半开、下游静默空体）。season-service 的 `/api/ops/season` 早就单独开格了，advisor 不该另起一套规矩。
+
+  - **做法**：`/api/ops/advisor`（GET，单独一格）——Feign `AiServiceClient`（name=`ai-service`，path=`/api/ai`）打 `/health`（configured/model/circuit/cache/upstreamCalls）与 `/jobs/stats`（capacity/depth/pending/inFlight/enqueued/rejected/dedupHits/done/deadLettered）。**返回原始 `Map<String,Object>` 而非强类型 record**：这两个队列实现（内存/Redis Streams）字段集并不相同，固定 record 会把其中一边的字段静默丢掉——运维视图不许丢信息；与 `LeaderboardService.stats()` 等其它运维读数的口径一致。两格 TTL 各 30s（复用 `seasonCache` 的 `advisor.health`/`advisor.jobs` 键），各自降级各自恢复。
+
+  - **降级双层**：① Feign `fallbackFactory`（熔断打开/实例全下线）返回**空 Map** → 这一格 `available:false, reason:fallback`；真实 ai-service 永不返回空 Map，空=没答上；② 本地 try/catch 接住直抛的异常（熔断没开、配置被改掉）→ `available:false, reason:<异常类名>`。两端点各自独立降级（health 挂了 jobs 仍可能是好的），日志 WARN 留下异常类名+消息。**运维视图永不 500**。
+
+  - **结构化变更**：`OpsController` 构造器由八参变为九参；`SeasonBroadcastListenerTest` 原按下标 `[7]` 断言 @Nullable 参数，改为按类型定位（`Arrays.stream(...).filter(t == SeasonBroadcastListener.class)`）——下标会随切片增长而失效，是哑火的脆弱断言。
+
+  - **验证**：`mvn -B -f server/pom.xml verify` **BUILD SUCCESS**（game-service 全绿含新增 `OpsAdvisorEndpointTest` 5 例：快乐路径透出 / 空 Map 降级诚实 / 半失败独立降级 / 双直抛本地兜底 / stats 零外呼契约——即使 client 必抛，`stats()` 也必须返回且不含 advisor 键；`OpsSeasonEndpointTest` 默认 stub advisor 继续过三条）；`smoke.ps1` 新增 **§4m**（ASCII only）经网关断言 health/jobs 两格存在、`available:true`、`upstreamCalls` 为数值、`capacity:64` ——本机两遍 PASSED。
+
+  - **与 W-Z1 ADR ⑤ 的偏离（有意）**：死信可见性不走 `/api/ops/stats`，走 `/api/ops/advisor` 的 `jobs` 一格（内含 `deadLettered`/`rejected`/`dedupHits`），外加 health 的 `circuit` 与 `upstreamCalls` 给「硅还热不热」的另一半。**判据**：面板要的是「能安全轮询」，不是「键尽量多的聚合」——超时失败的聚合面不是面板是故障放大器。
+
+  - **风险与后续**：① 两个端点分两次 Feign 调用、两次 Redis/缓存命中；30s 陈旧度对「队列多深」可接受，对「熔断刚打开」不可接受——但这是运维视图不是玩家路径，可接受；② W-P16 已有运维面板的前端入口，下一片把 `/api/ops/advisor` 摆上去（W-Z8 切片2）；③ 死信流 `ai:advisor:dlq` 的**逐条明细**（而非计数）仍未曝出——需要 ai-service 侧加一个白名单 `/jobs/dead-letter?limit=N` 端点（内容含 question 但**不含**答案原文的残余风险评估先行）；④ XAUTOCLAIM 待 Spring Data Redis 封装，本服务不引社区扩展。
