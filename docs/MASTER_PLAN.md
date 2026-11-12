@@ -6530,3 +6530,15 @@ Phase D（系统与质量）
   - **验证**：单测 3 例钉 3 契约（header-only 透传 / body 优先幂等 / 畸形 header 不当幂等键）；`mvn -pl ai-service verify` **52/52 全绿**；smoke 新增 **4l 段**（header-only 提交 → 202 echo + 轮询视图 echo + 429 路径也带 id，gateway 回声 `request-id` 整数断言存在）——本地实测 PASSED，含 4j 真实外呼。
 
   - **风险与后续**：① correlation id 进了响应体而不是响应头——响应头已有网关钉住的真正那条 `X-Request-Id`（W-P8 出行无条件覆盖），body 里这条是「方便玩家/运维直接读、不必再调 header」的影子，两者始终同源；② 死信日志里的 print 没有改——ai-service 侧至今没有结构化日志层，id 进了任务视图本身也就进了任何 `jobs/{id}` 轮询端点与运维读数；③ 下一片：把 id 顺 Feign 那条线也贯通到 game-service 的 AI 侧出口（W-P8 只到 Feign 边界，没进 ai-service 的 HTTP 日志——但 ai-service 连结构化日志都没有，那是下一条独立的线）；④ 与 W-Z6 同族的 W-Z7 是它的 UI 半边（关掉面板后答案落地仍可见）。
+
+- **2026-11-12 W-Z5 切片2 星轨成就质检（ach-qa）** —— 提交 `c67b6da`
+
+  - **起因**：W-Z5 切片1 扫的是回声/POI 文案，成就是 next logical 语料——22+10 条次元回声成就与 10 枚额外成就加 12 枚主线成就共 44 条，从未系统性地被人读过一遍；同一套「真 LLM 判语料、不评创意」方法论直接套上去。
+
+  - **做法**：`scripts/ach-qa.mjs`（dev-time、CI-safe；没 LLM_API_KEY 直接 exit 1）：载入 `content/achievements.js`（EXTRA + POP_CULTURE）与 `game/AchievementSystem.js`（主向）；每 10 条/批丢给真实 gpt-6-sol，要求只回 JSON 数组，逐条判「title 牌感 / desc 年鉴像」（≤10 字牌子口吻；desc 一句话）。报告先自己看，不改文案——工具不替人改文案。
+
+  - **真跑结果**：`ach-qa: batch 1..5` 共 5 次上游调用；ok 38 / warn 5 / **bad 1**。唯一 bad = `rematch-3`「信标猎人」——false positive：判官判 title 对不上「Rematch a boss 3 times」，但判官没读进游戏机制：此 beacon 即「boss 再战」锚点，「信标猎人」收的是整条再战链的总名字而非机制复述（square side quest 同名）。**本片内容层零改动**。再证一次「判官语境化边界」：LLM 不是通灵的，它需要同步进一段游戏机制笔记才能不发明出「这是错的」。
+
+  - **验证**：批次全部跑完，5 次调用零 error；CI 零外呼；发现项人审后不入库。
+
+  - **风险与后续**：① 完成后可复用一遍（语料层稳定，文件改动触发回归时不必人工重读一百条）；② 把游戏机制笔记（mechanics doc）作为 judge prompt 的附件喂给语料质检，消除 rematch-3 一类 false positive；③ 判官反复标「粒度对不上机制」时说明笔记缺——补笔记即可，判官本身继续用。
