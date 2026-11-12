@@ -305,6 +305,9 @@ export class SettingsManager {
       setLanguage('zh');
     }
     applyTranslations();
+    // W-Y2 切片1：顾问面板里几格是 JS 现算的（状态胶囊 / 字数 / 延迟 / 错误气泡），
+    // applyTranslations 只扫 data-i18n，够不到它们；换语言要显式重算一遍。
+    game?.advisorPanel?.refreshLabels?.();
     // W-D2 切片27：HUD 里三句带 {动作} 的提示是 JS 现算的（keyText(t(键))），
     // applyTranslations 只扫 data-i18n —— 换语言后在这里把 HUD 重算一遍
     //（改绑那条路走 Game.rebuildHotkeys → hud.refreshKeyHints）

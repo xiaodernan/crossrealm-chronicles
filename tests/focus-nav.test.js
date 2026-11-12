@@ -693,18 +693,57 @@ describe('静态门禁：焦点只有一个出口，激活只有浏览器一个�
     expect(UI_ACTIONS.some((a) => /nav[A-Z]/.test(a)), '手柄动作名混进了热键表').toBe(false);
   });
 
-  it('← → 归我们派发的前提：收焦点的面板里不许出现要靠方向键移动光标的文本控件', () => {
+  it('← → 归我们派发的前提：文本框只许出现在「不收焦点且交还方向键」的那一层', () => {
     // `preventDefault: true` 把原生滑杆步进一并挡下（不挡就是按一下走两档），代价是方向键不再归浏览器。
-    // 今天这是安全的：面板里只有按钮 / 滑杆 / 复选框。哪天有人往面板里塞一个文本框，
-    // 光标就再也移不动 —— 那时该改的是这条接管，而不是偷偷给文本框开例外。
+    // 收焦点的面板里因此不能放文本框。W-Y2 切片1 的星轨顾问确实需要一枚输入框，
+    // 于是它采取的是**结构性解法**而不是「给文本框开个例外」：那一层不认领 `nav`
+    // （↑↓ 不归面板走格），`Game.hotkeyBlocked` 再把导航码挡下，Router 既不
+    // preventDefault 也不派发，方向键原样交还浏览器。这里把两半都钉住：
+    // 少一半就等于悄悄把光标卡死，而所有测试仍然绿。
     const TEXT_WIDGET = /<textarea\b|type\s*[:=]\s*['"](?:text|search|number|email|url|password)['"]/i;
     const shell = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
-    const shellHit = shell.match(new RegExp(TEXT_WIDGET.source, 'gi')) ?? [];
-    expect(shellHit, '壳页里出现了文本控件，方向键接管会吃掉它的光标移动').toEqual([]);
-    const offenders = FILES
-      .filter(({ source }) => TEXT_WIDGET.test(source))
-      .map(({ name }) => name);
+    const scan = (s) => s.match(new RegExp(TEXT_WIDGET.source, 'gi')) ?? [];
+    const shellHit = scan(shell);
+    expect(shellHit.length, '壳页里冒出了第二枚文本控件：每一枚都得单独立一条方向键保证').toBeLessThanOrEqual(1);
+    if (shellHit.length) {
+      expect(shell, '这枚文本控件不是顾问输入框').toContain('id="advisor-input"');
+      expect(OVERLAY_LAYERS.find((l) => l.layer === 'advisor')?.nav,
+        '有文本框的层不许认领焦点宿主').toBeFalsy();
+      const body = sourceOf('core/Game.js').match(/hotkeyBlocked\(code\)\s*\{[\s\S]*?\n {2}\}/);
+      expect(body, '找不到 hotkeyBlocked 的方法体').toBeTruthy();
+      expect(body[0], '顾问开着时没把导航码挡下：Router 会 preventDefault 掉光标键').toContain('advisorOpen');
+      expect(body[0], '不许抄死箭头键码，要问生效表').toContain('isNavCode(code)');
+    }
+    const offenders = FILES.filter(({ source }) => TEXT_WIDGET.test(source)).map(({ name }) => name);
     expect(offenders, '源码里动态造了文本控件').toEqual([]);
+    // 反向控制：再加一枚就量得到 —— 免得「≤1」是扫描器空转出来的
+    expect(scan(`${shell}<input type="search">`)).toHaveLength(shellHit.length + 1);
+  });
+
+  it('行为腿：焦点在输入框时方向键交还浏览器；焦点在按钮上时导航照常', () => {
+    setHotkeyTable(UI_HOTKEYS);
+    const 旧 = globalThis.document;
+    try {
+      globalThis.document = { activeElement: { tagName: 'INPUT', type: 'text' } };
+      const blocked = (code, advisorOpen) => Game.prototype.hotkeyBlocked.call(
+        { overlayState: () => ({ advisorOpen }) }, code,
+      );
+      for (const action of UI_NAV_ACTIONS) {
+        expect(blocked(hotkeyCodeFor(action), true), `${action} 在输入框里该归光标`).toBe(true);
+        expect(blocked(hotkeyCodeFor(action), false), `${action} 平时不该被这一条挡`).toBe(false);
+      }
+      expect(blocked(hotkeyCodeFor('escape'), true), '返回键要放给级联').toBe(false);
+      expect(blocked('KeyJ', true), '日志热键仍被模态挡住').toBe(true);
+
+      // 焦点挪到芯片 / 关闭按钮上：这一条文本例外不再生效（导航照常由层表决定）
+      globalThis.document = { activeElement: { tagName: 'BUTTON' } };
+      for (const action of UI_NAV_ACTIONS) {
+        expect(blocked(hotkeyCodeFor(action), true), `${action} 在按钮上不该被文本例外挡`).toBe(false);
+      }
+    } finally {
+      if (旧 === undefined) delete globalThis.document;
+      else globalThis.document = 旧;
+    }
   });
 
   it('导航路径只许造一个事件：`input` 那一次在 `adjustFocused` 里，点按钮只许在 `activateFocused` 里', () => {

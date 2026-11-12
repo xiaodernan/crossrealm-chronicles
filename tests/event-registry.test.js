@@ -36,6 +36,9 @@ const BUS_SELF = 'engine/EventBus.js';
 /** 浏览器原生事件名：不是游戏事件，允许直接挂在 addEventListener 上 */
 const DOM_EVENT_NAMES = new Set([
   'change', 'click', 'contextmenu', 'input',
+  // W-Y2 切片1：顾问输入框用 <form> 的原生 submit（回车即送出，不必再挂一条 keydown）。
+  // 它与 change/input 同类，是浏览器自己派发的，不是 EventBus 上的游戏事件。
+  'submit',
   'keydown', 'keyup', 'mousedown', 'mouseup', 'mousemove',
   'pointercancel', 'pointerdown', 'pointerlockchange', 'pointermove', 'pointerup',
   'resize', 'wheel',

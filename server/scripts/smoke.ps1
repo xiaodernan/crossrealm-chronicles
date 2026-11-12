@@ -1,18 +1,18 @@
-# Smoke test: boot discovery / config / game-service / gateway for real and verify the whole chain:
-#   config-server serves centrally managed config -> service registers with Eureka -> gateway lb-routes by service name.
+# Smoke test: boot discovery / config / game-service / season-service / ai-service / gateway for real and verify the whole chain:
+#   config-server serves centrally managed config -> services register with Eureka -> gateway lb-routes by service name.
 #
 # Usage (from server/):
 #   powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 #
 # Ports are fixed to 28xxx: the standard Eureka(8761)/Config(8888)/Gateway(8080) ports AND the 18xxx range are already in use on this dev machine (another Spring Cloud project). Do not collide.
-# When done, the four java processes started here are stopped automatically. Logs land in %TEMP%\crossrealm-server-smoke\.
+# When done, the java processes started here are stopped automatically. Logs land in %TEMP%\crossrealm-server-smoke\.
 # ASCII-only on purpose: Windows PowerShell 5.1 reads BOM-less scripts as ANSI, and CJK bytes can masquerade as quotes/braces.
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $logDir = Join-Path ([System.IO.Path]::GetTempPath()) 'crossrealm-server-smoke'
 New-Item -ItemType Directory -Force $logDir | Out-Null
 
-$ports = @{ 'discovery-server' = 28161; 'config-server' = 28888; 'game-service' = 28081; 'season-service' = 28082; 'gateway' = 28080 }
+$ports = @{ 'discovery-server' = 28161; 'config-server' = 28888; 'game-service' = 28081; 'season-service' = 28082; 'ai-service' = 28083; 'gateway' = 28080 }
 
 # Preflight: refuse to start if any target port is taken (a stray instance would fail its own health check and hide behind a false "ready").
 # Cross-platform port check: try a TCP connect; it succeeds iff something listens. Works on Windows PowerShell 5.1 and pwsh on Linux CI.
@@ -109,6 +109,16 @@ season-service:
   override: ""
 '@ | Set-Content -Encoding UTF8 $seasonConfigFile
 
+# ai-service is a config client too (model / retries). NOTE: the api-key is
+# deliberately NOT in here - keys never come through the config center.
+$aiConfigFile = Join-Path $tmpConfigDir 'ai-service.yml'
+@'
+ai-service:
+  model: gpt-6-sol
+  max-retries: 1
+  cache-ttl-seconds: 30
+'@ | Set-Content -Encoding UTF8 $aiConfigFile
+
 $procs = @()
 try {
     $procs += Start-Server 'discovery-server' 'discovery-server-0.1.0-SNAPSHOT.jar' 28161
@@ -135,6 +145,13 @@ try {
     $procs += Start-Server 'season-service' 'season-service-0.1.0-SNAPSHOT.jar' 28082
     Remove-Item Env:SPRING_CONFIG_IMPORT -ErrorAction SilentlyContinue
     if (-not (Wait-Healthy 28082 'season-service')) { exit 1 }
+
+    # ai-service pulls config from config-server too (it is a client, NOT config-server itself).
+    # No api-key is written here or anywhere on disk; the LLM key comes only from the process environment.
+    $env:SPRING_CONFIG_IMPORT = 'optional:configserver:http://localhost:28888'
+    $procs += Start-Server 'ai-service' 'ai-service-0.1.0-SNAPSHOT.jar' 28083
+    Remove-Item Env:SPRING_CONFIG_IMPORT -ErrorAction SilentlyContinue
+    if (-not (Wait-Healthy 28083 'ai-service')) { exit 1 }
 
     $procs += Start-Server 'gateway' 'gateway-0.1.0-SNAPSHOT.jar' 28080
     if (-not (Wait-Healthy 28080 'gateway')) { exit 1 }
@@ -313,6 +330,33 @@ game-service:
     Write-Host "leaderboard after refresh: $lb"
     if (-not ($ver -match 'smoke-reload-note-v2')) { Write-Error "refresh did NOT rebind versionNote to v2: $ver"; exit 1 }
     if (-not ($lb -match '"count":3')) { Write-Error "refresh did NOT rebind max-limit to 3 (leaderboard count stayed above 3): $lb"; exit 1 }
+
+    Write-Host "=== 4j) via gateway: ai-service health via lb://ai-service (W-Y1) ==="
+    $aiHealth = $null
+    for ($i = 0; $i -lt 90; $i++) {
+        try {
+            $r = Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ai/health' -TimeoutSec 10
+            if ($r.StatusCode -eq 200) { $aiHealth = $r.Content; Write-Host "lb:// ai-service warm (try $i) -> HTTP 200"; break }
+        } catch {}
+        Start-Sleep -Milliseconds 1000
+    }
+    if ($null -eq $aiHealth) { Write-Error 'warm-up failed: gateway never resolved ai-service within 90s'; exit 1 }
+    if ($aiHealth -is [byte[]]) { $aiHealth = [System.Text.Encoding]::UTF8.GetString($aiHealth) }
+    Write-Host $aiHealth
+    if (-not ($aiHealth -match '"model":"gpt-6-sol"')) { Write-Error "ai-service health payload missing model: $aiHealth"; exit 1 }
+    if (-not ($aiHealth -match '"circuit":"(CLOSED|OPEN|HALF_OPEN)"')) { Write-Error "ai-service health payload missing circuit state: $aiHealth"; exit 1 }
+    if ($aiHealth -match 'sk-') { Write-Error 'ai-service health leaks an api key'; exit 1 }
+    # Live LLM round trip only when the key is present in the environment.
+    # CI does not hold LLM_API_KEY and stays green without it (boot + route + health asserted).
+    if ($env:LLM_API_KEY) {
+        $aiHint = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/ai/echo-hint' -ContentType 'application/json' -Body '{"franchise":"CYBER","title":"floating_casino","desc":"test"}' -TimeoutSec 120).Content
+        Write-Host $aiHint
+        if ($aiHint -is [byte[]]) { $aiHint = [System.Text.Encoding]::UTF8.GetString($aiHint) }
+        if (-not ($aiHint -match '"available":true')) { Write-Error "ai-service echo-hint round trip failed: $aiHint"; exit 1 }
+        Write-Host 'ai-service echo-hint round trip ok (LLM_API_KEY present - real upstream call made)'
+    } else {
+        Write-Host 'LLM_API_KEY not in environment - skipping live LLM round trip (ai-service boot + route + health asserted)'
+    }
 
     Write-Host ""
     Write-Host "=== 6) discovery: applications currently registered ==="

@@ -25,6 +25,9 @@ export const UI_HOTKEYS = [
   { code: 'KeyJ', action: 'journal' },
   { code: 'F2', action: 'photoMode', preventDefault: true },
   { code: 'F3', action: 'perfHud', preventDefault: true },
+  // W-Y2 切片1：星轨顾问。用 F7 而不是字母键 —— 字母区已被游戏动作占满
+  // （KeyY 是关卡编辑器的模板轮换），而这一格是「随时能开的一扇窗」，功能键更像它。
+  { code: 'F7', action: 'advisor', preventDefault: true },
   { code: 'Backquote', action: 'sessionStats', preventDefault: true },
   { code: 'KeyP', action: 'save' },
   { code: 'KeyL', action: 'load' },
@@ -59,6 +62,9 @@ export const UI_HOTKEY_LABELS = {
   journal: 'journal_title',
   photoMode: 'hotkey_label_photo_mode',
   perfHud: 'start_perf',
+  // 与常驻按钮共用一枚键：重映射表里那一行写的就是玩家在 FAB 上看到的那句话，
+  // 不再另抄一份「星轨顾问」（i18n 有「同一份文案最多两个键」的门禁，抄第三遍会红）
+  advisor: 'advisor_fab',
   sessionStats: 'hotkey_label_session_stats',
   save: 'common_save',
   load: 'hotkey_label_load',

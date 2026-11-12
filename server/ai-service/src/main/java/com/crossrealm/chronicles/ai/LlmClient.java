@@ -48,6 +48,13 @@ public class LlmClient {
     private final String systemPrompt;
     private final AtomicLong upstreamCalls = new AtomicLong();
 
+    /**
+     * Spring picks among multiple constructors only when one is annotated.
+     * Without @Autowired here the container falls back to a (nonexistent)
+     * default constructor and the whole context fails to start. The package-
+     * private constructor above stays for tests with injected fakes/cache.
+     */
+    @org.springframework.beans.factory.annotation.Autowired
     public LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper) {
         this(props, transport, mapper,
                 new ResponseCache(props.getCacheMaxEntries(), props.getCacheTtlSeconds() * 1000L),

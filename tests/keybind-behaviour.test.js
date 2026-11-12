@@ -68,6 +68,7 @@ const panels = (over = {}) => {
     dialogOpen: false,
     upgradeOpen: false,
   journalOpen: false,
+    advisorOpen: false,   // W-Y2 切片1：星轨顾问（有输入框，不认领 nav 宿主）
   };
   for (const k of Object.keys(over)) expect(base, `状态名 "${k}" 不在层表里`).toHaveProperty(k);
   return { ...base, ...over };
@@ -442,7 +443,10 @@ describe('静态门禁：行为侧不许再抄物理键码', () => {
     const game = sourceOf('core/Game.js');
     const body = game.match(/hotkeyBlocked\(code\)\s*\{[\s\S]*?\n {2}\}/);
     expect(body, '找不到 hotkeyBlocked 的方法体').toBeTruthy();
-    expect(body[0]).toContain('hotkeyBlockedBy(this.overlayState()');
+    // W-Y2 切片1：顾问那一层要多问一句「焦点是不是在文本控件里」，
+    // 于是现状先存成局部变量再喂给纯函数 —— 判据本体仍只有 `hotkeyBlockedBy` 一处。
+    expect(body[0]).toMatch(/hotkeyBlockedBy\((?:this\.overlayState\(\)|state), code\)/);
+    expect(body[0]).toContain('this.overlayState()');   // 现状仍只有一个生产者
     expect(body[0]).not.toMatch(CODE_LITERAL);
   });
 
@@ -462,6 +466,7 @@ describe('静态门禁：行为侧不许再抄物理键码', () => {
       dialogOpen: 'this.overlayStack.toStateMap().dialogOpen',
       upgradeOpen: 'this.overlayStack.toStateMap().upgradeOpen',
       journalOpen: 'this.overlayStack.toStateMap().journalOpen',
+      advisorOpen: 'this.overlayStack.toStateMap().advisorOpen',
     })) expect(body[0], `少喂 ${key}`).toContain(`${key}: ${field}`);
   });
 

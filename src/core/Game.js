@@ -41,6 +41,7 @@ const gameOn = (name, handler) => on(name, handler, GAME_EVENT_TAG);
 import { HUD } from '../ui/HUD.js';
 import { Dialog } from '../ui/Dialog.js';
 import { OverlayStack } from '../ui/OverlayStack.js';
+import { AdvisorPanel } from '../ui/AdvisorPanel.js';
 import { HelpManual } from '../ui/HelpManual.js';
 import { Tutorial } from '../ui/Tutorial.js';
 import { UpgradePanel } from '../ui/UpgradePanel.js';
@@ -150,7 +151,7 @@ import { attachPopCultureCombatBarks } from '../game/PopCultureCombatBarks.js';
 import { ZONE_IDS } from '../content/ZoneIdentity.js';
 import { GamepadInput } from '../engine/GamepadInput.js';
 import { Rumble } from '../engine/Rumble.js';
-import { UI_HOTKEYS, setHotkeyTable } from '../content/hotkeys.js';
+import { UI_HOTKEYS, isNavCode, setHotkeyTable } from '../content/hotkeys.js';
 import { gearLabel, pickupChoice } from '../content/gear.js';
 import { endingDialogKey } from '../content/objectives.js';
 import { getLanguage } from '../engine/i18n.js';
@@ -162,7 +163,7 @@ import { setHintPadOutlets } from '../ui/keyHints.js';
 import { HotkeyRouter, escapeRoute, hotkeyBlockedBy } from '../ui/HotkeyRouter.js';
 import { InputDevice } from '../engine/InputDevice.js';
 import { topNavLayer } from '../ui/OverlayStack.js';
-import { moveFocusWithin, activateFocused, adjustFocused, trapTabFocus } from '../ui/FocusNav.js';
+import { moveFocusWithin, activateFocused, adjustFocused, trapTabFocus, isTextEntryFocused } from '../ui/FocusNav.js';
 
 /**
  * 四个方向各自把地图光标推多少格（切片13）。
@@ -426,6 +427,11 @@ export class Game {
   _buildUiAndSystems() {
     this.hud = this._adopt('ui/HUD', new HUD(this));
     this.overlayStack = new OverlayStack(this);
+    // W-Y2 切片1：星轨顾问。建在栈之后（show/hide 要登记模态层）、在线服务挂上之前也没关系
+    // （askAdvisor 是按下那一刻才读 game.onlineServices）。它自己没有 THREE 资源、不监听
+    // 游戏事件，但**监听 DOM 且持有 AbortController** —— 所以照样进 teardown 登记表，
+    // dispose() 会把在飞的请求 abort 掉，不留一条烧到关服之后的 fetch。
+    this.advisorPanel = this._adopt('ui/AdvisorPanel', new AdvisorPanel(this));
     this.upgrade = new UpgradePanel(this);
     this.helpManual = new HelpManual(this);
     this.tutorial = new Tutorial(this.dialog, this.helpManual, this);
@@ -873,6 +879,7 @@ export class Game {
       dialogOpen: this.overlayStack.toStateMap().dialogOpen,
       upgradeOpen: this.overlayStack.toStateMap().upgradeOpen,
       journalOpen: this.overlayStack.toStateMap().journalOpen,
+      advisorOpen: this.overlayStack.toStateMap().advisorOpen,
     };
   }
 
@@ -884,6 +891,13 @@ export class Game {
    * 世界地图那条例外的键名归生效表说（切片7，B50）。
    */
   hotkeyBlocked(code) {
+    // W-Y2 切片1：顾问开着时方向键归输入框的光标，不归面板走格。
+    // 这一层没有 `nav` 宿主（输入框就是「不收焦点」的那一层），方向键不能被 Router
+    // 抢去走格 —— 焦点在文本控件里时 `isTextEntryFocused` 让它们原样交还浏览器，
+    // 否则 Router preventDefault、光标彻底卡死（B52 同一根输入两个消费者）。
+    // 焦点不在文本控件时（芯片 / 关闭 / 发送上）按钮通路归 Tab/Enter 与浏览器自己，
+    // 导航码同样不许走格 —— 这一层不接焦点，这一下就该没人接住。
+    if (this.overlayState().advisorOpen && isNavCode(code) && isTextEntryFocused()) return true;
     return hotkeyBlockedBy(this.overlayState(), code);
   }
 
@@ -1040,6 +1054,9 @@ export class Game {
       case 'questTracker': return this.questAssistant.toggle();
       case 'autoPlay': return this.questAssistant.startAutoPlay();
       case 'journal': return this.hud.toggleJournal();
+      // W-Y2 切片1：F7。开着时层表会挡住其余 UI 热键（输入框要真的收到字母），
+      // 而这一格本身在层表里是 back:true，所以再按一次 / Escape 都收得回去。
+      case 'advisor': return this.advisorPanel.toggle();
       case 'photoMode': return this.photoMode?.toggle();
       case 'perfHud': {
         // 追踪器与性能 HUD 一起开/关：两者都是开发期工具，**开着才有开销**
@@ -1141,6 +1158,7 @@ export class Game {
       // 日志抽屉（切片27 / 修 B57）：走 `setJournal(false)` 而不是 `toggleJournal()` ——
       // 级联关它的时候再 toggle 一次就是"按一下变成再开一次"，那正是改前读数的"关不掉"
       case 'journal': this.hud.setJournal(false); return true;
+      case 'advisor': return this.advisorPanel.hide();
       case 'pauseMenu': return this.pauseMenu.toggle();
       default: return false;
     }
@@ -1312,6 +1330,9 @@ export class Game {
       // 那一格的走焦、又还在推玩家走路（真浏览器读数 K3：开着日志 `mag` 0.972、速度 26.98 m/s）。
       // 一根输入两个消费者，与 B52 同族；这里按既有形状补上"这一层开着就不玩"
       && !this.hud?.journalOpen
+      // 星轨顾问（W-Y2 切片1）：层表里它是 blocks:true，玩法这一侧也必须认得 ——
+      // 否则摇杆一边在输入框上方走焦、一边还在推玩家走路（与 B57 同一根输入两个消费者）
+      && !this.advisorPanel?.open
       && !inputLocked
       && !this.autoPlayMode;
 

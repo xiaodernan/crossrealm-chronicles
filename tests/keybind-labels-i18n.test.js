@@ -105,13 +105,14 @@ describe('结构腿：六张表的值全是登记过的键', () => {
     }
   });
 
-  it('分母自证：六张表一共 74 格，外加一句插值句式（pad_stick_label）', () => {
+  it('分母自证：六张表一共 75 格，外加一句插值句式（pad_stick_label）', () => {
     const 全部 = [
       KEY_LABELS, MOUSE_LABELS, PAD_BUTTON_LABELS,
       UI_HOTKEY_LABELS, KEY_ACTION_LABELS, PAD_ONLY_ACTION_LABELS,
     ];
     const 总数 = 全部.reduce((n, 表) => n + Object.keys(表).length, 0);
-    expect(总数, '表格格子数变了：迁移漏了格，或多搬了格').toBe(74);
+    // W-Y2 切片1：UI_HOTKEYS 多了 F7 → advisor，六张表 74 → 75 格
+    expect(总数, '表格格子数变了：迁移漏了格，或多搬了格').toBe(75);
     // 原值钉死 = 68 格逐字 + 1 句插值句式（在行为腿里钉）：七格撞已有文案，按惯例指向已有键、不新起
     expect(Object.keys(原值).length).toBe(68);
     const 表内键 = new Set(全部.flatMap((表) => Object.values(表)));
@@ -126,9 +127,11 @@ describe('结构腿：六张表的值全是登记过的键', () => {
   });
 });
 
-describe('撞车的六格指向已有键（同一份文案最多两个键）', () => {
-  it('日志 / 性能面板 / 保存 / 设置 / 弹反 / 快速旅行不新起同文案的键', () => {
+describe('撞车的七格指向已有键（同一份文案最多两个键）', () => {
+  it('日志 / 星轨顾问 / 性能面板 / 保存 / 设置 / 弹反 / 快速旅行不新起同文案的键', () => {
     expect(UI_HOTKEY_LABELS.journal).toBe('journal_title');
+    // W-Y2 切片1：重映射表那一行与 FAB 上写的是同一句话，不另起第三枚「星轨顾问」
+    expect(UI_HOTKEY_LABELS.advisor).toBe('advisor_fab');
     expect(UI_HOTKEY_LABELS.perfHud).toBe('start_perf');
     expect(UI_HOTKEY_LABELS.save).toBe('common_save');
     expect(UI_HOTKEY_LABELS.settings).toBe('settings_title');

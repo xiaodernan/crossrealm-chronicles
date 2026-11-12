@@ -214,6 +214,57 @@
         <p id="boot-error" class="hidden"></p>
       </div>
     </div>
+    <!-- W-Y2：星轨顾问。按钮常驻，面板默认收起；开着时由 OverlayStack 记为模态层。
+         文案键一律走 data-i18n / data-i18n-aria，聊天气泡是模型回的**不可信文本**，
+         由 AdvisorPanel 用 createElement + textContent 写，绝不拼进 innerHTML。 -->
+    <button type="button" id="advisor-fab" class="advisor-fab" aria-controls="advisor-panel"
+            aria-expanded="false" data-i18n-aria="advisor_fab_aria">
+      <span class="advisor-orbit" aria-hidden="true"></span>
+      <span class="advisor-label" data-i18n="advisor_fab">星轨顾问</span>
+      <span class="advisor-keycap" data-keys="advisor"></span>
+    </button>
+    <div id="advisor-panel" class="advisor-panel hidden" role="dialog" aria-modal="false"
+         aria-labelledby="advisor-title" data-i18n-aria="advisor_aria_label">
+      <div class="advisor-aurora" aria-hidden="true"></div>
+      <div class="advisor-head panel-drag-handle">
+        <div class="advisor-sigil" aria-hidden="true"><span class="advisor-sigil-core"></span></div>
+        <div class="advisor-heading">
+          <h2 id="advisor-title" data-i18n="advisor_title">星轨顾问</h2>
+          <p class="advisor-subtitle" data-i18n="advisor_subtitle">隔着位面听见的那点回响</p>
+        </div>
+        <div class="advisor-head-actions">
+          <span id="advisor-status" class="advisor-status is-checking" role="status">
+            <span class="advisor-status-dot" aria-hidden="true"></span>
+            <span id="advisor-status-text"></span>
+          </span>
+          <button type="button" id="advisor-close" class="advisor-icon-btn"
+                  data-i18n-aria="advisor_close_aria">✕</button>
+        </div>
+      </div>
+      <div id="advisor-transcript" class="advisor-transcript" role="log" aria-live="polite" aria-relevant="additions">
+        <p id="advisor-greeting" class="advisor-greeting" data-i18n="advisor_greeting">我在篝火边等你。</p>
+      </div>
+      <div id="advisor-typing" class="advisor-typing hidden" aria-hidden="true">
+        <span class="advisor-dot"></span><span class="advisor-dot"></span><span class="advisor-dot"></span>
+        <span class="advisor-typing-text" data-i18n="advisor_thinking">正在观星…</span>
+      </div>
+      <div id="advisor-suggestions" class="advisor-suggestions">
+        <button type="button" class="advisor-chip" data-advisor-prompt="advisor_suggestion_build" data-i18n="advisor_suggestion_build">这一季该堆什么属性？</button>
+        <button type="button" class="advisor-chip" data-advisor-prompt="advisor_suggestion_season" data-i18n="advisor_suggestion_season">眼前的词缀怎么破？</button>
+        <button type="button" class="advisor-chip" data-advisor-prompt="advisor_suggestion_trial" data-i18n="advisor_suggestion_trial">位面试炼最后一层怎么打？</button>
+      </div>
+      <form id="advisor-form" class="advisor-composer">
+        <input id="advisor-input" class="advisor-input" type="text" autocomplete="off"
+               data-i18n-aria="advisor_input_aria" />
+        <span id="advisor-count" class="advisor-count" aria-hidden="true"></span>
+        <button type="submit" id="advisor-send" class="advisor-send" data-i18n="advisor_send">送出</button>
+        <button type="button" id="advisor-stop" class="advisor-stop hidden" data-i18n="advisor_stop">停止</button>
+      </form>
+      <div class="advisor-foot">
+        <span id="advisor-meta" class="advisor-meta" aria-live="polite"></span>
+        <span class="advisor-disclaimer" data-i18n="advisor_disclaimer">回答由 AI 生成，未必与当前版本一致</span>
+      </div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

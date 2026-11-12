@@ -54,7 +54,9 @@ const sourceOf = (name) => {
   return found.source;
 };
 
-const LAYER_NAMES = ['endCredits', 'dialog', 'worldMap', 'autoPlay', 'help', 'journal', 'cinematic',
+// W-Y2 切片1：星轨顾问排在日志之后、演出之前 —— 它是一扇常驻可开的窗，
+// 开着时输入框要真的收到字母（blocks:true），Escape 也要收得回去（back:true）。
+const LAYER_NAMES = ['endCredits', 'dialog', 'worldMap', 'autoPlay', 'help', 'journal', 'advisor', 'cinematic',
   'settings', 'fastTravel', 'pauseMenu', 'combatCinematic', 'upgrade'];
 
 /** 状态进、状态出：字段名全部现问表；写错一个状态名立刻红（测试里的字面量也因此被钉住） */
@@ -118,6 +120,7 @@ describe('一张表：层序、字段名与 blocks 的取值域', () => {
       'help|helpOpen|back|true|help-manual',
       // 日志抽屉今天是一层（切片27 / B57）：以前它只归 HUD 记，级联与走焦都不知道它开着
       'journal|journalOpen|back|true|journal-panel',
+      'advisor|advisorOpen|back|true|-',   // W-Y2 切片1：有文本输入框 ⇒ 刻意不认领 nav 宿主
       'cinematic|cinematicActive|back|false|-',
       'settings|settingsOpen|back|true|settings-panel',
       'fastTravel|fastTravelOpen|back|true|fast-travel-panel',
@@ -150,6 +153,7 @@ describe('一张表：层序、字段名与 blocks 的取值域', () => {
       pauseMenu: 'this.paused',
       upgrade: 'this.upgrade.open',
       journal: 'this.hud?.journalOpen',
+      advisor: 'this.advisorPanel?.open',   // W-Y2 切片1：输入框开着时不许还在推玩家走路
     };
     expect(Object.keys(ASKED).sort(), '挡键层的名单与层表对不上（加一层就得在这里说清它挡不挡玩法）')
       .toEqual(OVERLAY_LAYERS.filter((l) => l.blocks === true).map((l) => l.layer).sort());
@@ -227,6 +231,8 @@ describe('topNavLayer：↑↓ 走进哪个面板（切片11，与返回键同�
 
   it('登记的层就是"焦点进得去"的那几层：对话 / 说明书 / 日志 / 设置 / 快速旅行 / 暂停菜单 / 升级面板', () => {
     // 对话框（切片10）里的选项是玩法决策；升级面板那九格（切片24 / B55）与日志抽屉那八格（切片27 / B57）今天都有宿主
+    // W-Y2 切片1：星轨顾问**不在**这份名单里 —— 它有一枚文本输入框，
+    // ↑↓←→ 得留给光标；焦点落点由 focusElement() 在开面板时直接交给输入框。
     expect(NAV).toEqual(['dialog', 'help', 'journal', 'settings', 'fastTravel', 'pauseMenu', 'upgrade']);
   });
 

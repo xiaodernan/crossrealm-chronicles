@@ -111,13 +111,65 @@ export function trapTabFocus(e, layer, doc = globalThis.document) {
   return moveFocusWithin(doc.getElementById(layer.nav), e.shiftKey ? -1 : 1);
 }
 
-/** 面板刚打开：焦点落在清单第一格，玩家立刻有"现在选中的是谁"可看（没有可落的东西返回 false） */
-export function focusFirstItem(host, doc = globalThis.document) {
+/**
+ * 把焦点交给**指定的一格**（W-Y2 切片1）。
+ *
+ * 与 `focusFirstItem` 的分工：那一格问「清单里第一格是谁」，这一格不问清单，
+ * 只替调用方把焦点落到一个它已经认准的元素上（顾问面板开/关时是输入框 ↔ FAB）。
+ * 抽到这里而不是让面板自己写 `.focus()`，是为了让「全仓只有这个文件碰焦点」
+ * 那条门禁继续成立 —— 否则每多一个有输入框的面板就多一个焦点真源。
+ */
+export function focusElement(el) {
+  if (!el || typeof el.focus !== 'function') return false;
+  el.focus();
+  return true;
+}
+
+/**
+ * 文本控件判据（W-Y2 切片1）：↑↓←→ 既是移焦键、也是浏览器的光标键。
+ *
+ * 面板开着时移焦键被接管（`Game.panelNav` / 轮询派发），文本框里的光标就再也移不动 ——
+ * 玩家按 → 是想「把光标向右挪一个字」，不是想「焦点从输入框走到芯片」。判据归这一处：
+ * 热键的 `isBlocked` 据此放行方向键给浏览器；芯片 / 按钮 / 复选框上焦点（没有光标），
+ * 导航照常。移动端没有文本输入，不受影响。
+ *
+ * 收的都是「光标 = 命根」的控件：TEXTAREA、contenteditable、以及除 range/checkbox/
+ * radio/button/submit/reset/file/hidden/image 之外的 INPUT（没写 type 的就是 text）。
+ * range 刻意不收：←→ 该归 `adjustFocused` 推值（在这里放行反而是把滑杆吃了）。
+ */
+/**
+ * 「现在焦点是不是停在文本控件里」—— 唯一允许读 `activeElement` 的出口。
+ *
+ * `Game.hotkeyBlocked` 只问这一句，不自己碰 `document.activeElement`：
+ * 全仓的焦点账只在 FocusNav / OverlayStack 两个文件里，多一处读就是第二套真源
+ * （切片11 立的规矩）。测试可以注入一份假 doc，不必真的起浏览器。
+ */
+export function isTextEntryFocused(doc = globalThis.document) {
+  return isTextLikeControl(doc?.activeElement ?? null);
+}
+
+export function isTextLikeControl(el) {
+  if (!el || !el.tagName) return false;
+  const tag = String(el.tagName).toUpperCase();
+  if (tag === 'TEXTAREA') return true;
+  if (el.isContentEditable) return true;
+  if (tag !== 'INPUT') return false;
+  const type = String(el.type ?? 'text').toLowerCase();
+  return !['range', 'checkbox', 'radio', 'button', 'submit', 'reset', 'file', 'hidden', 'image'].includes(type);
+}
+
+/** 面板刚打开：焦点落在清单第一格（或 `preferred` 指定的那一格），玩家不用猜焦点在哪 */
+export function focusFirstItem(host, doc = globalThis.document, { preferred = null } = {}) {
   const items = navItems(host);
   if (!items.length) return false;
   // 已经落在这一格里就别动它：从别的界面退回同一个面板时保留玩家选中的那一格
   if (items.includes(doc?.activeElement)) return true;
-  items[0].focus();
+  // `preferred`（可选）：面板自己的落点偏好（如 `#advisor-input`）。
+  // 找不到该格时退回清单第一个 —— 出厂行为不再由调用方拼 DOM 查询决定
+  const preferredItem = preferred && typeof host?.querySelector === 'function'
+    ? items.find((el) => el === host.querySelector(preferred))
+    : null;
+  (preferredItem ?? items[0]).focus();
   return true;
 }
 

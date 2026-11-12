@@ -105,8 +105,18 @@ export function node(tag, doc) {
   });
   /** 属性四件套（与浏览器对齐）：`applyTranslations` 等真代码路径读的是 getAttribute */
   el.getAttribute = (name) => (name in el.attrs ? el.attrs[name] : null);
-  el.setAttribute = (name, value) => { el.attrs[name] = String(value); };
-  el.removeAttribute = (name) => { delete el.attrs[name]; };
+  // 真 DOM 里 `data-*` 属性与 `dataset` 是同一份数据的两个视图：运行期 setAttribute
+  // 写出来的 `data-advisor-role` 必须也能被 `[data-advisor-role]` 选择器筛到。
+  // 早先只有 html 解析那一路同步了 dataset，于是「代码在跑，但选择器看不见」——
+  // 那是桩不够真，不是被测方的问题（W-Y2 切片1 修）。
+  el.setAttribute = (name, value) => {
+    el.attrs[name] = String(value);
+    if (name.startsWith('data-')) el.dataset[camel(name.slice(5))] = String(value);
+  };
+  el.removeAttribute = (name) => {
+    delete el.attrs[name];
+    if (name.startsWith('data-')) delete el.dataset[camel(name.slice(5))];
+  };
   el.hasAttribute = (name) => name in el.attrs;
   el.addEventListener = (type, fn) => { (el.listeners[type] ??= []).push(fn); };
   el.dispatch = (type) => { (el.listeners[type] ?? []).forEach((fn) => fn({ type, target: el })); };

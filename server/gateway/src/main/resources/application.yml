@@ -104,3 +104,23 @@ gateway:
   ratelimit:
     # memory = 内存滑动窗口（默认，smoke/CI 用）；redis = Redis 集群共享窗口（多实例生产用）
     backend: memory
+
+# 熔断/限时器显式口径（W-Y1 回填）：reactive circuit breaker 缺省 TimeLimiter 是 1 秒——
+# LLM 一轮调用常态 2~30 秒，缺省会把每个 POST 都判成「超时」直接吃回顾问离线页。
+# 现在：aiServiceBreaker 限时 75s（覆盖 ai-service 自身 timeout: 20s + 2 次重试 + 退避抖动），
+# 熔断窗口 10 次 / 50% 失败率、open 30s 后自动半开——比缺省 100 次窗口更早止损，
+# 又不因为一两次上游抖动就开路。其余路由（game-service/season/version）保持缺省 1s，
+# 那些端点全部毫秒级返回，缺省对它们是对的。
+resilience4j:
+  circuitbreaker:
+    instances:
+      aiServiceBreaker:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        automatic-transition-from-open-to-half-open-enabled: true
+  timelimiter:
+    instances:
+      aiServiceBreaker:
+        timeout-duration: 75s

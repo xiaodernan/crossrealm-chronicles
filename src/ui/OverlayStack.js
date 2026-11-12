@@ -50,6 +50,18 @@ export const OVERLAY_LAYERS = [
    * 现在它与说明书同档：吃返回键、挡别的 UI 热键、认领 `#journal-panel` 那一格的焦点。
    */
   { layer: 'journal', state: 'journalOpen', back: true, blocks: true, nav: 'journal-panel' },
+  /**
+   * 星轨顾问（W-Y2 切片1）。放在日志之后、演出之前：它是一扇**常驻可开的窗**，
+   * 开着时输入框要真的收到字母与方向键 —— 所以 `blocks:true`（挡掉 `KeyJ` 之类的
+   * UI 热键、也停玩法）。
+   *
+   * **刻意不认领 `nav` 宿主**：这一层里有一枚文本输入框，↑↓←→ 属于光标移动；
+   * 认领了宿主就等于宣布「方向键归面板走格」，输入时光标会卡死。配合
+   * `Game.hotkeyBlocked()` 里那条「顾问开着时导航码一并挡下」，
+   * Router 既不 `preventDefault` 也不派发，方向键原样交还浏览器。
+   * 芯片与按钮走浏览器原生 Tab，不需要第二个焦点出口。
+   */
+  { layer: 'advisor', state: 'advisorOpen', back: true, blocks: true },
   { layer: 'cinematic', state: 'cinematicActive', back: true, blocks: false },
   { layer: 'settings', state: 'settingsOpen', back: true, blocks: true, nav: 'settings-panel' },
   { layer: 'fastTravel', state: 'fastTravelOpen', back: true, blocks: true, nav: 'fast-travel-panel' },

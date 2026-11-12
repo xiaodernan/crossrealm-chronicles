@@ -15,9 +15,26 @@
  * - Node 下可注入 `fetchImpl`（单测用）。
  */
 
+import {
+  ADVISOR_LIMITS, ADVISOR_REASONS, normalizeAdvisorQuestion, normalizeAdvisorContext,
+} from '../content/advisor.js';
+
 const TIMEOUT_MS = 1500;
 const LS_FLAG = 'crossrealm_online';
 const LS_BASE = 'crossrealm_online_base_url';
+
+/**
+ * 超时 + 外部取消合成一个信号（W-Y2 切片1）。
+ *
+ * `AbortSignal.any` 在较老的浏览器里没有；缺了就退化成「只有超时、没有取消」，
+ * 而不是让整个请求抛 TypeError。取消是锦上添花，超时是底线。
+ */
+function requestSignal(timeoutMs, external) {
+  const timeout = AbortSignal.timeout(timeoutMs);
+  if (!external) return timeout;
+  if (typeof AbortSignal.any === 'function') return AbortSignal.any([timeout, external]);
+  return timeout;
+}
 
 export class OnlineServices {
   constructor({ baseUrl, fetchImpl, enabled } = {}) {
@@ -133,6 +150,86 @@ export class OnlineServices {
       console.warn('[online] 拉取试炼榜失败（已吞掉）', e?.message ?? e);
       return null;
     }
+  }
+
+  /**
+   * 顾问链路的统一请求口（W-Y2 切片1）。
+   *
+   * 与 `#post` 的差别是**它不把失败压成一个 false**：面板要分清「在线服务没开」、
+   * 「网关 503 熔断中」、「上游超时」和「模型答了」，四种的玩家可读动作完全不同。
+   * 返回 `{ ok, reason, status, data }`；`reason` 只取这份枚举，UI 的文案表照它展开。
+   * 依旧吞掉所有异常 —— 网络不好绝不打断本地游戏，只是把状态说清楚。
+   */
+  async #jsonRequest(path, { method = 'GET', body, timeoutMs = TIMEOUT_MS, signal } = {}) {
+    if (!this._enabled) return { ok: false, reason: ADVISOR_REASONS.DISABLED, status: 0, data: null };
+    try {
+      const init = {
+        method,
+        signal: requestSignal(timeoutMs, signal),
+      };
+      if (body !== undefined) {
+        init.headers = { 'content-type': 'application/json' };
+        init.body = JSON.stringify(body);
+      }
+      const res = await this._fetch(this._baseUrl + path, init);
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        /* 非 JSON（网关的纯文本 503 等）：留给下面的 status 分支说清楚 */
+      }
+      if (!res.ok) return { ok: false, reason: ADVISOR_REASONS.HTTP, status: res.status, data };
+      if (!data || typeof data !== 'object') {
+        return { ok: false, reason: ADVISOR_REASONS.BAD_JSON, status: res.status, data: null };
+      }
+      return { ok: true, reason: ADVISOR_REASONS.OK, status: res.status, data };
+    } catch (e) {
+      if (signal?.aborted) return { ok: false, reason: ADVISOR_REASONS.CANCELLED, status: 0, data: null };
+      const name = e?.name ?? '';
+      const reason = name === 'TimeoutError' || name === 'AbortError'
+        ? ADVISOR_REASONS.TIMEOUT : ADVISOR_REASONS.NETWORK;
+      console.warn('[online] 顾问请求失败（已吞掉）', path, reason, e?.message ?? e);
+      return { ok: false, reason, status: 0, data: null };
+    }
+  }
+
+  /**
+   * 向星轨顾问问一句（W-Y2 切片1，`POST /api/ai/chat`）。
+   *
+   * 问题与上下文在这里按内容层的上限收敛一次：**发出去的那一份**与面板显示的
+   * 字符计数是同一个字符串，否则玩家看到 380/400，服务端却按 412 字拒了。
+   * `signal` 是面板「停止」按钮的 AbortController，取消是真取消（fetch 会断）。
+   */
+  async askAdvisor(question, context = {}, { signal } = {}) {
+    const q = normalizeAdvisorQuestion(question);
+    if (!q) return { ok: false, reason: ADVISOR_REASONS.BLANK, status: 0, data: null };
+    return this.#jsonRequest('/api/ai/chat', {
+      method: 'POST',
+      body: { question: q, context: normalizeAdvisorContext(context) },
+      timeoutMs: ADVISOR_LIMITS.requestTimeoutMs,
+      signal,
+    });
+  }
+
+  /** 顾问健康快照（`GET /api/ai/health`）：configured / model / circuit / cache / upstreamCalls */
+  async fetchAdvisorHealth({ signal } = {}) {
+    return this.#jsonRequest('/api/ai/health', {
+      timeoutMs: ADVISOR_LIMITS.healthTimeoutMs,
+      signal,
+    });
+  }
+
+  /**
+   * 回声灯的一句暗示（W-X22 收编版，`POST /api/ai/echo-hint`）。
+   * 与顾问共用同一条网关路径、同一份熔断与缓存，只是人格提示不同。
+   */
+  async fetchEchoHint({ franchise, title, desc = '' }, { signal } = {}) {
+    return this.#jsonRequest('/api/ai/echo-hint', {
+      method: 'POST',
+      body: { franchise, title, desc },
+      timeoutMs: ADVISOR_LIMITS.requestTimeoutMs,
+      signal,
+    });
   }
 
   /**
