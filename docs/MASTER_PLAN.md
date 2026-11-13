@@ -6867,3 +6867,16 @@ Phase D（系统与质量）
   - **判据**：只加可观测探针、零业务面变更；计数器在所有空路径（未配置 Micrometer）下恒 null，不会让单测崩；为 `calls{outcome}` 用 tag 而非两名 counter；Gauge 不维护“瞬时”比率而维护启动后累加比率（与 sum/prompt 对齐，且免高基数 tag）。
 
   - **风险与后续**：① ai-upstream 线现有 span=一次上游调用，如果上游流式已由同线返回 usage，则 cached 依赖上游是否报；② api-key 绝不进入指标 label——所有指标零 provider 数据；③ W-Z13 可以对接：game telemetry 也拉到 Prom 与现有 `game_telemetry_*` 对上一致，または {游戏，顾问} 两条线合成统一 SLO 仪表板。
+- **2026-11-13 W-E18 前端美学微打磨（gold-dark 统一语言）** —— 提交 `dfe80f0`（切片1）· `bbf9144`（切片2）
+
+  - **起因**：前端 UI 已经有像样的二稿重设计（标题屏的余晖+晚霞双层渐变、clamp 字号、漂浮金钮、动态光晕；按 W-Z3 设的 :root 语义令牌如 `--gold-hi`/`--gold`/`--gold-dim`/`--dur-fast`/`--ease-out` 动态分级），但两处仍停留在浏览器默认皮肤里，与世界的鎏金感违章：① 滚动条是系统的灰白刀口——所有面板窗口都用它，咀咬得有多彻底取决于玩家系统；② i18n 键帽类（`data-keys`）只写短文字不带键框；③ 存档槽 `select` 的 hover/focus 只有默认残留；④ focus-within 作用域完全没有关照 `.pause-slot-row` 这一行下拉的投递。另外 609 行高级规则没有这样一幅残缺的统一语言——从 “键帽 — 下拉 — 滚动条 — 选区” 拉通一条鎏金线。
+
+  - **做法（切片1）**：`style.css` 追加一块纯新增规则：`html { scrollbar-width: thin; scrollbar-color: rgba(201,169,98,.35) transparent; }` + `::-webkit-scrollbar` 8px 细条透明轨道 + `::-webkit-scrollbar-thumb` rgba(201,169,98,.35) hover 55%。全仓 gold-dark 统一后——Demo 面板、自定义栏、社交面板、日志散文、全部一起。零结构影响（`.hidden`/`.panel-box`/测试钉住的 `.bar-fill` 都没碰）。
+
+  - **做法（切片2）**：悬停加宽深浅按钮 + 焦点光环扩充到 `.pause-slot-row:focus-within`（双层金辉）与 `select` hover/focus 双层阴影（外辉 + inset 顶光），去常量 shadow — 用 `inset 0 1px 0 rgba(255,217,138,.22)` 的同一金徽；"键帽字" 注入 flex 规则：`.panel-box .hint span[data-keys] { 描金小圆角胶子 + var(--gold-hi) / letter-spacing }`。全部加 `.panel-box` 私有作用域、全加法。
+
+  - **防雷钉**：`focus-nav.test.js` 三例全红保护：焦点环只有一条（`:focus` 不走 `:focus-visible`）、死罪 `.outline:none` 严禁；本片曾因 `select:focus { outline: none; }` 直接触发红，立刻删掉收敛到全仓唯一 focus 规则。这也印证了 focus-nav 门禁的活性——它咬得住“前端想偷换哪一格焦点语言”。
+
+  - **判据**：lint 0 / 6556 例全绿（含三条焦点环死罪钉）/ build ✓ / size 2.15 MiB（余 0.04，刻线上限 2.19）/ e2e 通关 ✓ / perf exit 0（超限 0）。故障手段：全新规则自己没漏值会 false red 无法逃过 lint 守住的两行 tester 守门——该门禁在 CI 极难骗过。
+
+  - **风险与后续**：① 逐片 canvas/2D 路由面仍用者默认 UI 字型（chapter/season 卡片），W-S3 考虑随风格扩至自定义 panel 字体族；② 没有做 "amphibious focus/autopromote chain"，序列动符合成本收益（咱按钮吞掉 aria-label）；OVERKILL。W-E19+（本会话之外的内容）多从 Toast/成就闪光向打开的团队继续。
