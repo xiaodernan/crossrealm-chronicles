@@ -52,3 +52,9 @@ jobs:
       # 停 redis 报错、起 redis 恢复。真修过一次 final record + NON_FINAL 反序列化 bug。
       - name: Redis-backed season cache (W-S2 verification)
         run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-season-cache.ps1"
+
+      # Redis 背板的顾问队列（W-Z1）：throwaway redis + ai-service ai-service.jobs.backend=redis。
+      # 无 LLM_API_KEY 时 worker 确定性地不配置失败→DEAD；验证提交→claim→DEAD→DLQ→
+      # 死信白名单端点（不回显玩家提问）；ai:advisor:jobs/dlq 键真的存在（证明走了 Redis 后端）。
+      - name: Redis-backed advisor queue (W-Z1 verification)
+        run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-advisor-queue.ps1"
