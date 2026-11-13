@@ -73,6 +73,9 @@ export const ECHOES = [
   { id: 'echo-speakeasy', franchise: FRANCHISE.FAMILY, zone: 'abyss', title: 'echo_speakeasy_title', desc: 'echo_speakeasy_desc', trigger: 'echo:speakeasy' },
   { id: 'echo-family-shrine', franchise: FRANCHISE.FAMILY, zone: 'abyss', title: 'echo_family_shrine_title', desc: 'echo_family_shrine_desc', trigger: 'echo:family-shrine' },
   { id: 'echo-dock-crates', franchise: FRANCHISE.FAMILY, zone: 'abyss', title: 'echo_dock_crates_title', desc: 'echo_dock_crates_desc', trigger: 'echo:dock-crates' },
+  { id: 'echo-gangster-cuff', franchise: FRANCHISE.FAMILY, zone: 'abyss', title: 'echo_gangster_cuff_title', desc: 'echo_gangster_cuff_desc', trigger: 'echo:speakeasy' },
+  { id: 'echo-gangster-lotus', franchise: FRANCHISE.FAMILY, zone: 'abyss', title: 'echo_gangster_lotus_title', desc: 'echo_gangster_lotus_desc', trigger: 'echo:family-shrine' },
+  { id: 'echo-gangster-ledger', franchise: FRANCHISE.FAMILY, zone: 'abyss', title: 'echo_gangster_ledger_title', desc: 'echo_gangster_ledger_desc', trigger: 'echo:dock-crates' },
 
   // ── 深空纪元（科幻）──
   { id: 'echo-colony-dome', franchise: FRANCHISE.DEEPSPACE, zone: 'space', title: 'echo_colony_dome_title', desc: 'echo_colony_dome_desc', trigger: 'echo:colony-dome' },
@@ -116,6 +119,9 @@ export const ECHOES = [
   { id: 'echo-void-pearl', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_pearl_title', desc: 'echo_void_pearl_desc', trigger: 'echo:void-pearl' },
   { id: 'echo-abyss-conch', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_conch_title', desc: 'echo_abyss_conch_desc', trigger: 'echo:abyss-conch' },
   { id: 'echo-abyss-bonegate', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_bonegate_title', desc: 'echo_abyss_bonegate_desc', trigger: 'echo:abyss-bonegate' },
+  { id: 'echo-abyss-saltmarch', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_saltmarch_title', desc: 'echo_abyss_saltmarch_desc', trigger: 'echo:abyss-stele' },
+  { id: 'echo-abyss-saltbreath', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_saltbreath_title', desc: 'echo_abyss_saltbreath_desc', trigger: 'echo:abyss-conch' },
+  { id: 'echo-abyss-saltfeast', franchise: FRANCHISE.ABYSSSALT, zone: 'abyss', title: 'echo_abyss_saltfeast_title', desc: 'echo_abyss_saltfeast_desc', trigger: 'echo:abyss-bonegate' },
 
   // ── Wave8（薄暮巡礼 / 辉煌巡礼）──
   { id: 'echo-gloom-lanterns', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_lanterns_title', desc: 'echo_gloom_lanterns_desc', trigger: 'echo:gloom-lanterns' },

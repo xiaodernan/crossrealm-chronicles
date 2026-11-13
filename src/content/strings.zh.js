@@ -5,6 +5,22 @@
  * 键名按"模块_用途"命名，值是唯一真源 —— 改显示文案只改这一处。
  */
 export const STRINGS_ZH = Object.freeze({
+  echo_gangster_cuff_title: '纽扣与印玺',
+  echo_gangster_cuff_desc: '每枚袖扣后面都是一片盟约——这家店的纽扣比刀多。',
+  echo_gangster_lotus_title: '黑莲茶座',
+  echo_gangster_lotus_desc: '黑莲花开的季节里没人碰牌——茶座只谈消息，不谈输赢。',
+  echo_gangster_ledger_title: '账房先生',
+  echo_gangster_ledger_desc: '账房瘦得像根蜡烛——他记的账里，没有一笔结清过。',
+  echo_abyss_saltmarch_title: '盐柱长征',
+  echo_abyss_saltmarch_desc: '每年霜降，盐柱都会比去年多出一指——它们走的路，比骨头还老。',
+  echo_abyss_saltbreath_title: '咸风',
+  echo_abyss_saltbreath_desc: '从海沟吹来的风是咸的——舔过它的人，都知道深渊有多深。',
+  echo_abyss_saltfeast_title: '无盐宴席',
+  echo_abyss_saltfeast_desc: '这顿席不上盐——盐是给海用的，人只欠海债。',
+  ach_echo_gangster_six_title: '帮派六响',
+  ach_echo_gangster_six_desc: '黑道残响全六枚齐鸣',
+  ach_echo_abysssalt_six_title: '深颚六响',
+  ach_echo_abysssalt_six_desc: '深颚残响全六枚齐鸣',
   echo_border_undertaker_title: '掘墓人沙龙',
   echo_border_undertaker_desc: '黄昏总有一位戴黑纱的妇人走进来——点两杯威士忌，其中一杯留给自己。',
   echo_border_sheriff_title: '空镇警长',

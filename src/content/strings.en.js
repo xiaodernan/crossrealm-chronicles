@@ -5,6 +5,22 @@
  * Keys follow "module_purpose" naming, values are the single source of truth.
  */
 export const STRINGS_EN = Object.freeze({
+  echo_gangster_cuff_title: 'Cuffs and Sigils',
+  echo_gangster_cuff_desc: 'Every cufflink hides a treaty — this shop holds more treaties than knives.',
+  echo_gangster_lotus_title: 'The Black Lotus Tea Room',
+  echo_gangster_lotus_desc: 'In black lotus season no one touches the tiles — the tea shop trades in news, never in wins and losses.',
+  echo_gangster_ledger_title: 'The Ledger Keeper',
+  echo_gangster_ledger_desc: 'The ledger keeper is thin as a candle — not one entry in his books has ever been settled.',
+  echo_abyss_saltmarch_title: 'March of the Salt Columns',
+  echo_abyss_saltmarch_desc: 'Every frost the salt columns stand a finger taller — the road they walk is older than bone.',
+  echo_abyss_saltbreath_title: 'Salt on the Tongue',
+  echo_abyss_saltbreath_desc: 'The wind from the trench tastes of salt — those who have licked it know exactly how deep the abyss runs.',
+  echo_abyss_saltfeast_title: 'A Feast Without Salt',
+  echo_abyss_saltfeast_desc: 'No salt is served at this table — salt belongs to the sea; men owe it debts.',
+  ach_echo_gangster_six_title: 'Six Family Echoes',
+  ach_echo_gangster_six_desc: 'Resonate with all six family echoes',
+  ach_echo_abysssalt_six_title: 'Six Abyssal Echoes',
+  ach_echo_abysssalt_six_desc: 'Resonate with all six abyssal echoes',
   echo_border_undertaker_title: 'The Mourner at the Saloon',
   echo_border_undertaker_desc: 'Every dusk a veiled woman walks in — two whiskies, and one of them she keeps.',
   echo_border_sheriff_title: 'The Hollow Badge',
