@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -46,6 +48,8 @@ public class PresenceController {
     private static final long KEEPALIVE_MS = 15_000L;
 
     private final PresenceStore store;
+    /** 频道维度的活跃 SSE 连接数（ops 端点读；只读、无判断分支） */
+    private final ConcurrentHashMap<String, AtomicInteger> activeStreams = new ConcurrentHashMap<>();
     private final PresenceEventHub hub;
     private final PresenceProperties props;
     private final ScheduledExecutorService scheduler;
@@ -99,6 +103,7 @@ public class PresenceController {
         response.setHeader("X-Accel-Buffering", "no");
 
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
+        activeStreams.computeIfAbsent(channel, k -> new AtomicInteger()).incrementAndGet();
 
         // 1) 先推当前快照（只读新鲜者），再发一个 snapshot-end 让前端知道"初始名单齐了"
         try {
@@ -133,6 +138,11 @@ public class PresenceController {
 
         Runnable cleanup = () -> {
             ping.cancel(true);
+            activeStreams.computeIfPresent(channel, (k, v) -> {
+                int next = Math.max(0, v.get() - 1);
+                v.set(next);
+                return next == 0 ? null : v;
+            });
             try {
                 sub.close();
             } catch (Exception ignore) {
@@ -146,6 +156,25 @@ public class PresenceController {
         return emitter;
     }
 
+    /**
+     * 运维视图（GET /{channel}/ops）：members / fresh / capacity / sseConnections / backend / ttlSeconds。
+     * 只读；与 count 同级（不泄露游侠身份），无法绕过网关限流。
+     */
+    @GetMapping("/{channel}/ops")
+    public Map<String, Object> ops(@PathVariable String channel) {
+        if (!CHANNEL_RE.matcher(channel).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid channel");
+        }
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("channel", channel);
+        r.put("members", store.memberCount(channel));
+        r.put("fresh", store.snapshot(channel).size());
+        r.put("capacity", props.getMaxWanderersPerChannel());
+        r.put("sseConnections", activeStreams.getOrDefault(channel, new AtomicInteger()).get());
+        r.put("backend", props.getBackend());
+        r.put("ttlSeconds", props.getTtlSeconds());
+        return r;
+    }
     private static void send(SseEmitter emitter, String event, String data) throws IOException {
         synchronized (emitter) {
             emitter.send(SseEmitter.event().name(event).data(data, MediaType.APPLICATION_JSON));

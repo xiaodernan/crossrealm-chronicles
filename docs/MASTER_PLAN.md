@@ -7173,3 +7173,12 @@ Phase D（系统与质量）
   - **风险**：① **SSE 连接数** = 在线玩家数（每标签一条）——presence-service 的 SSE 是只读频道广播，N 个连接 = N 条 emitter，扇出复杂度 O(K)（K=进频道的人数；压测口径后续可加 `/api/ops/presence` 监控 SSE 活跃数）；② `crossrealm_presence_id` 如果被手手动删号：下一次 beat 用新档案再来（频道里最多多一盏微尘）；③ 地图重绘帧成本：游侠数量 × radial gradient，常态 < 50 人 → 每帧 < 0.5ms（看实现复杂度，非常态扩缩时值得注意）；④ 地图上自身 mote 覆盖的问题已规避（ownId 跳过）。
 
   - **后续**：① 「篝火记忆」里插入一段只在在线时出现的叙事分支（在线伙伴的影子，占位）；② `/api/ops/presence` 进运维页（频道上限/SSE 连接数/新鲜数）；③ 星盘上「漂流信件」：微行者之间可留匿名纸条（先只读，收发需 ID 白名单+按频道限 50 字）；④ **全在线玩家名册的幽光星屑**——与 credits 谢幕场景对接（谢幕即出现「游侠 {name} · 第 N 趟」静默滚动致谢）。
+- **2026-11-14 W-Z28 在场存在层运维入口：GET /api/presence/{channel}/ops** —— 提交：本次 HEAD
+
+  - **起因**：W-Z24/25/26/27 把在线存在层铺到了玩家面前（设置页按钮 / F7 顾问徽章 / M 世界地图微光足迹），但这条链缺着自己的仪表——「这个频道现在新鲜人数、SSE 活跃连接数、上限、后端、TTL」——这些就是运维的第一问。
+
+  - **做法**：① `PresenceController` 增 `activeStreams: ConcurrentHashMap<String,AtomicInteger>` 频道维度**活跃 SSE 连接数**（stream 入口 +1，cleanup −1，归零自回收，无空键泄露）；② 新 route `GET /{channel}/ops` → `{channel, members, fresh, capacity, sseConnections, backend, ttlSeconds}`——**只读、无外呼、channel 白名单与 beat/count 同源**；③ `PresenceControllerUnitTest` +2 例（ops 全字段值钉 + 非法频道 400），**25 → 27**；④ `server/scripts/verify-presence-redis.ps1` 实例 B 后加 ops 断言（backend==redis / capacity≥1 / sseConnections≥0 / ttlSeconds==60）；docs/ONLINE_SERVICES.md + server/README.md 同步。
+
+  - **判据**：presence-service `mvn test` → **27 例全绿**；`mvn -f server/pom.xml verify` BUILD SUCCESS；`verify-presence-redis.ps1` 三连跑绿并含 ops 断言（`ops endpoint OK (backend=redis, sseConnections=0, capacity=500)`）。
+
+  - **风险**：① `activeStreams` 是**进程内**计数，多实例 docker 栈只看到本实例（在 ops 页聚合需网关侧 `gateway_requests_total{route,outcome}` 兜底）；② ops 不泄露游侠 id/name（只出计数）。

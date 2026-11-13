@@ -11,7 +11,7 @@
 | 在线伙伴业务 API | `game-service`：排行榜 / 遥测事件 / 版本号（纯内存实现、零数据库） | 8081 |
 | 赛季服务（W-X14） | `season-service`：赛季主题 / 词缀 / 周期倒计时（按 epochDay 算，不存状态） | 8082 |
 | AI 顾问（W-Y1） | `ai-service`：星轨顾问（服务端独占密钥 / 选择性重试 / 熔断 / TTL 缓存） | 8083 |
-| 在场同游（W-Z-同游） | `presence-service`：在场存在感（POST 心跳 beat → Set/Hash+TTL 存储；SSE 订阅 `presence:events:{channel}` Pub/Sub；memory 默认 / redis 可选；`/api/presence/{channel}/stream` SSE） | 8084 |
+| 在场同游（W-Z-同游） | `presence-service`：在场存在感（POST 心跳 beat → Set/Hash+TTL 存储；SSE 订阅 `presence:events:{channel}` Pub/Sub；memory 默认 / redis 可选；`/api/presence/{channel}/stream` SSE；`/api/presence/{channel}/ops` 运维（members/fresh/capacity/sseConnections/backend/ttlSeconds）） | 8084 |
 | 可靠任务队列（W-Y4） | `ai-service`：`/api/ai/chat/async` 提交 → `/api/ai/jobs/{id}` 轮询；有界队列 / 2 worker / 幂等键 / 选择性重试 / 死信 / 背压 429 | 8083 |
 
 > 与游戏本体**完全解耦**：`npm run build` 不感知它；不接它时游戏功能不受任何影响。

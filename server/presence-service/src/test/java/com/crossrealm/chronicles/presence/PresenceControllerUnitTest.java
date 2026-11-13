@@ -151,6 +151,26 @@ class PresenceControllerUnitTest {
     }
 
     @Test
+    void ops端点返回members_capacity_backend_sseConnections() {
+        controller.beat("world", body("a1", "A", 10, 0, 0));
+        controller.beat("world", body("a2", "B", 20, 0, 0));
+
+        Map<String, Object> ops = controller.ops("world");
+        assertEquals("world", ops.get("channel"));
+        assertEquals(2L, ((Number) ops.get("members")).longValue());
+        assertEquals(2L, ((Number) ops.get("fresh")).longValue());
+        assertEquals(500, ((Number) ops.get("capacity")).intValue());
+        assertEquals(0L, ((Number) ops.get("sseConnections")).longValue());
+        assertEquals("memory", ops.get("backend"));
+        assertEquals(15, ((Number) ops.get("ttlSeconds")).intValue());
+    }
+
+    @Test
+    void ops非法频道抛400() {
+        assertThrows(ResponseStatusException.class,
+                () -> controller.ops("bad channel!"));
+    }
+    @Test
     void stream合法频道返回SseEmitter() {
         assertNotNull(controller.stream("world", new org.springframework.mock.web.MockHttpServletResponse()));
     }

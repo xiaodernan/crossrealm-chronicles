@@ -164,6 +164,14 @@ $memberB = docker exec $redisContainer redis-cli SISMEMBER presence:world:ids cr
 if (($memberB | Out-String).Trim() -ne '1') { Write-Error "instance B did not see crimson-gavel in shared redis: $memberB"; exit 1 }
 Write-Output "cross-instance proof OK (count=$($countB.count), shared redis)"
 
+# ops 运维端点（白名单同频道名）：字段齐全、无外呼、无泄露
+$ops = (Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:28089/api/presence/world/ops' -TimeoutSec 10).Content | ConvertFrom-Json
+if ($ops.backend -ne 'redis') { Write-Error "ops backend expected redis, got $($ops.backend)"; exit 1 }
+if ([long]$ops.ttlSeconds -ne 60) { Write-Error "ops ttlSeconds expected 60, got $($ops.ttlSeconds)"; exit 1 }
+if ([long]$ops.capacity -lt 1) { Write-Error "ops capacity missing: $($ops.capacity)"; exit 1 }
+if ([long]$ops.sseConnections -lt 0) { Write-Error "ops sseConnections missing: $($ops.sseConnections)"; exit 1 }
+Write-Output "ops endpoint OK (backend=$($ops.backend), sseConnections=$($ops.sseConnections), capacity=$($ops.capacity))"
+
 Write-Output 'verify-presence-redis PASSED'
 exit 0
 
