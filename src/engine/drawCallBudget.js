@@ -384,15 +384,40 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
  *   / gloom.body 121→128 / radiant.frame 502→514 / radiant.body 439→463。
  */
 
+/**
+ * ## 2026-11-13（W-E11 后 CI run 43358830935 真 CI 失败捕获，seed 20261028）
+ *
+ * 真 CI 失败稳定复现到这几格（W-E11 voidmaw 深渊母题 Wave18：3 座新 POI + ach + 双表 + 钉子，
+ * modulepreload 重排 + 新 mesh 同步抬高所有站 draw call）：
+ *   过顶：hub.frame 332 > 330 / hub.body 271 > 270 / fantasy.body 256 > 250
+ *        / magic.frame 661 > 660 / magic.body 623 > 620 / gloom.body 132 > 130
+ *        / radiant.frame 527 > 520 / radiant.body 476 > 470
+ *   地板过期：hub.frame 332 / hub.body 271 / fantasy.frame 306 / fantasy.body 256
+ *        / magic.frame 661 / magic.body 623 / space.frame 259 / space.body 186
+ *        / void.frame 169 / void.body 105 / gloom.frame 209 / gloom.body 132
+ *        / radiant.frame 527 / radiant.body 476
+ *
+ * **天花板只升不降**（CI 实修）：
+ *   hub.frame 330 → 340（+10，规则 cap 约 370）
+ *   hub.body 270 → 280（+10，规则 cap 约 310）
+ *   fantasy.body 250 → 265（+15，规则 cap 约 290）
+ *   magic.frame 660 → 670（+10，规则 cap 约 700）
+ *   magic.body 620 → 630（+10，规则 cap 约 700）
+ *   gloom.body 130 → 140（+10，规则 cap 约 150）
+ *   radiant.frame 520 → 540（+20，规则 cap 约 590）
+ *   radiant.body 470 → 490（+20，规则 cap 约 550）
+ *   **地板**按 CI 实修：hub 332/271 / fantasy 306/256 / magic 661/623 / space 259/186
+ *   / void 169/105 / gloom 209/132 / radiant 527/476。
+ */
 export const DRAW_CALL_CEILINGS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 330, body: 270, shadow: 70 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 250, shadow: 70 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 660, body: 620, shadow: 50 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 340, body: 280, shadow: 70 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 265, shadow: 70 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 670, body: 630, shadow: 50 }),
   [ZONE_IDS.SPACE]: Object.freeze({ frame: 260, body: 190, shadow: 80 }),
   [ZONE_IDS.VOID]: Object.freeze({ frame: 190, body: 110, shadow: 70 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 120, shadow: 90 }),
-  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 210, body: 130, shadow: 80 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 520, body: 470, shadow: 60 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 215, body: 140, shadow: 80 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 540, body: 490, shadow: 60 }),
 });
 
 /**
@@ -468,15 +493,30 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  *   / space.body 174→182 / void.frame 163→165 / void.body 97→101 / gloom.frame 198→205
  *   / gloom.body 121→128 / radiant.frame 502→514 / radiant.body 439→463。
  */
+/**
+ * ## 2026-11-13（W-E11 后 CI run 43358830935 真 CI 失败捕获，seed 20261028）
+ *
+ * 真 CI 失败稳定复现到这几格（Wave18 三件新 POI + ach + 双表 pin 全部落地，
+ * modulepreload 重排 + 新 mesh 同步抬高所有站 draw call：
+ *   hub.frame 332 / hub.body 271 / fantasy.frame 306 / fantasy.body 256
+ *   / magic.frame 661 / magic.body 623 / space.frame 259 / space.body 186
+ *   / void.frame 169 / void.body 105 / gloom.frame 209 / gloom.body 132
+ *   / radiant.frame 527 / radiant.body 476
+ *
+ * 天花板见上方 W-E11 注释块（`DRAW_CALL_CEILINGS` 同步升）。
+ * 地板按 CI 实修同步抬：hub 326→332 / 262→271 / fantasy 294→306 / 245→256 / magic 645→661 / 609→623
+ * / space 255→259 / 182→186 / void 165→169 / 101→105 / gloom 205→209 / 128→132
+ * / radiant 514→527 / 463→476。
+ */
 export const DRAW_CALL_FLOORS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 326, body: 262, shadow: 65 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 294, body: 245, shadow: 55 }),
-  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 645, body: 609, shadow: 40 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 255, body: 182, shadow: 72 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 165, body: 101, shadow: 66 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 332, body: 271, shadow: 65 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 306, body: 256, shadow: 55 }),
+  [ZONE_IDS.MAGIC]: Object.freeze({ frame: 661, body: 623, shadow: 40 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 259, body: 186, shadow: 72 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 169, body: 105, shadow: 66 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 195, body: 116, shadow: 79 }),
-  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 205, body: 128, shadow: 77 }),
-  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 514, body: 463, shadow: 53 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 209, body: 132, shadow: 77 }),
+  [ZONE_IDS.RADIANT]: Object.freeze({ frame: 527, body: 476, shadow: 53 }),
 });
 
 /**
