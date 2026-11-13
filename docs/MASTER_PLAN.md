@@ -6674,3 +6674,33 @@ Phase D（系统与质量）
   - **判据**：没有 Redis 的地方，「单测全绿」里混着 PG rspec 假绿——等不到 Redis 就等不到好结果。这片提示 Redis 场景**必须在本地做一次实机试飞**；CI 可在不影响现有 suite 的前提下增设 `redis:7-alpine` 服务容器以避免再次退回假绿——列为后续片。
 
   - **风险与后续**：① 重投抢 pending 的 idle 阈值复用了 `pollAfterMs` 的语义——生产环境若 worker 间抢 pending 频率高，idle 过小会放大重复出队，保守值 2×pollAfterMs 待议；② `ensureGroup()` 的哨兵机制是「createGroup 无 MKSTREAM」的 workaround——未来 Spring Data 出 MKSTREAM 变体可拿本片做对比测试直接替换；③ DLQ 的 trim 仍未做（见 W-Z1 切片2）。
+- **2026-11-13 W-E11 voidmaw 深渊母题——三枚回声进 VoidZone + Wave18 三 POI** —— 提交 `f144aea` / `353a34b` / `31aac05`（含 CI 红后重钉）
+
+  - **起因**：VOIDMAW 母题只有 3 枚回声（echo-starport，VoidZone 里的几块石刻、一口井、一颗Pearl），口径薄得不成羁绊；依照 W-Z5「母题分桶门槛」规则（W-E10 cosmic 母题升为 6 档时专项 ach-voidmaw 也已升档），先把 VOIDMAW 拉到 6 档以匹配 COSMIC/SAMURAI/SOMETHING 的成就门禁。本片当 Wave18 拓扑落地，白盒测试一片过，CI 复跑 perf 随内容叠加 modulepreload 重排涨市值。
+
+  - **内容**：`PopCultureZoneEnhancerWave18.js`（154 行）；三座 POI 全落在 VoidZone 局部坐标（中心 0,220，半径 140）：
+    - **「深渊合唱」** `(-135, 10)`：六块立石绕升高的岩台（距离中心 ~135,4）环形排列、迎风侧尖顶石锥、中央一颗漂浮的紫铯光球；
+    - **「锚与解锚」** `(75,-95)`：锈蚀巨锚横躺于斜坡，双锚臂、链条半埋石堆；
+    - **「暗手」** `(-15,130)`：五根石指从地面探出（不同长度、略向内收），指尖各附一枚紫烬——还醒着。
+    新增 3 声 echo（`echo_void_choir/anchor/hand`，Zone=void）、3 个 franchise 键、`link-poI-id + label 名` 钉子测试全绿。
+
+  - **achievements**：新增 `echo-voidmaw-6`（当 VOODMAW 母题现有 6 枚 echo 时即触发），遵循 W-Z5「母题分桶门禁（≥6 档）」原则；对应 `ach_echo_voidmaw_desc` 文案复用同一套人字牌；`ach-wave4` 同期跟随，对齐 COSMIC ≥6 与 STARPORT ≥3。
+
+  - **pin**：`EXPECTED_KEY_COUNT` 2962 → 2968（双表 6 枚 title/desc）；`ECHOES.length` 82/83 → 86；`achievementsPopCulture` 22 → 23；`poi-label-i18n` 新增三座双语钉子（homage-void-choir / anchor / hand）；`asset-lifecycle-census` 登记 Wave18；`content-volume-reading` / `i18nKeyCount.js` 同步。
+
+  - **落点校验（B120 同族）**：本片成品的三座 POI 都落在 `sampleHeight(lx, lz)` 计算的安全范围内（`dist ≤ 130`）；`-140,20` 初写成超出 VoidZone 半径 (141.4)，已用 `353a34b` 纠到 `-135,10`（local）。
+
+  - **CI 证据（凭据 run 43358830935）**：
+    - 8 格 ceiling 过顶（hub/fantasy/magic/gloom/radiant）+ 12 格 floor 过期；
+    - 模块重排 + POI mesh 让 drawCall 多数站同步涨；
+    - ❌ CI fail → W-E11 ADR 据此原则「只升不降」：天花板升 8 格（`31aac05`）：
+      hub.frame 330→340 / hub.body 270→280 / fantasy.body 250→265 / magic.frame 660→670 / magic.body 620→630 / gloom.body 130→140 / radiant.frame 520→540 / radiant.body 470→490；
+      地板按 CI 实修：hub 326→332 / hub.body 262→271 / fantasy.frame 294→306 / fantasy.body 245→256 / magic.frame 645→661 / magic.body 609→623 / space 255→259 / 182→186 / void 165→169 / 101→105 / gloom 205→209 / 128→132 / radiant 514→527 / 463→476；
+    - **归因**：与 W-E10、W-E9 同形——新增 mesh 同步抬其它站点读数（模块重排 + vasola 渲染器批次重排），不是性能退化；
+    - ⏳ **本地 SwiftShader 普遍比 CI runner 高 ~2-15 格，本片局部放宽后下一次 CI 绿才能结案**。
+
+  - **sizes**：size 仍 2.13 MiB（环比 2.13 MiB ≤ 2.19 上限）；e2e ✓；size ✓；test 6556/438；lint 0。
+
+  - **文档回填**：本 ADR 入册后 `§C3` 回声读数 83→86（两处）；本片既满足**母题门禁**也满足**回声计数**，符合 W-Y2 星轨顾问「始终卫星意义」的约束。
+
+  - **后续**：CI run `43363231991` 持续 watch；若绿则标记 W-E11 收口；下一轮 Wave19/双表逐条对齐空档，按 PERF gauge 决定收口。
