@@ -18,7 +18,7 @@ import { STRINGS_ZH } from '../src/content/strings.zh.js';
 const BASE = (process.env.LLM_BASE_URL ?? 'https://wkapi.pro/v1').replace(/\/+$/, '');
 const KEY = process.env.LLM_API_KEY;
 const MODEL = process.env.LLM_MODEL ?? 'gpt-6-sol';
-const BATCH = Math.max(1, Number(process.argv[2] ?? 12) || 12);
+const BATCH = Math.max(1, Number(process.argv[2] ?? 10) || 10);
 const outPath = process.argv[3] ?? null;
 
 if (!KEY) {
@@ -83,39 +83,73 @@ async function askBatch(items) {
     items.map((a, i) => `${i + 1}. id=${a.id} | 来源=${a.source} | 「${a.title}」\n   ${a.desc}`).join('\n');
   const res = await fetch(`${BASE}/chat/completions`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' },
+    headers: {
+      'Authorization': `Bearer ${KEY}`,
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
+    },
     body: JSON.stringify({
       model: MODEL,
       messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: user }],
-      max_tokens: 2048,
+      max_tokens: 1536,
       temperature: 0.2,
+      stream: true,
+      stream_options: { include_usage: true },
     }),
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(180_000),
   });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`HTTP ${res.status}: ${text.slice(0, 400)}`);
   }
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content ?? '';
+  const sse = await res.text();
+  let content = '', usage = null;
+  for (const rawLine of sse.split('\n')) {
+    const line = rawLine.trim();
+    if (!line.startsWith('data:')) continue;
+    const dataLine = line.slice(5).trim();
+    if (dataLine === '[DONE]') continue;
+    try {
+      const j = JSON.parse(dataLine);
+      content += j.choices?.[0]?.delta?.content ?? '';
+      if (j.usage) usage = j.usage;
+    } catch { /* 单行坏 JSON 跳过 */ }
+  }
+  const details = usage?.prompt_tokens_details ?? usage?.input_token_details ?? {};
+  const cached = details.cached_tokens ?? usage?.cached_tokens ?? null;
+  usageTotals.prompt += usage?.prompt_tokens ?? 0;
+  usageTotals.completion += usage?.completion_tokens ?? 0;
+  usageTotals.cached += cached ?? 0;
+  usageTotals.callsWithUsage += usage ? 1 : 0;
+  process.stderr.write(`  usage: prompt=${usage?.prompt_tokens ?? '?'} completion=${usage?.completion_tokens ?? '?'} cached=${cached ?? '?'}\n`);
   const lo = content.indexOf('[');
   const hi = content.lastIndexOf(']');
   if (lo < 0 || hi < 0) throw new Error(`batch ${items[0]?.id}..: 模型未返回 JSON 数组`);
   return JSON.parse(content.slice(lo, hi + 1));
 }
 
+const usageTotals = { prompt: 0, completion: 0, cached: 0, callsWithUsage: 0 };
 const results = [];
 let calls = 0;
+let upstreamAttempts = 0;
 for (let i = 0; i < corpus.length; i += BATCH) {
   const batch = corpus.slice(i, i + BATCH);
   process.stderr.write(`ach-qa: batch ${Math.floor(i / BATCH) + 1} (${batch[0].id} .. ${batch[batch.length - 1].id})…\n`);
   let parsed = null;
-  try {
-    parsed = await askBatch(batch);
-    calls += 1;
-  } catch (e) {
-    console.error('batch failed:', e?.message ?? e);
-    parsed = batch.map((b) => ({ id: b.id, verdict: 'error', issues: [String(e?.message ?? e).slice(0, 60)] }));
+  for (let attempt = 1; attempt <= 2 && !parsed; attempt++) {
+    try {
+      upstreamAttempts += 1;
+      parsed = await askBatch(batch);
+      calls += 1;
+    } catch (e) {
+      if (attempt === 1) {
+        process.stderr.write('  batch failed (will retry once): ' + (e?.message ?? e) + '\n');
+        continue;
+      }
+      // 一批失败不带走整轮：记为 error 条目，人审时手动重判
+      console.error('batch failed twice:', e?.message ?? e);
+      parsed = batch.map((b) => ({ id: b.id, verdict: 'error', issues: [String(e?.message ?? e).slice(0, 60)] }));
+    }
   }
   const byId = new Map((parsed ?? []).map((r) => [r.id, r]));
   for (const item of batch) {
@@ -149,6 +183,9 @@ section('bad（确凿错位/残句，人工复核后改内容层）', results.fi
 section('warn（可商榷，人工决断）', results.filter((r) => r.verdict === 'warn'));
 section('error（本批未能解析，需人工重判）', results.filter((r) => r.verdict === 'error'));
 section('ok（抽查即可）', results.filter((r) => r.verdict === 'ok'));
+
+lines.push('');
+lines.push(`- 上游用量合计：prompt=${usageTotals.prompt} completion=${usageTotals.completion} cached=${usageTotals.cached} cachedRatio=${usageTotals.prompt > 0 ? (usageTotals.cached * 100 / usageTotals.prompt).toFixed(1) + '%' : 'n/a'} （${usageTotals.callsWithUsage}/${upstreamAttempts} 次上报用量）`);
 
 const md = lines.join('\n') + '\n';
 if (outPath) {

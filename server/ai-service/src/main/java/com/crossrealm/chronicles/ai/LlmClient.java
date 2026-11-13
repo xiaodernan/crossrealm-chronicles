@@ -14,7 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+/** 上游一次调用的用量快照。只含数字，**永远不含**玩家输入或回答正文。 */
+record UpstreamUsage(Integer promptTokens, Integer completionTokens, Integer cachedTokens) {}
 
 /**
  * 一次提问的完整生命周期：组装 → 摘要缓存 → 熔断 → 选择性重试 → 解析 → 记账。
@@ -31,6 +36,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class LlmClient {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LlmClient.class);
+    private volatile UpstreamUsage lastUpstreamUsage;
 
     public record Answer(String answer, String model, boolean cached, long latencyMs) {}
 
@@ -102,8 +110,18 @@ public class LlmClient {
             try {
                 if (attempt > 0) backoff(attempt);
                 upstreamCalls.incrementAndGet();
-                String raw = transport.postJson(endpoint(), props.getApiKey(), body, props.getTimeout());
+                LlmTransport.UpstreamReply reply = transport.postJsonWithUsage(endpoint(), props.getApiKey(), body, props.getTimeout());
+                String raw = reply.rawJson();
                 String answer = extractAnswer(raw);
+                lastUpstreamUsage = toUsage(reply);
+                if (lastUpstreamUsage != null) {
+                    Integer cachedTokens = lastUpstreamUsage.cachedTokens();
+                    Integer promptTokens = lastUpstreamUsage.promptTokens();
+                    String ratio = (cachedTokens != null && promptTokens != null && promptTokens > 0)
+                            ? String.format("%.1f%%", cachedTokens * 100.0 / promptTokens) : "n/a";
+                    LOG.info("ai.upstream.usage model={} prompt={} completion={} cached={} cachedRatio={}",
+                            props.getModel(), promptTokens, lastUpstreamUsage.completionTokens(), cachedTokens, ratio);
+                }
                 breaker.onSuccess();
                 cache.put(key, answer);
                 return new Answer(answer, props.getModel(), false, elapsedMs(started));
@@ -115,6 +133,19 @@ public class LlmClient {
 
         breaker.onFailure();
         throw new AdvisorUnavailableException("upstream-" + (last == null ? 0 : last.status()));
+    }
+
+    /** 给运维/联调看的用量快照：最近一次上游调用的数字，不含任何正文。没报就 null。 */
+    public UpstreamUsage lastUpstreamUsage() {
+        return lastUpstreamUsage;
+    }
+
+    private static UpstreamUsage toUsage(LlmTransport.UpstreamReply reply) {
+        if (reply == null) return null;
+        if (reply.promptTokens() == null && reply.completionTokens() == null && reply.cachedTokens() == null) {
+            return null;
+        }
+        return new UpstreamUsage(reply.promptTokens(), reply.completionTokens(), reply.cachedTokens());
     }
 
     /** 给运维看的快照。字段白名单里没有 apiKey、没有 baseUrl、没有任何玩家输入。 */
@@ -144,6 +175,10 @@ public class LlmClient {
                 Map.of("role", "user", "content", user)));
         body.put("max_tokens", props.getMaxTokens());
         body.put("temperature", 0.7);
+        // W-Z11：始终流式上游（include_usage 让末段 SSE 带用量块）——
+        // wkapi 控制台按「流式」归类；HttpLlmTransport 在传输边界把 SSE 收拢回普通 JSON
+        body.put("stream", Boolean.TRUE);
+        body.put("stream_options", Map.of("include_usage", Boolean.TRUE));
         try {
             return mapper.writeValueAsString(body);
         } catch (JsonProcessingException e) {

@@ -63,7 +63,6 @@ const SYSTEM = `你是《跨界纪元》（史诗幻想 + 群像致敬「次元�
 - 乐章只鉴文案不鉴玩法；"五维_tesseract" 等残留英文 key 片段属于 bad（W-Z5 切片1 已修回双表）。
 - **{word} 占位符**：文案里 {roll} / {parry} / {dodge} 这类花括号词是键位占位符——keyText() 在界面渲染时把它们展开成「玩家当前真实的键名」（例如「Space」），绝不是未渲染的漏洞。判官看到这类占位符**不许**判 bad/warn。
 - title 牌感：短、硬、允许复用母纲大纲意象（"石碑""深井""深渊"）而不必复述机制；desc 一行年鉴口吻，允许画外音——不求交代触发条件。
-- 142 上游调用次数请控制在 10 次以内（batch=10），否则上游 429 会打断整册扫描。
 `;
 
 async function askBatch(items) {
@@ -75,40 +74,73 @@ async function askBatch(items) {
       { role: 'system', content: SYSTEM },
       { role: 'user', content: user },
     ],
-    max_tokens: 2048,
+    max_tokens: 1536,
     temperature: 0.2,
+    stream: true,
+    stream_options: { include_usage: true },
   };
   const res = await fetch(`${BASE}/chat/completions`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' },
+    headers: {
+      'Authorization': `Bearer ${KEY}`,
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
+    },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(180_000),
   });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`HTTP ${res.status}: ${text.slice(0, 400)}`);
   }
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content ?? '';
+  const sse = await res.text();
+  let content = '', usage = null;
+  for (const rawLine of sse.split('\n')) {
+    const line = rawLine.trim();
+    if (!line.startsWith('data:')) continue;
+    const data = line.slice(5).trim();
+    if (data === '[DONE]') continue;
+    try {
+      const j = JSON.parse(data);
+      content += j.choices?.[0]?.delta?.content ?? '';
+      if (j.usage) usage = j.usage;
+    } catch { /* 单行坏 JSON 跳过 */ }
+  }
+  const details = usage?.prompt_tokens_details ?? usage?.input_token_details ?? {};
+  const cached = details.cached_tokens ?? usage?.cached_tokens ?? null;
+  usageTotals.prompt += usage?.prompt_tokens ?? 0;
+  usageTotals.completion += usage?.completion_tokens ?? 0;
+  usageTotals.cached += cached ?? 0;
+  usageTotals.callsWithUsage += usage ? 1 : 0;
+  process.stderr.write(`  usage: prompt=${usage?.prompt_tokens ?? '?'} completion=${usage?.completion_tokens ?? '?'} cached=${cached ?? '?'}\n`);
   const lo = content.indexOf('[');
   const hi = content.lastIndexOf(']');
   if (lo < 0 || hi < 0) throw new Error(`batch ${items[0]?.id}..: 模型未返回 JSON 数组：${content.slice(0, 200)}`);
   return JSON.parse(content.slice(lo, hi + 1));
 }
 
+const usageTotals = { prompt: 0, completion: 0, cached: 0, callsWithUsage: 0 };
 const results = [];
 let calls = 0;
+let upstreamAttempts = 0;
 for (let i = 0; i < corpus.length; i += BATCH) {
   const batch = corpus.slice(i, i + BATCH);
   process.stderr.write(`echo-qa: batch ${Math.floor(i / BATCH) + 1} (${batch[0].id} .. ${batch[batch.length - 1].id})…\n`);
   let parsed = null;
-  try {
-    parsed = await askBatch(batch);
-    calls += 1;
-  } catch (e) {
-    // 一批失败不带走整轮：记成 error 条目，人工 review 时手动重判
-    console.error('batch failed:', e?.message ?? e);
-    parsed = batch.map((b) => ({ id: b.id, verdict: 'error', issues: [String(e?.message ?? e).slice(0, 60)] }));
+  for (let attempt = 1; attempt <= 2 && !parsed; attempt++) {
+    try {
+      upstreamAttempts += 1;
+      parsed = await askBatch(batch);
+      calls += 1;
+    } catch (e) {
+      if (attempt === 1) {
+        process.stderr.write('  batch failed (will retry once): ' + (e?.message ?? e) + '\n');
+        continue;
+      }
+      // 一批失败不带走整轮：记为 error 条目，人审时手动重判
+      console.error('batch failed twice:', e?.message ?? e);
+      parsed = batch.map((b) => ({ id: b.id, verdict: 'error', issues: [String(e?.message ?? e).slice(0, 60)] }));
+    }
   }
   const byId = new Map((parsed ?? []).map((r) => [r.id, r]));
   for (const item of batch) {
@@ -143,6 +175,9 @@ section('bad（确凿错位/硬伤，人工复核后改内容层）', results.fi
 section('warn（可商榷，人工决断）', results.filter((r) => r.verdict === 'warn'));
 section('error（本批未能解析，需人工重判）', results.filter((r) => r.verdict === 'error'));
 section('ok（抽查即可）', results.filter((r) => r.verdict === 'ok'));
+
+lines.push('');
+lines.push(`- 上游用量合计：prompt=${usageTotals.prompt} completion=${usageTotals.completion} cached=${usageTotals.cached} cachedRatio=${usageTotals.prompt > 0 ? (usageTotals.cached * 100 / usageTotals.prompt).toFixed(1) + '%' : 'n/a'} （${usageTotals.callsWithUsage}/${upstreamAttempts} 次上报用量）`);
 
 const md = lines.join('\n') + '\n';
 if (outPath) {

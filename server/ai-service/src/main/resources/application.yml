@@ -45,6 +45,13 @@ eureka:
     prefer-ip-address: true
 
 management:
+  # 关闭 Redis 探活 — spring-boot-starter-data-redis 在 W-Z1 起进了 classpath，
+  # 而本机 Redis 是可选的（默认 backend=memory）：RedisHealthIndicator ping 不通时
+  # /actuator/health 会 503，smoke 门禁因此空等 240s。上线若要开 redis 后端：
+  # MANAGEMENT_HEALTH_REDIS_ENABLED=true（与 season-service 同口径）。
+  health:
+    redis:
+      enabled: false
   endpoints:
     web:
       exposure:
