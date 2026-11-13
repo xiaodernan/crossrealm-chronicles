@@ -7015,3 +7015,12 @@ Phase D（系统与质量）
   - **风险与后续**：①ach-type spawning per franchise（vaste coverevery母题）——母题考核目标具体数皆为 ≥6，与「整三组全 Multi-Sign」差 2;② 之后任何母题出关不需要再改ACHIEVEMENTS，NEW뱃但每出 MULL：神olves 一个母题。当本己完成 6+6+6+6+？+? —— 五个留在“无 franchises with an even count ≥ 6 with title ending with -6 ” 清单里了，W-E23 这次全。
 
   - **风险与后续**：① 残留 16/17 母题里已经没 *six_title* 的两个已是正确的父母题（homecoming，stripes）；② 不过之后任何新母题 additions 例如 W-E12 uphill addition will require also adding an ach;③ 之后建议配套自动化剧本「母题 ≥6 的母 id 是否都在 ACHIEVEMENTS 里」的 coverage gate。
+- **2026-11-13 README 集大成者实况盘点（W-Z18）** —— 提交 `ee8d432`
+
+  - **起因**：上一大堆 W-E13~E23 + W-Z10~Z14 的内容/服务面全做完之后，仓库的“入门页”还是老描述——“近期增强（2026-11）”里写的还是 Wave11 + 66 枚回声标语。集大成者这个结项不能停在代码里，要落在给第一次 clone 下来的人看的入门页。
+
+  - **做法**：重写 `README.md` 的“近期增强”段：17 母题 ≥6 档（110/110）+ 39 Badge 详细列入；终局字幕衍生行；game/ai/gateway 三端 `/actuator/prometheus`；Redis mirror × 2 + Redis Streams advisor queue at-least-once；cachedRatio 上游可见与 collapsed SSE 消费模式；W-E18/E19/E20 前端+布局+E20+E14/E15/E16/E17 progress；`/api/ops/redis`；`PopCultureEchoSystem` 触发索引 O(matched) 短路优化。
+
+  - **判据**：零代码变动（纯 .md）；仓库主页未来和 `README` 驱动的渲染器一致。
+
+  - **风险与后续**：①README 单向同步真相——每类新成员要记得回来补；②进入这一步之后整个 W-* 可以算“红艳卷末”了——接下来可以focus 到 `engine/canonical` 与通用行为一致性上。
