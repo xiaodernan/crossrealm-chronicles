@@ -208,6 +208,7 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
     const msgs = bubbles(h.doc);
     expect(msgs[1].querySelectorAll('.is-upstream-cached')).toHaveLength(1);
     expect(msgs[1].querySelectorAll('.is-cached')).toHaveLength(0);
+    expect(msgs[1].classList.contains('is-upstream-hit')).toBe(true);
     expect(h.doc.getElementById('advisor-meta').textContent).toContain('上游缓存');
     h.cleanup();
   });

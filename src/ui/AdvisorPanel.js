@@ -341,6 +341,8 @@ export class AdvisorPanel {
       const meta = document.createElement('span');
       meta.className = 'advisor-msg-meta';
       let added = false;
+      // 命中上游 prompt-cache：气泡加一道金色微光（CSS 动画），与 token 高效复用呼应。
+      if (extra.upstreamCached) box.classList.add('is-upstream-hit');
       // 上游 prompt-cache 命中（token 高效复用）优先用金色角标，与本地摘要缓存的青色角标区分开。
       if (extra.upstreamCached) {
         const up = document.createElement('span');
