@@ -471,6 +471,18 @@ game-service:
     if ($oredis -match 'sk-') { Write-Error 'ops/redis leaks an api key'; exit 1 }
     Write-Host "ops/redis diagnostics ok (backend flags + mirror presence + ZCARD; no secrets)"
 
+    Write-Host ""
+    Write-Host "=== 4r) /actuator/prometheus 注册到网关（W-Z14）==="
+    $gwProm = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/actuator/prometheus' -TimeoutSec 15).Content
+    if ($gwProm -is [byte[]]) { $gwProm = [System.Text.Encoding]::UTF8.GetString($gwProm) }
+    Write-Host "prometheus content length: $($gwProm.Length) bytes"
+    if (-not ($gwProm -match 'jvm_memory_used_bytes')) { Write-Error 'gateway prometheus missing jvm_memory_used_bytes'; exit 1 }
+    if (-not ($gwProm -match 'process_uptime_seconds')) { Write-Error 'gateway prometheus missing process_uptime_seconds'; exit 1 }
+    if (-not ($gwProm -match 'gateway_requests_total')) { Write-Error 'gateway prometheus missing gateway_requests_total'; exit 1 }
+    if (-not ($gwProm -match 'gateway_request_duration_seconds')) { Write-Error 'gateway prometheus missing gateway_request_duration_seconds'; exit 1 }
+    if ($gwProm -match 'sk-') { Write-Error 'gateway prometheus leaks an api key'; exit 1 }
+    Write-Host "gateway prometheus ok (JVM + gateway_requests_total + gateway_request_duration_seconds; no secrets)"
+
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content
 

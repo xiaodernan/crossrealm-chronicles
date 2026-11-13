@@ -99,7 +99,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway,springcloud
+        include: health,info,gateway,springcloud,metrics,prometheus
 gateway:
   ratelimit:
     # memory = 内存滑动窗口（默认，smoke/CI 用）；redis = Redis 集群共享窗口（多实例生产用）
