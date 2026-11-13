@@ -16,6 +16,14 @@ export class PopCultureEchoSystem {
   constructor(game) {
     this.game = game;
     this.unlocked = new Set();
+    // 触发词索引：每个触发词 -> 其解锁的所有回声。ECHOES 在模块 import 时固定、
+    // 此后不再动——在构造期建一次 hash 表，解锁 O(匹配数)，不必每次扫描全部回声。
+    this.triggerIndex = new Map();
+    for (const echo of ECHOES) {
+      const bucket = this.triggerIndex.get(echo.trigger);
+      if (bucket) bucket.push(echo);
+      else this.triggerIndex.set(echo.trigger, [echo]);
+    }
     this.setupListeners();
   }
 
@@ -31,8 +39,10 @@ export class PopCultureEchoSystem {
   }
 
   tryUnlock(triggerKey) {
-    for (const echo of ECHOES) {
-      if (echo.trigger !== triggerKey || this.unlocked.has(echo.id)) continue;
+    const matches = this.triggerIndex.get(triggerKey);
+    if (!matches) return;
+    for (const echo of matches) {
+      if (this.unlocked.has(echo.id)) continue;
       this.unlocked.add(echo.id);
       this.game.dialog?.toast(t('pop_culture_echo_unlocked', { title: t(echo.title) }), 3400);
       this.game.storyJournal?.add?.({
@@ -49,9 +59,16 @@ export class PopCultureEchoSystem {
       // 改前用 `getStats().percent >= 100` 判定 —— 但 percent 的分母把共鸣本身也算进去
       // （48/49 = 98），永远够不到 100 ⇒ 共鸣永远不解锁、`echoPercent` 也永远到不了 100
       // （`echo-full` 成就连带锁死）。改成"除共鸣外全部解锁即放出"。
-      if (!this.unlocked.has('echo-full-resonance')
-        && ECHOES.every((e) => e.id === 'echo-full-resonance' || this.unlocked.has(e.id))) {
-        this.tryUnlock('echo:full-resonance');
+      if (!this.unlocked.has('echo-full-resonance')) {
+        // 短路：只扫到第二项未解锁就停——比 ECHOES.every 少一大趟遍历
+        let unseen = 0;
+        for (const e of ECHOES) {
+          if (e.id !== 'echo-full-resonance' && !this.unlocked.has(e.id)) {
+            unseen += 1;
+            if (unseen > 1) break;
+          }
+        }
+        if (unseen === 0) this.tryUnlock('echo:full-resonance');
       }
     }
   }
