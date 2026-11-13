@@ -1485,8 +1485,8 @@ export const STRINGS_ZH = Object.freeze({
   ach_cg_half_desc: 'CG 画廊解锁 50%',
   ach_codex_half_title: '秘典学者',
   ach_codex_half_desc: '秘典收录 50%',
-  ach_rematch_3_title: '信标猎人',
-  ach_rematch_3_desc: '通过 Boss 信标再战 3 次',
+  ach_rematch_3_title: '三度相逢',
+  ach_rematch_3_desc: '通过 Boss 信标再战任一位 Boss 三次',
   ach_campfire_all_desc: '在全部 6 处营火休息',
   ach_photo_mode_title: '位面摄影师',
   ach_photo_mode_desc: '使用拍照模式',
@@ -3398,6 +3398,12 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   ach_echo_upside_six_desc: '逆相残响全六枚齐鸣',
   ach_echo_cosmic_six_title: '旧日六响',
   ach_echo_cosmic_six_desc: '旧日低语全六枚齐鸣',
+  sq_side_middle_earth_tour_title: '中洲巡礼',
+  sq_side_middle_earth_tour_desc: '共鸣 3 条中洲残响',
+  sq_side_middle_earth_tour_journal: '碎戒指沉进石环里，没有人再回头望。',
+  sq_side_beyond_frames_title: '越境狂想曲',
+  sq_side_beyond_frames_desc: '共鸣 3 条跨界残响',
+  sq_side_beyond_frames_journal: '跨越的不是边境，是墙；不是墙，是回声。',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

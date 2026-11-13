@@ -1485,8 +1485,8 @@ export const STRINGS_EN = Object.freeze({
   ach_cg_half_desc: "Unlock 50% of the CG gallery",
   ach_codex_half_title: "Codex Scholar",
   ach_codex_half_desc: "Collect 50% of the codex",
-  ach_rematch_3_title: "Beacon Hunter",
-  ach_rematch_3_desc: "Rematch a boss 3 times through beacons",
+  ach_rematch_3_title: "Triptych",
+  ach_rematch_3_desc: "Rematch the same boss three times through beacons",
   ach_campfire_all_desc: "Rest at all 6 campfires",
   ach_photo_mode_title: "Plane Photographer",
   ach_photo_mode_desc: "Use photo mode",
@@ -3399,6 +3399,12 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   ach_echo_upside_six_desc: 'Resonate with all six upside-down echoes',
   ach_echo_cosmic_six_title: 'Six Old-Days Echoes',
   ach_echo_cosmic_six_desc: 'Resonate with all six old-days whispered echoes',
+  sq_side_middle_earth_tour_title: 'The Tour of Middle-Earth',
+  sq_side_middle_earth_tour_desc: 'Resonate with all three middle-earth remnants',
+  sq_side_middle_earth_tour_journal: 'The broken ring fell into stone; no one looked back.',
+  sq_side_beyond_frames_title: 'Beyond the Frames',
+  sq_side_beyond_frames_desc: 'Resonate with all three crossover echoes',
+  sq_side_beyond_frames_journal: 'The border is not the edge; the wall is; the echo is not the wall.',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

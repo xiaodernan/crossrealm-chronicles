@@ -393,11 +393,11 @@ describe('W-B12 切片3：单系列致敬支线的 zone 由回声表推，不再
   };
   const 单系列条目 = SIDE_QUESTS_POP.filter((q) => q.id.endsWith('-tour'));
 
-  it('十四条单系列致敬支线的 zone 与回声表一致（边写死边漂的情况不存在）', () => {
-    expect(单系列条目.length).toBe(14);
+  it('十五条单系列致敬支线的 zone 与回声表一致（边写死边漂的情况不存在）', () => {
+    expect(单系列条目.length).toBe(15);
     for (const q of 单系列条目) {
       expect(q.zone, `${q.id} 的 zone 不是回声表推出来的那座`)
-        .toBe(复算({ 'side-wizard-tour': 'wizard', 'side-space-tour': 'interstellar', 'side-upside-tour': 'upside', 'side-western-tour': 'border', 'side-gangster-tour': 'family', 'side-scifi-tour': 'deepspace', 'side-cyber-tour': 'cyber', 'side-samurai-tour': 'samurai', 'side-cosmic-tour': 'cosmic', 'side-starport-tour': 'starport', 'side-voidmaw-tour': 'voidmaw', 'side-abysssalt-tour': 'abysssalt', 'side-gloom-tour': 'gloom', 'side-radiant-tour': 'radiant' }[q.id]));
+        .toBe(复算({ 'side-wizard-tour': 'wizard', 'side-space-tour': 'interstellar', 'side-upside-tour': 'upside', 'side-western-tour': 'border', 'side-gangster-tour': 'family', 'side-scifi-tour': 'deepspace', 'side-cyber-tour': 'cyber', 'side-samurai-tour': 'samurai', 'side-cosmic-tour': 'cosmic', 'side-starport-tour': 'starport', 'side-voidmaw-tour': 'voidmaw', 'side-abysssalt-tour': 'abysssalt', 'side-gloom-tour': 'gloom', 'side-radiant-tour': 'radiant', 'side-middle-earth-tour': 'middle-earth', 'side-beyond-frames': 'crossover' }[q.id]));
     }
   });
 
@@ -407,7 +407,7 @@ describe('W-B12 切片3：单系列致敬支线的 zone 由回声表推，不再
     // 与 `side-wave4-master` 同形（四位面各 3 回声），同样一座位面装不下。
     // 第六位是 W-J1 的 `side-homecoming-wayfare`：返乡母题回声散在五座位面上，同一条规则也装不下。
     expect(仍全局.map((q) => q.id).sort()).toEqual(
-      ['side-echo-full', 'side-echo-half', 'side-homecoming-wayfare', 'side-original-master', 'side-triad-master', 'side-wave4-master'],
+      ['side-beyond-frames', 'side-echo-full', 'side-echo-half', 'side-homecoming-wayfare', 'side-original-master', 'side-triad-master', 'side-wave4-master'],
     );
     expect(仍全局.every((q) => q.zone === 'global')).toBe(true);
   });
