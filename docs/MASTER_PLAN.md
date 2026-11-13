@@ -6933,3 +6933,14 @@ Phase D（系统与质量）
   - **判据**：echoHint 走与 ask() 一样的 `complete()` 链路（含流式、熔断、摘要缓存、退避），唯一不同的只是 SYSTEM 人格；为人格线补一条 live test 是 round out，不是 fork。
 
   - **风险与后续**：① 真 OpenAI-compatible 上限仍是“非确定性”：提示长度几十一个字符浮动，断言只接受“>0 ≤60”——所有大于 60 的会踩；单个 hint 不该被 unit semantics 钉死。② 二次调用同样 question 精确串相等才命中缓存；所以 live test 两次都传完全一致的字符串。③ W-Z16 起将把同样的 live 测试套到 §4q ops 接口上——“/api/ops/advisor 在 live 上游下首次出线”。
+- **2026-11-13 W-E19 advisor 面板 token 回笼率可见化（累计 hits/total 徽章）** —— 提交 `02cffc5`
+
+  - **起因**：wkapi.pro 的上游缓存行为时好时坏（实测同一前缀某些批次 4992/5248 命中——约 90%+，某几批次 token 似乎完全是新流的，cached=0），玩家问出去的每一个字，“这一句是不是吃过缓存”全靠猜。
+
+  - **做法**：① i18n key `advisor_meta_cached_fmt`（zh `${hits}/${total} 缓存命中` / en `${hits}/${total} cached`）+ EXPECTED_KEY_COUNT 3034 → **3035**；② `AdvisorPanel` 增加 `_cacheStats {hits,total}` session 内计数，每次 advisor 一问就 `+1`，缓存命中再 `+1 hits`；`advisor-meta` 收口字串从 `model · ms ms` 变成 `model · ms ms · hits/total 缓存命中`；③ `advisor-panel-wiring.test.js` 钉子同步（`advisor-meta` 文本期望值从 `gpt-6-sol · 1235 ms` 更新到带 `1/1 缓存命中` 的版本）；④ 所有其他 lint 门禁、size gate 透出。
+
+  - **影响**：完全 additive——显示模型不破；非 advisor 的失败分支不进入统计（失败分支不计入 `_cacheStats.total`，与一次失败的体验一致）；英文、中文双键各带正确插值语法；`advisor_meta_fmt` 字面被复用，不重复定义合成逻辑。
+
+  - **判据**：6538 测试 + 18 ACIHEMY 全绿 checkpoint: 我刚更新了一个 i18n 钉子，所有其他 holder 不动；e2e 通关；size 2.15 MiB。
+
+  - **风险与后续**：① 计数只在 client 端生命周期——会话切换/刷新会归零，这正是设计目的（session-level 而非 total-history 是一个更轻的隐私边界）；② W-Z16/Z17 没动后端，这次纯前端闭环，所以 wkapi 那边 mounted BK 多久都没影响本徽章；③ 前端不存在 package.json 里“全局 i18n 测试”要么复核要么诚实 skip——实际通过了 i18n.test.js（键数对称、zh/en 双表同步）。
