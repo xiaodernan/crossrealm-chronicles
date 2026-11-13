@@ -1202,6 +1202,8 @@ export const STRINGS_EN = Object.freeze({
   echo_one_ring_desc: "One Realm to bind them all… the ring is broken, the stone still stands.",
   echo_poster_wall_title: "The Six Faded Scenes",
   echo_poster_wall_desc: "Six faded murals cover the peeling wall: academy, wastes, upside-down, ring, chaos, anchor.",
+  echo_beyond_frames_title: 'Beyond the Frames',
+  echo_beyond_frames_desc: 'So long as the lantern is lit, a poster is never just paper — every passer-by lights one more.',
   echo_nine_platform_title: "Platform Nine and Three-Quarters",
   echo_nine_platform_desc: "The brick wall splits open in the middle of the platform — only those who \"believe\" can pass.",
   echo_patronus_lake_title: "Patronus Lake",

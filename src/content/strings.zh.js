@@ -1203,6 +1203,8 @@ export const STRINGS_ZH = Object.freeze({
   echo_one_ring_desc: "One Realm to bind them all… 戒指已碎，石环仍在。",
   echo_poster_wall_title: "残壁六画",
   echo_poster_wall_desc: "斑驳的墙面上画着六幅褪色的图景：学院、荒原、逆相、石环、混沌、锚点。",
+  echo_beyond_frames_title: '界外',
+  echo_beyond_frames_desc: '只要灯还亮着，海报就不只是纸——每多一位过客，世界就多亮一盏。',
   echo_nine_platform_title: "九又四分之三站台",
   echo_nine_platform_desc: "砖墙在月台中央裂开 — 只有「相信」的人才能穿过去。",
   echo_patronus_lake_title: "护念湖镜",

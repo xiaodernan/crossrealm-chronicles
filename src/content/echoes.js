@@ -39,6 +39,7 @@ export const ECHOES = [
 
   // ── 枢纽彩蛋墙 ──
   { id: 'echo-poster-wall', franchise: FRANCHISE.CROSSOVER, zone: 'hub', title: 'echo_poster_wall_title', desc: 'echo_poster_wall_desc', trigger: 'echo:poster-wall' },
+  { id: 'echo-beyond-frames', franchise: FRANCHISE.CROSSOVER, zone: 'hub', title: 'echo_beyond_frames_title', desc: 'echo_beyond_frames_desc', trigger: 'echo:poster-wall' },
 
   // ── Wave2 ──
   // 魔法学院
