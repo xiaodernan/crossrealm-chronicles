@@ -3989,6 +3989,25 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   .advisor-subtitle, .advisor-disclaimer { display: none; }
 }
 
+/* ── 全局细节打磨（W-E18 切片1）：滚动条与选区，全仓一套金暗皮肤 ──
+   面板都用系统默认滚动条，在鎏金暗幕里像刀口一样突兀；
+   按 gold-dim 落一条细条 + 透明轨道，与整体配色一脉相承。
+   选择区统一鎏金字 + 深底，复制出来的任何文字都带着世界的颜色。 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 98, 0.35) transparent;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 98, 0.35);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(201, 169, 98, 0.55); background-clip: padding-box; }
+::selection { background: rgba(201, 169, 98, 0.9); color: #1a1526; }
+
 /* 系统级「减少动态效果」—— W-Z3 全局兜底网
  * 设计意图（动效分三档）：
  *   档A·功能性 (loading 进度 / 状态点 / 血条)：reduced-motion 下用
