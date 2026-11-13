@@ -54,17 +54,22 @@ jobs:
         run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-season-cache.ps1"
 
       # Redis 背板的顾问队列（W-Z1）：throwaway redis + ai-service ai-service.jobs.backend=redis。
-      # 无 LLM_API_KEY 时 worker 确定性地不配置失败→DEAD；验证提交→claim→DEAD→DLQ→
-      # 死信白名单端点（不回显玩家提问）；ai:advisor:jobs/dlq 键真的存在（证明走了 Redis 后端）。
+      # 无 LLM_API_KEY 时 worker 确定性地不配置失败 -> DEAD；
+      # 验证提交 -> claim -> DEAD -> DLQ -> 死信白名单端点，且 ai:advisor:jobs/dlq 
+      # 键真的存在（这是跨实例 at-least-once 投递的真实红绿灯）。
       - name: Redis-backed advisor queue (W-Z1 verification)
         run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-advisor-queue.ps1"
 
-      # Redis 背板的排行榜（W-Y5）：throwaway redis + game-service backend=redis：三条记录提交→镜像→重启后仍存在。
-      # 验证 ZSET 里确实有数据、服务重启后 top-K 完整恢复——这是"在内存排行榜加一份可靠投递"的实证。
+      # Redis-backed leaderboard (W-Y5): throwaway redis + game-service leaderboard.backend=redis
       - name: Redis-backed leaderboard (W-Y5 verification)
         run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-leaderboard.ps1"
 
-      # Redis 背板的试炼榜（W-Y6 切片3）：与排行榜镜像同一形态，专门验证 TrialLeaderboardService。
-      # 重启后赛季过滤正确、score 降序仍然恢复。
+      # Redis-backed trial leaderboard (W-Y6 切片3): throwaway redis + game-service trial.backend=redis
       - name: Redis-backed trial leaderboard (W-Y6 verification)
         run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-trial.ps1"
+
+      # Micrometer/Prometheus exposition (W-Z10): boot game-service locally,
+      # push one boss_defeated event, scrape /actuator/prometheus and assert
+      # game_telemetry_enqueued_total + jvm_memory_used_bytes + process_uptime_seconds.
+      - name: Prometheus telemetry exposition (W-Z10 verification)
+        run: pwsh -File "${{ github.workspace }}/server/scripts/verify-prometheus.ps1"

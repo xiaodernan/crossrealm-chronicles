@@ -3,6 +3,8 @@ package com.crossrealm.chronicles.game.telemetry;
 import com.crossrealm.chronicles.game.GameServiceProperties;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayDeque;
@@ -51,6 +53,10 @@ public class TelemetryService {
     private static final int INBOX_CAPACITY = 1024;
 
     private final GameServiceProperties properties;
+    private final io.micrometer.core.instrument.MeterRegistry meterRegistry;
+    private final io.micrometer.core.instrument.Counter telemetryEnqueued;
+    private final io.micrometer.core.instrument.Counter telemetryDropped;
+    private final io.micrometer.core.instrument.Counter telemetryProcessed;
     private final Deque<TelemetryEvent> events = new ArrayDeque<>();
     private final AtomicLong sequence = new AtomicLong();
 
@@ -63,7 +69,17 @@ public class TelemetryService {
     private Thread drainer;
 
     public TelemetryService(GameServiceProperties properties) {
+        this(properties, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public TelemetryService(GameServiceProperties properties,
+                            @org.springframework.lang.Nullable io.micrometer.core.instrument.MeterRegistry meterRegistry) {
         this.properties = properties;
+        this.meterRegistry = meterRegistry;
+        this.telemetryEnqueued = meterRegistry != null ? meterRegistry.counter("game_telemetry_enqueued_total") : null;
+        this.telemetryDropped  = meterRegistry != null ? meterRegistry.counter("game_telemetry_dropped_total") : null;
+        this.telemetryProcessed = meterRegistry != null ? meterRegistry.counter("game_telemetry_processed_total") : null;
     }
 
     @PostConstruct
@@ -121,6 +137,7 @@ public class TelemetryService {
             events.addLast(event);
         }
         processed.incrementAndGet();
+        if (telemetryProcessed != null) telemetryProcessed.increment();
     }
 
     /**
@@ -130,9 +147,11 @@ public class TelemetryService {
     public TelemetryEvent record(String type, String detail) {
         TelemetryEvent event = TelemetryEvent.of(sequence.incrementAndGet(), type, detail);
         enqueued.incrementAndGet();
+        if (telemetryEnqueued != null) telemetryEnqueued.increment();
         if (!inbox.offer(event)) {
             inbox.poll();          // 丢最老一格
             dropped.incrementAndGet();
+            if (telemetryDropped != null) telemetryDropped.increment();
             inbox.offer(event);    // 必然成功（刚空出一格）
         }
         return event;

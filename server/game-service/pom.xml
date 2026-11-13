@@ -60,6 +60,11 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
+    <!-- W-Z10：Micrometer + Prometheus exporter — 把 jvm/http/advisor 指标暴露给 /actuator/prometheus，供本机 Prom 9090 scrape -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
