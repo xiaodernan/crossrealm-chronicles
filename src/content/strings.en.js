@@ -3378,6 +3378,7 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   advisor_error_http_fmt: 'The stars refused that question (HTTP ${status}).',
   advisor_error_busy: 'The stars are crowded right now and the queue is full. Try again in a moment; this question was not lost.',
   advisor_meta_fmt: '${model} · ${ms} ms',
+  advisor_meta_cached_fmt: '${hits}/${total} cached',
   advisor_cached: 'cached',
   advisor_char_count_fmt: '${n}/${max}',
 

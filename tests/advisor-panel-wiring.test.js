@@ -191,7 +191,7 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
     expect(msgs.map((m) => m.getAttribute('data-advisor-role'))).toEqual(['user', 'advisor']);
     expect(msgs[1].textContent).toContain('先堆火伤。');
     expect(msgs[1].querySelectorAll('.is-cached')).toHaveLength(1);
-    expect(h.doc.getElementById('advisor-meta').textContent).toBe('gpt-6-sol · 1235 ms');
+    expect(h.doc.getElementById('advisor-meta').textContent).toBe('gpt-6-sol · 1235 ms · 1/1 缓存命中');
     expect(h.doc.getElementById('advisor-typing').classList.contains('hidden')).toBe(true);
     h.cleanup();
   });

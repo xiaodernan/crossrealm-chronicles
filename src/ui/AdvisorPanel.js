@@ -68,6 +68,7 @@ export class AdvisorPanel {
     this._healthChecked = false;
     this._status = 'checking';
     this._lastMeta = null;
+    this._cacheStats = { hits: 0, total: 0 };
     this._messages = [];
 
     const doc = typeof document !== 'undefined' ? document : null;
@@ -281,7 +282,9 @@ export class AdvisorPanel {
     if (res?.ok && typeof data.answer === 'string' && data.answer.trim()) {
       const model = typeof data.model === 'string' ? data.model : '—';
       const ms = Number.isFinite(data.latencyMs) ? Math.max(0, Math.round(data.latencyMs)) : 0;
-      this._lastMeta = t('advisor_meta_fmt', { model, ms });
+      this._cacheStats.total += 1;
+      if (data.cached === true) this._cacheStats.hits += 1;
+      this._lastMeta = t('advisor_meta_fmt', { model, ms }) + ' · ' + t('advisor_meta_cached_fmt', this._cacheStats);
       this._renderMeta();
       this._appendMessage('advisor', data.answer, { cached: data.cached === true });
       if (this._status === 'offline') this._setStatus('ready');
