@@ -39,6 +39,7 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-samurai', title: 'ach_echo_samurai_title', desc: 'ach_echo_samurai_desc', check: (s) => (s.echoSamurai ?? 0) >= 6 },
   { id: 'echo-cosmic', title: 'ach_echo_cosmic_title', desc: 'ach_echo_cosmic_desc', check: (s) => (s.echoCosmic ?? 0) >= 6 },
   { id: 'echo-starport', title: 'ach_echo_starport_title', desc: 'ach_echo_starport_desc', check: (s) => (s.echoStarport ?? 0) >= 3 },
+  { id: 'echo-starport-6', title: 'ach_echo_starport_title', desc: 'ach_echo_starport_desc', check: (s) => (s.echoStarport ?? 0) >= 6 },
   { id: 'echo-wave4', title: 'ach_echo_wave4_title', desc: 'ach_echo_wave4_desc', check: (s) => (s.echoCyber ?? 0) >= 6 && (s.echoSamurai ?? 0) >= 6 && (s.echoCosmic ?? 0) >= 6 && (s.echoStarport ?? 0) >= 3 },
   { id: 'echo-gloom', title: 'ach_echo_gloom_title', desc: 'ach_echo_gloom_desc', check: (s) => (s.echoGloom ?? 0) >= 3 },
   { id: 'echo-radiant', title: 'ach_echo_radiant_title', desc: 'ach_echo_radiant_desc', check: (s) => (s.echoRadiant ?? 0) >= 3 },

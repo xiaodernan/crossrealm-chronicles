@@ -3265,6 +3265,13 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
 
   // W-E10（深空孔径 Wave16）：黑砂石碑 / 坠锚飞行员 / 将熄的星骸
   // Wave18（深渊母题 voidmaw）：深渊合唱 / 锚与解锚 / 暗手（W-E11）
+  // Wave19（星港 STARPORT Wave19）—— 复用三座既有星港 POI 各派一份新回声，不增新网格、不动 perf 读数
+  echo_starport_dealmaker_title: '星港掮客',
+  echo_starport_dealmaker_desc: '掮客只认手势，不讲理由——点个火、推杯酒，接下该他扛的货。',
+  echo_starport_rigger_title: '吊钩灯',
+  echo_starport_rigger_desc: '船舱里那盏总在点头的灯，工头一个手势让它停，他就停。',
+  echo_starport_navigator_title: '星图跑者',
+  echo_starport_navigator_desc: '星图跑者不一定去过那颗星——他能从外轮廓数到每座星球的确切重量。',
   echo_void_choir_title: '深渊合唱',
   echo_void_choir_desc: '深渊偶尔把周遭的风声拼成合唱，转调得像一首人间再也唱不上去的赞美诗。',
   echo_void_anchor_title: '锚与解锚',

@@ -3265,6 +3265,13 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
 
   // W-E10 (Deep Sky Aperture Wave16): Obsidian Obelisk / Broken-Anchor Pilot / Dying Star Hulk
   // Wave18 (Abyssal Mouth voidmaw): The Choir Below / The Anchor / The Dim Hand (W-E11)
+  // Wave19 (STARPORT Wave19) — new echoes reused on the three existing starport POIs; no new meshes, no perf ceiling impact
+  echo_starport_dealmaker_title: 'The Starport Dealmaker',
+  echo_starport_dealmaker_desc: 'The Dealmaker does not bargain with words — he lights a match, slides a glass of wine, and carries what he is owed.',
+  echo_starport_rigger_title: 'The Hook-Lantern',
+  echo_starport_rigger_desc: 'The lantern that always nods in the hold — one gesture from the foreman and it goes still.',
+  echo_starport_navigator_title: 'The Star-Chart Runner',
+  echo_starport_navigator_desc: 'The star-chart runner may never have been to the star — he can count every planet\'s exact weight by looking at its outline.',
   echo_void_choir_title: 'The Choir Below',
   echo_void_choir_desc: 'Now and then the abyss turns the surrounding wind into a choir — the modulation is one no mortal voice can reach.',
   echo_void_anchor_title: 'The Anchor and Its Unmooring',

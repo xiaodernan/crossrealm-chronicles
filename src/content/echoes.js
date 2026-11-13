@@ -157,4 +157,9 @@ export const ECHOES = [
   { id: 'echo-void-choir', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_choir_title', desc: 'echo_void_choir_desc', trigger: 'echo:void-choir' },
   { id: 'echo-void-anchor', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_anchor_title', desc: 'echo_void_anchor_desc', trigger: 'echo:void-anchor' },
   { id: 'echo-void-hand', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_hand_title', desc: 'echo_void_hand_desc', trigger: 'echo:void-hand' },
+
+  // ── Wave19（STARPORT 星港）：复用既有 3 座 POI 各派一份新回声（零新网格） ──
+  { id: 'echo-starport-dealmaker', franchise: FRANCHISE.STARPORT, zone: 'space', title: 'echo_starport_dealmaker_title', desc: 'echo_starport_dealmaker_desc', trigger: 'echo:star-cantina' },
+  { id: 'echo-starport-rigger', franchise: FRANCHISE.STARPORT, zone: 'space', title: 'echo_starport_rigger_title', desc: 'echo_starport_rigger_desc', trigger: 'echo:smuggler-dock' },
+  { id: 'echo-starport-navigator', franchise: FRANCHISE.STARPORT, zone: 'space', title: 'echo_starport_navigator_title', desc: 'echo_starport_navigator_desc', trigger: 'echo:holo-chart' },
 ];
