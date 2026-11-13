@@ -1,5 +1,6 @@
 import { ACHIEVEMENTS } from '../game/AchievementSystem.js';
 import { MASTER_ACHIEVEMENT_IDS } from '../content/masterAchievements.js';
+import { ECHO_EPITAPHS } from '../content/echoEpitaphs.js';
 import { keyText, refreshKeyText } from './keyHints.js';
 import { t } from '../engine/i18n.js';
 
@@ -31,10 +32,22 @@ export class AchievementsJournalTab {
       </div>`;
     }).join('');
 
+    // 星尘铭文（W-Z29「卷帙残章」）：母题毕业时在此亮起一行字
+    const epitaphCards = ECHO_EPITAPHS.map((e) => {
+      const ok = unlocked.has(e.ach);
+      const theme = t(e.themeKey);
+      return ok
+        ? `<div class="ach-epitaph ach-epitaph-unlocked"><div class="ach-epitaph-glyph">🕯</div><div class="ach-epitaph-theme">${theme}</div><div class="ach-epitaph-text">${t(e.key)}</div></div>`
+        : `<div class="ach-epitaph"><div class="ach-epitaph-glyph">🔒</div><div class="ach-epitaph-theme">${theme}</div><div class="ach-epitaph-text">${t('ach_epitaphs_locked')}</div></div>`;
+    }).join('');
+
     panelEl.innerHTML = `
       <h2>${keyText(t('journal_tab_achievements'))}</h2>
       <p class="ach-stats">${t('achievement_stats', { done, total, pct })}</p>
       <div class="ach-grid">${cards}</div>
+      <h3 class="ach-epitaphs-title">${t('ach_epitaphs_title')}</h3>
+      <p class="hint">${t('ach_epitaphs_hint')}</p>
+      <div class="ach-ept-grid">${epitaphCards}</div>
       <p class="hint">${t('achievement_hint')}</p>
     `;
 

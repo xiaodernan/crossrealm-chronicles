@@ -7182,3 +7182,17 @@ Phase D（系统与质量）
   - **判据**：presence-service `mvn test` → **27 例全绿**；`mvn -f server/pom.xml verify` BUILD SUCCESS；`verify-presence-redis.ps1` 三连跑绿并含 ops 断言（`ops endpoint OK (backend=redis, sseConnections=0, capacity=500)`）。
 
   - **风险**：① `activeStreams` 是**进程内**计数，多实例 docker 栈只看到本实例（在 ops 页聚合需网关侧 `gateway_requests_total{route,outcome}` 兜底）；② ops 不泄露游侠 id/name（只出计数）。
+- **2026-11-14 W-Z29「卷帙残章」——星尘铭文：母题毕业时点亮的一行碑文** —— 提交：本次 HEAD
+
+  - **起因**：成就墙一直是「收齐了→弹窗「解锁」→就完事了」——每位母题主题的终段档（`echo-<x>-6` / `echo-homecoming-master` / `echo-crossover`，唯一只有 3 枚的母题）在一次性反馈之后，没有任何剩下的回响。世界的母亲惯例是「每一段旅程结束留下一句话」——旅人从容地在这里写下它：每套回声全收齐之后，炉火替他多留一行字。
+
+  - **做法**：
+    · `src/content/echoEpitaphs.js`（新）：`ECHO_EPITAPHS` = 17 个母题的结构化成对登记 `{franchise, ach, key, themeKey}`——**全部字面量，不拼模板**（`themeKey` 如 `franchise_wizard_label` 直写，规避 B142/B143 的拼键口径；域验证在 tests/echo-epitaphs 双向钉住：解锁成就存在、themeKey 双表在场）。
+    · `src/content/strings.zh.js` / `.en.js`：+20 键 × 2 表（`ach_epitaphs_title` / `ach_epitaphs_hint` / `ach_epitaphs_locked` + 17 残章——每个母题一句不长于 30 字的汉语残章、对应一句英语碑文；中文全部不押韵但做安魂状，英语做母题者）；`EXPECTED_KEY_COUNT` 3065 → **3085**。
+    · `src/ui/AchievementsJournalTab.js`：成就网格下面加「星尘铭文 · 卷帙残章」：`ECHO_EPITAPHS.map` → 每张卡片按 `unlocked.has(e.ach)` 分两支——解锁态：🕯 + 母题标签 + 残章全文（金牌 hover 光环）；锁态：🔒 + 母题标签 +「母题尚未出关」；**卡片文本走 textContent（字符串是我方表驱动，但口径统一绝不 innerHTML-插值星辰），请别把这些写回拼接链**。
+    · `style.css`：`.ach-epitaphs-title` / `.ach-ept-grid`（auto-fill 150px）/ `.ach-epitaph` 灰卡 + `.ach-epitaph-unlocked` 金牌（box-shadow 发光 + drop-shadow 🕯️）。
+    · `tests/echo-epitaphs.test.js`（+5 例）：17 条目双表齐 / 解锁成就全部登记且为终段档（-6/-master/echo-crossover）/ themeKey 对齐真表在场 / AchievementsJournalTab 接线 / CSS 双登记。
+
+  - **判据**：`npm test` **6618 例全绿**（+6 净增 W-Z29：+5 条 + trivially 支线登记差值）；`npm run lint` 0；`npm run build` ✓（20 秒）。
+
+  - **风险**：① **碑文里的"字数回缩"是 feature**：汉字一句成章，英语碑文刻意做短句截断（不押韵也不如诗句），避免拿英文去拉中文的字长产生两种体裁的分裂；② `ach_epitaphs_locked` 锁态**任何母题一视同仁**——不写母题名之外的信息，避免染上「卡关体」；③ 17 个母题 × 篇幅一致性由双向钉（FRANCHISE 存在 + ach 存在 + themeKey 存在）。
