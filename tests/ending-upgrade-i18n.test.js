@@ -61,6 +61,7 @@ const PIN = {
   credits_line_thanks: ['感谢游玩', 'Thanks for playing'],
   credits_line_features: ['{journal} 日志 · CG 画廊 · 秘典 · 成就', '{journal} Journal · CG Gallery · Codex · Achievements'],
   credits_line_systems: ['营火 NPC · Boss 再战 · 战斗风格', 'Campfire NPCs · Boss rematch · Combat styles'],
+  credits_line_extended: ['衍生 —— 《跨界纪事》长篇 · OST 24 曲 · 电影剧本', 'Beyond the game — the novel · the OST · the film script'],
   credits_line_fin: ['— fin —', '— fin —'],
   credits_toast: ['Chapter 5 完成 — 滚动字幕', 'Chapter 5 complete - rolling credits'],
   upgrade_lore_intro_a: ['营火不仅是休息点 — 位面行者的剑与杖在此与', "The campfire is more than a resting place - the Plane Wanderer's sword and staff resonate here with "],
@@ -134,7 +135,7 @@ afterEach(() => {
 describe('结局对话 / 片尾字幕 / 升级面板双表化（W-D2 切片26）', () => {
   it('结构腿：CREDITS 每一行（含空行占位）都是双表键或空串', () => {
     const 行 = 读字幕表(Credits源码);
-    expect(行.length, '字幕行数不对 —— 空行也是布局，不许被过滤掉').toBe(11);
+    expect(行.length, '字幕行数不对 —— 空行也是布局，不许被过滤掉').toBe(13);
     for (const k of 行) {
       if (k === '') continue;
       expect(STRINGS_ZH[k], `中文表里没有字幕键 ${k}`).toBeTypeOf('string');
@@ -148,12 +149,12 @@ describe('结局对话 / 片尾字幕 / 升级面板双表化（W-D2 切片26）
     expect(假键, '改回中文的那一行必须是双表里没有的值').toEqual(['感谢游玩']);
   });
 
-  it('钉文案腿：21 个新键的中英原值逐字钉死', () => {
+  it('钉文案腿：22 个新键的中英原值逐字钉死', () => {
     for (const [键, [中, 英]] of Object.entries(PIN)) {
       expect(STRINGS_ZH[键], `中文表里没有 ${键}`).toBe(中);
       expect(STRINGS_EN[键], `英文表里没有 ${键}`).toBe(英);
     }
-    expect(NEW_KEYS.length, '新键数对不上 —— 切片范围变了？').toBe(21);
+    expect(NEW_KEYS.length, '新键数对不上 —— 切片范围变了？').toBe(22);
   });
 
   it('行为腿：片尾字幕真播一遍，中英两语都出展开句、{journal} 换成当前键名', () => {
@@ -274,7 +275,7 @@ describe('结局对话 / 片尾字幕 / 升级面板双表化（W-D2 切片26）
     expect(旧字幕行.includes('keyText(t(l))'), '人造的旧写法必须被点名').toBe(false);
   });
 
-  it('新键不孤儿：21 个新键都在源文件里被引用（切片46/48 起含抉择行与结局字幕）', () => {
+  it('新键不孤儿：22 个新键都在源文件里被引用（切片46/48 起含抉择行与结局字幕）', () => {
     const 没人用 = NEW_KEYS.filter((k) =>
       !Game源码.includes("'" + k + "'") && !Credits源码.includes("'" + k + "'")
       && !Panel源码.includes("'" + k + "'") && !Objectives源码.includes("'" + k + "'"));

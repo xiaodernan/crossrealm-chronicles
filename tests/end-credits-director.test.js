@@ -62,7 +62,7 @@ describe('EndCreditsDirector play / hide', () => {
     expect(director.active).toBe(true);
     expect(parts.el.classList.contains('hidden')).toBe(false);
     // CREDITS 有 7 条非空文案键（其余是空行，不产生 <p>）
-    expect((parts.scroll.innerHTML.match(/<p>/g) ?? []).length).toBe(7);
+    expect((parts.scroll.innerHTML.match(/<p>/g) ?? []).length).toBe(8);
     expect(parts.skip.dataset.ktext).toBe(t('cg_caption_void_skip'));
     expect(game.dialog.toast).toHaveBeenCalledWith(t('credits_toast'), 3000);
   });

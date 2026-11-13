@@ -3156,6 +3156,7 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   credits_line_thanks: 'Thanks for playing',
   credits_line_features: '{journal} Journal · CG Gallery · Codex · Achievements',
   credits_line_systems: 'Campfire NPCs · Boss rematch · Combat styles',
+  credits_line_extended: 'Beyond the game — the novel · the OST · the film script',
   credits_line_fin: '— fin —',
   credits_line_last_light: 'And the last light — held for you.',
   credits_toast: 'Chapter 5 complete - rolling credits',

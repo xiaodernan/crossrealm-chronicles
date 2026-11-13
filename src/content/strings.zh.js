@@ -3156,6 +3156,7 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   credits_line_thanks: '感谢游玩',
   credits_line_features: '{journal} 日志 · CG 画廊 · 秘典 · 成就',
   credits_line_systems: '营火 NPC · Boss 再战 · 战斗风格',
+  credits_line_extended: '衍生 —— 《跨界纪事》长篇 · OST 24 曲 · 电影剧本',
   credits_line_fin: '— fin —',
   credits_line_last_light: '而最后那盏灯，是为你留的。',
   credits_toast: 'Chapter 5 完成 — 滚动字幕',

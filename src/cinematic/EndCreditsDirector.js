@@ -30,6 +30,8 @@ const CREDITS = [
   'credits_line_features',
   'credits_line_systems',
   '',
+  'credits_line_extended',
+  '',
   'credits_line_fin',
 ];
 
