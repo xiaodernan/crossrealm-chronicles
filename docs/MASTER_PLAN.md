@@ -6984,3 +6984,21 @@ Phase D（系统与质量）
   - **判据**：lint 0 / 6556 例全绿 / build ✓ / size 2.15 MiB（余 0.04）/ e2e 通关 ✓。
 
   - **风险与后续**：① 同一触发词解锁三枚 Crossover 后，该成就不再需要自己单独枚举；② 只要 `echo:full-resonance` 被《永恒之环》的“意义的现在”触发，再有任何第三位母题出现并入跨界，日签内容将复用这个三键成就门；③ 之后任何 Crossover 新增都需要经过这一门禁。
+- **2026-11-13 W-E21+W-E22 Crossover 母题出关：「界外」ECHO-BEYOND-FRAMES + 「墙外之约」ACH-ECHO-CROSSOVER** —— 提交 `c11f94e` · `1417883`
+
+  - **起因**：整个母题出关的路线上（六档出关 17/17）Crossover 这一类一直在它独一无二的角色里——它不是任何特定的来源 fought by in-game，反而是台布·屏幕·同人·文字——玩家愿意读到最后一行的角落。让这一片成为“本宇宙即宇宙”的高潮行当，给这位情绪落点位下一个完整的名字。
+
+  - **做法（两颗母题钉一次🔨出）**：
+    · **W-E21** echo_beyond_frames「界外」——POSTER_WALL 同触发词（echo:poster-wall）：「只要灯还亮着，海报就不只是纸——每多一位过客，世界就多亮一盏。」（EN: “Beyond the Frames — so long as the lantern is lit, a poster is never just paper. Every passer-by lights one more.”），CROSSOVER zone: hub。STRINGS 各 +2：EXPECTED_KEY_COUNT 3036 → **3038**；echoes 109 → **110**（content-registry + content-volume-reading pins 同步；MASTER_PLAN §1.2 C3 双处 回声109→回声110）。
+    · **W-E22** **ach-echo-crossover**「墙外之约」（EN: The Promise Beyond）——`ACHIEVEMENTS_POP_CULTURE` 新增，check `s.echoCrossover >= 3`（三枚 Crossover：poster-wall · beyond-frames · full-resonance）。`ECHO_FRANCHISE_BUCKETS` 加入 `['echoCrossover', FRANCHISE.CROSSOVER]`。strings 各 +2（ach_echo_crossover_title/desc）；EXPECTED_KEY_COUNT 3038 → **3040**；content-registry achievementsPopCulture 32 → **33**（由本测试实跑断言确定）。
+
+  - **判据**：lint 0 / 6556 例全绿 / typecheck build ✓ / size 2.15 MiB（余 0.04）/ perf exit 0 / e2e 通关 ✓ / server CI 通过 / server verify BUILD SUCCESS。
+
+  - **影响**：Mother-franchise 全出关闭环终于把 “从灰白森林（第一枚 crossover trigger 路径：Echo:poster-wall）到海报墙”的公司**自写**入散篇；
+    · The full-resonance 三枚自此不是设计上独立的分子——它们是这一宇宙感知自身的章节索引；
+    · 之后任何 “只是加一个玩家看的本作即宇宙” 内容的发布，如 auto-narrative cleverness 这类，都跟 W-E22 同一场景。
+
+  - **风险与后续**：
+    ① 同一触发词解锁两枚 crossover，journal 可能会写入两条胶片作为独立碎片——预期，扩容也没风险；
+    ② 如果有更多“本作即宇宙”风格新 echo 入跨横，只需要再加一枚子成就在 ACHIEVEMENTS_POP_CULTURE（≤5 枚自己的门槛：完整三枚后就会成为升级版的 .echo-meaningless）；
+    ③ 这不是“第 18 母题”——CROSSOVER 是跨母题而不是某个源，它的意义比父号更多。
