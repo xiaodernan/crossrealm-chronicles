@@ -6973,3 +6973,14 @@ Phase D（系统与质量）
   - **判据**：lint 0 / 6556 例全绿。两枚“盐”徽章与其余处同源了。
 
   - **风险与后续**：① 不能作为 键的一项存档钉子——ach_id 名存字面仍为 abyssalt——但无人引用文案内字面，无影响；② 这也说明“深颚咸鸣”/“深颚咸响”仍保留双子——让标题 σ/描述分别走人便于故事氛围，不强令归一；③ 如果将来决定“残响”才是正格，就全部要一起改。
+- **2026-11-13 W-E22 「墙外之约」ach-echo-crossover——跨界母题出口篇** —— 提交 `1417883`
+
+  - **起因**：同 W-E21——三枚 crossover（poster-wall / beyond-frames / full-resonance）自这一刻起成为一道完整的“本作即宇宙”的印记。但以前 RE_FRANCHISE_BUCKETS 没有这口径，`ach-full-resonance` 也只是全百分时才亮；没有“跨界三齐”这一口的中间门槛。
+
+  - **做法**：`ECHO_FRANCHISE_BUCKETS` 新增 `['echoCrossover', FRANCHISE.CROSSOVER]`；`ACHIEVEMENTS_POP_CULTURE` 新增 `ach-echo-crossover`（《墙外之约》/The Promise Beyond）——check `s.echoCrossover >= 3`（与三母题同一触发词海报墙一次解锁对应的三枚 Crossover 回声）；strings zh/en 各 +2；EXPECTED_KEY_COUNT 3038 → **3040**；content-registry pin achievementsPopCulture 32 → **33**（本次实跑测试才确定的真值：33）。
+
+  - **影响**：这一成就是跨界母题的自指出口——“把海报看成帷幕后”——解锁条件是老动作（一次海报墙交互）+ 全体 17 母题闭环的同一信号源：源是开发者/宇宙**之间**。《墙外之约》的完成不创“宇宙”这件事，玩家在体验这些回声的时候正好觉知它们是主题展的副本。
+
+  - **判据**：lint 0 / 6556 例全绿 / build ✓ / size 2.15 MiB（余 0.04）/ e2e 通关 ✓。
+
+  - **风险与后续**：① 同一触发词解锁三枚 Crossover 后，该成就不再需要自己单独枚举；② 只要 `echo:full-resonance` 被《永恒之环》的“意义的现在”触发，再有任何第三位母题出现并入跨界，日签内容将复用这个三键成就门；③ 之后任何 Crossover 新增都需要经过这一门禁。
