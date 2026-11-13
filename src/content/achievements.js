@@ -51,6 +51,10 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-homecoming-master', title: 'ach_echo_homecoming_master_title', desc: 'ach_echo_homecoming_master_desc', check: (s) => (s.echoHomecoming ?? 0) >= 10 },
   { id: 'echo-middle-earth', title: 'ach_echo_middle_earth_title', desc: 'ach_echo_middle_earth_desc', check: (s) => (s.echoMiddleEarth ?? 0) >= 4 },
   { id: 'echo-cyber', title: 'ach_echo_cyber_title', desc: 'ach_echo_cyber_desc', check: (s) => (s.echoCyber ?? 0) >= 6 },
+  { id: 'echo-wave5', title: 'ach_echo_wave5_title', desc: 'ach_echo_wave5_desc', check: (s) =>
+    (s.echoWizard ?? 0) >= 6 && (s.echoSpace ?? 0) >= 6 && (s.echoUpside ?? 0) >= 6 &&
+    (s.echoCyber ?? 0) >= 6 && (s.echoSamurai ?? 0) >= 6 && (s.echoCosmic ?? 0) >= 6 &&
+    (s.echoStarport ?? 0) >= 6 && (s.echoVoidMaw ?? 0) >= 6 && (s.echoHomecoming ?? 0) >= 6 },
 ];
 
 /**

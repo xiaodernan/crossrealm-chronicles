@@ -1468,6 +1468,8 @@ export const STRINGS_ZH = Object.freeze({
   ach_echo_starport_desc: '共鸣全部星港商路回声',
   ach_echo_wave4_title: '四系同频',
   ach_echo_wave4_desc: 'Wave4 四系列全共鸣',
+  ach_echo_wave5_title: '九重星潮',
+  ach_echo_wave5_desc: '九类星系残响全部凑够六个',
   ach_echo_gloom_title: '薄暮同频',
   ach_echo_gloom_desc: '共鸣全部薄暮回响',
   ach_echo_radiant_title: '辉煌齐鸣',

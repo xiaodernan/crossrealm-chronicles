@@ -1468,6 +1468,8 @@ export const STRINGS_EN = Object.freeze({
   ach_echo_starport_desc: "Resonate with every starport trade-route echo",
   ach_echo_wave4_title: "Four Series Aligned",
   ach_echo_wave4_desc: "Resonate with all four Wave4 series",
+  ach_echo_wave5_title: "Nine Constellations",
+  ach_echo_wave5_desc: "Resonate with all nine franchise star-wakes (six each)",
   ach_echo_gloom_title: "Mist Resonance",
   ach_echo_gloom_desc: "Resonate with every gloom echo",
   ach_echo_radiant_title: "Radiant Chorus",
