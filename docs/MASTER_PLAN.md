@@ -6944,3 +6944,14 @@ Phase D（系统与质量）
   - **判据**：6538 测试 + 18 ACIHEMY 全绿 checkpoint: 我刚更新了一个 i18n 钉子，所有其他 holder 不动；e2e 通关；size 2.15 MiB。
 
   - **风险与后续**：① 计数只在 client 端生命周期——会话切换/刷新会归零，这正是设计目的（session-level 而非 total-history 是一个更轻的隐私边界）；② W-Z16/Z17 没动后端，这次纯前端闭环，所以 wkapi 那边 mounted BK 多久都没影响本徽章；③ 前端不存在 package.json 里“全局 i18n 测试”要么复核要么诚实 skip——实际通过了 i18n.test.js（键数对称、zh/en 双表同步）。
+- **2026-11-13 W-E20 终局字幕组加一行“衍生”——把整部原生宇宙全部正式写进游戏** —— 提交 `49d1051`
+
+  - **起因**：游戏内到处呼应 creative/ 里的原生作品——《跨界纪事》长篇、24 首 OST、电影剧本（IMAX 级分场）——但到了玩家最有归属感的“通关字幕”反而完全失语。字幕本该是“这一切都是与你一道的”。
+
+  - **做法**：CREDITS 数组在 fin 之前插入 `credits_line_extended`，行文案：`衍生 —— 《跨界纪事》长篇 · OST 24 曲 · 电影剧本` / EN `Beyond the game — the novel · the OST · the film script`。EXPECTED_KEY_COUNT 3035 → **3036**；CREDITS 行数 11 → **13**（含新插入的空行布局）；ending-upgrade-i18n NEW_KEYS 21 → **22**，`credits_line_extended` 加入逐字 pin；end-credits-director <p> 计数 7 → **8**。
+
+  - **影响**：字面量 layout 变化：多 1 个 <p> 节点，更吃几个行高；film/chapter 字幕滚动时间增 ≈0.5s，仍然落在合理时长内；字段 good thing——players 完整读完整个创意宇宙名单。
+
+  - **判据**：lint 0 / 6556 例全绿 / build ✓ / size 2.15 MiB（余 0.04）/ e2e 通关 ✓；e2e 通关文体检查已过（.end-credits-dot> 仍然按 <p> 行渲染）——额外一行的 layout 不会 clash 现有断言，wire-up 测试不动。
+
+  - **风险与后续**：① 如果 creative/ 新增演出了别的衍生（比如手办/插画展/同人），必须同步更新本键；下一次“衍生行”的调整钉子是 22 个新键数；② CREDITS 里目前只有片尾的三个结局分支锁死了 flavor，这不复冲突——单独加入两格分支不会再有新分支；③ 片头和 chapter 字幕表中没有什么本行的明显同事，美学一致。
