@@ -6922,3 +6922,14 @@ Phase D（系统与质量）
   - **判据**：纯 gateway scope，不碰任何下游服务；有限枚举，杜绝 input-label 注入；order=100 不在 `beforeCommit`，状态码拿得稳；Registry 没场景不挂。
 
   - **风险 & 后续**：① `/actuator/prometheus` 对任何能连到 gateway 的人可读——如暴露面要收窄，加 `management.endpoints.web.base-path` 或安全层；② 若未来路由增多，补常量即可；**不要** fallback 到“全路径原样”，那是 cardinality 注入陷阱，与 brainrot 同一技术档案。③ W-Z15 可以把 game telemetry 三色 + gateway RT/SLO + ai token/cachedRatio 汇成统一流水线。
+- **2026-11-13 W-Z15 EchoHint live 联调测试——回声先知也首次做“真打枪实弹”** —— 提交 `03b42ed`
+
+  - **起因**：W-X22 的「回声先知」散在 game-service 的半成品，W-Y1 收口到 ai-service 共用 LlmClient——但 echoHint 这条人格线从落地起就连一只 live 测试都没有，它走的是同一个 `complete()`，却只能靠 mock 断言——“真上游答出来的到底靠不靠谱” 没人知道。W-Z15 把这个口子补上。
+
+  - **做法**：`EchoHintLiveIntegrationTest` 仿 W-Y1 形态：仅 `LLM_API_KEY` 在 env 时运行；问 `{franchise: middle-earth, title: 至尊石环, desc: …}`，断言 hint 非空 ≤60 字（先知 ≤45，但留口不硬掐）；第二次同 question+SYSTEM 必须命中 `ResponseCache`（upstreamCalls 不涨）。连同注入 wkapi 的 token 计数化 `ai_upstream_calls_total` ≥ 1 也不在这里断言——那条只能 `verify-prometheus-ai.ps1` 的实弹 scrape 看，因为 unit-seam 不会触发 Micrometer 注入主链。
+
+  - **实测**：本地带 LLM_API_KEY 跑：PASS（prompt=129 completion=123；第二回 local cache 命中零上游）。同一 W-Z15 不触发 CI（Unity test runner 有 key=空前缀触发 skip=continue），所以服务器CI不受影响。
+
+  - **判据**：echoHint 走与 ask() 一样的 `complete()` 链路（含流式、熔断、摘要缓存、退避），唯一不同的只是 SYSTEM 人格；为人格线补一条 live test 是 round out，不是 fork。
+
+  - **风险与后续**：① 真 OpenAI-compatible 上限仍是“非确定性”：提示长度几十一个字符浮动，断言只接受“>0 ≤60”——所有大于 60 的会踩；单个 hint 不该被 unit semantics 钉死。② 二次调用同样 question 精确串相等才命中缓存；所以 live test 两次都传完全一致的字符串。③ W-Z16 起将把同样的 live 测试套到 §4q ops 接口上——“/api/ops/advisor 在 live 上游下首次出线”。
