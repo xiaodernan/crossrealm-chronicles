@@ -155,6 +155,8 @@ export const ECHOES = [
   { id: 'echo-broken-sword', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_broken_sword_title', desc: 'echo_broken_sword_desc', trigger: 'echo:broken-sword' },
   { id: 'echo-elven-harp', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_elven_harp_title', desc: 'echo_elven_harp_desc', trigger: 'echo:elven-harp' },
   { id: 'echo-mithril-shard', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_mithril_shard_title', desc: 'echo_mithril_shard_desc', trigger: 'echo:mithril-shard' },
+  { id: 'echo-mithril-vein', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_mithril_vein_title', desc: 'echo_mithril_vein_desc', trigger: 'echo:mithril-shard' },
+  { id: 'echo-grey-chant', franchise: FRANCHISE.MIDDLE_EARTH, zone: 'fantasy', title: 'echo_grey_chant_title', desc: 'echo_grey_chant_desc', trigger: 'echo:elven-harp' },
 
   // ── Wave14（赛博深渊 · 浮空赌场、黑市舱、天台道场）──
   { id: 'echo-floating-casino', franchise: FRANCHISE.CYBER, zone: 'magic', title: 'echo_floating_casino_title', desc: 'echo_floating_casino_desc', trigger: 'echo:floating-casino' },
