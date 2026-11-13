@@ -3264,6 +3264,13 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   echo_tea_ware_desc: '茶凉了，刀没放下。这碗里曾经倒满过谁的话？',
 
   // W-E10（深空孔径 Wave16）：黑砂石碑 / 坠锚飞行员 / 将熄的星骸
+  // Wave18（深渊母题 voidmaw）：深渊合唱 / 锚与解锚 / 暗手（W-E11）
+  echo_void_choir_title: '深渊合唱',
+  echo_void_choir_desc: '深渊偶尔把周遭的风声拼成合唱，转调得像一首人间再也唱不上去的赞美诗。',
+  echo_void_anchor_title: '锚与解锚',
+  echo_void_anchor_desc: '这里的每一下重锚落下去，都像在上水启锚——你站着不动时，它才一步一步活过来。',
+  echo_void_hand_title: '暗手',
+  echo_void_hand_desc: '深渊伸上来的手从来不握紧什么——它只是在等手掌里的温度。',
   echo_grain_obelisk_title: '黑砂石碑',
   echo_grain_obelisk_desc: '太空中只有那块石碑留了下来——它比文明更早，比这块位面还要早。',
   echo_pilot_crash_title: '坠锚飞行员',

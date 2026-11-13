@@ -43,6 +43,7 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-gloom', title: 'ach_echo_gloom_title', desc: 'ach_echo_gloom_desc', check: (s) => (s.echoGloom ?? 0) >= 3 },
   { id: 'echo-radiant', title: 'ach_echo_radiant_title', desc: 'ach_echo_radiant_desc', check: (s) => (s.echoRadiant ?? 0) >= 3 },
   { id: 'echo-voidmaw', title: 'ach_echo_voidmaw_title', desc: 'ach_echo_voidmaw_desc', check: (s) => (s.echoVoidMaw ?? 0) >= 3 },
+  { id: 'echo-voidmaw-6', title: 'ach_echo_voidmaw_title', desc: 'ach_echo_voidmaw_desc', check: (s) => (s.echoVoidMaw ?? 0) >= 6 },
   { id: 'echo-abysssalt', title: 'ach_echo_abysssalt_title', desc: 'ach_echo_abysssalt_desc', check: (s) => (s.echoAbysssalt ?? 0) >= 3 },
   { id: 'echo-original', title: 'ach_echo_original_title', desc: 'ach_echo_original_desc', check: (s) => (s.echoGloom ?? 0) >= 3 && (s.echoRadiant ?? 0) >= 3 && (s.echoVoidMaw ?? 0) >= 3 && (s.echoAbysssalt ?? 0) >= 3 },
   { id: 'echo-homecoming', title: 'ach_echo_homecoming_title', desc: 'ach_echo_homecoming_desc', check: (s) => (s.echoHomecoming ?? 0) >= 3 },

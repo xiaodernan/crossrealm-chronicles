@@ -152,4 +152,9 @@ export const ECHOES = [
   { id: 'echo-grain-obelisk', franchise: FRANCHISE.COSMIC, zone: 'void', title: 'echo_grain_obelisk_title', desc: 'echo_grain_obelisk_desc', trigger: 'echo:grain-obelisk' },
   { id: 'echo-pilot-crash', franchise: FRANCHISE.COSMIC, zone: 'void', title: 'echo_pilot_crash_title', desc: 'echo_pilot_crash_desc', trigger: 'echo:pilot-crash' },
   { id: 'echo-star-derelict', franchise: FRANCHISE.COSMIC, zone: 'void', title: 'echo_star_derelict_title', desc: 'echo_star_derelict_desc', trigger: 'echo:star-derelict' },
+
+  // ── Wave18（voidmaw 深渊母题）：深渊合唱 / 锚与解锚 / 暗手 ──
+  { id: 'echo-void-choir', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_choir_title', desc: 'echo_void_choir_desc', trigger: 'echo:void-choir' },
+  { id: 'echo-void-anchor', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_anchor_title', desc: 'echo_void_anchor_desc', trigger: 'echo:void-anchor' },
+  { id: 'echo-void-hand', franchise: FRANCHISE.VOIDMAW, zone: 'void', title: 'echo_void_hand_title', desc: 'echo_void_hand_desc', trigger: 'echo:void-hand' },
 ];

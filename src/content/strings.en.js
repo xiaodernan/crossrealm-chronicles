@@ -3264,6 +3264,13 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   echo_tea_ware_desc: 'The tea has cooled; the sword is not sheathed. Whose words filled this bowl?',
 
   // W-E10 (Deep Sky Aperture Wave16): Obsidian Obelisk / Broken-Anchor Pilot / Dying Star Hulk
+  // Wave18 (Abyssal Mouth voidmaw): The Choir Below / The Anchor / The Dim Hand (W-E11)
+  echo_void_choir_title: 'The Choir Below',
+  echo_void_choir_desc: 'Now and then the abyss turns the surrounding wind into a choir — the modulation is one no mortal voice can reach.',
+  echo_void_anchor_title: 'The Anchor and Its Unmooring',
+  echo_void_anchor_desc: 'Every heavy anchor that strikes here behaves as if it is surfacing to depart — only when you stand still does it walk itself forward, step by step.',
+  echo_void_hand_title: 'The Dim Hand',
+  echo_void_hand_desc: 'The hand that reaches out of the abyss never closes on anything — it is only waiting for the warmth it is meant to hold.',
   echo_grain_obelisk_title: 'The Obsidian Obelisk',
   echo_grain_obelisk_desc: 'Nothing survived the crossing but the stone pillar — older than the civilization it fell near.',
   echo_pilot_crash_title: 'Broken-Anchor Pilot',
