@@ -85,7 +85,11 @@ Write-Output 'redis state verified (set member + hashed wanderer)'
 $sseOut = Join-Path ([System.IO.Path]::GetTempPath()) 'presence-sse.out'
 Remove-Item $sseOut -ErrorAction SilentlyContinue
 $curlArgs = @('-sN', '--max-time', '8', 'http://127.0.0.1:28088/api/presence/world/stream')
-$sse = Start-Process -FilePath 'curl.exe' -ArgumentList $curlArgs -RedirectStandardOutput $sseOut -PassThru -WindowStyle Hidden
+$curlExe = if (Get-Command curl.exe -ErrorAction SilentlyContinue) { 'curl.exe' }
+           elseif (Get-Command curl -ErrorAction SilentlyContinue -and (Get-Command curl).CommandType -eq 'Application') { 'curl' }
+           else { $null }
+if (-not $curlExe) { Write-Error 'curl not found (CI runner / dev box both ship one)'; exit 1 }
+$sse = Start-Process -FilePath $curlExe -ArgumentList $curlArgs -RedirectStandardOutput $sseOut -PassThru
 Start-Sleep -Milliseconds 800
 
 # eventSource has to receive THIS beat: capture starts with a replayed snapshot, then a fresh present frame
