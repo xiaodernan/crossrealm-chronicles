@@ -95,7 +95,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 - **运维聚合派生 `/api/ops/advisor`（W-Z8）**：game-service 的 Feign（`AiServiceClient`）读 ai-service `/health` + `/jobs/stats`，两格各自 30s TTL 缓存、空 Map 即降级 `available:false`（reason:fallback），本地 try/catch 再保一层——运维视图永不 500。**单独一格，不进 `/api/ops/stats`**：stats 是本实例内存数据、零外呼，advisor 不能让 stats 继承外呼失败模式（与 `/api/ops/season` 同一先例）。前端设置页「星轨诊断」按钮（W-Z8 切片2）按下才拉，一句话显示 model/circuit/calls + depth/inFlight/rejected/deadLettered；行内全程 `textContent`。
 - **结构化访问日志（W-Z9）**：game-service 与 ai-service 各一个 `AccessLogFilter`——一次请求一条 JSON 行 `{ts, app, requestId, method, path（不含 query/body）, status, durationMs}`；`/actuator` 不记；X-Request-Id 原样透出。
 - **前端异步路径（W-Z7 切片B）**：星轨顾问面板的提问走 `OnlineServices.askAdvisorBackground`——提交 → `AbortSignal` 一拍一拍轮询（零裸计时器）到终态；「停止」= 断开轮询 + 发 cancel POST 撤回排队中的任务（LLM 已跑的撤不回，服务端诚实回 already-running）；DEAD 归并入「503 + advisor-unavailable」那格；429 → busy；连续 3 次轮询失败 → NETWORK。
-- **smoke**：§4k（队列背压）/ §4l（X-Request-Id 贯通）/ §4m（/api/ops/advisor）/ §4n（撤回契约）/ §4o（死信白名单无玩家输入）。
+- **smoke**：§4k（队列背压）/ §4l（X-Request-Id 贯通）/ §4m（/api/ops/advisor）/ §4n（撤回契约）/ §4o（死信白名单无玩家输入）/ §4p（`/api/ops/dead-letter` 聚合 + reason 直方图）。
+- **Redis 背板顾问队列门禁（W-Z1 / `verify-redis-advisor-queue.ps1`）**：throwaway redis:7-alpine 上起 ai-service（`AI_SERVICE_JOBS_BACKEND=redis`），无 LLM_API_KEY 时 worker 确定性 not-configured→DEAD；验证提交→claim→DEAD→DLQ→死信白名单端点，且 `ai:advisor:jobs`/`ai:advisor:dlq` 流键真实存在（证明走了 Redis 后端不是内存后端），死信无玩家输入。每次 `server/**` push 都要过。
+- **Redis 背板 rate limiter（`verify-redis-rate-limit.ps1`）/ 赛季缓存（`verify-redis-season-cache.ps1`）**：同一 CI 门禁下两个既有真 Redis 脚本——70 条突发 429 / `/api/seasons/active` 两次相同 + TTL≈300s。
 
 ## 部署
 
