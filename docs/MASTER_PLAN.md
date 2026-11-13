@@ -472,7 +472,7 @@
 
 | 编号 | 工作包 | 状态 | 备注 |
 |------|--------|------|------|
-| W-Z1 | **Redis Streams 跨实例可靠投递** | ✅ 切片1+2 | 2026-11-13 | `6202da4` / `a9c1a24` | `AdvisorQueue` 接口 + 两个实现（`AdvisorJobQueue` 内存默认 / `RedisStreamAdvisorQueue`：XADD/XACK/XREADGROUP + XPENDING 重投 + `ai:advisor:dlq` + SETNX 幂等）；`StreamJobState` 纯判定类钉死重试/死信边界；fail-open 退回内存后端；切片2：`GET /api/ai/jobs/dead-letter?limit=N` 死信只读白名单（{id, requestId, reason, attempts}，零 question/answer/context） |
+| W-Z1 | **Redis Streams 跨实例可靠投递** | ✅ 切片1+2+3 | 2026-11-13 | `6202da4` / `a9c1a24` / `5c92972` | `AdvisorQueue` 接口 + 两个实现（`AdvisorJobQueue` 内存默认 / `RedisStreamAdvisorQueue`：XADD/XACK/XREADGROUP + XPENDING+XCLAIM 重投 + `ai:advisor:dlq` + SETNX 幂等）；`StreamJobState` 纯判定类钉死重试/死信边界；fail-open 退回内存后端。切片2：死信只读白名单。切片3（`5c92972`）：**本机 redis:7-alpine 真机联调通过**——修复 XREADGROUP 精确 ID 永远空集（改 XCLAIM：XAUTOCLAIM 等价）、createGroup 无 MKSTREAM 的静默 no-such-key（哨兵 XADD+XDEL 兜底 + 真异常抛出）、容量测试 capacity hardcode 64+workers=0 悄悄升 1 两处测试/实现 bug；Live 5/5 PASSED |
 | W-Z2 | **帧内算法与硬件适配** | ✅ 切片1 | `SpatialGrid` 均匀网格把分离推力的邻居查询从 O(n²) 全遍历改成 O(邻域桶)；**逐只对拍** 3 组随机 × 200 只 + 密集重叠 + 自定义 pad，推力逐值相等；1000 只均匀分布时候选数 < 全量 10%；`npm run perf` 全部预算内（枢纽 updateAvg 1.52ms / 灰白森林 1.59ms / p95 2.5ms / exceptions=0）。切片2：对象池 / 脏标记 / 帧预算、draw-call 地板 8 格重钉 |
 | W-Z3 | **设计令牌与动效分级** | ✅ 切片1 | `:root` 收敛语义令牌：时长档（--dur-instant→--dur-cinematic 单调）+ 缓动 + 层级（--z-hud→--z-loading）+ 圆角/阴影/间距尺度；末尾新增**全局** reduced-motion 兜底网（`* { animation-duration:0.001ms; iteration:1 }` 让 forwards 动效瞬间到终态 + 档C 纯装饰元素 `animation:none`）；`advisor-enter` 接入 `--ease-out`/`--dur-base`；新增 `tests/design-tokens.test.js`（27 例钉令牌定义 + 全局网存在）。`W-Y7` 的「设计令牌/动效分级」半边由本片覆盖，剩「光效分层/可访问性（色盲档与字号档不被覆盖）」 |
 | W-Z4 | **数据库读写路径** | ✅ 切片1 | 2026-11-12 | `e7d378f` | 先量现有内存仓储复杂度：三个仓的结构/读写复杂度入册；`/api/ops/stats` 读数 O(n log n) 真实热路径判断——当前不上持久层；Redis 化留给 W-Z1 跨实例语境（已落地）；不为了上数据库而上 |
@@ -6659,3 +6659,18 @@ Phase D（系统与质量）
   - **CI 侧证据**：W-Z8 切片3（`3b1317f`）的前端 E2E 首跑因 CI runner「vite ready in 411 ms 但游戏 450 s 没起来」失败；按纪律不赌「flake 就是 flake」——本地连续两次 `npm run e2e` 通关（55s/, 读数帧数 13560 零异常），再 `gh run rerun --failed`，**重跑 18m55s 全绿**。同一树连续三次 e2e：本地 pass / 本地 pass / CI 重跑 pass。CI 首败定性为 runner 环境抖动，非代码。
 
   - **卫生**：六个 e2e 进程按各自端口定位并逐一 `Stop-Process`；端口全部释放；key 从未进入任何文件/提交/日志。
+- **2026-11-13 W-Z1 Redis 实机联调（切片3）——测试从没被真跑过，三处真 bug 只有真 Redis 能抓** —— 提交 `5c92972`
+
+  - **起因**：W-Z1 切片1 落地以来，`RedisStreamAdvisorQueueLiveTest` 只在「没有 Redis」时 skip——本机/CI 从未连上真 Redis，5 个 case 是「假绿」。这一次临时起了 `redis:7-alpine`（port 27937）+ `REDIS_HOST/REDIS_PORT` 环境变量跑了一遍，**三处真 bug 当场现形**：
+
+  - **bug①：崩溃重投路径 XREADGROUP 永远返回空**。`claimOne()` 处理 pending 条目时用 `StreamOffset.create(streamKey, ReadOffset.from(pm.getIdAsString()))` 重读精确 ID——但 XREADGROUP 的 stream-id 参数是「更大 than 此 id」的游标语义，**精确 ID 永远返回空**。所以任务一旦被 worker 取走但还没 ACK，无论怎么重试都是空队列——`瞬态失败`、`重试耗尽进死信`两条测试在真 Redis 下卡死在 QUEUED，「崩溃重投」整个能力是虚的。修复：pending 列表改用 group-wide `Range.unbounded()` 查询，按 id 逐条发 `XCLAIM`（XAUTOCLAIM 在这版 Spring Data 里没有封装，XCLAIM 逐包代之），`XClaimOptions.minIdle(pollAfterMs).ids(…)`。重投后 entries 被认领到当前 consumer——这是跨实例抢救崩溃实例 pending 的正解。
+
+  - **bug②：`no such key` 被静默吞掉**。原 `start()` 在 `createGroup` 上 `catch (RuntimeException ignore)`，没有可用 Redis 版本会在流不存在时抛——于是组从没建起来，worker 一直在读空气。修复：`ensureGroup()` 先入哨兵条目再 `XDEL` 清除（Spring 本版 createGroup 无 MKSTREAM），BUSYGROUP 幂等忽略、其余异常**原样抛出**。worker 循环再加上 `try/catch + 200 ms backoff + log.warn`——原本根本不可见的异常从死灰复燃。
+
+  - **bug③：容量测试从未真正测过容量**。`props(64, …)` 把 capacity 硬编码成 64 —「容量 2、第 3 条 429 拒绝」的注释就是谎话；而且 `Math.max(1, props.getWorkers())` 把 workers=0 悄悄升为 1（就算有真 Redis 也会被消耗掉，「不入队处理，专门卡容量」是句空话）。修复：helper 增加 capacity 形参，本 case 明确传 `2`；workers=0 改为合法态（`Math.max(0,…)`）；断言 `attempts` 比对类型修正为 `Long`。
+
+  - **真闭环证据**（redis:7-alpine @ 27937）：提交后 worker 取走 → DONE + answer ✓ /  transient fail 2 次 → XCLAIM idle ≥ 150 ms 重投 → attempts 跨投递累加 1→2→3 → DONE ✓ / 永远失败 → DLQ → DEAD + `stats.deadLettered >= 1` ✓ / 容量 2、0 worker：第 3 条明确 429 ✓ / 同 requestId 幂等去重 ✓。**5/5 全绿**。
+
+  - **判据**：没有 Redis 的地方，「单测全绿」里混着 PG rspec 假绿——等不到 Redis 就等不到好结果。这片提示 Redis 场景**必须在本地做一次实机试飞**；CI 可在不影响现有 suite 的前提下增设 `redis:7-alpine` 服务容器以避免再次退回假绿——列为后续片。
+
+  - **风险与后续**：① 重投抢 pending 的 idle 阈值复用了 `pollAfterMs` 的语义——生产环境若 worker 间抢 pending 频率高，idle 过小会放大重复出队，保守值 2×pollAfterMs 待议；② `ensureGroup()` 的哨兵机制是「createGroup 无 MKSTREAM」的 workaround——未来 Spring Data 出 MKSTREAM 变体可拿本片做对比测试直接替换；③ DLQ 的 trim 仍未做（见 W-Z1 切片2）。
