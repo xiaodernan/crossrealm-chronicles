@@ -99,8 +99,12 @@ class RedisStreamAdvisorQueueLiveTest {
     }
 
     private RedisStreamAdvisorQueue 起队列(AdvisorJobQueue.Handler h, int workers, int maxAttempts, long pollAfterMs) {
+        return 起队列(h, workers, maxAttempts, pollAfterMs, 64);
+    }
+
+    private RedisStreamAdvisorQueue 起队列(AdvisorJobQueue.Handler h, int workers, int maxAttempts, long pollAfterMs, int capacity) {
         RedisStreamAdvisorQueue q = new RedisStreamAdvisorQueue(
-                props(64, workers, maxAttempts, pollAfterMs), h, Thread::sleep, redis);
+                props(capacity, workers, maxAttempts, pollAfterMs), h, Thread::sleep, redis);
         q.start();
         return q;
     }
@@ -138,7 +142,7 @@ class RedisStreamAdvisorQueueLiveTest {
             var r = q.submit("retry-me", Map.of(), null);
             Map<String, Object> v = 轮询到终态(q, r.jobId(), 6000);
             assertEquals("DONE", v.get("status"));
-            assertEquals(3, v.get("attempts"), "两次失败 + 一次成功，attempts 必须累计到 3（XREADGROUP+XAUTOCLAIM 同一条）");
+            assertEquals(3L, v.get("attempts"), "两次失败 + 一次成功，attempts 必须累计到 3（XREADGROUP + XCLAIM 同一个）");
         }
     }
 
@@ -170,7 +174,7 @@ class RedisStreamAdvisorQueueLiveTest {
     void 容量满明确拒绝_不静默丢() {
         ScriptedHandler h = new ScriptedHandler(0);
         // 容量 2、0 个 worker（不入队处理，专门卡容量）：提交 3 条，第 3 条应被拒。
-        try (var q = 起队列(h, 0, 3, 200)) {
+        try (var q = 起队列(h, 0, 3, 200, 2)) {
             q.submit("a", Map.of(), null);
             q.submit("b", Map.of(), null);
             var c = q.submit("c", Map.of(), null);

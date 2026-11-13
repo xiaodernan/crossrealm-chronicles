@@ -14,11 +14,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.Limit;
+import org.springframework.data.redis.connection.RedisStreamCommands.XClaimOptions;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.PendingMessage;
 import org.springframework.data.redis.connection.stream.ReadOffset;
+import org.springframework.data.redis.connection.stream.RecordId;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -47,6 +52,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  * 在 idle 后被另一消费者认领重投）。
  */
 public class RedisStreamAdvisorQueue implements AdvisorQueue, AutoCloseable {
+
+    private static final Logger log = LoggerFactory.getLogger(RedisStreamAdvisorQueue.class);
 
     private final AdvisorJobProperties props;
     private final AdvisorJobQueue.Handler handler;
@@ -84,17 +91,60 @@ public class RedisStreamAdvisorQueue implements AdvisorQueue, AutoCloseable {
 
     @PostConstruct
     public void start() {
-        try {
-            redis.opsForStream().createGroup(streamKey, group);
-        } catch (RuntimeException ignore) {
-            // BUSYGROUP：组已存在，幂等忽略。
-        }
-        int n = Math.max(1, props.getWorkers());
+        ensureGroup();
+
+        int n = Math.max(0, props.getWorkers());
         for (int i = 0; i < n; i++) {
             Thread t = new Thread(this::workerLoop, "redis-advisor-worker-" + i);
             t.setDaemon(true);
             workers.add(t);
             t.start();
+        }
+    }
+
+    /**
+     * 本版本 Spring Data Redis 的 createGroup **没有 MKSTREAM**：流还不存在时就执行，
+     * 会报 no such key —— 而这类异常原本被静默吞掉（catch ignore），worker 从此读个寂寞，
+     * 任务永远停留 QUEUED。先造一枚哨兵条目把流建起来（建完立即 XDEL 清掉），
+     * 再建组——BUSYGROUP 幂等忽略（组已存在即成功）；其余失败原样抛出——
+     * 组建不起来时队列不该默默开工。
+     */
+    private void ensureGroup() {
+        if (tryCreateGroup()) {
+            return;
+        }
+        RecordId sentinel = null;
+        try {
+            sentinel = redis.opsForStream().add(streamKey, Map.of("__sentinel__", "1"));
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("无法创建工作流 " + streamKey + "：" + e.getMessage(), e);
+        }
+        if (sentinel != null) {
+            try {
+                redis.opsForStream().delete(streamKey, sentinel);
+            } catch (RuntimeException ignored) {
+                // 哨兵清理失败不影响建组（XGROUP CREATE 认的是键存在，条目内容无所谓）
+            }
+        }
+        tryCreateGroup();
+    }
+
+    /** @return true = 组已存在（或本次建成）；false = 流不存在，需要先造哨兵；其余异常直接抛出 */
+    private boolean tryCreateGroup() {
+        try {
+            // 新建组从流的最早条目开始投递（0-0）——崩溃期间堆积的消息不应被跳过；
+            // ReadOffset.latest()($）会丢掉堆积消息；组已存在时 BUSYGROUP 幂等忽略
+            redis.opsForStream().createGroup(streamKey, ReadOffset.from("0-0"), group);
+            return true;
+        } catch (RuntimeException e) {
+            String msg = e.getMessage() == null ? "" : e.getMessage();
+            if (msg.contains("BUSYGROUP")) {
+                return true;
+            }
+            if (msg.contains("no such key")) {
+                return false;
+            }
+            throw e;
         }
     }
 
@@ -114,7 +164,19 @@ public class RedisStreamAdvisorQueue implements AdvisorQueue, AutoCloseable {
 
     private void workerLoop() {
         while (running.get()) {
-            MapRecord<String, Object, Object> rec = claimOne();
+            MapRecord<String, Object, Object> rec = null;
+            try {
+                rec = claimOne();
+            } catch (RuntimeException e) {
+                log.warn("worker {}: claimOne 抛出（NOGROUP?），下一轮重试：{}", consumer, e.getMessage());
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                continue;
+            }
             if (rec == null) continue;
             try {
                 process(rec);
@@ -125,7 +187,7 @@ public class RedisStreamAdvisorQueue implements AdvisorQueue, AutoCloseable {
         }
     }
 
-    /** 先取从未投递的新条目（>），没有再按 idle 捞 pending（崩溃重投的等价实现）。 */
+    /** 先取从未投递的新条目（>），没有再认领 idle 足够的 pending（崩溃重投：XCLAIM ≈ XAUTOCLAIM）。 */
     @SuppressWarnings("unchecked")
     private MapRecord<String, Object, Object> claimOne() {
         List<MapRecord<String, Object, Object>> fresh = redis.opsForStream().read(
@@ -134,21 +196,29 @@ public class RedisStreamAdvisorQueue implements AdvisorQueue, AutoCloseable {
                 StreamOffset.create(streamKey, ReadOffset.lastConsumed()));
         if (fresh != null && !fresh.isEmpty()) return fresh.get(0);
 
-        var pending = redis.opsForStream().pending(
-                streamKey, Consumer.from(group, consumer), Range.unbounded(), 16L);
-        if (pending != null) {
-            for (int i = 0; i < pending.size(); i++) {
-                var pm = pending.get(i);
-                Duration idle = pm.getElapsedTimeSinceLastDelivery();
-                if (idle != null && idle.toMillis() >= props.getPollAfterMs()) {
-                    List<MapRecord<String, Object, Object>> reclaimed = redis.opsForStream().read(
-                            Consumer.from(group, consumer),
-                            StreamReadOptions.empty().count(1),
-                            StreamOffset.create(streamKey, ReadOffset.from(pm.getIdAsString())));
-                    if (reclaimed != null && !reclaimed.isEmpty()) return reclaimed.get(0);
-                }
+        // group-wide pending：pendingClaim 会把认领到的条目归给 newOwner（XAUTOCLAIM 的包装缺失，
+        // XCLAIM 逐条代之——等价语义：任何一个存活的实例都能领回崩溃实例的 pending）
+        var pending = redis.opsForStream().pending(streamKey, group, Range.unbounded(), 16L);
+        if (pending.isEmpty()) {
+            return null;
+        }
+        // idle 足够的 pending 逐条 XCLAIM——这是 Redis 里"每条消费者拿回自己未 ACK 的消息"的正解
+        // （不走 ReadOffset.from(id) 那条路：它是 cursor 语义，精确 ID 永远返回空，重试队列会卡死）
+        List<String> claimable = new ArrayList<>();
+        for (PendingMessage pm : pending) {
+            Duration idle = pm.getElapsedTimeSinceLastDelivery();
+            if (idle != null && idle.toMillis() >= props.getPollAfterMs()) {
+                claimable.add(pm.getIdAsString());
             }
         }
+        if (claimable.isEmpty()) {
+            return null;
+        }
+        List<MapRecord<String, Object, Object>> claimed = redis.opsForStream().claim(
+                streamKey, group, consumer,
+                XClaimOptions.minIdle(Duration.ofMillis(props.getPollAfterMs()))
+                        .ids(claimable.toArray(new String[0])));
+        if (claimed != null && !claimed.isEmpty()) return claimed.get(0);
         return null;
     }
 
