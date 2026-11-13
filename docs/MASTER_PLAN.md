@@ -7131,3 +7131,17 @@ Phase D（系统与质量）
   - **风险**：① **心跳即生命**——presence 没有「历史」，TTL 外一格即消失；任何要求「在线时长」的可视化都不能建在它上面（那该走 game-service 遥测）。② SSE 客户端量大的话 `maxWanderersPerChannel` 与网关连接数一起考虑（当前 500/频道，网关对文件描述符/直接缓冲区友好度由 webflux 兜底）。③ 单频道上限的「满」是 429 语义，与限流一样要监控（后续可暴露 `/api/ops/presence`，如 `OpsController` 聚合）。④ eureka `lb://` 首次拉取后客户端缓存有 30s 暖场窗口——docker-compose 用健康检查割断启动顺序规避，不要在前端狠刷 count。⑤ **presence-service 是无密钥进程**（不调上游 LLM），不需要 `LLM_API_KEY`；docker-compose 里只注入 Eureka/Config 变量。
 
   - **后续**：① 客户端 `src/online/` 侧的 presence 读数 UI（沿用 `crossrealm_online` 开关、FAB 旁一枚「在线 N 人」金点，EventSource 自动重连）——需与 AdvisorPanel 同一门禁口径（textContent-only + 离线不可见）；② `/api/ops/presence` 聚合（如 `OpsController` 风格，`ZCARD`/memberCount/SSE 活跃连接数，白名单不外泄）；③ 网关 `GatewayMetricsFilter` 的 routeId 自动覆盖 `/api/presence/**`（现状：限额统计走全局路径，可交给输出侧）；④ 前端 FullArt 热区：游侠光点在 WorldMap 星盘上浮动（需接 `world.js` 的 SSE 通道，属于「在线可选层」统一波次）。
+- **2026-11-14 W-Z25「在场微光」——设置页在场人数（presence-service 前端对接件）** —— 提交：本次 HEAD
+
+  - **起因**：W-Z24 把并轨侧的 presence-service 续建到可合入（`:8084`，`POST /api/presence/{channel}/beat` / `GET .../count` / SSE 实时 fanout），但前端没人喊它——这一格的价值只能由「在线服务」门后面那群人看到。W-Z25 把它接到现有入口里（不新开面板）。
+
+  - **做法**：沿用 W-X7/W-X10/W-Z8 的同一门禁口径（默认关闭、按钮按下才拉、结果行 `textContent`/绝非 innerHTML、吞错不阻塞面板）：
+    · `src/online/OnlineServices.js` 新增 `fetchPresenceCount(channel='world')`：未启用直接 null；**channel 白名单与服务端逐字同源**（`^[A-Za-z0-9_-]{1,32}$`，非法零外呼）；非 2xx/异常/超时/脏数据 → null；**严格要求 JSON number ≥ 0 才认**（`null`/字符串不当合法值），小数 floor。
+    · `index.html`：在线服务区加 `#set-online-presence` + `#set-online-presence-result`（跟 ping/diag 同一格风格）。
+    · `SettingsPanel.js`：监听器——`!enabled()` 吐 `settings_online_lb_unavailable` 兜底（不另立文案表），否则 `data ? t('settings_online_presence_fmt', { count }) : t('settings_online_lb_unavailable')`。
+    · 双表 +2 键（`settings_online_presence_btn` / `settings_online_presence_fmt`），`EXPECTED_KEY_COUNT` 3062 → **3064**；`_fmt` 后缀使用本仓库 `${count}` 模板语法（i18n 插值不走裸 `{name}`——那是键位动作的专用形）。
+    · `tests/online-presence.test.js`：12 例门禁（enabled-false 零外呼 / 白名单零外呼（含 `null`、`42`、`中文`、超长 33、注入）/ undefined 默认参数别名语义 pin / 200 原样 / 脏 count / 小数 floor / 非 2xx json 不解析 / 抛错吞掉 / index.html+panel 接线结构 / zh/en 键 / textContent-only）。
+
+  - **判据**：`npm test` **6580 例全绿**（+12）；`npm run lint` 0；`npm run build` ✓；SSE 链路的端到端实证由后端 W-Z24 smoke 覆盖；前端本格只读 count（无需 EventSource，FAB 角标/「世界星盘游侠光点」属下一波 I2C 在线可选层统一波次）。
+
+  - **后续**：① 在线可选层统一整合——crossrealm_online 开启后 AdvisorPanel 角标旁边加「{count} 在场」微光徽章（EventSource + 断连自动静默）；② on-FullArt 星盘 SSE 游侠光点（x/z 归一坐标直接在 WorldMap canvas 上作光点）；③ `/api/ops/presence` 聚合进运维页（count/在场上限/SSE 活跃连接数），对照 leaderboard 的 `ZCARD` 口径。

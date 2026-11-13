@@ -467,6 +467,32 @@ export class OnlineServices {
    * 失败/未启用/超时 → null。**不做语义校验**：id 认不认识由 `SeasonSystem` 判 ——
    * 这一层的职责只是"把服务端说的话原样带回来"，校验放在知道名册的那一层。
    */
+  /**
+   * 在场人数（W-Z25）——`GET /api/presence/{channel}/count`，在场服务（presence-service，W-Z-同游）供的数
+   *
+   * 返回 `{ channel, count }`；未启用 / 失败 / 超时 / 非 2xx → null（吞掉，不向上抛）。
+   * channel 与服务端同一白名单（`^[A-Za-z0-9_-]{1,32}$`），不符直接 null（零外呼）。
+   * 这一格是给设置页「在场人数」按钮的——读不到就一句兜底提示，不让孩子们因为没在线而烦恼
+   */
+  async fetchPresenceCount(channel = 'world') {
+    if (!this._enabled) return null;
+    if (typeof channel !== 'string' || !/^[A-Za-z0-9_-]{1,32}$/.test(channel)) return null;
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/presence/${channel}/count`, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const count = data?.count;
+      // 严格要 JSON number：字符串/null 不当合法值回，脏数据直接 null
+      if (typeof count !== 'number' || !Number.isFinite(count) || count < 0) return null;
+      return { channel, count: Math.floor(count) };
+    } catch (e) {
+      console.warn('[online] 拉取在场人数失败（已吞掉）', e?.message ?? e);
+      return null;
+    }
+  }
+
   async fetchActiveSeason() {
     if (!this._enabled) return null;
     try {

@@ -116,6 +116,8 @@ export const STRINGS_EN = Object.freeze({
   settings_online_lb_btn: 'Refresh leaderboard',
   settings_online_lb_unavailable: 'Leaderboard unavailable: online service is off or the gateway is unreachable',
   settings_online_lb_empty: 'The leaderboard is empty',
+  settings_online_presence_btn: 'Count wanderers here',
+  settings_online_presence_fmt: '${count} wanderer(s) present',
   settings_online_ping: 'Ping online service',
   settings_online_ping_ok: 'Online service alive · ${service} · ${version} · ${note}',
   settings_online_ping_fail: 'Online service unreachable (check the gateway is up / the toggle is on)',

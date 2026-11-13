@@ -118,6 +118,8 @@ export const STRINGS_ZH = Object.freeze({
   settings_online_lb_btn: '刷新排行榜',
   settings_online_lb_unavailable: '拉不到排行榜：在线服务未开启或网关连不上',
   settings_online_lb_empty: '排行榜还是空的',
+  settings_online_presence_btn: '查看在场人数',
+  settings_online_presence_fmt: '在场 ${count} 人',
   settings_online_ping: '在线服务连通性自检',
   settings_online_ping_ok: '在线服务活着 · ${service} · ${version} · ${note}',
   settings_online_ping_fail: '在线服务暂不可用（检查网关在跑 / 开关已开）',

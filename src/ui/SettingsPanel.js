@@ -379,6 +379,20 @@ export class SettingsPanel {
     // 若「死信有多少、高频哪一类」拉得到，捎一句进同一行——排障只需要这一格。
     // 服务端数据当不可信 —— 行内文本只走 textContent（绝不 innerHTML），字段逐个 ?? 兜底。
     // 两格（health / jobs）各自独立可用——缺哪格就别叫整格消失：报"另一半还是好的"对运维没用，诚实报"拉不全"。
+    // 在场人数（W-Z25）：只读；按钮按下才拉一次 /api/presence/world/count；
+    // 读不到就一句兜底（同游服务没开 / 网关连不上），不阻塞面板其余格
+    const presenceBtn = document.getElementById('set-online-presence');
+    if (presenceBtn) {
+      presenceBtn.addEventListener('click', async () => {
+        const out = document.getElementById('set-online-presence-result');
+        if (!out) return;
+        if (!onlineServices.enabled()) { out.textContent = t('settings_online_lb_unavailable'); return; }
+        const data = await onlineServices.fetchPresenceCount();
+        out.textContent = data
+          ? t('settings_online_presence_fmt', { count: data.count })
+          : t('settings_online_lb_unavailable');
+      });
+    }
     const diagBtn = document.getElementById('set-online-diag');
     if (diagBtn) {
       diagBtn.addEventListener('click', async () => {

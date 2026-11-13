@@ -165,6 +165,9 @@
         <!-- 星轨诊断（W-Z8 切片2）：只读 /api/ops/advisor —— 顾问服务健康 + 队列背压一句话；服务端数据不可信，结果行内 textContent 写 -->
         <button id="set-online-diag" type="button" data-i18n="settings_online_diag_btn">星轨诊断（顾问 · 队列）</button>
         <p id="set-online-diag-result" class="setting-hint"></p>
+        <!-- 在场人数（W-Z25）：只读；按钮按下才拉一次 /api/presence/world/count；通道白名单只字不改 -->
+        <button id="set-online-presence" type="button" data-i18n="settings_online_presence_btn">查看在场人数</button>
+        <p id="set-online-presence-result" class="setting-hint"></p>
         <button id="settings-close" data-i18n="common_close">关闭</button>
       </div>
     </div>
