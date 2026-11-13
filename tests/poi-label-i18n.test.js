@@ -117,7 +117,7 @@ const POI_LABELS = {
   'homage-neon-mall': ['echo_neon_mall_title', '霓虹商场残影', 'Neon Mall Afterimage'],
   'homage-rift-hound': ['echo_rift_hound_title', '裂隙猎犬足迹', 'Rift Hound Tracks'],
   'fantasy-ring-echo': ['pop_poi_fantasy_ring_echo_label', '至尊石环（回声）', 'One Ring (Echo)'],
-  'hub-poster-wall': ['echo_poster_wall_title', '位面海报墙', 'Plane Poster Wall'],
+  'hub-poster-wall': ['echo_poster_wall_title', '残壁六画', 'The Six Faded Scenes'],
   'homage-nine-platform': ['echo_nine_platform_title', '九又四分之三站台', 'Platform Nine and Three-Quarters'],
   'homage-patronus-lake': ['echo_patronus_lake_title', '护念湖镜', 'Patronus Lake'],
   'homage-triwizard-cup': ['echo_triwizard_title', '三强赛台', 'Triwizard Stands'],

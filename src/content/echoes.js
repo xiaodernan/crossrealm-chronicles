@@ -114,8 +114,14 @@ export const ECHOES = [
   // ── Wave8（薄暮巡礼 / 辉煌巡礼）──
   { id: 'echo-gloom-lanterns', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_lanterns_title', desc: 'echo_gloom_lanterns_desc', trigger: 'echo:gloom-lanterns' },
   { id: 'echo-gloom-wishing-tree', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_wishing_tree_title', desc: 'echo_gloom_wishing_tree_desc', trigger: 'echo:gloom-wishing-tree' },
+  { id: 'echo-gloom-mossroot', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_mossroot_title', desc: 'echo_gloom_mossroot_desc', trigger: 'echo:gloom-nine-stones' },
+  { id: 'echo-gloom-lamproad', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_lamproad_title', desc: 'echo_gloom_lamproad_desc', trigger: 'echo:gloom-lanterns' },
+  { id: 'echo-gloom-newknot', franchise: FRANCHISE.GLOOM, zone: 'gloom', title: 'echo_gloom_newknot_title', desc: 'echo_gloom_newknot_desc', trigger: 'echo:gloom-wishing-tree' },
   { id: 'echo-radiant-banner', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_banner_title', desc: 'echo_radiant_banner_desc', trigger: 'echo:radiant-banner' },
   { id: 'echo-radiant-orb', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_orb_title', desc: 'echo_radiant_orb_desc', trigger: 'echo:radiant-orb' },
+  { id: 'echo-radiant-mirrorpool', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_mirrorpool_title', desc: 'echo_radiant_mirrorpool_desc', trigger: 'echo:radiant-torii' },
+  { id: 'echo-radiant-bannermender', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_bannermender_title', desc: 'echo_radiant_bannermender_desc', trigger: 'echo:radiant-banner' },
+  { id: 'echo-radiant-bellfounder', franchise: FRANCHISE.RADIANT, zone: 'radiant', title: 'echo_radiant_bellfounder_title', desc: 'echo_radiant_bellfounder_desc', trigger: 'echo:radiant-orb' },
 
   // ── Wave11（返乡 / 归航）──
   { id: 'echo-homecoming-cairn', franchise: FRANCHISE.HOMECOMING, zone: 'gloom', title: 'echo_homecoming_cairn_title', desc: 'echo_homecoming_cairn_desc', trigger: 'echo:homecoming-cairn' },
