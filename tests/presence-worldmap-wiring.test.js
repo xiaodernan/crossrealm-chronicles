@@ -31,16 +31,29 @@ describe('wanderers() 公共口径', () => {
 describe('WorldMapPanel 星尘层画法', () => {
   it('不画自身游侠（地图白点已代表玩家）', () => {
     expect(PANEL).toContain('resolvePresenceId');
-    expect(PANEL).toContain('if (w.id === ownId) continue');
+    expect(PANEL).toContain('if (wanderer.id === ownId) continue');
   });
 
   it('游侠只落在已探索区域（isRevealed 门槛）', () => {
-    expect(PANEL).toMatch(/for \(const w of presenceTracker\.wanderers\(\)\)[\s\S]{0,500}isRevealed\(wx, wz\)/);
+    expect(PANEL).toMatch(/for \(const wanderer of presenceTracker\.wanderers\(\)\)[\s\S]{0,500}isRevealed\(wx, wz\)/);
   });
 
   it('使用 NORMALIZED_WORLD_EXTENT 反推世界坐标（不另抄 900）', () => {
     expect(PANEL).toContain('NORMALIZED_WORLD_EXTENT');
     expect(PANEL).not.toMatch(/w\.x \* 900\b/);
+  });
+});
+
+describe('Canvas 缓存（W-Z32 · 雾/POI = 一次性）', () => {
+  it('draw() 引用 this._staticCanvas 和 drawImage，不再逐帧全重绘', () => {
+    expect(PANEL).toContain('this._staticCanvas');
+    expect(PANEL).toContain('ctx.drawImage(');
+    expect(PANEL).toContain('_drawStaticLayers(');
+    expect(PANEL).toMatch(/this\._staticCanvas = built|this\._staticCanvas = off/);
+  });
+
+  it('show() 标脏 _staticDirty（开关面板触发一次重建）', () => {
+    expect(PANEL).toContain('this._staticDirty = true;');
   });
 });
 

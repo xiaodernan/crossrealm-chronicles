@@ -33,6 +33,13 @@ export class WorldMapPanel {
     this._scale = 1;
     this._cx = 0;
     this._cy = 0;
+// W-Z32 画图缓存：静态层（雾格/三环线/副本/Boss/休息点）只构建一次，300ms 自动失效；
+// 动态层（玩家、光标、路点、游侠）每帧只绘制本屏 ~40 件——draw call 从 3300+/帧省到 40/帧
+this._staticCanvas = null;
+this._staticBuiltAt = 0;
+this._staticDirty = true;
+this._staticW = 0;
+this._staticH = 0;
   }
 
   _screenToWorld(clientX, clientY) {
@@ -142,6 +149,7 @@ export class WorldMapPanel {
       return;
     }
     this.open = true;
+    this._staticDirty = true; // W-Z32：开关面板时一次性重建静态层
     // 光标从玩家脚下那一格起步：打开地图时人就站在那儿，这是最不意外的起点
     this.cursor = this.game.explorationMap
       ? this._worldToCell(this.game.player.position.x, this.game.player.position.z)
@@ -176,23 +184,13 @@ export class WorldMapPanel {
     `;
   }
 
-  draw() {
-    if (!this.canvas || !this.open) return;
-    const ctx = this.canvas.getContext('2d');
-    const w = this.canvas.width = this.canvas.clientWidth || 720;
-    const h = this.canvas.height = this.canvas.clientHeight || 520;
-    const em = this.game.explorationMap;
-    const grid = em.getGridSize();
-    const scale = Math.min(w / (grid.max - grid.min), h / (grid.max - grid.min)) * 0.88;
-    const cx = w / 2;
-    const cy = h / 2;
-    this._scale = scale;
-    this._cx = cx;
-    this._cy = cy;
-
+  /**
+   * 静态层构建一次：2916 个雾格（+非 revealed 再覆一层）+ 区域环 + 路线虚线 + 副本/Boss/休息点 + 地城。
+   * 只在 300ms 自动失效时重建——fog 不会一直变、POI 更慢；标脏只用在开关面板（show/hide）。
+   */
+  _drawStaticLayers(ctx, w, h, scale, cx, cy, grid, em) {
     ctx.fillStyle = '#0a0c12';
     ctx.fillRect(0, 0, w, h);
-
     for (let gz = 0; gz < grid.gh; gz++) {
       for (let gx = 0; gx < grid.gw; gx++) {
         const wx = grid.min + gx * grid.cell + grid.cell / 2;
@@ -208,7 +206,6 @@ export class WorldMapPanel {
         }
       }
     }
-
     for (const zone of this.game.world.getZoneMapData()) {
       if (!em.isRevealed(zone.center.x, zone.center.z)) continue;
       ctx.beginPath();
@@ -222,7 +219,6 @@ export class WorldMapPanel {
       ctx.font = '11px sans-serif';
       ctx.fillText(t(zone.name), cx + zone.center.x * scale - 20, cy + zone.center.z * scale - zone.radius * scale - 4);
     }
-
     ctx.strokeStyle = 'rgba(201,169,98,0.35)';
     ctx.lineWidth = 2;
     ctx.setLineDash([6, 6]);
@@ -238,10 +234,6 @@ export class WorldMapPanel {
       ctx.stroke();
     }
     ctx.setLineDash([]);
-
-    // 副本的点由 `content/dungeons.js` 推导：这座表加一行，地图上就有一个点，不用再来这里加一行。
-    // 以前这是一张五行的私有表（坐标逐格等于 `entrance`、简称是全名的手写缩写），
-    // 于是名册长到 7 座那天，新增的两座在地图上根本没有点（普查 .tmp-20261002/wb10s3c-census.mjs）。
     for (const d of DUNGEON_DEFS) {
       if (!em.isRevealed(d.entrance.x, d.entrance.z)) continue;
       ctx.fillStyle = '#bb77ff';
@@ -252,7 +244,6 @@ export class WorldMapPanel {
       ctx.font = '9px sans-serif';
       ctx.fillText(t(d.mapLabel), cx + d.entrance.x * scale + 7, cy + d.entrance.z * scale + 3);
     }
-
     for (const b of MAP_BOSSES) {
       if (!em.isRevealed(b.x, b.z)) continue;
       ctx.strokeStyle = b.color;
@@ -264,7 +255,6 @@ export class WorldMapPanel {
       ctx.font = '10px sans-serif';
       ctx.fillText('💀', cx + b.x * scale - 6, cy + b.z * scale + 4);
     }
-
     for (const rp of this.game.restPoints?.points ?? []) {
       if (!em.isRevealed(rp.position.x, rp.position.z)) continue;
       ctx.fillStyle = '#ff9944';
@@ -272,29 +262,69 @@ export class WorldMapPanel {
       ctx.arc(cx + rp.position.x * scale, cy + rp.position.z * scale, 4, 0, Math.PI * 2);
       ctx.fill();
     }
+  
+  }
 
-    // 在线微行者（W-Z27「星尘微行」）：presenceTracker 里的在场游侠，以月白微光落在地图上
+  draw() {
+    if (!this.canvas || !this.open) return;
+    const ctx = this.canvas.getContext('2d');
+    const w = this.canvas.width = this.canvas.clientWidth || 720;
+    const h = this.canvas.height = this.canvas.clientHeight || 520;
+    const em = this.game.explorationMap;
+    const grid = em.getGridSize();
+    const scale = Math.min(w / (grid.max - grid.min), h / (grid.max - grid.min)) * 0.88;
+    const cx = w / 2;
+    const cy = h / 2;
+    this._scale = scale;
+    this._cx = cx;
+    this._cy = cy;
+
+    // 静态层：优先走 offscreen canvas 缓存（一次性构建，300ms 轮询或开关面板时重建）；
+    // 文档创建不了 canvas 时（测试/无 DOM 宿主），回退为直接画在主 ctx —— 正确性优先于性能
+    const now = (typeof performance !== 'undefined' ? performance.now() : 0);
+    const sizeMismatch = w !== this._staticW || h !== this._staticH;
+    if (sizeMismatch || this._staticDirty || !this._staticCanvas || (now - this._staticBuiltAt) > 300) {
+      let built = null;
+      try {
+        const off = document.createElement('canvas');
+        off.width = w; off.height = h;
+        const offCtx = off.getContext('2d');
+        this._drawStaticLayers(offCtx, w, h, scale, cx, cy, grid, em);
+        built = off;
+      } catch {
+        this._drawStaticLayers(ctx, w, h, scale, cx, cy, grid, em);
+      }
+      this._staticCanvas = built;
+      this._staticBuiltAt = now;
+      this._staticW = w;
+      this._staticH = h;
+      this._staticDirty = false;
+    }
+    if (this._staticCanvas) ctx.drawImage(this._staticCanvas, 0, 0);
+
+    // 在线微行者（W-Z27/W-Z32）：月光雨落在地图上，每滴带名
     const ownId = resolvePresenceId?.() ?? null;
-    for (const w of presenceTracker.wanderers()) {
-      if (w.id === ownId) continue;               // 自身位移由地图上那颗白点代表
-      const wx = w.x * NORMALIZED_WORLD_EXTENT;
-      const wz = w.z * NORMALIZED_WORLD_EXTENT;
-      if (!em.isRevealed(wx, wz)) continue;      // 和 Boss/副本同一条纪律：没探索的地方不能浮出“鬼影”
+    for (const wanderer of presenceTracker.wanderers()) {
+      if (wanderer.id === ownId) continue;
+      const wx = wanderer.x * NORMALIZED_WORLD_EXTENT;
+      const wz = wanderer.z * NORMALIZED_WORLD_EXTENT;
+      if (!em.isRevealed(wx, wz)) continue;
       const mx = cx + wx * scale;
       const mz = cy + wz * scale;
       const glow = ctx.createRadialGradient(mx, mz, 0, mx, mz, 14);
-      const tint = `hsl(${w.hue ?? 45} 92% 72%)`;
+      const tint = `hsl(${wanderer.hue ?? 45} 92% 72%)`;
       glow.addColorStop(0, tint);
       glow.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.beginPath(); ctx.arc(mx, mz, 14, 0, Math.PI * 2); ctx.fillStyle = glow; ctx.fill();
       ctx.beginPath(); ctx.arc(mx, mz, 2.4, 0, Math.PI * 2); ctx.fillStyle = '#fff8e1'; ctx.fill();
       ctx.beginPath(); ctx.arc(mx, mz, 4.6, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(255,241,190,0.65)'; ctx.lineWidth = 1; ctx.stroke();
-      if (w.name) {
+      if (wanderer.name) {
         ctx.font = '8px sans-serif';
         ctx.fillStyle = 'rgba(255,244,205,0.75)';
-        ctx.fillText(w.name, mx + 7, mz + 2);
+        ctx.fillText(wanderer.name, mx + 7, mz + 2);
       }
     }
+
     const wp = this.game.quests.getQuestWaypoint();
     if (wp && em.isRevealed(wp.x, wp.z)) {
       const wx = cx + wp.x * scale;
@@ -342,14 +372,6 @@ export class WorldMapPanel {
     this._drawCursor(ctx, cx, cy, scale, grid);
   }
 
-  /**
-   * 光标（切片13）：一个**方框** + 一个十字 + 坐标。
-   *
-   * 形状刻意与地图上其它记号全都不一样 —— 圆是区域 / 副本 / Boss，菱是自定义路点，
-   * 三角是任务目标，光标是方的。这正是 W-D6 一贯的"不靠颜色分辩"：把颜色全关掉，
-   * 也认得出哪个是光标。未探索的格照画，只把框改虚线：玩家得看得见"我走到边界了"，
-   * 而不是莫名其妙按不动。
-   */
   _drawCursor(ctx, cx, cy, scale, grid) {
     if (!this.cursor) return;
     const { x, z } = this._cellToWorld(this.cursor.gx, this.cursor.gz);

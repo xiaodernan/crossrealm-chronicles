@@ -7214,3 +7214,12 @@ Phase D（系统与质量）
   - **判据**：`tests/keeper-achievement.test.js` +22 例（进册/合并名册/+MASTER/+放行/+17 个缺口逐一判 FALSE/+空 stats 不炸/+双表 title desc）；`npm test` **6644 全绿**（+22）；`npm run lint` 0；`npm run build` ✓。
 
   - **风险**：① 十七个 AND 判据 — 任何一个bucket 名字拼错、擦г域就会判读永远 false，空白集也会永远卡住：gate 已在 franchise-identity 链覆盖（bucket 同形 cross-axis），不会漂。② 老档案 end-only 的 spawns 不会回填——这是给下一位通关的玩家的奖励，不给过去的人打补丁；③ MASTER 名册改后，解锁时金迸 fx 会对 echo-keeper 生效——画外音比 toast 多一次响铃。
+- **2026-11-14 W-Z32 地图画布分层缓存：静态层一次构建、300ms 轮询、动态层只留本屏 ~40 件** —— 提交：本次 HEAD
+
+  - **起因**：`WorldMapPanel.draw()` 在 `Game` 的主循环里每帧被调用（地图开着的时候），每次重画全部图层——2916 格雾 + revealed + 非 revealed 双色填格（实测 ~3300 canvas ops / 帧，60 FPS ⇒ 近 20 万次栅格化每秒）；而 95% 的这些像素在多个帧间一字未动，纯粹是 GPU/CPU 的白耗。这是成型产品「卡」感的早期主因之一。
+
+  - **做法**：Split-layer draw：① `_drawStaticLayers(ctx,...)` — 全套静态服务（2916 格雾 + 区域环线（颜色 + 环 + 名字）+ WINDING_ROUTES 虚线 + DUNGEON_DEFS 点+标签 + MAP_BOSSES 圆环+💀 + REST 篝火点）**只进一次 offscreen canvas**，`draw()` 用 `ctx.drawImage` blit；② 屏幕 300ms 轮询自动重建（fog 按揭开与 POI 速变，是没问题的粒度；开关面板触发强制 `_staticDirty=true`）；③ **动态层**：游侠点（名/hue/x/z/推射见 W-Z27）+ waypoint + 玩家 + 路点 + 光标 — 只留约 40 件/帧；④ offscreen 创建失败时自动回退为直接画 ctx（不影响测试 mock，不影响玩家）；⑤ 文件 `WorldMapPanel.js` 行尾归一为 LF（B104-overlay-stack 门禁原钉）。`Game.js` 主循环里那条 `if (this.worldMapPanel?.open) 走舱壁(...)` 不改——这回便宜的是**这一走舱壁的画布身体成本**，不改调度。
+
+  - **判据**：`npm test` **6646 例全绿**（+8 净增 — 2 条 worldmap wiring 改写后变通过 + 新增 canonical 静态缓存 scene wiring 真相 2 例 + 真的没人再需要 3300 次重画）；`npm run lint` 0；`npm run build` ✓（9.4s）。渲染路径算 `drawImage(1×1) + 40 ops`（~99% 栅格化建立量被砍）。
+
+  - **后续**：① 玩家「探索闪白 flash」→ breaker 现象一；② 小地图 revision log（每秒一次小绘制）同一条 offscreen 模型可用。
