@@ -46,9 +46,10 @@ $logOutA = Join-Path ([System.IO.Path]::GetTempPath()) 'presence-a.out.log'
 $logErrA = Join-Path ([System.IO.Path]::GetTempPath()) 'presence-a.err.log'
 $svcA = (Start-Process -FilePath 'java' -ArgumentList @('-jar', $jar,
     '--server.port=28088',
-    "--spring.data.redis.host=localhost",
+    '--spring.data.redis.host=localhost',
     "--spring.data.redis.port=$redisPort",
     '--presence.backend=redis',
+    '--presence.ttl-seconds=60',
     '--eureka.client.register-with-eureka=false',
     '--eureka.client.fetch-registry=false') -PassThru `
     -RedirectStandardOutput $logOutA -RedirectStandardError $logErrA).Id
@@ -77,7 +78,13 @@ Write-Output "count after beat = $($count.count)"
 $member = docker exec $redisContainer redis-cli SISMEMBER presence:world:ids crimson-gavel
 if (($member | Out-String).Trim() -ne '1') { Write-Error "redis SISMEMBER presence:world:ids crimson-gavel expected 1, got $member"; exit 1 }
 
-$wanderer = docker exec $redisContainer redis-cli GET presence:world:crimson-gavel
+# 原始键校验：docker exec 在偶发情况下 stderr 混进流、stdout 为空（重试 5 次以消除宿主抖动）
+$wanderer = $null
+for ($i = 0; $i -lt 5; $i++) {
+    $wanderer = (docker exec $redisContainer redis-cli GET presence:world:crimson-gavel 2>&1 | Out-String).Trim()
+    if ($wanderer -match '"hue":\s*310') { break }
+    Start-Sleep -Milliseconds 400
+}
 if ($wanderer -notmatch '"hue":\s*310') { Write-Error "redis presence row did not carry hue 310: $wanderer"; exit 1 }
 Write-Output 'redis state verified (set member + hashed wanderer)'
 
@@ -86,11 +93,22 @@ $sseOut = Join-Path ([System.IO.Path]::GetTempPath()) 'presence-sse.out'
 Remove-Item $sseOut -ErrorAction SilentlyContinue
 $curlArgs = @('-sN', '--max-time', '8', 'http://127.0.0.1:28088/api/presence/world/stream')
 $curlExe = if (Get-Command curl.exe -ErrorAction SilentlyContinue) { 'curl.exe' }
-           elseif (Get-Command curl -ErrorAction SilentlyContinue -and (Get-Command curl).CommandType -eq 'Application') { 'curl' }
+           elseif (Get-Command curl -CommandType Application -ErrorAction SilentlyContinue) { 'curl' }
            else { $null }
 if (-not $curlExe) { Write-Error 'curl not found (CI runner / dev box both ship one)'; exit 1 }
 $sse = Start-Process -FilePath $curlExe -ArgumentList $curlArgs -RedirectStandardOutput $sseOut -PassThru
-Start-Sleep -Milliseconds 800
+Start-Sleep -Milliseconds 500
+
+# 等 SSE 订阅真正注册到 redis Pub/Sub（最多 15s 内轮询 NUMSUB>=1），消事件竞态：
+# 注册没完成就 beat2，publish 会被错过（跨实例 one-way live frame 的老坑）。
+$registered = $false
+for ($i = 0; $i -lt 30; $i++) {
+    $nsub = docker exec $redisContainer redis-cli PUBSUB NUMSUB presence:events:world
+    if (($nsub | Out-String).Trim() -match '1') { $registered = $true; break }
+    Start-Sleep -Milliseconds 500
+}
+if (-not $registered) { Write-Error 'SSE subscription did not register with redis pub/sub within 15s'; exit 1 }
+Write-Output 'SSE registered with redis pub/sub'
 
 # eventSource has to receive THIS beat: capture starts with a replayed snapshot, then a fresh present frame
 $beat2 = '{"id":"silver-leaf","name":"Silver","hue":120,"x":-0.25,"z":0.75}'
@@ -119,6 +137,7 @@ $svcB = (Start-Process -FilePath 'java' -ArgumentList @('-jar', $jar,
     "--spring.data.redis.host=localhost",
     "--spring.data.redis.port=$redisPort",
     '--presence.backend=redis',
+    '--presence.ttl-seconds=60',
     '--eureka.client.register-with-eureka=false',
     '--eureka.client.fetch-registry=false') -PassThru `
     -RedirectStandardOutput $logOutB -RedirectStandardError $logErrB).Id
