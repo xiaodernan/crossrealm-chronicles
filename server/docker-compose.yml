@@ -1,12 +1,13 @@
-# 跨服王冠 · 在线伙伴服务 —— 一键部署（五容器：discovery / config / game / season / gateway）
+# 跨服王冠 · 在线伙伴服务 —— 一键部署（七容器：discovery / config / game / season / gateway / presence / redis）
 # 用法（仓库根目录 server/ 下）：
 #   docker compose up --build
 # 全栈起来之后：
 #   curl http://localhost:8080/api/version
 #   curl http://localhost:8080/api/leaderboard
+#   curl http://localhost:8080/api/presence/world/count
 #
-# 注册名刻意不用 localhost：容器间网络用服务名（discovery / config / game-service / gateway），
-# 与单机 smoke 脚本的 localhost 配置是两个世界，不要混。
+# 注册名刻意不用 localhost：容器间网络用服务名（discovery / config / game-service / season-service
+# / presence-service / gateway / redis），与单机 smoke 脚本的 localhost 配置是两个世界，不要混。
 
 name: crossrealm-chronicles-server
 
@@ -134,7 +135,51 @@ services:
       retries: 30
       start_period: 25s
 
-  # 一次性验证容器：全栈健康后把版本/排行榜/遥测/赛季/ops 跑一遍并退出（exit 0 = 全绿）
+  # Redis：在场所需的 Pub/Sub + 哈希/集合后端（W-Z-同游）。同时给想切 redis 限流的网关留着。
+  # 只在 presence-service 真正用（gateway 默认仍走内存限流，不依赖它）。
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+
+  # 在场服务（W-Z-同游）：星轨同游 Real-time 存在感。默认 memory 后端（无 Redis 也健康）；
+  # 这里用 PRESENCE_BACKEND=redis 接上面的 redis，真正走 Pub/Sub 扇出。
+  presence-service:
+    build:
+      context: .
+      dockerfile: presence-service/Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: presence-service
+      EUREKA_INSTANCE_PREFERIPADDRESS: "false"
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config:8888
+      PRESENCE_BACKEND: redis
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+      MANAGEMENT_HEALTH_REDIS_ENABLED: "true"
+    depends_on:
+      discovery:
+        condition: service_healthy
+      config:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8084/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 25s
+
+  # 一次性验证容器：全栈健康后把版本/排行榜/遥测/赛季/ops/在场 跑一遍并退出（exit 0 = 全绿）
   verify:
     image: curlimages/curl:8.10.1
     depends_on:
@@ -157,6 +202,8 @@ services:
       curl -fsS http://gateway:8080/api/ops/stats;
       echo; echo '== /api/ops/season ==';
       curl -fsS http://gateway:8080/api/ops/season;
+      echo; echo '== /api/presence/world/count ==';
+      curl -fsS http://gateway:8080/api/presence/world/count;
       echo; echo '== /actuator/springcloud ==';
       curl -fsS http://gateway:8080/actuator/springcloud;
       echo"

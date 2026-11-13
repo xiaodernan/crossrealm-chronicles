@@ -7115,3 +7115,19 @@ Phase D（系统与质量）
   - **判官噪声政策（硬规则，后续不再议）**：**ach-qa / echo-qa 的单次判决不是门禁**——同一文本跨次运行在 ok/warn/bad 间漂移（如 echo-gangster / echo-scifi / echo-starport / echo-wave4 在相邻批次从 ok 漂到 bad，均无代码变动），且偶发虚构机制（「三枚信标」「四大母题」「深空孔径」均非本游戏真实概念，全仓零出现）。处理规程：① 复判前任何「bad」必须先对代码/内容表核事实；② 判词判错时**保留机械正确文本**，不按模型口吻改写；③ 唯一以代码为源的描述修改才提交；④ echo-/side-all 等结构判据交给 gates（6538→6568 例）。
 
   - **判据**：`npm test` **6568 例全绿**（含 W-Z21 新增 6 例）；双表逐键存在、`i18nKeyCount` 3060 未动（零新键）；仅 `strings.zh.js` / `strings.en.js` 三对 desc 字符串改写，无逻辑变更。
+- **2026-11-14 W-Z24 在场同游 presence-service（并轨侧脚手架，主线侧续建至集大成线）** —— 提交：本次 HEAD
+
+  - **起因**：并轨侧（WorkBuddy Agent）在 2026-11-14 00:33–00:43 落盘了一个完整但未打磨的新微服务——**presence-service（:**README:8084，W-Z-同游）**：回答「此刻还有谁在这片世界里游走」。架构上把三件事各归其位：① 存在感状态：Redis 哈希 + 频道 Set（每位游侠一个带 TTL 的键，续命即在联）；② 实时扇出：Redis Pub/Sub（`presence:events:{channel}`）；③ 下发：SSE 穿网关（单向只读 + 自动重连，比 WebSocket 轻）。网关注入 `order=-1` 专用路由 (lb://presence-service)，TimeLimiter **3600s** 不掐 SSE，Resilience4j 50%/30s 兜底；docker-compose 引入 redis:7-alpine 与 presence-service 两容器 + 健康检查割断启动顺序。**随后停手**：留下完整业务代码但无测试、无文档、无 CI、3 个关键缺陷未修。
+
+  - **遗留裁定（主线侧接手续建，缺陷全修完再合）**：
+    · **端口撞车**：presence-service `port: 8083` → **8084**（application.yml / Dockerfile EXPOSE / compose 映射+healthcheck 两处）——ai-service 是 ports `8083:8083` 保留不动。
+    · **缺 actuator**：pom 补 `spring-boot-starter-actuator`——否则 `/actuator/health` 404，docker-compose healthcheck 永远 unhealthy。
+    · **配置仓缺位**：application.yml 注释指向 native 仓库里的 `presence-service.yml`，实则不存在 → 新增 config-server 侧 presence-service.yml（backend/ttl/max 三旋钮，同口径，无密钥）。
+    · **live fanout 帧 ts=0**：`hub.publish` 广播的是「出 sanitize 但未打 ts」的对象——存进 Redis 的有 ts（store 自打），线上收到的 live 帧没有。修正：beat 入口一次打 ts、pub/sub 与 store 同源（frame 不再 ts=0；smoke 断言 `"ts":[0-9]{10,}`）。
+    · **TTL 语义 vs 重启误判**：首轮 smoke 的「跨实例重启 count>=2」断言与 15s heartbeat TTL 自洽失败——重启窗口足以让全部心跳过期。改断言：B 启动后先续命（beat crimson-gavel），count>=1 + SISMEMBER 真值；这正是 presence 与 leaderboard 镜像的根本差异（leaderboard 是持久榜单，presence 是**续命的存在感**）。
+
+  - **判据**：① **mvn -f server/pom.xml verify → BUILD SUCCESS（8 modules；presence 新增 25 例：Wanderer 编解码 4 / InMemoryPresenceStore 4 / InMemoryPresenceEventHub 4 / Controller 单测 11（beat 校验 400/429/ hue 归一 / x/z 夹紧 / name 控制字符清洗）/ Context 装配 + actuator health 2）；**SC-T previous 零回归**。② **server/scripts/verify-presence-redis.ps1（throwaway redis:7-alpine @26388 + PRESENCE_BACKEND=redis，ASCII-only）**：beat(202) → count=1 → `SISMEMBER presence:world:ids`==1 + `GET presence:world:crimson-gavel` 原始行 `"hue":310` → curl SSE 先快照重放（crimson-gavel）+ `snapshot-end` + live beat 后 **silver-leaf `event:present` 实时帧** → 停 A → 起 B(28089 同 redis) → B 上续命 crimson-gavel → count≥1 + SISMEMBER==1——**W-Z-同游 全链路真实可证**；该脚本已接入 `.github/workflows/server.yml`。③ 前端离线零影响（服务端路线，未接 `src/online/`，后续切片再讲）。④ README.md 根章节「五个」→「七个微服务」含 presence-service（:8084）；server/README.md 服务表 + 模块树 + 快速启动 + 脚本清单；docs/ONLINE_SERVICES.md 路由表 + quick verify 行。
+
+  - **风险**：① **心跳即生命**——presence 没有「历史」，TTL 外一格即消失；任何要求「在线时长」的可视化都不能建在它上面（那该走 game-service 遥测）。② SSE 客户端量大的话 `maxWanderersPerChannel` 与网关连接数一起考虑（当前 500/频道，网关对文件描述符/直接缓冲区友好度由 webflux 兜底）。③ 单频道上限的「满」是 429 语义，与限流一样要监控（后续可暴露 `/api/ops/presence`，如 `OpsController` 聚合）。④ eureka `lb://` 首次拉取后客户端缓存有 30s 暖场窗口——docker-compose 用健康检查割断启动顺序规避，不要在前端狠刷 count。⑤ **presence-service 是无密钥进程**（不调上游 LLM），不需要 `LLM_API_KEY`；docker-compose 里只注入 Eureka/Config 变量。
+
+  - **后续**：① 客户端 `src/online/` 侧的 presence 读数 UI（沿用 `crossrealm_online` 开关、FAB 旁一枚「在线 N 人」金点，EventSource 自动重连）——需与 AdvisorPanel 同一门禁口径（textContent-only + 离线不可见）；② `/api/ops/presence` 聚合（如 `OpsController` 风格，`ZCARD`/memberCount/SSE 活跃连接数，白名单不外泄）；③ 网关 `GatewayMetricsFilter` 的 routeId 自动覆盖 `/api/presence/**`（现状：限额统计走全局路径，可交给输出侧）；④ 前端 FullArt 热区：游侠光点在 WorldMap 星盘上浮动（需接 `world.js` 的 SSE 通道，属于「在线可选层」统一波次）。

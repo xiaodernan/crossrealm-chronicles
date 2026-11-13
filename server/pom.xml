@@ -26,6 +26,7 @@
     <module>season-service</module>
     <module>ai-service</module>
     <module>gateway</module>
+    <module>presence-service</module>
   </modules>
 
   <properties>

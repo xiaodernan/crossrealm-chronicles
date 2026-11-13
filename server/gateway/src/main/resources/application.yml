@@ -64,6 +64,20 @@ spring:
                   args:
                     name: seasonServiceBreaker
                     fallbackUri: forward:/fallback/503
+            # 在场服务（W-Z-同游）：星轨同游 Real-time 存在感。SSE 长连接，所以这条路由
+            # 的熔断限时器必须放很长（默认 1s 会把流直接掐断）；其余短请求走同一熔断器，
+            # 失败率超阈值才开路，开路时兜底 503（客户端 EventSource 会自动重连）。
+            - id: presence-service
+              uri: lb://presence-service
+              order: -1
+              predicates:
+                - Path=/api/presence,/api/presence/**
+              filters:
+                - AddRequestHeader=X-Gateway-Source, crossrealm-chronicles-gateway
+                - name: CircuitBreaker
+                  args:
+                    name: presenceServiceBreaker
+                    fallbackUri: forward:/fallback/503
             # 游戏伙伴服务：排行榜 / 遥测 / 版本信息
             - id: game-service
               uri: lb://game-service
@@ -120,7 +134,16 @@ resilience4j:
         failure-rate-threshold: 50
         wait-duration-in-open-state: 30s
         automatic-transition-from-open-to-half-open-enabled: true
+      presenceServiceBreaker:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        automatic-transition-from-open-to-half-open-enabled: true
   timelimiter:
     instances:
       aiServiceBreaker:
         timeout-duration: 75s
+      presenceServiceBreaker:
+        # SSE 长连接不能被 1s 缺省掐断；3600s 等于"基本不超时"，只靠断路器本身的失败率开路。
+        timeout-duration: 3600s

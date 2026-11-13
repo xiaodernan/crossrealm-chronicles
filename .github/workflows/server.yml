@@ -1,4 +1,4 @@
-# 在线伙伴服务（server/）的独立门禁：Maven 编译 + 9 项单测 + 全链路冒烟。
+# 在线伙伴服务（server/）的独立门禁：Maven 编译 + 全部单测 + 全链路冒烟。
 # 与前端 ci.yml 分离：前端门禁（lint→test→build→size→perf→e2e）本体完全不感知本目录，
 # 这里单独守住 Java 侧的可构建性与整链装配。触发条件：动到 server/ 或本工作流自身才跑。
 name: server
@@ -67,6 +67,12 @@ jobs:
       # Redis-backed trial leaderboard (W-Y6 切片3): throwaway redis + game-service trial.backend=redis
       - name: Redis-backed trial leaderboard (W-Y6 verification)
         run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-trial.ps1"
+
+      # Redis-backed presence store (W-Z-同游): throwaway redis + PRESENCE_BACKEND=redis
+      # proves beat -> count -> SISMEMBER + raw redis wanderer -> SSE snapshot replay +
+      # live pub/sub frame -> cross-instance restart sharing the same keys
+      - name: Redis-backed presence store (W-Z-同游 verification)
+        run: pwsh -File "${{ github.workspace }}/server/scripts/verify-presence-redis.ps1"
 
       # Micrometer/Prometheus exposition (W-Z10): boot game-service locally,
       # push one boss_defeated event, scrape /actuator/prometheus and assert

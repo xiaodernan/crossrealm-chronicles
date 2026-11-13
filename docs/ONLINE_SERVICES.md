@@ -17,7 +17,9 @@
   （`epochDay / cycleDays`，多实例/重启/时区都不会给出两个答案）；`override` 可在配置中心强制指定，
   写错一个字母服务**拒绝启动**。gateway 路由 `/api/seasons/**`（`lb://season-service`，order=-1，带熔断）；
   `game-service` 用 **OpenFeign**（`SeasonClient` + `fallbackFactory` + Resilience4j 熔断）读它，
-  在 `/api/ops/season` 聚合成一格运维视图 —— 下游没起时回 `available:false`，不 500。
+  在 `/api/ops/season` 聚合成一格运维视图 —— 下游没起时回 `available:false`，不 500；
+- **presence-service**（:8084，W-Z-同游）——**在场同游**（Real-time presence）：`POST /api/presence/{channel}/beat`（`{id,name,hue,x,z}`）→ Redis 哈希（TTL 15s，心跳即续命，不用后台扫表）+ 频道成员 Set；`GET /api/presence/{channel}/count` 读新鲜人数（HUD 用）；`GET /api/presence/{channel}/stream` SSE：先推快照（`present` × N + `snapshot-end`），再推后续心跳（`presence:events:{channel}` 频道，Redis Pub/Sub 扇出）。校验口径：channel/id 白名单正则（`^[A-Za-z0-9_-]{1,32}$` / `^[A-Za-z0-9_-]{1,40}$`）、name 去控制字符并裁剪 24 字、hue 归一 `[0,359]`、x/z 夹紧 `[-1,1]`、单频道 `maxWanderersPerChannel` 超限直 429。默认 `presence.backend=memory`（无 Redis 也健康）；`PRESENCE_BACKEND=redis` 切真 Fanout（docker-compose 栈如此）。网关路由 `/api/presence/**`（`lb://presence-service`，order=-1，TimeLimiter **3600s** 不掐 SSE，failureRate 50%、开路 30s 半开、`forward:/fallback/503` 兜底）。SSE 之于 WebSocket：单向、自动重连、无需握手升级；
+
 
 游戏侧对应的是 `src/online/OnlineServices.js`（W-X2，默认关闭）：
 

@@ -1,0 +1,12 @@
+# presence-service 的集中下发配置（config-server 的 native 仓库里那一份）。
+#
+# 这里不放密钥——这个服务本就没密钥（它只收心跳、发 SSE，不调外部 LLM）。
+# 下发哪些旋钮：后端选择 / 新鲜度 / 单频道上限。止步于此，前端不需要跟着改。
+# 任何键名写错，服务【拒绝启动】（@ConfigurationProperties 校验）——宁可早红不要静默回退。
+presence:
+  # memory = 纯内存（默认，无 Redis 也健康、可测）；redis = Redis Pub/Sub + 哈希/集合（docker 栈用）
+  backend: memory
+  # 一位游侠多久没心跳就视为离线（按 TTL 计）；前端每 5s 一跳，按 3 倍余量取 15
+  ttl-seconds: 15
+  # 单频道成员硬上限，超过直 429——防止有人拿脚本刷“在场”
+  max-wanderers-per-channel: 500

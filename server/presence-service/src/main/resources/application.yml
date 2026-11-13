@@ -1,0 +1,46 @@
+server:
+  port: 8084
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
+  application:
+    name: presence-service
+  config:
+    import: "optional:configserver:http://localhost:8888"
+  cache:
+    type: simple
+  data:
+    redis:
+      # 默认连本机；docker 栈里由服务名 `redis` 覆盖。backend=memory 时下面的连接不会真正被用到。
+      host: localhost
+      port: 6379
+
+# 本地默认（与 config-server 仓库里的 presence-service.yml 保持一致）
+presence:
+  # 一位游侠多久没心跳就视为离线（键 TTL）。前端每 5s 一跳，留 3 倍余量。
+  ttl-seconds: 15
+  # 单频道成员硬上限，超过直接 429——防止有人拿脚本刷"在场"。
+  max-wanderers-per-channel: 500
+  # memory = 纯内存（默认，无 Redis 也健康、可测）；redis = 接 Redis Pub/Sub + 哈希/集合（docker 栈用）。
+  backend: memory
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  # classpath 有 spring-boot-starter-data-redis 时 Boot 会登记 RedisHealthIndicator；
+  # 没 Redis（默认 memory 后端 / CI）时它会让 health 一直 DOWN。默认关掉，
+  # 上线切 redis 时 MANAGEMENT_HEALTH_REDIS_ENABLED=true 打开。
+  health:
+    redis:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -11,6 +11,7 @@
 | 在线伙伴业务 API | `game-service`：排行榜 / 遥测事件 / 版本号（纯内存实现、零数据库） | 8081 |
 | 赛季服务（W-X14） | `season-service`：赛季主题 / 词缀 / 周期倒计时（按 epochDay 算，不存状态） | 8082 |
 | AI 顾问（W-Y1） | `ai-service`：星轨顾问（服务端独占密钥 / 选择性重试 / 熔断 / TTL 缓存） | 8083 |
+| 在场同游（W-Z-同游） | `presence-service`：在场存在感（POST 心跳 beat → Set/Hash+TTL 存储；SSE 订阅 `presence:events:{channel}` Pub/Sub；memory 默认 / redis 可选；`/api/presence/{channel}/stream` SSE） | 8084 |
 | 可靠任务队列（W-Y4） | `ai-service`：`/api/ai/chat/async` 提交 → `/api/ai/jobs/{id}` 轮询；有界队列 / 2 worker / 幂等键 / 选择性重试 / 死信 / 背压 429 | 8083 |
 
 > 与游戏本体**完全解耦**：`npm run build` 不感知它；不接它时游戏功能不受任何影响。
@@ -25,6 +26,8 @@ server/
   game-service/          # REST API（排行榜 / 遥测 / 版本 / 运维视图），OpenFeign 调 season-service
   season-service/        # 赛季主题与词缀（周期轮转 + 配置中心 override），独立单测（+ Dockerfile）
   ai-service/            # 星轨顾问：唯一持有 LLM_API_KEY 的进程（+ Dockerfile / system-prompt.txt）
+  presence-service/      # 在场服务（W-Z-同游）：心跳写入 + SSE 推送；memory 默认 / PRESENCE_BACKEND=redis
+  config-server/          # （上列对应 config-server/presence-service.yml native 配置仓库）
   gateway/               # Spring Cloud Gateway（/api/** → game-service，/api/seasons/** → season-service，/api/ai/** → ai-service）
   env.example            # 环境变量样例（**不含真值**）：复制成 server/.env 后填 LLM_API_KEY
   scripts/smoke.ps1      # 冒烟脚本：六个实例真起真打（含 4j AI 健康 / 4k 异步队列契约），跑完自动关闭
@@ -36,9 +39,10 @@ server/
   scripts/verify-redis-trial.ps1 # W-Y6 切片3 Redis 试炼榜镜像实证（与排行榜同一形态；重启后赛季过滤与 score 降序完整恢复；CI 真跑）
   scripts/verify-prometheus.ps1 # W-Z10 Prometheus 端点实证（Micrometer metrics + JVM 基础指标；scrape 到 game_telemetry_* + jvm_memory_used_bytes）
   scripts/verify-prometheus-ai.ps1 # W-Z12 ai-service Prometheus 端点实证（advisor chat 一次真对话 + scrape /actuator/prometheus 看到 ai_upstream_calls_total / prompt_tokens_total / cache_hit_ratio）
+  scripts/verify-presence-redis.ps1 # W-Z-同游 在场服务实证（throwaway redis：beat → count=1 → SISMEMBER+GET 原始键 → SSE snapshot 重放 + silver-leaf 实时帧 → 跨实例重启共享状态；CI 真跑）
  scripts/smoke.ps1 # 全链路冒烟门禁（含 gateway→gateway_prometheus 段 §4r：JVM + gateway_requests_total + _duration_seconds；ci 真跑）
   scripts/verify-prometheus-ai.ps1 # W-Z12 ai-service Prometheus 端点实证（advisor chat 一次真对话 + scrape /actuator/prometheus 看到 ai_upstream_calls_total / prompt_tokens_total / cache_hit_ratio）
-  docker-compose.yml     # 六容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
+  docker-compose.yml     # 七容器一键部署（discovery / config / game / season / ai / presence / redis）+ 一次性 verify 容器（/api/presence/world/count 也已纳入）
 ```
 
 ## 快速开始
@@ -51,6 +55,7 @@ java -jar config-server/target/config-server-0.1.0-SNAPSHOT.jar          # :8888
 java -jar game-service/target/game-service-0.1.0-SNAPSHOT.jar            # :8081
 java -jar season-service/target/season-service-0.1.0-SNAPSHOT.jar        # :8082
 java -jar ai-service/target/ai-service-0.1.0-SNAPSHOT.jar                # :8083（LLM_API_KEY 不设则返回 503，游戏不受影响）
+java -jar presence-service/target/presence-service-0.1.0-SNAPSHOT.jar     # :8084（默认 memory 后端，无 Redis 也健康）
 java -jar gateway/target/gateway-0.1.0-SNAPSHOT.jar                      # :8080
 ```
 
