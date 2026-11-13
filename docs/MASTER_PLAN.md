@@ -6830,3 +6830,16 @@ Phase D（系统与质量）
   - **判据**：母题计数口径不动、网格不动、drawcall 不动、perf ceil/floor 原样；只动内容表计数；两文件脚本持续保持单文件自包含（判官不“写代码”）。工业纪律：content 和 scripts 分两条提交，互不掺进 runway。
 
   - **风险与后续**：① 剩余 3 档母题只剩 FAMILY/ABYSSSALT——W-E16 再推这两片、母题六档成就出关；② 上游瞬时空返回的根因在 wkapi wire 侧，本片只救判官不改上游；③ `MISSED` 的仅是上游黑洞偶发事件，不是流程要求；④ `ach_echo_full_resonance` 之类“模糊敬意”继续保留，不被误伤。
+- **2026-11-13 W-E16 FAMILY / ABYSSSALT 双 6 档母题出关——六个 3 档母题集体扫平** —— 提交 `4a7b99e`
+
+  - **起因**：W-E14/W-E15 顺次收拢 GLOOM/RADIANT（W-E14）与 BORDER/DEEPSPACE（W-E15）之后，仓库仅剩两个 3 档母题：family（黑道家族）与 abysssalt（深颚盐响）——均为 abyss 区，与既有黑帮/盐母题梗共用 zone，正好沿用 W-E14 的零新网格·触发词复用范式把全册 17 个母题里“3 档”的存量清零。
+
+  - **做法**：6 枚新回声（echo-gangster-cuff 名义 echo:speakeasy；echo-gangster-lotus 名义 echo:family-shrine；echo-gangster-ledger 名义 echo:dock-crates；echo-abyss-saltmarch 名义 echo:abyss-stele；echo-abyss-saltbreath 名义 echo:abyss-conch；echo-abyss-saltfeast 名义 echo:abyss-bonegate）；两枚六档成就 **echo-gangster-6**「帮派六响」/ Six Family Echoes（s.echoGangster >= 6）与 **echo-abysssalt-6**「深颚六响」/ Six Abyssal Echoes（s.echoAbysssalt >= 6）。EXPECTED_KEY_COUNT 3012 → **3028**；achPopCulture 29 → **31**；回声 101 → **107**（content-volume-reading + MASTER_PLAN §1.2 C3 双处同步）。
+
+  - **判官收敛（gpt-6-sol 真实 wkapi，batch=10）**：echo-qa 107 条 bad=0（ok 92 / warn 15 ——warn 清一色既有母题风格，不采纳）；cachedRatio=11.6%（11/11 上报，batch 4 cached=5248、batch 8 cached=4736——两个 ~85–96% 命中峰值）。ach-qa 53 条 bad=0/error=0（ok 48 / warn 5）；**echo-gangster-6 / echo-abysssalt-6 判官双双 ok**。
+
+  - **全册母题成就地图（W-E16 收口态，全部六档出关或既有更高档）**：wizard 8 / interstellar 8 / upside 9 / middle-earth 4✓（未出关的唯一母题）/ border 6 / family 6 / deepspace 6 / cyber 6 / samurai 6 / cosmic 6 / starport 6 / gloom 6 / radiant 6 / voidmaw 6 / abysssalt 6；跨母题组合 ach-gate 已有 ach-wave4/wave5。下一母题出关目标只剩 middle-earth（补两枚 + 一枚六档成就即可清零全册 3/4 档）——但 middle-earth 的《魔戒》致敬敬意需要专门对齐 echo-qa 的判官窗口确认再推，收口但大头预留。
+
+  - **判据**：母题计数口径不动、网格不动、drawcall 不动、perf ceil/floor 原样；只动内容表计数；e2e 通关；size 2.14 MiB（余 0.04）。
+
+  - **风险与后续**：① 仅剩 middle-earth——W-E17 预留做（需老人尊重舌母题上边界）；② 桌面 perf 门禁仍无 ceiling 变动；③ 17 个母题六档全出关之后，下一步的内容爆发点转向“跨母题母纲”——例如 PAI 母题综合成就与赛季向 Ach（与赛季潮汐同步刷新）。
