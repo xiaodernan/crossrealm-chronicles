@@ -6719,3 +6719,14 @@ Phase D（系统与质量）
   - **放弃JPA的理由**：W-Y6 的问题是「重启丢分」+「跨实例失真」，不是「schema 分析」——数据模型是固定的 `(runner, bossId, clearTimeMs, chapter, submittedAt)`，表单轮训只有 insert/read/top-k，用 ZSET 精确命中就是答案；引入 @Entity/H2/Postgres 只会在 CI 里白生一套 build stage，增量价值抵不上维护面。若后期需要批量分析/统计图轴/ETL，再切到 Postgres。
 
   - **风险与后续**：① 单个 ZSET key 无 TTL——通过应用层写入保留上限（demo 3 条以外的生产实操建议每天离线 rotate）；② Boss 标识符白名单校验目前只在 `BossRoster` 列出的名字进行检查，Mirror 不做强校验；③ Redis 进程不可达时 `add` 会成功但分不进 Redis——`/api/leaderboard` 仍然回答 200，而不是在 Redis 异常时打断提交；④ 镜像无法立即触发跨实例增量，但出榜重启后的手势目前足够；⑤ 升级策略：backend 切换至 `redis` 只要一个实例生效；若几个实例同时开 `redis` 会多副本镜像——这是提交面，不是读面，风险可控；⑥ 如需完全离线/异地备份，等 next slice 做 Snapshot export。
+- **2026-11-13 W-Y6 切片2（live test Redis Leaderboard）——测试从来没真跑过的翻案** —— 提交 `79bc188`
+
+  - **起因**：W-Y6 切片1 给了 `/api/leaderboard` 一个 Redis 镜像（leaderboard:runs），但它**没有被真正的 live Redis 验证过**——`verify-redis-leaderboard.ps1` 是 boot-bootstrap 级别的 PS1 烟雾测试，不够。本片补上 `RedisLeaderboardMirrorLiveTest`（JUnit）4 例，第一遍被一次性全部抓出来：
+
+  - **修复**：文档-only 的 ok；但反复出现「根本没跑过真 Redis」的问题（W-Z1 切片1 的 advisor queue live test 同样如此）——这片在 CI 没有 Redis 时 skip；本地跑来就是 4/4 绿。
+
+  - **Live 结果**：4/4 PASSED（REDIS_HOST=localhost REDIS_PORT=27938 本机进程）。`提交 → ZCARD=3 → 新实例 seedDemoData 拉回 → silver-leaf/8000 排第一`、`同时间戳并列两条 → ZCARD=2 不算重复`、`损坏行全部被 skip 默不抛`、`memory backend 默认零变更路径仍然可用`。
+
+  - **验证**：`mvn -B -f server/pom.xml verify BUILD SUCCESS`。
+
+  - **判据**：别再相信 skip 默认绿色等干扰——真 Redis 的 live test 必须跟代码一起被 CI 验证（这件事的责任不在测试框架，在 people）。
