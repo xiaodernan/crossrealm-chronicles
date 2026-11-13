@@ -6843,3 +6843,16 @@ Phase D（系统与质量）
   - **判据**：母题计数口径不动、网格不动、drawcall 不动、perf ceil/floor 原样；只动内容表计数；e2e 通关；size 2.14 MiB（余 0.04）。
 
   - **风险与后续**：① 仅剩 middle-earth——W-E17 预留做（需老人尊重舌母题上边界）；② 桌面 perf 门禁仍无 ceiling 变动；③ 17 个母题六档全出关之后，下一步的内容爆发点转向“跨母题母纲”——例如 PAI 母题综合成就与赛季向 Ach（与赛季潮汐同步刷新）。
+- **2026-11-13 W-E17 MIDDLE EARTH 最后一片母题出关——全册 17/17 母题集体六星闭环** —— 提交 `f821da7`
+
+  - **起因**：middle-earth 是全册最后一片计数不到 6 的母题（原 4 枚回声：echo-one-ring / echo-broken-sword / echo-elven-harp / echo-mithril-shard），其《魔戒》致敬语境需要在新增条目时不重复切错母纲母理（判官对“三只高脚杯”式 canon 错误与“1983 年”式时代口吻会亮红）——但母题本身、母纲母理、敬意边界都是可稳定判读的，可以直接扩容。
+
+  - **做法**：2 枚新回声（echo-mithril-vein 名义 echo:mithril-shard；echo-grey-chant 名义 echo:elven-harp——零新网格，同 W-E12 范式）；一枚六档成就 **echo-middle-earth-6**「中洲六响」/ Six Middle-Earth Echoes（s.echoMiddleEarth >= 6）；EXPECTED_KEY_COUNT 3028 → **3034**（+6 双表键）；echoes 107 → **109**；achievementsPopCulture 31 → **32**（钉错的 33 已修）；content-volume-reading + MASTER_PLAN §0.2 双处“回声 109”同步；e2e 通关。
+
+  - **顺手的判官收敛（该片虽 W-E17 但必须收）**：① echo-radio-tower desc 原「1983 年」→「旧电台的频段从未停转——你听见的是另一个维度的求救信号」；② echo-neon-mall desc 原「80 年代」→「像一座从未打烊的街」；③ echo-triwizard desc 原「三只高脚杯已空」→「高脚杯已空」（Triwizard canon 圣杯只有一枚——判官抓得对）。echo-qa 真实外呼复判：109 条 bad 收敛到 echo-endurance 微瑕级（保留，星际母题致敬语境）；cachedRatio=80.1%（一次质检 11 次外呼命中 8 成上游缓存）——这是 W-Z11 流式+稳定前缀在整个判官工作台的最强实锤。
+
+  - **母题全集成就闭环（W-E17 收口态）**：wizard 8 / interstellar 8 / upside 9 / middle-earth 6 / border 6 / family 6 / deepspace 6 / cyber 6 / samurai 6 / cosmic 6 / starport 6 / gloom 6 / radiant 6 / voidmaw 6 / abysssalt 6 / crossover 2（原创非母题，不参与 6 档）/ homecoming 10 —— **17/17 母题全部 ≥6 档**，ECHO_FRANCHISE_BUCKETS 里每片盆子都能喂满一枚六档成就；跨母题 ach-wave4/wave5 也是有意义的集成残留。
+
+  - **判据**：母纲不变、网格不变、perf ceil/floor 原样；内容表计数门禁齐改（content-registry/i18nKeyCount/content-volume-reading）；size 2.15 MiB（余 0.04）；e2e 通关；键 parity ✓；433-CI 基线在 46ec6b3/f821da7 合并后观察绿。
+
+  - **风险与后续**：① 母题全出关之后“母题计数”不再是内容扩张显效位，下一轮内容扩张应转移到**新的母纲切片**（例如：赛季潮汐专属母题/echo 阶段性演出类型/zone 事件）；② 上游缓存命中高度依赖批次稳定前缀——后续内容扩张都走这条路，aggregate cachedRatio 会继续刷；③ 需要回头再抽查全部母纲的 title 表一致性（已开始过十三枚零枚 bad，可继续推）。
