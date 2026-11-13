@@ -3,6 +3,8 @@ package com.crossrealm.chronicles.game;
 import com.crossrealm.chronicles.game.ai.AiServiceClient;
 import com.crossrealm.chronicles.game.cache.TtlCache;
 import com.crossrealm.chronicles.game.leaderboard.LeaderboardService;
+import com.crossrealm.chronicles.game.leaderboard.LeaderboardRedisMirror;
+import com.crossrealm.chronicles.game.trial.TrialRedisMirror;
 import com.crossrealm.chronicles.game.season.SeasonClient;
 import com.crossrealm.chronicles.game.season.SeasonSnapshot;
 import com.crossrealm.chronicles.game.telemetry.TelemetryService;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
  * W-Z8 切片1 追加 `/api/ops/advisor`：同一纪律的第二处外呼（Feign → ai-service 只读派生），
  * 同样单独一格；`/api/ops/stats` 聚合自身内存数据，保持零外呼不变。
  * W-Z8 切片3 追加 `/api/ops/dead-letter`：死信只读白名单的再中转一格 + 一眼可读的 reason 直方图。
+ * W-Z13 追加 `/api/ops/redis`：Redis 背板镜像的只读诊断（后端标志 / mirror 是否挂上 / ZCARD）。
  */
 @RestController
 public class OpsController {
@@ -49,6 +52,10 @@ public class OpsController {
     private final TtlCache seasonCache;
     /** 换季广播接收器（W-M5）——仅 spring.cache.type=redis 时存在；不存在则 health 报告 -1（不编造） */
     private final SeasonBroadcastListener seasonBroadcastListener;
+    /** Redis 排行榜镜像（W-Y5；backend=redis 时装配，Cassandra 口径默认不出现） */
+    private final LeaderboardRedisMirror leaderboardMirror;
+    /** Redis 试炼榜镜像（W-Y6 切片3；backend=redis 时装配） */
+    private final TrialRedisMirror trialMirror;
 
     /** @Autowired: 与 W-X13 起的契约一致 — 单一构造供 Spring 注入（W-P14 起八参起；W-Z8 起九参） */
     @org.springframework.beans.factory.annotation.Autowired
@@ -64,7 +71,10 @@ public class OpsController {
             // 可选依赖要写 @Nullable，不能写 @Autowired(required=false)：后者放在**构造器参数**上
             // 不生效（单构造器的依赖解析是原子的），没有 listener bean 时 Spring 会直接启动失败。
             @org.springframework.lang.Nullable SeasonBroadcastListener seasonBroadcastListener,
-            @Value("${spring.application.name:game-service}") String applicationName) {
+            @Value("${spring.application.name:game-service}") String applicationName,
+            // 可选镜像：backend=redis 时 bean 才会注册；写 @Nullable 不写 required=false，与上面同口径
+            @org.springframework.lang.Nullable LeaderboardRedisMirror leaderboardMirror,
+            @org.springframework.lang.Nullable TrialRedisMirror trialMirror) {
         this.properties = properties;
         this.leaderboardService = leaderboardService;
         this.trialService = trialService;
@@ -75,6 +85,8 @@ public class OpsController {
         this.seasonCache = seasonCache;
         this.seasonBroadcastListener = seasonBroadcastListener;
         this.applicationName = applicationName;
+        this.leaderboardMirror = leaderboardMirror;
+        this.trialMirror = trialMirror;
     }
 
     /** Controller 构造时刻 ≈ 应用启动时刻（容器装配完才创建），足够当 uptime 的起点 */
@@ -249,6 +261,37 @@ public class OpsController {
      * 把 leaderboard / trial / telemetry 三块内存数据聚合一眼能读完。
      * 零外呼、零缓存（总量 O(n)，n = 三块各自小到可以遍历），全量快照式读取。
      */
+    /**
+     * Redis 背板诊断（W-Z13）：/api/ops/redis
+     *
+     * 只读视图——报告两个 Redis 镜像的存在形态与条数（不是业务智能）：
+     *   backend 标志（memory=默认 null 镜像 / redis=装配镜像，启动恢复过）
+     *   mirror 是否注册、mirrorEntries（ZCARD，出错回 -1；名字计数不含玩家内容）
+     *   seedDemoData / maxLimit 配置便于对凭证对齐本机验证值
+     */
+    @GetMapping("/api/ops/redis")
+    public Map<String, Object> redis() {
+        Map<String, Object> leaderboard = new LinkedHashMap<>();
+        leaderboard.put("backend", properties.getLeaderboard().getBackend());
+        leaderboard.put("seedDemoData", properties.getLeaderboard().isSeedDemoData());
+        leaderboard.put("maxLimit", properties.getLeaderboard().getMaxLimit());
+        leaderboard.put("mirror", leaderboardMirror != null);
+        leaderboard.put("mirrorEntries", leaderboardMirror != null ? leaderboardMirror.zcard() : -1);
+
+        Map<String, Object> trials = new LinkedHashMap<>();
+        trials.put("backend", properties.getTrial().getBackend());
+        trials.put("seedDemoData", properties.getTrial().isSeedDemoData());
+        trials.put("maxLimit", properties.getTrial().getMaxLimit());
+        trials.put("mirror", trialMirror != null);
+        trials.put("mirrorEntries", trialMirror != null ? trialMirror.zcard() : -1);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("leaderboard", leaderboard);
+        result.put("trials", trials);
+        result.put("note", "mirrorEntries=-1 的含义：memory 后端（mirror 非注册）或 ZCARD 失败；不是数据损坏");
+        return result;
+    }
+
     @GetMapping("/api/ops/stats")
     public Map<String, Object> stats() {
         Map<String, Object> result = new LinkedHashMap<>();

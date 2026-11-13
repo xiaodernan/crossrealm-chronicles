@@ -36,7 +36,9 @@ class OpsSeasonEndpointTest {
                 new RequestCountFilter(),
                 new com.crossrealm.chronicles.game.cache.TtlCache(),
                 null,
-                "game-service");
+                "game-service",
+                null,
+                null);
     }
 
     /** 默认 stub：ai-service 视为"答得上但没配 key"，本套测试不关心 advisor 那一格 */

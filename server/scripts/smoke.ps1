@@ -459,6 +459,18 @@ game-service:
     Write-Host "ops dead-letter aggregate ok (available flag + count + reasons histogram; no player text)"
 
     Write-Host ""
+    Write-Host ""
+    Write-Host "=== 4q) /api/ops/redis 只读诊断（W-Z13） ==="
+    $oredis = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/redis' -TimeoutSec 15).Content
+    if ($oredis -is [byte[]]) { $oredis = [System.Text.Encoding]::UTF8.GetString($oredis) }
+    Write-Host $oredis
+    if ($oredis -notmatch '"leaderboard"\s*:\s*\{') { Write-Error "ops/redis missing leaderboard block: $oredis"; exit 1 }
+    if ($oredis -notmatch '"trials"\s*:\s*\{') { Write-Error "ops/redis missing trials block: $oredis"; exit 1 }
+    if ($oredis -notmatch '"mirror"\s*:\s*(true|false)') { Write-Error "ops/redis missing mirror flag: $oredis"; exit 1 }
+    if ($oredis -notmatch '"mirrorEntries"\s*:\s*-?[0-9]+') { Write-Error "ops/redis missing mirrorEntries: $oredis"; exit 1 }
+    if ($oredis -match 'sk-') { Write-Error 'ops/redis leaks an api key'; exit 1 }
+    Write-Host "ops/redis diagnostics ok (backend flags + mirror presence + ZCARD; no secrets)"
+
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content
 

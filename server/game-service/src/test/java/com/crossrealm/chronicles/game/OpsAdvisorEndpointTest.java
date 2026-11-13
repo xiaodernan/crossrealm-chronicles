@@ -40,7 +40,9 @@ class OpsAdvisorEndpointTest {
                 new RequestCountFilter(),
                 new com.crossrealm.chronicles.game.cache.TtlCache(),
                 null,
-                "game-service");
+                "game-service",
+                null,
+                null);
     }
 
     private static AiServiceClient stub(Map<String, Object> health, Map<String, Object> jobs) {

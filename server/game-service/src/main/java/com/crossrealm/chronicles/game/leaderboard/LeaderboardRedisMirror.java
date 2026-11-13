@@ -80,4 +80,15 @@ public class LeaderboardRedisMirror {
                     .warn("leaderboard mirror 写入失败（忽略）：{}", e.getMessage());
         }
     }
+
+
+    /** ZCARD 计数（只读 diag；出错回 -1，不抛异常——上游满/空都正常）。 */
+    public long zcard() {
+        try {
+            Long c = redis.opsForZSet().zCard(KEY);
+            return c == null ? 0L : c.longValue();
+        } catch (Exception ignored) {
+            return -1L;
+        }
+    }
 }
