@@ -6650,3 +6650,12 @@ Phase D（系统与质量）
   - **验证**：`npm test` **6556 例 438 文件全绿**；lint 0；build ✓；size 2.13 MiB（刻度余 0.06）；e2e 通关 ✓；报告不入库。
 
   - **判据与经验**：LLM 判官判文案时，把游戏自己的「机制笔记」喂全了，bad 数会指数级塌缩（11 → 4 → 1 → 0（one-ring 除外，口径刻意保留））。**判官缺的是事实，不是创意**；下一波加 echo 波次（W-E11+）前，先把机制附录同步翻新，才轮得到「修文案」这一步。
+- **2026-11-13 W-Y2/W-Z7 端到端真实大模型演练** —— 本地全链路实测（非提交）
+
+  - **过程**：本地按 `scripts/e2e-advisor-boot.ps1` 拉起 discovery → config → game-service → season-service → ai-service → gateway（28161/28888/28081/28082/28083/28080），`LLM_API_KEY` 只进程环境注入；`npm run e2e:advisor` → vite dev + headless Chrome 全流程：点开 FAB → 输入提问「篝火快灭了，下一步该往哪里走？」→ 送出。
+
+  - **结果**：`E2E_ADVISOR PASSED`——FAB 打开面板 ✓ / 输入送出 ✓ / **真实 wkapi.pro/v1 回一条 21.8s 的中文回答** ✓（`meta = "gpt-6-sol · 21759 ms"`，status=`星图已连`）。这条路径是 W-Z7 切片B 换上的 `askAdvisorBackground`：提交 → `POST /api/ai/chat/async` → `AbortSignal` 轮询 → 面板气泡——**异步队列路径第一次在真实上游端到端走通**（此前只有单元测试与 mock 全绿）。
+
+  - **CI 侧证据**：W-Z8 切片3（`3b1317f`）的前端 E2E 首跑因 CI runner「vite ready in 411 ms 但游戏 450 s 没起来」失败；按纪律不赌「flake 就是 flake」——本地连续两次 `npm run e2e` 通关（55s/, 读数帧数 13560 零异常），再 `gh run rerun --failed`，**重跑 18m55s 全绿**。同一树连续三次 e2e：本地 pass / 本地 pass / CI 重跑 pass。CI 首败定性为 runner 环境抖动，非代码。
+
+  - **卫生**：六个 e2e 进程按各自端口定位并逐一 `Stop-Process`；端口全部释放；key 从未进入任何文件/提交/日志。
