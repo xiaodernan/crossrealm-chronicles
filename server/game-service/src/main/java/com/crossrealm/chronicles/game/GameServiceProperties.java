@@ -40,11 +40,26 @@ public class GameServiceProperties {
         this.versionNote = versionNote;
     }
 
+    /**
+     * 排行榜（W-Y5）。与 {@link Trial} 同构：**持久层**是可切换件——
+     * `memory`（默认，进程内）/ `redis`（Redis ZSET 兜底，重启/多实例共享历史）。
+     */
     public static class Leaderboard {
+        /** 持久层后端：memory（默认）/ redis */
+        private String backend = "memory";
         /** 启动时播种一批演示记录（离线联调排行榜用） */
         private boolean seedDemoData = true;
         /** 出榜条数上限 */
         private int maxLimit = 10;
+
+        /** 持久层后端：memory（默认）/ redis */
+        public String getBackend() {
+            return backend;
+        }
+
+        public void setBackend(String backend) {
+            this.backend = backend;
+        }
 
         public boolean isSeedDemoData() {
             return seedDemoData;

@@ -2,6 +2,8 @@ package com.crossrealm.chronicles.game.leaderboard;
 
 import com.crossrealm.chronicles.game.GameServiceProperties;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -39,18 +41,39 @@ public class LeaderboardService {
 
     private final GameServiceProperties properties;
     private final List<RunRecord> runs = new ArrayList<>();
+    // W-Y5：可选 Redis mirror（`game-service.leaderboard.backend=redis` 才能注入；@ConditionalOnProperty）
+    private final @Nullable LeaderboardRedisMirror mirror;
 
     // W-P1：每个 limit 一份惰性快照。writes 清空整表，reads 命中零排序成本。
     private final Map<Integer, List<RunRecord>> topCache = new ConcurrentHashMap<>();
     private final AtomicLong cacheHits = new AtomicLong();
     private final AtomicLong cacheMisses = new AtomicLong();
 
+    /** 默认构造（无 mirror）—— 测试 & memory 模式 */
     public LeaderboardService(GameServiceProperties properties) {
+        this(properties, null);
+    }
+
+    @Autowired
+    public LeaderboardService(GameServiceProperties properties,
+                              @Nullable LeaderboardRedisMirror mirror) {
         this.properties = properties;
+        this.mirror = mirror;
     }
 
     @PostConstruct
     void seedDemoData() {
+        // W-Y5：先尝试拉 Redis 历史（重启不丢得分）；不存在则走 demo 播种
+        if (mirror != null) {
+            List<RunRecord> persisted = mirror.pullAll();
+            if (!persisted.isEmpty()) {
+                synchronized (runs) {
+                    runs.addAll(persisted);
+                    topCache.clear();
+                }
+                return;
+            }
+        }
         if (!properties.getLeaderboard().isSeedDemoData()) {
             return;
         }
@@ -68,6 +91,13 @@ public class LeaderboardService {
             // 头条的每一次 add 都可能挤进任意 k 档的头部；整表失效是唯一
             // 永远不会漏的方案，而榜单写是低频路径，代价可以忽略。
             topCache.clear();
+            if (mirror != null) {
+                try {
+                    mirror.mirror(run);
+                } catch (RuntimeException ignored) {
+                    // Redis 进程间消失不阻碍提交
+                }
+            }
             return top(properties.getLeaderboard().getMaxLimit());
         }
     }
