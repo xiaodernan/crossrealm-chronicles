@@ -73,6 +73,14 @@ export const ACHIEVEMENTS_POP_CULTURE = [
     (s.echoCyber ?? 0) >= 6 && (s.echoSamurai ?? 0) >= 6 && (s.echoCosmic ?? 0) >= 6 &&
     (s.echoStarport ?? 0) >= 6 && (s.echoVoidMaw ?? 0) >= 6 && (s.echoHomecoming ?? 0) >= 6 },
   { id: 'echo-crossover', title: 'ach_echo_crossover_title', desc: 'ach_echo_crossover_desc', check: (s) => (s.echoCrossover ?? 0) >= 3 },
+  // W-Z31「炉主」—— 全母题终段档（echo-*-6 ×15 / homecoming-master / echo-crossover）：
+  // 17 枚母题全数共鸣——这枚成就第一次读懂「炉火替每位旅人分一杯火」
+  { id: 'echo-keeper', title: 'ach_echo_keeper_title', desc: 'ach_echo_keeper_desc', check: (s) => [
+    ['echoWizard', 6], ['echoSpace', 6], ['echoUpside', 6], ['echoWestern', 6], ['echoGangster', 6],
+    ['echoSciFi', 6], ['echoCyber', 6], ['echoSamurai', 6], ['echoCosmic', 6], ['echoStarport', 6],
+    ['echoGloom', 6], ['echoRadiant', 6], ['echoVoidMaw', 6], ['echoAbysssalt', 6], ['echoMiddleEarth', 6],
+    ['echoHomecoming', 10], ['echoCrossover', 3],
+  ].every(([k, n]) => (s[k] ?? 0) >= n) },
 ];
 
 /**

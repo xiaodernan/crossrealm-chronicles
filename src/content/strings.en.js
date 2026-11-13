@@ -3432,6 +3432,8 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   ach_ept_middle_earth: 'The ring is down; the stones remain; the sword is at rest.',
   ach_ept_homecoming: 'The one who returns is the fire that found its hearth.',
   ach_ept_crossover: 'The poster never finished; the best world is the next reel.',
+  ach_echo_keeper_title: 'Keeper of the Gathering Fire',
+  ach_echo_keeper_desc: 'All seventeen mother-themes resonate — the fire knows every world',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

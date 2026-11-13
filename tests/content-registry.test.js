@@ -686,7 +686,7 @@ describe('W-B2 内容普查：条数钉死', () => {
       npcLines: 3,
       restDialogues: 8,
       achievementsExtra: 11,
-      achievementsPopCulture: 39,
+      achievementsPopCulture: 40,
       cgGalleryBonusExtra: 5,
       sideQuestsPop: 22,
       helpSectionsExtra: 3,

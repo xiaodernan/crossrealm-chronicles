@@ -3431,6 +3431,8 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   ach_ept_middle_earth: '戒指沉底了，石环还在，剑都可以放下了。',
   ach_ept_homecoming: '回家的人是一盏火自己找到了炉。',
   ach_ept_crossover: '海报贴不完整，好的世界是下一场放映。',
+  ach_echo_keeper_title: '炉主',
+  ach_echo_keeper_desc: '十七枚母题全数共鸣——炉火点亮了每一个位面',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

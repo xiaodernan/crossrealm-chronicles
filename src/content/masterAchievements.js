@@ -11,4 +11,6 @@ export const MASTER_ACHIEVEMENT_IDS = Object.freeze([
   'echo-original',
   'echo-wave4',
   'echo-triad',
+  // W-Z31「炉主」—— 全母题共鸣成就：与 echo-triad 同级的旅程封印
+  'echo-keeper',
 ]);

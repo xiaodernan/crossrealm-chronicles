@@ -7205,3 +7205,12 @@ Phase D（系统与质量）
   - **判据**：新门禁 `tests/end-credits-epilogue.test.js`（+4 例：零碑不渲染 / 解锁 1 枚→碑文出现 / 解锁全量→17 母题行全出现 / 解锁 3 枚→仅那 3 枚出现）；`npm test` **6622 例全绿**（+4）；`npm run lint` 0；`npm run build` ✓（~15s）。
 
   - **风险**：① 碑文在真机 DOM 里以 `innerHTML` 合并进 scroll —— 与现行 W-G6 的 `credits_best_title` / `credits_best_row_fmt` 合并法同一类（都是 `t()` 展开本表字符串），不构成任何注入面（碑名/碑文全仓作者写死）；② 17 行之多会把片尾拉长——名册本就长，谢幕的 epilogue 部分没人会嫌多，碑只为真正把母题走完的旅人显。
+- **2026-11-14 W-Z31「炉主」——全母题终段档成就：echo-keeper（Keeper of the Gathering Fire）** —— 提交：本次 HEAD
+
+  - **起因**：十七母题各自的 -6 / -master 档都已达成（W-E13~E23 的两波账），「炉主」本身却从没被真的奖给玩家过——旅人可以把每一面世界都收齐，却没有一个仪式让他知道炉火这面全话了它的每一句。
+
+  - **做法**：`ACHIEVEMENTS_POP_CULTURE` +`echo-keeper`——`check` 读 17 格既有 `ECHO_FRANCHISE_BUCKETS` 同名格 `(s[k] ?? 0) >= n` 全部 AND 通过（thresholds per bucket: 17×6, homecoming 10, crossover 3）；进 `MASTER_ACHIEVEMENT_IDS`（取得 3.4s 金迸 + ach-master 牌匾样式）。title/desc 双表 +`ach_echo_keeper_title`（「炉主」/Keeper of the Gathering Fire）、`ach_echo_keeper_desc`（「十七枚母题全数共鸣——炉火点亮了每一个位面」/All seventeen mother-themes resonate — the fire knows every world）。i18nKeyCount 3085 → **3087**；content-registry achievementsPopCulture 39 → **40**；creative README 39 → 40；根 README 同步（母题徽章含「炉主」）。
+
+  - **判据**：`tests/keeper-achievement.test.js` +22 例（进册/合并名册/+MASTER/+放行/+17 个缺口逐一判 FALSE/+空 stats 不炸/+双表 title desc）；`npm test` **6644 全绿**（+22）；`npm run lint` 0；`npm run build` ✓。
+
+  - **风险**：① 十七个 AND 判据 — 任何一个bucket 名字拼错、擦г域就会判读永远 false，空白集也会永远卡住：gate 已在 franchise-identity 链覆盖（bucket 同形 cross-axis），不会漂。② 老档案 end-only 的 spawns 不会回填——这是给下一位通关的玩家的奖励，不给过去的人打补丁；③ MASTER 名册改后，解锁时金迸 fx 会对 echo-keeper 生效——画外音比 toast 多一次响铃。
