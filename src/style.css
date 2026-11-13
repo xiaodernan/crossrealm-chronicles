@@ -1309,6 +1309,22 @@ body {
   color: #c9a962;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
 }
+.banner-name {
+  background: linear-gradient(180deg, #ffe9b0 0%, #c9a962 50%, #6e5424 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(255, 217, 138, 0.35));
+}
+.banner-name::after {
+  content: "";
+  display: block;
+  width: 160px;
+  height: 1px;
+  margin: 12px auto 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 217, 138, 0.9), transparent);
+}
+
 
 .banner-sub {
   font-size: 0.85rem;
