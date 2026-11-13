@@ -6880,3 +6880,21 @@ Phase D（系统与质量）
   - **判据**：lint 0 / 6556 例全绿（含三条焦点环死罪钉）/ build ✓ / size 2.15 MiB（余 0.04，刻线上限 2.19）/ e2e 通关 ✓ / perf exit 0（超限 0）。故障手段：全新规则自己没漏值会 false red 无法逃过 lint 守住的两行 tester 守门——该门禁在 CI 极难骗过。
 
   - **风险与后续**：① 逐片 canvas/2D 路由面仍用者默认 UI 字型（chapter/season 卡片），W-S3 考虑随风格扩至自定义 panel 字体族；② 没有做 "amphibious focus/autopromote chain"，序列动符合成本收益（咱按钮吞掉 aria-label）；OVERKILL。W-E19+（本会话之外的内容）多从 Toast/成就闪光向打开的团队继续。
+- **2026-11-13 W-Z13 game-service /api/ops/redis 只读诊断——两个 Redis 镜像的"在不在"一目了然** —— 提交 `1d75938`
+
+  - **起因**：W-Y5/W-Y6 给两个榜（leaderboard + trial）都落了 Redis 镜像，但 /api/ops/* 面缺一面镜子——运维设置过 `backend=redis` 后，没法直接看到 "mirror 是否真装配了、ZCARD 现在多少"。W-Z13 补上这一格，作为 "backend 配了却看不到确认成功" 的可视化出口。
+
+  - **做法**：两个 mirror 各 + `zcard()`（`opsForZSet().zCard(KEY)`；findport 不存在/断线 → -1，不抛——诊断不能掀翻业务；不进入任何业务路径，只给运维打点）。OpsController 构造器 +2 个 `@Nullable` 参数（与 W-X13/W-P14 参数模式一致，不抄第二 set）+ `/api/ops/redis` 端点。只读 railroads：零玩家内容、零密钥、零外呼（纯自我 ZCARD）。
+
+  - **输出（示例）**：
+    ```json
+    {"leaderboard": {"backend": "memory|redis", "mirror": false, "mirrorEntries": -1, "maxLimit": N, "seedDemoData": true},
+     "trials":      {"backend": "memory|redis", "mirror": false, "mirrorEntries": -1, "maxLimit": N, "seedDemoData": true},
+     "note": "mirrorEntries=-1 的含义：memory 后端（mirror 非注册）或 ZCARD 失败；不是数据损坏"}
+    ```
+
+  - **门禁**：OpsRedisEndpointTest 3 例全绿（默认 memory → mirror=false / entries=-1）；`mvn -pl game-service verify` BUILD SUCCESS；`smoke.ps1` 追加 §4q；本地实测 exit=0 全绿。`status 只 get-only，但真的 return JSON，players 无从知泄露。
+
+  - **判据**：纯只读、零外呼、零 player data；为了非破坏性，`zcard()` 失败永远 -1 不抛。
+
+  - **风险与后续**：① GAME_IOS_MIRROR 命名空间下次若要分 shard，endpoint 就得升级成 `ops:redis/cluster`；② 现在 seed 30 条只反映启动时的 `leaderboard:seedSkipped` 而不更新；③ W-Z14 可以把 /actuator/prometheus 上的 game_telemetry_enqueued_total 和 thisNote 借 Feign 打通成单面，但当前 railway 不打算做。
