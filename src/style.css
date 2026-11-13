@@ -3989,6 +3989,54 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   .advisor-subtitle, .advisor-disclaimer { display: none; }
 }
 
+/* ── .panel-box .hint：快捷键读出（暂停/日志/设置泛化）——
+   按提示内的 `[键名]` 呈鎏金键帽字，配合 focus-within 加一层光。
+   纯装饰，非含义变化；全加法。 */
+.panel-box .hint span[data-keys] {
+  display: inline-block;
+  padding: 1px 8px 2px;
+  border: 1px solid rgba(255, 217, 138, 0.32);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  color: var(--gold-hi);
+  font-size: 0.82em;
+  letter-spacing: 0.04em;
+  padding: 2px 9px 3px;
+  background: linear-gradient(180deg, rgba(255, 217, 138, 0.08), rgba(255, 217, 138, 0.03));
+}
+.panel-box .pause-slot-row {
+  display: block;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--gold-hi);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin: 4px -10px;
+  transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+.panel-box .pause-slot-row:focus-within {
+  background: rgba(255, 217, 138, 0.07);
+  box-shadow: 0 0 0 2px rgba(255, 217, 138, 0.35), 0 0 24px rgba(255, 217, 138, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.panel-box .pause-slot-row select {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: rgba(13, 11, 22, 0.85);
+  color: #eeeac8;
+  border: 1px solid #3d3a44;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color .22s ease, box-shadow .22s ease;
+}
+.panel-box .pause-slot-row select:hover,
+.panel-box .pause-slot-row select:focus {
+  border-color: rgba(255, 217, 138, 0.6);
+  box-shadow: 0 0 18px rgba(255, 217, 138, 0.18), inset 0 1px 0 rgba(255, 217, 138, 0.2);
+}
+
 /* ── 全局细节打磨（W-E18 切片1）：滚动条与选区，全仓一套金暗皮肤 ──
    面板都用系统默认滚动条，在鎏金暗幕里像刀口一样突兀；
    按 gold-dim 落一条细条 + 透明轨道，与整体配色一脉相承。
