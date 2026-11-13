@@ -6856,3 +6856,14 @@ Phase D（系统与质量）
   - **判据**：母纲不变、网格不变、perf ceil/floor 原样；内容表计数门禁齐改（content-registry/i18nKeyCount/content-volume-reading）；size 2.15 MiB（余 0.04）；e2e 通关；键 parity ✓；433-CI 基线在 46ec6b3/f821da7 合并后观察绿。
 
   - **风险与后续**：① 母题全出关之后“母题计数”不再是内容扩张显效位，下一轮内容扩张应转移到**新的母纲切片**（例如：赛季潮汐专属母题/echo 阶段性演出类型/zone 事件）；② 上游缓存命中高度依赖批次稳定前缀——后续内容扩张都走这条路，aggregate cachedRatio 会继续刷；③ 需要回头再抽查全部母纲的 title 表一致性（已开始过十三枚零枚 bad，可继续推）。
+- **2026-11-13 W-Z12 ai-service Micrometer/Prometheus 指标接入——与 W-Z10 同一条观测线，换个目标** —— 提交 `376e532`
+
+  - **起因**：W-Z11 把上游调用切到流式 + include_usage 之后，ai.upstream.usage 的每个数字都只在日志里——需要把游戏里“这个调用花了多少 token / 命中多少缓存 / 成功失败各多少”上报成可拉、可告警的序列；和 W-Z10（game-service）同构，ai-service 亦给拉端补上 Micrometer 出口。
+
+  - **做法**：ai-service 加 `micrometer-registry-prometheus`；`application.yml` exposure include 加 `metrics,prometheus`。LlmClient 构造器改为 4-arg @Autowired ctor（AiProperties/Transport/ObjectMapper/MeterRegistry）并保留 3-arg 兼容；测试构造器存 null registry 不碰 Micrometer。对接：`ai_upstream_calls_total{outcome=success|failure}`、`ai_upstream_prompt_tokens_total`、`ai_upstream_completion_tokens_total`、`ai_upstream_cached_tokens_total`、`ai_cache_hits_total`（摘要缓存命中的正向计数）、Gauge `ai_upstream_cache_hit_ratio`（Σ cached / Σ prompt）。`verify-prometheus-ai.ps1`：本地 28084 起 ai-service，有 `LLM_API_KEY` 时真跑一轮 `/api/ai/chat`（HTTP 200），scrape /actuator/prometheus 断言 jvm_memory_used_bytes + process_uptime_seconds + ai_upstream_calls_total{outcome="success"}≥1 + ai_upstream_prompt_tokens_total + ai_upstream_cache_hit_ratio。CI 追加门禁「AI service Prometheus metrics (W-Z12 verification)」；README 脚本目录同步登记；docs/ONLINE_SERVICES 同步。
+
+  - **实测**：AiServiceApplicationContextTest 4 例全绿；`mvn -pl ai-service verify` exit=0；`verify-prometheus-ai.ps1` 本地真联调 PASSED（真 key 真实上行一次 advisor chat → scrape 指标含上述三项 ai_upstream_*，含 cache_hit_ratio JSON 出线）；`smoke.ps1` 全链路 PASSED。
+
+  - **判据**：只加可观测探针、零业务面变更；计数器在所有空路径（未配置 Micrometer）下恒 null，不会让单测崩；为 `calls{outcome}` 用 tag 而非两名 counter；Gauge 不维护“瞬时”比率而维护启动后累加比率（与 sum/prompt 对齐，且免高基数 tag）。
+
+  - **风险与后续**：① ai-upstream 线现有 span=一次上游调用，如果上游流式已由同线返回 usage，则 cached 依赖上游是否报；② api-key 绝不进入指标 label——所有指标零 provider 数据；③ W-Z13 可以对接：game telemetry 也拉到 Prom 与现有 `game_telemetry_*` 对上一致，または {游戏，顾问} 两条线合成统一 SLO 仪表板。
