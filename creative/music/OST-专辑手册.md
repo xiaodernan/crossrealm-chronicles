@@ -1,7 +1,7 @@
 # 《跨界纪事》原声音乐集（OST）
 
 **专辑名**：Crossrealm Chronicles Original Soundtrack  
-**中文名**：跨界纪事 · 四十九次元回声  
+**中文名**：跨界纪事 · 一百零九次元回声  
 **曲目**：24 首 · 78 分钟  
 **封面**：`../posters/poster-ost-album-4k.png`  
 
@@ -48,7 +48,7 @@
 | 20 | Samurai Gate（鸟居残门） | 武士残响 | 64 | 尺八 |
 | 21 | Neon Alley Rain（霓虹雨巷） | 赛博霓虹 | 110 | 合成器 arp |
 | 22 | Starport Cantina（星港酒肆） | 星港商路 | 98 | 爵士五度 |
-| 23 | Full Resonance（全频共鸣） | 49/49 解锁 | 72→96 | 全系列动机叠录 |
+| 23 | Full Resonance（全频共鸣） | 109/109 解锁 | 72→96 | 全系列动机叠录 |
 | 24 | Infinity Walker（无尽行者） | 滚动字幕 | 60 | 锚主题再现 |
 
 ---
@@ -97,7 +97,7 @@ F2 藏起 HUD 留一口火
 - **锚主题**：四音下行 D–A–F–D，金色调，大管 + 钟  
 - **Stay 动机**：上行小三度，钢琴，仅在荒原/书架  
 - **逆相动机**：全音阶 cluster，磁带饱和  
-- **回声动机**：49 个 POI 各 1 秒 micro-sample，叠成 #23  
+- **回声动机**：109 个 POI 各 1 秒 micro-sample，叠成 #23  
 
 ---
 
