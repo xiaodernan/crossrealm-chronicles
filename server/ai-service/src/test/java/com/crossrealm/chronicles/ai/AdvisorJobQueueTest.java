@@ -37,7 +37,7 @@ class AdvisorJobQueueTest {
     }
 
     private static LlmClient.Answer answer(String text) {
-        return new LlmClient.Answer(text, "gpt-6-sol", false, 12L);
+        return new LlmClient.Answer(text, "gpt-6-sol", false, false, 12L);
     }
 
     @Test

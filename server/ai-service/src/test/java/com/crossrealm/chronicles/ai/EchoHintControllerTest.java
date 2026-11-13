@@ -41,7 +41,7 @@ class EchoHintControllerTest {
     @Test
     void 成功时返回一句梦话() throws Exception {
         when(client.complete(anyString(), anyString()))
-                .thenReturn(new LlmClient.Answer("星河在那之前已经有人走过", "gpt-6-sol", false, 10L));
+                .thenReturn(new LlmClient.Answer("星河在那之前已经有人走过", "gpt-6-sol", false, false, 10L));
 
         mvc.perform(post("/api/ai/echo-hint").contentType(MediaType.APPLICATION_JSON)
                         .content(body("星际位面", "引擎低鸣", "舷窗外流过一缕星光")))
@@ -54,7 +54,7 @@ class EchoHintControllerTest {
     @Test
     void 人格提示与星轨顾问不同() throws Exception {
         when(client.complete(anyString(), anyString()))
-                .thenReturn(new LlmClient.Answer("好", "gpt-6-sol", false, 1L));
+                .thenReturn(new LlmClient.Answer("好", "gpt-6-sol", false, false, 1L));
         mvc.perform(post("/api/ai/echo-hint").contentType(MediaType.APPLICATION_JSON)
                         .content(body("CYBER", "浮空赌场", "云层里的赌场")))
                 .andExpect(status().isOk());

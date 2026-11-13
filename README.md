@@ -72,7 +72,7 @@ creative/     周边内容：原画 / 小说 / OST / 海报
 - **服务器侧可观测**：游戏 / ai-service / 网关**三条链路全部 export `/actuator/prometheus`**——`game_telemetry_{enqueued,dropped,processed}_total` / `ai_upstream_{calls,prompt_tokens,completion_tokens,cached_tokens}_total` + `ai_upstream_cache_hit_ratio`（Gauge）/ `gateway_requests_total{route,outcome}` + `gateway_request_duration_seconds`。每一次上游 LLM 调用都带 `stream:true` + `include_usage`。
 - **在线伙伴服务**：五个 Spring Cloud 微服务（Eureka / Config / Gateway / game-service / season-service / ai-service）——排行榜和试炼榜都**带进程重启后的 Redis 镜像**（`LeaderboardRedisMirror`/`TrialRedisMirror`，ZSET 写穿 + `backend=redis` 可选；`ZCARD` 经 `/api/ops/redis` 直报）。
 - **可靠投递**：顾问异步队列已过 Redis Streams consumer group 路径（W-Z1） —— `XADD/XACK/XREADGROUP` + pending re-claim，CI 真跑 5/5；`/api/ops/dead-letter` 白名单式诊断，**零玩家内容泄漏**；W-E20 起 `/api/ops/redis` 也经由 `§4q` 冒烟门禁。
-- **LLM 真联调缓存命中率**：`wkapi.pro / v1 / gpt-6-sol` 实测 `stream:true + include_usage` 后**可见**地**报告缓存命中**（cachedRatio 近期批次 42%~80%）；echo-qa / ach-qa 判官门禁接同款细节。
+- **LLM 真联调缓存命中率**：`wkapi.pro / v1 / gpt-6-sol` 实测 `stream:true + include_usage` 后**可见**地**报告缓存命中**；W-Z22 深度修正（稳定系统前缀扩为完整世界观智库 + `cache_control: ephemeral` 显式打点 + 始终流式）后，实测 `LIVE cache first prompt=5864 cached=4755` → `second prompt=5921 cached=4908`（全程 **>80%** 前缀命中）；`upstreamCached` 逐次打进 `ai.upstream.usage` 日志；echo-qa / ach-qa 判官门禁接同款细节。
 - **判官收敛**：echo-qa 全册 **110 条，bad=0**；ach-qa **39+ 徽章，bad=0**。
 - **算法改写**：`PopCultureEchoSystem.tryUnlock`（热路径）— 旧版每次触发都扫一遍 **109/110 枚** ECHOES；现在改用 `triggerIndex: Map<trigger, Echo[]>`，O(matched) 复杂度；full-resonance 判定也改成"见两项即停"短路。
 - **终局字幕**：★ 27 段（每段 <p>），含结局变体（keep/quiet）、跨媒体衍生署名、个人最速（W-G6 在线碑）。

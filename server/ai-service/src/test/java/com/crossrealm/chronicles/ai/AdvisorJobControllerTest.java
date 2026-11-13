@@ -35,7 +35,7 @@ class AdvisorJobControllerTest {
         p.setRetryBaseMs(1);
         p.setPollAfterMs(250);
         queue = new AdvisorJobQueue(p,
-                (question, ctx) -> new LlmClient.Answer("星图说：往东", "gpt-6-sol", true, 7L),
+                (question, ctx) -> new LlmClient.Answer("星图说：往东", "gpt-6-sol", true, false, 7L),
                 ms -> {});
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();

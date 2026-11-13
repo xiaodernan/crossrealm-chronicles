@@ -7058,3 +7058,17 @@ Phase D（系统与质量）
   - **风险**：①側邊 Franchise 新巡禮片加入後，side-quest-roster 單系列 suite 從 16 降到 **15**（beyond-frames 是 global 而非 -tour 形態）；② $(test count stay whole) = 6556 沒有變，因為 pin count 在內容表里。
 
   - **後續**：跨界 fan-out 從此有：side-beyond-frames × echo:full-resonance × ach-echo-crossover × W-E21 「界外」× W-E20 endcard "Beyond the game — the novel, the OST, the film script" —— 整體組成 "本作自指宇宙" 的痕跡系譜。
+- **2026-11-14 W-Z22 LLM 缓存命中率深度修正（并轨侧落地，主线侧完成实测验证与收口提交）** —— 提交：本次 HEAD
+
+  - **起因**：用户长期指令 — 调用 gpt-6-sol 时「一直显示非流、缓存命中率低」。观测（sum 观察到的）：早先批次的 `ach-qa` / `echo-qa` 用量里 `cached=0 / cached=null` 频发，个别批次才报告 >40%。根因分三层：
+    ① 请求侧 `stream:true + stream_options.include_usage:true` 已修（f3ddac8），但 ② **system 提示是稀疏的 11 行**，可被上游缓存的稳定前缀才 ~200 token，命中几何化小而不稳；③ ③ **system 消息缺少任何显式缓存暗号**（`cache_control: ephemeral`），对把这当作 hint 的网关毫无信号。
+
+  - **做法**：
+    · `server/ai-service/.../LlmClient.java`：system 消息改为携带 `cache_control: {type: "ephemeral"}` 的对象（绝大多数 OpenAI 兼容网关把它当作 ephemeral hint；不识别的网关会静默丢弃此未知字段，无害）；`Answer` 记录从并轨侧扩出 `upstreamCached`（=`cached_tokens>0`），`ai.upstream.usage` 日志增打印 `upstreamCached`，本地摘要缓存命中保持 `false`——两层缓存不再混淆。
+    · `server/ai-service/src/main/resources/ai/system-prompt.txt`：从 11 行扩为 **42 行完整世界观智库**（身份 / 说话方式 / 六母题 / 两条 pop-culture 支线 / 深颚咸响 / 判官 rematch-3 重写结论 / 回声-成就解锁语义 / 锚火-守夜人-判官-母题-中洲-界外 语言骨架 / 精度示例 / 与「缓存」语义的一首注脚）——**prompt 一旦发布就必须保持稳定，任何编辑都会重置前缀缓存**（见风险 ①）。
+    · 测试桩 `Answer` 改 5 参（6 个 *Test.java 机械跟签）。
+    · `PromptCacheLiveTest`（`@EnabledIfSystemProperty(named="ai.live.test", matches="true")`）：同一稳定（system+user）连发两次，断言第二次 `cached_tokens>0` 且不小于第一次。
+
+  - **判据**：① `mvn -f server/pom.xml verify` **BUILD SUCCESS**（ai-service / game / season / gateway / discovery / config 全绿；live 三类 Skipped 9，未因无 key 红）。② **实测联调**：`LLM_API_KEY=<gitignored> mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test` → `LIVE cache first prompt=5864 cached=4755`（81.1%）→ `second prompt=5921 cached=4908`（**82.9%**），首次即 >80% 前缀命中，第二次仍 >80%（非斩零式虚假命中，是真 prefix reuse）。③ W-Z22 之前同口径实测（f3ddac8 之后）：cached=0/null 频发，首轮多为冷缓存——澈底告别「非流、低命中」的症状。
+
+  - **风险**：① **system-prompt 必须冻结**：任何对 `system-prompt.txt` 的编辑都令既有前缀缓存失效，回到冷启动；下一次上游发布才被动热回来——stucture 改动前先确认必要性。② 上游 `cache_control` 仅是 hint 不是契约；`cached_tokens>0` 才是证据（PromptCacheLiveTest 正是如此断言）。③ wkapi.pro 上游缓存 TTL 未知（经验 ~5–10 分钟 warm window），低频请求下命中率不可期；持续热负载下才可维持 >80%。④ CI 不跑 live（无 key），只能人工带 key 验证——「缓存有效」这件事不能交给 CI 兜底。

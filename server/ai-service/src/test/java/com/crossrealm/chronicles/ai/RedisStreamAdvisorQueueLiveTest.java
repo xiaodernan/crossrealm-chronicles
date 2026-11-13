@@ -48,7 +48,7 @@ class RedisStreamAdvisorQueueLiveTest {
             if (calls <= failTimes) {
                 throw new AdvisorUnavailableException("upstream-flop");
             }
-            return new LlmClient.Answer("PONG", "gpt-6-sol", false, 7L);
+            return new LlmClient.Answer("PONG", "gpt-6-sol", false, false, 7L);
         }
     }
 

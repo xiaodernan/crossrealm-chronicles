@@ -52,7 +52,8 @@ public class LlmClient {
     private final java.util.concurrent.atomic.AtomicLong counterCached = new java.util.concurrent.atomic.AtomicLong();
 
 
-    public record Answer(String answer, String model, boolean cached, long latencyMs) {}
+    /** cached=本地摘要缓存命中；upstreamCached=上游 prompt-cache 命中（前缀复用）。 */
+    public record Answer(String answer, String model, boolean cached, boolean upstreamCached, long latencyMs) {}
 
     private static final Pattern TRAILING_SLASH = Pattern.compile("/+$");
     private static final Pattern UNSAFE_KEY = Pattern.compile("[^a-zA-Z0-9_\\-]");
@@ -142,7 +143,7 @@ public class LlmClient {
         String cached = cache.get(key);
         if (cached != null) {
             incrementCacheHitMeter();
-            return new Answer(cached, props.getModel(), true, 0L);
+            return new Answer(cached, props.getModel(), true, false, 0L);
         }
 
         if (!breaker.allow()) throw new AdvisorUnavailableException("circuit-open");
@@ -166,12 +167,14 @@ public class LlmClient {
                     Integer promptTokens = lastUpstreamUsage.promptTokens();
                     String ratio = (cachedTokens != null && promptTokens != null && promptTokens > 0)
                             ? String.format("%.1f%%", cachedTokens * 100.0 / promptTokens) : "n/a";
-                    LOG.info("ai.upstream.usage model={} prompt={} completion={} cached={} cachedRatio={}",
-                            props.getModel(), promptTokens, lastUpstreamUsage.completionTokens(), cachedTokens, ratio);
+                    boolean upstreamCached = cachedTokens != null && cachedTokens > 0;
+                    LOG.info("ai.upstream.usage model={} prompt={} completion={} cached={} cachedRatio={} upstreamCached={}",
+                            props.getModel(), promptTokens, lastUpstreamUsage.completionTokens(), cachedTokens, ratio, upstreamCached);
                 }
                 breaker.onSuccess();
                 cache.put(key, answer);
-                return new Answer(answer, props.getModel(), false, elapsedMs(started));
+                boolean upstreamCached = reply.cachedTokens() != null && reply.cachedTokens() > 0;
+                return new Answer(answer, props.getModel(), false, upstreamCached, elapsedMs(started));
             } catch (LlmUpstreamException e) {
                 last = e;
                 if (!e.retryable()) break;
@@ -243,9 +246,14 @@ public class LlmClient {
     private String requestBody(String system, String user) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", props.getModel());
-        body.put("messages", List.of(
-                Map.of("role", "system", "content", system),
-                Map.of("role", "user", "content", user)));
+        // 系统消息显式打 ephemeral 缓存标记：绝大多数 OpenAI 兼容网关会把这一段
+        // 当作可复用前缀写入 prompt-cache；即便上游忽略该字段也毫无副作用（unknown field 被丢弃）。
+        // 关键前提：系统提示是**稳定且 ≥1024 token** 的前缀，前缀缓存才会真正生效（见 W-Z-缓存修复）。
+        Map<String, Object> systemMsg = new LinkedHashMap<>();
+        systemMsg.put("role", "system");
+        systemMsg.put("content", system);
+        systemMsg.put("cache_control", Map.of("type", "ephemeral"));
+        body.put("messages", List.of(systemMsg, Map.of("role", "user", "content", user)));
         body.put("max_tokens", props.getMaxTokens());
         body.put("temperature", 0.7);
         // W-Z11：始终流式上游（include_usage 让末段 SSE 带用量块）——

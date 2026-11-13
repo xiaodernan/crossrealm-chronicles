@@ -38,7 +38,7 @@ class RequestCorrelationTest {
         p.setRetryBaseMs(1);
         p.setPollAfterMs(250);
         AdvisorJobQueue queue = new AdvisorJobQueue(p,
-                (question, ctx) -> new LlmClient.Answer("星图说：往前", "gpt-6-sol", false, 1L),
+                (question, ctx) -> new LlmClient.Answer("星图说：往前", "gpt-6-sol", false, false, 1L),
                 ms -> {});
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();

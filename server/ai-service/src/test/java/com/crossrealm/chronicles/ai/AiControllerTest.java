@@ -47,7 +47,7 @@ class AiControllerTest {
     @Test
     void 正常提问返回四段契约() throws Exception {
         when(client.ask(anyString(), org.mockito.Mockito.<Map<String, Object>>any()))
-                .thenReturn(new LlmClient.Answer("往有灯的地方走", "gpt-6-sol", false, 42L));
+                .thenReturn(new LlmClient.Answer("往有灯的地方走", "gpt-6-sol", false, false, 42L));
 
         mvc.perform(post("/api/ai/chat")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +119,7 @@ class AiControllerTest {
     void 模型输出原样返回转义由前端负责() throws Exception {
         String raw = "石阶上有 <script> 三个字";
         when(client.ask(anyString(), org.mockito.Mockito.<Map<String, Object>>any()))
-                .thenReturn(new LlmClient.Answer(raw, "gpt-6-sol", false, 1L));
+                .thenReturn(new LlmClient.Answer(raw, "gpt-6-sol", false, false, 1L));
 
         mvc.perform(post("/api/ai/chat").contentType(MediaType.APPLICATION_JSON)
                         .content(request("看见了什么", null)))
