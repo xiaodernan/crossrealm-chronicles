@@ -35,6 +35,7 @@ server/
   scripts/verify-redis-leaderboard.ps1 # W-Y5 Redis 排行榜镜像实证（backend=redis：三条提交→ZCARD=3→停 A→重启 B→Top-K 完整恢复；CI 真跑）
   scripts/verify-redis-trial.ps1 # W-Y6 切片3 Redis 试炼榜镜像实证（与排行榜同一形态；重启后赛季过滤与 score 降序完整恢复；CI 真跑）
   scripts/verify-prometheus.ps1 # W-Z10 Prometheus 端点实证（Micrometer metrics + JVM 基础指标；scrape 到 game_telemetry_* + jvm_memory_used_bytes）
+  scripts/verify-prometheus-ai.ps1 # W-Z12 ai-service Prometheus 端点实证（advisor chat 一次真对话 + scrape /actuator/prometheus 看到 ai_upstream_calls_total / prompt_tokens_total / cache_hit_ratio）
   docker-compose.yml     # 六容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
 ```
 

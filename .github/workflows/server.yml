@@ -73,3 +73,9 @@ jobs:
       # game_telemetry_enqueued_total + jvm_memory_used_bytes + process_uptime_seconds.
       - name: Prometheus telemetry exposition (W-Z10 verification)
         run: pwsh -File "${{ github.workspace }}/server/scripts/verify-prometheus.ps1"
+
+      # ai-service Micrometer/Prometheus exposition (W-Z12): game-service 同构。
+      # 本地起 ai-service，验证 /actuator/prometheus 真实拉取到 JVM 基础指标；
+      # 有 LLM_API_KEY 时真跑一轮 advisor chat —— ai_upstream_calls_total / prompt_tokens_total / cache_hit_ratio 出线。
+      - name: AI service Prometheus metrics (W-Z12 verification)
+        run: pwsh -File "${{ github.workspace }}/server/scripts/verify-prometheus-ai.ps1"

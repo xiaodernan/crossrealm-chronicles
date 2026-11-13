@@ -40,6 +40,18 @@ public class LlmClient {
     private static final Logger LOG = LoggerFactory.getLogger(LlmClient.class);
     private volatile UpstreamUsage lastUpstreamUsage;
 
+    // W-Z12：Micrometer 指标（仅在 MeterRegistry bean 存在时生效；单测构造器留空即全 null）
+    private final io.micrometer.core.instrument.MeterRegistry meterRegistry;
+    private io.micrometer.core.instrument.Counter callsSuccess;
+    private io.micrometer.core.instrument.Counter callsFailure;
+    private io.micrometer.core.instrument.Counter promptTokensTotal;
+    private io.micrometer.core.instrument.Counter completionTokensTotal;
+    private io.micrometer.core.instrument.Counter cachedTokensTotal;
+    private io.micrometer.core.instrument.Counter aiCacheHits;
+    private final java.util.concurrent.atomic.AtomicLong counterPrompt = new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.atomic.AtomicLong counterCached = new java.util.concurrent.atomic.AtomicLong();
+
+
     public record Answer(String answer, String model, boolean cached, long latencyMs) {}
 
     private static final Pattern TRAILING_SLASH = Pattern.compile("/+$");
@@ -60,14 +72,44 @@ public class LlmClient {
      * Spring picks among multiple constructors only when one is annotated.
      * Without @Autowired here the container falls back to a (nonexistent)
      * default constructor and the whole context fails to start. The package-
-     * private constructor above stays for tests with injected fakes/cache.
+     * private constructor below stays for tests with injected fakes/cache.
      */
     @org.springframework.beans.factory.annotation.Autowired
-    public LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper) {
+    public LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper,
+                     io.micrometer.core.instrument.MeterRegistry meterRegistry) {
         this(props, transport, mapper,
                 new ResponseCache(props.getCacheMaxEntries(), props.getCacheTtlSeconds() * 1000L),
                 new LlmCircuitBreaker(props.getBreakerThreshold(), props.getBreakerCooldownMs()),
-                loadSystemPrompt());
+                loadSystemPrompt(),
+                meterRegistry);
+    }
+
+    /** 兼容旧调用点（不带 MeterRegistry）。 */
+    public LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper) {
+        this(props, transport, mapper, null);
+    }
+
+    private LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper,
+                      ResponseCache cache, LlmCircuitBreaker breaker, String systemPrompt,
+                      io.micrometer.core.instrument.MeterRegistry meterRegistry) {
+        this.props = props;
+        this.transport = transport;
+        this.mapper = mapper;
+        this.cache = cache;
+        this.breaker = breaker;
+        this.systemPrompt = systemPrompt;
+        this.meterRegistry = meterRegistry;
+        if (meterRegistry != null) {
+            this.callsSuccess = meterRegistry.counter("ai_upstream_calls_total", "outcome", "success");
+            this.callsFailure = meterRegistry.counter("ai_upstream_calls_total", "outcome", "failure");
+            this.promptTokensTotal = meterRegistry.counter("ai_upstream_prompt_tokens_total");
+            this.completionTokensTotal = meterRegistry.counter("ai_upstream_completion_tokens_total");
+            this.cachedTokensTotal = meterRegistry.counter("ai_upstream_cached_tokens_total");
+            this.aiCacheHits = meterRegistry.counter("ai_cache_hits_total");
+            io.micrometer.core.instrument.Gauge.builder("ai_upstream_cache_hit_ratio", this,
+                    self -> self.counterPrompt.get() > 0 ? (double) self.counterCached.get() / self.counterPrompt.get() : 0.0)
+                    .register(meterRegistry);
+        }
     }
 
     /** 包内可见：测试注入可控的缓存 / 熔断器（含假时钟），不必真的 sleep 15 秒。 */
@@ -79,6 +121,7 @@ public class LlmClient {
         this.cache = cache;
         this.breaker = breaker;
         this.systemPrompt = systemPrompt;
+        this.meterRegistry = null;
     }
 
     public Answer ask(String question, Map<String, Object> context) {
@@ -97,7 +140,10 @@ public class LlmClient {
         if (!isConfigured()) throw new AdvisorUnavailableException("not-configured");
         String key = digest(props.getModel() + "\u0000" + system + "\u0000" + user);
         String cached = cache.get(key);
-        if (cached != null) return new Answer(cached, props.getModel(), true, 0L);
+        if (cached != null) {
+            incrementCacheHitMeter();
+            return new Answer(cached, props.getModel(), true, 0L);
+        }
 
         if (!breaker.allow()) throw new AdvisorUnavailableException("circuit-open");
 
@@ -113,6 +159,7 @@ public class LlmClient {
                 LlmTransport.UpstreamReply reply = transport.postJsonWithUsage(endpoint(), props.getApiKey(), body, props.getTimeout());
                 String raw = reply.rawJson();
                 String answer = extractAnswer(raw);
+                incrementMeters(reply, true);
                 lastUpstreamUsage = toUsage(reply);
                 if (lastUpstreamUsage != null) {
                     Integer cachedTokens = lastUpstreamUsage.cachedTokens();
@@ -132,7 +179,33 @@ public class LlmClient {
         }
 
         breaker.onFailure();
+        incrementMeters(null, false);
         throw new AdvisorUnavailableException("upstream-" + (last == null ? 0 : last.status()));
+    }
+
+    /** ai.upstream 指标装配（W-Z12）：success 由 answer 构建点计；failure 由终态计；cache-hits 由摘要缓存命中计。 */
+    private void incrementMeters(LlmTransport.UpstreamReply reply, boolean success) {
+        if (meterRegistry == null) return;
+        if (success) {
+            if (callsSuccess != null) callsSuccess.increment();
+            if (reply != null) {
+                if (reply.promptTokens() != null) {
+                    if (promptTokensTotal != null) promptTokensTotal.increment(reply.promptTokens());
+                    counterPrompt.addAndGet(reply.promptTokens());
+                }
+                if (reply.completionTokens() != null && completionTokensTotal != null) completionTokensTotal.increment(reply.completionTokens());
+                if (reply.cachedTokens() != null) {
+                    if (cachedTokensTotal != null) cachedTokensTotal.increment(reply.cachedTokens());
+                    counterCached.addAndGet(reply.cachedTokens());
+                }
+            }
+        } else {
+            if (callsFailure != null) callsFailure.increment();
+        }
+    }
+
+    private void incrementCacheHitMeter() {
+        if (aiCacheHits != null) aiCacheHits.increment();
     }
 
     /** 给运维/联调看的用量快照：最近一次上游调用的数字，不含任何正文。没报就 null。 */
