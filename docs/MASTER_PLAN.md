@@ -6756,3 +6756,16 @@ Phase D（系统与质量）
   - **pin**：`EXPECTED_KEY_COUNT` 2968 → 2974（双表各 6 枚 title/desc）；`ECHOES.length` 86 → 89；`achievementsPopCulture` 23 → 24；`content-volume-reading` 回声 86 → 89；`docs/MASTER_PLAN §C3` 回声读数 86→89（两处）；CI run `43376464425` 监控中；perf 未超线（零新网格）。
 
   - **验证**：lint 0 / 6556 例 438 文件全绿 / build ✓ / size 2.13 MiB（余 0.06 MiB）/ e2e 通关 ✓。
+- **2026-11-13 W-Y6 切片3——位面试炼上 Redis 镜像** —— 提交 `3939eaa`
+
+  - **起因**：W-Y6 切片1/2 把 /api/leaderboard（Boss 榜）落到了 Redis，切片3 把 /api/trials/leaderboard（位面试炼榜）落到另一份 ZSET `trial-leaderboard:runs` —— 两个都重启不见了分；都要 live Redis 实测。
+
+  - **做法**：`TrialRedisMirror`（`game-service.trial.backend=redis` 才注册；`ZREVRANGE` 出榜；`member=JSON TrialRun`；member 异常容错 → 跳过）+ `TrialLeaderboardService` 构造器重载 `(properties, @Nullable mirror)`；`add()` 镜像、`@PostConstruct` 优先 pullAll；Redis 进程间不挂提交。
+
+  - **live test**：`RedisTrialMirrorLiveTest` 5/5 真 Redis PASSED（提交 → 重启恢复 ember/gloom 两赛季过滤、score 降序仍生效、损坏行 skip 默不抛）。
+
+  - **真机联调**：throwaway redis:7-alpine on 26385（关闭无关 Redis 容器）→ 启动 A（backend=redis）→ POST 三条（amber-spirit 9000 / iron-scroll 8200 / ash-sage 7500 gloom）→ ZCARD=3 ✓ → 停 A → 启 B → `/api/trials/leaderboard?season=ember` 仍能看到 2 条且 amber-spirit 第一 ✓（`verify-redis-trial.ps1` 本机一次通过）。
+
+  - **CI**：server.yml 新增「Redis-backed trial leaderboard (W-Y6 verification)」步骤。
+
+  - **结论**：位面试炼榜也享受了与 Boss 榜相同的幂等重启恢复，赛季过滤 + score 降序在 Redis 层面被理解。
