@@ -32,6 +32,8 @@ import { 建配置, 配置总线题, 刷新题 } from '../platform/config.js';
 import { 建总线 } from '../platform/bus.js';
 import { 建写者租约, 租约可调项 } from '../platform/lease.js';
 import { onlineServices } from '../online/OnlineServices.js';
+import { PresenceBeat } from '../online/PresenceBeat.js';
+import { presenceTracker } from '../online/presenceTracker.js';
 import { bossBestTimes } from '../game/BossBestTimes.js';
 import { fmtClock } from '../ui/msClock.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
@@ -470,6 +472,9 @@ export class Game {
     // 在线伙伴服务的客户端挂在实例上（W-G2 切片1：试炼榜直接从 this.game 读，不去 import 单例 ——
     // 与其它 JournalTab 的口径一致）。模块单例本来就是全局唯一那一份，这里只是暴露它。
     this.onlineServices = onlineServices;
+    // W-Z26：上线后挂上在线在场心跳 + SSE 订阅（进程内单例，开局只 start 一次）
+    this.presenceBeat = this._adopt('online/PresenceBeat', new PresenceBeat(this));
+    presenceTracker.start();
     void this.seasons.refreshFromOnline();
     this.combatStyle = this._adopt('game/CombatStyleTracker', new CombatStyleTracker(this));
     this.combatStyleOverlay = this._adopt('ui/CombatStyleOverlay', new CombatStyleOverlay(this));
@@ -1321,6 +1326,7 @@ export class Game {
     走舱壁(this, 'triadVisualFx', () => this.triadVisualFx?.update(dt));
     走舱壁(this, 'wave4VisualFx', () => this.wave4VisualFx?.update(dt));
     走舱壁(this, 'restScene', () => this.restScene?.update(dt));
+    走舱壁(this, 'presenceBeat', () => this.presenceBeat?.update(dt));
     走舱壁(this, 'cinematics', () => this.cinematics.update(dt));
     const inputLocked = this.combatInputLock?.blocksInput?.() || this.combatCamera?.blocksInput?.();
     const canPlay = !this.dialog.open && !this.upgrade.open && !this.cinematicActive

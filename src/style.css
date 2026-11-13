@@ -3651,6 +3651,42 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 
 .advisor-head-actions { display: flex; align-items: center; gap: 8px; }
 
+/* 在场微光（W-Z26）：进在线服务后才浮出的冷色微尘。金火是本作的母题色——在场徽章用更安静的月白。
+   初始 hidden，ready/count>0 才现身；文字走 textContent，无 innerHTML 位。 */
+.advisor-presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  font-size: 0.66rem;
+  white-space: nowrap;
+  color: rgba(214, 235, 255, 0.88);
+  border: 1px solid rgba(172, 214, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(146, 208, 255, 0.07);
+  letter-spacing: 0.04em;
+}
+
+.advisor-presence.hidden { display: none; }
+
+.advisor-presence-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a9dcff;
+  box-shadow: 0 0 10px rgba(169, 220, 255, 0.9);
+  animation: advisor-presence-breathe 2.6s ease-in-out infinite;
+}
+
+@keyframes advisor-presence-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .advisor-presence-dot { animation: none; }
+}
+
 .advisor-status {
   display: inline-flex;
   align-items: center;

@@ -20,6 +20,8 @@ import {
 } from '../content/advisor.js';
 
 const TIMEOUT_MS = 1500;
+const ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
+const CHANNEL_RE = /^[A-Za-z0-9_-]{1,32}$/;
 const LS_FLAG = 'crossrealm_online';
 const LS_BASE = 'crossrealm_online_base_url';
 
@@ -474,6 +476,54 @@ export class OnlineServices {
    * channel 与服务端同一白名单（`^[A-Za-z0-9_-]{1,32}$`），不符直接 null（零外呼）。
    * 这一格是给设置页「在场人数」按钮的——读不到就一句兜底提示，不让孩子们因为没在线而烦恼
    */
+  /**
+   * SSE 快照与实时帧订阅（W-Z26「星图微光」）——`GET /api/presence/{channel}/stream`，
+   * 供 `presenceTracker` 开 EventSource 用；未启用 / 非法频道 → null（零外呼）。
+   */
+  presenceStreamUrl(channel = 'world') {
+    if (!this._enabled) return null;
+    if (typeof channel !== 'string' || !CHANNEL_RE.test(channel)) return null;
+    return `${this._baseUrl}/api/presence/${channel}/stream`;
+  }
+
+  /**
+   * 心跳（W-Z26「星图微光」）——`POST /api/presence/{channel}/beat`，body `{id,name,hue,x,z}`。
+   * 返回 true/false；未启用 / 非法字段 / 非 202 → false（吞错，不打断游戏）。
+   * 字段口径与服务端一致：id/channel 白名单、name 去控制字符裁剪 24、hue ∈ [0,359] 整数、x/z ∈ [-1,1] 有限。
+   */
+  async postPresenceBeat({ id, name, hue, x, z, channel = 'world' } = {}) {
+    if (!this._enabled) return false;
+    if (typeof channel !== 'string' || !CHANNEL_RE.test(channel)) return false;
+    if (typeof id !== 'string' || !ID_RE.test(id)) return false;
+    const rawName = typeof name === 'string' ? name : '';
+    const cleanName = [...rawName]
+      .map((c) => { const code = c.charCodeAt(0); return code < 0x20 || code === 0x7f ? ' ' : c; })
+      .join('')
+      .trim()
+      .slice(0, 24);
+    if (!cleanName) return false;
+    const safeHue = Number.isFinite(hue) ? Math.floor(((hue % 360) + 360) % 360) : 0;
+    const safeX = Number.isFinite(x) ? Math.max(-1, Math.min(1, x)) : 0;
+    const safeZ = Number.isFinite(z) ? Math.max(-1, Math.min(1, z)) : 0;
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/presence/${channel}/beat`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id, name: cleanName, hue: safeHue, x: safeX, z: safeZ }),
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      return res.status === 202;
+    } catch (e) {
+      console.warn('[online] 在场心跳失败（已吞掉）', e?.message ?? e);
+      return false;
+    }
+  }
+
+  /** 在场频道白名单导出给 tracker（不暴露实例字段，只给纯函数） */
+  static isValidPresenceChannel(channel) {
+    return typeof channel === 'string' && CHANNEL_RE.test(channel);
+  }
+
   async fetchPresenceCount(channel = 'world') {
     if (!this._enabled) return null;
     if (typeof channel !== 'string' || !/^[A-Za-z0-9_-]{1,32}$/.test(channel)) return null;

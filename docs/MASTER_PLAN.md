@@ -7145,3 +7145,18 @@ Phase D（系统与质量）
   - **判据**：`npm test` **6580 例全绿**（+12）；`npm run lint` 0；`npm run build` ✓；SSE 链路的端到端实证由后端 W-Z24 smoke 覆盖；前端本格只读 count（无需 EventSource，FAB 角标/「世界星盘游侠光点」属下一波 I2C 在线可选层统一波次）。
 
   - **后续**：① 在线可选层统一整合——crossrealm_online 开启后 AdvisorPanel 角标旁边加「{count} 在场」微光徽章（EventSource + 断连自动静默）；② on-FullArt 星盘 SSE 游侠光点（x/z 归一坐标直接在 WorldMap canvas 上作光点）；③ `/api/ops/presence` 聚合进运维页（count/在场上限/SSE 活跃连接数），对照 leaderboard 的 `ZCARD` 口径。
+- **2026-11-14 W-Z26「星图微光」——顾问面板的在线徽章 + 全局 SSE 订阅 + 在场心跳** —— 提交：本次 HEAD
+
+  - **起因**：W-Z24/W-Z25 把 presence-service 从脚手架续建到「设置页能看到 N 人在场」，但这一格始终只挂在设置页角落——玩家不进设置、永远没人知道自己是不是真·在场。W-Z26 把这件事提到玩家主动闭合的两个入口：① **顾问面板（F7）**：按故事内语境——篝火边看见同道——加一枚「在场 N 人」月白微尘徽章；② **游戏循环里的自我续命**：不进设置也不主动查的情况下，只要开了「在线伙伴服务」开关，本机游侠每 5s 自动续命一次，服务端 Set/TTL 永远看见他。
+
+  - **做法**：
+    · **`src/online/presenceTracker.js`（新）**：页面级共享 SSE 单例（`presenceTracker`）。`subscribe(fn)` 立即回调当前状态；`start()` 幂等、未启用/非法频道零动作；SSE 走原生 `EventSource`（自动重连、snapshot 重放由服务端保证）；**不自建 rAF/计时器**（B39）；`snapshot-end` 才算 ready；断连标注 `ready=false`；`stop()` 关连接、清名单。
+    · **`src/online/PresenceBeat.js`（新）**：Game 采用的心跳子系统（update(dt) 轴累计 5s 一跳，B39）；只在 `onlineServices.enabled()` 时候发；坐标取世界坐标 clamp(/900 → [-1,1])；id 为 localStorage 持久化的白名单形 ID（`resolvePresenceId()`，`^[A-Za-z0-9_-]{1,40}$`）；name `ranger-<id前6位>`；hue=38 锚火金；`dispose()` 幂等回收并 `presenceTracker.stop()`。
+    · **`OnlineServices.js`**：+`presenceStreamUrl(channel)`（启用门控 + 服务端同款白名单）、+`postPresenceBeat(...)`（服务端同款字段口径：id/channel/name 控制字符清洗/24 裁剪、hue 归一整数、x/z 夹紧有限、**只有 202 算 true**）+静态 `isValidPresenceChannel`。生命周期与注入式 `enabled`/`fetchImpl` 一致。
+    · **`Game.js`**：`_adopt('online/PresenceBeat')`（W-A1 收编口径，presenceBeat 有 dispose）+ `presenceTracker.start()`（开局一次、离线零成本）+ `update` 舱壁（与所有 update 同一入口）注册 `presenceBeat`。
+    · **AdvisorPanel + index.html + style.css**：FAB 右侧 `.advisor-presence` 月白徽章（`aria-hidden` 之外 `aria-live="polite"`，reduced-motion 下动画熄火）；只读 `settings_online_presence_fmt` 一份文案（**零新键，EXPECTED_KEY_COUNT 3064 不动**）；文本只走 `textContent`；`ready || count>0` 才现身；`dispose()` 退订。
+    · **event-registry**：`present` / `snapshot-end` 加入 DOM_EVENT_NAMES 白名单（EventSource 派发的频道事件，与 `storage`/`error`/`abort` 同类，不进游戏事件登记表）。
+
+  - **判据**：`npm test` **6606 例全绿**（+26：presence-tracker 7 / online-presence-beat 12 / presence-badge-wiring 6 + 1 修订 event-registry）；`npm run lint` 0；`npm run build` ✓。全链路意义：在「在线服务」打开的情况下，F7 → 顾问面板 → 看见「在场 N 人」徽章亮起；每 5s 有一次 POST beat 续命；关掉开关 → 徽章渐隐、下一拍自然停发。
+
+  - **风险**：① in-memory presence 事件在进程内只订阅不保活——presence-service 重启后 EventSource 重连、新连接快照重放自动补全（服务端保证）；② `crossrealm_presence_id` 如果被玩家手删，下一次 beat 会换档案再来一遍——频道内最多多一颗微尘、无副作用；③ Playwright/无 EventSource 环境（Node 单测、CSP 禁 EventSource）start() 返回 false，徽章不现身（零崩溃面已测）。

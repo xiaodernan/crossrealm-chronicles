@@ -31,6 +31,7 @@ import { t, applyTranslations } from '../engine/i18n.js';
 import { attachDraggable } from './DraggablePanel.js';
 import { focusElement, focusFirstItem } from './FocusNav.js';
 import { ADVISOR_REASONS, ADVISOR_LIMITS, normalizeAdvisorQuestion } from '../content/advisor.js';
+import { presenceTracker } from '../online/presenceTracker.js';
 
 /** 状态 → 文案键。显式表：`t(\`advisor_status_${s}\`)` 是运行时拼键，静态门禁看不见 */
 const STATUS_KEYS = Object.freeze({
@@ -72,7 +73,12 @@ export class AdvisorPanel {
     this._upstreamStats = { hits: 0, total: 0 };
     this._messages = [];
 
+
     const doc = typeof document !== 'undefined' ? document : null;
+    this.presenceEl = doc?.getElementById('advisor-presence') ?? null;
+    this.presenceText = doc?.getElementById('advisor-presence-text') ?? null;
+    this._presenceUnsub = null;
+
     this.el = doc?.getElementById('advisor-panel') ?? null;
     this.fab = doc?.getElementById('advisor-fab') ?? null;
     if (!this.el) return;
@@ -126,6 +132,9 @@ export class AdvisorPanel {
 
     // 与常驻指引同一条可拖动路径（位置写 localStorage，换语言时 title 由它自己重算）
     attachDraggable(this.el, { storageKey: 'advisor', handle: '.advisor-head' });
+    // 在场微光：在线开着才进订阅，count=0/未就绪时徽章不占位
+    this._presenceUnsub = presenceTracker.subscribe((count, ready) => this._renderPresence(count, ready));
+
   }
 
   toggle() {
@@ -372,6 +381,17 @@ export class AdvisorPanel {
     return box;
   }
 
+  /** 在场微光徽章：ready 或 count>0 才现身；文本走 textContent + settings_online_presence_fmt（复用同一份文案键） */
+  _renderPresence(count, ready) {
+    if (!this.presenceEl || !this.presenceText) return;
+    if (!ready && (!count || count <= 0)) {
+      this.presenceEl.classList.add('hidden');
+      return;
+    }
+    this.presenceText.textContent = t('settings_online_presence_fmt', { count });
+    this.presenceEl.classList.remove('hidden');
+  }
+
   dispose() {
     if (this._disposed) return;
     this._disposed = true;
@@ -386,6 +406,8 @@ export class AdvisorPanel {
     off(this.form, 'submit', this._onSubmit);
     off(this.input, 'input', this._onInput);
     for (const [chip, handler] of this._chipHandlers ?? []) off(chip, 'click', handler);
+    this._presenceUnsub?.();
+    this._presenceUnsub = null;
     if (this.open) this.game?.overlayStack?.close?.('advisor');
     this.open = false;
     this._messages = [];

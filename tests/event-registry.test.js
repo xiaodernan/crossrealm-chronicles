@@ -53,6 +53,9 @@ const DOM_EVENT_NAMES = new Set([
   // W-Z7 切片B：AbortSignal 自带原生 abort 事件（OnlineServices 轮询用它当一次性计时器/取消信号），
   // 浏览器派发、不是游戏事件，不进登记表
   'abort',
+  // W-Z26：presence-service 的 SSE 帧名——EventSource 派发的频道事件，由浏览器/服务端
+  // 定义（不是游戏事件、不进 EventBus），与 storage/error 同类的原生连接面，不进登记表
+  'present', 'snapshot-end',
 ]);
 
 function walk(dir) {
