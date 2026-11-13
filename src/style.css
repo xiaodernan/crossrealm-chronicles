@@ -2337,6 +2337,7 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .wm-legend-row .dot.dungeon { background: #bb77ff; }
 .wm-legend-row .dot.rest { background: #ff9944; }
 .wm-legend-row .dot.quest { background: #ffdd44; }
+.wm-legend-row .dot.presence { background: #fff3c4; box-shadow: 0 0 6px rgba(255, 243, 196, 0.85); }
 
 .wm-hint {
   width: 100%;

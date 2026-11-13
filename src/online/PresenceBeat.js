@@ -7,10 +7,10 @@
  * 不该影响本地打 Boss）。
  */
 import { onlineServices } from './OnlineServices.js';
-import { presenceTracker, resolvePresenceId, PRESENCE_CHANNEL } from './presenceTracker.js';
+import { presenceTracker, resolvePresenceId, PRESENCE_CHANNEL, NORMALIZED_WORLD_EXTENT } from './presenceTracker.js';
 
 const BEAT_INTERVAL_S = 5;
-const WORLD_EXTENT = 900;   // 与世界坐标系的归一化口径（x/z ∈ [-1,1]），>900 就贴边
+const WORLD_EXTENT = NORMALIZED_WORLD_EXTENT;   // 心跳归一化口径（与地图渲染同一常数）
 const DEFAULT_HUE = 38;     // 锚火金（本作唯一视觉母题色）
 
 export class PresenceBeat {

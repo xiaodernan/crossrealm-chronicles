@@ -2279,6 +2279,7 @@ export const STRINGS_ZH = Object.freeze({
   world_map_explore_label: '探索度',
   world_map_legend_quest: '任务目标 ▲',
   world_map_legend_marker: '自定义路点 ◆',
+  world_map_legend_presence_fmt: '在场微行者 · ${count} 位',
   world_map_legend_hints: '{worldMap} 关闭 · 方向键移动光标 · {mapMark} 放置路点 · {mapUnmark} 移除路点 · {zonePanel} 切换导航路点',
   world_map_legend_mouse_hint: '鼠标：点击放置路点 · Shift+点击移除',
 

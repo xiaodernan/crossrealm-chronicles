@@ -3,7 +3,13 @@ import { keyText } from './keyHints.js';
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { DUNGEON_DEFS } from '../content/dungeons.js';
 import { t } from '../engine/i18n.js';
+import { presenceTracker, NORMALIZED_WORLD_EXTENT, resolvePresenceId } from '../online/presenceTracker.js';
 
+/** 图例徽章：存在「在场微行者」时显示 N（探索者每按一次 F5 才知道这件事…不，开了地图就能看见） */
+const presenceRow = (count, ready) => {
+  if (!ready && count <= 0) return '';
+  return `<div class="wm-legend-row"><span class="dot presence"></span>${t('world_map_legend_presence_fmt', { count })}</div>`;
+};
 /** 全屏世界地图 + 迷雾 */
 export class WorldMapPanel {
   constructor(game) {
@@ -165,6 +171,7 @@ export class WorldMapPanel {
       <div class="wm-legend-row"><span class="dot quest"></span>${t('world_map_legend_quest')}</div>
       <div class="wm-legend-row"><span class="dot marker"></span>${t('world_map_legend_marker')}</div>
       <div class="wm-hint">${keyText(t('world_map_legend_hints'))}</div>
+      ${presenceRow(presenceTracker.count(), presenceTracker.ready)}
       <div class="wm-hint">${keyText(t('world_map_legend_mouse_hint'))}</div>
     `;
   }
@@ -266,6 +273,28 @@ export class WorldMapPanel {
       ctx.fill();
     }
 
+    // 在线微行者（W-Z27「星尘微行」）：presenceTracker 里的在场游侠，以月白微光落在地图上
+    const ownId = resolvePresenceId?.() ?? null;
+    for (const w of presenceTracker.wanderers()) {
+      if (w.id === ownId) continue;               // 自身位移由地图上那颗白点代表
+      const wx = w.x * NORMALIZED_WORLD_EXTENT;
+      const wz = w.z * NORMALIZED_WORLD_EXTENT;
+      if (!em.isRevealed(wx, wz)) continue;      // 和 Boss/副本同一条纪律：没探索的地方不能浮出“鬼影”
+      const mx = cx + wx * scale;
+      const mz = cy + wz * scale;
+      const glow = ctx.createRadialGradient(mx, mz, 0, mx, mz, 14);
+      const tint = `hsl(${w.hue ?? 45} 92% 72%)`;
+      glow.addColorStop(0, tint);
+      glow.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.beginPath(); ctx.arc(mx, mz, 14, 0, Math.PI * 2); ctx.fillStyle = glow; ctx.fill();
+      ctx.beginPath(); ctx.arc(mx, mz, 2.4, 0, Math.PI * 2); ctx.fillStyle = '#fff8e1'; ctx.fill();
+      ctx.beginPath(); ctx.arc(mx, mz, 4.6, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(255,241,190,0.65)'; ctx.lineWidth = 1; ctx.stroke();
+      if (w.name) {
+        ctx.font = '8px sans-serif';
+        ctx.fillStyle = 'rgba(255,244,205,0.75)';
+        ctx.fillText(w.name, mx + 7, mz + 2);
+      }
+    }
     const wp = this.game.quests.getQuestWaypoint();
     if (wp && em.isRevealed(wp.x, wp.z)) {
       const wx = cx + wp.x * scale;

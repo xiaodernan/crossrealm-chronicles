@@ -7160,3 +7160,16 @@ Phase D（系统与质量）
   - **判据**：`npm test` **6606 例全绿**（+26：presence-tracker 7 / online-presence-beat 12 / presence-badge-wiring 6 + 1 修订 event-registry）；`npm run lint` 0；`npm run build` ✓。全链路意义：在「在线服务」打开的情况下，F7 → 顾问面板 → 看见「在场 N 人」徽章亮起；每 5s 有一次 POST beat 续命；关掉开关 → 徽章渐隐、下一拍自然停发。
 
   - **风险**：① in-memory presence 事件在进程内只订阅不保活——presence-service 重启后 EventSource 重连、新连接快照重放自动补全（服务端保证）；② `crossrealm_presence_id` 如果被玩家手删，下一次 beat 会换档案再来一遍——频道内最多多一颗微尘、无副作用；③ Playwright/无 EventSource 环境（Node 单测、CSP 禁 EventSource）start() 返回 false，徽章不现身（零崩溃面已测）。
+- **2026-11-14 W-Z26「星图微光」+ W-Z27「星尘微行」——在线存在层落地为游戏内闭环** —— 提交：本次 HEAD
+
+  - **起因**：W-Z24 干出 presence 服务（续命+Pub/Sub+SSE）；W-Z25 在设置页接通了按钮；但存在感的全部意义本该横在——打打开游戏、F7 顾问、世界地图、星盘——每一面都该一眼能感受到「这里不只有我」。这一片把它接成三条真闭环。
+
+  - **W-Z26 做法**：① **`src/online/presenceTracker.js`（新）**：页面级共享 SSE 单例（`presenceTracker`）——`subscribe(fn)` 立即回调当前状态；`start()` 幂等、未启用/非法频道零动作；SSE 走原生 `EventSource`（自动重连，snapshot-end 帧才算 ready）；`stop()` 关连接、清名单。**不自建 rAF/计时器**（B39）。② **`src/online/PresenceBeat.js`（新）**：Game 采用的 update(dt) 轴心跳——每 5s 一拍（页面暂停就不发了——这是 presence 的语义），只在线时续命；坐标 /900 归一钳制；id 为 localStorage 持久化的白名单形 `crossrealm_presence_id`（`resolvePresenceId()`）；`dispose()` 幂等回收 + `presenceTracker.stop()`。③ **OnlineServices**：+`presenceStreamUrl(channel)`、+`postPresenceBeat(...)`（字段口径与服务端逐字同款：id/channel 白名单、name 控制字符替代+24 裁剪、hue 归一整数（floor 后 [0,360)）、x/z 夹紧有限、**只有 202 算 true**）+静态 `isValidPresenceChannel`；严格拒绝 `null`/字符串 count。④ **Game.js**：`_adopt('online/PresenceBeat')`（W-A1，dispose 回收）+ `presenceTracker.start()`（开局一次、离线零成本）+ `update` 舱壁注册。⑤ **AdvisorPanel**（F7）：FAB 旁月白「在场 N 人」徽章——`aria-live="polite"`、reduced-motion 下呼吸点熄火、`ready || count>0` 才现身、文案复用 `settings_online_presence_fmt`（零新键）、文本只走 `textContent`。⑥ **event-registry**：`present`/`snapshot-end` 加入 DOM_EVENT_NAMES（EventSource 派发的频道事件，非游戏事件）。
+
+  - **W-Z27 做法**：**世界地图（M）画出在线微行者**——① `presenceTracker` 新增公共 `wanderers()`（拷贝，不暴露内部字段）；② `PresenceBeat` 与地图渲染共享 `NORMALIZED_WORLD_EXTENT` 常数（不再两处抄 900）；③ `WorldMapPanel.draw()` 在副本/BOSS 与任务钩之前插入一层「月白微光足迹」：自身 id 跳过（已有地图白点）；**只画 `isRevealed` 的格**（和 BOSS/Dungeon 同一条纪律：未知处不显鬼影）；radial glow 以 hue 着色 + 白核 + 呼吸环 + 小字 name（`w.name` 已由服务端裁剪至 24 字）；④ 图例多一行微行者徽章（`world_map_legend_presence_fmt`，仅 count>0 或 ready 时显现）；`.dot.presence` 月白样式（box-shadow 发光）；⑤ 语料 +1 键 `world_map_legend_presence_fmt`（zh/en，`EXPECED_KEY_COUNT` 3064→**3065**）。
+
+  - **判据**：`npm test` **6613 例全绿**（W-Z26 +26 / W-Z27 +7）；`npm run lint` 0；`npm run build` ✓（冷启 45–53s）；**本地回归**：F7 顾问面板 → 在线开关开 →「在场 N 人」月白徽章浮起；每 5s POST `…/presence/world/beat`；关地图再开 → 游侠微光仍在（EventSource 断连自动快照重放）。`.github/workflows/server.yml` 的 presence 实证步骤（W-Z24 遗留 FAILING on Linux pwsh — `-WindowStyle Hidden` 与 PS `curl` 别名两处跨平台坑已在 `9f56f58` 修复并本地复验 PASSED）。
+
+  - **风险**：① **SSE 连接数** = 在线玩家数（每标签一条）——presence-service 的 SSE 是只读频道广播，N 个连接 = N 条 emitter，扇出复杂度 O(K)（K=进频道的人数；压测口径后续可加 `/api/ops/presence` 监控 SSE 活跃数）；② `crossrealm_presence_id` 如果被手手动删号：下一次 beat 用新档案再来（频道里最多多一盏微尘）；③ 地图重绘帧成本：游侠数量 × radial gradient，常态 < 50 人 → 每帧 < 0.5ms（看实现复杂度，非常态扩缩时值得注意）；④ 地图上自身 mote 覆盖的问题已规避（ownId 跳过）。
+
+  - **后续**：① 「篝火记忆」里插入一段只在在线时出现的叙事分支（在线伙伴的影子，占位）；② `/api/ops/presence` 进运维页（频道上限/SSE 连接数/新鲜数）；③ 星盘上「漂流信件」：微行者之间可留匿名纸条（先只读，收发需 ID 白名单+按频道限 50 字）；④ **全在线玩家名册的幽光星屑**——与 credits 谢幕场景对接（谢幕即出现「游侠 {name} · 第 N 趟」静默滚动致谢）。

@@ -14,6 +14,7 @@
 import { onlineServices } from './OnlineServices.js';
 
 const LS_ID = 'crossrealm_presence_id';
+export const NORMALIZED_WORLD_EXTENT = 900; // 心跳坐标的归一化口径（与 PresenceBeat 同一常数）
 export const PRESENCE_CHANNEL = 'world';
 
 /** 本浏览器实例的持久游侠档案（id 白名单约束后存 localStorage；随机 UUID 防撞） */
@@ -82,6 +83,8 @@ export class PresenceTracker {
     this._emit();
   }
 
+  /** 公共读数：当前名单（地图渲染用）；拷贝而非内部引用 */
+  wanderers() { return [...this._wanderers.values()]; }
   count() {
     return this._wanderers.size;
   }
@@ -99,6 +102,7 @@ export class PresenceTracker {
       if (!w || typeof w.id !== 'string' || !w.id) return;
       this._wanderers.set(w.id, {
         id: w.id,
+        name: typeof w.name === 'string' ? w.name.slice(0, 24) : '',
         hue: Number.isFinite(w.hue) ? Math.floor(w.hue) % 360 : 0,
         x: Number.isFinite(w.x) ? Math.max(-1, Math.min(1, w.x)) : 0,
         z: Number.isFinite(w.z) ? Math.max(-1, Math.min(1, w.z)) : 0,

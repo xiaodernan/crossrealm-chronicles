@@ -2281,6 +2281,7 @@ export const STRINGS_EN = Object.freeze({
   world_map_explore_label: 'Explored',
   world_map_legend_quest: 'Quest Objective ▲',
   world_map_legend_marker: 'Custom Waypoint ◆',
+  world_map_legend_presence_fmt: 'Wanderers online · ${count}',
   world_map_legend_hints: '{worldMap} Close · Arrow keys move cursor · {mapMark} Place waypoint · {mapUnmark} Remove waypoint · {zonePanel} Cycle nav waypoint',
   world_map_legend_mouse_hint: 'Mouse: click to place · Shift+click to remove',
 
