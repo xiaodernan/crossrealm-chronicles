@@ -36,22 +36,22 @@ function fireEcho(game, trigger) {
 // ── 深渊合唱：六块立石绕着升高的岩台，石尖指向深不见底的空 ──
 function attachVoidChoirHomage(zone, world, game) {
   const stoneMat = new THREE.MeshStandardMaterial({ color: 0x211b2b, roughness: 0.92, emissive: 0x241830, emissiveIntensity: 0.35 });
-  const gy = zone.groundYAt(-140, 20);
+  const gy = zone.groundYAt(-135, 10);
 
   // 中心岩台
   const dais = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.1, 0.5, 9), stoneMat);
-  dais.position.set(-140, gy + 0.25, 20);
+  dais.position.set(-135, gy + 0.25, 10);
   zone.group.add(dais);
   // 六块环穹石柱
   for (let i = 0; i < 6; i++) {
     const angle = (i / 6) * Math.PI * 2;
     const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.55, 3.4, 7), stoneMat);
-    pillar.position.set(-140 + Math.cos(angle) * 2.1, gy + 1.7, 20 + Math.sin(angle) * 2.1);
+    pillar.position.set(-135 + Math.cos(angle) * 2.1, gy + 1.7, 10 + Math.sin(angle) * 2.1);
     pillar.rotation.set(0, angle, (i % 2 ? 1 : -1) * 0.08);
     zone.group.add(pillar);
     // 顶端削尖的石锥
     const spike = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.9, 7), stoneMat);
-    spike.position.set(-140 + Math.cos(angle) * 2.1, gy + 3.85, 20 + Math.sin(angle) * 2.1);
+    spike.position.set(-135 + Math.cos(angle) * 2.1, gy + 3.85, 10 + Math.sin(angle) * 2.1);
     spike.rotation.z = (i % 2 ? 1 : -1) * 0.08;
     zone.group.add(spike);
   }
@@ -65,10 +65,10 @@ function attachVoidChoirHomage(zone, world, game) {
     opacity: 0.85,
   });
   const halo = new THREE.Mesh(new THREE.IcosahedronGeometry(0.4, 0), haloMat);
-  halo.position.set(-140, gy + 3.0, 20);
+  halo.position.set(-135, gy + 3.0, 10);
   zone.group.add(halo);
 
-  registerPoi(world, zone, { x: -140, y: 0, z: 20 }, 'echo_void_choir_title', () => {
+  registerPoi(world, zone, { x: -135, y: 0, z: 10 }, 'echo_void_choir_title', () => {
     game.dialog.show(t('echo_void_choir_title'), t('echo_void_choir_desc'));
     fireEcho(game, 'echo:void-choir');
   }, { id: 'homage-void-choir', color: 0x8866cc });
