@@ -6780,3 +6780,14 @@ Phase D（系统与质量）
   - **判据**：不必加业务面，不必加 security 边界——Micrometer 的 Counter` 是 near zero 成本(YAGNI)；只守 enqueued/dropped/processed 三个可证明 backpressure 的指标；只把 /actuator/prometheus 暴露为 public read-only；不拓展到 half-open 路径上还可能导致 noisy neighbors。
 
   - **风险与后续**：① `/actuator/metrics` 也公开——如 metrics 名词将来含有业务敏感词（比如 Xen 单机日志）需评估是否加 `management.endpoints.web.exposure.include` 加更多限制；② 不为三个指标加 i18n tag——Prometheus metric label 是 ASCII escaped，i18n 需求以指标名后缀 `{}` 表达；③ 未实现 dual-write 到 Timescale/ClickHouse，不假装它是时序数据。
+- **2026-11-13 W-E13 ach-qa 收敛切片（判官回填）** —— 提交 `abde833`
+
+  - **起因**：W-E13（✨九重星潮·九系母题成就）判官抽查发现 4 枚 bad（成就标题/描述重复、残留未中文化 token、占位标签）+ 若干 warn。LLM 判官这个循环的资产不是“断罪”，是逼内容层把命名歧义磨干净——但也确实需要人（我）拍板哪些判词成立。
+
+  - **采纳的判词（全部落定）**：①echo-starport-6 / echo-voidmaw-6 的 title/desc 与父条目重复 → 独立 `ach_echo_starport_six_*`（「星港六路」/ The Six Ways）与 `ach_echo_voidmaw_six_*`（「断口深语」/ Fathomless Severance）——`EXPECTED_KEY_COUNT` 2976 → **2980**（+4 双表键）；②echo-wave4 残留 “Wave4 四系列全共鸣” → 「赛博、武士、宇宙、星港四系残响齐鸣」；③style-a「风格 A」占位标签 → 「万象锋芒」/ Edge Unsheathed；④echo-wave5「凑够六个」措辞绕 → 「九系残响各六枚，同时齐鸣」；⑤echo-samurai / echo-cosmic / echo-abysssalt 的双词重复与称号空响，全部磨平。rematch-3 的判词追溯了三轮（Beacon Hunter 原本被判“与信标累积机制错位”）——最后定锚真实机制：`BossRematchDirector` + `BossBeacons` 的「Boss 信标再战」，标题保留「信标猎人」、desc 改为「通过 Boss 信标再战 3 次」，EN 同步。
+
+  - **不采纳的判词（记录在册，防下次误伤）**：echo-gloom / echo-radiant / echo-wave4 被判“缺少中洲世界 / 未体现四大回声母题”。查证无此 canon——`ECHO_FRANCHISE_BUCKETS` 里 middle-earth 与 gloom/radiant 并列独立母题；「薄暮回响 / 辉煌残响」本身就是 `franchise_gloom_label / franchise_radiant_label` 的正式母题名（与 `season_gloom_name / season_radiant_name` 同字同源，设计使然）；`echo-wave4` 的检查逻辑（cyber/samurai/cosmic/starport）就是代码真源，判官无权改门控。判官幻觉不改 content、不改代码。
+
+  - **判据与门禁**：全部是 value-only 文案打磨——lint 0 / 6556 例 438 文件全绿 / build ✓ / size 2.13 MiB（余 0.06）/ e2e 通关 ✓；键数仅因两个 _six 条目 +4（3276→2980）；键 parity（zh==en 双表）一致 ✓；`overlay-stack` 门禁踩过一次坑：我一度用 node 脚本插入 `\r\n` 导致 `\r\r\n`（lone CR），触发 B104 死口径自红——归一成 `\r\n` 即绿。教训：**手写脚本改文案表必须校验 lone CR**。
+
+  - **风险与后续**：LLM 判官批次间非确定性显著（同批次复跑 flag 构成会漂移，run2→run3）；判官只当第二只眼睛，所有“坏字”都要与机制/时轨对齐核实后再落地；ech-echo_full_resonance 那类真·梗敬意（one-ring/full-resonance）继续保留。下一刀：Wave19 新母题内容，或 echo-qa 覆盖缺口（90 枚中抽样率需提至全量）。
