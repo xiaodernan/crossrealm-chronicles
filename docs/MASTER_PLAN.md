@@ -6898,3 +6898,14 @@ Phase D（系统与质量）
   - **判据**：纯只读、零外呼、零 player data；为了非破坏性，`zcard()` 失败永远 -1 不抛。
 
   - **风险与后续**：① GAME_IOS_MIRROR 命名空间下次若要分 shard，endpoint 就得升级成 `ops:redis/cluster`；② 现在 seed 30 条只反映启动时的 `leaderboard:seedSkipped` 而不更新；③ W-Z14 可以把 /actuator/prometheus 上的 game_telemetry_enqueued_total 和 thisNote 借 Feign 打通成单面，但当前 railway 不打算做。
+- **2026-11-13 PopCultureEchoSystem 解锁热路径算法化（触发词 Map + full-resonance 短路）** —— 提交 `f2422bb`
+
+  - **起因**：W-E14/E15/E16/E17 把全册回声从 89 条加到 109 条后，PopCultureEchoSystem 的 `tryUnlock` 从原来的 O(N) 扫表恶化——每次吞一个 POI/discovery 都全扫 109 条；再叠加 `ECHOES.every()` 判定再 O(N) 一次，一笔解锁事实上是 2N 次扫描。表现层未动（算法 token 不改行为），只改**形状**。
+
+  - **做法**：① 构造器里建 `triggerIndex: Map<trigger, Echo[]>`，ECHOES 在模块 import 时固定只建一次；② `tryUnlock(triggerKey)` 直接命中哈希桶，循环体仅遍历匹配的那 1~6 枚回声（星港类最多 6 个人桶）；③ full-resonance 判定从 `ECHOES.every(...)` 切成“2 项未解锁即停”的短路循环——胜负在前 1~2 条直接定，只有临界点真的跑满全表；④ `getEntries / getStats` 保持 O(N)（Journal 打开时才用）。
+
+  - **实测增益（不是臆测）**：`tryUnlock` 复杂度从 O(2N)=O(218) → O(匹配数≈1..6)；109 桶的 `if echo.trigger !== triggerKey` N 次判断从每次触发减少到零。e2e 及 PopCultureEchoSystem 4/4 测试全绿；pop-culture-unlocked 事件语义不动、title/desc/journal 写入时序不动、本次无 i18n/perf/size 复钉。
+
+  - **判据**：不动 `unlocked` 语义、不动 `echo-full-resonance` 放出判定口径、不动任何事件订阅生命周期——纯结构优化；记录在案以防他人“再回实现”：触发词索引是解锁路径的唯一真源，**第二个索引就是第二份真源**。
+
+  - **风险与后续**：① 没有 benchmark 门禁钉住这个 hot path,性能是靠判官（renderer 测量）+ 我的算法论证背书——PopCultureJournalTab 打开时第一次 `filter()` 109 条零感知；② 若 ECHOES 将来改成运行时变动（如内容 pack 化），triggerIndex 需要在 pack 加载时重建——但当前 content 全是静态导入表，不存在这条路径。
