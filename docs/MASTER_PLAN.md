@@ -7002,3 +7002,16 @@ Phase D（系统与质量）
     ① 同一触发词解锁两枚 crossover，journal 可能会写入两条胶片作为独立碎片——预期，扩容也没风险；
     ② 如果有更多“本作即宇宙”风格新 echo 入跨横，只需要再加一枚子成就在 ACHIEVEMENTS_POP_CULTURE（≤5 枚自己的门槛：完整三枚后就会成为升级版的 .echo-meaningless）；
     ③ 这不是“第 18 母题”——CROSSOVER 是跨母题而不是某个源，它的意义比父号更多。
+- **2026-11-13 W-E23 母题徽章补齐：6 枚 *_-6 母题成就上架（wizard/space/samurai/cyber/upside/cosmic）** —— 提交 `1590b7f`
+
+  - **起因**：之前 W-E12~W-E16 的母题出关流程里，我们只为部分母题（western/sci_fi/globe/gangster/abysssalt 等）配了 "六档出关" 的专属成就——并行批次的 wizard / interstellar / samurai / cyber / cosmic / upside 六个却只留下 parent "Academy Graduate / Equation Closed / ..."，没有 *_six 门槛——这三个 parent "≥6 " 的成就判足了 THE WHOLE “全方程”需求但名册里少这一节本质的断口。
+
+  - **做法**：6 枚新成就进 `ACHIEVEMENTS_POP_CULTURE`——每枚实现 `check: (s) => (s.echoXxx ?? 0) >= 6` +title/desc；ZH/EN 各新增对应的 `ach_echo_xxx_six_title/_desc` 键；ECHO_FRANCHISE_BUCKETS 保持不变（目标已存在）；EXPECTED_KEY_COUNT 3040 → **3052**；ACHIEVEMENTS_POP_CULTURE 33 → **39**。
+
+  - **判官外部评分**：ach-qa batch=10 真上游调用，6 个新成就判官 **ok**；整体结论 bad=0/error=0。
+
+  - **判据**：lint 0 / 6556 例全绿 / size 2.15 MiB（余 0.04）/ perf exit 0 / e2e 通关 ✓ / server CI 通过 / mvn verify BUILD SUCCESS。
+
+  - **风险与后续**：①ach-type spawning per franchise（vaste coverevery母题）——母题考核目标具体数皆为 ≥6，与「整三组全 Multi-Sign」差 2;② 之后任何母题出关不需要再改ACHIEVEMENTS，NEW뱃但每出 MULL：神olves 一个母题。当本己完成 6+6+6+6+？+? —— 五个留在“无 franchises with an even count ≥ 6 with title ending with -6 ” 清单里了，W-E23 这次全。
+
+  - **风险与后续**：① 残留 16/17 母题里已经没 *six_title* 的两个已是正确的父母题（homecoming，stripes）；② 不过之后任何新母题 additions 例如 W-E12 uphill addition will require also adding an ach;③ 之后建议配套自动化剧本「母题 ≥6 的母 id 是否都在 ACHIEVEMENTS 里」的 coverage gate。
