@@ -6730,3 +6730,29 @@ Phase D（系统与质量）
   - **验证**：`mvn -B -f server/pom.xml verify BUILD SUCCESS`。
 
   - **判据**：别再相信 skip 默认绿色等干扰——真 Redis 的 live test 必须跟代码一起被 CI 验证（这件事的责任不在测试框架，在 people）。
+- **2026-11-13 W-E12 切片1 星港 STARPORT 母题 6 档出关（6 枚、零新网格、零 perf 搬迁成本）** —— 提交 `abcb95d`
+
+  - **起因**：STARPORT 现有恰 3 枚回声（流水行者/走私码头/星图），母题分桶门槛规则把"星港稀缺"当作待破事实；本片一次性刷到 6 档，与 COSMIC / SAMURAI / VOIDMAW 对齐。
+
+  - **做法（上游复用 POI，零增 mesh）**：三枚新回声 echo-starport-dealmaker（掮客「掮客只认手势，不讲理由——点个火、推杯酒，接下该他扛的货。」）/ echo-starport-rigger（船舱工头手势，灯随手停）/ echo-starport-navigator（星图跑者）挂在 Wave4 既有三个星港 POI（cantina / smuggler-dock / holo-chart）上——每个 POI 的 `fireEcho` 一次点燃两枚，成就表也跟着齐。
+
+  - **achievement**：新增 `echo-starport-6` 门槛；与 `CSNA`、`ach-wave4` 追随 >=6；echo-wave4 `cmatch` 同期对齐。
+
+  - **pin**：`EXPECTED_KEY_COUNT` 2968 → 2974（双表 6 枚 title/desc）；`ECHOES.length` 83/86 → 89；`achievementsPopCulture` 23 → 24；`content-volume-reading` 回声 86 → 89；`docs/MASTER_PLAN §C3` 回声读数 86→89（两处）。
+
+  - **perf**：零新网格、零新 draw call——本片对 draw call 零影响（区间读数仍为 660/620/520/470 per §W-E11 perf 重钉）。e2e 通关 ✓。
+
+  - **LLM 真机实测（echo-qa 复跑）**：`ok 70 / warn 15 / bad 4`——4 条全是既有故意致敬（`echo-radio-tower`、`echo-neon-mall`、`echo-one-ring`、`echo-full-resonance`），不动——同 W-Z5 切片4 保留 one-ring 的口径；**三枚新 echo（dealmaker / rigger / navigator）全部 clean**（不出现在任何 bad/warn 清单里）。
+
+  - **验证**：lint 0 / 6556 例 438 文件全绿 / build ✓ / size 2.13 MiB（余 0.06 MiB）/ e2e 通关 ✓。
+- **2026-11-13 W-E12 切片1 星港 STARPORT 母题 6 档出关——三枚回声复用既有星港 POI、零新网格、零 perf 搬迁成本** —— 提交 `abcb95d`
+
+  - **起因**：STARPORT 现有恰 3 枚回声（star-cantina / smuggler-dock / holo-chart 各一枚），母题分桶规则要求每个≥3 维度都升到 ≥6，与 COSMIC / SAMURAI / VOIDMAW 对齐。
+
+  - **做法**：三枚新 echo（echo-starport-dealmaker / rigger / navigator）分别挂在三大既有 POI 的 `fireEcho("echo:star-cantina"|…)` —— 一个 POI 点燃同时解锁两枚回声（原有那枚 + 新一枚）。**零新 mesh、零新 POI、零 perf 搬迁成本**。achievements 同步新增 `echo-starport-6`（六门槛对齐）。
+
+  - **LLM 真机实测（echo-qa 复跑）**：`ok 70 / warn 15 / bad 4` —— 4 条全是既成的预期内致敬（echo-radio-tower / echo-neon-mall / echo-one-ring / echo-full-resonance），不动，与 W-Z5 切片4 保留 one-ring 同一口径。**三枚新 echo（dealmaker / rigger / navigator）一条不在 bad/warn 清单里**。
+
+  - **pin**：`EXPECTED_KEY_COUNT` 2968 → 2974（双表各 6 枚 title/desc）；`ECHOES.length` 86 → 89；`achievementsPopCulture` 23 → 24；`content-volume-reading` 回声 86 → 89；`docs/MASTER_PLAN §C3` 回声读数 86→89（两处）；CI run `43376464425` 监控中；perf 未超线（零新网格）。
+
+  - **验证**：lint 0 / 6556 例 438 文件全绿 / build ✓ / size 2.13 MiB（余 0.06 MiB）/ e2e 通关 ✓。
