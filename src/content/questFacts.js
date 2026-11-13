@@ -122,6 +122,18 @@ export function questFactsWritten() {
   //    `#boot-error` 空、`loading` 永远转圈）。属性名和字符串字面量不参与压缩 ——
   //    直接在函数源码里找 `objectiveFlags` 这个字面量即可。
   if (applyObjectiveFlags.toString().includes('objectiveFlags')) out.add('objectiveFlags');
+  // ⑤ 生产构建会把函数形参 `s`/`d` 压成短标识符（如 `t`/`e`），`s.spellCasts` 的字面量会消失。
+  //    为了不让检查扫空，我们采用生产包里仍然稳定的证据：任何字面量 ".spellCasts" 形式的
+  //    字段名出现都算"写入"——规范的是"判据读的每一格都有生产者"这个不变量，不挑剔写法
+  //    （测试与 minify 都得过）。属性名从 `emptyStats()` 的键里取，不抄第二份，也不会随着
+  //    名册增长而漏。
+  const ledger = new Set(Object.keys(emptyStats()));
+  for (const fn of Object.values(STAT_EVENTS)) {
+    const src = typeof fn === 'function' ? fn.toString() : '';
+    for (const k of ledger) {
+      if (src.includes('.' + k)) out.add(k);
+    }
+  }
   return out;
 }
 

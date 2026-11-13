@@ -3322,6 +3322,26 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
     radial-gradient(ellipse at center, rgba(20, 16, 30, 0.92) 0%, rgba(2, 2, 4, 0.97) 82%);
 }
 
+.start-logo {
+  display: block;
+  margin: 0 auto 18px;
+  filter: drop-shadow(0 0 22px rgba(255, 217, 138, 0.32)) drop-shadow(0 8px 40px rgba(255, 183, 90, 0.15));
+  transition: transform 0.6s ease, filter 0.6s ease;
+  animation: start-logo-breathe 3.8s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .start-logo {
+    animation: none;
+  }
+}
+
+@keyframes start-logo-breathe {
+  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 22px rgba(255, 217, 138, 0.30)) drop-shadow(0 8px 40px rgba(255, 183, 90, 0.14)); }
+  50%      { transform: translateY(-6px) scale(1.02); filter: drop-shadow(0 0 34px rgba(255, 217, 138, 0.48)) drop-shadow(0 12px 52px rgba(255, 183, 90, 0.24)); }
+}
+
 .start-inner h2 {
   font-size: clamp(1.5rem, 4.5vw, 2.3rem);
   letter-spacing: 0.24em;
