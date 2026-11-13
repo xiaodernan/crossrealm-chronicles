@@ -3386,6 +3386,18 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   advisor_cached: '缓存',
   advisor_char_count_fmt: '${n}/${max}',
 
+  ach_echo_wizard_six_title: '学院六响',
+  ach_echo_wizard_six_desc: '魔法学院残响全六枚齐鸣',
+  ach_echo_space_six_title: '恒星六响',
+  ach_echo_space_six_desc: '星际穿越全六枚齐鸣',
+  ach_echo_samurai_six_title: '武士六响',
+  ach_echo_samurai_six_desc: '武士残响全六枚齐鸣',
+  ach_echo_cyber_six_title: '霓虹六响',
+  ach_echo_cyber_six_desc: '赛博霓虹全六枚齐鸣',
+  ach_echo_upside_six_title: '逆相六响',
+  ach_echo_upside_six_desc: '逆相残响全六枚齐鸣',
+  ach_echo_cosmic_six_title: '旧日六响',
+  ach_echo_cosmic_six_desc: '旧日低语全六枚齐鸣',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

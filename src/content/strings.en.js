@@ -3387,6 +3387,18 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   advisor_cached: 'cached',
   advisor_char_count_fmt: '${n}/${max}',
 
+  ach_echo_wizard_six_title: 'Six Academy Echoes',
+  ach_echo_wizard_six_desc: 'Resonate with all six academy echoes',
+  ach_echo_space_six_title: 'Six Interstellar Echoes',
+  ach_echo_space_six_desc: 'Resonate with all six interstellar echoes',
+  ach_echo_samurai_six_title: 'Six Samurai Echoes',
+  ach_echo_samurai_six_desc: 'Resonate with all six samurai echoes',
+  ach_echo_cyber_six_title: 'Six Cyber Echoes',
+  ach_echo_cyber_six_desc: 'Resonate with all six cyber echoes',
+  ach_echo_upside_six_title: 'Six Upside-Down Echoes',
+  ach_echo_upside_six_desc: 'Resonate with all six upside-down echoes',
+  ach_echo_cosmic_six_title: 'Six Old-Days Echoes',
+  ach_echo_cosmic_six_desc: 'Resonate with all six old-days whispered echoes',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

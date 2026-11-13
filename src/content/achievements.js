@@ -58,6 +58,13 @@ export const ACHIEVEMENTS_POP_CULTURE = [
   { id: 'echo-middle-earth', title: 'ach_echo_middle_earth_title', desc: 'ach_echo_middle_earth_desc', check: (s) => (s.echoMiddleEarth ?? 0) >= 4 },
   { id: 'echo-middle-earth-6', title: 'ach_echo_middle_earth_six_title', desc: 'ach_echo_middle_earth_six_desc', check: (s) => (s.echoMiddleEarth ?? 0) >= 6 },
   { id: 'echo-cyber', title: 'ach_echo_cyber_title', desc: 'ach_echo_cyber_desc', check: (s) => (s.echoCyber ?? 0) >= 6 },
+  { id: 'echo-wizard-6', title: 'ach_echo_wizard_six_title', desc: 'ach_echo_wizard_six_desc', check: (s) => (s.echoWizard ?? 0) >= 6 },
+  { id: 'echo-space-6', title: 'ach_echo_space_six_title', desc: 'ach_echo_space_six_desc', check: (s) => (s.echoSpace ?? 0) >= 6 },
+  { id: 'echo-samurai-6', title: 'ach_echo_samurai_six_title', desc: 'ach_echo_samurai_six_desc', check: (s) => (s.echoSamurai ?? 0) >= 6 },
+  { id: 'echo-cyber-6', title: 'ach_echo_cyber_six_title', desc: 'ach_echo_cyber_six_desc', check: (s) => (s.echoCyber ?? 0) >= 6 },
+  { id: 'echo-upside-6', title: 'ach_echo_upside_six_title', desc: 'ach_echo_upside_six_desc', check: (s) => (s.echoUpside ?? 0) >= 6 },
+  { id: 'echo-cosmic-6', title: 'ach_echo_cosmic_six_title', desc: 'ach_echo_cosmic_six_desc', check: (s) => (s.echoCosmic ?? 0) >= 6 },
+
   { id: 'echo-wave5', title: 'ach_echo_wave5_title', desc: 'ach_echo_wave5_desc', check: (s) =>
     (s.echoWizard ?? 0) >= 6 && (s.echoSpace ?? 0) >= 6 && (s.echoUpside ?? 0) >= 6 &&
     (s.echoCyber ?? 0) >= 6 && (s.echoSamurai ?? 0) >= 6 && (s.echoCosmic ?? 0) >= 6 &&
