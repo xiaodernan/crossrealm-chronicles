@@ -6955,3 +6955,12 @@ Phase D（系统与质量）
   - **判据**：lint 0 / 6556 例全绿 / build ✓ / size 2.15 MiB（余 0.04）/ e2e 通关 ✓；e2e 通关文体检查已过（.end-credits-dot> 仍然按 <p> 行渲染）——额外一行的 layout 不会 clash 现有断言，wire-up 测试不动。
 
   - **风险与后续**：① 如果 creative/ 新增演出了别的衍生（比如手办/插画展/同人），必须同步更新本键；下一次“衍生行”的调整钉子是 22 个新键数；② CREDITS 里目前只有片尾的三个结局分支锁死了 flavor，这不复冲突——单独加入两格分支不会再有新分支；③ 片头和 chapter 字幕表中没有什么本行的明显同事，美学一致。
+- **2026-11-13 W-E21 「界外」echo-beyond-frames——Crossover 第 3 枚，创意宇宙自指署名** —— 提交 `c11f94e`
+
+  - **起因**：回声系统一直有一类叫 crossover（“跨界”）——它们不是任何一个母题，而是这整个创意宇宙的反射镜（poster-wall）。但它们只有两枚。把第三枚补上，整个系列就从拼贴宣传走向了完整的自指闭环：一个游戏的回声系统里有且只有一个「界外」——它不叫任何字面意思，而叫“看客也入戏”。
+
+  - **做法**：跨界条目在 `echo:poster-wall` 同一触发词下解锁（与海报墙一次交互解锁两枚 crossover）——「界外」echo-beyond-frames：「只要灯还亮着，海报就不只是纸——每多一位过客，世界就多亮一盏。」 EN：‘Beyond the Frames — so long as the lantern is lit, a poster is never just paper; every passer-by lights one more.’ FRANCHISE.CROSSOVER / hub / echo:poster-wall。计数：echoes 109 → **110**；EXPECTED_KEY_COUNT 3036 → **3038**（+2 双表键）；stats 分布完整。
+
+  - **判据**：lint 0 / 6556 例全绿 / size 2.15 MiB（余 0.04）；e2e 通关 ✓；eframes 不引入新的 FRANCHISE enum（CROSSOVER 已有），因此 `ECHO_FRANCHISE_BUCKETS` 不动；`ach-complete-overlay` 也不用升级。
+
+  - **风险与后续**：① 同一触发词现在解锁两枚 crossover——海报墙交互一次，玩家拿到两条日志（poster-wall + beyond-frames）——以此加成而不是稀释；② 如果 crossover 还有第 4 张牌（例如 a four-minute spot for the trailer），需要刷新 RE 表里“同一触发词可解锁多枚”；③ 没有牺牲任何其他列表——只是多一个新的并行条目。
