@@ -6964,3 +6964,12 @@ Phase D（系统与质量）
   - **判据**：lint 0 / 6556 例全绿 / size 2.15 MiB（余 0.04）；e2e 通关 ✓；eframes 不引入新的 FRANCHISE enum（CROSSOVER 已有），因此 `ECHO_FRANCHISE_BUCKETS` 不动；`ach-complete-overlay` 也不用升级。
 
   - **风险与后续**：① 同一触发词现在解锁两枚 crossover——海报墙交互一次，玩家拿到两条日志（poster-wall + beyond-frames）——以此加成而不是稀释；② 如果 crossover 还有第 4 张牌（例如 a four-minute spot for the trailer），需要刷新 RE 表里“同一触发词可解锁多枚”；③ 没有牺牲任何其他列表——只是多一个新的并行条目。
+- **2026-11-13 深颚咸响母题统一——ach_echo_abysssalt_* 改“咸响”真源，与 franchise_abysssalt_label 对齐** —— 提交 `c25b5b7`
+
+  - **起因**：ach-qa 在 echo_original_desc（“共鸣全部薄暮回响 / 辉煌残响 / 断口残响 / 深颚咸响”）里瞥见“咸响”与成就描述里的“深颚残响”不对位——parent 徽章与真源条目说的是不同的词。母题 label `franchise_abysssalt_label`/`season_tide_name` 为“深颚咸响”，且 `sq_side_abysssalt_tour_desc`/`sq_side_original_master_desc` 也用“咸响”——唯二怪胎是 ach_echo_abysssalt_desc 与 ach_echo_abysssalt_six_desc（“深颚残响”）。
+
+  - **做法**：zh ach_echo_abysssalt_desc “共鸣全部深颚残响”→“共鸣全部深颚咸响”；ach_echo_abysssalt_six_desc “深颚残响全六枚齐鸣”→“深颚咸响全六枚齐鸣”。英文无连带（Resonate with every deep-jaw echo 仍通）。
+
+  - **判据**：lint 0 / 6556 例全绿。两枚“盐”徽章与其余处同源了。
+
+  - **风险与后续**：① 不能作为 键的一项存档钉子——ach_id 名存字面仍为 abyssalt——但无人引用文案内字面，无影响；② 这也说明“深颚咸鸣”/“深颚咸响”仍保留双子——让标题 σ/描述分别走人便于故事氛围，不强令归一；③ 如果将来决定“残响”才是正格，就全部要一起改。
