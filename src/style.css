@@ -3784,6 +3784,15 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   border-radius: 999px;
 }
 
+.advisor-msg-meta .is-upstream-cached {
+  margin-left: 6px;
+  padding: 1px 6px;
+  color: var(--adv-gold, #f4cf6a);
+  border: 1px solid rgba(244, 207, 106, 0.42);
+  border-radius: 999px;
+  background: rgba(244, 207, 106, 0.08);
+}
+
 .advisor-typing {
   display: flex;
   align-items: center;

@@ -38,7 +38,7 @@ const PANEL_KEYS = [
   'advisor_error_disabled', 'advisor_error_timeout', 'advisor_error_network',
   'advisor_error_bad_json', 'advisor_error_blank', 'advisor_error_cancelled',
   'advisor_error_unavailable', 'advisor_error_http_fmt', 'advisor_error_busy',
-  'advisor_meta_fmt', 'advisor_cached', 'advisor_char_count_fmt',
+  'advisor_meta_fmt', 'advisor_cached', 'advisor_meta_upstream_fmt', 'advisor_cached_upstream', 'advisor_char_count_fmt',
 ];
 
 describe('ERROR_KEYS 全覆盖：每一个失败原因都有且唯一一句玩家文案', () => {

@@ -7087,3 +7087,20 @@ Phase D（系统与质量）
   - **判据**：新增 `tests/side-all-achievement.test.js` 6 例 — 57 次不放水、第 58 次解锁且 PlayerStats 桶 = 1；attach 时按 `sideQuests.completed` 回填解锁；回填不下调高存档；半截 game 不抛；toJSON/fromJSON 往返保留；名册+双表对齐。全量 `npm test` **6562 例全绿**（新增 +6）；`npm run lint` 0；`npm run build` ✓。
 
   - **风险**：① `SIDE_QUESTS_ALL.length` 现算意味着未来加支线**不用**再改成就判据（数字随内容走）；代价是 `acheval` 文案里写死的「全部 58 条」必须随名单扩容同步改（与 `campfire-all` 写死「全部 6 处」同一纪律）。② `side-quest-complete` 从 hook 摘下后，`event-registry` 门禁自动把「监听者」口径切过去——已实测绿。③ 若将来有第二生产者广播同名事件（目前只有 SideQuestSystem），W-Z21 计数会双重进账——名单审查时已核实全仓唯一派发点。
+
+- **2026-11-13 W-Z-缓存修复 —— LLM 缓存命中率 / 非流 根因定位与真实联调修复**
+
+  - **起因（用户报告）**：调用 wkapi.pro 的 gpt-6-sol 时「缓存命中率极低、控制台一直显示非流；显示流时命中率明显更高」，怀疑调用方法有误。要求深度修正并实测。
+
+  - **实测定位（真实 API 联调，密钥走 LLM_API_KEY 环境变量，不入仓）**：
+    1. 同一请求分别经 curl（HTTP/1.1 + 浏览器 UA）与 JDK HttpClient（HTTP/2）发出：curl 拿到 SSE 且末段 usage 带 cached_tokens≈4800、控制台归类为「流」；JDK HttpClient 的响应里 cached_tokens 为 null、控制台归类为「非流」。差异只在传输层 HTTP 版本。
+    2. 小 system 提示（~255 token）时上游几乎不缓存（无 ≥1024 token 稳定前缀）；扩到 ~1103 token 后，稳定前缀命中上游 prompt-cache，cached_tokens≈4556~4894。
+    → 双根因：① JDK HttpClient 默认 HTTP/2 被上游当作非流、不回显缓存命中；② 客户端 system 提示过短，低于 prompt-cache 的 1024-token 门槛。
+
+  - **做法**：
+    1. `HttpLlmTransport` 强制 `HttpClient.Version.HTTP_1_1`（单条 POST 用不到 HTTP/2 多路复用；HTTP/1.1 + keep-alive 连接池等价且无兼容坑）。
+    2. `LlmClient.requestBody` 给 system 消息显式打 `cache_control:{type:"ephemeral"}` 标记（unknown field 被上游忽略，无副作用）；并把 system 提示扩到 ≥1024 token 的稳定世界设定/人格/样例（resources/ai/system-prompt.txt：255 → 1103 token）。
+    3. `LlmClient.Answer` 新增 `upstreamCached` 字段，`AiController` 在 /api/ai/chat 响应回显；前端 `AdvisorPanel` 据此显示金色「上游缓存」角标（与本地摘要缓存的青色「本地缓存」区分），让 token 利用率对玩家可见。i18n +2 键（advisor_meta_upstream_fmt / advisor_cached_upstream），键数 3060 → 3062。
+    4. 新增门禁实测 `PromptCacheLiveTest`（仅 `-Dai.live.test=true` + `LLM_API_KEY` 时运行，默认跳过）：同一稳定请求连发两次，断言第二次 cached_tokens 显著大于第一次，证明修复。
+
+  - **判据（真实联调）**：live test 通过——首次 cached=null（冷启动），二次 cached=4556（命中）。ai-service 全量单测 BUILD SUCCESS；前端 advisor 系列 + i18n 键数门禁 166/166 绿。

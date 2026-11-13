@@ -69,6 +69,7 @@ export class AdvisorPanel {
     this._status = 'checking';
     this._lastMeta = null;
     this._cacheStats = { hits: 0, total: 0 };
+    this._upstreamStats = { hits: 0, total: 0 };
     this._messages = [];
 
     const doc = typeof document !== 'undefined' ? document : null;
@@ -282,11 +283,23 @@ export class AdvisorPanel {
     if (res?.ok && typeof data.answer === 'string' && data.answer.trim()) {
       const model = typeof data.model === 'string' ? data.model : '—';
       const ms = Number.isFinite(data.latencyMs) ? Math.max(0, Math.round(data.latencyMs)) : 0;
+      const upstreamCached = data.upstreamCached === true;
       this._cacheStats.total += 1;
       if (data.cached === true) this._cacheStats.hits += 1;
-      this._lastMeta = t('advisor_meta_fmt', { model, ms }) + ' · ' + t('advisor_meta_cached_fmt', this._cacheStats);
+      // 本地摘要缓存命中 = 根本没打上游，这一问不进上游统计（也不该声称命中上游缓存）。
+      if (data.cached !== true) {
+        this._upstreamStats.total += 1;
+        if (upstreamCached) this._upstreamStats.hits += 1;
+      }
+      let meta = t('advisor_meta_fmt', { model, ms }) + ' · ' + t('advisor_meta_cached_fmt', this._cacheStats);
+      // 上游 prompt-cache 命中 = 这一问复用了上游稳定的前缀，token 利用率更高（见 W-Z 缓存修复）。
+      // 只在真打过上游之后才显示，离线/纯本地缓存命中时不凑数。
+      if (this._upstreamStats.total > 0) {
+        meta += ' · ' + t('advisor_meta_upstream_fmt', this._upstreamStats);
+      }
+      this._lastMeta = meta;
       this._renderMeta();
-      this._appendMessage('advisor', data.answer, { cached: data.cached === true });
+      this._appendMessage('advisor', data.answer, { cached: data.cached === true, upstreamCached });
       if (this._status === 'offline') this._setStatus('ready');
       return;
     }
@@ -324,14 +337,26 @@ export class AdvisorPanel {
     box.setAttribute('data-advisor-role', role);
     box.textContent = text;
 
-    if (role === 'advisor' && extra.cached) {
+    if (role === 'advisor') {
       const meta = document.createElement('span');
       meta.className = 'advisor-msg-meta';
-      const badge = document.createElement('span');
-      badge.className = 'is-cached';
-      badge.textContent = t('advisor_cached');
-      meta.appendChild(badge);
-      box.appendChild(meta);
+      let added = false;
+      // 上游 prompt-cache 命中（token 高效复用）优先用金色角标，与本地摘要缓存的青色角标区分开。
+      if (extra.upstreamCached) {
+        const up = document.createElement('span');
+        up.className = 'is-upstream-cached';
+        up.textContent = t('advisor_cached_upstream');
+        meta.appendChild(up);
+        added = true;
+      }
+      if (extra.cached) {
+        const badge = document.createElement('span');
+        badge.className = 'is-cached';
+        badge.textContent = t('advisor_cached');
+        meta.appendChild(badge);
+        added = true;
+      }
+      if (added) box.appendChild(meta);
     }
 
     this.transcript.appendChild(box);

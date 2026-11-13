@@ -36,7 +36,11 @@ public class HttpLlmTransport implements LlmTransport {
 
     private static final HttpClient CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
-            .version(HttpClient.Version.HTTP_2)
+            // W-Z-缓存修复：强制 HTTP/1.1。实测发现上游(wkapi.pro / Cloudflare)对 JDK 默认的
+            // HTTP/2 请求不回显 cached_tokens、且控制台归类为「非流」；改用 HTTP/1.1 后同一请求
+            // 立刻命中上游 prompt-cache（cached_tokens≈4800），与用户观察到的「流=高命中」一致。
+            // 单条 POST 用不到 HTTP/2 的多路复用，HTTP/1.1 + keep-alive 连接池等价且无兼容坑。
+            .version(HttpClient.Version.HTTP_1_1)
             .build();
 
     private static final ObjectMapper MAPPER = new ObjectMapper();

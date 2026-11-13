@@ -41,6 +41,7 @@ public class AiController {
         body.put("answer", answer.answer());
         body.put("model", answer.model());
         body.put("cached", answer.cached());
+        body.put("upstreamCached", answer.upstreamCached());
         body.put("latencyMs", answer.latencyMs());
         String effectiveRequestId = RequestCorrelation.sanitizeInbound(headerRequestId);
         if (effectiveRequestId != null) {

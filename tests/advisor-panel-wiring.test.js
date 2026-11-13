@@ -191,8 +191,39 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
     expect(msgs.map((m) => m.getAttribute('data-advisor-role'))).toEqual(['user', 'advisor']);
     expect(msgs[1].textContent).toContain('先堆火伤。');
     expect(msgs[1].querySelectorAll('.is-cached')).toHaveLength(1);
-    expect(h.doc.getElementById('advisor-meta').textContent).toBe('gpt-6-sol · 1235 ms · 1/1 缓存命中');
+    expect(h.doc.getElementById('advisor-meta').textContent).toBe('gpt-6-sol · 1235 ms · 1/1 本地缓存');
     expect(h.doc.getElementById('advisor-typing').classList.contains('hidden')).toBe(true);
+    h.cleanup();
+  });
+
+  it('上游 prompt-cache 命中：金色「上游缓存」角标 + meta 里的上游命中计数', async () => {
+    const h = panelHarness({
+      answer: () => ({ ok: true, data: { answer: '往有灯的地方走。', model: 'gpt-6-sol', latencyMs: 880, cached: false, upstreamCached: true } }),
+    });
+    h.panel.show();
+    await flush();
+    h.doc.getElementById('advisor-input').value = '下一站去哪？';
+    h.doc.getElementById('advisor-form').dispatch('submit');
+    await flush();
+    const msgs = bubbles(h.doc);
+    expect(msgs[1].querySelectorAll('.is-upstream-cached')).toHaveLength(1);
+    expect(msgs[1].querySelectorAll('.is-cached')).toHaveLength(0);
+    expect(h.doc.getElementById('advisor-meta').textContent).toContain('上游缓存');
+    h.cleanup();
+  });
+
+  it('上游冷调用（未命中缓存）：无上游角标，meta 仍记一笔上游调用', async () => {
+    const h = panelHarness({
+      answer: () => ({ ok: true, data: { answer: '往西也行。', model: 'gpt-6-sol', latencyMs: 1500, cached: false, upstreamCached: false } }),
+    });
+    h.panel.show();
+    await flush();
+    h.panel._ask('往东还是往西？');
+    await flush();
+    const msgs = bubbles(h.doc);
+    expect(msgs[1].querySelectorAll('.is-upstream-cached')).toHaveLength(0);
+    expect(msgs[1].querySelectorAll('.is-cached')).toHaveLength(0);
+    expect(h.doc.getElementById('advisor-meta').textContent).toContain('上游缓存');
     h.cleanup();
   });
 
