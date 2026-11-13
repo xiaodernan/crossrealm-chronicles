@@ -457,7 +457,7 @@
 | W-Y3 | **真实大模型联调与语料质检升级** | ✅ 切片1 | 2026-11-12 | `de7612c` / `b32b4ac` | `AiLiveIntegrationTest`（真实 `/v1/chat/completions`、中文回答 18.3s、同问缓存命中零二次外呼）+ **W-Y4 新增** `AdvisorJobLiveIntegrationTest`（真实上游 2 次外呼 / 3 任务 DONE / 幂等 1 次 / 缓存命中不打上游 / 死信 0）；两者都由 `LLM_API_KEY` 门控，CI 零外呼。切片2（语料质检健壮性）转 W-Z5 |
 | W-Y4 | **消息队列：可靠投递与背压** | ✅ 切片1 | 2026-11-12 | `ba7efd4` | `AdvisorJobQueue`：有界 `ArrayBlockingQueue` + 2 worker 把慢速 LLM 从 Tomcat 线程隔离；满 → 明确 429 + Retry-After（不静默丢）；`requestId` 幂等；只对 `upstream-*` / `circuit-open` 指数退避重试；耗尽进可见死信；终态按**单调完成序号** LRU 淘汰（毫秒时间戳会并列，实测抓到）；`POST /api/ai/chat/async` + `GET /api/ai/jobs/{id}` + `/jobs/stats`；前端 429 → `busy` 原因 + degraded 档（顺带修纯文本 500 时 `data.error` 抛异常的真缺陷）；真实联调通过；smoke 4k 段 |
 | W-Y5 | **算法与运行时性能**（空间索引 / 对象池 / 脏标记 / 帧预算） | ⬜ | | | 以 `npm run perf` 与 `perf:census` 的读数为准，不接受「看着快了」 |
-| W-Y6 | **数据库读写路径**（索引、批量写、读写分离口径） | ⬜ | | | 先量现有内存仓储的真实复杂度，再决定要不要引入持久层 |
+| W-Y6 | **数据库读写路径**（索引、批量写、读写分离口径） | ✅ 切片1 | 2026-11-13 | `bd9f21a` | 不引入 JPA/PG；Redis ZSET 镜像（`leaderboard:runs`，写穿 + 启动 MAX_PULL=1024 恢复）；`backend=redis` 启用、`memory` 默认零变更；`verify-redis-leaderboard.ps1` CI 真跑 |
 | W-Y7 | **前端视觉体系旗舰化**（设计令牌 / 光效分层 / 动效分级 / 可访问性） | 🚧 部分 | a11y 半边**已全部落地**（字号档 W-D6 切片69 / 色觉模式 default·deuteranopia·protanopia·tritanopia W-D6 切片3/4 / HUD 状态条色觉回写 / 字幕 W-D6 切片8+67 / 闪光强度 W-D6 切片68 / 亮度 W-E3 切片61 / reduced-motion 全局兜底网 W-Z3 / 设计令牌 W-Z3）；剩「**光效分层**」——需要人眼对比或 screenshot 工具链才能验收，当前无此工具链，暂挂为阻塞（视觉评审后再拆） |
 
 > **贯穿纪律**：① 大模型是**可选增强**，任何玩家路径都不许因它不可用而卡住；
@@ -6704,3 +6704,18 @@ Phase D（系统与质量）
   - **文档回填**：本 ADR 入册后 `§C3` 回声读数 83→86（两处）；本片既满足**母题门禁**也满足**回声计数**，符合 W-Y2 星轨顾问「始终卫星意义」的约束。
 
   - **后续**：CI run `43363231991` 持续 watch；若绿则标记 W-E11 收口；下一轮 Wave19/双表逐条对齐空档，按 PERF gauge 决定收口。
+- **2026-11-13 W-Y6 数据库（Redis 镜像）——game-service leaderboard 写穿持久化 + 启动恢复** —— 提交 `bd9f21a`
+
+  - **起因**：W-Y6「数据库读写路径」悬而未决：到底要不要上数据库？本片选择**不引入 JPA / Hikari / 实体 schema**，走「同一个内存 heap + Redis ZSET 镜像」的路——与 season-service 的 cache 契约同一口径、与 W-Z4 的「不为了上数据库而上数据库」决策保持一致；但把「重启不见分」这个真痛点了结。
+
+  - **做法**：`LeaderboardRedisMirror`（`game-service.leaderboard.backend=redis` 才注册，@ConditionalOnProperty）→ 写穿按 `RunRecord` JSON 塞入 ZSET `leaderboard:runs`，score=`clearTimeMs` 升序。`LeaderboardService` 构造器重载为 `(properties, @Nullable mirror)`；默认构造保留（旧测试零改动）；`@PostConstruct seedDemoData` 优先调 `mirror.pullAll()` 从 Redis 恢复最近 MAX_PULL=1024 条 → 空/不可达则退回 demo 播种。`add()` 调用 `mirror.mirror(run)` 顺手镜像；Redis 进程间不能阻碍持久——吞掉所有异常，不抛 500。
+
+  - **垂直切片**：properties 新增 `leaderboard.backend`（`memory` 默认 / `redis`）；`seedDemoData=false` 可禁用 demo 保证生产数据干净；默认 path=memory 路径零变更。
+
+  - **真机联调**：throwaway redis:7-alpine on 26384 → 启动 A（backend=redis、seed-demo-data=false）→ POST 三条得分（silver-leaf 8000 / shadow-dancer 9000 / crimson-gavel 10000）→ `ZCARD=3` ✓ / A 退出、B 重启 → Top-K 完整恢复（silver-leaf/8000 排第一）✓。`server BUILD SUCCESS`；`OpsController`、`AiServiceClient` 等调用方零影响（Redis 不可达时静默 fallback，不编造、不干扰 Z 一个 hook）。
+
+  - **CI 门禁**：server.yml 新增「Redis-backed leaderboard (W-Y5 verification)」环节（`server/scripts/verify-redis-leaderboard.ps1`）：CI runner 内阿铭负责选起 throwaway redis + 两次启 game-service，断言每一次 Top-K 完全一致。每次 server/** push 都会验证「Redis 里真的是持久分」这一事实拍板。
+
+  - **放弃JPA的理由**：W-Y6 的问题是「重启丢分」+「跨实例失真」，不是「schema 分析」——数据模型是固定的 `(runner, bossId, clearTimeMs, chapter, submittedAt)`，表单轮训只有 insert/read/top-k，用 ZSET 精确命中就是答案；引入 @Entity/H2/Postgres 只会在 CI 里白生一套 build stage，增量价值抵不上维护面。若后期需要批量分析/统计图轴/ETL，再切到 Postgres。
+
+  - **风险与后续**：① 单个 ZSET key 无 TTL——通过应用层写入保留上限（demo 3 条以外的生产实操建议每天离线 rotate）；② Boss 标识符白名单校验目前只在 `BossRoster` 列出的名字进行检查，Mirror 不做强校验；③ Redis 进程不可达时 `add` 会成功但分不进 Redis——`/api/leaderboard` 仍然回答 200，而不是在 Redis 异常时打断提交；④ 镜像无法立即触发跨实例增量，但出榜重启后的手势目前足够；⑤ 升级策略：backend 切换至 `redis` 只要一个实例生效；若几个实例同时开 `redis` 会多副本镜像——这是提交面，不是读面，风险可控；⑥ 如需完全离线/异地备份，等 next slice 做 Snapshot export。
