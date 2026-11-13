@@ -7196,3 +7196,12 @@ Phase D（系统与质量）
   - **判据**：`npm test` **6618 例全绿**（+6 净增 W-Z29：+5 条 + trivially 支线登记差值）；`npm run lint` 0；`npm run build` ✓（20 秒）。
 
   - **风险**：① **碑文里的"字数回缩"是 feature**：汉字一句成章，英语碑文刻意做短句截断（不押韵也不如诗句），避免拿英文去拉中文的字长产生两种体裁的分裂；② `ach_epitaphs_locked` 锁态**任何母题一视同仁**——不写母题名之外的信息，避免染上「卡关体」；③ 17 个母题 × 篇幅一致性由双向钉（FRANCHISE 存在 + ach 存在 + themeKey 存在）。
+- **2026-11-14 W-Z30「星尘致谢」——谢幕碑：鸣谢母题收齐的旅人** —— 提交：本次 HEAD
+
+  - **起因**：W-Z29 把母题毕业塞到了成就墙里——玩家回看时看见。但**终局通关那一刻**呢？E3 切片48 已经按终局抉择换 flavor 行；W-E6 已经为「最后一盏灯」留了谢幕行；个人最速榜已经挂在最底——**母题收齐这件事反而在谢幕里什么都没有**。每位全收齐的玩家，和没走通的玩家，在片尾字幕里被当成同一个人。
+
+  - **做法**：`src/cinematic/EndCreditsDirector.js`：在 epilogue 位置（fin 之后、`el.classList.remove(hidden)` 之前）插入**谢幕碑**——① 读 `this.game?.achievements?.unlocked`（老档/未毕业档保持空赦免，零碑不渲染）；② 按 `ECHO_EPITAPHS`（W-Z29 内容表）过滤已解锁主题；③ 每枚一行 `<p class="end-credits-epitaph-row">`：母题标签（`t(themeKey)`，走双表本已登记的 `franchise_*_label`）+「碑文」；**全出现，不设上限**（17/17 解锁 = 真正的封卷）；④ 挂在片尾之后、个人最速之前；⑤ 文本全走 `t()` + 内容表，无运行期拼键、无 innerHTML 中插任何用户/模型输入。`style.css` 新一节 `.end-credits-epilogue` / `.end-credits-epitaphs-title` / `.end-credits-epitaph-row` / `.end-credits-epitaph-theme` / `.end-credits-epitaph-quote`（母题金、碑文 italic 灰、上宽下窄 flex 堆叠、金字影）。
+
+  - **判据**：新门禁 `tests/end-credits-epilogue.test.js`（+4 例：零碑不渲染 / 解锁 1 枚→碑文出现 / 解锁全量→17 母题行全出现 / 解锁 3 枚→仅那 3 枚出现）；`npm test` **6622 例全绿**（+4）；`npm run lint` 0；`npm run build` ✓（~15s）。
+
+  - **风险**：① 碑文在真机 DOM 里以 `innerHTML` 合并进 scroll —— 与现行 W-G6 的 `credits_best_title` / `credits_best_row_fmt` 合并法同一类（都是 `t()` 展开本表字符串），不构成任何注入面（碑名/碑文全仓作者写死）；② 17 行之多会把片尾拉长——名册本就长，谢幕的 epilogue 部分没人会嫌多，碑只为真正把母题走完的旅人显。

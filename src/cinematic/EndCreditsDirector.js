@@ -5,6 +5,7 @@ import { on, offAll, emit } from '../engine/EventBus.js';
 import { endingDialogKey } from '../content/objectives.js';
 import { bossNameKeyOf } from '../content/bossRoster.js';
 import { bossBestTimes } from '../game/BossBestTimes.js';
+import { ECHO_EPITAPHS } from '../content/echoEpitaphs.js';
 import { fmtClock } from '../ui/msClock.js';
 
 const CINEMATIC_ENDCREDITSDIRECTOR = 'cinematic/EndCreditsDirector';
@@ -104,6 +105,13 @@ export class EndCreditsDirector {
         .map(({ bossId, bestMs }) => `<p class="end-credits-best-row">${t('legends_personal_row_fmt', { boss: t(bossNameKeyOf(bossId)), clock: fmtClock(bestMs) })}</p>`)
         .join('');
       scroll.innerHTML += `<div class="end-credits-best"><p class="end-credits-best-title">${t('credits_best_title')}</p>${rows}</div>`;
+    }
+    // W-Z30「星尘致谢」：共鸣越多，字幕越回看——母题毕业的每位同道都在这里留名。没走通的母题不出现（老档/自由探索档不视为残篇）
+    const unlocked = this.game?.achievements?.unlocked ?? new Set();
+    const memorials = ECHO_EPITAPHS.filter((e) => unlocked.has(e.ach));
+    if (memorials.length > 0) {
+      const rows = memorials.map((e) => `<p class="end-credits-epitaph-row"><span class="end-credits-epitaph-theme">${t(e.themeKey)}</span><span class="end-credits-epitaph-quote">「${t(e.key)}」</span></p>`).join('');
+      scroll.innerHTML += `<div class="end-credits-epilogue"><p class="end-credits-epitaphs-title">${t('ach_epitaphs_title')}</p>${rows}</div>`;
     }
     this.el.classList.remove('hidden');
     /* W-E6：终局专赠 —— 通关那一刻，返乡系列收尾一枚「最后一盏灯」。
