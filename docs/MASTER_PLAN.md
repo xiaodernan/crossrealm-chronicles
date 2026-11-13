@@ -6769,3 +6769,14 @@ Phase D（系统与质量）
   - **CI**：server.yml 新增「Redis-backed trial leaderboard (W-Y6 verification)」步骤。
 
   - **结论**：位面试炼榜也享受了与 Boss 榜相同的幂等重启恢复，赛季过滤 + score 降序在 Redis 层面被理解。
+- **2026-11-13 W-Z10 微服务 Prometheus/Micrometer 指标真接进 game-service** —— 提交 `4e51d96`
+
+  - **起因**：W-Z9 已把 game-service + ai-service 的光明访问日志铺上，但这些数据在 `/actuator/metrics` 这条路是死通道——Spring Boot 没有自动暴露任何「业务级」 Micrometer 计数器。本片补这条缺口。
+
+  - **做法**：game-service 加 `micrometer-registry-prometheus`；`application.yml` 的 `management.endpoints.web.exposure.include` 加 `metrics,prometheus`；`TelemetryService` 构造器双版重载（旧版 `TelemetryService(props)` 适合单测；新 @Autowired 版 `(props, @Nullable MeterRegistry)`——每次 `verify` 自动装入三个计数：`game_telemetry_enqueued_total` / `game_telemetry_dropped_total` / `game_telemetry_processed_total`。dropped 命中**少数 ThreadPoolRejected/Backpressure 实况**，在 enqueued 计数充裕时应当为 0。
+
+  - **真机联调**：`scripts/verify-prometheus.ps1`（docker-less）：起 game-service:28087（只用 eureka 不注册）→ `POST /api/telemetry/events`（type=boss_defeated/runner=void-chronarch）→ 命中 `/actuator/prometheus`，断言 `game_telemetry_enqueued_total`、`jvm_memory_used_bytes`、`process_uptime_seconds` 三个指标字段都活着——**13,270 字节**的 Prometheus exposition。脚本已接入 `server.yml` 门禁：每次 `server/**` push 都跑。
+
+  - **判据**：不必加业务面，不必加 security 边界——Micrometer 的 Counter` 是 near zero 成本(YAGNI)；只守 enqueued/dropped/processed 三个可证明 backpressure 的指标；只把 /actuator/prometheus 暴露为 public read-only；不拓展到 half-open 路径上还可能导致 noisy neighbors。
+
+  - **风险与后续**：① `/actuator/metrics` 也公开——如 metrics 名词将来含有业务敏感词（比如 Xen 单机日志）需评估是否加 `management.endpoints.web.exposure.include` 加更多限制；② 不为三个指标加 i18n tag——Prometheus metric label 是 ASCII escaped，i18n 需求以指标名后缀 `{}` 表达；③ 未实现 dual-write 到 Timescale/ClickHouse，不假装它是时序数据。
