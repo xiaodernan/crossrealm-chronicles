@@ -7024,3 +7024,16 @@ Phase D（系统与质量）
   - **判据**：零代码变动（纯 .md）；仓库主页未来和 `README` 驱动的渲染器一致。
 
   - **风险与后续**：①README 单向同步真相——每类新成员要记得回来补；②进入这一步之后整个 W-* 可以算“红艳卷末”了——接下来可以focus 到 `engine/canonical` 与通用行为一致性上。
+- **2026-11-13 W-Z19 favicon.svg——一枚锚火标志落地（W-cluster 终章第一个视觉标记）** —— 提交 `845166e`
+
+  - **起因**：刚刚把 README 刷成整个项目“集大成者”形态之后，又发现 favicon.svg 没设——2026 年一个入门在线页不应缺视觉入口。
+
+  - **做法**：一张 SVG，内容是“锚火”图腾——上部留有 `--gold-hi` 的暖光色 Amber 半径 glow；下部留有 `--gold-dim`→`--gold` 的压重金色锚形轮廓；背景用 `--abyss` 暗夜黑。与 style.css 的 #gold-hi/#c9a962/#07060f/#8b6914 严格同一支色序列。
+
+  - **做法**：
+    · `public/favicon.svg` 新增一张 SVG 图标（viewBox="0 0 64 64" 包含暗底/glow/锚）；
+    · `index.html` 追加一行 `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />`。
+
+  - **判据**：vite build 把 favicon.svg 原样复制到 dist/ 根目录；size budget 零影响；favicon 1361B（≈1.3 KB）。
+
+  - **风险与后续**：① 不产生任何第二 favicon 候选；② 不影响 i18n 键（纯图形）；③ 服务器 / public 路径位于 dist/ 根，不需要任何 Vite alias；④ 以 SVG 形式推给 CI gate。
