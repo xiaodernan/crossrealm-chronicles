@@ -680,13 +680,13 @@ describe('`ref` 能查 `index` 形状的表：收的是键，不是行里的 id 
 describe('W-B2 内容普查：条数钉死', () => {
   it('每张表的条数 = 与 HEAD 深比对那天实测的数', () => {
     expect(contentSummary()).toMatchObject({
-      echoes: 95,
+      echoes: 101,
       ambientZoneEvents: 6,
       loreFragments: 18,
       npcLines: 3,
       restDialogues: 8,
       achievementsExtra: 10,
-      achievementsPopCulture: 27,
+      achievementsPopCulture: 29,
       cgGalleryBonusExtra: 5,
       sideQuestsPop: 20,
       helpSectionsExtra: 3,

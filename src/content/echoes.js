@@ -65,6 +65,9 @@ export const ECHOES = [
   { id: 'echo-saloon-mirror', franchise: FRANCHISE.BORDER, zone: 'fantasy', title: 'echo_saloon_mirror_title', desc: 'echo_saloon_mirror_desc', trigger: 'echo:saloon-mirror' },
   { id: 'echo-duel-noon', franchise: FRANCHISE.BORDER, zone: 'fantasy', title: 'echo_duel_noon_title', desc: 'echo_duel_noon_desc', trigger: 'echo:duel-noon' },
   { id: 'echo-ghost-rails', franchise: FRANCHISE.BORDER, zone: 'fantasy', title: 'echo_ghost_rails_title', desc: 'echo_ghost_rails_desc', trigger: 'echo:ghost-rails' },
+  { id: 'echo-border-undertaker', franchise: FRANCHISE.BORDER, zone: 'fantasy', title: 'echo_border_undertaker_title', desc: 'echo_border_undertaker_desc', trigger: 'echo:saloon-mirror' },
+  { id: 'echo-border-sheriff', franchise: FRANCHISE.BORDER, zone: 'fantasy', title: 'echo_border_sheriff_title', desc: 'echo_border_sheriff_desc', trigger: 'echo:duel-noon' },
+  { id: 'echo-border-signalman', franchise: FRANCHISE.BORDER, zone: 'fantasy', title: 'echo_border_signalman_title', desc: 'echo_border_signalman_desc', trigger: 'echo:ghost-rails' },
 
   // ── 幽冥帮派（黑帮）──
   { id: 'echo-speakeasy', franchise: FRANCHISE.FAMILY, zone: 'abyss', title: 'echo_speakeasy_title', desc: 'echo_speakeasy_desc', trigger: 'echo:speakeasy' },
@@ -75,6 +78,9 @@ export const ECHOES = [
   { id: 'echo-colony-dome', franchise: FRANCHISE.DEEPSPACE, zone: 'space', title: 'echo_colony_dome_title', desc: 'echo_colony_dome_desc', trigger: 'echo:colony-dome' },
   { id: 'echo-ai-core', franchise: FRANCHISE.DEEPSPACE, zone: 'space', title: 'echo_ai_core_title', desc: 'echo_ai_core_desc', trigger: 'echo:ai-core' },
   { id: 'echo-jump-gate', franchise: FRANCHISE.DEEPSPACE, zone: 'space', title: 'echo_jump_gate_title', desc: 'echo_jump_gate_desc', trigger: 'echo:jump-gate' },
+  { id: 'echo-deepspace-nursery', franchise: FRANCHISE.DEEPSPACE, zone: 'space', title: 'echo_deepspace_nursery_title', desc: 'echo_deepspace_nursery_desc', trigger: 'echo:colony-dome' },
+  { id: 'echo-deepspace-scribe', franchise: FRANCHISE.DEEPSPACE, zone: 'space', title: 'echo_deepspace_scribe_title', desc: 'echo_deepspace_scribe_desc', trigger: 'echo:ai-core' },
+  { id: 'echo-deepspace-fourthgate', franchise: FRANCHISE.DEEPSPACE, zone: 'space', title: 'echo_deepspace_fourthgate_title', desc: 'echo_deepspace_fourthgate_desc', trigger: 'echo:jump-gate' },
 
   // ── Wave4 ──
   // 赛博霓虹 → 魔法遗境

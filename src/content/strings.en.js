@@ -5,6 +5,22 @@
  * Keys follow "module_purpose" naming, values are the single source of truth.
  */
 export const STRINGS_EN = Object.freeze({
+  echo_border_undertaker_title: 'The Mourner at the Saloon',
+  echo_border_undertaker_desc: 'Every dusk a veiled woman walks in — two whiskies, and one of them she keeps.',
+  echo_border_sheriff_title: 'The Hollow Badge',
+  echo_border_sheriff_desc: 'The badge hangs on a nail in the grey wall — the only living thing in this town is the wind and the badge itself.',
+  echo_border_signalman_title: 'The Signalman',
+  echo_border_signalman_desc: 'The light is always green — it is not clearing the way, it is waiting for its own corpse to come home.',
+  echo_deepspace_nursery_title: 'The Nursery Dome',
+  echo_deepspace_nursery_desc: 'At the top of the dome lies a nursery no one watches — every monitor reads the same: no one is missing.',
+  echo_deepspace_scribe_title: 'The Offline Scribe',
+  echo_deepspace_scribe_desc: 'The core has been writing one completion report for seven million years — the last line, without fail: waiting for him to return.',
+  echo_deepspace_fourthgate_title: 'The Fourth Gate',
+  echo_deepspace_fourthgate_desc: 'No survivor ever opened it — one day it will open on its own. The ones inside have been knocking ever since.',
+  ach_echo_western_six_title: 'Frontier Sixfold',
+  ach_echo_western_six_desc: 'Resonate with all six frontier echoes',
+  ach_echo_scifi_six_title: 'Six Deep-Space Echoes',
+  ach_echo_scifi_six_desc: 'Resonate with all six deep space echoes',
   echo_gloom_mossroot_title: 'The Moss Scroll',
   echo_gloom_mossroot_desc: 'Moss crept up the base of the stones into a single scroll - it can only be read at dawn, and only by the sleepless.',
   echo_gloom_lamproad_title: "The Lamp-Road's End",

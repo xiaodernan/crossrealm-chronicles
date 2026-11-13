@@ -5,6 +5,22 @@
  * 键名按"模块_用途"命名，值是唯一真源 —— 改显示文案只改这一处。
  */
 export const STRINGS_ZH = Object.freeze({
+  echo_border_undertaker_title: '掘墓人沙龙',
+  echo_border_undertaker_desc: '黄昏总有一位戴黑纱的妇人走进来——点两杯威士忌，其中一杯留给自己。',
+  echo_border_sheriff_title: '空镇警长',
+  echo_border_sheriff_desc: '警徽挂在灰墙钉上——这镇上活着的只有风和那个徽章。',
+  echo_border_signalman_title: '铁道信号员',
+  echo_border_signalman_desc: '红绿灯永远绿了——它不是在放行，是在等自己的尸体回家。',
+  echo_deepspace_nursery_title: '穹顶育儿室',
+  echo_deepspace_nursery_desc: '穹顶最高处有一间没人守夜的育儿室——婴儿的监护仪一直显示：没有人缺席。',
+  echo_deepspace_scribe_title: '离线抄写员',
+  echo_deepspace_scribe_desc: '核心把一份完工报告写了七百万年——每次写完的最后一行都是：等他回来。',
+  echo_deepspace_fourthgate_title: '第四扇门',
+  echo_deepspace_fourthgate_desc: '没有幸存者活着打开过它——有一天它会自己打开，里面的人敲了很久了。',
+  ach_echo_western_six_title: '边境六星',
+  ach_echo_western_six_desc: '边境星门残响全六枚齐鸣',
+  ach_echo_scifi_six_title: '深空六响',
+  ach_echo_scifi_six_desc: '深空航行残响全六枚齐鸣',
   echo_gloom_mossroot_title: '苔石经文',
   echo_gloom_mossroot_desc: '苔藓在石环底部朝夜长年堆成卷轴——只有睡不着的人，才能在清晨读出七行。',
   echo_gloom_lamproad_title: '灯路尽头',
