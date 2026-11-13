@@ -137,9 +137,35 @@ for (let i = 0; i < corpus.length; i += BATCH) {
         process.stderr.write('  batch failed (will retry once): ' + (e?.message ?? e) + '\n');
         continue;
       }
-      // 一批失败不带走整轮：记为 error 条目，人审时手动重判
-      console.error('batch failed twice:', e?.message ?? e);
-      parsed = batch.map((b) => ({ id: b.id, verdict: 'error', issues: [String(e?.message ?? e).slice(0, 60)] }));
+      // 半批降级救援：把 batch 切成两半各跑两轮。上游瞬时空返回多数发生在大 batch，
+      // 拆半后 prompt 减半，通常能拿回判词；两半任一还败则仅标那半批 error。
+      const halfSize = batch.length >> 1;
+      const merged = [];
+      let halvesOk = true;
+      for (const half of [batch.slice(0, halfSize), batch.slice(halfSize)]) {
+        let halfParsed = null;
+        for (let hAttempt = 1; hAttempt <= 2 && !halfParsed; hAttempt++) {
+          try {
+            upstreamAttempts += 1;
+            halfParsed = await askBatch(half);
+            calls += 1;
+          } catch (he) {
+            process.stderr.write('  half retry failed: ' + (he?.message ?? he) + '\n');
+          }
+        }
+        if (halfParsed) {
+          merged.push(...halfParsed);
+        } else {
+          halvesOk = false;
+          merged.push(...half.map((b) => ({ id: b.id, verdict: 'error', issues: [String(e?.message ?? e).slice(0, 60)] })));
+        }
+      }
+      if (halvesOk) {
+        process.stderr.write('  rescue succeeded: split ' + batch.length + ' items in half, both parsed\n');
+      } else {
+        console.error('batch failed twice and rescue failed:', e?.message ?? e);
+      }
+      parsed = merged;
     }
   }
   const byId = new Map((parsed ?? []).map((r) => [r.id, r]));
