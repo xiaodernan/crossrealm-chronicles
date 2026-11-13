@@ -26,7 +26,7 @@ export const STRINGS_ZH = Object.freeze({
   ach_echo_gangster_six_title: '帮派六响',
   ach_echo_gangster_six_desc: '黑道残响全六枚齐鸣',
   ach_echo_abysssalt_six_title: '深颚六响',
-  ach_echo_abysssalt_six_desc: '深颚残响全六枚齐鸣',
+  ach_echo_abysssalt_six_desc: '深颚咸响全六枚齐鸣',
   echo_border_undertaker_title: '掘墓人沙龙',
   echo_border_undertaker_desc: '黄昏总有一位戴黑纱的妇人走进来——点两杯威士忌，其中一杯留给自己。',
   echo_border_sheriff_title: '空镇警长',
@@ -1537,7 +1537,7 @@ export const STRINGS_ZH = Object.freeze({
   ach_echo_voidmaw_six_title: '断口深语',
   ach_echo_voidmaw_six_desc: '断口残响，六枚齐鸣',
   ach_echo_abysssalt_title: '深颚咸鸣',
-  ach_echo_abysssalt_desc: '共鸣全部深颚残响',
+  ach_echo_abysssalt_desc: '共鸣全部深颚咸响',
   ach_echo_original_title: '原声齐鸣',
   ach_echo_original_desc: '共鸣全部薄暮回响 / 辉煌残响 / 断口残响 / 深颚咸响',
 
