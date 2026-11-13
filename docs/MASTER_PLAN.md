@@ -7104,3 +7104,14 @@ Phase D（系统与质量）
     4. 新增门禁实测 `PromptCacheLiveTest`（仅 `-Dai.live.test=true` + `LLM_API_KEY` 时运行，默认跳过）：同一稳定请求连发两次，断言第二次 cached_tokens 显著大于第一次，证明修复。
 
   - **判据（真实联调）**：live test 通过——首次 cached=null（冷启动），二次 cached=4556（命中）。ai-service 全量单测 BUILD SUCCESS；前端 advisor 系列 + i18n 键数门禁 166/166 绿。
+
+- **2026-11-14 ach-qa 复判后三枚描述收紧 + 判官噪声策略（side-all 已判过 ok）** —— 提交：本次 HEAD
+
+  - **起因**：W-Z21 落地后跑了一次 `ach-qa`（62 条 / gpt-6-sol）。`side-all`（环游诸界）当场判 **ok [extra]**；其余暴露三处**可验证为不精确**的描述（叙述口径与代码真值不符，而非风格）：
+    · `rematch-3`——码读 `stats.rematches >= 3`（每次 `boss-rematch-started` +1，全图任一信标均可，无「三枚信标」收集机制）；原文「通过 Boss 信标再战任一位 Boss 三次」可被读成「同一位 Boss 三次」，收紧为「通过 Boss 信标发动三次再战」，EN「Rematch the same boss…」→「Trigger 3 rematch summons through boss beacons」，标题 Triptych/三度相逢 不动。
+    · `echo-homecoming`（`echoHomecoming >= 3`）——「集齐三个返乡回声」中的「集齐」与 family 一致口径冲突（master 档是 10 枚）；改为 family 口径「共鸣 3 条返乡回声」 / EN「Resonate with 3 homecoming echoes」（判官复判当场 ok）。
+    · `echo-wave5`（九个母题 × ≥6：wizard/interstellar/upside/cyber/samurai/cosmic/starport/voidmaw/homecoming）——原文「九系残响各六枚，同时齐鸣」机制上正确但判官两度无法识别「九系」指代；收紧为明示九系名单「学院·星海·逆相·霓虹·武士·旧日·星港·断口·返乡九系，各六枚齐鸣」 / EN 同款明示（判官复判当场 ok）。
+
+  - **判官噪声政策（硬规则，后续不再议）**：**ach-qa / echo-qa 的单次判决不是门禁**——同一文本跨次运行在 ok/warn/bad 间漂移（如 echo-gangster / echo-scifi / echo-starport / echo-wave4 在相邻批次从 ok 漂到 bad，均无代码变动），且偶发虚构机制（「三枚信标」「四大母题」「深空孔径」均非本游戏真实概念，全仓零出现）。处理规程：① 复判前任何「bad」必须先对代码/内容表核事实；② 判词判错时**保留机械正确文本**，不按模型口吻改写；③ 唯一以代码为源的描述修改才提交；④ echo-/side-all 等结构判据交给 gates（6538→6568 例）。
+
+  - **判据**：`npm test` **6568 例全绿**（含 W-Z21 新增 6 例）；双表逐键存在、`i18nKeyCount` 3060 未动（零新键）；仅 `strings.zh.js` / `strings.en.js` 三对 desc 字符串改写，无逻辑变更。
