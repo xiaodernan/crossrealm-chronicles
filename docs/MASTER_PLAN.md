@@ -7037,3 +7037,24 @@ Phase D（系统与质量）
   - **判据**：vite build 把 favicon.svg 原样复制到 dist/ 根目录；size budget 零影响；favicon 1361B（≈1.3 KB）。
 
   - **风险与后续**：① 不产生任何第二 favicon 候选；② 不影响 i18n 键（纯图形）；③ 服务器 / public 路径位于 dist/ 根，不需要任何 Vite alias；④ 以 SVG 形式推给 CI gate。
+- **2026-11-13 W-Z20 橫披兩側新增加 pop-culture 支線 + rematch-3 判官重寫** —— 提交 `8c46ca2`
+
+  - **起因**：17 個 franchise 走 tour-型支線系列，向來有一條「某某巡禮 / Xxx Tour」級別的 sidequest 對應熟悉的 Collective-Gateway。系列完整度（W-E14~E23）後，缺了：
+    1. MIDDLE_EARTH 母系——四條格言成員之一、並和 Border/Family/… 一樣有 6 枚回聲的位面，Fantasy 位面裡最孤立。
+    2. CROSSOVER 母系——所有實質 anchor 內部的 nested arm，涉及 poster-wall / beyond-frames / full-resonance（3 枚 crossover 都在 hub 裡）。
+
+    兩個 Franchise 因此各需要一枚「成套」sidequest。
+
+  - **做法**：① `side-middle-earth-tour`「中洲巡禮」插在 side-radiant-tour 之後、side-wave4-master 之前；zone 由 franchiseZone() 反推（MIDDLE_EARTH echoes 全住在 FANTASY，與本體 gates 的 verb mapping ok）；`reward=20`；new 3 skills × 双表 = +6 keys。
+    標題「中洲巡禮」/ The Tour of Middle-Earth；desc「共鳴 3 條中洲殘響」/ Resonate with all three middle-earth remnants；journal「碎戒指沉進石環裡，沒有人再回頭望。」/ The broken ring fell into stone; no one looked back。
+    ② `side-beyond-frames`「界外狂想曲」：作為 crossover 的完整 arm —— zone=global（homecoming-wayfare 同口徑：hub 不可為 POI registry 所列的可用 zone，所有 3 枚 crossover echo 散在 hub，3 個 hub 回聲無法誠實地標為任一座子位面；故標 global）。
+    標題「界外狂想曲／Beyond the Frames」；desc「共鳴 3 條跨界殘響」/ Resonate with all three crossover echoes；journal「跨越的不是邊境，是牆；不是牆，是回聲。」/ The border is not the edge; the wall is; the echo is not the wall。（reward=20）—— sideQuestsPop 21 → **22**。
+
+    **rematch-3 判官痛點重寫**：title「信标獵人」/ "Beacon Hunter" + desc「通過 Boss 信标再戰 3 次」被 ach-qa（gpt-6-sol）多次標为 title/desc 不一致——title 字面有 "獵人" 信標組合引導向收集方向。
+    收紧：zh 「三度相逢／Triptych」；desc「通過 Boss 信标再戰任一位 Boss 三次」/ "Rematch the same boss three times through beacons"；键名與 ach 接口函數不變。
+
+  - **判据**：lint 0 / 6556 例全绿 / build ✓ / size 2.15 MiB（余 0.04）/ e2e 通关 ✓ / perf exit 0 / server CI 通过 / mvn verify BUILD SUCCESS。
+
+  - **风险**：①側邊 Franchise 新巡禮片加入後，side-quest-roster 單系列 suite 從 16 降到 **15**（beyond-frames 是 global 而非 -tour 形態）；② $(test count stay whole) = 6556 沒有變，因為 pin count 在內容表里。
+
+  - **後續**：跨界 fan-out 從此有：side-beyond-frames × echo:full-resonance × ach-echo-crossover × W-E21 「界外」× W-E20 endcard "Beyond the game — the novel, the OST, the film script" —— 整體組成 "本作自指宇宙" 的痕跡系譜。
