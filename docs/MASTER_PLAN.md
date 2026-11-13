@@ -6909,3 +6909,16 @@ Phase D（系统与质量）
   - **判据**：不动 `unlocked` 语义、不动 `echo-full-resonance` 放出判定口径、不动任何事件订阅生命周期——纯结构优化；记录在案以防他人“再回实现”：触发词索引是解锁路径的唯一真源，**第二个索引就是第二份真源**。
 
   - **风险与后续**：① 没有 benchmark 门禁钉住这个 hot path,性能是靠判官（renderer 测量）+ 我的算法论证背书——PopCultureJournalTab 打开时第一次 `filter()` 109 条零感知；② 若 ECHOES 将来改成运行时变动（如内容 pack 化），triggerIndex 需要在 pack 加载时重建——但当前 content 全是静态导入表，不存在这条路径。
+- **2026-11-13 W-Z14 Spring Cloud Gateway Micrometer/Prometheus——最后一个 SLO 盲区补平** —— 提交 `327f78f`（曾遗漏 gateway pom/yml，amended 入册）
+
+  - **起因**：ai-service（W-Z12）和 game-service（W-Z10）都拉上了 `/actuator/prometheus`，但活在路由前面的 Spring Cloud Gateway 始终没有任何 Micrometer 线——既看不到哪些路由在吃流量/耗时/4xx/5xx，也看不到它各自的命中率。
+
+  - **做法**：gateway pom 加 `micrometer-registry-prometheus`（Boot 版本锁）；application.yml `management.endpoints.web.exposure.include` 加 `metrics,prometheus`。新增 `GatewayMetricsFilter`（GlobalFilter order=100）：**路由桶** = `version|ai|seasons|leaderboard|trials|telemetry|ops|other`（只取首段、含 query strip、大小写归一）、**结果桶** = `2xx|4xx|5xx|other`——8×4=32 次 counter 全部在构造器预注册（`gateway_requests_total{route,outcome}`），外加唯一直方图 `gateway_request_duration_seconds`（120s 上限，含 LLM 长尾）。绝无玩家输入 label。
+
+  - **测试**：GatewayMetricsFilterTest 3 例——① routeBucket 有限枚举钉死（含 query strip 变例）；② outcomeBucket 200/400/500/301/null 七格钉；③ registry meter 总数 = (ROUTE_NAMES×OUTCOME_NAMES)+1（Timer 计 1），且每个 (route,outcome) counter 存在。
+
+  - **验证**：`mvn verify` BUILD SUCCESS（gateway 49 例全绿）；`smoke.ps1` 追加 §4r——flag 打开的暴露面活抓取：`jvm_memory_used_bytes` + `process_uptime_seconds` + `gateway_requests_total` + `gateway_request_duration_seconds`，且无 `sk-` 泄漏。§0-warm-up → gateway healthy 21s；exit=0 全链路绿。
+
+  - **判据**：纯 gateway scope，不碰任何下游服务；有限枚举，杜绝 input-label 注入；order=100 不在 `beforeCommit`，状态码拿得稳；Registry 没场景不挂。
+
+  - **风险 & 后续**：① `/actuator/prometheus` 对任何能连到 gateway 的人可读——如暴露面要收窄，加 `management.endpoints.web.base-path` 或安全层；② 若未来路由增多，补常量即可；**不要** fallback 到“全路径原样”，那是 cardinality 注入陷阱，与 brainrot 同一技术档案。③ W-Z15 可以把 game telemetry 三色 + gateway RT/SLO + ai token/cachedRatio 汇成统一流水线。
