@@ -62,6 +62,7 @@ export const ACHIEVEMENTS_POP_CULTURE = [
     (s.echoWizard ?? 0) >= 6 && (s.echoSpace ?? 0) >= 6 && (s.echoUpside ?? 0) >= 6 &&
     (s.echoCyber ?? 0) >= 6 && (s.echoSamurai ?? 0) >= 6 && (s.echoCosmic ?? 0) >= 6 &&
     (s.echoStarport ?? 0) >= 6 && (s.echoVoidMaw ?? 0) >= 6 && (s.echoHomecoming ?? 0) >= 6 },
+  { id: 'echo-crossover', title: 'ach_echo_crossover_title', desc: 'ach_echo_crossover_desc', check: (s) => (s.echoCrossover ?? 0) >= 3 },
 ];
 
 /**
@@ -83,6 +84,7 @@ export const ECHO_FRANCHISE_BUCKETS = [
   ['echoRadiant', FRANCHISE.RADIANT],
   ['echoVoidMaw', FRANCHISE.VOIDMAW],
   ['echoAbysssalt', FRANCHISE.ABYSSSALT],
+  ['echoCrossover', FRANCHISE.CROSSOVER],
   ['echoHomecoming', FRANCHISE.HOMECOMING],
   ['echoMiddleEarth', FRANCHISE.MIDDLE_EARTH],
 ];

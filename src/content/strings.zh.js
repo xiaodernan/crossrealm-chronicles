@@ -3303,6 +3303,8 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   echo_mithril_shard_title: "中洲回响·秘银矿",
   echo_mithril_shard_desc: "莫里亚深处散落的秘银碎片——比铁更轻、比银更白、比沉默更值钱。",
   ach_echo_middle_earth_title: "中洲低语",
+  ach_echo_crossover_title: '墙外之约',
+  ach_echo_crossover_desc: '海报墙尽头的三枚跨界回声，尽收囊中',
   ach_echo_middle_earth_desc: "集齐全部四枚中洲回声",
   echo_floating_casino_title: "赛博深渊·浮空赌场",
   echo_floating_casino_desc: "霓虹浮在云层里的赌场没有牌桌也没有筹码 — 进来的人赌的是自己，出去的人输掉了灵魂。",

@@ -3303,6 +3303,8 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   echo_mithril_shard_title: "Middle-earth Echo · The Mithril Shard",
   echo_mithril_shard_desc: "Scattered mithril from the deep mines of Moria — lighter than iron, whiter than silver, and dearer than silence.",
   ach_echo_middle_earth_title: "Whispers of Middle-earth",
+  ach_echo_crossover_title: 'The Promise Beyond',
+  ach_echo_crossover_desc: 'Collect all three crossover echoes from beyond the poster wall',
   ach_echo_middle_earth_desc: "Collect all four Middle-earth echoes",
   echo_floating_casino_title: "Cyber Neon · The Floating Casino",
   echo_floating_casino_desc: "Neon glowing above the cloud layer — no tables, no chips — everyone who enters wagers themselves, and walks away lighter of soul.",
