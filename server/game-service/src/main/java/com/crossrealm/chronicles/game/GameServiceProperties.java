@@ -82,12 +82,15 @@ public class GameServiceProperties {
      * 位面试炼榜（W-F3 切片6）。与 {@link Leaderboard} 是两张表、两套次序：
      * 这里**分数降序**，那边用时升序 —— 合并不了，因为它们的"更好"不是同一个方向。
      */
+    /** 试炼榜（W-X）。与 {@link Leaderboard} 同构：**持久层**可切换—— `memory`（默认，进程内）/ `redis`（Redis ZSET 镜像，重启/多实例共享成绩）。 */
     public static class Trial {
+        /** 持久层后端：memory（默认）/ redis */
+        private String backend = "memory";
         /** 启动时播种一批演示成绩（离线联调试炼榜用） */
         private boolean seedDemoData = true;
         /** 出榜条数上限 */
         private int maxLimit = 10;
-        /** 内存里最多留多少条（超出后丢最老的一条 —— 不限容的内存榜是内存泄漏） */
+        /** 内存里最多留多少条（超出后丢最老的一条） */
         private int maxEntries = 500;
 
         public boolean isSeedDemoData() {
@@ -112,6 +115,14 @@ public class GameServiceProperties {
 
         public void setMaxEntries(int maxEntries) {
             this.maxEntries = maxEntries;
+        }
+
+        public String getBackend() {
+            return backend;
+        }
+
+        public void setBackend(String backend) {
+            this.backend = backend;
         }
     }
 

@@ -63,3 +63,8 @@ jobs:
       # 验证 ZSET 里确实有数据、服务重启后 top-K 完整恢复——这是"在内存排行榜加一份可靠投递"的实证。
       - name: Redis-backed leaderboard (W-Y5 verification)
         run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-leaderboard.ps1"
+
+      # Redis 背板的试炼榜（W-Y6 切片3）：与排行榜镜像同一形态，专门验证 TrialLeaderboardService。
+      # 重启后赛季过滤正确、score 降序仍然恢复。
+      - name: Redis-backed trial leaderboard (W-Y6 verification)
+        run: pwsh -File "${{ github.workspace }}/server/scripts/verify-redis-trial.ps1"

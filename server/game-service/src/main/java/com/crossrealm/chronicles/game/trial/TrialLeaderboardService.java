@@ -2,6 +2,8 @@ package com.crossrealm.chronicles.game.trial;
 
 import com.crossrealm.chronicles.game.GameServiceProperties;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -39,6 +41,8 @@ public class TrialLeaderboardService {
 
     private final GameServiceProperties properties;
     private final List<TrialRun> runs = new ArrayList<>();
+    // W-Y6 切片3：可选 Redis mirror（`game-service.trial.backend=redis` 才能注入）
+    private final @Nullable TrialRedisMirror mirror;
 
     /** seasonId → 按当前 cap 缓存的榜单（add 时整表失效） */
     private final Map<String, List<TrialRun>> topCache = new ConcurrentHashMap<>();
@@ -59,12 +63,29 @@ public class TrialLeaderboardService {
 
 
     public TrialLeaderboardService(GameServiceProperties properties) {
+        this(properties, null);
+    }
+
+    @Autowired
+    public TrialLeaderboardService(GameServiceProperties properties,
+                                    @Nullable TrialRedisMirror mirror) {
         this.properties = properties;
+        this.mirror = mirror;
     }
 
     /** 演示数据：只在启动时写一次，且只用于联调/演示（与 Boss 榜同一条纪律） */
     @PostConstruct
     void seedDemoData() {
+        if (mirror != null) {
+            List<TrialRun> persisted = mirror.pullAll();
+            if (!persisted.isEmpty()) {
+                synchronized (runs) {
+                    runs.addAll(persisted);
+                    topCache.clear();
+                }
+                return;
+            }
+        }
         if (!properties.getTrial().isSeedDemoData()) {
             return;
         }
@@ -88,6 +109,13 @@ public class TrialLeaderboardService {
             synchronized (topCache) {
                 // add 进来的一条可以搅动任何 season:cap 组合的榜首 — 整表失效最保险。
                 topCache.clear();
+            }
+            if (mirror != null) {
+                try {
+                    mirror.mirror(run);
+                } catch (RuntimeException ignored) {
+                    // Redis 进程间消失不阻碍提交
+                }
             }
             return top(run.seasonId(), properties.getTrial().getMaxLimit());
         }

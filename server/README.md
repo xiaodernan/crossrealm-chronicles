@@ -33,6 +33,7 @@ server/
   scripts/verify-redis-season-cache.ps1 # W-S2 Redis 赛季缓存实证（cache.type=redis：两次返回相同、键存在、TTL~300s、停 redis 报错、起 redis 恢复；CI 真跑）
   scripts/verify-redis-advisor-queue.ps1 # W-Z1 Redis 顾问队列实证（jobs.backend=redis：提交→DEAD（无 LLM 密钥确定）→DLQ→死信白名单不回显玩家提问；CI 真跑）
   scripts/verify-redis-leaderboard.ps1 # W-Y5 Redis 排行榜镜像实证（backend=redis：三条提交→ZCARD=3→停 A→重启 B→Top-K 完整恢复；CI 真跑）
+  scripts/verify-redis-trial.ps1 # W-Y6 切片3 Redis 试炼榜镜像实证（与排行榜同一形态；重启后赛季过滤与 score 降序完整恢复；CI 真跑）
   docker-compose.yml     # 六容器一键部署 + 一次性 verify 容器（见下文「用 Docker 部署」）
 ```
 
