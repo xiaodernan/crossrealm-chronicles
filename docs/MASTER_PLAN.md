@@ -7072,3 +7072,18 @@ Phase D（系统与质量）
   - **判据**：① `mvn -f server/pom.xml verify` **BUILD SUCCESS**（ai-service / game / season / gateway / discovery / config 全绿；live 三类 Skipped 9，未因无 key 红）。② **实测联调**：`LLM_API_KEY=<gitignored> mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test` → `LIVE cache first prompt=5864 cached=4755`（81.1%）→ `second prompt=5921 cached=4908`（**82.9%**），首次即 >80% 前缀命中，第二次仍 >80%（非斩零式虚假命中，是真 prefix reuse）。③ W-Z22 之前同口径实测（f3ddac8 之后）：cached=0/null 频发，首轮多为冷缓存——澈底告别「非流、低命中」的症状。
 
   - **风险**：① **system-prompt 必须冻结**：任何对 `system-prompt.txt` 的编辑都令既有前缀缓存失效，回到冷启动；下一次上游发布才被动热回来——stucture 改动前先确认必要性。② 上游 `cache_control` 仅是 hint 不是契约；`cached_tokens>0` 才是证据（PromptCacheLiveTest 正是如此断言）。③ wkapi.pro 上游缓存 TTL 未知（经验 ~5–10 分钟 warm window），低频请求下命中率不可期；持续热负载下才可维持 >80%。④ CI 不跑 live（无 key），只能人工带 key 验证——「缓存有效」这件事不能交给 CI 兜底。
+- **2026-11-14 W-Z21「环游诸界」achieve side-all（全支线进成就墙 + 老存档回填）** —— 提交：本次 HEAD
+
+  - **起因**：支线系统早就有唯一一份名单（`SideQuestSystem.completed` + `getProgress()`），`side-quest-complete` 清清楚楚由 `SkillQuestSystem.complete()` 广播；可成就系统对此一概不知——玩家做完全部 **58 条**支线（含 W-Z20 的 中洲巡礼/界外狂想曲），成就墙一点残余都没有。更傲慢的是：成就里没有任何一格数支线个数。
+
+  - **做法**：
+    · `AchievementSystemExtras.attachAchievementExtras` 里新增 `side-quest-complete` 监听 → `stats.sideQuests += 1` → `checkAll()`。
+    · **老存档回填（attach 时）**：`SaveSystem.load` 是在 extras 挂载之前跑的，故挂载那一刻 `game.sideQuests.completed` 已是读档后的集合；若存档自带计数 < 实际完成数，按实际值对齐并 `checkAll()` 追认。**只补不改**（不会把存档里更高的计数往下砍）。
+    · `achievements.js` 的 `ACHIEVEMENTS_EXTRA` 追加 `side-all`（title/ach_side_all_title、desc/ach_side_all_desc），**判据直接读 `SIDE_QUESTS_ALL.length` 现算**（与运行时侧唯一一份名单同源，杜绝第二份常量）。
+    · `AchievementSystem` 构造期 `stats.sideQuests = 0`（toJSON/fromJSON 自动往返）。
+    · `engine/events.js` 把 `side-quest-complete` 从 hook-registry 摘下（它现在有真监听点了；`hook` 字段留空）；事件注释同步为 W-Z21 口径。
+    · 双表各 +2 键（title/desc × zh/en）；`EXPECTED_KEY_COUNT` 3058 → **3060**；`content-registry` 普查 achievementsExtra 10 → **11**。
+
+  - **判据**：新增 `tests/side-all-achievement.test.js` 6 例 — 57 次不放水、第 58 次解锁且 PlayerStats 桶 = 1；attach 时按 `sideQuests.completed` 回填解锁；回填不下调高存档；半截 game 不抛；toJSON/fromJSON 往返保留；名册+双表对齐。全量 `npm test` **6562 例全绿**（新增 +6）；`npm run lint` 0；`npm run build` ✓。
+
+  - **风险**：① `SIDE_QUESTS_ALL.length` 现算意味着未来加支线**不用**再改成就判据（数字随内容走）；代价是 `acheval` 文案里写死的「全部 58 条」必须随名单扩容同步改（与 `campfire-all` 写死「全部 6 处」同一纪律）。② `side-quest-complete` 从 hook 摘下后，`event-registry` 门禁自动把「监听者」口径切过去——已实测绿。③ 若将来有第二生产者广播同名事件（目前只有 SideQuestSystem），W-Z21 计数会双重进账——名单审查时已核实全仓唯一派发点。

@@ -250,9 +250,8 @@ export const GAME_EVENTS = Object.freeze({
     payload: '{ chapter, current, completed, total, index }',
   },
   'side-quest-complete': {
-    desc: '支线完成，整体转发支线对象',
+    desc: '支线完成，整体转发支线对象；成就账本（W-Z21）按这条逐条进账',
     payload: '（整体转发支线对象：id/title/desc…）',
-    hook: '派发方自己已写日志与提示；这条给成就/统计出口，仓库内无监听点',
   },
   'journal-entry': {
     desc: '日志新增一条（图鉴、成就、HUD 与教程各取所需）',

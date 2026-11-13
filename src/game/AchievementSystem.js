@@ -49,6 +49,7 @@ export class AchievementSystem {
       discoveries: 0,
       loreFragments: 0,
       journalEntries: 0,
+      sideQuests: 0,
       styleBest: 0,
       cgPercent: 0,
       codexPercent: 0,

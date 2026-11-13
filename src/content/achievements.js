@@ -9,6 +9,7 @@
  * - franchiseBuckets: 母题分桶统计配置（原 ECHO_FRANCHISE_BUCKETS）
  */
 import { FRANCHISE } from './franchises.js';
+import { SIDE_QUESTS_ALL } from './sideQuests.js';
 
 // 基础成就在 AchievementSystem.js 中定义（ACHIEVEMENTS 常量）
 // 这里只导出额外成就与次元回声成就
@@ -24,6 +25,8 @@ export const ACHIEVEMENTS_EXTRA = [
   { id: 'champion-of-hub', title: 'ach_champion_of_hub_title', desc: 'ach_champion_of_hub_desc', check: (s) => s.boss1 && s.boss2 && s.boss3 && s.voidBoss && s.chaosBoss },
   { id: 'ending-keep', title: 'ach_ending_keep_title', desc: 'ach_ending_keep_desc', check: (s) => s.endingKeep },
   { id: 'ending-quiet', title: 'ach_ending_quiet_title', desc: 'ach_ending_quiet_desc', check: (s) => s.endingQuiet },
+  // W-Z21：全支线横披 — 判据以 SIDE_QUESTS_ALL（内容层唯一一份表）现算的长度为门槛，禁止另抄一份数
+  { id: 'side-all', title: 'ach_side_all_title', desc: 'ach_side_all_desc', check: (s) => (s.sideQuests ?? 0) >= SIDE_QUESTS_ALL.length },
 ];
 
 export const ACHIEVEMENTS_POP_CULTURE = [
