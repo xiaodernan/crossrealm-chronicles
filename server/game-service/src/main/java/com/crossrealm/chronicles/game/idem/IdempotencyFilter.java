@@ -54,6 +54,8 @@ public class IdempotencyFilter extends OncePerRequestFilter {
     private static final Set<String> PATHS = Set.of("/api/leaderboard", "/api/trials/runs");
     private static final String CT = "application/json;charset=UTF-8";
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    /** 幂等只为小 JSON 生效；超过此上限的请求一律 413（拒绝，不读不缓存，不半途放行） */
+    private static final int MAX_BODY_BYTES = 64 * 1024;
 
     private final InMemoryIdempotencyStore fallback;
     @Nullable
@@ -100,9 +102,14 @@ public class IdempotencyFilter extends OncePerRequestFilter {
         }
         byte[] body;
         try {
-            body = request.getInputStream().readAllBytes();
+            body = readLimited(request.getInputStream(), MAX_BODY_BYTES + 1);
         } catch (IOException | RuntimeException e) {
             writeJson(response, 500, Map.of("error", "idempotency-body-read-failed"));
+            return;
+        }
+        if (body.length > MAX_BODY_BYTES) {
+            // 请求太大——不读进来、不缓存、不放行：拒绝而非「放行一个可能被截断的请求」
+            writeJson(response, 413, Map.of("error", "idempotency-body-too-large"));
             return;
         }
         String fingerprint = sha256Hex(body);
@@ -149,6 +156,22 @@ public class IdempotencyFilter extends OncePerRequestFilter {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 not available", e);
         }
+    }
+
+    /** 只读这么多字节；超出即停（调用方据此判定 413） */
+    private static byte[] readLimited(java.io.InputStream in, int limit) throws IOException {
+        java.io.ByteArrayOutputStream buf = new java.io.ByteArrayOutputStream(Math.min(limit, 8192));
+        byte[] chunk = new byte[8192];
+        int remaining = limit;
+        while (remaining > 0) {
+            int read = in.read(chunk, 0, Math.min(chunk.length, remaining));
+            if (read < 0) {
+                break;
+            }
+            buf.write(chunk, 0, read);
+            remaining -= read;
+        }
+        return buf.toByteArray();
     }
 
     private void writeJson(HttpServletResponse response, int status, Map<String, String> payload)

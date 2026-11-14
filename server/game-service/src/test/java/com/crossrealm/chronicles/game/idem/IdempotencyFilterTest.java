@@ -133,6 +133,21 @@ class IdempotencyFilterTest {
     }
 
     @Test
+    @DisplayName("请求体超过 64KB → 413 {\"error\":\"idempotency-body-too-large\"}，业务永远不到服务层")
+    void oversizedBodyRejected() throws Exception {
+        RecordingChain chain = new RecordingChain("{\"accepted\":true}");
+        MockHttpServletRequest req = new MockHttpServletRequest("POST", "/api/leaderboard");
+        req.setContent(new byte[70 * 1024]); // 全零字节 —— 不需要是合法 JSON，也不会读完
+        req.setContentType("application/json");
+        req.addHeader(IdempotencyFilter.HEADER, "k-body-limit");
+        MockHttpServletResponse res = new MockHttpServletResponse();
+        filter().doFilter(req, res, chain);
+        assertEquals(413, res.getStatus());
+        assertTrue(res.getContentAsString().contains("idempotency-body-too-large"));
+        assertEquals(0, chain.calls.get());
+    }
+
+    @Test
     @DisplayName("GET 不拦截；其他 POST 路径不拦截（幂等只服务那两条写路径）")
     void pathsAndMethodsScoped() throws Exception {
         RecordingChain getChain = new RecordingChain("{}");

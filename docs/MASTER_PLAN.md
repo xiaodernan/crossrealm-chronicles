@@ -7711,6 +7711,7 @@ Phase D（系统与质量）
        所有异常 fail-open）；③ `IdempotencyFilter`（@Component，只服务 `POST /api/leaderboard` 与 `POST /api/trials/runs`）：
        未提供 key = 完全不走幂等路径；key 必须 `^[A-Za-z0-9_-]{1,128}$` 否则 400；同 key 同 body → 逐字节重放
        （`X-Idempotent-Replayed: true`）；同 key 不同 body → 409 `{"error":"idempotency-key-conflict"}`，业务永远不到服务层；
+       **请求体上限 64KB**：超限 → 413 `{"error":"idempotency-body-too-large"}`，不读、不缓存、不半途放行（公开过滤器不收任意大身体）；
        2xx 才入台；Body 只到响应快照——台账只缓存 2xx，失败的永远不会糊住。
     ④ docker-compose game-service 增 `GAMESERVICE_IDEMPOTENCY_BACKEND=redis`（Relaxed 含 `-` 的表单）；
        config-server `game-service.yml` 增 `idempotency{enabled,backend,ttl-seconds,max-entries}` 默认值；
@@ -7718,8 +7719,8 @@ Phase D（系统与质量）
        同 key 不同 body → 409
        ；key `!!nope` → 400（ParseFile 语法复核 + CI 真跑）。
 
-  - **判据**：`InMemoryIdempotencyStoreTest` 4 例（TTL/LRU/覆盖/存取）；`IdempotencyFilterTest` 7 例
-    （无 key 零拦截/enabled=false passthrough/非法 key 400/同 key 同 body 字节一致重放/同 key 不同 body 409/GET 与非白名单路径不拦截/TTL=0 立即过期）；
+  - **判据**：`InMemoryIdempotencyStoreTest` 4 例（TTL/LRU/覆盖/存取）；`IdempotencyFilterTest` 8 例
+    （无 key 零拦截/enabled=false passthrough/非法 key 400/同 key 同 body 字节一致重放/同 key 不同 body 409/GET 与非白名单路径不拦截/TTL=0 立即过期/>64KB 体 413）；
     game-service 相关 62 例全绿；`mvn -f server/pom.xml verify` → **BUILD SUCCESS**（9 模块）。
 
   - **风险**：① 台账按 TTL 自然死亡——长期 client 若永远不换 key 长期缓存也无益（10 分钟足够一次重试并发）；
