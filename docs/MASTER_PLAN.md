@@ -7328,3 +7328,27 @@ Phase D（系统与质量）
   - **后续**：① notification-service 可以订阅 `season:advance` / `boss-defeated` 直接自动发报讯（当前是被动登记，
     主动发布留待 W-Z50）；② 前端地图 hover 报讯徽章（复用 notifyTracker）；③ 报讯台 ops 端点
     （`GET /api/notify/ops`，只读白名单，仿 presence）；④ Compose：notify 接 Kafka？（不——Redis 够了）。
+- **2026-11-14 W-Z50「世界事件进报讯台」——game-service 遥测 → notification-service 自动镜像** —— 提交：本次 HEAD
+
+  - **起因**：W-Z49 立了报讯台却只能被动登记——没有任何真实事件流会往里写，
+    「炉火报讯台」在真实部署里是一片空台账。本切片把它接上游：`boss_defeated` 是全仓唯一对外高信号世界事件，
+    经 Feign 从 game-service 镜像到 notification-service，形成「玩家击杀 Boss → 遥测入口 → 报讯台有一条」的真链路。
+
+  - **做法**：① `NotifyClient`（@FeignClient→notification-service，`fallbackFactory`，永远不抛）+ `NotifyClientFallbackFactory`
+    （静默丢弃 + WARN 无玩家数据）；② `NotifyMirrorService`（@Component）：白名单只认 `boss_defeated`；
+    bossId → 中文名映射五条（与 `bossRoster.js` 同源，单测钉住）；未知 id 走「未知 Boss（id）」兜底；
+    detail 先去控制字符、裁剪 64 字（进 Feign 前就干净）；③ `TelemetryController` 在 `service.record()` 之后
+    同步调镜像（Feign connect 800ms / read 1200ms + fallback，遥测入口永远 201）；
+    ④ `game-service.notify-mirror-enabled` 开关（默认 true；config-server game-service.yml 同步下发）。
+
+  - **判据**：`mvn -f server/pom.xml verify` → game-service 88 例全绿（新增 `NotifyMirrorServiceTest` 7 例：
+    白名单 / 中文名映射 / 未知兜底 / 控制字符与裁剪 / 开关关闭零调用 / 客户端抛异常吞掉 / fallbackFactory 降级回执）；
+    全量 reactor BUILD SUCCESS；docs（ONLINE_SERVICES 专节）回填。
+
+  - **风险**：① 每次 Boss 击杀向 notification-service 发 1 条（50 格环形在几百场讨伐后开始滚出老条目——
+    这是刻意的「最近事件」语义，不是账本）；② 报讯台无法区分单机/联机来源——
+    online 关闭时遥测根本不会上报，台账天然只记录开启在线的玩家事件；
+    ③ 镜像是同步的——notification-service 慢（read 1200ms）时遥测入口跟着慢（可接受：上限 1.2s + 熔断打开后约 0ms）。
+
+  - **后续**：① season:advance / trial 榜 Top-1 变更这类低频名场面也可以镜像（白名单加两行）；
+    ② 报讯台接入前端后可以在地图上叠「最近世界事件」角标；③ 若要 exactly-once，上 Redis Streams 消费者组（与 W-Z1 同构）。

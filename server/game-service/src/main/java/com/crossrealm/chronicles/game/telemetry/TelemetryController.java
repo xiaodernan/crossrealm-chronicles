@@ -1,6 +1,7 @@
 package com.crossrealm.chronicles.game.telemetry;
 
 import com.crossrealm.chronicles.game.GameServiceProperties;
+import com.crossrealm.chronicles.game.notify.NotifyMirrorService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,16 +21,21 @@ public class TelemetryController {
 
     private final TelemetryService service;
     private final GameServiceProperties properties;
+    private final NotifyMirrorService notifyMirror;
 
-    public TelemetryController(TelemetryService service, GameServiceProperties properties) {
+    public TelemetryController(TelemetryService service, GameServiceProperties properties,
+                               NotifyMirrorService notifyMirror) {
         this.service = service;
         this.properties = properties;
+        this.notifyMirror = notifyMirror;
     }
 
     @PostMapping("/api/telemetry/events")
     public ResponseEntity<Map<String, Object>> record(@Valid @RequestBody SubmitEvent body) {
         TelemetryEvent event = service.record(body.type().trim(),
                 body.detail() == null ? "" : body.detail().trim());
+        // W-Z50：高信号世界事件（boss_defeated）镜像到报讯台——吞掉一切失败，不拖垮入口
+        notifyMirror.mirror(event.type(), event.detail());
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "id", event.id(),
                 "accepted", true));

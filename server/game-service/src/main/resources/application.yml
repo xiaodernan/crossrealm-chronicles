@@ -38,6 +38,9 @@ game-service:
     max-entries: 500
   telemetry:
     max-events: 500
+  # 世界事件 → 报讯台镜像（W-Z50）：boss_defeated 遥测经 Feign → notification-service
+  # notification-service 没起时静默丢弃（fallbackFactory），不阻塞遥测入口
+  notify-mirror-enabled: true
   version-note: "本地默认配置"
 
 eureka:

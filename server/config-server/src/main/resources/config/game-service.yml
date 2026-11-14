@@ -17,4 +17,5 @@ game-service:
   telemetry:
     # 内存里最多缓存多少条遥测事件（超出后丢弃最老的一条）
     max-events: 500
+  notify-mirror-enabled: true
   version-note: "在线伙伴服务 —— 由 Spring Cloud 统一配置中心下发"
