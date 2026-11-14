@@ -22,6 +22,8 @@ npm run size     # 首屏体积门禁（< 2.25 MiB）
 npm run lint     # ESLint
 npm run perf     # 回归 draw-call / 帧速门禁
 npm run e2e      # 真玩家端到端通关（headless 浏览器，~226 秒）
+npm run preview  # 本地预览构建产物（测试生产白屏回归）
+node scripts/cache-hit-bench.mjs --calls=8   # 真上游 prompt-cache 命中率实测（LLM_API_KEY 必需；输出 plain 文本或 --json）
 ```
 
 ## 操作
