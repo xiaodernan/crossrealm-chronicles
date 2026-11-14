@@ -8,8 +8,8 @@
 
 | 路径 | 内容 |
 |------|------|
-| `novel/` | 长篇小说**七章 + 序言 + 四番外**（锚火守夜人 · 《炉火给你的回信》 · 《看守的回信》·《林渡给看守的回信》·《后来者的回信》） |
-| `GLOSSARY.md` | 《跨界纪事》设定集（Codex）——真上游机器抽取的十二章 canon 档案（人物/地点/时间线/母题/译名）；机器直抽、对照原文使用 |
+| `novel/` | 长篇小说**七章 + 序言 + 五番外**（锚火守夜人 · 《炉火给你的回信》 · 《看守的回信》·《林渡给看守的回信》·《后来者的回信》·《火之前》） |
+| `GLOSSARY.md` | 《跨界纪事》设定集（Codex）——真上游机器抽取的十二章 canon 档案（人物/地点/时间线/母题/译名）；机器直抽、对照原文使用（`12-番外五-火之前` 已落盘，下一次生成脚本 pass 即入谱） |
 | `GLOSSARY-en.md` | 英文版同源 Codex——由 EN 译本真上游逐章机器抽取；与 GLOSSARY.md 互为正本相反语言版本 |
 | `film/` | 142 分钟电影剧本（三幕结构 + 导演阐述；终章后彩蛋 · 星图之外）+ 每分钟伴生短片《看守的日子》——中文母本；英译 `电影剧本-跨界纪事.en.md` · `film/短片-看守的日子.md`（ZH）· `film/short-keeper-day.en.md`（EN twin） |
 | `music/` | OST 25 曲手册 + `liner-notes.md` 曲目释义（逐曲注解：剧场 / 记忆 / 位面，对应 canon 出处）+ 可播放 Web Audio 预览（全 25 首真手写）· 英文同源 `OST-专辑手册.en.md` / `liner-notes.en.md` |
@@ -38,9 +38,9 @@ creative/music/soundtrack.html
 
 ## 📖 读小说
 
-按顺序阅读：`novel/00-序言.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-番外` → `09-番外二` → `10-番外三` → **`11-番外四`**
+按顺序阅读：`novel/00-序言.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-番外` → `09-番外二` → `10-番外三` → **`11-番外四`**，尾声读 **`12-番外五-火之前`**（原典底稿 · 新生成章节：火问自己愿不愿意之前）
 
-英文版（全量译本）：`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after`（译本与母本同频率、同一笔触、同一节拍）
+英文版（全量译本）：`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → **`11-interlude-came-after`** → **`12-interlude-before-the-flame`**（译本与母本同频率、同一笔触、同一节拍）
 
 **EN 全集快速入口（双链接，直接用于阅读）**：
 
@@ -58,6 +58,7 @@ creative/music/soundtrack.html
 | 番外二 · The Keeper’s Reply | [interlude-keeper-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/09-interlude-keeper-reply.md) |
 | 番外三 · Lin’s Reply to the Keeper | [interlude-lin-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/10-interlude-lin-reply.md) |
 | 番外四 · The Reply of the One Who Came After | [interlude-came-after](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/11-interlude-came-after.md) |
+| 番外五 · Before the Flame | [interlude-before-the-flame](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/12-interlude-before-the-flame.md) |
 
 每一章对应游戏的章节走法：
 
@@ -75,6 +76,7 @@ creative/music/soundtrack.html
 | 番外二 · 看守的回信 | 第七章之后（readers' letter） | 雾的那一边执笔——给还没有按过 E 的人：雾是千年没吐出的气、看守为什么不先开口、存档之间他重新点灯、结局前那句「哪一种留下更多」问错了 |
 | 番外三 · 林渡给看守的回信 | 第七章之后（final letter） | 三封信收束——火/雾/人三柱终章：林渡背着火走完荒原、把灯路画满世界、门就是你；看守不是在守火，是在等下一位林渡 |
 | 番外四 · 后来者的回信 | 第七章之后（open letter） | 读完前三封信的人执笔——不署名、不下结论、不发放信件，在星图边缘那道银丝旁压着第四封信；「你不是守炉的人，你是下一盏灯。」 |
+| 番外五 · 火之前 | 新章节（原典底稿） | 火问自己愿不愿意之前的世界：九盏没点过的灯漂着，一个人背着最后一块煤横穿荒原——「一百零八人放下，一个人没放下，于是世界有了一百零九道回声」；本章不署名、不进成就、只多一张海报：第十三张。 |
 
 ## 🎥 看电影（剧本）
 

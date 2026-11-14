@@ -1,6 +1,6 @@
 # 《跨界纪事》设定集（Codex · 英文版）—— 真上游机器抽取 · 出处同 zh
 
-**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 12 章抽取；条目标出处；不构成权威发布稿，任何冲突以正文为准。
+**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 12 章抽取；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame（`en/12-interlude-before-the-flame`，2026-11-15 新章）将在下一次生成 pass 进入谱系**——本文件不与此后续章节冲突，也不收录其条目。
 
 > 与 `GLOSSARY.md` 关系：同一正本（canon）两种语言版本；英文字词保留原文锚点（`Anchor Flame`, `The Keeper`, `stay` 等），不做语义再翻译。
 > 这份文件是机器生成者写出的英文对照，**每章记五段**（①人物 / ②地点·位面 / ③时间线 / ④关键物件·母题 / ⑤易混淆译名·统一写法）。
@@ -18,6 +18,7 @@
 - `en/09-interlude-keeper-reply` — Interlude II · The Keeper’s Reply
 - `en/10-interlude-lin-reply` — Interlude III · Lin’s Reply to the Keeper
 - `en/11-interlude-came-after` — Interlude IV · The Reply of the One Who Came After
+- `en/12-interlude-before-the-flame` — Interlude V · Before the Flame *(new chapter — next generation pass pending)*
 
 ---
 

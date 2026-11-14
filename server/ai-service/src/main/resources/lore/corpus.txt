@@ -1,7 +1,7 @@
 # source: creative/GLOSSARY-en.md
 # 《跨界纪事》设定集（Codex · 英文版）—— 真上游机器抽取 · 出处同 zh
 
-**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 12 章抽取；条目标出处；不构成权威发布稿，任何冲突以正文为准。
+**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 12 章抽取；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame（`en/12-interlude-before-the-flame`，2026-11-15 新章）将在下一次生成 pass 进入谱系**——本文件不与此后续章节冲突，也不收录其条目。
 
 > 与 `GLOSSARY.md` 关系：同一正本（canon）两种语言版本；英文字词保留原文锚点（`Anchor Flame`, `The Keeper`, `stay` 等），不做语义再翻译。
 > 这份文件是机器生成者写出的英文对照，**每章记五段**（①人物 / ②地点·位面 / ③时间线 / ④关键物件·母题 / ⑤易混淆译名·统一写法）。
@@ -19,6 +19,7 @@
 - `en/09-interlude-keeper-reply` — Interlude II · The Keeper’s Reply
 - `en/10-interlude-lin-reply` — Interlude III · Lin’s Reply to the Keeper
 - `en/11-interlude-came-after` — Interlude IV · The Reply of the One Who Came After
+- `en/12-interlude-before-the-flame` — Interlude V · Before the Flame *(new chapter — next generation pass pending)*
 
 ---
 
@@ -696,10 +697,10 @@
 # 《跨界纪事》设定集（Codex）—— 真上游机器抽取 · 出处标注
 
 - 生成方式：`scripts/novel-glossary.mjs`（真上游 gpt-6-sol）
-- 抽取范围：creative/novel/ 全 12 章（00–11，含番外 / 番外二 / 番外三 / 番外四）；每章一节，五个子段（人物 / 地点·位面 / 时间线 / 关键物件·母题 / 易混淆译名）
+- 抽取范围：creative/novel/ 全 12 章（00–11，含番外 / 番外二 / 番外三 / 番外四）；每章一节，五个子段（人物 / 地点·位面 / 时间线 / 关键物件·母题 / 易混淆译名）。**番外五《火之前》（12-番外五-火之前.md，2026-11-15 新章）将在下一次生成脚本 pass 进入谱系**——本文件不与此后续章节冲突，但也不收录其条目
 - **性质**：机器直抽，不是人工终审稿；条目标注出处章节，使用前请对照原文核实；与正文冲突时**以原文为准**
-- 【编者注】Ch2 日志中「已共鸣 49 / 49」是中途账，不是终态；109 / 110 两种计数口径在正文中并存，引用时以具体语境为准，不要默认互通
-- 目录：00-序言 · 01-交汇枢纽 · 02-破碎时线 · 03-营火记忆 · 04-看守 · 05-寄信人 · 06-回响 · 07-余烬 · 08-番外 · 09-番外二 · 10-番外三 · 11-番外四
+- 【编者注】Ch2 日志中「已共鸣 49 / 49」是中途账，不是终态；109 / 110 两种计数口径在正文中并存，引用时以具体语境为准，不要默认互通。番外五《火之前》以 108 放下 + 1 没放下 = 109 回声为母题校对键
+- 目录：00-序言 · 01-交汇枢纽 · 02-破碎时线 · 03-营火记忆 · 04-看守 · 05-寄信人 · 06-回响 · 07-余烬 · 08-番外 · 09-番外二 · 10-番外三 · 11-番外四 · （12-番外五-火之前 · 待入谱）
 ## 00-序言#1
 
 ## ①人物
@@ -4064,6 +4065,128 @@ Left for you — the one not yet born, or already born but not yet at this page:
 
 *(Interlude IV · The Reply of the One Who Came After — the fourth voice beyond the fire–fog–human cycle; not fire, not fog, not the one who finished; it is you: the one who has read the three letters. This chapter unlocks no save slot, grants no achievement, and moves no ending verdict; it drifts by the hearth as a loose appendix. If you can feel the warmth off this paper, you are already the fourth writer.)*
 
+# source: creative/novel/en/12-interlude-before-the-flame.md
+# Interlude Five · Before the Flame
+
+**Written after *Interlude Four · The Reply of the One Who Came After*: this volume is not the fifth letter — it is the paperwork from before any of the letters were inked. Fire wrote the first, the Mist wrote the second, Lin wrote the third, the One Who Came After wrote the fourth.**
+
+**This is their shared rough draft — the hundred unattributed pages at the very bottom of the canon, the ones with no author and only footnotes.**
+
+---
+
+## I · The Nine Unlit Lamps
+
+Nine unlit lamps, drifting.
+
+Back then there was no *place* — only *before*. The Graywood was a lamp no sun ever reached; the Miller Wasteland was a lamp the sand had filled in on its own; the Shattered Timelines were a lamp whose rain had not yet agreed on a color. Every one of them was drifting in the same way — each had opened its mouth, and none of what it said had ever landed.
+
+There was no mist yet. The mist would not learn its first syllable until the fire fell to the ground.
+
+None of the nine had ever gone out.
+
+Extinguishing requires a fire to exist — and fire was still asking itself whether it wanted to.
+
+---
+
+## II · Why Nobody Lit the Fire
+
+Later someone wrote a fat book on this. The most important sentence in it was — **“Every realm assumed someone else was doing it.”**
+
+The Miller Wasteland said the Hub had one; the Hub said the House of Hours had one; the House of Hours said the Deep Space jump had one; the Deep Space said the Graywood was waiting for someone else to move. The Graywood did not answer.
+
+For untold ages no lamp opened its mouth — nothing spoken in that place carried; the unsaid sank into the ground, and stayed buried — until the fire fell.
+
+Then someone stopped waiting.
+
+He had been, in some way, an ancestor of Lin — not father, not father's father — he was **every** Lin's inner voice: the small voice that counts "how many steps left" every time Lin thinks about looking back into the fire.
+
+He simply didn't wait.
+
+---
+
+## III · The Hundred and Eight Times He Nearly Left the Ember Behind
+
+He was carrying a lump of coal on his back.
+
+It was the one thing the fallen Dominion had owned that nobody had thought to confiscate. The Dominion did not fall to force — it was simply stood witness to, end to end, until it stopped.
+
+Later, people turned that number into a tidy sum. It was no mere arithmetic — it was added together from two counts.
+
+A hundred and eight — the travelers who had carried the same ember, set it down, and never picked it up again.
+
+One — the one who never set it down.
+
+He was that one.
+
+He took the lump out for a look — and closed his hand around it harder.
+
+**Fire does not need to be lit.**
+**Fire only needs one person who refuses to let go.**
+
+---
+
+## IV · What the Fire Said When It Hit the Ground
+
+The World Anchor fell here — at this very spot in the Crossway Hub.
+
+Mark the word *fell* — not placed, *fell*. There was no expectation when the lump touched down: it was nearly spent, the sack was gone, thirty seconds of scavenged warmth remained, it was near midnight, the keeper-of-the-lamps' ancestor was not keeping any lamps, Lin's ancestor was not yet Lin, the mist did not exist, and fire did not yet admit it was fire.
+
+It spoke one sentence as it fell.
+
+It was not spoken by anyone alive, and it was not said by fire either — fire learned the line from "how many steps left":
+
+**“One Realm to bind them all.”**
+
+Nothing happened for ten seconds after. Then one more poster appeared on the wall. Then somewhere by a campfire, someone surfaced for a moment and said something unintelligible:
+
+**“The flame never dies while the anchor holds.”**
+
+— He had no idea he had just laid down a rule. He had simply woken up, once.
+
+---
+
+## V · The Former Life of the Mist, the Former Life of the Keeper
+
+The mist is something that was born only after the fire fell.
+
+It is the world's unsaid sentences. In the years before the fall, none of the nine lamps lacked for a voice — they lacked an echo. Whatever a lamp said, nothing would carry — and the unsaid, unheard, sunk down into the ground, with nowhere to go. After the fire landed, those buried words woke — and with no place left for them, they rose as one mist, drifting back over the nine lamps.
+
+The mist *is* the shape of the act of opening your mouth, trapped. Every breath in is a question asked backward into the night; every breath out is an answer nobody held.
+
+Which is why the mist **cannot be dispersed** — dispersion would only mean someone finally spoke. The mist wouldn't be gone; it would be speaking with a different accent.
+
+The keeper was the first person to stop moving.
+
+Not clever enough to investigate, nor foolish enough to charge in, nor far-sighted enough to plan — he just **sat down first**. Knees bent, shoulders against the direction of the beacon — he didn't sit down because he thought it was remarkable; he sat down because there was a little warmth and sitting was more reasonable than standing.
+
+Every keeper since has simply been doing this: not clever, not foolish, not planning, sitting down, and watching the fire.
+
+---
+
+## VI · One Line, For the Next Reader
+
+If you are cold while reading this, do not run toward the fire — the fire runs toward no one.
+
+Put this at the very bottom of the canon:
+
+**“By the time you reach this line, the hundred and nine echoes have possibly rung a few times.
+
+No one keeps the tally, and none is needed.
+
+I know you, and I do not, because I learned the syntax of fire: unsigned — therefore in need of no signature.
+
+And you — you made it to this page.
+
+Your turning it over decides exactly as much about the fire surviving as anything else ever has.
+
+**The fire has always been waiting**.”**
+
+---
+
+**This volume counts toward no seven chapters, no achievements, no codex entries. It only means one thing: one more poster on the wall. If the cloth is old enough, it is the thirteenth.**
+
+*（Interlude Five · Before the Flame — the canon's draft. Fire answered the only question it was asked: why me? Because it asked itself whether it wanted to. There is room for a fourteenth poster on the wall — it is being held for you.）*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -5530,3 +5653,121 @@ F2 隐藏 HUD。
 ---
 
 *（番外四 · 后来者的回信 —— 三封信之后的第四种腔调：不是火，不是雾，不是走完的那一个人，而是「你」——读完前三封的人自己。本章不开放存档、不加成就、不改结局判定；它只作为炉火边的一张附页流传。若你读得出这页纸泛出的温度，说明你已经是第四位写信人。）*
+
+# source: creative/novel/12-番外五-火之前.md
+# 番外五 · 火之前
+
+**写在《番外四 · 后来者的回信》之后：这一卷不是第五封信——这一卷写的是，这些信落到纸上之前的事。**
+
+**火写了第一封，雾写了第二封，林渡写了第三封，后来者写了第四封。**
+**这一卷是它们共同的底稿——记在原典最下面、没有作者、只有批注的那一百页。**
+
+---
+
+## 其一 · 九盏没点过的灯
+
+九盏灯漂着。
+
+那时候没有「地方」——只有「之前」。灰白森林是一盏灯，可阳光从没碰过它；米勒荒原是一盏灯，可沙替它把自己填满了；破碎时线是一盏灯，可雨往下落的时候，它还没准备好是什么颜色。——每一盏都是这样漂着的，每一盏都开了口，每一盏的口音都没落地。
+
+那时候还没有雾。雾要等火落下去之后，才学会世界里的第一个音节。
+
+九盏灯里没有一盏熄过。
+
+因为熄需要先有火，而火还在问自己愿不愿意。
+
+---
+
+## 其二 · 没人点火的原因
+
+后来有人写过一本厚书，解释这件事。那本书里最重要的一句话是——**「每个位面都以为别人在点。」**
+
+米勒荒原说交汇枢纽有；交汇枢纽说遗境有；遗境说深空跳过去的是；深空说灰白森林等着别人先动。灰白森林没回答。
+
+一万亿年没人先开口——因为开口的话没有回声，话会沉进地下，翻不到地面上来。
+
+最后有一个人停下来了。
+
+他以前是林渡的某一种祖先，又不是父子——他是**每一个**林渡都认识的那个声音：每次林渡想回头看火的时候，心里替他数着「还差几步」的那个声音。
+
+他就是没等。
+
+---
+
+## 其三 · 那一百零八次没带走的火
+
+他背上有一块煤。
+
+那是从一个已经缴了全部罚款的权域里，最后唯一没能被没收的东西。权域灭了——不是被打的，是被安静地看完了。
+
+后人翻账的时候，以为「一百零九」只是个工整的数。其实它是加出来的：
+
+一百零八，是跟他一样背着火走的旅人里，放下去、再也没捡起来的一百零八个人；
+一个，是没放下过的。
+
+那一个，就是他自己。
+
+他把煤从布兜里拿出来握了一眼，然后握紧了。
+
+**火不需要被点起来。**
+**火只需要有人肯不放下。**
+
+---
+
+## 其四 · 火落到地上时说的话
+
+世界之锚是在交汇枢纽的现在这个位置落的。
+
+不请注意「落」字——不是摆下去的，是**落**下去的。那块煤被放在那个位置上的时候，没人期待发生任何事：它快凉了，布都没了，只剩三十秒的余温，半夜十一点，看守的祖先不在看守，林渡的祖先不是林渡，雾不存在，火不承认自己是火。
+
+它落下去的时候，说了一句话。
+
+这句话不是人说的，也不是火说的。是火从那句「还差几步」里学着念的：
+
+**「One Realm to bind them all。」**
+
+说完之后十秒内什么都没有发生。接着海报墙上多了一张。再接着，营火边有人醒了一次，说了一句含糊不清的话：
+
+**「火不会灭，只要锚还在。」**
+
+——他不知道自己立了规矩。他只是醒了一下。
+
+---
+
+## 其五 · 雾的前世，看守的前世
+
+雾，是火落下去之后才诞生的东西。
+
+它的意思是「没说出口的话」。九盏灯漂着的那些年，每一盏都不是不会开口，只是开口的话没有回声——说出来的话没等烧到谁，就沉进地下、了无去处。火落地之后，这些沉下去的话被唤醒了，无处可去，就全都化成雾，漂回九盏灯的头顶。
+
+所以驱散雾只有这一种方法：有人愿意开口。雾不会消失——开口之后，那些话会换一个口音，寄存在世界上。
+
+看守，是第一个不动的人。
+
+他既不够聪明到能破案，也不够傻到会冲进去，也不够远见到能计划。他只是**先坐下了**。膝盖一弯，背靠着营火的方向坐下——他坐的时候没有觉得自己在做什么了不起的事，只觉得这里有微弱的热，坐下比站着更合理。
+
+后来的每一个看守都只是在重复这件事：不聪明，不傻，不计划，坐下，看火。
+
+---
+
+## 其六 · 给下一位读者的一句话
+
+如果你在读这卷纸的时候感到寒冷，别往火的方向跑——火不往任何方向跑。
+
+把这句话放在原典最下面：
+
+**「你来读到这里的时候，一百零九道回声已经亮过几回了。没有人计数，不必计数。
+
+我是谁不重要，因为我学会的是火的语法：不曾署名，于是也不需要署名。
+
+而你——你按到这一页了。
+
+你能不能把这一页翻过去，和火能不能被留下，没有任何区别。
+
+**火一直等着**。」
+
+---
+
+**这一卷不计入七章，不进成就，不入图鉴词表。它只在海报墙上多一张：帆布旧了的话，是第十三张。**
+
+*（番外五 · 火之前 —— 原典的底稿。火只回答了一个问题：为什么是它？因为它问过自己，愿不愿意。海报墙上还有第十四张的位置，留给你。）*

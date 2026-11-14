@@ -7,8 +7,8 @@
 
 | Path | Content |
 |------|---------|
-| `novel/` | Long-form novel — **seven chapters + prologue + four epistles** (The Anchor Keeper · *A Letter from the Fire* · *The Keeper’s Reply* · *Lin’s Reply to the Keeper* · *The Reply of the One Who Came After*) |
-| `GLOSSARY.md` | *Crossrealm Chronicles* Codex — machine-extracted from all twelve chapters of the original Chinese text (characters / locations·planes / timeline / key items·motifs / name do’s & don’ts). Machine-extracted; never canonical — when in doubt, the text rules. |
+| `novel/` | Long-form novel — **seven chapters + prologue + five interludes** (The Anchor Keeper · *A Letter from the Fire* · *The Keeper’s Reply* · *Lin’s Reply to the Keeper* · *The Reply of the One Who Came After* · *Before the Flame*) |
+| `GLOSSARY.md` | *Crossrealm Chronicles* Codex — machine-extracted from all twelve chapters of the original Chinese text (characters / locations·planes / timeline / key items·motifs / name do’s & don’ts). Machine-extracted; never canonical — when in doubt, the text rules. *(Interlude V · Before the Flame is in the tree — it enters the codex on the next generation pass.)* |
 | `GLOSSARY-en.md` | Canonical Codex EN sibling — machine-extracted from the full English rendering (all twelve chapters, same section machinery, same per-chapter sourcing). Counterparts for every chapter. |
 | `film/` | 142-minute film script — three-act structure + director’s notes; ending coda “Beyond the Star-Charts”; English twin: `电影剧本-跨界纪事.en.md` · companion short — `film/短片-看守的日子.md` (ZH) · `film/short-keeper-day.en.md` (EN, same structure beat-for-beat) — ending-after coda: the day before the anchor, the keeper never leaves |
 | `music/` | OST-25 track manual + `liner-notes.md` (English: `liner-notes.en.md`) track commentary (stage / memory / plane, with canon sources) + playable Web Audio previews (25 tracks hand-synthesised) · English sibling: `OST-专辑手册.en.md`. |
@@ -37,11 +37,11 @@ creative/music/soundtrack.html
 
 ## 📖 Read the novel
 
-Reading order: `novel/00-prologue.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → **`11-interlude-came-after`**
+Reading order: `novel/00-prologue.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → **`11-interlude-came-after`** → **`12-interlude-before-the-flame`**
 
-The full English rendering lives under `creative/novel/en/` (00–11, every chapter — prologue through Interlude IV — rendered by hand at the same cadence, same beat, same hand):
+The full English rendering lives under `creative/novel/en/` (00–12, every chapter — prologue through Interlude V — rendered by hand at the same cadence, same beat, same hand):
 
-`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after`
+`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after` → `12-interlude-before-the-flame`
 
 **EN direct links (jump to any chapter, no table-of-contents scrolling):**
 
@@ -59,6 +59,7 @@ The full English rendering lives under `creative/novel/en/` (00–11, every chap
 | Interlude II · The Keeper’s Reply | [interlude-keeper-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/09-interlude-keeper-reply.md) |
 | Interlude III · Lin’s Reply to the Keeper | [interlude-lin-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/10-interlude-lin-reply.md) |
 | Interlude IV · The Reply of the One Who Came After | [interlude-came-after](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/11-interlude-came-after.md) |
+| Interlude V · Before the Flame | [interlude-before-the-flame](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/12-interlude-before-the-flame.md) |
 
 Chapter → game-chapter mapping:
 
@@ -76,6 +77,7 @@ Chapter → game-chapter mapping:
 | Interlude II · The Keeper’s Reply | after Ch7 (readers’ letters) | the mist’s side of the door — for those who have not yet pressed E |
 | Interlude III · Lin’s Reply to the Keeper | after Ch7 (final letter) | three letters closed — fire/fog/human confrontation: the Lamp Road, the door is you — waits for the next Lin |
 | Interlude IV · The Reply of the One Who Came After | after Ch7 (open letter) | the one who read the three letters — no verdict, presses the fourth page by the silver filament: you are the next lamp |
+| Interlude V · Before the Flame | new chapter (the canon's draft) | the world before the fire asked itself whether it wanted to — nine unlit lamps adrift, a traveler with the last coal; a hundred and eight figures set it down, one didn't; that is where the hundred and nine echoes come from; the chapter is unsigned and grants no achievements; it buys one poster: the thirteenth |
 
 ## 🎥 Watch (as a script)
 
