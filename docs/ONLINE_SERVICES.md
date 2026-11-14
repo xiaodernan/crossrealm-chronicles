@@ -116,6 +116,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 - **Redis 背板排行榜镜像门禁（W-Y5 / `verify-redis-leaderboard.ps1`）**：throwaway redis:7-alpine + game-service（`backend=redis`、`seed-demo-data=false`）→ 提交三条得分 → `ZCARD=3` → 重启后 Top-K 完整恢复（silver-leaf 8000 仍第一）。默认 backend=memory 路径零变更。
 - **Redis 背板试炼榜门禁（W-Y6 切片3 / `verify-redis-trial.ps1`）**：与 Boss 排行榜同形态——throwaway redis + `game-service.trial.backend=redis`；三条 trial 提交（ember 两条 + gloom 一条）→ 有 ZSET 证据 → 重启后 season 过滤仍能看到 `amber-spirit` 排第一。共同回 `smoke §4q`（W-Y5 / W-Y6 各自有脚本在 CI 真跑）。
 - **Redis 背板 rate limiter（`verify-redis-rate-limit.ps1`）/ 赛季缓存（`verify-redis-season-cache.ps1`）**：同一 CI 门禁下两个既有真 Redis 脚本——70 条突发 429 / `/api/seasons/active` 两次相同 + TTL≈300s。
+- **压测门禁（`stress-verify.ps1` / `scripts/stress-load.mjs`，W-Z79/W-Z79b）**：throwaway game-service（memory 后端，28081/28088 独立端口，不连占用 8761 的 `career-os-backend` eureka）→ `/api/version` 等到 200 → `stress-load.mjs mixed`（7:3 读读/写，60 并发 × 20s）→ 断言 5xx=0 / errRate≤0.02 / rps≥300；deadlock 修复后实测 `issued=10355 ok=10355 errRate=0% p50=78 p95=147 rps=688` GREEN。只杀自己 PID，不 `Stop-Process java`。
 
 ## 部署
 
@@ -168,7 +169,8 @@ Gateway 4.x 起路由配置前缀是 `spring.cloud.gateway.server.webflux.*`（�
 - `server/scripts/verify-breaker.ps1` —— W-X5 网关熔断验证（手动诊断）
 - `.github/workflows/server.yml` — CI（编译 + 单测 + 全链路冒烟）
 - `src/online/OnlineServices.js` — 游戏侧客户端（默认关闭）
-- `scripts/stress-load.mjs` — Node 零依赖压测器（五场景；p50/p95/p99；见 W-Z79 ADR）
+- `scripts/stress-load.mjs` — Node 零依赖压测器（五场景；p50/p95/p99；见 W-Z79/W-Z79b ADR与 docs/STRESS_RESULTS.md）
+- `server/scripts/stress-verify.ps1` — 一键压测门禁（隔离端口 · 断言 5xx=0 / errRate≤0.02 / rps≥300；只收自己 PID；见 W-Z79b ADR）
 - `server/season-service/` — 赛季服务（名册 / 周期轮转 / 词缀契约）
 - `server/ai-service/` — 星轨顾问 / 回声灯（唯一持有密钥；`verify-ai-service.ps1` 真调用验证）
 - `server/notification-service/` — 炉火报讯台（W-Z49；`verify-notify-redis.ps1` 真跑跨实例共享台账）
