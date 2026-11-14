@@ -49,7 +49,7 @@ jobs:
           cp creative/showcase.html _site/index.html
           cp creative/player-guide.html _site/guide.html
           cp creative/tapestry.html _site/tapestry.html
-          cp favicon.svg _site/favicon.svg
+          cp public/favicon.svg _site/favicon.svg
           cp -r dist/. _site/game/
 
       - name: Publish to gh-pages
