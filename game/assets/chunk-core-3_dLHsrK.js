@@ -166,7 +166,7 @@ Boss 再战 — 击败后在信标按 {interact} 召唤，+5 魂火
 区域切换 — 全屏过渡动画 + 区域名`,hm_title_online_living:"在线层 · 炉火报讯台",hm_body_online_living:`「设置」→「在线伙伴」开启（localStorage 记录；永远不强制注册账号）。
 在线启用后，游戏才会向同源后端（http://localhost:8080）发请求——不开 = 零网络。
 
-顾问面板（F7）底部「炉火报讯台」：
+顾问面板（{advisor}）底部「炉火报讯台」：
 【布】Boss 讨伐、换季、试炼榜易主、首领速通新王 —— 时间戳 + 类型芯片，全部 textContent 直写。
 右上角未读金点：有新报讯时亮起（本地计数），打开面板即熄。
 
@@ -382,7 +382,7 @@ Kill-streak Souls — 3+ kills within 4.5s gives extra souls
 Zone Switch — fullscreen transition + zone name`,hm_title_online_living:"Online layer · Fireside rumors",hm_body_online_living:`Settings → Online partners → turn on (read from localStorage; no forced account, ever).
 Online layer sends requests to your own backend (http://localhost:8080). Off = zero network traffic.
 
-Advisor panel (F7), bottom strip — “炉火报讯台 / Fireside rumors”:
+Advisor panel ({advisor}), bottom strip — “炉火报讯台 / Fireside rumors”:
 [world] boss defeats · season transitions · trial-crown swaps · speedrun-crown swaps — timestamped kind chips, written via textContent.
 
 Unread dot (FAB): lit when there is something new (local counter); opens the panel, then turns off.
