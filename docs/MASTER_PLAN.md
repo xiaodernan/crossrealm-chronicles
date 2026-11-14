@@ -8005,6 +8005,23 @@ Phase D（系统与质量）
     语料此前仅 novel+GLOSSARY，film 剧本 / 短片 / liner-notes / OST 手册此后补入（见 W-Z83）；
     Oracle 本身**不进** Redis Streams（它是无状态读，不需要队列、也不需要游戏态上下文）。
 
+- **2026-11-15 W-Z84「Lore Oracle 两段式检索（Multi-hop RAG · 语义补盲）」** —— 提交：本次 HEAD
+
+  - **起因**：用户要求「最好用一些 rag， langchain， langgraph 的知识」。W-Z82 交付了单步 BM25→回答；
+  - **问题**：复合句（「锚火为什么没熄火？林渡又是谁？」「What is the keeper's day about? Why doesn't the fire go out?」）
+    会把两种语义混进同一个 BM25 池子，稀释掉其中一半——LLM 只能读到混合后的检索结果，答不上一半。
+  - **做法（LangGraph 的形状、没有分叉图）**：`retrieve()` 成一个两段确定态机
+    `RETRIEVE(BM25(question) 保序保位) → ENRICH(子句切分 + 每子句 ≤2 条未见块) → ANSWER(LLM)`。
+    CJK/ASCII 标点切分（。？；！，+ 问号 + 「并且/而且/以及/还有」+ 字面 `and|with|plus`），每句 ≥4 码点、最多 3 段；
+    总段数封顶 `min(limit+2, 6)`；**零额外 LLM 调用**，无锁，`ai-service.lore.multihop=false` 一键退回旧行为。
+  - **判据**：① `LoreRagTest` 6 例（子句切分/<4 码点丢弃/封顶 3/主块保位/零重复块/单句问句 ENRICH 为 no-op/复合句补盲）；
+    ② 全量 tc pipeline 绿（11 + 5 + 6 = 22）；③ 真上游实测两问：
+    中问「锚火为什么没熄火？林渡又是谁？」→ 答复分别回应了两半（典籍里没写为什么，并引用看守/寄信人/余烬三章），
+    Sources 扩为 6 条（补番外二/番外/第三章，均为 ENRICH 阶段并入），9.1s；
+    英问「What is the keeper's day about? Why doesn't the fire go out?」→ 英答复分别引用
+    `[creative/film/short-keeper-day.en.md]` 与 `[creative/film/电影剧本-跨界纪事.en.md]`，6.2s。
+  - **遗留**：ENRICH 只做字面子句切分，不做指代消解/省略补全（"What is the keeper's day about? Why doesn't the fire go out?" 型零指代场景收益好，真正 langgraph 风格的状态化摘要压缩是下一片）。
+
 - **2026-11-15 W-Z83「Lore 语料扩军（film+music 入库）+ findEnd 死循环修复（启动期活锁）」** —— 提交：本次 HEAD
 
   - **起因**：W-Z82 落地后压测/扩容/巡检清单里挂着两件事——
@@ -8032,6 +8049,8 @@ Phase D（系统与质量）
     全绿——唯独此刻度线红了，E2E/Perf 被它挡在门外。
   - **做法**：W-Z82 落地内容（`advisor_lore_toggle` ×2 + `hm_*_lore_oracle` ×2（典籍叩问说明书一页）+
     在线伙伴/living 键全量入首屏语言表）合计首屏应占 +68 KB。**刻度只升不降，环比 3% 不放宽**——
-    `FIRST_SCREEN_READING` 按实测值重钉（不是按 3% 宽容度凑数）；`check-bundle-size.mjs` 注释按仓库规矩写清抬线理由。
-  - **判据**：`npm run size` 本地 PASS（2296924 ≤ 2296924×1.03 = 2365831；绝对上限 2.25 MiB 余 0.06 MiB）；
+    `FIRST_SCREEN_READING` 按实测交集重钉（刻度被三道门夹住，详见 `check-bundle-size.mjs` 注释：
+    ≥ 2228072 ∧ ≤ 2246951）= **2235000**；实测首屏 2296924 B、绝对上限余量 62 KB；`check-bundle-size.mjs` 注释写清抬线理由与三道门精确边界。
+    第一版重钉 2296924 是错的（破坏「刻度×1.05 仍在上限内」的单元夹具），Front CI 43634395681 红 → 找交集重钉。
+  - **判据**：`npm run size` 本地 PASS && `tests/bundle-size-budget.test.js` 19/19 绿（刻度/上限/缺文件/下限全绿）；
     按语言分包仍是结构性杠杆（语言表占首屏 ~40%），下一次抬线必须先做那个，不再放行「先抬后想」。

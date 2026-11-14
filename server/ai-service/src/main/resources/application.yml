@@ -27,6 +27,12 @@ ai-service:
   max-tokens: 320
   breaker-threshold: 4
   breaker-cooldown-ms: 15000
+  # W-Z82/W-Z84 · 典籍叩问：BM25 检索注原典段落交给大模型。
+  # limit = 喂给模型的原典段落数（封顶 6）；multihop 打开后「复合问题」按标点切子句，
+  # 每子句补 2 条未被主检索覆盖的块（总数封顶 limit+2 且绝对 ≤ 6）；关掉即退回单步检索。
+  lore:
+    limit: 4
+    multihop: true
   # W-Y4：慢速 LLM 调用的独立车道（有界队列 + 2 worker + 重试/死信）。
   # 容量与并发都远小于 Tomcat 线程池：上游是慢资源，排队比抢线程更诚实。
   jobs:
