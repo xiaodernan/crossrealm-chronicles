@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="The Chronicles Compendium — the official archive of the Crossrealm Chronicles transmedia universe: timeline, mothers, echo roster, finale notes and the hand-book of the crew. The fire does not go out. Neither does the story.">
+<title>The Chronicles Compendium · 跨界纪事年鉴</title>
+<style>
+  :root {
+    --ink: #ece4d1;
+    --dim: #a89a80;
+    --gold: #ffd98a;
+    --gold-dim: #c9a962;
+    --ember: #ffb85a;
+    --bg: #0a0812;
+    --bg-raise: #14101f;
+    --line: rgba(255, 217, 138, 0.22);
+    --serif: 'Noto Serif SC', 'Source Han Serif SC', Georgia, serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 115%, rgba(255, 183, 90, 0.10), transparent 62%),
+      radial-gradient(ellipse 55% 45% at 50% -20%, rgba(154, 118, 255, 0.08), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--serif);
+    min-height: 100vh;
+    transition: background 0.6s ease;
+  }
+  ::selection { background: rgba(201, 169, 98, 0.85); color: #1a1526; }
+
+  header {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    padding: 56px 24px 28px;
+    border-bottom: 1px solid var(--line);
+    position: relative; overflow: hidden;
+  }
+  .lang-corner {
+    position: absolute; top: 18px; right: 22px; font-size: 0.72rem; letter-spacing: 0.12em;
+    color: var(--gold-dim); border: 1px solid rgba(255, 217, 138, 0.25); border-radius: 6px;
+    padding: 6px 12px; text-decoration: none; transition: color 0.2s, border-color 0.2s;
+  }
+  .lang-corner:hover { color: var(--gold); border-color: var(--gold); }
+  header::after {
+    content: ''; position: absolute; left: 10%; right: 10%; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: 0.65;
+  }
+  .sigil-flame { width: 96px; height: 96px; position: relative; animation: breathe 4.5s ease-in-out infinite; }
+  @keyframes breathe {
+    0%, 100% { transform: scale(0.96); filter: drop-shadow(0 0 18px rgba(255, 217, 138, 0.55)); }
+    50% { transform: scale(1.04); filter: drop-shadow(0 0 34px rgba(255, 217, 138, 0.85)); }
+  }
+  .kicker { color: var(--gold-dim); letter-spacing: 0.4em; font-size: 0.7rem; text-transform: uppercase; }
+  h1 {
+    font-size: clamp(1.6rem, 5vw, 2.6rem); font-weight: 400; letter-spacing: 0.18em;
+    color: var(--gold); text-shadow: 0 0 40px rgba(255, 217, 138, 0.35); text-align: center;
+  }
+  .tagline { color: var(--dim); font-size: 0.86rem; letter-spacing: 0.2em; }
+
+  nav.tabs {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 4px;
+    padding: 18px 16px; position: sticky; top: 0; z-index: 20;
+    background: rgba(10, 8, 18, 0.82); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .tab-btn {
+    font-family: var(--serif); cursor: pointer; font-size: 0.82rem; letter-spacing: 0.12em;
+    color: var(--dim); background: transparent; border: 1px solid transparent;
+    border-radius: 4px 4px 0 0; padding: 9px 18px 11px; transition: color 0.25s, border-color 0.25s, background 0.25s;
+  }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn[aria-selected="true"] {
+    color: var(--gold); border-bottom: 2px solid var(--gold); background: linear-gradient(180deg, transparent, rgba(255, 217, 138, 0.06));
+  }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 34px 22px 64px; }
+  .tab-panel { display: none; animation: fadeUp 0.45s ease-out both; }
+  .tab-panel.is-active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  h2.section-title {
+    font-size: 1.15rem; letter-spacing: 0.3em; color: var(--gold); font-weight: 400;
+    border-left: 3px solid var(--gold-dim); padding-left: 12px; margin: 8px 0 20px;
+  }
+  .hint { color: var(--dim); font-size: 0.76rem; letter-spacing: 0.08em; margin-bottom: 14px; }
+
+  .timeline { list-style: none; border-left: 1px solid var(--line); margin-left: 14px; }
+  .tl-item { position: relative; padding: 0 0 22px 30px; }
+  .tl-item::before {
+    content: ''; position: absolute; left: -6.5px; top: 7px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--bg); border: 1px solid var(--gold-dim);
+  }
+  .tl-item.major::before { background: var(--gold); box-shadow: 0 0 12px rgba(255, 217, 138, 0.7); }
+  .tl-time { color: var(--gold-dim); font-size: 0.7rem; letter-spacing: 0.2em; }
+  .tl-title { font-size: 1.05rem; margin: 2px 0 4px; color: var(--ink); }
+  .tl-item.major .tl-title { color: var(--gold); }
+  .tl-body { color: var(--dim); font-size: 0.86rem; line-height: 1.8; max-width: 720px; }
+  .tl-ost { color: var(--gold-dim); font-size: 0.72rem; letter-spacing: 0.12em; margin-top: 5px; }
+
+  .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(228px, 1fr)); gap: 12px; }
+  .theme-card {
+    border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 14px 14px 12px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), transparent 60%), var(--bg-raise);
+    display: flex; flex-direction: column; gap: 6px; min-height: 118px;
+  }
+  .theme-card .theme-glyph { font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(255, 217, 138, 0.4)); }
+  .theme-card .theme-name { font-size: 0.92rem; color: var(--ink); letter-spacing: 0.06em; }
+  .theme-card .theme-id { font-size: 0.66rem; color: #6f665f; letter-spacing: 0.08em; font-family: ui-monospace, monospace; }
+  .theme-card .theme-mood { font-size: 0.74rem; color: var(--dim); line-height: 1.7; }
+  .theme-card.special { border-color: rgba(255, 217, 138, 0.35); background: linear-gradient(160deg, rgba(255, 217, 138, 0.06), transparent 60%), var(--bg-raise); }
+  .theme-card.special .theme-name { color: var(--gold); }
+
+  .search-wrap { margin-bottom: 16px; }
+  .search-wrap input {
+    width: 100%; max-width: 420px; font-family: var(--serif); font-size: 0.86rem; letter-spacing: 0.05em;
+    color: var(--ink); background: var(--bg-raise); border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 14px; outline: none;
+  }
+  .search-wrap input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255, 217, 138, 0.25); }
+  .echo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 8px; }
+  .echo-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(255, 255, 255, 0.02); font-size: 0.8rem;
+  }
+  .echo-item .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold-dim); flex: 0 0 auto; }
+  .echo-item.six .dot { background: var(--gold); box-shadow: 0 0 8px rgba(255, 217, 138, 0.8); }
+  .echo-item small { color: #6f665f; font-size: 0.66rem; margin-left: auto; font-family: ui-monospace, monospace; }
+  .echo-empty { color: var(--dim); padding: 20px; text-align: center; font-size: 0.85rem; display: none; }
+
+  .finale-frame {
+    border: 1px solid var(--line); border-radius: 14px;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 130%, rgba(255, 183, 90, 0.28), transparent 65%),
+      radial-gradient(ellipse 60% 50% at 50% -10%, rgba(154, 118, 255, 0.15), transparent 55%),
+      #070510;
+    padding: 52px 32px 40px; text-align: center; position: relative; overflow: hidden;
+  }
+  .finale-title { font-size: clamp(1.8rem, 6vw, 2.6rem); color: var(--gold); letter-spacing: 0.4em; padding-left: 0.4em; font-weight: 300; }
+  .finale-sub { color: var(--ink); opacity: 0.82; margin-top: 14px; font-size: 0.9rem; line-height: 1.9; }
+  .ept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 34px auto 0; max-width: 980px; }
+  .ept { border: 1px solid rgba(255, 217, 138, 0.16); border-radius: 8px; padding: 10px 8px; font-size: 0.72rem; color: var(--dim); line-height: 1.7; }
+  .ept b { display: block; color: var(--gold-dim); font-weight: 400; letter-spacing: 0.08em; margin-bottom: 2px; font-size: 0.72rem; }
+
+  .cast { columns: 2 320px; column-gap: 40px; }
+  .cast-row { break-inside: avoid; margin-bottom: 14px; border-bottom: 1px dotted rgba(255, 255, 255, 0.09); padding-bottom: 10px; }
+  .cast-role { color: var(--gold-dim); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; }
+  .cast-name { font-size: 0.94rem; color: var(--ink); margin-top: 1px; }
+  .cast-note { font-size: 0.74rem; color: var(--dim); line-height: 1.75; margin-top: 2px; }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 26px 20px 34px; text-align: center;
+    color: #6f665f; font-size: 0.72rem; letter-spacing: 0.12em; line-height: 2;
+  }
+  footer b { color: var(--gold-dim); font-weight: 400; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sigil-flame, .tab-panel { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="lang-corner" href="./tapestry.html">中文版</a>
+  <svg class="sigil-flame" viewBox="0 0 100 100" role="img" aria-label="Anchor and flame emblem">
+    <circle cx="50" cy="18" r="8.5" fill="none" stroke="#ffd98a" stroke-width="3" opacity="0.95"/>
+    <path d="M50 26 L50 44" stroke="#ffd98a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M22 52 H78" stroke="#ffd98a" stroke-width="3.5" stroke-linecap="round" opacity="0.9"/>
+    <path d="M50 44 C50 62, 34 66, 30 82 C42 74, 46 74, 50 84 C54 74, 58 74, 70 82 C66 66, 50 62, 50 44 Z"
+          fill="url(#emberGrad)" stroke="#ffd98a" stroke-width="2.4" stroke-linejoin="round"/>
+    <defs>
+      <radialGradient id="emberGrad" cx="0.5" cy="0.72" r="0.62">
+        <stop offset="0" stop-color="#ffd98a"/>
+        <stop offset="0.55" stop-color="#ffb85a"/>
+        <stop offset="1" stop-color="#7a3a12"/>
+      </radialGradient>
+    </defs>
+  </svg>
+  <div class="kicker">THE CHRONICLES COMPENDIUM</div>
+  <h1>The Chronicles Compendium</h1>
+  <p class="tagline">game · novel · film · OST · posters — five typefaces for one fire</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Compendium sections">
+  <button class="tab-btn" role="tab" aria-selected="true" data-tab="timeline">Timeline</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="mothers">Mothers</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="echoes">Echoes</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="finale">Finale</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="cast">Credits</button>
+</nav>
+
+<main>
+
+  <!-- ============ Timeline ============ -->
+  <section class="tab-panel is-active" id="panel-timeline" role="tabpanel">
+    <h2 class="section-title">Timeline</h2>
+    <p class="hint">The Crossrealm Chronicles — seven chapters + prologue + four letters (*A Letter from the Fire* · *The Keeper’s Reply* · *Lin’s Reply to the Keeper* · *The Reply of the One Who Came After*), in the order the story happens. Brackets point to the game chapters and OST landing points.</p>
+    <ol class="timeline">
+      <li class="tl-item">
+        <div class="tl-time">Prologue</div>
+        <div class="tl-title">Prologue · One Hundred and Nine Echoes</div>
+        <div class="tl-body">The first pulse of the World Anchor. The turbulence across the realms was never an accident — it was a single sentence nobody had finished reading. The inbox-shaped slot on the anchor stays empty, and the emptiness is the invitation.</div>
+        <div class="tl-ost">OST 01 «Anchor Pulse»</div>
+      </li>
+      <li class="tl-item major">
+        <div class="tl-time">Chapter One</div>
+        <div class="tl-title">Chapter One · The Intersection Hub</div>
+        <div class="tl-body">Three ancient paths sink into three skies. A campfire of the elfin scout in the Greywood, the unopened letter on the Miller Wastes, a floating candle in the Magic Realm — the traveller presses F for the first time, and hears the wind remember his name for the first time.</div>
+        <div class="tl-ost">OST 02 «Three Roads» · 06 «Campfire Ember»</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">Chapter Two</div>
+        <div class="tl-title">Chapter Two · The Broken Timeline and Chaos Fringe</div>
+        <div class="tl-body">Nineteen eighty-three, playing on a loop on the radio — nobody remembers what happened that year, and everyone is waiting for it to happen again. Upside spores make the shadow move first; the clocktower tolls at 11:06.</div>
+        <div class="tl-ost">OST 11 «Miller’s Hourglass» · 13 «1983 Loop» · 15 «11:06 Bell»</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">Chapter Three</div>
+        <div class="tl-title">Chapter Three · The People in the Campfire’s Memory</div>
+        <div class="tl-body">The hearth needs no fuel — because it feeds on the shape of the past. By the fire, the traveller first hears the two voices of ‘keep the light’ and ‘put it out’ — and in both voices, a version of themselves.</div>
+        <div class="tl-ost">OST 06 · OST 23 «Full Resonance»</div>
+      </li>
+      <li class="tl-item major">
+        <div class="tl-time">Chapter Four</div>
+        <div class="tl-title">Chapter Four · The Keeper</div>
+        <div class="tl-body">The Keeper never speaks. Not because he can’t — he hands one splinter of his own silence to every traveller who drifts through, because he knows the only thing that lets someone put their sword down is hearing, undisturbed, their own voice.</div>
+        <div class="tl-ost">OST 04 «Stone Ring Chant» · 16 «Spiral Count»</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">Chapter Five</div>
+        <div class="tl-title">Chapter Five · The One Who Writes</div>
+        <div class="tl-body">After the ending, Lin Du begins to write. The first letter — to the deepest dark of the moon; the second — to travellers not yet born; the third — to himself. In the middle of the writing, he starts to cry.</div>
+        <div class="tl-ost">OST 10 «Murphy’s Stay» · 24 «Infinity Walker»</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">Chapter Six</div>
+        <div class="tl-title">Chapter Six · Echoes</div>
+        <div class="tl-body">What is an echo? A mountain telling you what shape your line has. The wilderness is a wider mountain — it tells the traveller what self they are willing to see.</div>
+        <div class="tl-ost">OST 23 «Full Resonance» · OST 24 «Infinity Walker»</div>
+      </li>
+      <li class="tl-item major">
+        <div class="tl-time">Finale</div>
+        <div class="tl-title">Chapter Seven · Embers</div>
+        <div class="tl-body">The waystation notice board: we take no letters here, only wayfarers. At the rim of the star-map a filament-thin silver crack hangs between Old God Whisper and Starport Trade — the fire gives the next lamp one direction.</div>
+        <div class="tl-ost">OST 25 «Ember Low Hum»</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">Interlude I</div>
+        <div class="tl-title">A Letter from the Fire to You</div>
+        <div class="tl-body">Five short letters written by the fire, addressed to everyone who has pressed E: why you came here, why the fire never dies — that you are already the candidate — and a word about what comes next.</div>
+        <div class="tl-ost">OST 25 «Ember Low Hum»</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">Interlude II</div>
+        <div class="tl-title">The Keeper’s Reply</div>
+        <div class="tl-body">A letter written from the other side of the mist — addressed to those who haven’t pressed E yet: the mist is a thousand-year-old held breath; the Keeper never speaks first; the lamp he relights between saves; and the question that was asked wrong — ‘which keeps more?’</div>
+        <div class="tl-ost">OST 25 «Ember Low Hum»</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">Interlude III</div>
+        <div class="tl-title">Lin Du’s Reply to the Keeper</div>
+        <div class="tl-body">The third and final letter of the trilogy — after the fire wrote, after the fog wrote — the one who walked out of the fire begins to write: carrying fire to the end of the wastes, painting the Lamp Road onto the world, ‘the door is you’; the Keeper was never guarding the flame — he was waiting for the next Lin Du.</div>
+        <div class="tl-ost">OST 25 «Ember Low Hum»</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">Interlude IV</div>
+        <div class="tl-title">The Reply of the One Who Came After</div>
+        <div class="tl-body">The one who read all three letters picks up the pen — nameless, with no verdict, no conclusion; pressing a fourth page by the silver filament at the rim of the star-map: you are not the keeper of the hearth; you are the next lamp.</div>
+        <div class="tl-ost">OST 25 «Ember Low Hum»</div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ============ Mothers ============ -->
+  <section class="tab-panel" id="panel-mothers" role="tabpanel">
+    <h2 class="section-title">Mothers</h2>
+    <p class="hint">Seventeen echo mothers + one exception (crossover) — each a lamp paired with its badge line and one line in the epitaph wall. Switch to the Echoes tab to filter the roster by name.</p>
+    <div class="theme-grid" id="theme-grid"></div>
+  </section>
+
+  <!-- ============ Echoes ============ -->
+  <section class="tab-panel" id="panel-echoes" role="tabpanel">
+    <h2 class="section-title">Echoes</h2>
+    <p class="hint">Badge roster (✦ = graduation badge / ◦ = standard). Type any keyword — Chinese or English — to filter instantly.</p>
+    <div class="search-wrap"><input id="echo-search" type="search" placeholder="Search badges: Academy / Ember-Keeper / Fringe…" aria-label="Search mother badges"></div>
+    <div class="echo-grid" id="echo-grid"></div>
+    <div class="echo-empty" id="echo-empty">No badge matches — the fire remembers more than it tells.</div>
+  </section>
+
+  <!-- ============ Finale ============ -->
+  <section class="tab-panel" id="panel-finale" role="tabpanel">
+    <div class="finale-frame">
+      <div class="kicker">FINALE</div>
+      <h3 class="finale-title">THE ANCHOR STILL BURNS</h3>
+      <p class="finale-sub">The fire does not go out because of the ending —<br>the story only changes the frequency of the light.<br><br>— A word for the one who has walked this road. You do not have to go any further.<br>You only have to sit down, and leave this lamp ready for the next traveller who presses E.</p>
+      <div class="ept-grid" id="ept-grid"></div>
+    </div>
+  </section>
+
+  <!-- ============ Credits ============ -->
+  <section class="tab-panel" id="panel-cast" role="tabpanel">
+    <h2 class="section-title">Credits</h2>
+    <p class="hint">Copied verbatim from the end credits — every name on this list has sat by the hearth.</p>
+    <div class="cast" id="cast-grid"></div>
+  </section>
+
+</main>
+
+<footer>
+  <b>THE CHRONICLES COMPENDIUM — 跨界纪事年鉴</b><br>
+  Crossrealm Chronicles × the Crossrealm Chronicles novel × the film script × OST-25<br>
+  ‘The fire does not go out. Neither does the story.’<br>
+  Homage to every motif · borrowing their atmospheres · no official endorsement · the hearth lights every traveller
+</footer>
+
+<script>
+'use strict';
+
+const MOTHERS = [
+  ['Academy of Magic', 'wizard', 'The planes’ first classroom — the candle never stops floating; being late is still the first time.', 'candle'],
+  ['Starward Crossing', 'space', 'Not attached to arriving — attached to the act of crossing itself.', 'rocket'],
+  ['The Upside', 'upside', 'Where shadows move first, the heartbeat finally slows down.', 'spores'],
+  ['Border Old Days', 'western', 'At dusk a veiled woman walks in and orders two whiskies.', 'star'],
+  ['Underworld Triad', 'gangster', 'The rules of the triad outlast the laws of physics.', 'diamond'],
+  ['Deepspace Age', 'deepspace', 'The echoes of the old age carry at the speed of light.', 'sparkle'],
+  ['Cyber Neon', 'cyber', 'The neon cannot light the bottom of the well — but it lights the eyes in the lid.', 'chip'],
+  ['Samurai Echoes', 'samurai', 'Somewhere past a broken torii, the duel is never over.', 'sword'],
+  ['Whispers of the Old Days', 'cosmic', 'Words never said somehow carry the farthest.', 'spiral'],
+  ['Starport Routes', 'starport', 'Behind every lane, someone is counting their credit.', 'port'],
+  ['Gloom Echoes', 'gloom', 'The world after the sun sets is the real one.', 'moon'],
+  ['Radiant Echoes', 'radiant', 'Gold is never a colour — it is a weight.', 'sun'],
+  ['Voidmaw Echoes', 'voidmaw', 'The crack is not only in the ground — it is in what goes unsaid.', 'mouth'],
+  ['Abyssal Salt-Song', 'abysssalt', 'The sea floor holds the sound; it cannot hold the direction.', 'salt'],
+  ['Middle-Earth', 'middle-earth', 'Swords, harps, mithril — every old name lives here.', 'harp'],
+  ['Homecoming', 'homecoming', 'The road home is itself a corridor of echoes.', 'home'],
+  ['Crossover', 'crossover', 'The exception of exceptions — never its own genre, yet sees through them all.', 'link'],
+];
+
+const ECHOES = [
+  ['Middle-Earth Sixfold', 'middle_earth_six', true], ['Triad Sixfold', 'gangster_six', true], ['Abyssal Salt Sixfold', 'abysssalt_six', true],
+  ['Border Six Stars', 'western_six', true], ['Deepspace Sixfold', 'scifi_six', true], ['Gloom Sixfold', 'gloom_six', true],
+  ['Radiant Sixfold', 'radiant_six', true], ['Half-Resonance', 'half', false], ['Full-Walker', 'full', false],
+  ['Academy Graduate', 'wizard', false], ['Equation Closed', 'space', false], ['Upside Survivor', 'upside', false],
+  ['Border Sharpshooter', 'western', false], ['Triad Whisperer', 'gangster', false], ['Deepspace Navigator', 'scifi', false],
+  ['Triad in Tune', 'triad', false], ['Neon Walker', 'cyber', false], ['Echo Swordsman', 'samurai', false],
+  ['Whisperer of the Old', 'cosmic', false], ['Starport Veteran', 'starport', false], ['Starport Sixfold', 'starport_six', true],
+  ['Fourfold in Tune', 'wave4', false], ['Ninefold Star-Tide', 'wave5', false], ['Gloom in Tune', 'gloom', false],
+  ['Radiant in Harmony', 'radiant', false], ['Voidmaw Whisper', 'voidmaw', false], ['Voidmaw Sixfold', 'voidmaw_six', true],
+  ['Abyssal Salt-Song Echo', 'abysssalt', false], ['Original in Harmony', 'original', false], ['Homecoming Echoes', 'homecoming', false],
+  ['All Roads Return', 'homecoming_master', false], ['The Pact Beyond the Wall', 'crossover', false], ['Academy Sixfold', 'wizard_six', true],
+  ['Starward Sixfold', 'space_six', true], ['Samurai Sixfold', 'samurai_six', true], ['Cyber Sixfold', 'cyber_six', true],
+  ['Upside Sixfold', 'upside_six', true], ['Old Days Sixfold', 'cosmic_six', true], ['Ember-Keeper', 'keeper', false],
+];
+
+const CAST = [
+  ['Lead · the Plane-Walker', 'Lin Du', 'every traveller who has pressed E'],
+  ['Keeper of the Anchor Flame', 'Yuwen', 'silence — his only line, and by far the longest'],
+  ['Elf Scout', 'Greywood', 'she appears only at dusk; her arrow never misses'],
+  ['The Miller', 'The Hourglass Madman', 'the one who pocketed time — never knew when it ran out'],
+  ['The Archmage', 'Sarlin', 'a mirror for Academy graduates — he climbed up out of graduation too'],
+  ['The Gravity Incarnate', 'Singularity Herald', 'gravity itself, waiting for something heavier'],
+  ['The Timeline Chronarch', 'Chronarch of the Void', 'the timeline is a street; he is its shopkeeper'],
+  ['The Chaos Overlord', 'Overlord of the Rift', 'the rift itself; has never once thought of itself as a rift'],
+  ['The Star-Rail Advisor', 'The One Behind F7', 'the echo you hear across planes — and it’s willing to admit it is an echo'],
+  ['Ember-Keeper', 'every traveller who finishes the ending', 'not a crowning — a relay'],
+  ['Costumes / Concept', 'gold ≠ a colour; it is a weight', 'wherever light touches, someone has shone there'],
+  ['Cinematography', 'grey · Deakins fog', 'the mist was never for hiding — it clears the path for light'],
+  ['Score', 'Crossrealm Chronicles OST (OST-25)', 'Anchor Pulse · Campfire Ember · Full Resonance · Ember Low Hum'],
+  ['Screenplay · the novel', 'Crossrealm Chronicles — seven chapters + prologue + four letters (Fire · Fog · Lin Du · the next)', 'the fire does not go out; neither does the story'],
+  ['Editor', 'cut — immediately after the end', 'the hardest cut is the blink of the hearth-fire'],
+  ['Dialogue Direction', 'silence — one order of magnitude harder than dialogue', 'the Keeper gets a single line — and it is never spoken'],
+];
+
+const EPITAPHS = [
+  ['Academy of Magic', 'candles never die in the final bell'],
+  ['Starward Crossing', 'the line you crossed crosses back'],
+  ['The Upside', 'the shadow you followed, followed you home'],
+  ['Border Old Days', 'both cups of whiskey were yours'],
+  ['Underworld Triad', 'the rules you kept kept you'],
+  ['Deepspace Age', 'the oldest light still knows your name'],
+  ['Cyber Neon', 'the neon hums your frequency now'],
+  ['Samurai Echoes', 'the duel ended; the gate never did'],
+  ['Whispers of the Old Days', 'the unsaid outlived the said'],
+  ['Starport Routes', 'every manifest lists one more you'],
+  ['Gloom Echoes', 'the sunset learned your silhouette'],
+  ['Radiant Echoes', 'glory weighed itself against you'],
+  ['Voidmaw Echoes', 'the crack grew a voice of its own'],
+  ['Abyssal Salt-Song', 'the deep returned your echo, salted'],
+  ['Middle-Earth', 'every old name answered'],
+  ['Homecoming', 'the road home was the long way'],
+  ['Crossover', 'the wall you never hit, never was'],
+];
+
+const GLYPHS = { candle: '🕯️', rocket: '🚀', spores: '🍄', star: '⭐', diamond: '💠', sparkle: '✨', chip: '🔌', sword: '🗡️', spiral: '🌀', port: '⚓', moon: '🌙', sun: '☀️', mouth: '🕳️', salt: '🧂', harp: '🪕', home: '🏡', link: '🔗' };
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+const grid = $('#theme-grid');
+for (const [name, id, mood, glyph] of MOTHERS) {
+  const el = document.createElement('div');
+  el.className = 'theme-card' + (id === 'crossover' ? ' special' : '');
+  el.innerHTML = `<div class="theme-glyph" aria-hidden="true">${GLYPHS[glyph] ?? '🕯️'}</div>
+    <div class="theme-name">${name}</div>
+    <div class="theme-id">franchise · ${id}</div>
+    <div class="theme-mood">${mood}</div>`;
+  grid.appendChild(el);
+}
+
+const echoGrid = $('#echo-grid');
+const empty = $('#echo-empty');
+const echoItems = ECHOES.map(([title, id, six]) => {
+  const el = document.createElement('div');
+  el.className = 'echo-item' + (six ? ' six' : '');
+  el.innerHTML = `<span class="dot"></span><span>${title}</span><small>${six ? '✦ VI' : '◦'} ${id}</small>`;
+  el.dataset.search = (title + ' ' + id).toLowerCase();
+  echoGrid.appendChild(el);
+  return el;
+});
+$('#echo-search').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  let visible = 0;
+  for (const el of echoItems) {
+    const show = !q || el.dataset.search.includes(q);
+    el.style.display = show ? '' : 'none';
+    if (show) visible += 1;
+  }
+  empty.style.display = visible === 0 ? 'block' : 'none';
+});
+
+const eptGrid = $('#ept-grid');
+for (const [theme, line] of EPITAPHS) {
+  const el = document.createElement('div');
+  el.className = 'ept';
+  el.innerHTML = `<b>${theme}</b>${line}`;
+  eptGrid.appendChild(el);
+}
+
+const castGrid = $('#cast-grid');
+for (const [role, name, note] of CAST) {
+  const el = document.createElement('div');
+  el.className = 'cast-row';
+  el.innerHTML = `<div class="cast-role">${role}</div><div class="cast-name">${name}</div><div class="cast-note">${note}</div>`;
+  castGrid.appendChild(el);
+}
+
+const tabBtns = $$('.tab-btn');
+const panels = $$('.tab-panel');
+tabBtns.forEach((btn, i) => {
+  btn.addEventListener('click', () => activate(btn));
+  btn.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const delta = e.key === 'ArrowRight' ? 1 : -1;
+    const next = tabBtns[(i + delta + tabBtns.length) % tabBtns.length];
+    next.focus();
+    activate(next);
+  });
+});
+function activate(btn) {
+  const id = btn.dataset.tab;
+  for (const b of tabBtns) b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+  for (const p of panels) p.classList.toggle('is-active', p.id === 'panel-' + id);
+}
+</script>
+</body>
+</html>
