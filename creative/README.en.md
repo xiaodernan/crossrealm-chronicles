@@ -8,7 +8,7 @@
 | Path | Content |
 |------|---------|
 | `novel/` | Long-form novel — **seven chapters + prologue + five interludes** (The Anchor Keeper · *A Letter from the Fire* · *The Keeper’s Reply* · *Lin’s Reply to the Keeper* · *The Reply of the One Who Came After* · *Before the Flame*) |
-| `GLOSSARY.md` | *Crossrealm Chronicles* Codex — machine-extracted from all twelve chapters of the original Chinese text (characters / locations·planes / timeline / key items·motifs / name do’s & don’ts). Machine-extracted; never canonical — when in doubt, the text rules. *(Interlude V · Before the Flame is in the tree — it enters the codex on the next generation pass.)* |
+| `GLOSSARY.md` | *Crossrealm Chronicles* Codex — machine-extracted canon (characters / locations·planes / timeline / key items·motifs / name do’s & don’ts). Machine-extracted; never canonical — when in doubt, the text rules. *(Interlude V · Before the Flame was added in the 2026-11-16 generation pass — see the end of the file.)* |
 | `GLOSSARY-en.md` | Canonical Codex EN sibling — machine-extracted from the full English rendering (all twelve chapters, same section machinery, same per-chapter sourcing). Counterparts for every chapter. |
 | `film/` | 142-minute film script — three-act structure + director’s notes; ending coda “Beyond the Star-Charts”; English twin: `电影剧本-跨界纪事.en.md` · companion short — `film/短片-看守的日子.md` (ZH) · `film/short-keeper-day.en.md` (EN, same structure beat-for-beat) — ending-after coda: the day before the anchor, the keeper never leaves |
 | `music/` | OST-25 track manual + `liner-notes.md` (English: `liner-notes.en.md`) track commentary (stage / memory / plane, with canon sources) + playable Web Audio previews (25 tracks hand-synthesised) · English sibling: `OST-专辑手册.en.md`. |

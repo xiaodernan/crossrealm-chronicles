@@ -1,6 +1,6 @@
 # 《跨界纪事》设定集（Codex · 英文版）—— 真上游机器抽取 · 出处同 zh
 
-**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 12 章抽取；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame（`en/12-interlude-before-the-flame`，2026-11-15 新章）将在下一次生成 pass 进入谱系**——本文件不与此后续章节冲突，也不收录其条目。
+**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 13 章抽取（00-11 + Interlude V）；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame 的章节段见文件末尾（`## en/12-interlude-before-the-flame#1`）**。
 
 > 与 `GLOSSARY.md` 关系：同一正本（canon）两种语言版本；英文字词保留原文锚点（`Anchor Flame`, `The Keeper`, `stay` 等），不做语义再翻译。
 > 这份文件是机器生成者写出的英文对照，**每章记五段**（①人物 / ②地点·位面 / ③时间线 / ④关键物件·母题 / ⑤易混淆译名·统一写法）。
@@ -18,7 +18,7 @@
 - `en/09-interlude-keeper-reply` — Interlude II · The Keeper’s Reply
 - `en/10-interlude-lin-reply` — Interlude III · Lin’s Reply to the Keeper
 - `en/11-interlude-came-after` — Interlude IV · The Reply of the One Who Came After
-- `en/12-interlude-before-the-flame` — Interlude V · Before the Flame *(new chapter — next generation pass pending)*
+- `en/12-interlude-before-the-flame` — Interlude V · Before the Flame *(Interlude V 段于文件末尾)*
 
 ---
 
@@ -691,3 +691,98 @@
 - Upside：Upside。【en/11-interlude-came-after#1】
 - outer starport：外层星港。【en/11-interlude-came-after#1】
 - wasteland：荒原。【en/11-interlude-came-after#1】
+
+
+---
+
+
+## en/12-interlude-before-the-flame#1
+
+## ① 人物
+
+- **林（Lin）**：第三封信的书写者；文中提到他的某位先祖，以及每个林心中计算“还剩多少步”的声音。【12-Interlude Five · Before the Flame】
+- **林的先祖**：并非林的父亲或祖父；他背着煤块前行，是携带同一余烬的人中唯一从未将其放下的人。【12-Interlude Five · Before the Flame】
+- **看灯人的先祖**：世界锚坠落时，他尚未看守任何灯。【12-Interlude Five · Before the Flame】
+- **第一位看守人（the keeper）**：第一个停下脚步、坐在一点暖意旁看火的人；此后的看守人也坐下看火。【12-Interlude Five · Before the Flame】
+- **后来者（the One Who Came After）**：第四封信的书写者。【12-Interlude Five · Before the Flame】
+
+## ② 地点·位面
+
+- **九盏未点亮的灯**：文中以九盏漂流的灯称述九个位面；在火坠落前，它们都未曾熄灭。【12-Interlude Five · Before the Flame】
+- **灰木（Graywood）**：九盏灯之一，被写作阳光从未抵达的灯。【12-Interlude Five · Before the Flame】
+- **米勒荒原（Miller Wasteland）**：九盏灯之一，被写作自行被沙填满的灯。【12-Interlude Five · Before the Flame】
+- **破碎时间线（Shattered Timelines）**：九盏灯之一，其雨尚未确定颜色。【12-Interlude Five · Before the Flame】
+- **交汇枢纽（Crossway Hub／Hub）**：世界锚坠落之处；火落地后，这里的墙上多出一张海报。【12-Interlude Five · Before the Flame】
+- **时之屋（House of Hours）**：在各处互以为别处已有火的叙述中出现。【12-Interlude Five · Before the Flame】
+- **深空跳跃（Deep Space jump／Deep Space）**：在同一段叙述中出现。【12-Interlude Five · Before the Flame】
+
+## ③ 时间线
+
+1. 最初只有“之前”，九盏未点亮的灯漂流；雾尚不存在。【12-Interlude Five · Before the Flame】
+2. 各处以为别处会负责点火；未被听见的话语沉入地下。【12-Interlude Five · Before the Flame】
+3. 林的先祖背着旧日领地留下的煤块前行；此前已有一百零八名携带同一余烬的旅人将它放下，再未拾起。【12-Interlude Five · Before the Flame】
+4. 世界锚坠落在交汇枢纽；落地时只剩三十秒搜集来的暖意，并说出“One Realm to bind them all.”【12-Interlude Five · Before the Flame】
+5. 十秒后，墙上多出一张海报；某处篝火旁有人短暂醒来，说出“The flame never dies while the anchor holds.”【12-Interlude Five · Before the Flame】
+6. 火落地后，沉埋的话语苏醒，汇成雾，飘回九盏灯上方。【12-Interlude Five · Before the Flame】
+7. 第一位看守人停下、坐下看火；此后的看守人延续这一举动。【12-Interlude Five · Before the Flame】
+
+## ④ 关键物件·母题
+
+- **世界锚（World Anchor）**：坠落于交汇枢纽；“The flame never dies while the anchor holds”由篝火旁短暂醒来的人说出。【12-Interlude Five · Before the Flame】
+- **煤块／余烬**：林的先祖所背的煤块，是旧日领地沦落后无人想到没收之物；“一百零八”与“一”分别指放下同一余烬的旅人和始终未放下它的人。【12-Interlude Five · Before the Flame】
+- **火与雾**：火坠落后雾才诞生；雾由先前未被听见、沉入地下的话语形成，文中称它不能被驱散。【12-Interlude Five · Before the Flame】
+- **海报**：火落地十秒后，墙上多出一张；本卷也被称作墙上的又一张海报，若布足够旧，它就是第十三张，墙上还留有第十四张的位置。【12-Interlude Five · Before the Flame】
+- **书信与本卷**：火、雾、林、后来者分别写下前四封信；本卷不是第五封信，被称为书信落笔前的文书及正典底部无署名、只有脚注的一百页草稿，不计入七章、成就或 codex 条目。【12-Interlude Five · Before the Flame】
+
+## ⑤ 易混淆译名·统一写法
+
+- **Fire／Mist／Lin／the One Who Came After**：统一写作“火／雾／林／后来者”；四者分别对应第一至第四封信，本卷不称“第五封信”。【12-Interlude Five · Before the Flame】
+- **the keeper／the keeper-of-the-lamps' ancestor／Lin's ancestor**：分别写作“看守人／看灯人的先祖／林的先祖”；原文未说明后两者是同一人。【12-Interlude Five · Before the Flame】
+- **the Hub／the Crossway Hub**：统一写作“交汇枢纽”；两种英文称法均见于本节。【12-Interlude Five · Before the Flame】
+- **Deep Space jump／Deep Space**：分别保留“深空跳跃／深空”的原文称法，不将其扩写为原文未给出的位面名称。【12-Interlude Five · Before the Flame】
+
+## en/12-interlude-before-the-flame#1
+
+## ① 人物
+
+- **林（Lin）**：第三封信的书写者；文中提到他的某位先祖，以及每个林心中计算“还剩多少步”的声音。【12-Interlude Five · Before the Flame】
+- **林的先祖**：并非林的父亲或祖父；他背着煤块前行，是携带同一余烬的人中唯一从未将其放下的人。【12-Interlude Five · Before the Flame】
+- **看灯人的先祖**：世界锚坠落时，他尚未看守任何灯。【12-Interlude Five · Before the Flame】
+- **第一位看守人（the keeper）**：第一个停下脚步、坐在一点暖意旁看火的人；此后的看守人也坐下看火。【12-Interlude Five · Before the Flame】
+- **后来者（the One Who Came After）**：第四封信的书写者。【12-Interlude Five · Before the Flame】
+
+## ② 地点·位面
+
+- **九盏未点亮的灯**：文中以九盏漂流的灯称述九个位面；在火坠落前，它们都未曾熄灭。【12-Interlude Five · Before the Flame】
+- **灰木（Graywood）**：九盏灯之一，被写作阳光从未抵达的灯。【12-Interlude Five · Before the Flame】
+- **米勒荒原（Miller Wasteland）**：九盏灯之一，被写作自行被沙填满的灯。【12-Interlude Five · Before the Flame】
+- **破碎时间线（Shattered Timelines）**：九盏灯之一，其雨尚未确定颜色。【12-Interlude Five · Before the Flame】
+- **交汇枢纽（Crossway Hub／Hub）**：世界锚坠落之处；火落地后，这里的墙上多出一张海报。【12-Interlude Five · Before the Flame】
+- **时之屋（House of Hours）**：在各处互以为别处已有火的叙述中出现。【12-Interlude Five · Before the Flame】
+- **深空跳跃（Deep Space jump／Deep Space）**：在同一段叙述中出现。【12-Interlude Five · Before the Flame】
+
+## ③ 时间线
+
+1. 最初只有“之前”，九盏未点亮的灯漂流；雾尚不存在。【12-Interlude Five · Before the Flame】
+2. 各处以为别处会负责点火；未被听见的话语沉入地下。【12-Interlude Five · Before the Flame】
+3. 林的先祖背着旧日领地留下的煤块前行；此前已有一百零八名携带同一余烬的旅人将它放下，再未拾起。【12-Interlude Five · Before the Flame】
+4. 世界锚坠落在交汇枢纽；落地时只剩三十秒搜集来的暖意，并说出“One Realm to bind them all.”【12-Interlude Five · Before the Flame】
+5. 十秒后，墙上多出一张海报；某处篝火旁有人短暂醒来，说出“The flame never dies while the anchor holds.”【12-Interlude Five · Before the Flame】
+6. 火落地后，沉埋的话语苏醒，汇成雾，飘回九盏灯上方。【12-Interlude Five · Before the Flame】
+7. 第一位看守人停下、坐下看火；此后的看守人延续这一举动。【12-Interlude Five · Before the Flame】
+
+## ④ 关键物件·母题
+
+- **世界锚（World Anchor）**：坠落于交汇枢纽；“The flame never dies while the anchor holds”由篝火旁短暂醒来的人说出。【12-Interlude Five · Before the Flame】
+- **煤块／余烬**：林的先祖所背的煤块，是旧日领地沦落后无人想到没收之物；“一百零八”与“一”分别指放下同一余烬的旅人和始终未放下它的人。【12-Interlude Five · Before the Flame】
+- **火与雾**：火坠落后雾才诞生；雾由先前未被听见、沉入地下的话语形成，文中称它不能被驱散。【12-Interlude Five · Before the Flame】
+- **海报**：火落地十秒后，墙上多出一张；本卷也被称作墙上的又一张海报，若布足够旧，它就是第十三张，墙上还留有第十四张的位置。【12-Interlude Five · Before the Flame】
+- **书信与本卷**：火、雾、林、后来者分别写下前四封信；本卷不是第五封信，被称为书信落笔前的文书及正典底部无署名、只有脚注的一百页草稿，不计入七章、成就或 codex 条目。【12-Interlude Five · Before the Flame】
+
+## ⑤ 易混淆译名·统一写法
+
+- **Fire／Mist／Lin／the One Who Came After**：统一写作“火／雾／林／后来者”；四者分别对应第一至第四封信，本卷不称“第五封信”。【12-Interlude Five · Before the Flame】
+- **the keeper／the keeper-of-the-lamps' ancestor／Lin's ancestor**：分别写作“看守人／看灯人的先祖／林的先祖”；原文未说明后两者是同一人。【12-Interlude Five · Before the Flame】
+- **the Hub／the Crossway Hub**：统一写作“交汇枢纽”；两种英文称法均见于本节。【12-Interlude Five · Before the Flame】
+- **Deep Space jump／Deep Space**：分别保留“深空跳跃／深空”的原文称法，不将其扩写为原文未给出的位面名称。【12-Interlude Five · Before the Flame】
+

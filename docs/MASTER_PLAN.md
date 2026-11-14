@@ -8071,5 +8071,5 @@ Phase D（系统与质量）
     ⑤ ZH「七盏/两盏」算数含糊 → 改为「无一盏熄过」彻底去掉错误算数；
     ⑥ EN II/V「nothing spoken carries／buried until the fire fell」——加「until the fire fell」锚定时间、与 V「火落后被唤醒成雾」闭环。
     最终判定：zh「本章无矛盾」en「本章无矛盾」。
-  - **配套落地**：原典语料重建（12→13 章，自动入 corpus——Oracle 已能答番外五相关问题）；README / player-guide / creative READMEs / showcase feed 全部新增「番外五」条目（双语）；GLOSSARY 头注记番外五待入谱、母题校对键。
+  - **配套落地**：原典语料重建（12→13 章，自动入 corpus——Oracle 已能答番外五相关问题）；README / player-guide / creative READMEs / showcase feed / tapestry 全部新增「番外五」条目（双语）；**GLOSSARY 于 2026-11-16 同步补入番外五两段**（真上游 `novel-glossary.mjs --only=火之前 / --only=before-the-flame --append=true`，36 源语料重建，Bm25IndexTest 11/11 绿）。
   - **判据**：QA 双语言「本章无矛盾」；canon 母题 109 在全章闭环；番外五不写进七章/成就/图鉴（授权范围内的保护，防止误判定结局）；link:check 全绿。
