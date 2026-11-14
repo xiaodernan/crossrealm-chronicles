@@ -7517,3 +7517,101 @@ Phase D（系统与质量）
 
   - **后续**：① ops 端点可回显 `notifyLeaderboardDethronesReceived`（observability 三件套）；
     ② 首领榜与试炼榜的「双榜同王」（同一玩家同时登基两块榜）值得一个合影彩蛋。
+- **2026-11-14 W-Z57b「WKAPI 缓存实测」—— token 账一次算清楚（真上游四件套对照）** —— 提交：本次 HEAD
+
+  - **背景**：用户连续三轮点名「调用 OpenAI 时缓存命中率这么低、一直显示非流、stream 明明命中更好」。
+    服务端 LlmClient 早在 W-Z11 定型为 stream + include_usage + system cache_control:ephemeral，
+    但缺一次**可复现的实测台子**——于是写了 `scripts/cache-probe.mjs` 把上游回答当面板看：
+
+  - **实测结果（2026-11-14 18:47 · gpt-6-sol · ~5100 prompt token）**：
+    ① 非流（stream 缺省，无标记）→ HTTP 200，usage 只回 `{prompt_tokens:5076, completion_tokens:29, total_tokens:5105}`，
+       **没有 prompt_tokens_details，缓存字段根本不存在**——任何按 usage 算命中率的客户端都会读到全 0，
+       这就是「非流 → 低命中」的真相：不是模型不缓存，是**账簿里没这一栏**。
+    ② 流 + include_usage（无 system 标记）→ 回了 `prompt_tokens_details:{cached_tokens:4864}`（**cached 95.8%**）——
+       上游对**字面相同的热前缀**做自动缓存，cache_control 只是给不支持自动缓存的网关的提示，不是契约。
+    ③ 流 + 标记第 1 次（前缀已被②热过）→ cached=4864；第 2 次 → usage **整个丢了 prompt_tokens_details**，只剩
+       `{"prompt_tokens":5076,"completion_tokens":41,"total_tokens":5117}`——上游记账是**尽力而为**，
+       命中字段有时整格缺席（answer 也变长了），不是客户端 bug。
+    ④ 系统提示 **≥1024 token 门槛**依旧成立（W-Z12 结论复核）；`prompt_cache_key` 依旧不传（W-Z11 结论复核）。
+
+  - **结论**：LlmClient 现有请求形状（stream + include_usage + system 缓存标记）**已经是 wkapi 的最优姿态**；
+    命中率的绝对值受上游记账随机缺字段影响，同模板同 prefix 的重复请求依旧落在 ~82–97% 区间（热态）。
+    CI 不跑 live（无 key），`PromptCacheLiveTest` 已放宽为「至少一格 cached>0」断言，本片不改判据。
+    `scripts/cache-probe.mjs` 入仓（带 `.env` 读 key，不打印），用于日后升级模型/切换网关时一键复测。
+
+  - **后续**：若上游未来稳定回 `prompt_tokens_details.cached_tokens`，可把 `ai_upstream_cache_hit_ratio`
+    Gauge 从「可能缺格」改为「显式 emit 百分比直方图」（micrometer 侧，不影响上游）。
+
+- **2026-11-14 W-Z58「炉边传闻」——出场页门楣上的那一行世界真话** —— 提交：本次 HEAD
+
+  - **起因**：W-Z55 给出场页加了炉主徽记，但出场页对「世界正在发生什么」仍是哑的——
+    「世界正自己转动」这件事只在顾问面板里可见，玩家按下开始键之前不知道他打的这个宇宙不止他一人在动。
+
+  - **做法**：`src/online/startTicker.js`（新模块）：boot 在 `game.run()` 之前调用 `revealStartTicker(document)`；
+    ① 离线（`onlineServices.enabled() === false`）→ **不 fetch、直接 return、元素保持 hidden**（零网络契约与全仓一致）；
+    ② 在线 → 拉一次 `fetchNotifyRecents(3)`，`pickTickerItem(items)` 优先取带 `kind === "world"` 的真实世界事件、
+       缺则取首条、没有则**保持安静不编凑**；③ 上墙用 `textContent`（永不 innerHTML）；④ 无定时器、无旋转、
+       纯 CSS 金点（`.start-ticker-ember` glow）+ 单行省略号文本（`.start-ticker-text`，`max-width:34ch`）。
+    index.html `#start-ticker`（aria-hidden，初始 hidden）挂在 `#start-keeper` 之下；双表 +1 键 `start_ticker_label`
+    （zh「此刻 · 炉边传闻」/ en “Now · fireside rumors”）；`EXPECTED_KEY_COUNT` 3103 → **3104**。
+
+  - **判据**：`tests/start-ticker.test.js` **9 例**：pickTickerItem 的 world 优先/首条回退/坏输入；
+    离线=零 fetch；成功=textContent 上墙+hidden 移除；fetch 炸/世界安静=静默不动；
+    HTML/i18n/CSS/main.js 四格契约。`npm test` **6674 例全绿**（+9）；lint 0；size 2.18 MiB（余 0.07 MiB）。
+
+  - **风险**：① 出场页现在多了一条「在线才出现」的信息线——离线玩家零感知（这是刻意的）；
+    ② 上线的 title ≤120 字符由 notification-service 硬上限兜住，textContent 无注入面；
+    ③ 常态安静的世界（后端没人玩）→ 出场页不说谎，只显示炉主徽记，行为与 W-Z55 一致。
+
+  - **后续**：炉边传闻 + 炉主徽记 + 跨媒体 caption 组成「出场页三件套」；W-Z60 可以在门楣加一枚
+    「双榜同王」合影彩蛋（首领榜+试炼榜同一玩家登基 → 出场页或日志页签一枚 ✦✦ 徽记）。
+
+- **2026-11-14 W-Z59「报讯流的账」——/api/ops/health 回 notifyMirrors（observability 三件套完满）** —— 提交：本次 HEAD
+
+  - **起因**：`SeasonBroadcastListener.receivedCount()` 早有 `seasonBroadcastReceived`（W-M5/W-Z53）；
+    Boss 被讨伐 / 试炼榜易主 / 首领速通新王 这三条「镜像流」的发布侧却全靠日志（`ai.upstream.usage` 同类病）。
+    运维点 `curl /api/ops/health` 时看不出「报讯到底发了没」——于是补上最便宜的那格账本。
+
+  - **做法**：`NotifyMirrorService` 加四枚 `AtomicLong`（bossDefeated/seasonAdvance/trialDethrone/leaderboardDethrone），
+    每个 `client.publish` 成功路径 +1；新 `mirrorStats()` 返回 LinkedHashMap{四类计数+total}。
+    `OpsController` 注入 `@Nullable NotifyMirrorService`（构造尾增一参，三支测试 `OpsAdvisor/OpsSeason/OpsDeadLetter` 同步补 null），
+    `/api/ops/health` 新节 `notifyMirrors:{available, published:{bossDefeated, seasonAdvance, trialDethrone, leaderboardDethrone, total}}`；
+    bean 缺席 → `{available:false}`（如实沉默，语义与 seasonBroadcastReceived=-1 同族）；
+    bean 装配但 enabled=false → `available:true` + `published.total=0`（区分「没装」与「关着」）。每个计数只是本进程值。
+
+  - **判据**：`OpsHealthNotifyTest` **3 例**（四类镜像依次走一遍 total=4 / bean 缺席 available=false / disabled 但装配 total=0）；
+    game-service 相关 6 测试类全绿；`mvn -f server/pom.xml verify` → **BUILD SUCCESS**（9 模块）。
+
+  - **风险**：① 计数不跨进程（game-service 多副本时每副本各数各的，与 mirror/leaderboard ZCARD 一样属「本地账本」，非全局真值——
+    真值在 notification-service 的台账/stats）；② bean 在 disabled 时也注册（@Component 永在），
+    故 `available=true, total=0` 是合法态，不是 bug；③ 点菜风格维持 ops 家族：无玩家内容、无行级明细。
+
+  - **后续**：W-Z60「双榜同王」；notification-service `/stats` 与本地 `published` 双源对照可进 ops 大盘（W-P11/W-Z52 家族）。
+- **2026-11-14 W-Z60「双冠」——首领榜皇位易主 + 试炼皇冠在身 = 世界报讯（双榜合影）** —— 提交：本次 HEAD
+
+  - **起因**：W-Z54（试炼榜易主）与 W-Z56（首领速通易主）都能镜报讯，但「同一玩家同时是两榜的王」
+    只是这两条流里的巧合——没有任何代码看得见这个巧合本身。双冠是跨两份内存榜单的事实，必须由能看见两边的人来判。
+
+  - **做法**：**单向瞭望、不引入循环依赖**（`TrialLeaderboardService` 永远不知道 `LeaderboardService`）。
+    ① `TrialLeaderboardService.crownsHeldBy(runner)`：对本进程所有出现过的 seasonId 逐季 `top(1)`，
+       normalizeRunner 对比，回**已加冕的 seasonId 列表**（去重、空 = 一个冠都没有）——
+       只在首领榜易主那一刻调用，不进热路径（O(季数 · 榜体量) 的常数级）；
+    ② `LeaderboardService` 4-arg `@Autowired` 生产构造（尾增 `@Nullable TrialLeaderboardService`）；
+       `detectDethroning=true` 之后：先照旧 `mirrorLeaderboardDethrone`，再 `crownsHeldBy`，
+       非空 → `NotifyMirrorService.mirrorDualCrown(runner, crowns)`（kind=world，title「世界事件 · 双冠」，
+       body「{runner} 同时加冕：{season} 试炼榜首与首领速通榜首。」；runner 24 字裁剪、season id 白名单 `^[a-z][a-z0-9-]{0,19}$`、
+       最多列 3 个 season）；③ `NotifyMirrorService.mirrorStats()` 增 `dualCrown` 格，
+       `/api/ops/health` 的 `notifyMirrors.published` 自动带出（W-Z59 同契约，bean 缺席 = `{available:false}`）。
+
+  - **判据**：`LeaderboardDualCrownTest` **4 例**（易主+试炼皇冠=单冠+双冠两条 / 本人刷新零条 /
+    旧构造路径行为不变 / 多季皇冠去重列出 3 个）；`NotifyMirrorServiceTest` 16 例（+双冠镜像+五类计数口径）；
+    `OpsHealthNotifyTest` 3 例（total=5）；`mvn -f server/pom.xml verify` → **BUILD SUCCESS**（9 模块）。
+
+  - **风险**：① 双冠瞭望只在这一进程看见全榜——两个榜单都是多副本内存/Redis 时视图跟本节点一致，
+    这是已知的「本地账本」语义（同 trial/leaderboard 本身一样），真值在 notification-service 台账；
+    ② 首领榜易主 + 试炼皇冠在身的同一刻可能镜两条报讯——这是刻意的：双冠是新闻，但单冠报讯不该缺；
+    ③ season id 不在白名单内会被降级为 unknown（身份维持白名单强约束，不做多值拼接注入面）。
+
+  - **后续**：① 若 season-service 将来提供「本周期是哪一季」只读端点，可把 双冠 的 season 限定为当前周期、
+    其余历史冠军另立「终身双冠」彩蛋；② notification-service `/stats` 按 kind=world 分桶聚合双冠类事件
+    （需要 title 白名单之眼，不建议——台账只存事实，不做语义分类）。
