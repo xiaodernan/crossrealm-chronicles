@@ -527,6 +527,19 @@ game-service:
     if ($gwProm -match 'sk-') { Write-Error 'gateway prometheus leaks an api key'; exit 1 }
     Write-Host "gateway prometheus ok (JVM + gateway_requests_total + gateway_request_duration_seconds; no secrets)"
 
+    Write-Host ""
+    Write-Host "=== 4s) /api/ops/health notifyMirrors (W-Z59 observability) ==="
+    $oh = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/health' -TimeoutSec 15).Content
+    if ($oh -is [byte[]]) { $oh = [System.Text.Encoding]::UTF8.GetString($oh) }
+    Write-Host $oh
+    if ($oh -notmatch '"notifyMirrors"') { Write-Error "ops/health missing notifyMirrors section: $oh"; exit 1 }
+    if ($oh -notmatch '"available":(true|false)') { Write-Error "ops/health notifyMirrors missing available flag: $oh"; exit 1 }
+    if ($oh -match '"available":true') {
+        if ($oh -notmatch '"dualCrown":[0-9]+') { Write-Error "ops/health notifyMirrors missing dualCrown counter: $oh"; exit 1 }
+        if ($oh -notmatch '"total":[0-9]+') { Write-Error "ops/health notifyMirrors missing total counter: $oh"; exit 1 }
+    }
+    if ($oh -match 'sk-') { Write-Error 'ops/health leaks an api key'; exit 1 }
+    Write-Host "ops/health notifyMirrors ok (available flag + dualCrown/total counters; no secrets)"
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content
 
