@@ -8096,3 +8096,19 @@ Phase D（系统与质量）
   - **配套修复**：`Test-PortFree` 之前把 TIME_WAIT 当成忙——Windows 关闭后 ~2min 内全部拒跑；只看 LISTEN 态、不拒 TIME_WAIT。
   - **配套文档**：ONLINE_SERVICES 双语各补「Lore Oracle 压测（W-Z86）」段与 scripts 清单；STRESS_RESULTS.md 归档四组读数（honest tail note）；package.json 注册 `stress:oracle`。
   - **判据**：gate GREEN ×4 run；零网络零 token；Oracle 昂贵路径结构级安全验证通过（tail 受本 stub 限制，生产分布与冷启动由真上游实测为准）。
+
+- **2026-11-16 W-Z87/W-Z88「十七母题孤立成块入语料（`creative/tapestry-lore/`）· Oracle 的弱模型失效实证」** —— 提交：本次 HEAD
+
+  - **起因**：番外五的 Oracle 答题已稳定引用 `creative/novel/12-番外五-火之前.md`（明确 citation）；
+    但 Tapestry-lore（十七母题：每个 mother 的灯喻/谢幕碑/中英双语 annot 均为重复模板）入 corpus 后，模型无法从相似块选出「学院」一条答案（Q：「学院的谢幕碑写了什么？」/「What does the Academy of Magic epitaph say?」—— Academy 块明确在 context 且独占 source 文件：模型仍拒答 10/10 答复）。
+  - **诊断**：retrieval 端用 Medium/high rank 块 Academy 正确返回；`inclusion=failure` 来自 **wkapi.pro gpt-6-sol 的注意力在同构重复块上系统性地平均——context precision 问题、不是 BM25 问题**。
+    把 tapestry-lore.md 拆成十七文件（每 Mother 一个 source）：实测 Academy 仍然拒答（zero change），但 `Homecoming epitaph` 答对（`the road home was the long way`，citation `16-homecoming.md`）、✓ evidence 回答能经由单母题区分出来部分。
+  - **试过的办法（没有作效的）**：anchor-10（anchor 标注 + 「most relevant excerpt」 label）；trailing reminder 重申 heading lookup；prompt 骤「only look at the first excerpt」；BM25 ridge threshold 0.62（删除弱命中——却在 番外五 query 上让 film block 成为唯一 primary，模型回答不对且后可能拒答；已回退）；prompt 单复行 expansion（extra LLM call，没有收益）。
+  - **诚实结论（产品态）**：Oracle 在英雄语料/film prose（规模不同、模板 ≠ 母题）**稳定正确**（番外五、短片、EP、essay 全部跑通引用）；
+    对**重复模板的双语碑文型语料**，`gpt-6-sol`（wkapi.pro）实测**注意力稳定地泄漏到邻近相同块**——无 prompt 能可靠指定「Academy 学院对应哪一块」。保留实测、不做魔法。
+    Oracle 永远以 Advisory 形态存在，不会代判世界结局——这些**错误归属**（错配引用但原样呈现的事实摘录）不会走出玩家屏幕。
+  - **做法**：① `creative/tapestry-lore.md` 按 `## NN` 标记拆成 17 文件（`01-academy-of-magic.md`…`17-crossover.md`），`scripts/split-tapestry-lore.mjs` 一次性迁移；
+    ② `scripts/build-lore-corpus.mjs`：tapestry → collect 目录（贪心收录 17 文件）；语料重编译 36→**53 源**（~201 KB UTF-8，重建 `--check` 幂等）；
+    ③  OracleControllerTest + Bm25IndexTest 11/11 + LoreRagTest 6/6 绿；corpus tests 不回退；
+    ④ **新增已知约束**：template-variant 双语碑文语料上的 attention limit，未来任何人接手时应知道：
+    若模型对同构母题 block 选择失败，通路 A 是继续 XML-style 块标注拆分（已做）、B 是等 wkapi 上游模型换代（候选：deepseek-r2 / qwen-72b；换模型只需改一行配置和重跑同 probe）、C 是把 Academy 恒零回答的一条写进 Advisory fallback（程序短路：Academy Had Better Citation Match 必答 with source-span quoting clause），而不是试图 prompt/fine-tune 去压服。

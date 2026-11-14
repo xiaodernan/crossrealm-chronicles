@@ -6019,3 +6019,143 @@ F2 隐藏 HUD。
 **这一卷不计入七章，不进成就，不入图鉴词表。它只在海报墙上多一张：帆布旧了的话，是第十三张。**
 
 *（番外五 · 火之前 —— 原典的底稿。火只回答了一个问题：为什么是它？因为它问过自己，愿不愿意。海报墙上还有第十四张的位置，留给你。）*
+
+# source: creative/tapestry-lore/01-academy-of-magic.md
+## 01 · 魔法学院 · Academy of Magic (wizard)
+
+**灯的喻体**：位面的第一间教室——蜡烛永远飘着，迟到永远是第一次。
+**lamp metaphor**: The planes' first classroom — the candle never stops floating; being late is still the first time.
+**谢幕碑 / epitaph**: candles never die in the final bell
+**锚铭 / id**: wizard · candle
+
+# source: creative/tapestry-lore/02-starward-crossing.md
+## 02 · 星际穿越 · Starward Crossing (space)
+
+**灯的喻体**：不执着于到达，执着于「穿越」本身这件事。
+**lamp metaphor**: Not attached to arriving — attached to the act of crossing itself.
+**谢幕碑 / epitaph**: the line you crossed crosses back
+**锚铭 / id**: space · rocket
+
+# source: creative/tapestry-lore/03-the-upside.md
+## 03 · 逆相界 · The Upside (upside)
+
+**灯的喻体**：影子先动的地方，心跳反而慢了下来。
+**lamp metaphor**: Where shadows move first, the heartbeat finally slows down.
+**谢幕碑 / epitaph**: the shadow you followed, followed you home
+**锚铭 / id**: upside · spores
+
+# source: creative/tapestry-lore/04-border-old-days.md
+## 04 · 边境往事 · Border Old Days (western)
+
+**灯的喻体**：黄昏总有一位戴黑纱的妇人走进来，点两杯威士忌。
+**lamp metaphor**: At dusk a veiled woman walks in and orders two whiskies.
+**谢幕碑 / epitaph**: both cups of whiskey were yours
+**锚铭 / id**: western · star
+
+# source: creative/tapestry-lore/05-underworld-triad.md
+## 05 · 幽冥帮派 · Underworld Triad (gangster)
+
+**灯的喻体**：帮派的规矩比位面的物理法则更久。
+**lamp metaphor**: The rules of the triad outlast the laws of physics.
+**谢幕碑 / epitaph**: the rules you kept kept you
+**锚铭 / id**: gangster · diamond
+
+# source: creative/tapestry-lore/06-deepspace-age.md
+## 06 · 深空纪元 · Deepspace Age (deepspace)
+
+**灯的喻体**：旧时代的回声在深空里以光速传播。
+**lamp metaphor**: The echoes of the old age carry at the speed of light.
+**谢幕碑 / epitaph**: the oldest light still knows your name
+**锚铭 / id**: deepspace · sparkle
+
+# source: creative/tapestry-lore/07-cyber-neon.md
+## 07 · 赛博霓虹 · Cyber Neon (cyber)
+
+**灯的喻体**：霓虹灯照不亮井底，却照得亮井盖下面的眼睛。
+**lamp metaphor**: The neon cannot light the bottom of the well — but it lights the eyes in the lid.
+**谢幕碑 / epitaph**: the neon hums your frequency now
+**锚铭 / id**: cyber · chip
+
+# source: creative/tapestry-lore/08-samurai-echoes.md
+## 08 · 武士残响 · Samurai Echoes (samurai)
+
+**灯的喻体**：鸟居残门之后，决斗还没收场。
+**lamp metaphor**: Somewhere past a broken torii, the duel is never over.
+**谢幕碑 / epitaph**: the duel ended; the gate never did
+**锚铭 / id**: samurai · sword
+
+# source: creative/tapestry-lore/09-whispers-of-the-old-days.md
+## 09 · 旧日低语 · Whispers of the Old Days (cosmic)
+
+**灯的喻体**：不说出的话，反而能一直传下去。
+**lamp metaphor**: Words never said somehow carry the farthest.
+**谢幕碑 / epitaph**: the unsaid outlived the said
+**锚铭 / id**: cosmic · spiral
+
+# source: creative/tapestry-lore/10-starport-routes.md
+## 10 · 星港商路 · Starport Routes (starport)
+
+**灯的喻体**：每一条航线背后，都有人在数自己的信用。
+**lamp metaphor**: Behind every lane, someone is counting their credit.
+**谢幕碑 / epitaph**: every manifest lists one more you
+**锚铭 / id**: starport · port
+
+# source: creative/tapestry-lore/11-gloom-echoes.md
+## 11 · 薄暮回响 · Gloom Echoes (gloom)
+
+**灯的喻体**：太阳落山之后的世界，才是真世界。
+**lamp metaphor**: The world after the sun sets is the real one.
+**谢幕碑 / epitaph**: the sunset learned your silhouette
+**锚铭 / id**: gloom · moon
+
+# source: creative/tapestry-lore/12-radiant-echoes.md
+## 12 · 辉煌残响 · Radiant Echoes (radiant)
+
+**灯的喻体**：金色不是颜色，是重量。
+**lamp metaphor**: Gold is never a colour — it is a weight.
+**谢幕碑 / epitaph**: glory weighed itself against you
+**锚铭 / id**: radiant · sun
+
+# source: creative/tapestry-lore/13-voidmaw-echoes.md
+## 13 · 断口残响 · Voidmaw Echoes (voidmaw)
+
+**灯的喻体**：裂开的不仅是地面，还有说出口的话。
+**lamp metaphor**: The crack is not only in the ground — it is in what goes unsaid.
+**谢幕碑 / epitaph**: the crack grew a voice of its own
+**锚铭 / id**: voidmaw · mouth
+
+# source: creative/tapestry-lore/14-abyssal-salt-song.md
+## 14 · 深颚咸响 · Abyssal Salt-Song (abysssalt)
+
+**灯的喻体**：海底压得住声音，却压不住方向。
+**lamp metaphor**: The sea floor holds the sound; it cannot hold the direction.
+**谢幕碑 / epitaph**: the deep returned your echo, salted
+**锚铭 / id**: abysssalt · salt
+
+# source: creative/tapestry-lore/15-middle-earth.md
+## 15 · 中洲 · Middle-Earth (middle-earth)
+
+**灯的喻体**：长剑、harp、mithril——所有古老的姓氏都活在这里。
+**lamp metaphor**: Swords, harps, mithril — every old name lives here.
+**谢幕碑 / epitaph**: every old name answered
+**锚铭 / id**: middle-earth · harp
+
+# source: creative/tapestry-lore/16-homecoming.md
+## 16 · 返乡 · Homecoming (homecoming)
+
+**灯的喻体**：归途本身，就是一条回声走廊。
+**lamp metaphor**: The road home is itself a corridor of echoes.
+**谢幕碑 / epitaph**: the road home was the long way
+**锚铭 / id**: homecoming · home
+
+# source: creative/tapestry-lore/17-crossover.md
+## 17 · 跨界 · Crossover (crossover)
+
+**灯的喻体**：例外中的例外：不自成一系，却照见所有系。
+**lamp metaphor**: The exception of exceptions — never its own genre, yet sees through them all.
+**谢幕碑 / epitaph**: the wall you never hit, never was
+**锚铭 / id**: crossover · link
+
+---
+
+*（十七母题 · The Seventeen Mothers——年鉴的中轴。这一章不进新篇章，只让年鉴里的灯在典籍语料里再亮一遍。每一个母题都是一盏灯；每一盏都照见过至少一个按过 E 的人。）*

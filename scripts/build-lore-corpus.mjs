@@ -6,6 +6,7 @@
  *   novel-zh   creative/novel/*.md（正篇 12 章，简体）
  *   novel-en   creative/novel/en/*.md（全书英译）
  *   codex      creative/GLOSSARY.md + creative/GLOSSARY-en.md（机器抽取设定集）
+ *   tapestry   creative/tapestry-lore/*.md（十七母题·年鉴中轴——年鉴原数据的原典化，每母题独立成块入库）
  *   film       creative/film/电影剧本-跨界纪事.md + .en.md + 短片双语（锚点前的一天）
  *   music      creative/music/liner-notes.md + .en.md + OST-专辑手册.md + .en.md
  * 出：server/ai-service/src/main/resources/lore/corpus.txt
@@ -26,6 +27,7 @@ const GROUPS = [
   ...collect('creative/novel', (f) => f.endsWith('.md') && f.split('/').length === 3).map((f) => ['novel-zh', f]),
   ...collect('creative/novel/en', (f) => f.endsWith('.md')).map((f) => ['novel-en', f]),
   ...['creative/GLOSSARY.md', 'creative/GLOSSARY-en.md'].map((f) => ['codex', f]),
+  ...collect('creative/tapestry-lore', (f) => f.endsWith('.md')).map((f) => ['tapestry-lore', f]),
   ...[
     'creative/film/电影剧本-跨界纪事.md',
     'creative/film/电影剧本-跨界纪事.en.md',

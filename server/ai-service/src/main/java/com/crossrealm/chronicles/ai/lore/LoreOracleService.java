@@ -65,16 +65,23 @@ public class LoreOracleService {
             return new OracleResult(true, "此物未在典籍中 · This is not in the record.",
                     List.of(), "oracle-bm25", false, false, 0L);
         }
-        StringBuilder context = new StringBuilder();
-        for (Bm25Index.Hit hit : hits) {
-            context.append("[").append(hit.doc().source()).append("]\n")
-                    .append(hit.doc().text().trim())
+        StringBuilder firstBlock = new StringBuilder();
+        Bm25Index.Hit anchor = hits.get(0);
+        firstBlock.append("[").append(anchor.doc().source()).append("]\n")
+                .append(anchor.doc().text().trim());
+        StringBuilder rest = new StringBuilder();
+        for (int i = 1; i < hits.size(); i++) {
+            rest.append("[").append(hits.get(i).doc().source()).append("]\n")
+                    .append(hits.get(i).doc().text().trim())
                     .append("\n\n---\n\n");
         }
         String system = loadOracleSystem();
         String user = "Player question (use the language the player asked in):\n" + question
-                + "\n\nExcerpts from the canon (use ONLY these; cite the bracket paths):\n\n"
-                + context.toString().trim();
+                + "\n\nMost relevant excerpt (quote it verbatim if it answers the question):\n\n"
+                + firstBlock.toString().trim()
+                + (rest.length() > 0 ? "\n\nOther excerpts (use only if the first doesn't answer):\n\n"
+                        + rest.toString().trim() : "")
+                + "\n\nReminder (read this FIRST):\nThe question asks about the entry in the **most relevant excerpt** block — locate its heading line (the one containing the exact name from the player question) and answer with that block's line verbatim. If no heading line contains the asked name, refuse with 「此物未在典籍中 · This is not in the record.」";
 
         LlmClient.Answer answer = client.complete(system, user);
         List<String> sources = hits.stream().map(h -> h.doc().source()).distinct().toList();
