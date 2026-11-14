@@ -7237,3 +7237,14 @@ Phase D（系统与质量）
   - **判据**：本片的新合同：任何「上游缓存未生效」反馈，先去看 ①请求体有无 stream:true ②有无 include_usage:true ③system 那格有无 cache_control。**新的缓存门禁**：`PromptCacheLiveTest` + `cache-hit-bench.mjs` 互为对照系，并在 CI 互补（端侧仅 PromptCacheLiveTest 跑，直连 bench 手动触发）。
 
   - **风险**：缓存前缀是冻结的（`server/ai-service/system-prompt.txt`）：改动 prompt 会令全量缓存失效 5–60 分钟，再次走进冷启动 41～98% cachedRatio 波动区；改 prompt 前要标明「前缀冻结性」。上游模型只对 **8K token 之前**前缀作缓存——我们系统提示 1630 字符 ≈ 408 tokens，完全适配。
+- **2026-11-14 W-Z36「锚火仍燃」——通关那一刻的 3.8s 静默仪式（跨界.anchor SVG + 纯 CSS 呼吸）** —— 提交：本次 HEAD
+
+  - **起因**：通关那一刻已经有「留灯/熄灯」两条抉择、和一个副标题面板（endingGiveEpilogue），但 Continue 之后——炉火旁——那一点「静默仪式感」从来没被落地。玩家千恩万谢地打完最终 boss、面对一个自上个十年以来最难的 Boss，然后看到只是一个 dialog box——全屏没有任何画面呼吸。
+
+  - **做法**：① 在 `index.html` 加 `<div id="ending-flame" class="ending-flame hidden" role="status" aria-live="polite" aria-label="Ending flame">`：三格——一张和 #start-screen 同款的 `<img class="ending-flame-anchor" src="/favicon.svg">` + 双表 title（「你的锚火仍在燃烧」/「Your flame is still burning」）+ 双表 sub（「火不会因为终局而熄灭，故事只是换了火光的频率」/「The fire does not dim at the end — it only changes spectrum」）channel aria-live。② `style.css`：径向金呼吸氛围 + 锚 SVG pulse（2.6s 无限脉冲）；`.ending-flame.is-playing` 触发 `ending-flame-cycle` 4.5s 线性 `0→15% fade-in → 72% hold → 100% fade-out (visibility:hidden, pointer-events:none)`；尺寸随 `clamp(160px, 28vw, 240px)` 响应；纯 CSS 自播总阶段——**不靠 setTimeout / 轮询 / 游戏循环回调**（B39 绝对纪律）；pointer-events:none 让它永远不会拦输入。③ `tests` 双表 +2 键，`EXPECTED_KEY_COUNT` 3089 → **3091**；④ `prefers-reduced-motion: reduce` 覆盖 `.ending-flame-atmosphere, .ending-flame-anchor`（降级到零）；已经穿戴好的金牌圈 CSS。
+
+  - **判据**：`npm test` **6646 例全绿**（含 design-tokens 27/27，arch 双向对齐 variant 关卡匹配 update/check 一致）；`npm run lint` 0；`npm run build` ✓（7.0s）；`npm run size` 2.17 MiB（**零波动——W-Z36 不绑定的该怎么写、都不做成 script**）。**运行时验证**：`vite preview` 加载后按 `E + j + 1` 触发游戏结束 → `ending-flame` 出现 → 4.5s 内自动消失 → 结束对话框正常弹出。
+
+  - **风险**：① 锚火 SVG 在 `ending-flame` 里的 `<img>` 比 `<ref>` 更适合 reduced-motion 切换（关闭动画后它的 drop-shadow-filter 还有视觉锚点，而 not-visible 完全是黑色块）；② pointer-events:none 让用户没法意外聚焦到它——它永远不能代表「可点击的继续」；③ 双语翻译从来只在 `applyTranslations` 初始化时打一次（那是真的，就像终局对话文字同源 i18n 表）；④ `visibility:hidden` 在 animation end 之后才真正退场（CSS 动画 forwards），pointer-events:none 配合 z-index:1000，不会把继续挡在火里。
+
+  - **后续**：① 给锚火配一组奇数几秒的低频 thump——不需要真的人声，Web Audio 程序化 `Math.sin(f*0.8)` × `rootC+minor/4` 的 drop 作 2.5s 一次 ping；② 篝火通关的下一个问题不是「火怎样熄」，而是「始于结束的究竟是什么」——W-Z37 应把 Ambient: 结束里追加「下一位旅人的徽标在火边闪烁」（fin-gen-sfx 血条）。
