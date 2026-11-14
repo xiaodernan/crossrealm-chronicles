@@ -2,7 +2,7 @@
 
 ## One · Recipient: The Starry Sky
 
-After the ending, Lin Shen starts writing.
+After the ending, Lin Du starts writing.
 
 Not letters to anyone in the settled worlds — the names of Miller, Greywood, the Upside, and the Timeline have already been spent across the first four chapters.
 He writes to a thing without an address, without a post office, without postal codes.
@@ -24,7 +24,7 @@ The Keeper said one strange thing.
 
 "Fire is not changeless. It is new every second. Only the color is nearly the same."
 
-Lin Shen thinks of the inbox-shaped slot on the Anchor — the one that stayed empty through every cycle before the finale. Tonight, it lit up.
+Lin Du thinks of the inbox-shaped slot on the Anchor — the one that stayed empty through every cycle before the finale. Tonight, it lit up.
 
 He places a finger on it.
 
@@ -46,7 +46,7 @@ You can see one point of starlight from the Miller Wastes.
 Light doesn’t rush like a shooting star — that light stays much too long.
 The Keeper says: those aren’t stars, they are companions on the same road.
 
-Lin Shen stands on an outcrop beyond the finale, watching this sky.
+Lin Du stands on an outcrop beyond the finale, watching this sky.
 The Keeper’s fog recedes and rises, and falls, and rises.
 They say nothing.
 
@@ -80,7 +80,7 @@ What remains of the record is two lines:
 
 **Leave a light for those who come after. When they count to one hundred and ten, they will find that they, too, have a light in their hand.**
 
-Lin Shen writes this into his captain’s log.
+Lin Du writes this into his captain’s log.
 He writes: from this moment, every new traveler who comes aboard our ship receives a letter — he has sent one already, and the next is on the way.
 
 This letter isn’t from anyone.
@@ -104,7 +104,7 @@ And every pair of eyes that sees him open, every eye carries the burden of passi
 
 The Anchor Flame relights itself.
 
-Lin Shen doesn’t put it out.
+Lin Du doesn’t put it out.
 He only sits there.
 People from the other realms come to take a look,
 to find a stranger sitting at the fire —
@@ -124,7 +124,7 @@ In that moment, he understands —
 the words under the rim of the fire are their own handwriting,
 the words flow up from under the fire instead of being printed on it.
 
-Lin Shen copies the last lines of his captain’s log next to the fire:
+Lin Du copies the last lines of his captain’s log next to the fire:
 
 > Everyone who steps aboard this ship is a part of the light.
 > The recipients — always the next traveler aboard.

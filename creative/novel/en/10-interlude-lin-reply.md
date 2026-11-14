@@ -116,4 +116,4 @@ One single character more, and no more.
 
 ---
 
-*(Interlude III · Lin’s Reply to the Keeper — the final letter of the three-letter cycle; corresponds to: Chapter Seven Ending Flame · the frequency at the far coast of the campfire · fire-pen → fog-pen → human-pen, the closing of the three-letter cycle. After all three letters are read, go on a fresh playthrough — the fog recedes the moment you press E.)*
+*(Interlude III · Lin’s Reply to the Keeper — the final letter of the three-letter cycle; corresponds to: Chapter Seven Ending Flame · the frequency at the far coast of the campfire · fire-pen → fog-pen → human-pen, the closing of the three-letter cycle. After all three letters are read, go on a fresh playthrough — the door opens its inch for the ones who reach the end of their own road.)*

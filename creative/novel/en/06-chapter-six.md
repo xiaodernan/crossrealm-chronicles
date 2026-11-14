@@ -2,7 +2,7 @@
 
 ## One · Two Nights of Campfire
 
-Lin Shen counts his campfires.
+Lin Du counts his campfires.
 
 The one in the Miller Wastes. The one atop the Chequerboard Town's roof. The one buried in the deep trench of the sea — they all seem to have flickered at the same moment — silent, but he knows.
 
@@ -111,7 +111,7 @@ whether you are willing to see yourself again.
 
 ## Six · Who the Fire Belongs To
 
-The day Lin Shen leaves, he doesn’t put out the fire.
+The day Lin Du leaves, he doesn’t put out the fire.
 
 He places his own lamp at the edge of the fire.
 

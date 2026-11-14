@@ -7,7 +7,7 @@ No two fires are alike.
 The Hub, the Grey Wood, the Rift, the Wilds, the Timeline, the Fringe — six fires, six dialects.  
 **Six fires, all rest** is not an achievement — it is a qualification: only someone who has rested at all six belongs to see the full conversation tree in the campfire’s memory.
 
-Lin Shen replays it in the Memory tab:
+Lin Du replays it in the Memory tab:
 
 The Anchor Keeper: "Leaving again?"  
 The Elf Faggot: "Don’t be greedy when the Boss shows red."  
@@ -24,7 +24,7 @@ Six sentences knitted together: **Don’t stop.**
 
 Every echo is an **E**.
 
-Lin Shen can’t write all forty-nine in a novel — the reader will have to press them in the game. But he can write a few:
+Lin Du can’t write all forty-nine in a novel — the reader will have to press them in the game. But he can write a few:
 
 **Platform 9¾, three-quarters past four.** The brick wall splits through the center of the platform. The ones who believe never ask where the ticket gate is.
 
@@ -40,11 +40,11 @@ Lin Shen can’t write all forty-nine in a novel — the reader will have to pre
 
 ---
 
-## Three · Who is Lin Shen
+## Three · Who is Lin Du
 
 At this point the novel must be honest:
 
-Lin Shen is anyone who opens the game.  
+Lin Du is anyone who opens the game.  
 He is anyone who presses J to open the journal.  
 He is anyone who presses F2 to take a photo, ~ to see this run’s stats, at the beacon to press E to summon a Boss rematch.
 
@@ -58,7 +58,7 @@ In Immerser mode, the labyrinth layout changes every time.
 The full map is G. Custom waypoints are Shift+click.  
 The Abyss may be re-explored freely — after Chapter Five.
 
-Lin Shen sits at the Hub campfire.  
+Lin Du sits at the Hub campfire.  
 He presses F2 to hide the HUD.  
 He takes a photo.
 
@@ -89,7 +89,7 @@ If someone scores this book, please keep:
 
 If someone paints posters —
 
-Lin Shen has already painted four.  
+Lin Du has already painted four.  
 At `d:\3a大作\creative\posters\`.
 
 ---

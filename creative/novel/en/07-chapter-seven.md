@@ -117,7 +117,7 @@ it waits for travelers to finally hear themselves.
 
 That night, the traveler finally understands all the words the earlier chapters left unsaid.
 
-Why Lin Shen never put out the fire.  
+Why Lin Du never put out the fire.  
 Why the Keeper never spoke.  
 Why the campfires never needed sweeping, logging, or fanning.  
 Why a hundred-ten echoes, the nest of monuments, dungeons, seasons, trials, echoes —
