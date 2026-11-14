@@ -404,6 +404,11 @@ body.lang-en .locale-en { display: block; }
     <li>炉主徽记：通关的旅人在出场页有金字「炉主 · 火没有灭」（只出现给他们）；</li>
     <li>报讯台 FAB 未读金点：有新报讯时按钮亮一眼。</li>
   </ul>
+  <p><strong>典籍叩问 · Lore Oracle（新）</strong> — 让典籍保管员只依据原典回答。
+  在顾问面板（F7）输入框上方点亮「典籍 / Lore」胶囊（金紫辉光），提问会改走 <code>/api/ai/lore/answer</code>：
+  原典 BM25 精检索（正篇 12 章双语 + 词囊 + 电影剧本 + OST 释义，34 源 · 1866 检索块）→ 答复逐句带 [出处] 标号。
+  原典里没写的，它就答「此物未在典籍中 · This is not in the record.」——不编、不脑补。</p>
+  <p>例：「林渡是谁？」「锚火为什么没熄？」「短片《看守的日子》讲的是什么？」「<em>Why doesn't the fire go out?</em>」</p>
   <p class="note">关闭 = 零网络，零后台请求，与离线完全一致。在线层从不强制注册。玩家可随时关闭。</p>
 </section>
 
@@ -415,6 +420,13 @@ body.lang-en .locale-en { display: block; }
     <li>Echo-keeper badge — clear the game and the start page carries an extra gold pill: <em>Echo-keeper · the flame endures.</em></li>
     <li>Unread gold dot on the Advisor FAB — lights up when there’s something new to read.</li>
   </ul>
+  <p><strong>Lore Oracle (new)</strong> — ask the canon itself; the keeper answers only from the record.
+  In the Advisor panel (F7), light up the “典籍 / Lore” pill above the input (gold-violet glow) — your questions
+  then go to <code>/api/ai/lore/answer</code> instead of the general advisor: BM25 retrieval over the canon corpus
+  (both language editions of all twelve chapters + the glossary + the film screenplay + liner notes —
+  34 sources · 1866 blocks), then a grounded answer where every claim carries an inline [source] citation.
+  If the canon is silent, the Oracle replies “This is not in the record.” — no invention, ever.</p>
+  <p>Try: “Who is Lin Du?” · “Why doesn’t the fire go out?” · “What is the keeper’s day about?” · “锚火为什么没熄？”</p>
   <p class="note">Off = zero network, zero background requests; identical to offline. No accounts ever required. Toggle at will.</p>
 </section>
 
