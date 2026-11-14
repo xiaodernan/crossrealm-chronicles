@@ -46,6 +46,40 @@ public class NotifyMirrorService {
     }
 
     /**
+     * 镜像一次「试炼榜易主」（W-Z54）。与 boss_defeated / season_advance 同一套纪律：
+     * kind=world，runner 去控制字符 + 裁剪 24 字（玩家输入），seasonId 白名单，异常一律吞。
+     */
+    public boolean mirrorTrialDethrone(String runner, String seasonId, int score, int layersCleared) {
+        if (!enabled) {
+            return false;
+        }
+        String name = sanitizeRunner(runner);
+        String season = sanitizeSeasonId(seasonId);
+        try {
+            client.publish(new NotifyEvent(
+                    "world",
+                    "世界事件 · 试炼榜易主",
+                    name + " 登上 " + season + " 试炼榜首（" + Math.max(0, score) + " 分 · 第 " + Math.min(5, Math.max(0, layersCleared)) + " 层）。"));
+            return true;
+        } catch (RuntimeException e) {
+            LOG.warn("NotifyClient threw despite fallback (cause={}), event dropped", e.getClass().getSimpleName());
+            return false;
+        }
+    }
+
+    /** runner 是玩家输入：去控制字符 + 裁剪 24 字 */
+    private static String sanitizeRunner(String runner) {
+        if (runner == null) {
+            return "无名旅人";
+        }
+        String stripped = runner.replaceAll("\\p{Cntrl}", "").trim();
+        if (stripped.isEmpty()) {
+            return "无名旅人";
+        }
+        return stripped.length() <= 24 ? stripped : stripped.substring(0, 24);
+    }
+
+    /**
      * 镜像一条换季广播（W-Z53）。与 boss_defeated 同一套纪律：仅在 enabled 时发，异常一律吞掉。
      *
      * @param seasonId season-service 广播体里的 {@code id}（如 ember / tide / gloom / radiant）

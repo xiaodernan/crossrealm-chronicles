@@ -7441,3 +7441,32 @@ Phase D（系统与质量）
 
   - **后续**：① trial 榜 Top-1 易主的广播可以走同一镜像器（season:complete 事件族）；
     ② ops/health 可以回显「最近一次换季镜像成功/降级」（observability 三件套）。
+- **2026-11-14 W-Z54「试炼榜易主」——榜变第二位玩家时报讯台才开口** —— 提交：本次 HEAD
+
+  - **起因**：W-Z50/53 让报讯台上线了两类真实世界事件（Boss 被讨伐 / 赛季更替），
+    而「试炼榜易主」——在线伙伴服务里最有「世界正在发生」感的事件——还没接。
+    这次不搞「越过你个人最佳就响」这种没营养的触发器（那是个人里程碑，报讯台是世界频道），
+    而是钉死在**换位**：榜首从某位玩家换成另一位玩家。
+
+  - **做法**：① `TrialLeaderboardService.add(TrialRun, boolean notifyRankChange)`（public add 默认 true；seed 走 false）：
+    插入**前**读 `top(season,1)` 记住旧榜首；插入后再读，若新榜首正是这一条、且**旧榜首是另一位玩家**
+    （runner 控制字符剥离 + 24 字裁剪 + `trim+lower` 归一）→ 调 `notifyMirror.mirrorTrialDethrone(...)`；
+    ② `NotifyMirrorService.mirrorTrialDethrone(runner, seasonId, score, layersCleared)`：
+    kind=world、title「世界事件 · 试炼榜易主」、body 带 sanitized runner/seasonId/score/layers，
+    与 boss_defeated / season_advance 同一套 enabled + 吞异常纪律；
+    ③ `TrialLeaderboardService` 全参构造器接 `@Nullable NotifyMirrorService`（与 TrialRedisMirror 同族可选）；
+    1-arg / 2-arg 旧构造器全兼容（单测/调用点零改动）；seed 演示数据一律静默（`add(run, false)`），
+    绝不把演示数据灌进报讯台；
+    ④ `TrialNotifyDethroneTest` 5 例钉死口径：seed 零镜像 / 首次提交静默 / 压过旧榜首恰好一次 + 其后低于榜首静默 /
+    同一玩家刷新自己纪录静默 / null mirror 旧口径不变。
+
+  - **判据**：`NotifyMirrorServiceTest` 12 例、`TrialNotifyDethroneTest` 5 例、`TrialLeaderboardServiceTest` 7 例全绿；
+    `mvn -f server/pom.xml verify` → BUILD SUCCESS（9 modules）。
+
+  - **风险**：① 「同一人自己刷榜」不再入台——刻意取舍：世界频道不刷屏，个人突破属于成就墙；
+    ② 榜首换手高频场景下（巨量真实玩家）通知量与试炼榜提交量同阶但上限 50 条环形——旧事件自然滚出；
+    ③ notifyMirror 为 null 时（所有现存单测）行为零变化；④ runner 无稳定身份，
+    字符串归一是「同一玩家」的最强可用近似——不同机器打法写法不同的人名会被镜像两次榜首，属已知边界。
+
+  - **后续**：①「榜首保持 N 天」的退位事件（试炼赛季收束）适合 W-Z55；
+    ② ops/health 可回显最近一次 mirror 成功/降级（与 seasonBroadcastReceived 同族）。

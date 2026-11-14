@@ -1,6 +1,7 @@
 package com.crossrealm.chronicles.game.trial;
 
 import com.crossrealm.chronicles.game.GameServiceProperties;
+import com.crossrealm.chronicles.game.notify.NotifyMirrorService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -43,6 +44,8 @@ public class TrialLeaderboardService {
     private final List<TrialRun> runs = new ArrayList<>();
     // W-Y6 切片3：可选 Redis mirror（`game-service.trial.backend=redis` 才能注入）
     private final @Nullable TrialRedisMirror mirror;
+    // W-Z54：可选「试炼榜易主」镜像器（null = 不通知，内存榜/seed 默认）
+    private final @Nullable NotifyMirrorService notifyMirror;
 
     /** seasonId → 按当前 cap 缓存的榜单（add 时整表失效） */
     private final Map<String, List<TrialRun>> topCache = new ConcurrentHashMap<>();
@@ -62,15 +65,23 @@ public class TrialLeaderboardService {
                     .thenComparing(TrialRun::submittedAt);
 
 
-    public TrialLeaderboardService(GameServiceProperties properties) {
-        this(properties, null);
-    }
-
+    /** W-Z54：全参构造器——与其余切片「两个构造器各司一职」的口径一致：默认不通知 */
     @Autowired
     public TrialLeaderboardService(GameServiceProperties properties,
-                                    @Nullable TrialRedisMirror mirror) {
+                                    @Nullable TrialRedisMirror mirror,
+                                    @Nullable NotifyMirrorService notifyMirror) {
         this.properties = properties;
         this.mirror = mirror;
+        this.notifyMirror = notifyMirror;
+    }
+
+    public TrialLeaderboardService(GameServiceProperties properties) {
+        this(properties, null, null);
+    }
+
+    public TrialLeaderboardService(GameServiceProperties properties,
+                                    @Nullable TrialRedisMirror mirror) {
+        this(properties, mirror, null);
     }
 
     /** 演示数据：只在启动时写一次，且只用于联调/演示（与 Boss 榜同一条纪律） */
@@ -90,19 +101,34 @@ public class TrialLeaderboardService {
             return;
         }
         String now = Instant.now().toString();
-        add(new TrialRun("执灯的巡礼者", "ember", 613, 5, 113, now));
-        add(new TrialRun("断桥上的琴师", "tide", 528, 5, 28, now));
-        add(new TrialRun("深井抄书的人", "gloom", 402, 4, 2, now));
-        add(new TrialRun("赤手的老兵", "radiant", 311, 3, 11, now));
-        add(new TrialRun("迷路的学者", "ember", 118, 1, 18, now));
+        // seed 一律静默：启动播种不是「世界事件」，报讯台不该被演示数据污染
+        add(new TrialRun("执灯的巡礼者", "ember", 613, 5, 113, now), false);
+        add(new TrialRun("断桥上的琴师", "tide", 528, 5, 28, now), false);
+        add(new TrialRun("深井抄书的人", "gloom", 402, 4, 2, now), false);
+        add(new TrialRun("赤手的老兵", "radiant", 311, 3, 11, now), false);
+        add(new TrialRun("迷路的学者", "ember", 118, 1, 18, now), false);
     }
 
     /**
      * 收一条成绩并回一份新榜（客户端拿它直接刷页面，不用再发一条 GET）。
      *
+     * <p>W-Z54：提交这一条真若让「试炼榜易主」——即此前已有榜首、而这一条把它挤下去——
+     * 镜像一条 `world` 报讯到报讯台（`notifyMirror == null` 时静默跳过，seed 路径也不触发）。
+     *
      * @return 新榜（按当前配置的 {@code maxLimit} 截断）
      */
     public List<TrialRun> add(TrialRun run) {
+        return add(run, true);
+    }
+
+    List<TrialRun> add(TrialRun run, boolean notifyRankChange) {
+        TrialRun beforeTop1 = null;
+        if (notifyRankChange && notifyMirror != null) {
+            List<TrialRun> snapshot = top(run.seasonId(), 1);
+            if (!snapshot.isEmpty()) {
+                beforeTop1 = snapshot.get(0);
+            }
+        }
         synchronized (runs) {
             runs.add(run);
             trim();
@@ -117,8 +143,53 @@ public class TrialLeaderboardService {
                     // Redis 进程间消失不阻碍提交
                 }
             }
-            return top(run.seasonId(), properties.getTrial().getMaxLimit());
+            List<TrialRun> after = top(run.seasonId(), properties.getTrial().getMaxLimit());
+            TrialMirrorOutcome mirrorOutcome = notifyRankChange && notifyMirror != null
+                    ? detectDethroning(run, beforeTop1, run.seasonId())
+                    : null;
+            if (mirrorOutcome != null) {
+                notifyMirror.mirrorTrialDethrone(run.runner(), run.seasonId(), run.score(), run.layersCleared());
+            }
+            return after;
         }
+    }
+
+    /**
+     * 易主判定（W-Z54）：提交后新榜首正是这一条，且**换了位**——
+     * 即旧榜首是另一位玩家（runner 归一化后不同）。
+     * 同一玩家刷新自己的纪录不是易主（不刷屏世界频道）。
+     * records 全按分量比；runner 做 trim+小写归一后比，容错「执灯的巡礼者」与
+     * 「执灯的巡礼者 」这种手误被当作不同人。
+     */
+    private TrialMirrorOutcome detectDethroning(TrialRun run, TrialRun beforeTop1, String seasonId) {
+        if (beforeTop1 == null) {
+            return null; // 没有旧榜首 = 从头建榜，不是易主
+        }
+        List<TrialRun> after = top(seasonId, 1);
+        if (after.isEmpty()) {
+            return null;
+        }
+        TrialRun afterTop1 = after.get(0);
+        if (!afterTop1.equals(run)) {
+            return null; // 新榜首不是这一条（被别人压过了）
+        }
+        String prev = normalizeRunner(beforeTop1.runner());
+        String now = normalizeRunner(run.runner());
+        if (prev.equals(now)) {
+            return null; // 同一人刷新纪录 = 不是易主
+        }
+        return TrialMirrorOutcome.DETHRONE;
+    }
+
+    private static String normalizeRunner(String runner) {
+        if (runner == null) {
+            return "";
+        }
+        return runner.replaceAll("\\p{Cntrl}", "").trim().toLowerCase(java.util.Locale.ROOT);
+    }
+
+    private enum TrialMirrorOutcome {
+        DETHRONE
     }
 
     /**

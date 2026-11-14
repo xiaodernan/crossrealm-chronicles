@@ -155,6 +155,38 @@ class NotifyMirrorServiceTest {
     }
 
     @Test
+    @DisplayName("试炼榜易主镜像：enabled → 发 world 报讯；runner 裁剪 24；异常吞掉")
+    void trialDethronePublishes() {
+        RecordingClient client = new RecordingClient();
+        NotifyMirrorService m = mirror(client, true);
+        assertTrue(m.mirrorTrialDethrone("沉默的琴师", "tide", 999, 5));
+        NotifyEvent sent = client.calls.get(0);
+        assertEquals("world", sent.kind());
+        assertTrue(sent.title().contains("试炼榜易主"), sent.title());
+        assertTrue(sent.body().contains("沉默的琴师"), sent.body());
+        assertTrue(sent.body().contains("tide"), sent.body());
+
+        // 24 字裁剪 + 控制字符剥离
+        String dirty = "沉" + "默".repeat(50) + "\u0001";
+        m.mirrorTrialDethrone(dirty, "ember", 10, 2);
+        NotifyEvent cut = client.calls.get(1);
+        assertFalse(cut.body().contains("\u0001"), cut.body());
+
+        // 异常吞掉
+        client.toThrow = new RuntimeException("feign blew up");
+        assertFalse(m.mirrorTrialDethrone("x", "tide", 1, 1));
+    }
+
+    @Test
+    @DisplayName("试炼榜易主镜像：enabled=false → 零调用")
+    void trialDethroneDisabled() {
+        RecordingClient client = new RecordingClient();
+        NotifyMirrorService m = mirror(client, false);
+        assertFalse(m.mirrorTrialDethrone("x", "tide", 1, 1));
+        assertTrue(client.calls.isEmpty());
+    }
+
+    @Test
     @DisplayName("换季镜像：开关关闭 → 零调用；客户端抛异常 → 吞掉")
     void seasonAdvanceDisabledAndSwallowed() {
         RecordingClient client = new RecordingClient();
