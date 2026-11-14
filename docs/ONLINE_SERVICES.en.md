@@ -76,7 +76,30 @@ Ops notes:
 - The frontend never client-retries (the stop button aborts the real request via AbortController — not “cancel” by greying out a button).
 - **ai-service self-healing**: identical question hits the SHA-256 cache within 120s (cache misses automatically on model / system change); breaker OPEN 30s, then single half-open probe; `/api/ai/health` reports `configured/model/circuit/cache/upstreamCalls` — a strict allowlist, never echoing key or upstream base URL.
 - The **Echo-Lamp** (`POST /api/ai/echo-hint`) shares the same digest→cache→breaker→selective-retry→parse pipeline — only its system prompt differs.
-- Live联调: `mvn -o -pl ai-service -am package -DskipTests` then `powershell -File .\scripts\verify-ai-service.ps1` (with `LLM_API_KEY` it really hits chat + echo-hint and asserts non-empty answers; without a key it asserts the structured 503 degradation path, zero outbound calls).
+- Live verification: `mvn -o -pl ai-service -am package -DskipTests` then `powershell -File .\scripts\verify-ai-service.ps1` (with `LLM_API_KEY` it really hits chat + echo-hint and asserts non-empty answers; without a key it asserts the structured 503 degradation path, zero outbound calls).
+
+## Lore Oracle — the canon-answer lane (W-Z82, retrieval-augmented generation)
+
+Player entry: **the pill “典籍 / Lore” in the Star-Rail Advisor panel** (always above the input, gold-violet glow = on). With it on, *the same input box* no longer goes to the advisor loop but to `/api/ai/lore/answer` — the server picks the most relevant canon excerpts with BM25, ships them to the big model together with a “keeper of the chronicles” system prompt, and the answer may only cite what the corpus contains, inline as `[path]`. Flip it off and you’re back to the everyday advisor.
+
+Topology:
+
+`AdvisorPanel (loreMode) → OnlineServices.askOracle → Gateway /api/ai/lore/** (lb://ai-service) → ai-service (:8083) → BM25 → wkapi.pro/v1`
+
+Contract:
+
+- **`POST /api/ai/lore/answer`** — body `{ question ≤ 400 chars, limit? = 0|1..6 }`, default 4 → `{ ok, answer, sources: [path…], model, cached, upstreamCached, latencyMs, requestId? }`. If no BM25 hit exists, the model is **not** called; the service returns `「此物未在典籍中 · This is not in the record.」` (`model: "oracle-bm25"`) — not a shrug, the canon simply doesn’t have it.
+- **`GET /api/ai/lore/health`** → `{ ready: true, candidates, bm25Probe }`; never echoes corpus text.
+- Corpus = deterministically compiled by `scripts/build-lore-corpus.mjs` from `creative/novel/*.md` + `creative/novel/en/*.md` + `creative/GLOSSARY.md` + `creative/GLOSSARY-en.md` into `classpath:/lore/corpus.txt` (~130 KB, 36 sources, 1803 blocks); `--check` validates anywhere with read-only CI.
+- Tokenization: one token per Han codepoint + lowercase ASCII alphanumeric runs (`Bm25Tokenizer`); scoring: standard BM25 (k1=1.5, b=0.75); the fixed system prompt + fixed excerpt set means identical questions hit the digest cache.
+- System prompt hard rules: answer in the language the player asked; every claim carries an inline `[bracket]` citation; unknown characters/locations/items ⇒ the exact “not in the record” line — no invention.
+- Frontend accounting keeps the advisor-panel conventions: `cached=true` ⇒ local-digest hit (excluded from upstream totals); `upstreamCached=true` ⇒ gold “upstream cache” badge; failures collapse into the shared eight-sentence `ADVISOR_REASONS` taxonomy (reason=`http` + status=503 renders “breaker circuit open”, *not* “gateway unreachable”).
+
+Ops notes:
+
+- **No gateway change at all**: `/api/ai/lore/**` is covered by the existing `Path=/api/ai,/api/ai/**` predicate; POST carries no Retry (same reasoning — a lore question must never be double-billed).
+- This path **does not enter Redis Streams** (stateless read, no game state pulled): triage is `/api/ai/lore/health` + the access log, full stop.
+- Two ways to verify: browser DevTools with the online switch on → open the advisor panel → tap “Lore” → ask “林渡为什么没熄火？” and expect a chapter-07 citation; or server-side `mvn -o -pl ai-service test -Dtest=OracleControllerTest`.
 
 ## Async advisor queue & ops surfaces (W-Y4 / W-Z1 / W-Z7 / W-Z8 / W-Z9)
 

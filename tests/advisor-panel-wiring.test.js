@@ -101,11 +101,12 @@ function bootDoc() {
   return doc;
 }
 
-function panelHarness({ health = { ok: true, data: { configured: true, circuit: 'CLOSED' } }, answer } = {}) {
+function panelHarness({ health = { ok: true, data: { configured: true, circuit: 'CLOSED' } }, answer, oracleAnswer } = {}) {
   const doc = bootDoc();
   globalThis.document = doc;
   globalThis.localStorage = fakeStorage();
   const asked = [];
+  const askedOracle = [];
   let healthCalls = 0;
   let pendingResolve = null;
   const stack = { opened: [], closed: [], open(n) { this.opened.push(n); }, close(n) { this.closed.push(n); } };
@@ -121,11 +122,26 @@ function panelHarness({ health = { ok: true, data: { configured: true, circuit: 
         if (answer) return Promise.resolve(answer(asked.length, opts));
         return new Promise((resolve) => { pendingResolve = resolve; });
       },
+      askOracle: (q, opts) => {
+        askedOracle.push({ q, signal: opts?.signal });
+        if (oracleAnswer) return Promise.resolve(oracleAnswer(askedOracle.length));
+        return Promise.resolve({
+          ok: true,
+          data: {
+            answer: '典籍没有写为什么，只写了火还在。',
+            model: 'gpt-6-sol',
+            latencyMs: 88,
+            cached: false,
+            upstreamCached: false,
+            sources: ['creative/novel/07-第七章-余烬.md'],
+          },
+        });
+      },
     },
   };
   const panel = new AdvisorPanel(game);
   return {
-    doc, panel, game, stack, asked,
+    doc, panel, game, stack, asked, askedOracle,
     get healthCalls() { return healthCalls; },
     resolve: (v) => pendingResolve?.(v),
     cleanup: () => { panel.dispose(); delete globalThis.document; delete globalThis.localStorage; },
@@ -463,5 +479,48 @@ describe('④ 壳页 / 层表 / Game / 换语言 / 样式指同一件事', () =>
     expect(tail).toContain('@media (prefers-reduced-motion: reduce)');
     expect(tail).toContain('animation: none !important');
     expect(tail).toContain('.advisor-msg');
+  });
+
+  it('「典籍」开关：aria-pressed 翻转，提问走 askOracle 而不是顾问链路', async () => {
+    const h = panelHarness();
+    h.panel.show();
+    await flush();
+
+    const toggle = h.doc.getElementById('advisor-lore-toggle');
+    expect(toggle).toBeTruthy();
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    toggle.click();
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(toggle.classList.contains('is-on')).toBe(true);
+
+    h.panel._ask('林渡为什么没熄火？');
+    await flush();
+    expect(h.askedOracle).toHaveLength(1);
+    expect(h.askedOracle[0].q).toBe('林渡为什么没熄火？');
+    expect(h.asked).toHaveLength(0); // 顾问链路零调用
+    expect(lastBubble(h.doc).textContent).toContain('典籍没有写为什么');
+
+    toggle.click(); // 切回顾问态
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    h.panel._ask('这一季堆什么？');
+    await flush();
+    expect(h.asked).toHaveLength(1);
+    expect(h.askedOracle).toHaveLength(1);
+    h.cleanup();
+  });
+
+  it('「典籍」态下的模型失败：错误气泡与顾问态共享同一套 ADVISOR_REASONS 文案', async () => {
+    const h = panelHarness({
+      oracleAnswer: () => ({ ok: false, reason: ADVISOR_REASONS.HTTP, status: 503, data: { error: 'advisor-unavailable' } }),
+    });
+    h.panel.show();
+    await flush();
+    h.doc.getElementById('advisor-lore-toggle').click();
+    h.panel._ask('这是什么？');
+    await flush();
+    // HTTP 503 + advisor-unavailable：面板把它说成「熔断中」而不是「连不上网关」——两句话玩家差很多
+    expect(lastBubble(h.doc).textContent).toBe(STRINGS_ZH.advisor_error_unavailable);
+    expect(lastBubble(h.doc).getAttribute('data-advisor-role')).toBe('error');
+    h.cleanup();
   });
 });

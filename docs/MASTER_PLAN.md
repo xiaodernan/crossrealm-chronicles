@@ -7970,3 +7970,37 @@ Phase D（系统与质量）
     不新增任何人物/台词/彩蛋（番外四 + 正片结束彩蛋 + 片尾字幕全部镜像）；翻译为信达雅口径。
     全库中英双语现状：序言·11章+1叙事线 / 正片 + 短片 / OST 25 曲目 / 海报 5 / Source 词表 + CRT 覆盖表
     全部交付英语对照；只剩音箱参谋附属词表/主人公名册业务内部中间表等代码真码待双语化。
+
+- **2026-11-15 W-Z82「Lore Oracle · 原典检索增强回答管线（BM25 + 大模型）全链路落地」** —— 提交：本次 HEAD
+
+  - **起因**：用户明确要求「最好用一些 RAG、LangChain、LangGraph 的知识」。评估后选出最小而完整的切入：
+    **不引外部向量库 / 不引 Python 栈**，在 ai-service 内做一版可随 jar 走的 Java 原生 RAG——
+    这是全栈自研、可审计、零新依赖、能在 CI 门禁里跑并被真上游验证的路线。
+
+  - **做法（服务端，ai-service）**：`scripts/build-lore-corpus.mjs` 把 canon（12 章中+11 章EN + 两份 GLOSSARY + 番外，
+    36 源、~130 KB）编译为 `classpath:/lore/corpus.txt`（带 `# source:` 行首，语料固定按字典序 → 输出可复现；
+    `--check` 供 CI 校验）。Java 侧四个新成员：`Bm25Index`（k1=1.5、b=0.75，构建期倒排、查询热路径零分配）、
+    `Bm25Tokenizer`（Han 逐码点成词 + ASCII 字母/数字小写词串；**修正了初版正则把整段 Han 连成一词的分词缺陷**）、
+    `LoreCorpus`（一次性加载 + 按空行切 ~900 字块，共 1803 块）、
+    `LoreOracleService`（BM25 top-k → 原典段落 + `/ai/lore-system-prompt.txt`
+    交给既有 `LlmClient`（含摘要缓存 + 上游 prompt-cache 计账 + 熔断 + 指数退避）答复，答案内 inline bracket 出处）。
+    `OracleController`：`POST /api/ai/lore/answer`（`@NotBlank @Size(max=400)` + `@Max(6)`）+ `GET /api/ai/lore/health`
+    （`{ready, candidates, bm25Probe}`），经网关 `lb://ai-service` 直通，不重做路由。
+
+  - **做法（前端）**：顾问面板新增「典籍 / Lore」胶囊开关（`.advisor-lore-toggle`，is-on 金紫辉光 + `aria-pressed`），
+    打开即把**同一只输入框**的提问路由到 `OnlineServices.askOracle → /api/ai/lore/answer`（同一套 ADVISOR_REASONS
+    失败枚举、同一只停止按钮 AbortController、同一套缓存/上游命中角标计账）；说明书新增一页
+    「典籍叩问 · Lore Oracle」（`hm_*_lore_oracle` × 双表，说明书扩展 5→6 章）。文案双语
+    （`advisor_lore_toggle` 典籍 / Lore，`hm_*_lore_oracle` ×2，双表 3111 键），
+    测试 `tests/advisor-panel-wiring.test.js` 两例、`tests/advisor.test.js` 两例、`Bm25IndexTest` 10、
+    `OracleControllerTest` 5。
+
+  - **判据**：① `Bm25IndexTest` 10/10 + `OracleControllerTest` 5/5（独立 MockMvc standalone + 真 corpus + mock LlmClient：
+    命中/限额/排序/未知词零命中不调模型/健康端点）；② 真上游 gpt-6-sol 两问：
+    中文「林渡为什么没熄火？」→ 引用 `[creative/novel/07-第七章-余烬.md]`（Sources 含 07/08/04），4.5s；
+    英文「Why doesn't the fire go out?」→ 英文答复引用 `[creative/novel/en/08-interlude-fire-letter.md]`，5.6s；
+    ③ `npm test` 6687/6687 绿；④ gateway `/api/ai/**` 已能到达 qa 级 `/api/ai/lore/*`，无需新路由条目。
+
+  - **遗留**：LangGraph 式有状态多跳推理未上（单跳 BM25+LLM 已覆盖「原典问一句答一句」）；
+    语料目前仅 novel+GLOSSARY，showcase 的 film script / OST liner notes 未入索引（下一跳候选）；
+    Oracle 本身**不进** Redis Streams（它是无状态读，不需要队列、也不需要游戏态上下文）。

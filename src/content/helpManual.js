@@ -16,6 +16,11 @@ export const HELP_SECTIONS_EXTRA = [
     body: 'hm_body_online_living',
   },
   {
+    id: 'lore-oracle',
+    title: 'hm_title_lore_oracle',
+    body: 'hm_body_lore_oracle',
+  },
+  {
     id: 'ending-journey',
     title: 'hm_title_ending_journey',
     body: 'hm_body_ending_journey',

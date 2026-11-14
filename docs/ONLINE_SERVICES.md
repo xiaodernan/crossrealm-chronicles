@@ -96,6 +96,29 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 - **回声灯**（`POST /api/ai/echo-hint`）与顾问共用同一条「摘要 → 缓存 → 熔断 → 选择性重试 → 解析」链路，只是 system prompt 不同（篝火边的旅人 ≠ 梦话先知）；
 - 上线侧联调：`mvn -o -pl ai-service -am package -DskipTests` 后 `powershell -File .\scripts\verify-ai-service.ps1`（带 `LLM_API_KEY` 真打 chat + echo-hint 且答案非空；不带 key 则断言结构化 503 降级，零外呼）。
 
+## 典籍叩问 · Lore Oracle（W-Z82 · 原典检索增强回答）
+
+玩家侧入口：**星轨顾问面板 → 「典籍 / Lore」胶囊开关**（常驻输入框上方，金紫高亮 = 开）。开启后，**同一只输入框**的问题不再走顾问链路，而是走 `/api/ai/lore/answer`——服务端用 BM25 从 canon 语料选出最相关的原典段落，连同典籍保管员 system prompt 交给大模型，回答只许引用语料、带 `[路径]` 出处。关闭即切回日常顾问。
+
+链式拓扑：
+
+`前端 AdvisorPanel（loreMode）→ OnlineServices.askOracle → 网关 /api/ai/lore/** (lb://ai-service) → ai-service(:8083) → BM25 → wkapi.pro/v1`
+
+契约：
+
+- **`POST /api/ai/lore/answer`**（请求体 `{ question ≤ 400 字, limit? = 0|1..6 }`，缺省 4）→ `{ ok, answer, sources: [路径…], model, cached, upstreamCached, latencyMs, requestId? }`；无任何 BM25 命中时**不调模型**，直接回 `「此物未在典籍中 · This is not in the record.」`（`model: "oracle-bm25"`）——不是答不出，是典籍没有。
+- **`GET /api/ai/lore/health`** → `{ ready: true, candidates, bm25Probe }`；不回显任何语料文字。
+- 语料 = `scripts/build-lore-corpus.mjs` 从 `creative/novel/*.md` + `creative/novel/en/*.md` + `creative/GLOSSARY.md` + `creative/GLOSSARY-en.md` 确定性编译出的 `classpath:/lore/corpus.txt`（~130 KB，36 源，1803 块）；`--check` 可以在任何装只读的 CI 上校验语料未漂移。
+- 分词：Han 逐码点成词 + ASCII 字母/数字小写词串（`Bm25Tokenizer`）；打分：标准 BM25（k1=1.5、b=0.75）；命中即缓存键（system 固定 + 段落固定 ⇒ 同一问题走 digest cache）。
+- system prompt 强制：答案语言跟随提问语言；回答必须带 `[bracket]` 出处；未提及的人物/地点/物件一律回答「未在典籍中」——不许现编。
+- 前端计账延续顾问面板的口径：`cached=true` 本地命中不进上游统计；`upstreamCached=true` 显示金色「上游缓存」角标；Oracle 的失败分八句按同一套 `ADVISOR_REASONS` 枚举（reason=HTTP+status=503 ⇒「熔断中」文案，不是「连不上网关」）。
+
+运维要点：
+
+- **网关零改动**：`/api/ai/lore/**` 由既有 `Path=/api/ai,/api/ai/**` 谓词覆盖，POST 无 Retry（与顾问一致，绝不双扣计费）。
+- 该路径**不走 Redis Streams**（无状态读、无游戏态上下文）：排障只需要 `/api/ai/lore/health` + 访问日志。
+- CI/浏览器两条都能验：浏览器 DevTools 开「在线伙伴服务」→ 顾问面板点「典籍」→ 问「林渡为什么没熄火？」应看到 07-第七章 出处；服务端 `mvn -o -pl ai-service test -Dtest=OracleControllerTest` 一把梭。
+
 
 ## 异步顾问队列与运维面（W-Y4 / W-Z1 / W-Z7 / W-Z8 / W-Z9）
 

@@ -242,4 +242,30 @@ describe('OnlineServices.askAdvisor / fetchAdvisorHealth：ok/reason 映射全�
     expect(url).toBe(`${BASE}/api/ai/health`);
     expect(init.signal).toBeInstanceOf(AbortSignal);
   });
+
+  it('askOracle 走 POST /api/ai/lore/answer：limit 可选、带 AbortSignal、question 原样上去', async () => {
+    const answer = { ok: true, answer: '典籍没有写为什么，只写了火还在。', model: 'gpt-6-sol', latencyMs: 88, sources: ['creative/novel/07-第七章-余烬.md'] };
+    const fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => answer });
+    const svc = new OnlineServices({ baseUrl: BASE, fetchImpl: fetch, enabled: true });
+
+    const defaultLimit = await svc.askOracle('林渡为什么没熄火？');
+    expect(defaultLimit.ok).toBe(true);
+    expect(defaultLimit.data.sources).toContain('creative/novel/07-第七章-余烬.md');
+    const [url1, init1] = fetch.mock.calls[0];
+    expect(url1).toBe(`${BASE}/api/ai/lore/answer`);
+    expect(init1.method).toBe('POST');
+    expect(init1.signal).toBeInstanceOf(AbortSignal);
+    expect(JSON.parse(init1.body)).toEqual({ question: '林渡为什么没熄火？' }); // limit 缺省不发
+
+    await svc.askOracle('林渡为什么没熄火？', { limit: 6 });
+    expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({ question: '林渡为什么没熄火？', limit: 6 });
+  });
+
+  it('askOracle 未启用：disabled，且 fetch 零调用', async () => {
+    const fetch = vi.fn();
+    const svc = new OnlineServices({ baseUrl: BASE, fetchImpl: fetch, enabled: false });
+    const r = await svc.askOracle('火是什么');
+    expect(r).toEqual({ ok: false, reason: ADVISOR_REASONS.DISABLED, status: 0, data: null });
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });

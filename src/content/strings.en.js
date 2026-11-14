@@ -3100,6 +3100,25 @@ Ranked pages:
 Double crown: same runner holding both the speedrun crown and the trial crown = world-class news.
 
 Off = zero network, exactly like offline.`,
+  hm_title_lore_oracle: 'The Lore Oracle · Ask the canon',
+  hm_body_lore_oracle: `The Lore Oracle — you ask the canon itself, not a general assistant.
+
+In the advisor panel ({advisor}), tap the “典籍 / Lore” pill above the input (gold-violet glow = on).
+While it is on, every question you send is answered from the canon only — the original 12-chapter novel
+(Chinese + English) and the glossary: 36 sources, 1803 retrieval blocks.
+
+The Keeper is bound by a few iron rules:
+· Every claim must carry an inline [source] citation — right where the sentence is.
+· If the canon does not answer your question, the Keeper says “This is not in the record.” — no invention,
+  no improvisation, no drifting off-canon.
+· Chinese question, Chinese answer; English question, English answer.
+
+Good questions to try: “Who is Lin Du?” / “Why doesn't the fire go out?” / “What happens in chapter 7?”
+
+Same panel, same stop button, same cache badges (local / upstream).
+Tap the pill again to flip back to the regular advisor.
+
+The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
   hm_title_ending_journey: 'Ending · After the anchor flame · Embers Journal',
   hm_body_ending_journey: `After the fifth boss (Chaos Overlord) unlocks the ending choice:
 “Keep the flame” — pass the light on; “Quiet end” — gather the journey and let the flame rest. Both are valid. Neither is wrong.
