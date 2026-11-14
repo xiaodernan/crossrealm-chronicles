@@ -7903,3 +7903,34 @@ Phase D（系统与质量）
     **不修这一行的后果**：节点推送后 `https://xiaodernan.github.io/crossrealm-chronicles/tapestry.en.html` 404——恰是 W-Z68 那次 favicon 漏点同一类错误空白。
 
   - **判据**：link-check 60/60 绿；音乐线/运维线/年鉴线全部有 EN 姊妹文件；CSS 未动；Pages 组装清单常驻 EN 孪生。
+- **2026-11-14 W-Z79「压测风暴」——高并发压测发现真死锁，全栈修通 + stress-load 新增** —— 提交：本次 HEAD
+
+  - **起因**：用户点名“做压测/高并发测试，看看系统会不会崩溃”。
+    本机无 Redis 可用（docker 被另一项目占用），决定：**直接用 Java 进程 + Node 零依赖压测器** 跑真压测。
+    工具（scripts/stress-load.mjs，W-Z79）：readBurst/writeBurst/telemetryFlood/mixed/idempotentReplay 五个场景，
+    p50/p95/p99/max、errRate、退出码（failRate>0.02 或任一 5xx => 1）。
+
+  - **头一回跑（写路径 100% 超时，p50=3000ms）**，压根一个 201 都没有——「服务器挂了」的第一直觉，
+    实则是**AB-BA 环死锁**：写路径线程(A)持 `runs` ArrayList 锁 → 调 `synchronized (topCache)` → 调 CHM.clear()，
+    clear() 内线程(B)持 ReservationNode 等 bin 锁，B 里 rebuildTop() 等 A 的 `runs` —— A 等 clear() 里某bin的 ReservationNode → 死锁环。
+    jcmd Thread.print 实证（ exec-9/exec-18 格挡串链；bulge 从首轮压测一直躺到 3s+）。
+  - 修法三处（server/game-service 两个榜单完全对称）：
+    ① `topCache` 从 `final ConcurrentHashMap + synchronized(topCache){}` 改成 **volatile Map + 整表换实例**（CHM.clear() 不再触 bin 锁；
+        零环、O(1)）。② 易主报讯 Feign（W-Z50 双冠/首领易主）**移出 synchronized(runs)**，同一提交线程、同一调用顺序但绝不在锁里外呼。
+    ③ `top()` 从 `computeIfAbsent`（Lambda 里又 `synchronized (runs)`，CHM bin 锁 vs runs 锁——两把锁成环）改成
+    **runs 锁内双检 + 全量写回**，CHM 只用 get/put——零 bin-锁访问、删了整个成环风险。
+  - 附带：**新 `AsyncNotifyMirrorService`**（daemon 线程 + 有界队列 256/丢弃最旧），Sp ring bean 装配默认异步）——
+    notification-service 不答（本机 loopback 未监听端口 RST 要 2~4s）时易主/双冠/换季几条 Feign 外呼不再拖慢任何写请求；
+    `game-service.notify-mirror-async=false` 可退回为同步装配（旧行为保底）。
+  - ancillary：`/api/leaderboard`、`/api/trials/runs` 在**写死锁成帧期间**完全静默——AccessLogFilter 一行没记。本片之后写路径双层门禁复归：
+    幂等台账（链路可退回）与 leaderboard cache swap 并行。
+
+  - **基准线重新测得（28081 端口，种子固定）**：readBurst **43155 请求 全 2xx p50=43ms / p95=65ms / p99=134ms / max=229ms / ~2151 rps**；
+    writeBurst **17593 请求 全 201 p50=32ms / p95=49ms / p99=77ms / max=134ms / ~1171 rps**；telemetryFlood 14298 / ~1425 rps 全绿；
+    mixed 30728 / ~1532 rps 全绿；idempotentReplay 200/200 ok（X-Idempotent-Replayed 头部一致） ~702 rps。
+    与修前的绝对不可用（0% ok、~3000ms）对照，单机 game-service 现**每秒可收数千前面请求，零 5xx**。
+
+  - **既知限制 / 诚实声明**：单机无头压测≠`SQLite 级真世界`——Redis 背板本轮未跑（该主机 docker 被另一项目长期占用）；
+    多实例/跨 JVM 镜像恢复 smoke §4u/4t 仍以 CI 的 redis:7-alpine throwaway 为准。
+    本机的平衡测试基线 = 单 JVM（整表换实例 O(1)、heap 结构不变）。长期：压测 Sink 进 CI（新机器上）/
+    多实例 Redis 压测可交给 `verify-redis-*` 那组现有脚本（server CI 已有）。
