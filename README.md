@@ -4,6 +4,8 @@
 > 世界观：奇幻 · 魔法 · 星际 三个位面碎片拼接而成
 > 当前状态：**17 母题六档闭环 / 全链路可观测 / LLM 联调流式化** ——唯一执行计划：[`docs/MASTER_PLAN.md`](docs/MASTER_PLAN.md)
 
+> 🆕 **线上展示（最新成果同步）：** [作品最新进展一页看](creative/showcase.html) · [玩家小册子（双语全量）](creative/player-guide.html) · [启用自动同步 → Pages](docs/SHOWCASE_SYNC.md)
+
 ---
 
 ## 快速开始

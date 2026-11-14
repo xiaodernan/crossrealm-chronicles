@@ -7750,3 +7750,48 @@ Phase D（系统与质量）
 
   - **后续**：① 若决定做 CD-booklet 实体化，本曲目释义可再扩写为两版（收藏家版+演奏者版）；
     ② 《看守的日子》短片的 DCP 完成后，本专辑手册可新增「短片原声段」一章。
+- **2026-11-14 W-Z67「玩家小册子」——游戏内说明书扩写 + 双语全量书落盘** —— 提交：本次 HEAD
+
+  - **起因**：用户点名两件事：①「简明说明书的开发——就是要有一本小册子，用户可以打开」；②「所有项目都要支持全内容中英文切换，不要中英夹杂」。
+    游戏内说明书已存在（F1，此前 10 页），但缺「在线层报讯台 / 终章与归途」两页；同时缺一份可独立打开的完整书——面向来宾与玩家的正式公开读物。
+
+  - **做法**：
+    ① 游戏内说明书扩写为 12 页：新增 `hm_title_online_living` / `hm_body_online_living` 与
+       `hm_title_ending_journey` / `hm_body_ending_journey`（双表；覆盖：顾问面板报讯台 · 出场页炉主金字 · 自动通关边界；
+       终章两种结局 · 归途 x/17 · 13 页签打开口径）；`EXPECTED_KEY_COUNT` 3104 → **3108**（双表同增）。
+    ② `creative/player-guide.html`（新增、全自给、右上中/ EN 切换）：Welcome / Install / Controls（同源 `data-keys`、F1 说明书、
+       T 自动通关、F7 顾问）/ Combat 101 / World tour / Bosses / Journal & tabs / Ending & Embers / Autoplay / Online layer /
+       Crossmedia / FAQ / The Epitaph——每种语言 12 节，独立成稿、无外部资产、同源 GT 不复用代码。
+       封面为炉火美学：暗色底 ember-gold、letter-spacing 标题、打印 CSS（A4 友好）与 reduced-motion 兜底。
+
+  - **判据**：i18n 五件套 **111 例全绿**（含 key-count=3108）；`creative/README.md` 目录表 player-guide.html +1 行；
+    玩家书在本地 `file://` 双击可开（所有资源自给，gateway/wire 是他翻开才能知道的工程细节）。
+
+  - **风险**：① 书里的「自动通关」描述一定要再重复边界——「仅演示/参考用，榜单不提交」——已在架构上做硬隔离（自动通关 run 默认不打线上的榜）；
+    ② 手册随游戏版本漂移——打 tag 后须同步这一份 HTML；③ 双语书体量约 36 KB——media 转印时能直接发进 Pages。
+
+  - **后续**：① 玩家书可补「归途 17 epitaph 手抄版」（只显示你所选结局的碑文，作为通关寄语）；
+    ② 若 Pages 开通，把 player-guide.html 路径连到 `xiaodernan.github.io/crossrealm-chronicles/guide.html` 即永久同步。
+
+- **2026-11-14 W-Z68「Showcase · 最新同步」——个人展示页的「最新」一页 + gh-pages 自动线** —— 提交：本次 HEAD
+
+  - **起因**：用户要求个人展示页（xiaodernan.github.io）上本项目的入口永远展示**最新**成果，且过程全自动、不用手推。
+    同时根 README 缺一扇「陌生人一眼看懂」的窗。
+
+  - **做法**：`creative/showcase.html`（双语全自给）：9 微服务 · 25 OST · 110 回声 · 40+ 成就 · 142′ 影片 · MIT；
+    跨媒体宇宙概览 + 工程盘系统（`/api/ops/health`· notifyMirrors）+ 最新动态 feed + 中英双语右上切。
+    `.github/workflows/showcase.yml`：push main（或手动触发）→ `npm ci` + `npm run build` → 组装 `_site/`
+    （`index.html`←showcase；`game/`←dist；`guide.html`←player-guide；`tapestry.html`←年鉴；`favicon.svg`）→
+    peaceiris/actions-gh-pages@v4 推 `gh-pages` 分支（`permissions: contents:write`，用 GITHUB_TOKEN 无密钥）。
+    `docs/SHOWCASE_SYNC.md`：一次性 30 秒 Settings→Pages 开通路径 + 索引；README 顶部加「线上展示（最新成果同步）」三链条；
+    `creative/README.md` 目录表补 `showcase.html` / `player-guide.html` 两行。
+
+  - **判据**：push 后 `gh-pages` 分支出现 `_site/index.html` 与完整可播 `game/`（dist 原样）；
+    全流程无外部密钥；并发控制 `concurrency: showcase`；与生产 workflow 解耦（新增 file only）。
+
+  - **风险**：① 启用 Pages 需要一次人点（一次性 30 秒）；`actions-gh-pages` 用官方 action 版本清零；
+    ② `publish_dir: _site, keep_files: false`——不保留旧产物，展示永远「刚打好的样」；
+    ③ 展示页面向陌生人——页面无任何内网路径/密钥/token；④ 增加一个 workflow 触发器——CI 面多一条并行队列，但分叉路径互不打扰。
+
+  - **后续**：① 「最新动态 feed」当前是手写——可脚本化成 git log/tag 注入的最近 N 项；
+    ② Pages 开通后，README 可挂 gh-pages 徽章，点击进去就是线上最新证明。

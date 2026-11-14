@@ -1,0 +1,64 @@
+name: Showcase
+
+on:
+  # 手册改动、creative/ 的变动、README 入口的改动、以及明确触发
+  push:
+    branches: [main]
+    paths:
+      - 'creative/showcase.html'
+      - 'creative/player-guide.html'
+      - 'creative/tapestry.html'
+      - 'creative/GLOSSARY.md'
+      - '.github/workflows/showcase.yml'
+      - 'README.md'
+      - 'src/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.js'
+  workflow_dispatch:
+
+concurrency:
+  group: showcase
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build the game bundle
+        run: npm run build
+
+      - name: Assemble the site
+        run: |
+          mkdir -p _site/game
+          cp creative/showcase.html _site/index.html
+          cp creative/player-guide.html _site/guide.html
+          cp creative/tapestry.html _site/tapestry.html
+          cp favicon.svg _site/favicon.svg
+          cp -r dist/. _site/game/
+
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _site
+          publish_branch: gh-pages
+          keep_files: false
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          commit_message: 'showcase: sync latest build & docs (${{ github.sha }})'

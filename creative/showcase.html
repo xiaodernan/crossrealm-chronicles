@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>跨界纪元 · Crossrealm Chronicles — 最新成果 · Showcase</title>
+<meta name="description" content="跨界纪元的最新成果：浏览器 ARPG + Spring Cloud 微服务 + 跨媒体宇宙。最新构建、最新测试数、最新章节，一页只读最新。">
+<meta property="og:title" content="跨界纪元 — Crossrealm Chronicles Showcase">
+<meta property="og:description" content="Browser ARPG + Spring Cloud microservices + transmedia universe. Latest build, latest tests, latest chapters — read the newest state of the project.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<style>
+:root {
+  --bg: #14110f;
+  --panel: #1c1815;
+  --panel-2: #241f1b;
+  --line: rgba(255, 217, 138, 0.16);
+  --gold: #ffd98a;
+  --amber: #ffb75a;
+  --text: #e9e2d2;
+  --dim: rgba(233, 226, 210, 0.60);
+  --maxw: 1120px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background:
+    radial-gradient(1100px 640px at 50% -10%, rgba(255, 183, 90, 0.10), transparent 60%),
+    radial-gradient(1000px 600px at 50% 115%, rgba(120, 90, 255, 0.06), transparent 55%),
+    var(--bg);
+  color: var(--text);
+  font: 16px/1.72 "Segoe UI", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
+.topbar { position: sticky; top: 0; z-index: 30; backdrop-filter: blur(10px); background: rgba(20, 17, 15, 0.82); border-bottom: 1px solid var(--line); }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--gold); }
+.lang-toggle { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--panel); }
+.lang-toggle button { appearance: none; border: none; background: transparent; color: var(--dim); padding: 6px 14px; font-size: 0.82rem; letter-spacing: 0.08em; cursor: pointer; }
+.lang-toggle button[aria-pressed="true"] { background: var(--gold); color: #201505; font-weight: 700; }
+.fresh { font-size: 0.72rem; color: var(--amber); border: 1px solid rgba(255,183,90,0.35); padding: 2px 10px; border-radius: 999px; margin-left: 6px; }
+.hero { padding: 54px 0 42px; text-align: center; border-bottom: 1px solid var(--line); position: relative; }
+.hero .ko { display: inline-block; font-size: 0.76rem; letter-spacing: 0.32em; color: var(--amber); border: 1px solid rgba(255, 183, 90, 0.35); border-radius: 999px; padding: 4px 14px; margin-bottom: 14px; }
+.hero h1 { font-size: clamp(2rem, 5.4vw, 3.4rem); line-height: 1.16; letter-spacing: 0.02em; }
+.hero h1 em { color: var(--gold); font-style: normal; text-shadow: 0 0 36px rgba(255, 217, 138, 0.4); }
+.hero p { max-width: 60ch; margin: 14px auto 0; color: var(--dim); }
+.hero-ctas { display: flex; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 8px; padding: 11px 20px; border: 1px solid rgba(255, 217, 138, 0.35); color: var(--gold); font-size: 0.92rem; letter-spacing: 0.05em; text-decoration: none; }
+.btn.primary { background: var(--gold); color: #201505; border-color: var(--gold); font-weight: 700; }
+.btn:hover { border-color: var(--gold); }
+.statrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 8px; text-align: center; }
+.stat b { display: block; font-size: 1.55rem; color: var(--gold); }
+.stat span { font-size: 0.72rem; color: var(--dim); letter-spacing: 0.05em; }
+.section { padding: 32px 0; border-bottom: 1px solid var(--line); }
+.section:last-child { border-bottom: none; }
+.section h2 { font-size: 1.45rem; color: var(--gold); letter-spacing: 0.04em; margin-bottom: 14px; display: flex; align-items: baseline; gap: 12px; }
+.section h2 small { color: var(--dim); font-size: 0.8rem; font-weight: 400; letter-spacing: 0.1em; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.card h4 { color: var(--amber); margin-bottom: 6px; font-size: 0.98rem; letter-spacing: 0.04em; }
+.card p { color: var(--dim); font-size: 0.87rem; }
+.card b { color: var(--gold); font-weight: 600; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.82rem; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; color: var(--gold); }
+.feed { border-left: 2px solid var(--amber); margin-left: 4px; padding-left: 14px; }
+.feed-item { padding: 6px 0; font-size: 0.9rem; color: var(--dim); }
+.feed-item time { color: var(--amber); font-size: 0.75rem; margin-right: 8px; }
+.feed-item b { color: var(--gold); }
+footer { padding: 26px 0 48px; text-align: center; color: var(--dim); font-size: 0.82rem; border-top: 1px solid var(--line); }
+.locale { display: none; }
+body.lang-zh .locale-zh { display: block; }
+body.lang-en .locale-en { display: block; }
+h1, h2 { text-wrap: balance; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (max-width: 640px) { .hero { padding-top: 36px; } .stat b { font-size: 1.3rem; } }
+</style>
+</head>
+<body class="lang-zh">
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand">⚓ 跨界纪元 <span class="fresh locale locale-zh">最新 · Nov 2026</span><span class="fresh locale locale-en">Latest · Nov 2026</span></div>
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button type="button" data-set="lang-zh" aria-pressed="true">中文</button>
+      <button type="button" data-set="lang-en" aria-pressed="false">English</button>
+    </div>
+  </div>
+</div>
+
+<div class="hero wrap">
+  <div class="ko locale locale-zh">全栈 · 仅此一页 · 永远最新</div>
+  <div class="ko locale locale-en">FULL STACK · ONE PAGE · ALWAYS LATEST</div>
+  <h1 class="locale locale-zh">浏览器里的<em>位面史诗</em>。<br>一页读完全部进度。</h1>
+  <h1 class="locale locale-en">A <em>plane-spanning epic</em> in your browser.<br>Latest state, one page.</h1>
+  <p class="locale locale-zh">跨界纪元 / Crossrealm Chronicles v0.1.0：浏览器 ARPG（三 Boss 战、110 回声、40+ 成就、自动通关），Spring Cloud 9 个微服务，25 首可播放 OST，小说三卷 + 电影剧本，内置玩家小册子——所有成果都在本页同步最新。</p>
+  <p class="locale locale-en">Crossrealm Chronicles v0.1.0: an ARPG that runs entirely in the browser (five bosses, 110 echoes, 40+ achievements, autoplay),nine Spring Cloud microservices, a 25-track playable OST, a novel trilogy and a film script — and a built-in player’s booklet. This page is always the latest state.</p>
+  <div class="hero-ctas">
+    <a class="btn primary" href="./game/">▶ 进入游戏 · Play</a>
+    <a class="btn" href="./guide.html">📖 玩家小册子 · Player guide</a>
+    <a class="btn" href="https://github.com/xiaodernan/crossrealm-chronicles">GitHub ↗</a>
+  </div>
+</div>
+
+<div class="wrap statrow">
+  <div class="stat"><b>9</b><span class="locale locale-zh">Spring Cloud 微服务</span><span class="locale locale-en">Spring Cloud services</span></div>
+  <div class="stat"><b>6674</b><span class="locale locale-zh">单测全绿 + Perf/E2E 门禁</span><span class="locale locale-en">unit tests green + perf/e2e gates</span></div>
+  <div class="stat"><b>25</b><span class="locale locale-zh">OST 可播放 25 首 · Web Audio</span><span class="locale locale-en">OST tracks, playable via Web Audio</span></div>
+  <div class="stat"><b>142</b><span class="locale locale-zh">分钟 IMAX 剧本</span><span class="locale locale-en">minutes IMAX script</span></div>
+  <div class="stat"><b>110</b><span class="locale locale-zh">次元回声</span><span class="locale locale-en">echo entries</span></div>
+  <div class="stat"><b>40+</b><span class="locale locale-zh">成就 · 40+8+3</span><span class="locale locale-en">achievements · 40+8+3</span></div>
+</div>
+
+<main class="wrap">
+
+<section class="section">
+  <h2><span class="locale locale-zh">游戏世界</span><span class="locale locale-en">The Game</span><small>ARPG · 0.1.0</small></h2>
+  <div class="grid">
+    <div class="card"><h4 class="locale locale-zh">七座位面 + 逆相终局</h4><h4 class="locale locale-en">Seven realms + inverted rift</h4><p class="locale locale-zh">交汇枢纽 · 灰白森林 · 魔法遗境 · 米勒荒原 · 破碎时线 · 混沌边境 · 烬火之上 —— 七座位面环而成环，终局在逆相里等你选。</p><p class="locale locale-en">Intersection Hub · Grey Wood · Magic Realm · Miller’s Wastes · Broken Timeline · Chaos Line · Embers End — seven realms in one ring; the finale waits in the Upside breach.</p></div>
+    <div class="card"><h4 class="locale locale-zh">五场 Boss 大战</h4><h4 class="locale locale-en">Five boss duels</h4><p class="locale locale-zh">影界守护者 · 大奥术师萨尔林 · 引力化身奇点领主 · 时线执政官 · 混沌裂隙领主。锁定 → 弹反 → 反手，每尊都要十二遍手感。</p><p class="locale locale-en">Shadow Warden · Archmagus Sarlin · Singularity Herald · Timeline Inspector · Chaos Overlord. Lock-on, parry, punish — each takes a dozen goes to learn.</p></div>
+    <div class="card"><h4 class="locale locale-zh">终章选择</h4><h4 class="locale locale-en">The ending choice</h4><p class="locale locale-zh">两个都对、都有意义：留灯 · 把火交给后来人；安静走完 · 把旅程收好。「炉主」成就 + 出场页金字 = 已经走完这一趟的人会被看见。</p><p class="locale locale-en">Both answers are right and both are heavy: keep the flame / gather the journey. “Echo-keeper” — the start page burns a gold pill for those who walk to the end.</p></div>
+    <div class="card"><h4 class="locale locale-zh">自动通关 Demo</h4><h4 class="locale locale-en">Autoplay demo</h4><p class="locale locale-zh">按 T — 游戏自己走到结局。可用于剧情鉴赏 / 性能分享 / CI 门禁（e2e 通关全绿）。</p><p class="locale locale-en">Press T — the game walks itself to the ending. Story viewing, performance posts — and the repo’s own e2e gate clears the game hands-off.</p></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2><span class="locale locale-zh">跨媒体宇宙</span><span class="locale locale-en">Transmedia Universe</span><small>CANON-ONE</small></h2>
+  <div class="grid">
+    <div class="card"><h4 class="locale locale-zh">小说 · 七章 + 三番外</h4><h4 class="locale locale-en">The novel · 7 chapters + 3 letters</h4><p class="locale locale-zh">《跨界纪事》——时间一千零一十九次 + 三封回信：火执笔 · 雾执笔 · 人执笔。番外互为同源。</p><p class="locale locale-en">Crossrealm Chronicles — the thousand-echo tale + three letters from the other side (fire, mist, human). One canon, epistolary arc.</p></div>
+    <div class="card"><h4 class="locale locale-zh">电影剧本 · 142 分钟</h4><h4 class="locale locale-en">Film · 142 minutes</h4><p class="locale locale-zh">IMAX · 三幕式 · 导演阐述 + 彩蛋《星图之外》。灰雾 Deakins 光 · 火光全彩爆发点在海报墙。</p><p class="locale locale-en">IMAX, 3 acts, director notes + coda. Deakins grey-fog · one full-colour finale at the poster wall.</p></div>
+    <div class="card"><h4 class="locale locale-zh">OST · 25 首</h4><h4 class="locale locale-en">OST · 25 tracks</h4><p class="locale locale-zh">Disc 1 锚脉 / Disc 2 营火余温 / Disc 3 逆相混沌 / Disc 4 回声全集。可在浏览器实时播放（Web Audio 程序合成，无任何音频文件）。</p><p class="locale locale-en">Disc 1 Anchor / Disc 2 Campfire / Disc 3 Upside-Chime / Disc 4 Echoes. Fully playable in-browser via programmatic Web Audio (zero audio assets).</p></div>
+    <div class="card"><h4 class="locale locale-zh">年鉴 · tapestry.html</h4><h4 class="locale locale-en">Compendium · tapestry.html</h4><p class="locale locale-zh">官方单页档案：年表（00 序言 → 番外三）· 17 母题滤镜 · 110 回声墙 · 谢幕碑 · 制作手记。</p><p class="locale locale-en">Official single-page archive: timeline (00 prologue → extra letter III) · 17 mothers filter · 110-echo wall · epilogue tablets · credits.</p></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2><span class="locale locale-zh">工程与架构</span><span class="locale locale-en">Engineering</span><small>THE REAL STACK</small></h2>
+  <div class="grid">
+    <div class="card"><h4 class="locale locale-zh">九个微服务（Spring Cloud）</h4><h4 class="locale locale-en">Nine Spring Cloud services</h4><p class="locale locale-zh">Eureka · Config · Gateway · game · season · ai · presence · notification (<span class="mono">8085</span>) — LB + Circuit Breaker + Retry + TimeLimiter 全部接通，<strong>9 模块 verify 全绿</strong>。</p><p class="locale locale-en">Eureka · Config · Gateway · game · season · ai · presence · notification (<span class="mono">8085</span>) — LB + Circuit Breaker + Retry + TimeLimiter everywhere; all nine modules <strong>verify green</strong>.</p></div>
+    <div class="card"><h4 class="locale locale-zh">Redis 全矩阵</h4><h4 class="locale locale-en">Redis everywhere</h4><p class="locale locale-zh">存在TTL · 会榜 ZSET · 赛季计数 · 报讯台List/Hash/PubSub · AI队列 Streams · 幂等跨实例台账（新）。mirror-write 模式一致。</p><p class="locale locale-en">Presence TTL · leaderboard ZSETs · season counters · notification List/Hash/PubSub · AI job Streams · cross-instance idempotency ledger (new). All mirror-write.</p></div>
+    <div class="card"><h4 class="locale locale-zh">缓存体系</h4><h4 class="locale locale-en">Cache theory</h4><p class="locale locale-zh">堆顶K+解耦 memo · Cache-Control 全路径 · LRU · TTL · Spring Cache（simple/redis）—— 三层缓存模型，主线 TTL 都在。</p><p class="locale locale-en">Heap-K + decoupled memo · Cache-Control per path · LRU · TTL · Spring Cache (simple/redis) — three tiers, all TTL-bounded.</p></div>
+    <div class="card"><h4 class="locale locale-zh">可观测性入口</h4><h4 class="locale locale-en">Ops observability</h4><p class="locale locale-zh"><span class="mono">/api/ops/health</span>· notifyMirrors 计数 · <span class="mono">/api/ops/redis</span>· <span class="mono">/api/ops/advisor</span>· <span class="mono">/api/ops/dead-letter</span>· <span class="mono">/actuator/springcloud</span>—— 每一步都可被钩子验。</p><p class="locale locale-en"><span class="mono">/api/ops/health</span> · notifyMirrors counters · <span class="mono">/api/ops/redis</span> · <span class="mono">/api/ops/advisor</span> · <span class="mono">/api/ops/dead-letter</span> · <span class="mono">/actuator/springcloud</span> — every path hook-verified.</p></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2><span class="locale locale-zh">最新进展</span><span class="locale locale-en">Latest landed</span><small>NOVEMBER 2026</small></h2>
+  <div class="feed">
+    <div class="feed-item"><time>11 · 14</time><b>《看守的日子》</b> <span class="locale locale-zh">七分钟 IMAX 伴生短片——锚点前的一天 ·《跨界纪事》的前提。</span><span class="locale locale-en">a 7-minute IMAX companion: the day the keeper stays.</span></div>
+    <div class="feed-item"><time>11 · 14</time><b>每章 canon Codex</b> <span class="locale locale-zh">《跨界纪事》设定集 · 11 章机器抽取版（对照原文）。</span><span class="locale locale-en">novel Codex — 11 chapters machine-extracted with source-tags.</span></div>
+    <div class="feed-item"><time>11 · 14</time><b>炉边传闻 · W-Z58</b> <span class="locale locale-zh">出场页门楣上，世界最近的一条真实报讯。</span><span class="locale locale-en">the start-screen ticker: the world’s latest pulse, live.</span></div>
+    <div class="feed-item"><time>11 · 15</time><b>W-Z65 幂等提交</b> <span class="locale locale-zh">榜单写路径支持 X-Idempotency-Key · 重放字节一致 · 409/413。</span><span class="locale locale-en">leaderboard idempotency — X-Idempotency-Key, byte-identical replay.</span></div>
+    <div class="feed-item"><time>11 · 15</time><b>曲目释义 · OST 25</b> <span class="locale locale-zh">liner notes：每一首曲子为什么存在。</span><span class="locale locale-en">liner notes — why each of the 25 tracks exists.</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2><span class="locale locale-zh">六个问题的答案</span><span class="locale locale-en">Six Answers</span><small>DELIBERATELY NARROW</small></h2>
+  <div class="grid">
+    <div class="card"><h4 class="locale locale-zh">为什么用浏览器</h4><h4 class="locale locale-en">Why browser</h4><p class="locale locale-zh">因为《跨界纪元》不落卡——点一下就进、不要注册、不要下载。最低配置电脑能跑满帧。</p><p class="locale locale-en">Because the game is the door: click, play, done. No install, no signup, regular hardware runs at 60.</p></div>
+    <div class="card"><h4 class="locale locale-zh">为什么全双平台语言</h4><h4 class="locale locale-en">Why full bilingual</h4><p class="locale locale-zh">因为火所有语言都听懂。所有文案双表维护 · 死键/缺键门禁 const play at CI.</p><p class="locale locale-en">Because the flame listens in every language. All strings live in both locales; missing-key gates fail CI.</p></div>
+    <div class="card"><h4 class="locale locale-zh">为什么玩家不违规</h4><h4 class="locale locale-en">Why no cheats</h4><p class="locale locale-zh">自动通关是给讲故事用的，不是给刷榜用的——榜单不接自动通关。</p><p class="locale locale-en">Autoplay is for storytelling, never for ranks — leaderboards exclude autoplay runs.</p></div>
+    <div class="card"><h4 class="locale locale-zh">为什么 17 退</h4><h4 class="locale locale-en">Why 17</h4><p class="locale locale-zh">七章 · 三 Boss · 一百一十回声 · 四十成就 · 十七母题最后一层。退开就有 17 个抱歉在门后等你。</p><p class="locale locale-en">Seven chapters · three bosses · 110 echoes · 40 achievements · the seventeenth mother in the last row. There’s a thing waiting at the end of 17.</p></div>
+    <div class="card"><h4 class="locale locale-zh">为什么 110</h4><h4 class="locale locale-en">Why 110</h4><p class="locale locale-zh">一百十分线的没出现，事情还没完——你比想象的结局更多一格。</p><p class="locale locale-en">The hundred-and-tenth is missing — there is always one more, one ahead of you, one beyond the wall.</p></div>
+    <div class="card"><h4 class="locale locale-zh">为什么未完</h4><h4 class="locale locale-en">Why “open end”</h4><p class="locale locale-zh">因为结束在「余烬」之后仍有一层纸条：「此驿站不收信。路过的人，下次再坐。」</p><p class="locale locale-en">Because even after the ending: the notice board reads “We take no letters here — only travellers, come sit a while.”</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <p>
+    <span class="locale locale-zh">跨界纪元 v0.1.0 · MIT · 著作人 · xiaodernan · 2026 · <a href="./guide.html">玩家小册子</a> · <a href="./tapestry.html">年鉴</a> · <a href="https://github.com/xiaodernan/crossrealm-chronicles">仓库</a></span>
+    <span class="locale locale-en">Crossrealm Chronicles v0.1.0 · MIT · xiaodernan · 2026 · <a href="./guide.html">Player guide</a> · <a href="./tapestry.html">Compendium</a> · <a href="https://github.com/xiaodernan/crossrealm-chronicles">Repo</a></span>
+  </p>
+</footer>
+
+<script>
+const root = document.body;
+const buttons = document.querySelectorAll('.lang-toggle [data-set]');
+buttons.forEach((btn) => btn.addEventListener('click', () => {
+  root.classList.remove('lang-zh', 'lang-en');
+  root.classList.add(btn.dataset.set);
+  buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+}));
+</script>
+</body>
+</html>
