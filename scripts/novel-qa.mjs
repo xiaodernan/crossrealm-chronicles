@@ -123,33 +123,49 @@ async function askChunk(chunk) {
   let buffer = '';
   let content = '';
   let usage = null;
-  while (reader) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    let idx;
-    while ((idx = buffer.indexOf('\n\n')) !== -1) {
-      const raw = buffer.slice(0, idx); buffer = buffer.slice(idx + 2);
-      for (const ln of raw.split('\n')) {
-        if (!ln.startsWith('data:')) continue;
-        const data = ln.slice(5).trim();
-        if (data === '[DONE]') continue;
-        try {
-          const j = JSON.parse(data);
-          const delta = j.choices?.[0]?.delta?.content;
-          if (delta) content += delta;
-          if (j.usage) usage = j.usage;
-        } catch { /* partial json */ }
+  try {
+    while (reader) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buffer.indexOf('\n\n')) !== -1) {
+        const raw = buffer.slice(0, idx); buffer = buffer.slice(idx + 2);
+        for (const ln of raw.split('\n')) {
+          if (!ln.startsWith('data:')) continue;
+          const data = ln.slice(5).trim();
+          if (data === '[DONE]') continue;
+          try {
+            const j = JSON.parse(data);
+            const delta = j.choices?.[0]?.delta?.content;
+            if (delta) content += delta;
+            if (j.usage) usage = j.usage;
+          } catch { /* partial json */ }
+        }
       }
     }
+  } catch (streamError) {
+    // SSE 中途断线：保留已收到的片段 / 记录为错误
+    const msg = streamError?.message ?? String(streamError);
+    if (content.length === 0) {
+      return { name: chunk.name, error: `SSE 中途断开: ${msg}` };
+    }
+    process.stderr.write(`novel-qa: ${chunk.name} SSE 断开，但保留已收到 ${content.length} 字：${msg}\n`);
   }
   return { name: chunk.name, content: content.trim(), usage };
 }
 
 const results = [];
+// 主循环加宽守卫：fetch 本身（ECONNRESET/TLS）会把 askChunk 的 try 绕过去；
+// 那种失败值应视为该片的失败行，而不是整个批次的崩溃点
 for (let i = 0; i < targets.length; i += 1) {
   process.stderr.write(`novel-qa: [${i + 1}/${targets.length}] ${targets[i].name}\n`);
-  const r = await askChunk(targets[i]);
+  let r;
+  try {
+    r = await askChunk(targets[i]);
+  } catch (err) {
+    r = { name: targets[i].name, error: `调用失败: ${err?.message ?? err}` };
+  }
   if (r.error) {
     process.stderr.write(`novel-qa: ${r.name} → ${r.error}\n`);
     results.push({ name: r.name, error: r.error });

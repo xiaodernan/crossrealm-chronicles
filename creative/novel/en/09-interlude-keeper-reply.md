@@ -1,6 +1,6 @@
 # Interlude II · The Keeper’s Reply
 
-**Written after Interlude I · A Letter from the Fire to You: this one was written from the other side of the mist. The Keeper has never written anyone a letter — this one has been sitting in the fog for many years, waiting for someone who has not yet pressed E.**
+**Written after Interlude I · A Letter from the Fire to You: this one was written from the other side of the mist. The Keeper never gives letters to anyone — this one has been folded into the fog for many years, waiting for someone who has not yet pressed E.**
 
 ---
 
@@ -173,4 +173,4 @@ That is the whole secret of the Keeper.
 
 ---
 
-*(Interlude II · The Keeper’s Reply — A reader’s letter from outside the door of the Crossrealm Chronicles; corresponds to: the NPC “the Keeper” at the hub’s anchor point, the lamp at each campfire save point, and the inch of fog that retreats in endingFlame when the player looks back. Finish this letter and play a new run — the fastest moment the fog recedes is when you press E.)*
+*(Interlude II · The Keeper’s Reply — A reader’s letter from outside the door of the Crossrealm Chronicles; corresponds to: the NPC “the Keeper” at the hub’s anchor point, the lamp at each campfire save point, and the inch of fog that retreats each time the player turns back. Finish this letter and play a new run — the fog always makes room for those who walk the road at their own pace.)*

@@ -44,7 +44,7 @@ Lin Lian always remembers the end-scene choice.
 Option one — **red**, the steady path: hand the lamp to the stone steps forever.  
 Option two — **grey**, the ash path: smother the Anchor by hand, and let this section of the world remain undisturbed.
 
-Variation Keeper watches him.
+The Keeper watches him.
 
 He doesn’t know about the one truly difficult choice this stove has ever held — the one he hasn’t made yet.
 

@@ -81,24 +81,33 @@ async function askOnce(chunk) {
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '', content = '';
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    let idx;
-    while ((idx = buffer.indexOf('\n\n')) !== -1) {
-      const raw = buffer.slice(0, idx); buffer = buffer.slice(idx + 2);
-      for (const ln of raw.split('\n')) {
-        if (!ln.startsWith('data:')) continue;
-        const data = ln.slice(5).trim();
-        if (data === '[DONE]') continue;
-        try {
-          const j = JSON.parse(data);
-          const delta = j.choices?.[0]?.delta?.content;
-          if (delta) content += delta;
-        } catch { /* partial */ }
+  try {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buffer.indexOf('\n\n')) !== -1) {
+        const raw = buffer.slice(0, idx); buffer = buffer.slice(idx + 2);
+        for (const ln of raw.split('\n')) {
+          if (!ln.startsWith('data:')) continue;
+          const data = ln.slice(5).trim();
+          if (data === '[DONE]') continue;
+          try {
+            const j = JSON.parse(data);
+            const delta = j.choices?.[0]?.delta?.content;
+            if (delta) content += delta;
+          } catch { /* partial */ }
+        }
       }
     }
+  } catch (streamError) {
+    const msg = streamError?.message ?? String(streamError);
+    if (content.length === 0) {
+      process.stderr.write(`novel-glossary: ${chunk.name} SSE 中途断开 (${msg})，退化为报错条目\n`);
+      return { name: chunk.name, error: true };
+    }
+    process.stderr.write(`novel-glossary: ${chunk.name} SSE 断开，保留已收到 ${content.length} 字：${msg}\n`);
   }
   return { name: chunk.name, content: content.trim() };
 }

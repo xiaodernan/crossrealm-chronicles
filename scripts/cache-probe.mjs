@@ -80,25 +80,31 @@ async function call(label, opts) {
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '', usage = null, text = '';
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    let idx;
-    while ((idx = buffer.indexOf('\n\n')) !== -1) {
-      const raw = buffer.slice(0, idx); buffer = buffer.slice(idx + 2);
-      for (const ln of raw.split('\n')) {
-        if (!ln.startsWith('data:')) continue;
-        const data = ln.slice(5).trim();
-        if (data === '[DONE]') continue;
-        try {
-          const j = JSON.parse(data);
-          const delta = j.choices?.[0]?.delta?.content;
-          if (delta) text += delta;
-          if (j.usage) usage = j.usage;
-        } catch { /* partial */ }
+  try {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buffer.indexOf('\n\n')) !== -1) {
+        const raw = buffer.slice(0, idx); buffer = buffer.slice(idx + 2);
+        for (const ln of raw.split('\n')) {
+          if (!ln.startsWith('data:')) continue;
+          const data = ln.slice(5).trim();
+          if (data === '[DONE]') continue;
+          try {
+            const j = JSON.parse(data);
+            const delta = j.choices?.[0]?.delta?.content;
+            if (delta) text += delta;
+            if (j.usage) usage = j.usage;
+          } catch { /* partial */ }
+        }
       }
     }
+  } catch (streamError) {
+    const msg = streamError?.message ?? String(streamError);
+    console.log(`${label}: SSE 中途断开 (${msg})；保留已收到的 usage: ${JSON.stringify(usage)}`);
+    return usage;
   }
   console.log(`${label}: HTTP 200 usage=${JSON.stringify(usage)} answer=${text.slice(0, 40).replace(/\n/g, ' ')}`);
   return usage;

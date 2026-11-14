@@ -25,7 +25,7 @@ The shadow laughs.
 
 The shadow fades into dry tinder. He picks it up and drops it into the campfire. The flame doesn’t change size. Only the color deepens by one shade.
 
-He knows what that moment means — this is the first time he has truly tended a fire alone.
+He knows what that moment means — this is the first time he realizes a fire can burn for him even if he never feeds it.
 
 ---
 
@@ -38,7 +38,7 @@ Who snuffs a flame?
 
 He thinks about it — and decides to do both.
 
-He leaves the flame a single lamp, then personally extinguishes it.
+He leaves one lamp behind. He personally puts another out.
 At the moment his thumb lands on the tabletop, a very faint warmth moves through — not fire; others, elsewhere, are doing the same thing with the same pair of fingers.
 
 So the ending is not letting go or holding tight —

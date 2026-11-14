@@ -72,7 +72,7 @@ Lin Lian doesn’t skip.
 The crawl reads:  
 *Crossrealm Chronicles*  
 *Plane-Walker · Endless Exploration Unlocked*  
-*Forty-nine Echoes · Waiting for Resonance*
+*Forty-nine Echoes · Resonance Arrives.*
 
 ---
 

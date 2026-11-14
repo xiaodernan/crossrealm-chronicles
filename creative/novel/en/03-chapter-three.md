@@ -94,7 +94,7 @@ At `d:\3a大作\creative\posters\`.
 
 ---
 
-*(End of Chapter Three · End of the book)*
+*(End of Chapter Three · the volume isn’t done yet)*
 
 **《跨界纪事：锚火守夜人》**  
 *Crossrealm Chronicles: Keeper of the Anchor Flame*

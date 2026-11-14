@@ -81,7 +81,7 @@ What remains of the record is two lines:
 **Leave a light for those who come after. When they count to one hundred and ten, they will find that they, too, have a light in their hand.**
 
 Lin Shen writes this into his captain’s log.
-He writes: from this moment, every single traveler who comes aboard our ship receives a letter.
+He writes: from this moment, every new traveler who comes aboard our ship receives a letter — he has sent one already, and the next is on the way.
 
 This letter isn’t from anyone.
 It carries no name in it.
@@ -127,7 +127,7 @@ the words flow up from under the fire instead of being printed on it.
 Lin Shen copies the last lines of his captain’s log next to the fire:
 
 > Everyone who steps aboard this ship is a part of the light.
-> Every recipient of every letter is the next traveler aboard.
+> The recipients — always the next traveler aboard.
 > The fire itself knows who the recipient is.
 
 ---
