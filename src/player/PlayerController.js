@@ -408,12 +408,10 @@ export class PlayerController {
 
   addCameraInput(dx, dy) {
     this.yaw -= dx * this.cameraSensitivity;
-    /* 第一人称的鼠标 dy 反向补手感。`pitch` 语义已在两人称统一为「> 0 = 视线朝下」
-     * （见 `_updateFirstPersonCamera` 的注），而第一人称的 look 向量对 pitch 取了反，
-     * 所以这里必须把 dy 也取反，鼠标下推（dy > 0）才会让 pitch 变大 = 视线朝下压 ——
-     * 第一人称该有的手感；第三人称吊臂随 pitch 升高，鼠标下推 → 吊臂下沉 →
-     * 仰视角色，那是 TPS 的标准手感。两边手感各自符合常识，底层是同一个方向。 */
-    const dyEff = this.cameraMode === 'first' ? -dy : dy;
+    /* `pitch` 一致：> 0 = 视线朝下（见 `_updateFirstPersonCamera` / `_updateThirdPersonCamera`）。
+     * 手感约定（统一两模式）：鼠标上推（dy < 0）→ pitch 变小 = 抬头；鼠标下拉（dy > 0）→ pitch 变大 = 低头。
+     * padLook（右摇杆，前推 = 抬头）和鼠标共享同一条物理输入路径，不单独换号。 */
+    const dyEff = -dy;
     this.pitch -= dyEff * this.cameraSensitivityY;
     if (this.cameraMode === 'first') {
       this.pitch = THREE.MathUtils.clamp(this.pitch, -0.5, 0.5);
@@ -1212,16 +1210,12 @@ export class PlayerController {
 
 
 
-    /* 统一 pitch 语义：**pitch > 0 = 视线朝下**。两人称必须同一把尺 ——
-     * 第三人称里 pitch > 0 意味着相机升到支点之上（`_updateThirdPersonCamera` 的
-     * `pivot.y + sinP * dist`），画面是俯身看角色；第一人称原本写 `Math.sin(pitch)`，
-     * 同一个正值却变成抬头。于是**同一个 pitch 值在两人称描述相反的方向**，
-     * 按 V 切换视角时视线被整个翻个面（探针 `.tmp-scan/probe-camera-pitch.mjs`
-     * 实测：第三人称把镜头推到高位俯视角色时切第一人称，同一个 pitch 值变成仰望天空）
-     * —— 玩家的说法是"视角转换有问题、操作对玩家很不友好"。这里取反与第三人称对齐：
-     * 同一个 pitch 值在两人称描述同一件事，切视角不再翻面。鼠标手感由
-     * `addCameraInput` 里对第一人称 dy 取反补回（两边各自符合常识）。
-     * 存储语义不变（存档字段不迁移）。 */
+    /* 统一 pitch 语义：**pitch > 0 = 视线朝下**。两人称同一把尺 ——
+     * 第三人称里 `pivot.y + sinP * dist`（pitch > 0 → 吊臂升高 → 俯视角色）；
+     * 第一人称 look 向量的 y 取反补齐（同一个 pitch = 视线朝下）。
+     * 鼠标方向也在 `addCameraInput` 里统一（#W-Z69：`dyEff = -dy`，
+     * 不分人称），不再有“第一人称取反补回”的特例 —— 切换视角、手柄/鼠标、两种人称
+     * 共享同一条输入符号规则。存档字段语义不变（不迁移）。 */
     const look = this._camTmp2.set(
       Math.sin(this.yaw) * Math.cos(this.pitch),
       -Math.sin(this.pitch),

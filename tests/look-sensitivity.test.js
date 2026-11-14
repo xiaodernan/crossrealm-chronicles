@@ -157,7 +157,7 @@ describe('鼠标镜头灵敏度（W-D6 切片7）', () => {
       const p = mkPlayer();
       p.setLookSensitivity(0.5);
       p.addCameraInput(0, 100);
-      expect(p.pitch).toBeCloseTo(-100 * 0.0017 * 0.5, 12);
+      expect(p.pitch).toBeCloseTo(100 * 0.0017 * 0.5, 12);
     });
   });
 
