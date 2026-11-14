@@ -2399,7 +2399,7 @@ export const STRINGS_ZH = Object.freeze({
   ending_flame_title: '你的锚火仍在燃烧',
   ending_flame_sub: '火不会因为终局而熄灭，故事只是换了火光的频率',
   start_crossmedia_title: '── 跨界纪事 · 跨媒体宇宙 ──',
-  start_crossmedia_caption: '长篇小说六章 · 142 分钟电影剧本 · OST 24 曲手册（见 creative/ 目录）',
+  start_crossmedia_caption: '长篇小说七章 · 142 分钟电影剧本 · OST 24 曲手册（见 creative/ 目录）',
 
   // 指南面板动态文案（W-D2 切片8：GameGuidePanel 三元素）
   guide_title_auto: '⚡ 自动通关进行中',

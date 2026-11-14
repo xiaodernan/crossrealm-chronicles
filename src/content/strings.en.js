@@ -2402,7 +2402,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Six novel chapters · 142-min film script · 24-track OST booklet (see creative/)',
+  start_crossmedia_caption: 'Seven novel chapters · 142-min film script · 24-track OST booklet (see creative/)',
 
   // Guide panel dynamic texts (W-D2 slice 8: GameGuidePanel three elements)
   guide_title_auto: '⚡ Auto-run in progress',
