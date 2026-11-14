@@ -8002,5 +8002,36 @@ Phase D（系统与质量）
     ③ `npm test` 6687/6687 绿；④ gateway `/api/ai/**` 已能到达 qa 级 `/api/ai/lore/*`，无需新路由条目。
 
   - **遗留**：LangGraph 式有状态多跳推理未上（单跳 BM25+LLM 已覆盖「原典问一句答一句」）；
-    语料目前仅 novel+GLOSSARY，showcase 的 film script / OST liner notes 未入索引（下一跳候选）；
+    语料此前仅 novel+GLOSSARY，film 剧本 / 短片 / liner-notes / OST 手册此后补入（见 W-Z83）；
     Oracle 本身**不进** Redis Streams（它是无状态读，不需要队列、也不需要游戏态上下文）。
+
+- **2026-11-15 W-Z83「Lore 语料扩军（film+music 入库）+ findEnd 死循环修复（启动期活锁）」** —— 提交：本次 HEAD
+
+  - **起因**：W-Z82 落地后压测/扩容/巡检清单里挂着两件事——
+    ① 语料只收了 novel+GLOSSARY，影/成员/音乐人文典范里同样是 canon，Oracle 答不了关于电影和 OST 的问题；
+    ②（意外挖出的真 bug）：扩军后 `Bm25IndexTest` **启动期活锁**——`LoreCorpus` 在加载 GLOSSARY-en 一个 970 字符段落时
+    CPU 100% 超过 190 秒、`ai-service` 永远起不来。
+  - **诊断**：`splitIntoDocs` 的长段切分窗口，`findEnd` 的最低返回值是 `end-180`；当窗口被夹到段尾（`end = paragraph.length()`）
+    且前一刀恰好落在标点位上时，会得到 `cut == i`，`i` 永不前进 → **切出来的同一块被无限再切**。
+    `scripts/build-lore-corpus.mjs` 侧另修两处：语料 `collect()` 之前递归走进 novel/en，导致 EN 章节**双写入库**
+    （36 源里其实有 24 份 EN）；过滤器改为对 forward-slash 拼好的相对路径生效，并把 novel 中英文的分组条件
+    改为按相对路径深度判定。
+  - **做法**：① `findEnd` 调用处加 `if (cut <= i) cut = i + 1` + 上限 clamp；② `paragraphs()` 手写逐行扫描替代 `\R\s*\R`
+    正则段落切分（行为可见、杜绝正则退化的任何怀疑）；③ 语料重新编译为 `classpath:/lore/corpus.txt`
+    （novel 中英 24 + GLOSSARY 双版 2 + film 4（剧本双语 + 短片双语）+ music 4（liner-notes + OST 手册双语）= **34 源，1866 检索块**，
+    加载 < 20 ms / 索引构建 < 70 ms / 单查询 < 30 ms）；④ `Bm25IndexTest` 把脆弱的
+    「熄 → 第七章前六」断言换成两个可靠不变式（`熄` 单 token ⇒ 每一命中块必含 `熄`；`第七章` 查询应 cites `07-第七章` 源）。
+  - **判据**：ai-service 全绿（94 tests、9 skipped 是无 upstream key 的 live tests 的既定模式）；
+    「node scripts/build-lore-corpus.mjs --check」确定性幂等；Oracle 关机重启后 health 仍回 200。
+
+- **2026-11-15 W-Z82b「首屏体积刻度重钉 2228948 → 2296924（W-Z82 同批抓到的 CI 红）」** —— 提交：本次 HEAD
+
+  - **起因**：Front CI `main CI`（运行 43622299679）在 9f83891 上 fail——
+    `Size budget (first paint < 2 MiB)` 步骤 1s 红。本地 `npm run build` 复现：
+    刻度×1.03 = 2,295,816 < 实际 2,296,924，超出 **1,108 字节**。Lint/Test/Build/Size-reference
+    全绿——唯独此刻度线红了，E2E/Perf 被它挡在门外。
+  - **做法**：W-Z82 落地内容（`advisor_lore_toggle` ×2 + `hm_*_lore_oracle` ×2（典籍叩问说明书一页）+
+    在线伙伴/living 键全量入首屏语言表）合计首屏应占 +68 KB。**刻度只升不降，环比 3% 不放宽**——
+    `FIRST_SCREEN_READING` 按实测值重钉（不是按 3% 宽容度凑数）；`check-bundle-size.mjs` 注释按仓库规矩写清抬线理由。
+  - **判据**：`npm run size` 本地 PASS（2296924 ≤ 2296924×1.03 = 2365831；绝对上限 2.25 MiB 余 0.06 MiB）；
+    按语言分包仍是结构性杠杆（语言表占首屏 ~40%），下一次抬线必须先做那个，不再放行「先抬后想」。

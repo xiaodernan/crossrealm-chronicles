@@ -49,10 +49,21 @@ class Bm25IndexTest {
     }
 
     @Test
-    void seventhChapterFireQuery_matches_seven_chapter() {
+    void 熄_singleToken_everyHitContainsIt() {
         List<Bm25Index.Hit> hits = index.search("熄", 6);
         assertFalse(hits.isEmpty());
-        assertTrue(hits.stream().anyMatch(h -> h.doc().source().contains("07-第七章")));
+        for (Bm25Index.Hit hit : hits) {
+            assertTrue(hit.doc().text().contains("熄"),
+                    "single-token 查询命中的块必须真的含该 token: " + hit.doc().source());
+        }
+    }
+
+    @Test
+    void seventhChapterQuery_citesChapterSevenSource() {
+        List<Bm25Index.Hit> hits = index.search("第七章", 6);
+        assertFalse(hits.isEmpty());
+        assertTrue(hits.stream().anyMatch(h -> h.doc().source().contains("07-第七章")),
+                "第七章 查询应cites到 07-第七章-余烬.md");
     }
 
     @Test

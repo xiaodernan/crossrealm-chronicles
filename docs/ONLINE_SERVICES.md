@@ -108,7 +108,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 
 - **`POST /api/ai/lore/answer`**（请求体 `{ question ≤ 400 字, limit? = 0|1..6 }`，缺省 4）→ `{ ok, answer, sources: [路径…], model, cached, upstreamCached, latencyMs, requestId? }`；无任何 BM25 命中时**不调模型**，直接回 `「此物未在典籍中 · This is not in the record.」`（`model: "oracle-bm25"`）——不是答不出，是典籍没有。
 - **`GET /api/ai/lore/health`** → `{ ready: true, candidates, bm25Probe }`；不回显任何语料文字。
-- 语料 = `scripts/build-lore-corpus.mjs` 从 `creative/novel/*.md` + `creative/novel/en/*.md` + `creative/GLOSSARY.md` + `creative/GLOSSARY-en.md` 确定性编译出的 `classpath:/lore/corpus.txt`（~130 KB，36 源，1803 块）；`--check` 可以在任何装只读的 CI 上校验语料未漂移。
+- 语料 = `scripts/build-lore-corpus.mjs` 从 `creative/novel/*.md`（12 章）+ `creative/novel/en/*.md`（全书英译）+ `creative/GLOSSARY.md` + `creative/GLOSSARY-en.md` + `creative/film/*.md`（电影剧本中英 + 短片中英）+ `creative/music/liner-notes.md/.en.md` + `creative/music/OST-专辑手册.md/.en.md` 确定性编译出的 `classpath:/lore/corpus.txt`（~300 KB UTF-8，34 源，1866 检索块）；`--check` 可以在任何装只读的 CI 上校验语料未漂移。
 - 分词：Han 逐码点成词 + ASCII 字母/数字小写词串（`Bm25Tokenizer`）；打分：标准 BM25（k1=1.5、b=0.75）；命中即缓存键（system 固定 + 段落固定 ⇒ 同一问题走 digest cache）。
 - system prompt 强制：答案语言跟随提问语言；回答必须带 `[bracket]` 出处；未提及的人物/地点/物件一律回答「未在典籍中」——不许现编。
 - 前端计账延续顾问面板的口径：`cached=true` 本地命中不进上游统计；`upstreamCached=true` 显示金色「上游缓存」角标；Oracle 的失败分八句按同一套 `ADVISOR_REASONS` 枚举（reason=HTTP+status=503 ⇒「熔断中」文案，不是「连不上网关」）。

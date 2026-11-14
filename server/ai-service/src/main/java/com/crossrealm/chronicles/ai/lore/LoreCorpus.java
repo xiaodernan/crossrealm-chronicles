@@ -14,6 +14,14 @@ import org.springframework.stereotype.Component;
  * <p>Each corpus file contributes one or more {@link LoreDoc} entries. The file is
  * expected to be the same exact file compiled by build-lore-corpus.mjs — a CI gate
  * (`--check`) asserts it doesn't drift.
+ *
+ * <p>Two deliberate engineering choices here, both paid for in debugging:
+ * <ul>
+ *   <li>段落切分用手写逐行扫描（{@link #paragraphs}），不用正则——行为可见、可预测；</li>
+ *   <li>长段切分时 {@code i} 必须前进至少一个字符（{@code cut > i}），否则某个
+ *       恰好等于 {@code i} 的落点（窗口被夹到段尾 + 前一刀正好落在标点位）会让
+ *       这一刀卡死在同一偏移上，段落被无限重复切片（实测 GLOSSARY-en 一段 970 字符挂死）。</li>
+ * </ul>
  */
 @Component
 public class LoreCorpus {
@@ -35,23 +43,23 @@ public class LoreCorpus {
         }
         String source = "creative/novel/00-prologue.md"; // fallback; replaced on first # source: line
         int blockStart = 0;
-        int blockEnd = raw.length();
         int i = 0;
-        while (i < raw.length()) {
-            int next = raw.indexOf('\n', i);
-            if (next < 0) next = raw.length();
-            String line = raw.substring(i, next).trim();
+        int n = raw.length();
+        while (i < n) {
+            int nl = raw.indexOf('\n', i);
+            if (nl < 0) nl = n;
+            String line = raw.substring(i, nl).trim();
             if (line.startsWith("# source: ")) {
                 if (i > blockStart) {
                     String block = raw.substring(blockStart, i).trim();
                     splitIntoDocs(source, block);
                 }
                 source = line.substring("# source: ".length()).trim();
-                blockStart = next + 1;
+                blockStart = nl + 1;
             }
-            i = next + 1;
+            i = nl + 1;
         }
-        if (blockStart < raw.length()) {
+        if (blockStart < n) {
             String block = raw.substring(blockStart).trim();
             splitIntoDocs(source, block);
         }
@@ -61,8 +69,8 @@ public class LoreCorpus {
     }
 
     private void splitIntoDocs(String source, String block) {
-        // 按空行切段——任何段落型 md 源都自然落在段间。过长的段进一步按 ~800 字切分。
-        for (String paragraph : block.split("\\R\\s*\\R")) {
+        // 按空行切段——任何段落型 md 源都自然落在段间。
+        for (String paragraph : paragraphs(block)) {
             paragraph = paragraph.trim();
             if (paragraph.isEmpty()) continue;
             // 过长段按句界切分，并且不混淆节标题
@@ -71,6 +79,10 @@ public class LoreCorpus {
                     int end = Math.min(i + 900, paragraph.length());
                     // 尽量在标点处切断——但这控制只是检索召回，不是语义块
                     int cut = findEnd(paragraph, end);
+                    // 守门：findEnd 的最低返回值是 end-180。窗口被夹到段长时它可能恰好等于 i
+                    // （前一刀正好落在标点位上）——那一刀必须硬切进至少一个字符，否则 i 永不前进。
+                    if (cut <= i) cut = i + 1;
+                    if (cut > paragraph.length()) cut = paragraph.length();
                     String chunk = paragraph.substring(i, cut).trim();
                     if (chunk.length() > 60) {
                         docs.add(new LoreDoc(source, chunk));
@@ -83,10 +95,35 @@ public class LoreCorpus {
         }
     }
 
+    /** 段落扫描：空（或全空白）行冲出当前段；其余行拼进当前段，\n 续行。 */
+    private static List<String> paragraphs(String block) {
+        List<String> out = new ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        int start = 0;
+        int n = block.length();
+        while (start < n) {
+            int nl = block.indexOf('\n', start);
+            if (nl < 0) nl = n;
+            String line = block.substring(start, nl);
+            if (line.trim().isEmpty()) {
+                if (cur.length() > 0) {
+                    out.add(cur.toString());
+                    cur.setLength(0);
+                }
+            } else {
+                if (cur.length() > 0) cur.append('\n');
+                cur.append(line);
+            }
+            start = nl + 1;
+        }
+        if (cur.length() > 0) out.add(cur.toString());
+        return out;
+    }
+
     private static int findEnd(String s, int target) {
         for (int p = target; p > Math.max(0, target - 180); p--) {
             char c = s.charAt(p - 1);
-            if (c == '。' || c == '。' || c == '?' || c == '？' || c == '!' || c == '！' || c == '\n') {
+            if (c == '。' || c == '？' || c == '！' || c == '?' || c == '!' || c == '\n') {
                 return p;
             }
         }
