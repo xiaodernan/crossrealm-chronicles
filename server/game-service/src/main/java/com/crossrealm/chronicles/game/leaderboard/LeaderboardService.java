@@ -1,6 +1,7 @@
 package com.crossrealm.chronicles.game.leaderboard;
 
 import com.crossrealm.chronicles.game.GameServiceProperties;
+import com.crossrealm.chronicles.game.notify.NotifyMirrorService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -43,6 +44,8 @@ public class LeaderboardService {
     private final List<RunRecord> runs = new ArrayList<>();
     // W-Y5：可选 Redis mirror（`game-service.leaderboard.backend=redis` 才能注入；@ConditionalOnProperty）
     private final @Nullable LeaderboardRedisMirror mirror;
+    // W-Z56：可选「首领速通新王」镜像器（null = 不通知；seed 演示数据也不触发）
+    private final @Nullable NotifyMirrorService notifyMirror;
 
     // W-P1：每个 limit 一份惰性快照。writes 清空整表，reads 命中零排序成本。
     private final Map<Integer, List<RunRecord>> topCache = new ConcurrentHashMap<>();
@@ -51,14 +54,23 @@ public class LeaderboardService {
 
     /** 默认构造（无 mirror）—— 测试 & memory 模式 */
     public LeaderboardService(GameServiceProperties properties) {
-        this(properties, null);
+        this(properties, null, null);
     }
 
-    @Autowired
     public LeaderboardService(GameServiceProperties properties,
                               @Nullable LeaderboardRedisMirror mirror) {
+        this(properties, mirror, null);
+    }
+
+    /** W-Z56：全参构造器（两个可选下游各自可空；默认不镜像）；@Autowired 指向本签名，
+     *  让 NotifyMirrorService（普通 @Component、永远在）经由这里注入。 */
+    @Autowired
+    public LeaderboardService(GameServiceProperties properties,
+                              @Nullable LeaderboardRedisMirror mirror,
+                              @Nullable NotifyMirrorService notifyMirror) {
         this.properties = properties;
         this.mirror = mirror;
+        this.notifyMirror = notifyMirror;
     }
 
     @PostConstruct
@@ -78,14 +90,32 @@ public class LeaderboardService {
             return;
         }
         String now = Instant.now().toString();
-        add(new RunRecord("横冲直撞的铁匠", "void-chronarch", 6_120_000L, 5, now));
-        add(new RunRecord("误入荒野的学者", "shadow-warden", 4_830_000L, 5, now));
-        add(new RunRecord("夜游者", "player", 7_200_000L, 1, now));
-        add(new RunRecord("位面行者", "abyss-titan", 5_400_000L, 5, now));
-        add(new RunRecord("渡鸦牧师", "magic-archon", 5_700_000L, 4, now));
+        // seed 一律静默：演示数据不污染报讯台
+        add(new RunRecord("横冲直撞的铁匠", "void-chronarch", 6_120_000L, 5, now), false);
+        add(new RunRecord("误入荒野的学者", "shadow-warden", 4_830_000L, 5, now), false);
+        add(new RunRecord("夜游者", "player", 7_200_000L, 1, now), false);
+        add(new RunRecord("位面行者", "abyss-titan", 5_400_000L, 5, now), false);
+        add(new RunRecord("渡鸦牧师", "magic-archon", 5_700_000L, 4, now), false);
     }
 
+    /**
+     * 收一条通关记录并回一份新榜。
+     *
+     * <p>W-Z56：若这一条让「首领速通新王」—— 即此前已有榜首（按用时升序）、
+     * 而这一条把它挤下去——镜像一条 `world` 报讯到报讯台（`notifyMirror == null` 时静默）。
+     */
     public List<RunRecord> add(RunRecord run) {
+        return add(run, true);
+    }
+
+    List<RunRecord> add(RunRecord run, boolean notifyRankChange) {
+        RunRecord beforeTop1 = null;
+        if (notifyRankChange && notifyMirror != null) {
+            List<RunRecord> snapshot = top(1);
+            if (!snapshot.isEmpty()) {
+                beforeTop1 = snapshot.get(0);
+            }
+        }
         synchronized (runs) {
             runs.add(run);
             // 头条的每一次 add 都可能挤进任意 k 档的头部；整表失效是唯一
@@ -98,8 +128,40 @@ public class LeaderboardService {
                     // Redis 进程间消失不阻碍提交
                 }
             }
-            return top(properties.getLeaderboard().getMaxLimit());
+            List<RunRecord> after = top(properties.getLeaderboard().getMaxLimit());
+            if (notifyRankChange && notifyMirror != null && detectDethroning(run, beforeTop1)) {
+                notifyMirror.mirrorLeaderboardDethrone(run.runner(), run.bossId(), run.clearTimeMs());
+            }
+            return after;
         }
+    }
+
+    /**
+     * W-Z56 易主判定：提交后新榜首正是这一条，且换了位——
+     * 即旧榜首是另一位玩家（runner 归一化后不同）。同一玩家刷新自己的纪录不算易主。
+     */
+    private boolean detectDethroning(RunRecord run, RunRecord beforeTop1) {
+        if (beforeTop1 == null) {
+            return false; // 无旧榜首 = 从头建榜，不是易主
+        }
+        List<RunRecord> after = top(1);
+        if (after.isEmpty()) {
+            return false;
+        }
+        RunRecord afterTop1 = after.get(0);
+        if (!afterTop1.equals(run)) {
+            return false; // 新榜首不是这一条
+        }
+        String prev = normalizeRunner(beforeTop1.runner());
+        String now = normalizeRunner(run.runner());
+        return !prev.equals(now);
+    }
+
+    private static String normalizeRunner(String runner) {
+        if (runner == null) {
+            return "";
+        }
+        return runner.replaceAll("\\p{Cntrl}", "").trim().toLowerCase(java.util.Locale.ROOT);
     }
 
     /** 按用时升序（同用时按提交时间升序），取前 {@code limit} 行。 */

@@ -28,6 +28,14 @@ public class NotifyMirrorService {
             "void-chronarch", "时线执政官",
             "chaos-overlord", "混沌裂隙领主");
 
+    /** 供 leaderboard mirror 复用：id → 中文名（未知 id 返回「未知 Boss（id）」兜底） */
+    static String bossDisplayName(String bossId) {
+        if (bossId == null || bossId.isBlank()) {
+            return "未知 Boss";
+        }
+        return Optional.ofNullable(BOSS_NAMES.get(bossId)).orElseGet(() -> "未知 Boss（" + bossId + "）");
+    }
+
     private static final String TYPE_BOSS_DEFEATED = "boss_defeated";
 
     /** 赛季 id 白名单形状（ember / tide / gloom / radiant 这一族） */
@@ -77,6 +85,41 @@ public class NotifyMirrorService {
             return "无名旅人";
         }
         return stripped.length() <= 24 ? stripped : stripped.substring(0, 24);
+    }
+
+    /**
+     * 镜像一次「首领速通易主」（W-Z56）。与其余 mirror 同一套纪律：
+     * kind=world、runner 去控制字符 + 24 字、异常一律吞。
+     * 用时格式：h:mm:ss 或 m:ss（<1 小时），毫秒截断到秒。
+     */
+    public boolean mirrorLeaderboardDethrone(String runner, String bossId, long clearTimeMs) {
+        if (!enabled) {
+            return false;
+        }
+        String name = sanitizeRunner(runner);
+        String boss = bossDisplayName(bossId);
+        try {
+            client.publish(new NotifyEvent(
+                    "world",
+                    "世界事件 · 首领速通新王",
+                    name + " 刷新了 " + boss + " 的最速（" + formatClearTimeMs(clearTimeMs) + "）。"));
+            return true;
+        } catch (RuntimeException e) {
+            LOG.warn("NotifyClient threw despite fallback (cause={}), event dropped", e.getClass().getSimpleName());
+            return false;
+        }
+    }
+
+    private static String formatClearTimeMs(long ms) {
+        if (ms <= 0) {
+            return "0:00";
+        }
+        long totalSec = ms / 1000;
+        long h = totalSec / 3600;
+        long m = (totalSec % 3600) / 60;
+        long s = totalSec % 60;
+        return h > 0 ? String.format(java.util.Locale.ROOT, "%d:%02d:%02d", h, m, s)
+                     : String.format(java.util.Locale.ROOT, "%d:%02d", m, s);
     }
 
     /**

@@ -7490,3 +7490,30 @@ Phase D（系统与质量）
     「火没有灭」四个字在这里是真的字面真话，不是 marketing copy。
 
   - **后续**：W-Z56 可以在这里加「已回响数 x/17」第二行（归途残卷同源），但先别——W-Z55 这一行静默金 pill 刚刚好。
+- **2026-11-14 W-Z56「首领速通新王」——首领榜易主镜像（Boss 皇位易主，报讯台开口）** —— 提交：本次 HEAD
+
+  - **起因**：W-Z54 让报讯台学会了「榜首易主」（试炼榜按分数降序），而**首领速通榜**——玩家最在意的那块「谁最快打穿」的碑——还没入台。
+    两种榜的清算口径相反（试炼按分降、首领按用时升），同一套易主语义套不进同一个判定，
+    于是镜像器补第三个分支，比复制一份错的判定划算。
+
+  - **做法**：① `NotifyMirrorService.mirrorLeaderboardDethrone(runner, bossId, clearTimeMs)`：
+    kind=world，title「世界事件 · 首领速通新王」，body 形如 `{runner} 刷新了 {中文Boss名} 的最速（{h:mm:ss}）。`；
+    runner 沿用 trial 路的 sanitizeRunner（控制字符剥离 + 24 字），bossId → 中文名提取为
+    `static bossDisplayName(String)`（复用 W-Z50 的 `BOSS_NAMES`，五名册全覆盖，单测钉住）；
+    ② `LeaderboardService.add(RunRecord, notifyRankChange)`：插入**前**快照 `top(1)`，插入并清缓存后再读，
+    若新榜首正是这一条且旧榜首是**另一位玩家**（normalizeRunner 归一：`replaceAll(\p{Cntrl}).trim().toLowerCase(ROOT)`）→ 镜像；
+    ③ 1-arg / 2-arg 旧构造器全兼容；全参 @Autowired 指向三参；seed 演示数据一律 `add(run, false)` 静默；
+    ④ `timeMs` 格式化：<1h → m:ss；≥1h → h:mm:ss。
+
+  - **判据**：`LeaderboardNotifyDethroneTest` 5 例（seed 零镜像 / 首次提交静默 / 更快即一次且中文名+用时 /
+    更慢+本人刷新静默 / null mirror 旧口径）；`NotifyMirrorServiceTest` 14 例；
+    `mvn -f server/pom.xml verify` → BUILD SUCCESS（9 modules）。
+
+  - **风险**：① 首次重放 seed 数据不看新王——seed 走的就是静默路径，裸榜开始时没有易主事件（这是刻意的）；
+    ② runner 无稳定身份，字符串归一是「同一玩家」的最强可用近似；
+    ③ 与 trial mirror 一样，title/body 长度受控（runner ≤24、中文名 ≤16、数字 ≤9），
+    不会撑爆 notification-service 的 title ≤120 / body ≤500 硬上限；
+    ④ 镜像翻译全部走 Feign 与 fallback，永远 201。
+
+  - **后续**：① ops 端点可回显 `notifyLeaderboardDethronesReceived`（observability 三件套）；
+    ② 首领榜与试炼榜的「双榜同王」（同一玩家同时登基两块榜）值得一个合影彩蛋。

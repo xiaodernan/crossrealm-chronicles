@@ -155,6 +155,40 @@ class NotifyMirrorServiceTest {
     }
 
     @Test
+    @DisplayName("首领速通易主镜像：enabled → 发 world 报讯；用时 h:mm:ss 格式")
+    void leaderboardDethronePublishes() {
+        RecordingClient client = new RecordingClient();
+        NotifyMirrorService m = mirror(client, true);
+        assertTrue(m.mirrorLeaderboardDethrone("沉默的琴师", "shadow-warden", 5_000_000L));
+        NotifyEvent sent = client.calls.get(0);
+        assertEquals("world", sent.kind());
+        assertTrue(sent.title().contains("首领速通"), sent.title());
+        assertTrue(sent.body().contains("影界守护者"), sent.body());
+        assertTrue(sent.body().contains("1:23:20"), sent.body());
+        // 未知 bossId → 兜底
+        m.mirrorLeaderboardDethrone("沉默的琴师", "some-new-boss", 1_000L);
+        assertTrue(client.calls.get(1).body().contains("未知 Boss（some-new-boss）"), client.calls.get(1).body());
+        // 耗时 < 1h → m:ss
+        m.mirrorLeaderboardDethrone("沉默的琴师", "archmagus", 83_000L);
+        assertTrue(client.calls.get(2).body().contains("1:23"), client.calls.get(2).body());
+        // enabled=false → 零调用
+        NotifyMirrorService off = mirror(client, false);
+        assertFalse(off.mirrorLeaderboardDethrone("沉默的琴师", "void-chronarch", 10L));
+        assertEquals(3, client.calls.size());
+    }
+
+    @Test
+    @DisplayName("boss 名册中文映射：五个已知 Boss 全部落盘")
+    void bossDisplayNameCoversKnownRoster() {
+        assertEquals("影界守护者", NotifyMirrorService.bossDisplayName("shadow-warden"));
+        assertEquals("大奥术师·萨尔林", NotifyMirrorService.bossDisplayName("archmagus"));
+        assertEquals("引力化身·奇点领主", NotifyMirrorService.bossDisplayName("singularity-herald"));
+        assertEquals("时线执政官", NotifyMirrorService.bossDisplayName("void-chronarch"));
+        assertEquals("混沌裂隙领主", NotifyMirrorService.bossDisplayName("chaos-overlord"));
+        assertEquals("未知 Boss", NotifyMirrorService.bossDisplayName(null));
+    }
+
+    @Test
     @DisplayName("试炼榜易主镜像：enabled → 发 world 报讯；runner 裁剪 24；异常吞掉")
     void trialDethronePublishes() {
         RecordingClient client = new RecordingClient();
