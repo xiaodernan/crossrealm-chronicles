@@ -9,12 +9,13 @@
 |------|---------|
 | `novel/` | Long-form novel — **seven chapters + prologue + five interludes** (The Anchor Keeper · *A Letter from the Fire* · *The Keeper’s Reply* · *Lin’s Reply to the Keeper* · *The Reply of the One Who Came After* · *Before the Flame*) |
 | `GLOSSARY.md` | *Crossrealm Chronicles* Codex — machine-extracted canon (characters / locations·planes / timeline / key items·motifs / name do’s & don’ts). Machine-extracted; never canonical — when in doubt, the text rules. *(Interlude V · Before the Flame was added in the 2026-11-16 generation pass — see the end of the file.)* |
-| `GLOSSARY-en.md` | Canonical Codex EN sibling — machine-extracted from the full English rendering (all twelve chapters, same section machinery, same per-chapter sourcing). Counterparts for every chapter. |
+| `GLOSSARY-en.md` | Canonical Codex EN sibling — machine-extracted from the full English rendering (all thirteen chapters, same section machinery, same per-chapter sourcing). Counterparts for every chapter. |
 | `film/` | 142-minute film script — three-act structure + director’s notes; ending coda “Beyond the Star-Charts”; English twin: `电影剧本-跨界纪事.en.md` · companion short — `film/短片-看守的日子.md` (ZH) · `film/short-keeper-day.en.md` (EN, same structure beat-for-beat) — ending-after coda: the day before the anchor, the keeper never leaves |
 | `music/` | OST-25 track manual + `liner-notes.md` (English: `liner-notes.en.md`) track commentary (stage / memory / plane, with canon sources) + playable Web Audio previews (25 tracks hand-synthesised) · English sibling: `OST-专辑手册.en.md`. |
 | `player-guide.html` | **Player booklet / Player Guide** — bilingual full manual: install, controls, combat 101, boss compendium, world tour, journal tabs, ending & remnant-scroll, autoplay, online layer, crossmedia universe, FAQ. zh/en switch in-page. |
 | `showcase.html` | **Latest-results showcase** — the “latest” page for the project entry: 9 microservices / 25 OST / 110 echoes / 40+ achievements / MIT; zh/en toggle. |
-| `tapestry.html` | **The Chronicles Compendium** — single-page official archive: timeline (prologue → Interlude IV) / 17 mothers (emoji sigils) / 39 badges (live filter) / epilogue tablets / film-crew end-titles (verbatim). English edition: `tapestry.en.html`. |
+| `tapestry.html` | **The Chronicles Compendium** — single-page official archive: timeline (prologue → Interlude V) / 17 mothers (emoji sigils) / 39 badges (live filter) / epilogue tablets / film-crew end-titles (verbatim). English edition: `tapestry.en.html`. |
+| `tapestry-lore/` | **Tapestry-Lore · The Seventeen Mothers** — the compendium's central column, canonised as recall-ready corpus (one `.md` per Mother: bilingual lamp metaphor + epitaph + anchor id) — what the Lore Oracle cites. |
 | `posters/` | 4 ultra-HD key posters (4K-class concept art) |
 
 ## 🎬 Posters
