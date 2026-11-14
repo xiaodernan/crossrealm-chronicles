@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="跨界纪事年鉴 · THE CHRONICLES COMPENDIUM —— 《跨界纪事》跨媒体宇宙的官方档案：年表、母题、回声名册、终章与制作人员手记。火不会灭。故事也不会。">
+<title>跨界纪事年鉴 · The Chronicles Compendium</title>
+<style>
+  :root {
+    --ink: #ece4d1;
+    --dim: #a89a80;
+    --gold: #ffd98a;
+    --gold-dim: #c9a962;
+    --ember: #ffb85a;
+    --bg: #0a0812;
+    --bg-raise: #14101f;
+    --line: rgba(255, 217, 138, 0.22);
+    --serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', Georgia, serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 115%, rgba(255, 183, 90, 0.10), transparent 62%),
+      radial-gradient(ellipse 55% 45% at 50% -20%, rgba(154, 118, 255, 0.08), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--serif);
+    min-height: 100vh;
+    transition: background 0.6s ease;
+  }
+  ::selection { background: rgba(201, 169, 98, 0.85); color: #1a1526; }
+
+  /* === 顶部：锚与火 ======================================================== */
+  header {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    padding: 56px 24px 28px;
+    border-bottom: 1px solid var(--line);
+    position: relative; overflow: hidden;
+  }
+  header::after {
+    content: ''; position: absolute; left: 10%; right: 10%; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: 0.65;
+  }
+  .sigil-flame {
+    width: 96px; height: 96px; position: relative; animation: breathe 4.5s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { transform: scale(0.96); filter: drop-shadow(0 0 18px rgba(255, 217, 138, 0.55)); }
+    50% { transform: scale(1.04); filter: drop-shadow(0 0 34px rgba(255, 217, 138, 0.85)); }
+  }
+  .kicker { color: var(--gold-dim); letter-spacing: 0.4em; font-size: 0.7rem; text-transform: uppercase; }
+  h1 {
+    font-size: clamp(1.6rem, 5vw, 2.6rem); font-weight: 400; letter-spacing: 0.18em;
+    color: var(--gold); text-shadow: 0 0 40px rgba(255, 217, 138, 0.35); text-align: center;
+  }
+  .tagline { color: var(--dim); font-size: 0.86rem; letter-spacing: 0.2em; }
+
+  /* === 页签导航 ============================================================ */
+  nav.tabs {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 4px;
+    padding: 18px 16px; position: sticky; top: 0; z-index: 20;
+    background: rgba(10, 8, 18, 0.82); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .tab-btn {
+    font-family: var(--serif); cursor: pointer; font-size: 0.82rem; letter-spacing: 0.12em;
+    color: var(--dim); background: transparent; border: 1px solid transparent;
+    border-radius: 4px 4px 0 0; padding: 9px 18px 11px; transition: color 0.25s, border-color 0.25s, background 0.25s;
+  }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn[aria-selected="true"] {
+    color: var(--gold); border-bottom: 2px solid var(--gold); background: linear-gradient(180deg, transparent, rgba(255, 217, 138, 0.06));
+  }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 34px 22px 64px; }
+  .tab-panel { display: none; animation: fadeUp 0.45s ease-out both; }
+  .tab-panel.is-active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  h2.section-title {
+    font-size: 1.15rem; letter-spacing: 0.3em; color: var(--gold); font-weight: 400;
+    border-left: 3px solid var(--gold-dim); padding-left: 12px; margin: 8px 0 20px;
+  }
+  .hint { color: var(--dim); font-size: 0.76rem; letter-spacing: 0.08em; margin-bottom: 14px; }
+
+  /* === 年表 ================================================================ */
+  .timeline { list-style: none; border-left: 1px solid var(--line); margin-left: 14px; }
+  .tl-item { position: relative; padding: 0 0 22px 30px; }
+  .tl-item::before {
+    content: ''; position: absolute; left: -6.5px; top: 7px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--bg); border: 1px solid var(--gold-dim);
+  }
+  .tl-item.major::before { background: var(--gold); box-shadow: 0 0 12px rgba(255, 217, 138, 0.7); }
+  .tl-time { color: var(--gold-dim); font-size: 0.7rem; letter-spacing: 0.2em; }
+  .tl-title { font-size: 1.05rem; margin: 2px 0 4px; color: var(--ink); }
+  .tl-item.major .tl-title { color: var(--gold); }
+  .tl-body { color: var(--dim); font-size: 0.86rem; line-height: 1.8; max-width: 720px; }
+  .tl-ost { color: var(--gold-dim); font-size: 0.72rem; letter-spacing: 0.12em; margin-top: 5px; }
+
+  /* === 母题格 ============================================================== */
+  .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(228px, 1fr)); gap: 12px; }
+  .theme-card {
+    border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 14px 14px 12px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.03), transparent 60%), var(--bg-raise);
+    display: flex; flex-direction: column; gap: 6px; min-height: 118px;
+  }
+  .theme-card .theme-glyph { font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(255, 217, 138, 0.4)); }
+  .theme-card .theme-name { font-size: 0.92rem; color: var(--ink); letter-spacing: 0.06em; }
+  .theme-card .theme-id { font-size: 0.66rem; color: #6f665f; letter-spacing: 0.08em; font-family: ui-monospace, monospace; }
+  .theme-card .theme-mood { font-size: 0.74rem; color: var(--dim); line-height: 1.7; }
+  .theme-card.special { border-color: rgba(255, 217, 138, 0.35); background: linear-gradient(160deg, rgba(255, 217, 138, 0.06), transparent 60%), var(--bg-raise); }
+  .theme-card.special .theme-name { color: var(--gold); }
+
+  /* === 回声名册 ============================================================ */
+  .search-wrap { margin-bottom: 16px; }
+  .search-wrap input {
+    width: 100%; max-width: 420px; font-family: var(--serif); font-size: 0.86rem; letter-spacing: 0.05em;
+    color: var(--ink); background: var(--bg-raise); border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 14px; outline: none;
+  }
+  .search-wrap input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255, 217, 138, 0.25); }
+  .echo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 8px; }
+  .echo-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(255, 255, 255, 0.02); font-size: 0.8rem;
+  }
+  .echo-item .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold-dim); flex: 0 0 auto; }
+  .echo-item.six .dot { background: var(--gold); box-shadow: 0 0 8px rgba(255, 217, 138, 0.8); }
+  .echo-item small { color: #6f665f; font-size: 0.66rem; margin-left: auto; font-family: ui-monospace, monospace; }
+  .echo-empty { color: var(--dim); padding: 20px; text-align: center; font-size: 0.85rem; display: none; }
+
+  /* === 终章 =============================================================== */
+  .finale-frame {
+    border: 1px solid var(--line); border-radius: 14px;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 130%, rgba(255, 183, 90, 0.28), transparent 65%),
+      radial-gradient(ellipse 60% 50% at 50% -10%, rgba(154, 118, 255, 0.15), transparent 55%),
+      #070510;
+    padding: 52px 32px 40px; text-align: center; position: relative; overflow: hidden;
+  }
+  .finale-title { font-size: clamp(1.8rem, 6vw, 2.6rem); color: var(--gold); letter-spacing: 0.4em; padding-left: 0.4em; font-weight: 300; }
+  .finale-sub { color: var(--ink); opacity: 0.82; margin-top: 14px; font-size: 0.9rem; line-height: 1.9; }
+  .ept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 34px auto 0; max-width: 980px; }
+  .ept { border: 1px solid rgba(255, 217, 138, 0.16); border-radius: 8px; padding: 10px 8px; font-size: 0.72rem; color: var(--dim); line-height: 1.7; }
+  .ept b { display: block; color: var(--gold-dim); font-weight: 400; letter-spacing: 0.08em; margin-bottom: 2px; font-size: 0.72rem; }
+
+  /* === 制作人员 ============================================================ */
+  .cast { columns: 2 320px; column-gap: 40px; }
+  .cast-row { break-inside: avoid; margin-bottom: 14px; border-bottom: 1px dotted rgba(255, 255, 255, 0.09); padding-bottom: 10px; }
+  .cast-role { color: var(--gold-dim); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; }
+  .cast-name { font-size: 0.94rem; color: var(--ink); margin-top: 1px; }
+  .cast-note { font-size: 0.74rem; color: var(--dim); line-height: 1.75; margin-top: 2px; }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 26px 20px 34px; text-align: center;
+    color: #6f665f; font-size: 0.72rem; letter-spacing: 0.12em; line-height: 2;
+  }
+  footer b { color: var(--gold-dim); font-weight: 400; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sigil-flame, .tab-panel { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="sigil-flame" viewBox="0 0 100 100" role="img" aria-label="锚与火徽记">
+    <circle cx="50" cy="18" r="8.5" fill="none" stroke="#ffd98a" stroke-width="3" opacity="0.95"/>
+    <path d="M50 26 L50 44" stroke="#ffd98a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M22 52 H78" stroke="#ffd98a" stroke-width="3.5" stroke-linecap="round" opacity="0.9"/>
+    <path d="M50 44 C50 62, 34 66, 30 82 C42 74, 46 74, 50 84 C54 74, 58 74, 70 82 C66 66, 50 62, 50 44 Z"
+          fill="url(#emberGrad)" stroke="#ffd98a" stroke-width="2.4" stroke-linejoin="round"/>
+    <defs>
+      <radialGradient id="emberGrad" cx="0.5" cy="0.72" r="0.62">
+        <stop offset="0" stop-color="#ffd98a"/>
+        <stop offset="0.55" stop-color="#ffb85a"/>
+        <stop offset="1" stop-color="#7a3a12"/>
+      </radialGradient>
+    </defs>
+  </svg>
+  <div class="kicker">THE CHRONICLES COMPENDIUM</div>
+  <h1>跨界纪事年鉴</h1>
+  <p class="tagline">游戏 · 小说 · 电影 · OST · 海报 —— 同一团火的五种字体</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="年鉴页签">
+  <button class="tab-btn" role="tab" aria-selected="true" data-tab="timeline">年 · 表</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="mothers">母 · 题</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="echoes">回 · 声</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="finale">终 · 章</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="cast">制作手记</button>
+</nav>
+
+<main>
+
+  <!-- ============ 年表 ============ -->
+  <section class="tab-panel is-active" id="panel-timeline" role="tabpanel">
+    <h2 class="section-title">年 · 表</h2>
+    <p class="hint">《跨界纪事》七章 + 序言 + 番外，按故事发生的次序排列。括号里是对应的游戏章节与 OST 落点。</p>
+    <ol class="timeline">
+      <li class="tl-item">
+        <div class="tl-time">序幕</div>
+        <div class="tl-title">序言 · 一百零九道回声</div>
+        <div class="tl-body">世界之锚第一次脉动。所有位面的混乱并非事故——它是一次还没人读完的句子。锚点收件箱形状的槽位一直空着，而空着本身就是邀请。</div>
+        <div class="tl-ost">OST 01《Anchor Pulse · 锚脉》</div>
+      </li>
+      <li class="tl-item major">
+        <div class="tl-time">第一章</div>
+        <div class="tl-title">Chapter 1 · 交汇枢纽</div>
+        <div class="tl-body">三条古径没入三块天空。灰白森林里精灵斥候的营火、米勒荒原上不拆的信、魔法遗境里悬浮的蜡烛——旅人第一次按下 F，也第一次听见自己名字被风记住。</div>
+        <div class="tl-ost">OST 02《Three Roads · 三路》 · 06《Campfire Ember · 营火余温》</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">第二章</div>
+        <div class="tl-title">Chapter 2 · 破碎时线与混沌边境</div>
+        <div class="tl-body">广播里循环播放的一九八三——没有人记得那年发生了什么，但所有人都在等它重演。逆相孢子让影子先动，钟塔在十一点零六分敲响。</div>
+        <div class="tl-ost">OST 11《Miller's Hourglass · 米勒沙漏》 · 13《1983 Loop · 一九八三循环》 · 15《11:06 Bell》</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">第三章</div>
+        <div class="tl-title">Chapter 3 · 营火记忆</div>
+        <div class="tl-body">营火不需要加柴——因为它烧的是过去的形状。旅人在火边第一次听见「留灯」与「熄灯」两种声音，而两种声音里都有一个自己。</div>
+        <div class="tl-ost">OST 06 · OST 23《Full Resonance · 全频共鸣》</div>
+      </li>
+      <li class="tl-item major">
+        <div class="tl-time">第四章</div>
+        <div class="tl-title">Chapter 4 · 看守</div>
+        <div class="tl-body">看守不说话。不是不会——是把自己的沉默分出一点点给每一位过路的旅人，因为他深知唯一能让人真正放下剑的，是不被打扰地听见自己。</div>
+        <div class="tl-ost">OST 04《Stone Ring Chant · 石环吟诵》 · 16《Spiral Count · 螺旋计数》</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">第五章</div>
+        <div class="tl-title">Chapter 5 · 寄信</div>
+        <div class="tl-body">终局之后，林渡开始写信。第一封给月影最深处，第二封给还没诞生的旅者，第三封给自己——写着写着就哭了。</div>
+        <div class="tl-ost">OST 10《Murphy's Stay · 墨菲留书》 · 24《Infinity Walker · 无尽行者》</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">第六章</div>
+        <div class="tl-title">第六章 · 回响</div>
+        <div class="tl-body">回响是什么？是山告诉你那句话是什么声音。荒野是更宽的山——它告诉旅人，你愿意看见的自己是什么样。</div>
+        <div class="tl-ost">OST 23《Full Resonance》 · OST 24《Infinity Walker》</div>
+      </li>
+      <li class="tl-item major">
+        <div class="tl-time">终章</div>
+        <div class="tl-title">第七章 · 余烬</div>
+        <div class="tl-body">公告栏多出一张旧纸条：此驿站不收信，只收路过的人。星图边缘一道银丝裂痕悬在旧日低语与星港商路之间——炉火给了下一盏灯一个方向。</div>
+        <div class="tl-ost">OST 25《Ember Low Hum · 锚火低鸣》</div>
+      </li>
+      <li class="tl-item">
+        <div class="tl-time">番外</div>
+        <div class="tl-title">番外 · 炉火给你的回信</div>
+        <div class="tl-body">炉火执笔，给按过 E 的人写了五封短信：你为什么走到这里、火为什么不灭、你已经是那个候选人了、以及——关于下一次。</div>
+        <div class="tl-ost">OST 25《Ember Low Hum · 锚火低鸣》</div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ============ 母题 ============ -->
+  <section class="tab-panel" id="panel-mothers" role="tabpanel">
+    <h2 class="section-title">母 · 题</h2>
+    <p class="hint">十七个回声母题 + 一个例外（跨界）——每一个母题都是一盏灯，对应游戏里的一枚 ≥6 枚残响徽章与谢幕碑的一行残章。点击页签可回到「回声」按名筛选。</p>
+    <div class="theme-grid" id="theme-grid"></div>
+  </section>
+
+  <!-- ============ 回声 ============ -->
+  <section class="tab-panel" id="panel-echoes" role="tabpanel">
+    <h2 class="section-title">回 · 声</h2>
+    <p class="hint">母题徽章名册（✦ = 毕业徽章 / ◦ = 常规）。输入关键字即时筛选，中英文都认。</p>
+    <div class="search-wrap"><input id="echo-search" type="search" placeholder="搜索徽章：魔法学院 / 炉主 / 边境……" aria-label="搜索母题徽章"></div>
+    <div class="echo-grid" id="echo-grid"></div>
+    <div class="echo-empty" id="echo-empty">没有匹配的徽章——炉火记得的，比你想的模糊</div>
+  </section>
+
+  <!-- ============ 终章 ============ -->
+  <section class="tab-panel" id="panel-finale" role="tabpanel">
+    <div class="finale-frame">
+      <div class="kicker">FINALE</div>
+      <h3 class="finale-title">锚火仍燃</h3>
+      <p class="finale-sub">火不会因为终局而熄灭，<br>故事只是换了火光的频率。<br><br>—— 这是留给走完这一程的你的一句话。你不需要再往前走了，<br>你只需要坐下来，替下一位按 E 的旅人留好这一盏灯。</p>
+      <div class="ept-grid" id="ept-grid"></div>
+    </div>
+  </section>
+
+  <!-- ============ 制作人员 ============ -->
+  <section class="tab-panel" id="panel-cast" role="tabpanel">
+    <h2 class="section-title">制作手记</h2>
+    <p class="hint">片尾字幕原样照录——这些名字里每一个都在篝火里待过。</p>
+    <div class="cast" id="cast-grid"></div>
+  </section>
+
+</main>
+
+<footer>
+  <b>跨界纪事 · THE CHRONICLES COMPENDIUM</b><br>
+  游戏《Crossrealm Chronicles》× 长篇《跨界纪事》七章 × 电影剧本《跨界纪事》× 原声音乐集 OST-25<br>
+  『火不会灭。故事也不会。』<br>
+  致敬母题 · 借氛围 · 非官方授权 · 炉火照见每一位旅人
+</footer>
+
+<script>
+'use strict';
+
+/* ============ 母题数据（十七盏灯 + 跨界例外） ============ */
+const MOTHERS = [
+  ['魔法学院', 'wizard', '位面的第一间教室——蜡烛永远飘着，迟到永远是第一次。', 'candle'],
+  ['星际穿越', 'space', '不执着于到达，执着于「穿越」本身这件事。', 'rocket'],
+  ['逆相界', 'upside', '影子先动的地方，心跳反而慢了下来。', 'spores'],
+  ['边境往事', 'western', '黄昏总有一位戴黑纱的妇人走进来，点两杯威士忌。', 'star'],
+  ['幽冥帮派', 'gangster', '帮派的规矩比位面的物理法则更久。', 'diamond'],
+  ['深空纪元', 'deepspace', '旧时代的回声在深空里以光速传播。', 'sparkle'],
+  ['赛博霓虹', 'cyber', '霓虹灯照不亮井底，却照得亮井盖下面的眼睛。', 'chip'],
+  ['武士残响', 'samurai', '鸟居残门之后，决斗还没收场。', 'sword'],
+  ['旧日低语', 'cosmic', '不说出的话，反而能一直传下去。', 'spiral'],
+  ['星港商路', 'starport', '每一条航线背后，都有人在数自己的信用。', 'port'],
+  ['薄暮回响', 'gloom', '太阳落山之后的世界，才是真世界。', 'moon'],
+  ['辉煌残响', 'radiant', '金色不是颜色，是重量。', 'sun'],
+  ['断口残响', 'voidmaw', '裂开的不仅是地面，还有说出口的话。', 'mouth'],
+  ['深颚咸响', 'abysssalt', '海底压得住声音，却压不住方向。', 'salt'],
+  ['中洲', 'middle-earth', '长剑、harp、mithril——所有古老的姓氏都活在这里。', 'harp'],
+  ['返乡', 'homecoming', '归途本身，就是一条回声走廊。', 'home'],
+  ['跨界', 'crossover', '例外中的例外：不自成一系，却照见所有系。', 'link'],
+];
+
+/* ============ 徽章数据（39 枚） ============ */
+const ECHOES = [
+  ['中洲六响', 'middle_earth_six', true], ['帮派六响', 'gangster_six', true], ['深颚六响', 'abysssalt_six', true],
+  ['边境六星', 'western_six', true], ['深空六响', 'scifi_six', true], ['薄暮六响', 'gloom_six', true],
+  ['辉煌六耀', 'radiant_six', true], ['半频共鸣', 'half', false], ['全频行者', 'full', false],
+  ['学院毕业人', 'wizard', false], ['方程闭合', 'space', false], ['逆相幸存者', 'upside', false],
+  ['边境枪手', 'western', false], ['幽冥话事人', 'gangster', false], ['深空领航员', 'scifi', false],
+  ['三巨头同频', 'triad', false], ['霓虹行者', 'cyber', false], ['残响剑士', 'samurai', false],
+  ['旧日低语者', 'cosmic', false], ['星港老手', 'starport', false], ['星港六路', 'starport_six', true],
+  ['四系同频', 'wave4', false], ['九重星潮', 'wave5', false], ['薄暮同频', 'gloom', false],
+  ['辉煌齐鸣', 'radiant', false], ['断口耳语', 'voidmaw', false], ['断口深语', 'voidmaw_six', true],
+  ['深颚咸鸣', 'abysssalt', false], ['原声齐鸣', 'original', false], ['归途回响', 'homecoming', false],
+  ['万籁归一', 'homecoming_master', false], ['墙外之约', 'crossover', false], ['学院六响', 'wizard_six', true],
+  ['恒星六响', 'space_six', true], ['武士六响', 'samurai_six', true], ['霓虹六响', 'cyber_six', true],
+  ['逆相六响', 'upside_six', true], ['旧日六响', 'cosmic_six', true], ['炉主', 'keeper', false],
+];
+
+/* ============ 制作人员（片尾字幕照录） ============ */
+const CAST = [
+  ['主演 · 位面行者', '林渡', '每一个按过 E 的旅人'],
+  ['锚火看守', '余温', '沉默是他唯一的台词，也是最长的一句'],
+  ['精灵斥候', '灰林', '她只在黄昏出现，她的箭从不落空'],
+  ['米勒', '沙漏疯子', '把时间装进口袋的人，从不知道它何时漏完'],
+  ['大奥术师', '萨尔林', '学院毕业人的镜子——他也是从毕业走上来的'],
+  ['引力化身', '奇点领主', '引力本身，在等一个比它还重的东西'],
+  ['时线执政官', 'void-chronarch', '时线是条街，他是这条街的店主'],
+  ['混沌裂隙领主', 'chaos-overlord', '裂隙本身，从不认为自己是裂隙'],
+  ['星轨顾问', 'F7 的那一个', '隔着位面听见的回响——它愿意承认自己是回响'],
+  ['炉主', '每一位终局的旅人', '不是加冕，是接力'],
+  ['服装 / 概念', '金色 ≠ 颜色，是重量', '凡是亮的地方，都是有人在那儿发过光'],
+  ['摄影', '灰 · Deakins 雾光', '雾不是用来藏的，是用来给光让路的'],
+  ['作曲', '跨界纪事原声音乐集（OST-25）', '锚脉 · 营火余温 · 全频共鸣 · 锚火低鸣'],
+  ['编剧 · 长篇', '《跨界纪事》七章 + 序言 + 番外', '火不会灭，故事也不会'],
+  ['剪辑', '于通关之后立刻停机', '最难剪的是一眨眼的炉火'],
+  ['配音指导', '沉默比台词难一个量级', '看守的台词只有一句——而那句从不出口'],
+];
+
+/* ============ 终章谢幕碑（17 位 + 跨界） ============ */
+const EPITAPHS = [
+  ['魔法学院', 'candles never die in the final bell'],
+  ['星际穿越', 'the line you crossed crosses back'],
+  ['逆相界', 'the shadow you followed, followed you home'],
+  ['边境往事', 'both cups of whiskey were yours'],
+  ['幽冥帮派', 'the rules you kept kept you'],
+  ['深空纪元', 'the oldest light still knows your name'],
+  ['赛博霓虹', 'the neon hums your frequency now'],
+  ['武士残响', 'the duel ended; the gate never did'],
+  ['旧日低语', 'the unsaid outlived the said'],
+  ['星港商路', 'every manifest lists one more you'],
+  ['薄暮回响', 'the sunset learned your silhouette'],
+  ['辉煌残响', 'glory weighed itself against you'],
+  ['断口残响', 'the crack grew a voice of its own'],
+  ['深颚咸响', 'the deep returned your echo, salted'],
+  ['中洲', 'every old name answered'],
+  ['返乡', 'the road home was the long way'],
+  ['跨界', 'the wall you never hit, never was'],
+];
+
+const GLYPHS = { candle: '🕯️', rocket: '🚀', spores: '🍄', star: '⭐', diamond: '💠', sparkle: '✨', chip: '🔌', sword: '🗡️', spiral: '🌀', port: '⚓', moon: '🌙', sun: '☀️', mouth: '🕳️', salt: '🧂', harp: '🪕', home: '🏡', link: '🔗' };
+
+/* ============ 渲染 ============ */
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+const grid = $('#theme-grid');
+for (const [name, id, mood, glyph] of MOTHERS) {
+  const el = document.createElement('div');
+  el.className = 'theme-card' + (id === 'crossover' ? ' special' : '');
+  el.innerHTML = `<div class="theme-glyph" aria-hidden="true">${GLYPHS[glyph] ?? '🕯️'}</div>
+    <div class="theme-name">${name}</div>
+    <div class="theme-id">franchise · ${id}</div>
+    <div class="theme-mood">${mood}</div>`;
+  grid.appendChild(el);
+}
+
+const echoGrid = $('#echo-grid');
+const empty = $('#echo-empty');
+const echoItems = ECHOES.map(([title, id, six]) => {
+  const el = document.createElement('div');
+  el.className = 'echo-item' + (six ? ' six' : '');
+  el.innerHTML = `<span class="dot"></span><span>${title}</span><small>${six ? '✦ VI' : '◦'} ${id}</small>`;
+  el.dataset.search = (title + ' ' + id).toLowerCase();
+  echoGrid.appendChild(el);
+  return el;
+});
+$('#echo-search').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  let visible = 0;
+  for (const el of echoItems) {
+    const show = !q || el.dataset.search.includes(q);
+    el.style.display = show ? '' : 'none';
+    if (show) visible += 1;
+  }
+  empty.style.display = visible === 0 ? 'block' : 'none';
+});
+
+const eptGrid = $('#ept-grid');
+for (const [theme, line] of EPITAPHS) {
+  const el = document.createElement('div');
+  el.className = 'ept';
+  el.innerHTML = `<b>${theme}</b>${line}`;
+  eptGrid.appendChild(el);
+}
+
+const castGrid = $('#cast-grid');
+for (const [role, name, note] of CAST) {
+  const el = document.createElement('div');
+  el.className = 'cast-row';
+  el.innerHTML = `<div class="cast-role">${role}</div><div class="cast-name">${name}</div><div class="cast-note">${note}</div>`;
+  castGrid.appendChild(el);
+}
+
+/* ============ 页签切换（可键盘） ============ */
+const tabBtns = $$('.tab-btn');
+const panels = $$('.tab-panel');
+tabBtns.forEach((btn, i) => {
+  btn.addEventListener('click', () => activate(btn));
+  btn.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const delta = e.key === 'ArrowRight' ? 1 : -1;
+    const next = tabBtns[(i + delta + tabBtns.length) % tabBtns.length];
+    next.focus();
+    activate(next);
+  });
+});
+function activate(btn) {
+  const id = btn.dataset.tab;
+  for (const b of tabBtns) b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+  for (const p of panels) p.classList.toggle('is-active', p.id === 'panel-' + id);
+}
+</script>
+</body>
+</html>
