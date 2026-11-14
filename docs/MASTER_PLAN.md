@@ -7934,3 +7934,22 @@ Phase D（系统与质量）
     多实例/跨 JVM 镜像恢复 smoke §4u/4t 仍以 CI 的 redis:7-alpine throwaway 为准。
     本机的平衡测试基线 = 单 JVM（整表换实例 O(1)、heap 结构不变）。长期：压测 Sink 进 CI（新机器上）/
     多实例 Redis 压测可交给 `verify-redis-*` 那组现有脚本（server CI 已有）。
+- **2026-11-14 W-Z79b「压测脚本上线」——stress-verify.ps1 把压力测试变成一键门禁** —— 提交：本次 HEAD 批次
+
+  - **起因**：用户点名“模拟大量用户/高并发压测，看系统会不会崩溃”。W-Z79 已修复写入路径 AB-BA 死锁；
+    但 W-Z79 压测只跑在开发机本地手打一步。需要把同等压测装进仓库，能随时随地跑（不含CI门禁，先进入可选环境）。
+
+  - **做法**：`server/scripts/stress-verify.ps1`——和 `smoke.ps1` / `verify-redis-*` 同族：
+    ① 先测 port 空闲（默认 `28081`，参数化 `-Port`）；② jar 缺了就 `mvn -o -pl game-service -am package -DskipTests`，
+    否则直接用；③ `EUREKA_CLIENT_ENABLED=false` / `SPRING_CLOUD_CONFIG_ENABLED=false` 隔离启动 daemon，
+    绝不连入任何相邻项目的 Eureka；④ 等 `/api/version` 拉到 200；⑤ 调 `scripts/stress-load.mjs`（mixed 场景，
+    `--concurrency 60 --duration 20`，绝对依赖 `node` 通路）；⑥ 断言：任意 5xx → RED；
+    `errRate > 0.02` → RED；`rps < MinRps=300` → RED；否则 GREEN。
+    全局只收自己的 PID，不 `Stop-Process java`（避免杀掉开发机上其它 Java 项目）。
+
+  - **实战**：`Port=28090 Concurrency=60 DurationSec=15` → `issued=10355 ok=10355 errRate=0% p50=78 p95=147 p99=292 max=773` GREEN（本机同时有 docker 常驻项目干扰，吞吐较主机干净时低，但仍然远超 MinRps=300 门槛；服务器/日志完整、镜像重启两次后稳定通过）。
+
+  - **判据**：link-check 61 files 全绿；脚本不依赖 CI 和外部 Redis/Config —— 可选环境下任何机器均可跑；
+    不改任何既有 CI 行为（server CI 仍以冒烟 smoke.ps1 为权威装配检查）。
+
+  - **既知限制**：单机压测≠跨多实例深度压测；Redis 背板压测仍以 server CI 中 `verify-redis-*` 一族脚本为准（W-Z23 起的七条实证脚本现成）。
