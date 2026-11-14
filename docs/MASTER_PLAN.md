@@ -7416,3 +7416,28 @@ Phase D（系统与质量）
   - **后续**：① FAB 金点可以在 4.5s 内脉动一次（有且仅有一次入场闪动）；② 归途残卷在通关那刻可让金点「亮一下熄三秒」致意；
     ③ /api/notify/ops 可以被 `/api/ops/health` 复合视图收纳（W-Z13 家族）；
     ④ 第八章/番外第二封信留给「炉主接力」的完整闭环（在场微光在线层的小说化）。
+- **2026-11-14 W-Z53「换季也入台」——season-service 广播 → game-service SeasonBroadcastListener → 报讯台** —— 提交：本次 HEAD
+
+  - **起因**：W-Z50 让报讯台有了第一条真实事件流（boss_defeated 遥测），
+    而「赛季更替」——线上世界的另一种大事——至今只在 Redis pub/sub 里走到 cache invalidate，
+    玩家眼里的「今天灰烬过去了、潮汐来了」，报讯台没有。
+
+  - **做法**：① `NotifyMirrorService.mirrorSeasonAdvance(seasonId)`：白名单 `^[a-z][a-z0-9-]{0,19}$`
+    （控制字符剥离 + 小写归一，非法 → unknown），kind=season、title「世界事件 · 赛季更替」，
+    body 带 sanitized id；enabled 开关与 boss_defeated 同一条（`game-service.notify-mirror-enabled`）；
+    ② `SeasonBroadcastListener` 增设 `@Autowired(required=false) setNotifyMirror()`（与 setConnectionFactory 同一套
+    可选依赖口径——没有 mirror bean 时上下文照常启动）；`season:advance` 分支在 cache invalidate 之后调 mirror，
+    全链路异常吞掉（与 telemetry 入口同一「事件不是玩家选项、是运维旋钮、绝不阻塞」纪律）。
+
+  - **判据**：`NotifyMirrorServiceTest` 10 例（新增：enabled 发 season / 非法 id→unknown / 关关关闭零调用+异常吞掉）；
+    `SeasonBroadcastListenerTest` 9 例（含「换季广播也会镜像一条 season 报讯」「不注入 mirror 时照常工作」）；
+    `mvn -f server/pom.xml verify` → BUILD SUCCESS（9 modules）。
+
+  - **风险**：① 镜像仅在 `spring.cache.type=redis` 时存在（共性同 presence 的 W-M5 口径），
+    内存模式下不镜像——这是刻意的最小惊讶；② season-service 若没人推换季广播，
+    报讯台照旧空——入口是季度运营事故而不是订阅方，发布责任在 season-service；
+    ③ 赛季 id 白名单接受 `[a-z0-9-]` 是宽松的（未知 id 发「未知 Boss（id）」风格的兜底文案？不——
+    换季用「unknown」——比编造一个「Tide Tide 周」假名称好得多）。
+
+  - **后续**：① trial 榜 Top-1 易主的广播可以走同一镜像器（season:complete 事件族）；
+    ② ops/health 可以回显「最近一次换季镜像成功/降级」（observability 三件套）。

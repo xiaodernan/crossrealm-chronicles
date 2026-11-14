@@ -30,6 +30,10 @@ public class NotifyMirrorService {
 
     private static final String TYPE_BOSS_DEFEATED = "boss_defeated";
 
+    /** 赛季 id 白名单形状（ember / tide / gloom / radiant 这一族） */
+    private static final java.util.regex.Pattern SEASON_ID_RE =
+            java.util.regex.Pattern.compile("^[a-z][a-z0-9-]{0,19}$");
+
     private static final Logger LOG = LoggerFactory.getLogger(NotifyMirrorService.class);
 
     private final NotifyClient client;
@@ -39,6 +43,36 @@ public class NotifyMirrorService {
                                @Value("${game-service.notify-mirror-enabled:true}") boolean enabled) {
         this.client = client;
         this.enabled = enabled;
+    }
+
+    /**
+     * 镜像一条换季广播（W-Z53）。与 boss_defeated 同一套纪律：仅在 enabled 时发，异常一律吞掉。
+     *
+     * @param seasonId season-service 广播体里的 {@code id}（如 ember / tide / gloom / radiant）
+     */
+    public boolean mirrorSeasonAdvance(String seasonId) {
+        if (!enabled) {
+            return false;
+        }
+        String id = sanitizeSeasonId(seasonId);
+        try {
+            client.publish(new NotifyEvent(
+                    "season",
+                    "世界事件 · 赛季更替",
+                    "新的赛季词缀已生效（" + id + "）。"));
+            return true;
+        } catch (RuntimeException e) {
+            LOG.warn("NotifyClient threw despite fallback (cause={}), event dropped", e.getClass().getSimpleName());
+            return false;
+        }
+    }
+
+    private static String sanitizeSeasonId(String id) {
+        if (id == null) {
+            return "unknown";
+        }
+        String stripped = id.replaceAll("\\p{Cntrl}", "").trim().toLowerCase(java.util.Locale.ROOT);
+        return SEASON_ID_RE.matcher(stripped).matches() ? stripped : "unknown";
     }
 
     /**

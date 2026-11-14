@@ -125,4 +125,45 @@ class NotifyMirrorServiceTest {
         assertFalse(ack.stored());
         assertFalse(ack.broadcast());
     }
+
+    @Test
+    @DisplayName("换季镜像：enabled → 发 season 频道报讯，body 带赛季 id")
+    void seasonAdvancePublishes() {
+        RecordingClient client = new RecordingClient();
+        NotifyMirrorService m = mirror(client, true);
+        assertTrue(m.mirrorSeasonAdvance("tide"));
+        assertEquals(1, client.calls.size());
+        NotifyEvent sent = client.calls.get(0);
+        assertEquals("season", sent.kind());
+        assertTrue(sent.title().contains("赛季更替"), sent.title());
+        assertTrue(sent.body().contains("tide"), sent.body());
+    }
+
+    @Test
+    @DisplayName("换季镜像：非法 id → unknown，绝不带怪字符进 Feign")
+    void seasonAdvanceSanitizes() {
+        RecordingClient client = new RecordingClient();
+        NotifyMirrorService m = mirror(client, true);
+        m.mirrorSeasonAdvance("Tide Advance!!");   // 空格 + 叹号 → 不命中白名单 → unknown
+        m.mirrorSeasonAdvance(null);               // 缺 id → unknown
+        m.mirrorSeasonAdvance("EMber");            // 大小写归一
+        m.mirrorSeasonAdvance("tide\u0001");       // 控制字符剥离后仍合法
+        assertTrue(client.calls.get(0).body().contains("unknown"), client.calls.get(0).body());
+        assertTrue(client.calls.get(1).body().contains("unknown"), client.calls.get(1).body());
+        assertTrue(client.calls.get(2).body().contains("ember"), client.calls.get(2).body());
+        assertTrue(client.calls.get(3).body().contains("tide"), client.calls.get(3).body());
+    }
+
+    @Test
+    @DisplayName("换季镜像：开关关闭 → 零调用；客户端抛异常 → 吞掉")
+    void seasonAdvanceDisabledAndSwallowed() {
+        RecordingClient client = new RecordingClient();
+        NotifyMirrorService disabled = mirror(client, false);
+        assertFalse(disabled.mirrorSeasonAdvance("tide"));
+        assertTrue(client.calls.isEmpty());
+
+        client.toThrow = new RuntimeException("feign blew up");
+        NotifyMirrorService boom = mirror(client, true);
+        assertFalse(boom.mirrorSeasonAdvance("tide"));
+    }
 }

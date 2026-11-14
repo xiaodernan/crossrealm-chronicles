@@ -14,6 +14,8 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
+import com.crossrealm.chronicles.game.notify.NotifyMirrorService;
+
 /**
  * W-M5：season-service 经 Redis Pub/Sub 广播的「换季」事件监听器。
  *
@@ -40,6 +42,9 @@ public class SeasonBroadcastListener {
     private final AtomicLong received = new AtomicLong();
     private volatile RedisMessageListenerContainer container;
 
+    @Nullable
+    private volatile NotifyMirrorService notifyMirror;
+
     @Autowired
     public SeasonBroadcastListener(TtlCache seasonCache) {
         this.seasonCache = seasonCache;
@@ -53,6 +58,12 @@ public class SeasonBroadcastListener {
         c.setConnectionFactory(connectionFactory);
         c.addMessageListener(this::onMessage, new ChannelTopic(CHANNEL));
         this.container = c;
+    }
+
+    /** 注入报讯镜像器（W-Z53）—— 可选：在场即镜像「赛季更替」到报讯台，缺省（null）静默不镜像 */
+    @Autowired(required = false)
+    public void setNotifyMirror(@Nullable NotifyMirrorService notifyMirror) {
+        this.notifyMirror = notifyMirror;
     }
 
     @PostConstruct
@@ -95,6 +106,11 @@ public class SeasonBroadcastListener {
             if ("season:advance".equals(parsed.get("event"))) {
                 seasonCache.invalidate("season.active");
                 received.incrementAndGet();
+                // W-Z53：同一条换季广播镜像到报讯台（什么都不保证、只 swallow，绝不阻塞订阅通道）
+                NotifyMirrorService nm = this.notifyMirror;
+                if (nm != null) {
+                    nm.mirrorSeasonAdvance(String.valueOf(parsed.get("id")));
+                }
                 org.slf4j.LoggerFactory.getLogger(SeasonBroadcastListener.class)
                         .info("[W-M5] season-advance received, id={} dayInCycle={}, cache invalidated",
                                 parsed.get("id"), parsed.get("dayInCycle"));

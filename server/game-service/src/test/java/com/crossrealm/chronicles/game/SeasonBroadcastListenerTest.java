@@ -106,6 +106,32 @@ class SeasonBroadcastListenerTest {
     }
 
     @Test
+    void 配置了报讯镜像时换季广播也会入报讯台() {
+        TtlCache cache = primed();
+        SeasonBroadcastListener listener = new SeasonBroadcastListener(cache);
+        java.util.List<com.crossrealm.chronicles.game.notify.NotifyEvent> calls = new java.util.ArrayList<>();
+        com.crossrealm.chronicles.game.notify.NotifyClient stub = event -> {
+            calls.add(event);
+            return new com.crossrealm.chronicles.game.notify.NotifyAck("id", event.kind(), true, false);
+        };
+        listener.setNotifyMirror(new com.crossrealm.chronicles.game.notify.NotifyMirrorService(stub, true));
+
+        listener.handle(VALID);
+
+        assertEquals(1, calls.size(), "换季广播应该镜像一条 season 报讯");
+        assertEquals("season", calls.get(0).kind());
+        assertTrue(calls.get(0).body().contains("tide"), calls.get(0).body());
+    }
+
+    @Test
+    void 没配报讯镜像时也正常工作() {
+        TtlCache cache = primed();
+        SeasonBroadcastListener listener = new SeasonBroadcastListener(cache); // 不 setNotifyMirror
+        listener.handle(VALID); // 不抛、计数照常
+        assertEquals(1L, listener.receivedCount());
+    }
+
+    @Test
     void 可选依赖必须用Nullable标记() throws Exception {
         Constructor<?> ctor = OpsController.class.getDeclaredConstructors()[0];
         // 按类型定位 seasonBroadcastListener，不写死下标（构造器顺序会随切片增长而变）
