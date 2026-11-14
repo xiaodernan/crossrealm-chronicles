@@ -351,6 +351,21 @@ export class OnlineServices {
   }
 
   /**
+   * Lore Oracle——召唤 canon 的管家问一记典籍（`POST /api/ai/lore/answer`）。
+   * 携带的是“当前最相关的典籍段落”，不是完整提取——节省调用次数与耐心。
+   * `limit` 可省略（默认 4），回答里会含 `sources` 数组指向原典段落。
+   */
+  async askOracle(question, { limit, signal } = {}) {
+    const body = limit === undefined ? { question } : { question, limit };
+    return this.#jsonRequest('/api/ai/lore/answer', {
+      method: 'POST',
+      body,
+      timeoutMs: ADVISOR_LIMITS.requestTimeoutMs,
+      signal,
+    });
+  }
+
+  /**
    * 回声灯的一句暗示（W-X22 收编版，`POST /api/ai/echo-hint`）。
    * 与顾问共用同一条网关路径、同一份熔断与缓存，只是人格提示不同。
    */

@@ -3412,6 +3412,7 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   advisor_input_placeholder: 'Ask anything — press Enter to send',
   advisor_send: 'Send',
   advisor_stop: 'Stop',
+  advisor_lore_toggle: 'Lore',
   advisor_disclaimer: 'AI-generated answers may not match this build',
   advisor_notify_title: 'The Hearth Wire',
   advisor_notify_kind_achievement: 'Feat',

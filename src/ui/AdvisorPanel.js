@@ -100,6 +100,8 @@ export class AdvisorPanel {
     this.send = q('#advisor-send');
     this.stop = q('#advisor-stop');
     this.closeBtn = q('#advisor-close');
+    this.loreToggle = q('#advisor-lore-toggle');
+    this._loreMode = false;
     this.statusEl = q('#advisor-status');
     this.statusText = q('#advisor-status-text');
     this.metaEl = q('#advisor-meta');
@@ -121,10 +123,18 @@ export class AdvisorPanel {
       this._ask(normalizeAdvisorQuestion(this.input?.value ?? ''));
     };
     this._onInput = () => this._renderCount();
+    this._onLoreToggle = () => {
+      this._loreMode = !this._loreMode;
+      this.loreToggle?.setAttribute?.('aria-pressed', this._loreMode ? 'true' : 'false');
+      this.loreToggle?.classList.toggle('is-on', this._loreMode);
+      // 切回对话态时，状态条回到之前维护的源（在线伙伴/离线/降级）
+      if (!this._loreMode) this._healthChecked = false;
+    };
 
     this.fab?.addEventListener?.('click', this._onFab);
     this.closeBtn?.addEventListener?.('click', this._onClose);
     this.stop?.addEventListener?.('click', this._onStop);
+    this.loreToggle?.addEventListener?.('click', this._onLoreToggle);
     this.form?.addEventListener?.('submit', this._onSubmit);
     this.input?.addEventListener?.('input', this._onInput);
 
@@ -280,9 +290,17 @@ export class AdvisorPanel {
     this._setPending(true);
     let res;
     try {
-      res = await this.game?.onlineServices?.askAdvisorBackground?.(question, this._context(), {
-        signal: this._controller.signal,
-      });
+      if (this._loreMode) {
+        // W-Z82 Lore Oracle：问典籍时绕过普通提示词，让服务端 BM25 选出最相关的原典段落
+        // 与带标号的 system prompt 跑 LLM，回答只用提取语料、并把出处以 inline bracket 形式写入。
+        res = await this.game?.onlineServices?.askOracle?.(question, {
+          signal: this._controller.signal,
+        });
+      } else {
+        res = await this.game?.onlineServices?.askAdvisorBackground?.(question, this._context(), {
+          signal: this._controller.signal,
+        });
+      }
     } catch (e) {
       // 客户端这一层已经吞错；真漏出来也不能把面板留在「正在观星」的永久态
       console.warn('[advisor] 请求出口抛了（已兜住）', e?.message ?? e);

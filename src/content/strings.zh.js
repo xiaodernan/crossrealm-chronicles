@@ -3410,6 +3410,7 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   advisor_input_placeholder: '想问点什么？回车送出',
   advisor_send: '送出',
   advisor_stop: '停止',
+  advisor_lore_toggle: '典籍',
   advisor_disclaimer: '回答由 AI 生成，未必与当前版本一致',
   advisor_notify_title: '炉火报讯台',
   advisor_notify_kind_achievement: '成就',

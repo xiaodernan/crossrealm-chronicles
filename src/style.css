@@ -4100,6 +4100,26 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 
 .advisor-chip:disabled { opacity: 0.42; cursor: default; }
 
+.advisor-lore-toggle {
+  flex: 0 0 auto;
+  border: 1px solid rgba(190, 166, 255, 0.32);
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: rgba(18, 16, 36, 0.62);
+  color: rgba(200, 188, 232, 0.78);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.advisor-lore-toggle:hover { color: rgba(232, 224, 250, 0.94); border-color: rgba(169, 130, 255, 0.62); }
+.advisor-lore-toggle.is-on {
+  color: #ffe3a3;
+  border-color: rgba(255, 217, 138, 0.7);
+  background: rgba(36, 29, 10, 0.72);
+  box-shadow: 0 0 0 3px rgba(255, 217, 138, 0.18), inset 0 0 12px rgba(255, 217, 138, 0.18);
+}
+
 /* ── 输入框 ───────────────────────────────────────────────────────────── */
 
 .advisor-composer {
