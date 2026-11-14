@@ -9,64 +9,72 @@
     body {
       min-height: 100vh;
       font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
-      background: linear-gradient(160deg, #0a0818 0%, #1a1028 40%, #081018 100%);
+      background: linear-gradient(160deg, #0a0818 0%, #1a1028 50%, #081018 100%);
       color: #c9a962;
       padding: 2rem;
     }
     h1 { font-size: 1.8rem; letter-spacing: 0.15em; margin-bottom: 0.25rem; }
     .sub { color: #888; font-size: 0.85rem; margin-bottom: 2rem; }
-    .cover {
-      width: min(320px, 90vw);
-      border-radius: 8px;
-      box-shadow: 0 8px 40px rgba(201,169,98,0.2);
-      margin-bottom: 2rem;
-    }
-    .tracks { display: grid; gap: 12px; max-width: 640px; }
+    .cover { width: min(320px, 90vw); display: block; margin: 0 auto 2rem; border-radius: 12px; border: 1px solid rgba(201,169,98,0.35); box-shadow: 0 0 45px rgba(201,169,98,0.25); filter: brightness(0.88) contrast(1.05) saturate(0.85); }
+    .tracks { display: flex; flex-direction: column; gap: 8px; }
     .track {
-      display: flex; align-items: center; gap: 12px;
-      background: rgba(0,0,0,0.35);
-      border: 1px solid rgba(201,169,98,0.25);
-      border-radius: 8px;
+      display: flex; align-items: center; gap: 14px;
       padding: 14px 16px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .track:hover { border-color: rgba(201,169,98,0.55); background: rgba(201,169,98,0.06); }
-    .track.playing { border-color: #c9a962; background: rgba(201,169,98,0.12); }
-    .num { width: 28px; color: #666; font-size: 0.8rem; }
-    .name { flex: 1; font-weight: 600; }
-    .meta { font-size: 0.72rem; color: #666; }
-    .stop {
-      margin-top: 2rem;
-      padding: 10px 24px;
-      background: transparent;
-      border: 1px solid rgba(201,169,98,0.5);
-      color: #c9a962;
+      background: rgba(201,169,98,0.04);
+      border: 1px solid rgba(201,169,98,0.18);
       border-radius: 6px;
       cursor: pointer;
-      font-size: 0.9rem;
+      transition: all 0.2s;
     }
-    .stop:hover { background: rgba(201,169,98,0.1); }
-    .viz { height: 4px; background: #222; border-radius: 2px; margin-top: 2rem; max-width: 640px; overflow: hidden; }
-    .viz-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #c9a962, #8866cc); transition: width 0.1s; }
+    .track:hover { background: rgba(201,169,98,0.10); border-color: rgba(201,169,98,0.45); }
+    .track.playing { border-color: #ffd98a; background: rgba(255,217,138,0.12); box-shadow: 0 0 12px rgba(255,217,138,0.18); }
+    .num { font-size: 0.78rem; color: #666; width: 26px; letter-spacing: 0.08em; }
+    .name { flex: 1; font-size: 0.92rem; color: #d9cfba; letter-spacing: 0.02em; }
+    .track.playing .name { color: #ffd98a; }
+    .meta { font-size: 0.72rem; color: #777; width: 172px; text-align: right; }
+    .playing .meta { color: #c9a962; }
+    .stop { margin-top: 18px; padding: 10px 22px; font-size: 0.8rem; background: transparent; color: #c9a962; border: 1px solid rgba(201,169,98,0.4); border-radius: 4px; cursor: pointer; letter-spacing: 0.12em; }
+    .stop:hover { border-color: #ffd98a; color: #ffd98a; }
+    #viz { height: 4px; background: rgba(255,217,138,0.12); border-radius: 2px; overflow: hidden; margin: 18px 0 4rem; }
+    #viz::after { content: ''; display: block; height: 100%; width: 0; background: linear-gradient(90deg, #8b6914, #ffd98a, #c9a962); transition: width 0.1s linear; }
+    #viz-fill { height: 100%; width: 0; background: linear-gradient(90deg, #8b6914, #ffd98a, #c9a962); transition: width 0.1s linear; }
   </style>
 </head>
 <body>
-  <h1>跨界纪事 OST</h1>
-  <p class="sub">Crossrealm Chronicles · Web Audio 六首预览 · 点击播放</p>
-  <img class="cover" src="../posters/poster-ost-album-4k.png" alt="OST 封面" />
+  <h1>跨界纪事 · OST</h1>
+  <p class="sub">Crossrealm Chronicles Original Soundtrack · 24 tracks · Web Audio procedural preview</p>
+  <img src="../posters/poster-ost-album-4k.png" alt="OST 专辑封面" class="cover" />
+  <div id="viz"><div id="viz-fill"></div></div>
   <div class="tracks" id="tracks"></div>
-  <button class="stop" id="stop">■ 停止全部</button>
-  <div class="viz"><div class="viz-bar" id="viz"></div></div>
+  <button class="stop" id="stop">STOP · 停止预览</button>
 
   <script>
+    // ========== 24 曲 Web Audio 实时预览（procedural synth） ==========
     const TRACKS = [
-      { id: 'anchor', num: '01', name: 'Anchor Pulse（锚脉）', meta: 'D min · 72 BPM', play: playAnchor },
-      { id: 'campfire', num: '06', name: 'Campfire Ember（营火余温）', meta: '钢琴泛音 · 56 BPM', play: playCampfire },
-      { id: '1983', num: '13', name: '1983 Loop（一九八三循环）', meta: '逆相界 · 120 BPM', play: play1983 },
-      { id: 'upside', num: '14', name: 'Upside Spores（逆相孢子）', meta: '全音阶 · 88 BPM', play: playUpside },
-      { id: 'full', num: '23', name: 'Full Resonance（全频共鸣）', meta: '109 echo layers', play: playFull },
-      { id: 'infinity', num: '24', name: 'Infinity Walker（无尽行者）', meta: '字幕 roll · 60 BPM', play: playInfinity },
+      { num: '01', name: 'Anchor Pulse（锚脉）',                   meta: 'D min · 72 BPM · 主菜单',       fn: playAnchor },
+      { num: '02', name: 'Three Roads（三路）',                     meta: 'D→G→A · 80 BPM · 过渡',         fn: playThreeRoads },
+      { num: '03', name: 'Grey Mist Waltz（灰雾圆舞曲）',           meta: 'G min · 90 BPM · 森林',         fn: playGreyMist },
+      { num: '04', name: 'Stone Ring Chant（石环吟诵）',            meta: '低频合唱 · 60 BPM · 至尊石环',   fn: playStoneRing },
+      { num: '05', name: 'Shadow Warden（影界守护者）',              meta: '140 BPM · 小调打击 · Boss1',    fn: playShadowWarden },
+      { num: '06', name: 'Campfire Ember（营火余温）',              meta: '56 BPM · 钢琴+弦乐泛音',         fn: playCampfire },
+      { num: '07', name: 'Floating Candle（悬浮蜡烛）',             meta: '减七和弦 · 100 BPM · 魔法遗境',   fn: playFloatingCandle },
+      { num: '08', name: 'Broom Ring Race（环赛快板）',              meta: '128 BPM · 6/8 快板 · 飞行环',    fn: playBroomRing },
+      { num: '09', name: 'Endurance Log（坚韧号日志）',              meta: '管风琴 · 68 BPM · 米勒荒原',     fn: playEndurance },
+      { num: '10', name: 'Murphy\'s Stay（墨菲留书）',               meta: '钢琴独奏 · 54 BPM · 书架 POI',   fn: playMurphy },
+      { num: '11', name: 'Miller\'s Hourglass（米勒沙漏）',          meta: '渐快 72→60 · 过山盅速差',       fn: playHourglass },
+      { num: '12', name: 'Singularity Herald（奇点领主）',            meta: '152 BPM · 引力滑音 · Boss3',   fn: playSingularity },
+      { num: '13', name: '1983 Loop（一九八三循环）',                meta: '120 BPM · 锯齿+磁带 wow',        fn: play1983 },
+      { num: '14', name: 'Upside Spores（逆相孢子）',                meta: '88 BPM · 全音阶不协和',          fn: playUpside },
+      { num: '15', name: '11:06 Bell（十一点零六）',                 meta: '66 BPM · 钟声+反向混响',          fn: playElevenOSix },
+      { num: '16', name: 'Spiral Count（螺旋计数）',                  meta: '自由 · 人声倒数 · 深井',          fn: playSpiral },
+      { num: '17', name: 'Speakeasy Tariff（禁酒窖关税）',            meta: '92 BPM · 低音 sax noir 黑市',     fn: playSpeakeasy },
+      { num: '18', name: 'Chaos Overlord（混沌领主）',                meta: '160 BPM · 熔岩对撞冰晶',          fn: playChaosOverlord },
+      { num: '19', name: 'Western Mirror（沙龙镜墙）',               meta: '76 BPM · 口琴+弦 · 边境往事',     fn: playWesternMirror },
+      { num: '20', name: 'Samurai Gate（鸟居残门）',                  meta: '64 BPM · 尺八 · 武士残响',        fn: playSamuraiGate },
+      { num: '21', name: 'Neon Alley Rain（霓虹雨巷）',               meta: '110 BPM · 合成器 arp · 霓虹区',   fn: playNeonRain },
+      { num: '22', name: 'Starport Cantina（星港酒肆）',              meta: '98 BPM · 爵士五度 · 星港',        fn: playCantina },
+      { num: '23', name: 'Full Resonance（全频共鸣）',                meta: '72→96 BPM · 解锁全母题 · 五段叠唱', fn: playFull },
+      { num: '24', name: 'Infinity Walker（无尽行者）',               meta: '60 BPM · 锚主题再奏 · 滚动字幕',   fn: playInfinity },
     ];
 
     let ctx, master, currentNodes = [], currentId = null, raf;
@@ -82,7 +90,7 @@
       currentNodes.forEach(n => { try { n.stop?.(); n.disconnect?.(); } catch (_) {} });
       currentNodes = [];
       if (raf) cancelAnimationFrame(raf);
-      document.getElementById('viz').style.width = '0%';
+      document.getElementById('viz-fill').style.width = '0%';
       document.querySelectorAll('.track').forEach(t => t.classList.remove('playing'));
       currentId = null;
     }
@@ -90,8 +98,7 @@
     function tone(freq, type, start, dur, vol = 0.15, dest = master) {
       const o = ctx.createOscillator();
       const g = ctx.createGain();
-      o.type = type;
-      o.frequency.value = freq;
+      o.type = type; o.frequency.value = freq;
       g.gain.setValueAtTime(0, start);
       g.gain.linearRampToValueAtTime(vol, start + 0.05);
       g.gain.exponentialRampToValueAtTime(0.001, start + dur);
@@ -101,41 +108,147 @@
       return o;
     }
 
+    function noise(start, dur, vol = 0.1, cutoff = 1200) {
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const g = ctx.createGain(); const f = ctx.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = cutoff;
+      g.gain.setValueAtTime(0, start); g.gain.linearRampToValueAtTime(vol, start + 0.02); g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      src.connect(f); f.connect(g); g.connect(master);
+      src.start(start);
+      currentNodes.push(src, f, g);
+    }
+
+    // —— Disc 1 ——
     function playAnchor() {
       const t0 = ctx.currentTime;
       const notes = [293.66, 220, 174.61, 146.83];
       notes.forEach((f, i) => tone(f, 'sine', t0 + i * 0.6, 1.2, 0.12));
       setIntervalLoop(t0, 4.8);
     }
-
+    function playThreeRoads() {
+      const t0 = ctx.currentTime; const seq = [293.66, 392, 440, 523.25];
+      seq.forEach((f, i) => { tone(f, 'triangle', t0 + i * 0.9, 0.75, 0.09); tone(f / 2, 'sine', t0 + i * 0.9 + 0.02, 0.75, 0.07); });
+      setIntervalLoop(t0, 4.5);
+    }
+    function playGreyMist() {
+      const t0 = ctx.currentTime;
+      for (let i = 0; i < 12; i++) tone(196 + (i % 3) * 65.4, 'triangle', t0 + i * 0.36, 0.45, 0.07);
+      noise(t0, 4, 0.05, 700);
+      setIntervalLoop(t0, 5);
+    }
+    function playStoneRing() {
+      const t0 = ctx.currentTime; [98, 147, 196, 147].forEach((f, i) => tone(f, 'sine', t0 + i * 1.2, 2.2, 0.16));
+      noise(t0, 5, 0.12, 300);
+      setIntervalLoop(t0, 5.5);
+    }
+    function playShadowWarden() {
+      const t0 = ctx.currentTime;
+      for (let i = 0; i < 32; i++) tone(73.42, 'square', t0 + i * 0.135, 0.09, 0.20);
+      for (let i = 0; i < 8; i++) tone(146.83, 'sawtooth', t0 + i * 0.54, 0.32, 0.08);
+      setIntervalLoop(t0, 5.5);
+    }
     function playCampfire() {
       const t0 = ctx.currentTime;
-      [523.25, 659.25, 783.99].forEach((f, i) => {
-        tone(f, 'triangle', t0 + i * 1.1, 2.5, 0.06);
-        tone(f * 2, 'sine', t0 + i * 1.1 + 0.3, 1.8, 0.03);
-      });
+      [523.25, 659.25, 783.99].forEach((f, i) => { tone(f, 'triangle', t0 + i * 1.1, 2.5, 0.06); tone(f * 2, 'sine', t0 + i * 1.1 + 0.3, 1.8, 0.03); });
       setIntervalLoop(t0, 5);
     }
 
+    // —— Disc 2 ——
+    function playFloatingCandle() {
+      const t0 = ctx.currentTime;
+      const chords = [[311.13, 392.0, 466.16], [293.66, 369.99, 440.0]];
+      chords.forEach((ch, i) => ch.forEach(f => tone(f, 'triangle', t0 + i * 1.4, 1.6, 0.08)));
+      for (let i = 0; i < 18; i++) tone(700 + Math.random() * 500, 'sine', t0 + Math.random() * 3.5, 0.35, 0.03);
+      setIntervalLoop(t0, 4);
+    }
+    function playBroomRing() {
+      const t0 = ctx.currentTime;
+      [392, 494, 587, 740, 587, 494].forEach((f, i) => tone(f, 'square', t0 + i * 0.22, 0.16, 0.07));
+      noise(t0, 3, 0.06, 2500);
+      setIntervalLoop(t0, 4);
+    }
+    function playEndurance() {
+      const t0 = ctx.currentTime;
+      const chords = [146.83, 220, 293.66, 369.99];
+      chords.forEach((f, i) => tone(f, 'sawtooth', t0 + i * 0.75, 0.8, 0.06));
+      setIntervalLoop(t0, 3.2);
+    }
+    function playMurphy() {
+      const t0 = ctx.currentTime; [392, 523.25, 659.25].forEach((f, i) => tone(f, 'triangle', t0 + i * 1.8, 2.2, 0.09));
+      setIntervalLoop(t0, 6);
+    }
+    function playHourglass() {
+      const t0 = ctx.currentTime;
+      for (let i = 0; i < 10; i++) tone(i < 5 ? 293.66 : 220, 'sine', t0 + i * (i < 5 ? 0.8 : 0.45), 0.9, 0.07);
+      setIntervalLoop(t0, 6.5);
+    }
+    function playSingularity() {
+      const t0 = ctx.currentTime;
+      const steps = 32;
+      for (let i = 0; i < steps; i++) tone(100 + i * 25, 'sawtooth', t0 + i * 0.025, 0.9, 0.16);
+      tone(50, 'square', t0, 2, 0.25);
+      setIntervalLoop(t0, 1.1);
+    }
+
+    // —— Disc 3 ——
     function play1983() {
       const t0 = ctx.currentTime;
-      for (let i = 0; i < 16; i++) {
-        tone(110 + (i % 4) * 55, 'sawtooth', t0 + i * 0.25, 0.15, 0.04);
-      }
+      for (let i = 0; i < 16; i++) tone(110 + (i % 4) * 55, 'sawtooth', t0 + i * 0.25, 0.15, 0.04);
       tone(55, 'square', t0, 4, 0.08);
       setIntervalLoop(t0, 4);
     }
-
     function playUpside() {
       const t0 = ctx.currentTime;
       const cluster = [277.18, 311.13, 369.99, 415.30];
       cluster.forEach((f, i) => tone(f, 'sawtooth', t0 + i * 0.15, 3, 0.05));
-      for (let i = 0; i < 20; i++) {
-        tone(800 + Math.random() * 400, 'sine', t0 + Math.random() * 3, 0.08, 0.02);
-      }
+      for (let i = 0; i < 20; i++) tone(800 + Math.random() * 400, 'sine', t0 + Math.random() * 3, 0.08, 0.02);
+      setIntervalLoop(t0, 4);
+    }
+    function playElevenOSix() {
+      const t0 = ctx.currentTime; tone(370.0, 'sine', t0, 3.0, 0.2); tone(293.66, 'sine', t0 + 3.0, 2.5, 0.25); tone(98, 'triangle', t0, 5.2, 0.08);
+      setIntervalLoop(t0, 5.5);
+    }
+    function playSpiral() {
+      const t0 = ctx.currentTime;
+      for (let i = 7; i >= 1; i--) tone(140 + i * 40, 'triangle', t0 + (7 - i) * 0.45, 0.28, 0.08);
+      setIntervalLoop(t0, 4);
+    }
+    function playSpeakeasy() {
+      const t0 = ctx.currentTime;
+      const seq = [98, 110, 123.47, 139.6];
+      seq.forEach((f, i) => { tone(f, 'sawtooth', t0 + i * 0.42, 0.32, 0.08); tone(f * 2, 'sine', t0 + i * 0.42 + 0.02, 0.3, 0.04); });
+      setIntervalLoop(t0, 2.2);
+    }
+    function playChaosOverlord() {
+      const t0 = ctx.currentTime;
+      for (let i = 0; i < 18; i++) tone(440 + (i * 47) % 400, 'sawtooth', t0 + i * 0.18, 0.12, 0.11);
+      noise(t0, 3.5, 0.15, 3500);
       setIntervalLoop(t0, 4);
     }
 
+    // —— Disc 4 ——
+    function playWesternMirror() {
+      const t0 = ctx.currentTime; [392, 330, 262].forEach((f, i) => tone(f, 'triangle', t0 + i * 1.1, 1.0, 0.08));
+      setIntervalLoop(t0, 4.5);
+    }
+    function playSamuraiGate() {
+      const t0 = ctx.currentTime; [523.25, 392, 311.13, 233.08].forEach((f, i) => tone(f, 'sine', t0 + i * 1.4, 1.8, 0.11));
+      setIntervalLoop(t0, 6);
+    }
+    function playNeonRain() {
+      const t0 = ctx.currentTime;
+      for (let i = 0; i < 24; i++) { const f = [880, 660, 1047, 1175][i % 4]; tone(f, 'square', t0 + i * 0.16, 0.1, 0.04); }
+      noise(t0, 3, 0.06, 5000);
+      setIntervalLoop(t0, 4);
+    }
+    function playCantina() {
+      const t0 = ctx.currentTime;
+      [220, 277, 330, 440].forEach((f, i) => { tone(f, 'triangle', t0 + i * 0.35, 0.3, 0.07); tone(f * 2, 'sine', t0 + i * 0.35 + 0.08, 0.25, 0.045); });
+      setIntervalLoop(t0, 1.7);
+    }
     function playFull() {
       const t0 = ctx.currentTime;
       const freqs = [146.83, 174.61, 220, 261.63, 293.66, 329.63, 349.23, 392, 440, 493.88];
@@ -143,7 +256,6 @@
       tone(73.42, 'sine', t0, 6, 0.1);
       setIntervalLoop(t0, 6);
     }
-
     function playInfinity() {
       const t0 = ctx.currentTime;
       [146.83, 174.61, 220, 261.63].forEach((f, i) => tone(f, 'sine', t0 + i * 1.5, 3, 0.1 - i * 0.015));
@@ -151,11 +263,11 @@
     }
 
     function setIntervalLoop(t0, dur) {
-      let start = performance.now();
+      const start = performance.now();
       function anim() {
         if (currentId === null) return;
         const p = ((performance.now() - start) % (dur * 1000)) / (dur * 1000) * 100;
-        document.getElementById('viz').style.width = p + '%';
+        document.getElementById('viz-fill').style.width = p + '%';
         raf = requestAnimationFrame(anim);
       }
       raf = requestAnimationFrame(anim);
@@ -170,14 +282,13 @@
         if (!ctx) init();
         if (ctx.state === 'suspended') await ctx.resume();
         stopAll();
-        currentId = tr.id;
+        currentId = tr.num;
         el.classList.add('playing');
-        tr.play();
+        tr.fn();
       };
       container.appendChild(el);
     });
-
-    document.getElementById('stop').onclick = stopAll;
+    document.querySelector('.stop').onclick = stopAll;
   </script>
 </body>
 </html>
