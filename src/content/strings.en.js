@@ -3088,7 +3088,7 @@ Zone Switch — fullscreen transition + zone name`,
   hm_body_online_living: `Settings → Online partners → turn on (read from localStorage; no forced account, ever).
 Online layer sends requests to your own backend (http://localhost:8080). Off = zero network traffic.
 
-Advisor panel (F7), bottom strip — “炉火报讯台 / Fireside rumors”:
+Advisor panel ({advisor}), bottom strip — “炉火报讯台 / Fireside rumors”:
 [world] boss defeats · season transitions · trial-crown swaps · speedrun-crown swaps — timestamped kind chips, written via textContent.
 
 Unread dot (FAB): lit when there is something new (local counter); opens the panel, then turns off.
