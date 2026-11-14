@@ -31,10 +31,14 @@ const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6-sol';
 if (!KEY) { console.error('novel-glossary: 缺少 LLM_API_KEY'); process.exit(1); }
 console.error('novel-glossary: base=%s model=%s key=****（不打印）', BASE, MODEL);
 
-const outArg = process.argv[2] ?? join(ROOT, 'creative', 'GLOSSARY.md');
+const arg = (name, fallback = null) => process.argv.find((a) => a.startsWith('--' + name + '='))?.slice(name.length + 3) ?? fallback;
+const only = arg('only', null); // 只抽取文件名包含此子串的章节（如 02-第二章）
+const outArg = arg('out', join(ROOT, 'creative', 'GLOSSARY.md'));
+const appendMode = arg('append', null) === 'true'; // true = 只写各章节段（不写页眉），供多进程拼接
 
 /* 按章切块（≤ 8000 字）喂给模型；章内分片防注意力漂移 */
 const files = readdirSync(NOVEL_DIR).filter((f) => f.endsWith('.md')).sort();
+const selected = only ? files.filter((f) => f.includes(only)) : files;
 function chunks(name, text, maxChars = 8000) {
   const out = [];
   let cur = [], len = 0;
@@ -46,7 +50,7 @@ function chunks(name, text, maxChars = 8000) {
   if (cur.length) out.push({ name: `${name}#${out.length + 1}`, text: cur.join('\n') });
   return out;
 }
-const targets = files.flatMap((f) => chunks(f.replace(/\.md$/, ''), readFileSync(join(NOVEL_DIR, f), 'utf8')));
+const targets = selected.flatMap((f) => chunks(f.replace(/\.md$/, ''), readFileSync(join(NOVEL_DIR, f), 'utf8')));
 
 const SYSTEM = `你是《跨界纪事》的设定集编辑，正在为该系列建立官方 codex。
 规则：
@@ -115,6 +119,17 @@ async function ask(chunk) {
   return { name: chunk.name, error: true };
 }
 
+process.on('uncaughtException', (err) => {
+  process.stderr.write(`novel-glossary: FATAL uncaughtException: ${err?.stack ?? err}\n`);
+  try { writeFileSync(outArg, render(parts), 'utf8'); } catch { /* nothing to save */ }
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  process.stderr.write(`novel-glossary: FATAL unhandledRejection: ${reason?.stack ?? reason}\n`);
+  try { writeFileSync(outArg, render(parts), 'utf8'); } catch { /* nothing to save */ }
+  process.exit(1);
+});
+
 const parts = [];
 try {
   for (let i = 0; i < targets.length; i += 1) {
@@ -129,13 +144,24 @@ try {
 }
 
 function render(parts) {
-  return [
-    '# 《跨界纪事》设定集（Codex）—— 机器抽取 · 人工校对',
+  if (appendMode) {
+    let prev = '';
+    try { prev = readFileSync(outArg, 'utf8'); } catch { prev = ''; }
+    const body = parts.flatMap((p) => [`## ${p.name}`, '', p.content, '']).join('\n');
+    return (prev.endsWith('\n') || !prev ? prev : prev + '\n') + body + '\n';
+  }
+  const header = [
+    '# 《跨界纪事》设定集（Codex）—— 真上游机器抽取 · 出处标注',
     '',
     `- 生成方式：\`scripts/novel-glossary.mjs\`（真上游 ${MODEL}）`,
-    '- 抽取范围：creative/novel/ 全 10 章（00–09）',
-    '- 每条标注出处章节；合并同类项时出处并列',
+    '- 抽取范围：creative/novel/ 全 10 章（00–09）；每章一节，五个子段（人物 / 地点·位面 / 时间线 / 关键物件·母题 / 易混淆译名）',
+    '- **性质**：机器直抽，不是人工终审稿；条目标注出处章节，使用前请对照原文核实；与正文冲突时**以原文为准**',
+    '- 【编者注】Ch2 日志中「已共鸣 49 / 49」是中途账，不是终态；109 / 110 两种计数口径在正文中并存，引用时以具体语境为准，不要默认互通',
+    '- 目录：00-序言 · 01-交汇枢纽 · 02-破碎时线 · 03-营火记忆 · 04-看守 · 05-寄信人 · 06-回响 · 07-余烬 · 08-番外 · 09-番外二',
     '',
+  ];
+  return [
+    ...header,
     ...parts.flatMap((p) => [`## ${p.name}`, '', p.content, '']),
   ].join('\n');
 }

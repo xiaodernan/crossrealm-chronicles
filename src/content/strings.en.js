@@ -2402,7 +2402,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Seven novel chapters + 2 extras · 142-min film script · 25-track OST booklet (see creative/)',
+  start_crossmedia_caption: 'Seven novel chapters + 3 extras · 142-min film script · 25-track OST booklet (see creative/)',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
