@@ -46,7 +46,11 @@
 
 
 
-**压测（W-Z79）**：`scripts/stress-load.mjs`——Node 零依赖五场景压测器（readBurst / writeBurst / telemetryFlood / mixed / idempotentReplay；退出码 errRate>0.02 或任一 5xx => 1）。用法：`mvn -o -pl game-service -am package` 后 `java -jar server/game-service/target/game-service-0.1.0-SNAPSHOT.jar`（28081 建议独立端口），然后 `node scripts/stress-load.mjs --target http://localhost:28081 --scenario mixed --concurrency 60 --duration 20`。2026-11-14 首轮实测抓到真死锁（CHM.clear() × computeIfAbsent bin 锁 + `synchronized (runs)`，AB-BA 环），修复（整表换实例 + runs 锁双检计算 + Feign 外呼移出锁外 + `AsyncNotifyMirrorService` daemon 异步派发）后读 ~2151 rps / 写 ~1171 rps、零 5xx —— 见 `docs/MASTER_PLAN.md` W-Z79 条目。
+**压测（W-Z79）**：`scripts/stress-load.mjs`——Node 零依赖五场景压测器（readBurst / writeBurst / telemetryFlood / mixed / idempotentReplay；退出码 errRate>0.02 或任一 5xx => 1）。用法：`mvn -o -pl game-service -am package` 后 `java -jar server/game-service/target/game-service-0.1.0-SNAPSHOT.jar`（28081 建议独立端口），然后 `node scripts/stress-load.mjs --target http://localhost:28081 --scenario mixed --concurrency 60 --duration 20`。2026-11-14 首轮实测抓到真死锁（CHM.clear() × computeIfAbsent bin 锁 + `synchronized (runs)`，AB-BA 环），修复（整表换实例 + runs 锁双检计算 + Feign 外呼移出锁外 + `AsyncNotifyMirrorService` daemon 异步派发）后读 ~2151 rps / 写 ~1171 rps、零 5xx —— 见 `docs/MASTER_PLAN.md` W-Z79 条目与 `docs/STRESS_RESULTS.md`（前/后对照数据归档）。最新基准复验报表附于 `docs/STRESS_RESULTS.md`：本机 8 路 par、持续 20 秒、CPU idle 状态测得。
+
+**可用性可观测（W-Z79）**：`/api/ops/health.notifyMirrors{available,published{bossDefeated,seasonAdvance,trialDethrone,leaderboardDethrone,dualCrown,total}}` 暴露每个镜像走的是热路径还是 cold/asleep 状态——大流量下任何 dethrone 都异步扇出，不会吞吐放大到 game-service 主线程上。
+
+**异步通道**：game-service 内置 daemon `notify-mirror-dispatch` 单线程 + 有界队列（256、满丢最旧）负责 `NotifyClient` 外呼——抢答超时或 LB 无实例时 payload 立即丢弃并累计计数器。Spring bean 默认 async 装配；`game-service.notify-mirror-async=false` 可回滚为同步装配（旧行为保底）。
 
 ## 快速验证（5 分钟）
 

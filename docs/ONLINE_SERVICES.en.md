@@ -33,6 +33,8 @@ The game-side client is `src/online/OnlineServices.js` (default off):
 
 ---
 
+**Stress testing (W-Z79, 2026-11-14)**: `scripts/stress-load.mjs` — Node zero-dependency, five scenarios (`readBurst` / `writeBurst` / `telemetryFlood` / `mixed` 7:3 / `idempotentReplay`), exit-code gate (errRate > 0.02 or any 5xx ⇒ 1), `--json` for CI consumption. Boot: `mvn -o -pl game-service -am package` → `java -jar target/game-service-0.1.0-SNAPSHOT.jar` (`28081` advised) → `node scripts/stress-load.mjs --scenario mixed --concurrency 60 --duration 20 --target http://localhost:28081`. First run exposed a genuine AB-BA ring-deadlock: leaderboard & trial boards both had `topCache` held as a monitor under `synchronized (runs)` and `ConcurrentHashMap.clear()` waiting on bin ReservationNodes — the write path was 100% timeouts (p50≈3000ms, 0 successful 201s). Fix: `volatile Map` whole-table swap, `top()` double-checked under `runs` lock (no computeIfAbsent), herald Feign calls moved off the critical section, new `AsyncNotifyMirrorService` (daemon + bounded 256-slot queue, drop-oldest). Result: **reads ~2151 rps / writes ~1171 rps / mixed ~1532 rps / idempotentReplay 200/200 — zero 5xx**. See `docs/STRESS_RESULTS.md` (before/after numeric archive), `server/scripts/stress-verify.ps1` (one-shot gate script; boots, hammers, asserts 5xx=0 / errRate≤0.02 / rps≥300), and `docs/MASTER_PLAN.md` W-Z79/W-Z79b ADR. Local Docker is permanently occupied by a separate project — Redis-backed stress tests live in CI (9 `verify-redis-*` scripts, all green).
+
 ## Quick verification (5 minutes)
 
 ```bash
