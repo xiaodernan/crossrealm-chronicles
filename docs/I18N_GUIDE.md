@@ -1,5 +1,6 @@
 # i18n 新内容接入规范（W-D2 切片56）
 
+> English mirror: [`I18N_GUIDE.en.md`](I18N_GUIDE.en.md)
 > 适用范围：任何**玩家可见**的文案（界面文本、toast、aria-label、canvas 绘制的文字），
 > 以及任何**带显示名的内容 id**（Boss / 区域 / 敌人 / 支线 / 成就 / 物品 / 旗标）。
 > 开发者向的 console / throw / 不变量消息不键化（键化反而遮眼），本规范不管它们。

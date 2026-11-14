@@ -1,5 +1,6 @@
 # 跨界纪元 · Showcase 页面与 Pages 自动同步（W-Z68）
 
+> English mirror: [`SHOWCASE_SYNC.en.md`](SHOWCASE_SYNC.en.md)
 **本仓库带了一份完全自包含、双语的《最新成果展示页》** —— `creative/showcase.html`：
 最新实验室规模、最新测试数、最新章节，一页自给，给你个人展示页用。
 

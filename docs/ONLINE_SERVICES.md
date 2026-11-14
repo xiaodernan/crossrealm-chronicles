@@ -1,6 +1,7 @@
 # 在线伙伴服务使用与部署手册
 
-《Crossrealm Chronicles》本体是**纯前端**的离线游戏——没有后端也能完整玩完 3–5 小时的主线。
+> English mirror: [`ONLINE_SERVICES.en.md`](ONLINE_SERVICES.en.md)（中文为主，冲突以本文件为准）
+> 《Crossrealm Chronicles》本体是**纯前端**的离线游戏——没有后端也能完整玩完 3–5 小时的主线。
 本手册讲的东西完全是**可选项**：不管它，什么都不会坏。
 
 ## 它是什么
