@@ -79,6 +79,9 @@ creative/     周边内容：原画 / 小说 / OST / 海报
 - **算法改写**：`PopCultureEchoSystem.tryUnlock`（热路径）— 旧版每次触发都扫一遍 **109/110 枚** ECHOES；现在改用 `triggerIndex: Map<trigger, Echo[]>`，O(matched) 复杂度；full-resonance 判定也改成"见两项即停"短路。
 - **终局字幕**：★ 27 段（每段 <p>），含结局变体（keep/quiet）、跨媒体衍生署名、个人最速（W-G6 在线碑）。
 - **前端美学**：全仓 gold-dark 滚动条 + 选区 / 焦点光晕；暂停面板 slot focus-within 漂浮双层金辉；键帽字 (kbd pill)；区域横幅字岘；签名态「::selection」 鎏金深底。
+- **跨媒体宇宙**：《跨界纪事》长篇**七章** + 序言（终章后彩蛋《星图之外》已并进 142 分钟电影剧本）+ OST **25 曲**（可播放 Web Audio 25/25）+ 海报 5 张——游戏、小说、剧本、OST、海报五条产线同源。
+- **日志 · 归途残卷**：通关后才点亮的终局一页——终局正文（keep/quiet 两路）+ 17 枚星尘铭文复刻展陈；页签计数 (x/17)。
+- **顾问面板 · 炉火报讯台条**：开启在线伙伴后，顾问面板顶部出现报讯 strip——最近三条跨微服务通知（成就/赛季/世界事件），W-Z50 起 `boss_defeated` 遥测自动进台（Feign → notification-service，fallback 静默丢弃）。
 
 ## 文档
 
