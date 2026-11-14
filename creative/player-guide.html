@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>跨界纪元 · 玩家小册子 · Player Guide</title>
+<meta name="description" content="《跨界纪元 / Crossrealm Chronicles》——完整用户手册：安装、操作、战斗、世界导览、终章、自动通关、在线层、跨媒体宇宙与故障排查。中文 / English 双语。">
+<meta property="og:title" content="跨界纪元 · 玩家小册子 — Crossrealm Chronicles Player Guide">
+<meta property="og:description" content="Complete player’s manual for the browser ARPG Crossrealm Chronicles: install, controls, combat, world tour, endings, autoplay, online layer, crossmedia universe and FAQ.">
+<meta property="og:type" content="article">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+:root {
+  --bg: #14110f;
+  --panel: #1c1815;
+  --panel-2: #221d19;
+  --line: rgba(255, 217, 138, 0.16);
+  --gold: #ffd98a;
+  --amber: #ffb75a;
+  --text: #e9e2d2;
+  --dim: rgba(233, 226, 210, 0.62);
+  --maxw: 980px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: radial-gradient(1200px 700px at 50% -10%, rgba(255, 183, 90, 0.09), transparent 60%),
+              radial-gradient(900px 500px at 50% 115%, rgba(255, 183, 90, 0.05), transparent 55%),
+              var(--bg);
+  color: var(--text);
+  font: 16px/1.72 "Segoe UI", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+a { color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(255, 217, 138, 0.3); }
+a:hover { border-bottom-color: var(--gold); }
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(10px); background: rgba(20, 17, 15, 0.8);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--gold); }
+.brand .glyph { font-size: 1.2rem; }
+.lang-toggle {
+  display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--panel);
+}
+.lang-toggle button {
+  appearance: none; border: none; background: transparent; color: var(--dim);
+  padding: 6px 14px; font-size: 0.85rem; letter-spacing: 0.08em; cursor: pointer;
+}
+.lang-toggle button[aria-pressed="true"] { background: var(--gold); color: #201505; font-weight: 700; }
+.hero { padding: 56px 0 30px; text-align: center; border-bottom: 1px solid var(--line); }
+.hero .ko { display: inline-block; font-size: 0.78rem; letter-spacing: 0.32em; color: var(--amber); border: 1px solid rgba(255, 183, 90, 0.35); border-radius: 999px; padding: 4px 14px; margin-bottom: 14px; }
+.hero h1 { font-size: clamp(2rem, 4.6vw, 3.1rem); line-height: 1.18; letter-spacing: 0.02em; }
+.hero h1 em { color: var(--gold); font-style: normal; text-shadow: 0 0 34px rgba(255, 217, 138, 0.35); }
+.hero .tag { margin-top: 12px; color: var(--dim); font-size: 1rem; }
+.tagrow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+.chip { border: 1px solid var(--line); border-radius: 999px; font-size: 0.72rem; letter-spacing: 0.06em; padding: 4px 12px; color: var(--dim); }
+.toc { padding: 22px 0 6px; }
+.toc-inner { display: flex; flex-wrap: wrap; gap: 8px; }
+.toc-inner a { font-size: 0.8rem; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; color: var(--dim); border-bottom: 1px solid var(--line); }
+.toc-inner a:hover { color: var(--gold); border-color: var(--amber); }
+section { padding: 30px 0; border-bottom: 1px solid var(--line); }
+section:last-child { border-bottom: none; }
+h2 { font-size: 1.5rem; margin-bottom: 4px; color: var(--gold); letter-spacing: 0.04em; }
+h2 small { display: block; color: var(--dim); font-size: 0.82rem; font-weight: 400; letter-spacing: 0.12em; margin-top: 2px; }
+h3 { font-size: 1.06rem; margin: 16px 0 6px; color: var(--amber); }
+p { margin: 8px 0; color: var(--text); }
+ul { padding-left: 1.1em; }
+li { margin: 4px 0; }
+.kbd { display: inline-block; min-width: 1.9em; text-align: center; padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 3px; border-radius: 6px; background: var(--panel-2); font-size: 0.85em; color: var(--gold); margin-right: 4px; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92rem; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid rgba(255, 217, 138, 0.09); vertical-align: top; }
+th { color: var(--gold); font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; }
+tr:hover td { background: rgba(255, 217, 138, 0.03); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.card h4 { color: var(--gold); margin-bottom: 6px; font-size: 1rem; letter-spacing: 0.05em; }
+.card p { color: var(--dim); font-size: 0.87rem; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 8px; padding: 10px 18px; border: 1px solid rgba(255, 217, 138, 0.35); color: var(--gold); font-size: 0.92rem; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255, 217, 138, 0.35); }
+.btn.primary { background: var(--gold); color: #201505; border-color: var(--gold); font-weight: 700; }
+.note { border-left: 3px solid var(--amber); background: rgba(255, 183, 90, 0.06); padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; margin: 10px 0; }
+footer { padding: 26px 0 46px; text-align: center; color: var(--dim); font-size: 0.82rem; border-top: 1px solid var(--line); }
+.locale { display: none; }
+body.lang-zh .locale-zh { display: block; }
+body.lang-en .locale-en { display: block; }
+@media print {
+  .topbar, .tagrow { display: none; }
+  body { background: #fff; color: #111; }
+  :root { --panel: #f4f1ea; --panel-2: #eee; --line: #d8d2c2; --text: #111; --dim: #444; --gold: #5c3d00; --amber: #7a4a00; --bg: #fff; }
+  a { color: #5c3d00; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body class="lang-zh">
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="glyph">⚓</span> 跨界纪元 · Crossrealm Chronicles</div>
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button type="button" data-set="lang-zh" aria-pressed="true">中文</button>
+      <button type="button" data-set="lang-en" aria-pressed="false">English</button>
+    </div>
+  </div>
+</div>
+
+<div class="hero wrap">
+  <div class="ko">0.1.0 · ARC FIELD</div>
+  <h1 class="locale locale-zh">一本小册子，<br>带你意识<em>通关之后</em>的世界。</h1>
+  <h1 class="locale locale-en">One booklet to <em>understand everything</em><br>this world does after you beat it.</h1>
+  <p class="tag locale locale-zh">《跨界纪元》——浏览器里的位面动作角色扮演：从交汇枢纽的第一口火，到混沌领主最后一粒光。安装→上手→Boss→终章→炉主之名，全在这本小册子里。</p>
+  <p class="tag locale locale-en">Crossrealm Chronicles — a browser ARPG across seven realms: from the first ember at the Intersection Hub to the last glint of the Chaos Overlord. Install → play → bosses → ending → the keeper’s name — the whole journey, in one small book.</p>
+  <div class="tagrow">
+    <span class="chip">操作 RPG / Action RPG</span><span class="chip">位面冒险 / 7 realms</span><span class="chip">5 Boss</span><span class="chip">40+ achievement walls</span><span class="chip">OST 25</span><span class="chip">Spring Cloud 9 services</span>
+  </div>
+</div>
+
+<nav class="toc wrap" aria-label="contents">
+  <div class="toc-inner locale locale-zh">
+    <a href="#welcome">1 欢迎</a><a href="#install">2 安装与运行</a><a href="#controls">3 操作键位</a><a href="#combat">4 战斗入门</a><a href="#world">5 世界导览</a><a href="#bosses">6 Boss 图鉴</a><a href="#journal">7 日志与页签</a><a href="#ending">8 终章与归途</a><a href="#autoplay">9 自动通关</a><a href="#online">10 在线层与报讯台</a><a href="#crossmedia">11 跨媒体宇宙</a><a href="#faq">12 FAQ / 故障排查</a>
+  </div>
+  <div class="toc-inner locale locale-en">
+    <a href="#welcome">1 Welcome</a><a href="#install">2 Install & run</a><a href="#controls">3 Controls</a><a href="#combat">4 Combat 101</a><a href="#world">5 World tour</a><a href="#bosses">6 Bosses</a><a href="#journal">7 Journal & tabs</a><a href="#ending">8 Ending & embers</a><a href="#autoplay">9 Autoplay</a><a href="#online">10 Online layer</a><a href="#crossmedia">11 Crossmedia</a><a href="#faq">12 FAQ / Troubleshooting</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section id="welcome" class="locale locale-zh">
+  <h2>1 欢迎<small>Welcome to Crossrealm Chronicles</small></h2>
+  <p>《跨界纪元》是一款完全运行在浏览器里的位面动作角色扮演——无 Boxes，无插件，干净的 HTML + JS，打开就打。你将操控一位「位面行者」，探索七座位面枢纽连成的世界，从基础的采集与炼制，到五个 Boss 的完整叙事线，最后在没有所谓对错——却各自有重量的结局里做出选择。</p>
+  <p>它同时是一套完整的工程作品：Spring Cloud 微服务、Redis 台账、消息队列、世界事件报讯、110 枚次元回声、40+ 成就与 17 枚母题终章；另外还有小说、电影剧本、25 首可播放 OST 与一座「年鉴」单页网站——它和游戏永远同源，永远沉默。</p>
+</section>
+
+<section id="welcome" class="locale locale-en">
+  <h2>1 Welcome<small>Welcome to Crossrealm Chronicles</small></h2>
+  <p>Crossrealm Chronicles is a full ARPG that runs entirely in your browser — no installers, no plugins, just a clean HTML/JS build you open and play. You are a Planewanderer: seven realms joined by a light-frame; gathering → forging → combat → duels → a finale where both answers are right and neither is free.</p>
+  <p>It is also a complete engineering artifact: Spring Cloud microservices, Redis ledgers, message queues, world-event feeds, 110 echo entries, 40+ achievements and a 17-mother “keeper” ending — plus a novel trilogy, a 142-minute film script, a 25-track playable OST and an official compendium site. One canon, forever consistent.</p>
+</section>
+
+<section id="install" class="locale locale-zh">
+  <h2>2 安装与运行<small>30 秒</small></h2>
+  <ol>
+    <li>克隆本仓库 <code>git clone https://github.com/xiaodernan/crossrealm-chronicles.git</code></li>
+    <li>进入目录：<code>cd crossrealm-chronicles</code></li>
+    <li>安装：<code>npm install</code></li>
+    <li>开发模式：<code>npm run dev</code> → 浏览器打开 <a href="http://localhost:5173">http://localhost:5173</a></li>
+    <li>正式产物：<code>npm run build</code>，产物在 <code>dist/</code> 目录，任意静态服务器即可</li>
+  </ol>
+  <div class="note">存档保存在浏览器 localStorage 中（键名 <code>crossrealm_save_v21</code>），不占用任何网络。跨设备迁移：在游戏中按 <span class="kbd">Escape</span> → 设置 → 导出存档，然后在新设备上导入。存档损坏时，游戏会自动兜底到最小可用状态，绝不丢失进度。</div>
+</section>
+
+<section id="install" class="locale locale-en">
+  <h2>2 Install & Run<small>in 30 seconds</small></h2>
+  <ol>
+    <li>Clone the repo: <code>git clone https://github.com/xiaodernan/crossrealm-chronicles.git</code></li>
+    <li>Enter it: <code>cd crossrealm-chronicles</code></li>
+    <li>Install: <code>npm install</code></li>
+    <li>Dev: <code>npm run dev</code> → open <a href="http://localhost:5173">http://localhost:5173</a></li>
+    <li>Prod build: <code>npm run build</code> — output in <code>dist/</code>, serve with any static file server</li>
+  </ol>
+  <div class="note">Saves are kept in the browser’s localStorage under <code>crossrealm_save_v21</code> — zero network calls. Moving devices: Esc → Settings → Export save, then import on the new machine. Corrupt save? The game migrates back to a safe baseline instead of locking you out.</div>
+</section>
+
+<section id="controls" class="locale locale-zh">
+  <h2>3 操作键位<small>移动手柄一致、键鼠深度流</small></h2>
+  <table>
+    <thead><tr><th>键 / 手柄</th><th>动作</th></tr></thead>
+    <tbody>
+      <tr><td><span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span></td><td>移动 / move</td></tr>
+      <tr><td><span class="kbd">Space</span></td><td>跳跃 / jump</td></tr>
+      <tr><td><span class="kbd">Shift</span> + 移动</td><td>冲刺 / dash</td></tr>
+      <tr><td><span class="kbd">Ctrl</span></td><td>闪避翻滚 / roll</td></tr>
+      <tr><td><span class="kbd">鼠标左键</span></td><td>轻击 / 连击（连击增伤）</td></tr>
+      <tr><td><span class="kbd">鼠标右键</span></td><td>重击 / 蓄力法术</td></tr>
+      <tr><td><span class="kbd">Q</span></td><td>锁定 / 解除锁定（Boss 房必看）</td></tr>
+      <tr><td><span class="kbd">F</span></td><td>弹反 / 完美格挡（粒子会亮起）</td></tr>
+      <tr><td><span class="kbd">E</span></td><td>互动 / 对话 / 开箱 / 阅读</td></tr>
+      <tr><td><span class="kbd">1</span>–<span class="kbd">4</span></td><td>法术槽（真火 / 玄冰 / 引力 / 化身）</td></tr>
+      <tr><td><span class="kbd">Tab</span> / <span class="kbd">J</span></td><td>日志</td></tr>
+      <tr><td><span class="kbd">H</span></td><td>说明书（游戏内置）</td></tr>
+      <tr><td><span class="kbd">F7</span></td><td>星轨顾问 AI</td></tr>
+      <tr><td><span class="kbd">T</span></td><td>位面自动通关（Demo 模式，全自动过图）</td></tr>
+      <tr><td><span class="kbd">M</span></td><td>地图</td></tr>
+      <tr><td><span class="kbd">Esc</span></td><td>暂停 / 返回</td></tr>
+      <tr><td><span class="kbd">F9</span></td><td>性能 HUD（开发期工具）</td></tr>
+    </tbody>
+  </table>
+  <p class="note">全部按键可在游戏内按 <span class="kbd">Esc</span> → 控制 重新映射；物理按键冲突自动避让。</p>
+</section>
+
+<section id="controls" class="locale locale-en">
+  <h2>3 Controls<small>keyboard + mouse with controller-like flow</small></h2>
+  <table>
+    <thead><tr><th>Key / Button</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td><span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span></td><td>Move</td></tr>
+      <tr><td><span class="kbd">Space</span></td><td>Jump</td></tr>
+      <tr><td><span class="kbd">Shift</span> + move</td><td>Sprint</td></tr>
+      <tr><td><span class="kbd">Ctrl</span></td><td>Dodge roll</td></tr>
+      <tr><td><span class="kbd">Left-click</span></td><td>Light attack / combos (higher combo = finisher damage)</td></tr>
+      <tr><td><span class="kbd">Right-click</span></td><td>Heavy attack / spell charge</td></tr>
+      <tr><td><span class="kbd">Q</span></td><td>Lock on / release lock (enter any boss room with this)</td></tr>
+      <tr><td><span class="kbd">F</span></td><td>Parry / perfect guard (you’ll see the flash)</td></tr>
+      <tr><td><span class="kbd">E</span></td><td>Interact / talk / loot / read</td></tr>
+      <tr><td><span class="kbd">1</span>–<span class="kbd">4</span></td><td>Spell slots (True Fire / Ice / Gravity / Avatar)</td></tr>
+      <tr><td><span class="kbd">Tab</span> / <span class="kbd">J</span></td><td>Journal</td></tr>
+      <tr><td><span class="kbd">H</span></td><td>In-game manual</td></tr>
+      <tr><td><span class="kbd">F7</span></td><td>Star-route Advisor (AI)</td></tr>
+      <tr><td><span class="kbd">T</span></td><td>Auto-play demo (walks the mainline for you)</td></tr>
+      <tr><td><span class="kbd">M</span></td><td>Map</td></tr>
+      <tr><td><span class="kbd">Esc</span></td><td>Pause / back</td></tr>
+      <tr><td><span class="kbd">F9</span></td><td>Performance HUD (developer tool)</td></tr>
+    </tbody>
+  </table>
+  <p class="note">All keys are remappable in game (Esc → Control); conflicts are auto-resolved.</p>
+</section>
+
+<section id="combat" class="locale locale-zh">
+  <h2>4 战斗入门<small>从"会打"到"会玩"</small></h2>
+  <ol>
+    <li><strong>开打前</strong>：先按 <span class="kbd">Q</span> 锁定 Boss。Q 是眼睛，<span class="kbd">F</span> 是心。</li>
+    <li><strong>打法节奏</strong>：轻击（左键）连击攒伤害，连击高了接普攻终结（闪屏特效）；压力大时用右键重击打断。</li>
+    <li><strong>弹反窗口</strong>：Boss 红闪 = 将要出重击。F 弹反成功：无伤硬直 Boss，并回自己的资源。</li>
+    <li><strong>Boss 出手语义</strong>：
+      <ul>
+        <li>影界守护者 — 横斩两连，弹反后反手</li>
+        <li>大奥术师 — 紫弹扇形，闪避后背刺</li>
+        <li>奇点领主 — 吸力→冲刺，停顿时机</li>
+        <li>时线执政官 — 时间冻结，冻结结束前出手</li>
+        <li>混沌裂隙领主 — 弹幕，贴近短时输出</li>
+      </ul>
+    </li>
+    <li><strong>死亡也是进度</strong>：Boss 给出奖励/提示用于整理战斗，重打不惩罚。</li>
+  </ol>
+</section>
+
+<section id="combat" class="locale locale-en">
+  <h2>4 Combat 101<small>from “surviving” to “playing”</small></h2>
+  <ol>
+    <li><strong>Before you engage</strong>: lock on with <span class="kbd">Q</span>. Q is your eyes. <span class="kbd">F</span> is your heart.</li>
+    <li><strong>Rhythm</strong>: light-attack combos build damage; high combo → finisher (screen flash). Pressure spike? Heavy attack with RMB to interrupt.</li>
+    <li><strong>Parry window</strong>: a boss’s red flash = a heavy incoming. Land <span class="kbd">F</span>: free damage + refill your resources.</li>
+    <li><strong>Boss grammar</strong>:
+      <ul>
+        <li>Shadow Warden — twin slashes: parry, then counter</li>
+        <li>Archmagus — purple fan: dodge, then turn to flank</li>
+        <li>Singularity Herald — gravity pull + dash: punish the pause</li>
+        <li>The Timeline Inspector — time-freeze: strike before it ends</li>
+        <li>Chaos Overlord — bullet hell: close in, short bursts</li>
+      </ul>
+    </li>
+    <li><strong>Death counts as progress</strong>: death cues you toward the instakill patterns; retries are free.</li>
+  </ol>
+</section>
+
+<section id="world" class="locale locale-zh">
+  <h2>5 世界导览<small>七座位面 + 逆相终局</small></h2>
+  <div class="grid">
+    <div class="card"><h4>交汇枢纽</h4><p>世界之锚、训练木人、炉火边的纸条、海报墙、集货站——一切之前，先在锚火边坐 10 秒钟。</p></div>
+    <div class="card"><h4>灰白森林</h4><p>雾 + 斥候营火 + 至尊石环铭文。</p></div>
+    <div class="card"><h4>魔法遗境</h4><p>霍格沃兹遗境，飞天环赛与魔药。</p></div>
+    <div class="card"><h4>米勒荒原</h4><p>沙漏、墨菲书架、逆相裂口——时间这里跟你比耐心。</p></div>
+    <div class="card"><h4>破碎时线</h4><p>逆相广播塔、时线箭头雨（1983）。越少乱按 Tab，越清楚自己在干什么。</p></div>
+    <div class="card"><h4>混沌边境</h4><p>码头走私、禁酒窖、裂隙猎犬，米勒荒原的毒奶。</p></div>
+    <div class="card"><h4>灰烬尽头</h4><p>终章篇章·火帧，锚火之前的锚点。</p></div>
+  </div>
+  <p class="note">快速旅行：在交汇枢纽旁传送阵按 <span class="kbd">T</span>（开放野外旅行）；快速存档点（营火篝火）是跨地牢链路的锚点。</p>
+</section>
+
+<section id="world" class="locale locale-en">
+  <h2>5 World Tour<small>six + one realms</small></h2>
+  <div class="grid">
+    <div class="card"><h4>Intersection Hub</h4><p>The Anchor, the training dummies, a note at the hearth, the poster wall — sit ten seconds by the fire before you do anything.</p></div>
+    <div class="card"><h4>Grey Wood</h4><p>Mist, a scout’s campfire, the One Ring inscription.</p></div>
+    <div class="card"><h4>Magic Realm</h4><p>Hogworts ruin, flying-hoop race, potion trials.</p></div>
+    <div class="card"><h4>Miller’s Wastes</h4><p>Hourglasses, Murphy’s shelf, the Upside breach — time tests your patience here.</p></div>
+    <div class="card"><h4>Broken Timeline</h4><p>Upside broadcast tower, time-arrow rain (1983). The more you frantically beat Tab, the less you’ll see.</p></div>
+    <div class="card"><h4>Chaos Line</h4><p>Smuggling docks, speakeasy tariffs, rupture hounds.</p></div>
+    <div class="card"><h4>Ember’s End</h4><p>Chapter-Zero altar flame. The one day before the end.</p></div>
+  </div>
+  <p class="note">Fast travel: <span class="kbd">T</span> at the hub travel node. Campfires and waypoints anchor cross-dungeon routes; rest there heals and lets you talk to yourself.</p>
+</section>
+
+<section id="bosses" class="locale locale-zh">
+  <h2>6 Boss 图鉴<small>五位擂主 · 苏醒后全线开放</small></h2>
+  <table>
+    <thead><tr><th>Boss</th><th>弱点</th><th>位置</th></tr></thead>
+    <tbody>
+      <tr><td>影界守护者</td><td>光/暗两系弹反后反手</td><td>灰白森林（西）</td></tr>
+      <tr><td>大奥术师·萨尔林</td><td>蓄力打断 + 闪避后贴脸</td><td>魔法遗境（北）</td></tr>
+      <tr><td>引力化身·奇点领主</td><td>Gravity-well then punish</td><td>米勒荒原（天空）</td></tr>
+      <tr><td>时线执政官</td><td>时间冻结恢复前贴出</td><td>破碎时线</td></tr>
+      <tr><td>混沌裂隙领主</td><td>近战 burst，弹幕留行</td><td>混沌边境</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="bosses" class="locale locale-en">
+  <h2>6 Boss Index<small>five crowned duels · all open after awakening</small></h2>
+  <table>
+    <thead><tr><th>Boss</th><th>Weakness</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Shadow Warden</td><td>parry + counter on light/dark swings</td><td>Grey Wood (W)</td></tr>
+      <tr><td>Archmagus Sarlin</td><td>interrupt charge + dodge in close</td><td>Magic Realm (N)</td></tr>
+      <tr><td>Singularity Herald</td><td>Gravity-well, then punish the reset</td><td>Miller’s Wastes (sky)</td></tr>
+      <tr><td>Timeline Inspector</td><td>hit before time-freeze recovers</td><td>Broken Timeline</td></tr>
+      <tr><td>Chaos Overlord</td><td>tight spacing bursts; bullets leave no walk path</td><td>Chaos Line</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="journal" class="locale locale-zh">
+  <h2>7 日志与页签<small>日志共 13 页签：任务 · 碎片 · Boss · CG 画廊 · 回声 · 地图 · 照片 · 星轨 · 终章
+  归途  /  成就 · 系统 · 群聊（旅途注记）</small></h2>
+  <div class="grid">
+    <div class="card"><h4>任务页签</h4><p>所有主线 / 支线 / 密文，含「走到哪一步」的锚点与回溯。</p></div>
+    <div class="card"><h4>Boss 页签</h4><p>每尊 Boss 的最佳时光、斗胜记录，还有同屏回响。</p></div>
+    <div class="card"><h4>成就墙</h4><p>40+ 成就 + 17 枚母题终极 NPC——唯一「全部点亮」的奖杯在墙的尽头。</p></div>
+    <div class="card"><h4>CG 画廊</h4><p>可回看/重编排的全部 CG 解锁条件。</p></div>
+    <div class="card"><h4>回声</h4><p>110 枚 · 次元回声篇：每一枚都可以在荒原里被重新听见。</p></div>
+    <div class="card"><h4>归途</h4><p>终章后唯一的一页：17 行星尘铭文，只有走完这段路的人才能读。</p></div>
+  </div>
+</section>
+
+<section id="journal" class="locale locale-en">
+  <h2>7 Journal &amp; Tabs<small>13 tabs: Quests · Shards · Bosses · CG Gallery · Echoes · Map · Photo · Star-route · Ending</small></h2>
+  <div class="grid">
+    <div class="card"><h4>Quests</h4><p>Mainline / side-lines / lore crystals, anchored to exactly “where you are”.</p></div>
+    <div class="card"><h4>Bosses</h4><p>Best clear-time, duel history, and a friendly race-you-mirror wall.</p></div>
+    <div class="card"><h4>Achievements</h4><p>40+ + 17 mothers + a single “absenteenig” — the wall only ends when every single card burns.</p></div>
+    <div class="card"><h4>CG Gallery</h4><p>All unlockable CGs and how to reach them; watchable backlog.</p></div>
+    <div class="card"><h4>Echoes</h4><p>110 echo entries — every one can be heard again in the right zone.</p></div>
+    <div class="card"><h4>Ending</h4><p>17 stardust epitaphs — the one page you earn only by walking to the end.</p></div>
+  </div>
+</section>
+
+<section id="ending" class="locale locale-zh">
+  <h2>8 终章与归途<small>两种结局都不是错的</small></h2>
+  <p>世界之锚倒下之后，镜前没有对错，只有你愿意的那种「走」。</p>
+  <ul>
+    <li><strong>把火留给后来人</strong> —— 点燃锚火，灯继续亮在通道那边；通关成就「炉主」，出场页多一行金字：炉主 · 火没有灭。</li>
+    <li><strong>安静地走完</strong> —— 旅程在你脚下收好，没有谁流淌到下一程，但你的选择仍然被看见。</li>
+  </ul>
+  <p class="note">选择后：日志第十三页签「归途残卷」会以你的抉择亮出谢幕碑文 + 17 枚星尘铭文（17 = 第七节拍），每行可显示字：炉火·选择·问候三线思念。</p>
+</section>
+
+<section id="ending" class="locale locale-en">
+  <h2>8 Ending &amp; Embers<small>both answers are right</small></h2>
+  <p>After the Anchor falls there is no correct route — only the walking you’re willing to do.</p>
+  <ul>
+    <li><strong>“Keep the flame.”</strong> — your light goes on; cleared achievement “Echo-keeper”, and the start page carries an extra gold pill: Echo-keeper · the flame endures.</li>
+    <li><strong>“Walk it out.”</strong> — the journey gathers itself under you; nobody else receives the baton, but your choice is still seen.</li>
+  </ul>
+  <p class="note">After either choice: the <em>Embers Journal</em> tab lights its epitaph + 17 stardust inscriptions (your 17 = seven ticks). Each line reads as Fire, Choice or Hello — three ways the flame writes you home.</p>
+</section>
+
+<section id="autoplay" class="locale locale-zh">
+  <h2>9 自动通关<small>Demo Mode · 幕后</small></h2>
+  <p>按 <span class="kbd">T</span> 或在「位面助手」中点「自动通关」，游戏会自动推进整个主线：战斗 AI 规避弹反、拾取、支线全部完成。全程无需输入。</p>
+  <p class="note">用途：在未玩过的场景下欣赏剧情演出 / 评审截图 / 自动化测试（e2e gate 利用此轨通关）。</p>
+</section>
+
+<section id="autoplay" class="locale locale-en">
+  <h2>9 Auto-play<small>demo / e2e mode</small></h2>
+  <p>Press <span class="kbd">T</span> (or the “Auto-play” node in the guide panel) and the game will walk the entire mainline for you: parrying AI, looting, side-quests — you’ll watch, not play.</p>
+  <p class="note">Use cases: experience the story hands-off, capture screenshots, or let CI clear the game (the repo’s e2e gate does exactly this).</p>
+</section>
+
+<section id="online" class="locale locale-zh">
+  <h2>10 在线层与报讯台<small>默认关闭 · 全绿灯可控</small></h2>
+  <p>「设置」→「在线伙伴」开启后（持久化在 localStorage），游戏会加入一云端世界的市场生态：</p>
+  <ul>
+    <li>跨微服务世界事件 feed（Boss 被讨伐 / 换季 / 试炼榜易主 / 首领速通新王 / 双榜合影）——顾问面板底部「炉火报讯台」板块；</li>
+    <li>炉主徽记：通关的旅人在出场页有金字「炉主 · 火没有灭」（只出现给他们）；</li>
+    <li>报讯台 FAB 未读金点：有新报讯时按钮亮一眼。</li>
+  </ul>
+  <p class="note">关闭 = 零网络，零后台请求，与离线完全一致。在线层从不强制注册。玩家可随时关闭。</p>
+</section>
+
+<section id="online" class="locale locale-en">
+  <h2>10 Online Layer &amp; Fireside Rumors<small>off by default · opt-in only</small></h2>
+  <p>Turn it on in <em>Settings → Online partners</em> (persisted in localStorage) and the game joins a small cloud of real-time services:</p>
+  <ul>
+    <li>World-event feed — boss defeats, season rollovers, trial-crown swaps, speedrun-crown swaps and <strong>double crowns</strong> — pinned to the Advisor board (“Fireside rumors”).</li>
+    <li>Echo-keeper badge — clear the game and the start page carries an extra gold pill: <em>Echo-keeper · the flame endures.</em></li>
+    <li>Unread gold dot on the Advisor FAB — lights up when there’s something new to read.</li>
+  </ul>
+  <p class="note">Off = zero network, zero background requests; identical to offline. No accounts ever required. Toggle at will.</p>
+</section>
+
+<section id="crossmedia" class="locale locale-zh">
+  <h2>11 跨媒体宇宙<small>同一世界 · 多种形态</small></h2>
+  <div class="grid">
+    <div class="card"><h4>小说《跨界纪事》</h4><p>七章 + 三番外（《炉火给你的回信》《看守的回信》《林渡给看守的回信》），序言·一百零九道回声。</p></div>
+    <div class="card"><h4>电影剧本</h4><p>142 分钟 · IMAX · 三幕式 + 导演阐述 · 彩蛋《星图之外》。</p></div>
+    <div class="card"><h4>OST · 25 曲</h4><p>全部可播放 Web Audio · 手册 + 曲目释义（liner-notes）。</p></div>
+    <div class="card"><h4>年鉴 tapestry.html</h4><p>官方单页档案：年表、17 母题、110 徽章、谢幕碑、制作手记。</p></div>
+  </div>
+</section>
+
+<section id="crossmedia" class="locale locale-en">
+  <h2>11 Crossmedia Universe<small>one world · many doors</small></h2>
+  <div class="grid">
+    <div class="card"><h4>The novel</h4><p>Seven chapters + three letters (Epistolary I–III) with prologue: “One hundred and nine echoes.”</p></div>
+    <div class="card"><h4>The film</h4><p>142-minute IMAX script, three acts, director’s notes; coda: <em>Beyond the Star-maps.</em></p></div>
+    <div class="card"><h4>The OST · 25 tracks</h4><p>Fully playable Web Audio; booklet + liner notes included.</p></div>
+    <div class="card"><h4>The Compendium</h4><p><code>creative/tapestry.html</code> — official archive: timeline, 17 mothers, 110 echoes, epilogue tablets, credits.</p></div>
+  </div>
+</section>
+
+<section id="faq" class="locale locale-zh">
+  <h2>12 FAQ / 故障排查<small>跑不起来就看这页</small></h2>
+  <h3>黑屏 / 白屏</h3>
+  <p>「你的浏览器拒绝了 GLES」→ 在设置里把画质调「低」，GPU 子模块自动关闭光照细节。持续跑 60fps≈打开 perf HUD。</p>
+  <h3>无法锁定鼠标（Pointer lock 失败）</h3>
+  <p>浏览器需要 HTTPS 或 localhost 才允许锁定——按 <code>http://localhost:5173</code> 而不是直接双击 HTML 文件；F11 全屏有帮助。</p>
+  <h3>存档没了</h3>
+  <p>全部数据都在你自己的浏览器里（localStorage），不上传任何服务器。导出/导入存档请去「Esc → 设置」。</p>
+  <h3>怎么开报讯台</h3>
+  <p>只有自己运行后端服务（Spring Cloud 网关）时，「在线伙伴」开关才会产生网络请求；开发模式默认端口 8080。不开 = 零网络，不需要你所在局域网有任何东西。</p>
+  <h3>运行 dev 卡顿</h3>
+  <p>开发模式未压缩体积较大。正式使用：<code>npm run build</code> 后用 <code>npm run preview</code>，或任何静态服务，帧率远好于 dev。</p>
+</section>
+
+<section id="faq" class="locale locale-en">
+  <h2>12 FAQ / Troubleshooting<small>read me if anything feels off</small></h2>
+  <h3>Black / white screen</h3>
+  <p>If your GPU disagrees with GLES: open <em>Settings → Graphics</em> and set quality to <em>Low</em>; the pipeline drops lighting detail. Watch the perf HUD (<span class="kbd">F9</span>) to confirm stability.</p>
+  <h3>Pointer lock fails</h3>
+  <p>Browsers only allow pointer-lock on <code>https</code> or <code>localhost</code> — open <code>http://localhost:5173</code>, don’t double-click the built file. F11 full-screen helps.</p>
+  <h3>Where did my save go?</h3>
+  <p>Saves live entirely in your browser’s localStorage — nothing is ever uploaded. Esc → Settings to export/import.</p>
+  <h3>How do I turn on the rumors feed?</h3>
+  <p>Only when you’re running your own backend (Spring Cloud gateway): the “Online partners” toggle starts producing traffic. Default port 8080. Off = exactly zero network.</p>
+  <h3>The dev server stutters</h3>
+  <p>Dev mode is unminified on purpose. Use <code>npm run build</code> + <code>npm run preview</code> (or any static host) — it’s much faster.</p>
+</section>
+
+<section class="locale locale-zh">
+  <h2>写在最后</h2>
+  <p>火不会灭。故事也不会。</p>
+  <div class="cta">
+    <a class="btn primary" href="./README.md">查阅项目主页</a>
+    <a class="btn" href="./index.html">进入游戏</a>
+    <a class="btn" href="./creative/tapestry.html">官方年鉴</a>
+    <a class="btn" href="./creative/novel/00-序言.md">开始阅读</a>
+  </div>
+</section>
+<section class="locale locale-en">
+  <h2>The Epitaph</h2>
+  <p>The flame does not die. Neither does the story.</p>
+  <div class="cta">
+    <a class="btn primary" href="./README.md">Project home</a>
+    <a class="btn" href="./index.html">Enter the game</a>
+    <a class="btn" href="./creative/tapestry.html">The Compendium</a>
+    <a class="btn" href="./creative/novel/00-序言.md">Begin the novel</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <p>跨界纪元 · Crossrealm Chronicles 0.1.0 · MIT · 著作人 · xiaodernan · 2026 · <a href="./index.html">进入游戏</a></p>
+</footer>
+
+<script>
+const root = document.body;
+const buttons = document.querySelectorAll('.lang-toggle [data-set]');
+buttons.forEach((btn) => btn.addEventListener('click', () => {
+  root.classList.remove('lang-zh', 'lang-en');
+  root.classList.add(btn.dataset.set);
+  document.querySelectorAll('.lang-toggle [data-set]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b === btn));
+  });
+}));
+</script>
+</body>
+</html>
