@@ -126,6 +126,12 @@ if ($stats.backend -ne 'redis') { Write-Error "stats backend expected redis, got
 if ([long]$stats.totalPublished -lt 2) { Write-Error "totalPublished expected >= 2, got $($stats.totalPublished)"; exit 1 }
 if ([long]$stats.byKind.achievement -lt 1 -or [long]$stats.byKind.season -lt 1) { Write-Error "byKind missing achievement or season: $($stats.byKind | ConvertTo-Json -Compress)"; exit 1 }
 Write-Output "stats verified (backend=$($stats.backend) totalPublished=$($stats.totalPublished))"
+$ops = (Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:28086/api/notify/ops' -TimeoutSec 10).Content | ConvertFrom-Json
+if ($ops.backend -ne 'redis') { Write-Error "ops backend expected redis, got $($ops.backend)"; exit 1 }
+if ([long]$ops.capacity -lt 1) { Write-Error "ops capacity missing: $($ops.capacity)"; exit 1 }
+if ([long]$ops.stored -lt 2) { Write-Error "ops stored expected >= 2, got $($ops.stored)"; exit 1 }
+if ($ops.channel -ne 'crossrealm:notify:channel') { Write-Error "ops channel mismatch: $($ops.channel)"; exit 1 }
+Write-Output "ops verified (backend=$($ops.backend) stored=$($ops.stored) capacity=$($ops.capacity))"
 
 Write-Output 'verify-notify-redis PASSED'
 exit 0

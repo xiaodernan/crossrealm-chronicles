@@ -89,6 +89,25 @@ class NotifyControllerTest {
     }
 
     @Test
+    @DisplayName("ops：后端/容量/台账深度/按 kind 计数/频道名齐全且无玩家内容")
+    void opsEndpointCarriesWhiteListOnly() throws Exception {
+        mockMvc.perform(post("/api/notify").contentType("application/json")
+                .content("{\"kind\":\"world\",\"title\":\"w1\",\"body\":\"b1\"}"));
+        mockMvc.perform(post("/api/notify").contentType("application/json")
+                .content("{\"kind\":\"season\",\"title\":\"s1\",\"body\":\"b3\"}"));
+
+        mockMvc.perform(get("/api/notify/ops"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.backend", is("simple")))
+                .andExpect(jsonPath("$.stored", is(2)))
+                .andExpect(jsonPath("$.capacity", is(NotifyController.MAX_LIMIT)))
+                .andExpect(jsonPath("$.totalPublished", is(2)))
+                .andExpect(jsonPath("$.byKind.world", is(1)))
+                .andExpect(jsonPath("$.byKind.season", is(1)))
+                .andExpect(jsonPath("$.channel", is("crossrealm:notify:channel")));
+    }
+
+    @Test
     @DisplayName("recent：limit 越界被夹到 [1,50]")
     void recentClampsLimit() throws Exception {
         mockMvc.perform(get("/api/notify/recent?limit=0"))

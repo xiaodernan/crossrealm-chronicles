@@ -12,7 +12,7 @@
 | 赛季服务（W-X14） | `season-service`：赛季主题 / 词缀 / 周期倒计时（按 epochDay 算，不存状态） | 8082 |
 | AI 顾问（W-Y1） | `ai-service`：星轨顾问（服务端独占密钥 / 选择性重试 / 熔断 / TTL 缓存） | 8083 |
 | 在场同游（W-Z-同游） | `presence-service`：在场存在感（POST 心跳 beat → Set/Hash+TTL 存储；SSE 订阅 `presence:events:{channel}` Pub/Sub；memory 默认 / redis 可选；`/api/presence/{channel}/stream` SSE；`/api/presence/{channel}/ops` 运维（members/fresh/capacity/sseConnections/backend/ttlSeconds）） | 8084 |
-| 炉火报讯台（W-Z49） | `notification-service`：跨微服务通知登记处（POST `/api/notify` 校验 registry→台账→Pub/Sub 扇出；`GET /api/notify/recent?limit=N` 最近 N 条；`GET /api/notify/stats` 按 kind 计数；Redis List（LPUSH/LTRIM 50）+ Hash（HINCRBY）环形台账，7 天 TTL；memory 默认 / `SPRING_CACHE_TYPE=redis` 切真共享台账；广播 fire-and-forget，台账写失败才 503） | 8085 |
+| 炉火报讯台（W-Z49） | `notification-service`：跨微服务通知登记处（POST `/api/notify` 校验 registry→台账→Pub/Sub 扇出；`GET /api/notify/recent?limit=N` 最近 N 条；`GET /api/notify/stats` 按 kind 计数；`GET /api/notify/ops` 运维只读白名单（backend/stored/capacity/totalPublished/byKind/channel，W-Z52）；Redis List（LPUSH/LTRIM 50）+ Hash（HINCRBY）环形台账，7 天 TTL；memory 默认 / `SPRING_CACHE_TYPE=redis` 切真共享台账；广播 fire-and-forget，台账写失败才 503） | 8085 |
 | 可靠任务队列（W-Y4） | `ai-service`：`/api/ai/chat/async` 提交 → `/api/ai/jobs/{id}` 轮询；有界队列 / 2 worker / 幂等键 / 选择性重试 / 死信 / 背压 429 | 8083 |
 
 > 与游戏本体**完全解耦**：`npm run build` 不感知它；不接它时游戏功能不受任何影响。
@@ -42,7 +42,7 @@ server/
   scripts/verify-prometheus.ps1 # W-Z10 Prometheus 端点实证（Micrometer metrics + JVM 基础指标；scrape 到 game_telemetry_* + jvm_memory_used_bytes）
   scripts/verify-prometheus-ai.ps1 # W-Z12 ai-service Prometheus 端点实证（advisor chat 一次真对话 + scrape /actuator/prometheus 看到 ai_upstream_calls_total / prompt_tokens_total / cache_hit_ratio）
   scripts/verify-presence-redis.ps1 # W-Z-同游 在场服务实证（throwaway redis：beat → count=1 → SISMEMBER+GET 原始键 → SSE snapshot 重放 + silver-leaf 实时帧 → 跨实例重启共享状态；CI 真跑）
-  scripts/verify-notify-redis.ps1 # W-Z49 炉火报讯台实证（throwaway redis：发布→recent 读回→LLEN/HGET 原始键→跨实例 B 可见同一行→stats backend=redis；CI 真跑）
+  scripts/verify-notify-redis.ps1 # W-Z49 炉火报讯台实证（throwaway redis：发布→recent 读回→LLEN/HGET 原始键→跨实例 B 可见同一行→stats backend=redis → /ops 只读白名单 backend/stored/capacity/channel；CI 真跑）
  scripts/smoke.ps1 # 全链路冒烟门禁（含 gateway→gateway_prometheus 段 §4r：JVM + gateway_requests_total + _duration_seconds；ci 真跑）
   scripts/verify-prometheus-ai.ps1 # W-Z12 ai-service Prometheus 端点实证（advisor chat 一次真对话 + scrape /actuator/prometheus 看到 ai_upstream_calls_total / prompt_tokens_total / cache_hit_ratio）
   docker-compose.yml     # 八容器一键部署（discovery / config / game / season / ai / presence / notification / redis）+ 一次性 verify 容器（/api/presence/world/count + /api/notify/recent 也已纳入）

@@ -92,6 +92,26 @@ public class NotifyController {
         return out;
     }
 
+    /**
+     * W-Z52：报讯台运维只读白名单（presence `/ops` 同族）——
+     * 给 /api/ops/health 聚合与人肉排障用。白名单里没有任何玩家内容：
+     * 后端实现、台账深度、容量、按 kind 的发布计数、频道名。
+     * 无鉴权也安全（全是数字和固定字符串），与 presence ops 同一口径。
+     */
+    @GetMapping("/api/notify/ops")
+    public Map<String, Object> ops() {
+        Map<String, Long> byKind = ledger.countsByKind();
+        long total = byKind.values().stream().mapToLong(Long::longValue).sum();
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("backend", ledger.backend());
+        out.put("stored", ledger.size());
+        out.put("capacity", MAX_LIMIT);
+        out.put("totalPublished", total);
+        out.put("byKind", byKind);
+        out.put("channel", CHANNEL);
+        return out;
+    }
+
     /** 台账写失败统一 503；不让它变成 Spring 默认 500（调用方看不懂是哪坏了）。 */
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> ledgerUnavailable(IllegalStateException e) {
