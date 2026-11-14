@@ -37,7 +37,18 @@ const outArg = arg('out', join(ROOT, 'creative', 'GLOSSARY.md'));
 const appendMode = arg('append', null) === 'true'; // true = 只写各章节段（不写页眉），供多进程拼接
 
 /* 按章切块（≤ 8000 字）喂给模型；章内分片防注意力漂移 */
-const files = readdirSync(NOVEL_DIR).filter((f) => f.endsWith('.md')).sort();
+const files = (() => {
+  const out = [];
+  const walk = (dir, prefix) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) walk(join(dir, entry.name), rel);
+      else if (entry.isFile() && entry.name.endsWith('.md')) out.push(rel);
+    }
+  };
+  walk(NOVEL_DIR, '');
+  return out.sort();
+})();
 const selected = only ? files.filter((f) => f.includes(only)) : files;
 function chunks(name, text, maxChars = 8000) {
   const out = [];
