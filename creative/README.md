@@ -38,7 +38,7 @@ creative/music/soundtrack.html
 
 按顺序阅读：`novel/00-序言.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-番外` → `09-番外二` → **`10-番外三`**
 
-英文版：`novel/en/00-prologue.md`（EN 版 Prologue；其余章节中文为母本，逐一译出中）
+英文版（全量译本）：`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply`（译本与母本同频率、同一笔触、同一节拍）
 
 每一章对应游戏的章节走法：
 
