@@ -18,6 +18,7 @@ public class GameServiceProperties {
     private final Leaderboard leaderboard = new Leaderboard();
     private final Trial trial = new Trial();
     private final Telemetry telemetry = new Telemetry();
+    private final Idempotency idempotency = new Idempotency();
     private String versionNote = "本地默认配置";
 
     public Leaderboard getLeaderboard() {
@@ -30,6 +31,10 @@ public class GameServiceProperties {
 
     public Telemetry getTelemetry() {
         return telemetry;
+    }
+
+    public Idempotency getIdempotency() {
+        return idempotency;
     }
 
     public String getVersionNote() {
@@ -136,6 +141,55 @@ public class GameServiceProperties {
 
         public void setMaxEvents(int maxEvents) {
             this.maxEvents = maxEvents;
+        }
+    }
+
+    /**
+     * 幂等提交（W-Z65）：`POST /api/leaderboard`、`POST /api/trials/runs` 支持可选的
+     * `X-Idempotency-Key` 头。**`enabled=false` = 完全关闭（无开销、行为与无 key 时一致）。**
+     * `backend=memory`（默认）= 本进程 LRU + TTL；`redis` = Redis SET NX PX（多实例共享台账）。
+     * 未提供 key 的请求永远不走幂等路径——行为与改造前完全一致。
+     */
+    public static class Idempotency {
+        /** 幂等总开关；关 = 完全不拦截 */
+        private boolean enabled = true;
+        /** 台账后端：memory（默认）/ redis */
+        private String backend = "memory";
+        /** 台账 TTL（超时后同 key 可再次提交） */
+        private int ttlSeconds = 600;
+        /** 内存台账容量（LRU 逐出最旧） */
+        private int maxEntries = 512;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getBackend() {
+            return backend;
+        }
+
+        public void setBackend(String backend) {
+            this.backend = backend;
+        }
+
+        public int getTtlSeconds() {
+            return ttlSeconds;
+        }
+
+        public void setTtlSeconds(int ttlSeconds) {
+            this.ttlSeconds = ttlSeconds;
+        }
+
+        public int getMaxEntries() {
+            return maxEntries;
+        }
+
+        public void setMaxEntries(int maxEntries) {
+            this.maxEntries = maxEntries;
         }
     }
 }

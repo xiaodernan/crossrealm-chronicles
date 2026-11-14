@@ -18,4 +18,13 @@ game-service:
     # 内存里最多缓存多少条遥测事件（超出后丢弃最老的一条）
     max-events: 500
   notify-mirror-enabled: true
+  idempotency:
+    # 幂等提交：X-Idempotency-Key 头（可选、仅 POST /api/leaderboard 与 /api/trials/runs）
+    # memory（默认）= 本进程 LRU + TTL；redis = 跨实例共享台账（与 verify-notify-redis 同套验证思路）
+    enabled: true
+    backend: memory
+    # 台账 TTL：超时后同 key 可以再次提交
+    ttl-seconds: 600
+    # 内存台账容量（LRU 逐出最旧）
+    max-entries: 512
   version-note: "在线伙伴服务 —— 由 Spring Cloud 统一配置中心下发"

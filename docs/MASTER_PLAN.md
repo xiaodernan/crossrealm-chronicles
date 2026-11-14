@@ -7698,3 +7698,34 @@ Phase D（系统与质量）
 
   - **后续**：① posters 可增一张《看守的日子 · Studio Proof》（挂在 tapestry 年鉴尾页即可）；
     ② 若 DCP 定版，导出 OST 25 为杜比 atmos 主题曲，次声垫底 + 三角波，无需乐队、无需配乐——只留咳嗽和纸声。
+- **2026-11-14 W-Z65「幂等提交」——榜单写路径的分布式重试语义（X-Idempotency-Key）** —— 提交：本次 HEAD
+
+  - **起因**：玩家在弱网环境下重复按下「提交通关」（或 CDN/网关层无反馈地重试），`POST /api/leaderboard` 与
+    `POST /api/trials/runs` 每次都真实入账——首领榜前几名长出重复记录、碎片榜镜像被真假两条挤两次、
+    易主镜像（W-Z54/W-Z56/W-Z60）还会被刷两次的虚假易主节奏；而**这是常见的、后端业内默认已经解决的分布式问题**——幂等键。
+
+  - **做法**：新增 `game-service/idempotency` 包：
+    ① `StoredResponse`（fingerprint/status/body/expiresAtMs）；② `IdempotencyStore` 接口 + `InMemoryIdempotencyStore`
+       （accessOrder LRU LinkedHashMap，容量逐出、TTL 60s–X 懒失效，无定时器线程——与 B39 纪律同源）
+       + `RedisIdempotencyStore`（@ConditionalOnProperty `backend=redis`；`crossrealm:idem:{key}`，PX=ttl，
+       所有异常 fail-open）；③ `IdempotencyFilter`（@Component，只服务 `POST /api/leaderboard` 与 `POST /api/trials/runs`）：
+       未提供 key = 完全不走幂等路径；key 必须 `^[A-Za-z0-9_-]{1,128}$` 否则 400；同 key 同 body → 逐字节重放
+       （`X-Idempotent-Replayed: true`）；同 key 不同 body → 409 `{"error":"idempotency-key-conflict"}`，业务永远不到服务层；
+       2xx 才入台；Body 只到响应快照——台账只缓存 2xx，失败的永远不会糊住。
+    ④ docker-compose game-service 增 `GAMESERVICE_IDEMPOTENCY_BACKEND=redis`（Relaxed 含 `-` 的表单）；
+       config-server `game-service.yml` 增 `idempotency{enabled,backend,ttl-seconds,max-entries}` 默认值；
+       smoke 新增 **4t 段**：POST 两次同 key → 响应**逐字节一致** + `X-Idempotent-Replayed: true`；
+       同 key 不同 body → 409
+       ；key `!!nope` → 400（ParseFile 语法复核 + CI 真跑）。
+
+  - **判据**：`InMemoryIdempotencyStoreTest` 4 例（TTL/LRU/覆盖/存取）；`IdempotencyFilterTest` 7 例
+    （无 key 零拦截/enabled=false passthrough/非法 key 400/同 key 同 body 字节一致重放/同 key 不同 body 409/GET 与非白名单路径不拦截/TTL=0 立即过期）；
+    game-service 相关 62 例全绿；`mvn -f server/pom.xml verify` → **BUILD SUCCESS**（9 模块）。
+
+  - **风险**：① 台账按 TTL 自然死亡——长期 client 若永远不换 key 长期缓存也无益（10 分钟足够一次重试并发）；
+    ② 多实例 memory 模式下只有单实例 dedupe（多副本对同 key 可能双入账）——docker-compose 已切 redis，生产多实例靠 redis 共享台账；
+    ③ 2xx 以复用为准——200 的全量重放口径；409 给 client 的语义是「你用了旧 key」，
+       客户端应丢弃旧 key 生成新 key——这与 HTTP 规范里其它幂等机制（Stripe Idempotency-Key）一致，不特殊。
+
+  - **后续**：① notify 侧 telemetry boss_defeated 亦可加幂等键（当前按「重复计数本身就是信息」设计，不立刻加）；
+    ② AI 服务的 /api/ai/jobs（异步队列）是天然幂等土壤——用户可禁用自动重发；③ `X-Idempotency-Key-Expiry` 头可以告知客户端台账还有多久/过期时间。

@@ -252,6 +252,30 @@ try {
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/leaderboard?limit=4' -TimeoutSec 15).Content
 
     Write-Host ""
+    Write-Host ""
+    Write-Host "=== 4t) via gateway: X-Idempotency-Key replay (W-Z65) ==="
+    $idemBody = '{"runner":"smoke-idem","bossId":"shadow-warden","clearTimeMs":222222,"chapter":2}'
+    $idem1 = Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/leaderboard' `
+        -ContentType 'application/json' -Body $idemBody -Headers @{ 'X-Idempotency-Key' = 'smoke-idem-key-1' } -TimeoutSec 15
+    $idem2 = Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/leaderboard' `
+        -ContentType 'application/json' -Body $idemBody -Headers @{ 'X-Idempotency-Key' = 'smoke-idem-key-1' } -TimeoutSec 15
+    if ($idem1.Content -ne $idem2.Content) { Write-Error ("idempotency replay body mismatch: first=" + $idem1.Content + " second=" + $idem2.Content); exit 1 }
+    if ($idem2.Headers['X-Idempotent-Replayed'] -ne 'true') { Write-Error ("second call must be a replay: " + ($idem2.Headers | Out-String)); exit 1 }
+    Write-Host "replay ok: identical bodies; X-Idempotent-Replayed=true"
+
+    # 同 key 不同 payload → 409
+    $conflict = $null
+    try { $conflict = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/leaderboard' `
+        -ContentType 'application/json' -Body '{"runner":"smoke-idem","bossId":"shadow-warden","clearTimeMs":333333,"chapter":3}' `
+        -Headers @{ 'X-Idempotency-Key' = 'smoke-idem-key-1' } -TimeoutSec 15).StatusCode } catch { $conflict = [int] $_.Exception.Response.StatusCode }
+    if ($conflict -ne 409) { Write-Error ("expected 409 for key conflict, got: " + $conflict); exit 1 }
+
+    # 非法 key → 400
+    $bad = $null
+    try { $bad = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/leaderboard' `
+        -ContentType 'application/json' -Body $idemBody -Headers @{ 'X-Idempotency-Key' = '!!nope' } -TimeoutSec 15).StatusCode } catch { $bad = [int] $_.Exception.Response.StatusCode }
+    if ($bad -ne 400) { Write-Error ("expected 400 for invalid idempotency key, got: " + $bad); exit 1 }
+    Write-Host "idempotency 409/400 paths ok"
     Write-Host "=== 4) via gateway: post one telemetry event, then read the counter ==="
     (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/telemetry/events' `
         -ContentType 'application/json' -Body '{"type":"boss_defeated","detail":"void-chronarch"}' -TimeoutSec 15).Content

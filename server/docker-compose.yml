@@ -58,8 +58,15 @@ services:
       EUREKA_INSTANCE_PREFERIPADDRESS: "false"
       # 只有 game-service 拉配置；config-server 自己绝不回拉自己（见 scripts/smoke.ps1 注释）
       SPRING_CONFIG_IMPORT: optional:configserver:http://config:8888
+      # 幂等提交台账切到 redis（多实例共享、跨实例同 key 同回答；memory=单实例默认）。
+      # Spring relaxed binding：game-service.idempotency.backend → GAMESERVICE_IDEMPOTENCY_BACKEND
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+      GAMESERVICE_IDEMPOTENCY_BACKEND: redis
     depends_on:
       config:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8081/actuator/health || exit 1"]

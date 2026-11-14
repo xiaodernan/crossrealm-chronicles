@@ -94,6 +94,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\verify-breaker.ps1
 配置中心支持 
 **W-X13 深度健康视图**（`OpsController`，无外呼）：`GET /api/ops/health` —— 一次调用答出：service name / version / javaVersion / 当前 bind 的 `game-service.*` 配置（seed / max events / version note）以及 `inMemory.*`（leaderboard 记录数 / telemetry 事件数）。互补 /acactuator/health 只判 liveness、不出别的信息。
 **W-Z59/W-Z60 报讯流的账（`notifyMirrors`）**：同一端点新节 `notifyMirrors:{available, published:{bossDefeated, seasonAdvance, trialDethrone, leaderboardDethrone, dualCrown, total}}`（game-service 本进程发布成功计数；镜像 bean 缺席 → `{available:false}`，装配但 `game-service.notify-mirror-enabled=false` → `published.total=0`）。**W-Z60 双冠**：首领榜易主且新王同时戴着试炼榜皇冠（`TrialLeaderboardService.crownsHeldBy()` 逐 season 判 `top(1)`）→ 再镜一条 `world` 报讯（「世界事件 · 双冠」）；旧构造路径行为与 W-Z56 一致。
+**W-Z65 幂等提交**：`POST /api/leaderboard`、`POST /api/trials/runs` 支持可选 `X-Idempotency-Key`（`^[A-Za-z0-9_-]{1,128}$`，TTL 600s，2xx 才入台）：未提供 key = 完全零拦截；同 key 同 body 原样重放（`X-Idempotent-Replayed: true`）；同 key 不同 body → 409 `{"error":"idempotency-key-conflict"}`，业务不到服务层；内存默认（LRU+TTL）/ `redis` 共享台账（`crossrealm:idem:{key}`，PX）；fail-open；smoke 4t 段真跑回放 + 409/400 路径。
 **W-X12 限流（rate-limit by IP）**：网关新增 `RateLimitByIpFilter`（Spring Cloud Gateway `GlobalFilter`，order=-100，独立于 circuitbreaker / retry）—— `X-Forwarded-For`（信任代理后）或连接 `remoteAddress`（fallback）为 key，同 IP 10 秒最多 60 次，超出返回 `429 + {"error":"rate-limited","retryAfterMs":…}`。
 - 正常玩家与 smoke 不会撞上（smoke 全链路 ~15 次）
 - 60 req / 10s 足以挡住单 IP 高频抓取 / 刷榜
