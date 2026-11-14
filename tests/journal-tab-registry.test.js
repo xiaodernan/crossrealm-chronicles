@@ -30,6 +30,8 @@ const 迁移前中文 = {
   trial: '试炼',
   // W-G4 切片1：传说碑
   legends: '传说碑',
+  // W-Z51：终局后「归途残卷」
+  ending: '归途残卷',
 };
 
 describe('日志页签合并（JournalTabRegistry）', () => {
@@ -46,9 +48,9 @@ describe('日志页签合并（JournalTabRegistry）', () => {
     expect(JSON.stringify(base)).toBe(snapshot);
   });
 
-  it('扩展页签的键集合是 HUD 计数分支认得的那 12 个（加/改页签时这里会红，提醒同步 HUD）', () => {
+  it('扩展页签的键集合是 HUD 计数分支认得的那 13 个（加/改页签时这里会红，提醒同步 HUD）', () => {
     expect(Object.keys(JOURNAL_EXTRA_TABS).sort()).toEqual(
-      ['achievements', 'bestiary', 'cg', 'codex', 'dungeons', 'echoes', 'legends', 'memory', 'season', 'side', 'skills', 'trial'],
+      ['achievements', 'bestiary', 'cg', 'codex', 'dungeons', 'echoes', 'ending', 'legends', 'memory', 'season', 'side', 'skills', 'trial'],
     );
   });
 

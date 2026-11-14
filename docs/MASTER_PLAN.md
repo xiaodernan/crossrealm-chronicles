@@ -7352,3 +7352,32 @@ Phase D（系统与质量）
 
   - **后续**：① season:advance / trial 榜 Top-1 变更这类低频名场面也可以镜像（白名单加两行）；
     ② 报讯台接入前端后可以在地图上叠「最近世界事件」角标；③ 若要 exactly-once，上 Redis Streams 消费者组（与 W-Z1 同构）。
+- **2026-11-14 W-Z51「归途残卷」——日志新增通关后才点亮的终局页（journal tab #13）** —— 提交：本次 HEAD
+
+  - **起因**：成就墙 + 次元回声页已经承载「收集」的满足感，但**终局本身**没有一页可读的纪念——
+    通关那一刻的两个收尾抉择（把火留给后来人 / 亲手熄掉锚点）、17 枚星尘铭文的解锁状态、以及终局正文本身，
+    全部散落在成就墙里、在 `end-credits-epilogue` 里、在对话框里——没有一个地方把它们**收拢成一页**。
+
+  - **做法**：① 新页签 `ending`（源文案键 `journal_tab_ending` = 归途残卷 / The Return）；
+    ② `EndingJournalTab.js`：**通关前全锁**（`quests.completed !== true` ⇒ 一个锁 +「锚火属于走完这段路的人——通关后此页点亮」）；
+    通关后：终局正文按 keep/quiet 取**正文键**反推（`endingDialogKey()` —— 与结局对话框 / 谢幕碑同一条取名路径，
+    B155 口径的**唯一**；本文件自己读 decisions 会被 choice-objective 门禁当作第二份真相直接红），
+    下方按 W-Z29 星尘铭文口径列出 17 枚残章（解锁 ⇒ 金色 glyph 🕯；未解锁 ⇒ 🔒）；
+    ③ HUD：计数 suffix `(x/17)`（epitaphs 口径），子页签壳与返回按钮沿既有 `ensureBackToList` 走；
+    ④ Tab Registry：`JOURNAL_EXTRA_TABS.ending`；测试钉死 12 → **13**；
+    ⑤ i18n 双表 +6 键（`journal_tab_ending` + 5 枚 `ending_epitaph_*`），`EXPECTED_KEY_COUNT` 3096 → **3102**（W-Z49 后第二刀）；
+    ⑥ CSS `.ending-intro` / `.ending-locked*`；无新增动画（reduced-motion 零增量）。
+
+  - **判据**：`npm test` **6651 例全绿**（含 `journal-tab-registry` 13 枚钉死、`choice-objective` 单源门禁、
+    `content-i18n-keys` 31/31、`journal-tab-return` 八个子页签逐一走一遍）；`npm run lint` 0；
+    `npm run build` ✓（13.9s）；`npm run size` 2.18 MiB（首屏增量 0.00 MiB，余 0.07 MiB，门禁过）。
+
+  - **风险**：① 页签顺序插在 `legends` 之后（菜单位置固定，不打乱老玩家的肌肉记忆）；
+    ② epitaph 解锁态与成就墙共用 `ACHIEVEMENTS.unlocked` 单一真相——不引入第二套完成判定；
+    ③ 老档（未在完整存档路径通关过）玩家会看见锁——这是刻意语义：「通关后此页点亮」；
+    ④ W-Z50/W-Z49b 的报讯流与它共用 EndingJournalTab 的金光语言（coherence），但**没有耦合**——
+    两条链路互不依赖、互不 import（防环形）。
+
+  - **后续**：① 归途残卷可以在谢幕碑退场后主动脉冲一次（CSS-only 脉动，不新增 JS 轮询）；
+    ② 星尘铭文全解锁时，EndingJournalTab 把 `ach_ept_all` 那一格点亮；
+    ③ 归途残卷值得一个 e2e 帧（e2e-clear 的 dump 截图里核对 `ending-locked` 的存在与通关后缺失）。

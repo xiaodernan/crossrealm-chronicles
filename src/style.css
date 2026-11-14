@@ -4409,3 +4409,18 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   0%, 100% { opacity: 0.7; }
   50%      { opacity: 1.0; }
 }
+
+
+/* === 归途残卷（W-Z51）：通关后才点亮的终局一页 ============================================
+   未通关的玩家只看见一把锁：锚火属于走完这段路的人。
+   已通关的玩家看见：终局抉择取名正文 + 17 枚星尘铭文。 */
+.ending-intro {
+  font-size: 0.84rem; line-height: 1.85; font-style: italic;
+  color: rgba(233, 226, 210, 0.82); margin: 4px 0 10px;
+}
+.ending-locked {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; padding: 48px 24px 36px; text-align: center;
+}
+.ending-locked-glyph { font-size: 2.4rem; filter: grayscale(0.6); opacity: 0.8; }
+.ending-locked-text { max-width: 420px; font-size: 0.82rem; line-height: 1.8; color: rgba(217, 200, 168, 0.68); margin: 0; }

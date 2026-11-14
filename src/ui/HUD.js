@@ -3,6 +3,7 @@ import { MAP_SPAN_M } from '../game/ExplorationMap.js';
 import { WINDING_ROUTES } from '../content/windingRoutes.js';
 import { JOURNAL_CATEGORIES, DISCOVERABLE_TOTAL } from '../game/StoryJournal.js';
 import { mergeJournalCategories } from './JournalTabRegistry.js';
+import { ECHO_EPITAPHS } from '../content/echoEpitaphs.js';
 import { scheduler } from '../engine/Scheduler.js';
 import { on, offAll } from '../engine/EventBus.js';
 import { refreshKeyText, setHintDevice, keyText } from './keyHints.js';
@@ -158,6 +159,7 @@ const JOURNAL_SUB_TABS = {
   side: (game, panel) => game.sideQuestJournalTab.render(panel),
   echoes: (game, panel) => game.popCultureTab.render(panel),
   legends: (game, panel) => game.legendsTab.render(panel),
+  ending: (game, panel) => game.endingTab.render(panel),
 };
 
 export class HUD {
@@ -881,6 +883,10 @@ buildHUD() {
       else if (k === 'skills') suffix = ` (${this.game.weaponSkills?.unlocked?.size ?? 0})`;
       else if (k === 'side') suffix = ` (${this.game.sideQuests?.getProgress()?.done ?? 0}/${this.game.sideQuests?.getProgress()?.total ?? 0})`;
       else if (k === 'echoes') suffix = ` (${this.game.popCulture?.getStats()?.unlocked ?? 0})`;
+      else if (k === 'ending') {
+        const unlockedSet = this.game.achievements?.unlocked ?? new Set();
+        suffix = ` (${ECHO_EPITAPHS.filter((e) => unlockedSet.has(e.ach)).length}/${ECHO_EPITAPHS.length})`;
+      }
       else if (k !== 'all') suffix = ` (${j.getCounts()[k] ?? 0})`;
       return `<button type="button" class="journal-tab${tab === k ? ' active' : ''}" data-tab="${k}">${t(label)}${suffix}</button>`;
     }).join('');

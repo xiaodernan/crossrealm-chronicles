@@ -20,6 +20,7 @@ export const JOURNAL_EXTRA_TABS = {
   side: 'journal_tab_side',
   echoes: 'journal_tab_echoes',
   legends: 'journal_tab_legends',
+  ending: 'journal_tab_ending',
 };
 
 export function mergeJournalCategories(base) {
