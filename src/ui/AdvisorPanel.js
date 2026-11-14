@@ -82,6 +82,7 @@ export class AdvisorPanel {
     this.notifyEl = doc?.getElementById('advisor-notify') ?? null;
     this.notifyList = doc?.getElementById('advisor-notify-list') ?? null;
     this.notifyDot = doc?.getElementById('advisor-notify-dot') ?? null;
+    this.fabDot = doc?.getElementById('fab-notify-dot') ?? null;
     this._notifyUnsub = null;
     this._notifyState = null;
 
@@ -144,6 +145,7 @@ export class AdvisorPanel {
     this._notifyUnsub = notifyTracker.subscribe((items, ready) => {
       this._notifyState = [items, ready];
       this._renderNotify();
+      this._renderFabDot();
     });
 
   }
@@ -164,7 +166,7 @@ export class AdvisorPanel {
     this._renderCount();
     void this._checkHealth();
     // 报讯台：打开面板时拉一次最近三条（拉完即把水位线推到最新——红点随即熄灭）
-    void notifyTracker.refresh().then((ok) => { if (ok) notifyTracker.markSeen(); });
+    void notifyTracker.refresh().then((ok) => { if (ok) notifyTracker.markSeen(); this._renderFabDot(); });
     return true;
   }
 
@@ -445,6 +447,14 @@ export class AdvisorPanel {
       this.notifyDot.classList.toggle('hidden', notifyTracker.unreadCount() <= 0);
     }
     this.notifyEl.classList.remove('hidden');
+  }
+
+  /** FAB 上的金点：ready 且有未读才亮（aria-hidden，不打断读屏）；打开面板后即熄灭 */
+  _renderFabDot() {
+    if (!this.fabDot) return;
+    const [items, ready] = this._notifyState ?? [[], false];
+    const show = !!ready && items.length > 0 && notifyTracker.unreadCount() > 0;
+    this.fabDot.classList.toggle('hidden', !show);
   }
 
   dispose() {

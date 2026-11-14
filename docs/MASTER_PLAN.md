@@ -7381,3 +7381,38 @@ Phase D（系统与质量）
   - **后续**：① 归途残卷可以在谢幕碑退场后主动脉冲一次（CSS-only 脉动，不新增 JS 轮询）；
     ② 星尘铭文全解锁时，EndingJournalTab 把 `ach_ept_all` 那一格点亮；
     ③ 归途残卷值得一个 e2e 帧（e2e-clear 的 dump 截图里核对 `ending-locked` 的存在与通关后缺失）。
+- **2026-11-14 W-Z52「报讯台 ops 只读白名单 + FAB 未读金点 + 炉火给你的回信番外」——线上可观测、线下可喜爱、纸上可无限** —— 提交：本次 HEAD
+
+  - **起因**：W-Z49 立了报讯台，而运维只看得见 `/api/notify/stats`（按 kind 计数）——
+    容量/在途/频道名这类白名单级诊断，`presence-service /ops` 同族却没有。
+    同时前端侧紫金金点是「未读报讯才亮」的天然锚点——报讯台再有内容，
+    玩家也只能自己想起去打开顾问面板；金点是「炉火给你留着」的视觉语言。
+    而《跨界纪事》的七章主线 + 余烬之后，还差一封真正「炉火执笔」给读者的信。
+
+  - **做法**（server）：① `GET /api/notify/ops` —— 白名单仅 6 格（backend / stored / capacity=50 /
+    totalPublished / byKind / channel=crossrealm:notify:channel），presence ops 同族，无玩家内容、无鉴权也安全；
+    ② `verify-notify-redis.ps1` 增加 `/ops` 断言（backend=redis / capacity / stored / channel）；
+    ③ `NotifyControllerTest` +1 例（10/10 绿）。Docker 本机不可用，redis 联调由 CI server workflow 承载。
+
+  - **做法**（src，W-Z52b）：① `#fab-notify-dot`（aria-hidden 11px 金点，纯 CSS 无动画）；
+    ② `AdvisorPanel` 复用既有 notifyTracker 订阅——订阅回调与 `refresh().then(markSeen)` 各调一次
+    `_renderFabDot()`（状态变化 + 已读后立即熄灭两条路径）；`notifyTracker.unreadCount()` 判定；
+    ③ `Game.js` 开局 `if (onlineServices.enabled()) void notifyTracker.refresh()`——**在线关闭 = 零网络契约不变**；
+    ④ 类名刻意避开 `advisor-fab` 子串（W-D6 切片11 焦点门禁：CSS `cursor:pointer` 的每个类只许写在可聚焦标签上；
+    `advisor-fab` 指向 button，而 `<span class="advisor-fab-dot">` 会让扫描器把 .advisor-fab 误配到 span 上，已改名为 `.fab-notify-dot`）。
+
+  - **做法**（creative）：《番外 · 炉火给你的回信》——写在第七章之后，炉火执笔给「按过 E 的人」的五封短信：
+    收件人 / 你为什么走到这里 / 火为什么不灭 / 你已经是那个候选人了 / 关于下一次。
+    以第八个字「火」收尾——字幕、OST、小说、剧本、海报至此全部收拢。
+
+  - **判据**：`npm test` **6661 例全绿**（含 `advisor-fab-dot` 5 例 + `focus-nav` 65 例）；
+    `npm run lint` 0；`npm run build` ✓（6.2s）；`npm run size` 2.18 MiB（零波动，余 0.07 MiB）；
+    `mvn -f server/notification-service/pom.xml test` → **10/10 绿**。
+
+  - **风险**：① FAB 金点亮起依赖 notifyTracker 的 enabled()——离线玩家永远看不见（这是默认关闭契约，不修）。
+    ② 金点「未读数」基于 localStorage 水位线，换设备/清数据 → 全部重算未读（可接受，与 presence id 同级）；
+    ③ `/ops` 无鉴权公开了台账容量/发布量——它们是数字与固定字符串（无玩家内容），与 presence ops 同一口径，不破先例。
+
+  - **后续**：① FAB 金点可以在 4.5s 内脉动一次（有且仅有一次入场闪动）；② 归途残卷在通关那刻可让金点「亮一下熄三秒」致意；
+    ③ /api/notify/ops 可以被 `/api/ops/health` 复合视图收纳（W-Z13 家族）；
+    ④ 第八章/番外第二封信留给「炉主接力」的完整闭环（在场微光在线层的小说化）。

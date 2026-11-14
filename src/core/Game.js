@@ -34,6 +34,7 @@ import { 建写者租约, 租约可调项 } from '../platform/lease.js';
 import { onlineServices } from '../online/OnlineServices.js';
 import { PresenceBeat } from '../online/PresenceBeat.js';
 import { presenceTracker } from '../online/presenceTracker.js';
+import { notifyTracker } from '../online/notifyTracker.js';
 import { bossBestTimes } from '../game/BossBestTimes.js';
 import { fmtClock } from '../ui/msClock.js';
 /** 本文件自己的监听出口（W-A1 注销欠账迁移第四处）：所有**游戏事件**监听都带同一个所有权标识。
@@ -478,6 +479,9 @@ export class Game {
     // W-Z26：上线后挂上在线在场心跳 + SSE 订阅（进程内单例，开局只 start 一次）
     this.presenceBeat = this._adopt('online/PresenceBeat', new PresenceBeat(this));
     presenceTracker.start();
+    // W-Z52：在线开启时开局拉一次报讯快照——FAB 上那枚金点才有得亮；
+    // 未启用在线服务时零网络请求（与默认关闭契约一致），失败静默（notifyTracker 自己吞）
+    if (onlineServices.enabled()) void notifyTracker.refresh();
     void this.seasons.refreshFromOnline();
     this.combatStyle = this._adopt('game/CombatStyleTracker', new CombatStyleTracker(this));
     this.combatStyleOverlay = this._adopt('ui/CombatStyleOverlay', new CombatStyleOverlay(this));

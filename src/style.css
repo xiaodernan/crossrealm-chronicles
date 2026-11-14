@@ -4424,3 +4424,14 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 }
 .ending-locked-glyph { font-size: 2.4rem; filter: grayscale(0.6); opacity: 0.8; }
 .ending-locked-text { max-width: 420px; font-size: 0.82rem; line-height: 1.8; color: rgba(217, 200, 168, 0.68); margin: 0; }
+
+
+/* === advisor-fab 未读金点（W-Z52） ===================================================
+   在线开启 + 有未读报讯时浮在 FAB 右上角：一枚 11px 的金点（无动画、不抢戏、aria-hidden）。 */
+.fab-notify-dot {
+  position: absolute; top: -3px; right: -3px;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--gold-hi, #ffd98a);
+  box-shadow: 0 0 10px rgba(255, 217, 138, 0.95), 0 0 0 2px rgba(8, 7, 14, 0.75);
+}
+.fab-notify-dot.hidden { display: none; }
