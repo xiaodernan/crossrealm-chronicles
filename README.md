@@ -109,8 +109,8 @@ creative/     周边内容：原画 / 小说 / OST / 海报 · Surrounding conte
 |-----------|---------------|
 | [`MASTER_PLAN.md`](docs/MASTER_PLAN.md) | **唯一执行计划**：执行协议、现状快照、工作包 W-A/B/C/D、内容数量目标、进度看板、ADR · **The single running plan**: execution protocol, current snapshot, work packets W-A/B/C/D, content targets, status board, ADRs |
 | [`OVERHAUL_PLAN.md`](docs/OVERHAUL_PLAN.md) | 工程重构详录（历史，不再排期） · Overhaul log (historical, no longer scheduled) |
-| [`COMBAT_DESIGN.md`](docs/COMBAT_DESIGN.md) | 战斗设计 · Combat design |
-| [`MIXAMO_PIPELINE.md`](docs/MIXAMO_PIPELINE.md) | 动画导入管线 · Animation import pipeline |
+| [`COMBAT_DESIGN.md`](docs/COMBAT_DESIGN.md) | 战斗设计 · Combat design · EN mirror: [`COMBAT_DESIGN.en.md`](docs/COMBAT_DESIGN.en.md) |
+| [`MIXAMO_PIPELINE.md`](docs/MIXAMO_PIPELINE.md) | 动画导入管线 · Animation import pipeline · EN mirror: [`MIXAMO_PIPELINE.en.md`](docs/MIXAMO_PIPELINE.en.md) |
 | [`ONLINE_SERVICES.md`](docs/ONLINE_SERVICES.md) | 在线伙伴服务手册：Spring Cloud 微服务部署、冒烟 `smoke §0-§6`、Prometheus 金丝雀验证 · Online-partner manual: Spring Cloud deployment, smoke suite `§0-§6`, Prometheus canary checks · EN mirror: [`ONLINE_SERVICES.en.md`](docs/ONLINE_SERVICES.en.md) |
 | [`SHOWCASE_SYNC.md`](docs/SHOWCASE_SYNC.md) | 个人展示页自动同步（One-time Pages toggle） · Personal showcase auto-sync (one-time Pages toggle) |
 | [`I18N_GUIDE.md`](docs/I18N_GUIDE.md) | 双语门禁要点 · Bilingual gatekeeping notes · EN mirror: [`I18N_GUIDE.en.md`](docs/I18N_GUIDE.en.md) |
