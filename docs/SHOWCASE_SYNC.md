@@ -5,7 +5,7 @@
 
 ## 它是什么
 
-- 一份单页 HTML（`creative/showcase.html`）：九个微服务 · 25 首 OST · 七章小说三番外 · 110 回声 · 40+ 成就 · MIT。
+- 一份单页 HTML（`creative/showcase.html`）：九个微服务 · 25 首 OST · 七章小说四番外（中 · 英双译） · 110 回声 · 40+ 成就 · MIT。
 - **中文 / English 双语**（右上角切换），与游戏定义同源、与手册 `creative/player-guide.html` 口径一致。
 - 与《跨界纪事》全系保持同一套叙事美学：炉火、雾、E2→A2、"火没有熄"——那是同源的灵魂。
 

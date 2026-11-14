@@ -7,14 +7,14 @@
 
 | 路径 | 内容 |
 |------|------|
-| `novel/` | 长篇小说**七章 + 序言 + 三番外**（锚火守夜人 · 《炉火给你的回信》 · 《看守的回信》·《林渡给看守的回信》） |
-| `GLOSSARY.md` | 《跨界纪事》设定集（Codex）——真上游机器抽取的十一章 canon 档案（人物/地点/时间线/母题/译名）；机器直抽、对照原文使用 |
+| `novel/` | 长篇小说**七章 + 序言 + 四番外**（锚火守夜人 · 《炉火给你的回信》 · 《看守的回信》·《林渡给看守的回信》·《后来者的回信》） |
+| `GLOSSARY.md` | 《跨界纪事》设定集（Codex）——真上游机器抽取的十二章 canon 档案（人物/地点/时间线/母题/译名）；机器直抽、对照原文使用 |
 | `GLOSSARY-en.md` | 英文版同源 Codex——由 EN 译本真上游逐章机器抽取；与 GLOSSARY.md 互为正本相反语言版本 |
 | `film/` | 142 分钟电影剧本（三幕结构 + 导演阐述；终章后彩蛋 · 星图之外）+ 七分钟伴生短片《看守的日子》（终章后彩蛋：锚点前的一天，# OST 25 同频段）· 英文同源 `short-keeper-day.en.md` |
 | `music/` | OST 25 曲手册 + `liner-notes.md` 曲目释义（逐曲注解：剧场 / 记忆 / 位面，对应 canon 出处）+ 可播放 Web Audio 预览（全 25 首真手写） |
 | `player-guide.html` | **玩家小册子 · Player Guide**——双语全量手册：安装、操作键位、战斗入门、Boss 图鉴、世界导览、日志页签、终章与归途、自动通关、在线层、跨媒体、FAQ |
 | `showcase.html` | **最新成果展示页**——给项目入口用的「最新」一页：9 微服务 / 25 OST / 110 回声 / 40+ 成就 / MIT；中英双语切换 |
-| `tapestry.html` | **跨界纪事年鉴 · The Chronicles Compendium** —— 单页官方档案：年表（序言→三番外）/ 17 枚母题（配 emoji 纹章）/ 39 枚徽章（实时筛选）/ 谢幕碑 / 制作手记（片尾字幕照录） |
+| `tapestry.html` | **跨界纪事年鉴 · The Chronicles Compendium** —— 单页官方档案：年表（序言→四番外）/ 17 枚母题（配 emoji 纹章）/ 39 枚徽章（实时筛选）/ 谢幕碑 / 制作手记（片尾字幕照录） |
 | `posters/` | 4 张超高清宣传海报（4K 级概念图） |
 
 ## 🎬 海报
@@ -37,9 +37,9 @@ creative/music/soundtrack.html
 
 ## 📖 读小说
 
-按顺序阅读：`novel/00-序言.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-番外` → `09-番外二` → **`10-番外三`**
+按顺序阅读：`novel/00-序言.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-番外` → `09-番外二` → `10-番外三` → **`11-番外四`**
 
-英文版（全量译本）：`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply`（译本与母本同频率、同一笔触、同一节拍）
+英文版（全量译本）：`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after`（译本与母本同频率、同一笔触、同一节拍）
 
 每一章对应游戏的章节走法：
 
@@ -56,6 +56,7 @@ creative/music/soundtrack.html
 | 番外 · 炉火给你的回信 | 第七章之后（epistolary） | 炉火执笔给读者的五封短信——按过 E 的人、火为什么不灭、你已经是候选人、下一次续篇 |
 | 番外二 · 看守的回信 | 第七章之后（readers' letter） | 雾的那一边执笔——给还没有按过 E 的人：雾是千年没吐出的气、看守为什么不先开口、存档之间他重新点灯、结局前那句「哪一种留下更多」问错了 |
 | 番外三 · 林渡给看守的回信 | 第七章之后（final letter） | 三封信收束——火/雾/人三柱终章：林渡背着火走完荒原、把灯路画满世界、门就是你；看守不是在守火，是在等下一位林渡 |
+| 番外四 · 后来者的回信 | 第七章之后（open letter） | 读完前三封信的人执笔——不署名、不下结论、不发放信件，在星图边缘那道银丝旁压着第四封信；「你不是守炉的人，你是下一盏灯。」 |
 
 ## 🎥 看电影（剧本）
 

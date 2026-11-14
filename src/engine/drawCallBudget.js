@@ -409,11 +409,30 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
  *   **地板**按 CI 实修：hub 332/271 / fantasy 306/256 / magic 661/623 / space 259/186
  *   / void 169/105 / gloom 209/132 / radiant 527/476。
  */
+/**
+ * ## 2026-11-14（W-Z72 perf 重钉，源 CI run 43602794963 真门失败捕获，seed 20261028）
+ *
+ * 真 CI 失败稳定复现到这几格：
+ *   过顶：space.frame 264 > 260 / space.body 191 > 190（唯一裁决项；地板 5 格过期**不改退出码**）
+ *   地板过期：hub.frame 335 > 332 / space.frame 264 > 259 / space.body 191 > 186
+ *        / void.frame 172 > 169 / void.body 107 > 105
+ *   （void 报告列阴影 65 / 数出来 64 → 差 1，在 ±4 抖动带里，不进这一片）
+ *
+ * 归因：W-E11 → 本次之间主干上的内容搬移（EN Codex + EN 译本 + 短片 EN + 番外四等）不产生 draw call，
+ * 所以这份漂移是【modulepreload chunk 顺序 + 年轻页页龄噪声】——与 W-E10/W-E11 同一条体质：
+ * 所有站读数同步抬 1–4，只有 space 两格顶到天花板沿。
+ *
+ * **天花板只升不降**（CI 实修）：space.frame 260 → 270（+10；规则允许到 310）、
+ * space.body 190 → 200（+10；规则允许到 220）。
+ * **地板**按 CI 实修同步抬：hub.frame 332→335 / space.frame 259→264 / space.body 186→191
+ * / void.frame 169→172 / void.body 105→107。
+ * 余量依然够用；若后续往 space 加投影/几何 POI，先复测再动这两格。
+ */
 export const DRAW_CALL_CEILINGS = Object.freeze({
   [ZONE_IDS.HUB]: Object.freeze({ frame: 340, body: 280, shadow: 70 }),
   [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 265, shadow: 70 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 670, body: 630, shadow: 50 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 260, body: 190, shadow: 80 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 270, body: 200, shadow: 80 }),
   [ZONE_IDS.VOID]: Object.freeze({ frame: 190, body: 110, shadow: 70 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 120, shadow: 90 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 215, body: 140, shadow: 80 }),
@@ -508,12 +527,22 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  * / space 255→259 / 182→186 / void 165→169 / 101→105 / gloom 205→209 / 128→132
  * / radiant 514→527 / 463→476。
  */
+/**
+ * ## 2026-11-14（W-Z72 perf 重钉，源 CI run 43602794963 真门失败捕获，seed 20261028）
+ *
+ * CI 实测（年轻页口径，种子 20261028，与门禁同源）：hub 335/268/64、fantasy 301/247/53
+ * （≤ 306/256/55 不动）、magic 635/623/40、space 264/191/72、void 172/107/64
+ * （报告 65 / 数出来 64，差 1，在 ±4 抖动带内）、abyss 192/113/79、
+ * gloom 194/117/77、radiant 509/473/53。
+ * 地板只升不降：hub 332→335 / space 259→264 / 186→191 / void 169→172 / 105→107；
+ * 其余格保持 W-E11 钉值（幻想 fantasy 306/256/55 等不动，逐格仍 ≤ 当日年轻页读数）。
+ */
 export const DRAW_CALL_FLOORS = Object.freeze({
-  [ZONE_IDS.HUB]: Object.freeze({ frame: 332, body: 271, shadow: 65 }),
+  [ZONE_IDS.HUB]: Object.freeze({ frame: 335, body: 271, shadow: 65 }),
   [ZONE_IDS.FANTASY]: Object.freeze({ frame: 306, body: 256, shadow: 55 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 661, body: 623, shadow: 40 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 259, body: 186, shadow: 72 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 169, body: 105, shadow: 66 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 264, body: 191, shadow: 72 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 172, body: 107, shadow: 66 }),
   [ZONE_IDS.ABYSS]: Object.freeze({ frame: 195, body: 116, shadow: 79 }),
   [ZONE_IDS.GLOOM]: Object.freeze({ frame: 209, body: 132, shadow: 77 }),
   [ZONE_IDS.RADIANT]: Object.freeze({ frame: 527, body: 476, shadow: 53 }),

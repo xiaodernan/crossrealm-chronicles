@@ -1,6 +1,6 @@
 # 《跨界纪事》设定集（Codex · 英文版）—— 真上游机器抽取 · 出处同 zh
 
-**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 11 章抽取；条目标出处；不构成权威发布稿，任何冲突以正文为准。
+**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 12 章抽取；条目标出处；不构成权威发布稿，任何冲突以正文为准。
 
 > 与 `GLOSSARY.md` 关系：同一正本（canon）两种语言版本；英文字词保留原文锚点（`Anchor Flame`, `The Keeper`, `stay` 等），不做语义再翻译。
 > 这份文件是机器生成者写出的英文对照，**每章记五段**（①人物 / ②地点·位面 / ③时间线 / ④关键物件·母题 / ⑤易混淆译名·统一写法）。
@@ -17,6 +17,7 @@
 - `en/08-interlude-fire-letter` — Interlude · A Letter from the Fire to You
 - `en/09-interlude-keeper-reply` — Interlude II · The Keeper’s Reply
 - `en/10-interlude-lin-reply` — Interlude III · Lin’s Reply to the Keeper
+- `en/11-interlude-came-after` — Interlude IV · The Reply of the One Who Came After
 
 ---
 
@@ -636,3 +637,56 @@
 - **Lamp Road**：统一译作“灯路”。【en/10-interlude-lin-reply#1】
 - **anchor / anchor flame**：分别统一译作“锚点 / 锚火”。【en/10-interlude-lin-reply#1】
 - **Miller Wastes**：统一译作“米勒荒地”。【en/10-interlude-lin-reply#1】
+# 《跨界纪事》设定集（Codex）—— 真上游机器抽取 · 出处标注
+
+- 生成方式：`scripts/novel-glossary.mjs`（真上游 gpt-6-sol）
+- 抽取范围：creative/novel/ 全 10 章（00–09）；每章一节，五个子段（人物 / 地点·位面 / 时间线 / 关键物件·母题 / 易混淆译名）
+- **性质**：机器直抽，不是人工终审稿；条目标注出处章节，使用前请对照原文核实；与正文冲突时**以原文为准**
+- 【编者注】Ch2 日志中「已共鸣 49 / 49」是中途账，不是终态；109 / 110 两种计数口径在正文中并存，引用时以具体语境为准，不要默认互通
+- 目录：00-序言 · 01-交汇枢纽 · 02-破碎时线 · 03-营火记忆 · 04-看守 · 05-寄信人 · 06-回响 · 07-余烬 · 08-番外 · 09-番外二
+
+## en/11-interlude-came-after#1
+
+## ① 人物
+- 无名的“后来者”：坐在交汇枢纽以东的椅子上，读完前三封信后写下第四封信；文中称其为读过三封信的“你”。【en/11-interlude-came-after#1】
+- Keeper（守望者）：曾在旧星图的银色细线旁画过一盏小灯。【en/11-interlude-came-after#1】
+- Lin：第三封信的作者；其文字已成为壁炉中的灰烬。【en/11-interlude-came-after#1】
+
+## ② 地点·位面
+- 交汇枢纽（Intersection Hub）：后来者坐下的椅子位于枢纽以东。【en/11-interlude-came-after#1】
+- 荒原（wasteland）：后来者从此处走向外层星港。【en/11-interlude-came-after#1】
+- 外层星港（outer starport）：后来者到达的地点。【en/11-interlude-came-after#1】
+- 破碎时间线的石门：后来者看见的地点或物件，原文未进一步说明。【en/11-interlude-came-after#1】
+- Upside 裂口：其中有孢子；原文未进一步说明其性质。【en/11-interlude-came-after#1】
+- 主街（Main Street）：一百一十座壁炉没有一座靠主街的灯燃烧。【en/11-interlude-came-after#1】
+- 旧星图的边缘：有一道银色细线；原文称其为故事的页边。【en/11-interlude-came-after#1】
+
+## ③ 时间线
+1. 火写下第一封信，雾写下第二封，Lin 写下第三封。【en/11-interlude-came-after#1】
+2. 后来者坐到交汇枢纽以东的椅子上，看到铜盒压着三封信。【en/11-interlude-came-after#1】
+3. 后来者认出三封信分别以灰烬色墨水、白色墨水和灯光离开的方向写成。【en/11-interlude-came-after#1】
+4. 后来者从荒原走到外层星港，看见破碎时间线的石门、Upside 裂口中的孢子和一百一十座壁炉。【en/11-interlude-came-after#1】
+5. 后来者取出铜盒下的信，在旁边压下一页，写成第四封信。【en/11-interlude-came-after#1】
+6. 后来者说：“把这一章写到这里。翻页时，我会站在下一页上。”【en/11-interlude-came-after#1】
+7. 后来者说明第四封信不替读者决定留下或离开，并说自己曾看过下一盏灯一次，随后成为第四封信。【en/11-interlude-came-after#1】
+8. 后来者把信留给尚未读到此页的人，并请其翻页。【en/11-interlude-came-after#1】
+
+## ④ 关键物件·母题
+- 三封信与第四封信：前三封分别由火、雾、Lin 写下；后来者写成第四封。前三封和第四封均不署名。【en/11-interlude-came-after#1】
+- 铜盒：无锁、无盖，像一本多次开合过的书；压在三封信最下面一封上。【en/11-interlude-came-after#1】
+- 椅子：位于交汇枢纽以东；文中说下一盏灯可能就在这把椅子上。【en/11-interlude-came-after#1】
+- 银色细线：位于旧星图最远边缘；没有门、墙或裂隙，被称作故事的页边。【en/11-interlude-came-after#1】
+- 一百一十座壁炉：没有一座靠主街的灯燃烧；它们燃烧在完成信件者的手中。【en/11-interlude-came-after#1】
+- 灯／下一盏灯：后来者称自己曾看过它一次；文中说下一盏灯不需要被寻找，只需要经过时看它一次。【en/11-interlude-came-after#1】
+- E：原文称为让名字长入火焰的按键；也提到“按下 E”之后可能出现下一盏灯。【en/11-interlude-came-after#1】
+- 灰烬与火、雾：火只懂“愿意”，雾只问“是否走过”；Lin 的文字被说成壁炉中的灰烬。【en/11-interlude-came-after#1】
+- 结局判定与存档：本章不解锁存档槽、不授予成就，也不改变结局判定。【en/11-interlude-came-after#1】
+
+## ⑤ 易混淆译名·统一写法
+- Intersection Hub：交汇枢纽。【en/11-interlude-came-after#1】
+- Keeper：守望者。【en/11-interlude-came-after#1】
+- Lin：Lin。【en/11-interlude-came-after#1】
+- Main Street：主街。【en/11-interlude-came-after#1】
+- Upside：Upside。【en/11-interlude-came-after#1】
+- outer starport：外层星港。【en/11-interlude-came-after#1】
+- wasteland：荒原。【en/11-interlude-came-after#1】
