@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>跨界纪元 — Crossrealm Chronicles</title>
+    <script type="module" crossorigin src="/assets/index-BOG1rigc.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-three-DsPFPwaW.js">
+    <link rel="modulepreload" crossorigin href="/assets/chunk-core-CG0JaTOr.js">
+    <link rel="modulepreload" crossorigin href="/assets/chunk-combat-NC9g7H7C.js">
+    <link rel="modulepreload" crossorigin href="/assets/chunk-world-5XGbKH7e.js">
+    <link rel="modulepreload" crossorigin href="/assets/chunk-ui-ecuGaBEr.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-k0m9IUMp.css">
+  </head>
+  <body>
+    <div id="loading">
+      <div class="loading-inner">
+        <h1 data-i18n="start_brand">跨界纪元</h1>
+        <p data-i18n="loading_subtitle">位面正在汇聚…</p>
+        <div class="bar"><div class="bar-fill"></div></div>
+      </div>
+    </div>
+    <div id="hud"></div>
+    <div id="minimap-wrap">
+        <div class="minimap-title"><span data-i18n="minimap_title">地图</span> · <span data-keys="minimap"></span> <span data-i18n="minimap_switch">切换</span> · <span data-i18n="minimap_dungeon_hint">地下城内显示迷宫</span></div>
+      <canvas id="minimap"></canvas>
+    </div>
+    <div id="zone-panel" class="hidden"></div>
+    <div id="journal-panel" class="hidden"></div>
+    <div id="zone-banner" class="hidden"></div>
+    <div id="interaction-prompt" class="hidden"></div>
+    <div id="game-guide" class="game-guide">
+      <div class="guide-head panel-drag-handle">⋮⋮ <span data-i18n="guide_head">现在该做什么 · 可拖动</span></div>
+      <div id="guide-title" class="guide-title">加载中…</div>
+      <div id="guide-step" class="guide-step">请稍候</div>
+      <div id="guide-hint" class="guide-hint"></div>
+      <div class="guide-btns">
+        <button type="button" id="guide-sync" data-i18n="guide_sync">同步任务</button>
+        <button type="button" id="guide-autoplay"><span data-i18n="autoplay_label">自动通关</span> <span data-keys="autoPlay"></span></button>
+      </div>
+    </div>
+    <button type="button" id="autoplay-fab">⚡ <span data-i18n="autoplay_label">自动通关</span></button>
+    <div id="toast-container"></div>
+    <div id="upgrade-panel" class="hidden">
+      <div class="upgrade-box">
+        <h2 id="upgrade-rest-name" data-i18n="upgrade_rest_default">营火</h2>
+        <p class="upgrade-meta"><span data-i18n="upgrade_meta_souls">位面之魂</span> <strong id="upgrade-souls">0</strong> · <span data-i18n="upgrade_meta_cost">升级需</span> <strong id="upgrade-cost">0</strong> · <span data-i18n="upgrade_meta_level">Lv.</span><strong id="upgrade-level">1</strong> · <span data-i18n="upgrade_meta_points">技能点</span> <strong id="upgrade-skill-points">0</strong></p>
+        <div class="upgrade-tabs">
+          <button type="button" id="tab-stats" data-i18n="upgrade_tab_stats">属性</button>
+          <button type="button" id="tab-skills" data-i18n="upgrade_tab_skills">武器技能</button>
+          <button type="button" id="tab-lore" data-i18n="upgrade_tab_lore">剧情技能</button>
+          <button type="button" id="tab-gear" data-i18n="upgrade_tab_gear">装备</button>
+        </div>
+        <div id="upgrade-stats-section">
+        <div class="upgrade-stats">
+          <div><span data-i18n="upgrade_stat_hp">生命上限</span><strong id="stat-hp-preview">118</strong></div>
+          <div><span data-i18n="upgrade_stat_st">精力上限</span><strong id="stat-st-preview">108</strong></div>
+        </div>
+        <div class="upgrade-btns">
+          <button data-stat="vigor"><span data-i18n="upgrade_stat_vigor">活力</span> <span id="stat-vigor">1</span></button>
+          <button data-stat="endurance"><span data-i18n="upgrade_stat_endurance">耐力</span> <span id="stat-endurance">1</span></button>
+          <button data-stat="strength"><span data-i18n="upgrade_stat_strength">力量</span> <span id="stat-strength">1</span></button>
+          <button data-stat="arcane"><span data-i18n="upgrade_stat_arcane">奥术</span> <span id="stat-arcane">1</span></button>
+          <button data-stat="mind"><span data-i18n="upgrade_stat_mind">心智</span> <span id="stat-mind">0</span></button>
+        </div>
+        <p class="upgrade-hint"><span data-i18n="upgrade_hint">升级后完全恢复</span> · <span data-keys="save"></span> 存档 · <span data-keys="load"></span> 读档</p>
+        </div>
+        <!-- 流派那几行由 `UpgradePanel` 按 `content/skillTrees.js` 的 `SKILL_BRANCHES` 在运行期生成。
+             手抄一份"有哪两条流派"的下场是：加第三条时这里静默少一整棵树，而没有任何报错。 -->
+        <div id="upgrade-skills-section" class="hidden"></div>
+        <div id="upgrade-lore-section" class="hidden">
+          <div id="upgrade-lore-body" class="upgrade-lore-body"></div>
+        </div>
+        <div id="upgrade-gear-section" class="hidden">
+          <div class="gear-slots" id="gear-slots"></div>
+          <h3 class="skill-branch-title"><span data-i18n="upgrade_gear_bag">背包</span> <span id="gear-bag-count" class="gear-bag-count"></span></h3>
+          <div class="skill-list" id="gear-bag"></div>
+        </div>
+        <div class="upgrade-actions">
+          <button id="upgrade-back" data-i18n="upgrade_back">返回</button>
+          <button id="upgrade-close" data-i18n="upgrade_continue">继续探索</button>
+        </div>
+      </div>
+    </div>
+    <div id="pause-menu" class="overlay-panel hidden">
+      <div class="panel-box">
+        <h2 data-i18n="menu_pause">暂停</h2>
+        <button id="pause-resume" data-i18n="pause_resume">继续游戏</button>
+        <label class="pause-slot-row"><span data-i18n="slot_label">存档槽</span>
+          <!-- 选项由 PauseMenu 从 `SaveSystem.listSlots()` 现推（W-D3 切片3）：不抄第二份名单 -->
+          <select id="pause-slot"></select>
+        </label>
+        <button id="pause-save" data-i18n="pause_save">保存进度</button>
+        <button id="pause-load-slot" data-i18n="pause_load_slot">读取所选槽</button>
+        <button id="pause-export" data-i18n="pause_export">导出 JSON</button>
+        <button id="pause-import" data-i18n="pause_import">导入 JSON</button>
+        <input id="pause-import-file" type="file" accept=".json,application/json" class="hidden" />
+        <button id="pause-settings" data-i18n="menu_settings">设置</button>
+        <button id="pause-manual"><span data-i18n="manual_short">说明书</span> (<span data-keys="help"></span>)</button>
+        <button id="pause-journal"><span data-i18n="journal_title">日志</span> (<span data-keys="journal"></span>)</button>
+        <p class="hint"><span data-keys="escape"></span> <span data-i18n="common_close">关闭</span> · <span data-keys="save load"></span> <span data-i18n="quick_save_slot">快捷存读（主槽）</span> · <span data-keys="help"></span> <span data-i18n="manual_short">说明书</span> · <span data-keys="perfHud"></span> <span data-i18n="start_perf">性能面板</span> · <span data-i18n="save_version_note">存档 v7（旧档自动迁移）</span></p>
+      </div>
+    </div>
+    <div id="settings-panel" class="overlay-panel hidden">
+      <div class="panel-box settings-box">
+        <h2 data-i18n="settings_title">设置</h2>
+        <!-- 语言（W-D2 切片2）：选项由 SettingsPanel 从 LANGUAGES 现推 -->
+        <label><span data-i18n="settings_language">语言</span> <select id="set-language"></select></label>
+        <!-- 难度档（W-E1 切片2）：选项由 SettingsPanel 从 difficultyOptions() 现推 -->
+        <label><span data-i18n="settings_difficulty">难度</span> <select id="set-difficulty"></select></label>
+        <!-- 辅助功能（W-D6 切片8）：色觉、字幕、镜头灵敏度归入同一分区，统一入口 -->
+        <h3 data-i18n="settings_accessibility">辅助功能</h3>
+        <!-- 色觉档（W-D6 切片3）：选项由 SettingsPanel 从 colorVisionOptions() 现推 -->
+        <label><span data-i18n="settings_colorvision">色觉模式</span> <select id="set-colorvision"></select></label>
+        <!-- 字幕（W-D6 切片8）：把只靠声音传递的信息写到屏幕上 -->
+        <label><input id="set-captions" type="checkbox" /> <span data-i18n="settings_captions">字幕</span></label>
+        <!-- 字幕字号档（W-D6 切片67）：选项由 SettingsPanel 从 captionScaleOptions() 现推 -->
+        <label><span data-i18n="settings_caption_size">字幕大小</span> <select id="set-caption-size"></select></label>
+        <!-- 界面文字档（W-D6 切片69）：选项由 SettingsPanel 从 uiTextScaleOptions() 现推 -->
+        <label><span data-i18n="settings_ui_text">界面文字</span> <select id="set-ui-text"></select></label>
+        <!-- 震屏强度（W-E3 切片58）：选项由 SettingsPanel 从 shakeStrengthOptions() 现推 -->
+        <label><span data-i18n="settings_shake">震屏强度</span> <select id="set-shake"></select></label>
+        <!-- 闪光强度（W-D6 切片68）：选项由 SettingsPanel 从 flashStrengthOptions() 现推 -->
+        <label><span data-i18n="settings_flash">闪光强度</span> <select id="set-flash"></select></label>
+        <!-- 画面亮度（W-E3 切片61）：曝光倍率，min/max/step 由 SettingsPanel 从 BRIGHTNESS 灌进来；右侧回显百分比 -->
+        <label><span data-i18n="settings_brightness">画面亮度</span> <input id="set-brightness" type="range" /> <span id="set-brightness-value" class="setting-value"></span></label>
+        <!-- 鼠标镜头灵敏度（W-D6 切片7）：倍率不是绝对值，min/max/step 由 SettingsPanel 从 LOOK_SENSITIVITY 灌进来 -->
+        <label><span data-i18n="settings_look_sensitivity">镜头灵敏度</span> <input id="set-look-sensitivity" type="range" /></label>
+        <label><span data-i18n="settings_master_volume">主音量</span> <input id="set-master-vol" type="range" min="0" max="1" step="0.05" /></label>
+        <label><span data-i18n="settings_sfx_volume">音效</span> <input id="set-sfx-vol" type="range" min="0" max="1" step="0.05" /></label>
+        <!-- 音乐 / 环境（W-C7 切片5）：两条子总线进面板，出厂值 = 切片5 前的内部混音字面量，默认档零听觉变更。
+             step=0.01（B140）：出厂 0.14/0.12 不是 0.05 的倍数 —— 页面腿实测滑杆一格就把出厂档吃成 0.15/0.10 -->
+        <label><span data-i18n="settings_music_volume">音乐音量</span> <input id="set-music-vol" type="range" min="0" max="1" step="0.01" /></label>
+        <label><span data-i18n="settings_ambient_volume">环境音量</span> <input id="set-ambient-vol" type="range" min="0" max="1" step="0.01" /></label>
+        <label>Bloom <input id="set-bloom" type="range" min="0" max="1" step="0.05" /></label>
+        <label><span data-i18n="settings_pixel_ratio">渲染精度</span> <input id="set-pixel" type="range" min="0.5" max="2" step="0.25" /></label>
+        <label><span data-i18n="settings_lod_distance">敌人更新距离</span> <input id="set-lod" type="range" min="40" max="150" step="5" /></label>
+        <label><input id="set-shadows" type="checkbox" /> <span data-i18n="settings_shadows">阴影</span></label>
+        <!-- 画质预设（W-D3 切片1）：低/中/高三档一键切换，选项由 SettingsPanel 从 PRESET_NAMES 现推 -->
+        <label><span data-i18n="settings_graphics_preset">画质预设</span> <select id="set-graphics-preset"></select></label>
+        <!-- 选项由 SettingsPanel 从 SHADOW_QUALITY_SIZES 现推（HTML 不抄名册，抄了就会漏） -->
+        <label><span data-i18n="settings_shadow_quality">阴影精度</span> <select id="set-shadow-quality"></select></label>
+        <!-- 同上：选项由 SettingsPanel 从 MSAA_SAMPLES 现推 -->
+        <label><span data-i18n="settings_msaa">抗锯齿</span> <select id="set-msaa"></select></label>
+        <!-- 同上：选项由 SettingsPanel 从 SSAO_QUALITY_NAMES 现推（W-C4 切片5） -->
+        <label><span data-i18n="settings_ssao">环境光遮蔽</span> <select id="set-ssao"></select></label>
+        <h3 data-i18n="settings_pad_tuning">手柄手感</h3>
+        <label><span data-i18n="settings_deadzone">摇杆死区</span> <input id="set-deadzone" type="range" /></label>
+        <label><span data-i18n="settings_analog_range">外圈量程</span> <input id="set-analog-range" type="range" /></label>
+        <label><span data-i18n="settings_look_curve">镜头响应曲线</span> <input id="set-look-curve" type="range" /></label>
+        <label><span data-i18n="settings_look_deadzone">镜头死区</span> <input id="set-look-deadzone" type="range" /></label>
+        <label><span data-i18n="settings_look_speed">镜头转速</span> <input id="set-look-pixels-per-second" type="range" /></label>
+        <label><span data-i18n="settings_sprint_threshold">冲刺触发深度</span> <input id="set-move-sprint-threshold" type="range" /></label>
+        <label><span data-i18n="settings_left_trigger">左扳机深度（LT）</span> <input id="set-left-trigger-depth" type="range" /></label>
+        <label><span data-i18n="settings_right_trigger">右扳机深度（RT）</span> <input id="set-right-trigger-depth" type="range" /></label>
+        <label><input id="set-vibration" type="checkbox" /> <span data-i18n="settings_vibration">手柄震动</span></label>
+        <h3 data-i18n="settings_keybinds">键位</h3>
+        <div id="set-keybinds" class="keybind-list"></div>
+        <!-- 在线伙伴服务（W-X6）：默认关闭；面板直接写 localStorage crossrealm_online + 翻运行时单例（不经 SettingsStore） -->
+        <hr class="online-divider" />
+        <h3 data-i18n="settings_online">在线服务</h3>
+        <label><input id="set-online" type="checkbox" /> <span data-i18n="settings_online_toggle">启用在线服务（排行榜 / 遥测）</span></label>
+        <p data-i18n="settings_online_hint">默认关闭。开启后击杀 Boss 会向网关上报遥测；关掉网络也不会影响本地游戏。</p>
+        <!-- 在线排行榜（W-X7）：只读；按钮拉取一次、行文本走 textContent（服务端数据当不可信） -->
+        <button id="set-online-lb" type="button" data-i18n="settings_online_lb_btn">刷新排行榜</button>
+        <ol id="set-online-lb-list" class="online-lb-list"></ol>
+        <!-- 在线服务连通性自检（W-X10）：ping 一次 GET /api/version；null / 不通就一句话提示，常态不占版面 -->
+        <button id="set-online-ping" type="button" data-i18n="settings_online_ping">在线服务连通性自检</button>
+        <p id="set-online-ping-result" class="setting-hint"></p>
+        <!-- 星轨诊断（W-Z8 切片2）：只读 /api/ops/advisor —— 顾问服务健康 + 队列背压一句话；服务端数据不可信，结果行内 textContent 写 -->
+        <button id="set-online-diag" type="button" data-i18n="settings_online_diag_btn">星轨诊断（顾问 · 队列）</button>
+        <p id="set-online-diag-result" class="setting-hint"></p>
+        <!-- 在场人数（W-Z25）：只读；按钮按下才拉一次 /api/presence/world/count；通道白名单只字不改 -->
+        <button id="set-online-presence" type="button" data-i18n="settings_online_presence_btn">查看在场人数</button>
+        <p id="set-online-presence-result" class="setting-hint"></p>
+        <button id="settings-close" data-i18n="common_close">关闭</button>
+      </div>
+    </div>
+    <div id="fast-travel-panel" class="overlay-panel hidden">
+      <div class="panel-box">
+        <h2 data-i18n="fast_travel_title">快速旅行</h2>
+        <div id="fast-travel-list"></div>
+        <button id="fast-travel-close" data-i18n="common_cancel">取消</button>
+      </div>
+    </div>
+    <div id="dialog-overlay" class="hidden">
+      <div class="dialog-box">
+        <h2 id="dialog-title"></h2>
+        <div id="dialog-speaker" class="dialog-speaker hidden"></div>
+        <div id="dialog-cg" class="dialog-cg hidden">
+          <img id="dialog-cg-img" alt="" />
+        </div>
+        <p id="dialog-text"></p>
+        <div id="dialog-choices" class="dialog-choices hidden"></div>
+        <button id="dialog-close" data-i18n="upgrade_continue">继续探索</button>
+      </div>
+    </div>
+    <div id="world-map-panel" class="overlay-panel hidden">
+      <div class="world-map-box">
+        <div class="world-map-header">
+          <h2 data-i18n="world_map_title">位面全图 · 迷雾探索</h2>
+          <button type="button" id="world-map-close"><span data-i18n="common_close">关闭</span> (<span data-keys="worldMap"></span>)</button>
+        </div>
+        <canvas id="world-map-canvas"></canvas>
+        <div id="world-map-legend" class="world-map-legend"></div>
+      </div>
+    </div>
+    <div id="help-manual" class="overlay-panel hidden">
+      <div class="panel-box help-box">
+        <div class="help-header">
+          <h2 data-i18n="manual_title">跨界纪元 · 说明书</h2>
+          <button type="button" id="help-close"><span data-i18n="common_close">关闭</span> (<span data-keys="escape"></span>)</button>
+        </div>
+        <div class="help-layout">
+          <nav id="help-nav" class="help-nav"></nav>
+          <div id="help-body" class="help-content"></div>
+        </div>
+      </div>
+    </div>
+    <div id="start-screen" class="hidden">
+      <div class="start-inner">
+        <img class="start-logo" src="/favicon.svg" alt="" role="presentation" width="156" height="156" />
+        <h2 data-i18n="start_brand">跨界纪元</h2>
+        <p><span data-i18n="start_click">点击开始 · 锁定鼠标</span> · <span data-keys="moveUp moveLeft moveDown moveRight"></span> <span data-i18n="start_move">移动</span><br /><span data-keys="escape"></span> <span data-i18n="start_pause">暂停</span> · <span data-keys="help"></span> <span data-i18n="manual_short">说明书</span> · <span data-keys="journal"></span> <span data-i18n="journal_title">日志</span> · <span data-keys="perfHud"></span> <span data-i18n="start_perf">性能面板</span> · <span data-keys="autoPlay"></span> <span data-i18n="autoplay_label">自动通关</span></p>
+        <button type="button" id="start-btn" data-i18n="start_enter">点击进入游戏</button>
+        <p class="start-crossmedia start-crossmedia-title" data-i18n="start_crossmedia_title">── 跨界纪事 · 跨媒体宇宙 ──</p>
+        <p class="start-crossmedia start-crossmedia-caption" data-i18n="start_crossmedia_caption">长篇小说七章 + 三番外 · 142 分钟电影剧本 · OST 25 曲手册（见 creative/ 目录）</p>
+        <p id="start-keeper" class="start-keeper hidden" aria-hidden="true"><span class="start-keeper-glyph" aria-hidden="true">⚓</span><span data-i18n="start_keeper_badge">炉主 · 火没有灭</span></p>
+        <p id="start-ticker" class="start-ticker hidden" aria-hidden="true"><span class="start-ticker-ember" aria-hidden="true">·</span><span class="start-ticker-label" data-i18n="start_ticker_label">此刻 · 炉边传闻</span><span id="start-ticker-text" class="start-ticker-text"></span></p>
+        <p class="start-url" data-i18n="start_url_note">请使用 http://localhost:5173 访问（需先运行 npm run dev）</p>
+        <p id="boot-error" class="hidden"></p>
+      </div>
+    </div>
+    <!-- W-Z36：终局「灯还在燃」帧 —— 通关那一刻，锚火被点亮 3.8s 渐强渐暗，给玩家一份静默的仪式感 -->
+    <div id="ending-flame" class="ending-flame hidden" role="status" aria-live="polite" aria-label="Ending flame">
+      <div class="ending-flame-atmosphere" aria-hidden="true"></div>
+      <img class="ending-flame-anchor" src="/favicon.svg" alt="" width="200" height="200" />
+      <h2 class="ending-flame-title" data-i18n="ending_flame_title">你的锚火仍在燃烧</h2>
+      <p class="ending-flame-sub" data-i18n="ending_flame_sub">火不会因为终局而熄灭，故事只是换了火光的频率</p>
+    </div>
+
+    <!-- W-Y2：星轨顾问。按钮常驻，面板默认收起；开着时由 OverlayStack 记为模态层。
+         文案键一律走 data-i18n / data-i18n-aria，聊天气泡是模型回的**不可信文本**，
+         由 AdvisorPanel 用 createElement + textContent 写，绝不拼进 innerHTML。 -->
+    <button type="button" id="advisor-fab" class="advisor-fab" aria-controls="advisor-panel"
+            aria-expanded="false" data-i18n-aria="advisor_fab_aria">
+      <span class="fab-notify-dot hidden" id="fab-notify-dot" aria-hidden="true"></span>
+      <span class="advisor-orbit" aria-hidden="true"></span>
+      <span class="advisor-label" data-i18n="advisor_fab">星轨顾问</span>
+      <span class="advisor-keycap" data-keys="advisor"></span>
+    </button>
+    <div id="advisor-panel" class="advisor-panel hidden" role="dialog" aria-modal="false"
+         aria-labelledby="advisor-title" data-i18n-aria="advisor_aria_label">
+      <div class="advisor-aurora" aria-hidden="true"></div>
+      <div class="advisor-head panel-drag-handle">
+        <div class="advisor-sigil" aria-hidden="true"><span class="advisor-sigil-core"></span></div>
+        <div class="advisor-heading">
+          <h2 id="advisor-title" data-i18n="advisor_title">星轨顾问</h2>
+          <p class="advisor-subtitle" data-i18n="advisor_subtitle">隔着位面听见的那点回响</p>
+        </div>
+        <div class="advisor-head-actions">
+          <span id="advisor-status" class="advisor-status is-checking" role="status">
+            <span class="advisor-status-dot" aria-hidden="true"></span>
+            <span id="advisor-status-text"></span>
+          </span>
+          <span id="advisor-presence" class="advisor-presence hidden" aria-live="polite">
+            <span class="advisor-presence-dot" aria-hidden="true"></span>
+            <span id="advisor-presence-text"></span>
+          </span>
+          <button type="button" id="advisor-close" class="advisor-icon-btn"
+                  data-i18n-aria="advisor_close_aria">✕</button>
+        </div>
+      </div>
+      <div id="advisor-notify" class="advisor-notify hidden" role="status" aria-live="polite" aria-atomic="true">
+        <span class="advisor-notify-title"><span id="advisor-notify-dot" class="advisor-notify-dot hidden" aria-hidden="true"></span><span data-i18n="advisor_notify_title">炉火报讯台</span></span>
+        <ul id="advisor-notify-list" class="advisor-notify-list"></ul>
+      </div>
+      <div id="advisor-transcript" class="advisor-transcript" role="log" aria-live="polite" aria-relevant="additions">
+        <p id="advisor-greeting" class="advisor-greeting" data-i18n="advisor_greeting">我在篝火边等你。</p>
+      </div>
+      <div id="advisor-typing" class="advisor-typing hidden" aria-hidden="true">
+        <span class="advisor-dot"></span><span class="advisor-dot"></span><span class="advisor-dot"></span>
+        <span class="advisor-typing-text" data-i18n="advisor_thinking">正在观星…</span>
+      </div>
+      <div id="advisor-suggestions" class="advisor-suggestions">
+        <button type="button" class="advisor-chip" data-advisor-prompt="advisor_suggestion_build" data-i18n="advisor_suggestion_build">这一季该堆什么属性？</button>
+        <button type="button" class="advisor-chip" data-advisor-prompt="advisor_suggestion_season" data-i18n="advisor_suggestion_season">眼前的词缀怎么破？</button>
+        <button type="button" class="advisor-chip" data-advisor-prompt="advisor_suggestion_trial" data-i18n="advisor_suggestion_trial">位面试炼最后一层怎么打？</button>
+      </div>
+      <form id="advisor-form" class="advisor-composer">
+        <input id="advisor-input" class="advisor-input" type="text" autocomplete="off"
+               data-i18n-aria="advisor_input_aria" />
+        <span id="advisor-count" class="advisor-count" aria-hidden="true"></span>
+        <button type="submit" id="advisor-send" class="advisor-send" data-i18n="advisor_send">送出</button>
+        <button type="button" id="advisor-stop" class="advisor-stop hidden" data-i18n="advisor_stop">停止</button>
+      </form>
+      <div class="advisor-foot">
+        <span id="advisor-meta" class="advisor-meta" aria-live="polite"></span>
+        <span class="advisor-disclaimer" data-i18n="advisor_disclaimer">回答由 AI 生成，未必与当前版本一致</span>
+      </div>
+    </div>
+  </body>
+</html>
