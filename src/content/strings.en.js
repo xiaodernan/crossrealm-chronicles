@@ -2399,6 +2399,8 @@ export const STRINGS_EN = Object.freeze({
   start_perf: 'Perf panel',
   start_enter: 'Click to enter the game',
   start_url_note: 'Open http://localhost:5173 (run npm run dev first)',
+  start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
+  start_crossmedia_caption: 'Six novel chapters · 142-min film script · 24-track OST booklet (see creative/)',
 
   // Guide panel dynamic texts (W-D2 slice 8: GameGuidePanel three elements)
   guide_title_auto: '⚡ Auto-run in progress',

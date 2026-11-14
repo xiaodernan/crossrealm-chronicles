@@ -119,6 +119,32 @@ body {
   color: #666;
 }
 
+.start-crossmedia {
+  margin-top: 12px;
+  font-size: 0.72rem;
+  color: rgba(201, 169, 98, 0.75);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}
+
+.start-crossmedia-title {
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: rgba(255, 217, 138, 0.85);
+  margin-top: 22px;
+  text-shadow: 0 0 14px rgba(255, 217, 138, 0.2);
+}
+
+.start-crossmedia-caption {
+  font-size: 0.7rem;
+  color: rgba(233, 226, 210, 0.58);
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+  text-transform: none;
+}
+
 #boot-error {
   color: #ff8888;
   font-size: 0.85rem;
