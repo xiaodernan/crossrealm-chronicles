@@ -102,6 +102,8 @@ creative/     周边内容：原画 / 小说 / OST / 海报 · Surrounding conte
   A terminal page that only lights up after the true ending — the full ending text (keep/quiet branches) plus a gallery of the 17 dust-stele inscriptions; tab counter shows (x/17).
 - **顾问面板 · 炉火报讯台条 / Advisor panel · Fireside herald strip**：开启在线伙伴后，顾问面板顶部出现报讯 strip——最近三条跨微服务通知（成就/赛季/世界事件），W-Z50 起 `boss_defeated` 遥测自动进台（Feign → notification-service，fallback 静默丢弃）；**W-Z52 FAB 金点**：FAB 右上角随未读报讯亮起，打开面板即熄。
   With the online partner enabled, a herald strip appears at the top of the advisor panel — the three most recent cross-service notifications (achievements / seasons / world events). Since W-Z50, `boss_defeated` telemetry flows straight into the strip (Feign → notification-service; silent fallback drop). **W-Z52 FAB gold dot** — a dot on the FAB’s upper-right corner while there are unread heralds; it dims as soon as the panel opens.
+- **典籍叩问 · Lore Oracle（W-Z82/W-Z84）/ The Lore Oracle**：星轨顾问面板输入框上方点亮「典籍 / Lore」胶囊——提问改走 `/api/ai/lore/answer`：原典 BM25 检索（12 章双语 + 词囊 + 电影剧本 + OST 释义，34 源 · 1866 块）→ 大模型答复，逐句带 [出处]，原典中没有的它就答「此物未在典籍中」；复合问题（「锚火为什么没熄火？林渡又是谁？」）两段检索，零额外 LLM 调用。
+  Tap the “典籍 / Lore” pill above the Advisor input — questions then hit `/api/ai/lore/answer`: BM25 over the canon corpus (12 chapters bilingual + glossary + film screenplay + liner notes; 34 sources · 1866 blocks) → a grounded answer with inline [source] citations, or the honest “This is not in the record.”; compound questions split clause-wise and enrich retrieval — zero extra LLM calls.
 
 ## 文档 / Docs
 
