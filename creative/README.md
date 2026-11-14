@@ -1,5 +1,6 @@
 # 跨界纪事 · 跨媒体宇宙（Creative Bible）
 
+> English mirror: [`README.en.md`](README.en.md)
 本目录为 **Crossrealm Chronicles（跨界纪事）** 的衍生创作资产，与游戏代码独立，可直接用于宣传、同人、配乐参考。
 所有计数以游戏真实内容为准（当前：**110 枚次元回声** + **40 枚母题徽章** + **3 枚跨界回声**）。
 

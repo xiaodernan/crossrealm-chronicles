@@ -7881,3 +7881,25 @@ Phase D（系统与质量）
 
   - **坑**：别碰 tests/draw-call-budget.test.js——它没有抄本，两边共读 `DRAW_CALL_FLOORS` 这一份唯一真源；
     任何一天改一半就被另一半咬住。`tests` 里那条「两侧带」会永远红。
+- **2026-11-14 W-Z73/W-Z74/W-Z75/W-Z76「双语最后一公里」——运维线 / 创作线 / Pages 组装全双语补齐 + 全仓链接门禁** —— 提交：本次 HEAD 批次（未推送）
+
+  - **W-Z73「仓库里不能再有裸断链」**：新增 `scripts/link-check.mjs` 全仓扫 `.md/.html` 相对路径引用——初次 19 处疑似断链；按归因分四类闭合：
+    ① 行内代码先剥离（`.md` 的 fenced/inline code 移除后再扫——MASTER_PLAN 里 `objectives[8]("finale")` 这类假命中出自这里）；
+    ② 前导 `/` 映射 repo 根 + `public/`（vite `public/` 挂到 `/`）；
+    ③ `creative/*.html` 对 `_site` 站根 sibling 的引用（`game/ guide.html tapestry.html tapestry.en.html index.html favicon.svg`）按部署布局白名单校验；
+    ④ 各文档真修（断档引用、指向错误/失效的旧文件名）。落盘后 `npm run link:check` → scanned 57 → 60 files / all links resolve。
+    `package.json` 加 `link:check` 键，供 CI 未来接入。
+
+  - **W-Z74「创作线双语补齐」**：`creative/music/liner-notes.en.md`（25 曲英文释义；同频入《后来者的回信》），`creative/music/OST-专辑手册.en.md`（四 Disc + 词 + leitmotif），
+    `docs/COMBAT_DESIGN.en.md`（战斗数值首段窗口）、`docs/MIXAMO_PIPELINE.en.md`（Mixamo→GLB→Godot→UE5 全管线）、
+    `docs/ONLINE_SERVICES.en.md`（Spring Cloud 九组件全量）、`docs/I18N_GUIDE.en.md`（双语门禁）、`docs/SHOWCASE_SYNC.en.md`（Pages 手册）、
+    `server/README.en.md`（227 行全镜像：Docker/安全边界/Deep health/幂等/顾问链路），`creative/README.en.md`（Creative Bible 全镜像：novel/film/music/tapestry/cast）——
+    中文原件顶部一律加 `English mirror: <file>` 指向；全部书面镜像由各 EN 文件反向指回，无双向大编辑。
+
+  - **W-Z75「年鉴英译 · tapestry.en.html」**：478 行孪生文件 1:1 同构（CSS 原样保留、全英文 content / JS 数据全英文、Search empty 文案/页签/aria 全英），
+    与中文版 `tapestry.html` 互挂 EN⇄中文 角标；计数对齐 12/17/39/16/17（LinkCheck + 双文件脚本验证相等）；`showcase.html` Feed/Footer/跨媒体卡同步双版指向。
+
+  - **W-Z76「Pages 组装补登 EN 年鉴」**：`.github/workflows/showcase.yml` — `paths:` 加入 `creative/tapestry.en.html`，`Assemble` cp 到 `_site/`。
+    **不修这一行的后果**：节点推送后 `https://xiaodernan.github.io/crossrealm-chronicles/tapestry.en.html` 404——恰是 W-Z68 那次 favicon 漏点同一类错误空白。
+
+  - **判据**：link-check 60/60 绿；音乐线/运维线/年鉴线全部有 EN 姊妹文件；CSS 未动；Pages 组装清单常驻 EN 孪生。
