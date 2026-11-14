@@ -1256,7 +1256,10 @@ export class Game {
 
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
-      this.player.adjustZoom(e.deltaY * 0.01);
+      // 2026-11-14：玩家反馈「往上划是往下看、往下划是往上看，方向反了」。
+      // 约定改为：上划（deltaY < 0）= 镜头拉远（看得开阔），下划（deltaY > 0）= 镜头推近（往下看）。
+      // 触控板双指滚动同理。单行 sign flip，配置不外泄到任何状态机。
+      this.player.adjustZoom(-e.deltaY * 0.01);
     }, { passive: false });
   }
 
