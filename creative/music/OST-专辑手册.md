@@ -50,7 +50,7 @@
 | 22 | Starport Cantina（星港酒肆） | 星港商路 | 98 | 爵士五度 |
 | 23 | Full Resonance（全频共鸣） | 109/109 解锁 | 72→96 | 全系列动机叠录 |
 | 24 | Infinity Walker（无尽行者） | 滚动字幕 | 60 | 锚主题再现 |
-| 25 | Ember Low Hum（锚火低鸣） | 终章后彩蛋 · endingFlame 同频段 | 48 | 三角波 E2→A2 + 41.2Hz 次声 |
+| 25 | Ember Low Hum（锚火低鸣） | 终章后彩蛋 · endingFlame 同频段 · 双番外《炉火给你的回信》《看守的回信》 | 48 | 三角波 E2→A2 + 41.2Hz 次声 |
 
 ---
 
