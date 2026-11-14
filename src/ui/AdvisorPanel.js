@@ -32,6 +32,7 @@ import { attachDraggable } from './DraggablePanel.js';
 import { focusElement, focusFirstItem } from './FocusNav.js';
 import { ADVISOR_REASONS, ADVISOR_LIMITS, normalizeAdvisorQuestion } from '../content/advisor.js';
 import { presenceTracker } from '../online/presenceTracker.js';
+import { notifyTracker } from '../online/notifyTracker.js';
 
 /** 状态 → 文案键。显式表：`t(\`advisor_status_${s}\`)` 是运行时拼键，静态门禁看不见 */
 const STATUS_KEYS = Object.freeze({
@@ -78,6 +79,11 @@ export class AdvisorPanel {
     this.presenceEl = doc?.getElementById('advisor-presence') ?? null;
     this.presenceText = doc?.getElementById('advisor-presence-text') ?? null;
     this._presenceUnsub = null;
+    this.notifyEl = doc?.getElementById('advisor-notify') ?? null;
+    this.notifyList = doc?.getElementById('advisor-notify-list') ?? null;
+    this.notifyDot = doc?.getElementById('advisor-notify-dot') ?? null;
+    this._notifyUnsub = null;
+    this._notifyState = null;
 
     this.el = doc?.getElementById('advisor-panel') ?? null;
     this.fab = doc?.getElementById('advisor-fab') ?? null;
@@ -134,6 +140,11 @@ export class AdvisorPanel {
     attachDraggable(this.el, { storageKey: 'advisor', handle: '.advisor-head' });
     // 在场微光：在线开着才进订阅，count=0/未就绪时徽章不占位
     this._presenceUnsub = presenceTracker.subscribe((count, ready) => this._renderPresence(count, ready));
+    // 炉火报讯台：订阅当前快照；面板打开时 refresh() 才拉一次（不空跑）
+    this._notifyUnsub = notifyTracker.subscribe((items, ready) => {
+      this._notifyState = [items, ready];
+      this._renderNotify();
+    });
 
   }
 
@@ -152,6 +163,8 @@ export class AdvisorPanel {
     focusFirstItem(this.el, undefined, { preferred: '#advisor-input' });
     this._renderCount();
     void this._checkHealth();
+    // 报讯台：打开面板时拉一次最近三条（拉完即把水位线推到最新——红点随即熄灭）
+    void notifyTracker.refresh().then((ok) => { if (ok) notifyTracker.markSeen(); });
     return true;
   }
 
@@ -180,6 +193,7 @@ export class AdvisorPanel {
     this._renderStatus();
     this._renderCount();
     this._renderMeta();
+    this._renderNotify();
     // 错误气泡是按 key 现展开的，得跟着换语言；模型回答与玩家原句保持原样（那是内容，不是界面文字）
     for (const msg of this._messages) {
       if (msg.key) msg.el.textContent = msg.key === 'advisor_error_http_fmt'
@@ -392,6 +406,47 @@ export class AdvisorPanel {
     this.presenceEl.classList.remove('hidden');
   }
 
+  /** 被 kind 白名单罩住的文案键：kind 来自后端，非法值直接回退到 system（绝不把变量塞进反引号当键） */
+  static notifyKindKey(kind) {
+    const keys = {
+      achievement: 'advisor_notify_kind_achievement',
+      season: 'advisor_notify_kind_season',
+      world: 'advisor_notify_kind_world',
+      system: 'advisor_notify_kind_system',
+    };
+    return keys[kind] ?? keys.system;
+  }
+
+  /** 炉火报讯台：ready 且至少一条才现身；条目全程 textContent 写（后端是不可信文本） */
+  _renderNotify() {
+    if (!this.notifyEl || !this.notifyList) return;
+    const [items, ready] = this._notifyState ?? [[], false];
+    if (!ready || !Array.isArray(items) || items.length === 0) {
+      this.notifyEl.classList.add('hidden');
+      if (this.notifyDot) this.notifyDot.classList.add('hidden');
+      return;
+    }
+    // 重建列表：createElement + textContent，没有一处 innerHTML
+    while (this.notifyList.firstChild) this.notifyList.removeChild(this.notifyList.firstChild);
+    for (const item of items) {
+      const li = document.createElement('li');
+      li.className = 'advisor-notify-item';
+      const chip = document.createElement('span');
+      chip.className = `advisor-notify-kind is-${typeof item.kind === 'string' && /^[a-z]+$/.test(item.kind) ? item.kind : 'system'}`;
+      chip.textContent = t(AdvisorPanel.notifyKindKey(item.kind));
+      const text = document.createElement('span');
+      text.className = 'advisor-notify-item-text';
+      text.textContent = typeof item.title === 'string' ? item.title : '';
+      li.appendChild(chip);
+      li.appendChild(text);
+      this.notifyList.appendChild(li);
+    }
+    if (this.notifyDot) {
+      this.notifyDot.classList.toggle('hidden', notifyTracker.unreadCount() <= 0);
+    }
+    this.notifyEl.classList.remove('hidden');
+  }
+
   dispose() {
     if (this._disposed) return;
     this._disposed = true;
@@ -408,6 +463,8 @@ export class AdvisorPanel {
     for (const [chip, handler] of this._chipHandlers ?? []) off(chip, 'click', handler);
     this._presenceUnsub?.();
     this._presenceUnsub = null;
+    this._notifyUnsub?.();
+    this._notifyUnsub = null;
     if (this.open) this.game?.overlayStack?.close?.('advisor');
     this.open = false;
     this._messages = [];

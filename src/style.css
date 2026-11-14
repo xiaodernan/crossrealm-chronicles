@@ -3846,6 +3846,50 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   .advisor-presence-dot { animation: none; }
 }
 
+/* 炉火报讯台（W-Z49）："报讯" strip——head 行下、transcript 上，不抢输入框。
+   条目一律 textContent 写（后端是不可信文本），隐藏时整条不占位。 */
+.advisor-notify {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 12px;
+  margin: 0 14px 6px;
+  border: 1px solid rgba(255, 217, 138, 0.2);
+  border-left: 3px solid rgba(255, 217, 138, 0.55);
+  border-radius: 10px;
+  background: linear-gradient(120deg, rgba(255, 217, 138, 0.08), rgba(255, 190, 110, 0.03) 60%, transparent);
+  font-size: 0.72rem;
+  color: rgba(233, 226, 210, 0.9);
+}
+.advisor-notify.hidden { display: none; }
+.advisor-notify-title {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 600; letter-spacing: 0.08em;
+  color: var(--gold-hi, #ffd98a); white-space: nowrap; font-size: 0.66rem;
+}
+.advisor-notify-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #ffd98a; box-shadow: 0 0 12px rgba(255, 217, 138, 0.95);
+}
+.advisor-notify-dot.hidden { display: none; }
+.advisor-notify-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 auto;
+}
+.advisor-notify-item { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.advisor-notify-kind {
+  flex: 0 0 auto; padding: 1px 8px; border-radius: 999px;
+  font-size: 0.6rem; letter-spacing: 0.08em;
+  border: 1px solid rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.75);
+}
+.advisor-notify-kind.is-achievement { border-color: rgba(255, 217, 138, 0.45); color: #ffd98a; }
+.advisor-notify-kind.is-season      { border-color: rgba(154, 118, 255, 0.5);  color: #c4b5ff; }
+.advisor-notify-kind.is-world       { border-color: rgba(122, 220, 190, 0.45); color: #8be0c0; }
+.advisor-notify-kind.is-system      { border-color: rgba(200, 200, 210, 0.3); color: #cfd0d8; }
+.advisor-notify-item-text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+
 .advisor-status {
   display: inline-flex;
   align-items: center;

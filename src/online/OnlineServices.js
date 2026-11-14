@@ -556,6 +556,40 @@ export class OnlineServices {
       return null;
     }
   }
+
+  /**
+   * 拉取炉火报讯台最近几条（W-Z49，`GET /api/notify/recent?limit=N`）。
+   *
+   * 网关熔断 / 报讯台没开 / 断网 → null（面板隐藏那一块，不假装空台账）。
+   * 这一层只做形状筛：`items` 必须是数组；条目里只收 { id, kind, title, ts } 四格，
+   * 其余字段（包括 body —— 面板不显示的，少一格传播面）一律不留。
+   */
+  async fetchNotifyRecents(limit = 3) {
+    if (!this._enabled) return null;
+    const clamped = Math.max(1, Math.min(10, Math.floor(limit) || 3));
+    try {
+      const res = await this._fetch(`${this._baseUrl}/api/notify/recent?limit=${clamped}`, {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || !Array.isArray(data.items)) return null;
+      const items = data.items
+        .filter((n) => n && typeof n.id === 'string' && typeof n.title === 'string'
+          && typeof n.kind === 'string' && Number.isFinite(n.ts))
+        .slice(0, clamped)
+        .map((n) => ({
+          id: n.id.slice(0, 64),
+          kind: n.kind.slice(0, 16),
+          title: n.title.slice(0, 120),
+          ts: Math.floor(n.ts),
+        }));
+      return { count: items.length, items };
+    } catch (e) {
+      console.warn('[online] 拉取报讯失败（已吞掉）', e?.message ?? e);
+      return null;
+    }
+  }
 }
 
 /** 全局单例（读当前 window 环境决定是否启用） */
