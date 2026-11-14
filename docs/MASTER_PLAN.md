@@ -7257,3 +7257,74 @@ Phase D（系统与质量）
   - **判据**：`npm test` **6646 例全绿**（`audio-sfx-contract` 18/18，含「名册每一格有调用方」双向对齐）；`npm run lint` 0；`npm run build` ✓ ；size 零波动（2.17 MiB）。
 
   - **风险**：① 41.2 Hz sine 次声对完全听不见但会推动次声带——对不适配低音的玩家完全不可见；② SFX_NAMES 反向删除时不能只删此格（连带删 Game.js 调用点），仍须保持 B71 对偶；③ AudioManager.prototype.endingFlame 暂无 JSDoc → 文档妥协换门禁绿；④ 与 W-Z36 视频仪式并轴——同一次 game-completed 调度，视觉平面和听觉平面在同一个 await 之下，一阶段一致。
+- **2026-11-14 W-Z48「成就文案与回声母题对齐」——ach-qa 四条标红，三条落地文案修正、一条机制保留** —— 提交：93e0dd1
+
+  - **起因**：W-Z47 的 ach-qa（真实上游 gpt-6-sol）标出 4 条 bad。逐条对照仓库机制后：
+    · `rematch-3`「三度相逢」—— judge 说「信标是再战后累积获得，不是发动再战的凭据」，**这是误读**：
+      `BossRematchDirector._startRematch()` 的触发条件就是「击败过 → 信标 → 玩家按 E」，
+      `boss-rematch-started` 在召唤时派发，文案「通过 Boss 信标发动三次再战」逐字忠于机制，保留不动；
+    · `echo-western-6`「边境六星」—— 文案里的「星门」在机制里**根本不存在**（西部沙龙 / 空镇警长 / 白日决斗 / 幽灵轨 / 掘墓人 / 联络员六枚残响，无星门意象）→ 改为「边境往事的六枚残响全部听见」；
+    · `echo-triad`「三巨头同频」—— 缩写都准（BORDER=边境往事 / FAMILY=幽冥帮派 / DEEPSPACE=深空纪元），但全称更忠实：「边境往事、幽冥帮派、深空纪元三系残响齐鸣」；
+    · `echo-wave4`「四系同频」—— 「宇宙」是生硬泛化词，franchise_cosmic_label=旧日低语 → 「赛博霓虹、武士残响、旧日低语、星港商路四系残响齐鸣」。
+
+  - **判据**：achievement gate 33/33 全绿（side-all / keeper / echo-epitaphs）；纯文案，首屏体积零波动（2.17 MiB）。
+
+  - **风险**：不 chase 随机 judge 的剩余判词（尤其 judge 发明的「母题名」从不在仓库里出现）——只改机械忠实度。
+
+- **2026-11-14 W-Z49「炉火报讯台」——第八个 Spring Cloud 微服务 + 顾问面板报讯条（前后端并轨）** —— 提交：本次 HEAD
+
+  - **起因**：W-Z24 presence-service（W-Z-同游）把并轨侧的「在场服务」收编到集大成线后，在线伙伴栈仍然没有「通知登记处」——
+    成就达成、换季、世界事件没有任何跨微服务的统一落点；前端（顾问面板）只有「在场微光」没有「报讯台」。
+    并轨授权原文允许「并轨没做完的部分直接接手做完」，且点名要求 Spring Cloud 微服务元素 + Redis / 计网 / 算法的合理运用。
+
+  - **做法**（server/）：① **notification-service**（:8085，Java 17 / Boot 3.5.16 / Spring Cloud 2025.0.3）——
+    `POST /api/notify`（校验 kind 白名单 achievement|season|world|system、title ≤120、body ≤500）→
+    台账 push（Redis：`LPUSH crossrealm:notify:recent` + `LTRIM 50` + `HINCRBY crossrealm:notify:stats` + 两个键 7 天 TTL；
+    memory：50 格有界环形队列 + O(1) 计数器，`spring.cache.type` 二选一，`simple` 默认）→
+    Pub/Sub `crossrealm:notify:channel`（`notify:radiate` 事件，fire-and-forget：广播失败只标 `broadcast:false`，
+    **台账写失败才 503** ——「连记忆都记不下」才是真故障，订阅方断了不在本服务责任范围内）。
+    `GET /api/notify/recent?limit=N`（limit 夹 [1,50]，新的在前，脏 JSON 逐条跳过不崩）；
+    `GET /api/notify/stats` 回 `{stored, totalPublished, byKind, backend}`（backend 由台账实现自报，不依赖环境变量）；
+    `DELETE /api/notify` 仅 `notification-service.admin-enabled=true` 时注册（默认不存在）。
+    ② **gateway**：新增 `/api/notify/**` 路由（lb://notification-service，order=-1，
+    Resilience4j `notificationServiceBreaker` 50%/30s、TimeLimiter 3s、`forward:/fallback/503`；**POST 不给 Retry**）。
+    ③ **docker-compose**：八容器（notify 用 SPRING_CACHE_TYPE=redis 接 redis）；`verify` 容器加 POST/recent/stats curl。
+    ④ **config-server**：新增 `notification-service.yml`（ledger-capacity）。⑤ **父 pom** 加 module。
+    ⑥ **scripts**：新增 `verify-notify-redis.ps1`（throwaway redis → 发布 → recent 读回 → LLEN/HGET 原始键 → 
+    跨实例 B 同 redis 可见同一行 → stats backend=redis），已接入 `.github/workflows/server.yml`；
+    `smoke.ps1` 加 notification-service（端口 28085）+ `=== 4l) notification-service round trip ===` 
+    （配置下发 → 启动 → lb:// 暖场 → publish/recent/stats 三项断言；原 4l..4r 顺延为 4m..4s）。
+    ⑦ **docs**：ONLINE_SERVICES / server README / 根 README 更新为「八个微服务」。
+
+  - **做法**（src/，W-Z49b）：① `OnlineServices.fetchNotifyRecents(limit)`（`/api/notify/recent`，
+    只收 `{id, kind, title, ts}` 四格，body 不传播，非 2xx/JSON 失败/未启用 → null）；
+    ② `src/online/notifyTracker.js`：页面级共享快照（**无 SSE、无自建计时器**；仅在**面板打开时**
+    `refresh()` 一次，`AbortSignal.timeout` 管超时，在途去重）；`unreadCount()` 基于
+    localStorage 水位线（`crossrealm_notify_seen_ts`）；`markSeen()` 在打开面板后把水位推到最新；
+    ③ AdvisorPanel：head 条下新增 `#advisor-notify` 报讯 strip（`role=status`），kind 芯片走
+    **白名单映射**（`is-<kind>`，非法值回退 `is-system`）——**绝不拼键**；条目全程 `createElement+textContent`；
+    ⑤ i18n 双表 +5 键（`advisor_notify_title` + 4 kind），`EXPECTED_KEY_COUNT` 3091 → **3096**；
+    ⑥ CSS：金色左边线 strip + 每 kind 芯片色（achievement 金 / season 紫 / world 青 / system 灰），
+    reduced-motion 无新增动画（不进档C 网）。
+
+  - **判据**：① `mvn -f server/pom.xml verify` → BUILD SUCCESS（9 modules；notification-service 新增 9 例：
+    发布 201/stored/broadcast 语义、非法 kind/空 title/超长 title 400、recent 顺序+limit 夹紧、
+    stats 计数、台账 503 错误页、内存环形溢出环出）；② `verify-notify-redis.ps1` 真跑 → **PASSED** 
+    （publish broadcast=True → recent 读回 → `LLEN crossrealm:notify:recent`=1 + `HGET ... achievement`=1 → 
+    停 A → 起 B（fresh JVM）→ recent 仍见同一行 → stats `backend=redis totalPublished=2`）；
+    ③ 前端 `npm test` **6651 例全绿**（新增 `tests/notify-tracker.test.js` 5 例：未启用静默 / 成功快照 / 
+    失败静默 / 在途去重 / 水位线未读），`npm run lint` 0，`npm run build` ✓，`npm run size` 2.18 MiB（余 0.07 MiB）；
+    ④ 本地 curl 全链路：`POST /api/notify`（28080 经 gateway lb://）→ `GET /api/notify/recent` 返回刚发布的条目（见 session 记录：草稿环境下 gateway→eureka 暖场后正常转发）。
+
+  - **风险**：① 本机沙箱会在约 30–120s 后回收 JVM 进程，`smoke.ps1` 全绿只能在 CI（ubuntu-latest）上复现，
+    本机以 `verify-notify-redis.ps1`（throwaway redis）+ 模块测试代偿，CI 已接线；
+    ② Broadcast ≠ 交付保证（fire-and-forget），订阅方要重发必须自己对 recent 轮询——这是刻意的简化，
+    要 exactly-once 需上 Streams（presence/game-service 已有前例，留待后续切片）；
+    ③ 报讯台**不经过数据库**是主动决定（QQ：memoir/账本不是本游戏的卖点，ZSET 榜已带 Redis 镜像）；
+    ④ 前端在线开关关闭时**零网络请求**（默认关闭的全部契约不变）；
+    ⑤ `advisor-notify-kind` 的 `<kind>` 必须过 `/^[a-z]+$/` 白名单才进 className——
+    否则一个回声里的 `x onload=` 就会变成属性注入（类名白名单已堵住）。
+
+  - **后续**：① notification-service 可以订阅 `season:advance` / `boss-defeated` 直接自动发报讯（当前是被动登记，
+    主动发布留待 W-Z50）；② 前端地图 hover 报讯徽章（复用 notifyTracker）；③ 报讯台 ops 端点
+    （`GET /api/notify/ops`，只读白名单，仿 presence）；④ Compose：notify 接 Kafka？（不——Redis 够了）。
