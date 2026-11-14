@@ -147,7 +147,8 @@ for (let i = 0; i < targets.length; i += 1) {
     continue;
   }
   const used = r.usage;
-  process.stderr.write(`novel-qa: ${r.name} 完成 — prompt=${used?.prompt_tokens ?? '?'} cached=${used?.prompt_cache_hit_tokens ?? used?.prompt_tokens_details?.cached_tokens ?? '?'} completion=${used?.completion_tokens ?? '?'}\n`);
+  const cachedTokens = used?.prompt_cache_hit_tokens ?? used?.prompt_tokens_details?.cached_tokens ?? (used ? 0 : '?');
+  process.stderr.write(`novel-qa: ${r.name} 完成 — prompt=${used?.prompt_tokens ?? '?'} cached=${cachedTokens} completion=${used?.completion_tokens ?? '?'}\n`);
   results.push({ name: r.name, content: r.content, usage: r.usage ?? null });
 }
 
