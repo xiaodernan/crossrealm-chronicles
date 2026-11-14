@@ -407,10 +407,15 @@ export class SettingsPanel {
           out.textContent = t('settings_online_diag_unavailable');
           return;
         }
+        const hp = h?.upstreamUsage ?? null;
+        const hitLine = hp && typeof hp.hitRatio === 'number' && Number.isFinite(hp.hitRatio) && hp.hitRatio > 0
+          ? t('settings_online_diag_hit_ok', { pct: (hp.hitRatio * 100).toFixed(1) })
+          : '';
         const mainLine = t('settings_online_diag_ok', {
           model: h.model ?? '—',
           circuit: h.circuit ?? '—',
           calls: h.upstreamCalls ?? '—',
+          hitLine,
           depth: j.depth ?? '—',
           inFlight: j.inFlight ?? '—',
           rejected: j.rejected ?? '—',

@@ -188,19 +188,19 @@ public class LlmClient {
 
     /** ai.upstream 指标装配（W-Z12）：success 由 answer 构建点计；failure 由终态计；cache-hits 由摘要缓存命中计。 */
     private void incrementMeters(LlmTransport.UpstreamReply reply, boolean success) {
+        // AtomicLong 计数器**永远有值**——它们是 /api/ai/health 回显的底层数，
+        // 与微米 meter 装配无关（无 registry 时也不能让健康快照挂死在假零上）。
+        if (success && reply != null) {
+            if (reply.promptTokens() != null) counterPrompt.addAndGet(reply.promptTokens());
+            if (reply.cachedTokens() != null) counterCached.addAndGet(reply.cachedTokens());
+        }
         if (meterRegistry == null) return;
         if (success) {
             if (callsSuccess != null) callsSuccess.increment();
             if (reply != null) {
-                if (reply.promptTokens() != null) {
-                    if (promptTokensTotal != null) promptTokensTotal.increment(reply.promptTokens());
-                    counterPrompt.addAndGet(reply.promptTokens());
-                }
+                if (reply.promptTokens() != null && promptTokensTotal != null) promptTokensTotal.increment(reply.promptTokens());
                 if (reply.completionTokens() != null && completionTokensTotal != null) completionTokensTotal.increment(reply.completionTokens());
-                if (reply.cachedTokens() != null) {
-                    if (cachedTokensTotal != null) cachedTokensTotal.increment(reply.cachedTokens());
-                    counterCached.addAndGet(reply.cachedTokens());
-                }
+                if (reply.cachedTokens() != null && cachedTokensTotal != null) cachedTokensTotal.increment(reply.cachedTokens());
             }
         } else {
             if (callsFailure != null) callsFailure.increment();
@@ -232,6 +232,21 @@ public class LlmClient {
         snapshot.put("circuit", breaker.state().name());
         snapshot.put("cache", cache.stats());
         snapshot.put("upstreamCalls", upstreamCalls.get());
+        Map<String, Object> upstream = new LinkedHashMap<>();
+        long promptSum = counterPrompt.get();
+        long cachedSum = counterCached.get();
+        upstream.put("promptTokens", promptSum);
+        upstream.put("cachedTokens", cachedSum);
+        double ratio = promptSum > 0 ? Math.round(((double) cachedSum / promptSum) * 10000.0) / 10000.0 : 0.0;
+        upstream.put("hitRatio", ratio);
+        if (lastUpstreamUsage != null) {
+            Map<String, Object> last = new LinkedHashMap<>();
+            if (lastUpstreamUsage.promptTokens() != null) last.put("promptTokens", lastUpstreamUsage.promptTokens());
+            if (lastUpstreamUsage.completionTokens() != null) last.put("completionTokens", lastUpstreamUsage.completionTokens());
+            if (lastUpstreamUsage.cachedTokens() != null) last.put("cachedTokens", lastUpstreamUsage.cachedTokens());
+            upstream.put("last", last);
+        }
+        snapshot.put("upstreamUsage", upstream);
         return snapshot;
     }
 

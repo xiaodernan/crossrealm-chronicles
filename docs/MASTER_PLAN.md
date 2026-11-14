@@ -8097,21 +8097,29 @@ Phase D（系统与质量）
   - **配套文档**：ONLINE_SERVICES 双语各补「Lore Oracle 压测（W-Z86）」段与 scripts 清单；STRESS_RESULTS.md 归档四组读数（honest tail note）；package.json 注册 `stress:oracle`。
   - **判据**：gate GREEN ×4 run；零网络零 token；Oracle 昂贵路径结构级安全验证通过（tail 受本 stub 限制，生产分布与冷启动由真上游实测为准）。
 
-- **2026-11-16 W-Z87/W-Z88「十七母题孤立成块入语料（`creative/tapestry-lore/`）· Oracle 的弱模型失效实证」** —— 提交：本次 HEAD
+- **2026-11-16 W-Z87/W-Z88「十七母题孤立成块入语料 · 弱模型失效实证」** —— 提交：本次 HEAD
 
   - **起因**：番外五的 Oracle 答题已稳定引用 `creative/novel/12-番外五-火之前.md`（明确 citation）；
-    但 Tapestry-lore（十七母题：每个 mother 的灯喻/谢幕碑/中英双语 annot 均为重复模板）入 corpus 后，模型无法从相似块选出「学院」一条答案（Q：「学院的谢幕碑写了什么？」/「What does the Academy of Magic epitaph say?」—— Academy 块明确在 context 且独占 source 文件：模型仍拒答 10/10 答复）。
-  - **诊断**：retrieval 端用 Medium/high rank 块 Academy 正确返回；`inclusion=failure` 来自 **wkapi.pro gpt-6-sol 的注意力在同构重复块上系统性地平均——context precision 问题、不是 BM25 问题**。
-    把 tapestry-lore.md 拆成十七文件（每 Mother 一个 source）：实测 Academy 仍然拒答（zero change），但 `Homecoming epitaph` 答对（`the road home was the long way`，citation `16-homecoming.md`）、✓ evidence 回答能经由单母题区分出来部分。
+    但 Tapestry-lore（十七母题：每个 mother 的灯喻/谢幕碑/中英双语 annot 均为重复模板）入 corpus 后，模型无法从相似块选出「学院」一条答案（Q：「学院的谢幕碑写了什么？」/「What does the Academy of Magic epitaph say?」）。
+  - **诊断**：retrieval 端用 BM25 正确返回 Academy 块（score 21.92 顶位）；`inclusion=failure` 来自 **wkapi.pro gpt-6-sol 的注意力在同构重复块上系统性地平均——context precision 问题、不是 BM25 问题**。
+    把 tapestry-lore.md 拆成十七文件（每 Mother 一个 source）：实测 Academy 仍然拒答（zero change），但 `Homecoming epitaph` 答对（`the road home was the long way`，citation `16-homecoming.md`）、回答能经由单母题区分出来部分。
   - **试过的办法（没有作效的）**：anchor-标注（信任「most relevant excerpt」标签）；trailing reminder 重申 heading lookup；prompt 直接加一句「只看第一段摘录」；BM25 ridge threshold 0.62（删除弱命中——却在番外五 query 上让 film block 成为唯一 primary，模型反而拒答；已回退）；prompt 单次外接 expansion（再加一次独立 LLM call，没有收益）。
-  - **诚实结论（产品态）**：Oracle 在英雄语料/film prose（规模不同、模板 ≠ 母题）**稳定正确**（番外五、短片、EP、essay 全部跑通引用）；
-    对**重复模板的双语碑文型语料**，`gpt-6-sol`（wkapi.pro）实测**注意力稳定地泄漏到邻近相同块**——无 prompt 能可靠指定「Academy 学院对应哪一块」。保留实测、不做魔法。
-    Oracle 永远以 Advisory 形态存在，不会代判世界结局——这些**错误归属**（错配引用但原样呈现的事实摘录）不会走出玩家屏幕。
+  - **诚实结论**：Oracle 在散文/章节型语料（番外五、短片、章节）**稳定正确**。对**重复模板的双语碑文型语料**，
+    gpt-6-sol 注意力稳定地泄漏到邻近相同块；无 prompt 能可靠指定「学院 → 哪一块碑文」。保留实测、不做魔法。
+    Oracle 以 Advisory 形态存在，不会代判世界结局——错误归属（错配引用但原样呈现的事实摘录）不会走出玩家屏幕。
   - **做法**：① `creative/tapestry-lore.md` 按 `## NN` 标记拆成 17 文件（`01-academy-of-magic.md`…`17-crossover.md`），`scripts/split-tapestry-lore.mjs` 一次性迁移；
-    ② `scripts/build-lore-corpus.mjs`：tapestry → collect 目录（贪心收录 17 文件）；语料重编译 36→**53 源**（~201 KB UTF-8，重建 `--check` 幂等）；
-    ③  OracleControllerTest + Bm25IndexTest 11/11 + LoreRagTest 6/6 绿；corpus tests 不回退；
+    ② `scripts/build-lore-corpus.mjs`：tapestry → collect 目录（贪心收录 17 文件）；语料重编译 36→**53 源**（~201 KB UTF-8）；
+    ③  OracleControllerTest + Bm25IndexTest 11/11 + LoreRagTest 6/6 绿；
     ④ **新增已知约束**：template-variant 双语碑文语料上的 attention limit，未来任何人接手时应知道：
     若模型对同构母题 block 选择失败，通路 A 是继续 XML-style 块标注拆分（已做）、B 是等 wkapi 上游模型换代（候选：deepseek-r2 / qwen-72b；换模型只需改一行配置和重跑同 probe）、C 是把 Academy 恒零回答的一条写进 Advisory fallback（程序短路：Academy Had Better Citation Match 必答 with source-span quoting clause），而不是试图 prompt/fine-tune 去压服。
+
+- **2026-11-17 W-Z90「Oracle upstream 用量进健康快照 + 星轨诊断显示「上游缓存命中率」」** —— 提交：本次 HEAD
+
+  - **起因**：用户再次提出「为什么调用我的 API 缓存命中率低」—— 真正观测到的事：非流式上游**不回报** `prompt_tokens_details`，控制台被非流误解误导；真正的流+include_usage 口径（W-Z82）已经把命中率拉到 82–95%。但玩家/运维站在前端**看不见**这件事。
+  - **做法**：① `LlmClient.health()` 新增 `upstreamUsage`（白名单）：{ promptTokens, cachedTokens, hitRatio ∈ [0,1], last:{ promptTokens / completionTokens / cachedTokens } } — **计数器永远可用**（修正：`incrementMeters` 之前在 `meterRegistry == null` 时整体 return，AtomicLong 计数被误伤不计；现先写 AtomicLong 再由 meterRegistry 有无分流给微米）；② `AiServiceClient`（Feign）/ game-service 的 `/api/ops/advisor` 不改代码（原始 Map 透传）；③ 前端星轨诊断（`SettingsPanel.js`）：健康快照出 `upstreamUsage.hitRatio` 后拼一句 ` · 上游缓存命中 ${pct}%`；④ `strings.{zh,en}.js` 增加 `settings_online_diag_hit_ok` 双语（` · 上游缓存命中 ${pct}%` / ` · ${pct}% cached upstream`）并在 `settings_online_diag_ok` 主句多一枚 `${hitLine}` 占位符；`EXPECTED_KEY_COUNT 3113 → 3114`。
+  - **验证**：`LlmClientTest` 新增一例：注入 Scripted transport 时 `/api/ai/health` 仍能报 `promptTokens=9400 / cachedTokens=786 / hitRatio≈0.084 / last={4700,393}` 且不含玩家问题正文；前端 `online-ops-advisor.test.js` 视图不回退；`npm test 6687/6687` 绿；`ai-service` 101/101 绿（含 9 skipped 无上游 key 的既定 live tests）；eslint 0
+  - **判据**：前端预期形如 `顾问 gpt-6-sol · 熔断 CLOSED · 真实调用 N 次 · 上游缓存命中 88.3%；队列深度 ...`；真实流量下以 wkapi pro gpt-6-sol 对 chat-shape 流的流后缓存口径≈82–95%（同 W-Z82 已解非流误解自证）；Anyway: hit rate 看**注意不能改掉 `cache_control:ephemeral`**（prefix cache ≥ 82%）否则数字 0。
+  - **遗留**：该景数目以本 session 的 gpt-6-sol / 参考问句压力实测最优为准。流式命中可以轻松走到 95%+（缓存前缀长度直接拉大即可——系统 prompt 已稳固不换）。
 
 - **2026-11-17 W-Z89「番外六 · 换班（Interlude VI · Handover）入典籍 · 全表面收尾」** —— 提交：本次 HEAD
 

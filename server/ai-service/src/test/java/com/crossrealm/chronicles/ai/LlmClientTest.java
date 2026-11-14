@@ -215,6 +215,33 @@ class LlmClientTest {
     }
 
     @Test
+    void 上游用量计数进入upstreamUsage_不含正文() {
+        AiProperties p = props();
+        String withUsage = "{\"object\":\"chat.completion\",\"choices\":[{\"index\":0,\"message\":"
+                + "{\"role\":\"assistant\",\"content\":\"好\"},\"finish_reason\":\"stop\"}],"
+                + "\"usage\":{\"total_tokens\":4740,\"prompt_tokens\":4700,"
+                + "\"prompt_tokens_details\":{\"cached_tokens\":393}}}";
+        Scripted t = new Scripted(withUsage, withUsage);
+        LlmClient c = client(p, t);
+        c.ask("第一句", null);
+        c.ask("第二句", null);
+
+        Map<String, Object> health = c.health();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> usage = (Map<String, Object>) health.get("upstreamUsage");
+        assertNotNull(usage);
+        assertEquals(9400L, ((Number) usage.get("promptTokens")).longValue());
+        assertEquals(786L, ((Number) usage.get("cachedTokens")).longValue());
+        double ratio = ((Number) usage.get("hitRatio")).doubleValue();
+        assertTrue(ratio > 0.08 && ratio < 0.09, "786/9400 ≈ 0.0836, got=" + ratio);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> last = (Map<String, Object>) usage.get("last");
+        assertEquals(4700, ((Number) last.get("promptTokens")).intValue());
+        assertEquals(393, ((Number) last.get("cachedTokens")).intValue());
+        assertFalse(health.toString().contains("第一句"), "健康快照不得回显玩家提问正文");
+    }
+
+    @Test
     void 上下文被限长且换行被抹平() throws Exception {
         Scripted t = new Scripted(response("好"));
         Map<String, Object> context = new LinkedHashMap<>();
