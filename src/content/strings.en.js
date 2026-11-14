@@ -2399,6 +2399,8 @@ export const STRINGS_EN = Object.freeze({
   start_perf: 'Perf panel',
   start_enter: 'Click to enter the game',
   start_url_note: 'Open http://localhost:5173 (run npm run dev first)',
+  ending_flame_title: 'Your flame is still burning',
+  ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
   start_crossmedia_caption: 'Six novel chapters · 142-min film script · 24-track OST booklet (see creative/)',
 

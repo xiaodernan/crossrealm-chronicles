@@ -2396,6 +2396,8 @@ export const STRINGS_ZH = Object.freeze({
   start_perf: '性能面板',
   start_enter: '点击进入游戏',
   start_url_note: '请使用 http://localhost:5173 访问（需先运行 npm run dev）',
+  ending_flame_title: '你的锚火仍在燃烧',
+  ending_flame_sub: '火不会因为终局而熄灭，故事只是换了火光的频率',
   start_crossmedia_title: '── 跨界纪事 · 跨媒体宇宙 ──',
   start_crossmedia_caption: '长篇小说六章 · 142 分钟电影剧本 · OST 24 曲手册（见 creative/ 目录）',
 

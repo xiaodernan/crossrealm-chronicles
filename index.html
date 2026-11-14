@@ -224,6 +224,14 @@
         <p id="boot-error" class="hidden"></p>
       </div>
     </div>
+    <!-- W-Z36：终局「灯还在燃」帧 —— 通关那一刻，锚火被点亮 3.8s 渐强渐暗，给玩家一份静默的仪式感 -->
+    <div id="ending-flame" class="ending-flame hidden" role="status" aria-live="polite" aria-label="Ending flame">
+      <div class="ending-flame-atmosphere" aria-hidden="true"></div>
+      <img class="ending-flame-anchor" src="/favicon.svg" alt="" width="200" height="200" />
+      <h2 class="ending-flame-title" data-i18n="ending_flame_title">你的锚火仍在燃烧</h2>
+      <p class="ending-flame-sub" data-i18n="ending_flame_sub">火不会因为终局而熄灭，故事只是换了火光的频率</p>
+    </div>
+
     <!-- W-Y2：星轨顾问。按钮常驻，面板默认收起；开着时由 OverlayStack 记为模态层。
          文案键一律走 data-i18n / data-i18n-aria，聊天气泡是模型回的**不可信文本**，
          由 AdvisorPanel 用 createElement + textContent 写，绝不拼进 innerHTML。 -->

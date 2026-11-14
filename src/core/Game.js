@@ -696,6 +696,9 @@ export class Game {
       this.weaponSkills.tryNarrativeUnlocks(this);
     });
     gameOn('game-completed', () => {
+      // W-Z36：灯还在燃 — 通关那一刻把锚火点亮 3.8s（纯 CSS），给旅人 3.8s 的静默仪式
+      const flame = typeof document !== 'undefined' ? document.getElementById('ending-flame') : null;
+      if (flame) flame.classList.add('is-playing');
       // W-D2 切片26：说话人复用终局那一步的目标标题（同一个称号，且那一格已经占了两个键的上限）。
       // 对话框只过 `keyText()`（把 `{动作}` 换成键名）而不过 `t()` —— 展开必须在这里做。
       // W-E3 切片46：正文按最后一次终局抉择换段（"把火留给后来人" / "亲手熄掉锚点"），

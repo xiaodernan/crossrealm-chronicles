@@ -4309,7 +4309,59 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   .advisor-status.is-checking .advisor-status-dot,
   .advisor-rise, .cr-ember, .cr-boss-ember, .cr-gold-sweep, .cr-btn-sweep,
   .cr-sheen, .ztf-pulse, .bestRowGlow, .endCreditsLastLight, .achBreathe,
-  .autoplay-pulse, .pulse, .realmBleedPulse, .bossVictoryTide, .cr-critical-pulse {
+  .autoplay-pulse, .pulse, .realmBleedPulse, .bossVictoryTide, .cr-critical-pulse,
+  .ending-flame-atmosphere, .ending-flame-anchor {
     animation: none !important;
   }
+}
+
+/* === 终局"灯还在燃"帧（W-Z36） ============================================
+   通关那一刻的静默仪式：全屏一道锚火被点亮、3.8s 渐强渐暗，给旅人呼吸的空间。
+   pointer-events 关掉（点不到的彩蛋），减少动态偏好时只褪色不闪烁。 */
+.ending-flame {
+  position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 18px;
+  background: radial-gradient(ellipse 70% 55% at 50% 115%, rgba(255,183,90,0.30), transparent 62%),
+              radial-gradient(ellipse 55% 45% at 50% -15%, rgba(154,118,255,0.18), transparent 55%),
+              rgba(4,3,10,0.96);
+  pointer-events: none; visibility: hidden; opacity: 0;
+}
+.ending-flame.is-playing {
+  visibility: visible; opacity: 1; animation: ending-flame-cycle 4.5s ease-in-out forwards;
+}
+
+@keyframes ending-flame-cycle {
+  0%   { opacity: 0; visibility: hidden; transform: scale(0.98); }
+  15%  { opacity: 1; visibility: visible; transform: scale(1); }
+  72%  { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+.ending-flame-atmosphere {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 62%, rgba(255,217,138,0.38) 0%, transparent 55%);
+  animation: ending-flame-atmosphere-breathe 3.8s ease-in-out infinite;
+}
+.ending-flame-anchor {
+  width: clamp(160px, 28vw, 240px); height: auto;
+  filter: drop-shadow(0 0 48px rgba(255,217,138,0.7)) drop-shadow(0 0 100px rgba(255,183,90,0.35));
+  animation: ending-flame-anchor-pulse 2.6s ease-in-out infinite;
+}
+.ending-flame-title {
+  font-size: clamp(1.4rem, 4vw, 2.2rem); font-weight: 300; letter-spacing: 0.28em;
+  color: var(--gold-hi, #ffd98a); text-shadow: 0 0 36px rgba(255,217,138,0.4), 0 0 80px rgba(255,183,90,0.2);
+  margin: 0; text-align: center;
+}
+.ending-flame-sub {
+  color: rgba(233,226,210,0.78); font-size: 0.92rem; line-height: 1.7;
+  max-width: 520px; padding: 0 24px; text-align: center; margin: 0;
+}
+
+@keyframes ending-flame-anchor-pulse {
+  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 32px rgba(255,217,138,0.55)) drop-shadow(0 0 80px rgba(255,183,90,0.28)); }
+  50%      { transform: translateY(-10px) scale(1.05); filter: drop-shadow(0 0 64px rgba(255,217,138,0.82)) drop-shadow(0 0 130px rgba(255,183,90,0.45)); }
+}
+
+@keyframes ending-flame-atmosphere-breathe {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1.0; }
 }
