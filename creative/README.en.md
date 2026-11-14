@@ -7,14 +7,14 @@
 
 | Path | Content |
 |------|---------|
-| `novel/` | Long-form novel — **seven chapters + prologue + five interludes** (The Anchor Keeper · *A Letter from the Fire* · *The Keeper’s Reply* · *Lin’s Reply to the Keeper* · *The Reply of the One Who Came After* · *Before the Flame*) |
+| `novel/` | Long-form novel — **seven chapters + prologue + six interludes** (The Anchor Keeper · *A Letter from the Fire* · *The Keeper’s Reply* · *Lin’s Reply to the Keeper* · *The Reply of the One Who Came After* · *Before the Flame* · *Handover*) |
 | `GLOSSARY.md` | *Crossrealm Chronicles* Codex — machine-extracted canon (characters / locations·planes / timeline / key items·motifs / name do’s & don’ts). Machine-extracted; never canonical — when in doubt, the text rules. *(Interlude V · Before the Flame was added in the 2026-11-16 generation pass — see the end of the file.)* |
 | `GLOSSARY-en.md` | Canonical Codex EN sibling — machine-extracted from the full English rendering (all thirteen chapters, same section machinery, same per-chapter sourcing). Counterparts for every chapter. |
 | `film/` | 142-minute film script — three-act structure + director’s notes; ending coda “Beyond the Star-Charts”; English twin: `电影剧本-跨界纪事.en.md` · companion short — `film/短片-看守的日子.md` (ZH) · `film/short-keeper-day.en.md` (EN, same structure beat-for-beat) — ending-after coda: the day before the anchor, the keeper never leaves |
 | `music/` | OST-25 track manual + `liner-notes.md` (English: `liner-notes.en.md`) track commentary (stage / memory / plane, with canon sources) + playable Web Audio previews (25 tracks hand-synthesised) · English sibling: `OST-专辑手册.en.md`. |
 | `player-guide.html` | **Player booklet / Player Guide** — bilingual full manual: install, controls, combat 101, boss compendium, world tour, journal tabs, ending & remnant-scroll, autoplay, online layer, crossmedia universe, FAQ. zh/en switch in-page. |
 | `showcase.html` | **Latest-results showcase** — the “latest” page for the project entry: 9 microservices / 25 OST / 110 echoes / 40+ achievements / MIT; zh/en toggle. |
-| `tapestry.html` | **The Chronicles Compendium** — single-page official archive: timeline (prologue → Interlude V) / 17 mothers (emoji sigils) / 39 badges (live filter) / epilogue tablets / film-crew end-titles (verbatim). English edition: `tapestry.en.html`. |
+| `tapestry.html` | **The Chronicles Compendium** — single-page official archive: timeline (prologue → Interlude VI) / 17 mothers (emoji sigils) / 39 badges (live filter) / epilogue tablets / film-crew end-titles (verbatim). English edition: `tapestry.en.html`. |
 | `tapestry-lore/` | **Tapestry-Lore · The Seventeen Mothers** — the compendium's central column, canonised as recall-ready corpus (one `.md` per Mother: bilingual lamp metaphor + epitaph + anchor id) — what the Lore Oracle cites. |
 | `posters/` | 4 ultra-HD key posters (4K-class concept art) |
 
@@ -38,11 +38,11 @@ creative/music/soundtrack.html
 
 ## 📖 Read the novel
 
-Reading order: `novel/00-prologue.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → **`11-interlude-came-after`** → **`12-interlude-before-the-flame`**
+Reading order: `novel/00-prologue.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after` → `12-interlude-before-the-flame` → **`13-interlude-handover`**
 
-The full English rendering lives under `creative/novel/en/` (00–12, every chapter — prologue through Interlude V — rendered by hand at the same cadence, same beat, same hand):
+The full English rendering lives under `creative/novel/en/` (00–13, every chapter — prologue through Interlude VI — rendered by hand at the same cadence, same beat, same hand):
 
-`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after` → `12-interlude-before-the-flame`
+`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after` → `12-interlude-before-the-flame` → `13-interlude-handover`
 
 **EN direct links (jump to any chapter, no table-of-contents scrolling):**
 
@@ -61,6 +61,7 @@ The full English rendering lives under `creative/novel/en/` (00–12, every chap
 | Interlude III · Lin’s Reply to the Keeper | [interlude-lin-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/10-interlude-lin-reply.md) |
 | Interlude IV · The Reply of the One Who Came After | [interlude-came-after](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/11-interlude-came-after.md) |
 | Interlude V · Before the Flame | [interlude-before-the-flame](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/12-interlude-before-the-flame.md) |
+| Interlude VI · Handover | [interlude-handover](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/13-interlude-handover.md) |
 
 Chapter → game-chapter mapping:
 
@@ -79,6 +80,7 @@ Chapter → game-chapter mapping:
 | Interlude III · Lin’s Reply to the Keeper | after Ch7 (final letter) | three letters closed — fire/fog/human confrontation: the Lamp Road, the door is you — waits for the next Lin |
 | Interlude IV · The Reply of the One Who Came After | after Ch7 (open letter) | the one who read the three letters — no verdict, presses the fourth page by the silver filament: you are the next lamp |
 | Interlude V · Before the Flame | new chapter (the canon's draft) | the world before the fire asked itself whether it wanted to — nine unlit lamps adrift, a traveler with the last coal; a hundred and eight figures set it down, one didn't; that is where the hundred and nine echoes come from; the chapter is unsigned and grants no achievements; it buys one poster: the thirteenth |
+| Interlude VI · Handover | the shift handed over (the canon at dawn) | the night the desk changes hands — the new one learns that the wick is never replaced (first wick, first night), the ledger's last page tells him this very hour is his; the alderman's habit survives; the flame is yours now |
 
 ## 🎥 Watch (as a script)
 

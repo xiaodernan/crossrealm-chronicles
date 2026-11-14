@@ -8103,7 +8103,7 @@ Phase D（系统与质量）
     但 Tapestry-lore（十七母题：每个 mother 的灯喻/谢幕碑/中英双语 annot 均为重复模板）入 corpus 后，模型无法从相似块选出「学院」一条答案（Q：「学院的谢幕碑写了什么？」/「What does the Academy of Magic epitaph say?」—— Academy 块明确在 context 且独占 source 文件：模型仍拒答 10/10 答复）。
   - **诊断**：retrieval 端用 Medium/high rank 块 Academy 正确返回；`inclusion=failure` 来自 **wkapi.pro gpt-6-sol 的注意力在同构重复块上系统性地平均——context precision 问题、不是 BM25 问题**。
     把 tapestry-lore.md 拆成十七文件（每 Mother 一个 source）：实测 Academy 仍然拒答（zero change），但 `Homecoming epitaph` 答对（`the road home was the long way`，citation `16-homecoming.md`）、✓ evidence 回答能经由单母题区分出来部分。
-  - **试过的办法（没有作效的）**：anchor-10（anchor 标注 + 「most relevant excerpt」 label）；trailing reminder 重申 heading lookup；prompt 骤「only look at the first excerpt」；BM25 ridge threshold 0.62（删除弱命中——却在 番外五 query 上让 film block 成为唯一 primary，模型回答不对且后可能拒答；已回退）；prompt 单复行 expansion（extra LLM call，没有收益）。
+  - **试过的办法（没有作效的）**：anchor-标注（信任「most relevant excerpt」标签）；trailing reminder 重申 heading lookup；prompt 直接加一句「只看第一段摘录」；BM25 ridge threshold 0.62（删除弱命中——却在番外五 query 上让 film block 成为唯一 primary，模型反而拒答；已回退）；prompt 单次外接 expansion（再加一次独立 LLM call，没有收益）。
   - **诚实结论（产品态）**：Oracle 在英雄语料/film prose（规模不同、模板 ≠ 母题）**稳定正确**（番外五、短片、EP、essay 全部跑通引用）；
     对**重复模板的双语碑文型语料**，`gpt-6-sol`（wkapi.pro）实测**注意力稳定地泄漏到邻近相同块**——无 prompt 能可靠指定「Academy 学院对应哪一块」。保留实测、不做魔法。
     Oracle 永远以 Advisory 形态存在，不会代判世界结局——这些**错误归属**（错配引用但原样呈现的事实摘录）不会走出玩家屏幕。
@@ -8112,3 +8112,13 @@ Phase D（系统与质量）
     ③  OracleControllerTest + Bm25IndexTest 11/11 + LoreRagTest 6/6 绿；corpus tests 不回退；
     ④ **新增已知约束**：template-variant 双语碑文语料上的 attention limit，未来任何人接手时应知道：
     若模型对同构母题 block 选择失败，通路 A 是继续 XML-style 块标注拆分（已做）、B 是等 wkapi 上游模型换代（候选：deepseek-r2 / qwen-72b；换模型只需改一行配置和重跑同 probe）、C 是把 Academy 恒零回答的一条写进 Advisory fallback（程序短路：Academy Had Better Citation Match 必答 with source-span quoting clause），而不是试图 prompt/fine-tune 去压服。
+
+- **2026-11-17 W-Z89「番外六 · 换班（Interlude VI · Handover）入典籍 · 全表面收尾」** —— 提交：本次 HEAD
+
+  - **起因**：番外五之后，用户持续要求"新章节 · 史诗叙事 · 宏观世界观"扩到新的一块；原典全部交代都在一处收束——
+    「炉主接力」「火不换引信」是《跨界纪事》内在母题；番外六把这句写成一整章：**一班炉边人在换班夜晚交出的手艺**——
+    炉芯不换、毯子永远折、蜡笔筒多一支、炉边人下次就走、读者坐在椅子上就是下一班。
+  - **做法**：`creative/novel/13-番外六-换班.md` + `creative/novel/en/13-interlude-handover.md`；
+    同番外五 QA 套路，`scripts/novel-qa.mjs "13-"`，每轮真上游 gpt-6-sol 红-绿（**5 轮**，包括 ledger 中「明天/今天」时序一致、新三件事条理矛盾递归清洗干净）；最终 zh/en「本章无矛盾」。
+  - **配套落地**：① 原典语料重建 55 源（+2 chapter 文件，GLOSSARY 双版以真上游生成补入番外六：zh 8.4 KB / en 13.8 KB；README 篇名数 五番外→六番外、tapestry/film/短片字幕等交叉名目同步刷新；player-guide 跨媒体卡片双语各补「换班」；showcase feed 11·16 补 W-Z89；tapestry 双语各增番外六 Interlude VI 大项（OST 01 前、OST 25 后的接班低鸣定位）。
+  - **判据**：QA 双语「本章无矛盾」；「六番外 / Interlude VI / 换班 / Handover」四表面（README 中英 + creative READMEs 中英 + player-guide 中英 + tapestry 中英 + showcase 中英）名目逐项与文件落盘一致；link:check 全绿；canon 文本互引 0 冲突（QA 红→绿循环 5 轮，含「明天/今天」时序一致、ledger 记录与「第一目 vs 新第一目」顺序一致）。
