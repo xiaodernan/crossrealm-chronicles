@@ -43,6 +43,23 @@ The full English rendering lives under `creative/novel/en/` (00–11, every chap
 
 `novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after`
 
+**EN direct links (jump to any chapter, no table-of-contents scrolling):**
+
+| Chapter | Direct |
+|---------|--------|
+| Prologue · One Hundred and Nine Echoes | [prologue](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/00-prologue.md) |
+| Chapter One · The Intersection Hub | [chapter-one](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/01-chapter-one.md) |
+| Chapter Two · The Fragmented Timeline | [chapter-two](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/02-chapter-two.md) |
+| Chapter Three · The Campfire | [chapter-three](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/03-chapter-three.md) |
+| Chapter Four · The Keeper | [chapter-four](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/04-chapter-four.md) |
+| Chapter Five · The One Who Writes | [chapter-five](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/05-chapter-five.md) |
+| Chapter Six · Echoes | [chapter-six](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/06-chapter-six.md) |
+| Chapter Seven · Embers | [chapter-seven](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/07-chapter-seven.md) |
+| Interlude I · A Letter from the Fire to You | [interlude-fire-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/08-interlude-fire-letter.md) |
+| Interlude II · The Keeper’s Reply | [interlude-keeper-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/09-interlude-keeper-reply.md) |
+| Interlude III · Lin’s Reply to the Keeper | [interlude-lin-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/10-interlude-lin-reply.md) |
+| Interlude IV · The Reply of the One Who Came After | [interlude-came-after](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/11-interlude-came-after.md) |
+
 Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |

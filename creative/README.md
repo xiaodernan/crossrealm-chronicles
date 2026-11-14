@@ -42,6 +42,23 @@ creative/music/soundtrack.html
 
 英文版（全量译本）：`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after`（译本与母本同频率、同一笔触、同一节拍）
 
+**EN 全集快速入口（双链接，直接用于阅读）**：
+
+| 章节 | 直达 |
+|------|------|
+| 序言 · One Hundred and Nine Echoes | [prologue](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/00-prologue.md) |
+| 第一章 · The Intersection Hub | [chapter-one](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/01-chapter-one.md) |
+| 第二章 · The Fragmented Timeline | [chapter-two](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/02-chapter-two.md) |
+| 第三章 · The Campfire | [chapter-three](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/03-chapter-three.md) |
+| 第四章 · The Keeper | [chapter-four](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/04-chapter-four.md) |
+| 第五章 · The One Who Writes | [chapter-five](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/05-chapter-five.md) |
+| 第六章 · Echoes | [chapter-six](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/06-chapter-six.md) |
+| 第七章 · Embers | [chapter-seven](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/07-chapter-seven.md) |
+| 番外 · A Letter from the Fire to You | [interlude-fire-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/08-interlude-fire-letter.md) |
+| 番外二 · The Keeper’s Reply | [interlude-keeper-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/09-interlude-keeper-reply.md) |
+| 番外三 · Lin’s Reply to the Keeper | [interlude-lin-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/10-interlude-lin-reply.md) |
+| 番外四 · The Reply of the One Who Came After | [interlude-came-after](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/11-interlude-came-after.md) |
+
 每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
