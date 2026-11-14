@@ -10,6 +10,8 @@ export const LORE_FRAGMENTS = [
   { id: 'lore-6', title: 'lore_6_title', text: 'lore_6_text', chapter: 5 },
   { id: 'lore-7', title: 'lore_7_title', text: 'lore_7_text', chapter: 3 },
   { id: 'lore-8', title: 'lore_8_title', text: 'lore_8_text', chapter: 2 },
+  // W-Z85 扩展：番外五「火之前」——前传锚铭，canon 原文只出现过在 letters，这里给玩家一眼
+  { id: 'lore-9', title: 'lore_9_title', text: 'lore_9_text', chapter: 2 },
   ...LORE_FRAGMENTS_POP,
 ];
 

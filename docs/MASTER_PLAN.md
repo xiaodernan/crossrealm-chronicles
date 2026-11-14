@@ -8073,3 +8073,10 @@ Phase D（系统与质量）
     最终判定：zh「本章无矛盾」en「本章无矛盾」。
   - **配套落地**：原典语料重建（12→13 章，自动入 corpus——Oracle 已能答番外五相关问题）；README / player-guide / creative READMEs / showcase feed / tapestry 全部新增「番外五」条目（双语）；**GLOSSARY 于 2026-11-16 同步补入番外五两段**（真上游 `novel-glossary.mjs --only=火之前 / --only=before-the-flame --append=true`，36 源语料重建，Bm25IndexTest 11/11 绿）。
   - **判据**：QA 双语言「本章无矛盾」；canon 母题 109 在全章闭环；番外五不写进七章/成就/图鉴（授权范围内的保护，防止误判定结局）；link:check 全绿。
+
+- **2026-11-16 W-Z85b「番外五入游戏：迷宫新 stele `lore-9` · 双语 · 文献黄金签名按 generator 重冻」** —— 提交：本次 HEAD
+
+  - **起因**：W-Z85 珍藏纸上；游戏内迷宫 stele 池是原典的天然注脚位——`lore-1…8` 家族一直位于 `src/game/LoreFragments.js`、章节门控、双语文案、种子 shuffle 摆进副本，15→17→19 篇。
+  - **做法**：新增 `lore-9`（title/text 双语各一键）：zh「无烟之年残碑」/「火没有先问世界。火先问了自己，然后被留住了。」；en「Stele of the Smokeless Year」/"Fire did not ask the world first. Fire asked itself — and was kept."（番外五 V 章锚铭原意，第一次在游戏内出现）；chapter: 2；LORE_FRAGMENTS 8→9 篇；`EXPECTED_KEY_COUNT 3111→3113`（hm_*_lore_oracle 等口径不变）；`content-registry.test.js` 不动（census 钉 POP 表，LORE_FRAGMENTS 独立计数）。
+  - **重冻守门**：`MazeLayout.js` 的 `shuffle(LORE_FRAGMENTS, rnd)` 是 seed-determined——加一篇会洗动全部文献落点（三颗种子同时变）。`tests/maze-shuffle-order.test.js` 黄金签名按 generator 实测输出重冻（20261001 / 7 / −3），并保留「换的只是哪一间在场」的归因注记——**换的不是发放那套流**。`lore-9` 的落点由 seed 决定、零既有副本被摸过。
+  - **判据**：`npm test 6687/6687` 绿；`narrative-i18n-keys` + `key-hint-source` + `maze-shuffle-order` 全绿；link:check 67/67。

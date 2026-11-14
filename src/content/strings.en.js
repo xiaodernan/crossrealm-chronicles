@@ -2787,6 +2787,8 @@ export const STRINGS_EN = Object.freeze({
   lore_7_text: '"I only keep the doors. I do not ask where the traveler goes. But the maze remembers every lost soul."',
   lore_8_title: 'Hub Echo',
   lore_8_text: 'The World Anchor\'s pulse connects to every dungeon. Clear one dungeon, and the anchor glows a little brighter.',
+  lore_9_title: 'Stele of the Smokeless Year',
+  lore_9_text: '"Fire did not ask the world first. Fire asked itself — and was kept."',
 
   // Homage-layer lore fragments (W-D2 slice 16b)
   lore_pop_wizard_title: 'Spell Academy Scrap',
