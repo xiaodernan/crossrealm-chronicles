@@ -81,6 +81,11 @@ async function boot() {
 
   loading?.classList.add('hidden');
   start?.classList.remove('hidden');
+  // W-Z55：炉主之名黄金纹章——已通关（炉主/echo-keeper）的人回到出场页时多看一件金器物
+  const keeperBadge = document.getElementById('start-keeper');
+  if (keeperBadge && game?.achievements?.unlocked?.has?.('echo-keeper')) {
+    keeperBadge.classList.remove('hidden');
+  }
   bindStartScreen(game);
   game.run();
 

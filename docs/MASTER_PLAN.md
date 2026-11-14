@@ -7470,3 +7470,23 @@ Phase D（系统与质量）
 
   - **后续**：①「榜首保持 N 天」的退位事件（试炼赛季收束）适合 W-Z55；
     ② ops/health 可回显最近一次 mirror 成功/降级（与 seasonBroadcastReceived 同族）。
+- **2026-11-14 W-Z55「炉主之名」——出场页炉主徽记：回家的旅人多一件金饰物** —— 提交：本次 HEAD
+
+  - **起因**：出场页是旅程的门。打过 56 步主线、把五个 Boss 全放回灯下、选了「把火留给后来人」、成就「炉主」刻进火边的同一个名字——
+    回到主菜单时什么都看不出这段路走过。旅人需要一个「看见自己走过」的瞬间，而不必再去翻成就墙确认。
+
+  - **做法**：`#start-keeper`（`aria-hidden="true"` + 初始 `.hidden`）：⚓ 炉火徽记 + 「炉主 · 火没有灭」
+    （EN `Echo-keeper · the flame endures`），一行金 pill 徽记挂在跨媒体宇宙caption之下——
+    出场页金字只属炉主，其它玩家看到的是静默。`main.js boot` 在 Game 构造完成、存档已 in-memory 之后判定：
+    `game?.achievements?.unlocked?.has?.('echo-keeper')` 为真才解除 hidden（未进存档通关的老档不误亮）。
+    纯 CSS，无任何动画/定时器（B39 纪律）；`.start-keeper.hidden{display:none}` 兜底。
+
+  - **判据**：`npm test` **6665 例全绿**（新增 `tests/start-keeper-badge.test.js` 4 例：DOM 存在+初始 hidden+aria-hidden /
+    双表 start_keeper_badge / main 侧生硬 reveal 判定 / CSS 注册）；`npm run lint` 0；`npm run build` ✓（14.0s）；
+    `npm run size` 2.18 MiB（余 0.07 MiB，门禁过）；`EXPECTED_KEY_COUNT` 3102 → **3103**。
+
+  - **风险**：金徽记对通关玩家是常亮的——出场页是唯一谢幕位，金字多亮一年也不抢戏；
+    `echo-keeper` 的解锁需要全母题 ≥ 6、且主题成就 17 母关闭——这是终局的最高门槛，
+    「火没有灭」四个字在这里是真的字面真话，不是 marketing copy。
+
+  - **后续**：W-Z56 可以在这里加「已回响数 x/17」第二行（归途残卷同源），但先别——W-Z55 这一行静默金 pill 刚刚好。

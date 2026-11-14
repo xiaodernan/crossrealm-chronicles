@@ -4435,3 +4435,17 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   box-shadow: 0 0 10px rgba(255, 217, 138, 0.95), 0 0 0 2px rgba(8, 7, 14, 0.75);
 }
 .fab-notify-dot.hidden { display: none; }
+
+
+/* === 炉主之名（W-Z55）：已通关的玩家回到出场页时，标题下多一行金 =================
+   出场页是旅程的门——炉主徽记是一句不需要翻译的话：火没有灭。 */
+.start-keeper {
+  display: inline-flex; align-items: center; gap: 9px;
+  margin: 6px auto 0; padding: 6px 18px;
+  font-size: 0.78rem; letter-spacing: 0.34em; color: var(--gold-hi, #ffd98a);
+  border: 1px solid rgba(255, 217, 138, 0.42); border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 217, 138, 0.14), rgba(255, 183, 90, 0.05) 55%, transparent);
+  text-shadow: 0 0 22px rgba(255, 217, 138, 0.45);
+}
+.start-keeper-glyph { font-size: 1.05em; }
+.start-keeper.hidden { display: none; }
