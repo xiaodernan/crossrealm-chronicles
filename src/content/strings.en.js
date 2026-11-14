@@ -3084,6 +3084,33 @@ Kill-streak Souls — 3+ kills within 4.5s gives extra souls
 {photoMode} Photo — hide HUD screenshot
 {escape} — execution slow-mo skippable; ending credits skippable
 Zone Switch — fullscreen transition + zone name`,
+  hm_title_online_living: 'Online layer · Fireside rumors',
+  hm_body_online_living: `Settings → Online partners → turn on (read from localStorage; no forced account, ever).
+Online layer sends requests to your own backend (http://localhost:8080). Off = zero network traffic.
+
+Advisor panel (F7), bottom strip — “炉火报讯台 / Fireside rumors”:
+[world] boss defeats · season transitions · trial-crown swaps · speedrun-crown swaps — timestamped kind chips, written via textContent.
+
+Unread dot (FAB): lit when there is something new (local counter); opens the panel, then turns off.
+
+Ranked pages:
+[Speedrun] boss best-clear times; same runner refreshing their own record never counts as an upset;
+[Trial crown] per-season leaderboard (score, layers, seconds left); same runner taking the crown = not an upset — only a real crown swap is mirrored.
+
+Double crown: same runner holding both the speedrun crown and the trial crown = world-class news.
+
+Off = zero network, exactly like offline.`,
+  hm_title_ending_journey: 'Ending · After the anchor flame · Embers Journal',
+  hm_body_ending_journey: `After the fifth boss (Chaos Overlord) unlocks the ending choice:
+“Keep the flame” — pass the light on; “Quiet end” — gather the journey and let the flame rest. Both are valid. Neither is wrong.
+
+After either choice: [{journal}] tab 13 “Embers Journal” —
+before the end: “The anchor flame belongs to those who walk this road to the end” (foreshadow);
+after the end: your choice lights its own epitaph + 17 stardust inscriptions — every line you open (n/17) becomes lit.
+
+Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
+
+Crossmedia universe: novel trilogy (seven chapters + three extras) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

@@ -11,6 +11,16 @@
  */
 export const HELP_SECTIONS_EXTRA = [
   {
+    id: 'online-living',
+    title: 'hm_title_online_living',
+    body: 'hm_body_online_living',
+  },
+  {
+    id: 'ending-journey',
+    title: 'hm_title_ending_journey',
+    body: 'hm_body_ending_journey',
+  },
+  {
     id: 'journal-tabs',
     title: 'hm_title_journal_tabs',
     body: 'hm_body_journal_tabs',
