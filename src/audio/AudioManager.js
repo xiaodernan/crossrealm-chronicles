@@ -68,7 +68,7 @@ const BGM_TRIM = Object.freeze({ zone: 1, dungeon: 0.16 / 0.14, boss: 0.22 / 0.1
  * `src/` 里每一处 `sfx: '<字面量>'` 必须在这里、这里每一格必须至少有一个调用方。
  * 也就是说：加一格要么带一个真派发点，要么红。
  */
-export const SFX_NAMES = Object.freeze(['doorOpen', 'roomClear', 'levelUp', 'bossPhase', 'loreDiscover', 'masterChime']);
+export const SFX_NAMES = Object.freeze(['doorOpen', 'roomClear', 'levelUp', 'bossPhase', 'loreDiscover', 'masterChime', 'endingFlame']);
 
 export class AudioManager {
   /** 本文件的监听都挂在同一个所有权下，`dispose()` 一次结清（W-A1 迁移第七处） */
@@ -759,6 +759,32 @@ export class AudioManager {
     });
     this.playTone(220, 1.3, 'sine', 0.045);
   }
+
+  /**
+   * 锣火一声 —— 通关那一刻、锚火 3.8s 静默仪式（W-Z36）点起时的低回鸣。
+   * 五声降 E + A 持续低频长鸣（比 masterChime 低一档、更沉，属于"幕"的那一种）。
+   */
+  endingFlame() {
+    if (!this.ctx || !this.enabled) return;
+    const t = this.ctx.currentTime;
+    // 半音 E2→A2：持续 2.4s 长音，几乎听不见它的开始——它是一盏灯而不是一道闪
+    [82.41, 110, 164.81].forEach((f, i) => {
+      const o = this.ctx.createOscillator();
+      o.type = 'triangle';
+      o.frequency.value = f;
+      const g = this.ctx.createGain();
+      const start = t + i * 0.18;
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.linearRampToValueAtTime(0.07, start + 0.35);
+      g.gain.exponentialRampToValueAtTime(0.001, start + 2.6);
+      o.connect(g);
+      g.connect(this.sfx);
+      o.start(start);
+      o.stop(start + 2.8);
+    });
+    this.playTone(41.2, 2.4, 'sine', 0.045);
+  }
+
   restDialogueOpen() { this.playTone(392, 0.2, 'sine', 0.06); this.playTone(523, 0.25, 'triangle', 0.05); }
   executionSting() { this.playTone(55, 0.35, 'sawtooth', 0.14); this.playTone(110, 0.25, 'square', 0.1); this._playNoise(0.06, 0.08, 280); }
   wispChase() { this.playTone(520 + Math.random() * 30, 0.04, 'sine', 0.03); }

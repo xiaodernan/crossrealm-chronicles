@@ -696,6 +696,8 @@ export class Game {
       this.weaponSkills.tryNarrativeUnlocks(this);
     });
     gameOn('game-completed', () => {
+      // 锚火点亮那一秒 —— 远程拉一声低频回鸣 SFX（与 masterChime 同一套 SFX_NAMES 远程请求面）
+      window.dispatchEvent(new CustomEvent('game-audio-sfx', { detail: { sfx: 'endingFlame' } }));
       // W-Z36：灯还在燃 — 通关那一刻把锚火点亮 3.8s（纯 CSS），给旅人 3.8s 的静默仪式
       const flame = typeof document !== 'undefined' ? document.getElementById('ending-flame') : null;
       if (flame) flame.classList.add('is-playing');
