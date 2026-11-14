@@ -2,7 +2,7 @@
 
 **专辑名**：Crossrealm Chronicles Original Soundtrack  
 **中文名**：跨界纪事 · 一百零九次元回声  
-**曲目**：24 首 · 78 分钟  
+**曲目**：25 首 · 84 分钟  
 **封面**：`../posters/poster-ost-album-4k.png`  
 
 ---
@@ -50,6 +50,7 @@
 | 22 | Starport Cantina（星港酒肆） | 星港商路 | 98 | 爵士五度 |
 | 23 | Full Resonance（全频共鸣） | 109/109 解锁 | 72→96 | 全系列动机叠录 |
 | 24 | Infinity Walker（无尽行者） | 滚动字幕 | 60 | 锚主题再现 |
+| 25 | Ember Low Hum（锚火低鸣） | 终章后彩蛋 · endingFlame 同频段 | 48 | 三角波 E2→A2 + 41.2Hz 次声 |
 
 ---
 
@@ -104,4 +105,4 @@ F2 藏起 HUD 留一口火
 ## 可播放 Demo
 
 浏览器打开：**`soundtrack.html`**  
-含 6 首 procedurally 生成的 Web Audio 预览（锚脉 / 营火 / 1983 / 逆相 / 全频 / 无尽）
+含 25 首 procedurally 生成的 Web Audio 预览（锚脉 / 营火 / 1983 / 逆相 / 全频 / 无尽）

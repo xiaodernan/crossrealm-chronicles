@@ -61,7 +61,7 @@ const PIN = {
   credits_line_thanks: ['感谢游玩', 'Thanks for playing'],
   credits_line_features: ['{journal} 日志 · CG 画廊 · 秘典 · 成就', '{journal} Journal · CG Gallery · Codex · Achievements'],
   credits_line_systems: ['营火 NPC · Boss 再战 · 战斗风格', 'Campfire NPCs · Boss rematch · Combat styles'],
-  credits_line_extended: ['衍生 —— 《跨界纪事》长篇 · OST 24 曲 · 电影剧本', 'Beyond the game — the novel · the OST · the film script'],
+  credits_line_extended: ['衍生 —— 《跨界纪事》长篇 · OST 25 曲 · 电影剧本', 'Beyond the game — the novel · the OST · the film script'],
   credits_line_fin: ['— fin —', '— fin —'],
   credits_toast: ['Chapter 5 完成 — 滚动字幕', 'Chapter 5 complete - rolling credits'],
   upgrade_lore_intro_a: ['营火不仅是休息点 — 位面行者的剑与杖在此与', "The campfire is more than a resting place - the Plane Wanderer's sword and staff resonate here with "],

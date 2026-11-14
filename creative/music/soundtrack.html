@@ -42,14 +42,14 @@
 </head>
 <body>
   <h1>跨界纪事 · OST</h1>
-  <p class="sub">Crossrealm Chronicles Original Soundtrack · 24 tracks · Web Audio procedural preview</p>
+  <p class="sub">Crossrealm Chronicles Original Soundtrack · 25 tracks · Web Audio procedural preview</p>
   <img src="../posters/poster-ost-album-4k.png" alt="OST 专辑封面" class="cover" />
   <div id="viz"><div id="viz-fill"></div></div>
   <div class="tracks" id="tracks"></div>
   <button class="stop" id="stop">STOP · 停止预览</button>
 
   <script>
-    // ========== 24 曲 Web Audio 实时预览（procedural synth） ==========
+    // ========== 25 曲 Web Audio 实时预览（procedural synth） ==========
     const TRACKS = [
       { num: '01', name: 'Anchor Pulse（锚脉）',                   meta: 'D min · 72 BPM · 主菜单',       fn: playAnchor },
       { num: '02', name: 'Three Roads（三路）',                     meta: 'D→G→A · 80 BPM · 过渡',         fn: playThreeRoads },
@@ -75,6 +75,7 @@
       { num: '22', name: 'Starport Cantina（星港酒肆）',              meta: '98 BPM · 爵士五度 · 星港',        fn: playCantina },
       { num: '23', name: 'Full Resonance（全频共鸣）',                meta: '72→96 BPM · 解锁全母题 · 五段叠唱', fn: playFull },
       { num: '24', name: 'Infinity Walker（无尽行者）',               meta: '60 BPM · 锚主题再奏 · 滚动字幕',   fn: playInfinity },
+      { num: '25', name: 'Ember Low Hum（锚火低鸣）',                 meta: '48 BPM · 三角波 E2→A2 + 41.2Hz 次声 · 结局/彩蛋',   fn: playEmberHum },
     ];
 
     let ctx, master, currentNodes = [], currentId = null, raf;
@@ -260,6 +261,32 @@
       const t0 = ctx.currentTime;
       [146.83, 174.61, 220, 261.63].forEach((f, i) => tone(f, 'sine', t0 + i * 1.5, 3, 0.1 - i * 0.015));
       setIntervalLoop(t0, 8);
+    }
+
+    // Disc 4 bonus — 「锚火低鸣」：结局/彩蛋专用，三角波 E2→A2 缓升 + 41.2Hz 次声垫底，
+    // 频段刻意低于 masterChime（锣）而沉于它——它是「幕」不是「号」。
+    function playEmberHum() {
+      const t0 = ctx.currentTime;
+      // 次声垫底：41.2 Hz sine 2.4s 渐起渐消（不可言传的压迫/温柔同源）
+      (function playSub() {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = 41.2;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.linearRampToValueAtTime(0.055, t0 + 0.9);
+        g.gain.exponentialRampToValueAtTime(0.001, t0 + 10);
+        o.connect(g); g.connect(master);
+        o.start(t0); o.stop(t0 + 10.2);
+        currentNodes.push(o, g);
+      })();
+      // 三音缓升（82.41 / 110 / 164.81），每音 2.6s，重叠入场——炉火呼吸而非号角
+      [82.41, 110, 164.81].forEach((f, i) => {
+        tone(f, 'triangle', t0 + i * 0.55, 4.2, 0.075);
+        tone(f * 2, 'sine', t0 + i * 0.55 + 0.3, 3.4, 0.03);
+      });
+      // 呼吸噪底：低切 300Hz 的火声
+      noise(t0 + 0.2, 6.5, 0.028, 300);
+      setIntervalLoop(t0, 10);
     }
 
     function setIntervalLoop(t0, dur) {
