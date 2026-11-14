@@ -74,6 +74,12 @@ jobs:
       - name: Redis-backed presence store (W-Z-同游 verification)
         run: pwsh -File "${{ github.workspace }}/server/scripts/verify-presence-redis.ps1"
 
+      # Redis-backed notification ledger (W-Z49): throwaway redis + spring.cache.type=redis
+      # proves publish -> recent readback -> LLEN/HGET raw keys -> cross-instance B sees
+      # the same row -> stats backend=redis
+      - name: Redis-backed notification ledger (W-Z49 verification)
+        run: pwsh -File "${{ github.workspace }}/server/scripts/verify-notify-redis.ps1"
+
       # Micrometer/Prometheus exposition (W-Z10): boot game-service locally,
       # push one boss_defeated event, scrape /actuator/prometheus and assert
       # game_telemetry_enqueued_total + jvm_memory_used_bytes + process_uptime_seconds.

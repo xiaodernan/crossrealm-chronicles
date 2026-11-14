@@ -1,0 +1,43 @@
+server:
+  port: 8085
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    # 关停时先停止接收新请求，再给在途请求最长 15 秒慢慢收尾（Linux/systemd 下生效）
+    timeout-per-shutdown-phase: 15s
+  application:
+    name: notification-service
+  config:
+    # 从 config-server 拉集中配置；config-server 不在线时静默回退到本地默认
+    import: "optional:configserver:http://localhost:8888"
+  cache:
+    # 显式默认：内存台账。classpath 有 redis 时若不写这个，
+    # Spring Boot 会自建 RedisCacheManager 并登记 RedisHealthIndicator ——
+    # 本地/CI 没 Redis，健康检查一直 DOWN（smoke 门禁因此卡死）。
+    # 上线开 Redis：SPRING_CACHE_TYPE=redis + SPRING_DATA_REDIS_HOST=... 
+    type: simple
+
+# 本地默认（与 config-server 仓库里的 notification-service.yml 保持一致）
+notification-service:
+  # 最近台账最多留多少条（Redis 环形 / 内存环形同一口径）
+  ledger-capacity: 50
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  # classpath 有 spring-boot-starter-data-redis 时，Boot 会登记 RedisHealthIndicator。
+  # 没有 Redis 时它会让 health 一直 DOWN。默认关闭探活，上线开 Redis 后
+  # MANAGEMENT_HEALTH_REDIS_ENABLED=true 打开。
+  health:
+    redis:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh

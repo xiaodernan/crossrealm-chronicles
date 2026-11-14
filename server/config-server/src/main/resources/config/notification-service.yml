@@ -1,0 +1,5 @@
+# notification-service 的集中下发配置（config-server 的 native 仓库里那一份）
+# 服务启动时通过 spring.config.import 拉取；下线 config-server 也能起（optional: 前缀）
+notification-service:
+  # 最近台账最多留多少条（Redis 环形 / 内存环形同一口径，改这里即全局生效）
+  ledger-capacity: 50

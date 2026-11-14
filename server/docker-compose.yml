@@ -1,13 +1,14 @@
-# 跨服王冠 · 在线伙伴服务 —— 一键部署（七容器：discovery / config / game / season / gateway / presence / redis）
+# 跨服王冠 · 在线伙伴服务 —— 一键部署（八容器：discovery / config / game / season / gateway / presence / redis / notify）
 # 用法（仓库根目录 server/ 下）：
 #   docker compose up --build
 # 全栈起来之后：
 #   curl http://localhost:8080/api/version
 #   curl http://localhost:8080/api/leaderboard
 #   curl http://localhost:8080/api/presence/world/count
+#   curl http://localhost:8080/api/notify/recent
 #
 # 注册名刻意不用 localhost：容器间网络用服务名（discovery / config / game-service / season-service
-# / presence-service / gateway / redis），与单机 smoke 脚本的 localhost 配置是两个世界，不要混。
+# / presence-service / notification-service / gateway / redis），与单机 smoke 脚本的 localhost 配置是两个世界，不要混。
 
 name: crossrealm-chronicles-server
 
@@ -128,6 +129,10 @@ services:
         condition: service_healthy
       season-service:
         condition: service_healthy
+      presence-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/actuator/health || exit 1"]
       interval: 5s
@@ -179,7 +184,38 @@ services:
       retries: 30
       start_period: 25s
 
-  # 一次性验证容器：全栈健康后把版本/排行榜/遥测/赛季/ops/在场 跑一遍并退出（exit 0 = 全绿）
+# 炉火报讯台（W-Z49）：跨微服务的通知 / 广播登记处。默认 memory 后端（无 Redis 也健康）；
+# 这里用 SPRING_CACHE_TYPE=redis 接上面的 redis，走 List/Hash 环形台账 + Pub/Sub 广播。
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    ports:
+      - "8085:8085"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: notification-service
+      EUREKA_INSTANCE_PREFERIPADDRESS: "false"
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config:8888
+      SPRING_CACHE_TYPE: redis
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+      MANAGEMENT_HEALTH_REDIS_ENABLED: "true"
+    depends_on:
+      discovery:
+        condition: service_healthy
+      config:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8085/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 25s
+
+  # 一次性验证容器：全栈健康后把版本/排行榜/遥测/赛季/ops/在场/报讯 跑一遍并退出（exit 0 = 全绿）
   verify:
     image: curlimages/curl:8.10.1
     depends_on:
@@ -204,6 +240,10 @@ services:
       curl -fsS http://gateway:8080/api/ops/season;
       echo; echo '== /api/presence/world/count ==';
       curl -fsS http://gateway:8080/api/presence/world/count;
+      echo; echo '== /api/notify/stats ==';
+      curl -fsS -X POST http://gateway:8080/api/notify -H 'content-type: application/json' -d '{"kind":"system","title":"compose-smoke","body":"全栈报讯台在线"}';
+      echo; curl -fsS http://gateway:8080/api/notify/recent?limit=1;
+      echo; curl -fsS http://gateway:8080/api/notify/stats;
       echo; echo '== /actuator/springcloud ==';
       curl -fsS http://gateway:8080/actuator/springcloud;
       echo"

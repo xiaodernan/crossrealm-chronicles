@@ -1,0 +1,21 @@
+# 测试专用：关掉 Eureka/Config 的网络依赖，保证 CI 离线可跑
+spring:
+  cloud:
+    config:
+      enabled: false
+  config:
+    # 覆盖 application.yml 里的 optional:configserver: —— 测试不该等一个连不上的配置中心
+    import: ""
+
+eureka:
+  client:
+    enabled: false
+
+notification-service:
+  ledger-capacity: 50
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh

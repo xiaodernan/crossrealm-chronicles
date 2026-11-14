@@ -1,4 +1,4 @@
-# Smoke test: boot discovery / config / game-service / season-service / ai-service / gateway for real and verify the whole chain:
+# Smoke test: boot discovery / config / game-service / season-service / ai-service / notification-service / gateway for real and verify the whole chain:
 #   config-server serves centrally managed config -> services register with Eureka -> gateway lb-routes by service name.
 #
 # Usage (from server/):
@@ -12,7 +12,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $logDir = Join-Path ([System.IO.Path]::GetTempPath()) 'crossrealm-server-smoke'
 New-Item -ItemType Directory -Force $logDir | Out-Null
 
-$ports = @{ 'discovery-server' = 28161; 'config-server' = 28888; 'game-service' = 28081; 'season-service' = 28082; 'ai-service' = 28083; 'gateway' = 28080 }
+$ports = @{ 'discovery-server' = 28161; 'config-server' = 28888; 'game-service' = 28081; 'season-service' = 28082; 'ai-service' = 28083; 'notification-service' = 28085; 'gateway' = 28080 }
 
 # Preflight: refuse to start if any target port is taken (a stray instance would fail its own health check and hide behind a false "ready").
 # Cross-platform port check: try a TCP connect; it succeeds iff something listens. Works on Windows PowerShell 5.1 and pwsh on Linux CI.
@@ -119,6 +119,15 @@ ai-service:
   cache-ttl-seconds: 30
 '@ | Set-Content -Encoding UTF8 $aiConfigFile
 
+# notification-service is a config client too (ledger capacity). Deliberately no
+# Redis wiring here: the compose stack runs it with spring.cache.type=redis; this
+# script proves the memory ledger + gateway lb:// route on every server change.
+$notifyConfigFile = Join-Path $tmpConfigDir 'notification-service.yml'
+@'
+notification-service:
+  ledger-capacity: 50
+'@ | Set-Content -Encoding UTF8 $notifyConfigFile
+
 $procs = @()
 try {
     $procs += Start-Server 'discovery-server' 'discovery-server-0.1.0-SNAPSHOT.jar' 28161
@@ -152,6 +161,12 @@ try {
     $procs += Start-Server 'ai-service' 'ai-service-0.1.0-SNAPSHOT.jar' 28083
     Remove-Item Env:SPRING_CONFIG_IMPORT -ErrorAction SilentlyContinue
     if (-not (Wait-Healthy 28083 'ai-service')) { exit 1 }
+
+    # notification-service pulls config from config-server too (it is a client, NOT config-server itself).
+    $env:SPRING_CONFIG_IMPORT = 'optional:configserver:http://localhost:28888'
+    $procs += Start-Server 'notification-service' 'notification-service-0.1.0-SNAPSHOT.jar' 28085
+    Remove-Item Env:SPRING_CONFIG_IMPORT -ErrorAction SilentlyContinue
+    if (-not (Wait-Healthy 28085 'notification-service')) { exit 1 }
 
     $procs += Start-Server 'gateway' 'gateway-0.1.0-SNAPSHOT.jar' 28080
     if (-not (Wait-Healthy 28080 'gateway')) { exit 1 }
@@ -385,7 +400,36 @@ game-service:
     if ($view -match 'smoke async ping') { Write-Error 'job view must not echo the player question back'; exit 1 }
     Write-Host 'async advisor queue ok (submit / dedup / poll / no secret echo)'
 
-    Write-Host "=== 4l) via gateway: X-Request-Id propagates into ai-service (W-Z6) ==="
+    Write-Host "=== 4l) via gateway: notification-service round trip (W-Z49) ==="
+    # lb:// warm-up must be per-service: the gateway's registry cache learns routes lazily.
+    $notifyWarmOk = $false
+    for ($i = 0; $i -lt 90; $i++) {
+        try {
+            $r = Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/notify/recent?limit=1' -TimeoutSec 10
+            if ($r.StatusCode -eq 200) { $notifyWarmOk = $true; Write-Host "notification lb:// routing warm (try $i) -> HTTP 200"; break }
+        } catch {}
+        Start-Sleep -Milliseconds 1000
+    }
+    if (-not $notifyWarmOk) { Write-Error 'warm-up failed: gateway never resolved notification-service within 90s'; exit 1 }
+    $notifyBody = '{"kind":"system","title":"compose-smoke","body":"full stack notify path alive"}'
+    $pub = (Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/notify' -ContentType 'application/json' -Body $notifyBody -TimeoutSec 15).Content
+    if ($pub -is [byte[]]) { $pub = [System.Text.Encoding]::UTF8.GetString($pub) }
+    Write-Host "POST /api/notify -> $pub"
+    if (-not ($pub -match '"stored":true')) { Write-Error "notification publish not stored: $pub"; exit 1 }
+    if ($pub -notmatch '"id"') { Write-Error "notification publish missing id: $pub"; exit 1 }
+    $recent = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/notify/recent?limit=3' -TimeoutSec 15).Content
+    if ($recent -is [byte[]]) { $recent = [System.Text.Encoding]::UTF8.GetString($recent) }
+    Write-Host "GET /api/notify/recent -> $recent"
+    if (-not ($recent -match '"count":\s*[1-9]')) { Write-Error "recent did not return at least one row after publish: $recent"; exit 1 }
+    if (-not ($recent -match 'compose-smoke')) { Write-Error "recent did not echo the published row: $recent"; exit 1 }
+    $nstats = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/notify/stats' -TimeoutSec 15).Content
+    if ($nstats -is [byte[]]) { $nstats = [System.Text.Encoding]::UTF8.GetString($nstats) }
+    Write-Host "GET /api/notify/stats -> $nstats"
+    if (-not ($nstats -match '"backend":"simple"')) { Write-Error "stats backend expected simple in smoke (no redis): $nstats"; exit 1 }
+    if (-not ($nstats -match '"byKind":\{[^}]*"system":')) { Write-Error "stats byKind missing system counter: $nstats"; exit 1 }
+    Write-Host 'notification-service round trip ok (publish / recent / stats through gateway)'
+
+    Write-Host "=== 4m) via gateway: X-Request-Id propagates into ai-service (W-Z6) ==="
     $ridHdr = 'smoke-trace-ai-001'
     $hdrResp = Invoke-WebRequest -UseBasicParsing -Method Post 'http://localhost:28080/api/ai/chat/async' -Headers @{ 'X-Request-Id' = $ridHdr } -ContentType 'application/json' -Body '{"question":"smoke request-id ping"}' -TimeoutSec 15
     $hdrBody = if ($hdrResp.Content -is [byte[]]) { [System.Text.Encoding]::UTF8.GetString($hdrResp.Content) } else { [string]$hdrResp.Content }
@@ -400,7 +444,7 @@ game-service:
     Write-Host "jobs/$hdrJobId -> $hdrView"
     if (-not ($hdrView -match '"requestId":"smoke-trace-ai-001"')) { Write-Error "job view missing the gateway-carried requestId: $hdrView"; exit 1 }
 
-    Write-Host "=== 4m) via gateway: ops advisor cross-service read (W-Z8) ==="
+    Write-Host "=== 4n) via gateway: ops advisor cross-service read (W-Z8) ==="
     $opsAdvisor = (Invoke-WebRequest -UseBasicParsing 'http://localhost:28080/api/ops/advisor' -TimeoutSec 20).Content
     if ($opsAdvisor -is [byte[]]) { $opsAdvisor = [System.Text.Encoding]::UTF8.GetString($opsAdvisor) }
     Write-Host $opsAdvisor
@@ -411,7 +455,7 @@ game-service:
     if (-not ($opsAdvisor -match '"capacity":64')) { Write-Error "ops advisor jobs missing queue capacity: $opsAdvisor"; exit 1 }
     Write-Host 'ops advisor cross-service read ok (health + job queue via Feign, cached 30s)'
 
-    Write-Host "=== 4n) via gateway: cancel a queued advisor job (W-Z7) ==="
+    Write-Host "=== 4o) via gateway: cancel a queued advisor job (W-Z7) ==="
     # no-key CI: the worker fails fast, so this races the LLM-less worker. Tolerate any terminal state,
     # but the cancel endpoint contract (shape + honest already-terminal/running) must hold either way.
     $cancelBody = '{"question":"smoke cancel ping","requestId":"smoke-cancel-1"}'
