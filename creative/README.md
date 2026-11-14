@@ -14,7 +14,7 @@
 | `music/` | OST 25 曲手册 + `liner-notes.md` 曲目释义（逐曲注解：剧场 / 记忆 / 位面，对应 canon 出处）+ 可播放 Web Audio 预览（全 25 首真手写）· 英文同源 `OST-专辑手册.en.md` / `liner-notes.en.md` |
 | `player-guide.html` | **玩家小册子 · Player Guide**——双语全量手册：安装、操作键位、战斗入门、Boss 图鉴、世界导览、日志页签、终章与归途、自动通关、在线层、跨媒体、FAQ |
 | `showcase.html` | **最新成果展示页**——给项目入口用的「最新」一页：9 微服务 / 25 OST / 110 回声 / 40+ 成就 / MIT；中英双语切换 |
-| `tapestry.html` | **跨界纪事年鉴 · The Chronicles Compendium** —— 单页官方档案：年表（序言→四番外）/ 17 枚母题（配 emoji 纹章）/ 39 枚徽章（实时筛选）/ 谢幕碑 / 制作手记（片尾字幕照录） |
+| `tapestry.html` | **跨界纪事年鉴 · The Chronicles Compendium** —— 单页官方档案：年表（序言→四番外）/ 17 枚母题（配 emoji 纹章）/ 39 枚徽章（实时筛选）/ 谢幕碑 / 制作手记（片尾字幕照录）· 英文版本：`tapestry.en.html` |
 | `posters/` | 4 张超高清宣传海报（4K 级概念图） |
 
 ## 🎬 海报

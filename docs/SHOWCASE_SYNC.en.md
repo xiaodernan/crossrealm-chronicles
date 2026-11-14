@@ -18,7 +18,7 @@ The more valuable contract: **your personal showcase at `xiaodernan.github.io` w
 1. Push to `main` (or manual `workflow_dispatch`) triggers:
    - `npm ci`
    - `npm run build` (a green production build is the newest deployable artifact)
-   - Assembly into `_site/`: `index.html` ← showcase · `game/` ← `dist/` (the whole game, playable) · `guide.html` (player booklet) · `tapestry.html` (the compendium) · `favicon.svg`
+   - Assembly into `_site/`: `index.html` ← showcase · `game/` ← `dist/` (the whole game, playable) · `guide.html` (player booklet) · `tapestry.html` (the compendium) · `tapestry.en.html` (the compendium, English) · `favicon.svg`
    - Publishes to this repo’s `gh-pages` branch
 2. Settings → Pages → Source = branch `gh-pages`, root `/` — and
    `https://xiaodernan.github.io/crossrealm-chronicles/` is always the freshest publishable state: playable, readable, linkable.
@@ -40,5 +40,6 @@ If you don’t enable Pages, the sync still lands on the `gh-pages` branch (brow
 | Latest Results showcase | `creative/showcase.html` |
 | Player booklet / Player Guide | `creative/player-guide.html` |
 | The Chronicles Compendium | `creative/tapestry.html` |
+| The Chronicles Compendium · English | `creative/tapestry.en.html` |
 | Auto-sync CI | `.github/workflows/showcase.yml` |
 | Player save format | `crossrealm_save_v21` (browser localStorage) |

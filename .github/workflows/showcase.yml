@@ -8,6 +8,7 @@ on:
       - 'creative/showcase.html'
       - 'creative/player-guide.html'
       - 'creative/tapestry.html'
+      - 'creative/tapestry.en.html'
       - 'creative/GLOSSARY.md'
       - '.github/workflows/showcase.yml'
       - 'README.md'
@@ -49,6 +50,7 @@ jobs:
           cp creative/showcase.html _site/index.html
           cp creative/player-guide.html _site/guide.html
           cp creative/tapestry.html _site/tapestry.html
+          cp creative/tapestry.en.html _site/tapestry.en.html
           cp public/favicon.svg _site/favicon.svg
           cp -r dist/. _site/game/
 

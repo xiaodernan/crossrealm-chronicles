@@ -20,7 +20,7 @@
 1. 推送到 `main`（或 `workflow_dispatch` 手动跑）→ 自动执行：
    - `npm ci`
    - `npm run build`（完整前端构建通过 = 最新能打包的成果）
-   - 组装到 `_site/`：`index.html` ← showcase（最新成果）/`game/` ← `dist/`（整个游戏，可玩）/ `guide.html`（玩家小册子）/ `tapestry.html`（年鉴）/ `favicon.svg`
+   - 组装到 `_site/`：`index.html` ← showcase（最新成果）/`game/` ← `dist/`（整个游戏，可玩）/ `guide.html`（玩家小册子）/ `tapestry.html`（年鉴）/ `tapestry.en.html`（年鉴英文版）/ `favicon.svg`
    - 推送到本仓库的 `gh-pages` 分支
 2. 只要在 **Settings → Pages** 里把 Source 设为 `gh-pages` 分支根目录，
    `https://xiaodernan.github.io/crossrealm-chronicles/` 就是**你点进去就能玩、就能看**的最新状态。

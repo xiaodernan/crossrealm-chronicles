@@ -1,5 +1,6 @@
 # Crossrealm Chronicles :: Server —— 在线伙伴服务（可选）
 
+> English mirror: [`README.en.md`](README.en.md)
 《Crossrealm Chronicles》本体是**纯前端**的 Three.js 游戏，离线可玩、无任何运行时依赖。
 本目录是一个**独立的、可选的** Spring Cloud 微服务后端（Java 17+ / Maven 3.9+），为联机场景提供：
 
