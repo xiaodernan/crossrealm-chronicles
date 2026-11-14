@@ -1,6 +1,7 @@
 import { Game } from './core/Game.js';
 import { setLanguage, t } from './engine/i18n.js';
 import { storedLanguage } from './core/SettingsManager.js';
+import { revealStartTicker } from './online/startTicker.js';
 
 function showBootError(msg) {
   const loading = document.getElementById('loading');
@@ -86,6 +87,8 @@ async function boot() {
   if (keeperBadge && game?.achievements?.unlocked?.has?.('echo-keeper')) {
     keeperBadge.classList.remove('hidden');
   }
+  // W-Z58：出场页「炉边传闻」——在线启用时，把世界最近一条真实报讯挂上门楣（离线零网络）
+  revealStartTicker(document);
   bindStartScreen(game);
   game.run();
 

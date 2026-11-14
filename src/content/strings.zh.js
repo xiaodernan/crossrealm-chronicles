@@ -2401,6 +2401,7 @@ export const STRINGS_ZH = Object.freeze({
   start_crossmedia_title: '── 跨界纪事 · 跨媒体宇宙 ──',
   start_crossmedia_caption: '长篇小说七章 · 142 分钟电影剧本 · OST 25 曲手册（见 creative/ 目录）',
   start_keeper_badge: '炉主 · 火没有灭',
+  start_ticker_label: '此刻 · 炉边传闻',
 
   // 指南面板动态文案（W-D2 切片8：GameGuidePanel 三元素）
   guide_title_auto: '⚡ 自动通关进行中',
