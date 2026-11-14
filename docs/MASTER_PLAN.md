@@ -7248,3 +7248,12 @@ Phase D（系统与质量）
   - **风险**：① 锚火 SVG 在 `ending-flame` 里的 `<img>` 比 `<ref>` 更适合 reduced-motion 切换（关闭动画后它的 drop-shadow-filter 还有视觉锚点，而 not-visible 完全是黑色块）；② pointer-events:none 让用户没法意外聚焦到它——它永远不能代表「可点击的继续」；③ 双语翻译从来只在 `applyTranslations` 初始化时打一次（那是真的，就像终局对话文字同源 i18n 表）；④ `visibility:hidden` 在 animation end 之后才真正退场（CSS 动画 forwards），pointer-events:none 配合 z-index:1000，不会把继续挡在火里。
 
   - **后续**：① 给锚火配一组奇数几秒的低频 thump——不需要真的人声，Web Audio 程序化 `Math.sin(f*0.8)` × `rootC+minor/4` 的 drop 作 2.5s 一次 ping；② 篝火通关的下一个问题不是「火怎样熄」，而是「始于结束的究竟是什么」——W-Z37 应把 Ambient: 结束里追加「下一位旅人的徽标在火边闪烁」（fin-gen-sfx 血条）。
+- **2026-11-14 W-Z37「锚火低鸣」——终局 SFX：远程拉一声低频回鸣（与 masterChime 同一档远程请求面）** —— 提交：本次 HEAD
+
+  - **起因**：W-Z36 给了终局一道视觉仪式（3.8s 帧锚火 SVG + 纯 CSS 金晕呼吸），但纯视觉——耳朵不属于「火在燃」的隐喻。锚火熄灭/点燃是整个游戏真正的声画隐喻中心；终局只点一盏火而不给它一声音，等于让玩家觉得锚火是「静默关机」。B71 音效契约双向门禁已经，SFX_NAMES + AudioManager 上同名方法 + Game.js 中至少一组 `sfx: '<literal>'`。
+
+  - **做法**：① `src/audio/AudioManager.js` 新增 `endingFlame()`：在 82.41 Hz（E2）/ 110 Hz（A2）/ 164.81 Hz（E3） 三角波上叠 41.2 Hz sine 长持续，2.4s 4 段，envelope 0.07 峰 + 2.6s 指数衰——比 masterChime 低一档、更沉的那种「幕」，不抢镜。② 加到 `SFX_NAMES` 末。③ `src/core/Game.js` 在 game-completed 回调开端里写 `window.dispatchEvent(new CustomEvent('game-audio-sfx', { detail: { sfx: 'endingFlame' } }));` —— 与随后 `classList.add('is-playing')` 同级，视觉/听觉同步。④ B71 双向门禁对偶符合：endingFlame 在 SFX_NAMES 里 + 在 Game.js 有 caller 派发。
+
+  - **判据**：`npm test` **6646 例全绿**（`audio-sfx-contract` 18/18，含「名册每一格有调用方」双向对齐）；`npm run lint` 0；`npm run build` ✓ ；size 零波动（2.17 MiB）。
+
+  - **风险**：① 41.2 Hz sine 次声对完全听不见但会推动次声带——对不适配低音的玩家完全不可见；② SFX_NAMES 反向删除时不能只删此格（连带删 Game.js 调用点），仍须保持 B71 对偶；③ AudioManager.prototype.endingFlame 暂无 JSDoc → 文档妥协换门禁绿；④ 与 W-Z36 视频仪式并轴——同一次 game-completed 调度，视觉平面和听觉平面在同一个 await 之下，一阶段一致。
