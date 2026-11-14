@@ -5,8 +5,9 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
+/* 注意：W-Z79 起本类不再是 @Component —— bean 由 GameServiceApplication 显式声明
+   （默认 AsyncNotifyMirrorService 派发），单测直构造不受影响。 */
 /**
  * 世界事件 → 报讯台的镜像器（W-Z50）。
  *
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Component;
  * <p>所有异常（Feign 抛出、fallback 已吞、序列化、脏 detail）一律吞掉：
  * telemetry 入口不允许因为一个旁观件失败而 500。
  */
-@Component
 public class NotifyMirrorService {
 
     /** bossId → 中文名（与 src/content/bossRoster.js 同源，服务端不读前端文件，各抄一份 + 单测钉住） */

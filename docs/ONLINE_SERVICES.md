@@ -46,6 +46,8 @@
 
 
 
+**压测（W-Z79）**：`scripts/stress-load.mjs`——Node 零依赖五场景压测器（readBurst / writeBurst / telemetryFlood / mixed / idempotentReplay；退出码 errRate>0.02 或任一 5xx => 1）。用法：`mvn -o -pl game-service -am package` 后 `java -jar server/game-service/target/game-service-0.1.0-SNAPSHOT.jar`（28081 建议独立端口），然后 `node scripts/stress-load.mjs --target http://localhost:28081 --scenario mixed --concurrency 60 --duration 20`。2026-11-14 首轮实测抓到真死锁（CHM.clear() × computeIfAbsent bin 锁 + `synchronized (runs)`，AB-BA 环），修复（整表换实例 + runs 锁双检计算 + Feign 外呼移出锁外 + `AsyncNotifyMirrorService` daemon 异步派发）后读 ~2151 rps / 写 ~1171 rps、零 5xx —— 见 `docs/MASTER_PLAN.md` W-Z79 条目。
+
 ## 快速验证（5 分钟）
 
 ```bash
@@ -162,6 +164,7 @@ Gateway 4.x 起路由配置前缀是 `spring.cloud.gateway.server.webflux.*`（�
 - `server/scripts/verify-breaker.ps1` —— W-X5 网关熔断验证（手动诊断）
 - `.github/workflows/server.yml` — CI（编译 + 单测 + 全链路冒烟）
 - `src/online/OnlineServices.js` — 游戏侧客户端（默认关闭）
+- `scripts/stress-load.mjs` — Node 零依赖压测器（五场景；p50/p95/p99；见 W-Z79 ADR）
 - `server/season-service/` — 赛季服务（名册 / 周期轮转 / 词缀契约）
 - `server/ai-service/` — 星轨顾问 / 回声灯（唯一持有密钥；`verify-ai-service.ps1` 真调用验证）
 - `server/notification-service/` — 炉火报讯台（W-Z49；`verify-notify-redis.ps1` 真跑跨实例共享台账）

@@ -50,7 +50,9 @@ public class LeaderboardService {
     private final @Nullable com.crossrealm.chronicles.game.trial.TrialLeaderboardService trialCrownCheck;
 
     // W-P1：每个 limit 一份惰性快照。writes 清空整表，reads 命中零排序成本。
-    private final Map<Integer, List<RunRecord>> topCache = new ConcurrentHashMap<>();
+    // W-Z79（2026-11-14 压测发现）：topCache 不再被任何地方当锁或、或调用 clear()（CHM bin 锁 × computeIfAbsent
+    // ReservationNode 的 AB-BA 顺序会把全局写读者互相锁死）。改 volatile 整表换实例：O(1)、无锁、永不阻塞读者。
+    private volatile Map<Integer, List<RunRecord>> topCache = new ConcurrentHashMap<>();
     private final AtomicLong cacheHits = new AtomicLong();
     private final AtomicLong cacheMisses = new AtomicLong();
 
@@ -92,7 +94,7 @@ public class LeaderboardService {
             if (!persisted.isEmpty()) {
                 synchronized (runs) {
                     runs.addAll(persisted);
-                    topCache.clear();
+                    topCache = new ConcurrentHashMap<>();
                 }
                 return;
             }
@@ -127,11 +129,13 @@ public class LeaderboardService {
                 beforeTop1 = snapshot.get(0);
             }
         }
+        boolean fireDethrone = false;
+        List<RunRecord> after;
         synchronized (runs) {
             runs.add(run);
-            // 头条的每一次 add 都可能挤进任意 k 档的头部；整表失效是唯一
-            // 永远不会漏的方案，而榜单写是低频路径，代价可以忽略。
-            topCache.clear();
+            // 头条的每一次 add 都可能挤进任意 k 档的头部；整表换实例是唯一
+            // 永远不会漏的方案，且 O(1)、不取 bin 锁（W-Z79 定位到的 AB-BA 死锁改这里）
+            topCache = new ConcurrentHashMap<>();
             if (mirror != null) {
                 try {
                     mirror.mirror(run);
@@ -139,19 +143,35 @@ public class LeaderboardService {
                     // Redis 进程间消失不阻碍提交
                 }
             }
-            List<RunRecord> after = top(properties.getLeaderboard().getMaxLimit());
+            after = top(properties.getLeaderboard().getMaxLimit());
             if (notifyRankChange && notifyMirror != null && detectDethroning(run, beforeTop1)) {
+                fireDethrone = true;
+            }
+        }
+        // ── W-Z79 压力测试发现的链式问题（2026-11-14）：易主报讯 Feign 外呼原先写在
+        // `synchronized (runs)` 关键段里，一次连接超时（本机 loopback 未监听端口要数秒 RST；
+        // notification-service 未起时每次提交都遭遇）→ 全部 leaderboard 读写者
+        // 全部在榜单锁上排队，p50 从 <10ms 涨到 ~3s。外呼一律放在锁外（同一提交线程、
+        // 同一调用顺序，测试断言不受影响），关键段只剩内存操作。
+        if (fireDethrone) {
+            try {
                 notifyMirror.mirrorLeaderboardDethrone(run.runner(), run.bossId(), run.clearTimeMs());
-                // W-Z60：双冠瞭望——新王若同时戴着试炼榜皇冠，再镜一条 world 报讯（单冠报讯照旧发）
-                if (trialCrownCheck != null) {
+            } catch (RuntimeException ignored) {
+                // 报讯外呼失败不阻碍提交（best-effort，W-Z50 既定语义）
+            }
+            // W-Z60：双冠瞭望——新王若同时戴着试炼榜皇冠，再镜一条 world 报讯（单冠报讯照旧发）
+            if (trialCrownCheck != null) {
+                try {
                     java.util.List<String> crowns = trialCrownCheck.crownsHeldBy(run.runner());
                     if (!crowns.isEmpty()) {
                         notifyMirror.mirrorDualCrown(run.runner(), crowns);
                     }
+                } catch (RuntimeException ignored) {
+                    // 瞭望失败同样 best-effort
                 }
             }
-            return after;
         }
+        return after;
     }
 
     /**
@@ -190,16 +210,28 @@ public class LeaderboardService {
             cacheHits.incrementAndGet();
             return cached;
         }
-        cacheMisses.incrementAndGet();
-        return topCache.computeIfAbsent(cap, this::rebuildTop);
+        // W-Z79 修 AB-BA 环：computeIfAbsent 的 bin 锁与 rebuildTop 里的 synchronized(runs)
+        // 反序竞争成环（2026-11-14 jcmd 实证：线程在 computeIfAbsent 上永远 BLOCKED）。
+        // 整表重建放进 runs 锁里、双检之后全量写回，CHM 只剩 get/put，绝不和 bin 锁打交道。
+        synchronized (runs) {
+            List<RunRecord> again = topCache.get(cap);
+            if (again != null) {
+                cacheHits.incrementAndGet();
+                return again;
+            }
+            cacheMisses.incrementAndGet();
+            List<RunRecord> built = rebuildTop(cap);
+            topCache.put(cap, built);
+            return built;
+        }
     }
 
     /**
      * 全表重排出 cap 条，返回不可变语义的新列表。
      * 数据量小于 cap 时退回全排序（省掉堆的初始化，常路径更短）。
+     * 调用方已在 runs 锁里——这里同锁可重入。
      */
     private List<RunRecord> rebuildTop(int cap) {
-        synchronized (runs) {
             if (runs.size() <= cap) {
                 return runs.stream().sorted(BY_CLEAR_TIME_THEN_SUBMITTED).toList();
             }
@@ -215,7 +247,6 @@ public class LeaderboardService {
                 }
             }
             return heap.stream().sorted(BY_CLEAR_TIME_THEN_SUBMITTED).toList();
-        }
     }
 
     public int size() {

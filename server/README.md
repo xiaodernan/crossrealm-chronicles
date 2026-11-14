@@ -201,6 +201,16 @@ localStorage seed 打开在线伙伴、点 FAB、送出问题，再等一个非�
 - **注册名**：本地联调建议 `EUREKA_INSTANCE_HOSTNAME=localhost` + `EUREKA_INSTANCE_PREFERIPADDRESS=false`
   （否则注册成 `host.docker.internal`，网关从本机访问路由失败）。
 
+**压测（W-Z79）**：`scripts/stress-load.mjs` —— Node 零依赖：
+
+```bash
+mvn -o -pl game-service -am package     # 产出 jar
+SERVER_PORT=28081 EUREKA_CLIENT_ENABLED=false SPRING_CLOUD_CONFIG_ENABLED=false java -jar game-service/target/game-service-0.1.0-SNAPSHOT.jar &
+node scripts/stress-load.mjs --target http://localhost:28081 --scenario mixed --concurrency 60 --duration 20
+```
+
+场景：`readBurst`（GET 榜单/事件数）→ `writeBurst`（POST 两张榜）→ `telemetryFlood`（遥测洪峰）→ `mixed`（7:3 读写）→ `idempotentReplay`（X-Idempotency-Key 重放）。退出码：errRate>2% 或任一 5xx => 1。首轮实测抓到 AB-BA 环死锁（`topCache.clear()` × `computeIfAbsent` × `synchronized(runs)`），全修完后读 ~2151 rps / 写 ~1171 rps、全部场景零 5xx —— 见 `docs/MASTER_PLAN.md` W-Z79。
+
 ## 与游戏的对接（W-X2）
 
 游戏侧已有可选客户端（默认关闭）：`src/online/OnlineServices.js`。

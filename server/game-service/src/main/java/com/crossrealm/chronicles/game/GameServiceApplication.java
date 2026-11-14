@@ -1,9 +1,14 @@
 package com.crossrealm.chronicles.game;
 
-import com.crossrealm.chronicles.game.GameServiceProperties;
+import com.crossrealm.chronicles.game.notify.AsyncNotifyMirrorService;
+import com.crossrealm.chronicles.game.notify.NotifyClient;
+import com.crossrealm.chronicles.game.notify.NotifyMirrorService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
@@ -23,6 +28,23 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 // 不写 basePackages 时 Feign 会从本类所在包往下扫，恰好就是我们要的那一棵。
 @EnableFeignClients
 public class GameServiceApplication {
+
+    /**
+     * W-Z79（2026-11-14 压测定位）：报讯镜像默认走**异步派发**——易主/双冠/换季几条
+     * Feign 外呼脱离请求线程，notification-service 不答时端到端 p50 不再被 loopback
+     * RST 放大。单测直构造 NotifyMirrorService 不经此 bean，行为确定性不受影响；
+     * 要回滚为外呼同步只需 `GAMESERVICE_NOTIFY_MIRROR_ASYNC=false`。
+     */
+    @Bean
+    @Primary
+    public NotifyMirrorService notifyMirrorService(NotifyClient client,
+            @Value("${game-service.notify-mirror-enabled:true}") boolean enabled,
+            @Value("${game-service.notify-mirror-async:true}") boolean async) {
+        if (async) {
+            return new AsyncNotifyMirrorService(client, enabled);
+        }
+        return new NotifyMirrorService(client, enabled);
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(GameServiceApplication.class, args);

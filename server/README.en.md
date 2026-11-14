@@ -168,6 +168,18 @@ npm run e2e:advisor                        # headless Chrome → F7 panel → re
 - **Config server address**: `game-service` uses `spring.config.import=optional:configserver:http://localhost:8888`. Do **not** set `SPRING_CONFIG_IMPORT` on config-server itself (it would pull from itself, saturating HTTP worker threads and fake-killing health checks — the classic empty-log corpse; see smoke script comments and git history).
 - **Registration name**: for local joint debugging prefer `EUREKA_INSTANCE_HOSTNAME=localhost` + `EUREKA_INSTANCE_PREFERIPADDRESS=false` (otherwise it registers as `host.docker.internal`, and the gateway cannot route from the host machine).
 
+## Stress testing (W-Z79)
+
+`scripts/stress-load.mjs` — Node-zero-dependency five-scenario load driver:
+
+```bash
+mvn -o -pl game-service -am package     # build the jar
+SERVER_PORT=28081 EUREKA_CLIENT_ENABLED=false SPRING_CLOUD_CONFIG_ENABLED=false java -jar game-service/target/game-service-0.1.0-SNAPSHOT.jar &
+node scripts/stress-load.mjs --target http://localhost:28081 --scenario mixed --concurrency 60 --duration 20
+```
+
+Scenarios: `readBurst` (GET boards/event counts) → `writeBurst` (POST both boards) → `telemetryFlood` (telemetry flood) → `mixed` (7:3 r:w) → `idempotentReplay` (X-Idempotency-Key replay). Exit codes: errRate > 2% or any 5xx ⇒ 1. The first real run captured a genuine AB-BA ring-deadlock (`topCache.clear()` × `computeIfAbsent` × `synchronized(runs)`); after the fix — reads ~2151 rps / writes ~1171 rps, zero 5xx across all scenarios — see `docs/MASTER_PLAN.md` W-Z79.
+
 ## Partnering with the game (W-X2)
 
 The game ships an optional client (off by default): `src/online/OnlineServices.js`.

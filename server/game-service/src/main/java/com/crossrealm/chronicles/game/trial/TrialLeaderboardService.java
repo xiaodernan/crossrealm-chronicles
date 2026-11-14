@@ -48,7 +48,11 @@ public class TrialLeaderboardService {
     private final @Nullable NotifyMirrorService notifyMirror;
 
     /** seasonId → 按当前 cap 缓存的榜单（add 时整表失效） */
-    private final Map<String, List<TrialRun>> topCache = new ConcurrentHashMap<>();
+    // W-Z79（2026-11-14 压测发现）：`topCache` 不再能在任何地方被当作锁对象或调用 clear()——
+    // CHM 的 clear() 与 computeIfAbsent 的 ReservationNode  bin 锁交叉时曾把全局写读者全部锁死
+    // （A 持 runs 等 bin 锁，B 持 bin 锁等 runs → 死锁）。改为 volatile 整表换实例：
+    // 失效路径 O(1)、无锁、永不阻塞读者。
+    private volatile Map<String, List<TrialRun>> topCache = new ConcurrentHashMap<>();
     private final AtomicLong cacheHits = new AtomicLong();
     private final AtomicLong cacheMisses = new AtomicLong();
 
@@ -92,7 +96,7 @@ public class TrialLeaderboardService {
             if (!persisted.isEmpty()) {
                 synchronized (runs) {
                     runs.addAll(persisted);
-                    topCache.clear();
+                    topCache = new ConcurrentHashMap<>();
                 }
                 return;
             }
@@ -129,13 +133,13 @@ public class TrialLeaderboardService {
                 beforeTop1 = snapshot.get(0);
             }
         }
+        boolean fireDethrone = false;
+        List<TrialRun> after;
         synchronized (runs) {
             runs.add(run);
             trim();
-            synchronized (topCache) {
-                // add 进来的一条可以搅动任何 season:cap 组合的榜首 — 整表失效最保险。
-                topCache.clear();
-            }
+            // add 进来的一条可以搅动任何 season:cap 组合的榜首——整表换实例最保险（O(1)、无 bin 锁）
+            topCache = new ConcurrentHashMap<>();
             if (mirror != null) {
                 try {
                     mirror.mirror(run);
@@ -143,15 +147,21 @@ public class TrialLeaderboardService {
                     // Redis 进程间消失不阻碍提交
                 }
             }
-            List<TrialRun> after = top(run.seasonId(), properties.getTrial().getMaxLimit());
-            TrialMirrorOutcome mirrorOutcome = notifyRankChange && notifyMirror != null
+            after = top(run.seasonId(), properties.getTrial().getMaxLimit());
+            TrialMirrorOutcome outcome = notifyRankChange && notifyMirror != null
                     ? detectDethroning(run, beforeTop1, run.seasonId())
                     : null;
-            if (mirrorOutcome != null) {
-                notifyMirror.mirrorTrialDethrone(run.runner(), run.seasonId(), run.score(), run.layersCleared());
-            }
-            return after;
+            fireDethrone = outcome != null;
         }
+        // 同 LeaderboardService（W-Z79）：Feign 外呼不进关键段
+        if (fireDethrone) {
+            try {
+                notifyMirror.mirrorTrialDethrone(run.runner(), run.seasonId(), run.score(), run.layersCleared());
+            } catch (RuntimeException ignored) {
+                // 报讯外呼失败不阻碍提交（best-effort，W-Z54 既定语义）
+            }
+        }
+        return after;
     }
 
     /**
@@ -238,16 +248,26 @@ public class TrialLeaderboardService {
             cacheHits.incrementAndGet();
             return cached;
         }
-        cacheMisses.incrementAndGet();
-        return topCache.computeIfAbsent(cacheKey, k -> rebuildTop(season, cap));
+        // W-Z79 修 AB-BA 环：computeIfAbsent 的 bin 锁与 rebuildTop 里 synchronized(runs)
+        // 反序竞争（jcmd 实证全跑期线程全 BLOCKED）——整表重建放进 runs 锁里、双检之后全量写回。
+        synchronized (runs) {
+            List<TrialRun> again = topCache.get(cacheKey);
+            if (again != null) {
+                cacheHits.incrementAndGet();
+                return again;
+            }
+            cacheMisses.incrementAndGet();
+            List<TrialRun> built = rebuildTop(season, cap);
+            topCache.put(cacheKey, built);
+            return built;
+        }
     }
 
     /**
      * 全表扫，用最小堆只留 cap 条（O(n log cap)），再按 COMPARATOR 输出一次。
-     * 调用方在写侧已经整表失效，所以这里只会在 miss 时走一次。
+     * 调用方已在 runs 锁里——这里同锁可重入。
      */
     private List<TrialRun> rebuildTop(String season, int cap) {
-        synchronized (runs) {
             if (runs.size() <= cap) {
                 return runs.stream()
                         .filter(r -> season.isEmpty() || season.equals(r.seasonId()))
@@ -268,7 +288,6 @@ public class TrialLeaderboardService {
                 }
             }
             return heap.stream().sorted(COMPARATOR).toList();
-        }
     }
 
     public int size() {
@@ -279,12 +298,10 @@ public class TrialLeaderboardService {
 
     /** 缓存命中/未命中/当前缓存栏位数，供 /api/ops/health 与调试面板使用。 */
     public Map<String, Object> cacheStats() {
-        synchronized (topCache) {
-            return Map.of(
-                    "hits", cacheHits.get(),
-                    "misses", cacheMisses.get(),
-                    "entries", topCache.size());
-        }
+        return Map.of(
+                "hits", cacheHits.get(),
+                "misses", cacheMisses.get(),
+                "entries", topCache.size());
     }
 
     /** 超出上限时丢**最老**的一条（列表是按到达顺序追加的，所以就是下标 0） */
