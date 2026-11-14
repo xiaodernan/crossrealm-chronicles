@@ -50,6 +50,28 @@ npm run stress -- --scenario mixed --target http://localhost:28081 --concurrency
 
 脚本：`scripts/stress-load.mjs`——Node 零依赖，退出码 `errRate > 0.02` 或任一 5xx ⇒ 1。可接入 CI（建议为 server-CI 增加一个 "stress" job，不作为合并门禁）。
 
+## ai-service · Lore Oracle 压测（W-Z86，2026-11-16）
+
+另起一组 throwaway 实例——`scripts/local-stub-llm.mjs` 做确定性 fake 上游（20 ms workload，SSE 全链路按 wkapi 规范回 tokens，不用真上游、不烧 token），ai-service 以 `LLM_BASE_URL=http://127.0.0.1:28884/v1` 直指它，全链路（BM25 → DigestCache → Breaker → 重试）真实参与：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\server\scripts\stress-oracle-verify.ps1 -Scenario mixed -Concurrency 30 -DurationSec 15
+powershell -ExecutionPolicy Bypass -File .\server\scripts\stress-oracle-verify.ps1 -Scenario mixed -Concurrency 40
+powershell -ExecutionPolicy Bypass -File .\server\scripts\stress-oracle-verify.ps1 -Scenario mixed -Concurrency 60 -DurationSec 20
+powershell -ExecutionPolicy Bypass -File .\server\scripts\stress-oracle-verify.ps1 -Scenario answerBurst -Concurrency 30 -DurationSec 12
+```
+
+| 场景 | 并发/时长 | issued | 2xx | 4xx | 5xx | errRate | p50 | p95 | p99 | rps |
+|---|---|---|---|---|---|---|---|---|---|---|
+| mixed | 30 / 15s | 1651 | 1651 | 0 | 0 | 0.00% | 195 ms | 540 ms | 2406 ms | ~110 |
+| mixed | 40 / 16s | 1657 | 1657 | 0 | 0 | 0.00% | 314 ms | 693 ms | 2503 ms | ~103 |
+| mixed | 60 / 20s | 1692 | 1692 | 0 | 0 | 0.00% | 481 ms | 1516 ms | 4735 ms | ~84 |
+| answerBurst | 30 / 12s | 724 | 724 | 0 | 0 | 0.00% | 124 ms | 2751 ms | 3133 ms | ~54 |
+
+结论：Oracle 昂贵路径在 throwaway stub-backed 实例上 **errRate 0%、5xx 0、单实例热场稳定**；尾延迟（p95/p99）由 fake stub 的单线程 SSE 串行限制决定——生产以真上游为准。`answerBurst` 的 p50=124ms 说明 digest cache 热路径真实有效（同一问句反复命中）。
+
+已知限制：计时走本地 throwaway port（`28883/28884`），不与其他项目共用；不覆盖真实 wkapi pro 长尾延迟分布；不覆盖 Redis Streams（Oracle 本身不进队列）。
+
 ## 已知限制（诚实声明）
 
 - **单机、无 Redis**：多实例跨重启 Redis 背板不构成本节结论，依赖 CI 的 9 个 `verify-redis-*` 脚本为准。

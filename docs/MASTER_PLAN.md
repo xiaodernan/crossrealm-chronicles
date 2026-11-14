@@ -8080,3 +8080,19 @@ Phase D（系统与质量）
   - **做法**：新增 `lore-9`（title/text 双语各一键）：zh「无烟之年残碑」/「火没有先问世界。火先问了自己，然后被留住了。」；en「Stele of the Smokeless Year」/"Fire did not ask the world first. Fire asked itself — and was kept."（番外五 V 章锚铭原意，第一次在游戏内出现）；chapter: 2；LORE_FRAGMENTS 8→9 篇；`EXPECTED_KEY_COUNT 3111→3113`（hm_*_lore_oracle 等口径不变）；`content-registry.test.js` 不动（census 钉 POP 表，LORE_FRAGMENTS 独立计数）。
   - **重冻守门**：`MazeLayout.js` 的 `shuffle(LORE_FRAGMENTS, rnd)` 是 seed-determined——加一篇会洗动全部文献落点（三颗种子同时变）。`tests/maze-shuffle-order.test.js` 黄金签名按 generator 实测输出重冻（20261001 / 7 / −3），并保留「换的只是哪一间在场」的归因注记——**换的不是发放那套流**。`lore-9` 的落点由 seed 决定、零既有副本被摸过。
   - **判据**：`npm test 6687/6687` 绿；`narrative-i18n-keys` + `key-hint-source` + `maze-shuffle-order` 全绿；link:check 67/67。
+
+- **2026-11-16 W-Z86「Lore Oracle 昂贵路径压测（stub-driven，零 token）+ 门禁脚本 + 别端中文文档链」** —— 提交：本次 HEAD
+
+  - **起因**：W-Z79 给 game-service 做了压测，但 ai-service —— 真实 LLM 调用路径上热度最高的进程 —— 从没被压过。
+    用户明确要求"模拟大量用户/高并发、撞库、大数据流/大数据量压测"——Oracle 昂贵路径必须有这个档次的验证。
+  - **做法（三样东西）**：`scripts/local-stub-llm.mjs`（确定性 fake 上游：20 ms workload；SSE chunk 与 wkapi.pro 真实端
+    逐字同构，含 `prompt_tokens_details.cached_tokens`，不烧真实 token）→ `scripts/stress-oracle.mjs`（与 stress-load 同构
+    零依赖 Node 压测器；scenarios：readBurst / answerBurst / mixed；退出码 0/1）→
+    `server/scripts/stress-oracle-verify.ps1`（throwaway 编排：独立端口 28883/28884、boot stub + ai-service、
+    轮询 /api/ai/lore/health 到 200、打 mixed、断言 5xx=0 ∧ errRate≤2% ∧ rps≥Min、只杀自己 PID）。
+  - **实测结论**：三轮 mixed（30/40/60 并发）+ 一轮 answerBurst：issues 724–1692、errRate **0.00%**、**0 5xx、0 4xx**；
+    p50 124–481 ms；rps 54–110（受本 stub 单线程 SSE 限制，非生产容量）；answerBurst 热缓存 p50=124 ms 说明
+    digest cache 真实生效。日志落在 `%TEMP%\crossrealm-oracle-stress-<pid>\`；gate GREEN。
+  - **配套修复**：`Test-PortFree` 之前把 TIME_WAIT 当成忙——Windows 关闭后 ~2min 内全部拒跑；只看 LISTEN 态、不拒 TIME_WAIT。
+  - **配套文档**：ONLINE_SERVICES 双语各补「Lore Oracle 压测（W-Z86）」段与 scripts 清单；STRESS_RESULTS.md 归档四组读数（honest tail note）；package.json 注册 `stress:oracle`。
+  - **判据**：gate GREEN ×4 run；零网络零 token；Oracle 昂贵路径结构级安全验证通过（tail 受本 stub 限制，生产分布与冷启动由真上游实测为准）。

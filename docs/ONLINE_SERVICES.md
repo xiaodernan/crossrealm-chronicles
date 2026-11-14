@@ -48,6 +48,8 @@
 
 **压测（W-Z79）**：`scripts/stress-load.mjs`——Node 零依赖五场景压测器（readBurst / writeBurst / telemetryFlood / mixed / idempotentReplay；退出码 errRate>0.02 或任一 5xx => 1）。用法：`mvn -o -pl game-service -am package` 后 `java -jar server/game-service/target/game-service-0.1.0-SNAPSHOT.jar`（28081 建议独立端口），然后 `node scripts/stress-load.mjs --target http://localhost:28081 --scenario mixed --concurrency 60 --duration 20`。2026-11-14 首轮实测抓到真死锁（CHM.clear() × computeIfAbsent bin 锁 + `synchronized (runs)`，AB-BA 环），修复（整表换实例 + runs 锁双检计算 + Feign 外呼移出锁外 + `AsyncNotifyMirrorService` daemon 异步派发）后读 ~2151 rps / 写 ~1171 rps、零 5xx —— 见 `docs/MASTER_PLAN.md` W-Z79 条目与 `docs/STRESS_RESULTS.md`（前/后对照数据归档）。最新基准复验报表附于 `docs/STRESS_RESULTS.md`：本机 8 路 par、持续 20 秒、CPU idle 状态测得。
 
+**典籍叩问压测（W-Z86）**：另一套 throwaway gate——`scripts/local-stub-llm.mjs`（确定性 fake 上游：20 ms workload、SSE 按 wkapi 规范回 tokens + cached_tokens —— 不烧 token）+ `server/scripts/stress-oracle-verify.ps1`，一键起桩 + ai-service(28883) → 对 `/api/ai/lore/answer` / `/health` 按 mixed/answerBurst/readBurst 洪峰打锤，退出码 0 = 零 5xx ∧ errRate ≤ 2%。2026-11-16 已实测并归档四组读数（30/40/60 并发 × mixed + 30 × answerBurst，p50 124–481ms / rps 54–110 / errRate 0% / 5xx 0）——详见 `docs/STRESS_RESULTS.md`「ai-service · Lore Oracle 压测（W-Z86）」节。Oracle 昂贵路径不走外部 LLM，tail 受本 stub 单线程 SSE 限制，生产以真上游旋度为准。
+
 **可用性可观测（W-Z79）**：`/api/ops/health.notifyMirrors{available,published{bossDefeated,seasonAdvance,trialDethrone,leaderboardDethrone,dualCrown,total}}` 暴露每个镜像走的是热路径还是 cold/asleep 状态——大流量下任何 dethrone 都异步扇出，不会吞吐放大到 game-service 主线程上。
 
 **异步通道**：game-service 内置 daemon `notify-mirror-dispatch` 单线程 + 有界队列（256、满丢最旧）负责 `NotifyClient` 外呼——抢答超时或 LB 无实例时 payload 立即丢弃并累计计数器。Spring bean 默认 async 装配；`game-service.notify-mirror-async=false` 可回滚为同步装配（旧行为保底）。
@@ -194,6 +196,7 @@ Gateway 4.x 起路由配置前缀是 `spring.cloud.gateway.server.webflux.*`（�
 - `.github/workflows/server.yml` — CI（编译 + 单测 + 全链路冒烟）
 - `src/online/OnlineServices.js` — 游戏侧客户端（默认关闭）
 - `scripts/stress-load.mjs` — Node 零依赖压测器（五场景；p50/p95/p99；见 W-Z79/W-Z79b ADR与 docs/STRESS_RESULTS.md）
+- `scripts/stress-oracle.mjs` + `scripts/local-stub-llm.mjs` + `server/scripts/stress-oracle-verify.ps1` — Lore Oracle 昂贵路径压测（W-Z86：本地 throwaway stub 上游，SSE 全链路，零 token；见 W-Z86 ADR 与 ONLINE_SERVICES / STRESS_RESULTS）
 - `server/scripts/stress-verify.ps1` — 一键压测门禁（隔离端口 · 断言 5xx=0 / errRate≤0.02 / rps≥300；只收自己 PID；见 W-Z79b ADR）
 - `server/season-service/` — 赛季服务（名册 / 周期轮转 / 词缀契约）
 - `server/ai-service/` — 星轨顾问 / 回声灯（唯一持有密钥；`verify-ai-service.ps1` 真调用验证）
