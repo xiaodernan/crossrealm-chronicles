@@ -42,6 +42,7 @@ class OpsAdvisorEndpointTest {
                 null,
                 "game-service",
                 null,
+                null,
                 null);
     }
 

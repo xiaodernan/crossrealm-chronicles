@@ -46,6 +46,8 @@ public class LeaderboardService {
     private final @Nullable LeaderboardRedisMirror mirror;
     // W-Z56：可选「首领速通新王」镜像器（null = 不通知；seed 演示数据也不触发）
     private final @Nullable NotifyMirrorService notifyMirror;
+    // W-Z60：可选「双冠瞭望」——易主后顺带看看这一位是否同时戴着试炼榜皇冠
+    private final @Nullable com.crossrealm.chronicles.game.trial.TrialLeaderboardService trialCrownCheck;
 
     // W-P1：每个 limit 一份惰性快照。writes 清空整表，reads 命中零排序成本。
     private final Map<Integer, List<RunRecord>> topCache = new ConcurrentHashMap<>();
@@ -62,15 +64,24 @@ public class LeaderboardService {
         this(properties, mirror, null);
     }
 
-    /** W-Z56：全参构造器（两个可选下游各自可空；默认不镜像）；@Autowired 指向本签名，
-     *  让 NotifyMirrorService（普通 @Component、永远在）经由这里注入。 */
-    @Autowired
+    /** W-Z56：旧全参构造器（测试 / 手工装配路径）—— 只接镜像器，双冠瞭望默认不装。 */
     public LeaderboardService(GameServiceProperties properties,
                               @Nullable LeaderboardRedisMirror mirror,
                               @Nullable NotifyMirrorService notifyMirror) {
+        this(properties, mirror, notifyMirror, null);
+    }
+
+    /** W-Z56+W-Z60：生产装配路径 —— @Autowired 指向本签名，
+     *  让 NotifyMirrorService（普通 @Component、永远在）与 TrialLeaderboardService（同包同服务、永在）经由这里注入。 */
+    @Autowired
+    public LeaderboardService(GameServiceProperties properties,
+                              @Nullable LeaderboardRedisMirror mirror,
+                              @Nullable NotifyMirrorService notifyMirror,
+                              @Nullable com.crossrealm.chronicles.game.trial.TrialLeaderboardService trialCrownCheck) {
         this.properties = properties;
         this.mirror = mirror;
         this.notifyMirror = notifyMirror;
+        this.trialCrownCheck = trialCrownCheck;
     }
 
     @PostConstruct
@@ -131,6 +142,13 @@ public class LeaderboardService {
             List<RunRecord> after = top(properties.getLeaderboard().getMaxLimit());
             if (notifyRankChange && notifyMirror != null && detectDethroning(run, beforeTop1)) {
                 notifyMirror.mirrorLeaderboardDethrone(run.runner(), run.bossId(), run.clearTimeMs());
+                // W-Z60：双冠瞭望——新王若同时戴着试炼榜皇冠，再镜一条 world 报讯（单冠报讯照旧发）
+                if (trialCrownCheck != null) {
+                    java.util.List<String> crowns = trialCrownCheck.crownsHeldBy(run.runner());
+                    if (!crowns.isEmpty()) {
+                        notifyMirror.mirrorDualCrown(run.runner(), crowns);
+                    }
+                }
             }
             return after;
         }

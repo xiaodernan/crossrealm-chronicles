@@ -188,6 +188,36 @@ public class TrialLeaderboardService {
         return runner.replaceAll("\\p{Cntrl}", "").trim().toLowerCase(java.util.Locale.ROOT);
     }
 
+    /**
+     * 双冠瞭望（W-Z60）：{@code runner} 是否握着某一（或多个）试炼榜的头把交椅？
+     * 按本进程内所有出现过的 seasonId 逐季查 #1（榜单体量 ≤ maxEntries，逐季一次 top(1) 是常量级开销），
+     * 只用于首领榜易主那一刻的边角判定，不进热路径。
+     *
+     * @return 已经加冕的 seasonId 列表（去重、按出现序）；空 = 一个冠都没有
+     */
+    public List<String> crownsHeldBy(String runner) {
+        String wanted = normalizeRunner(runner);
+        if (wanted.isEmpty()) {
+            return List.of();
+        }
+        List<String> seasons;
+        synchronized (runs) {
+            seasons = runs.stream()
+                    .map(TrialRun::seasonId)
+                    .filter(s -> s != null && !s.isBlank())
+                    .distinct()
+                    .toList();
+        }
+        List<String> held = new ArrayList<>();
+        for (String season : seasons) {
+            List<TrialRun> head = top(season, 1);
+            if (!head.isEmpty() && normalizeRunner(head.get(0).runner()).equals(wanted)) {
+                held.add(season);
+            }
+        }
+        return held;
+    }
+
     private enum TrialMirrorOutcome {
         DETHRONE
     }

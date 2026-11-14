@@ -47,6 +47,14 @@ public class NotifyMirrorService {
     private final NotifyClient client;
     private final boolean enabled;
 
+    // W-Z59：每条报讯的“发布成功计数器”（fire-and-forget 也要有自己的账本——
+    // 运维问「这条流到底走了没」时，不该靠翻日志回答）
+    private final java.util.concurrent.atomic.AtomicLong bossDefeatedMirrors = new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.atomic.AtomicLong seasonAdvanceMirrors = new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.atomic.AtomicLong trialDethroneMirrors = new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.atomic.AtomicLong leaderboardDethroneMirrors = new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.atomic.AtomicLong dualCrownMirrors = new java.util.concurrent.atomic.AtomicLong();
+
     public NotifyMirrorService(NotifyClient client,
                                @Value("${game-service.notify-mirror-enabled:true}") boolean enabled) {
         this.client = client;
@@ -68,6 +76,7 @@ public class NotifyMirrorService {
                     "world",
                     "世界事件 · 试炼榜易主",
                     name + " 登上 " + season + " 试炼榜首（" + Math.max(0, score) + " 分 · 第 " + Math.min(5, Math.max(0, layersCleared)) + " 层）。"));
+            trialDethroneMirrors.incrementAndGet();
             return true;
         } catch (RuntimeException e) {
             LOG.warn("NotifyClient threw despite fallback (cause={}), event dropped", e.getClass().getSimpleName());
@@ -103,6 +112,7 @@ public class NotifyMirrorService {
                     "world",
                     "世界事件 · 首领速通新王",
                     name + " 刷新了 " + boss + " 的最速（" + formatClearTimeMs(clearTimeMs) + "）。"));
+            leaderboardDethroneMirrors.incrementAndGet();
             return true;
         } catch (RuntimeException e) {
             LOG.warn("NotifyClient threw despite fallback (cause={}), event dropped", e.getClass().getSimpleName());
@@ -123,6 +133,31 @@ public class NotifyMirrorService {
     }
 
     /**
+     * 镜像一次「双冠」（W-Z60）。与其余 mirror 同一套纪律：kind=world、runner 去控制字符 + 裁剪 24 字、异常一律吞。
+     * 只在“双冠”同时落定的那一刻调用（首领榜易主 + 试炼榜已加冕）——双冠是新闻，不是常态。
+     */
+    public boolean mirrorDualCrown(String runner, java.util.List<String> crownedSeasons) {
+        if (!enabled) {
+            return false;
+        }
+        String name = sanitizeRunner(runner);
+        String seasons = crownedSeasons == null ? ""
+                : crownedSeasons.stream().limit(3).map(s -> sanitizeSeasonId(s)).distinct()
+                        .collect(java.util.stream.Collectors.joining(" / "));
+        try {
+            client.publish(new NotifyEvent(
+                    "world",
+                    "世界事件 · 双冠",
+                    name + " 同时加冕：" + (seasons.isEmpty() ? "未知赛季" : seasons) + " 试炼榜首与首领速通榜首。"));
+            dualCrownMirrors.incrementAndGet();
+            return true;
+        } catch (RuntimeException e) {
+            LOG.warn("NotifyClient threw despite fallback (cause={}), event dropped", e.getClass().getSimpleName());
+            return false;
+        }
+    }
+
+    /**
      * 镜像一条换季广播（W-Z53）。与 boss_defeated 同一套纪律：仅在 enabled 时发，异常一律吞掉。
      *
      * @param seasonId season-service 广播体里的 {@code id}（如 ember / tide / gloom / radiant）
@@ -137,6 +172,7 @@ public class NotifyMirrorService {
                     "season",
                     "世界事件 · 赛季更替",
                     "新的赛季词缀已生效（" + id + "）。"));
+            seasonAdvanceMirrors.incrementAndGet();
             return true;
         } catch (RuntimeException e) {
             LOG.warn("NotifyClient threw despite fallback (cause={}), event dropped", e.getClass().getSimpleName());
@@ -171,6 +207,7 @@ public class NotifyMirrorService {
                     "world",
                     "世界事件 · Boss 被讨伐",
                     name + " 已倒下。"));
+            bossDefeatedMirrors.incrementAndGet();
             return true;
         } catch (RuntimeException e) {
             // fallbackFactory 在 feign circuit open 时会自己返回 degraded，不会走到这里；
@@ -197,5 +234,25 @@ public class NotifyMirrorService {
             return "某位 Boss";
         }
         return "未知 Boss（" + bossId + "）";
+    }
+
+    /**
+     * W-Z59/W-Z60：五类镜像的发布成功计数（只计本进程内 client.publish 返回成功）。
+     * 给 /api/ops/health 的 notifyMirrors 一节用——运维不该翻日志回答「报讯流走了没」。
+     */
+    public java.util.Map<String, Object> mirrorStats() {
+        java.util.Map<String, Object> stats = new java.util.LinkedHashMap<>();
+        long boss = bossDefeatedMirrors.get();
+        long season = seasonAdvanceMirrors.get();
+        long trial = trialDethroneMirrors.get();
+        long leaderboard = leaderboardDethroneMirrors.get();
+        long dualCrown = dualCrownMirrors.get();
+        stats.put("bossDefeated", boss);
+        stats.put("seasonAdvance", season);
+        stats.put("trialDethrone", trial);
+        stats.put("leaderboardDethrone", leaderboard);
+        stats.put("dualCrown", dualCrown);
+        stats.put("total", boss + season + trial + leaderboard + dualCrown);
+        return stats;
     }
 }

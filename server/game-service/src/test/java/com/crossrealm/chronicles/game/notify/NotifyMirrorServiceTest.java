@@ -232,4 +232,46 @@ class NotifyMirrorServiceTest {
         NotifyMirrorService boom = mirror(client, true);
         assertFalse(boom.mirrorSeasonAdvance("tide"));
     }
+
+    @Test
+    @DisplayName("双冠镜像：enabled 且 seasons 合法 → 发 world 报讯；异常吞掉；enabled=false 全跳过")
+    void dualCrownPublishes() {
+        RecordingClient client = new RecordingClient();
+        NotifyMirrorService m = mirror(client, true);
+        assertTrue(m.mirrorDualCrown("沉默的琴师", List.of("ember", "tide")));
+        NotifyEvent sent = client.calls.get(0);
+        assertEquals("world", sent.kind());
+        assertTrue(sent.title().contains("双冠"), sent.title());
+        assertTrue(sent.body().contains("ember"), sent.body());
+        assertTrue(sent.body().contains("tide"), sent.body());
+        // 24 字裁剪与控制字符剥离照旧
+        m.mirrorDualCrown("沉" + "默".repeat(40) + "\u0001", List.of("ember"));
+        assertFalse(client.calls.get(1).body().contains("\u0001"));
+        // enabled=false → 零调用
+        NotifyMirrorService off = mirror(client, false);
+        assertFalse(off.mirrorDualCrown("x", List.of("ember")));
+        // 异常吞掉 → false
+        client.toThrow = new RuntimeException("feign blew up");
+        NotifyMirrorService boom = mirror(client, true);
+        assertFalse(boom.mirrorDualCrown("沉默的琴师", List.of("ember")));
+    }
+
+    @Test
+    @DisplayName("mirrorStats：五类计数 + total 口径")
+    void mirrorStatsCountsAllKinds() {
+        RecordingClient client = new RecordingClient();
+        NotifyMirrorService m = mirror(client, true);
+        m.mirror("boss_defeated", "shadow-warden");
+        m.mirrorSeasonAdvance("ember");
+        m.mirrorTrialDethrone("x", "ember", 1, 1);
+        m.mirrorLeaderboardDethrone("x", "archmagus", 1_000L);
+        m.mirrorDualCrown("x", List.of("ember"));
+        java.util.Map<String, Object> stats = m.mirrorStats();
+        assertEquals(1L, stats.get("bossDefeated"));
+        assertEquals(1L, stats.get("seasonAdvance"));
+        assertEquals(1L, stats.get("trialDethrone"));
+        assertEquals(1L, stats.get("leaderboardDethrone"));
+        assertEquals(1L, stats.get("dualCrown"));
+        assertEquals(5L, stats.get("total"));
+    }
 }

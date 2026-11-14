@@ -38,6 +38,7 @@ class OpsSeasonEndpointTest {
                 null,
                 "game-service",
                 null,
+                null,
                 null);
     }
 

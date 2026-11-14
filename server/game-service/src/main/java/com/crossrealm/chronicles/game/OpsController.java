@@ -4,6 +4,7 @@ import com.crossrealm.chronicles.game.ai.AiServiceClient;
 import com.crossrealm.chronicles.game.cache.TtlCache;
 import com.crossrealm.chronicles.game.leaderboard.LeaderboardService;
 import com.crossrealm.chronicles.game.leaderboard.LeaderboardRedisMirror;
+import com.crossrealm.chronicles.game.notify.NotifyMirrorService;
 import com.crossrealm.chronicles.game.trial.TrialRedisMirror;
 import com.crossrealm.chronicles.game.season.SeasonClient;
 import com.crossrealm.chronicles.game.season.SeasonSnapshot;
@@ -56,6 +57,8 @@ public class OpsController {
     private final LeaderboardRedisMirror leaderboardMirror;
     /** Redis 试炼榜镜像（W-Y6 切片3；backend=redis 时装配） */
     private final TrialRedisMirror trialMirror;
+    /** W-Z59：暂存发布计数出口（bean 永远存在；@Nullable 之于对称构造风格） */
+    private final NotifyMirrorService notifyMirror;
 
     /** @Autowired: 与 W-X13 起的契约一致 — 单一构造供 Spring 注入（W-P14 起八参起；W-Z8 起九参） */
     @org.springframework.beans.factory.annotation.Autowired
@@ -74,7 +77,8 @@ public class OpsController {
             @Value("${spring.application.name:game-service}") String applicationName,
             // 可选镜像：backend=redis 时 bean 才会注册；写 @Nullable 不写 required=false，与上面同口径
             @org.springframework.lang.Nullable LeaderboardRedisMirror leaderboardMirror,
-            @org.springframework.lang.Nullable TrialRedisMirror trialMirror) {
+            @org.springframework.lang.Nullable TrialRedisMirror trialMirror,
+            @org.springframework.lang.Nullable NotifyMirrorService notifyMirror) {
         this.properties = properties;
         this.leaderboardService = leaderboardService;
         this.trialService = trialService;
@@ -87,6 +91,7 @@ public class OpsController {
         this.applicationName = applicationName;
         this.leaderboardMirror = leaderboardMirror;
         this.trialMirror = trialMirror;
+        this.notifyMirror = notifyMirror;
     }
 
     /** Controller 构造时刻 ≈ 应用启动时刻（容器装配完才创建），足够当 uptime 的起点 */
@@ -94,6 +99,21 @@ public class OpsController {
 
     private long seasonBroadcastReceived() {
         return seasonBroadcastListener != null ? seasonBroadcastListener.receivedCount() : -1L;
+    }
+
+    /**
+     * W-Z59：报讯镜像的本进程发布成功账本。镜像 bean 没装配时不标部分成功，
+     * 而是如实回 {available:false}（与 seasonBroadcastReceived=-1 同一意图：
+     * 运维看一眼就知道「这条流根本没装」，而不是「装了但一次没走」）。
+     */
+    private Map<String, Object> notifyMirrors() {
+        if (notifyMirror == null) {
+            return Map.of("available", false);
+        }
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("available", true);
+        stats.put("published", notifyMirror.mirrorStats());
+        return stats;
     }
 
     @GetMapping("/api/ops/health")
@@ -124,6 +144,8 @@ public class OpsController {
                 "seasonCache", seasonCache.stats()));
         // W-M5：广播接收计数（没有监听器就返 -1 —— “不适用”，不编造）
         result.put("seasonBroadcastReceived", seasonBroadcastReceived());
+        // W-Z59：报讯镜像本进程的发布成功计数（boss/season/trial/leaderboard/total）
+        result.put("notifyMirrors", notifyMirrors());
         return result;
     }
 

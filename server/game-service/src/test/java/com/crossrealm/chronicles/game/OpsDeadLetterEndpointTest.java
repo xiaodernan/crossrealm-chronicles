@@ -38,6 +38,7 @@ class OpsDeadLetterEndpointTest {
                 null,
                 "game-service",
                 null,
+                null,
                 null);
     }
 
