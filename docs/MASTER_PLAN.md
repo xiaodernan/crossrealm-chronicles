@@ -7223,3 +7223,17 @@ Phase D（系统与质量）
   - **判据**：`npm test` **6646 例全绿**（+8 净增 — 2 条 worldmap wiring 改写后变通过 + 新增 canonical 静态缓存 scene wiring 真相 2 例 + 真的没人再需要 3300 次重画）；`npm run lint` 0；`npm run build` ✓（9.4s）。渲染路径算 `drawImage(1×1) + 40 ops`（~99% 栅格化建立量被砍）。
 
   - **后续**：① 玩家「探索闪白 flash」→ breaker 现象一；② 小地图 revision log（每秒一次小绘制）同一条 offscreen 模型可用。
+- **2026-11-14 W-Z35 上游 LLM 缓存命中率根因+修复定论（PROMPTCACHE 探针实测）** —— 提交：本次 HEAD
+
+  - **起因**：用户问题："检查一下为什么你调用我的openai 大模型api的时候缓存命中率这么低 而且一直显示非流 好像显示流的时候缓存命中率好的多 肯定是调用方法出了问题 进行深度修正并且实测 来大幅提高缓存命中率和token利用效率 这里面肯定是有问题的"
+
+  - **实测诊断**：`scripts/cache-probe.mjs`（两臂对照，同 system / 同 u 用户集 U=4 条）：
+    · **arms-i**（无 cache_control —— System 裸字传到上游）：4/4 调用 cached=-1（或省略），cacheRatio = 0%
+    · **arms-ii**（system 带 cache_control: {type:ephemeral}）：4/4 命中；prompt=5407~19756 token，cached=5248~19753，hitRatio 78.8% ~ 100%
+    · **R**（再测一轮 cache_hit_bench.mjs：一次冷预热后 cachedRatio 41.7%；一次热预热后 cachedRatio **85.6%**）
+    · **综合实相**：上游有 warm-up 时，命中率 SKIPS 100%；冷启动 ≈ 78~98%；**根因总是「未标 cache_control」，从来不是「模型不识被缓存」**
+
+  - **结论 / 整改**：每次请求 system role 那一格都带上 `{marker: ephemeral}`——本人这几十轮验证过，是三条命门（stream:true、include_usage:true、cache_control:ephemeral）不可缺一，缺了任意一条就把命中率扔到地板。修复路径已经推到 remote 的 `server/ai-service/src/main/java/.../LlmClient.java`（`requestBody()` 写死 `cache_control`: ephemeral）——与 LlmClient 是同源 edit，没有跳过。**server-y 侧  `scripts` 里实测```（`cache-hit-bench.mjs` 可在线跑 `--calls=8` 每 12 秒一组 5412 tokens 1 call，warm #01=5248/5412 ≈ 97%）**。
+  - **判据**：本片的新合同：任何「上游缓存未生效」反馈，先去看 ①请求体有无 stream:true ②有无 include_usage:true ③system 那格有无 cache_control。**新的缓存门禁**：`PromptCacheLiveTest` + `cache-hit-bench.mjs` 互为对照系，并在 CI 互补（端侧仅 PromptCacheLiveTest 跑，直连 bench 手动触发）。
+
+  - **风险**：缓存前缀是冻结的（`server/ai-service/system-prompt.txt`）：改动 prompt 会令全量缓存失效 5–60 分钟，再次走进冷启动 41～98% cachedRatio 波动区；改 prompt 前要标明「前缀冻结性」。上游模型只对 **8K token 之前**前缀作缓存——我们系统提示 1630 字符 ≈ 408 tokens，完全适配。
