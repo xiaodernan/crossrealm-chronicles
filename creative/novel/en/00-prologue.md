@@ -25,5 +25,5 @@ He is just the last traveller who still believes in **pressing E**.
 
 ---
 
-*One Realm to bind them all — invisible, translucent, still inscribed in the Elder Scroll.*  
-*So the Elder Scroll says, in the grey ash-forest. No one reads it. No one can.*
+*One Realm to bind them all — invisible, translucent, still lingering on the Elder Scroll’s spine.*
+*The Elder Scroll says so — in the grey ash-forest. No one sees it but those who walk there.*

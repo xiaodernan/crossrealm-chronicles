@@ -41,9 +41,18 @@ const sliceArg = process.argv[2] ?? 'all';
 const outPath = process.argv[3] ?? null;
 
 /** 按文件名收集章文件（排除番外之外的统一口径） */
-const allFiles = readdirSync(NOVEL_DIR)
-  .filter((f) => f.endsWith('.md'))
-  .sort();
+const allFiles = (() => {
+  const out = [];
+  const walk = (dir, prefix) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) walk(join(dir, entry.name), rel);
+      else if (entry.isFile() && entry.name.endsWith('.md')) out.push(rel);
+    }
+  };
+  walk(NOVEL_DIR, '');
+  return out.sort();
+})();
 
 /** 对每一章按「半章分片」切块——单章太长时模型注意力会漂 */
 function chunkChapter(name, text, maxChars = 9000) {
