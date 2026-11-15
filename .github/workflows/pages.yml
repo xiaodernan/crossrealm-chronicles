@@ -65,6 +65,7 @@ jobs:
           mkdir -p _site/admin/data
           cp docs/admin/index.html _site/admin/index.html
           cp docs/admin/data/synthetic.json _site/admin/data/synthetic.json
+          cp docs/admin/data/simulation.json _site/admin/data/simulation.json
           cp creative/music/soundtrack.html _site/soundtrack.html
           cp creative/music/poster-ost-album-4k.png _site/poster-ost-album-4k.png
           cp public/favicon.svg _site/favicon.svg
