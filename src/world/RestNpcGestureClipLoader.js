@@ -1,15 +1,19 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { assetUrl } from '../assets/assetBase.js';
 
 /**
  * 营火 NPC 的手势素材名册（`scripts/import-rest-gestures.ps1` → `blender_rest_gestures_to_glb.py`
  * 的 `GESTURE_MAP` 键就是这里的文件名）。两边各写一次必然漂：导入脚本换一次输出名，
  * 这里只是"一个也读不到"，而读不到与"玩家没导素材"长得一模一样。
  * 对账由 `tests/rest-npc-gesture-loader.test.js` 钉住（它去读那份 python 表的键）。
+ *
+ * 路径经 `assetUrl()` 跟着构建 base 走——Pages 子路径部署把 public/assets 挂在
+ * `/crossrealm-chronicles/game/` 下，不包的话永远 404。
  */
 export const GESTURE_URLS = [
-  '/assets/models/rest/gestures/wave.glb',
-  '/assets/models/rest/gestures/sit.glb',
-  '/assets/models/rest/gestures/talk.glb',
+  assetUrl('/assets/models/rest/gestures/wave.glb'),
+  assetUrl('/assets/models/rest/gestures/sit.glb'),
+  assetUrl('/assets/models/rest/gestures/talk.glb'),
 ];
 
 let _loader = null;
