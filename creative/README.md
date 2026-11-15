@@ -76,6 +76,7 @@ creative/music/soundtrack.html
 | 归途之共 · The Last Persimmon | [the-last-persimmon](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/27-the-last-persimmon.md) |
 | 新苗 · The New Sapling | [the-new-sapling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/28-the-new-sapling.md) |
 | 蝉鸣 · The First Cicada | [the-first-cicada](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/29-the-first-cicada.md) |
+| 九日 · The Ninth Day | [the-ninth-day](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/30-the-ninth-day.md) |
 
 每一章对应游戏的章节走法：
 
