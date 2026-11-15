@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Forty-seven volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Forty-eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 47 volumes of the canon, fully readable
+· Canon Library — 48 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Trisolar Tide — one weekly cast, three cards revealed together
 
@@ -3135,8 +3135,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 47-volume index',
-  hm_body_codex: `Codex — 47 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 48-volume index',
+  hm_body_codex: `Codex — 48 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3185,6 +3185,7 @@ hm_title_codex: 'Codex · the 47-volume index',
 45 · The Torch — on the Little New Year, A-Shi brings a bowl he has fired himself; after dinner Lin Wen sets it at the center of the table with a fresh candle — his mother suddenly speaks the first two characters of the father’s name — Lin Wen understands; the next morning A-Shi takes home a parcel of matches and the crumb of wax remnant; he burns it in his own stove; the following spring he returns carrying the bowl with the same flame still burning: “This one is mine. Just like yours.”
 46 · The Spring Equinox — he carries a bowl, a box of matches, and a pouch of dried persimmon leaves down to Uncle Du’s courtyard, where the stove has not held a flame for three winters; together they light it with one persimmon leaf — and after dinner A-Shi walks home with a fire-token in his pocket, into dusk on a road lined with red flame trees.
 47 · The Black Letter — three days after the equinox, a black-inked envelope arrives from Uncle Du; the characters reveal themselves only in flame light: “横桥。火等。”; Lin Wen and A-Shi ride north to the half-fallen bridge; someone down the valley is drawing a slow constant breath of smoke; the iron token in his palm warms once — the fire comes from where it has always been.
+48 · The Child Beyond the Bridge — five days after the spring equinox a small girl stands in the doorway bearing a clay jar bound in three layers of red cloth; inside, a single ember that has not died — her grandfather 墨鹮 carried it three stations; this old house is the third; an answer he had been waiting for.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3198,7 +3199,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (forty-seven volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (forty-eight volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

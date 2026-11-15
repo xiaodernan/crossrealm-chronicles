@@ -94,6 +94,7 @@ creative/music/soundtrack.html
 | 火炬 · The Torch | [the-torch](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/45-the-torch.md) |
 | 春分 · The Spring Equinox | [the-spring-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/46-the-spring-equinox.md) |
 | 黑信 · The Black Letter | [the-black-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/47-the-black-letter.md) |
+| 桥那头的孩子 · The Child Beyond the Bridge | [the-child-beyond-the-bridge](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/48-the-child-beyond-the-bridge.md) |
 
 每一章对应游戏的章节走法：
 
