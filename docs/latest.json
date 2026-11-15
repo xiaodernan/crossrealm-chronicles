@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T15:30:00.655Z",
+  "generated_at": "2026-11-15T15:33:36.741Z",
   "branch": "main",
-  "head": "afd2192c",
-  "total_commits": 1738,
-  "pushed_at": "2026-11-15T23:29:15+08:00",
+  "head": "d48af889",
+  "total_commits": 1740,
+  "pushed_at": "2026-11-15T23:32:51+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "d48af88",
+      "at": "2026-11-15T23:32:51+08:00",
+      "subject": "refactor(canon): W-Z161 原典重校 · 第二十六卷《烛火之下 / Under the Candle Flame》重写"
+    },
+    {
+      "short": "8ed2267",
+      "at": "2026-11-15T15:30:00Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "afd2192",
       "at": "2026-11-15T23:29:15+08:00",
@@ -21,16 +31,6 @@
       "short": "f741273",
       "at": "2026-11-15T15:22:41Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "89f5172",
-      "at": "2026-11-15T23:22:00+08:00",
-      "subject": "feat(canon): W-Z158 第三十七卷《火之门 / The Gate of Fire》——卷五之四"
-    },
-    {
-      "short": "f313b8e",
-      "at": "2026-11-15T15:18:18Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
   "tracked_files": 1297,
@@ -39,7 +39,7 @@
   "lore_sources": 59,
   "novel_chapters_zh": 38,
   "novel_chapters_en": 38,
-  "milestone": "W-Z160",
+  "milestone": "W-Z161",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
