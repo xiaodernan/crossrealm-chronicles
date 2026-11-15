@@ -148,6 +148,13 @@ a{color:var(--gold-dim)}
       <div style="font-size:.68rem;color:var(--muted);margin-top:6px" data-i18n-html="local_note">说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。</div>
     </div>
 
+    <!-- Backend live rollup (when served from the LAN gateway compose) -->
+    <div class="panel" id="liveRollupPanel" style="display:none;border-color:rgba(155,214,122,.35)">
+      <h2>后端真值 · Live Backend <small>/api/telemetry/summary-rollup · Postgres 14 天 · 仅本机 compose</small></h2>
+      <div id="liveRollupBars" style="display:flex;flex-direction:column;gap:4px;font-size:.72rem"></div>
+      <div id="liveRollupFoot" style="font-size:.62rem;color:var(--muted);margin-top:6px"></div>
+    </div>
+
     <!-- KPI Strip -->
     <div class="kpi-grid" id="kpiGrid"></div>
 
@@ -396,6 +403,7 @@ function renderAll(data) {
   renderKpis(data);
   renderDailyChart(data);
   renderLocalEvents();
+  loadLiveRollup();
   renderPredictionChart(data);
   renderFeatures(data);
   renderFunnel(data);
@@ -562,6 +570,37 @@ function renderLocalEvents() {
 
 /* 首次进入页面即应用保存的语言（未解锁也生效） */
 applyLang(curLang);
+
+/* ---------- W-Z130：后端真值（Postgres rollup by day×type）---------- */
+async function loadLiveRollup() {
+  try {
+    const res = await fetch('/api/telemetry/summary-rollup', { cache: 'no-store' });
+    if (!res.ok) return; // Pages 静
+    const j = await res.json();
+    if (!j || j.enabled !== true) return;
+    const totals = j.totals || {};
+    const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+    const max = Math.max(...entries.map(([, v]) => Number(v) || 1), 1);
+    const panelEl = document.getElementById('liveRollupPanel');
+    const barsEl = document.getElementById('liveRollupBars');
+    const footEl = document.getElementById('liveRollupFoot');
+    if (!panelEl || !barsEl || !footEl) return;
+    panelEl.style.display = 'block';
+    barsEl.innerHTML = entries.slice(0, 12).map(([type, count]) => {
+      const w = Math.max(2, Math.round((Number(count) / max) * 100));
+      return '<div style="display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center">' +
+        '<code style="color:rgba(233,226,210,.85)">' + escapeHtml(String(type)) + '</code>' +
+        '<div style="height:10px;background:#120d18;border-radius:5px;overflow:hidden"><div style="height:100%;width:' + w + '%;background:linear-gradient(90deg,#9bd67a,#71e3ef);border-radius:5px"></div></div>' +
+        '<div style="text-align:right;font-family:var(--font-mono-num)">' + Number(count).toLocaleString() + '</div>' +
+      '</div>';
+    }).join('');
+    footEl.textContent = (curLang === 'zh'
+      ? '数据为本机 Postgres · telemetry_daily_rollup（day × type）14 日窗' +
+        ' · 总计事件 ' + Number(j.total ?? 0).toLocaleString() + ' 条 · 只有 本机 compose 启动时此卡才有数据'
+      : 'Live from local Postgres · telemetry_daily_rollup (day × type), 14-day window' +
+        ' · total events ' + Number(j.total ?? 0).toLocaleString() + ' · panel only populates when local compose is up');
+  } catch (_) { /* silent: Pages deployment has no backend */ }
+}
 </script>
 </body>
 </html>

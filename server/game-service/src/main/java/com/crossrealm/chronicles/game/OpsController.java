@@ -331,6 +331,10 @@ public class OpsController {
         /* --- telemetry 队列背压（W-M1：capacity / depth / enqueued / dropped / processed） --- */
         result.put("telemetryQueue", new LinkedHashMap<>(telemetryService.queueStats()));
 
+        /* --- telemetry DB sink（W-Z130：Postgres 落盘计数） --- */
+        result.put("telemetryDbSink", telemetryService.dbSinkStats());
+
+
         /* --- 请求计数（W-P14：本实例从启动到现在吃了多少业务流量） --- */
         Map<String, Object> req = new LinkedHashMap<>();
         req.putAll(requestCountFilter.counters());

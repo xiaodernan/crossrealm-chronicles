@@ -43,4 +43,7 @@ curl -fsS "$BASE/api/notify/stats"; echo
 echo '== /actuator/springcloud =='
 curl -fsS "$BASE/actuator/springcloud"; echo
 
+echo '== /api/telemetry/summary-rollup =='
+curl -fsS "$BASE/api/telemetry/summary-rollup"; echo
+
 echo '== ALL VERIFY CHECKS PASSED =='

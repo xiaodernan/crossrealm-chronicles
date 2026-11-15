@@ -67,15 +67,24 @@ public class TelemetryService {
     private final AtomicLong processed = new AtomicLong();
     private final AtomicBoolean running = new AtomicBoolean(true);
     private Thread drainer;
+    /** W-Z130 —— 可选的 Postgres 落地盘（未启用时 offer 是免费 no-op） */
+    private TelemetryJdbcSink jdbcSink;
 
     public TelemetryService(GameServiceProperties properties) {
-        this(properties, null);
+        this(properties, null, null);
+    }
+
+    public TelemetryService(GameServiceProperties properties,
+                            @org.springframework.lang.Nullable io.micrometer.core.instrument.MeterRegistry meterRegistry) {
+        this(properties, meterRegistry, null);
     }
 
     @org.springframework.beans.factory.annotation.Autowired
     public TelemetryService(GameServiceProperties properties,
-                            @org.springframework.lang.Nullable io.micrometer.core.instrument.MeterRegistry meterRegistry) {
+                            @org.springframework.lang.Nullable io.micrometer.core.instrument.MeterRegistry meterRegistry,
+                            @org.springframework.lang.Nullable TelemetryJdbcSink jdbcSink) {
         this.properties = properties;
+        this.jdbcSink = jdbcSink;
         this.meterRegistry = meterRegistry;
         this.telemetryEnqueued = meterRegistry != null ? meterRegistry.counter("game_telemetry_enqueued_total") : null;
         this.telemetryDropped  = meterRegistry != null ? meterRegistry.counter("game_telemetry_dropped_total") : null;
@@ -138,6 +147,7 @@ public class TelemetryService {
         }
         processed.incrementAndGet();
         if (telemetryProcessed != null) telemetryProcessed.increment();
+        if (jdbcSink != null) jdbcSink.offer(event);
     }
 
     /**
@@ -212,6 +222,16 @@ public class TelemetryService {
     }
 
     /** W-M1：背压度量——capacity / depth / enqueued / dropped / processed，给 /api/ops/stats 与测试用 */
+    /** W-Z130：db sink 的计数 — 给 /api/ops/stats 单列一格 */
+    public Map<String, Object> dbSinkStats() {
+        if (jdbcSink == null) {
+            Map<String, Object> m = new java.util.LinkedHashMap<>();
+            m.put("enabled", 0);
+            return m;
+        }
+        return jdbcSink.stats();
+    }
+
     public Map<String, Long> queueStats() {
         Map<String, Long> m = new java.util.LinkedHashMap<>();
         m.put("capacity", (long) INBOX_CAPACITY);

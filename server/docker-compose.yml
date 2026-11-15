@@ -46,6 +46,27 @@ services:
       retries: 30
       start_period: 20s
 
+  # W-Z130 —— Postgres 遥测落地盘（与 Redis 同批秩序；未连入的 game-service 无感）
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: crossrealm
+      POSTGRES_USER: crossrealm
+      # dev-local 凭据：compose 内仅绑定 127.0.0.1，不对外暴露
+      POSTGRES_PASSWORD: telemetry-local
+    ports:
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - crossrealm_pg_data:/var/lib/postgresql/data
+      - ./init/telemetry-init.sql:/docker-entrypoint-initdb.d/00-telemetry.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crossrealm -d crossrealm"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+
   game-service:
     build:
       context: .
@@ -63,10 +84,17 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: "6379"
       GAMESERVICE_IDEMPOTENCY_BACKEND: redis
+      # W-Z130 —— Postgres 落盘默认开启（compose 内部网络 + 127.0.0.1 绑定）
+      GAMESERVICE_TELEMETRY_JDBC_ENABLED: "true"
+      GAMESERVICE_TELEMETRY_JDBC_URL: jdbc:postgresql://postgres:5432/crossrealm
+      GAMESERVICE_TELEMETRY_JDBC_USER: crossrealm
+      GAMESERVICE_TELEMETRY_JDBC_PASSWORD: telemetry-local
     depends_on:
       config:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8081/actuator/health || exit 1"]
@@ -242,3 +270,7 @@ services:
     volumes:
       - ./scripts/verify.sh:/verify.sh:ro
     command: ["sh", "/verify.sh"]
+
+# W-Z130 —— Postgres 数据卷（named volume；compose down -v 才会清空）
+volumes:
+  crossrealm_pg_data: {}

@@ -91,3 +91,38 @@ docker compose run --rm verify
 
 docker compose down   # 压测后必收，别在笔记本上长跑 9 个 JVM
 ```
+
+## 2026-11-15 · Postgres 遥测落地盘实测（W-Z130）
+
+### 架构（两条写路径，一条主）
+
+`POST /api/telemetry/events`（经 Gateway 限流 + game-service 验证）→ W-M1 有界 inbox（1024 格，drop-oldest）→ 单消费者 `telemetry-drainer`：
+
+1. 纯内存 deque（maxEvents=500）—— `/api/telemetry/summary` 的来源，与之前完全一致
+2. **W-Z130 可选 Postgres sink**（`TelemetryJdbcSink`）：4096 格有界队列，单事务批量 ≤100 条 → `telemetry_events`，同时 UPSERT `telemetry_daily_rollup(day, type, count)`；启动一次 probe，连不上 ⇒ WARN 后自闭，游戏继续纯内存
+
+### 实测（2026-11-15 11:00，Postgres 16-alpine :15432，game-service 容器内）
+
+| 指标 | 值 |
+|---|---|
+| enqueued / written / failures（W-Z130 计数，/api/ops/stats → telemetryDbSink） | 463 / 463 / 0 |
+| dropped（镜像 MAX queue full） | 0 |
+| `telemetry_events` 行数（`psql`） | 463 |
+| roll-up（day×type）：loadtest=424 · boss_kill=30 · canon_open=8 · smoke=1 | 463（与 events 对齐） |
+| `/api/telemetry/summary-rollup` | `{"enabled":true,"days":14,"totals":{"boss_kill":30,…},"total":38}`（首次 38，后随 load 424→463） |
+| 200 并发（同上批 load-test，整站 ~4666/4666 成功，0.00%） | telemetry 424 条，p50≈640ms p95≈1120ms，0 失败 |
+| verify.sh（compose run --rm verify） | 全绿（VERSION/LEADERBOARD/TELEMETRY/SEASONS/OPS/NOTIFY/SPRINGCLOUD/summary-rollup 全 200） |
+
+### 端口与下线
+
+- 本机多个默认端口已被其他栈占（Careeros 系列在 8761/8080/8081）—— 本仓 dev 跑在 **18xxx** 口：DISCOVERY=18761、CONFIG=18888、GATEWAY=18880、GAME=18801、SEASON=18802、AI=18803、PRESENCE=18804、NOTIFY=18805、REDIS=16379、POSTGRES=15432（compose 内部网络照用 8080/6379/5432，端口映射只影响宿主机）
+- `docker compose down` 停栈；`docker compose down -v` 清空 pg volume（跨重启 roll-up 丢失；下次启动 init 脚本重建两表）
+- 没有 Postgres = sink 自闭而游戏完整可用（只是炉边盘看不到后端真值，页脚会如实说 "backend absent"）
+
+### 验证路径
+
+```bash
+docker compose -p crossrealm-chronicles-server logs game-service | grep jdbc
+curl http://localhost:18880/api/telemetry/summary-rollup
+docker exec crossrealm-chronicles-server-postgres-1 psql -U crossrealm -d crossrealm -c 'SELECT * FROM telemetry_daily_rollup'
+```

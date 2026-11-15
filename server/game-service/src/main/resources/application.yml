@@ -38,6 +38,18 @@ game-service:
     max-entries: 500
   telemetry:
     max-events: 500
+    jdbc:
+      # W-Z130 —— 可选的 Postgres 落盘驱动（DriverManager 单连接式，无 Spring datasource 池）。
+      # 关闭（默认）= 完全零影响；enable 但连不上 ⇒ 打 WARN 自闭，游戏继续纯内存。
+      # 开启方式（本仓 dev 环境，docker compose 里已经接好）：
+      #   GAMESERVICE_TELEMETRY_JDBC_ENABLED=true
+      #   GAMESERVICE_TELEMETRY_JDBC_URL=jdbc:postgresql://postgres:5432/crossrealm
+      #   GAMESERVICE_TELEMETRY_JDBC_USER=crossrealm
+      #   GAMESERVICE_TELEMETRY_JDBC_PASSWORD=telemetry-local
+      enabled: ${GAMESERVICE_TELEMETRY_JDBC_ENABLED:false}
+      url: ${GAMESERVICE_TELEMETRY_JDBC_URL:}
+      user: ${GAMESERVICE_TELEMETRY_JDBC_USER:}
+      password: ${GAMESERVICE_TELEMETRY_JDBC_PASSWORD:}
   # 世界事件 → 报讯台镜像（W-Z50）：boss_defeated 遥测经 Feign → notification-service
   # notification-service 没起时静默丢弃（fallbackFactory），不阻塞遥测入口
   notify-mirror-enabled: true

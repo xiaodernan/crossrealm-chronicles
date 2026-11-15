@@ -22,12 +22,15 @@ public class TelemetryController {
     private final TelemetryService service;
     private final GameServiceProperties properties;
     private final NotifyMirrorService notifyMirror;
+    private final TelemetryJdbcSink jdbcSink;
 
     public TelemetryController(TelemetryService service, GameServiceProperties properties,
-                               NotifyMirrorService notifyMirror) {
+                               NotifyMirrorService notifyMirror,
+                               TelemetryJdbcSink jdbcSink) {
         this.service = service;
         this.properties = properties;
         this.notifyMirror = notifyMirror;
+        this.jdbcSink = jdbcSink;
     }
 
     @PostMapping("/api/telemetry/events")
@@ -63,6 +66,15 @@ public class TelemetryController {
     @GetMapping("/api/telemetry/summary")
     public Map<String, Object> summary(@RequestParam(name = "topN", defaultValue = "5") int topN) {
         return service.summarize(topN);
+    }
+
+    /**
+     * W-Z130：Postgres 14 天逐日 roll-up（每 day × type 一行）—— 炉边盘的"真值"来源。
+     * 未启用 JDBC 时返回 enabled=false —— 前端自行降级到合成模式。
+     */
+    @GetMapping("/api/telemetry/summary-rollup")
+    public Map<String, Object> summaryRollup() {
+        return jdbcSink.summaryRollup();
     }
 
     public record SubmitEvent(
