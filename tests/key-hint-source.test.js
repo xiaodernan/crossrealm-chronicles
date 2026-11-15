@@ -405,8 +405,8 @@ const LEDGER = {
   // 不是 UI 文案 —— 《跨界纪事：锚火守夜人》原本就是以「按 E 调查光柱的人」为锚点的元叙事，
   // 键名出现在字面量里是内容本身；典籍馆正文渲染时不走 keyText 包装。
   // 记账只许变小：再往原典里塞新的写死键名会红，得来本账查着立账。
-  'content/novella/zh.js': 19,
-  'content/novella/en.js': 11,
+  'content/novella/zh.js': 21,
+  'content/novella/en.js': 12,
 };
 
 const LIT = /`(?:\\.|[^`\\])*`|'(?:\\.|[^'\n])*'|"(?:\\.|[^"\n])*"/g;

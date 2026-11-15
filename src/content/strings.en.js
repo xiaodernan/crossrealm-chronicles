@@ -3124,8 +3124,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 16-volume index',
-  hm_body_codex: `Codex — 16 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 17-volume index',
+  hm_body_codex: `Codex — 17 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3143,6 +3143,7 @@ hm_title_codex: 'Codex · the 16-volume index',
 13 · Interlude VI · Handover — one shift took over from another; the flame never moved.
 14 · Interlude VII · Come Sit Awhile — that piece of paper is hung for the one who has not yet arrived.
 16 · Interlude VIII · Leaking Lamp — the wax that leaks is a warmth no one lets die.
+17 · Echoes of the Morning Mist — after the mist lifts, the Keeper finally speaks the last line.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
