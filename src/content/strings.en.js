@@ -2830,6 +2830,12 @@ export const STRINGS_EN = Object.freeze({
   lore_pop_obelisk_text: '"The inscription is an angle — not a word."',
   lore_pop_cantina_title: 'Starport Menu',
   lore_pop_cantina_text: '"House specials: jump contracts, bounties, coordinates."',
+  lore_pop_sunpyramid_title: 'Sunpillar Rubbing',
+  lore_pop_sunpyramid_text: 'The distance between suns admits no horn, no witness — only the drowned field of sky.',
+  lore_pop_echomail_title: 'The Unsent Letter',
+  lore_pop_echomail_text: 'The one who answered never stood where the letter was dispatched — or never stood anywhere.',
+  lore_pop_silence_title: 'The Three-Sighted Silence',
+  lore_pop_silence_text: 'When the three suns hung in the same meridian, not one wing beat. And nothing spoken could be trusted.',
 
   // Zone ambient events (W-D2 slice 16a: base layer / extra `_e` / homage `_p`)
   ambient_journal_title: 'Travel Notes',

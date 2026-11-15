@@ -2825,6 +2825,12 @@ export const STRINGS_ZH = Object.freeze({
   lore_pop_obelisk_text: '「铭文是角度 — 不是字。」',
   lore_pop_cantina_title: '星港菜单',
   lore_pop_cantina_text: '「特供：跃迁合同、赏金、坐标。」',
+  lore_pop_sunpyramid_title: '三日碑文',
+  lore_pop_sunpyramid_text: '「星与星的间距从不承认号角，也不承认目送者——只承认沉没。」',
+  lore_pop_echomail_title: '未署名回信',
+  lore_pop_echomail_text: '「回信的人不在原处；或者，从不曾在原处。」',
+  lore_pop_silence_title: '三容天禁',
+  lore_pop_silence_text: '「三颗太阳一起停在天顶时，没有任何鸟飞过；也没有任何话——能被信任。」',
 
   // 区域氛围事件（W-D2 切片16a：基础层 / 扩展层 `_e` / 致敬层 `_p`）
   ambient_journal_title: '旅途见闻',

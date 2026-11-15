@@ -308,9 +308,9 @@ describe('⑦ 文献的黄金签名：换洗法必须让这一条红，而不是
    * W-Z96 注记（2026-11-17）: 名册 19 → 20 篇（`lore-10`，番外七《下次再坐》驿站残碑），三颗种子落点全重排——归因仍是「名册规模 +1」而非发放那套流；数值由 generator 实测打印后逐字冻结。
    */
   const 黄金 = [
-    [20261001, '-,-,lore-broom,lore-speakeasy,-,-,lore-obelisk,lore-saloon,-,-,-,lore-10,-,lore-7,lore-ai-core,lore-wizard,lore-2,-,-,-,lore-murphy,lore-5'],
-    [7, '-,lore-8,lore-speakeasy,-,-,lore-4,-,lore-vecna,lore-wormhole,lore-1,lore-nine,-,-,-,-,-,lore-10,-,-,-,lore-upside,-'],
-    [-3, '-,lore-cantina,-,lore-wormhole,lore-9,-,-,lore-torii,-,-,lore-murphy,lore-wizard,lore-ai-core,lore-jump-gate,lore-10,lore-1,-,-,lore-3,-,-,lore-speakeasy'],
+    [20261001, '-,lore-echomail,-,-,-,lore-duel,lore-neon,-,-,-,lore-wizard,lore-jump-gate,-,-,lore-9,lore-wormhole,-,lore-2,-,lore-6,lore-murphy,-'],
+    [7, '-,-,lore-8,lore-5,-,-,-,lore-sunpyramid,-,lore-1,lore-vecna,lore-3,-,-,lore-ai-core,lore-wormhole,lore-cantina,lore-torii,lore-saloon,-,-,-'],
+    [-3, '-,lore-upside,-,lore-wizard,lore-jump-gate,lore-murphy,lore-inter,-,-,-,-,lore-arcade,lore-9,lore-1,-,lore-neon,lore-10,-,-,lore-7,-,lore-5'],
   ];
   for (const [seed, 期望] of 黄金) {
     it(`seed=${seed} 的文献落点签名`, () => {

@@ -97,6 +97,9 @@ export const LORE_FRAGMENTS_POP = [
   { id: "lore-torii", title: "lore_pop_torii_title", text: "lore_pop_torii_text", chapter: 1 },
   { id: "lore-obelisk", title: "lore_pop_obelisk_title", text: "lore_pop_obelisk_text", chapter: 4 },
   { id: "lore-cantina", title: "lore_pop_cantina_title", text: "lore_pop_cantina_text", chapter: 3 },
+  { id: "lore-sunpyramid", title: "lore_pop_sunpyramid_title", text: "lore_pop_sunpyramid_text", chapter: 5 },
+  { id: "lore-echomail", title: "lore_pop_echomail_title", text: "lore_pop_echomail_text", chapter: 3 },
+  { id: "lore-silence", title: "lore_pop_silence_title", text: "lore_pop_silence_text", chapter: 5 },
 ];
 
 /**
