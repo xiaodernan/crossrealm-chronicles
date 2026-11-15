@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Sixty-two volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Sixty-three volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 62 volumes of the canon, fully readable
+· Canon Library — 63 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3136,8 +3136,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 62-volume index',
-  hm_body_codex: `Codex — 62 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 63-volume index',
+  hm_body_codex: `Codex — 63 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3201,6 +3201,7 @@ hm_title_codex: 'Codex · the 62-volume index',
 60 · The Firewood — a winter night, the hearth bright; his mother places a sandalwood-handled sword in his hands: “It is yours now — it has been handed down your grandfather’s wrist for six centuries”; A-Shi holds it in both hands and understands the whole arch of the family’s destiny — the fire was never left; it was handed through hands.
 61 · Splitting the Firewood — the first good day for chopping; A-Shi carries his axe up the mountain only to fail repeatedly; his mother teaches him from a distance: “feet wide, turn your waist first, let the axe fall” — he does it exactly as she said, and the log splits cleanly in two; six hundred years chose him.
 62 · The Last Stick — A-Shi stops at the oldest persimmon tree on the south slope; it has held the family’s main temple candle through six hundred years; he cannot bring himself to cut it; he returns home and stands at the stove watching it burn extraordinary; he finally understands he is the fire, not its keeper; he will always carry the fire of six hundred years for his family.
+63 · The Original Fire — his mother goes to market, and A-Shi opens the dusty little wooden chest; six fire tokens lie inside, each one bearing the same face: his grandfather’s face in different ages; he closes it quickly as she spends the market buying for the family; she admits: “Your grandfather kept this stove for six hundred years; the whole family descends from this one fire.” A-Shi finally understands — the fire has always been there, in his family, through every generation.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3214,7 +3215,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (sixty-two volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (sixty-three volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
