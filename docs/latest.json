@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T03:45:54.636Z",
+  "generated_at": "2026-11-15T03:50:18.083Z",
   "branch": "main",
-  "head": "2ab53b4",
-  "total_commits": 1631,
-  "pushed_at": "2026-11-15T11:36:31+08:00",
+  "head": "fd06a30",
+  "total_commits": 1633,
+  "pushed_at": "2026-11-15T11:50:02+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "fd06a30",
+      "at": "2026-11-15T11:50:02+08:00",
+      "subject": "chore(ai): W-Z106-par料 语料重编译 + root README 15→16 章 inventory"
+    },
+    {
+      "short": "e94fb67",
+      "at": "2026-11-15T11:49:39+08:00",
+      "subject": "feat(creative): W-Z106 番外八 · 漏灯记（Interlude VIII · Leaking Lamp）——《跨界纪事》原典再添一卷"
+    },
     {
       "short": "2ab53b4",
       "at": "2026-11-15T11:36:31+08:00",
@@ -21,25 +31,15 @@
       "short": "ee21c29",
       "at": "2026-11-15T11:27:11+08:00",
       "subject": "docs(creative): player-guide 世界导览章节加「宇宙指针」说明（zh/en）——路标光柱入口动词"
-    },
-    {
-      "short": "23f7f47",
-      "at": "2026-11-15T03:25:39Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "f15aebc",
-      "at": "2026-11-15T11:25:14+08:00",
-      "subject": "feat(game): W-Z104 宇宙指针——主世界立金色路标光柱 · 防丢路"
     }
   ],
-  "tracked_files": 1225,
+  "tracked_files": 1227,
   "test_files": 453,
   "i18n_keys": 3136,
   "lore_sources": 59,
-  "novel_chapters_zh": 15,
-  "novel_chapters_en": 15,
-  "milestone": "W-Z105",
+  "novel_chapters_zh": 16,
+  "novel_chapters_en": 16,
+  "milestone": "W-Z106",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
