@@ -21,6 +21,11 @@ export const HELP_SECTIONS_EXTRA = [
     body: 'hm_body_newcomer_traps',
   },
   {
+    id: 'trilance-tip',
+    title: 'hm_title_trilance_tip',
+    body: 'hm_body_trilance_tip',
+  },
+  {
     id: 'lore-oracle',
     title: 'hm_title_lore_oracle',
     body: 'hm_body_lore_oracle',

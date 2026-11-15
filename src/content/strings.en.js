@@ -3625,6 +3625,13 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
 · Want to see the story first? Press {autoPlay} — autoplay runs the mainline to its end and forks the ending; turn it off if you want the real trip.
 · Lost at the doorway? Press {minimap} — the world map shows quest waypoints, POIs and dungeon entrances; follow the gold arrows.
 · Don't want to memorize keys? Press {help} — everything you can do is on this page.`,
+  hm_title_trilance_tip: 'Starpath · Weekly tide — the three details',
+  hm_body_trilance_tip: 'A third hand at the Starpath table. Three things you should know first.\n\n'
+    + '**Monday** (UTC 00:00) — draws reset weekly. If you came today, the next chance opens on Monday.\n'
+    + '**Three cards per draw.** If the three cards match the same tier (all ★1, all ★2, or all ★3), you score an **"Aligned"** — 30% extra souls. The Trisolar Tide is the weekly gamble.\n'
+    + 'The daily Flame draw is for today; the weekly tide is for the week. Two systems, two registers.\n'
+    + 'Both live under Journal → Starpath · Anchor Flame. Tap to cast, see the three moons land side by side.\n\n'
+    + '**Together they give you today and the week ahead** — two lines of reading, two windows on the door.',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */
