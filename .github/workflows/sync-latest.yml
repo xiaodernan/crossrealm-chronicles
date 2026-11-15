@@ -1,8 +1,9 @@
 name: Sync latest.json fact pack
 
-# W-Z92：个人展示页「跨界纪元」卡片要的不是快照，是 main 上最新的真实数字。
-# 每周一 12:30 UTC 重跑 scripts/build-latest.mjs，把 docs/latest.json 推回 main。
-# 手工跑：workflow_dispatch（发版里程碑之后顺手点一下即可）。
+# W-Z92：展示页靠 latest.json 算出"最新成果"是哪一件；main 推了 fact pack 就该更新。
+# 每周一 12:30 UTC 自动跑 `scripts/build-latest.mjs`，docs/latest.json 提交回 main。
+# 手动派发：workflow_dispatch；任一侧 commit 都会自动出发起于 weekly refresh。
+
 on:
   schedule:
     - cron: "30 12 * * 1"   # weekly Monday 12:30 UTC
@@ -21,23 +22,47 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0    # git rev-list --count 需要完整历史
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 24
 
-      - name: Rebuild the fact pack
-        run: node scripts/build-latest.mjs
-
-      - name: Commit if anything moved
+      - name: Rebase onto upstream first (avoid non-fast-forward)
         run: |
-          if git diff --quiet -- docs/latest.json; then
-            echo "no change"
-            exit 0
-          fi
           git config user.name "crossrealm-sync-bot"
           git config user.email "crossrealm-sync-bot@users.noreply.github.com"
+          git pull --rebase origin main
+
+      - name: Rebuild the fact pack
+        run: |
+          node scripts/build-latest.mjs
+          if git diff --quiet -- docs/latest.json; then
+            echo "no change — fact pack already in sync"
+            exit 0
+          fi
+
+
+      - name: Commit and push (with retries)
+        run: |
+          git config user.name "crossrealm-sync-bot"
+          git config user.email "crossrealm-sync-bot@users.noreply.github.com"
+
+          if git diff --quiet -- docs/latest.json; then exit 0; fi
           git add docs/latest.json
           git commit -m "chore(latest): refresh the showcase fact pack from main"
-          git push
+
+          PUSH_OK=0
+          for i in 1 2 3; do
+            git pull --rebase origin main || true
+            if git push origin HEAD; then
+              PUSH_OK=1
+              break
+            fi
+            echo "push attempt $i failed; retrying after pull --rebase"
+          done
+
+          if [ "$PUSH_OK" != "1" ]; then
+            echo "::error::Could not push fact pack after 3 attempts"
+            exit 1
+          fi
