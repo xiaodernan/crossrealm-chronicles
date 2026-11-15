@@ -12,29 +12,25 @@
 
 ## 怎么让它「最新」
 
-推送后不及时机会出问题的字段只有测试数/提交列表这类动态指标——可以接受它们每次 push 更新一次。
-但更重要的是：**你个人展示页 (`xiaodernan.github.io`) 的项目入口想要的是「如今天最新的成果」**。
+## 部署路径（W-Z99 统一）
 
-本仓库已内置 `.github/workflows/showcase.yml`：
+**Pages 源已固定为 workflow-artifact**——`main` 分支推送即全量自动部署，不再依赖 gh-pages 分支。
 
-1. 推送到 `main`（或 `workflow_dispatch` 手动跑）→ 自动执行：
-   - `npm ci`
-   - `npm run build`（完整前端构建通过 = 最新能打包的成果）
-   - 组装到 `_site/`：`index.html` ← showcase（最新成果）/`game/` ← `dist/`（整个游戏，可玩）/ `guide.html`（玩家小册子）/ `tapestry.html`（年鉴）/ `tapestry.en.html`（年鉴英文版）/ `favicon.svg`
-   - 推送到本仓库的 `gh-pages` 分支
-2. 只要在 **Settings → Pages** 里把 Source 设为 `gh-pages` 分支根目录，
-   `https://xiaodernan.github.io/crossrealm-chronicles/` 就是**你点进去就能玩、就能看**的最新状态。
-3. 启用之后每次 push `main`，Pages 缓存会刷新；**不需要你手动改仓库任何内容**。
+本仓库内置 `.github/workflows/pages.yml`，每次推送到 `main` 就自动执行：
 
-## 你需要做的（一次性，约 30 秒）
+1. `npm ci`
+2. `npm run build`，其中 `BASE_PATH=/crossrealm-chronicles/game/`（游戏要放在 `/game/` 子路径，chunk 才不会 404）
+3. 组装 `_site/`：
+   - `/` → `creative/showcase.html`（最新成果单页）
+   - `/game/` → `dist/`（完整可玩构建，**自动最新**）
+   - `/guide.html`（玩家小册子）/ `/tapestry.html`（年鉴）/ `/tapestry.en.html`（年鉴 EN）/ `/favicon.svg`
+   - 推送到 workflow artifact → `actions/deploy-pages@v4` → `https://xiaodernan.github.io/crossrealm-chronicles/`
+4. 你**不需要任何手工操作**——Pages 源已设为 workflow；每次 `main` push 都自动刷新展示页。此前 `showcase.yml`（往 gh-pages 分支推 `_site/`）因孤儿推送自生自灭——Pages 真部署在 `pages.yml`，现已合并为唯一路径（gh-pages 分支保留为静态副本，不再维护）。无需再设 Settings → Pages。
 
-1. 打开本仓库 → **Settings → Pages**（需管理员）
-2. Source: **Deploy from a branch** → Branch: **`gh-pages`** / **`/ (root)`** → Save
-3. 进入 `https://xiaodernan.github.io/crossrealm-chronicles/` 验证（第一次部署约 1 分钟）
-4. 在你的个人展示页 (`xiaodernan.github.io`) 把项目入口链接改为这个网址即可。
+可玩游戏的地址：**`https://xiaodernan.github.io/crossrealm-chronicles/game/`**（个人展示页「进入游戏」入口）。
 
-如果不想启用 Pages，本次同步仍然把最新内容推到了 `gh-pages` 分支（md 里也能看），
-`./creative/showcase.html` 在本地直接双击也能打开 —— 它是自包含 HTML，无外部依赖。
+`./creative/showcase.html` 在本地双击也能打开——它是自包含 HTML，零外部依赖；
+`npm run build && npm run preview -— --base=/` 本地也可看整包效果。
 
 ## 文件索引
 
@@ -44,7 +40,7 @@
 | 玩家小册子 / Player Guide | `creative/player-guide.html` |
 | 年鉴（tapestry） | `creative/tapestry.html` |
 | 年鉴（tapestry）英文版 | `creative/tapestry.en.html` |
-| 自动同步 CI | `.github/workflows/showcase.yml` |
+| 自动部署 CI | `.github/workflows/pages.yml` |
 | 事实包（个人页数据源） | `docs/latest.json`（`scripts/build-latest.mjs` 生成；`sync-latest.yml` 每周一自动重推） |
 | 玩家存档格式 | `crossrealm_save_v21` (browser localStorage) |
 

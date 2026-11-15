@@ -1,8 +1,17 @@
 name: Deploy Crossrealm Chronicles
 
+# W-Z99：个人展示页入口 → 展品根（showcase）+ 可玩游戏（./game/），Pages workflow-artifact 真路径。
+# 之前两个独立路径的老死角：
+#   1) 本文件原来只在推到 `master` 分支时触发——根本没有 master，这个工作流从上线到现在
+#      从未跑过（个人入口展示的是 2026-11-11 的旧构建，没有 W-Z90~W-Z98 任何新成果）；
+#   2) showcase.yml（推 gh-pages 分支）与 Pages 的 workflow-artifact 部署不是同一个源
+#      ——它自建 gh-pages 分支的内容没人看得见，浪费 CI 时间。
+# 现在统一成**一次推送即全量上线**：展示页根 + 游戏（新 BASE_PATH） + 小册子 + 年鉴，
+# 与个人展示页 `xiaodernan.github.io/crossrealm-chronicles/` 的「点进去就看到最新成果」完全对齐，
+# 与 Rust/Rustup 之类的官方仓库同款 Pages artifact 形态。
 on:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -20,23 +29,44 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
+
       - name: Install dependencies
         run: npm ci
-      - name: Build
-        env:
-          BASE_PATH: /crossrealm-chronicles/
+
+      # 可玩的游戏落在 /crossrealm-chronicles/game/ —— 个人展示页的「进入游戏」入口
+      # 就是它；base 指向同一子路径，chunk 路径才不会 404。
+      - name: Build the game bundle (base=/crossrealm-chronicles/game/)
         run: npm run build
+        env:
+          BASE_PATH: /crossrealm-chronicles/game/
+
+      - name: Assemble the site (showcase root + game + booklet + compendium)
+        run: |
+          mkdir -p _site/game
+          cp creative/showcase.html _site/index.html
+          cp creative/player-guide.html _site/guide.html
+          cp creative/tapestry.html _site/tapestry.html
+          cp creative/tapestry.en.html _site/tapestry.en.html
+          cp public/favicon.svg _site/favicon.svg
+          cp -r dist/. _site/game/
+          echo "assembled:"
+          du -sh _site
+          find _site -maxdepth 2 -type f | wc -l
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
-      - name: Deploy
+          path: _site
+
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

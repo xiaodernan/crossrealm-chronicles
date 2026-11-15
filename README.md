@@ -7,8 +7,8 @@
 > 当前状态：**17 母题六档闭环 / 全链路可观测 / LLM 联调流式化** ——唯一执行计划：[`docs/MASTER_PLAN.md`](docs/MASTER_PLAN.md)
 > Status: 17 mother-themes × full loop / end-to-end observability / real-time LLM streaming out of the box. Authoritative plan: [`docs/MASTER_PLAN.md`](docs/MASTER_PLAN.md)
 
-> 🆕 **线上展示（最新成果同步）：** [作品最新进展一页看](creative/showcase.html) · [玩家小册子（双语全量）](creative/player-guide.html) · [启用自动同步 → Pages](docs/SHOWCASE_SYNC.md) · [跨界纪事设定集 · 英文版](creative/GLOSSARY-en.md)
-> 🆕 **Live showcase (always latest):** [One-page latest results](creative/showcase.html) · [Player booklet (full bilingual)](creative/player-guide.html) · [Auto-sync via Pages →](docs/SHOWCASE_SYNC.md) · [Crossrealm Chronicles Codex · EN](creative/GLOSSARY-en.md)
+> 🆕 **线上展示（最新成果全自动部署）：** [最新成果展示页](https://xiaodernan.github.io/crossrealm-chronicles/) · [进入游戏（可玩 · /game/）](https://xiaodernan.github.io/crossrealm-chronicles/game/) · [玩家小册子（双语全量）](creative/player-guide.html) · [持续自动同步 ← 部署链路](docs/SHOWCASE_SYNC.md) · [跨界纪事设定集 · 英文版](creative/GLOSSARY-en.md)
+> 🆕 **Live showcase (always latest):** [Latest results one-pager](https://xiaodernan.github.io/crossrealm-chronicles/) · [Jump into the game (playable · /game/)](https://xiaodernan.github.io/crossrealm-chronicles/game/) · [Player booklet (full bilingual)](creative/player-guide.html) · [The pipeline behind the sync →](docs/SHOWCASE_SYNC.md) · [Crossrealm Chronicles Codex · EN](creative/GLOSSARY-en.md)
 
 ---
 
@@ -114,7 +114,7 @@ creative/     周边内容：原画 / 小说 / OST / 海报 · Surrounding conte
 | [`COMBAT_DESIGN.md`](docs/COMBAT_DESIGN.md) | 战斗设计 · Combat design · EN mirror: [`COMBAT_DESIGN.en.md`](docs/COMBAT_DESIGN.en.md) |
 | [`MIXAMO_PIPELINE.md`](docs/MIXAMO_PIPELINE.md) | 动画导入管线 · Animation import pipeline · EN mirror: [`MIXAMO_PIPELINE.en.md`](docs/MIXAMO_PIPELINE.en.md) |
 | [`ONLINE_SERVICES.md`](docs/ONLINE_SERVICES.md) | 在线伙伴服务手册：Spring Cloud 微服务部署、冒烟 `smoke §0-§6`、Prometheus 金丝雀验证 · Online-partner manual: Spring Cloud deployment, smoke suite `§0-§6`, Prometheus canary checks · EN mirror: [`ONLINE_SERVICES.en.md`](docs/ONLINE_SERVICES.en.md) |
-| [`SHOWCASE_SYNC.md`](docs/SHOWCASE_SYNC.md) | 个人展示页自动同步（One-time Pages toggle） · Personal showcase auto-sync (one-time Pages toggle) |
+| [`SHOWCASE_SYNC.md`](docs/SHOWCASE_SYNC.md) | 个人展示页自动部署（GitHub Pages · workflow-artifact） · Personal showcase auto-deploy (GitHub Pages · workflow-artifact) |
 | [`I18N_GUIDE.md`](docs/I18N_GUIDE.md) | 双语门禁要点 · Bilingual gatekeeping notes · EN mirror: [`I18N_GUIDE.en.md`](docs/I18N_GUIDE.en.md) |
 
 ## 三条硬性约束（来自总计划）/ Three hard constraints (from the master plan)
