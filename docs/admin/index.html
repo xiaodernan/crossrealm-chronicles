@@ -201,9 +201,9 @@ a{color:var(--gold-dim)}
     <div class="panel" id="measuredPanel" style="border-color:rgba(120,214,175,.35)">
       <h2><span data-i18n="meas_h2">实测记录 · Measured</span> <small data-i18n="meas_small">2026-11-15 真跑真测 · 不是演示数据</small></h2>
       <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l1">压测 · 200 并发总请求</div><div class="kpi-value">3302<span style="font-size:.7em;color:var(--muted)"> / 3302</span></div><div class="kpi-trend up" data-i18n="meas_tr1">100% 成功 · 0 5xx</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l1">压测 · 200 并发总请求</div><div class="kpi-value">4666<span style="font-size:.7em;color:var(--muted)"> / 4666</span></div><div class="kpi-trend up" data-i18n="meas_tr1">100% 成功 · 0 5xx（W-Z130 Postgres 落盘在场）</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l2">全场错误率</div><div class="kpi-value">0.00%</div><div class="kpi-trend up" data-i18n="meas_tr2">八条路由全部走通 · 无 5xx</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l3">p50 时延（同机 9 JVM）</div><div class="kpi-value">890~914<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend up" data-i18n="meas_tr3">网络代理开销为主</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l3">p50 时延（同机 9 JVM + PG）</div><div class="kpi-value">625~641<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend up" data-i18n="meas_tr3">网络代理开销为主</div></div>
         <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l4">单 IP 洪水被打回</div><div class="kpi-value">52.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend flat">622.7 rps → HTTP 429 · Redis 60次/10s</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l5">seasons 缓存命中</div><div class="kpi-value">0.997</div><div class="kpi-trend up">Spring Cache + Redis</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l6">窗口内限流计数</div><div class="kpi-value">14481<span style="font-size:.7em;color:var(--muted)"> allowed</span></div><div class="kpi-trend down">rejected 6376 · allowed:rejected ≈ 2.3:1</div></div>
@@ -256,9 +256,9 @@ const I18N = {
     features_h2: '功能潮汐 · 玩家爱用什么', features_small: '最近 30 天 · 占会话比',
     funnel_h2: '转化漏斗', funnel_small: '从抵达出场页 → 炉主徽章', retention_h2: '次留 / 复滚 / 回流',
     meas_h2: '实测记录 · Measured', meas_small: '2026-11-15 真跑真测 · 不是演示数据',
-    meas_l1: '压测 · 200 并发总请求', meas_tr1: '100% 成功 · 0 5xx',
+    meas_l1: '压测 · 200 并发 · Postgres 在场', meas_tr1: '100% 成功 · 0 5xx · 4666/4666（2026-11-15 W-Z130）',
     meas_l2: '全场错误率', meas_tr2: '八条路由全部走通 · 无 5xx',
-    meas_l3: 'p50 时延（同机 9 JVM）', meas_tr3: '网络代理开销为主',
+    meas_l3: 'p50 时延（9 JVM + PG · 同机）', meas_tr3: '网络代理开销为主',
     meas_l4: '单 IP 洪水被打回',
     meas_l5: 'seasons 缓存命中',
     meas_l6: '窗口内限流计数',
@@ -295,9 +295,9 @@ const I18N = {
     features_h2: 'Feature tides · what players actually use', features_small: 'Last 30 days · share of sessions',
     funnel_h2: 'Conversion funnel', funnel_small: 'From opening screen → Furnace-keeper badge', retention_h2: 'Retention / return',
     meas_h2: 'Measured · 实测记录', meas_small: '2026-11-15 live runs · not demo data',
-    meas_l1: 'Load test · 200-way concurrent', meas_tr1: '100% success · 0 5xx',
+    meas_l1: 'Load test · 200-way + Postgres live', meas_tr1: '100% success · 0 5xx · 4666/4666 (2026-11-15 W-Z130)',
     meas_l2: 'Error rate, whole run', meas_tr2: 'All eight routes clean · no 5xx',
-    meas_l3: 'p50 latency (9 JVMs, same host)', meas_tr3: 'Mostly network proxy overhead',
+    meas_l3: 'p50 latency (9 JVMs + PG · same host)', meas_tr3: 'Mostly network proxy overhead',
     meas_l4: 'Single-IP flood shed',
     meas_l5: 'seasons cache hit',
     meas_l6: 'Windowed rate-limit counters',
