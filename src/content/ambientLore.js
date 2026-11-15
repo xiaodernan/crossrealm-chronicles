@@ -106,6 +106,8 @@ export const LORE_FRAGMENTS_POP = [
   { id: "lore-silence", title: "lore_pop_silence_title", text: "lore_pop_silence_text", chapter: 5 },
   { id: "lore-trilance", title: "lore_pop_trilance_title", text: "lore_pop_trilance_text", chapter: 4 },
   { id: "lore-glasschoir", title: "lore_pop_glasschoir_title", text: "lore_pop_glasschoir_text", chapter: 5 },
+  { id: "lore-mirror", title: "lore_pop_mirror_title", text: "lore_pop_mirror_text", chapter: 5 },
+  { id: "lore-nightwalk", title: "lore_pop_nightwalk_title", text: "lore_pop_nightwalk_text", chapter: 5 },
 ];
 
 /**

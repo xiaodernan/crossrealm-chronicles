@@ -3639,6 +3639,10 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   reader_mirror_body: 'When you set down the twentieth volume, the stars step back and leave an open seat. From that moment on, you are not the one who has finished this book — you are the one who, after closing the last page, still sees a fire through the edge of the window. The flame will not die, because reading has always been your own gift to yourself.',
   reader_mirror_reward: 'The Mirror unlocks · +200 souls (once)',
   reader_mirror_made: 'You finished all 20 volumes here. The fire kept a shadow of you.',
+  lore_pop_mirror_title: 'The One Who Finished Volume Twenty',
+  lore_pop_mirror_text: 'He used the wax his father had left nailing shut. The one who finishes volume twenty stops fearing books; he has learned that the fire does not need to be seen — only remembered.',
+  lore_pop_nightwalk_title: 'Father Never Nailed It',
+  lore_pop_nightwalk_text: 'The door was not broken. A handful of village children, unseen, replaced the three nailed planks with a piece of ginkgo by daylight. No one asked why; the children already knew.',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */
