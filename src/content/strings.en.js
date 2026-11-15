@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Fifty-seven volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Fifty-eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 57 volumes of the canon, fully readable
+· Canon Library — 58 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3136,8 +3136,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 57-volume index',
-  hm_body_codex: `Codex — 57 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 58-volume index',
+  hm_body_codex: `Codex — 58 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3196,6 +3196,7 @@ hm_title_codex: 'Codex · the 57-volume index',
 55 · The Last Candle — a thin frost settles through the porch; Lin Wen produces one small wooden box — “Open it.” — inside, one slip in his grandfather’s hand: “阿石。用它点完。” — A-Shi sits beside the bowl the entire night; halfway through, he feels the doorway fill — his grandfather stands in silence, then withdrew; by dawn A-Shi finds the match wedged beside the bowl — the fire was never gone. Volume VIII — complete.
 56 · The Match — A-Shi wakes to find the bowl dark; his store of matches is empty; a shred of paper tucked inside his grandfather’s old chest reads: “Fire does not die — it sleeps.” Du the Elder gives him one single match back; A-Shi traverses the heather to the house, lights the bowl again — the fire was only sleeping; the whole valley glows back awake in response.
 57 · The Embers — a month later, his mother draws a small ceramic firepot from the bottom of the wardrobe, still warm with embers — she says: “He gave it to me; it keeps you”; A-Shi takes it into his lap — the pot rests in his hands warm — he keeps vigil; the fire never goes out; the whole room breathes softly as the fire settles into the ash; his grandfather is folded into every coal.
+58 · The White Stone — A-Shi goes down to the thawing river one early spring day; a white-haired girl sits by the bank — she presses one simple white stone into his palm, says nothing but “It is from your grandfather.” — A-Shi slips it into the bowl; the bowl warms immediately; his mother weeps and says: “Your grandfather has not left — he never did.” A-Shi finally understands what he is.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3209,7 +3210,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (fifty-seven volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (fifty-eight volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
