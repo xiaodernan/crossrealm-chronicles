@@ -101,6 +101,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 拾岁 · The Tenth Year | [the-tenth-year](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/50-the-tenth-year.md) |
 | 一路烟收 · The Smoke Clears | [the-smoke-clears](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/51-the-smoke-clears.md) |
 | 老碗 · The Old Bowl | [the-old-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/52-the-old-bowl.md) |
+| 守碗 · The Vigil | [the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/53-the-vigil.md) |
 
 Chapter → game-chapter mapping:
 
