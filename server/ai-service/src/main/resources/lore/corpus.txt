@@ -5120,6 +5120,48 @@ Come sit a while.
 
 *（Interlude Seven · Come Sit Awhile — the origin of the paper on the wall. Every passer-by walks below it; every scrap knows exactly where it needs to be. The wall does not speak — the paper knows where it goes. Come sit a while.）*
 
+# source: creative/novel/en/16-interlude-leaking-lamp.md
+# Interlude Eight · Leaking Lamp
+
+**Written after *Interlude Seven · Come Sit Awhile*: nothing in this volume is a letter — only a lamp that was never replaced.**
+**The wax from inside the lamp will eventually finish leaking. The bowl in the bowl cabinet will always be there. This is how the station lets go.**
+
+---
+
+## I · The Leak
+
+The wax that slipped from the lamp first fell onto the pedestal, later onto the table. It made no sound; it only pressed a small light into the grain, a slow seal. Each night the old keeper refilled the oil; somewhere down the line, he noticed that the thin white rim had already circled the base.
+
+## II · Summer
+
+The lamp burned through one whole summer. That summer there were many damp nights, paper-window panes that did not breathe, and so the flame lay against the wick for hours — as though someone had fallen asleep inside it. The wick grew short; the oil grew thin; only the wax kept coming down, a little more with each day.
+
+## III · The Bowl
+
+At the far end of the table, a bowl no one had ever used — its lip had a nick, turned toward the wall; in the cabinet sat other bowls behind it, and the ones who ate always reached for the nearest one first. In time, those nearest bowls were replaced many times; this one stayed clean, barely touched by dust.
+
+## IV · The Cloth
+
+One new keeper asked why the lamp was never replaced. The old keeper wiped the lamp-body with a cloth and said nothing. Wax stuck to it; it only loosened on the third pass. He folded the cloth and left it on the table's corner — as though it would come in handy for the next night.
+
+## V · The Rainy Night
+
+One rainy night, a traveller stayed a long time. After the meal, he set his own bowl on the table — its rim still faintly warm with the last of the heat; at the far end, the untouched bowl remained as it always had — not lifted, not turned, not moved. He walked out into the rain without his umbrella; the old keeper saw the traveller’s bowl on the table, carried it to the sink, and washed it clean.
+
+## VI · Autumn
+
+After summer, the lamp no longer burned as bright. The old keeper moved it against the wall; the wax ring on the table was fully exposed now, a thin circle — like a sentence no one had managed to finish, spoken a long time ago. Some nights the cabinet door did not quite close; the bowl lay at the far end of the table, rim turned toward the wall, pale in the half-light, almost too light to tell how long it had waited for someone.
+
+## VII · The Replacement
+
+Later came a new keeper; the wick was changed; the oil was refilled. The old wax was never scraped away, and the bowl was never taken out. In the ledger a single line was added: *table as before; one bowl at the far end, untouched.* No one asked who had written it; the wind through the window never touched the page.
+
+## End
+
+The flame crept low; the wax slid along the old trail, leaving a little more from the last time. The bowl still stood at the far end of the table, rim turned toward the wall, exactly where it had rested all along.
+
+*(Interlude Eight · Leaking Lamp — the lamp will finally go dark. The bowl stays at the far end of the table, rim toward the wall. That is the way of the waystation.)*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -6901,6 +6943,47 @@ F2 隐藏 HUD。
 ---
 
 *（番外七 · 下次再坐——纸的来历。每一班路过的人都从纸下面走过，每一张纸条都知道它该在哪里。墙不说话，纸自己会走。下次再坐。）*
+
+# source: creative/novel/16-番外八-漏灯记.md
+# 番外八 · 漏灯记
+
+**写在《番外七 · 下次再坐》之后：这一卷里没有回信，只有一盏没换过的灯。**
+**灯里漏出的蜡，最终会漏完。碗柜里的碗，会一直在。驿站就是这样停下的。**
+
+---
+
+## 其一 · 灯漏
+
+灯里漏出来的蜡，先落在灯座上，后来落到桌面。它没有声音，只把一小片木纹慢慢封住。老看守每夜添油，添到后来，才看见那道白痕已经绕过灯脚。
+
+## 其二 · 夏天
+
+这盏灯燃过一个夏天。夏天里有许多潮湿的夜，窗纸不透风，灯焰便长久地伏着，像有人在里面睡。烛芯短了，灯油也薄了，只有漏下来的蜡一日比一日多。
+
+## 其三 · 碗
+
+桌边有一只碗，从来没有用过。碗口缺了一点，缺口向着墙；柜里有别的碗，吃饭的人总顺手取近处那一只。久而久之，近处的碗换过几回，这只却仍旧干净，连灰也落得很少。
+
+## 其四 · 布
+
+新来的看守问过，为什么不把灯换掉。老看守拿布擦了擦灯腹，没有回答。蜡沾在布上，擦到第三遍才松开；他把那块布折好，放在桌角，像留着下回再用。
+
+## 其五 · 雨夜
+
+有个雨夜，来人坐得很久。饭后，他将碗放在桌上，碗沿还留着一点热气；那只没有用过的碗仍在柜中。来人走时忘了带伞，老看守把伞递出去，又把桌上的碗洗净。
+
+## 其六 · 秋
+
+入秋以后，灯不大亮了。老看守把它移到墙边，桌面那道蜡痕便露在外头，细细的一圈，像某年某夜没有说完的话。柜门有时关不严，碗就在暗处，白得很轻，轻到看不出它等过谁。
+
+## 其七 · 换灯
+
+后来换了看守，灯也换过灯芯。旧蜡没有刮，碗也没有取出；账簿上只添了一行：桌面照旧，柜中一只碗。没人问这行字是谁写的，窗外的风也没有把它吹走。
+
+## 终
+
+灯焰低下去时，蜡沿着旧痕又漏了一点。柜门仍旧合着，里面没有用过的碗，安安静静地留在原处。
+（番外八 · 漏灯记 · 灯油最后会干，碗会留在碗柜——这是驿站的方式。）
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)
