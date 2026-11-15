@@ -13,6 +13,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # fact pack 由 sync-latest.yml 用 GITHUB_TOKEN 提交（Actions 不会因机器人推送再触发 push 事件），
+  # 这里显式挂 workflow_run，让刚刷新的 latest.json 立刻上线，用户点进去永远是最新事实，
+  # 而不必等到下一笔人工提交。
+  workflow_run:
+    workflows: ["Sync latest.json fact pack"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -25,6 +31,8 @@ concurrency:
 
 jobs:
   deploy:
+    # 机器人触发的 workflow_run 只在 sync-latest 成功时才重发 Pages；手动/push 照常部署。
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
