@@ -69,6 +69,7 @@ creative/music/soundtrack.html
 | 读完自己 · The Reader Opens This Page | [the-reader-opens-this-page](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/20-the-reader-opens-this-page.md) |
 | 夜幕归乡 · Night Walk Home | [night-walk-home](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/21-night-walk-home.md) |
 | 雾散之后 · After the Mist Scatters | [after-the-mist-scatters](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/22-after-the-mist-scatters.md) |
+| 月光起 · The Moon Rises | [the-moon-rises](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/23-the-moon-rises.md) |
 
 每一章对应游戏的章节走法：
 
