@@ -117,6 +117,7 @@ creative/music/soundtrack.html
 | 围炉 · The Gathering | [the-gathering](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/68-the-gathering.md) |
 | 墨 · Ink | [ink](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/69-ink.md) |
 | 第六百零一 · The Six Hundred and First | [the-601st](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/70-the-601st.md) |
+| 画匠 · The Painter | [the-painter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/71-the-painter.md) |
 
 每一章对应游戏的章节走法：
 

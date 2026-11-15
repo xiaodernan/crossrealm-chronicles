@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Seventy volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Seventy-one volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 70 volumes of the canon, fully readable
+· Canon Library — 71 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3136,8 +3136,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 70-volume index',
-  hm_body_codex: `Codex — 70 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 71-volume index',
+  hm_body_codex: `Codex — 71 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3209,6 +3209,7 @@ hm_title_codex: 'Codex · the 70-volume index',
 68 · The Gathering — seven days after the kindle, his mother briefly faints at the hearth; A-Shi must keep the stove alone for the first time; Uncle Ye, Aunty Li and the old Daoist all bring food to the stove-side unprompted; his mother tells the tale of the six-hundred-year-old peddler who borrowed the first spark and built the crossroads lamp with it; late that night Baiyin comes down from the ridge — six hundred years of keepers gathered before one hearth, sharing a single bowl of plain rice porridge. A keeper keeps fire so others may carry it away. Volume XI, third part.
 69 · Ink — A-Shi keeps his first night watch before the hearth after the gathering; the wind turns, and the fire sinks an inch as if pressed down; Baiyin appears behind the stove and speaks of a time before ink: the world once held colour, until one character fell — 墨 (ink) — and everything burnt became ink — wood does, bone does, cruel words do — this fire is one of the few lights ink cannot swallow; keepers do not keep fire for fire’s sake, they keep it to remember the Chinese character 暖 — the one with fire inside it — Baiyin gives A-Shi a charred ledger in which every keeper before him wrote the character 记 (to remember) before death; the ink was still warm under his fingertips. Volume XI, fourth part.
 70 · The Six Hundred and First — the morning Baiyin left, the beacon on the white stone went out; six hundred years never extinguished; Baiyin explains: it was people who never let it go, not the fire; now it is needed no more — A-Shi’s stove stands alone; she hands him the last pinch of black dust — the lamp’s final breath — he seals it into his hearth; the fire brightens; his mother wakes and smiles: the seven-hundredth year; Baiyin corrects: the six hundred and first keeper — everything from six hundred years now lands in A-Shi’s hands — the stove is now a light the whole valley can see without ever climbing the ridge again; Baiyin’s last words: fire is not kept for people to see — it is kept so they can remember — remember it, and it will not go out. The seventy-volume canon passes its milestone. Volume XI, fifth part.
+71 · The Painter — on the third day after the snow stopped, a painter in a traveller’s hat comes to the stove; he confesses he has painted three months of fires — the beacon, the white-stone night lamp, the ever-burning lamp, Ye’s pipe coal, Li’s incense — every one of them recognizable as somebody else’s fire, not one as itself; he paints seven strokes before the hearth — each stroke a direction he knows — and hands the painting to A-Shi: the oldest fire in the world, six hundred years burning, is not something any man can pass off as his own work; the traveller from six hundred years ago — the peddler who borrowed the first coal — has spent six hundred years looking for this exact fire; he finally found it. Volume XI, sixth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3222,7 +3223,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (seventy volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (seventy-one volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
