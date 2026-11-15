@@ -8168,3 +8168,21 @@ Phase D（系统与质量）
   - **说明书/展示面**：`creative/showcase.html` —— 番外七进入「Latest landed · 11·17」（W-Z95）+ 小说卡片更新为七番外 + tapestry 时间轴补上「Interlude VII · Come Sit Awhile」+ 高端横文「七章 + 七番外」；README（根）/ `creative/README.md` / `creative/README.en.md` / `creative/player-guide.html`（双语境）/ `tapestry.html` / `tapestry.en.html`（时间轴）/ `docs/ONLINE_SERVICES.md`（含 EN）全部更新到 57 源 · 15 章；历史条目标注为历史、不删改。
   - **判据**：QA 双语各一次「本章无矛盾」；典籍语料 `--check` 绿；`npm test 6696/6696` 绿；`npm run lint` 0/0；`link:check` 86/86；`npm run size` 绿；Showcase 部署绿。Oracle 语料 +2 源后答案质量无需回退（++novel 章不进检索向量计算逻辑）。
   - **遗留**：① Oracle 对第 14 章的专项召回可在 W-Z96 验证（该章目前仅作原典候选源出现，未做针对性 probe——番外五的 Gatekeeper 范式也走过这一步）；② 若未来有番外 8，母题方向是「寄信人/回信」第三封——**留给下一班的方向**。
+
+- **2026-11-17 W-Z96「番外七入迷宫——`lore-10`《驿站残碑》· 名册 19 → 20 · 黄金签名重冻」** —— 提交：本次 HEAD
+
+  - **起因**：番外七入典籍（W-Z95）之后，番外五走过 lore-9 → 迷宫 stele 的路，番外七原本只活"在纸上"。游戏里座位唯一留给番外五的 stele 写"无烟之年残碑"；番外七这张残碑应该留下它自己的那一句—— canon 里反复出现的「驿站不收信。路过的人，下次再坐。」。
+  - **做法**：① `lore-10`（`lore_10_title` / `lore_10_text`）双语入迷宫；zh「驿站残碑」/「驿站不收信。路过的人，下次再坐。」；en「Waystation Stele」/「"We take no letters here — only travellers, come sit a while."」——与 番外五 lore-9 同格（canon 原文的碑石，不是编造）。② 名单扩容 LORE_FRAGMENTS 19 → 20 篇，`chapter: 2`（与 lore-9 同位——番外的 stele 都摆第二章段位）；③ `EXPECTED_KEY_COUNT 3134 → 3136`；④ `maze-shuffle-order.test.js` 三颗黄金签名 generator 实测逐字重冻（seeds `20261001` / `7` / `-3` 的 lore 起草落点全重排——归因是「名册规模 +1」而非 tokenize/shuffle/发放逻辑变更）。
+  - **判据**：`npm test 6696/6696`；`npm run build` 绿（size gate 1.98 MiB，ratchet 2.04 MiB）；maze-shuffle-order 23/23 绿。
+
+- **2026-11-17 W-Z97「Oracle reminder 增引用枝（Quote branch）——引文类问句不再被误拒；上游三探针全绿」** —— 提交：本次 HEAD
+
+  - **起因**：对新入典籍的番外七做 Oracle probe，问「『驿站不收信。路过的人，下次再坐。』这句话出自哪一卷？」—— BM25 命中 `creative/novel/14-番外七-下次再坐.md`（score 47.47），但模型仍回答「此物未在典籍中」：reminder 把"heading line contains the asked name"定位当成唯一合法路径——未命名的引文问句被错误拒访。不符"如果摘录里有答问的原文则逐字引用"那条规。
+  - **探针（上游实测，wkapi.pro gpt-6-sol，cache_control ephemeral）**：A 问句仅带引文 → 原 reminder 误拒 ✓ 修后 → 「…出自《番外七 · 下次再坐》。[creative/novel/14-番外七-下次再坐.md]」；B 未引文的无标题问句 → 以原文 Verbatim 回答（grounded in-excerpt）；C 纯垃圾问句（「短笛声从哪座塔传来？」）→ 仍拒答「此物未在典籍中 · This is not in the record.」——保住 conservative-by-design 底线。A `prompt_tokens=6179` / B `1798` / C `6170`；Triton cache_hit — B 明显命中缓存（1798）。
+  - **做法**：`LoreOracleService.answer()` 的 `user` 模板在 reminder 里增加一支：「引文枝」——若玩家问句含引文（任何引号），模型必须以引文文本本身定位（找包含引文的摘录行 + 答原文 + 出处文件），找不到原文才「未在典籍中」。不动 system prompt、不动 refusal 文案、不动 BM25/检索/cache 逻辑；`ai-service.lore.multihop` 不受影响。`mvn -Dtest=OracleControllerTest,Bm25IndexTest,LoreRagTest,LoreCorpusTest` 22/22 绿。
+  - **判据**：A/B/C 三探针按预期；前端无需改动；Oracle 语义现有五问族（命名条目阅读 / 未命名拒答 / 双语 / 复合句 / 引文归属）全覆盖。
+- **2026-11-17 W-Z96b「个人展示页 fact pack 新 HEAD 自动重推触发验证（sync-latest + sync-crossrealm 手动）· milestone 不再检成 W-?」** —— 提交：本次 HEAD
+
+  - **起因**：直推 main 若被 sync-bot 或其它 bot 抢先推完，HEAD 会变成 bot 的 `chore(latest)`，W-Z%xx 检不到——personal page 的「最新」指示器被推空。
+  - **做法**：build-latest.mjs 的 milestone 提取改为「向前看最近 20 条提交取最近的 feature 里程碑」（W-Z92→W-Z93→W-Z94→W-Z95 全部测试过）；commits 同时由脚本现场推导；个人页 cr-* 数据（`crHead`、`crCommits`、`crGenerated`、`crFeatures`、`crMilestone`）经 UI 快照验收：「main @ 4e733d7」→「1605 commits」→「W-Z95」在桌面/手机视口（844×390）都正常。
+  - **遗留**：`crGenerated` 这一行内含 `milestone` 字符串本身，改了 milestone_full 会触发一整轮 fact pack 重发——可接受（每次 feature 推送都应刷新）；如不想频繁重推，只需在 build-latest.mjs 把 milestone_full 改为较粗的叙述（longstr 漂移是常规现象，不影响 seasonality gate）。

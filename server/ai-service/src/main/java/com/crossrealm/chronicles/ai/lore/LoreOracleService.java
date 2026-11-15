@@ -81,7 +81,7 @@ public class LoreOracleService {
                 + firstBlock.toString().trim()
                 + (rest.length() > 0 ? "\n\nOther excerpts (use only if the first doesn't answer):\n\n"
                         + rest.toString().trim() : "")
-                + "\n\nReminder (read this FIRST):\nThe question asks about the entry in the **most relevant excerpt** block — locate its heading line (the one containing the exact name from the player question) and answer with that block's line verbatim. If no heading line contains the asked name, refuse with 「此物未在典籍中 · This is not in the record.」";
+                + "\n\nReminder (read this FIRST):\nThe question asks about the entry in the **most relevant excerpt** block — locate its heading line (the one containing the exact name from the player question) and answer with that block's line verbatim. If no heading line contains the asked name, refuse with 「此物未在典籍中 · This is not in the record.」\n\nQuote branch: if the player question quotes a line verbatim (any quote/quotation marks included), treat the quoted text as the \"name\" to locate — find the excerpt line containing that quote exactly, and answer with that quote together with the file path it came from. Only refuse when the quoted text does not appear anywhere in the excerpts.";
 
         LlmClient.Answer answer = client.complete(system, user);
         List<String> sources = hits.stream().map(h -> h.doc().source()).distinct().toList();
