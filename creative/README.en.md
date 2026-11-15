@@ -73,6 +73,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 雾散之后 · After the Mist Scatters | [after-the-mist-scatters](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/22-after-the-mist-scatters.md) |
 | 月光起 · The Moon Rises | [the-moon-rises](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/23-the-moon-rises.md) |
 | 归途再启 · Beyond the Threshold | [beyond-the-threshold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/24-beyond-the-threshold.md) |
+| 月光回廊 · Moonlit Corridor | [moonlit-corridor](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/25-moonlit-corridor.md) |
 
 Chapter → game-chapter mapping:
 
