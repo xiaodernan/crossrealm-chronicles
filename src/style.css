@@ -4775,6 +4775,23 @@ h1, h2, h3 {
 .canon-body p { margin: 0 0 10px; }
 .canon-h3 { font-size: 0.82rem; color: var(--gold); letter-spacing: 0.06em; margin: 12px 0 6px; font-weight: 400; border-bottom: 1px solid rgba(201, 169, 98, 0.22); padding-bottom: 4px; }
 .canon-hr { border: none; border-top: 1px solid rgba(201, 169, 98, 0.18); margin: 12px 0; }
+.canon-reader-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.canon-reader-header h2 { margin: 0; flex: 1 1 auto; }
+.canon-toolbar { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.canon-tbtn { min-width: 26px; height: 26px; padding: 0 6px; border-radius: 6px; border: 1px solid rgba(201, 169, 98, 0.28); background: rgba(10, 8, 14, 0.45); color: rgba(223, 214, 196, 0.78); cursor: pointer; font-size: 0.78rem; line-height: 1; font-family: inherit; transition: border-color 0.15s, color 0.15s, background 0.15s; display: inline-flex; align-items: center; justify-content: center; }
+.canon-tbtn:hover { border-color: rgba(255, 217, 138, 0.5); color: var(--gold); }
+.canon-tbtn.is-disabled { opacity: 0.35; pointer-events: none; }
+.canon-tbtn-serif { font-size: 0.66rem; letter-spacing: 0.06em; padding: 0 8px; }
+.canon-tbtn-serif.sans { border-color: rgba(255, 217, 138, 0.45); color: #ffd98a; }
+.canon-tbtn-bookmark { color: rgba(223, 214, 196, 0.4); }
+.canon-tbtn-bookmark.is-on { color: #ffd98a; text-shadow: 0 0 8px rgba(255, 217, 138, 0.35); }
+.canon-font-step { font-family: var(--font-mono-num); font-size: 0.62rem; color: rgba(223, 214, 196, 0.5); min-width: 1.4em; text-align: center; }
+.canon-progress { font-family: var(--font-mono-num); font-size: 0.62rem; color: rgba(201, 169, 98, 0.75); margin-bottom: 6px; letter-spacing: 0.04em; }
+.canon-bookmarks { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(201, 169, 98, 0.14); }
+.canon-bookmark-chip { padding: 1px 8px; font-size: 0.62rem; border-radius: 6px; border: 1px solid rgba(255, 217, 138, 0.3); background: rgba(10, 8, 14, 0.35); color: #ffd98a; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.canon-bookmark-chip:hover { border-color: rgba(255, 217, 138, 0.6); }
+.canon-check { font-size: 0.6em; color: #9bd67a; margin-left: 2px; }
+.canon-body.sans { font-family: var(--font-body) !important; font-size: 0.84rem !important; line-height: 1.66 !important; letter-spacing: 0 !important; }
 .canon-loading, .canon-empty, .canon-error { font-size: 0.8rem; color: rgba(223, 214, 196, 0.55); padding: 24px 8px; text-align: center; }
 .canon-error { color: #d98a8a; }
 .canon-body::-webkit-scrollbar-thumb { background: rgba(201, 169, 98, 0.3); }
