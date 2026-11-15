@@ -122,6 +122,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Painter | [the-painter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/71-the-painter.md) |
 | The Reply | [the-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/72-the-reply.md) |
 | The Homecoming | [the-homecoming](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/73-the-homecoming.md) |
+| The Seed | [the-seed](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/74-the-seed.md) |
 
 Chapter → game-chapter mapping:
 
