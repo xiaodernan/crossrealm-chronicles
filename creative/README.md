@@ -119,6 +119,7 @@ creative/music/soundtrack.html
 | 第六百零一 · The Six Hundred and First | [the-601st](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/70-the-601st.md) |
 | 画匠 · The Painter | [the-painter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/71-the-painter.md) |
 | 回信 · The Reply | [the-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/72-the-reply.md) |
+| 归来 · The Homecoming | [the-homecoming](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/73-the-homecoming.md) |
 
 每一章对应游戏的章节走法：
 
