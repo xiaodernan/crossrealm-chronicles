@@ -29,3 +29,4 @@ vite.config.js.timestamp-*.mjs
 
 # server/ �� Maven �������target/��
 server/**/target/
+/_commit-msg.txt
