@@ -1,36 +1,36 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T02:22:20.296Z",
+  "generated_at": "2026-11-15T02:49:31.490Z",
   "branch": "main",
-  "head": "8741f4a",
-  "total_commits": 1613,
-  "pushed_at": "2026-11-15T10:21:35+08:00",
+  "head": "538edc2",
+  "total_commits": 1617,
+  "pushed_at": "2026-11-15T10:44:55+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "538edc2",
+      "at": "2026-11-15T10:44:55+08:00",
+      "subject": "feat(pages): W-Z101「25 首可播放 OST」上线 Pages 根——creative/music/soundtrack.html 注册为部署目标 + 封面直链生效"
+    },
+    {
+      "short": "eade7fc",
+      "at": "2026-11-15T10:41:13+08:00",
+      "subject": "docs(creative): player-guide 中文+英文快速上手条目加「炉边快速上手」自动弹说明（W-Z100）· 文档与最近 ship 对齐"
+    },
+    {
+      "short": "3327e3b",
+      "at": "2026-11-15T10:33:20+08:00",
+      "subject": "feat(pages): W-Z99 个人展示页入口线路打通——pages.yml 统一部署（展示页根 / /game/ 子路径即开即玩）· 删除孤儿 gh-pages 部署链"
+    },
+    {
+      "short": "181e186",
+      "at": "2026-11-15T02:22:20Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "8741f4a",
       "at": "2026-11-15T10:21:35+08:00",
       "subject": "docs(stress): STRESS_RESULTS 增 2026-11-17 Oracle 复测一节（W-Z97 落地后 · 57 源语料 + 引文枝 reminder）"
-    },
-    {
-      "short": "b277c94",
-      "at": "2026-11-15T02:19:01Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "ca19722",
-      "at": "2026-11-15T10:18:33+08:00",
-      "subject": "docs(creative): showcase Feed 增补 W-Z96/W-Z97/W-Z98（三件新落地）"
-    },
-    {
-      "short": "3fd61d8",
-      "at": "2026-11-15T10:16:03+08:00",
-      "subject": "feat(ui): W-Z98 暂停菜单视觉重塑——「金调炭光·罗盘环」语言（与说明书/炉边快速上手同源）"
-    },
-    {
-      "short": "0424faa",
-      "at": "2026-11-15T02:12:10Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
   "tracked_files": 1224,
@@ -39,7 +39,7 @@
   "lore_sources": 57,
   "novel_chapters_zh": 15,
   "novel_chapters_en": 15,
-  "milestone": "W-Z97",
+  "milestone": "W-Z101",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
