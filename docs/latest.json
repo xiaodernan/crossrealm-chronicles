@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T07:54:28.524Z",
+  "generated_at": "2026-11-15T08:17:10.066Z",
   "branch": "main",
-  "head": "6c918dd",
-  "total_commits": 1653,
-  "pushed_at": "2026-11-15T15:53:32+08:00",
+  "head": "3227b0e",
+  "total_commits": 1655,
+  "pushed_at": "2026-11-15T16:15:07+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "3227b0e",
+      "at": "2026-11-15T16:15:07+08:00",
+      "subject": "feat(game): W-Z118 星轨 · 锚火占卜——[J] 页新增\"火里有字\"慰问互动"
+    },
+    {
+      "short": "a8c5603",
+      "at": "2026-11-15T07:54:28Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "6c918dd",
       "at": "2026-11-15T15:53:32+08:00",
@@ -21,25 +31,15 @@
       "short": "30820e9",
       "at": "2026-11-15T15:28:20+08:00",
       "subject": "feat(ui): W-Z115 字体与排版抛光——无网络字体依赖的 CJK 衬线体系"
-    },
-    {
-      "short": "20790fd",
-      "at": "2026-11-15T07:19:42Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "8036154",
-      "at": "2026-11-15T15:15:08+08:00",
-      "subject": "feat(content): W-Z114 新章「十七 · 晨雾回声」双语入典籍馆（17→? 卷齐）"
     }
   ],
-  "tracked_files": 1239,
+  "tracked_files": 1242,
   "test_files": 453,
-  "i18n_keys": 3160,
+  "i18n_keys": 3170,
   "lore_sources": 59,
   "novel_chapters_zh": 17,
   "novel_chapters_en": 17,
-  "milestone": "W-Z117",
+  "milestone": "W-Z118",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
