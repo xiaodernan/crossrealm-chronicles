@@ -43,5 +43,16 @@
 | 最新成果展示页 | `creative/showcase.html` |
 | 玩家小册子 / Player Guide | `creative/player-guide.html` |
 | 年鉴（tapestry） | `creative/tapestry.html` |
+| 年鉴（tapestry）英文版 | `creative/tapestry.en.html` |
 | 自动同步 CI | `.github/workflows/showcase.yml` |
+| 事实包（个人页数据源） | `docs/latest.json`（`scripts/build-latest.mjs` 生成；`sync-latest.yml` 每周一自动重推） |
 | 玩家存档格式 | `crossrealm_save_v21` (browser localStorage) |
+
+## 个人展示页实时同步（W-Z92）
+
+`https://xiaodernan.github.io/` 的「跨界纪元」卡片需要「点进去即最新」的进度信物，而不是静态快照。本机制双通路：
+
+1. **页面运行时直读**：`raw.githubusercontent.com/xiaodernan/crossrealm-chronicles/main/docs/latest.json?ts=<now>`（带 CORS `*`；直击缓存），失败退化为展示页仓库 `assets/crossrealm/latest.json`。
+2. **每周一兜底**：`.github/workflows/sync-latest.yml` 在本仓库重跑 `scripts/build-latest.mjs` 并把 `docs/latest.json` 推回 `main`；展示页仓库侧 `sync-crossrealm.yml` 同步落盘 `assets/crossrealm/latest.json`（错峰 30 分钟）。
+
+`docs/latest.json` 的每个数字（提交数 / 测试文件数 / i18n 键数 / 语料源数 / 双语章回数）都由脚本现场推导，不手抄、不漂移。发版里程碑之后可在 Actions 页手动跑一次 `Sync latest.json fact pack` 立即刷新。
