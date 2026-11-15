@@ -86,6 +86,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 九十一里 · Ninety-one Li | [ninety-one-li](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/35-ninety-one-li.md) |
 | 第四座亭 · The Fourth Pavilion | [the-fourth-pavilion](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/36-the-fourth-pavilion.md) |
 | 火之门 · The Gate of Fire | [the-gate-of-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/37-the-gate-of-fire.md) |
+| 南归 · The Road Home | [the-road-home](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/38-the-road-home.md) |
 
 Chapter → game-chapter mapping:
 
