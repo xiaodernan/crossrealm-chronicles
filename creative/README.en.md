@@ -100,6 +100,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 五年后 · Five Years From Now | [five-years-from-now](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/49-five-years-from-now.md) |
 | 拾岁 · The Tenth Year | [the-tenth-year](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/50-the-tenth-year.md) |
 | 一路烟收 · The Smoke Clears | [the-smoke-clears](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/51-the-smoke-clears.md) |
+| 老碗 · The Old Bowl | [the-old-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/52-the-old-bowl.md) |
 
 Chapter → game-chapter mapping:
 
