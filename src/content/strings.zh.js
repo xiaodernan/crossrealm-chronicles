@@ -2785,6 +2785,8 @@ export const STRINGS_ZH = Object.freeze({
   lore_8_text: '世界之锚的脉动与所有地下城相连。清空一座迷宫，锚点就亮一分。',
   lore_9_title: '无烟之年残碑',
   lore_9_text: '「火没有先问世界。火先问了自己，然后被留住了。」',
+  lore_10_title: '驿站残碑',
+  lore_10_text: '「驿站不收信。路过的人，下次再坐。」',
 
   // 致敬层 lore 碎片（W-D2 切片16b）
   lore_pop_wizard_title: '咒术学院残页',

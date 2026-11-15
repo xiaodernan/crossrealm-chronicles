@@ -2790,6 +2790,8 @@ export const STRINGS_EN = Object.freeze({
   lore_8_text: 'The World Anchor\'s pulse connects to every dungeon. Clear one dungeon, and the anchor glows a little brighter.',
   lore_9_title: 'Stele of the Smokeless Year',
   lore_9_text: '"Fire did not ask the world first. Fire asked itself — and was kept."',
+  lore_10_title: 'Waystation Stele',
+  lore_10_text: '"We take no letters here — only travellers, come sit a while."',
 
   // Homage-layer lore fragments (W-D2 slice 16b)
   lore_pop_wizard_title: 'Spell Academy Scrap',

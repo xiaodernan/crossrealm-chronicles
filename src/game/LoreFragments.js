@@ -12,6 +12,8 @@ export const LORE_FRAGMENTS = [
   { id: 'lore-8', title: 'lore_8_title', text: 'lore_8_text', chapter: 2 },
   // W-Z85 扩展：番外五「火之前」——前传锚铭，canon 原文只出现过在 letters，这里给玩家一眼
   { id: 'lore-9', title: 'lore_9_title', text: 'lore_9_text', chapter: 2 },
+  // W-Z95 扩展：番外七「下次再坐」——驿站残碑，canon 里反复出现的纸条
+  { id: 'lore-10', title: 'lore_10_title', text: 'lore_10_text', chapter: 2 },
   ...LORE_FRAGMENTS_POP,
 ];
 
