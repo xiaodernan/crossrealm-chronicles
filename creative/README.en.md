@@ -75,6 +75,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 归途再启 · Beyond the Threshold | [beyond-the-threshold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/24-beyond-the-threshold.md) |
 | 月光回廊 · Moonlit Corridor | [moonlit-corridor](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/25-moonlit-corridor.md) |
 | 烛火之下 · Under the Candle Flame | [under-the-candle-flame](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/26-under-the-candle-flame.md) |
+| 归途之共 · The Last Persimmon | [the-last-persimmon](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/27-the-last-persimmon.md) |
 
 Chapter → game-chapter mapping:
 
