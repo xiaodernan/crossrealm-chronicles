@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T18:28:02.533Z",
+  "generated_at": "2026-11-15T18:33:53.759Z",
   "branch": "main",
-  "head": "887f2447",
-  "total_commits": 1785,
-  "pushed_at": "2026-11-16T02:25:49+08:00",
+  "head": "ce4b40e9",
+  "total_commits": 1787,
+  "pushed_at": "2026-11-16T02:33:03+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "ce4b40e",
+      "at": "2026-11-16T02:33:03+08:00",
+      "subject": "feat(canon): W-Z185 第五十九卷《火种 / The Kindling》——卷九之四，《祷火 —— 重燃之劫》完结"
+    },
+    {
+      "short": "22dc3df",
+      "at": "2026-11-15T18:28:02Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "887f244",
       "at": "2026-11-16T02:25:49+08:00",
@@ -21,25 +31,15 @@
       "short": "4f35fac",
       "at": "2026-11-16T02:18:38+08:00",
       "subject": "feat(game): W-Z183 命途 · 锚火三问 —— StateGraph 真路由 + [J] 新子页"
-    },
-    {
-      "short": "8b5b816",
-      "at": "2026-11-15T18:02:23Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "a36e4e4",
-      "at": "2026-11-16T01:59:26+08:00",
-      "subject": "feat(canon): W-Z182 第五十七卷《烬 / The Embers》——卷九之二"
     }
   ],
-  "tracked_files": 1343,
+  "tracked_files": 1345,
   "test_files": 458,
   "i18n_keys": 3223,
   "lore_sources": 59,
-  "novel_chapters_zh": 58,
-  "novel_chapters_en": 58,
-  "milestone": "W-Z184",
+  "novel_chapters_zh": 59,
+  "novel_chapters_en": 59,
+  "milestone": "W-Z185",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
