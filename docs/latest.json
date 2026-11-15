@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T18:41:46.370Z",
+  "generated_at": "2026-11-15T18:49:55.527Z",
   "branch": "main",
-  "head": "330c1cd8",
-  "total_commits": 1789,
-  "pushed_at": "2026-11-16T02:39:43+08:00",
+  "head": "b66254bc",
+  "total_commits": 1791,
+  "pushed_at": "2026-11-16T02:47:13+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "b66254b",
+      "at": "2026-11-16T02:47:13+08:00",
+      "subject": "feat(canon): W-Z187 第六十一卷《劈薪 / Splitting the Firewood》——卷十之二"
+    },
+    {
+      "short": "5d73657",
+      "at": "2026-11-15T18:41:46Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "330c1cd",
       "at": "2026-11-16T02:39:43+08:00",
@@ -21,25 +31,15 @@
       "short": "ce4b40e",
       "at": "2026-11-16T02:33:03+08:00",
       "subject": "feat(canon): W-Z185 第五十九卷《火种 / The Kindling》——卷九之四，《祷火 —— 重燃之劫》完结"
-    },
-    {
-      "short": "22dc3df",
-      "at": "2026-11-15T18:28:02Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "887f244",
-      "at": "2026-11-16T02:25:49+08:00",
-      "subject": "feat(canon): W-Z184 第五十八卷《白石 / The White Stone》——卷九之三"
     }
   ],
-  "tracked_files": 1347,
+  "tracked_files": 1349,
   "test_files": 458,
   "i18n_keys": 3223,
   "lore_sources": 59,
-  "novel_chapters_zh": 60,
-  "novel_chapters_en": 60,
-  "milestone": "W-Z186",
+  "novel_chapters_zh": 61,
+  "novel_chapters_en": 61,
+  "milestone": "W-Z187",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
