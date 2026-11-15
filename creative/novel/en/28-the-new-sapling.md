@@ -8,64 +8,48 @@
 
 ## Twenty-eight: The New Sapling
 
-The persimmon sat on the ancestral altar for three months.
+After the frost, the persimmon on the altar did not move from its place.
 
-After the second frost, its leather skin tightened and the wrinkles deepened into little rims of glittering ice. Lin Wen looked at it every morning before his mother did, and after — she would brush a finger across its back on her way past, the way you rest a hand on a sleeping child's forehead.
+On the day the first true ice crept across the courtyard stones, the bowl was already dry through and through. Lin Wen's mother took it onto the porch, split the shell with a small bamboo knife, and drew out a single white persimmon pit — round, clean, and free of any crack.
 
-On the winter solstice, his mother took the fruit down. She peeled it and divided it into four portions: one for Lin Wen, one for her daughter who had not come home this year, one for the neighbor across the road who had been keeping him company through the winter, and one for the child her daughter had brought with her.
+She did not tell anyone. She only took the hoe, a basket, and a shovel from the storeroom the following morning — and ordered Lin Wen to carry them up the eastern slope.
 
-Lin Wen stared at his quarter for a long time. The flesh had dried to almost nothing. The sweetness ran deep. It made no sound when he bit it.
+"To the slope," she said. "You pick the ground. Then I dig the hole."
 
-"When you eat it, don't just hold it in your mouth," his mother said. "Where the persimmon is, the family is."
+The eastern slope was the highest point of the village — good sun, no wind, thick dark soil. Lin Wen walked the whole slope to choose. He passed on one parcel after another before settling on the one patch that was dry, sheltered, and protected by a natural bend.
 
-Three days later, he found the skin and the seed had all been wrapped in clean white paper and pressed neatly under one corner of the altar table. The seed was a single dark thing — round, full, and heavy as a marble.
+His mother dug the hole herself. Slowly. Precisely. As though she had spent years learning how to give something back to the earth.
 
-Lin Wen did nothing with it through the rest of that winter. He turned it over and over in his palm like a book reduced to one single page. Once, he was tempted to plant it right then and there — but he set it down. He was waiting for something. For years he had not known what. It was this moment all along: to be the one who plants himself into the ground.
+"Your father planted things here too," she said. "He planted a jujube once. It did not live. A few years ago he set out a persimmon. It did not live either."
 
-The rain came early in February. The bare tree stood against the south wind like a bundle of unstruck matches. His mother was out on the porch in the sun when she said, without turning around:
+She said nothing more. She slipped the pit into the ground, dropped the soil back on, pressed it flat, and poured a full ladle of water over the spot.
 
-"Plant yours. Then this one can rest easy."
+Fifteen days before the Start of Spring — nothing moved.
 
-So he went up the eastern slope with a shovel and the seed — the same slope where the old tree had been grafted. He chose a spot in full sun, sheltered from the wind, with deep dark soil. He began to dig. When the hole was as long as his palm, he remembered who had taught him to dig a hole: his father. His father had planted persimmons, jujubes, and one arbor of grapes — none of them had survived. Only the tree by the gate had lived, because his mother had measured the ground three times before she chose it.
+On the first day of spring, a single leaf pushed up through the earth. Pale as a crescent. Thin as paper. His mother saw it first and walked past the courtyard without going into the altar room.
 
-He placed the seed, covered it, tamped it down, and watered it well.
+At two leaves, she built a loose cradle of split bamboo to shelter the shoot.
 
-The next day his sister arrived with her family. She had married into the south and rarely came home; this time she brought the child, a boy of three. The child circled the old tree once and slapped its trunk with a small open palm, shouting:
+At four leaves, she untied the bright red ribbon she had worn at her waist on her own wedding day and tied it around the frame — the same stroke her own mother had used on her at the same age, in the same courtyard, at the start of a long-buried spring.
 
-"Grandpa and Grandma's tree!"
+On a midsummer evening, a boy came up the slope on a visit. He was the second cousin's second-born son. He stood beside the new shoot and asked:
 
-Lin Wen lifted the boy onto his shoulders. The child pointed at the slope:
+"Grandmother — will this tree bear fruit?"
 
-"And that tiny one?"
+His mother considered him for some time. Then she said:
 
-Lin Wen turned and saw the fresh-heaped black earth by the shovel. The boy, riding high on his shoulders, was pointing with terrible seriousness.
+"Yes."
 
-"That's the one I planted," he said. "It hasn't sprouted yet."
+She did not explain.
 
-"Then I'll count to three," the boy said, and squeezed his eyes shut. "One — two — THREE!"
+That night, a thin column of smoke lifted from far across the ridges to the south — almost invisible, but clearly there. From somewhere in the direction of the Ember Post.
 
-He opened his eyes. There was nothing in the hole.
+Lin Wen stood on the slope and felt his heart tighten.
 
-But the child laughed louder than anyone else that day.
+Now he knew — the pit would not die. This tree had walked out of the altar, out of the bowl, out of the persimmon that his mother had named him for. Every autumn from now on, it would be there to remind him who he had become.
 
-On an April morning, Lin Wen climbed the slope and found a single shoot breaking the soil. Two leaves, pale green, thin enough to let the light through, every vein distinct — like a hand learning to breathe for the first time. He hurried home and returned with a split bamboo sleeve to shield the shoot, and a small stake to keep it upright against wind and rain.
-
-His mother saw the bamboo and asked nothing. She only went inside and came back with a red cord, which she tied to the stake. Her hands shook once as she tied the knot. Lin Wen saw it.
-
-It was the same red cord she had worn at her waist on the day she married. She had carried it ever since.
-
-By June, the seedling had grown a full foot. Four leaves. His sister called from the south, and Lin Wen handed the phone to his mother. She said only:
-
-"The little one lived."
-
-Then she added, after a pause:
-
-"Your father's row lived too."
-
-Lin Wen did not answer. He stepped outside and looked at the old persimmon by the gate. Its leaves were thicker than they had been the year before. He reached into his jacket and found a match he did not need. He set it beside the incense on the altar. He was going to plant another next year.
-
-The stove in the kitchen kept its low, steady burn. No one said anything more — but that year, two trees went into winter together.
+— like an unsent letter.
 
 ---
 
-*(End of volume twenty-eight · Volume IV, fifth part.)*
+*(End of volume twenty-eight · Volume IV, fifth part. The Academy's revision of the original chapter.)*

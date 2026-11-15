@@ -90,6 +90,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 夏来了 · The Summer Arrives | [the-summer-arrives](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/39-the-summer-arrives.md) |
 | 头道火 · The First Fire | [the-first-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/40-the-first-fire.md) |
 | 守炉 · The Tending | [the-tending](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/41-the-tending.md) |
+| 松手 · The Letting Go | [the-letting-go](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/42-the-letting-go.md) |
 
 Chapter → game-chapter mapping:
 
