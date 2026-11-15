@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T10:23:37.415Z",
+  "generated_at": "2026-11-15T10:43:43.362Z",
   "branch": "main",
-  "head": "5fc8dc2",
-  "total_commits": 1674,
-  "pushed_at": "2026-11-15T18:22:39+08:00",
+  "head": "eed276f",
+  "total_commits": 1676,
+  "pushed_at": "2026-11-15T18:42:41+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "eed276f",
+      "at": "2026-11-15T18:42:41+08:00",
+      "subject": "feat(game): W-Z129 星轨 · 三日曜盘——每周一盘三卡同启（The Trisolar Tide）"
+    },
+    {
+      "short": "9d7acce",
+      "at": "2026-11-15T10:23:37Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "5fc8dc2",
       "at": "2026-11-15T18:22:39+08:00",
@@ -21,25 +31,15 @@
       "short": "4c87a8c",
       "at": "2026-11-15T09:59:46Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "697bc92",
-      "at": "2026-11-15T17:59:08+08:00",
-      "subject": "feat(admin): W-Z126 炉边盘 · 实测记录面板上板——真跑真测，不演示"
-    },
-    {
-      "short": "ed27fe4",
-      "at": "2026-11-15T09:49:38Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
-  "tracked_files": 1250,
-  "test_files": 453,
-  "i18n_keys": 3184,
+  "tracked_files": 1255,
+  "test_files": 455,
+  "i18n_keys": 3202,
   "lore_sources": 59,
   "novel_chapters_zh": 19,
   "novel_chapters_en": 19,
-  "milestone": "W-Z128",
+  "milestone": "W-Z129",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
