@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T20:38:41.760Z",
+  "generated_at": "2026-11-15T20:43:55.438Z",
   "branch": "main",
-  "head": "a9c9d3b8",
-  "total_commits": 1826,
-  "pushed_at": "2026-11-16T04:36:18+08:00",
+  "head": "9e4cffb8",
+  "total_commits": 1828,
+  "pushed_at": "2026-11-16T04:43:30+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "9e4cffb",
+      "at": "2026-11-16T04:43:30+08:00",
+      "subject": "feat(admin): 实测记录卡第 13 格——ui-walkthrough 2026-11-16 复跑 18/18 全绿"
+    },
+    {
+      "short": "0d5a78c",
+      "at": "2026-11-15T20:38:41Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "a9c9d3b",
       "at": "2026-11-16T04:36:18+08:00",
@@ -20,16 +30,6 @@
     {
       "short": "6b0139d",
       "at": "2026-11-15T20:27:45Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "97d11d0",
-      "at": "2026-11-16T04:27:18+08:00",
-      "subject": "fix(showcase): latest.json headline/milestone_full 卷数动态化——从 zhNovel 计数现读，不再手抄"
-    },
-    {
-      "short": "d77558c",
-      "at": "2026-11-15T20:25:53Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
