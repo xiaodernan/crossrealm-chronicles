@@ -8,34 +8,48 @@
 
 ## Twenty-six: Under the Candle Flame
 
-After the moon had lit the whole night and this night was finally over, Lin Wen sat beneath the persimmon tree by the gate.
+After the moon had risen and fallen a full cycle, the long night closed at last.
 
-The old mirror had vanished from the end of the road. In its place, a silver ring on the stones still glowed — the same ring of light that had swept over the world just before the second moon rose. He looked down at his wrist. He knew this night had changed things. He had gone to visit every person he suddenly missed; he still wasn't sure whether they had ever truly been there.
+Lin Wen stood beneath the persimmon tree by the gate. He reached down and plucked one of the leaves — already turning, curled at its rim — and dropped it into the wind. He did not bend to pick it up.
 
-Lin Wen reached out and plucked a single leaf from the persimmon tree. The leaf had already gone yellow; it drifted faintly to the ground and settled into the basket beneath.
+A bookmark slid from his pocket.
 
-He found a bookmark nestled between its edges—
+He looked down. Nestled inside the folded paper was a single match. It had not been struck yet.
 
-He slid the bookmark out; it was a single, fresh matchstick, its head still dark against his fingertip.
+He stood and considered it for a long time and finally decided — he would let it burn.
 
-He pulled it out and struck it against the casing. The flame rose at once. As the fire climbed, he looked through the blaze and saw the young self standing opposite him—the self he had once been, the self he had long since left behind.
+The moment the match flame rose, he lifted his eyes toward the far wall of the old house. In the firelight, the wall was holding his own silhouette.
 
-The younger self stared back at him for a long time.
+A younger himself.
 
-A spark burst from the furnace, and Lin Wen's hand hid the last page of a tiny booklet that had ridden in his pocket for years—inside it, one line:
+That shadow looked at him.
 
-*Worry not. There is no one else here. This night is the one you spent with yourself.*
+Fire was burning between them. Then the flame shuddered, it reached, the match slipped from his fingers, and the spark landed in the stove's belly. The fire in the stove leapt — brighter than any second of the night — and for one heartbeat he saw, perfectly whole, the man he had been: his young, his patient, his unscarred self, watching him from somewhere between youth and ash.
 
-Lin Wen snapped the match into the fire, and fed the hearth fresh kindling. Back at the doorway, something forced him to remember his mother's face one last time—something like moving a book from one shelf to another, again and again.
+Lin Wen understood what that hour had in store for him. The fire had held up a mirror so he could see what he had become. Whatever he had burned on the way inside had left a mark. His younger silhouette bore it.
 
-At last he opened that aged page.
+He did not cry then, or later either.
 
-*Child, every night that came before has flowed through me. Now I live inside those nights, and it is your fire that walks the road. When you linger under the persimmon tree recalling the hearth, remember—no fire is ever alone. You were never on your own. Neither were you.*
+He pushed his fingers into his pocket, discovered a little booklet he had never once opened in the long weeks since the night began — small enough to hide inside a matchbook — and turned it over in his hand.
 
-Lin Wen closed the page. Opened it again. And sat down beneath the persimmon tree.
+There was exactly one page inside. It read:
 
-The moon climbed again. It didn't ask him any questions—that is what moons are for.
+*You don't need to worry. There is no one here but us — tonight, this was you using me.*
+
+Lin Wen sat very still for a long while. Slowly, in a low voice he didn't recognize as his own, he asked the air:
+
+"Who are you?"
+
+The fire did not answer. But it understood.
+
+Great change was coming. He could feel it weighting the air, the house, the shadow of the tree standing bare in the dusk behind him.
+
+He closed the little booklet, laid it on the table, and sat with the fire until the night was fully gone.
+
+When the first bell rang across the mountains, he put out the last match, returned to bed, and waited for whatever would wake him.
+
+He was, he would learn, the only one in the night who had seen both himself and his shadow. He was also the only one in the town, and every town in the distance of valleys folded into light, who remembered that a younger reflection had stood on the other side of his own burning and called him by an unfamiliar name.
 
 ---
 
-*(End of volume twenty-six · Volume IV, third part.)*
+*(End of volume twenty-six · Volume IV, third part. The Academy's revision of the original chapter.)*
