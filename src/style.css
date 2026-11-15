@@ -4252,7 +4252,10 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 .advisor-fab {
   position: fixed;
   right: 24px;
-  bottom: 24px;
+  /* W-Z117：原本 bottom:24px 与 #game-guide（right:20px;bottom:20px）的【自动通关】按钮
+   * 完全重叠覆盖（FAB z 44 > guide z 35），点【自动通关】= 点到「星轨顾问」。
+   * 现在抬到 guide 之上 236px（guide 同行最多约 190px 高，含内边距）——顶部区域没有控件争抢该坐标。 */
+  bottom: 236px;
   z-index: 44;
   display: inline-flex;
   align-items: center;
@@ -4319,7 +4322,7 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 
 @media (max-width: 560px) {
   .advisor-panel { right: 12px; bottom: 76px; width: calc(100vw - 24px); max-height: calc(100vh - 120px); }
-  .advisor-fab { right: 12px; bottom: 16px; }
+  .advisor-fab { right: 12px; bottom: 236px; }
   .advisor-subtitle, .advisor-disclaimer { display: none; }
 }
 
