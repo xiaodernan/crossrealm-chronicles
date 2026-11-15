@@ -1,45 +1,45 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T00:30:36.533Z",
+  "generated_at": "2026-11-15T01:05:12.700Z",
   "branch": "main",
-  "head": "89df1e2",
-  "total_commits": 1595,
-  "pushed_at": "2026-11-15T08:20:52+08:00",
+  "head": "c6ca860",
+  "total_commits": 1601,
+  "pushed_at": "2026-11-15T09:04:17+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
     {
-      "short": "89df1e2",
-      "at": "2026-11-15T08:20:52+08:00",
-      "subject": "feat(ui): 游戏内说明书（W-Z91 切片2 · HelpManual 重塑）——跨页一致的金调炭光 + 炉边 Quickstart 共享设计语言"
+      "short": "c6ca860",
+      "at": "2026-11-15T09:04:17+08:00",
+      "subject": "test(scripts): W-Z94 e2e/perf 等 fresh-profile 注入跨页首开播种——炉边快速上手别挡住真正的测试"
     },
     {
-      "short": "c103881",
-      "at": "2026-11-15T08:12:44+08:00",
-      "subject": "chore(plan): 删 _commit-msg.txt — W-Z90/W-Z91 残留的临时提交说明文件——agent 误塞进仓库，已从索引移除"
+      "short": "3f48175",
+      "at": "2026-11-15T09:01:17+08:00",
+      "subject": "docs(creative): showcase 最新成果刷新到 W-Z93——6696 tests、Feed 增补 W-Z90/W-Z91/W-Z92/W-Z93 四条（首屏 1.98 MiB）"
     },
     {
-      "short": "e01e623",
-      "at": "2026-11-15T08:11:56+08:00",
-      "subject": "docs(plan): W-Z91 ADR 回填——炉边快速上手（首屏内嵌 30 秒读完的 SRS 新手引导）"
+      "short": "acf2b7f",
+      "at": "2026-11-15T08:59:49+08:00",
+      "subject": "chore(gitignore): 显式忽略 /_commit-msg.txt，堵死 agent 误塞提交信息文件的通道（W-Z93 二犯）"
     },
     {
-      "short": "5b50c23",
-      "at": "2026-11-15T08:09:05+08:00",
-      "subject": "feat(ui): W-Z91 炉边快速上手——首屏常驻的 30 秒新手引导（内嵌说明书）"
+      "short": "da97d23",
+      "at": "2026-11-15T08:59:27+08:00",
+      "subject": "chore(plan): 删 _commit-msg.txt — W-Z93 提交时 agent 又把提交信息文件误塞进仓库（同前序错误二犯，已迁移到 .gitignore 流程：以后一律先 rm --cached）"
     },
     {
-      "short": "aacbce2",
-      "at": "2026-11-15T07:26:18+08:00",
-      "subject": "feat(ai): W-Z90 Oracle upstream 用量进健康快照 + 星轨诊断显示「上游缓存命中率」"
+      "short": "a7b50ca",
+      "at": "2026-11-15T08:58:37+08:00",
+      "subject": "feat(i18n): W-Z93 按语言分包——en 表独立成 chunk-en（首屏 2.20→1.98 MiB），刻度下调到 2079856"
     }
   ],
-  "tracked_files": 1217,
+  "tracked_files": 1222,
   "test_files": 453,
   "i18n_keys": 3134,
   "lore_sources": 55,
   "novel_chapters_zh": 14,
   "novel_chapters_en": 14,
-  "milestone": "W-Z91",
+  "milestone": "W-Z94",
   "milestone_full": "炉边快速上手·内嵌 SRS 小册子 + Lore Oracle 真上游守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
