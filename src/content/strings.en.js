@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Seventy-four volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Seventy-five volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 74 volumes of the canon, fully readable
+· Canon Library — 75 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3137,8 +3137,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 74-volume index',
-  hm_body_codex: `Codex — 74 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 75-volume index',
+  hm_body_codex: `Codex — 75 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3214,6 +3214,7 @@ hm_title_codex: 'Codex · the 74-volume index',
 72 · The Reply — five days after the painter leaves, A-Shi finds a tiny charred page inside the ancestral kindle-jar: “The debt is not fire — your grandfather’s grandfather’s grandfather owes me a reply”; his mother tells him: six hundred years ago the peddler borrowed the coal, lit the ever-burning lamp, and after that never crossed the threshold again — he could not come home, not because the fire went out, but because it never did; A-Shi spreads the painter’s painting beside the charred page, dips pine-soot ink in the stove’s fiercest ash, and writes the reply: “The fire received the message — the debt is not fire — six hundred years of people kept this door for you — the stove is still here — it is time to come home.” Volume XI, seventh part.
 73 · The Homecoming — ten days after the reply was written, A-Shi waits each morning by the stove; on the seventh morning a very old man sits on the threshold — hair like two logs of dead winter wood — in his hands a tiny bone-dry oil lamp, the very lamp from six hundred years ago; he says: I borrowed this lamp six hundred years; I could not come home not because my legs gave way, but because the stove never went out and my debt was never settled; he straightens the lamp before the stove; from his sleeve he takes six yellowed pine needles — picked up the day he left six hundred years ago — never gone grey: “fire-seeds”; the flame leaps — a six-hundred-year-old chair pushed back where it belongs. Volume XI, eighth part.
 74 · The Seed — the pine needles rest one week in the wooden box; A-Shi in secret plants one in the bare dirt beside the stove and waters it with a single spoonful of stove-ash slurry; on the sixth morning a tiny shoot pushes up — every sliver rimmed faint orange — his mother recognizes it at once: “fire-seed tree,” the tree every keeper’s house grows at its door — she saw one as a girl with her mother in the high hills — orange-red needles, she said, it belongs at this stove — six hundred years, planted once, never truly gone grey — the seedling steadies on its own; before early summer it cones one small dark-red bud; Baiyin scatters a pinch of ash around its roots and says: “the six hundred years of the fire — this house’s from tonight”; the fire line does not break — it grew on its own. Volume XI, ninth part.
+75 · The Character — early summer brings the fifth needle to the seed-tree; every morning A-Shi waters it, tends the stove, then sets down one brushstroke of 记 (to remember) — the character every keeper since six hundred years ago wrote on their final night — one hundred sixty-seven keepers, one hundred sixty-seven 记 — one page left: his; strokes begin ugly and bend into place over months — his palm settles into a brush-grip his great-great-grandmother never had to teach him — the yard tree shivers on the day the stove leaps and the ledger opens itself; Baiyin says: “when the tree is grown — you may write it” — the six hundred and second keeper begins with this page. Volume XI, tenth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3227,7 +3228,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (seventy-four volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (seventy-five volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

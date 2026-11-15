@@ -121,6 +121,7 @@ creative/music/soundtrack.html
 | 回信 · The Reply | [the-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/72-the-reply.md) |
 | 归来 · The Homecoming | [the-homecoming](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/73-the-homecoming.md) |
 | 种 · The Seed | [the-seed](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/74-the-seed.md) |
+| 记 · The Character | [the-character](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/75-the-character.md) |
 
 每一章对应游戏的章节走法：
 
