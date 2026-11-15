@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Sixty-seven volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Sixty-eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 67 volumes of the canon, fully readable
+· Canon Library — 68 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3136,8 +3136,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 67-volume index',
-  hm_body_codex: `Codex — 67 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 68-volume index',
+  hm_body_codex: `Codex — 68 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3206,6 +3206,7 @@ hm_title_codex: 'Codex · the 67-volume index',
 65 · Still Burns — A-Shi sixteen; on the winter solstice his mother calls him to the stove; she hands him a small clay jar — inside it one small living flame; Baiyin sits waiting on the mountain stone — six hundred years she has held vigil; they understand — every keeper has always been the fire itself; from now on A-Shi will keep it too. Volume X — complete.
 66 · The Keeper — A-Shi eighteen; on the morning of his birthday his mother hands him a folded letter — it says: “Six hundred years we have kept the fire. To you henceforth.” No one ever told him; no one ever gave him half a hint; he feels the weight and fire of six hundred years — their hands pass this fire down to him; he keeps it now. Volume XI — opens.
 67 · The Kindle — A-Shi eighteen, his first winter as keeper-to-be; before he takes the hearth alone, his mother teaches him the old rite: carry a pinch from his own stove, Uncle Ye’s pipe coal, the crossroads ever-burning lamp, Aunty Li’s incense head, and the white-stone night lamp — five sparks home in the ancestral kindle-jar sealed in the six-hundredth year; he understands the valley itself has kept this fire. Volume XI, second part.
+68 · The Gathering — seven days after the kindle, his mother briefly faints at the hearth; A-Shi must keep the stove alone for the first time; Uncle Ye, Aunty Li and the old Daoist all bring food to the stove-side unprompted; his mother tells the tale of the six-hundred-year-old peddler who borrowed the first spark and built the crossroads lamp with it; late that night Baiyin comes down from the ridge — six hundred years of keepers gathered before one hearth, sharing a single bowl of plain rice porridge. A keeper keeps fire so others may carry it away. Volume XI, third part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3219,7 +3220,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (sixty-seven volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (sixty-eight volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

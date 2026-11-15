@@ -114,6 +114,7 @@ creative/music/soundtrack.html
 | 不熄 · Still Burns | [still-burns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/65-still-burns.md) |
 | 守火 · The Keeper | [the-keeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/66-the-keeper.md) |
 | 拾火 · The Kindle | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/67-the-kindle.md) |
+| 围炉 · The Gathering | [the-gathering](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/68-the-gathering.md) |
 
 每一章对应游戏的章节走法：
 
