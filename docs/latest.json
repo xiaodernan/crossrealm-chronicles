@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T13:21:13.206Z",
+  "generated_at": "2026-11-15T13:28:50.680Z",
   "branch": "main",
-  "head": "7b8a74d",
-  "total_commits": 1696,
-  "pushed_at": "2026-11-15T21:14:52+08:00",
+  "head": "3af6929",
+  "total_commits": 1698,
+  "pushed_at": "2026-11-15T21:25:09+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "3af6929",
+      "at": "2026-11-15T21:25:09+08:00",
+      "subject": "feat(lore): W-Z140 两枚新 lore 碎片 —— 第二十卷与第二十一卷带回来的 - `lore-mirror` 《读完第二十卷的人》：林渡留下了父亲钉死的那一夜的蜡；读完的人会学到——火不一定要被看见，它只需要被记住。 - `lore-nightwalk` 《父亲没有钉》：那个钉了三次的门不是被敲开的，是全村的孩子趁没人注意用一棵银杏木换了它。没人问为什么，他们都知道。 - 生成序 maze-shuffle golden refrozen：生根段 5 / 5 不变，归因是 25（23 → +2）——归   因仅是「名册规模 +2」而非发放那套流。 - `LORE_FRAGMENTS_POP` 23 → 25；i18n key 3211 → 3215（+4，双表同步）；   content-registry: helpSectionsExtra+2 例（25）+ i18nKeyCount (3215)"
+    },
+    {
+      "short": "2cb5895",
+      "at": "2026-11-15T13:21:13Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "7b8a74d",
       "at": "2026-11-15T21:14:52+08:00",
@@ -21,25 +31,15 @@
       "short": "eaae425",
       "at": "2026-11-15T13:06:15Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "843b453",
-      "at": "2026-11-15T21:05:30+08:00",
-      "subject": "feat(game): W-Z138 炉火之镜 · 读完整第二十卷后的一次性奖励"
-    },
-    {
-      "short": "1ef11d5",
-      "at": "2026-11-15T12:51:48Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
   "tracked_files": 1263,
   "test_files": 456,
-  "i18n_keys": 3211,
+  "i18n_keys": 3215,
   "lore_sources": 59,
   "novel_chapters_zh": 21,
   "novel_chapters_en": 21,
-  "milestone": "W-Z139",
+  "milestone": "W-Z140",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
