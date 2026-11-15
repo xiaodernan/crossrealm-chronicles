@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Fifty-five volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Fifty-six volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 55 volumes of the canon, fully readable
+· Canon Library — 56 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Trisolar Tide — one weekly cast, three cards revealed together
 
@@ -3135,8 +3135,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 55-volume index',
-  hm_body_codex: `Codex — 55 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 56-volume index',
+  hm_body_codex: `Codex — 56 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3193,6 +3193,7 @@ hm_title_codex: 'Codex · the 55-volume index',
 53 · The Vigil — A-Shi sits awake beside the bowl one entire night; near dawn, a faint halo slips across its rim; his mother says those who sit every night for thirty years hear it too; A-Shi finally understands — his grandfather never left; he has been beside the bowl all along.
 54 · The Supper by Moonlight — winter came; A-Shi sat on the porch eating rice; two figures entered the yard — the older one is unmistakably his grandfather; he says: “A-Shi. Eat with me.” They sit side by side under the moon; the moon crosses; A-Shi finds the bowl warm again; he finally understands: his grandfather never left.
 55 · The Last Candle — a thin frost settles through the porch; Lin Wen produces one small wooden box — “Open it.” — inside, one slip in his grandfather’s hand: “阿石。用它点完。” — A-Shi sits beside the bowl the entire night; halfway through, he feels the doorway fill — his grandfather stands in silence, then withdrew; by dawn A-Shi finds the match wedged beside the bowl — the fire was never gone. Volume VIII — complete.
+56 · The Match — A-Shi wakes to find the bowl dark; his store of matches is empty; a shred of paper tucked inside his grandfather’s old chest reads: “Fire does not die — it sleeps.” Du the Elder gives him one single match back; A-Shi traverses the heather to the house, lights the bowl again — the fire was only sleeping; the whole valley glows back awake in response.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3206,7 +3207,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (fifty-five volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (fifty-six volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
