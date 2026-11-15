@@ -36,6 +36,8 @@ const 迁移前中文 = {
   canon: '典籍馆 · 原典全篇',
   // W-Z118：星轨 · 锚火占卜——火里有字，一天一签
   flame: '星轨 · 锚火占卜',
+  // W-Z129：星轨 · 三日曜盘——一周一盘，三卡同启
+  trilance: '星轨 · 三日曜盘',
 };
 
 describe('日志页签合并（JournalTabRegistry）', () => {
@@ -54,7 +56,7 @@ describe('日志页签合并（JournalTabRegistry）', () => {
 
   it('扩展页签的键集合是 HUD 计数分支认得的那 15 个（加/改页签时这里会红，提醒同步 HUD）', () => {
     expect(Object.keys(JOURNAL_EXTRA_TABS).sort()).toEqual(
-      ['achievements', 'bestiary', 'canon', 'cg', 'codex', 'dungeons', 'echoes', 'ending', 'flame', 'legends', 'memory', 'season', 'side', 'skills', 'trial'],
+      ['achievements', 'bestiary', 'canon', 'cg', 'codex', 'dungeons', 'echoes', 'ending', 'flame', 'legends', 'memory', 'season', 'side', 'skills', 'trial', 'trilance'],
     );
   });
 

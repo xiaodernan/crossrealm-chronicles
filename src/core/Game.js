@@ -130,6 +130,8 @@ import { EndingJournalTab } from '../ui/EndingJournalTab.js';
 import { CanonJournalTab } from '../ui/CanonJournalTab.js';
 import { FlameReadingSystem } from '../game/FlameReadingSystem.js';
 import { FlameReadingTab } from '../ui/FlameReadingTab.js';
+import { TrilanceReadingSystem } from '../game/TrilanceReadingSystem.js';
+import { TrilanceReadingTab } from '../ui/TrilanceReadingTab.js';
 import { CombatStyleTracker } from '../game/CombatStyleTracker.js';
 import { Captions } from '../ui/Captions.js';
 import { CombatStyleOverlay } from '../ui/CombatStyleOverlay.js';
@@ -484,6 +486,8 @@ export class Game {
     this.canonTab = new CanonJournalTab(this);
     this.flameReading = new FlameReadingSystem(this);
     this.flameTab = new FlameReadingTab(this);
+    this.trilanceReading = new TrilanceReadingSystem(this);
+    this.trilanceTab = new TrilanceReadingTab(this);
     // 在线伙伴服务的客户端挂在实例上（W-G2 切片1：试炼榜直接从 this.game 读，不去 import 单例 ——
     // 与其它 JournalTab 的口径一致）。模块单例本来就是全局唯一那一份，这里只是暴露它。
     this.onlineServices = onlineServices;

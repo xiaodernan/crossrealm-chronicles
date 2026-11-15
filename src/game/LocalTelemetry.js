@@ -55,6 +55,7 @@ export const localTelemetry = {
         worldmap_open: perEvent.worldmap_open ?? 0,
         canon_open: perEvent.canon_open ?? 0,
         flame_draw: perEvent.flame_draw ?? 0,
+        trilance_draw: perEvent.trilance_draw ?? 0,
         boss_kill: perEvent.boss_kill ?? 0,
       },
     };

@@ -3090,6 +3090,7 @@ export const STRINGS_ZH = Object.freeze({
 · 支线 — 可选目标，自动奖魂火
 · 典籍馆 — 19 卷原典全目录（含三日之议）
 · 星轨占卜 — 每日一签，火里有字
+· 三日曜盘 — 每周一盘，三牌同启
 
 页签按钮上显示已解锁数量。`,
   hm_title_meta_systems: '进阶系统',
@@ -3594,6 +3595,24 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   lore_pop_glasschoir_text: '玻璃风琴奏过一次之后再没奏过。音是对的，和声是稳的，只是每一根音管的末端都早已空无——那样吹出来的不是音，是替某个没写完的句子作的证。在场的人散得很快，只有最后一排的老者笑了一声：这架琴不吹给活着的人听。',
   ambient_void_p9: '烛影底下多出一行没人写的字：在三阳碑面前不要先问哪盏先灭，该先问自己是几号的客人。',
   ambient_void_p10: '你一直没有烧掉那封信。三颗太阳为此同时安静了一瞬，然后各自继续。',
+  journal_tab_trilance: '星轨 · 三日曜盘',
+  trilance_intro: '一周一盘，三张牌。三日陵说过的话，轮到这周由你读。',
+  trilance_cast_cta: '起曜盘 · Cast the Tide',
+  trilance_cast_done: '本周曜盘已起 · Already Cast',
+  trilance_placeholder_hint: '曜盘未启，三颗太阳还没接角。',
+  trilance_history_title: '曜盘旧页',
+  trilance_history_empty: '还没有曜盘页 —— 等到下一个周一',
+  trilance_stats_weeks_fmt: '曜盘已起 ${n} 周',
+  trilance_souls_total_fmt: '曜盘共得 ${n} 魂',
+  trilance_souls_reward: '魂',
+  trilance_aligned_title: '合帘 · Aligned',
+  trilance_aligned_text: '三盏同色——这一周你不必再犹豫，结局站在你这边。',
+  trilance_aligned_bonus_fmt: '合帘加成 +${n} 魂',
+  trilance_staggered_title: '余响 · Staggered',
+  trilance_staggered_text: '三盏不全——结局不一定站在你这边，但过程会记住。',
+  trilance_reveal_left: '左阳（余烬）',
+  trilance_reveal_mid: '中阳（不燃尽）',
+  trilance_reveal_right: '右阳（冷烬）',
 });
 
 /** 键名清单（用于静态门禁：确保没有漏网之鱼） */

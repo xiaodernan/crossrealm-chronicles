@@ -164,6 +164,7 @@ const JOURNAL_SUB_TABS = {
   canon: (game, panel) => game.canonTab.render(panel),
   // W-Z118：星轨 · 锚火占卜（一天一次抽魂 + 满档火壁画面）
   flame: (game, panel) => game.flameTab.render(panel),
+  trilance: (game, panel) => game.trilanceTab.render(panel),
 };
 
 export class HUD {
@@ -895,6 +896,7 @@ buildHUD() {
       else if (k === 'canon') suffix = '';
       // W-Z118 锚火占卜：日卡制，无需计数角标
       else if (k === 'flame') suffix = '';
+      else if (k === 'trilance') suffix = '';
       else if (k !== 'all') suffix = ` (${j.getCounts()[k] ?? 0})`;
       return `<button type="button" class="journal-tab${tab === k ? ' active' : ''}" data-tab="${k}">${t(label)}${suffix}</button>`;
     }).join('');

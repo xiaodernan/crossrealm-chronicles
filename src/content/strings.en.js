@@ -3090,6 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Side Quests — optional objectives, auto-reward souls
 · Canon Library — 19 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
+· Trisolar Tide — one weekly cast, three cards revealed together
 
 Tab buttons show unlocked count。`,
   hm_title_meta_systems: 'Meta Systems',
@@ -3597,6 +3598,24 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   lore_pop_glasschoir_text: 'The Glass Organ sounded once and never again. The pitch was right, the harmony was steady — and yet every pipe ended in silence, so what it played was not music but testimony for some unfinished sentence. The audience dispersed quickly. Only the old man in the last row laughed: this organ is not played for the living.',
   ambient_void_p9: 'A line no one wrote appeared under the candle-shadow: before the Trilance, do not ask which one goes out first — ask which number guest you are.',
   ambient_void_p10: 'You never burned the letter. The three suns fell silent at the same time, for one shared moment, and then went on turning.',
+  journal_tab_trilance: 'Starpath · The Trisolar Tide',
+  trilance_intro: 'One tide a week, three cards. Whatever Sunscar Stair said is yours to read this week.',
+  trilance_cast_cta: 'Cast the Tide · 起曜盘',
+  trilance_cast_done: 'Already Cast · 本周曜盘已起',
+  trilance_placeholder_hint: 'Tide uncast — the three suns have not taken their positions.',
+  trilance_history_title: 'Old Tides',
+  trilance_history_empty: 'No tides yet — wait for next Monday',
+  trilance_stats_weeks_fmt: '${n} tides cast',
+  trilance_souls_total_fmt: '${n} souls from tides',
+  trilance_souls_reward: 'souls',
+  trilance_aligned_title: 'Aligned · 合帘',
+  trilance_aligned_text: 'Three of a kind — this week nothing waits for you; the ending chooses you.',
+  trilance_aligned_bonus_fmt: 'Aligned bonus +${n} souls',
+  trilance_staggered_title: 'Staggered · 余响',
+  trilance_staggered_text: 'Three that do not match — the ending may not choose you, but the process will remember.',
+  trilance_reveal_left: 'Left Sun (emberside)',
+  trilance_reveal_mid: 'Middle Sun (unlit)',
+  trilance_reveal_right: 'Right Sun (cold)',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

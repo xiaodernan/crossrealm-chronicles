@@ -143,7 +143,7 @@ a{color:var(--gold-dim)}
     <!-- Local real telemetry (this browser) -->
     <div class="panel" id="localPanel" style="margin-bottom:16px">
       <h2><span data-i18n="local_h2">本地真实事件</span> <small data-i18n="local_small">当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条</small></h2>
-      <div id="localEventsGrid" class="kpi-grid" style="grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:10px"></div>
+      <div id="localEventsGrid" class="kpi-grid" style="grid-template-columns:repeat(9,1fr);gap:6px;margin-bottom:10px"></div>
       <div id="localEventsList" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:.65rem;color:rgba(233,226,210,.6);max-height:60px;overflow-y:auto;line-height:1.6;white-space:pre-line"></div>
       <div style="font-size:.68rem;color:var(--muted);margin-top:6px" data-i18n-html="local_note">说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。</div>
     </div>
@@ -267,7 +267,7 @@ const I18N = {
     kpi_new: '新用户/日', kpi_sessions: '总会话数', kpi_boss_clears: '总 Boss 通关', kpi_d14: '留存 D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
     lt_game_start: '游戏启动', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
-    lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关',
+    lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关', lt_trilance_draw: '曜盘已起',
     lt_empty: '尚无本地事件；游戏进去之后会自动记录。',
     gate_error: '口令不对。再想想——炉子见过你的笑脸。',
     aria_dau_curve: '30 天 DAU 曲线', aria_pred: '14 天 DAU 预测',
@@ -306,7 +306,7 @@ const I18N = {
     kpi_new: 'New users / day', kpi_sessions: 'Total sessions', kpi_boss_clears: 'Total boss clears', kpi_d14: 'Retention D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
     lt_game_start: 'Game start', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
-    lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped',
+    lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped', lt_trilance_draw: 'Trisolar tide cast',
     lt_empty: 'No local events yet — they are recorded automatically when you enter the game.',
     gate_error: 'Wrong passphrase. The furnace frowns — but try again.',
     aria_dau_curve: '30-day DAU curve', aria_pred: '14-day DAU forecast',
@@ -545,8 +545,8 @@ function renderLocalEvents() {
   const arr = readLocalEvents();
   const counts = Object.create(null);
   for (const e of arr) if (e && typeof e.event === 'string') counts[e.event] = (counts[e.event] ?? 0) + 1;
-  const known = ['game_start', 'help_open', 'journal_open', 'worldmap_open', 'canon_open', 'flame_draw', 'boss_kill', 'autoplay_tap'];
-  const labelKey = { game_start: 'lt_game_start', help_open: 'lt_help_open', journal_open: 'lt_journal_open', worldmap_open: 'lt_worldmap_open', canon_open: 'lt_canon_open', flame_draw: 'lt_flame_draw', boss_kill: 'lt_boss_kill', autoplay_tap: 'lt_autoplay_tap' };
+  const known = ['game_start', 'help_open', 'journal_open', 'worldmap_open', 'canon_open', 'flame_draw', 'boss_kill', 'autoplay_tap', 'trilance_draw'];
+  const labelKey = { game_start: 'lt_game_start', help_open: 'lt_help_open', journal_open: 'lt_journal_open', worldmap_open: 'lt_worldmap_open', canon_open: 'lt_canon_open', flame_draw: 'lt_flame_draw', boss_kill: 'lt_boss_kill', autoplay_tap: 'lt_autoplay_tap', trilance_draw: 'lt_trilance_draw' };
   const gridHtml = known.map(k => {
     const v = counts[k] ?? 0;
     const active = v > 0;

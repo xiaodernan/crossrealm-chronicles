@@ -25,6 +25,8 @@ export const JOURNAL_EXTRA_TABS = {
   canon: 'journal_tab_canon',
   // W-Z118「星轨 · 锚火占卜」—— 命运火系，每天一次魂反馈
   flame: 'journal_tab_flame',
+  // W-Z129：星轨 · 三日曜盘（周一张，三卡同抽）
+  trilance: 'journal_tab_trilance',
 };
 
 export function mergeJournalCategories(base) {

@@ -4826,3 +4826,37 @@ h1, h2, h3 {
 .flame-history-empty { color: rgba(233, 226, 210, 0.4); font-size: 0.72rem; font-style: italic; }
 .canon-error { color: #d98a8a; }
 .canon-body::-webkit-scrollbar-thumb { background: rgba(201, 169, 98, 0.3); }
+
+/* === 星轨 · 三日曜盘（W-Z129） ============================================ */
+.trilance-intro { font-size: 0.78rem; color: rgba(233, 226, 210, 0.78); margin-bottom: 10px; line-height: 1.55; }
+.trilance-altar { display: flex; justify-content: center; margin-bottom: 6px; }
+.trilance-card-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.trilance-card { position: relative; width: min(150px, 30%); min-width: 104px; border-radius: 10px; padding: 10px 8px 8px; text-align: center; background: linear-gradient(168deg, rgba(30, 22, 44, 0.96), rgba(8, 8, 18, 0.96)); border: 1px solid rgba(201, 169, 98, 0.3); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 217, 138, 0.06) inset; animation: flame-rise 0.42s ease-out; }
+.trilance-role { font-size: 0.6rem; color: rgba(201, 169, 98, 0.85); letter-spacing: 0.06em; margin-bottom: 4px; text-transform: uppercase; }
+.trilance-card-glyph { font-family: var(--font-display); font-size: 1.6rem; line-height: 1.1; color: #ffd98a; text-shadow: 0 0 14px rgba(255, 180, 80, 0.5); margin-bottom: 6px; }
+.trilance-card-glyph-idle { color: rgba(255, 217, 138, 0.55); }
+.trilance-card-stars { color: #ffd98a; font-size: 0.62rem; letter-spacing: 0.18em; margin-bottom: 4px; }
+.trilance-card-name { font-family: var(--font-display); font-size: 0.76rem; color: #f5e7c1; letter-spacing: 0.03em; margin: 0 0 4px; line-height: 1.35; }
+.trilance-card-line { font-size: 0.62rem; color: rgba(233, 226, 210, 0.78); line-height: 1.55; font-style: italic; min-height: 4.6em; }
+.trilance-card-placeholder .trilance-card-line { font-style: normal; min-height: 0; padding: 6px 2px 12px; }
+.trilance-card-souls { margin-top: 6px; font-family: var(--font-mono-num); font-size: 0.62rem; color: #c9a962; letter-spacing: 0.05em; }
+.trilance-card-placeholder { border-style: dashed; opacity: 0.85; }
+.trilance-verdict { text-align: center; margin: 2px 2px 10px; padding: 7px 10px; border-radius: 8px; border: 1px solid rgba(201, 169, 98, 0.28); background: rgba(12, 9, 18, 0.55); }
+.trilance-verdict.is-aligned { border-color: rgba(255, 217, 138, 0.55); box-shadow: 0 0 16px rgba(255, 180, 80, 0.12) inset; }
+.trilance-verdict.is-staggered { border-color: rgba(113, 227, 239, 0.32); }
+.trilance-verdict-title { font-size: 0.76rem; color: #ffd98a; letter-spacing: 0.08em; margin-bottom: 3px; font-weight: 400; }
+.trilance-verdict.is-staggered .trilance-verdict-title { color: #9ee0e9; }
+.trilance-verdict-line { font-size: 0.68rem; color: rgba(233, 226, 210, 0.82); line-height: 1.6; }
+.trilance-verdict-bonus { margin-top: 3px; font-family: var(--font-mono-num); font-size: 0.66rem; color: #9bd67a; letter-spacing: 0.05em; }
+.trilance-verdict.is-idle { border-style: dashed; color: rgba(233, 226, 210, 0.5); font-size: 0.7rem; font-style: italic; background: transparent; padding: 8px; }
+.trilance-draw-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.trilance-cta { flex: 1 1 auto; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255, 217, 138, 0.45); background: linear-gradient(120deg, rgba(48, 28, 92, 0.85), rgba(18, 10, 38, 0.92)); color: #ffd98a; font-family: inherit; font-size: 0.8rem; letter-spacing: 0.04em; cursor: pointer; transition: filter 0.18s, transform 0.18s; }
+.trilance-cta:hover { filter: brightness(1.15); }
+.trilance-cta:active { transform: translateY(1px); }
+.trilance-cta.is-done { border-color: rgba(120, 120, 130, 0.35); color: rgba(220, 215, 200, 0.48); background: rgba(10, 8, 14, 0.45); cursor: default; }
+.trilance-totals { font-family: var(--font-mono-num); font-size: 0.62rem; color: rgba(201, 169, 98, 0.8); letter-spacing: 0.03em; white-space: nowrap; }
+.trilance-history-title { font-size: 0.74rem; color: rgba(201, 169, 98, 0.8); margin-bottom: 4px; letter-spacing: 0.06em; }
+.trilance-history { display: flex; flex-wrap: wrap; gap: 4px; }
+.trilance-history-chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 7px; font-size: 0.6rem; border-radius: 6px; border: 1px solid rgba(201, 169, 98, 0.2); background: rgba(10, 8, 14, 0.4); color: rgba(233, 226, 210, 0.72); max-width: 100%; overflow: hidden; white-space: nowrap; }
+.trilance-history-glyph { color: #ffd98a; opacity: 0.8; }
+.trilance-history-empty { color: rgba(233, 226, 210, 0.4); font-size: 0.72rem; font-style: italic; }
