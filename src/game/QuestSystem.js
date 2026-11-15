@@ -1,4 +1,5 @@
 import { keyText } from '../ui/keyHints.js';
+import { localTelemetry } from './LocalTelemetry.js';
 import { TRIAL_DUNGEON_IDS } from '../content/dungeons.js';
 import {
   BOSS_STAT_KEYS, MAINLINE, MAINLINE_BY_ID, STAT_EVENTS, applyStatEvent, chapterAt, chapterGateAfter, chapterGateById,
@@ -358,6 +359,8 @@ export class QuestSystem {
     // W-B6 切片4：记录任务完成
     if (finishedId) this.game?.stats?.onQuestCompleted(finishedId);
     if (this.questIndex >= MAINLINE.length) {
+      // W-Z125：炉边盘 telemetry — 玩家走完最终章
+      localTelemetry.record('chapter_complete', { chapter: this.chapter });
       this.completed = true;
       window.dispatchEvent(new CustomEvent('game-completed'));
     }

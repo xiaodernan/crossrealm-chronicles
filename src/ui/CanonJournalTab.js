@@ -106,6 +106,7 @@ export class CanonJournalTab {
 
   async render(panelEl) {
     /* 语言切换后：缓存按语言分包，改语言 = 重新懒 import 另一端 */
+    try { (window.__crossrealmTelemetry)?.record?.('canon_open'); } catch { /* ignore */ }
     const currentLang = getLanguage() === 'en' ? 'en' : 'zh';
     if (this.entries && this.loadedLang !== currentLang) {
       this.entries = null;

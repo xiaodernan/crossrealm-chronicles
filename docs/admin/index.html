@@ -125,6 +125,14 @@ a{color:var(--gold-dim)}
       </nav>
     </div>
 
+    <!-- Local real telemetry (this browser) -->
+    <div class="panel" id="localPanel" style="margin-bottom:16px">
+      <h2>本地真实事件 <small>当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条</small></h2>
+      <div id="localEventsGrid" class="kpi-grid" style="grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:10px"></div>
+      <div id="localEventsList" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:.65rem;color:rgba(233,226,210,.6);max-height:60px;overflow-y:auto;line-height:1.6"></div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:6px">说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。</div>
+    </div>
+
     <!-- KPI Strip -->
     <div class="kpi-grid" id="kpiGrid"></div>
 
@@ -238,6 +246,7 @@ async function bootDashboard() {
 
   renderKpis(data);
   renderDailyChart(data);
+  renderLocalEvents();
   renderPredictionChart(data);
   renderFeatures(data);
   renderFunnel(data);
@@ -367,6 +376,29 @@ function renderRecommendations(d) {
 /* ---------- Utility ---------- */
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- 本地真实事件（从 localStorage 读 LS_KEY 滚动缓冲） ---------- */
+function readLocalEvents() {
+  try { return JSON.parse(localStorage.getItem('crossrealm_telemetry_v1') ?? '[]'); } catch { return []; }
+}
+function renderLocalEvents() {
+  const arr = readLocalEvents();
+  const counts = Object.create(null);
+  for (const e of arr) counts[e.event] = (counts[e.event] ?? 0) + 1;
+  const known = ['game_start','help_open','journal_open','worldmap_open','canon_open','flame_draw','boss_kill','quit_30s'];
+  const labels = { game_start: '游戏启动', help_open: '按 H 打开说明', journal_open: '按 J 打开日志', worldmap_open: '按 M 打开地图', canon_open: '打开典籍馆', flame_draw: '占卜抽火', boss_kill: 'Boss 通关', autoplay_tap: '自动通关' };
+  const gridHtml = known.map(k => {
+    const v = counts[k] ?? 0;
+    const active = v > 0;
+    return '<div class="kpi" style="' + (active ? 'border-color:rgba(255,217,138,.5)' : '') + '"><div class="kpi-label">' + escapeHtml(labels[k]) + '</div><div class="kpi-value">' + v + '</div><div class="kpi-trend up">' + (active ? '▲' : '—') + '</div></div>';
+  }).join('');
+  document.getElementById('localEventsGrid').innerHTML = gridHtml;
+  const recent = arr.slice(-8).slice().reverse().map(e => {
+    const t = new Date(e.t).toTimeString().slice(0, 8);
+    return '[' + t + '] ' + e.event + (e.meta ? ' · ' + JSON.stringify(e.meta).slice(0, 40) : '');
+  }).join('\n');
+  document.getElementById('localEventsList').textContent = recent || '（尚无本地事件；游戏进去之后会自动记录。）';
 }
 </script>
 </body>

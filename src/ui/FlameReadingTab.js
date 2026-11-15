@@ -70,6 +70,7 @@ export class FlameReadingTab {
     panelEl.querySelector('#flame-draw-btn')?.addEventListener('click', () => {
       if (!canDraw) return;
       const result = fs?.draw?.();
+      try { (window.__crossrealmTelemetry)?.record?.('flame_draw'); } catch { /* ignore */ }
       if (result?.drewNew && result.card) {
         try { this.game?.stats?.addSouls?.(result.souls ?? result.card.souls ?? 0); } catch { /* stats 未就位 → 静默 */ }
       }

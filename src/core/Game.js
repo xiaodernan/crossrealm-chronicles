@@ -163,6 +163,7 @@ import { Rumble } from '../engine/Rumble.js';
 import { UI_HOTKEYS, isNavCode, setHotkeyTable } from '../content/hotkeys.js';
 import { gearLabel, pickupChoice } from '../content/gear.js';
 import { endingDialogKey } from '../content/objectives.js';
+import { localTelemetry } from '../game/LocalTelemetry.js';
 import { getLanguage } from '../engine/i18n.js';
 import {
   GAMEPAD_BINDINGS, UI_GAMEPAD_BINDINGS, bindingFor, buildBindingTables, factoryKeybindings,
@@ -486,6 +487,8 @@ export class Game {
     // 在线伙伴服务的客户端挂在实例上（W-G2 切片1：试炼榜直接从 this.game 读，不去 import 单例 ——
     // 与其它 JournalTab 的口径一致）。模块单例本来就是全局唯一那一份，这里只是暴露它。
     this.onlineServices = onlineServices;
+    // W-Z125：炉边盘 telemetry —— 真实用户行为汇总
+    localTelemetry.record('game_start', { lang: getLanguage(), screen: (typeof window !== 'undefined' ? window.innerWidth + 'x' + window.innerHeight : 'ssr') });
     // W-Z26：上线后挂上在线在场心跳 + SSE 订阅（进程内单例，开局只 start 一次）
     this.presenceBeat = this._adopt('online/PresenceBeat', new PresenceBeat(this));
     presenceTracker.start();
@@ -767,6 +770,8 @@ export class Game {
       const clearTimeMs = Math.max(1, Math.round(now - (fightStart ?? this.runStartedAt ?? now)));
       this._bossFightStart?.delete(bossId);
       const { improved } = bossBestTimes.consider(bossId, clearTimeMs);
+      // W-Z125：炉边盘 telemetry 记录 boss_kill
+      localTelemetry.record('boss_kill', { bossId, clearTimeMs: Math.round(clearTimeMs) });
       // W-G7：新纪录就地播报 —— 诸神哪天倒下，记住的是"这一架"的用时
       if (improved) {
         this.dialog?.toast?.(t('boss_best_time_new_record_fmt', { clock: fmtClock(clearTimeMs) }));
@@ -1062,9 +1067,9 @@ export class Game {
   /** 一个动作一格：动作名来自 `content/hotkeys.js`，键盘与手柄派发的是同一个这里 */
   runHotkey(action) {
     switch (action) {
-      case 'help': return this.helpManual.toggle();
+      case 'help': { const r = this.helpManual.toggle(); localTelemetry.record('help_open'); return r; }
       case 'minimap': return this.hud.toggleMinimap();
-      case 'worldMap': return this.worldMapPanel?.toggle();
+      case 'worldMap': { const r = this.worldMapPanel?.toggle(); localTelemetry.record('worldmap_open'); return r; }
       case 'cameraMode': return this.player.toggleCameraMode();
       case 'zonePanel':
         // Tab 在地图上开著时是"换选中的标记"，在野外才是"翻区域面板"
@@ -1079,8 +1084,8 @@ export class Game {
       case 'mapMark': return this.worldMapPanel?.markAtCursor();
       case 'mapUnmark': return this.worldMapPanel?.unmarkAtCursor();
       case 'questTracker': return this.questAssistant.toggle();
-      case 'autoPlay': return this.questAssistant.startAutoPlay();
-      case 'journal': return this.hud.toggleJournal();
+      case 'autoPlay': { const r = this.questAssistant.startAutoPlay(); localTelemetry.record('autoplay_tap'); return r; }
+      case 'journal': { const r = this.hud.toggleJournal(); localTelemetry.record('journal_open'); return r; }
       // W-Y2 切片1：F7。开着时层表会挡住其余 UI 热键（输入框要真的收到字母），
       // 而这一格本身在层表里是 back:true，所以再按一次 / Escape 都收得回去。
       case 'advisor': return this.advisorPanel.toggle();
