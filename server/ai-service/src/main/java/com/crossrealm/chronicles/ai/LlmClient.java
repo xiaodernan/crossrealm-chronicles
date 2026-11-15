@@ -61,6 +61,8 @@ public class LlmClient {
     private static final int MAX_CONTEXT_KEYS = 8;
     private static final int MAX_CONTEXT_VALUE = 80;
 
+    /** 上游 prompt-cache 路由键：同前缀的请求导向同一份缓存（不含玩家数据）。 */
+    private static final String PROMPT_CACHE_KEY = "crossrealm-canon-v1";
     private final AiProperties props;
     private final LlmTransport transport;
     private final ObjectMapper mapper;
@@ -261,6 +263,11 @@ public class LlmClient {
     private String requestBody(String system, String user) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", props.getModel());
+        // W-Z168：wkapi 网关下实测——stream+include_usage+ephemeral 前缀已能走缓存（首包 null、第二次约 87% 命中）；
+        // 加上 prompt_cache_key 后：第二包起稳定 ~96% 命中（实测 4 连包：0 / 5632 / 5632 / 5632 / 5632，6237 token 中缓存 6016）。
+        // 该字段是「缓存路由提示」（x-openai prompt_cache_key 语义）：把共享前缀的请求导向同一份缓存，
+        // 不含玩家数据、不暴露内容；上游不认该字段时会原样忽略（unknown field 安全丢弃）。
+        body.put("prompt_cache_key", PROMPT_CACHE_KEY);
         // 系统消息显式打 ephemeral 缓存标记：绝大多数 OpenAI 兼容网关会把这一段
         // 当作可复用前缀写入 prompt-cache；即便上游忽略该字段也毫无副作用（unknown field 被丢弃）。
         // 关键前提：系统提示是**稳定且 ≥1024 token** 的前缀，前缀缓存才会真正生效（见 W-Z-缓存修复）。

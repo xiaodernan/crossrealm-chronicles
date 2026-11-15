@@ -81,6 +81,8 @@ class PromptCacheLiveTest {
         Map<String, Object> userMsg = Map.of("role", "user", "content", question);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", model);
+        // 与生产请求体一致：stream+include_usage+ephemeral 系统前缀 + prompt_cache_key 路由提示
+        body.put("prompt_cache_key", "crossrealm-canon-v1");
         body.put("messages", List.of(systemMsg, userMsg));
         body.put("max_tokens", 160);
         body.put("temperature", 0.7);
