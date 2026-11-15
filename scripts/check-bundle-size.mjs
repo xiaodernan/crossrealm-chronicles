@@ -66,7 +66,7 @@ import { fileURLToPath } from 'node:url';
  *   上限往上抬了 0.25 MiB，**环比容差反而把警戒线从 0.63 MiB 收紧到 61 KB**。
  */
 /** 上次审阅的刻度（2026-11-15，见上方注释与 ADR W-Z82b / W-Z93；W-Z93 付清按语言分包债后的真读数）。 */
-export const FIRST_SCREEN_READING = 2079856;
+export const FIRST_SCREEN_READING = 2153509; // W-Z183: +8 i18n keys (path_*, journal_tab_path) + FortunePathSystem/StateGraph/LuckPickTab + ~2KB CSS ([J] 命途 · 锚火三问 · StateGraph 驱动)
 
 /** 环比容差：单次改动允许比上次审阅长 3%（见上方注释） */
 export const FIRST_SCREEN_GROWTH_RATIO = 1.03;

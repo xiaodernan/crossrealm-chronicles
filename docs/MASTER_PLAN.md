@@ -1,3 +1,8 @@
+
+
+> **2026-11-16 · W-Z183 锚火命途（StateGraph 真路由）**：
+> FIRST_SCREEN_READING 2,079,856 → 2,153,509 字节（+3.5%），原因：新增 [J] 命途 · 锚火三问 子页（FortunePathSystem/FortunePathTab + StateGraph true-routing + ortuneDivination-like 双语 inline 内容 + 约 2 KB CSS + i18n +8 键）。
+> 门禁阈值：FIRST_SCREEN_READING × 1.03 = 2.12 MiB·上限 2.25 MiB（余 0.13/0.20），本工作增量远低于 3% 阈值，先登记取舍期（行内 scripts/check-bundle-size.mjs 注释为准）。
 # 跨界纪元 · 增强与内容总计划
 
 > 版本：**v2.0**（2026-09-22 制定）

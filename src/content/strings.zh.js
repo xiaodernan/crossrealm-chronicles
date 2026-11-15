@@ -3090,6 +3090,7 @@ export const STRINGS_ZH = Object.freeze({
 · 支线 — 可选目标，自动奖魂火
 · 典籍馆 — 57 卷原典全目录（含三日之议）
 · 星轨占卜 — 每日一签，火里有字
+· 命途 · 锚火三问 — 三道自答，StateGraph 真实路由
 · 三日曜盘 — 每周一盘，三牌同启
 
 页签按钮上显示已解锁数量。`,
@@ -3392,6 +3393,14 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   canon_empty: '原典暂时是空的。',
   canon_load_failed: '原典没能装载（development-fresh? 先 npm run build 再打开）。',
   journal_tab_flame: '星轨 · 锚火占卜',
+  path_intro: '三道题，不掺一丝随机。直视自己——火看得见你是哪一类守炉人。',
+  path_hint: '三问答完后自动揭晓——不用点确认。',
+  path_souls_reward: '命火',
+  path_total_draws_fmt: '共答 ${n} 次',
+  path_total_souls_fmt: '心火魂 ${n}',
+  path_history_title: '你走过的地砖',
+  path_history_empty: '你还没走完——前面还很远。',
+  journal_tab_path: '命途 · 锚火三问',
   flame_intro: '炉边有风，火里有字。每天占一次火——它会向你说一句，不问你信不信。',
   flame_draw_cta: '占火 · Ask the Flame',
   flame_draw_done: '今日已占 · Already Drawn',

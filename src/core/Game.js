@@ -129,7 +129,9 @@ import { LegendsJournalTab } from '../ui/LegendsJournalTab.js';
 import { EndingJournalTab } from '../ui/EndingJournalTab.js';
 import { CanonJournalTab } from '../ui/CanonJournalTab.js';
 import { FlameReadingSystem } from '../game/FlameReadingSystem.js';
+import { FortunePathSystem } from '../game/FortunePathSystem.js';
 import { FlameReadingTab } from '../ui/FlameReadingTab.js';
+import { FortunePathTab } from '../ui/FortunePathTab.js';
 import { TrilanceReadingSystem } from '../game/TrilanceReadingSystem.js';
 import { TrilanceReadingTab } from '../ui/TrilanceReadingTab.js';
 import { CombatStyleTracker } from '../game/CombatStyleTracker.js';
@@ -485,7 +487,9 @@ export class Game {
     this.endingTab = new EndingJournalTab(this);
     this.canonTab = new CanonJournalTab(this);
     this.flameReading = new FlameReadingSystem(this);
+    this.fortunePath = new FortunePathSystem(this);
     this.flameTab = new FlameReadingTab(this);
+    this.fortunePathTab = new FortunePathTab(this);
     this.trilanceReading = new TrilanceReadingSystem(this);
     this.trilanceTab = new TrilanceReadingTab(this);
     // 在线伙伴服务的客户端挂在实例上（W-G2 切片1：试炼榜直接从 this.game 读，不去 import 单例 ——

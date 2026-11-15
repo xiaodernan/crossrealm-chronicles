@@ -3090,6 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Side Quests — optional objectives, auto-reward souls
 · Canon Library — 57 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
+· Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
 
 Tab buttons show unlocked count。`,
@@ -3428,6 +3429,14 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   canon_empty: 'The canon is empty.',
   canon_load_failed: 'The canon could not load (offline or build missing?). npm run build, then reopen.',
   journal_tab_flame: 'Starpath · Anchor Flame Reading',
+  path_intro: 'Three questions, no dice. Only what the fire can see.',
+  path_hint: 'Answer all three; the ending reveals itself.',
+  path_souls_reward: 'matchlight',
+  path_total_draws_fmt: 'answers: ${n}',
+  path_total_souls_fmt: 'heart embers: ${n}',
+  path_history_title: 'The path behind you',
+  path_history_empty: 'You have not walked yet; the road has been waiting for you.',
+  journal_tab_path: 'Fortune Path · The Three Questions',
   flame_intro: 'There is wind at the forge, and there are words in the fire. One reading per day — it speaks a line, whether you believe it or not.',
   flame_draw_cta: 'Ask the Flame',
   flame_draw_done: 'Drawn Today',

@@ -27,6 +27,8 @@ export const JOURNAL_EXTRA_TABS = {
   flame: 'journal_tab_flame',
   // W-Z129：星轨 · 三日曜盘（周一张，三卡同抽）
   trilance: 'journal_tab_trilance',
+  // W-Z183：命途 · 锚火三问（StateGraph 真实驱动）
+  path: 'journal_tab_path',
 };
 
 export function mergeJournalCategories(base) {
