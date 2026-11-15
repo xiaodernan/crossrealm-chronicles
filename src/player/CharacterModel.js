@@ -5,10 +5,12 @@ import { ANIMATION_GLB_MANIFEST } from '../assets/AnimationGLBManifest.js';
 import { isSkeletonClipName, registerSkeletonClips, boneName } from '../assets/SkeletonMotion.js';
 import { applyShadow } from '../engine/shadowPolicy.js';
 import { releaseSubtree } from '../engine/releaseSubtree.js';
+import { assetUrl } from '../assets/assetBase.js';
 
+// 本地 GLB 候选（跟着构建 base 走，Pages 子路径部署也能命中 public/）；CDN 兜底用绝对 URL 不经 assetUrl
 const MODEL_CANDIDATES = [
-  '/assets/models/player.glb',
-  '/assets/models/Soldier.glb',
+  assetUrl('/assets/models/player.glb'),
+  assetUrl('/assets/models/Soldier.glb'),
   'https://threejs.org/examples/models/gltf/Soldier.glb',
 ];
 

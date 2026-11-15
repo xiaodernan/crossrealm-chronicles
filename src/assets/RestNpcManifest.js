@@ -1,7 +1,9 @@
 /** 营火 NPC Mixamo 模型路径与动画配置 */
+import { assetUrl } from './assetBase.js';
+
 export const REST_NPC_MODELS = {
   hub: {
-    glb: ['/assets/models/rest/hub_keeper.glb', '/assets/models/rest/shared_idle.glb', '/assets/models/Soldier.glb'],
+    glb: [assetUrl('/assets/models/rest/hub_keeper.glb'), assetUrl('/assets/models/rest/shared_idle.glb'), assetUrl('/assets/models/Soldier.glb')],
     scale: 0.95,
     rotY: Math.PI,
     idleAnim: ['idle', 'Idle', 'mixamo.com'],
@@ -9,7 +11,7 @@ export const REST_NPC_MODELS = {
     sit: false,
   },
   fantasy: {
-    glb: ['/assets/models/rest/elf_scout.glb', '/assets/models/rest/shared_sit.glb', '/assets/models/Soldier.glb'],
+    glb: [assetUrl('/assets/models/rest/elf_scout.glb'), assetUrl('/assets/models/rest/shared_sit.glb'), assetUrl('/assets/models/Soldier.glb')],
     scale: 0.92,
     rotY: Math.PI,
     idleAnim: ['idle', 'Idle'],
@@ -17,7 +19,7 @@ export const REST_NPC_MODELS = {
     sit: true,
   },
   magic: {
-    glb: ['/assets/models/rest/mage_wanderer.glb', '/assets/models/rest/shared_idle.glb', '/assets/models/Soldier.glb'],
+    glb: [assetUrl('/assets/models/rest/mage_wanderer.glb'), assetUrl('/assets/models/rest/shared_idle.glb'), assetUrl('/assets/models/Soldier.glb')],
     scale: 0.98,
     rotY: Math.PI * 0.5,
     idleAnim: ['idle', 'Idle'],
@@ -26,7 +28,7 @@ export const REST_NPC_MODELS = {
     float: true,
   },
   space: {
-    glb: ['/assets/models/rest/astronaut.glb', '/assets/models/rest/shared_idle.glb', '/assets/models/Soldier.glb'],
+    glb: [assetUrl('/assets/models/rest/astronaut.glb'), assetUrl('/assets/models/rest/shared_idle.glb'), assetUrl('/assets/models/Soldier.glb')],
     scale: 1.0,
     rotY: Math.PI,
     idleAnim: ['idle', 'Idle'],
@@ -35,7 +37,7 @@ export const REST_NPC_MODELS = {
     helmet: true,
   },
   void: {
-    glb: ['/assets/models/rest/time_ghost.glb', '/assets/models/rest/shared_idle.glb', '/assets/models/Soldier.glb'],
+    glb: [assetUrl('/assets/models/rest/time_ghost.glb'), assetUrl('/assets/models/rest/shared_idle.glb'), assetUrl('/assets/models/Soldier.glb')],
     scale: 1.02,
     rotY: Math.PI * 1.2,
     idleAnim: ['idle', 'Idle'],
@@ -44,7 +46,7 @@ export const REST_NPC_MODELS = {
     ghost: true,
   },
   abyss: {
-    glb: ['/assets/models/rest/chaos_guide.glb', '/assets/models/rest/shared_idle.glb', '/assets/models/Soldier.glb'],
+    glb: [assetUrl('/assets/models/rest/chaos_guide.glb'), assetUrl('/assets/models/rest/shared_idle.glb'), assetUrl('/assets/models/Soldier.glb')],
     scale: 1.05,
     rotY: Math.PI * 0.85,
     idleAnim: ['idle', 'Idle'],

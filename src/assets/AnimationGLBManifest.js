@@ -9,12 +9,12 @@
  * - 缺失的招式自动回退到 `SkeletonMotion`（程序化）
  */
 
-// 真 clip GLB 列表（相对 public/）
+// 真 clip GLB 列表（相对 public/；经 assetUrl() 跟着构建 base 走，否则 Pages 子路径必 404）
 export const ANIMATION_GLB_MANIFEST = [
   // 例：
-  // '/assets/models/animations/attack1.glb',
-  // '/assets/models/animations/dodge.glb',
-  // '/assets/models/animations/block.glb',
+  // assetUrl('/assets/models/animations/attack1.glb'),
+  // assetUrl('/assets/models/animations/dodge.glb'),
+  // assetUrl('/assets/models/animations/block.glb'),
 ];
 
 /** 与 ANIM_MANIFEST 键对齐的优先级：真 clip → 程序化 → 素材 fallback */

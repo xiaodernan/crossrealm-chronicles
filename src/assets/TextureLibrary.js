@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { SURFACE_SPECS } from '../content/materialSurfaces.js';
+import { assetUrl } from './assetBase.js';
 
-const LOCAL = '/textures';
+/** 本地贴图基址——跟着构建 base 走（Pages 子路径部署也能找到 public/textures/*） */
+const LOCAL = assetUrl('/textures');
 
 /** CC0 贴图（Poly Haven）— 本地 public/textures + CDN 回退 */
 const MANIFEST = {
