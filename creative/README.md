@@ -96,6 +96,7 @@ creative/music/soundtrack.html
 | 黑信 · The Black Letter | [the-black-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/47-the-black-letter.md) |
 | 桥那头的孩子 · The Child Beyond the Bridge | [the-child-beyond-the-bridge](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/48-the-child-beyond-the-bridge.md) |
 | 五年后 · Five Years From Now | [five-years-from-now](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/49-five-years-from-now.md) |
+| 拾岁 · The Tenth Year | [the-tenth-year](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/50-the-tenth-year.md) |
 
 每一章对应游戏的章节走法：
 
