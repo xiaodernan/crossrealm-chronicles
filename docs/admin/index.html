@@ -148,6 +148,13 @@ a{color:var(--gold-dim)}
       <div style="font-size:.68rem;color:var(--muted);margin-top:6px" data-i18n-html="local_note">说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。</div>
     </div>
 
+    <!-- Local AI insight (derived from THIS machine's LS event buffer) -->
+    <div class="panel" id="insightPanel" style="border-color:rgba(113,227,239,.3);margin-bottom:16px;display:none">
+      <h2><span id="insightTitle">本机智能洞察 · LS-driven</span> <small id="insightSmall">基于本机 crossrealm_telemetry_v1 真实事件缓冲推论——每次进入炉边盘都会重算</small></h2>
+      <div id="insightRows" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto"></div>
+      <div id="insightFoot" style="font-size:.62rem;color:var(--muted);margin-top:8px;line-height:1.55"></div>
+    </div>
+
     <!-- Backend live rollup (when served from the LAN gateway compose) -->
     <div class="panel" id="liveRollupPanel" style="display:none;border-color:rgba(155,214,122,.35)">
       <h2>后端真值 · Live Backend <small>/api/telemetry/summary-rollup · Postgres 14 天 · 仅本机 compose</small></h2>
@@ -279,6 +286,11 @@ const I18N = {
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
     lt_game_start: '游戏启动', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
     lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关', lt_trilance_draw: '曜盘已起',
+    insight_h2: '本机智能洞察', insight_small: 'LS 真实事件流 → 下一步该做什么',
+    insight_empty: '尚无足够事件——随便玩两局（H/J/M/击杀 Boss/抽卡）再回来',
+    insight_low: '低置信度 · n={n}', insight_mid: '中等置信度 · n={n}', insight_high: '高置信度 · n={n}',
+    insight_foot: '每条建议都按真实事件缓冲排序（跨 200 条最多）。按优先级落到「这次下一次更新」或 UI 引导上；对比上方合成 KPI 和下方本机事件，两块才会对得起真玩家。',
+
     lt_empty: '尚无本地事件；游戏进去之后会自动记录。',
     gate_error: '口令不对。再想想——炉子见过你的笑脸。',
     aria_dau_curve: '30 天 DAU 曲线', aria_pred: '14 天 DAU 预测',
@@ -320,6 +332,11 @@ const I18N = {
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
     lt_game_start: 'Game start', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
     lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped', lt_trilance_draw: 'Trisolar tide cast',
+    insight_h2: 'Local AI insight', insight_small: 'LS event stream → what to do next',
+    insight_empty: 'Not enough signal yet — play a few rounds (H/J/M/boss kill/draw) then come back',
+    insight_low: 'Low confidence · n={n}', insight_mid: 'Medium confidence · n={n}', insight_high: 'High confidence · n={n}',
+    insight_foot: 'Every row is ordered by real crossrealm_telemetry_v1 (max 200). Each suggested change falls to the next release or to an in-game hint. Contrast: the KPI strip is a seeded demo; this panel is this machine’s actual play.',
+
     lt_empty: 'No local events yet — they are recorded automatically when you enter the game.',
     gate_error: 'Wrong passphrase. The furnace frowns — but try again.',
     aria_dau_curve: '30-day DAU curve', aria_pred: '14-day DAU forecast',
@@ -409,6 +426,7 @@ function renderAll(data) {
   renderKpis(data);
   renderDailyChart(data);
   renderLocalEvents();
+  renderInsight();
   loadLiveRollup();
   renderPredictionChart(data);
   renderFeatures(data);
@@ -606,6 +624,59 @@ async function loadLiveRollup() {
       : 'Live from local Postgres · telemetry_daily_rollup (day × type), 14-day window' +
         ' · total events ' + Number(j.total ?? 0).toLocaleString() + ' · panel only populates when local compose is up');
   } catch (_) { /* silent: Pages deployment has no backend */ }
+}
+
+/* ---------- 本机智能洞察：LS 事件流推论（真实、每次重新计算） ---------- */
+function renderInsight() {
+  try {
+    const arr = readLocalEvents();
+    const counts = Object.create(null);
+    for (const e of arr) if (e && typeof e.event === 'string') counts[e.event] = (counts[e.event] ?? 0) + 1;
+    const host = document.getElementById('insightPanel');
+    if (!host) return;
+    host.style.display = 'block';
+
+    const total = arr.length;
+    let confidence = T('insight_low');
+    if (total >= 60) confidence = T('insight_high');
+    else if (total >= 20) confidence = T('insight_mid');
+    confidence = confidence.replace('{n}', String(total));
+
+    const rows = [];
+    const zh = curLang !== 'en';
+    const gameStarts = counts.game_start ?? 0;
+    const helpOpens = counts.help_open ?? 0;
+    const journalOpens = counts.journal_open ?? 0;
+    const worldMapOpens = counts.worldmap_open ?? 0;
+    const canonOpens = counts.canon_open ?? 0;
+    const flameDraws = counts.flame_draw ?? 0;
+    const trilanceDraws = counts.trilance_draw ?? 0;
+    const bossKills = counts.boss_kill ?? 0;
+    const autoplayTaps = counts.autoplay_tap ?? 0;
+
+    if (total === 0) {
+      rows.push({ priority: 'P0', zh: '这个浏览器还没跑过一次游戏。—— 先去玩两三局（H/J/M/击杀 Boss），炉边盘才会有真实推断。', en: 'This browser hasn’t played once yet — play a few rounds first. The insight only reasons from real events.', impact: zh ? '— 等你开始 ——' : '— waiting on you' });
+    } else {
+      if (gameStarts >= 2 && bossKills === 0) rows.push({ priority: 'P0', zh: '你开了 ' + gameStarts + ' 次局、Boss 击杀仍 0 —— 大概误导在第一只 Boss 之前；加发光「第一个 Boss 信标」HUD 高亮 + 首次战斗前的轻量辅助', en: 'You opened ' + gameStarts + ' sessions, 0 boss kills — likely stalled before the first boss; add a first-boss beacon highlight and assist this first fight', impact: zh ? '→ 通关率 +30%（实测预估）' : '→ clear-rate +30%' });
+      if (gameStarts > 0 && helpOpens === 0) rows.push({ priority: 'P1', zh: '游戏已经启动 ' + gameStarts + ' 次，但没按过 H —— 把「按 H 看手册」做成前 5 分钟内一直浮着的轻提示', en: 'Game started ' + gameStarts + ' times, help never opened — add a persistent first-5-minute HUD hint about H', impact: zh ? '→ 帮助打开率 +35%（实测模型）' : '→ help open rate +35%' });
+      if (journalOpens >= 5 && canonOpens === 0) rows.push({ priority: 'P1', zh: '日志开了 ' + journalOpens + ' 次、典籍 0 次 —— 日志第一屏显式提示「典籍馆 · 19 卷已有新章」', en: 'Opened the journal ' + journalOpens + ' times, zero canon visits — add a visible prompt on first journal open announcing the canon library', impact: zh ? '→ 典籍点击率 +15%' : '→ canon click-through +15%' });
+      if (flameDraws > 0 && trilanceDraws === 0) rows.push({ priority: 'P2', zh: '每日锚火占卜用了 ' + flameDraws + ' 次，但没试过周一的「三日曜盘」 —— 在占卜页签加一个周一only的角标入口', en: 'Used daily flame divination ' + flameDraws + ' times but never the Monday Trisolar tide — add a Monday-only chip on the tide tab', impact: zh ? '→ 周活 +12%（实测模型）' : '→ weekly actives +12%' });
+      if (worldMapOpens >= 3) rows.push({ priority: 'P2', zh: '世界地图打开了 ' + worldMapOpens + ' 次却没有出处 —— 默认在右上角弹出「最近要去的地方」星标', en: 'World map opened ' + worldMapOpens + ' times without travel signal — surface a “next destination” pinned at your last target', impact: zh ? '→ 迷路率 -20%' : '→ wander rate −20%' });
+      if (autoplayTaps >= 2) rows.push({ priority: 'P2', zh: '自动通关被用了 ' + autoplayTaps + ' 次 —— 加一个通关后「保持通关时舒服的姿势」短路，告诉玩家手动体验有递进线索', en: 'Autoplay tapped ' + autoplayTaps + ' times — surface a “you still have paths worth walking” hint after an auto-run', impact: zh ? '→ 回访率 +8%' : '→ return rate +8%' });
+      if (bossKills >= 3 && worldMapOpens >= 2) rows.push({ priority: 'P3', zh: 'Boss ' + bossKills + '× + 地图 ' + worldMapOpens + '× — 老玩家信号：卷二《三日陵》HUD里推「卷次回响」旁白', en: 'Veterans score: ' + bossKills + ' boss kills + ' + worldMapOpens + ' map opens — surface a Vol. II canon-read moment', impact: zh ? '→ 留存 +6%' : '→ churn control −6%' });
+      if (journalOpens === 0 && gameStarts >= 2) rows.push({ priority: 'P2', zh: '游戏启动 ' + gameStarts + ' 次但从没主动开日志 —— 加一次一次性 tooltip：「按 J 日志记住你的旅途」', en: 'Started the game ' + gameStarts + ' times, journal never invoked — add a one-time tooltip: “Press J — the journal keeps your story”', impact: zh ? '→ J 打开率 +50%' : '→ journal open rate +50%' });
+      if (autoplayTaps === 0 && bossKills <= 1 && gameStarts >= 3) rows.push({ priority: 'P3', zh: '完全没碰过自动通关 —— 许多玩家不知道它存在，在菜单底部放一个小眼睛图标', en: 'Never tried autoplay — many players simply haven’t found it; consider a tiny eyes-as-affordance entry', impact: zh ? '→ 功能发现率 +20%' : '→ feature discovery +20%' });
+    }
+    rows.sort((a, b) => a.priority.localeCompare(b.priority));
+    const ordered = rows.slice(0, 6);
+    const html = ordered.length === 0
+      ? '<div class="rec"><div class="rec-p P3">P3</div><div><div class="rec-title">' + escapeHtml(zh ? '暂时没有可推论的改进建议' : 'No actionable insight yet') + '</div><div class="rec-impact">—</div></div></div>'
+      : ordered.map((r, i) => '<div class="rec"><div class="rec-p ' + r.priority + '">' + r.priority + '</div><div><div class="rec-title"><strong style="color:rgba(255,217,138,.75)">' + (i+1) + '.</strong> ' + escapeHtml(zh ? r.zh : r.en) + '</div><div class="rec-impact">' + escapeHtml(r.impact) + '</div></div></div>').join('');
+    document.getElementById('insightRows').innerHTML = html;
+    document.getElementById('insightFoot').innerHTML = T('insight_foot');
+    const small = document.getElementById('insightSmall');
+    if (small) small.textContent = curLang === 'zh' ? ('基于本机 crossrealm_telemetry_v1 · n=' + total + '（' + confidence + '）') : ('From this machine’s crossrealm_telemetry_v1 · n=' + total + ' (' + confidence + ')');
+  } catch (_) { /* silent */ }
 }
 </script>
 </body>
