@@ -75,6 +75,9 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`local-stub-llm listening on 127.0.0.1:${PORT} — gpt-6-sol fake (20 ms, streamed)`);
+const hostArg = process.argv.find((a) => a.startsWith('--host='));
+// 默认回环（安全）；--host=0.0.0.0 显式开放给 docker 容器走（仅合成数据，无上游凭据）
+const HOST = hostArg ? hostArg.slice('--host='.length) : '127.0.0.1';
+server.listen(PORT, HOST, () => {
+  console.log(`local-stub-llm listening on ${HOST}:${PORT} · gpt-6-sol fake (20 ms, streamed)`);
 });

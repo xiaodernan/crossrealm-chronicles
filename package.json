@@ -29,9 +29,11 @@
     "size": "node scripts/check-bundle-size.mjs",
     "e2e:combat": "node scripts/e2e-combat.mjs",
     "e2e:advisor": "node scripts/e2e-advisor.mjs",
-      "soak": "node scripts/soak.mjs",
+    "soak": "node scripts/soak.mjs",
     "walkthrough:ui": "node scripts/ui-walkthrough.mjs",
-    "preview:boot": "node scripts/preview-boot.mjs"
+    "preview:boot": "node scripts/preview-boot.mjs",
+    "load-test": "node scripts/load-test.mjs",
+    "advisor-e2e": "node scripts/advisor-e2e.mjs"
   },
   "dependencies": {
     "three": "^0.172.0"
