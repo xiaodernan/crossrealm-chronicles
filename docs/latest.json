@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T15:06:51.895Z",
+  "generated_at": "2026-11-15T15:13:19.872Z",
   "branch": "main",
-  "head": "e398b8df",
-  "total_commits": 1729,
-  "pushed_at": "2026-11-15T23:05:15+08:00",
+  "head": "15f9000e",
+  "total_commits": 1731,
+  "pushed_at": "2026-11-15T23:12:09+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "15f9000",
+      "at": "2026-11-15T23:12:09+08:00",
+      "subject": "feat(canon): W-Z156 第三十五卷《九十一里 / Ninety-one Li》——卷五之二"
+    },
+    {
+      "short": "e14db04",
+      "at": "2026-11-15T15:06:51Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "e398b8d",
       "at": "2026-11-15T23:05:15+08:00",
@@ -21,25 +31,15 @@
       "short": "9c07c2a",
       "at": "2026-11-15T22:58:00+08:00",
       "subject": "feat(canon): W-Z154 第三十三卷《账册 / The Ledger》——卷四之十"
-    },
-    {
-      "short": "e3db3a3",
-      "at": "2026-11-15T14:53:57Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "5457e6f",
-      "at": "2026-11-15T22:52:53+08:00",
-      "subject": "feat(canon): W-Z153 第三十二卷《立冬 / The Start of Winter》——卷四之九"
     }
   ],
-  "tracked_files": 1289,
+  "tracked_files": 1291,
   "test_files": 456,
   "i18n_keys": 3215,
   "lore_sources": 59,
-  "novel_chapters_zh": 34,
-  "novel_chapters_en": 34,
-  "milestone": "W-Z155",
+  "novel_chapters_zh": 35,
+  "novel_chapters_en": 35,
+  "milestone": "W-Z156",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
