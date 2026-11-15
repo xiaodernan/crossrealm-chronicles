@@ -70,9 +70,10 @@ const FEATURE_SURFACE = [
   'spring-cloud-plane',     // Eureka + Config + Gateway + Feign + CircuitBreaker + Redis Streams
   'redis-everywhere',       // seasons / leaderboard / advisor-queue / telemetry
   'lore-oracle-rag',        // BM25 两段式检索 + 55 源原典语料 + gpt-6-sol 真上游
-  'bilingual-3134-keys',    // 中英双表严格对齐
+  `bilingual-${i18nKeys}-keys`,  // 中英双表严格对齐（数值从 i18nKeyCount 现读，绝不手抄）
   'three-js-world',         // 第三人称开放位面 + 五大 BOSS
   'quickstart-embed',       // 首屏内嵌 30 秒快速上手（炉边小册子）
+  'stategraph-teaching',    // LangGraph StateGraph 真路由（锚火三问 [J]）+ 说明书星图章节双语教学
   'spectator-pvp',          // 剑参战 + 影子笔记
   'crossrealm-chronicles',  // 七章小说 × 双语 + 电影剧本 + 25 首 OST
 ];
@@ -93,8 +94,8 @@ const doc = {
   novel_chapters_zh: zhNovel,
   novel_chapters_en: enNovel,
   milestone,
-  milestone_full: '番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护',
-  headline: '跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。',
+  milestone_full: '卷六十七《拾火》 · 卷十一《墨火》开篇 · StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 59 源守护',
+  headline: '跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：六十七卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 卷末守火线），全部内容中英双语逐字对齐。',
   feature_surface: FEATURE_SURFACE,
 };
 
