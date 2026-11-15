@@ -8113,6 +8113,17 @@ Phase D（系统与质量）
     ④ **新增已知约束**：template-variant 双语碑文语料上的 attention limit，未来任何人接手时应知道：
     若模型对同构母题 block 选择失败，通路 A 是继续 XML-style 块标注拆分（已做）、B 是等 wkapi 上游模型换代（候选：deepseek-r2 / qwen-72b；换模型只需改一行配置和重跑同 probe）、C 是把 Academy 恒零回答的一条写进 Advisory fallback（程序短路：Academy Had Better Citation Match 必答 with source-span quoting clause），而不是试图 prompt/fine-tune 去压服。
 
+- **2026-11-17 W-Z91「炉边快速上手·首屏常驻 30 秒新手引导（内嵌说明书）」** —— 提交：本次 HEAD
+
+  - **起因**：用户明确修正路线：「完整项目说明书必须**嵌入项目启动一起就能看到**」——写在项目的开工那一屏、开始界面、看得见；不许写在 markdown，不许让玩家找外部文档，客户不会翻。
+  - **做法（内嵌式教育）**：`src/ui/Quickstart.js`，纯壳页粒度的「炉边快速上手·30 秒」overlay——新鲜开出场看过一次（localStorage `crossrealm_quickstart_seen` 自我标记停掉），之后看到随时能点暂停菜单那一行再开；展示 6 个一卡一问题（你是谁 / 怎么玩 / 在哪里看世界 / 星轨顾问 / 你的目的 / 回到这页）；内嵌 `{attackLight}`/`{spell1}` 等键位通过与 HelpManual 同一套 `t()` + `keyText()` 渲染；所有键全双语、纯 textContent、焦点环被全局 `.button:focus` 覆盖；`prefers-reduced-motion` 把 `.quickstart-ember` 列进档C 关闭；lint 0/0。
+  - **开工出场（main.js + Game.js 实装）**：`boot()` 在 start-screen 出现之后调用 `game.quickstart?.maybeShowOnBoot?.()` —— 一旦看过就停、常驻菜单入口 2 处（暂停菜单 `pause-quickstart`、出场页幽灵按钮 `start-quickstart`，共 2 入口）。
+  - **同步串接**：①index.html 两格（overlay + 2 个按钮 id）+ ARIA 基本属性（role=dialog、aria-labelledby=quickstart-title、aria-hidden）；②CSS `.quickstart-*` 栅格 3×2 卡（≤880px 2×3、≤560px 1col、`.card-glow` 特殊突出"你是谁"、`.quickstart-primary` 实心金按钮、`@keyframes emberPulse` + reduced-motion 显式 `animation: none !important`）；③20 键 zh/en 逐表核对 + 并入 `QUICKSTART_STATIC_KEYS` 常量覆盖在测试里
+  - **测试**：`tests/quickstart.test.js` 9 例（壳页 id 完备性、首次弹、关闭即记住、Esc 关闭、两表逐键对齐、6 个静态键、节点权、席位焦点）+ 3 例负向扫描门禁（parkFocus/restoreParkedFocus 在 4 处调用点清单内同步、keydown 监听者清单扩到 5 处、`.quickstart-ember` 登记档C）。
+  - **同步部门**：`tests/overlay-stack.test.js`（keydown 清单 4→5 处）+ `tests/modal-trail.test.js`（parkFocus/restoreParkedFocus 调用点白名单 + 按 code-unit 顺序 Quickstart 在 SettingsPanel 之前）+ `tests/design-tokens.test.js`（`.quickstart-ember` 登记进 reduce-motion 档C 装饰元素块）+ `EXPECTED_KEY_COUNT 3114 → 3134`。
+  - **实测**：本地浏览器 `http://localhost:5173/`：首次载入首页直接弹出「炉边快速上手·30 秒读完」（关闭即写 seen=1 / 不再自动弹）——侧栏能正常按 Esc 退出；src/ 里零密钥、零 innerHTML（壳页纯静态）、零音频启动延迟。
+  - **遗留（暂缓项）**：① 按钮字重 placeholder 待逐页视觉细化（与 Help Manual 一致，减少叠加样式）；②「看到这个就关闭」语义按用户出场看的次数与本地存储耦合——如需更多节奏教学，应通过阶段性提示而非全量弹窗实现。
+
 - **2026-11-17 W-Z90「Oracle upstream 用量进健康快照 + 星轨诊断显示「上游缓存命中率」」** —— 提交：本次 HEAD
 
   - **起因**：用户再次提出「为什么调用我的 API 缓存命中率低」—— 真正观测到的事：非流式上游**不回报** `prompt_tokens_details`，控制台被非流误解误导；真正的流+include_usage 口径（W-Z82）已经把命中率拉到 82–95%。但玩家/运维站在前端**看不见**这件事。
