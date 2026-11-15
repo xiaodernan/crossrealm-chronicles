@@ -3367,6 +3367,12 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   trial_summary_note_fmt: '最近 ${windowSize} 次行动的频次（内存窗口，不是全量历史）',
   journal_tab_legends: '传说碑',
   journal_tab_ending: '归途残卷',
+  journal_tab_canon: '典籍馆 · 原典全篇',
+  canon_intro: '炉边全书搁在这里。点击章节切换，原文都原样保留。',
+  canon_loading: '正在装载原典……',
+  canon_empty: '原典暂时是空的。',
+  canon_load_failed: '原典没能装载（development-fresh? 先 npm run build 再打开）。',
+
   ending_epitaph_locked: '锚火属于走完这段路的人——通关后此页点亮。',
   ending_epitaph_intro: '锚火记得每一位按过 E 的旅人。',
   ending_epitaph_intro_keep: '把火留给后来人那年，你成了自己的锚。',

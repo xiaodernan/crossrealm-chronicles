@@ -69,6 +69,10 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules/three')) return 'vendor-three';
+
+          // W-Z109：novella 按语言分包，绝不进首屏
+          if (id.includes('/src/content/novella/zh.js')) return 'chunk-novella-zh';
+          if (id.includes('/src/content/novella/en.js')) return 'chunk-novella-en';
           // W-Z93：en 表只由 `localeProvider` 动态 import —— 必须切成独立的异步块。
           // 若落进 chunk-core，它会连带把整张英文表钉回首屏账面（gate 的 2.25 MiB 线）
           if (id.includes('/src/content/strings.en.js')) return 'chunk-en';

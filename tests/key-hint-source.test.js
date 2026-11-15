@@ -398,6 +398,12 @@ const LEDGER = {
   // style.css 里的"按 1"（两处，见 lines 9 和 1316）是注释里的中文短语"按 1 算"，
   // 不是键位提示，但命中了 KEY_PROSE 的"按 [key]"模式，故记 2。
   'style.css': 2,
+  // W-Z109 「典籍馆」：content/novella/zh.js / en.js 里的键名是**小说正文**，
+  // 不是 UI 文案 —— 《跨界纪事：锚火守夜人》原本就是以「按 E 调查光柱的人」为锚点的元叙事，
+  // 键名出现在字面量里是内容本身；典籍馆正文渲染时不走 keyText 包装。
+  // 记账只许变小：再往原典里塞新的写死键名会红，得来本账查着立账。
+  'content/novella/zh.js': 19,
+  'content/novella/en.js': 11,
 };
 
 const LIT = /`(?:\\.|[^`\\])*`|'(?:\\.|[^'\n])*'|"(?:\\.|[^"\n])*"/g;
@@ -470,6 +476,8 @@ describe('还写死键名的地方：逐文件记账，只许变小', () => {
 describe('界面上说出的键名只能从两张表来（字样尺子）', () => {
   const SKIP = new Set([
     'content/keybinds.js', 'content/hotkeys.js', 'ui/keyLabels.js', 'ui/keyHints.js',
+    // W-Z109 「典籍馆」：原典正文是小说内容，键名是叙事的一部分（见上面 LEDGER 说明）
+    'content/novella/zh.js', 'content/novella/en.js',
   ]);
   /** 反引号在热键表里确实是一格，但它同时是 JS 模板串的边界字符：拿它当字样会在每个模板字面量上误报 */
   const NOT_AS_LABEL = new Set(['`']);

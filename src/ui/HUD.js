@@ -160,6 +160,8 @@ const JOURNAL_SUB_TABS = {
   echoes: (game, panel) => game.popCultureTab.render(panel),
   legends: (game, panel) => game.legendsTab.render(panel),
   ending: (game, panel) => game.endingTab.render(panel),
+  // W-Z109：原典 16 卷全篇可读
+  canon: (game, panel) => game.canonTab.render(panel),
 };
 
 export class HUD {
@@ -887,6 +889,8 @@ buildHUD() {
         const unlockedSet = this.game.achievements?.unlocked ?? new Set();
         suffix = ` (${ECHO_EPITAPHS.filter((e) => unlockedSet.has(e.ach)).length}/${ECHO_EPITAPHS.length})`;
       }
+      // W-Z109 典籍馆：没有进度可数（原典恒为全量开放）——不显示「(0)」让玩家误以为没内容
+      else if (k === 'canon') suffix = '';
       else if (k !== 'all') suffix = ` (${j.getCounts()[k] ?? 0})`;
       return `<button type="button" class="journal-tab${tab === k ? ' active' : ''}" data-tab="${k}">${t(label)}${suffix}</button>`;
     }).join('');

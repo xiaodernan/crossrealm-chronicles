@@ -21,6 +21,8 @@ export const JOURNAL_EXTRA_TABS = {
   echoes: 'journal_tab_echoes',
   legends: 'journal_tab_legends',
   ending: 'journal_tab_ending',
+  // W-Z109「典籍馆」—— 原典 16 卷全篇可读（novels 融入游戏而非独立观看）
+  canon: 'journal_tab_canon',
 };
 
 export function mergeJournalCategories(base) {
