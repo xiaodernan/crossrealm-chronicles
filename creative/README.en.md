@@ -120,6 +120,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Ink · The Character That Remains | [ink](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/69-ink.md) |
 | The Six Hundred and First | [the-601st](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/70-the-601st.md) |
 | The Painter | [the-painter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/71-the-painter.md) |
+| The Reply | [the-reply](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/72-the-reply.md) |
 
 Chapter → game-chapter mapping:
 
