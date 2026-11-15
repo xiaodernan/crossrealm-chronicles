@@ -56,6 +56,7 @@ function body({ stream, cacheControl }) {
     : { role: 'system', content: SYSTEM };
   const b = {
     model: MODEL,
+    prompt_cache_key: 'crossrealm-canon-v1',
     messages: [system, { role: 'user', content: USER }],
     temperature: 0,
     max_tokens: 64,
@@ -110,15 +111,27 @@ async function call(label, opts) {
   return usage;
 }
 
-const u1 = await call('① 非流·无标记          ', { stream: false, cacheControl: false });
-const u2 = await call('② 流+include_usage·无标记', { stream: true, cacheControl: false });
-const u3 = await call('③ 流+include_usage+标记·第1次', { stream: true, cacheControl: true });
-const u4 = await call('③ 流+include_usage+标记·第2次', { stream: true, cacheControl: true });
+const u1 = await call('① non-stream, no marker (control)', { stream: false, cacheControl: false });
+const u2 = await call('② stream+include_usage, no marker (control)', { stream: true, cacheControl: false });
+const u3 = await call('③ cold (first prompt_cache_key call)', { stream: true, cacheControl: true });
+const u4 = await call('③ warm #2', { stream: true, cacheControl: true });
+const u5 = await call('③ warm #3', { stream: true, cacheControl: true });
+const u6 = await call('③ warm #4', { stream: true, cacheControl: true });
+const u7 = await call('③ warm #5', { stream: true, cacheControl: true });
+const u8 = await call('③ warm #6', { stream: true, cacheControl: true });
 
-const cached = (u) => u?.prompt_cache_hit_tokens ?? u?.prompt_tokens_details?.cached_tokens ?? u?.cached_tokens ?? '（usage 未携带缓存字段）';
-console.log('\n==== 结论 ====');
-console.log('非流（无标记）        cached =', cached(u1));
-console.log('流+include_usage（无标记）cached =', cached(u2));
-console.log('流+include_usage+标记（第1次・冷） cached =', cached(u3));
-console.log('流+include_usage+标记（第2次・暖） cached =', cached(u4));
-console.log('LlmClient 实际请求形状 = ③（stream + include_usage + system cache_control:ephemeral）');
+const cached = (u) => u?.prompt_cache_hit_tokens ?? u?.prompt_tokens_details?.cached_tokens ?? u?.cached_tokens ?? 'no cache field in usage';
+const pct = (u) => {
+  const c = cached(u);
+  const p = u?.prompt_tokens;
+  if (typeof c === 'number' && Number.isFinite(p) && p > 0) return (c / p * 100).toFixed(1) + '% (' + c + '/' + p + ')';
+  return String(c);
+};
+console.log('');
+console.log('==== result (③ set carries prompt_cache_key: crossrealm-canon-v1, identical shape to LlmClient) ====');
+console.log('① non-stream  cached =', cached(u1));
+console.log('② stream warm cached =', cached(u2));
+for (const [label, u] of [['cold', u3], ['warm#2', u4], ['warm#3', u5], ['warm#4', u6], ['warm#5', u7], ['warm#6', u8]]) {
+  console.log('③ ' + label + ' cached =', pct(u));
+}
+console.log('LlmClient real request shape = stream + include_usage + system cache_control:ephemeral (frozen prefix) + prompt_cache_key:crossrealm-canon-v1');
