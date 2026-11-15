@@ -25,7 +25,7 @@ const asJson = process.argv.includes('--json');
 // Pages 站点根部署的 sibling 产物（showcase.yml 组装的 _site/：
 // game/ ← dist/、guide.html ← player-guide.html、tapestry.html、favicon.svg、index.html ← showcase.html）
 // creative/*.html 里对它们的相对链接在 gh-pages 上必然成立、在仓库里必然不存在——按部署版一寸预期跳过。
-const DEPLOY_SIBLINGS = new Set(['game', 'index.html', 'guide.html', 'tapestry.html', 'favicon.svg']);
+const DEPLOY_SIBLINGS = new Set(['game', 'index.html', 'guide.html', 'tapestry.html', 'favicon.svg', 'soundtrack.html', 'tapestry.en.html', 'latest.json', 'poster-ost-album-4k.png']);
 
 function walk(dir) {
   const out = [];

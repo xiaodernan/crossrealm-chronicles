@@ -1,6 +1,6 @@
 # 《跨界纪事》设定集（Codex · 英文版）—— 真上游机器抽取 · 出处同 zh
 
-**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 15 章抽取（00–14，含 Interlude V《Before the Flame》、Interlude VI《Handover》与 Interlude VII《Come Sit Awhile》）；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame（`## en/12-interlude-before-the-flame#1`，文件末尾）与 Interlude VI · Handover（`## en/13-interlude-handover#1`，Interlude V 之后成为文件末尾）均已入谱，2026-11-17**。
+**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 16 章抽取（00–14，含 Interlude V《Before the Flame》、Interlude VI《Handover》与 Interlude VII《Come Sit Awhile》）；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame（`## en/12-interlude-before-the-flame#1`，文件末尾）与 Interlude VI · Handover（`## en/13-interlude-handover#1`，Interlude V 之后成为文件末尾）均已入谱，2026-11-17**。
 
 > 与 `GLOSSARY.md` 关系：同一正本（canon）两种语言版本；英文字词保留原文锚点（`Anchor Flame`, `The Keeper`, `stay` 等），不做语义再翻译。
 > 这份文件是机器生成者写出的英文对照，**每章记五段**（①人物 / ②地点·位面 / ③时间线 / ④关键物件·母题 / ⑤易混淆译名·统一写法）。
@@ -1021,4 +1021,94 @@
 - **Hearthmen：炉边人**。本节以此称谓讨论为何他们不写姓名；不要与原文的“apprentices（学徒）”混作一称。【14-Interlude Seven · Come Sit Awhile】
 - **“Next time”：保留英文原文**。女人留下的纸片只写这两个词，不是“下次我会来”或“谢谢”。【14-Interlude Seven · Come Sit Awhile】
 - **Interlude Seven · Come Sit Awhile：间章七·来坐一会儿**；文首明确说本卷写于 *Interlude Six · Handover* 之后，既非序章也非尾声。【14-Interlude Seven · Come Sit Awhile】
+
+## en/16-interlude-leaking-lamp#1
+
+## ①人物
+
+- **老看守**：反复给灯添油、擦拭灯身，并在雨夜清洗旅客留下的碗。【en/16-interlude-leaking-lamp#1】
+- **一位新看守**：曾询问老看守为何不更换灯；原文未说明其是否就是后来到来的新看守。【en/16-interlude-leaking-lamp#1】
+- **后来到来的新看守**：更换了灯芯并添满油；原文未说明其是否就是曾询问老看守的人。【en/16-interlude-leaking-lamp#1】
+- **旅客**：一个雨夜在驿站停留很久，饭后留下自己的碗，随后冒雨离开且没有带伞。【en/16-interlude-leaking-lamp#1】
+
+## ②地点·位面
+
+- **驿站（station / waystation）**：故事中看守、旅客、桌子与灯所在之处；结尾称这是驿站的行事方式。【en/16-interlude-leaking-lamp#1】
+- **桌子**：灯蜡先落在灯座台上，后来落到桌上；未使用的碗始终放在桌子远端。【en/16-interlude-leaking-lamp#1】
+- **碗柜**：桌边碗柜中放着其他碗；未使用的碗位于桌子远端，柜门有时不能完全关上。【en/16-interlude-leaking-lamp#1】
+- **窗户**：原文提到纸窗窗格不透气，风会穿过窗户；风没有吹动账簿上的页面。【en/16-interlude-leaking-lamp#1】
+
+## ③时间线
+
+1. 灯蜡最初滴到灯座台上，后来滴到桌上；老看守每晚给灯添油，并注意到灯座周围已有一圈薄白蜡。【en/16-interlude-leaking-lamp#1】
+2. 灯持续燃过一个夏天；潮湿的夜晚很多，灯芯变短、油变少，灯蜡继续日渐滴落。【en/16-interlude-leaking-lamp#1】
+3. 桌子远端放着一个从未使用的碗；其他常用的碗多次更换，这只碗仍干净，几乎没有落灰。【en/16-interlude-leaking-lamp#1】
+4. 一位新看守问灯为何从未更换；老看守用布擦灯身，蜡到第三遍才松动，随后把布叠好放在桌角。【en/16-interlude-leaking-lamp#1】
+5. 一个雨夜，旅客停留很久；饭后把自己的碗放在桌上，随后没有带伞便走进雨中。老看守把旅客的碗拿到水槽洗净。【en/16-interlude-leaking-lamp#1】
+6. 夏天过后，灯光变暗；老看守把灯移到墙边，桌上的蜡圈完全显露。【en/16-interlude-leaking-lamp#1】
+7. 后来有新看守到来，更换灯芯并添满油；旧蜡没有刮掉，未使用的碗也没有被拿走。账簿添了一行，记载桌上原有摆放及远端有一只未动过的碗。【en/16-interlude-leaking-lamp#1】
+8. 火焰渐低，蜡沿旧有轨迹继续滑落；碗仍在桌子远端，碗沿朝墙。【en/16-interlude-leaking-lamp#1】
+
+## ④关键物件·母题
+
+- **灯（lamp）**：老看守一直添油；有人问为何不更换，后来新看守更换灯芯、添油，但灯身未被替换。【en/16-interlude-leaking-lamp#1】
+- **灯蜡（wax）**：从灯座台滴到桌上，形成蜡圈；旧蜡没有被刮掉，最终仍沿旧轨迹滴落。【en/16-interlude-leaking-lamp#1】
+- **未使用的碗（bowl）**：位于桌子远端，碗沿有缺口并朝向墙；始终未被拿起、转动或移动。【en/16-interlude-leaking-lamp#1】
+- **旅客的碗**：饭后留在桌上，碗沿仍微温；老看守将它拿到水槽洗净。它与桌子远端那只未使用的碗是原文分别描述的两只碗。【en/16-interlude-leaking-lamp#1】
+- **布（cloth）**：老看守用它擦灯身；擦拭后折好放在桌角。【en/16-interlude-leaking-lamp#1】
+- **账簿（ledger）**：后来被添上一行，记录桌子照旧摆放，桌子远端有一只未动过的碗；原文未说明记录者身份。【en/16-interlude-leaking-lamp#1】
+- **灯芯与油（wick and oil）**：夏天里灯芯变短、油变少；后来新看守更换灯芯并重新添油。【en/16-interlude-leaking-lamp#1】
+- **信与灯**：篇首明确说本卷中没有任何东西是一封信，只有一盏从未被更换的灯。【en/16-interlude-leaking-lamp#1】
+
+## ⑤易混淆译名·统一写法
+
+- **station / waystation：驿站**。原文在篇内分别使用 *station* 与 *waystation*；本条统一译作“驿站”。【en/16-interlude-leaking-lamp#1】
+- **lamp：灯**；**flame：火焰**；**wick：灯芯**；**oil：油**；**wax：灯蜡**。原文分别指向灯具及其部件或燃烧现象，不合并为同一条目。【en/16-interlude-leaking-lamp#1】
+- **bowl：碗**。桌子远端从未使用的碗与旅客饭后留下、被老看守洗净的碗应分别称述。【en/16-interlude-leaking-lamp#1】
+- **old keeper：老看守**；**new keeper：新看守**；**traveller：旅客**。人物均无原文明示姓名，不补姓名或身份关系。【en/16-interlude-leaking-lamp#1】
+
+## en/16-interlude-leaking-lamp#1
+
+## ①人物
+
+- **老看守**：反复给灯添油、擦拭灯身，并在雨夜清洗旅客留下的碗。【en/16-interlude-leaking-lamp#1】
+- **一位新看守**：曾询问老看守为何不更换灯；原文未说明其是否就是后来到来的新看守。【en/16-interlude-leaking-lamp#1】
+- **后来到来的新看守**：更换了灯芯并添满油；原文未说明其是否就是曾询问老看守的人。【en/16-interlude-leaking-lamp#1】
+- **旅客**：一个雨夜在驿站停留很久，饭后留下自己的碗，随后冒雨离开且没有带伞。【en/16-interlude-leaking-lamp#1】
+
+## ②地点·位面
+
+- **驿站（station / waystation）**：故事中看守、旅客、桌子与灯所在之处；结尾称这是驿站的行事方式。【en/16-interlude-leaking-lamp#1】
+- **桌子**：灯蜡先落在灯座台上，后来落到桌上；未使用的碗始终放在桌子远端。【en/16-interlude-leaking-lamp#1】
+- **碗柜**：桌边碗柜中放着其他碗；未使用的碗位于桌子远端，柜门有时不能完全关上。【en/16-interlude-leaking-lamp#1】
+- **窗户**：原文提到纸窗窗格不透气，风会穿过窗户；风没有吹动账簿上的页面。【en/16-interlude-leaking-lamp#1】
+
+## ③时间线
+
+1. 灯蜡最初滴到灯座台上，后来滴到桌上；老看守每晚给灯添油，并注意到灯座周围已有一圈薄白蜡。【en/16-interlude-leaking-lamp#1】
+2. 灯持续燃过一个夏天；潮湿的夜晚很多，灯芯变短、油变少，灯蜡继续日渐滴落。【en/16-interlude-leaking-lamp#1】
+3. 桌子远端放着一个从未使用的碗；其他常用的碗多次更换，这只碗仍干净，几乎没有落灰。【en/16-interlude-leaking-lamp#1】
+4. 一位新看守问灯为何从未更换；老看守用布擦灯身，蜡到第三遍才松动，随后把布叠好放在桌角。【en/16-interlude-leaking-lamp#1】
+5. 一个雨夜，旅客停留很久；饭后把自己的碗放在桌上，随后没有带伞便走进雨中。老看守把旅客的碗拿到水槽洗净。【en/16-interlude-leaking-lamp#1】
+6. 夏天过后，灯光变暗；老看守把灯移到墙边，桌上的蜡圈完全显露。【en/16-interlude-leaking-lamp#1】
+7. 后来有新看守到来，更换灯芯并添满油；旧蜡没有刮掉，未使用的碗也没有被拿走。账簿添了一行，记载桌上原有摆放及远端有一只未动过的碗。【en/16-interlude-leaking-lamp#1】
+8. 火焰渐低，蜡沿旧有轨迹继续滑落；碗仍在桌子远端，碗沿朝墙。【en/16-interlude-leaking-lamp#1】
+
+## ④关键物件·母题
+
+- **灯（lamp）**：老看守一直添油；有人问为何不更换，后来新看守更换灯芯、添油，但灯身未被替换。【en/16-interlude-leaking-lamp#1】
+- **灯蜡（wax）**：从灯座台滴到桌上，形成蜡圈；旧蜡没有被刮掉，最终仍沿旧轨迹滴落。【en/16-interlude-leaking-lamp#1】
+- **未使用的碗（bowl）**：位于桌子远端，碗沿有缺口并朝向墙；始终未被拿起、转动或移动。【en/16-interlude-leaking-lamp#1】
+- **旅客的碗**：饭后留在桌上，碗沿仍微温；老看守将它拿到水槽洗净。它与桌子远端那只未使用的碗是原文分别描述的两只碗。【en/16-interlude-leaking-lamp#1】
+- **布（cloth）**：老看守用它擦灯身；擦拭后折好放在桌角。【en/16-interlude-leaking-lamp#1】
+- **账簿（ledger）**：后来被添上一行，记录桌子照旧摆放，桌子远端有一只未动过的碗；原文未说明记录者身份。【en/16-interlude-leaking-lamp#1】
+- **灯芯与油（wick and oil）**：夏天里灯芯变短、油变少；后来新看守更换灯芯并重新添油。【en/16-interlude-leaking-lamp#1】
+- **信与灯**：篇首明确说本卷中没有任何东西是一封信，只有一盏从未被更换的灯。【en/16-interlude-leaking-lamp#1】
+
+## ⑤易混淆译名·统一写法
+
+- **station / waystation：驿站**。原文在篇内分别使用 *station* 与 *waystation*；本条统一译作“驿站”。【en/16-interlude-leaking-lamp#1】
+- **lamp：灯**；**flame：火焰**；**wick：灯芯**；**oil：油**；**wax：灯蜡**。原文分别指向灯具及其部件或燃烧现象，不合并为同一条目。【en/16-interlude-leaking-lamp#1】
+- **bowl：碗**。桌子远端从未使用的碗与旅客饭后留下、被老看守洗净的碗应分别称述。【en/16-interlude-leaking-lamp#1】
+- **old keeper：老看守**；**new keeper：新看守**；**traveller：旅客**。人物均无原文明示姓名，不补姓名或身份关系。【en/16-interlude-leaking-lamp#1】
 

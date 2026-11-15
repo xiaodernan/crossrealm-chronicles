@@ -8,7 +8,7 @@
 
 | 路径 | 内容 |
 |------|------|
-| `novel/` | 长篇小说**七章 + 序言 + 七番外**（锚火守夜人 · 《炉火给你的回信》 · 《看守的回信》·《林渡给看守的回信》·《后来者的回信》·《火之前》·《换班》 · 《下次再坐》） |
+| `novel/` | 长篇小说**七章 + 序言 + 八番外**（锚火守夜人 · 《炉火给你的回信》 · 《看守的回信》·《林渡给看守的回信》·《后来者的回信》·《火之前》·《换班》·《下次再坐》 · 《漏灯记》） |
 | `GLOSSARY.md` | 《跨界纪事》设定集（Codex）——真上游机器抽取的 canon 档案（人物/地点/时间线/母题/译名）；机器直抽、对照原文使用（番外五《火之前》已于 2026-11-16 补入，见文末） |
 | `GLOSSARY-en.md` | 英文版同源 Codex——由 EN 译本真上游逐章机器抽取；与 GLOSSARY.md 互为正本相反语言版本 |
 | `film/` | 142 分钟电影剧本（三幕结构 + 导演阐述；终章后彩蛋 · 星图之外）+ 每分钟伴生短片《看守的日子》——中文母本；英译 `电影剧本-跨界纪事.en.md` · `film/短片-看守的日子.md`（ZH）· `film/short-keeper-day.en.md`（EN twin） |
@@ -39,9 +39,9 @@ creative/music/soundtrack.html
 
 ## 📖 读小说
 
-按顺序阅读：`novel/00-序言.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-番外` → `09-番外二` → `10-番外三` → `11-番外四` → **`12-番外五-火之前`**（创世补遗）→ **`13-番外六-换班`** · **`14-番外七-下次再坐`**（炉火换班）
+按顺序阅读：`novel/00-序言.md` → `01` → `02` → `03` → `04` → `05` → `06` → `07` → `08-番外` → `09-番外二` → `10-番外三` → `11-番外四` → **`12-番外五-火之前`**（创世补遗）→ **`13-番外六-换班`** · **`14-番外七-下次再坐`** · **`16-番外八-漏灯记`**（炉火换班）
 
-英文版（全量译本）：`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after` → `12-interlude-before-the-flame` → **`13-interlude-handover`** · **`14-interlude-come-sit-awhile`**（译本与母本同频率、同一笔触、同一节拍）
+英文版（全量译本）：`novel/en/00-prologue.md` → `01-chapter-one` → `02-chapter-two` → `03-chapter-three` → `04-chapter-four` → `05-chapter-five` → `06-chapter-six` → `07-chapter-seven` → `08-interlude-fire-letter` → `09-interlude-keeper-reply` → `10-interlude-lin-reply` → `11-interlude-came-after` → `12-interlude-before-the-flame` → **`13-interlude-handover`** · **`14-interlude-come-sit-awhile`** · **`16-interlude-leaking-lamp`**（译本与母本同频率、同一笔触、同一节拍）
 
 **EN 全集快速入口（双链接，直接用于阅读）**：
 
@@ -62,6 +62,7 @@ creative/music/soundtrack.html
 | 番外五 · Before the Flame | [interlude-before-the-flame](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/12-interlude-before-the-flame.md) |
 | 番外六 · Handover | [interlude-handover](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/13-interlude-handover.md) |
 | 番外七 · 下次再坐（Come Sit Awhile） | [interlude-come-sit-awhile](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/14-interlude-come-sit-awhile.md) |
+| 番外八 · 漏灯记（Leaking Lamp） | [interlude-leaking-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/16-interlude-leaking-lamp.md) |
 
 每一章对应游戏的章节走法：
 

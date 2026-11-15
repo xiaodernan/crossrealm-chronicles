@@ -110,7 +110,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 
 - **`POST /api/ai/lore/answer`**（请求体 `{ question ≤ 400 字, limit? = 0|1..6 }`，缺省 4）→ `{ ok, answer, sources: [路径…], model, cached, upstreamCached, latencyMs, requestId? }`；无任何 BM25 命中时**不调模型**，直接回 `「此物未在典籍中 · This is not in the record.」`（`model: "oracle-bm25"`）——不是答不出，是典籍没有。
 - **`GET /api/ai/lore/health`** → `{ ready: true, candidates, bm25Probe }`；不回显任何语料文字。
-- 语料 = `scripts/build-lore-corpus.mjs` 从 `creative/novel/*.md`（15 章，00–07 + 番外一至番外七）+ `creative/novel/en/*.md`（全书英译）+ `creative/GLOSSARY.md` + `creative/GLOSSARY-en.md` + `creative/film/*.md`（电影剧本中英 + 短片中英）+ `creative/music/liner-notes.md/.en.md` + `creative/music/OST-专辑手册.md/.en.md` 确定性编译出的 `classpath:/lore/corpus.txt`（~234 KB UTF-8，57 源）；`--check` 可以在任何装只读的 CI 上校验语料未漂移。
+- 语料 = `scripts/build-lore-corpus.mjs` 从 `creative/novel/*.md`（15 章，00–07 + 番外一至番外七）+ `creative/novel/en/*.md`（全书英译）+ `creative/GLOSSARY.md` + `creative/GLOSSARY-en.md` + `creative/film/*.md`（电影剧本中英 + 短片中英）+ `creative/music/liner-notes.md/.en.md` + `creative/music/OST-专辑手册.md/.en.md` 确定性编译出的 `classpath:/lore/corpus.txt`（~234 KB UTF-8，59 源）；`--check` 可以在任何装只读的 CI 上校验语料未漂移。
 - 分词：Han 逐码点成词 + ASCII 字母/数字小写词串（`Bm25Tokenizer`）；打分：标准 BM25（k1=1.5、b=0.75）；命中即缓存键（system 固定 + 段落固定 ⇒ 同一问题走 digest cache）。
 - system prompt 强制：答案语言跟随提问语言；回答必须带 `[bracket]` 出处；未提及的人物/地点/物件一律回答「未在典籍中」——不许现编。
 - **引用枝（W-Z97）**：reminder 里增加一支——若玩家问句里**带原文引文**（含引号），模型以引文文本为定位依据（找包含该引文的摘录行 + 回答原文 + 带出处），只有引文全文找不到才「未在典籍中」；修复了引文类问句（如「「驿站不收信。路过的人，下次再坐。」出自哪一卷？」）被标题定位逻辑误拒的问题；un-named 无引文问句仍走原来的「找标题行/拒答」路径。上游探针（2026-11-17）：A 引文问句 → 正确答以 `[creative/novel/14-番外七-下次再坐.md]`；B 未引文无标题问句 → 以原文 Verbatim 回答；C 垃圾问句 → 拒答。Oracle 语义现有五问族全覆盖。

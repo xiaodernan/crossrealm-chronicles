@@ -1,45 +1,45 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T03:25:39.331Z",
+  "generated_at": "2026-11-15T03:45:54.636Z",
   "branch": "main",
-  "head": "f15aebc",
-  "total_commits": 1627,
-  "pushed_at": "2026-11-15T11:25:14+08:00",
+  "head": "2ab53b4",
+  "total_commits": 1631,
+  "pushed_at": "2026-11-15T11:36:31+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "2ab53b4",
+      "at": "2026-11-15T11:36:31+08:00",
+      "subject": "feat(pages): W-Z105 展示页英雄位加锚火金纹 SVG 徽章——纯内联矢量"
+    },
+    {
+      "short": "af59296",
+      "at": "2026-11-15T11:30:33+08:00",
+      "subject": "docs(creative): showcase Feed 增补 W-Z104「宇宙指针·金色光柱入路」"
+    },
+    {
+      "short": "ee21c29",
+      "at": "2026-11-15T11:27:11+08:00",
+      "subject": "docs(creative): player-guide 世界导览章节加「宇宙指针」说明（zh/en）——路标光柱入口动词"
+    },
+    {
+      "short": "23f7f47",
+      "at": "2026-11-15T03:25:39Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "f15aebc",
       "at": "2026-11-15T11:25:14+08:00",
       "subject": "feat(game): W-Z104 宇宙指针——主世界立金色路标光柱 · 防丢路"
-    },
-    {
-      "short": "751fee7",
-      "at": "2026-11-15T03:11:44Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "d63b2f3",
-      "at": "2026-11-15T11:11:17+08:00",
-      "subject": "docs(creative): showcase Feed 增补 W-Z103——GitHub REST 仓库指标实况单行"
-    },
-    {
-      "short": "ef456ad",
-      "at": "2026-11-15T11:08:36+08:00",
-      "subject": "feat(pages): W-Z103 showcase 真实数据单行情——.gh-vitals 在线抓取 GitHub REST 仓库指标（commits/files/stars/size/last push/default branch）"
-    },
-    {
-      "short": "ea7e35d",
-      "at": "2026-11-15T03:02:47Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
   "tracked_files": 1225,
   "test_files": 453,
   "i18n_keys": 3136,
-  "lore_sources": 57,
+  "lore_sources": 59,
   "novel_chapters_zh": 15,
   "novel_chapters_en": 15,
-  "milestone": "W-Z104",
+  "milestone": "W-Z105",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
