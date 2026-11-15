@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T18:02:23.786Z",
+  "generated_at": "2026-11-15T18:20:36.750Z",
   "branch": "main",
-  "head": "a36e4e49",
-  "total_commits": 1781,
-  "pushed_at": "2026-11-16T01:59:26+08:00",
+  "head": "4f35fac0",
+  "total_commits": 1783,
+  "pushed_at": "2026-11-16T02:18:38+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "4f35fac",
+      "at": "2026-11-16T02:18:38+08:00",
+      "subject": "feat(game): W-Z183 命途 · 锚火三问 —— StateGraph 真路由 + [J] 新子页"
+    },
+    {
+      "short": "8b5b816",
+      "at": "2026-11-15T18:02:23Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "a36e4e4",
       "at": "2026-11-16T01:59:26+08:00",
@@ -21,25 +31,15 @@
       "short": "110c92a",
       "at": "2026-11-16T01:43:28+08:00",
       "subject": "feat(canon): W-Z181 第五十六卷《麻火柴 / The Match》——卷九之一 · 卷九《祷火 —— 重燃之劫》开卷"
-    },
-    {
-      "short": "c5b9445",
-      "at": "2026-11-15T17:38:20Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "fc81c1a",
-      "at": "2026-11-16T01:36:41+08:00",
-      "subject": "feat(canon): W-Z180 第五十五卷《留灯 / The Last Candle》——卷八之四，《过火 —— 守护者之别》完结"
     }
   ],
-  "tracked_files": 1335,
-  "test_files": 456,
-  "i18n_keys": 3215,
+  "tracked_files": 1341,
+  "test_files": 458,
+  "i18n_keys": 3223,
   "lore_sources": 59,
   "novel_chapters_zh": 57,
   "novel_chapters_en": 57,
-  "milestone": "W-Z182",
+  "milestone": "W-Z183",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
