@@ -83,6 +83,7 @@ import { SoulWispManager } from '../world/SoulWispManager.js';
 import { QuestAssistant } from '../ui/QuestAssistant.js';
 import { WorldDecorations } from '../world/WorldDecorations.js';
 import { BossBeacons } from '../world/BossBeacons.js';
+import { QuestWaypointBeacon } from '../world/QuestWaypointBeacon.js';
 import { PlayerAutoPlay } from '../player/PlayerAutoPlay.js';
 import { GameGuidePanel } from '../ui/GameGuidePanel.js';
 import { CombatFeedback } from '../effects/CombatFeedback.js';
@@ -369,6 +370,7 @@ export class Game {
     this.worldDecorations.build();
     this.bossBeacons = this._adopt('world/BossBeacons', new BossBeacons(this.scene, this.world));
     this.bossBeacons.build();
+    this.questWaypointBeacon = this._adopt('world/QuestWaypointBeacon', new QuestWaypointBeacon(this));
 
     this.worldEffects = this._adopt('world/WorldEffects', new WorldEffects(this.scene));
     this.restPoints = this._adopt('world/RestPointManager', new RestPointManager(this.scene, this.world));
@@ -1411,6 +1413,7 @@ export class Game {
     走舱壁(this, 'ambientPass', () => this.ambientPass?.update(dt, this.player.position));
     if (this.worldMapPanel?.open) 走舱壁(this, 'worldMapPanel', () => this.worldMapPanel.draw());
     走舱壁(this, 'worldEffects', () => this.worldEffects.update(dt, this.player.position));
+    走舱壁(this, 'questWaypointBeacon', () => this.questWaypointBeacon?.update?.());
     走舱壁(this, 'weather', () => this.weather.update(dt, this.player.position));
     走舱壁(this, 'restNpcs', () => this.restNpcs.update(dt, this.player.position));
     走舱壁(this, 'restNpcAnimDirector', () => this.restNpcAnimDirector?.update(dt, this.player.position));

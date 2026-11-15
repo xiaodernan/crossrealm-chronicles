@@ -4649,3 +4649,30 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   color: rgba(223, 214, 196, 0.42);
   margin-top: 10px;
 }
+
+/* === 任务路标光柱（W-Z104）——与 Boss Beacons 同源美学、暖金光 ==============
+   出现在「下一份 quest」所在的方向，主世界里看得见；副本/自由模式/游客模式不显示。 */
+.quest-beacon-label {
+  padding: 4px 10px;
+  background: linear-gradient(180deg, rgba(20, 13, 6, 0.85), rgba(10, 7, 3, 0.9));
+  border: 1px solid rgba(255, 217, 138, 0.55);
+  border-radius: 6px;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 0 18px rgba(255, 217, 138, 0.25);
+}
+.quest-beacon-label strong {
+  display: block;
+  color: #ffd98a;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-shadow: 0 0 6px rgba(255, 217, 138, 0.5);
+}
+.quest-beacon-label span {
+  display: block;
+  color: rgba(223, 214, 196, 0.85);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  margin-top: 1px;
+}
