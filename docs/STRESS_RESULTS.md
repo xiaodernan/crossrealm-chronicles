@@ -96,3 +96,18 @@ powershell -ExecutionPolicy Bypass -File .\server\scripts\stress-oracle-verify.p
 **零 4xx、零 5xx、0% errRate**；依然是 throwaway stub isolated 压铸（不代表真 wkapi 的生产 p95）；只证明 Oracle 昂贵路径在新语料 + 新 prompt 形下不崩、不死循环、不超时、4xx 不暴露。2 次完整 verify.ps1 GREEN；语料漂移仍然由 `--check` 看守。
 
 > **与 W-Z86 数据的关系**：W-Z86 的 1.6k 样次中 `p50` 已从 481→215ms 收敛（node_modules 冷启动 amortization + 公告吞吐的相对提升），而吞吐近似翻倍（481ms→~242 rps）——Oracle 当前瓶颈依然是 stub 的单线程确定性 SSE（模拟 wkapi pro 内网回程时，真实 p95 由上游决定）。`answerBurst` 降到 188ms p50 = digest 缓存命中提升（对 5-Q 稳定问句集，12s 后段巩固填 llm-service 的 memoize 前缀）。
+
+
+---
+
+## 2026-11-16 路 鍘嬫祴澶嶆祴锛圵-Z203 路 Java 25.0.1 + Maven 3.9.15 路 game-service memory backends 路 绔彛 28083锛?
+> **鍙ｅ緞**锛氫笌 W-Z79 鍚屼竴鎬濊矾鐨勬湰鏈?throwaway 鍘嬫祴鈥斺€擡UREKA_CLIENT_ENABLED=false銆丼PRING_CLOUD_CONFIG_ENABLED=false 闅旂锛宮emory backends锛堟棤 Redis锛岃 docs/LOAD_TEST.md 鍚屽彛寰勶級锛涗粎 game-service 涓€涓?JVM锛涙満鍣ㄤ负 Windows 鏈満銆備笌 W-Z79锛? JVM 鍚屾椂璺戯級涓嶆槸鍚屼竴璐熻浇褰㈢姸锛屾暟瀛楀彧鐢ㄦ潵璇存槑褰㈡€侊紝涓嶅綋鎴愬閲忚鍒掓壙璇恒€?
+| 鍦烘櫙 | 骞跺彂 / 鏃堕暱 | issued | ok | errRate | p50 | p95 | p99 | max | 浼扮畻鍚炲悙 |
+|---|---|---|---|---|---|---|---|---|---|
+| mixed | 60 / 15s | 14,474 | 14,474 | 0.00% | 56 ms | 97 ms | 148 ms | 538 ms | ~963 rps |
+| readBurst | 80 / 15s | 27,647 | 27,647 | 0.00% | 41 ms | 68 ms | 98 ms | 172 ms | ~1,838 rps |
+| writeBurst | 40 / 15s | 19,035 | 19,035 | 0.00% | 31 ms | 50 ms | 71 ms | 156 ms | ~1,267 rps |
+| idempotentReplay | 300 req | 300 | 300 | 0.00% | 60 ms | 138 ms | 143 ms | 143 ms | ~940 rps |
+
+**闆?4xx銆侀浂 5xx銆乪rrRate 0.00%**锛沬dempotentReplay 鍏ㄩ儴鍛戒腑鐨勬槸骞傜瓑閲嶆斁璺緞锛圶-Idempotent-Replayed锛夈€備笌 W-Z79锛?026-11-14锛屼慨 AB-BA 閿佸墠 100% 鎵撴锛涗慨鍚庡悓 host 澶?JVM 骞跺彂 ~1,532 rps锛夊姣旓細浠婃棩鍗?JVM銆佹棤 9 杩?JVM 鑳屾櫙璐熻浇鐨勫共鍑€鐜涓嬶紝read 璺緞 p99 宸插帇鍒?~98ms锛涘啓璺緞绋冲畾 ~31ms p50銆?*娌℃湁鍙戠幇鏂板穿婧冪偣锛汚B-BA 閿佸凡鍦ㄦ鐗堟湰涓婃寔缁笉鍥炲綊**銆?
+宸茬煡闄愬埗锛堝瀹炲０鏄庯級锛氭棤 Redis锛坧resence/leaderboard/notify backend=memory锛夛紱涓嶈鐩栫湡 wkapi 涓婃父闀垮熬锛沴oopback 绔彛琛屼负锛涗笉鏄敓浜ф嫇鎵戯紱瀹归噺鎵胯瑙?docs/LOAD_TEST.md 鐢熶骇鍖?TODO銆?
