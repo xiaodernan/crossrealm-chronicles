@@ -89,6 +89,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 南归 · The Road Home | [the-road-home](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/38-the-road-home.md) |
 | 夏来了 · The Summer Arrives | [the-summer-arrives](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/39-the-summer-arrives.md) |
 | 头道火 · The First Fire | [the-first-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/40-the-first-fire.md) |
+| 守炉 · The Tending | [the-tending](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/41-the-tending.md) |
 
 Chapter → game-chapter mapping:
 
