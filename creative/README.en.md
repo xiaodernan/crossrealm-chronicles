@@ -105,6 +105,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 月下饭 · The Supper by Moonlight | [the-supper-by-moonlight](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/54-the-supper-by-moonlight.md) |
 | 留灯 · The Last Candle | [the-last-candle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/55-the-last-candle.md) |
 | 麻火柴 · The Match | [the-match](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/56-the-match.md) |
+| 烬 · The Embers | [the-embers](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/57-the-embers.md) |
 
 Chapter → game-chapter mapping:
 
