@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T20:27:03.224Z",
+  "generated_at": "2026-11-15T20:27:45.107Z",
   "branch": "main",
-  "head": "d77558c",
-  "total_commits": 1822,
-  "pushed_at": "2026-11-15T20:25:53Z",
+  "head": "97d11d09",
+  "total_commits": 1823,
+  "pushed_at": "2026-11-16T04:27:18+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "97d11d0",
+      "at": "2026-11-16T04:27:18+08:00",
+      "subject": "fix(showcase): latest.json headline/milestone_full 卷数动态化——从 zhNovel 计数现读，不再手抄"
+    },
     {
       "short": "d77558c",
       "at": "2026-11-15T20:25:53Z",
@@ -26,11 +31,6 @@
       "short": "5f8d2f7",
       "at": "2026-11-16T04:20:24+08:00",
       "subject": "fix(ci): Pages 装配时同步拷贝 simulation.json —— 炉边盘「真实玩家行为模拟」卡可读"
-    },
-    {
-      "short": "c918447",
-      "at": "2026-11-15T20:18:21Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
   "tracked_files": 1371,
