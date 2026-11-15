@@ -175,6 +175,27 @@ a{color:var(--gold-dim)}
       </div>
     </div>
 
+    <!-- Measured (real, not synthetic) -->
+    <div class="panel" id="measuredPanel" style="border-color:rgba(120,214,175,.35)">
+      <h2>实测记录 · Measured <small>2026-11-15 真跑真测 · 不是演示数据</small></h2>
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">压测 · 200 并发总请求</div><div class="kpi-value">3302<span style="font-size:.7em;color:var(--muted)"> / 3302</span></div><div class="kpi-trend up">100% 成功 · 0 5xx</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">全场错误率</div><div class="kpi-value">0.00%</div><div class="kpi-trend up">version/leaderboard/seasons/presence/telemetry 八路由</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">p50 时延（同机 9 JVM）</div><div class="kpi-value">890~914<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend up">网络代理开销为主</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label">单 IP 洪水被打回</div><div class="kpi-value">52.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend flat">622.7 rps → HTTP 429 · Redis 60次/10s</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">seasons 缓存命中</div><div class="kpi-value">0.997</div><div class="kpi-trend up">Spring Cache + Redis 母存</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">窗口内限流计数</div><div class="kpi-value">14481<span style="font-size:.7em;color:var(--muted)"> allowed</span></div><div class="kpi-trend down">rejected 6376 · allowed:rejected ≈ 2.3:1</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">Advisor 真实 e2e（BM25+LLM）</div><div class="kpi-value">≈10.4<span style="font-size:.7em;color:var(--muted)"> s p95/p99</span></div><div class="kpi-trend flat">30 job · 5 并发 · 主模型 gpt-6-sol</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label">LLM 前缀缓存（本次实跑）</div><div class="kpi-value">4516<span style="font-size:.7em;color:var(--muted)">/5862</span></div><div class="kpi-trend up">≈77.0% · 冷启 null → 次调命中</div></div>
+      </div>
+      <div style="font-size:.66rem;color:var(--muted);line-height:1.6">
+        <strong style="color:#e8e4dc">来源（全部本仓库实跑）</strong>：<code>docs/LOAD_TEST.md</code>（Windows + Docker Desktop · 9 JVM + Redis 7 · 2026-11-15）；
+        <code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> 打真实 wkapi.pro/v1 gpt-6-sol；<br/>
+        LLM 缓存修复链（HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral 冻结 system-prompt）：首调冷启动（cached=null）后，次调前缀命中率 ~77–83%（此前 HTTP/2 恒为 null，被判定「非流低命中」的根因就是上游控制台归类）。<br/>
+        <strong style="color:#e8e4dc">合成面板</strong>（KPI / 预测 / 漏斗 / 留存）仍是确定性合成数据（seed=20261115），标注为“合成”；<strong style="color:#e8e4dc">本卡片是真实实验数据</strong>，不想看合成就只看此卡。
+      </div>
+    </div>
+
     <!-- Recommendations -->
     <div class="panel">
       <h2>下一步优化清单 <small>按优先级排序 · 调参优先级 P0→P3</small></h2>
@@ -182,7 +203,8 @@ a{color:var(--gold-dim)}
     </div>
 
     <p class="footer-note">Crossrealm Chronicles · 炉边盘 ·
-      本快照由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115）——
+      「实测记录」为 2026-11-15 本机实跑（<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> 打真实 wkapi.pro /v1 gpt-6-sol）——
+      合成面板由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115）——
       真实上线后，同出数据源 <code>crossrealm_telemetry_*</code> 的本地事件也会汇入上述图表中。
       若 you 要把上报接进后端：只需 <code>POST /api/telemetry/events</code>，
       数据存 <code>telemetry</code> 面板中；炉边盘保持只读与静态。</p>
