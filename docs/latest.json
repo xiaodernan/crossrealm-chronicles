@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T02:12:10.535Z",
+  "generated_at": "2026-11-15T02:19:01.596Z",
   "branch": "main",
-  "head": "b66c88f",
-  "total_commits": 1608,
-  "pushed_at": "2026-11-15T10:11:35+08:00",
+  "head": "ca19722",
+  "total_commits": 1611,
+  "pushed_at": "2026-11-15T10:18:33+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "ca19722",
+      "at": "2026-11-15T10:18:33+08:00",
+      "subject": "docs(creative): showcase Feed 增补 W-Z96/W-Z97/W-Z98（三件新落地）"
+    },
+    {
+      "short": "3fd61d8",
+      "at": "2026-11-15T10:16:03+08:00",
+      "subject": "feat(ui): W-Z98 暂停菜单视觉重塑——「金调炭光·罗盘环」语言（与说明书/炉边快速上手同源）"
+    },
+    {
+      "short": "0424faa",
+      "at": "2026-11-15T02:12:10Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "b66c88f",
       "at": "2026-11-15T10:11:35+08:00",
@@ -16,21 +31,6 @@
       "short": "af2625f",
       "at": "2026-11-15T10:02:13+08:00",
       "subject": "feat(game): W-Z96 番外七入迷宫——lore-10「驿站残碑」（Interlude VII stele）"
-    },
-    {
-      "short": "a4170fb",
-      "at": "2026-11-15T01:28:54Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "b065fcd",
-      "at": "2026-11-15T09:28:27+08:00",
-      "subject": "fix(pages): build-latest 的 milestone 往前看 20 条提交——同步 bot 的 chore(latest) 不再把\"最新里程碑\"检成 W-?；milestone_full 同步为 W-Z95 番外七·七番外全译本"
-    },
-    {
-      "short": "47ea79d",
-      "at": "2026-11-15T01:20:08Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
   "tracked_files": 1224,
@@ -39,7 +39,7 @@
   "lore_sources": 57,
   "novel_chapters_zh": 15,
   "novel_chapters_en": 15,
-  "milestone": "W-Z97",
+  "milestone": "W-Z96",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
