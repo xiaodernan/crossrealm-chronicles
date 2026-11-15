@@ -3616,6 +3616,15 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   trilance_reveal_left: 'Left Sun (emberside)',
   trilance_reveal_mid: 'Middle Sun (unlit)',
   trilance_reveal_right: 'Right Sun (cold)',
+  hm_title_newcomer_traps: 'First 30 seconds — do these right',
+  hm_body_newcomer_traps: `Thirty seconds, six things you will never regret knowing:
+
+· Mouse direction is fixed — it now feels the way it should: scroll up = look up, scroll down = look down; wheel also zooms.
+· Don't mash {escape} — each press closes only the topmost layer; stuck in menus? Press {journal}, open the journal, come back out.
+· Don't bang on doors — some need lore, some need anchor shards, some need a lit flame — press {help} whenever you are unsure; the journal remembers unsolved symbols.
+· Want to see the story first? Press {autoPlay} — autoplay runs the mainline to its end and forks the ending; turn it off if you want the real trip.
+· Lost at the doorway? Press {minimap} — the world map shows quest waypoints, POIs and dungeon entrances; follow the gold arrows.
+· Don't want to memorize keys? Press {help} — everything you can do is on this page.`,
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

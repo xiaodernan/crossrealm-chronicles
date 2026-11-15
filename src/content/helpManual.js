@@ -16,6 +16,11 @@ export const HELP_SECTIONS_EXTRA = [
     body: 'hm_body_online_living',
   },
   {
+    id: 'newcomer-traps',
+    title: 'hm_title_newcomer_traps',
+    body: 'hm_body_newcomer_traps',
+  },
+  {
     id: 'lore-oracle',
     title: 'hm_title_lore_oracle',
     body: 'hm_body_lore_oracle',
