@@ -8,42 +8,48 @@
 
 ## Twenty-seven: The Last Persimmon
 
-The persimmon tree grew even taller this year.
+After the frost, the old persimmon tree stood almost bare. Three leaves trembled on its highest limb.
 
-Lin Wen stood under it, looking up at the branches heavy with fruit. His heart sank. Far fewer persimmons hung on the tree this season — and the leaves had already begun to thin out to a pale, withered gold.
+Lin Wen had been standing under it for a long time. The leaves were thin, the fruit few — only one persimmon still hung on the branch closest to the gate, its weight bowing the limb down.
 
-"Mother, are they almost gone?" he asked.
+His mother came out of the house, tied her apron, and stopped beside him. She looked at the fruit. Then at him.
 
-His mother came out from the kitchen door tying her apron and did not answer.
+"That one," she said, "has been hanging on that branch the day you were born."
 
-Lin Wen stepped forward and caught a fully-ripe persimmon in his palm. The fruit faced downward in the branch, its leather skin already dimpled by the wind. Every branch he looked at seemed to be holding just one or two fewer than last year.
+Lin Wen did not answer.
 
-He wanted to walk next door for a drink. He did not say a word. The fruit was getting heavier and the wind getting brisker; his mother never spoke, so he simply slipped the persimmon into his jacket.
+She went on. "The morning you were born I stood right here — I tried to pluck it for you. But it never fell. It was still hanging the next morning too. For years and years it never fell."
 
-Dinner was set. His sister was not back; his sister-in-law sat at the table and pointed to his sleeve: "You have left a persimmon in your pocket."
+It was the first fruit the tree had ever given. The fingers press into it lightly — it had the weight of a bell tied to a single knot.
 
-Lin Wen pulled the fruit out. It was large, red, and luminous — like a small sun pressed into the lining. "It is yours," he said.
+Lin Wen stared at the persimmon. Its skin had moved from scarlet to deep crimson, powdered with the season's first frost like a small velvet moon.
 
-His sister-in-law laughed and helped him ladle out a bowl she knew he liked. The bowl came out steaming.
+His mother stood for a long time and said nothing for so long that a cold breath passed between them. Then she said:
 
-Lin Wen looked out the window. The moon had climbed above the ridge again; it was silver on the roofs. The moon had shone every night since the night of the homecoming — but tonight, Lin Wen had the sudden and certain feeling he had never looked at it properly before.
+"The year your father passed — it was still on that branch. The day your sister married out — it was still on the branch. Your yearly visits, every autumn — it was still on the branch. Fruit falls and falls, but it never did. All those seasons. All those years from you — it kept this one for you."
 
-That was not a real persimmon.
+Lin Wen understood, all at once, what this fruit was — everything the tree had saved for him, everything the gate, the yard, the old house had held in its shadow.
 
-That was the first fruit his mother had picked on the day he was born. The whole family had been told it was a perfect fruit. No one had ever been able to explain what that meant — perhaps because no child was given it, only carried.
+His mother fell silent. She stood where she was; the apron's edge lifted faintly with the wind.
 
-It had stayed on the tree all these years — until Lin Wen came back.
+Lin Wen turned and looked at her. She had aged — her hair had gone white at the temples, deep lines had set across her face. He wanted to say something — he wanted to say: Mother, you should eat. He wanted to say: Mother, don't. He wanted to say: I'm home now.
 
-Lin Wen lifted his head. His mother was standing at the window. She had grown old; the apron rose and fell with her breathing. He opened his mouth, and the persimmon jumped in his jacket. His mother simply took it from him and placed it into a small clay bowl.
+He could say nothing.
 
-Then she opened the family altar, lit three sticks of incense, set the bowl at the center, and stepped back.
+His mother moved at last. Slowly, carefully — she reached up and plucked the fruit.
 
-Lin Wen saw that the table was heaped with offerings — everything from the autumn harvest, arranged as though on the altar every year.
+Lin Wen cried out once and she laughed — a brief, understated laugh — and then she walked back toward the house with the fruit still in her hands.
 
-The moon had slid past the crest of the mountain. Lin Wen lowered his head and saw the persimmon in the bowl shimmer with the long, slow constellation of light across its skin.
+She opened the family altar. The clay bowl had only one thing inside it — a persimmon leaf. She laid the fruit inside the bowl and, with great care, broke it in two. She ate one half herself. The other half she handed to Lin Wen.
 
-Lin Wen wept, very quietly, for the first time in his entire journey.
+"Keep it," she said. "It is the second harvest now."
+
+He held the half persimmon in his palm for a very long time. Its coolness settled into his hand — into his wrist — into his forearm — deep.
+
+When the moon finally crossed the ridge, Lin Wen wept. Silently, head bent, the fruit cupped in his hand, the moon sliding down the fruit's skin like a slow river, the fire inside the house cracking softly behind him.
+
+And the old fire in the kitchen burned until dawn.
 
 ---
 
-*(End of volume twenty-seven · Volume IV, fourth part.)*
+*(End of volume twenty-seven · Volume IV, fourth part. The Academy's revision of the original chapter.)*
