@@ -105,7 +105,8 @@ h1, h2 { text-wrap: balance; }
 
 <div class="wrap statrow">
   <div class="stat"><b>9</b><span class="locale locale-zh">Spring Cloud 微服务</span><span class="locale locale-en">Spring Cloud services</span></div>
-  <div class="stat"><b>6696</b><span class="locale locale-zh">单测全绿 + Perf/E2E 门禁</span><span class="locale locale-en">unit tests green + perf/e2e gates</span></div>
+  <div class="stat"><b id="live-testfiles">6696</b><span class="locale locale-zh">单测全绿（CI 门禁实装）</span><span class="locale locale-en">unit tests green (CI gated)</span></div>
+  <div class="stat"><b id="live-commits">—</b><span class="locale locale-zh">次提交（CI 门禁）</span><span class="locale locale-en">commits so far</span></div>
   <div class="stat"><b>25</b><span class="locale locale-zh">OST 可播放 25 首 · Web Audio</span><span class="locale locale-en">OST tracks, playable via Web Audio</span></div>
   <div class="stat"><b>142</b><span class="locale locale-zh">分钟 IMAX 剧本</span><span class="locale locale-en">minutes IMAX script</span></div>
   <div class="stat"><b>110</b><span class="locale locale-zh">次元回声</span><span class="locale locale-en">echo entries</span></div>
@@ -201,6 +202,17 @@ buttons.forEach((btn) => btn.addEventListener('click', () => {
   root.classList.add(btn.dataset.set);
   buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
 }));
+</script>
+<script>
+  (async function () {
+    try {
+      const r = await fetch('./latest.json', { cache: 'no-store' });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (typeof d.total_commits === 'number') { const el = document.getElementById('live-commits'); if (el) el.textContent = String(d.total_commits); }
+      if (typeof d.test_files === 'number') { const el = document.getElementById('live-testfiles'); if (el) el.textContent = String(d.test_files); }
+    } catch (_) { /* latest.json unreachable — demo fallback stays in place */ }
+  })();
 </script>
 </body>
 </html>

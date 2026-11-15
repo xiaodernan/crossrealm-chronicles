@@ -53,6 +53,7 @@ jobs:
           cp creative/player-guide.html _site/guide.html
           cp creative/tapestry.html _site/tapestry.html
           cp creative/tapestry.en.html _site/tapestry.en.html
+          cp docs/latest.json _site/latest.json
           cp creative/music/soundtrack.html _site/soundtrack.html
           cp creative/music/poster-ost-album-4k.png _site/poster-ost-album-4k.png
           cp public/favicon.svg _site/favicon.svg
