@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T17:38:19.997Z",
+  "generated_at": "2026-11-15T17:50:06.301Z",
   "branch": "main",
-  "head": "fc81c1ac",
-  "total_commits": 1777,
-  "pushed_at": "2026-11-16T01:36:41+08:00",
+  "head": "110c92a5",
+  "total_commits": 1779,
+  "pushed_at": "2026-11-16T01:43:28+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "110c92a",
+      "at": "2026-11-16T01:43:28+08:00",
+      "subject": "feat(canon): W-Z181 第五十六卷《麻火柴 / The Match》——卷九之一 · 卷九《祷火 —— 重燃之劫》开卷"
+    },
+    {
+      "short": "c5b9445",
+      "at": "2026-11-15T17:38:20Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "fc81c1a",
       "at": "2026-11-16T01:36:41+08:00",
@@ -21,25 +31,15 @@
       "short": "4debca0",
       "at": "2026-11-16T01:32:05+08:00",
       "subject": "feat(canon): W-Z179 第五十四卷《月下饭 / The Supper by Moonlight》——卷八之三"
-    },
-    {
-      "short": "b83ce44",
-      "at": "2026-11-15T17:26:14Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "ba83ebd",
-      "at": "2026-11-16T01:23:30+08:00",
-      "subject": "feat(canon): W-Z178 第五十三卷《守碗 / The Vigil》——卷八之二"
     }
   ],
-  "tracked_files": 1331,
+  "tracked_files": 1333,
   "test_files": 456,
   "i18n_keys": 3215,
   "lore_sources": 59,
-  "novel_chapters_zh": 55,
-  "novel_chapters_en": 55,
-  "milestone": "W-Z180",
+  "novel_chapters_zh": 56,
+  "novel_chapters_en": 56,
+  "milestone": "W-Z181",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
