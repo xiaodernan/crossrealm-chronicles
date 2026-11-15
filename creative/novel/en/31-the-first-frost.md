@@ -8,50 +8,50 @@
 
 ## Thirty-one: The First Frost
 
-On the day the first frost arrived, only three persimmons were left on the old tree.
+The morning the first frost arrived, only three persimmons remained on the old tree.
 
-At Double Ninth it had carried twenty-three. Within a month, the wind had taken five, the birds had taken fifteen, the frost had taken one. These three were the last — darkening at the stem, powdered in frost like old ivory, heavier than any fruit the tree had ever borne.
+Her husband had told her for years that when frost came, any fruit still on the tree would fall and rot into the earth on its own. Fruit left on the bark would be lost to humans — and loved ones would be gone from the world.
 
-His mother stood beneath the branches and looked up for a long time.
+Lin Wen climbed the ladder and plucked each fruit before the cold could take it.
 
-"Climb up and pick them," she said. "One more day and they will fall on their own. On the ground they feed the soil — not us. Everything was always like that. Fruit taken at the right hour feeds the family; taken a day late, it feeds the earth."
+He came down with exactly three.
 
-Lin Wen set up the ladder. The branches moved in the wind. He climbed to the highest fork, reached carefully across, and pinched the stem of the last persimmon. The instant his fingers closed on it, he felt its temperature — cooler than the skin of his own hand.
-
-If the fruit was cold, then winter had come.
-
-He came down with three in the crook of his arm. His mother arranged them in a bamboo basket and counted them out loud.
-
-"Three," she said. "One for you. One for your sister. One for the boy. I won't eat."
+His mother counted them twice, then set them on the bamboo tray. "One for you. One for your sister. One for the boy." She turned and walked away. "I don't eat any."
 
 "Mother —"
 
-"I've had mine," she said. "I ate what my mother's hands gave me. I've had my share of persimmons in this life."
+"I've had enough," she said. "My portion was set long ago, by the woman who carried it across the mountain."
 
-That evening they made noodles, as families in the north do on the day of the first frost. Hidden in the broth were three marbled dumplings of persimmon paste — his mother's work. His sister took a bite and said it was better than last year. His mother, not looking up, said:
+That evening they cooked noodle soup with persimmon dumplings. His sister took a bite and said it was good, again, just like last year.
 
-"These came from the seed her grandmother carried across the mountain in her wedding clothes."
+His mother, looking down into her bowl, said:
 
-It was the first time Lin Wen had ever heard his mother speak of the mountain.
+"This tree is none of ours. Your great-grandmother carried the seeds across the mountain in her bridal clothes. The first tree died. The second survived. Four generations have eaten its fruit because of that second tree."
 
-After supper, his sister tucked the boy to bed. His mother took the blue scarf down from the frame on the slope. She folded it into a perfect square and laid it into the empty clay bowl on the altar — where the persimmon leaf had curled in the frost. The scarf rested on the leaf, smoothed flat by the tips of her fingers.
+It was the first time in their lives he had ever heard her speak of the woman on the other side of the mountains.
 
-"It won't freeze in winter," she said.
+After supper, his mother walked to the altar and lifted the piece of blue silk his grandmother had given her — the scarf embroidered with persimmon blossoms — and folded it into a neat, small square. She laid it into the clay altar bowl, resting on a single curled persimmon leaf.
+
+"Winter comes, the silk stays here," she said.
+
+Lin Wen asked:
 
 "When does it go back?"
 
-"At the Start of Spring," his mother said. "While it stands where it can see the child, the child stands steady."
+"On the Start of Spring," she said. "While it is still by the bowl, the sapling will stand."
 
-That night, Lin Wen swept the courtyard clean. Persimmon leaves had fallen in a single yellow sheet. He gathered them one by one and placed them in the bowl. The fruit was gone — but the leaves kept their shape, layer upon layer, until the bowl was full again in a different way.
+That same evening, Lin Wen swept the courtyard one last time. Persimmon leaves lay everywhere, their stems curled into fine bronze curls. He gathered them leaf by leaf and laid them inside the bowl.
 
-The fire in the stove cracked once, as if answering a question no one had asked.
+The bowl now held: one faded persimmon skin, one dried persimmon leaf, one folded blue scarf, and now two fresh persimmon leaves — a family relic becoming heavier each year.
 
-Lin Wen stepped outside and stood for a long time. The new tree swayed on the slope. The red cord caught the moonlight and burned like a thin line of darker gold. He remembered what his mother had said — *at the Start of Spring, everything it learns this winter will be answered.*
+The stove cracked once, softly, like someone in the room gently reminding the house that someone was still watching.
 
-Deep in the night, the north wind came down over the back ridge. The first frost settled on the sixth leaf of the seedling — a thin white mantle, light as a quilt no one had seen laid by any hand.
+He walked to the foot of the slope. The sapling was partly hardened, one side of it curling in the chill, leaves fluttering along the cedar ring.
 
-That night the whole family slept. No one knew who had laid that frost — but the whole eastern slope knew it would be there until spring.
+No one would ever know who had stayed beside Lin Wen's bed when he was a baby or who had stayed beside him on that first autumn he learned the taste of persimmons.
+
+— but the whole eastern slope knew.
 
 ---
 
-*(End of volume thirty-one · Volume IV, eighth part.)*
+*(End of volume thirty-one · Volume IV, eighth part. The Academy's revision of the original chapter.)*
