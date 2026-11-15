@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T19:18:23.670Z",
+  "generated_at": "2026-11-15T19:28:14.947Z",
   "branch": "main",
-  "head": "e027d66d",
-  "total_commits": 1799,
-  "pushed_at": "2026-11-16T03:16:19+08:00",
+  "head": "28ddc8a6",
+  "total_commits": 1801,
+  "pushed_at": "2026-11-16T03:26:48+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "28ddc8a",
+      "at": "2026-11-16T03:26:48+08:00",
+      "subject": "feat(canon): W-Z192 第六十六卷《守火 / The Keeper》——卷十一之一，《墨火》开篇"
+    },
+    {
+      "short": "cda8f8a",
+      "at": "2026-11-15T19:18:23Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "e027d66",
       "at": "2026-11-16T03:16:19+08:00",
@@ -21,25 +31,15 @@
       "short": "2f286f2",
       "at": "2026-11-16T03:10:13+08:00",
       "subject": "feat(canon): W-Z190 第六十四卷《烽火 / The Beacon》——卷十之五"
-    },
-    {
-      "short": "0574e0d",
-      "at": "2026-11-15T19:04:46Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "6796839",
-      "at": "2026-11-16T03:01:58+08:00",
-      "subject": "feat(canon): W-Z189 第六十三卷《原火 / The Original Fire》——卷十之四"
     }
   ],
-  "tracked_files": 1357,
+  "tracked_files": 1359,
   "test_files": 458,
   "i18n_keys": 3223,
   "lore_sources": 59,
-  "novel_chapters_zh": 65,
-  "novel_chapters_en": 65,
-  "milestone": "W-Z191",
+  "novel_chapters_zh": 66,
+  "novel_chapters_en": 66,
+  "milestone": "W-Z192",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
