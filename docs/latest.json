@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T19:55:37.827Z",
+  "generated_at": "2026-11-15T19:56:24.886Z",
   "branch": "main",
-  "head": "dd14543b",
-  "total_commits": 1811,
-  "pushed_at": "2026-11-16T03:52:17+08:00",
+  "head": "15cee51d",
+  "total_commits": 1813,
+  "pushed_at": "2026-11-15T19:55:39Z",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "15cee51",
+      "at": "2026-11-15T19:55:39Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
+    {
+      "short": "6994de3",
+      "at": "2026-11-16T03:55:00+08:00",
+      "subject": "feat(canon): W-Z197 第七十卷《第六百零一 / The Six Hundred and First》——卷十一之五，七十卷基线达成"
+    },
     {
       "short": "dd14543",
       "at": "2026-11-16T03:52:17+08:00",
@@ -21,25 +31,15 @@
       "short": "5800601",
       "at": "2026-11-16T03:49:54+08:00",
       "subject": "feat(canon): W-Z195 第六十八卷《围炉 / The Gathering》——卷十一之三"
-    },
-    {
-      "short": "7c40332",
-      "at": "2026-11-15T19:48:22Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "cfbf503",
-      "at": "2026-11-16T03:47:13+08:00",
-      "subject": "fix(showcase): 展示页事实包 feature_surface 动态化"
     }
   ],
-  "tracked_files": 1365,
+  "tracked_files": 1367,
   "test_files": 458,
   "i18n_keys": 3225,
   "lore_sources": 59,
-  "novel_chapters_zh": 69,
-  "novel_chapters_en": 69,
-  "milestone": "W-Z196",
+  "novel_chapters_zh": 70,
+  "novel_chapters_en": 70,
+  "milestone": "W-Z197",
   "milestone_full": "卷六十七《拾火》 · 卷十一《墨火》开篇 · StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 59 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：六十七卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 卷末守火线），全部内容中英双语逐字对齐。",
   "feature_surface": [
