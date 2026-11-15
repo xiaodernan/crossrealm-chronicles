@@ -69,6 +69,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 三日陵 · Sunscar Stair | [trilarite-stair](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/18-trilarite-stair.md) |
 | 三日之议 · The Council of Three Suns | [the-council-of-three-suns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/19-the-council-of-three-suns.md) |
 | 读完自己 · The Reader Opens This Page | [the-reader-opens-this-page](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/20-the-reader-opens-this-page.md) |
+| 夜幕归乡 · Night Walk Home | [night-walk-home](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/21-night-walk-home.md) |
 
 Chapter → game-chapter mapping:
 
