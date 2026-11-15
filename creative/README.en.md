@@ -114,6 +114,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 原火 · The Original Fire | [the-original-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/63-the-original-fire.md) |
 | 烽火 · The Beacon | [the-beacon](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/64-the-beacon.md) |
 | 不熄 · Still Burns | [still-burns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/65-still-burns.md) |
+| The Keeper · The Crossrealm Fire | [the-keeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/66-the-keeper.md) |
 
 Chapter → game-chapter mapping:
 
