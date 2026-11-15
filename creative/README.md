@@ -93,6 +93,7 @@ creative/music/soundtrack.html
 | 冬至 · The Winter Solstice | [the-winter-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/44-the-winter-solstice.md) |
 | 火炬 · The Torch | [the-torch](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/45-the-torch.md) |
 | 春分 · The Spring Equinox | [the-spring-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/46-the-spring-equinox.md) |
+| 黑信 · The Black Letter | [the-black-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/47-the-black-letter.md) |
 
 每一章对应游戏的章节走法：
 
