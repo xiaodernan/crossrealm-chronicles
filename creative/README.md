@@ -113,6 +113,7 @@ creative/music/soundtrack.html
 | 烽火 · The Beacon | [the-beacon](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/64-the-beacon.md) |
 | 不熄 · Still Burns | [still-burns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/65-still-burns.md) |
 | 守火 · The Keeper | [the-keeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/66-the-keeper.md) |
+| 拾火 · The Kindle | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/67-the-kindle.md) |
 
 每一章对应游戏的章节走法：
 

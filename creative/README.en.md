@@ -115,6 +115,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 烽火 · The Beacon | [the-beacon](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/64-the-beacon.md) |
 | 不熄 · Still Burns | [still-burns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/65-still-burns.md) |
 | The Keeper · The Crossrealm Fire | [the-keeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/66-the-keeper.md) |
+| The Kindle · Six Hundred Years | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/67-the-kindle.md) |
 
 Chapter → game-chapter mapping:
 
