@@ -83,6 +83,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 立冬 · The Start of Winter | [the-start-of-winter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/32-the-start-of-winter.md) |
 | 账册 · The Ledger | [the-ledger](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/33-the-ledger.md) |
 | 驿站 · The Waystation | [the-waystation](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/34-the-waystation.md) |
+| 九十一里 · Ninety-one Li | [ninety-one-li](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/35-ninety-one-li.md) |
 
 Chapter → game-chapter mapping:
 
