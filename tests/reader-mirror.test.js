@@ -1,7 +1,7 @@
 /**
  * W-Z138 — 炉火之镜：读完整 20 卷的一次性镜像。
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { CanonJournalTab } from '../src/ui/CanonJournalTab.js';
 
 const store = () => {
