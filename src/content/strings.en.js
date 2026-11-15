@@ -3080,6 +3080,8 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
+· Canon Library — 17 volumes of the canon, fully readable
+· Starpath Reading — one daily sign, the flame speaks
 
 Tab buttons show unlocked count。`,
   hm_title_meta_systems: 'Meta Systems',
