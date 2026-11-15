@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Sixty volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Sixty-one volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 60 volumes of the canon, fully readable
+· Canon Library — 61 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3136,8 +3136,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 60-volume index',
-  hm_body_codex: `Codex — 60 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 61-volume index',
+  hm_body_codex: `Codex — 61 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3199,6 +3199,7 @@ hm_title_codex: 'Codex · the 60-volume index',
 58 · The White Stone — A-Shi goes down to the thawing river one early spring day; a white-haired girl sits by the bank — she presses one simple white stone into his palm, says nothing but “It is from your grandfather.” — A-Shi slips it into the bowl; the bowl warms immediately; his mother weeps and says: “Your grandfather has not left — he never did.” A-Shi finally understands what he is.
 59 · The Kindling — winter approaches; his mother sets a single piece of dark orange volcanic glass on the table — the ember-seed passed down for six hundred years; A-Shi understands — he has never been keeping the fire; the fire has been keeping him — for an eternity. Volume IX — complete.
 60 · The Firewood — a winter night, the hearth bright; his mother places a sandalwood-handled sword in his hands: “It is yours now — it has been handed down your grandfather’s wrist for six centuries”; A-Shi holds it in both hands and understands the whole arch of the family’s destiny — the fire was never left; it was handed through hands.
+61 · Splitting the Firewood — the first good day for chopping; A-Shi carries his axe up the mountain only to fail repeatedly; his mother teaches him from a distance: “feet wide, turn your waist first, let the axe fall” — he does it exactly as she said, and the log splits cleanly in two; six hundred years chose him.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3212,7 +3213,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (sixty volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (sixty-one volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
