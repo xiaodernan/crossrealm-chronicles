@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T01:28:13.917Z",
+  "generated_at": "2026-11-15T01:28:54.191Z",
   "branch": "main",
-  "head": "47ea79d",
-  "total_commits": 1604,
-  "pushed_at": "2026-11-15T01:20:08Z",
+  "head": "b065fcd",
+  "total_commits": 1605,
+  "pushed_at": "2026-11-15T09:28:27+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "b065fcd",
+      "at": "2026-11-15T09:28:27+08:00",
+      "subject": "fix(pages): build-latest 的 milestone 往前看 20 条提交——同步 bot 的 chore(latest) 不再把\"最新里程碑\"检成 W-?；milestone_full 同步为 W-Z95 番外七·七番外全译本"
+    },
     {
       "short": "47ea79d",
       "at": "2026-11-15T01:20:08Z",
@@ -26,11 +31,6 @@
       "short": "c6ca860",
       "at": "2026-11-15T09:04:17+08:00",
       "subject": "test(scripts): W-Z94 e2e/perf 等 fresh-profile 注入跨页首开播种——炉边快速上手别挡住真正的测试"
-    },
-    {
-      "short": "3f48175",
-      "at": "2026-11-15T09:01:17+08:00",
-      "subject": "docs(creative): showcase 最新成果刷新到 W-Z93——6696 tests、Feed 增补 W-Z90/W-Z91/W-Z92/W-Z93 四条（首屏 1.98 MiB）"
     }
   ],
   "tracked_files": 1224,
