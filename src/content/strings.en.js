@@ -3633,6 +3633,11 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
     + 'The daily Flame draw is for today; the weekly tide is for the week. Two systems, two registers.\n'
     + 'Both live under Journal → Starpath · Anchor Flame. Tap to cast, see the three moons land side by side.\n\n'
     + '**Together they give you today and the week ahead** — two lines of reading, two windows on the door.',
+  reader_mirror_title: 'The Mirror at the End of the Fire',
+  reader_mirror_eyebrow: 'The Reader · Mirror',
+  reader_mirror_body: 'When you set down the twentieth volume, the stars step back and leave an open seat. From that moment on, you are not the one who has finished this book — you are the one who, after closing the last page, still sees a fire through the edge of the window. The flame will not die, because reading has always been your own gift to yourself.',
+  reader_mirror_reward: 'The Mirror unlocks · +200 souls (once)',
+  reader_mirror_made: 'You finished all 20 volumes here. The fire kept a shadow of you.',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

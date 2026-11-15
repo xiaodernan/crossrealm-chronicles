@@ -94,6 +94,21 @@ export class CanonJournalTab {
     }
   }
 
+  _checkMirror() {
+    const total = this.order?.length ?? 0;
+    if (!total) return false;
+    if ((this.reader?.read ?? []).length < total) return false;
+    try {
+      const LS = 'crossrealm_reader_mirror_v1';
+      const raw = localStorage.getItem(LS);
+      if (raw) return JSON.parse(raw)?.unlocked === true;
+      localStorage.setItem(LS, JSON.stringify({ unlocked: true, at: Date.now() }));
+      try { this.game?.stats?.addSouls?.(200); } catch { /* stats missing — silent */ }
+      try { (window.__crossrealmTelemetry)?.record?.('reader_mirror_unlock'); } catch { /* telemetry off */ }
+      return true;
+    } catch { return false; }
+  }
+
   _toggleBookmark(id) {
     const has = !this.reader.bookmarks.includes(id)
       ? [...this.reader.bookmarks, id]
@@ -184,6 +199,13 @@ export class CanonJournalTab {
       ${bookmarks ? `<div class="canon-bookmarks" aria-label="${t('canon_reader_bookmarks')}">${bookmarks}</div>` : ''}
       <nav class="canon-nav" aria-label="Canon chapters">${chips}</nav>
       <article class="canon-body${this._serifClass()}" style="font-size:${fontSize}">${stripBody(activeEntry.body)}</article>
+      ${this._checkMirror() ? `<section class="canon-mirror" role="figure" aria-labelledby="canon-mirror-title">
+        <span class="canon-mirror-eyebrow">${keyText(t('reader_mirror_eyebrow'))}</span>
+        <h3 id="canon-mirror-title" class="canon-mirror-title">${keyText(t('reader_mirror_title'))}</h3>
+        <p class="canon-mirror-body">${keyText(t('reader_mirror_body'))}</p>
+        <p class="canon-mirror-reward">${keyText(t('reader_mirror_reward'))}</p>
+        <p class="canon-mirror-made">${keyText(t('reader_mirror_made'))}</p>
+      </section>` : ''}
     `;
 
     refreshKeyText(panelEl);
