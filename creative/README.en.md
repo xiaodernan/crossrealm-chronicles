@@ -108,6 +108,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 烬 · The Embers | [the-embers](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/57-the-embers.md) |
 | 白石 · The White Stone | [the-white-stone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/58-the-white-stone.md) |
 | 火种 · The Kindling | [the-kindling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/59-the-kindling.md) |
+| 薪 · The Firewood | [the-firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/60-the-firewood.md) |
 
 Chapter → game-chapter mapping:
 
