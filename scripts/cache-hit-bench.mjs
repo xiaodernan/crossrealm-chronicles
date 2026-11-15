@@ -30,6 +30,8 @@ const MODEL = process.env.LLM_MODEL || env.LLM_MODEL || 'gpt-6-sol';
 const CALLS = parsePositiveInt(getArg('--calls')) ?? 8;
 const JSON_OUT = getArg('--json') !== undefined;
 const GAP_MS = parsePositiveInt(getArg('--gap-ms')) ?? 1200;
+/** --repeat=true —— 8 次都用同一个 user prompt（相同 prefix），量化纯热缓存命中率 */
+const REPEAT = getArg('--repeat') === 'true';
 
 if (!API_KEY) { console.error('LLM_API_KEY is required (env or .env).'); process.exit(2); }
 
@@ -101,14 +103,14 @@ async function chat(system, user) {
 
 function formatRatio(a, b) { return b > 0 ? ((a / b) * 100).toFixed(1) + '%' : 'n/a'; }
 function parsePositiveInt(v) { const n = Number(v); return Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined; }
-function getArg(name) { const i = process.argv.indexOf(name); return i >= 0 ? process.argv[i + 1] : undefined; }
+function getArg(name) { const i = process.argv.indexOf(name); if (i >= 0 && process.argv[i + 1] && !process.argv[i + 1].startsWith('--')) return process.argv[i + 1]; const p = process.argv.find((a) => a.startsWith(name + '=')); return p ? p.slice(name.length + 1) : undefined; }
 function readFileSafe(p) { try { const txt = readFileSync(p, 'utf8'); const out = {}; for (const line of txt.split(/\r?\n/)) { const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/); if (!m) continue; out[m[1]] = m[2].replace(/^["']|["']$/g, '').trim(); } return out; } catch { return {}; } }
 async function safeText(res) { try { return await res.text(); } catch { return null; } }
 
 // ---------- 跑 ----------
 const rows = [];
 for (let i = 0; i < CALLS; i++) {
-  const user = userPrompts[i % userPrompts.length];
+  const user = REPEAT ? userPrompts[0] : userPrompts[i % userPrompts.length];
   const t0 = Date.now();
   const r = await chat(systemPrompt, user);
   const dt = Date.now() - t0;
