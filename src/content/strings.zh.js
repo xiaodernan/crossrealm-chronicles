@@ -2400,7 +2400,7 @@ export const STRINGS_ZH = Object.freeze({
   ending_flame_title: '你的锚火仍在燃烧',
   ending_flame_sub: '火不会因为终局而熄灭，故事只是换了火光的频率',
   start_crossmedia_title: '── 跨界纪事 · 跨媒体宇宙 ──',
-  start_crossmedia_caption: '长篇小说 17 卷全书 · 电影剧本 · OST 25 曲手册—— 原典全部内嵌于游戏内',
+  start_crossmedia_caption: '长篇小说 18 卷全书 · 电影剧本 · OST 25 曲手册—— 原典全部内嵌于游戏内',
   start_keeper_badge: '炉主 · 火没有灭',
   start_ticker_label: '此刻 · 炉边传闻',
 
@@ -3088,7 +3088,7 @@ export const STRINGS_ZH = Object.freeze({
 · 地下城 — 迷宫清空记录
 · 流派 — 剑/杖技能树预览
 · 支线 — 可选目标，自动奖魂火
-· 典籍馆 — 17 卷原典全目录（晨雾回声）
+· 典籍馆 — 18 卷原典全目录（晨雾回声）
 · 星轨占卜 — 每日一签，火里有字
 
 页签按钮上显示已解锁数量。`,
@@ -3130,8 +3130,8 @@ Boss 再战 — 击败后在信标按 {interact} 召唤，+5 魂火
 再点一下「典籍」即切回顾问态。
 
 典籍叩问是只读的：不写世界状态，只需要在线开关开着。`,
-hm_title_codex: '典籍馆 · 17 卷全部目录',
-  hm_body_codex: `跨界纪事 17 卷，原点在游戏里——每章一句话：
+hm_title_codex: '典籍馆 · 18 卷全部目录',
+  hm_body_codex: `跨界纪事 18 卷，原点在游戏里——每章一句话：
 
 00 · 序言 · 表面之下的轻摇
 01 · 第一章 · 交汇枢纽，一根光柱给点燃它的人周期。
@@ -3150,6 +3150,7 @@ hm_title_codex: '典籍馆 · 17 卷全部目录',
 14 · 番外七 · 下次再坐 — 那张纸挂在那里，是给还没有坐过的人看的。
 16 · 番外八 · 漏灯记 — 灯漏出来的蜡在木桌上是一截温存；有人没有让这截磨灭。
 17 · 晨雾回声 — 雾散之后，守夜人终于肯把最后一句说出口。
+18 · 三日陵 — 异太阳的暖灯，依然给愿意探险的旅人一点光。
 
 想在游戏之外继续读？GitHub 上的逐章原文（双语全译）：
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
