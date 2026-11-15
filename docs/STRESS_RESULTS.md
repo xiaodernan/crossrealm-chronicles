@@ -81,3 +81,18 @@ powershell -ExecutionPolicy Bypass -File .\server\scripts\stress-oracle-verify.p
 ---
 
 *文档随提交 `418ec36`+W-Z79 ADR 产出，作为 W-Z79 证据链附页。*
+
+---
+
+## 2026-11-17 · Oracle 压铸复测（W-Z97 落地后 · 57 源语料 + 引文枝 reminder）
+
+> ** W-Z86 的同一台 throwaway 编排代码不变**（`scripts/local-stub-llm.mjs` + `scripts/stress-oracle.mjs` + `server/scripts/stress-oracle-verify.ps1`）——只变了语料版本（34 → 57 源，2026-11-17 起）和 `LoreOracleService` 的 user 非流 line（reminder 增 Quote branch，W-Z97）。同端口 28883/28884，同 stub（确定性 fake upstream，20ms，零真 token）。
+
+| 场景 | 并发 / 时长 | issued | ok | 4xx | 5xx | errRate | p50 | p95 | p99 | rps |
+|------|------------|--------|----|-----|-----|---------|-----|-----|-----|-----|
+| mixed | 60 / 18s | 4361 | 4361 | 0 | 0 | **0.00%** | 215 ms | 379 ms | 1553 ms | ~241.7 |
+| answerBurst | 40 / 12s | 2114 | 2114 | 0 | 0 | **0.00%** | 188 ms | 370 ms | 1536 ms | ~175.3 |
+
+**零 4xx、零 5xx、0% errRate**；依然是 throwaway stub isolated 压铸（不代表真 wkapi 的生产 p95）；只证明 Oracle 昂贵路径在新语料 + 新 prompt 形下不崩、不死循环、不超时、4xx 不暴露。2 次完整 verify.ps1 GREEN；语料漂移仍然由 `--check` 看守。
+
+> **与 W-Z86 数据的关系**：W-Z86 的 1.6k 样次中 `p50` 已从 481→215ms 收敛（node_modules 冷启动 amortization + 公告吞吐的相对提升），而吞吐近似翻倍（481ms→~242 rps）——Oracle 当前瓶颈依然是 stub 的单线程确定性 SSE（模拟 wkapi pro 内网回程时，真实 p95 由上游决定）。`answerBurst` 降到 188ms p50 = digest 缓存命中提升（对 5-Q 稳定问句集，12s 后段巩固填 llm-service 的 memoize 前缀）。
