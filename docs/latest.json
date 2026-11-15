@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T14:33:53.123Z",
+  "generated_at": "2026-11-15T14:38:01.904Z",
   "branch": "main",
-  "head": "6368c452",
-  "total_commits": 1717,
-  "pushed_at": "2026-11-15T22:33:09+08:00",
+  "head": "e7c2b5bb",
+  "total_commits": 1719,
+  "pushed_at": "2026-11-15T22:36:53+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "e7c2b5b",
+      "at": "2026-11-15T22:36:53+08:00",
+      "subject": "feat(canon): W-Z150 第三十卷《九日 / The Ninth Day》——卷四之七"
+    },
+    {
+      "short": "06dcba7",
+      "at": "2026-11-15T14:33:53Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "6368c45",
       "at": "2026-11-15T22:33:09+08:00",
@@ -21,25 +31,15 @@
       "short": "f6850b1",
       "at": "2026-11-15T22:28:52+08:00",
       "subject": "feat(canon): W-Z148 第二十八卷《新苗 / The New Sapling》——卷四之五"
-    },
-    {
-      "short": "26e8c7d",
-      "at": "2026-11-15T14:24:46Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "161b687",
-      "at": "2026-11-15T22:22:24+08:00",
-      "subject": "feat(canon): W-Z147 第二十七卷《归途之共 / The Last Persimmon》——卷四之四"
     }
   ],
-  "tracked_files": 1279,
+  "tracked_files": 1281,
   "test_files": 456,
   "i18n_keys": 3215,
   "lore_sources": 59,
-  "novel_chapters_zh": 29,
-  "novel_chapters_en": 29,
-  "milestone": "W-Z149",
+  "novel_chapters_zh": 30,
+  "novel_chapters_en": 30,
+  "milestone": "W-Z150",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
