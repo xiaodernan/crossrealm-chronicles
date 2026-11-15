@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T17:13:30.075Z",
+  "generated_at": "2026-11-15T17:19:08.014Z",
   "branch": "main",
-  "head": "df654979",
-  "total_commits": 1769,
-  "pushed_at": "2026-11-16T01:12:34+08:00",
+  "head": "e03bffeb",
+  "total_commits": 1771,
+  "pushed_at": "2026-11-16T01:18:23+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "e03bffe",
+      "at": "2026-11-16T01:18:23+08:00",
+      "subject": "feat(canon): W-Z177 第五十二卷《老碗 / The Old Bowl》——卷八之一 · 卷八《过火 —— 守护者之别》开篇"
+    },
+    {
+      "short": "1e3d7c1",
+      "at": "2026-11-15T17:13:30Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "df65497",
       "at": "2026-11-16T01:12:34+08:00",
@@ -21,25 +31,15 @@
       "short": "2aa194a",
       "at": "2026-11-16T01:06:48+08:00",
       "subject": "feat(canon): W-Z175 第五十卷《拾岁 / The Tenth Year》——卷七之五 · 五十卷里程碑"
-    },
-    {
-      "short": "6a5a248",
-      "at": "2026-11-15T17:01:32Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "6eee57f",
-      "at": "2026-11-16T01:00:37+08:00",
-      "subject": "feat(canon): W-Z174 第四十九卷《五年后 / Five Years From Now》——卷七之四"
     }
   ],
-  "tracked_files": 1323,
+  "tracked_files": 1325,
   "test_files": 456,
   "i18n_keys": 3215,
   "lore_sources": 59,
-  "novel_chapters_zh": 51,
-  "novel_chapters_en": 51,
-  "milestone": "W-Z176",
+  "novel_chapters_zh": 52,
+  "novel_chapters_en": 52,
+  "milestone": "W-Z177",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
