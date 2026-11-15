@@ -46,6 +46,7 @@ import { Dialog } from '../ui/Dialog.js';
 import { OverlayStack } from '../ui/OverlayStack.js';
 import { AdvisorPanel } from '../ui/AdvisorPanel.js';
 import { HelpManual } from '../ui/HelpManual.js';
+import { Quickstart } from '../ui/Quickstart.js';
 import { Tutorial } from '../ui/Tutorial.js';
 import { UpgradePanel } from '../ui/UpgradePanel.js';
 import { EnemyManager } from '../combat/EnemyManager.js';
@@ -438,6 +439,7 @@ export class Game {
     this.advisorPanel = this._adopt('ui/AdvisorPanel', new AdvisorPanel(this));
     this.upgrade = new UpgradePanel(this);
     this.helpManual = new HelpManual(this);
+    this.quickstart = new Quickstart(this);
     this.tutorial = new Tutorial(this.dialog, this.helpManual, this);
     this.cinematics = this._adopt('cinematic/CinematicManager', new CinematicManager(this));
     this.combatCamera = this._adopt('cinematic/CombatCameraDirector', new CombatCameraDirector(this));

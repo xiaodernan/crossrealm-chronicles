@@ -3152,6 +3152,27 @@ Wave3 three-franchise motifs:
 Entering the corresponding plane has slight visual overlay; POI interaction briefly enhances.
 
 Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (Timeline) · Star Port (Wastes)`,
+  // Hearthside Quickstart (W-Z91): start screen / pause menu / first boot — the 30-second reading guide
+  quickstart_title: 'Hearthside Quickstart · read me in 30s',
+  quickstart_aria: 'Hearthside Quickstart',
+  quickstart_tagline: 'No docs necessary — this page IS the doc. The five things you need to know, right here.',
+  quickstart_you_title: 'Who you are',
+  quickstart_you_body: 'A crossroads runner — you are the single protagonist of this story. From the moment you awaken the World Anchor, every choice and every ending funnels through you.',
+  quickstart_play_title: 'How to play',
+  quickstart_play_body: 'Light {attackLight} · Heavy {attackHeavy} · Spells {spell1}/{spell4} · Weapon {swapWeapon}. Read the enemy — hit the stagger, not the health bar.',
+  quickstart_where_title: 'Where to look',
+  quickstart_where_body: 'Press {journal} anytime — story progress, achievements, shadow notes, the anchor journey, all of it assembled for you.',
+  quickstart_advisor_title: 'The Star-Rail Advisor',
+  quickstart_advisor_body: 'Press {advisor} to ask the Star-Rail Advisor anything; tap the pill above the input to ask the canon itself — your answer comes back with citations.',
+  quickstart_goal_title: 'Your goal',
+  quickstart_goal_body: 'From the Crossway Hub to the Anchor Flame — five major bosses lie between you and the ending. After the credits, there is still something about the next traveler…',
+  quickstart_again_title: 'Back to this page',
+  quickstart_again_body: 'Press {escape} to pause anytime, hit “Hearthside Quickstart” — always there.',
+  quickstart_begin: 'I know — let me play',
+  quickstart_later: 'Hold on — maybe later',
+  quickstart_footnote: 'Your progress saves reliably. Play freely.',
+  quickstart_start_btn: '30-second Quickstart',
+  quickstart_pause_btn: 'Hearthside Quickstart (30 s)',
   // Interaction prompt and toast copy (W-D2 slice 22: PlayerController updatePrompt / boundary / camera switch)
   prompt_dungeon_read_fmt: '${interact} Read — ${title}',
   prompt_dungeon_boss_leave: '${interact} Defeat the keywarden to leave · Watch for the Boss phase two',

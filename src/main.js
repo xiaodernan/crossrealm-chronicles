@@ -82,6 +82,8 @@ async function boot() {
 
   loading?.classList.add('hidden');
   start?.classList.remove('hidden');
+  // W-Z91：炉边快速上手——出场页第一次弹出；下次不再自动（localStorage：crossrealm_quickstart_seen）
+  game.quickstart?.maybeShowOnBoot?.();
   // W-Z55：炉主之名黄金纹章——已通关（炉主/echo-keeper）的人回到出场页时多看一件金器物
   const keeperBadge = document.getElementById('start-keeper');
   if (keeperBadge && game?.achievements?.unlocked?.has?.('echo-keeper')) {

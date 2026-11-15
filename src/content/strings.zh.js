@@ -3149,6 +3149,27 @@ Wave3 三巨头母题：
 进入对应位面有轻微视觉 overlay；POI 交互时短暂增强。
 
 Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低语（时线）· 星港商路（荒原）`,
+  // 炉边快速上手（W-Z91）：出场页 / 暂停菜单 / 关机后第一次进游戏——30 秒读完整张 SRS
+  quickstart_title: '炉边快速上手 · 30 秒读完',
+  quickstart_aria: '炉边快速上手',
+  quickstart_tagline: '不用看文档——这一整页就是你此刻最想知道的那五件事。随时能关能回来。',
+  quickstart_you_title: '你是谁',
+  quickstart_you_body: '位面行者——你是这场冒险唯一的主角。从「觉醒：世界之锚」的那一刻起，一切终归到你手里做。',
+  quickstart_play_title: '怎么玩',
+  quickstart_play_body: '普通攻击 {attackLight} · 重击 {attackHeavy} · 法术 {spell1}/{spell4} · 法器 {swapWeapon}。专打 BOSS 硬直——赢的方式来自反应，不是数值。',
+  quickstart_where_title: '在哪里看世界',
+  quickstart_where_body: '任意时刻按 {journal} 打开日志——主线的进度、成就、影子笔记、锚火之旅：你解锁的每一件东西，都在里面排好。',
+  quickstart_advisor_title: '星轨顾问 · 请教它',
+  quickstart_advisor_body: '遇到不会的就按 {advisor} 问：星轨顾问给你答——再点输入框上方「典籍」胶囊，问的可直接查原典，系统把出处标出来。',
+  quickstart_goal_title: '你的目的',
+  quickstart_goal_body: '从交汇枢纽到终章「锚火」——击穿五大 BOSS，做你自己的结局。终章之后还有尾声：它会问你，要不要点一盏灯留给后来人。',
+  quickstart_again_title: '回到这页',
+  quickstart_again_body: '任何时候按 {escape} 打开暂停菜单，最下面一行「炉边快速上手」还在——随时重新打开。',
+  quickstart_begin: '我知道了——先打一局',
+  quickstart_later: '先等等，我回头再看',
+  quickstart_footnote: '你的进度全程自动保存。放心按键。',
+  quickstart_start_btn: '30 秒快速上手',
+  quickstart_pause_btn: '炉边快速上手（30 秒）',
   // 交互提示与提示 toast 的运行期文案（W-D2 切片22：PlayerController 的 updatePrompt / 边界 / 视角切换）
   prompt_dungeon_read_fmt: '${interact} 阅读 — ${title}',
   prompt_dungeon_boss_leave: '${interact} 击败守钥者后离开 · Boss 二阶段留意',

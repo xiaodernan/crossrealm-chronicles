@@ -92,6 +92,7 @@
         <input id="pause-import-file" type="file" accept=".json,application/json" class="hidden" />
         <button id="pause-settings" data-i18n="menu_settings">设置</button>
         <button id="pause-manual"><span data-i18n="manual_short">说明书</span> (<span data-keys="help"></span>)</button>
+        <button id="pause-quickstart"><span data-i18n="quickstart_pause_btn">炉边快速上手（30 秒）</span></button>
         <button id="pause-journal"><span data-i18n="journal_title">日志</span> (<span data-keys="journal"></span>)</button>
         <p class="hint"><span data-keys="escape"></span> <span data-i18n="common_close">关闭</span> · <span data-keys="save load"></span> <span data-i18n="quick_save_slot">快捷存读（主槽）</span> · <span data-keys="help"></span> <span data-i18n="manual_short">说明书</span> · <span data-keys="perfHud"></span> <span data-i18n="start_perf">性能面板</span> · <span data-i18n="save_version_note">存档 v7（旧档自动迁移）</span></p>
       </div>
@@ -212,12 +213,56 @@
         </div>
       </div>
     </div>
+    <!-- W-Z91：炉边快速上手 · 30 秒读完整张 SRS —— 首屏出现一次（可 localStorage 关掉），暂停随时重开 -->
+    <div id="quickstart-overlay" class="overlay-panel hidden" role="dialog" aria-modal="true" aria-labelledby="quickstart-title">
+      <div class="panel-box quickstart-box">
+        <div class="quickstart-header">
+          <div class="quickstart-brand"><span class="quickstart-ember" aria-hidden="true">◈</span><h2 id="quickstart-title" data-i18n="quickstart_title">炉边快速上手 · 30 秒读完</h2></div>
+          <button type="button" id="quickstart-close" data-i18n="common_close" aria-label="Close"></button>
+        </div>
+        <p class="quickstart-tagline" data-i18n="quickstart_tagline">不用看文档——这一整页就是你此刻最想知道的那五件事。</p>
+        <div class="quickstart-grid">
+          <section class="quickstart-card quickstart-card-glow" aria-labelledby="qs-you">
+            <h3 id="qs-you" data-i18n="quickstart_you_title">你是谁</h3>
+            <p data-i18n="quickstart_you_body">位面行者——你是这场冒险唯一的主角。</p>
+          </section>
+          <section class="quickstart-card" aria-labelledby="qs-play">
+            <h3 id="qs-play" data-i18n="quickstart_play_title">怎么玩</h3>
+            <p data-i18n="quickstart_play_body">普通攻击；专打 BOSS 硬直。</p>
+          </section>
+          <section class="quickstart-card" aria-labelledby="qs-where">
+            <h3 id="qs-where" data-i18n="quickstart_where_title">在哪里看世界</h3>
+            <p data-i18n="quickstart_where_body">任意时刻按日志看一切。</p>
+          </section>
+          <section class="quickstart-card" aria-labelledby="qs-advisor">
+            <h3 id="qs-advisor" data-i18n="quickstart_advisor_title">星轨顾问</h3>
+            <p data-i18n="quickstart_advisor_body">按问顾问——点「典籍」可查原典。</p>
+          </section>
+          <section class="quickstart-card" aria-labelledby="qs-goal">
+            <h3 id="qs-goal" data-i18n="quickstart_goal_title">你的目的</h3>
+            <p data-i18n="quickstart_goal_body">击穿五大 BOSS，做你自己的结局。</p>
+          </section>
+          <section class="quickstart-card" aria-labelledby="qs-again">
+            <h3 id="qs-again" data-i18n="quickstart_again_title">回到这页</h3>
+            <p data-i18n="quickstart_again_body">暂停菜单随时能再打开。</p>
+          </section>
+        </div>
+        <div class="quickstart-footer">
+          <p class="quickstart-footnote" data-i18n="quickstart_footnote">你的进度全程自动保存。放心按键。</p>
+          <div class="quickstart-actions">
+            <button type="button" id="quickstart-later" data-i18n="quickstart_later">先等等，我回头再看</button>
+            <button type="button" id="quickstart-start" class="quickstart-primary" data-i18n="quickstart_begin">我知道了——先打一局</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="start-screen" class="hidden">
       <div class="start-inner">
         <img class="start-logo" src="/favicon.svg" alt="" role="presentation" width="156" height="156" />
         <h2 data-i18n="start_brand">跨界纪元</h2>
         <p><span data-i18n="start_click">点击开始 · 锁定鼠标</span> · <span data-keys="moveUp moveLeft moveDown moveRight"></span> <span data-i18n="start_move">移动</span><br /><span data-keys="escape"></span> <span data-i18n="start_pause">暂停</span> · <span data-keys="help"></span> <span data-i18n="manual_short">说明书</span> · <span data-keys="journal"></span> <span data-i18n="journal_title">日志</span> · <span data-keys="perfHud"></span> <span data-i18n="start_perf">性能面板</span> · <span data-keys="autoPlay"></span> <span data-i18n="autoplay_label">自动通关</span></p>
         <button type="button" id="start-btn" data-i18n="start_enter">点击进入游戏</button>
+        <button type="button" id="start-quickstart" class="start-ghost-btn" data-i18n="quickstart_start_btn">30 秒快速上手</button>
         <p class="start-crossmedia start-crossmedia-title" data-i18n="start_crossmedia_title">── 跨界纪事 · 跨媒体宇宙 ──</p>
         <p class="start-crossmedia start-crossmedia-caption" data-i18n="start_crossmedia_caption">长篇小说七章 + 三番外 · 142 分钟电影剧本 · OST 25 曲手册（见 creative/ 目录）</p>
         <p id="start-keeper" class="start-keeper hidden" aria-hidden="true"><span class="start-keeper-glyph" aria-hidden="true">⚓</span><span data-i18n="start_keeper_badge">炉主 · 火没有灭</span></p>

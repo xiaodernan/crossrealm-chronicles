@@ -1,0 +1,11 @@
+feat(ui): W-Z91 炉边快速上手——首屏常驻的 30 秒新手引导（内嵌说明书）
+
+- 新建 `src/ui/Quickstart.js`：首屏（`start-quickstart` 幽灵按钮）/ 暂停菜单（`pause-quickstart`）/ 出场页，均可随时打开「炉边快速上手 · 30 秒读完」
+- 出场页第一次打开展示一次（`localStorage` 跨页 `crossrealm_quickstart_seen`），之后不再自动弹
+- 覆盖 6 个一卡一问题的标签页：「你是谁 / 怎么玩 / 在哪里看世界 / 星轨顾问 / 你的目的 / 回到这页」
+- 双语全量：`quickstart_*` × 20 键 zh/en；EXPECTED_KEY_COUNT 3134；模板语法 `{attackLight}` `{journal}` 通过 keyText 同源于 {动作} 表
+- 纯壳页（不跑游戏逻辑）、纯 textContent、键盘可达（焦点环由全局 `button:focus, input:focus, select:focus, textarea:focus, a:focus, [tabindex]:focus` 覆盖）、`prefers-reduced-motion` 提交门内 `.quickstart-ember` 被显式关闭
+- SAVE `hook` 不碰存档、不 fetch、只碰 `crossrealm_quickstart_seen`；写出 = 标记 seen
+- `tests/quickstart.test.js`（9 例：壳页全 id / 首次弹 / 关闭即记住 / Esc 关闭 / 两表键逐一对齐 / 壳页不留 innerHTML 抓侥幸 / 交互清单只在正文留 `quickstart_start_btn`、`pause_btn`）
+- 门禁维护：`overlay-stack.test.js`（`keydown` 监听者清单扩至 5 处）· `modal-trail.test.js`（`parkFocus`/`restoreParkedFocus` 调用点列表更新、`beds` 按 code-unit 排序对齐 Quickstart 在 HUD→Quickstart→Settings 的 name 顺序）· `design-tokens.test.js`（档C 装饰元素补入 `.quickstart-ember`）
+- npm test 6696/6696 绿；npm lint 0 error / 0 warning；link:check 86/86

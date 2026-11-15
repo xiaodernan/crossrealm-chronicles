@@ -360,11 +360,12 @@ describe('静态门禁：来路只有一处写、一处读，旧写法一贴回�
     .map((f) => ({ name: f.name, n: (f.source.match(needle) || []).length }))
     .filter(({ n }) => n > 0);
 
-  it('`parkFocus(` 只有三处调用：菜单进设置、菜单进说明书、菜单进日志（切片27）', () => {
+  it('`parkFocus(` 只有四处调用：菜单进设置、菜单进说明书、菜单进日志、炉边快速上手（W-Z91）', () => {
     expect(byName(callSites(/parkFocus\(/g))).toEqual([
       { name: 'ui/HUD.js', n: 1 },
       { name: 'ui/HelpManual.js', n: 1 },
       { name: 'ui/PauseMenu.js', n: 1 },
+      { name: 'ui/Quickstart.js', n: 1 },
     ]);
   });
 
@@ -373,6 +374,8 @@ describe('静态门禁：来路只有一处写、一处读，旧写法一贴回�
       // 日志抽屉关掉时也走这一条（切片27）：从暂停菜单点进去的，退回来要站回原来那一格
       { name: 'ui/HUD.js', n: 1 },
       { name: 'ui/HelpManual.js', n: 1 },
+      // W-Z91：快速上手关闭时也必须把焦点还给 pause 菜单原来那一格
+      { name: 'ui/Quickstart.js', n: 1 },
       { name: 'ui/SettingsPanel.js', n: 1 },
     ]);
   });
