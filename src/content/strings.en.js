@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Forty-two volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Forty-three volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 42 volumes of the canon, fully readable
+· Canon Library — 43 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Trisolar Tide — one weekly cast, three cards revealed together
 
@@ -3135,8 +3135,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 42-volume index',
-  hm_body_codex: `Codex — 42 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 43-volume index',
+  hm_body_codex: `Codex — 43 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3180,6 +3180,7 @@ hm_title_codex: 'Codex · the 42-volume index',
 40 · The First Fire — A-Shi arrives with dried jujube leaves after his family’s old jujube tree died; he asks: “Can I still keep the fire?”; Lin Wen lifts him onto the threshold — “The fire never leaves.” A-Shi: “Then I stay.” The next generation takes root.
 41 · The Tending — A-Shi is left alone with the fire; at midnight it goes out; at dawn he confesses; Lin Wen hands him the last unstruck match — “The man who loses a flame and still wants to kindle the next one — that man is the keeper.” A-Shi strikes it, and sets the spent stick beside the clay bowl.
 42 · The Letting Go — autumn; his mother is away; Lin Wen hears a match being struck in the doorway; A-Shi has already lit the bowl on his own — he leaves a bundle of persimmon leaves straightened and tied, labeled in small careful characters: “The Fire Does Not Go Out.”
+43 · A Full Night — in deep winter, the wind pushes the door in and the candle dies; A-Shi sits by the dry-branch pile a long time, then kneels and rescues the wick with a curved persimmon-leaf notch — the flame holds the whole night; by morning, the dish holds a paper note reading “Fire is still here.”
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3193,7 +3194,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (forty-two volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (forty-three volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

@@ -89,6 +89,7 @@ creative/music/soundtrack.html
 | 头道火 · The First Fire | [the-first-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/40-the-first-fire.md) |
 | 守炉 · The Tending | [the-tending](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/41-the-tending.md) |
 | 松手 · The Letting Go | [the-letting-go](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/42-the-letting-go.md) |
+| 一整夜 · A Full Night | [a-full-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/43-a-full-night.md) |
 
 每一章对应游戏的章节走法：
 
