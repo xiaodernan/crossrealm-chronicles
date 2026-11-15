@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T20:48:58.357Z",
+  "generated_at": "2026-11-15T20:56:43.049Z",
   "branch": "main",
-  "head": "2bc9e5c3",
-  "total_commits": 1830,
-  "pushed_at": "2026-11-16T04:47:19+08:00",
+  "head": "e87a02a1",
+  "total_commits": 1833,
+  "pushed_at": "2026-11-16T04:55:35+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "e87a02a",
+      "at": "2026-11-16T04:55:35+08:00",
+      "subject": "feat(canon): W-Z204 第七十四卷《种 / The Seed》——卷十一之九"
+    },
+    {
+      "short": "d35e2a1",
+      "at": "2026-11-16T04:55:33+08:00",
+      "subject": "test(stress): W-Z203 压测复测——真跑真数字，零 4xx 零 5xx"
+    },
+    {
+      "short": "808944d",
+      "at": "2026-11-15T20:48:58Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "2bc9e5c",
       "at": "2026-11-16T04:47:19+08:00",
@@ -16,32 +31,17 @@
       "short": "7e8aae6",
       "at": "2026-11-15T20:43:55Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "9e4cffb",
-      "at": "2026-11-16T04:43:30+08:00",
-      "subject": "feat(admin): 实测记录卡第 13 格——ui-walkthrough 2026-11-16 复跑 18/18 全绿"
-    },
-    {
-      "short": "0d5a78c",
-      "at": "2026-11-15T20:38:41Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "a9c9d3b",
-      "at": "2026-11-16T04:36:18+08:00",
-      "subject": "feat(canon): W-Z201 第七十二卷《回信 / The Reply》——卷十一之七"
     }
   ],
-  "tracked_files": 1375,
+  "tracked_files": 1377,
   "test_files": 458,
   "i18n_keys": 3225,
   "lore_sources": 59,
-  "novel_chapters_zh": 73,
-  "novel_chapters_en": 73,
-  "milestone": "W-Z202",
-  "milestone_full": "卷 73 · 六百年守火线（73 / 73 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 59 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：73 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "novel_chapters_zh": 74,
+  "novel_chapters_en": 74,
+  "milestone": "W-Z204",
+  "milestone_full": "卷 74 · 六百年守火线（74 / 74 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 59 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：74 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
