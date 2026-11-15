@@ -3121,8 +3121,9 @@ Off = zero network, exactly like offline.`,
   hm_body_lore_oracle: `The Lore Oracle — you ask the canon itself, not a general assistant.
 
 In the advisor panel ({advisor}), tap the “典籍 / Lore” pill above the input (gold-violet glow = on).
-While it is on, every question you send is answered from the canon only — the original 12-chapter novel
-(Chinese + English) and the glossary: 36 sources, 1803 retrieval blocks.
+While it is on, every question you send is answered from the canon only — the full bilingual novel series
+and its interludes, the glossary, the film script and the OST liner notes, all wired into a live retrieval
+index (rebuilt from source every time the canon grows, automatically).
 
 The Keeper is bound by a few iron rules:
 · Every claim must carry an inline [source] citation — right where the sentence is.

@@ -43,9 +43,10 @@ class Bm25IndexTest {
 
     @Test
     void linDu_query_matches_lin_du_chapter() {
-        List<Bm25Index.Hit> hits = index.search("林渡", 5);
+        List<Bm25Index.Hit> hits = index.search("林渡", 10);
         assertFalse(hits.isEmpty());
-        assertTrue(hits.stream().anyMatch(h -> h.doc().source().contains("01-第一章")));
+        assertTrue(hits.stream().anyMatch(h -> h.doc().source().contains("01-第一章")),
+                "原典第一章必须在前十内（语料已扩容到 175 源——GLOSSARY/番外同样入索引，前五是不可再守的硬指标）");
     }
 
     @Test
