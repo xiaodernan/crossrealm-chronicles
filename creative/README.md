@@ -82,6 +82,7 @@ creative/music/soundtrack.html
 | 账册 · The Ledger | [the-ledger](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/33-the-ledger.md) |
 | 驿站 · The Waystation | [the-waystation](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/34-the-waystation.md) |
 | 九十一里 · Ninety-one Li | [ninety-one-li](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/35-ninety-one-li.md) |
+| 第四座亭 · The Fourth Pavilion | [the-fourth-pavilion](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/36-the-fourth-pavilion.md) |
 
 每一章对应游戏的章节走法：
 
