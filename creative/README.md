@@ -72,6 +72,7 @@ creative/music/soundtrack.html
 | 月光起 · The Moon Rises | [the-moon-rises](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/23-the-moon-rises.md) |
 | 归途再启 · Beyond the Threshold | [beyond-the-threshold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/24-beyond-the-threshold.md) |
 | 月光回廊 · Moonlit Corridor | [moonlit-corridor](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/25-moonlit-corridor.md) |
+| 烛火之下 · Under the Candle Flame | [under-the-candle-flame](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/26-under-the-candle-flame.md) |
 
 每一章对应游戏的章节走法：
 
