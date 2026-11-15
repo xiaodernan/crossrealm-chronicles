@@ -109,28 +109,28 @@ const maxOf = (k) => Math.max(...daily.map((r) => r[k]));
 
 /* ---------- 12 项功能采纳 ---------- */
 const features = [
-  { name: '主线推进（觉醒 → 章 5）', sessions: 4200, pctOfSessions: 78.2 },
-  { name: '快速上手 / 出场页', sessions: 2689, pctOfSessions: 96.4 },
-  { name: '说明书 [H] · HelpManual', sessions: 1510, pctOfSessions: 68.2 },
-  { name: '日志（J） / 全页签', sessions: 2380, pctOfSessions: 89.7 },
-  { name: '典籍馆 [J → 典籍]', sessions: 1944, pctOfSessions: 73.1 },
-  { name: '星轨顾问（AI 问答·F7）', sessions: 1180, pctOfSessions: 43.8 },
-  { name: '星轨·锚火占卜（W-Z118）', sessions: 420, pctOfSessions: 15.3 },
-  { name: '成就 / 传说碑', sessions: 1793, pctOfSessions: 61.7 },
-  { name: '支线任务完成', sessions: 1634, pctOfSessions: 53.4 },
-  { name: '头目 ×5 击败', sessions: 880, pctOfSessions: 29.5 },
-  { name: '营火休息 / 对话', sessions: 2415, pctOfSessions: 81.4 },
-  { name: '存档 / 读档', sessions: 3051, pctOfSessions: 91.2 },
+  { nameEn: 'Mainline progress · Awakening to Ch.5', name: '主线推进（觉醒 → 章 5）', sessions: 4200, pctOfSessions: 78.2 },
+  { nameEn: 'Quick start / opening screen', name: '快速上手 / 出场页', sessions: 2689, pctOfSessions: 96.4 },
+  { nameEn: 'Help manual [H]', name: '说明书 [H] · HelpManual', sessions: 1510, pctOfSessions: 68.2 },
+  { nameEn: 'Journal (J) / all tabs', name: '日志（J） / 全页签', sessions: 2380, pctOfSessions: 89.7 },
+  { nameEn: 'Canon library [J → Canon]', name: '典籍馆 [J → 典籍]', sessions: 1944, pctOfSessions: 73.1 },
+  { nameEn: 'Star advisor (AI Q&A · F7)', name: '星轨顾问（AI 问答·F7）', sessions: 1180, pctOfSessions: 43.8 },
+  { nameEn: 'Star-flame divination (W-Z118)', name: '星轨·锚火占卜（W-Z118）', sessions: 420, pctOfSessions: 15.3 },
+  { nameEn: 'Achievements / Legend stele', name: '成就 / 传说碑', sessions: 1793, pctOfSessions: 61.7 },
+  { nameEn: 'Side-quest completion', name: '支线任务完成', sessions: 1634, pctOfSessions: 53.4 },
+  { nameEn: 'Bosses ×5 defeated', name: '头目 ×5 击败', sessions: 880, pctOfSessions: 29.5 },
+  { nameEn: 'Campfire rest / dialogue', name: '营火休息 / 对话', sessions: 2415, pctOfSessions: 81.4 },
+  { nameEn: 'Save / Load', name: '存档 / 读档', sessions: 3051, pctOfSessions: 91.2 },
 ];
 
 /* ---------- 漏斗 ---------- */
 const funnel = [
-  { stage: '抵达出场页', pct: 100.0 },
-  { stage: '点燃（按入游戏）', pct: 84.7 },
-  { stage: '完成 §首日引导（觉醒锚点）', pct: 69.3 },
-  { stage: '首个 Boss 通关', pct: 44.1 },
-  { stage: '章 5 过毕 (真·结局)', pct: 18.7 },
-  { stage: '炉主徽章（十七枚共鸣）', pct: 4.9 },
+  { stageEn: 'Reached the opening', stage: '抵达出场页', pct: 100.0 },
+  { stageEn: 'Sparked (pressed into the game)', stage: '点燃（按入游戏）', pct: 84.7 },
+  { stageEn: 'Finished Day-1 tutorial (Anchor of Awakening)', stage: '完成 §首日引导（觉醒锚点）', pct: 69.3 },
+  { stageEn: 'First boss cleared', stage: '首个 Boss 通关', pct: 44.1 },
+  { stageEn: 'Chapter 5 complete (true ending)', stage: '章 5 过毕 (真·结局)', pct: 18.7 },
+  { stageEn: 'Furnace-keeper badge (17 resonance marks)', stage: '炉主徽章（十七枚共鸣）', pct: 4.9 },
 ];
 
 const retention = { d1: 64.0, d3: 34.5, d7: 18.6, d14: 11.2 };
@@ -156,23 +156,23 @@ for (let k = 1; k <= 14; k++) {
 
 /* ---------- 经验规则 → 优化建议（把数字翻译成产品建议） ---------- */
 const recommendations = [
-  { priority: 'P0', title: '快速上手面板点击率高，说明首日未通关概率高 — 把「按 E 调查光柱」的微教学做成更主动、但可跳过的常驻提示', impact: '留存 +6~9pp' },
-  { priority: 'P0', title: '出口点集中在「没首通Boss之前」— 加上「再战即胜」的无障碍通关柔性补', impact: '章 1 → 章 5 通关 +10pp' },
-  { priority: 'P0', title: '快速上手时长 < 3 分钟即流失最多，说明前 3 分钟戏眼不够密集，需扩一条更紧的「锚点必须锚定」开场', impact: '前 3 分钟放弃 -11pp' },
-  { priority: 'P1', title: '典籍馆阅读次数与章节进完成率高度相关（canonReaders/dau ≈ 0.61 for 通关组）— 把「读完某一章自动解锁对应 CG / 称号」常态化', impact: '通关组 +12%' },
-  { priority: 'P1', title: '首页 AI 顾问的采用率 44%，但打开后向提问用户仅 62%，说明「点开后不知道问什么」— 推荐 preloaded 3 个问题', impact: 'F7 入口 → 发起对话 44→68%' },
-  { priority: 'P1', title: '营火休息是所有玩家都走的中继，利用营火做「下一位面该去的地方 + 下一目标」的醒悟/召回是感谢密度最高的投放点', impact: '下一章启动率 +9pp' },
-  { priority: 'P2', title: '大量首日会话全程停留在「位面行者」不出城墙 — 增加一个「能看见的世界边界地图」提示路径', impact: '首日离开 Hub 的玩家 +8pp' },
-  { priority: 'P2', title: '成就激励感相对较弱（仅 29.5% 完成所有 Boss），建议把成就可见性再翻一倍（至少在 HUD 显示 1 个能被立即出动的成就）', impact: 'Boss 击败数 +18%' },
-  { priority: 'P2', title: '星轨 · 锚火占卜到达 15% — 做完后 /channe 推强化推送，把它做到 35%+ 可显著提升「回访率」', impact: 'D1 召回 +4pp' },
-  { priority: 'P2', title: '首日结束后流失率 48% — 优化「保存后告一段落」的结尾 over (例如跳到结局回报时弹帮助)', impact: 'session→chapter 1 推进 +6pp' },
-  { priority: 'P3', title: '支线任务完成率 53% 低于主线 78% — 缩短支线流程，用既定主线中交易站/营火对话直接给予', impact: '支线完成率 +12pp' },
-  { priority: 'P3', title: '分享/传播入口尚未建立 — 考虑挂一个「给你的好友一段文字链接」的在向层推送', impact: '自然增长 +3pp' },
+  { priority: 'P0', title: '快速上手面板点击率高，说明首日未通关概率高 — 把「按 E 调查光柱」的微教学做成更主动、但可跳过的常驻提示', titleEn: 'Quick-start panel is heavily tapped, meaning high day-1 miss rate — make the "press E to inspect the pillar" micro-tutorial proactive, persistent and skippable', impact: '留存 +6~9pp', impactEn: 'Retention +6~9pp' },
+  { priority: 'P0', title: '出口点集中在「没首通Boss之前」— 加上「再战即胜」的无障碍通关柔性补', titleEn: 'Churn concentrates before the first boss kill — add an accessible "next attempt is near-certain" assist for the opening fights', impact: '章 1 → 章 5 通关 +10pp', impactEn: 'Ch.1 → Ch.5 cleared +10pp' },
+  { priority: 'P0', title: '快速上手时长 < 3 分钟即流失最多，说明前 3 分钟戏眼不够密集，需扩一条更紧的「锚点必须锚定」开场', titleEn: 'Most churn happens within 3 minutes of onboarding — the opening lacks density; tighten the "the anchor must be anchored" opener', impact: '前 3 分钟放弃 -11pp', impactEn: '3-minute drop-off −11pp' },
+  { priority: 'P1', title: '典籍馆阅读次数与章节进完成率高度相关（canonReaders/dau ≈ 0.61 for 通关组）— 把「读完某一章自动解锁对应 CG / 称号」常态化', titleEn: 'Canon-read volume strongly correlates with completion (canonReaders/dau ≈ 0.61 for finishers) — permanently enable "finishing a volume auto-unlocks its CG / title"', impact: '通关组 +12%', impactEn: 'Finisher cohort +12%' },
+  { priority: 'P1', title: '首页 AI 顾问的采用率 44%，但打开后向提问用户仅 62%，说明「点开后不知道问什么」— 推荐 preloaded 3 个问题', titleEn: 'Advisor adoption is 44%, but only 62% of openers actually ask — preload three starter questions', impact: 'F7 入口 → 发起对话 44→68%', impactEn: 'F7 open → first question 44→68%' },
+  { priority: 'P1', title: '营火休息是所有玩家都走的中继，利用营火做「下一位面该去的地方 + 下一目标」的醒悟/召回是感谢密度最高的投放点', titleEn: 'Campfire is the universal mid-session node — use it for "where to go next + next objective" nudges; it is the highest-reward placement', impact: '下一章启动率 +9pp', impactEn: 'Next-chapter kickoff +9pp' },
+  { priority: 'P2', title: '大量首日会话全程停留在「位面行者」不出城墙 — 增加一个「能看见的世界边界地图」提示路径', titleEn: 'Many day-1 sessions never leave the hub — add a visible "edge of the world" map hint that steers outward', impact: '首日离开 Hub 的玩家 +8pp', impactEn: 'Day-1 hub exit +8pp' },
+  { priority: 'P2', title: '成就激励感相对较弱（仅 29.5% 完成所有 Boss），建议把成就可见性再翻一倍（至少在 HUD 显示 1 个能被立即出动的成就）', titleEn: 'Achievement pull is weak (only 29.5% clear every boss) — double achievement visibility (always surface ≥1 immediately actionable one in the HUD)', impact: 'Boss 击败数 +18%', impactEn: 'Boss clears +18%' },
+  { priority: 'P2', title: '星轨 · 锚火占卜到达 15% — 做完后 /channe 推强化推送，把它做到 35%+ 可显著提升「回访率」', titleEn: 'Only 15% reach the star-flame divination — after finishing, push a /channel nudge; reaching 35%+ meaningfully lifts revisit rate', impact: 'D1 召回 +4pp', impactEn: 'D1 recall +4pp' },
+  { priority: 'P2', title: '首日结束后流失率 48% — 优化「保存后告一段落」的结尾 over (例如跳到结局回报时弹帮助)', titleEn: 'Day-1 churn is 48% — improve the "save and close" beat (e.g. surface help when an ending report pops up)', impact: 'session→chapter 1 推进 +6pp', impactEn: 'session→chapter-1 progress +6pp' },
+  { priority: 'P3', title: '支线任务完成率 53% 低于主线 78% — 缩短支线流程，用既定主线中交易站/营火对话直接给予', titleEn: 'Side quests complete at 53% vs mainline 78% — shorten side loops; fold them into trader/campfire dialogues', impact: '支线完成率 +12pp', impactEn: 'Side-quest completion +12pp' },
+  { priority: 'P3', title: '分享/传播入口尚未建立 — 考虑挂一个「给你的好友一段文字链接」的在向层推送', titleEn: 'No share/spread entry exists — consider a "send a friend a text link" push on the outgoing layer', impact: '自然增长 +3pp', impactEn: 'Organic growth +3pp' },
 ];
 
 /* ---------- 组装输出 ---------- */
 const out = {
-  schema_version: 'crossrealm.admin.v1',
+  schema_version: 'crossrealm.admin.v2',
   generated_at: new Date().toISOString(),
   seed: SEED,
   window: { days: DAYS, from: dateStr(daysAgo(DAYS - 1)), to: dateStr(today) },

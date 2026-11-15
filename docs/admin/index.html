@@ -28,6 +28,7 @@
 html,body{background:var(--bg);color:var(--ink);font-family:'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB',sans-serif;line-height:1.55;min-height:100vh;}
 a{color:var(--gold-dim)}
 .out{max-width:1080px;margin:0 auto;padding:28px;}
+.gate-wrap{position:relative}
 .gate-card{max-width:420px;margin:80px auto;padding:28px;background:var(--panel);border:1px solid var(--rim-strong);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,0.5),0 0 60px rgba(255,180,80,0.08) inset;text-align:center;}
 .gate-glyph{font-size:3rem;line-height:1;color:var(--gold);text-shadow:0 0 24px rgba(255,180,80,0.45);margin-bottom:8px}
 .gate-title{font-size:1.2rem;color:#f0e7d0;letter-spacing:.06em;margin-bottom:4px}
@@ -40,9 +41,14 @@ a{color:var(--gold-dim)}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:linear-gradient(135deg,#1a1420,#0f0c14);border:1px solid var(--rim);border-radius:12px;margin-bottom:16px;}
 .topbar h1{font-size:1rem;color:var(--gold-dim);letter-spacing:.04em}
 .topbar .crumbs{font-size:.7rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-.topbar nav{display:flex;gap:10px}
+.topbar nav{display:flex;gap:10px;align-items:center}
 .topbar nav a{font-size:.75rem;padding:6px 12px;border:1px solid var(--rim);border-radius:6px;text-decoration:none;color:var(--muted)}
 .topbar nav a:hover{color:var(--gold);border-color:var(--gold-dim)}
+.lang-toggle{display:inline-flex;gap:4px;margin-left:4px}
+.lang-toggle button{font-size:.68rem;padding:5px 10px;border:1px solid var(--rim-strong);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;letter-spacing:.05em;transition:all .15s}
+.lang-toggle button[aria-pressed="true"]{border-color:var(--gold-dim);color:var(--gold);background:rgba(255,217,138,.08)}
+.lang-toggle button:hover{color:var(--gold)}
+.gate-lang{position:absolute;top:10px;right:0}
 .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px}
 .kpi{background:var(--panel);border:1px solid var(--rim);border-radius:10px;padding:14px 10px;text-align:center;transition:border-color .25s}
 .kpi:hover{border-color:var(--rim-strong)}
@@ -61,13 +67,12 @@ a{color:var(--gold-dim)}
 .chart-axes{color:var(--muted);font-size:.62rem}
 .spark{stroke:var(--gold);stroke-width:2;fill:rgba(255,217,138,0.09)}
 .spark-grid{stroke:#2a2230;stroke-width:0.5}
-. spark-label{font-family:'JetBrains Mono',Consolas,monospace;font-size:.6rem;fill:#8a8278}
-.bar-row{display:grid;grid-template-columns:140px 1fr 70px;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(201,169,98,0.06);font-size:.78rem}
+.spark-label{font-family:'JetBrains Mono',Consolas,monospace;font-size:.6rem;fill:#8a8278}
+.bar-row{display:grid;grid-template-columns:170px 1fr 92px;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(201,169,98,0.06);font-size:.78rem}
 .bar-row:last-child{border-bottom:none}
 .bar-row .name{color:#e8e4dc;line-height:1.3}
 .bar-track{height:10px;background:#120d18;border-radius:5px;overflow:hidden;position:relative}
 .bar{height:100%;background:linear-gradient(90deg,#c9a962 0%,#ffd98a 100%);border-radius:5px;transition:width 0.6s}
-.bar.count{color:var(--cyan)}
 .bar-pct{font-family:'JetBrains Mono',Consolas,monospace;font-size:.7rem;color:var(--muted);text-align:right}
 .funnel{display:flex;gap:6px;align-items:stretch}
 .funnel-cell{flex:1;padding:10px 8px;border:1px solid var(--rim);border-radius:8px;background:var(--panel-2);text-align:center;opacity:0.95}
@@ -94,20 +99,26 @@ a{color:var(--gold-dim)}
 .locked-pane{display:none}
 .unlocked .locked-pane{display:block}
 .locked-note{color:var(--muted);font-size:.78rem;text-align:center;margin-top:12px}
-.kicker{color:var(--dim);letter-spacing:.1em;text-transform:uppercase;font-size:.6rem;margin-bottom:6px}
+.kicker{color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-size:.6rem;margin-bottom:6px}
 </style>
 </head>
 <body>
 <div class="out" id="root">
   <!-- ====== Gate ====== -->
-  <div id="gate" class="gate-card" role="dialog" aria-labelledby="gate-title">
-    <div class="gate-glyph" aria-hidden="true">◉</div>
-    <h1 id="gate-title" class="gate-title">炉边盘 · 炉火之外的门</h1>
-    <p class="gate-sub">管理员 · Admin · 任何知道口令的人</p>
-    <input id="pwd" class="gate-input" type="password" autocomplete="off" placeholder="口令" aria-label="管理员口令" />
-    <button id="unlock" class="gate-btn" type="button">开门 · Unlock</button>
-    <p id="gateError" class="gate-error" role="alert"></p>
-    <p class="locked-note">该页不对公众开放 · 仅用文字口令 · Frontend-only 安全</p>
+  <div class="gate-wrap">
+    <div class="lang-toggle gate-lang" role="group" aria-label="Language / 语言">
+      <button type="button" data-lang-btn="zh" aria-pressed="true">中</button>
+      <button type="button" data-lang-btn="en" aria-pressed="false">EN</button>
+    </div>
+    <div id="gate" class="gate-card" role="dialog" aria-labelledby="gate-title">
+      <div class="gate-glyph" aria-hidden="true">◉</div>
+      <h1 id="gate-title" class="gate-title" data-i18n="gate_title">炉边盘 · 炉火之外的门</h1>
+      <p class="gate-sub" data-i18n="gate_sub">管理员 · Admin · 任何知道口令的人</p>
+      <input id="pwd" class="gate-input" type="password" autocomplete="off" data-i18n-ph="gate_ph" placeholder="口令" data-i18n-aria="gate_aria" aria-label="管理员口令" />
+      <button id="unlock" class="gate-btn" type="button" data-i18n="gate_btn">开门 · Unlock</button>
+      <p id="gateError" class="gate-error" role="alert"></p>
+      <p class="locked-note" data-i18n="gate_note">该页不对公众开放 · 仅用文字口令 · Frontend-only 安全</p>
+    </div>
   </div>
 
   <!-- ====== Dashboard ====== -->
@@ -115,22 +126,26 @@ a{color:var(--gold-dim)}
     <!-- Top bar -->
     <div class="topbar">
       <div>
-        <h1>炉边盘 · Crossrealm Chronicles — 运营盘</h1>
+        <h1 data-i18n="top_h1">炉边盘 · Crossrealm Chronicles — 运营盘</h1>
         <div class="crumbs">Internal · 60-day snapshot</div>
       </div>
       <nav>
-        <a href="../">← 回主页</a>
-        <a href="../game/">游戏</a>
-        <a href="../guide.html">说明书</a>
+        <a href="../" data-i18n="nav_home">← 回主页</a>
+        <a href="../game/" data-i18n="nav_game">游戏</a>
+        <a href="../guide.html" data-i18n="nav_guide">说明书</a>
+        <span class="lang-toggle" role="group" aria-label="Language / 语言">
+          <button type="button" data-lang-btn="zh" aria-pressed="true">中</button>
+          <button type="button" data-lang-btn="en" aria-pressed="false">EN</button>
+        </span>
       </nav>
     </div>
 
     <!-- Local real telemetry (this browser) -->
     <div class="panel" id="localPanel" style="margin-bottom:16px">
-      <h2>本地真实事件 <small>当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条</small></h2>
+      <h2><span data-i18n="local_h2">本地真实事件</span> <small data-i18n="local_small">当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条</small></h2>
       <div id="localEventsGrid" class="kpi-grid" style="grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:10px"></div>
-      <div id="localEventsList" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:.65rem;color:rgba(233,226,210,.6);max-height:60px;overflow-y:auto;line-height:1.6"></div>
-      <div style="font-size:.68rem;color:var(--muted);margin-top:6px">说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。</div>
+      <div id="localEventsList" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:.65rem;color:rgba(233,226,210,.6);max-height:60px;overflow-y:auto;line-height:1.6;white-space:pre-line"></div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:6px" data-i18n-html="local_note">说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。</div>
     </div>
 
     <!-- KPI Strip -->
@@ -139,14 +154,14 @@ a{color:var(--gold-dim)}
     <!-- DAU curve + features -->
     <div class="two-col">
       <div class="panel">
-        <h2>30 日 DAU 曲线 <small>mu × 日数据</small></h2>
+        <h2><span data-i18n="dau_h2">30 天 DAU 曲线</span> <small data-i18n="dau_small">mu × 日数 · 滚动</small></h2>
         <div id="dChart" style="position:relative;height:180px"></div>
         <div class="chart-axes" style="display:flex;justify-content:space-between;padding:0 4px;font-family:'JetBrains Mono',Consolas,monospace;">
           <span>D30</span><span>D20</span><span>Today</span>
         </div>
       </div>
       <div class="panel">
-        <h2>未来 14 天 · 趋势预测 <small>线性回归 · 平移</small></h2>
+        <h2><span data-i18n="pred_h2">未来 14 天 · 趋势预测</span> <small data-i18n="pred_small">线性回归 · 平移</small></h2>
         <div id="pChart" style="height:180px"></div>
         <div class="chart-axes" style="display:flex;justify-content:space-between;padding:0 4px;font-family:'JetBrains Mono',Consolas,monospace;">
           <span>+1d</span><span>+7d</span><span>+14d</span>
@@ -159,36 +174,36 @@ a{color:var(--gold-dim)}
 
     <!-- Feature adoption -->
     <div class="panel">
-      <h2>功能曲 · 玩家改用什么 <small>最近 30 天 · 占会话比</small></h2>
+      <h2><span data-i18n="features_h2">功能潮汐 · 玩家爱用什么</span> <small data-i18n="features_small">最近 30 天 · 占会话比</small></h2>
       <div id="featureBars"></div>
     </div>
 
     <!-- Funnel + retention -->
     <div class="two-col">
       <div class="panel">
-        <h2>转化漏斗 <small>从抵达出场页 → 炉主徽章</small></h2>
+        <h2><span data-i18n="funnel_h2">转化漏斗</span> <small data-i18n="funnel_small">从抵达出场页 → 炉主徽章</small></h2>
         <div class="funnel" id="funnelRow"></div>
       </div>
       <div class="panel">
-        <h2>次留 / 复滚 / 回流 <small>D1 · D3 · D7 · D14</small></h2>
+        <h2><span data-i18n="retention_h2">次留 / 复滚 / 回流</span> <small>D1 · D3 · D7 · D14</small></h2>
         <div class="retention-grid" id="retentionGrid"></div>
       </div>
     </div>
 
     <!-- Measured (real, not synthetic) -->
     <div class="panel" id="measuredPanel" style="border-color:rgba(120,214,175,.35)">
-      <h2>实测记录 · Measured <small>2026-11-15 真跑真测 · 不是演示数据</small></h2>
+      <h2><span data-i18n="meas_h2">实测记录 · Measured</span> <small data-i18n="meas_small">2026-11-15 真跑真测 · 不是演示数据</small></h2>
       <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">压测 · 200 并发总请求</div><div class="kpi-value">3302<span style="font-size:.7em;color:var(--muted)"> / 3302</span></div><div class="kpi-trend up">100% 成功 · 0 5xx</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">全场错误率</div><div class="kpi-value">0.00%</div><div class="kpi-trend up">version/leaderboard/seasons/presence/telemetry 八路由</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">p50 时延（同机 9 JVM）</div><div class="kpi-value">890~914<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend up">网络代理开销为主</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label">单 IP 洪水被打回</div><div class="kpi-value">52.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend flat">622.7 rps → HTTP 429 · Redis 60次/10s</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">seasons 缓存命中</div><div class="kpi-value">0.997</div><div class="kpi-trend up">Spring Cache + Redis 母存</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">窗口内限流计数</div><div class="kpi-value">14481<span style="font-size:.7em;color:var(--muted)"> allowed</span></div><div class="kpi-trend down">rejected 6376 · allowed:rejected ≈ 2.3:1</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label">Advisor 真实 e2e（BM25+LLM）</div><div class="kpi-value">≈10.4<span style="font-size:.7em;color:var(--muted)"> s p95/p99</span></div><div class="kpi-trend flat">30 job · 5 并发 · 主模型 gpt-6-sol</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label">LLM 前缀缓存（本次实跑）</div><div class="kpi-value">4516<span style="font-size:.7em;color:var(--muted)">/5862</span></div><div class="kpi-trend up">≈77.0% · 冷启 null → 次调命中</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l1">压测 · 200 并发总请求</div><div class="kpi-value">3302<span style="font-size:.7em;color:var(--muted)"> / 3302</span></div><div class="kpi-trend up" data-i18n="meas_tr1">100% 成功 · 0 5xx</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l2">全场错误率</div><div class="kpi-value">0.00%</div><div class="kpi-trend up" data-i18n="meas_tr2">八条路由全部走通 · 无 5xx</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l3">p50 时延（同机 9 JVM）</div><div class="kpi-value">890~914<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend up" data-i18n="meas_tr3">网络代理开销为主</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l4">单 IP 洪水被打回</div><div class="kpi-value">52.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend flat">622.7 rps → HTTP 429 · Redis 60次/10s</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l5">seasons 缓存命中</div><div class="kpi-value">0.997</div><div class="kpi-trend up">Spring Cache + Redis</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l6">窗口内限流计数</div><div class="kpi-value">14481<span style="font-size:.7em;color:var(--muted)"> allowed</span></div><div class="kpi-trend down">rejected 6376 · allowed:rejected ≈ 2.3:1</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l7">Advisor 真实 e2e（BM25+LLM）</div><div class="kpi-value">≈10.4<span style="font-size:.7em;color:var(--muted)"> s p95/p99</span></div><div class="kpi-trend flat" data-i18n="meas_tr7">30 job · 5 并发 · 主模型 gpt-6-sol</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l8">LLM 前缀缓存（本次实跑）</div><div class="kpi-value">4516<span style="font-size:.7em;color:var(--muted)">/5862</span></div><div class="kpi-trend up" data-i18n="meas_tr8">≈77.0% · 冷启 null → 次调命中</div></div>
       </div>
-      <div style="font-size:.66rem;color:var(--muted);line-height:1.6">
+      <div style="font-size:.66rem;color:var(--muted);line-height:1.6" data-i18n-html="meas_foot">
         <strong style="color:#e8e4dc">来源（全部本仓库实跑）</strong>：<code>docs/LOAD_TEST.md</code>（Windows + Docker Desktop · 9 JVM + Redis 7 · 2026-11-15）；
         <code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> 打真实 wkapi.pro/v1 gpt-6-sol；<br/>
         LLM 缓存修复链（HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral 冻结 system-prompt）：首调冷启动（cached=null）后，次调前缀命中率 ~77–83%（此前 HTTP/2 恒为 null，被判定「非流低命中」的根因就是上游控制台归类）。<br/>
@@ -198,24 +213,110 @@ a{color:var(--gold-dim)}
 
     <!-- Recommendations -->
     <div class="panel">
-      <h2>下一步优化清单 <small>按优先级排序 · 调参优先级 P0→P3</small></h2>
+      <h2><span data-i18n="rec_h2">下一步优化清单</span> <small data-i18n="rec_small">按优先级排序 · 调参优先 P0→P3</small></h2>
       <div class="rec-list" id="recList"></div>
     </div>
 
-    <p class="footer-note">Crossrealm Chronicles · 炉边盘 ·
+    <p class="footer-note" data-i18n-html="foot">Crossrealm Chronicles · 炉边盘 ·
       「实测记录」为 2026-11-15 本机实跑（<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> 打真实 wkapi.pro /v1 gpt-6-sol）——
       合成面板由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115）——
       真实上线后，同出数据源 <code>crossrealm_telemetry_*</code> 的本地事件也会汇入上述图表中。
-      若 you 要把上报接进后端：只需 <code>POST /api/telemetry/events</code>，
+      若你想把上报接进后端：只需 <code>POST /api/telemetry/events</code>，
       数据存 <code>telemetry</code> 面板中；炉边盘保持只读与静态。</p>
   </div>
 </div>
 
 <script>
 /* ============================================================
- * 炉边盘 — 炉火外的门（password = "123"）
- * 数据：docs/admin/data/synthetic.json（确定性种子，随时 rebuildable）
+ * 炉边盘 · 运营面板（password = "123"）
+ * 数据：docs/admin/data/synthetic.json（确定性合成，rebuildable）+ 本机 LS 真实事件
+ * 语言：中文 / English 一键切换（localStorage crossrealm_admin_lang）
  * ============================================================ */
+const I18N = {
+  zh: {
+    doc_title: '炉边盘 · Crossrealm Chronicles · 运营',
+    gate_title: '炉边盘 · 炉火之外的门',
+    gate_sub: '管理员 · Admin · 任何知道口令的人',
+    gate_ph: '口令', gate_aria: '管理员口令', gate_btn: '开门 · Unlock',
+    gate_note: '该页不对公众开放 · 仅用文字口令 · Frontend-only 安全',
+    top_h1: '炉边盘 · Crossrealm Chronicles — 运营盘',
+    nav_home: '← 回主页', nav_game: '游戏', nav_guide: '说明书',
+    local_h2: '本地真实事件',
+    local_small: '当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条',
+    local_note: '说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。',
+    dau_h2: '30 天 DAU 曲线', dau_small: 'mu × 日数 · 滚动',
+    pred_h2: '未来 14 天 · 趋势预测', pred_small: '线性回归 · 平移',
+    features_h2: '功能潮汐 · 玩家爱用什么', features_small: '最近 30 天 · 占会话比',
+    funnel_h2: '转化漏斗', funnel_small: '从抵达出场页 → 炉主徽章', retention_h2: '次留 / 复滚 / 回流',
+    meas_h2: '实测记录 · Measured', meas_small: '2026-11-15 真跑真测 · 不是演示数据',
+    meas_l1: '压测 · 200 并发总请求', meas_tr1: '100% 成功 · 0 5xx',
+    meas_l2: '全场错误率', meas_tr2: '八条路由全部走通 · 无 5xx',
+    meas_l3: 'p50 时延（同机 9 JVM）', meas_tr3: '网络代理开销为主',
+    meas_l4: '单 IP 洪水被打回',
+    meas_l5: 'seasons 缓存命中',
+    meas_l6: '窗口内限流计数',
+    meas_l7: 'Advisor 真实 e2e（BM25+LLM）', meas_tr7: '30 job · 5 并发 · 主模型 gpt-6-sol',
+    meas_l8: 'LLM 前缀缓存（本次实跑）', meas_tr8: '≈77.0% · 冷启 null → 次调命中',
+    meas_foot: '<strong style="color:#e8e4dc">来源（全部本仓库实跑）</strong>：<code>docs/LOAD_TEST.md</code>（Windows + Docker Desktop · 9 JVM + Redis 7 · 2026-11-15）；<code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> 打真实 wkapi.pro/v1 gpt-6-sol；<br/>LLM 缓存修复链（HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral 冻结 system-prompt）：首调冷启动（cached=null）后，次调前缀命中率 ~77–83%；<br/><strong style="color:#e8e4dc">合成面板</strong>（KPI / 预测 / 漏斗 / 留存）仍是确定性合成数据（seed=20261115），标注为“合成”；<strong style="color:#e8e4dc">本卡片是真实实验数据</strong>。',
+    rec_h2: '下一步优化清单', rec_small: '按优先级排序 · 调参优先 P0→P3',
+    foot: 'Crossrealm Chronicles · 炉边盘 ·<br/>「实测记录」为 2026-11-15 本机实跑（<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> 打真实 wkapi.pro /v1 gpt-6-sol）—— 合成面板由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115）—— 真实上线后，同出数据源 <code>crossrealm_telemetry_*</code> 的本地事件也会汇入上述图表中。<br/>若你想把上报接进后端：只需 <code>POST /api/telemetry/events</code>，数据存 <code>telemetry</code> 面板中；炉边盘保持只读与静态。',
+    boot_fail: 'synthetic.json 未能装载。<br>请先跑 <code>node scripts/admin-synthetic.mjs</code>',
+    slope_line: '陡度：每天 %DAU DAU/14d；今日值 %AVG；预测 +14d 峰值 ≈ %PEAK',
+    kpi_dau_avg: '日活均值', kpi_session_min: '会话平均分钟', kpi_boss: 'Boss 胜率', kpi_canon: '典籍阅读率',
+    kpi_d1: '留存 D1', kpi_d7: '留存 D7', kpi_bounce: '出口率', kpi_churn: '放弃率',
+    kpi_new: '新用户/日', kpi_sessions: '总会话数', kpi_boss_clears: '总 Boss 通关', kpi_d14: '留存 D14',
+    kpi_up: '▲ rolling', kpi_down: '▼ cap',
+    lt_game_start: '游戏启动', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
+    lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关',
+    lt_empty: '尚无本地事件；游戏进去之后会自动记录。',
+    gate_error: '口令不对。再想想——炉子见过你的笑脸。',
+    aria_dau_curve: '30 天 DAU 曲线', aria_pred: '14 天 DAU 预测',
+  },
+  en: {
+    doc_title: 'Crossrealm Chronicles · Admin Console',
+    gate_title: 'Crossrealm Chronicles · Admin',
+    gate_sub: 'Administrator · Admin · anyone holding the passphrase',
+    gate_ph: 'Passphrase', gate_aria: 'Admin passphrase', gate_btn: 'Unlock · 开门',
+    gate_note: 'Internal only · passphrase-gated · Frontend-only security',
+    top_h1: 'Crossrealm Chronicles — Operations Console',
+    nav_home: '← Showcase', nav_game: 'Play game', nav_guide: 'Handbook',
+    local_h2: 'Local real events',
+    local_small: 'This browser · crossrealm_telemetry_v1 LS rolling buffer of 200',
+    local_note: 'These are <em>the real events this browser</em> produced locally. Real multi-user aggregates will appear in the panels above once a backend aggregates them.',
+    dau_h2: '30-day DAU curve', dau_small: 'µ × 30d · rolling',
+    pred_h2: 'Next 14 days · forecast', pred_small: 'Linear regression · flat extrapolation',
+    features_h2: 'Feature tides · what players actually use', features_small: 'Last 30 days · share of sessions',
+    funnel_h2: 'Conversion funnel', funnel_small: 'From opening screen → Furnace-keeper badge', retention_h2: 'Retention / return',
+    meas_h2: 'Measured · 实测记录', meas_small: '2026-11-15 live runs · not demo data',
+    meas_l1: 'Load test · 200-way concurrent', meas_tr1: '100% success · 0 5xx',
+    meas_l2: 'Error rate, whole run', meas_tr2: 'All eight routes clean · no 5xx',
+    meas_l3: 'p50 latency (9 JVMs, same host)', meas_tr3: 'Mostly network proxy overhead',
+    meas_l4: 'Single-IP flood shed',
+    meas_l5: 'seasons cache hit',
+    meas_l6: 'Windowed rate-limit counters',
+    meas_l7: 'Advisor live e2e (BM25+LLM)', meas_tr7: '30 jobs · 5 concurrent · primary gpt-6-sol',
+    meas_l8: 'LLM prefix cache (this run)', meas_tr8: '≈77.0% · cold null → warm hit on 2nd call',
+    meas_foot: '<strong style="color:#e8e4dc">Sources (all live in this repo)</strong>: <code>docs/LOAD_TEST.md</code> (Windows + Docker Desktop · 9 JVMs + Redis 7 · 2026-11-15);<br/><code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> against real wkapi.pro/v1 gpt-6-sol;<br/>LLM cache fix chain (HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral frozen system-prompt): first call cold (cached=null), warm calls hit ~77–83% prefix reuse;<br/><strong style="color:#e8e4dc">Synthetic panels</strong> (KPI / forecast / funnel / retention) are deterministic demo data (seed=20261115, labeled “synthetic”); <strong style="color:#e8e4dc">this card is real measured data</strong>.',
+    rec_h2: 'Next-step optimization plan', rec_small: 'Priority order · tune before building · P0→P3',
+    foot: 'Crossrealm Chronicles · Admin Console ·<br/>The “Measured” card is a 2026-11-15 live run (<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> against real wkapi.pro /v1 gpt-6-sol). The synthetic panels are deterministically generated by <code>scripts/admin-synthetic.mjs</code> (seed 20261115).<br/>Once real players go online, events sourced from <code>crossrealm_telemetry_*</code> will fold into the same charts. To wire reporting into a backend: <code>POST /api/telemetry/events</code> — data lands in the <code>telemetry</code> panel; this console stays read-only and static.',
+    boot_fail: 'synthetic.json failed to load.<br>Run <code>node scripts/admin-synthetic.mjs</code> first.',
+    slope_line: 'Slope: %DAU DAU/day over 14d; today %AVG; +14d peak ≈ %PEAK',
+    kpi_dau_avg: 'Avg DAU', kpi_session_min: 'Avg session (min)', kpi_boss: 'Boss win rate', kpi_canon: 'Canon read rate',
+    kpi_d1: 'Retention D1', kpi_d7: 'Retention D7', kpi_bounce: 'Bounce rate', kpi_churn: '3-min drop-off',
+    kpi_new: 'New users / day', kpi_sessions: 'Total sessions', kpi_boss_clears: 'Total boss clears', kpi_d14: 'Retention D14',
+    kpi_up: '▲ rolling', kpi_down: '▼ cap',
+    lt_game_start: 'Game start', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
+    lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped',
+    lt_empty: 'No local events yet — they are recorded automatically when you enter the game.',
+    gate_error: 'Wrong passphrase. The furnace frowns — but try again.',
+    aria_dau_curve: '30-day DAU curve', aria_pred: '14-day DAU forecast',
+  },
+};
+
+let curLang = 'zh';
+try { const saved = localStorage.getItem('crossrealm_admin_lang'); if (saved === 'en' || saved === 'zh') curLang = saved; } catch (_) {}
+const T = (k) => (I18N[curLang] && I18N[curLang][k]) ?? I18N.zh[k] ?? k;
+
 const gate = document.getElementById('gate');
 const dashboard = document.getElementById('dashboard');
 const pwd = document.getElementById('pwd');
@@ -241,7 +342,7 @@ unlock.addEventListener('click', () => {
     savePassed();
     showDashboard();
   } else {
-    err.textContent = '✗ 口令不对。再想想——炉子见过你的笑脸。';
+    err.textContent = T('gate_error');
     pwd.select();
   }
 });
@@ -250,10 +351,32 @@ pwd.addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock.click(); 
 if (loadPassed()) showDashboard();
 
 /* ============================================================
+ * applyLang — 切换语言（静态节点 + 动态渲染重跑）
+ * ============================================================ */
+function applyLang(lang) {
+  curLang = lang === 'en' ? 'en' : 'zh';
+  try { localStorage.setItem('crossrealm_admin_lang', curLang); } catch (_) {}
+  document.documentElement.setAttribute('lang', curLang === 'zh' ? 'zh-CN' : 'en');
+  document.title = T('doc_title');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = T(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = T(el.getAttribute('data-i18n-html')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.setAttribute('placeholder', T(el.getAttribute('data-i18n-ph'))); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', T(el.getAttribute('data-i18n-aria'))); });
+  document.querySelectorAll('[data-lang-btn]').forEach(btn => { btn.setAttribute('aria-pressed', String(btn.getAttribute('data-lang-btn') === curLang)); });
+  const dau = document.getElementById('dChart');
+  if (dau && dau.firstElementChild) dau.firstElementChild.setAttribute('aria-label', T('aria_dau_curve'));
+  const pChart = document.getElementById('pChart');
+  if (pChart && pChart.firstElementChild) pChart.firstElementChild.setAttribute('aria-label', T('aria_pred'));
+  if (window.__adminLoaded && window.__adminData) renderAll(window.__adminData);
+}
+document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+  btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang-btn')));
+});
+
+/* ============================================================
  * Dashboard bootstrap
  * ============================================================ */
 async function bootDashboard() {
-  // 加载 synthetic snapshot（先 bail out 再处理），失败则展示 empty-state
   let data;
   try {
     const res = await fetch('data/synthetic.json', { cache: 'no-store' });
@@ -262,10 +385,14 @@ async function bootDashboard() {
   } catch (e) {
     console.error('[admin] synthetic.json load failed:', e);
     const grid = document.getElementById('kpiGrid');
-    grid.innerHTML = '<div class="panel" style="grid-column:1/-1">synthetic.json 未能装载。<br>请先跑 <code>node scripts/admin-synthetic.mjs</code></div>';
+    grid.innerHTML = '<div class="panel" style="grid-column:1/-1">' + T('boot_fail') + '</div>';
     return;
   }
+  window.__adminData = data;
+  renderAll(data);
+}
 
+function renderAll(data) {
   renderKpis(data);
   renderDailyChart(data);
   renderLocalEvents();
@@ -274,34 +401,37 @@ async function bootDashboard() {
   renderFunnel(data);
   renderRetention(data);
   renderRecommendations(data);
-  document.getElementById('slopeLine').textContent =
-    `陡度：每天 +${(data.predictions[data.predictions.length-1].dau - data.kpis.dauMin).toFixed(0)} DAU/14d；`
-    + `今日值 ${(data.kpis.dauAvg).toFixed(0)}；`
-    + `预测 +14d 峰值 ≈ ${data.predictions[data.predictions.length-1].dau}`;
+  const peak = data.predictions[data.predictions.length - 1].dau;
+  const delta = peak - Math.round(data.kpis.dauAvg);
+  const fmtSigned = (n) => (n >= 0 ? '+' + n : String(n));
+  document.getElementById('slopeLine').textContent = T('slope_line')
+    .replace('%DAU', fmtSigned(delta))
+    .replace('%AVG', data.kpis.dauAvg.toFixed(0))
+    .replace('%PEAK', String(peak));
 }
 
 /* ---------- KPI strip ---------- */
 function renderKpis(d) {
   const grid = document.getElementById('kpiGrid');
   const tiles = [
-    { label: '日活均值', value: d.kpis.dauAvg, trend: 'avgdau', suffix: '' },
-    { label: '会话平均秒', value: Math.round(d.kpis.avgSessionSeconds / 60), unit: 'min', suffix: 'min' },
-    { label: 'Boss 胜率', value: d.kpis.bossWinRate, unit: '%', suffix: '%' },
-    { label: '典籍阅读率', value: d.kpis.canonReadRate, unit: '%', suffix: '%' },
-    { label: '留存 D1', value: d.kpis.retentionD1, unit: '%', suffix: '%' },
-    { label: '留存 D7', value: d.kpis.retentionD7, unit: '%', suffix: '%' },
-    { label: '出口率', value: d.kpis.bounceRate, unit: '%', suffix: '%', down: true },
-    { label: '放弃率', value: d.kpis.churn3min, unit: '%', suffix: '%', down: true },
-    { label: '新用户/日', value: d.kpis.newUsersAvg, suffix: '' },
-    { label: '总会话数', value: d.kpis.totalSessions.toLocaleString(), suffix: '' },
-    { label: '总 Boss 通关', value: d.kpis.totalBossClears.toLocaleString(), suffix: '' },
-    { label: 'D14 留存', value: d.kpis.retentionD14, suffix: '%' },
+    { label: 'kpi_dau_avg', value: d.kpis.dauAvg, suffix: '' },
+    { label: 'kpi_session_min', value: Math.round(d.kpis.avgSessionSeconds / 60), suffix: 'min' },
+    { label: 'kpi_boss', value: d.kpis.bossWinRate, suffix: '%' },
+    { label: 'kpi_canon', value: d.kpis.canonReadRate, suffix: '%' },
+    { label: 'kpi_d1', value: d.kpis.retentionD1, suffix: '%' },
+    { label: 'kpi_d7', value: d.kpis.retentionD7, suffix: '%' },
+    { label: 'kpi_bounce', value: d.kpis.bounceRate, suffix: '%', down: true },
+    { label: 'kpi_churn', value: d.kpis.churn3min, suffix: '%', down: true },
+    { label: 'kpi_new', value: d.kpis.newUsersAvg, suffix: '' },
+    { label: 'kpi_sessions', value: d.kpis.totalSessions.toLocaleString(), suffix: '' },
+    { label: 'kpi_boss_clears', value: d.kpis.totalBossClears.toLocaleString(), suffix: '' },
+    { label: 'kpi_d14', value: d.kpis.retentionD14, suffix: '%' },
   ];
   grid.innerHTML = tiles.map(t => `
     <div class="kpi">
-      <div class="kpi-label">${escapeHtml(t.label)}</div>
-      <div class="kpi-value">${typeof t.value === 'number' ? t.value.toLocaleString('en-US', { maximumFractionDigits: 1 }) : t.value}${t.suffix ? '<small style="font-size:.55em;color:var(--muted)">'+escapeHtml(t.suffix)+'</small>' : ''}</div>
-      <div class="kpi-trend ${t.down ? 'down' : 'up'}">${t.down ? '▼ cap' : '▲ rolling'}</div>
+      <div class="kpi-label">${escapeHtml(T(t.label))}</div>
+      <div class="kpi-value">${typeof t.value === 'number' ? t.value.toLocaleString('en-US', { maximumFractionDigits: 1 }) : t.value}${t.suffix ? '<small style="font-size:.55em;color:var(--muted)">' + escapeHtml(t.suffix) + '</small>' : ''}</div>
+      <div class="kpi-trend ${t.down ? 'down' : 'up'}">${escapeHtml(T(t.down ? 'kpi_down' : 'kpi_up'))}</div>
     </div>`).join('');
 }
 
@@ -311,16 +441,15 @@ function renderDailyChart(d) {
   const W = 540, H = 160, padL = 10, padR = 10, padT = 10, padB = 6;
   const data = d.daily;
   const maxY = Math.max(...data.map(p => p.dau)) * 1.15;
-  const minY = 0;
   const xAt = (i) => padL + (i / (data.length - 1)) * (W - padL - padR);
   const yAt = (v) => H - padB - (v / maxY) * (H - padT - padB);
   let path = '';
   data.forEach((p, i) => { path += (i === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ',' + yAt(p.dau).toFixed(1) + ' '; });
-  const areaPath = path + `L ${xAt(data.length-1).toFixed(1)},${H - padB} L ${xAt(0).toFixed(1)},${H - padB} Z`;
+  const areaPath = path + `L ${xAt(data.length - 1).toFixed(1)},${H - padB} L ${xAt(0).toFixed(1)},${H - padB} Z`;
   const ticks = [0, Math.round(maxY * 0.33), Math.round(maxY * 0.66), Math.round(maxY)];
   const gridLines = ticks.map(t => `<line x1="${padL}" y1="${yAt(t).toFixed(1)}" x2="${W - padR}" y2="${yAt(t).toFixed(1)}" class="spark-grid"/><text x="${padL}" y="${(yAt(t) - 2).toFixed(1)}" class="spark-label">${t}</text>`).join('');
   host.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:100%" aria-label="30-day DAU curve">
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:100%" role="img" aria-label="${escapeHtml(T('aria_dau_curve'))}">
       ${gridLines}
       <path d="${areaPath}" class="spark" />
       <path d="${path}" class="spark" fill="none" />
@@ -340,11 +469,11 @@ function renderPredictionChart(d) {
   preds.forEach((p, i) => { path += (i === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ',' + yAt(p.dau).toFixed(1) + ' '; });
   const baseY = yAt(baseline);
   host.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:100%" aria-label="14-day DAU forecast">
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:100%" role="img" aria-label="${escapeHtml(T('aria_pred'))}">
       <line x1="${padL}" y1="${baseY.toFixed(1)}" x2="${W - padR}" y2="${baseY.toFixed(1)}" stroke="#c9a962" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.7" />
       <path d="${path}" class="spark" fill="none" stroke="#ffd98a" stroke-width="2.2" />
       <circle cx="${xAt(0).toFixed(1)}" cy="${yAt(preds[0].dau).toFixed(1)}" r="3" fill="#ffd98a" />
-      <circle cx="${xAt(preds.length-1).toFixed(1)}" cy="${yAt(preds[preds.length-1].dau).toFixed(1)}" r="4" fill="#ffd98a" stroke="#0a080e" stroke-width="1.2" />
+      <circle cx="${xAt(preds.length - 1).toFixed(1)}" cy="${yAt(preds[preds.length - 1].dau).toFixed(1)}" r="4" fill="#ffd98a" stroke="#0a080e" stroke-width="1.2" />
     </svg>`;
 }
 
@@ -353,8 +482,9 @@ function renderFeatures(d) {
   const host = document.getElementById('featureBars');
   host.innerHTML = d.features.map(f => {
     const w = Math.min(100, f.pctOfSessions);
+    const label = curLang === 'en' ? (f.nameEn || f.name) : f.name;
     return `<div class="bar-row">
-      <div class="name">${escapeHtml(f.name)}</div>
+      <div class="name">${escapeHtml(label)}</div>
       <div class="bar-track"><div class="bar" style="width:${w.toFixed(1)}%"></div></div>
       <div class="bar-pct">${f.pctOfSessions.toFixed(1)}% · ${f.sessions.toLocaleString()}</div>
     </div>`;
@@ -363,11 +493,14 @@ function renderFeatures(d) {
 
 /* ---------- Funnel ---------- */
 function renderFunnel(d) {
-  document.getElementById('funnelRow').innerHTML = d.funnel.map(f => `
+  document.getElementById('funnelRow').innerHTML = d.funnel.map(f => {
+    const label = curLang === 'en' ? (f.stageEn || f.stage) : f.stage;
+    return `
     <div class="funnel-cell">
       <div class="funnel-pct">${f.pct.toFixed(1)}%</div>
-      <div class="funnel-label">${escapeHtml(f.stage)}</div>
-    </div>`).join('');
+      <div class="funnel-label">${escapeHtml(label)}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ---------- Retention tiles ---------- */
@@ -385,43 +518,50 @@ function renderRetention(d) {
 
 /* ---------- Recommendations ---------- */
 function renderRecommendations(d) {
-  document.getElementById('recList').innerHTML = d.recommendations.map(r => `
+  document.getElementById('recList').innerHTML = d.recommendations.map(r => {
+    const title = curLang === 'en' ? (r.titleEn || r.title) : r.title;
+    const impact = curLang === 'en' ? (r.impactEn || r.impact) : r.impact;
+    return `
     <div class="rec">
       <div class="rec-p ${escapeHtml(r.priority)}">${escapeHtml(r.priority)}</div>
       <div>
-        <div class="rec-title">${escapeHtml(r.title)}</div>
-        <div class="rec-impact">↳ ${escapeHtml(r.impact)}</div>
+        <div class="rec-title">${escapeHtml(title)}</div>
+        <div class="rec-impact">✦ ${escapeHtml(impact)}</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 /* ---------- Utility ---------- */
 function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-/* ---------- 本地真实事件（从 localStorage 读 LS_KEY 滚动缓冲） ---------- */
+/* ---------- 本地真实事件（从 LS_KEY 滚动缓冲读） ---------- */
 function readLocalEvents() {
   try { return JSON.parse(localStorage.getItem('crossrealm_telemetry_v1') ?? '[]'); } catch { return []; }
 }
 function renderLocalEvents() {
   const arr = readLocalEvents();
   const counts = Object.create(null);
-  for (const e of arr) counts[e.event] = (counts[e.event] ?? 0) + 1;
-  const known = ['game_start','help_open','journal_open','worldmap_open','canon_open','flame_draw','boss_kill','quit_30s'];
-  const labels = { game_start: '游戏启动', help_open: '按 H 打开说明', journal_open: '按 J 打开日志', worldmap_open: '按 M 打开地图', canon_open: '打开典籍馆', flame_draw: '占卜抽火', boss_kill: 'Boss 通关', autoplay_tap: '自动通关' };
+  for (const e of arr) if (e && typeof e.event === 'string') counts[e.event] = (counts[e.event] ?? 0) + 1;
+  const known = ['game_start', 'help_open', 'journal_open', 'worldmap_open', 'canon_open', 'flame_draw', 'boss_kill', 'autoplay_tap'];
+  const labelKey = { game_start: 'lt_game_start', help_open: 'lt_help_open', journal_open: 'lt_journal_open', worldmap_open: 'lt_worldmap_open', canon_open: 'lt_canon_open', flame_draw: 'lt_flame_draw', boss_kill: 'lt_boss_kill', autoplay_tap: 'lt_autoplay_tap' };
   const gridHtml = known.map(k => {
     const v = counts[k] ?? 0;
     const active = v > 0;
-    return '<div class="kpi" style="' + (active ? 'border-color:rgba(255,217,138,.5)' : '') + '"><div class="kpi-label">' + escapeHtml(labels[k]) + '</div><div class="kpi-value">' + v + '</div><div class="kpi-trend up">' + (active ? '▲' : '—') + '</div></div>';
+    return '<div class="kpi" style="' + (active ? 'border-color:rgba(255,217,138,.5)' : '') + '"><div class="kpi-label">' + escapeHtml(T(labelKey[k])) + '</div><div class="kpi-value">' + v + '</div><div class="kpi-trend up">' + (active ? '▲' : '—') + '</div></div>';
   }).join('');
   document.getElementById('localEventsGrid').innerHTML = gridHtml;
   const recent = arr.slice(-8).slice().reverse().map(e => {
     const t = new Date(e.t).toTimeString().slice(0, 8);
     return '[' + t + '] ' + e.event + (e.meta ? ' · ' + JSON.stringify(e.meta).slice(0, 40) : '');
   }).join('\n');
-  document.getElementById('localEventsList').textContent = recent || '（尚无本地事件；游戏进去之后会自动记录。）';
+  document.getElementById('localEventsList').textContent = recent || T('lt_empty');
 }
+
+/* 首次进入页面即应用保存的语言（未解锁也生效） */
+applyLang(curLang);
 </script>
 </body>
 </html>
