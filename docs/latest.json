@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T19:04:46.464Z",
+  "generated_at": "2026-11-15T19:11:07.456Z",
   "branch": "main",
-  "head": "67968396",
-  "total_commits": 1795,
-  "pushed_at": "2026-11-16T03:01:58+08:00",
+  "head": "2f286f22",
+  "total_commits": 1797,
+  "pushed_at": "2026-11-16T03:10:13+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "2f286f2",
+      "at": "2026-11-16T03:10:13+08:00",
+      "subject": "feat(canon): W-Z190 第六十四卷《烽火 / The Beacon》——卷十之五"
+    },
+    {
+      "short": "0574e0d",
+      "at": "2026-11-15T19:04:46Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "6796839",
       "at": "2026-11-16T03:01:58+08:00",
@@ -21,25 +31,15 @@
       "short": "5ae9d3e",
       "at": "2026-11-16T02:55:10+08:00",
       "subject": "feat(canon): W-Z188 第六十二卷《薪尽 / The Last Stick》——卷十之三"
-    },
-    {
-      "short": "d225a01",
-      "at": "2026-11-15T18:49:55Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "b66254b",
-      "at": "2026-11-16T02:47:13+08:00",
-      "subject": "feat(canon): W-Z187 第六十一卷《劈薪 / Splitting the Firewood》——卷十之二"
     }
   ],
-  "tracked_files": 1353,
+  "tracked_files": 1355,
   "test_files": 458,
   "i18n_keys": 3223,
   "lore_sources": 59,
-  "novel_chapters_zh": 63,
-  "novel_chapters_en": 63,
-  "milestone": "W-Z189",
+  "novel_chapters_zh": 64,
+  "novel_chapters_en": 64,
+  "milestone": "W-Z190",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
