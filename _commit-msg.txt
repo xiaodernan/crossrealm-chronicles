@@ -1,0 +1,9 @@
+feat(i18n): W-Z93 按语言分包——en 表独立成 chunk-en（首屏 2.20→1.98 MiB），刻度下调到 2079856
+
+- 新增 src/content/localeProvider.js：content 层 TLA `await import('./strings.en.js')`，提供 stringTable(lang)；任何消费者求值被 TLA 自动排在 en 表就绪之后
+- vite.config.js manualChunks：strings.en.js 切出独立异步块 `chunk-en`（置于 content/ 规则之前，否则会被强制吸回 chunk-core）
+- engine/i18n.js + franchises / gear / semanticColors / skillTrees 全部改走 stringTable()；不再静态 import strings.en.js
+- 实测：chunk-core 972186 → 746394（−225792 B）；首屏 2306741 → 2079856 B；`npm run size` 通过（环比余量 0.21 MiB）
+- FIRST_SCREEN_READING 2235000 → 2079856（刻度不是预算，结构债还完就把刻度钉回真实读数）
+- ADR W-Z93 附 MEMORY 教训：manualChunks 吸附规则会把动态 import 也并进大块——分包必须成对做（代码侧动态化 + 分块规则白名单）
+- npm test 6696/6696 绿；lint 0/0；link:check 86/86；浏览器双语启动实测（zh/en 都能完整 boot）

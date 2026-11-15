@@ -5,12 +5,10 @@
  * `e.franchise === '魔法学院'` 做判定：改一行文案，十条成就和四条支线就会静默失效。
  * 现在条目存 id，中文只在这张表的值里出现一次，显示统一走 `franchiseLabel()`。
  */
-import { STRINGS_ZH } from './strings.zh.js';
-import { STRINGS_EN } from './strings.en.js';
+import { stringTable } from './localeProvider.js';
 
 // 双表住在**同层**（content/strings.*）—— 内容层读它不违反"地基层不向上够"那条约定。
-const 双表 = { zh: STRINGS_ZH, en: STRINGS_EN };
-const 表 = (lang) => 双表[lang] ?? STRINGS_ZH;
+const 表 = (lang) => stringTable(lang);
 
 export const FRANCHISE = {
   WIZARD: 'wizard',

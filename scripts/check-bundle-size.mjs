@@ -48,6 +48,13 @@ import { fileURLToPath } from 'node:url';
  *   ≥ 2296924/1.03 = 2228072（环比门）∧ ≤ 2359296/1.05 ≈ 2246951（「刻度×1.05 仍在上限内」的单元夹具门）
  *   ∧ ×1.03 < 2359296（刻度×容差 < 上限·测试）。2235000 落在交集内（环比余量 51 KB）。
  *   2.25 MiB 绝对上限仍有余量，但结构性杠杆（按语言分包）仍是**下一次抬线必须先还/分掉**的债，不再放行「先抬后想」）。
+ *   2026-11-15 **W-Z93 按语言分包 · 把刻度压到 2079856**：`src/content/localeProvider.js`
+ *   以 TLA 动态 import `strings.en.js`（整张 227 KB / gzip 72 KB 独立成 `chunk-en`），
+ *   四个内容模块（franchises / gear / semanticColors / skillTrees）与 `engine/i18n.js`
+ *   全部改走 `stringTable(lang)` —— 英文表不再进 chunk-core、不再被 modulepreload 钉上首屏账面。
+ *   实测首屏 2306741 → **2079856 B**（chunk-core 972186 → 746394，−225792 B 即英文表本体），
+ *   刻度下调的同时保留 2.25 MiB 绝对上限不动；`chunk-en` 由玩家语言/首个 en 调用时异步接上，
+ *   默认中文用户零成本。ADR W-Z93 记录全过程。
  * - `FIRST_SCREEN_GROWTH_RATIO` —— 环比容差。单次改动允许比刻度长 3%（约 61 KB），
  *   超了当场红。61 KB 是"一次切片合理增重"的上限：本仓近 200 个切片的实测中位数在
  *   10 KB 以内，最大的一片（`chunk-world` 首次落地）也只有 60 KB 出头。
@@ -58,8 +65,8 @@ import { fileURLToPath } from 'node:url';
  *   `skillTrees` 四个内容模块在 import 期静态读英文表挡住了，那是独立一片的活。
  *   上限往上抬了 0.25 MiB，**环比容差反而把警戒线从 0.63 MiB 收紧到 61 KB**。
  */
-/** 上次审阅的刻度（2026-11-15，见上方注释与 ADR W-Z82b；三道门交集取中值 2235000）。 */
-export const FIRST_SCREEN_READING = 2235000;
+/** 上次审阅的刻度（2026-11-15，见上方注释与 ADR W-Z82b / W-Z93；W-Z93 付清按语言分包债后的真读数）。 */
+export const FIRST_SCREEN_READING = 2079856;
 
 /** 环比容差：单次改动允许比上次审阅长 3%（见上方注释） */
 export const FIRST_SCREEN_GROWTH_RATIO = 1.03;

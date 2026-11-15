@@ -38,15 +38,13 @@
  */
 
 /** 色觉档位。`default` 是出厂档；其余三档是常见的色觉异常类型 */
-import { STRINGS_ZH } from './strings.zh.js';
-import { STRINGS_EN } from './strings.en.js';
+import { stringTable } from './localeProvider.js';
 
 /**
  * 双表住在**同层**（content/strings.*）—— 内容层读它不违反"地基层不向上够"那条约定。
  * `lang` 决定读哪张（与 `content/gear.js` 里那件按语言拼装的事同一套办法）。
  */
-const 双表 = { zh: STRINGS_ZH, en: STRINGS_EN };
-const 表 = (lang) => 双表[lang] ?? STRINGS_ZH;
+const 表 = (lang) => stringTable(lang);
 
 export const COLOR_MODES = Object.freeze(['default', 'deuteranopia', 'protanopia', 'tritanopia']);
 

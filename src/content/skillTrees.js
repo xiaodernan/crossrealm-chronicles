@@ -37,8 +37,7 @@
  * "谁在什么地方读它"，而 `tests/skill-trees.test.js` 会去源码里核对这句话仍然成立。
  */
 
-import { STRINGS_ZH } from './strings.zh.js';
-import { STRINGS_EN } from './strings.en.js';
+import { stringTable } from './localeProvider.js';
 
 /**
  * 分支清单 —— "一共几条流派"的唯一真源。
@@ -57,7 +56,7 @@ export const SKILL_BRANCHES = [
 
 /** 流派显示名 / 说明（按语言展开） */
 export function skillBranchText(branch, lang = 'zh') {
-  const t = lang === 'en' ? STRINGS_EN : STRINGS_ZH;
+  const t = stringTable(lang);
   return {
     name: t[branch.name] ?? branch.id,
     note: t[branch.note] ?? '',

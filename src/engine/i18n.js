@@ -11,11 +11,11 @@
  */
 
 import { STRINGS_ZH } from '../content/strings.zh.js';
-import { STRINGS_EN } from '../content/strings.en.js';
+import { stringTable, STRINGS_EN } from '../content/localeProvider.js';
 
 /** 语言 -> 文案表。两张表各自在 content 层已 Object.freeze，这里连映射一起冻上：
  *  运行时没有任何正当理由换表（换语言走 setLanguage，不改这张映射）（W-D2 切片56）。 */
-const TABLES = Object.freeze({ zh: STRINGS_ZH, en: STRINGS_EN });
+const TABLES = Object.freeze({ zh: STRINGS_ZH, en: stringTable('en') });
 
 /**
  * 已经告过警的缺失键（W-D2 切片56）。

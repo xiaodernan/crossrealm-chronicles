@@ -1,11 +1,9 @@
 import { DEFAULT_COLOR_MODE, semanticColor, semanticLabel, raritySemanticId } from './semanticColors.js';
-import { STRINGS_ZH } from './strings.zh.js';
-import { STRINGS_EN } from './strings.en.js';
+import { stringTable } from './localeProvider.js';
 
 // 装备名表存的是**文案键**（W-D2 切片16m），不是文案本身 —— 显示侧在那一刻展开。
 // 双表住在**同层**（content/strings.*），所以内容层读它不违反"地基层不向上够"那条约定。
-const 双表 = { zh: STRINGS_ZH, en: STRINGS_EN };
-const 表 = (lang) => 双表[lang] ?? STRINGS_ZH;
+const 表 = (lang) => stringTable(lang);
 
 /**
  * 装备的数据层（W-B5 切片1）：槽位、基表、稀有度、词缀，以及"一件装备等于几点属性"这一处算式。

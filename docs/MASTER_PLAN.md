@@ -8141,3 +8141,19 @@ Phase D（系统与质量）
     同番外五 QA 套路，`scripts/novel-qa.mjs "13-"`，每轮真上游 gpt-6-sol 红-绿（**5 轮**，包括 ledger 中「明天/今天」时序一致、新三件事条理矛盾递归清洗干净）；最终 zh/en「本章无矛盾」。
   - **配套落地**：① 原典语料重建 55 源（+2 chapter 文件，GLOSSARY 双版以真上游生成补入番外六：zh 8.4 KB / en 13.8 KB；README 篇名数 五番外→六番外、tapestry/film/短片字幕等交叉名目同步刷新；player-guide 跨媒体卡片双语各补「换班」；showcase feed 11·16 补 W-Z89；tapestry 双语各增番外六 Interlude VI 大项（OST 01 前、OST 25 后的接班低鸣定位）。
   - **判据**：QA 双语「本章无矛盾」；「六番外 / Interlude VI / 换班 / Handover」四表面（README 中英 + creative READMEs 中英 + player-guide 中英 + tapestry 中英 + showcase 中英）名目逐项与文件落盘一致；link:check 全绿；canon 文本互引 0 冲突（QA 红→绿循环 5 轮，含「明天/今天」时序一致、ledger 记录与「第一目 vs 新第一目」顺序一致）。
+
+- **2026-11-17 W-Z92「个人展示页「跨界纪元」实时同步通路——事实包 docs/latest.json + 每周一自动刷新」** —— 提交：本次 HEAD
+
+  - **起因**：用户明确要求个人展示页（`xiaodernan.github.io`）的项目入口「每次点进去都是最新成果」——全量自动、但频率要压低（有大提升再更新）。既有参照：`minicc-codex` 的 `docs/latest.json` + 页面 raw 直读 + 每周 cron 兜底。
+  - **做法（双通路）**：① `scripts/build-latest.mjs`：现场推导事实包——commit 数 / tracked files / 测试文件数 / `EXPECTED_KEY_COUNT`（从 `tests/helpers/i18nKeyCount.js` 现读）/ 原典语料源数（`corpus.txt` 的 `# source:` 行数）/ 双语章回数（`creative/novel/*.md` + `en/*.md`）/ 最近 5 条提交 / `first_commit_at`，零手抄、零漂移；② `docs/latest.json` 提交在仓库（`crossrealm.latest.v1` schema），页面运行时优先 `?ts=Date.now()` 直读（CORS `*`），失败退回页面仓库 `assets/crossrealm/latest.json`；③ `.github/workflows/sync-latest.yml`（本仓库，周一 12:30 UTC 重推 main）+ 展示页仓库 `sync-crossrealm.yml`（周一 13:00 UTC，错峰 30 分钟，checkout 本仓库跑同一脚本落盘 `assets/crossrealm/latest.json`）。
+  - **展示页侧（`xiaodernan/xiaodernan.github.io`）**：`index.html` 卡片下新增 `crossrealm:latest` 条带（cr-* ids：提交次数 / 测试文件 / i18n 键 / 原典语料源 / 双语章回 + 最近 5 条提交记录折叠列表 + `MAIN · LATEST` 印）；内联脚本与 minicc 同款双通路取数；`index-note` 加注「`crossrealm-chronicles` 以 `main` 为唯一展示入口，每周一自动跟随 `main` 刷新」。
+  - **判据**：raw.githubusercontent 200；`gh` 手调 `sync-crossrealm.yml` 绿（提交 `b46dd92` 把 assets/crossrealm/latest.json 刷到 main 头）；线上 `https://xiaodernan.github.io/` DOM 实测 `cr-commits=1595 / cr-testfiles=453 / cr-i18n=3134 / cr-lore=55 / cr-novel=14 章 / cr-head=main @ 89df1e2` 全部真实填充（非占位符）。
+
+- **2026-11-17 W-Z93「按语言分包——首屏付清『双语表』结构性债，首屏 2.20 → 1.98 MiB」** —— 提交：本次 HEAD
+
+  - **起因**：Front CI 在 `89df1e2` 与 `a3b5a1c` 两次红在 `Size budget`：首屏 2306741 B，超 `FIRST_SCREEN_READING × 1.03 = 2302050` 4,692 B（刻度 2235000 ×3%）。绝对上限 2.25 MiB 未动（余量仍有）。ADR W-Z82b 已声明「按语言分包是下一次抬线必须先还/分掉的债，不再放行先抬后想」。
+  - **根因**：两张语言表各 ~230/250 KB；`engine/i18n.js` 与四个内容模块（`franchises` / `gear` / `semanticColors` / `skillTrees`）**静态 import** `strings.en.js` → `manualChunks` 把 en 表强制并进 `chunk-core` → 被 `modulepreload` 钉上首屏账面——「一场冒险两种文字，首屏两份都下」。
+  - **做法（方案）**：新增 `src/content/localeProvider.js`（`content` 层、`await import('./strings.en.js')` **TLA** 接上 en 表 + `stringTable(lang)` 统一出口）。`i18n.js` 与四个内容模块全部改走 `stringTable()`；`vite.config.js` `manualChunks`：`strings.en.js` → 独立异步 `chunk-en`（置于 content/ 规则**之前**，否则会被吸回 core）；en 表不再被 index.html 引用 → 首屏账面剔除。
+  - **实测**：`npm run build` → `chunk-en-C1bQysCr.js 227.01 kB (gzip 72.27 kB)`；首屏 **2306741 → 2079856 B**（chunk-core 972186 → 746394，−225792 B 即英文表本体）；`npm run size` 通过（环比余量 0.21 MiB、上限余量 0.27 MiB）。`FIRST_SCREEN_READING` **下调**到 2079856（刻度不是预算：结构债还完就把刻度钉回真实读数，ADR W-D5 切片4 的口径）。
+  - **验证**：`npm test 6696/6696` 绿；`lint` 0/0；`link:check` 86/86；本地浏览器双语各验一遍（`crossrealm_settings.values.language`：`zh`/`en` 都能完整启动、HUD 12 格、start screen 正常、说明书章节名按语言呈现；`documentElement.lang` 随语言切换）。`tests/chunk-graph.test.js` 无感（`chunk-en` 无出边，DAG 成立）。
+  - **教训**：① manualChunks 的「吸附规则」会把动态 import 也拽进大块——分包必须**成对**做：代码侧动态化 + 分块规则白名单；② 中文/英文表同构双表不是免费的，模块图上的每条静态边都是真金白银的首屏字节。

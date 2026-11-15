@@ -69,6 +69,9 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules/three')) return 'vendor-three';
+          // W-Z93：en 表只由 `localeProvider` 动态 import —— 必须切成独立的异步块。
+          // 若落进 chunk-core，它会连带把整张英文表钉回首屏账面（gate 的 2.25 MiB 线）
+          if (id.includes('/src/content/strings.en.js')) return 'chunk-en';
           // 共享显示工具：keyLabels / keyHints 被 core（Game / PlayerController / QuestSystem）、
           // combat、cinematic、ui **同时读**，而它们只依赖 content/ 与 engine/i18n（都在 core）——
           // 所以它们必须落在 core 这一层当叶子，不能进 chunk-ui，否则 chunk-core 回读 chunk-ui
