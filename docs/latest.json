@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T14:00:25.808Z",
+  "generated_at": "2026-11-15T14:13:16.041Z",
   "branch": "main",
-  "head": "0d2ae279",
-  "total_commits": 1709,
-  "pushed_at": "2026-11-15T21:59:20+08:00",
+  "head": "146534de",
+  "total_commits": 1711,
+  "pushed_at": "2026-11-15T22:11:40+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "146534d",
+      "at": "2026-11-15T22:11:40+08:00",
+      "subject": "feat(canon): W-Z146 第二十六卷《烛火之下 / Under the Candle Flame》——卷四之三"
+    },
+    {
+      "short": "26ba0e3",
+      "at": "2026-11-15T14:00:25Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "0d2ae27",
       "at": "2026-11-15T21:59:20+08:00",
@@ -21,25 +31,15 @@
       "short": "3479cbe",
       "at": "2026-11-15T21:50:53+08:00",
       "subject": "feat(canon): W-Z144 第二十四卷《卷四 · 归途再启 / Beyond the Threshold》——卷四之一"
-    },
-    {
-      "short": "3511fc0",
-      "at": "2026-11-15T13:46:55Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "975af90",
-      "at": "2026-11-15T21:45:32+08:00",
-      "subject": "feat(canon): W-Z143 第二十三卷《卷三 · 月光起 / The Moon Rises》——卷三之四"
     }
   ],
-  "tracked_files": 1271,
+  "tracked_files": 1273,
   "test_files": 456,
   "i18n_keys": 3215,
   "lore_sources": 59,
-  "novel_chapters_zh": 25,
-  "novel_chapters_en": 25,
-  "milestone": "W-Z145",
+  "novel_chapters_zh": 26,
+  "novel_chapters_en": 26,
+  "milestone": "W-Z146",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
