@@ -4676,3 +4676,36 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   letter-spacing: 0.06em;
   margin-top: 1px;
 }
+
+/* === 出场页 6 格快键速查（W-Z108）：秒学会，再也不用看文档  
+   把教学融在画面里——键名 {动作} 经 keyText 字幕展开，全双语 */
+.start-quickkeys {
+  max-width: 640px; margin: 14px auto 0; padding: 12px 18px;
+  border: 1px solid rgba(255, 217, 138, 0.28); border-radius: 10px;
+  background: linear-gradient(160deg, rgba(255, 217, 138, 0.06), rgba(20, 14, 22, 0.55) 72%), rgba(8, 6, 12, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.start-quickkey-title {
+  font-size: 0.78rem; color: rgba(255, 236, 200, 0.80); letter-spacing: 0.14em;
+  text-align: center; margin: 0 0 10px;
+  text-shadow: 0 0 12px rgba(255, 217, 138, 0.22);
+}
+.start-quickkeys-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+  text-align: left;
+}
+@media (max-width: 560px) { .start-quickkeys-grid { grid-template-columns: repeat(2, 1fr); } }
+.start-quickkey {
+  display: flex; gap: 10px; align-items: center; padding: 6px 8px;
+  border-left: 2px solid rgba(255, 217, 138, 0.14);
+  min-width: 0;
+}
+.start-quickkey-keys {
+  flex-shrink: 0; min-width: 0;
+  font-family: 'JetBrains Mono', 'Menlo', monospace; font-size: 0.78rem; color: #ffd98a;
+  letter-spacing: 0.08em; background: rgba(255, 217, 138, 0.07);
+  border: 1px solid rgba(255, 217, 138, 0.22); border-radius: 6px;
+  padding: 4px 8px;
+}
+.start-quickkey-tail { font-size: 0.78rem; color: rgba(223, 214, 196, 0.88); min-width: 0; }
+@media (prefers-reduced-motion: reduce) { .start-quickkeys { animation: none; } .start-quickkey { border-left-color: transparent; } }

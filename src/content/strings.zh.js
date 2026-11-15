@@ -3192,6 +3192,13 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
   quickstart_begin: '我知道了——先打一局',
   quickstart_later: '先等等，我回头再看',
   quickstart_footnote: '你的进度全程自动保存。放心按键。',
+  start_quickkey_title: '在这五秒就能上手，剩下靠你自己',
+  start_qk_move: '移动',
+  start_qk_attack: '普攻 / 重击',
+  start_qk_spell: '法术四个',
+  start_qk_weapon: '法器切换',
+  start_qk_interact: '互动 / 对话',
+  start_qk_pause: '暂停 / 说明书',
   quickstart_start_btn: '30 秒快速上手',
   quickstart_pause_btn: '炉边快速上手（30 秒）',
   // 交互提示与提示 toast 的运行期文案（W-D2 切片22：PlayerController 的 updatePrompt / 边界 / 视角切换）

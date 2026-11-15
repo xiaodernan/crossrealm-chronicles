@@ -3195,6 +3195,13 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   quickstart_begin: 'I know — let me play',
   quickstart_later: 'Hold on — maybe later',
   quickstart_footnote: 'Your progress saves reliably. Play freely.',
+  start_quickkey_title: 'You can be playing in five seconds — the rest is on you',
+  start_qk_move: 'Move',
+  start_qk_attack: 'Light / Heavy',
+  start_qk_spell: 'Spells 1-4',
+  start_qk_weapon: 'Weapon swap',
+  start_qk_interact: 'Interact / Talk',
+  start_qk_pause: 'Pause / Manual',
   quickstart_start_btn: '30-second Quickstart',
   quickstart_pause_btn: 'Hearthside Quickstart (30 s)',
   // Interaction prompt and toast copy (W-D2 slice 22: PlayerController updatePrompt / boundary / camera switch)
