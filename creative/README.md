@@ -75,6 +75,7 @@ creative/music/soundtrack.html
 | 烛火之下 · Under the Candle Flame | [under-the-candle-flame](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/26-under-the-candle-flame.md) |
 | 归途之共 · The Last Persimmon | [the-last-persimmon](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/27-the-last-persimmon.md) |
 | 新苗 · The New Sapling | [the-new-sapling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/28-the-new-sapling.md) |
+| 蝉鸣 · The First Cicada | [the-first-cicada](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/29-the-first-cicada.md) |
 
 每一章对应游戏的章节走法：
 
