@@ -128,6 +128,8 @@ import { TrialJournalTab } from '../ui/TrialJournalTab.js';
 import { LegendsJournalTab } from '../ui/LegendsJournalTab.js';
 import { EndingJournalTab } from '../ui/EndingJournalTab.js';
 import { CanonJournalTab } from '../ui/CanonJournalTab.js';
+import { FlameReadingSystem } from '../game/FlameReadingSystem.js';
+import { FlameReadingTab } from '../ui/FlameReadingTab.js';
 import { CombatStyleTracker } from '../game/CombatStyleTracker.js';
 import { Captions } from '../ui/Captions.js';
 import { CombatStyleOverlay } from '../ui/CombatStyleOverlay.js';
@@ -479,6 +481,8 @@ export class Game {
     // W-Z51：归途残卷——通关后才点亮的那一页（Ember journal）
     this.endingTab = new EndingJournalTab(this);
     this.canonTab = new CanonJournalTab(this);
+    this.flameReading = new FlameReadingSystem(this);
+    this.flameTab = new FlameReadingTab(this);
     // 在线伙伴服务的客户端挂在实例上（W-G2 切片1：试炼榜直接从 this.game 读，不去 import 单例 ——
     // 与其它 JournalTab 的口径一致）。模块单例本来就是全局唯一那一份，这里只是暴露它。
     this.onlineServices = onlineServices;

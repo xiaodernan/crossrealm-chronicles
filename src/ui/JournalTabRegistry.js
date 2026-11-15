@@ -23,6 +23,8 @@ export const JOURNAL_EXTRA_TABS = {
   ending: 'journal_tab_ending',
   // W-Z109「典籍馆」—— 原典 16 卷全篇可读（novels 融入游戏而非独立观看）
   canon: 'journal_tab_canon',
+  // W-Z118「星轨 · 锚火占卜」—— 命运火系，每天一次魂反馈
+  flame: 'journal_tab_flame',
 };
 
 export function mergeJournalCategories(base) {

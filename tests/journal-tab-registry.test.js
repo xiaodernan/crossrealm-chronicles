@@ -34,6 +34,8 @@ const 迁移前中文 = {
   ending: '归途残卷',
   // W-Z109：典籍馆 · 原典全篇（16 卷全篇可读，小说融入游戏本体）
   canon: '典籍馆 · 原典全篇',
+  // W-Z118：星轨 · 锚火占卜——火里有字，一天一签
+  flame: '星轨 · 锚火占卜',
 };
 
 describe('日志页签合并（JournalTabRegistry）', () => {
@@ -50,9 +52,9 @@ describe('日志页签合并（JournalTabRegistry）', () => {
     expect(JSON.stringify(base)).toBe(snapshot);
   });
 
-  it('扩展页签的键集合是 HUD 计数分支认得的那 14 个（加/改页签时这里会红，提醒同步 HUD）', () => {
+  it('扩展页签的键集合是 HUD 计数分支认得的那 15 个（加/改页签时这里会红，提醒同步 HUD）', () => {
     expect(Object.keys(JOURNAL_EXTRA_TABS).sort()).toEqual(
-      ['achievements', 'bestiary', 'canon', 'cg', 'codex', 'dungeons', 'echoes', 'ending', 'legends', 'memory', 'season', 'side', 'skills', 'trial'],
+      ['achievements', 'bestiary', 'canon', 'cg', 'codex', 'dungeons', 'echoes', 'ending', 'flame', 'legends', 'memory', 'season', 'side', 'skills', 'trial'],
     );
   });
 
