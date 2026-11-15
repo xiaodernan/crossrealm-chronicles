@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T01:05:12.700Z",
+  "generated_at": "2026-11-15T01:20:08.186Z",
   "branch": "main",
-  "head": "c6ca860",
-  "total_commits": 1601,
-  "pushed_at": "2026-11-15T09:04:17+08:00",
+  "head": "4e733d7",
+  "total_commits": 1603,
+  "pushed_at": "2026-11-15T09:18:52+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "4e733d7",
+      "at": "2026-11-15T09:18:52+08:00",
+      "subject": "feat(creative): W-Z95 番外七 · 下次再坐（Interlude VII · Come Sit Awhile）——原典再扩一卷，W-Z85/89/93 谱系的第三卷续"
+    },
+    {
+      "short": "4941374",
+      "at": "2026-11-15T01:05:12Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "c6ca860",
       "at": "2026-11-15T09:04:17+08:00",
@@ -21,25 +31,15 @@
       "short": "acf2b7f",
       "at": "2026-11-15T08:59:49+08:00",
       "subject": "chore(gitignore): 显式忽略 /_commit-msg.txt，堵死 agent 误塞提交信息文件的通道（W-Z93 二犯）"
-    },
-    {
-      "short": "da97d23",
-      "at": "2026-11-15T08:59:27+08:00",
-      "subject": "chore(plan): 删 _commit-msg.txt — W-Z93 提交时 agent 又把提交信息文件误塞进仓库（同前序错误二犯，已迁移到 .gitignore 流程：以后一律先 rm --cached）"
-    },
-    {
-      "short": "a7b50ca",
-      "at": "2026-11-15T08:58:37+08:00",
-      "subject": "feat(i18n): W-Z93 按语言分包——en 表独立成 chunk-en（首屏 2.20→1.98 MiB），刻度下调到 2079856"
     }
   ],
-  "tracked_files": 1222,
+  "tracked_files": 1224,
   "test_files": 453,
   "i18n_keys": 3134,
-  "lore_sources": 55,
-  "novel_chapters_zh": 14,
-  "novel_chapters_en": 14,
-  "milestone": "W-Z94",
+  "lore_sources": 57,
+  "novel_chapters_zh": 15,
+  "novel_chapters_en": 15,
+  "milestone": "W-Z95",
   "milestone_full": "炉边快速上手·内嵌 SRS 小册子 + Lore Oracle 真上游守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
