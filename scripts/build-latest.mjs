@@ -74,6 +74,7 @@ const FEATURE_SURFACE = [
   'three-js-world',         // 第三人称开放位面 + 五大 BOSS
   'quickstart-embed',       // 首屏内嵌 30 秒快速上手（炉边小册子）
   'stategraph-teaching',    // LangGraph StateGraph 真路由（锚火三问 [J]）+ 说明书星图章节双语教学
+  'admin-simulation',       // 真实玩家行为模拟实录（本机 Chrome 五个人格，0 异常，docs/admin/data/simulation.json）
   'spectator-pvp',          // 剑参战 + 影子笔记
   'crossrealm-chronicles',  // 七章小说 × 双语 + 电影剧本 + 25 首 OST
 ];

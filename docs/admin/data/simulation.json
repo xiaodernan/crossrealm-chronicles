@@ -1,0 +1,211 @@
+{
+  "schema": "crossrealm.simulation.v1",
+  "generated_at": "2026-11-15T20:14:30.003Z",
+  "mode": "real-browser-simulation (headless Chrome via CDP)",
+  "seed": 20261117,
+  "requestedSessions": 14,
+  "completedSessions": 14,
+  "environmentError": null,
+  "viewport": {
+    "width": 1440,
+    "height": 800
+  },
+  "notes": [
+    "这一卡是“本机真浏览器 × 本仓库代码 × 五个人格”的真实交互测试，不是生产遥测。",
+    "人格行为按剧本施加（impatient 点一下就走/wanderer 随机瞎点/reader 先开说明书 H 再玩/speedrunner 直接进 J 开日志/sprinter 直接进跑），观测值是真的。",
+    "Pages 上没有任何后端，真实生产遥测只存在于联网环境（/api/telemetry/summary-rollup 有值时炉边盘自动切换）。",
+    "数字每次跑有抖动——记下 seed=20261117 保证人格序列可复现；测量值以下方本次实跑为准。"
+  ],
+  "summary": {
+    "bootMsAvg": 21668,
+    "bootMsP95": 49970,
+    "totalExceptions": 0,
+    "bounced": 3,
+    "wanderClicksAvg": 4,
+    "manualOpenedCount": 3,
+    "manualSessions": 3
+  },
+  "personas": {
+    "impatient": {
+      "sessions": 3,
+      "bootMsAvg": 30469,
+      "outcomes": {
+        "bounced": 3
+      },
+      "exceptions": 0
+    },
+    "wanderer": {
+      "sessions": 3,
+      "bootMsAvg": 19268,
+      "outcomes": {
+        "wandered": 3
+      },
+      "exceptions": 0
+    },
+    "reader": {
+      "sessions": 3,
+      "bootMsAvg": 20435,
+      "outcomes": {
+        "read-then-played": 3
+      },
+      "exceptions": 0
+    },
+    "speedrunner": {
+      "sessions": 3,
+      "bootMsAvg": 15807,
+      "outcomes": {
+        "entered-world-opened-journal": 3
+      },
+      "exceptions": 0
+    },
+    "sprinter": {
+      "sessions": 2,
+      "bootMsAvg": 22711,
+      "outcomes": {
+        "entered-world": 2
+      },
+      "exceptions": 0
+    }
+  },
+  "sessions": [
+    {
+      "index": 1,
+      "persona": "impatient",
+      "bootMs": 49970,
+      "exceptions": 0,
+      "outcome": "bounced",
+      "openSeconds": 2.6,
+      "clickedAt": {
+        "x": 124,
+        "y": 798
+      },
+      "durationMs": 52967
+    },
+    {
+      "index": 2,
+      "persona": "wanderer",
+      "bootMs": 8317,
+      "exceptions": 0,
+      "outcome": "wandered",
+      "wanderClicks": 3,
+      "durationMs": 12891
+    },
+    {
+      "index": 3,
+      "persona": "reader",
+      "bootMs": 18031,
+      "exceptions": 0,
+      "outcome": "read-then-played",
+      "manualOpened": true,
+      "startClicked": true,
+      "durationMs": 27359
+    },
+    {
+      "index": 4,
+      "persona": "speedrunner",
+      "bootMs": 15944,
+      "exceptions": 0,
+      "outcome": "entered-world-opened-journal",
+      "bootToJournalMs": 7386,
+      "durationMs": 26124
+    },
+    {
+      "index": 5,
+      "persona": "impatient",
+      "bootMs": 18987,
+      "exceptions": 0,
+      "outcome": "bounced",
+      "openSeconds": 1.41,
+      "clickedAt": {
+        "x": 580,
+        "y": 646
+      },
+      "durationMs": 21723
+    },
+    {
+      "index": 6,
+      "persona": "wanderer",
+      "bootMs": 23540,
+      "exceptions": 0,
+      "outcome": "wandered",
+      "wanderClicks": 3,
+      "durationMs": 35890
+    },
+    {
+      "index": 7,
+      "persona": "reader",
+      "bootMs": 24307,
+      "exceptions": 0,
+      "outcome": "read-then-played",
+      "manualOpened": true,
+      "startClicked": true,
+      "durationMs": 37911
+    },
+    {
+      "index": 8,
+      "persona": "speedrunner",
+      "bootMs": 18051,
+      "exceptions": 0,
+      "outcome": "entered-world-opened-journal",
+      "bootToJournalMs": 6244,
+      "durationMs": 27799
+    },
+    {
+      "index": 9,
+      "persona": "impatient",
+      "bootMs": 22449,
+      "exceptions": 0,
+      "outcome": "bounced",
+      "openSeconds": 2.41,
+      "clickedAt": {
+        "x": 54,
+        "y": 452
+      },
+      "durationMs": 28850
+    },
+    {
+      "index": 10,
+      "persona": "wanderer",
+      "bootMs": 25947,
+      "exceptions": 0,
+      "outcome": "wandered",
+      "wanderClicks": 6,
+      "durationMs": 57357
+    },
+    {
+      "index": 11,
+      "persona": "reader",
+      "bootMs": 18968,
+      "exceptions": 0,
+      "outcome": "read-then-played",
+      "manualOpened": true,
+      "startClicked": true,
+      "durationMs": 27714
+    },
+    {
+      "index": 12,
+      "persona": "speedrunner",
+      "bootMs": 13425,
+      "exceptions": 0,
+      "outcome": "entered-world-opened-journal",
+      "bootToJournalMs": 7923,
+      "durationMs": 25539
+    },
+    {
+      "index": 13,
+      "persona": "sprinter",
+      "bootMs": 22253,
+      "exceptions": 0,
+      "outcome": "entered-world",
+      "durationMs": 29118
+    },
+    {
+      "index": 14,
+      "persona": "sprinter",
+      "bootMs": 23168,
+      "exceptions": 0,
+      "outcome": "entered-world",
+      "durationMs": 28937
+    }
+  ]
+}
