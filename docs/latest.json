@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T03:50:18.083Z",
+  "generated_at": "2026-11-15T03:50:45.780Z",
   "branch": "main",
-  "head": "fd06a30",
-  "total_commits": 1633,
-  "pushed_at": "2026-11-15T11:50:02+08:00",
+  "head": "17298ff",
+  "total_commits": 1634,
+  "pushed_at": "2026-11-15T11:50:28+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "17298ff",
+      "at": "2026-11-15T11:50:28+08:00",
+      "subject": "chore(latest): W-Z106 番外八入典籍——fact pack milestone=W-Z106，novel 15→16，corpus=59"
+    },
     {
       "short": "fd06a30",
       "at": "2026-11-15T11:50:02+08:00",
@@ -26,11 +31,6 @@
       "short": "af59296",
       "at": "2026-11-15T11:30:33+08:00",
       "subject": "docs(creative): showcase Feed 增补 W-Z104「宇宙指针·金色光柱入路」"
-    },
-    {
-      "short": "ee21c29",
-      "at": "2026-11-15T11:27:11+08:00",
-      "subject": "docs(creative): player-guide 世界导览章节加「宇宙指针」说明（zh/en）——路标光柱入口动词"
     }
   ],
   "tracked_files": 1227,
