@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T12:38:33.137Z",
+  "generated_at": "2026-11-15T12:51:48.120Z",
   "branch": "main",
-  "head": "cb19c61",
-  "total_commits": 1689,
-  "pushed_at": "2026-11-15T20:37:37+08:00",
+  "head": "0254421",
+  "total_commits": 1691,
+  "pushed_at": "2026-11-15T20:48:52+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "0254421",
+      "at": "2026-11-15T20:48:52+08:00",
+      "subject": "feat(canon): W-Z137 第二十卷《卷三 · 读完自己 / The Reader Opens This Page》——卷三开启"
+    },
+    {
+      "short": "aff5fd7",
+      "at": "2026-11-15T12:38:33Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "cb19c61",
       "at": "2026-11-15T20:37:37+08:00",
@@ -21,25 +31,15 @@
       "short": "8d20ffe",
       "at": "2026-11-15T20:28:30+08:00",
       "subject": "feat(admin): W-Z135 炉边盘 · 本机智能洞察面板——LS 事件流真推论"
-    },
-    {
-      "short": "91ffa64",
-      "at": "2026-11-15T12:22:36Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "a12b022",
-      "at": "2026-11-15T20:21:25+08:00",
-      "subject": "feat(admin): W-Z134 实测记录再补 Oracle 上游探针卡（A/B/C 6179/1798/6170 tok）+ cache_hit_bench 冷41.7%→热85.6%"
     }
   ],
-  "tracked_files": 1258,
+  "tracked_files": 1260,
   "test_files": 455,
   "i18n_keys": 3206,
   "lore_sources": 59,
-  "novel_chapters_zh": 19,
-  "novel_chapters_en": 19,
-  "milestone": "W-Z136",
+  "novel_chapters_zh": 20,
+  "novel_chapters_en": 20,
+  "milestone": "W-Z137",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
