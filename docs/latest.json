@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T12:22:36.574Z",
+  "generated_at": "2026-11-15T12:29:22.477Z",
   "branch": "main",
-  "head": "a12b022",
-  "total_commits": 1685,
-  "pushed_at": "2026-11-15T20:21:25+08:00",
+  "head": "8d20ffe",
+  "total_commits": 1687,
+  "pushed_at": "2026-11-15T20:28:30+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "8d20ffe",
+      "at": "2026-11-15T20:28:30+08:00",
+      "subject": "feat(admin): W-Z135 炉边盘 · 本机智能洞察面板——LS 事件流真推论"
+    },
+    {
+      "short": "91ffa64",
+      "at": "2026-11-15T12:22:36Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "a12b022",
       "at": "2026-11-15T20:21:25+08:00",
@@ -21,16 +31,6 @@
       "short": "34fe42b",
       "at": "2026-11-15T11:42:27Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "bf09d52",
-      "at": "2026-11-15T11:40:36Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "2a7d1d7",
-      "at": "2026-11-15T19:37:57+08:00",
-      "subject": "feat(help): W-Z132 帮助手册新章「新手 30 秒 · 六坑别跳」——内嵌速查，非文档"
     }
   ],
   "tracked_files": 1258,
@@ -39,7 +39,7 @@
   "lore_sources": 59,
   "novel_chapters_zh": 19,
   "novel_chapters_en": 19,
-  "milestone": "W-Z134",
+  "milestone": "W-Z135",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
