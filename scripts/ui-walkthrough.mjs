@@ -43,6 +43,7 @@ import { join } from 'node:path';
 import { createServer } from 'node:net';
 import { 开通道 } from './cdp-channel.mjs';
 import { 走查越线, 重载线索, 原话尾巴 } from './harness-readings.mjs';
+import { firstBootSeedSource } from './first-boot-seed.mjs';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const CDP_SPEC = 0;
@@ -167,6 +168,7 @@ try {
   const { send, evalJs, 异常 } = 开通道({ ws, 名义: 'ui-walkthrough', 通道, 等待页面Promise: true });
   await send('Runtime.enable');
   await send('Page.enable');
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: firstBootSeedSource() });
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
   // 连到的必须是本进程的 vite 页（口是我自己挑的，页地址必须落在它上面）

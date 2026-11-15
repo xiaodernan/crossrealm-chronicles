@@ -24,6 +24,7 @@ import { PERF_BUDGETS, overCeiling, missingCeilings, extraCeilings, 过期格 } 
 import { draw读数问题, 普查读数问题, cpu读数问题, 帧普查读数问题, 覆盖问题, 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
 import { 开通道 } from './cdp-channel.mjs';
 import { WORLD_SEED, worldSeedSource } from './world-seed.mjs';
+import { firstBootSeedSource } from './first-boot-seed.mjs';
 
 /**
  * 预算表在 `./perf-budgets.mjs` —— **判据与执行分家**（W-D4 切片3 修）。
@@ -295,6 +296,8 @@ try {
    * 碎石与障碍的散布，draw call 上限表里那块"跨世界噪声"永远收不掉。见 `./world-seed.mjs`。
    */
   await send('Page.addScriptToEvaluateOnNewDocument', { source: worldSeedSource(WORLD_SEED) });
+  /** 炉边快速上手（W-Z91）也别挡 perf 的采样窗：模拟回访玩家的 profile —— 见 ./first-boot-seed.mjs */
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: firstBootSeedSource() });
   console.log(`perf-smoke：世界种子 ${WORLD_SEED}（这一轮的散布可复现）`);
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 

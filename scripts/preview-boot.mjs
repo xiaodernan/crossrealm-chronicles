@@ -37,6 +37,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:net';
 import { 开通道 } from './cdp-channel.mjs';
+import { firstBootSeedSource } from './first-boot-seed.mjs';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -141,6 +142,7 @@ try {
   异常Ref = 异常;
   await send('Runtime.enable');
   await send('Page.enable');
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: firstBootSeedSource() });
   await send('Page.navigate', { url: `http://127.0.0.1:${PREVIEW_PORT}/` });
 
   // 生产构建没有 __game（DEV-only）。就绪信号 = loading 藏起 + start-btn 可见 + boot-error 为空

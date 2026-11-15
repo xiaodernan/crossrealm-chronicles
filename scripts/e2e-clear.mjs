@@ -81,6 +81,7 @@ import { createServer } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { E2E_BUDGETS, E2E_DEMO_STEPS } from './e2e-budgets.mjs';
+import { firstBootSeedSource } from './first-boot-seed.mjs';
 import { 开通道 } from './cdp-channel.mjs';
 import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴 } from './harness-readings.mjs';
 
@@ -353,6 +354,7 @@ try {
 
   await send('Runtime.enable');
   await send('Page.enable');
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: firstBootSeedSource() });
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
   /** CI 冷启动窗口按 CI 的尺子：windows-latest + 软件渲染 + 每轮冷 vite。CI 放宽到 ~450 秒（240→900），本机 120 秒口径不动。 */

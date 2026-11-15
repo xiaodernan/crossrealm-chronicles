@@ -67,6 +67,7 @@ import {
   SOAK_COLUMNS, parseSoakArgs, planSoak, snapshotProblem, growthProblem, programFamilyProblem, journeyProblem,
 } from './soak-readings.mjs';
 import { 解析CDP口, 页地址问题, 通道问题, 重载问题 } from './harness-readings.mjs';
+import { firstBootSeedSource } from './first-boot-seed.mjs';
 
 const VITE_PORT = 5323;
 
@@ -290,6 +291,7 @@ try {
 
   await send('Runtime.enable');
   await send('Page.enable');
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: firstBootSeedSource() });
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
   /* 开机窗口 120 秒：冷缓存下 vite 按需转译 ~300 个模块要 57.5 秒（perf-smoke 实测），

@@ -143,7 +143,7 @@ try {
   await send(ws, 'Page.enable');
 
   // 1) seed localStorage via addScriptToEvaluateOnNewDocument, then navigate
-  const seed = `localStorage.setItem('crossrealm_online', '1'); localStorage.removeItem('crossrealm_online_base_url');`;
+  const seed = `localStorage.setItem('crossrealm_online', '1'); localStorage.removeItem('crossrealm_online_base_url'); localStorage.setItem('crossrealm_quickstart_seen', '1');`;
   await send(ws, 'Page.addScriptToEvaluateOnNewDocument', { source: seed });
   await send(ws, 'Page.navigate', { url: STATIC_URL });
   console.log('navigated →', STATIC_URL);

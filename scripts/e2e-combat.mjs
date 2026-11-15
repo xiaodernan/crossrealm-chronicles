@@ -63,6 +63,7 @@ import { join } from 'path';
 import { E2E_COMBAT_BUDGETS } from './e2e-budgets.mjs';
 import { 解析CDP口, 页地址问题, 通道问题, 重载问题, 重载线索, 原话尾巴, 战斗越线 } from './harness-readings.mjs';
 import { 开通道 } from './cdp-channel.mjs';
+import { firstBootSeedSource } from './first-boot-seed.mjs';
 
 /**
  * 预算与阈值住在 `./e2e-budgets.mjs` —— **判据与执行分家**（与 `e2e-clear` 同一条纪律）：
@@ -264,6 +265,7 @@ try {
 
   await send('Runtime.enable');
   await send('Page.enable');
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: firstBootSeedSource() });
   await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
   /** 就绪表达式：三处都要问同一件事，所以只有一个真源（复制三份时"重建后重问"会用错表达式） */
