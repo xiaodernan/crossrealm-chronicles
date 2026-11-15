@@ -58,8 +58,12 @@ const zhNovel = allFiles.filter((f) => /^creative\/novel\/[^/]+\.md$/.test(f)).l
 const enNovel = allFiles.filter((f) => /^creative\/novel\/en\/[^/]+\.md$/.test(f)).length;
 
 // 手工维护的两项（有意不动态）：
-//  - milestone：从 HEAD 提交主题现抓 W-Zxx；真没有就写 'W-?'，宁缺毋假
-const milestoneMatch = recentCommits[0]?.subject?.match(/W-Z\d+[a-z]?/);
+//  - milestone：从最近 N 条提交主题现抓 W-Zxx（机器刷新事实包的那条 "chore(latest)" 不带里程碑号，
+//    往前看一眼最近一次 feature 里程碑就好——里程碑代表"玩家看到的最新能力"，不是同步时间）
+const milestoneMatch = git(['log', '-20', '--format=%s'])
+  .split('\n')
+  .map((s) => s.match(/W-Z\d+[a-z]?/))
+  .find(Boolean);
 const milestone = milestoneMatch ? milestoneMatch[0] : 'W-?';
 //  - feature_surface：面向展示页的「值得让陌生参观者记住」特性清单（按真实系统面写，不写吹水）
 const FEATURE_SURFACE = [
@@ -89,7 +93,7 @@ const doc = {
   novel_chapters_zh: zhNovel,
   novel_chapters_en: enNovel,
   milestone,
-  milestone_full: '炉边快速上手·内嵌 SRS 小册子 + Lore Oracle 真上游守护',
+  milestone_full: '番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护',
   headline: '跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。',
   feature_surface: FEATURE_SURFACE,
 };
