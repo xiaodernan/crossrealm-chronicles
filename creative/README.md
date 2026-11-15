@@ -92,6 +92,7 @@ creative/music/soundtrack.html
 | 一整夜 · A Full Night | [a-full-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/43-a-full-night.md) |
 | 冬至 · The Winter Solstice | [the-winter-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/44-the-winter-solstice.md) |
 | 火炬 · The Torch | [the-torch](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/45-the-torch.md) |
+| 春分 · The Spring Equinox | [the-spring-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/46-the-spring-equinox.md) |
 
 每一章对应游戏的章节走法：
 
