@@ -1,5 +1,0 @@
-docs(plan): W-Z91 ADR 回填——炉边快速上手（首屏内嵌 30 秒读完的 SRS 新手引导）
-
-- W-Z91：`src/ui/Quickstart.js`（首屏可渲、可 Esc 退、localStorage 只记录一次 satseen；暂停菜单 + 出场幽灵按钮 2 处可点出）
-- 顺手清理 W-Z90 遗留误塞进仓库的 `_commit-msg.txt` 残留（5b50c23 犯规痕迹消除）
-- npm test 6696/6696 绿；npm lint 0 error；link:check 86/86
