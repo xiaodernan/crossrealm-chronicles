@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Nineteen volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Twenty volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 19 volumes of the canon, fully readable
+· Canon Library — 20 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Trisolar Tide — one weekly cast, three cards revealed together
 
@@ -3135,8 +3135,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 19-volume index',
-  hm_body_codex: `Codex — 19 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 20-volume index',
+  hm_body_codex: `Codex — 20 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3157,6 +3157,7 @@ hm_title_codex: 'Codex · the 19-volume index',
 17 · Echoes of the Morning Mist — after the mist lifts, the Keeper finally speaks the last line.
 18 · Sunscar Stair — the strange suns still throw their light on whoever dares to climb.
 19 · The Council of Three Suns — three suns in a circle, asking the last one who walks in: who will you stay and keep the dark for?
+20 · The Reader Opens This Page — the reader does not keep the next page; volume III begins.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3170,7 +3171,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (nineteen volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (twenty volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
