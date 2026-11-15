@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T14:24:46.892Z",
+  "generated_at": "2026-11-15T14:30:41.170Z",
   "branch": "main",
-  "head": "161b687e",
-  "total_commits": 1713,
-  "pushed_at": "2026-11-15T22:22:24+08:00",
+  "head": "f6850b18",
+  "total_commits": 1715,
+  "pushed_at": "2026-11-15T22:28:52+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "f6850b1",
+      "at": "2026-11-15T22:28:52+08:00",
+      "subject": "feat(canon): W-Z148 第二十八卷《新苗 / The New Sapling》——卷四之五"
+    },
+    {
+      "short": "26e8c7d",
+      "at": "2026-11-15T14:24:46Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "161b687",
       "at": "2026-11-15T22:22:24+08:00",
@@ -21,25 +31,15 @@
       "short": "146534d",
       "at": "2026-11-15T22:11:40+08:00",
       "subject": "feat(canon): W-Z146 第二十六卷《烛火之下 / Under the Candle Flame》——卷四之三"
-    },
-    {
-      "short": "26ba0e3",
-      "at": "2026-11-15T14:00:25Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "0d2ae27",
-      "at": "2026-11-15T21:59:20+08:00",
-      "subject": "feat(canon): W-Z145 第二十五卷《卷四 · 月光回廊 / Moonlit Corridor》——卷四之二"
     }
   ],
-  "tracked_files": 1275,
+  "tracked_files": 1277,
   "test_files": 456,
   "i18n_keys": 3215,
   "lore_sources": 59,
-  "novel_chapters_zh": 27,
-  "novel_chapters_en": 27,
-  "milestone": "W-Z147",
+  "novel_chapters_zh": 28,
+  "novel_chapters_en": 28,
+  "milestone": "W-Z148",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
