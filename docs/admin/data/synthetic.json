@@ -1,0 +1,606 @@
+{
+  "schema_version": "crossrealm.admin.v1",
+  "generated_at": "2026-11-15T09:22:08.993Z",
+  "seed": 20261115,
+  "window": {
+    "days": 30,
+    "from": "2026-10-17",
+    "to": "2026-11-15"
+  },
+  "kpis": {
+    "dauAvg": 303,
+    "dauMax": 543,
+    "dauMin": 172,
+    "sessionsAvg": 442,
+    "avgSessionSeconds": 580,
+    "newUsersAvg": 73,
+    "bounceRate": 30.1,
+    "churn3min": 20.1,
+    "bossWinRate": 46.3,
+    "canonReadRate": 62.4,
+    "codexOpenRate": 44.1,
+    "retentionD1": 64,
+    "retentionD3": 34.5,
+    "retentionD7": 18.6,
+    "retentionD14": 11.2,
+    "totalSessions": 13255,
+    "totalUsers": 2201,
+    "totalBossClears": 5125
+  },
+  "daily": [
+    {
+      "date": "2026-10-17",
+      "dau": 491,
+      "newUsers": 93,
+      "sessions": 684,
+      "avgSessionSeconds": 711,
+      "bossClears": 294,
+      "canonReaders": 251,
+      "codexOpens": 295,
+      "bounceRate": 22.4,
+      "churn3min": 22.5
+    },
+    {
+      "date": "2026-10-18",
+      "dau": 453,
+      "newUsers": 131,
+      "sessions": 632,
+      "avgSessionSeconds": 649,
+      "bossClears": 235,
+      "canonReaders": 206,
+      "codexOpens": 247,
+      "bounceRate": 29.1,
+      "churn3min": 15.7
+    },
+    {
+      "date": "2026-10-19",
+      "dau": 543,
+      "newUsers": 103,
+      "sessions": 758,
+      "avgSessionSeconds": 669,
+      "bossClears": 279,
+      "canonReaders": 212,
+      "codexOpens": 324,
+      "bounceRate": 26.2,
+      "churn3min": 19.7
+    },
+    {
+      "date": "2026-10-20",
+      "dau": 461,
+      "newUsers": 134,
+      "sessions": 672,
+      "avgSessionSeconds": 773,
+      "bossClears": 219,
+      "canonReaders": 176,
+      "codexOpens": 293,
+      "bounceRate": 24.5,
+      "churn3min": 19
+    },
+    {
+      "date": "2026-10-21",
+      "dau": 322,
+      "newUsers": 89,
+      "sessions": 443,
+      "avgSessionSeconds": 439,
+      "bossClears": 173,
+      "canonReaders": 145,
+      "codexOpens": 153,
+      "bounceRate": 31.1,
+      "churn3min": 20.6
+    },
+    {
+      "date": "2026-10-22",
+      "dau": 303,
+      "newUsers": 83,
+      "sessions": 440,
+      "avgSessionSeconds": 570,
+      "bossClears": 176,
+      "canonReaders": 131,
+      "codexOpens": 180,
+      "bounceRate": 35.5,
+      "churn3min": 19.5
+    },
+    {
+      "date": "2026-10-23",
+      "dau": 362,
+      "newUsers": 99,
+      "sessions": 559,
+      "avgSessionSeconds": 520,
+      "bossClears": 204,
+      "canonReaders": 146,
+      "codexOpens": 170,
+      "bounceRate": 30.6,
+      "churn3min": 16.1
+    },
+    {
+      "date": "2026-10-24",
+      "dau": 278,
+      "newUsers": 69,
+      "sessions": 428,
+      "avgSessionSeconds": 341,
+      "bossClears": 159,
+      "canonReaders": 106,
+      "codexOpens": 176,
+      "bounceRate": 29.2,
+      "churn3min": 19.4
+    },
+    {
+      "date": "2026-10-25",
+      "dau": 287,
+      "newUsers": 73,
+      "sessions": 401,
+      "avgSessionSeconds": 501,
+      "bossClears": 160,
+      "canonReaders": 122,
+      "codexOpens": 177,
+      "bounceRate": 27.4,
+      "churn3min": 18.8
+    },
+    {
+      "date": "2026-10-26",
+      "dau": 429,
+      "newUsers": 95,
+      "sessions": 589,
+      "avgSessionSeconds": 679,
+      "bossClears": 224,
+      "canonReaders": 264,
+      "codexOpens": 274,
+      "bounceRate": 35.1,
+      "churn3min": 17.1
+    },
+    {
+      "date": "2026-10-27",
+      "dau": 434,
+      "newUsers": 86,
+      "sessions": 601,
+      "avgSessionSeconds": 803,
+      "bossClears": 279,
+      "canonReaders": 293,
+      "codexOpens": 229,
+      "bounceRate": 30.4,
+      "churn3min": 21.4
+    },
+    {
+      "date": "2026-10-28",
+      "dau": 428,
+      "newUsers": 106,
+      "sessions": 679,
+      "avgSessionSeconds": 652,
+      "bossClears": 275,
+      "canonReaders": 298,
+      "codexOpens": 200,
+      "bounceRate": 30.2,
+      "churn3min": 17.1
+    },
+    {
+      "date": "2026-10-29",
+      "dau": 370,
+      "newUsers": 87,
+      "sessions": 584,
+      "avgSessionSeconds": 693,
+      "bossClears": 196,
+      "canonReaders": 267,
+      "codexOpens": 184,
+      "bounceRate": 26.7,
+      "churn3min": 22.4
+    },
+    {
+      "date": "2026-10-30",
+      "dau": 385,
+      "newUsers": 95,
+      "sessions": 583,
+      "avgSessionSeconds": 697,
+      "bossClears": 247,
+      "canonReaders": 288,
+      "codexOpens": 190,
+      "bounceRate": 32,
+      "churn3min": 16.5
+    },
+    {
+      "date": "2026-10-31",
+      "dau": 204,
+      "newUsers": 39,
+      "sessions": 291,
+      "avgSessionSeconds": 437,
+      "bossClears": 131,
+      "canonReaders": 77,
+      "codexOpens": 116,
+      "bounceRate": 28.3,
+      "churn3min": 19.5
+    },
+    {
+      "date": "2026-11-01",
+      "dau": 210,
+      "newUsers": 58,
+      "sessions": 308,
+      "avgSessionSeconds": 497,
+      "bossClears": 134,
+      "canonReaders": 80,
+      "codexOpens": 107,
+      "bounceRate": 31.4,
+      "churn3min": 20.3
+    },
+    {
+      "date": "2026-11-02",
+      "dau": 277,
+      "newUsers": 56,
+      "sessions": 381,
+      "avgSessionSeconds": 537,
+      "bossClears": 164,
+      "canonReaders": 111,
+      "codexOpens": 141,
+      "bounceRate": 28.1,
+      "churn3min": 19.2
+    },
+    {
+      "date": "2026-11-03",
+      "dau": 207,
+      "newUsers": 50,
+      "sessions": 317,
+      "avgSessionSeconds": 518,
+      "bossClears": 119,
+      "canonReaders": 71,
+      "codexOpens": 130,
+      "bounceRate": 28.8,
+      "churn3min": 23.7
+    },
+    {
+      "date": "2026-11-04",
+      "dau": 217,
+      "newUsers": 47,
+      "sessions": 314,
+      "avgSessionSeconds": 643,
+      "bossClears": 120,
+      "canonReaders": 110,
+      "codexOpens": 133,
+      "bounceRate": 34.6,
+      "churn3min": 19.3
+    },
+    {
+      "date": "2026-11-05",
+      "dau": 262,
+      "newUsers": 67,
+      "sessions": 361,
+      "avgSessionSeconds": 453,
+      "bossClears": 157,
+      "canonReaders": 128,
+      "codexOpens": 124,
+      "bounceRate": 28.8,
+      "churn3min": 24.1
+    },
+    {
+      "date": "2026-11-06",
+      "dau": 256,
+      "newUsers": 46,
+      "sessions": 392,
+      "avgSessionSeconds": 570,
+      "bossClears": 146,
+      "canonReaders": 109,
+      "codexOpens": 120,
+      "bounceRate": 26.8,
+      "churn3min": 22.4
+    },
+    {
+      "date": "2026-11-07",
+      "dau": 211,
+      "newUsers": 57,
+      "sessions": 291,
+      "avgSessionSeconds": 538,
+      "bossClears": 108,
+      "canonReaders": 94,
+      "codexOpens": 119,
+      "bounceRate": 33.1,
+      "churn3min": 18.1
+    },
+    {
+      "date": "2026-11-08",
+      "dau": 223,
+      "newUsers": 58,
+      "sessions": 348,
+      "avgSessionSeconds": 735,
+      "bossClears": 113,
+      "canonReaders": 90,
+      "codexOpens": 107,
+      "bounceRate": 32.5,
+      "churn3min": 22
+    },
+    {
+      "date": "2026-11-09",
+      "dau": 215,
+      "newUsers": 59,
+      "sessions": 341,
+      "avgSessionSeconds": 520,
+      "bossClears": 116,
+      "canonReaders": 97,
+      "codexOpens": 136,
+      "bounceRate": 30.4,
+      "churn3min": 22
+    },
+    {
+      "date": "2026-11-10",
+      "dau": 190,
+      "newUsers": 34,
+      "sessions": 301,
+      "avgSessionSeconds": 566,
+      "bossClears": 105,
+      "canonReaders": 75,
+      "codexOpens": 115,
+      "bounceRate": 28,
+      "churn3min": 21.3
+    },
+    {
+      "date": "2026-11-11",
+      "dau": 172,
+      "newUsers": 51,
+      "sessions": 259,
+      "avgSessionSeconds": 491,
+      "bossClears": 95,
+      "canonReaders": 62,
+      "codexOpens": 100,
+      "bounceRate": 32.5,
+      "churn3min": 19.8
+    },
+    {
+      "date": "2026-11-12",
+      "dau": 229,
+      "newUsers": 57,
+      "sessions": 347,
+      "avgSessionSeconds": 522,
+      "bossClears": 126,
+      "canonReaders": 99,
+      "codexOpens": 135,
+      "bounceRate": 26.1,
+      "churn3min": 22.2
+    },
+    {
+      "date": "2026-11-13",
+      "dau": 191,
+      "newUsers": 45,
+      "sessions": 268,
+      "avgSessionSeconds": 592,
+      "bossClears": 97,
+      "canonReaders": 67,
+      "codexOpens": 118,
+      "bounceRate": 34.7,
+      "churn3min": 19.7
+    },
+    {
+      "date": "2026-11-14",
+      "dau": 230,
+      "newUsers": 65,
+      "sessions": 329,
+      "avgSessionSeconds": 608,
+      "bossClears": 118,
+      "canonReaders": 81,
+      "codexOpens": 127,
+      "bounceRate": 33.4,
+      "churn3min": 20.8
+    },
+    {
+      "date": "2026-11-15",
+      "dau": 252,
+      "newUsers": 69,
+      "sessions": 354,
+      "avgSessionSeconds": 463,
+      "bossClears": 156,
+      "canonReaders": 115,
+      "codexOpens": 142,
+      "bounceRate": 34.8,
+      "churn3min": 23.9
+    }
+  ],
+  "features": [
+    {
+      "name": "主线推进（觉醒 → 章 5）",
+      "sessions": 4200,
+      "pctOfSessions": 78.2
+    },
+    {
+      "name": "快速上手 / 出场页",
+      "sessions": 2689,
+      "pctOfSessions": 96.4
+    },
+    {
+      "name": "说明书 [H] · HelpManual",
+      "sessions": 1510,
+      "pctOfSessions": 68.2
+    },
+    {
+      "name": "日志（J） / 全页签",
+      "sessions": 2380,
+      "pctOfSessions": 89.7
+    },
+    {
+      "name": "典籍馆 [J → 典籍]",
+      "sessions": 1944,
+      "pctOfSessions": 73.1
+    },
+    {
+      "name": "星轨顾问（AI 问答·F7）",
+      "sessions": 1180,
+      "pctOfSessions": 43.8
+    },
+    {
+      "name": "星轨·锚火占卜（W-Z118）",
+      "sessions": 420,
+      "pctOfSessions": 15.3
+    },
+    {
+      "name": "成就 / 传说碑",
+      "sessions": 1793,
+      "pctOfSessions": 61.7
+    },
+    {
+      "name": "支线任务完成",
+      "sessions": 1634,
+      "pctOfSessions": 53.4
+    },
+    {
+      "name": "头目 ×5 击败",
+      "sessions": 880,
+      "pctOfSessions": 29.5
+    },
+    {
+      "name": "营火休息 / 对话",
+      "sessions": 2415,
+      "pctOfSessions": 81.4
+    },
+    {
+      "name": "存档 / 读档",
+      "sessions": 3051,
+      "pctOfSessions": 91.2
+    }
+  ],
+  "funnel": [
+    {
+      "stage": "抵达出场页",
+      "pct": 100
+    },
+    {
+      "stage": "点燃（按入游戏）",
+      "pct": 84.7
+    },
+    {
+      "stage": "完成 §首日引导（觉醒锚点）",
+      "pct": 69.3
+    },
+    {
+      "stage": "首个 Boss 通关",
+      "pct": 44.1
+    },
+    {
+      "stage": "章 5 过毕 (真·结局)",
+      "pct": 18.7
+    },
+    {
+      "stage": "炉主徽章（十七枚共鸣）",
+      "pct": 4.9
+    }
+  ],
+  "retention": {
+    "d1": 64,
+    "d3": 34.5,
+    "d7": 18.6,
+    "d14": 11.2
+  },
+  "recommendations": [
+    {
+      "priority": "P0",
+      "title": "快速上手面板点击率高，说明首日未通关概率高 — 把「按 E 调查光柱」的微教学做成更主动、但可跳过的常驻提示",
+      "impact": "留存 +6~9pp"
+    },
+    {
+      "priority": "P0",
+      "title": "出口点集中在「没首通Boss之前」— 加上「再战即胜」的无障碍通关柔性补",
+      "impact": "章 1 → 章 5 通关 +10pp"
+    },
+    {
+      "priority": "P0",
+      "title": "快速上手时长 < 3 分钟即流失最多，说明前 3 分钟戏眼不够密集，需扩一条更紧的「锚点必须锚定」开场",
+      "impact": "前 3 分钟放弃 -11pp"
+    },
+    {
+      "priority": "P1",
+      "title": "典籍馆阅读次数与章节进完成率高度相关（canonReaders/dau ≈ 0.61 for 通关组）— 把「读完某一章自动解锁对应 CG / 称号」常态化",
+      "impact": "通关组 +12%"
+    },
+    {
+      "priority": "P1",
+      "title": "首页 AI 顾问的采用率 44%，但打开后向提问用户仅 62%，说明「点开后不知道问什么」— 推荐 preloaded 3 个问题",
+      "impact": "F7 入口 → 发起对话 44→68%"
+    },
+    {
+      "priority": "P1",
+      "title": "营火休息是所有玩家都走的中继，利用营火做「下一位面该去的地方 + 下一目标」的醒悟/召回是感谢密度最高的投放点",
+      "impact": "下一章启动率 +9pp"
+    },
+    {
+      "priority": "P2",
+      "title": "大量首日会话全程停留在「位面行者」不出城墙 — 增加一个「能看见的世界边界地图」提示路径",
+      "impact": "首日离开 Hub 的玩家 +8pp"
+    },
+    {
+      "priority": "P2",
+      "title": "成就激励感相对较弱（仅 29.5% 完成所有 Boss），建议把成就可见性再翻一倍（至少在 HUD 显示 1 个能被立即出动的成就）",
+      "impact": "Boss 击败数 +18%"
+    },
+    {
+      "priority": "P2",
+      "title": "星轨 · 锚火占卜到达 15% — 做完后 /channe 推强化推送，把它做到 35%+ 可显著提升「回访率」",
+      "impact": "D1 召回 +4pp"
+    },
+    {
+      "priority": "P2",
+      "title": "首日结束后流失率 48% — 优化「保存后告一段落」的结尾 over (例如跳到结局回报时弹帮助)",
+      "impact": "session→chapter 1 推进 +6pp"
+    },
+    {
+      "priority": "P3",
+      "title": "支线任务完成率 53% 低于主线 78% — 缩短支线流程，用既定主线中交易站/营火对话直接给予",
+      "impact": "支线完成率 +12pp"
+    },
+    {
+      "priority": "P3",
+      "title": "分享/传播入口尚未建立 — 考虑挂一个「给你的好友一段文字链接」的在向层推送",
+      "impact": "自然增长 +3pp"
+    }
+  ],
+  "predictions": [
+    {
+      "date": "2026-11-16",
+      "dau": 156
+    },
+    {
+      "date": "2026-11-17",
+      "dau": 146
+    },
+    {
+      "date": "2026-11-18",
+      "dau": 137
+    },
+    {
+      "date": "2026-11-19",
+      "dau": 127
+    },
+    {
+      "date": "2026-11-20",
+      "dau": 118
+    },
+    {
+      "date": "2026-11-21",
+      "dau": 108
+    },
+    {
+      "date": "2026-11-22",
+      "dau": 99
+    },
+    {
+      "date": "2026-11-23",
+      "dau": 89
+    },
+    {
+      "date": "2026-11-24",
+      "dau": 80
+    },
+    {
+      "date": "2026-11-25",
+      "dau": 70
+    },
+    {
+      "date": "2026-11-26",
+      "dau": 61
+    },
+    {
+      "date": "2026-11-27",
+      "dau": 51
+    },
+    {
+      "date": "2026-11-28",
+      "dau": 41
+    },
+    {
+      "date": "2026-11-29",
+      "dau": 40
+    }
+  ]
+}
