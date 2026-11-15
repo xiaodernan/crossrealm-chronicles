@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T02:19:01.596Z",
+  "generated_at": "2026-11-15T02:22:20.296Z",
   "branch": "main",
-  "head": "ca19722",
-  "total_commits": 1611,
-  "pushed_at": "2026-11-15T10:18:33+08:00",
+  "head": "8741f4a",
+  "total_commits": 1613,
+  "pushed_at": "2026-11-15T10:21:35+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "8741f4a",
+      "at": "2026-11-15T10:21:35+08:00",
+      "subject": "docs(stress): STRESS_RESULTS 增 2026-11-17 Oracle 复测一节（W-Z97 落地后 · 57 源语料 + 引文枝 reminder）"
+    },
+    {
+      "short": "b277c94",
+      "at": "2026-11-15T02:19:01Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "ca19722",
       "at": "2026-11-15T10:18:33+08:00",
@@ -21,16 +31,6 @@
       "short": "0424faa",
       "at": "2026-11-15T02:12:10Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "b66c88f",
-      "at": "2026-11-15T10:11:35+08:00",
-      "subject": "feat(ai): W-Z97 Oracle reminder 增引用枝（Quote branch）——引文类问句不再被误拒；上游三探针 A/B/C 全绿"
-    },
-    {
-      "short": "af2625f",
-      "at": "2026-11-15T10:02:13+08:00",
-      "subject": "feat(game): W-Z96 番外七入迷宫——lore-10「驿站残碑」（Interlude VII stele）"
     }
   ],
   "tracked_files": 1224,
@@ -39,7 +39,7 @@
   "lore_sources": 57,
   "novel_chapters_zh": 15,
   "novel_chapters_en": 15,
-  "milestone": "W-Z96",
+  "milestone": "W-Z97",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
