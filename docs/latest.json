@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T02:49:31.490Z",
+  "generated_at": "2026-11-15T02:52:33.400Z",
   "branch": "main",
-  "head": "538edc2",
-  "total_commits": 1617,
-  "pushed_at": "2026-11-15T10:44:55+08:00",
+  "head": "76ad578",
+  "total_commits": 1619,
+  "pushed_at": "2026-11-15T10:50:14+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "76ad578",
+      "at": "2026-11-15T10:50:14+08:00",
+      "subject": "docs(creative): player-guide OST 卡片双语直链 Pages 可播放原声页（W-Z101 链路打通）"
+    },
+    {
+      "short": "aaa930a",
+      "at": "2026-11-15T02:49:31Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "538edc2",
       "at": "2026-11-15T10:44:55+08:00",
@@ -21,16 +31,6 @@
       "short": "3327e3b",
       "at": "2026-11-15T10:33:20+08:00",
       "subject": "feat(pages): W-Z99 个人展示页入口线路打通——pages.yml 统一部署（展示页根 / /game/ 子路径即开即玩）· 删除孤儿 gh-pages 部署链"
-    },
-    {
-      "short": "181e186",
-      "at": "2026-11-15T02:22:20Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "8741f4a",
-      "at": "2026-11-15T10:21:35+08:00",
-      "subject": "docs(stress): STRESS_RESULTS 增 2026-11-17 Oracle 复测一节（W-Z97 落地后 · 57 源语料 + 引文枝 reminder）"
     }
   ],
   "tracked_files": 1224,
