@@ -425,11 +425,20 @@ export class PlayerController {
 
 
   adjustZoom(delta) {
-
     if (this.cameraMode === 'first') return;
-
     this.cameraDistance = THREE.MathUtils.clamp(this.cameraDistance + delta * 0.8, this.minCameraDistance, this.maxCameraDistance);
+  }
 
+  /**
+   * 滚轮俯仰（2026-11-15 用户反馈：默认滚轮 = 上下看向，往下滑就往下看）。
+   * `delta > 0`（滚轮向下）→ pitch 增大 = 视线朝下；`delta < 0`（向上滑）→ pitch 减小 = 抬头。
+   * 与 `addCameraInput` 的 dyEff 同一口径（pitch > 0 = 视线朝下）。
+   * 钳制与当前 cameraMode 的 `addCameraInput` 完全一致（一人称 ±0.5，三人称 -0.12 .. 0.62）。
+   */
+  adjustPitch(delta) {
+    const clampRange = this.cameraMode === 'first' ? [-0.5, 0.5] : [-0.12, 0.62];
+    this.pitch = THREE.MathUtils.clamp(this.pitch + delta, clampRange[0], clampRange[1]);
+    this.targetPitch = this.pitch;
   }
 
 

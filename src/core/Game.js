@@ -1262,10 +1262,14 @@ export class Game {
 
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
-      // 2026-11-14：玩家反馈「往上划是往下看、往下划是往上看，方向反了」。
-      // 约定改为：上划（deltaY < 0）= 镜头拉远（看得开阔），下划（deltaY > 0）= 镜头推近（往下看）。
-      // 触控板双指滚动同理。单行 sign flip，配置不外泄到任何状态机。
-      this.player.adjustZoom(-e.deltaY * 0.01);
+      // 2026-11-15 用户明确要求：滚轮默认上下看向——往下滑 = 向下看，往上滑 = 向上看
+      // （与鼠标移动同一口径，pitch>0 = 视线朝下）。Ctrl/⌘+滚轮保留为镜头缩放；拍照模式下仍缩放。
+      // 触控板双指滚动同理。
+      if (e.ctrlKey || e.metaKey || this.photoMode?.active === true) {
+        this.player.adjustZoom(-e.deltaY * 0.01);
+        return;
+      }
+      this.player.adjustPitch(e.deltaY * 0.0008);
     }, { passive: false });
   }
 

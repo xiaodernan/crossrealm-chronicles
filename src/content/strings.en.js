@@ -2985,7 +2985,7 @@ After the Rift Lord falls, the old dungeons return with a random layout for the 
 
 1. Click the screen to lock the mouse, WASD to move, {sprint} to sprint
 2. {cameraMode} to switch first/third person (recommended third person — Dark Souls style orbital camera, mouse directly turns view)
-3. Mouse wheel to scale camera distance · Camera always looks at character, no more "looking at the ground in front" causing motion sickness
+3. Mouse wheel tilts the view (scroll down = look down, scroll up = look up) · Ctrl+wheel to zoom · Camera always frames the character, no more "looking at the ground ahead" motion sickness
 2. Walk to the blue "World Anchor" and press {interact} to accept the mission
 3. East training dummy to practice combos (left click light hit, right click heavy hit)
 4. Press {journal} to open the quest log, follow Chapter 1→5 main line

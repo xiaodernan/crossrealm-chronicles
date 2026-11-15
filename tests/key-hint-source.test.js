@@ -379,8 +379,11 @@ const LEDGER = {
   // （zh 2 → 3 / en 3 → 4 / WorldMapPanel 1 → 0，总数一处没多）。
   // W-D2 切片41：开机失败那句（`请按 F12 查看控制台详情`）从 main.js 搬进
   // `boot_error_init_failed_fmt`，这笔账跟着文案搬了家（zh 3 -> 4 / en 4 -> 5 / main.js 1 -> 0）。
-  'content/strings.zh.js': 4,
-  'content/strings.en.js': 5,
+  // 2026-11-15（滚轮俯仰修复）：hm_body_start item 3 新增一句「Ctrl+滚轮缩放」——
+  // 滚轮默认改为上下看向后，缩放只剩 Ctrl+滚轮这一条路，说明书必须写出 Ctrl 这一个字面。
+  // 本次不是放任新写死键名，是**把缩放这一条路写进玩家第一眼能看到的句子里**。
+  'content/strings.zh.js': 5,
+  'content/strings.en.js': 6,
   // W-D2 切片41：开机失败那一条错误整句搬进双表（`boot_error_init_failed_fmt`），
   // 这笔账随之搬去 `content/strings.*.js`（见上），本文件归零。
   'main.js': 0,
