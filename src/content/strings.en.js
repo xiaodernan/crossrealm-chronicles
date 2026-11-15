@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Eighteen volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Nineteen volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 18 volumes of the canon, fully readable
+· Canon Library — 19 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 
 Tab buttons show unlocked count。`,
@@ -3134,8 +3134,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 18-volume index',
-  hm_body_codex: `Codex — 18 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 19-volume index',
+  hm_body_codex: `Codex — 19 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3155,6 +3155,7 @@ hm_title_codex: 'Codex · the 18-volume index',
 16 · Interlude VIII · Leaking Lamp — the wax that leaks is a warmth no one lets die.
 17 · Echoes of the Morning Mist — after the mist lifts, the Keeper finally speaks the last line.
 18 · Sunscar Stair — the strange suns still throw their light on whoever dares to climb.
+19 · The Council of Three Suns — three suns in a circle, asking the last one who walks in: who will you stay and keep the dark for?
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3168,7 +3169,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel trilogy (seven chapters + three extras) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (nineteen volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
@@ -3590,6 +3591,12 @@ Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (
   ach_ept_crossover: 'The poster never finished; the best world is the next reel.',
   ach_echo_keeper_title: 'Keeper of the Gathering Fire',
   ach_echo_keeper_desc: 'All seventeen mother-themes resonate — the fire knows every world',
+  lore_pop_trilance_title: 'The Fourth Drop of Wax on the Trilance',
+  lore_pop_trilance_text: 'The Trilance lights no one and no thing; it lights only what it has remembered. The three suns take turns laying their shadows across the stele, and after the third one dies there is always one lone drop of wax, seeping down the seam of the stone. They say it is the third sun writing an invitation for whoever comes after — no addressee, only a single line: if you came, the seat at the edge is already yours.',
+  lore_pop_glasschoir_title: 'An Octave of the Glass Organ',
+  lore_pop_glasschoir_text: 'The Glass Organ sounded once and never again. The pitch was right, the harmony was steady — and yet every pipe ended in silence, so what it played was not music but testimony for some unfinished sentence. The audience dispersed quickly. Only the old man in the last row laughed: this organ is not played for the living.',
+  ambient_void_p9: 'A line no one wrote appeared under the candle-shadow: before the Trilance, do not ask which one goes out first — ask which number guest you are.',
+  ambient_void_p10: 'You never burned the letter. The three suns fell silent at the same time, for one shared moment, and then went on turning.',
 });
 
 /** Key list (for static gates: ensure nothing slips through) */

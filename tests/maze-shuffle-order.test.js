@@ -306,11 +306,12 @@ describe('⑦ 文献的黄金签名：换洗法必须让这一条红，而不是
    * （`.tmp-wb10s5d/pins.mjs` ② 与本用例的 `Received:`）。
    * W-Z85 注记（2026-11-16）: 名册 18 → 19 篇（`lore-9`，番外五《火之前》），三颗种子落点全重排——归因仍是「名册规模 +1」而非发放那套流；数值由 generator 实测打印后逐字冻结。
    * W-Z96 注记（2026-11-17）: 名册 19 → 20 篇（`lore-10`，番外七《下次再坐》驿站残碑），三颗种子落点全重排——归因仍是「名册规模 +1」而非发放那套流；数值由 generator 实测打印后逐字冻结。
+   * W-Z128 注记（2026-11-15）: 名册 21 → 23 篇（`lore-trilance` 三阳碑的第四滴蜡 + `lore-glasschoir` 玻璃风琴的八度音），三颗种子落点全重排——归因仍是「名册规模 +2」而非发放那套流；数值由 generator 实测打印后逐字冻结。
    */
   const 黄金 = [
-    [20261001, '-,lore-echomail,-,-,-,lore-duel,lore-neon,-,-,-,lore-wizard,lore-jump-gate,-,-,lore-9,lore-wormhole,-,lore-2,-,lore-6,lore-murphy,-'],
-    [7, '-,-,lore-8,lore-5,-,-,-,lore-sunpyramid,-,lore-1,lore-vecna,lore-3,-,-,lore-ai-core,lore-wormhole,lore-cantina,lore-torii,lore-saloon,-,-,-'],
-    [-3, '-,lore-upside,-,lore-wizard,lore-jump-gate,lore-murphy,lore-inter,-,-,-,-,lore-arcade,lore-9,lore-1,-,lore-neon,lore-10,-,-,lore-7,-,lore-5'],
+    [20261001, '-,-,lore-10,-,lore-7,lore-obelisk,lore-torii,-,-,lore-saloon,-,lore-2,-,-,-,lore-neon,-,lore-4,-,lore-inter,-,lore-upside'],
+    [7, '-,-,-,-,-,-,-,-,lore-sunpyramid,lore-upside,lore-wizard,-,lore-wormhole,-,lore-6,lore-1,-,lore-9,lore-5,lore-vecna,lore-obelisk,-'],
+    [-3, '-,-,lore-upside,-,lore-broom,lore-vecna,-,lore-silence,lore-inter,-,lore-saloon,-,lore-10,lore-murphy,-,lore-torii,-,-,lore-jump-gate,lore-1,-,-'],
   ];
   for (const [seed, 期望] of 黄金) {
     it(`seed=${seed} 的文献落点签名`, () => {

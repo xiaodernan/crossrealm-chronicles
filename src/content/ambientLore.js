@@ -54,6 +54,8 @@ export const ZONE_EVENTS_POP = {
     { text: "ambient_void_p6", weight: 0.45 },
     { text: "ambient_void_p7", weight: 0.32 },
     { text: "ambient_void_p8", weight: 0.35 },
+    { text: "ambient_void_p9", weight: 0.30 },
+    { text: "ambient_void_p10", weight: 0.28 },
   ],
   fantasy: [
     { text: "ambient_fantasy_p0", weight: 0.5 },
@@ -102,6 +104,8 @@ export const LORE_FRAGMENTS_POP = [
   { id: "lore-sunpyramid", title: "lore_pop_sunpyramid_title", text: "lore_pop_sunpyramid_text", chapter: 5 },
   { id: "lore-echomail", title: "lore_pop_echomail_title", text: "lore_pop_echomail_text", chapter: 3 },
   { id: "lore-silence", title: "lore_pop_silence_title", text: "lore_pop_silence_text", chapter: 5 },
+  { id: "lore-trilance", title: "lore_pop_trilance_title", text: "lore_pop_trilance_text", chapter: 4 },
+  { id: "lore-glasschoir", title: "lore_pop_glasschoir_title", text: "lore_pop_glasschoir_text", chapter: 5 },
 ];
 
 /**

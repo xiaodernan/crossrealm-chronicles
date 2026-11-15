@@ -65,6 +65,9 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Interlude VII · Come Sit Awhile | the paper on the wall | the origin of the notice-board note: The wall takes no letters, travellers tuck scraps into the wall-gap anyway, names never reach the ledger; one scrap says "next time" and the furnace burns warmer; the letter that mattered waits for the next sit |
 | Interlude VII · Come Sit Awhile | [interlude-come-sit-awhile](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/14-interlude-come-sit-awhile.md) |
 | Interlude VIII · Leaking Lamp | [interlude-leaking-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/16-interlude-leaking-lamp.md) |
+| 晨雾回声 · Echoes of the Morning Mist | [chapter-seventeen](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/17-chapter-seventeen.md) |
+| 三日陵 · Sunscar Stair | [trilarite-stair](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/18-trilarite-stair.md) |
+| 三日之议 · The Council of Three Suns | [the-council-of-three-suns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/19-the-council-of-three-suns.md) |
 
 Chapter → game-chapter mapping:
 

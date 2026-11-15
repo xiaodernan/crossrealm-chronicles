@@ -682,7 +682,7 @@ describe('W-B2 内容普查：条数钉死', () => {
     expect(contentSummary()).toMatchObject({
       echoes: 110,
       ambientZoneEvents: 6,
-      loreFragments: 21,
+      loreFragments: 23,
       npcLines: 3,
       restDialogues: 8,
       achievementsExtra: 11,

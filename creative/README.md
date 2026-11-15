@@ -63,6 +63,9 @@ creative/music/soundtrack.html
 | 番外六 · Handover | [interlude-handover](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/13-interlude-handover.md) |
 | 番外七 · 下次再坐（Come Sit Awhile） | [interlude-come-sit-awhile](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/14-interlude-come-sit-awhile.md) |
 | 番外八 · 漏灯记（Leaking Lamp） | [interlude-leaking-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/16-interlude-leaking-lamp.md) |
+| 晨雾回声 · Echoes of the Morning Mist | [chapter-seventeen](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/17-chapter-seventeen.md) |
+| 三日陵 · Sunscar Stair | [trilarite-stair](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/18-trilarite-stair.md) |
+| 三日之议 · The Council of Three Suns | [the-council-of-three-suns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/19-the-council-of-three-suns.md) |
 
 每一章对应游戏的章节走法：
 
