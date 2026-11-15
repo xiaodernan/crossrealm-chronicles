@@ -21,6 +21,11 @@ export const HELP_SECTIONS_EXTRA = [
     body: 'hm_body_lore_oracle',
   },
   {
+    id: 'codex',
+    title: 'hm_title_codex',
+    body: 'hm_body_codex',
+  },
+  {
     id: 'ending-journey',
     title: 'hm_title_ending_journey',
     body: 'hm_body_ending_journey',

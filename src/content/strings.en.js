@@ -3124,6 +3124,28 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
+hm_title_codex: 'Codex · the 16-volume index',
+  hm_body_codex: `Codex — 16 volumes, synopsis in one line each.
+
+00 · Prologue · A Sway Under the Surface
+01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
+02 · Chapter Two · The Fragmented Timeline — the dawn that looks like retreat did not retreat; it just changed direction.
+03 · Chapter Three · The Campfire Memory — he chose a fire and sat down next to it.
+04 · Chapter Four · The Keeper — the one who did not decide to stay; the one who did not leave also found their place.
+05 · Chapter Five · The Letter — the delay for that letter on the waystation is not yours to carry.
+06 · Chapter Six · Echo — the one hundred and ninth sound is a position, not a voice.
+07 · Chapter Seven · Embers — the way had been travelled; you only became aware here.
+08 · Interlude I · A Letter on Written Paper — some letters are truer on paper than on the way.
+09 · Interlude II · The Keeper's Reply — the one who guards the fire never looked up before answering.
+10 · Interlude III · Lin's Reply to the Keeper — Lin Du is the name this book gives the man.
+11 · Interlude IV · The Reply of the One Who Came After — the reply that arrives from a later person.
+12 · Interlude V · Before the Flame — the world was already burning in silence before the first lamp.
+13 · Interlude VI · Handover — one shift took over from another; the flame never moved.
+14 · Interlude VII · Come Sit Awhile — that piece of paper is hung for the one who has not yet arrived.
+16 · Interlude VIII · Leaking Lamp — the wax that leaks is a warmth no one lets die.
+
+Continue reading outside the game? GitHub, bilingual full text:
+github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
   hm_title_ending_journey: 'Ending · After the anchor flame · Embers Journal',
   hm_body_ending_journey: `After the fifth boss (Chaos Overlord) unlocks the ending choice:
 “Keep the flame” — pass the light on; “Quiet end” — gather the journey and let the flame rest. Both are valid. Neither is wrong.
