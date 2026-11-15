@@ -110,6 +110,7 @@ creative/music/soundtrack.html
 | 劈薪 · Splitting the Firewood | [splitting-the-firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/61-splitting-the-firewood.md) |
 | 薪尽 · The Last Stick | [the-last-stick](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/62-the-last-stick.md) |
 | 原火 · The Original Fire | [the-original-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/63-the-original-fire.md) |
+| 烽火 · The Beacon | [the-beacon](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/64-the-beacon.md) |
 
 每一章对应游戏的章节走法：
 
