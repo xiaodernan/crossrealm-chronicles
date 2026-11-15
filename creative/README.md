@@ -108,6 +108,7 @@ creative/music/soundtrack.html
 | 火种 · The Kindling | [the-kindling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/59-the-kindling.md) |
 | 薪 · The Firewood | [the-firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/60-the-firewood.md) |
 | 劈薪 · Splitting the Firewood | [splitting-the-firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/61-splitting-the-firewood.md) |
+| 薪尽 · The Last Stick | [the-last-stick](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/62-the-last-stick.md) |
 
 每一章对应游戏的章节走法：
 
