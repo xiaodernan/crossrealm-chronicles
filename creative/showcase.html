@@ -52,6 +52,12 @@ body {
 .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 8px; text-align: center; }
 .stat b { display: block; font-size: 1.55rem; color: var(--gold); }
 .stat span { font-size: 0.72rem; color: var(--dim); letter-spacing: 0.05em; }
+.gh-vitals { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; padding: 14px 0; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, rgba(30, 24, 40, 0.35), transparent); }
+.gh-cell { text-align: center; padding: 4px 2px; border-right: 1px solid rgba(201, 169, 98, 0.15); }
+.gh-cell:last-child { border-right: none; }
+.gh-num { display: block; font-family: 'DM Mono', monospace; font-size: 1.15rem; color: #ffd98a; letter-spacing: 0.06em; }
+.gh-lab { display: block; font-size: 0.66rem; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+.gh-vitals .gh-source { grid-column: 1 / -1; text-align: right; font-size: 0.62rem; color: rgba(223, 214, 196, 0.35); letter-spacing: 0.04em; padding-right: 6px; }
 .section { padding: 32px 0; border-bottom: 1px solid var(--line); }
 .section:last-child { border-bottom: none; }
 .section h2 { font-size: 1.45rem; color: var(--gold); letter-spacing: 0.04em; margin-bottom: 14px; display: flex; align-items: baseline; gap: 12px; }
@@ -107,6 +113,15 @@ h1, h2 { text-wrap: balance; }
   <div class="stat"><b>9</b><span class="locale locale-zh">Spring Cloud 微服务</span><span class="locale locale-en">Spring Cloud services</span></div>
   <div class="stat"><b id="live-testfiles">6696</b><span class="locale locale-zh">单测全绿（CI 门禁实装）</span><span class="locale locale-en">unit tests green (CI gated)</span></div>
   <div class="stat"><b id="live-commits">—</b><span class="locale locale-zh">次提交（CI 门禁）</span><span class="locale locale-en">commits so far</span></div>
+</div>
+<div class="wrap gh-vitals" aria-label="Repository vitals (live)">
+  <div class="gh-cell"><span class="gh-num" id="gh-commits">—</span><span class="gh-lab">commits · main</span></div>
+  <div class="gh-cell"><span class="gh-num" id="gh-testfiles">—</span><span class="gh-lab">test files · CI 绿</span></div>
+  <div class="gh-cell"><span class="gh-num" id="gh-stars">—</span><span class="gh-lab">stars · xiaodernan</span></div>
+  <div class="gh-cell"><span class="gh-num" id="gh-size">—</span><span class="gh-lab">repo size (KB)</span></div>
+  <div class="gh-cell"><span class="gh-num" id="gh-pushed">—</span><span class="gh-lab">last push (UTC)</span></div>
+  <div class="gh-cell"><span class="gh-num" id="gh-branch">—</span><span class="gh-lab">default branch</span></div>
+  <div class="gh-source">real data · GitHub REST · refreshed per visit · api.github.com/repos/xiaodernan/crossrealm-chronicles</div>
   <div class="stat"><b>25</b><span class="locale locale-zh">OST 可播放 25 首 · Web Audio</span><span class="locale locale-en">OST tracks, playable via Web Audio</span></div>
   <div class="stat"><b>142</b><span class="locale locale-zh">分钟 IMAX 剧本</span><span class="locale locale-en">minutes IMAX script</span></div>
   <div class="stat"><b>110</b><span class="locale locale-zh">次元回声</span><span class="locale locale-en">echo entries</span></div>
@@ -208,12 +223,30 @@ buttons.forEach((btn) => btn.addEventListener('click', () => {
 }));
 </script>
 <script>
+      function setGitFromLatest(d) {
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      if (d.total_commits) set('gh-commits', String(d.total_commits));
+      if (d.test_files) set('gh-testfiles', String(d.test_files) + ' files');
+      try {
+        fetch('https://api.github.com/repos/xiaodernan/crossrealm-chronicles', { cache: 'no-store', headers: { 'Accept': 'application/vnd.github+json' } })
+          .then((r) => r.ok ? r.json() : null)
+          .then((repo) => {
+            if (!repo) return;
+            set('gh-stars', String(repo.stargazers_count ?? '—'));
+            set('gh-size', String(repo.size ?? '—'));
+            set('gh-pushed', String(repo.pushed_at ?? '').slice(0, 10));
+            set('gh-branch', String(repo.default_branch ?? '—'));
+          })
+          .catch(() => { /* GitHub API offline — stars/size stay as placeholder */ });
+      } catch (_) { /* same */ }
+    }
   (async function () {
     try {
       const r = await fetch('./latest.json', { cache: 'no-store' });
       if (!r.ok) return;
       const d = await r.json();
       if (typeof d.total_commits === 'number') { const el = document.getElementById('live-commits'); if (el) el.textContent = String(d.total_commits); }
+      setGitFromLatest(d);
       if (typeof d.test_files === 'number') { const el = document.getElementById('live-testfiles'); if (el) el.textContent = String(d.test_files); }
     } catch (_) { /* latest.json unreachable — demo fallback stays in place */ }
   })();
