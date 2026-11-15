@@ -1,6 +1,6 @@
 # 《跨界纪事》设定集（Codex · 英文版）—— 真上游机器抽取 · 出处同 zh
 
-**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 14 章抽取（00–13，含 Interlude V《Before the Flame》与 Interlude VI《Handover》）；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame（`## en/12-interlude-before-the-flame#1`，文件末尾）与 Interlude VI · Handover（`## en/13-interlude-handover#1`，Interlude V 之后成为文件末尾）均已入谱，2026-11-17**。
+**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 15 章抽取（00–14，含 Interlude V《Before the Flame》、Interlude VI《Handover》与 Interlude VII《Come Sit Awhile》）；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame（`## en/12-interlude-before-the-flame#1`，文件末尾）与 Interlude VI · Handover（`## en/13-interlude-handover#1`，Interlude V 之后成为文件末尾）均已入谱，2026-11-17**。
 
 > 与 `GLOSSARY.md` 关系：同一正本（canon）两种语言版本；英文字词保留原文锚点（`Anchor Flame`, `The Keeper`, `stay` 等），不做语义再翻译。
 > 这份文件是机器生成者写出的英文对照，**每章记五段**（①人物 / ②地点·位面 / ③时间线 / ④关键物件·母题 / ⑤易混淆译名·统一写法）。
@@ -941,4 +941,84 @@
 - **desk**：统一译为“桌位”；表示值班岗位，不与普通“桌子”混用。
 - **handover**：统一译为“交接”。
 - **shift**：表示值班时译为“班”或“值班”；`next shift` 统一译为“下一班”。
+
+## en/14-interlude-come-sit-awhile#1
+
+## ① 人物
+
+- **老看守（the old keeper）**：在驿站看守期间，不读也不清理墙缝里的纸片；他曾将一封信折好放入墙缝。【14-Interlude Seven · Come Sit Awhile】
+- **新任看守（the new one）**：曾问墙上那张纸是谁写的；老看守轮值结束时，他拿起铅笔杯，却没有写下自己的名字。【14-Interlude Seven · Come Sit Awhile】
+- **留下“Next time”的女人**：某年寒季将尽时来到驿站，把写着“Next time”的纸片塞进墙缝。【14-Interlude Seven · Come Sit Awhile】
+- **写信人（the letter-writer）**：带来一封写给母亲的信，知道自己终有一天会继续上路，希望信留在驿站等待下一位来者。【14-Interlude Seven · Come Sit Awhile】
+- **后来读信的旅人**：多年后首次经过此地，从墙缝中取出折好的信，读完后照原样折回。【14-Interlude Seven · Come Sit Awhile】
+
+## ② 地点·位面
+
+- **驿站（waystation）**：墙上贴着写有“不收信，只请旅人小坐”之意的纸；墙缝里留有旅人塞入的纸片。【14-Interlude Seven · Come Sit Awhile】
+
+## ③ 时间线
+
+1. 最早的旧账簿页面写着“The lamping still happens.”；后来笔迹与措辞变化，这句话始终保留。【14-Interlude Seven · Come Sit Awhile】
+2. 墙上的纸没有姓名、日期或印章；老看守说写下它的人早已离去。【14-Interlude Seven · Come Sit Awhile】
+3. 旅人陆续将袜子、渡船票、画着靴子的纸和未写答案的半道数学题等塞进墙缝；老看守不读，也不清理。【14-Interlude Seven · Come Sit Awhile】
+4. 某年寒季将尽时，一名女人在驿站吃了半份热餐，留下写着“Next time”的纸片；当晚炉火比平时暖了一些。【14-Interlude Seven · Come Sit Awhile】
+5. 老看守轮值结束时，新任看守拿起铅笔杯，没有写自己的名字，而是放回供下一轮值使用的铅笔。【14-Interlude Seven · Come Sit Awhile】
+6. 另一年，写信人带来一封写给母亲的信；老看守依规不收信、不送信，却将信折好塞进墙缝，作为路标。【14-Interlude Seven · Come Sit Awhile】
+7. 多年后，一名此前从未来过这条路的旅人经过驿站，取出信阅读，又照原样折回。【14-Interlude Seven · Come Sit Awhile】
+
+## ④ 关键物件·母题
+
+- **墙上的纸**：写着“We take no letters here — only travellers, come sit a while.”；左下角被手摸得圆润。【14-Interlude Seven · Come Sit Awhile】
+- **墙缝与纸片**：旅人把物件和纸片塞在墙上那张纸的下方；文中反复出现“The paper knows where it goes.”。【14-Interlude Seven · Come Sit Awhile】
+- **驿站账簿**：不记姓名，只记时间、灯与页面。【14-Interlude Seven · Come Sit Awhile】
+- **灯与炉火**：账簿最早一页提到点灯仍在继续；留下“Next time”的女人离开当晚，炉火比平时暖了一些。【14-Interlude Seven · Come Sit Awhile】
+- **信与路标**：墙上的规矩是不收信；老看守把那封写给母亲的信放入墙缝，文中称此举是留下路标。【14-Interlude Seven · Come Sit Awhile】
+- **椅子**：结尾将墙、纸片、椅子和夜晚写给未能到驿站、或到了却不敢坐下的人。【14-Interlude Seven · Come Sit Awhile】
+
+## ⑤ 易混淆译名·统一写法
+
+- **waystation：驿站**；**old keeper：老看守**；**the new one：新任看守**。原文均未给出姓名。【14-Interlude Seven · Come Sit Awhile】
+- **Hearthmen：炉边人**。本节以此称谓讨论为何他们不写姓名；不要与原文的“apprentices（学徒）”混作一称。【14-Interlude Seven · Come Sit Awhile】
+- **“Next time”：保留英文原文**。女人留下的纸片只写这两个词，不是“下次我会来”或“谢谢”。【14-Interlude Seven · Come Sit Awhile】
+- **Interlude Seven · Come Sit Awhile：间章七·来坐一会儿**；文首明确说本卷写于 *Interlude Six · Handover* 之后，既非序章也非尾声。【14-Interlude Seven · Come Sit Awhile】
+
+## en/14-interlude-come-sit-awhile#1
+
+## ① 人物
+
+- **老看守（the old keeper）**：在驿站看守期间，不读也不清理墙缝里的纸片；他曾将一封信折好放入墙缝。【14-Interlude Seven · Come Sit Awhile】
+- **新任看守（the new one）**：曾问墙上那张纸是谁写的；老看守轮值结束时，他拿起铅笔杯，却没有写下自己的名字。【14-Interlude Seven · Come Sit Awhile】
+- **留下“Next time”的女人**：某年寒季将尽时来到驿站，把写着“Next time”的纸片塞进墙缝。【14-Interlude Seven · Come Sit Awhile】
+- **写信人（the letter-writer）**：带来一封写给母亲的信，知道自己终有一天会继续上路，希望信留在驿站等待下一位来者。【14-Interlude Seven · Come Sit Awhile】
+- **后来读信的旅人**：多年后首次经过此地，从墙缝中取出折好的信，读完后照原样折回。【14-Interlude Seven · Come Sit Awhile】
+
+## ② 地点·位面
+
+- **驿站（waystation）**：墙上贴着写有“不收信，只请旅人小坐”之意的纸；墙缝里留有旅人塞入的纸片。【14-Interlude Seven · Come Sit Awhile】
+
+## ③ 时间线
+
+1. 最早的旧账簿页面写着“The lamping still happens.”；后来笔迹与措辞变化，这句话始终保留。【14-Interlude Seven · Come Sit Awhile】
+2. 墙上的纸没有姓名、日期或印章；老看守说写下它的人早已离去。【14-Interlude Seven · Come Sit Awhile】
+3. 旅人陆续将袜子、渡船票、画着靴子的纸和未写答案的半道数学题等塞进墙缝；老看守不读，也不清理。【14-Interlude Seven · Come Sit Awhile】
+4. 某年寒季将尽时，一名女人在驿站吃了半份热餐，留下写着“Next time”的纸片；当晚炉火比平时暖了一些。【14-Interlude Seven · Come Sit Awhile】
+5. 老看守轮值结束时，新任看守拿起铅笔杯，没有写自己的名字，而是放回供下一轮值使用的铅笔。【14-Interlude Seven · Come Sit Awhile】
+6. 另一年，写信人带来一封写给母亲的信；老看守依规不收信、不送信，却将信折好塞进墙缝，作为路标。【14-Interlude Seven · Come Sit Awhile】
+7. 多年后，一名此前从未来过这条路的旅人经过驿站，取出信阅读，又照原样折回。【14-Interlude Seven · Come Sit Awhile】
+
+## ④ 关键物件·母题
+
+- **墙上的纸**：写着“We take no letters here — only travellers, come sit a while.”；左下角被手摸得圆润。【14-Interlude Seven · Come Sit Awhile】
+- **墙缝与纸片**：旅人把物件和纸片塞在墙上那张纸的下方；文中反复出现“The paper knows where it goes.”。【14-Interlude Seven · Come Sit Awhile】
+- **驿站账簿**：不记姓名，只记时间、灯与页面。【14-Interlude Seven · Come Sit Awhile】
+- **灯与炉火**：账簿最早一页提到点灯仍在继续；留下“Next time”的女人离开当晚，炉火比平时暖了一些。【14-Interlude Seven · Come Sit Awhile】
+- **信与路标**：墙上的规矩是不收信；老看守把那封写给母亲的信放入墙缝，文中称此举是留下路标。【14-Interlude Seven · Come Sit Awhile】
+- **椅子**：结尾将墙、纸片、椅子和夜晚写给未能到驿站、或到了却不敢坐下的人。【14-Interlude Seven · Come Sit Awhile】
+
+## ⑤ 易混淆译名·统一写法
+
+- **waystation：驿站**；**old keeper：老看守**；**the new one：新任看守**。原文均未给出姓名。【14-Interlude Seven · Come Sit Awhile】
+- **Hearthmen：炉边人**。本节以此称谓讨论为何他们不写姓名；不要与原文的“apprentices（学徒）”混作一称。【14-Interlude Seven · Come Sit Awhile】
+- **“Next time”：保留英文原文**。女人留下的纸片只写这两个词，不是“下次我会来”或“谢谢”。【14-Interlude Seven · Come Sit Awhile】
+- **Interlude Seven · Come Sit Awhile：间章七·来坐一会儿**；文首明确说本卷写于 *Interlude Six · Handover* 之后，既非序章也非尾声。【14-Interlude Seven · Come Sit Awhile】
 

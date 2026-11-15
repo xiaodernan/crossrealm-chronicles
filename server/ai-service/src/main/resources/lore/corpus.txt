@@ -1,7 +1,7 @@
 # source: creative/GLOSSARY-en.md
 # 《跨界纪事》设定集（Codex · 英文版）—— 真上游机器抽取 · 出处同 zh
 
-**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 14 章抽取（00–13，含 Interlude V《Before the Flame》与 Interlude VI《Handover》）；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame（`## en/12-interlude-before-the-flame#1`，文件末尾）与 Interlude VI · Handover（`## en/13-interlude-handover#1`，Interlude V 之后成为文件末尾）均已入谱，2026-11-17**。
+**性质**：`scripts/novel-glossary.mjs` 真上游 gpt-6-sol，从 `creative/novel/en/` 全 15 章抽取（00–14，含 Interlude V《Before the Flame》、Interlude VI《Handover》与 Interlude VII《Come Sit Awhile》）；条目标出处；不构成权威发布稿，任何冲突以正文为准。**Interlude V · Before the Flame（`## en/12-interlude-before-the-flame#1`，文件末尾）与 Interlude VI · Handover（`## en/13-interlude-handover#1`，Interlude V 之后成为文件末尾）均已入谱，2026-11-17**。
 
 > 与 `GLOSSARY.md` 关系：同一正本（canon）两种语言版本；英文字词保留原文锚点（`Anchor Flame`, `The Keeper`, `stay` 等），不做语义再翻译。
 > 这份文件是机器生成者写出的英文对照，**每章记五段**（①人物 / ②地点·位面 / ③时间线 / ④关键物件·母题 / ⑤易混淆译名·统一写法）。
@@ -943,14 +943,94 @@
 - **handover**：统一译为“交接”。
 - **shift**：表示值班时译为“班”或“值班”；`next shift` 统一译为“下一班”。
 
+## en/14-interlude-come-sit-awhile#1
+
+## ① 人物
+
+- **老看守（the old keeper）**：在驿站看守期间，不读也不清理墙缝里的纸片；他曾将一封信折好放入墙缝。【14-Interlude Seven · Come Sit Awhile】
+- **新任看守（the new one）**：曾问墙上那张纸是谁写的；老看守轮值结束时，他拿起铅笔杯，却没有写下自己的名字。【14-Interlude Seven · Come Sit Awhile】
+- **留下“Next time”的女人**：某年寒季将尽时来到驿站，把写着“Next time”的纸片塞进墙缝。【14-Interlude Seven · Come Sit Awhile】
+- **写信人（the letter-writer）**：带来一封写给母亲的信，知道自己终有一天会继续上路，希望信留在驿站等待下一位来者。【14-Interlude Seven · Come Sit Awhile】
+- **后来读信的旅人**：多年后首次经过此地，从墙缝中取出折好的信，读完后照原样折回。【14-Interlude Seven · Come Sit Awhile】
+
+## ② 地点·位面
+
+- **驿站（waystation）**：墙上贴着写有“不收信，只请旅人小坐”之意的纸；墙缝里留有旅人塞入的纸片。【14-Interlude Seven · Come Sit Awhile】
+
+## ③ 时间线
+
+1. 最早的旧账簿页面写着“The lamping still happens.”；后来笔迹与措辞变化，这句话始终保留。【14-Interlude Seven · Come Sit Awhile】
+2. 墙上的纸没有姓名、日期或印章；老看守说写下它的人早已离去。【14-Interlude Seven · Come Sit Awhile】
+3. 旅人陆续将袜子、渡船票、画着靴子的纸和未写答案的半道数学题等塞进墙缝；老看守不读，也不清理。【14-Interlude Seven · Come Sit Awhile】
+4. 某年寒季将尽时，一名女人在驿站吃了半份热餐，留下写着“Next time”的纸片；当晚炉火比平时暖了一些。【14-Interlude Seven · Come Sit Awhile】
+5. 老看守轮值结束时，新任看守拿起铅笔杯，没有写自己的名字，而是放回供下一轮值使用的铅笔。【14-Interlude Seven · Come Sit Awhile】
+6. 另一年，写信人带来一封写给母亲的信；老看守依规不收信、不送信，却将信折好塞进墙缝，作为路标。【14-Interlude Seven · Come Sit Awhile】
+7. 多年后，一名此前从未来过这条路的旅人经过驿站，取出信阅读，又照原样折回。【14-Interlude Seven · Come Sit Awhile】
+
+## ④ 关键物件·母题
+
+- **墙上的纸**：写着“We take no letters here — only travellers, come sit a while.”；左下角被手摸得圆润。【14-Interlude Seven · Come Sit Awhile】
+- **墙缝与纸片**：旅人把物件和纸片塞在墙上那张纸的下方；文中反复出现“The paper knows where it goes.”。【14-Interlude Seven · Come Sit Awhile】
+- **驿站账簿**：不记姓名，只记时间、灯与页面。【14-Interlude Seven · Come Sit Awhile】
+- **灯与炉火**：账簿最早一页提到点灯仍在继续；留下“Next time”的女人离开当晚，炉火比平时暖了一些。【14-Interlude Seven · Come Sit Awhile】
+- **信与路标**：墙上的规矩是不收信；老看守把那封写给母亲的信放入墙缝，文中称此举是留下路标。【14-Interlude Seven · Come Sit Awhile】
+- **椅子**：结尾将墙、纸片、椅子和夜晚写给未能到驿站、或到了却不敢坐下的人。【14-Interlude Seven · Come Sit Awhile】
+
+## ⑤ 易混淆译名·统一写法
+
+- **waystation：驿站**；**old keeper：老看守**；**the new one：新任看守**。原文均未给出姓名。【14-Interlude Seven · Come Sit Awhile】
+- **Hearthmen：炉边人**。本节以此称谓讨论为何他们不写姓名；不要与原文的“apprentices（学徒）”混作一称。【14-Interlude Seven · Come Sit Awhile】
+- **“Next time”：保留英文原文**。女人留下的纸片只写这两个词，不是“下次我会来”或“谢谢”。【14-Interlude Seven · Come Sit Awhile】
+- **Interlude Seven · Come Sit Awhile：间章七·来坐一会儿**；文首明确说本卷写于 *Interlude Six · Handover* 之后，既非序章也非尾声。【14-Interlude Seven · Come Sit Awhile】
+
+## en/14-interlude-come-sit-awhile#1
+
+## ① 人物
+
+- **老看守（the old keeper）**：在驿站看守期间，不读也不清理墙缝里的纸片；他曾将一封信折好放入墙缝。【14-Interlude Seven · Come Sit Awhile】
+- **新任看守（the new one）**：曾问墙上那张纸是谁写的；老看守轮值结束时，他拿起铅笔杯，却没有写下自己的名字。【14-Interlude Seven · Come Sit Awhile】
+- **留下“Next time”的女人**：某年寒季将尽时来到驿站，把写着“Next time”的纸片塞进墙缝。【14-Interlude Seven · Come Sit Awhile】
+- **写信人（the letter-writer）**：带来一封写给母亲的信，知道自己终有一天会继续上路，希望信留在驿站等待下一位来者。【14-Interlude Seven · Come Sit Awhile】
+- **后来读信的旅人**：多年后首次经过此地，从墙缝中取出折好的信，读完后照原样折回。【14-Interlude Seven · Come Sit Awhile】
+
+## ② 地点·位面
+
+- **驿站（waystation）**：墙上贴着写有“不收信，只请旅人小坐”之意的纸；墙缝里留有旅人塞入的纸片。【14-Interlude Seven · Come Sit Awhile】
+
+## ③ 时间线
+
+1. 最早的旧账簿页面写着“The lamping still happens.”；后来笔迹与措辞变化，这句话始终保留。【14-Interlude Seven · Come Sit Awhile】
+2. 墙上的纸没有姓名、日期或印章；老看守说写下它的人早已离去。【14-Interlude Seven · Come Sit Awhile】
+3. 旅人陆续将袜子、渡船票、画着靴子的纸和未写答案的半道数学题等塞进墙缝；老看守不读，也不清理。【14-Interlude Seven · Come Sit Awhile】
+4. 某年寒季将尽时，一名女人在驿站吃了半份热餐，留下写着“Next time”的纸片；当晚炉火比平时暖了一些。【14-Interlude Seven · Come Sit Awhile】
+5. 老看守轮值结束时，新任看守拿起铅笔杯，没有写自己的名字，而是放回供下一轮值使用的铅笔。【14-Interlude Seven · Come Sit Awhile】
+6. 另一年，写信人带来一封写给母亲的信；老看守依规不收信、不送信，却将信折好塞进墙缝，作为路标。【14-Interlude Seven · Come Sit Awhile】
+7. 多年后，一名此前从未来过这条路的旅人经过驿站，取出信阅读，又照原样折回。【14-Interlude Seven · Come Sit Awhile】
+
+## ④ 关键物件·母题
+
+- **墙上的纸**：写着“We take no letters here — only travellers, come sit a while.”；左下角被手摸得圆润。【14-Interlude Seven · Come Sit Awhile】
+- **墙缝与纸片**：旅人把物件和纸片塞在墙上那张纸的下方；文中反复出现“The paper knows where it goes.”。【14-Interlude Seven · Come Sit Awhile】
+- **驿站账簿**：不记姓名，只记时间、灯与页面。【14-Interlude Seven · Come Sit Awhile】
+- **灯与炉火**：账簿最早一页提到点灯仍在继续；留下“Next time”的女人离开当晚，炉火比平时暖了一些。【14-Interlude Seven · Come Sit Awhile】
+- **信与路标**：墙上的规矩是不收信；老看守把那封写给母亲的信放入墙缝，文中称此举是留下路标。【14-Interlude Seven · Come Sit Awhile】
+- **椅子**：结尾将墙、纸片、椅子和夜晚写给未能到驿站、或到了却不敢坐下的人。【14-Interlude Seven · Come Sit Awhile】
+
+## ⑤ 易混淆译名·统一写法
+
+- **waystation：驿站**；**old keeper：老看守**；**the new one：新任看守**。原文均未给出姓名。【14-Interlude Seven · Come Sit Awhile】
+- **Hearthmen：炉边人**。本节以此称谓讨论为何他们不写姓名；不要与原文的“apprentices（学徒）”混作一称。【14-Interlude Seven · Come Sit Awhile】
+- **“Next time”：保留英文原文**。女人留下的纸片只写这两个词，不是“下次我会来”或“谢谢”。【14-Interlude Seven · Come Sit Awhile】
+- **Interlude Seven · Come Sit Awhile：间章七·来坐一会儿**；文首明确说本卷写于 *Interlude Six · Handover* 之后，既非序章也非尾声。【14-Interlude Seven · Come Sit Awhile】
+
 # source: creative/GLOSSARY.md
 # 《跨界纪事》设定集（Codex）—— 真上游机器抽取 · 出处标注
 
 - 生成方式：`scripts/novel-glossary.mjs`（真上游 gpt-6-sol）
-- 抽取范围：creative/novel/ 全 14 章（00–11 以及 2026-11-15 新章；含番外 / 番外二 / 番外三 / 番外四 / 番外五 / 番外六）；每章一节，五个子段（人物 / 地点·位面 / 时间线 / 关键物件·母题 / 易混淆译名）。**番外五与番外六见文件末尾**（番外五于 2026-11-16 补入，番外六于 2026-11-17 补入）
+- 抽取范围：creative/novel/ 全 15 章（00–11 以及 2026-11-15 新章；含番外 / 番外二 / 番外三 / 番外四 / 番外五 / 番外六 / 番外七）；每章一节，五个子段（人物 / 地点·位面 / 时间线 / 关键物件·母题 / 易混淆译名）。**番外五与番外六见文件末尾**（番外五于 2026-11-16 补入，番外六于 2026-11-17 补入，番外七于 2026-11-17 补入）
 - **性质**：机器直抽，不是人工终审稿；条目标注出处章节，使用前请对照原文核实；与正文冲突时**以原文为准**
 - 【编者注】Ch2 日志中「已共鸣 49 / 49」是中途账，不是终态；109 / 110 两种计数口径在正文中并存，引用时以具体语境为准，不要默认互通。番外五《火之前》以 108 放下 + 1 没放下 = 109 回声为母题校对键
-- 目录：00-序言 · 01-交汇枢纽 · 02-破碎时线 · 03-营火记忆 · 04-看守 · 05-寄信人 · 06-回响 · 07-余烬 · 08-番外 · 09-番外二 · 10-番外三 · 11-番外四 · 12-番外五-火之前（末尾） · 13-番外六-换班（末尾）
+- 目录：00-序言 · 01-交汇枢纽 · 02-破碎时线 · 03-营火记忆 · 04-看守 · 05-寄信人 · 06-回响 · 07-余烬 · 08-番外 · 09-番外二 · 10-番外三 · 11-番外四 · 12-番外五-火之前（末尾） · 13-番外六-换班（末尾） · 14-番外七-下次再坐（末尾）
 ## 00-序言#1
 
 ## ①人物
@@ -1897,6 +1977,164 @@
 - 炉子／炉火／炉芯：分别按原文用词保留；文中明确说「炉芯不需要换」，并称炉火一直燃烧。【13-番外六-换班#1】
 - 灯／小油灯：账本所记的「哪盏灯」与炉边被更换的「一盏小油灯」均保留原文写法。【13-番外六-换班#1】
 - 锚火／营火：均按原文写法，不与「炉火」合并称呼。【13-番外六-换班#1】
+
+## 14-番外七-下次再坐#1
+
+## ① 人物
+
+- **老看守**：驿站中的看守，遵守“不收信”的规矩，从不阅读或清走墙缝里的纸条；其班结束后由新来的人接替。出处：【14-番外七-下次再坐#1】
+- **新来的人**：曾询问墙上那句话是谁写的，也在老看守交班后接过笔筒。出处：【14-番外七-下次再坐#1】
+- **靴子上有灰的女人**：某年冬天晚些时候来到驿站，在墙缝里留下写着“下次”的纸条。出处：【14-番外七-下次再坐#1】
+- **背着信的人**：带着一封替已经不在的人写给其母亲的信来到驿站。出处：【14-番外七-下次再坐#1】
+- **从没来过的旅行者**：几年后经过驿站，在墙缝里找到那封信，展开后认出自己不认识的笔迹，并将信放回原处。出处：【14-番外七-下次再坐#1】
+- **旅行者**：会把纸条塞进墙缝；文本也称其为“路过的人”。出处：【14-番外七-下次再坐#1】
+- **炉边人**：驿站中按班次工作、负责记灯和使用笔的人；账簿上不记录他们的名字。出处：【14-番外七-下次再坐#1】
+- **已经不在的人**：一封信的实际代写对象，信是写给其母亲的。出处：【14-番外七-下次再坐#1】
+- **已经走了的母亲**：背信之人预想中将来会离世的母亲，信被留在驿站等待那个“下次”。出处：【14-番外七-下次再坐#1】
+- **学徒**：被提及为名字的书写对象；驿站不需要学徒。出处：【14-番外七-下次再坐#1】
+
+## ② 地点·位面
+
+- **驿站**：墙上贴着一张写有“驿站不收信。路过的人，下次再坐。”的纸；设有炉子、账簿、墙缝和椅子。出处：【14-番外七-下次再坐#1】
+- **驿站的墙**：贴着没有落款、日期和印章的纸，也被旅行者用来塞放纸条。出处：【14-番外七-下次再坐#1】
+- **墙缝**：旅行者塞入纸条的地方；老看守将那封信折起后也放入其中，几年后被一名旅行者找到。出处：【14-番外七-下次再坐#1】
+- **炉边**：炉边人按班次工作；冬天女人留下“下次”后，那一夜炉子比平时暖一点。出处：【14-番外七-下次再坐#1】
+- **墙上的椅子**：有些人走到驿站后只敢看墙、不敢坐；文本将“见过那张椅子”作为“已经来过”的表述。出处：【14-番外七-下次再坐#1】
+- **驿站之外的路**：灰尘旧到“驿站的路都不问她了”；文本还写到有些人没能走到驿站。出处：【14-番外七-下次再坐#1】
+
+## ③ 时间线
+
+1. 驿站墙上出现一张没有落款、日期和印章的纸，内容是：“驿站不收信。路过的人，下次再坐。”【14-番外七-下次再坐#1】
+2. 旧账中最早的一页写着“照明还是要用的”；后续账页的字迹不断更换，但句子没有变化。【14-番外七-下次再坐#1】
+3. 纸的左下角因被坐过太多次而磨出圆角。【14-番外七-下次再坐#1】
+4. 旅行者陆续把袜子、船票、画着旧靴子的纸和写了一半的数学题塞进墙缝。【14-番外七-下次再坐#1】
+5. 老看守始终不读这些纸条，也不把它们清走；纸条经历风、雨和日晒。【14-番外七-下次再坐#1】
+6. 新来的人询问墙上那句话是谁写的；老看守回答说，写这句话的人已经不在了，但话还在。【14-番外七-下次再坐#1】
+7. 某年冬天晚些时候，靴子上有灰的女人来到驿站，吃了半份热食。【14-番外七-下次再坐#1】
+8. 女人离开时在墙缝里留下写着“下次”的纸条；那一夜炉子比平时暖一点。【14-番外七-下次再坐#1】
+9. 老看守的班结束后，新来的人拿起笔筒，并放入下一班要使用的笔，没有放入自己的名字。【14-番外七-下次再坐#1】
+10. 又一年，背着信的人来到驿站，带着一封替已经不在的人写给其母亲的信。【14-番外七-下次再坐#1】
+11. 老看守依照驿站规矩没收信，也没有替他送信；随后将信折起，塞进墙缝。【14-番外七-下次再坐#1】
+12. 几年后，一名从没来过的旅行者经过驿站，在墙缝里找到那封信。【14-番外七-下次再坐#1】
+13. 旅行者没有查看寄件人和地址，只展开信，认出自己不认识的笔迹，并把信放回原处，多看了一眼。【14-番外七-下次再坐#1】
+14. 文本将墙指向没能走到驿站、走到却不敢坐下，以及只想确认驿站仍在的人。【14-番外七-下次再坐#1】
+
+## ④ 关键物件·母题
+
+- **墙上那张纸**：没有落款、日期和印章，内容固定为“驿站不收信。路过的人，下次再坐。”其来历构成番外主题。出处：【14-番外七-下次再坐#1】
+- **“下次再坐”**：墙上纸条的固定句子，也是篇章反复出现的核心话语。出处：【14-番外七-下次再坐#1】
+- **“下次”纸条**：靴子上有灰的女人留下的纸条，上面只有“下次”两个字。出处：【14-番外七-下次再坐#1】
+- **墙缝里的纸条**：旅行者曾塞入袜子、船票、画着靴子的纸和写了一半的数学题；老看守不读也不清走。出处：【14-番外七-下次再坐#1】
+- **船票**：有人揉皱后塞进墙缝的纸条。出处：【14-番外七-下次再坐#1】
+- **画着旧靴子的纸**：有人塞入墙缝的纸条，画中鞋带是散的。出处：【14-番外七-下次再坐#1】
+- **写了一半的数学题**：有人塞入墙缝的纸条，笔迹很用力，未写答案。出处：【14-番外七-下次再坐#1】
+- **那封信**：背信之人带来的信，内容是替已经不在的人写给其母亲；老看守后来将其作为“路标”留在墙缝中。出处：【14-番外七-下次再坐#1】
+- **信的路标**：老看守把信塞进墙缝时，对其行为的表述；信没有被送出，而是被留在那里等待后来者找到。出处：【14-番外七-下次再坐#1】
+- **旧账·账簿**：记录时间、哪盏灯和哪一页，从来不记录驿站中炉边人的名字。出处：【14-番外七-下次再坐#1】
+- **灯**：账簿记录的项目之一；旧账最早一页写着“照明还是要用的”。出处：【14-番外七-下次再坐#1】
+- **笔筒与交班的笔**：老看守班结束后，新来的人把下一班要用的笔插入笔筒，没有插入自己的名字。出处：【14-番外七-下次再坐#1】
+- **炉子与炉门**：女人留下“下次”后，老看守擦炉门；当夜炉子比平时暖一点。出处：【14-番外七-下次再坐#1】
+- **纸的流动**：文本写道，纸会经历风、雨和日晒，“纸自己会走的。纸知道去哪儿。”出处：【14-番外七-下次再坐#1】
+- **名字**：炉边人的名字不写在驿站账簿上；文本称名字是写给学徒的，驿站不需要学徒。出处：【14-番外七-下次再坐#1】
+- **墙**：面向未能抵达、未敢坐下或只想确认驿站仍在的人；文本说“墙是给他们的”。出处：【14-番外七-下次再坐#1】
+- **照明**：旧账最早一页留下的句子是“照明还是要用的”。出处：【14-番外七-下次再坐#1】
+
+## ⑤ 易混淆译名·统一写法
+
+| 统一写法 | 原文相关称呼 | 说明 |
+|---|---|---|
+| **老看守** | 老看守 | 全文统一指驿站中遵守规矩、处理纸条与信件的看守。出处：【14-番外七-下次再坐#1】 |
+| **新来的人** | 新来的人 | 指询问墙上句子来历、并在交班后接过笔筒的人；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **炉边人** | 炉边人、有人 | 统一指驿站中按班次工作、记灯和使用笔的人；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **驿站** | 驿站 | 固定地点名称；不改写为“车站”“旅店”或其他称呼。出处：【14-番外七-下次再坐#1】 |
+| **墙上那张纸** | 那张纸、纸 | 指写有“驿站不收信。路过的人，下次再坐。”的纸。出处：【14-番外七-下次再坐#1】 |
+| **纸条** | 纸、纸条 | 统一指被塞入墙缝的袜子、船票、靴子图、数学题以及“下次”纸条等物件；具体物件另行保留。出处：【14-番外七-下次再坐#1】 |
+| **墙缝** | 墙底下、墙缝 | 统一指纸条和信被塞入、后来被旅行者找到的位置。出处：【14-番外七-下次再坐#1】 |
+| **下次再坐** | 下次、那个“下次” | “下次”是女人留下的单字纸条；“下次再坐”是墙上纸的完整句子。两者不合并为同一件纸条。出处：【14-番外七-下次再坐#1】 |
+| **那封信** | 信、真正的那封信 | 统一指背信之人带来、后被老看守放入墙缝的信。出处：【14-番外七-下次再坐#1】 |
+| **写信对象的母亲** | 母亲、他自己的母亲 | 指那封信预定写给的对象；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **靴子上有灰的女人** | 女人 | 统一指留下“下次”纸条的女性；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **背着信的人** | 背着信的人、他 | 统一指携带那封信来到驿站的人；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **从没来过的旅行者** | 旅行者、她 | 统一指几年后找到那封信并将其放回原处的女性；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+
+## 14-番外七-下次再坐#1
+
+## ① 人物
+
+- **老看守**：驿站中的看守，遵守“不收信”的规矩，从不阅读或清走墙缝里的纸条；其班结束后由新来的人接替。出处：【14-番外七-下次再坐#1】
+- **新来的人**：曾询问墙上那句话是谁写的，也在老看守交班后接过笔筒。出处：【14-番外七-下次再坐#1】
+- **靴子上有灰的女人**：某年冬天晚些时候来到驿站，在墙缝里留下写着“下次”的纸条。出处：【14-番外七-下次再坐#1】
+- **背着信的人**：带着一封替已经不在的人写给其母亲的信来到驿站。出处：【14-番外七-下次再坐#1】
+- **从没来过的旅行者**：几年后经过驿站，在墙缝里找到那封信，展开后认出自己不认识的笔迹，并将信放回原处。出处：【14-番外七-下次再坐#1】
+- **旅行者**：会把纸条塞进墙缝；文本也称其为“路过的人”。出处：【14-番外七-下次再坐#1】
+- **炉边人**：驿站中按班次工作、负责记灯和使用笔的人；账簿上不记录他们的名字。出处：【14-番外七-下次再坐#1】
+- **已经不在的人**：一封信的实际代写对象，信是写给其母亲的。出处：【14-番外七-下次再坐#1】
+- **已经走了的母亲**：背信之人预想中将来会离世的母亲，信被留在驿站等待那个“下次”。出处：【14-番外七-下次再坐#1】
+- **学徒**：被提及为名字的书写对象；驿站不需要学徒。出处：【14-番外七-下次再坐#1】
+
+## ② 地点·位面
+
+- **驿站**：墙上贴着一张写有“驿站不收信。路过的人，下次再坐。”的纸；设有炉子、账簿、墙缝和椅子。出处：【14-番外七-下次再坐#1】
+- **驿站的墙**：贴着没有落款、日期和印章的纸，也被旅行者用来塞放纸条。出处：【14-番外七-下次再坐#1】
+- **墙缝**：旅行者塞入纸条的地方；老看守将那封信折起后也放入其中，几年后被一名旅行者找到。出处：【14-番外七-下次再坐#1】
+- **炉边**：炉边人按班次工作；冬天女人留下“下次”后，那一夜炉子比平时暖一点。出处：【14-番外七-下次再坐#1】
+- **墙上的椅子**：有些人走到驿站后只敢看墙、不敢坐；文本将“见过那张椅子”作为“已经来过”的表述。出处：【14-番外七-下次再坐#1】
+- **驿站之外的路**：灰尘旧到“驿站的路都不问她了”；文本还写到有些人没能走到驿站。出处：【14-番外七-下次再坐#1】
+
+## ③ 时间线
+
+1. 驿站墙上出现一张没有落款、日期和印章的纸，内容是：“驿站不收信。路过的人，下次再坐。”【14-番外七-下次再坐#1】
+2. 旧账中最早的一页写着“照明还是要用的”；后续账页的字迹不断更换，但句子没有变化。【14-番外七-下次再坐#1】
+3. 纸的左下角因被坐过太多次而磨出圆角。【14-番外七-下次再坐#1】
+4. 旅行者陆续把袜子、船票、画着旧靴子的纸和写了一半的数学题塞进墙缝。【14-番外七-下次再坐#1】
+5. 老看守始终不读这些纸条，也不把它们清走；纸条经历风、雨和日晒。【14-番外七-下次再坐#1】
+6. 新来的人询问墙上那句话是谁写的；老看守回答说，写这句话的人已经不在了，但话还在。【14-番外七-下次再坐#1】
+7. 某年冬天晚些时候，靴子上有灰的女人来到驿站，吃了半份热食。【14-番外七-下次再坐#1】
+8. 女人离开时在墙缝里留下写着“下次”的纸条；那一夜炉子比平时暖一点。【14-番外七-下次再坐#1】
+9. 老看守的班结束后，新来的人拿起笔筒，并放入下一班要使用的笔，没有放入自己的名字。【14-番外七-下次再坐#1】
+10. 又一年，背着信的人来到驿站，带着一封替已经不在的人写给其母亲的信。【14-番外七-下次再坐#1】
+11. 老看守依照驿站规矩没收信，也没有替他送信；随后将信折起，塞进墙缝。【14-番外七-下次再坐#1】
+12. 几年后，一名从没来过的旅行者经过驿站，在墙缝里找到那封信。【14-番外七-下次再坐#1】
+13. 旅行者没有查看寄件人和地址，只展开信，认出自己不认识的笔迹，并把信放回原处，多看了一眼。【14-番外七-下次再坐#1】
+14. 文本将墙指向没能走到驿站、走到却不敢坐下，以及只想确认驿站仍在的人。【14-番外七-下次再坐#1】
+
+## ④ 关键物件·母题
+
+- **墙上那张纸**：没有落款、日期和印章，内容固定为“驿站不收信。路过的人，下次再坐。”其来历构成番外主题。出处：【14-番外七-下次再坐#1】
+- **“下次再坐”**：墙上纸条的固定句子，也是篇章反复出现的核心话语。出处：【14-番外七-下次再坐#1】
+- **“下次”纸条**：靴子上有灰的女人留下的纸条，上面只有“下次”两个字。出处：【14-番外七-下次再坐#1】
+- **墙缝里的纸条**：旅行者曾塞入袜子、船票、画着靴子的纸和写了一半的数学题；老看守不读也不清走。出处：【14-番外七-下次再坐#1】
+- **船票**：有人揉皱后塞进墙缝的纸条。出处：【14-番外七-下次再坐#1】
+- **画着旧靴子的纸**：有人塞入墙缝的纸条，画中鞋带是散的。出处：【14-番外七-下次再坐#1】
+- **写了一半的数学题**：有人塞入墙缝的纸条，笔迹很用力，未写答案。出处：【14-番外七-下次再坐#1】
+- **那封信**：背信之人带来的信，内容是替已经不在的人写给其母亲；老看守后来将其作为“路标”留在墙缝中。出处：【14-番外七-下次再坐#1】
+- **信的路标**：老看守把信塞进墙缝时，对其行为的表述；信没有被送出，而是被留在那里等待后来者找到。出处：【14-番外七-下次再坐#1】
+- **旧账·账簿**：记录时间、哪盏灯和哪一页，从来不记录驿站中炉边人的名字。出处：【14-番外七-下次再坐#1】
+- **灯**：账簿记录的项目之一；旧账最早一页写着“照明还是要用的”。出处：【14-番外七-下次再坐#1】
+- **笔筒与交班的笔**：老看守班结束后，新来的人把下一班要用的笔插入笔筒，没有插入自己的名字。出处：【14-番外七-下次再坐#1】
+- **炉子与炉门**：女人留下“下次”后，老看守擦炉门；当夜炉子比平时暖一点。出处：【14-番外七-下次再坐#1】
+- **纸的流动**：文本写道，纸会经历风、雨和日晒，“纸自己会走的。纸知道去哪儿。”出处：【14-番外七-下次再坐#1】
+- **名字**：炉边人的名字不写在驿站账簿上；文本称名字是写给学徒的，驿站不需要学徒。出处：【14-番外七-下次再坐#1】
+- **墙**：面向未能抵达、未敢坐下或只想确认驿站仍在的人；文本说“墙是给他们的”。出处：【14-番外七-下次再坐#1】
+- **照明**：旧账最早一页留下的句子是“照明还是要用的”。出处：【14-番外七-下次再坐#1】
+
+## ⑤ 易混淆译名·统一写法
+
+| 统一写法 | 原文相关称呼 | 说明 |
+|---|---|---|
+| **老看守** | 老看守 | 全文统一指驿站中遵守规矩、处理纸条与信件的看守。出处：【14-番外七-下次再坐#1】 |
+| **新来的人** | 新来的人 | 指询问墙上句子来历、并在交班后接过笔筒的人；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **炉边人** | 炉边人、有人 | 统一指驿站中按班次工作、记灯和使用笔的人；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **驿站** | 驿站 | 固定地点名称；不改写为“车站”“旅店”或其他称呼。出处：【14-番外七-下次再坐#1】 |
+| **墙上那张纸** | 那张纸、纸 | 指写有“驿站不收信。路过的人，下次再坐。”的纸。出处：【14-番外七-下次再坐#1】 |
+| **纸条** | 纸、纸条 | 统一指被塞入墙缝的袜子、船票、靴子图、数学题以及“下次”纸条等物件；具体物件另行保留。出处：【14-番外七-下次再坐#1】 |
+| **墙缝** | 墙底下、墙缝 | 统一指纸条和信被塞入、后来被旅行者找到的位置。出处：【14-番外七-下次再坐#1】 |
+| **下次再坐** | 下次、那个“下次” | “下次”是女人留下的单字纸条；“下次再坐”是墙上纸的完整句子。两者不合并为同一件纸条。出处：【14-番外七-下次再坐#1】 |
+| **那封信** | 信、真正的那封信 | 统一指背信之人带来、后被老看守放入墙缝的信。出处：【14-番外七-下次再坐#1】 |
+| **写信对象的母亲** | 母亲、他自己的母亲 | 指那封信预定写给的对象；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **靴子上有灰的女人** | 女人 | 统一指留下“下次”纸条的女性；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **背着信的人** | 背着信的人、他 | 统一指携带那封信来到驿站的人；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
+| **从没来过的旅行者** | 旅行者、她 | 统一指几年后找到那封信并将其放回原处的女性；原文未给姓名。出处：【14-番外七-下次再坐#1】 |
 
 # source: creative/film/short-keeper-day.en.md
 # The Keeper’s Day (The Companion Short Film)
@@ -4782,6 +5020,106 @@ The flame only belongs to the next shift.
 
 *（Interlude Six · Handover — one shift, handed to the next. The writer of this volume has long since become used to seeing his own shift come to an end. The flame is still burning. The flame still has the same wick. The flame will never tell you how many shifts it has kept — it will only light the whole night for whoever sits in your chair next.）*
 
+# source: creative/novel/en/14-interlude-come-sit-awhile.md
+# Interlude Seven · Come Sit Awhile
+
+**Written after *Interlude Six · Handover*: this volume is neither prologue nor epilogue.**
+**It is the origin of the paper on the wall.**
+
+---
+
+## I · Nobody Knows Who Pinned the Paper
+
+The paper on the wall of the waystation carries no name, no date, and no seal.
+
+Flip through every old ledger — the earliest page reads *“The lamping still happens.”* Page by page the hand changes, ink by ink the line changes, and yet the sentence never does. It says only this:
+
+**“We take no letters here — only travellers, come sit a while.”**
+
+The new one once asked who had written it. The old keeper said that whoever did was long gone. And then he added: the sentence is still here.
+
+The bottom-left corner of the paper has been worn to a soft radius — not by the shape of paper, but by the shape of hands.
+
+---
+
+## II · Under the Paper
+
+The paper says *no letters.* The space under the paper has never been clean.
+
+Someone tucked in a sock folded small. Someone tucked in a crumpled ferry ticket. Someone tucked in a drawing of boots — boots worn through, laces long since given up. Someone tucked in half a math problem, the pen strokes pressed hard, the answer unwritten.
+
+The old keeper never read them.
+
+And he never cleared them out.
+
+The wind scattered them, the rain softened them, the sun dried them back to crisp. The travellers who tuck the scraps into the wall-gap know exactly what they are tucking in. The waystation does not collect drawings; it collects paper. The flame does not read them, and the ash will not carry them away.
+
+The paper knows where it goes. The paper always knows.
+
+---
+
+## III · The One Who Left “Next Time” Behind
+
+One year, late in the cold season, a woman arrived with dust on her boots.
+
+The dust was so old the road below her had long since stopped asking. She sat, she finished half a warm meal, chewed the last bite slowly, stood, and tucked a scrap of paper into the wall-gap —
+
+**Next time.**
+
+Not *next time I'll come.* Not *thank you.* Just *next time.*
+
+The old keeper looked at the scrap for a long while. Then he began wiping the furnace door.
+
+That night the furnace burned a little warmer than usual.
+
+---
+
+## IV · Why Hearthmen Never Write Their Names
+
+The waystation ledger has never held a name. Only the time, the lamp, and the page.
+
+Time blurs the boundaries between one shift and the next. Someone remembers the lamp they lit in the small hours; someone remembers who came before them — whoever remembers first is the one who loses, and the one who still has to stay.
+
+When the old keeper's shift came to its end, the new one picked up the pencil cup. He did not write his own name into it. He set the next shift's pencil back.
+
+Names are for apprentices. The waystation does not need apprentices.
+
+---
+
+## V · The Letter That Mattered
+
+Another year, someone came carrying a letter.
+
+The letter was written for someone who was already gone — to a mother. The letter-writer knew she would one day walk on; the letter was to hang in the waystation, waiting for the one who would come *next time.*
+
+The old keeper followed the letter of the rule. He did not take the letter. He would not deliver it. The paper on the wall said: no letters accepted.
+
+But the old keeper folded the letter and tucked it into the wall-gap — not to leave the letter in the waystation, but to leave a road-marker there.
+
+Years later, a traveller who had never once come that way passed through. In the wall-gap she felt a folded letter. She did not look at the sender; she did not look at the address. She simply opened it, read the handwriting she did not recognize, folded it back exactly as she found it — and looked at it one more time.
+
+The paper knows where it goes. The traveller knows who it was for.
+
+---
+
+## VI · For Everyone Who Cannot Sit in the Chair
+
+If you're reading this —
+
+**You don't have to have been there. You only have to have never been there.**
+
+Some people never made it to the waystation. Some arrived and only dared to look at the wall, never dared to sit. Some came only to see one line of words — to believe, or not to believe, as long as it tells them the waystation is still there.
+
+The wall was for them.
+
+The waystation takes no letters — this is said for *them*: **you don't have to come. You've already come. The scraps are yours; the chair was yours; the night was yours.**
+
+Come sit a while.
+
+---
+
+*（Interlude Seven · Come Sit Awhile — the origin of the paper on the wall. Every passer-by walks below it; every scrap knows exactly where it needs to be. The wall does not speak — the paper knows where it goes. Come sit a while.）*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -6463,6 +6801,106 @@ F2 隐藏 HUD。
 ---
 
 *（番外六 · 换班——一班交给另一班。写到这一卷的人已经换了不知多少班了。炉火一直在燃烧。炉火仍然没换引信。炉火不会告诉你它换了多少班，它只会在下一班坐到你的椅子上时，为你照亮整夜。）*
+
+# source: creative/novel/14-番外七-下次再坐.md
+# 番外七 · 下次再坐
+
+**写在《番外六 · 换班》之后：这一卷不是前传，也不是后传。**
+**这是墙上那张纸的来历。**
+
+---
+
+## 其一 · 没有人知道那张纸是谁按上去的
+
+驿站墙上那张纸没有落款，没有日期，也没有印章。
+
+翻过所有的旧账——最早那一页写着「照明还是要用的」，再往后的几页，字迹换了一茬又一茬，句子却从没换过。它只有一句：
+
+**「驿站不收信。路过的人，下次再坐。」**
+
+新来的人问过那是谁写的。老看守说，写这句话的人已经不在了；然后才说，话还在。
+
+纸的左下角被坐过太多次的手磨出一个圆角——不是纸的形状，是人的形状。
+
+---
+
+## 其二 · 纸条底下
+
+纸上说不收信，纸底下却从来不干净。
+
+有人塞过一张叠得很小的袜子。有人塞过一张揉皱的船票。有人塞过一张画着靴子的纸——靴子很旧，鞋带是散的。有人塞过一张写了一半的数学题，笔迹很用力，答案没写。
+
+老看守从来不读。
+
+也从来不把它们清走。
+
+风把它们吹散，雨把它们浸软，太阳把它们晒回干爽。旅行者把纸条塞进墙缝的时候，知道自己塞的是什么；驿站不收图，只收纸。炉子不读它们，灰也不带他们走。
+
+纸自己会走的。纸知道去哪儿。
+
+---
+
+## 其三 · 那位留下「下次」的人
+
+有一年冬天晚些时候，来了一个靴子上有灰的女人。
+
+灰太旧了，旧得驿站的路都不问她了。她坐下来，吃了半份热食，把最后一口嚼得很慢；起身的时候，把一张纸条塞进墙缝——上面只有一个字：
+
+**下次。**
+
+不是「下次再来」。不是「谢谢」。就一个「下次」。
+
+老看守在那上面看了很久。然后开始擦炉门。
+
+那一夜，炉子比平时暖一点。
+
+---
+
+## 其四 · 炉边人为什么不记自己的名字
+
+驿站的账簿上从来没有名字。只有时间、哪盏灯、哪一页。
+
+时间久了，班与班之间的界限就糊成了一团。有人记得自己半夜添的那盏灯；有人记得自己从没见过的前任是谁——谁先记得，谁就输了，谁就还得留下。
+
+老看守的班结束了之后，新来的人拿起笔筒，另一支笔插进去——没有插他自己的名字，插的是下一班要用的那支。
+
+名字是写给学徒的。驿站不需要学徒。
+
+---
+
+## 其五 · 真正的那封信
+
+又有一年，来了一个背着信的人。
+
+信是替一个已经不在的人写的——是写给他自己的母亲的，他知道母亲有一天会走，信要挂在驿站的墙边，等那个「下次」。
+
+老看守按照驿站的规矩，没收他的信，也没替他送。纸上说了：不收信。
+
+但老看守把信折起来，塞进了墙缝——不是把信留在驿站，是把路标留在那里。
+
+几年后，一个从没来过的旅行者经过驿站，在墙缝里摸到了那封信。她没看寄件人，没看地址，只是把信展开，认得自己不认识的笔迹；她把信放回原处，只是多看一眼。
+
+纸知道它要去哪儿。旅行者知道信是给谁的。
+
+---
+
+## 其六 · 给所有坐不到这张椅子上的人
+
+如果你正读到这里——
+
+**你不一定来过。你只是从没来过。**
+
+有些人没能走到驿站。有些人走到了，却只敢看墙、不敢坐。有些人只是想在墙上看到一行字，信也好，不信也好，只要确认驿站还在。
+
+墙是给他们的。
+
+驿站不收信，是对他们说的——**你不必来。你已经来过了。坐过，没坐过，纸条在不在，你都见过那张椅子了。**
+
+下次再坐。
+
+---
+
+*（番外七 · 下次再坐——纸的来历。每一班路过的人都从纸下面走过，每一张纸条都知道它该在哪里。墙不说话，纸自己会走。下次再坐。）*
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)

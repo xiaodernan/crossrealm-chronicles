@@ -8157,3 +8157,14 @@ Phase D（系统与质量）
   - **实测**：`npm run build` → `chunk-en-C1bQysCr.js 227.01 kB (gzip 72.27 kB)`；首屏 **2306741 → 2079856 B**（chunk-core 972186 → 746394，−225792 B 即英文表本体）；`npm run size` 通过（环比余量 0.21 MiB、上限余量 0.27 MiB）。`FIRST_SCREEN_READING` **下调**到 2079856（刻度不是预算：结构债还完就把刻度钉回真实读数，ADR W-D5 切片4 的口径）。
   - **验证**：`npm test 6696/6696` 绿；`lint` 0/0；`link:check` 86/86；本地浏览器双语各验一遍（`crossrealm_settings.values.language`：`zh`/`en` 都能完整启动、HUD 12 格、start screen 正常、说明书章节名按语言呈现；`documentElement.lang` 随语言切换）。`tests/chunk-graph.test.js` 无感（`chunk-en` 无出边，DAG 成立）。
   - **教训**：① manualChunks 的「吸附规则」会把动态 import 也拽进大块——分包必须**成对**做：代码侧动态化 + 分块规则白名单；② 中文/英文表同构双表不是免费的，模块图上的每条静态边都是真金白银的首屏字节。
+
+- **2026-11-17 W-Z95「番外七 · 下次再坐（Interlude VII · Come Sit Awhile）——原典再扩一卷，W-Z85/89/93 谱系的第三卷续」** —— 提交：本次 HEAD
+
+  - **起因**：用户持续要求"新章节 · 史诗叙事 · 宏观世界观"；原典的"火—班—纸"三部母题已经分别落到《番外五 火之前》（火）、《番外六 换班》（班）；第三卷自然应当是"纸"——驿站墙上那张「不收信」的纸到底从哪里来、谁写下的第一张——原典的设定已经留好了这个锚（\u201c驿站不收信。路过的人，下次再坐\u201d 反复出现过）。
+  - **成稿**：`creative/novel/14-番外七-下次再坐.md` + 英译 `creative/novel/en/14-interlude-come-sit-awhile.md`，七个小节（其一 … 其六 + 尾声），延续本系列的写意写法：短段落、独白式、第二人称、以"女人留下只有一个「下次」的纸条"为核心意象（呼应原典「炉火是谁留下的」的母题链）；双语版同频逐拍，同语义事实覆盖，无一处新矛盾。
+  - **真上游 QA**：`node scripts/novel-qa.mjs 14-番外七` → **本章无矛盾**（prompt=1387 / completion=422）；英文镜像 `node scripts/novel-qa.mjs 14-interlude` → **本章无矛盾**（prompt=5698 / cached=0 / completion=242）。两次都是 gpt-6-sol 一次通过，未改写一字。
+  - **Codex 同步**：`node scripts/novel-glossary.mjs --only=14-番外七 --append=true` 与 `--only=14-interlude --append=true --out=creative/GLOSSARY-en.md` —— 两卷均补入 GLOSSARY（五段表式抽取 + 易混淆译名统一写法）；中文 / 英文 GLOSSARY 头部「抽取范围」同步更新为**全 15 章**。
+  - **典籍语料**：`node scripts/build-lore-corpus.mjs` → **57 源**（novel 中 +15 双语），`--check` 幂等验证通过；`corpus.txt` 重新编译入 ai-service（约 234 KB UTF-8）。无 LLM 语义变动——确定性重组。
+  - **说明书/展示面**：`creative/showcase.html` —— 番外七进入「Latest landed · 11·17」（W-Z95）+ 小说卡片更新为七番外 + tapestry 时间轴补上「Interlude VII · Come Sit Awhile」+ 高端横文「七章 + 七番外」；README（根）/ `creative/README.md` / `creative/README.en.md` / `creative/player-guide.html`（双语境）/ `tapestry.html` / `tapestry.en.html`（时间轴）/ `docs/ONLINE_SERVICES.md`（含 EN）全部更新到 57 源 · 15 章；历史条目标注为历史、不删改。
+  - **判据**：QA 双语各一次「本章无矛盾」；典籍语料 `--check` 绿；`npm test 6696/6696` 绿；`npm run lint` 0/0；`link:check` 86/86；`npm run size` 绿；Showcase 部署绿。Oracle 语料 +2 源后答案质量无需回退（++novel 章不进检索向量计算逻辑）。
+  - **遗留**：① Oracle 对第 14 章的专项召回可在 W-Z96 验证（该章目前仅作原典候选源出现，未做针对性 probe——番外五的 Gatekeeper 范式也走过这一步）；② 若未来有番外 8，母题方向是「寄信人/回信」第三封——**留给下一班的方向**。
