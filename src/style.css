@@ -17,8 +17,11 @@ body {
   height: 100%;
   overflow: hidden;
   background: #0a0a12;
-  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-body);
   color: #e8e4dc;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
   user-select: none;
 }
 
@@ -4398,6 +4401,57 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
  * 这张网覆盖 `*`，所以任何未来新增的 animation 只要没写进
  * `no-preference` 门，也不会对减少动态用户造成持续运动——这是比逐块
  * 门禁更稳的一道保险。 */
+
+/* === W-Z115 字体与排版抛光（Noto 字体栈变量 · 零网络依赖 · 系统字体收口一致）========
+   为何用 CSS 变量而不是再上网络字体：
+   本产品的每一行字都在深色底上漂亮发光，跑满视口的渲染器又和字体强相关——
+   不上网络字体是为了零依赖地保证"任何机器上第一眼就是做过的字"。
+   中文字形后备顺序：思源宋 → 微软雅黑 → 苹方 → 冬青黑简体 → 默认无衬线。
+   拉丁装饰字用宽松的 UI 无衬线；数字统一等宽，满足 HUD 的列对齐。 */
+:root {
+  --font-display: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', 'STSong', serif;
+  --font-body: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', sans-serif;
+  --font-mono-num: 'JetBrains Mono', 'Cascadia Mono', 'SFMono-Regular', Consolas, 'SFMono-Regular', monospace;
+}
+
+/* 数字与指标：等宽 + tabular，零列抖动（FPS / 碎片数 / 坐标 / 魂值） */
+.stat-item, .season-pill-num, .speed-value, .fps-value,
+.quest-reward-num, .discovery-count, .minimap-coord {
+  font-family: var(--font-mono-num);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* 标题/仪式感文字：CJK 衬线，单向着引力排版 */
+#zone-banner h1, .start-logo, .credits-name,
+.journal-tab h2, .upgrade-box h2, .upgrade-box h3,
+.canon-h3, #game-guide .guide-title,
+.world-map h2 {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+/* 结尾字幕：大字衬线体，信赖 CJK 字形重量 */
+.credits-line-name, .end-credit-line-name {
+  font-family: var(--font-display);
+}
+
+/* [J] 典籍馆——把阅读当阅读，不当插件 UI */
+.canon-body {
+  font-family: var(--font-display);
+  font-size: 0.84rem;
+  line-height: 1.78;
+  letter-spacing: 0.015em;
+}
+
+/* 字形 hints：深色底上的中文不再糊成一团 */
+.start-logo, .zone-banner, .journal-panel, .canon-body,
+h1, h2, h3 {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
