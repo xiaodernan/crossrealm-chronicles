@@ -55,4 +55,9 @@ export const HELP_SECTIONS_EXTRA = [
     title: 'hm_title_pop_culture',
     body: 'hm_body_pop_culture',
   },
+  {
+    id: 'state-graph',
+    title: 'hm_title_state_graph',
+    body: 'hm_body_state_graph',
+  },
 ];

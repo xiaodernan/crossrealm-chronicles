@@ -3193,6 +3193,22 @@ Wave3 三巨头母题：
 进入对应位面有轻微视觉 overlay；POI 交互时短暂增强。
 
 Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低语（时线）· 星港商路（荒原）`,
+  hm_title_state_graph: '星图 · StateGraph 图编排',
+  hm_body_state_graph: `锚火三问不只是玩法——它是把编排图长在了世界里。
+
+先讲词。StateGraph（状态图）= 带类型状态的有限状态机。LangGraph 的核心制品就是它：给整张图一份 State（状态 schema），compile（编译）时校验拓扑，invoke（调用）后 State 累积演进。
+
+四件事：
+· State（状态）— 你的答案一路滚雪球：第一问 → 第二问 → 第三问 → 结局 id → souls 奖励。每个结点只返回增量片段，由图自己合并定音。
+· Node（结点）— 纯函数：吃 State、吐 State 片段。锚火三问的三问，就是三个结点（加开场入口与结局收尾）。
+· Edge（边）— 顺序连线：入口 → 问一 → 问二 → 问三。
+· Conditional Edge（条件边）— 路由器：看第三问的答案，分到 10 个结局之一（ember / grey / self / windkeeper 群各三签，风守人一签）。
+
+compile 守三件事：入口结点存在、每条边的跳转目标都存在、从入口必走得到终点。图断了当场红——tests/state-graph.test.js 的 25 个用例把它焊死；编译不过，玩家永远看不到崩掉的画面。
+
+为什么这很值钱——LangGraph 的生产管线也长这样：一条 RAG 链路 = 检索结点 → 重排结点 → 生成结点 → 引用门禁结点，条件边兜底「证据不够 → 回检索」。本项目的 Lore Oracle（典籍原典问答）走的也是同一念头：BM25 两段式召回 → 带引用生成 → 证据不足就说「原典没有」。锚火三问是摆在你面前的一件活教材，打开这几份源码对照着看：src/core/StateGraph.js（约 70 行纯 JS，零依赖）、src/game/FortunePathSystem.js（每日限流 + LS 落盘 crossrealm_fortune_path_v1）、src/ui/FortunePathTab.js（[J] 页签渲染）。
+
+上手：{journal} → 星轨 · 锚火三问；每日 UTC 限一签；首签 souls 60/35/30/25（最高稀有度 60）。答案只有你自己认得，结局也是——六百年守火的回响都写在你按下的每个选项里。`,
   // 炉边快速上手（W-Z91）：出场页 / 暂停菜单 / 关机后第一次进游戏——30 秒读完整张 SRS
   quickstart_title: '炉边快速上手 · 30 秒读完',
   quickstart_aria: '炉边快速上手',

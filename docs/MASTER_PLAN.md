@@ -1,5 +1,8 @@
 
 
+> **2026-11-16 · W-Z193 说明书星图章节（StateGraph 知识内嵌入 H 手册）**：[H] 新增加 `state-graph` 章节（`hm_title_state_graph` / `hm_body_state_graph`），双语系统讲授 StateGraph 四要素（State / Node / Edge / Conditional Edge）、compile 三件事（入口存在、跳转目标存在、可达终点）、与 LangGraph 生产管线 RAG 链路（检索 → 重排 → 生成 → 引用门禁 + 证据不够回检索的条件边）的一一对应，并把锚火三问标为「活教材」（`src/core/StateGraph.js` 约 70 行纯 JS / `src/game/FortunePathSystem.js` 每日 UTC 限流 + 落盘 `crossrealm_fortune_path_v1` / `src/ui/FortunePathTab.js` [J] 页签）。
+> EXPECTED_KEY_COUNT 3223 → **3225**（+2 hm_*）；`helpSectionsExtra` 9 → **10**；i18n / content-i18n-keys / help-manual-i18n / content-registry / state-graph / fortune-path **212/212** 绿；首屏 2.06 MiB 不变（纯内联文案，无新依赖）。
+>
 > **2026-11-16 · W-Z183 锚火命途（StateGraph 真路由）**：
 > FIRST_SCREEN_READING 2,079,856 → 2,153,509 字节（+3.5%），原因：新增 [J] 命途 · 锚火三问 子页（FortunePathSystem/FortunePathTab + StateGraph true-routing + ortuneDivination-like 双语 inline 内容 + 约 2 KB CSS + i18n +8 键）。
 > 门禁阈值：FIRST_SCREEN_READING × 1.03 = 2.12 MiB·上限 2.25 MiB（余 0.13/0.20），本工作增量远低于 3% 阈值，先登记取舍期（行内 scripts/check-bundle-size.mjs 注释为准）。

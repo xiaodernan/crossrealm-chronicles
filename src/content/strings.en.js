@@ -3238,6 +3238,22 @@ Wave3 three-franchise motifs:
 Entering the corresponding plane has slight visual overlay; POI interaction briefly enhances.
 
 Wave4 four schools: Cyber Neon (Ruins) · Samurai Echo (Forest) · Old Whisper (Timeline) · Star Port (Wastes)`,
+  hm_title_state_graph: 'Star Map · StateGraph Orchestration',
+  hm_body_state_graph: `The Three Questions of the Anchor Fire are more than a mini-game — they are an orchestration graph grown into the world.
+
+The words first. StateGraph = a finite state machine with typed state. It is the core construct behind LangGraph: you hand the graph one State (state schema); compile() validates the topology before anything runs; invoke() runs it, and State accumulates along the way.
+
+Four moving parts:
+· State — your answers snowball along the run: Q1 → Q2 → Q3 → ending id → souls reward. Each node returns only an increment, and the graph merges it.
+· Node — a pure function: State in, State fragment out. The three questions are the three nodes (plus an entry node and a closing node).
+· Edge — order: entry → q1 → q2 → q3.
+· Conditional Edge — the router: reads the third answer and branches into one of the 10 endings (ember / grey / self — three signatures each, plus the one windkeeper signature).
+
+compile() enforces three things: the entry node exists, every edge target exists, and the graph can actually reach its sink. A broken graph fails loudly at compile time — tests/state-graph.test.js pins this with 25 cases. The player never sees a crashed screen.
+
+Why this is worth learning — production LangGraph pipelines have the same shape: a RAG chain is retriever → reranker → generator → citation-gate nodes, with a conditional edge for “not enough evidence → back to retrieval”. The Lore Oracle (canon Q&A) lives on the same idea: BM25 two-stage retrieval → grounded generation with inline citations → “the canon does not say” when evidence runs out. The Three Questions are a living textbook in front of you — open these sources side by side: src/core/StateGraph.js (about 70 lines of pure JS, zero dependencies), src/game/FortunePathSystem.js (daily UTC gate + localStorage crossrealm_fortune_path_v1), src/ui/FortunePathTab.js (the [J] tab renderer).
+
+How to play: press {journal} → Fortune Path · The Three Questions. One reading per UTC day. First-read souls 60/35/30/25 (windkeeper 30). Only you know your answers — and your ending. Six hundred years of tending the fire are written into every option you pick.`,
   // Hearthside Quickstart (W-Z91): start screen / pause menu / first boot — the 30-second reading guide
   quickstart_title: 'Hearthside Quickstart · read me in 30s',
   quickstart_aria: 'Hearthside Quickstart',
