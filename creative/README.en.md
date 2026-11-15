@@ -92,6 +92,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | 守炉 · The Tending | [the-tending](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/41-the-tending.md) |
 | 松手 · The Letting Go | [the-letting-go](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/42-the-letting-go.md) |
 | 一整夜 · A Full Night | [a-full-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/43-a-full-night.md) |
+| 冬至 · The Winter Solstice | [the-winter-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/44-the-winter-solstice.md) |
 
 Chapter → game-chapter mapping:
 
