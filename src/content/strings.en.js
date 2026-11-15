@@ -2891,6 +2891,8 @@ export const STRINGS_EN = Object.freeze({
   ambient_void_p4: 'An arcade CRT flickers green in the distance — Pac-Man is always one step behind.',
   ambient_void_p5: 'The clock tower points silently at 11:06 — the ceiling feels further away.',
   ambient_void_p6: 'The spiral well echoes a count — do not approach the wellhead.',
+  ambient_void_p7: 'By the tea of Sunscar Stair, three suns set in rotation — no cup dares be filled here.',
+  ambient_void_p8: 'A corridor whose wall-stars have all moved their spots; no one who walks it ever looks back.',
   ambient_fantasy_p0: 'The One Ring whispers low — One Realm to bind them all…',
   ambient_fantasy_p1: 'A turning door creaks toward the saloon mirrors — border history stirs at the Greywood edge.',
   ambient_fantasy_p2: 'The noon duel circle\'s chalk line glows in the fog — do not fight inside it.',

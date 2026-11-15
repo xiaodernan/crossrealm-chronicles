@@ -2886,6 +2886,8 @@ export const STRINGS_ZH = Object.freeze({
   ambient_void_p4: '街机 CRT 在远处闪绿光 — 吃豆人永远差一步。',
   ambient_void_p5: '裂相钟塔无声指向 11:06 — 天花板感觉更远了。',
   ambient_void_p6: '螺旋深井回声在数数 — 别靠近井口。',
+  ambient_void_p7: '三日陵的茶边，三颗太阳轮流落下——没有人敢把杯子装满。',
+  ambient_void_p8: '有一段走廊，墙上的星位置都变过；出门的人，谁也没回头。',
   ambient_fantasy_p0: '至尊石环低声吟诵 — One Realm to bind them all…',
   ambient_fantasy_p1: '沙龙镜墙方向传来旋转门吱呀声 — 边境往事在灰林边缘苏醒。',
   ambient_fantasy_p2: '正午决斗圈的粉笔线在雾里发亮 — 别在圈里恋战。',

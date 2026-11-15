@@ -52,6 +52,8 @@ export const ZONE_EVENTS_POP = {
     { text: "ambient_void_p4", weight: 0.5 },
     { text: "ambient_void_p5", weight: 0.35 },
     { text: "ambient_void_p6", weight: 0.45 },
+    { text: "ambient_void_p7", weight: 0.32 },
+    { text: "ambient_void_p8", weight: 0.35 },
   ],
   fantasy: [
     { text: "ambient_fantasy_p0", weight: 0.5 },
