@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T14:42:40.102Z",
+  "generated_at": "2026-11-15T14:48:03.080Z",
   "branch": "main",
-  "head": "8fc280b2",
-  "total_commits": 1721,
-  "pushed_at": "2026-11-15T22:41:27+08:00",
+  "head": "95d6ced8",
+  "total_commits": 1723,
+  "pushed_at": "2026-11-15T22:46:00+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "95d6ced",
+      "at": "2026-11-15T22:46:00+08:00",
+      "subject": "feat(canon): W-Z152 第三十一卷《霜降 / The First Frost》——卷四之八"
+    },
+    {
+      "short": "05e3077",
+      "at": "2026-11-15T14:42:40Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "8fc280b",
       "at": "2026-11-15T22:41:27+08:00",
@@ -21,25 +31,15 @@
       "short": "e7c2b5b",
       "at": "2026-11-15T22:36:53+08:00",
       "subject": "feat(canon): W-Z150 第三十卷《九日 / The Ninth Day》——卷四之七"
-    },
-    {
-      "short": "06dcba7",
-      "at": "2026-11-15T14:33:53Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "6368c45",
-      "at": "2026-11-15T22:33:09+08:00",
-      "subject": "feat(canon): W-Z149 第二十九卷《蝉鸣 / The First Cicada》——卷四之六"
     }
   ],
-  "tracked_files": 1281,
+  "tracked_files": 1283,
   "test_files": 456,
   "i18n_keys": 3215,
   "lore_sources": 59,
-  "novel_chapters_zh": 30,
-  "novel_chapters_en": 30,
-  "milestone": "W-Z151",
+  "novel_chapters_zh": 31,
+  "novel_chapters_en": 31,
+  "milestone": "W-Z152",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
