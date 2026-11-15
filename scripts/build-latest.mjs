@@ -95,8 +95,8 @@ const doc = {
   novel_chapters_zh: zhNovel,
   novel_chapters_en: enNovel,
   milestone,
-  milestone_full: '卷七十《第六百零一位守火人》 · 七十卷 canon 里程碑 · 六百年守火线 · StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 59 源守护',
-  headline: '跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七十卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。',
+  milestone_full: `卷 ${zhNovel} · 六百年守火线（${zhNovel} / ${enNovel} 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 59 源守护`,
+  headline: `跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：${zhNovel} 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。`,
   feature_surface: FEATURE_SURFACE,
 };
 

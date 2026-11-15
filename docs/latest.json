@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T20:25:52.893Z",
+  "generated_at": "2026-11-15T20:27:03.224Z",
   "branch": "main",
-  "head": "55525d38",
-  "total_commits": 1821,
-  "pushed_at": "2026-11-16T04:25:00+08:00",
+  "head": "d77558c",
+  "total_commits": 1822,
+  "pushed_at": "2026-11-15T20:25:53Z",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "d77558c",
+      "at": "2026-11-15T20:25:53Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "55525d3",
       "at": "2026-11-16T04:25:00+08:00",
@@ -26,11 +31,6 @@
       "short": "c918447",
       "at": "2026-11-15T20:18:21Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "9907333",
-      "at": "2026-11-16T04:16:10+08:00",
-      "subject": "feat(admin): W-Z198 真实玩家行为模拟——本机 Chrome 五个人格，炉边盘新增「真实玩家行为模拟」卡"
     }
   ],
   "tracked_files": 1371,
@@ -40,8 +40,8 @@
   "novel_chapters_zh": 71,
   "novel_chapters_en": 71,
   "milestone": "W-Z199",
-  "milestone_full": "卷七十《第六百零一位守火人》 · 七十卷 canon 里程碑 · 六百年守火线 · StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 59 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七十卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "milestone_full": "卷 71 · 六百年守火线（71 / 71 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 59 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：71 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
