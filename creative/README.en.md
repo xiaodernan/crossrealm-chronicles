@@ -117,6 +117,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Keeper · The Crossrealm Fire | [the-keeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/66-the-keeper.md) |
 | The Kindle · Six Hundred Years | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/67-the-kindle.md) |
 | The Gathering · Six Hundred Years Around the Hearth | [the-gathering](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/68-the-gathering.md) |
+| Ink · The Character That Remains | [ink](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/69-ink.md) |
 
 Chapter → game-chapter mapping:
 

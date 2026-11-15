@@ -115,6 +115,7 @@ creative/music/soundtrack.html
 | 守火 · The Keeper | [the-keeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/66-the-keeper.md) |
 | 拾火 · The Kindle | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/67-the-kindle.md) |
 | 围炉 · The Gathering | [the-gathering](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/68-the-gathering.md) |
+| 墨 · Ink | [ink](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/69-ink.md) |
 
 每一章对应游戏的章节走法：
 
