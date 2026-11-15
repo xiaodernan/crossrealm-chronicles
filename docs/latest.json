@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-15T15:22:41.134Z",
+  "generated_at": "2026-11-15T15:30:00.655Z",
   "branch": "main",
-  "head": "89f5172c",
-  "total_commits": 1735,
-  "pushed_at": "2026-11-15T23:22:00+08:00",
+  "head": "afd2192c",
+  "total_commits": 1738,
+  "pushed_at": "2026-11-15T23:29:15+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "afd2192",
+      "at": "2026-11-15T23:29:15+08:00",
+      "subject": "refactor(canon): W-Z160 原典重校 · 第二十七卷《归途之共 / The Last Persimmon》重写"
+    },
+    {
+      "short": "04d43d0",
+      "at": "2026-11-15T23:26:46+08:00",
+      "subject": "feat(canon): W-Z159 第三十八卷《南归 / The Road Home》——卷五之五"
+    },
+    {
+      "short": "f741273",
+      "at": "2026-11-15T15:22:41Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "89f5172",
       "at": "2026-11-15T23:22:00+08:00",
@@ -16,30 +31,15 @@
       "short": "f313b8e",
       "at": "2026-11-15T15:18:18Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "350083f",
-      "at": "2026-11-15T23:17:21+08:00",
-      "subject": "feat(canon): W-Z157 第三十六卷《第四座亭 / The Fourth Pavilion》——卷五之三"
-    },
-    {
-      "short": "2a0df9e",
-      "at": "2026-11-15T15:13:19Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "15f9000",
-      "at": "2026-11-15T23:12:09+08:00",
-      "subject": "feat(canon): W-Z156 第三十五卷《九十一里 / Ninety-one Li》——卷五之二"
     }
   ],
-  "tracked_files": 1295,
+  "tracked_files": 1297,
   "test_files": 456,
   "i18n_keys": 3215,
   "lore_sources": 59,
-  "novel_chapters_zh": 37,
-  "novel_chapters_en": 37,
-  "milestone": "W-Z158",
+  "novel_chapters_zh": 38,
+  "novel_chapters_en": 38,
+  "milestone": "W-Z160",
   "milestone_full": "番外七《下次再坐》·原典七番外中英双语·Lore Oracle 57 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：七章史诗小说 × 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，全部内容中英双语逐字对齐。",
   "feature_surface": [
