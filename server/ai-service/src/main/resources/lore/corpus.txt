@@ -7990,6 +7990,47 @@ The fire burned.
 
 *(End of volume one hundred and thirty-five · Volume XV, thirty-sixth part · The seven-hundredth year — The Third Morning's Breakfast.)*
 
+# source: creative/novel/en/136-the-third-bowl-comes-back.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Third Bowl Comes Back
+
+---
+
+## One Hundred and Thirty-six: The Third Bowl Comes Back
+
+Wednesday of the nineteenth week after the spring equinox — afternoon — the sun high and bright.
+
+A-Shi walked back with Aunt Guo — his mother said only: “Go and look.”
+
+Aunt Guo’s stove was small — what she fed it was scavenged old wood — the fire burned steadily enough — but she said: “Mine doesn’t warm like yours.”
+
+A-Shi said: “It’s the same fire.”
+
+Aunt Guo shook her head — she fed it a dead branch — “Fires are different,” she said — “they know who is sitting at them.”
+
+A-Shi stayed until dark — he said nothing — he didn’t go.
+
+On the way home in the evening — he carried a small bag of dry rice — Aunt Guo had pressed it into his hands — she didn’t say anything.
+
+His mother opened the door — saw the rice — nobody asked.
+
+His mother poured the half-bag into the grain sieve — sifted it once — set it back in the jar.
+
+“When you were small,” she said, “I would carry grain for you this way too.”
+
+A-Shi said nothing.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and thirty-six · Volume XV, thirty-seventh part · The seven-hundredth year — The Third Bowl Comes Back.)*
+
 # source: creative/novel/en/14-interlude-come-sit-awhile.md
 # Interlude Seven · Come Sit Awhile
 
@@ -19703,6 +19744,47 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百三十五卷 · 卷十五之三十六 · 第七百年 · 第三天的早饭）*
+
+# source: creative/novel/136-第三只碗回来了.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 第三只碗回来了
+
+---
+
+## 一百三十六 · 第三只碗回来了
+
+立春后第十九周——周三——午后——天晴出奇好。
+
+阿石跟着郭阿婆回去——母亲说「去看看」。
+
+郭阿婆家里的灶小——她添的是捡来的旧木柴——灶火烧得很稳——但她说了一句：「我这口没你们那口暖。」
+
+阿石说：「也一样的火。」
+
+郭阿婆摇头——她去添了一根枯树枝——她说：「火是不一样的——它知道你家里是谁坐着。」
+
+阿石一直坐到天黑——他没说什么——他也没走。
+
+傍晚回家的路上——他带了一小袋干米——郭阿婆塞到他手里——她什么都没说。
+
+母亲开门——看见他拿着米——家里什么都没说。
+
+母亲倒掉那小半袋——她倒了之后又去取了米筛——筛完——放回了米缸。
+
+母亲说：「你小时候——我也代你们收过米。」
+
+阿石没说。
+
+炉火燃着。
+
+炉火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百三十六卷 · 卷十五之三十七 · 第七百年 · 第三只碗回来了）*
 
 # source: creative/novel/14-番外七-下次再坐.md
 # 番外七 · 下次再坐

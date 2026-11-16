@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and thirty-five volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and thirty-six volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 135 volumes of the canon, fully readable
+· Canon Library — 136 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3141,8 +3141,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 135-volume index',
-  hm_body_codex: `Codex — 135 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 136-volume index',
+  hm_body_codex: `Codex — 136 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3281,6 +3281,7 @@ hm_title_codex: 'Codex · the 135-volume index',
 133 · The Third Bowl — Saturday of the seventeenth week after the spring equinox, morning, clear weather; Aunt Guo came again — she brought a brand-new white porcelain bowl, a bag of glutinous rice, and a bundle of new birch; “the fire has a mouth now, too,” she said; A-Shi dropped the rice in; the bowl went on the iron rim; the fire leapt once; Uncle Zhou came in — he saw it — drank his own bowl — and left; the bowl stayed on the iron rim all afternoon; in the evening the bowl was empty; Aunt Guo looked at it for a long time — then set it back — “come and look tomorrow,” she said; the fire burned. Volume XV, thirty-fourth part.
 134 · Come and Look Tomorrow — Saturday of the eighteenth week after the spring equinox, morning, clear weather; Aunt Guo arrived as she said, early — the yard’s stone seams showed fresh white again — the air clear as water; she walked up to the iron rim — the white bowl was still there — the fire burning steadily — the morning smoke slipped out in one thin thread; she ladled out half a bowl of rice porridge — set it to the left of the white bowl — “the half pot of rice I cooked yesterday,” she said; A-Shi did not look up — he kept feeding the white birch; the fire burned on; Aunt Guo pressed the back of her hand against the iron rim — warm — “The fire is well kept,” she said; Xiao Huo sat up straight — he did not speak either; Uncle Zhou stood at the gate further out than usual — he did not come in; Aunt Guo picked up the white bowl — looked at it once — set it back down; no one asked; no one answered; the fire burned; when she left, one thing more – “I’ll come and look tomorrow,” she said; A-Shi still did not speak — the fire lit his hands — he put down the third birch branch — no more, no less; the fire burned. Volume XV, thirty-fifth part.
 135 · The Third Morning’s Breakfast — Tuesday of the nineteenth week after the spring equinox, morning, the sun had not climbed yet; Uncle Zhou arrived again — carrying a small iron pot from home — half full of dry rice; Aunt Guo was there too — she was sitting at the stove — four bowls on the table — A-Shi’s, Mother’s, Xiao Huo’s — and one white porcelain bowl, still empty; A-Shi kept feeding the birch — no more, no less — exactly the keeper’s measure; Mother brought the porridge out — she set two bowls down — A-Shi took them over — set them at the stove — he did not look at the white bowl; Xiao Huo was at the table too — very quiet; Mother glanced at the fire — “It kept the night,” she said — a very short line; Aunt Guo did not look up either — “The fire keeps itself,” she said; Mother looked at her a second time — “You keep it too,” she said; Uncle Zhou set his bowl down beside the empty white one — he did not eat — he only set the dry rice at the stove’s edge; Mother picked up the little iron pot — she studied it for a long time — she did not ask whose it was — she set it on the table; the fire burned; Mother went back to the kitchen — she brought out one bowl of plain porridge — set it beside Uncle Zhou’s pot — “This is yours,” she said; No one spoke again — A-Shi put the third birch branch into the stove; the fire burned. Volume XV, thirty-sixth part.
+136 · The Third Bowl Comes Back — Wednesday of the nineteenth week after the spring equinox, afternoon, the sun high and bright; A-Shi walked back with Aunt Guo — his mother said only: “Go and look.”; Aunt Guo’s stove was small — what she fed it was scavenged old wood — the fire burned steadily enough — but she said: “Mine doesn’t warm like yours.”; A-Shi said: “It’s the same fire.”; Aunt Guo shook her head — she fed it a dead branch — “Fires are different,” she said — “they know who is sitting at them.”; A-Shi stayed until dark — he said nothing — he didn’t go; On the way home in the evening — he carried a small bag of dry rice — Aunt Guo had pressed it into his hands — she didn’t say anything; his mother opened the door — saw the rice — nobody asked; his mother poured the half-bag into the grain sieve — sifted it once — set it back in the jar; “When you were small,” she said, “I would carry grain for you this way too.”; A-Shi said nothing. Volume XV, thirty-seventh part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3294,7 +3295,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and thirty-five volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and thirty-six volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

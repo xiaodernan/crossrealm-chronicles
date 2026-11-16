@@ -181,7 +181,8 @@ creative/music/soundtrack.html
 | 第二夜 · The Second Night | [the-second-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/132-the-second-night.md) |
 | 第三碗 · The Third Bowl | [the-third-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/133-the-third-bowl.md) |
 | 明天再来看 · Come and Look Tomorrow | [come-and-look-tomorrow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/134-come-and-look-tomorrow.md) |
-| 第三天的早饭 · The Third Morning’s Breakfast | [the-third-mornings-breakfast](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/135-the-third-mornings-breakfast.md) |每一章对应游戏的章节走法：
+| 第三天的早饭 · The Third Morning’s Breakfast | [the-third-mornings-breakfast](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/135-the-third-mornings-breakfast.md) |
+| 第三只碗回来了 · The Third Bowl Comes Back | [the-third-bowl-comes-back](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/136-the-third-bowl-comes-back.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
