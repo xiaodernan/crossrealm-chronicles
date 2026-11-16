@@ -3,6 +3,7 @@ import { t } from '../engine/i18n.js';
 
 import { on, offAll, emit } from '../engine/EventBus.js';
 import { endingDialogKey } from '../content/objectives.js';
+import { buildArbiterPayload, parseArbiterAnswer } from './arbiterEpilogue.js';
 import { bossNameKeyOf } from '../content/bossRoster.js';
 import { bossBestTimes } from '../game/BossBestTimes.js';
 import { ECHO_EPITAPHS } from '../content/echoEpitaphs.js';
@@ -113,6 +114,9 @@ export class EndCreditsDirector {
       const rows = memorials.map((e) => `<p class="end-credits-epitaph-row"><span class="end-credits-epitaph-theme">${t(e.themeKey)}</span><span class="end-credits-epitaph-quote">「${t(e.key)}」</span></p>`).join('');
       scroll.innerHTML += `<div class="end-credits-epilogue"><p class="end-credits-epitaphs-title">${t('ach_epitaphs_title')}</p>${rows}</div>`;
     }
+    // W-Z288「烬灯回信」：通关的最后一句话——LLM 基于这一手的账本亲笔写下的短信。
+    // 必须静默回退：离线 / 熔断 / 解析失败 → 片尾依旧完整，只是少了这一节。
+    void this._appendArbiterEpilogue(scroll);
     this.el.classList.remove('hidden');
     /* W-E6：终局专赠 —— 通关那一刻，返乡系列收尾一枚「最后一盏灯」。
      * 与 echo-full-resonance 同类：派生式回声，trigger 由本类自己放出（pop-culture-echo），
@@ -121,6 +125,42 @@ export class EndCreditsDirector {
     // DOM 建一次、演出可能很久之后才放：键名到播放这一刻才问生效表
     refreshKeyText(this.el);
     this.game.dialog?.toast(t('credits_toast'), 3000);
+  }
+
+  /**
+   * 「烬灯回信」：向 `/api/ai/arbiter` 要一封短信，回来了再落屏。
+   * 片尾不等它——`play()` 先把字幕放出去，这段自己补进 `.end-credits-scroll`；
+   * 解析失败 / 在线关着 / 熔断 → 什么都不发生（见 `arbiterEpilogue.js` 头注释）。
+   */
+  async _appendArbiterEpilogue(scroll) {
+    const online = this.game?.onlineServices;
+    const payload = buildArbiterPayload(this.game);
+    let parsed = null;
+    try {
+      const res = await online?.askArbiter?.(payload);
+      const raw = res?.ok ? res?.data?.raw : null;
+      parsed = raw ? parseArbiterAnswer(raw) : null;
+    } catch {
+      parsed = null;
+    }
+    if (!parsed) return;
+    const block = document.createElement('div');
+    block.className = 'end-credits-arbiter';
+    const title = document.createElement('p');
+    title.className = 'end-credits-arbiter-title';
+    title.textContent = parsed.title;
+    const body = document.createElement('p');
+    body.className = 'end-credits-arbiter-body';
+    body.textContent = parsed.epilogue;
+    block.append(title, body);
+    if (parsed.omen) {
+      const omen = document.createElement('p');
+      omen.className = 'end-credits-arbiter-omen';
+      omen.textContent = parsed.omen;
+      block.appendChild(omen);
+    }
+    scroll.appendChild(block);
+    try { (window.__crossrealmTelemetry)?.record?.('arbiter_epilogue', { choice: payload.choice }); } catch { /* telemetry absent — ignore */ }
   }
 
   hide() {

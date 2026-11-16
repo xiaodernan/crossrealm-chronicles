@@ -378,6 +378,20 @@ export class OnlineServices {
     });
   }
 
+  /** 烬灯回信（W-Z288「烬灯回信」，`POST /api/ai/arbiter`）。
+   * 终章抉择落定之后，炉火的记录者替这个人写下一封短信——这是「大模型输出即玩家的下一段内容」
+   * 的那一段：传回的是可解析的短 JSON 原文（title / epilogue / omen），由调用方解析、截断、落屏。
+   * 只走一次同步请求；20s 预算，比普通遥测长比顾问短——片尾尾韵不该让人等一个转圈三分钟。
+   */
+  async askArbiter({ choice, lang, stats, player }, { signal } = {}) {
+    return this.#jsonRequest('/api/ai/arbiter', {
+      method: 'POST',
+      body: { choice, lang, stats, player },
+      timeoutMs: 20000,
+      signal,
+    });
+  }
+
   /**
    * 探活：GET /api/version。
    * 成功返回 `{ service, version, javaVersion, note }`；离线 / 未启用 / 超时 / 非 2xx → null。

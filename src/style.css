@@ -3170,6 +3170,43 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   letter-spacing: 0.05em;
 }
 
+/* W-Z288「烬灯回信」——炉火的记录者给这位旅人的短信。神圣的空白 + 微次于灯光的字色。 */
+.end-credits-arbiter {
+  margin-top: 8vh;
+  text-align: center;
+  opacity: 0;
+  animation: arbiter-fade-in 2.6s ease 0.6s forwards;
+}
+
+@keyframes arbiter-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.end-credits-arbiter-title {
+  color: #ffe0a8;
+  font-size: 1.02rem;
+  letter-spacing: 0.34em;
+  margin-bottom: 0.8em;
+  text-shadow: 0 0 26px rgba(255, 224, 168, 0.45);
+}
+
+.end-credits-arbiter-body {
+  color: #e8dcc0;
+  font-size: 1.02rem;
+  line-height: 1.9;
+  letter-spacing: 0.08em;
+  max-width: 30rem;
+  margin: 0 auto 0.9em;
+}
+
+.end-credits-arbiter-omen {
+  color: #9f8f72;
+  font-size: 0.74rem;
+  font-style: italic;
+  letter-spacing: 0.16em;
+}
+
 .end-credits-last-light {
   margin-top: 6vh;
   color: #ffe9ad;
