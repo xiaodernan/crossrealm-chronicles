@@ -1,52 +1,52 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T19:06:09.508Z",
+  "generated_at": "2026-11-16T21:09:29.395Z",
   "branch": "main",
-  "head": "03dbaa60",
-  "total_commits": 1982,
-  "pushed_at": "2026-11-17T03:04:34+08:00",
+  "head": "17c48156",
+  "total_commits": 1987,
+  "pushed_at": "2026-11-17T04:40:43+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
     {
-      "short": "03dbaa6",
-      "at": "2026-11-17T03:04:34+08:00",
-      "subject": "feat(canon): W-Z284 第一百三十一卷《第一夜 / The First Night》入典——卷十五之三十二"
+      "short": "17c4815",
+      "at": "2026-11-17T04:40:43+08:00",
+      "subject": "feat(canon): W-Z287 第一百三十二卷《第二夜 / The Second Night》入典——卷十五之三十三"
     },
     {
-      "short": "afc199a",
-      "at": "2026-11-16T18:52:52Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
+      "short": "603f69c",
+      "at": "2026-11-17T04:30:18+08:00",
+      "subject": "chore: unstage volume-132 draft and commit-message scratch from the W-Z286 tree (they land via the W-Z287 pipeline)"
     },
     {
-      "short": "656ca2d",
-      "at": "2026-11-17T02:52:03+08:00",
-      "subject": "chore: drop stray commit-message scratch file from the W-Z282 tree"
+      "short": "6362050",
+      "at": "2026-11-17T04:29:12+08:00",
+      "subject": "feat(advisor): W-Z286 星轨顾问的指引协议 —— LLM 提名目的地 → 游戏里的一次真实跳转"
     },
     {
-      "short": "9843a93",
-      "at": "2026-11-17T02:50:53+08:00",
-      "subject": "feat(canon): W-Z282 炉火的交棒 —— 《跨界纪事》卷十五最后一课 · StateGraph 真路由传承链三段闭环 + W-Z283 Admin 第 21 瓦"
+      "short": "3a02450",
+      "at": "2026-11-17T04:24:26+08:00",
+      "subject": "refactor(bundle): W-Z285 双语言分包全额付清 —— 首屏 −277 KB → 1.86 MiB · index.html 零语言表"
     },
     {
-      "short": "1209025",
-      "at": "2026-11-16T18:19:56Z",
+      "short": "7eb8d8c",
+      "at": "2026-11-16T19:06:09Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
-  "tracked_files": 1520,
-  "test_files": 460,
-  "i18n_keys": 3247,
-  "lore_sources": 293,
-  "novel_chapters_zh": 131,
-  "novel_chapters_en": 131,
-  "milestone": "W-Z284",
-  "milestone_full": "卷 131 · 六百年守火线（131 / 131 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 293 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：131 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "tracked_files": 1525,
+  "test_files": 461,
+  "i18n_keys": 3248,
+  "lore_sources": 295,
+  "novel_chapters_zh": 132,
+  "novel_chapters_en": 132,
+  "milestone": "W-Z287",
+  "milestone_full": "卷 132 · 六百年守火线（132 / 132 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 295 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：132 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3247-keys",
+    "bilingual-3248-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",
