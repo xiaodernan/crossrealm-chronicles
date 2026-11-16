@@ -192,12 +192,25 @@ public class LoreOracleService {
         return new OracleResult(false, reason, List.of(), "none", false, false, 0L);
     }
 
+    /**
+     * The frozen Oracle system prompt — lore-system-prompt.txt + the verbatim glossary digest
+     * (lore-digest-frozen.txt, rebuilt by scripts/build-freeze-glossary.mjs). The digest is a
+     * byte-identical copy of the GLOSSARY head, frozen to keep the prefix prompt-cacheable
+     * (W-Z247: the bare lore-system-prompt was ~500 tokens — below the upstream prompt-cache page
+     * threshold, so Oracle calls ran cold even with stream+include_usage+ephemeral+prompt_cache_key).
+     */
     private static String loadOracleSystem() {
-        try (InputStream in = LoreOracleService.class.getResourceAsStream("/ai/lore-system-prompt.txt")) {
-            if (in == null) throw new IllegalStateException("missing classpath:/ai/lore-system-prompt.txt");
+        String base = loadResource("/ai/lore-system-prompt.txt");
+        String digest = loadResource("/ai/lore-digest-frozen.txt");
+        return (base + "\n\n" + digest).trim();
+    }
+
+    private static String loadResource(String path) {
+        try (InputStream in = LoreOracleService.class.getResourceAsStream(path)) {
+            if (in == null) throw new IllegalStateException("missing classpath:" + path);
             return new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
         } catch (IOException e) {
-            throw new IllegalStateException("cannot read oracle system prompt", e);
+            throw new IllegalStateException("cannot read Oracle resource " + path, e);
         }
     }
 }

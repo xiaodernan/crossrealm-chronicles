@@ -12,6 +12,14 @@
 > **2026-11-16 · W-Z245 第105卷入典《仲冬见 / The Midwinter Visit》**：《跨界纪事》卷十五「第七百年」第六篇——仲冬前三天院子薄雪落地、母亲磨了三天油纸伞却不说给谁——灶火安静得不寻常——第四天山坳里来了一个人，没有马驴只有一只背篓，高得快碰到头顶——白石头顶的老人——他背着一只竹篓，里面一个瓷罐装着祖火的灰、一枚铁丝勾着的小炭球——老人把那颗灰白火种放进灶火——灶火跳了一下没熄——反而更亮了——七百年——两盏火——第一次在一个灶膛里稳稳地烧——两个守火人同时哭了出来——小火喃喃念了些什么然后睡着了——老人走时留下一句话：「祖火看见灶火了。灶火也看见祖火了。」
 > 交付：creative/novel/105-仲冬见.md + en 孪生 105-the-midwinter-visit.md；novella 105 × 2 = 210 模块（典籍馆现为 105 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：239 源；showcase feed 新增 W-Z244 + W-Z245 实录。
 >
+> **2026-11-16 · W-Z247 Oracle prompt-cache 分桶实证 + 冻结修复（canon lane 從此有缓存）**：实测探针（新 `scripts/oracle-cache-probe.mjs`）发现——canon lane 两次同问 **cached_tokens=null（0%）**，refs lane 命中 96.9%。根因：上游 prompt-cache 约有 ~1024-token 的「页」门槛，lore-system-prompt.txt ≈500 tokens 的 system 前缀不足以热住——refs lane 因摘录体量大而跨过页门槛，canon lane 恒稳态冷。
+> 修复：`scripts/build-freeze-glossary.mjs`（确定性生成、byte-identical）从 `creative/GLOSSARY.md` 首 ~2500 字节原样摘出为 `lore-digest-frozen.txt`，与 lore-system-prompt.txt 一并装入 system（`LoreOracleService.loadOracleSystem()` 拼接，注释说明冻结原因）；消融实测：canon #2 → **cached=6784/6973 ≈97.3%**（修复前恒 null）；refs #2 ≈72%（例证本身增大了首 token 成本但换来恒暖稳定态）。Java live 3/3 绿（canon 问题 → novel/67,106,89,77 ··· refs 问题 → refs 卷 · 无义提问 → 诚实拒答 latency=0）；Oracle Lore gate 48/48 绿；digest 与源一致性可用 `--check` 校验。
+> 教训：prompt-cache 不是「前缀写了 cache_control 就好」——**冻结前缀必须跨过上游页门槛**；探针先量、再改、再量，数字为证。
+> 新增 `scripts/oracle-cache-probe.mjs`（双轨探针，7 次小调用实测 canon/refs 各两连）：记录在本条；实测的两组 lane 数据如上。
+>
+> **2026-11-16 · W-Z248 第107卷入典《无名柴 / The Nameless Twig》**：卷十五之八——老人走后第十五天院门多了一捆白桦柴，干净干透，缠着三次补过的灰布条，附纸条两个字「添柴」——母亲摸了摸布条，认出这是舅舅补丁的针脚——全家人都站着看——没有人问是谁——小火捧了一根送进灶火——灶火没有跳也没有熄——安静地接住了——阿石晚上擦了石碑——月亮让白桦枝泛出一点白——第二天早上少了一根，没人看见谁添的——母亲在铁匣子底下又压一张纸「七百年——第一根无名柴——灶火知道了」。
+> 交付：creative/novel/107-无名柴.md + en 孪生 107-the-nameless-twig.md；novella 107 × 2 = 214 模块（典籍馆现为 107 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：243 源；showcase feed 新增 W-Z247 + W-Z248 实录。
+>
 > **2026-11-16 · W-Z246 第106卷入典《炉边故事 / The Stove Stories》+ Admin 第17瓦 · Oracle 现实原型路由 live 实证入档**：
 > 卷十五之七——箍桶匠补好水缸后，留在院子里，问能不能听听仲冬夜——母亲让小火讲——小火坐在灶边小板凳上，把雪、油纸伞、瓷罐祖灰、灰白火种、两火相见的一切慢慢讲出来——「我们的灶火不是我们家的——它是所有人的」——箍桶匠沉默很久，说要立碑——母亲说「字会变成神坛——我们的火不是给神坛的，是给火的」——他照做了，碑上没有字，只有一根白桦枝的图案——雨天浸透、月光照着，它像是从石头里透出光来——「此处有火，从来没灭过七百年」。
 > 交付：creative/novel/106-炉边故事.md + en 孪生 106-the-stove-stories.md；novella 106 × 2 = 212 模块（典籍馆现为 106 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：241 源；showcase feed 新增 W-Z246 实录。
