@@ -130,6 +130,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Into the Outlands | [into-the-outlands](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/79-into-the-outlands.md) |
 | The North Lamp | [the-north-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/80-the-north-lamp.md) |
 | The Second Lamp | [the-second-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/81-the-second-lamp.md) |
+| The Return | [the-return](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/82-the-return.md) |
 
 Chapter → game-chapter mapping:
 
