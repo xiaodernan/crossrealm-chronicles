@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Seventy-eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Seventy-nine volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 78 volumes of the canon, fully readable
+· Canon Library — 79 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3137,8 +3137,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 78-volume index',
-  hm_body_codex: `Codex — 78 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 79-volume index',
+  hm_body_codex: `Codex — 79 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3218,6 +3218,7 @@ hm_title_codex: 'Codex · the 78-volume index',
 76 · Thunderfire — deep June thunderstorm: one violet-white bolt splits the night and cracks the white stone — the beacon dies after six hundred years; A-Shi runs up the mountain through hail without knowing why his mother lets him go; finds only the lamp-stand holding, glass shattered to nothing — then a gust from the east carries woodsmoke; down the ridge to the abandoned pine flats east of the village — a single pine burns at its tip with blue flame — the Lord of the Pines — A-Shi pours the last spoonful of stove-ash-water into the blue fire and it turns to gold; he calls his name: “six hundred and first keeper — I have come for what is ours” — the flame bends toward him and pours itself into his little wooden breast-box — the rain stops — every needle-tip in the flats glows gold, a river of sparks leading home; the yard seed-tree flickers that night. Volume XI, eleventh part.
 77 · The Broken Stone — seven days after the storm, A-Shi climbs the ridge to look at the white stone — split clean in two, but politely declining to fall apart; he reaches inside the cleft and finds one tiny coal, hard and round — it is the very first coal the first keeper ever carried up the mountain, six hundred years ago; it lay hidden in the stone’s heart, warmed by six hundred years of beacon-vigil, until lightning let it fall — into A-Shi’s open palm — he seals it in his little iron canister with a cloth of stove-ash and sets the canister into a shallow groove in his father’s workbench; that night the coal glows once — the oldest fire and the stove from this moment on share one breath — the fire-seed tree’s highest needle burns deeper red than ever. Volume XI, twelfth part.
 78 · The Guest — three weeks after the black coal came home; one afternoon a small girl appears at the gate — about seven, one shoe on one off — carrying her grandmother’s letter: a painted pair of eyes, wordless — her home’s stove went out — she walked across the ridge alone to borrow fire from the six-hundred-year stove; A-Shi remembers a face he once half-knew; he dips her coal in stove-ash water; it blazes blue under his own hand — he wraps it back with instructions not to open it — she turns away and says: my grandmother told me to say — the fire-seed walks on its own feet — the fire was never theirs alone — it has been travelling six hundred years to find the next house. Volume XI, thirteenth part.
+79 · Into the Outlands — high summer quiet hearth: one dawn Baiyin stands in the doorway and says — “it is time you left the mountain” — points north — three more lamps beyond the ridge, all burning for six hundred years just like this hearth — she hands A-Shi an old fire-sickle — the valley keeper stays at the stove; the outlands keeper carries the fire — two different callings — A-Shi packs: pine needles, the charred ledger-page, a sprig of the fire-seed tree — his mother silently hands him ink-line, kitchen paper, and a stopper of stove-ash — he steps out the gate for the first time in six hundred years, bows to his house, and does not look back — the stove gives one low bright leap — and the keeper is on the road. Volume XI, fourteenth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3231,7 +3232,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (seventy-eight volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (seventy-nine volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
