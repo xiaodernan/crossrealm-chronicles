@@ -15,6 +15,9 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-17 · W-Z270 第119卷入典《雪安 / Snow’an》——卷十五之二十（雪安来了，炉火真正不寂寞了）**：立春后第十五天——老李带了个孩子来——不是他自己的——是隔壁庄停认进的儿子铁木苏木——十一二岁——眼睛特别亮——他站在院子里看火种树的新叶子一层一层地伸出来——母亲叫他坐他不坐——阿石挪矮凳——他盯着灶火看了很久——灶火的光把他的脸照得暖烘烘的——他伸手去摸铁沿——烫了一下缩回去——他的手还是热的——他说「我周六来」——他走了——院子里静下来——火种树沙沙地摇。
+> 交付：creative/novel/119-雪安.md + en 孪生 119-snowan.md；novella 119 × 2 = 238 模块（典籍馆现为 119 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：269 源；showcase feed 新增 W-Z270 实录。
+>
 > **2026-11-16 · W-Z269 BM25 search 改用 posting-list 反向索引（Java · 纯 perf · 语义不变）**：`Bm25Index.java`——旧实现对每个 query-term 重扫 N 篇文档的每一个 token 半计算 tf；新实现构造期建 `Map<token, List<Posting(docId, tf)>>`，search 只沿命中对累加分数——时间从 `O(N×Σtokens_per_doc×|query_terms|)` 降为 `O(|matching_postings|)`。向量与 bm25-eval / 整体 ranking 完全不变。
 > 回归：Bm25IndexTest 11/11 ✅ · LoreRagTest 6/6 ✅ · OracleControllerTest 5/5 ✅ · LoreOracleRouteHintTest 23/23 ✅ · BUILD SUCCESS · Oracle live 4/4 ✅（canon/refs/refusal 行为一致）。
 >
@@ -5216,7 +5219,9 @@ Phase D（系统与质量）
   - **做法**：新两条腿 —— ① `BOSS_ARENA_SCRIPTS` 的键集必须**精确等于** `['default', ...BOSS_IDS, ...DUNGEON_IDS.map(d => `dungeon-${d}`)]`；② `ARENA_MOVES` 的每一枚招式名至少被一条脚本点到（死招式的反面不是"名册里没有"，而是"名册里有、永远不出现"）。两条各带一条反向控制（凭空塞一页 / 多一枚假招式必须被点名），防比对退化成恒真。
   - **普查读数（本片实测，直接 import 三张表算的）**：脚本 **16 条** = 兜底 1 + 世界 Boss 5 + 副本守钥者 10；条目 **37 条**；`entry` **19 枚**（原注释写"十八枚"，过期 —— 切片29 给无灯祷堂补了一枚入场招之后没人改，本片一并改回十九）；场地招 6 种（slam / barrage / well / freeze / freezeAll / homing）全部有人用；闸门 3 种（melee / timed / opportunity）全部有人用。
   - **门禁与分母**：`tests/arena-scripts.test.js` 26 → **28 例**，定向跑 28 例全绿；lint 0 error；`npm run build` 通过（本片不动运行时，build 只是确认测试改动没碰到构建）。
-  - **变异两臂（如实记，第一臂打偏过一次）**：① 往 `BOSS_ARENA_SCRIPTS` 尾部塞 `'dungeon-removed'` ⇒ **2 条红**（钉死的 19 枚 entry 落点 + 新"死脚本"腿），还原后 28 例全绿；② 打偏那一次：脚本按"第一处 `};\r\n\r\n/**`"定位，命中的是 `ARENA_MOVES` 而不是主表 ⇒ 红在"现表通过校验"与"死招式"两条，**新腿没响**。这条记在这里：变异脚本也要按"函数位置"定位，不能按"第一个长得像的括号"定位。
+  - **变异两臂（如实记，第一臂打偏过一次）**：① 往 `BOSS_ARENA_SCRIPTS` 尾部塞 `'dungeon-removed'` ⇒ **2 条红**（钉死的 19 枚 entry 落点 + 新"死脚本"腿），还原后 28 例全绿；② 打偏那一次：脚本按"第一处 `};
+
+/**`"定位，命中的是 `ARENA_MOVES` 而不是主表 ⇒ 红在"现表通过校验"与"死招式"两条，**新腿没响**。这条记在这里：变异脚本也要按"函数位置"定位，不能按"第一个长得像的括号"定位。
   - **放弃了什么**：① 没钉"每条脚本的指纹必须互不相同" —— 10 座副本里 `ruin-crypt` 与 `void-broken-casket` 结构相同、只差 `tint`（同为 slam@p2 + barrage@p3/9s/16m）。把它们判成"抄袭"就等于现在要求改设计，那是内容决定（且 tint 本身就是这一族的身份：两座副本的配色不同），不是一次结账；② 没把冷却 / 半径的具体数值搬进门禁 —— 那是 `ground-hazard.test.js` 与 `barrage.test.js` 的分母，重复钉只会让两处读数打架。
   - **留了什么尾巴**：① 五条分支路的手感 / 镜头 / Boss 编排真机走查仍欠（这是唯一不能自动化的那一项）；② 真 GPU 上的副本 / Boss 帧时仍没有读数；③ W-B8 的"6 个 × 3 阶段"仍按五只世界 Boss 计（影之战士是名册上的第五只，副本守钥者不在"6 个"口径里）—— 若将来把副本守钥者也算进"Boss 重做"的分母，这一行的标题要重写。
 
@@ -6927,7 +6932,10 @@ Phase D（系统与质量）
 
   - **不采纳的判词（记录在册，防下次误伤）**：echo-gloom / echo-radiant / echo-wave4 被判“缺少中洲世界 / 未体现四大回声母题”。查证无此 canon——`ECHO_FRANCHISE_BUCKETS` 里 middle-earth 与 gloom/radiant 并列独立母题；「薄暮回响 / 辉煌残响」本身就是 `franchise_gloom_label / franchise_radiant_label` 的正式母题名（与 `season_gloom_name / season_radiant_name` 同字同源，设计使然）；`echo-wave4` 的检查逻辑（cyber/samurai/cosmic/starport）就是代码真源，判官无权改门控。判官幻觉不改 content、不改代码。
 
-  - **判据与门禁**：全部是 value-only 文案打磨——lint 0 / 6556 例 438 文件全绿 / build ✓ / size 2.13 MiB（余 0.06）/ e2e 通关 ✓；键数仅因两个 _six 条目 +4（3276→2980）；键 parity（zh==en 双表）一致 ✓；`overlay-stack` 门禁踩过一次坑：我一度用 node 脚本插入 `\r\n` 导致 `\r\r\n`（lone CR），触发 B104 死口径自红——归一成 `\r\n` 即绿。教训：**手写脚本改文案表必须校验 lone CR**。
+  - **判据与门禁**：全部是 value-only 文案打磨——lint 0 / 6556 例 438 文件全绿 / build ✓ / size 2.13 MiB（余 0.06）/ e2e 通关 ✓；键数仅因两个 _six 条目 +4（3276→2980）；键 parity（zh==en 双表）一致 ✓；`overlay-stack` 门禁踩过一次坑：我一度用 node 脚本插入 `
+` 导致 `\r
+`（lone CR），触发 B104 死口径自红——归一成 `
+` 即绿。教训：**手写脚本改文案表必须校验 lone CR**。
 
   - **风险与后续**：LLM 判官批次间非确定性显著（同批次复跑 flag 构成会漂移，run2→run3）；判官只当第二只眼睛，所有“坏字”都要与机制/时轨对齐核实后再落地；ech-echo_full_resonance 那类真·梗敬意（one-ring/full-resonance）继续保留。下一刀：Wave19 新母题内容，或 echo-qa 覆盖缺口（90 枚中抽样率需提至全量）。
 - **2026-11-13 W-E14 满天星回声 GLOOM / RADIANT 双 6 档母题出关（纯内容、零新网格）** —— 提交 `f568d4f`（与 ach-qa 收敛尾巴分片提交）
