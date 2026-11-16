@@ -137,6 +137,7 @@ creative/music/soundtrack.html
 | 新人 · The Newcomer | [the-newcomer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/88-the-newcomer.md) |
 | 新火 · New Fire | [new-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/89-new-fire.md) |
 | 墨 · Ink | [ink](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/90-ink.md) |
+| 送礼 · The Bestowal | [the-bestowal](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/91-the-bestowal.md) |
 
 每一章对应游戏的章节走法：
 
