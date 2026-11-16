@@ -10932,7 +10932,7 @@ He took the brush from the holder, set it in the inkstone, and wrote.
 
 Three strokes. One breath. The same character.
 
-The stroke for "i̇" — a little wider on the right than it was on the left, tilting slightly into the habit he had practised a thousand times.
+The stroke for 记 (to remember) — a little wider on the right than it was on the left, tilting slightly into the habit he had practised a thousand times.
 
 He set the brush down.
 
@@ -10985,6 +10985,123 @@ They are kindled.
 ---
 
 *(End of volume eighty-three · Volume XII, fourth part.)*
+
+# source: creative/novel/en/84-the-cone.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XII**: The Long Journey — Fire and Ink
+
+---
+
+## Eighty-four: The Coning
+
+On the morning of the Winter Solstice, A-Shi went out to gather wood, and saw one cone on the fire-seed tree.
+
+He drew closer. A small thing, barely the size of his thumb's knuckle, painted a dark umber red.
+
+His mother came to the doorway with a bowl in her hand and saw it too.
+
+"What is that on the tree?"
+
+She said nothing for a long while.
+
+"It is the fire-seed tree's first cone," she said at last. "The sign of the next keeper."
+
+A-Shi said nothing.
+
+"Your great-grandmother's mother used to say: when the fire-seed tree cones for the first time in its life, it is telling the family — the next keeper is on the road."
+
+Her tone did not change. Her eyes went soft.
+
+Snow began to fall.
+
+The stove burned quietly all night.
+
+At some point long past midnight, A-Shi opened his eyes to find a man seated before the stove.
+
+Middle-aged. Thin. A grey robe. His breathing was as steady as the stove's breath.
+
+The man noticed A-Shi was awake. He smiled faintly.
+
+"I have been sent," he said, "to bring the ledger."
+
+A-Shi asked, "Who are you?"
+
+"I am called Guo Ke," the man said. "They call me the Walker. My business is the sixth-hundred-and-second keeper's ledger."
+
+"What ledger?"
+
+He laid a bundle of pages on the table — yellowed, brittle with age, filled with characters nobody living had ever read out loud.
+
+"Every keeper you will ever know in the next book," Guo Ke said, "kept their own ledger."
+
+A-Shi looked down at the paper and felt the weight of ink six hundred years old settling in his hands.
+
+He flipped to the first page.
+
+A single character: 记.
+
+Every page after — the same.
+
+And then, deeper in, his own grandfather's hand appeared — his short-across stroke, light and telling. After that, his father's lighter ink.
+
+And then a blank page.
+
+"This is yours," Guo Ke said.
+
+"What does it want?"
+
+"The next page."
+
+A-Shi looked at the blank. His hand began to tremble without his willing it.
+
+Baiyin had come and gone like weather. His mother was always there but never spoke of it. The tree had coned twice since midwinter. Every detail was running ahead of him now.
+
+"You will receive it when you are ready," Guo Ke said, "not before."
+
+He prepared to leave.
+
+At the gate, he paused.
+
+"Six hundred years," he said. "You are not alone in this. You are only the next bloom of this tree."
+
+He slipped into the snow.
+
+A-Shi stood alone in the doorway.
+
+On the table, the ledger waited — six hundred and one names already written in it.
+
+And one.
+
+His mother joined him in the doorway.
+
+Neither of them spoke.
+
+The Third Six Hundredth Winter passed the way all six hundred years had done — softly.
+
+At first light, by the stove, the tree gave up a second cone.
+
+It was redder, still, than the first.
+
+The keeper's ledger on the table had been waiting six hundred years to close the last page — and was ready to begin the next.
+
+A-Shi sealed it with his hand.
+
+His mother said quietly, "Keeper."
+
+He nodded.
+
+He did not know what came next for him — but the tree knew, and the ledger knew, and the stove knew. He had been a keeper from the moment he first touched it — he simply had not known how to look back.
+
+The dawn broke clean over the ridge. Across it, one lamp lit by another, six hundred years of fire now burned bright enough to see from the stars.
+
+Someone had written it all in.
+
+---
+
+*(End of volume eighty-four · Volume XII, fifth part.)*
 
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
@@ -18946,6 +19063,147 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第八十三卷 · 卷十二之四）*
+
+# source: creative/novel/84-结木.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十二**：远行 —— 火与墨
+
+---
+
+## 八十四 · 结木
+
+冬至清晨，阿石出去添柴，看见院子里的火种树上挂了一枚果子。
+
+不大，拇指肚那么大，针叶围着它红得像着火。
+
+母亲出门加衣服，站在院里看那枚果子看了很久。
+
+"什么树果？"
+
+"你六百年——" 她说到一半停住。
+
+阿石也抬头看。
+
+"你早就猜到了。"她说。
+
+阿石摇头。
+
+"没。"他说。
+
+母亲笑了笑。
+
+"火种树，"她说，"结第一枚果子——接灶火的一户接火的信。"
+
+阿石沉默了一会儿。
+
+"外婆家那年。"他说。
+
+母亲点头。
+
+"你外婆家那年、你们那栋老家的老屋那年——门前每年冬至都会结一枚果子。结完这一枚，下一位守火人就到了。"
+
+阿石没有问。
+
+他心里清楚了：刚才那枚果子——不是树收成的东西——是灶火的信。
+
+当天晚上，雪落下来了。
+
+灶火安静地烧。雪从窗缝里钻进来，墨一样落到了地板上。
+
+子夜过了不久，阿石睡着了。他没听见开锁的声音——他只是梦里忽然有了火的静。
+
+他打开眼睛的时候，灶前坐着一个不陌生的男人。
+
+中年，清瘦，灰褂，头发很干，呼吸像前方灶灰一样稳。
+
+他面前的灶火，跳得很有节奏。
+
+男人看见阿石醒了，笑了笑。
+
+"你家的火，"他说，"我替你带了册序。"
+
+阿石坐起来。
+
+"你是谁？"
+
+"册序。"他把一卷发黄的纸摊在桌前，"是白奶奶那一册。"
+
+阿石翻开。
+
+纸上是六百年所有守火人的名字——他爷爷、他爸爸、他自己。
+
+他还没看到第六百零二位的名字。
+
+"这册序是什么？"
+
+过客笑了。
+
+"这是白奶奶托我带来的。"他说，"你从前的六百页，是她辈辈守火人自己写上去的。"
+
+阿石看灶火。
+
+灶火很稳。
+
+"爸爸？"他说。
+
+过客点头。
+
+"你的家谱上白奶奶替你写下一笔。你要守到它。"他说，"白奶奶从来没误过一轮——一户没误一天——火自己也不会误。"
+
+阿石沉默了很久。
+
+"那是我一个人写下去的？"
+
+过客笑了。
+
+"不是。火自己会等，灶自己会烧，白奶奶会替你写下一笔。"
+
+他抬头看着灶火，像整体看到了这间屋子六百年的重量。
+
+过客走到门口，回头。
+
+"我只带册序，"他说，"你接着就是一册。"
+
+阿石点头。
+
+外面雪还在下。
+
+灶火忽然跳得很高。
+
+远方——那盏山顶的烽火同时也亮了。
+
+过客走到门口，回头，轻声说：
+
+"六百年，"他说，"你不是一个人。你只是它开出来的第一朵花。"
+
+他走了。
+
+灶火稳稳地燃烧。门外雪大了一寸。屋里温暖得不大现实。
+
+阿石没有哭。
+
+他站起来，从灶前舀一勺灰，放桌上。
+
+他打开母亲给他的册序那一册，翻到他要写的第一页，夹住了——他必须写——这是白奶奶写下的那一段：
+
+「守到全案。」
+
+他提笔。
+
+外面的雪停了。
+
+天放亮的时候，阿石写完了。
+
+屋里那一刻——如同从来没灭过的灶子。
+
+灶火高高地亮了——稳稳的。
+
+---
+
+*（本章完 · 跨界线总第八十四卷 · 卷十二之五）*
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)

@@ -132,6 +132,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Second Lamp | [the-second-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/81-the-second-lamp.md) |
 | The Return | [the-return](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/82-the-return.md) |
 | The Ledger | [the-ledger](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/83-the-ledger.md) |
+| The Cone | [the-cone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/84-the-cone.md) |
 
 Chapter → game-chapter mapping:
 
