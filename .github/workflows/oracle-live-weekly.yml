@@ -1,0 +1,74 @@
+# Oracle live weekly — 每周一（UTC）起一次真上游 Oracle 联调，归档原文为 GitHub Actions artifact。
+#
+# 口径（2026-11-16 定案）：
+# - 需要仓库 secret `LLM_API_KEY`（Settings → Secrets → Actions）。没配置就**跳过**，按成功处理——不烧 key、不假红。
+# - 不走 push 触发（每次 main 都打真钱不划算）；只 weekly + workflow_dispatch 手动。
+# - 历史归档在 main 的 docs/oracle-live-log/ 下（本地 `node scripts/oracle-log-archive.mjs` 手动跑）；
+#   本 workflow 只上传 artifact（`actions/upload-artifact`），不自动提交——避免无审查 commit 进 main。
+# - 上游：https://api.aizzz.xyz/v1 · model=gpt-6.1-terra。绝不将 secret 或响应体写入公开 issue/日志展示之外的地方。
+# - Clash 代理只存在于本机；Actions runner 是 GitHub 托管机器，直连同 api.aizzz.xyz（生产真实线上路径）。本 workflow 不走 Clash，
+#   只验证「无代理条件下线上路径也成立」——这正是用户要的「降频、但真跑」证据。
+name: Oracle live weekly
+
+on:
+  schedule:
+    # 每周一 02:00 UTC（= 北京时间 10:00）
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: oracle-live-weekly
+  cancel-in-progress: true
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Java (Temurin 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Install Maven
+        run: sudo apt-get update && sudo apt-get install -y maven
+
+      - name: Install Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Skip gracefully when LLM_API_KEY is not configured
+        id: gate
+        run: |
+          if [ -n "${{ secrets.LLM_API_KEY }}" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::LLM_API_KEY secret is not configured — skipping live call (no cost, no failure)"
+          fi
+
+      - name: Bm25 + lore gates (always)
+        run: mvn -o -B -f server/pom.xml -pl ai-service test -Dtest='LoreRagTest,Bm25IndexTest,Bm25TokenizerTest,OracleControllerTest,LoreOracleRouteHintTest' -DfailIfNoTests=false
+
+      - name: Oracle live probe (only with secret)
+        if: steps.gate.outputs.present == 'true'
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: https://api.aizzz.xyz/v1
+          LLM_MODEL: gpt-6.1-terra
+        run: node scripts/oracle-log-archive.mjs
+
+      - name: Upload live logs artifact (only with secret)
+        if: steps.gate.outputs.present == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-live-logs
+          path: docs/oracle-live-log/*.md
+          if-no-files-found: error
+          retention-days: 90

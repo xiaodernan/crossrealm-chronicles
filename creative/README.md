@@ -156,6 +156,7 @@ creative/music/soundtrack.html
 | 无名柴 · The Nameless Twig | [the-nameless-twig](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/107-the-nameless-twig.md) |
 | 山顶雪 · The Mountain Snow | [the-mountain-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/108-the-mountain-snow.md) |
 | 送灰 · The Delivery of Ashes | [the-delivery-of-ashes](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/109-the-delivery-of-ashes.md) |
+| 同炉 · The Shared Hearth | [the-shared-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/110-the-shared-hearth.md) |
 
 每一章对应游戏的章节走法：
 
