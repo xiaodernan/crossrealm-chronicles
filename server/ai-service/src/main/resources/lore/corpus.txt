@@ -7403,6 +7403,55 @@ The stove had never gone out.
 
 *(End of volume one hundred and twenty-four · Volume XV, twenty-fifth part · The seven-hundredth year — The Whole Town and the Fire.)*
 
+# source: creative/novel/en/125-the-thunder-rain.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Thunder Rain
+
+---
+
+## One Hundred and Twenty-five: The Thunder Rain
+
+The tenth Saturday after the spring equinox — afternoon came with a genuinely grey sky.
+
+The whole town came. No one knew who had told them that today the stove would be burning loud. Everyone knew.
+
+First Uncle Zhou arrived. Then old Aunt Guo. Then the man who had asked A-Shi to repair his stove yesterday — no one recognized him either. Then more than thirty people arrived. The courtyard was so packed that the door barely opened. The stove burned steadily. Nobody spoke.
+
+His mother looked at it for a long time.
+
+"Too many people," she said.
+
+"Don't be afraid," A-Shi said.
+
+Everyone took bowls for the meal. The pot was full of broth.
+
+Rain came in earnest at three-thirty in the afternoon. The roof filled with the sound of water hitting tiles across the whole village. Inside the stove the coals popped softly under the damp.
+
+The whole town sat watching the stove.
+
+The ditch outside ran swift with brown water. The courtyard gathered rain before it could dry. Everyone in the yard sat quietly.
+
+No one spoke.
+
+When there were no visitors, the stove burned steadily.
+
+When it rained, it also burned steadily.
+
+Everyone waited that whole afternoon.
+
+Then the rain stopped, and the sun came out.
+
+The whole town shared one bowl of broth per person before anyone said a word.
+
+The stove burned.
+
+---
+
+*(End of volume one hundred and twenty-five · Volume XV, twenty-sixth part · The seven-hundredth year — The Thunder Rain.)*
+
 # source: creative/novel/en/13-interlude-handover.md
 # Interlude Six · Handover
 
@@ -18646,6 +18695,43 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百二十四卷 · 卷十五之二十五 · 第七百年 · 满镇的火）*
+
+# source: creative/novel/125-雷雨.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 雷雨
+
+---
+
+## 一百二十五 · 雷雨
+
+立春后第十周——周六下午——周叔先到。
+
+他进门看一眼灶火，就退到屋角站着。郭阿婆第二到，也在屋角。很快第三个、第四个——终于快三十个人全进了门。院子里站得满满的——门口还有人挤不进来。
+
+全都为了看一眼灶火。
+
+母亲站在灶前。她担心了一会儿。没开口。灶火在烧着，匀匀的。
+
+"不怕，"阿石说。
+
+母亲开始分碗。一碗两碗三碗一行排下去。长凳上坐了人。灶火一口一口地烧。
+
+下午三点半—哗啦，一场大雷雨——一声更比一声大——整个屋顶全被打透了——院子里的石头缝全泡了水——煤烟被雨压住，——满屋白雾，气氛极静。
+
+全镇的人每个人手里端着一碗。全都蹲着。没有人动。没有人说话。
+
+雨连下了快一个小时。
+
+雨停了。阳光重新照到屋檐上。
+
+全镇人起身——拿了碗——聚在灶前——吃饭，灶火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百二十五卷 · 卷十五之二十六 · 第七百年 · 雷雨）*
 
 # source: creative/novel/13-番外六-换班.md
 # 番外六 · 换班

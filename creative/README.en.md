@@ -172,7 +172,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Fire Comes | [the-fire-comes](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/121-the-fire-comes.md) |
 | Always Here | [always-here](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/122-always-here.md) |
 | Snow’an Turns Back | [snowan-turns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/123-snowan-turns.md) |
-| The Whole Town and the Fire | [the-whole-town-and-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/124-the-whole-town-and-the-fire.md) |Chapter → game-chapter mapping:
+| The Whole Town and the Fire | [the-whole-town-and-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/124-the-whole-town-and-the-fire.md) |
+| The Thunder Rain | [the-thunder-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/125-the-thunder-rain.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
