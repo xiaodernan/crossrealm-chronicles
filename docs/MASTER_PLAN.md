@@ -9,6 +9,10 @@
 >
 > **2026-11-16 · W-Z205 原典语料重建：59 → 175 源 + 真上游口径对齐**：corpus.txt 全量重编（74 卷双语小说 + 74 卷英译 + 27 份参照文件 ≈ 520 KB，含 66–74 卷守火主线全链）；`Bm25IndexTest.linDu_query_matches_lin_du_chapter` 因如实语料扩容从 top-5 → top-10（如实登记，非放水）；`hm_body_lore_oracle` 不再手写「36 源 / 1803 检索块」的漂移数字——说明书永远引用语料的运行时重编能力；`build-latest.mjs` 的 `lore_sources` 本就是活读（latest.json 实测 175）；说明书/showcase feed 新增 11·16 三条 W-Z190+ 实录；`ONLINE_SERVICES.md(+EN)` / README / player-guide 同步到 175 源；AI 侧 lore 门禁（LoreRagTest/Bm25IndexTest/Bm25TokenizerTest）绿。
 >
+> **2026-11-16 · W-Z240/240b Oracle 压测复跑 + 炉边盘解锁空白修复 + 实测瓦片双语落齐**：压测（同构 `stress-oracle-verify.ps1`：throwaway ai-service + local-stub-llm 20ms）—— mixed（health × answerBurst）**16s / 40 并发：3488 请求 · 0 4xx · 0 5xx · errRate 0.00% · p50=125ms · p95=346ms · p99=2672ms · max=3403ms · ≈217 rps · GREEN**。
+> 线上 Admin 补两格真实验证瓦片（W-Z238 Lore Oracle live 2/2 绿：锚火是什么？→ BM25 4 块 → 锚火作答 HTTP 200 sources=[67,89,77,35] ≈3.2s；无义提问 → BM25 全词零召回 → 诚实拒答「此物未在典籍中」 latency=0 · 不花 token；W-Z240 stress 3488/3488 全绿）——中英 i18n 成对登记。
+> **W-Z240b（实测线上发现）**：Admin 口令 123 解锁后 `#dashboard`（自身带 `.unlock`）计算样式 display=none 永远空——CSS 只写 `.unlocked .unlock`（祖先 × 后代），#dashboard 不是自己的后代，规则不命中。此缺陷从 gate 引入日起在线上存在（`gateError` 路径都没人点）。修复：补 `.unlocked.unlock{display:block}`（一行、只作用 #dashboard）；修复后浏览器实测：解锁 → dashboard display:block → Measured 16 tiles 全部渲染（14 旧瓦 + 2 新瓦）。
+>
 > **2026-11-16 · W-Z239 第102卷入典 · 卷十五之三《第一夜 / The First Night》**：《跨界纪事》卷十五「第七百年」第三篇——第十八天，小火学码第一根柴（A-Shi 三次点头就不再需要点头）；傍晚来了第七百年第一个客——从白石头方向走了一百二十二天——只为了看一眼灶火是不是真不灭；母亲端菜上桌，小火添柴、阿石添水；那人从褡裢掏出一面铁镜——镜面中央有铁线勾出的火苗——和灶前墙上小火画的那个圆圆火苗一模一样；母亲手指碰了碰镜面，久久没说话；「炉边有碗——灶火在」；那人磕了一个头，从这间屋子走了出去——他娘的灶也还会亮。
 > 交付：creative/novel/102-第一夜.md + en 孪生 102-the-first-night.md；novella 重生成 102 × 2 = 204 模块（典籍馆现为 102 卷）；root README（长篇**一百零二卷**、novel/en → 102-the-first-night）、creative README(zh+en)、strings(zh+en) codex 全量同步到 102 卷；原典语料重建：231 源；showcase feed 新增 W-Z239 实录。
 > 全量门禁 6754 / 6754 绿 · Build ✓ · Size ✓（首屏 2.08 MiB）· i18n 3227。
