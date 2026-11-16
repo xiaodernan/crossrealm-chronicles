@@ -163,6 +163,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Night of the Vigil | [the-night-of-the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/112-the-night-of-the-vigil.md) |
 | The Awakening Hearth | [the-awakening-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/113-the-awakening-hearth.md) |
 | The First Day of Spring | [the-first-day-of-spring](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/114-the-first-day-of-spring.md) |
+| The Hearth Named | [the-hearth-named](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/115-the-hearth-named.md) |
 
 Chapter → game-chapter mapping:
 

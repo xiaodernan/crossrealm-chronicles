@@ -161,6 +161,7 @@ creative/music/soundtrack.html
 | 守火之夜 · The Night of the Vigil | [the-night-of-the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/112-the-night-of-the-vigil.md) |
 | 醒灶 · The Awakening Hearth | [the-awakening-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/113-the-awakening-hearth.md) |
 | 立春 · The First Day of Spring | [the-first-day-of-spring](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/114-the-first-day-of-spring.md) |
+| 叫炉 · The Hearth Named | [the-hearth-named](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/115-the-hearth-named.md) |
 
 每一章对应游戏的章节走法：
 
