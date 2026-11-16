@@ -3345,6 +3345,22 @@ Where to put your hands:
 · tests/state-graph.test.js — the 25 cases pin down each routeFn against adversarial input
 
 Then go practice it — press {journal} → Fortune Path · The Three Questions. One reading per UTC day, first-read souls, no hurry — the fire is patient.`,
+  hm_title_vigil_vow: 'Starpath · The Hearth Vow',
+  hm_body_vigil_vow: `Starpath · The Hearth Vow — the second half of the Three-Questions vow chain.
+
+You have already asked the fire three things — what the fire is, how to keep it, whom to hand it to. Now the fire turns the question on you: what did you say to yourself while you were keeping it?
+
+On top of the same axes, three vows on top of the Three Questions:
+· Q1 You are alone before the stove — the fire is nearly out. What do you say? (“I’m waiting for you.” / You split your breakfast in half and set it on the iron rim. / “I’m here.”)
+· Q2 The first night they let you keep the fire alone — what did you do? (One twig of white birch at a time / You sat through the night without disturbing it / You carved a character into the soot)
+· Q3 The fire finally has its name — how do you remember that day? (Your mother’s flat hand on the iron rim / The old man pressing a fingertip of ash onto paper / Xiao Huo calling it 炉火 in one voice)
+
+Not a fortune telling — a vow. Same shape as the Three Questions, same axes (ember / grey / self), same ten endings (炉火春安 / 白默灰 / 炉照面 / 炉名七百 / 无名炉…). Deterministic, no dice, no random — the fire knows what you were thinking when you kept it.
+
+Execution path: src/content/vigilVow.js — the same axis set as the Fortune Path; the vow chain is compiled by the same src/core/StateGraph.js that powers the Three Questions; the daily state machine lives in src/game/VigilVowSystem.js; the Starpath · The Hearth Vow tab is rendered by src/ui/VigilVowTab.js.
+
+How to use: {journal} → Starpath · The Hearth Vow; one vow per UTC day — your answers, your reward, your ending, all live in crossrealm_vow_path_v1; first-vow souls 25/35/60 (max rarity 60).
+A whole day in three frames: the fire, the fire remembering your name, you calling it 炉火 for the first time.`,
   // Hearthside Quickstart (W-Z91): start screen / pause menu / first boot — the 30-second reading guide
   quickstart_title: 'Hearthside Quickstart · read me in 30s',
   quickstart_aria: 'Hearthside Quickstart',

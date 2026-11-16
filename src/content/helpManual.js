@@ -65,4 +65,9 @@ export const HELP_SECTIONS_EXTRA = [
     title: 'hm_title_state_graph2',
     body: 'hm_body_state_graph2',
   },
+  {
+    id: 'vigil-vow',
+    title: 'hm_title_vigil_vow',
+    body: 'hm_body_vigil_vow',
+  },
 ];
