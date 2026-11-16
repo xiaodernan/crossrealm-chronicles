@@ -19,8 +19,28 @@
 import http from 'node:http';
 import { connect } from 'node:net';
 import tls from 'node:tls';
+import { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const PROXY_RAW = process.env.LLM_PROXY_URL;
+/**
+ * 取值顺序：shell 环境变量 > 仓库根 .env 里的 LLM_PROXY_URL > undefined。
+ * （2026-11-16 实测：cache-probe 手动解析 .env 却只把 KEY/BASE/MODEL 注入脚本，
+ *  没人把 LLM_PROXY_URL 推进 process.env —— 于是 proxyIsSet()=false，探测直连，
+ *  上游 Cloudflare 全量 403，被误判成「Clash 不通」。这里在模块加载期就合并 .env。）
+ */
+const REPO_ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
+function resolveProxyRaw() {
+  if (process.env.LLM_PROXY_URL) return process.env.LLM_PROXY_URL;
+  try {
+    for (const line of readFileSync(join(REPO_ROOT, '.env'), 'utf8').split(/\r?\n/)) {
+      const m = line.match(/^\s*LLM_PROXY_URL\s*=\s*(.*)\s*$/);
+      if (m) return m[1].replace(/^["']|["']$/g, '');
+    }
+  } catch { /* 没有 .env —— 沿用 undefined */ }
+  return undefined;
+}
+const PROXY_RAW = resolveProxyRaw();
 
 export const proxyIsSet = () => Boolean(PROXY_RAW) && PROXY_RAW !== 'direct';
 export const proxyInfo = () => (PROXY_RAW === 'direct' ? 'direct' : PROXY_RAW ?? 'unset');
