@@ -54,9 +54,10 @@ import { checkQuestFactClosure } from './questFacts.js';
 import { ENEMY_ROSTER } from './enemies.js';
 import { ENEMY_SPAWNS } from './enemySpawns.js';
 // 章节判据要读**展开后**的 announce（`announce` 存的是键，W-D2 切片16j）——
-// 中文表就在**同层**（`content/strings.zh.js`），不构成"向上够 engine"。
-// 读中文表够用：判的是"喊的是不是第 N 章"，而 `Chapter N` 这句写法两种语言一致。
-import { STRINGS_ZH } from './strings.zh.js';
+// 中文表由 `localeProvider`（TLA 门）统一供给：`registry.js` 不直取 `strings.zh.js`，
+// 否则 zh 表会被这条静态边钉进 chunk-core（W-Z285 按语言分包已清掉这条边）。
+// 判的是"喊的是不是第 N 章"，而 `Chapter N` 这句写法两种语言一致，读 zh 够用。
+import { STRINGS_ZH } from './localeProvider.js';
 import { SURFACE_SPECS, SURFACE_PATTERNS } from './materialSurfaces.js';
 import { DIFFICULTY_TIERS, checkDifficultyTable } from './difficulty.js';
 import { ENEMY_GROWTH, GROWTH_MAX_STAGE, checkEnemyGrowth } from './enemyGrowth.js';

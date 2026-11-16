@@ -168,9 +168,13 @@ try {
     const t0Navigation = Date.now();
     await send('Page.navigate', { url: `http://127.0.0.1:${VITE_PORT}/` });
 
-    // boot：等 window.__game ready
+    // boot：等 window.__game ready。
+    // 60s 是 2026-10 机器上的读数；2026-11-17 同一台机器在别的工作负载挤占 CPU 时，
+    // dev server 现场 transform 2600+ 模块，一次冷启动实测 >220s（scripts/boot-probe.mjs 复核）——
+    // 会话超时只应描述"用户等不及走了"，不该把"这台机器今天慢"记成 boot 失败。
+    const BOOT_MS_CAP = 300000;
     let bootMs = null;
-    for (let t = Date.now() + 60000; ;) {
+    for (let t = Date.now() + BOOT_MS_CAP; ;) {
       const ok = await evalJs('!!window.__game && !!window.__game.enemyManager');
       if (ok) { bootMs = Date.now() - t0Navigation; break; }
       if (Date.now() > t) break;

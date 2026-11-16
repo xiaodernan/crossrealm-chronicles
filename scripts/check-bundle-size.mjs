@@ -55,7 +55,11 @@ import { fileURLToPath } from 'node:url';
  *   实测首屏 2306741 → **2079856 B**（chunk-core 972186 → 746394，−225792 B 即英文表本体），
  *   刻度下调的同时保留 2.25 MiB 绝对上限不动；`chunk-en` 由玩家语言/首个 en 调用时异步接上，
  *   默认中文用户零成本。ADR W-Z93 记录全过程。
- * - `FIRST_SCREEN_GROWTH_RATIO` —— 环比容差。单次改动允许比刻度长 3%（约 61 KB），
+ *   **2026-11-17 W-Z285 付清剩余债务**：中文表经 `localeProvider` 对称 TLA 动态化（`chunk-zh`，
+ *   与 `chunk-en` 并行），`i18n` / `content/registry` 两个静态消费者改走 TLA 门；
+ *   首屏 2226011 → **1948907 B**（chunk-core 852127 → 575023，−277104 B ≈ 中文表本体 277614 B）；
+ *   index.html 里无任何 chunk-zh/chunk-en 引用、modulepreload 清单里也没有。刻度下调。
+ * - `FIRST_SCREEN_GROWTH_RATIO` —— 环比容差。单次改动允许比刻度长 3%（约 58 KB），
  *   超了当场红。61 KB 是"一次切片合理增重"的上限：本仓近 200 个切片的实测中位数在
  *   10 KB 以内，最大的一片（`chunk-world` 首次落地）也只有 60 KB 出头。
  * - `FIRST_SCREEN_BUDGET` —— §2.3 的**绝对上限，2.25 MiB**。由 2.00 上调这一次
@@ -66,7 +70,7 @@ import { fileURLToPath } from 'node:url';
  *   上限往上抬了 0.25 MiB，**环比容差反而把警戒线从 0.63 MiB 收紧到 61 KB**。
  */
 /** 上次审阅的刻度（2026-11-17，见上方注释与 ADR W-Z84/W-Z93 的抬线规程）。 */
-export const FIRST_SCREEN_READING = 2226011; // W-Z282 炉火的交棒：src/content/kindlePass.js + src/game/KindlePassSystem.js + src/ui/KindlePassTab.js（StateGraph 传承链传承链第三段）+ hm_title_kindle_pass/hm_body_kindle_pass 双语（zh 仍在 chunk-core，en 侧随 W-Z93 localeProvider 分包不进首屏）+ instrumented telemetry lt_ 双表接入 —— 实测首屏 2226011 B（chunk-core 852127 + vendor-three 682986 + chunk-world 215769 + chunk-ui 211036 + index.css 110651 + chunk-combat 86766 + index 66676）；首屏增 72.5 KB，全部为真实新功能与双语句条，无死代码；2.25 MiB 绝对上限仍余 0.13 MiB。结构性杠杆（按语言分包把 zh 侧也分出去）仍是独立一片的活——下次抬线前必须先还/分掉，不再放行「先抬后想」。
+export const FIRST_SCREEN_READING = 1948907; // W-Z285 按语言分包收尾：strings.zh.js 动态化为独立 chunk-zh（与 chunk-en 并行 TLA 供给）· en/zh 均不再进 chunk-core —— 实测首屏 2226011 → 1948907 B（chunk-core 852127 → 575023；首屏 −277104 B ≈ zh 表本体 277614）；index.html 里无 chunk-zh/chunk-en 任何引用；build/lint/tests 全绿 6770/6770。结构性杠杆「双语言分包」在此全额付清——预算仍是 2.25 MiB，环比容差仍是上一版读数金额的 3%。
 
 /** 环比容差：单次改动允许比上次审阅长 3%（见上方注释） */
 export const FIRST_SCREEN_GROWTH_RATIO = 1.03;

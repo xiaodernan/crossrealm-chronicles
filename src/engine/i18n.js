@@ -10,8 +10,7 @@
  * 告警按键去重（`t()` 在每帧路径上，逐帧刷屏会埋掉真正的报错）。
  */
 
-import { STRINGS_ZH } from '../content/strings.zh.js';
-import { stringTable, STRINGS_EN } from '../content/localeProvider.js';
+import { stringTable, STRINGS_EN, STRINGS_ZH } from '../content/localeProvider.js';
 
 /** 语言 -> 文案表。两张表各自在 content 层已 Object.freeze，这里连映射一起冻上：
  *  运行时没有任何正当理由换表（换语言走 setLanguage，不改这张映射）（W-D2 切片56）。 */

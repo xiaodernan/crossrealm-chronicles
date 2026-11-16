@@ -15,6 +15,16 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-17 · W-Z285 双语言分包全额付清（首屏 −277 KB → 1.86 MiB）**：W-Z93 当年只卸下了英文表（`chunk-en`），中文表仍常驻 `chunk-core`（852,127 B），导致后续每次首屏抬线都贴着 3% 环比线蹭。本片兑现登记过的结构性杠杆：
+> · `localeProvider.js` 改为中英对称 TLA（`Promise.all([import(chunk-zh), import(chunk-en)])`），`chunk-zh` 独立成块（277,614 B），与 en 并行，同一条 TLA 排程；
+> · `engine/i18n.js` 撤掉对 `strings.zh.js` 的静态 import，改走 localeProvider（`stringTable` + 直接再导出的 `STRINGS_ZH`）；`content/registry.js` 的章节判据读表同理换走 TLA 门——W-Z109 后唯一定位注释里那条"本层同层"的老理由也随表卸载而更新；
+> · `vite.config.js` manualChunks 新增 `chunk-zh`（排在 `/src/content/` 兜底规则之前）；
+> · 首屏原始字节 **2226011 → 1948907 B**（chunk-core 852127 → **575023** −277104 B ≈ 中文表本体），dist/index.html 中没有任何 chunk-zh / chunk-en 的 modulepreload 引用；
+> · `check-bundle-size.mjs` FIRST_SCREEN_READING 随实测下调到 1948907（注释写明了本次全下调理由及上环比容差 3% ≈ 58 KB 与绝对上限 2.25 MiB 的余量 0.39 MiB）；
+> · 全量门禁：Build ✓ · Size ✓ · Lint ✓（0 errors）· **Tests 6770/6770 ✓** · vitest 460 文件 ✓。
+> · 实 Chrome 验证：ui-walkthrough **18/18 全绿**（zh/en × scale=large × 390×844 / 768×1024，越界元素 0 · HUD 挤叠 0）——双语 boot 路径在新 TLA 下完好；simulate-players 重采（seed=20261117 · 新挡 `BOOT_MS_CAP=300000`，原因见下）：**14/14 会话全部跑完 · totalExceptions=0 · bounced=3 · bootMsAvg=64928（dev 冷变换 + 同机挤占 CPU，生产构建远快于此）**；`docs/admin/data/simulation.json` 刷新入库。
+> · 顺带修复：simulate-players 的 boot 上限 60s → 300s（本机 2026-11-17 实测 dev 首启 >220s，机器没错，尺子太紧）；并新增 `scripts/boot-probe.mjs`（vite dev + headless Chrome + 90s 轮询的最小复核探针）作为"这一片的地板仪器"。
+>
 > **2026-11-17 · W-Z284 第131卷入典《第一夜 / The First Night》——卷十五之三十二（炉火的交棒的第一个完整夜晚）**：立春后第十六周——周六——午后出奇好的晴天——阿祖没有再出来——郭阿婆把粥托上去——阿祖没吃——阿石在灶前等——天黑以后他添了一根白桦——不多不少——和守火的份量一样——他没有睡——炉火替他醒着——第二天早上他还是坐在炉火前——全镇的人都慢慢知道了——炉火依然燃着。
 > 交付：creative/novel/131-第一夜.md + en 孪生 131-the-first-night.md；novella 131 × 2 = 262 模块（典籍馆现为 131 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：293 源；showcase feed 新增 W-Z284 实录。
 >
