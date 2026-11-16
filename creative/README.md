@@ -144,6 +144,7 @@ creative/music/soundtrack.html
 | 续火 · The Following Fire | [the-following-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/95-the-following-fire.md) |
 | 白茵 · Baiyin | [baiyin](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/96-baiyin.md) |
 | 光里 · In the Light | [in-the-light](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/97-in-the-light.md) |
+| 阁楼 · The Loft | [the-loft](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/98-the-loft.md) |
 
 每一章对应游戏的章节走法：
 

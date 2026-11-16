@@ -12246,6 +12246,85 @@ Both burned together.
 
 *(End of volume ninety-seven · Volume XIV, third part.)*
 
+# source: creative/novel/en/98-the-loft.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIV**: The Seven-Hundredth Year — the Continuing Volume
+
+---
+
+## Ninety-eight: The Loft
+
+A little before dawn, A-Shi heard something above him.
+
+Very soft. Like a small step on the wooden loft floor — a creak that was not his mother, not Xiao Huo, not the wind.
+
+He listened without moving.
+
+Nothing.
+
+He went up the ladder into the loft.
+
+The trap door was open.
+
+He had not opened it.
+
+Inside, the small room was washed with thin, pale morning light. Nothing had been disturbed. The pile of old winter clothes in the corner had not been moved. The stack of yellowing paper in the far corner had not been shifted.
+
+And in the middle of the room, on the old wobbly table nobody used anymore, sat a single coal.
+
+Plain. Very ordinary. No larger than a knuckle. Still faintly glowing at its very center, as though something deep inside it had never gone out.
+
+A-Shi walked to it slowly.
+
+He did not touch it.
+
+He looked at it for a long time.
+
+It was the kind of coal his grandfather used to carry from the mountain on the day of the first frost — the kind of charcoal his great-grandfather used to set special nights apart for — the kind the family had always brought home from the white stone on the northern ridge.
+
+He lifted it gently with one hand.
+
+It was warm.
+
+Not just warm from sitting in the loft — warm from within. The way the burned center of a long-since-extinguished fireplace stays warm hours after the last wood has ashed over.
+
+There was a small piece of paper tucked under its edge.
+
+He unfolded it with two fingers, very carefully.
+
+On it, a single line:
+
+The fire carries everything forward.
+
+A-Shi stood in the loft for a long while.
+
+Then he carried the coal down the ladder.
+
+He approached the stove.
+
+He opened the stove's iron door.
+
+He placed the coal inside.
+
+The stove did not explode. It did not roar. It simply — brightened.
+
+The kitchen filled with a gentle white-gold light that felt less like a flame and more like warmth arriving from somewhere far away — from a stove so ancient nobody alive could claim to have tended it.
+
+The fire in the stove ate the coal in a single silent breath.
+
+It burned steadily — brighter than ever.
+
+In the courtyard, the fire-seed tree shimmered in the new light.
+
+And the morning began.
+
+---
+
+*(End of volume ninety-eight · Volume XIV, fourth part.)*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -21646,6 +21725,91 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第九十七卷 · 卷十四之三）*
+
+# source: creative/novel/98-阁楼.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十四**：第七百年 —— 续卷
+
+---
+
+## 九十八 · 阁楼
+
+天还没亮透的时候，阿石听见头顶有
+
+很轻的响动。
+
+他愣了一下。
+
+小火在灶前。
+
+母亲在院子里收了。
+
+阿石立起身，往阁楼方向走。
+
+门开着。
+
+里面什么人也没有。
+
+他上了梯子，伸出手指碰阁楼门框——是凉的。
+
+他推开。
+
+里面——
+
+面前是一张榻。
+
+榻上放着一块煤——很普通的煤——像一块长过头了的石头——上面附了一片很薄的黑皮。
+
+他正在想这是什么，灶火又透过梯角的窗里了他的手。
+
+小火下来找他。
+
+灶火跳了一下。
+
+阿石抬头。
+
+他们屋两间暗阁，清晨微亮，站在梯子下的人都能看见天。
+
+煤在榻上被晨光照着。
+
+很平常。
+
+阿石蹲下来看。
+
+煤身底下还夹着一块小纸，不大不小的纸——拿出来。
+
+"六百年灶火给第七百年。"
+
+上面没什么字。
+
+他把煤夹着纸放在手心。
+
+院子里的火种树在阳光里闪一下。
+
+灶火在屋里响了一下。
+
+阿石负了煤下楼。
+
+他把煤放进灶火里。
+
+灶火照在他手上——瞬间灰烬落下。
+
+整间厨房亮起来。
+
+灶火没灭。
+
+夜里灶火自己照常燃烧。
+
+天亮灶火没灭。
+
+灶火没灭。
+
+---
+
+*（本章完 · 跨界线总第九十八卷 · 卷十四之四）*
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)

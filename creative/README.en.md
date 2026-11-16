@@ -146,6 +146,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Following Fire | [the-following-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/95-the-following-fire.md) |
 | Baiyin | [baiyin](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/96-baiyin.md) |
 | In the Light | [in-the-light](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/97-in-the-light.md) |
+| The Loft | [the-loft](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/98-the-loft.md) |
 
 Chapter → game-chapter mapping:
 

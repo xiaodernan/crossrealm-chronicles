@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Ninety-seven volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Ninety-eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 97 volumes of the canon, fully readable
+· Canon Library — 98 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3137,8 +3137,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 97-volume index',
-  hm_body_codex: `Codex — 97 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 98-volume index',
+  hm_body_codex: `Codex — 98 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3239,6 +3239,7 @@ hm_title_codex: 'Codex · the 97-volume index',
 95 · The Following Fire — three months after Baiyin’s last visit, a letter arrives that is almost empty — just paper that carries its own warmth; A-Shi holds it to the stove to read it; no ink is visible; his mother walks in and knows at once what it is; she draws out a small skillet from the hearth-shelf — the same kind the family has been using for six hundred years, the iron still warm — “six hundred years have arrived,” she says — Xiao Huo toddles over and nestles the skillet against his grandmother’s chest; the stove burned steady as ever; the seven-hundredth year begins, right there in the kitchen, at the stove — and the stove does not stop. Volume XIV, first part.
 96 · Baiyin — Baiyin arrives at midday without warning; the stove sees her immediately and rises in a welcoming curve; his mother brings water; Baiyin pours a little of that water into the stove the way generations before her have done; she walks to the door, turns back once, and is gone; the stove flickers; the fire has remembered something — not yet told to anyone — but the seven-hundredth year is now underway; the fire has never gone away. Volume XIV, second part.
 97 · In the Light — A-Shi woke before dawn to a light that had no source: the stove glowing with a white-gold radiance; his mother stepped out of the back room, barefoot, her hair still uncombed; neither of them spoke; she knelt by the stove — she had been waiting, all her life, for this morning — she put both her hands into the light — it did not burn her — she wept, softly, with her whole face lit; A-Shi reached his hand in beside hers; the warmth entered him from fingertips to chest — and settled there like a heartbeat finally finding its rhythm — outside, the day was beginning; two lights met on the kitchen floor: one from the east, one from the stove — neither cancelled the other — the fire has never gone away; it has only been waiting for them. Volume XIV, third part.
+98 · The Loft — A-Shi hears a very soft shifting above; nothing has disturbed the loft for a hundred years; footsteps withdraw; he climbs; trap door; inside, in the middle of the otherwise-empty room, on the old wobbly table nobody has used in fifty years, sits a single plain coal — plain, ordinary, still faintly glowing at its center; under its edge a tiny slip of paper — one line: “the fire carries everything forward”; he lifts it — warm — much warmer from within; he carries it downstairs and places it in the stove; the stove eats it in a single silent breath; the kitchen fills with a gentle white-gold light, not like any flame he has seen before; the fire-seed tree in the yard sways once; morning arrives. Volume XIV, fourth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3252,7 +3253,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (ninety-seven volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (ninety-eight volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
