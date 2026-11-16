@@ -15,6 +15,9 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-16 · W-Z269 BM25 search 改用 posting-list 反向索引（Java · 纯 perf · 语义不变）**：`Bm25Index.java`——旧实现对每个 query-term 重扫 N 篇文档的每一个 token 半计算 tf；新实现构造期建 `Map<token, List<Posting(docId, tf)>>`，search 只沿命中对累加分数——时间从 `O(N×Σtokens_per_doc×|query_terms|)` 降为 `O(|matching_postings|)`。向量与 bm25-eval / 整体 ranking 完全不变。
+> 回归：Bm25IndexTest 11/11 ✅ · LoreRagTest 6/6 ✅ · OracleControllerTest 5/5 ✅ · LoreOracleRouteHintTest 23/23 ✅ · BUILD SUCCESS · Oracle live 4/4 ✅（canon/refs/refusal 行为一致）。
+>
 > **2026-11-16 · W-Z268 中英双语审计机控（i18n-audit.mjs）**：新增 `scripts/i18n-audit.mjs`（手动运行）——grep 扫描 strings.en.js / strings.zh.js 两侧——英文 UI 中残留 CJK 字符 = 0 · 中文 UI 中夹带成段英文 = 0（in-world 碑文以「…」引号包裹的诗意英文原句保留，如 `zone_disc_void_tablet_text`）。
 > 首次跑出的 2 个夹带英文均已修：`canon_load_failed` 中「development-fresh? 先 npm run build 再打开」改纯中文 + 技术命令；现为 0 残留。
 >
