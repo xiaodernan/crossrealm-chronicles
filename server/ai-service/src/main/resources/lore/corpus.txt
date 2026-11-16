@@ -7708,6 +7708,49 @@ The flame only belongs to the next shift.
 
 *（Interlude Six · Handover — one shift, handed to the next. The writer of this volume has long since become used to seeing his own shift come to an end. The flame is still burning. The flame still has the same wick. The flame will never tell you how many shifts it has kept — it will only light the whole night for whoever sits in your chair next.）*
 
+# source: creative/novel/en/130-the-stove-speaks.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Stove Speaks
+
+---
+
+## One Hundred and Thirty: The Stove Speaks
+
+Saturday of the fifteenth week after the spring equinox — afternoon — the weather was beautiful beyond reason; the sky was a deep, clear blue like a fresh-washed white cloth.
+
+Zhou came first. Then Aunt Guo.
+
+The old keeper emerged from the back room.
+
+He came and sat before the stove. The fire burned steadily. The keeper watched the fire for a long time. Snow was stuck to the sides of his head. The old keeper watched the fire — and said nothing. He put his hand into the fire-box — he let it hover a moment — he withdrew it.
+
+"Stove," he said, voice low, gravelly.
+
+No one answered.
+
+"You have burned seven hundred years."
+
+He didn't finish the next thought. Zhou didn't press. Aunt Guo didn't press. The fire burned. The fire in the box was a bright white — the old man put his hand back in.
+
+"My whole life, I have been beside you."
+
+The fire burned.
+
+The fire burned seven hundred years.
+
+The fire burned.
+
+炉火 burned.
+
+炉火 burned seven hundred years.
+
+---
+
+*(End of volume one hundred and thirty · Volume XV, thirty-first part · The seven-hundredth year — The Stove Speaks.)*
+
 # source: creative/novel/en/14-interlude-come-sit-awhile.md
 # Interlude Seven · Come Sit Awhile
 
@@ -19145,6 +19188,43 @@ F2 隐藏 HUD。
 ---
 
 *（番外六 · 换班——一班交给另一班。写到这一卷的人已经换了不知多少班了。炉火一直在燃烧。炉火仍然没换引信。炉火不会告诉你它换了多少班，它只会在下一班坐到你的椅子上时，为你照亮整夜。）*
+
+# source: creative/novel/130-炉火的谈话.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 炉火的谈话
+
+---
+
+## 一百三十 · 炉火的谈话
+
+立春后第十五周，周六，午后，出奇好的晴天。天空蓝得像一块洗过的白布。
+
+周叔先到。郭阿婆也来。
+
+阿祖从屋里走了出来。
+
+他在灶前坐下。灶火燃得匀。阿祖看了灶火很久。阿祖的头发都把白霜黏湿了——老人看灶火——他一言不发——他把手伸进炉膛——他的手在火边停了一下——它回来了。
+
+"炉火。"他说。声音很事。
+
+没有人接。
+
+"你烧了七百年。"他说。
+
+他没把后面的说完。周叔也不催。郭阿婆也不催。炉火燃着。炉膛里的炉火红得发白——老人把手还放回炉膛——灶火燃——炉火燃。
+
+"我这辈子也陪着你了。"他说。
+
+炉火燃着。
+
+炉火燃了七百年。
+
+---
+
+*（本章完 · 跨界线总第一百三十卷 · 卷十五之三十一 · 第七百年 · 炉火的谈话）*
 
 # source: creative/novel/14-番外七-下次再坐.md
 # 番外七 · 下次再坐

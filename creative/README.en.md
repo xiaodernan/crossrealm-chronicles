@@ -177,7 +177,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Shadow at the Stove’s Mouth | [the-shadow-at-the-stoves-mouth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/126-the-shadow-at-the-stoves-mouth.md) |
 | The Waiting | [the-waiting](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/127-the-waiting.md) |
 | The Card in the Stove | [the-card-in-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/128-the-card-in-the-stove.md) |
-| The Thin Rain | [the-thin-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/129-the-thin-rain.md) |Chapter → game-chapter mapping:
+| The Thin Rain | [the-thin-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/129-the-thin-rain.md) |
+| The Stove Speaks | [the-stove-speaks](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/130-the-stove-speaks.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
