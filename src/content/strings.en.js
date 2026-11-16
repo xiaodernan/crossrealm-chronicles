@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and twenty-seven volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and twenty-eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 127 volumes of the canon, fully readable
+· Canon Library — 128 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3138,8 +3138,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 127-volume index',
-  hm_body_codex: `Codex — 127 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 128-volume index',
+  hm_body_codex: `Codex — 128 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3270,6 +3270,7 @@ hm_title_codex: 'Codex · the 127-volume index',
 125 · The Thunder Rain — Saturday of the tenth week after the spring equinox, the morning went grey; the whole town came — Uncle Zhou first, old Aunt Guo second, then others none of them recognized, then so many that the door could not close; Mother was worried — A-Shi said “don’t be afraid” — the pot was filled with broth, bowls were passed around, the stove burned steadily; at three thirty in the afternoon the sky exploded — a storm rolled in — every tile across the village drummed with rain; the courtyard gathered water; everyone sat around the stove; no one spoke for a long time; after the rain finally stopped and sunlight returned, the whole town sat again at the benches and ate together, the stove still burning. Volume XV, twenty-sixth part.
 126 · The Shadow at the Stove’s Mouth — Saturday of the eleventh week after the spring equinox, the sun had barely risen; the yard was still cool and clear; A-Shi was sweeping with a bamboo broom while Xiao Huo watched him from the porch; “eggs today,” Mother called from the kitchen; the sky was very wide, surprisingly blue; the fire-seed tree’s needles had grown another layer; He turned back to the kitchen and saw Xiao Huo standing at the stove with his hand flat against the iron edge; he had not moved; “did you hear it?” Xiao Huo asked; A-Shi stopped; “hear what?”; “the stove,” Xiao Huo said; “listening to it”; A-Shi crouched down and listened; the stove was making a sound — a low, steady sound — not loud exactly, but unmistakably there; A-Shi put both hands on the iron edge; the iron was warm; “灶火,” he said; “炉火”; Xiao Huo nodded slowly; he reached out and pressed his small hand against the iron; “seven hundred years,” he said quietly; nobody answered; the stove burned. Volume XV, twenty-seventh part.
 127 · The Waiting — Saturday of the twelfth week after the spring equinox, fog lay over the yard at dawn — not too thick — the sun was climbing; Uncle Zhou arrived early; he did not speak; the stove burned as it always had, watching; Uncle Zhou stood in the yard for a long time — he wanted to leave — he didn’t; he stood before the stove for close to an hour; “are you here,” he said to the fire; the fire didn’t answer; A-Shi brought out a fresh bowl of warm rice gruel and offered it to Uncle Zhou; he took it, drank it in one gulp, and held the bowl; “you’ve been carrying something,” A-Shi said; “no,” Uncle Zhou said; he stood there after finishing the bowl for some time; then he left; the stove didn’t go out; the stove burned; the stove burned. Volume XV, twenty-eighth part.
+128 · The Card in the Stove — Saturday of the thirteenth week after the spring equinox, clear sky, bright, stinging light; Uncle Zhou arrived first; Aunt Guo was second; two strangers came from far outside town — no one knew them — they stood from the corner to the stove; A-Shi was sweeping with a bamboo broom; Xiao Huo brought two bowls of broth and set them down; their grandfather came out from the back room and stood at the door — he didn’t speak, he only watched the stove; by six, a light rain began to fall; the town stopped leaving; no one went home; the night was very long; the people by the stove decided nobody would leave before dawn; A-Shi went to the kitchen and brought out dishes; Uncle Zhou and Aunt Guo insisted on staying the whole night; the grandfather stayed too; no one asked about the cards; no one asked what the cards were for; no one asked where the cards came from; they burned the cards, one by one, in the stove; the fire figured out what they were; seven hundred years, and these were the pieces of paper no one could bring themselves to speak of aloud; 炉火 burned; 炉火 burned. Volume XV, twenty-ninth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3283,7 +3284,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and twenty-seven volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and twenty-eight volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

@@ -175,7 +175,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Whole Town and the Fire | [the-whole-town-and-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/124-the-whole-town-and-the-fire.md) |
 | The Thunder Rain | [the-thunder-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/125-the-thunder-rain.md) |
 | The Shadow at the Stove’s Mouth | [the-shadow-at-the-stoves-mouth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/126-the-shadow-at-the-stoves-mouth.md) |
-| The Waiting | [the-waiting](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/127-the-waiting.md) |Chapter → game-chapter mapping:
+| The Waiting | [the-waiting](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/127-the-waiting.md) |
+| The Card in the Stove | [the-card-in-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/128-the-card-in-the-stove.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
