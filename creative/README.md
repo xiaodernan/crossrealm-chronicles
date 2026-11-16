@@ -127,6 +127,7 @@ creative/music/soundtrack.html
 | 客 · The Guest | [the-guest](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/78-the-guest.md) |
 | 出山 · Into the Outlands | [into-the-outlands](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/79-into-the-outlands.md) |
 | 北灯 · The North Lamp | [the-north-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/80-the-north-lamp.md) |
+| 第二盏灯 · The Second Lamp | [the-second-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/81-the-second-lamp.md) |
 
 每一章对应游戏的章节走法：
 

@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Eighty volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Eighty-one volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 80 volumes of the canon, fully readable
+· Canon Library — 81 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3137,8 +3137,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 80-volume index',
-  hm_body_codex: `Codex — 80 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 81-volume index',
+  hm_body_codex: `Codex — 81 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3220,6 +3220,7 @@ hm_title_codex: 'Codex · the 80-volume index',
 78 · The Guest — three weeks after the black coal came home; one afternoon a small girl appears at the gate — about seven, one shoe on one off — carrying her grandmother’s letter: a painted pair of eyes, wordless — her home’s stove went out — she walked across the ridge alone to borrow fire from the six-hundred-year stove; A-Shi remembers a face he once half-knew; he dips her coal in stove-ash water; it blazes blue under his own hand — he wraps it back with instructions not to open it — she turns away and says: my grandmother told me to say — the fire-seed walks on its own feet — the fire was never theirs alone — it has been travelling six hundred years to find the next house. Volume XI, thirteenth part.
 79 · Into the Outlands — high summer quiet hearth: one dawn Baiyin stands in the doorway and says — “it is time you left the mountain” — points north — three more lamps beyond the ridge, all burning for six hundred years just like this hearth — she hands A-Shi an old fire-sickle — the valley keeper stays at the stove; the outlands keeper carries the fire — two different callings — A-Shi packs: pine needles, the charred ledger-page, a sprig of the fire-seed tree — his mother silently hands him ink-line, kitchen paper, and a stopper of stove-ash — he steps out the gate for the first time in six hundred years, bows to his house, and does not look back — the stove gives one low bright leap — and the keeper is on the road. Volume XI, fourteenth part.
 80 · The North Lamp — third evening, A-Shi crosses the chimney ridge; on a vast dark flatland before him, a row of tiny yellow-orange lamps hangs over the horizon; he walks for the nearest — an old man sitting there with an iron canister at his feet: “Are you the six hundred and first?” — : six hundred they have all waited — the north wind carries A-Shi’s stove-fire’s scent in every season — the three lamps light at once for the first time in six hundred years — he gives A-Shi a wooden plaque: “keep the fire — until the whole case comes alight”; A-Shi walks on toward the second lamp — the ridge breathes brighter than it has in six hundred years. Volume XII — The Long Journey: Fire and Ink — opens.
+81 · The Second Lamp — an entire day deeper into the ash-flat; A-Shi reaches the second lamp — a young woman about his age straining rice straw before the light; she draws from her sleeve the same wooden plaque: “keep the fire — until the whole case comes alight” — she is Grandma Bai’s sister — the three lamps, south/middle/north — the south’s always burns, so the north carries its breath and can always be relit, because the line never breaks; she gives A-Shi a tiny black coal, one of the original kindling-stock carried out of the white stone; the third lamp has been dark six hundred years — she lights it with burning rice straw at nightfall — for the first time the northern flatland burns end-to-end — six hundred years of silence end in one light. Volume XII, second part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3233,7 +3234,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (eighty volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (eighty-one volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
