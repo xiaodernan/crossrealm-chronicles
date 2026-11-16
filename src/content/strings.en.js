@@ -3094,6 +3094,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Trisolar Tide — one weekly cast, three cards revealed together
 · Starpath · Hearth Vow — a vow for the keeper, same stateful routing
 · Starpath · Passing of the Fire — the last handover, seven hundred years waiting
+· Starpath Advisor guidance — when its answer nominates a destination, a button lands under the word; one tap takes you there
 
 Tab buttons show unlocked count。`,
   hm_title_meta_systems: 'Meta Systems',
@@ -3777,6 +3778,8 @@ Three frames in retrospection: the fire + the light on your palm + the house shi
   advisor_error_unavailable: 'The advisor is resting (circuit open). Come back shortly.',
   advisor_error_http_fmt: 'The stars refused that question (HTTP ${status}).',
   advisor_error_busy: 'The stars are crowded right now and the queue is full. Try again in a moment; this question was not lost.',
+  // W-Z286: directive protocol — the button label shown when the advisor nominates a destination (one tap lands on the tab)
+  advisor_directive_follow_fmt: 'Follow the guide · open ${tab}',
   advisor_meta_fmt: '${model} · ${ms} ms',
   advisor_meta_cached_fmt: '${hits}/${total} local cache',
   advisor_meta_upstream_fmt: '${hits}/${total} prompt cache',

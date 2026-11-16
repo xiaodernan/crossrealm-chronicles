@@ -3094,6 +3094,7 @@ export const STRINGS_ZH = Object.freeze({
 · 三日曜盘 — 每周一盘，三牌同启
 · 星轨 · 炉火祈愿 — 守火祈愿，StateGraph 真实路由
 · 炉火的交棒 — 阿祖把七百年交给你的最后一课
+· 星轨顾问的指引 — 回答里若有提名，按钮下在答案下面，按一下就到
 
 页签按钮上显示已解锁数量。`,
   hm_title_meta_systems: '进阶系统',
@@ -3686,6 +3687,8 @@ trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在
   advisor_error_unavailable: '顾问暂时不在（熔断中），过一会儿再来。',
   advisor_error_http_fmt: '星图拒了这一问（HTTP ${status}）。',
   advisor_error_busy: '问星图的人有点多，队列暂时满了。稍等一下再问，这一句没有丢。',
+  // W-Z286：指引协议——模型提名目的地时渲染的按钮文案（点一下落到对应日志子页）
+  advisor_directive_follow_fmt: '跟随指引 · 打开「${tab}」',
   advisor_meta_fmt: '${model} · ${ms} ms',
   advisor_meta_cached_fmt: '${hits}/${total} 本地缓存',
   advisor_meta_upstream_fmt: '${hits}/${total} 上游缓存',

@@ -837,6 +837,19 @@ buildHUD() {
     return this.setJournal(!this.journalOpen);
   }
 
+  /**
+   * 星轨顾问的落点（W-Z286）——把回答里的"跟随指引"落到某个日志子页签。
+   * 白名单：日志的全部类目键（基础类目在清单视图里，扩展类目落各自子面板）。
+   * 非法 slug 一律拒收（调用方两端都过了白名单，这里再兜一层）；打开后回 true。
+   */
+  openJournalTab(tab) {
+    if (typeof tab !== 'string' || !tab || !Object.prototype.hasOwnProperty.call(mergeJournalCategories(JOURNAL_CATEGORIES), tab)) {
+      return false;
+    }
+    this.journalTab = tab;
+    return this.setJournal(true);
+  }
+
   toggleZonePanel() {
     this.zonePanel.classList.toggle('hidden');
   }

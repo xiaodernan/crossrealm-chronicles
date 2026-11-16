@@ -31,6 +31,7 @@ import { t, applyTranslations } from '../engine/i18n.js';
 import { attachDraggable } from './DraggablePanel.js';
 import { focusElement, focusFirstItem } from './FocusNav.js';
 import { ADVISOR_REASONS, ADVISOR_LIMITS, normalizeAdvisorQuestion } from '../content/advisor.js';
+import { DIRECTIVE_TABS, resolveAdvisorDirectives, stripAdvisorDirectives } from '../content/advisorDirectives.js';
 import { presenceTracker } from '../online/presenceTracker.js';
 import { notifyTracker } from '../online/notifyTracker.js';
 
@@ -375,10 +376,12 @@ export class AdvisorPanel {
   /** 唯一的写气泡出口：模型文本只经 `textContent`，并给 DOM 长度封顶 */
   _appendMessage(role, text, extra = {}) {
     if (!this.transcript || typeof document === 'undefined') return null;
+    // 顾问的回答是不可信文本，且可能带回"协议标记"——协议文本不该让玩家读到
+    const visible = role === 'advisor' ? stripAdvisorDirectives(text) : text;
     const box = document.createElement('div');
     box.className = `advisor-msg is-${role}`;
     box.setAttribute('data-advisor-role', role);
-    box.textContent = text;
+    box.textContent = visible;
 
     if (role === 'advisor') {
       const meta = document.createElement('span');
@@ -402,6 +405,21 @@ export class AdvisorPanel {
         added = true;
       }
       if (added) box.appendChild(meta);
+      // 指引协议落点：模型许诺的目的地解析成真按钮——点一下落到日志对应子页
+      const directives = resolveAdvisorDirectives(text, (slug) => t(DIRECTIVE_TABS[slug]));
+      for (const slug of directives) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'advisor-directive-btn';
+        btn.textContent = t('advisor_directive_follow_fmt', { tab: t(DIRECTIVE_TABS[slug]) });
+        btn.addEventListener('click', () => {
+          const hud = this.game?.hud;
+          const opened = hud?.openJournalTab?.(slug) === true;
+          try { (window.__crossrealmTelemetry)?.record?.('advisor_directive_follow', { tab: slug, ok: opened }); } catch { /* telemetry absent — ignore */ }
+          if (opened && typeof this.hide === 'function') this.hide();
+        });
+        box.appendChild(btn);
+      }
     }
 
     this.transcript.appendChild(box);

@@ -326,7 +326,7 @@ const I18N = {
     kpi_new: '新用户/日', kpi_sessions: '总会话数', kpi_boss_clears: '总 Boss 通关', kpi_d14: '留存 D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
     lt_game_start: '游戏启动', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
-    lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关', lt_trilance_draw: '曜盘已起', lt_vow_draw: '祈愿已许', lt_kindle_pass_draw: '交棒已候',
+    lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关', lt_trilance_draw: '曜盘已起', lt_vow_draw: '祈愿已许', lt_kindle_pass_draw: '交棒已候', lt_advisor_directive_follow: '跟随指引',
     insight_h2: '本机智能洞察', insight_small: 'LS 真实事件流 → 下一步该做什么',
     insight_empty: '尚无足够事件——随便玩两局（H/J/M/击杀 Boss/抽卡）再回来',
     insight_low: '低置信度 · n={n}', insight_mid: '中等置信度 · n={n}', insight_high: '高置信度 · n={n}',
@@ -384,7 +384,7 @@ const I18N = {
     kpi_new: 'New users / day', kpi_sessions: 'Total sessions', kpi_boss_clears: 'Total boss clears', kpi_d14: 'Retention D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
     lt_game_start: 'Game start', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
-    lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped', lt_trilance_draw: 'Trisolar tide cast', lt_vow_draw: 'Vow drawn', lt_kindle_pass_draw: 'Handing drawn',
+    lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped', lt_trilance_draw: 'Trisolar tide cast', lt_vow_draw: 'Vow drawn', lt_kindle_pass_draw: 'Handing drawn', lt_advisor_directive_follow: 'Guide followed',
     insight_h2: 'Local AI insight', insight_small: 'LS event stream → what to do next',
     insight_empty: 'Not enough signal yet — play a few rounds (H/J/M/boss kill/draw) then come back',
     insight_low: 'Low confidence · n={n}', insight_mid: 'Medium confidence · n={n}', insight_high: 'High confidence · n={n}',
@@ -672,8 +672,8 @@ function renderLocalEvents() {
   const arr = readLocalEvents();
   const counts = Object.create(null);
   for (const e of arr) if (e && typeof e.event === 'string') counts[e.event] = (counts[e.event] ?? 0) + 1;
-  const known = ['game_start', 'help_open', 'journal_open', 'worldmap_open', 'canon_open', 'flame_draw', 'boss_kill', 'autoplay_tap', 'trilance_draw', 'vow_draw', 'kindle_pass_draw'];
-  const labelKey = { game_start: 'lt_game_start', help_open: 'lt_help_open', journal_open: 'lt_journal_open', worldmap_open: 'lt_worldmap_open', canon_open: 'lt_canon_open', flame_draw: 'lt_flame_draw', boss_kill: 'lt_boss_kill', autoplay_tap: 'lt_autoplay_tap', trilance_draw: 'lt_trilance_draw', vow_draw: 'lt_vow_draw', kindle_pass_draw: 'lt_kindle_pass_draw' };
+  const known = ['game_start', 'help_open', 'journal_open', 'worldmap_open', 'canon_open', 'flame_draw', 'boss_kill', 'autoplay_tap', 'trilance_draw', 'vow_draw', 'kindle_pass_draw', 'advisor_directive_follow'];
+  const labelKey = { game_start: 'lt_game_start', help_open: 'lt_help_open', journal_open: 'lt_journal_open', worldmap_open: 'lt_worldmap_open', canon_open: 'lt_canon_open', flame_draw: 'lt_flame_draw', boss_kill: 'lt_boss_kill', autoplay_tap: 'lt_autoplay_tap', trilance_draw: 'lt_trilance_draw', vow_draw: 'lt_vow_draw', kindle_pass_draw: 'lt_kindle_pass_draw', advisor_directive_follow: 'lt_advisor_directive_follow' };
   const gridHtml = known.map(k => {
     const v = counts[k] ?? 0;
     const active = v > 0;

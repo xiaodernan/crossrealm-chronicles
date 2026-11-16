@@ -15,6 +15,16 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-17 · W-Z286 星轨顾问的指引协议（LLM → 游戏里的一次真实跳转）**：此前模型只"说"，玩家还得自己找入口——这一片把大模型的指向变成界面里的一次真状态流转（回答 → 落在某个日志子页）。
+> · 正式通道：`server/ai-service/src/main/resources/ai/system-prompt.txt` 追加【指引协议】段——模型可在回答末尾挂一个小标记 `⟦guide:slug⟧`，slug 只能取 18 枚白名单之一（canon/codex/flame/trilance/path/vigil/pass/ending/memory/bestiary/legends/season/trial/side/skills/echoes/dungeons/cg）或 `none`；不挂、不自创、不翻语言、不连发。这是上游 frozen prefix 的一次性追加（首调冷，随后回暖；W-Z247 同款手法）。
+> · 降级通道：`src/content/advisorDirectives.js`（content 层自洽，不 import ui/，避免 B37 中 core→ui 成环）——正式标记优先，为空再按 tab 文案别名（「·」左右两段 + 整标签，≥2 字符、过滤过于通用的词、大小写不敏感）在正文里做 substring 命中，最多 2 处。
+> · UI 落地：`src/ui/AdvisorPanel.js` —— 顾问回答剥协议文本后再入白名单解析；渲染与缓存徽章同一行的 textContent 安全路径之上，命中者渲染 `advisor-directive-btn`（全程 createElement + textContent，绝不拼进 innerHTML）——「跟随指引 · 打开{tab}」；点击 → `HUD.openJournalTab(slug)`（新公开方法：JournalTabRegistry 白名单兜底，setJournal(true) 落焦第一格）+ window.__crossrealmTelemetry 上报 `advisor_directive_follow` + 关闭顾问面板。
+> · i18n：+1 键 `advisor_directive_follow_fmt`（中英双语），EXPECTED_KEY_COUNT 3247→3248；样式 `.advisor-directive-btn`（inline-flex、萤火虫式萤火按钮，焦点可达——文笔与尺子双头）。
+> · tests/advisor-directives.test.js —— 白名单与 JOURNAL_EXTRA_TABS registry 同键同值、zh/en 两表都有活文案、正式通道标记解析（白名单/去重/上限 3/none 净化）、别名降级匹配、正式通道优先级、顺序稳定性（按钮不乱跳）。
+> · Admin：`lt_advisor_directive_follow` 标签（zh+en）+ known 白名单 + labelKey 接入（顾问落点遥测可在炉边盘实时计数）。
+> · 说明书补记：`hm_body_journal_tabs`（双语）各加一行——「星轨顾问的指引 — 回答里若有提名，按钮下在答案下面」；不再另开教学章（协议是顾问自发行为，一句就讲尽）。
+> · Gates：Build ✓ · Size ✓（1.91 MiB 环比线内，0.39 MiB 绝对余量）· Lint ✓（0 errors）· **Tests 6782/6782 ✓**（461 文件）。
+>
 > **2026-11-17 · W-Z285 双语言分包全额付清（首屏 −277 KB → 1.86 MiB）**：W-Z93 当年只卸下了英文表（`chunk-en`），中文表仍常驻 `chunk-core`（852,127 B），导致后续每次首屏抬线都贴着 3% 环比线蹭。本片兑现登记过的结构性杠杆：
 > · `localeProvider.js` 改为中英对称 TLA（`Promise.all([import(chunk-zh), import(chunk-en)])`），`chunk-zh` 独立成块（277,614 B），与 en 并行，同一条 TLA 排程；
 > · `engine/i18n.js` 撤掉对 `strings.zh.js` 的静态 import，改走 localeProvider（`stringTable` + 直接再导出的 `STRINGS_ZH`）；`content/registry.js` 的章节判据读表同理换走 TLA 门——W-Z109 后唯一定位注释里那条"本层同层"的老理由也随表卸载而更新；

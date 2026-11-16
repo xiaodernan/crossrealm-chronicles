@@ -4088,6 +4088,30 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   background: rgba(244, 207, 106, 0.08);
 }
 
+/* 顾问的指引协议落点：模型许诺的标记被解析成按钮，点一下就落到某个日志子页
+   （此前顾问只会"说"，玩家还得自己找入口——这一片把大模型指向变成状态流转）。
+   按钮刻意做得像"炉边的一只萤火虫"，不与关闭/发送抢注意力。 */
+.advisor-directive-btn {
+  display: inline-flex;
+  margin: 8px 6px 0 0;
+  padding: 4px 10px;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: #c9b8ff;
+  cursor: pointer;
+  border: 1px solid rgba(190, 166, 255, 0.32);
+  border-radius: 999px;
+  background: rgba(126, 88, 220, 0.16);
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.advisor-directive-btn:hover {
+  color: #e6dcff;
+  border-color: rgba(190, 166, 255, 0.6);
+  background: rgba(126, 88, 220, 0.26);
+}
+
 .advisor-typing {
   display: flex;
   align-items: center;

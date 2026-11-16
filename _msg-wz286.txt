@@ -1,0 +1,22 @@
+feat(advisor): W-Z286 星轨顾问的指引协议 —— LLM 提名目的地 → 游戏里的一次真实跳转
+
+此前星轨顾问只会「说」：回答完，玩家还得自己在日志里翻典籍馆 / 占火 / 炉火的交棒。
+这一片把模型的指向变成界面里的**真状态流转**——一句提名 → 一颗萤火虫式按钮 → 落到对应的日志子页。
+
+正式通道：
+- `server/ai-service/src/main/resources/ai/system-prompt.txt` 追加【指引协议】段：模型可在回答末尾挂 `⟦guide:slug⟧`，slug 白名单 18 枚（canon/codex/flame/trilance/path/vigil/pass/ending/memory/bestiary/legends/season/trial/side/skills/echoes/dungeons/cg）或 none；不挂、不自创、不翻语言、不连发。这是上游 frozen prefix 的一次性追加（首调冷启动，随后回暖——W-Z247 同款手法）。
+
+降级通道（老 backend / 离线工时）：
+- `src/content/advisorDirectives.js`（content 层自洽，**不 import ui/**，避免 "chunk-core → chunk-ui" 成环——B37）：正式标记优先；为空则按 tab 文案别名（「·」左右两段 + 整标签，≥2 字符、过滤过于通用的词如 星轨/Starpath、大小写不敏感）做 substring 命中，至多 2 处。
+
+UI 落地：
+- `src/ui/AdvisorPanel.js` —— 回答剥协议文本后入白名单解析；命中者渲染 `advisor-directive-btn`（createElement + textContent，绝不拼 innerHTML，与缓存徽章同层段）——"跟随指引 · 打开${tab}"；点击 → `HUD.openJournalTab(slug)`（新公开方法：JOURNAL_CATEGORIES ∪ EXTRA 白名单双兜底 + setJournal(true) 落焦第一格 + overlay 语义一致）+ window.__crossrealmTelemetry 上报 `advisor_directive_follow` + 关闭顾问面板。
+- 样式 `.advisor-directive-btn`（style.css，inline-flex、萤火虫式萤火按钮；焦点可达——按钮天生在 FOCUSABLE_TAGS，pointer-or-nothing 违规不会重演）。
+
+i18n / 文档：
+- +1 键 `advisor_directive_follow_fmt`（中英双语），EXPECTED_KEY_COUNT 3247 → 3248；
+- `hm_body_journal_tabs`（双语）各补一行指引协议说明（说明书完整覆盖全部功能）；
+- Admin 炉边盘 `lt_advisor_directive_follow` 标签（zh+en）+ known 白名单 + labelKey 接入（advisor_directive_follow 可在本机事件流里实时计数）；
+- MASTER_PLAN W-Z286 记入；showcase feed 新增 W-Z286 实录。
+
+门禁：build ✓ · size ✓（1.91 MiB 环比线内 · 绝对余量 0.39 MiB）· lint ✓（0 errors；仅 4 项既有警告）· **Tests 6782/6782 ✓（461 文件）** · focus-nav/chunk-graph/content-registry 三道分层尺子全绿。
