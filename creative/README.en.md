@@ -142,6 +142,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Bestowal | [the-bestowal](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/91-the-bestowal.md) |
 | The Hearth | [the-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/92-the-hearth.md) |
 | The Night | [the-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/93-the-night.md) |
+| The Mother’s Stove | [the-mothers-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/94-the-mothers-stove.md) |
 
 Chapter → game-chapter mapping:
 

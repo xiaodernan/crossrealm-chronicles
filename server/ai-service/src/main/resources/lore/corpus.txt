@@ -11934,6 +11934,85 @@ A-Shi shifted against the stove and slept on.
 
 *(End of volume ninety-three · Volume XIII, fifth part.)*
 
+# source: creative/novel/en/94-the-mothers-stove.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIII**: New Fire — the Seven-Hundred Year
+
+---
+
+## Ninety-four: The Mother's Stove
+
+When the light in the kitchen began to change, the mother was already awake.
+
+A-Shi came down the stairs carrying a bowl of his own and stopped at the threshold.
+
+She was on her knees in front of the stove.
+
+She did not turn around when she heard him.
+
+The stove burned low and gold, as it always burned in the morning, before anyone else was awake to see it.
+
+His mother had a small wooden bucket in one hand and a bundle of dry rice-husk in the other. She tipped a little of the husk into her palm, and let it flicker into the stove.
+
+A wreath of incense lifted from the stove.
+
+"For?" A-Shi asked.
+
+His mother did not turn around.
+
+"Grandmother Bai," she said.
+
+He did not ask which grandmother.
+
+They were on the same ground now. Six hundred years had gone through their house — generations of keepers, each of whom had sat right here in front of this stove, each of whom had known his mother's mother and her mother's mother before her.
+
+A-Shi thought about six hundred years: all the meals shared, all the winters, all the nights when nobody slept before dawn. He thought about the names he had only heard from his grandfather, who had only heard them from his grandfather — names of people who had sat right here, smelling exactly what she was smelling now, feeling what she was feeling now.
+
+He understood, suddenly, why his mother woke so early every day.
+
+She lit this stove before anyone else's eyes were open so it would be burning before anyone else needed it — not for them, but for the ones who came before.
+
+The stove was still warm from yesterday.
+
+His mother set the bucket back on the shelf where it always lived.
+
+"Your grandfather," she said, without turning, "lit this stove every morning for forty years."
+
+A-Shi knew it.
+
+"I was born after the third year of the sixth hundred years," she said.
+
+He did not know she remembered everything so clearly.
+
+"The house has always been the same house," she said. "The stove has always been the same stove. The grandmother has always been the same grandmother."
+
+The stove gave one small, contented crack.
+
+Outside, the sky brightened a little more.
+
+A-Shi sat down on the stool where he always ate.
+
+His mother finally turned around and looked at him.
+
+She smiled very faintly.
+
+"Six hundred years," she said.
+
+He nodded.
+
+"Six hundred years," he repeated.
+
+They did not look at each other directly, either of them.
+
+The stove burned steadily, steady as it always had been, as it always would be.
+
+---
+
+*(End of volume ninety-four · Volume XIII, sixth part.)*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -21030,6 +21109,83 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第九十三卷 · 卷十三之五）*
+
+# source: creative/novel/94-母亲的灶.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十三**：新火 —— 第七百年
+
+---
+
+## 九十四 · 母亲灶
+
+灶火点着的那天，天色还谈得上什么颜色，母亲先醒了。
+
+她把灶火里的灰——六百年——拨到墙边，像从来不需要来记这个东西。
+
+她关上灶后的那扇小门，从里面拿了只小竹筛。
+
+阿石看见了。
+
+灶火醒了的样子，灶火没说话。小火在他怀里动一下——没动。
+
+她把筛子放在灶沿上——筛子里是半瓢灶灰。
+
+她把每一抔舀起——整整往下撒——妈娘、六百年前最小灶房里那代。
+
+"灶火看着我们吃过最后一顿饭的人。"
+
+她每一把撒下去的灰都落在她丈夫的袖口上。他点头，不知道为什么她这么安静。
+
+阿石笑。
+
+"你没烧过。火没有烫我们的手。"她说。
+
+阿石问：
+
+"六百年谁都知道这只是回忆。"
+
+母亲沉默了一会儿，说：
+
+"他们也是人。"
+
+"他们是三位在炉灶两侧站过的老人家。"——就是灶火前——每一位阿石听过的老灶火人——都是灶火侧站过的。
+
+她抹了抹手，把炉灰堆到一起——烧尽。
+
+火苗亮了一段。
+
+他看清楚了炉火。
+
+他想爸爸——灶火也去了他爸爸那里。
+
+母亲把它端回去，他跪下来。
+
+他不想说。他一开口说不出来。
+
+她回到阿石旁边。
+
+灶火蹿得高了一寸。
+
+院子里那棵火种树抖了一下。
+
+母亲拉着他往外走，外面天刚快亮。灶火稳稳烧着。
+
+"六百年灶火，"小火轻声说，"灶火六百年都在守我们。"
+
+母亲点头：
+
+"我们守灶火。"
+
+今日——阿石想：来年他们一家灶火灶火——这屋子里面它一直都是这样守着。
+
+每一年每一天。
+
+---
+
+*（本章完 · 跨界线总第九十四卷 · 卷十三之六）*
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)
