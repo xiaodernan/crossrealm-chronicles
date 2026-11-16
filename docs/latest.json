@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T15:13:56.041Z",
+  "generated_at": "2026-11-16T15:26:56.649Z",
   "branch": "main",
-  "head": "ab727d50",
-  "total_commits": 1952,
-  "pushed_at": "2026-11-16T23:09:13+08:00",
+  "head": "d68e66ea",
+  "total_commits": 1954,
+  "pushed_at": "2026-11-16T23:23:37+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "d68e66e",
+      "at": "2026-11-16T23:23:37+08:00",
+      "subject": "feat(canon): W-Z270 第一百一十九卷《雪安 / Snow’an》入典——卷十五之二十"
+    },
+    {
+      "short": "d073a02",
+      "at": "2026-11-16T15:13:56Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "ab727d5",
       "at": "2026-11-16T23:09:13+08:00",
@@ -21,27 +31,17 @@
       "short": "d2f161a",
       "at": "2026-11-16T15:05:48Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "44ee760",
-      "at": "2026-11-16T23:04:00+08:00",
-      "subject": "perf(lore): W-Z269 BM25 search 改用 posting-list 反向索引——不再 O(N×|q|) 全库重扫"
-    },
-    {
-      "short": "fae7c71",
-      "at": "2026-11-16T15:01:17Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
-  "tracked_files": 1488,
+  "tracked_files": 1490,
   "test_files": 459,
   "i18n_keys": 3237,
-  "lore_sources": 267,
-  "novel_chapters_zh": 118,
-  "novel_chapters_en": 118,
-  "milestone": "W-Z269",
-  "milestone_full": "卷 118 · 六百年守火线（118 / 118 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 267 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：118 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 269,
+  "novel_chapters_zh": 119,
+  "novel_chapters_en": 119,
+  "milestone": "W-Z270",
+  "milestone_full": "卷 119 · 六百年守火线（119 / 119 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 269 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：119 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
