@@ -156,6 +156,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Midwinter Visit | [the-midwinter-visit](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/105-the-midwinter-visit.md) |
 | The Stove Stories | [the-stove-stories](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/106-the-stove-stories.md) |
 | The Nameless Twig | [the-nameless-twig](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/107-the-nameless-twig.md) |
+| The Mountain Snow | [the-mountain-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/108-the-mountain-snow.md) |
 
 Chapter → game-chapter mapping:
 

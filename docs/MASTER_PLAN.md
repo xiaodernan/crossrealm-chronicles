@@ -12,6 +12,11 @@
 > **2026-11-16 · W-Z245 第105卷入典《仲冬见 / The Midwinter Visit》**：《跨界纪事》卷十五「第七百年」第六篇——仲冬前三天院子薄雪落地、母亲磨了三天油纸伞却不说给谁——灶火安静得不寻常——第四天山坳里来了一个人，没有马驴只有一只背篓，高得快碰到头顶——白石头顶的老人——他背着一只竹篓，里面一个瓷罐装着祖火的灰、一枚铁丝勾着的小炭球——老人把那颗灰白火种放进灶火——灶火跳了一下没熄——反而更亮了——七百年——两盏火——第一次在一个灶膛里稳稳地烧——两个守火人同时哭了出来——小火喃喃念了些什么然后睡着了——老人走时留下一句话：「祖火看见灶火了。灶火也看见祖火了。」
 > 交付：creative/novel/105-仲冬见.md + en 孪生 105-the-midwinter-visit.md；novella 105 × 2 = 210 模块（典籍馆现为 105 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：239 源；showcase feed 新增 W-Z244 + W-Z245 实录。
 >
+> **2026-11-16 · W-Z249 Oracle 缓存双轨探针固化记录（Admin 第18瓦）+ 第108卷入典《山顶雪 / The Mountain Snow》（W-Z250）**：
+> **W-Z249**：`scripts/oracle-cache-probe.mjs --json` 把实测固化为机器可读档案（`docs/admin/data/oracle-cache-probe.json`）——本轮双轨：canon cached=**6784/6784 ≈97.3%** ×2 连 + refs cached=**7424/7424 ≈97.5%** ×2 连——冻结 system（lore-system-prompt ≈500 token + GLOSSARY 首 ~2500 字节）跨过上游 prompt-cache ~1024-token 页门槛后双轨恒暖。Admin「实测记录」新增第 18 瓦（zh/en 成对，`meas_l18` / `meas_tr18`）。
+> **W-Z250**：卷十五之九——开春前夜薄雪落地；火种树针叶挂霜风一刮就掉；第六天院门口又多了一捆无名柴，只有一根细白桦枝绑在布条上；母亲把它码进柴堆最隐蔽的位置「第九根——最隐蔽的一根」；小火说以后每月十五喂一根给灶火「别管是谁的」；阿石点头；开春第一枝梅花开了；十四那天数了数灶台——一无所变；十五那晚灶火自己比平时亮了一寸——没有任何人叫它——它自己知道——它自己记得——每月十五。
+> 交付：creative/novel/108-山顶雪.md + en 孪生 108-the-mountain-snow.md；novella 108 × 2 = 216 模块（典籍馆现为 108 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：245 源；showcase feed 新增 W-Z249 + W-Z250 实录；Admin meas_l18 成对双语。
+>
 > **2026-11-16 · W-Z247 Oracle prompt-cache 分桶实证 + 冻结修复（canon lane 從此有缓存）**：实测探针（新 `scripts/oracle-cache-probe.mjs`）发现——canon lane 两次同问 **cached_tokens=null（0%）**，refs lane 命中 96.9%。根因：上游 prompt-cache 约有 ~1024-token 的「页」门槛，lore-system-prompt.txt ≈500 tokens 的 system 前缀不足以热住——refs lane 因摘录体量大而跨过页门槛，canon lane 恒稳态冷。
 > 修复：`scripts/build-freeze-glossary.mjs`（确定性生成、byte-identical）从 `creative/GLOSSARY.md` 首 ~2500 字节原样摘出为 `lore-digest-frozen.txt`，与 lore-system-prompt.txt 一并装入 system（`LoreOracleService.loadOracleSystem()` 拼接，注释说明冻结原因）；消融实测：canon #2 → **cached=6784/6973 ≈97.3%**（修复前恒 null）；refs #2 ≈72%（例证本身增大了首 token 成本但换来恒暖稳定态）。Java live 3/3 绿（canon 问题 → novel/67,106,89,77 ··· refs 问题 → refs 卷 · 无义提问 → 诚实拒答 latency=0）；Oracle Lore gate 48/48 绿；digest 与源一致性可用 `--check` 校验。
 > 教训：prompt-cache 不是「前缀写了 cache_control 就好」——**冻结前缀必须跨过上游页门槛**；探针先量、再改、再量，数字为证。

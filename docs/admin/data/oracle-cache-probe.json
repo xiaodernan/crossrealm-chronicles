@@ -1,0 +1,30 @@
+{
+  "schema": "crossrealm.oracle-cache-probe.v1",
+  "generatedAt": "2026-11-16T12:17:25.010Z",
+  "model": "gpt-6.1-terra",
+  "base": "https://api.aizzz.xyz/v1",
+  "cacheKey": "crossrealm-canon-v1",
+  "frozenSystemBytes": 3221,
+  "lanes": {
+    "canon": [
+      {
+        "prompt": 6973,
+        "cached": 6784
+      },
+      {
+        "prompt": 6973,
+        "cached": 6784
+      }
+    ],
+    "refs": [
+      {
+        "prompt": 7611,
+        "cached": 7424
+      },
+      {
+        "prompt": 7611,
+        "cached": 7424
+      }
+    ]
+  }
+}

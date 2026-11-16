@@ -88,7 +88,27 @@ const ask = async (label, question, bodyExcerpt) => {
 console.log('oracle-cache-probe: base=' + BASE + ' model=' + MODEL + ' cacheKey=crossrealm-canon-v1');
 const qCanon = '锚火是什么？';
 const qRefs = '祭灶习俗在现实里怎么做？';
-await ask('canon #1', qCanon, CANON_EXCERPT);
-await ask('canon #2', qCanon, CANON_EXCERPT);
-await ask('refs  #1', qRefs, REFS_EXCERPT);
-await ask('refs  #2', qRefs, REFS_EXCERPT);
+const wantJson = process.argv.includes('--json');
+const record = {
+  schema: 'crossrealm.oracle-cache-probe.v1',
+  generatedAt: new Date().toISOString(),
+  model: MODEL,
+  base: BASE,
+  cacheKey: 'crossrealm-canon-v1',
+  frozenSystemBytes: LORE_SYS.length,
+  lanes: {},
+};
+for (const [lane, q, excerpt] of [['canon', qCanon, CANON_EXCERPT], ['refs', qRefs, REFS_EXCERPT]]) {
+  record.lanes[lane] = [];
+  for (let i = 1; i <= 2; i += 1) {
+    const r = await ask(`${lane} #${i}`, q, excerpt);
+    record.lanes[lane].push(r ?? { http: 'non-200' });
+  }
+}
+if (wantJson) {
+  const { mkdirSync, writeFileSync } = await import('node:fs');
+  const out = resolve(ROOT, 'docs/admin/data/oracle-cache-probe.json');
+  mkdirSync(resolve(ROOT, 'docs/admin/data'), { recursive: true });
+  writeFileSync(out, JSON.stringify(record, null, 2), 'utf8');
+  console.log('oracle-cache-probe: wrote ' + out);
+}

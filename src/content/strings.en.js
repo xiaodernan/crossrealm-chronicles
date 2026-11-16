@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and seven volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 107 volumes of the canon, fully readable
+· Canon Library — 108 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3138,8 +3138,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 107-volume index',
-  hm_body_codex: `Codex — 107 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 108-volume index',
+  hm_body_codex: `Codex — 108 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3250,6 +3250,7 @@ hm_title_codex: 'Codex · the 107-volume index',
 105 · The Midwinter Visit — three days before midwinter, a light snow falls on the courtyard; his mother spends three days oiling a paper umbrella for Xiao Huo and will not say why; the house grows quieter than it ever has; on the fourth morning, a figure appears at the bend of the path — no horse, no cart, only a single basket slung across his back, slung high enough to touch the sky; inside the bamboo basket, a small porcelain jar of ancestor-ash, and above it a tiny ball of living charcoal held in an iron wire; it is the same old man from the mountain; he kneels in the courtyard; A-Shi’s mother kneels in return; the old man sets the porcelain jar on the stove; the flame leaps one inch higher than it ever has; from under his robe he draws out a square of white silk with a chestnut-sized ember resting on it; he lays it gently inside the stove; the stove leaps once — and does not diminish; both keepers weep without a sound; Xiao Huo whispers something no one can make out, then falls asleep at the stove’s foot; the old man leaves at dawn; the two remaining pieces of Bai Yin’s birch stand on either side of the stove as witnesses; the fire burns for one full night; no white birch jumps in by itself; the stove now holds two fires in one hearth — seven hundred years, one flame finally meeting another. Volume XV, sixth part.
 106 · The Stove Stories — nine days after the old man has left, a cooper arrives at the house; he fixes the family’s water cistern and lingers in the yard; he asks to hear the story of that night; A-Shi’s mother calls Xiao Huo to tell it; Xiao Huo climbs onto a little stool by the stove and recounts everything — the snow, the umbrella, the ancestor-ash, the two fires meeting in one hearth; he concludes: “our fire is not ours — it belongs to everyone who waits for it”; the cooper is silent for a long time; he offers to build a stone marker at the gate; A-Shi’s mother forbids any word on it: “a word becomes an altar — our fire does not belong to an altar — it belongs to the fire”; the cooper instead carves the outline of a single white birch branch; the stone stands on the south side of the courtyard; no words, only the branch; when rain soaks the carving and moonlight catches it, the branch seems to glow from inside the stone — the kind of quiet that does not ask to be worshipped, only noticed. Volume XV, seventh part.
 107 · The Nameless Twig — fifteen days after the old man has left, the first frost of the season falls on the courtyard; in the morning, a new bundle lies beside the gate; white birch, each stick dry to the core and exactly the width of a man’s palm; they are tied with a strip of grey cloth patched in three places with beige thread; tucked under the cloth, a slip of paper with two characters: 添柴 — “add fuel”; A-Shi carries the bundle inside; nobody asks who left it; his mother runs her finger over the cloth and recognizes the stitching from his uncle’s old coat; Xiao Huo carries one twig to the stove and feeds it in; the flame leaps once; it does not grow brighter; it does not die; it simply accepts; that evening A-Shi washes down the stone tablet at the gate; in the moonlight, the white birch branch seems to glow from inside; seven hundred years, no one has ever fed this stove so much as a single twig; by morning one of the sticks is missing and nobody saw it happen; his mother slips another page under the iron box: “the first nameless twig — the stove has seen it”; his mother: “come next spring, when the flowers open, if we see another bundle like this, then we will know this house is no longer the only one keeping the fire”. Volume XV, eighth part.
+108 · The Mountain Snow — on the last night of winter, a light snow falls on the courtyard; the white frost on the fire-seed tree wavers and drops in the wind; on the sixth day another bundle of unknown firewood appears at the gate — one thin birch twig, tied with white thread; A-Shi says nothing; Xiao Huo looks at it and says the uncle is gone; his mother sets the bundle in the most hidden place in the woodpile, ninth in line; “this is the ninth bundle. The least visible.”; Xiao Huo decides: from now on, on the fifteenth of every month, one branch is fed to the stove; in spring the first apricot blossom opens at the foot of the path; on the fourteenth day the hearth is counted — nothing changed; on the fifteenth the stove leaps one inch higher than the night before; in the morning a slip of paper is tucked into the woodpile: “The fifteenth. Again.”; no one has told the stove what day it is; yet every month, on the fifteenth, the gate light seems just slightly warmer; A-Shi asks how it knows; the answer: someone is watching it on the fifteenth of every month and fire always knows when it is being watched. Volume XV, ninth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3263,7 +3264,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and seven volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and eight volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
