@@ -162,6 +162,7 @@ creative/music/soundtrack.html
 | 醒灶 · The Awakening Hearth | [the-awakening-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/113-the-awakening-hearth.md) |
 | 立春 · The First Day of Spring | [the-first-day-of-spring](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/114-the-first-day-of-spring.md) |
 | 叫炉 · The Hearth Named | [the-hearth-named](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/115-the-hearth-named.md) |
+| 炉火的下一次 · The Next Visit | [the-next-visit](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/116-the-next-visit.md) |
 
 每一章对应游戏的章节走法：
 
