@@ -154,6 +154,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Letter from the Peak | [the-letter-from-the-peak](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/103-the-letter-from-the-peak.md) |
 | The Autumn Equinox | [the-autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/104-the-autumn-equinox.md) |
 | The Midwinter Visit | [the-midwinter-visit](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/105-the-midwinter-visit.md) |
+| The Stove Stories | [the-stove-stories](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/106-the-stove-stories.md) |
 
 Chapter → game-chapter mapping:
 

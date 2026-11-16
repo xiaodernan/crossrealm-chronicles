@@ -12,6 +12,11 @@
 > **2026-11-16 · W-Z245 第105卷入典《仲冬见 / The Midwinter Visit》**：《跨界纪事》卷十五「第七百年」第六篇——仲冬前三天院子薄雪落地、母亲磨了三天油纸伞却不说给谁——灶火安静得不寻常——第四天山坳里来了一个人，没有马驴只有一只背篓，高得快碰到头顶——白石头顶的老人——他背着一只竹篓，里面一个瓷罐装着祖火的灰、一枚铁丝勾着的小炭球——老人把那颗灰白火种放进灶火——灶火跳了一下没熄——反而更亮了——七百年——两盏火——第一次在一个灶膛里稳稳地烧——两个守火人同时哭了出来——小火喃喃念了些什么然后睡着了——老人走时留下一句话：「祖火看见灶火了。灶火也看见祖火了。」
 > 交付：creative/novel/105-仲冬见.md + en 孪生 105-the-midwinter-visit.md；novella 105 × 2 = 210 模块（典籍馆现为 105 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：239 源；showcase feed 新增 W-Z244 + W-Z245 实录。
 >
+> **2026-11-16 · W-Z246 第106卷入典《炉边故事 / The Stove Stories》+ Admin 第17瓦 · Oracle 现实原型路由 live 实证入档**：
+> 卷十五之七——箍桶匠补好水缸后，留在院子里，问能不能听听仲冬夜——母亲让小火讲——小火坐在灶边小板凳上，把雪、油纸伞、瓷罐祖灰、灰白火种、两火相见的一切慢慢讲出来——「我们的灶火不是我们家的——它是所有人的」——箍桶匠沉默很久，说要立碑——母亲说「字会变成神坛——我们的火不是给神坛的，是给火的」——他照做了，碑上没有字，只有一根白桦枝的图案——雨天浸透、月光照着，它像是从石头里透出光来——「此处有火，从来没灭过七百年」。
+> 交付：creative/novel/106-炉边故事.md + en 孪生 106-the-stove-stories.md；novella 106 × 2 = 212 模块（典籍馆现为 106 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：241 源；showcase feed 新增 W-Z246 实录。
+> Admin「实测记录」补第 17 瓦（W-Z244 live 实证入档，zh/en 成对）：canon「锚火是什么？」→ [novel/67, 89, 77, 35] ≈2.6s ✓；refs 问题 → [refs/crossrealm-realworld-notes.md] ≈13s ✓；无义提问 → 诚实拒答 latency=0 · 不花 token；LoreOracleRouteHintTest 23 断言全绿。
+>
 > **2026-11-16 · W-Z244 Lore Oracle 现实原型机械路由（keyword router · 零零额外 LLM · 系统前缀不冻住被撞）**：`LoreOracleService` 新增 `prefersRealWorldRefs(String question)` + `REALWORLD_ROUTE_NOTE`——命中 zh/en refs 专属短语（祭灶/灶神/赫斯提亚/维斯塔/白桦/秋分/二十四节气/中秋/永恒火焰/长明灯/圣火/奥运圣火 + real world/prototype/vesta/hestia/vestal/birch/equinox/solstice/zhao jun/kitchen god/eternal flame 等）时，在 **user** 消息末尾追加一行「Routing note (mechanical, obey it): this question sits in real-world-reference territory…」，不动 system 前缀冻结、不引入额外 LLM 调用。**canon 问题不交叉**（如「白茵」「灶火为什么不灭」无 refs token 不命中），routing 只是一行，不锁主语。
 > 新增单测 `LoreOracleRouteHintTest.java`：23 例（11 zh / 11 en / blank-null）——全部命中/全部不命中，符合预期。`mvn -Dtest=LoreOracleRouteHintTest,LoreRagTest,Bm25IndexTest,Bm25TokenizerTest,OracleControllerTest` → **45/45 绿，BUILD SUCCESS**。
 > live 复核：① canon「锚火是什么？」→ sources=[67,89,77,35] · latency≈2.6s ✓；② refs「锚火在现实世界对应祭灶还是维斯塔……」→ sources=[creative/refs/crossrealm-realworld-notes.md] · latency≈13s（上游高位延迟但全成功）✓；③ 无义字符提问 → 诚实拒答，latency=0、不花 token ✓。**一次偶发 AdvisorUnavailable（upstream-0，上游临时波动），重试后 3/3 绿**。
