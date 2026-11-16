@@ -168,7 +168,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Neighbor’s Stove | [the-neighbors-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/117-the-neighbors-stove.md) |
 | The Spoonful of Soup | [the-spoonful-of-soup](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/118-the-spoonful-of-soup.md) |
 | Snow’an | [snowan](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/119-snowan.md) |
-
+| Saturdays | [saturdays](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/120-saturdays.md) |
 Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
