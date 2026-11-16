@@ -3481,6 +3481,8 @@ Three frames in retrospection: the fire + the light on your palm + the house shi
   journal_dungeon_cleared_text: 'The keywarden falls and the plane gate seals once more. You leave with more than loot - you carry the buried memories.',
   journal_boss_defeated_fmt: 'Defeated ${name}',
   journal_boss_defeated_text: 'Another planar shackle is cut. The pulse of the anchor echoes in your chest.',
+  // W-Z291: the Ember Verse lands in the journal — the LLM-written line is now recorded in [J]
+  boss_verse_journal_title_fmt: 'Ember Verse · ${name}',
   // Ending dialog / end credits / remaining player-visible Chinese in the upgrade panel (W-D2 slice 26)
 
   ending_dialog_text: 'Chapter 5 complete. You cut through chaos and became a true Plane Wanderer.\n\nFive realms joined, six Bosses fallen - the journey ends here. May the world be wider when we meet again.',

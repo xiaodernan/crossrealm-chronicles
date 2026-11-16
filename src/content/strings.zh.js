@@ -3390,6 +3390,8 @@ trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在
   journal_dungeon_cleared_text: '迷宫守钥者倒下，位面之门再次闭合。你带走的不只是战利品，还有被埋藏的记忆。',
   journal_boss_defeated_fmt: '击败 ${name}',
   journal_boss_defeated_text: '又一道位面枷锁被斩断。锚点的脉动在你胸口回响。',
+  // W-Z291：余火回响落进日志——LLM 亲笔写下的那一句，真落进 [J] 日志
+  boss_verse_journal_title_fmt: '余火回响 · ${name}',
   // 结局对话 / 片屏字幕 / 升级面板剩余玩家可见中文（W-D2 切片26）
 
   ending_dialog_text: 'Chapter 5 完成。你斩裂混沌，成为真正的位面行者。\n\n五区贯通、六位 Boss 倒下，这段旅程到此为止——愿下次重逢时，这个世界更加辽阔。',

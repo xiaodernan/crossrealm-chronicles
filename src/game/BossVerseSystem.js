@@ -65,17 +65,29 @@ export class BossVerseSystem {
     if (!bossId) return;
     const online = this.game?.onlineServices;
     if (!online?.enabled?.() || typeof online.askBossVerse !== 'function') return;
+    const payload = bossVersePayload(this.game, bossId);
+    let line = '';
     try {
-      const res = await online.askBossVerse(bossVersePayload(this.game, bossId));
-      const line = res?.ok ? sanitizeVerse(res?.data?.verse) : '';
-      if (!line) {
-        try { localTelemetry.record('boss_verse', { bossId, ok: false }); } catch { /* absent */ }
-        return;
-      }
-      this.game.dialog?.toast?.(line, 6000);
-      try { localTelemetry.record('boss_verse', { bossId, ok: true }); } catch { /* absent */ }
+      const res = await online.askBossVerse(payload);
+      line = res?.ok ? sanitizeVerse(res?.data?.verse) : '';
     } catch {
-      try { localTelemetry.record('boss_verse', { bossId, ok: false }); } catch { /* absent */ }
+      line = '';
     }
+    if (!line) {
+      try { localTelemetry.record('boss_verse', { bossId, ok: false }); } catch { /* absent */ }
+      return;
+    }
+    this.game.dialog?.toast?.(line, 6000);
+    try { localTelemetry.record('boss_verse', { bossId, ok: true }); } catch { /* absent */ }
+    // W-Z291：余火回响落进 [J] 日志——LLM 亲笔写下的这一句，真成为日志里的一款条目
+    try {
+      this.game.storyJournal?.addSilent?.({
+        id: `boss-verse-${bossId}-${Date.now()}`,
+        category: 'boss',
+        title: t('boss_verse_journal_title_fmt', { name: payload.name }),
+        text: line,
+        chapter: Number(payload.chapter) || 1,
+      });
+    } catch { /* journal absent — the toast is enough */ }
   }
 }

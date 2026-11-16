@@ -15,6 +15,10 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-17 · W-Z291 余火回响落进 [J] 日志（LLM 输出真成为游戏内的一款文物）**：W-Z289 的那句炉火自语原本只活 6 秒 toast——这一片把它落进 [J] 日志，成为随存档带走的一款文物（category=boss · 文本净化 · 唯一 id · 章节随存档）。玩家通关五场 Boss 后再翻日志，会看见炉火为五个倒下的人各自留了一句话——那是 LLM 替这个世界记下的影子。
+> 交付：`src/game/BossVerseSystem.js` 在成功吐出一句后调 `storyJournal.addSilent`（`id: boss-verse-${bossId}-${ts}` · `category: 'boss'` · `title: boss_verse_journal_title_fmt` · `text: line`）；i18n +1 键 `boss_verse_journal_title_fmt`（zh+en，「余火回响 · ${name}」/「Ember Verse · ${name}」），EXPECTED_KEY_COUNT 3248→3249；`tests/boss-verse-journal.test.js` 4 例（enabled=false 零网络 / enabled=true+一句 → toast 落地且 journal 收到 category=boss 条目 / 垃圾响应两边都安静 / 控制字符净化 + 72 字上限）。
+> Gates：Build ✓ · Size ✓ · Lint 0 errors · **Tests 6806/6806 ✓（464 文件）**。
+>
 > **2026-11-17 · W-Z290 第133卷入典《第三碗 / The Third Bowl》——卷十五之三十四（七百年第一次想到它也得吃一口）**：立春后第十七周——周六——上午天晴——郭阿婆又来了——她带了一只崭新的白瓷碗——一包糯米——一把新白桦——「灶火也有了一只嘴」——阿石下了糯米——白碗推上铁沿——炉火跳了一下——周叔当天也来喝了一碗——白瓷碗搁在铁沿上一直没人碰——傍晚碗还是空的——郭阿婆又搁下了——「明天再来看」——灶火燃着。
 > 交付：creative/novel/133-第三碗.md + en 孪生 133-the-third-bowl.md；novella 133 × 2 = 266 模块（典籍馆现为 133 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：297 源；showcase feed 新增 W-Z290 实录。
 >
