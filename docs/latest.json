@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T11:21:36.180Z",
+  "generated_at": "2026-11-16T11:33:17.257Z",
   "branch": "main",
-  "head": "696ecc5e",
-  "total_commits": 1909,
-  "pushed_at": "2026-11-16T19:21:10+08:00",
+  "head": "661ccfaf",
+  "total_commits": 1911,
+  "pushed_at": "2026-11-16T19:31:26+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "661ccfa",
+      "at": "2026-11-16T19:31:26+08:00",
+      "subject": "feat(canon): W-Z242 第一百零四卷《秋分 / The Autumn Equinox》——卷十五之五·第七百年"
+    },
+    {
+      "short": "b590ef3",
+      "at": "2026-11-16T11:21:36Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "696ecc5",
       "at": "2026-11-16T19:21:10+08:00",
@@ -21,27 +31,17 @@
       "short": "e0f1854",
       "at": "2026-11-16T11:05:15Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "a4aafd4",
-      "at": "2026-11-16T19:04:13+08:00",
-      "subject": "docs(plan): W-Z240/240b 压测复跑 + Admin 实测瓦片（双语）+ 解锁空白修复登记"
-    },
-    {
-      "short": "335b289",
-      "at": "2026-11-16T18:46:33+08:00",
-      "subject": "fix(admin): W-Z240b 修复炉边盘解锁后整页空白 —— `#dashboard` 自身带 .unlock，但 `.unlocked .unlock` 规则匹配不到自身"
     }
   ],
-  "tracked_files": 1438,
+  "tracked_files": 1440,
   "test_files": 458,
   "i18n_keys": 3227,
-  "lore_sources": 233,
-  "novel_chapters_zh": 103,
-  "novel_chapters_en": 103,
-  "milestone": "W-Z241",
-  "milestone_full": "卷 103 · 六百年守火线（103 / 103 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 233 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：103 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 235,
+  "novel_chapters_zh": 104,
+  "novel_chapters_en": 104,
+  "milestone": "W-Z242",
+  "milestone_full": "卷 104 · 六百年守火线（104 / 104 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 235 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：104 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
