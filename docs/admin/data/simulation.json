@@ -1,6 +1,6 @@
 {
   "schema": "crossrealm.simulation.v1",
-  "generated_at": "2026-11-15T20:14:30.003Z",
+  "generated_at": "2026-11-16T11:14:06.676Z",
   "mode": "real-browser-simulation (headless Chrome via CDP)",
   "seed": 20261117,
   "requestedSessions": 14,
@@ -17,8 +17,8 @@
     "数字每次跑有抖动——记下 seed=20261117 保证人格序列可复现；测量值以下方本次实跑为准。"
   ],
   "summary": {
-    "bootMsAvg": 21668,
-    "bootMsP95": 49970,
+    "bootMsAvg": 9117,
+    "bootMsP95": 51995,
     "totalExceptions": 0,
     "bounced": 3,
     "wanderClicksAvg": 4,
@@ -28,7 +28,7 @@
   "personas": {
     "impatient": {
       "sessions": 3,
-      "bootMsAvg": 30469,
+      "bootMsAvg": 21701,
       "outcomes": {
         "bounced": 3
       },
@@ -36,7 +36,7 @@
     },
     "wanderer": {
       "sessions": 3,
-      "bootMsAvg": 19268,
+      "bootMsAvg": 5788,
       "outcomes": {
         "wandered": 3
       },
@@ -44,7 +44,7 @@
     },
     "reader": {
       "sessions": 3,
-      "bootMsAvg": 20435,
+      "bootMsAvg": 6156,
       "outcomes": {
         "read-then-played": 3
       },
@@ -52,7 +52,7 @@
     },
     "speedrunner": {
       "sessions": 3,
-      "bootMsAvg": 15807,
+      "bootMsAvg": 5226,
       "outcomes": {
         "entered-world-opened-journal": 3
       },
@@ -60,7 +60,7 @@
     },
     "sprinter": {
       "sessions": 2,
-      "bootMsAvg": 22711,
+      "bootMsAvg": 5516,
       "outcomes": {
         "entered-world": 2
       },
@@ -71,7 +71,7 @@
     {
       "index": 1,
       "persona": "impatient",
-      "bootMs": 49970,
+      "bootMs": 51995,
       "exceptions": 0,
       "outcome": "bounced",
       "openSeconds": 2.6,
@@ -79,40 +79,40 @@
         "x": 124,
         "y": 798
       },
-      "durationMs": 52967
+      "durationMs": 56112
     },
     {
       "index": 2,
       "persona": "wanderer",
-      "bootMs": 8317,
+      "bootMs": 5448,
       "exceptions": 0,
       "outcome": "wandered",
       "wanderClicks": 3,
-      "durationMs": 12891
+      "durationMs": 10338
     },
     {
       "index": 3,
       "persona": "reader",
-      "bootMs": 18031,
+      "bootMs": 7960,
       "exceptions": 0,
       "outcome": "read-then-played",
       "manualOpened": true,
       "startClicked": true,
-      "durationMs": 27359
+      "durationMs": 12328
     },
     {
       "index": 4,
       "persona": "speedrunner",
-      "bootMs": 15944,
+      "bootMs": 5314,
       "exceptions": 0,
       "outcome": "entered-world-opened-journal",
-      "bootToJournalMs": 7386,
-      "durationMs": 26124
+      "bootToJournalMs": 3668,
+      "durationMs": 9861
     },
     {
       "index": 5,
       "persona": "impatient",
-      "bootMs": 18987,
+      "bootMs": 6804,
       "exceptions": 0,
       "outcome": "bounced",
       "openSeconds": 1.41,
@@ -120,40 +120,40 @@
         "x": 580,
         "y": 646
       },
-      "durationMs": 21723
+      "durationMs": 9226
     },
     {
       "index": 6,
       "persona": "wanderer",
-      "bootMs": 23540,
+      "bootMs": 6023,
       "exceptions": 0,
       "outcome": "wandered",
       "wanderClicks": 3,
-      "durationMs": 35890
+      "durationMs": 9532
     },
     {
       "index": 7,
       "persona": "reader",
-      "bootMs": 24307,
+      "bootMs": 5136,
       "exceptions": 0,
       "outcome": "read-then-played",
       "manualOpened": true,
       "startClicked": true,
-      "durationMs": 37911
+      "durationMs": 8655
     },
     {
       "index": 8,
       "persona": "speedrunner",
-      "bootMs": 18051,
+      "bootMs": 5584,
       "exceptions": 0,
       "outcome": "entered-world-opened-journal",
-      "bootToJournalMs": 6244,
-      "durationMs": 27799
+      "bootToJournalMs": 3703,
+      "durationMs": 10199
     },
     {
       "index": 9,
       "persona": "impatient",
-      "bootMs": 22449,
+      "bootMs": 6303,
       "exceptions": 0,
       "outcome": "bounced",
       "openSeconds": 2.41,
@@ -161,51 +161,51 @@
         "x": 54,
         "y": 452
       },
-      "durationMs": 28850
+      "durationMs": 9935
     },
     {
       "index": 10,
       "persona": "wanderer",
-      "bootMs": 25947,
+      "bootMs": 5893,
       "exceptions": 0,
       "outcome": "wandered",
       "wanderClicks": 6,
-      "durationMs": 57357
+      "durationMs": 13367
     },
     {
       "index": 11,
       "persona": "reader",
-      "bootMs": 18968,
+      "bootMs": 5371,
       "exceptions": 0,
       "outcome": "read-then-played",
       "manualOpened": true,
       "startClicked": true,
-      "durationMs": 27714
+      "durationMs": 8586
     },
     {
       "index": 12,
       "persona": "speedrunner",
-      "bootMs": 13425,
+      "bootMs": 4780,
       "exceptions": 0,
       "outcome": "entered-world-opened-journal",
-      "bootToJournalMs": 7923,
-      "durationMs": 25539
+      "bootToJournalMs": 3281,
+      "durationMs": 8870
     },
     {
       "index": 13,
       "persona": "sprinter",
-      "bootMs": 22253,
+      "bootMs": 5609,
       "exceptions": 0,
       "outcome": "entered-world",
-      "durationMs": 29118
+      "durationMs": 10473
     },
     {
       "index": 14,
       "persona": "sprinter",
-      "bootMs": 23168,
+      "bootMs": 5422,
       "exceptions": 0,
       "outcome": "entered-world",
-      "durationMs": 28937
+      "durationMs": 10423
     }
   ]
 }

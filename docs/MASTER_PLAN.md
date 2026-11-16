@@ -9,6 +9,14 @@
 >
 > **2026-11-16 · W-Z205 原典语料重建：59 → 175 源 + 真上游口径对齐**：corpus.txt 全量重编（74 卷双语小说 + 74 卷英译 + 27 份参照文件 ≈ 520 KB，含 66–74 卷守火主线全链）；`Bm25IndexTest.linDu_query_matches_lin_du_chapter` 因如实语料扩容从 top-5 → top-10（如实登记，非放水）；`hm_body_lore_oracle` 不再手写「36 源 / 1803 检索块」的漂移数字——说明书永远引用语料的运行时重编能力；`build-latest.mjs` 的 `lore_sources` 本就是活读（latest.json 实测 175）；说明书/showcase feed 新增 11·16 三条 W-Z190+ 实录；`ONLINE_SERVICES.md(+EN)` / README / player-guide 同步到 175 源；AI 侧 lore 门禁（LoreRagTest/Bm25IndexTest/Bm25TokenizerTest）绿。
 >
+> **2026-11-16 · W-Z241 第103卷入典《山顶来信 / The Letter from the Peak》+ ui-walkthrough 复跑 + 玩家行为模拟重采**：
+> 卷十五之四：客人走后第十九天，山顶守祖火的人派人送下一封火漆压火苗印的短信——字迹瘦长笔直，和第一代守火人一模一样——「你守的那一头，还在烧。我们守的这一头，也还在烧」；小火第一次知道白石头顶上也有一间石头屋、也有一个人守了它七百年；秋分两边的火要一起加白桦——阿石劈开捡存六百年的那根白桦：一半进灶，一半用旧布包好留给小火，等他亲手走上山顶。
+> 交付：creative/novel/103-山顶来信.md + en 孪生 103-the-letter-from-the-peak.md；novella 103 × 2 = 206 模块（典籍馆现为 103 卷）；root README / creative README(zh+en) / strings(zh+en) codex 全量同步；原典语料重建：233 源；showcase feed 新增 W-Z241 实录。
+> **ui-walkthrough 复跑全绿**：18/18 未越线（三视口 × zh medium / zh large / en large，HUD 挤叠 overlap=0）。
+> **玩家行为模拟重采**（seed=20261117，14 会话 × 5 人格，真 Chrome + vite）：0 未捕获异常，impatient 弹窗 3 次，bootMsAvg=9117（#1 冷启异常 51.9s 拉偏，已如实入档 simulation.json）。
+> 全量 6754/6754 绿 · Build ✓ · Size ✓（首屏 2.08 MiB）· i18n 3227。
+> 备注（不阻塞、非本次引入）：vitest 全量偶发一行「This might cause false positive tests」而用例全绿（三跑中出现一次、两跑干净退出零），疑似 jsdom 瞬态 unhandled rejection；content-only 改动不触 UI/逻辑路径，已留档观察。
+>
 > **2026-11-16 · W-Z240/240b Oracle 压测复跑 + 炉边盘解锁空白修复 + 实测瓦片双语落齐**：压测（同构 `stress-oracle-verify.ps1`：throwaway ai-service + local-stub-llm 20ms）—— mixed（health × answerBurst）**16s / 40 并发：3488 请求 · 0 4xx · 0 5xx · errRate 0.00% · p50=125ms · p95=346ms · p99=2672ms · max=3403ms · ≈217 rps · GREEN**。
 > 线上 Admin 补两格真实验证瓦片（W-Z238 Lore Oracle live 2/2 绿：锚火是什么？→ BM25 4 块 → 锚火作答 HTTP 200 sources=[67,89,77,35] ≈3.2s；无义提问 → BM25 全词零召回 → 诚实拒答「此物未在典籍中」 latency=0 · 不花 token；W-Z240 stress 3488/3488 全绿）——中英 i18n 成对登记。
 > **W-Z240b（实测线上发现）**：Admin 口令 123 解锁后 `#dashboard`（自身带 `.unlock`）计算样式 display=none 永远空——CSS 只写 `.unlocked .unlock`（祖先 × 后代），#dashboard 不是自己的后代，规则不命中。此缺陷从 gate 引入日起在线上存在（`gateError` 路径都没人点）。修复：补 `.unlocked.unlock{display:block}`（一行、只作用 #dashboard）；修复后浏览器实测：解锁 → dashboard display:block → Measured 16 tiles 全部渲染（14 旧瓦 + 2 新瓦）。
