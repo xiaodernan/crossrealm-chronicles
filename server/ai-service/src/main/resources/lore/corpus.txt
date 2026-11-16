@@ -10887,6 +10887,105 @@ Outside, the fire-seed tree stood straight and tall — and its needles burned r
 
 *(End of volume eighty-two · Volume XII, third part.)*
 
+# source: creative/novel/en/83-the-ledger.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XII**: The Long Journey — Fire and Ink
+
+---
+
+## Eighty-three: The Ledger
+
+On the seventh morning after they came home, A-Shi woke alone.
+
+His mother had gone out early. The kitchen held nothing but the stove and himself.
+
+He took down the ledger from beside the stove.
+
+The cover was thin — the kind of thing people throw away after a few years. Not much like a treasure. He opened it anyway.
+
+On the first page a very faint character was written in ink gone pale with time:
+
+记.
+
+He turned the page. The next character was also 记. The third was 记. Every page — every single page — held the same character, written by a different hand, with a different temperament, in a different season of the writer's life.
+
+He read three generations of hands.
+
+His grandfather's stroke — short across, tall down, heavy on the finish. His father's stroke — lighter, smaller, more careful, as though conscious of taking up space. His great-great-grandfather's stroke — away on the corner — bold and unsteady.
+
+He saw age in the ink long before he saw it in faces.
+
+He turned page after page. His hands grew heavier with each one.
+
+He reached the final, blank page.
+
+He sat there for a long time.
+
+He wanted to do something grand — to write the character with a flourish nobody could forget, to put six hundred years of ink into one gesture. Then he understood: nobody wanted that. The last keeper had not tried to out-do the others.
+
+A ray of sunlight fell through the kitchen window and lit the center of the stove-fire.
+
+He took the brush from the holder, set it in the inkstone, and wrote.
+
+Three strokes. One breath. The same character.
+
+The stroke for "i̇" — a little wider on the right than it was on the left, tilting slightly into the habit he had practised a thousand times.
+
+He set the brush down.
+
+Three strokes. One breath.
+
+He looked at what he had written.
+
+记.
+
+Horizontal stroke his grandfather's habit. Vertical his father's. Ink his own.
+
+From the doorway behind him:
+
+"You finally did it."
+
+Baiyin.
+
+He didn't ask when she had arrived.
+
+"You see?" he said, without turning. "It is a little of all of them."
+
+Baiyin came to his side and studied the character.
+
+"Beautiful," she said.
+
+He shook his head.
+
+"I wrote it by hand. Wait until the village sees it."
+
+Baiyin laughed.
+
+"The village never will," she said. "This book is yours alone."
+
+She held it for a moment, then handed it back.
+
+"Tomorrow," she said, "you begin the next book."
+
+"The next book?"
+
+"The one they are all waiting for," Baiyin said.
+
+He asked nothing more.
+
+That evening the stove burned higher than it usually did, and the fire-seed tree rustled though there was no wind. He understood that the next volume of the ledger was already open — and that he would never be able to refuse the next step.
+
+Some things are not inherited.
+
+They are kindled.
+
+---
+
+*(End of volume eighty-three · Volume XII, fourth part.)*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -18746,6 +18845,107 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第八十二卷 · 卷十二之三）*
+
+# source: creative/novel/83-册.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十二**：远行 —— 火与墨
+
+---
+
+## 八十三 · 册
+
+阿石回家后的第七天，母亲早起出去了。屋子里只有灶火和他。
+
+他翻开那本册子。
+
+封面下面写着一个极淡的字。
+
+记。
+
+他往里翻。第一页一个字，第二个也是，第三、第四也是——都是一个字：记。
+
+他从第一位守灶人的笔看到第六百零一位。他爷爷的笔锋他认得——横得短，竖得长，收笔时腕转一下，压得很重。他爸爸的字比较软，字势小一点，像怕占太多地方。他再也没见过白茵一笔一画写出来的「记」，但每笔都压得极深。
+
+他翻了很多页。手慢慢感到沉。
+
+他在最后的空白页上坐了很久。
+
+他本来想重写一遍第六百零一页——写的比他爷爷还重一些，写的比爸爸还圆——但不对。他的手停在那里——他该怎么写那一个字。
+
+外边过来一道光。
+
+他没听见风声。他只看见灶火中央正中心一束极细的光亮起来——它那么小，又那么亮。
+
+他把笔放进砚池里蘸了蘸墨——
+
+他写了那个字。
+
+他写得出乎他自己意料地稳。
+
+横，竖，横。三段一气呵成。
+
+他最后把那个字放桌子上端详。
+
+记。
+
+横是他爷爷的横。竖是他爸的竖。墨是他自己的墨。
+
+他忽然笑了。
+
+他回头看灶火。灶火还稳稳地烧着。
+
+他又低头看自己写的字——他的字——这一页多了两个字「阿石」，是白茵没教过他的写法，但他的手自己知道了。
+
+白茵不知什么时候站到他身后。
+
+"你终于写出来了。"她说。
+
+阿石点头。
+
+"它不是我一个人写的。"他说。
+
+白茵没有这么说。
+
+她说：
+
+"你父亲用炭写的，你母亲用煤写的，你爷爷用木段蘸了铁锈写的，最早的那几位——是用手指蘸了灶灰直接刻在纸上的。"
+
+阿石抬头看她。
+
+"很丑。"他说。
+
+白茵笑了。
+
+"很丑。"她说，"但他们和我们——是一页一页接过来的。"
+
+她从他身后走到桌边，指了指那几页。
+
+"他们把手底下的功夫都留给了你。"
+
+阿石的眼睛湿了。
+
+灶火又跳上了一寸。
+
+夏天的风吹进屋里，火势忽而高、而忽低。阿石望着灶火，又望向灶火边上的那本旧册子，目光最终落在这间屋子从六百年前流传到今天的那本子的全部字迹上。
+
+白茵走之前说了最后一句话：
+
+"等你再翻开这本书的时候——
+
+翻到最后一页——
+
+它会向你展开另一条路。"
+
+阿石没问她那是什么路。
+
+他知道——等他到了那天，他再也不用问什么路了——他只是要走下去。
+
+---
+
+*（本章完 · 跨界线总第八十三卷 · 卷十二之四）*
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)
