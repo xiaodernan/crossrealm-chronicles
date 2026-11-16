@@ -128,6 +128,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Broken Stone | [the-broken-stone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/77-the-broken-stone.md) |
 | The Guest | [the-guest](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/78-the-guest.md) |
 | Into the Outlands | [into-the-outlands](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/79-into-the-outlands.md) |
+| The North Lamp | [the-north-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/80-the-north-lamp.md) |
 
 Chapter → game-chapter mapping:
 
