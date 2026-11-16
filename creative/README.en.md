@@ -160,6 +160,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Delivery of Ashes | [the-delivery-of-ashes](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/109-the-delivery-of-ashes.md) |
 | The Shared Hearth | [the-shared-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/110-the-shared-hearth.md) |
 | The Characters | [the-characters](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/111-the-characters.md) |
+| The Night of the Vigil | [the-night-of-the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/112-the-night-of-the-vigil.md) |
 
 Chapter → game-chapter mapping:
 

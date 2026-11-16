@@ -158,6 +158,7 @@ creative/music/soundtrack.html
 | 送灰 · The Delivery of Ashes | [the-delivery-of-ashes](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/109-the-delivery-of-ashes.md) |
 | 同炉 · The Shared Hearth | [the-shared-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/110-the-shared-hearth.md) |
 | 教字 · The Characters | [the-characters](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/111-the-characters.md) |
+| 守火之夜 · The Night of the Vigil | [the-night-of-the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/112-the-night-of-the-vigil.md) |
 
 每一章对应游戏的章节走法：
 

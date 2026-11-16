@@ -41,7 +41,8 @@ const GROUPS = [
     'creative/music/OST-专辑手册.md',
     'creative/music/OST-专辑手册.en.md',
   ].map((f) => ['music', f]),
-  ...['creative/refs/crossrealm-realworld-notes.md', 'creative/refs/crossrealm-realworld-notes.en.md']
+  ...['creative/refs/crossrealm-realworld-notes.md', 'creative/refs/crossrealm-realworld-notes.en.md',
+       'creative/refs/crossrealm-realworld-notes-2.md', 'creative/refs/crossrealm-realworld-notes-2.en.md']
     .map((f) => ['refs', f]),
 ].map(([group, file]) => ({ key: `${group}:${file}`, file, group }))
   .filter((item) => existsSync(join(ROOT, item.file)))

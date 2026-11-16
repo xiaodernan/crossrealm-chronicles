@@ -81,6 +81,23 @@ class LoreOracleLiveIntegrationTest {
     }
 
     @Test
+    void oracleRefsVol2AnswersWinterSolsticeWithRefsVol2() {
+        // 这条问句只有 vol.2 单独的冬至条目可以命中（vol.1 是祭灶/火塘/维斯塔族系列）——
+        // 用它钉住 refs 卷2 入典后仍被 BM25 检索到，Oracle 诚实答复原文内容。
+        LoreOracleService oracle = new LoreOracleService(liveClient(), index);
+        LoreOracleService.OracleResult r = oracle.answer(
+                "冬至守夜火在现实世界中对应什么习俗？比如中国守夜和日本灶神", 4);
+
+        assertTrue(r.ok(), "真实上游必须完成作答");
+        assertFalse(r.answer().isBlank());
+        boolean refs2Hit = r.sources().stream().anyMatch(s -> s.startsWith("creative/refs/crossrealm-realworld-notes-2"));
+        assertTrue(refs2Hit, "冬至对照类问题必须召回 refs vol.2 出处，实际 sources=" + r.sources());
+
+        System.out.println("[W-Z256 live] refs-vol2 sources=" + r.sources()
+                + " model=" + r.model() + " latency=" + r.latencyMs() + "ms\n" + r.answer());
+    }
+
+    @Test
     void oracleOutOfCorpusRefusesWithoutTokens() {
         // 语料是 101 卷双语锚火线 + 配套番外/词囊/剧本/OST。BM25 按单字切分，纯中文提问几乎
         // 总能召回一些token；要命中「此物未在典籍中」的拒答分支，问题的 token 必须**整个都不在语料里**——
