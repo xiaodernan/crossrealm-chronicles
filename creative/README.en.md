@@ -135,6 +135,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Cone | [the-cone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/84-the-cone.md) |
 | The Letter | [the-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/85-the-letter.md) |
 | The Lamp | [the-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/86-the-lamp.md) |
+| The Grandmother | [the-grandmother](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/87-the-grandmother.md) |
 
 Chapter → game-chapter mapping:
 

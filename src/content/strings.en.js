@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Eighty-six volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Eighty-seven volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 86 volumes of the canon, fully readable
+· Canon Library — 87 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3137,8 +3137,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 86-volume index',
-  hm_body_codex: `Codex — 86 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 87-volume index',
+  hm_body_codex: `Codex — 87 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3226,6 +3226,7 @@ hm_title_codex: 'Codex · the 86-volume index',
 84 · The Cone — on the Winter Solstice morning A-Shi sees a small dark cone on the fire-seed tree; his mother tells him the meaning: when the fire-seed tree cones, the next keeper is on the road — the wait is over; that night past midnight he wakes to a thin, grey-robed stranger seated before his stove — middle-aged, soot-scented — he has carried the next ledger: every keeper’s name is in it, his grandfather, his father, himself — the page for the next keeper is blank — Baiyin’s granddaughter-keeper has been on the road for six hundred years; at dawn the third cone drops from the tree into the snow, and all through the valley the fire leaps up in witness. Volume XII, fifth part.
 85 · The Letter — the third day after the Solstice, A-Shi decides to write to Baiyin; he strikes out every stroke he tries — his grandfather’s short-across, his father’s lighter line — and finally writes four characters: “The fire will not go out” — he seals the letter into the ledger — his mother sees it and says nothing — past midnight the stove leaps once and the ledger opens itself; on the final page, in ink no hand could have written, his own grandfather’s hand appears: “A sealed book wakes itself”; the next morning the page holds only Baiyin’s words: “I will see it inside the ledger” — and the stove still burns, steadier than ever. Volume XII, sixth part.
 86 · The Lamp — Baiyin comes in from the mountain; the light in the kitchen does not go out for even a moment; she sits by the stove and asks, at last: “Have you given it to them yet?” — he nods, slowly — she warns him gently that the fire is nearly full — once the ledger is full, the next keeper begins, and she closes the door softly and does not turn back; the stove flares with a gold-white flame so clear A-Shi can see every one of the keepers who ever tended it — six hundred years of faces, each one lit by the same fire they kept; the letter is gone; the final page of the ledger is blank and ready; sixth-hundred-and-second — a new beginning. Volume XII, seventh part.
+87 · The Grandmother — on the third morning after Baiyin left, A-Shi finds a folded cloth on the kitchen table he had never noticed, thin as a letter; inside, one tiny strip of paper survives — Baiyin’s hand — three characters: “Bai Nainai” — Grandmother Bai; the stove leaps once behind him; it comes to him all at once — six hundred years of keepers all calling the fire by the same name they thought belonged to one woman — Grandmother Bai — the fire was the family itself, she kept every house, warmed every hand, held every ledger — A-Shi touches the stove’s warm iron ledge and understands that he has been sitting in her lap for as long as he can remember; his mother enters with soup; she looks at him; she knows; they do not say anything; six hundred years decided what needed saying without either of them speaking; the stove settles, gentle — a grandmother tucking in her grandson. Volume XII, eighth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3239,7 +3240,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (eighty-six volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (eighty-seven volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
