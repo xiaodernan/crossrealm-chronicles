@@ -149,6 +149,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Loft | [the-loft](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/98-the-loft.md) |
 | The Arrival | [the-arrival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/99-the-arrival.md) |
 | The Hundredth Volume | [the-hundredth-volume](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/100-the-hundredth-volume.md) |
+| The Handover | [the-handover](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/101-the-handover.md) |
 
 Chapter → game-chapter mapping:
 

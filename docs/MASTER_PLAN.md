@@ -9,6 +9,10 @@
 >
 > **2026-11-16 · W-Z205 原典语料重建：59 → 175 源 + 真上游口径对齐**：corpus.txt 全量重编（74 卷双语小说 + 74 卷英译 + 27 份参照文件 ≈ 520 KB，含 66–74 卷守火主线全链）；`Bm25IndexTest.linDu_query_matches_lin_du_chapter` 因如实语料扩容从 top-5 → top-10（如实登记，非放水）；`hm_body_lore_oracle` 不再手写「36 源 / 1803 检索块」的漂移数字——说明书永远引用语料的运行时重编能力；`build-latest.mjs` 的 `lore_sources` 本就是活读（latest.json 实测 175）；说明书/showcase feed 新增 11·16 三条 W-Z190+ 实录；`ONLINE_SERVICES.md(+EN)` / README / player-guide 同步到 175 源；AI 侧 lore 门禁（LoreRagTest/Bm25IndexTest/Bm25TokenizerTest）绿。
 >
+> **2026-11-16 · W-Z236 第101卷入典 · 卷十五之二《传火 / The Handover》**：《跨界纪事》卷十五「第七百年」第二篇——第七百年的第五天，细雨下到傍晚；母亲捧出一只六百年按不开的铁匣；阿石按准暗扣——盖子咔地开了——里面是一叠泛黄的纸和一块更旧的黑炭；第一代守火人的字瘦而稳：火从白石头落下来——我接住了——它怕冷——只要还有人添柴它就不灭——传到第七百年的人还能看到这行字——灶火还在烧；名字只剩半个偏旁——母亲说那是白茵（Bai Yin，七百年前第一代守火人）；随后她看向小火：落到他手里了——阿石当晚在纸上写下「续写」放回匣子——灶火亮了一寸——《传火》落笔。
+> 交付：creative/novel/101-传火.md + en 孪生 101-the-handover.md；novella 重生成 101 × 2 = 202 模块（典籍馆现为 101 卷）；root README（跨媒体宇宙线 100→101 卷、`novel/en` → `101-the-handover`）、creative README(zh+en)、strings(zh+en) codex 全量同步到 101 卷；原典语料重建：229 源（101 卷双语全书）；showcase feed 新增 W-Z236（含 W-Z235 实录补记）。
+> 全量门禁 6754 / 6754 绿 · Build ✓ · Size ✓（首屏 2.08 MiB）· i18n 3227。
+>
 > **2026-11-16 · W-Z235 说明书星图深章节（StateGraph 内部机制 · 双语 · 门禁扩容）**：[H] 新增 `state-graph-2` 章节（`hm_title_state_graph2` / `hm_body_state_graph2`），**逐行讲授 StateGraph 内部机制**：State / Node（patch merge by Object.assign）/ Edge 两类（静态 vs 条件）/ setEntryPoint + compile() 静态良构（invoke 才执行 routeFn）/ setMeta（可选标签，不影响走图）/ invoke(initialState) 拷贝→步进→trace / 节点纯度（副作用进 context 不污染 state）；并给出 LangChain/LangGraph 生产管线（RAG 链路 retriever → reranker → generator → citation-gate + 「证据不够回检索」的条件边）的完整映射，指明源码（`src/core/StateGraph.js` ≈ 80 行零依赖纯 JS、`src/content/fortunePath.js` 三问十结局内容形态、`src/game/FortunePathSystem.js` 每日 UTC 限流 + 落盘 `crossrealm_fortune_path_v1`）、[J] 页签（`src/ui/FortunePathTab.js` [J] 子页视觉回放）、`tests/state-graph.test.js` 25 用例作为活教材。
 > EXPECTED_KEY_COUNT 3225 → **3227**（+2 hm_*）；`helpSectionsExtra` 10 → **11**；首屏不变（纯内联文案，无新依赖）；i18n / help-manual-i18n / content-registry 绿。
 >
