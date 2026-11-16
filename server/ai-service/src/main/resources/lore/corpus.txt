@@ -6366,6 +6366,81 @@ The stove was ready for it.
 
 *(End of volume one hundred and thirteen · Volume XV, fourteenth part · The seven-hundredth year — The Awakening Hearth.)*
 
+# source: creative/novel/en/114-the-first-day-of-spring.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The First Day of Spring
+
+---
+
+## One Hundred and Fourteen: The First Day of Spring
+
+On the night before the first day of spring, a light snow fell on the courtyard.
+
+It was not heavy — a few strong breaths of wind and it was nearly gone. The strip of frozen mud along the far edge of the yard was already turning dark.
+
+At three in the morning, the courtyard gate rattled once.
+
+Not the wind. Not the snow falling. A different sound.
+
+A-Shi's eyes opened.
+
+He sat up. He did not wake his mother. He went out to the door alone.
+
+The door opened a crack. No snow came in — a figure stood in the doorway.
+
+Not the old man from the mountain. Not the cooper. Not the letter-bearer.
+
+A person whose face was hidden by a white cloth, fragrant with something he could not name.
+
+The stranger drew from within his robe a small oil-paper parcel and handed it into the room. He said nothing. He turned and was gone.
+
+A-Shi picked up the parcel.
+
+Inside was — a single small piece of white birch. A fresh-looking one, still rimmed with frost, with a little snow clinging to the white.
+
+His mother came to the doorway. One look was enough.
+
+On the oil-paper was written four characters only:
+
+"灶火春安。May the stove fire be at peace in spring."
+
+She set the piece of white birch into the fire.
+
+The flames shook once.
+
+A-Shi placed his hand near the fire's edge. The warmth was intense — a spring kind of warmth.
+
+"Stove," Xiao Huo said, rubbing his eyes.
+
+"Stove," A-Shi confirmed.
+
+The room went quiet.
+
+"The stove ate a piece of white birch last night," his mother said.
+
+Everyone in the house knew about the log of white birch Bai Yin had stored away six hundred years ago. It had been split into three pieces — the smallest had already gone into the stove in midwinter; the two larger pieces still sat in the yard.
+
+Someone — someone no one had seen — had left this one on the doorstep.
+
+The ones who came to leave white birch — they were folded into the stove's own kin. The fire knew all their names.
+
+The morning of the first day of spring came up white and clean.
+
+On the fire-seed tree, one tiny leaf pushed out — just one — and the stove lit it up like gold under the rising sun.
+
+This house. Seven hundred years.
+
+The first day of spring.
+
+The stove is still burning.
+
+---
+
+*(End of volume one hundred and fourteen · Volume XV, fifteenth part · The seven-hundredth year — The First Day of Spring.)*
+
 # source: creative/novel/en/12-interlude-before-the-flame.md
 # Interlude Five · Before the Flame
 
@@ -16688,6 +16763,95 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百一十三卷 · 卷十五之十四 · 第七百年 · 醒灶）*
+
+# source: creative/novel/114-立春.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 立春
+
+---
+
+## 一百一十四 · 立春
+
+立春前夜，院子里落了一场薄雪。
+
+雪不厚，几场风就把它吹干净了。院子里最外角那条沟槽里还剩下点残雪，明天会变成泥。
+
+夜里三更，院子里传来很轻很轻的一声响。
+
+不是风，不是雪——是院门自己响了一下。
+
+阿石醒了。
+
+他坐起来，他没有叫母亲——他自己去开门。
+
+屋门开了一条缝，雪没有进来——门槛外面站着一个人。
+
+不是老人，也不是箍桶匠，也不是送信的。
+
+是个白布遮脸的陌生人。
+
+陌生人用右手从怀里掏出一个油纸包，递进门内。他没有说话。他转过身来，走了。
+
+阿石捡起那个油纸包。
+
+里面是——一小块白桦。
+
+一小块凌着霜的、和残雪混着一点白亮的、很新的白桦。
+
+母亲出来看——她一眼就认出来了。
+
+油纸上只写了四个字：
+
+"灶火春安。"
+
+母亲把那块白桦放进了灶里。
+
+灶火抖了一下。
+
+阿石把手放到灶前。
+
+炉子烫得很暖。暖意是春天的。
+
+"灶火。"小火出来揉着眼说。
+
+"灶火。"阿石看着他。
+
+屋里安静了很久。
+
+"灶火昨夜吃了一块白桦。"母亲说。
+
+全家人都知道白茵寄存那半根白桦——那是寄存了六百年的。
+
+那块白桦被劈成三段——最小的那段被他们在仲冬送给了灶火——剩下两段留在院里。
+
+现在，院门留了这一块。
+
+谁来放？——谁都没看见。
+
+全家人都知道。
+
+留白桦的那个人，放白桦的那个人，祖火的那个人，白茵的那个人——
+
+灶火，知道他们每个人的姓。
+
+立春早上，全院子的光都是白里透亮的一种白。
+
+火种树上长出了第一颗黄色的小叶子，灶火正把它照得发金。
+
+灶火这个家。
+
+第七百年。
+
+立春。
+
+灶火依然在烧。
+
+---
+
+*（本章完 · 跨界线总第一百一十四卷 · 卷十五之十五 · 第七百年 · 立春）*
 
 # source: creative/novel/12-番外五-火之前.md
 # 番外五 · 火之前

@@ -162,6 +162,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Characters | [the-characters](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/111-the-characters.md) |
 | The Night of the Vigil | [the-night-of-the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/112-the-night-of-the-vigil.md) |
 | The Awakening Hearth | [the-awakening-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/113-the-awakening-hearth.md) |
+| The First Day of Spring | [the-first-day-of-spring](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/114-the-first-day-of-spring.md) |
 
 Chapter → game-chapter mapping:
 

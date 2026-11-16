@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and thirteen volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and fourteen volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 113 volumes of the canon, fully readable
+· Canon Library — 114 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3138,8 +3138,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 113-volume index',
-  hm_body_codex: `Codex — 113 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 114-volume index',
+  hm_body_codex: `Codex — 114 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3256,6 +3256,7 @@ hm_title_codex: 'Codex · the 113-volume index',
 111 · The Characters — thirty days after the equinox, the first autumn rain of the season falls on the courtyard — earlier than any autumn rain in seven hundred years; the old man comes again; he carries nothing; he wears a fresh white hemp robe and sets his shoes at the threshold as if he had been born here; tonight is the fifteenth — the full moon — the fire watch night; from within his robe he draws out a small piece of black charcoal — a chip of ancestor-fire, the very ember the first keepers had carried seven hundred years before; he says: you will learn three characters from me — 火, 灶, 守; he draws 火 on the ground: six strokes — the forked head, the anchored mid-stroke; he draws 灶 below it: one more horizontal stroke; then 守: the watcher; he says: this one has been alive seven hundred years; Xiao Huo takes the charcoal and tries thirteen times to carve out his fire character; no one speaks; as the thirteenth attempt finally holds its strokes, his mother comes to the kitchen doorway and says: that one looks like fire — A-Shi replies: that one looks like Xiao Huo; the old man asks Xiao Huo to carve all three characters on the kitchen wall, two feet from the stove iron, where the fire can see them; Xiao Huo carves them slowly, one by one; when the last stroke is finished the flame leaps once — everyone knows; seven hundred years and no keeper had ever been taught these characters; tonight someone was; he banks the stove with ash for the first time without being told — he is a keeper now. Volume XV, twelfth part — the hundred-and-eleventh volume.
 112 · The Night of the Vigil — on the day of the winter solstice the courtyard has no daylight; by nine in the morning it is light, but by three in the afternoon the sky is already pitch black; every branch of the fire-seed tree is silhouette against frost; the only warm thing in the yard is the tofu-cube glow of the stove at the center of the kitchen; tonight the stove is not to go out; his mother calls Xiao Huo to the stove; “for seven hundred years, whoever was in the family would take turns watching the fire”; tonight no one takes turns; A-Shi is asleep; tonight A-Shi lets you take the watch; he cares for the stove all night long; the wind presses against the door — two or three hours, it rattles the latch; once, twice, once; Xiao Huo feeds the stove one sliver of birch at a time; slow, sparing, steady; he never falls asleep; at four in the morning the horizon turns white; at six the gate rattles — his mother, dressed in white, comes out and stands in the courtyard; “The stove?” — “Still burning,” Xiao Huo said; she goes inside — the hearth is warm, the ash level — one piece of birch he did not see his own hands feed sat glowing at the edge; Tonight was the first time a keeper had taken the night alone; at dawn she kisses the top of his head; “Happy solstice,” she says; Xiao Huo does not answer; he is too tired, and too proud; he banks the stove again, the way he has been taught; the stove is very quiet; tonight, for the first time in seven hundred years, no one had to say “tomorrow” — he said it himself and meant it. Volume XV, thirteenth part.
 113 · The Awakening Hearth — the next morning, fog rolls in from outside the courtyard, thick the way porridge is thick; the doorway vanishes into it; every needle on the fire-seed tree furred with frost; his mother is already cooking — rice, tofu, the last of the cabbage — the stove was burning steadily, the way it burned all night; A-Shi woke; he had not slept at all the night before; Xiao Huo woke too; he sat up slowly — the stove was still burning, same level, same calm, same golden yellow it had been at three in the morning when the wind had stopped for an instant; “It knows me now,” A-Shi said finally, his voice lower than ordinary; his mother did not turn around; she only nodded; the fog kept coming; Xiao Huo knelt at the stove; he placed one small hand flat on the iron edge — warm, not hot, in the way iron is warm when the fire underneath has burned steady all night; “Last night was me,” he said; no one answered; A-Shi knelt beside him; reached both hands to the stove’s edge — “Seven hundred years,” he said; his hands were lit red-gold by the fire; his mother came to stand behind them; “From now on, the two of you will keep the fire — in turns — whoever keeps it knows”; the kitchen was silent for a long time; from that day on, nobody in the house used the phrase “keeping the fire”; the stove had become the third member of the family; spring was still a fortnight away — but already here, already warm in every square of light the stove poured into the kitchen. Volume XV, fourteenth part.
+114 · The First Day of Spring — on the night before the first day of spring a light snow falls on the courtyard; by morning it is nearly gone; the strip of frozen mud along the far edge of the yard was already turning dark; at three in the morning, the courtyard gate rattles once; A-Shi’s eyes open; he does not wake his mother — he goes out to the door alone; the door opens a crack; a figure stands in the doorway whose face is hidden by a white cloth; the stranger draws from his robe a small oil-paper parcel and hands it into the room; he says nothing; he turns and is gone; A-Shi picks up the parcel — inside, a single small piece of white birch still rimmed with frost; his mother comes to the doorway — one look was enough; on the oil-paper was written four characters only — 灶火春安 — “May the stove fire be at peace in spring”; she sets the piece of white birch into the fire; the flames shake once; the warmth is intense — a spring kind of warmth; it is a spring day, and somewhere in the mountains the old man — or someone he sent — had walked all the way down with a piece of white birch to add one more log to their stove’s ever-burning fire. Volume XV, fifteenth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3269,7 +3270,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and thirteen volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and fourteen volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
