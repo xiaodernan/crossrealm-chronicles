@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T17:11:37.786Z",
+  "generated_at": "2026-11-16T17:16:06.151Z",
   "branch": "main",
-  "head": "e7aad30e",
-  "total_commits": 1966,
-  "pushed_at": "2026-11-17T01:10:08+08:00",
+  "head": "2855cba7",
+  "total_commits": 1967,
+  "pushed_at": "2026-11-16T17:11:37Z",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "2855cba",
+      "at": "2026-11-16T17:11:37Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "e7aad30",
       "at": "2026-11-17T01:10:08+08:00",
@@ -26,11 +31,6 @@
       "short": "f3a6535",
       "at": "2026-11-16T16:46:28Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "e514a51",
-      "at": "2026-11-17T00:43:34+08:00",
-      "subject": "feat(canon): W-Z274 第一百二十三卷《雪安回头 / Snow’an Turns Back》入典——卷十五之二十四"
     }
   ],
   "tracked_files": 1502,
