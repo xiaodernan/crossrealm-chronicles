@@ -9,6 +9,10 @@
 >
 > **2026-11-16 · W-Z205 原典语料重建：59 → 175 源 + 真上游口径对齐**：corpus.txt 全量重编（74 卷双语小说 + 74 卷英译 + 27 份参照文件 ≈ 520 KB，含 66–74 卷守火主线全链）；`Bm25IndexTest.linDu_query_matches_lin_du_chapter` 因如实语料扩容从 top-5 → top-10（如实登记，非放水）；`hm_body_lore_oracle` 不再手写「36 源 / 1803 检索块」的漂移数字——说明书永远引用语料的运行时重编能力；`build-latest.mjs` 的 `lore_sources` 本就是活读（latest.json 实测 175）；说明书/showcase feed 新增 11·16 三条 W-Z190+ 实录；`ONLINE_SERVICES.md(+EN)` / README / player-guide 同步到 175 源；AI 侧 lore 门禁（LoreRagTest/Bm25IndexTest/Bm25TokenizerTest）绿。
 >
+> **2026-11-16 · W-Z239 第102卷入典 · 卷十五之三《第一夜 / The First Night》**：《跨界纪事》卷十五「第七百年」第三篇——第十八天，小火学码第一根柴（A-Shi 三次点头就不再需要点头）；傍晚来了第七百年第一个客——从白石头方向走了一百二十二天——只为了看一眼灶火是不是真不灭；母亲端菜上桌，小火添柴、阿石添水；那人从褡裢掏出一面铁镜——镜面中央有铁线勾出的火苗——和灶前墙上小火画的那个圆圆火苗一模一样；母亲手指碰了碰镜面，久久没说话；「炉边有碗——灶火在」；那人磕了一个头，从这间屋子走了出去——他娘的灶也还会亮。
+> 交付：creative/novel/102-第一夜.md + en 孪生 102-the-first-night.md；novella 重生成 102 × 2 = 204 模块（典籍馆现为 102 卷）；root README（长篇**一百零二卷**、novel/en → 102-the-first-night）、creative README(zh+en)、strings(zh+en) codex 全量同步到 102 卷；原典语料重建：231 源；showcase feed 新增 W-Z239 实录。
+> 全量门禁 6754 / 6754 绿 · Build ✓ · Size ✓（首屏 2.08 MiB）· i18n 3227。
+>
 > **2026-11-16 · W-Z238 Lore Oracle 全链路真实上游联调测试（检索→作答→诚实拒答）**：新增 `server/ai-service/.../lore/LoreOracleLiveIntegrationTest.java`（与 AiLiveIntegrationTest 同口径，`@EnabledIfEnvironmentVariable("LLM_API_KEY")`，默认 CI 零外呼）。两条断言：
 > ① 原典问题「锚火是什么？」走**真 BM25 召回（101 卷双语语料，classpath:/lore/corpus.txt 229 源）→ 真 LlmClient（prompt_cache_key:crossrealm-canon-v1 + stream+include_usage+ephemeral）**——实测 HTTP 200，sources=[creative/novel/67, 89, 77, 35]，model=gpt-6.1-terra，latency≈3.2s；ok=true、出处非空。
 > ② 纯 ASCII 无义字符提问「zxqjwop qkdjw zqwvjqmw rfjklw」——BM25 单字切分后**一个 token 都召不回** → 直接诚实拒答「此物未在典籍中」、sources 空、latencyMs=0，**不进入 LLM、不花 token**（CJK 语料单字索引几乎不可能 0 召回，此用例是拒答分支的确定性守卫）。

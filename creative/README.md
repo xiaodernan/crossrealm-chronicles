@@ -148,6 +148,7 @@ creative/music/soundtrack.html
 | 抵达 · The Arrival | [the-arrival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/99-the-arrival.md) |
 | 第百卷 · The Hundredth Volume | [the-hundredth-volume](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/100-the-hundredth-volume.md) |
 | 传火 · The Handover | [the-handover](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/101-the-handover.md) |
+| 第一夜 · The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/102-the-first-night.md) |
 
 每一章对应游戏的章节走法：
 
