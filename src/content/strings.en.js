@@ -3288,9 +3288,47 @@ Four moving parts:
 
 compile() enforces three things: the entry node exists, every edge target exists, and the graph can actually reach its sink. A broken graph fails loudly at compile time — tests/state-graph.test.js pins this with 25 cases. The player never sees a crashed screen.
 
-Why this is worth learning — production LangGraph pipelines have the same shape: a RAG chain is retriever → reranker → generator → citation-gate nodes, with a conditional edge for “not enough evidence → back to retrieval”. The Lore Oracle (canon Q&A) lives on the same idea: BM25 two-stage retrieval → grounded generation with inline citations → “the canon does not say” when evidence runs out. The Three Questions are a living textbook in front of you — open these sources side by side: src/core/StateGraph.js (about 70 lines of pure JS, zero dependencies), src/game/FortunePathSystem.js (daily UTC gate + localStorage crossrealm_fortune_path_v1), src/ui/FortunePathTab.js (the [J] tab renderer).
+Why this is worth learning — production LangGraph pipelines have the same shape: a RAG chain is retriever → reranker → generator → citation-gate nodes, with a conditional edge for “not enough evidence → back to retrieval”. The Lore Oracle (canon Q&A) lives on the same idea: BM25 two-stage retrieval → grounded generation with inline citations → “the canon does not say” when evidence runs out. The Three Questions are a living textbook in front of you — open these sources side by side: src/core/StateGraph.js (about 70 lines of pure JS, zero dependencies), src/game/FortunePathSystem.js (daily UTC gate + localStorage crossrealm_fortune_path_v1), src/ui/FortunePathTab.js (the {journal} tab renderer).
 
 How to play: press {journal} → Fortune Path · The Three Questions. One reading per UTC day. First-read souls 60/35/30/25 (windkeeper 30). Only you know your answers — and your ending. Six hundred years of tending the fire are written into every option you pick.`,
+  hm_title_state_graph2: 'Star Map · Under the Hood of StateGraph',
+  hm_body_state_graph2: `The previous section showed what the Three Questions look like as a graph. This section explains how the graph actually runs. After this you can walk the source with your finger on the screen.
+
+Seven structures to name.
+
+State — the single object the whole run accumulates. invoke copies the initial state you hand it into a working variable; nodes return patch fragments; the graph merges each patch into state in order — no reducers, no race, no surprises. The plain JS analog of a reducer: whoever runs next sees the accumulated state. Node A cannot leak state into node B except through the state object.
+
+Node (function) — f(state, context) returns a patch object (possibly empty, possibly with multiple keys). It must not mutate the passed state object, must not do async work, must not throw unpredictably. If a node returns no patch, the state is unchanged; the graph simply moves forward.
+
+Edge — two shapes.
+· addEdge(a, b): unconditional — always go from a to b.
+· addConditionalEdges(a, routeFn): routeFn(state) returns the name of the next node — that's the routing decision. The branch that answers which of the 10 endings the player deserves is exactly this mechanism. In LangGraph terms, it is LangGraph's conditional edge.
+
+setEntryPoint(name) + compile() — the entry must be declared, nodes must be registered before edges are attached; compile performs one check: every edge’s start node must exist in the registry; compile does not execute routeFn (it may depend on state), it only verifies the static shape. Invoke is where the dynamic branch is actually exercised; if a branch points at nothing, you will see it at runtime.
+
+src/core/StateGraph.js
+
+setMeta(name, meta) — optional. Pin a label/color/coordinates to a node; reading side visible, zero effect on the run itself. This is how the {journal} sub-page knows the order of the questions and how the story graph lays them out.
+
+invoke(initialState = {}) — the trigger. Copies state, walks the graph branch-by-branch, steps up to 1024 times, accumulates a trace of (node, state) pairs, stops when either the next edge returns empty/self or step hits 1024. In tests you can pass a trick initialState like { mood: 'warm', time: 2 } and watch the graph settle into your ending.
+
+trace (replay trace) — recorded at invoke. This is where the Fortune Path’s replay log comes from: every (node, state-after) is captured. The {journal} tab uses this to show “as you went” replay of what the player has already drawn.
+
+Node functions should be pure; side effects go in a context slot (counters, retries, timers) rather than in state.
+
+LangChain/LangGraph mapping for this codebase:
+· LangGraph's construct is precisely what is in this project — a StateGraph compiled into a runnable graph; invoke(state) walks the compiled graph.
+· A RAG chain in LangGraph = retriever → reranker → generator → citation-gate; a conditional edge routes “not enough evidence” back to retriever.
+· This project's Lore Oracle (canon Q&A) uses the same shape: BM25 → two-stage retrieval → grounded generation with inline citations; when evidence runs out, it says “the canon does not say”.
+
+Where to put your hands:
+· src/core/StateGraph.js — zero-dependency pure JS (about 80 lines)
+· src/content/fortunePath.js — the three questions + 10 endings, as content
+· src/game/FortunePathSystem.js — daily-UTC gate + localStorage crossrealm_fortune_path_v1
+· src/ui/FortunePathTab.js — the {journal} tab's renderer
+· tests/state-graph.test.js — the 25 cases pin down each routeFn against adversarial input
+
+Then go practice it — press {journal} → Fortune Path · The Three Questions. One reading per UTC day, first-read souls, no hurry — the fire is patient.`,
   // Hearthside Quickstart (W-Z91): start screen / pause menu / first boot — the 30-second reading guide
   quickstart_title: 'Hearthside Quickstart · read me in 30s',
   quickstart_aria: 'Hearthside Quickstart',

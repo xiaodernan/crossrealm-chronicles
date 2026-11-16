@@ -60,4 +60,9 @@ export const HELP_SECTIONS_EXTRA = [
     title: 'hm_title_state_graph',
     body: 'hm_body_state_graph',
   },
+  {
+    id: 'state-graph-2',
+    title: 'hm_title_state_graph2',
+    body: 'hm_body_state_graph2',
+  },
 ];

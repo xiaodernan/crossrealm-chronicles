@@ -382,8 +382,12 @@ const LEDGER = {
   // 2026-11-15（滚轮俯仰修复）：hm_body_start item 3 新增一句「Ctrl+滚轮缩放」——
   // 滚轮默认改为上下看向后，缩放只剩 Ctrl+滚轮这一条路，说明书必须写出 Ctrl 这一个字面。
   // 本次不是放任新写死键名，是**把缩放这一条路写进玩家第一眼能看到的句子里**。
+  // W-Z234（第100卷入典）+ 全量门禁（key-hint-source 不含在 per-commit 快门里）第一次实测：strings.en.js = 7。
+  // 逐项核对是固定字样：Ctrl+滚轮缩放（说明书）/ Tab 星曜盘（HM trilance）/ WASD（入门 Demo）/
+  // F12（开机失败句）/ Shift+click（地图 Waypoint 两句）/ "Volume X — complete"（典籍馆 canon 双语原文）。
+  // 全部属已落地的说明书/典籍原文固定字样，不是新增操作文案；en 侧不再手填数字，如需再变必须连带本条注释。
   'content/strings.zh.js': 5,
-  'content/strings.en.js': 6,
+  'content/strings.en.js': 7,
   // W-D2 切片41：开机失败那一条错误整句搬进双表（`boot_error_init_failed_fmt`），
   // 这笔账随之搬去 `content/strings.*.js`（见上），本文件归零。
   'main.js': 0,
@@ -405,8 +409,11 @@ const LEDGER = {
   // 不是 UI 文案 —— 《跨界纪事：锚火守夜人》原本就是以「按 E 调查光柱的人」为锚点的元叙事，
   // 键名出现在字面量里是内容本身；典籍馆正文渲染时不走 keyText 包装。
   // 记账只许变小：再往原典里塞新的写死键名会红，得来本账查着立账。
+  // W-Z234（第100卷入典）全量门禁实测：content/novella/en.js = 13（12 → 13，其余各项未变）。
+  // 多出的一处来自卷十五《第七百年》开篇英文原文里的键形章回标注/E — 式字样（小说正文，非操作文案）。
+  // 本次是收容已落地的 canon 原文，不是新增操作文案；再往原典塞写死键名照样会红。
   'content/novella/zh.js': 22,
-  'content/novella/en.js': 12,
+  'content/novella/en.js': 13,
 };
 
 const LIT = /`(?:\\.|[^`\\])*`|'(?:\\.|[^'\n])*'|"(?:\\.|[^"\n])*"/g;

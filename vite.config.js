@@ -81,6 +81,9 @@ export default defineConfig({
           // 所以它们必须落在 core 这一层当叶子，不能进 chunk-ui，否则 chunk-core 回读 chunk-ui
           // 成环（B37 那条"core 是叶子"）。W-D2 切片46 为收 content→engine 边界把它们从
           // content/ 迁进了 ui/，本行按"谁读谁"（不是按目录名）把它们留回 core 块。
+          // W-Z235：StateGraph 是零依赖的状态机原语——被 game/（chunk-core）的
+          // FortunePathSystem 读取；若留在整体 core/（index），共享层就反向依赖入口（B37）
+          if (id.includes('/src/core/StateGraph.js')) return 'chunk-core';
           if (id.includes('/src/ui/keyLabels.js') || id.includes('/src/ui/keyHints.js')) {
             return 'chunk-core';
           }

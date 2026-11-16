@@ -3206,9 +3206,49 @@ Wave4 四系：赛博霓虹（遗境）· 武士残响（灰林）· 旧日低�
 
 compile 守三件事：入口结点存在、每条边的跳转目标都存在、从入口必走得到终点。图断了当场红——tests/state-graph.test.js 的 25 个用例把它焊死；编译不过，玩家永远看不到崩掉的画面。
 
-为什么这很值钱——LangGraph 的生产管线也长这样：一条 RAG 链路 = 检索结点 → 重排结点 → 生成结点 → 引用门禁结点，条件边兜底「证据不够 → 回检索」。本项目的 Lore Oracle（典籍原典问答）走的也是同一念头：BM25 两段式召回 → 带引用生成 → 证据不足就说「原典没有」。锚火三问是摆在你面前的一件活教材，打开这几份源码对照着看：src/core/StateGraph.js（约 70 行纯 JS，零依赖）、src/game/FortunePathSystem.js（每日限流 + LS 落盘 crossrealm_fortune_path_v1）、src/ui/FortunePathTab.js（[J] 页签渲染）。
+为什么这很值钱——LangGraph 的生产管线也长这样：一条 RAG 链路 = 检索结点 → 重排结点 → 生成结点 → 引用门禁结点，条件边兜底「证据不够 → 回检索」。本项目的 Lore Oracle（典籍原典问答）走的也是同一念头：BM25 两段式召回 → 带引用生成 → 证据不足就说「原典没有」。锚火三问是摆在你面前的一件活教材，打开这几份源码对照着看：src/core/StateGraph.js（约 70 行纯 JS，零依赖）、src/game/FortunePathSystem.js（每日限流 + LS 落盘 crossrealm_fortune_path_v1）、src/ui/FortunePathTab.js（{journal} 页签渲染）。
 
 上手：{journal} → 星轨 · 锚火三问；每日 UTC 限一签；首签 souls 60/35/30/25（最高稀有度 60）。答案只有你自己认得，结局也是——六百年守火的回响都写在你按下的每个选项里。`,
+  hm_title_state_graph2: '星图 · StateGraph 内部机制',
+  hm_body_state_graph2: `上一章讲「星图 · 锚火三问」是 StateGraph 玩起来长什么样；这一章讲它怎么跑。看完你就能沿源码走一遍。
+
+看七个结构。
+
+State（状态对象）——整个图从不直接写入，只由 join 落地：invoke 拷贝一份初始 state 出来逐节点滚雪球；节点函数只返回 patch，引擎用 Object.assign(state, patch) 合并回去——你可以在节点想 patch 多少字段就 patch 多少字段，不会和其他节点打架。这就是 reducer 的纯 JS 雏形，不带任何黑魔法。
+
+Node（节点）——一个纯函数 f(state, context) → patch 要么 void；void 返回原样不进 state；patch 合并进 state。不许直接改 state（让引擎管），不许抛出不受控错误（compile 阶段只能静态良构——routeFn 的 state 分支在 invoke 阶段再做验证）。
+
+Edge（边）——两种。
+· addEdge(a, b)：无条件：a 跑完一定跳 b。
+· addConditionalEdges(a, routeFn)：routeFn(state) → 下一节点名。锚火三问的 Q1/Q2 就是前一类，Q3 就是后一类——routeFn 读的是累积的轴，10 个结局里选 1 个。
+
+setEntryPoint(name) + compile()——入口必须先设、节点先于边被注册——compile() 做的一件事：缺节点的合法性检查，所有加过的边起点必须为已注册节点；routeFn 在 compile 期只会被试探探测、不会真正跑——运行期 invoke() 才把 branch 都跑一遍。
+
+src/core/StateGraph.js
+
+setMeta(name, meta)——可选字段，打标签给每个节点（位置、颜色、标签），读侧可见，不影响走图本身。这一点用来做 {journal} 子页的可视化回放。
+
+invoke(initialState = {})——触发器：拷贝 state；按 entry 开始；跑到 1024 步为止；沿路把每一步的(node, state) 推进 trace；下一节点为空或自身则停止。你可以传任意 initialState 进去——测试里用 { mood: 'warm', time: 2 } 这类假状态验证超时、分支错误、最终命中结局都不成问题。
+
+trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在碰到结局卡时看到的那条回放路径就是从这个数组被算出来的。
+
+节点函数本来就该纯净、记录副作用单独放 context（如计数、重试、计时），而不污染 state。
+
+这个项目的 LangChain/LangGraph 映射：
+· LangGraph 的核心制品就是它——定义图的拓扑、编译、invoke，路由是 conditional edge。
+· 一条 RAG 链路就是 retriever → reranker → generator → citation-gate。
+   证据 ≤ 阈值，conditional_edge 回到 retriever 再来一遍——锚火三问的「不确定」在生产水里是「不够但还想再试」。
+· 本仓库的 Lore Oracle（典籍原典问答）用了同样的念头：retrieve → assemble → generate → cite-gate；
+   如果证据不够，就诚实地说「这物未在典籍中」。
+
+动手参考：
+· src/core/StateGraph.js——零依赖纯 JS（约 80 行），
+· src/content/fortunePath.js——3 问 + 10 结局的内容形态，
+· src/game/FortunePathSystem.js——每日限流 + LS 落盘 crossrealm_fortune_path_v1，
+· src/ui/FortunePathTab.js——{journal} 子页的视觉回放，
+· tests/state-graph.test.js 里 25 个用例告诉你每个 routeFn 都要被什么输入破解过。
+
+动手就动手。{journal} → 星轨 · 锚火三问（每日限一签 + souls 首签奖励）。`,
   // 炉边快速上手（W-Z91）：出场页 / 暂停菜单 / 关机后第一次进游戏——30 秒读完整张 SRS
   quickstart_title: '炉边快速上手 · 30 秒读完',
   quickstart_aria: '炉边快速上手',
