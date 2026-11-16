@@ -132,6 +132,7 @@ import { FlameReadingSystem } from '../game/FlameReadingSystem.js';
 import { FortunePathSystem } from '../game/FortunePathSystem.js';
 import { VigilVowSystem } from '../game/VigilVowSystem.js';
 import { KindlePassSystem } from '../game/KindlePassSystem.js';
+import { BossVerseSystem } from '../game/BossVerseSystem.js';
 import { FlameReadingTab } from '../ui/FlameReadingTab.js';
 import { FortunePathTab } from '../ui/FortunePathTab.js';
 import { VigilVowTab } from '../ui/VigilVowTab.js';
@@ -494,6 +495,7 @@ export class Game {
     this.fortunePath = new FortunePathSystem(this);
     this.vigilVow = new VigilVowSystem(this);
     this.kindlePass = new KindlePassSystem(this);
+    this.bossVerse = this._adopt('game/BossVerseSystem', new BossVerseSystem(this));
     this.flameTab = new FlameReadingTab(this);
     this.fortunePathTab = new FortunePathTab(this);
     this.vigilVowTab = new VigilVowTab(this);

@@ -378,6 +378,20 @@ export class OnlineServices {
     });
   }
 
+  /**
+   * 余火回响（W-Z289，`POST /api/ai/boss-verse`）。
+   * Boss 倒下那一刻，《炉火的记录者》写下一行可以落字幕的话。
+   * 单次请求即返回，20s 预算——击杀后的耳语不该让人等转圈。
+   */
+  async askBossVerse(payload, { signal } = {}) {
+    return this.#jsonRequest('/api/ai/boss-verse', {
+      method: 'POST',
+      body: payload,
+      timeoutMs: 20000,
+      signal,
+    });
+  }
+
   /** 烬灯回信（W-Z288「烬灯回信」，`POST /api/ai/arbiter`）。
    * 终章抉择落定之后，炉火的记录者替这个人写下一封短信——这是「大模型输出即玩家的下一段内容」
    * 的那一段：传回的是可解析的短 JSON 原文（title / epilogue / omen），由调用方解析、截断、落屏。
