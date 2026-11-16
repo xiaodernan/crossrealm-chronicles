@@ -63,6 +63,24 @@ class LoreOracleLiveIntegrationTest {
     }
 
     @Test
+    void oracleRealWorldPrototypeAnswersWithRefs() {
+        // refs 卷（现实对照札记）只在「现实世界对应什么」类问题里被召回。
+        // 这条问句几乎只会命中 refs（祭灶/Vesta/白桦/永恒火焰全是 refs 卷的专属 token），
+        // 用它钉住 refs 入典后仍能被 BM25 检索到——Oracle 回答得诚实即可，不问输出具体措辞。
+        LoreOracleService oracle = new LoreOracleService(liveClient(), index);
+        LoreOracleService.OracleResult r = oracle.answer(
+                "锚火在现实世界对应祭灶还是维斯塔？以及秋分的节气对照是什么？", 4);
+
+        assertTrue(r.ok(), "真实上游必须完成作答");
+        assertFalse(r.answer().isBlank());
+        boolean refsHit = r.sources().stream().anyMatch(s -> s.startsWith("creative/refs/"));
+        assertTrue(refsHit, "现实对照类问题必须召回 refs 卷出处，实际 sources=" + r.sources());
+
+        System.out.println("[W-Z243 live] refs-question sources=" + r.sources()
+                + " model=" + r.model() + " latency=" + r.latencyMs() + "ms\n" + r.answer());
+    }
+
+    @Test
     void oracleOutOfCorpusRefusesWithoutTokens() {
         // 语料是 101 卷双语锚火线 + 配套番外/词囊/剧本/OST。BM25 按单字切分，纯中文提问几乎
         // 总能召回一些token；要命中「此物未在典籍中」的拒答分支，问题的 token 必须**整个都不在语料里**——

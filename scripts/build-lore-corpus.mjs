@@ -9,6 +9,7 @@
  *   tapestry   creative/tapestry-lore/*.md（十七母题·年鉴中轴——年鉴原数据的原典化，每母题独立成块入库）
  *   film       creative/film/电影剧本-跨界纪事.md + .en.md + 短片双语（锚点前的一天）
  *   music      creative/music/liner-notes.md + .en.md + OST-专辑手册.md + .en.md
+  refs       creative/refs/crossrealm-realworld-notes*.md（现实对照札记：节气/白桦/祭灶/维斯塔/永恒火焰——非 canon，仅给「现实对应什么」类提问提供诚实援引）
  * 出：server/ai-service/src/main/resources/lore/corpus.txt
  *   格式：每段一个块，块首是 `# source: <相对路径>`，空行分隔。路径名固定按字典序——
  *   相同语料 ⇒ 相同输出 ⇒ 同一 git 提交可复现（这个文件是 build 产物、也入库，别手改）。
@@ -40,6 +41,8 @@ const GROUPS = [
     'creative/music/OST-专辑手册.md',
     'creative/music/OST-专辑手册.en.md',
   ].map((f) => ['music', f]),
+  ...['creative/refs/crossrealm-realworld-notes.md', 'creative/refs/crossrealm-realworld-notes.en.md']
+    .map((f) => ['refs', f]),
 ].map(([group, file]) => ({ key: `${group}:${file}`, file, group }))
   .filter((item) => existsSync(join(ROOT, item.file)))
   .sort((a, b) => a.key.localeCompare(b.key, 'en'));
