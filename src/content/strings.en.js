@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and four volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and five volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 104 volumes of the canon, fully readable
+· Canon Library — 105 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3136,9 +3136,10 @@ Good questions to try: “Who is Lin Du?” / “Why doesn't the fire go out?”
 Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
+Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 104-volume index',
-  hm_body_codex: `Codex — 104 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 105-volume index',
+  hm_body_codex: `Codex — 105 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3246,6 +3247,7 @@ hm_title_codex: 'Codex · the 104-volume index',
 102 · The First Night — on the eighteenth day of the seven-hundredth year, Xiao Huo receives his first bundle of firewood; he stacks it with enormous care, each log straight; A-Shi sits on the doorway step with tea gone cold; three nods are all it takes; that evening, the first guest in remembered time walks in from the direction of the white stone — one hundred and twenty-two days on foot, just to see whether the stove really never goes out; his mother cooks, Xiao Huo feeds the fire, A-Shi pours the water; the traveler draws from his bundle a small iron mirror whose center holds a wire-drawn flame — the same round little flame Xiao Huo once drew on the kitchen wall; he was sent by his mother, who said she no longer knew whether anyone still cared to keep such things; A-Shi’s mother touches the wire flame and is silent for a long time; “the stove is here,” she tells him; “when you reach home, feed one piece of wood into your own stove”; the traveler bows once — to the stove, to the tree, to the white stone — and leaves; Xiao Huo cries for a fire he did not yet know how to give; that night, the fire burned one inch higher. Volume XV, third part.
 103 · The Letter from the Peak — nineteen days after the guest has gone, another arrives; hemp cuffs frayed white, a polished copper mirror at the hip; he says only “entrusted with this — ask no more”; the bowl stays untouched as he turns away; his mother breaks the seal without a word; the little flame pressed into the wax is the seal of those who live by a stove; the page is folded with a keeper’s precision; the hand is thin and upright, exactly like the first keeper’s; the message is one line: “You keep it below — it is still burning; we keep it above — it is still burning; leave one sentence for whoever comes after — the fire is not kept for one person, but for all who might still find the way back”; no name follows — only the same flame; his mother weeps without sound; Xiao Huo asks whether there is a stove on the peak too; there is — the ancestor-flame, kept for seven hundred years by the last of Bai Yin’s line in a small stone house beside the white rock; six hundred years of silence, and now a letter; the equinox will call both fires to feed at the same moment — with white birch; A-Shi cuts the one birch log in the house in half; one half feeds the stove; the other waits in an old cloth for Xiao Huo to someday carry it up the mountain himself. Volume XV, fourth part.
 104 · The Autumn Equinox — the fog inside the courtyard burns off earlier than it ever has; when his mother wakes before dawn, the stove is cold; she kindles it herself; the white birch splits clean and pale, frost-white; the flame leaps once as if it recognizes something, then settles; Xiao Huo wakes to find a piece of white birch inside the firebox that nobody set there — “The stove fed itself”; the next morning the family climbs the mountain together; at the top of the white stone ridge there is one small stone house; the same man from the letter stands before it; the two keepers kneel facing each other — the keeper of the stove below and the keeper of the ancestor-flame above; neither speaks; the stone bends the light back so that all three are lit white-gold; his mother draws out a bag of stove-ash and holds it out; the old man draws out a porcelain jar of ancestor-ash; they exchange their ashes; the two colors cannot be told apart; walking down, Xiao Huo dreams of Bai standing on the ridge watching both fires; when he wakes he is sleeping at the foot of the stove; the fire has climbed one inch higher. Volume XV, fifth part.
+105 · The Midwinter Visit — three days before midwinter, a light snow falls on the courtyard; his mother spends three days oiling a paper umbrella for Xiao Huo and will not say why; the house grows quieter than it ever has; on the fourth morning, a figure appears at the bend of the path — no horse, no cart, only a single basket slung across his back, slung high enough to touch the sky; inside the bamboo basket, a small porcelain jar of ancestor-ash, and above it a tiny ball of living charcoal held in an iron wire; it is the same old man from the mountain; he kneels in the courtyard; A-Shi’s mother kneels in return; the old man sets the porcelain jar on the stove; the flame leaps one inch higher than it ever has; from under his robe he draws out a square of white silk with a chestnut-sized ember resting on it; he lays it gently inside the stove; the stove leaps once — and does not diminish; both keepers weep without a sound; Xiao Huo whispers something no one can make out, then falls asleep at the stove’s foot; the old man leaves at dawn; the two remaining pieces of Bai Yin’s birch stand on either side of the stove as witnesses; the fire burns for one full night; no white birch jumps in by itself; the stove now holds two fires in one hearth — seven hundred years, one flame finally meeting another. Volume XV, sixth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3259,7 +3261,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and four volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and five volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

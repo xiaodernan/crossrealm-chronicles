@@ -54,6 +54,45 @@ public class LoreOracleService {
      * Answer a lore question. {@code limit} = max excerpts fed to the model
      * (clamped to [1, 6]). Pass {@code 0} to take the default.
      */
+    /** Routing note for "real-world prototype" territory — appended to the user message (never the system). */
+    static final String REALWORLD_ROUTE_NOTE =
+            "Routing note (mechanical, obey it): this question sits in real-world-reference territory. "
+            + "Prefer the refs: blocks when answering; "
+            + "if the canon itself is the answer, say that plainly. Do not answer from general knowledge alone.";
+
+    /**
+     * W-Z244: route a "real-world prototype" question to the refs volume — keyword router,
+     * zero extra LLM tokens. Only refs-specific multi-word tokens count; anything canon shares is out.
+     */
+    static boolean prefersRealWorldRefs(String question) {
+        if (question == null || question.isBlank()) {
+            return false;
+        }
+        String q = question.toLowerCase(java.util.Locale.ROOT);
+        for (String token : REALWORLD_TOKENS) {
+            if (q.contains(token)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static final List<String> REALWORLD_TOKENS = List.of(
+            // zh — refs 卷专属短语（任何 canon 字单独不入）
+            "现实", "史实", "真实世界", "对应原型", "对照", "对应",
+            "祭灶", "灶神", "火塘", "灶头边", "命火不熄",
+            "赫斯提亚", "维斯塔", "维斯塔童女", "祭月", "月饼", "月亮",
+            "白桦", "秋分", "二十四节气", "中秋", "寒露",
+            "永恒火焰", "长明灯", "圣火", "奥运圣火",
+            // en — equally narrow, lowercase-matched
+            "real world", "real-world", "prototype", "historical", "history",
+            "zhao jun", "zao jun", "stove god", "kitchen god",
+            "hestia", "vesta", "vestal", "birch", "equinox", "solstice",
+            "mid-autumn", "zhongqiu", "chuseok", "jūgoya", "tet trung thu",
+            "eternal flame", "olympic torch", "torch relay",
+            "24 solar terms", "lunar new year", "lunar november", "lunar august"
+    );
+
     public OracleResult answer(String question, Integer limitRaw) {
         if (question == null || question.isBlank()) {
             return failure("blank question");
@@ -76,7 +115,9 @@ public class LoreOracleService {
                     .append("\n\n---\n\n");
         }
         String system = loadOracleSystem();
+        String routeNote = prefersRealWorldRefs(question) ? "\n\n" + REALWORLD_ROUTE_NOTE : "";
         String user = "Player question (use the language the player asked in):\n" + question
+                + routeNote
                 + "\n\nMost relevant excerpt (quote it verbatim if it answers the question):\n\n"
                 + firstBlock.toString().trim()
                 + (rest.length() > 0 ? "\n\nOther excerpts (use only if the first doesn't answer):\n\n"
