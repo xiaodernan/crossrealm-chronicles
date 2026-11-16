@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T22:24:29.995Z",
+  "generated_at": "2026-11-16T22:48:16.769Z",
   "branch": "main",
-  "head": "3a181b2c",
-  "total_commits": 1997,
-  "pushed_at": "2026-11-16T22:18:12Z",
+  "head": "1e75f402",
+  "total_commits": 1999,
+  "pushed_at": "2026-11-17T06:47:42+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "1e75f40",
+      "at": "2026-11-17T06:47:42+08:00",
+      "subject": "feat(ending): W-Z292 烬灯回信 · 烬火答 —— LLM 作为 NPC：你写一行，炉火回一行"
+    },
+    {
+      "short": "5fc0695",
+      "at": "2026-11-16T22:24:30Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "3a181b2",
       "at": "2026-11-16T22:18:12Z",
@@ -21,32 +31,22 @@
       "short": "99cbe25",
       "at": "2026-11-16T22:05:28Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "912999a",
-      "at": "2026-11-17T06:02:26+08:00",
-      "subject": "feat(canon): W-Z290 第一百三十三卷《第三碗 / The Third Bowl》入典——卷十五之三十四"
-    },
-    {
-      "short": "c5a2daa",
-      "at": "2026-11-17T05:56:12+08:00",
-      "subject": "docs(plan): 记录 showcase card 双路兜底（工作流撞 race + 手工同语义代推两轮均成功落地）"
     }
   ],
-  "tracked_files": 1538,
-  "test_files": 464,
-  "i18n_keys": 3249,
+  "tracked_files": 1545,
+  "test_files": 465,
+  "i18n_keys": 3259,
   "lore_sources": 297,
   "novel_chapters_zh": 133,
   "novel_chapters_en": 133,
-  "milestone": "W-Z291",
+  "milestone": "W-Z292",
   "milestone_full": "卷 133 · 六百年守火线（133 / 133 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 297 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：133 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3249-keys",
+    "bilingual-3259-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",
