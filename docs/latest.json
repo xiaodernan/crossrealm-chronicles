@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T10:43:13.774Z",
+  "generated_at": "2026-11-16T11:05:15.293Z",
   "branch": "main",
-  "head": "46dfeef3",
-  "total_commits": 1903,
-  "pushed_at": "2026-11-16T18:42:38+08:00",
+  "head": "a4aafd4e",
+  "total_commits": 1906,
+  "pushed_at": "2026-11-16T19:04:13+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "a4aafd4",
+      "at": "2026-11-16T19:04:13+08:00",
+      "subject": "docs(plan): W-Z240/240b 压测复跑 + Admin 实测瓦片（双语）+ 解锁空白修复登记"
+    },
+    {
+      "short": "335b289",
+      "at": "2026-11-16T18:46:33+08:00",
+      "subject": "fix(admin): W-Z240b 修复炉边盘解锁后整页空白 —— `#dashboard` 自身带 .unlock，但 `.unlocked .unlock` 规则匹配不到自身"
+    },
+    {
+      "short": "442a474",
+      "at": "2026-11-16T10:43:13Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "46dfeef",
       "at": "2026-11-16T18:42:38+08:00",
@@ -16,21 +31,6 @@
       "short": "d16bd4a",
       "at": "2026-11-16T10:38:14Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "67744ce",
-      "at": "2026-11-16T18:36:39+08:00",
-      "subject": "feat(canon): W-Z239 第一百零二卷《第一夜 / The First Night》——卷十五之三·第七百年"
-    },
-    {
-      "short": "f8cc73d",
-      "at": "2026-11-16T10:31:39Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "8ce5c8a",
-      "at": "2026-11-16T18:31:01+08:00",
-      "subject": "test(ai): W-Z238 Lore Oracle 全链路真实上游联调测试 + scripts/_live-env.mjs live 测试一键入口"
     }
   ],
   "tracked_files": 1436,
