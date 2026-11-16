@@ -178,7 +178,8 @@ creative/music/soundtrack.html
 | 细雨 · The Thin Rain | [the-thin-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/129-the-thin-rain.md) |
 | 炉火的谈话 · The Stove Speaks | [the-stove-speaks](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/130-the-stove-speaks.md) |
 | 第一夜 · The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/131-the-first-night.md) |
-| 第二夜 · The Second Night | [the-second-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/132-the-second-night.md) |每一章对应游戏的章节走法：
+| 第二夜 · The Second Night | [the-second-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/132-the-second-night.md) |
+| 第三碗 · The Third Bowl | [the-third-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/133-the-third-bowl.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

@@ -180,7 +180,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Thin Rain | [the-thin-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/129-the-thin-rain.md) |
 | The Stove Speaks | [the-stove-speaks](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/130-the-stove-speaks.md) |
 | The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/131-the-first-night.md) |
-| The Second Night | [the-second-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/132-the-second-night.md) |Chapter → game-chapter mapping:
+| The Second Night | [the-second-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/132-the-second-night.md) |
+| The Third Bowl | [the-third-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/133-the-third-bowl.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

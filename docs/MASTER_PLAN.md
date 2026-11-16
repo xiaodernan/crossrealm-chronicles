@@ -15,6 +15,9 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-17 · W-Z290 第133卷入典《第三碗 / The Third Bowl》——卷十五之三十四（七百年第一次想到它也得吃一口）**：立春后第十七周——周六——上午天晴——郭阿婆又来了——她带了一只崭新的白瓷碗——一包糯米——一把新白桦——「灶火也有了一只嘴」——阿石下了糯米——白碗推上铁沿——炉火跳了一下——周叔当天也来喝了一碗——白瓷碗搁在铁沿上一直没人碰——傍晚碗还是空的——郭阿婆又搁下了——「明天再来看」——灶火燃着。
+> 交付：creative/novel/133-第三碗.md + en 孪生 133-the-third-bowl.md；novella 133 × 2 = 266 模块（典籍馆现为 133 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：297 源；showcase feed 新增 W-Z290 实录。
+>
 > **2026-11-17 · W-Z289 余火回响（LLM 深度嵌入第四块 · Boss 倒下那一刻的亲笔回响）**：每一位 Boss 倒下时，HUD 用一行字告诉玩家「炉火看见了这一刀」——不是台词、不是伤害数字、不是教程，是炉火自己在自言自语。W-Z288 的终章线只管终章；W-Z289 把同一种能力铺进每一场战斗。
 > 正式通道：`POST /api/ai/boss-verse`（新建 `BossVerseController`）——人格与烬灯回信同一族但分工不同：Boss 倒下后炉火的记录者只写一句 ≤ 72 字符的回响（zh/en，lang 白名单），出现本作印记（母题 / 回声 / 锚点 / 七百年），不出数值、不出机制、不挑衅不安慰。`BossVerseControllerTest`（人格隔离/控制字符净化/lang 白名单/超长 name）6/6 绿 · `BossVerseLiveIntegrationTest`（Clash 7897 · gpt-6.1-terra）1/1 绿（Second call 严格 local cache，upstreamCalls 不变）。
 > 降级通道：`src/game/BossVerseSystem.js`（独立子系统，owner tab `game/BossVerseSystem`，`dispose()` 一次结清）——只在 `boss-defeated` 时且 `onlineServices.enabled` 为真才发请求（默认零网络法）；payload 只带真数据（`bossNameKeyOf` 解析中文名 / 章节 / 击杀次数 / 玩家等级 / lang）≤ 64 字符；`sanitizeVerse` 净化回句 → `textContent`（HUD toast 6s），控制字符净化 + 空白合并 + 72 字符上限。

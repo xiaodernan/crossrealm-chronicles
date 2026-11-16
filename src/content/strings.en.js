@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and thirty-two volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and thirty-three volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 132 volumes of the canon, fully readable
+· Canon Library — 133 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3141,8 +3141,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 132-volume index',
-  hm_body_codex: `Codex — 132 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 133-volume index',
+  hm_body_codex: `Codex — 133 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3278,6 +3278,7 @@ hm_title_codex: 'Codex · the 132-volume index',
 130 · The Stove Speaks — Saturday of the fifteenth week after the spring equinox, afternoon, beautiful weather beyond reason — the sky was a deep, clear blue like a fresh-washed white cloth; Zhou came first; then Aunt Guo; the old keeper emerged from the back room; he came and sat before the stove; the fire burned steadily; the keeper watched the fire for a long time; snow was stuck to the sides of his head; the old keeper watched the fire — and said nothing; he put his hand into the fire-box — he let it hover a moment — he withdrew it; “Stove,” he said, voice low, gravelly; no one answered; “You have burned seven hundred years”; he didn’t finish the next thought; Zhou didn’t press; Aunt Guo didn’t press; the fire burned; the fire in the box was a bright white — the old man put his hand back in; “My whole life, I have been beside you”; the fire burned; the fire burned seven hundred years. Volume XV, thirty-first part.
 131 · The First Night — Saturday of the sixteenth week after the spring equinox, afternoon, the sky so clear it hurt to look up; the old keeper did not come out again; Aunt Guo sent the porridge up first — the old keeper did not eat; no sound came from the back room; A-Shi stood before the stove — the fire burned steadily; he was waiting for the old keeper; the old keeper did not come out; he waited a long time; he squatted down and looked into the fire-box — the fire lit his face; Uncle Zhou came and leaned against the door-post — he watched A-Shi; no one said a single word; when the light went, A-Shi fed the fire one birch branch — no more, no less — exactly a keeper’s measure; he sat down before the stove — he did not sleep — the fire stayed awake for him; the next morning — the fire was still burning — A-Shi was still at the stove; the old keeper was in the back room; A-Shi heard one cough, once, from behind the door; no one left; everyone in the town slowly understood — the old keeper wanted to hand the fire to A-Shi; nobody knew what was in the old keeper’s heart; the fire burned; the fire burned. Volume XV, thirty-second part.
 132 · The Second Night — Saturday of the sixteenth week after the spring equinox, afternoon, the sky so clear it hurt to look up; Aunt Guo sent the porridge up once more — the old keeper did not eat; A-Shi sat before the stove again; Xiao Huo came from the side room — he pressed his small hand against the iron rim — “Hot,” he said — no one answered him; that night A-Shi fed the fire one birch — no more — no less — exactly a keeper’s measure; he closed his eyes — he did not dare fall asleep — he only rested them; the fire stayed awake for him; the next morning — the fire was still burning; A-Shi opened his eyes — he was still at the stove; everyone in the town understood by then — the old keeper wanted to hand the fire to A-Shi; Aunt Guo brought the porridge again — A-Shi set it down for him; the fire burned on. Volume XV, thirty-third part.
+133 · The Third Bowl — Saturday of the seventeenth week after the spring equinox, morning, clear weather; Aunt Guo came again — she brought a brand-new white porcelain bowl, a bag of glutinous rice, and a bundle of new birch; “the fire has a mouth now, too,” she said; A-Shi dropped the rice in; the bowl went on the iron rim; the fire leapt once; Uncle Zhou came in — he saw it — drank his own bowl — and left; the bowl stayed on the iron rim all afternoon; in the evening the bowl was empty; Aunt Guo looked at it for a long time — then set it back — “come and look tomorrow,” she said; the fire burned. Volume XV, thirty-fourth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3291,7 +3292,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and thirty-two volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and thirty-three volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
