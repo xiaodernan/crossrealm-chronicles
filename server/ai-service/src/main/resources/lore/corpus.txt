@@ -7583,6 +7583,33 @@ Seven hundred years, and these were the pieces of paper no one could bring thems
 
 *(End of volume one hundred and twenty-eight · Volume XV, twenty-ninth part · The seven-hundredth year — The Card in the Stove.)*
 
+# source: creative/novel/en/129-the-thin-rain.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Thin Rain
+
+---
+
+## One Hundred and Twenty-nine: The Thin Rain
+
+Saturday of the fourteenth week after the spring equinox — midday — a very fine rain started to fall — so fine it barely fell, just hovered in the air — the whole town came.
+
+All the people of the town crowded into the kitchen. The rain turned the courtyard into a wet mirror and nobody noticed. The stove burned. Zhou arrived first, then Aunt Guo, then all the people, everyone came inside — those who came were already so soaked it hardly mattered.
+
+A-Shi brought in hot broth and thin porridge. The people sat down slowly — each person's face turned a little warmer when the fire licked the iron.
+
+Nobody left. The whole afternoon, until the sky went dark. The stove never went out. The people of the town remained until the hour of the fifteenth when the emptied bowls were gathered and carried to the back room — finally they left, one by one, carrying something home that had never been there before.
+
+The stove burned.
+
+炉火.
+
+---
+
+*(End of volume one hundred and twenty-nine · Volume XV, thirtieth part · The seven-hundredth year — The Thin Rain.)*
+
 # source: creative/novel/en/13-interlude-handover.md
 # Interlude Six · Handover
 
@@ -18996,6 +19023,31 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百二十八卷 · 卷十五之二十九 · 第七百年 · 灶里的纸牌）*
+
+# source: creative/novel/129-细雨.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 细雨
+
+---
+
+## 一百二十九 · 细雨
+
+立春后第十四周，周六，天午开始下细雨，细小得像针。
+
+整个镇的人又来了——全镇的人都坐在灶前。细雨施施地落在院子里，石阶上亮晶晶，院子里所有的衣服湿透了，没有人回家。
+
+周叔先到，郭阿婆也来。灶火燃着，阿石端出米汤和稀饭。祭灶的时候全镇的人都站着——灶火燃烧，火光照亮了很多人的脸。
+
+没有人离开。整个下午——直到天黑下来。灶火依然燃着。全镇的人一直留在灶前——才慢慢走回家——每个人都带走了什么——灶火燃着。
+
+炉火。
+
+---
+
+*（本章完 · 跨界线总第一百二十九卷 · 卷十五之三十 · 第七百年 · 细雨）*
 
 # source: creative/novel/13-番外六-换班.md
 # 番外六 · 换班

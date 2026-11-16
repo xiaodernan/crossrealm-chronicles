@@ -174,7 +174,8 @@ creative/music/soundtrack.html
 | 雷雨 · The Thunder Rain | [the-thunder-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/125-the-thunder-rain.md) |
 | 炉口的影 · The Shadow at the Stove’s Mouth | [the-shadow-at-the-stoves-mouth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/126-the-shadow-at-the-stoves-mouth.md) |
 | 炉火的等 · The Waiting | [the-waiting](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/127-the-waiting.md) |
-| 灶里的纸牌 · The Card in the Stove | [the-card-in-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/128-the-card-in-the-stove.md) |每一章对应游戏的章节走法：
+| 灶里的纸牌 · The Card in the Stove | [the-card-in-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/128-the-card-in-the-stove.md) |
+| 细雨 · The Thin Rain | [the-thin-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/129-the-thin-rain.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
