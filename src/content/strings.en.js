@@ -3092,6 +3092,8 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
+· Starpath · Hearth Vow — a vow for the keeper, same stateful routing
+· Starpath · Passing of the Fire — the last handover, seven hundred years waiting
 
 Tab buttons show unlocked count。`,
   hm_title_meta_systems: 'Meta Systems',
@@ -3376,6 +3378,23 @@ Execution path: src/content/vigilVow.js — the same axis set as the Fortune Pat
 
 How to use: {journal} → Starpath · The Hearth Vow; one vow per UTC day — your answers, your reward, your ending, all live in crossrealm_vow_path_v1; first-vow souls 25/35/60 (max rarity 60).
 A whole day in three frames: the fire, the fire remembering your name, you calling it 炉火 for the first time.`,
+  // W-Z282: the last mile after the Three Questions and the Hearth Vow
+  hm_title_kindle_pass: 'Starpath · The Passing of the Fire',
+  hm_body_kindle_pass: `Starpath · The Passing of the Fire — the last mile after the Three Questions and the Hearth Vow.
+
+You have already questioned the fire and sworn your vow — the fire asks you the question it has kept in reserve for seven hundred years: can these hands be trusted to take it.
+
+The Passing of the Fire runs on the same axes:
+· Q1 The old keeper says “The fire is going now.” — the fire asks you for one answer, first. ( “You do not die.” / “I am watching you.” / “I call it 炉火.” )
+· Q2 The fire asks for the second thing. ( one birch, no more / your own bowl on the rim / the song your mother taught you )
+· Q3 The fire pours its brightest crumb of light onto your palm — how do you remember this night? ( my mother’s hand / the stove burning on / you, outlined in the light )
+
+Not divination — a handover — same fabric as the Three Questions: three prompts, three axes (kindling / tending / rooted), ten endings (The One Who Feeds / The Night Watch / The Seven-Hundred-Year Fire / The Unnamed Keeper…). Deterministic throughout, no dice — it knows what seven hundred years feel like, passing hands.
+
+Path: same lineage as the Three Questions and the Hearth Vow — the same src/core/StateGraph.js compiler + src/game/KindlePassSystem.js daily state machine + src/content/kindlePass.js question set — a handover is not a walk; it is the fire changing hands.
+
+Play: {journal} → Starpath · The Passing of the Fire; one draw per day (UTC) — drawn, souls reward, and ending all land in crossrealm_kindle_pass_v1; first-draw souls 25/35/60 (60 at highest rarity).
+Three frames in retrospection: the fire + the light on your palm + the house shining on its own seven hundred years later — the fire gave itself to you.`,
   // Hearthside Quickstart (W-Z91): start screen / pause menu / first boot — the 30-second reading guide
   quickstart_title: 'Hearthside Quickstart · read me in 30s',
   quickstart_aria: 'Hearthside Quickstart',
@@ -3593,6 +3612,15 @@ A whole day in three frames: the fire, the fire remembering your name, you calli
   vow_total_souls_fmt: 'hearth-embers: ${n}',
   vow_history_title: 'The vow behind you',
   vow_history_empty: 'The fire is waiting; your route is unwritten.',
+  // W-Z282: Starpath · The Passing of the Fire (StateGraph-driven handoff triad)
+  journal_tab_pass: 'Starpath · The Passing of the Fire',
+  pass_intro: 'Three answers: one bowl, one hand in the ash, one name — the old keeper goes; the fire hands you its seven hundred years.',
+  pass_hint: 'Answer all three; the handing resolves itself.',
+  pass_souls_reward: 'passing flame',
+  pass_total_draws_fmt: 'handings: ${n}',
+  pass_total_souls_fmt: 'passing-embers: ${n}',
+  pass_history_title: 'The handings behind you',
+  pass_history_empty: 'The fire is waiting for its keeper.',
   flame_intro: 'There is wind at the forge, and there are words in the fire. One reading per day — it speaks a line, whether you believe it or not.',
   flame_draw_cta: 'Ask the Flame',
   flame_draw_done: 'Drawn Today',

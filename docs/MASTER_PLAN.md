@@ -15,6 +15,13 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-17 · W-Z282 炉火的交棒上线（StateGraph 真路由 · 卷十五「第七百年」最后一课）+ W-Z283 Admin 第 21 瓦**：锚火三问（W-Z183）→ 炉火祈愿（W-Z262）→ 炉火的交棒（W-Z282）的传承链闭环。阿祖说完「炉火，我要走了」—— 炉火回过头来，把七百年交到你手心。
+> 三问：Q1 阿祖说完「炉火，我要走了」炉火让你回答它一件事（「你不灭。」/「我看着你。」/「我叫它炉火。」）· Q2 炉火让你做第二件事（添一根白桦 / 把饭碗放上铁沿 / 念母亲教你的那支歌）· Q3 炉火把最亮的一点光照在你手心——你以什么记住这一晚（母亲的手 / 灶火燃着 / 你自己的手心）。三个轴：火（kindle）/ 守（tend）/ 根（root）—— Q3 决定结局变体，1-1-1 平票走「无名守火人」（heirkeeper，30 souls，rarity 2）。
+> 判定与锚火三问完全一致：轴值 ≥2 → 对应结局 × Q3 变体；1-1-1 → heirkeeper。无随机、无骰、全确定性。结局：kindle_1 食火者 25/1 · kindle_2 白桦路 35/2 · kindle_3 春田之火 60/3 · tend_1 铁沿上的碗 25/1 · tend_2 长夜守 35/2 · tend_3 灰里的掌纹 60/3 · root_1 小火 25/1 · root_2 叫它炉火 35/2 · root_3 炉火七百 60/3。
+> 落盘 crossrealm_kindle_pass_v1，UTC 每日一次，不读写其他模块。交付：src/content/kindlePass.js · src/game/KindlePassSystem.js · src/ui/KindlePassTab.js · tests/kindle-pass.test.js（与 vigil-vow.test.js 同构：内容表/拓扑良构/路由全枚举/日切门禁/LS 往返）· JournalTabRegistry（页签 pass）· HUD（JOURNAL_SUB_TABS + 计数角标豁免）· Game.js 实例化/收编。
+> [H] 说明书新增 extra 第 13 章 hm_title_kindle_pass / hm_body_kindle_pass（中英双语）；hm_body_journal_tabs 双语补入「星轨 · 炉火祈愿 / 炉火的交棒」；i18n +10 键 → EXPECTED_KEY_COUNT 3237→3247；helpSectionsExtra 12→13；journal-tab-registry 扩展页签 18→19（迁移原值表新钉 pass: 炉火的交棒）。
+> Admin：meas_l21/meas_tr21（zh+en，第 21 瓦）+ scripts/pass-mc.mjs 全枚举 27/27（heirkeeper 6/27≈22.2% · kindle_1 5/27 · tend_2 5/27 · root_3 5/27 · 其余 6 枚各 1/27≈3.7%；docs/admin/data/pass-montecarlo.json 入库）；telemetry lt_vow_draw / lt_kindle_pass_draw 两个事件标签（zh+en）+ known 白名单 + labelKey 完整接入；智能洞察新增两条交叉引流建议（交棒→祈愿 P2、祈愿→交棒 P2）。showcase feed 两条实录（W-Z282 / W-Z283）。
+>
 > **2026-11-17 · W-Z281 第130卷入典《炉火的谈话 / The Stove Speaks》——卷十五之三十一（老祖第一次说 "你烧了七百年了"）**：立春后第十五周——周六——午后晴天出奇好——天空蓝得像一块洗过的白布——周叔先到——郭阿婆也来——阿祖白发全白——他在灶前坐下——炉火燃得匀——他看了灶火很久——他把手伸进炉膛——他的手在火边停了一下——它回来了——「炉火——你烧了七百年了」——没有人接——他也没把后面的说完——周叔也不催——郭阿婆也不催——炉火燃着——炉膛里的炉火红得发白——他把手还放回炉膛——灶火燃——「我这辈子也陪着你了」。
 > 交付：creative/novel/130-炉火的谈话.md + en 孪生 130-the-stove-speaks.md；novella 130 × 2 = 260 模块（典籍馆现为 130 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：291 源；showcase feed 新增 W-Z281 实录。
 >

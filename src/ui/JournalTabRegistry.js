@@ -31,6 +31,8 @@ export const JOURNAL_EXTRA_TABS = {
   path: 'journal_tab_path',
   // W-Z262：星轨 · 炉火祈愿（StateGraph，守火人之祈愿）
   vigil: 'journal_tab_vigil',
+  // W-Z282：炉火的交棒（StateGraph，七百年里这把火有没有人接得住）
+  pass: 'journal_tab_pass',
 };
 
 export function mergeJournalCategories(base) {

@@ -1,0 +1,59 @@
+{
+  "schema": "crossrealm.pass-montecarlo.v1",
+  "generatedAt": "2026-11-16T18:28:36.699Z",
+  "totalCombos": 27,
+  "distribution": [
+    {
+      "id": "heirkeeper",
+      "count": 6,
+      "pct": 22.2
+    },
+    {
+      "id": "kindle_1",
+      "count": 5,
+      "pct": 18.5
+    },
+    {
+      "id": "tend_2",
+      "count": 5,
+      "pct": 18.5
+    },
+    {
+      "id": "root_3",
+      "count": 5,
+      "pct": 18.5
+    },
+    {
+      "id": "kindle_2",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "kindle_3",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "tend_1",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "tend_3",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "root_1",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "root_2",
+      "count": 1,
+      "pct": 3.7
+    }
+  ],
+  "heirkeeper": 6,
+  "sanity": "enum == simulate: 27/27 verified both ways"
+}

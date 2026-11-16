@@ -65,8 +65,8 @@ import { fileURLToPath } from 'node:url';
  *   `skillTrees` 四个内容模块在 import 期静态读英文表挡住了，那是独立一片的活。
  *   上限往上抬了 0.25 MiB，**环比容差反而把警戒线从 0.63 MiB 收紧到 61 KB**。
  */
-/** 上次审阅的刻度（2026-11-15，见上方注释与 ADR W-Z82b / W-Z93；W-Z93 付清按语言分包债后的真读数）。 */
-export const FIRST_SCREEN_READING = 2153509; // W-Z183: +8 i18n keys (path_*, journal_tab_path) + FortunePathSystem/StateGraph/LuckPickTab + ~2KB CSS ([J] 命途 · 锚火三问 · StateGraph 驱动)
+/** 上次审阅的刻度（2026-11-17，见上方注释与 ADR W-Z84/W-Z93 的抬线规程）。 */
+export const FIRST_SCREEN_READING = 2226011; // W-Z282 炉火的交棒：src/content/kindlePass.js + src/game/KindlePassSystem.js + src/ui/KindlePassTab.js（StateGraph 传承链传承链第三段）+ hm_title_kindle_pass/hm_body_kindle_pass 双语（zh 仍在 chunk-core，en 侧随 W-Z93 localeProvider 分包不进首屏）+ instrumented telemetry lt_ 双表接入 —— 实测首屏 2226011 B（chunk-core 852127 + vendor-three 682986 + chunk-world 215769 + chunk-ui 211036 + index.css 110651 + chunk-combat 86766 + index 66676）；首屏增 72.5 KB，全部为真实新功能与双语句条，无死代码；2.25 MiB 绝对上限仍余 0.13 MiB。结构性杠杆（按语言分包把 zh 侧也分出去）仍是独立一片的活——下次抬线前必须先还/分掉，不再放行「先抬后想」。
 
 /** 环比容差：单次改动允许比上次审阅长 3%（见上方注释） */
 export const FIRST_SCREEN_GROWTH_RATIO = 1.03;

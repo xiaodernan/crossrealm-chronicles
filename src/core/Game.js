@@ -131,9 +131,11 @@ import { CanonJournalTab } from '../ui/CanonJournalTab.js';
 import { FlameReadingSystem } from '../game/FlameReadingSystem.js';
 import { FortunePathSystem } from '../game/FortunePathSystem.js';
 import { VigilVowSystem } from '../game/VigilVowSystem.js';
+import { KindlePassSystem } from '../game/KindlePassSystem.js';
 import { FlameReadingTab } from '../ui/FlameReadingTab.js';
 import { FortunePathTab } from '../ui/FortunePathTab.js';
 import { VigilVowTab } from '../ui/VigilVowTab.js';
+import { KindlePassTab } from '../ui/KindlePassTab.js';
 import { TrilanceReadingSystem } from '../game/TrilanceReadingSystem.js';
 import { TrilanceReadingTab } from '../ui/TrilanceReadingTab.js';
 import { CombatStyleTracker } from '../game/CombatStyleTracker.js';
@@ -491,9 +493,11 @@ export class Game {
     this.flameReading = new FlameReadingSystem(this);
     this.fortunePath = new FortunePathSystem(this);
     this.vigilVow = new VigilVowSystem(this);
+    this.kindlePass = new KindlePassSystem(this);
     this.flameTab = new FlameReadingTab(this);
     this.fortunePathTab = new FortunePathTab(this);
     this.vigilVowTab = new VigilVowTab(this);
+    this.kindlePassTab = new KindlePassTab(this);
     this.trilanceReading = new TrilanceReadingSystem(this);
     this.trilanceTab = new TrilanceReadingTab(this);
     // 在线伙伴服务的客户端挂在实例上（W-G2 切片1：试炼榜直接从 this.game 读，不去 import 单例 ——

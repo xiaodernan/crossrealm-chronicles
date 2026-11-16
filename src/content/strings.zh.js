@@ -3092,6 +3092,8 @@ export const STRINGS_ZH = Object.freeze({
 · 星轨占卜 — 每日一签，火里有字
 · 命途 · 锚火三问 — 三道自答，StateGraph 真实路由
 · 三日曜盘 — 每周一盘，三牌同启
+· 星轨 · 炉火祈愿 — 守火祈愿，StateGraph 真实路由
+· 炉火的交棒 — 阿祖把七百年交给你的最后一课
 
 页签按钮上显示已解锁数量。`,
   hm_title_meta_systems: '进阶系统',
@@ -3286,6 +3288,22 @@ trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在
 
 上手：{journal} → 星轨 · 炉火祈愿；每日 UTC 限一次——每日祈愿、魂奖励、结局全落在 crossrealm_vow_path_v1；首押 souls 25/35/60（最高稀有 60）。
 场景三帧回看：炉火 + 炉火记下你的名字 + 你叫它炉火；那就是守火的一整天。`,
+  hm_title_kindle_pass: '星轨 · 炉火的交棒',
+  hm_body_kindle_pass: `炉火的交棒 — 锚火三问之后的最后一段路。
+
+你已经问完了火、守住了火——炉火又回过头来问你：七百年的手——这把火有没有人接得住。
+
+炉火的交棒用同一张轴再问你三个问题：
+· Q1 阿祖说完「炉火，我要走了」——炉火让你回答它一件事。（ 「你不灭。」/「我看着你。」/「我叫它炉火。」）
+· Q2 炉火让你做第二件事。（ 添一根白桦 / 把饭碗放上铁沿 / 念母亲教你的那支歌）
+· Q3 炉火把最亮的一点光照在你手心——你以什么记住这一晚？（ 母亲的手 / 灶火燃着 / 你自己的手心）
+
+不是占卜——是交棒——和锚火三问、炉火祈愿一模一样：三个问题、三个轴（火 / 守 / 根）、十个结局（食火者 / 长夜守 / 炉火七百 / 无名守火人……）。一切确定性、无随机、无掷骰——它知道七百年换一次手是什么滋味。
+
+线路：与锚火三问、炉火祈愿同源——同一份 src/core/StateGraph.js 编译器 + src/game/KindlePassSystem.js 每日状态机 + src/content/kindlePass.js 三问内容——交棒不是走，是「火不过换了一个手」。
+
+上手：{journal} → 炉火的交棒；每日 UTC 限一次——每日交棒、魂奖励、结局全落在 crossrealm_kindle_pass_v1；首押 souls 25/35/60（最高稀有 60）。
+场景三帧回看：炉火 + 光照在你手心 + 七百年后的一个我——那就是你接住它的那一晚。`,
   // 炉边快速上手（W-Z91）：出场页 / 暂停菜单 / 关机后第一次进游戏——30 秒读完整张 SRS
   quickstart_title: '炉边快速上手 · 30 秒读完',
   quickstart_aria: '炉边快速上手',
@@ -3503,6 +3521,15 @@ trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在
   vow_total_souls_fmt: '守火魂 ${n}',
   vow_history_title: '你的祈愿廊',
   vow_history_empty: '灶火还在等——走进来。',
+  // W-Z282：炉火的交棒（StateGraph，七百年换手的最后一课）
+  journal_tab_pass: '炉火的交棒',
+  pass_intro: '三道问：一只碗、一手灰、一个名字——阿祖要走了，炉火把七百年交给你。',
+  pass_hint: '三道问答完自动揭晓——交棒已落定。',
+  pass_souls_reward: '交棒之火',
+  pass_total_draws_fmt: '交棒 ${n} 次',
+  pass_total_souls_fmt: '交棒魂 ${n}',
+  pass_history_title: '你的交棒廊',
+  pass_history_empty: '炉火还在——阿祖还没有把它交给你。',
   flame_intro: '炉边有风，火里有字。每天占一次火——它会向你说一句，不问你信不信。',
   flame_draw_cta: '占火 · Ask the Flame',
   flame_draw_done: '今日已占 · Already Drawn',

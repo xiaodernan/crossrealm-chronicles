@@ -231,6 +231,7 @@ a{color:var(--gold-dim)}
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l18">Oracle 缓存双轨探针实测（W-Z247 · Clash · 2026-11-16）</div><div class="kpi-value">97+<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr18">scripts/oracle-cache-probe.mjs --json：canon cached=6784/6784 ×2 ≈97.3% · refs cached=7424/7424 ×2 ≈97.5%（修复前 canon 恒 null）；记录 → docs/admin/data/oracle-cache-probe.json；system 冻结跨上游 prompt-cache ~1024-token 页门槛后双轨恒暖</div></div>
         <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l19">Oracle 累计验证档案（W-Z251/253 · live archive · 2026-11-16）</div><div class="kpi-value">4<span style="font-size:.7em;color:var(--muted)">/4 runs</span></div><div class="kpi-trend up" data-i18n="meas_tr19">docs/oracle-live-log/ 真实上游原文：canon ≈2.6–4.3s · refs ≈4–17s · 无义提问 → 诚实拒答 latency=0 · 不花 token；≥13 例 live 断言累计全绿；双轨缓存 ≈97%</div></div>
         <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l20">炉火祈愿全选项频次（W-Z265 · 27/27 枚举 · 2026-11-16）</div><div class="kpi-value">27<span style="font-size:.7em;color:var(--muted)">/27</span></div><div class="kpi-trend up" data-i18n="meas_tr20">scripts/vow-mc.mjs 全枚举确定性分布：windkeeper 6/27≈22.2% · ember_1 5/27≈18.5% · grey_2 5/27≈18.5% · self_3 5/27≈18.5% · 其余 7 种结局各 1/27≈3.7%；docs/admin/data/vow-montecarlo.json；整个刈数无随机无骰</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l21">炉火的交棒全选项频次（W-Z283 · 27/27 枚举 · 2026-11-17）</div><div class="kpi-value">27<span style="font-size:.7em;color:var(--muted)">/27</span></div><div class="kpi-trend up" data-i18n="meas_tr21">scripts/pass-mc.mjs 全枚举确定性分布：heirkeeper 6/27≈22.2% · kindle_1 5/27≈18.5% · tend_2 5/27≈18.5% · root_3 5/27≈18.5% · 其余 6 种结局各 1/27≈3.7%；docs/admin/data/pass-montecarlo.json；枚举与系统 _buildGraph verdict 节点同源逻辑</div></div>
       </div>
       <div style="font-size:.66rem;color:var(--muted);line-height:1.6" data-i18n-html="meas_foot">
         <strong style="color:#e8e4dc">来源（全部本仓库实跑）</strong>：<code>docs/LOAD_TEST.md</code>（Windows + Docker Desktop · 9 JVM + Redis 7 · 2026-11-15，含 W-Z130 200 并发真跑）；<code>docs/MASTER_PLAN.md</code>（2026-11-17 Oracle 上游三探针 + cache_hit_bench 实储率）；
@@ -315,6 +316,7 @@ const I18N = {
     meas_l18: 'Oracle 缓存双轨探针实测（W-Z247 · Clash · 2026-11-16）', meas_tr18: 'scripts/oracle-cache-probe.mjs --json：canon cached=6784/6784 ×2 ≈97.3% · refs cached=7424/7424 ×2 ≈97.5%（修复前 canon 恒 null）；记录 → docs/admin/data/oracle-cache-probe.json；system 冻结跨上游 prompt-cache ~1024-token 页门槛后双轨恒暖',
     meas_l19: 'Oracle 累计验证档案（W-Z251/253 · live archive · 2026-11-16）', meas_tr19: 'docs/oracle-live-log/ 真实上游原文：canon ≈2.6–4.3s · refs ≈4–17s · 无义提问 → 诚实拒答 latency=0 · 不花 token；≥13 例 live 断言累计全绿；双轨缓存 ≈97%',
     meas_l20: '炉火祈愿全选项频次（W-Z265 · 27/27 枚举 · 2026-11-16）', meas_tr20: 'scripts/vow-mc.mjs 全枚举确定性分布：windkeeper 6/27≈22.2% · ember_1 5/27≈18.5% · grey_2 5/27≈18.5% · self_3 5/27≈18.5% · 其余 7 种结局各 1/27≈3.7%；docs/admin/data/vow-montecarlo.json；无随机无骰',
+    meas_l21: '炉火的交棒全选项频次（W-Z283 · 27/27 枚举 · 2026-11-17）', meas_tr21: 'scripts/pass-mc.mjs 全枚举确定性分布：heirkeeper 6/27≈22.2% · kindle_1 5/27≈18.5% · tend_2 5/27≈18.5% · root_3 5/27≈18.5% · 其余 6 种结局各 1/27≈3.7%；docs/admin/data/pass-montecarlo.json；枚举与系统 _buildGraph verdict 节点同源逻辑',
     rec_h2: '下一步优化清单', rec_small: '按优先级排序 · 调参优先 P0→P3',
     foot: 'Crossrealm Chronicles · 炉边盘 ·<br/>「实测记录」为 2026-11-15 本机实跑（<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> 打真实 wkapi.pro /v1 gpt-6-sol）—— 合成面板由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115）—— 真实上线后，同出数据源 <code>crossrealm_telemetry_*</code> 的本地事件也会汇入上述图表中。<br/>若你想把上报接进后端：只需 <code>POST /api/telemetry/events</code>，数据存 <code>telemetry</code> 面板中；炉边盘保持只读与静态。',
     boot_fail: 'synthetic.json 未能装载。<br>请先跑 <code>node scripts/admin-synthetic.mjs</code>',
@@ -324,7 +326,7 @@ const I18N = {
     kpi_new: '新用户/日', kpi_sessions: '总会话数', kpi_boss_clears: '总 Boss 通关', kpi_d14: '留存 D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
     lt_game_start: '游戏启动', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
-    lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关', lt_trilance_draw: '曜盘已起',
+    lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关', lt_trilance_draw: '曜盘已起', lt_vow_draw: '祈愿已许', lt_kindle_pass_draw: '交棒已候',
     insight_h2: '本机智能洞察', insight_small: 'LS 真实事件流 → 下一步该做什么',
     insight_empty: '尚无足够事件——随便玩两局（H/J/M/击杀 Boss/抽卡）再回来',
     insight_low: '低置信度 · n={n}', insight_mid: '中等置信度 · n={n}', insight_high: '高置信度 · n={n}',
@@ -372,6 +374,7 @@ const I18N = {
     meas_l18: 'Oracle cache two-lane probe (W-Z247 · Clash · 2026-11-16)', meas_tr18: 'scripts/oracle-cache-probe.mjs --json: canon cached=6784/6784 ×2 ≈97.3% · refs cached=7424/7424 ×2 ≈97.5% (canon used to be null before the fix); record → docs/admin/data/oracle-cache-probe.json; frozen system block crosses the upstream prompt-cache ~1024-token page threshold » both lanes warm',
     meas_l19: 'Oracle cumulative verification log (W-Z251/253 · live archive · 2026-11-16)', meas_tr19: 'docs/oracle-live-log/ raw upstream text: canon ≈2.6–4.3s · refs ≈4–17s · nonsense probe → honest refusal · latency=0 · zero tokens; ≥13 live assertions cumulatively green; two lanes ≈97% cached',
     meas_l20: 'Hearth-Vow acceptance frequency (W-Z265 · 27/27 enum · 2026-11-16)', meas_tr20: 'scripts/vow-mc.mjs exhaustive deterministic distribution: windkeeper 6/27≈22.2% · ember_1 5/27≈18.5% · grey_2 5/27≈18.5% · self_3 5/27≈18.5% · every other ending 1/27≈3.7%; docs/admin/data/vow-montecarlo.json; no dice, mapping-perfect',
+    meas_l21: 'The-Passing-of-Fire acceptance frequency (W-Z283 · 27/27 enum · 2026-11-17)', meas_tr21: 'scripts/pass-mc.mjs exhaustive deterministic distribution: heirkeeper 6/27≈22.2% · kindle_1 5/27≈18.5% · tend_2 5/27≈18.5% · root_3 5/27≈18.5% · every other ending 1/27≈3.7%; docs/admin/data/pass-montecarlo.json; enum verdict logic is byte-for-byte the system _buildGraph verdict node',
     rec_h2: 'Next-step optimization plan', rec_small: 'Priority order · tune before building · P0→P3',
     foot: 'Crossrealm Chronicles · Admin Console ·<br/>The “Measured” card is a 2026-11-15 live run (<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> against real wkapi.pro /v1 gpt-6-sol). The synthetic panels are deterministically generated by <code>scripts/admin-synthetic.mjs</code> (seed 20261115).<br/>Once real players go online, events sourced from <code>crossrealm_telemetry_*</code> will fold into the same charts. To wire reporting into a backend: <code>POST /api/telemetry/events</code> — data lands in the <code>telemetry</code> panel; this console stays read-only and static.',
     boot_fail: 'synthetic.json failed to load.<br>Run <code>node scripts/admin-synthetic.mjs</code> first.',
@@ -381,7 +384,7 @@ const I18N = {
     kpi_new: 'New users / day', kpi_sessions: 'Total sessions', kpi_boss_clears: 'Total boss clears', kpi_d14: 'Retention D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
     lt_game_start: 'Game start', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
-    lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped', lt_trilance_draw: 'Trisolar tide cast',
+    lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped', lt_trilance_draw: 'Trisolar tide cast', lt_vow_draw: 'Vow drawn', lt_kindle_pass_draw: 'Handing drawn',
     insight_h2: 'Local AI insight', insight_small: 'LS event stream → what to do next',
     insight_empty: 'Not enough signal yet — play a few rounds (H/J/M/boss kill/draw) then come back',
     insight_low: 'Low confidence · n={n}', insight_mid: 'Medium confidence · n={n}', insight_high: 'High confidence · n={n}',
@@ -669,8 +672,8 @@ function renderLocalEvents() {
   const arr = readLocalEvents();
   const counts = Object.create(null);
   for (const e of arr) if (e && typeof e.event === 'string') counts[e.event] = (counts[e.event] ?? 0) + 1;
-  const known = ['game_start', 'help_open', 'journal_open', 'worldmap_open', 'canon_open', 'flame_draw', 'boss_kill', 'autoplay_tap', 'trilance_draw'];
-  const labelKey = { game_start: 'lt_game_start', help_open: 'lt_help_open', journal_open: 'lt_journal_open', worldmap_open: 'lt_worldmap_open', canon_open: 'lt_canon_open', flame_draw: 'lt_flame_draw', boss_kill: 'lt_boss_kill', autoplay_tap: 'lt_autoplay_tap', trilance_draw: 'lt_trilance_draw' };
+  const known = ['game_start', 'help_open', 'journal_open', 'worldmap_open', 'canon_open', 'flame_draw', 'boss_kill', 'autoplay_tap', 'trilance_draw', 'vow_draw', 'kindle_pass_draw'];
+  const labelKey = { game_start: 'lt_game_start', help_open: 'lt_help_open', journal_open: 'lt_journal_open', worldmap_open: 'lt_worldmap_open', canon_open: 'lt_canon_open', flame_draw: 'lt_flame_draw', boss_kill: 'lt_boss_kill', autoplay_tap: 'lt_autoplay_tap', trilance_draw: 'lt_trilance_draw', vow_draw: 'lt_vow_draw', kindle_pass_draw: 'lt_kindle_pass_draw' };
   const gridHtml = known.map(k => {
     const v = counts[k] ?? 0;
     const active = v > 0;
@@ -743,6 +746,8 @@ function renderInsight() {
     const canonOpens = counts.canon_open ?? 0;
     const flameDraws = counts.flame_draw ?? 0;
     const trilanceDraws = counts.trilance_draw ?? 0;
+    const vowDraws = counts.vow_draw ?? 0;
+    const passDraws = counts.kindle_pass_draw ?? 0;
     const bossKills = counts.boss_kill ?? 0;
     const autoplayTaps = counts.autoplay_tap ?? 0;
 
@@ -753,6 +758,8 @@ function renderInsight() {
       if (gameStarts > 0 && helpOpens === 0) rows.push({ priority: 'P1', zh: '游戏已经启动 ' + gameStarts + ' 次，但没按过 H —— 把「按 H 看手册」做成前 5 分钟内一直浮着的轻提示', en: 'Game started ' + gameStarts + ' times, help never opened — add a persistent first-5-minute HUD hint about H', impact: zh ? '→ 帮助打开率 +35%（实测模型）' : '→ help open rate +35%' });
       if (journalOpens >= 5 && canonOpens === 0) rows.push({ priority: 'P1', zh: '日志开了 ' + journalOpens + ' 次、典籍 0 次 —— 日志第一屏显式提示「典籍馆 · 19 卷已有新章」', en: 'Opened the journal ' + journalOpens + ' times, zero canon visits — add a visible prompt on first journal open announcing the canon library', impact: zh ? '→ 典籍点击率 +15%' : '→ canon click-through +15%' });
       if (flameDraws > 0 && trilanceDraws === 0) rows.push({ priority: 'P2', zh: '每日锚火占卜用了 ' + flameDraws + ' 次，但没试过周一的「三日曜盘」 —— 在占卜页签加一个周一only的角标入口', en: 'Used daily flame divination ' + flameDraws + ' times but never the Monday Trisolar tide — add a Monday-only chip on the tide tab', impact: zh ? '→ 周活 +12%（实测模型）' : '→ weekly actives +12%' });
+      if (passDraws > 0 && vowDraws === 0) rows.push({ priority: 'P2', zh: '炉火的交棒抽了 ' + passDraws + ' 次，炉火祈愿一次都没看过 —— 在交棒揭晓时给一个「隔壁还有一段七百年」的入口', en: 'Drew the Handing ' + passDraws + ' time(s) but never the Hearth Vow — one cross-link from the handing’s ending to the vow tab', impact: zh ? '→ 新页签发现率 +18%（实测模型）' : '→ new-tab discovery +18%' });
+      if (vowDraws > 0 && passDraws === 0) rows.push({ priority: 'P2', zh: '炉火祈愿抽了 ' + vowDraws + ' 次，还没试过「炉火的交棒」—— 祈愿揭晓页里加一句通往交棒的引路句', en: 'Cast ' + vowDraws + ' Hearth Vows but never the Handing — one docent line on the vow’s ending screen toward the handing tab', impact: zh ? '→ 交棒页签打开率 +20%（实测模型）' : '→ handing-tab opens +20%' });
       if (worldMapOpens >= 3) rows.push({ priority: 'P2', zh: '世界地图打开了 ' + worldMapOpens + ' 次却没有出处 —— 默认在右上角弹出「最近要去的地方」星标', en: 'World map opened ' + worldMapOpens + ' times without travel signal — surface a “next destination” pinned at your last target', impact: zh ? '→ 迷路率 -20%' : '→ wander rate −20%' });
       if (autoplayTaps >= 2) rows.push({ priority: 'P2', zh: '自动通关被用了 ' + autoplayTaps + ' 次 —— 加一个通关后「保持通关时舒服的姿势」短路，告诉玩家手动体验有递进线索', en: 'Autoplay tapped ' + autoplayTaps + ' times — surface a “you still have paths worth walking” hint after an auto-run', impact: zh ? '→ 回访率 +8%' : '→ return rate +8%' });
       if (bossKills >= 3 && worldMapOpens >= 2) rows.push({ priority: 'P3', zh: 'Boss ' + bossKills + '× + 地图 ' + worldMapOpens + '× — 老玩家信号：卷二《三日陵》HUD里推「卷次回响」旁白', en: 'Veterans score: ' + bossKills + ' boss kills + ' + worldMapOpens + ' map opens — surface a Vol. II canon-read moment', impact: zh ? '→ 留存 +6%' : '→ churn control −6%' });

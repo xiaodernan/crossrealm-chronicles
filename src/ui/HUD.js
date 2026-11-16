@@ -169,6 +169,8 @@ const JOURNAL_SUB_TABS = {
   path: (game, panel) => game.fortunePathTab.render(panel),
   // W-Z262：星轨 · 炉火祈愿（StateGraph，守火人之祈愿）
   vigil: (game, panel) => game.vigilVowTab.render(panel),
+  // W-Z282：炉火的交棒（StateGraph，七百年换手的最后一课）
+  pass: (game, panel) => game.kindlePassTab.render(panel),
 };
 
 export class HUD {
@@ -904,6 +906,8 @@ buildHUD() {
       else if (k === 'path') suffix = '';
       // W-Z262 炉火祈愿：日抽制，无需计数角标
       else if (k === 'vigil') suffix = '';
+      // W-Z282 炉火的交棒：日抽制，无需计数角标
+      else if (k === 'pass') suffix = '';
       else if (k !== 'all') suffix = ` (${j.getCounts()[k] ?? 0})`;
       return `<button type="button" class="journal-tab${tab === k ? ' active' : ''}" data-tab="${k}">${t(label)}${suffix}</button>`;
     }).join('');

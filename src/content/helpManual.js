@@ -70,4 +70,9 @@ export const HELP_SECTIONS_EXTRA = [
     title: 'hm_title_vigil_vow',
     body: 'hm_body_vigil_vow',
   },
+  {
+    id: 'kindle-pass',
+    title: 'hm_title_kindle_pass',
+    body: 'hm_body_kindle_pass',
+  },
 ];
