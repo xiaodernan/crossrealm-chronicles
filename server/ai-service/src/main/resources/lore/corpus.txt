@@ -12082,6 +12082,85 @@ She had been here all along.
 
 *(End of volume ninety-five · Volume XIV, first part.)*
 
+# source: creative/novel/en/96-baiyin.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIV**: The Seven-Hundredth Year — the Continuing Volume
+
+---
+
+## Ninety-six: Baiyin
+
+Baiyin came without warning.
+
+She arrived at midday carrying nothing — a single bundle, nothing more, nothing of herself that needed to arrive with her.
+
+The stove saw her immediately. It rose in a welcoming curve — one long, gentle gesture, a wave of gold reaching up toward the ceiling.
+
+A-Shi stopped in the doorway.
+
+His mother was inside, sweeping the floor. Neither of them said anything about Baiyin standing in the threshold with the fire reaching up for her.
+
+Baiyin set her bundle down by the stove — she did not open it.
+
+She simply stood there, watching the fire.
+
+The stove flickered once. A single tongue of flame leapt upward.
+
+She reached out one hand — hovering just above the rim, hovering in the heat — and the stove breathed.
+
+She pulled her hand back slowly.
+
+She turned to A-Shi, and she smiled, very slightly, very carefully.
+
+"The fire remembers you," she said.
+
+He knew it did.
+
+"The fire has always remembered," she said.
+
+He did not know that, until she said it.
+
+His mother brought a bowl of water and set it on the table.
+
+She poured a little of that water into the stove — she had done it every morning for six hundred years — and the fire leapt up, gold and warm, and Baiyin closed her eyes for a moment with the gesture of someone who had been carrying too much for too long.
+
+She drank the water.
+
+Then she stood up.
+
+"I have come to see the fire," she said. "To see it with you, one last time."
+
+"Yes," A-Shi said.
+
+"Tomorrow, I must leave," she said.
+
+He nodded.
+
+She walked to the door, turned back once, and then left.
+
+The stove flickered after she was gone.
+
+In the evening, his mother cooked the usual meal. The fire burned as it had always burned — steady, warm, golden.
+
+But A-Shi understood something now, for the first time.
+
+The fire had never stopped. It had never gone away. It had never needed to be relit, or reminded, or told to stay.
+
+The fire had been here all along. Six hundred years of faithful, patient light, right here in this kitchen.
+
+And now, for reasons he did not yet understand, it had remembered something.
+
+He did not know what yet.
+
+But tomorrow, he would learn.
+
+---
+
+*(End of volume ninety-six · Volume XIV, second part.)*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -21328,6 +21407,75 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第九十五卷 · 卷十四之一）*
+
+# source: creative/novel/96-白茵.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十四**：第七百年 —— 续卷
+
+---
+
+## 九十六 · 白茵
+
+白茵忽然来了。
+
+她穿着一身极旧的布袍，没带行李，站在灶火前的院中没有坐。灶火一认出她来，就整面舔了一下。其他人坐了很久不成的眼——阿石和母亲没有推开门——就什么都没说。
+
+白茵在灶前的兽槛上站了很久——灶火整面都是光——她伸手，靠了近一点——她伸到灶火的掌边——灶火把半截掌烧得更橙黄了。
+
+她又伸手。
+
+阿石站起来看她。
+
+母亲退后一步。
+
+白茵走到灶前。
+
+灶火又亮——跳一下——又亮——又跳一下——跳到一尺多高。
+
+她没伸手把火关下去。
+
+他们没有问。
+
+母亲把三样东西放到后山——日晷、石墨、半壶酒——灶火用来做饭的那口灶每次过祭都烧不到的火。
+
+阿石收拾好——母亲说——这是白奶奶的传统。
+
+他沉默。
+
+白茵站起来说：
+
+"我走了以后灶火不要烧得比这更亮。"
+
+"不会。"
+
+"白奶奶说，灶火从此往下传。"
+
+阿石没说话。
+
+母亲端了一碗水。
+
+白茵接住那碗水。
+
+他们三个人，灶火前。
+
+他们，灶火。
+
+晌午过去了。
+
+白茵走了。
+
+她走之前，留这桌一把火。
+
+灶火收下了。
+
+院子里那棵火种树也抖了一抖。
+
+---
+
+*（本章完 · 跨界线总第九十六卷 · 卷十四之二）*
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)
