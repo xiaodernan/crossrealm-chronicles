@@ -7452,6 +7452,57 @@ The stove burned.
 
 *(End of volume one hundred and twenty-five · Volume XV, twenty-sixth part · The seven-hundredth year — The Thunder Rain.)*
 
+# source: creative/novel/en/126-the-shadow-at-the-stoves-mouth.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Shadow at the Stove's Mouth
+
+---
+
+## One Hundred and Twenty-six: The Shadow at the Stove's Mouth
+
+Saturday of the eleventh week after the spring equinox — the sun had barely risen — the yard was still cool and clear.
+
+A-Shi was sweeping with a bamboo broom while Xiao Huo watched him from the porch.
+
+"Eggs today," Mother called from the kitchen.
+
+A-Shi set the broom aside and gave a small nod. The sky was very wide, surprisingly blue. The fire-seed tree's needles had grown another layer — their serrated edges shimmered in the morning light.
+
+He turned back to the kitchen and saw Xiao Huo standing at the stove with his hand flat against the iron edge. He had not moved.
+
+"Did you hear it?" Xiao Huo asked.
+
+A-Shi stopped for a moment. "Hear what?"
+
+"The stove," Xiao Huo said. "Listening to it."
+
+A-Shi crouched down and listened.
+
+The stove was making a sound — a low, steady sound — not loud exactly, but unmistakably there. A-Shi put both hands on the iron edge.
+
+The iron was warm.
+
+"灶火," he said. "炉火."
+
+Xiao Huo nodded slowly.
+
+He reached out and pressed his small hand against the iron.
+
+"Seven hundred years," he said quietly.
+
+Nobody answered.
+
+The stove burned.
+
+The stove burned.
+
+---
+
+*(End of volume one hundred and twenty-six · Volume XV, twenty-seventh part · The seven-hundredth year — The Shadow at the Stove's Mouth.)*
+
 # source: creative/novel/en/13-interlude-handover.md
 # Interlude Six · Handover
 
@@ -18732,6 +18783,55 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百二十五卷 · 卷十五之二十六 · 第七百年 · 雷雨）*
+
+# source: creative/novel/126-炉口的影.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 炉口的影
+
+---
+
+## 一百二十六 · 炉口的影
+
+立春后第十一周——周六——太阳刚出来——院子里的光还是清亮的——后来慢慢黄起来——阿石在院子里摇着竹扫帚——小火跟在后面看着。
+
+"今天做蛋。"母亲的声音从灶房里传出来。
+
+阿石答应了一声。他把扫帚放下，拿了个簸箕出门。天空很宽，出奇蓝。火种树的叶子又长大了一层——叶子的锯齿边缘在晨光里参差地泛光。
+
+阿石回到灶前一看——小火已经在那里了——小火站在灶前，手贴在铁沿上，没动。
+
+"你听见了吗？"小火突然问。
+
+阿石愣了一下。"听见什么？"
+
+"灶火在说什么。"小火说。
+
+阿石蹲下来，听灶火的声音。
+
+灶火确实在响——咳咳——声音像远处的河——像森林——像昨晚做的白菜猪肉炖火的味道——灶火在响——这种响是灶火特有的。
+
+阿石把手贴在铁沿上。
+
+铁沿是温的。
+
+"小火——灶火——炉火。"他轻轻念出来。
+
+"嗯。"小火说。
+
+"炉火七百年了。"阿石说。
+
+他没再说。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百二十六卷 · 卷十五之二十七 · 第七百年 · 炉口的影）*
 
 # source: creative/novel/13-番外六-换班.md
 # 番外六 · 换班
