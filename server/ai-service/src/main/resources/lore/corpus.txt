@@ -7943,6 +7943,53 @@ The fire burned.
 
 *(End of volume one hundred and thirty-four · Volume XV, thirty-fifth part · The seven-hundredth year — Come and Look Tomorrow.)*
 
+# source: creative/novel/en/135-the-third-mornings-breakfast.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Third Morning's Breakfast
+
+---
+
+## One Hundred and Thirty-five: The Third Morning's Breakfast
+
+Tuesday of the nineteenth week after the spring equinox — morning — the sun had not climbed yet.
+
+Uncle Zhou arrived again — he was carrying a small iron pot from home — half full of dry rice.
+
+Aunt Guo was there too — she was sitting at the stove — four bowls on the table: A-Shi's, Mother's, Xiao Huo's — and one white porcelain bowl, still empty.
+
+A-Shi kept feeding the birch — no more, no less — exactly the keeper's measure.
+
+Mother brought the porridge out — she set two bowls down — A-Shi took them over — set them at the stove — he did not look at the white bowl.
+
+Xiao Huo was at the table too — very quiet.
+
+Mother glanced at the fire. “It kept the night,” she said — a very short line.
+
+Aunt Guo did not look up either. “The fire keeps itself,” she said.
+
+Mother looked at her a second time. “You keep it too,” she said.
+
+Uncle Zhou set his bowl down beside the empty white one — he did not eat — he only set the dry rice at the stove's edge.
+
+Mother picked up the little iron pot — she studied it for a long time — she did not ask whose it was — she set it on the table.
+
+The fire burned.
+
+Mother went back to the kitchen — she brought out one bowl of plain porridge — set it beside Uncle Zhou's pot. “This is yours,” she said.
+
+No one spoke again — A-Shi put the third birch branch into the stove.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and thirty-five · Volume XV, thirty-sixth part · The seven-hundredth year — The Third Morning's Breakfast.)*
+
 # source: creative/novel/en/14-interlude-come-sit-awhile.md
 # Interlude Seven · Come Sit Awhile
 
@@ -19609,6 +19656,53 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百三十四卷 · 卷十五之三十五 · 第七百年 · 明天再来看）*
+
+# source: creative/novel/135-第三天的早饭.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 第三天的早饭
+
+---
+
+## 一百三十五 · 第三天的早饭
+
+立春后第十九周——周二——早上——太阳还没全上来。
+
+周叔又到了——他手里拿自己家的一只小铁罐——干米装了半罐。
+
+郭阿婆在那——她坐在灶前——桌子上放了四只碗：阿石的、母亲的、小火的——还有一只空着的白瓷碗。
+
+阿石继续添白桦——不多不少——和守火的份量一样。
+
+母亲端了粥出来——她放下两碗——阿石端过去——放在灶前——他没看那只白瓷碗。
+
+小火也上桌了——很安静。
+
+母亲看了灶火一眼——"守了一夜。"她说的句子很短。
+
+郭阿婆也没抬头——"灶火自己会守。"她说。
+
+母亲又看了她一眼——"你也会守。"她说。
+
+周叔把自己那碗搁在空着的白瓷碗旁边——他没有吃——他只是把干米也放到灶前去了。
+
+母亲拿起那只铁罐——看了很久——她没问是谁的——她把它搁在桌上。
+
+灶火燃着。
+
+母亲去灶房端了一碗白粥——放在周叔的铁罐旁边——"这是你的。"她说。
+
+没人再开口——阿石把第三根白桦放进灶膛里。
+
+炉火燃着。
+
+炉火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百三十五卷 · 卷十五之三十六 · 第七百年 · 第三天的早饭）*
 
 # source: creative/novel/14-番外七-下次再坐.md
 # 番外七 · 下次再坐
