@@ -15,6 +15,9 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-17 · W-Z287 第132卷入典《第二夜 / The Second Night》——卷十五之三十三（守火交棒的第二个夜晚）**：立春后第十六周——周六——天气出奇好——郭阿婆又把粥托上去——阿祖没吃——阿石还是坐在灶前——小火从隔壁屋子走过来——手贴在铁沿上——「烫」——夜里阿石添了一根白桦——不多不少——和守火的份量一样——他闭上眼睛没睡着——炉火替他醒着——第二天早上炉火依然燃着。
+> 交付：creative/novel/132-第二夜.md + en 孪生 132-the-second-night.md；novella 132 × 2 = 264 模块（典籍馆现为 132 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：295 源；showcase feed 新增 W-Z287 实录。
+>
 > **2026-11-17 · W-Z286 星轨顾问的指引协议（LLM → 游戏里的一次真实跳转）**：此前模型只"说"，玩家还得自己找入口——这一片把大模型的指向变成界面里的一次真状态流转（回答 → 落在某个日志子页）。
 > · 正式通道：`server/ai-service/src/main/resources/ai/system-prompt.txt` 追加【指引协议】段——模型可在回答末尾挂一个小标记 `⟦guide:slug⟧`，slug 只能取 18 枚白名单之一（canon/codex/flame/trilance/path/vigil/pass/ending/memory/bestiary/legends/season/trial/side/skills/echoes/dungeons/cg）或 `none`；不挂、不自创、不翻语言、不连发。这是上游 frozen prefix 的一次性追加（首调冷，随后回暖；W-Z247 同款手法）。
 > · 降级通道：`src/content/advisorDirectives.js`（content 层自洽，不 import ui/，避免 B37 中 core→ui 成环）——正式标记优先，为空再按 tab 文案别名（「·」左右两段 + 整标签，≥2 字符、过滤过于通用的词、大小写不敏感）在正文里做 substring 命中，最多 2 处。
