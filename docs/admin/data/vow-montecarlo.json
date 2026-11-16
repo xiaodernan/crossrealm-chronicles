@@ -1,0 +1,59 @@
+{
+  "schema": "crossrealm.vow-montecarlo.v1",
+  "generatedAt": "2026-11-16T14:31:08.475Z",
+  "totalCombos": 27,
+  "distribution": [
+    {
+      "id": "windkeeper",
+      "count": 6,
+      "pct": 22.2
+    },
+    {
+      "id": "ember_1",
+      "count": 5,
+      "pct": 18.5
+    },
+    {
+      "id": "grey_2",
+      "count": 5,
+      "pct": 18.5
+    },
+    {
+      "id": "self_3",
+      "count": 5,
+      "pct": 18.5
+    },
+    {
+      "id": "ember_2",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "ember_3",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "grey_1",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "grey_3",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "self_1",
+      "count": 1,
+      "pct": 3.7
+    },
+    {
+      "id": "self_2",
+      "count": 1,
+      "pct": 3.7
+    }
+  ],
+  "windkeeper": 6,
+  "sanity": "enum == simulate: 27/27 verified both ways"
+}

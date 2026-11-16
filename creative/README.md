@@ -163,6 +163,7 @@ creative/music/soundtrack.html
 | 立春 · The First Day of Spring | [the-first-day-of-spring](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/114-the-first-day-of-spring.md) |
 | 叫炉 · The Hearth Named | [the-hearth-named](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/115-the-hearth-named.md) |
 | 炉火的下一次 · The Next Visit | [the-next-visit](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/116-the-next-visit.md) |
+| 隔壁的灶 · The Neighbor’s Stove | [the-neighbors-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/117-the-neighbors-stove.md) |
 
 每一章对应游戏的章节走法：
 
