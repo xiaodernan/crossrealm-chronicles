@@ -183,7 +183,8 @@ creative/music/soundtrack.html
 | 明天再来看 · Come and Look Tomorrow | [come-and-look-tomorrow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/134-come-and-look-tomorrow.md) |
 | 第三天的早饭 · The Third Morning’s Breakfast | [the-third-mornings-breakfast](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/135-the-third-mornings-breakfast.md) |
 | 第三只碗回来了 · The Third Bowl Comes Back | [the-third-bowl-comes-back](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/136-the-third-bowl-comes-back.md) |
-| 空碗里的火光 · The Light in the Empty Bowl | [the-light-in-the-empty-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/137-the-light-in-the-empty-bowl.md) |每一章对应游戏的章节走法：
+| 空碗里的火光 · The Light in the Empty Bowl | [the-light-in-the-empty-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/137-the-light-in-the-empty-bowl.md) |
+| 说出口的那两个字 · The Two Words He Said Aloud | [the-two-words-he-said-aloud](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/138-the-two-words-he-said-aloud.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
