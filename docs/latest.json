@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T07:14:13.972Z",
+  "generated_at": "2026-11-16T07:20:18.882Z",
   "branch": "main",
-  "head": "edf8c963",
-  "total_commits": 1863,
-  "pushed_at": "2026-11-16T15:13:29+08:00",
+  "head": "ed1d8ee2",
+  "total_commits": 1865,
+  "pushed_at": "2026-11-16T15:19:34+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "ed1d8ee",
+      "at": "2026-11-16T15:19:34+08:00",
+      "subject": "feat(canon): W-Z221 第八十七卷《白奶奶 / The Grandmother》——卷十二之八"
+    },
+    {
+      "short": "b02d5e8",
+      "at": "2026-11-16T07:14:14Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "edf8c96",
       "at": "2026-11-16T15:13:29+08:00",
@@ -21,27 +31,17 @@
       "short": "dbcd537",
       "at": "2026-11-16T15:08:12+08:00",
       "subject": "feat(canon): W-Z219 第八十五卷《信 / The Letter》——卷十二之六"
-    },
-    {
-      "short": "ac68739",
-      "at": "2026-11-16T07:04:11Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "064393f",
-      "at": "2026-11-16T15:02:54+08:00",
-      "subject": "feat(canon): W-Z218 第八十四卷《结木 / The Cone》——卷十二之五"
     }
   ],
-  "tracked_files": 1402,
+  "tracked_files": 1404,
   "test_files": 458,
   "i18n_keys": 3225,
-  "lore_sources": 199,
-  "novel_chapters_zh": 86,
-  "novel_chapters_en": 86,
-  "milestone": "W-Z220",
-  "milestone_full": "卷 86 · 六百年守火线（86 / 86 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 199 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：86 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 201,
+  "novel_chapters_zh": 87,
+  "novel_chapters_en": 87,
+  "milestone": "W-Z221",
+  "milestone_full": "卷 87 · 六百年守火线（87 / 87 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 201 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：87 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
