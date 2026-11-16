@@ -139,6 +139,7 @@ creative/music/soundtrack.html
 | 墨 · Ink | [ink](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/90-ink.md) |
 | 送礼 · The Bestowal | [the-bestowal](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/91-the-bestowal.md) |
 | 灶火 · The Hearth | [the-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/92-the-hearth.md) |
+| 夜 · The Night | [the-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/93-the-night.md) |
 
 每一章对应游戏的章节走法：
 

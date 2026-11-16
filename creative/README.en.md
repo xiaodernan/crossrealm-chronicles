@@ -141,6 +141,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Ink | [ink](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/90-ink.md) |
 | The Bestowal | [the-bestowal](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/91-the-bestowal.md) |
 | The Hearth | [the-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/92-the-hearth.md) |
+| The Night | [the-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/93-the-night.md) |
 
 Chapter → game-chapter mapping:
 
