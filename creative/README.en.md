@@ -170,7 +170,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Snow’an | [snowan](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/119-snowan.md) |
 | Saturdays | [saturdays](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/120-saturdays.md) |
 | The Fire Comes | [the-fire-comes](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/121-the-fire-comes.md) |
-| Always Here | [always-here](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/122-always-here.md) |Chapter → game-chapter mapping:
+| Always Here | [always-here](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/122-always-here.md) |
+| Snow’an Turns Back | [snowan-turns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/123-snowan-turns.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

@@ -168,7 +168,8 @@ creative/music/soundtrack.html
 | 雪安 · Snow’an | [snowan](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/119-snowan.md) |
 | 周六 · Saturdays | [saturdays](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/120-saturdays.md) |
 | 炉火来了 · The Fire Comes | [the-fire-comes](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/121-the-fire-comes.md) |
-| 常来 · Always Here | [always-here](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/122-always-here.md) |每一章对应游戏的章节走法：
+| 常来 · Always Here | [always-here](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/122-always-here.md) |
+| 雪安回头 · Snow’an Turns Back | [snowan-turns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/123-snowan-turns.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
