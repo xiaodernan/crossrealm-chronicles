@@ -7503,6 +7503,51 @@ The stove burned.
 
 *(End of volume one hundred and twenty-six · Volume XV, twenty-seventh part · The seven-hundredth year — The Shadow at the Stove's Mouth.)*
 
+# source: creative/novel/en/127-the-waiting.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Waiting
+
+---
+
+## One Hundred and Twenty-seven: The Waiting
+
+Saturday of the twelfth week after the spring equinox.
+
+The fog lay over the yard at dawn — not too thick — the sun was climbing.
+
+Uncle Zhou arrived early.He did not speak.
+
+The stove burned as it always had, watching.
+
+Uncle Zhou stood in the yard for a long time — he wanted to leave — he didn't. He stood before the stove for close to an hour.
+
+"You are here," he said to the fire.
+
+The fire didn't answer.
+
+A-Shi brought out a fresh bowl of warm rice gruel and offered it to Uncle Zhou. He took it, drank it in one gulp, and held the bowl.
+
+"You've been carrying something," A-Shi said.
+
+"No," Uncle Zhou said.
+
+He stood there after finishing the bowl for some time.
+
+Then he left.
+
+The stove didn't go out.
+
+The stove burned.
+
+The stove burned.
+
+---
+
+*(End of volume one hundred and twenty-seven · Volume XV, twenty-eighth part · The seven-hundredth year — The Waiting.)*
+
 # source: creative/novel/en/13-interlude-handover.md
 # Interlude Six · Handover
 
@@ -18832,6 +18877,49 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百二十六卷 · 卷十五之二十七 · 第七百年 · 炉口的影）*
+
+# source: creative/novel/127-炉火的等.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 炉火的等
+
+---
+
+## 一百二十七 · 炉火的等
+
+立春后第十二周，周六。
+
+天刚亮——院子里雾起来了——雾不是太浓——太阳慢慢升出来。周叔来了——他来得早——他没说话。
+
+炉火还是不灭——它像老朋友——蹲在灶口——嘴巴不说——却在那里看。
+
+周叔没有站起来——他站在院子里——他想离开——又没走——他在灶前站了半个时辰。
+
+"你今天会来的吧。"他对灶火说。
+
+灶火没有说什么。
+
+阿石出来——他端着一碗刚煮的米汤——给周叔——周叔接过来——喝一口——灶火燃着。
+
+"你一肚子话，周叔。"阿石说。
+
+"我没事。"周叔说。
+
+周叔把碗喝完了——站了很久——灶火燃着。
+
+他走了。
+
+灶火依然没灭。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百二十七卷 · 卷十五之二十八 · 第七百年 · 炉火的等）*
 
 # source: creative/novel/13-番外六-换班.md
 # 番外六 · 换班
