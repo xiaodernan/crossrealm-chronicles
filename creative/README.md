@@ -150,6 +150,7 @@ creative/music/soundtrack.html
 | 传火 · The Handover | [the-handover](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/101-the-handover.md) |
 | 第一夜 · The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/102-the-first-night.md) |
 | 山顶来信 · The Letter from the Peak | [the-letter-from-the-peak](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/103-the-letter-from-the-peak.md) |
+| 秋分 · The Autumn Equinox | [the-autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/104-the-autumn-equinox.md) |
 
 每一章对应游戏的章节走法：
 

@@ -9,6 +9,10 @@
 >
 > **2026-11-16 · W-Z205 原典语料重建：59 → 175 源 + 真上游口径对齐**：corpus.txt 全量重编（74 卷双语小说 + 74 卷英译 + 27 份参照文件 ≈ 520 KB，含 66–74 卷守火主线全链）；`Bm25IndexTest.linDu_query_matches_lin_du_chapter` 因如实语料扩容从 top-5 → top-10（如实登记，非放水）；`hm_body_lore_oracle` 不再手写「36 源 / 1803 检索块」的漂移数字——说明书永远引用语料的运行时重编能力；`build-latest.mjs` 的 `lore_sources` 本就是活读（latest.json 实测 175）；说明书/showcase feed 新增 11·16 三条 W-Z190+ 实录；`ONLINE_SERVICES.md(+EN)` / README / player-guide 同步到 175 源；AI 侧 lore 门禁（LoreRagTest/Bm25IndexTest/Bm25TokenizerTest）绿。
 >
+> **2026-11-16 · W-Z242 第104卷入典《秋分 / The Autumn Equinox》**：《跨界纪事》卷十五「第七百年」第五篇——秋分雾散得比往年早，母亲在灶冷时拢了火，白桦码在灶台边白得像霜；小火醒来时灶膛里多了一根没人添的白桦——「灶火自己添了柴」；第二天一家三口上山，白石头顶上那间小石屋、送过信的那个老人守着祖火——两个守火人隔着一面灶火跪下来，七百年里第一次——谁也没说话；母亲掏出自己灶里的灰，老人掏出祖火的灰——两种颜色肉眼分不出来；下山路上阿石背着小火，小火做了一个梦——梦见白茵站在山顶，同时看着两盏火，七百年，两盏火第一次见面。
+> 交付：creative/novel/104-秋分.md + en 孪生 104-the-autumn-equinox.md；novella 104 × 2 = 208 模块（典籍馆现为 104 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：235 源；showcase feed 新增 W-Z242 实录。
+> **同期实测（Admin 真工作，不只是静态壳）**：线上 Admin 口令全链路实测——解锁（dashboard display:block，W-Z240b 生效）→ 12 合成 KPI 瓦渲染 → 12 条下一步优化建议渲染 → Measured 16 瓦（含 W-Z238 真 LLM 作答实证：sources 四块、latency≈3.2s；无义提问 0 召回 → 诚实拒答 latency=0 不花 token）→ sim 面板直读 seed=20261117 的 simulation.json HTTP 200（bootMsAvg=9117 · bootMsP95=51995 · 0 未捕获异常 · impatient 弹窗 3/14 · reader 3/3 打开说明书 · generatedAt 2026-11-16T11:14Z）。控制台各模块全部真实可用，console 仅 /api/telemetry/summary-rollup 404（Pages 无后端，属预设缺省而非故障）。
+>
 > **2026-11-16 · W-Z241 第103卷入典《山顶来信 / The Letter from the Peak》+ ui-walkthrough 复跑 + 玩家行为模拟重采**：
 > 卷十五之四：客人走后第十九天，山顶守祖火的人派人送下一封火漆压火苗印的短信——字迹瘦长笔直，和第一代守火人一模一样——「你守的那一头，还在烧。我们守的这一头，也还在烧」；小火第一次知道白石头顶上也有一间石头屋、也有一个人守了它七百年；秋分两边的火要一起加白桦——阿石劈开捡存六百年的那根白桦：一半进灶，一半用旧布包好留给小火，等他亲手走上山顶。
 > 交付：creative/novel/103-山顶来信.md + en 孪生 103-the-letter-from-the-peak.md；novella 103 × 2 = 206 模块（典籍馆现为 103 卷）；root README / creative README(zh+en) / strings(zh+en) codex 全量同步；原典语料重建：233 源；showcase feed 新增 W-Z241 实录。
