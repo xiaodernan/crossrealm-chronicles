@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T09:17:27.883Z",
+  "generated_at": "2026-11-16T09:27:57.212Z",
   "branch": "main",
-  "head": "4a378776",
-  "total_commits": 1887,
-  "pushed_at": "2026-11-16T17:15:39+08:00",
+  "head": "e468cdcb",
+  "total_commits": 1889,
+  "pushed_at": "2026-11-16T17:24:09+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "e468cdc",
+      "at": "2026-11-16T17:24:09+08:00",
+      "subject": "feat(canon): W-Z233 第九十九卷《抵达 / The Arrival》——卷十四之五"
+    },
+    {
+      "short": "6eefe19",
+      "at": "2026-11-16T09:17:27Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "4a37877",
       "at": "2026-11-16T17:15:39+08:00",
@@ -21,27 +31,17 @@
       "short": "68cab3f",
       "at": "2026-11-16T17:09:18+08:00",
       "subject": "feat(canon): W-Z231 第九十七卷《光里 / In the Light》——卷十四之三"
-    },
-    {
-      "short": "7d6cb02",
-      "at": "2026-11-16T09:05:25Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "81e2b63",
-      "at": "2026-11-16T16:50:59+08:00",
-      "subject": "feat(canon): W-Z230 第九十六卷《白茵 / Baiyin》——卷十四之二"
     }
   ],
-  "tracked_files": 1426,
+  "tracked_files": 1428,
   "test_files": 458,
   "i18n_keys": 3225,
-  "lore_sources": 223,
-  "novel_chapters_zh": 98,
-  "novel_chapters_en": 98,
-  "milestone": "W-Z232",
-  "milestone_full": "卷 98 · 六百年守火线（98 / 98 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 223 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：98 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 225,
+  "novel_chapters_zh": 99,
+  "novel_chapters_en": 99,
+  "milestone": "W-Z233",
+  "milestone_full": "卷 99 · 六百年守火线（99 / 99 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 225 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：99 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
