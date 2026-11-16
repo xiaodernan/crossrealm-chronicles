@@ -11103,6 +11103,85 @@ Someone had written it all in.
 
 *(End of volume eighty-four · Volume XII, fifth part.)*
 
+# source: creative/novel/en/85-the-letter.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XII**: The Long Journey — Fire and Ink
+
+---
+
+## Eighty-five: The Letter
+
+Three days after the Solstice, A-Shi decided to write to Baiyin.
+
+He reached under the stove ledge for a square of trimmed kitchen paper — just the right size — and laid it flat on the table. The fire-light gilded it orange. He set down the brush.
+
+The stroke began — a single short horizontal, heavy and brief, as if stamped out of his grandfather's hand.
+
+He stared at it.
+
+His grandfather's stroke, yes. His father's vertical, yes. His own ink — and it was also his grandfather's ink, mixed from the same stove ash.
+
+He crossed out the横.
+
+He crossed out the竖.
+
+He thought — about everything he wanted to say: about the ridge, the ledger, his mother's silence, the three days he had not slept.
+
+He crossed out everything he wanted to say.
+
+He picked up the brush once more — this time, his own stroke.
+
+His was lighter than his father's, faster than his grandfather's.
+
+He wrote one line:
+
+The fire will not go out.
+
+Nothing else.
+
+Not a word more.
+
+He folded the paper into quarters, then folded it again until it was thin enough to tuck into the chest-bag — the way Baiyin always did her own letters. He slipped it under the stove's ledge, where his grandfather's book was kept — where the ledger lived — where his own pulse had somehow started leaping in time with the stove.
+
+His mother, sweeping the floor, picked up the folded square. She looked at it — then at him — said nothing. She set it aside, beside the ledger.
+
+That night the stove leapt once, sharply.
+
+A-Shi looked up.
+
+The ledger opened itself.
+
+On the final page, in real ink — not copied, not simulated, but truly his grandfather's hand — letters appeared that have not been there before:
+
+A sealed book, and it wakes itself.
+
+He did not touch it.
+
+He waited.
+
+The next morning the page was blank again — except one line:
+
+I will be the one to see it inside the ledger.
+
+Baiyin's brush.
+
+A-Shi looked at the stove.
+
+He set the folded letter down on the stove's hottest corner, closed his hand tight around it, and took a long breath.
+
+Sealed.
+
+Sealed for good.
+
+Six hundred years and the flames still rose.
+
+---
+
+*(End of volume eighty-five · Volume XII, sixth part.)*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -19204,6 +19283,83 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第八十四卷 · 卷十二之五）*
+
+# source: creative/novel/85-信.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十二**：远行 —— 火与墨
+
+---
+
+## 八十五 · 信
+
+冬至过后的第三天，阿石忽然决定给白茵写一封信。
+
+他从木板逆槽里翻出一张不大不小的纸，铺在灶前。灶火光把纸染得橙黄，纸上一行字也没有。
+
+他提笔——笔尖沾了一滴墨——落在横笔上。
+
+他爷爷的笔锋——横得短而重，像踩在雪上踩出了个窝的人。
+
+他画了一横。他又看了看。
+
+这是他爷爷的横。他爸爸的竖。他自己的墨——也是他爷爷的墨。
+
+这封信不是给谁看的，他不能再重演他们的字。他丢开横，丢开竖。三个字都划掉。
+
+他重新提笔。
+
+这一笔，他自己的。
+
+他的字比他爷爷的要快一些，墨比他爸爸的要淡一些。
+
+他写了一行——
+
+灶火，不熄。
+
+后面什么都没写。
+
+后面本来还有他想写的很多话——关于远山的路，关于册序，关于母亲怎么没问他一句话，关于他整夜没睡。
+
+他划掉这些所有想。
+
+灶火不熄——够了。
+
+他把纸折好，像昨夜看见过的白奶奶折那样——四下对折，再四下对折，最后夹成很薄的一叠。他从木箱里取出一张白纸，用父亲的铜镜反着罩了，放回灶前——放回册子书旁边。
+
+母亲收拾晚饭的时候，顺手把那封信旁边的纸收了起来，没说话，也没问他。
+
+夜里，灶火忽然轻轻跳了一下。
+
+阿石抬头看。
+
+册子那一页上幽幽亮了一下——册子自己翻开了。
+
+最后一页背面出现了一行新的字——他爷爷的字——不是仿的，是真正出自他爷爷的笔迹：
+
+「被封的书，会自己醒过来。」
+
+阿石没去触。
+
+他知道白茵在等。
+
+第二天早上他翻了过来——只剩一页纸——白茵的字：
+
+「我要看见它落到册子里。」
+
+阿石朝灶火看了一眼。
+
+他把那封信封好，重新放到灶前最热的地方。
+
+他闭上眼，又睁开——四目相对时，灶火稳了。
+
+封在盖上，封稳——六百年的每一个字，都还在稳稳地烧下去。
+
+---
+
+*（本章完 · 跨界线总第八十五卷 · 卷十二之六）*
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)
