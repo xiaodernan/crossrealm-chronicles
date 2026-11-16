@@ -137,6 +137,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Lamp | [the-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/86-the-lamp.md) |
 | The Grandmother | [the-grandmother](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/87-the-grandmother.md) |
 | The Newcomer | [the-newcomer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/88-the-newcomer.md) |
+| New Fire | [new-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/89-new-fire.md) |
 
 Chapter → game-chapter mapping:
 

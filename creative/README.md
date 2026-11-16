@@ -135,6 +135,7 @@ creative/music/soundtrack.html
 | 灯 · The Lamp | [the-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/86-the-lamp.md) |
 | 白奶奶 · The Grandmother | [the-grandmother](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/87-the-grandmother.md) |
 | 新人 · The Newcomer | [the-newcomer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/88-the-newcomer.md) |
+| 新火 · New Fire | [new-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/89-new-fire.md) |
 
 每一章对应游戏的章节走法：
 
