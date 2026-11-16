@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T23:36:59.038Z",
+  "generated_at": "2026-11-16T23:47:01.920Z",
   "branch": "main",
-  "head": "18941cf3",
-  "total_commits": 2007,
-  "pushed_at": "2026-11-17T07:36:06+08:00",
+  "head": "5aff3678",
+  "total_commits": 2009,
+  "pushed_at": "2026-11-17T07:44:59+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "5aff367",
+      "at": "2026-11-17T07:44:59+08:00",
+      "subject": "feat(canon): W-Z297 第一百三十八卷《说出口的那两个字 / The Two Words He Said Aloud》入典——卷十五之三十九"
+    },
+    {
+      "short": "694ca80",
+      "at": "2026-11-16T23:36:59Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "18941cf",
       "at": "2026-11-17T07:36:06+08:00",
@@ -21,27 +31,17 @@
       "short": "72ee56b",
       "at": "2026-11-17T07:23:58+08:00",
       "subject": "feat(canon): W-Z295 第一百三十六卷《第三只碗回来了 / The Third Bowl Comes Back》入典——卷十五之三十七"
-    },
-    {
-      "short": "10e5c1a",
-      "at": "2026-11-16T23:15:12Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "df20434",
-      "at": "2026-11-17T07:13:53+08:00",
-      "subject": "feat(canon): W-Z294 第一百三十五卷《第三天的早饭 / The Third Morning’s Breakfast》入典——卷十五之三十六"
     }
   ],
-  "tracked_files": 1553,
+  "tracked_files": 1555,
   "test_files": 465,
   "i18n_keys": 3259,
-  "lore_sources": 305,
-  "novel_chapters_zh": 137,
-  "novel_chapters_en": 137,
-  "milestone": "W-Z296",
-  "milestone_full": "卷 137 · 六百年守火线（137 / 137 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 305 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：137 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 307,
+  "novel_chapters_zh": 138,
+  "novel_chapters_en": 138,
+  "milestone": "W-Z297",
+  "milestone_full": "卷 138 · 六百年守火线（138 / 138 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 307 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：138 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
