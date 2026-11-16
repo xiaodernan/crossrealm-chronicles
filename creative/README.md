@@ -146,6 +146,7 @@ creative/music/soundtrack.html
 | 光里 · In the Light | [in-the-light](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/97-in-the-light.md) |
 | 阁楼 · The Loft | [the-loft](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/98-the-loft.md) |
 | 抵达 · The Arrival | [the-arrival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/99-the-arrival.md) |
+| 第百卷 · The Hundredth Volume | [the-hundredth-volume](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/100-the-hundredth-volume.md) |
 
 每一章对应游戏的章节走法：
 
