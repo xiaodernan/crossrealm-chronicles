@@ -15,6 +15,9 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-17 · W-Z275 第124卷入典《满镇的火 / The Whole Town and the Fire》——卷十五之二十五（全镇来看灶火）**：立春后第九周——周六——阳光很好——院子里站满了人——周叔第一个进——老郭第二个——第三个谁也没记住——再后来五个——十个——二十五个——母亲忙到腿软——锅里的水一瓢一瓢添好——全镇人没说一句话——全都盯着灶火看——祖父去世那天全镇人也都来了——灶火是从那时候开始燃的——锅里的水开了——他们排成一条长队——每个人都拿了一碗——灶火没有灭——炉火燃着。
+> 交付：creative/novel/124-满镇的火.md + en 孪生 124-the-whole-town-and-the-fire.md；novella 124 × 2 = 248 模块（典籍馆现为 124 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：279 源；showcase feed 新增 W-Z275 实录。
+>
 > **2026-11-17 · W-Z274 第123卷入典《雪安回头 / Snow’an Turns Back》——卷十五之二十四（雪安妈带棉鞋再来）**：立春后第八周——周六——晴天——白光还是暖的——雪安妈再次出现在灶前——手里拎着篮子里是两个棉鞋——雪安站在灶前露出一点点笑容——四个人——母亲——阿石——小火——雪安妈——围坐在灶前——一小时没人说话——每个人都伸手凑灶——灶火燃着——雪安妈终于开口——「你们家的灶——不灭」——火苗跳了一下——全镇都知道——白茵家的灶——不走——炉火。
 > 交付：creative/novel/123-雪安回头.md + en 孪生 123-snowan-turns.md；novella 123 × 2 = 246 模块（典籍馆现为 123 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：277 源；showcase feed 新增 W-Z274 实录。
 > 已知问题（递交记录，未修）：`xiaodernan/xiaodernan.github.io` 的 `sync-crossrealm.yml` 触发后会因为 pages 仓库并发提交（每分钟几次）成员冲突而退出 non-fast-forward；本 OAuth token 没有 `workflow` scope，无法直接升级该 workflow——pages 更新最终只能靠添加 `git pull --rebase origin master` 一步解决；已本地试行该补丁但被远端拒绝（token 权限），留待人工合并 / 或带 workflow scope 的 token 替代。
