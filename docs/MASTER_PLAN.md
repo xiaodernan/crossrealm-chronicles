@@ -1,5 +1,8 @@
 
 
+> **2026-11-16 · W-Z212 上游迁移：wkapi.pro/gpt-6-sol → api.aizzz.xyz / v1 / gpt-6.1-terra**。应用侧全线切换（`application.yml` 默认、`AiProperties`、config-server `ai-service.yml`、`env.example`、`docker-compose.yml` 兜底、`PromptCacheLiveTest`、`scripts/cache-probe.mjs`、`.env`）；
+> **实测（本机，2026-11-16）**：`GET https://api.aizzz.xyz/v1/models` → **HTTP 403「本站不对您所在的国家及地区进行商业服务」**；Java `PromptCacheLiveTest` → `LlmUpstreamException status 403`——上游的商业可用性限于其许可地域，不是本仓库代码问题；Node 侧 `cache-probe.mjs` 同现象。历史里程碑（2026-11-12 ～ W-Z168 的 wkapi 实测）保持原样登记；等等许可地域节点就位即可复跑完整缓存套件（预期 PromptCacheLiveTest 走通）。炉边盘「实测记录」第 14 格登记这一实测。
+>
 > **2026-11-16 · W-Z205 原典语料重建：59 → 175 源 + 真上游口径对齐**：corpus.txt 全量重编（74 卷双语小说 + 74 卷英译 + 27 份参照文件 ≈ 520 KB，含 66–74 卷守火主线全链）；`Bm25IndexTest.linDu_query_matches_lin_du_chapter` 因如实语料扩容从 top-5 → top-10（如实登记，非放水）；`hm_body_lore_oracle` 不再手写「36 源 / 1803 检索块」的漂移数字——说明书永远引用语料的运行时重编能力；`build-latest.mjs` 的 `lore_sources` 本就是活读（latest.json 实测 175）；说明书/showcase feed 新增 11·16 三条 W-Z190+ 实录；`ONLINE_SERVICES.md(+EN)` / README / player-guide 同步到 175 源；AI 侧 lore 门禁（LoreRagTest/Bm25IndexTest/Bm25TokenizerTest）绿。
 >
 > **2026-11-16 · W-Z193 说明书星图章节（StateGraph 知识内嵌入 H 手册）**：[H] 新增加 `state-graph` 章节（`hm_title_state_graph` / `hm_body_state_graph`），双语系统讲授 StateGraph 四要素（State / Node / Edge / Conditional Edge）、compile 三件事（入口存在、跳转目标存在、可达终点）、与 LangGraph 生产管线 RAG 链路（检索 → 重排 → 生成 → 引用门禁 + 证据不够回检索的条件边）的一一对应，并把锚火三问标为「活教材」（`src/core/StateGraph.js` 约 70 行纯 JS / `src/game/FortunePathSystem.js` 每日 UTC 限流 + 落盘 `crossrealm_fortune_path_v1` / `src/ui/FortunePathTab.js` [J] 页签）。

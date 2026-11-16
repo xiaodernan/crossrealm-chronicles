@@ -70,7 +70,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 4. 跑完自动关闭它拉起的六个进程（含 **warm-up 轮询等 `lb://` 注册表暖起来**，约 30 秒，之后每一步都是确定性断言）；网关熔断诊断见 `scripts/verify-breaker.ps1`（baseline 200 → 停掉 game-service 后 6 次 503 → 重新拉起后自愈 200）。
 5. **配置热刷新（W-X9）**：脚本创建一个**临时 config 目录**（`target/smoke-config/`），给 config-server 设置 `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS=file:/…`，先让 game-service 拉到 `max-limit=4 / version-note=v1`；然后改写该目录的 `game-service.yml` 为 `max-limit=3, v2`，调 **`POST /actuator/refresh`** ——**不重启 game-service**，`/api/version` 立刻回显 `note=smoke-reload-note-v2`、排行榜 `maxLimit` 立刻变成 3。`/actuator/refresh` 的 `Content-Type` 必须是 `application/json`（空 body 也要），否则直接 415。
 
-2026-11-12 实测全绿（本机带 `LLM_API_KEY`：gateway→ai-service→wkapi.pro/v1 真实往返，回声提示正常返回；CI 无 key 时只断言启动/路由/健康）。
+2026-11-12 实测全绿（本机带 `LLM_API_KEY`：gateway→ai-service→api.aizzz.xyz/v1 真实往返，回声提示正常返回；CI 无 key 时只断言启动/路由/健康）。
 2026-11-10 实测全绿（配置下发、version 经网关、排行榜、遥测 POST+count、Eureka 3 应用注册、配置热刷新生效）。
 
 ## 端到端开关（浏览器里）
@@ -87,7 +87,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 
 链式拓扑：
 
-`前端 AdvisorPanel → OnlineServices（默认关闭；AbortController 真取消） → 网关 /api/ai/** (lb://ai-service, order=-1, aiServiceBreaker) → ai-service(:8083) → wkapi.pro/v1`
+`前端 AdvisorPanel → OnlineServices（默认关闭；AbortController 真取消） → 网关 /api/ai/** (lb://ai-service, order=-1, aiServiceBreaker) → ai-service(:8083) → api.aizzz.xyz/v1`
 
 运维要点：
 
@@ -104,7 +104,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
 
 链式拓扑：
 
-`前端 AdvisorPanel（loreMode）→ OnlineServices.askOracle → 网关 /api/ai/lore/** (lb://ai-service) → ai-service(:8083) → BM25 → wkapi.pro/v1`
+`前端 AdvisorPanel（loreMode）→ OnlineServices.askOracle → 网关 /api/ai/lore/** (lb://ai-service) → ai-service(:8083) → BM25 → api.aizzz.xyz/v1`
 
 契约：
 
@@ -172,8 +172,8 @@ docker compose down
 | `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS` | native profile 下 config-server 服务的配置仓库 —— 临时 smoke 用，把它指向 temp 目录以改写 game-service.yml | （classpath:/config） |
 | `CROSSREALM_ONLINE_BASE_URL`（前端侧：`crossrealm_online_base_url`） | 前端网关地址 | 同源 origin |
 | `LLM_API_KEY` | **ai-service 独占**的大模型密钥（不进配置中心 / 镜像 / 日志 / 响应体） | （空 = ai-service 以未配置模式启动，`/api/ai/health.configured=false`） |
-| `LLM_BASE_URL` | OpenAI 兼容上游地址 | `https://wkapi.pro/v1` |
-| `LLM_MODEL` | 模型 id（`/v1/models` 列出 `gpt-6-sol` 等） | `gpt-6-sol` |
+| `LLM_BASE_URL` | OpenAI 兼容上游地址 | `https://api.aizzz.xyz/v1` |
+| `LLM_MODEL` | 模型 id（`/v1/models` 列出 `gpt-6.1-terra` 等） | `gpt-6.1-terra` |
 | `CROSSREALM_ONLINE_BASE_URL`（前端侧：`crossrealm_online_base_url`） | 前端网关地址 | 同源 origin |
 
 ## 已知坑（都被踩过并写进 `server/README.md` 与 ADR）

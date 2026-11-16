@@ -13,8 +13,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("ai-service")
 public class AiProperties {
 
-    private String baseUrl = "https://wkapi.pro/v1";
-    private String model = "gpt-6-sol";
+    private String baseUrl = "https://api.aizzz.xyz/v1";
+    private String model = "gpt-6.1-terra";
     private String apiKey = "";
     private Duration timeout = Duration.ofSeconds(20);
     private int maxRetries = 2;

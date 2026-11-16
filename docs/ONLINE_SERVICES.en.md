@@ -53,7 +53,7 @@ The smoke script:
 4. Tears down everything it started (including the warm-up poll on `lb://` until the registry goes green — ~30s; every assertion after that is deterministic). Gateway breaker diagnostics: `scripts/verify-breaker.ps1` (baseline 200 → stop game-service → six 503s → restart → heals back to 200);
 5. **Hot config refresh (W-X9)**: the script creates a **temp config dir** (`target/smoke-config/`), points config-server at it via `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS=file:/…`, boots game-service with `max-limit=4 / version-note=v1`, then rewrites `game-service.yml` to `max-limit=3, v2` and hits **`POST /actuator/refresh`** — **no restart of game-service** — `/api/version` immediately echoes `note=smoke-reload-note-v2` and the leaderboard `maxLimit` is instantly 3. `/actuator/refresh` **requires `Content-Type: application/json` even for an empty body** — anything else is an instant 415.
 
-2026-11-12: all checks green with `LLM_API_KEY` present (gateway→ai-service→wkapi.pro/v1 real round-trip; echo adequately lands). CI (no key): asserts boot/routing/health only.
+2026-11-12: all checks green with `LLM_API_KEY` present (gateway→ai-service→api.aizzz.xyz/v1 real round-trip; echo adequately lands). CI (no key): asserts boot/routing/health only.
 
 ## End-to-end switch (in the browser)
 
@@ -69,7 +69,7 @@ Player entry: **F7** (or the bottom-right permanent “Star-Rail Advisor” FAB)
 
 Topology:
 
-`AdvisorPanel → OnlineServices (off by default; real AbortController cancel) → Gateway /api/ai/** (lb://ai-service, order=-1, aiServiceBreaker) → ai-service (:8083) → wkapi.pro/v1`
+`AdvisorPanel → OnlineServices (off by default; real AbortController cancel) → Gateway /api/ai/** (lb://ai-service, order=-1, aiServiceBreaker) → ai-service (:8083) → api.aizzz.xyz/v1`
 
 Ops notes:
 
@@ -86,7 +86,7 @@ Player entry: **the pill “典籍 / Lore” in the Star-Rail Advisor panel** (a
 
 Topology:
 
-`AdvisorPanel (loreMode) → OnlineServices.askOracle → Gateway /api/ai/lore/** (lb://ai-service) → ai-service (:8083) → BM25 → wkapi.pro/v1`
+`AdvisorPanel (loreMode) → OnlineServices.askOracle → Gateway /api/ai/lore/** (lb://ai-service) → ai-service (:8083) → BM25 → api.aizzz.xyz/v1`
 
 Contract:
 
@@ -147,8 +147,8 @@ docker compose down
 | `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS` | Config repo location for the native profile (smoke uses it to redirect config-server at a temp dir) | `classpath:/config` |
 | `CROSSREALM_ONLINE_BASE_URL` (frontend: `crossrealm_online_base_url`) | Frontend gateway address | same origin |
 | `LLM_API_KEY` | **ai-service exclusive** upstream LLM key (never config server / image / logs / body) | (empty ⇒ ai-service boots unconfigured; `/api/ai/health.configured=false`) |
-| `LLM_BASE_URL` | OpenAI-compatible upstream | `https://wkapi.pro/v1` |
-| `LLM_MODEL` | Model id (`gpt-6-sol` etc. under `/v1/models`) | `gpt-6-sol` |
+| `LLM_BASE_URL` | OpenAI-compatible upstream | `https://api.aizzz.xyz/v1` |
+| `LLM_MODEL` | Model id (`gpt-6.1-terra` etc. under `/v1/models`) | `gpt-6.1-terra` |
 
 ## Known pitfalls (all previously stepped on; see also `server/README.md` & ADRs)
 

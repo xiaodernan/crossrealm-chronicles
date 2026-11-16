@@ -26,8 +26,8 @@ try {
   }
 } catch { /*退回环境变量*/ }
 const KEY = env.LLM_API_KEY || process.env.LLM_API_KEY;
-const BASE = (env.LLM_BASE_URL || process.env.LLM_BASE_URL || 'https://wkapi.pro/v1').replace(/\/+$/, '');
-const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6-sol';
+const BASE = (env.LLM_BASE_URL || process.env.LLM_BASE_URL || 'https://api.aizzz.xyz/v1').replace(/\/+$/, '');
+const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6.1-terra';
 if (!KEY) { console.error('cache-probe: 缺少 LLM_API_KEY'); process.exit(1); }
 console.log('cache-probe: base=%s model=%s key=****（不打印）', BASE, MODEL);
 
