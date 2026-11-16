@@ -33,6 +33,8 @@ export const JOURNAL_EXTRA_TABS = {
   vigil: 'journal_tab_vigil',
   // W-Z282：炉火的交棒（StateGraph，七百年里这把火有没有人接得住）
   pass: 'journal_tab_pass',
+  // W-Z292：烬灯回信 · 烬火答页（终章之后——你写一行，炉火回一行）
+  letter: 'journal_tab_letter',
 };
 
 export function mergeJournalCategories(base) {

@@ -3609,7 +3609,17 @@ Three frames in retrospection: the fire + the light on your palm + the house shi
   path_history_title: 'The path behind you',
   path_history_empty: 'You have not walked yet; the road has been waiting for you.',
   journal_tab_path: 'Fortune Path · The Three Questions',
-  // W-Z262: Starpath · The Hearth Vow (StateGraph-driven vow triad)
+  // W-Z292: Ember Letter · Ember Reply (post-ending — you write a line, the fire answers with one)
+  journal_tab_letter: 'Ember Letter',
+  letter_intro: 'Act four after the ending: you write a line — the fire answers with one. It answers with only one.',
+  letter_locked: 'Ember Letter · Not Open Yet',
+  letter_locked_body: 'After the final choice — keep the flame or a quiet walk — this letter unrolls itself for you.',
+  letter_empty: 'No lines yet. Say what you like — the fire picks no words for you.',
+  letter_unavailable: 'The fire listens, it just won’t answer — check the online companion in Settings.',
+  letter_archive_hint: 'The reply lives in the Advisor panel — press {advisor} and write; the fire answers there.',
+  advisor_letter_toggle: 'Ember Reply',
+  letter_placeholder: 'Write a line to the fire…',
+  kindle_letter_turn_title_fmt: 'Letters to the fire · No. ${n}',
   journal_tab_vigil: 'Starpath · The Hearth Vow',
   vow_intro: 'Three vows: one lit fire, one revealed name, one kept promise. The fire reads what is in your palm.',
   vow_hint: 'Answer all three; the vow resolves itself.',

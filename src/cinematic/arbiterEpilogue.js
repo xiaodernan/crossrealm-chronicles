@@ -1,5 +1,5 @@
 import { getLanguage } from '../engine/i18n.js';
-import { endingDialogKey } from '../content/objectives.js';
+import { arbiterChoiceOf, arbiterStatsSummary, ARBITER_TEXT_LIMITS } from '../content/endingChoice.js';
 
 /**
  * 烬灯回信 · W-Z288 —— 终章抉择之后，炉火的记录者为玩家写下一封短信。
@@ -23,44 +23,12 @@ import { endingDialogKey } from '../content/objectives.js';
  * 3. **不可信文本永不进 innerHTML**：模型回的 JSON 经 `JSON.parse` 后只走
  *    `textContent`，三行分别截断（title ≤ 30 / epilogue ≤ 160 / omen ≤ 60）。
  */
-export const ARBITER_TEXT_LIMITS = Object.freeze({
-  titleLen: 30,
-  epilogueLen: 160,
-  omenLen: 60,
-  statsMax: 500,
-});
+export { arbiterChoiceOf, arbiterStatsSummary, ARBITER_TEXT_LIMITS };
 
 const stripControls = (s) => [...String(s ?? '')].filter((ch) => {
   const code = ch.codePointAt(0);
   return code > 31 && code !== 127;
 }).join('');
-
-/**
- * 终局抉择路由键 —— 与 `endingDialogKey` **同钮同源**（全仓唯一的抉择取名入口，
- * 由 choice-objective.test.js 这类尺子钉住"这一族判据只在一处问"）。
- * 别自己读 `stats.decisions.has(...)`：那是第二真相，改了一头另一头不会红。
- */
-export function arbiterChoiceOf(stats) {
-  const key = endingDialogKey(stats);
-  if (key === 'ending_dialog_text_keep') return 'keep';
-  if (key === 'ending_dialog_text_quiet') return 'quiet';
-  return 'unwritten';
-}
-
-/** 旅途账本摘要：紧凑 JSON，永远别超过 server 的 @Size(500) */
-export function arbiterStatsSummary(stats, { echoes = 0, killsTotal = 0 } = {}) {
-  const compact = {
-    echoes,
-    dungeons: stats?.dungeonsCleared?.size ?? 0,
-    discoveries: stats?.discoveries?.size ?? 0,
-    decisions: stats?.decisions?.size ?? 0,
-    level: stats?.level ?? 1,
-    killsTotal,
-  };
-  let out = JSON.stringify(compact);
-  if (out.length > ARBITER_TEXT_LIMITS.statsMax) out = JSON.stringify({ echoes, dungeons: compact.dungeons, killsTotal });
-  return out.slice(0, ARBITER_TEXT_LIMITS.statsMax);
-}
 
 /** 把这一档的账本收敛成 `/api/ai/arbiter` 的请求体 */
 export function buildArbiterPayload(game) {

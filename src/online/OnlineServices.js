@@ -392,6 +392,20 @@ export class OnlineServices {
     });
   }
 
+  /**
+   * 烬灯回信 · 烬火答（W-Z292，`POST /api/ai/kindle-letter`）。
+   * 终章落定后，玩家在炉边写下的那一行；炉火回一行。
+   * 20s 预算——回信不该占用你走开的那几步。
+   */
+  async askKindleLetter(payload, { signal } = {}) {
+    return this.#jsonRequest('/api/ai/kindle-letter', {
+      method: 'POST',
+      body: payload,
+      timeoutMs: 20000,
+      signal,
+    });
+  }
+
   /** 烬灯回信（W-Z288「烬灯回信」，`POST /api/ai/arbiter`）。
    * 终章抉择落定之后，炉火的记录者替这个人写下一封短信——这是「大模型输出即玩家的下一段内容」
    * 的那一段：传回的是可解析的短 JSON 原文（title / epilogue / omen），由调用方解析、截断、落屏。

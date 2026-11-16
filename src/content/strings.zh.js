@@ -3529,6 +3529,17 @@ trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在
   vow_history_empty: '灶火还在等——走进来。',
   // W-Z282：炉火的交棒（StateGraph，七百年换手的最后一课）
   journal_tab_pass: '炉火的交棒',
+  // W-Z292：烬灯回信 · 烬火答页（终章后——你写一行，炉火回一行）
+  journal_tab_letter: '炉火的回信',
+  letter_intro: '终章之后的第四幕：你写一行，炉火回一行。它只回一行。',
+  letter_locked: '炉火的回信 · 尚未开门',
+  letter_locked_body: '通关终章并做出「留灯」或「安静走完」之后，这一封信才替你摊开。',
+  letter_empty: '还没有寄出的字。想说什么就说什么——炉火不替你挑词。',
+  letter_unavailable: '炉火在听，只是没有回——检查在线服务（设置 · 在线服务）。',
+  letter_archive_hint: '回信住在星轨顾问面板——按 {advisor} 写信给它，火在那边回。',
+  advisor_letter_toggle: '烬火答',
+  letter_placeholder: '写一行给炉火……',
+  kindle_letter_turn_title_fmt: '给炉火的信 · 第 ${n} 封',
   pass_intro: '三道问：一只碗、一手灰、一个名字——阿祖要走了，炉火把七百年交给你。',
   pass_hint: '三道问答完自动揭晓——交棒已落定。',
   pass_souls_reward: '交棒之火',

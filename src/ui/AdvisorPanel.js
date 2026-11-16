@@ -102,7 +102,9 @@ export class AdvisorPanel {
     this.stop = q('#advisor-stop');
     this.closeBtn = q('#advisor-close');
     this.loreToggle = q('#advisor-lore-toggle');
+    this.letterToggle = q('#advisor-letter-toggle');
     this._loreMode = false;
+    this._letterMode = false;
     this.statusEl = q('#advisor-status');
     this.statusText = q('#advisor-status-text');
     this.metaEl = q('#advisor-meta');
@@ -112,7 +114,32 @@ export class AdvisorPanel {
     this.input?.setAttribute?.('maxlength', String(ADVISOR_LIMITS.questionMax));
 
     this._bind();
+    this._refreshLetterToggle();
     this.refreshLabels();
+  }
+
+  _setLetterMode(on) {
+    this._letterMode = on === true;
+    this.letterToggle?.setAttribute?.('aria-pressed', this._letterMode ? 'true' : 'false');
+    this.letterToggle?.classList.toggle('is-on', this._letterMode);
+    // 切入烬火答之后，输入框的占位句换成炉边那句（切回来再还原）
+    this.input?.setAttribute?.('placeholder', this._letterMode ? t('letter_placeholder') : t('advisor_input_placeholder'));
+    this._healthChecked = false;
+  }
+
+  /** 烬火答只在终章抉择落定后现身（endingDialogKey 同钮同源）——之前它只挂一个 hidden 壳子 */
+  _refreshLetterToggle() {
+    if (!this.letterToggle) return;
+    const el = this.letterToggle;
+    const eligible = this.game?.kindleLetter?.isEligible?.() === true;
+    el.classList.toggle('hidden', !eligible);
+    if (!eligible && this._letterMode) {
+      this._letterMode = false;
+      this._loreMode = false;
+      el.setAttribute('aria-pressed', 'false');
+      el.classList.remove('is-on');
+      if (this.loreToggle) this.loreToggle.classList.remove('is-on');
+    }
   }
 
   _bind() {
@@ -126,16 +153,26 @@ export class AdvisorPanel {
     this._onInput = () => this._renderCount();
     this._onLoreToggle = () => {
       this._loreMode = !this._loreMode;
+      if (this._loreMode) this._setLetterMode(false);
       this.loreToggle?.setAttribute?.('aria-pressed', this._loreMode ? 'true' : 'false');
       this.loreToggle?.classList.toggle('is-on', this._loreMode);
-      // 切回对话态时，状态条回到之前维护的源（在线伙伴/离线/降级）
       if (!this._loreMode) this._healthChecked = false;
+    };
+    this._onLetterToggle = () => {
+      if (this._loreMode) {
+        this._loreMode = false;
+        this.loreToggle?.setAttribute?.('aria-pressed', 'false');
+        this.loreToggle?.classList.remove('is-on');
+        this._healthChecked = false;
+      }
+      this._setLetterMode(!this._letterMode);
     };
 
     this.fab?.addEventListener?.('click', this._onFab);
     this.closeBtn?.addEventListener?.('click', this._onClose);
     this.stop?.addEventListener?.('click', this._onStop);
     this.loreToggle?.addEventListener?.('click', this._onLoreToggle);
+    this.letterToggle?.addEventListener?.('click', this._onLetterToggle);
     this.form?.addEventListener?.('submit', this._onSubmit);
     this.input?.addEventListener?.('input', this._onInput);
 
@@ -291,7 +328,16 @@ export class AdvisorPanel {
     this._setPending(true);
     let res;
     try {
-      if (this._loreMode) {
+      if (this._letterMode) {
+        // 烬火答：玩家写一行给炉火——LLM 代炉火回一行；终局抉择之后才摊开
+        // （资格由 KindleLetterSystem.isEligible 把守；此处另查一次，防御）
+        const r = await this.game?.kindleLetter?.ask?.(question, { signal: this._controller.signal });
+        if (r?.ok && r.turn) {
+          res = { ok: true, reason: 'ok', status: 200, data: { answer: r.turn.reply, model: '', cached: false } };
+        } else {
+          res = { ok: false, reason: (r?.reason === 'locked' ? 'letter_locked' : 'letter_failed'), status: 0, data: null };
+        }
+      } else if (this._loreMode) {
         // W-Z82 Lore Oracle：问典籍时绕过普通提示词，让服务端 BM25 选出最相关的原典段落
         // 与带标号的 system prompt 跑 LLM，回答只用提取语料、并把出处以 inline bracket 形式写入。
         res = await this.game?.onlineServices?.askOracle?.(question, {
@@ -349,6 +395,11 @@ export class AdvisorPanel {
     }
 
     const reason = res?.reason ?? ADVISOR_REASONS.NETWORK;
+    // 烬火答的失败直接落信纸文案（《炉火没回》），不列入顾问的六种错误——那是炉火的事，不是星图的事。
+    if (reason === 'letter_locked' || reason === 'letter_failed') {
+      this._appendMessage('error', t('letter_unavailable'), { key: 'letter_unavailable' });
+      return;
+    }
     // data 可能是 null（网关返回纯文本错误页时 json() 抛过）；写 data.error 会在
     // 一次普通的 500 上把整个失败分支炸掉，玩家连"出了什么事"都看不到。
     if (reason === ADVISOR_REASONS.HTTP && (res.status === 503 || data?.error === 'advisor-unavailable')) {
