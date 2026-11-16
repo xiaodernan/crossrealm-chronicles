@@ -84,7 +84,7 @@
 >
 > **2026-11-17 · W-Z274 第123卷入典《雪安回头 / Snow’an Turns Back》——卷十五之二十四（雪安妈带棉鞋再来）**：立春后第八周——周六——晴天——白光还是暖的——雪安妈再次出现在灶前——手里拎着篮子里是两个棉鞋——雪安站在灶前露出一点点笑容——四个人——母亲——阿石——小火——雪安妈——围坐在灶前——一小时没人说话——每个人都伸手凑灶——灶火燃着——雪安妈终于开口——「你们家的灶——不灭」——火苗跳了一下——全镇都知道——白茵家的灶——不走——炉火。
 > 交付：creative/novel/123-雪安回头.md + en 孪生 123-snowan-turns.md；novella 123 × 2 = 246 模块（典籍馆现为 123 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：277 源；showcase feed 新增 W-Z274 实录。
-> 已知问题（递交记录，未修）：`xiaodernan/xiaodernan.github.io` 的 `sync-crossrealm.yml` 触发后会因为 pages 仓库并发提交（每分钟几次）成员冲突而退出 non-fast-forward；本 OAuth token 没有 `workflow` scope，无法直接升级该 workflow——pages 更新最终只能靠添加 `git pull --rebase origin master` 一步解决；已本地试行该补丁但被远端拒绝（token 权限），留待人工合并 / 或带 workflow scope 的 token 替代。
+> 已知问题（递交记录，未修）：`xiaodernan/xiaodernan.github.io` 的 `sync-crossrealm.yml` 触发后会因为 pages 仓库并发提交（每分钟几次）成员冲突而退出 non-fast-forward；本 OAuth token 没有 `workflow` scope，无法直接升级该 workflow——pages 更新最终只能靠添加 `git pull --rebase origin master` 一步解决；已本地试行该补丁但被远端拒绝（token 权限），留待人工合并 / 或带 workflow scope 的 token 替代。2026-11-17 实测：该 token 能以普通提交推送到 `master`（football/nexus-content 每小时在并行推），所以每次 `sync-crossrealm.yml` 撞 race 时，就在干净副本里按 bot 同语义手工提交一次 `assets/crossrealm/latest.json`（W-Z288 → W-Z289 两轮连续手动代同步均成功落地，18118e6 / 18a6f55）——最新 fact pack 保底双路线并行，一路 workflow、一路本人兜底。
 >
 > **2026-11-17 · W-Z273 第122卷入典《常来 / Always Here》——卷十五之二十三（常来的灶火里，有人坐着不动）**：立春后第七周——周六——阴天不晴——灶火烧得很稳——母亲在炒白菜猪肉——锅里的火烧得很匀——阿石蹲在灶前看火——小火看见门——门口站着雪安妈——她后面是三个孩子——两个穿蓝褂子的女孩一个灰夹袄男孩——全都不说话——灶膛里的光打在她们脸上——雪安妈把一个布篮子放在灶台上——母亲搬了三个矮凳过来——孩子们并排坐着——「以前我妈从这屋里拿的」——雪安妈只说一句——灶火里浮着煤烟——炉火燃着。
 > 交付：creative/novel/122-常来.md + en 孪生 122-always-here.md；novella 122 × 2 = 244 模块（典籍馆现为 122 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：275 源；showcase feed 新增 W-Z273 实录。
