@@ -167,7 +167,7 @@ creative/music/soundtrack.html
 | 一勺汤 · The Spoonful of Soup | [the-spoonful-of-soup](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/118-the-spoonful-of-soup.md) |
 | 雪安 · Snow’an | [snowan](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/119-snowan.md) |
 | 周六 · Saturdays | [saturdays](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/120-saturdays.md) |
-每一章对应游戏的章节走法：
+| 炉火来了 · The Fire Comes | [the-fire-comes](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/121-the-fire-comes.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
