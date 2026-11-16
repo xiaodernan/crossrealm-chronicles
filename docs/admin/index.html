@@ -95,6 +95,9 @@ a{color:var(--gold-dim)}
 .pill-warn{color:var(--warn);border:1px solid rgba(255,207,107,.25);padding:2px 8px;border-radius:4px;font-size:.6rem;letter-spacing:.06em}
 .unlock{display:none}
 .unlocked .unlock{display:block}
+/* W-Z240b：#dashboard 自己带 .unlock —— `.unlocked .unlock` 匹配不到自身，解锁后整页是空白。
+   之前没发现了：门显示 none，内容却不显示 block，页面看似「开了门却什么也没有」。 */
+.unlocked.unlock{display:block}
 .lock .unlock{display:none}
 .locked-pane{display:none}
 .unlocked .locked-pane{display:block}
