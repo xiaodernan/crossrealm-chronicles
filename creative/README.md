@@ -132,6 +132,7 @@ creative/music/soundtrack.html
 | 册 · The Ledger | [the-ledger](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/83-the-ledger.md) |
 | 结木 · The Cone | [the-cone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/84-the-cone.md) |
 | 信 · The Letter | [the-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/85-the-letter.md) |
+| 灯 · The Lamp | [the-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/86-the-lamp.md) |
 
 每一章对应游戏的章节走法：
 
