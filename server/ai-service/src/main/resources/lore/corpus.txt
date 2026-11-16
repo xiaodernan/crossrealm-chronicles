@@ -11576,6 +11576,89 @@ New keeper.
 
 *(End of volume eighty-nine · Volume XIII, first part.)*
 
+# source: creative/novel/en/90-ink.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIII**: New Fire — the Seven-Hundred Year
+
+---
+
+## Ninety: Ink
+
+On the winter solstice all the stove's flames had been bright for three months.
+
+Snow was falling heavily that night. A-Shi's mother was back from the mountain carrying wood, resting by the stove. She watched Xiao Huo standing before the ledger's last page.
+
+He was holding the brush.
+
+A-Shi had not set the ink already. His mother was watching too. The stove ticked once.
+
+Xiao Huo dipped the brush in the ink, raised it to the last empty page of the ledger, and wrote.
+
+What he wrote was not a character he had ever seen.
+
+He wrote:
+
+Fire.
+
+Not the ordinary word for it. Not any character. It was something the fire had transmitted through his hand — a single stroke of pure combustion, incised into the paper, glowing faintly red as the ink spread.
+
+The moment the stroke touched the page, all six hundred years of fire in the room leapt at once.
+
+His mother pressed both hands to her chest.
+
+Outside, the fire-seed tree shook once — every needle on every branch trembling together.
+
+Far away, over the cloud-heavy ridge, no light shone and no dark lay.
+
+The stove flared so high the entire kitchen turned white.
+
+A-Shi saw — in that instant, in the heart of the flame — a silhouette standing. Not clearly. Not completely. An old, old figure — ancient beyond measure, the feet planted into the earth, the silhouette the shape of someone made from the fire itself — she looked once at Xiao Huo, once at A-Shi, once at the whole kitchen — and vanished.
+
+The stove flickered.
+
+All through the night, deep midnight, the fire burned steady and silent.
+
+A tear slipped down Xiao Huo's cheek.
+
+A-Shi sat down beside him, wiped it away gently.
+
+"Did you see who?" he asked.
+
+Xiao Huo wiped his own eyes.
+
+He was quiet a long while.
+
+Then he said:
+
+"I saw all six hundred years of them."
+
+A-Shi did not say anything.
+
+Xiao Huo said softly:
+
+"They are all here."
+
+He paused.
+
+"I could smell their hands."
+
+He set the brush down.
+
+He stood, slowly, cradling the ledger against his chest.
+
+Outside, the snow fell deeper over the yard, over the fire-seed tree, over the house and the stove, over the two generations of keepers keeping the same watch — one generation closing, one generation opened, all of it burning, all of it one breath of the same fire.
+
+The stove kept the fire as the stove always had.
+
+It would keep it still.
+
+---
+
+*(End of volume ninety · Volume XIII, second part.)*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -20242,6 +20325,107 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第八十九卷 · 卷十三之一）*
+
+# source: creative/novel/90-墨.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十三**：新火 —— 第七百年
+
+---
+
+## 九十 · 墨
+
+小火在小火把册序翻到最后一页的时候，灶火已经亮了三个月。
+
+那一天也是冬至。
+
+外头下了很大的雪。母亲从后山挑了一捆柴进来，放在灶边，歇了一会儿。
+
+小火最后一眼看见阿石的眼睛——阿石指着册子最后一行空格。
+
+他懂了。
+
+他把笔拿起来。
+
+阿石没有替他磨墨——母亲也走到了灶边，停住。
+
+灶火响了一下。
+
+小火用他小小的手握住笔，在墨上一蘸，对准那空白的最后一页。
+
+他写的不是他见过的字。
+
+他写的是：
+
+火。
+
+不是「火」，不是「火」——是灶火他自己在火里看到的那个字。那不是一个汉字，是一个方向，是灶火借他的手，把它自己写了出来。
+
+墨迹落在纸上的时候，整屋的六百年的火——所有同时跳了一下。
+
+母亲把手放到胸前。
+
+院子里，火种树同时示了示。
+
+很远很远的远方，云很满，不亮也不暗。
+
+灶火——一下——
+
+跳了很高。
+
+很高的光。
+
+很亮的光。
+
+白奶奶——她从没有出现过——她出现了一下。
+
+阿石看见火里站着一个人——个很老、很老、但脚底深扎地、风骨好像风的人影——她看了一眼小火，一眼又一眼看阿石，最后一眼看了整间屋子——然后消失了。
+
+灶火跳了一下，又跳了一下，整个——火矮下来。
+
+子时的时候灶火忽然安静了下来。
+
+小火的嘴里不知道什么时候流了一滴泪。
+
+阿石坐下来，给他抹掉。
+
+"看见了谁？"
+
+小火擦了眼泪，还没答。
+
+他说：
+
+"我看见六百年的人。"
+
+阿石沉默了。
+
+小火接着说：
+
+"他们都在这里。"
+
+他又说：
+
+"我能闻到他们的手。"
+
+他站起来。
+
+阿石站起来。
+
+灶火没跳。
+
+小火小心合上书册。
+
+院子里的雪大了一寸。
+
+灶火整夜都烧得很稳。
+
+灶火——也要守下去。
+
+---
+
+*（本章完 · 跨界线总第九十卷 · 卷十三之二）*
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)

@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Eighty-nine volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Ninety volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 89 volumes of the canon, fully readable
+· Canon Library — 90 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3137,8 +3137,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 89-volume index',
-  hm_body_codex: `Codex — 89 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 90-volume index',
+  hm_body_codex: `Codex — 90 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3230,6 +3230,8 @@ hm_title_codex: 'Codex · the 89-volume index',
 88 · The Newcomer — on the second morning after the snow, a boy appears at the doorway — eight or nine, shaved head, robes washed to the colour of ash — he holds a slip of paper: “I am small fire — number six hundred and two” — his grandmother sent him — Grandma Bai sent him — he has been standing outside the ridge all night, afraid to come in — inside his sleeve he carries a single cold coal — A-Shi takes his own from the iron canister — the two coals meet on the stove’s ledge — they are the same grandmother — the light runs from the ever-burning lamp to the beacon on the white stone to every stove in the valley — one breath — six hundred years in a single instant of gold. Volume XII, ninth part.
 89 · New Fire — Xiao Huo spends his first month at A-Shi’s doing the same thing every day: watching the fire — “The fire moves”; then, some days later: “People are taking turns inside”; then, weeks later, “They all look like me, like every keeper before me” — his mother sees a thread of light clinging to her son’s son like the one that sat on Baiyin’s shoulders — the ledger is opened before him — he does not write yet — the hearth waits — the fire-seed tree’s needles turn deepest crimson — the last smoke from the beacon lifts from the ridge — the seven-hundredth year has truly begun. Volume XIII — New Fire — the first part opens.
 
+90 · Ink — on the winter solstice itself, Xiao Huo takes the brush at last; the ledger lies open and empty before him; he dips the brush in the ink; he writes the one word that has never been written in six hundred years — the word the fire itself taught him to write — the moment the stroke touches the page, all six hundred years of the fire-family leap at once; a thin silhouette stands in the heart of the flame, an old figure — unbearably ancient — she looks at Xiao Huo once, then at A-Shi, then at the kitchen, and is gone; the stove quiets; Xiao Huo wipes away his tears; “they are all here,” he says; the ledger is closed; the stove keeps watching. Volume XIII, second part.
+
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
   hm_title_ending_journey: 'Ending · After the anchor flame · Embers Journal',
@@ -3242,7 +3244,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (eighty-nine volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (ninety volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
