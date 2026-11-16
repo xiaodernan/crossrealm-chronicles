@@ -1,47 +1,47 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T06:44:41.886Z",
+  "generated_at": "2026-11-16T06:54:32.686Z",
   "branch": "main",
-  "head": "1593274b",
-  "total_commits": 1853,
-  "pushed_at": "2026-11-16T14:43:53+08:00",
+  "head": "56b4f5a5",
+  "total_commits": 1857,
+  "pushed_at": "2026-11-16T14:53:57+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "56b4f5a",
+      "at": "2026-11-16T14:53:57+08:00",
+      "subject": "fix(admin): 实测卡瓦片 #14 落盘「AI 全链路 live 3/3 绿 + PromptCacheLiveTest ≈ 96.96%」"
+    },
+    {
+      "short": "67b8b94",
+      "at": "2026-11-16T14:52:12+08:00",
+      "subject": "feat(canon): W-Z217 第八十三卷《册 / The Ledger》——卷十二之四"
+    },
+    {
+      "short": "d032032",
+      "at": "2026-11-16T14:52:10+08:00",
+      "subject": "feat(oracle): W-Z216 AI 全链路真跑通——AiLiveIntegrationTest / AdvisorJobLiveIntegrationTest / EchoHintLiveIntegrationTest 经 Clash 代理首次全绿"
+    },
+    {
+      "short": "968245a",
+      "at": "2026-11-16T06:44:42Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "1593274",
       "at": "2026-11-16T14:43:53+08:00",
       "subject": "feat(canon): W-Z215 第八十二卷《归乡 / The Return》——卷十二之三"
-    },
-    {
-      "short": "890b2c9",
-      "at": "2026-11-16T14:43:44+08:00",
-      "subject": "feat(infra): W-Z214 Clash 混合端口直通新上游——Java 96.96% 缓存命中率真跑通 + Node 全线 200"
-    },
-    {
-      "short": "4ed0c2a",
-      "at": "2026-11-16T05:58:17Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "5e91193",
-      "at": "2026-11-16T13:55:41+08:00",
-      "subject": "feat(canon): W-Z213 第八十一卷《第二盏灯 / The Second Lamp》——卷十二之二"
-    },
-    {
-      "short": "45d989a",
-      "at": "2026-11-16T05:45:38Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
-  "tracked_files": 1394,
+  "tracked_files": 1396,
   "test_files": 458,
   "i18n_keys": 3225,
-  "lore_sources": 191,
-  "novel_chapters_zh": 82,
-  "novel_chapters_en": 82,
-  "milestone": "W-Z215",
-  "milestone_full": "卷 82 · 六百年守火线（82 / 82 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 191 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：82 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 193,
+  "novel_chapters_zh": 83,
+  "novel_chapters_en": 83,
+  "milestone": "W-Z217",
+  "milestone_full": "卷 83 · 六百年守火线（83 / 83 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 193 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：83 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
