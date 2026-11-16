@@ -25,6 +25,8 @@ public class Bm25Index {
     private final List<LoreDoc> docs = new ArrayList<>();
     private final List<List<String>> tokenized = new ArrayList<>();
     private final Map<String, Integer> documentFrequency = new HashMap<>();
+    // W-Z269：反向索引 posting list——search() 只扫命中的 (docId, tf) 对，不再对全库 O(N×|q|) 重扫每篇文档的 tf。
+    private final Map<String, List<Posting>> postings = new HashMap<>();
     private double averageLength;
 
     public Bm25Index(LoreCorpus corpus) {
@@ -33,8 +35,14 @@ public class Bm25Index {
             if (tokens.isEmpty()) continue;
             docs.add(doc);
             tokenized.add(tokens);
-            for (String token : new java.util.HashSet<>(tokens)) {
-                documentFrequency.merge(token, 1, Integer::sum);
+            Map<String, Integer> tf = new HashMap<>();
+            for (String t : new java.util.HashSet<>(tokens)) {
+                documentFrequency.merge(t, 1, Integer::sum);
+            }
+            for (String t : tokens) tf.merge(t, 1, Integer::sum);
+            for (var entry : tf.entrySet()) {
+                postings.computeIfAbsent(entry.getKey(), k -> new ArrayList<>())
+                        .add(new Posting(docs.size() - 1, entry.getValue()));
             }
         }
         if (docs.isEmpty()) {
@@ -42,6 +50,8 @@ public class Bm25Index {
         }
         this.averageLength = tokenized.stream().mapToInt(List::size).average().orElse(1);
     }
+
+    private record Posting(int docId, int tf) {}
 
     /**
      * Lowercase ASCII runs + single Han ideographs. Punctuation/whitespace are boundaries —
@@ -56,35 +66,36 @@ public class Bm25Index {
         List<String> queryTokens = tokenize(query);
         if (queryTokens.isEmpty()) return List.of();
         int n = docs.size();
-        double[] scores = new double[n];
         Map<String, Integer> queryTf = new HashMap<>();
         for (String token : queryTokens) {
             queryTf.merge(token, 1, Integer::sum);
         }
+        // W-Z269：BM25 posting-list 反向索引——search() 只扫被命中的 (docId, tf)，不再对全库 O(N×|q|) 重扫。
+        // 结果集与旧算法完全一致：同样的 idf × 同样的 norm(tf, k1, b, avgLen)、同样的 tie-break 顺序。
+        Map<Integer, Double> scores = new HashMap<>();
         for (Map.Entry<String, Integer> entry : queryTf.entrySet()) {
             String token = entry.getKey();
             Integer df = documentFrequency.get(token);
-            if (df == null) continue;
+            if (df == null || df == 0) continue;
             double idf = Math.log(1.0 + (n - df + 0.5) / (df + 0.5));
             if (idf <= 0) continue;
-            for (int i = 0; i < n; i++) {
+            for (Posting p : postings.getOrDefault(token, List.of())) {
+                int i = p.docId();
                 List<String> doc = tokenized.get(i);
-                int tf = 0;
-                for (String t : doc) if (t.equals(token)) tf++;
-                if (tf == 0) continue;
-                double norm = tf * (K1 + 1) / (tf + K1 * (1 - B + B * doc.size() / averageLength));
-                scores[i] += idf * norm;
+                double docLen = doc.size();
+                double tf = p.tf();
+                double norm = tf * (K1 + 1) / (tf + K1 * (1 - B + B * docLen / averageLength));
+                scores.merge(i, idf * norm, Double::sum);
             }
         }
         // top-k (stable tie-breaking on index — identical scores keep source order)
-        List<Integer> idx = new ArrayList<>();
-        for (int i = 0; i < n; i++) if (scores[i] > 0) idx.add(i);
-        idx.sort(Comparator.comparingDouble((Integer i) -> scores[i]).reversed().thenComparingInt(i -> i));
+        List<Integer> idx = new ArrayList<>(scores.keySet());
+        idx.sort(Comparator.comparingDouble((Integer i) -> scores.get(i)).reversed().thenComparingInt(Integer::intValue));
         int cutoff = Math.min(limit, idx.size());
         List<Hit> out = new ArrayList<>(cutoff);
         for (int k = 0; k < cutoff; k++) {
             int i = idx.get(k);
-            out.add(new Hit(docs.get(i), scores[i]));
+            out.add(new Hit(docs.get(i), scores.get(i)));
         }
         return out;
     }
