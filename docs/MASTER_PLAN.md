@@ -12,6 +12,11 @@
 > **2026-11-16 · W-Z245 第105卷入典《仲冬见 / The Midwinter Visit》**：《跨界纪事》卷十五「第七百年」第六篇——仲冬前三天院子薄雪落地、母亲磨了三天油纸伞却不说给谁——灶火安静得不寻常——第四天山坳里来了一个人，没有马驴只有一只背篓，高得快碰到头顶——白石头顶的老人——他背着一只竹篓，里面一个瓷罐装着祖火的灰、一枚铁丝勾着的小炭球——老人把那颗灰白火种放进灶火——灶火跳了一下没熄——反而更亮了——七百年——两盏火——第一次在一个灶膛里稳稳地烧——两个守火人同时哭了出来——小火喃喃念了些什么然后睡着了——老人走时留下一句话：「祖火看见灶火了。灶火也看见祖火了。」
 > 交付：creative/novel/105-仲冬见.md + en 孪生 105-the-midwinter-visit.md；novella 105 × 2 = 210 模块（典籍馆现为 105 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：239 源；showcase feed 新增 W-Z244 + W-Z245 实录。
 >
+> **2026-11-16 · W-Z251 Oracle live 输出自动归档（≥10 次可审计真实数据积累）**：新增 `scripts/oracle-log-archive.mjs`——本机真实联调 `LoreOracleLiveIntegrationTest`（Clash 7897 通道），把完整输出落到 `docs/oracle-live-log/YYYY-MM-DD-HHmm.md` + 自动写索引 `docs/oracle-live-log/README.md`（保留最近 50 次）。本轮首档 `2026-11-16-1225.md`：3/3 全绿（refs 问题 → refs/crossrealm-realworld-notes.md ≈16.8s · canon 问题 → sources=[67,106,89,77] ≈4.3s）。**live 原文真片存档，不需任何演示数据**。
+>
+> **2026-11-16 · W-Z252 第109卷入典《送灰 / The Delivery of Ashes》**：卷十五之十——开春前院门自己响了一下——门口又多一捆更细的白桦柴——薄纸条只有一行「给小守火人」——母亲把小火填进瓷罐的灶灰连同纸条一起背给阿石上山——白石头顶上的老人比去年矮了一点——罐盖落了一层霜——他手指从罐盖上抬起来——他说「下一个秋分——我们两家一块过」——阿石下山时天快黑了——灶火又跳了一次——七百年第一次——大家都在送灰。
+> 交付：creative/novel/109-送灰.md + en 孪生 109-the-delivery-of-ashes.md；novella 109 × 2 = 218 模块（典籍馆现为 109 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：247 源；showcase feed 新增 W-Z251 + W-Z252 实录。
+>
 > **2026-11-16 · W-Z249 Oracle 缓存双轨探针固化记录（Admin 第18瓦）+ 第108卷入典《山顶雪 / The Mountain Snow》（W-Z250）**：
 > **W-Z249**：`scripts/oracle-cache-probe.mjs --json` 把实测固化为机器可读档案（`docs/admin/data/oracle-cache-probe.json`）——本轮双轨：canon cached=**6784/6784 ≈97.3%** ×2 连 + refs cached=**7424/7424 ≈97.5%** ×2 连——冻结 system（lore-system-prompt ≈500 token + GLOSSARY 首 ~2500 字节）跨过上游 prompt-cache ~1024-token 页门槛后双轨恒暖。Admin「实测记录」新增第 18 瓦（zh/en 成对，`meas_l18` / `meas_tr18`）。
 > **W-Z250**：卷十五之九——开春前夜薄雪落地；火种树针叶挂霜风一刮就掉；第六天院门口又多了一捆无名柴，只有一根细白桦枝绑在布条上；母亲把它码进柴堆最隐蔽的位置「第九根——最隐蔽的一根」；小火说以后每月十五喂一根给灶火「别管是谁的」；阿石点头；开春第一枝梅花开了；十四那天数了数灶台——一无所变；十五那晚灶火自己比平时亮了一寸——没有任何人叫它——它自己知道——它自己记得——每月十五。
