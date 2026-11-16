@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-16T10:38:14.649Z",
+  "generated_at": "2026-11-16T10:43:13.774Z",
   "branch": "main",
-  "head": "67744cec",
-  "total_commits": 1901,
-  "pushed_at": "2026-11-16T18:36:39+08:00",
+  "head": "46dfeef3",
+  "total_commits": 1903,
+  "pushed_at": "2026-11-16T18:42:38+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "46dfeef",
+      "at": "2026-11-16T18:42:38+08:00",
+      "subject": "docs(admin): W-Z240「实测记录」新增两格真实验证瓦片 + stress-oracle 复跑（16s · 40 并发 · 3488/3488 全绿）"
+    },
+    {
+      "short": "d16bd4a",
+      "at": "2026-11-16T10:38:14Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "67744ce",
       "at": "2026-11-16T18:36:39+08:00",
@@ -21,16 +31,6 @@
       "short": "8ce5c8a",
       "at": "2026-11-16T18:31:01+08:00",
       "subject": "test(ai): W-Z238 Lore Oracle 全链路真实上游联调测试 + scripts/_live-env.mjs live 测试一键入口"
-    },
-    {
-      "short": "62dac3c",
-      "at": "2026-11-16T10:27:00Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "9db36cb",
-      "at": "2026-11-16T18:26:25+08:00",
-      "subject": "fix(tooling): W-Z237 Node 侧 LLM 探测链路自修复——Clash 7897 直通复测，缓存命中 ≈98.2%"
     }
   ],
   "tracked_files": 1436,
@@ -39,7 +39,7 @@
   "lore_sources": 231,
   "novel_chapters_zh": 102,
   "novel_chapters_en": 102,
-  "milestone": "W-Z239",
+  "milestone": "W-Z240",
   "milestone_full": "卷 102 · 六百年守火线（102 / 102 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 231 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：102 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
