@@ -12013,6 +12013,75 @@ The stove burned steadily, steady as it always had been, as it always would be.
 
 *(End of volume ninety-four · Volume XIII, sixth part.)*
 
+# source: creative/novel/en/95-the-following-fire.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIV**: The Seven-Hundredth Year — the Continuing Volume
+
+---
+
+## Ninety-five: The Following Fire
+
+Three months after Baiyin's last visit, a letter came.
+
+The letter was almost empty — nothing but a single line of text across the middle.
+
+A-Shi held the paper to the stove to read it in the orange light — and discovered, as he tilted the page, that there was no ink on it at all.
+
+But the paper was warm.
+
+Not warm from his hands or from the kitchen stove. It was warm because it had been carrying something inside it — something that had not yet become anything a reader could recognise as a letter.
+
+The fire had written it.
+
+A whole six hundred years of keepers had signed their names — had written wordlessly — and the ink had never left the paper.
+
+Mother walked in, soapsuds on her hands, and saw him standing with the letter open.
+
+She noticed immediately.
+
+"That paper," she said. "It was never written on."
+
+He nodded.
+
+"The fire wrote it without writing."
+
+She dried her hands with a kitchen cloth. She set it down.
+
+"Everyone who ever tended this stove," she said, "told it their names. The stove carried them. The stove carried you. The stove is carrying you."
+
+She reached into the fireplace — not into the fire, but beside it, in the folded wool on the shelf — and drew out something wrapped in three layers of cloth.
+
+She unwrapped it.
+
+Inside lay a small rough-hewn skillet — the same shape as the one resting inside the hearth, the same kind of iron as the iron of the stove itself. The iron was still warm.
+
+She placed it in his hands.
+
+"Six hundred years of fire," she said gently.
+
+He could not speak.
+
+She looked at him steadily.
+
+"Seven hundred years," she said.
+
+Xiao Huo, who had been listening from the doorway, toddled forward and nestled the skillet beside him against A-Shi's chest.
+
+The stove burned quietly in the background.
+
+The eastern beacon burned across the ridge.
+
+Grandmother was not absent.
+
+She had been here all along.
+
+---
+
+*(End of volume ninety-five · Volume XIV, first part.)*
+
 # source: creative/novel/00-序言.md
 # 《跨界纪事：锚火守夜人》
 
@@ -21186,6 +21255,79 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第九十四卷 · 卷十三之六）*
+
+# source: creative/novel/95-续火.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十四**：第七百年 —— 续卷
+
+---
+
+## 九十五 · 续火
+
+白茵那一回走了三个月之后，阿石一整家人都一直惦记着她。
+
+六月，她托人捎来了一张纸。
+
+纸上什么也没有。空空白白的。
+
+但阿石从眼睛接过那张纸时，本来以为它只有六百年墨水的味道。他发现，那张纸，上面还有一层隐隐约约热气的味道。
+
+烧过一半的灶火的气息，写在六百年长的纸上。
+
+他把它放在灶上如原汁的火——最好的火——风也吹不进去的火。
+
+火的那边亮了亮。
+
+他对母亲说：
+
+"白奶奶来了，没有真来。"
+
+母亲笑。
+
+"灶火自己来了。"她说，"火写过六百页，六百页之后，不是阿石写，就是火自己写。"
+
+小火坐在灶前，用手指拢着灶火，为灶火添一根柴。
+
+炉灰长出一片风。
+
+他轻轻跟灶火说话：
+
+"我守。"
+
+册序灯火跳了一下。
+
+阿石没有再说话。他知道白奶奶认定他守着这把风火。
+
+第七百年来——灶火没有停过。
+
+它在等起飞的那天。
+
+它在问谁去接过来。
+
+院子里火种树上新枝子压下来时，一团叶互分开——
+
+火种树的叶子——
+
+有一天会落下来。
+
+风吹过来。
+
+灶火轻轻跳了一跳。
+
+远方——那盏灯仍然在山上烧着。
+
+灶火，家里。
+
+灶火，稳。
+
+火还在——没有停过——也不会停过。
+
+---
+
+*（本章完 · 跨界线总第九十五卷 · 卷十四之一）*
 
 # source: creative/tapestry-lore/01-academy-of-magic.md
 ## 01 · 魔法学院 · Academy of Magic (wizard)

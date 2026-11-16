@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Ninety-four volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Ninety-five volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 94 volumes of the canon, fully readable
+· Canon Library — 95 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3137,8 +3137,8 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 94-volume index',
-  hm_body_codex: `Codex — 94 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 95-volume index',
+  hm_body_codex: `Codex — 95 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3236,6 +3236,8 @@ hm_title_codex: 'Codex · the 94-volume index',
 93 · The Night — Xiao Huo feeds the stove for the first time alone; a reading of the stove’s breath hums through his open palm; he is young and small and warm; his grandfather beside him drowses in the warmth of the room; Xiao Huo rocks A-Shi gently and he smiles in his sleep; then he understands the stove is not without Grandma; she has been holding it all the while, six hundred years, from somewhere deeper than fire; they sit until the first light arrives; the stove never goes out; the fire-seeds outside the window lean toward the warm kitchen as if pulled by one breath. Volume XIII, fifth part.
 94 · The Mother’s Stove — A-Shi comes down before dawn; his mother is already kneeling at the stove; she feeds a small pinch of rice husk into the flame; she does not turn when she speaks — but everything she says is about the six hundred years of women who stood in this kitchen before her — every mother who ever leaned over this stove, every grandmother who lit it first before the household woke; the stove cracks contentedly; the house breathes in the same rhythm as the stove; six hundred years of warmth, kept. Volume XIII, sixth part.
 
+95 · The Following Fire — three months after Baiyin’s last visit, a letter arrives that is almost empty — just paper that carries its own warmth; A-Shi holds it to the stove to read it; no ink is visible; his mother walks in and knows at once what it is; she draws out a small skillet from the hearth-shelf — the same kind the family has been using for six hundred years, the iron still warm — “six hundred years have arrived,” she says — Xiao Huo toddles over and nestles the skillet against his grandmother’s chest; the stove burned steady as ever; the seven-hundredth year begins, right there in the kitchen, at the stove — and the stove does not stop. Volume XIV, first part.
+
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
   hm_title_ending_journey: 'Ending · After the anchor flame · Embers Journal',
@@ -3248,7 +3250,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (ninety-four volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (ninety-five volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
