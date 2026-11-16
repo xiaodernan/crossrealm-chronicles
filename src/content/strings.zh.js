@@ -3472,7 +3472,7 @@ trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在
   canon_intro: '炉边全书搁在这里。点击章节切换，原文都原样保留。',
   canon_loading: '正在装载原典……',
   canon_empty: '原典暂时是空的。',
-  canon_load_failed: '原典没能装载（development-fresh? 先 npm run build 再打开）。',
+  canon_load_failed: '原典没能装载——请先执行 npm run build 重新构建后再打开。',
   journal_tab_flame: '星轨 · 锚火占卜',
   path_intro: '三道题，不掺一丝随机。直视自己——火看得见你是哪一类守炉人。',
   path_hint: '三问答完后自动揭晓——不用点确认。',
