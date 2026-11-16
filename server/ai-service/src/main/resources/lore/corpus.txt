@@ -7751,6 +7751,51 @@ The fire burned.
 
 *(End of volume one hundred and thirty · Volume XV, thirty-first part · The seven-hundredth year — The Stove Speaks.)*
 
+# source: creative/novel/en/131-the-first-night.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The First Night
+
+---
+
+## One Hundred and Thirty-one: The First Night
+
+Saturday of the sixteenth week after the spring equinox — afternoon — the sky so clear it hurt to look up — the old keeper did not come out again.
+
+Aunt Guo sent the porridge up first — the old keeper did not eat — no sound came from the back room at all.
+
+A-Shi stood before the stove — the fire burned steadily. He was waiting for the old keeper. The old keeper did not come out. He waited a long time.
+
+He squatted down and looked into the fire-box — the fire lit his face.
+
+Uncle Zhou came and leaned against the door-post — he watched A-Shi.
+
+No one said a single word.
+
+When the light went, A-Shi fed the fire one birch branch — no more, no less — exactly a keeper's measure.
+
+He sat down before the stove — he did not sleep — the fire stayed awake for him.
+
+The next morning — the fire was still burning — A-Shi was still at the stove — the fire burned on.
+
+The old keeper was in the back room — A-Shi heard one cough, once, from behind the door.
+
+No one left.
+
+Everyone in the town slowly understood — the old keeper wanted to hand the fire to A-Shi.
+
+Nobody knew what was in the old keeper's heart.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and thirty-one · Volume XV, thirty-second part · The seven-hundredth year — The First Night.)*
+
 # source: creative/novel/en/14-interlude-come-sit-awhile.md
 # Interlude Seven · Come Sit Awhile
 
@@ -19225,6 +19270,51 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百三十卷 · 卷十五之三十一 · 第七百年 · 炉火的谈话）*
+
+# source: creative/novel/131-第一夜.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 第一夜
+
+---
+
+## 一百三十一 · 第一夜
+
+立春后第十六周——周六——午后——晴天出奇好——阿祖没有再出来。
+
+郭阿婆先把粥托上去——阿祖没吃——后屋没有动静。
+
+阿石站在灶前——炉火燃得很匀。他在等阿祖。阿祖没有出来。他等了很久。
+
+他蹲下来——他往炉膛里看——炉火照着他的脸。
+
+周叔过来了——他靠在门框上——他看着阿石。
+
+没人说任何一句话。
+
+天黑了以后——阿石添了一根白桦——不多不少——和守火的份量一样。
+
+他坐在灶前——他没有睡——炉火替他醒着。
+
+第二天早上——炉火依然燃着——阿石还是坐在炉火前——灶火燃着。
+
+老人在里屋里——阿石听见他咳了一声。
+
+没有人离开。
+
+全镇的人都慢慢知道了——阿祖想把炉火交给阿石。
+
+谁也不知道阿祖心里怎么想的。
+
+炉火燃着。
+
+炉火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百三十一卷 · 卷十五之三十二 · 第七百年 · 第一夜）*
 
 # source: creative/novel/14-番外七-下次再坐.md
 # 番外七 · 下次再坐
