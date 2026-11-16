@@ -167,6 +167,8 @@ const JOURNAL_SUB_TABS = {
   trilance: (game, panel) => game.trilanceTab.render(panel),
   // W-Z183：命途 · 锚火三问（StateGraph，每日三问）
   path: (game, panel) => game.fortunePathTab.render(panel),
+  // W-Z262：星轨 · 炉火祈愿（StateGraph，守火人之祈愿）
+  vigil: (game, panel) => game.vigilVowTab.render(panel),
 };
 
 export class HUD {
@@ -900,6 +902,8 @@ buildHUD() {
       else if (k === 'flame') suffix = '';
       else if (k === 'trilance') suffix = '';
       else if (k === 'path') suffix = '';
+      // W-Z262 炉火祈愿：日抽制，无需计数角标
+      else if (k === 'vigil') suffix = '';
       else if (k !== 'all') suffix = ` (${j.getCounts()[k] ?? 0})`;
       return `<button type="button" class="journal-tab${tab === k ? ' active' : ''}" data-tab="${k}">${t(label)}${suffix}</button>`;
     }).join('');

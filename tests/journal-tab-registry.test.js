@@ -38,6 +38,8 @@ const 迁移前中文 = {
   flame: '星轨 · 锚火占卜',
   // W-Z129：星轨 · 三日曜盘——一周一盘，三卡同启
   trilance: '星轨 · 三日曜盘',
+  // W-Z262：星轨 · 炉火祈愿（StateGraph，守灶祈愿三问）
+  vigil: '星轨 · 炉火祈愿',
   // W-Z183：星轨 · 锚火三问——StateGraph 真路由驱动（新键 journal_tab_path）
   path: '命途 · 锚火三问',
 };
@@ -56,9 +58,9 @@ describe('日志页签合并（JournalTabRegistry）', () => {
     expect(JSON.stringify(base)).toBe(snapshot);
   });
 
-  it('扩展页签的键集合是 HUD 计数分支认得的那 17 个（加/改页签时这里会红，提醒同步 HUD）', () => {
+  it('扩展页签的键集合是 HUD 计数分支认得的那 18 个（加/改页签时这里会红，提醒同步 HUD）', () => {
     expect(Object.keys(JOURNAL_EXTRA_TABS).sort()).toEqual(
-      ['achievements', 'bestiary', 'canon', 'cg', 'codex', 'dungeons', 'echoes', 'ending', 'flame', 'legends', 'memory', 'path', 'season', 'side', 'skills', 'trial', 'trilance'],
+      ['achievements', 'bestiary', 'canon', 'cg', 'codex', 'dungeons', 'echoes', 'ending', 'flame', 'legends', 'memory', 'path', 'season', 'side', 'skills', 'trial', 'trilance', 'vigil'],
     );
   });
 
@@ -71,7 +73,7 @@ describe('日志页签合并（JournalTabRegistry）', () => {
     expect([...new Set(dup)], `重复的页签标签: ${[...new Set(dup)].join(' / ')}`).toEqual([]);
   });
 
-  it('迁移原值钉死：二十五个键展开后逐字等于迁移前的中文（一个都没换）', () => {
+  it('迁移原值钉死：二十六个键展开后逐字等于迁移前的中文（一个都没换）', () => {
     const cats = mergeJournalCategories(JOURNAL_CATEGORIES);
     expect(Object.keys(cats).sort()).toEqual(Object.keys(迁移前中文).sort());
     for (const [k, 原值] of Object.entries(迁移前中文)) {

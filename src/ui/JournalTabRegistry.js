@@ -29,6 +29,8 @@ export const JOURNAL_EXTRA_TABS = {
   trilance: 'journal_tab_trilance',
   // W-Z183：命途 · 锚火三问（StateGraph 真实驱动）
   path: 'journal_tab_path',
+  // W-Z262：星轨 · 炉火祈愿（StateGraph，守火人之祈愿）
+  vigil: 'journal_tab_vigil',
 };
 
 export function mergeJournalCategories(base) {
