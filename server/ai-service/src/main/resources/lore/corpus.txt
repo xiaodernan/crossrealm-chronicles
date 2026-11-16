@@ -6732,6 +6732,93 @@ It was calling.
 
 *(End of volume one hundred and seventeen · Volume XV, eighteenth part · The seven-hundredth year — The Neighbor's Stove.)*
 
+# source: creative/novel/en/118-the-spoonful-of-soup.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Spoonful of Soup
+
+---
+
+## One Hundred and Eighteen: The Spoonful of Soup
+
+The rain ended for good seven days ago.
+
+Old Li came every day for those seven days. On the sixth day he laid a small cloth bundle on the stove. His mother opened it and found a white patch of fabric — a faint flame drawn on it, stitched very finely along its edges.
+
+He said nothing, and left.
+
+On the seventh day he came again. The moment he stepped inside he went straight to the stove, picked up an old wooden spoon, and ladled one spoonful of hot broth from the pot and drank it.
+
+His mother watched his hands on the spoon.
+
+"I've come to learn how to feed the fire," he said.
+
+His mother stood still.
+
+"I don't want a title," he said.
+
+A-Shi came out of the kitchen with a bowl of rice.
+
+"My six family members haven't eaten," he said.
+
+His mother smiled.
+
+"Anyone who comes in from the rain," she said, "doesn't need to ask to be fed."
+
+Old Li stared at the stove.
+
+"Seven hundred years," he said slowly. "I've been looking at the wrong fire this whole time. These days I'm finally beginning to see it properly."
+
+"It breathes," he said.
+
+A-Shi stepped back.
+
+In the yard the fire-seed tree shook gently. The third flush of new leaves was opening.
+
+Seven hundred years of keepers in this house — the stove, the kitchen, this room. No one invited anyone else inside the gate. It was a quiet rule the household kept without speaking aloud.
+
+A-Shi watched the fire. His mother tended the stove. This house had always been a Hearthkeeper's house.
+
+Today, for the first and maybe the last time in seven hundred years, another hearth-hand would join them at the fire.
+
+Old Li did not take the spoon back. He let it rest in the pot.
+
+Fire.
+
+He placed the spoon back in the pot and his hands stayed in the glare of the flame a moment longer than necessary.
+
+"Tomorrow," A-Shi's mother said. "Tomorrow you'll come."
+
+Old Li did not say anything. He only nodded.
+
+He left, walking back down the lane in the rain-fresh air.
+
+A-Shi and his mother and Xiao Huo stood at the porch for a long time watching him go.
+
+The fire-seed tree swayed.
+
+The stove burned very steadily.
+
+They had six bowls tonight.
+
+They had always cooked six bowls.
+
+That night in this house, the fire was very bright.
+
+All the trees in the yard, all the stones, all the ash in the stove, all the water on the path — they were all a little warmer than any previous night this year.
+
+The stove had not gone out.
+
+The whole yard had not gone out.
+
+Spring had come.
+
+---
+
+*(End of volume one hundred and eighteen · Volume XV, nineteenth part · The seven-hundredth year — The Spoonful of Soup.)*
+
 # source: creative/novel/en/12-interlude-before-the-flame.md
 # Interlude Five · Before the Flame
 
@@ -17448,6 +17535,69 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百一十七卷 · 卷十五之十八 · 第七百年 · 隔壁的灶）*
+
+# source: creative/novel/118-一勺汤.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 一勺汤
+
+---
+
+## 一百一十八 · 一勺汤
+
+雨停了七天。
+
+七天来老李每天都来。第六天，他把一小布包放在灶台上。母亲打开，里面是一块很小的白布——白布上画着一个很淡的火苗，针脚走得很密。
+
+他啥也没说，转身走了。
+
+第七天，他又来了。他一进门就蹲在灶台前，端起一只旧勺子，舀了一勺锅里的热汤，喝了。
+
+母亲看着他在他手里拿的那一勺。
+
+"我来学添柴。"他说。
+
+母亲站着。
+
+"我不要名字。"他说。
+
+阿石从屋里出来，端来一碗饭。
+
+"我有六口人没吃饭。"他说。
+
+母亲笑了。
+
+她说："每天来的人，不缺吃饭。"
+
+老李盯着灶火看。
+
+"我看了七百年没看见的火——这两天才算开始看见——它呼吸。"他说。
+
+阿石后退一步。
+
+院子里的火种树沙沙地摇着——第三拨新叶子正在伸出。
+
+这间灶前——七百年来——星潮灶守炉的人在这间屋子里踏过脚步。
+
+阿石守火。母亲守灶。这间屋子——是他们家的炉心。
+
+这个家——有一条从来没人说出口的规矩——这炉子从来不给别人烧——今晚——它烧给了两个家。
+
+全院子的火——昨晚烧得格外亮。
+
+所有的树——所有的砖——所有的灰——所有的水——都带了点温度。
+
+灶火昨晚没灭。
+
+全院子都没灭。
+
+春天来了。
+
+---
+
+*（本章完 · 跨界线总第一百一十八卷 · 卷十五之十九 · 第七百年 · 一勺汤）*
 
 # source: creative/novel/12-番外五-火之前.md
 # 番外五 · 火之前

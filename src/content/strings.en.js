@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and seventeen volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and eighteen volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 117 volumes of the canon, fully readable
+· Canon Library — 118 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3138,8 +3138,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 117-volume index',
-  hm_body_codex: `Codex — 117 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 118-volume index',
+  hm_body_codex: `Codex — 118 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3260,6 +3260,7 @@ hm_title_codex: 'Codex · the 117-volume index',
 115 · The Hearth Named — ten days after the first day of spring, the yard grows warmer; half the needles on the fire-seed tree have turned a soft ivory yellow; the ditch by the gate has turned to flowing mud; the old man comes again; he carries no basket — he walks in wearing only a clean blue cotton robe; he bows his head once — the kind of formal bow neither A-Shi nor Xiao Huo had ever seen him perform; his mother smiles — “come in”; he takes a stool and sits beside the stove, facing it; she brings out the meal she brings whenever a guest comes; rice, cabbage tofu soup, preserved radish; nothing unusual; nothing added; the bowls fill; there is a lot of rice and only a little food; the old man sniffs the air — “Fragrant”; A-Shi sits close to the stove; the fire sways; “Stove,” he says; the flame leaps once — then softened — then settles into long, low burning; “It is spring,” his mother says; “Spring must have a name”; the kitchen goes quiet; “What name?” Xiao Huo asks; his mother glances at A-Shi; A-Shi pointed at the stove — “Stove”; “Stove is not enough”; the old man draws from his robe a small clean piece of paper, no larger than his palm; presses one finger against it, leaving a faint soot print behind; “炉,” he says; “炉火”; “炉火,” his mother repeats slowly; after that day, no one in the house said “the stove” anymore — they said 炉火; the next morning the mother stirred the porridge and said “the fire is coming warm”; Xiao Huo said “the fire is warmer today than yesterday”; A-Shi said “炉火 breathes on its own at night”; everyone left it at that; the soup boiled a few minutes longer than usual; the family gathered at the long table and ate; in the iron box beneath the stove lay a thin slip of paper that Bai Yin had written six hundred years ago — everyone knew what it was — it was the name of the fire; 炉火; in the first month of spring; in this house; finally — it had a name. Volume XV, sixteenth part.
 116 · The Next Visit — on the twelfth day after the spring equinox, the first guest of the season comes to the house; not the old man from the mountain; it is the neighbor, old Li; there are only three households next door; Old Li’s family keeps six mouths to feed; he stands at the gate with a slightly embarrassed look; “the fire,” he says, “the fire — would it come to our house tomorrow?”; A-Shi stares at him; his mother comes out of the kitchen; Old Li wrung his hands — “our stove at home — it doesn’t work as well as yours; I heard you say your fire is alive; our fire is not”; A-Shi does not contradict him — “if it’s all right with you, you can come see it tomorrow”; “see it?” — “you can come over and eat here”; the next day a real rain rolls in — thunder far off, the street below streaming red-brown; at breakfast the gate rattles once; Old Li stands under the eave, one sleeve already wet; the family stands; the stove is burning steadily; Old Li stood very properly, looking at the fire, then at his own feet; “I can’t do this,” he says finally, very soft; A-Shi brings two bowls of noodles and sets them on the low table; “Stove,” Old Li says, barely audible; “Mm,” A-Shi says; “I’ll come back tomorrow,” he says; he says nothing more; he left; his mother washed Old Li’s bowl and turned it over on the shelf; the stove burned steady as ever; “next time,” his mother said, “let him come”; seven hundred years, and for the first time the neighbor’s hearth and this hearth had eaten at the same table; the fire had never seen this many people sit with it at once; it had not gone out; it had not gone out; spring had come for keeps. Volume XV, seventeenth part.
 117 · The Neighbor’s Stove — the rain at the neighbor’s house had not let up; it rained for fourteen days; the ditch along our gate carved itself deeper; the stone outside the kitchen wobbled once and slid halfway into the run; Old Li came every day; Mother did not say anything — she told A-Shi to let him stand a while and watch; the first day he stood for nearly half an hour; the second day he stood the whole morning; the third day he stood closer, one foot from the stove — for nearly three full hours; on the fourth day he arrived soaked through, shoes streaming water; “I came for the fire,” he said; “on my own — not my six, just me”; she told A-Shi to let him cook; on the tenth day the sky cleared; the ditch ran red-brown with silt; Old Li came carrying a small iron pot; he stood at the door for a long time; he set the pot on the stove; nobody said a word; he crouched down, filled it with a little water; from his pocket he drew a handful of rice — only a few grains — and poured them in; the stove, it was burning; the pot stirred — barely a sound; he went out to the porch and stopped there; “Stove,” he said, “I’ll come again tomorrow”; no one answered; the wind pushed the gate open; the family stood on the porch and watched — the stove had not gone out; for the first time in seven hundred years these people and this stove were waiting together for the neighbor to come; the fire was calling. Volume XV, eighteenth part.
+118 · The Spoonful of Soup — the rain ended for good seven days ago; Old Li had come every day for those seven days; on the sixth he laid a small cloth bundle on the stove — a white patch of fabric, a faint flame stitched along its edges — he said nothing and left; on the seventh he came again and the moment he stepped inside he went straight to the stove, picked up an old wooden spoon, and ladled one spoonful of hot broth from the pot and drank it; his mother’s hands did not move; “I’ve come to learn how to feed the fire,” he said; his mother stood still; “I don’t want a title,” he said — A-Shi came out of the kitchen with a bowl of rice — “My six haven’t eaten,” he said — his mother smiled: “Anyone who comes in from the rain doesn’t need to ask to be fed”; Old Li stared at the stove; “Seven hundred years,” he said slowly, “I’ve been looking at the wrong fire this whole time; these days I’m finally beginning to see it properly — it breathes” — A-Shi stepped back; in the yard the fire-seed tree was already sprouting its third flush of new leaves. Volume XV, nineteenth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3273,7 +3274,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and seventeen volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and eighteen volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

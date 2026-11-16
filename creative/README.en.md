@@ -166,6 +166,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Hearth Named | [the-hearth-named](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/115-the-hearth-named.md) |
 | The Next Visit | [the-next-visit](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/116-the-next-visit.md) |
 | The Neighbor’s Stove | [the-neighbors-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/117-the-neighbors-stove.md) |
+| The Spoonful of Soup | [the-spoonful-of-soup](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/118-the-spoonful-of-soup.md) |
 
 Chapter → game-chapter mapping:
 
