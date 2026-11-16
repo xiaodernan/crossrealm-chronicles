@@ -9,6 +9,12 @@
 >
 > **2026-11-16 · W-Z205 原典语料重建：59 → 175 源 + 真上游口径对齐**：corpus.txt 全量重编（74 卷双语小说 + 74 卷英译 + 27 份参照文件 ≈ 520 KB，含 66–74 卷守火主线全链）；`Bm25IndexTest.linDu_query_matches_lin_du_chapter` 因如实语料扩容从 top-5 → top-10（如实登记，非放水）；`hm_body_lore_oracle` 不再手写「36 源 / 1803 检索块」的漂移数字——说明书永远引用语料的运行时重编能力；`build-latest.mjs` 的 `lore_sources` 本就是活读（latest.json 实测 175）；说明书/showcase feed 新增 11·16 三条 W-Z190+ 实录；`ONLINE_SERVICES.md(+EN)` / README / player-guide 同步到 175 源；AI 侧 lore 门禁（LoreRagTest/Bm25IndexTest/Bm25TokenizerTest）绿。
 >
+> **2026-11-16 · W-Z238 Lore Oracle 全链路真实上游联调测试（检索→作答→诚实拒答）**：新增 `server/ai-service/.../lore/LoreOracleLiveIntegrationTest.java`（与 AiLiveIntegrationTest 同口径，`@EnabledIfEnvironmentVariable("LLM_API_KEY")`，默认 CI 零外呼）。两条断言：
+> ① 原典问题「锚火是什么？」走**真 BM25 召回（101 卷双语语料，classpath:/lore/corpus.txt 229 源）→ 真 LlmClient（prompt_cache_key:crossrealm-canon-v1 + stream+include_usage+ephemeral）**——实测 HTTP 200，sources=[creative/novel/67, 89, 77, 35]，model=gpt-6.1-terra，latency≈3.2s；ok=true、出处非空。
+> ② 纯 ASCII 无义字符提问「zxqjwop qkdjw zqwvjqmw rfjklw」——BM25 单字切分后**一个 token 都召不回** → 直接诚实拒答「此物未在典籍中」、sources 空、latencyMs=0，**不进入 LLM、不花 token**（CJK 语料单字索引几乎不可能 0 召回，此用例是拒答分支的确定性守卫）。
+> 另新增 `scripts/_live-env.mjs`：读取根 .env 注入进程环境（不打印密钥），透传 `-Dai.live.test=true` + Clash 混合端口 `127.0.0.1:7897`，一条命令复现全部 Java live 测试（AiLiveIntegrationTest / PromptCacheLiveTest / AdvisorJobLiveIntegrationTest / EchoHintLiveIntegrationTest / LoreOracleLiveIntegrationTest）。
+> 结论：Lore Oracle 这条最深的 LLM 管线在真实上游上端到端可用；「原典没有的问题」确实不会硬编答案、也不会浪费 token。
+>
 > **2026-11-16 · W-Z237 Node 侧 LLM 探测链路自修复（Clash 7897 复测 · 缓存命中 98.2%）**：修 `scripts/_clash-proxy.mjs` —— `LLM_PROXY_URL` 取值从单纯 `process.env` 改为「shell 环境变量 > 仓库根 .env 兜底 > undefined」；此前 `cache-probe.mjs` 手动解析 .env 却没把 `LLM_PROXY_URL` 推进 `process.env`，于是 `proxyIsSet()=false`、探测直连、上游 Cloudflare 全量 403，被误读为 Clash 不通。修复后：`node scripts/cache-probe.mjs` 直跑即走 Clash 混合端口 `127.0.0.1:7897`，实测 `stream + include_usage + frozen system(cache_control:ephemeral) + prompt_cache_key:crossrealm-canon-v1` → **HTTP 200 × 6 连发，热态 cached_tokens=5248/5344（≈98.2%）**（冷启动 cached=null；非流对照组无 cached 字段）。Java 链路同期复测：`PromptCacheLiveTest -Dai.live.test=true` → **BUILD SUCCESS（first cached=null → second cached=5632/5679 ≈ 99.2%）**。线上 API 端到端健康。
 >
 > **2026-11-16 · W-Z236 第101卷入典 · 卷十五之二《传火 / The Handover》**：《跨界纪事》卷十五「第七百年」第二篇——第七百年的第五天，细雨下到傍晚；母亲捧出一只六百年按不开的铁匣；阿石按准暗扣——盖子咔地开了——里面是一叠泛黄的纸和一块更旧的黑炭；第一代守火人的字瘦而稳：火从白石头落下来——我接住了——它怕冷——只要还有人添柴它就不灭——传到第七百年的人还能看到这行字——灶火还在烧；名字只剩半个偏旁——母亲说那是白茵（Bai Yin，七百年前第一代守火人）；随后她看向小火：落到他手里了——阿石当晚在纸上写下「续写」放回匣子——灶火亮了一寸——《传火》落笔。
