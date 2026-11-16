@@ -1,7 +1,11 @@
 
 
-> **2026-11-16 · W-Z212 上游迁移：wkapi.pro/gpt-6-sol → api.aizzz.xyz / v1 / gpt-6.1-terra**。应用侧全线切换（`application.yml` 默认、`AiProperties`、config-server `ai-service.yml`、`env.example`、`docker-compose.yml` 兜底、`PromptCacheLiveTest`、`scripts/cache-probe.mjs`、`.env`）；
-> **实测（本机，2026-11-16）**：`GET https://api.aizzz.xyz/v1/models` → **HTTP 403「本站不对您所在的国家及地区进行商业服务」**；Java `PromptCacheLiveTest` → `LlmUpstreamException status 403`——上游的商业可用性限于其许可地域，不是本仓库代码问题；Node 侧 `cache-probe.mjs` 同现象。历史里程碑（2026-11-12 ～ W-Z168 的 wkapi 实测）保持原样登记；等等许可地域节点就位即可复跑完整缓存套件（预期 PromptCacheLiveTest 走通）。炉边盘「实测记录」第 14 格登记这一实测。
+> **2026-11-16 · W-Z212 上游迁移：wkapi.pro/gpt-6-sol → api.aizzz.xyz / v1 / gpt-6.1-terra（Clash 节点可用）**。应用侧全线切换（`application.yml` 默认、`AiProperties`、config-server `ai-service.yml`、`env.example`、`docker-compose.yml` 兜底、`PromptCacheLiveTest`、`scripts/cache-probe.mjs`、`.env` 的 `LLM_PROXY_URL=http://127.0.0.1:7897`）；
+> **实测（本机，2026-11-16）**：直连直探全部 `HTTP 403「本站不对您所在的国家及地区进行商业服务」`（Cloudflare 边缘拦截，HTTP 标准）——**必经 Clash Verge 混合端口 `127.0.0.1:7897`**（用户指引：本机梯子节点必燃打通）——
+> **经 Clash 后全通**：`GET /v1/models` 404 路由存在；`chat/completions`（PONG）→ HTTP 200 + `prompt_tokens_details.cached_tokens: 4224`；
+> Java `PromptCacheLiveTest -DargLine="-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=7897 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=7897"` → **LIVE cache first prompt=5679 cached=null → second prompt=5679 cached=5504（≈ 96.96%，冷启一次 null 然后全线热）** ✓ 端到端 Java 链路 BUILD SUCCESS；
+> Node `cache-probe.mjs`（新增 `scripts/_clash-proxy.mjs` 的 CONNECT 隧道 · `LLM_PROXY_URL=http://127.0.0.1:7897`）全线 HTTP 200（含流式 stream+include_usage）。
+> 历史里程碑（2026-11-12 ～ W-Z168 的 wkapi 实测）保持原样登记；炉边盘实测记录第 14 格改写为本次 Clash 实测。
 >
 > **2026-11-16 · W-Z205 原典语料重建：59 → 175 源 + 真上游口径对齐**：corpus.txt 全量重编（74 卷双语小说 + 74 卷英译 + 27 份参照文件 ≈ 520 KB，含 66–74 卷守火主线全链）；`Bm25IndexTest.linDu_query_matches_lin_du_chapter` 因如实语料扩容从 top-5 → top-10（如实登记，非放水）；`hm_body_lore_oracle` 不再手写「36 源 / 1803 检索块」的漂移数字——说明书永远引用语料的运行时重编能力；`build-latest.mjs` 的 `lore_sources` 本就是活读（latest.json 实测 175）；说明书/showcase feed 新增 11·16 三条 W-Z190+ 实录；`ONLINE_SERVICES.md(+EN)` / README / player-guide 同步到 175 源；AI 侧 lore 门禁（LoreRagTest/Bm25IndexTest/Bm25TokenizerTest）绿。
 >

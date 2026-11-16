@@ -16,6 +16,7 @@
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { proxyIsSet, proxyJsonPost } from './_clash-proxy.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const env = {};
@@ -66,11 +67,37 @@ function body({ stream, cacheControl }) {
 }
 
 async function call(label, opts) {
-  const res = await fetch(`${BASE}/chat/completions`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', ...(opts.stream ? { accept: 'text/event-stream' } : {}), authorization: 'Bearer ' + KEY },
-    body: JSON.stringify(body(opts)),
-  });
+  const useProxy = proxyIsSet();
+  const url = `${BASE}/chat/completions`;
+  const headersCommon = { 'content-type': 'application/json', ...(opts.stream ? { accept: 'text/event-stream' } : {}), authorization: 'Bearer ' + KEY };
+  let res;
+  if (useProxy) {
+    const proxied = await proxyJsonPost(url, headersCommon, body(opts), 120000);
+    console.log('[proxy] status=' + proxied.status);
+    const chunks = [];
+    let bi = 0;
+    for (;;) {
+      const ni = proxied.body.indexOf('\n\n', bi);
+      if (ni < 0) break;
+      chunks.push(proxied.body.slice(bi, ni + 2));
+      bi = ni + 2;
+    }
+    if (bi < proxied.body.length) chunks.push(proxied.body.slice(bi));
+    const pseudo = {
+      ok: proxied.status >= 200 && proxied.status < 300,
+      status: proxied.status,
+      text: async () => proxied.body,
+      json: async () => JSON.parse(proxied.body),
+      body: { getReader: () => ({ read: async () => (chunks.length ? { done: false, value: Buffer.from(chunks.shift()) } : { done: true }) }) },
+    };
+    res = pseudo;
+  } else {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: headersCommon,
+      body: JSON.stringify(body(opts)),
+    });
+  }
   if (!res.ok) { console.log(`${label}: HTTP ${res.status} ${(await res.text()).slice(0, 120)}`); return null; }
   if (!opts.stream) {
     const j = await res.json();
