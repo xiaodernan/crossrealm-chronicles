@@ -184,7 +184,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Third Bowl | [the-third-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/133-the-third-bowl.md) |
 | Come and Look Tomorrow | [come-and-look-tomorrow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/134-come-and-look-tomorrow.md) |
 | The Third Morning’s Breakfast | [the-third-mornings-breakfast](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/135-the-third-mornings-breakfast.md) |
-| The Third Bowl Comes Back | [the-third-bowl-comes-back](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/136-the-third-bowl-comes-back.md) |Chapter → game-chapter mapping:
+| The Third Bowl Comes Back | [the-third-bowl-comes-back](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/136-the-third-bowl-comes-back.md) |
+| The Light in the Empty Bowl | [the-light-in-the-empty-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/137-the-light-in-the-empty-bowl.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

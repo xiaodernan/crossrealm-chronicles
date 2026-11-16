@@ -8031,6 +8031,45 @@ The fire burned.
 
 *(End of volume one hundred and thirty-six · Volume XV, thirty-seventh part · The seven-hundredth year — The Third Bowl Comes Back.)*
 
+# source: creative/novel/en/137-the-light-in-the-empty-bowl.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Light in the Empty Bowl
+
+---
+
+## One Hundred and Thirty-seven: The Light in the Empty Bowl
+
+Thursday of the twentieth week after the spring equinox — morning — the sun had just come up.
+
+A-Shi went to the stove-house first — his mother had not gotten up yet.
+
+He crouched by the iron rim — the white bowl was still there — the fire burned steadily.
+
+A-Shi reached out very close to it — he did not touch the bowl — he felt the heat between his palm and the porcelain.
+
+He said nothing — his mother came in — she carried two bowls.
+
+"Eat," she said — she set the bowls down — she did not look at the white one.
+
+A-Shi did not answer either — he only glanced at it — the fire leapt once.
+
+His mother saw — she set the bowls down — she went back into the yard — she didn't turn around.
+
+A-Shi picked up his bowl — he looked at the white porcelain bowl — he felt it was whiter today than yesterday — and whiter than the day before.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and thirty-seven · Volume XV, thirty-eighth part · The seven-hundredth year — The Light in the Empty Bowl.)*
+
 # source: creative/novel/en/14-interlude-come-sit-awhile.md
 # Interlude Seven · Come Sit Awhile
 
@@ -19785,6 +19824,45 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百三十六卷 · 卷十五之三十七 · 第七百年 · 第三只碗回来了）*
+
+# source: creative/novel/137-空碗里的火光.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 空碗里的火光
+
+---
+
+## 一百三十七 · 空碗里的火光
+
+立春后第二十周——周四——早上——太阳刚出来。
+
+阿石先去了灶房——母亲还没有起来。
+
+他蹲在铁沿前——白瓷碗还在那里——灶火燃得匀。
+
+阿石把手伸得很近——他没碰碗——他感觉到了——手掌和碗之间那一层热。
+
+他没说话——母亲进来了——她端着两只碗。
+
+"吃了。"她放碗——她没看那只白瓷碗。
+
+阿石也没开口——他只看了它一眼——灶火又跳了一下。
+
+母亲看见了——她把碗搁下——她回到院子里去了——她没回头。
+
+阿石把自己的碗端起来——他看着白瓷碗——他觉得它比昨天白——也比前天白。
+
+灶火燃着。
+
+炉火燃着。
+
+炉火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百三十七卷 · 卷十五之三十八 · 第七百年 · 空碗里的火光）*
 
 # source: creative/novel/14-番外七-下次再坐.md
 # 番外七 · 下次再坐
