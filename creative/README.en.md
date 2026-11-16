@@ -126,6 +126,7 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Character | [the-character](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/75-the-character.md) |
 | Thunderfire | [thunderfire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/76-thunderfire.md) |
 | The Broken Stone | [the-broken-stone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/77-the-broken-stone.md) |
+| The Guest | [the-guest](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/78-the-guest.md) |
 
 Chapter → game-chapter mapping:
 

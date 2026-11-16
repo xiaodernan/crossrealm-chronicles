@@ -124,6 +124,7 @@ creative/music/soundtrack.html
 | 记 · The Character | [the-character](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/75-the-character.md) |
 | 雷火 · Thunderfire | [thunderfire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/76-thunderfire.md) |
 | 碎石 · The Broken Stone | [the-broken-stone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/77-the-broken-stone.md) |
+| 客 · The Guest | [the-guest](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/78-the-guest.md) |
 
 每一章对应游戏的章节走法：
 
