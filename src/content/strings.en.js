@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and twenty-one volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and twenty-two volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 121 volumes of the canon, fully readable
+· Canon Library — 122 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3138,8 +3138,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 121-volume index',
-  hm_body_codex: `Codex — 121 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 122-volume index',
+  hm_body_codex: `Codex — 122 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3264,6 +3264,7 @@ hm_title_codex: 'Codex · the 121-volume index',
 119 · Snow’an — on the fifteenth day after the spring equinox, Old Li came again, this time with a child; not his own — it was Tiě mù sùmù, a boy who had been taken in by neighbors across the ridge; eleven or twelve, a gaze that went straight through anything he looked at; he stands before the fire-seed tree and does not move; the tree’s new leaves unfurling in layers; his mother says, “sit down”; he does not move; A-Shi brings the low stool over; he sits and looks at the stove for a long time; the firelight warms his face; his hand reaches toward the stove, recoils; he says, “I will come Saturday”; he leaves without looking back; the courtyard is very quiet; the fire-seed tree sways. Volume XV, twentieth part.
 120 · Saturdays — Saturday morning begins under a light rain that hangs in the air and clings to the needles of the fire-seed tree; the yard is cooler than it has been for days, but the stove burned steadily; his mother is cooking — cabbage and tofu — the pan hisses and sighs; A-Shi sat in front of the stove, watching the fire; the gate rattled softly — a small figure stood in the doorway: grey jacket, brand-new cloth shoes — it was Snow’an; he does not speak; he walks into the kitchen; he sits in front of the stove; the fire-seed tree above his head unfolded another layer of leaves; the firelight lit his face softly from within — he reached out one small hand, pressed it against the stove iron — the iron edge was warm, the heat came through, his hand did not burn; he left; he returned the following Saturday, then the next, then the one after that; on the fifth week, he arrived carrying a small oil jar and set it on the low table in the yard; the fire-seed tree swayed in a gentle wind; the whole household understood: every Saturday the boy came here, sat, watched the fire, and left without saying a word; sometimes Mother slips him a bowl of rice; the stove burned; seven hundred years had passed; the stove still burned. Volume XV, twenty-first part.
 121 · The Fire Comes — week six after the spring equinox, a Saturday before daylight; Mother had already risen, dumpling filling mixed — cabbage and pork; Xiao Huo sat in front of the stove, silent, watching the fire; Snow’an should have arrived by now; he came — with company; Mother-of-Snow’an trailed behind him; A-Shi stood up from the straw mat; “Mother-of-Snow’an,” he said; Snow’an’s mother stopped in the doorway; she looked at the stove — through the doorway they could see it faintly glowing; “I’ll sit here,” she said; she sat down beside the stove; she didn’t speak; the entire household came inside; Mother brought the dumpling filling over; “Making dumplings,” A-Shi said; Mother and A-Shi sat down to make dumplings; Snow’an’s mother stayed in front of the stove, watching the fire; she did not speak; sometimes a family does not speak — they simply sit together — the fire leaps up from within the stove — every person is silent — silence is the deepest language; Snow’an’s mother sat like that for almost two hours before she spoke; “From now on,” she said; she stopped; “From now on, I will come every Saturday; I’ll come to watch the fire”; no one stopped their hands; the dumplings were finished; Mother served one bowl to each person; the whole family ate; she ate; this house was seven hundred years old — no outsider had ever sat in this kitchen before; half a pot of dumplings remained; the fire-seed tree swayed; within days the whole village learned — Bai Yin’s stove, the one across the ridge, now had a guest; and from that day on, every Saturday, Mother-of-Snow’an came and watched the fire; this house had finally gained one person. Volume XV, twenty-second part.
+122 · Always Here — week seven after the spring equinox, Saturday, overcast, heavy and not raining; the stove burned steadily — Mother was frying cabbage and pork; A-Shi was crouched by the stove watching the fire; Xiao Huo scratched his eyes and saw the doorway; Snow’an’s mother stood there with three children behind her — two girls in blue, a boy in grey; none spoke; the stove’s glow warmed their faces; Snow’an’s mother set a small cloth basket on the stove and said nothing; Mother brought three stools; the children sat side by side watching the fire for a long time; “these are from the house my mother came from,” Snow’an’s mother said — that was all; no one spoke; the stove burned; the smell of coal smoke drifted up — 炉火 — Volume XV, twenty-third part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3277,7 +3278,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and twenty-one volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and twenty-two volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
