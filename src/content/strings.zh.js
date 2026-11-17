@@ -3339,6 +3339,8 @@ trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在
   quickstart_title: '炉边快速上手 · 30 秒读完',
   quickstart_aria: '炉边快速上手',
   quickstart_tagline: '不用看文档——这一整页就是你此刻最想知道的那五件事。随时能关能回来。',
+  quickstart_pillar_title: '第一个必须做的动作',
+  quickstart_pillar_body: '开局别乱跑——先按 {interact} 探究前方的光柱（就是锚点信标）——它自动塞给你第一道任务——那才是你唤醒世界的方式。',
   quickstart_you_title: '你是谁',
   quickstart_you_body: '位面行者——你是这场冒险唯一的主角。从「觉醒：世界之锚」的那一刻起，一切终归到你手里做。',
   quickstart_play_title: '怎么玩',

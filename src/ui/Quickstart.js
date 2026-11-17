@@ -116,6 +116,7 @@ export const QUICKSTART_STATIC_KEYS = Object.freeze([
   'quickstart_title', 'quickstart_aria', 'quickstart_tagline',
   'quickstart_you_title', 'quickstart_you_body',
   'quickstart_play_title', 'quickstart_play_body',
+  'quickstart_pillar_title', 'quickstart_pillar_body',
   'quickstart_where_title', 'quickstart_where_body',
   'quickstart_advisor_title', 'quickstart_advisor_body',
   'quickstart_goal_title', 'quickstart_goal_body',

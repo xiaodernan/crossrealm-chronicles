@@ -3429,7 +3429,9 @@ Three frames in retrospection: the fire + the light on your palm + the house shi
   // Hearthside Quickstart (W-Z91): start screen / pause menu / first boot — the 30-second reading guide
   quickstart_title: 'Hearthside Quickstart · read me in 30s',
   quickstart_aria: 'Hearthside Quickstart',
-  quickstart_tagline: 'No docs necessary — this page IS the doc. The five things you need to know, right here.',
+  quickstart_tagline: 'No docs necessary — this page IS the doc. The six things you need to know, right here.',
+  quickstart_pillar_title: 'The one move to make first',
+  quickstart_pillar_body: 'Don’t wander at the start — press {interact} to investigate the pillar in front of you (that’s the Anchor beacon). It hands you your first quest, and that’s how you wake the world.',
   quickstart_you_title: 'Who you are',
   quickstart_you_body: 'A crossroads runner — you are the single protagonist of this story. From the moment you awaken the World Anchor, every choice and every ending funnels through you.',
   quickstart_play_title: 'How to play',

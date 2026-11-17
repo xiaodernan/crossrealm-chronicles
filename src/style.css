@@ -4704,6 +4704,9 @@ h1, h2, h3 {
 }
 .quickstart-tagline { margin: 0 0 14px; color: rgba(255, 236, 200, 0.72); font-size: 0.82rem; line-height: 1.55; text-align: center; }
 .quickstart-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.quickstart-card-anchor { border-color: rgba(120, 230, 255, 0.55); box-shadow: inset 0 1px 0 rgba(120, 230, 255, 0.18), 0 0 28px rgba(120, 230, 255, 0.2); }
+.quickstart-card-anchor h3 { color: #C7F0FF !important; letter-spacing: 0.12em !important; }
+.quickstart-card-anchor p { color: rgba(220, 245, 255, 0.96); }
 @media (max-width: 880px) { .quickstart-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .quickstart-grid { grid-template-columns: 1fr; } }
 .quickstart-card {
