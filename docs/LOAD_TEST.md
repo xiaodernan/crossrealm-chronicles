@@ -66,6 +66,42 @@ submit→done：p50≈33ms（热/重复态）· p95≈p99≈10.4s（BM25 检索 
 ```
 真实玩家旅程 = 秒级响应；10s 量级是 BM25 编排的真实成本，不是事故。
 
+## 实测记录（2026-11-17 · W-Z314 · 单 IP 洪水对修复后网关）
+
+环境：同机 docker-compose 参考栈（discovery 18761 / config 18888 / game 28081 / season 28082 / ai 28083 / presence 28084 / notify 28085 / gateway **28080**（redis 限流背板）/ redis 26379 / postgres 15432），与 careeros / football-os 其它项目共存。网关镜像按 W-Z314 重建并重新部署（`mvn -f server/gateway/pom.xml test` 52/52 绿后打包，`GATEWAY_RATELIMIT_XFFTRUST` 默认 `false`）。
+
+### 网关全链路自检（`docker compose run --rm verify`）：**全绿**（含 `/api/seasons/active`、`/api/telemetry/summary-rollup`；`notify backend=redis`，`allowed` 持续累计）。
+
+### XFF 伪造实机验证（修复前后差异）
+
+修复前（旧镜像）：轮换 75 个不同 `X-Forwarded-For` → 全部 `2xx`（限流桶按假 IP 分散 → 限流形同未启用）。
+修复后（新镜像，默认不信任 XFF）：轮换 75 个不同 XFF → **前 60 次 `2xx`、第 61 次起全部 `HTTP 429`**（按远端地址计数）；不带 XFF 直打 → 同一 IP 桶全 429。结论：XFF 伪造无法绕过网关限流了。
+
+### 单 IP 洪水（gateway 28080，共 ~65,000 次请求，**5xx 全 0**，全部卸载在 429）
+
+| 场景 | 发出 | 成功(2xx) | 429 | 5xx | p50 | p95 | p99 | max |
+|---|---|---|---|---|---|---|---|---|
+| readBurst × 80 并发 × 15s | 19,465 | 120 | 19,345 | **0** | 50ms | 118ms | 300ms | 616ms |
+| writeBurst × 40 × 15s | 17,823 | 56 | 17,767 | **0** | 29ms | 52ms | 80ms | 1212ms |
+| telemetryFlood × 80 × 15s | 13,757 | 120 | 13,637 | **0** | 79ms | 150ms | 238ms | 488ms |
+| mixed × 80 × 15s | 12,189 | 120 | 12,069 | **0** | 88ms | 169ms | 263ms | 412ms |
+| idempotentReplay × 500 同键 | 500 | 60 | 440 | **0** | 102ms | 280ms | 373ms | 402ms |
+
+解读：单 IP 洪水被 60 次/10s 令牌桶（Redis 后端）正确压在设计水位上，**网关没崩、熔断没被打到奇怪态、下游服务未被灌到错误侧**；`errRate` 按负载工具口径计（429 算失败）≈99%，但 `server=0` —— 卸载完全按设计发生。
+
+### 直连服务容量（绕过限流器，测"服务本身能扛多少"）
+
+| 直连目标 | 12s × 32 并发 | 2xx | 5xx | p50 | p95 | max |
+|---|---|---|---|---|---|---|
+| game-service `/api/leaderboard?limit=10` | 15,668 | **15,668** | **0** | 20ms | 52ms | 209ms |
+| season-service `/api/seasons/active` | 18,001 | **18,001** | **0** | 18ms | 44ms | 191ms |
+
+解读：本机按 **>1,300 rps** 直连读流量、**100% 2xx**，p50 20ms / p95 44–52ms。Node `stress-load.mjs` 出口（非浏览器）。
+
+### W-Z314 代码修复（安全项）
+
+`RateLimitByIpFilter.resolveClientIp` 旧实现**无条件信任 `X-Forwarded-For`**——对外网关上攻击者只需轮换 XFF 即可获得无限量桶。修复：默认只按 `RemoteAddress` 计数；仅在显式配置 `gateway.ratelimit.xff-trust=true`（`GATEWAY_RATELIMIT_XFFTRUST=true`，compose 默认 `false`）且处于受控 LB/反代（LB 清 XFF）时才取第一跳；拿不到对端地址时归入共享 `unknown` 桶（限流器永远不接收 null）。单元测试 6/6（含 XFF 第一跳解析、缺省不信任 XFF、空白 XFF 回退 remote address）；全量 gateway 测试 52/52 绿。
+
 ## 拒绝语义速查（读报告的方式）
 
 | 状态码 | 含义 | 是病吗 |

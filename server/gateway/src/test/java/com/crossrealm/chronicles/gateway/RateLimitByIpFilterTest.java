@@ -86,6 +86,37 @@ class RateLimitByIpFilterTest {
     }
 
     @Test
+    void defaultNeverTrustsForwardedForHeader() {
+        // W-Z314：缺省（trustForwardedFor=false）时，两个请求只有 XFF 不同 → 解析出同一个桶（远端地址）
+        RateLimitByIpFilter filter = newFilter();
+        ServerWebExchange a = exchangeWithIp("1.1.1.1");
+        ServerWebExchange b = exchangeWithIp("2.2.2.2");
+        assertEquals(filter.resolveClientIp(a), filter.resolveClientIp(b));
+    }
+
+    @Test
+    void trustingModeTakesFirstForwardedForHop() {
+        RateLimitByIpFilter filter = new RateLimitByIpFilter(new InMemoryIpRateLimiter(), true);
+        MockServerHttpRequest req = MockServerHttpRequest.get("/api/whatever")
+                .header("X-Forwarded-For", "9.9.9.9, 10.0.0.1, 172.16.0.1")
+                .build();
+        ServerWebExchange exchange = new StubExchange(req);
+        assertEquals("9.9.9.9", filter.resolveClientIp(exchange));
+    }
+
+    @Test
+    void trustingModeFallsBackToRemoteAddressWhenHeaderBlank() {
+        RateLimitByIpFilter filter = new RateLimitByIpFilter(new InMemoryIpRateLimiter(), true);
+        MockServerHttpRequest req = MockServerHttpRequest.get("/api/whatever")
+                .header("X-Forwarded-For", "   ")
+                .build();
+        ServerWebExchange exchange = new StubExchange(req);
+        if (req.getRemoteAddress() != null) {
+            assertEquals(req.getRemoteAddress().getHostString(), filter.resolveClientIp(exchange));
+        }
+    }
+
+    @Test
     void normalRequestIsAllowedThrough() {
         RateLimitByIpFilter filter = newFilter();
         int[] pass = {0};

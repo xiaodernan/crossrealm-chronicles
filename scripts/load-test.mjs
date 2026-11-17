@@ -36,7 +36,9 @@ const DURATION_MS = parseIntArg(getArg('--duration-ms'), 15000);
 const JSON_OUT = process.argv.includes('--json');
 const TIMEOUT_MS = parseIntArg(getArg('--timeout-ms'), 10000);
 /** 轮转 X-Forwarded-For：把 N 个虚拟玩家摊到 N 个不同源 IP，模拟真实分布式玩家（而不是同一 localhost 撞同一条 IP 限流）。
- *  gateway 有意信任 XFF（代理部署），此模式测的是**限流器之外**的整条链路。
+ *  W-Z314 起网关默认**不信任** XFF（任何客户端都可以伪造第一跳 IP → 限流器形同空设
+ *  的反面示范）；只有部署位于受控反代/LB 之后、且 LB 清客户端 XFF 并自己写真值时
+ *  `GATEWAY_RATELIMIT_XFFTRUST=true`，这个 flag 才能把限流分散到 N 个 IP。
  *  不带这个 flag：所有请求来自同一个 IP —— 那会测出"限流器扛住了"（这也是一件事）。 */
 const SPOOF_IPS = getArg('--spoof-ips') === 'true';
 

@@ -8,6 +8,8 @@ import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -29,8 +31,26 @@ public class RateLimitByIpFilter implements GlobalFilter, Ordered {
 
     private final IpRateLimiter limiter;
 
+    /**
+     * W-Z314：{@code trustForwardedFor} 默认 {@code false}——**不信任**客户端送来的
+     * {@code X-Forwarded-For}（普通对外网关上，任何客户端都可以伪造第一跳 IP，把
+     * 60 次/10s 的桶当成无限额度刷下游）。
+     * <p>只有在「链路前面有受控反向代理/负载均衡器、且它会清掉客户端 XFF 并自己
+     * 写真值」的部署里才应置 {@code true}（compose 里按 {@code GATEWAY_RATELIMIT_XFFTRUST}
+     * 显式开启——Spring relaxed binding 把 {@code gateway.ratelimit.xff-trust} 压平成
+     * {@code XFFTRUST}；缺省 false）。
+     */
+    private final boolean trustForwardedFor;
+
     public RateLimitByIpFilter(IpRateLimiter limiter) {
+        this(limiter, false);
+    }
+
+    @Autowired
+    public RateLimitByIpFilter(IpRateLimiter limiter,
+            @Value("${gateway.ratelimit.xff-trust:false}") boolean trustForwardedFor) {
         this.limiter = limiter;
+        this.trustForwardedFor = trustForwardedFor;
     }
 
     @Override
@@ -56,17 +76,27 @@ public class RateLimitByIpFilter implements GlobalFilter, Ordered {
                 });
     }
 
-    /** 先信 X-Forwarded-For（信任代理），再退到远程地址 */
-    private String resolveClientIp(ServerWebExchange exchange) {
-        String xff = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
-        if (xff != null && !xff.isBlank()) {
-            int comma = xff.indexOf(',');
-            return (comma >= 0 ? xff.substring(0, comma) : xff).trim();
+    /**
+     * 解析客户端 IP。
+     * <p>默认（{@code trustForwardedFor=false}）只用连接对端地址——XFF 是请求头，
+     * 外网客户端想怎么写就怎么写；信它的限流器等于关掉限流器。
+     * <p>仅在部署位于受控反向代理/负载均衡之后（LB 会清掉客户端 XFF 并自己写第一跳）
+     * 时置 true，此时取 XFF 第一个 hop（离客户端最近的身份）。
+     */
+    String resolveClientIp(ServerWebExchange exchange) {
+        if (trustForwardedFor) {
+            String xff = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
+            if (xff != null && !xff.isBlank()) {
+                int comma = xff.indexOf(',');
+                return (comma >= 0 ? xff.substring(0, comma) : xff).trim();
+            }
         }
-        if (exchange.getRequest().getRemoteAddress() != null) {
+        if (exchange.getRequest().getRemoteAddress() != null
+                && exchange.getRequest().getRemoteAddress().getHostString() != null) {
             return exchange.getRequest().getRemoteAddress().getHostString();
         }
-        return null;
+        // 拿不到对端地址时归入共享的 unknown 桶——限流器永远看到非空键
+        return "unknown";
     }
 
     @Override

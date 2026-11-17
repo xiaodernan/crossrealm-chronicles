@@ -167,6 +167,10 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: "6379"
       GATEWAY_RATELIMIT_BACKEND: redis
+      # W-Z314：缺省不信任客户端 XFF——对外网关上 XFF 可伪造（限流器就是摆设）；只有部署在
+      # 受控反代/LB 之后、且 LB 清掉客户端 XFF 时，才设 GATEWAY_RATELIMIT_XFFTRUST=true
+      # （relaxed binding：gateway.ratelimit.xff-trust → GATEWAY_RATELIMIT_XFFTRUST）。
+      GATEWAY_RATELIMIT_XFFTRUST: ${GATEWAY_RATELIMIT_XFFTRUST:-false}
       MANAGEMENT_HEALTH_REDIS_ENABLED: "true"
     depends_on:
       game-service:
