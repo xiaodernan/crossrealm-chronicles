@@ -570,9 +570,9 @@ export class Enemy {
         });
       }
     }
-    // W-B7 尾巴：formation → 周围同类得急速
+    // W-B7 尾巴：formation → 周围同类得急速（候选池走 ctx.neighbors —— 不再每 cast 遍历整棵场景树）
     if (move.haste) {
-      this.applyHasteToAllies(move.haste.radius, move.haste.duration * 1000, move.haste.mult);
+      this.applyHasteToAllies(move.haste.radius, move.haste.duration * 1000, move.haste.mult, ctx);
     }
     // W-B7 尾巴：scan → 标记玩家（受伤害提升）
     if (move.mark) {
@@ -1078,10 +1078,25 @@ export class Enemy {
    * @param {number} radius 搜索半径（米）
    * @param {number} durationMs 急速持续毫秒数
    * @param {number} mult 急速乘数（默认 this.hasteMult）
+   * @param {object|null} ctx 可选：含 `neighbors`（EnemyManager 共享的敌人数组）——
+   *   有候选池就只扫这一份；缺省时才退回整棵场景树（旧路径）。
    */
-  applyHasteToAllies(radius, durationMs, mult = this.hasteMult) {
-    if (!this.scene || typeof this.scene.traverse !== 'function') return;
+  applyHasteToAllies(radius, durationMs, mult = this.hasteMult, ctx = null) {
     const r2 = radius * radius;
+    const pool = ctx && Array.isArray(ctx.neighbors) ? ctx.neighbors : null;
+    if (pool) {
+      for (const obj of pool) {
+        if (obj === this || !obj.alive || obj.type !== this.type || obj.hasteTimer === undefined) continue;
+        const dx = obj.position.x - this.position.x;
+        const dz = obj.position.z - this.position.z;
+        if (dx * dx + dz * dz <= r2) {
+          obj.hasteTimer = Math.max(obj.hasteTimer, durationMs);
+          obj.hasteMult = Math.max(obj.hasteMult ?? 1, mult);
+        }
+      }
+      return;
+    }
+    if (!this.scene || typeof this.scene.traverse !== 'function') return;
     this.scene.traverse((obj) => {
       if (obj !== this && obj.alive && obj.type === this.type && obj.hasteTimer !== undefined) {
         const dx = obj.position.x - this.position.x;

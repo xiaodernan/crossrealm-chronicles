@@ -54,8 +54,15 @@ export class SpatialGrid {
     return Number.isFinite(r) && r > 0 ? r : 0;
   }
 
+  /**
+   * 格子坐标 → 精确数值键（不做字符串拼接）。
+   * 要求 |cell| < 32768（16m 格 → ±524 km）；超出时退化为字符串键，不出静默重复。
+   */
   static cellKey(cx, cz) {
-    return `${cx},${cz}`;
+    if (Math.abs(cx) < 32768 && Math.abs(cz) < 32768) {
+      return (cx + 32768) * 65536 + (cz + 32768);
+    }
+    return `${cx}|${cz}`;
   }
 
   cellOf(x, z) {

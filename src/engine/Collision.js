@@ -84,6 +84,19 @@ export class CollisionWorld {
     this.colliders = [];
     this.grid = new Map();
     this.built = false;
+    // 查询期 scratch：整个候选收集只借这具数组，避免每帧每次子步各造一份
+    this._scratch = [];
+    /** 每次 candidates() 一个唯一 int 戳（取模回绕的 int32）；配合 _stamp 免掉 Set 分配 */
+    this._queryId = 0;
+    /** 每个碰撞体上一次出现在候选里时的查询戳（Int32Array 按 id 下标） */
+    this._stamp = new Int32Array(16);
+    /** 碰撞体 id 发放器——与 `colliders.length` 解耦：remove() 会让长度回退，id 绝不能回退 */
+    this._nextId = 0;
+  }
+
+  /** 格子坐标 → 精确数值键（避免字符串拼接与哈希）。仅适用于 |cell| < 32768，*2^31 内不冲突 */
+  static #cellKey(ix, iz) {
+    return (ix + 32768) * 65536 + (iz + 32768);
   }
 
   /**
@@ -102,8 +115,13 @@ export class CollisionWorld {
   }
 
   add(c) {
-    c.id = this.colliders.length;
+    c.id = this._nextId++;
     if (c.shape === 'box') c.rotated = !!c.rot;
+    if (c.id >= this._stamp.length) {
+      const next = new Int32Array(Math.max(this._stamp.length * 2, c.id + 1));
+      next.set(this._stamp);
+      this._stamp = next;
+    }
     this.colliders.push(c);
     this.built = false;
     return c;
@@ -121,7 +139,7 @@ export class CollisionWorld {
       const iz1 = Math.floor(b.maxZ / cs);
       for (let ix = ix0; ix <= ix1; ix++) {
         for (let iz = iz0; iz <= iz1; iz++) {
-          const key = `${ix}|${iz}`;
+          const key = CollisionWorld.#cellKey(ix, iz);
           let arr = this.grid.get(key);
           if (!arr) this.grid.set(key, (arr = []));
           arr.push(c);
@@ -131,22 +149,36 @@ export class CollisionWorld {
     this.built = true;
   }
 
+  /**
+   * 半径覆盖区内的碰撞体候选（未排序）。
+   *
+   * 性能约定（W-Z335）：返回的是**实例级 scratch 数组**——内容正确、但**不是调用方拥有的对象**。
+   * 调用方必须**同步消费**（for..of / .length / 立刻用完），不得存进变量下一帧再读、不得 push 进
+   * 别的数组、不得跨子步之间交错读取（`moveCircle` 内的子步循环每轮都重新调用本函数）。
+   * 需要持有结果的调用方：逐元素 `.slice()` 拷贝自己留存。
+   *
+   * 内部：数值格键 + 每查询 int 戳（`_stamp`）——零字符串拼接、零 Set、零中间对象。
+   */
   candidates(x, z, radius) {
     if (!this.built) this.build();
     const cs = this.cellSize;
-    const out = [];
-    const seen = new Set();
+    const out = this._scratch;
+    out.length = 0;
+    this._queryId = (this._queryId + 1) | 0;
+    const q = this._queryId;
+    const stamp = this._stamp;
     const ix0 = Math.floor((x - radius) / cs);
     const ix1 = Math.floor((x + radius) / cs);
     const iz0 = Math.floor((z - radius) / cs);
     const iz1 = Math.floor((z + radius) / cs);
     for (let ix = ix0; ix <= ix1; ix++) {
       for (let iz = iz0; iz <= iz1; iz++) {
-        const arr = this.grid.get(`${ix}|${iz}`);
+        const arr = this.grid.get(CollisionWorld.#cellKey(ix, iz));
         if (!arr) continue;
         for (const c of arr) {
-          if (seen.has(c.id)) continue;
-          seen.add(c.id);
+          const id = c.id;
+          if (stamp[id] === q) continue;
+          stamp[id] = q;
           out.push(c);
         }
       }

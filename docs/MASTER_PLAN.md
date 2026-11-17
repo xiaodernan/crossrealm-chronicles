@@ -15,6 +15,16 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-18 · W-Z335 热路径优化五连 + formation 急速复活 + 压测实录（真上游 10 healthy · verify ALL VERIFY CHECKS PASSED）**：
+> 一、**CollisionWorld.candidates() 消灭每查询 3 件垃圾**：返回实例级 scratch（调用方同步消费、不得保留）＋ 数值格键 `(ix+32768)*65536+(iz+32768)`（不再拼 `` 字符串）＋ Int32Array `_stamp` 戳去重（不再造 Set）＋ `_nextId` 单调发钱（`remove()` 后新增 id 不再撞号）。热路径 `moveCircle`/`unpenetrate`/`supportAt`/`blockersAt`/`blockedBy` 全部在线程内消费，零泄漏。
+> 二、**SpatialGrid.cellKey 数值化**（插入桶与查询方同一键，Υ 排序不变）。
+> 三、**Separation 内联改写**：不再对每个邻居分配 `{x,z}`（一场 30×8 场景每帧砍掉 ~500 个短命对象），运算顺序与原版逐位一致（golden `enemy-ai.test.js` 逐字验证）。
+> 四、**Squad.note/drop O(1)**：`_members: Set` 消去每个非仇恨兵每帧的 `indexOf` O(n²) 扫描。
+> 五、**`findFarthestRoom`（唯一的 BFS）**：`q.shift()` O(n) 出队 + 每节点扫全部 doors O(V·E) + 逐条 `rooms.find` O(n²) ⇒ 邻接表 + 队头下标 + id→room Map，O(V+E)；**BFS 访问顺序与旧版逐位一致**（Boss 场归属不漂，maze-shuffle-order 门禁绿）。
+> 六、**formation 急速复活（真 bug）**：`applyHasteToAllies` 旧走 `scene.traverse`——Enemy 实例**从不**挂在场景图上（只有 mesh group 挂），`alive/type/hasteTimer` 三格全为 undefined ⇒ 匹配数=0，formation 招的「半径内同类得急速」一生没生效过。改走 `ctx.neighbors`（活着的敌人 + 玩家身体分离体）⇒ 同类/半径内/活着才入账。**golden 读数被诚实复算**：连换·起手聚合 `[60,83,135,135] → [54,87,142,142]`（急速真实生效、节奏加快）；新增 `tests/haste-formation.test.js` 5 例钉住新路径。
+> 七、**压测实录（W-Z335 · Docker Desktop 本日反复崩溃两次，stack 复位至 10/10 healthy，verify ALL VERIFY CHECKS PASSED）**：8 个一次性容器（独立源 IP）× `--scenario mixed` × 40 并发 × 10s ⇒ **37,363 次请求 aggregate ≈3,736 rps，p50 36–96ms，p99 ≤ 733ms，479 ok / 36,883 limited（429·治理器每源 60/10s 精确压住）/ **1 个 5xx**；治理器抗住全洪峰无崩溃。修 `scripts/stress-load.mjs`：Windows libuv 硬退出 `UV_HANDLE_CLOSING` 崩溃（改 `process.exitCode` + 自然回落）、新增 `--accept-limited`（退出码只按非 429/413 真失败判定）、输出 `limited`/`errRateNoLimited`；host `127.0.0.1:28080` 本地端口转发今日不可达（容器内部实测一切 200/verify 绿）。
+> Tests **6829/6829 ✓** · Build ✓ · Size ✓（首屏余 0.38 MiB）。
+>
 > **2026-11-18 · W-Z334 第164卷入典《五个字 / Five Characters》——卷十七之二 · 第七百零一年 · 五个字**：立春后第二十八周——周一——晚上——天又黑了——母亲把盒子放回原处——但阿石记得那五个字「七百零一年至此」——他躺在床上数着——他起身走到灶前——灶火燃着——他说「妈——那个字是谁写的」——母亲在屋里回答「写的人——早不到了」——阿石说「那它怎么还在发光」——母亲没答——过了一会儿——母亲从屋里出来——她坐在灶前——她盯着灶火——她低声说「因为有人替它添柴」——阿石说「谁」——母亲说「你」——阿石说「我」——母亲点了点头——她说「七百年来——每一代守夜人都这样问——每一代都有人回答——你是第七百零一年的回答」——阿石没出声——灶火燃着。
 > 交付：creative/novel/164-五个字.md + en 孪生 164-five-characters.md；novella 164 × 2 = 328 模块（典籍馆现为 164 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：359 源；showcase feed 新增 W-Z334 实录。
 >

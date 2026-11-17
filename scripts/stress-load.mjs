@@ -21,6 +21,13 @@
  * - `fail` = 任何非预期状态码（全部场景 2xx 为绿；预期 4xx 仅出现在 429/413 阶）/ 网络错误 / 超时视为失败；
  * - 退出码：`--fail-on-5xx`（默认开）任一 5xx ⇒ 1；`--max-fail-rate <0-1>=0.02`（默认 2%）失败率超限 ⇒ 1；否则 0。
  *
+ * ## 预期 4xx（治理器是功能，不是故障）
+ * Spring Cloud Gateway 的按源IP限流（`maxRequests`/`windowMs`，默认 60 次 / 10 秒）会把
+ * 超额请求一律以 429 打下来。单源冲击时这就是**预期结果**，不是系统脆弱：报告里单独列
+ * `limited`（429/413 计数）与 `errRateNoLimited`；传 `--accept-limited` 后，退出码只按
+ * 「非 429/413 的真失败」+ 5xx 判定（多源 × 限流压测时用这个）。未传时行为与旧版一致。
+ * `limited` 与 `errRateNoLimited` 始终输出，便于人工看板直接截取。
+ *
  * ## 用法
  *   node scripts/stress-load.mjs --target http://localhost:8081 --scenario readBurst --concurrency 120 --duration 25
  *   node scripts/stress-load.mjs --scenario writeBurst --concurrency 40 --duration 15
@@ -62,6 +69,7 @@ const timeoutMs = Number(opt('timeout', DEFAULTS.timeoutMs));
 const failRate = Number(opt('max-fail-rate', DEFAULTS.failRate));
 const failOn5xx = !args.includes('--no-fail-on-5xx');
 const asJson = args.includes('--json');
+const acceptLimited = args.includes('--accept-limited');
 
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
 const payload = (kind) => {
@@ -170,7 +178,12 @@ const failCount = failures.length;
 const fivexx = results.filter((r) => r.status >= 500 && r.status < 600).length;
 const count2xx = results.filter((r) => r.status >= 200 && r.status < 300).length;
 const count4xx = results.filter((r) => r.status >= 400 && r.status < 500).length;
+const limited = results.filter((r) => r.status === 429 || r.status === 413).length;
+const realFailures = acceptLimited
+  ? results.filter((r) => !r.ok || (r.status >= 400 && r.status !== 429 && r.status !== 413)).length
+  : failCount;
 const errRate = results.length ? failCount / results.length : 0;
+const errRateNoLimited = results.length ? realFailures / results.length : 0;
 const sorted = [...results].map((r) => r.latency).sort((a, b) => a - b);
 const pct = (p) => (sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] : 0);
 const avg = sorted.length ? sorted.reduce((a, b) => a + b, 0) / sorted.length : 0;
@@ -180,7 +193,8 @@ const actualRps = results.length ? results.length / wallSec : 0;
 
 const report = {
   scenario, target, concurrency, durationSec, issued: results.length,
-  ok: count2xx, client: count4xx, server: fivexx, errRate,
+  ok: count2xx, client: count4xx, server: fivexx, limited, errRate,
+  errRateNoLimited: Number(errRateNoLimited.toFixed(4)),
   latencyMs: { p50: Math.round(pct(0.5)), p95: Math.round(pct(0.95)), p99: Math.round(pct(0.99)), max: Math.round(pct(1)), avg: Math.round(avg) },
   rpsApprox: Number(actualRps.toFixed(1)),
   okRate: Number((count2xx / Math.max(1, results.length)).toFixed(4)),
@@ -189,10 +203,13 @@ const report = {
 if (asJson) {
   console.log(JSON.stringify(report, null, 2));
 } else {
-  console.log(`stress-load ${scenario} → ${target}`);
-  console.log(`issued=${report.issued} ok=${report.ok} 4xx=${report.client} 5xx=${report.server} errRate=${(report.errRate * 100).toFixed(2)}%`);
+  console.log(`stress-load ${scenario} → ${target}${acceptLimited ? ' [accept-limited]' : ''}`);
+  console.log(`issued=${report.issued} ok=${report.ok} 4xx=${report.client} (limited=${report.limited}) 5xx=${report.server} errRate=${(report.errRate * 100).toFixed(2)}% errRateNoLimited=${(report.errRateNoLimited * 100).toFixed(2)}%`);
   console.log(`latency p50=${report.latencyMs.p50}ms p95=${report.latencyMs.p95}ms p99=${report.latencyMs.p99}ms max=${report.latencyMs.max}ms avg=${report.latencyMs.avg}ms`);
   console.log(`rps(approx)=${report.rpsApprox}`);
 }
-const shouldFail = errRate > failRate || (failOn5xx && fivexx > 0);
-process.exit(shouldFail ? 1 : 0);
+const judgeRate = acceptLimited ? errRateNoLimited : errRate;
+const shouldFail = judgeRate > failRate || (failOn5xx && fivexx > 0);
+// Windows libuv 会因「未来得及关闭的 fetch 句柄」在 process.exit 硬退出路径上触发
+// STATUS_STACK_BUFFER_OVERRUN（0xC0000409 / UV_HANDLE_CLOSING）——用 exitCode + 自然回落代替硬退出。
+process.exitCode = shouldFail ? 1 : 0;

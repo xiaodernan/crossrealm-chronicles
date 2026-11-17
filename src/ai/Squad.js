@@ -39,6 +39,8 @@ export class SquadController {
     this.seats = new Map();
     /** @type {object[]} 排队顺序：轮转唯一认的依据，先进先轮 */
     this.line = [];
+    /** line 的 O(1) 成员判定（`note`/`drop` 每帧走两遍，不许再线性扫表） */
+    this._members = new Set();
   }
 
   /**
@@ -50,13 +52,13 @@ export class SquadController {
    */
   note(enemy, wants) {
     if (!enemy || enemy.isBoss) return;
-    const i = this.line.indexOf(enemy);
     if (!wants) {
       this.drop(enemy);
       return;
     }
-    if (i >= 0) return;
+    if (this._members.has(enemy)) return;          // O(1)，不再线性扫表
     this.line.push(enemy);
+    this._members.add(enemy);
     this._refill();                                 // 空着的坑按名次填，不等下一次 tick
   }
 
@@ -107,6 +109,7 @@ export class SquadController {
     if (!enemy || enemy.isBoss) return;
     this.leases.delete(enemy);
     this.seats.delete(enemy);
+    if (!this._members.delete(enemy)) return;      // 本来就不在名单里——零数组操作
     const i = this.line.indexOf(enemy);
     if (i >= 0) this.line.splice(i, 1);
     this._refill();
@@ -158,6 +161,7 @@ export class SquadController {
     this.leases.clear();
     this.seats.clear();
     this.line.length = 0;
+    this._members.clear();
   }
 
   /** 按名次把空坑填上：让位 / 退场 / 新报名之后都走这里，不等下一次 `tick` */
@@ -179,7 +183,10 @@ export class SquadController {
   _rotateOut(enemy) {
     if (!this.seats.delete(enemy)) return false;
     const i = this.line.indexOf(enemy);
-    if (i >= 0) { this.line.splice(i, 1); this.line.push(enemy); }
+    if (i >= 0) {
+      this.line.splice(i, 1);
+      this.line.push(enemy);                        // 摘座排到队尾——仍在名单里
+    }
     return true;
   }
 }

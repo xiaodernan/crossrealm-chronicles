@@ -668,17 +668,34 @@ function drawFromPool(pool, rnd) {
   throw new RangeError(`遭遇池抽样越界：rnd() 给出 ${t + total} / 总权重 ${total}`);
 }
 
+/**
+ * 距出生点最远的房间（Boss 场地点）。
+ * 同级宽邻接表 + 队列头下标推进 + id→room 索引：
+ * 旧实现 q.shift()（O(n) 出队）+ 每节点扫全部 doors（O(V·E)）+ 逐 dist 条目 find（O(n²)）——
+ * 分配 O(V·E) / 比较 O(V·E + n²)，这里压到 O(V+E)。**BFS 访问顺序与旧版逐位一致**（
+ * 邻接数组仍按 doors 数组序入队），因此 Boss 场归属不会漂。
+ */
 function findFarthestRoom(spawn, rooms, doors) {
+  const adj = new Map();
+  for (const door of doors) {
+    let a = adj.get(door.fromRoomId);
+    if (!a) adj.set(door.fromRoomId, (a = []));
+    a.push(door.toRoomId);
+    let b = adj.get(door.toRoomId);
+    if (!b) adj.set(door.toRoomId, (b = []));
+    b.push(door.fromRoomId);
+  }
+  const byId = new Map();
+  for (const r of rooms) byId.set(r.id, r);
   const dist = new Map([[spawn.id, 0]]);
   const q = [spawn.id];
-  while (q.length) {
-    const id = q.shift();
+  for (let head = 0; head < q.length; head++) {
+    const id = q[head];
     const d = dist.get(id);
-    for (const door of doors) {
-      let next = null;
-      if (door.fromRoomId === id) next = door.toRoomId;
-      if (door.toRoomId === id) next = door.fromRoomId;
-      if (next && !dist.has(next)) {
+    const nbs = adj.get(id);
+    if (!nbs) continue;
+    for (const next of nbs) {
+      if (!dist.has(next)) {
         dist.set(next, d + 1);
         q.push(next);
       }
@@ -689,7 +706,7 @@ function findFarthestRoom(spawn, rooms, doors) {
   for (const [id, d] of dist) {
     if (d > bestD) {
       bestD = d;
-      best = rooms.find((r) => r.id === id) ?? best;
+      best = byId.get(id) ?? best;
     }
   }
   return best;
