@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T00:41:20.972Z",
+  "generated_at": "2026-11-17T00:51:43.577Z",
   "branch": "main",
-  "head": "0f39bcca",
-  "total_commits": 2017,
-  "pushed_at": "2026-11-17T08:39:55+08:00",
+  "head": "38fd5a08",
+  "total_commits": 2019,
+  "pushed_at": "2026-11-17T08:50:34+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "38fd5a0",
+      "at": "2026-11-17T08:50:34+08:00",
+      "subject": "feat(canon): W-Z302 第一百四十三卷《纸牌上的那个字 / The Word on the Card》入典——卷十五之四十四"
+    },
+    {
+      "short": "fd2edd8",
+      "at": "2026-11-17T00:41:21Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "0f39bcc",
       "at": "2026-11-17T08:39:55+08:00",
@@ -21,27 +31,17 @@
       "short": "35b7e2c",
       "at": "2026-11-17T08:28:52+08:00",
       "subject": "feat(canon): W-Z300 第一百四十一卷《灶口的纸牌 / The Card by the Stove》入典——卷十五之四十二"
-    },
-    {
-      "short": "ab199f0",
-      "at": "2026-11-17T00:19:48Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "5fbb584",
-      "at": "2026-11-17T08:18:46+08:00",
-      "subject": "feat(canon): W-Z299 第一百四十卷《炉火静了七天 / Seven Days of Silent Fire》入典——卷十五之四十一"
     }
   ],
-  "tracked_files": 1563,
+  "tracked_files": 1565,
   "test_files": 465,
   "i18n_keys": 3259,
-  "lore_sources": 315,
-  "novel_chapters_zh": 142,
-  "novel_chapters_en": 142,
-  "milestone": "W-Z301",
-  "milestone_full": "卷 142 · 六百年守火线（142 / 142 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 315 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：142 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 317,
+  "novel_chapters_zh": 143,
+  "novel_chapters_en": 143,
+  "milestone": "W-Z302",
+  "milestone_full": "卷 143 · 六百年守火线（143 / 143 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 317 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：143 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
