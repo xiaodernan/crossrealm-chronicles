@@ -16,11 +16,11 @@
  * 注意：必须经 Clash Verge（LLM_PROXY_URL=http://127.0.0.1:7897），否则上游 Cloudflare 全量 403。
  */
 import { readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { proxyJsonPost, proxyIsSet } from './_clash-proxy.mjs';
+import { proxyIsSet, curlJsonPost } from './_curl-proxy.mjs';
 
-const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const env = {};
 try {
   for (const line of readFileSync(join(ROOT, '.env'), 'utf8').split(/\r?\n/)) {
@@ -62,10 +62,10 @@ const ask = async (label, question, bodyExcerpt) => {
   };
   const url = `${BASE}/chat/completions`;
   const t0 = Date.now();
-  const res = await proxyJsonPost(url, { 'content-type': 'application/json', accept: 'text/event-stream', authorization: 'Bearer ' + KEY }, body, 120000);
+  const res = await curlJsonPost(url, { 'content-type': 'application/json', accept: 'text/event-stream', authorization: 'Bearer ' + KEY }, body, 120000);
   const latency = Date.now() - t0;
   if (res.status !== 200) {
-    console.log(`${label}: HTTP ${res.status} · ${String(res.body).slice(0, 80)}`);
+    console.log(`${label}: HTTP ${res.status} · ${String(res.body).slice(0, 80)}${res.error ? ' · curl: ' + String(res.error).slice(0, 80) : ''}`);
     return null;
   }
   let cached = null; let prompt = null;

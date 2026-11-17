@@ -1,40 +1,38 @@
 #!/usr/bin/env node
 /**
- * 2026-11-14 W-Z57b：wkapi.pro 缓存命中实测（真上游，~5 次小调用）
+ * 2026-11-17 W-Z308：缓存命中实测（真上游，经 Clash 7897 隧道，curl 出口）
  *
- * 背景（用户连续反馈）：
- *   「为什么缓存命中率低 / 一直显示非流 / 好像流的时候命中率高」
- * 结论已在 W-Z11/W-Z12 修复（stream:true + stream_options.include_usage:true
- * + system message cache_control:ephemeral），这里用**真实调用**实测验证：
- *   ① 非流（stream 缺省）        —— usage 是否可见？
- *   ② 流 + include_usage，无标记 —— cached 是否一直是 0？
- *   ③ 流 + include_usage + cache_control，连发两次 —— 第二次 cached > 0？
+ * 背景：
+ *   scripts/cache-probe.mjs 原先走自写的 `_clash-proxy.mjs`（CONNECT + TLS 裸写）。
+ *   2026-11-17 复测时该隧道稳定失败（上游先于响应头 `end`，报「Clash 隧道：响应没有头部」），
+ *   而同一进程、同一代理、同一 URL 用 curl 实测 HTTP 200 且 usage 完整 —— 失败在自写栈本身。
+ *   本脚本改用 scripts/_curl-proxy.mjs（curl 出口），与上游交互恢复实测能力。
  *
  * 用法：node scripts/cache-probe.mjs
- * 读 .env 的 LLM_API_KEY / LLM_BASE_URL / LLM_MODEL；密钥不打印。
+ * 读 .env 的 LLM_API_KEY / LLM_BASE_URL / LLM_MODEL；密钥不打印、不写盘。
+ *  LLM_PROXY_URL 未设置时默认走 http://127.0.0.1:7897；设为 direct 则直连（不推荐，本机会被拦）。
  */
 import { readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { proxyIsSet, proxyJsonPost } from './_clash-proxy.mjs';
+import { proxyIsSet, curlFetch } from './_curl-proxy.mjs';
 
-const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const env = {};
 try {
   for (const line of readFileSync(join(ROOT, '.env'), 'utf8').split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
     if (m) env[m[1]] = m[2].replace(/^["']|["']$/g, '');
   }
-} catch { /*退回环境变量*/ }
+} catch { /* 退回环境变量 */ }
 const KEY = env.LLM_API_KEY || process.env.LLM_API_KEY;
 const BASE = (env.LLM_BASE_URL || process.env.LLM_BASE_URL || 'https://api.aizzz.xyz/v1').replace(/\/+$/, '');
 const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6.1-terra';
 if (!KEY) { console.error('cache-probe: 缺少 LLM_API_KEY'); process.exit(1); }
+if (!proxyIsSet()) console.log('cache-probe: LLM_PROXY_URL=direct —— 本机直连大概率 403（仅自测用）');
 console.log('cache-probe: base=%s model=%s key=****（不打印）', BASE, MODEL);
 
-/* 足够长的稳定前缀：wkapi 的 prompt-cache 要求 system ≥ 1024 tokens，
-   以下是「跨界纪元顾问设定」原文的摘抄与扩写（约 1200 tokens），
-   与 LlmClient 的 /ai/system-prompt.txt 同一性质——稳定、不含时间戳。 */
+/* 足够长的稳定前缀：>1024 tokens 门槛——与 LlmClient 的 /ai/system-prompt.txt 同一性质 */
 const SYSTEM = [
   '你是「跨界纪元」的资深顾问。你只根据游戏实际存在的系统回答，不虚构不存在的 NPC、道具、任务与数字。',
   '你回答时使用玩家当前语言（中文为主），控制在三段以内：结论 → 理由 → 一条可执行建议。',
@@ -66,86 +64,53 @@ function body({ stream, cacheControl }) {
   return b;
 }
 
-async function call(label, opts) {
-  const useProxy = proxyIsSet();
-  const url = `${BASE}/chat/completions`;
-  const headersCommon = { 'content-type': 'application/json', ...(opts.stream ? { accept: 'text/event-stream' } : {}), authorization: 'Bearer ' + KEY };
-  let res;
-  if (useProxy) {
-    const proxied = await proxyJsonPost(url, headersCommon, body(opts), 120000);
-    console.log('[proxy] status=' + proxied.status);
-    const chunks = [];
-    let bi = 0;
-    for (;;) {
-      const ni = proxied.body.indexOf('\n\n', bi);
-      if (ni < 0) break;
-      chunks.push(proxied.body.slice(bi, ni + 2));
-      bi = ni + 2;
-    }
-    if (bi < proxied.body.length) chunks.push(proxied.body.slice(bi));
-    const pseudo = {
-      ok: proxied.status >= 200 && proxied.status < 300,
-      status: proxied.status,
-      text: async () => proxied.body,
-      json: async () => JSON.parse(proxied.body),
-      body: { getReader: () => ({ read: async () => (chunks.length ? { done: false, value: Buffer.from(chunks.shift()) } : { done: true }) }) },
-    };
-    res = pseudo;
-  } else {
-    res = await fetch(url, {
-      method: 'POST',
-      headers: headersCommon,
-      body: JSON.stringify(body(opts)),
-    });
+function call(label, opts) {
+  const { status, body: raw, error, timeTotal } = curlFetch({
+    url: `${BASE}/chat/completions`,
+    method: 'POST',
+    headers: {
+      accept: opts.stream ? 'text/event-stream' : 'application/json',
+      authorization: 'Bearer ' + KEY,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body(opts)),
+    timeoutMs: 120000,
+  });
+  if (error || status !== 200) {
+    console.log(`${label}: ${error ? 'curl error ' + String(error).slice(0, 120) : 'HTTP ' + status} · ${String(raw).slice(0, 120)}`);
+    return null;
   }
-  if (!res.ok) { console.log(`${label}: HTTP ${res.status} ${(await res.text()).slice(0, 120)}`); return null; }
+  let usage = null, text = '';
   if (!opts.stream) {
-    const j = await res.json();
-    console.log(`${label}: HTTP 200 usage=${JSON.stringify(j.usage)}`);
-    return j.usage ?? null;
-  }
-  // SSE：逐块解析，抓末尾 usage 块
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '', usage = null, text = '';
-  try {
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      let idx;
-      while ((idx = buffer.indexOf('\n\n')) !== -1) {
-        const raw = buffer.slice(0, idx); buffer = buffer.slice(idx + 2);
-        for (const ln of raw.split('\n')) {
-          if (!ln.startsWith('data:')) continue;
-          const data = ln.slice(5).trim();
-          if (data === '[DONE]') continue;
-          try {
-            const j = JSON.parse(data);
-            const delta = j.choices?.[0]?.delta?.content;
-            if (delta) text += delta;
-            if (j.usage) usage = j.usage;
-          } catch { /* partial */ }
-        }
-      }
-    }
-  } catch (streamError) {
-    const msg = streamError?.message ?? String(streamError);
-    console.log(`${label}: SSE 中途断开 (${msg})；保留已收到的 usage: ${JSON.stringify(usage)}`);
+    try { const j = JSON.parse(raw); usage = j.usage ?? null; text = j.choices?.[0]?.message?.content ?? ''; } catch { /* 非 JSON */ }
+    console.log(`${label}: HTTP 200 · ${timeTotal}s · usage=${JSON.stringify(usage)} answer=${String(text).slice(0, 40).replace(/\n/g, ' ')}`);
     return usage;
   }
-  console.log(`${label}: HTTP 200 usage=${JSON.stringify(usage)} answer=${text.slice(0, 40).replace(/\n/g, ' ')}`);
+  for (const block of String(raw).split('\n\n')) {
+    for (const ln of block.split('\n')) {
+      if (!ln.startsWith('data:')) continue;
+      const data = ln.slice(5).trim();
+      if (data === '[DONE]') continue;
+      try {
+        const j = JSON.parse(data);
+        const delta = j.choices?.[0]?.delta?.content;
+        if (delta) text += delta;
+        if (j.usage) usage = j.usage;
+      } catch { /* partial chunk */ }
+    }
+  }
+  console.log(`${label}: HTTP 200 · ${timeTotal}s · usage=${JSON.stringify(usage)} answer=${text.slice(0, 40).replace(/\n/g, ' ')}`);
   return usage;
 }
 
-const u1 = await call('① non-stream, no marker (control)', { stream: false, cacheControl: false });
-const u2 = await call('② stream+include_usage, no marker (control)', { stream: true, cacheControl: false });
-const u3 = await call('③ cold (first prompt_cache_key call)', { stream: true, cacheControl: true });
-const u4 = await call('③ warm #2', { stream: true, cacheControl: true });
-const u5 = await call('③ warm #3', { stream: true, cacheControl: true });
-const u6 = await call('③ warm #4', { stream: true, cacheControl: true });
-const u7 = await call('③ warm #5', { stream: true, cacheControl: true });
-const u8 = await call('③ warm #6', { stream: true, cacheControl: true });
+const u1 = call('① non-stream, no marker (control)', { stream: false, cacheControl: false });
+const u2 = call('② stream+include_usage, no marker (control)', { stream: true, cacheControl: false });
+const u3 = call('③ cold (first prompt_cache_key call)', { stream: true, cacheControl: true });
+const u4 = call('③ warm #2', { stream: true, cacheControl: true });
+const u5 = call('③ warm #3', { stream: true, cacheControl: true });
+const u6 = call('③ warm #4', { stream: true, cacheControl: true });
+const u7 = call('③ warm #5', { stream: true, cacheControl: true });
+const u8 = call('③ warm #6', { stream: true, cacheControl: true });
 
 const cached = (u) => u?.prompt_cache_hit_tokens ?? u?.prompt_tokens_details?.cached_tokens ?? u?.cached_tokens ?? 'no cache field in usage';
 const pct = (u) => {
@@ -155,7 +120,7 @@ const pct = (u) => {
   return String(c);
 };
 console.log('');
-console.log('==== result (③ set carries prompt_cache_key: crossrealm-canon-v1, identical shape to LlmClient) ====');
+console.log('==== result (③ same prompt_cache_key: crossrealm-canon-v1, identical shape to LlmClient) ====');
 console.log('① non-stream  cached =', cached(u1));
 console.log('② stream warm cached =', cached(u2));
 for (const [label, u] of [['cold', u3], ['warm#2', u4], ['warm#3', u5], ['warm#4', u6], ['warm#5', u7], ['warm#6', u8]]) {
