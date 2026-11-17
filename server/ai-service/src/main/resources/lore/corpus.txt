@@ -9967,6 +9967,43 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and seventy-two overall · the seven-hundred-and-first year, tenth part — The Fire Will Remember You.)*
 
+# source: creative/novel/en/173-something-happened.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Eleventh Volume — Something Happened
+
+---
+
+## One Hundred and Seventy-three: Something Happened
+
+The eighth day — late at night — the fire burned.
+
+A-Shi did not sleep — he sat before the stove — his mother pushed the door open — holding a bowl of soup — she looked at him — she said: “Azu, the day he died, was keeping the fire too.”
+
+A-Shi said: “Did he keep it?”
+
+His mother said: “ — he kept it. The next year — the fire had not gone out —”
+
+The fire burned.
+
+A-Shi said nothing — the fire burned.
+
+His mother put the soup in A-Shi’s hand — she said: “Fire doesn’t choose the person — it chooses the one who is willing to stay —”
+
+The fire burned.
+
+A-Shi lowered his head — he finished the soup — he put the bowl away — he said nothing — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and seventy-three overall · the seven-hundred-and-first year, eleventh part — Something Happened.)*
+
 # source: creative/novel/en/18-trilarite-stair.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -23429,6 +23466,43 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百七十二卷 · 卷十七之十 · 第七百零一年 · 火会记住你）*
+
+# source: creative/novel/173-事情发生了.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第十一卷 —— 事情发生了
+
+---
+
+## 一百七十三 · 事情发生了
+
+第八天——深夜——灶火燃着。
+
+阿石没睡——他坐在炉前——他母亲推开门——她手里端着一碗汤——她看了他一眼——她说：「阿祖死那天——也是这样守着。」
+
+阿石说：「他守住了吗？」
+
+母亲说：「——他守住了——第二年——火没有灭——」
+
+灶火燃着。
+
+阿石没出声——灶火燃着。
+
+母亲把汤放在阿石手上——她说：「火不挑人——它挑的——是愿意守住的那个人——」
+
+灶火燃着。
+
+阿石低下头——他把汤喝完——他把碗放好——他没说话——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百七十三卷 · 卷十七之十一 · 第七百零一年 · 事情发生了）*
 
 # source: creative/novel/18-三日陵.md
 # 《跨界纪事：锚火守夜人》
