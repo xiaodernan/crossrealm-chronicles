@@ -9257,6 +9257,53 @@ The fire burned.
 
 *(End of volume XVI · Volume one hundred and fifty-eight overall · the seven-hundred-and-first year, sixth part — The Eighth Grain.)*
 
+# source: creative/novel/en/159-the-first-rain.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVI**: The Seven-hundred-and-first Year — The First Rain
+
+---
+
+## One Hundred and Fifty-nine: The First Rain
+
+Monday of the twenty-sixth week after the spring equinox — afternoon — the sky darkened for a moment — the rain came.
+
+A-Shi stood in the yard — he stretched out a hand — a few drops caught on his fingertips — very light — still carrying a bit of winter's residual cold.
+
+His mother was not at the stove — she was in the house — she heard the rain — she pushed the door open — she looked at A-Shi.
+
+She said: “Come inside.”
+
+A-Shi said: “Just for a moment.”
+
+The rain came down without urgency — one drop at a time — striking the blue-grey stone slabs in the yard — the sound of ceramic.
+
+His mother stood at the door — she did not insist — she just stood — waiting.
+
+The fire burned.
+
+The rain grew a little heavier.
+
+His mother said: “Seven hundred years — this is the first rain of the seven-hundred-and-first year — last year it came crying — this year it comes smiling.”
+
+A-Shi tilted his face upward — rain fell on his face — he did not move.
+
+His mother said: “Last year, after your grandfather left, the rain came — that one — came crying.”
+
+The fire burned.
+
+A-Shi said nothing — he stood for a while — he went back inside — he did not wipe his face — his mother did not hand him a towel — the two of them sat at the stove like that.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVI · Volume one hundred and fifty-nine overall · the seven-hundred-and-first year, seventh part — The First Rain.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -22139,6 +22186,53 @@ F2 隐藏 HUD。
 ---
 
 *（卷十六 · 本章完 · 跨界线总第一百五十八卷 · 第七百零一年第六篇 · 第八个米粒）*
+
+# source: creative/novel/159-第一场雨.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十六**：第七百零一年 —— 第一场雨
+
+---
+
+## 一百五十九 · 第一场雨
+
+立春后第二十六周——周一——下午——天色暗了一瞬——雨下来了。
+
+阿石站在院子里——他伸出手——指尖收了几滴——很轻——还带着点冬天的余寒。
+
+母亲不在灶前——她在屋里——她听见雨声——她推开门——她看阿石。
+
+她说：「回来。」
+
+阿石说：「就一会儿。」
+
+雨下得不急——一滴一滴的——砸在院子里的青石板上——声音瓷瓷的。
+
+母亲站在门边——她没让——她只是站着——等着。
+
+灶火燃着。
+
+雨更大了一些。
+
+母亲说：「七百年了——这是七百零一年的第一场雨——去年它是哭着来的——今年它是笑着来的。」
+
+阿石仰着脸——雨落在他脸上——他没动。
+
+母亲说：「去年你姥爷走了之后——雨也来了——那一场——哭的。」
+
+灶火燃着。
+
+阿石没说话——他站了一会儿——他回到屋里——他没擦脸——母亲也没递毛巾——两个人就那么在灶前坐着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十六 · 本章完 · 跨界线总第一百五十九卷 · 第七百零一年第七篇 · 第一场雨）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记

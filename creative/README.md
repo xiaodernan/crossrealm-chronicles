@@ -204,7 +204,8 @@ creative/music/soundtrack.html
 | 雪落下来 · The Snow Came Down | [the-snow-came-down](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/155-the-snow-came-down.md) |
 | 猫还在里面 · The Cat Is Still Inside | [the-cat-is-still-inside](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/156-the-cat-is-still-inside.md) |
 | 第一个碾盘 · The First Grinding Stone | [the-first-grinding-stone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/157-the-first-grinding-stone.md) |
-| 第八个米粒 · The Eighth Grain | [the-eighth-grain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/158-the-eighth-grain.md) |每一章对应游戏的章节走法：
+| 第八个米粒 · The Eighth Grain | [the-eighth-grain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/158-the-eighth-grain.md) |
+| 第一场雨 · The First Rain | [the-first-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/159-the-first-rain.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
