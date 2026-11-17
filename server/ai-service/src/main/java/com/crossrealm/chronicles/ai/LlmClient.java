@@ -82,6 +82,8 @@ public class LlmClient {
         public static final String FORTUNE_PATH = "crossrealm-fortune-path-v1";
         /** 炉火祈愿 · Hearth Vow. */
         public static final String VIGIL_VOW = "crossrealm-vigil-vow-v1";
+        /** 执笔人 · Boss 前死笔一行（W-Z340）. */
+        public static final String DEATH_EPITAPH = "crossrealm-death-epitaph-v1";
     }
 
     private final AiProperties props;

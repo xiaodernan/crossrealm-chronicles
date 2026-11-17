@@ -410,6 +410,20 @@ export class OnlineServices {
   }
 
   /**
+   * 执笔人 · Boss 前死笔一行（W-Z340，`POST /api/ai/death-epitaph`）——「LLM 作为 NPC」的第三阶段。
+   * 玩家在 Boss 面前倒下数次后，炉火替他收下一滴残墨，回一句正好合适的话（≤45 字，三档口径 3 / 4–6 / ≥7）。
+   * 20s 预算——不劝、不推、不绕；它永远不阻断重生，只是一张递过来的纸条。
+   */
+  async askDeathEpitaph(payload, { signal } = {}) {
+    return this.#jsonRequest('/api/ai/death-epitaph', {
+      method: 'POST',
+      body: payload,
+      timeoutMs: 20000,
+      signal,
+    });
+  }
+
+  /**
    * 烬灯回信 · 烬火答（W-Z292，`POST /api/ai/kindle-letter`）。
    * 终章落定后，玩家在炉边写下的那一行；炉火回一行。
    * 20s 预算——回信不该占用你走开的那几步。

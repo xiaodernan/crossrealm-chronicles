@@ -243,6 +243,7 @@ export const STRINGS_EN = Object.freeze({
   combat_perfect_parry: 'Perfect parry!',
   combat_finisher: 'Combo finisher!',
   death_hint_prefix: 'Hint ·',
+  death_epitaph_label: 'Ledger-Keeper:',
   death_hint_combo: 'Do not get greedy at high combo — save stamina to roll.',
   death_hint_boss: 'Boss fight: {lockOn} to lock, {parry} to parry the red circle or {roll} to roll.',
   death_hint_dungeon: 'In the maze, clear the small enemies before entering the boss room — watch unexplored rooms on the minimap.',

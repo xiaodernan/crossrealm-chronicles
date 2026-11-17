@@ -31,11 +31,32 @@ export class DeathHintDirector {
     deathHintOn('player-respawn', () => this.onRespawn());
   }
 
+  /** 执笔人 · 每三次倒下在 Boss 面前才问一次（fire-and-forget，不阻断重生）。 */
+  maybeAskEpitaph() {
+    if (this.deathCount < 3 || this.deathCount % 3 !== 0) return;
+    if (!this.game?.enemyManager?.boss?.alive) return;
+    const online = this.game?.onlineServices;
+    if (!(online?.enabled?.())) return;
+    if (typeof online.askDeathEpitaph !== 'function') return;
+    const bossName = this.game.enemyManager.boss?.name ?? '未知的 Boss';
+    const attempts = this.deathCount;
+    online
+      .askDeathEpitaph({ bossName, attempts, lang: 'zh' })
+      .then((res) => {
+        const line = res?.data?.line;
+        if (typeof line === 'string' && line.trim()) {
+          this.game.dialog.toast(`${t('death_epitaph_label')} ${line.trim()}`, 5200);
+        }
+      })
+      .catch(() => { /* 纸条没送到——游戏不等它，重生继续 */ });
+  }
+
   onRespawn() {
     this.deathCount += 1;
     // 两层展开：先 `t()` 取文案（键 → 句子），再 `keyText()` 把 `{动作}` 令牌换成真实键名。
     const hint = keyText(t(HINTS.find((h) => h.test(this.game))?.text ?? HINTS[HINTS.length - 1].text));
     this.game.dialog.toast(`${t('death_hint_prefix')} ${hint}`, 4200);
+    this.maybeAskEpitaph();
     this.game.storyJournal?.add?.({
       id: `death-${this.deathCount}-${Date.now()}`,
       category: 'poi',
