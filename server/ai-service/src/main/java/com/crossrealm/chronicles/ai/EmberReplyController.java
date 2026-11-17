@@ -154,12 +154,12 @@ public class EmberReplyController {
     }
 
     private LlmClient.Answer callOrThrow(String system, String user) {
-        return client.complete(system, user);
+        return client.complete(system, user, LlmClient.CacheKeys.EMBER);
     }
 
     /** 分拣：只要答案字节（不需要 model/cached 记账）。 */
     private String callClassifyOrThrow(String user) {
-        return client.complete(CLASSIFIER_SYSTEM, user).answer();
+        return client.complete(CLASSIFIER_SYSTEM, user, LlmClient.CacheKeys.EMBER).answer();
     }
 
     private static final java.util.regex.Pattern CLASSIFY_NOISE =

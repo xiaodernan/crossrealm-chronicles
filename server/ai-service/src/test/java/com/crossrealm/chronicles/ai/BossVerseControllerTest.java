@@ -45,7 +45,7 @@ class BossVerseControllerTest {
 
     @Test
     void 成功时返回一句余火回响() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("火还在——它只是换了个方向烧", "gpt-6.1-terra", false, false, 9L));
 
         mvc.perform(post("/api/ai/boss-verse").contentType(MediaType.APPLICATION_JSON)
@@ -58,14 +58,14 @@ class BossVerseControllerTest {
 
     @Test
     void 人格与顾问回声烬灯都不同() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("收灯", "gpt-6.1-terra", false, false, 1L));
         mvc.perform(post("/api/ai/boss-verse").contentType(MediaType.APPLICATION_JSON)
                         .content(body("archmagus", "大奥术师萨尔林", "zh", "2", "2", "20", "魔法遗境")))
                 .andExpect(status().isOk());
 
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
-        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString());
+        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString(), anyString());
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("倒下了"),
                 "boss-verse 人格应以 Boss 倒下开场，实际：" + captor.getValue().substring(0, 60));
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("星轨顾问"));
@@ -76,14 +76,14 @@ class BossVerseControllerTest {
 
     @Test
     void 账本里的控制字符会被抹掉再进提示词() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("收灯", "gpt-6.1-terra", false, false, 1L));
         mvc.perform(post("/api/ai/boss-verse").contentType(MediaType.APPLICATION_JSON)
                         .content(body("sigil-lord", "\u0000影\u001b界\u0000守护者", "zh", "1", "1", "5", "\r\n灰白森林")))
                 .andExpect(status().isOk());
 
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
-        org.mockito.Mockito.verify(client).complete(anyString(), captor.capture());
+        org.mockito.Mockito.verify(client).complete(anyString(), captor.capture(), anyString());
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("\u001b"));
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("守护者"));
     }
@@ -97,7 +97,7 @@ class BossVerseControllerTest {
 
     @Test
     void 上游不可用时回五零三而不是五零零() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenThrow(new AdvisorUnavailableException("circuit-open"));
 
         mvc.perform(post("/api/ai/boss-verse").contentType(MediaType.APPLICATION_JSON)

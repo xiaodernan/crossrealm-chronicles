@@ -42,7 +42,7 @@ class ArbiterControllerTest {
 
     @Test
     void 成功时返回原文与统计_客户端自己解析JSON文本() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("{\"title\":\"灯还亮着\",\"epilogue\":\"走完七百年的人，门还开着。\",\"omen\":\"下一盏灯，等你叫它的名字。\"}",
                         "gpt-6.1-terra", false, true, 12L));
 
@@ -57,14 +57,14 @@ class ArbiterControllerTest {
 
     @Test
     void 人格提示是烬灯记录者而不是顾问也不是回声先知() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("{}", "gpt-6.1-terra", false, false, 1L));
         mvc.perform(post("/api/ai/arbiter").contentType(MediaType.APPLICATION_JSON)
                         .content(body("quiet", "zh", "", "")))
                 .andExpect(status().isOk());
 
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
-        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString());
+        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString(), anyString());
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("炉火的记录者"));
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("星轨顾问"));
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("回声先知"));
@@ -72,14 +72,14 @@ class ArbiterControllerTest {
 
     @Test
     void 账本里的控制字符会被抹掉再进提示词() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("{}", "gpt-6.1-terra", false, false, 1L));
         mvc.perform(post("/api/ai/arbiter").contentType(MediaType.APPLICATION_JSON)
                         .content(body("keep", "zh", "{\"echoes\":110}\u0000\u001b[2J", "周\r\n弈")))
                 .andExpect(status().isOk());
 
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
-        org.mockito.Mockito.verify(client).complete(anyString(), captor.capture());
+        org.mockito.Mockito.verify(client).complete(anyString(), captor.capture(), anyString());
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("\u001b"));
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("echoes"));
     }
@@ -96,7 +96,7 @@ class ArbiterControllerTest {
 
     @Test
     void 上游不可用时回五零三而不是五零零() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenThrow(new AdvisorUnavailableException("circuit-open"));
 
         mvc.perform(post("/api/ai/arbiter").contentType(MediaType.APPLICATION_JSON)

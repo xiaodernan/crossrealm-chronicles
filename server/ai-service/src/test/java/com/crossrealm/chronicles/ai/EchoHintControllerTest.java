@@ -40,7 +40,7 @@ class EchoHintControllerTest {
 
     @Test
     void 成功时返回一句梦话() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("星河在那之前已经有人走过", "gpt-6-sol", false, false, 10L));
 
         mvc.perform(post("/api/ai/echo-hint").contentType(MediaType.APPLICATION_JSON)
@@ -53,21 +53,21 @@ class EchoHintControllerTest {
 
     @Test
     void 人格提示与星轨顾问不同() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("好", "gpt-6-sol", false, false, 1L));
         mvc.perform(post("/api/ai/echo-hint").contentType(MediaType.APPLICATION_JSON)
                         .content(body("CYBER", "浮空赌场", "云层里的赌场")))
                 .andExpect(status().isOk());
 
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
-        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString());
+        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString(), anyString());
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("回声先知"));
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("星轨顾问"));
     }
 
     @Test
     void 上游不可用时五零三而不是五百() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenThrow(new AdvisorUnavailableException("circuit-open"));
 
         mvc.perform(post("/api/ai/echo-hint").contentType(MediaType.APPLICATION_JSON)

@@ -50,7 +50,7 @@ public class EchoHintController {
         String user = "母题：%s%n回声名：%s%n回声描述：%s%n%n请给一个游戏内的暗示（只回一句，不超过 45 字）："
                 .formatted(request.franchise(), request.title(),
                         request.desc() == null || request.desc().isBlank() ? "（无描述）" : request.desc());
-        LlmClient.Answer answer = client.complete(ECHO_SYSTEM, user);
+        LlmClient.Answer answer = client.complete(ECHO_SYSTEM, user, LlmClient.CacheKeys.ECHO);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("available", true);
         body.put("hint", answer.answer());

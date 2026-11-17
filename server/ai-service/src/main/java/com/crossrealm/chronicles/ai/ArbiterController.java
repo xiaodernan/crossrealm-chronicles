@@ -91,7 +91,7 @@ public class ArbiterController {
                         stats.isBlank() ? "（无账本数据）" : stats,
                         player.isBlank() ? "（一名无名旅人）" : player,
                         lang);
-        LlmClient.Answer answer = client.complete(ARBITER_SYSTEM, user);
+        LlmClient.Answer answer = client.complete(ARBITER_SYSTEM, user, LlmClient.CacheKeys.ARBITER);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("available", true);
         body.put("raw", answer.answer());

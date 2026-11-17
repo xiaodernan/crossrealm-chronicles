@@ -61,9 +61,86 @@ public class LlmClient {
     private static final int MAX_CONTEXT_KEYS = 8;
     private static final int MAX_CONTEXT_VALUE = 80;
 
-    /** 上游 prompt-cache 路由键：同前缀的请求导向同一份缓存（不含玩家数据）。 */
-    private static final String PROMPT_CACHE_KEY = "crossrealm-canon-v1";
+    /** Public namespace of cache keys — one key per distinct workload; routing hint only, no player data in keys. */
+    public static final class CacheKeys {
+        private CacheKeys() {}
+        /** 共享前缀缓存桶（v2 大前缀，同 canon family）：direct Codex shape. */
+        public static final String CANON = "crossrealm-canon-v1";
+        /** Ember 答火（W-Z316 烬灯回信/烬火答 + Classifier）：同一前缀，两条后端 lane 下共用一桶. */
+        public static final String EMBER = "crossrealm-ember-v2";
+        /** BossVerse Boss 余火回响. */
+        public static final String BOSSVERSE = "crossrealm-boss-verse-v1";
+        /** Echo Hint — Echo 的实时回声. */
+        public static final String ECHO = "crossrealm-echo-hint-v1";
+        /** Arbiter 终章抉择裁决. */
+        public static final String ARBITER = "crossrealm-arbiter-v1";
+        /** 星轨顾问 · 主对话. */
+        public static final String ADVISOR = "crossrealm-advisor-v1";
+        /** 典籍叩问 · Oracle（大冻结前缀的另一个 lane，分开 sticky） */
+        public static final String ORACLE = "crossrealm-oracle-v1";
+        /** 锚火三问 · Fortune Path. */
+        public static final String FORTUNE_PATH = "crossrealm-fortune-path-v1";
+        /** 炉火祈愿 · Hearth Vow. */
+        public static final String VIGIL_VOW = "crossrealm-vigil-vow-v1";
+    }
+
     private final AiProperties props;
+
+    /** 这答这桶的默认上游 key 在下一行汇编同一条 prefix 而不改变性质 */
+    public Answer complete(String system, String user, String cacheKey) {
+        if (!isConfigured()) throw new AdvisorUnavailableException("not-configured");
+        String key = digest(props.getModel() + "\u0000" + system + "\u0000" + user);
+        String cached = cache.get(key);
+        if (cached != null) {
+            incrementCacheHitMeter();
+            return new Answer(cached, props.getModel(), true, false, 0L);
+        }
+
+        if (!breaker.allow()) throw new AdvisorUnavailableException("circuit-open");
+
+        String body = requestBody(system, user, cacheKey);
+        long started = System.nanoTime();
+        int retries = Math.max(0, props.getMaxRetries());
+        LlmUpstreamException last = null;
+
+        for (int attempt = 0; attempt <= retries; attempt++) {
+            try {
+                if (attempt > 0) backoff(attempt);
+                upstreamCalls.incrementAndGet();
+                LlmTransport.UpstreamReply reply = transport.postJsonWithUsage(endpoint(), props.getApiKey(), body, props.getTimeout());
+                String raw = reply.rawJson();
+                String answer = extractAnswer(raw);
+                incrementMeters(reply, true);
+                lastUpstreamUsage = toUsage(reply);
+                if (lastUpstreamUsage != null) {
+                    Integer cachedTokens = lastUpstreamUsage.cachedTokens();
+                    Integer promptTokens = lastUpstreamUsage.promptTokens();
+                    String ratio = (cachedTokens != null && promptTokens != null && promptTokens > 0)
+                            ? String.format("%.1f%%", cachedTokens * 100.0 / promptTokens) : "n/a";
+                    boolean upstreamCached = cachedTokens != null && cachedTokens > 0;
+                    LOG.info("ai.upstream.usage cache={} model={} prompt={} completion={} cached={} cachedRatio={} upstreamCached={}",
+                            cacheKey, props.getModel(), promptTokens, lastUpstreamUsage.completionTokens(),
+                            cachedTokens, ratio, upstreamCached);
+                }
+                breaker.onSuccess();
+                cache.put(key, answer);
+                boolean upstreamCached = reply.cachedTokens() != null && reply.cachedTokens() > 0;
+                return new Answer(answer, props.getModel(), false, upstreamCached, elapsedMs(started));
+            } catch (LlmUpstreamException e) {
+                last = e;
+                if (!e.retryable()) break;
+            }
+        }
+
+        breaker.onFailure();
+        incrementMeters(null, false);
+        throw new AdvisorUnavailableException("upstream-" + (last == null ? 0 : last.status()));
+    }
+
+    /** 文本兼容（旧的调用点）—— 落在 canon assuredly、body-shape 不变。 */
+    public Answer complete(String system, String user) {
+        return complete(system, user, CacheKeys.CANON);
+    }
     private final LlmTransport transport;
     private final ObjectMapper mapper;
     private final ResponseCache cache;
@@ -129,63 +206,7 @@ public class LlmClient {
 
     public Answer ask(String question, Map<String, Object> context) {
         if (question == null || question.isBlank()) throw new IllegalArgumentException("blank question");
-        return complete(systemPrompt, userMessage(question, context));
-    }
-
-    /**
-     * 通用完成入口：星轨顾问（/api/ai/chat）与回声灯（/api/ai/echo-hint）共用
-     * 同一条「摘要 → 缓存 → 熔断 → 选择性重试 → 解析」链路。
-     *
-     * <p>**system 参与缓存键**：两个功能的人格提示不同，若只按 user 文本做键，
-     * 同一段文字会拿到另一个人格的口吻，而且界面上还看不出哪里错了。
-     */
-    public Answer complete(String system, String user) {
-        if (!isConfigured()) throw new AdvisorUnavailableException("not-configured");
-        String key = digest(props.getModel() + "\u0000" + system + "\u0000" + user);
-        String cached = cache.get(key);
-        if (cached != null) {
-            incrementCacheHitMeter();
-            return new Answer(cached, props.getModel(), true, false, 0L);
-        }
-
-        if (!breaker.allow()) throw new AdvisorUnavailableException("circuit-open");
-
-        String body = requestBody(system, user);
-        long started = System.nanoTime();
-        int retries = Math.max(0, props.getMaxRetries());
-        LlmUpstreamException last = null;
-
-        for (int attempt = 0; attempt <= retries; attempt++) {
-            try {
-                if (attempt > 0) backoff(attempt);
-                upstreamCalls.incrementAndGet();
-                LlmTransport.UpstreamReply reply = transport.postJsonWithUsage(endpoint(), props.getApiKey(), body, props.getTimeout());
-                String raw = reply.rawJson();
-                String answer = extractAnswer(raw);
-                incrementMeters(reply, true);
-                lastUpstreamUsage = toUsage(reply);
-                if (lastUpstreamUsage != null) {
-                    Integer cachedTokens = lastUpstreamUsage.cachedTokens();
-                    Integer promptTokens = lastUpstreamUsage.promptTokens();
-                    String ratio = (cachedTokens != null && promptTokens != null && promptTokens > 0)
-                            ? String.format("%.1f%%", cachedTokens * 100.0 / promptTokens) : "n/a";
-                    boolean upstreamCached = cachedTokens != null && cachedTokens > 0;
-                    LOG.info("ai.upstream.usage model={} prompt={} completion={} cached={} cachedRatio={} upstreamCached={}",
-                            props.getModel(), promptTokens, lastUpstreamUsage.completionTokens(), cachedTokens, ratio, upstreamCached);
-                }
-                breaker.onSuccess();
-                cache.put(key, answer);
-                boolean upstreamCached = reply.cachedTokens() != null && reply.cachedTokens() > 0;
-                return new Answer(answer, props.getModel(), false, upstreamCached, elapsedMs(started));
-            } catch (LlmUpstreamException e) {
-                last = e;
-                if (!e.retryable()) break;
-            }
-        }
-
-        breaker.onFailure();
-        incrementMeters(null, false);
-        throw new AdvisorUnavailableException("upstream-" + (last == null ? 0 : last.status()));
+        return complete(systemPrompt, userMessage(question, context), CacheKeys.ADVISOR);
     }
 
     /** ai.upstream 指标装配（W-Z12）：success 由 answer 构建点计；failure 由终态计；cache-hits 由摘要缓存命中计。 */
@@ -260,14 +281,14 @@ public class LlmClient {
         return TRAILING_SLASH.matcher(props.getBaseUrl()).replaceAll("") + "/chat/completions";
     }
 
-    private String requestBody(String system, String user) {
+    private String requestBody(String system, String user, String cacheKey) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", props.getModel());
         // W-Z168：wkapi 网关下实测——stream+include_usage+ephemeral 前缀已能走缓存（首包 null、第二次约 87% 命中）；
         // 加上 prompt_cache_key 后：第二包起稳定 ~96% 命中（实测 4 连包：0 / 5632 / 5632 / 5632 / 5632，6237 token 中缓存 6016）。
         // 该字段是「缓存路由提示」（x-openai prompt_cache_key 语义）：把共享前缀的请求导向同一份缓存，
         // 不含玩家数据、不暴露内容；上游不认该字段时会原样忽略（unknown field 安全丢弃）。
-        body.put("prompt_cache_key", PROMPT_CACHE_KEY);
+        body.put("prompt_cache_key", cacheKey);
         // 系统消息显式打 ephemeral 缓存标记：绝大多数 OpenAI 兼容网关会把这一段
         // 当作可复用前缀写入 prompt-cache；即便上游忽略该字段也毫无副作用（unknown field 被丢弃）。
         // 关键前提：系统提示是**稳定且 ≥1024 token** 的前缀，前缀缓存才会真正生效（见 W-Z-缓存修复）。

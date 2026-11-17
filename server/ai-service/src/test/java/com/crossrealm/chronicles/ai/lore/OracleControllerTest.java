@@ -43,7 +43,7 @@ class OracleControllerTest {
 
     @Test
     void happyPath_returnsOracleAnswerWithSources() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("典籍里没有写为什么，只写了「火还在」。", "gpt-6-sol", false, true, 321L));
 
         Map<String, Object> body = new LinkedHashMap<>();

@@ -84,7 +84,7 @@ public class BossVerseController {
                 + "出处：第 %s 章 · 击杀第 %s 次 · 玩家第 %s 级 · 地带：%s%n"
                 + "%n请只回一行回响。")
                 .formatted(name, bossId, chapter, kills, level, zone.isBlank() ? "（未登记）" : zone);
-        LlmClient.Answer answer = client.complete(BOSS_VERSE_SYSTEM, user);
+        LlmClient.Answer answer = client.complete(BOSS_VERSE_SYSTEM, user, LlmClient.CacheKeys.BOSSVERSE);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("available", true);
         body.put("verse", answer.answer());

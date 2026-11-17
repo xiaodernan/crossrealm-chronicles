@@ -52,9 +52,9 @@ class EmberReplyControllerTest {
 
     @Test
     void 分拣命中的是五条人格之一_编排走对应lane() throws Exception {
-        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("lore"));
-        when(client.complete(eq(EmberReplyController.LORE_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.LORE_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("七百年的火一直在——它知道的人与事，它都记得。"));
 
         mvc.perform(post("/api/ai/ember-reply").contentType(MediaType.APPLICATION_JSON)
@@ -69,9 +69,9 @@ class EmberReplyControllerTest {
 
     @Test
     void 分拣回garbage_fallback到journey() throws Exception {
-        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("不知道"));
-        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("火听见了——它在，就在这锅旁边。"));
 
         mvc.perform(post("/api/ai/ember-reply").contentType(MediaType.APPLICATION_JSON)
@@ -93,8 +93,8 @@ class EmberReplyControllerTest {
             MockMvc inner = MockMvcBuilders.standaloneSetup(new EmberReplyController(c))
                     .setValidator(new LocalValidatorFactoryBean() {{ afterPropertiesSet(); }})
                     .build();
-            when(c.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString())).thenReturn(answerOf(r[0]));
-            when(c.complete(eq(EmberReplyController.laneSystem(r[0])), anyString())).thenReturn(answerOf("回信" + r[0]));
+            when(c.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString(), anyString())).thenReturn(answerOf(r[0]));
+            when(c.complete(eq(EmberReplyController.laneSystem(r[0])), anyString(), anyString())).thenReturn(answerOf("回信" + r[0]));
 
             inner.perform(post("/api/ai/ember-reply").contentType(MediaType.APPLICATION_JSON)
                             .content(body("hello", "keep", "en", "")))
@@ -105,9 +105,9 @@ class EmberReplyControllerTest {
 
     @Test
     void 护栏_编排回了泄漏词_整行作废回安全句() throws Exception {
-        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("journey"));
-        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("我是AI，星轨顾问在此。"));
 
         mvc.perform(post("/api/ai/ember-reply").contentType(MediaType.APPLICATION_JSON)
@@ -119,10 +119,10 @@ class EmberReplyControllerTest {
 
     @Test
     void 护栏_编排回了超长的字_作废回安全句() throws Exception {
-        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("journey"));
         // 61 个汉字（超 60 上限）
-        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("你好世界".repeat(16)));
 
         mvc.perform(post("/api/ai/ember-reply").contentType(MediaType.APPLICATION_JSON)
@@ -134,9 +134,9 @@ class EmberReplyControllerTest {
 
     @Test
     void 护栏_markdown记号被剥掉() throws Exception {
-        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("journey"));
-        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("## 炉火说\n守着，不灭。"));
 
         mvc.perform(post("/api/ai/ember-reply").contentType(MediaType.APPLICATION_JSON)
@@ -152,7 +152,7 @@ class EmberReplyControllerTest {
         MockMvc inner = MockMvcBuilders.standaloneSetup(new EmberReplyController(captor))
                 .setValidator(new LocalValidatorFactoryBean() {{ afterPropertiesSet(); }})
                 .build();
-        when(captor.complete(anyString(), anyString())).thenReturn(answerOf("journey"));
+        when(captor.complete(anyString(), anyString(), anyString())).thenReturn(answerOf("journey"));
 
         inner.perform(post("/api/ai/ember-reply").contentType(MediaType.APPLICATION_JSON)
                         .content(body("今天还好吗", "keep", "zh", "")))
@@ -160,7 +160,7 @@ class EmberReplyControllerTest {
 
         org.mockito.ArgumentCaptor<String> captorSys = org.mockito.ArgumentCaptor.forClass(String.class);
         org.mockito.Mockito.verify(captor, org.mockito.Mockito.times(2)).complete(captorSys.capture(),
-                anyString());
+                anyString(), anyString());
         String first = captorSys.getAllValues().get(0);
         String second = captorSys.getAllValues().get(1);
         // classify 冻结 persona 必须按意图分拣 5 类且不含 story arc 数字
@@ -174,9 +174,9 @@ class EmberReplyControllerTest {
 
     @Test
     void 控制字符净化_空信纸四百_超长信纸四百() throws Exception {
-        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("journey"));
-        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString()))
+        when(client.complete(eq(EmberReplyController.JOURNEY_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("火收到了"));
 
         mvc.perform(post("/api/ai/ember-reply").contentType(MediaType.APPLICATION_JSON)
@@ -201,7 +201,7 @@ class EmberReplyControllerTest {
                 .andExpect(status().isBadRequest());
 
         LlmClient dead = mock(LlmClient.class);
-        when(dead.complete(anyString(), anyString()))
+        when(dead.complete(anyString(), anyString(), anyString()))
                 .thenThrow(new AdvisorUnavailableException("circuit-open"));
         MockMvc deadMvc = MockMvcBuilders.standaloneSetup(new EmberReplyController(dead))
                 .setValidator(new LocalValidatorFactoryBean() {{ afterPropertiesSet(); }})

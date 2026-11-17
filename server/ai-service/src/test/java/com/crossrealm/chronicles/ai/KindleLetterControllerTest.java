@@ -42,7 +42,7 @@ class KindleLetterControllerTest {
 
     @Test
     void 成功时返回炉火写回的那一行() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("这趟没白走——下一锅米要留给后来人。", "gpt-6.1-terra", false, false, 8L));
 
         mvc.perform(post("/api/ai/kindle-letter").contentType(MediaType.APPLICATION_JSON)
@@ -55,14 +55,14 @@ class KindleLetterControllerTest {
 
     @Test
     void 人格与顾问烬灯回信都不同() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("回信的第一笔", "gpt-6.1-terra", false, false, 1L));
         mvc.perform(post("/api/ai/kindle-letter").contentType(MediaType.APPLICATION_JSON)
                         .content(body("收到", "quiet", "zh", "")))
                 .andExpect(status().isOk());
 
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
-        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString());
+        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString(), anyString());
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("炉火的记录者"));
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("守夜人"),
                 "烬火答人格应钉炉火/守夜人这一锚点，实际：" + captor.getValue().substring(0, 120));
@@ -73,14 +73,14 @@ class KindleLetterControllerTest {
 
     @Test
     void 信纸里的控制字符会被抹掉再进提示词() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenReturn(new LlmClient.Answer("火收到了", "gpt-6.1-terra", false, false, 1L));
         mvc.perform(post("/api/ai/kindle-letter").contentType(MediaType.APPLICATION_JSON)
                         .content(body("你好\u0000\u001b[2J炉火", "keep", "zh", "")))
                 .andExpect(status().isOk());
 
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
-        org.mockito.Mockito.verify(client).complete(anyString(), captor.capture());
+        org.mockito.Mockito.verify(client).complete(anyString(), captor.capture(), anyString());
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("\u001b"));
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("炉火"));
     }
@@ -97,7 +97,7 @@ class KindleLetterControllerTest {
 
     @Test
     void 上游不可用时回五零三而不是五零零() throws Exception {
-        when(client.complete(anyString(), anyString()))
+        when(client.complete(anyString(), anyString(), anyString()))
                 .thenThrow(new AdvisorUnavailableException("circuit-open"));
 
         mvc.perform(post("/api/ai/kindle-letter").contentType(MediaType.APPLICATION_JSON)

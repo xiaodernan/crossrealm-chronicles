@@ -78,7 +78,7 @@ public class KindleLetterController {
                 + "旅途账本(stats, 紧凑 JSON 片段)：%s%n"
                 + "%n请写回那一行（只写那一行）。")
                 .formatted(choice, line, stats.isBlank() ? "（无账本数据）" : stats);
-        LlmClient.Answer answer = client.complete(KINDLE_LETTER_SYSTEM, user);
+        LlmClient.Answer answer = client.complete(KINDLE_LETTER_SYSTEM, user, LlmClient.CacheKeys.EMBER);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("available", true);
         body.put("reply", answer.answer());
