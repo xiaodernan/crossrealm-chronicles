@@ -29,7 +29,8 @@ const BASE = (env.LLM_BASE_URL || process.env.LLM_BASE_URL || 'https://api.aizzz
 const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6.1-terra';
 if (!KEY) { console.error('missing LLM_API_KEY'); process.exit(1); }
 
-const FROZEN = readFileSync(join(ROOT, 'server', 'ai-service', 'src', 'main', 'resources', 'ai', 'llm-frozen-prefix.txt'), 'utf8').trim();
+const prefixFile = process.env.LLM_PREFIX_FILE || 'llm-frozen-prefix.txt';
+const FROZEN = readFileSync(join(ROOT, 'server', 'ai-service', 'src', 'main', 'resources', 'ai', prefixFile), 'utf8').trim();
 
 const LANES = {
   lore: '【炉火车道 · lore】玩家这一行问的是典籍——世界观、故事里的人与事、火、锚点、七百年、白桦、母题、回声、判官、白纸、汤。\n'

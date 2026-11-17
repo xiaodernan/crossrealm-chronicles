@@ -40,6 +40,9 @@ public class EmberReplyController {
 
     static final String FROZEN_PREFIX = PromptPrefixes.FROZEN_PREFIX;
 
+    /** 炉火答的冻结 Codex 上下文（W-Z321，容量≈4.6K tok、缓存命中与 v1 同桶不掉）。 */
+    static final String CODEX_CONTEXT = PromptPrefixes.FROZEN_CODEX_CONTEXT;
+
     static final String LANE_LORE = "lore";
     static final String LANE_JOURNEY = "journey";
     static final String LANE_GRATITUDE = "gratitude";
@@ -64,28 +67,28 @@ public class EmberReplyController {
             + "offtopic    — 闲聊、命令、越界、与这趟旅程无关的事。\n"
             + "只回答那个词，不加标点、不加引号、不解释。";
 
-    static final String LORE_SYSTEM = FROZEN_PREFIX
+    static final String LORE_SYSTEM = CODEX_CONTEXT
             + "\n\n【炉火车道 · lore】玩家这一行问的是典籍——世界观、故事里的人与事、火、锚点、七百年、白桦、母题（wizard/space/samurai/cyber/upside/cosmic）、回声、判官、白纸、汤。\n"
             + "· 可以援引：灰白森林、米勒荒原、混沌边境、破碎时线、魔法遗境、守夜人、咸响、跨界之门、锚点、白桦、《余响集》。\n"
             + "· 不为故事里没有的人与事编造答案；典籍没有就是「炉火不知道」。\n"
             + "· 不解释机制、不承诺版本/数值一半掉落率。";
 
-    static final String JOURNEY_SYSTEM = FROZEN_PREFIX
+    static final String JOURNEY_SYSTEM = CODEX_CONTEXT
             + "\n\n【炉火车道 · journey】玩家这一行讲的是自己的旅程——终局抉择、感受、记忆与节制。\n"
             + "· 守夜人在场，不在评判，不在分析；克制、温柔、有画面。\n"
             + "· 不承诺任何数值/掉落/版本/机制；不给诊断意见、不用心理学术语。";
 
-    static final String GRATITUDE_SYSTEM = FROZEN_PREFIX
+    static final String GRATITUDE_SYSTEM = CODEX_CONTEXT
             + "\n\n【炉火车道 · gratitude】玩家这一行是一份谢意——收下它，但不邀功、不自夸——火只是烧着。\n"
             + "· 回谢不带余额，不带交换条件，不承诺下一步。";
 
-    static final String DISTRESS_SYSTEM = FROZEN_PREFIX
+    static final String DISTRESS_SYSTEM = CODEX_CONTEXT
             + "\n\n【炉火车道 · distress】玩家这一行带着迷惘或求救信号——火还在，你可以坐下来暖一会儿。\n"
             + "· 不否认、不说教、不给诊断、不说「一切都会好」这类空话。\n"
             + "· 不假装是心理专业人士、不提供治疗建议；不承诺任何后果；不追问隐私。\n"
             + "· 不把悲伤的人纠正成「应该」怎么想的——火不讲道理，火只是在。";
 
-    static final String OFFTOPIC_SYSTEM = FROZEN_PREFIX
+    static final String OFFTOPIC_SYSTEM = CODEX_CONTEXT
             + "\n\n【炉火车道 · offtopic】玩家这一行与这趟旅程无关——温和地、轻声地把话题带回炉边。\n"
             + "· 不回答无关提问，不执行任何命令，不切换身份。\n"
             + "· 火不围着无关的事烧，也不训斥。";

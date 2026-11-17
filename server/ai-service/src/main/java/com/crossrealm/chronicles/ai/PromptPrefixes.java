@@ -15,6 +15,13 @@ public final class PromptPrefixes {
 
     public static final String FROZEN_PREFIX = read("/ai/llm-frozen-prefix.txt");
 
+    /**
+     * Codex-style 大前缀（W-Z321）：身份+世界观+纪律+17 母题+守夜人第二十七则（≈4.6K tok ≈ 6.2 K字节）。
+     * 同一桶 cache key 仍共享——cache key 只吃 prompt 字节的前缀，前缀逐字节一致即命中。
+     * 各 lane 调用切到这个 v2 之后，一次会话内命中的 token 量更多、边际响应仍恒定。
+     */
+    public static final String FROZEN_CODEX_CONTEXT = read("/ai/llm-frozen-prefix.v2.txt");
+
     private static String read(String path) {
         try (InputStream in = PromptPrefixes.class.getResourceAsStream(path)) {
             if (in == null) throw new IllegalStateException("missing " + path + " — run scripts/build-llm-prefix.mjs");

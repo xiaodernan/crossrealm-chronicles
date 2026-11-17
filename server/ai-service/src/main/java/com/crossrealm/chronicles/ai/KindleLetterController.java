@@ -40,8 +40,8 @@ public class KindleLetterController {
             + "· 只写一行，不超过 60 个字（zh）/ 72 个字符（en）。\n"
             + "· 守夜人在场——不在评判，不在分析，只是每句都稳。";
 
-    /** 烬火答冻结 system = 共享冻结前缀 + 烬火答车道收敛（缓存友好：所有 LLM 调用头部共享同一份）。 */
-    static final String KINDLE_LETTER_SYSTEM = PromptPrefixes.FROZEN_PREFIX + KINDLE_LETTER_CONTRACT;
+    /** 炉火答冻结 system = 冻结 Codex 大前缀 + 烬火答车道收敛（cache key 单桶：v1/v2 同桶兼容）。 */
+    static final String KINDLE_LETTER_SYSTEM = PromptPrefixes.FROZEN_CODEX_CONTEXT + KINDLE_LETTER_CONTRACT;
 
     private static final Set<String> CHOICES = Set.of("keep", "quiet", "unwritten");
     private static final Set<String> LANGS = Set.of("zh", "en");
