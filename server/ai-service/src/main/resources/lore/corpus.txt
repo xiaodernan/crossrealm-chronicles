@@ -8256,6 +8256,57 @@ Come sit a while.
 
 *（Interlude Seven · Come Sit Awhile — the origin of the paper on the wall. Every passer-by walks below it; every scrap knows exactly where it needs to be. The wall does not speak — the paper knows where it goes. Come sit a while.）*
 
+# source: creative/novel/en/140-seven-days-of-silent-fire.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — Seven Days of Silent Fire
+
+---
+
+## One Hundred and Forty: Seven Days of Silent Fire
+
+Saturday of the twenty-second week after the spring equinox — afternoon — the sky very flat.
+
+This week — Aunt Guo did not come.
+
+The fire burned all the same — Mother fed the birch all the same — A-Shi kept watch all the same — they did not speak of it either.
+
+Mother moved the white porcelain bowl from the stove to the shelf — she wiped down the stove — she swept it once — she said nothing.
+
+Uncle Zhou came the next day again — he stood at the stove — the fire burned — he did not come in.
+
+Mother asked him: “What are you waiting for?”
+
+He shook his head — “Nothing.” he said.
+
+Mother nodded — “Sit down and have tea,” she said.
+
+He did not sit — he said: “I’ll just look at the chickens.”
+
+He left — he said it very softly.
+
+The fire burned.
+
+On the third day — morning, the sky not yet light — A-Shi woke — he did not eat — he went straight to the stove-house — he looked into the firebox — it burned very evenly.
+
+He glanced at the shelf — the white bowl sat at the top — the fire lit it — it was very white — whiter than the day before — and whiter than the day before that.
+
+He reached out very close to it — he did not touch it — he felt the heat against the back of his hand.
+
+He said nothing — his mother woke — she carried two bowls of porridge — she said nothing — she set them on the table — she did not touch the white bowl either.
+
+A-Shi picked up his bowl — he looked at the fire — he did not speak.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and forty · Volume XV, forty-first part · The seven-hundredth year — Seven Days of Silent Fire.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -20135,6 +20186,57 @@ F2 隐藏 HUD。
 ---
 
 *（番外七 · 下次再坐——纸的来历。每一班路过的人都从纸下面走过，每一张纸条都知道它该在哪里。墙不说话，纸自己会走。下次再坐。）*
+
+# source: creative/novel/140-炉火静了七天.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 炉火静了七天
+
+---
+
+## 一百四十 · 炉火静了七天
+
+立春后第二十二周——周六——午后——天很平。
+
+这一周——郭阿婆没来。
+
+灶火依旧燃着——母亲照样添白桦——阿石也照样守——他们也没说话。
+
+母亲把白瓷碗从灶台移到碗架上——她拭过灶台——她扫过了一遍——她也没说什么。
+
+周叔第二天又来了——他站在灶前——灶火燃着——他没进门。
+
+母亲问他：「你等什么？」
+
+他摇了摇头——"不等什么。"他说。
+
+母亲点了点头——"坐下喝茶。"她说。
+
+他没坐——他说：「我先看看鸡。」
+
+他走了——他说得很轻。
+
+灶火燃着。
+
+第三天——早上天色还没亮——阿石醒了——他没吃早饭——他先去了灶房——他往灶膛里看——它燃得很匀。
+
+他看了一眼那只碗架——白瓷碗摆在最上面——灶火照着它——它依旧很白——比昨天白——也比前天白。
+
+他把手伸得很近——他没碰它——他感觉到了——手掌和碗之间那一层热。
+
+他没说话——母亲醒来了——她端着两碗稀饭——她没说话——她摆上桌子——她也没碰那只白瓷碗。
+
+阿石端起碗——他看着灶火——他没开口。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百四十卷 · 卷十五之四十一 · 第七百年 · 炉火静了七天）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记
