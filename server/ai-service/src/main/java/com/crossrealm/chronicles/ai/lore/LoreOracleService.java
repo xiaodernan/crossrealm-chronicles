@@ -203,7 +203,19 @@ public class LoreOracleService {
      * 启动热身走这条（W-Z345）：吐出**完整 Oracle 冻结前缀（v2 大前缀 + lore-system-prompt）**给
      * LlmClient.warmupUpstream()，无需第二份手抄——手抄就是两份迟早分家的前缀。
      */
+    /** Oracle 冻结前缀（v4）：lore-system-prompt + GLOSSARY verbatim 全量（≈90K tok）。 */
+    private static final String ORACLE_V4_PATH = "/ai/oracle-v4-frozen-prefix.txt";
+
     public static String loadOracleSystem() {
+        // W-Z349：优先 v4（全量典籍正典）；老降级路径保留，单元测试不必碰大文件
+        InputStream in = LoreOracleService.class.getResourceAsStream(ORACLE_V4_PATH);
+        if (in != null) {
+            try (in) {
+                return new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
+            } catch (IOException e) {
+                throw new IllegalStateException("cannot read Oracle v4 resource " + ORACLE_V4_PATH, e);
+            }
+        }
         String base = loadResource("/ai/lore-system-prompt.txt");
         String digest = loadResource("/ai/lore-digest-frozen.txt");
         return (base + "\n\n" + digest).trim();

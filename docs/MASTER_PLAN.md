@@ -15,6 +15,13 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-18 · W-Z349 Oracle v4——「让全书开口」：45K-tok 全量具典 Context，把 Oracle 从 2K 级拉到 45K 级的真实问答（真上游 LIVE 实测）**：`scripts/build-oracle-v4.mjs` 把 `creative/GLOSSARY.md` verbatim 全量（120KB）直接拷进 `resources/ai/oracle-v4-frozen-prefix.txt`（precedent: `lore-system-prompt.txt` verbatim + 典籍全量），`LoreOracleService.loadOracleSystem()` 优先出 v4（老降级路径保留给单元测试）。**v4 = 炉主把全书背进 prompt**——知识不是装出来的检索命中，而是正典全文在 context 里就是记住全书。
+> **真上游 LIVE 实测**（docker compose 重建 ai-service · verify ALL VERIFY CHECKS PASSED → in-network 真调用）：
+> · warmup（新增 lane 首包 aptly 命中）：`prompt=45085 cached=4224 cachedRatio=9.4% upstreamCached=true`（cold population，1 次 warm 即可触发 cache）；
+> · 调问频：`prompt=45346 cached=42661 cachedRatio=94.1% upstreamCached=true` · 接着稳定 94.0% · 93.8% · 93.9% · 94.0% · 93.7%（~94% steady-state）；
+> · 真知识问答（`"锚火"}`）：sources=[creative/film/电影剧本-跨界纪事.md, creative/novel/00-序言.md, creative/novel/100-第百卷.md, creative/novel/101-传火.md] · answer=「火不会灭，只要锚还在。」latency=4031ms（v4 仍然是 stream+ephemeral，45K prompt cache 之后 4s 级响应）。
+> **注：**ORS hit-rate 从 9.4%（warm 前）→ 94.1%（post-warm 第 2 包）→ 93.7–94.1% 稳态——这里再次证明 W-Z345 boot warmup 的效果（2 rich上下文），不依赖偶然。
+>
 > **2026-11-18 · W-Z348 第170卷入典《第一夜 / The First Night》——卷十七之八 · 第七百零一年 · 第一夜（+ **W-292 以来整个游戏真 boot 硬崩（从来起不来）**的紧急修复）**：第二天——深夜——灶火燃着——阿石睡着了——他斜靠在椅子上——他手里还拿着那根木炭——母亲从屋里出来——她蹲下——她没有拿下他手里的炭——她只是把旧毯子盖在他腿上——灶火燃着——她轻声说「守火」——阿石没睁眼——嘴角动了一下——母亲看了灶火很久——灶火燃着——她没有再说话——她只是——坐回她的位置——等不亮的时候——灶火燃着。
 > **perf-smoke 深度挖掘出真·boot 级缺陷**：`npm run perf` 上头条报错——`adoptSubsystem('game/KindleLetterSystem'): 这个子系统没有 dispose()，收编不了——先给它补上清理路径`——KindleLetterSystem 自 W-Z292（11·13）起从不 dispose() ⇒ Game 构造每一枪就抛 ⇒ **真浏览器里整个游戏根本没法 boot**；vitest 从不构造完整 Game，这条线索只被真浏览器 perf_smoke 挖到（另一个 perf-smoke 的价值：预算之外的 boot 合同）。紧急修复 = 补 dispose()（internal no-op state reset）+ **结构门禁 tests/adopt-dispose.test.js**（67 例：每一个 `_adopt('tag', new Cls())` 都必须能解到 .js 文件且源文件里写着 `dispose(`）。
 > 交付：creative/novel/170-第一夜.md + en 孪生 170-the-first-night.md；novella 170 × 2 = 340 模块（典籍馆现为 170 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：371 源；**v3 冻结前缀自增第 170 条年表条目**；showcase feed 新增 W-Z348 实录；**adopt-dispose 门禁落入 vitest（全套 6896/6896 ✓）；Build ✓ · Size ✓。
