@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T07:21:49.368Z",
+  "generated_at": "2026-11-17T07:37:25.279Z",
   "branch": "main",
-  "head": "a74c5c6e",
-  "total_commits": 2029,
-  "pushed_at": "2026-11-17T15:20:52+08:00",
+  "head": "f6b7531e",
+  "total_commits": 2031,
+  "pushed_at": "2026-11-17T15:36:36+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "f6b7531",
+      "at": "2026-11-17T15:36:36+08:00",
+      "subject": "fix(scripts): W-Z308 Node 侧 LLM 探测链路复修——curl 出口上线，Oracle 双轨复测 97.3% / 97.5%"
+    },
+    {
+      "short": "c4f0ba4",
+      "at": "2026-11-17T07:21:49Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "a74c5c6",
       "at": "2026-11-17T15:20:52+08:00",
@@ -21,25 +31,15 @@
       "short": "7fbd343",
       "at": "2026-11-17T15:11:43+08:00",
       "subject": "feat(canon): W-Z306 第一百四十七卷《说出了「火」字之后 / After He Said the Word》入典——卷十五之四十八"
-    },
-    {
-      "short": "708d027",
-      "at": "2026-11-17T06:59:59Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "3418089",
-      "at": "2026-11-17T14:58:54+08:00",
-      "subject": "feat(canon): W-Z305 第一百四十六卷《明天再说 / Tomorrow, Then》入典——卷十五之四十七"
     }
   ],
-  "tracked_files": 1575,
+  "tracked_files": 1576,
   "test_files": 465,
   "i18n_keys": 3259,
   "lore_sources": 327,
   "novel_chapters_zh": 148,
   "novel_chapters_en": 148,
-  "milestone": "W-Z307",
+  "milestone": "W-Z308",
   "milestone_full": "卷 148 · 六百年守火线（148 / 148 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 327 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：148 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
