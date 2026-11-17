@@ -15,6 +15,13 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-18 · W-Z336 真上游「并行会话缓存隔离」实测——回答用户点名问题（真 API · Clash 7897 · docs/admin/data/llm-parallel-cache-probe.json）**：`scripts/cache-parallel-probe.mjs` 三回合实测，请求 100% 镜像 `LlmClient.requestBody()`（stream+include_usage · system ephemeral · `prompt_cache_key` · temperature 0.7 · `llm-frozen-prefix.v2.txt` ≥4.6K tok）：
+> **① 顺串同键对照**：2×`crossrealm-parallel-fireball-v1` 同键同问题，**cached=0 / 0**（新 lane 首两包必然零，warm-up 需要 ~3 次调用）；
+> **② 同键并行突发 ×8**（8 个独立子进程同时打同一把 `prompt_cache_key`）：**7× ratio=98.0% + 1× 97.9% · aggregate 97.98%**——并行会话共享同一把 key 完全没有互震、没有稀释；
+> **③ 混合 lane 并行 3×ember + 3×oracle 同键共前缀并发**：头两包各 0%，第三包起各自 **98.0% / 97.9%**；两条 lane 的 `aggregate ratio`（各 32.7%，被前两包冷启动拖累）相同——上游的缓存最终是**内容哈希命中**、键只是路由提示，lane 之间共享同一段冻结前缀的缓存，互不污染。
+> **结论**：862 字冷启动门槛在上游；稳定 ≥95% 取决于「同键 + 冻结前缀 + stream」三条铁律 + 每条 lane 在部署/重启后头 ~3 包的热身窗口；**并行会话不是缓存掉的元凶**；`cache-control: ephemeral` 与 `prompt_cache_key` 的正确使用方式没有问题，至上 98% 命中的通路已通。
+> **附**：Admin KPI 新增 `meas_l18c` 卡（并行实测证据，双语）；脚本实测成本 ≈13 次真上游调用（1+8+6 同键不同问题；prompt=9.1K×13 ≈ 12 万 token，真实可复现）。
+>
 > **2026-11-18 · W-Z335 热路径优化五连 + formation 急速复活 + 压测实录（真上游 10 healthy · verify ALL VERIFY CHECKS PASSED）**：
 > 一、**CollisionWorld.candidates() 消灭每查询 3 件垃圾**：返回实例级 scratch（调用方同步消费、不得保留）＋ 数值格键 `(ix+32768)*65536+(iz+32768)`（不再拼 `` 字符串）＋ Int32Array `_stamp` 戳去重（不再造 Set）＋ `_nextId` 单调发钱（`remove()` 后新增 id 不再撞号）。热路径 `moveCircle`/`unpenetrate`/`supportAt`/`blockersAt`/`blockedBy` 全部在线程内消费，零泄漏。
 > 二、**SpatialGrid.cellKey 数值化**（插入桶与查询方同一键，Υ 排序不变）。

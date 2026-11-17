@@ -1,0 +1,175 @@
+{
+  "generated": "2026-11-17T18:43:04.182Z",
+  "script": "scripts/cache-parallel-probe.mjs",
+  "model": "gpt-6.1-terra",
+  "base": "https://api.aizzz.xyz/v1",
+  "prefixBytes": 6170,
+  "rounds": {
+    "sequentialSameKeyPair": {
+      "ratio": 0,
+      "calls": [
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：终章抉择的两种结局分别会发生什么？",
+          "status": 200,
+          "cached": 0,
+          "prompt": 9146,
+          "ratio": 0,
+          "timeTotal": 3.632919
+        },
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：终章抉择的两种结局分别会发生什么？",
+          "status": 200,
+          "cached": 0,
+          "prompt": 9146,
+          "ratio": 0,
+          "timeTotal": 3.037485
+        }
+      ]
+    },
+    "sameKeyBurst8": {
+      "ratio": 0.9798,
+      "calls": [
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：终章抉择的两种结局分别会发生什么？",
+          "status": 200,
+          "cached": 8960,
+          "prompt": 9146,
+          "ratio": 0.9797,
+          "timeTotal": 3.080556
+        },
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：引力化身·奇点领主的招式偏好是什么？",
+          "status": 200,
+          "cached": 8960,
+          "prompt": 9147,
+          "ratio": 0.9796,
+          "timeTotal": 2.901059
+        },
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：锚火终局里玩家能留下什么？",
+          "status": 200,
+          "cached": 8960,
+          "prompt": 9142,
+          "ratio": 0.9801,
+          "timeTotal": 2.682835
+        },
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：17 母题成就墙最后一块通常怎么集齐？",
+          "status": 200,
+          "cached": 8960,
+          "prompt": 9146,
+          "ratio": 0.9797,
+          "timeTotal": 3.239651
+        },
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：世界时间到了晚上炉边会发生什么？",
+          "status": 200,
+          "cached": 8960,
+          "prompt": 9141,
+          "ratio": 0.9802,
+          "timeTotal": 3.673981
+        },
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：开天刃和回护刃分别擅长什么场景？",
+          "status": 200,
+          "cached": 8960,
+          "prompt": 9148,
+          "ratio": 0.9794,
+          "timeTotal": 3.364813
+        },
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：破碎时线那一章的规则是什么？",
+          "status": 200,
+          "cached": 8960,
+          "prompt": 9142,
+          "ratio": 0.9801,
+          "timeTotal": 3.855789
+        },
+        {
+          "cacheKey": "crossrealm-parallel-fireball-v1",
+          "userLine": "用一句话回答：灰岩关塞为什么不是一扇普通的门？",
+          "status": 200,
+          "cached": 8960,
+          "prompt": 9144,
+          "ratio": 0.9799,
+          "timeTotal": 3.770904
+        }
+      ]
+    },
+    "mixedLanes": {
+      "ember": {
+        "ratio": 0.3267,
+        "calls": [
+          {
+            "cacheKey": "crossrealm-parallel-ember-v2",
+            "userLine": "用一句话回答：终章抉择的两种结局分别会发生什么？",
+            "status": 200,
+            "cached": 0,
+            "prompt": 9146,
+            "ratio": 0,
+            "timeTotal": 3.248257
+          },
+          {
+            "cacheKey": "crossrealm-parallel-ember-v2",
+            "userLine": "用一句话回答：锚火终局里玩家能留下什么？",
+            "status": 200,
+            "cached": 0,
+            "prompt": 9142,
+            "ratio": 0,
+            "timeTotal": 2.803136
+          },
+          {
+            "cacheKey": "crossrealm-parallel-ember-v2",
+            "userLine": "用一句话回答：世界时间到了晚上炉边会发生什么？",
+            "status": 200,
+            "cached": 8960,
+            "prompt": 9141,
+            "ratio": 0.9802,
+            "timeTotal": 3.315209
+          }
+        ]
+      },
+      "oracle": {
+        "ratio": 0.3265,
+        "calls": [
+          {
+            "cacheKey": "crossrealm-parallel-oracle-v1",
+            "userLine": "用一句话回答：引力化身·奇点领主的招式偏好是什么？",
+            "status": 200,
+            "cached": 0,
+            "prompt": 9147,
+            "ratio": 0,
+            "timeTotal": 3.26969
+          },
+          {
+            "cacheKey": "crossrealm-parallel-oracle-v1",
+            "userLine": "用一句话回答：17 母题成就墙最后一块通常怎么集齐？",
+            "status": 200,
+            "cached": 0,
+            "prompt": 9146,
+            "ratio": 0,
+            "timeTotal": 3.264513
+          },
+          {
+            "cacheKey": "crossrealm-parallel-oracle-v1",
+            "userLine": "用一句话回答：开天刃和回护刃分别擅长什么场景？",
+            "status": 200,
+            "cached": 8960,
+            "prompt": 9148,
+            "ratio": 0.9794,
+            "timeTotal": 3.380767
+          }
+        ]
+      }
+    }
+  }
+}
