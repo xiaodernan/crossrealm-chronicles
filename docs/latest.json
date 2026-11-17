@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T23:08:58.283Z",
+  "generated_at": "2026-11-17T23:18:30.089Z",
   "branch": "main",
-  "head": "30269a27",
-  "total_commits": 2112,
-  "pushed_at": "2026-11-18T07:08:22+08:00",
+  "head": "3069c5e7",
+  "total_commits": 2114,
+  "pushed_at": "2026-11-18T07:17:56+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "3069c5e",
+      "at": "2026-11-18T07:17:56+08:00",
+      "subject": "feat(admin): W-Z350 Boot 真·冷启动实测——Admin LLM P0 #3 落地第一刀（本机 SwiftShader 最坏 case）"
+    },
+    {
+      "short": "dbf28e7",
+      "at": "2026-11-17T23:08:58Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "30269a2",
       "at": "2026-11-18T07:08:22+08:00",
@@ -21,25 +31,15 @@
       "short": "9b401f4",
       "at": "2026-11-18T06:45:50+08:00",
       "subject": "docs(canon): W-Z348 遗留书账回填（README 的 170 卷台账 · showcase W-Z348 实录 · MASTER_PLAN §W-Z348 补记 · corpus 371 源）"
-    },
-    {
-      "short": "670d61f",
-      "at": "2026-11-18T06:44:42+08:00",
-      "subject": "fix(game): W-Z348 真 boot 级致命修复——KindleLetterSystem 从未 dispose() · 169→170 卷"
-    },
-    {
-      "short": "81da6b5",
-      "at": "2026-11-17T22:08:08Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
-  "tracked_files": 1649,
+  "tracked_files": 1650,
   "test_files": 468,
   "i18n_keys": 3267,
   "lore_sources": 371,
   "novel_chapters_zh": 170,
   "novel_chapters_en": 170,
-  "milestone": "W-Z349",
+  "milestone": "W-Z350",
   "milestone_full": "卷 170 · 六百年守火线（170 / 170 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 371 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：170 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
