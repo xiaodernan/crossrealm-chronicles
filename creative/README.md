@@ -214,7 +214,8 @@ creative/music/soundtrack.html
 | 回答 · The Answer | [the-answer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/165-the-answer.md) |
 | 守火的人 · The Firekeeper | [the-firekeeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/166-the-firekeeper.md) |
 | 稳的手 · The Steady Hand | [the-steady-hand](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/167-the-steady-hand.md) |
-| 第一根柴 · The First Log | [the-first-log](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/168-the-first-log.md) |每一章对应游戏的章节走法：
+| 第一根柴 · The First Log | [the-first-log](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/168-the-first-log.md) |
+| 第一炉火 · The First Steady Fire | [the-first-steady-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/169-the-first-steady-fire.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

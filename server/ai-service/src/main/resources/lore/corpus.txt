@@ -9727,6 +9727,51 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and sixty-eight overall · the seven-hundred-and-first year, sixth part — The First Log.)*
 
+# source: creative/novel/en/169-the-first-steady-fire.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Seventh Volume — The First Steady Fire
+
+---
+
+## One Hundred and Sixty-nine: The First Steady Fire
+
+The ninth day — before first light — the fire burned.
+
+A-Shi woke — the first thing he did was look at the stove — the fire burned.
+
+His mother was not there — she was in the yard — A-Shi walked over — she sat on the stone block — holding a piece of charcoal — she lifted it up — showed it to him.
+
+A-Shi said: “What is this?”
+
+His mother said: “Your Azu — the day he died — he gave it to me.”
+
+A-Shi said: “Did he say anything?”
+
+His mother said: “He did. He said — you tend the fire not to watch it — you keep it because the fire remembers —”
+
+The fire burned.
+
+A-Shi did not speak — the fire burned.
+
+His mother placed the charcoal in his hand — she said: “This one — keep it. Burn it until it is only ash — then add more.”
+
+A-Shi said: “Why this one?”
+
+His mother said: “Because Azu lit it —”
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and sixty-nine overall · the seven-hundred-and-first year, seventh part — The First Steady Fire.)*
+
 # source: creative/novel/en/17-chapter-seventeen.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -23036,6 +23081,51 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百六十八卷 · 卷十七之六 · 第七百零一年 · 第一根柴）*
+
+# source: creative/novel/169-第一炉火.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第七卷 —— 第一炉火
+
+---
+
+## 一百六十九 · 第一炉火
+
+第九天——天没亮——灶火燃着。
+
+阿石醒来——他第一件事——是看灶——灶火燃着。
+
+母亲不在——她在院子里——阿石走过去——她坐在石墩上——她手里拿着一根木炭——她把它举起来——给他看。
+
+阿石说：「这是？」
+
+母亲说：「你阿祖——临死那一天——把它给了我。」
+
+阿石说：「他没说什么？」
+
+母亲说：「说了——他说——你挑火不是为了看火——你守火——是因为火会记住——」
+
+灶火燃着。
+
+阿石没出声——灶火燃着。
+
+母亲把木炭放在他手上——她说：「这一根——留着——烧到只剩灰——再添。」
+
+阿石说：「为什么是这一根？」
+
+母亲说：「——因为它是阿祖点的——」
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百六十九卷 · 卷十七之七 · 第七百零一年 · 第一炉火）*
 
 # source: creative/novel/17-晨雾回声.md
 # 《跨界纪事：锚火守夜人》
