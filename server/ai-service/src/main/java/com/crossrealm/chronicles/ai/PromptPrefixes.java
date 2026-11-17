@@ -22,6 +22,14 @@ public final class PromptPrefixes {
      */
     public static final String FROZEN_CODEX_CONTEXT = read("/ai/llm-frozen-prefix.v2.txt");
 
+    /**
+     * Codex-style 加强大前缀（W-Z346）：v2 + 典籍大事年表（00-168 每卷一行）
+     * + 原典词料摘 verbatim + 守夜人谱系（阿祖→姥爷→阿父→阿石）。
+     * 具体字数 ≈ 21K 字节（~15K tok）；新一代 cache page 单独暖（见 LlmWarmup），
+     * 旧桶不动。 v2 不删不替换（缓存页不可复用但还在命中），想要大上下文的 lane 用这条。
+     */
+    public static final String FROZEN_CODEX_CONTEXT_V3 = read("/ai/llm-frozen-prefix.v3.txt");
+
     private static String read(String path) {
         try (InputStream in = PromptPrefixes.class.getResourceAsStream(path)) {
             if (in == null) throw new IllegalStateException("missing " + path + " — run scripts/build-llm-prefix.mjs");

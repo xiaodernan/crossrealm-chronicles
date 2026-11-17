@@ -41,7 +41,7 @@ public class EmberReplyController {
     static final String FROZEN_PREFIX = PromptPrefixes.FROZEN_PREFIX;
 
     /** 炉火答的冻结 Codex 上下文（W-Z321，容量≈4.6K tok、缓存命中与 v1 同桶不掉）。 */
-    static final String CODEX_CONTEXT = PromptPrefixes.FROZEN_CODEX_CONTEXT;
+    static final String CODEX_CONTEXT = PromptPrefixes.FROZEN_CODEX_CONTEXT_V3;
 
     static final String LANE_LORE = "lore";
     static final String LANE_JOURNEY = "journey";

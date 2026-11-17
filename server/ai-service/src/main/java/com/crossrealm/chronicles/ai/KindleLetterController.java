@@ -41,7 +41,7 @@ public class KindleLetterController {
             + "· 守夜人在场——不在评判，不在分析，只是每句都稳。";
 
     /** 炉火答冻结 system = 冻结 Codex 大前缀 + 烬火答车道收敛（cache key 单桶：v1/v2 同桶兼容）。 */
-    static final String KINDLE_LETTER_SYSTEM = PromptPrefixes.FROZEN_CODEX_CONTEXT + KINDLE_LETTER_CONTRACT;
+    static final String KINDLE_LETTER_SYSTEM = PromptPrefixes.FROZEN_CODEX_CONTEXT_V3 + KINDLE_LETTER_CONTRACT;
 
     private static final Set<String> CHOICES = Set.of("keep", "quiet", "unwritten");
     private static final Set<String> LANGS = Set.of("zh", "en");
