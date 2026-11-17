@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T16:53:20.026Z",
+  "generated_at": "2026-11-17T17:04:51.295Z",
   "branch": "main",
-  "head": "0e898552",
-  "total_commits": 2075,
-  "pushed_at": "2026-11-18T00:51:45+08:00",
+  "head": "b637c124",
+  "total_commits": 2077,
+  "pushed_at": "2026-11-18T01:04:06+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "b637c12",
+      "at": "2026-11-18T01:04:06+08:00",
+      "subject": "feat(admin): W-Z330 炉边盘 Admin LLM 双语运营分析卡登记——脚本已是 W-Z311 里程碑，这次搬进 KPI 网格"
+    },
+    {
+      "short": "885bf87",
+      "at": "2026-11-17T16:53:20Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "0e89855",
       "at": "2026-11-18T00:51:45+08:00",
@@ -21,16 +31,6 @@
       "short": "cc71228",
       "at": "2026-11-18T00:37:48+08:00",
       "subject": "feat(canon): W-Z328 第一百六十一卷《起锚 / Raising the Anchor》入典——卷十六之九"
-    },
-    {
-      "short": "3dea20f",
-      "at": "2026-11-17T16:22:23Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "290da1f",
-      "at": "2026-11-18T00:21:29+08:00",
-      "subject": "feat(help): W-Z327 炉边快速上手——Admin LLM P0 之二：首战先做光柱（明视化 anchor 调用块）"
     }
   ],
   "tracked_files": 1618,
@@ -39,7 +39,7 @@
   "lore_sources": 355,
   "novel_chapters_zh": 162,
   "novel_chapters_en": 162,
-  "milestone": "W-Z329",
+  "milestone": "W-Z330",
   "milestone_full": "卷 162 · 六百年守火线（162 / 162 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 355 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：162 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
