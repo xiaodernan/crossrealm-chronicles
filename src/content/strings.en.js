@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and sixty-five volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and sixty-six volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 165 volumes of the canon, fully readable
+· Canon Library — 166 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3141,8 +3141,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 165-volume index',
-  hm_body_codex: `Codex — 165 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 166-volume index',
+  hm_body_codex: `Codex — 166 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3311,6 +3311,7 @@ hm_title_codex: 'Codex · the 165-volume index',
 163 · The First Light — Monday of the twenty-eighth week after the spring equinox, morning — the sky just brightening; his mother brought out the old box from the stove — it was very old — its edges cracked — she lifted the lid — inside lay a book — a leather cover — deep brown — a copper sun-disk nailed to the front, glowing faintly; she said: “This is the first page of the book.”; A-Shi leaned in — the fire burned — he could not quite see; his mother said: “It doesn’t show itself to just anyone — today you may see a glimpse — do not read any further.”; A-Shi nodded — he reached out — his mother said again: “Slowly.”; A-Shi paused — he slowly extended his finger — gently turned to the first page; the fire burned; on the page were only five characters — “The seven-hundred-and-first year, up to here” — in an ancient hand; A-Shi did not speak — the fire burned; his mother closed the box — she did not let him look any longer — she put the box back where it belonged — she did not speak — the fire burned. Volume XVII, first part.
 164 · Five Characters — Monday of the twenty-eighth week after the spring equinox, evening — the sky dark again; his mother had put the box back where it belonged — but A-Shi remembered the five characters “The seven-hundred-and-first year, up to here” — he lay in bed counting them — the ancient hand; he got up — walked to the stove — the fire burned; he said: “Ma — who wrote that character?”; his mother answered from the room: “The writer is long gone.”; A-Shi said: “Then why is it still glowing?”; his mother did not answer — the fire burned; after a while, his mother came out — she sat before the stove — she stared at the fire — she said softly: “Because someone keeps adding wood for it.”; A-Shi said: “Who?”; his mother said: “You —”; A-Shi said: “Me?”; his mother nodded — she said: “For seven hundred years, every keeper has asked the same thing — every generation has had its answer — you are the seven-hundred-and-first year’s answer.”; A-Shi did not speak — the fire burned. Volume XVII, second part.
 165 · The Answer — Late at night — the fire burned — his mother slept — no sound from the room; A-Shi rose from his bed — walked to the stove — he stared at the quiet ring of fire — he said softly: “I know.”; A-Shi crouched down — from the corner bundle of wood — one log — two logs — he laid them gently onto the fire; the fire did not burst — it only brightened a little — as if it had heard something; A-Shi said: “I will keep adding wood.”; the fire burned; A-Shi did not go back to bed — he sat before the stove — he was not sleepy anymore — he watched the fire — he counted the five characters “The seven-hundred-and-first year, up to here” — he counted them one hundred times. Volume XVII, third part.
+166 · The Firekeeper — For seven days straight — A-Shi got up before dawn every day; his mother noticed — the wood on the stove vanished fast — she said nothing; on the eighth day — A-Shi walked to the stove in the dark — before it got light — he saw his mother sitting there — holding a cup of warm water — she was not looking at the fire — she was waiting for him; A-Shi stopped at the door — he said: “Ma — why aren’t you asleep?”; his mother said: “I can’t sleep.”; A-Shi said: “I didn’t mean to wait for you —”; his mother shook her head — she said: “I know.”; the fire burned; his mother said: “If you want to learn — I will teach you.”; A-Shi said: “Learn what?”; his mother said: “How to read the fire — when to add wood — when to hold back — seven hundred years ago, that is how they taught me.”; the fire burned. Volume XVII, fourth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3324,7 +3325,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and sixty-five volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and sixty-six volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

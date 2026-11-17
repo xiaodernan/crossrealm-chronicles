@@ -211,7 +211,8 @@ creative/music/soundtrack.html
 | 火的声音 · The Sound of the Fire | [the-sound-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/162-the-sound-of-the-fire.md) |
 | 第一道光 · The First Light | [the-first-light](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/163-the-first-light.md) |
 | 五个字 · Five Characters | [five-characters](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/164-five-characters.md) |
-| 回答 · The Answer | [the-answer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/165-the-answer.md) |每一章对应游戏的章节走法：
+| 回答 · The Answer | [the-answer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/165-the-answer.md) |
+| 守火的人 · The Firekeeper | [the-firekeeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/166-the-firekeeper.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

@@ -213,7 +213,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Sound of the Fire | [the-sound-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/162-the-sound-of-the-fire.md) |
 | The First Light | [the-first-light](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/163-the-first-light.md) |
 | Five Characters | [five-characters](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/164-five-characters.md) |
-| The Answer | [the-answer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/165-the-answer.md) |Chapter → game-chapter mapping:
+| The Answer | [the-answer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/165-the-answer.md) |
+| The Firekeeper | [the-firekeeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/166-the-firekeeper.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

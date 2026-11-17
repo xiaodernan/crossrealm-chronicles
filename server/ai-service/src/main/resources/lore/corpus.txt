@@ -9608,6 +9608,51 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and sixty-five overall · the seven-hundred-and-first year, third part — The Answer.)*
 
+# source: creative/novel/en/166-the-firekeeper.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Fourth Volume — The Firekeeper
+
+---
+
+## One Hundred and Sixty-six: The Firekeeper
+
+For seven days straight — A-Shi got up before dawn every day.
+
+His mother noticed — the wood on the stove vanished fast — she said nothing.
+
+On the eighth day — A-Shi walked to the stove in the dark — before it got light — he saw his mother sitting there — holding a cup of warm water — she was not looking at the fire — she was waiting for him.
+
+A-Shi stopped at the door — he said: “Ma — why aren’t you asleep?”
+
+His mother said: “I can’t sleep.”
+
+A-Shi said: “I didn’t mean to wait for you —”
+
+His mother shook her head — she said: “I know.”
+
+The fire burned.
+
+His mother said: “If you want to learn — I will teach you.”
+
+A-Shi said: “Learn what?”
+
+His mother said: “How to read the fire — when to add wood — when to hold back — seven hundred years ago, that is how they taught me.”
+
+The fire burned.
+
+A-Shi did not speak — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and sixty-six overall · the seven-hundred-and-first year, fourth part — The Firekeeper.)*
+
 # source: creative/novel/en/17-chapter-seventeen.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -22798,6 +22843,51 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百六十五卷 · 卷十七之三 · 第七百零一年 · 回答）*
+
+# source: creative/novel/166-守火的人.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第四卷 —— 守火的人
+
+---
+
+## 一百六十六 · 守火的人
+
+连着七天——阿石每天天不亮就起来。
+
+母亲注意到——灶台上的柴少得很快——她没有说。
+
+第八天——阿石天没亮——他摸黑走到灶前——他看见母亲坐在那里——她手里捧着一杯温水——她没看火——她在等他。
+
+阿石停在门口——他说：「妈——你怎么没睡？」
+
+母亲说：「睡不着。」
+
+阿石说：「我不是故意不等你——」
+
+母亲摇了摇头——她说：「我知道。」
+
+灶火燃着。
+
+母亲说：「你想学——我教你。」
+
+阿石说：「学什么？」
+
+母亲说：「怎么看火——哪儿该添——哪儿该停——七百年前他们也是这么教我的。」
+
+灶火燃着。
+
+阿石没出声——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百六十六卷 · 卷十七之四 · 第七百零一年 · 守火的人）*
 
 # source: creative/novel/17-晨雾回声.md
 # 《跨界纪事：锚火守夜人》
