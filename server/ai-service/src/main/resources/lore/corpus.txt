@@ -9571,6 +9571,43 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and sixty-four overall · the seven-hundred-and-first year, second part — Five Characters.)*
 
+# source: creative/novel/en/165-the-answer.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Third Volume — The Answer
+
+---
+
+## One Hundred and Sixty-five: The Answer
+
+Late at night — the fire burned.
+
+His mother slept — no sound from the room.
+
+A-Shi rose from his bed — walked to the stove — he stared at the quiet ring of fire — he said softly: “I know.”
+
+The fire burned.
+
+A-Shi crouched down — from the corner bundle of wood — one log — two logs — he laid them gently onto the fire.
+
+The fire did not burst — it only brightened a little — as if it had heard something.
+
+A-Shi said: “I will keep adding wood.”
+
+The fire burned.
+
+A-Shi did not go back to bed — he sat before the stove — he was not sleepy anymore — he watched the fire — he counted the five characters — “The seven-hundred-and-first year, up to here” — he counted them one hundred times.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and sixty-five overall · the seven-hundred-and-first year, third part — The Answer.)*
+
 # source: creative/novel/en/17-chapter-seventeen.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -22724,6 +22761,43 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百六十四卷 · 卷十七之二 · 第七百零一年 · 五个字）*
+
+# source: creative/novel/165-回答.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第三卷 —— 回答
+
+---
+
+## 一百六十五 · 回答
+
+深夜——灶火燃着。
+
+母亲睡了——屋里没有声音。
+
+阿石从床上起身——他走到灶前——他看着那一圈安静的火——他轻声说：「我知道了。」
+
+灶火燃着。
+
+阿石蹲下——他把屋角那捆柴——一根——两根——轻轻放到火上。
+
+火不爆——它只是轻轻亮了一点——像是听到了什么。
+
+阿石说：「我会添柴的。」
+
+灶火燃着。
+
+阿石没有回到床上——他坐在灶前——他不困了——他看着火——他数着那五个字——「七百零一年至此」——他数了一百遍。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百六十五卷 · 卷十七之三 · 第七百零一年 · 回答）*
 
 # source: creative/novel/17-晨雾回声.md
 # 《跨界纪事：锚火守夜人》

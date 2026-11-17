@@ -15,6 +15,9 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-18 · W-Z337 第165卷入典《回答 / The Answer》——卷十七之三 · 第七百零一年 · 回答**：深夜——灶火燃着——母亲睡了——屋里没有声音——阿石从床上起身——他走到灶前——他看着那一圈安静的火——他轻声说「我知道了」——灶火燃着——阿石蹲下——他把屋角那捆柴——一根——两根——轻轻放到火上——火不爆——它只是轻轻亮了一点——像是听到了什么——阿石说「我会添柴的」——灶火燃着——阿石没有回到床上——他坐在灶前——他不困了——他看着火——他数着那五个字「七百零一年至此」——他数了一百遍——灶火燃着。
+> 交付：creative/novel/165-回答.md + en 孪生 165-the-answer.md；novella 165 × 2 = 330 模块（典籍馆现为 165 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：361 源；showcase feed 新增 W-Z337 实录。
+>
 > **2026-11-18 · W-Z336 真上游「并行会话缓存隔离」实测——回答用户点名问题（真 API · Clash 7897 · docs/admin/data/llm-parallel-cache-probe.json）**：`scripts/cache-parallel-probe.mjs` 三回合实测，请求 100% 镜像 `LlmClient.requestBody()`（stream+include_usage · system ephemeral · `prompt_cache_key` · temperature 0.7 · `llm-frozen-prefix.v2.txt` ≥4.6K tok）：
 > **① 顺串同键对照**：2×`crossrealm-parallel-fireball-v1` 同键同问题，**cached=0 / 0**（新 lane 首两包必然零，warm-up 需要 ~3 次调用）；
 > **② 同键并行突发 ×8**（8 个独立子进程同时打同一把 `prompt_cache_key`）：**7× ratio=98.0% + 1× 97.9% · aggregate 97.98%**——并行会话共享同一把 key 完全没有互震、没有稀释；
