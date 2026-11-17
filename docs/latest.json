@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T10:08:47.851Z",
+  "generated_at": "2026-11-17T11:26:21.713Z",
   "branch": "main",
-  "head": "7b9a219c",
-  "total_commits": 2045,
-  "pushed_at": "2026-11-17T18:04:03+08:00",
+  "head": "268fddfd",
+  "total_commits": 2047,
+  "pushed_at": "2026-11-17T19:24:25+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "268fddf",
+      "at": "2026-11-17T19:24:25+08:00",
+      "subject": "feat(ai): W-Z316 烬灯回信 · 返炉——StateGraph 分拣→编排→回灌，LLM 作为 NPC 第二步"
+    },
+    {
+      "short": "a8899c1",
+      "at": "2026-11-17T10:08:47Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "7b9a219",
       "at": "2026-11-17T18:04:03+08:00",
@@ -21,25 +31,15 @@
       "short": "7959c1a",
       "at": "2026-11-17T17:40:13+08:00",
       "subject": "fix(gateway): W-Z314 网关 IP 限流器 XFF 伪造绕过堵漏洞——默认不信任 X-Forwarded-For"
-    },
-    {
-      "short": "ea94651",
-      "at": "2026-11-17T08:37:51Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "aefb61c",
-      "at": "2026-11-17T16:37:00+08:00",
-      "subject": "feat(canon): W-Z313 第一百五十二卷《除夕 / New Year’s Eve》入典——卷十五之五十三"
     }
   ],
-  "tracked_files": 1589,
-  "test_files": 465,
+  "tracked_files": 1593,
+  "test_files": 466,
   "i18n_keys": 3259,
   "lore_sources": 337,
   "novel_chapters_zh": 153,
   "novel_chapters_en": 153,
-  "milestone": "W-Z315",
+  "milestone": "W-Z316",
   "milestone_full": "卷 153 · 六百年守火线（153 / 153 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 337 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：153 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
