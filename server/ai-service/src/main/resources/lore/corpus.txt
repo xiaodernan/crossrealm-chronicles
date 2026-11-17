@@ -9039,7 +9039,7 @@ She poured the tea into the bowls — the first for A-Shi — the second for her
 
 A-Shi held the bowl — he smelled it — a faint bitterness — he took a sip — it was very hot.
 
-His mother said: “Small sips — it will not scald you to death — and mind you not scald the fire either.”
+His mother said: “Small sips — don't scald yourself — and don't scald the fire either.”
 
 A-Shi laughed — she laughed too — the fire burned.
 
@@ -9066,6 +9066,59 @@ The fire burned.
 ---
 
 *(End of volume XVI · Volume one hundred and fifty-four overall · the seven-hundred-and-first year, second part — One Cup of Tea.)*
+
+# source: creative/novel/en/155-the-snow-came-down.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVI**: The Seven-hundred-and-first Year — The Snow Came Down
+
+---
+
+## One Hundred and Fifty-five: The Snow Came Down
+
+Monday of the twenty-sixth week after the spring equinox — morning — the sky not yet bright.
+
+A-Shi woke — the yard was all white — the snow had fallen all night.
+
+The fire burned — his mother was at the stove — she had not slept.
+
+A-Shi asked: “Why did the snow wait so long to fall?”
+
+His mother said: “It had its exam to finish in the house — now it will come out.”
+
+A-Shi did not understand — she laughed — she did not explain — the fire burned.
+
+His mother said: “Corn gruel — have some.”
+
+She scooped a bowl for him — the gruel was still steaming — A-Shi held the bowl — he looked at the snow — the fire burned.
+
+The fire burned.
+
+A-Shi said: “I am going to sweep the snow.”
+
+His mother said: “Finish eating first.”
+
+A-Shi took a bite — he put it down — he looked at the snow again — the fire burned.
+
+The fire burned.
+
+His mother said: “Eat your fill — go out — the snow will cover the footprints — you have to finish the path before it does.”
+
+The fire burned.
+
+A-Shi put on his cotton jacket — he pushed the door open — the wind and snow struck his face — he took a deep breath — he went out.
+
+The fire burned.
+
+His mother watched the snow fall — the fire burned — the fire burned — the fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVI · Volume one hundred and fifty-five overall · the seven-hundred-and-first year, third part — The Snow Came Down.)*
 
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
@@ -21759,6 +21812,59 @@ F2 隐藏 HUD。
 ---
 
 *（卷十六 · 本章完 · 跨界线总第一百五十四卷 · 第七百零一年第二篇 · 一碗茶）*
+
+# source: creative/novel/155-雪落下来.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十六**：第七百零一年 —— 雪落下来
+
+---
+
+## 一百五十五 · 雪落下来
+
+立春后第二十六周——周一——早上——天还没亮。
+
+阿石醒了——院外一片白——雪下了一夜。
+
+灶火燃着——母亲在灶前——她没睡。
+
+阿石问：「雪为什么不早下？」
+
+母亲说：「它在家里考完试——现在才出门。」
+
+阿石没懂——她笑了——她也没解释——灶火燃着。
+
+母亲说：「玉米糊糊——你吃点。」
+
+她舀了一碗给他——糊糊还冒着热气——阿石端着——他看雪——灶火燃着。
+
+灶火燃着。
+
+阿石说：「我去扫雪。」
+
+母亲说：「你吃完了再说。」
+
+阿石吃了一口——他放下——他又看了一下雪——灶火燃着。
+
+灶火燃着。
+
+母亲说：「吃饱了——出去——雪要盖住脚印——你得在它盖住之前走完。」
+
+灶火燃着。
+
+阿石穿上棉袄——他推开门——风雪扑了他一脸——他吸了一口气——他出去了。
+
+灶火燃着。
+
+母亲看着雪落下来——灶火燃着——灶火燃着——灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十六 · 本章完 · 跨界线总第一百五十五卷 · 第七百零一年第三篇 · 雪落下来）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记

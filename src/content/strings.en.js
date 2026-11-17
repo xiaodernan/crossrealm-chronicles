@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and fifty-four volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and fifty-five volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 154 volumes of the canon, fully readable
+· Canon Library — 155 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3141,8 +3141,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 154-volume index',
-  hm_body_codex: `Codex — 154 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 155-volume index',
+  hm_body_codex: `Codex — 155 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3300,6 +3300,7 @@ hm_title_codex: 'Codex · the 154-volume index',
 152 · New Year’s Eve — Wednesday of the twenty-fifth week after the spring equinox, evening, the sky very cold, wind snuck in through the stove’s seams; his mother and A-Shi sat at the stove — the kitchen-god portrait was still pasted above — the paper edge curled a little — the fire burned; his mother said: “Tonight is New Year’s Eve — seven hundred years ago, the first keeper of the fire kept this night — he kept it until dawn — the fire did not go out.”; A-Shi nodded — he looked at the fire — the fire burned; his mother said: “Seven hundred years — seven hundred New Year’s Eves — the fire has not gone out for a single one.”; A-Shi did not speak — he counted the bricks of the stove — he counted once — he counted twice — he stopped; The fire burned; his mother said: “At twelve — the new year.”; A-Shi said: “The new year — does the fire have a new year too?”; his mother smiled — she did not speak — she looked at the fire; The fire burned; the sky darkened further — the wind grew stronger — the fire burned; his mother moved her chair toward the stove by an inch — then another — A-Shi moved his too; The fire burned; it was almost twelve — his mother did not look at the clock — she touched A-Shi’s hand — it was cold; his mother said: “The new year is coming.”; A-Shi said: “The fire has not gone out — it has not.”; his mother nodded — she looked at him — she smiled — the fire burned; Twelve — a firecracker sounded in the yard — on the distant mountain a patch lit up — then went dark; his mother said: “The new year has come — and the fire is seven hundred and one.”; A-Shi looked at the fire — the fire burned — it burned — it burned; his mother leaned against A-Shi — she said: “Keeping the watch is not about the fire — it is about the fire still being here — so long as the fire is here, the year is here.”; A-Shi did not speak — the fire burned. Volume XV, fifty-third part.
 153 · The Fire Still Burns — Thursday of the twenty-fifth week after the spring equinox, morning, the sky is bright; the rooster crowed — his mother and A-Shi woke together — the fire burned; A-Shi opened his eyes first — the first thing he looked at was the stove — the fire burned; his mother opened her eyes too — the first thing she looked at was the stove — the fire burned; the two of them looked at each other — neither spoke; his mother said: “Seven hundred and one.”; A-Shi said: “Seven hundred and one.”; his mother got up — she added a little firewood — the fire burned brighter — it burned; A-Shi brought yesterday’s sugar dish — half a dish left — he looked at his mother — his mother looked at the fire — she did not speak; his mother said: “Have some — no offering today — today is the fire’s day.”; A-Shi tasted a little — very sweet — he did not speak; The fire burned; his mother said: “Seven hundred years — every single morning of every year — the fire was there — today is the same.”; The fire burned; A-Shi looked at the kitchen god — the kitchen god looked at the fire — the fire burned; his mother sat down — she poured a cup of water — she did not drink — she looked at the fire — she said: “The fire is still here.”; A-Shi said: “The fire is still here.”; The fire burned. Volume XVI, seven-hundred-and-first year, first part.
 154 · One Cup of Tea — Friday of the twenty-fifth week after the spring equinox, morning, the sky still wet with dew; his mother boiled the water — she took out two bowls — one for her — one for A-Shi; A-Shi looked at the two bowls — he asked: “Two?”; his mother said: “Two keepers of the night — two bowls.”; she poured the tea into the bowls — the first for A-Shi — the second for herself — she pushed one bowl across the table to him — the fire burned; A-Shi held the bowl — he smelled it — a faint bitterness — he took a sip — it was very hot; his mother said: “Small sips — don’t scald yourself — and don’t scald the fire either.”; A-Shi laughed — she laughed too — the fire burned; his mother said: “The tea was the same in your grandfather’s time — a bowl for each — the same in your father’s time — me — A-Shi.”; The fire burned; his mother looked at A-Shi — she said: “You drink very slowly — as if waiting for something.”; A-Shi said: “I am not.”; his mother nodded — she did not ask again — she too drank slowly; The fire burned; the two of them finished — the bowls were empty — the fire burned; his mother washed the bowls — she set them on the table — she did not look at A-Shi. Volume XVI, seven-hundred-and-first year, second part.
+155 · The Snow Came Down — Monday of the twenty-sixth week after the spring equinox, morning, the sky not yet bright; A-Shi woke — the yard was all white — the snow had fallen all night; the fire burned — his mother was at the stove — she had not slept; A-Shi asked: “Why did the snow wait so long to fall?”; his mother said: “It had its exam to finish in the house — now it will come out.”; A-Shi did not understand — she laughed — she did not explain — the fire burned; his mother said: “Corn gruel — have some.”; she scooped a bowl for him — the gruel was still steaming — A-Shi held the bowl — he looked at the snow — the fire burned; A-Shi said: “I am going to sweep the snow.”; his mother said: “Finish eating first.”; A-Shi took a bite — he put it down — he looked at the snow again — the fire burned; his mother said: “Eat your fill — go out — the snow will cover the footprints — you have to finish the path before it does.”; The fire burned; A-Shi put on his cotton jacket — he pushed the door open — the wind and snow struck his face — he took a deep breath — he went out; The fire burned; his mother watched the snow fall — the fire burned. Volume XVI, third part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3313,7 +3314,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and fifty-four volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and fifty-five volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

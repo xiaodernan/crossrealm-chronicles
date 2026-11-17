@@ -200,7 +200,8 @@ creative/music/soundtrack.html
 | 小年 · The Little Year’s Eve | [the-little-year-s-eve](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/151-the-little-year-s-eve.md) |
 | 除夕 · New Year’s Eve | [new-year-s-eve](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/152-new-year-s-eve.md) |
 | 火还在 · The Fire Still Burns | [the-fire-still-burns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/153-the-fire-still-burns.md) |
-| 一碗茶 · One Cup of Tea | [one-cup-of-tea](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/154-one-cup-of-tea.md) |每一章对应游戏的章节走法：
+| 一碗茶 · One Cup of Tea | [one-cup-of-tea](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/154-one-cup-of-tea.md) |
+| 雪落下来 · The Snow Came Down | [the-snow-came-down](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/155-the-snow-came-down.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
