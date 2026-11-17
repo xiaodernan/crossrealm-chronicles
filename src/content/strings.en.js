@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and forty-five volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and forty-six volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 145 volumes of the canon, fully readable
+· Canon Library — 146 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3141,8 +3141,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 145-volume index',
-  hm_body_codex: `Codex — 145 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 146-volume index',
+  hm_body_codex: `Codex — 146 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3291,6 +3291,7 @@ hm_title_codex: 'Codex · the 145-volume index',
 143 · The Word on the Card — Sunday of the twenty-third week after the spring equinox, morning, the sky very white; A-Shi had not spoken — Aunt Guo had not opened her mouth — his mother had not moved either; the fire burned; A-Shi held his bowl of thin porridge — he looked at the card again — he had remembered the character; his mother said: “Done — eat now”; he finished — he put the bowl down — the fire burned; Aunt Guo said: “Remembered it?”; A-Shi nodded — he did not open his mouth — the fire burned; his mother went out — she took a sieve — she came back holding lotus seeds — she set them on the stove — she did not look up; the fire burned; Aunt Guo said: “Now that you’re fed — I’ll show you the second one.”; A-Shi stopped — he lifted his head — the fire burned; Aunt Guo drew out a stack of cards — she counted — she counted thirteen — she turned one over with her thumb — the character was different; she turned it over — this was the same character A-Shi had just learned — A-Shi saw it at a glance; her mother said nothing — the fire burned; A-Shi said: “Two characters — one above the fire — one beneath.”; Aunt Guo did not answer — she did not look up — she gathered the cards — she put them away — she said: “Squat and look.”; A-Shi squatted in front of the stove — the fire lit him — he counted the fire — he said nothing — his mother watched the fire — Aunt Guo watched the fire too — the fire burned. Volume XV, forty-fourth part.
 144 · The Seventh Silent Day — Saturday of the twenty-fifth week after the spring equinox, afternoon, the sky very quiet; A full week had passed — A-Shi had already learned the sixth card; the sixth card — the white character — was “休” — he said it aloud — the fire burned; his mother sat at the stove — she was crouching too — there was no tea at her side — she only watched the fire; Aunt Guo went out — she went beyond the door — A-Shi did not move — the fire burned; his mother did not ask where she had gone — the fire burned; A-Shi picked up that card again — he looked at it — he looked for a long time; his mother looked at him — “Can you keep it?” she asked; “I can,” A-Shi said; his mother did not reply — she watched the fire — the fire burned; Toward evening — Aunt Guo came back — she came in — the fire burned — she said only: “It’s time for the next one.”; A-Shi nodded — his mother said nothing — the fire burned; Aunt Guo spread the cards on the table — she counted them one by one — she counted up to the seventh — the fire burned. Volume XV, forty-fifth part.
 145 · The Number on the Card — Sunday of the twenty-fifth week after the spring equinox, afternoon, the light crisp and bright; Aunt Guo laid the cards out one by one on the stove — a stack of seven — she counted to the top; A-Shi watched — he did not speak — his mother sat at the stove too — the fire burned; Aunt Guo turned one over — she held the character up to A-Shi — “Remembered it?” she said; A-Shi nodded — his lips moved — he did not speak — the fire burned; Aunt Guo folded that one — she took it back — she drew another out — the same character — she handed this one to A-Shi; he looked for a long time — he folded it once — he unfolded it — he looked again; his mother said: “Your sleeve is stained.”; A-Shi did not move; his mother did not speak — the fire burned; A-Shi suddenly smiled — it was a small smile — Aunt Guo watched him — she did not answer — the fire burned; Aunt Guo said: “Remembered. The seventh card.”; A-Shi put the cards away — he set them back on the stove — he looked at his mother — she was smiling too; The fire burned; Aunt Guo said: “We’ll talk tomorrow.”; A-Shi nodded — the fire burned; his mother nodded — Aunt Guo nodded too — the fire burned. Volume XV, forty-sixth part.
+146 · Tomorrow, Then — Monday of the twenty-fifth week after the spring equinox, morning, the sky very grey; Aunt Guo had said “tomorrow” — she came today — she brought one thing — she set the cards on the table — she turned to leave; A-Shi stopped her — “You’re going?”; Aunt Guo stopped — she did not turn around — she said nothing; A-Shi chased her out — she was already at the gate — it was bright outside the gate — he caught up with her — “Can’t we say it today?” he asked; Aunt Guo finally turned around — she looked at him — she said nothing — he saw the stove in the direction of the kitchen — he walked back toward it; he turned around — Aunt Guo turned too — the two of them walked back together; his mother stood at the stove — the fire burned — no one looked up — the fire burned; A-Shi crouched — he held his two hands — he did not speak — his mother said nothing either; The fire burned; Aunt Guo said: “Everyone sit.” — his mother sat — A-Shi sat too; Aunt Guo said: “We say it today.” — she laid the cards on the table — she did not look at the fire — she only looked at the two of them — “The seventh card — you’ve already learned it.”; A-Shi did not lift his head — his mother did not move — the fire burned; Aunt Guo said again: “Say it.”; A-Shi still did not lift his head — he looked at his own hands — he closed them — he opened them again; he spoke one character slowly; his mother looked at him — Aunt Guo saw it too — the fire burned; Aunt Guo nodded — “That’s it.”; the fire burned; Aunt Guo said: “This character — fire — it burned for seven hundred years.”; A-Shi did not answer — the fire burned; Aunt Guo gathered the few cards — she left — she said nothing — she went through the door; the fire burned; Aunt Guo had gone — A-Shi crouched at the stove — his mother sat at the stove — the fire burned; his mother patted his shoulder — she did not speak — the fire burned. Volume XV, forty-seventh part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3304,7 +3305,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and forty-five volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and forty-six volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
