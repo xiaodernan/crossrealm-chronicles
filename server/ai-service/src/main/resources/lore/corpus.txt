@@ -9120,6 +9120,47 @@ The fire burned.
 
 *(End of volume XVI · Volume one hundred and fifty-five overall · the seven-hundred-and-first year, third part — The Snow Came Down.)*
 
+# source: creative/novel/en/156-the-cat-is-still-inside.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVI**: The Seven-hundred-and-first Year — The Cat Is Still Inside
+
+---
+
+## One Hundred and Fifty-six: The Cat Is Still Inside
+
+Monday of the twenty-sixth week after the spring equinox — morning — the sky just bright.
+
+A-Shi pushed the door open — the wind and snow struck his face — he took a deep breath.
+
+The yard was all white — his eyes went straight to the cloth laid at the door — it was entirely covered — the snow had covered it.
+
+The cat slept on that cloth — seven hundred years — the keepers came and went — it only ever slept there — the fire burned.
+
+A-Shi squatted down — he looked under the snow — under the snow there was a rounded lump — it let out a wisp of warmth — he laughed.
+
+He laid both hands on the snow — he did not dig — it was inside — the fire burned.
+
+He went back inside — he took two dry cloths — he pushed the door open — the snow was still falling — he spread the two dry cloths over the cat.
+
+His mother stood at the door — she looked at A-Shi — she did not speak — the fire burned.
+
+A-Shi said: “The cat is still inside.”
+
+His mother nodded — she said: “Seven hundred years — it is just like that — when it is your turn, you will be just like that too.”
+
+The fire burned.
+
+A-Shi watched the snow fall — the fire burned — the fire burned — the fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVI · Volume one hundred and fifty-six overall · the seven-hundred-and-first year, fourth part — The Cat Is Still Inside.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -21865,6 +21906,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十六 · 本章完 · 跨界线总第一百五十五卷 · 第七百零一年第三篇 · 雪落下来）*
+
+# source: creative/novel/156-猫还在里面.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十六**：第七百零一年 —— 猫还在里面
+
+---
+
+## 一百五十六 · 猫还在里面
+
+立春后第二十六周——周一——早上——天刚蒙蒙亮。
+
+阿石推开门——风雪扑了他一脸——他吸了一口气。
+
+院外一片白——他一眼就看见了门口那块布——整个盖住了——雪盖住了它。
+
+猫睡在那块布上——七百年了——守夜人来了又去——它只在这儿睡——灶火燃着。
+
+阿石蹲下来——他看雪下面——雪下面有一个弯团——它冒着一缕热气——他笑了。
+
+他把两只手放在雪上——他没挖——它在里面——灶火燃着。
+
+他回到屋里——他拿了两块干布——他推门出去——雪还在——他把两块干布铺在猫的上面。
+
+母亲站在门口——她看阿石——她没说话——灶火燃着。
+
+阿石说：「猫还在里面。」
+
+母亲点了点头——她说：「七百年了——它就这样——你到那时候——也就是这样。」
+
+灶火燃着。
+
+阿石看着雪落下来——灶火燃着——灶火燃着——灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十六 · 本章完 · 跨界线总第一百五十六卷 · 第七百零一年第四篇 · 猫还在里面）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记

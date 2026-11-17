@@ -203,7 +203,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | New Year’s Eve | [new-year-s-eve](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/152-new-year-s-eve.md) |
 | The Fire Still Burns | [the-fire-still-burns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/153-the-fire-still-burns.md) |
 | One Cup of Tea | [one-cup-of-tea](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/154-one-cup-of-tea.md) |
-| The Snow Came Down | [the-snow-came-down](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/155-the-snow-came-down.md) |Chapter → game-chapter mapping:
+| The Snow Came Down | [the-snow-came-down](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/155-the-snow-came-down.md) |
+| The Cat Is Still Inside | [the-cat-is-still-inside](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/156-the-cat-is-still-inside.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
