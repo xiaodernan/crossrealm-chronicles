@@ -197,7 +197,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Tomorrow, Then | [tomorrow-then](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/146-tomorrow-then.md) |
 | After He Said the Word | [after-he-said-the-word](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/147-after-he-said-the-word.md) |
 | The Previous Lamp | [the-previous-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/148-the-previous-lamp.md) |
-| The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/149-the-first-night.md) |Chapter → game-chapter mapping:
+| The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/149-the-first-night.md) |
+| The Rest of the Night | [the-rest-of-the-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/150-the-rest-of-the-night.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

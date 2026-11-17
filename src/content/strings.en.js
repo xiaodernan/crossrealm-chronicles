@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and forty-nine volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and fifty volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 149 volumes of the canon, fully readable
+· Canon Library — 150 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3141,8 +3141,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 149-volume index',
-  hm_body_codex: `Codex — 149 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 150-volume index',
+  hm_body_codex: `Codex — 150 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3295,6 +3295,7 @@ hm_title_codex: 'Codex · the 149-volume index',
 147 · After He Said the Word — Monday of the twenty-fifth week after the spring equinox, evening, the sky fully dark; A-Shi stood at the stove — he did not move — he did not speak — he only watched the fire; his mother made one motion — she pushed her own bowl across to him — she did not speak — A-Shi did not move the bowl — he did not lift his head; his mother went out — she came back — she carried clean bowls — she set them on the table — she said nothing; A-Shi slowly walked over — he looked at his mother — he looked at the fire — the fire burned; his mother looked at A-Shi — she came over — she softly patted his shoulder from behind — he did not move; The fire burned; his mother said: “It has burned seven hundred years.”; A-Shi did not answer — the fire burned; his mother said: “It burned seven hundred years — it burned your grandfather — and it burned your mother’s mother — and it will burn you too — it will keep burning.”; The fire burned; A-Shi said: “I know.”; his mother nodded — she said nothing more — the fire burned; The two of them looked at the fire — the fire burned; A-Shi slowly squatted down — he pressed his face into his knees — he did not cry — he did not speak; his mother squatted at the fire too — the fire burned; The two of them just squatted there — the fire burned. Volume XV, forty-eighth part.
 148 · The Previous Lamp — Tuesday of the twenty-fifth week after the spring equinox, morning, the sky just bright; A-Shi woke — the fire still burned — his mother was already sitting at the stove — she did not look at him; in the corner of the stove there was a lamp — an old lamp — a stone base — no shade — the wick burnt — A-Shi had never seen it; he walked over — his mother did not stop him — she only looked at the fire; A-Shi picked up the old lamp — it was very light — there was no oil in it — on the stone base there was a line of characters — he could not make them out — he held the lamp close to the stove — the firelight fell on the line — the characters were deep — they were carved long ago; his mother said: “Your mother’s father kept the night-watch with this.”; A-Shi did not speak — he looked at the line — he slowly made it out — it read: “Light it once — burn for seven hundred years.”; he lifted his head to his mother — his mother still looked at the fire — she did not look up; his mother said: “Before he left, he set it at the stove — he said — the next keeper of the watch — is you.”; A-Shi did not move — the fire burned; his mother said: “It is not a lamp — it is a thing — it remembers seven hundred years — it remembers your great-grandfather — it remembers your grandfather — it remembers your father — it remembers you — it will keep remembering.”; A-Shi set the old lamp back — he looked at it again — the wick burnt — there was no oil; his mother said: “No oil — the fire itself is its oil — so long as the fire burns, it is.”; A-Shi looked at the fire — the fire burned; his mother stood up — she came over and laid her hand on his head — she said nothing — she just kept it there. Volume XV, forty-ninth part.
 149 · The First Night — Tuesday of the twenty-fifth week after the spring equinox, evening, the sky fully dark; his mother finished supper — she stood up — she untied her apron — she laid it on the table; she said to A-Shi: “Tonight — you keep the watch alone.”; A-Shi lifted his head — he did not speak — he looked at the fire — the fire burned; his mother walked to the door — she stopped — she did not turn around — “If the fire goes out, you go too.” she said; she went out — the yard was very quiet — the gate closed — the latch sounded once; A-Shi stood alone at the stove — the fire burned; he sat down — he watched the fire — he counted how many times it jumped — he counted seven — he stopped; he thought of his mother’s words — “Light it once — burn for seven hundred years” — he thought of the line on the old lamp; he took the old lamp over — he set it by the stove — the wick burnt — there was no oil — the fire burned; A-Shi said: “I’m here.”; the fire leapt once — it did not go out — it burned; the night deepened — he did not sleep — he just sat — he watched the fire — the fire burned; he counted the fire — one — two — three — he counted seven — he started over — one — two — three; the sky was almost bright — the fire still burned; his mother came back — she stood at the door — she looked at A-Shi — she said nothing — the fire burned; his mother said: “It did not go out.”; A-Shi said: “It did not go out.”; his mother came over — she sat down — she watched the fire with him. Volume XV, fiftieth part.
+150 · The Rest of the Night — Tuesday of the twenty-fifth week after the spring equinox, deep night, only the firelight left; A-Shi kept the watch through the night — he did not sleep — toward dawn — he dozed off against the stove’s edge; he did not know when he had fallen asleep — he only remembered the fire was still there — the fire burned; he woke — it was still dark — the fire was still there — the fire burned; his mother was not in the room — he did not know when she had gone out — the fire burned; A-Shi stood up — he looked at the fire — it had not gone out — he sat again — he looked at the fire again; The fire burned; he counted — one — two — three — he counted to seven — he stopped — he counted again — one — two — three — he counted to seven — he stopped; The fire burned; he thought — keeping the watch is not about not sleeping — it is about not leaving; he looked at the fire again — the fire burned — he straightened the old lamp a little — the wick burnt — there was no oil — the fire burned; his mother came back — she stood at the doorway — she looked at him — she said nothing — the fire burned; his mother said: “The fire did not go out.”; A-Shi said: “The fire did not go out.”; his mother came over — she sat down — she watched the fire — she said: “Keeping the watch is not about the fire — it is about the fire still being here.”; The fire burned; his mother said again: “You fell asleep — and it did not go out.”; A-Shi did not speak — the fire burned; the sky brightened little by little — the fire burned. Volume XV, fifty-first part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3308,7 +3309,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and forty-nine volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and fifty volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
