@@ -9016,6 +9016,57 @@ The fire burned.
 
 *(End of volume XVI · Volume one hundred and fifty-three overall · the seven-hundred-and-first year, first part — The Fire Still Burns.)*
 
+# source: creative/novel/en/154-one-cup-of-tea.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVI**: The Seven-hundred-and-first Year — One Cup of Tea
+
+---
+
+## One Hundred and Fifty-four: One Cup of Tea
+
+Friday of the twenty-fifth week after the spring equinox — morning — the sky still wet with dew.
+
+His mother boiled the water — she took out two bowls — one for her — one for A-Shi.
+
+A-Shi looked at the two bowls — he asked: “Two?”
+
+His mother said: “Two keepers of the night — two bowls.”
+
+She poured the tea into the bowls — the first for A-Shi — the second for herself — she pushed one bowl across the table to him — the fire burned.
+
+A-Shi held the bowl — he smelled it — a faint bitterness — he took a sip — it was very hot.
+
+His mother said: “Small sips — it will not scald you to death — and mind you not scald the fire either.”
+
+A-Shi laughed — she laughed too — the fire burned.
+
+His mother said: “The tea was the same in your grandfather's time — a bowl for each — the same in your father's time — me — A-Shi.”
+
+The fire burned.
+
+His mother looked at A-Shi — she said: “You drink very slowly — as if waiting for something.”
+
+A-Shi said: “I am not.”
+
+His mother nodded — she did not ask again — she too drank slowly.
+
+The fire burned.
+
+The two of them finished — the bowls were empty — the fire burned.
+
+His mother washed the bowls — she set them on the table — she did not look at A-Shi — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVI · Volume one hundred and fifty-four overall · the seven-hundred-and-first year, second part — One Cup of Tea.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -21657,6 +21708,57 @@ F2 隐藏 HUD。
 ---
 
 *（卷十六 · 本章完 · 跨界线总第一百五十三卷 · 第七百零一年第一篇 · 火还在）*
+
+# source: creative/novel/154-一碗茶.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十六**：第七百零一年 —— 一碗茶
+
+---
+
+## 一百五十四 · 一碗茶
+
+立春后第二十五周——周五——早上——天还带着露水。
+
+母亲烧了开水——她拿了两个碗——一个给她——一个给阿石。
+
+阿石看了两个碗——他问：「两个？」
+
+母亲说：「火守夜——两个守夜的人——两个碗。」
+
+她把茶倒进碗里——第一碗给阿石——第二碗给自己——她推了一碗给他——灶火燃着。
+
+阿石捧着碗——他闻了闻——一股淡的苦味——他喝了一口——很烫。
+
+母亲说：「小口小口的喝——别烫伤自己——也别烫到火。」
+
+阿石笑了——她也笑了——灶火燃着。
+
+母亲说：「你祖父的时候——也是这个茶——一个人一碗——你父亲的时候——也是——我——阿石。」
+
+灶火燃着。
+
+母亲看阿石——她说：「你喝得很慢——像是在等什么。」
+
+阿石说：「我没有。」
+
+母亲点了点头——她没再问——她自己也喝得很慢。
+
+灶火燃着。
+
+两个人都喝完了——碗空了——灶火燃着。
+
+母亲把碗洗了——她又扣在桌上——她没看阿石——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十六 · 本章完 · 跨界线总第一百五十四卷 · 第七百零一年第二篇 · 一碗茶）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记
