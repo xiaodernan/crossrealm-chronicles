@@ -64,8 +64,8 @@ class KindleLetterControllerTest {
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
         org.mockito.Mockito.verify(client).complete(captor.capture(), anyString());
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("炉火的记录者"));
-        org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("仍是炉火自己的声音"),
-                "烬火答人格应钉炉火自己的声音这一句，实际：" + captor.getValue().substring(0, 80));
+        org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("守夜人"),
+                "烬火答人格应钉炉火/守夜人这一锚点，实际：" + captor.getValue().substring(0, 120));
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("星轨顾问"));
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("回声先知"));
         org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("boss-verse"));
