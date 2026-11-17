@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T17:50:00.948Z",
+  "generated_at": "2026-11-17T18:35:34.588Z",
   "branch": "main",
-  "head": "5a9dfd87",
-  "total_commits": 2083,
-  "pushed_at": "2026-11-18T01:48:58+08:00",
+  "head": "5bfc84db",
+  "total_commits": 2085,
+  "pushed_at": "2026-11-18T02:34:31+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "5bfc84d",
+      "at": "2026-11-18T02:34:31+08:00",
+      "subject": "perf(engine): W-Z335 热路径优化五连 + formation 急速复活 + Windows 压测修复（verify ALL VERIFY CHECKS PASSED）"
+    },
+    {
+      "short": "9f07605",
+      "at": "2026-11-17T17:50:00Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "5a9dfd8",
       "at": "2026-11-18T01:48:58+08:00",
@@ -21,25 +31,15 @@
       "short": "361bd61",
       "at": "2026-11-18T01:38:52+08:00",
       "subject": "feat(help): W-Z333 炉火玩家 · 开局三分钟——Admin LLM P0 #2 落地（说明书置首章）"
-    },
-    {
-      "short": "74d8c05",
-      "at": "2026-11-17T17:26:31Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "decd5f5",
-      "at": "2026-11-18T01:25:30+08:00",
-      "subject": "feat(canon): W-Z332 第一百六十三卷《第一道光 / The First Light》入典——卷十七开篇 · 第七百零一年"
     }
   ],
-  "tracked_files": 1622,
-  "test_files": 466,
+  "tracked_files": 1623,
+  "test_files": 467,
   "i18n_keys": 3265,
   "lore_sources": 359,
   "novel_chapters_zh": 164,
   "novel_chapters_en": 164,
-  "milestone": "W-Z334",
+  "milestone": "W-Z335",
   "milestone_full": "卷 164 · 六百年守火线（164 / 164 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 359 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：164 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
