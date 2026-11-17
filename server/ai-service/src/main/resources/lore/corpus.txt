@@ -9653,6 +9653,45 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and sixty-six overall · the seven-hundred-and-first year, fourth part — The Firekeeper.)*
 
+# source: creative/novel/en/167-the-steady-hand.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Fifth Volume — The Steady Hand
+
+---
+
+## One Hundred and Sixty-seven: The Steady Hand
+
+The next day — before first light — the fire burned.
+
+His mother carried a log out to the yard — she set it on the stone block — she handed an axe to A-Shi.
+
+A-Shi took it — he did not move.
+
+His mother said: “First you watch —”
+
+His mother raised the axe — she did not chop — she only stood there — she said: “Fire does not choose hands — steady hands do —”
+
+A-Shi said: “What does steady mean?”
+
+His mother said: “A log falling on the ground does not hurt — a hand can — so steady first — then let fall —”
+
+A-Shi nodded — he said nothing — the fire burned.
+
+His mother put the axe in A-Shi’s hand — she gripped his hand together with hers — she said: “Follow me —”
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and sixty-seven overall · the seven-hundred-and-first year, fifth part — The Steady Hand.)*
+
 # source: creative/novel/en/17-chapter-seventeen.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -22888,6 +22927,45 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百六十六卷 · 卷十七之四 · 第七百零一年 · 守火的人）*
+
+# source: creative/novel/167-稳的手.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第五卷 —— 稳的手
+
+---
+
+## 一百六十七 · 稳的手
+
+第二天——天没亮——灶火燃着。
+
+母亲把一根圆木抱到院子里——她放在石墩上——她递一把斧头给阿石。
+
+阿石接过来——他没动。
+
+母亲说：「你先看——」
+
+母亲举起斧头——她没砍——她只是站着——她说「火不挑人——手稳不稳——」
+
+阿石说：「稳的什么意思？」
+
+母亲说：「木头落在地上不会疼——人的手会——所以先稳——再落——」
+
+阿石点了点头——他没说话——灶火燃着。
+
+母亲把斧头放在阿石手上——她扶住了他的手——她说：「跟着我——」
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百六十七卷 · 卷十七之五 · 第七百零一年 · 稳的手）*
 
 # source: creative/novel/17-晨雾回声.md
 # 《跨界纪事：锚火守夜人》

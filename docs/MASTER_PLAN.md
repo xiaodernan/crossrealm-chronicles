@@ -15,6 +15,9 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-18 · W-Z341 第167卷入典《稳的手 / The Steady Hand》——卷十七之五 · 第七百零一年 · 稳的手**：第二天——天没亮——灶火燃着——母亲把一根圆木抱到院子里——她放在石墩上——她递一把斧头给阿石——阿石接过来——他没动——母亲说「你先看」——母亲举起斧头——她没砍——她只是站着——她说「火不挑人——手稳不稳」——阿石说「稳的什么意思」——母亲说「木头落在地上不会疼——人的手会——所以先稳——再落」——阿石点了点头——他没说话——灶火燃着——母亲把斧头放在阿石手上——她扶住了他的手——她说「跟着我」——灶火燃着。
+> 交付：creative/novel/167-稳的手.md + en 孪生 167-the-steady-hand.md；novella 167 × 2 = 334 模块（典籍馆现为 167 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：365 源；showcase feed 新增 W-Z341 实录。
+>
 > **2026-11-18 · W-Z340 执笔人 · Boss 前死笔一行——「LLM 作为 NPC」第三阶段（真上游 LIVE 端到端实测）**：`POST /api/ai/death-epitaph`（`DeathEpitaphController`）：玩家在 Boss 面前每第 3 次倒下、且 Boss 活着时，由客户端 fire-and-forget 送一滴残墨换一句 ≤45 字的纸条——三档口径 ≤3（递来一张只写了半行的纸条鼓励再来一次）/ 4–6（旁边笑着看一眼松一口气的话）/ ≥7（过来人点出真正该注意的规律），`crossrealm-death-epitaph-v1` 独立桶。脚本：`DeathHintDirector` `maybeAskEpitaph()`（cache miss/connection 断线时完全静默跳过，**永远不阻断重生**）；`DeathHintDirector.onRespawn()` toast 原链路不变；新 key `death_epitaph_label`（i18n 3265 → **3266**）；backend `DeathEpitaphControllerTest` 4 例（三档提示句 contains 断言 / 上游不可用 503 / 越界 400 / Controller 桶号）；Tests 6829/6829 ✓ Build ✓ Size ✓ · verify ALL VERIFY CHECKS PASSED。
 > **真上游 LIVE 实测**（docker compose 重建 ai-service → ALL VERIFY CHECKS PASSED → in-network 真调用）：
 > · 3 次 `{"bossName":"影界守护者","attempts":3}`：**L1 "影界守护者还没把路封死，歇一口气，再试一次吧。"（cached=false）→ same#1/same#2 同句**（`cached:true`，本地消化摘要命中）；
