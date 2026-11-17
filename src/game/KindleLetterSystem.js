@@ -102,7 +102,12 @@ export class KindleLetterSystem {
 
     let reply = '';
     try {
-      const res = await this.game.onlineServices.askKindleLetter(payload, { signal });
+      // Ember Reply 先（StateGraph 分拣 + lane 编排 + 回灌护栏，W-Z316）；
+      // 旧后端没有该端点时（404/503/超时/坏 JSON）回落到 kindle-letter——同一条信纸契约、向后兼容。
+      let res = await this.game.onlineServices.askEmberReply?.(payload, { signal });
+      if (!res?.ok || !res?.data?.reply) {
+        res = await this.game.onlineServices.askKindleLetter(payload, { signal });
+      }
       reply = res?.ok ? sanitizeVerse(String(res?.data?.reply ?? '')) : '';
     } catch {
       reply = '';

@@ -393,6 +393,23 @@ export class OnlineServices {
   }
 
   /**
+   * 烬灯回信 · 返炉（W-Z316，`POST /api/ai/ember-reply`）——「LLM 作为 NPC」的第二阶段。
+   * 终章落定后，玩家在炉边写下的那一行；炉火回一行——但这一回之前，信纸里的意图先过一条
+   * StateGraph 路由（lore / journey / gratitude / distress / offtopic 五条车道），
+   * 再配上按 lane 分派的炉火人格编排，最后过一道确定性回灌护栏（泄漏词/超长/markdown 一律拦下）。
+   * 20s 预算——回信不该占用你走开的那几步。
+   * 旧后端没有这个端点时（404/非 ok），调用方应回落到 askKindleLetter。
+   */
+  async askEmberReply(payload, { signal } = {}) {
+    return this.#jsonRequest('/api/ai/ember-reply', {
+      method: 'POST',
+      body: payload,
+      timeoutMs: 20000,
+      signal,
+    });
+  }
+
+  /**
    * 烬灯回信 · 烬火答（W-Z292，`POST /api/ai/kindle-letter`）。
    * 终章落定后，玩家在炉边写下的那一行；炉火回一行。
    * 20s 预算——回信不该占用你走开的那几步。
