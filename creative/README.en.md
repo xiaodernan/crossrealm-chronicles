@@ -195,7 +195,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Seventh Silent Day | [the-seventh-silent-day](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/144-the-seventh-silent-day.md) |
 | The Number on the Card | [the-number-on-the-card](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/145-the-number-on-the-card.md) |
 | Tomorrow, Then | [tomorrow-then](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/146-tomorrow-then.md) |
-| After He Said the Word | [after-he-said-the-word](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/147-after-he-said-the-word.md) |Chapter → game-chapter mapping:
+| After He Said the Word | [after-he-said-the-word](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/147-after-he-said-the-word.md) |
+| The Previous Lamp | [the-previous-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/148-the-previous-lamp.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
