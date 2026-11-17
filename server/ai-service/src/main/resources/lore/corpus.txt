@@ -9397,6 +9397,47 @@ The fire burned.
 
 *(End of volume XVI · Volume one hundred and sixty overall · the seven-hundred-and-first year, eighth part — The Shadow.)*
 
+# source: creative/novel/en/161-raising-the-anchor.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVI**: The Seven-hundred-and-first Year — Raising the Anchor
+
+---
+
+## One Hundred and Sixty-one: Raising the Anchor
+
+Monday of the twenty-seventh week after the spring equinox — morning — the sky not yet fully bright.
+
+A-Shi woke — the fire burned — on the stove there was something he had never seen — a small anchor stone — a small rock — with three characters carved on it — but he could not make them out.
+
+The stone mortar roused itself too — it gave a single sound — as if someone had struck inside it — his mother was not at the stove — she was only in the room.
+
+A-Shi picked up the stone — he held it close to the fire — the fire burned — the characters lit up.
+
+On it was written — “Raising the Anchor.”
+
+He did not speak — he looked at the fire — the fire burned.
+
+He set it on the table — he looked at the stove again — his mother pushed the door open — she stood in the doorway — she saw it too.
+
+His mother said: “The anchor is rising.”
+
+A-Shi said: “When did it start?”
+
+His mother said: “Seven hundred years.”
+
+A-Shi did not answer — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVI · Volume one hundred and sixty-one overall · the seven-hundred-and-first year, ninth part — Raising the Anchor.)*
+
 # source: creative/novel/en/17-chapter-seventeen.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -22376,6 +22417,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十六 · 本章完 · 跨界线总第一百六十卷 · 第七百零一年第八篇 · 影子）*
+
+# source: creative/novel/161-起锚.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十六**：第七百零一年 —— 起锚
+
+---
+
+## 一百六十一 · 起锚
+
+立春后第二十七周——周一——早上——天还没全亮。
+
+阿石醒来——灶火燃着——灶台上有一件他从来没有见过的东西——一块锚点牌——一小块石头——上面刻着三个字——但他还没看清。
+
+石臼自己也动了——它响了一声——像有人在里面敲了一下——母亲不在灶前——她只在屋里。
+
+阿石拿起那块石头——他把它凑近灶火——灶火燃着——字亮了。
+
+上面写的——「起锚」——
+
+他没说话——他看灶火——灶火燃着。
+
+他把它放在桌上——他又看了看炉子——母亲推开门——她站在门口——她也看见了。
+
+母亲说：「起锚了。」
+
+阿石说：「什么时候起的？」
+
+母亲说：「七百年。」
+
+阿石没接——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十六 · 本章完 · 跨界线总第一百六十一卷 · 卷十六之九 · 第七百零一年 · 起锚）*
 
 # source: creative/novel/17-晨雾回声.md
 # 《跨界纪事：锚火守夜人》

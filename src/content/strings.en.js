@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and sixty volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and sixty-one volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 160 volumes of the canon, fully readable
+· Canon Library — 161 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3141,8 +3141,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 160-volume index',
-  hm_body_codex: `Codex — 160 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 161-volume index',
+  hm_body_codex: `Codex — 161 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3306,6 +3306,7 @@ hm_title_codex: 'Codex · the 160-volume index',
 158 · The Eighth Grain — Monday of the twenty-sixth week after the spring equinox, morning, the sky already half-bright; the rice jar at the stove held new rice — A-Shi picked one grain after another — he counted seven, and stopped; his mother said: “Finish counting, then call me.”; A-Shi did not answer — he counted one more — eight; he put the grains in a bowl — he looked at the bowl — the fire burned; his mother walked over carrying half a bowl of congee — she did not speak — she set the bowl in front of A-Shi — the fire burned; A-Shi looked at the grains in the bowl — he reached out — he ate one grain — eight; his mother stood behind him — she did not speak — the fire burned; A-Shi ate another grain — nine; he did not stop — he kept eating — ten — eleven — twelve — until only one grain was left in the bowl — the fire burned; A-Shi set the last grain back on the stove — he looked at his mother — his mother looked at the fire — the fire burned; he said: “Keep the last one.”; his mother nodded — she said: “Our rule about leaving rice is not because we are poor — it is so that the next time the fire burns, someone still remembers what the first bowl meant.”; The fire burned; his mother came over — she picked up that grain — she placed it in her palm — she held her hand out — A-Shi held his hand out too — his mother placed the grain in his palm — A-Shi closed his hand around it; The fire burned. Volume XVI, sixth part.
 159 · The First Rain — Monday of the twenty-sixth week after the spring equinox, afternoon — the sky darkened for a moment — the rain came; A-Shi stood in the yard — he stretched out a hand — a few drops caught on his fingertips — very light — still carrying a bit of winter’s residual cold; his mother was not at the stove — she was in the house — she heard the rain — she pushed the door open — she looked at A-Shi; she said: “Come inside.”; A-Shi said: “Just for a moment.”; the rain came down without urgency — one drop at a time — striking the blue-grey stone slabs in the yard — the sound of ceramic; his mother stood at the door — she did not insist — she just stood — waiting; the fire burned; the rain grew a little heavier; his mother said: “Seven hundred years — this is the first rain of the seven-hundred-and-first year — last year it came crying — this year it comes smiling.”; A-Shi tilted his face upward — rain fell on his face — he did not move; his mother said: “Last year, after your grandfather left, the rain came — that one — came crying.”; the fire burned; A-Shi said nothing — he stood for a while — he went back inside — he did not wipe his face — his mother did not hand him a towel — the two of them sat at the stove like that. Volume XVI, seventh part.
 160 · The Shadow — Monday of the twenty-sixth week after the spring equinox, evening — the dusk pressed the wall lower than by day; A-Shi stood at the yard gate — he saw his own shadow — the shadow stretched very long — it reached outside the yard; his mother was in the house — she heard he had stopped — she pushed the door open — she saw it too — the shadow; he did not turn around — his mother did not speak either; the shadow moved — it moved on its own — it crept slowly along the ground — it stretched out a hand — that hand was long — it was black — it was very old; his mother said: “Come inside.”; A-Shi did not move — the fire burned; the shadow stopped — it stopped in the middle of the yard — its hand rested upon the shadow of the stove — his mother saw it — his mother did not move either; his mother said: “It has come back too.”; A-Shi looked at the shadow — the shadow looked at him — the fire burned; the shadow was longer than before — it no longer moved — it just stood — it stood in silence — like a keeper of the watch — like every keeper of every year for seven hundred and one years; his mother stood for a long time — she let out a breath — she said: “It is watching you.”; A-Shi nodded — he did not move either; the shadow moved — it crept slowly back toward the yard wall — it vanished into the shadow of the wall — it could no longer be seen — the fire burned; his mother said: “Go back inside.”; A-Shi went back inside — he went back to the stove — the fire burned; his mother came in too — she pushed the door — she did not turn around — the fire burned. Volume XVI, eighth part.
+161 · Raising the Anchor — Monday of the twenty-seventh week after the spring equinox, morning — the sky not yet fully bright; A-Shi woke — the fire burned — on the stove there was something he had never seen — a small anchor stone — a small rock — with three characters carved on it — but he could not make them out; the stone mortar roused itself too — it gave a single sound — as if someone had struck inside it — his mother was not at the stove — she was only in the room; A-Shi picked up the stone — he held it close to the fire — the fire burned — the characters lit up; on it was written — “Raising the Anchor.”; he did not speak — he looked at the fire — the fire burned; he set it on the table — he looked at the stove again — his mother pushed the door open — she stood in the doorway — she saw it too; his mother said: “The anchor is rising.”; A-Shi said: “When did it start?”; his mother said: “Seven hundred years.”; A-Shi did not answer — the fire burned. Volume XVI, ninth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3319,7 +3320,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and sixty volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and sixty-one volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
