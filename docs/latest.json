@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T20:53:13.209Z",
+  "generated_at": "2026-11-17T21:19:10.387Z",
   "branch": "main",
-  "head": "538a6db1",
-  "total_commits": 2099,
-  "pushed_at": "2026-11-18T04:50:12+08:00",
+  "head": "a7c1c193",
+  "total_commits": 2101,
+  "pushed_at": "2026-11-18T05:17:33+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "a7c1c19",
+      "at": "2026-11-18T05:17:33+08:00",
+      "subject": "feat(ai): W-Z343 残章 · 跨章落笔一行——「LLM 作为 NPC」第四阶段（Admin LLM P1 · 章节推进断点）"
+    },
+    {
+      "short": "f63f6de",
+      "at": "2026-11-17T20:53:13Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "538a6db",
       "at": "2026-11-18T04:50:12+08:00",
@@ -21,32 +31,22 @@
       "short": "2065192",
       "at": "2026-11-18T04:34:29+08:00",
       "subject": "feat(canon): W-Z341 第一百六十七卷《稳的手 / The Steady Hand》入典——卷十七之五 · 第七百零一年"
-    },
-    {
-      "short": "59a3226",
-      "at": "2026-11-17T20:16:52Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "fad32c8",
-      "at": "2026-11-18T04:14:34+08:00",
-      "subject": "feat(ai): W-Z340 执笔人 · Boss 前死笔一行——「LLM 作为 NPC」第三阶段（漏斗 P0 · 首 Boss 断崖）"
     }
   ],
-  "tracked_files": 1637,
+  "tracked_files": 1639,
   "test_files": 467,
-  "i18n_keys": 3266,
+  "i18n_keys": 3267,
   "lore_sources": 367,
   "novel_chapters_zh": 168,
   "novel_chapters_en": 168,
-  "milestone": "W-Z342",
+  "milestone": "W-Z343",
   "milestone_full": "卷 168 · 六百年守火线（168 / 168 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 367 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：168 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3266-keys",
+    "bilingual-3267-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",
