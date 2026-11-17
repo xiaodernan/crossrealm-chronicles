@@ -215,7 +215,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Five Characters | [five-characters](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/164-five-characters.md) |
 | The Answer | [the-answer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/165-the-answer.md) |
 | The Firekeeper | [the-firekeeper](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/166-the-firekeeper.md) |
-| The Steady Hand | [the-steady-hand](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/167-the-steady-hand.md) |Chapter → game-chapter mapping:
+| The Steady Hand | [the-steady-hand](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/167-the-steady-hand.md) |
+| The First Log | [the-first-log](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/168-the-first-log.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

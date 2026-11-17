@@ -9692,6 +9692,41 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and sixty-seven overall · the seven-hundred-and-first year, fifth part — The Steady Hand.)*
 
+# source: creative/novel/en/168-the-first-log.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Sixth Volume — The First Log
+
+---
+
+## One Hundred and Sixty-eight: The First Log
+
+The third day — morning — A-Shi got up alone.
+
+He walked to the yard — he saw his mother had left a bundle of logs by the stone block — he stood there and looked for a long time.
+
+The fire burned.
+
+He walked over — he picked one up — one that was not thick — and not thin either — he walked to the stove — he crouched down — and laid it inside.
+
+The fire did not burst — it simply burned a little brighter — steadily — the fire burned.
+
+A-Shi sat before the stove for a long time — he listened to the sound of the wood in the fire — it crackled — it did not speak — it only burned.
+
+The fire burned.
+
+His mother came out from the room — she stood at the door — she did not come in — she looked at A-Shi for a while — she said nothing — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and sixty-eight overall · the seven-hundred-and-first year, sixth part — The First Log.)*
+
 # source: creative/novel/en/17-chapter-seventeen.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -22966,6 +23001,41 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百六十七卷 · 卷十七之五 · 第七百零一年 · 稳的手）*
+
+# source: creative/novel/168-第一根柴.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第六卷 —— 第一根柴
+
+---
+
+## 一百六十八 · 第一根柴
+
+第三天——早上——阿石独自起来。
+
+他走到院子——他看见母亲放了一捆柴在石墩旁——他站在那里看了很久。
+
+灶火燃着。
+
+他走过去——他拿起一根——不粗——也不细的那根——他走到灶前——他蹲下——他把它放进去。
+
+火不爆——它稳稳地亮了一点——灶火燃着。
+
+阿石在灶前坐了很久——他听见柴在火里的声音——它噼啪——它不说话——它只是燃着。
+
+灶火燃着。
+
+母亲从屋里出来——她站在门口——她没进来——她看了阿石一会儿——她也没说话——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百六十八卷 · 卷十七之六 · 第七百零一年 · 第一根柴）*
 
 # source: creative/novel/17-晨雾回声.md
 # 《跨界纪事：锚火守夜人》
