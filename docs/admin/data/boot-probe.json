@@ -1,0 +1,21 @@
+{
+  "generated": "2026-11-17T23:31:00+08:00",
+  "script": "scripts/boot-probe.mjs",
+  "host": "Windows 11 · dev box · headless SwiftShader (no GPU budget — worst-case boot smoke test)",
+  "windowsNote": "玩家真机（硬件加速 GPU）的 boot 显著低于此读数。",
+  "marks": [
+    [44, "probe start · vite spawned"],
+    [9073, "vite ready"],
+    [15300, "chrome ready on 54860"],
+    [38881, "navigated"],
+    [95016, "BOOT OK in 77801ms · title=跨界纪元 · Crossrealm Chronicles · fps-ish=2.5 (rAF frames in 2s, SwiftShader) · start-btn present=true"],
+    [100511, "done"]
+  ],
+  "bo_ms": 77801,
+  "vite_ms": 9073,
+  "chrome_ms": 6227,
+  "navigate_ms": 23581,
+  "fps_ish": 2.5,
+  "start_button_present": true,
+  "note": "真启动探测真跑（W-Z350，post-boot-probe fix：scripts 路径从 scripts/ 解析 vite.bin 的 BUG 已修）。game 完整初始化——window.__game / enemyManager / scene 三项均 present。软件渲染 GPU-less 机器 boot≈78s；真 GPU 玩家远快此值。"
+}

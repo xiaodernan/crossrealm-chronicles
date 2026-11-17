@@ -14,7 +14,7 @@ const t0 = Date.now();
 const marks = [];
 const mark = (label) => { marks.push([Date.now() - t0, label]); console.log(`[probe +${Date.now() - t0}ms] ${label}`); };
 
-const root = join(dirname(fileURLToPath(import.meta.url)));
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const viteBin = join(root, 'node_modules', 'vite', 'bin', 'vite.js');
 const VITE_PORT = 5519;
 const profileDir = join(tmpdir(), `crossrealm-probe-${Date.now()}`);
