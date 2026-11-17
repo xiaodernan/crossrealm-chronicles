@@ -197,7 +197,8 @@ creative/music/soundtrack.html
 | 上一盏灯 · The Previous Lamp | [the-previous-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/148-the-previous-lamp.md) |
 | 第一夜 · The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/149-the-first-night.md) |
 | 剩下的半夜 · The Rest of the Night | [the-rest-of-the-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/150-the-rest-of-the-night.md) |
-| 小年 · The Little Year’s Eve | [the-little-year-s-eve](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/151-the-little-year-s-eve.md) |每一章对应游戏的章节走法：
+| 小年 · The Little Year’s Eve | [the-little-year-s-eve](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/151-the-little-year-s-eve.md) |
+| 除夕 · New Year’s Eve | [new-year-s-eve](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/152-new-year-s-eve.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

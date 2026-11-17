@@ -199,7 +199,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Previous Lamp | [the-previous-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/148-the-previous-lamp.md) |
 | The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/149-the-first-night.md) |
 | The Rest of the Night | [the-rest-of-the-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/150-the-rest-of-the-night.md) |
-| The Little Year’s Eve | [the-little-year-s-eve](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/151-the-little-year-s-eve.md) |Chapter → game-chapter mapping:
+| The Little Year’s Eve | [the-little-year-s-eve](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/151-the-little-year-s-eve.md) |
+| New Year’s Eve | [new-year-s-eve](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/152-new-year-s-eve.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

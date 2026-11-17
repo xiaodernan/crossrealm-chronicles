@@ -8898,6 +8898,69 @@ The fire burned.
 
 *(End of volume one hundred and fifty-one · Volume XV, fifty-second part · The seven-hundredth year — The Little Year's Eve.)*
 
+# source: creative/novel/en/152-new-year-s-eve.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — New Year's Eve
+
+---
+
+## One Hundred and Fifty-two: New Year's Eve
+
+Wednesday of the twenty-fifth week after the spring equinox — evening — the sky very cold — wind snuck in through the stove's seams.
+
+His mother and A-Shi sat at the stove — the kitchen-god portrait was still pasted above — the paper edge curled a little — the fire burned.
+
+His mother said: “Tonight is New Year's Eve — seven hundred years ago, the first keeper of the fire kept this night — he kept it until dawn — the fire did not go out.”
+
+A-Shi nodded — he looked at the fire — the fire burned.
+
+His mother said: “Seven hundred years — seven hundred New Year's Eves — the fire has not gone out for a single one.”
+
+A-Shi did not speak — he counted the bricks of the stove — he counted once — he counted twice — he stopped.
+
+The fire burned.
+
+His mother said: “At twelve — the new year.”
+
+A-Shi said: “The new year — does the fire have a new year too?”
+
+His mother smiled — she did not speak — she looked at the fire.
+
+The fire burned.
+
+The sky darkened further — the wind grew stronger — the fire burned.
+
+His mother moved her chair toward the stove by an inch — then another — A-Shi moved his too.
+
+The fire burned.
+
+It was almost twelve — his mother did not look at the clock — she touched A-Shi's hand — it was cold.
+
+His mother said: “The new year is coming.”
+
+A-Shi said: “The fire has not gone out — it has not.”
+
+His mother nodded — she looked at him — she smiled — the fire burned.
+
+Twelve — a firecracker sounded in the yard — on the distant mountain a patch lit up — then went dark.
+
+His mother said: “The new year has come — and the fire is seven hundred and one.”
+
+A-Shi looked at the fire — the fire burned — it burned — it burned.
+
+His mother leaned against A-Shi — she said: “Keeping the watch is not about the fire — it is about the fire still being here — so long as the fire is here, the year is here.”
+
+A-Shi did not speak — the fire burned — the fire burned — the fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and fifty-two · Volume XV, fifty-third part · The seven-hundredth year — New Year's Eve.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -21421,6 +21484,69 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百五十一卷 · 卷十五之五十二 · 第七百年 · 小年）*
+
+# source: creative/novel/152-除夕.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 除夕
+
+---
+
+## 一百五十二 · 除夕
+
+立春后第二十五周——周三——晚上——天很冷——风从灶缝里灌进来。
+
+母亲和阿石坐在灶前——灶王爷像还贴在上方——纸边卷了一点——灶火燃着。
+
+母亲说：「今天除夕——七百年前——第一个守火的人守这一夜——守到了天亮——火没灭。」
+
+阿石点了点头——他看灶火——灶火燃着。
+
+母亲说：「七百年——七百个除夕——火一天没灭过。」
+
+阿石没说话——他数砖——灶台的砖——他数了一遍——他数了两遍——他停了。
+
+灶火燃着。
+
+母亲说：「十二点——新年。」
+
+阿石说：「新年——火也要过新年吗？」
+
+母亲笑了——她没说话——她看灶火。
+
+灶火燃着。
+
+天越来越黑了——风越来越大了——灶火燃着。
+
+母亲把椅子往灶边挪了一寸——又挪了一寸——阿石也把椅子往灶边挪了一寸。
+
+灶火燃着。
+
+天快十二点了——母亲没看钟——她摸了一下阿石的手——他的手是凉的。
+
+母亲说：「新年快到了。」
+
+阿石说：「火没灭——它没灭。」
+
+母亲点了点头——她看他——她笑了——灶火燃着。
+
+十二点——院子里响了一声鞭——远处的山上亮了一片——又暗了。
+
+母亲说：「新年到了——火也七百零一了。」
+
+阿石看灶火——灶火燃着——它燃着——它燃着。
+
+母亲靠着阿石——她说：「守火——守的是火还在——火还在——年就在。」
+
+阿石没说话——灶火燃着——灶火燃着——灶火燃着。
+
+灶火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百五十二卷 · 卷十五之五十三 · 第七百年 · 除夕）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记
