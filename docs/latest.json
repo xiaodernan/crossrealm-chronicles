@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T13:15:17.664Z",
+  "generated_at": "2026-11-17T13:44:21.259Z",
   "branch": "main",
-  "head": "18916615",
-  "total_commits": 2055,
-  "pushed_at": "2026-11-17T21:14:45+08:00",
+  "head": "564a3d95",
+  "total_commits": 2057,
+  "pushed_at": "2026-11-17T21:37:00+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "564a3d9",
+      "at": "2026-11-17T21:37:00+08:00",
+      "subject": "feat(ai): W-Z321 Codex-style 大前缀升级——输入从 ~2K tok 涨到 ~7-9K tok · 命中率 97%+ 维持"
+    },
+    {
+      "short": "465e290",
+      "at": "2026-11-17T13:15:17Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "1891661",
       "at": "2026-11-17T21:14:45+08:00",
@@ -21,25 +31,15 @@
       "short": "74fc6fa",
       "at": "2026-11-17T20:56:03+08:00",
       "subject": "feat(canon): W-Z319 第一百五十六卷《猫还在里面 / The Cat Is Still Inside》入典——卷十六之四"
-    },
-    {
-      "short": "8e58ef2",
-      "at": "2026-11-17T12:37:46Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "1135475",
-      "at": "2026-11-17T20:35:58+08:00",
-      "subject": "feat(canon): W-Z318 第一百五十五卷《雪落下来 / The Snow Came Down》入典——卷十六之三"
     }
   ],
-  "tracked_files": 1604,
+  "tracked_files": 1606,
   "test_files": 466,
   "i18n_keys": 3259,
   "lore_sources": 343,
   "novel_chapters_zh": 156,
   "novel_chapters_en": 156,
-  "milestone": "W-Z320",
+  "milestone": "W-Z321",
   "milestone_full": "卷 156 · 六百年守火线（156 / 156 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 343 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：156 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
