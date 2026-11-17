@@ -187,7 +187,8 @@ creative/music/soundtrack.html
 | 说出口的那两个字 · The Two Words He Said Aloud | [the-two-words-he-said-aloud](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/138-the-two-words-he-said-aloud.md) |
 | 粥不见了 · The Porridge Is Gone | [the-porridge-is-gone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/139-the-porridge-is-gone.md) |
 | 炉火静了七天 · Seven Days of Silent Fire | [seven-days-of-silent-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/140-seven-days-of-silent-fire.md) |
-| 灶口的纸牌 · The Card by the Stove | [the-card-by-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/141-the-card-by-the-stove.md) |每一章对应游戏的章节走法：
+| 灶口的纸牌 · The Card by the Stove | [the-card-by-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/141-the-card-by-the-stove.md) |
+| 写上去的那张纸牌 · The Card She Wrote On | [the-card-she-wrote-on](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/142-the-card-she-wrote-on.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
