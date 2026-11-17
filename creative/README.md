@@ -207,7 +207,8 @@ creative/music/soundtrack.html
 | 第八个米粒 · The Eighth Grain | [the-eighth-grain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/158-the-eighth-grain.md) |
 | 第一场雨 · The First Rain | [the-first-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/159-the-first-rain.md) |
 | 影子 · The Shadow | [the-shadow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/160-the-shadow.md) |
-| 起锚 · Raising the Anchor | [raising-the-anchor](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/161-raising-the-anchor.md) |每一章对应游戏的章节走法：
+| 起锚 · Raising the Anchor | [raising-the-anchor](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/161-raising-the-anchor.md) |
+| 火的声音 · The Sound of the Fire | [the-sound-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/162-the-sound-of-the-fire.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
