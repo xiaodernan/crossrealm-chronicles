@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T07:12:32.360Z",
+  "generated_at": "2026-11-17T07:21:49.368Z",
   "branch": "main",
-  "head": "7fbd343b",
-  "total_commits": 2027,
-  "pushed_at": "2026-11-17T15:11:43+08:00",
+  "head": "a74c5c6e",
+  "total_commits": 2029,
+  "pushed_at": "2026-11-17T15:20:52+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "a74c5c6",
+      "at": "2026-11-17T15:20:52+08:00",
+      "subject": "feat(canon): W-Z307 第一百四十八卷《上一盏灯 / The Previous Lamp》入典——卷十五之四十九"
+    },
+    {
+      "short": "1ca75e6",
+      "at": "2026-11-17T07:12:32Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "7fbd343",
       "at": "2026-11-17T15:11:43+08:00",
@@ -21,27 +31,17 @@
       "short": "3418089",
       "at": "2026-11-17T14:58:54+08:00",
       "subject": "feat(canon): W-Z305 第一百四十六卷《明天再说 / Tomorrow, Then》入典——卷十五之四十七"
-    },
-    {
-      "short": "e7c21bb",
-      "at": "2026-11-17T06:48:39Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "9200c4c",
-      "at": "2026-11-17T14:47:38+08:00",
-      "subject": "feat(canon): W-Z304 第一百四十五卷《纸牌上第几个字 / The Number on the Card》入典——卷十五之四十六"
     }
   ],
-  "tracked_files": 1573,
+  "tracked_files": 1575,
   "test_files": 465,
   "i18n_keys": 3259,
-  "lore_sources": 325,
-  "novel_chapters_zh": 147,
-  "novel_chapters_en": 147,
-  "milestone": "W-Z306",
-  "milestone_full": "卷 147 · 六百年守火线（147 / 147 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 325 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：147 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 327,
+  "novel_chapters_zh": 148,
+  "novel_chapters_en": 148,
+  "milestone": "W-Z307",
+  "milestone_full": "卷 148 · 六百年守火线（148 / 148 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 327 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：148 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
