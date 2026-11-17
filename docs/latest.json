@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T22:08:08.835Z",
+  "generated_at": "2026-11-17T22:46:29.166Z",
   "branch": "main",
-  "head": "9f37e759",
-  "total_commits": 2107,
-  "pushed_at": "2026-11-18T06:07:06+08:00",
+  "head": "9b401f48",
+  "total_commits": 2110,
+  "pushed_at": "2026-11-18T06:45:50+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "9b401f4",
+      "at": "2026-11-18T06:45:50+08:00",
+      "subject": "docs(canon): W-Z348 遗留书账回填（README 的 170 卷台账 · showcase W-Z348 实录 · MASTER_PLAN §W-Z348 补记 · corpus 371 源）"
+    },
+    {
+      "short": "670d61f",
+      "at": "2026-11-18T06:44:42+08:00",
+      "subject": "fix(game): W-Z348 真 boot 级致命修复——KindleLetterSystem 从未 dispose() · 169→170 卷"
+    },
+    {
+      "short": "81da6b5",
+      "at": "2026-11-17T22:08:08Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "9f37e75",
       "at": "2026-11-18T06:07:06+08:00",
@@ -16,32 +31,17 @@
       "short": "e30e9d6",
       "at": "2026-11-17T21:57:29Z",
       "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "92c9dc3",
-      "at": "2026-11-18T05:56:24+08:00",
-      "subject": "feat(ai): W-Z346 Codex v3 冻结大前缀——「输入上下文太小」真材实料补掉（真上游 live ~11.6K tok）"
-    },
-    {
-      "short": "d3c6e57",
-      "at": "2026-11-17T21:38:48Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "846384a",
-      "at": "2026-11-18T05:38:11+08:00",
-      "subject": "feat(ai): W-Z345 启动热身——「缓存利用率不如 Codex」的真因与真解（真上游 LIVE 实测：每 lane 首包即暖）"
     }
   ],
-  "tracked_files": 1644,
-  "test_files": 467,
+  "tracked_files": 1647,
+  "test_files": 468,
   "i18n_keys": 3267,
-  "lore_sources": 369,
-  "novel_chapters_zh": 169,
-  "novel_chapters_en": 169,
-  "milestone": "W-Z347",
-  "milestone_full": "卷 169 · 六百年守火线（169 / 169 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 369 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：169 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 371,
+  "novel_chapters_zh": 170,
+  "novel_chapters_en": 170,
+  "milestone": "W-Z348",
+  "milestone_full": "卷 170 · 六百年守火线（170 / 170 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 371 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：170 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
