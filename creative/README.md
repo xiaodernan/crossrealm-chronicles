@@ -202,7 +202,8 @@ creative/music/soundtrack.html
 | 火还在 · The Fire Still Burns | [the-fire-still-burns](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/153-the-fire-still-burns.md) |
 | 一碗茶 · One Cup of Tea | [one-cup-of-tea](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/154-one-cup-of-tea.md) |
 | 雪落下来 · The Snow Came Down | [the-snow-came-down](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/155-the-snow-came-down.md) |
-| 猫还在里面 · The Cat Is Still Inside | [the-cat-is-still-inside](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/156-the-cat-is-still-inside.md) |每一章对应游戏的章节走法：
+| 猫还在里面 · The Cat Is Still Inside | [the-cat-is-still-inside](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/156-the-cat-is-still-inside.md) |
+| 第一个碾盘 · The First Grinding Stone | [the-first-grinding-stone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/157-the-first-grinding-stone.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

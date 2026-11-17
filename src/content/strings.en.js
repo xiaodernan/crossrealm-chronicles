@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and fifty-six volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and fifty-seven volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 156 volumes of the canon, fully readable
+· Canon Library — 157 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3141,8 +3141,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 156-volume index',
-  hm_body_codex: `Codex — 156 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 157-volume index',
+  hm_body_codex: `Codex — 157 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3302,6 +3302,7 @@ hm_title_codex: 'Codex · the 156-volume index',
 154 · One Cup of Tea — Friday of the twenty-fifth week after the spring equinox, morning, the sky still wet with dew; his mother boiled the water — she took out two bowls — one for her — one for A-Shi; A-Shi looked at the two bowls — he asked: “Two?”; his mother said: “Two keepers of the night — two bowls.”; she poured the tea into the bowls — the first for A-Shi — the second for herself — she pushed one bowl across the table to him — the fire burned; A-Shi held the bowl — he smelled it — a faint bitterness — he took a sip — it was very hot; his mother said: “Small sips — don’t scald yourself — and don’t scald the fire either.”; A-Shi laughed — she laughed too — the fire burned; his mother said: “The tea was the same in your grandfather’s time — a bowl for each — the same in your father’s time — me — A-Shi.”; The fire burned; his mother looked at A-Shi — she said: “You drink very slowly — as if waiting for something.”; A-Shi said: “I am not.”; his mother nodded — she did not ask again — she too drank slowly; The fire burned; the two of them finished — the bowls were empty — the fire burned; his mother washed the bowls — she set them on the table — she did not look at A-Shi. Volume XVI, seven-hundred-and-first year, second part.
 155 · The Snow Came Down — Monday of the twenty-sixth week after the spring equinox, morning, the sky not yet bright; A-Shi woke — the yard was all white — the snow had fallen all night; the fire burned — his mother was at the stove — she had not slept; A-Shi asked: “Why did the snow wait so long to fall?”; his mother said: “It had its exam to finish in the house — now it will come out.”; A-Shi did not understand — she laughed — she did not explain — the fire burned; his mother said: “Corn gruel — have some.”; she scooped a bowl for him — the gruel was still steaming — A-Shi held the bowl — he looked at the snow — the fire burned; A-Shi said: “I am going to sweep the snow.”; his mother said: “Finish eating first.”; A-Shi took a bite — he put it down — he looked at the snow again — the fire burned; his mother said: “Eat your fill — go out — the snow will cover the footprints — you have to finish the path before it does.”; The fire burned; A-Shi put on his cotton jacket — he pushed the door open — the wind and snow struck his face — he took a deep breath — he went out; The fire burned; his mother watched the snow fall — the fire burned. Volume XVI, third part.
 156 · The Cat Is Still Inside — Monday of the twenty-sixth week after the spring equinox, morning, the sky just bright; A-Shi pushed the door open — the wind and snow struck his face — he took a deep breath; the yard was all white — his eyes went straight to the cloth laid at the door — it was entirely covered — the snow had covered it; the cat slept on that cloth — seven hundred years — the keepers came and went — it only ever slept there — the fire burned; A-Shi squatted down — he looked under the snow — under the snow there was a rounded lump — it let out a wisp of warmth — he laughed; he laid both hands on the snow — he did not dig — it was inside — the fire burned; he went back inside — he took two dry cloths — he pushed the door open — the snow was still falling — he spread the two dry cloths over the cat; his mother stood at the door — she looked at A-Shi — she did not speak — the fire burned; A-Shi said: “The cat is still inside.”; his mother nodded — she said: “Seven hundred years — it is just like that — when it is your turn, you will be just like that too.”; The fire burned. Volume XVI, fourth part.
+157 · The First Grinding Stone — Monday of the twenty-sixth week after the spring equinox, morning, the sky not fully bright; his mother sat at the stove — she picked up the pestle — she said to A-Shi: “Today you grind.”; A-Shi looked at the pestle — the pestle belonged to a mill — the mortar was old — its grooves were worn deep by seven hundred years of grinding; he asked: “What are we grinding?”; his mother said: “Rice — white rice — seven hundred years — this is the first time with new rice.”; A-Shi nodded — he stretched out his hand — his mother passed him the pestle — it went into his hands — he held the handle — he did not dare apply much force; his mother said: “No need to force it — let time help you.”; A-Shi held it — he did not use force — he turned it slowly — the husk came off the grains — rustle rustle — a very small sound; A-Shi said: “Did my great-grandfather grind?”; his mother said: “Every generation did.”; A-Shi said: “Then I have ground it too.”; his mother did not laugh — she nodded — she waited until A-Shi finished one grain — she showed him the ground rice — it was done; A-Shi set the pestle down — the fire burned; his mother said: “Good — next time you grind yourself.”; A-Shi looked at the fire — he did not speak — the fire burned. Volume XVI, fifth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3315,7 +3316,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and fifty-six volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and fifty-seven volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

@@ -9161,6 +9161,53 @@ The fire burned.
 
 *(End of volume XVI · Volume one hundred and fifty-six overall · the seven-hundred-and-first year, fourth part — The Cat Is Still Inside.)*
 
+# source: creative/novel/en/157-the-first-grinding-stone.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVI**: The Seven-hundred-and-first Year — The First Grinding Stone
+
+---
+
+## One Hundred and Fifty-seven: The First Grinding Stone
+
+Monday of the twenty-sixth week after the spring equinox — morning — the sky not fully bright.
+
+His mother sat at the stove — she picked up the pestle — she said to A-Shi: “Today you grind.”
+
+A-Shi looked at the pestle — the pestle belonged to a mill — the mortar was old — its grooves were worn deep by seven hundred years of grinding.
+
+He asked: “What are we grinding?”
+
+His mother said: “Rice — white rice — seven hundred years — this is the first time with new rice.”
+
+A-Shi nodded — he stretched out his hand — his mother passed him the pestle — it went into his hands — he held the handle — he did not dare apply much force.
+
+His mother said: “No need to force it — let time help you.”
+
+A-Shi held it — he did not use force — he turned it slowly — the husk came off the grains — rustle rustle — a very small sound.
+
+A-Shi said: “Did my great-grandfather grind?”
+
+His mother said: “Every generation did.”
+
+A-Shi said: “Then I have ground it too.”
+
+His mother did not laugh — she nodded — she waited until A-Shi finished one grain — she showed him the ground rice — it was done.
+
+A-Shi set the pestle down — the fire burned.
+
+His mother said: “Good — next time you grind yourself.”
+
+A-Shi looked at the fire — he did not speak — the fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVI · Volume one hundred and fifty-seven overall · the seven-hundred-and-first year, fifth part — The First Grinding Stone.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -21947,6 +21994,53 @@ F2 隐藏 HUD。
 ---
 
 *（卷十六 · 本章完 · 跨界线总第一百五十六卷 · 第七百零一年第四篇 · 猫还在里面）*
+
+# source: creative/novel/157-第一个碾盘.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十六**：第七百零一年 —— 第一个碾盘
+
+---
+
+## 一百五十七 · 第一个碾盘
+
+立春后第二十六周——周一——早上——天还没有完全亮。
+
+母亲在灶前——她拿起碾——她对阿石说：「今天你碾。」
+
+阿石看着碾——碾是磨坊的——臼是老臼——里面压着一条条深沟——七百年磨出的深。
+
+他问：「碾什么？」
+
+母亲说：「米——白的米——七百年了——这是第一次新的米。」
+
+阿石点了点头——他伸出手——母亲把碾递给他——碾入他手里——他握住碾柄——他没敢用力。
+
+母亲说：「碾米不用使劲——时间会帮你。」
+
+阿石握着——他没使劲——他让碾慢慢转——稻粒脱了壳——哗啦哗啦——声音很小。
+
+阿石说：「阿祖碾过吗？」
+
+母亲说：「每一代都碾过。」
+
+阿石说：「那我也碾过了。」
+
+母亲没笑——她点了点头——她等阿石碾完一粒——碾给阿石看——碾完了。
+
+阿石把碾放下——灶火燃着。
+
+母亲说：「好——下一次你自己碾。」
+
+阿石看灶火——他没说话——灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十六 · 本章完 · 跨界线总第一百五十七卷 · 第七百零一年第五篇 · 第一个碾盘）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记
