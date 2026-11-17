@@ -9893,6 +9893,43 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and seventy overall · the seven-hundred-and-first year, eighth part — The First Night.)*
 
+# source: creative/novel/en/171-the-warm-charcoal.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Ninth Volume — The Warm Charcoal
+
+---
+
+## One Hundred and Seventy-one: The Warm Charcoal
+
+The next day — before first light — his mother pushed the door open — holding a cup of warm water — she saw A-Shi sitting before the stove — the charcoal in his hand — it had cooled.
+
+His mother said: “It isn’t spoiled —”
+
+A-Shi said: “It has cooled.”
+
+His mother said: “The charcoal cools — the fire doesn’t —”
+
+She said she meant the small one in the stove — A-Shi turned his head — he saw the fire — it was very small — but he saw it — he said nothing.
+
+His mother said: “Azu used to say — fire doesn’t choose the hand — it chooses the heart — it chooses who can stay —”
+
+The fire burned.
+
+A-Shi nodded — he said nothing — he put the charcoal back before the stove — he said softly: “I can stay.”
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and seventy-one overall · the seven-hundred-and-first year, ninth part — The Warm Charcoal.)*
+
 # source: creative/novel/en/18-trilarite-stair.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -23281,6 +23318,43 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百七十卷 · 卷十七之八 · 第七百零一年 · 第一夜）*
+
+# source: creative/novel/171-炭的余温.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第九卷 —— 炭的余温
+
+---
+
+## 一百七十一 · 炭的余温
+
+第二天——天没亮——母亲推开门——她手里端一杯温水——她看见阿石坐在灶前——手里拿着那块木炭——它已经凉了。
+
+母亲说：「它没坏——」
+
+阿石说：「它凉了。」
+
+母亲说：「炭凉了——火没熄——」
+
+她说她指的是灶膛里那一点——阿石回头——他看见灶火——它很小——但他看见了——他没说话。
+
+母亲说：「阿祖说——火不挑人——挑手——挑心——挑守得住——」
+
+灶火燃着。
+
+阿石点了点头——他没说话——他把木炭放回灶前——他轻声说：「我守得住。」
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百七十一卷 · 卷十七之九 · 第七百零一年 · 炭的余温）*
 
 # source: creative/novel/18-三日陵.md
 # 《跨界纪事：锚火守夜人》

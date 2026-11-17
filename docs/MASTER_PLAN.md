@@ -15,6 +15,9 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-18 · W-Z351 第171卷入典《炭的余温 / The Warm Charcoal》——卷十七之九 · 第七百零一年 · 炭的余温**：第二天——天没亮——母亲推开门——她手里端一杯温水——她看见阿石坐在灶前——手里拿着那块木炭——它已经凉了——母亲说「它没坏」——阿石说「它凉了」——母亲说「炭凉了——火没熄」——她说她指的是灶膛里那一点——阿石回头——他看见灶火——它很小——但他看见了——他没说话——母亲说「阿祖说——火不挑人——挑手——挑心——挑守得住」——灶火燃着——阿石点了点头——他没说话——他把木炭放回灶前——他轻声说「我守得住」——灶火燃着。
+> 交付：creative/novel/171-炭的余温.md + en 孪生 171-the-warm-charcoal.md；novella 171 × 2 = 342 模块（典籍馆现为 171 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：373 源；**v3 冻结前缀自增第 171 条年表条目**；showcase feed 新增 W-Z351 实录。
+>
 > **2026-11-18 · W-Z350 Boot 真·冷启动实测（Admin LLM P0 #3 真落地一部分 · Local · SwiftShader 最坏 case）**：`scripts/boot-probe.mjs` 在 vite dev 路径上真跑一次——vite ready 9.1s → chrome ready 6.2s → navigate 23.6s → **BOOT OK in 77801ms**（软件 SwiftShader；本机零 GPU 也跑完）· `__game/enemyManager/scene` 全 present · 零未捕获异常 · rAF frames(2s)≈2.5（仅为 SwiftShader 限制，玩家真机远低）· artifact → docs/admin/data/boot-probe.json · Admin KPI 新增 `meas_l23`/`meas_tr23` 双语卡（与演示数据分列）· 顺手修 `scripts/boot-probe.mjs` 的路径 bug（vite bin 从 scripts/ 解析 → repo root，导致 boot-probe 永远拿不到 vite）。
 > **下一串热图**：首屏字体/布局细节 + 快速上手教学（锚点 30s）—— Admin LLM P0 #3 余下部分（FontFit + 首屏 GC 回收）。
 >

@@ -216,7 +216,8 @@ creative/music/soundtrack.html
 | 稳的手 · The Steady Hand | [the-steady-hand](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/167-the-steady-hand.md) |
 | 第一根柴 · The First Log | [the-first-log](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/168-the-first-log.md) |
 | 第一炉火 · The First Steady Fire | [the-first-steady-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/169-the-first-steady-fire.md) |
-| 第一夜 · The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/170-the-first-night.md) |每一章对应游戏的章节走法：
+| 第一夜 · The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/170-the-first-night.md) |
+| 炭的余温 · The Warm Charcoal | [the-warm-charcoal](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/171-the-warm-charcoal.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

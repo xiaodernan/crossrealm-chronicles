@@ -218,7 +218,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Steady Hand | [the-steady-hand](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/167-the-steady-hand.md) |
 | The First Log | [the-first-log](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/168-the-first-log.md) |
 | The First Steady Fire | [the-first-steady-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/169-the-first-steady-fire.md) |
-| The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/170-the-first-night.md) |Chapter → game-chapter mapping:
+| The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/170-the-first-night.md) |
+| The Warm Charcoal | [the-warm-charcoal](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/171-the-warm-charcoal.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
