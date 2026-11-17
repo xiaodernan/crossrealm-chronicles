@@ -313,6 +313,7 @@ End of frozen digest.
 169 · 第一炉火
 170 · 第一夜
 171 · 炭的余温
+172 · 火会记住你
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

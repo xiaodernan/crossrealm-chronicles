@@ -9930,6 +9930,43 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and seventy-one overall · the seven-hundred-and-first year, ninth part — The Warm Charcoal.)*
 
+# source: creative/novel/en/172-the-fire-will-remember-you.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Tenth Volume — The Fire Will Remember You
+
+---
+
+## One Hundred and Seventy-two: The Fire Will Remember You
+
+The eighth day — late at night — the fire burned.
+
+A-Shi couldn’t sleep — he wanted to keep the fire — he sat before the stove — he was not sure how long he could stay — he said: “Mother said — you can stay —”
+
+The fire burned.
+
+He put the charcoal back — he looked at it — its edges were whitening — he said: “It won’t wake —”
+
+The fire burned.
+
+His mother was in the room — she was not asleep — she said softly: “The fire will remember you — can you stay?”
+
+The fire burned.
+
+A-Shi said nothing — the fire burned.
+
+A-Shi said nothing — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and seventy-two overall · the seven-hundred-and-first year, tenth part — The Fire Will Remember You.)*
+
 # source: creative/novel/en/18-trilarite-stair.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -23355,6 +23392,43 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百七十一卷 · 卷十七之九 · 第七百零一年 · 炭的余温）*
+
+# source: creative/novel/172-火会记住你.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第十卷 —— 火会记住你
+
+---
+
+## 一百七十二 · 火会记住你
+
+第八天——深夜——灶火燃着。
+
+阿石不能睡——他想守火——他坐到灶前——他不确定自己能守多久——他说：「母亲说——你守得住——」
+
+灶火燃着。
+
+他把那块菩提……不——他把那块木炭放回去——他看着炭——它的边沿变白了——他说：「它不会醒——」
+
+灶火燃着。
+
+母亲在屋里——她没睡——她轻声说：「火会记住你——你守得住？」
+
+灶火燃着。
+
+阿石没接——灶火燃着。
+
+阿石没接——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百七十二卷 · 卷十七之十 · 第七百零一年 · 火会记住你）*
 
 # source: creative/novel/18-三日陵.md
 # 《跨界纪事：锚火守夜人》
