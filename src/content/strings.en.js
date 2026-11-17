@@ -3897,6 +3897,16 @@ Three frames in retrospection: the fire + the light on your palm + the house shi
   trilance_reveal_left: 'Left Sun (emberside)',
   trilance_reveal_mid: 'Middle Sun (unlit)',
   trilance_reveal_right: 'Right Sun (cold)',
+  hm_title_first_3_minutes: 'First three minutes at the hearth — your opening route',
+  hm_body_first_3_minutes: `From ignition to your first small foe brought down — a three-minute route; follow it and you will not get lost.
+
+· 0:00 — Press {interact} to inspect the anchor beacon ahead (blue-white light pillar) — the quest logs itself automatically; follow the golden arrow in the {journal} panel.
+· 0:30 — Walk to the edge of the Greywood — your first piece of gear lies in the wooden crate behind the Hearth Elder — glance at it on the way; press {interact} to pick up.
+· 1:00 — The first enemy is not charging at you: it is a slow-walker on the right side of the woods — get close and press {interact} to swing — it falls in two or three hits; pick up its dropped shards.
+· 1:30 — Shards stow automatically — walk back to the anchor fire and press {interact} at the hearth vendor — trade for your first “Brambleguard Blade”.
+· 2:00 — The lantern brightens: a golden arrow to Greyrock Pass appears top-left — the main quest line has lit up.
+· 2:30 — Before entering Greyrock Pass, press {help} and skim “First Boss — How Not To Die” — under three minutes, and the boss stops being scary.
+· 3:00 — Press {journal} to check the journal: quests / goals / read fragments all live here — lost? Press {minimap}.`,
   hm_title_newcomer_traps: 'First 30 seconds — do these right',
   hm_body_newcomer_traps: `Thirty seconds, six things you will never regret knowing:
 

@@ -11,6 +11,11 @@
  */
 export const HELP_SECTIONS_EXTRA = [
   {
+    id: 'first-3-minutes',
+    title: 'hm_title_first_3_minutes',
+    body: 'hm_body_first_3_minutes',
+  },
+  {
     id: 'online-living',
     title: 'hm_title_online_living',
     body: 'hm_body_online_living',
