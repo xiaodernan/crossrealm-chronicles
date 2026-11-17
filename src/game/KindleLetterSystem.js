@@ -74,6 +74,11 @@ export class KindleLetterSystem {
     return this.game?.onlineServices?.enabled?.() === true;
   }
 
+  /** 子系统清理路径（W-A1 的最后一根筋）：自己没有监听不需要退订，state 不落盘隐私，只确认可回收。 */
+  dispose() {
+    this.state = this._default();
+  }
+
   snapshot() {
     return { ...this.state, eligible: this.isEligible(), enabled: this.isEnabled() };
   }
