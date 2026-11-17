@@ -207,7 +207,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Cat Is Still Inside | [the-cat-is-still-inside](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/156-the-cat-is-still-inside.md) |
 | The First Grinding Stone | [the-first-grinding-stone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/157-the-first-grinding-stone.md) |
 | The Eighth Grain | [the-eighth-grain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/158-the-eighth-grain.md) |
-| The First Rain | [the-first-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/159-the-first-rain.md) |Chapter → game-chapter mapping:
+| The First Rain | [the-first-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/159-the-first-rain.md) |
+| The Shadow | [the-shadow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/160-the-shadow.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

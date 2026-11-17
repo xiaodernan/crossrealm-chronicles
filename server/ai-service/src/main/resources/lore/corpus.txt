@@ -9346,6 +9346,57 @@ The flame crept low; the wax slid along the old trail, leaving a little more fro
 
 *(Interlude Eight · Leaking Lamp — the lamp will finally go dark. The bowl stays at the far end of the table, rim toward the wall. That is the way of the waystation.)*
 
+# source: creative/novel/en/160-the-shadow.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVI**: The Seven-hundred-and-first Year — The Shadow
+
+---
+
+## One Hundred and Sixty: The Shadow
+
+Monday of the twenty-sixth week after the spring equinox — evening — the dusk pressed the wall lower than by day.
+
+A-Shi stood at the yard gate — he saw his own shadow — the shadow stretched very long — it reached outside the yard.
+
+His mother was in the house — she heard he had stopped — she pushed the door open — she saw it too — the shadow.
+
+He did not turn around — his mother did not speak either.
+
+The shadow moved — it moved on its own — it crept slowly along the ground — it stretched out a hand — that hand was long — it was black — it was very old.
+
+His mother said: “Come inside.”
+
+A-Shi did not move — the fire burned.
+
+The shadow stopped — it stopped in the middle of the yard — its hand rested upon the shadow of the stove — his mother saw it — his mother did not move either.
+
+His mother said: “It has come back too.”
+
+A-Shi looked at the shadow — the shadow looked at him — the fire burned.
+
+The shadow was longer than before — it no longer moved — it just stood — it stood in silence — like a keeper of the watch — like every keeper of every year for seven hundred and one years.
+
+His mother stood for a long time — she let out a breath — she said: “It is watching you.”
+
+A-Shi nodded — he did not move either.
+
+The shadow moved — it crept slowly back toward the yard wall — it vanished into the shadow of the wall — it could no longer be seen — the fire burned.
+
+His mother said: “Go back inside.”
+
+A-Shi went back inside — he went back to the stove — the fire burned.
+
+His mother came in too — she pushed the door — she did not turn around — the fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVI · Volume one hundred and sixty overall · the seven-hundred-and-first year, eighth part — The Shadow.)*
+
 # source: creative/novel/en/17-chapter-seventeen.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -22274,6 +22325,57 @@ F2 隐藏 HUD。
 
 灯焰低下去时，蜡沿着旧痕又漏了一点。柜门仍旧合着，里面没有用过的碗，安安静静地留在原处。
 （番外八 · 漏灯记 · 灯油最后会干，碗会留在碗柜——这是驿站的方式。）
+
+# source: creative/novel/160-影子.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十六**：第七百零一年 —— 影子
+
+---
+
+## 一百六十 · 影子
+
+立春后第二十六周——周一——傍晚——暮色把墙压得比白天低。
+
+阿石站在院门口——他看见自己的影子——影子拉得很长——拉到院外去了。
+
+母亲站在屋里——她听见他站住了——她推门出来——她也看见了——影子。
+
+他没回头——母亲也没说话。
+
+影子动了——它自己动——它沿着地面慢慢挪——它伸出一只手——那只手是长的——是黑的——是很旧的。
+
+母亲说：「回来。」
+
+阿石没动——灶火燃着。
+
+影子停了——它停在院中央——它的手搁在灶台上的阴影里——母亲看见了——母亲也没动。
+
+母亲说：「它也回来了。」
+
+阿石看影子——影子也看他——灶火燃着。
+
+影子比前几次更长——它不再挪动——它只是站着——沉默地站着——像一个守夜人——像七百零一年前的每一个守夜人。
+
+母亲也站了很久——她呼出一口气——她说：「它在看你。」
+
+阿石点了点头——他也没动。
+
+影子动了——它慢慢挪回院墙——它消失在墙的阴影里——再也看不见了——灶火燃着。
+
+母亲说：「回去。」
+
+阿石回到屋里——他回到灶前——灶火燃着。
+
+母亲也进来了——她推门——她没回头——灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十六 · 本章完 · 跨界线总第一百六十卷 · 第七百零一年第八篇 · 影子）*
 
 # source: creative/novel/17-晨雾回声.md
 # 《跨界纪事：锚火守夜人》
