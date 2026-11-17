@@ -2403,7 +2403,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and forty-three volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and forty-four volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3088,7 +3088,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 143 volumes of the canon, fully readable
+· Canon Library — 144 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3141,8 +3141,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 143-volume index',
-  hm_body_codex: `Codex — 143 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 144-volume index',
+  hm_body_codex: `Codex — 144 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3289,6 +3289,7 @@ hm_title_codex: 'Codex · the 143-volume index',
 141 · The Card by the Stove — Saturday of the twenty-third week after the spring equinox, afternoon, the sky very thin; Mother set the white porcelain bowl back on the stove-top — she said nothing; Aunt Guo came again — she carried a bag — one thing in it — she did not say what; Aunt Guo set the bag down — she drew out a stack of paper cards — the fire did not move; A-Shi did not ask — he kept the broom — he swept once — he swept again; “Wash your hands,” Aunt Guo said; A-Shi stopped — he dipped his hands in the basin — he looked up at Aunt Guo — Aunt Guo nodded; Aunt Guo laid the cards out one by one on the table — the fire did not move; his mother came back — she carried the rice — she saw them — she paused a step — she said nothing; A-Shi saw — he kept sweeping — he swept for a long time; Mother put the rice on the counter — Mother came back to the stove — she fed one more white-birch branch — the fire burned; Mother said: “When did you learn those cards?”; Aunt Guo did not look up — “The old man gave them to me,” she said; no one answered — the fire burned; Aunt Guo taught A-Shi the cards — one by one — he studied each — he said nothing — the fire lit his hands — he finished — he said “Done.”; Mother brought the bowls — rice gruel — the four of them sat — no one spoke — the fire burned; Aunt Guo said: “Don’t rush — I’ll teach you one a day.”; A-Shi nodded — the fire burned. Volume XV, forty-second part.
 142 · The Card She Wrote On — Sunday of the twenty-third week after the spring equinox, morning, the sun had just come up; Aunt Guo came a third day — she carried a small brush — and a blank card; she said: “A-Shi — look.”; A-Shi turned his head — he saw what Aunt Guo held — she set the blank card on the table; the fire burned; Aunt Guo said: “Before the old man died — he said you would be able to read one.”; A-Shi did not ask — the fire burned; Aunt Guo took a small brush — she dipped it in ink — she wrote one character on the card — she did not lift her head — she finished writing; she handed the card to A-Shi — he took it — he looked at that one; that one character — the one this house’s fire could not say — A-Shi knew it — he said nothing; A-Shi looked at it for a long time — he did not move — the fire burned; his mother came — she saw the card on the table — she paused a step — she said nothing — she did not leave either; Aunt Guo turned the card over — on the back was a date — “seven hundred years, three months, twelve days” — Mother saw it — she said nothing; A-Shi’s palm was warm — he did not lower his head — the fire burned; A-Shi said: “Done.” — he set the card back; his mother nodded — the fire burned; Aunt Guo gathered the cards — she said: “From now on I’ll teach you one every day.”; A-Shi nodded — his mother nodded too — the fire burned. Volume XV, forty-third part.
 143 · The Word on the Card — Sunday of the twenty-third week after the spring equinox, morning, the sky very white; A-Shi had not spoken — Aunt Guo had not opened her mouth — his mother had not moved either; the fire burned; A-Shi held his bowl of thin porridge — he looked at the card again — he had remembered the character; his mother said: “Done — eat now”; he finished — he put the bowl down — the fire burned; Aunt Guo said: “Remembered it?”; A-Shi nodded — he did not open his mouth — the fire burned; his mother went out — she took a sieve — she came back holding lotus seeds — she set them on the stove — she did not look up; the fire burned; Aunt Guo said: “Now that you’re fed — I’ll show you the second one.”; A-Shi stopped — he lifted his head — the fire burned; Aunt Guo drew out a stack of cards — she counted — she counted thirteen — she turned one over with her thumb — the character was different; she turned it over — this was the same character A-Shi had just learned — A-Shi saw it at a glance; her mother said nothing — the fire burned; A-Shi said: “Two characters — one above the fire — one beneath.”; Aunt Guo did not answer — she did not look up — she gathered the cards — she put them away — she said: “Squat and look.”; A-Shi squatted in front of the stove — the fire lit him — he counted the fire — he said nothing — his mother watched the fire — Aunt Guo watched the fire too — the fire burned. Volume XV, forty-fourth part.
+144 · The Seventh Silent Day — Saturday of the twenty-fifth week after the spring equinox, afternoon, the sky very quiet; A full week had passed — A-Shi had already learned the sixth card; the sixth card — the white character — was “休” — he said it aloud — the fire burned; his mother sat at the stove — she was crouching too — there was no tea at her side — she only watched the fire; Aunt Guo went out — she went beyond the door — A-Shi did not move — the fire burned; his mother did not ask where she had gone — the fire burned; A-Shi picked up that card again — he looked at it — he looked for a long time; his mother looked at him — “Can you keep it?” she asked; “I can,” A-Shi said; his mother did not reply — she watched the fire — the fire burned; Toward evening — Aunt Guo came back — she came in — the fire burned — she said only: “It’s time for the next one.”; A-Shi nodded — his mother said nothing — the fire burned; Aunt Guo spread the cards on the table — she counted them one by one — she counted up to the seventh — the fire burned. Volume XV, forty-fifth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3302,7 +3303,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and forty-three volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and forty-four volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 

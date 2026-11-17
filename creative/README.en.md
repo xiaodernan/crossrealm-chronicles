@@ -191,7 +191,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Seven Days of Silent Fire | [seven-days-of-silent-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/140-seven-days-of-silent-fire.md) |
 | The Card by the Stove | [the-card-by-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/141-the-card-by-the-stove.md) |
 | The Card She Wrote On | [the-card-she-wrote-on](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/142-the-card-she-wrote-on.md) |
-| The Word on the Card | [the-word-on-the-card](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/143-the-word-on-the-card.md) |Chapter → game-chapter mapping:
+| The Word on the Card | [the-word-on-the-card](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/143-the-word-on-the-card.md) |
+| The Seventh Silent Day | [the-seventh-silent-day](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/144-the-seventh-silent-day.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
