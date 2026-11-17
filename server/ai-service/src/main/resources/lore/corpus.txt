@@ -8961,6 +8961,61 @@ The fire burned.
 
 *(End of volume one hundred and fifty-two · Volume XV, fifty-third part · The seven-hundredth year — New Year's Eve.)*
 
+# source: creative/novel/en/153-the-fire-still-burns.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVI**: The Seven-hundred-and-first Year — The Fire Still Burns
+
+---
+
+## One Hundred and Fifty-three: The Fire Still Burns
+
+Thursday of the twenty-fifth week after the spring equinox — morning — the sky is bright.
+
+The rooster crowed — his mother and A-Shi woke together — the fire burned.
+
+A-Shi opened his eyes first — the first thing he looked at was the stove — the fire burned.
+
+His mother opened her eyes too — the first thing she looked at was the stove — the fire burned.
+
+The two of them looked at each other — neither spoke.
+
+His mother said: “Seven hundred and one.”
+
+A-Shi said: “Seven hundred and one.”
+
+His mother got up — she added a little firewood — the fire burned brighter — it burned.
+
+A-Shi brought yesterday's sugar dish — half a dish left — he looked at his mother — his mother looked at the fire — she did not speak.
+
+His mother said: “Have some — no offering today — today is the fire's day.”
+
+A-Shi tasted a little — very sweet — he did not speak.
+
+The fire burned.
+
+His mother said: “Seven hundred years — every single morning of every year — the fire was there — today is the same.”
+
+The fire burned.
+
+A-Shi looked at the kitchen god — the kitchen god looked at the fire — the fire burned.
+
+His mother sat down — she poured a cup of water — she did not drink — she looked at the fire — she said: “The fire is still here.”
+
+A-Shi said: “The fire is still here.”
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVI · Volume one hundred and fifty-three overall · the seven-hundred-and-first year, first part — The Fire Still Burns.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -21547,6 +21602,61 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百五十二卷 · 卷十五之五十三 · 第七百年 · 除夕）*
+
+# source: creative/novel/153-火还在.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十六**：第七百零一年 —— 火还在
+
+---
+
+## 一百五十三 · 火还在
+
+立春后第二十五周——周四——早上——天亮了。
+
+鸡叫了——母亲和阿石一起醒了——灶火燃着。
+
+阿石先睁了眼——他先看灶——灶火燃着。
+
+母亲也睁了眼——她也先看灶——灶火燃着。
+
+两个人对看了一眼——谁也没说话。
+
+母亲说：「七百零一了。」
+
+阿石说：「七百零一了。」
+
+母亲起来——她添了一点柴——灶火燃得更旺了——它燃着。
+
+阿石把昨天的糖碟拿过来——还剩半碟——他看着母亲——母亲看灶火——她没说话。
+
+母亲说：「吃点吧——今天不用祭灶——今天是火的日子。」
+
+阿石尝了一口——很甜——他没说话。
+
+灶火燃着。
+
+母亲说：「七百年——每一个年头的早晨——火都还在——今天也一样。」
+
+灶火燃着。
+
+阿石看着灶王爷——灶王爷看着灶火——灶火燃着。
+
+母亲坐下来——她倒了一杯水——她没喝——她看灶火——她说：「火还在。」
+
+阿石说：「火还在。」
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十六 · 本章完 · 跨界线总第一百五十三卷 · 第七百零一年第一篇 · 火还在）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记
