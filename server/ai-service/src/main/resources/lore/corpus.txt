@@ -9526,6 +9526,51 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and sixty-three overall · the seven-hundred-and-first year, first part — The First Light.)*
 
+# source: creative/novel/en/164-five-characters.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Second Volume — Five Characters
+
+---
+
+## One Hundred and Sixty-four: Five Characters
+
+Monday of the twenty-eighth week after the spring equinox — evening — the sky dark again.
+
+His mother had put the box back where it belonged — but A-Shi remembered the five characters — “The seven-hundred-and-first year, up to here” — he lay in bed counting them — the ancient hand.
+
+He got up — walked to the stove — the fire burned.
+
+He said: “Ma — who wrote that character?”
+
+His mother answered from the room: “The writer is long gone.”
+
+A-Shi said: “Then why is it still glowing?”
+
+His mother did not answer — the fire burned.
+
+After a while, his mother came out — she sat before the stove — she stared at the fire — she said softly: “Because someone keeps adding wood for it.”
+
+A-Shi said: “Who?”
+
+His mother said: “You —”
+
+A-Shi said: “Me?”
+
+His mother nodded — she said: “For seven hundred years, every keeper has asked the same thing — every generation has had its answer — you are the seven-hundred-and-first year's answer.”
+
+A-Shi did not speak — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and sixty-four overall · the seven-hundred-and-first year, second part — Five Characters.)*
+
 # source: creative/novel/en/17-chapter-seventeen.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -22634,6 +22679,51 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百六十三卷 · 卷十七之一 · 第七百零一年 · 第一道光）*
+
+# source: creative/novel/164-五个字.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第二卷 —— 五个字
+
+---
+
+## 一百六十四 · 五个字
+
+立春后第二十八周——周一——晚上——天又黑了。
+
+母亲把盒子放回原处——但阿石记得那五个字——「七百零一年至此」——他躺在床上数着——一个很老的字。
+
+他起身——走到灶前——灶火燃着。
+
+他说：「妈——那个字是谁写的？」
+
+母亲在屋里回答：「写的人——早不到了。」
+
+阿石说：「那它怎么还在发光？」
+
+母亲没答——灶火燃着。
+
+过了一会儿——母亲从屋里出来——她坐在灶前——她盯着灶火——她低声说：「因为有人替它添柴。」
+
+阿石说：「谁？」
+
+母亲说：「你——」
+
+阿石说：「我？」
+
+母亲点了点头——她说：「七百年来——每一代守夜人都这样问——每一代都有人回答——你是第七百零一年的回答。」
+
+阿石没出声——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百六十四卷 · 卷十七之二 · 第七百零一年 · 五个字）*
 
 # source: creative/novel/17-晨雾回声.md
 # 《跨界纪事：锚火守夜人》
