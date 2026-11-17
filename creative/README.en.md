@@ -186,7 +186,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Third Morning’s Breakfast | [the-third-mornings-breakfast](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/135-the-third-mornings-breakfast.md) |
 | The Third Bowl Comes Back | [the-third-bowl-comes-back](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/136-the-third-bowl-comes-back.md) |
 | The Light in the Empty Bowl | [the-light-in-the-empty-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/137-the-light-in-the-empty-bowl.md) |
-| The Two Words He Said Aloud | [the-two-words-he-said-aloud](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/138-the-two-words-he-said-aloud.md) |Chapter → game-chapter mapping:
+| The Two Words He Said Aloud | [the-two-words-he-said-aloud](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/138-the-two-words-he-said-aloud.md) |
+| The Porridge Is Gone | [the-porridge-is-gone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/139-the-porridge-is-gone.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

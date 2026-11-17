@@ -8115,6 +8115,47 @@ The fire burned.
 
 *(End of volume one hundred and thirty-eight · Volume XV, thirty-ninth part · The seven-hundredth year — The Two Words He Said Aloud.)*
 
+# source: creative/novel/en/139-the-porridge-is-gone.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Porridge Is Gone
+
+---
+
+## One Hundred and Thirty-nine: The Porridge Is Gone
+
+Saturday of the twenty-first week after the spring equinox — afternoon — wind rose against the courtyard.
+
+A-Shi came home from outside — he rushed to the stove — the whole family was sitting there — the fire burned.
+
+On the table — it was empty.
+
+Mother was looking at the stove — she did not speak.
+
+A-Shi looked at the white porcelain bowl — it stood at the corner of the table — he looked back at the fire — the fire burned.
+
+Mother spoke — her voice was very low — she said: “The fire set it for us” — she did not move.
+
+A-Shi did not move — Uncle Zhou did not move — Aunt Guo did not move — Xiao Huo did not move either.
+
+Mother turned the white bowl over — the bottom was empty — she studied it a moment — she put it back.
+
+No one said anything.
+
+Aunt Guo finally spoke — her voice was very light — “It is full — it is open now.”
+
+Uncle Zhou cleared his throat — he did not speak — he still kept silent.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and thirty-nine · Volume XV, fortieth part · The seven-hundredth year — The Porridge Is Gone.)*
+
 # source: creative/novel/en/14-interlude-come-sit-awhile.md
 # Interlude Seven · Come Sit Awhile
 
@@ -19953,6 +19994,47 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百三十八卷 · 卷十五之三十九 · 第七百年 · 说出口的那两个字）*
+
+# source: creative/novel/139-粥不见了.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 粥不见了
+
+---
+
+## 一百三十九 · 粥不见了
+
+立春后第二十一周——周六——午后——天起了风。
+
+阿石放学回来——他冲进灶前——全家人都坐在那——灶火燃着。
+
+桌子上——空了。
+
+母亲看著灶火——她没说话。
+
+阿石看了一眼那只白瓷碗——它搁在桌角——他又看了一眼灶火——灶火燃着。
+
+母亲才开始说话——她声音很小——她说「灶火替我们收了」——她没动。
+
+阿石没动——周叔没动——郭阿婆也没动——小火也没动。
+
+母亲把那只白瓷碗翻过来——底下是空的——她看了它一会儿——她又放回去了。
+
+没人说话。
+
+郭阿婆才开口——她声音很轻——「它吃饱了——它开春了」。
+
+周叔清了清嗓子——他没说出来——他还是没出声。
+
+灶火燃着。
+
+炉火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百三十九卷 · 卷十五之四十 · 第七百年 · 粥不见了）*
 
 # source: creative/novel/14-番外七-下次再坐.md
 # 番外七 · 下次再坐
