@@ -1,0 +1,48 @@
+{
+  "generated": "2026-11-17T19:12:27.862Z",
+  "source": "docker compose network (http://gateway:8080/api/telemetry/summary-rollup)",
+  "note": "本机 compose 栈实抓：docker compose -f server/docker-compose.yml up -d · docker run --network crossrealm-chronicles-server_default alpine wget -qO- http://gateway:8080/api/telemetry/summary-rollup",
+  "endpoint": "/api/telemetry/summary-rollup",
+  "real": true,
+  "windowDays": 14,
+  "total": 611,
+  "totals": {
+    "boss_kill": 30,
+    "canon_open": 8,
+    "loadtest": 424,
+    "smoke": 16,
+    "stress-probe": 133
+  },
+  "byDayAndType": [
+    {
+      "day": "2026-11-15",
+      "type": "boss_kill",
+      "count": 30
+    },
+    {
+      "day": "2026-11-15",
+      "type": "canon_open",
+      "count": 8
+    },
+    {
+      "day": "2026-11-15",
+      "type": "loadtest",
+      "count": 424
+    },
+    {
+      "day": "2026-11-15",
+      "type": "smoke",
+      "count": 1
+    },
+    {
+      "day": "2026-11-17",
+      "type": "smoke",
+      "count": 15
+    },
+    {
+      "day": "2026-11-17",
+      "type": "stress-probe",
+      "count": 133
+    }
+  ]
+}
