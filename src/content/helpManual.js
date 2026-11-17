@@ -16,6 +16,11 @@ export const HELP_SECTIONS_EXTRA = [
     body: 'hm_body_online_living',
   },
   {
+    id: 'first-boss-assist',
+    title: 'hm_title_first_boss_assist',
+    body: 'hm_body_first_boss_assist',
+  },
+  {
     id: 'newcomer-traps',
     title: 'hm_title_newcomer_traps',
     body: 'hm_body_newcomer_traps',
