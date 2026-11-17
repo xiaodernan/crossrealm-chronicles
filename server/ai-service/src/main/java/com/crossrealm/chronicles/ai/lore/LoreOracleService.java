@@ -199,7 +199,11 @@ public class LoreOracleService {
      * (W-Z247: the bare lore-system-prompt was ~500 tokens — below the upstream prompt-cache page
      * threshold, so Oracle calls ran cold even with stream+include_usage+ephemeral+prompt_cache_key).
      */
-    private static String loadOracleSystem() {
+    /**
+     * 启动热身走这条（W-Z345）：吐出**完整 Oracle 冻结前缀（v2 大前缀 + lore-system-prompt）**给
+     * LlmClient.warmupUpstream()，无需第二份手抄——手抄就是两份迟早分家的前缀。
+     */
+    public static String loadOracleSystem() {
         String base = loadResource("/ai/lore-system-prompt.txt");
         String digest = loadResource("/ai/lore-digest-frozen.txt");
         return (base + "\n\n" + digest).trim();

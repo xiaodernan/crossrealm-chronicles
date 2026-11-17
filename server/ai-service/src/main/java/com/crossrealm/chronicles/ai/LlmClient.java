@@ -141,6 +141,46 @@ public class LlmClient {
         throw new AdvisorUnavailableException("upstream-" + (last == null ? 0 : last.status()));
     }
 
+    /**
+     * 启动热身（W-Z345 · Codex 同型）：上游语料缓存按「冻结前缀 + cache-key」铺页，
+     * 新进程的头 ~2-3 个真请求注定是冷的——空头直接 warm 一次把页面铺满。
+     * 每个 lane 发一小个请求（user 只写「warmup」），把 prefix 缓存铺满；
+     * 同键/同 digest 的 warmup 请求只在哪里 fetch一次——warm 不占 digest 行，
+     * 不把真实用户第一问凭空缓存成同一句话。任何失败完全静默。
+     */
+    public void warmupUpstream() {
+        if (!isConfigured()) {
+            LOG.info("llm.warmup.skip (no api key configured)");
+            return;
+        }
+        Map<String, String> lanes = new LinkedHashMap<>();
+        lanes.put(CacheKeys.ADVISOR, systemPrompt);
+        lanes.put(CacheKeys.EMBER + ":classifier", EmberReplyController.CLASSIFIER_SYSTEM);
+        lanes.put(CacheKeys.EMBER + ":lore", EmberReplyController.LORE_SYSTEM);
+        lanes.put(CacheKeys.EMBER + ":journey", EmberReplyController.JOURNEY_SYSTEM);
+        lanes.put(CacheKeys.EMBER + ":gratitude", EmberReplyController.GRATITUDE_SYSTEM);
+        lanes.put(CacheKeys.EMBER + ":distress", EmberReplyController.DISTRESS_SYSTEM);
+        lanes.put(CacheKeys.EMBER + ":offtopic", EmberReplyController.OFFTOPIC_SYSTEM);
+        lanes.put(CacheKeys.BOSSVERSE, BossVerseController.BOSS_VERSE_SYSTEM);
+        lanes.put(CacheKeys.ECHO, EchoHintController.ECHO_SYSTEM);
+        lanes.put(CacheKeys.ARBITER, ArbiterController.ARBITER_SYSTEM);
+        lanes.put(CacheKeys.ORACLE, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystem());
+        lanes.put(CacheKeys.DEATH_EPITAPH, DeathEpitaphController.DEATH_SYSTEM);
+        lanes.put(CacheKeys.CHAPTER_CODA, ChapterCodaController.CODA_SYSTEM);
+        for (Map.Entry<String, String> e : lanes.entrySet()) {
+            String laneName = e.getKey();
+            String laneKey = laneName.contains(":") ? laneName.substring(0, laneName.indexOf(':')) : laneName;
+            long start = System.currentTimeMillis();
+            try {
+                Answer a = complete(e.getValue(), "warmup", laneKey);
+                LOG.info("llm.warmup.lane={} cached={} upstreamCached={} took={}ms", laneName, a.cached(), a.upstreamCached(), System.currentTimeMillis() - start);
+            } catch (Throwable t) {
+                LOG.info("llm.warmup.lane={} skipped ({})", laneName, t.getClass().getSimpleName() + ": " + String.valueOf(t.getMessage()).substring(0, Math.min(80, String.valueOf(t.getMessage()).length())));
+            }
+        }
+        LOG.info("llm.warmup.done");
+    }
+
     /** 文本兼容（旧的调用点）—— 落在 canon assuredly、body-shape 不变。 */
     public Answer complete(String system, String user) {
         return complete(system, user, CacheKeys.CANON);
