@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-17T23:18:30.089Z",
+  "generated_at": "2026-11-17T23:29:45.938Z",
   "branch": "main",
-  "head": "3069c5e7",
-  "total_commits": 2114,
-  "pushed_at": "2026-11-18T07:17:56+08:00",
+  "head": "ea300774",
+  "total_commits": 2116,
+  "pushed_at": "2026-11-18T07:27:00+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "ea30077",
+      "at": "2026-11-18T07:27:00+08:00",
+      "subject": "feat(canon): W-Z351 第一百七十一卷《炭的余温 / The Warm Charcoal》入典——卷十七之九 · 第七百零一年（v3 前缀随卷自增 171 条年表）"
+    },
+    {
+      "short": "432379d",
+      "at": "2026-11-17T23:18:30Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "3069c5e",
       "at": "2026-11-18T07:17:56+08:00",
@@ -21,27 +31,17 @@
       "short": "30269a2",
       "at": "2026-11-18T07:08:22+08:00",
       "subject": "feat(ai): W-Z349 Oracle v4「把全书背进 prompt」——45K-tok 具典全量 Context（真上游 LIVE 实测）"
-    },
-    {
-      "short": "580b351",
-      "at": "2026-11-17T22:46:29Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "9b401f4",
-      "at": "2026-11-18T06:45:50+08:00",
-      "subject": "docs(canon): W-Z348 遗留书账回填（README 的 170 卷台账 · showcase W-Z348 实录 · MASTER_PLAN §W-Z348 补记 · corpus 371 源）"
     }
   ],
-  "tracked_files": 1650,
+  "tracked_files": 1652,
   "test_files": 468,
   "i18n_keys": 3267,
-  "lore_sources": 371,
-  "novel_chapters_zh": 170,
-  "novel_chapters_en": 170,
-  "milestone": "W-Z350",
-  "milestone_full": "卷 170 · 六百年守火线（170 / 170 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 371 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：170 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 373,
+  "novel_chapters_zh": 171,
+  "novel_chapters_en": 171,
+  "milestone": "W-Z351",
+  "milestone_full": "卷 171 · 六百年守火线（171 / 171 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 373 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：171 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
