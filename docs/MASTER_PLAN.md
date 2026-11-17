@@ -15,6 +15,8 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-18 · W-Z343 残章 · 跨章落笔一行——「LLM 作为 NPC」第四阶段（真上游 LIVE 实测）**：`POST /api/ai/chapter-coda`（`ChapterCodaController`）——玩家跨过一章章节门的那一刻，炉火的记录者落一句 ≤60 字的残章（Admin LLM P1 · 章节推进断点的回应：章级推进是玩家最容易叹一口气关掉页面的节点；弹窗会被关，杀断记得结留在日志里）。System 冻结（残章执笔人：合上上一页时角落里有人替他把灯拨亮了一点 · 不解释不写梗概不出戏）、user 行只报「上一章/下一章」+语言、独立桶 `crossrealm-chapter-coda-v1`。前端：`OnlineServices.askChapterCoda()`；`StoryDirector.maybeAskCoda()`——与章节开场同一信号、各走各的路（fire-and-forget，失败完全静默，日志留下一行 `coda_journal_title`）；i18n +1（coda_journal_title · zh「残章：」en「Coda: 」）→ **3267**；`ChapterCodaControllerTest` 4 例；Tests 6829/6829 ✓ Build ✓ Size ✓ · verify ALL VERIFY CHECKS PASSED（真上游 LIVE：`{"chapter":2,"prev":1}` → 「炉火替你收好这一页，前路的灯已微微亮起。」· same#2 cached:true）。
+>
 > **2026-11-18 · W-Z342 第168卷入典《第一根柴 / The First Log》——卷十七之六 · 第七百零一年 · 第一根柴**：第三天——早上——阿石独自起来——他走到院子——他看见母亲放了一捆柴在石墩旁——他站在那里看了很久——灶火燃着——他走过去——他拿起一根——不粗——也不细的那根——他走到灶前——他蹲下——他把它放进去——火不爆——它稳稳地亮了一点——灶火燃着——阿石在灶前坐了很久——他听见柴在火里的声音——它噼啪——它不说话——它只是燃着——灶火燃着——母亲从屋里出来——她站在门口——她没进来——她看了阿石一会儿——她也没说话——灶火燃着。
 > 交付：creative/novel/168-第一根柴.md + en 孪生 168-the-first-log.md；novella 168 × 2 = 336 模块（典籍馆现为 168 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：367 源；showcase feed 新增 W-Z342 实录。
 >

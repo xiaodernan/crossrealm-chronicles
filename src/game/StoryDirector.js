@@ -34,9 +34,38 @@ export class StoryDirector {
     return { shownChapters: [...this.shownChapters], shownZones: [...this.shownZones] };
   }
 
+  /**
+   * 残章 · fire-and-forget：跨章那一瞬让炉火的记录者顺手落一笔，安静写进日志。
+   * 断线/不可用/超时一律静默——章节门永远不为一句话等人。
+   */
+  maybeAskCoda(chapter, prev) {
+    const online = this.game?.onlineServices;
+    if (!(online?.enabled?.())) return;
+    if (typeof online.askChapterCoda !== 'function') return;
+    const key = `chapter-coda-${chapter}`;
+    const lang = (typeof document !== 'undefined'
+      && (document.documentElement?.lang ?? '').toLowerCase().startsWith('en')) ? 'en' : 'zh';
+    online
+      .askChapterCoda({ chapter, prev: prev ?? 1, lang })
+      .then((res) => {
+        const line = res?.data?.line;
+        if (typeof line === 'string' && line.trim()) {
+          this.game.storyJournal?.addSilent?.({
+            id: key,
+            category: 'lore',
+            title: t('coda_journal_title'),
+            text: line.trim(),
+            chapter,
+          });
+        }
+      })
+      .catch(() => { /* 残章没写成的代价：日志里少一行 */ });
+  }
+
   setupListeners() {
     storyOn('chapter-changed', (e) => {
       const ch = e.detail.chapter;
+      this.maybeAskCoda(ch, e.detail.prev);
       if (!CHAPTER_INTROS[ch] || this.shownChapters.has(ch)) return;
       this.shownChapters.add(ch);
       const intro = CHAPTER_INTROS[ch];

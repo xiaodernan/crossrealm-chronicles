@@ -424,6 +424,20 @@ export class OnlineServices {
   }
 
   /**
+   * 残章 · 跨章落笔一行（W-Z343，`POST /api/ai/chapter-coda`）——每次跨章的火之记脚。
+   * 玩家跨过一章章节门的那一刻，炉火的记录者落一句 ≤60 字的残章——安静、不打断。
+   * 20s 预算；失败完全静默。
+   */
+  async askChapterCoda(payload, { signal } = {}) {
+    return this.#jsonRequest('/api/ai/chapter-coda', {
+      method: 'POST',
+      body: payload,
+      timeoutMs: 20000,
+      signal,
+    });
+  }
+
+  /**
    * 烬灯回信 · 烬火答（W-Z292，`POST /api/ai/kindle-letter`）。
    * 终章落定后，玩家在炉边写下的那一行；炉火回一行。
    * 20s 预算——回信不该占用你走开的那几步。

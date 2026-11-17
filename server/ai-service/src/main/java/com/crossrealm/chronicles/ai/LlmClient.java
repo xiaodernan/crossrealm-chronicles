@@ -84,6 +84,8 @@ public class LlmClient {
         public static final String VIGIL_VOW = "crossrealm-vigil-vow-v1";
         /** 执笔人 · Boss 前死笔一行（W-Z340）. */
         public static final String DEATH_EPITAPH = "crossrealm-death-epitaph-v1";
+        /** 残章 · 跨章落笔一行（W-Z343）. */
+        public static final String CHAPTER_CODA = "crossrealm-chapter-coda-v1";
     }
 
     private final AiProperties props;

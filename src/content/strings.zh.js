@@ -245,6 +245,7 @@ export const STRINGS_ZH = Object.freeze({
   combat_perfect_parry: '完美弹反！',
   combat_finisher: '连击终结！',
   death_hint_prefix: '提示 ·',
+  coda_journal_title: '残章：',
   death_epitaph_label: '执笔人：',
   death_hint_combo: '高连击时别贪刀 — 留精力翻滚。',
   death_hint_boss: 'Boss 战：{lockOn} 锁定，红圈前 {parry} 弹反或 {roll} 翻滚。',

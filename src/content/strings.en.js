@@ -243,6 +243,7 @@ export const STRINGS_EN = Object.freeze({
   combat_perfect_parry: 'Perfect parry!',
   combat_finisher: 'Combo finisher!',
   death_hint_prefix: 'Hint ·',
+  coda_journal_title: 'Coda: ',
   death_epitaph_label: 'Ledger-Keeper:',
   death_hint_combo: 'Do not get greedy at high combo — save stamina to roll.',
   death_hint_boss: 'Boss fight: {lockOn} to lock, {parry} to parry the red circle or {roll} to roll.',
