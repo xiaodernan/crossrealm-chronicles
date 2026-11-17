@@ -188,7 +188,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Light in the Empty Bowl | [the-light-in-the-empty-bowl](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/137-the-light-in-the-empty-bowl.md) |
 | The Two Words He Said Aloud | [the-two-words-he-said-aloud](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/138-the-two-words-he-said-aloud.md) |
 | The Porridge Is Gone | [the-porridge-is-gone](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/139-the-porridge-is-gone.md) |
-| Seven Days of Silent Fire | [seven-days-of-silent-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/140-seven-days-of-silent-fire.md) |Chapter → game-chapter mapping:
+| Seven Days of Silent Fire | [seven-days-of-silent-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/140-seven-days-of-silent-fire.md) |
+| The Card by the Stove | [the-card-by-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/141-the-card-by-the-stove.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

@@ -8307,6 +8307,59 @@ The fire burned.
 
 *(End of volume one hundred and forty · Volume XV, forty-first part · The seven-hundredth year — Seven Days of Silent Fire.)*
 
+# source: creative/novel/en/141-the-card-by-the-stove.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Card by the Stove
+
+---
+
+## One Hundred and Forty-one: The Card by the Stove
+
+Saturday of the twenty-third week after the spring equinox — afternoon — the sky very thin.
+
+Mother set the white porcelain bowl back on the stove-top — she said nothing.
+
+Aunt Guo came again — she carried a bag — one thing in it — she did not say what.
+
+Aunt Guo set the bag down — she drew out a stack of paper cards — the fire did not move.
+
+A-Shi did not ask — he kept the broom — he swept once — he swept again.
+
+“Wash your hands,” Aunt Guo said.
+
+A-Shi stopped — he dipped his hands in the basin — he looked up at Aunt Guo — Aunt Guo nodded.
+
+Aunt Guo laid the cards out one by one on the table — the fire did not move.
+
+His mother came back — she carried the rice — she saw them — she paused a step — she said nothing.
+
+A-Shi saw — he kept sweeping — he swept for a long time.
+
+Mother put the rice on the counter — Mother came back to the stove — she fed one more white-birch branch — the fire burned.
+
+Mother said: “When did you learn those cards?”
+
+Aunt Guo did not look up — “The old man gave them to me,” she said.
+
+No one answered — the fire burned.
+
+Aunt Guo taught A-Shi the cards — one by one — he studied each — he said nothing — the fire lit his hands — he finished — he said “Done.”
+
+Mother brought the bowls — rice gruel — the four of them sat — no one spoke — the fire burned.
+
+Aunt Guo said: “Don’t rush — I’ll teach you one a day.”
+
+A-Shi nodded — the fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and forty-one · Volume XV, forty-second part · The seven-hundredth year — The Card by the Stove.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -20237,6 +20290,59 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百四十卷 · 卷十五之四十一 · 第七百年 · 炉火静了七天）*
+
+# source: creative/novel/141-灶口的纸牌.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 灶口的纸牌
+
+---
+
+## 一百四十一 · 灶口的纸牌
+
+立春后第二十三周——周六——午后——天很薄。
+
+母亲又把白瓷碗放回灶台了——她没说什么。
+
+郭阿婆今天又来了——她背着一个包——包里一样东西——她没说是什么。
+
+郭阿婆放下包——她从里面拿出一叠纸牌——灶火没动。
+
+阿石没问——他继续拿扫笤帚——他扫了一遍——他又扫了一遍。
+
+「洗洗手。」郭阿婆说。
+
+阿石停了——他把手放在水盆里——他抬头看郭阿婆——郭阿婆点了点头。
+
+郭阿婆把那副牌一张一张摆在桌上——灶火没动。
+
+母亲回来了——她拎着米——她看见了——她停了一步——她什么都没说。
+
+阿石看见了——他继续扫——他扫了很久。
+
+母亲的米放在台面上——母亲回到灶前——她又添了一根白桦——灶火燃着。
+
+母亲说：「纸牌什么时候教的？」
+
+郭阿婆没抬头——「阿祖给我的。」她说。
+
+没人接——灶火燃着。
+
+郭阿婆教阿石认牌——一张一张翻——他一张一张看——他没出声——灶火照着他的手——他看完了——他说「好了」。
+
+母亲端来碗——米粥——四个人都坐下了——没人说话——灶火燃着。
+
+郭阿婆说：「别急——以后天天教你一张。」
+
+阿石点了点头——灶火燃着。
+
+灶火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百四十一卷 · 卷十五之四十二 · 第七百年 · 灶口的纸牌）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记
