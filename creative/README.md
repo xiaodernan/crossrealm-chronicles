@@ -190,7 +190,8 @@ creative/music/soundtrack.html
 | 灶口的纸牌 · The Card by the Stove | [the-card-by-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/141-the-card-by-the-stove.md) |
 | 写上去的那张纸牌 · The Card She Wrote On | [the-card-she-wrote-on](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/142-the-card-she-wrote-on.md) |
 | 纸牌上的那个字 · The Word on the Card | [the-word-on-the-card](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/143-the-word-on-the-card.md) |
-| 炉火静默的第七天 · The Seventh Silent Day | [the-seventh-silent-day](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/144-the-seventh-silent-day.md) |每一章对应游戏的章节走法：
+| 炉火静默的第七天 · The Seventh Silent Day | [the-seventh-silent-day](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/144-the-seventh-silent-day.md) |
+| 纸牌上第几个字 · The Number on the Card | [the-number-on-the-card](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/145-the-number-on-the-card.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

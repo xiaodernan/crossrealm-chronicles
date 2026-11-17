@@ -8509,6 +8509,61 @@ The fire burned.
 
 *(End of volume one hundred and forty-four · Volume XV, forty-fifth part · The seven-hundredth year — The Seventh Silent Day.)*
 
+# source: creative/novel/en/145-the-number-on-the-card.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Number on the Card
+
+---
+
+## One Hundred and Forty-five: The Number on the Card
+
+Sunday of the twenty-fifth week after the spring equinox — afternoon — the light crisp and bright.
+
+Aunt Guo laid the cards out one by one on the stove — a stack of seven — she counted to the top.
+
+A-Shi watched — he did not speak — his mother sat at the stove too — the fire burned.
+
+Aunt Guo turned one over — she held the character up to A-Shi —
+
+“Remembered it?” she said.
+
+A-Shi nodded — his lips moved — he did not speak — the fire burned.
+
+Aunt Guo folded that one — she took it back — she drew another out — the same character — she handed this one to A-Shi.
+
+He looked for a long time — he folded it once — he unfolded it — he looked again.
+
+His mother said: “Your sleeve is stained.”
+
+A-Shi did not move.
+
+His mother did not speak — the fire burned.
+
+A-Shi suddenly smiled — it was a small smile — Aunt Guo watched him — she did not answer — the fire burned.
+
+Aunt Guo said: “Remembered. The seventh card.”
+
+A-Shi put the cards away — he set them back on the stove — he looked at his mother — she was smiling too.
+
+The fire burned.
+
+The fire burned.
+
+Aunt Guo said: “We’ll talk tomorrow.”
+
+A-Shi nodded — the fire burned.
+
+His mother nodded — Aunt Guo nodded too — the fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and forty-five · Volume XV, forty-sixth part · The seven-hundredth year — The Number on the Card.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -20643,6 +20698,61 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百四十四卷 · 卷十五之四十五 · 第七百年 · 炉火静默的第七天）*
+
+# source: creative/novel/145-纸牌上第几个字.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 纸牌上第几个字
+
+---
+
+## 一百四十五 · 纸牌上第几个字
+
+立春后第二十五周——周日——下午——天很亮。
+
+郭阿婆把纸牌一张一张摆在灶台上——一叠七张——她数到最上面。
+
+阿石看着——他没出声——母亲也蹲在灶前——灶火燃着。
+
+郭阿婆翻了一张——把字对着阿石——
+
+"记住了？"她说。
+
+阿石点了点头——他嘴唇动了——没出声——灶火燃着。
+
+郭阿婆把那一张折起来——她收回去——她又拿出一张——同样的字——她把这张递给阿石。
+
+他又看了很久——他把它叠了一下——他又摊开——他又看了。
+
+妈说：「你袖子沾了。」
+
+阿石没动。
+
+母亲没说话——灶火燃着。
+
+阿石忽然笑了——他笑得很小——郭阿婆看他——她没接话——灶火燃着。
+
+郭阿婆说：「记住了——第七张。」
+
+阿石收好那几张——他放回灶台上——他看了母亲——母亲也在笑。
+
+灶火燃着。
+
+灶火燃着。
+
+郭阿婆又说：「明天再说。」
+
+阿石点了点头——灶火燃着。
+
+母亲也点了点头——郭阿婆也点了点头——灶火燃着。
+
+灶火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百四十五卷 · 卷十五之四十六 · 第七百年 · 纸牌上第几个字）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记
