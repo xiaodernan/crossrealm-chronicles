@@ -9485,6 +9485,47 @@ The fire burned.
 
 *(End of volume XVI · Volume one hundred and sixty-two overall · the seven-hundred-and-first year, tenth part — The Sound of the Fire.)*
 
+# source: creative/novel/en/163-the-first-light.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The First Volume — The First Light
+
+---
+
+## One Hundred and Sixty-three: The First Light
+
+Monday of the twenty-eighth week after the spring equinox — morning — the sky just brightening.
+
+His mother brought out the old box from the stove — it was very old — its edges cracked — she lifted the lid — inside lay a book — a leather cover — deep brown — a copper sun-disk nailed to the front, glowing faintly.
+
+She said: “This is the first page of the book.”
+
+A-Shi leaned in — the fire burned — he could not quite see.
+
+His mother said: “It doesn’t show itself to just anyone — today you may see a glimpse — do not read any further.”
+
+A-Shi nodded — he reached out — his mother said again: “Slowly.”
+
+A-Shi paused — he slowly extended his finger — gently turned to the first page.
+
+The fire burned.
+
+On the page were only five characters — “The seven-hundred-and-first year, up to here” — in an ancient hand.
+
+A-Shi did not speak — the fire burned.
+
+His mother closed the box — she did not let him look any longer — she put the box back where it belonged — she did not speak — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and sixty-three overall · the seven-hundred-and-first year, first part — The First Light.)*
+
 # source: creative/novel/en/17-chapter-seventeen.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -22552,6 +22593,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十六 · 本章完 · 跨界线总第一百六十二卷 · 卷十六之十 · 第七百零一年 · 火的声音）*
+
+# source: creative/novel/163-第一道光.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第一卷 —— 第一道光
+
+---
+
+## 一百六十三 · 第一道光
+
+立春后第二十八周——周一——早上——天刚亮了一线。
+
+母亲把灶台上的旧盒子搬出来——它很旧——四边有裂纹——她揭开盖——里面躺着一本书——皮封面——深棕——一块太阳铜钉在上面发光。
+
+她说：「这是这本书的第一页。」
+
+阿石凑过去——灶火燃着——他看不清。
+
+母亲说：「它不让所有人看——今天让你看一眼——不要读完。」
+
+阿石点了点头——他把手伸出来——母亲又说：「慢一点。」
+
+阿石停了一下——他慢慢把手指——轻轻翻到第一页。
+
+灶火燃着。
+
+页面上只有五个字——「七百零一年至此」——一个很老的字。
+
+阿石没出声——灶火燃着。
+
+母亲合上盒子——她没让阿石多看——她把盒子又放回原处——她没说话——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百六十三卷 · 卷十七之一 · 第七百零一年 · 第一道光）*
 
 # source: creative/novel/17-晨雾回声.md
 # 《跨界纪事：锚火守夜人》

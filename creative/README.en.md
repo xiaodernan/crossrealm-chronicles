@@ -210,7 +210,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The First Rain | [the-first-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/159-the-first-rain.md) |
 | The Shadow | [the-shadow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/160-the-shadow.md) |
 | Raising the Anchor | [raising-the-anchor](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/161-raising-the-anchor.md) |
-| The Sound of the Fire | [the-sound-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/162-the-sound-of-the-fire.md) |Chapter → game-chapter mapping:
+| The Sound of the Fire | [the-sound-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/162-the-sound-of-the-fire.md) |
+| The First Light | [the-first-light](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/163-the-first-light.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
