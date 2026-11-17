@@ -8737,6 +8737,63 @@ The fire burned.
 
 *(End of volume one hundred and forty-eight · Volume XV, forty-ninth part · The seven-hundredth year — The Previous Lamp.)*
 
+# source: creative/novel/en/149-the-first-night.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The First Night
+
+---
+
+## One Hundred and Forty-nine: The First Night
+
+Tuesday of the twenty-fifth week after the spring equinox — evening — the sky fully dark.
+
+His mother finished supper — she stood up — she untied her apron — she laid it on the table.
+
+She said to A-Shi: “Tonight — you keep the watch alone.”
+
+A-Shi lifted his head — he did not speak — he looked at the fire — the fire burned.
+
+His mother walked to the door — she stopped — she did not turn around — “If the fire goes out, you go too.” she said.
+
+She went out — the yard was very quiet — the gate closed — the latch sounded once.
+
+A-Shi stood alone at the stove — the fire burned.
+
+He sat down — he watched the fire — he counted how many times it jumped — he counted seven — he stopped.
+
+He thought of his mother’s words — “Light it once — burn for seven hundred years” — he thought of the line on the old lamp.
+
+He took the old lamp over — he set it by the stove — the wick burnt — there was no oil — the fire burned.
+
+A-Shi said: “I’m here.”
+
+The fire leapt once — it did not go out — it burned.
+
+The night deepened — he did not sleep — he just sat — he watched the fire — the fire burned.
+
+He counted the fire — one — two — three — he counted seven — he started over — one — two — three.
+
+The sky was almost bright — the fire still burned.
+
+His mother came back — she stood at the door — she looked at A-Shi — she said nothing — the fire burned.
+
+His mother said: “It did not go out.”
+
+A-Shi said: “It did not go out.”
+
+His mother came over — she sat down — she watched the fire with him — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and forty-nine · Volume XV, fiftieth part · The seven-hundredth year — The First Night.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -21099,6 +21156,63 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百四十八卷 · 卷十五之四十九 · 第七百年 · 上一盏灯）*
+
+# source: creative/novel/149-第一夜.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 第一夜
+
+---
+
+## 一百四十九 · 第一夜
+
+立春后第二十五周——周二——晚上——天全黑了。
+
+母亲吃完饭——她站起来——她把围裙解下来——她放在桌上。
+
+她对阿石说：「今夜——你自己守。」
+
+阿石抬头——他没说话——他看了灶火——灶火燃着。
+
+母亲走到门口——她停了——她没回头——「灶火灭了——你就走。」她说。
+
+她出了门——院子里很安静——院门关了——门闩响了一声。
+
+阿石一个人站在灶前——灶火燃着。
+
+他坐下来——他看灶火——他数灶火跳动了几次——他数到七——他停了。
+
+他想起母亲说的话——「点一次——烧七百年」——他想起那行字。
+
+他把旧灯拿过来——他放在灶边——灯芯焦着——没有油——灶火燃着。
+
+阿石说：「我在。」
+
+灶火跳了一下——它没灭——它燃着。
+
+夜很深了——他没睡——他就那么坐着——他看灶火——灶火燃着。
+
+他数着灶火——一——二——三——他数到七——他又从头数——一——二——三。
+
+天快亮了——灶火还是燃着。
+
+母亲回来了——她站在门口——她看阿石——她没说话——灶火燃着。
+
+母亲说：「它没灭。」
+
+阿石说：「它没灭。」
+
+母亲走过来——她坐下——她和阿石一起看灶火——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百四十九卷 · 卷十五之五十 · 第七百年 · 第一夜）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记

@@ -194,7 +194,8 @@ creative/music/soundtrack.html
 | 纸牌上第几个字 · The Number on the Card | [the-number-on-the-card](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/145-the-number-on-the-card.md) |
 | 明天再说 · Tomorrow, Then | [tomorrow-then](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/146-tomorrow-then.md) |
 | 说出了「火」字之后 · After He Said the Word | [after-he-said-the-word](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/147-after-he-said-the-word.md) |
-| 上一盏灯 · The Previous Lamp | [the-previous-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/148-the-previous-lamp.md) |每一章对应游戏的章节走法：
+| 上一盏灯 · The Previous Lamp | [the-previous-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/148-the-previous-lamp.md) |
+| 第一夜 · The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/149-the-first-night.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
