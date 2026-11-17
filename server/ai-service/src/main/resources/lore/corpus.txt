@@ -8413,6 +8413,59 @@ The fire burned.
 
 *(End of volume one hundred and forty-two · Volume XV, forty-third part · The seven-hundredth year — The Card She Wrote On.)*
 
+# source: creative/novel/en/143-the-word-on-the-card.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XV**: The Seven-Hundredth Year — The Word on the Card
+
+---
+
+## One Hundred and Forty-three: The Word on the Card
+
+Sunday of the twenty-third week after the spring equinox — morning — the sky very white.
+
+A-Shi had not spoken — Aunt Guo had not opened her mouth — his mother had not moved either.
+
+The fire burned.
+
+A-Shi held his bowl of thin porridge — he looked at the card again — he had remembered the character.
+
+His mother said: “Done — eat now.”
+
+He finished — he put the bowl down — the fire burned.
+
+Aunt Guo said: “Remembered it?”
+
+A-Shi nodded — he did not open his mouth — the fire burned.
+
+His mother went out — she took a sieve — she came back holding lotus seeds — she set them on the stove — she did not look up.
+
+The fire burned.
+
+Aunt Guo said: “Now that you’re fed — I’ll show you the second one.”
+
+A-Shi stopped — he lifted his head — the fire burned.
+
+Aunt Guo drew out a stack of cards — she counted — she counted thirteen — she turned one over with her thumb — the character was different.
+
+She turned it over — this was the same character A-Shi had just learned — A-Shi saw it at a glance.
+
+Her mother said nothing — the fire burned.
+
+A-Shi said: “Two characters — one above the fire — one beneath.”
+
+Aunt Guo did not answer — she did not look up — she gathered the cards — she put them away — she said: “Squat and look.”
+
+A-Shi squatted in front of the stove — the fire lit him — he counted the fire — he said nothing — his mother watched the fire — Aunt Guo watched the fire too — the fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume one hundred and forty-three · Volume XV, forty-fourth part · The seven-hundredth year — The Word on the Card.)*
+
 # source: creative/novel/en/16-interlude-leaking-lamp.md
 # Interlude Eight · Leaking Lamp
 
@@ -20449,6 +20502,61 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第一百四十二卷 · 卷十五之四十三 · 第七百年 · 写上去的那张纸牌）*
+
+# source: creative/novel/143-纸牌上的那个字.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十五**：第七百年 —— 纸牌上的那个字
+
+---
+
+## 一百四十三 · 纸牌上的那个字
+
+立春后第二十三周——周日——上午——天色很白。
+
+阿石还没说话——郭阿婆还没开口——母亲也没动。
+
+灶火燃着。
+
+阿石捧着自己那碗稀饭——他又看了那张纸牌——他已经记住了那个字。
+
+妈说：「好了——吃了。」
+
+他喝完了——他放下碗——灶火燃着。
+
+郭阿婆说：「记住了？」
+
+阿石点了点头——他没张嘴——灶火燃着。
+
+母亲出去拿了个簸箕——簸的莲子——她放灶台上——她没抬头。
+
+灶火燃着。
+
+郭阿婆说：「吃饱了——给你看第二张。」
+
+阿石停了——他抬头——灶火燃着。
+
+郭阿婆从包里拿出来一叠牌——她数——数了十三张——她用拇指翻了一张——字不同。
+
+她把它翻过来——这个字阿石刚认过——阿石一眼就看见了。
+
+妈没说话——灶火燃着。
+
+阿石说：「两个字——一个在灶火上——一个在灶火下。」
+
+郭阿婆没接——她没抬头——她收牌——她放好——她说"自己蹲。"
+
+灶火燃着。
+
+阿石蹲灶前——灶火照着他——他数灶火——他没出声——母亲看着灶火——郭阿婆也看灶火——灶火燃着。
+
+灶火燃着。
+
+---
+
+*（本章完 · 跨界线总第一百四十三卷 · 卷十五之四十四 · 第七百年 · 纸牌上的那个字）*
 
 # source: creative/novel/16-番外八-漏灯记.md
 # 番外八 · 漏灯记
