@@ -243,7 +243,8 @@ creative/music/soundtrack.html
 | 说话之后 · After the Birch Spoke | [after-the-birch-spoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/194-after-the-birch-spoke.md) |
 | 白桦的寂静 · The Silence of the Birch | [the-silence-of-the-birch](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/195-the-silence-of-the-birch.md) |
 | 柴 · Firewood | [firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/196-firewood.md) |
-| 火种 · The Kindling | [the-kindling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/197-the-kindling.md) |每一章对应游戏的章节走法：
+| 火种 · The Kindling | [the-kindling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/197-the-kindling.md) |
+| 阿祖的册子 · Azu's Notebook | [azus-notebook](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/198-azus-notebook.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

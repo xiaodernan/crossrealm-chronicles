@@ -11124,6 +11124,51 @@ The fire burned.
 
 *(End of volume XIX · Volume one hundred and ninety-seven overall · the seven-hundred-and-second year, second part — The Kindling.)*
 
+# source: creative/novel/en/198-azus-notebook.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Third Volume — Azu's Notebook
+
+---
+
+## One Hundred and Ninety-eight: Azu's Notebook
+
+The sixth week after the spring equinox — Monday — evening — the fire burned.
+
+A-Shi was going through Azu's old notebook — the fire burned — the paper was yellow — the hand was narrow — he could read half — the fire burned.
+
+His mother said: “ — Azu wrote it — what he thought while tending the fire — is all in here —”
+
+A-Shi said: “ — Azu — what did he write —”
+
+His mother said: “ — keeping the fire — the kindling — step by step —”
+
+The fire burned.
+
+A-Shi said: “ — mother said the kindling was — one piece of wood —”
+
+His mother said: “ — the kindling — is not one piece — it is what is kept — it is what is passed on —”
+
+The fire burned.
+
+A-Shi turned to the last page — the fire burned — there was only one character on it — “守” — the staying — the keeping — the word was very old — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+A-Shi said: “ — 守 —”
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume one hundred and ninety-eight overall · the seven-hundred-and-second year, third part — Azu's Notebook.)*
+
 # source: creative/novel/en/20-the-reader-opens-this-page.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25629,6 +25674,51 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第一百九十七卷 · 卷十九之二 · 第七百零二年 · 火种）*
+
+# source: creative/novel/198-阿祖的册子.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第三卷 —— 阿祖的册子
+
+---
+
+## 一百九十八 · 阿祖的册子
+
+立春后第六周——周一——晚上——灶火燃着。
+
+阿石在翻阿祖的旧册子——灶火燃着——纸很黄——字很瘦——他认出一半——灶火燃着。
+
+母亲说：「——阿祖写的——他守火时——想的什么——都在这里——」
+
+阿石说：「——阿祖——他写了什么——」
+
+母亲说：「——守火——火种——一步一步——」
+
+灶火燃着。
+
+阿石说：「——我妈说火种——是一——是一根柴——」
+
+母亲说：「——火种——不是一根——是守下来的——是传下来的——」
+
+灶火燃着。
+
+阿石翻到最后一页——灶火燃着——那页上只有一个字——「守」——字很老——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+阿石说：「——守——」
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第一百九十八卷 · 卷十九之三 · 第七百零二年 · 阿祖的册子）*
 
 # source: creative/novel/20-读完自己.md
 # 《跨界纪事：锚火守夜人》

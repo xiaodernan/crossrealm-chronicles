@@ -339,6 +339,7 @@ End of frozen digest.
 195 · 白桦的寂静
 196 · 柴
 197 · 火种
+198 · 阿祖的册子
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
