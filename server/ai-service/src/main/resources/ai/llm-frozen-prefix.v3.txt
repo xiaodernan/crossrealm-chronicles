@@ -349,6 +349,7 @@ End of frozen digest.
 205 · 应声
 206 · 守夜的夜
 207 · 谢火
+208 · 守夜的冬
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
