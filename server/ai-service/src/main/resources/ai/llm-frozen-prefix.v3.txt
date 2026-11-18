@@ -324,6 +324,7 @@ End of frozen digest.
 180 · 火又起
 181 · 火什么都没说
 182 · 烟火
+183 · 天亮了
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

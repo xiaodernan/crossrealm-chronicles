@@ -10420,6 +10420,49 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and eighty-two overall · the seven-hundred-and-second year, third part — Sparks.)*
 
+# source: creative/novel/en/183-the-sky-brightened.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Fourth Volume — The Sky Brightened
+
+---
+
+## One Hundred and Eighty-three: The Sky Brightened
+
+The second week after the spring equinox — Monday — morning — the sky brightened.
+
+The fire burned.
+
+A-Shi woke — he opened the window — he looked outside — the birch was still there — it had not changed — but it stood a little taller.
+
+His mother said: “It will speak.”
+
+A-Shi said: “ — speak.”
+
+His mother said: “ — the way — whatever can be kept — can be seen clearly —”
+
+The fire burned.
+
+A-Shi said: “ — good.”
+
+His mother said: “ — the sparks burned once — they are recorded — you remember them too —”
+
+The fire burned.
+
+A-Shi said: “ — I remember.”
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and eighty-three overall · the seven-hundred-and-second year, fourth part — The Sky Brightened.)*
+
 # source: creative/novel/en/19-the-council-of-three-suns.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -24283,6 +24326,49 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百八十二卷 · 卷十八之三 · 第七百零二年 · 烟火）*
+
+# source: creative/novel/183-天亮了.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第四卷 —— 天亮了
+
+---
+
+## 一百八十三 · 天亮了
+
+立春后第二周——周一——早上——天亮了。
+
+灶火燃着。
+
+阿石醒来——他开窗——他看着外面——白桦还在——它没什么变化——但它更高了一点。
+
+母亲说：「它会说。」
+
+阿石说：「——说。」
+
+母亲说：「——道是——守得住的——会看明白——」
+
+灶火燃着。
+
+阿石说：「——好。」
+
+母亲说：「——烟火烧了一回——它记在了——你也记得——」
+
+灶火燃着。
+
+阿石说：「——我记得。」
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百八十三卷 · 卷十八之四 · 第七百零二年 · 天亮了）*
 
 # source: creative/novel/19-三日之议.md
 # 《跨界纪事：锚火守夜人》
