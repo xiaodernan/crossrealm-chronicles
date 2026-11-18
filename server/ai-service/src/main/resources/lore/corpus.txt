@@ -11318,6 +11318,55 @@ The fire burned.
 
 *(End of volume XIX · Volume two hundred overall · the seven-hundred-and-second year, fifth part — Mending the Hearth.)*
 
+# source: creative/novel/en/201-daytime.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Sixth Volume — Daytime
+
+---
+
+## Two Hundred and One: Daytime
+
+The seventh week after the spring equinox — Saturday — noon — the fire burned.
+
+A-Shi woke — the light outside was already full — the fire burned — it was quiet — enough for now — the fire burned.
+
+His mother said: “ — Azu used to keep the fire in the day too —”
+
+A-Shi said: “ — in the day — whom did he keep it for —”
+
+His mother said: “ — he kept it for the afternoon —”
+
+The fire burned.
+
+A-Shi said: “ — kept it for the afternoon —”
+
+His mother said: “ — the fire doesn’t know — but someone must —”
+
+The fire burned.
+
+A-Shi said: “ — I am here —”
+
+His mother said: “ — I am here —”
+
+The fire burned.
+
+Daytime.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume two hundred and one overall · the seven-hundred-and-second year, sixth part — Daytime.)*
+
 # source: creative/novel/en/21-night-walk-home.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25958,6 +26007,55 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第二百卷 · 卷十九之五 · 第七百零二年 · 补柴）*
+
+# source: creative/novel/201-白昼.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第六卷 —— 白昼
+
+---
+
+## 二百零一 · 白昼
+
+立春后第七周——周六——中午——灶火燃着。
+
+阿石醒来——窗外的光已经很足——灶火燃着——火还不太旺——够用了——灶火燃着。
+
+母亲说：「——阿祖以前常在白天守火——」
+
+阿石说：「——白天——他守谁——」
+
+母亲说：「——守下午——」
+
+灶火燃着。
+
+阿石说：「——守下午——」
+
+母亲说：「——守下午——火不会知道——但总要有人——」
+
+灶火燃着。
+
+阿石说：「——我在——」
+
+母亲说：「——我在——」
+
+灶火燃着。
+
+白昼。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第二百零一卷 · 卷十九之六 · 第七百零二年 · 白昼）*
 
 # source: creative/novel/21-夜幕归乡.md
 # 《跨界纪事：锚火守夜人》

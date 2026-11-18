@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and one volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 200 volumes of the canon, fully readable
+· Canon Library — 201 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 200-volume index',
-  hm_body_codex: `Codex — 200 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 201-volume index',
+  hm_body_codex: `Codex — 201 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3348,6 +3348,7 @@ hm_title_codex: 'Codex · the 200-volume index',
 198 · Azu’s Notebook — The sixth week after the spring equinox — Monday — evening — the fire burned; A-Shi was going through Azu’s old notebook — the paper was yellow — the hand was narrow — he could read half — his mother said: “ — Azu wrote it — his last word was “守” — the staying.” Volume XIX, third part.
 199 · Tending the Fire — The sixth week after the spring equinox — Tuesday — morning — the fire burned; A-Shi woke early — his mother was still asleep; he added a small piece of wood to the fire — the flame was quiet — his mother woke — she said: “ — tend the fire —”. Volume XIX, fourth part.
 200 · Mending the Hearth — The seventh week after the spring equinox — Wednesday — afternoon — the fire burned; A-Shi split wood — his mother said: “ — mend the hearth —”; A-Shi took clay — he sealed the crack — the flame steadied — his mother said: “ — it is old — but it will not break —”. Volume XIX, fifth part.
+201 · Daytime — The seventh week after the spring equinox — Saturday — noon — the fire burned; A-Shi woke — the light outside was already full; his mother said: “ — Azu used to keep the fire in the day too —”; A-Shi said: “ — whom did he keep it for —”; his mother said: “ — he kept it for the afternoon —”. Volume XIX, sixth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
