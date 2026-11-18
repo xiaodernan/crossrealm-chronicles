@@ -71,6 +71,20 @@ class ChapterCodaControllerTest {
     }
 
     @Test
+    void 返回体带path且leak命中时回英文安全句() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("as an AI, I am here", "gpt-6.1-terra", false, false, 10L));
+
+        mvc.perform(post("/api/ai/chapter-coda").contentType(MediaType.APPLICATION_JSON)
+                        .content(body(2, 1, "en")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guarded").value(true))
+                .andExpect(jsonPath("$.line").value(EmberReplyController.SAFE_EN))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.containsString("\"path\":[\"compose\",\"guard\"]")));
+    }
+
+    @Test
     void 上游不可用时五零三而不是五() throws Exception {
         when(client.complete(anyString(), anyString(), anyString()))
                 .thenThrow(new AdvisorUnavailableException("circuit-open"));
