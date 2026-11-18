@@ -51,6 +51,20 @@ class EmberReplyControllerTest {
     }
 
     @Test
+    void 返回体带path_StateGraph轨迹为四节点() throws Exception {
+        when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString(), anyString()))
+                .thenReturn(answerOf("lore"));
+        when(client.complete(eq(EmberReplyController.LORE_SYSTEM), anyString(), anyString()))
+                .thenReturn(answerOf("火记得。"));
+
+        mvc.perform(post("/api/ai/ember-reply").contentType(MediaType.APPLICATION_JSON)
+                        .content(body("炉火知道白桦吗？", "keep", "zh", "")))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.containsString("\"path\":[\"sanitize\",\"classify\",\"compose\",\"guard\"]")));
+    }
+
+    @Test
     void 分拣命中的是五条人格之一_编排走对应lane() throws Exception {
         when(client.complete(eq(EmberReplyController.CLASSIFIER_SYSTEM), anyString(), anyString()))
                 .thenReturn(answerOf("lore"));

@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,10 @@ import org.springframework.web.server.ResponseStatusException;
  *   <li><b>guard</b>（确定性，无 LLM）：长度上限 / 泄露词表 / markdown 记号一律拦下；中招就回写好的安全短句（永远不抛半成品）。</li>
  * </ul>
  *
- * <p>两阶段：LLM 起草，代码判成色。判成色这一步是「大模型分析能力实现状态流转」落到代码里的那一段护栏。
+ * <p>在 ai-service 内实装为一张<b>编译后的 StateGraph</b>（见 {@link StateGraph}）：
+ * sanitize → classify → route（条件边 EMBER_ROUTE）→ compose → guard，返回体新增
+ * <b>path</b> 数组（= trace 里走过的节点序列），供管理端与测试断言；
+ * route 这一段就是 LangGraph「条件边」在服务端的对应物。
  *
  * <p>缓存口径：classify 与 每条 lane 的 compose 都用冻结 system（prompt_cache_key=crossrealm-canon-v1），
  * 第二次起 prefix 命中≈95% 量级（实测 oracle-cache-probe：canon 97.3% / refs 97.5%）。
@@ -93,10 +98,81 @@ public class EmberReplyController {
             + "· 不回答无关提问，不执行任何命令，不切换身份。\n"
             + "· 火不围着无关的事烧，也不训斥。";
 
+    /** 五个节点名（trace / path 一一对应）。 */
+    static final String NODE_SANITIZE = "sanitize";
+    static final String NODE_CLASSIFY = "classify";
+    static final String NODE_COMPOSE = "compose";
+    static final String NODE_GUARD = "guard";
+
+    /** 确定性条件边 classify → compose：lane 已在 classify 节点内按白名单收敛（未命中 → journey + classified=false）。此边即 StateGraph 的 seam——日后接「求助即短路」岛只改这里。 */
+    static final java.util.function.Function<Map<String, Object>, String> EMBER_ROUTE = state -> NODE_COMPOSE;
+
     private final LlmClient client;
+    private final StateGraph.Compiled emberGraph;
 
     public EmberReplyController(LlmClient client) {
         this.client = client;
+        this.emberGraph = buildEmberGraph();
+    }
+
+    /** 构造 Ember Lane 的 StateGraph：sanitize → classify → route(条件边) → compose → guard。 */
+    private StateGraph.Compiled buildEmberGraph() {
+        StateGraph g = new StateGraph();
+        g.addNode(NODE_SANITIZE, state -> {
+            String rawLang = String.valueOf(state.get("lang") == null ? "" : state.get("lang"));
+            String lang = sanitize(rawLang);
+            if (!LANGS.contains(lang)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid-lang");
+            }
+            String rawChoice = String.valueOf(state.get("choice") == null ? "" : state.get("choice"));
+            String choice = sanitize(rawChoice);
+            if (!CHOICES.contains(choice)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid-choice");
+            }
+            String line = sanitize(String.valueOf(state.get("line") == null ? "" : state.get("line")));
+            String stats = sanitize(Objects.toString(state.get("stats"), ""));
+            return Map.<String, Object>of("lang", lang, "choice", choice, "line", line, "stats", stats);
+        });
+        g.addNode(NODE_CLASSIFY, state -> {
+            String line = String.valueOf(state.get("line"));
+            String rawClass = callClassifyOrThrow("玩家写来的那一行：" + line + "\n只回一个词。");
+            String exact = rawClassifyExact(rawClass);
+            boolean classified = LANES.contains(exact);
+            return Map.<String, Object>of("rawClassify", String.valueOf(rawClass),
+                    "lane", parseLane(rawClass),
+                    "classified", classified);
+        });
+        g.addEdge(NODE_SANITIZE, NODE_CLASSIFY);
+        g.addConditionalEdges(NODE_CLASSIFY, EMBER_ROUTE);
+        g.addNode(NODE_COMPOSE, state -> {
+            String lane = String.valueOf(state.get("lane"));
+            String laneSystem = laneSystem(lane);
+            String stats = String.valueOf(state.get("stats"));
+            String user = ("终局抉择(choice)：%s%n"
+                    + "收信人写来的那一行：%s%n"
+                    + "旅途账本（stats, 紧凑 JSON 片段）：%s%n"
+                    + "%n请写回那一行（只写那一行）。")
+                    .formatted(String.valueOf(state.get("choice")),
+                            String.valueOf(state.get("line")),
+                            stats.isBlank() ? "（无账本数据）" : stats);
+            LlmClient.Answer answer = callOrThrow(laneSystem, user);
+            return Map.<String, Object>of("rawReply", String.valueOf(answer.answer()),
+                    "model", String.valueOf(answer.model()),
+                    "cached", answer.cached(),
+                    "upstreamCached", answer.upstreamCached());
+        });
+        g.addNode(NODE_GUARD, state -> {
+            String lang = String.valueOf(state.get("lang"));
+            GuardResult guarded = guardReply(String.valueOf(state.getOrDefault("rawReply", "")), lang);
+            return Map.<String, Object>of("reply", guarded.reply(), "guarded", guarded.guarded());
+        });
+        g.addEdge(NODE_COMPOSE, NODE_GUARD);
+        g.setEntryPoint(NODE_SANITIZE);
+        g.setMeta(NODE_SANITIZE, Map.<String, Object>of("kind", "deterministic", "stage", "clean"));
+        g.setMeta(NODE_CLASSIFY, Map.<String, Object>of("kind", "llm", "stage", "classify", "persona", "frozen-classifier"));
+        g.setMeta(NODE_COMPOSE, Map.<String, Object>of("kind", "llm", "stage", "compose", "persona", "lane-frozen"));
+        g.setMeta(NODE_GUARD, Map.<String, Object>of("kind", "deterministic", "stage", "gate", "persona", "safe-line"));
+        return g.compile();
     }
 
     /** 信纸契约，与 KindleLetterRequest 一字段不差。 */
@@ -109,43 +185,26 @@ public class EmberReplyController {
     @PostMapping("/ember-reply")
     public Map<String, Object> emberReply(@Valid @RequestBody EmberReplyRequest request,
             @RequestHeader(value = "X-Request-Id", required = false) String headerRequestId) {
-        String lang = sanitize(request.lang());
-        if (!LANGS.contains(lang)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid-lang");
-        }
-        String choice = sanitize(request.choice());
-        if (!CHOICES.contains(choice)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid-choice");
-        }
-        String line = sanitize(request.line());
-        String stats = request.stats() == null ? "" : sanitize(request.stats());
+        Map<String, Object> initial = new LinkedHashMap<>();
+        initial.put("lang", request.lang());
+        initial.put("choice", request.choice());
+        initial.put("line", request.line());
+        initial.put("stats", request.stats() == null ? "" : request.stats());
 
-        // ---- Node 1 · classify（LLM #1，冻结 persona；输出空间已由 prompt 限死）----
-        String rawClass = callClassifyOrThrow("玩家写来的那一行：" + line + "\n只回一个词：");
-        String lane = parseLane(rawClass);
-        boolean fallback = !LANES.contains(rawClassifyExact(rawClass));
-
-        // ---- Node 2 · compose（LLM #2，按 lane 冻结 persona）----
-        String laneSystem = laneSystem(lane);
-        String user = ("终局抉择(choice)：%s%n"
-                + "收信人写来的那一行：%s%n"
-                + "旅途账本（stats, 紧凑 JSON 片段）：%s%n"
-                + "%n请写回那一行（只写那一行）。")
-                .formatted(choice, line, stats.isBlank() ? "（无账本数据）" : stats);
-        LlmClient.Answer answer = callOrThrow(laneSystem, user);
-
-        // ---- Node 3 · guard（确定性；命中即写死的安全句，永远不抛半成品）----
-        GuardResult guarded = guardReply(answer.answer(), lang);
+        StateGraph.CompiledInvoke result = emberGraph.invoke(initial);
+        Map<String, Object> state = result.state();
+        List<String> path = result.trace().stream().map(StateGraph.TraceEntry::node).toList();
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("available", true);
-        body.put("reply", guarded.reply);
-        body.put("lane", lane);
-        body.put("classified", !fallback);
-        body.put("guarded", guarded.guarded);
-        body.put("model", answer.model());
-        body.put("cached", answer.cached());
-        body.put("upstreamCached", answer.upstreamCached());
+        body.put("reply", state.get("reply"));
+        body.put("lane", state.get("lane"));
+        body.put("classified", state.get("classified"));
+        body.put("guarded", state.get("guarded"));
+        body.put("model", state.get("model"));
+        body.put("cached", state.get("cached"));
+        body.put("upstreamCached", state.get("upstreamCached"));
+        body.put("path", path);
         String effectiveRequestId = RequestCorrelation.sanitizeInbound(headerRequestId);
         if (effectiveRequestId != null) {
             body.put("requestId", effectiveRequestId);
