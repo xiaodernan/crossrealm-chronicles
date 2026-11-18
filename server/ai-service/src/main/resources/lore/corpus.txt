@@ -11034,6 +11034,51 @@ The fire burned.
 
 *(End of volume XVIII · The final part · Volume one hundred and ninety-five overall · the seven-hundred-and-second year — The Silence of the Birch.)*
 
+# source: creative/novel/en/196-firewood.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The First Volume — Firewood
+
+---
+
+## One Hundred and Ninety-six: Firewood
+
+The fifth week after the spring equinox — Friday — morning — the fire burned.
+
+A-Shi split firewood — his axe was steady — one piece per swing — the fire burned — the wood split — he smelled the wood — pine — the fire burned.
+
+His mother came in from the courtyard — she said: “ — Azu split this kind —”
+
+A-Shi said: “ — Azu —”
+
+His mother said: “ — when Azu split the wood — the fire never went out —”
+
+The fire burned.
+
+A-Shi split another piece — the fire burned — the wood became more orderly piece by piece — the fire burned — the fire burned — the fire burned.
+
+His mother stacked the wood in the woodshed — the fire burned — she turned and said: “ — every piece is the fire's life —”
+
+A-Shi said: “ — I remember —”
+
+The fire burned.
+
+Firewood.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume one hundred and ninety-six overall · the seven-hundred-and-second year, first part — Firewood.)*
+
 # source: creative/novel/en/20-the-reader-opens-this-page.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25449,6 +25494,51 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 卷终 · 跨界线总第一百九十五卷 · 卷十八之终 · 第七百零二年 · 白桦的寂静）*
+
+# source: creative/novel/196-柴.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第一卷 —— 柴
+
+---
+
+## 一百九十六 · 柴
+
+立春后第五周——周五——早上——灶火燃着。
+
+阿石劈柴——他的斧子很稳——一柴一斧——灶火燃着——柴裂了——他闻到木头的味道——它是松木——灶火燃着。
+
+母亲从院里进来——她说：「——阿祖那时——劈的也是这个——」
+
+阿石说：「——阿祖——」
+
+母亲说：「——阿祖劈柴时——灶火才不灭——」
+
+灶火燃着。
+
+阿石又劈了一根——灶火燃着——柴越劈越整齐——灶火燃着——灶火燃着——灶火燃着。
+
+母亲把柴码进柴屋——灶火燃着——她回头说：「——一根都是它的命——」
+
+阿石说：「——我记着——」
+
+灶火燃着。
+
+柴。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第一百九十六卷 · 卷十九之一 · 第七百零二年 · 柴）*
 
 # source: creative/novel/20-读完自己.md
 # 《跨界纪事：锚火守夜人》
