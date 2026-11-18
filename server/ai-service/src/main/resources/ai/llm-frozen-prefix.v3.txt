@@ -315,6 +315,7 @@ End of frozen digest.
 171 · 炭的余温
 172 · 火会记住你
 173 · 事情发生了
+174 · 炉火里的白
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

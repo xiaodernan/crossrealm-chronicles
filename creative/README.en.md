@@ -221,7 +221,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/170-the-first-night.md) |
 | The Warm Charcoal | [the-warm-charcoal](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/171-the-warm-charcoal.md) |
 | The Fire Will Remember You | [the-fire-will-remember-you](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/172-the-fire-will-remember-you.md) |
-| Something Happened | [something-happened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/173-something-happened.md) |Chapter → game-chapter mapping:
+| Something Happened | [something-happened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/173-something-happened.md) |
+| The White in the Fire | [the-white-in-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/174-the-white-in-the-fire.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

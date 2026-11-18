@@ -219,7 +219,8 @@ creative/music/soundtrack.html
 | 第一夜 · The First Night | [the-first-night](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/170-the-first-night.md) |
 | 炭的余温 · The Warm Charcoal | [the-warm-charcoal](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/171-the-warm-charcoal.md) |
 | 火会记住你 · The Fire Will Remember You | [the-fire-will-remember-you](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/172-the-fire-will-remember-you.md) |
-| 事情发生了 · Something Happened | [something-happened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/173-something-happened.md) |每一章对应游戏的章节走法：
+| 事情发生了 · Something Happened | [something-happened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/173-something-happened.md) |
+| 炉火里的白 · The White in the Fire | [the-white-in-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/174-the-white-in-the-fire.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
