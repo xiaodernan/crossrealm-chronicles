@@ -62,3 +62,11 @@ const payload = {
 writeFileSync(OUT, JSON.stringify(payload, null, 2) + '\n', 'utf8');
 const t = parsed.totals ?? {};
 console.log('fetch: wrote %s · via %s · total=%s · boss_kill=%s canon_open=%s loadtest=%s smoke=%s stress-probe=%s', OUT, via, parsed.total, t.boss_kill, t.canon_open, t.loadtest, t.smoke, t['stress-probe']);
+
+// W-Z355：fetched snapshot 已新鲜——顺手刷新下游 MEASURED 漏斗 artifact（失败不回滚本次 telemetry 刷新）
+try {
+  const funnelScript = resolve(ROOT, 'scripts/derived-funnel.mjs');
+  execFileSync(process.execPath, [funnelScript], { stdio: ['ignore', 'inherit', 'inherit'] });
+} catch (e) {
+  console.error('fetch: derived-funnel 刷新失败（不影响本次 telemetry 刷新）——%s', String(e.message ?? e).slice(0, 120));
+}

@@ -1,0 +1,31 @@
+{
+  "generated": "2026-11-18T00:31:30.150Z",
+  "source": "D:\\3a大作\\docs\\admin\\data\\telemetry-summary.json",
+  "fromSnapshot": {
+    "generated": "2026-11-18T00:31:29.375Z",
+    "source": "docker compose network (http://gateway:8080/api/telemetry/summary-rollup)"
+  },
+  "note": "MEASURED（本机 compose 落账事件 · verify 冒烟 + stress-load 洪测 + Ember/Oracle 实测亲手写）——admin 首屏其他卡 = SYNTHETIC（seed=20261117），这是 admin 里唯一和真实玩家行为链沾边的一条。不做留存分群推断——只有约 3 天窗口，伪分群等于撒谎。",
+  "windowDays": 14,
+  "totals": {
+    "bossKill": 30,
+    "canonOpen": 8,
+    "smoke": 26,
+    "loadtest": 424,
+    "stressProbe": 133,
+    "total": 621
+  },
+  "derived": {
+    "bossKillShare": 0.0483,
+    "canonOpenShare": 0.0129,
+    "humanAdjacentShare": 0.0612,
+    "firehoseNoiseRatio": 0.8969,
+    "canonOpenPerBossKill": 0.2667
+  },
+  "interpretation": {
+    "bossKillLine": "Boss 击杀 4.83%（boss_kill=30 · MEASURED）",
+    "canonLine": "典籍开启 1.29%（canon_open=8 · MEASURED）",
+    "ratioLine": "≈ 0.2667「开典籍」/「Boss 击杀」——MEASURED，非外推，没有 D1/D3/D7 retention 分群（只有 3 天窗口，伪分群等于撒谎）",
+    "note": "probe 火线占比 89.69%（loadtest 424 + stress-probe 133 = 557 / 621）；真正与玩家行为相邻段 = boss_kill 30 + canon_open 8 = 38 事件（6.12%）。任何「留存曲线」在这组窗口上都是造假，不做承诺。"
+  }
+}
