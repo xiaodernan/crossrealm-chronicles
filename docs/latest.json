@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-18T19:50:48.305Z",
+  "generated_at": "2026-11-18T21:11:37.612Z",
   "branch": "main",
-  "head": "7797aa2",
-  "total_commits": 2226,
-  "pushed_at": "2026-11-19T03:50:07+08:00",
+  "head": "6141c18",
+  "total_commits": 2228,
+  "pushed_at": "2026-11-19T04:16:44+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "6141c18",
+      "at": "2026-11-19T04:16:44+08:00",
+      "subject": "fix(front): W-Z412 炉边快速上手首弹层排序修复（z=1001 > 出场页 999）+ 营火手势可选素材误报 broken 改 absent（SPA 200+index.html 识别）"
+    },
+    {
+      "short": "4d2f84e",
+      "at": "2026-11-19T03:51:06+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z411 (novels 220 · lore 471 · i18n 3267 · commits 2226)"
+    },
     {
       "short": "7797aa2",
       "at": "2026-11-19T03:50:07+08:00",
@@ -21,16 +31,6 @@
       "short": "25f4f52",
       "at": "2026-11-19T03:39:40+08:00",
       "subject": "measure(admin): W-Z410 数据产物落档 cache-probe-w-z410.json（MEASURED）· Admin 卡指向 .json"
-    },
-    {
-      "short": "f23f085",
-      "at": "2026-11-19T03:39:00+08:00",
-      "subject": "measure(admin): W-Z410 诚实卡 meas_l27 - stream vs non-stream 对照探针（gpt-6.1-terra · Clash 7897 · cached=5066/5342≈94.8% steady；上游偶发不回 cached_tokens 字段，字段缺失=上游抖动而非缓存失效）"
-    },
-    {
-      "short": "024582a",
-      "at": "2026-11-19T03:35:10+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z409 (novels 219 · lore 469 · i18n 3267 · commits 2221)"
     }
   ],
   "tracked_files": 1757,
@@ -39,7 +39,7 @@
   "lore_sources": 471,
   "novel_chapters_zh": 220,
   "novel_chapters_en": 220,
-  "milestone": "W-Z411",
+  "milestone": "W-Z412",
   "milestone_full": "卷 220 · 六百年守火线（220 / 220 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 471 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：220 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
