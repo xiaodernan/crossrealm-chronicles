@@ -10625,6 +10625,47 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and eighty-seven overall · the seven-hundred-and-second year, eighth part — Kitchen Smoke.)*
 
+# source: creative/novel/en/188-after-the-smoke-cleared.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Ninth Volume — After the Smoke Cleared
+
+---
+
+## One Hundred and Eighty-eight: After the Smoke Cleared
+
+The third week after the spring equinox — Wednesday — morning — the fire burned.
+
+A-Shi stood at the doorway — there was no smoke in the sky — the birch swayed in the wind — the fire burned.
+
+His mother handed him the bowl — her hands were empty — she said: “ — the kitchen smoke is gone —”
+
+A-Shi said: “ — gone —”
+
+His mother said: “ — gone — it’s gone —”
+
+The fire burned.
+
+A-Shi looked at the sky — it was very high — the fire burned — he thought — no one had told him to leave — no one had told him to stay — the fire burned.
+
+He stayed.
+
+The smoke cleared.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and eighty-eight overall · the seven-hundred-and-second year, ninth part — After the Smoke Cleared.)*
+
 # source: creative/novel/en/19-the-council-of-three-suns.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -24694,6 +24735,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百八十七卷 · 卷十八之八 · 第七百零二年 · 炊烟）*
+
+# source: creative/novel/188-炊烟散了.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第九卷 —— 炊烟散了
+
+---
+
+## 一百八十八 · 炊烟散了
+
+立春后第三周——周三——早上——灶火燃着。
+
+阿石站在门口——炊烟不见了——白桦在风里——灶火燃着。
+
+母亲把碗递给他——她手里空了——她说：「——炊烟散了——」
+
+阿石说：「——散了——」
+
+母亲说：「——散了——就散了——」
+
+灶火燃着。
+
+阿石看着天——天很高——灶火燃着——他想了想——没有人说他要走——没有人说他要留下——灶火燃着。
+
+他留下了。
+
+炊烟散了。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百八十八卷 · 卷十八之九 · 第七百零二年 · 炊烟散了）*
 
 # source: creative/novel/19-三日之议.md
 # 《跨界纪事：锚火守夜人》
