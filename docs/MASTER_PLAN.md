@@ -20,6 +20,9 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-19 · W-Z418 第二百二十三卷入典《扬花 / The Pollination》——卷二十之十二 · 第七百零三年 · 扬花**：第七百零三年——立春后第七周——周日——下午——灶火燃着——阿石站在门口——田里面青色的——风轻——风来——麦穗在风里摆——摆开了——他说「——扬花——」——母亲说「——扬花——」——风来——风走——灶火燃着——麦穗在风里——摇了三次——他说「——香——」——母亲说「——香——」——灶火燃着——风停了——他说「——了——」——母亲说「——了——」——灶火燃着。
+> 交付：creative/novel/223-扬花.md + en 孪生 223-the-pollination.md；novella 223 × 2 = 446 模块（典籍馆现为 223 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**477 源**；**v3 冻结前缀含 223 条年表条目**；showcase feed 新增 W-Z418 实录。
+>
 > **2026-11-19 · W-Z417 Oracle v4 全量前缀直击上游实测——prompt=47,370 · 冻结前缀约 4–5 万 token，与 Codex 同档 · warm=44363 (93.7%)**
 > 新脚本 `scripts/oracle-v4-live-probe.mjs`：把生产 Oracle 用的同一份 v4 冻结前缀（125KB · 约 28K tok，含 GLOSSARY.md verbatim 全量）直接送上游，不用经 gateway，离线即可复现。
 > 实测：`① 全量 v4 前缀 · 第 1 次 HTTP 200 · prompt=47,370 · cached=2255 (4.8%)` → 第 2 次 `prompt=47,370 · cached=44,363 (93.7%) · ~4.6s`。

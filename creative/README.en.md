@@ -270,7 +270,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Birch’s Kiss | [the-birchs-kiss](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/219-the-birchs-kiss.md) |
 | Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/220-grain-rain.md) |
 | The Wheat Grain | [the-wheat-grain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/221-the-wheat-grain.md) |
-| The Ears of Wheat | [the-ears-of-wheat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/222-the-ears-of-wheat.md) |Chapter → game-chapter mapping:
+| The Ears of Wheat | [the-ears-of-wheat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/222-the-ears-of-wheat.md) |
+| The Pollination | [the-pollination](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/223-the-pollination.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

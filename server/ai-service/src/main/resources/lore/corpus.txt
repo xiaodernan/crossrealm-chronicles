@@ -12278,6 +12278,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and twenty-two overall · the seven-hundred-and-third year, eleventh part — The Ears of Wheat.)*
 
+# source: creative/novel/en/223-the-pollination.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Twelfth Volume — The Pollination
+
+---
+
+## Two Hundred and Twenty-Three: The Pollination
+
+The seventh week after the spring equinox — Sunday — afternoon — the fire burned.
+
+A-Shi stood at the doorway — the fields were green — the wind was light — the wind came — the ears of wheat swayed in the wind — they swung wide — he watched — he said: “ — the pollination —” — his mother said: “ — the pollination —” — the wind came — the wind went — the fire burned — the ears were in the wind — they swayed three times — he said: “ — it is fragrant —” — his mother said: “ — it is fragrant —” — the fire burned — the wind stopped — he said: “ — it is done —” — his mother said: “ — it is done —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+The pollination.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and twenty-three overall · the seven-hundred-and-third year, twelfth part — The Pollination.)*
+
 # source: creative/novel/en/23-the-moon-rises.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27793,6 +27824,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百二十二卷 · 卷二十之十一 · 第七百零三年 · 抽穗）*
+
+# source: creative/novel/223-扬花.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第十二卷 —— 扬花
+
+---
+
+## 二百二十三 · 扬花
+
+立春后第七周——周日——下午——灶火燃着。
+
+阿石站在门口——田里面青色的——风轻——风来——麦穗在风里摆——摆开了——他看——他说「——扬花——」——母亲说「——扬花——」——风来——风走——灶火燃着——麦穗在风里——摇了三次——他说「——香——」——母亲说「——香——」——灶火燃着——风停了——他说「——了——」——母亲说「——了——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+扬花。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百二十三卷 · 卷二十之十二 · 第七百零三年 · 扬花）*
 
 # source: creative/novel/23-月光起.md
 # 《跨界纪事：锚火守夜人》

@@ -364,6 +364,7 @@ End of frozen digest.
 220 · 谷雨
 221 · 麦粒
 222 · 抽穗
+223 · 扬花
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
