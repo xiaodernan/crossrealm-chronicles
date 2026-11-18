@@ -67,6 +67,38 @@ class OracleControllerTest {
     }
 
     @Test
+    void leakAnswer_isGatedWithRefusalAndKeepsSourceFreePath() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("as an AI, the lore says the fire remembers", "gpt-6-sol", false, true, 55L));
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("question", "锚火在典籍里的口径是什么？");
+
+        mvc.perform(post("/api/ai/lore/answer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(MAPPER.writeValueAsString(body)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guarded").value(true))
+                .andExpect(jsonPath("$.answer").value("此物未在典籍中 · This is not in the record."));
+    }
+
+    @Test
+    void happyPath_carriesStateGraphPathThreeNodes() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("典籍里说火记得阿石。", "gpt-6-sol", false, true, 30L));
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("question", "火记得阿石吗？");
+
+        mvc.perform(post("/api/ai/lore/answer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(MAPPER.writeValueAsString(body)))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.containsString("\"path\":[\"retrieve\",\"compose\",\"gate\"]")));
+    }
+
+    @Test
     void blankQuestion_isRejected() throws Exception {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("question", "");

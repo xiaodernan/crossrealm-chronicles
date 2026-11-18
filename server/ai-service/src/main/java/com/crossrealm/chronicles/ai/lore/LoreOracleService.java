@@ -1,6 +1,8 @@
 package com.crossrealm.chronicles.ai.lore;
 
 import com.crossrealm.chronicles.ai.LlmClient;
+import com.crossrealm.chronicles.ai.LlmGuards;
+import com.crossrealm.chronicles.ai.StateGraph;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -32,12 +34,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoreOracleService {
 
-    /** Result shape mirrored in the HTTP response. */
+    /** Result shape mirrored in the HTTP response. {@code path} = the StateGraph nodes actually walked (retrieve → compose → gate / retrieve → gate on a no-match short-circuit). */
     public record OracleResult(boolean ok, String answer, List<String> sources, String model,
-            boolean cached, boolean upstreamCached, long latencyMs) {}
+            boolean cached, boolean upstreamCached, long latencyMs, boolean guarded, List<String> path) {}
 
     private final LlmClient client;
     private final Bm25Index index;
+    private final StateGraph.Compiled oracleGraph;
 
     @Value("${ai-service.lore.limit:4}")
     private int defaultLimit;
@@ -45,9 +48,97 @@ public class LoreOracleService {
     @Value("${ai-service.lore.multihop:true}")
     private boolean multihop;
 
+    static final String NODE_RETRIEVE = "retrieve";
+    static final String NODE_COMPOSE = "compose";
+    static final String NODE_GATE = "gate";
+
+    /** 没有任何典籍子句命中的拒绝语——和「han」一样稳定，客户端可以依赖它判断「典籍没有」。 */
+    static final String REFUSAL = "此物未在典籍中 · This is not in the record.";
+
     public LoreOracleService(LlmClient client, Bm25Index index) {
         this.client = client;
         this.index = index;
+        this.oracleGraph = buildOracleGraph();
+    }
+
+    /** 检索→编排→门禁三节点 StateGraph 在 invoke；未命中子句时 compose 节点整个跳过（不打 LLM）。 */
+    private StateGraph.Compiled buildOracleGraph() {
+        StateGraph g = new StateGraph();
+        g.addNode(NODE_RETRIEVE, state -> {
+            String question = String.valueOf(state.get("question"));
+            int limit = clampLimit((Integer) state.get("limitRaw"));
+            List<Bm25Index.Hit> hits = retrieve(question, limit);
+            Map<String, Object> patch = new LinkedHashMap<>();
+            patch.put("hitCount", hits.size());
+            patch.put("hits", new ArrayList<Bm25Index.Hit>(hits));
+            patch.put("sources", hits.stream().map(h -> h.doc().source()).distinct().toList());
+            return patch;
+        });
+        g.addConditionalEdges(NODE_RETRIEVE, state ->
+                ((Number) state.getOrDefault("hitCount", 0)).intValue() > 0 ? NODE_COMPOSE : NODE_GATE);
+        g.addNode(NODE_COMPOSE, state -> {
+            String question = String.valueOf(state.get("question"));
+            List<Bm25Index.Hit> hits = new ArrayList<>();
+            Object rawHits = state.get("hits");
+            if (rawHits instanceof List<?> list) {
+                for (Object o : list) {
+                    if (o instanceof Bm25Index.Hit hit) {
+                        hits.add(hit);
+                    }
+                }
+            }
+            if (hits.isEmpty()) {
+                return Map.<String, Object>of("rawAnswer", "", "model", "none",
+                        "cached", false, "upstreamCached", false, "latencyMs", 0L);
+            }
+            StringBuilder firstBlock = new StringBuilder();
+            Bm25Index.Hit anchor = hits.get(0);
+            firstBlock.append("[").append(anchor.doc().source()).append("]\n")
+                    .append(anchor.doc().text().trim());
+            StringBuilder rest = new StringBuilder();
+            for (int i = 1; i < hits.size(); i++) {
+                rest.append("[").append(hits.get(i).doc().source()).append("]\n")
+                        .append(hits.get(i).doc().text().trim())
+                        .append("\n\n---\n\n");
+            }
+            String system = loadOracleSystem();
+            String routeNote = prefersRealWorldRefs(question) ? "\n\n" + REALWORLD_ROUTE_NOTE : "";
+            String user = "Player question (use the language the player asked in):\n" + question
+                    + routeNote
+                    + "\n\nMost relevant excerpt (quote it verbatim if it answers the question):\n\n"
+                    + firstBlock.toString().trim()
+                    + (rest.length() > 0 ? "\n\nOther excerpts (use only if the first doesn't answer):\n\n"
+                            + rest.toString().trim() : "")
+                    + "\n\nReminder (read this FIRST):\nThe question asks about the entry in the **most relevant excerpt** block — locate its heading line (the one containing the exact name from the player question) and answer with that block's line verbatim. If no heading line contains the asked name, refuse with 「此物未在典籍中 · This is not in the record.」\n\nQuote branch: if the player question quotes a line verbatim (any quote/quotation marks included), treat the quoted text as the \"name\" to locate — find the excerpt line containing that quote exactly, and answer with that quote together with the file path it came from. Only refuse when the quoted text does not appear anywhere in the excerpts.";
+            LlmClient.Answer answer = client.complete(system, user, LlmClient.CacheKeys.ORACLE);
+            return Map.<String, Object>of("rawAnswer", String.valueOf(answer.answer()),
+                    "model", String.valueOf(answer.model()),
+                    "cached", answer.cached(),
+                    "upstreamCached", answer.upstreamCached(),
+                    "latencyMs", answer.latencyMs());
+        });
+        g.addNode(NODE_GATE, state -> {
+            if (((Number) state.getOrDefault("hitCount", 0)).intValue() == 0) {
+                return Map.<String, Object>of("answer", REFUSAL, "guarded", false,
+                        "model", "oracle-bm25", "cached", false,
+                        "upstreamCached", false, "latencyMs", 0L);
+            }
+            String raw = String.valueOf(state.getOrDefault("rawAnswer", ""));
+            String cleaned = LlmGuards.stripMarkdown(raw);
+            boolean guarded = LlmGuards.containsLeak(cleaned) || cleaned.isBlank();
+            String line = guarded ? REFUSAL : cleaned;
+            return Map.<String, Object>of("answer", line, "guarded", guarded,
+                    "model", String.valueOf(state.get("model")),
+                    "cached", state.get("cached"),
+                    "upstreamCached", state.get("upstreamCached"),
+                    "latencyMs", state.get("latencyMs"));
+        });
+        g.addEdge(NODE_COMPOSE, NODE_GATE);
+        g.setEntryPoint(NODE_RETRIEVE);
+        g.setMeta(NODE_RETRIEVE, Map.<String, Object>of("kind", "deterministic", "stage", "retrieve", "engine", "bm25+multihop"));
+        g.setMeta(NODE_COMPOSE, Map.<String, Object>of("kind", "llm", "stage", "compose", "persona", "canon-scribe", "prefix", "oracle-v4"));
+        g.setMeta(NODE_GATE, Map.<String, Object>of("kind", "deterministic", "stage", "gate", "persona", "safe-line"));
+        return g.compile();
     }
 
     /**
@@ -97,37 +188,23 @@ public class LoreOracleService {
         if (question == null || question.isBlank()) {
             return failure("blank question");
         }
-        int limit = clampLimit(limitRaw);
-        List<Bm25Index.Hit> hits = retrieve(question, limit);
-        if (hits.isEmpty()) {
-            // 没有任何匹配——不给模型找词也能硬编一个。该答假说了。
-            return new OracleResult(true, "此物未在典籍中 · This is not in the record.",
-                    List.of(), "oracle-bm25", false, false, 0L);
-        }
-        StringBuilder firstBlock = new StringBuilder();
-        Bm25Index.Hit anchor = hits.get(0);
-        firstBlock.append("[").append(anchor.doc().source()).append("]\n")
-                .append(anchor.doc().text().trim());
-        StringBuilder rest = new StringBuilder();
-        for (int i = 1; i < hits.size(); i++) {
-            rest.append("[").append(hits.get(i).doc().source()).append("]\n")
-                    .append(hits.get(i).doc().text().trim())
-                    .append("\n\n---\n\n");
-        }
-        String system = loadOracleSystem();
-        String routeNote = prefersRealWorldRefs(question) ? "\n\n" + REALWORLD_ROUTE_NOTE : "";
-        String user = "Player question (use the language the player asked in):\n" + question
-                + routeNote
-                + "\n\nMost relevant excerpt (quote it verbatim if it answers the question):\n\n"
-                + firstBlock.toString().trim()
-                + (rest.length() > 0 ? "\n\nOther excerpts (use only if the first doesn't answer):\n\n"
-                        + rest.toString().trim() : "")
-                + "\n\nReminder (read this FIRST):\nThe question asks about the entry in the **most relevant excerpt** block — locate its heading line (the one containing the exact name from the player question) and answer with that block's line verbatim. If no heading line contains the asked name, refuse with 「此物未在典籍中 · This is not in the record.」\n\nQuote branch: if the player question quotes a line verbatim (any quote/quotation marks included), treat the quoted text as the \"name\" to locate — find the excerpt line containing that quote exactly, and answer with that quote together with the file path it came from. Only refuse when the quoted text does not appear anywhere in the excerpts.";
-
-        LlmClient.Answer answer = client.complete(system, user, LlmClient.CacheKeys.ORACLE);
-        List<String> sources = hits.stream().map(h -> h.doc().source()).distinct().toList();
-        return new OracleResult(true, answer.answer(), sources, answer.model(),
-                answer.cached(), answer.upstreamCached(), answer.latencyMs());
+        Map<String, Object> initial = new LinkedHashMap<>();
+        initial.put("question", question);
+        initial.put("limitRaw", limitRaw);
+        StateGraph.CompiledInvoke result = oracleGraph.invoke(initial);
+        Map<String, Object> state = result.state();
+        List<String> path = result.trace().stream().map(StateGraph.TraceEntry::node).toList();
+        @SuppressWarnings("unchecked")
+        List<String> sources = (List<String>) state.get("sources");
+        return new OracleResult(true,
+                String.valueOf(state.get("answer")),
+                sources == null ? List.of() : sources,
+                String.valueOf(state.get("model")),
+                Boolean.TRUE.equals(state.get("cached")),
+                Boolean.TRUE.equals(state.get("upstreamCached")),
+                ((Number) state.get("latencyMs")).longValue(),
+                Boolean.TRUE.equals(state.get("guarded")),
+                path);
     }
 
     /**
@@ -189,7 +266,7 @@ public class LoreOracleService {
     }
 
     private OracleResult failure(String reason) {
-        return new OracleResult(false, reason, List.of(), "none", false, false, 0L);
+        return new OracleResult(false, reason, List.of(), "none", false, false, 0L, false, List.of());
     }
 
     /**

@@ -51,6 +51,8 @@ public class OracleController {
         body.put("cached", result.cached());
         body.put("upstreamCached", result.upstreamCached());
         body.put("latencyMs", result.latencyMs());
+        body.put("guarded", result.guarded());
+        body.put("path", result.path());
         String effectiveRequestId = RequestCorrelation.sanitizeInbound(headerRequestId);
         if (effectiveRequestId != null) {
             body.put("requestId", effectiveRequestId);

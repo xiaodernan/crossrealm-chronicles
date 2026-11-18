@@ -267,12 +267,9 @@ public class EmberReplyController {
         if (reply == null || reply.isBlank()) {
             return new GuardResult(safeLine(lang), true);
         }
-        String cleaned = reply.replaceAll("[`*_]+", "").replaceAll("(^|\\n)\\s*#{1,6}\\s*", "$1").trim();
-        String lower = cleaned.toLowerCase(java.util.Locale.ROOT);
-        for (String leak : LEAK_TOKENS) {
-            if (lower.contains(leak)) {
-                return new GuardResult(safeLine(lang), true);
-            }
+        String cleaned = LlmGuards.stripMarkdown(reply);
+        if (LlmGuards.containsLeak(cleaned)) {
+            return new GuardResult(safeLine(lang), true);
         }
         int cap = "en".equalsIgnoreCase(lang) ? 72 : 60;
         long codePoints = cleaned.codePointCount(0, cleaned.length());
@@ -286,13 +283,11 @@ public class EmberReplyController {
         return "en".equalsIgnoreCase(lang) ? SAFE_EN : SAFE_ZH;
     }
 
-    /** 炉火永不泄露的词表（命中任何一条就整行作废；全部小写，匹配前统一转小写）。 */
-    static final String[] LEAK_TOKENS = {
-            "星轨顾问", "bossverse", "我是ai", "我是 ai", "作为ai", "作为 ai",
-            "as an ai", "language model", "large language model",
-            "system prompt", "prompt:", "system:", "我是语言模型",
-            "gpt", "claude", "openai", "org/chat", "anthropic",
-    };
+    /**
+     * EmberLane 泄露词表（命中任何一条就整行作废；全部小写）。
+     * 与 {@link LlmGuards#LEAK_TOKENS} 同一份——Oracle 等其他 lane 也共用这一判成色标准。
+     */
+    static final String[] LEAK_TOKENS = LlmGuards.LEAK_TOKENS;
 
     @ExceptionHandler(AdvisorUnavailableException.class)
     public ResponseEntity<Map<String, Object>> unavailable(AdvisorUnavailableException e) {
