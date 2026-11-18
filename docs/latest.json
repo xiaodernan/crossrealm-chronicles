@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-18T01:04:28.426Z",
+  "generated_at": "2026-11-18T02:59:14.946Z",
   "branch": "main",
-  "head": "e4e9db38",
-  "total_commits": 2128,
-  "pushed_at": "2026-11-18T09:03:13+08:00",
+  "head": "33cb94ae",
+  "total_commits": 2130,
+  "pushed_at": "2026-11-18T10:58:08+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "33cb94a",
+      "at": "2026-11-18T10:58:08+08:00",
+      "subject": "feat(canon): W-Z358 第一百七十七卷《灶屋的夜 / The Night in the Kitchen》入典——卷十七之十五 · 第七百零一年（v3 前缀随卷自增 177 条年表）"
+    },
+    {
+      "short": "c788cfc",
+      "at": "2026-11-18T01:04:28Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "e4e9db3",
       "at": "2026-11-18T09:03:13+08:00",
@@ -21,27 +31,17 @@
       "short": "ea9dea9",
       "at": "2026-11-18T08:43:18+08:00",
       "subject": "feat(canon): W-Z356 第一百七十五卷《灯芯很细 / The Wick Is Fine》入典——卷十七之十三 · 第七百零一年（v3 前缀随卷自增 175 条年表）"
-    },
-    {
-      "short": "10e330a",
-      "at": "2026-11-18T00:33:48Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "27602a2",
-      "at": "2026-11-18T08:32:52+08:00",
-      "subject": "feat(admin): W-Z355 MEASURED 漏斗卡落板——Admin 首屏不再只是演示数据"
     }
   ],
-  "tracked_files": 1664,
+  "tracked_files": 1666,
   "test_files": 468,
   "i18n_keys": 3267,
-  "lore_sources": 383,
-  "novel_chapters_zh": 176,
-  "novel_chapters_en": 176,
-  "milestone": "W-Z357",
-  "milestone_full": "卷 176 · 六百年守火线（176 / 176 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 383 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：176 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 385,
+  "novel_chapters_zh": 177,
+  "novel_chapters_en": 177,
+  "milestone": "W-Z358",
+  "milestone_full": "卷 177 · 六百年守火线（177 / 177 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 385 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：177 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
