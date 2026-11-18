@@ -11543,6 +11543,47 @@ The fire burned.
 
 *(End of volume XIX · Volume two hundred and five overall · the seven-hundred-and-second year, tenth part — The Answering Voice.)*
 
+# source: creative/novel/en/206-the-night-of-the-vigil.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Eleventh Volume — The Night of the Vigil
+
+---
+
+## Two Hundred and Six: The Night of the Vigil
+
+The tenth week after the spring equinox — Wednesday — evening — the fire burned.
+
+A-Shi did not sleep all night — he kept the vigil — the fire burned — he did not light the oil lamp — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+The sky brightened.
+
+The fire burned.
+
+A-Shi said: “ — I kept it —”
+
+His mother said: “ — you kept it —”
+
+The fire burned.
+
+The night of the vigil.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume two hundred and six overall · the seven-hundred-and-second year, eleventh part — The Night of the Vigil.)*
+
 # source: creative/novel/en/21-night-walk-home.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -26408,6 +26449,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第二百零五卷 · 卷十九之十 · 第七百零二年 · 应声）*
+
+# source: creative/novel/206-守夜的夜.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第十一卷 —— 守夜的夜
+
+---
+
+## 二百零六 · 守夜的夜
+
+立春后第十周——周三——晚上——灶火燃着。
+
+阿石一宿没睡——守夜——灶火燃着——煤油灯没点——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+天亮了。
+
+灶火燃着。
+
+阿石说：「——守住了——」
+
+母亲说：「——守住了——」
+
+灶火燃着。
+
+守夜的夜。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第二百零六卷 · 卷十九之十一 · 第七百零二年 · 守夜的夜）*
 
 # source: creative/novel/21-夜幕归乡.md
 # 《跨界纪事：锚火守夜人》
