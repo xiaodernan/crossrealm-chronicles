@@ -235,7 +235,8 @@ creative/music/soundtrack.html
 | 开门了 · The Door Opened | [the-door-opened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/186-the-door-opened.md) |
 | 炊烟 · Kitchen Smoke | [kitchen-smoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/187-kitchen-smoke.md) |
 | 炊烟散了 · After the Smoke Cleared | [after-the-smoke-cleared](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/188-after-the-smoke-cleared.md) |
-| 灶屋的最后一盏灯 · The Last Lamp in the Stove-House | [the-last-lamp-in-the-stove-house](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/189-the-last-lamp-in-the-stove-house.md) |每一章对应游戏的章节走法：
+| 灶屋的最后一盏灯 · The Last Lamp in the Stove-House | [the-last-lamp-in-the-stove-house](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/189-the-last-lamp-in-the-stove-house.md) |
+| 煤油灯亮了 · The Oil Lamp Lit | [the-oil-lamp-lit](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/190-the-oil-lamp-lit.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

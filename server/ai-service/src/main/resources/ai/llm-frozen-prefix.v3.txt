@@ -331,6 +331,7 @@ End of frozen digest.
 187 · 炊烟
 188 · 炊烟散了
 189 · 灶屋的最后一盏灯
+190 · 煤油灯亮了
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
