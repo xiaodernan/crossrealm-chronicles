@@ -334,6 +334,7 @@ End of frozen digest.
 190 · 煤油灯亮了
 191 · 灯下
 192 · 守夜
+193 · 白桦说话
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

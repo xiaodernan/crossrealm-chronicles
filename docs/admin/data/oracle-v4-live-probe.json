@@ -1,0 +1,18 @@
+{
+  "milestone": "W-Z376-parallel-probe",
+  "measured_at": "2026-11-18T11:21:26Z",
+  "via": "docker compose network probe (node:22-alpine) → gateway:8080/api/ai/lore/answer → ai-service/nio-8083",
+  "frozen_prefix": "oracle-v4-frozen-prefix.txt (lore-system-prompt + GLOSSARY verbatim, ≈45K tok)",
+  "prompt_cache_key": "crossrealm-oracle-v1",
+  "stream": true,
+  "include_usage": true,
+  "cache_control": "ephemeral",
+  "requests": [
+    { "question": "火记得白桦吗？", "prompt": 47583, "cached": 44360, "cachedRatio": 93.2, "upstreamCached": true, "latencyMs": 7229 },
+    { "question": "阿祖留在瓮里的是什么？", "prompt": 47657, "cached": 44361, "cachedRatio": 93.1, "upstreamCached": true, "latencyMs": 11989 },
+    { "question": "守得住的人是谁？", "prompt": 47588, "cached": 44361, "cachedRatio": 93.2, "upstreamCached": true, "latencyMs": 7118 },
+    { "question": "炊烟散了之后有什么？", "prompt": 47575, "cached": 44361, "cachedRatio": 93.2, "upstreamCached": true, "latencyMs": 12459 }
+  ],
+  "cold_window": "reboot 后首请求（2026-11-18T10:50:56Z）：prompt=47609 cached=44617 cachedRatio=93.7% · 热身 12/12 lane 首包 upstreamCached=true（41.5s）",
+  "note": "同车道并行只会让共享页同时命中，不会互相覆盖；真正的冷窗口仅此一个。本文档由 scripts 实测产证，非 SYNTHETIC。"
+}

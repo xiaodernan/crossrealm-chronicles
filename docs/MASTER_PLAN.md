@@ -17,6 +17,11 @@
 >
 > **2026-11-18 · W-Z378 隐盾 · OneSeek 万息登上个人主页（Pages f3479d9）**：审计 20 仓——public 16 均已在首页（6 精选行 + 16 全部仓库卡）；4 个 missing（fagougou-desensitize / teedyas / teedyassi / teedy-assign）**全部 PRIVATE**——fagougou-desensitize 即法狗狗实习内部脱敏系统，源码不曝光，入口改为在线演示：**精选列表新增第 11 行**（OneSeek · `https://yindun.fagougou.com` · ONLINE / 实习产品 · state-orange · ↗）+ **全部仓库首格新增「隐盾 · OneSeek 万息」在线产品卡**（Python · Web/API/MCP · chip 在线产品）；eyebrow 标「ALL REPOS / 16 · +隐盾在线」；正文「演示公网可访问（隐盾）」落为超链接；「6 行精选」→「7 行精选」。identity-guard OK · Pages deploy 40s ✅ · live 引用 8 处存在 · 「全部仓库」完整不漏。
 >
+> **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
+> 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
+>
+> **2026-11-18 · W-Z381 Admin KPI「v4 具典+冻结前缀 cachedRatio」实测卡（meas_l25/meas_tr25 · 双语 zh/en）**：不再用口头争执缓存行为如何，直接落一张 WER：并行 4 条不同 Oracle 提问同一 v4 冻结前缀（`prompt_cache_key=crossrealm-oracle-v1`）——四条全部 upstreamCached=true · cachedRatio 93.2/93.1/93.2/93.2% · 重启后首请求亦为 93.7%（2026-11-18T10:50:56Z） · Codex 稳定 90% 的三条件（frozen-prefix + per-lane key + stream/include_usage）全在位 · artifact `docs/admin/data/oracle-v4-live-probe.json`（真·测量，非 SYNTHETIC）。
+>
 > **2026-11-18 · W-Z380 主页失精行指引修正（dd56f26 → master）**：「怎么读这一页」行仍是上版——精选 06 → **精选 07 · 含隐盾在线**、全部仓库（**16 仓 + 隐盾在线 · 分类过滤**）；crossrealm 仓卡 copy 升格："Three.js 第三人称开放世界动作 RPG 原型（可在线试玩）· **双语游戏内说明书 · LLM NPC 沿 StateGraph 真路由**"。identity-guard 双闸 OK。Pages push-deploy 队列已被 bot 占满，push deploy 编号 44298995740 排队等出 bake（等下一轮 bot 冲刷部署即翻牌 live）。
 >
 > **2026-11-18 · W-Z379 第192卷入典《守夜 / The Night Watch》——卷十八之十三 · 第七百零二年 · 守夜**：立春后第四周——周一——晚上——灶火燃着——阿石坐在灯下——灯亮着——他记住火苗的样子——凌晨三点——母亲没醒——灶火燃着——他添了一根柴——柴很小——他没添多——他听见很远的地方——白桦在风里摇——他不用看——东方亮了一线——灯灭了一瞬——他没再添柴——天亮了——守夜——灶火燃着。

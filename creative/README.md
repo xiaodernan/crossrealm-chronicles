@@ -238,7 +238,8 @@ creative/music/soundtrack.html
 | 灶屋的最后一盏灯 · The Last Lamp in the Stove-House | [the-last-lamp-in-the-stove-house](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/189-the-last-lamp-in-the-stove-house.md) |
 | 煤油灯亮了 · The Oil Lamp Lit | [the-oil-lamp-lit](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/190-the-oil-lamp-lit.md) |
 | 灯下 · By the Lamp | [by-the-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/191-by-the-lamp.md) |
-| 守夜 · The Night Watch | [the-night-watch](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/192-the-night-watch.md) |每一章对应游戏的章节走法：
+| 守夜 · The Night Watch | [the-night-watch](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/192-the-night-watch.md) |
+| 白桦说话 · When the Birch Spoke | [when-the-birch-spoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/193-when-the-birch-spoke.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
