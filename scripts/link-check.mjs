@@ -70,8 +70,10 @@ for (const file of files) {
     if (/\$\{|<|>/.test(raw)) continue;             // 模板占位符
     const noFragment = raw.split('#')[0].split('?')[0];
     if (!noFragment) continue;
-    // creative/*.html 里的站根 sibling 引用：gh-pages 保证存在，仓库内无对应实体
-    if (rel.startsWith('creative/') && DEPLOY_SIBLINGS.has(noFragment.replace(/^\.\//, '').split('/')[0])) { continue; }
+    // gh-pages 焙烤的 sibling _site 产物（pages.yml 组装 _site/）：站点根 sibling 必然成立、仓库内无对应实体。
+    // 兼容一层或多层前缀（如 creative/ 直接子级、docs/admin/ 退一层到站根），所有 _site web 文件都允许此例外。
+    const stripLeading = noFragment.replace(/^(\.\.\/|\.\/)+/, '');
+    if (stripLeading && DEPLOY_SIBLINGS.has(stripLeading.split('/')[0])) { continue; }
     let target;
     if (noFragment.startsWith('/')) {
       const siteRootRel = noFragment.slice(1);
@@ -79,6 +81,9 @@ for (const file of files) {
       if (!existsSync(target)) target = resolve(ROOT, 'public', siteRootRel); // vite: public/ 挂到 /
     } else {
       target = resolve(dirname(file), decodeURIComponent(noFragment));
+      // vite build 把 public/ 挂到站根：仓库根的相对引用（如 index.html 的 ./favicon.svg）
+      // 在部署产物里 = dist/favicon.svg（CI 复制 public/favicon.svg 到 _site/ 根）。
+      if (!existsSync(target)) target = resolve(ROOT, 'public', noFragment.replace(/^\.\//, ''));
     }
     if (!target.startsWith(ROOT)) { bad.push(`${rel}: 越界链接 -> ${raw}`); continue; }
     if (!existsSync(target)) bad.push(`${rel}: ${raw}`);

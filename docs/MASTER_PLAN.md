@@ -20,6 +20,9 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-19 · W-Z416 link-check 口径修正——Pages 焙烤 _site 的站点根 sibling 误判 6 条断链（全部为假阳性）**
+> 原因对账：`.github/workflows/pages.yml` 把 `creative/showcase.html → _site/index.html`、`docs/admin/index.html → admin/index.html`、`player-guide → guide.html`、`dist/ → game/`、`public/favicon.svg → favicon.svg` 焙烤部署；仓库里没有 `docs/favicon.svg`、`docs/game/`、`docs/guide.html`、仓库根 `favicon.svg` 本就是 vite public 挂载点。旧门禁只允许 `creative/` 直接子级跳过站点根 sibling，`docs/admin/../game/` 与仓库根 `index.html → ./favicon.svg` 全判死。修法：① 统一跳过规则——递归剥离前导 `../` 与 `./` 后，首段落在 DEPLOY_SIBLINGS 白名单内一律放行（覆盖任意 _site 成员方向）；② 非斜线绝对/相对路径在 `resolve(dirname(file), x)` 失败后回退 `resolve(ROOT, "public", x)`（vite public 挂载语义）。513 文件全量复扫：**all links resolve** ✓（此前 6 条全为假阳性，真断链 0）。git diff regen only scripts/link-check.mjs。
+>
 > **2026-11-19 · W-Z415 Oracle RAG 离线检索实测——recall@4 = 88.9%（8/9，Java Bm25Index 逐字镜像）**
 > 交付 `scripts/lore-retrieval-probe.mjs`：把 corpus.txt（475 源）切成 docs，分词器（Han 单码点 token · k1=1.5 · b=0.75 · 同 idf 公式 `log(1+(N-df+0.5)/(df+0.5))`）逐字镜像 `Bm25Tokenizer.java`/`Bm25Index.java`——离线可跑与生产完全一致的检索。9 条真实问法：卷 217~222 全部命中（「比拇指大两倍 夏火」→ 218 · 「白桦的叶子全是绿的」→ 219 · 「天刚亮，天还灰，谷雨」→ 220 · 「他拿起一颗麦粒」→ 221 · 「籽粒还在叶鞘里」→ 222 · 「阿石坐在灶前 灶火燃着」唯一未命中，146/197/131 等灶火高频章胜过 217——如实记录：单字 token 的极高频全场词噪声是已知天花板）。recall@4 = 88.9% · recall@6（ENRICH 封顶视角） = 88.9%。产物 docs/admin/data/lore-retrieval-probe.json（MEASURED）；Admin 页新增诚实卡 `meas_l28`/`meas_tr28`，zh/en 双语对照。
 >
