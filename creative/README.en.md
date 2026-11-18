@@ -250,7 +250,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Tending the Fire | [tending-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/199-tending-the-fire.md) |
 | Mending the Hearth | [mending-the-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/200-mending-the-hearth.md) |
 | Daytime | [daytime](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/201-daytime.md) |
-| The Keeper of the Fire | [the-keeper-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/202-the-keeper-of-the-fire.md) |Chapter → game-chapter mapping:
+| The Keeper of the Fire | [the-keeper-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/202-the-keeper-of-the-fire.md) |
+| Kitchen Smoke | [kitchen-smoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/203-kitchen-smoke.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

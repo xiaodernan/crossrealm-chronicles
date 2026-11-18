@@ -11412,6 +11412,49 @@ The fire burned.
 
 *(End of volume XIX · Volume two hundred and two overall · the seven-hundred-and-second year, seventh part — The Keeper of the Fire.)*
 
+# source: creative/novel/en/203-kitchen-smoke.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Eighth Volume — Kitchen Smoke
+
+---
+
+## Two Hundred and Three: Kitchen Smoke
+
+The eighth week after the spring equinox — Wednesday — evening — the fire burned.
+
+A-Shi lit the stove — the fire burned — the flame dimmed — he did not turn on the lamp — the fire burned.
+
+He sat before the stove — the fire burned — his mother was washing bowls in the other room — the fire burned.
+
+The smoke curled up — he watched — the fire burned — the fire burned — the fire burned.
+
+His mother said: “ — the north wind is coming — the smoke will lean west —”
+
+A-Shi said: “ — the smoke will lean west —”
+
+His mother said: “ — the smoke of the hearth — each day it leans in one direction —”
+
+The fire burned.
+
+Kitchen smoke.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume two hundred and three overall · the seven-hundred-and-second year, eighth part — Kitchen Smoke.)*
+
 # source: creative/novel/en/21-night-walk-home.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -26146,6 +26189,49 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第二百零二卷 · 卷十九之七 · 第七百零二年 · 守火之人）*
+
+# source: creative/novel/203-烟火.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第八卷 —— 烟火
+
+---
+
+## 二百零三 · 烟火
+
+立春后第八周——周三——晚上——灶火燃着。
+
+阿石屋里点了烟——灶火燃着——火渐渐暗——灶火燃着——他没开灯——灶火燃着。
+
+他坐在灶前——灶火燃着——灶火燃着——母亲在屋里洗碗——灶火燃着——灶火燃着。
+
+烟袅起来——他看——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+母亲说：「——北风要来了——烟会往西——」
+
+阿石说：「——烟会往西——」
+
+母亲说：「——灶火的烟——每天往一个方向——」
+
+灶火燃着。
+
+烟火。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第二百零三卷 · 卷十九之八 · 第七百零二年 · 烟火）*
 
 # source: creative/novel/21-夜幕归乡.md
 # 《跨界纪事：锚火守夜人》
