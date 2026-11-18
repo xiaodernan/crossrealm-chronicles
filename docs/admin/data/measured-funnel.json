@@ -1,31 +1,39 @@
 {
-  "generated": "2026-11-18T00:31:30.150Z",
-  "source": "D:\\3a大作\\docs\\admin\\data\\telemetry-summary.json",
-  "fromSnapshot": {
-    "generated": "2026-11-18T00:31:29.375Z",
-    "source": "docker compose network (http://gateway:8080/api/telemetry/summary-rollup)"
-  },
-  "note": "MEASURED（本机 compose 落账事件 · verify 冒烟 + stress-load 洪测 + Ember/Oracle 实测亲手写）——admin 首屏其他卡 = SYNTHETIC（seed=20261117），这是 admin 里唯一和真实玩家行为链沾边的一条。不做留存分群推断——只有约 3 天窗口，伪分群等于撒谎。",
+  "generated": "2026-11-19T02:28:12Z",
+  "source": "gateway:8080/api/telemetry/summary-rollup (refreshed AFTER W-Z404 compose restart — Desktop 内存泄压，11-18/11-19 的 live 实测少量 tickle)",
+  "note": "MEASURED（本机 compose 落账 · verify/stress Probe/Ember/Oracle 实测亲手走过 gateway 入账）—— admin 里唯一和『真实玩家行为』沾边的一条；所有其他 KPI 卡都是 SYNTHETIC（seed=20261117）。不做 D1/D3/D7 留存分群——数据首个出现是 2026-11-15；11-19 当日 0 事件；这是真窗口而非 demo。",
   "windowDays": 14,
+  "windowStart": "2026-11-15",
+  "windowEnd": "2026-11-19",
+  "eventsPresentInDays": 3,
   "totals": {
     "bossKill": 30,
     "canonOpen": 8,
-    "smoke": 26,
+    "smoke": 32,
     "loadtest": 424,
     "stressProbe": 133,
-    "total": 621
+    "total": 627
   },
+  "byDayAndType": [
+    { "day": "2026-11-15", "type": "boss_kill",    "count": 30 },
+    { "day": "2026-11-15", "type": "canon_open",   "count": 8 },
+    { "day": "2026-11-15", "type": "loadtest",     "count": 424 },
+    { "day": "2026-11-15", "type": "smoke",        "count": 1 },
+    { "day": "2026-11-17", "type": "smoke",        "count": 23 },
+    { "day": "2026-11-17", "type": "stress-probe", "count": 133 },
+    { "day": "2026-11-18", "type": "smoke",        "count": 8 }
+  ],
   "derived": {
-    "bossKillShare": 0.0483,
-    "canonOpenShare": 0.0129,
-    "humanAdjacentShare": 0.0612,
-    "firehoseNoiseRatio": 0.8969,
-    "canonOpenPerBossKill": 0.2667
+    "bossKillShare": 0.0478,
+    "canonOpenShare": 0.0128,
+    "humanAdjacentShare": 0.0607,
+    "firehoseNoiseRatio": 0.885,
+    "canonOpenPerBossKill": 0.2667,
+    "daysWithZeroEvents": 11
   },
-  "interpretation": {
-    "bossKillLine": "Boss 击杀 4.83%（boss_kill=30 · MEASURED）",
-    "canonLine": "典籍开启 1.29%（canon_open=8 · MEASURED）",
-    "ratioLine": "≈ 0.2667「开典籍」/「Boss 击杀」——MEASURED，非外推，没有 D1/D3/D7 retention 分群（只有 3 天窗口，伪分群等于撒谎）",
-    "note": "probe 火线占比 89.69%（loadtest 424 + stress-probe 133 = 557 / 621）；真正与玩家行为相邻段 = boss_kill 30 + canon_open 8 = 38 事件（6.12%）。任何「留存曲线」在这组窗口上都是造假，不做承诺。"
+  "honestyGate": {
+    "retentionEligible": false,
+    "reason": "windows 里只有 3 个自然日有事件（11-15 / 11-17 / 11-18），11-19 为 0；没有 unique user 维度（verify/stress 全为机器身份）；没有足够的 D1/D3 间窗——任何 retention 曲线在当前数据上都是虚构。",
+    "nextStep": "telemetry v2：每次 BossKill 注入 userId 哈希 + 加载 hashed-IP / session · 不存个人信息 · 至少 14 天自然窗 · 达到 n≥200 distinct user 后再开放 D1/D7 即真伤人留面卡。"
   }
 }

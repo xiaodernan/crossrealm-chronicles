@@ -20,6 +20,9 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-19 · W-Z405 Admin 真·留存窗口卡 meas_l26 落地（把「留存不能算」从 footnote 升级成头等 KPI）**：用户历次强调「别在没数据时假装有数据」。把已知事实直接摆进 Admin KPI：2026-11-15/11-17/11-18 唯一 3 个有数据的自然日 / 11 天（含 11-19）为 0 · 627 事件 · human-adjacent 38 （6.07%)。结论一句话：**MEASURED 漏斗哪怕用来做留存都是造假**，真要做得等到 telemetry v2（hashed-userId on boss_kill/canon_open · n≥200 unique users · ≥14 天自然窗）。诚实呈现信息密度远高于「制造假柔」更好——是强制审计，不是窗口。
+> 交付：docs/admin/data/measured-funnel.json 重抓真数据（含坦白 11-19 当日为 0）· docs/admin/index.html +meas_l26 (zh/en 双语） · 完整 non-fabrication 原则 translocated: 留存不作为 admin KPI 而是**禁义**——除非条件到位。
+>
 > **2026-11-19 · W-Z404 第二百一十五卷入典《火候 / The Right Heat》——卷二十之四 · 第七百零三年 · 火候**：第七百零三年——立春后第一周——周四——早上——灶火燃着——阿石烧了一碗粥——它还没到点——母亲说「——再等——」——灶火燃着——粥好了——火候——灶火燃着。
 > 交付：creative/novel/215-火候.md + en 孪生 215-the-right-heat.md；novella 215 × 2 = 430 模块（典籍馆现为 215 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**461 源**；**v3 冻结前缀含 215 条年表条目**；showcase feed 新增 W-Z404 实录。
 >
