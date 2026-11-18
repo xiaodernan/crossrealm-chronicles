@@ -11455,6 +11455,43 @@ The fire burned.
 
 *(End of volume XIX · Volume two hundred and three overall · the seven-hundred-and-second year, eighth part — Kitchen Smoke.)*
 
+# source: creative/novel/en/204-wind.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Ninth Volume — Wind
+
+---
+
+## Two Hundred and Four: Wind
+
+The ninth week after the spring equinox — Monday — morning — the fire burned.
+
+A-Shi opened the window — the fire burned — the wind came in — the fire burned — the fire burned.
+
+The wind brought things — clay — snow — pollen — whatever — the fire burned — his mother said: “ — spring —” — A-Shi said: “ — spring —” — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The wind was gone.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume two hundred and four overall · the seven-hundred-and-second year, ninth part — Wind.)*
+
 # source: creative/novel/en/21-night-walk-home.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -26232,6 +26269,43 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第二百零三卷 · 卷十九之八 · 第七百零二年 · 烟火）*
+
+# source: creative/novel/204-风.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第九卷 —— 风
+
+---
+
+## 二百零四 · 风
+
+立春后第九周——周一——早上——灶火燃着。
+
+阿石开了窗——灶火燃着——风进来了——灶火燃着——灶火燃着——灶火燃着。
+
+风带了些东西——泥——雪——花粉——什么的——灶火燃着——母亲说「——春天——」——阿石说「——春天——」——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+风去了。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第二百零四卷 · 卷十九之九 · 第七百零二年 · 风）*
 
 # source: creative/novel/21-夜幕归乡.md
 # 《跨界纪事：锚火守夜人》

@@ -345,6 +345,7 @@ End of frozen digest.
 201 · 白昼
 202 · 守火之人
 203 · 烟火
+204 · 风
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
