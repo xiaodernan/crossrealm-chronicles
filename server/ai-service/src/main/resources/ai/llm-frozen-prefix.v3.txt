@@ -328,6 +328,7 @@ End of frozen digest.
 184 · 那天了
 185 · 她来了
 186 · 开门了
+187 · 炊烟
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

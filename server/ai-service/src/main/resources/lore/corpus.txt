@@ -10584,6 +10584,47 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and eighty-six overall · the seven-hundred-and-second year, seventh part — The Door Opened.)*
 
+# source: creative/novel/en/187-kitchen-smoke.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Eighth Volume — Kitchen Smoke
+
+---
+
+## One Hundred and Eighty-seven: Kitchen Smoke
+
+The third week after the spring equinox — Tuesday — morning — the fire burned.
+
+A-Shi stood at the doorway — the birch stood a little taller than yesterday — his mother carried porridge — she said: “ — kitchen smoke —”
+
+A-Shi said: “ — smoke —”
+
+His mother said: “ — from the stove — out the door — up to the sky —”
+
+The fire burned.
+
+A-Shi said: “ — who can see it —”
+
+His mother said: “ — whoever still walks — can see it —”
+
+The fire burned.
+
+A-Shi stood by the door — he looked at the sky — the fire burned — one thread of smoke — rising straight and tall — the fire burned.
+
+The smoke dispersed.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and eighty-seven overall · the seven-hundred-and-second year, eighth part — Kitchen Smoke.)*
+
 # source: creative/novel/en/19-the-council-of-three-suns.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -24612,6 +24653,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百八十六卷 · 卷十八之七 · 第七百零二年 · 开门了）*
+
+# source: creative/novel/187-炊烟.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第八卷 —— 炊烟
+
+---
+
+## 一百八十七 · 炊烟
+
+立春后第三周——周二——早上——灶火燃着。
+
+阿石站在门口——白桦比昨天高了一点——母亲端着粥——她说：「——炊烟——」
+
+阿石说：「——烟——」
+
+母亲说：「——从灶里——到门外——到天上——」
+
+灶火燃着。
+
+阿石说：「——谁看得见——」
+
+母亲说：「——走得动的人——都看得见——」
+
+灶火燃着。
+
+阿石站在门边——他看了看天——灶火燃着——炊烟一缕——升得很直——灶火燃着。
+
+炊烟散了。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百八十七卷 · 卷十八之八 · 第七百零二年 · 炊烟）*
 
 # source: creative/novel/19-三日之议.md
 # 《跨界纪事：锚火守夜人》

@@ -15,6 +15,12 @@
 > **2026-11-16 · W-Z261 第115卷入典《叫炉 / The Hearth Named》——卷十五之十六（七百年第一次给火起名字）**：立春后的第十天——院子里已经觉暖了——院门外的泥沟已化成了水——门外又来了一个人——不是来送信——是来吃饭——是老人——他穿着一身干净的蓝布衣——进门先朝全家鞠了一躬——母亲笑着拉过板凳——锅里是白米饭青菜豆腐汤腌萝卜——菜很少饭很多——老人吸了吸鼻子——「香」——阿石在灶前看火——老人说不叫灶火——春天应该有个新名字——他从怀里掏出一片薄纸——用指节擦了擦黑炭灰——在纸上留了一个淡淡的灰印——「炉」——全家念起来——以后这个家里不再叫这灶「灶火」——他们叫「炉火」——白茵当年亲手写的纸条——终于等到了它必须等的人。
 > 交付：creative/novel/115-叫炉.md + en 孪生 115-the-hearth-named.md；novella 115 × 2 = 230 模块（典籍馆现为 115 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：261 源；showcase feed 新增 W-Z261 实录。
 >
+> **2026-11-18 · W-Z370 执笔人·残章双 lane「图化」—— StateGraph 落地到每一条 LLM NPC（W-Z367 顺延真上线）**：DeathEpitaph（执笔人）与 ChapterCoda（残章）此前只是「单次 LLM + 零护栏」——出戏词与泄露词一旦上游失控就直接漏到玩家面前。现改为 **compose（LLM）→ guard（确定性：leak 词表 / markdown 剥除 / 长度 zh≤60/en≤72 / SAFE 安全句回落）** 两节点 StateGraph，与 Ember Lane 共享 EmberReplyController.guardReply 的安全词典（SAFE_ZH/SAFE_EN/LEAK_TOKENS 同一份）；返回体新增 **guarded** 与 **path**（["compose","guard"]）。DeathEpitaph 没有 lang 字段：默认按项目原生 zh 收尾。**ai-service 180/180 绿**（+2 leak→safe-line 断言：death-epitaph leak→SAFE_ZH；chapter-coda en leak→SAFE_EN）。**网关 live 实测（真上游）**：death-epitaph 200「纸条还留着半行，歇一口气，再去试一次吧。」 · chapter-coda 200「炉火映着新的一页，愿你带着余温，继续往前。」——两条 path 都是 compose→guard，guarded=false、cached=false。
+> 交付：DeathEpitaphController / ChapterCodaController 重构为编译后的 StateGraph invoke；节点带 meta（kind/stage/persona）；春分过后「每一条 LLM NPC」现在都有一条真的图在跑，而不是 if-else。
+>
+> **2026-11-18 · W-Z369 第187卷入典《炊烟 / Kitchen Smoke》——卷十八之八 · 第七百零二年 · 炊烟**：立春后第三周——周二——早上——灶火燃着——阿石站在门口——白桦比昨天高了一点——母亲端着粥——她说「——炊烟」——阿石说「——烟」——母亲说「——从灶里——到门外——到天上」——灶火燃着——阿石说「——谁看得见」——母亲说「——走得动的人——都看得见」——灶火燃着——阿石站在门边——他看了看天——灶火燃着——炊烟一缕——升得很直——灶火燃着——炊烟散了——灶火燃着。
+> 交付：creative/novel/187-炊烟.md + en 孪生 187-kitchen-smoke.md；novella 187 × 2 = 374 模块（典籍馆现为 187 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**405 源**；**v3 冻结前缀含 187 条年表条目**；showcase feed 新增 W-Z369 + W-Z370 实录。
+>
 > **2026-11-18 · W-Z368 第186卷入典《开门了 / The Door Opened》——卷十八之七 · 第七百零二年 · 开门了**：立春后第三周——周一——早上——灶火燃着——阿石开门——他没喊——门轴自己响了一声——门外——早饭的香气、白桦的叶子、还有一炉子的白烟——母亲站在廊下——她手里什么都没有——她说「——阿祖说」——阿石说「——什么」——母亲说「——守得住的人——门都会自己开」——灶火燃着——阿石说「——我守得住」——母亲说「——阿祖说——守得住——门才开」——灶火燃着——阿石站在门口——白桦更高了一点——他没进去——他留在门边——灶火燃着。
 > 交付：creative/novel/186-开门了.md + en 孪生 186-the-door-opened.md；novella 186 × 2 = 372 模块（典籍馆现为 186 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**403 源**；**v3 冻结前缀自增第 186 条年表条目**；showcase feed 新增 W-Z368 实录。
 >
