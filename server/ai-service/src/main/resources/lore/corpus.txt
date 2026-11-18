@@ -10856,6 +10856,45 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and ninety-one overall · the seven-hundred-and-second year, twelfth part — By the Lamp.)*
 
+# source: creative/novel/en/192-the-night-watch.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Thirteenth Volume — The Night Watch
+
+---
+
+## One Hundred and Ninety-two: The Night Watch
+
+The fourth week after the spring equinox — Monday — evening — the fire burned.
+
+A-Shi sat by the lamp — the lamp was lit — the fire burned — he memorized the shape of the flame — the fire burned.
+
+Three in the morning — his mother had not woken — the fire burned — he added one piece of wood — it was small — he did not add more — the fire burned.
+
+He heard, far away — the birch swaying in the wind — the fire burned — he did not need to look — the fire burned.
+
+The east grew a thread of light — the lamp flickered — the fire burned — he added no more wood — the fire burned.
+
+The sky brightened.
+
+The fire burned.
+
+By the night watch — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and ninety-two overall · the seven-hundred-and-second year, thirteenth part — The Night Watch.)*
+
 # source: creative/novel/en/20-the-reader-opens-this-page.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25093,6 +25132,45 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百九十一卷 · 卷十八之十二 · 第七百零二年 · 灯下）*
+
+# source: creative/novel/192-守夜.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第十三卷 —— 守夜
+
+---
+
+## 一百九十二 · 守夜
+
+立春后第四周——周一——晚上——灶火燃着。
+
+阿石坐在灯下——灯亮着——灶火燃着——他记住火苗的样子——灶火燃着。
+
+凌晨三点——母亲没醒——灶火燃着——他添了一根柴——柴很小——他没添多——灶火燃着。
+
+他听见很远的地方——白桦在风里摇——灶火燃着——他不用看——灶火燃着。
+
+东方亮了一线——灯灭了一瞬——灶火燃着——他没再添柴——灶火燃着。
+
+天亮了。
+
+灶火燃着。
+
+守夜——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百九十二卷 · 卷十八之十三 · 第七百零二年 · 守夜）*
 
 # source: creative/novel/20-读完自己.md
 # 《跨界纪事：锚火守夜人》

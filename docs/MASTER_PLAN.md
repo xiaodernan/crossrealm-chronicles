@@ -17,6 +17,11 @@
 >
 > **2026-11-18 · W-Z378 隐盾 · OneSeek 万息登上个人主页（Pages f3479d9）**：审计 20 仓——public 16 均已在首页（6 精选行 + 16 全部仓库卡）；4 个 missing（fagougou-desensitize / teedyas / teedyassi / teedy-assign）**全部 PRIVATE**——fagougou-desensitize 即法狗狗实习内部脱敏系统，源码不曝光，入口改为在线演示：**精选列表新增第 11 行**（OneSeek · `https://yindun.fagougou.com` · ONLINE / 实习产品 · state-orange · ↗）+ **全部仓库首格新增「隐盾 · OneSeek 万息」在线产品卡**（Python · Web/API/MCP · chip 在线产品）；eyebrow 标「ALL REPOS / 16 · +隐盾在线」；正文「演示公网可访问（隐盾）」落为超链接；「6 行精选」→「7 行精选」。identity-guard OK · Pages deploy 40s ✅ · live 引用 8 处存在 · 「全部仓库」完整不漏。
 >
+> **2026-11-18 · W-Z380 主页失精行指引修正（dd56f26 → master）**：「怎么读这一页」行仍是上版——精选 06 → **精选 07 · 含隐盾在线**、全部仓库（**16 仓 + 隐盾在线 · 分类过滤**）；crossrealm 仓卡 copy 升格："Three.js 第三人称开放世界动作 RPG 原型（可在线试玩）· **双语游戏内说明书 · LLM NPC 沿 StateGraph 真路由**"。identity-guard 双闸 OK。Pages push-deploy 队列已被 bot 占满，push deploy 编号 44298995740 排队等出 bake（等下一轮 bot 冲刷部署即翻牌 live）。
+>
+> **2026-11-18 · W-Z379 第192卷入典《守夜 / The Night Watch》——卷十八之十三 · 第七百零二年 · 守夜**：立春后第四周——周一——晚上——灶火燃着——阿石坐在灯下——灯亮着——他记住火苗的样子——凌晨三点——母亲没醒——灶火燃着——他添了一根柴——柴很小——他没添多——他听见很远的地方——白桦在风里摇——他不用看——东方亮了一线——灯灭了一瞬——他没再添柴——天亮了——守夜——灶火燃着。
+> 交付：creative/novel/192-守夜.md + en 孪生 192-the-night-watch.md；novella 192 × 2 = 384 模块（典籍馆现为 192 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**415 源**；**v3 冻结前缀含 192 条年表条目**；showcase feed 新增 W-Z379 + W-Z380 实录。
+>
 > **2026-11-18 · W-Z377 第191卷入典《灯下 / By the Lamp》——卷十八之十二 · 第七百零二年 · 灯下**：立春后第三周——周六——晚上——灶火燃着——阿石坐在灯下——母亲睡了——灯照着他的手——他的手很稳——灯灭了一下——又亮了——是风——阿石没关灯——他想了想——守了七百年的火——守到第七百零二年——守到他手上——他没睡——灯下——灶火燃着。
 > 交付：creative/novel/191-灯下.md + en 孪生 191-by-the-lamp.md；novella 191 × 2 = 382 模块（典籍馆现为 191 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**413 源**；**v3 冻结前缀含 191 条年表条目**；showcase feed 新增 W-Z377 + W-Z378 实录。
 >
