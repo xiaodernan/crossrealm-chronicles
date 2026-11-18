@@ -267,7 +267,8 @@ creative/music/soundtrack.html
 | 夏火 · Summer Fire | [summer-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/218-summer-fire.md) |
 | 白桦吻 · The Birch’s Kiss | [the-birchs-kiss](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/219-the-birchs-kiss.md) |
 | 谷雨 · Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/220-grain-rain.md) |
-| 麦粒 · The Wheat Grain | [the-wheat-grain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/221-the-wheat-grain.md) |每一章对应游戏的章节走法：
+| 麦粒 · The Wheat Grain | [the-wheat-grain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/221-the-wheat-grain.md) |
+| 抽穗 · The Ears of Wheat | [the-ears-of-wheat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/222-the-ears-of-wheat.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

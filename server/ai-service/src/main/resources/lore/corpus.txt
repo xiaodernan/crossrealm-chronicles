@@ -12247,6 +12247,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and twenty-one overall · the seven-hundred-and-third year, tenth part — The Wheat Grain.)*
 
+# source: creative/novel/en/222-the-ears-of-wheat.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Eleventh Volume — The Ears of Wheat
+
+---
+
+## Two Hundred and Twenty-Two: The Ears of Wheat
+
+The sixth week after the spring equinox — Saturday — morning — the fire burned.
+
+A-Shi stood at the doorway — the fields were green — they were taller already — she said — he listened — his mother said: “ — the ears of wheat —” — he said: “ — the ears of wheat —” — A-Shi walked to the field — he squatted down — he touched the shoots — the grains were still inside the sheath — the sheath was wrinkled — he said: “ — they are coming out of the sheath —” — his mother said: “ — they are coming out of the sheath —” — the fire burned — he rested his palm over the heads — he said: “ — soon —” — his mother said: “ — soon —” — the fire burned — A-Shi put the last grain into his pocket — he said: “ — wait —” — his mother said: “ — wait —” — the fire burned.
+
+They came out of the sheath.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and twenty-two overall · the seven-hundred-and-third year, eleventh part — The Ears of Wheat.)*
+
 # source: creative/novel/en/23-the-moon-rises.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27731,6 +27762,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百二十一卷 · 卷二十之十 · 第七百零三年 · 麦粒）*
+
+# source: creative/novel/222-抽穗.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第十一卷 —— 抽穗
+
+---
+
+## 二百二十二 · 抽穗
+
+立春后第六周——周六——早上——灶火燃着。
+
+阿石站在门口——田里面青色的——有几分高了——她说——他听——母亲说「——穗子——」——他说「——穗子——」——阿石走到田里——他蹲下去——他摸了一下麦苗——籽粒还在叶鞘里——叶鞘皱了——他说「——抽穗——」——母亲说「——抽穗——」——灶火燃着——他把手掌放在穗子上——他说「——快了——」——母亲说「——快了——」——灶火燃着——阿石把最后几粒麦粒放进口袋——他说「——等——」——母亲说「——等——」——灶火燃着。
+
+抽穗。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百二十二卷 · 卷二十之十一 · 第七百零三年 · 抽穗）*
 
 # source: creative/novel/23-月光起.md
 # 《跨界纪事：锚火守夜人》
