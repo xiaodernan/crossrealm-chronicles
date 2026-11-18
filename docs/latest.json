@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-18T22:53:27.903Z",
+  "generated_at": "2026-11-18T23:06:33.893Z",
   "branch": "main",
-  "head": "9ac8fb0",
-  "total_commits": 2235,
-  "pushed_at": "2026-11-19T06:53:04+08:00",
+  "head": "2418777",
+  "total_commits": 2238,
+  "pushed_at": "2026-11-19T07:05:47+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "2418777",
+      "at": "2026-11-19T07:05:47+08:00",
+      "subject": "feat(canon): W-Z418 第二百二十三卷《扬花 / The Pollination》入典——卷二十之十二 · 第七百零三年 · 扬花（v3 前缀 223 条年表）"
+    },
+    {
+      "short": "a85e23f",
+      "at": "2026-11-19T06:56:26+08:00",
+      "subject": "measure(oracle): W-Z417 Oracle v4 全量前缀直击上游实测 - prompt=47,370 · cold=2255 (4.8%) → warm=44,363 (93.7%) · 冻结前缀约 4-5 万 tok 与 Codex 同档 · Admin meas_tr25 追加数据（HTML+zh+en）"
+    },
+    {
+      "short": "444eb89",
+      "at": "2026-11-19T06:53:38+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z416 (novels 222 · lore 475 · i18n 3267 · commits 2235)"
+    },
     {
       "short": "9ac8fb0",
       "at": "2026-11-19T06:53:04+08:00",
@@ -16,32 +31,17 @@
       "short": "9cd45fb",
       "at": "2026-11-19T06:51:04+08:00",
       "subject": "measure(rag): W-Z415 Oracle BM25 离线检索实测 - recall@4=88.9%（8/9，Java Bm25Index 逐字镜像，475 源）· Admin 卡 meas_l28 诚实落档（zh/en）"
-    },
-    {
-      "short": "2023d96",
-      "at": "2026-11-19T06:46:15+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z414 (novels 222 · lore 475 · i18n 3267 · commits 2232)"
-    },
-    {
-      "short": "e748457",
-      "at": "2026-11-19T06:45:01+08:00",
-      "subject": "feat(canon): W-Z414 第二百二十二卷《抽穗 / The Ears of Wheat》入典——卷二十之十一 · 第七百零三年 · 抽穗（v3 前缀 222 条年表）"
-    },
-    {
-      "short": "2ca5747",
-      "at": "2026-11-19T06:37:12+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z413 (novels 221 · lore 473 · i18n 3267 · commits 2230)"
     }
   ],
-  "tracked_files": 1763,
+  "tracked_files": 1767,
   "test_files": 468,
   "i18n_keys": 3267,
-  "lore_sources": 475,
-  "novel_chapters_zh": 222,
-  "novel_chapters_en": 222,
-  "milestone": "W-Z416",
-  "milestone_full": "卷 222 · 六百年守火线（222 / 222 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 475 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：222 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 477,
+  "novel_chapters_zh": 223,
+  "novel_chapters_en": 223,
+  "milestone": "W-Z418",
+  "milestone_full": "卷 223 · 六百年守火线（223 / 223 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 477 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：223 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
