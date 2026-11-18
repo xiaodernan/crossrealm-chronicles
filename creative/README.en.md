@@ -246,7 +246,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Silence of the Birch | [the-silence-of-the-birch](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/195-the-silence-of-the-birch.md) |
 | Firewood | [firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/196-firewood.md) |
 | The Kindling | [the-kindling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/197-the-kindling.md) |
-| Azu's Notebook | [azus-notebook](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/198-azus-notebook.md) |Chapter → game-chapter mapping:
+| Azu's Notebook | [azus-notebook](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/198-azus-notebook.md) |
+| Tending the Fire | [tending-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/199-tending-the-fire.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

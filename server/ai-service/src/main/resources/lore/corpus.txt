@@ -11169,6 +11169,49 @@ The fire burned.
 
 *(End of volume XIX · Volume one hundred and ninety-eight overall · the seven-hundred-and-second year, third part — Azu's Notebook.)*
 
+# source: creative/novel/en/199-tending-the-fire.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Fourth Volume — Tending the Fire
+
+---
+
+## One Hundred and Ninety-nine: Tending the Fire
+
+The sixth week after the spring equinox — Tuesday — morning — the fire burned.
+
+A-Shi woke early — the fire burned — his mother was still asleep — the fire burned — the fire burned.
+
+He added a small piece of wood to the fire — the wood was small — the flame was quiet — the fire burned — the fire burned.
+
+He watched — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+His mother woke — she said: “ — tend the fire —”
+
+A-Shi said: “ — tend the fire —”
+
+His mother said: “ — tend the fire —”
+
+The fire burned.
+
+Tend the fire.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume one hundred and ninety-nine overall · the seven-hundred-and-second year, fourth part — Tending the Fire.)*
+
 # source: creative/novel/en/20-the-reader-opens-this-page.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25719,6 +25762,49 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第一百九十八卷 · 卷十九之三 · 第七百零二年 · 阿祖的册子）*
+
+# source: creative/novel/199-守火.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第四卷 —— 守火
+
+---
+
+## 一百九十九 · 守火
+
+立春后第六周——周二——早上——灶火燃着。
+
+阿石起得早——灶火燃着——母亲还在睡——灶火燃着——灶火燃着——灶火燃着。
+
+他给灶火添了一小根柴——柴小——火静——灶火燃着——灶火燃着。
+
+他看着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+母亲醒来——她说：「——守火——」
+
+阿石说：「——守火——」
+
+母亲说：「——守火——」
+
+灶火燃着。
+
+守火。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第一百九十九卷 · 卷十九之四 · 第七百零二年 · 守火）*
 
 # source: creative/novel/20-读完自己.md
 # 《跨界纪事：锚火守夜人》
