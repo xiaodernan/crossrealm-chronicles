@@ -353,6 +353,7 @@ End of frozen digest.
 209 · 谢客
 210 · 他说了
 211 · 他听见了
+212 · 灶堂的灰
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
