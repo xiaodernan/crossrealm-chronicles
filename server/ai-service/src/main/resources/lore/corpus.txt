@@ -11959,6 +11959,41 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and fourteen overall · the seven-hundred-and-third year, third part — The Kindle.)*
 
+# source: creative/novel/en/215-the-right-heat.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Fourth Volume — The Right Heat
+
+---
+
+## Two Hundred and Fifteen: The Right Heat
+
+The first week after the spring equinox — Thursday — morning — the fire burned.
+
+A-Shi was cooking a bowl of porridge — the fire burned — it had not reached the point — the fire burned — the fire burned — his mother turned — she said: “ — wait —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+The porridge was done.
+
+The fire burned.
+
+The right heat.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and fifteen overall · the seven-hundred-and-third year, fourth part — The Right Heat.)*
+
 # source: creative/novel/en/22-after-the-mist-scatters.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27194,6 +27229,41 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百一十四卷 · 卷二十之三 · 第七百零三年 · 薪火）*
+
+# source: creative/novel/215-火候.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第四卷 —— 火候
+
+---
+
+## 二百一十五 · 火候
+
+立春后第一周——周四——早上——灶火燃着。
+
+阿石烧了一碗粥——灶火燃着——它还没到点——灶火燃着——灶火燃着——母亲回头——她说「——再等——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+粥好了。
+
+灶火燃着。
+
+火候。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百一十五卷 · 卷二十之四 · 第七百零三年 · 火候）*
 
 # source: creative/novel/22-雾散之后.md
 # 《跨界纪事：锚火守夜人》
