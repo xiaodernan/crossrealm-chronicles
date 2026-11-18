@@ -229,7 +229,8 @@ creative/music/soundtrack.html
 | 火又起 · The Fire Rises Again | [the-fire-rises-again](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/180-the-fire-rises-again.md) |
 | 火什么都没说 · The Fire Did Not Say | [the-fire-did-not-say](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/181-the-fire-did-not-say.md) |
 | 烟火 · Sparks | [sparks](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/182-sparks.md) |
-| 天亮了 · The Sky Brightened | [the-sky-brightened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/183-the-sky-brightened.md) |每一章对应游戏的章节走法：
+| 天亮了 · The Sky Brightened | [the-sky-brightened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/183-the-sky-brightened.md) |
+| 那天了 · The Day Came | [the-day-came](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/184-the-day-came.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
