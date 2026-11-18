@@ -11271,6 +11271,53 @@ Nothing answered. That, too, is narrative.
 
 *(End of volume twenty and Volume III · the reader is holding this page now)*
 
+# source: creative/novel/en/200-mending-the-hearth.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Fifth Volume — Mending the Hearth
+
+---
+
+## Two Hundred: Mending the Hearth
+
+The seventh week after the spring equinox — Wednesday — afternoon — the fire burned.
+
+A-Shi split wood — half of it done — he watched — the fire burned — the flame steadier — it would not go out — the fire burned.
+
+His mother said: “ — mend the hearth —”
+
+A-Shi said: “ — mend the hearth —”
+
+His mother said: “ — the hearth needs fixing — a crack in the body of the stove —”
+
+A-Shi said: “ — mend it —”
+
+The fire burned.
+
+A-Shi took clay — he sealed the crack — the fire burned — the flame steadied — the fire burned — the fire burned — the fire burned.
+
+His mother said: “ — it is old — but it will not break —”
+
+A-Shi said: “ — it will not break —”
+
+The fire burned.
+
+Mending the hearth.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume two hundred overall · the seven-hundred-and-second year, fifth part — Mending the Hearth.)*
+
 # source: creative/novel/en/21-night-walk-home.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25864,6 +25911,53 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第二十卷 · 卷三之一。）*
+
+# source: creative/novel/200-补柴.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第五卷 —— 补柴
+
+---
+
+## 二百 · 补柴
+
+立春后第七周——周三——下午——灶火燃着。
+
+阿石劈柴——柴劈好了一半——他看——灶火燃着——火势稍好——不灭了——灶火燃着。
+
+母亲说：「——补柴——」
+
+阿石说：「——补柴——」
+
+母亲说：「——灶火要修——灶膛裂了一条缝——」
+
+阿石说：「——修——」
+
+灶火燃着。
+
+阿石拿了泥——他把裂缝糊住——灶火燃着——火苗稳了——灶火燃着——灶火燃着——灶火燃着。
+
+母亲说：「——它老了——但不会坏——」
+
+阿石说：「——不会坏——」
+
+灶火燃着。
+
+补柴。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第二百卷 · 卷十九之五 · 第七百零二年 · 补柴）*
 
 # source: creative/novel/21-夜幕归乡.md
 # 《跨界纪事：锚火守夜人》
