@@ -11656,6 +11656,49 @@ A-Shi went outside — frost settled on his shoes — he did not shake — the f
 
 *(End of volume XIX · Volume two hundred and eight overall · the seven-hundred-and-second year, thirteenth part — The Winter of the Vigil.)*
 
+# source: creative/novel/en/209-the-thanked-guest.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Fourteenth Volume — The Thanked Guest
+
+---
+
+## Two Hundred and Nine: The Thanked Guest
+
+The twelfth week after the spring equinox — Monday — morning — the fire burned.
+
+The door sounded — the servant Ah-Jin said: “ — a guest —” — A-Shi went to open it — outside the wind was hard — an old man stood — his hands were empty — the fire burned.
+
+The old man said: “ — the fire is still alive —”
+
+A-Shi said: “ — it is —”
+
+The old man said: “ — it told you —”
+
+A-Shi said: “ — it did —”
+
+The fire burned.
+
+The old man left — the fire burned — Ah-Jin said: “ — who was that — nobody knows him —” — A-Shi said: “ — the fire knows —” — the fire burned.
+
+The thanked guest.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume two hundred and nine overall · the seven-hundred-and-second year, fourteenth part — The Thanked Guest.)*
+
 # source: creative/novel/en/21-night-walk-home.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -26634,6 +26677,49 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第二百零八卷 · 卷十九之十三 · 第七百零二年 · 守夜的冬）*
+
+# source: creative/novel/209-谢客.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第十四卷 —— 谢客
+
+---
+
+## 二百零九 · 谢客
+
+立春后第十二周——周一——早上——灶火燃着。
+
+门响了一声——仆人阿金说「——有客——」——阿石去开门——门外——风大——一个老人站着——他手里什么都没拿——灶火燃着。
+
+老人说：「——灶火还在——」
+
+阿石说：「——还在——」
+
+老人说：「——叫你说了——」
+
+阿石说：「——说了——」
+
+灶火燃着。
+
+老人走了——灶火燃着——阿金说「——这人——谁也不认识——」——阿石说「——灶火知道——」——灶火燃着。
+
+谢客。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第二百零九卷 · 卷十九之十四 · 第七百零二年 · 谢客）*
 
 # source: creative/novel/21-夜幕归乡.md
 # 《跨界纪事：锚火守夜人》
