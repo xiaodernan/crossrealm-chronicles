@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>鐐夎竟鐩?路 Crossrealm Chronicles 路 杩愯惀</title>
+<title>炉边盘 · Crossrealm Chronicles · 运营</title>
 <meta name="theme-color" content="#0a080e" />
 <meta name="robots" content="noindex,nofollow" />
 <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
@@ -95,8 +95,8 @@ a{color:var(--gold-dim)}
 .pill-warn{color:var(--warn);border:1px solid rgba(255,207,107,.25);padding:2px 8px;border-radius:4px;font-size:.6rem;letter-spacing:.06em}
 .unlock{display:none}
 .unlocked .unlock{display:block}
-/* W-Z240b锛?dashboard 鑷繁甯?.unlock 鈥斺€?`.unlocked .unlock` 鍖归厤涓嶅埌鑷韩锛岃В閿佸悗鏁撮〉鏄┖鐧姐€?
-   涔嬪墠娌″彂鐜颁簡锛氶棬鏄剧ず none锛屽唴瀹瑰嵈涓嶆樉绀?block锛岄〉闈㈢湅浼笺€屽紑浜嗛棬鍗翠粈涔堜篃娌℃湁銆嶃€?*/
+/* W-Z240b：#dashboard 自己带 .unlock —— `.unlocked .unlock` 匹配不到自身，解锁后整页是空白。
+   之前没发现了：门显示 none，内容却不显示 block，页面看似「开了门却什么也没有」。 */
 .unlocked.unlock{display:block}
 .lock .unlock{display:none}
 .locked-pane{display:none}
@@ -109,18 +109,18 @@ a{color:var(--gold-dim)}
 <div class="out" id="root">
   <!-- ====== Gate ====== -->
   <div class="gate-wrap">
-    <div class="lang-toggle gate-lang" role="group" aria-label="Language / 璇█">
-      <button type="button" data-lang-btn="zh" aria-pressed="true">涓?/button>
+    <div class="lang-toggle gate-lang" role="group" aria-label="Language / 语言">
+      <button type="button" data-lang-btn="zh" aria-pressed="true">中</button>
       <button type="button" data-lang-btn="en" aria-pressed="false">EN</button>
     </div>
     <div id="gate" class="gate-card" role="dialog" aria-labelledby="gate-title">
-      <div class="gate-glyph" aria-hidden="true">鈼?/div>
-      <h1 id="gate-title" class="gate-title" data-i18n="gate_title">鐐夎竟鐩?路 鐐夌伀涔嬪鐨勯棬</h1>
-      <p class="gate-sub" data-i18n="gate_sub">绠＄悊鍛?路 Admin 路 浠讳綍鐭ラ亾鍙ｄ护鐨勪汉</p>
-      <input id="pwd" class="gate-input" type="password" autocomplete="off" data-i18n-ph="gate_ph" placeholder="鍙ｄ护" data-i18n-aria="gate_aria" aria-label="绠＄悊鍛樺彛浠? />
-      <button id="unlock" class="gate-btn" type="button" data-i18n="gate_btn">寮€闂?路 Unlock</button>
+      <div class="gate-glyph" aria-hidden="true">◉</div>
+      <h1 id="gate-title" class="gate-title" data-i18n="gate_title">炉边盘 · 炉火之外的门</h1>
+      <p class="gate-sub" data-i18n="gate_sub">管理员 · Admin · 任何知道口令的人</p>
+      <input id="pwd" class="gate-input" type="password" autocomplete="off" data-i18n-ph="gate_ph" placeholder="口令" data-i18n-aria="gate_aria" aria-label="管理员口令" />
+      <button id="unlock" class="gate-btn" type="button" data-i18n="gate_btn">开门 · Unlock</button>
       <p id="gateError" class="gate-error" role="alert"></p>
-      <p class="locked-note" data-i18n="gate_note">璇ラ〉涓嶅鍏紬寮€鏀?路 浠呯敤鏂囧瓧鍙ｄ护 路 Frontend-only 瀹夊叏</p>
+      <p class="locked-note" data-i18n="gate_note">该页不对公众开放 · 仅用文字口令 · Frontend-only 安全</p>
     </div>
   </div>
 
@@ -129,15 +129,15 @@ a{color:var(--gold-dim)}
     <!-- Top bar -->
     <div class="topbar">
       <div>
-        <h1 data-i18n="top_h1">鐐夎竟鐩?路 Crossrealm Chronicles 鈥?杩愯惀鐩?/h1>
-        <div class="crumbs">Internal 路 60-day snapshot</div>
+        <h1 data-i18n="top_h1">炉边盘 · Crossrealm Chronicles — 运营盘</h1>
+        <div class="crumbs">Internal · 60-day snapshot</div>
       </div>
       <nav>
-        <a href="../" data-i18n="nav_home">鈫?鍥炰富椤?/a>
-        <a href="../game/" data-i18n="nav_game">娓告垙</a>
-        <a href="../guide.html" data-i18n="nav_guide">璇存槑涔?/a>
-        <span class="lang-toggle" role="group" aria-label="Language / 璇█">
-          <button type="button" data-lang-btn="zh" aria-pressed="true">涓?/button>
+        <a href="../" data-i18n="nav_home">← 回主页</a>
+        <a href="../game/" data-i18n="nav_game">游戏</a>
+        <a href="../guide.html" data-i18n="nav_guide">说明书</a>
+        <span class="lang-toggle" role="group" aria-label="Language / 语言">
+          <button type="button" data-lang-btn="zh" aria-pressed="true">中</button>
           <button type="button" data-lang-btn="en" aria-pressed="false">EN</button>
         </span>
       </nav>
@@ -145,22 +145,22 @@ a{color:var(--gold-dim)}
 
     <!-- Local real telemetry (this browser) -->
     <div class="panel" id="localPanel" style="margin-bottom:16px">
-      <h2><span data-i18n="local_h2">鏈湴鐪熷疄浜嬩欢</span> <small data-i18n="local_small">褰撳墠娴忚鍣?路 crossrealm_telemetry_v1 LS 婊氬姩缂撳啿 200 鏉?/small></h2>
+      <h2><span data-i18n="local_h2">本地真实事件</span> <small data-i18n="local_small">当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条</small></h2>
       <div id="localEventsGrid" class="kpi-grid" style="grid-template-columns:repeat(9,1fr);gap:6px;margin-bottom:10px"></div>
       <div id="localEventsList" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:.65rem;color:rgba(233,226,210,.6);max-height:60px;overflow-y:auto;line-height:1.6;white-space:pre-line"></div>
-      <div style="font-size:.68rem;color:var(--muted);margin-top:6px" data-i18n-html="local_note">璇存槑锛氫互涓嬫槸 <em>浣犺繖鍙版祻瑙堝櫒</em> 鍦ㄨ繃鍘昏窇鍑烘潵鐨勭湡瀹炰簨浠讹紱鐪熷疄澶氱敤鎴锋暟鎹敱鍚庣鑱氬悎鏃跺憟鐜板湪涓婇潰鐨勫悎鎴愰潰鏉夸腑銆?/div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:6px" data-i18n-html="local_note">说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。</div>
     </div>
 
     <!-- Local AI insight (derived from THIS machine's LS event buffer) -->
     <div class="panel" id="insightPanel" style="border-color:rgba(113,227,239,.3);margin-bottom:16px;display:none">
-      <h2><span id="insightTitle">鏈満鏅鸿兘娲炲療 路 LS-driven</span> <small id="insightSmall">鍩轰簬鏈満 crossrealm_telemetry_v1 鐪熷疄浜嬩欢缂撳啿鎺ㄨ鈥斺€旀瘡娆¤繘鍏ョ倝杈圭洏閮戒細閲嶇畻</small></h2>
+      <h2><span id="insightTitle">本机智能洞察 · LS-driven</span> <small id="insightSmall">基于本机 crossrealm_telemetry_v1 真实事件缓冲推论——每次进入炉边盘都会重算</small></h2>
       <div id="insightRows" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto"></div>
       <div id="insightFoot" style="font-size:.62rem;color:var(--muted);margin-top:8px;line-height:1.55"></div>
     </div>
 
     <!-- Backend live rollup (when served from the LAN gateway compose) -->
     <div class="panel" id="liveRollupPanel" style="display:none;border-color:rgba(155,214,122,.35)">
-      <h2>鍚庣鐪熷€?路 Live Backend <small>/api/telemetry/summary-rollup 路 Postgres 14 澶?路 浠呮湰鏈?compose</small></h2>
+      <h2>后端真值 · Live Backend <small>/api/telemetry/summary-rollup · Postgres 14 天 · 仅本机 compose</small></h2>
       <div id="liveRollupBars" style="display:flex;flex-direction:column;gap:4px;font-size:.72rem"></div>
       <div id="liveRollupFoot" style="font-size:.62rem;color:var(--muted);margin-top:6px"></div>
     </div>
@@ -171,14 +171,14 @@ a{color:var(--gold-dim)}
     <!-- DAU curve + features -->
     <div class="two-col">
       <div class="panel">
-        <h2><span data-i18n="dau_h2">30 澶?DAU 鏇茬嚎</span> <small data-i18n="dau_small">mu 脳 鏃ユ暟 路 婊氬姩</small></h2>
+        <h2><span data-i18n="dau_h2">30 天 DAU 曲线</span> <small data-i18n="dau_small">mu × 日数 · 滚动</small></h2>
         <div id="dChart" style="position:relative;height:180px"></div>
         <div class="chart-axes" style="display:flex;justify-content:space-between;padding:0 4px;font-family:'JetBrains Mono',Consolas,monospace;">
           <span>D30</span><span>D20</span><span>Today</span>
         </div>
       </div>
       <div class="panel">
-        <h2><span data-i18n="pred_h2">鏈潵 14 澶?路 瓒嬪娍棰勬祴</span> <small data-i18n="pred_small">绾挎€у洖褰?路 骞崇Щ</small></h2>
+        <h2><span data-i18n="pred_h2">未来 14 天 · 趋势预测</span> <small data-i18n="pred_small">线性回归 · 平移</small></h2>
         <div id="pChart" style="height:180px"></div>
         <div class="chart-axes" style="display:flex;justify-content:space-between;padding:0 4px;font-family:'JetBrains Mono',Consolas,monospace;">
           <span>+1d</span><span>+7d</span><span>+14d</span>
@@ -191,74 +191,74 @@ a{color:var(--gold-dim)}
 
     <!-- Feature adoption -->
     <div class="panel">
-      <h2><span data-i18n="features_h2">鍔熻兘娼睈 路 鐜╁鐖辩敤浠€涔?/span> <small data-i18n="features_small">鏈€杩?30 澶?路 鍗犱細璇濇瘮</small></h2>
+      <h2><span data-i18n="features_h2">功能潮汐 · 玩家爱用什么</span> <small data-i18n="features_small">最近 30 天 · 占会话比</small></h2>
       <div id="featureBars"></div>
     </div>
 
     <!-- Funnel + retention -->
     <div class="two-col">
       <div class="panel">
-        <h2><span data-i18n="funnel_h2">杞寲婕忔枟</span> <small data-i18n="funnel_small">浠庢姷杈惧嚭鍦洪〉 鈫?鐐変富寰界珷</small></h2>
+        <h2><span data-i18n="funnel_h2">转化漏斗</span> <small data-i18n="funnel_small">从抵达出场页 → 炉主徽章</small></h2>
         <div class="funnel" id="funnelRow"></div>
       </div>
       <div class="panel">
-        <h2><span data-i18n="retention_h2">娆＄暀 / 澶嶆粴 / 鍥炴祦</span> <small>D1 路 D3 路 D7 路 D14</small></h2>
+        <h2><span data-i18n="retention_h2">次留 / 复滚 / 回流</span> <small>D1 · D3 · D7 · D14</small></h2>
         <div class="retention-grid" id="retentionGrid"></div>
       </div>
     </div>
 
     <!-- Measured (real, not synthetic) -->
     <div class="panel" id="measuredPanel" style="border-color:rgba(120,214,175,.35)">
-      <h2><span data-i18n="meas_h2">瀹炴祴璁板綍 路 Measured</span> <small data-i18n="meas_small">2026-11-15 鐪熻窇鐪熸祴 路 涓嶆槸婕旂ず鏁版嵁</small></h2>
+      <h2><span data-i18n="meas_h2">实测记录 · Measured</span> <small data-i18n="meas_small">2026-11-15 真跑真测 · 不是演示数据</small></h2>
       <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l1">鍘嬫祴 路 200 骞跺彂鎬昏姹?/div><div class="kpi-value">4666<span style="font-size:.7em;color:var(--muted)"> / 4666</span></div><div class="kpi-trend up" data-i18n="meas_tr1">100% 鎴愬姛 路 0 5xx锛圵-Z130 Postgres 钀界洏鍦ㄥ満锛?/div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l2">鍏ㄥ満閿欒鐜?/div><div class="kpi-value">0.00%</div><div class="kpi-trend up" data-i18n="meas_tr2">鍏潯璺敱鍏ㄩ儴璧伴€?路 鏃?5xx</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l3">p50 鏃跺欢锛堝悓鏈?9 JVM + PG锛?/div><div class="kpi-value">625~641<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend up" data-i18n="meas_tr3">缃戠粶浠ｇ悊寮€閿€涓轰富</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l4">鍗?IP 娲按琚墦鍥?/div><div class="kpi-value">52.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend flat">622.7 rps 鈫?HTTP 429 路 Redis 60娆?10s</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l5">seasons 缂撳瓨鍛戒腑</div><div class="kpi-value">0.997</div><div class="kpi-trend up">Spring Cache + Redis</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l6">绐楀彛鍐呴檺娴佽鏁?/div><div class="kpi-value">14481<span style="font-size:.7em;color:var(--muted)"> allowed</span></div><div class="kpi-trend down">rejected 6376 路 allowed:rejected 鈮?2.3:1</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l7">Advisor 鐪熷疄 e2e锛圔M25+LLM锛?/div><div class="kpi-value">鈮?0.4<span style="font-size:.7em;color:var(--muted)"> s p95/p99</span></div><div class="kpi-trend flat" data-i18n="meas_tr7">30 job 路 5 骞跺彂 路 涓绘ā鍨?gpt-6-sol</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l8">LLM 鍓嶇紑缂撳瓨锛堟湰娆″疄璺戯級</div><div class="kpi-value">4516<span style="font-size:.7em;color:var(--muted)">/5862</span></div><div class="kpi-trend up" data-i18n="meas_tr8">鈮?7.0% 路 鍐峰惎 null 鈫?娆¤皟鍛戒腑</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l9">Oracle 涓婃父鎺㈤拡锛圓/B/C锛?/div><div class="kpi-value">3<span style="font-size:.7em;color:var(--muted)">/3</span></div><div class="kpi-trend up" data-i18n="meas_tr9">6179 / 1798 / 6170 tok 路 姝ｇ‘鍒嗙骇 100%</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l10">缂撳瓨 bench 鐑鐑紙cache_hit_bench锛?/div><div class="kpi-value">85.6<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr10">鍐?41.7% 鈫?鐑?85.6%锛堢湡鍛戒腑锛?/div></div>
-        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l11">prompt_cache_key 璺敱锛圵-Z168 瀹炴祴锛?/div><div class="kpi-value">96.1<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr11">鍐峰寘 null 鈫?浜屽寘璧风ǔ瀹?5632/5858 cached锛? 鍖呰繛娴嬶級</div></div>
-        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l12">cache-probe 2026-11-16 澶嶆祴锛圢ode 渚э級</div><div class="kpi-value">78鈥?9.5<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr12">鍐荤粨鍓嶇紑 745鈥?68 / 966 鍛戒腑锛涒憽 鏃犳爣璁版亽鏃?cache 瀛楁锛? 娆＄灛鎬?miss锛?327 tok 路 cached=0 路 璺敱婕傜Щ锛?/div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l13">ui-walkthrough 2026-11-16 澶嶈窇</div><div class="kpi-value">18<span style="font-size:.7em;color:var(--muted)">/18</span></div><div class="kpi-trend up" data-i18n="meas_tr13">瓒婄晫鍏冪礌 0 路 HUD 鎸ゅ彔 0 路 鍏ㄧ豢锛堝惈 en large 鏈€澶ф。鏂囨湰锛?/div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l14">鏂?API 杩佺Щ瀹炴祴锛?026-11-16 路 Clash 鑺傜偣锛?/div><div class="kpi-value">96.96<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr14">api.aizzz.xyz 鐩磋繛 403锛涚粡 Clash 7897 鑺傜偣鐪熼€氾細Java PromptCacheLiveTest 鍐锋祴 5679鈫抍ached=null 鐑祴 cached=5504/5679 鈮?96.96%锛汚I 鍏ㄩ摼璺?live 3/3 缁匡紙AiLiveIntegrationTest / AdvisorJobLiveIntegrationTest / EchoHintLiveIntegrationTest 路 model=gpt-6.1-terra锛夛紱Node cache-probe 鍏ㄧ嚎 200</div></div>
-        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l15">Lore Oracle 鍏ㄩ摼璺?live锛圵-Z238 路 Clash 7897锛?/div><div class="kpi-value">2<span style="font-size:.7em;color:var(--muted)">/2</span></div><div class="kpi-trend up" data-i18n="meas_tr15">鐪熷疄涓婃父锛氶敋鐏槸浠€涔堬紵鈫?BM25 鍙洖 4 鍧?鈫?HTTP 200 sources=[67,89,77,35] 路 model=gpt-6.1-terra 路 latency鈮?.2s锛涙棤涔夋彁闂?zxqjwop qkdjw zqwvjqmw rfjklw 鈫?BM25 鍏ㄨ瘝闆跺彫鍥?鈫?璇氬疄鎷掔瓟銆屾鐗╂湭鍦ㄥ吀绫嶄腑銆嵚?latency=0 路 涓嶈姳 token锛?29鈫?31 婧?corpus锛?01鈫?02 鍗凤級</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l16">Oracle stress 16s 路 40 骞跺彂锛圵-Z240 路 鏈満鐩磋窇锛?/div><div class="kpi-value">3488<span style="font-size:.7em;color:var(--muted)">/3488</span></div><div class="kpi-trend up" data-i18n="meas_tr16">mixed 鍦烘櫙锛坔ealth 脳 answerBurst锛夛細0 4xx / 0 5xx 路 errRate 0.00% 路 p50=125ms 路 p95=346ms 路 p99=2672ms 路 max=3403ms 路 鈮?17 rps 路 ai-service + 20ms stub 鍏ㄩ摼璺?路 logs 瀛?temp\crossrealm-oracle-stress-*</div></div>
-        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l17">Oracle 鐜板疄鍘熷瀷璺敱 live锛圵-Z244 路 Clash 7897锛?/div><div class="kpi-value">3<span style="font-size:.7em;color:var(--muted)">/3</span></div><div class="kpi-trend up" data-i18n="meas_tr17">refs 璺敱锛堟満姊拌矾鐢卞懡涓?refs 涓撳睘鐭锛寀ser 娉ㄨ琛岋紝system 鍐荤粨涓嶅姩锛夛細canon銆岄敋鐏槸浠€涔堬紵銆嶁啋 sources=[novel/67, 89, 77, 35] 鈮?.6s 鉁擄紱refs銆岄敋鐏湪鐜板疄涓栫晫瀵瑰簲绁伓杩樻槸缁存柉濉旓紵鈥︹€︺€嶁啋 sources=[refs/crossrealm-realworld-notes.md] 鈮?3s 鉁擄紱鏃犱箟鎻愰棶 鈫?璇氬疄鎷掔瓟銆屾鐗╂湭鍦ㄥ吀绫嶄腑銆?latency=0 路 涓嶈姳 token锛?3 鏂█ LoreOracleRouteHintTest 鍏ㄧ豢</div></div>
-        <div class="kpi" style="border-color:rgba(190,155,255,.4)"><div class="kpi-label" data-i18n="meas_l18c">骞惰缂撳瓨闅旂瀹炴祴锛圵-Z336 路 鐪熶笂娓?路 8 骞跺彂 same-key锛?/div><div class="kpi-value">98<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr18c">scripts/cache-parallel-probe.mjs锛堢湡 API 路 Clash 7897锛夛細鈶?鍚岄敭 2脳椤轰覆鍐峰惎鍔?cached=0锛坙ane 澶?~3 鍖呭繀鍐凤紝涓婃父琛屼负锛夆憽 8 骞跺彂瀛愯繘绋嬪悓 key锛?脳98.0% + 1脳97.9% 路 aggregate 鈮?7.98% 鈥斺€?骞惰浼氳瘽鍏变韩 prompt_cache_key 涓嶆帀缂撳瓨銆佷笉浜掗渿 鈶?3脳ember+3脳oracle 娣峰悎骞跺彂锛氱 3 鍖呰捣 98.0/97.9%锛堜笂娓稿唴瀹瑰搱甯屽叡浜喕缁撳墠缂€锛沴ane 浜掍笉姹℃煋锛壜?artifact 鈫?docs/admin/data/llm-parallel-cache-probe.json</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l18">Oracle 缂撳瓨鍙岃建鎺㈤拡瀹炴祴锛圵-Z247 路 Clash 路 2026-11-16锛?/div><div class="kpi-value">97+<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr18">scripts/oracle-cache-probe.mjs --json锛歝anon cached=6784/6784 脳2 鈮?7.3% 路 refs cached=7424/7424 脳2 鈮?7.5%锛堜慨澶嶅墠 canon 鎭?null锛夛紱璁板綍 鈫?docs/admin/data/oracle-cache-probe.json锛泂ystem 鍐荤粨璺ㄤ笂娓?prompt-cache ~1024-token 椤甸棬妲涘悗鍙岃建鎭掓殩</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l18b">Admin LLM 鍙岃杩愯惀鍒嗘瀽锛圵-Z311 路 鐪熶笂娓?gpt-6.1-terra锛?/div><div class="kpi-value">2<span style="font-size:.7em;color:var(--muted)">/2</span></div><div class="kpi-trend up" data-i18n="meas_tr18b">scripts/admin-llm-analysis.mjs锛氬疄娴嬭繍钀ュ缓璁弻璇腑/鑻扁€斺€旂幇鐘跺垽璇?路 瓒嬪娍 路 P0鈫扨3 路銆屽厛楠岃瘉鍐嶆墽琛屻€嶁墺4 鏉★紱zh chars=2361 / en chars=5439 路 prompt鈮?968/5918 tok 路 寮?cached鈮?5.8%锛涙姤鍛?鈫?docs/admin/data/admin-llm-analysis.zh.md + .en.md锛圠LM 鐢熸垚锛屽嵆 搂 Admin LLM ops analysis锛屼笉鏇夸唬 GA data pin锛?/div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l19">Oracle 绱楠岃瘉妗ｆ锛圵-Z251/253 路 live archive 路 2026-11-16锛?/div><div class="kpi-value">4<span style="font-size:.7em;color:var(--muted)">/4 runs</span></div><div class="kpi-trend up" data-i18n="meas_tr19">docs/oracle-live-log/ 鐪熷疄涓婃父鍘熸枃锛歝anon 鈮?.6鈥?.3s 路 refs 鈮?鈥?7s 路 鏃犱箟鎻愰棶 鈫?璇氬疄鎷掔瓟 latency=0 路 涓嶈姳 token锛涒墺13 渚?live 鏂█绱鍏ㄧ豢锛涘弻杞ㄧ紦瀛?鈮?7%</div></div>
-        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l20">鐐夌伀绁堟効鍏ㄩ€夐」棰戞锛圵-Z265 路 27/27 鏋氫妇 路 2026-11-16锛?/div><div class="kpi-value">27<span style="font-size:.7em;color:var(--muted)">/27</span></div><div class="kpi-trend up" data-i18n="meas_tr20">scripts/vow-mc.mjs 鍏ㄦ灇涓剧‘瀹氭€у垎甯冿細windkeeper 6/27鈮?2.2% 路 ember_1 5/27鈮?8.5% 路 grey_2 5/27鈮?8.5% 路 self_3 5/27鈮?8.5% 路 鍏朵綑 7 绉嶇粨灞€鍚?1/27鈮?.7%锛沝ocs/admin/data/vow-montecarlo.json锛涙暣涓垐鏁版棤闅忔満鏃犻</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l21">鐐夌伀鐨勪氦妫掑叏閫夐」棰戞锛圵-Z283 路 27/27 鏋氫妇 路 2026-11-17锛?/div><div class="kpi-value">27<span style="font-size:.7em;color:var(--muted)">/27</span></div><div class="kpi-trend up" data-i18n="meas_tr21">scripts/pass-mc.mjs 鍏ㄦ灇涓剧‘瀹氭€у垎甯冿細heirkeeper 6/27鈮?2.2% 路 kindle_1 5/27鈮?8.5% 路 tend_2 5/27鈮?8.5% 路 root_3 5/27鈮?8.5% 路 鍏朵綑 6 绉嶇粨灞€鍚?1/27鈮?.7%锛沝ocs/admin/data/pass-montecarlo.json锛涙灇涓句笌绯荤粺 _buildGraph verdict 鑺傜偣鍚屾簮閫昏緫</div></div>
-        <div class="kpi" style="border-color:rgba(155,225,255,.45)"><div class="kpi-label" data-i18n="meas_l22">瀹炴椂閬ユ祴蹇収锛圵-Z338 路 鐪熉锋湰鏈?compose 钀界洏浜嬩欢 路 2026-11-18锛?/div><div class="kpi-value">611<span style="font-size:.7em;color:var(--muted)">/14d</span></div><div class="kpi-trend up" data-i18n="meas_tr22">GET /api/telemetry/summary-rollup锛堟瀯寤烘椂瀹炴姄锛夛細boss_kill 30 路 canon_open 8 路 loadtest 424 路 smoke 16 路 stress-probe 133锛涘垽鎹鍓嶁€斺€擪PI 棣栧睆婕旂ず鏁版嵁鏄?SYNTHETIC锛坰eed=20261117 纭畾鎬э級锛屾湰鍗℃槸鍞竴璐磋繎銆岀湡瀹炵帺瀹惰涓恒€嶇殑涓滆タ锛氬畠灏辨槸 9 涓?JVM 瀹炶窇鎺㈤拡锛坴erify 鍐掔儫 + stress-load 娲祴 + EmberLane/Oracle 瀹炴祴锛変翰鎵嬪啓杩?Postgres/Redis 鐨勮惤璐︼紝缁?gateway:8080 璇诲嚭鏉ワ紱姣忔 Pages 鍚屾鑷姩鍒锋柊锛涘揩鐓?鈫?docs/admin/data/telemetry-summary.json 路 鎶撳彇 鈫?scripts/fetch-telemetry-summary.mjs锛坉ocker 鍐呴儴 wget锛宧ost 绔彛浠ｇ悊鍧忎簡涔熻兘鎶擄級</div></div>
-        <div class="kpi" style="border-color:rgba(255,179,130,.45)"><div class="kpi-label" data-i18n="meas_l24">MEASURED 婕忔枟锛圵-Z355 路 鐪熉穋ompose 钀借处 路 2026-11-18 路 涓嶅垎缇わ級</div><div class="kpi-value">4.8<span style="font-size:.7em;color:var(--muted)">% bk</span></div><div class="kpi-trend up" data-i18n="meas_tr24">derived-funnel.mjs 鈫?docs/admin/data/measured-funnel.json锛歜oss_kill 30锛?.83% of 621 路 MEASURED锛壜?canon_open 8锛?.29% 路 MEASURED锛壜?human-adjacent 38 浜嬩欢锛?.12%锛壜?probe 鐏嚎 89.69%锛坙oadtest 424 + stress-probe 133锛?路 鈮?.27銆屽紑鍏哥睄銆?銆孊oss 鍑绘潃銆嵚?鍙湁 3 澶╃獥鍙ｏ紝涓嶅仛鐣欏瓨鍒嗙兢鎺ㄦ柇锛堜吉鍒嗙兢=鎾掕皫锛壜?鍏朵粬 KPI 鍗″鏄?SYNTHETIC锛坰eed=20261117锛夛紝鏈崱涓哄敮涓€ MEASURED 閾捐矾銆?/div></div>
-        <div class="kpi" style="border-color:rgba(180,240,190,.45)"><div class="kpi-label" data-i18n="meas_l25">v4 鍏峰吀+鍐荤粨鍓嶇紑 cachedRatio锛圵-Z376 路 鐪熉峰苟琛?4 璺疄娴?路 2026-11-18T11:21Z锛?/div><div class="kpi-value">93<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr25">POST gateway:8080/api/ai/lore/answer锛堝悓 v4 鍐荤粨鍓嶇紑锛? 鏉″苟鍙戞彁闂€斺€斾笉鍚岄棶棰樺悓鍓嶇紑锛夛細鍥涙潯鍏ㄩ儴 upstreamCached=true 路 cachedRatio 93.2 / 93.1 / 93.2 / 93.2%锛坧rompt鈮?7.6K tok 路 cached鈮?4.4K锛?路 閲嶅惎鍚庨璇锋眰浜︿负 93.7%銆傜粨璁猴細Codex 绋冲畾 90% 鐨勪笁鏉′欢锛坒rozen-prefix + per-lane prompt_cache_key + stream/include_usage锛夊凡鍏ㄥ湪浣嶏紱鐪熷疄鍐风獥鍙ｄ粎 Desktop 閲嶅惎鍚庨鎵撲竴鏉°€備骇鐗?鈫?docs/admin/data/oracle-v4-live-probe.json锛圡EASURED锛岄潪 SYNTHETIC锛夈€?/div></div>
-        <div class="kpi" style="border-color:rgba(180,240,190,.45)"><div class="kpi-label" data-i18n="meas_l27">娴佸紡瀵圭収鎺㈤拡锛圵-Z410 路 2026-11-19 路 gpt-6.1-terra 路 Clash锛?/div><div class="kpi-value">94.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr27">scripts/cache-probe.mjs 鐪熶笂娓稿疄娴嬶紙涓ゆ鐙珛杩愯锛夛細cached鈮?066/5342 鈮?4.8% 鎭掑畾锛涗笂娓稿伓鍙戜笉鍥炴姤 cached_tokens 瀛楁锛堢涓€娆¤繍琛?non-stream 鏃犲瓧娈碉紝绗簩娆¤繍琛?stream warm#4 鏃犲瓧娈碉級鈥斺€斿嵆瀛楁缂哄け鏄笂娓告姤鍛婃姈鍔ㄨ€岄潪缂撳瓨澶辨晥锛沨it=5066 鎭掑畾涓嶅彉锛堝悓 prefix 鍚?key锛夈€傜粨璁猴細缂撳瓨绋冲畾 90%+ 鐨勪笁涓繀瑕佹潯浠?= 鍐荤粨鍓嶇紑 &gt;1024 tok + per-lane prompt_cache_key + stream:true &amp; include_usage锛岀己涓€涓嶅彲锛涖€屽苟琛屼細璇濇姠缂撳瓨鍖恒€嶄笉澶嶇幇锛圵-Z336 骞惰鎺㈤拡锛? 璺悓 key 鈮?8%锛夈€備骇鐗?鈫?docs/admin/data/cache-probe-w-z410.json锛圡EASURED锛夈€?/div></div>
-        <div class="kpi" style="border-color:rgba(255,150,150,.45)"><div class="kpi-label" data-i18n="meas_l26">鐣欏瓨绐楀彛锛圵-Z404 鍚庡疄娴?路 2026-11-19 路 3 澶╂湁浜嬩欢 / 11 澶╀负 0锛?/div><div class="kpi-value">0<span style="font-size:.7em;color:var(--muted)"> D+14</span></div><div class="kpi-trend flat" data-i18n="meas_tr26">鍞竴鐪熷疄閬ユ祴锛坓ateway /api/telemetry/summary-rollup 路 627 浜嬩欢 / 3 鏃ワ級锛歜oss_kill 30 路 canon_open 8 路 loadtest 424 路 stress-probe 133 路 smoke 32 路 human-adjacent 38 (6.07%)路 11-19 褰撴棩 0 浜嬩欢銆?b>鐣欏瓨涓嶅彲璁＄畻</b>锛氬彧鏈?3 澶╂湁鏁版嵁銆?1 澶?0銆乿erified probe 鍏ㄨ窇鍚屾娴嬭瘯 rig銆佹病鏈?userId/session銆佹病鏈夌浜屾鍥炶銆備换浣?D1/D3/D7 retention 鏇茬嚎鍦ㄨ繖缁勭獥鍙ｄ笂閮芥槸铏氭瀯鈥斺€旀晠浜嬫槑鍐欍€佽鍒欐槑鍐欙細zero events = no cohort. 琛屽姩椤?鈫?telemetry v2锛坆oss_kill 娉ㄥ叆 hashed-userId + reason 路 涓嶅瓨涓汉淇℃伅 路 鑷冲皯 n鈮?00 unique user / 14 澶╃獥 路 鍏抽棴鍚庢墠鏀捐鐣欏瓨鍗★級銆俤ocs/admin/data/measured-funnel.json<b>褰撳墠涓嶅仛鐣欏瓨鎺ㄦ柇</b>銆?/div></div>
-        <div class="kpi" style="border-color:rgba(255,179,204,.45)"><div class="kpi-label" data-i18n="meas_l23">Boot 鐪熉锋椿鍦哄綍锛圵-Z350 路 鏈満 SwiftShader 路 2026-11-18锛?/div><div class="kpi-value">77.8<span style="font-size:.7em;color:var(--muted)"> s</span></div><div class="kpi-trend flat" data-i18n="meas_tr23">scripts/boot-probe.mjs锛坴ite dev + headless Chrome 路 鐪熺獥瀹炴祴锛夛細vite ready 9.1s 鈫?navigate 23.6s 鈫?BOOT OK in **77801ms** 路 frames赂赂锝?.5锛圫wiftShader 杞欢娓叉煋锛涚湡 GPU 杩滆繙涓嶆杩欎簺锛壜?__game/enemyManager/scene 鍏?present 路 boot 瀹屾垚涓旈浂寮傚父锛沘rtifact 鈫?docs/admin/data/boot-probe.json</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l1">压测 · 200 并发总请求</div><div class="kpi-value">4666<span style="font-size:.7em;color:var(--muted)"> / 4666</span></div><div class="kpi-trend up" data-i18n="meas_tr1">100% 成功 · 0 5xx（W-Z130 Postgres 落盘在场）</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l2">全场错误率</div><div class="kpi-value">0.00%</div><div class="kpi-trend up" data-i18n="meas_tr2">八条路由全部走通 · 无 5xx</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l3">p50 时延（同机 9 JVM + PG）</div><div class="kpi-value">625~641<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend up" data-i18n="meas_tr3">网络代理开销为主</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l4">单 IP 洪水被打回</div><div class="kpi-value">52.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend flat">622.7 rps → HTTP 429 · Redis 60次/10s</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l5">seasons 缓存命中</div><div class="kpi-value">0.997</div><div class="kpi-trend up">Spring Cache + Redis</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l6">窗口内限流计数</div><div class="kpi-value">14481<span style="font-size:.7em;color:var(--muted)"> allowed</span></div><div class="kpi-trend down">rejected 6376 · allowed:rejected ≈ 2.3:1</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l7">Advisor 真实 e2e（BM25+LLM）</div><div class="kpi-value">≈10.4<span style="font-size:.7em;color:var(--muted)"> s p95/p99</span></div><div class="kpi-trend flat" data-i18n="meas_tr7">30 job · 5 并发 · 主模型 gpt-6-sol</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l8">LLM 前缀缓存（本次实跑）</div><div class="kpi-value">4516<span style="font-size:.7em;color:var(--muted)">/5862</span></div><div class="kpi-trend up" data-i18n="meas_tr8">≈77.0% · 冷启 null → 次调命中</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l9">Oracle 上游探针（A/B/C）</div><div class="kpi-value">3<span style="font-size:.7em;color:var(--muted)">/3</span></div><div class="kpi-trend up" data-i18n="meas_tr9">6179 / 1798 / 6170 tok · 正确分级 100%</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l10">缓存 bench 热预热（cache_hit_bench）</div><div class="kpi-value">85.6<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr10">冷 41.7% → 热 85.6%（真命中）</div></div>
+        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l11">prompt_cache_key 路由（W-Z168 实测）</div><div class="kpi-value">96.1<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr11">冷包 null → 二包起稳定 5632/5858 cached（4 包连测）</div></div>
+        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l12">cache-probe 2026-11-16 复测（Node 侧）</div><div class="kpi-value">78–79.5<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr12">冻结前缀 745–768 / 966 命中；② 无标记恒无 cache 字段；1 次瞬态 miss（1327 tok · cached=0 · 路由漂移）</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l13">ui-walkthrough 2026-11-16 复跑</div><div class="kpi-value">18<span style="font-size:.7em;color:var(--muted)">/18</span></div><div class="kpi-trend up" data-i18n="meas_tr13">越界元素 0 · HUD 挤叠 0 · 全绿（含 en large 最大档文本）</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l14">新 API 迁移实测（2026-11-16 · Clash 节点）</div><div class="kpi-value">96.96<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr14">api.aizzz.xyz 直连 403；经 Clash 7897 节点真通：Java PromptCacheLiveTest 冷测 5679→cached=null 热测 cached=5504/5679 ≈ 96.96%；AI 全链路 live 3/3 绿（AiLiveIntegrationTest / AdvisorJobLiveIntegrationTest / EchoHintLiveIntegrationTest · model=gpt-6.1-terra）；Node cache-probe 全线 200</div></div>
+        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l15">Lore Oracle 全链路 live（W-Z238 · Clash 7897）</div><div class="kpi-value">2<span style="font-size:.7em;color:var(--muted)">/2</span></div><div class="kpi-trend up" data-i18n="meas_tr15">真实上游：锚火是什么？→ BM25 召回 4 块 → HTTP 200 sources=[67,89,77,35] · model=gpt-6.1-terra · latency≈3.2s；无义提问 zxqjwop qkdjw zqwvjqmw rfjklw → BM25 全词零召回 → 诚实拒答「此物未在典籍中」· latency=0 · 不花 token；229→231 源 corpus（101→102 卷）</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l16">Oracle stress 16s · 40 并发（W-Z240 · 本机直跑）</div><div class="kpi-value">3488<span style="font-size:.7em;color:var(--muted)">/3488</span></div><div class="kpi-trend up" data-i18n="meas_tr16">mixed 场景（health × answerBurst）：0 4xx / 0 5xx · errRate 0.00% · p50=125ms · p95=346ms · p99=2672ms · max=3403ms · ≈217 rps · ai-service + 20ms stub 全链路 · logs 存 temp\crossrealm-oracle-stress-*</div></div>
+        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l17">Oracle 现实原型路由 live（W-Z244 · Clash 7897）</div><div class="kpi-value">3<span style="font-size:.7em;color:var(--muted)">/3</span></div><div class="kpi-trend up" data-i18n="meas_tr17">refs 路由（机械路由命中 refs 专属短语，user 注记行，system 冻结不动）：canon「锚火是什么？」→ sources=[novel/67, 89, 77, 35] ≈2.6s ✓；refs「锚火在现实世界对应祭灶还是维斯塔？……」→ sources=[refs/crossrealm-realworld-notes.md] ≈13s ✓；无义提问 → 诚实拒答「此物未在典籍中」 latency=0 · 不花 token；23 断言 LoreOracleRouteHintTest 全绿</div></div>
+        <div class="kpi" style="border-color:rgba(190,155,255,.4)"><div class="kpi-label" data-i18n="meas_l18c">并行缓存隔离实测（W-Z336 · 真上游 · 8 并发 same-key）</div><div class="kpi-value">98<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr18c">scripts/cache-parallel-probe.mjs（真 API · Clash 7897）：① 同键 2×顺串冷启动 cached=0（lane 头 ~3 包必冷，上游行为）② 8 并发子进程同 key：7×98.0% + 1×97.9% · aggregate ≈97.98% —— 并行会话共享 prompt_cache_key 不掉缓存、不互震 ③ 3×ember+3×oracle 混合并发：第 3 包起 98.0/97.9%（上游内容哈希共享冻结前缀；lane 互不污染）· artifact → docs/admin/data/llm-parallel-cache-probe.json</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l18">Oracle 缓存双轨探针实测（W-Z247 · Clash · 2026-11-16）</div><div class="kpi-value">97+<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr18">scripts/oracle-cache-probe.mjs --json：canon cached=6784/6784 ×2 ≈97.3% · refs cached=7424/7424 ×2 ≈97.5%（修复前 canon 恒 null）；记录 → docs/admin/data/oracle-cache-probe.json；system 冻结跨上游 prompt-cache ~1024-token 页门槛后双轨恒暖</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l18b">Admin LLM 双语运营分析（W-Z311 · 真上游 gpt-6.1-terra）</div><div class="kpi-value">2<span style="font-size:.7em;color:var(--muted)">/2</span></div><div class="kpi-trend up" data-i18n="meas_tr18b">scripts/admin-llm-analysis.mjs：实测运营建议双语中/英——现状判读 · 趋势 · P0→P3 ·「先验证再执行」≥4 条；zh chars=2361 / en chars=5439 · prompt≈5968/5918 tok · 强-cached≈95.8%；报告 → docs/admin/data/admin-llm-analysis.zh.md + .en.md（LLM 生成，即 § Admin LLM ops analysis，不替代 GA data pin）</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l19">Oracle 累计验证档案（W-Z251/253 · live archive · 2026-11-16）</div><div class="kpi-value">4<span style="font-size:.7em;color:var(--muted)">/4 runs</span></div><div class="kpi-trend up" data-i18n="meas_tr19">docs/oracle-live-log/ 真实上游原文：canon ≈2.6–4.3s · refs ≈4–17s · 无义提问 → 诚实拒答 latency=0 · 不花 token；≥13 例 live 断言累计全绿；双轨缓存 ≈97%</div></div>
+        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="meas_l20">炉火祈愿全选项频次（W-Z265 · 27/27 枚举 · 2026-11-16）</div><div class="kpi-value">27<span style="font-size:.7em;color:var(--muted)">/27</span></div><div class="kpi-trend up" data-i18n="meas_tr20">scripts/vow-mc.mjs 全枚举确定性分布：windkeeper 6/27≈22.2% · ember_1 5/27≈18.5% · grey_2 5/27≈18.5% · self_3 5/27≈18.5% · 其余 7 种结局各 1/27≈3.7%；docs/admin/data/vow-montecarlo.json；整个刈数无随机无骰</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l21">炉火的交棒全选项频次（W-Z283 · 27/27 枚举 · 2026-11-17）</div><div class="kpi-value">27<span style="font-size:.7em;color:var(--muted)">/27</span></div><div class="kpi-trend up" data-i18n="meas_tr21">scripts/pass-mc.mjs 全枚举确定性分布：heirkeeper 6/27≈22.2% · kindle_1 5/27≈18.5% · tend_2 5/27≈18.5% · root_3 5/27≈18.5% · 其余 6 种结局各 1/27≈3.7%；docs/admin/data/pass-montecarlo.json；枚举与系统 _buildGraph verdict 节点同源逻辑</div></div>
+        <div class="kpi" style="border-color:rgba(155,225,255,.45)"><div class="kpi-label" data-i18n="meas_l22">实时遥测快照（W-Z338 · 真·本机 compose 落盘事件 · 2026-11-18）</div><div class="kpi-value">611<span style="font-size:.7em;color:var(--muted)">/14d</span></div><div class="kpi-trend up" data-i18n="meas_tr22">GET /api/telemetry/summary-rollup（构建时实抓）：boss_kill 30 · canon_open 8 · loadtest 424 · smoke 16 · stress-probe 133；判据如前——KPI 首屏演示数据是 SYNTHETIC（seed=20261117 确定性），本卡是唯一贴近「真实玩家行为」的东西：它就是 9 个 JVM 实跑探针（verify 冒烟 + stress-load 洪测 + EmberLane/Oracle 实测）亲手写进 Postgres/Redis 的落账，经 gateway:8080 读出来；每次 Pages 同步自动刷新；快照 → docs/admin/data/telemetry-summary.json · 抓取 → scripts/fetch-telemetry-summary.mjs（docker 内部 wget，host 端口代理坏了也能抓）</div></div>
+        <div class="kpi" style="border-color:rgba(255,179,130,.45)"><div class="kpi-label" data-i18n="meas_l24">MEASURED 漏斗（W-Z355 · 真·compose 落账 · 2026-11-18 · 不分群）</div><div class="kpi-value">4.8<span style="font-size:.7em;color:var(--muted)">% bk</span></div><div class="kpi-trend up" data-i18n="meas_tr24">derived-funnel.mjs → docs/admin/data/measured-funnel.json：boss_kill 30（4.83% of 621 · MEASURED）· canon_open 8（1.29% · MEASURED）· human-adjacent 38 事件（6.12%）· probe 火线 89.69%（loadtest 424 + stress-probe 133） · ≈0.27「开典籍」/「Boss 击杀」· 只有 3 天窗口，不做留存分群推断（伪分群=撒谎）· 其他 KPI 卡多是 SYNTHETIC（seed=20261117），本卡为唯一 MEASURED 链路。</div></div>
+        <div class="kpi" style="border-color:rgba(180,240,190,.45)"><div class="kpi-label" data-i18n="meas_l25">v4 具典+冻结前缀 cachedRatio（W-Z376 · 真·并行 4 路实测 · 2026-11-18T11:21Z）</div><div class="kpi-value">93<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr25">POST gateway:8080/api/ai/lore/answer（同 v4 冻结前缀，4 条并发提问——不同问题同前缀）：四条全部 upstreamCached=true · cachedRatio 93.2 / 93.1 / 93.2 / 93.2%（prompt≈47.6K tok · cached≈44.4K） · 重启后首请求亦为 93.7%。结论：Codex 稳定 90% 的三条件（frozen-prefix + per-lane prompt_cache_key + stream/include_usage）已全在位；真实冷窗口仅 Desktop 重启后首打一条。产物 → docs/admin/data/oracle-v4-live-probe.json（MEASURED，非 SYNTHETIC）。</div></div>
+        <div class="kpi" style="border-color:rgba(180,240,190,.45)"><div class="kpi-label" data-i18n="meas_l27">流式对照探针（W-Z410 · 2026-11-19 · gpt-6.1-terra · Clash）</div><div class="kpi-value">94.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr27">scripts/cache-probe.mjs 真上游实测（两次独立运行）：cached≈5066/5342 ≈94.8% 恒定；上游偶发不回报 cached_tokens 字段（第一次运行 non-stream 无字段，第二次运行 stream warm#4 无字段）——即字段缺失是上游报告抖动而非缓存失效；hit=5066 恒定不变（同 prefix 同 key）。结论：缓存稳定 90%+ 的三个必要条件 = 冻结前缀 &gt;1024 tok + per-lane prompt_cache_key + stream:true &amp; include_usage，缺一不可；「并行会话抢缓存区」不复现（W-Z336 并行探针：8 路同 key ≈98%）。产物 → docs/admin/data/cache-probe-w-z410.json（MEASURED）。</div></div>
+        <div class="kpi" style="border-color:rgba(255,150,150,.45)"><div class="kpi-label" data-i18n="meas_l26">留存窗口（W-Z404 后实测 · 2026-11-19 · 3 天有事件 / 11 天为 0）</div><div class="kpi-value">0<span style="font-size:.7em;color:var(--muted)"> D+14</span></div><div class="kpi-trend flat" data-i18n="meas_tr26">唯一真实遥测（gateway /api/telemetry/summary-rollup · 627 事件 / 3 日）：boss_kill 30 · canon_open 8 · loadtest 424 · stress-probe 133 · smoke 32 · human-adjacent 38 (6.07%)· 11-19 当日 0 事件。<b>留存不可计算</b>：只有 3 天有数据、11 天 0、verified probe 全跑同次测试 rig、没有 userId/session、没有第二次回访。任何 D1/D3/D7 retention 曲线在这组窗口上都是虚构——故事明写、规则明写：zero events = no cohort. 行动项 → telemetry v2（boss_kill 注入 hashed-userId + reason · 不存个人信息 · 至少 n≥200 unique user / 14 天窗 · 关闭后才放行留存卡）。docs/admin/data/measured-funnel.json<b>当前不做留存推断</b>。</div></div>
+        <div class="kpi" style="border-color:rgba(255,179,204,.45)"><div class="kpi-label" data-i18n="meas_l23">Boot 真·活场录（W-Z350 · 本机 SwiftShader · 2026-11-18）</div><div class="kpi-value">77.8<span style="font-size:.7em;color:var(--muted)"> s</span></div><div class="kpi-trend flat" data-i18n="meas_tr23">scripts/boot-probe.mjs（vite dev + headless Chrome · 真窗实测）：vite ready 9.1s → navigate 23.6s → BOOT OK in **77801ms** · frames¸¸ｮ2.5（SwiftShader 软件渲染；真 GPU 远远不止这些）· __game/enemyManager/scene 全 present · boot 完成且零异常；artifact → docs/admin/data/boot-probe.json</div></div>
       </div>
       <div style="font-size:.66rem;color:var(--muted);line-height:1.6" data-i18n-html="meas_foot">
-        <strong style="color:#e8e4dc">鏉ユ簮锛堝叏閮ㄦ湰浠撳簱瀹炶窇锛?/strong>锛?code>docs/LOAD_TEST.md</code>锛圵indows + Docker Desktop 路 9 JVM + Redis 7 路 2026-11-15锛屽惈 W-Z130 200 骞跺彂鐪熻窇锛夛紱<code>docs/MASTER_PLAN.md</code>锛?026-11-17 Oracle 涓婃父涓夋帰閽?+ cache_hit_bench 瀹炲偍鐜囷級锛?
-        <code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> 鎵撶湡瀹?wkapi.pro/v1 gpt-6-sol锛?br/>
-        LLM 缂撳瓨淇閾撅紙HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral 鍐荤粨 system-prompt锛夛細棣栬皟鍐峰惎鍔紙cached=null锛夊悗锛屾璋冨墠缂€鍛戒腑鐜?~77鈥?3%锛堟鍓?HTTP/2 鎭掍负 null锛岃鍒ゅ畾銆岄潪娴佷綆鍛戒腑銆嶇殑鏍瑰洜灏辨槸涓婃父鎺у埗鍙板綊绫伙級銆?br/>
-        <strong style="color:#e8e4dc">鍚堟垚闈㈡澘</strong>锛圞PI / 棰勬祴 / 婕忔枟 / 鐣欏瓨锛変粛鏄‘瀹氭€у悎鎴愭暟鎹紙seed=20261115锛夛紝鏍囨敞涓衡€滃悎鎴愨€濓紱<strong style="color:#e8e4dc">鏈崱鐗囨槸鐪熷疄瀹為獙鏁版嵁</strong>锛屼笉鎯崇湅鍚堟垚灏卞彧鐪嬫鍗°€?
+        <strong style="color:#e8e4dc">来源（全部本仓库实跑）</strong>：<code>docs/LOAD_TEST.md</code>（Windows + Docker Desktop · 9 JVM + Redis 7 · 2026-11-15，含 W-Z130 200 并发真跑）；<code>docs/MASTER_PLAN.md</code>（2026-11-17 Oracle 上游三探针 + cache_hit_bench 实储率）；
+        <code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> 打真实 wkapi.pro/v1 gpt-6-sol；<br/>
+        LLM 缓存修复链（HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral 冻结 system-prompt）：首调冷启动（cached=null）后，次调前缀命中率 ~77–83%（此前 HTTP/2 恒为 null，被判定「非流低命中」的根因就是上游控制台归类）。<br/>
+        <strong style="color:#e8e4dc">合成面板</strong>（KPI / 预测 / 漏斗 / 留存）仍是确定性合成数据（seed=20261115），标注为“合成”；<strong style="color:#e8e4dc">本卡片是真实实验数据</strong>，不想看合成就只看此卡。
       </div>
     </div>
 
     <!-- Real player behaviour simulation (W-Z198) -->
     <div class="panel" id="simulationPanel" style="border-color:rgba(122,146,214,.45)">
-      <h2><span data-i18n="sim_h2">鐪熷疄鐜╁琛屼负妯℃嫙</span> <small data-i18n="sim_small">鏈満 Chrome 脳 浜斾釜浜烘牸 脳 瀹炴祴鍊?/small></h2>
+      <h2><span data-i18n="sim_h2">真实玩家行为模拟</span> <small data-i18n="sim_small">本机 Chrome × 五个人格 × 实测值</small></h2>
       <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px" id="simKpis">
-        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="sim_k1">骞冲潎 boot</div><div class="kpi-value" id="simBootAvg">鈥?span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend flat" id="simBootAvgNote" data-i18n="sim_k1n">瑙佷笅鏂硅鏄?/div></div>
-        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="sim_k2">boot p95</div><div class="kpi-value" id="simBootP95">鈥?span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend flat" data-i18n="sim_k2n">dev 妯″紡鍐峰惎鍔?/div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="sim_k3">鏈崟鑾峰紓甯?/div><div class="kpi-value" id="simExceptions">鈥?/div><div class="kpi-trend up" data-i18n="sim_k3n">0 = 鍏ㄥ憳鐪熸祻瑙堝櫒闆剁偢</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="sim_k4">娌¤€愬績灏卞叧浜?/div><div class="kpi-value" id="simBounced">鈥?/div><div class="kpi-trend flat" data-i18n="sim_k4n">鍚€滈殢渚跨偣涓€涓嬪氨璧扳€?/div></div>
-        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="sim_k5">鐬庣偣骞冲潎娆℃暟</div><div class="kpi-value" id="simWander">鈥?/div><div class="kpi-trend flat" data-i18n="sim_k5n">wanderer 浜烘牸</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="sim_k6">璇存槑涔︽墦寮€鐜?/div><div class="kpi-value" id="simManual">鈥?/div><div class="kpi-trend up" data-i18n="sim_k6n">reader 浜烘牸锛欻 閿啋鐪熸墦寮€</div></div>
+        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="sim_k1">平均 boot</div><div class="kpi-value" id="simBootAvg">—<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend flat" id="simBootAvgNote" data-i18n="sim_k1n">见下方说明</div></div>
+        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="sim_k2">boot p95</div><div class="kpi-value" id="simBootP95">—<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend flat" data-i18n="sim_k2n">dev 模式冷启动</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="sim_k3">未捕获异常</div><div class="kpi-value" id="simExceptions">—</div><div class="kpi-trend up" data-i18n="sim_k3n">0 = 全员真浏览器零炸</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="sim_k4">没耐心就关了</div><div class="kpi-value" id="simBounced">—</div><div class="kpi-trend flat" data-i18n="sim_k4n">含“随便点一下就走”</div></div>
+        <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="sim_k5">瞎点平均次数</div><div class="kpi-value" id="simWander">—</div><div class="kpi-trend flat" data-i18n="sim_k5n">wanderer 人格</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="sim_k6">说明书打开率</div><div class="kpi-value" id="simManual">—</div><div class="kpi-trend up" data-i18n="sim_k6n">reader 人格：H 键→真打开</div></div>
       </div>
       <div id="simSessions" style="font-size:.68rem;color:var(--muted);line-height:1.7;margin-bottom:8px;font-family:Consolas,'JetBrains Mono',monospace"></div>
       <div style="font-size:.66rem;color:var(--muted);line-height:1.6" id="simFoot"></div>
@@ -266,152 +266,152 @@ a{color:var(--gold-dim)}
 
     <!-- Recommendations -->
     <div class="panel">
-      <h2><span data-i18n="rec_h2">涓嬩竴姝ヤ紭鍖栨竻鍗?/span> <small data-i18n="rec_small">鎸変紭鍏堢骇鎺掑簭 路 璋冨弬浼樺厛 P0鈫扨3</small></h2>
+      <h2><span data-i18n="rec_h2">下一步优化清单</span> <small data-i18n="rec_small">按优先级排序 · 调参优先 P0→P3</small></h2>
       <div class="rec-list" id="recList"></div>
     </div>
 
-    <p class="footer-note" data-i18n-html="foot">Crossrealm Chronicles 路 鐐夎竟鐩?路
-      銆屽疄娴嬭褰曘€嶄负 2026-11-15 鏈満瀹炶窇锛?code>docs/LOAD_TEST.md</code> 路 <code>PromptCacheLiveTest</code> 鎵撶湡瀹?wkapi.pro /v1 gpt-6-sol锛夆€斺€?
-      鍚堟垚闈㈡澘鐢?<code>scripts/admin-synthetic.mjs</code> 纭畾鎬х敓鎴愶紙绉嶅瓙 20261115锛夆€斺€?
-      鐪熷疄涓婄嚎鍚庯紝鍚屽嚭鏁版嵁婧?<code>crossrealm_telemetry_*</code> 鐨勬湰鍦颁簨浠朵篃浼氭眹鍏ヤ笂杩板浘琛ㄤ腑銆?
-      鑻ヤ綘鎯虫妸涓婃姤鎺ヨ繘鍚庣锛氬彧闇€ <code>POST /api/telemetry/events</code>锛?
-      鏁版嵁瀛?<code>telemetry</code> 闈㈡澘涓紱鐐夎竟鐩樹繚鎸佸彧璇讳笌闈欐€併€?/p>
+    <p class="footer-note" data-i18n-html="foot">Crossrealm Chronicles · 炉边盘 ·
+      「实测记录」为 2026-11-15 本机实跑（<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> 打真实 wkapi.pro /v1 gpt-6-sol）——
+      合成面板由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115）——
+      真实上线后，同出数据源 <code>crossrealm_telemetry_*</code> 的本地事件也会汇入上述图表中。
+      若你想把上报接进后端：只需 <code>POST /api/telemetry/events</code>，
+      数据存 <code>telemetry</code> 面板中；炉边盘保持只读与静态。</p>
   </div>
 </div>
 
 <script>
 /* ============================================================
- * 鐐夎竟鐩?路 杩愯惀闈㈡澘锛坧assword = "123"锛?
- * 鏁版嵁锛歞ocs/admin/data/synthetic.json锛堢‘瀹氭€у悎鎴愶紝rebuildable锛? 鏈満 LS 鐪熷疄浜嬩欢
- * 璇█锛氫腑鏂?/ English 涓€閿垏鎹紙localStorage crossrealm_admin_lang锛?
+ * 炉边盘 · 运营面板（password = "123"）
+ * 数据：docs/admin/data/synthetic.json（确定性合成，rebuildable）+ 本机 LS 真实事件
+ * 语言：中文 / English 一键切换（localStorage crossrealm_admin_lang）
  * ============================================================ */
 const I18N = {
   zh: {
-    doc_title: '鐐夎竟鐩?路 Crossrealm Chronicles 路 杩愯惀',
-    gate_title: '鐐夎竟鐩?路 鐐夌伀涔嬪鐨勯棬',
-    gate_sub: '绠＄悊鍛?路 Admin 路 浠讳綍鐭ラ亾鍙ｄ护鐨勪汉',
-    gate_ph: '鍙ｄ护', gate_aria: '绠＄悊鍛樺彛浠?, gate_btn: '寮€闂?路 Unlock',
-    gate_note: '璇ラ〉涓嶅鍏紬寮€鏀?路 浠呯敤鏂囧瓧鍙ｄ护 路 Frontend-only 瀹夊叏',
-    top_h1: '鐐夎竟鐩?路 Crossrealm Chronicles 鈥?杩愯惀鐩?,
-    nav_home: '鈫?鍥炰富椤?, nav_game: '娓告垙', nav_guide: '璇存槑涔?,
-    local_h2: '鏈湴鐪熷疄浜嬩欢',
-    local_small: '褰撳墠娴忚鍣?路 crossrealm_telemetry_v1 LS 婊氬姩缂撳啿 200 鏉?,
-    local_note: '璇存槑锛氫互涓嬫槸 <em>浣犺繖鍙版祻瑙堝櫒</em> 鍦ㄨ繃鍘昏窇鍑烘潵鐨勭湡瀹炰簨浠讹紱鐪熷疄澶氱敤鎴锋暟鎹敱鍚庣鑱氬悎鏃跺憟鐜板湪涓婇潰鐨勫悎鎴愰潰鏉夸腑銆?,
-    dau_h2: '30 澶?DAU 鏇茬嚎', dau_small: 'mu 脳 鏃ユ暟 路 婊氬姩',
-    pred_h2: '鏈潵 14 澶?路 瓒嬪娍棰勬祴', pred_small: '绾挎€у洖褰?路 骞崇Щ',
-    features_h2: '鍔熻兘娼睈 路 鐜╁鐖辩敤浠€涔?, features_small: '鏈€杩?30 澶?路 鍗犱細璇濇瘮',
-    funnel_h2: '杞寲婕忔枟', funnel_small: '浠庢姷杈惧嚭鍦洪〉 鈫?鐐変富寰界珷', retention_h2: '娆＄暀 / 澶嶆粴 / 鍥炴祦',
-    meas_h2: '瀹炴祴璁板綍 路 Measured', meas_small: '2026-11-15 鐪熻窇鐪熸祴 路 涓嶆槸婕旂ず鏁版嵁',
-    meas_l1: '鍘嬫祴 路 200 骞跺彂 路 Postgres 鍦ㄥ満', meas_tr1: '100% 鎴愬姛 路 0 5xx 路 4666/4666锛?026-11-15 W-Z130锛?,
-    meas_l2: '鍏ㄥ満閿欒鐜?, meas_tr2: '鍏潯璺敱鍏ㄩ儴璧伴€?路 鏃?5xx',
-    meas_l3: 'p50 鏃跺欢锛? JVM + PG 路 鍚屾満锛?, meas_tr3: '缃戠粶浠ｇ悊寮€閿€涓轰富',
-    meas_l4: '鍗?IP 娲按琚墦鍥?,
-    meas_l5: 'seasons 缂撳瓨鍛戒腑',
-    meas_l6: '绐楀彛鍐呴檺娴佽鏁?,
-    meas_l7: 'Advisor 鐪熷疄 e2e锛圔M25+LLM锛?, meas_tr7: '30 job 路 5 骞跺彂 路 涓绘ā鍨?gpt-6-sol',
-    meas_l8: 'LLM 鍓嶇紑缂撳瓨锛堟湰娆″疄璺戯級', meas_tr8: '鈮?7.0% 路 鍐峰惎 null 鈫?娆¤皟鍛戒腑',
-    meas_l9: 'Oracle 涓婃父鎺㈤拡锛圓/B/C锛?, meas_tr9: '6179 / 1798 / 6170 tok 路 姝ｇ‘鍒嗙骇 100%',
-    meas_l10: '缂撳瓨 bench 鐑鐑紙cache_hit_bench锛?, meas_tr10: '鍐?41.7% 鈫?鐑?85.6%锛堢湡鍛戒腑锛?, meas_l11: 'prompt_cache_key 璺敱锛圵-Z168 瀹炴祴锛?, meas_tr11: '鍐峰寘 null 鈫?浜屽寘璧风ǔ瀹?5632/5858 cached锛? 鍖呰繛娴嬶級',
-    meas_foot: '<strong style="color:#e8e4dc">鏉ユ簮锛堝叏閮ㄦ湰浠撳簱瀹炶窇锛?/strong>锛?code>docs/LOAD_TEST.md</code>锛圵indows + Docker Desktop 路 9 JVM + Redis 7 路 2026-11-15锛夛紱<code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> 鎵撶湡瀹?wkapi.pro/v1 gpt-6-sol锛?br/>LLM 缂撳瓨淇閾撅紙HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral 鍐荤粨 system-prompt + W-Z168 鏂板 prompt_cache_key: crossrealm-canon-v1锛夛細棣栬皟鍐峰惎鍔紙cached=null锛夊悗锛屾璋冨墠缂€鍛戒腑鐜?~96鈥?7%锛圝ava PromptCacheLiveTest 瀹炲緱 prompt=5411 cached=5248锛? 鍖呰繛鍙戝叏绾?0 鈫?5632 鈫?5632 鈫?5632 鈫?5632 / 5858 = 96.1%锛夛紱<br/><strong style="color:#e8e4dc">鍚堟垚闈㈡澘</strong>锛圞PI / 棰勬祴 / 婕忔枟 / 鐣欏瓨锛変粛鏄‘瀹氭€у悎鎴愭暟鎹紙seed=20261115锛夛紝鏍囨敞涓衡€滃悎鎴愨€濓紱<strong style="color:#e8e4dc">鏈崱鐗囨槸鐪熷疄瀹為獙鏁版嵁</strong>銆?,
-    sim_h2: '鐪熷疄鐜╁琛屼负妯℃嫙', sim_small: '鏈満 Chrome 脳 浜斾釜浜烘牸 脳 瀹炴祴鍊硷紙W-Z198锛?, sim_k1: '骞冲潎 boot', sim_k1n: '瑙佷笅鏂硅鏄?, sim_k2: 'boot p95', sim_k2n: 'dev 妯″紡鍐峰惎鍔紙鐢熶骇鏋勫缓鏇村揩锛?, sim_k3: '鏈崟鑾峰紓甯?, sim_k3n: '0 = 鍏ㄥ憳鐪熸祻瑙堝櫒闆剁偢', sim_k4: '娌¤€愬績灏卞叧浜?, sim_k4n: '鍚€滈殢渚跨偣涓€涓嬪氨璧扳€?, sim_k5: '鐬庣偣骞冲潎娆℃暟', sim_k5n: 'wanderer 浜烘牸锛?鈥? 澶勯殢鏈虹偣', sim_k6: '璇存槑涔︽墦寮€鐜?, sim_k6n: 'reader 浜烘牸锛欻 閿啋鐪熸墦寮€', sim_verdict_ok: '鍏ㄩ儴浼氳瘽闆舵湭鎹曡幏寮傚父 路 鍏抽敭璺緞锛堣繘涓栫晫 / 寮€鏃ュ織 / 寮€璇存槑涔︼級鍏ㄩ儴鍒拌揪', sim_verdict_bad: '鏈変細璇濇挒鍑烘湭鎹曡幏寮傚父鈥斺€旇 exceptionSample', sim_unavailable: 'simulation.json 鏈壘鍒扳€斺€斿湪浠撳簱鏍圭洰褰曡繍琛?node scripts/simulate-players.mjs 鐢熸垚', sim_generated: '鐢熸垚鏃堕棿', sim_note1: 'impatient锛堢偣涓€涓嬪氨璧帮級/ wanderer锛堥殢鏈虹瀻鐐癸級/ reader锛堝厛寮€璇存槑涔?H 鍐嶇帺锛? speedrunner锛堣繘涓栫晫鍚?J 寮€鏃ュ織锛? sprinter锛堢洿鎺ヨ繘璺戯級銆?, sim_note2: '浜烘牸琛屼负鎸夊墽鏈柦鍔狅紝瑙傛祴鍊兼槸鐪熺殑锛涗笉鏄敓浜ч仴娴嬶紙Pages 鏃犲悗绔級銆?, sim_note3: '瀹屾暣鏁版嵁锛歞ocs/admin/data/simulation.json锛涢噸璺戯細node scripts/simulate-players.mjs锛坰eed=20261117锛夈€?,
-    meas_l12: 'cache-probe 2026-11-16 澶嶆祴锛圢ode锛?, meas_tr12: '鍐荤粨鍓嶇紑 745鈥?68 / 966 鍛戒腑锛涒憽 鏃犳爣璁版亽鏃?cache 瀛楁锛? 娆＄灛鎬?miss锛?327 tok 路 cached=0 路 璺敱婕傜Щ锛?,
-    meas_l13: 'ui-walkthrough 2026-11-16 澶嶈窇', meas_tr13: '18/18 鍏ㄧ豢 路 瓒婄晫鍏冪礌 0 路 HUD 鎸ゅ彔 0锛坺h/en 脳 large锛屽惈鎵嬫満 390脳844锛?,
-    sim_derived: '浠庢湰娆℃ā鎷熸帹鍑烘潵鐨勪紭鍖栦紭鍏堢骇锛堟寜鏈窇鏁板瓧锛屼笉鎷嶈剳琚嬶級', sim_d_boot: '棣栧睆 boot avg %Vms锛坉ev 鍐峰惎鍔ㄥ彛寰勶級鈥斺€?鍏抽敭璺緞鍘嬬缉锛堝ぇ绾圭悊鎯版€у姞杞?/ 浠ｇ爜鍒嗗壊锛?, sim_d_bounce: '娌¤€愬績鍏?%V 鈥斺€?寮€濮嬬晫闈?30 绉掔倝杈瑰皬鍐屽瓙缁х画鍓嶇Щ锛屽紑鍦烘枃鏈啀鐮嶄竴鍒€', sim_d_zero: '0 鏈崟鑾峰紓甯?鈥斺€?鎶婅繖鏉?CDP 鍐掔儫鐒婅繘 CI锛屽綋浣滃悎骞堕棬绂佷箣涓€', sim_d_manual: '璇存槑涔?H 閿墦寮€鐜?%V 鈥斺€?璇存槑涔﹁矾寰勬湁鏁堬紝H 閿彁绀哄崌涓洪灞忓彲瑙?,
-    meas_l14: '鏂?API 杩佺Щ瀹炴祴锛?026-11-16 路 Clash 鑺傜偣锛?, meas_tr14: '鐩磋繛 403锛涚粡 Clash 娣峰悎绔彛鐪熻蛋閫氾細Java 鍐锋祴 cached=null 鈫?鐑祴 cached=5504/5679 鈮?96.96% 路 AI 鍏ㄩ摼璺?live 3/3 缁匡紙AiLiveIntegrationTest / AdvisorJobLiveIntegrationTest / EchoHintLiveIntegrationTest 路 model=gpt-6.1-terra锛壜?Node cache-probe 鍏ㄧ嚎 200',
-    meas_l15: 'Lore Oracle 鍏ㄩ摼璺?live锛圵-Z238 路 Clash 7897锛?, meas_tr15: '鐪熷疄涓婃父锛氶敋鐏槸浠€涔堬紵鈫?BM25 鍙洖 4 鍧?鈫?HTTP 200 sources=[67,89,77,35] 路 model=gpt-6.1-terra 路 latency鈮?.2s锛涙棤涔夋彁闂?zxqjwop qkdjw zqwvjqmw rfjklw 鈫?BM25 鍏ㄨ瘝闆跺彫鍥?鈫?璇氬疄鎷掔瓟銆屾鐗╂湭鍦ㄥ吀绫嶄腑銆嵚?latency=0 路 涓嶈姳 token',
-    meas_l16: 'Oracle stress 16s 路 40 骞跺彂锛圵-Z240 路 鏈満鐩磋窇锛?, meas_tr16: 'mixed锛坔ealth 脳 answerBurst锛夛細3488 璇锋眰 路 0 4xx 路 0 5xx 路 errRate 0.00% 路 p50=125ms 路 p95=346ms 路 p99=2672ms 路 max=3403ms 路 鈮?17 rps',
-    meas_l17: 'Oracle 鐜板疄鍘熷瀷璺敱 live锛圵-Z244 路 Clash 7897锛?, meas_tr17: '鏈烘璺敱鍛戒腑 refs 涓撳睘鐭锛坲ser 娉ㄨ琛岋紝system 鍐荤粨涓嶅姩锛夛細canon銆岄敋鐏槸浠€涔堬紵銆嶁啋 sources=[novel/67, 89, 77, 35] 鈮?.6s 鉁擄紱refs 闂 鈫?sources=[refs/crossrealm-realworld-notes.md] 鈮?3s 鉁擄紱鏃犱箟鎻愰棶 鈫?璇氬疄鎷掔瓟 latency=0 路 涓嶈姳 token锛汱oreOracleRouteHintTest 23 鏂█鍏ㄧ豢',
-    meas_l18: 'Oracle 缂撳瓨鍙岃建鎺㈤拡瀹炴祴锛圵-Z247 路 Clash 路 2026-11-16锛?, meas_tr18: 'scripts/oracle-cache-probe.mjs --json锛歝anon cached=6784/6784 脳2 鈮?7.3% 路 refs cached=7424/7424 脳2 鈮?7.5%锛堜慨澶嶅墠 canon 鎭?null锛夛紱璁板綍 鈫?docs/admin/data/oracle-cache-probe.json锛泂ystem 鍐荤粨璺ㄤ笂娓?prompt-cache ~1024-token 椤甸棬妲涘悗鍙岃建鎭掓殩', meas_l18b: 'Admin LLM 鍙岃杩愯惀鍒嗘瀽锛圵-Z311 路 鐪熶笂娓?gpt-6.1-terra锛?, meas_tr18b: 'scripts/admin-llm-analysis.mjs锛氬疄娴嬭繍钀ュ缓璁弻璇腑/鑻扁€斺€旂幇鐘跺垽璇?路 瓒嬪娍 路 P0鈫扨3 路銆屽厛楠岃瘉鍐嶆墽琛屻€嶁墺4 鏉★紱zh chars=2361 / en chars=5439 路 prompt鈮?968/5918 tok 路 cached鈮?5.8%锛涙姤鍛?鈫?docs/admin/data/admin-llm-analysis.zh.md + .en.md锛圠LM 鐢熸垚锛岀敤浜庢不鐞?路銆屽厛楠岃瘉鍐嶆墽琛屻€嶏級', meas_l18c: '骞惰缂撳瓨闅旂瀹炴祴锛圵-Z336 路 鐪熶笂娓?路 8 骞跺彂鍚岄敭锛?, meas_tr18c: 'scripts/cache-parallel-probe.mjs锛堢湡 API 路 Clash 7897锛夛細鈶?鍚岄敭 2脳椤轰覆鍐峰惎鍔?cached=0锛坙ane 澶?~3 鍖呭繀鍐凤紝涓婃父琛屼负锛夆憽 8 骞跺彂瀛愯繘绋嬪悓 key锛?脳98.0% + 1脳97.9% 路 aggregate 鈮?7.98% 鈥斺€?骞惰浼氳瘽鍏变韩 prompt_cache_key 涓嶆帀缂撳瓨 鈶?3脳ember+3脳oracle 娣峰悎骞跺彂锛氱 3 鍖呰捣 98.0/97.9%锛堝唴瀹瑰搱甯屽叡浜喕缁撳墠缂€锛沴ane 浜掍笉姹℃煋锛壜?artifact 鈫?docs/admin/data/llm-parallel-cache-probe.json',
-    meas_l19: 'Oracle 绱楠岃瘉妗ｆ锛圵-Z251/253 路 live archive 路 2026-11-16锛?, meas_tr19: 'docs/oracle-live-log/ 鐪熷疄涓婃父鍘熸枃锛歝anon 鈮?.6鈥?.3s 路 refs 鈮?鈥?7s 路 鏃犱箟鎻愰棶 鈫?璇氬疄鎷掔瓟 latency=0 路 涓嶈姳 token锛涒墺13 渚?live 鏂█绱鍏ㄧ豢锛涘弻杞ㄧ紦瀛?鈮?7%',
-    meas_l20: '鐐夌伀绁堟効鍏ㄩ€夐」棰戞锛圵-Z265 路 27/27 鏋氫妇 路 2026-11-16锛?, meas_tr20: 'scripts/vow-mc.mjs 鍏ㄦ灇涓剧‘瀹氭€у垎甯冿細windkeeper 6/27鈮?2.2% 路 ember_1 5/27鈮?8.5% 路 grey_2 5/27鈮?8.5% 路 self_3 5/27鈮?8.5% 路 鍏朵綑 7 绉嶇粨灞€鍚?1/27鈮?.7%锛沝ocs/admin/data/vow-montecarlo.json锛涙棤闅忔満鏃犻',
-    meas_l21: '鐐夌伀鐨勪氦妫掑叏閫夐」棰戞锛圵-Z283 路 27/27 鏋氫妇 路 2026-11-17锛?, meas_tr21: 'scripts/pass-mc.mjs 鍏ㄦ灇涓剧‘瀹氭€у垎甯冿細heirkeeper 6/27鈮?2.2% 路 kindle_1 5/27鈮?8.5% 路 tend_2 5/27鈮?8.5% 路 root_3 5/27鈮?8.5% 路 鍏朵綑 6 绉嶇粨灞€鍚?1/27鈮?.7%锛沝ocs/admin/data/pass-montecarlo.json锛涙灇涓句笌绯荤粺 _buildGraph verdict 鑺傜偣鍚屾簮閫昏緫',
-    meas_l22: '瀹炴椂閬ユ祴蹇収锛圵-Z338 路 鐪熉穋ompose 钀界洏浜嬩欢 路 2026-11-18锛?, meas_tr22: 'GET /api/telemetry/summary-rollup锛堟瀯寤烘椂瀹炴姄锛夛細boss_kill 30 路 canon_open 8 路 loadtest 424 路 smoke 16 路 stress-probe 133锛涢灞?KPI 鏄?SYNTHETIC锛坰eed=20261117锛夛紝鏈崱鏄敮涓€璐磋繎鐪熷疄鐜╁琛屼负鐨勨€斺€攙erify 鍐掔儫 + stress-load 娲祴 + Ember/Oracle 瀹炴祴浜叉墜鍐欒繘璐︾殑閬ユ祴锛岀粡 gateway:8080 璇诲嚭锛涙瘡娆?Pages 鍚屾鑷姩鍒锋柊锛涘揩鐓?鈫?docs/admin/data/telemetry-summary.json 路 鎶撳彇鍣?鈫?scripts/fetch-telemetry-summary.mjs',
-    meas_l23: 'Boot 鐪熉峰喎鍚姩瀹炴祴锛圵-Z350 路 鏈満 SwiftShader 路 2026-11-18锛?, meas_tr23: 'scripts/boot-probe.mjs锛坴ite dev + headless Chrome 路 鐪熺獥瀹炴祴锛夛細vite ready 9.1s 鈫?navigate 23.6s 鈫?BOOT OK in 77801ms 路 frames(2s)鈮?.5锛圫wiftShader 杞欢娓叉煋锛涚湡 GPU 杩滀綆锛壜?__game/enemyManager/scene 鍏?present 路 boot 瀹屾垚涓旈浂寮傚父锛沘rtifact 鈫?docs/admin/data/boot-probe.json',
-    meas_l24: 'MEASURED 婕忔枟锛圵-Z355 路 鐪熉穋ompose 钀借处 路 2026-11-18 路 涓嶅垎缇わ級', meas_tr24: 'derived-funnel.mjs 鈫?docs/admin/data/measured-funnel.json锛歜oss_kill 30锛?.83% of 621 路 MEASURED锛壜?canon_open 8锛?.29% 路 MEASURED锛壜?human-adjacent 38 浜嬩欢锛?.12%锛壜?probe 鐏嚎 89.69%锛坙oadtest 424 + stress-probe 133锛?路 鈮?.27銆屽紑鍏哥睄銆?銆孊oss 鍑绘潃銆?路 鍙湁 3 澶╃獥鍙ｏ紝涓嶅仛鐣欏瓨鍒嗙兢鎺ㄦ柇锛堜吉鍒嗙兢=鎾掕皫锛壜?鍏朵粬 KPI 鍗″鏄?SYNTHETIC锛坰eed=20261117锛夛紝鏈崱涓哄敮涓€ MEASURED 閾捐矾',
-    meas_l25: 'v4 鍏峰吀+鍐荤粨鍓嶇紑 cachedRatio锛圵-Z376 路 鐪熉峰苟琛?4 璺疄娴?路 2026-11-18锛?, meas_tr25: 'POST gateway:8080/api/ai/lore/answer锛? 鏉″苟鍙戜笉鍚岄棶棰樸€佸悓 v4 鍐荤粨鍓嶇紑鈥斺€斿叏閮?upstreamCached=true 路 cachedRatio 93.2/93.1/93.2/93.2%锛坧rompt鈮?7.6K 路 cached鈮?4.4K锛?路 閲嶅惎鍚庨璇锋眰浜︿负 93.7%锛?0:50:56Z锛?路 Codex 绋冲畾 90% 鐨勪笁鏉′欢锛坒rozen-prefix+per-lane key+stream/include_usage锛夊叏鍦ㄤ綅 路 鍐风獥鍙ｄ粎 Desktop 閲嶅惎鍚庨鎵撲竴鏉?路 docs/admin/data/oracle-v4-live-probe.json锛圡EASURED锛?,
-    meas_l26: '鐣欏瓨绐楀彛锛堜笅娆″疄娴?路 2026-11-19 路 3 鏃ユ湁 8 娆°€?1 鏃ヤ负 0锛?, meas_tr26: 'gateway 瀹炴祴 627 浜嬩欢 / 3 鏃ユ湁鏁帮紙11-15/11-17/11-18锛?11 澶╀负 0锛歜oss_kill 30 路 canon_open 8 路 loadtest 424 路 stress 133 路 smoke 32 路 human-adjacent 38 (6.07%) 路 鐣欏瓨涓嶅彲璁＄畻鈥斺€斿彧鏈?3 澶╂湁鏁版嵁銆?1 澶╀负 0銆佹病鏈?unique user 缁村害銆佹病鏈?D1/D3 涔嬮棿绐楀彛锛涚粷涓嶅仛鐣欏瓨鏇茬嚎锛堜吉鍒嗙兢=璋庯級銆倀elemetry v2 涓嬩釜閲岀▼纰戯細boss_kill 娉ㄥ叆 hashed-userId 路 鑷冲皯 14 澶╃獥 n鈮?00 unique user 鍚庢墠鏀捐鐣欏瓨鍗?,
-    meas_l27: '娴佸紡瀵圭収鎺㈤拡锛圵-Z410 路 2026-11-19 路 gpt-6.1-terra 路 Clash锛?, meas_tr27: 'scripts/cache-probe.mjs 鐪熶笂娓稿疄娴嬶紙涓ゆ鐙珛杩愯锛夛細cached鈮?066/5342 鈮?4.8% 鎭掑畾锛涗笂娓稿伓鍙戜笉鍥炴姤 cached_tokens 瀛楁锛堢涓€娆¤繍琛?non-stream 鏃犲瓧娈碉紝绗簩娆¤繍琛?stream 绗?璋冩棤瀛楁锛夆€斺€斿嵆瀛楁缂哄け鏄笂娓告姤鍛婃姈鍔ㄨ€岄潪缂撳瓨澶辨晥锛沨it=5066/5342 鎭掑畾涓嶅彉锛堝悓 prefix 鍚?key锛夈€傚喕缁撳墠缂€ >1024 tok + per-lane prompt_cache_key + stream:true & include_usage 涓夋潯浠剁己涓€涓嶅彲锛涘苟琛屼細璇濇姠缂撳瓨涓嶅鐜帮紙W-Z336 8 璺?鈮?8%锛?,
-    rec_h2: '涓嬩竴姝ヤ紭鍖栨竻鍗?, rec_small: '鎸変紭鍏堢骇鎺掑簭 路 璋冨弬浼樺厛 P0鈫扨3',
-    foot: 'Crossrealm Chronicles 路 鐐夎竟鐩?路<br/>銆屽疄娴嬭褰曘€嶄负 2026-11-15 鏈満瀹炶窇锛?code>docs/LOAD_TEST.md</code> 路 <code>PromptCacheLiveTest</code> 鎵撶湡瀹?wkapi.pro /v1 gpt-6-sol锛夆€斺€?鍚堟垚闈㈡澘鐢?<code>scripts/admin-synthetic.mjs</code> 纭畾鎬х敓鎴愶紙绉嶅瓙 20261115锛夆€斺€?鐪熷疄涓婄嚎鍚庯紝鍚屽嚭鏁版嵁婧?<code>crossrealm_telemetry_*</code> 鐨勬湰鍦颁簨浠朵篃浼氭眹鍏ヤ笂杩板浘琛ㄤ腑銆?br/>鑻ヤ綘鎯虫妸涓婃姤鎺ヨ繘鍚庣锛氬彧闇€ <code>POST /api/telemetry/events</code>锛屾暟鎹瓨 <code>telemetry</code> 闈㈡澘涓紱鐐夎竟鐩樹繚鎸佸彧璇讳笌闈欐€併€?br/>W-Z311 璧凤細LLM 鍙岃杩愯惀鍒嗘瀽锛坉igest 鍐荤粨銆佺湡涓婃父銆佺粡 <code>scripts/admin-llm-analysis.mjs</code> 瀹炶窇锛夎 <code><a href="data/admin-llm-analysis.zh.md">涓枃鎶ュ憡</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code>锛圠LM 鐢熸垚锛宒igest 涓庡師濮?JSON 涓哄噯锛夈€?,
-    boot_fail: 'synthetic.json 鏈兘瑁呰浇銆?br>璇峰厛璺?<code>node scripts/admin-synthetic.mjs</code>',
-    slope_line: '闄″害锛氭瘡澶?%DAU DAU/14d锛涗粖鏃ュ€?%AVG锛涢娴?+14d 宄板€?鈮?%PEAK',
-    kpi_dau_avg: '鏃ユ椿鍧囧€?, kpi_session_min: '浼氳瘽骞冲潎鍒嗛挓', kpi_boss: 'Boss 鑳滅巼', kpi_canon: '鍏哥睄闃呰鐜?,
-    kpi_d1: '鐣欏瓨 D1', kpi_d7: '鐣欏瓨 D7', kpi_bounce: '鍑哄彛鐜?, kpi_churn: '鏀惧純鐜?,
-    kpi_new: '鏂扮敤鎴?鏃?, kpi_sessions: '鎬讳細璇濇暟', kpi_boss_clears: '鎬?Boss 閫氬叧', kpi_d14: '鐣欏瓨 D14',
-    kpi_up: '鈻?rolling', kpi_down: '鈻?cap',
-    lt_game_start: '娓告垙鍚姩', lt_help_open: '鎸?H 鎵撳紑璇存槑', lt_journal_open: '鎸?J 鎵撳紑鏃ュ織', lt_worldmap_open: '鎸?M 鎵撳紑鍦板浘',
-    lt_canon_open: '鎵撳紑鍏哥睄棣?, lt_flame_draw: '鍗犲崪鎶界伀', lt_boss_kill: 'Boss 閫氬叧', lt_autoplay_tap: '鑷姩閫氬叧', lt_trilance_draw: '鏇滅洏宸茶捣', lt_vow_draw: '绁堟効宸茶', lt_kindle_pass_draw: '浜ゆ宸插€?, lt_advisor_directive_follow: '璺熼殢鎸囧紩', lt_arbiter_epilogue: '鐑伅鍥炰俊', lt_boss_verse: '浣欑伀鍥炲搷', lt_kindle_letter_exchange: '鐑伀绛?,
-    insight_h2: '鏈満鏅鸿兘娲炲療', insight_small: 'LS 鐪熷疄浜嬩欢娴?鈫?涓嬩竴姝ヨ鍋氫粈涔?,
-    insight_empty: '灏氭棤瓒冲浜嬩欢鈥斺€旈殢渚跨帺涓ゅ眬锛圚/J/M/鍑绘潃 Boss/鎶藉崱锛夊啀鍥炴潵',
-    insight_low: '浣庣疆淇″害 路 n={n}', insight_mid: '涓瓑缃俊搴?路 n={n}', insight_high: '楂樼疆淇″害 路 n={n}',
-    insight_foot: '姣忔潯寤鸿閮芥寜鐪熷疄浜嬩欢缂撳啿鎺掑簭锛堣法 200 鏉℃渶澶氾級銆傛寜浼樺厛绾ц惤鍒般€岃繖娆′笅涓€娆℃洿鏂般€嶆垨 UI 寮曞涓婏紱瀵规瘮涓婃柟鍚堟垚 KPI 鍜屼笅鏂规湰鏈轰簨浠讹紝涓ゅ潡鎵嶄細瀵瑰緱璧风湡鐜╁銆?,
+    doc_title: '炉边盘 · Crossrealm Chronicles · 运营',
+    gate_title: '炉边盘 · 炉火之外的门',
+    gate_sub: '管理员 · Admin · 任何知道口令的人',
+    gate_ph: '口令', gate_aria: '管理员口令', gate_btn: '开门 · Unlock',
+    gate_note: '该页不对公众开放 · 仅用文字口令 · Frontend-only 安全',
+    top_h1: '炉边盘 · Crossrealm Chronicles — 运营盘',
+    nav_home: '← 回主页', nav_game: '游戏', nav_guide: '说明书',
+    local_h2: '本地真实事件',
+    local_small: '当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条',
+    local_note: '说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。',
+    dau_h2: '30 天 DAU 曲线', dau_small: 'mu × 日数 · 滚动',
+    pred_h2: '未来 14 天 · 趋势预测', pred_small: '线性回归 · 平移',
+    features_h2: '功能潮汐 · 玩家爱用什么', features_small: '最近 30 天 · 占会话比',
+    funnel_h2: '转化漏斗', funnel_small: '从抵达出场页 → 炉主徽章', retention_h2: '次留 / 复滚 / 回流',
+    meas_h2: '实测记录 · Measured', meas_small: '2026-11-15 真跑真测 · 不是演示数据',
+    meas_l1: '压测 · 200 并发 · Postgres 在场', meas_tr1: '100% 成功 · 0 5xx · 4666/4666（2026-11-15 W-Z130）',
+    meas_l2: '全场错误率', meas_tr2: '八条路由全部走通 · 无 5xx',
+    meas_l3: 'p50 时延（9 JVM + PG · 同机）', meas_tr3: '网络代理开销为主',
+    meas_l4: '单 IP 洪水被打回',
+    meas_l5: 'seasons 缓存命中',
+    meas_l6: '窗口内限流计数',
+    meas_l7: 'Advisor 真实 e2e（BM25+LLM）', meas_tr7: '30 job · 5 并发 · 主模型 gpt-6-sol',
+    meas_l8: 'LLM 前缀缓存（本次实跑）', meas_tr8: '≈77.0% · 冷启 null → 次调命中',
+    meas_l9: 'Oracle 上游探针（A/B/C）', meas_tr9: '6179 / 1798 / 6170 tok · 正确分级 100%',
+    meas_l10: '缓存 bench 热预热（cache_hit_bench）', meas_tr10: '冷 41.7% → 热 85.6%（真命中）', meas_l11: 'prompt_cache_key 路由（W-Z168 实测）', meas_tr11: '冷包 null → 二包起稳定 5632/5858 cached（4 包连测）',
+    meas_foot: '<strong style="color:#e8e4dc">来源（全部本仓库实跑）</strong>：<code>docs/LOAD_TEST.md</code>（Windows + Docker Desktop · 9 JVM + Redis 7 · 2026-11-15）；<code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> 打真实 wkapi.pro/v1 gpt-6-sol；<br/>LLM 缓存修复链（HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral 冻结 system-prompt + W-Z168 新增 prompt_cache_key: crossrealm-canon-v1）：首调冷启动（cached=null）后，次调前缀命中率 ~96–97%（Java PromptCacheLiveTest 实得 prompt=5411 cached=5248；4 包连发全线 0 → 5632 → 5632 → 5632 → 5632 / 5858 = 96.1%）；<br/><strong style="color:#e8e4dc">合成面板</strong>（KPI / 预测 / 漏斗 / 留存）仍是确定性合成数据（seed=20261115），标注为“合成”；<strong style="color:#e8e4dc">本卡片是真实实验数据</strong>。',
+    sim_h2: '真实玩家行为模拟', sim_small: '本机 Chrome × 五个人格 × 实测值（W-Z198）', sim_k1: '平均 boot', sim_k1n: '见下方说明', sim_k2: 'boot p95', sim_k2n: 'dev 模式冷启动（生产构建更快）', sim_k3: '未捕获异常', sim_k3n: '0 = 全员真浏览器零炸', sim_k4: '没耐心就关了', sim_k4n: '含“随便点一下就走”', sim_k5: '瞎点平均次数', sim_k5n: 'wanderer 人格：3–7 处随机点', sim_k6: '说明书打开率', sim_k6n: 'reader 人格：H 键→真打开', sim_verdict_ok: '全部会话零未捕获异常 · 关键路径（进世界 / 开日志 / 开说明书）全部到达', sim_verdict_bad: '有会话撞出未捕获异常——见 exceptionSample', sim_unavailable: 'simulation.json 未找到——在仓库根目录运行 node scripts/simulate-players.mjs 生成', sim_generated: '生成时间', sim_note1: 'impatient（点一下就走）/ wanderer（随机瞎点）/ reader（先开说明书 H 再玩）/ speedrunner（进世界后 J 开日志）/ sprinter（直接进跑）。', sim_note2: '人格行为按剧本施加，观测值是真的；不是生产遥测（Pages 无后端）。', sim_note3: '完整数据：docs/admin/data/simulation.json；重跑：node scripts/simulate-players.mjs（seed=20261117）。',
+    meas_l12: 'cache-probe 2026-11-16 复测（Node）', meas_tr12: '冻结前缀 745–768 / 966 命中；② 无标记恒无 cache 字段；1 次瞬态 miss（1327 tok · cached=0 · 路由漂移）',
+    meas_l13: 'ui-walkthrough 2026-11-16 复跑', meas_tr13: '18/18 全绿 · 越界元素 0 · HUD 挤叠 0（zh/en × large，含手机 390×844）',
+    sim_derived: '从本次模拟推出来的优化优先级（按本跑数字，不拍脑袋）', sim_d_boot: '首屏 boot avg %Vms（dev 冷启动口径）—— 关键路径压缩（大纹理惰性加载 / 代码分割）', sim_d_bounce: '没耐心关 %V —— 开始界面 30 秒炉边小册子继续前移，开场文本再砍一刀', sim_d_zero: '0 未捕获异常 —— 把这条 CDP 冒烟焊进 CI，当作合并门禁之一', sim_d_manual: '说明书 H 键打开率 %V —— 说明书路径有效，H 键提示升为首屏可见',
+    meas_l14: '新 API 迁移实测（2026-11-16 · Clash 节点）', meas_tr14: '直连 403；经 Clash 混合端口真走通：Java 冷测 cached=null → 热测 cached=5504/5679 ≈ 96.96% · AI 全链路 live 3/3 绿（AiLiveIntegrationTest / AdvisorJobLiveIntegrationTest / EchoHintLiveIntegrationTest · model=gpt-6.1-terra）· Node cache-probe 全线 200',
+    meas_l15: 'Lore Oracle 全链路 live（W-Z238 · Clash 7897）', meas_tr15: '真实上游：锚火是什么？→ BM25 召回 4 块 → HTTP 200 sources=[67,89,77,35] · model=gpt-6.1-terra · latency≈3.2s；无义提问 zxqjwop qkdjw zqwvjqmw rfjklw → BM25 全词零召回 → 诚实拒答「此物未在典籍中」· latency=0 · 不花 token',
+    meas_l16: 'Oracle stress 16s · 40 并发（W-Z240 · 本机直跑）', meas_tr16: 'mixed（health × answerBurst）：3488 请求 · 0 4xx · 0 5xx · errRate 0.00% · p50=125ms · p95=346ms · p99=2672ms · max=3403ms · ≈217 rps',
+    meas_l17: 'Oracle 现实原型路由 live（W-Z244 · Clash 7897）', meas_tr17: '机械路由命中 refs 专属短语（user 注记行，system 冻结不动）：canon「锚火是什么？」→ sources=[novel/67, 89, 77, 35] ≈2.6s ✓；refs 问题 → sources=[refs/crossrealm-realworld-notes.md] ≈13s ✓；无义提问 → 诚实拒答 latency=0 · 不花 token；LoreOracleRouteHintTest 23 断言全绿',
+    meas_l18: 'Oracle 缓存双轨探针实测（W-Z247 · Clash · 2026-11-16）', meas_tr18: 'scripts/oracle-cache-probe.mjs --json：canon cached=6784/6784 ×2 ≈97.3% · refs cached=7424/7424 ×2 ≈97.5%（修复前 canon 恒 null）；记录 → docs/admin/data/oracle-cache-probe.json；system 冻结跨上游 prompt-cache ~1024-token 页门槛后双轨恒暖', meas_l18b: 'Admin LLM 双语运营分析（W-Z311 · 真上游 gpt-6.1-terra）', meas_tr18b: 'scripts/admin-llm-analysis.mjs：实测运营建议双语中/英——现状判读 · 趋势 · P0→P3 ·「先验证再执行」≥4 条；zh chars=2361 / en chars=5439 · prompt≈5968/5918 tok · cached≈95.8%；报告 → docs/admin/data/admin-llm-analysis.zh.md + .en.md（LLM 生成，用于治理 ·「先验证再执行」）', meas_l18c: '并行缓存隔离实测（W-Z336 · 真上游 · 8 并发同键）', meas_tr18c: 'scripts/cache-parallel-probe.mjs（真 API · Clash 7897）：① 同键 2×顺串冷启动 cached=0（lane 头 ~3 包必冷，上游行为）② 8 并发子进程同 key：7×98.0% + 1×97.9% · aggregate ≈97.98% —— 并行会话共享 prompt_cache_key 不掉缓存 ③ 3×ember+3×oracle 混合并发：第 3 包起 98.0/97.9%（内容哈希共享冻结前缀；lane 互不污染）· artifact → docs/admin/data/llm-parallel-cache-probe.json',
+    meas_l19: 'Oracle 累计验证档案（W-Z251/253 · live archive · 2026-11-16）', meas_tr19: 'docs/oracle-live-log/ 真实上游原文：canon ≈2.6–4.3s · refs ≈4–17s · 无义提问 → 诚实拒答 latency=0 · 不花 token；≥13 例 live 断言累计全绿；双轨缓存 ≈97%',
+    meas_l20: '炉火祈愿全选项频次（W-Z265 · 27/27 枚举 · 2026-11-16）', meas_tr20: 'scripts/vow-mc.mjs 全枚举确定性分布：windkeeper 6/27≈22.2% · ember_1 5/27≈18.5% · grey_2 5/27≈18.5% · self_3 5/27≈18.5% · 其余 7 种结局各 1/27≈3.7%；docs/admin/data/vow-montecarlo.json；无随机无骰',
+    meas_l21: '炉火的交棒全选项频次（W-Z283 · 27/27 枚举 · 2026-11-17）', meas_tr21: 'scripts/pass-mc.mjs 全枚举确定性分布：heirkeeper 6/27≈22.2% · kindle_1 5/27≈18.5% · tend_2 5/27≈18.5% · root_3 5/27≈18.5% · 其余 6 种结局各 1/27≈3.7%；docs/admin/data/pass-montecarlo.json；枚举与系统 _buildGraph verdict 节点同源逻辑',
+    meas_l22: '实时遥测快照（W-Z338 · 真·compose 落盘事件 · 2026-11-18）', meas_tr22: 'GET /api/telemetry/summary-rollup（构建时实抓）：boss_kill 30 · canon_open 8 · loadtest 424 · smoke 16 · stress-probe 133；首屏 KPI 是 SYNTHETIC（seed=20261117），本卡是唯一贴近真实玩家行为的——verify 冒烟 + stress-load 洪测 + Ember/Oracle 实测亲手写进账的遥测，经 gateway:8080 读出；每次 Pages 同步自动刷新；快照 → docs/admin/data/telemetry-summary.json · 抓取器 → scripts/fetch-telemetry-summary.mjs',
+    meas_l23: 'Boot 真·冷启动实测（W-Z350 · 本机 SwiftShader · 2026-11-18）', meas_tr23: 'scripts/boot-probe.mjs（vite dev + headless Chrome · 真窗实测）：vite ready 9.1s → navigate 23.6s → BOOT OK in 77801ms · frames(2s)≈2.5（SwiftShader 软件渲染；真 GPU 远低）· __game/enemyManager/scene 全 present · boot 完成且零异常；artifact → docs/admin/data/boot-probe.json',
+    meas_l24: 'MEASURED 漏斗（W-Z355 · 真·compose 落账 · 2026-11-18 · 不分群）', meas_tr24: 'derived-funnel.mjs → docs/admin/data/measured-funnel.json：boss_kill 30（4.83% of 621 · MEASURED）· canon_open 8（1.29% · MEASURED）· human-adjacent 38 事件（6.12%）· probe 火线 89.69%（loadtest 424 + stress-probe 133） · ≈0.27「开典籍」/「Boss 击杀」 · 只有 3 天窗口，不做留存分群推断（伪分群=撒谎）· 其他 KPI 卡多是 SYNTHETIC（seed=20261117），本卡为唯一 MEASURED 链路',
+    meas_l25: 'v4 具典+冻结前缀 cachedRatio（W-Z376 · 真·并行 4 路实测 · 2026-11-18）', meas_tr25: 'POST gateway:8080/api/ai/lore/answer：4 条并发不同问题、同 v4 冻结前缀——全部 upstreamCached=true · cachedRatio 93.2/93.1/93.2/93.2%（prompt≈47.6K · cached≈44.4K） · 重启后首请求亦为 93.7%（10:50:56Z） · Codex 稳定 90% 的三条件（frozen-prefix+per-lane key+stream/include_usage）全在位 · 冷窗口仅 Desktop 重启后首打一条 · docs/admin/data/oracle-v4-live-probe.json（MEASURED）',
+    meas_l26: '留存窗口（下次实测 · 2026-11-19 · 3 日有 8 次、11 日为 0）', meas_tr26: 'gateway 实测 627 事件 / 3 日有数（11-15/11-17/11-18）+11 天为 0：boss_kill 30 · canon_open 8 · loadtest 424 · stress 133 · smoke 32 · human-adjacent 38 (6.07%) · 留存不可计算——只有 3 天有数据、11 天为 0、没有 unique user 维度、没有 D1/D3 之间窗口；绝不做留存曲线（伪分群=谎）。telemetry v2 下个里程碑：boss_kill 注入 hashed-userId · 至少 14 天窗 n≥200 unique user 后才放行留存卡',
+    meas_l27: '流式对照探针（W-Z410 · 2026-11-19 · gpt-6.1-terra · Clash）', meas_tr27: 'scripts/cache-probe.mjs 真上游实测（两次独立运行）：cached≈5066/5342 ≈94.8% 恒定；上游偶发不回报 cached_tokens 字段（第一次运行 non-stream 无字段，第二次运行 stream 第4调无字段）——即字段缺失是上游报告抖动而非缓存失效；hit=5066/5342 恒定不变（同 prefix 同 key）。冻结前缀 >1024 tok + per-lane prompt_cache_key + stream:true & include_usage 三条件缺一不可；并行会话抢缓存不复现（W-Z336 8 路 ≈98%）',
+    rec_h2: '下一步优化清单', rec_small: '按优先级排序 · 调参优先 P0→P3',
+    foot: 'Crossrealm Chronicles · 炉边盘 ·<br/>「实测记录」为 2026-11-15 本机实跑（<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> 打真实 wkapi.pro /v1 gpt-6-sol）—— 合成面板由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115）—— 真实上线后，同出数据源 <code>crossrealm_telemetry_*</code> 的本地事件也会汇入上述图表中。<br/>若你想把上报接进后端：只需 <code>POST /api/telemetry/events</code>，数据存 <code>telemetry</code> 面板中；炉边盘保持只读与静态。<br/>W-Z311 起：LLM 双语运营分析（digest 冻结、真上游、经 <code>scripts/admin-llm-analysis.mjs</code> 实跑）见 <code><a href="data/admin-llm-analysis.zh.md">中文报告</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code>（LLM 生成，digest 与原始 JSON 为准）。',
+    boot_fail: 'synthetic.json 未能装载。<br>请先跑 <code>node scripts/admin-synthetic.mjs</code>',
+    slope_line: '陡度：每天 %DAU DAU/14d；今日值 %AVG；预测 +14d 峰值 ≈ %PEAK',
+    kpi_dau_avg: '日活均值', kpi_session_min: '会话平均分钟', kpi_boss: 'Boss 胜率', kpi_canon: '典籍阅读率',
+    kpi_d1: '留存 D1', kpi_d7: '留存 D7', kpi_bounce: '出口率', kpi_churn: '放弃率',
+    kpi_new: '新用户/日', kpi_sessions: '总会话数', kpi_boss_clears: '总 Boss 通关', kpi_d14: '留存 D14',
+    kpi_up: '▲ rolling', kpi_down: '▼ cap',
+    lt_game_start: '游戏启动', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
+    lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关', lt_trilance_draw: '曜盘已起', lt_vow_draw: '祈愿已许', lt_kindle_pass_draw: '交棒已候', lt_advisor_directive_follow: '跟随指引', lt_arbiter_epilogue: '烬灯回信', lt_boss_verse: '余火回响', lt_kindle_letter_exchange: '烬火答',
+    insight_h2: '本机智能洞察', insight_small: 'LS 真实事件流 → 下一步该做什么',
+    insight_empty: '尚无足够事件——随便玩两局（H/J/M/击杀 Boss/抽卡）再回来',
+    insight_low: '低置信度 · n={n}', insight_mid: '中等置信度 · n={n}', insight_high: '高置信度 · n={n}',
+    insight_foot: '每条建议都按真实事件缓冲排序（跨 200 条最多）。按优先级落到「这次下一次更新」或 UI 引导上；对比上方合成 KPI 和下方本机事件，两块才会对得起真玩家。',
 
-    lt_empty: '灏氭棤鏈湴浜嬩欢锛涙父鎴忚繘鍘讳箣鍚庝細鑷姩璁板綍銆?,
-    gate_error: '鍙ｄ护涓嶅銆傚啀鎯虫兂鈥斺€旂倝瀛愯杩囦綘鐨勭瑧鑴搞€?,
-    aria_dau_curve: '30 澶?DAU 鏇茬嚎', aria_pred: '14 澶?DAU 棰勬祴',
+    lt_empty: '尚无本地事件；游戏进去之后会自动记录。',
+    gate_error: '口令不对。再想想——炉子见过你的笑脸。',
+    aria_dau_curve: '30 天 DAU 曲线', aria_pred: '14 天 DAU 预测',
   },
   en: {
-    doc_title: 'Crossrealm Chronicles 路 Admin Console',
-    gate_title: 'Crossrealm Chronicles 路 Admin',
-    gate_sub: 'Administrator 路 Admin 路 anyone holding the passphrase',
-    gate_ph: 'Passphrase', gate_aria: 'Admin passphrase', gate_btn: 'Unlock 路 寮€闂?,
-    gate_note: 'Internal only 路 passphrase-gated 路 Frontend-only security',
-    top_h1: 'Crossrealm Chronicles 鈥?Operations Console',
-    nav_home: '鈫?Showcase', nav_game: 'Play game', nav_guide: 'Handbook',
+    doc_title: 'Crossrealm Chronicles · Admin Console',
+    gate_title: 'Crossrealm Chronicles · Admin',
+    gate_sub: 'Administrator · Admin · anyone holding the passphrase',
+    gate_ph: 'Passphrase', gate_aria: 'Admin passphrase', gate_btn: 'Unlock · 开门',
+    gate_note: 'Internal only · passphrase-gated · Frontend-only security',
+    top_h1: 'Crossrealm Chronicles — Operations Console',
+    nav_home: '← Showcase', nav_game: 'Play game', nav_guide: 'Handbook',
     local_h2: 'Local real events',
-    local_small: 'This browser 路 crossrealm_telemetry_v1 LS rolling buffer of 200',
+    local_small: 'This browser · crossrealm_telemetry_v1 LS rolling buffer of 200',
     local_note: 'These are <em>the real events this browser</em> produced locally. Real multi-user aggregates will appear in the panels above once a backend aggregates them.',
-    dau_h2: '30-day DAU curve', dau_small: '碌 脳 30d 路 rolling',
-    pred_h2: 'Next 14 days 路 forecast', pred_small: 'Linear regression 路 flat extrapolation',
-    features_h2: 'Feature tides 路 what players actually use', features_small: 'Last 30 days 路 share of sessions',
-    funnel_h2: 'Conversion funnel', funnel_small: 'From opening screen 鈫?Furnace-keeper badge', retention_h2: 'Retention / return',
-    meas_h2: 'Measured 路 瀹炴祴璁板綍', meas_small: '2026-11-15 live runs 路 not demo data',
-    meas_l1: 'Load test 路 200-way + Postgres live', meas_tr1: '100% success 路 0 5xx 路 4666/4666 (2026-11-15 W-Z130)',
-    meas_l2: 'Error rate, whole run', meas_tr2: 'All eight routes clean 路 no 5xx',
-    meas_l3: 'p50 latency (9 JVMs + PG 路 same host)', meas_tr3: 'Mostly network proxy overhead',
+    dau_h2: '30-day DAU curve', dau_small: 'µ × 30d · rolling',
+    pred_h2: 'Next 14 days · forecast', pred_small: 'Linear regression · flat extrapolation',
+    features_h2: 'Feature tides · what players actually use', features_small: 'Last 30 days · share of sessions',
+    funnel_h2: 'Conversion funnel', funnel_small: 'From opening screen → Furnace-keeper badge', retention_h2: 'Retention / return',
+    meas_h2: 'Measured · 实测记录', meas_small: '2026-11-15 live runs · not demo data',
+    meas_l1: 'Load test · 200-way + Postgres live', meas_tr1: '100% success · 0 5xx · 4666/4666 (2026-11-15 W-Z130)',
+    meas_l2: 'Error rate, whole run', meas_tr2: 'All eight routes clean · no 5xx',
+    meas_l3: 'p50 latency (9 JVMs + PG · same host)', meas_tr3: 'Mostly network proxy overhead',
     meas_l4: 'Single-IP flood shed',
     meas_l5: 'seasons cache hit',
     meas_l6: 'Windowed rate-limit counters',
-    meas_l7: 'Advisor live e2e (BM25+LLM)', meas_tr7: '30 jobs 路 5 concurrent 路 primary gpt-6-sol',
-    meas_l8: 'LLM prefix cache (this run)', meas_tr8: '鈮?7.0% 路 cold null 鈫?warm hit on 2nd call',
-    meas_l9: 'Oracle upstream probes (A/B/C)', meas_tr9: '6179 / 1798 / 6170 tok 路 3/3 correct routing',
-    meas_l10: 'cache_hit_bench warm ratio', meas_tr10: 'cold 41.7% 鈫?warm 85.6% (real prefix reuse)', meas_l11: 'prompt_cache_key routing (W-Z168 measured)', meas_tr11: 'cold call null 鈫?steady 5632/5858 cached from 2nd call (4-call run)',
-    meas_foot: '<strong style="color:#e8e4dc">Sources (all live in this repo)</strong>: <code>docs/LOAD_TEST.md</code> (Windows + Docker Desktop 路 9 JVMs + Redis 7 路 2026-11-15);<br/><code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> against real wkapi.pro/v1 gpt-6-sol;<br/>Oracle upstream probes A/B/C (quote attribution / verbatim grounded / conservative refuse 鈥?6179/1798/6170 prompt tokens) and cache_hit_bench (41.7% cold 鈫?85.6% warm) from MASTER_PLAN;<br/>LLM cache fix chain (HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral frozen system-prompt + W-Z168 prompt_cache_key: crossrealm-canon-v1): first call cold (cached=null), warm calls hit ~96鈥?7% prefix reuse (Java PromptCacheLiveTest measured prompt=5411 cached=5248; 4-call run 0 鈫?5632 鈫?5632 鈫?5632 鈫?5632 / 5858 = 96.1%);<br/><strong style="color:#e8e4dc">Synthetic panels</strong> (KPI / forecast / funnel / retention) are deterministic demo data (seed=20261115, labeled 鈥渟ynthetic鈥?; <strong style="color:#e8e4dc">this card is real measured data</strong>.',
-    sim_h2: 'Real Player Behaviour Simulation', sim_small: 'local Chrome x five personas x measured values (W-Z198)', sim_k1: 'avg boot', sim_k1n: 'see notes below', sim_k2: 'boot p95', sim_k2n: 'dev-mode cold boot (production build is faster)', sim_k3: 'uncaught exceptions', sim_k3n: '0 = zero crashes across the run', sim_k4: 'impatient bounces', sim_k4n: 'includes the "one random tap and gone" case', sim_k5: 'avg random taps', sim_k5n: 'wanderer: 3-7 taps per session', sim_k6: 'manual open rate', sim_k6n: 'reader: H key -> really opened', sim_verdict_ok: 'zero uncaught exceptions in all sessions; critical paths reached (world entered / journal opened / manual opened)', sim_verdict_bad: 'someone hit an uncaught exception 鈥?see exceptionSample', sim_unavailable: 'simulation.json not found 鈥?run node scripts/simulate-players.mjs from the repo root', sim_generated: 'generated at', sim_note1: 'impatient (one tap and gone) / wanderer (random taps) / reader (open H manual first) / speedrunner (into world then J for journal) / sprinter (straight into run).', sim_note2: 'Persona behaviour is scripted; measured values are real. Not production telemetry (Pages has no backend).', sim_note3: 'Full record: docs/admin/data/simulation.json; re-run: node scripts/simulate-players.mjs (seed=20261117).',
-    meas_l12: 'cache-probe re-run (2026-11-16, Node side)', meas_tr12: 'frozen prefix hits 745鈥?68 / 966; marker-less stream = zero cache field; one transient miss (1327 tok 路 cached=0 路 route drift)',
-    meas_l13: 'ui-walkthrough re-run (2026-11-16)', meas_tr13: '18/18 all-green 路 zero overflow elements 路 zero HUD overlap (zh/en 脳 large, incl. 390脳844 phone)',
-    sim_derived: 'Optimization priorities derived from THIS run (computed, not vibes)', sim_d_boot: 'avg boot %V ms (dev cold boot) 鈥?shrink the critical path (lazy textures / code split)', sim_d_bounce: 'impatient bounces %V 鈥?keep the 30s hearth guide ahead of everything, trim intro text once more', sim_d_zero: 'zero uncaught exceptions 鈥?pin this CDP smoke run into CI as a merge gate', sim_d_manual: 'manual open rate %V 鈥?path works, promote the H-key hint to first-screen-visible',
-    meas_l14: 'New API live-test (2026-11-16 路 Clash proxy)', meas_tr14: 'direct = 403; via Clash mixed port: Java cold cached=null 鈫?warm cached=5504/5679 鈮?96.96% 路 AI e2e live 3/3 green (AiLiveIntegrationTest / AdvisorJobLiveIntegrationTest / EchoHintLiveIntegrationTest 路 model=gpt-6.1-terra) 路 Node cache-probe all 200',
-    meas_l15: 'Lore Oracle full chain live (W-Z238 路 Clash 7897)', meas_tr15: 'real upstream 鈥渁nchor fire?鈥?鈫?BM25 recall 4 chunks 鈫?HTTP 200 sources=[67,89,77,35] 路 model=gpt-6.1-terra 路 latency鈮?.2s; nonsense probe zxqjwop qkdjw zqwvjqmw rfjklw 鈫?zero-recall 鈫?honest refusal 鈥滄鐗╂湭鍦ㄥ吀绫嶄腑鈥?路 latency=0 路 zero tokens',
-    meas_l16: 'Oracle stress 路 16s @ 40 conn (W-Z240 路 local)', meas_tr16: 'mixed (health 脳 answerBurst): 3488 reqs 路 0 4xx 路 0 5xx 路 errRate 0.00% 路 p50=125ms 路 p95=346ms 路 p99=2672ms 路 max=3403ms 路 鈮?17 rps',
-    meas_l17: 'Oracle real-world router live (W-Z244 路 Clash 7897)', meas_tr17: 'mechanical router on refs-specific tokens (user-side note line, system freeze untouched): canon 鈥渁nchor fire?鈥?鈫?sources=[novel/67, 89, 77, 35] 鈮?.6s 鉁? refs prototype question 鈫?sources=[refs/crossrealm-realworld-notes.md] 鈮?3s 鉁? nonsense 鈫?honest refusal 路 latency=0 路 zero tokens; LoreOracleRouteHintTest 23 assertions green',
-    meas_l18: 'Oracle cache two-lane probe (W-Z247 路 Clash 路 2026-11-16)', meas_tr18: 'scripts/oracle-cache-probe.mjs --json: canon cached=6784/6784 脳2 鈮?7.3% 路 refs cached=7424/7424 脳2 鈮?7.5% (canon used to be null before the fix); record 鈫?docs/admin/data/oracle-cache-probe.json; frozen system block crosses the upstream prompt-cache ~1024-token page threshold 禄 both lanes warm', meas_l18b: 'Admin LLM bilingual ops analysis (W-Z311 路 live gpt-6.1-terra)', meas_tr18b: 'scripts/admin-llm-analysis.mjs: live bilingual advice 鈥?situation read 路 trend 路 P0鈫扨3 list 路 鈥渧erify before executing鈥?鈮? items; zh chars=2361 / en chars=5439 路 prompt鈮?968/5918 tok 路 cached鈮?5.8%; report 鈫?docs/admin/data/admin-llm-analysis.zh.md + .en.md (LLM-generated 路 鈥渧erify before executing鈥?gatekeeper)', meas_l18c: 'Parallel cross-lane cache probe (W-Z336 路 live upstream 路 8 same-key burst)', meas_tr18c: 'scripts/cache-parallel-probe.mjs (live API 路 Clash 7897): 1) 2脳 sequential same-key cold start cached=0 (first ~3 calls per lane are cold, upstream behavior) 2) 8 concurrent child processes same key: 7脳98.0% + 1脳97.9% 路 aggregate 鈮?7.98% 鈥?parallel sessions sharing prompt_cache_key do NOT drop cache, do NOT thrash 3) 3脳ember+3脳oracle concurrent: 98.0/97.9% from call #3 onward (content-hash reuse of the frozen prefix; lanes stay isolated) 路 artifact 鈫?docs/admin/data/llm-parallel-cache-probe.json',
-    meas_l19: 'Oracle cumulative verification log (W-Z251/253 路 live archive 路 2026-11-16)', meas_tr19: 'docs/oracle-live-log/ raw upstream text: canon 鈮?.6鈥?.3s 路 refs 鈮?鈥?7s 路 nonsense probe 鈫?honest refusal 路 latency=0 路 zero tokens; 鈮?3 live assertions cumulatively green; two lanes 鈮?7% cached',
-    meas_l20: 'Hearth-Vow acceptance frequency (W-Z265 路 27/27 enum 路 2026-11-16)', meas_tr20: 'scripts/vow-mc.mjs exhaustive deterministic distribution: windkeeper 6/27鈮?2.2% 路 ember_1 5/27鈮?8.5% 路 grey_2 5/27鈮?8.5% 路 self_3 5/27鈮?8.5% 路 every other ending 1/27鈮?.7%; docs/admin/data/vow-montecarlo.json; no dice, mapping-perfect',
-    meas_l21: 'The-Passing-of-Fire acceptance frequency (W-Z283 路 27/27 enum 路 2026-11-17)', meas_tr21: 'scripts/pass-mc.mjs exhaustive deterministic distribution: heirkeeper 6/27鈮?2.2% 路 kindle_1 5/27鈮?8.5% 路 tend_2 5/27鈮?8.5% 路 root_3 5/27鈮?8.5% 路 every other ending 1/27鈮?.7%; docs/admin/data/pass-montecarlo.json; enum verdict logic is byte-for-byte the system _buildGraph verdict node',
-    meas_l22: 'Live telemetry snapshot (W-Z338 路 REAL compose-firehose events 路 2026-11-18)', meas_tr22: 'GET /api/telemetry/summary-rollup (fetched at build time): boss_kill 30 路 canon_open 8 路 loadtest 424 路 smoke 16 路 stress-probe 133; the first-screen KPIs are SYNTHETIC (seed=20261117) 鈥?this card is the only one close to real player behavior: probe events written by the verify smoke + stress-load flood + Ember/Oracle live runs, read back via gateway:8080; refreshed on every Pages sync; snapshot 鈫?docs/admin/data/telemetry-summary.json 路 fetcher 鈫?scripts/fetch-telemetry-summary.mjs',
-    meas_l23: 'Real boot cold-start (W-Z350 路 local SwiftShader 路 2026-11-18)', meas_tr23: 'scripts/boot-probe.mjs (vite dev + headless Chrome 路 real window): vite ready 9.1s 鈫?navigate 23.6s 鈫?BOOT OK in 77801ms 路 frames(2s)鈮?.5 (SwiftShader software render; real GPU is far lower) 路 __game/enemyManager/scene all present 路 boot completes with zero exceptions; artifact 鈫?docs/admin/data/boot-probe.json',
-    meas_l24: 'MEASURED funnel (W-Z355 路 real compose-firehose events 路 2026-11-18 路 NO cohort slicing)', meas_tr24: 'derived-funnel.mjs 鈫?docs/admin/data/measured-funnel.json: boss_kill 30 (4.83% of 621 路 MEASURED) 路 canon_open 8 (1.29% 路 MEASURED) 路 human-adjacent 38 events (6.12%) 路 probe flood 89.69% (loadtest 424 + stress-probe 133) 路 鈮?.27 canon-opens / boss-kill 路 only a 3-day window, no D1/D3/D7 slicing (fake cohorts = lying) 路 other KPI cards are mostly SYNTHETIC (seed=20261117) 鈥?this is the only card on a MEASURED path',
-    meas_l25: 'v4 full-canon + frozen prefix cachedRatio (W-Z376 路 4 parallel REAL probes 路 2026-11-18)', meas_tr25: 'POST gateway:8080/api/ai/lore/answer: 4 parallel questions, same v4 frozen prefix 鈥?all upstreamCached=true 路 cachedRatio 93.2/93.1/93.2/93.2% (prompt鈮?7.6K 路 cached鈮?4.4K) 路 first request after Desktop reboot also 93.7% (10:50:56Z) 路 the three Codex conditions (frozen prefix + per-lane prompt_cache_key + stream/include_usage) are all in place 路 the only cold window is the first post-reboot request 路 artifact 鈫?docs/admin/data/oracle-v4-live-probe.json (MEASURED)',
-    meas_l26: 'Retention window (real test 路 2026-11-19 路 data on 3 days / 11 days zero)', meas_tr26: 'real gateway telemetry: 627 events 路 only 3 days have anything (11-15/11-17/11-18) 路 11 days zero (incl. 11-19) 路 boss_kill 30 路 canon_open 8 路 loadtest 424 路 stress-probe 133 路 smoke 32 路 human-adjacent 38 (6.07%) 路 retention is NOT computable here 鈥?no unique-user dimension, no 14-day window, no D1/D3 spacing; fake cohort curves = lying 路 action 鈫?telemetry v2 next: hashed-userId on boss_kill 路 鈮?4-day window 路 n鈮?00 distinct users before any retention card ships',
-    meas_l27: 'Stream-vs-non-stream control probe (W-Z410 路 2026-11-19 路 gpt-6.1-terra 路 Clash)', meas_tr27: 'scripts/cache-probe.mjs live probe (two independent runs): cached 鈮?066/5342 鈮?4.8% steady; upstream intermittently omits the cached_tokens field (run 1: non-stream control lacked it; run 2: warm-call #4 lacked it) 鈥?the omission is an upstream reporting quirk, NOT cache misses: the same frozen prefix + prompt_cache_key reports hit=5066/5342 every time the field is present. The three stability conditions = frozen prefix &gt;1024 tok + per-lane prompt_cache_key + stream:true &amp; include_usage; parallel-session cache thrash NOT reproduced (W-Z336: 8-way same-key 鈮?8%)',
-    rec_h2: 'Next-step optimization plan', rec_small: 'Priority order 路 tune before building 路 P0鈫扨3',
-    foot: 'Crossrealm Chronicles 路 Admin Console 路<br/>The 鈥淢easured鈥?card is a 2026-11-15 live run (<code>docs/LOAD_TEST.md</code> 路 <code>PromptCacheLiveTest</code> against real wkapi.pro /v1 gpt-6-sol). The synthetic panels are deterministically generated by <code>scripts/admin-synthetic.mjs</code> (seed 20261115).<br/>Once real players go online, events sourced from <code>crossrealm_telemetry_*</code> will fold into the same charts. To wire reporting into a backend: <code>POST /api/telemetry/events</code> 鈥?data lands in the <code>telemetry</code> panel; this console stays read-only and static.<br/>Since W-Z311: LLM-written bilingual ops analyses (frozen digest, real upstream, produced by <code>scripts/admin-llm-analysis.mjs</code>) live at <code><a href="data/admin-llm-analysis.zh.md">涓枃鎶ュ憡</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code> (LLM-generated; the digest and raw JSON files are the source of truth).',
+    meas_l7: 'Advisor live e2e (BM25+LLM)', meas_tr7: '30 jobs · 5 concurrent · primary gpt-6-sol',
+    meas_l8: 'LLM prefix cache (this run)', meas_tr8: '≈77.0% · cold null → warm hit on 2nd call',
+    meas_l9: 'Oracle upstream probes (A/B/C)', meas_tr9: '6179 / 1798 / 6170 tok · 3/3 correct routing',
+    meas_l10: 'cache_hit_bench warm ratio', meas_tr10: 'cold 41.7% → warm 85.6% (real prefix reuse)', meas_l11: 'prompt_cache_key routing (W-Z168 measured)', meas_tr11: 'cold call null → steady 5632/5858 cached from 2nd call (4-call run)',
+    meas_foot: '<strong style="color:#e8e4dc">Sources (all live in this repo)</strong>: <code>docs/LOAD_TEST.md</code> (Windows + Docker Desktop · 9 JVMs + Redis 7 · 2026-11-15);<br/><code>mvn -f server/ai-service/pom.xml -Dai.live.test=true -Dtest=PromptCacheLiveTest test</code> against real wkapi.pro/v1 gpt-6-sol;<br/>Oracle upstream probes A/B/C (quote attribution / verbatim grounded / conservative refuse — 6179/1798/6170 prompt tokens) and cache_hit_bench (41.7% cold → 85.6% warm) from MASTER_PLAN;<br/>LLM cache fix chain (HTTP/1.1 + stream:true + stream_options.include_usage + system cache_control:ephemeral frozen system-prompt + W-Z168 prompt_cache_key: crossrealm-canon-v1): first call cold (cached=null), warm calls hit ~96–97% prefix reuse (Java PromptCacheLiveTest measured prompt=5411 cached=5248; 4-call run 0 → 5632 → 5632 → 5632 → 5632 / 5858 = 96.1%);<br/><strong style="color:#e8e4dc">Synthetic panels</strong> (KPI / forecast / funnel / retention) are deterministic demo data (seed=20261115, labeled “synthetic”); <strong style="color:#e8e4dc">this card is real measured data</strong>.',
+    sim_h2: 'Real Player Behaviour Simulation', sim_small: 'local Chrome x five personas x measured values (W-Z198)', sim_k1: 'avg boot', sim_k1n: 'see notes below', sim_k2: 'boot p95', sim_k2n: 'dev-mode cold boot (production build is faster)', sim_k3: 'uncaught exceptions', sim_k3n: '0 = zero crashes across the run', sim_k4: 'impatient bounces', sim_k4n: 'includes the "one random tap and gone" case', sim_k5: 'avg random taps', sim_k5n: 'wanderer: 3-7 taps per session', sim_k6: 'manual open rate', sim_k6n: 'reader: H key -> really opened', sim_verdict_ok: 'zero uncaught exceptions in all sessions; critical paths reached (world entered / journal opened / manual opened)', sim_verdict_bad: 'someone hit an uncaught exception — see exceptionSample', sim_unavailable: 'simulation.json not found — run node scripts/simulate-players.mjs from the repo root', sim_generated: 'generated at', sim_note1: 'impatient (one tap and gone) / wanderer (random taps) / reader (open H manual first) / speedrunner (into world then J for journal) / sprinter (straight into run).', sim_note2: 'Persona behaviour is scripted; measured values are real. Not production telemetry (Pages has no backend).', sim_note3: 'Full record: docs/admin/data/simulation.json; re-run: node scripts/simulate-players.mjs (seed=20261117).',
+    meas_l12: 'cache-probe re-run (2026-11-16, Node side)', meas_tr12: 'frozen prefix hits 745–768 / 966; marker-less stream = zero cache field; one transient miss (1327 tok · cached=0 · route drift)',
+    meas_l13: 'ui-walkthrough re-run (2026-11-16)', meas_tr13: '18/18 all-green · zero overflow elements · zero HUD overlap (zh/en × large, incl. 390×844 phone)',
+    sim_derived: 'Optimization priorities derived from THIS run (computed, not vibes)', sim_d_boot: 'avg boot %V ms (dev cold boot) — shrink the critical path (lazy textures / code split)', sim_d_bounce: 'impatient bounces %V — keep the 30s hearth guide ahead of everything, trim intro text once more', sim_d_zero: 'zero uncaught exceptions — pin this CDP smoke run into CI as a merge gate', sim_d_manual: 'manual open rate %V — path works, promote the H-key hint to first-screen-visible',
+    meas_l14: 'New API live-test (2026-11-16 · Clash proxy)', meas_tr14: 'direct = 403; via Clash mixed port: Java cold cached=null → warm cached=5504/5679 ≈ 96.96% · AI e2e live 3/3 green (AiLiveIntegrationTest / AdvisorJobLiveIntegrationTest / EchoHintLiveIntegrationTest · model=gpt-6.1-terra) · Node cache-probe all 200',
+    meas_l15: 'Lore Oracle full chain live (W-Z238 · Clash 7897)', meas_tr15: 'real upstream “anchor fire?” → BM25 recall 4 chunks → HTTP 200 sources=[67,89,77,35] · model=gpt-6.1-terra · latency≈3.2s; nonsense probe zxqjwop qkdjw zqwvjqmw rfjklw → zero-recall → honest refusal “此物未在典籍中” · latency=0 · zero tokens',
+    meas_l16: 'Oracle stress · 16s @ 40 conn (W-Z240 · local)', meas_tr16: 'mixed (health × answerBurst): 3488 reqs · 0 4xx · 0 5xx · errRate 0.00% · p50=125ms · p95=346ms · p99=2672ms · max=3403ms · ≈217 rps',
+    meas_l17: 'Oracle real-world router live (W-Z244 · Clash 7897)', meas_tr17: 'mechanical router on refs-specific tokens (user-side note line, system freeze untouched): canon “anchor fire?” → sources=[novel/67, 89, 77, 35] ≈2.6s ✓; refs prototype question → sources=[refs/crossrealm-realworld-notes.md] ≈13s ✓; nonsense → honest refusal · latency=0 · zero tokens; LoreOracleRouteHintTest 23 assertions green',
+    meas_l18: 'Oracle cache two-lane probe (W-Z247 · Clash · 2026-11-16)', meas_tr18: 'scripts/oracle-cache-probe.mjs --json: canon cached=6784/6784 ×2 ≈97.3% · refs cached=7424/7424 ×2 ≈97.5% (canon used to be null before the fix); record → docs/admin/data/oracle-cache-probe.json; frozen system block crosses the upstream prompt-cache ~1024-token page threshold » both lanes warm', meas_l18b: 'Admin LLM bilingual ops analysis (W-Z311 · live gpt-6.1-terra)', meas_tr18b: 'scripts/admin-llm-analysis.mjs: live bilingual advice — situation read · trend · P0→P3 list · “verify before executing” ≥4 items; zh chars=2361 / en chars=5439 · prompt≈5968/5918 tok · cached≈95.8%; report → docs/admin/data/admin-llm-analysis.zh.md + .en.md (LLM-generated · “verify before executing” gatekeeper)', meas_l18c: 'Parallel cross-lane cache probe (W-Z336 · live upstream · 8 same-key burst)', meas_tr18c: 'scripts/cache-parallel-probe.mjs (live API · Clash 7897): 1) 2× sequential same-key cold start cached=0 (first ~3 calls per lane are cold, upstream behavior) 2) 8 concurrent child processes same key: 7×98.0% + 1×97.9% · aggregate ≈97.98% — parallel sessions sharing prompt_cache_key do NOT drop cache, do NOT thrash 3) 3×ember+3×oracle concurrent: 98.0/97.9% from call #3 onward (content-hash reuse of the frozen prefix; lanes stay isolated) · artifact → docs/admin/data/llm-parallel-cache-probe.json',
+    meas_l19: 'Oracle cumulative verification log (W-Z251/253 · live archive · 2026-11-16)', meas_tr19: 'docs/oracle-live-log/ raw upstream text: canon ≈2.6–4.3s · refs ≈4–17s · nonsense probe → honest refusal · latency=0 · zero tokens; ≥13 live assertions cumulatively green; two lanes ≈97% cached',
+    meas_l20: 'Hearth-Vow acceptance frequency (W-Z265 · 27/27 enum · 2026-11-16)', meas_tr20: 'scripts/vow-mc.mjs exhaustive deterministic distribution: windkeeper 6/27≈22.2% · ember_1 5/27≈18.5% · grey_2 5/27≈18.5% · self_3 5/27≈18.5% · every other ending 1/27≈3.7%; docs/admin/data/vow-montecarlo.json; no dice, mapping-perfect',
+    meas_l21: 'The-Passing-of-Fire acceptance frequency (W-Z283 · 27/27 enum · 2026-11-17)', meas_tr21: 'scripts/pass-mc.mjs exhaustive deterministic distribution: heirkeeper 6/27≈22.2% · kindle_1 5/27≈18.5% · tend_2 5/27≈18.5% · root_3 5/27≈18.5% · every other ending 1/27≈3.7%; docs/admin/data/pass-montecarlo.json; enum verdict logic is byte-for-byte the system _buildGraph verdict node',
+    meas_l22: 'Live telemetry snapshot (W-Z338 · REAL compose-firehose events · 2026-11-18)', meas_tr22: 'GET /api/telemetry/summary-rollup (fetched at build time): boss_kill 30 · canon_open 8 · loadtest 424 · smoke 16 · stress-probe 133; the first-screen KPIs are SYNTHETIC (seed=20261117) — this card is the only one close to real player behavior: probe events written by the verify smoke + stress-load flood + Ember/Oracle live runs, read back via gateway:8080; refreshed on every Pages sync; snapshot → docs/admin/data/telemetry-summary.json · fetcher → scripts/fetch-telemetry-summary.mjs',
+    meas_l23: 'Real boot cold-start (W-Z350 · local SwiftShader · 2026-11-18)', meas_tr23: 'scripts/boot-probe.mjs (vite dev + headless Chrome · real window): vite ready 9.1s → navigate 23.6s → BOOT OK in 77801ms · frames(2s)≈2.5 (SwiftShader software render; real GPU is far lower) · __game/enemyManager/scene all present · boot completes with zero exceptions; artifact → docs/admin/data/boot-probe.json',
+    meas_l24: 'MEASURED funnel (W-Z355 · real compose-firehose events · 2026-11-18 · NO cohort slicing)', meas_tr24: 'derived-funnel.mjs → docs/admin/data/measured-funnel.json: boss_kill 30 (4.83% of 621 · MEASURED) · canon_open 8 (1.29% · MEASURED) · human-adjacent 38 events (6.12%) · probe flood 89.69% (loadtest 424 + stress-probe 133) · ≈0.27 canon-opens / boss-kill · only a 3-day window, no D1/D3/D7 slicing (fake cohorts = lying) · other KPI cards are mostly SYNTHETIC (seed=20261117) — this is the only card on a MEASURED path',
+    meas_l25: 'v4 full-canon + frozen prefix cachedRatio (W-Z376 · 4 parallel REAL probes · 2026-11-18)', meas_tr25: 'POST gateway:8080/api/ai/lore/answer: 4 parallel questions, same v4 frozen prefix — all upstreamCached=true · cachedRatio 93.2/93.1/93.2/93.2% (prompt≈47.6K · cached≈44.4K) · first request after Desktop reboot also 93.7% (10:50:56Z) · the three Codex conditions (frozen prefix + per-lane prompt_cache_key + stream/include_usage) are all in place · the only cold window is the first post-reboot request · artifact → docs/admin/data/oracle-v4-live-probe.json (MEASURED)',
+    meas_l26: 'Retention window (real test · 2026-11-19 · data on 3 days / 11 days zero)', meas_tr26: 'real gateway telemetry: 627 events · only 3 days have anything (11-15/11-17/11-18) · 11 days zero (incl. 11-19) · boss_kill 30 · canon_open 8 · loadtest 424 · stress-probe 133 · smoke 32 · human-adjacent 38 (6.07%) · retention is NOT computable here — no unique-user dimension, no 14-day window, no D1/D3 spacing; fake cohort curves = lying · action → telemetry v2 next: hashed-userId on boss_kill · ≥14-day window · n≥200 distinct users before any retention card ships',
+    meas_l27: 'Stream-vs-non-stream control probe (W-Z410 · 2026-11-19 · gpt-6.1-terra · Clash)', meas_tr27: 'scripts/cache-probe.mjs live probe (two independent runs): cached ≈5066/5342 ≈94.8% steady; upstream intermittently omits the cached_tokens field (run 1: non-stream control lacked it; run 2: warm-call #4 lacked it) — the omission is an upstream reporting quirk, NOT cache misses: the same frozen prefix + prompt_cache_key reports hit=5066/5342 every time the field is present. The three stability conditions = frozen prefix &gt;1024 tok + per-lane prompt_cache_key + stream:true &amp; include_usage; parallel-session cache thrash NOT reproduced (W-Z336: 8-way same-key ≈98%)',
+    rec_h2: 'Next-step optimization plan', rec_small: 'Priority order · tune before building · P0→P3',
+    foot: 'Crossrealm Chronicles · Admin Console ·<br/>The “Measured” card is a 2026-11-15 live run (<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> against real wkapi.pro /v1 gpt-6-sol). The synthetic panels are deterministically generated by <code>scripts/admin-synthetic.mjs</code> (seed 20261115).<br/>Once real players go online, events sourced from <code>crossrealm_telemetry_*</code> will fold into the same charts. To wire reporting into a backend: <code>POST /api/telemetry/events</code> — data lands in the <code>telemetry</code> panel; this console stays read-only and static.<br/>Since W-Z311: LLM-written bilingual ops analyses (frozen digest, real upstream, produced by <code>scripts/admin-llm-analysis.mjs</code>) live at <code><a href="data/admin-llm-analysis.zh.md">中文报告</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code> (LLM-generated; the digest and raw JSON files are the source of truth).',
     boot_fail: 'synthetic.json failed to load.<br>Run <code>node scripts/admin-synthetic.mjs</code> first.',
-    slope_line: 'Slope: %DAU DAU/day over 14d; today %AVG; +14d peak 鈮?%PEAK',
+    slope_line: 'Slope: %DAU DAU/day over 14d; today %AVG; +14d peak ≈ %PEAK',
     kpi_dau_avg: 'Avg DAU', kpi_session_min: 'Avg session (min)', kpi_boss: 'Boss win rate', kpi_canon: 'Canon read rate',
     kpi_d1: 'Retention D1', kpi_d7: 'Retention D7', kpi_bounce: 'Bounce rate', kpi_churn: '3-min drop-off',
     kpi_new: 'New users / day', kpi_sessions: 'Total sessions', kpi_boss_clears: 'Total boss clears', kpi_d14: 'Retention D14',
-    kpi_up: '鈻?rolling', kpi_down: '鈻?cap',
-    lt_game_start: 'Game start', lt_help_open: 'H 路 help opened', lt_journal_open: 'J 路 journal opened', lt_worldmap_open: 'M 路 map opened',
+    kpi_up: '▲ rolling', kpi_down: '▼ cap',
+    lt_game_start: 'Game start', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
     lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped', lt_trilance_draw: 'Trisolar tide cast', lt_vow_draw: 'Vow drawn', lt_kindle_pass_draw: 'Handing drawn', lt_advisor_directive_follow: 'Guide followed', lt_arbiter_epilogue: 'Arbiter letter read', lt_boss_verse: 'Ember verse read', lt_kindle_letter_exchange: 'Ember letters sent',
-    insight_h2: 'Local AI insight', insight_small: 'LS event stream 鈫?what to do next',
-    insight_empty: 'Not enough signal yet 鈥?play a few rounds (H/J/M/boss kill/draw) then come back',
-    insight_low: 'Low confidence 路 n={n}', insight_mid: 'Medium confidence 路 n={n}', insight_high: 'High confidence 路 n={n}',
-    insight_foot: 'Every row is ordered by real crossrealm_telemetry_v1 (max 200). Each suggested change falls to the next release or to an in-game hint. Contrast: the KPI strip is a seeded demo; this panel is this machine鈥檚 actual play.',
+    insight_h2: 'Local AI insight', insight_small: 'LS event stream → what to do next',
+    insight_empty: 'Not enough signal yet — play a few rounds (H/J/M/boss kill/draw) then come back',
+    insight_low: 'Low confidence · n={n}', insight_mid: 'Medium confidence · n={n}', insight_high: 'High confidence · n={n}',
+    insight_foot: 'Every row is ordered by real crossrealm_telemetry_v1 (max 200). Each suggested change falls to the next release or to an in-game hint. Contrast: the KPI strip is a seeded demo; this panel is this machine’s actual play.',
 
-    lt_empty: 'No local events yet 鈥?they are recorded automatically when you enter the game.',
-    gate_error: 'Wrong passphrase. The furnace frowns 鈥?but try again.',
+    lt_empty: 'No local events yet — they are recorded automatically when you enter the game.',
+    gate_error: 'Wrong passphrase. The furnace frowns — but try again.',
     aria_dau_curve: '30-day DAU curve', aria_pred: '14-day DAU forecast',
   },
 };
@@ -454,7 +454,7 @@ pwd.addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock.click(); 
 if (loadPassed()) showDashboard();
 
 /* ============================================================
- * applyLang 鈥?鍒囨崲璇█锛堥潤鎬佽妭鐐?+ 鍔ㄦ€佹覆鏌撻噸璺戯級
+ * applyLang — 切换语言（静态节点 + 动态渲染重跑）
  * ============================================================ */
 function applyLang(lang) {
   curLang = lang === 'en' ? 'en' : 'zh';
@@ -487,30 +487,30 @@ async function loadSimulation() {
     const j = await res.json();
     if (!j || !j.summary) return;
     const sm = j.summary;
-    document.getElementById('simBootAvg').innerHTML = String(sm.bootMsAvg ?? '鈥?) + '<span style="font-size:.7em;color:var(--muted)"> ms</span>';
-    document.getElementById('simBootP95').innerHTML = String(sm.bootMsP95 ?? '鈥?) + '<span style="font-size:.7em;color:var(--muted)"> ms</span>';
-    document.getElementById('simExceptions').textContent = String(sm.totalExceptions ?? '鈥?);
+    document.getElementById('simBootAvg').innerHTML = String(sm.bootMsAvg ?? '—') + '<span style="font-size:.7em;color:var(--muted)"> ms</span>';
+    document.getElementById('simBootP95').innerHTML = String(sm.bootMsP95 ?? '—') + '<span style="font-size:.7em;color:var(--muted)"> ms</span>';
+    document.getElementById('simExceptions').textContent = String(sm.totalExceptions ?? '—');
     document.getElementById('simBounced').textContent = String(sm.bounced ?? 0) + ' / ' + String(j.completedSessions ?? '?');
-    document.getElementById('simWander').textContent = String(sm.wanderClicksAvg ?? '鈥?);
-    document.getElementById('simManual').textContent = (sm.manualSessions ? (sm.manualOpenedCount + ' / ' + sm.manualSessions) : '鈥?);
+    document.getElementById('simWander').textContent = String(sm.wanderClicksAvg ?? '—');
+    document.getElementById('simManual').textContent = (sm.manualSessions ? (sm.manualOpenedCount + ' / ' + sm.manualSessions) : '—');
     const personaRows = Object.entries(j.personas ?? {}).map(([name, p]) => {
-      const boots = p.bootMsAvg != null ? (p.bootMsAvg + 'ms') : '鈥?;
+      const boots = p.bootMsAvg != null ? (p.bootMsAvg + 'ms') : '—';
       const outcomes = Object.entries(p.outcomes ?? {}).map(([k, v]) => k + ':' + v).join(', ');
-      return name + ' 路 n=' + p.sessions + ' 路 boot鈮? + boots + ' 路 ' + outcomes + ' 路 exc=' + (p.exceptions ?? 0);
+      return name + ' · n=' + p.sessions + ' · boot≈' + boots + ' · ' + outcomes + ' · exc=' + (p.exceptions ?? 0);
     });
-    // 浠庢湰娆＄湡瀹炴ā鎷熸暟鎹洿鎺ユ帹瀵肩殑浼樺寲寤鸿锛堜笉鏄媿鑴戣锛屾槸鎸夋湰璺戞暟瀛楃畻鐨勶級
+    // 从本次真实模拟数据直接推导的优化建议（不是拍脑袋，是按本跑数字算的）
     const derived = [];
     if ((sm.bootMsAvg ?? 0) > 15000) derived.push({ pri: 'P0', text: T('sim_d_boot').replace('%V', String(sm.bootMsAvg)) });
     if ((sm.bounced ?? 0) >= 2) derived.push({ pri: 'P1', text: T('sim_d_bounce').replace('%V', String(sm.bounced) + ' / ' + String(j.completedSessions ?? '?')) });
     if ((sm.totalExceptions ?? 1) === 0) derived.push({ pri: 'P2', text: T('sim_d_zero') });
     if ((sm.manualSessions ?? 0) > 0 && sm.manualOpenedCount === sm.manualSessions) derived.push({ pri: 'P3', text: T('sim_d_manual').replace('%V', String(sm.manualOpenedCount) + '/' + String(sm.manualSessions)) });
-    const derivedBlock = derived.length ? ('<div style="margin-top:6px;border-top:1px solid rgba(255,255,255,.08);padding-top:6px"><div style="color:#ffd98a;margin-bottom:3px">' + T('sim_derived') + '</div>' + derived.map((d) => '<div>路 [' + d.pri + '] ' + d.text + '</div>').join('') + '</div>') : '';
+    const derivedBlock = derived.length ? ('<div style="margin-top:6px;border-top:1px solid rgba(255,255,255,.08);padding-top:6px"><div style="color:#ffd98a;margin-bottom:3px">' + T('sim_derived') + '</div>' + derived.map((d) => '<div>· [' + d.pri + '] ' + d.text + '</div>').join('') + '</div>') : '';
 
     const ok = (sm.totalExceptions ?? 0) === 0;
     document.getElementById('simSessions').innerHTML =
       '<div style="color:' + (ok ? '#7ad6af' : '#e08a8a') + ';margin-bottom:4px">' + (ok ? T('sim_verdict_ok') : T('sim_verdict_bad')) + '</div>'
-      + '<div>' + T('sim_generated') + ': ' + String(j.generated_at ?? '?') + ' 路 seed=' + String(j.seed ?? '?') + ' 路 sessions=' + String(j.completedSessions ?? '?') + '</div>'
-      + personaRows.map((r) => '<div>路 ' + r + '</div>').join('') + derivedBlock;
+      + '<div>' + T('sim_generated') + ': ' + String(j.generated_at ?? '?') + ' · seed=' + String(j.seed ?? '?') + ' · sessions=' + String(j.completedSessions ?? '?') + '</div>'
+      + personaRows.map((r) => '<div>· ' + r + '</div>').join('') + derivedBlock;
     document.getElementById('simFoot').innerHTML =
       '<strong style="color:#e8e4dc">' + T('sim_note1') + '</strong><br/>' + T('sim_note2') + '<br/>' + T('sim_note3');
   } catch (e) {
@@ -633,7 +633,7 @@ function renderFeatures(d) {
     return `<div class="bar-row">
       <div class="name">${escapeHtml(label)}</div>
       <div class="bar-track"><div class="bar" style="width:${w.toFixed(1)}%"></div></div>
-      <div class="bar-pct">${f.pctOfSessions.toFixed(1)}% 路 ${f.sessions.toLocaleString()}</div>
+      <div class="bar-pct">${f.pctOfSessions.toFixed(1)}% · ${f.sessions.toLocaleString()}</div>
     </div>`;
   }).join('');
 }
@@ -673,7 +673,7 @@ function renderRecommendations(d) {
       <div class="rec-p ${escapeHtml(r.priority)}">${escapeHtml(r.priority)}</div>
       <div>
         <div class="rec-title">${escapeHtml(title)}</div>
-        <div class="rec-impact">鉁?${escapeHtml(impact)}</div>
+        <div class="rec-impact">✦ ${escapeHtml(impact)}</div>
       </div>
     </div>`;
   }).join('');
@@ -684,7 +684,7 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-/* ---------- 鏈湴鐪熷疄浜嬩欢锛堜粠 LS_KEY 婊氬姩缂撳啿璇伙級 ---------- */
+/* ---------- 本地真实事件（从 LS_KEY 滚动缓冲读） ---------- */
 function readLocalEvents() {
   try { return JSON.parse(localStorage.getItem('crossrealm_telemetry_v1') ?? '[]'); } catch { return []; }
 }
@@ -697,24 +697,24 @@ function renderLocalEvents() {
   const gridHtml = known.map(k => {
     const v = counts[k] ?? 0;
     const active = v > 0;
-    return '<div class="kpi" style="' + (active ? 'border-color:rgba(255,217,138,.5)' : '') + '"><div class="kpi-label">' + escapeHtml(T(labelKey[k])) + '</div><div class="kpi-value">' + v + '</div><div class="kpi-trend up">' + (active ? '鈻? : '鈥?) + '</div></div>';
+    return '<div class="kpi" style="' + (active ? 'border-color:rgba(255,217,138,.5)' : '') + '"><div class="kpi-label">' + escapeHtml(T(labelKey[k])) + '</div><div class="kpi-value">' + v + '</div><div class="kpi-trend up">' + (active ? '▲' : '—') + '</div></div>';
   }).join('');
   document.getElementById('localEventsGrid').innerHTML = gridHtml;
   const recent = arr.slice(-8).slice().reverse().map(e => {
     const t = new Date(e.t).toTimeString().slice(0, 8);
-    return '[' + t + '] ' + e.event + (e.meta ? ' 路 ' + JSON.stringify(e.meta).slice(0, 40) : '');
+    return '[' + t + '] ' + e.event + (e.meta ? ' · ' + JSON.stringify(e.meta).slice(0, 40) : '');
   }).join('\n');
   document.getElementById('localEventsList').textContent = recent || T('lt_empty');
 }
 
-/* 棣栨杩涘叆椤甸潰鍗冲簲鐢ㄤ繚瀛樼殑璇█锛堟湭瑙ｉ攣涔熺敓鏁堬級 */
+/* 首次进入页面即应用保存的语言（未解锁也生效） */
 applyLang(curLang);
 
-/* ---------- W-Z130锛氬悗绔湡鍊硷紙Postgres rollup by day脳type锛?--------- */
+/* ---------- W-Z130：后端真值（Postgres rollup by day×type）---------- */
 async function loadLiveRollup() {
   try {
     const res = await fetch('/api/telemetry/summary-rollup', { cache: 'no-store' });
-    if (!res.ok) return; // Pages 闈?
+    if (!res.ok) return; // Pages 静
     const j = await res.json();
     if (!j || j.enabled !== true) return;
     const totals = j.totals || {};
@@ -734,14 +734,14 @@ async function loadLiveRollup() {
       '</div>';
     }).join('');
     footEl.textContent = (curLang === 'zh'
-      ? '鏁版嵁涓烘湰鏈?Postgres 路 telemetry_daily_rollup锛坉ay 脳 type锛?4 鏃ョ獥' +
-        ' 路 鎬昏浜嬩欢 ' + Number(j.total ?? 0).toLocaleString() + ' 鏉?路 鍙湁 鏈満 compose 鍚姩鏃舵鍗℃墠鏈夋暟鎹?
-      : 'Live from local Postgres 路 telemetry_daily_rollup (day 脳 type), 14-day window' +
-        ' 路 total events ' + Number(j.total ?? 0).toLocaleString() + ' 路 panel only populates when local compose is up');
+      ? '数据为本机 Postgres · telemetry_daily_rollup（day × type）14 日窗' +
+        ' · 总计事件 ' + Number(j.total ?? 0).toLocaleString() + ' 条 · 只有 本机 compose 启动时此卡才有数据'
+      : 'Live from local Postgres · telemetry_daily_rollup (day × type), 14-day window' +
+        ' · total events ' + Number(j.total ?? 0).toLocaleString() + ' · panel only populates when local compose is up');
   } catch (_) { /* silent: Pages deployment has no backend */ }
 }
 
-/* ---------- 鏈満鏅鸿兘娲炲療锛歀S 浜嬩欢娴佹帹璁猴紙鐪熷疄銆佹瘡娆￠噸鏂拌绠楋級 ---------- */
+/* ---------- 本机智能洞察：LS 事件流推论（真实、每次重新计算） ---------- */
 function renderInsight() {
   try {
     const arr = readLocalEvents();
@@ -772,29 +772,29 @@ function renderInsight() {
     const autoplayTaps = counts.autoplay_tap ?? 0;
 
     if (total === 0) {
-      rows.push({ priority: 'P0', zh: '杩欎釜娴忚鍣ㄨ繕娌¤窇杩囦竴娆℃父鎴忋€傗€斺€?鍏堝幓鐜╀袱涓夊眬锛圚/J/M/鍑绘潃 Boss锛夛紝鐐夎竟鐩樻墠浼氭湁鐪熷疄鎺ㄦ柇銆?, en: 'This browser hasn鈥檛 played once yet 鈥?play a few rounds first. The insight only reasons from real events.', impact: zh ? '鈥?绛変綘寮€濮?鈥斺€? : '鈥?waiting on you' });
+      rows.push({ priority: 'P0', zh: '这个浏览器还没跑过一次游戏。—— 先去玩两三局（H/J/M/击杀 Boss），炉边盘才会有真实推断。', en: 'This browser hasn’t played once yet — play a few rounds first. The insight only reasons from real events.', impact: zh ? '— 等你开始 ——' : '— waiting on you' });
     } else {
-      if (gameStarts >= 2 && bossKills === 0) rows.push({ priority: 'P0', zh: '浣犲紑浜?' + gameStarts + ' 娆″眬銆丅oss 鍑绘潃浠?0 鈥斺€?澶ф璇鍦ㄧ涓€鍙?Boss 涔嬪墠锛涘姞鍙戝厜銆岀涓€涓?Boss 淇℃爣銆岺UD 楂樹寒 + 棣栨鎴樻枟鍓嶇殑杞婚噺杈呭姪', en: 'You opened ' + gameStarts + ' sessions, 0 boss kills 鈥?likely stalled before the first boss; add a first-boss beacon highlight and assist this first fight', impact: zh ? '鈫?閫氬叧鐜?+30%锛堝疄娴嬮浼帮級' : '鈫?clear-rate +30%' });
-      if (gameStarts > 0 && helpOpens === 0) rows.push({ priority: 'P1', zh: '娓告垙宸茬粡鍚姩 ' + gameStarts + ' 娆★紝浣嗘病鎸夎繃 H 鈥斺€?鎶娿€屾寜 H 鐪嬫墜鍐屻€嶅仛鎴愬墠 5 鍒嗛挓鍐呬竴鐩存诞鐫€鐨勮交鎻愮ず', en: 'Game started ' + gameStarts + ' times, help never opened 鈥?add a persistent first-5-minute HUD hint about H', impact: zh ? '鈫?甯姪鎵撳紑鐜?+35%锛堝疄娴嬫ā鍨嬶級' : '鈫?help open rate +35%' });
-      if (journalOpens >= 5 && canonOpens === 0) rows.push({ priority: 'P1', zh: '鏃ュ織寮€浜?' + journalOpens + ' 娆°€佸吀绫?0 娆?鈥斺€?鏃ュ織绗竴灞忔樉寮忔彁绀恒€屽吀绫嶉 路 19 鍗峰凡鏈夋柊绔犮€?, en: 'Opened the journal ' + journalOpens + ' times, zero canon visits 鈥?add a visible prompt on first journal open announcing the canon library', impact: zh ? '鈫?鍏哥睄鐐瑰嚮鐜?+15%' : '鈫?canon click-through +15%' });
-      if (flameDraws > 0 && trilanceDraws === 0) rows.push({ priority: 'P2', zh: '姣忔棩閿氱伀鍗犲崪鐢ㄤ簡 ' + flameDraws + ' 娆★紝浣嗘病璇曡繃鍛ㄤ竴鐨勩€屼笁鏃ユ洔鐩樸€?鈥斺€?鍦ㄥ崰鍗滈〉绛惧姞涓€涓懆涓€only鐨勮鏍囧叆鍙?, en: 'Used daily flame divination ' + flameDraws + ' times but never the Monday Trisolar tide 鈥?add a Monday-only chip on the tide tab', impact: zh ? '鈫?鍛ㄦ椿 +12%锛堝疄娴嬫ā鍨嬶級' : '鈫?weekly actives +12%' });
-      if (passDraws > 0 && vowDraws === 0) rows.push({ priority: 'P2', zh: '鐐夌伀鐨勪氦妫掓娊浜?' + passDraws + ' 娆★紝鐐夌伀绁堟効涓€娆￠兘娌＄湅杩?鈥斺€?鍦ㄤ氦妫掓彮鏅撴椂缁欎竴涓€岄殧澹佽繕鏈変竴娈典竷鐧惧勾銆嶇殑鍏ュ彛', en: 'Drew the Handing ' + passDraws + ' time(s) but never the Hearth Vow 鈥?one cross-link from the handing鈥檚 ending to the vow tab', impact: zh ? '鈫?鏂伴〉绛惧彂鐜扮巼 +18%锛堝疄娴嬫ā鍨嬶級' : '鈫?new-tab discovery +18%' });
-      if (vowDraws > 0 && passDraws === 0) rows.push({ priority: 'P2', zh: '鐐夌伀绁堟効鎶戒簡 ' + vowDraws + ' 娆★紝杩樻病璇曡繃銆岀倝鐏殑浜ゆ銆嶁€斺€?绁堟効鎻檽椤甸噷鍔犱竴鍙ラ€氬線浜ゆ鐨勫紩璺彞', en: 'Cast ' + vowDraws + ' Hearth Vows but never the Handing 鈥?one docent line on the vow鈥檚 ending screen toward the handing tab', impact: zh ? '鈫?浜ゆ椤电鎵撳紑鐜?+20%锛堝疄娴嬫ā鍨嬶級' : '鈫?handing-tab opens +20%' });
-      if (worldMapOpens >= 3) rows.push({ priority: 'P2', zh: '涓栫晫鍦板浘鎵撳紑浜?' + worldMapOpens + ' 娆″嵈娌℃湁鍑哄 鈥斺€?榛樿鍦ㄥ彸涓婅寮瑰嚭銆屾渶杩戣鍘荤殑鍦版柟銆嶆槦鏍?, en: 'World map opened ' + worldMapOpens + ' times without travel signal 鈥?surface a 鈥渘ext destination鈥?pinned at your last target', impact: zh ? '鈫?杩疯矾鐜?-20%' : '鈫?wander rate 鈭?0%' });
-      if (autoplayTaps >= 2) rows.push({ priority: 'P2', zh: '鑷姩閫氬叧琚敤浜?' + autoplayTaps + ' 娆?鈥斺€?鍔犱竴涓€氬叧鍚庛€屼繚鎸侀€氬叧鏃惰垝鏈嶇殑濮垮娍銆嶇煭璺紝鍛婅瘔鐜╁鎵嬪姩浣撻獙鏈夐€掕繘绾跨储', en: 'Autoplay tapped ' + autoplayTaps + ' times 鈥?surface a 鈥測ou still have paths worth walking鈥?hint after an auto-run', impact: zh ? '鈫?鍥炶鐜?+8%' : '鈫?return rate +8%' });
-      if (bossKills >= 3 && worldMapOpens >= 2) rows.push({ priority: 'P3', zh: 'Boss ' + bossKills + '脳 + 鍦板浘 ' + worldMapOpens + '脳 鈥?鑰佺帺瀹朵俊鍙凤細鍗蜂簩銆婁笁鏃ラ櫟銆婬UD閲屾帹銆屽嵎娆″洖鍝嶃€嶆梺鐧?, en: 'Veterans score: ' + bossKills + ' boss kills + ' + worldMapOpens + ' map opens 鈥?surface a Vol. II canon-read moment', impact: zh ? '鈫?鐣欏瓨 +6%' : '鈫?churn control 鈭?%' });
-      if (journalOpens === 0 && gameStarts >= 2) rows.push({ priority: 'P2', zh: '娓告垙鍚姩 ' + gameStarts + ' 娆′絾浠庢病涓诲姩寮€鏃ュ織 鈥斺€?鍔犱竴娆′竴娆℃€?tooltip锛氥€屾寜 J 鏃ュ織璁颁綇浣犵殑鏃呴€斻€?, en: 'Started the game ' + gameStarts + ' times, journal never invoked 鈥?add a one-time tooltip: 鈥淧ress J 鈥?the journal keeps your story鈥?, impact: zh ? '鈫?J 鎵撳紑鐜?+50%' : '鈫?journal open rate +50%' });
-      if (autoplayTaps === 0 && bossKills <= 1 && gameStarts >= 3) rows.push({ priority: 'P3', zh: '瀹屽叏娌＄杩囪嚜鍔ㄩ€氬叧 鈥斺€?璁稿鐜╁涓嶇煡閬撳畠瀛樺湪锛屽湪鑿滃崟搴曢儴鏀句竴涓皬鐪肩潧鍥炬爣', en: 'Never tried autoplay 鈥?many players simply haven鈥檛 found it; consider a tiny eyes-as-affordance entry', impact: zh ? '鈫?鍔熻兘鍙戠幇鐜?+20%' : '鈫?feature discovery +20%' });
+      if (gameStarts >= 2 && bossKills === 0) rows.push({ priority: 'P0', zh: '你开了 ' + gameStarts + ' 次局、Boss 击杀仍 0 —— 大概误导在第一只 Boss 之前；加发光「第一个 Boss 信标」HUD 高亮 + 首次战斗前的轻量辅助', en: 'You opened ' + gameStarts + ' sessions, 0 boss kills — likely stalled before the first boss; add a first-boss beacon highlight and assist this first fight', impact: zh ? '→ 通关率 +30%（实测预估）' : '→ clear-rate +30%' });
+      if (gameStarts > 0 && helpOpens === 0) rows.push({ priority: 'P1', zh: '游戏已经启动 ' + gameStarts + ' 次，但没按过 H —— 把「按 H 看手册」做成前 5 分钟内一直浮着的轻提示', en: 'Game started ' + gameStarts + ' times, help never opened — add a persistent first-5-minute HUD hint about H', impact: zh ? '→ 帮助打开率 +35%（实测模型）' : '→ help open rate +35%' });
+      if (journalOpens >= 5 && canonOpens === 0) rows.push({ priority: 'P1', zh: '日志开了 ' + journalOpens + ' 次、典籍 0 次 —— 日志第一屏显式提示「典籍馆 · 19 卷已有新章」', en: 'Opened the journal ' + journalOpens + ' times, zero canon visits — add a visible prompt on first journal open announcing the canon library', impact: zh ? '→ 典籍点击率 +15%' : '→ canon click-through +15%' });
+      if (flameDraws > 0 && trilanceDraws === 0) rows.push({ priority: 'P2', zh: '每日锚火占卜用了 ' + flameDraws + ' 次，但没试过周一的「三日曜盘」 —— 在占卜页签加一个周一only的角标入口', en: 'Used daily flame divination ' + flameDraws + ' times but never the Monday Trisolar tide — add a Monday-only chip on the tide tab', impact: zh ? '→ 周活 +12%（实测模型）' : '→ weekly actives +12%' });
+      if (passDraws > 0 && vowDraws === 0) rows.push({ priority: 'P2', zh: '炉火的交棒抽了 ' + passDraws + ' 次，炉火祈愿一次都没看过 —— 在交棒揭晓时给一个「隔壁还有一段七百年」的入口', en: 'Drew the Handing ' + passDraws + ' time(s) but never the Hearth Vow — one cross-link from the handing’s ending to the vow tab', impact: zh ? '→ 新页签发现率 +18%（实测模型）' : '→ new-tab discovery +18%' });
+      if (vowDraws > 0 && passDraws === 0) rows.push({ priority: 'P2', zh: '炉火祈愿抽了 ' + vowDraws + ' 次，还没试过「炉火的交棒」—— 祈愿揭晓页里加一句通往交棒的引路句', en: 'Cast ' + vowDraws + ' Hearth Vows but never the Handing — one docent line on the vow’s ending screen toward the handing tab', impact: zh ? '→ 交棒页签打开率 +20%（实测模型）' : '→ handing-tab opens +20%' });
+      if (worldMapOpens >= 3) rows.push({ priority: 'P2', zh: '世界地图打开了 ' + worldMapOpens + ' 次却没有出处 —— 默认在右上角弹出「最近要去的地方」星标', en: 'World map opened ' + worldMapOpens + ' times without travel signal — surface a “next destination” pinned at your last target', impact: zh ? '→ 迷路率 -20%' : '→ wander rate −20%' });
+      if (autoplayTaps >= 2) rows.push({ priority: 'P2', zh: '自动通关被用了 ' + autoplayTaps + ' 次 —— 加一个通关后「保持通关时舒服的姿势」短路，告诉玩家手动体验有递进线索', en: 'Autoplay tapped ' + autoplayTaps + ' times — surface a “you still have paths worth walking” hint after an auto-run', impact: zh ? '→ 回访率 +8%' : '→ return rate +8%' });
+      if (bossKills >= 3 && worldMapOpens >= 2) rows.push({ priority: 'P3', zh: 'Boss ' + bossKills + '× + 地图 ' + worldMapOpens + '× — 老玩家信号：卷二《三日陵》HUD里推「卷次回响」旁白', en: 'Veterans score: ' + bossKills + ' boss kills + ' + worldMapOpens + ' map opens — surface a Vol. II canon-read moment', impact: zh ? '→ 留存 +6%' : '→ churn control −6%' });
+      if (journalOpens === 0 && gameStarts >= 2) rows.push({ priority: 'P2', zh: '游戏启动 ' + gameStarts + ' 次但从没主动开日志 —— 加一次一次性 tooltip：「按 J 日志记住你的旅途」', en: 'Started the game ' + gameStarts + ' times, journal never invoked — add a one-time tooltip: “Press J — the journal keeps your story”', impact: zh ? '→ J 打开率 +50%' : '→ journal open rate +50%' });
+      if (autoplayTaps === 0 && bossKills <= 1 && gameStarts >= 3) rows.push({ priority: 'P3', zh: '完全没碰过自动通关 —— 许多玩家不知道它存在，在菜单底部放一个小眼睛图标', en: 'Never tried autoplay — many players simply haven’t found it; consider a tiny eyes-as-affordance entry', impact: zh ? '→ 功能发现率 +20%' : '→ feature discovery +20%' });
     }
     rows.sort((a, b) => a.priority.localeCompare(b.priority));
     const ordered = rows.slice(0, 6);
     const html = ordered.length === 0
-      ? '<div class="rec"><div class="rec-p P3">P3</div><div><div class="rec-title">' + escapeHtml(zh ? '鏆傛椂娌℃湁鍙帹璁虹殑鏀硅繘寤鸿' : 'No actionable insight yet') + '</div><div class="rec-impact">鈥?/div></div></div>'
+      ? '<div class="rec"><div class="rec-p P3">P3</div><div><div class="rec-title">' + escapeHtml(zh ? '暂时没有可推论的改进建议' : 'No actionable insight yet') + '</div><div class="rec-impact">—</div></div></div>'
       : ordered.map((r, i) => '<div class="rec"><div class="rec-p ' + r.priority + '">' + r.priority + '</div><div><div class="rec-title"><strong style="color:rgba(255,217,138,.75)">' + (i+1) + '.</strong> ' + escapeHtml(zh ? r.zh : r.en) + '</div><div class="rec-impact">' + escapeHtml(r.impact) + '</div></div></div>').join('');
     document.getElementById('insightRows').innerHTML = html;
     document.getElementById('insightFoot').innerHTML = T('insight_foot');
     const small = document.getElementById('insightSmall');
-    if (small) small.textContent = curLang === 'zh' ? ('鍩轰簬鏈満 crossrealm_telemetry_v1 路 n=' + total + '锛? + confidence + '锛?) : ('From this machine鈥檚 crossrealm_telemetry_v1 路 n=' + total + ' (' + confidence + ')');
+    if (small) small.textContent = curLang === 'zh' ? ('基于本机 crossrealm_telemetry_v1 · n=' + total + '（' + confidence + '）') : ('From this machine’s crossrealm_telemetry_v1 · n=' + total + ' (' + confidence + ')');
   } catch (_) { /* silent */ }
 }
 </script>
