@@ -1,47 +1,47 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-18T19:35:01.634Z",
+  "generated_at": "2026-11-18T19:50:48.305Z",
   "branch": "main",
-  "head": "e6d45c7",
-  "total_commits": 2221,
-  "pushed_at": "2026-11-19T03:34:02+08:00",
+  "head": "7797aa2",
+  "total_commits": 2226,
+  "pushed_at": "2026-11-19T03:50:07+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
     {
-      "short": "e6d45c7",
-      "at": "2026-11-19T03:34:02+08:00",
-      "subject": "feat(canon): W-Z409 第二百一十九卷《白桦吻 / The Birch’s Kiss》入典——卷二十之八 · 第七百零三年 · 白桦吻（v3 前缀 219 条年表）"
+      "short": "7797aa2",
+      "at": "2026-11-19T03:50:07+08:00",
+      "subject": "feat(canon): W-Z411 第二百二十卷《谷雨 / Grain Rain》入典——卷二十之九 · 第七百零三年 · 谷雨（v3 前缀 220 条年表）"
     },
     {
-      "short": "087e58c",
-      "at": "2026-11-19T03:24:23+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z408 (novels 218 · lore 467 · i18n 3267 · commits 2219)"
+      "short": "5eabc46",
+      "at": "2026-11-19T03:40:49+08:00",
+      "subject": "fix(admin): restore UTF-8 bytes for MASTER_PLAN and admin index after accidental Set-Content re-encode; keep only the .log to .json reference fix"
     },
     {
-      "short": "d8502d3",
-      "at": "2026-11-19T03:23:22+08:00",
-      "subject": "feat(canon): W-Z408 第二百一十八卷《夏火 / Summer Fire》入典——卷二十之七 · 第七百零三年 · 夏火（v3 前缀 218 条年表）"
+      "short": "25f4f52",
+      "at": "2026-11-19T03:39:40+08:00",
+      "subject": "measure(admin): W-Z410 数据产物落档 cache-probe-w-z410.json（MEASURED）· Admin 卡指向 .json"
     },
     {
-      "short": "8eecae9",
-      "at": "2026-11-19T03:08:31+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z407 (novels 217 · lore 465 · i18n 3267 · commits 2217)"
+      "short": "f23f085",
+      "at": "2026-11-19T03:39:00+08:00",
+      "subject": "measure(admin): W-Z410 诚实卡 meas_l27 - stream vs non-stream 对照探针（gpt-6.1-terra · Clash 7897 · cached=5066/5342≈94.8% steady；上游偶发不回 cached_tokens 字段，字段缺失=上游抖动而非缓存失效）"
     },
     {
-      "short": "4e900d1",
-      "at": "2026-11-19T03:07:24+08:00",
-      "subject": "feat(canon): W-Z407 第二百一十七卷《灯灭了 / The Lamp Went Out》入典——卷二十之六 · 第七百零三年 · 灯灭了（v3 前缀含 217 条年表）"
+      "short": "024582a",
+      "at": "2026-11-19T03:35:10+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z409 (novels 219 · lore 469 · i18n 3267 · commits 2221)"
     }
   ],
-  "tracked_files": 1754,
+  "tracked_files": 1757,
   "test_files": 468,
   "i18n_keys": 3267,
-  "lore_sources": 469,
-  "novel_chapters_zh": 219,
-  "novel_chapters_en": 219,
-  "milestone": "W-Z409",
-  "milestone_full": "卷 219 · 六百年守火线（219 / 219 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 469 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：219 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 471,
+  "novel_chapters_zh": 220,
+  "novel_chapters_en": 220,
+  "milestone": "W-Z411",
+  "milestone_full": "卷 220 · 六百年守火线（220 / 220 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 471 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：220 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
