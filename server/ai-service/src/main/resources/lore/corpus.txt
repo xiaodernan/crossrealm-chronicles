@@ -11994,6 +11994,51 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and fifteen overall · the seven-hundred-and-third year, fourth part — The Right Heat.)*
 
+# source: creative/novel/en/216-spring.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Fifth Volume — Spring
+
+---
+
+## Two Hundred and Sixteen: Spring
+
+The first week after the spring equinox — Friday — morning — the fire burned.
+
+A-Shi stood at the doorway — the birch had sprouted leaves — they were about the size of a thumb — the fire burned — his mother stood at the kitchen table — she did not speak — the fire burned — the fire burned.
+
+A-Shi said: “ — spring —”
+
+His mother said: “ — spring —”
+
+The fire burned.
+
+A-Shi said: “ — the fire must be kept —”
+
+His mother said: “ — the fire must be kept —”
+
+The fire burned.
+
+Spring.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and sixteen overall · the seven-hundred-and-third year, fifth part — Spring.)*
+
 # source: creative/novel/en/22-after-the-mist-scatters.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27264,6 +27309,51 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百一十五卷 · 卷二十之四 · 第七百零三年 · 火候）*
+
+# source: creative/novel/216-春天.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第五卷 —— 春天
+
+---
+
+## 二百一十六 · 春天
+
+立春后第一周——周五——早上——灶火燃着。
+
+阿石站在门口——白桦的芽叶出来了——比拇指大一点——灶火燃着——母亲站在厨桌前——她没说话——灶火燃着——灶火燃着。
+
+阿石说：「——春天——」
+
+母亲说：「——春天——」
+
+灶火燃着。
+
+阿石说：「——灶火要守——」
+
+母亲说：「——灶火要守——」
+
+灶火燃着。
+
+春天。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百一十六卷 · 卷二十之五 · 第七百零三年 · 春天）*
 
 # source: creative/novel/22-雾散之后.md
 # 《跨界纪事：锚火守夜人》

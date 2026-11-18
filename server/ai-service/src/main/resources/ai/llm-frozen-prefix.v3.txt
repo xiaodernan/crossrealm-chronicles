@@ -357,6 +357,7 @@ End of frozen digest.
 213 · 灯下有灰
 214 · 薪火
 215 · 火候
+216 · 春天
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
