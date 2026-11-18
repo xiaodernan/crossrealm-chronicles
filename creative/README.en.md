@@ -272,7 +272,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Wheat Grain | [the-wheat-grain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/221-the-wheat-grain.md) |
 | The Ears of Wheat | [the-ears-of-wheat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/222-the-ears-of-wheat.md) |
 | The Pollination | [the-pollination](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/223-the-pollination.md) |
-| The Grain Filling | [the-grain-filling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/224-the-grain-filling.md) |Chapter → game-chapter mapping:
+| The Grain Filling | [the-grain-filling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/224-the-grain-filling.md) |
+| The Wheat Sea | [the-wheat-sea](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/225-the-wheat-sea.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

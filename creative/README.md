@@ -270,7 +270,8 @@ creative/music/soundtrack.html
 | 麦粒 · The Wheat Grain | [the-wheat-grain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/221-the-wheat-grain.md) |
 | 抽穗 · The Ears of Wheat | [the-ears-of-wheat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/222-the-ears-of-wheat.md) |
 | 扬花 · The Pollination | [the-pollination](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/223-the-pollination.md) |
-| 灌浆 · The Grain Filling | [the-grain-filling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/224-the-grain-filling.md) |每一章对应游戏的章节走法：
+| 灌浆 · The Grain Filling | [the-grain-filling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/224-the-grain-filling.md) |
+| 麦浪 · The Wheat Sea | [the-wheat-sea](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/225-the-wheat-sea.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
