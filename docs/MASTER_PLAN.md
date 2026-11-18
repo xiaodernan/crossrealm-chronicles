@@ -20,6 +20,9 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-19 · W-Z410 Admin 诚实卡 meas_l27——流式 vs 非流对照探针（真上游 gpt-6.1-terra · Clash 7897）**
+> 交付：scripts/cache-probe.mjs 两次独立实跑（MEASURED）——cached ≈ **5066/5342 ≈ 94.8%** 恒定（frozen prefix + prompt_cache_key=crossrealm-canon-v1 下 cold → warm#2…#6 同一值）。新发现：**上游偶发不回 `cached_tokens` 字段**（第 1 次跑 non-stream 无字段、第 2 次跑 stream warm#4 无字段）——字段缺失是上游报告抖动，不是缓存失效；现有 README 的「只在 stream+include_usage 上报」表述已被第二次实测推翻，按实测重写 Admin 卡 meas_l27/tr27 + cache-probe-w-z410.log 归档。结论：稳定 90%+ = 冻结前缀 >1024 tok + per-lane prompt_cache_key + stream:true & include_usage，无一可缺；并行会话抢缓存本实测不复现（W-Z336 8 路 ≈98%）。
+>
 > **2026-11-19 · W-Z409 第二百一十九卷入典《白桦吻 / The Birch’s Kiss》——卷二十之八 · 第七百零三年 · 白桦吻**：第七百零三年——立春后第三周——周三——早上——灶火燃着——阿石站在门口——白桦的叶子全是绿的——风轻——他伸手——他摸了一下白桦的叶子——它很轻——母亲站在厨桌前——她看他——她没开口——白桦吻——灶火燃着。
 > 交付：creative/novel/219-白桦吻.md + en 孪生 219-the-birchs-kiss.md；novella 219 × 2 = 438 模块（典籍馆现为 219 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**469 源**；**v3 冻结前缀含 219 条年表条目**；showcase feed 新增 W-Z409 实录。
 >
