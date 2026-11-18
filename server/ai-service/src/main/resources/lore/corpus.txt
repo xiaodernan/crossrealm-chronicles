@@ -10043,6 +10043,47 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and seventy-four overall · the seven-hundred-and-first year, twelfth part — The White in the Fire.)*
 
+# source: creative/novel/en/175-the-wick-is-fine.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Thirteenth Volume — The Wick Is Fine
+
+---
+
+## One Hundred and Seventy-five: The Wick Is Fine
+
+The tenth day — before first light — the fire burned.
+
+A-Shi woke — he saw the old oil lamp — it stood on the table — unlit — he did not move — he said softly: “Ma —”
+
+No — it was his mother’s voice — she said: “Look at the wick —”
+
+A-Shi said: “It’s very fine.”
+
+His mother said: “It is very fine — you do not need to look closely — it is waiting for you —”
+
+The fire burned.
+
+A-Shi walked over — he picked the lamp up — he set it back on the table — he said nothing — the fire burned.
+
+His mother said: “You keep the fire — you keep this too — slowly —”
+
+A-Shi said: “Slowly —”
+
+His mother said: “Yes.”
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and seventy-five overall · the seven-hundred-and-first year, thirteenth part — The Wick Is Fine.)*
+
 # source: creative/novel/en/18-trilarite-stair.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -23586,6 +23627,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百七十四卷 · 卷十七之十二 · 第七百零一年 · 炉火里的白）*
+
+# source: creative/novel/175-灯芯很细.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第十三卷 —— 灯芯很细
+
+---
+
+## 一百七十五 · 灯芯很细
+
+第十天——天没亮——灶火燃着。
+
+阿石醒来——他看见了那盏旧油灯——它站在桌上——它没点——他没动——他轻声说：「妈——」
+
+不——是母亲的声音——她说：「你看着灯芯——」
+
+阿石说：「它很细。」
+
+母亲说：「它很细——你不用细看——它等你——」
+
+灶火燃着。
+
+阿石走过去——他把灯拿起来——他把它放回桌上——他没说话——灶火燃着。
+
+母亲说：「你守火——也守这个——慢慢来——」
+
+阿石说：「慢慢来——」
+
+母亲说：「对。」
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百七十五卷 · 卷十七之十三 · 第七百零一年 · 灯芯很细）*
 
 # source: creative/novel/18-三日陵.md
 # 《跨界纪事：锚火守夜人》
