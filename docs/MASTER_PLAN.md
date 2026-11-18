@@ -20,6 +20,13 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-19 · W-Z417 Oracle v4 全量前缀直击上游实测——prompt=47,370 · 冻结前缀约 4–5 万 token，与 Codex 同档 · warm=44363 (93.7%)**
+> 新脚本 `scripts/oracle-v4-live-probe.mjs`：把生产 Oracle 用的同一份 v4 冻结前缀（125KB · 约 28K tok，含 GLOSSARY.md verbatim 全量）直接送上游，不用经 gateway，离线即可复现。
+> 实测：`① 全量 v4 前缀 · 第 1 次 HTTP 200 · prompt=47,370 · cached=2255 (4.8%)` → 第 2 次 `prompt=47,370 · cached=44,363 (93.7%) · ~4.6s`。
+> 意义：用户反馈「为什么你的输入上下文总是那么少，我看 Codex 一次上不是 5–9 万」——这个实测翻案：生产 Oracle 真在把全书（~47K token）带进每次提问，warm 命中稳定 ~93.7%，与 Codex 同量级；cold 只有 4.8%，说明 page 真的会过期。已把本次数据写进 Admin meas_tr25（HTML + zh + en）。
+> 注意：cold = 上游 page 已过期（probe 前距上次 v4 热身已隔天）；生产日志此前测过重启动后首请求 93.7%——仅 Desktop 重启后的冷窗口会是一条全量 100% ice。Admin 卡已按实测重写。不做「缓存稳定不掉」的承诺，只报实测。
+> 产物：docs/admin/data/oracle-v4-live-probe-2026-11-19.json（MEASURED）；Admin meas_tr25 双语并 HTML 卡已含本次数据。
+>
 > **2026-11-19 · W-Z416 link-check 口径修正——Pages 焙烤 _site 的站点根 sibling 误判 6 条断链（全部为假阳性）**
 > 原因对账：`.github/workflows/pages.yml` 把 `creative/showcase.html → _site/index.html`、`docs/admin/index.html → admin/index.html`、`player-guide → guide.html`、`dist/ → game/`、`public/favicon.svg → favicon.svg` 焙烤部署；仓库里没有 `docs/favicon.svg`、`docs/game/`、`docs/guide.html`、仓库根 `favicon.svg` 本就是 vite public 挂载点。旧门禁只允许 `creative/` 直接子级跳过站点根 sibling，`docs/admin/../game/` 与仓库根 `index.html → ./favicon.svg` 全判死。修法：① 统一跳过规则——递归剥离前导 `../` 与 `./` 后，首段落在 DEPLOY_SIBLINGS 白名单内一律放行（覆盖任意 _site 成员方向）；② 非斜线绝对/相对路径在 `resolve(dirname(file), x)` 失败后回退 `resolve(ROOT, "public", x)`（vite public 挂载语义）。513 文件全量复扫：**all links resolve** ✓（此前 6 条全为假阳性，真断链 0）。git diff regen only scripts/link-check.mjs。
 >
