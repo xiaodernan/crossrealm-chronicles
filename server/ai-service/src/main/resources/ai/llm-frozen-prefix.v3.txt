@@ -326,6 +326,7 @@ End of frozen digest.
 182 · 烟火
 183 · 天亮了
 184 · 那天了
+185 · 她来了
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

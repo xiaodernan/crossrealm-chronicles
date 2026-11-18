@@ -232,7 +232,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Fire Did Not Say | [the-fire-did-not-say](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/181-the-fire-did-not-say.md) |
 | Sparks | [sparks](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/182-sparks.md) |
 | The Sky Brightened | [the-sky-brightened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/183-the-sky-brightened.md) |
-| The Day Came | [the-day-came](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/184-the-day-came.md) |Chapter → game-chapter mapping:
+| The Day Came | [the-day-came](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/184-the-day-came.md) |
+| She Came | [she-came](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/185-she-came.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

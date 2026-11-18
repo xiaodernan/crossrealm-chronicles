@@ -10506,6 +10506,45 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and eighty-four overall · the seven-hundred-and-second year, fifth part — The Day Came.)*
 
+# source: creative/novel/en/185-she-came.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Sixth Volume — She Came
+
+---
+
+## One Hundred and Eighty-five: She Came
+
+The second week after the spring equinox — Wednesday — morning — the fire burned.
+
+A-Shi sat before the stove — the fire burned — his mother was not in the room — A-Shi did not speak — there was only the fire and the wind — the fire burned.
+
+The kitchen door opened — his mother, in her hand — she held nothing — she only reached out — she rested her hand on A-Shi’s head — she said: “She has come —”
+
+A-Shi said: “ — she —”
+
+His mother said: “ — Azu —”
+
+A-Shi said: “ — Azu —”
+
+His mother said: “ — yes —”
+
+The fire burned.
+
+A-Shi did not speak — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and eighty-five overall · the seven-hundred-and-second year, sixth part — She Came.)*
+
 # source: creative/novel/en/19-the-council-of-three-suns.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -24455,6 +24494,46 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百八十四卷 · 卷十八之五 · 第七百零二年 · 那天了）*
+
+# source: creative/novel/185-她来了.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第六卷 —— 她来了
+
+---
+
+## 一百八十五 · 她来了
+
+立春后第二周——周三——早上——灶火燃着。
+
+阿石在灶前——灶火燃着——母亲不在屋里——阿石没说——风里只有灶火——灶火燃着。
+
+厨房门开了——母亲手里——她没端——她只是伸手——她放在阿石头上——她说：「她来了——」
+
+阿石说：「——她——」
+
+母亲说：「——阿祖她——」
+
+阿石说：「——阿祖——」
+
+母亲说：「——对——」
+
+灶火燃着。
+
+阿石没出声——灶火燃着。
+
+灶火燃着。
+
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百八十五卷 · 卷十八之六 · 第七百零二年 · 她来了）*
 
 # source: creative/novel/19-三日之议.md
 # 《跨界纪事：锚火守夜人》
