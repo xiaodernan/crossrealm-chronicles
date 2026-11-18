@@ -323,6 +323,7 @@ End of frozen digest.
 179 · 他走过来了
 180 · 火又起
 181 · 火什么都没说
+182 · 烟火
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

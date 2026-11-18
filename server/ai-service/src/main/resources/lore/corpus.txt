@@ -10379,6 +10379,47 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and eighty-one overall · the seven-hundred-and-second year, second part — The Fire Did Not Say.)*
 
+# source: creative/novel/en/182-sparks.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Third Volume — Sparks
+
+---
+
+## One Hundred and Eighty-two: Sparks
+
+The first week after the spring equinox — Wednesday — late morning — the fire burned.
+
+A-Shi carried out from the room a small porcelain jar — he did not look — he set it on the table.
+
+His mother said: “That is.”
+
+A-Shi said: “ — sparks —”
+
+His mother said: “Yes.”
+
+The fire burned.
+
+A-Shi said: “ — this burns once — it leaves one —”
+
+His mother said: “ — Yes.”
+
+A-Shi said: “ — Azu kept it — for the seven-hundred-and-second —”
+
+His mother said: “ — Yes — if you can stay —”
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and eighty-two overall · the seven-hundred-and-second year, third part — Sparks.)*
+
 # source: creative/novel/en/19-the-council-of-three-suns.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -24201,6 +24242,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百八十一卷 · 卷十八之二 · 第七百零二年 · 火什么都没说）*
+
+# source: creative/novel/182-烟火.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第三卷 —— 烟火
+
+---
+
+## 一百八十二 · 烟火
+
+立春后第一周——周三——上午——灶火燃着。
+
+阿石从屋里搬出一只小瓷瓮——他没看——他把它放在桌上。
+
+母亲说：「那是。」
+
+阿石说：「——烟火——」
+
+母亲说：「是的。」
+
+灶火燃着。
+
+阿石说：「——它烧一回——剩一回。」
+
+母亲说：「——是的。」
+
+阿石说：「——阿祖留它——是为了第七百零二——」
+
+母亲说：「——是的——守得住——」
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百八十二卷 · 卷十八之三 · 第七百零二年 · 烟火）*
 
 # source: creative/novel/19-三日之议.md
 # 《跨界纪事：锚火守夜人》
