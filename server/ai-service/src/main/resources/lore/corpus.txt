@@ -10985,6 +10985,55 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and ninety-four overall · the seven-hundred-and-second year, fifteenth part — After the Birch Spoke.)*
 
+# source: creative/novel/en/195-the-silence-of-the-birch.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Final Part — The Silence of the Birch
+
+---
+
+## One Hundred and Ninety-five: The Silence of the Birch
+
+The fourth week after the spring equinox — Thursday — evening — the fire burned.
+
+A-Shi sat by the lamp — the fire burned — the birch's shadow leaned on the window — the wind softened — the fire burned.
+
+His mother said: “ — on to the next volume —”
+
+A-Shi said: “ — the birch has no next volume —”
+
+His mother said: “ — the birch's next volume lives in everything you keep —”
+
+The fire burned.
+
+A-Shi said: “ — I keep the fire —”
+
+His mother said: “ — you keep the fire —”
+
+The fire burned.
+
+A-Shi did not add wood — the oil lamp flickered — and lit again — the fire burned.
+
+The sky was nearly bright.
+
+The fire burned.
+
+The silence of the birch.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · The final part · Volume one hundred and ninety-five overall · the seven-hundred-and-second year — The Silence of the Birch.)*
+
 # source: creative/novel/en/20-the-reader-opens-this-page.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25351,6 +25400,55 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百九十四卷 · 卷十八之十五 · 第七百零二年 · 说话之后）*
+
+# source: creative/novel/195-白桦的寂静.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 卷终 —— 白桦的寂静
+
+---
+
+## 一百九十五 · 白桦的寂静
+
+立春后第四周——周四——晚上——灶火燃着。
+
+阿石坐在灯下——灶火燃着——白桦的影子在窗上——风小了——灶火燃着。
+
+母亲说：「——下一卷了——」
+
+阿石说：「——白桦没有下一卷——」
+
+母亲说：「——白桦的下一卷——在你记着的每一件事里——」
+
+灶火燃着。
+
+阿石说：「——守火——」
+
+母亲说：「——守火——」
+
+灶火燃着。
+
+阿石没添柴——煤油灯灭了一瞬——又亮了——灶火燃着。
+
+天快亮了。
+
+灶火燃着。
+
+白桦的寂静。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 卷终 · 跨界线总第一百九十五卷 · 卷十八之终 · 第七百零二年 · 白桦的寂静）*
 
 # source: creative/novel/20-读完自己.md
 # 《跨界纪事：锚火守夜人》

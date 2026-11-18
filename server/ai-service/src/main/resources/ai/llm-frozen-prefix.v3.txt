@@ -336,6 +336,7 @@ End of frozen digest.
 192 · 守夜
 193 · 白桦说话
 194 · 说话之后
+195 · 白桦的寂静
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
