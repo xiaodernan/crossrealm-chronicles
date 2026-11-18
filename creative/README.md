@@ -222,7 +222,8 @@ creative/music/soundtrack.html
 | 事情发生了 · Something Happened | [something-happened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/173-something-happened.md) |
 | 炉火里的白 · The White in the Fire | [the-white-in-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/174-the-white-in-the-fire.md) |
 | 灯芯很细 · The Wick Is Fine | [the-wick-is-fine](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/175-the-wick-is-fine.md) |
-| 纸灰 · The Ash | [the-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/176-the-ash.md) |每一章对应游戏的章节走法：
+| 纸灰 · The Ash | [the-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/176-the-ash.md) |
+| 灶屋的夜 · The Night in the Kitchen | [the-night-in-the-kitchen](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/177-the-night-in-the-kitchen.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

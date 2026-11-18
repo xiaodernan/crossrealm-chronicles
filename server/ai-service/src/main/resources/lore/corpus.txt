@@ -10123,6 +10123,47 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and seventy-six overall · the seven-hundred-and-first year, fourteenth part — The Ash.)*
 
+# source: creative/novel/en/177-the-night-in-the-kitchen.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Fifteenth Volume — The Night in the Kitchen
+
+---
+
+## One Hundred and Seventy-seven: The Night in the Kitchen
+
+The twelfth day — late at night — the fire burned.
+
+A-Shi couldn’t sleep — he sat before the stove — his mother did not speak — she only sat across — she did not look at him — she watched the fire.
+
+A-Shi said: “Ma —”
+
+His mother did not answer.
+
+A-Shi said: “Will the stove mind an extra person?”
+
+His mother said: “It doesn’t.”
+
+The fire burned.
+
+A-Shi said: “Then I’ll sit with it a while longer.”
+
+His mother said: “— All right.”
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and seventy-seven overall · the seven-hundred-and-first year, fifteenth part — The Night in the Kitchen.)*
+
 # source: creative/novel/en/18-trilarite-stair.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -23746,6 +23787,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百七十六卷 · 卷十七之十四 · 第七百零一年 · 纸灰）*
+
+# source: creative/novel/177-灶屋的夜.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第十五卷 —— 灶屋的夜
+
+---
+
+## 一百七十七 · 灶屋的夜
+
+第十二天——深夜——灶火燃着。
+
+阿石不能睡——他坐在灶前——母亲不说——她只是坐在对面——她没看他——她看着火。
+
+阿石说：「妈——」
+
+母亲没接话。
+
+阿石说：「炉子不会嫌人多吧。」
+
+母亲说：「不嫌。」
+
+灶火燃着。
+
+阿石说：「那我就多陪它一会。」
+
+母亲说：「——好。」
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百七十七卷 · 卷十七之十五 · 第七百零一年 · 灶屋的夜）*
 
 # source: creative/novel/18-三日陵.md
 # 《跨界纪事：锚火守夜人》
