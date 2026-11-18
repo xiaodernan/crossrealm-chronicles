@@ -266,7 +266,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Right Heat | [the-right-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/215-the-right-heat.md) |
 | Spring | [spring](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/216-spring.md) |
 | The Lamp Went Out | [the-lamp-went-out](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/217-the-lamp-went-out.md) |
-| Summer Fire | [summer-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/218-summer-fire.md) |Chapter → game-chapter mapping:
+| Summer Fire | [summer-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/218-summer-fire.md) |
+| The Birch’s Kiss | [the-birchs-kiss](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/219-the-birchs-kiss.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
