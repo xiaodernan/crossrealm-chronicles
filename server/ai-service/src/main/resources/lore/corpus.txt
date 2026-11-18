@@ -11584,6 +11584,47 @@ The fire burned.
 
 *(End of volume XIX · Volume two hundred and six overall · the seven-hundred-and-second year, eleventh part — The Night of the Vigil.)*
 
+# source: creative/novel/en/207-thanking-the-fire.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Twelfth Volume — Thanking the Fire
+
+---
+
+## Two Hundred and Seven: Thanking the Fire
+
+The tenth week after the spring equinox — Thursday — morning — the fire burned.
+
+A-Shi added wood — the flame rose — the fire burned — his mother said: “ — thank it —” — A-Shi said: “ — thank it —” — the fire burned.
+
+A-Shi said: “ — thank you —”
+
+The fire burned.
+
+His mother said: “ — the fire is listening — it knows —”
+
+The fire burned.
+
+Thanking the fire.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume two hundred and seven overall · the seven-hundred-and-second year, twelfth part — Thanking the Fire.)*
+
 # source: creative/novel/en/21-night-walk-home.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -26490,6 +26531,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第二百零六卷 · 卷十九之十一 · 第七百零二年 · 守夜的夜）*
+
+# source: creative/novel/207-谢火.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第十二卷 —— 谢火
+
+---
+
+## 二百零七 · 谢火
+
+立春后第十周——周四——早上——灶火燃着。
+
+阿石添了柴——火燃起来了——灶火燃着——母亲说「——谢谢它——」——阿石说「——谢谢它——」——灶火燃着。
+
+阿石说：「——谢——」
+
+灶火燃着。
+
+母亲说：「——灶火在听——它知道的——」
+
+灶火燃着。
+
+谢火。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第二百零七卷 · 卷十九之十二 · 第七百零二年 · 谢火）*
 
 # source: creative/novel/21-夜幕归乡.md
 # 《跨界纪事：锚火守夜人》

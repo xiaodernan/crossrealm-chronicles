@@ -254,7 +254,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Kitchen Smoke | [kitchen-smoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/203-kitchen-smoke.md) |
 | Wind | [wind](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/204-wind.md) |
 | The Answering Voice | [the-answering-voice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/205-the-answering-voice.md) |
-| The Night of the Vigil | [the-night-of-the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/206-the-night-of-the-vigil.md) |Chapter → game-chapter mapping:
+| The Night of the Vigil | [the-night-of-the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/206-the-night-of-the-vigil.md) |
+| Thanking the Fire | [thanking-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/207-thanking-the-fire.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

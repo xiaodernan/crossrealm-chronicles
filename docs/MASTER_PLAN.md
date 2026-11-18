@@ -20,6 +20,9 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-18 · W-Z396 第二百零七卷入典《谢火 / Thanking the Fire》——卷十九之十二 · 第七百零二年 · 谢火**：立春后第十周——周四——早上——灶火燃着——阿石添了柴——火燃起来了——母亲说「——谢谢它——」——阿石说「——谢谢它——」——灶火燃着——阿石说「——谢——」——母亲说「——灶火在听——它知道的——」——谢火——灶火燃着。
+> 交付：creative/novel/207-谢火.md + en 孪生 207-thanking-the-fire.md；novella 207 × 2 = 414 模块（典籍馆现为 207 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**445 源**；**v3 冻结前缀含 207 条年表条目**；showcase feed 新增 W-Z396 实录。
+>
 > **2026-11-18 · W-Z395 第二百零六卷入典《守夜的夜 / The Night of the Vigil》——卷十九之十一 · 第七百零二年 · 守夜的夜**：立春后第十周——周三——晚上——灶火燃着——阿石一宿没睡——守夜——煤油灯没点——灶火燃着——灶火燃着——灶火燃着——天亮了——阿石说「——守住了——」——母亲说「——守住了——」——守夜的夜——灶火燃着。
 > 交付：creative/novel/206-守夜的夜.md + en 孪生 206-the-night-of-the-vigil.md；novella 206 × 2 = 412 模块（典籍馆现为 206 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**443 源**；**v3 冻结前缀含 206 条年表条目**；showcase feed 新增 W-Z395 实录。
 >
