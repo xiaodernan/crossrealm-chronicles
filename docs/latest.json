@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-18T18:17:24.056Z",
+  "generated_at": "2026-11-18T18:36:32.436Z",
   "branch": "main",
-  "head": "73194ed",
-  "total_commits": 2211,
-  "pushed_at": "2026-11-19T02:16:30+08:00",
+  "head": "9758a52",
+  "total_commits": 2213,
+  "pushed_at": "2026-11-19T02:36:14+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "9758a52",
+      "at": "2026-11-19T02:36:14+08:00",
+      "subject": "feat(admin): W-Z405 Admin 真·留存卡 meas_l26 落地——627 事件/3 日有数据/11 天为 0/不能出留存曲线，不伪造"
+    },
+    {
+      "short": "c866338",
+      "at": "2026-11-19T02:17:42+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z404 (novels 215 · lore 461 · i18n 3267 · commits 2211)"
+    },
     {
       "short": "73194ed",
       "at": "2026-11-19T02:16:30+08:00",
@@ -21,16 +31,6 @@
       "short": "7b845bc",
       "at": "2026-11-19T02:05:27+08:00",
       "subject": "feat(canon): W-Z403 第二百一十四卷《薪火 / The Kindle》入典——卷二十之三 · 第七百零三年 · 薪火（v3 前缀含 214 条年表）"
-    },
-    {
-      "short": "fe5c186",
-      "at": "2026-11-19T01:57:11+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z402 (novels 213 · lore 457 · i18n 3267 · commits 2207)"
-    },
-    {
-      "short": "749f5ac",
-      "at": "2026-11-19T01:55:53+08:00",
-      "subject": "feat(canon): W-Z402 第二百一十三卷《灯下有灰 / Ash Beneath the Lamp》入典——卷二十之二 · 第七百零三年 · 灯下有灰（v3 前缀含 213 条年表）"
     }
   ],
   "tracked_files": 1746,
@@ -39,7 +39,7 @@
   "lore_sources": 461,
   "novel_chapters_zh": 215,
   "novel_chapters_en": 215,
-  "milestone": "W-Z404",
+  "milestone": "W-Z405",
   "milestone_full": "卷 215 · 六百年守火线（215 / 215 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 461 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：215 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
