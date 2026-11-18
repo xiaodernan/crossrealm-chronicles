@@ -10936,6 +10936,55 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and ninety-three overall · the seven-hundred-and-second year, fourteenth part — When the Birch Spoke.)*
 
+# source: creative/novel/en/194-after-the-birch-spoke.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Fifteenth Volume — After the Birch Spoke
+
+---
+
+## One Hundred and Ninety-four: After the Birch Spoke
+
+The fourth week after the spring equinox — Wednesday — morning — the fire burned.
+
+A-Shi woke — the fire burned — the birch was quiet now — the fire burned — the fire burned.
+
+His mother cooked breakfast — the fire burned — she did not speak — the fire burned — he heard the pot of water begin to sing — the fire burned.
+
+A-Shi said: “ — what did the birch say —”
+
+His mother said: “ — the birch said — the fire must be like this —”
+
+A-Shi said: “ — like this —”
+
+His mother said: “ — like this —”
+
+The fire burned.
+
+A-Shi sat down before the stove — the fire burned — his mother sat beside him — the fire burned — she said: “ — the vows of the seven-hundred-and-second year — the birch keeps them for you —”
+
+The fire burned.
+
+A-Shi did not ask — the fire burned — when the birch had said it — the fire burned — he knew — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and ninety-four overall · the seven-hundred-and-second year, fifteenth part — After the Birch Spoke.)*
+
 # source: creative/novel/en/20-the-reader-opens-this-page.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25253,6 +25302,55 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百九十三卷 · 卷十八之十四 · 第七百零二年 · 白桦说话）*
+
+# source: creative/novel/194-说话之后.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第十五卷 —— 说话之后
+
+---
+
+## 一百九十四 · 说话之后
+
+立春后第四周——周三——早上——灶火燃着。
+
+阿石醒来——灶火燃着——白桦不响了——灶火燃着——灶火燃着。
+
+母亲做饭——灶火燃着——她没说话——灶火燃着——他听见锅里的水响——灶火燃着。
+
+阿石说：「——白桦说了什么——」
+
+母亲说：「——白桦说——火要这样——」
+
+阿石说：「——这样——」
+
+母亲说：「——这样——」
+
+灶火燃着。
+
+阿石坐到灶前——灶火燃着——母亲坐在旁边——灶火燃着——她说：「——第七百零二年许过的愿——白桦都记着——」
+
+灶火燃着。
+
+阿石没问——灶火燃着——白桦什么时候说的——灶火燃着——他知道——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百九十四卷 · 卷十八之十五 · 第七百零二年 · 说话之后）*
 
 # source: creative/novel/20-读完自己.md
 # 《跨界纪事：锚火守夜人》

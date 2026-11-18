@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and ninety-three volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and ninety-four volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 193 volumes of the canon, fully readable
+· Canon Library — 194 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 193-volume index',
-  hm_body_codex: `Codex — 193 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 194-volume index',
+  hm_body_codex: `Codex — 194 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3341,6 +3341,7 @@ hm_title_codex: 'Codex · the 193-volume index',
 191 · By the Lamp — The third week after the spring equinox — Saturday — evening — the fire burned; A-Shi sat by the lamp — his mother had fallen asleep; the lamp lit his hands — the fire burned — his hands were steady — the fire burned; he did not turn it off — the fire burned — seven hundred years the fire has been kept — to the seven-hundred-and-second year — to his hands — the fire burned — he did not sleep — the fire burned. Volume XVIII, twelfth part.
 192 · The Night Watch — The fourth week after the spring equinox — Monday — evening — the fire burned; A-Shi sat by the lamp — the lamp was lit — he memorized the shape of the flame; three in the morning — he added one piece of wood — it was small — he did not add more — he heard, far away, the birch swaying in the wind — he did not need to look — the east grew a thread of light — the lamp flickered — he added no more wood — the sky brightened. Volume XVIII, thirteenth part.
 193 · When the Birch Spoke — The fourth week after the spring equinox — Tuesday — evening — the fire burned; A-Shi sat by the lamp — the wind came from the birch — the birch leaves murmured in the wind — he listened — he could not understand — but he nodded — his mother slept — A-Shi said: “ — I hear it —”. Volume XVIII, fourteenth part.
+194 · After the Birch Spoke — The fourth week after the spring equinox — Wednesday — morning — the fire burned; A-Shi woke — the birch was quiet now; his mother cooked breakfast — she did not speak — he heard the pot of water begin to sing — A-Shi said: “ — what did the birch say —”; his mother said: “ — the birch said — the fire must be like this —”; his mother said: “ — the vows of the seven-hundred-and-second year — the birch keeps them for you —”. Volume XVIII, fifteenth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3354,7 +3355,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and ninety-three volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and ninety-four volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
