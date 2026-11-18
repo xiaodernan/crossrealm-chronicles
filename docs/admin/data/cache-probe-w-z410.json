@@ -1,0 +1,26 @@
+{
+  "milestone": "W-Z410",
+  "date": "2026-11-19",
+  "tool": "scripts/cache-probe.mjs",
+  "upstream": {
+    "base": "https://api.aizzz.xyz/v1",
+    "model": "gpt-6.1-terra",
+    "via": "clash 7897"
+  },
+  "prompt_tokens": 5342,
+  "cached_tokens_reported": 5066,
+  "cachedRatio_pct": 94.8,
+  "stability": "cold -> warm#2..#6 all 94.8% (cached=5066)",
+  "field_omissions": [
+    "run1 non-stream control (no cached_tokens field)",
+    "run2 stream warm#4 (no cached_tokens field)"
+  ],
+  "conclusion": "upstream intermittently omits cached_tokens; every response that reports the field shows exactly 5066/5342 — the omission is reporting jitter, not a cache miss",
+  "codex_conditions": [
+    "frozen prefix >1024 tok",
+    "per-lane prompt_cache_key",
+    "stream:true & include_usage"
+  ],
+  "parallel_sessions": "not reproduced (W-Z336: 8-way same-key ~98%)",
+  "raw_log": "docs/admin/data/cache-probe-w-z410.log (untracked per *.log gitignore)"
+}
