@@ -12216,6 +12216,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and twenty overall · the seven-hundred-and-third year, ninth part — Grain Rain.)*
 
+# source: creative/novel/en/221-the-wheat-grain.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Tenth Volume — The Wheat Grain
+
+---
+
+## Two Hundred and Twenty-One: The Wheat Grain
+
+The fifth week after the spring equinox — Monday — morning — the fire burned.
+
+A-Shi stood at the doorway — the fields were green — they were up past the ankles — taller than chopsticks — his mother and A-Shi walked to the fields early in the morning — she looked at them — she did not speak — A-Shi squatted down — he ran his hand through — he picked up a wheat grain — it was very light — he said: “ — grain —” — his mother said: “ — grain —” — A-Shi put it in his pocket — he said: “ — a seed —” — his mother said: “ — a seed —” — the fire burned — he took it home — the fire burned.
+
+The wheat grain.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and twenty-one overall · the seven-hundred-and-third year, tenth part — The Wheat Grain.)*
+
 # source: creative/novel/en/23-the-moon-rises.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27669,6 +27700,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百二十卷 · 卷二十之九 · 第七百零三年 · 谷雨）*
+
+# source: creative/novel/221-麦粒.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第十卷 —— 麦粒
+
+---
+
+## 二百二十一 · 麦粒
+
+立春后第五周——周一——早上——灶火燃着。
+
+阿石站在门口——田里面青色的——有几分高——比筷子高——母亲和阿石早上去田里——她看着田——她没开口——阿石蹲下去——他摸了一把——他拿起一颗麦粒——很轻——他说「——麦粒——」——母亲说「——麦粒——」——阿石把麦粒放进口袋——他说「——种子——」——母亲说「——种子——」——灶火燃着——他把麦粒拿回家——灶火燃着。
+
+麦粒。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百二十一卷 · 卷二十之十 · 第七百零三年 · 麦粒）*
 
 # source: creative/novel/23-月光起.md
 # 《跨界纪事：锚火守夜人》

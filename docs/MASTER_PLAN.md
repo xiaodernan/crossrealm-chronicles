@@ -20,6 +20,9 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-19 · W-Z413 第二百二十一卷入典《麦粒 / The Wheat Grain》——卷二十之十 · 第七百零三年 · 麦粒**：第七百零三年——立春后第五周——周一——早上——灶火燃着——阿石站在门口——田里面青色的——有几分高——比筷子高——他蹲下去——他摸了一把——他拿起一颗麦粒——很轻——他说「——麦粒——」——母亲说「——麦粒——」——他把麦粒放进口袋——他说「——种子——」——母亲说「——种子——」——灶火燃着。
+> 交付：creative/novel/221-麦粒.md + en 孪生 221-the-wheat-grain.md；novella 221 × 2 = 442 模块（典籍馆现为 221 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**473 源**；**v3 冻结前缀含 221 条年表条目**；showcase feed 新增 W-Z413 实录。
+>
 > **2026-11-19 · W-Z412 前端两处真修：炉边快速上手首弹层排序 + 营火手势可选素材误报 broken**
 > （1）真实缺陷：#quickstart-overlay 只继承 .overlay-panel 的 z=800，而出场页 #start-screen 是 z=999 —— 新玩家第一次进来，教程被出场页整个盖住、永远看不到，且 localStorage 已记 seen=1（等于自动观看权直接作废）。修复：#quickstart-overlay 单设 z-index:1001，出场页出现前先盖住教程卡。浏览器实测：reload 后 quickstart 首弹（qsDisplay=flex、z=1001、seen=1），新玩家真的看得见 30 秒上手。
 > （2）真实缺陷：vite preview / Pages 是 SPA——缺的 GLB 回 200 + index.html，营火手势加载器把「Unexpected token『<』…not valid JSON」误归为「broken 素材事故」（日志级别 warn）；素材不来是预期（走程序化手臂），事故日志要留给真坏素材。修复：RestNpcGestureClipLoader 把 `<!DOCTYPE` / `Unexpected token <` 归入「absent 预期」档；浏览器实测 warnings 3→0，控制台只剩 info（素材不在提示）。

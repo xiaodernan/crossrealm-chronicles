@@ -362,6 +362,7 @@ End of frozen digest.
 218 · 夏火
 219 · 白桦吻
 220 · 谷雨
+221 · 麦粒
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
