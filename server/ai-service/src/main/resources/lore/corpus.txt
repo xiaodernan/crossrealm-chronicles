@@ -12309,6 +12309,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and twenty-three overall · the seven-hundred-and-third year, twelfth part — The Pollination.)*
 
+# source: creative/novel/en/224-the-grain-filling.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Thirteenth Volume — The Grain Filling
+
+---
+
+## Two Hundred and Twenty-Four: The Grain Filling
+
+The eighth week after the spring equinox — Monday — morning — the fire burned.
+
+A-Shi stood at the doorway — the fields were green — the ears were bending down — a little more than yesterday — he reached out — he touched a grain — the grain had hardened — he said: “ — the grain is filling —” — his mother said: “ — the grain is filling —” — the wind was light — the wind stopped — the fire burned — A-Shi squatted down — he looked at the ears — he looked at his own hands — he said: “ — they are hard —” — his mother said: “ — they are hard —” — the fire burned — the ears were in the wind — the wind came — the wind went — the fire burned — the fire burned — the fire burned.
+
+The grain is filling.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and twenty-four overall · the seven-hundred-and-third year, thirteenth part — The Grain Filling.)*
+
 # source: creative/novel/en/23-the-moon-rises.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27855,6 +27886,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百二十三卷 · 卷二十之十二 · 第七百零三年 · 扬花）*
+
+# source: creative/novel/224-灌浆.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第十三卷 —— 灌浆
+
+---
+
+## 二百二十四 · 灌浆
+
+立春后第八周——周一——早上——灶火燃着。
+
+阿石站在门口——田里面青色的——穗子往下弯——比昨天弯了一点——他伸手——他摸了一下麦粒——麦粒硬了——他说「——灌浆——」——母亲说「——灌浆——」——风轻——风停了——灶火燃着——阿石蹲下去——他看麦穗——他看他自己的手——他说「——硬了——」——母亲说「——硬了——」——灶火燃着——麦穗在风里——风来——风走——灶火燃着——灶火燃着——灶火燃着。
+
+灌浆。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百二十四卷 · 卷二十之十三 · 第七百零三年 · 灌浆）*
 
 # source: creative/novel/23-月光起.md
 # 《跨界纪事：锚火守夜人》
