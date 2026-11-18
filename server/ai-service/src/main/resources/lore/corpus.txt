@@ -11492,6 +11492,57 @@ The fire burned.
 
 *(End of volume XIX · Volume two hundred and four overall · the seven-hundred-and-second year, ninth part — Wind.)*
 
+# source: creative/novel/en/205-the-answering-voice.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Tenth Volume — The Answering Voice
+
+---
+
+## Two Hundred and Five: The Answering Voice
+
+The ninth week after the spring equinox — Tuesday — morning — the fire burned.
+
+A-Shi split wood — the axe fell — the wood split — he heard a dull sound — the fire burned — as if someone in the room had said something — but very soft — the fire burned — A-Shi smiled — the fire burned.
+
+He said: “ — hey —”
+
+The fire burned.
+
+He waited a while — the wind grew softer — the fire burned — the fire burned — the fire burned.
+
+His mother said: “ — who are you talking to —”
+
+A-Shi said: “ — the fire —”
+
+His mother said: “ — it will answer you — but only if you have not lied to it —”
+
+The fire burned.
+
+A-Shi said: “ — I have not lied to it —”
+
+His mother said: “ — then it will answer —”
+
+The fire burned.
+
+The answering voice.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume two hundred and five overall · the seven-hundred-and-second year, tenth part — The Answering Voice.)*
+
 # source: creative/novel/en/21-night-walk-home.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -26306,6 +26357,57 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第二百零四卷 · 卷十九之九 · 第七百零二年 · 风）*
+
+# source: creative/novel/205-应声.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第十卷 —— 应声
+
+---
+
+## 二百零五 · 应声
+
+立春后第九周——周二——早上——灶火燃着。
+
+阿石劈柴——斧头落下——柴开了——他听见一声闷响——灶火燃着——像是有人在屋里说了一句什么——但很轻——灶火燃着——阿石笑了——灶火燃着。
+
+他说：「——喂——」
+
+灶火燃着。
+
+他等了一会儿——风更轻了——灶火燃着——灶火燃着——灶火燃着。
+
+母亲说：「——你在跟谁说话——」
+
+阿石说：「——灶火——」
+
+母亲说：「——它会应你——前提是——你没骗它——」
+
+灶火燃着。
+
+阿石说：「——我没骗它——」
+
+母亲说：「——那它会应——」
+
+灶火燃着。
+
+应声。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第二百零五卷 · 卷十九之十 · 第七百零二年 · 应声）*
 
 # source: creative/novel/21-夜幕归乡.md
 # 《跨界纪事：锚火守夜人》

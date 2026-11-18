@@ -252,7 +252,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Daytime | [daytime](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/201-daytime.md) |
 | The Keeper of the Fire | [the-keeper-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/202-the-keeper-of-the-fire.md) |
 | Kitchen Smoke | [kitchen-smoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/203-kitchen-smoke.md) |
-| Wind | [wind](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/204-wind.md) |Chapter → game-chapter mapping:
+| Wind | [wind](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/204-wind.md) |
+| The Answering Voice | [the-answering-voice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/205-the-answering-voice.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

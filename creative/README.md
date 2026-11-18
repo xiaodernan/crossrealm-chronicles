@@ -250,7 +250,8 @@ creative/music/soundtrack.html
 | 白昼 · Daytime | [daytime](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/201-daytime.md) |
 | 守火之人 · The Keeper of the Fire | [the-keeper-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/202-the-keeper-of-the-fire.md) |
 | 烟火 · Kitchen Smoke | [kitchen-smoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/203-kitchen-smoke.md) |
-| 风 · Wind | [wind](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/204-wind.md) |每一章对应游戏的章节走法：
+| 风 · Wind | [wind](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/204-wind.md) |
+| 应声 · The Answering Voice | [the-answering-voice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/205-the-answering-voice.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
