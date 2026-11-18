@@ -247,7 +247,8 @@ creative/music/soundtrack.html
 | 阿祖的册子 · Azu's Notebook | [azus-notebook](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/198-azus-notebook.md) |
 | 守火 · Tending the Fire | [tending-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/199-tending-the-fire.md) |
 | 补柴 · Mending the Hearth | [mending-the-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/200-mending-the-hearth.md) |
-| 白昼 · Daytime | [daytime](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/201-daytime.md) |每一章对应游戏的章节走法：
+| 白昼 · Daytime | [daytime](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/201-daytime.md) |
+| 守火之人 · The Keeper of the Fire | [the-keeper-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/202-the-keeper-of-the-fire.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

@@ -249,7 +249,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Azu's Notebook | [azus-notebook](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/198-azus-notebook.md) |
 | Tending the Fire | [tending-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/199-tending-the-fire.md) |
 | Mending the Hearth | [mending-the-hearth](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/200-mending-the-hearth.md) |
-| Daytime | [daytime](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/201-daytime.md) |Chapter → game-chapter mapping:
+| Daytime | [daytime](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/201-daytime.md) |
+| The Keeper of the Fire | [the-keeper-of-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/202-the-keeper-of-the-fire.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
