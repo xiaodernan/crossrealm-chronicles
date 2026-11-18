@@ -228,7 +228,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Night in the Kitchen | [the-night-in-the-kitchen](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/177-the-night-in-the-kitchen.md) |
 | The Fire Remembers | [the-fire-remembers](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/178-the-fire-remembers.md) |
 | He Came Over | [he-came-over](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/179-he-came-over.md) |
-| The Fire Rises Again | [the-fire-rises-again](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/180-the-fire-rises-again.md) |Chapter → game-chapter mapping:
+| The Fire Rises Again | [the-fire-rises-again](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/180-the-fire-rises-again.md) |
+| The Fire Did Not Say | [the-fire-did-not-say](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/181-the-fire-did-not-say.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

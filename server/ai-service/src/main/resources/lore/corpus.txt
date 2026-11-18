@@ -10340,6 +10340,45 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and eighty overall · the seven-hundred-and-second year, first part — The Fire Rises Again.)*
 
+# source: creative/novel/en/181-the-fire-did-not-say.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Second Volume — The Fire Did Not Say
+
+---
+
+## One Hundred and Eighty-one: The Fire Did Not Say
+
+The first week after the spring equinox — Tuesday — late morning — the sunlight stayed for a while.
+
+The fire burned.
+
+A-Shi was boiling water — the water did not ask — he said: “The way — what is the way —”
+
+His mother was in the room — she did not speak — she only listened.
+
+A-Shi said: “ — if you don’t say it — I don’t know how to say it —”
+
+His mother said: “ — it never says — if it said — you would know —”
+
+The fire burned.
+
+A-Shi did not speak — the fire burned.
+
+His mother said: “ — the way — something you do — the way — something you don’t need to say —”
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and eighty-one overall · the seven-hundred-and-second year, second part — The Fire Did Not Say.)*
+
 # source: creative/novel/en/19-the-council-of-three-suns.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -24123,6 +24162,45 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百八十卷 · 卷十八之一 · 第七百零二年 · 火又起）*
+
+# source: creative/novel/181-火什么都没说.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第二卷 —— 火什么都没说
+
+---
+
+## 一百八十一 · 火什么都没说
+
+立春后第一周——周二——上午——阳光站了一会儿。
+
+灶火燃着。
+
+阿石烧水——水没人问——他说：「道是——道是什么——」
+
+母亲在屋里——她没出声——她只是听着。
+
+阿石说：「——你不说它——我也没法说它——」
+
+母亲说：「——它从不说——说了——你就知道是什么了——」
+
+灶火燃着。
+
+阿石没出声——灶火燃着。
+
+母亲说：「——道是——做了还知道——道是——做了不用说——」
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百八十一卷 · 卷十八之二 · 第七百零二年 · 火什么都没说）*
 
 # source: creative/novel/19-三日之议.md
 # 《跨界纪事：锚火守夜人》
