@@ -361,6 +361,7 @@ End of frozen digest.
 217 · 灯灭了
 218 · 夏火
 219 · 白桦吻
+220 · 谷雨
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

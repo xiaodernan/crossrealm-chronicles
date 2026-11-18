@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and nineteen volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and twenty volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 219 volumes of the canon, fully readable
+· Canon Library — 220 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 219-volume index',
-  hm_body_codex: `Codex — 219 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 220-volume index',
+  hm_body_codex: `Codex — 220 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3367,6 +3367,7 @@ hm_title_codex: 'Codex · the 219-volume index',
 217 · The Lamp Went Out — The first week after the spring equinox — Saturday — evening — the fire burned; A-Shi sat before the stove — the oil lamp was lit — no light at night — no wind at night — A-Shi said: “ — the fire —”; his mother said: “ — keep it —”; he did not add wood — the flame grew small — the lamp went out — the fire burned. Volume XX, sixth part.
 218 · Summer Fire — The second week after the spring equinox — Tuesday — morning — the fire burned; A-Shi stood at the doorway — the birch leaves were fully out — twice the size of a thumb — the wind was light — sunlight came out — his mother said: “ — summer fire —”; A-Shi said: “ — summer fire —”; his mother said: “ — the fire must be kept —”. Volume XX, seventh part.
 219 · The Birch’s Kiss — The third week after the spring equinox — Wednesday — morning — the fire burned; A-Shi stood at the doorway — the birch was fully green — the wind was light — he reached out — he touched a birch leaf — his mother stood at the kitchen table — she watched him — she did not speak. Volume XX, eighth part.
+220 · Grain Rain — The fourth week after the spring equinox — Friday — morning — the fire burned; A-Shi stood at the doorway — the sky was just brightening — the sky was still grey — he listened — there was a faint sound — it was rain — falling on the birch leaves — finer than needles — he reached out — he caught a few drops — he lowered his hand — he said: “ — grain rain —”; his mother said: “ — grain rain —”. Volume XX, ninth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,

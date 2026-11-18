@@ -265,7 +265,8 @@ creative/music/soundtrack.html
 | 春天 · Spring | [spring](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/216-spring.md) |
 | 灯灭了 · The Lamp Went Out | [the-lamp-went-out](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/217-the-lamp-went-out.md) |
 | 夏火 · Summer Fire | [summer-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/218-summer-fire.md) |
-| 白桦吻 · The Birch’s Kiss | [the-birchs-kiss](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/219-the-birchs-kiss.md) |每一章对应游戏的章节走法：
+| 白桦吻 · The Birch’s Kiss | [the-birchs-kiss](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/219-the-birchs-kiss.md) |
+| 谷雨 · Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/220-grain-rain.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
