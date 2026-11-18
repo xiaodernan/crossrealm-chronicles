@@ -45,7 +45,11 @@ function fetchGestureClips(url, loader) {
       const 状态码 = err?.target?.status ?? err?.status;
       const 是取不到 = (typeof 状态码 === 'number' && 状态码 >= 400)
         || /^THREE\.FileLoader/.test(String(err?.message ?? ''))
-        || /status code|Failed to load/i.test(String(err?.message ?? ''));
+        || /status code|Failed to load/i.test(String(err?.message ?? ''))
+        // Pages / vite preview 是 SPA：缺的文件回 200 + index.html，GLB 按 JSON 解析报
+        // 「<!DOCTYPE … is not valid JSON」—— 本质是「文件不在」，不是素材坏了，
+        // 别让可选素材吓出假的「broken」事故日志。
+        || /<!DOCTYPE|Unexpected token '<'/i.test(String(err?.message ?? ''));
       if (是取不到) {
         _status.set(url, 'absent');
         console.info(`[RestNpcGestures] ${basename(url)} 素材不在（可选流程，走程序化手臂）`);

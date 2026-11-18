@@ -1714,6 +1714,12 @@ body {
 
 .overlay-panel.hidden { display: none; }
 
+/* W-Z91 修复：炉边快速上手要从「遮不住出场页」变真——出场页 z=999，
+   通用 .overlay-panel 只有 800，首弹时被出场页整个盖住，新玩家永远看不到。
+   只把快速上手抬到 1001：别的 overlay（暂停/说明书/设置）没启动前出场，谁高谁低
+   无所谓；唯独这一层必须盖住出场页才有「第一次进来就看到教程」。 */
+#quickstart-overlay { z-index: 1001; }
+
 .hidden { display: none !important; }
 
 /* 位面渗漏 — 跨区 chromatic 闪变 */
