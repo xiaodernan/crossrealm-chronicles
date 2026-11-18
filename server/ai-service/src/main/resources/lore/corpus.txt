@@ -10817,6 +10817,45 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and ninety overall · the seven-hundred-and-second year, eleventh part — The Oil Lamp Lit.)*
 
+# source: creative/novel/en/191-by-the-lamp.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Twelfth Volume — By the Lamp
+
+---
+
+## One Hundred and Ninety-one: By the Lamp
+
+The third week after the spring equinox — Saturday — evening — the fire burned.
+
+A-Shi sat by the lamp — his mother had fallen asleep — the fire burned — he did not add wood — the flame was right — the fire burned.
+
+He turned his face — the lamp lit his hands — the fire burned — his hands were steady — the fire burned.
+
+The lamp flickered — and lit again — the fire burned — nothing was wrong with the oil — it was the wind — the fire burned.
+
+A-Shi did not turn it off — the fire burned — he thought — seven hundred years the fire has been kept — they kept it to the seven-hundred-and-second year — they kept it to his hands — the fire burned.
+
+He did not sleep.
+
+The fire burned.
+
+The fire burned.
+
+By the lamp — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and ninety-one overall · the seven-hundred-and-second year, twelfth part — By the Lamp.)*
+
 # source: creative/novel/en/20-the-reader-opens-this-page.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25015,6 +25054,45 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百九十卷 · 卷十八之十一 · 第七百零二年 · 煤油灯亮了）*
+
+# source: creative/novel/191-灯下.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第十二卷 —— 灯下
+
+---
+
+## 一百九十一 · 灯下
+
+立春后第三周——周六——晚上——灶火燃着。
+
+阿石坐在灯下——母亲睡了——灶火燃着——他没添柴——火正合适——灶火燃着。
+
+他侧过脸——灯照着他的手——灶火燃着——他的手很稳——灶火燃着。
+
+灯灭了一下——又亮了——灶火燃着——煤油没毛病——是风——灶火燃着。
+
+阿石没关灯——灶火燃着——他想了想——守了七百年的火——守到第七百零二年——守到他手上——灶火燃着。
+
+他没睡。
+
+灶火燃着。
+
+灶火燃着。
+
+灯下——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百九十一卷 · 卷十八之十二 · 第七百零二年 · 灯下）*
 
 # source: creative/novel/20-读完自己.md
 # 《跨界纪事：锚火守夜人》
