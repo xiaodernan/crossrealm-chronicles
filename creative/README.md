@@ -258,7 +258,8 @@ creative/music/soundtrack.html
 | 谢客 · The Thanked Guest | [the-thanked-guest](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/209-the-thanked-guest.md) |
 | 他说了 · He Said | [he-said](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/210-he-said.md) |
 | 他听见了 · He Heard It | [he-heard-it](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/211-he-heard-it.md) |
-| 灶堂的灰 · The Ash of the Stove | [the-ash-of-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/212-the-ash-of-the-stove.md) |每一章对应游戏的章节走法：
+| 灶堂的灰 · The Ash of the Stove | [the-ash-of-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/212-the-ash-of-the-stove.md) |
+| 灯下有灰 · Ash Beneath the Lamp | [ash-beneath-the-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/213-ash-beneath-the-lamp.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

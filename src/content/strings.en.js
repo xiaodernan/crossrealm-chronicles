@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and twelve volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and thirteen volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 212 volumes of the canon, fully readable
+· Canon Library — 213 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 212-volume index',
-  hm_body_codex: `Codex — 212 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 213-volume index',
+  hm_body_codex: `Codex — 213 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3360,6 +3360,7 @@ hm_title_codex: 'Codex · the 212-volume index',
 210 · He Said — The thirteenth week after the spring equinox — Tuesday — morning — the fire burned; the birch sounded — once — louder than usual — his mother stood at the door — she did not speak — A-Shi said: “ — who —”; his mother said: “ — Azu —”; his mother said: “ — he said those who keep the fire — must not stop —”; A-Shi said: “ — not stop —”. Volume XIX, fifteenth part.
 211 · He Heard It — The thirteenth week after the spring equinox — Wednesday — morning — the fire burned; A-Shi kept the stove — his eyes were open — he did not sleep; he heard it — that sound — lighter than an ordinary fire — farther than an ordinary fire — A-Shi said: “ — I am listening —”; he heard it. Volume XIX, sixteenth part.
 212 · The Ash of the Stove — The first week after the spring equinox — Monday — morning — the fire burned; A-Shi swept the stove — the ash was fine — he gathered the ash into a pan — he did not know where to pour the ash — his mother said: “ — into the stove chamber —”. Volume XX, first part.
+213 · Ash Beneath the Lamp — The first week after the spring equinox — Tuesday — evening — the fire burned; A-Shi lit the lamp — the lamp showed the stove’s mouth — ash fell onto his hand — he watched — the hand did not shake — his mother said: “ — ash on the palm — the hand does not shake —”; his mother said: “ — the keeper’s hand —”. Volume XX, second part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
