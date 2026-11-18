@@ -12039,6 +12039,41 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and sixteen overall · the seven-hundred-and-third year, fifth part — Spring.)*
 
+# source: creative/novel/en/217-the-lamp-went-out.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Sixth Volume — The Lamp Went Out
+
+---
+
+## Two Hundred and Seventeen: The Lamp Went Out
+
+The first week after the spring equinox — Saturday — evening — the fire burned.
+
+A-Shi sat before the stove — the oil lamp was lit — the fire burned — no light at night — no wind at night — the fire burned — the fire burned — A-Shi said: “ — the fire —” — his mother said: “ — keep it —” — A-Shi said: “ — the fire —” — the fire burned — he did not add wood — the fire burned — the flame grew small — the lamp went out — the fire burned.
+
+He remembered — the fire burned — the fire is — this thing — the fire burned.
+
+The lamp went out — the fire burned.
+
+The lamp went out.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventeen overall · the seven-hundred-and-third year, sixth part — The Lamp Went Out.)*
+
 # source: creative/novel/en/22-after-the-mist-scatters.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27354,6 +27389,41 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百一十六卷 · 卷二十之五 · 第七百零三年 · 春天）*
+
+# source: creative/novel/217-灯灭了.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第六卷 —— 灯灭了
+
+---
+
+## 二百一十七 · 灯灭了
+
+立春后第一周——周六——晚上——灶火燃着。
+
+阿石在灶前坐着——煤油灯亮着——灶火燃着——夜里没有灯——夜里没有风——灶火燃着——灶火燃着——阿石说「——灶火——」——母亲说「——守着——」——阿石说「——灶火——」——灶火燃着——他没添柴——灶火燃着——火小了——灯灭了——灶火燃着。
+
+他记住——灶火燃着——灶火就——这点事——灶火燃着。
+
+灯灭了——灶火燃着。
+
+灯灭了。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百一十七卷 · 卷二十之六 · 第七百零三年 · 灯灭了）*
 
 # source: creative/novel/22-雾散之后.md
 # 《跨界纪事：锚火守夜人》
