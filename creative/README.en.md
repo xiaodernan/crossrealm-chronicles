@@ -236,7 +236,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | She Came | [she-came](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/185-she-came.md) |
 | The Door Opened | [the-door-opened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/186-the-door-opened.md) |
 | Kitchen Smoke | [kitchen-smoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/187-kitchen-smoke.md) |
-| After the Smoke Cleared | [after-the-smoke-cleared](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/188-after-the-smoke-cleared.md) |Chapter → game-chapter mapping:
+| After the Smoke Cleared | [after-the-smoke-cleared](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/188-after-the-smoke-cleared.md) |
+| The Last Lamp in the Stove-House | [the-last-lamp-in-the-stove-house](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/189-the-last-lamp-in-the-stove-house.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
