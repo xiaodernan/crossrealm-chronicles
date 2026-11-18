@@ -12074,6 +12074,47 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and seventeen overall · the seven-hundred-and-third year, sixth part — The Lamp Went Out.)*
 
+# source: creative/novel/en/218-summer-fire.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Seventh Volume — Summer Fire
+
+---
+
+## Two Hundred and Eighteen: Summer Fire
+
+The second week after the spring equinox — Tuesday — morning — the fire burned.
+
+A-Shi stood at the doorway — the birch leaves were fully out — twice the size of a thumb — the wind was light — sunlight came out — the fire burned — he watched — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+His mother said: “ — summer fire —”
+
+A-Shi said: “ — summer fire —”
+
+His mother said: “ — the fire must be kept —”
+
+A-Shi said: “ — the fire must be kept —”
+
+The fire burned.
+
+Summer fire.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and eighteen overall · the seven-hundred-and-third year, seventh part — Summer Fire.)*
+
 # source: creative/novel/en/22-after-the-mist-scatters.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27424,6 +27465,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百一十七卷 · 卷二十之六 · 第七百零三年 · 灯灭了）*
+
+# source: creative/novel/218-夏火.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第七卷 —— 夏火
+
+---
+
+## 二百一十八 · 夏火
+
+立春后第二周——周二——早上——灶火燃着。
+
+阿石站在门口——白桦的叶子全出来了——比拇指大两倍——风轻——太阳出来——灶火燃着——他看——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+母亲说：「——夏火——」
+
+阿石说：「——夏火——」
+
+母亲说：「——灶火要守——」
+
+阿石说：「——灶火要守——」
+
+灶火燃着。
+
+夏火。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百一十八卷 · 卷二十之七 · 第七百零三年 · 夏火）*
 
 # source: creative/novel/22-雾散之后.md
 # 《跨界纪事：锚火守夜人》

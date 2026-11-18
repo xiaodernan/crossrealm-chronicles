@@ -359,6 +359,7 @@ End of frozen digest.
 215 · 火候
 216 · 春天
 217 · 灯灭了
+218 · 夏火
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
