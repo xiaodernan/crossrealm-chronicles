@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-18T22:46:04.821Z",
+  "generated_at": "2026-11-18T22:53:27.903Z",
   "branch": "main",
-  "head": "e748457",
-  "total_commits": 2232,
-  "pushed_at": "2026-11-19T06:45:01+08:00",
+  "head": "9ac8fb0",
+  "total_commits": 2235,
+  "pushed_at": "2026-11-19T06:53:04+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "9ac8fb0",
+      "at": "2026-11-19T06:53:04+08:00",
+      "subject": "fix(tool): W-Z416 link-check 口径修正 - Pages 烘焙 _site 站点根 sibling（creative 子级/docs/admin/../…/根 index）不再判假阳性；public/ vite 挂载回退；513 files all links resolve"
+    },
+    {
+      "short": "9cd45fb",
+      "at": "2026-11-19T06:51:04+08:00",
+      "subject": "measure(rag): W-Z415 Oracle BM25 离线检索实测 - recall@4=88.9%（8/9，Java Bm25Index 逐字镜像，475 源）· Admin 卡 meas_l28 诚实落档（zh/en）"
+    },
+    {
+      "short": "2023d96",
+      "at": "2026-11-19T06:46:15+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z414 (novels 222 · lore 475 · i18n 3267 · commits 2232)"
+    },
     {
       "short": "e748457",
       "at": "2026-11-19T06:45:01+08:00",
@@ -16,30 +31,15 @@
       "short": "2ca5747",
       "at": "2026-11-19T06:37:12+08:00",
       "subject": "chore(latest): refresh the showcase fact pack from main — W-Z413 (novels 221 · lore 473 · i18n 3267 · commits 2230)"
-    },
-    {
-      "short": "7dbf190",
-      "at": "2026-11-19T06:35:00+08:00",
-      "subject": "feat(canon): W-Z413 第二百二十一卷《麦粒 / The Wheat Grain》入典——卷二十之十 · 第七百零三年 · 麦粒（v3 前缀 221 条年表）+ 炉边盘 LLM 运营建议双语刷新"
-    },
-    {
-      "short": "b9d86af",
-      "at": "2026-11-19T05:39:16+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z412 (novels 220 · lore 471 · i18n 3267 · commits 2228)"
-    },
-    {
-      "short": "6141c18",
-      "at": "2026-11-19T04:16:44+08:00",
-      "subject": "fix(front): W-Z412 炉边快速上手首弹层排序修复（z=1001 > 出场页 999）+ 营火手势可选素材误报 broken 改 absent（SPA 200+index.html 识别）"
     }
   ],
-  "tracked_files": 1761,
+  "tracked_files": 1763,
   "test_files": 468,
   "i18n_keys": 3267,
   "lore_sources": 475,
   "novel_chapters_zh": 222,
   "novel_chapters_en": 222,
-  "milestone": "W-Z414",
+  "milestone": "W-Z416",
   "milestone_full": "卷 222 · 六百年守火线（222 / 222 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 475 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：222 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
