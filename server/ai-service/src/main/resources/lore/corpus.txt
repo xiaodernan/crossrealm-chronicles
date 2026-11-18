@@ -10545,6 +10545,45 @@ The fire burned.
 
 *(End of volume XVIII · Volume one hundred and eighty-five overall · the seven-hundred-and-second year, sixth part — She Came.)*
 
+# source: creative/novel/en/186-the-door-opened.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVIII**: The Seven-hundred-and-second Year — The Seventh Volume — The Door Opened
+
+---
+
+## One Hundred and Eighty-six: The Door Opened
+
+The third week after the spring equinox — Monday — morning — the fire burned.
+
+A-Shi opened the door — he did not call out — the hinge sounded of itself — the fire burned.
+
+Outside — the smell of breakfast, birch leaves, and a plume of white smoke — his mother stood on the porch — her hands were empty — she said: “ — Azu said —”
+
+A-Shi said: “ — what —”
+
+His mother said: “ — those who can stay — find every door opening on its own —”
+
+The fire burned.
+
+A-Shi said: “ — I can stay —”
+
+His mother said: “ — Azu said — only if you can stay does the door open —”
+
+The fire burned.
+
+A-Shi stood at the doorway — the birch stood a little taller — the fire burned — he did not go in — the fire burned — he stayed by the door — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVIII · Volume one hundred and eighty-six overall · the seven-hundred-and-second year, seventh part — The Door Opened.)*
+
 # source: creative/novel/en/19-the-council-of-three-suns.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -24534,6 +24573,45 @@ F2 隐藏 HUD。
 ---
 
 *（卷十八 · 本章完 · 跨界线总第一百八十五卷 · 卷十八之六 · 第七百零二年 · 她来了）*
+
+# source: creative/novel/186-开门了.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十八**：第七百零二年 · 第七卷 —— 开门了
+
+---
+
+## 一百八十六 · 开门了
+
+立春后第三周——周一——早上——灶火燃着。
+
+阿石开门——他没喊——门轴自己响了一声——灶火燃着。
+
+门外——早饭的香气、白桦的叶子、还有一炉子的白烟——母亲站在廊下——她手里什么都没有——她说：「——阿祖说——」
+
+阿石说：「——什么——」
+
+母亲说：「——守得住的人——门都会自己开——」
+
+灶火燃着。
+
+阿石说：「——我守得住——」
+
+母亲说：「——阿祖说——守得住——门才开——」
+
+灶火燃着。
+
+阿石站在门口——白桦更高了一点——灶火燃着——他没进去——灶火燃着——他留在门边——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十八 · 本章完 · 跨界线总第一百八十六卷 · 卷十八之七 · 第七百零二年 · 开门了）*
 
 # source: creative/novel/19-三日之议.md
 # 《跨界纪事：锚火守夜人》

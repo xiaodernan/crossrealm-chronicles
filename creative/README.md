@@ -231,7 +231,8 @@ creative/music/soundtrack.html
 | 烟火 · Sparks | [sparks](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/182-sparks.md) |
 | 天亮了 · The Sky Brightened | [the-sky-brightened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/183-the-sky-brightened.md) |
 | 那天了 · The Day Came | [the-day-came](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/184-the-day-came.md) |
-| 她来了 · She Came | [she-came](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/185-she-came.md) |每一章对应游戏的章节走法：
+| 她来了 · She Came | [she-came](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/185-she-came.md) |
+| 开门了 · The Door Opened | [the-door-opened](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/186-the-door-opened.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
