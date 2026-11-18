@@ -261,7 +261,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | He Said | [he-said](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/210-he-said.md) |
 | He Heard It | [he-heard-it](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/211-he-heard-it.md) |
 | The Ash of the Stove | [the-ash-of-the-stove](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/212-the-ash-of-the-stove.md) |
-| Ash Beneath the Lamp | [ash-beneath-the-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/213-ash-beneath-the-lamp.md) |Chapter → game-chapter mapping:
+| Ash Beneath the Lamp | [ash-beneath-the-lamp](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/213-ash-beneath-the-lamp.md) |
+| The Kindle | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/214-the-kindle.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

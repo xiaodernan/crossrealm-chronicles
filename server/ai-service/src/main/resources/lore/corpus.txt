@@ -11910,6 +11910,55 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and thirteen overall · the seven-hundred-and-third year, second part — Ash Beneath the Lamp.)*
 
+# source: creative/novel/en/214-the-kindle.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Third Volume — The Kindle
+
+---
+
+## Two Hundred and Fourteen: The Kindle
+
+The first week after the spring equinox — Wednesday — evening — the fire burned.
+
+A-Shi sat before the stove — the fire burned — he watched the flame — the fire burned — he said: “ — the kindle —”
+
+His mother said: “ — the kindle —”
+
+The fire burned.
+
+A-Shi said: “ — keeping the fire —”
+
+His mother said: “ — keeping the fire —”
+
+The fire burned.
+
+A-Shi said: “ — I remember —”
+
+His mother said: “ — you remember —”
+
+The fire burned.
+
+The kindle.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and fourteen overall · the seven-hundred-and-third year, third part — The Kindle.)*
+
 # source: creative/novel/en/22-after-the-mist-scatters.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27096,6 +27145,55 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百一十三卷 · 卷二十之二 · 第七百零三年 · 灯下有灰）*
+
+# source: creative/novel/214-薪火.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第三卷 —— 薪火
+
+---
+
+## 二百一十四 · 薪火
+
+立春后第一周——周三——晚上——灶火燃着。
+
+阿石坐在灶前——灶火燃着——他看着火——灶火燃着——他说：「——薪火——」
+
+母亲说：「——薪火——」
+
+灶火燃着。
+
+阿石说：「——守火——」
+
+母亲说：「——守火——」
+
+灶火燃着。
+
+阿石说：「——我记住——」
+
+母亲说：「——你记住——」
+
+灶火燃着。
+
+薪火。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百一十四卷 · 卷二十之三 · 第七百零三年 · 薪火）*
 
 # source: creative/novel/22-雾散之后.md
 # 《跨界纪事：锚火守夜人》
