@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'One hundred and seventy-eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'One hundred and seventy-nine volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 178 volumes of the canon, fully readable
+· Canon Library — 179 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 178-volume index',
-  hm_body_codex: `Codex — 178 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 179-volume index',
+  hm_body_codex: `Codex — 179 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3326,6 +3326,7 @@ hm_title_codex: 'Codex · the 178-volume index',
 176 · The Ash — The eleventh day — before first light — the fire burned; A-Shi sat before the stove — he did not add wood — he crouched before the stove — he did not move — he saw a piece of paper on the ground — it was very old — it was curled — it was in the corner — he picked it up — he held it in his palm; his mother was in the room — she said: “That was Azu’s paper —”; A-Shi said: “Can it catch?”; his mother said: “It can catch — it would burn away —”; A-Shi said: “Then keep it for what?”; his mother said: “Keep it not — the one who keeps the fire — need not keep it —”. Volume XVII, fourteenth part.
 177 · The Night in the Kitchen — The twelfth day — late at night — the fire burned; A-Shi couldn’t sleep — he sat before the stove — his mother did not speak — she only sat across — she did not look at him — she watched the fire; A-Shi said: “Ma —”; his mother did not answer; A-Shi said: “Will the stove mind an extra person?”; his mother said: “It doesn’t.”; the fire burned; A-Shi said: “Then I’ll sit with it a while longer.”; his mother said: “— All right.” Volume XVII, fifteenth part.
 178 · The Fire Remembers — The thirteenth day — late at night — the fire burned; A-Shi hardly slept — he watched the fire — he heard something at the back of the house — not a sound — a stillness — he said: “Ma —”; his mother said: “It will remember.”; A-Shi said: “Remember what?”; his mother said: “You —”; the fire burned; A-Shi said nothing — the fire burned; A-Shi said: “Then will it remember me instead?”; his mother said: “ — It will.”. Volume XVII, sixteenth part.
+179 · He Came Over — The fourteenth day — before first light — the fire burned; A-Shi could not sleep — he got up — he walked to the stove — he set the last piece of wood inside — it did not take — the fire burned; he did not add more — he only stood there — the fire burned; his mother came out of the room — she stood behind A-Shi — she saw the fire burned — she slowly came closer — she took his hand — the fire burned; his mother said: “ — he’s back —”; A-Shi said: “ — back? —”; his mother said: “If you can stay — he comes back —”. Volume XVII, seventeenth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
@@ -3339,7 +3340,7 @@ after the end: your choice lights its own epitaph + 17 stardust inscriptions —
 
 Clearing the game with the “Echo-keeper” achievement: a gold pill on the start page — “Echo-keeper · the flame endures”.
 
-Crossmedia universe: novel (one hundred and seventy-eight volumes) · 142-minute film script · 25-track OST — all in creative/.`,
+Crossmedia universe: novel (one hundred and seventy-nine volumes) · 142-minute film script · 25-track OST — all in creative/.`,
   hm_title_pop_culture: 'Cross-echoes (Homage)',
   hm_body_pop_culture: `Homage to pop-culture through motifs & atmosphere, names deliberately differentiated (no official license).
 
