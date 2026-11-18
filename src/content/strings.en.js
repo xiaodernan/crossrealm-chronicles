@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and twenty-five volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and twenty-six volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 225 volumes of the canon, fully readable
+· Canon Library — 226 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 225-volume index',
-  hm_body_codex: `Codex — 225 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 226-volume index',
+  hm_body_codex: `Codex — 226 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3373,6 +3373,7 @@ hm_title_codex: 'Codex · the 225-volume index',
 223 · The Pollination — The seventh week after the spring equinox — Sunday — afternoon — the fire burned; A-Shi stood at the doorway — the wind was light — the ears of wheat swayed in the wind — he said: “ — the pollination —”; his mother said: “ — the pollination —” — the wind stopped — he said: “ — it is done —”. Volume XX, twelfth part.
 224 · The Grain Filling — The eighth week after the spring equinox — Monday — morning — the fire burned; A-Shi stood at the doorway — the ears were bending down — he touched a grain — the grain had hardened — he said: “ — the grain is filling —”; his mother said: “ — the grain is filling —” — he said: “ — they are hard —”. Volume XX, thirteenth part.
 225 · The Wheat Sea — The ninth week after the spring equinox — Tuesday — morning — the fire burned; A-Shi stood at the doorway — the wind came from the fields — all the ears moved — the ears were like water — he said: “ — the wheat sea —”; his mother said: “ — the wheat sea —” — the wind came again — the ears swayed — he said: “ — the same —”. Volume XX, fourteenth part.
+226 · The Harvest — The tenth week after the spring equinox — Saturday — morning — the fire burned; A-Shi stood at the doorway — the ears had turned yellow — old ears — he brought out the sickle — he said: “ — the harvest —”; his mother said: “ — the harvest —” — he squatted down — he cut — the first stroke — the ears fell — the second stroke — the ears fell — the fire burned — he carried the ears home — the fire burned. Volume XX, fifteenth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,

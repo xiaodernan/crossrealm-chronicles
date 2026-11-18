@@ -12371,6 +12371,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and twenty-five overall · the seven-hundred-and-third year, fourteenth part — The Wheat Sea.)*
 
+# source: creative/novel/en/226-the-harvest.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Fifteenth Volume — The Harvest
+
+---
+
+## Two Hundred and Twenty-Six: The Harvest
+
+The tenth week after the spring equinox — Saturday — morning — the fire burned.
+
+A-Shi stood at the doorway — the ears had turned yellow — old ears — the wind blew — the wind passed — the stalks moved — he brought out the sickle — he said: “ — the harvest —” — his mother said: “ — the harvest —” — A-Shi walked out — he squatted down — he cut — the first stroke — the ears fell — the second stroke — the ears fell — the wind came again — he stopped — he watched — the fire burned — he said: “ — ah —” — his mother said: “ — ah —” — he cut again — the stalks fell — the fire burned — he carried the ears home — the fire burned.
+
+The harvest.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and twenty-six overall · the seven-hundred-and-third year, fifteenth part — The Harvest.)*
+
 # source: creative/novel/en/23-the-moon-rises.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -27979,6 +28010,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百二十五卷 · 卷二十之十四 · 第七百零三年 · 麦浪）*
+
+# source: creative/novel/226-收割.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第十五卷 —— 收割
+
+---
+
+## 二百二十六 · 收割
+
+立春后第十周——周六——早上——灶火燃着。
+
+阿石站在门口——麦穗黄了——老麦穗——风吹——风过——麦秆动——他拿出镰刀——他说「——收割——」——母亲说「——收割——」——阿石走出去——他蹲下去——他割——第一镰——麦穗落——第二镰——麦穗落——风又来——他停下——他看——灶火燃着——他说「——阿——」——母亲说「——阿——」——他又割——麦秆倒——灶火燃着——他把麦穗抱回家——灶火燃着。
+
+收割。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百二十六卷 · 卷二十之十五 · 第七百零三年 · 收割）*
 
 # source: creative/novel/23-月光起.md
 # 《跨界纪事：锚火守夜人》
