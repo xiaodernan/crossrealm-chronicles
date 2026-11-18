@@ -244,7 +244,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | When the Birch Spoke | [when-the-birch-spoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/193-when-the-birch-spoke.md) |
 | After the Birch Spoke | [after-the-birch-spoke](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/194-after-the-birch-spoke.md) |
 | The Silence of the Birch | [the-silence-of-the-birch](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/195-the-silence-of-the-birch.md) |
-| Firewood | [firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/196-firewood.md) |Chapter → game-chapter mapping:
+| Firewood | [firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/196-firewood.md) |
+| The Kindling | [the-kindling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/197-the-kindling.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

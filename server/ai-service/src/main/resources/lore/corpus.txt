@@ -11079,6 +11079,51 @@ The fire burned.
 
 *(End of volume XIX · Volume one hundred and ninety-six overall · the seven-hundred-and-second year, first part — Firewood.)*
 
+# source: creative/novel/en/197-the-kindling.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XIX**: The Seven-hundred-and-second Year — The Second Volume — The Kindling
+
+---
+
+## One Hundred and Ninety-seven: The Kindling
+
+The fifth week after the spring equinox — Saturday — morning — the fire burned.
+
+A-Shi split a whole bundle of firewood — the fire burned — his mother said: “ — the kindling Azu left — is in this bundle of wood you carry in your memory —”
+
+A-Shi said: “ — the kindling —”
+
+His mother said: “ — the kindling —”
+
+The fire burned.
+
+A-Shi said: “ — I am burning it — it is the kindling —”
+
+His mother said: “ — it is the kindling —”
+
+The fire burned.
+
+A-Shi sat before the stove — the fire burned — his mother sat beside him — the fire burned — one piece of wood after another — the fire burned — the fire burned — the fire burned.
+
+No one from outside would know — the fire burned — this bundle of wood — the fire burned — is the kindling of the seven-hundred-and-second year.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XIX · Volume one hundred and ninety-seven overall · the seven-hundred-and-second year, second part — The Kindling.)*
+
 # source: creative/novel/en/20-the-reader-opens-this-page.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -25539,6 +25584,51 @@ F2 隐藏 HUD。
 ---
 
 *（卷十九 · 本章完 · 跨界线总第一百九十六卷 · 卷十九之一 · 第七百零二年 · 柴）*
+
+# source: creative/novel/197-火种.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十九**：第七百零二年 · 第二卷 —— 火种
+
+---
+
+## 一百九十七 · 火种
+
+立春后第五周——周六——早上——灶火燃着。
+
+阿石劈了一整捆柴——灶火燃着——母亲说「——阿祖留下的火种——就在你记着的这堆柴里——」
+
+阿石说：「——火种——」
+
+母亲说：「——火种——」
+
+灶火燃着。
+
+阿石说：「——我在烧——它是火种——」
+
+母亲说：「——它是火种——」
+
+灶火燃着。
+
+阿石坐在灶前——灶火燃着——母亲坐在旁边——灶火燃着——柴一根一根——灶火燃着——灶火燃着——灶火燃着。
+
+旁人看过来——不会知道——灶火燃着——这一堆柴——灶火燃着——是七百零二年的火种。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十九 · 本章完 · 跨界线总第一百九十七卷 · 卷十九之二 · 第七百零二年 · 火种）*
 
 # source: creative/novel/20-读完自己.md
 # 《跨界纪事：锚火守夜人》
