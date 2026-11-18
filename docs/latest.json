@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-18T15:54:01.099Z",
+  "generated_at": "2026-11-18T16:02:20.164Z",
   "branch": "main",
-  "head": "6f3fdfd",
-  "total_commits": 2189,
-  "pushed_at": "2026-11-18T23:53:35+08:00",
+  "head": "9115409",
+  "total_commits": 2191,
+  "pushed_at": "2026-11-19T00:01:50+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "9115409",
+      "at": "2026-11-19T00:01:50+08:00",
+      "subject": "feat(canon): W-Z394 第二百零五卷《应声 / The Answering Voice》入典——卷十九之十 · 第七百零二年 · 应声（v3 前缀含 205 条年表）"
+    },
+    {
+      "short": "5926116",
+      "at": "2026-11-18T23:54:09+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z393 (novels 204 · lore 439 · i18n 3267 · commits 2189)"
+    },
     {
       "short": "6f3fdfd",
       "at": "2026-11-18T23:53:35+08:00",
@@ -21,27 +31,17 @@
       "short": "683b1e4",
       "at": "2026-11-18T23:43:23+08:00",
       "subject": "feat(canon): W-Z392 第二百零三卷《烟火 / Kitchen Smoke》入典——卷十九之八 · 第七百零二年 · 烟火（v3 前缀含 203 条年表）"
-    },
-    {
-      "short": "cbd3d34",
-      "at": "2026-11-18T21:42:37+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z391 (novels 202 · lore 435 · i18n 3267 · commits 2185)"
-    },
-    {
-      "short": "f6f228a",
-      "at": "2026-11-18T21:42:03+08:00",
-      "subject": "feat(canon): W-Z391 第二百零二卷《守火之人 / The Keeper of the Fire》入典——卷十九之七 · 第七百零二年 · 守火之人（v3 前缀含 202 条年表）"
     }
   ],
-  "tracked_files": 1724,
+  "tracked_files": 1726,
   "test_files": 468,
   "i18n_keys": 3267,
-  "lore_sources": 439,
-  "novel_chapters_zh": 204,
-  "novel_chapters_en": 204,
-  "milestone": "W-Z393",
-  "milestone_full": "卷 204 · 六百年守火线（204 / 204 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 439 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：204 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 441,
+  "novel_chapters_zh": 205,
+  "novel_chapters_en": 205,
+  "milestone": "W-Z394",
+  "milestone_full": "卷 205 · 六百年守火线（205 / 205 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 441 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：205 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
