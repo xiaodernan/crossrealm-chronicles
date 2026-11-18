@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-18T10:21:51.762Z",
+  "generated_at": "2026-11-18T10:46:25.855Z",
   "branch": "main",
-  "head": "8056988c",
-  "total_commits": 2151,
-  "pushed_at": "2026-11-18T18:20:38+08:00",
+  "head": "e0045835",
+  "total_commits": 2154,
+  "pushed_at": "2026-11-18T18:43:41+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "e004583",
+      "at": "2026-11-18T18:43:41+08:00",
+      "subject": "feat(canon): W-Z369 第一百八十七卷《炊烟 / Kitchen Smoke》入典——卷十八之八 · 第七百零二年（v3 前缀 187 条年表，含炊烟）"
+    },
+    {
+      "short": "7f6467c",
+      "at": "2026-11-18T18:43:31+08:00",
+      "subject": "feat(ai): W-Z370 执笔人·残章双 lane 图化——StateGraph 落地到每一条 LLM NPC（W-Z367 顺延真上线）"
+    },
+    {
+      "short": "2651659",
+      "at": "2026-11-18T10:21:51Z",
+      "subject": "chore(latest): refresh the showcase fact pack from main"
+    },
     {
       "short": "8056988",
       "at": "2026-11-18T18:20:38+08:00",
@@ -16,32 +31,17 @@
       "short": "0164d8c",
       "at": "2026-11-18T18:17:30+08:00",
       "subject": "feat(canon): W-Z368 第一百八十六卷《开门了 / The Door Opened》入典——卷十八之七 · 第七百零二年（v3 前缀随卷自增 186 条年表）"
-    },
-    {
-      "short": "ab541f2",
-      "at": "2026-11-18T07:03:27Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
-    },
-    {
-      "short": "ad26dc0",
-      "at": "2026-11-18T15:02:13+08:00",
-      "subject": "feat(ai): W-Z367 服务端 Java StateGraph 实装 · 烬灯回信图化落地（返回体新增 path=trace 四节点）"
-    },
-    {
-      "short": "be1570e",
-      "at": "2026-11-18T06:33:41Z",
-      "subject": "chore(latest): refresh the showcase fact pack from main"
     }
   ],
-  "tracked_files": 1686,
+  "tracked_files": 1688,
   "test_files": 468,
   "i18n_keys": 3267,
-  "lore_sources": 403,
-  "novel_chapters_zh": 186,
-  "novel_chapters_en": 186,
-  "milestone": "W-Z368",
-  "milestone_full": "卷 186 · 六百年守火线（186 / 186 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 403 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：186 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "lore_sources": 405,
+  "novel_chapters_zh": 187,
+  "novel_chapters_en": 187,
+  "milestone": "W-Z369",
+  "milestone_full": "卷 187 · 六百年守火线（187 / 187 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 405 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：187 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
