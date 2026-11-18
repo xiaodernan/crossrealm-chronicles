@@ -255,7 +255,8 @@ creative/music/soundtrack.html
 | 守夜的夜 · The Night of the Vigil | [the-night-of-the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/206-the-night-of-the-vigil.md) |
 | 谢火 · Thanking the Fire | [thanking-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/207-thanking-the-fire.md) |
 | 守夜的冬 · The Winter of the Vigil | [the-winter-of-the-vigil](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/208-the-winter-of-the-vigil.md) |
-| 谢客 · The Thanked Guest | [the-thanked-guest](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/209-the-thanked-guest.md) |每一章对应游戏的章节走法：
+| 谢客 · The Thanked Guest | [the-thanked-guest](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/209-the-thanked-guest.md) |
+| 他说了 · He Said | [he-said](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/210-he-said.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
