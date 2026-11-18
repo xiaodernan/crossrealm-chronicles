@@ -225,7 +225,8 @@ creative/music/soundtrack.html
 | 纸灰 · The Ash | [the-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/176-the-ash.md) |
 | 灶屋的夜 · The Night in the Kitchen | [the-night-in-the-kitchen](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/177-the-night-in-the-kitchen.md) |
 | 火记得 · The Fire Remembers | [the-fire-remembers](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/178-the-fire-remembers.md) |
-| 他走过来了 · He Came Over | [he-came-over](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/179-he-came-over.md) |每一章对应游戏的章节走法：
+| 他走过来了 · He Came Over | [he-came-over](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/179-he-came-over.md) |
+| 火又起 · The Fire Rises Again | [the-fire-rises-again](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/180-the-fire-rises-again.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
