@@ -319,6 +319,7 @@ End of frozen digest.
 175 · 灯芯很细
 176 · 纸灰
 177 · 灶屋的夜
+178 · 火记得
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

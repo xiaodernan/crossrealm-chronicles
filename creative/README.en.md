@@ -225,7 +225,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The White in the Fire | [the-white-in-the-fire](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/174-the-white-in-the-fire.md) |
 | The Wick Is Fine | [the-wick-is-fine](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/175-the-wick-is-fine.md) |
 | The Ash | [the-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/176-the-ash.md) |
-| The Night in the Kitchen | [the-night-in-the-kitchen](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/177-the-night-in-the-kitchen.md) |Chapter → game-chapter mapping:
+| The Night in the Kitchen | [the-night-in-the-kitchen](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/177-the-night-in-the-kitchen.md) |
+| The Fire Remembers | [the-fire-remembers](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/178-the-fire-remembers.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

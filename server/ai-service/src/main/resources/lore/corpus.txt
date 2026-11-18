@@ -10164,6 +10164,47 @@ The fire burned.
 
 *(End of volume XVII · Volume one hundred and seventy-seven overall · the seven-hundred-and-first year, fifteenth part — The Night in the Kitchen.)*
 
+# source: creative/novel/en/178-the-fire-remembers.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XVII**: The Seven-hundred-and-first Year — The Sixteenth Volume — The Fire Remembers
+
+---
+
+## One Hundred and Seventy-eight: The Fire Remembers
+
+The thirteenth day — late at night — the fire burned.
+
+A-Shi hardly slept — he watched the fire — he heard something at the back of the house — not a sound — a stillness — he said: “Ma —”
+
+His mother said: “It will remember.”
+
+A-Shi said: “Remember what?”
+
+His mother said: “You —”
+
+The fire burned.
+
+A-Shi said nothing — the fire burned.
+
+A-Shi said: “Then will it remember me instead?”
+
+His mother said: “ — It will.”
+
+The fire burned.
+
+A-Shi said nothing — the fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XVII · Volume one hundred and seventy-eight overall · the seven-hundred-and-first year, sixteenth part — The Fire Remembers.)*
+
 # source: creative/novel/en/18-trilarite-stair.md
 # Crossrealm Chronicles: Keeper of the Anchor Flame
 
@@ -23828,6 +23869,47 @@ F2 隐藏 HUD。
 ---
 
 *（卷十七 · 本章完 · 跨界线总第一百七十七卷 · 卷十七之十五 · 第七百零一年 · 灶屋的夜）*
+
+# source: creative/novel/178-火记得.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷十七**：第七百零一年 · 第十六卷 —— 火记得
+
+---
+
+## 一百七十八 · 火记得
+
+第十三天——深夜——灶火燃着。
+
+阿石几乎没睡——他看着火——他听见屋后有响———它不响——它是安静——他说：「妈——」
+
+母亲说：「它会记住的。」
+
+阿石说：「记住什么？」
+
+母亲说：「你——」
+
+灶火燃着。
+
+阿石没出声——灶火燃着。
+
+阿石说：「那它会替我记住吗？」
+
+母亲说：「——会。」
+
+灶火燃着。
+
+阿石没出声——灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷十七 · 本章完 · 跨界线总第一百七十八卷 · 卷十七之十六 · 第七百零一年 · 火记得）*
 
 # source: creative/novel/18-三日陵.md
 # 《跨界纪事：锚火守夜人》
