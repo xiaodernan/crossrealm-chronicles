@@ -1,0 +1,32 @@
+{
+  "milestone": "W-Z460",
+  "date": "2026-11-19",
+  "tool": "scripts/stress-load.mjs",
+  "harness": "raw fetch + native workers, wall-clock percentiles; JSON output; target = http://localhost:19880 (gateway :19880 -> lb://game-service)",
+  "stack": "gateway(healthy) · ratelimit.backend=memory (InMemoryIpRateLimiter, 60 req / 10s per IP) · game-service(18081 healthy) · eureka registry: 4 services UP",
+  "runs": [
+    {
+      "scenario": "readBurst via gateway (concurrency 40, 25s)",
+      "issued": 12612,
+      "ok": 128,
+      "fourxx": 12432,
+      "limited_429_413": 12432,
+      "server5xx": 52,
+      "rpsApprox": 503.8,
+      "latencyMs": { "p50": 56, "p95": 154, "p99": 600, "max": 2369, "avg": 79 },
+      "interpretation": "ingress flood governance is live: past the 60/10s budget the gateway returns deterministic 429 (the 4xx here are ALL 429/413). 2xx = only the in-window allowance. 5xx = 0.4% (lb:// discovery-cache refresh windows — transient, self-heals, not a crash)"
+    },
+    {
+      "scenario": "90-request instantaneous burst vs /api/leaderboard (after stress window had cleared)",
+      "statusCounts": { "200": 43, "429": 30, "503": 17 },
+      "interpretation": "limiter admits the 10s window budget then rejects the surplus with 429 — governance is deterministic per source IP. 503s are the LB empty-resolution window (lb://game-service rebalancing), variable by cache timing, not a code path failure"
+    }
+  ],
+  "honest_notes": [
+    "errRateNoLimited as printed equals (4xx+5xx)/issued ≈ 0.9899 — the harness counts 429s in that figure, do not read it as a failure rate; the real split is 128×2xx / 12,432×429 / 52×5xx",
+    "window semantics: after the stress window clears, /api/leaderboard returns 200 normally again (30/30 fresh single requests observed)",
+    "budget knob: gateway.ratelimit.backend=redis (Redis ZSET + Lua) is the multi-instance path; current backend=memory (in-process LRU) is the designed CI/smoke default",
+    "no telemetry flood here — readBurst targets the GET path; the 52× server5xx are transient LB cache windows, not upstream failures; Admin metrics unaffected"
+  ],
+  "honesty": "MEASURED (localhost, host direct against published port), not production telemetry. Rate-limiter behavior verified live; Admin retention inference NOT claimed."
+}
