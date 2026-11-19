@@ -13056,6 +13056,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and forty-four overall · the seven-hundred-and-third year, thirty-fourth part — The West Wind Rises.)*
 
+# source: creative/novel/en/245-the-clouds-move.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Thirty-Fifth Volume — The Clouds Move
+
+---
+
+## Two Hundred and Forty-Five: The Clouds Move
+
+The twenty-ninth week after the spring equinox — Thursday — afternoon — the fire burned.
+
+A-Shi stood at the doorway — he looked up — the clouds had moved — he said: “ — the clouds —” — his mother said: “ — the clouds —” — the fire burned — A-Shi watched the clouds drift — he said: “ — go —” — his mother said: “ — go —” — the fire burned — A-Shi looked again — another one — the fire burned — A-Shi said: “ — one after another —” — his mother said: “ — one after another —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+The clouds move.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and forty-five overall · the seven-hundred-and-third year, thirty-fifth part — The Clouds Move.)*
+
 # source: creative/novel/en/25-moonlit-corridor.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -29255,6 +29286,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百四十四卷 · 卷二十之三十四 · 第七百零三年 · 西风起）*
+
+# source: creative/novel/245-云动.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第三十五卷 —— 云动
+
+---
+
+## 二百四十五 · 云动
+
+立春后第二十九周——周四——下午——灶火燃着。
+
+阿石站在门口——他抬头——云动了——他说「——云动——」——母亲说「——云动——」——灶火燃着——阿石看着云走——他说「——走——」——母亲说「——走——」——灶火燃着——阿石又看——又一片——灶火燃着——阿石说「——一片又一片——」——母亲说「——一片又一片——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+云动。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百四十五卷 · 卷二十之三十五 · 第七百零三年 · 云动）*
 
 # source: creative/novel/25-月光回廊.md
 # 《跨界纪事：锚火守夜人》
