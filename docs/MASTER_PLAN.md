@@ -1,3 +1,9 @@
+> **2026-11-19 · W-Z464 双实例共享窗口实证（限流 memory vs Redis 的终局对照）**：临时起 gateway2（127.0.0.1:19881 · 同镜像 crossrealm-chronicles-server-gateway · 同网络 crossrealm-chronicles-server_default · RedisIpRateLimiter ZSET+Lua 背板 · eureka 作为 GATEWAY 注册第二个实例）与现网 gateway-1 并行，统一打 lb://game-service：
+> ① phase1 60 请求（30/30 分摊 · 同一源 IP 172.18.0.1）→ **55×200 + 5×503**（resilience4j 单实例熔断窗——两个实例各自独立记账，5×503 来自先熔断的那一个）；
+> ② phase2 再打 12 请求（6/6 分摊）→ **12×429**（窗口预算已打满，全部超额拒绝）；
+> ③ **redis-cli ZCARD ratelimit:172.18.0.1 = 60**（ZSET 原子计数印证——两实例共享同一 ZSET）；
+> 结论：**多实例共享窗口成立**——memory 背板办不到（每实例各 60 → 集群 120）。实验后 gateway2 已 docker rm -f，且其 eureka 注册已 DELETE，registry 恢复 **GATEWAY / GAME-SERVICE / CONFIG-SERVER / AI-SERVICE 四个健康实例**；Admin meas_l34（MEASURED）落屏（zh/en/HTML）。
+>
 > **2026-11-19 · W-Z463 第二百六十卷入典《大雪 / Great Snow》——卷二十之五十 · 第七百零三年 · 大雪**：第七百零三年——立春后第四十四周——周五——早上——灶火燃着——阿石站在门口——天上落了——白了——他说「——大雪——」——母亲说「——大雪——」——灶火燃着——阿石走到院子里——雪落在地上——白了一层——他说「——地白了——」——母亲说「——地白了——」——阿石又看树——树上也白了——他说「——树也白了——」——母亲说「——树也白了——」——过了一会——雪大了——一片一片——他说「——雪大了——」——母亲说「——雪大了——」——母亲说「——冬深了——」——阿石说「——冬深了——」——灶火燃着。
 > 交付：creative/novel/260-大雪.md + en 孪生 260-great-snow.md；novella 260 × 2 = 520 模块（典籍馆现为 260 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**551 源**；**v3 冻结前缀含 260 条年表条目**；showcase feed 新增 W-Z463 实录。
 >
