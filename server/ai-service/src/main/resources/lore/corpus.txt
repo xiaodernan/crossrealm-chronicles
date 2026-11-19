@@ -13889,6 +13889,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and sixty-seven overall · the seven-hundred-and-fourth year, fifty-seventh part — Spring Equinox.)*
 
+# source: creative/novel/en/268-grain-rain.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Fifty-Eighth Volume — Grain Rain
+
+---
+
+## Two Hundred and Sixty-Eight: Grain Rain
+
+Twenty-four days after spring begins — Monday — morning — the fire burned.
+
+A-Shi stood at the doorway — there was rain in the sky — he said: “ — grain rain —” — his mother said: “ — grain rain —” — the fire burned — A-Shi went out — he walked into the yard — the rain fell — fine and thin — the ground grew wet — he said: “ — the rain has fallen —” — his mother said: “ — the rain has fallen —” — the fire burned — after a while — the rain stopped — the sky had cleared — there was water on the ground — he said: “ — the rain has stopped —” — his mother said: “ — the rain has stopped —” — the fire burned — his mother said: “ — the grain rain has fallen —” — A-Shi said: “ — the grain rain has fallen —” — his mother said: “ — the crops are about to grow —” — A-Shi said: “ — the crops are about to grow —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Grain rain.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and sixty-eight overall · the seven-hundred-and-fourth year, fifty-eighth part — Grain Rain.)*
+
 # source: creative/novel/en/27-the-last-persimmon.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -30803,6 +30834,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百六十七卷 · 卷二十之五十七 · 第七百零四年 · 春分）*
+
+# source: creative/novel/268-谷雨.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第五十八卷 —— 谷雨
+
+---
+
+## 二百六十八 · 谷雨
+
+立春后二十四天——周一——早上——灶火燃着。
+
+阿石站在门口——天上有雨——他说「——谷雨——」——母亲说「——谷雨——」——灶火燃着——阿石出去——他走到院子里——雨落了——细细的——湿了——他说「——雨落了——」——母亲说「——雨落了——」——灶火燃着——过了一会——雨停了——天清了——地上有水——他说「——雨停了——」——母亲说「——雨停了——」——灶火燃着——母亲说「——谷雨落了——」——阿石说「——谷雨落了——」——母亲说「——作物要长了——」——阿石说「——作物要长了——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+谷雨。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百六十八卷 · 卷二十之五十八 · 第七百零四年 · 谷雨）*
 
 # source: creative/novel/27-归途之共.md
 # 《跨界纪事：锚火守夜人》
