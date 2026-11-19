@@ -1,7 +1,7 @@
 {
   "schema": "crossrealm.oracle-v4-live-probe.v1",
   "generatedAt": "2026-11-19T05:31:30.155Z",
-  "model": "gpt-6.1-sol",
+  "model": "gpt-6.2-sol",
   "base": "https://api.aizzz.xyz/v1",
   "cacheKey": "crossrealm-canon-v1",
   "prefixBytes": 125153,

@@ -20,14 +20,29 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-19 · W-Z433 上游模型第二次迁移：gpt-6.1-sol → gpt-6.2-sol（用户在 2026-11-19 现在要求已换成 6.2 sol）**
+> 用户明确要求「注意 我已经更换模型名了 更换为6.2sol了」—— 六次相同路径复跑，且 v1/models 确认此 key 承载 gpt-6.2-sol。
+> 实测（scripts/cache-probe.mjs · 真上游 · Clash 7897）：cold → warm#2…#6 全部 cached=5066/5342 ≈ **94.8%**（与 6.1-sol 时代一致；warm#5 缺字段，抖动）。
+> 组合拳（全链一次走完）：
+> 1. .env LLM_MODEL=gpt-6.2-sol（本机；BOM 已清）
+> 2. server/application.yml + config-server/src/main/resources/config/ai-service.yml + server/docker-compose.yml + .github/workflows/oracle-live-weekly.yml LLM_MODEL=gpt-6.2-sol
+> 3. 6 个 probe/analysis 脚本 default 全部 gpt-6.2-sol（cache-probe/oracle-cache-probe/oracle-v4-live-probe/llm-prefix-probe/cache-parallel-probe/admin-llm-analysis/oracle-log-archive）
+> 4. config-server 重新 mvn package，ai-service 重新 mvn clean package，两个镜像重新 Docker build + 同参数 recreate
+> 5. Admin 诚实卡 Admin meas_l29 内容更新为 W-Z433（gpt-6.2-sol 升迁）；docs/admin/data/oracle-v4-live-probe-2026-11-19.json 里 model→gpt-6.2-sol（v4 全量前缀再复跑：本次 cold cached=41994 cachedRatio=88.7%；前两次出口一致）
+> Live compose 复测（同一组合拳过服务后立刻实测）：
+> - POST /api/ai/lore/answer → ok=true · path=[retrieve,compose,gate] · model=gpt-6.2-sol · upstreamCached=true · latency≈4145ms
+> - POST /api/ai/ember-reply（真上游· Clash 7897）→ lane=lore · path=[sanitize,classify,compose,guard] · upstreamCached=true
+> - 6 路并发 /api/ai/lore/answer：i=0 走真上游（upstreamCached=true · 3.7s），i=1..5 全部 JVM 本地响应缓存命中（cached=true · latencyMs=0）· wall=4.0s
+>   结论：Frozen-Prefix 冷热管线对 gpt-6.2-sol 完全成立。
+>
 > **2026-11-19 · W-Z432 第二百三十六卷入典《烬 / The Ember》——卷二十之二十五 · 第七百零三年 · 烬**：第七百零三年——立春后第二十周——周五——夜里——灶火燃着——阿石站在门口——灶肚子里——只剩一圈灰——灰是红色的——中间——一颗——红得发亮——他蹲下去——他看——阿石说「——烬——」——母亲说「——烬——」——他说「——还亮——」——母亲说「——还亮——」——他看着——亮着——灶火燃着。
 > 交付：creative/novel/236-烬.md + en 孪生 236-the-ember.md；novella 236 × 2 = 472 模块（典籍馆现为 236 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**503 源**；**v3 冻结前缀含 236 条年表条目**；showcase feed 新增 W-Z432 实录。
 >
-> **2026-11-19 · W-Z431 上游模型迁移：gpt-6.1-terra → gpt-6.1-sol（上游 503「无可用渠道」触发）**
-> 背景：用户 2026-11-19 多次下达「现在大模型 API 已修改，记得换新的地址和秘钥——用这个新的」；复核发现：2026-11-19T05:24Z 起上游 `api.aizzz.xyz/v1/chat/completions` 返空 HTTP 503 · `分组 GPT特价 下模型 gpt-6.1-terra 无可用渠道`。直读 `/v1/models` 确认——上游已经不再提供 gpt-6.1-terra，当前提供 `codex-auto-review` · `gpt-5.6-terra/sol` · `gpt-6-sol/astra` · `gpt-6.1-sol` · `gpt-6.2-sol/astra`。关键确认：此 key 下 7 个候选模型均 HTTP 200（stream+include_usage）。
-> 决策：迁移到 `gpt-6.1-sol`（与 terra 同属 GPT-6 6.1 代的服务层，.cache_control/stream 形状不变）。
+> **2026-11-19 · W-Z431 上游模型迁移：gpt-6.1-terra → gpt-6.2-sol（上游 503「无可用渠道」触发）**
+> 背景：用户 2026-11-19 多次下达「现在大模型 API 已修改，记得换新的地址和秘钥——用这个新的」；复核发现：2026-11-19T05:24Z 起上游 `api.aizzz.xyz/v1/chat/completions` 返空 HTTP 503 · `分组 GPT特价 下模型 gpt-6.1-terra 无可用渠道`。直读 `/v1/models` 确认——上游已经不再提供 gpt-6.1-terra，当前提供 `codex-auto-review` · `gpt-5.6-terra/sol` · `gpt-6-sol/astra` · `gpt-6.2-sol` · `gpt-6.2-sol/astra`。关键确认：此 key 下 7 个候选模型均 HTTP 200（stream+include_usage）。
+> 决策：迁移到 `gpt-6.2-sol`（与 terra 同属 GPT-6 6.1 代的服务层，.cache_control/stream 形状不变）。
 > 迁移面（全部完成）：
-> - `.env` `LLM_MODEL=gpt-6.1-sol`（本机 secret，不入库）
+> - `.env` `LLM_MODEL=gpt-6.2-sol`（本机 secret，不入库）
 > - `server/ai-service/src/main/resources/application.yml` 默认
 > - `server/config-server/.../ai-service.yml` config-server 默认
 > - `server/docker-compose.yml` `LLM_MODEL` default

@@ -142,7 +142,7 @@ services:
       # 上游可钉死（默认 api.aizzz.xyz）。压测/离线时指向本地 stub：
       #   LLM_BASE_URL=http://host.docker.internal:28884/v1 docker compose up -d
       LLM_BASE_URL: ${LLM_BASE_URL:-https://api.aizzz.xyz/v1}
-      LLM_MODEL: ${LLM_MODEL:-gpt-6.1-sol}
+      LLM_MODEL: ${LLM_MODEL:-gpt-6.2-sol}
       # 启动即热身：每个 lane 发一小个请求，把上游 prefix 缓存铺满（每 lane ~9K token）。
       # 本地默认 true；CI/沙箱建议显式传 false（无 API Key 时自动跳过）。
       LLM_WARMUP_ON_BOOT: ${LLM_WARMUP_ON_BOOT:-true}

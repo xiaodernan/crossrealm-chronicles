@@ -4,7 +4,7 @@
 # 不是放密钥的地方。密钥只由进程环境变量 LLM_API_KEY 注入（见 ai-service/application.yml）。
 # 其余旋钮都可以在这里热更，且客户端与 game-service 都不需要跟着改。
 ai-service:
-  model: gpt-6.1-sol
+  model: gpt-6.2-sol
   timeout: 20s
   # 只重试「超时 / 429 / 5xx」；401/400 是请求本身错，重试只会把钱再花一遍
   max-retries: 2

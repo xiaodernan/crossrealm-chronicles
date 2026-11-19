@@ -39,7 +39,7 @@ try {
 } catch { /* fall through */ }
 const KEY = env.LLM_API_KEY || process.env.LLM_API_KEY;
 const BASE = (env.LLM_BASE_URL || process.env.LLM_BASE_URL || 'https://api.aizzz.xyz/v1').replace(/\/+$/, '');
-const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6.1-sol';
+const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6.2-sol';
 if (!KEY) { console.error('cache-parallel-probe: 缺少 LLM_API_KEY'); process.exit(1); }
 const FROZEN = readFileSync(PREFIX_PATH, 'utf8');
 

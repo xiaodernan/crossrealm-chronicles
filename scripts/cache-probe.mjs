@@ -27,7 +27,7 @@ try {
 } catch { /* 退回环境变量 */ }
 const KEY = env.LLM_API_KEY || process.env.LLM_API_KEY;
 const BASE = (env.LLM_BASE_URL || process.env.LLM_BASE_URL || 'https://api.aizzz.xyz/v1').replace(/\/+$/, '');
-const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6.1-sol';
+const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6.2-sol';
 if (!KEY) { console.error('cache-probe: 缺少 LLM_API_KEY'); process.exit(1); }
 if (!proxyIsSet()) console.log('cache-probe: LLM_PROXY_URL=direct —— 本机直连大概率 403（仅自测用）');
 console.log('cache-probe: base=%s model=%s key=****（不打印）', BASE, MODEL);

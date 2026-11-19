@@ -40,7 +40,7 @@ const md = [
   `# Oracle live 归档 · ${now.toISOString()}`,
   '',
   `> 命令：\`node scripts/_live-env.mjs -Dtest=LoreOracleLiveIntegrationTest\``,
-  `> 上游：https://api.aizzz.xyz/v1 · model=gpt-6.1-sol · Clash 混合端口 127.0.0.1:7897`,
+  `> 上游：https://api.aizzz.xyz/v1 · model=gpt-6.2-sol · Clash 混合端口 127.0.0.1:7897`,
   `> 结果：${ran ? (skipped ? '整体跳过（需要 LLM_API_KEY 环境）' : (ok ? '✅ 3/3 全绿' : '❌ 有失败用例，见下')) : '⚠️ 未能运行 / 未识别结果'}`,
   '',
   '```text',
