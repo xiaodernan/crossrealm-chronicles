@@ -14070,6 +14070,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and seventy-one overall · the seven-hundred-and-fourth year, sixty-first part — Summer Solstice.)*
 
+# source: creative/novel/en/272-minor-heat.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Sixty-Second Volume — Minor Heat
+
+---
+
+## Two Hundred and Seventy-Two: Minor Heat
+
+The sixteenth day after summer begins — Tuesday — morning — the fire burned.
+
+A-Shi stood at the doorway — a wave of heat surged over — he said: “ — minor heat —” — his mother said: “ — minor heat —” — the fire burned — A-Shi went out — he walked into the yard — the wheat had turned yellow — the ground scorched his feet — he said: “ — it is nearly sun-dried —” — his mother said: “ — it is nearly sun-dried —” — the fire burned — after a while — A-Shi drew a bucket of well water — ice-cold — he splashed it at the foot of the courtyard wall — he said: “ — the wall is cool now —” — his mother said: “ — the wall is cool now —” — the fire burned — his mother said: “ — what a hot day —” — A-Shi said: “ — what a hot day —” — his mother said: “ — the stove is still bright —” — A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Minor heat.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventy-two overall · the seven-hundred-and-fourth year, sixty-second part — Minor Heat.)*
+
 # source: creative/novel/en/28-the-new-sapling.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -31108,6 +31139,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百七十一卷 · 卷二十之六十一 · 第七百零四年 · 夏至）*
+
+# source: creative/novel/272-小暑.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第六十二卷 —— 小暑
+
+---
+
+## 二百七十二 · 小暑
+
+立夏后第十六天——周二——早上——灶火燃着。
+
+阿石站在门口——热浪涌过来了——他说「——小暑——」——母亲说「——小暑——」——灶火燃着——阿石出去——他走到院子里——麦子变黄了——地面烫脚——他说「——快晒干了——」——母亲说「——快晒干了——」——灶火燃着——过了一会——阿石提了一桶井水——水冰凉——他泼在院墙根下——他说「——墙凉快了——」——母亲说「——墙凉快了——」——灶火燃着——母亲说「——真热的一天——」——阿石说「——真热的一天——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+小暑。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百七十二卷 · 卷二十之六十二 · 第七百零四年 · 小暑）*
 
 # source: creative/novel/28-新苗.md
 # 《跨界纪事：锚火守夜人》
