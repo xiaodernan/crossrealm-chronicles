@@ -371,6 +371,7 @@ End of frozen digest.
 227 · 囤
 228 · 磨
 229 · 面团
+230 · 蒸
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
