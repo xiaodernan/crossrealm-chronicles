@@ -393,6 +393,7 @@ End of frozen digest.
 249 · 芒种
 250 · 夏至
 251 · 小暑
+252 · 大暑
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

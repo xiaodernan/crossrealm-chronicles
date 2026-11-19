@@ -13336,6 +13336,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and fifty-one overall · the seven-hundred-and-third year, forty-first part — Minor Heat.)*
 
+# source: creative/novel/en/252-major-heat.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Forty-Second Volume — Major Heat
+
+---
+
+## Two Hundred and Fifty-Two: Major Heat
+
+The thirty-sixth week after the spring equinox — Friday — afternoon — the fire burned.
+
+A-Shi stood at the doorway — the sun was fierce — the ground was white — he said: “ — major heat —” — his mother said: “ — major heat —” — the fire burned — A-Shi went out — he walked into the shade of the tree — the cicadas sang — he said: “ — the cicadas are singing —” — his mother said: “ — the cicadas are singing —” — the fire burned — A-Shi brought out a basin of water — he set it at the doorway — sweat dripped into the water — he said: “ — it is at its hottest —” — his mother said: “ — it is at its hottest —” — the fire burned — his mother said: “ — major heat is passing —” — A-Shi said: “ — major heat is passing —” — his mother said: “ — the beginning of autumn draws near —” — A-Shi said: “ — the beginning of autumn draws near —” — the fire burned — after a while — a few clouds gathered — a gust of wind rose — a sliver of sun was hidden by the cloud — he said: “ — clouds are coming —” — his mother said: “ — clouds are coming —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Major heat.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and fifty-two overall · the seven-hundred-and-third year, forty-second part — Major Heat.)*
+
 # source: creative/novel/en/26-under-the-candle-flame.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -29752,6 +29783,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百五十一卷 · 卷二十之四十一 · 第七百零三年 · 小暑）*
+
+# source: creative/novel/252-大暑.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第四十二卷 —— 大暑
+
+---
+
+## 二百五十二 · 大暑
+
+立春后第三十六周——周五——午后——灶火燃着。
+
+阿石站在门口——日头毒——地上白——他说「——大暑——」——母亲说「——大暑——」——灶火燃着——阿石出去——他走到树荫里——蝉叫——他说「——蝉叫——」——母亲说「——蝉叫——」——灶火燃着——阿石端了一盆水——他放在门口——汗滴在水里——他说「——热极了——」——母亲说「——热极了——」——灶火燃着——母亲说「——大暑过了——」——阿石说「——大暑过了——」——母亲说「——立秋就近了——」——阿石说「——立秋就近了——」——灶火燃着——过了一会——云聚了一点——风大了一阵——日头被云遮了一线——他说「——云来了——」——母亲说「——云来了——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+大暑。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百五十二卷 · 卷二十之四十二 · 第七百零三年 · 大暑）*
 
 # source: creative/novel/26-烛火之下.md
 # 《跨界纪事：锚火守夜人》
