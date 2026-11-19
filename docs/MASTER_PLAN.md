@@ -1,3 +1,10 @@
+> **2026-11-19 · W-Z444s 全线 LLM lane 入 StateGraph —— BossVerse / KindleLetter / EchoHint / Arbiter 四条车道补齐「compose → guard」图（Arbiter 为 compose → parse）**：
+> 此前 StateGraph 只覆盖 ChapterCoda / DeathEpitaph / EmberReply / LoreOracle 四车道；BossVerse（余火回响）、KindleLetter（烬火答）、EchoHint（回声灯）此前裸调 LlmClient（输出无确定性回灌），Arbiter（烬灯回信）则把模型吐出的 JSON 原样透传给客户端自己解析。本轮全部迁移：
+> ① BossVerse / KindleLetter / EchoHint → **compose（LLM）→ guard（确定性：泄露词表 / 长度 60 字 zh、72 码点 en / markdown 剥离，miss 即安全句）** 两节点图，返回体新增 **guarded** 与 **path**（["compose","guard"]），原字段（verse / reply / hint / cached / upstreamCached / model）零改动；
+> ② Arbiter → **compose（LLM）→ parse（确定性）** 两节点图：服务端找第一段 `{...}` → JSON.parse → 三字段必须为非空字符串 → 逐字段 markdown 剥离 / leak 词表检查 / 码点截断（title 30 / epilogue 160 / omen 60）；**任何一步失败 parsed=null + guarded=true**（客户端既有行为：整段不渲染，片尾依旧完整）——不再把模型的半成品当内容落屏；`raw` 原样保留（前端 parseArbiterAnswer 零改动），新增 **parsed / guarded / path**。
+> 验证：**ai-service 全量 182 tests / 34 classes green**（mvn package 新 jar 58187352 B）；**旧 compose 镜像为 14:02 构建（含未迁移代码）→ 重新打包、重建、重部署**；因宿主机 `127.0.0.1:8761` 已被 careeros-discovery 占用，本栈显式端口 **18761 / 18888 / 19883** 重建 live；**4 条迁移 lane 直连实测全部 = 503 advisor-unavailable（容器内无上游 key，静默失败契约成立，绝非 500）**；gateway 保持原样（unhealthy，不动）。
+> 附带发现（如实登记）：`docker compose up -d ai-service` 会连带重建 discovery/config 并在默认端口 8761 上撞 careeros-discovery 的 `127.0.0.1:8761` 绑定而整体失败——本次以 `DISCOVERY_PORT=18761` 显式端口恢复；容器内 `api.aizzz.xyz` 依旧 NXDOMAIN（DNS 拦截），**容器直连上游仍不可用**——host 端 live 探针（scripts/*.mjs 走 Clash 7897）不受影响。
+>
 
 
 > **2026-11-16 · W-Z212 上游迁移：wkapi.pro/gpt-6-sol → api.aizzz.xyz / v1 / gpt-6.1-terra（Clash 节点可用）**。应用侧全线切换（`application.yml` 默认、`AiProperties`、config-server `ai-service.yml`、`env.example`、`docker-compose.yml` 兜底、`PromptCacheLiveTest`、`scripts/cache-probe.mjs`、`.env` 的 `LLM_PROXY_URL=http://127.0.0.1:7897`）；
