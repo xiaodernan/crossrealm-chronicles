@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and fifty-three volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and fifty-four volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 253 volumes of the canon, fully readable
+· Canon Library — 254 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 253-volume index',
-  hm_body_codex: `Codex — 253 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 254-volume index',
+  hm_body_codex: `Codex — 254 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3401,6 +3401,7 @@ hm_title_codex: 'Codex · the 253-volume index',
 251 · Minor Heat — The thirty-fifth week after the spring equinox — Thursday — noon — the fire burned; A-Shi stood at the doorway — the noon sun — the heat — he said: “ — minor heat —”; his mother said: “ — minor heat —” — he walked to the well — the well water was cool — he said: “ — the well water is cool —”; his mother said: “ — the well water is cool —” — he drew a jug of water — he came back — he said: “ — the water is cool —”; his mother said: “ — the water is cool —” — after a while — a wave of hot wind passed and stopped — A-Shi soaked his handkerchief in the water — he draped it over his head — he said: “ — a little cover —”; his mother said: “ — a little cover —”. Volume XX, forty-first part.
 252 · Major Heat — The thirty-sixth week after the spring equinox — Friday — afternoon — the fire burned; A-Shi stood at the doorway — the sun was fierce — the ground was white — he said: “ — major heat —”; his mother said: “ — major heat —” — he walked into the shade of the tree — the cicadas sang — he said: “ — the cicadas are singing —”; his mother said: “ — the cicadas are singing —” — he brought out a basin of water — sweat dripped into the water — he said: “ — it is at its hottest —”; his mother said: “ — it is at its hottest —” — his mother said: “ — major heat is passing —”; A-Shi said: “ — major heat is passing —” — his mother said: “ — the beginning of autumn draws near —”; A-Shi said: “ — the beginning of autumn draws near —” — after a while — a few clouds gathered — a gust of wind rose — a sliver of sun was hidden by the cloud — he said: “ — clouds are coming —”; his mother said: “ — clouds are coming —”. Volume XX, forty-second part.
 253 · Limit of Heat — The thirty-seventh week after the spring equinox — Saturday — early morning — the fire burned; A-Shi stood at the doorway — the sun came up late — the wind had cooled — he said: “ — limit of heat —”; his mother said: “ — limit of heat —” — he walked behind the house — the persimmons were ripe — one — two — he said: “ — the persimmons are red —”; his mother said: “ — the persimmons are red —” — the swallows were flying south — he said: “ — the swallows have gone —”; his mother said: “ — the swallows have gone —” — his mother said: “ — major heat has passed —”; A-Shi said: “ — major heat has passed —” — his mother said: “ — autumn draws near —”; A-Shi said: “ — autumn draws near —” — after a while — a V in the sky — another — he said: “ — another flock —”; his mother said: “ — another flock —”. Volume XX, forty-third part.
+254 · White Dew — The thirty-eighth week after the spring equinox — Sunday — morning — the fire burned; A-Shi stood at the doorway — there was dew on the grass — it shone — he said: “ — white dew —”; his mother said: “ — white dew —” — he walked to the edge of the grass — he crouched down — he reached out — the dew clung to his fingertips — he said: “ — it is cool —”; his mother said: “ — it is cool —” — after a while — the sun came out — the dew dried — the grass was no longer shining — he said: “ — the dew has dried —”; his mother said: “ — the dew has dried —” — his mother said: “ — white dew has come —”; A-Shi said: “ — white dew has come —” — his mother said: “ — autumn has deepened —”; A-Shi said: “ — autumn has deepened —”. Volume XX, forty-fourth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
