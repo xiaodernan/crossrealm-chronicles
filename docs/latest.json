@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-19T17:07:38.629Z",
+  "generated_at": "2026-11-19T17:46:44.971Z",
   "branch": "main",
-  "head": "2cb783a",
-  "total_commits": 2351,
-  "pushed_at": "2026-11-20T01:05:47+08:00",
+  "head": "3eb26d0",
+  "total_commits": 2353,
+  "pushed_at": "2026-11-20T01:46:00+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "3eb26d0",
+      "at": "2026-11-20T01:46:00+08:00",
+      "subject": "feat(ai-service): W-Z475 compose→LLM 真上游贯通——LLM_PROXY_URL 走 CONNECT 代理，ai-service 活体到 api.aizzz.xyz"
+    },
+    {
+      "short": "e5feab1",
+      "at": "2026-11-20T01:07:58+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z474 (novels 269 · lore 569 · i18n 3267 · commits 2351)"
+    },
     {
       "short": "2cb783a",
       "at": "2026-11-20T01:05:47+08:00",
@@ -21,25 +31,15 @@
       "short": "f10c918",
       "at": "2026-11-20T00:51:29+08:00",
       "subject": "docs(readme): record 2026-11-19 cache-probe re-measurement on gpt-6.2-sol (warm cached_tokens=5066/5342 ~= 94.8%, 4/4 consistent; son non-stream still reports no cache field; 2 schannel flakes were Clash west-coast-node, not upstream)"
-    },
-    {
-      "short": "e04fde3",
-      "at": "2026-11-20T00:48:30+08:00",
-      "subject": "fix(hud): safe-area insets for notched phones - .hud-top/.hud-bottom now honor env(safe-area-inset-*); no more clipped HUD on iPhone notch / Android cutout"
-    },
-    {
-      "short": "c547c4c",
-      "at": "2026-11-20T00:45:41+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z473 (novels 268 · lore 567 · i18n 3267 · commits 2346)"
     }
   ],
-  "tracked_files": 1865,
+  "tracked_files": 1866,
   "test_files": 468,
   "i18n_keys": 3267,
   "lore_sources": 569,
   "novel_chapters_zh": 269,
   "novel_chapters_en": 269,
-  "milestone": "W-Z474",
+  "milestone": "W-Z475",
   "milestone_full": "卷 269 · 六百年守火线（269 / 269 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 569 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：269 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
