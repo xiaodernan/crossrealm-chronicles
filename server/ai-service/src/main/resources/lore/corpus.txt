@@ -12402,6 +12402,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and twenty-six overall · the seven-hundred-and-third year, fifteenth part — The Harvest.)*
 
+# source: creative/novel/en/227-the-silo.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Sixteenth Volume — The Silo
+
+---
+
+## Two Hundred and Twenty-Seven: The Silo
+
+The eleventh week after the spring equinox — Wednesday — morning — the fire burned.
+
+A-Shi stood at the doorway — A-Shi carried the ears in — the room could not hold them — he spread the ears across the floor — one row — two rows — three rows — A-Shi said: “ — the silo —” — his mother said: “ — the silo —” — there was sweat on A-Shi's forehead — his mother handed him a cup of water — he said: “ — it is a lot —” — his mother said: “ — it is a lot —” — the fire burned — he looked at the heap of ears — he said: “ — it is a great many —” — his mother said: “ — it is a great many —” — the fire burned — the ears in the room — the lamp lit — his mother watched — the fire burned — the fire burned — the fire burned — the fire burned.
+
+The silo.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and twenty-seven overall · the seven-hundred-and-third year, sixteenth part — The Silo.)*
+
 # source: creative/novel/en/23-the-moon-rises.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -28041,6 +28072,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百二十六卷 · 卷二十之十五 · 第七百零三年 · 收割）*
+
+# source: creative/novel/227-囤.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第十六卷 —— 囤
+
+---
+
+## 二百二十七 · 囤
+
+立春后第十一周——周三——早上——灶火燃着。
+
+阿石站在门口——阿石把麦穗扛回来——堂屋放不下了——他把麦穗铺在堂屋——地上——一排——两排——三排——阿石说「——囤——」——母亲说「——囤——」——阿石的额头上有汗——母亲给他递了一杯水——他说「——多——」——母亲说「——多——」——灶火燃着——他看着麦堆——他说「——多得很——」——母亲说「——多得很——」——灶火燃着——麦穗在堂屋里——灯亮着——母亲看着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+囤。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百二十七卷 · 卷二十之十六 · 第七百零三年 · 囤）*
 
 # source: creative/novel/23-月光起.md
 # 《跨界纪事：锚火守夜人》
