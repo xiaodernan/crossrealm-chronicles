@@ -274,7 +274,8 @@ creative/music/soundtrack.html
 | 麦浪 · The Wheat Sea | [the-wheat-sea](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/225-the-wheat-sea.md) |
 | 收割 · The Harvest | [the-harvest](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/226-the-harvest.md) |
 | 囤 · The Silo | [the-silo](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/227-the-silo.md) |
-| 磨 · The Mill | [the-mill](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/228-the-mill.md) |每一章对应游戏的章节走法：
+| 磨 · The Mill | [the-mill](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/228-the-mill.md) |
+| 面团 · The Dough | [the-dough](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/229-the-dough.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
