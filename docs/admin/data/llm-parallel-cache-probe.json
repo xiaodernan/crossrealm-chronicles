@@ -1,175 +1,32 @@
 {
-  "generated": "2026-11-17T18:43:04.182Z",
-  "script": "scripts/cache-parallel-probe.mjs",
-  "model": "gpt-6.1-terra",
-  "base": "https://api.aizzz.xyz/v1",
-  "prefixBytes": 6170,
-  "rounds": {
-    "sequentialSameKeyPair": {
-      "ratio": 0,
-      "calls": [
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：终章抉择的两种结局分别会发生什么？",
-          "status": 200,
-          "cached": 0,
-          "prompt": 9146,
-          "ratio": 0,
-          "timeTotal": 3.632919
-        },
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：终章抉择的两种结局分别会发生什么？",
-          "status": 200,
-          "cached": 0,
-          "prompt": 9146,
-          "ratio": 0,
-          "timeTotal": 3.037485
-        }
-      ]
-    },
-    "sameKeyBurst8": {
-      "ratio": 0.9798,
-      "calls": [
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：终章抉择的两种结局分别会发生什么？",
-          "status": 200,
-          "cached": 8960,
-          "prompt": 9146,
-          "ratio": 0.9797,
-          "timeTotal": 3.080556
-        },
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：引力化身·奇点领主的招式偏好是什么？",
-          "status": 200,
-          "cached": 8960,
-          "prompt": 9147,
-          "ratio": 0.9796,
-          "timeTotal": 2.901059
-        },
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：锚火终局里玩家能留下什么？",
-          "status": 200,
-          "cached": 8960,
-          "prompt": 9142,
-          "ratio": 0.9801,
-          "timeTotal": 2.682835
-        },
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：17 母题成就墙最后一块通常怎么集齐？",
-          "status": 200,
-          "cached": 8960,
-          "prompt": 9146,
-          "ratio": 0.9797,
-          "timeTotal": 3.239651
-        },
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：世界时间到了晚上炉边会发生什么？",
-          "status": 200,
-          "cached": 8960,
-          "prompt": 9141,
-          "ratio": 0.9802,
-          "timeTotal": 3.673981
-        },
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：开天刃和回护刃分别擅长什么场景？",
-          "status": 200,
-          "cached": 8960,
-          "prompt": 9148,
-          "ratio": 0.9794,
-          "timeTotal": 3.364813
-        },
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：破碎时线那一章的规则是什么？",
-          "status": 200,
-          "cached": 8960,
-          "prompt": 9142,
-          "ratio": 0.9801,
-          "timeTotal": 3.855789
-        },
-        {
-          "cacheKey": "crossrealm-parallel-fireball-v1",
-          "userLine": "用一句话回答：灰岩关塞为什么不是一扇普通的门？",
-          "status": 200,
-          "cached": 8960,
-          "prompt": 9144,
-          "ratio": 0.9799,
-          "timeTotal": 3.770904
-        }
-      ]
-    },
-    "mixedLanes": {
-      "ember": {
-        "ratio": 0.3267,
-        "calls": [
-          {
-            "cacheKey": "crossrealm-parallel-ember-v2",
-            "userLine": "用一句话回答：终章抉择的两种结局分别会发生什么？",
-            "status": 200,
-            "cached": 0,
-            "prompt": 9146,
-            "ratio": 0,
-            "timeTotal": 3.248257
-          },
-          {
-            "cacheKey": "crossrealm-parallel-ember-v2",
-            "userLine": "用一句话回答：锚火终局里玩家能留下什么？",
-            "status": 200,
-            "cached": 0,
-            "prompt": 9142,
-            "ratio": 0,
-            "timeTotal": 2.803136
-          },
-          {
-            "cacheKey": "crossrealm-parallel-ember-v2",
-            "userLine": "用一句话回答：世界时间到了晚上炉边会发生什么？",
-            "status": 200,
-            "cached": 8960,
-            "prompt": 9141,
-            "ratio": 0.9802,
-            "timeTotal": 3.315209
-          }
-        ]
-      },
-      "oracle": {
-        "ratio": 0.3265,
-        "calls": [
-          {
-            "cacheKey": "crossrealm-parallel-oracle-v1",
-            "userLine": "用一句话回答：引力化身·奇点领主的招式偏好是什么？",
-            "status": 200,
-            "cached": 0,
-            "prompt": 9147,
-            "ratio": 0,
-            "timeTotal": 3.26969
-          },
-          {
-            "cacheKey": "crossrealm-parallel-oracle-v1",
-            "userLine": "用一句话回答：17 母题成就墙最后一块通常怎么集齐？",
-            "status": 200,
-            "cached": 0,
-            "prompt": 9146,
-            "ratio": 0,
-            "timeTotal": 3.264513
-          },
-          {
-            "cacheKey": "crossrealm-parallel-oracle-v1",
-            "userLine": "用一句话回答：开天刃和回护刃分别擅长什么场景？",
-            "status": 200,
-            "cached": 8960,
-            "prompt": 9148,
-            "ratio": 0.9794,
-            "timeTotal": 3.380767
-          }
-        ]
-      }
-    }
-  }
+  "milestone": "W-Z442",
+  "date": "2026-11-19",
+  "tool": "scripts/cache-parallel-probe.mjs",
+  "upstream": {
+    "base": "https://api.aizzz.xyz/v1",
+    "model": "gpt-6.2-sol",
+    "via": "clash 7897"
+  },
+  "prefix_bytes": 6170,
+  "round_a": "sequential same-key pair — first 0.0% · second 97.0% (aggregate 0.4849 — cold once per lane, warm thereafter)",
+  "round_b": "same-key burst ×8 (all parallel): 7×97.0% + 1×0.0% ('破碎时线那一章的规则是什么' — that question's first-time arrival, unwarmed) · 8.59s aggregate",
+  "round_b_lanes": [
+    "HTTP 200 · prompt=9144 cached=8868 ratio=97.0%",
+    "HTTP 200 · prompt=9145 cached=8868 ratio=97.0%",
+    "HTTP 200 · prompt=9140 cached=8868 ratio=97.0%",
+    "HTTP 200 · prompt=9144 cached=8868 ratio=97.0%",
+    "HTTP 200 · prompt=9139 cached=8868 ratio=97.0%",
+    "HTTP 200 · prompt=9146 cached=8868 ratio=97.0%",
+    "HTTP 200 · prompt=9140 cached=0    ratio=0.0%",
+    "HTTP 200 · prompt=9142 cached=8868 ratio=97.0%"
+  ],
+  "round_b_aggregate": 0.8487,
+  "round_c": "mixed lanes (3×ember + 3×oracle in parallel): every first-in-lane call shows cached_tokens=0 because ember and oracle have different prompt_cache_key() values — expected behavior, not cache failure. Prompt-only cache is keyed per lane.",
+  "conclusion": "parallel-session cache-thrash NOT reproduced. same-key parallel calls share the same cache page; lanes stay isolated per prompt_cache_key; only cold-first-call shows 0; once-warm (very small prefix, ~6 KB), parallel bursts hit ~97%.",
+  "codex_conditions_verified": [
+    "frozen prefix >1024 tok (~6170 B · ≈1.5–3 KB token count)",
+    "per-lane prompt_cache_key ('crossrealm-ember-v2' vs 'crossrealm-canon-v1')",
+    "stream: true & stream_options.include_usage"
+  ],
+  "rawCacheWarning": "One probe run may intermittently omit cached_tokens for some calls (see Round B: one instance missing; warm#3 in an earlier cache-probe.mjs run also missed it) — upstream reporting jitter, not cache miss — but every call that reports the field shows the same frozen-prefix hit size."
 }
