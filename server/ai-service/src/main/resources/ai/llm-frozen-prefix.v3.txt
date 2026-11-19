@@ -369,6 +369,7 @@ End of frozen digest.
 225 · 麦浪
 226 · 收割
 227 · 囤
+228 · 磨
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

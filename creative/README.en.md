@@ -275,7 +275,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Grain Filling | [the-grain-filling](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/224-the-grain-filling.md) |
 | The Wheat Sea | [the-wheat-sea](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/225-the-wheat-sea.md) |
 | The Harvest | [the-harvest](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/226-the-harvest.md) |
-| The Silo | [the-silo](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/227-the-silo.md) |Chapter → game-chapter mapping:
+| The Silo | [the-silo](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/227-the-silo.md) |
+| The Mill | [the-mill](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/228-the-mill.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
