@@ -146,6 +146,9 @@ services:
       # 启动即热身：每个 lane 发一小个请求，把上游 prefix 缓存铺满（每 lane ~9K token）。
       # 本地默认 true；CI/沙箱建议显式传 false（无 API Key 时自动跳过）。
       LLM_WARMUP_ON_BOOT: ${LLM_WARMUP_ON_BOOT:-true}
+      # 容器 DNS 解析不了 api.aizzz.xyz 时，指向宿主机上的 Clash 混合端口（如 http://host.docker.internal:7897）。
+      # 传入后 ai-service 只让「唯一出口」HttpLlmTransport 走 CONNECT 隧道；进程内 HTTP 不受影响。
+      LLM_PROXY_URL: ${LLM_PROXY_URL:-}
     depends_on:
       config:
         condition: service_healthy

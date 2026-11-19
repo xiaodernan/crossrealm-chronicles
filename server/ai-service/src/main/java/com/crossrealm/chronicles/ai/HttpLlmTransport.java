@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -30,18 +32,64 @@ import org.springframework.stereotype.Component;
  * {@code chat.completion} JSON（内容拼进 message.content，usage 原样挂到根对象）；
  * 下游 LlmClient / 熔断器 / 缓存完全不感知 SSE。若上游忽略 stream 标记直接回普通 JSON，
  * 原样透传。这样既满足「wkapi 控制台只显示流式调用」的调度口径，又不让解析逻辑扩散到链路各处。
+ *
+ * <p><b>代理口径（W-Z475 · 2026-11-19）</b>：本类读一次环境变量 {@code LLM_PROXY_URL}
+ * （形如 {@code http://127.0.0.1:7897} 或裸 {@code 127.0.0.1:7897}）。设了且能解析出 host:port，
+ * JDK HttpClient 就用 {@link ProxySelector#of} 走 CONNECT 隧道——给「ai-service 容器内 DNS
+ * 解析不了 api.aizzz.xyz、直连被 Cloudflare 边缘按地区拒（403）」这类宿主提供一条
+ * 指向本机 Clash 混合端口的出口。不设、或解析不出，行为与从前逐字节一致（无代理）。
+ * Eureka/Config 等进程内 HTTP 不经过本类，不会被代理影响。日志只打 host:port，不含任何凭据。
  */
 @Component
 public class HttpLlmTransport implements LlmTransport {
 
-    private static final HttpClient CLIENT = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(5))
-            // W-Z-缓存修复：强制 HTTP/1.1。实测发现上游(wkapi.pro / Cloudflare)对 JDK 默认的
-            // HTTP/2 请求不回显 cached_tokens、且控制台归类为「非流」；改用 HTTP/1.1 后同一请求
-            // 立刻命中上游 prompt-cache（cached_tokens≈4800），与用户观察到的「流=高命中」一致。
-            // 单条 POST 用不到 HTTP/2 的多路复用，HTTP/1.1 + keep-alive 连接池等价且无兼容坑。
-            .version(HttpClient.Version.HTTP_1_1)
-            .build();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpLlmTransport.class);
+
+    private static final HttpClient CLIENT = buildClient();
+
+    /** 解析 LLM_PROXY_URL → InetSocketAddress；解析失败/未设置返回 null（= 直连）。包内静态、零网络，单测可覆盖。 */
+    static InetSocketAddress resolveProxy() {
+        return parseProxy(System.getenv("LLM_PROXY_URL"));
+    }
+
+    static InetSocketAddress parseProxy(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+        String s = raw.trim();
+        try {
+            URI u = URI.create(s);
+            String host = u.getHost();
+            int port = u.getPort();
+            if (host == null || host.isBlank()) {
+                int i = s.lastIndexOf(':');
+                if (i <= 0 || i == s.length() - 1) return null;
+                host = s.substring(0, i).trim();
+                int scheme = host.indexOf("://");
+                if (scheme >= 0) host = host.substring(scheme + 3);
+                port = Integer.parseInt(s.substring(i + 1).trim());
+            }
+            if (host.isBlank() || port <= 0 || port > 65535) return null;
+            return new InetSocketAddress(host, port);
+        } catch (Throwable t) {
+            LOG.warn("ai.proxy.invalid LLM_PROXY_URL (ignored, direct line)");
+            return null;
+        }
+    }
+
+    private static HttpClient buildClient() {
+        InetSocketAddress proxy = resolveProxy();
+        HttpClient.Builder b = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(5))
+                .version(HttpClient.Version.HTTP_1_1);
+        if (proxy != null) {
+            b.proxy(ProxySelector.of(proxy));
+            LOG.info("ai.proxy.enabled host={} port={}", proxy.getHostString(), proxy.getPort());
+        }
+        // W-Z-缓存修复：强制 HTTP/1.1。实测发现上游(wkapi.pro / Cloudflare)对 JDK 默认的
+        // HTTP/2 请求不回显 cached_tokens、且控制台归类为「非流」；改用 HTTP/1.1 后同一请求
+        // 立刻命中上游 prompt-cache（cached_tokens≈4800），与用户观察到的「流=高命中」一致。
+        // 单条 POST 用不到 HTTP/2 的多路复用，HTTP/1.1 + keep-alive 连接池等价且无兼容坑。
+        return b.build();
+    }
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
