@@ -311,7 +311,8 @@ creative/music/soundtrack.html
 | 小寒 · Minor Cold | [minor-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/262-minor-cold.md) |
 | 大寒 · Great Cold | [great-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/263-great-cold.md) |
 | 立春 · Beginning of Spring | [beginning-of-spring](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/264-beginning-of-spring.md) |
-| 雨水 · Rain Water | [rain-water](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/265-rain-water.md) |每一章对应游戏的章节走法：
+| 雨水 · Rain Water | [rain-water](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/265-rain-water.md) |
+| 惊蛰 · Awakening of Insects | [awakening-of-insects](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/266-awakening-of-insects.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

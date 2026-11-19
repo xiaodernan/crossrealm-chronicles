@@ -13827,6 +13827,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and sixty-five overall · the seven-hundred-and-fourth year, fifty-fifth part — Rain Water.)*
 
+# source: creative/novel/en/266-awakening-of-insects.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Fifty-Sixth Volume — Awakening of Insects
+
+---
+
+## Two Hundred and Sixty-Six: Awakening of Insects
+
+The second week after spring begins — Wednesday — morning — the fire burned.
+
+A-Shi stood at the doorway — there was a sound in the sky — as if something had been stirred awake — he said: “ — the thunder stirs —” — his mother said: “ — the thunder stirs —” — the fire burned — A-Shi went out — he walked into the yard — the snow had melted — the ground had softened — the grass was covered with a thin layer of green — he said: “ — the grass is green —” — his mother said: “ — the grass is green —” — the fire burned — after a while — there was a smell of soil in the wind — and insects — A-Shi crouched down — he looked — he said: “ — the insects have stirred —” — his mother said: “ — the insects have stirred —” — the fire burned — A-Shi looked again — beneath the roots of the grass — he said: “ — everything is alive —” — his mother said: “ — everything is alive —” — his mother said: “ — the stove is still bright —” — A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Awakening of insects.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and sixty-six overall · the seven-hundred-and-fourth year, fifty-sixth part — Awakening of Insects.)*
+
 # source: creative/novel/en/27-the-last-persimmon.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -30679,6 +30710,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百六十五卷 · 卷二十之五十五 · 第七百零四年 · 雨水）*
+
+# source: creative/novel/266-惊蛰.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第五十六卷 —— 惊蛰
+
+---
+
+## 二百六十六 · 惊蛰
+
+立春后第二周——周三——早上——灶火燃着。
+
+阿石站在门口——天上有响——好像什么醒了——他说「——雷动了——」——母亲说「——雷动了——」——灶火燃着——阿石出去——他走到院子里——雪融了——地松了——草一层薄绿——他说「——草绿了——」——母亲说「——草绿了——」——灶火燃着——过了一会——风里有土腥——有了虫——阿石蹲下来——看——他说「——虫动了——」——母亲说「——虫动了——」——灶火燃着——阿石又看——草根底——他说「——都活了——」——母亲说「——都活了——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+惊蛰。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百六十六卷 · 卷二十之五十六 · 第七百零四年 · 惊蛰）*
 
 # source: creative/novel/27-归途之共.md
 # 《跨界纪事：锚火守夜人》

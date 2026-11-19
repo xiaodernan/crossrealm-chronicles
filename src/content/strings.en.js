@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and sixty-five volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and sixty-six volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 265 volumes of the canon, fully readable
+· Canon Library — 266 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 265-volume index',
-  hm_body_codex: `Codex — 265 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 266-volume index',
+  hm_body_codex: `Codex — 266 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3413,6 +3413,7 @@ hm_title_codex: 'Codex · the 265-volume index',
 263 · Great Cold — The forty-seventh week after the spring equinox — Monday — early morning — the fire burned; A-Shi stood at the doorway — the sun rose late — the deep of the cold was at hand — he said: “ — great cold —”; his mother said: “ — great cold —” — he walked into the yard — a white layer of frost lay on the ground — he said: “ — the ground is iced —”; his mother said: “ — the ground is iced —” — he stepped on it once — the ice broke — he said: “ — the ice has broken —”; his mother said: “ — the ice has broken —” — after a while — A-Shi came back — he carried an armful of firewood — he said: “ — winter has come to its limit —”; his mother said: “ — winter has come to its limit —” — his mother said: “ — don’t let the stove go out —”; A-Shi said: “ — don’t let the stove go out —”. Volume XX, fifty-third part.
 264 · Beginning of Spring — The first week after the spring equinox — Tuesday — morning — the fire burned; A-Shi stood at the doorway — the wind had softened — he said: “ — spring begins —”; his mother said: “ — spring begins —” — he walked to the ridge of the field — there were traces on the ground — small sprouts — he said: “ — the ground has come alive —”; his mother said: “ — the ground has come alive —” — after a while — the sun came out — it was a little warmer — A-Shi came back — he said: “ — it is a little warmer —”; his mother said: “ — it is a little warmer —” — his mother said: “ — a year has come full circle —”; A-Shi said: “ — a year has come full circle —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, fifty-fourth part — the year comes full circle.
 265 · Rain Water — The second day after spring begins — Wednesday — morning — the fire burned; A-Shi stood at the doorway — there was a softness in the sky — he said: “ — it is going to rain —”; his mother said: “ — it is going to rain —” — he walked into the yard — the sky had gone gray — he said: “ — the sky is gray —”; his mother said: “ — the sky is gray —” — after a while — the rain began to fall — fine and thin — he said: “ — it is raining —”; his mother said: “ — it is raining —” — the rain fell for a long time — the ground grew wet — A-Shi looked again — he said: “ — the ground is wet —”; his mother said: “ — the ground is wet —” — his mother said: “ — things are about to grow —”; A-Shi said: “ — things are about to grow —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, fifty-fifth part.
+266 · Awakening of Insects — The second week after spring begins — Wednesday — morning — the fire burned; A-Shi stood at the doorway — there was a sound in the sky — as if something had been stirred awake — he said: “ — the thunder stirs —”; his mother said: “ — the thunder stirs —” — he walked into the yard — the snow had melted — the ground had softened — the grass was covered with a thin layer of green — he said: “ — the grass is green —”; his mother said: “ — the grass is green —” — after a while — there was a smell of soil in the wind — and insects — A-Shi crouched down — he looked — he said: “ — the insects have stirred —”; his mother said: “ — the insects have stirred —” — A-Shi looked again — beneath the roots of the grass — he said: “ — everything is alive —”; his mother said: “ — everything is alive —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, fifty-sixth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
