@@ -277,7 +277,8 @@ creative/music/soundtrack.html
 | 磨 · The Mill | [the-mill](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/228-the-mill.md) |
 | 面团 · The Dough | [the-dough](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/229-the-dough.md) |
 | 蒸 · The Steam | [the-steam](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/230-the-steam.md) |
-| 热气 · The Steam Heat | [the-steam-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/231-the-steam-heat.md) |每一章对应游戏的章节走法：
+| 热气 · The Steam Heat | [the-steam-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/231-the-steam-heat.md) |
+| 破壳 · The Split | [the-split](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/232-the-split.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

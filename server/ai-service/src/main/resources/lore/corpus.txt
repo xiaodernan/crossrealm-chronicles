@@ -12608,6 +12608,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and thirty-one overall · the seven-hundred-and-third year, twentieth part — The Steam Heat.)*
 
+# source: creative/novel/en/232-the-split.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Twenty-First Volume — The Split
+
+---
+
+## Two Hundred and Thirty-Two: The Split
+
+The sixteenth week after the spring equinox — Monday — morning — the fire burned.
+
+A-Shi stood at the doorway — the steamed buns were still hot — A-Shi took one up — he looked — he saw the shell of the bun — the shell was cracked — it had split along one seam — he said: “ — the shell split —” — his mother said: “ — the shell split —” — A-Shi pulled the bun apart — it came apart — inside — it was white — he gave half to his mother — the fire burned — his mother took it — she looked at it — she said: “ — it tastes good —” — A-Shi said: “ — it tastes good —” — the fire burned — the fire burned.
+
+The shell split.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and thirty-two overall · the seven-hundred-and-third year, twenty-first part — The Split.)*
+
 # source: creative/novel/en/24-beyond-the-threshold.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -28404,6 +28435,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百三十一卷 · 卷二十之二十 · 第七百零三年 · 热气）*
+
+# source: creative/novel/232-破壳.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第二十一卷 —— 破壳
+
+---
+
+## 二百三十二 · 破壳
+
+立春后第十六周——周一——早上——灶火燃着。
+
+阿石站在门口——馒头还热——阿石拿起一个——他看——他看见了馒头的壳——壳裂着——裂开了一道——他说「——破壳——」——母亲说「——破壳——」——阿石把馒头掰开——掰开了——里面——里面是白的——他把一半给了母亲——灶火燃着——母亲接了——她看着——她说「——好吃——」——阿石说「——好吃——」——灶火燃着——灶火燃着。
+
+破壳。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百三十二卷 · 卷二十之二十一 · 第七百零三年 · 破壳）*
 
 # source: creative/novel/24-归途再启.md
 # 《跨界纪事：锚火守夜人》

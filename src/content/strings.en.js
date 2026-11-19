@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and thirty-one volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and thirty-two volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 231 volumes of the canon, fully readable
+· Canon Library — 232 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 231-volume index',
-  hm_body_codex: `Codex — 231 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 232-volume index',
+  hm_body_codex: `Codex — 232 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3379,6 +3379,7 @@ hm_title_codex: 'Codex · the 231-volume index',
 229 · The Dough — The thirteenth week after the spring equinox — Friday — morning — the fire burned; A-Shi stood at the doorway — his mother poured the flour into the bowl — she added water — she added a little salt — she began to knead — the flour became dough — he said: “ — the dough —”; she covered the dough — she said: “ — wait a while —”. Volume XX, eighteenth part.
 230 · The Steam — The fourteenth week after the spring equinox — Saturday — morning — the fire burned; A-Shi stood at the doorway — his mother was already at the fire — the water had boiled — she placed the buns into the steamer — she covered it — A-Shi smelled — there was the scent of dough — she lifted the lid — she said: “ — ready —” — the buns came out of the steamer. Volume XX, nineteenth part.
 231 · The Steam Heat — The fifteenth week after the spring equinox — Sunday — morning — the fire burned; A-Shi stood at the doorway — the steamed buns were still hot — he took one up — he bit into it — he waited a moment — he split the bun in two — he gave half to his mother — his mother took it. Volume XX, twentieth part.
+232 · The Split — The sixteenth week after the spring equinox — Monday — morning — the fire burned; A-Shi stood at the doorway — the steamed buns were still hot — A-Shi took one up — he saw the shell was cracked — he said: “ — the shell split —”; his mother said: “ — the shell split —” — A-Shi pulled the bun apart — inside it was white — he gave half to his mother — she said: “ — it tastes good —”. Volume XX, twenty-first part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
