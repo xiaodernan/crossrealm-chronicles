@@ -298,7 +298,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/247-grain-rain.md) |
 | Wheat Waves | [wheat-waves](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/248-wheat-waves.md) |
 | Grain in Ear | [grain-in-ear](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/249-grain-in-ear.md) |
-| Summer Solstice | [summer-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/250-summer-solstice.md) |Chapter → game-chapter mapping:
+| Summer Solstice | [summer-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/250-summer-solstice.md) |
+| Minor Heat | [minor-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/251-minor-heat.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

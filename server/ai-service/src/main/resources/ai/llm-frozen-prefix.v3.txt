@@ -392,6 +392,7 @@ End of frozen digest.
 248 · 麦浪
 249 · 芒种
 250 · 夏至
+251 · 小暑
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

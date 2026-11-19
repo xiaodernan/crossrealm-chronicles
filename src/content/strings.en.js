@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and fifty volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and fifty-one volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 250 volumes of the canon, fully readable
+· Canon Library — 251 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 250-volume index',
-  hm_body_codex: `Codex — 250 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 251-volume index',
+  hm_body_codex: `Codex — 251 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3398,6 +3398,7 @@ hm_title_codex: 'Codex · the 250-volume index',
 248 · Wheat Waves — The thirty-second week after the spring equinox — Sunday — morning — the fire burned; A-Shi stood at the doorway — the field was wheat — the wheat bent in the wind — he said: “ — wheat waves —”; his mother said: “ — wheat waves —” — he walked to the ridge of the field — he watched layer upon layer lifting — he ran his hand over an ear of wheat — the ear was full — he said: “ — it is full —”; his mother said: “ — it is full —”. Volume XX, thirty-eighth part.
 249 · Grain in Ear — The thirty-third week after the spring equinox — Monday — morning — the fire burned; A-Shi stood at the doorway — the field was wheat — the awns were out — he said: “ — grain in ear —”; his mother said: “ — grain in ear —” — he walked to the ridge of the field — he bent down — the ears were thick with awns — he said: “ — the awns are out —”; his mother said: “ — the awns are out —” — after a while — the wind passed — the wheat lifted in rippling rows — he straightened up — he dusted his hands — a broken awn clung to them — very fine — he said: “ — a prick —”; his mother said: “ — a prick —”. Volume XX, thirty-ninth part.
 250 · Summer Solstice — The thirty-fourth week after the spring equinox — Tuesday — morning — the fire burned; A-Shi stood at the doorway — the day was long — the shadows of clouds moved slowly — he said: “ — summer solstice —”; his mother said: “ — summer solstice —” — he walked into the yard — he looked at the sky — the sun traveled its wheel slowly — he said: “ — the longest day —”; his mother said: “ — the longest day —” — his mother called from the kitchen: “ — grain in ear has passed —”; A-Shi said: “ — grain in ear has passed —” — his mother said: “ — the solstice has come —”; A-Shi said: “ — the solstice has come —” — after a while — the clouds thinned — the wind fell still — the sun’s shadow edged eastward — he said: “ — the sun is turning back —”; his mother said: “ — the sun is turning back —”. Volume XX, fortieth part.
+251 · Minor Heat — The thirty-fifth week after the spring equinox — Thursday — noon — the fire burned; A-Shi stood at the doorway — the noon sun — the heat — he said: “ — minor heat —”; his mother said: “ — minor heat —” — he walked to the well — the well water was cool — he said: “ — the well water is cool —”; his mother said: “ — the well water is cool —” — he drew a jug of water — he came back — he said: “ — the water is cool —”; his mother said: “ — the water is cool —” — after a while — a wave of hot wind passed and stopped — A-Shi soaked his handkerchief in the water — he draped it over his head — he said: “ — a little cover —”; his mother said: “ — a little cover —”. Volume XX, forty-first part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
