@@ -13460,6 +13460,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and fifty-five overall · the seven-hundred-and-third year, forty-fifth part — Autumn Equinox.)*
 
+# source: creative/novel/en/256-cold-dew.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Forty-Sixth Volume — Cold Dew
+
+---
+
+## Two Hundred and Fifty-Six: Cold Dew
+
+The fortieth week after the spring equinox — Tuesday — early morning — the fire burned.
+
+A-Shi stood at the doorway — the dew on the grass shone again — the wind had cooled — he said: “ — cold dew —” — his mother said: “ — cold dew —” — the fire burned — A-Shi went out — he walked into the yard — he looked at the grass — there was dew on it — it shone — the wind passed — the dew was gone — he said: “ — the dew is cold —” — his mother said: “ — the dew is cold —” — the fire burned — after a while — a sparrow called once — it flew away — southward — he said: “ — the sparrow has gone —” — his mother said: “ — the sparrow has gone —” — the fire burned — his mother said: “ — the nights are long —” — A-Shi said: “ — the nights are long —” — his mother said: “ — autumn has deepened —” — A-Shi said: “ — autumn has deepened —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Cold dew.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and fifty-six overall · the seven-hundred-and-third year, forty-sixth part — Cold Dew.)*
+
 # source: creative/novel/en/26-under-the-candle-flame.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -30000,6 +30031,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百五十五卷 · 卷二十之四十五 · 第七百零三年 · 秋分）*
+
+# source: creative/novel/256-寒露.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第四十六卷 —— 寒露
+
+---
+
+## 二百五十六 · 寒露
+
+立春后第四十周——周二——清早——灶火燃着。
+
+阿石站在门口——草上的露又亮了——风里凉——他说「——寒露——」——母亲说「——寒露——」——灶火燃着——阿石出去——他走到院子里——他看草——草上有露——亮——风过了——露不见了——他说「——露冷了——」——母亲说「——露冷了——」——灶火燃着——过了一会——雀儿叫了一声——飞走了——往南——他说「——雀儿走了——」——母亲说「——雀儿走了——」——灶火燃着——母亲说「——夜长了——」——阿石说「——夜长了——」——母亲说「——秋深了——」——阿石说「——秋深了——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+寒露。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百五十六卷 · 卷二十之四十六 · 第七百零三年 · 寒露）*
 
 # source: creative/novel/26-烛火之下.md
 # 《跨界纪事：锚火守夜人》

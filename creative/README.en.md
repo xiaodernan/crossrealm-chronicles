@@ -303,7 +303,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Major Heat | [major-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/252-major-heat.md) |
 | Limit of Heat | [limit-of-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/253-limit-of-heat.md) |
 | White Dew | [white-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/254-white-dew.md) |
-| Autumn Equinox | [autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/255-autumn-equinox.md) |Chapter → game-chapter mapping:
+| Autumn Equinox | [autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/255-autumn-equinox.md) |
+| Cold Dew | [cold-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/256-cold-dew.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
