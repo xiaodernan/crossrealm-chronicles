@@ -314,7 +314,8 @@ creative/music/soundtrack.html
 | 雨水 · Rain Water | [rain-water](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/265-rain-water.md) |
 | 惊蛰 · Awakening of Insects | [awakening-of-insects](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/266-awakening-of-insects.md) |
 | 春分 · Spring Equinox | [spring-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/267-spring-equinox.md) |
-| 谷雨 · Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/268-grain-rain.md) |每一章对应游戏的章节走法：
+| 谷雨 · Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/268-grain-rain.md) |
+| 小满 · Grain Buds | [grain-buds](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/269-grain-buds.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

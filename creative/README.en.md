@@ -316,7 +316,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Rain Water | [rain-water](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/265-rain-water.md) |
 | Awakening of Insects | [awakening-of-insects](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/266-awakening-of-insects.md) |
 | Spring Equinox | [spring-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/267-spring-equinox.md) |
-| Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/268-grain-rain.md) |Chapter → game-chapter mapping:
+| Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/268-grain-rain.md) |
+| Grain Buds | [grain-buds](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/269-grain-buds.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

@@ -13920,6 +13920,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and sixty-eight overall · the seven-hundred-and-fourth year, fifty-eighth part — Grain Rain.)*
 
+# source: creative/novel/en/269-grain-buds.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Fifty-Ninth Volume — Grain Buds
+
+---
+
+## Two Hundred and Sixty-Nine: Grain Buds
+
+The fifth day after summer begins — Wednesday — morning — the fire burned.
+
+A-Shi stood at the doorway — there were clouds in the sky — white clouds — he said: “ — grain buds —” — his mother said: “ — grain buds —” — the fire burned — A-Shi went out — he walked into the yard — the wheat ears were filled — but not yet full — when the wind passed — the ears swayed — he said: “ — the wheat ears are filled —” — his mother said: “ — the wheat ears are filled —” — the fire burned — after a while — A-Shi crouched down — he looked at the wheat waves — he said: “ — not yet full — it needs great fullness —” — his mother said: “ — not yet full — it needs great fullness —” — the fire burned — A-Shi looked again — a little farther — there was green at the foot of the hill — and water by the fields — he said: “ — there is water by the fields —” — his mother said: “ — there is water by the fields —” — his mother said: “ — filled but not full — that is the soundest state —” — A-Shi said: “ — filled but not full — that is the soundest state —” — his mother said: “ — the stove is still bright —” — A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Grain buds.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and sixty-nine overall · the seven-hundred-and-fourth year, fifty-ninth part — Grain Buds.)*
+
 # source: creative/novel/en/27-the-last-persimmon.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -30865,6 +30896,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百六十八卷 · 卷二十之五十八 · 第七百零四年 · 谷雨）*
+
+# source: creative/novel/269-小满.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第五十九卷 —— 小满
+
+---
+
+## 二百六十九 · 小满
+
+立夏后第五天——周三——早上——灶火燃着。
+
+阿石站在门口——天上有云——白云——他说「——小满——」——母亲说「——小满——」——灶火燃着——阿石出去——他走到院子里——麦穗饱了——还没满——风过的时候——穗头摇——他说「——麦穗饱了——」——母亲说「——麦穗饱了——」——灶火燃着——过了一会——阿石蹲下去——看麦浪——他说「——还没满——要大满——」——母亲说「——还没满——要大满——」——灶火燃着——阿石又看——远了一点——山边有一点绿——田边有水——他说「——田边有水——」——母亲说「——田边有水——」——母亲说「——饱而未满——才最稳妥——」——阿石说「——饱而未满——才最稳妥——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+小满。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百六十九卷 · 卷二十之五十九 · 第七百零四年 · 小满）*
 
 # source: creative/novel/27-归途之共.md
 # 《跨界纪事：锚火守夜人》
