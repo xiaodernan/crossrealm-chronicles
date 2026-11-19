@@ -13553,6 +13553,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and fifty-eight overall · the seven-hundred-and-third year, forty-eighth part — Start of Winter.)*
 
+# source: creative/novel/en/259-light-snow.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Forty-Ninth Volume — Light Snow
+
+---
+
+## Two Hundred and Fifty-Nine: Light Snow
+
+The forty-third week after the spring equinox — Friday — morning — the fire burned.
+
+A-Shi stood at the doorway — the sky had been gray for a whole day — he said: “ — it is going to snow —” — his mother said: “ — it is going to snow —” — the fire burned — A-Shi went out — he looked up — the clouds had thickened — he said: “ — it is coming —” — his mother said: “ — it is coming —” — the fire burned — after a while — grains of snow began to fall — they made no sound — but you could see them — he said: “ — light snow —” — his mother said: “ — light snow —” — the fire burned — A-Shi reached out — the grains of snow fell into his palm — they melted — he said: “ — it is cold —” — his mother said: “ — it is cold —” — the fire burned — his mother said: “ — winter has deepened —” — A-Shi said: “ — winter has deepened —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Light snow.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and fifty-nine overall · the seven-hundred-and-third year, forty-ninth part — Light Snow.)*
+
 # source: creative/novel/en/26-under-the-candle-flame.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -30186,6 +30217,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百五十八卷 · 卷二十之四十八 · 第七百零三年 · 立冬）*
+
+# source: creative/novel/259-小雪.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第四十九卷 —— 小雪
+
+---
+
+## 二百五十九 · 小雪
+
+立春后第四十三周——周五——早上——灶火燃着。
+
+阿石站在门口——天灰了一天——他说「——要下雪——」——母亲说「——要下雪——」——灶火燃着——阿石出去——他抬头——云厚了——他说「——要下了——」——母亲说「——要下了——」——灶火燃着——过了一会——雪粒子落了——听不见——但看见了——他说「——小雪——」——母亲说「——小雪——」——灶火燃着——阿石伸手——雪粒子落在手心——化了——他说「——凉了——」——母亲说「——凉了——」——灶火燃着——母亲说「——冬深了——」——阿石说「——冬深了——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+小雪。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百五十九卷 · 卷二十之四十九 · 第七百零三年 · 小雪）*
 
 # source: creative/novel/26-烛火之下.md
 # 《跨界纪事：锚火守夜人》

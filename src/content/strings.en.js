@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and fifty-eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and fifty-nine volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 258 volumes of the canon, fully readable
+· Canon Library — 259 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 258-volume index',
-  hm_body_codex: `Codex — 258 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 259-volume index',
+  hm_body_codex: `Codex — 259 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3406,6 +3406,7 @@ hm_title_codex: 'Codex · the 258-volume index',
 256 · Cold Dew — The fortieth week after the spring equinox — Tuesday — early morning — the fire burned; A-Shi stood at the doorway — the dew on the grass shone again — the wind had cooled — he said: “ — cold dew —”; his mother said: “ — cold dew —” — he walked into the yard — he looked at the grass — there was dew on it — the wind passed — the dew was gone — he said: “ — the dew is cold —”; his mother said: “ — the dew is cold —” — after a while — a sparrow called once — it flew away — southward — he said: “ — the sparrow has gone —”; his mother said: “ — the sparrow has gone —” — his mother said: “ — the nights are long —”; A-Shi said: “ — the nights are long —” — his mother said: “ — autumn has deepened —”; A-Shi said: “ — autumn has deepened —”. Volume XX, forty-sixth part.
 257 · Frost Descent — The forty-first week after the spring equinox — Wednesday — morning — the fire burned; A-Shi stood at the doorway — there was white frost on the grass — he said: “ — frost descent —”; his mother said: “ — frost descent —” — he walked into the yard — he looked at the grass — it was white — he reached out — the frost did not stick — he said: “ — it is white —”; his mother said: “ — it is white —” — after a while — the sun came out — the frost melted — the grass showed green — he said: “ — the frost has melted —”; his mother said: “ — the frost has melted —” — his mother said: “ — winter draws near —”; A-Shi said: “ — winter draws near —” — his mother said: “ — don’t let the stove go out —”; A-Shi said: “ — don’t let the stove go out —”. Volume XX, forty-seventh part.
 258 · Start of Winter — The forty-second week after the spring equinox — Thursday — early morning — the fire burned; A-Shi stood at the doorway — the wind was hard — the ground had cooled — he said: “ — start of winter —”; his mother said: “ — start of winter —” — he walked to the well — there was frost on the rim of the well — he said: “ — the well is rimmed with white —”; his mother said: “ — the well is rimmed with white —” — he came back — he carried an armful of firewood — he said: “ — winter has come —”; his mother said: “ — winter has come —” — his mother fed one more stick into the stove — the fire smiled — the fire burned — A-Shi said: “ — the firewood is plenty —”; his mother said: “ — the firewood is plenty —”. Volume XX, forty-eighth part.
+259 · Light Snow — The forty-third week after the spring equinox — Friday — morning — the fire burned; A-Shi stood at the doorway — the sky had been gray for a whole day — he said: “ — it is going to snow —”; his mother said: “ — it is going to snow —” — he looked up — the clouds had thickened — he said: “ — it is coming —”; his mother said: “ — it is coming —” — after a while — grains of snow began to fall — they made no sound — he said: “ — light snow —”; his mother said: “ — light snow —” — he reached out — the grains of snow fell into his palm — they melted — he said: “ — it is cold —”; his mother said: “ — it is cold —” — his mother said: “ — winter has deepened —”; A-Shi said: “ — winter has deepened —”. Volume XX, forty-ninth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,

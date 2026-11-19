@@ -304,7 +304,8 @@ creative/music/soundtrack.html
 | 秋分 · Autumn Equinox | [autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/255-autumn-equinox.md) |
 | 寒露 · Cold Dew | [cold-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/256-cold-dew.md) |
 | 霜降 · Frost Descent | [frost-descent](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/257-frost-descent.md) |
-| 立冬 · Start of Winter | [start-of-winter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/258-start-of-winter.md) |每一章对应游戏的章节走法：
+| 立冬 · Start of Winter | [start-of-winter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/258-start-of-winter.md) |
+| 小雪 · Light Snow | [light-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/259-light-snow.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
