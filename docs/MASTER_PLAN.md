@@ -20,6 +20,9 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-19 · W-Z432 第二百三十六卷入典《烬 / The Ember》——卷二十之二十五 · 第七百零三年 · 烬**：第七百零三年——立春后第二十周——周五——夜里——灶火燃着——阿石站在门口——灶肚子里——只剩一圈灰——灰是红色的——中间——一颗——红得发亮——他蹲下去——他看——阿石说「——烬——」——母亲说「——烬——」——他说「——还亮——」——母亲说「——还亮——」——他看着——亮着——灶火燃着。
+> 交付：creative/novel/236-烬.md + en 孪生 236-the-ember.md；novella 236 × 2 = 472 模块（典籍馆现为 236 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**503 源**；**v3 冻结前缀含 236 条年表条目**；showcase feed 新增 W-Z432 实录。
+>
 > **2026-11-19 · W-Z431 上游模型迁移：gpt-6.1-terra → gpt-6.1-sol（上游 503「无可用渠道」触发）**
 > 背景：用户 2026-11-19 多次下达「现在大模型 API 已修改，记得换新的地址和秘钥——用这个新的」；复核发现：2026-11-19T05:24Z 起上游 `api.aizzz.xyz/v1/chat/completions` 返空 HTTP 503 · `分组 GPT特价 下模型 gpt-6.1-terra 无可用渠道`。直读 `/v1/models` 确认——上游已经不再提供 gpt-6.1-terra，当前提供 `codex-auto-review` · `gpt-5.6-terra/sol` · `gpt-6-sol/astra` · `gpt-6.1-sol` · `gpt-6.2-sol/astra`。关键确认：此 key 下 7 个候选模型均 HTTP 200（stream+include_usage）。
 > 决策：迁移到 `gpt-6.1-sol`（与 terra 同属 GPT-6 6.1 代的服务层，.cache_control/stream 形状不变）。
