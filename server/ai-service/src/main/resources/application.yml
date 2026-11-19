@@ -16,7 +16,7 @@ spring:
 # 绝不落到配置仓库、镜像层、日志或任何响应体里。
 ai-service:
   base-url: "${LLM_BASE_URL:https://api.aizzz.xyz/v1}"
-  model: "${LLM_MODEL:gpt-6.1-terra}"
+  model: "${LLM_MODEL:gpt-6.1-sol}"
   api-key: "${LLM_API_KEY:}"
   timeout: 20s
   max-retries: 2

@@ -26,7 +26,7 @@ try {
 } catch { /* fall back to process env */ }
 const KEY = env.LLM_API_KEY || process.env.LLM_API_KEY;
 const BASE = (env.LLM_BASE_URL || process.env.LLM_BASE_URL || 'https://api.aizzz.xyz/v1').replace(/\/+$/, '');
-const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6.1-terra';
+const MODEL = env.LLM_MODEL || process.env.LLM_MODEL || 'gpt-6.1-sol';
 if (!KEY) { console.error('missing LLM_API_KEY'); process.exit(1); }
 
 const prefixFile = process.env.LLM_PREFIX_FILE || 'llm-frozen-prefix.txt';

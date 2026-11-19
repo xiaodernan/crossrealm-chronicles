@@ -1,7 +1,7 @@
 {
   "schema": "crossrealm.oracle-v4-live-probe.v1",
-  "generatedAt": "2026-11-18T22:55:27.875Z",
-  "model": "gpt-6.1-terra",
+  "generatedAt": "2026-11-19T05:31:30.155Z",
+  "model": "gpt-6.1-sol",
   "base": "https://api.aizzz.xyz/v1",
   "cacheKey": "crossrealm-canon-v1",
   "prefixBytes": 125153,
@@ -11,13 +11,13 @@
       "prompt": 47370,
       "cached": 2255,
       "ratio": 4.8,
-      "latencyMs": 4567
+      "latencyMs": 4234
     },
     {
       "prompt": 47370,
-      "cached": 44363,
-      "ratio": 93.7,
-      "latencyMs": 4622
+      "cached": 41994,
+      "ratio": 88.7,
+      "latencyMs": 4695
     }
   ]
 }

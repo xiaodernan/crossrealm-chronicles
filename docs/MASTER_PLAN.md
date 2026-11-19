@@ -20,6 +20,20 @@
 > **2026-11-18 · W-Z382 第193卷入典《白桦说话 / When the Birch Spoke》——卷十八之十四 · 第七百零二年 · 白桦说话**：立春后第四周——周二——晚上——灶火燃着——阿石坐在灯下——风从白桦那边来——白桦的叶子在风里响——他听——他听不懂——但他点头了——母亲睡着了——白桦继续响——火苗直着——阿石说「——我听见了」——白桦不说话了——灶火燃着。
 > 交付：creative/novel/193-白桦说话.md + en 孪生 193-when-the-birch-spoke.md；novella 193 × 2 = 386 模块（典籍馆现为 193 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**417 源**；**v3 冻结前缀含 193 条年表条目**；showcase feed 新增 W-Z381 + W-Z382 实录。
 >
+> **2026-11-19 · W-Z431 上游模型迁移：gpt-6.1-terra → gpt-6.1-sol（上游 503「无可用渠道」触发）**
+> 背景：用户 2026-11-19 多次下达「现在大模型 API 已修改，记得换新的地址和秘钥——用这个新的」；复核发现：2026-11-19T05:24Z 起上游 `api.aizzz.xyz/v1/chat/completions` 返空 HTTP 503 · `分组 GPT特价 下模型 gpt-6.1-terra 无可用渠道`。直读 `/v1/models` 确认——上游已经不再提供 gpt-6.1-terra，当前提供 `codex-auto-review` · `gpt-5.6-terra/sol` · `gpt-6-sol/astra` · `gpt-6.1-sol` · `gpt-6.2-sol/astra`。关键确认：此 key 下 7 个候选模型均 HTTP 200（stream+include_usage）。
+> 决策：迁移到 `gpt-6.1-sol`（与 terra 同属 GPT-6 6.1 代的服务层，.cache_control/stream 形状不变）。
+> 迁移面（全部完成）：
+> - `.env` `LLM_MODEL=gpt-6.1-sol`（本机 secret，不入库）
+> - `server/ai-service/src/main/resources/application.yml` 默认
+> - `server/config-server/.../ai-service.yml` config-server 默认
+> - `server/docker-compose.yml` `LLM_MODEL` default
+> - `.github/workflows/oracle-live-weekly.yml` LLM_MODEL 环境变量
+> - `scripts/cache-probe.mjs` · `oracle-cache-probe.mjs` · `oracle-v4-live-probe.mjs` · `llm-prefix-probe.mjs` · `cache-parallel-probe.mjs` · `admin-llm-analysis.mjs` · `oracle-log-archive.mjs` · 全部 default model
+> 实测：scripts/cache-probe.mjs 复跑 HTTP 200 · non-stream 无 cache 字段（与 terra 时代完全一致）；stream cold 有抖动，warm#2…#6 全部 cached=5066/5342 ≈ **94.8%** 恒定——与 gpt-6.1-terra 时代完全相符；warm#3 偶发缺 cached_tokens（与 terra 时代一致的上游抖动，不是缓存失效）。Admin 新增诚实卡 **meas_l29**（zh+en+html）；W-Z410/W-Z417 历史数字维持原状（当时实测事实不被重写）。
+> 未完成（Docker Desktop 仍崩）：`docker compose run --rm verify` 复跑 + Spring LLM live tests，等 Desktop 复活再跑。
+> 附注（同一探针，新模型）：scripts/oracle-v4-live-probe.mjs 复跑 HTTP 200 · prompt=47370 cached=2255→**41,994 (88.7%)**（cold→warm）；docs/admin/data/oracle-v4-live-probe-2026-11-19.json 已覆盖。
+>
 > **2026-11-19 · W-Z430 第二百三十五卷入典《灯芯 / The Wick》——卷二十之二十四 · 第七百零三年 · 灯芯**：第七百零三年——立春后第十九周——周四——晚上——灶火燃着——阿石站在门口——夜深了——灶肚子里——灶火燃着——她把灯芯挑了一挑——灯亮了——阿石说「——挑灯芯——」——母亲说「——挑灯芯——」——阿石看着——灯又亮了——他说「——我看书——」——母亲说「——你看书——」——灶火燃着——灯亮——阿石看书——灶火燃着。
 > 交付：creative/novel/235-灯芯.md + en 孪生 235-the-wick.md；novella 235 × 2 = 470 模块（典籍馆现为 235 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**501 源**；**v3 冻结前缀含 235 条年表条目**；showcase feed 新增 W-Z430 实录。
 >
