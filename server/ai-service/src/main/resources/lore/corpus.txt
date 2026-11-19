@@ -14039,6 +14039,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and seventy overall · the seven-hundred-and-fourth year, sixtieth part — Grain in Ear.)*
 
+# source: creative/novel/en/271-summer-solstice.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Sixty-First Volume — Summer Solstice
+
+---
+
+## Two Hundred and Seventy-One: Summer Solstice
+
+The thirteenth day after summer begins — Thursday — morning — the fire burned.
+
+A-Shi stood at the doorway — the sun was fiercest — the shadow was shortest — he said: “ — summer solstice —” — his mother said: “ — summer solstice —” — the fire burned — A-Shi went out — he walked into the yard — the wheat ears hung low — grain by grain gold — the hand clasped hot wind — he said: “ — it is nearly ripe —” — his mother said: “ — it is nearly ripe —” — the fire burned — after a while — A-Shi broke off an ear — he said: “ — this kernel is the fullest —” — his mother said: “ — this kernel is the fullest —” — the fire burned — his mother said: “ — the longest day of the year —” — A-Shi said: “ — the longest day of the year —” — his mother said: “ — the stove is still bright —” — A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Summer solstice.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventy-one overall · the seven-hundred-and-fourth year, sixty-first part — Summer Solstice.)*
+
 # source: creative/novel/en/28-the-new-sapling.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -31046,6 +31077,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百七十卷 · 卷二十之六十 · 第七百零四年 · 芒种）*
+
+# source: creative/novel/271-夏至.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第六十一卷 —— 夏至
+
+---
+
+## 二百七十一 · 夏至
+
+立夏后第十三天——周四——早上——灶火燃着。
+
+阿石站在门口——日头最毒——影子最短——他说「——夏至——」——母亲说「——夏至——」——灶火燃着——阿石出去——他走到院子里——麦穗垂头——一粒一粒金——沾手的是热风——他说「——快要熟了——」——母亲说「——快要熟了——」——灶火燃着——过了一会——阿石掰下一穗——说「——这一颗最饱——」——母亲说「——这一颗最饱——」——灶火燃着——母亲说「——白天最长的一天——」——阿石说「——白天最长的一天——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+夏至。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百七十一卷 · 卷二十之六十一 · 第七百零四年 · 夏至）*
 
 # source: creative/novel/28-新苗.md
 # 《跨界纪事：锚火守夜人》

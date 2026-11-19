@@ -412,6 +412,7 @@ End of frozen digest.
 268 · 谷雨
 269 · 小满
 270 · 芒种
+271 · 夏至
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
