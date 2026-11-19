@@ -12794,6 +12794,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and thirty-seven overall · the seven-hundred-and-third year, twenty-seventh part — The Wind Bell.)*
 
+# source: creative/novel/en/238-the-inn.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Twenty-Eighth Volume — The Inn
+
+---
+
+## Two Hundred and Thirty-Eight: The Inn
+
+The twenty-second week after the spring equinox — Thursday — morning — the fire burned.
+
+A-Shi stood at the doorway — the west wind had stopped — the fire burned — he took up the broom — he swept from the door to the kitchen table — the fire burned — his mother said: “ — sweep —” — A-Shi said: “ — sweep —” — A-Shi finished the sweep — on the floor — there was a birch leaf — A-Shi bent down — he picked it up — he said: “ — a birch leaf —” — his mother said: “ — a birch leaf —” — A-Shi placed the birch leaf into the hearth — the fire burned — he said: “ — the birch went into the hearth —” — his mother said: “ — the birch went into the hearth —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+The inn.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and thirty-eight overall · the seven-hundred-and-third year, twenty-eighth part — The Inn.)*
+
 # source: creative/novel/en/24-beyond-the-threshold.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -28776,6 +28807,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百三十七卷 · 卷二十之二十七 · 第七百零三年 · 风铃）*
+
+# source: creative/novel/238-客栈.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第二十八卷 —— 客栈
+
+---
+
+## 二百三十八 · 客栈
+
+立春后第二十二周——周四——早上——灶火燃着。
+
+阿石站在门口——西风停了——灶火燃着——他拿起扫帚——他从门口扫到厨桌——灶火燃着——母亲说「——扫——」——阿石说「——扫——」——阿石扫完了——地板上——有白桦叶——阿石弯腰——他捡起一片——他说「——白桦叶——」——母亲说「——白桦叶——」——阿石把白桦叶放进灶里——灶火燃着——他说「——白桦进了灶——」——母亲说「——白桦进了灶——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+客栈。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百三十八卷 · 卷二十之二十八 · 第七百零三年 · 客栈）*
 
 # source: creative/novel/24-归途再启.md
 # 《跨界纪事：锚火守夜人》
