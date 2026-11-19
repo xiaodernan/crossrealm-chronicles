@@ -1,3 +1,6 @@
+> **2026-11-19 · W-Z465 第二百六十一卷入典《冬至 / Winter Solstice》——卷二十之五十一 · 第七百零三年 · 冬至**：第七百零三年——立春后第四十五周——周六——早上——灶火燃着——阿石站在门口——日头出来得最晚——夜最长——他说「——冬至——」——母亲说「——冬至——」——灶火燃着——阿石走到院子里——他看天——日头刚起——天色淡——他说「——夜最长——」——母亲说「——夜最长——」——母亲往灶里添了一根柴——母亲说「——从今天起——」——阿石说「——从今天起——」——母亲说「——白天会长了——」——阿石说「——白天会长了——」——灶火燃着。
+> 交付：creative/novel/261-冬至.md + en 孪生 261-winter-solstice.md；novella 261 × 2 = 522 模块（典籍馆现为 261 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**553 源**；**v3 冻结前缀含 261 条年表条目**；showcase feed 新增 W-Z465 实录。
+>
 > **2026-11-19 · W-Z464 双实例共享窗口实证（限流 memory vs Redis 的终局对照）**：临时起 gateway2（127.0.0.1:19881 · 同镜像 crossrealm-chronicles-server-gateway · 同网络 crossrealm-chronicles-server_default · RedisIpRateLimiter ZSET+Lua 背板 · eureka 作为 GATEWAY 注册第二个实例）与现网 gateway-1 并行，统一打 lb://game-service：
 > ① phase1 60 请求（30/30 分摊 · 同一源 IP 172.18.0.1）→ **55×200 + 5×503**（resilience4j 单实例熔断窗——两个实例各自独立记账，5×503 来自先熔断的那一个）；
 > ② phase2 再打 12 请求（6/6 分摊）→ **12×429**（窗口预算已打满，全部超额拒绝）；
