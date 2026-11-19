@@ -12670,6 +12670,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and thirty-three overall · the seven-hundred-and-third year, twenty-second part — The Hearth Ash.)*
 
+# source: creative/novel/en/234-the-kindle.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Twenty-Third Volume — The Kindle
+
+---
+
+## Two Hundred and Thirty-Four: The Kindle
+
+The eighteenth week after the spring equinox — Wednesday — morning — the fire burned.
+
+A-Shi stood at the doorway — the fire was low — in the belly of the hearth — the ash was thin too — he brought the branches over — he picked three — he placed the first branch — into the hearth — the fire burned — he said: “ — feed the fire —” — his mother said: “ — feed the fire —” — he placed the second branch in — the fire burned — the flame grew — he said: “ — it grew —” — his mother said: “ — it grew —” — the third branch — the fire burned — the fire burned — the fire burned.
+
+Feed the fire.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and thirty-four overall · the seven-hundred-and-third year, twenty-third part — The Kindle.)*
+
 # source: creative/novel/en/24-beyond-the-threshold.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -28528,6 +28559,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百三十三卷 · 卷二十之二十二 · 第七百零三年 · 灶灰）*
+
+# source: creative/novel/234-添柴.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第二十三卷 —— 添柴
+
+---
+
+## 二百三十四 · 添柴
+
+立春后第十八周——周三——早上——灶火燃着。
+
+阿石站在门口——灶火小——灶肚子里——灰也少了——他把树枝拿过来——他拣了三根——他把第一根——放进灶里——灶火燃着——他说「——添柴——」——母亲说「——添柴——」——他又放进了第二根——灶火燃着——火大了一点——他说「——大了——」——母亲说「——大了——」——第三根——灶火燃着——灶火燃着——灶火燃着。
+
+添柴。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百三十四卷 · 卷二十之二十三 · 第七百零三年 · 添柴）*
 
 # source: creative/novel/24-归途再启.md
 # 《跨界纪事：锚火守夜人》
