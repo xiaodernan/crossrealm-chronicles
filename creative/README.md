@@ -308,7 +308,8 @@ creative/music/soundtrack.html
 | 小雪 · Light Snow | [light-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/259-light-snow.md) |
 | 大雪 · Great Snow | [great-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/260-great-snow.md) |
 | 冬至 · Winter Solstice | [winter-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/261-winter-solstice.md) |
-| 小寒 · Minor Cold | [minor-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/262-minor-cold.md) |每一章对应游戏的章节走法：
+| 小寒 · Minor Cold | [minor-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/262-minor-cold.md) |
+| 大寒 · Great Cold | [great-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/263-great-cold.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

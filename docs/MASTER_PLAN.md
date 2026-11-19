@@ -1,3 +1,12 @@
+> **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
+> 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
+>
+> **2026-11-19 · W-Z467 微服务全舰起锚 — season / presence / notification 三个 Created 容器首次拉起，网关三条路由直连实测**：
+> 之前这三条（`/api/seasons/**` · `/api/presence/**` · `/api/notify/**`）在网关里全是 503（lb:// 无人注册）。本轮以显式端口（DISCOVERY 18761 · CONFIG 18888 · AI-SERVICE 19883 · GAME-SERVICE 18081 · SEASON-SERVICE 18082 · PRESENCE-SERVICE 18084 · NOTIFICATION-SERVICE 18085 · REDIS 26379）把三个服务全部拉起：
+> **SEASON-SERVICE 18082（healthy，39s 启动）→ Eureka SEASON-SERVICE 578f17e81057:e8b… 注册 → gateway /api/seasons 200**（真赛季数据：ember/tide/gloom/radiant 四季 modifierIds）· **PRESENCE-SERVICE 18084（healthy，43s）→ presence world/count** 200 · **NOTIFICATION-SERVICE 18085（healthy，44s）→ /api/notify/recent** 200。
+> gateway lb:// season 路由缓存刷新约 30s（与 game-service 同窗口形态），本次无实例熔断介入；三个服务的 Tomcat/Redis/config 均按自己的口径在起始时报 Up。
+> eureka 现况（7 实例全 UP）：GATEWAY · GAME-SERVICE · SEASON-SERVICE · CONFIG-SERVER · NOTIFICATION-SERVICE · AI-SERVICE · PRESENCE-SERVICE。
+>
 > **2026-11-19 · W-Z466 第二百六十二卷入典《小寒 / Minor Cold》——卷二十之五十二 · 第七百零三年 · 小寒**：第七百零三年——立春后第四十六周——周日——早上——灶火燃着——阿石站在门口——日头出来得晚——天底冷——他说「——小寒——」——母亲说「——小寒——」——灶火燃着——阿石走到院子里——地上有一层霜——地方白了——他说「——地上白了——」——母亲说「——地上白了——」——阿石伸手——霜不粘——他说「——霜不粘——」——母亲说「——霜不粘——」——过了一会——风硬了——冷了一点——他说「——风硬了——」——母亲说「——风硬了——」——母亲说「——冬深了——」——阿石说「——冬深了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/262-小寒.md + en 孪生 262-minor-cold.md；novella 262 × 2 = 524 模块（典籍馆现为 262 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**555 源**；**v3 冻结前缀含 262 条年表条目**；showcase feed 新增 W-Z466 实录。
 >

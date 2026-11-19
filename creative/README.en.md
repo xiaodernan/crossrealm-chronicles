@@ -310,7 +310,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Light Snow | [light-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/259-light-snow.md) |
 | Great Snow | [great-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/260-great-snow.md) |
 | Winter Solstice | [winter-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/261-winter-solstice.md) |
-| Minor Cold | [minor-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/262-minor-cold.md) |Chapter → game-chapter mapping:
+| Minor Cold | [minor-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/262-minor-cold.md) |
+| Great Cold | [great-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/263-great-cold.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
