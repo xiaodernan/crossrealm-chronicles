@@ -381,6 +381,7 @@ End of frozen digest.
 237 · 风铃
 238 · 客栈
 239 · 灶灰的影子
+240 · 灶灰的来信
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

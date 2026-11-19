@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and thirty-nine volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and forty volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 239 volumes of the canon, fully readable
+· Canon Library — 240 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 239-volume index',
-  hm_body_codex: `Codex — 239 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 240-volume index',
+  hm_body_codex: `Codex — 240 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3387,6 +3387,7 @@ hm_title_codex: 'Codex · the 239-volume index',
 237 · The Wind Bell — The twenty-first week after the spring equinox — Wednesday — afternoon — the fire burned; A-Shi walked out of the lane — from the west a man came — the man wore a traveler’s cloak — the cloak was covered in dust — he pushed open the door — he said: “ — inn —” — the innkeeper said: “ — inn —” — the traveler said: “ — the west wind — it carries the smell of birch —” — the traveler said: “ — I have seen it — it is not far now —” — A-Shi said: “ — it is not far now —”. Volume XX, twenty-seventh part.
 238 · The Inn — The twenty-second week after the spring equinox — Thursday — morning — the fire burned; A-Shi stood at the doorway — the west wind had stopped — he took up the broom — he swept from the door to the kitchen table — he said: “ — sweep —”; his mother said: “ — sweep —” — on the floor — there was a birch leaf — he picked it up — he said: “ — a birch leaf —”; his mother said: “ — a birch leaf —” — he placed the birch leaf into the hearth — he said: “ — the birch went into the hearth —”; his mother said: “ — the birch went into the hearth —”. Volume XX, twenty-eighth part.
 239 · The Shadow of the Ash — The twenty-third week after the spring equinox — Friday — morning — the fire burned; A-Shi stood at the doorway — he took a handful of ash — he scattered it across the earthen floor — he said: “ — scatter —” — he said: “ — the shadow —”; his mother said: “ — the shadow —” — the fire burned. Volume XX, twenty-ninth part.
+240 · The Ash Letter — The twenty-fourth week after the spring equinox — Saturday — afternoon — the fire burned; A-Shi stood at the doorway — he took out an old piece of paper — he placed it on the table — he said: “ — look —”; his mother said: “ — look —” — there were characters on the page — the characters were faint — he said: “ — they have faded —”; his mother said: “ — they have faded —”. Volume XX, thirtieth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,

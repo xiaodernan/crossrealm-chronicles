@@ -12901,6 +12901,37 @@ He looked for a long moment, then said simply:
 
 *(End of volume twenty-four · Volume IV, first part.)*
 
+# source: creative/novel/en/240-the-ash-letter.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Thirtieth Volume — The Ash Letter
+
+---
+
+## Two Hundred and Forty: The Ash Letter
+
+The twenty-fourth week after the spring equinox — Saturday — afternoon — the fire burned.
+
+A-Shi stood at the doorway — he took out an old piece of paper — he placed it on the table — he said: “ — look —” — his mother said: “ — look —” — A-Shi looked — there were characters on the page — the characters were faint — A-Shi said: “ — they have faded —” — his mother said: “ — they have faded —” — the fire burned — A-Shi said: “ — what does it say —” — his mother said: “ — what does it say —” — the fire burned — the fire burned — the fire burned — the fire burned.
+
+The ash letter.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and forty overall · the seven-hundred-and-third year, thirtieth part — The Ash Letter.)*
+
 # source: creative/novel/en/25-moonlit-corridor.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -28870,7 +28901,7 @@ F2 隐藏 HUD。
 
 *（卷二十 · 本章完 · 跨界线总第二百三十八卷 · 卷二十之二十八 · 第七百零三年 · 客栈）*
 
-# source: creative/novel/239-灶灰之二.md
+# source: creative/novel/239-灶灰的影子.md
 # 《跨界纪事：锚火守夜人》
 
 **类型**：位面奇幻 / 黑暗史诗 / 元叙事
@@ -28945,6 +28976,37 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第二十四卷 · 卷四之一）*
+
+# source: creative/novel/240-灶灰的来信.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第三十卷 —— 灶灰的来信
+
+---
+
+## 二百四十 · 灶灰的来信
+
+立春后第二十四周——周六——下午——灶火燃着。
+
+阿石站在门口——他拿了一张旧纸——他把它放在桌上——他说「——看——」——母亲说「——看——」——阿石看了——纸上有字——字是淡色的——阿石说「——淡了——」——母亲说「——淡了——」——灶火燃着——阿石说「——写的是——」——母亲说「——你写的是什么——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+灶灰的来信。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百四十卷 · 卷二十之三十 · 第七百零三年 · 灶灰的来信）*
 
 # source: creative/novel/25-月光回廊.md
 # 《跨界纪事：锚火守夜人》
