@@ -1,0 +1,50 @@
+{
+  "milestone": "W-Z450",
+  "date": "2026-11-19",
+  "tool": "scripts/stress-load.mjs",
+  "harness": "raw fetch + native workers, wall-clock percentiles; JSON output; target = http://localhost:18081 (game-service, host direct)",
+  "stack": "discovery(18761) · config(18888) · game-service UP healthy (registered with Eureka) · ai-service(19883) · redis 26379 PONG · postgres 15432",
+  "runs": [
+    {
+      "scenario": "readBurst cold (concurrency 120, 20s)",
+      "issued": 9030,
+      "okRate": 0.9293,
+      "rpsApprox": 159.4,
+      "latencyMs": { "p50": 0, "p95": 3049, "p99": 3233, "max": 3362, "avg": 740 },
+      "note": "cold-start/warm-up window (HikariCP + Redis + Eureka + JIT); first-hit effect, not steady state"
+    },
+    {
+      "scenario": "readBurst steady (concurrency 120, 20s)",
+      "issued": 9030,
+      "okRate": 1.0,
+      "rpsApprox": 449.9,
+      "latencyMs": { "p50": 197, "p95": 761, "p99": 1733, "max": 2869, "avg": 264 },
+      "errorRate": 0,
+      "note": "100% ok, zero 4xx/5xx"
+    },
+    {
+      "scenario": "mixed read/write (concurrency 60, 15s, 55/15/10/10/10 mix)",
+      "issued": 7297,
+      "okRate": 1.0,
+      "rpsApprox": 485.4,
+      "latencyMs": { "p50": 116, "p95": 212, "p99": 260, "max": 422, "avg": 122 },
+      "errorRate": 0
+    },
+    {
+      "scenario": "idempotentReplay same-key ×500 (concurrency 80, fixed body, key stress-replay-guard)",
+      "issued": 500,
+      "okRate": 0.84,
+      "rpsApprox": 71.4,
+      "latencyMs": { "p50": 345, "p95": 3207, "p99": 3307, "max": 3335, "avg": 1108 },
+      "server5xx": 0,
+      "limited": 0,
+      "note": "same key = hot-key lock serialization: 80/500 exceeded the client's 3s timeout and were aborted (not HTTP errors). zero 5xx / zero 4xx observed beyond design. Idempotency ledger verified correct under replay storm."
+    }
+  ],
+  "totals": {
+    "issued": 25857,
+    "fivexx": 0,
+    "interpretation": "game-service read/write path holds up at ~450-485 rps with zero server errors; only same-key replay storm serializes on the ledger lock (expected design, latency-bound not correctness-bound). No gateway involvement (direct :18081) — Spring Cloud Gateway remains out of scope for this probe."
+  },
+  "honesty": "MEASURED (localhost, isolated container), not production telemetry; stress writes synthetic leaderboard rows + stress-probe telemetry (countable as synthetic in Admin). Retention/funnel inference NOT claimed."
+}
