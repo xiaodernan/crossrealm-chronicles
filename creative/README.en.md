@@ -296,7 +296,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Clouds Move | [the-clouds-move](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/245-the-clouds-move.md) |
 | Spring Begins | [spring-begins](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/246-spring-begins.md) |
 | Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/247-grain-rain.md) |
-| Wheat Waves | [wheat-waves](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/248-wheat-waves.md) |Chapter → game-chapter mapping:
+| Wheat Waves | [wheat-waves](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/248-wheat-waves.md) |
+| Grain in Ear | [grain-in-ear](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/249-grain-in-ear.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

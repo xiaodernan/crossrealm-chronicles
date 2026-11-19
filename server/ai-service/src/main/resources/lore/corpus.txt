@@ -13180,6 +13180,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and forty-eight overall · the seven-hundred-and-third year, thirty-eighth part — Wheat Waves.)*
 
+# source: creative/novel/en/249-grain-in-ear.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Thirty-Ninth Volume — Grain in Ear
+
+---
+
+## Two Hundred and Forty-Nine: Grain in Ear
+
+The thirty-third week after the spring equinox — Monday — morning — the fire burned.
+
+A-Shi stood at the doorway — the field was wheat — the waves of wheat rose again — the awns were out — he said: “ — grain in ear —” — his mother said: “ — grain in ear —” — the fire burned — A-Shi went out — he walked to the ridge of the field — he bent down — he looked — the ears were thick with awns — he said: “ — the awns are out —” — his mother said: “ — the awns are out —” — the fire burned — after a while — the wind passed — the wheat lifted in rippling rows — he said: “ — the wind is here —” — his mother said: “ — the wind is here —” — the fire burned — A-Shi straightened up — he dusted his hands — a broken awn clung to them — very fine — he said: “ — a prick —” — his mother said: “ — a prick —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Grain in ear.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and forty-nine overall · the seven-hundred-and-third year, thirty-ninth part — Grain in Ear.)*
+
 # source: creative/novel/en/25-moonlit-corridor.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -29503,6 +29534,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百四十八卷 · 卷二十之三十八 · 第七百零三年 · 麦浪）*
+
+# source: creative/novel/249-芒种.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第三十九卷 —— 芒种
+
+---
+
+## 二百四十九 · 芒种
+
+立春后第三十三周——周一——上午——灶火燃着。
+
+阿石站在门口——田里是麦——麦浪又起了一阵——麦芒出来了——他说「——芒种——」——母亲说「——芒种——」——灶火燃着——阿石出去——他走到田埂上——他弯下腰——他看——麦穗上密密的芒——他说「——有芒了——」——母亲说「——有芒了——」——灶火燃着——过了一会——风过了——麦一掀——一道一道——他说「——风来了——」——母亲说「——风来了——」——灶火燃着——阿石直起腰——他拍了拍手——手上沾了一截麦芒——极细——他说「——刺——」——母亲说「——刺——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+芒种。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百四十九卷 · 卷二十之三十九 · 第七百零三年 · 芒种）*
 
 # source: creative/novel/25-月光回廊.md
 # 《跨界纪事：锚火守夜人》

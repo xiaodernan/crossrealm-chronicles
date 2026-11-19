@@ -294,7 +294,8 @@ creative/music/soundtrack.html
 | 云动 · The Clouds Move | [the-clouds-move](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/245-the-clouds-move.md) |
 | 立春 · Spring Begins | [spring-begins](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/246-spring-begins.md) |
 | 谷雨 · Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/247-grain-rain.md) |
-| 麦浪 · Wheat Waves | [wheat-waves](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/248-wheat-waves.md) |每一章对应游戏的章节走法：
+| 麦浪 · Wheat Waves | [wheat-waves](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/248-wheat-waves.md) |
+| 芒种 · Grain in Ear | [grain-in-ear](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/249-grain-in-ear.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

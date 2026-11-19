@@ -390,6 +390,7 @@ End of frozen digest.
 246 · 立春
 247 · 谷雨
 248 · 麦浪
+249 · 芒种
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
