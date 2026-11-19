@@ -387,6 +387,7 @@ End of frozen digest.
 243 · 鱼影
 244 · 西风起
 245 · 云动
+246 · 立春
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

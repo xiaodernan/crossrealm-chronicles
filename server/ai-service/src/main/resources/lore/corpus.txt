@@ -13087,6 +13087,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and forty-five overall · the seven-hundred-and-third year, thirty-fifth part — The Clouds Move.)*
 
+# source: creative/novel/en/246-spring-begins.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Thirty-Sixth Volume — Spring Begins
+
+---
+
+## Two Hundred and Forty-Six: Spring Begins
+
+The thirtieth week after the spring equinox — Friday — morning — the fire burned.
+
+A-Shi stood at the doorway — the sun was out — he said: “ — spring has come —” — his mother said: “ — spring has come —” — the fire burned — A-Shi went out — he looked up — he said: “ — the sun is out —” — his mother said: “ — the sun is out —” — the fire burned — he went out — he walked to the river — he said: “ — there is fog on the river —” — his mother said: “ — there is fog on the river —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Spring begins.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and forty-six overall · the seven-hundred-and-third year, thirty-sixth part — Spring Begins.)*
+
 # source: creative/novel/en/25-moonlit-corridor.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -29317,6 +29348,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百四十五卷 · 卷二十之三十五 · 第七百零三年 · 云动）*
+
+# source: creative/novel/246-立春.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第三十六卷 —— 立春
+
+---
+
+## 二百四十六 · 立春
+
+立春后第三十周——周五——早上——灶火燃着。
+
+阿石站在门口——日头出来了——他说「——立春了——」——母亲说「——立春了——」——灶火燃着——阿石出去——他抬头——他看——他说「——日头出来——」——母亲说「——日头出来——」——灶火燃着——他出去了——他走到河岸——他说「——河上有雾——」——母亲说「——河上有雾——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+立春。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百四十六卷 · 卷二十之三十六 · 第七百零三年 · 立春）*
 
 # source: creative/novel/25-月光回廊.md
 # 《跨界纪事：锚火守夜人》

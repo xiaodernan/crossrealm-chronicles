@@ -293,7 +293,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Riverbank | [the-riverbank](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/242-the-riverbank.md) |
 | The Fish Shadow | [the-fish-shadow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/243-the-fish-shadow.md) |
 | The West Wind Rises | [the-west-wind-rises](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/244-the-west-wind-rises.md) |
-| The Clouds Move | [the-clouds-move](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/245-the-clouds-move.md) |Chapter → game-chapter mapping:
+| The Clouds Move | [the-clouds-move](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/245-the-clouds-move.md) |
+| Spring Begins | [spring-begins](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/246-spring-begins.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
