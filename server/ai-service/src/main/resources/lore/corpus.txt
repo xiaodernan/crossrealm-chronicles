@@ -12577,6 +12577,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and thirty overall · the seven-hundred-and-third year, nineteenth part — The Steam.)*
 
+# source: creative/novel/en/231-the-steam-heat.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Twentieth Volume — The Steam Heat
+
+---
+
+## Two Hundred and Thirty-One: The Steam Heat
+
+The fifteenth week after the spring equinox — Sunday — morning — the fire burned.
+
+A-Shi stood at the doorway — the steamed buns were still hot — he took one up — he took a bite — it was scalding — he let out a breath — the fire burned — he said: “ — hot —” — his mother said: “ — hot —” — A-Shi held the bun in his hands — he waited a moment — he took another bite — it was just right — the fire burned — his mother watched — he said: “ — the steam heat —” — his mother said: “ — the steam heat —” — he split the bun in two — he gave half to his mother — his mother took it — the fire burned — the fire burned — the fire burned.
+
+The steam heat.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and thirty-one overall · the seven-hundred-and-third year, twentieth part — The Steam Heat.)*
+
 # source: creative/novel/en/24-beyond-the-threshold.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -28342,6 +28373,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百三十卷 · 卷二十之十九 · 第七百零三年 · 蒸）*
+
+# source: creative/novel/231-热气.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第二十卷 —— 热气
+
+---
+
+## 二百三十一 · 热气
+
+立春后第十五周——周日——早上——灶火燃着。
+
+阿石站在门口——馒头还热——他拿起一个——他咬了一口——烫——他吐了一口气——灶火燃着——他说「——热——」——母亲说「——热——」——阿石把馒头放在手里——他等了一等——他又咬了一口——刚好——灶火燃着——母亲看——他说「——热气——」——母亲说「——热气——」——他把馒头掰成两半——给了母亲一半——灶火燃着——母亲接了——灶火燃着——灶火燃着。
+
+热气。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百三十一卷 · 卷二十之二十 · 第七百零三年 · 热气）*
 
 # source: creative/novel/24-归途再启.md
 # 《跨界纪事：锚火守夜人》
