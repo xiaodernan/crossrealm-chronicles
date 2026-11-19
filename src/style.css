@@ -79,8 +79,23 @@ body {
 
 .start-inner {
   text-align: center;
-  max-width: 420px;
-  padding: 24px;
+  max-width: 660px;
+  padding: 24px 20px;
+}
+
+/* 2026-11-19 W-Z446（walkthrough:ui 修值）：.start-inner 无高度约束——1000×700 实测内容
+   ~910px，居中后上下各裁 ~105px（logo 顶出视口 · start-url 完全不可见）。
+   #start-screen 允许纵向滚动；.start-inner margin:auto 负责居中（溢出时上缘对齐、
+   不再把内容顶出可滚区域）；logo 尺寸收为视口高度比例（小窗不撑出定值 156px）。 */
+#start-screen {
+  overflow-y: auto;
+}
+.start-inner {
+  margin: auto;
+}
+.start-logo {
+  width: clamp(88px, 18vh, 156px);
+  height: auto;
 }
 
 .start-inner h2 {
@@ -725,10 +740,13 @@ body {
   margin-top: 2px;
 }
 
+/* 2026-11-19 W-Z446（walkthrough:ui 修值）：right:20/bottom:20 与 .compass（right:16/bottom:16，
+   56px 圆钮）完全同位——实测重叠 300×52px（compass 压住指引卡）。上提到 bottom:88px
+   （compass 72px 让位 + 16px 气口），与 minimap（top:72 起）在 ≥560px 视口不相撞。 */
 .game-guide {
   position: fixed;
   right: 20px;
-  bottom: 20px;
+  bottom: 88px;
   z-index: 35;
   width: min(300px, 42vw);
   padding: 12px 14px;
@@ -844,9 +862,12 @@ body {
   color: #bbb;
 }
 
+/* 2026-11-19 W-Z446（walkthrough:ui 修值）：bottom:120px 与 .spell-bar（bottom:118px）
+   完全同位——实测与法术快捷栏重叠 148×39px。上提到 bottom:200px（法术栏 + 蓄力条
+   charge-wrap 168px 都清开）。 */
 #interaction-prompt {
   position: fixed;
-  bottom: 120px;
+  bottom: 200px;
   left: 50%;
   transform: translateX(-50%);
   padding: 10px 20px;
@@ -899,8 +920,16 @@ body {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.bar-row span {
-  width: 28px;
+.bar-row .bar-label {
+  min-width: 2.2em;
+  flex: 0 0 auto;
+}
+.bar-row .bar-value {
+  width: auto;
+  min-width: 3.4em;
+  flex: 0 0 auto;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .bar-track {
@@ -2101,10 +2130,14 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   pointer-events: none;
 }
 
+/* 2026-11-19 W-Z446（walkthrough:ui 修值）：bottom:24px 顶在 .status-bars（bottom:100px，三行
+   实占 100→~166px）与 .hud-bottom（bottom:16px）上——实测 .ctrl-grid 与 hp/stamina/mana 条
+   重叠 167×62px、#controls-teach 与 .hud-bottom 重叠 320×48px。上提到 bottom:175px
+   （状态条上方 9px 让位），与 quest-panel（top:90 起/高 ~110px）在 ≥560px 视口不相撞。 */
 .controls-teach {
   position: fixed;
   left: 24px;
-  bottom: 24px;
+  bottom: 175px;
   max-width: 320px;
   padding: 10px 12px;
   background: rgba(0, 0, 0, 0.72);
@@ -4846,8 +4879,11 @@ h1, h2, h3 {
   text-align: center; margin: 0 0 10px;
   text-shadow: 0 0 12px rgba(255, 217, 138, 0.22);
 }
+/* 2026-11-19 W-Z446（walkthrough:ui 修值）：3 列时「鼠标左键 / 鼠标右键」键帽 ≈147px，
+   把「普攻 / 重击」尾行压成 15px 宽（字符竖排挤成一格）——6 格快键改为 2 列 × 3 行，
+   所有单元格 ≈260px，最宽的键帽 + 尾行都有裕量。 */
 .start-quickkeys-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
   text-align: left;
 }
 @media (max-width: 560px) { .start-quickkeys-grid { grid-template-columns: repeat(2, 1fr); } }
