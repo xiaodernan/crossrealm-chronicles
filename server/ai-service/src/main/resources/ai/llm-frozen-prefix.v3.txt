@@ -405,6 +405,7 @@ End of frozen digest.
 261 · 冬至
 262 · 小寒
 263 · 大寒
+264 · 立春
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
