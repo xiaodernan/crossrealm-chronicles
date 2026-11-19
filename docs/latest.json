@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-19T16:45:31.359Z",
+  "generated_at": "2026-11-19T16:51:54.908Z",
   "branch": "main",
-  "head": "3dde01f",
-  "total_commits": 2346,
-  "pushed_at": "2026-11-20T00:44:16+08:00",
+  "head": "f10c918",
+  "total_commits": 2349,
+  "pushed_at": "2026-11-20T00:51:29+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "f10c918",
+      "at": "2026-11-20T00:51:29+08:00",
+      "subject": "docs(readme): record 2026-11-19 cache-probe re-measurement on gpt-6.2-sol (warm cached_tokens=5066/5342 ~= 94.8%, 4/4 consistent; son non-stream still reports no cache field; 2 schannel flakes were Clash west-coast-node, not upstream)"
+    },
+    {
+      "short": "e04fde3",
+      "at": "2026-11-20T00:48:30+08:00",
+      "subject": "fix(hud): safe-area insets for notched phones - .hud-top/.hud-bottom now honor env(safe-area-inset-*); no more clipped HUD on iPhone notch / Android cutout"
+    },
+    {
+      "short": "c547c4c",
+      "at": "2026-11-20T00:45:41+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z473 (novels 268 · lore 567 · i18n 3267 · commits 2346)"
+    },
     {
       "short": "3dde01f",
       "at": "2026-11-20T00:44:16+08:00",
@@ -16,21 +31,6 @@
       "short": "c0daf40",
       "at": "2026-11-20T00:34:13+08:00",
       "subject": "chore(latest): refresh the showcase fact pack from main — W-Z472 (novels 267 · lore 565 · i18n 3267 · commits 2344)"
-    },
-    {
-      "short": "98cc923",
-      "at": "2026-11-20T00:31:30+08:00",
-      "subject": "feat(canon): W-Z472 第二百六十七卷《春分 / Spring Equinox》入典——卷二十之五十七 · 第七百零四年 · 春分（v3 前缀 267 条年表）"
-    },
-    {
-      "short": "2042257",
-      "at": "2026-11-20T00:14:09+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z471 (novels 266 · lore 563 · i18n 3267 · commits 2342)"
-    },
-    {
-      "short": "dd5e838",
-      "at": "2026-11-20T00:12:41+08:00",
-      "subject": "feat(canon): W-Z471 第二百六十六卷《惊蛰 / Awakening of Insects》入典——卷二十之五十六 · 第七百零四年 · 惊蛰（v3 前缀 266 条年表）"
     }
   ],
   "tracked_files": 1863,
