@@ -44,8 +44,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/ai")
 public class ArbiterController {
 
-    /** 烬灯记录者的人格：只收束旅途，不出戏，不编造，三行输出，语言随玩家。 */
-    static final String ARBITER_SYSTEM =
+    /** 烬灯记录者的人格：只收束旅途，不出戏，不编造，三行输出，语言随玩家。**W-Z456**：v4 全量大前缀打底（~4-5 万 tok）——一次上下文顶 25 次 v3。 */
+    static final String ARBITER_CONTRACT =
             "你是《跨界纪事》里炉火的记录者。玩家刚刚走完终章，并且在门前做好了自己的终局抉择。\n"
             + "请基于他的旅途数据，为他写一封短信。\n"
             + "\n"
@@ -60,6 +60,9 @@ public class ArbiterController {
             + "· epilogue 可以出现母题、回声、判官、铁矿、白桦、七百年、炉火、守夜人、锚点这类本作印记。\n"
             + "· 用收信人的母语回答：zh 用中文，en 用英文；三行都必须同语。\n"
             + "· 三行都是内容，没有对白、没有引号标出说话人、没有列表。\n";
+
+    /** 系统 = v4 全量大前缀 + 烬灯回信的车道收敛（cache key 单桶：v4 前缀与 Oracle 共享同一 cache page） */
+    static final String ARBITER_SYSTEM = PromptPrefixes.FROZEN_CANON_CONTEXT_V4 + ARBITER_CONTRACT;
 
     static final String NODE_COMPOSE = "compose";
     static final String NODE_PARSE = "parse";

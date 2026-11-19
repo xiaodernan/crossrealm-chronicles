@@ -30,6 +30,15 @@ public final class PromptPrefixes {
      */
     public static final String FROZEN_CODEX_CONTEXT_V3 = read("/ai/llm-frozen-prefix.v3.txt");
 
+    /**
+     * 典籍全量大前缀（W-Z456）：oracle-v4-frozen-prefix.txt —— Oracle 系统提示 + creative/GLOSSARY.md
+     * **逐字全量**（≈122 KB，≈4-5 万 token）。终局大场（arbiter 烬灯回信 / kindle 烬火答）专用，
+     * 让一次上下文真正落在「5 万 tok 级」——与 v3 同桶共享同一 prompt_cache_key（缓存按前缀字节对齐），
+     * 实测 prompt=47,370 · cached≈88-95%（scripts/arbiter-v4-live-probe.mjs）。
+     * 日常 NPC 对话不要拿这条（Ember 首包延迟会被杀）——那一车仍用 v3。
+     */
+    public static final String FROZEN_CANON_CONTEXT_V4 = read("/ai/oracle-v4-frozen-prefix.txt");
+
     private static String read(String path) {
         try (InputStream in = PromptPrefixes.class.getResourceAsStream(path)) {
             if (in == null) throw new IllegalStateException("missing " + path + " — run scripts/build-llm-prefix.mjs");

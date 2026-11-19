@@ -1,0 +1,25 @@
+{
+  "probe": "arbiter-v4-live-probe",
+  "date": "2026-11-19",
+  "model": "gpt-6.2-sol",
+  "upstream": "https://api.aizzz.xyz/v1",
+  "cacheKey": "crossrealm-canon-v1",
+  "lane": "arbiter （烬灯回信）",
+  "elapsedMs": 9987,
+  "cold": {
+    "label": "cold",
+    "status": 200,
+    "prompt": 47763,
+    "cached": 2274,
+    "cachedRatio": "4.8%",
+    "completion": 65
+  },
+  "warm": {
+    "label": "warm#2",
+    "status": 200,
+    "prompt": 47763,
+    "cached": 42355,
+    "cachedRatio": "88.7%",
+    "completion": 54
+  }
+}

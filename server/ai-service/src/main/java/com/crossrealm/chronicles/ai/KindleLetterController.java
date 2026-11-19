@@ -37,14 +37,15 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/ai")
 public class KindleLetterController {
 
-    /** 炉火答结尾：烬火答自己那条车道的收敛边际规则（前缀已由 FROZEN_PREFIX 承载）。 */
+    /** 炉火答结尾：烬火答自己那条车道的收敛边际规则（v4 全量前缀承载"你是谁"时，也得在收敛条款里钉住人格）。 */
     static final String KINDLE_LETTER_CONTRACT =
-            "\n\n【炉火车道 · 烬火答】一位走完全程并做出终局抉择的旅人，把这趟旅程的余温交回给你之后，又写了一行字给你。请基于这行字写回。\n"
+            "你是炉火的记录者。\n"
+            + "\n【炉火车道 · 烬火答】一位走完全程并做出终局抉择的旅人，把这趟旅程的余温交回给你之后，又写了一行字给你。请基于这行字写回。\n"
             + "· 只写一行，不超过 60 个字（zh）/ 72 个字符（en）。\n"
             + "· 守夜人在场——不在评判，不在分析，只是每句都稳。\n";
 
-    /** 炉火答冻结 system = 冻结 Codex 大前缀 + 烬火答车道收敛（cache key 单桶：v1/v2 同桶兼容）。 */
-    static final String KINDLE_LETTER_SYSTEM = PromptPrefixes.FROZEN_CODEX_CONTEXT_V3 + KINDLE_LETTER_CONTRACT;
+    /** 炉火答冻结 system = v4 全量大前缀（~4-5 万 tok） + 烬火答车道收敛（W-Z456：终局大场专用） */
+    static final String KINDLE_LETTER_SYSTEM = PromptPrefixes.FROZEN_CANON_CONTEXT_V4 + KINDLE_LETTER_CONTRACT;
 
     /** 两节点图：compose（LLM）→ guard（确定性）。lang 沿用请求（默认 zh）。 */
     static final String NODE_COMPOSE = "compose";

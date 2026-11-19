@@ -1,3 +1,8 @@
+> **2026-11-19 · W-Z456 终局大场 v4 全量前缀 —— 烬灯回信 / 烬火答「一次上下文 4-5 万 tok」，与 Codex 同档（实测 47,763 tok · cached 88.7%）**：
+> 用户反复质疑「为什么输入上下文总这么少（Codex 5-9 万）」——查因后定位：除 Oracle（v4 · 47K）之外，**所有** player-facing 车道只吃 v3 小前缀（~1.5K tok）。W-Z456 把终局大场挂上 v4 全量：`PromptPrefixes.FROZEN_CANON_CONTEXT_V4`（oracle-v4-frozen-prefix.txt · creative/GLOSSARY.md verbatim · ≈122 KB）—— `ARBITER_SYSTEM = FROZEN_CANON_CONTEXT_V4 + ARBITER_CONTRACT`；`KINDLE_LETTER_SYSTEM = FROZEN_CANON_CONTEXT_V4 + KINDLE_LETTER_CONTRACT`（ember/kindle 日常对话仍用 v3）。
+> 真上游实测（scripts/arbiter-v4-live-probe.mjs · Clash 7897 · stream+include_usage）：**cold HTTP 200 prompt=47,763 cached=2,274（4.8%）→ warm#2 HTTP 200 prompt=47,763 cached=42,355（88.7%）** · completion 65/54；产物 docs/admin/data/arbiter-v4-live-probe-2026-11-19.json（MEASURED）。
+> 同步钉死：KINDLE_LETTER_CONTRACT 显式写「你是炉火的记录者。」——对齐 KindleLetterControllerTest 既有人格锚点断言（v4 前缀不包含该短语，收敛条款补齐）；PromptPrefixesTest（新增 4 case：v4 载入 ≥100KB / arbiter 以 v4 打底 / kindle 以 v4 打底 / v3 不受污染）—— **ai-service 186 tests / 35 classes 全绿**；mvn package（58,190,325 B）→ compose 重建重部署（healthy）；live 直连 4 lanes 保持 503 not-configured 静默失败契约（绝非 500）。`docs/admin meas_l32` 诚实卡（zh/en/HTML）同步为 MEASURED 口径。
+>
 > **2026-11-19 · W-Z448 Pages 部署管线全链修复实录（本机与 io 双仓协同）**：故障链三层、逐层实锤——
 > ① 上传构件硬依赖 WSL `/bin/bash`，`lenovo-pages` 自托管 Windows runner 只有 docker-desktop busybox（/bin/sh 有、/bin/bash 无）→ `actions/upload-pages-artifact@v3` execvpe 失败（44505338842 · 44506780662 · 44508076398）；
 > ② 我本轮第 3 次把 runner 切回 ubuntu-latest 并推送说明注释（419c465，另含证据与带注释的文件内说明）；仓库主随即推送交叉平台修复——**pwsh Archive artifact**（Linux 走 GNU tar · Windows 走 Git GNU tar / bsdtar，`artifact.tar` 命名不变 · deploy-pages@v4 不动）（7610de4 · 41555d0）；
