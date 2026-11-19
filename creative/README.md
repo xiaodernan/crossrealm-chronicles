@@ -282,7 +282,8 @@ creative/music/soundtrack.html
 | 灶灰 · The Hearth Ash | [the-hearth-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/233-the-hearth-ash.md) |
 | 添柴 · The Kindle | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/234-the-kindle.md) |
 | 灯芯 · The Wick | [the-wick](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/235-the-wick.md) |
-| 烬 · The Ember | [the-ember](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/236-the-ember.md) |每一章对应游戏的章节走法：
+| 烬 · The Ember | [the-ember](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/236-the-ember.md) |
+| 风铃 · The Wind Bell | [the-wind-bell](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/237-the-wind-bell.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

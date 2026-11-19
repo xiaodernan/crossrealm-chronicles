@@ -284,7 +284,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Hearth Ash | [the-hearth-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/233-the-hearth-ash.md) |
 | The Kindle | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/234-the-kindle.md) |
 | The Wick | [the-wick](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/235-the-wick.md) |
-| The Ember | [the-ember](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/236-the-ember.md) |Chapter → game-chapter mapping:
+| The Ember | [the-ember](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/236-the-ember.md) |
+| The Wind Bell | [the-wind-bell](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/237-the-wind-bell.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

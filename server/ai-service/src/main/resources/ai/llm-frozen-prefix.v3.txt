@@ -378,6 +378,7 @@ End of frozen digest.
 234 · 添柴
 235 · 灯芯
 236 · 烬
+237 · 风铃
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
