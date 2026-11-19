@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and sixty-nine volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and seventy volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 269 volumes of the canon, fully readable
+· Canon Library — 270 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 269-volume index',
-  hm_body_codex: `Codex — 269 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 270-volume index',
+  hm_body_codex: `Codex — 270 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3417,6 +3417,7 @@ hm_title_codex: 'Codex · the 269-volume index',
 267 · Spring Equinox — The second week after spring begins — Monday — morning — the fire burned; A-Shi stood at the doorway — the sun had come out — the sky had brightened — he said: “ — spring equinox —”; his mother said: “ — spring equinox —” — he walked into the yard — the shadow fell of equal length — he said: “ — the shadows are equally long —”; his mother said: “ — the shadows are equally long —” — after a while — the wind had softened — the flowers had opened — he said: “ — the flowers have opened —”; his mother said: “ — the flowers have opened —” — A-Shi looked again — the grass had turned green — he said: “ — the grass is green —”; his mother said: “ — the grass is green —” — his mother said: “ — the year has come around —”; A-Shi said: “ — the year has come around —”. Volume XX, fifty-seventh part.
 268 · Grain Rain — Twenty-four days after spring begins — Monday — morning — the fire burned; A-Shi stood at the doorway — there was rain in the sky — he said: “ — grain rain —”; his mother said: “ — grain rain —” — he walked into the yard — the rain fell — fine and thin — the ground grew wet — he said: “ — the rain has fallen —”; his mother said: “ — the rain has fallen —” — after a while — the rain stopped — the sky had cleared — there was water on the ground — he said: “ — the rain has stopped —”; his mother said: “ — the rain has stopped —” — his mother said: “ — the grain rain has fallen —”; A-Shi said: “ — the grain rain has fallen —” — his mother said: “ — the crops are about to grow —”; A-Shi said: “ — the crops are about to grow —”. Volume XX, fifty-eighth part.
 269 · Grain Buds — The fifth day after summer begins — Wednesday — morning — the fire burned; A-Shi stood at the doorway — there were clouds in the sky — white clouds — he said: “ — grain buds —”; his mother said: “ — grain buds —” — he walked into the yard — the wheat ears were filled — but not yet full — when the wind passed — the ears swayed — he said: “ — the wheat ears are filled —”; his mother said: “ — the wheat ears are filled —” — after a while — A-Shi crouched down — he looked at the wheat waves — he said: “ — not yet full — it needs great fullness —”; his mother said: “ — not yet full — it needs great fullness —” — A-Shi looked again — there was green at the foot of the hill — and water by the fields — he said: “ — there is water by the fields —”; his mother said: “ — there is water by the fields —” — his mother said: “ — filled but not full — that is the soundest state —”; A-Shi said: “ — filled but not full — that is the soundest state —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, fifty-ninth part.
+270 · Grain in Ear — The ninth day after summer begins — Friday — morning — the fire burned; A-Shi stood at the doorway — the rain had fallen through the night — there was more water in the field — he said: “ — grain in ear —”; his mother said: “ — grain in ear —” — he walked to the ridge of the field — the rice seedlings were set into the ground — row upon row — the water clung to his hands — he said: “ — plant faster —”; his mother said: “ — plant faster —” — after a while — A-Shi finished planting — he shook out his hands — he said: “ — it is planted —”; his mother said: “ — it is planted —” — his mother said: “ — the hour of sowing has come —”; A-Shi said: “ — the hour of sowing has come —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, sixtieth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,

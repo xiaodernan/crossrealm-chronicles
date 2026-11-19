@@ -14008,6 +14008,37 @@ And the old fire in the kitchen burned until dawn.
 
 *(End of volume twenty-seven · Volume IV, fourth part. The Academy's revision of the original chapter.)*
 
+# source: creative/novel/en/270-grain-in-ear.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Sixtieth Volume — Grain in Ear
+
+---
+
+## Two Hundred and Seventy: Grain in Ear
+
+The ninth day after summer begins — Friday — morning — the fire burned.
+
+A-Shi stood at the doorway — the rain had fallen through the night — there was more water in the field — he said: “ — grain in ear —” — his mother said: “ — grain in ear —” — the fire burned — A-Shi went out — he walked to the ridge of the field — the rice seedlings were set into the ground — row upon row — the water clung to his hands — he said: “ — plant faster —” — his mother said: “ — plant faster —” — the fire burned — after a while — A-Shi finished planting — he shook out his hands — he said: “ — it is planted —” — his mother said: “ — it is planted —” — the fire burned — his mother said: “ — the hour of sowing has come —” — A-Shi said: “ — the hour of sowing has come —” — his mother said: “ — the stove is still bright —” — A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Grain in ear.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventy overall · the seven-hundred-and-fourth year, sixtieth part — Grain in Ear.)*
+
 # source: creative/novel/en/28-the-new-sapling.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -30984,6 +31015,37 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第二十七卷 · 卷四之四，原典重校）*
+
+# source: creative/novel/270-芒种.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第六十卷 —— 芒种
+
+---
+
+## 二百七十 · 芒种
+
+立夏后第九天——周五——早上——灶火燃着。
+
+阿石站在门口——雨落了一夜——田里水多了——他说「——芒种——」——母亲说「——芒种——」——灶火燃着——阿石出去——他走到田埂上——水稻苗插进去——一排一排——沾手的是水——他说「——快点插——」——母亲说「——快点插——」——灶火燃着——过了一会——阿石插完了——他抖抖手——他说「——插完了——」——母亲说「——插完了——」——灶火燃着——母亲说「——种入的时辰到了——」——阿石说「——种入的时辰到了——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+芒种。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百七十卷 · 卷二十之六十 · 第七百零四年 · 芒种）*
 
 # source: creative/novel/28-新苗.md
 # 《跨界纪事：锚火守夜人》
