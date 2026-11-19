@@ -13641,6 +13641,37 @@ He was, he would learn, the only one in the night who had seen both himself and 
 
 *(End of volume twenty-six · Volume IV, third part. The Academy's revision of the original chapter.)*
 
+# source: creative/novel/en/260-great-snow.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Fiftieth Volume — Great Snow
+
+---
+
+## Two Hundred and Sixty: Great Snow
+
+The forty-fourth week after the spring equinox — Friday — morning — the fire burned.
+
+A-Shi stood at the doorway — the snow had fallen from the sky — it had turned the ground white — he said: “ — great snow —” — his mother said: “ — great snow —” — the fire burned — A-Shi went out — he walked into the yard — the snow lay on the ground — a white layer of it — he said: “ — the ground is white —” — his mother said: “ — the ground is white —” — the fire burned — A-Shi looked at the tree — snow rested on it too — he said: “ — the tree is white —” — his mother said: “ — the tree is white —” — the fire burned — after a while — the snow grew heavier — flake by flake — he said: “ — the snow is heavier —” — his mother said: “ — the snow is heavier —” — the fire burned — his mother said: “ — winter has deepened —” — A-Shi said: “ — winter has deepened —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Great snow.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and sixty overall · the seven-hundred-and-third year, fiftieth part — Great Snow.)*
+
 # source: creative/novel/en/27-the-last-persimmon.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -30307,6 +30338,37 @@ F2 隐藏 HUD。
 ---
 
 *（本章完 · 跨界线总第二十六卷 · 卷四之三，原典重校）*
+
+# source: creative/novel/260-大雪.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第五十卷 —— 大雪
+
+---
+
+## 二百六十 · 大雪
+
+立春后第四十四周——周五——早上——灶火燃着。
+
+阿石站在门口——天上落了——白了——他说「——大雪——」——母亲说「——大雪——」——灶火燃着——阿石出去——他走到院子里——雪落在地上——白了一层——他说「——地白了——」——母亲说「——地白了——」——灶火燃着——阿石又看树——树上也白了——他说「——树也白了——」——母亲说「——树也白了——」——灶火燃着——过了一会——雪大了——一片一片——他说「——雪大了——」——母亲说「——雪大了——」——灶火燃着——母亲说「——冬深了——」——阿石说「——冬深了——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+大雪。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百六十卷 · 卷二十之五十 · 第七百零三年 · 大雪）*
 
 # source: creative/novel/27-归途之共.md
 # 《跨界纪事：锚火守夜人》
