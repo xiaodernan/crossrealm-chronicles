@@ -408,6 +408,7 @@ End of frozen digest.
 264 · 立春
 265 · 雨水
 266 · 惊蛰
+267 · 春分
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

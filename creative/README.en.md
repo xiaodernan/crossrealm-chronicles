@@ -314,7 +314,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Great Cold | [great-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/263-great-cold.md) |
 | Beginning of Spring | [beginning-of-spring](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/264-beginning-of-spring.md) |
 | Rain Water | [rain-water](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/265-rain-water.md) |
-| Awakening of Insects | [awakening-of-insects](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/266-awakening-of-insects.md) |Chapter → game-chapter mapping:
+| Awakening of Insects | [awakening-of-insects](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/266-awakening-of-insects.md) |
+| Spring Equinox | [spring-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/267-spring-equinox.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
