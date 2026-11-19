@@ -289,7 +289,8 @@ creative/music/soundtrack.html
 | 灶灰的来信 · The Ash Letter | [the-ash-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/240-the-ash-letter.md) |
 | 柴 · The Firewood | [the-firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/241-the-firewood.md) |
 | 河岸 · The Riverbank | [the-riverbank](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/242-the-riverbank.md) |
-| 鱼影 · The Fish Shadow | [the-fish-shadow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/243-the-fish-shadow.md) |每一章对应游戏的章节走法：
+| 鱼影 · The Fish Shadow | [the-fish-shadow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/243-the-fish-shadow.md) |
+| 西风起 · The West Wind Rises | [the-west-wind-rises](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/244-the-west-wind-rises.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
