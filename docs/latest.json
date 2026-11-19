@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-19T09:20:07.207Z",
+  "generated_at": "2026-11-19T09:23:38.629Z",
   "branch": "main",
-  "head": "39cd937",
-  "total_commits": 2294,
-  "pushed_at": "2026-11-19T17:19:40+08:00",
+  "head": "c5e4287",
+  "total_commits": 2296,
+  "pushed_at": "2026-11-19T17:23:30+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "c5e4287",
+      "at": "2026-11-19T17:23:30+08:00",
+      "subject": "feat(admin): W-Z444s 诚实卡 meas_l30 —— StateGraph 全线化实测（8 lanes 过图）——docs/admin/index.html + zh/en i18n"
+    },
+    {
+      "short": "9e7924c",
+      "at": "2026-11-19T17:20:42+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z444s (novels 247 · lore 525 · i18n 3267 · commits 2294)"
+    },
     {
       "short": "39cd937",
       "at": "2026-11-19T17:19:40+08:00",
@@ -21,16 +31,6 @@
       "short": "94c4f70",
       "at": "2026-11-19T16:57:22+08:00",
       "subject": "feat(canon): W-Z444 第二百四十七卷《谷雨 / Grain Rain》入典——卷二十之三十七 · 第七百零三年 · 谷雨（v3 前缀 247 条年表）"
-    },
-    {
-      "short": "5537461",
-      "at": "2026-11-19T16:39:56+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z443 (novels 246 · lore 523 · i18n 3267 · commits 2290)"
-    },
-    {
-      "short": "9412221",
-      "at": "2026-11-19T16:38:50+08:00",
-      "subject": "feat(canon): W-Z443 第二百四十六卷《立春 / Spring Begins》入典——卷二十之三十六 · 第七百零三年 · 立春（v3 前缀 246 条年表）"
     }
   ],
   "tracked_files": 1815,
