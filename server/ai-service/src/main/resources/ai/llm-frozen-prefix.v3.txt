@@ -374,6 +374,7 @@ End of frozen digest.
 230 · 蒸
 231 · 热气
 232 · 破壳
+233 · 灶灰
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

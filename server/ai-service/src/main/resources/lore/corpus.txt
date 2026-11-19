@@ -12639,6 +12639,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and thirty-two overall · the seven-hundred-and-third year, twenty-first part — The Split.)*
 
+# source: creative/novel/en/233-the-hearth-ash.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Twenty-Second Volume — The Hearth Ash
+
+---
+
+## Two Hundred and Thirty-Three: The Hearth Ash
+
+The seventeenth week after the spring equinox — Tuesday — morning — the fire burned.
+
+A-Shi stood at the doorway — the fire was low — in the belly of the hearth — the ash had thickened — he said: “ — it is time to sweep —” — his mother said: “ — it is time to sweep —” — A-Shi took a broom — he swept through it — the ash was less — his mother watched — she said: “ — it is clean —” — A-Shi said: “ — it is clean —” — the fire burned — A-Shi swept again — inside the belly of the hearth — the ash was gone — he said: “ — it is done —” — his mother said: “ — it is done —” — the fire burned — the fire burned — the fire burned.
+
+The hearth ash.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and thirty-three overall · the seven-hundred-and-third year, twenty-second part — The Hearth Ash.)*
+
 # source: creative/novel/en/24-beyond-the-threshold.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -28466,6 +28497,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百三十二卷 · 卷二十之二十一 · 第七百零三年 · 破壳）*
+
+# source: creative/novel/233-灶灰.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第二十二卷 —— 灶灰
+
+---
+
+## 二百三十三 · 灶灰
+
+立春后第十七周——周二——早上——灶火燃着。
+
+阿石站在门口——灶火小——灶肚子里——灶灰厚了——他说「——要清了——」——母亲说「——要清了——」——阿石拿了扫帚——他扫了一遍——灶灰少了——母亲看——她说「——干净了——」——阿石说「——干净了——」——灶火燃着——阿石又扫了——灶肚子里——灰尽了——他说「——好了——」——母亲说「——好了——」——灶火燃着——灶火燃着——灶火燃着。
+
+灶灰。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百三十三卷 · 卷二十之二十二 · 第七百零三年 · 灶灰）*
 
 # source: creative/novel/24-归途再启.md
 # 《跨界纪事：锚火守夜人》
