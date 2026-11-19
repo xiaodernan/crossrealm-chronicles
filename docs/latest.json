@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-19T05:44:20.962Z",
+  "generated_at": "2026-11-19T06:10:10.733Z",
   "branch": "main",
-  "head": "9b064fe",
-  "total_commits": 2266,
-  "pushed_at": "2026-11-19T13:43:43+08:00",
+  "head": "97a3a82",
+  "total_commits": 2268,
+  "pushed_at": "2026-11-19T14:09:47+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "97a3a82",
+      "at": "2026-11-19T14:09:47+08:00",
+      "subject": "migrate(llm): W-Z433 finish GPT-6.2-sol migration across repo + compose live verify"
+    },
+    {
+      "short": "65c0b87",
+      "at": "2026-11-19T13:44:29+08:00",
+      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z432 (novels 236 · lore 503 · i18n 3267 · commits 2266)"
+    },
     {
       "short": "9b064fe",
       "at": "2026-11-19T13:43:43+08:00",
@@ -21,16 +31,6 @@
       "short": "7b8e4aa",
       "at": "2026-11-19T13:33:20+08:00",
       "subject": "migrate(llm): W-Z431 upstream model gpt-6.1-terra to gpt-6.1-sol (upstream 503 no-channel on the old id)"
-    },
-    {
-      "short": "b33f20a",
-      "at": "2026-11-19T13:15:30+08:00",
-      "subject": "chore(latest): refresh the showcase fact pack from main — W-Z430 (novels 235 · lore 501 · i18n 3267 · commits 2262)"
-    },
-    {
-      "short": "fff8bf8",
-      "at": "2026-11-19T13:12:48+08:00",
-      "subject": "feat(canon): W-Z430 第二百三十五卷《灯芯 / The Wick》入典——卷二十之二十四 · 第七百零三年 · 灯芯（v3 前缀 235 条年表）"
     }
   ],
   "tracked_files": 1793,
@@ -39,7 +39,7 @@
   "lore_sources": 503,
   "novel_chapters_zh": 236,
   "novel_chapters_en": 236,
-  "milestone": "W-Z432",
+  "milestone": "W-Z433",
   "milestone_full": "卷 236 · 六百年守火线（236 / 236 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 503 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：236 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
