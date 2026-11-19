@@ -287,7 +287,8 @@ creative/music/soundtrack.html
 | 客栈 · The Inn | [the-inn](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/238-the-inn.md) |
 | 灶灰的影子 · The Shadow of the Ash | [the-shadow-of-the-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/239-the-shadow-of-the-ash.md) |
 | 灶灰的来信 · The Ash Letter | [the-ash-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/240-the-ash-letter.md) |
-| 柴 · The Firewood | [the-firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/241-the-firewood.md) |每一章对应游戏的章节走法：
+| 柴 · The Firewood | [the-firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/241-the-firewood.md) |
+| 河岸 · The Riverbank | [the-riverbank](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/242-the-riverbank.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

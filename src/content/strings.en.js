@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and forty-one volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and forty-two volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 241 volumes of the canon, fully readable
+· Canon Library — 242 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 241-volume index',
-  hm_body_codex: `Codex — 241 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 242-volume index',
+  hm_body_codex: `Codex — 242 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3389,6 +3389,7 @@ hm_title_codex: 'Codex · the 241-volume index',
 239 · The Shadow of the Ash — The twenty-third week after the spring equinox — Friday — morning — the fire burned; A-Shi stood at the doorway — he took a handful of ash — he scattered it across the earthen floor — he said: “ — scatter —” — he said: “ — the shadow —”; his mother said: “ — the shadow —” — the fire burned. Volume XX, twenty-ninth part.
 240 · The Ash Letter — The twenty-fourth week after the spring equinox — Saturday — afternoon — the fire burned; A-Shi stood at the doorway — he took out an old piece of paper — he placed it on the table — he said: “ — look —”; his mother said: “ — look —” — there were characters on the page — the characters were faint — he said: “ — they have faded —”; his mother said: “ — they have faded —”. Volume XX, thirtieth part.
 241 · The Firewood — The twenty-fifth week after the spring equinox — Sunday — morning — the fire burned; A-Shi stood at the doorway — the firewood pile was low — he went out — he picked up an armful of wood — he placed it into the hearth — the fire burned — he placed a second armful — the fire burned — he placed a third — the fire burned — his mother said: “ — enough —”; A-Shi said: “ — enough —”. Volume XX, thirty-first part.
+242 · The Riverbank — The twenty-sixth week after the spring equinox — Monday — afternoon — the fire burned; A-Shi stood at the doorway — he carried two bowls — he walked out — he walked to the river — he placed one bowl on the stone — he said: “ — the river —”; his mother said: “ — the river —” — he said: “ — the water —”; his mother said: “ — the water —”. Volume XX, thirty-second part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,

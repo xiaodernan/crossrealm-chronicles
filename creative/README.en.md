@@ -289,7 +289,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Inn | [the-inn](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/238-the-inn.md) |
 | The Shadow of the Ash | [the-shadow-of-the-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/239-the-shadow-of-the-ash.md) |
 | The Ash Letter | [the-ash-letter](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/240-the-ash-letter.md) |
-| The Firewood | [the-firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/241-the-firewood.md) |Chapter → game-chapter mapping:
+| The Firewood | [the-firewood](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/241-the-firewood.md) |
+| The Riverbank | [the-riverbank](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/242-the-riverbank.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

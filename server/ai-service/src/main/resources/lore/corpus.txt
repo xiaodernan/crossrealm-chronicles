@@ -12963,6 +12963,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and forty-one overall · the seven-hundred-and-third year, thirty-first part — The Firewood.)*
 
+# source: creative/novel/en/242-the-riverbank.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Thirty-Second Volume — The Riverbank
+
+---
+
+## Two Hundred and Forty-Two: The Riverbank
+
+The twenty-sixth week after the spring equinox — Monday — afternoon — the fire burned.
+
+A-Shi stood at the doorway — he carried two bowls — he walked out — he walked to the river — he placed one bowl on the stone — he said: “ — the river —” — his mother said: “ — the river —” — A-Shi sat down — he looked at the river — the fire burned — he said: “ — the water —” — his mother said: “ — the water —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+The riverbank.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and forty-two overall · the seven-hundred-and-third year, thirty-second part — The Riverbank.)*
+
 # source: creative/novel/en/25-moonlit-corridor.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -29069,6 +29100,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百四十一卷 · 卷二十之三十一 · 第七百零三年 · 柴）*
+
+# source: creative/novel/242-河岸.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第三十二卷 —— 河岸
+
+---
+
+## 二百四十二 · 河岸
+
+立春后第二十六周——周一——下午——灶火燃着。
+
+阿石站在门口——他拿了两个碗——他走出去——他走到河边——他放了一个碗在石上——他说「——河——」——母亲说「——河——」——阿石坐下——他看着河——灶火燃着——他说「——水——」——母亲说「——水——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+河岸。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百四十二卷 · 卷二十之三十二 · 第七百零三年 · 河岸）*
 
 # source: creative/novel/25-月光回廊.md
 # 《跨界纪事：锚火守夜人》
