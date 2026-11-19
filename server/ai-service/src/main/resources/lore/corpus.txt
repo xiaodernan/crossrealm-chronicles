@@ -13118,6 +13118,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and forty-six overall · the seven-hundred-and-third year, thirty-sixth part — Spring Begins.)*
 
+# source: creative/novel/en/247-grain-rain.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Thirty-Seventh Volume — Grain Rain
+
+---
+
+## Two Hundred and Forty-Seven: Grain Rain
+
+The thirty-first week after the spring equinox — Saturday — afternoon — the fire burned.
+
+A-Shi stood at the doorway — there were clouds in the sky — the rain was near — he said: “ — it is going to rain —” — his mother said: “ — it is near —” — the fire burned — A-Shi went out — he looked up — he waited — the fire burned — the fire burned — after a while — drops fell — drops fell on the iron at the mouth of the hearth — he said: “ — it has begun —” — his mother said: “ — it has begun —” — the fire burned — A-Shi went out — he walked to the river — he said: “ — the river is a little higher —” — his mother said: “ — the river is a little higher —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Grain rain.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and forty-seven overall · the seven-hundred-and-third year, thirty-seventh part — Grain Rain.)*
+
 # source: creative/novel/en/25-moonlit-corridor.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -29379,6 +29410,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百四十六卷 · 卷二十之三十六 · 第七百零三年 · 立春）*
+
+# source: creative/novel/247-谷雨.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第三十七卷 —— 谷雨
+
+---
+
+## 二百四十七 · 谷雨
+
+立春后第三十一周——周六——下午——灶火燃着。
+
+阿石站在门口——天上有云——快了——他说「——要下雨——」——母亲说「——快了——」——灶火燃着——阿石出去——他抬头——他看——灶火燃着——灶火燃着——过了一会——水滴了——滴在灶口的铁上——他说「——下了——」——母亲说「——下了——」——灶火燃着——阿石出去——他走到河边——他说「——河大了一点——」——母亲说「——河大了一点——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+谷雨。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百四十七卷 · 卷二十之三十七 · 第七百零三年 · 谷雨）*
 
 # source: creative/novel/25-月光回廊.md
 # 《跨界纪事：锚火守夜人》

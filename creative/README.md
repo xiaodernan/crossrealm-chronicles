@@ -292,7 +292,8 @@ creative/music/soundtrack.html
 | 鱼影 · The Fish Shadow | [the-fish-shadow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/243-the-fish-shadow.md) |
 | 西风起 · The West Wind Rises | [the-west-wind-rises](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/244-the-west-wind-rises.md) |
 | 云动 · The Clouds Move | [the-clouds-move](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/245-the-clouds-move.md) |
-| 立春 · Spring Begins | [spring-begins](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/246-spring-begins.md) |每一章对应游戏的章节走法：
+| 立春 · Spring Begins | [spring-begins](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/246-spring-begins.md) |
+| 谷雨 · Grain Rain | [grain-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/247-grain-rain.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
