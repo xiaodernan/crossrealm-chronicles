@@ -302,7 +302,8 @@ creative/music/soundtrack.html
 | 处暑 · Limit of Heat | [limit-of-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/253-limit-of-heat.md) |
 | 白露 · White Dew | [white-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/254-white-dew.md) |
 | 秋分 · Autumn Equinox | [autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/255-autumn-equinox.md) |
-| 寒露 · Cold Dew | [cold-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/256-cold-dew.md) |每一章对应游戏的章节走法：
+| 寒露 · Cold Dew | [cold-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/256-cold-dew.md) |
+| 霜降 · Frost Descent | [frost-descent](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/257-frost-descent.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

@@ -13491,6 +13491,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and fifty-six overall · the seven-hundred-and-third year, forty-sixth part — Cold Dew.)*
 
+# source: creative/novel/en/257-frost-descent.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-third Year — The Forty-Seventh Volume — Frost Descent
+
+---
+
+## Two Hundred and Fifty-Seven: Frost Descent
+
+The forty-first week after the spring equinox — Wednesday — morning — the fire burned.
+
+A-Shi stood at the doorway — there was white frost on the grass — he said: “ — frost descent —” — his mother said: “ — frost descent —” — the fire burned — A-Shi went out — he walked into the yard — he looked at the grass — it was white — he reached out — the frost did not stick — he said: “ — it is white —” — his mother said: “ — it is white —” — the fire burned — after a while — the sun came out — the frost melted — the grass showed green — he said: “ — the frost has melted —” — his mother said: “ — the frost has melted —” — the fire burned — his mother said: “ — winter draws near —” — A-Shi said: “ — winter draws near —” — his mother said: “ — don’t let the stove go out —” — A-Shi said: “ — don’t let the stove go out —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Frost descent.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and fifty-seven overall · the seven-hundred-and-third year, forty-seventh part — Frost Descent.)*
+
 # source: creative/novel/en/26-under-the-candle-flame.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -30062,6 +30093,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百五十六卷 · 卷二十之四十六 · 第七百零三年 · 寒露）*
+
+# source: creative/novel/257-霜降.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零三年 · 第四十七卷 —— 霜降
+
+---
+
+## 二百五十七 · 霜降
+
+立春后第四十一周——周三——早上——灶火燃着。
+
+阿石站在门口——草上有白霜——他说「——霜降——」——母亲说「——霜降——」——灶火燃着——阿石出去——他走到院子里——他看草——草上白了——他伸手——霜不粘——他说「——白了——」——母亲说「——白了——」——灶火燃着——过了一会——日头出来——霜化了——草绿了——他说「——霜化了——」——母亲说「——霜化了——」——灶火燃着——母亲说「——冬近了——」——阿石说「——冬近了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+霜降。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百五十七卷 · 卷二十之四十七 · 第七百零三年 · 霜降）*
 
 # source: creative/novel/26-烛火之下.md
 # 《跨界纪事：锚火守夜人》
