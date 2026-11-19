@@ -282,7 +282,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | The Steam Heat | [the-steam-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/231-the-steam-heat.md) |
 | The Split | [the-split](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/232-the-split.md) |
 | The Hearth Ash | [the-hearth-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/233-the-hearth-ash.md) |
-| The Kindle | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/234-the-kindle.md) |Chapter → game-chapter mapping:
+| The Kindle | [the-kindle](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/234-the-kindle.md) |
+| The Wick | [the-wick](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/235-the-wick.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
