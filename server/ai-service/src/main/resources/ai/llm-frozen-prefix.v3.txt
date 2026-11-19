@@ -384,6 +384,7 @@ End of frozen digest.
 240 · 灶灰的来信
 241 · 柴
 242 · 河岸
+243 · 鱼影
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
