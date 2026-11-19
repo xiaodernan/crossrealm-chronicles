@@ -284,7 +284,8 @@ creative/music/soundtrack.html
 | 灯芯 · The Wick | [the-wick](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/235-the-wick.md) |
 | 烬 · The Ember | [the-ember](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/236-the-ember.md) |
 | 风铃 · The Wind Bell | [the-wind-bell](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/237-the-wind-bell.md) |
-| 客栈 · The Inn | [the-inn](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/238-the-inn.md) |每一章对应游戏的章节走法：
+| 客栈 · The Inn | [the-inn](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/238-the-inn.md) |
+| 灶灰的影子 · The Shadow of the Ash | [the-shadow-of-the-ash](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/239-the-shadow-of-the-ash.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|
