@@ -418,6 +418,8 @@ End of frozen digest.
 274 · 白露
 275 · 秋分
 276 · 寒露
+277 · 霜降
+278 · 小雪
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

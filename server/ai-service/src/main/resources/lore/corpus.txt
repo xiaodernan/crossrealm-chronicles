@@ -14225,6 +14225,68 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and seventy-six overall · the seven-hundred-and-fourth year, sixty-sixth part — Cold Dew.)*
 
+# source: creative/novel/en/277-frosts-descent.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Sixty-Seventh Volume — Frost's Descent
+
+---
+
+## Two Hundred and Seventy-Seven: Frost's Descent
+
+The fourteenth day after start of autumn — Monday — morning — the fire burned.
+
+A-Shi stood at the doorway — white on the ground — he said: “ — frost’s descent —” — his mother said: “ — frost’s descent —” — the fire burned — A-Shi went out — he walked into the yard — grass tips white as salt — freezing to the touch — he said: “ — frost’s descent has come —”; his mother said: “ — frost’s descent has come —” — the fire burned — after a while — A-Shi cupped a handful — ice flakes — he said: “ — it’s frozen —”; his mother said: “ — it’s frozen —” — the fire burned — his mother said: “ — winter is near —”; A-Shi said: “ — winter is near —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Frost's descent.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventy-seven overall · the seven-hundred-and-fourth year, sixty-seventh part — Frost's Descent.)*
+
+# source: creative/novel/en/278-minor-snow.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Sixty-Eighth Volume — Minor Snow
+
+---
+
+## Two Hundred and Seventy-Eight: Minor Snow
+
+The nineteenth day after start of autumn — Tuesday — morning — the fire burned.
+
+A-Shi stood at the doorway — white frost on the ground — he said: " — minor snow —"; his mother said: " — minor snow —" — the fire burned — A-Shi went out — he walked into the yard — grass tips white as frost — icy to the touch — he said: " — minor snow has fallen —"; his mother said: " — minor snow has fallen —" — the fire burned — after a while — A-Shi cupped a handful — water froze — he said: " — water froze —"; his mother said: " — water froze —" — the fire burned — his mother said: " — footsteps of winter —"; A-Shi said: " — footsteps of winter —"; his mother said: " — the stove is still bright —"; A-Shi said: " — the stove is still bright —" — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Minor snow.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventy-eight overall · the seven-hundred-and-fourth year, sixty-eighth part — Minor Snow.)*
+
 # source: creative/novel/en/28-the-new-sapling.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -31418,6 +31480,54 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百七十六卷 · 卷二十之六十六 · 第七百零四年 · 寒露）*
+
+# source: creative/novel/277-霜降.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第六十七卷 —— 霜降
+
+---
+
+## 二百七十七 · 霜降
+
+立秋后第十四天——周一——早上——灶火燃着。
+
+阿石站在门口——地上有白——他说「——霜降——」——母亲说「——霜降——」——灶火燃着——阿石出去——他走到院子里——草梢上白得像盖了一层盐——触手冻人——他说「——霜降了——」——母亲说「——霜降了——」——灶火燃着——过了一会——阿石掬了一掬——冰碴——他说「——冰了——」——母亲说「——冰了——」——灶火燃着——母亲说「——冬将近——」——阿石说「——冬将近——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+霜降。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百七十七卷 · 卷二十之六十七 · 第七百零四年 · 霜降）*
+
+# source: creative/novel/278-小雪.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第六十八卷 —— 小雪
+
+---
+
+## 二百七十八 · 小雪
+
+立秋后第十九天——周二——早上——灶火燃着。\n\n阿石站在门口——地上有白霜——他说「——小雪——」——母亲说「——小雪——」——灶火燃着——阿石出去——他走到院子里——草梢上白得像霜——触手冰凉——他说「——小雪落了——」——母亲说「——小雪落了——」——灶火燃着——过了一会——阿石掬了一掬——水结冰了——他说「——水冰了——」——母亲说「——水冰了——」——灶火燃着——母亲说「——冬的脚步——」——阿石说「——冬的脚步——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。\n\n小雪。\n\n灶火燃着。\n\n灶火燃着。\n\n灶火燃着。\n\n灶火燃着。\n\n灶火燃着。
+
+--- 
+
+*(卷二十 · 本章完 · 跨界线总第二百七十八卷 · 卷二十之六十八 · 第七百零四年 · 小雪)*
 
 # source: creative/novel/28-新苗.md
 # 《跨界纪事：锚火守夜人》
