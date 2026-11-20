@@ -112,14 +112,14 @@ describe('SoulStreakSystem —— 连杀魂火', () => {
     expect(s.best).toBe(4);
   });
 
-  it('best 只增不减；fromJSON 恢复后再杀只涨不回退', () => {
+  it('fromJSON 是快照恢复：热读另一个槽会接受该档自己的 best（可更小）', () => {
     const s = new SoulStreakSystem(game());
     s.fromJSON({ best: 9 });
     expect(s.best).toBe(9);
     s.fromJSON({ best: 3 });
-    expect(s.best).toBe(9); // ← 防止读旧档把最佳改小
-    defeated();
-    expect(s.best).toBe(9);
+    expect(s.best).toBe(3); // 读新档就按新档走，不被当前会话的高值挡住
+    defeated(); defeated();
+    expect(s.best).toBe(3);
   });
 
   it('toJSON 只存 best，往返幂等', () => {
@@ -137,6 +137,10 @@ describe('SoulStreakSystem —— 连杀魂火', () => {
     const s = new SoulStreakSystem(game());
     s.fromJSON({ best: -7 });
     expect(s.best).toBe(0); // ← 守卫：负数不能当最佳
+    s.fromJSON({ best: 'abc' });
+    expect(s.best).toBe(0);
+    s.fromJSON({ best: NaN });
+    expect(s.best).toBe(0);
     defeated();
     expect(s.best).toBe(1);
   });

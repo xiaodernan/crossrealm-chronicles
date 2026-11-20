@@ -51,8 +51,8 @@ export class SoulStreakSystem {
   fromJSON(data) {
     if (!data) return;
     const saved = Number(data.best);
-    // best 是「历史最佳」，只增不减：旧档/回档/坏档不能把它改小，
-    // 非法值（NaN/负数/非数字）更不能污染运行时。
-    if (Number.isFinite(saved) && saved > this.best) this.best = Math.floor(saved);
+    // 存档是「快照恢复」语义：热读另一个槽时必须接受该档自己的 best（可能更小）。
+    // 但坏档里的负数 / NaN / 非数字不能污染运行时，非法值一律归零。
+    this.best = Number.isFinite(saved) && saved >= 0 ? Math.floor(saved) : 0;
   }
 }
