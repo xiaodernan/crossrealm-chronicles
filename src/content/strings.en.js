@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and seventy-three volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and seventy-four volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 273 volumes of the canon, fully readable
+· Canon Library — 274 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 273-volume index',
-  hm_body_codex: `Codex — 273 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 274-volume index',
+  hm_body_codex: `Codex — 274 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3421,6 +3421,7 @@ hm_title_codex: 'Codex · the 273-volume index',
 271 · Summer Solstice — The thirteenth day after summer begins — Thursday — morning — the fire burned; A-Shi stood at the doorway — the sun was fiercest — the shadow was shortest — he said: “ — summer solstice —”; his mother said: “ — summer solstice —” — he walked into the yard — the wheat ears hung low — grain by grain gold — the hand clasped hot wind — he said: “ — it is nearly ripe —”; his mother said: “ — it is nearly ripe —” — after a while — A-Shi broke off an ear — he said: “ — this kernel is the fullest —”; his mother said: “ — this kernel is the fullest —” — his mother said: “ — the longest day of the year —”; A-Shi said: “ — the longest day of the year —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, sixty-first part.
 272 · Minor Heat — The sixteenth day after summer begins — Tuesday — morning — the fire burned; A-Shi stood at the doorway — a wave of heat surged over — he said: “ — minor heat —”; his mother said: “ — minor heat —” — he walked into the yard — the wheat had turned yellow — the ground scorched his feet — he said: “ — it is nearly sun-dried —”; his mother said: “ — it is nearly sun-dried —” — after a while — A-Shi drew a bucket of well water — ice-cold — he splashed it at the foot of the courtyard wall — he said: “ — the wall is cool now —”; his mother said: “ — the wall is cool now —” — his mother said: “ — what a hot day —”; A-Shi said: “ — what a hot day —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, sixty-second part.
 273 · Start of Autumn — The thirtieth day after summer begins — Saturday — morning — the fire burned; A-Shi stood at the doorway — there was a chill in the wind — he said: “ — start of autumn —”; his mother said: “ — start of autumn —” — he walked into the yard — the treetop leaves had a tinge of yellow — he said: “ — the leaves are turning yellow —”; his mother said: “ — the leaves are turning yellow —” — after a while — geese called in the distance — the sky had grown high — he said: “ — the geese are returning —”; his mother said: “ — the geese are returning —” — his mother said: “ — nights will turn cool —”; A-Shi said: “ — nights will turn cool —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, sixty-third part.
+274 · White Dew — The fourth day after start of autumn — Wednesday — morning — the fire burned; A-Shi stood at the doorway — white beads on the grass — he said: “ — white dew —”; his mother said: “ — white dew —” — he walked into the yard — grass tips gleamed crystal — a touch of cool gathered them — he said: “ — white dew has fallen —”; his mother said: “ — white dew has fallen —” — after a while — A-Shi cupped a handful — icy to the bone — he said: “ — cold water —”; his mother said: “ — cold water —” — his mother said: “ — autumn is growing —”; A-Shi said: “ — autumn is growing —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, sixty-fourth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,

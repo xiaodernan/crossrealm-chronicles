@@ -14132,6 +14132,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and seventy-three overall · the seven-hundred-and-fourth year, sixty-third part — Start of Autumn.)*
 
+# source: creative/novel/en/274-white-dew.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Sixty-Fourth Volume — White Dew
+
+---
+
+## Two Hundred and Seventy-Four: White Dew
+
+The fourth day after start of autumn — Wednesday — morning — the fire burned.
+
+A-Shi stood at the doorway — white beads on the grass — he said: “ — white dew —” — his mother said: “ — white dew —” — the fire burned — A-Shi went out — he walked into the yard — grass tips gleamed crystal — a touch of cool gathered them — he said: “ — white dew has fallen —” — his mother said: “ — white dew has fallen —” — the fire burned — after a while — A-Shi cupped a handful — icy to the bone — he said: “ — cold water —” — his mother said: “ — cold water —” — the fire burned — his mother said: “ — autumn is growing —” — A-Shi said: “ — autumn is growing —” — his mother said: “ — the stove is still bright —” — A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+White dew.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventy-four overall · the seven-hundred-and-fourth year, sixty-fourth part — White Dew.)*
+
 # source: creative/novel/en/28-the-new-sapling.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -31232,6 +31263,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百七十三卷 · 卷二十之六十三 · 第七百零四年 · 立秋）*
+
+# source: creative/novel/274-白露.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第六十四卷 —— 白露
+
+---
+
+## 二百七十四 · 白露
+
+立秋后第四天——周三——早上——灶火燃着。
+
+阿石站在门口——草上有白珠子——他说「——白露——」——母亲说「——白露——」——灶火燃着——阿石出去——他走到院子里——草梢上晶晶亮——凉气一沾就聚——他说「——白露落了——」——母亲说「——白露落了——」——灶火燃着——过了一会——阿石掬了一掬——水凉得刺骨——他说「——好凉的水——」——母亲说「——好凉的水——」——灶火燃着——母亲说「——秋意正在长——」——阿石说「——秋意正在长——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+白露。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百七十四卷 · 卷二十之六十四 · 第七百零四年 · 白露）*
 
 # source: creative/novel/28-新苗.md
 # 《跨界纪事：锚火守夜人》
