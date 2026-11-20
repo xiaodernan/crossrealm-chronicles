@@ -14101,6 +14101,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and seventy-two overall · the seven-hundred-and-fourth year, sixty-second part — Minor Heat.)*
 
+# source: creative/novel/en/273-start-of-autumn.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Sixty-Third Volume — Start of Autumn
+
+---
+
+## Two Hundred and Seventy-Three: Start of Autumn
+
+The thirtieth day after summer begins — Saturday — morning — the fire burned.
+
+A-Shi stood at the doorway — there was a chill in the wind — he said: “ — start of autumn —” — his mother said: “ — start of autumn —” — the fire burned — A-Shi went out — he walked into the yard — the treetop leaves had a tinge of yellow — he said: “ — the leaves are turning yellow —” — his mother said: “ — the leaves are turning yellow —” — the fire burned — after a while — geese called in the distance — the sky had grown high — he said: “ — the geese are returning —” — his mother said: “ — the geese are returning —” — the fire burned — his mother said: “ — nights will turn cool —” — A-Shi said: “ — nights will turn cool —” — his mother said: “ — the stove is still bright —” — A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Start of autumn.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventy-three overall · the seven-hundred-and-fourth year, sixty-third part — Start of Autumn.)*
+
 # source: creative/novel/en/28-the-new-sapling.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -31170,6 +31201,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百七十二卷 · 卷二十之六十二 · 第七百零四年 · 小暑）*
+
+# source: creative/novel/273-立秋.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第六十三卷 —— 立秋
+
+---
+
+## 二百七十三 · 立秋
+
+立夏后第三十天——周六——早上——灶火燃着。
+
+阿石站在门口——风里有凉——他说「——立秋——」——母亲说「——立秋——」——灶火燃着——阿石出去——他走到院子里——树梢上的叶子尖有一点黄——他说「——叶子要黄了——」——母亲说「——叶子要黄了——」——灶火燃着——过了一会——远处有雁叫——天空高了——他说「——雁回来了——」——母亲说「——雁回来了——」——灶火燃着——母亲说「——夜里要凉了——」——阿石说「——夜里要凉了——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+立秋。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百七十三卷 · 卷二十之六十三 · 第七百零四年 · 立秋）*
 
 # source: creative/novel/28-新苗.md
 # 《跨界纪事：锚火守夜人》

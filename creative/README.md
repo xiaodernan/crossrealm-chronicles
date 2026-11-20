@@ -318,7 +318,8 @@ creative/music/soundtrack.html
 | 小满 · Grain Buds | [grain-buds](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/269-grain-buds.md) |
 | 芒种 · Grain in Ear | [grain-in-ear](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/270-grain-in-ear.md) |
 | 夏至 · Summer Solstice | [summer-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/271-summer-solstice.md) |
-| 小暑 · Minor Heat | [minor-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/272-minor-heat.md) |每一章对应游戏的章节走法：
+| 小暑 · Minor Heat | [minor-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/272-minor-heat.md) |
+| 立秋 · Start of Autumn | [start-of-autumn](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/273-start-of-autumn.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

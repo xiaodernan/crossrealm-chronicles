@@ -320,7 +320,8 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Grain Buds | [grain-buds](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/269-grain-buds.md) |
 | Grain in Ear | [grain-in-ear](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/270-grain-in-ear.md) |
 | Summer Solstice | [summer-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/271-summer-solstice.md) |
-| Minor Heat | [minor-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/272-minor-heat.md) |Chapter → game-chapter mapping:
+| Minor Heat | [minor-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/272-minor-heat.md) |
+| Start of Autumn | [start-of-autumn](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/273-start-of-autumn.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
