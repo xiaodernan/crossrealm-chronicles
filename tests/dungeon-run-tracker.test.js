@@ -94,4 +94,18 @@ describe('DungeonRunTracker 上限与存档', () => {
     tracker.fromJSON(null); // 空档 → 安全 no-op
     expect(tracker.clears.d1).toBe(1);
   });
+
+  it('fromJSON 坏档：runs 超过上限时截到 40 条（保留最新的前 40）', () => {
+    const many = Array.from({ length: 100 }, (_, i) => ({ id: 'd', seconds: i }));
+    tracker.fromJSON({ clears: {}, runs: many });
+    expect(tracker.runs).toHaveLength(40);
+    expect(tracker.runs[0].seconds).toBe(0); // unshift 顺序：最新在前
+    expect(tracker.runs[39].seconds).toBe(39);
+  });
+
+  it('fromJSON 脏字段安全：runs 非数组 → 空；clears 非对象 → 空对象', () => {
+    tracker.fromJSON({ clears: 'bad', runs: 'bad' });
+    expect(tracker.runs).toEqual([]);
+    expect(tracker.clears).toEqual({});
+  });
 });

@@ -72,7 +72,12 @@ export class DungeonRunTracker {
 
   fromJSON(data) {
     if (!data) return;
-    this.clears = { ...(data.clears ?? {}) };
-    this.runs = data.runs ?? [];
+    // 存档是外部输入：清数字典与记录列表都要在这里收口，不能绕过
+    // _record 的 40 条上限与 toJSON 的 slice 口径（同 MapMarkerManager.fromJSON 家族）。
+    const clears = data.clears;
+    this.clears = (clears && typeof clears === 'object' && !Array.isArray(clears))
+      ? { ...clears }
+      : {};
+    this.runs = Array.isArray(data.runs) ? data.runs.slice(0, 40) : [];
   }
 }
