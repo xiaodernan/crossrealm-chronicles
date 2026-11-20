@@ -321,7 +321,8 @@ creative/music/soundtrack.html
 | 小暑 · Minor Heat | [minor-heat](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/272-minor-heat.md) |
 | 立秋 · Start of Autumn | [start-of-autumn](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/273-start-of-autumn.md) |
 | 白露 · White Dew | [white-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/274-white-dew.md) |
-| 秋分 · Autumn Equinox | [autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/275-autumn-equinox.md) |每一章对应游戏的章节走法：
+| 秋分 · Autumn Equinox | [autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/275-autumn-equinox.md) |
+| 寒露 · Cold Dew | [cold-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/276-cold-dew.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

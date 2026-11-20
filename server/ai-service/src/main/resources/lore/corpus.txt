@@ -14194,6 +14194,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and seventy-five overall · the seven-hundred-and-fourth year, sixty-fifth part — Autumn Equinox.)*
 
+# source: creative/novel/en/276-cold-dew.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Sixty-Sixth Volume — Cold Dew
+
+---
+
+## Two Hundred and Seventy-Six: Cold Dew
+
+The eleventh day after start of autumn — Friday — morning — the fire burned.
+
+A-Shi stood at the doorway — dew drops on grass froze — he said: “ — cold dew —” — his mother said: “ — cold dew —” — the fire burned — A-Shi went out — he walked into the yard — grass tips white as frost — icy to the touch — he said: “ — cold dew has fallen —”; his mother said: “ — cold dew has fallen —” — the fire burned — after a while — A-Shi cupped a handful — water colder — he said: “ — colder water —”; his mother said: “ — colder water —” — the fire burned — his mother said: “ — frost will come —”; A-Shi said: “ — frost will come —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Cold dew.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventy-six overall · the seven-hundred-and-fourth year, sixty-sixth part — Cold Dew.)*
+
 # source: creative/novel/en/28-the-new-sapling.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -31356,6 +31387,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百七十五卷 · 卷二十之六十五 · 第七百零四年 · 秋分）*
+
+# source: creative/novel/276-寒露.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第六十六卷 —— 寒露
+
+---
+
+## 二百七十六 · 寒露
+
+立秋后第十一天——周五——早上——灶火燃着。
+
+阿石站在门口——草上的水珠结冰了——他说「——寒露——」——母亲说「——寒露——」——灶火燃着——阿石出去——他走到院子里——草梢上白得像霜——触手冰凉——他说「——寒露落了——」——母亲说「——寒露落了——」——灶火燃着——过了一会——阿石掬了一掬——水更冷——他说「——更冷的水——」——母亲说「——更冷的水——」——灶火燃着——母亲说「——霜将至——」——阿石说「——霜将至——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+寒露。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百七十六卷 · 卷二十之六十六 · 第七百零四年 · 寒露）*
 
 # source: creative/novel/28-新苗.md
 # 《跨界纪事：锚火守夜人》
