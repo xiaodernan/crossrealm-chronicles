@@ -92,4 +92,32 @@ describe('MapMarkerManager.remove / cycle / 存档', () => {
     manager.fromJSON(null);
     expect(manager.activeId).toBe('x');
   });
+
+  it('fromJSON 存档塞超上限的点：截断到 8，保留最近的（末尾），不是最旧的', () => {
+    const many = Array.from({ length: 20 }, (_, i) => ({
+      id: `m${i}`, x: i, z: i, label: `L${i}`,
+    }));
+    manager.fromJSON({ markers: many, activeId: 'm19' });
+    expect(manager.markers).toHaveLength(8);
+    expect(manager.markers.map((m) => m.id)).toEqual([
+      'm12', 'm13', 'm14', 'm15', 'm16', 'm17', 'm18', 'm19',
+    ]);
+    expect(manager.getActive()?.id).toBe('m19'); // 活动点仍在（在保留段里）
+  });
+
+  it('fromJSON 的 activeId 指向被截断掉的老点：回落到保留段第一个，不留悬空 id', () => {
+    const many = Array.from({ length: 12 }, (_, i) => ({ id: `m${i}`, x: i, z: i }));
+    manager.fromJSON({ markers: many, activeId: 'm2' }); // m2 落在被丢掉的前 4 个里
+    expect(manager.markers).toHaveLength(8);
+    expect(manager.activeId).toBe(manager.markers[0].id);
+    expect(manager.getActive()).not.toBeNull();
+  });
+
+  it('fromJSON 脏字段安全：markers 非数组 / 混合非法项 → 空账本或只留合法点', () => {
+    manager.fromJSON({ markers: 'not-an-array' });
+    expect(manager.markers).toEqual([]);
+    manager.fromJSON({ markers: [null, { id: 'ok', x: 1, z: 2 }, 3] });
+    expect(manager.markers).toHaveLength(1);
+    expect(manager.markers[0].id).toBe('ok');
+  });
 });

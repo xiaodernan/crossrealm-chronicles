@@ -72,7 +72,13 @@ export class MapMarkerManager {
 
   fromJSON(data) {
     if (!data) return;
-    this.markers = data.markers ?? [];
-    this.activeId = data.activeId ?? this.markers[0]?.id ?? null;
+    // 存档是外部输入：非数组、混合非法项、超上限的点数都要在这里被挡住。
+    // 与 add() 同一口径——保留最近 maxMarkers 个（丢最旧的），不触发 toast/广播。
+    const raw = Array.isArray(data.markers) ? data.markers : [];
+    const valid = raw.filter((m) => m && typeof m === 'object' && typeof m.id === 'string' && m.id);
+    this.markers = valid.length > this.maxMarkers ? valid.slice(-this.maxMarkers) : valid;
+    const ids = new Set(this.markers.map((m) => m.id));
+    const saved = data.activeId;
+    this.activeId = ids.has(saved) ? saved : (this.markers[0]?.id ?? null);
   }
 }
