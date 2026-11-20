@@ -2405,7 +2405,7 @@ export const STRINGS_EN = Object.freeze({
   ending_flame_title: 'Your flame is still burning',
   ending_flame_sub: 'The fire does not dim at the end — it only changes spectrum',
   start_crossmedia_title: '── Crossrealm Chronicles · A Transmedia Universe ──',
-  start_crossmedia_caption: 'Two hundred and seventy-six volumes of the canon · film script · 25-track OST booklet — all built into the game',
+  start_crossmedia_caption: 'Two hundred and seventy-eight volumes of the canon · film script · 25-track OST booklet — all built into the game',
   start_keeper_badge: 'Echo-keeper · the flame endures',
   start_ticker_label: 'Now · fireside rumors',
 
@@ -3090,7 +3090,7 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 · Dungeons — maze clear records
 · Styles — sword/staff skill tree preview
 · Side Quests — optional objectives, auto-reward souls
-· Canon Library — 276 volumes of the canon, fully readable
+· Canon Library — 278 volumes of the canon, fully readable
 · Starpath Reading — one daily sign, the flame speaks
 · Fortune Path — three questions, one stateful route
 · Trisolar Tide — one weekly cast, three cards revealed together
@@ -3143,8 +3143,8 @@ Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
 The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
-hm_title_codex: 'Codex · the 276-volume index',
-  hm_body_codex: `Codex — 276 volumes, synopsis in one line each.
+hm_title_codex: 'Codex · the 278-volume index',
+  hm_body_codex: `Codex — 278 volumes, synopsis in one line each.
 
 00 · Prologue · A Sway Under the Surface
 01 · Chapter One · The Intersection — a pillar of light gets lit; the one who does it gets a cycle.
@@ -3424,6 +3424,8 @@ hm_title_codex: 'Codex · the 276-volume index',
 274 · White Dew — The fourth day after start of autumn — Wednesday — morning — the fire burned; A-Shi stood at the doorway — white beads on the grass — he said: “ — white dew —”; his mother said: “ — white dew —” — he walked into the yard — grass tips gleamed crystal — a touch of cool gathered them — he said: “ — white dew has fallen —”; his mother said: “ — white dew has fallen —” — after a while — A-Shi cupped a handful — icy to the bone — he said: “ — cold water —”; his mother said: “ — cold water —” — his mother said: “ — autumn is growing —”; A-Shi said: “ — autumn is growing —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, sixty-fourth part.
 275 · Autumn Equinox — The seventh day after start of autumn — Monday — morning — the fire burned; A-Shi stood at the doorway — shadows were equal — he said: “ — autumn equinox —”; his mother said: “ — autumn equinox —” — he walked into the yard — day and night of equal length — he said: “ — day and night are equal —”; his mother said: “ — day and night are equal —” — after a while — the wind no longer like summer — not so hot — he said: “ — the wind has softened —”; his mother said: “ — the wind has softened —” — his mother said: “ — the hour of harvest —”; A-Shi said: “ — the hour of harvest —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, sixty-fifth part.
 276 · Cold Dew — The eleventh day after start of autumn — Friday — morning — the fire burned; A-Shi stood at the doorway — dew drops on grass froze — he said: “ — cold dew —”; his mother said: “ — cold dew —” — he walked into the yard — grass tips white as frost — icy to the touch — he said: “ — cold dew has fallen —”; his mother said: “ — cold dew has fallen —” — after a while — A-Shi cupped a handful — water colder — he said: “ — colder water —”; his mother said: “ — colder water —” — his mother said: “ — frost will come —”; A-Shi said: “ — frost will come —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, sixty-sixth part.
+277 · Frost’s Descent — The fourteenth day after start of autumn — Monday — morning — the fire burned; A-Shi stood at the doorway — white on the ground — he said: “ — frost’s descent —”; his mother said: “ — frost’s descent —” — he walked into the yard — grass tips white as salt — freezing to the touch — he said: “ — frost’s descent has come —”; his mother said: “ — frost’s descent has come —” — after a while — A-Shi cupped a handful — ice flakes — he said: “ — it’s frozen —”; his mother said: “ — it’s frozen —” — his mother said: “ — winter is near —”; A-Shi said: “ — winter is near —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —”. Volume XX, sixty-seventh part.
+278 · Minor Snow — The nineteenth day after start of autumn — Tuesday — morning — the fire burned; A-Shi stood at the doorway — white on the ground — he said: " — minor snow —"; his mother said: " — minor snow —" — he walked into the yard — grass tips white as frost — icy to the touch — he said: " — minor snow has fallen —"; his mother said: " — minor snow has fallen —" — after a while — A-Shi cupped a handful — water froze — he said: " — water froze —"; his mother said: " — water froze —" — his mother said: " — footsteps of winter —"; A-Shi said: " — footsteps of winter —" — his mother said: " — the stove is still bright —"; A-Shi said: " — the stove is still bright —". Volume XX, sixty-eighth part.
 
 Continue reading outside the game? GitHub, bilingual full text:
 github.com/xiaodernan/crossrealm-chronicles · creative/novel/`,
