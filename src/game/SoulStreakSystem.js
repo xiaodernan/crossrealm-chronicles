@@ -49,6 +49,10 @@ export class SoulStreakSystem {
   }
 
   fromJSON(data) {
-    if (data) this.best = data.best ?? 0;
+    if (!data) return;
+    const saved = Number(data.best);
+    // best 是「历史最佳」，只增不减：旧档/回档/坏档不能把它改小，
+    // 非法值（NaN/负数/非数字）更不能污染运行时。
+    if (Number.isFinite(saved) && saved > this.best) this.best = Math.floor(saved);
   }
 }
