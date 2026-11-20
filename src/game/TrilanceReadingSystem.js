@@ -75,7 +75,11 @@ export class TrilanceReadingSystem {
   weekKey() { return isoWeekKey(); }
 
   canCastThisWeek() {
-    return this.state?.week !== this.weekKey();
+    if (this.state?.week !== this.weekKey()) return true;
+    // 与 FlameReadingSystem.canDrawToday 同源守卫：本周标记在、但牌面水化后
+    // 不足 3 张（字段丢失 / 内容下架 / 半截迁移）时视为可重起，避免自锁一周。
+    const cur = this.thisWeek();
+    return !cur || !Array.isArray(cur.cards) || cur.cards.length !== 3;
   }
 
   /** 本周已起的曜盘（未起则 null） */

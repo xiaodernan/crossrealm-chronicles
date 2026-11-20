@@ -60,7 +60,8 @@ export class FortunePathSystem {
   }
 
   canDrawToday() {
-    return this.state?.today !== todayKey();
+    if (this.state?.today !== todayKey()) return true;
+    return this.todayEnding() === null;
   }
 
   todayEnding() {

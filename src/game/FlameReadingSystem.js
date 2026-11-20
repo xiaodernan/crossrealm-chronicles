@@ -64,9 +64,16 @@ export class FlameReadingSystem {
     } catch { /* 隐私模式 / 配额满 → 静默 */ }
   }
 
-  /** 今天可否再占一张（UTC 边界） */
+  /**
+   * 今天可否再抽一张（UTC 边界）
+   *
+   * 判据必须包含「今日卡还能读回」：只认 `today` 标志位会在内容字段损坏时
+   * 把玩家锁死——今天既抽不了、也拿不到卡，直到 UTC 翻页。内容无效时视为可抽，
+   * 下次 draw() 会顺手把标志位与内容一起重写（自检自愈）。
+   */
   canDrawToday() {
-    return this.state?.today !== todayKey();
+    if (this.state?.today !== todayKey()) return true;
+    return this.todayCard() === null;
   }
 
   /** 今天已占的卡（若无 → null） */
