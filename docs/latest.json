@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-20T06:01:57.664Z",
+  "generated_at": "2026-11-20T06:03:13.860Z",
   "branch": "main",
-  "head": "0726bc9",
-  "total_commits": 2378,
-  "pushed_at": "2026-11-20T14:01:13+08:00",
+  "head": "95b69f3",
+  "total_commits": 2380,
+  "pushed_at": "2026-11-20T14:02:59+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "95b69f3",
+      "at": "2026-11-20T14:02:59+08:00",
+      "subject": "feat(canon): W-Z483 第二百八十三卷《元宵 / Lantern Festival》入典"
+    },
+    {
+      "short": "2b0eee7",
+      "at": "2026-11-20T14:02:15+08:00",
+      "subject": "fix(home): ribbon 281->282 volumes (align with latest.json W-Z483)"
+    },
     {
       "short": "0726bc9",
       "at": "2026-11-20T14:01:13+08:00",
@@ -21,27 +31,17 @@
       "short": "b76ea37",
       "at": "2026-11-20T13:59:36+08:00",
       "subject": "feat(canon): W-Z483 第二百八十一卷《小寒 / Minor Cold》入典"
-    },
-    {
-      "short": "3f305f3",
-      "at": "2026-11-20T13:58:39+08:00",
-      "subject": "fix(home): ribbon 279->280 volumes (align with latest.json W-Z483)"
-    },
-    {
-      "short": "fe9d76a",
-      "at": "2026-11-20T13:57:59+08:00",
-      "subject": "feat(canon): W-Z483 第二百八十卷《冬至 / Winter Solstice》入典"
     }
   ],
-  "tracked_files": 1892,
+  "tracked_files": 1894,
   "test_files": 468,
   "i18n_keys": 3267,
   "lore_sources": 587,
-  "novel_chapters_zh": 282,
-  "novel_chapters_en": 282,
+  "novel_chapters_zh": 283,
+  "novel_chapters_en": 283,
   "milestone": "W-Z483",
-  "milestone_full": "卷 282 · 六百年守火线（282 / 282 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 587 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：282 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "milestone_full": "卷 283 · 六百年守火线（283 / 283 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 587 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：283 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
