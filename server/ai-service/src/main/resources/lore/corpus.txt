@@ -14163,6 +14163,37 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and seventy-four overall · the seven-hundred-and-fourth year, sixty-fourth part — White Dew.)*
 
+# source: creative/novel/en/275-autumn-equinox.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Sixty-Fifth Volume — Autumn Equinox
+
+---
+
+## Two Hundred and Seventy-Five: Autumn Equinox
+
+The seventh day after start of autumn — Monday — morning — the fire burned.
+
+A-Shi stood at the doorway — shadows were equal — he said: “ — autumn equinox —” — his mother said: “ — autumn equinox —” — the fire burned — A-Shi went out — he walked into the yard — day and night of equal length — he said: “ — day and night are equal —”; his mother said: “ — day and night are equal —” — the fire burned — after a while — the wind no longer like summer — not so hot — he said: “ — the wind has softened —”; his mother said: “ — the wind has softened —” — the fire burned — his mother said: “ — the hour of harvest —”; A-Shi said: “ — the hour of harvest —” — his mother said: “ — the stove is still bright —”; A-Shi said: “ — the stove is still bright —” — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned — the fire burned.
+
+Autumn equinox.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+The fire burned.
+
+---
+
+*(End of volume XX · Volume two hundred and seventy-five overall · the seven-hundred-and-fourth year, sixty-fifth part — Autumn Equinox.)*
+
 # source: creative/novel/en/28-the-new-sapling.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -31294,6 +31325,37 @@ F2 隐藏 HUD。
 ---
 
 *（卷二十 · 本章完 · 跨界线总第二百七十四卷 · 卷二十之六十四 · 第七百零四年 · 白露）*
+
+# source: creative/novel/275-秋分.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第六十五卷 —— 秋分
+
+---
+
+## 二百七十五 · 秋分
+
+立秋后第七天——周一——早上——灶火燃着。
+
+阿石站在门口——影子一样长——他说「——秋分——」——母亲说「——秋分——」——灶火燃着——阿石出去——他走到院子里——日头与夜一样长——他说「——昼夜一样长——」——母亲说「——昼夜一样长——」——灶火燃着——过了一会——风不像夏了——不那么烫——他说「——风软了——」——母亲说「——风软了——」——灶火燃着——母亲说「——收获的时辰——」——阿石说「——收获的时辰——」——母亲说「——灶火还亮着——」——阿石说「——灶火还亮着——」——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着——灶火燃着。
+
+秋分。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+灶火燃着。
+
+---
+
+*（卷二十 · 本章完 · 跨界线总第二百七十五卷 · 卷二十之六十五 · 第七百零四年 · 秋分）*
 
 # source: creative/novel/28-新苗.md
 # 《跨界纪事：锚火守夜人》
