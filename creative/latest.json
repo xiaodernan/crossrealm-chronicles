@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T13:42:45.689Z",
+  "generated_at": "2026-11-21T13:53:32.599Z",
   "branch": "main",
-  "head": "b3d950b",
-  "total_commits": 2459,
-  "pushed_at": "2026-11-21T21:41:25+08:00",
+  "head": "90729b4",
+  "total_commits": 2460,
+  "pushed_at": "2026-11-21T21:43:00+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "90729b4",
+      "at": "2026-11-21T21:43:00+08:00",
+      "subject": "chore(latest): W-Z509 fact pack head=b3d950b (novels 290 · lore 611 · i18n 3272 · tests 491 · commits 2459)"
+    },
     {
       "short": "b3d950b",
       "at": "2026-11-21T21:41:25+08:00",
@@ -26,11 +31,6 @@
       "short": "09d146a",
       "at": "2026-11-21T21:19:49+08:00",
       "subject": "chore(latest): W-Z507 fact pack head=dcce376 (novels 290 · lore 611 · i18n 3272 · commits 2457)"
-    },
-    {
-      "short": "dcce376",
-      "at": "2026-11-21T21:15:30+08:00",
-      "subject": "fix(refs): W-Z507 现实对照札记事实复核——联网维基纠正两处假知识"
     }
   ],
   "tracked_files": 1943,

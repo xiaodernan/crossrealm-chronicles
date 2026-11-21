@@ -1,6 +1,10 @@
 > **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
 >
+> **2026-11-21 · W-Z510 showcase 英雄区文案对齐实况（需求十延续）**：W-Z509 修好实况数字镜像后，审计发现 showcase 英雄区文案仍写死「小说七章 + 七番外」「Spring Cloud 9 个微服务」，而实际已 290 卷 / 10 微服务——用户点进去第一屏看到的仍是旧成果描述。
+> 修复：英雄区与跨媒体卡的卷数改接 `live-novels` / `live-novel-inline`（fetch 从 latest.json 灌入，现实测 290），微服务数 9→10（compose 实测 11 服务含一次性 verify runner = 10 常驻），并补上 StateGraph LLM 炉火叙事一句。两语一致。浏览器实测：hero 与 4 处 inline 全显示 290、微服务 10、tests 491、commits 2459，零 console 错误。新增 `tests/showcase-hero-live.test.js`（4 例）。
+> 门禁：Tests **6997/6997** ✓（+4 例）· ai-service 201/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。
+> 
 > **2026-11-21 · W-Z509 showcase 实况数字镜像修复（需求十「最新成果入口」）**：审计发现个人主页指向的 `creative/showcase.html` 用 `fetch("./latest.json")` 取实况数字，但 `creative/latest.json` **从来不存在**——于是「单测全绿」永远卡在硬编码 6696（实际已 6993），commits 显示「—」。用户点进去看到的不是最新成果，与展示页「一页只读最新」的承诺矛盾。
 > 修复：`build-latest.mjs` 每次生成事实包时同步写一份 `creative/latest.json`（与 docs/latest.json 同源），showcase 的 `fetch` 从此 200 且数字实时；硬编码 fallback 也更新到当前值以防 fetch 失败。浏览器实测：showcase 显示 commits=2458 / testfiles=490（来自镜像），零 console 错误；server log 确认 `GET /latest.json 200`。新增 `tests/showcase-live-feed.test.js`（3 例：同步写/镜像同源/旧 6696 不残留）。
 > 门禁：Tests **6993/6993** ✓（+3 例）· ai-service 201/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓ · fact pack `--check` ✓。
