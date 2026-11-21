@@ -1,6 +1,10 @@
 > **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
 >
+> **2026-11-21 · W-Z489 管理页内联脚本语法修复（需求九 · 浏览器实测抓出的真 bug）**：用浏览器审计 `/docs/admin/index.html`（口令 123）发现 `SyntaxError: Invalid or unexpected token`——I18N 对象里 `meas_tr36` 的中文字符串中间多写了一个 `' ,`（`... /api/presence/world/count → 200 ' ,· /api/notify ...`），整段 `<script>` 解析失败。此 bug 在 HEAD 里就存在：页面只剩静态 HTML，**口令门 / 语言切换 / 本地遥测渲染全部失效**；构建与 vitest 都不看 HTML 里的 inline script，所以一路漏到用户面前。
+> 修复：删掉那个游离的 `',`，字符串恢复连续。浏览器复测：reload 后 console 零错误，输入 123 成功解锁完整运营盘（「本地真实事件 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条」与全部 KPI 卡正常渲染）。新增 `tests/admin-inline-script.test.js`：把管理页所有内联 `<script>` 抽出来用 `new Function` 做语法解析（只解析不执行，不碰 DOM），并对该病史字符串做精确回归——这类 bug 以后当场变红。
+> 门禁：Tests **6943/6943** ✓（+admin-inline-script 2 例）· ai-service 199/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。docs/admin/index.html 单点修复 + 测试，纯 additive。
+> 
 > **2026-11-21 · W-Z488 滚轮方向反转开关（需求五·项目长期反复反馈项）**：源码里滚轮口径数学上一直正确（下滚 deltaY>0 → pitch+ → 视线朝下），但用户多次反馈方向相反——根因是部分平台/设备的「自然滚动」在浏览器层把 deltaY 取反。与其猜平台（navigator.platform 已弃用且不可靠），给用户一个显式开关最稳：设置页新增「反转滚轮方向」勾选框（`set-invert-wheel`），`SettingsManager.invertWheel` 默认 false 持久化；Game 的 wheel handler 读 `=== true` 取反系数同时作用于俯仰与缩放，脏值一律当关。
 > 交付：SettingsManager 加 `invertWheel:false`（含注释与脏值口径）· Game wheel 乘 sign · SettingsPanel 绑定勾选框并回显 · index.html 加勾选框 · strings(zh+en) `settings_invert_wheel` · 两语说明书加教学（自然滚动时可勾）。浏览器实测：勾选框存在、标签正确、切换后 localStorage `crossrealm_settings.values.invertWheel` 在 false↔true 间正确持久化。
 > 门禁：Tests **6941/6941** ✓（+wheel-invert 2 例：出厂默认/反转系数真值判断）· ai-service 199/0 ✓ · Build ✓ · i18n 3271→**3272**（+1 双语各一）· identity-guard ✓。纯 additive，默认档手感零变更。
