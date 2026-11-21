@@ -14,7 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AiProperties {
 
     private String baseUrl = "https://api.aizzz.xyz/v1";
-    private String model = "gpt-6.1-terra";
+    private String model = "gpt-6.2-sol";
     private String apiKey = "";
     private Duration timeout = Duration.ofSeconds(20);
     private int maxRetries = 2;

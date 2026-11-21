@@ -173,7 +173,7 @@ docker compose down
 | `CROSSREALM_ONLINE_BASE_URL`（前端侧：`crossrealm_online_base_url`） | 前端网关地址 | 同源 origin |
 | `LLM_API_KEY` | **ai-service 独占**的大模型密钥（不进配置中心 / 镜像 / 日志 / 响应体） | （空 = ai-service 以未配置模式启动，`/api/ai/health.configured=false`） |
 | `LLM_BASE_URL` | OpenAI 兼容上游地址 | `https://api.aizzz.xyz/v1` |
-| `LLM_MODEL` | 模型 id（`/v1/models` 列出 `gpt-6.1-terra` 等） | `gpt-6.1-terra` |
+| `LLM_MODEL` | 模型 id（`/v1/models` 列出 `gpt-6.2-sol` 等） | `gpt-6.2-sol` |
 | `CROSSREALM_ONLINE_BASE_URL`（前端侧：`crossrealm_online_base_url`） | 前端网关地址 | 同源 origin |
 
 ## 已知坑（都被踩过并写进 `server/README.md` 与 ADR）

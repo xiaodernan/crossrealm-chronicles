@@ -40,7 +40,7 @@ class PromptCacheLiveTest {
         String apiKey = System.getenv("LLM_API_KEY");
         assertNotNull(apiKey, "LLM_API_KEY env required for live test");
         String baseUrl = System.getenv().getOrDefault("LLM_BASE_URL", "https://api.aizzz.xyz/v1");
-        String model = System.getenv().getOrDefault("LLM_MODEL", "gpt-6.1-terra");
+        String model = System.getenv().getOrDefault("LLM_MODEL", "gpt-6.2-sol");
 
         String system = new String(getClass().getResourceAsStream("/ai/system-prompt.txt")
                 .readAllBytes(), StandardCharsets.UTF_8).trim();

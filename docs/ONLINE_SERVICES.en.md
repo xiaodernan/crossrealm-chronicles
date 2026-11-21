@@ -148,7 +148,7 @@ docker compose down
 | `CROSSREALM_ONLINE_BASE_URL` (frontend: `crossrealm_online_base_url`) | Frontend gateway address | same origin |
 | `LLM_API_KEY` | **ai-service exclusive** upstream LLM key (never config server / image / logs / body) | (empty ⇒ ai-service boots unconfigured; `/api/ai/health.configured=false`) |
 | `LLM_BASE_URL` | OpenAI-compatible upstream | `https://api.aizzz.xyz/v1` |
-| `LLM_MODEL` | Model id (`gpt-6.1-terra` etc. under `/v1/models`) | `gpt-6.1-terra` |
+| `LLM_MODEL` | Model id (`gpt-6.2-sol` etc. under `/v1/models`) | `gpt-6.2-sol` |
 
 ## Known pitfalls (all previously stepped on; see also `server/README.md` & ADRs)
 
