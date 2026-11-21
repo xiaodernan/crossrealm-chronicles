@@ -1,0 +1,10 @@
+feat(telemetry): W-Z487 真·行为信号入 LLM 判读——localStorage 事件序列驱动「在场状态」
+
+守夜人指路此前只用面板交互估在场状态（多数玩家不开面板，信号恒0）。本片把本机真实遥测接进 LLM 判读：
+
+- LocalTelemetry.behaviorSnapshot()：从事件序列读出 idleSeconds（距最后事件）、recentActions（最近10秒事件数=瞎点密度）、sessionMs、lastEvent；空/脏数据保守归零不编造。
+- recordSessionEnd()：pagehide/visibilitychange 记一条带时长的 session_end（幂等）——如实留下「没耐心就关掉」的留存信号。
+- QuestAssistant 直接 import localTelemetry 读真信号（不再读 game.localTelemetry，避开 Game 表面契约），无数据回退面板估时。
+- 浏览器实测：新构建 behaviorSnapshot() 返回真实 game_start 时长，LLM 判读吃真行为。
+
+门禁：Tests 6939/6939 ✓（+telemetry-behavior 6 例；event-registry 登记两个原生事件）· ai-service 199/0 ✓ · Build ✓ · i18n 3271 不变 · identity-guard ✓。纯 additive。

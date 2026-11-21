@@ -5,6 +5,7 @@ import { emit } from '../engine/EventBus.js';
 import { BOSS_STAT_KEYS, MAINLINE_BY_ID, objectiveDesc, objectiveTitle } from '../content/objectives.js';
 import { rollGear } from '../content/gear.js';
 import { buildDemoSteps } from './demoSteps.js';
+import { localTelemetry } from '../game/LocalTelemetry.js';
 
 /** 自动通关/带路整条流程的计时分组，用户中途取消时整体撤销 */
 const AUTOPILOT_TAG = 'quest-autopilot';
@@ -101,16 +102,18 @@ export class QuestAssistant {
     }
   }
 
-  /** 本地估时：距最后一次面板交互的秒数（面板刚打开就当作正在行动）。 */
+  /** W-Z487：真·发呆时长 —— 直接读本机遥测最后一次事件的秒数，没数据才退回面板交互估时。 */
   _estimateIdleSeconds() {
+    const real = localTelemetry.behaviorSnapshot().idleSeconds;
+    if (real > 0) return real;
     const last = this._lastPanelInteractionAt;
-    if (!last) return 0;
-    return Math.max(0, Math.min(86400, Math.round((Date.now() - last) / 1000)));
+    return last ? Math.max(0, Math.min(86400, Math.round((Date.now() - last) / 1000))) : 0;
   }
 
-  /** 最近动作密度：面板内累积的交互次数（steady 默认）。 */
+  /** W-Z487：真·动作密度 —— 最近 10 秒的事件数；没数据退回面板交互计数。 */
   _estimateRecentActions() {
-    return this._panelInteractions ?? 0;
+    const real = localTelemetry.behaviorSnapshot().recentActions;
+    return real > 0 ? real : (this._panelInteractions ?? 0);
   }
 
   /** 记一次面板交互——供守夜人指路读取「在場状态」（W-Z486）。 */

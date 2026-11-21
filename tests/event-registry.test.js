@@ -56,6 +56,10 @@ const DOM_EVENT_NAMES = new Set([
   // W-Z26：presence-service 的 SSE 帧名——EventSource 派发的频道事件，由浏览器/服务端
   // 定义（不是游戏事件、不进 EventBus），与 storage/error 同类的原生连接面，不进登记表
   'present', 'snapshot-end',
+  // W-Z487：真·留存信号——pagehide / visibilitychange 是浏览器原生的页面生命周期事件，
+  // LocalTelemetry 挂在 window/document 上记录会话结束（「没耐心就关掉」），与 error/storage 同类，
+  // 不是 EventBus 上的游戏事件，不进登记表。
+  'pagehide', 'visibilitychange',
 ]);
 
 function walk(dir) {
