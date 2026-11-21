@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T05:34:32.230Z",
+  "generated_at": "2026-11-21T05:37:56.488Z",
   "branch": "main",
-  "head": "76d8398",
-  "total_commits": 2407,
-  "pushed_at": "2026-11-21T13:33:47+08:00",
+  "head": "368b96b",
+  "total_commits": 2409,
+  "pushed_at": "2026-11-21T13:36:40+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "368b96b",
+      "at": "2026-11-21T13:36:40+08:00",
+      "subject": "chore: remove stray temp file"
+    },
+    {
+      "short": "12c5c0a",
+      "at": "2026-11-21T13:34:41+08:00",
+      "subject": "chore(latest): W-Z485 fact pack head=76d8398 (novels 290 · lore 611 · i18n 3268 · commits 2407)"
+    },
     {
       "short": "76d8398",
       "at": "2026-11-21T13:33:47+08:00",
@@ -21,19 +31,9 @@
       "short": "7bc649b",
       "at": "2026-11-21T13:07:36+08:00",
       "subject": "chore: remove stray temp file"
-    },
-    {
-      "short": "0338050",
-      "at": "2026-11-21T13:06:45+08:00",
-      "subject": "docs(canon): W-Z484 文档对账——creative README 章节表补 278-290、showcase feed、MASTER_PLAN 里程碑；修正 287 残留错别字；v3/corpus 重建（290 卷 · 611 源）"
-    },
-    {
-      "short": "857aa2d",
-      "at": "2026-11-21T12:59:41+08:00",
-      "subject": "chore(latest): fact pack W-Z483 head=9b5a919 (novels 290 · lore 611 · i18n 3267 · commits 2402)"
     }
   ],
-  "tracked_files": 1916,
+  "tracked_files": 1915,
   "test_files": 471,
   "i18n_keys": 3268,
   "lore_sources": 611,
