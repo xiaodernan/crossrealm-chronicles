@@ -2,6 +2,20 @@ import { keyText, refreshKeyText } from './keyHints.js';
 import { getLanguage, t } from '../engine/i18n.js';
 
 /**
+ * W-Z496：典籍卷号按数值排序，不是字典序。
+ * 卷 id 是 "00".."289" 的字符串；默认 `.sort()` 会把 "100" 排在 "99" 前面
+ * （"1" < "9"），于是读者点「下一章」从 99 跳到 100 之后又跳回 18/180…，
+ * 290 卷的「无尽世界」阅读顺序整个乱掉。数值比较后字典序兜底（防御非数字 id）。
+ */
+export function sortVolumeIds(ids) {
+  return [...ids].sort((a, b) => {
+    const na = Number(a), nb = Number(b);
+    if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+    return String(a).localeCompare(String(b));
+  });
+}
+
+/**
  * [J] 典籍馆 · Canon — 游戏内直接可读全书（W-Z109 升级：W-Z116 阅读器模式）
  *
  * ## W-Z109 落地了什么
@@ -148,7 +162,7 @@ export class CanonJournalTab {
     }
 
     const entries = this.entries;
-    if (!this.order) this.order = Object.keys(entries).sort();
+    if (!this.order) this.order = sortVolumeIds(Object.keys(entries));
     const activeEntry = entries[this.activeId] ?? entries[this.order[0]] ?? Object.values(entries)[0];
     if (!activeEntry) {
       panelEl.innerHTML = `<p class="canon-error">${t('canon_empty')}</p>`;
