@@ -365,6 +365,9 @@ export const STRINGS_EN = Object.freeze({
   qa_btn_pilot_stop: 'Stop auto-pilot',
   qa_btn_teleport: 'Teleport to boss/objective',
   qa_btn_demo: 'Instant verify',
+  qa_btn_guide: 'Ask the keeper for a hint',
+  qa_guide_loading: 'The keeper gazes into the fire, thinking of your situation…',
+  qa_guide_unavailable: 'The fire still burns — just follow the current objective.',
   qa_status_autoplay: 'Auto-play running…',
   qa_status_demo: 'Instant verify… ${n}',
   qa_status_all_done: 'All cleared — endless exploration',
@@ -3068,7 +3071,9 @@ Defeat Boss gains large amount soul fire + 2 weapon skill points.
 Your character will start from Hub，automatically walk through five zones and push all missions.
 Camera follows behind，no need to operate；{escape} stop anytime。
 
-If only want skip walking directly complete acceptance，click "Instant Acceptance".`,
+If only want skip walking directly complete acceptance，click "Instant Acceptance".
+
+ [Ask the keeper for a hint (W-Z486)] Lost or going in circles? Click "Ask the keeper for a hint" — the keeper reads your situation (where you are, current objective, how long you've idled, whether you're clicking around), first judges if you're lost, then says one guiding line to match. He won't decide for you; he only brings the talk back to the fire. Offline it falls back to the assistant's built-in hint.`,
 
   hm_body_perf_hud: `{perfHud} toggle Performance HUD（dev tool，doesn't affect gameplay）。
 

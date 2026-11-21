@@ -370,6 +370,20 @@ export class OnlineServices {
   }
 
   /**
+   * 守夜人指路（W-Z486 · `POST /api/ai/guide`）——把玩家的在場状态（区域 / 目标 / 静止时长 /
+   * 最近动作密度）交给大模型判读局面，由模型判断驱动 StateGraph 条件流转，产出对应口吻的一句指路。
+   * 返回 { nudge, mood, lang, path, ... }。缺字段默认 0；带 AbortSignal 可取消。
+   */
+  async askGuide({ zone, objective, idleSeconds = 0, recentActions = 0, lang = 'zh' } = {}, { signal } = {}) {
+    return this.#jsonRequest('/api/ai/guide', {
+      method: 'POST',
+      body: { zone: zone ?? '', objective: objective ?? '', idleSeconds, recentActions, lang },
+      timeoutMs: ADVISOR_LIMITS.requestTimeoutMs,
+      signal,
+    });
+  }
+
+  /**
    * 回声灯的一句暗示（W-X22 收编版，`POST /api/ai/echo-hint`）。
    * 与顾问共用同一条网关路径、同一份熔断与缓存，只是人格提示不同。
    */

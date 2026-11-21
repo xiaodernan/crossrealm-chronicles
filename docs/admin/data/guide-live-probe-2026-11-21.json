@@ -1,0 +1,38 @@
+{
+  "schema": "crossrealm.guide-live-probe.v1",
+  "generatedAt": "2026-11-21T05:47:06.293Z",
+  "model": "gpt-6.2-sol",
+  "base": "https://api.aizzz.xyz/v1",
+  "cacheKey": "crossrealm-guide-v1",
+  "prefixBytes": 23636,
+  "scenario": {
+    "zone": "灰白森林",
+    "objective": "点亮回声灯",
+    "idleSeconds": 90,
+    "recentActions": 9,
+    "lang": "zh"
+  },
+  "mood": "lost",
+  "path": [
+    "observe",
+    "assess",
+    "guideLost",
+    "guard"
+  ],
+  "calls": [
+    {
+      "prompt": 12354,
+      "cached": null,
+      "ratio": null,
+      "latencyMs": 2865,
+      "text": "LOST"
+    },
+    {
+      "prompt": 12352,
+      "cached": 10673,
+      "ratio": 86.4,
+      "latencyMs": 3141,
+      "text": "灰白森林的雾里，先找找那盏尚未点亮的回声灯；你也可以看看位面助手，眼前哪处光最像在呼唤你？"
+    }
+  ]
+}

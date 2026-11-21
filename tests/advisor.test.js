@@ -273,6 +273,23 @@ describe('OnlineServices.askAdvisor / fetchAdvisorHealth：ok/reason 映射全�
     expect(init.signal).toBeInstanceOf(AbortSignal); // 深潜档仍带可取消信号（超时按 200s 档放宽）
   });
 
+  it('askGuide（W-Z486）：POST /api/ai/guide，在場状态作为数据原样上报', async () => {
+    const answer = { ok: true, nudge: '火还在，看看手边那盏灯。', mood: 'lost', lang: 'zh', path: ['observe', 'assess', 'guideLost', 'guard'] };
+    const fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => answer });
+    const svc = new OnlineServices({ baseUrl: BASE, fetchImpl: fetch, enabled: true });
+
+    const r = await svc.askGuide({ zone: '灰白森林', objective: '点亮回声灯', idleSeconds: 90, recentActions: 9, lang: 'zh' });
+    expect(r.ok).toBe(true);
+    expect(r.data.mood).toBe('lost');
+    const [url, init] = fetch.mock.calls[0];
+    expect(url).toBe(`${BASE}/api/ai/guide`);
+    expect(init.method).toBe('POST');
+    expect(JSON.parse(init.body)).toEqual({
+      zone: '灰白森林', objective: '点亮回声灯', idleSeconds: 90, recentActions: 9, lang: 'zh',
+    });
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
   it('askOracle 未启用：disabled，且 fetch 零调用', async () => {
     const fetch = vi.fn();
     const svc = new OnlineServices({ baseUrl: BASE, fetchImpl: fetch, enabled: false });

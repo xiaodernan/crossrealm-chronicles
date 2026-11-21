@@ -52,8 +52,10 @@ export class QuestAssistant {
         <button type="button" id="qa-pilot" data-i18n="qa_btn_pilot">自动带路</button>
         <button type="button" id="qa-tp" data-i18n="qa_btn_teleport">传送到 Boss/目标</button>
         <button type="button" id="qa-quick" data-i18n="qa_btn_demo">瞬间验收</button>
+        <button type="button" id="qa-guide" class="qa-guide" data-i18n="qa_btn_guide">向守夜人求一句指路</button>
       </div>
       <p class="qa-note">${keyText(t('qa_autoplay_note'))}</p>
+      <p id="qa-guide-result" class="qa-guide-result hidden"></p>
     `;
     document.body.appendChild(this._panel);
     this._statusEl = this._panel.querySelector('#qa-status');
@@ -64,6 +66,57 @@ export class QuestAssistant {
     this._panel.querySelector('#qa-pilot')?.addEventListener('click', () => this.toggleAutoPilot());
     this._panel.querySelector('#qa-tp')?.addEventListener('click', () => this.teleportToObjective());
     this._panel.querySelector('#qa-quick')?.addEventListener('click', () => this.startFullDemo());
+    this._panel.querySelector('#qa-guide')?.addEventListener('click', () => this.askKeeperGuide());
+    // 任何面板内交互都记一次——守夜人指路据此判断「玩家是在推进还是在瞎点」
+    this._panel.addEventListener('click', () => this._noteInteraction());
+  }
+
+  /**
+   * W-Z486 守夜人指路：把在場状态交给大模型判读局面，由模型判断驱动状态流转产出一句指路。
+   * idleSeconds 从本地遥测的最近一次交互时间估出（没有则用 0），recentActions 同上；
+   * 都只是「数据」，模型据以判断，不替玩家做决定。失败静默降级为确定性提示。
+   */
+  async askKeeperGuide() {
+    const resultEl = this._panel?.querySelector('#qa-guide-result');
+    if (!resultEl) return;
+    const q = this.game.quests?.current;
+    const zone = String(this.game.world?.zoneId ?? '');
+    const objective = q ? t(objectiveTitle(q, this.game.quests.stats)) : t('qa_status_all_done');
+    const lang = (typeof document !== 'undefined' && document.documentElement?.lang === 'en') ? 'en' : 'zh';
+    try {
+      resultEl.classList.remove('hidden');
+      resultEl.textContent = t('qa_guide_loading');
+      const res = await this.game.onlineServices?.askGuide?.({
+        zone, objective, idleSeconds: this._estimateIdleSeconds(),
+        recentActions: this._estimateRecentActions(), lang,
+      });
+      if (res?.ok && res.data?.nudge) {
+        resultEl.textContent = res.data.nudge;
+      } else {
+        // 离线 / 不可用：落回确定性提示，不让玩家看着空白
+        resultEl.textContent = this.game.quests?.getAssistantHint?.() || t('qa_guide_unavailable');
+      }
+    } catch {
+      resultEl.textContent = this.game.quests?.getAssistantHint?.() || t('qa_guide_unavailable');
+    }
+  }
+
+  /** 本地估时：距最后一次面板交互的秒数（面板刚打开就当作正在行动）。 */
+  _estimateIdleSeconds() {
+    const last = this._lastPanelInteractionAt;
+    if (!last) return 0;
+    return Math.max(0, Math.min(86400, Math.round((Date.now() - last) / 1000)));
+  }
+
+  /** 最近动作密度：面板内累积的交互次数（steady 默认）。 */
+  _estimateRecentActions() {
+    return this._panelInteractions ?? 0;
+  }
+
+  /** 记一次面板交互——供守夜人指路读取「在場状态」（W-Z486）。 */
+  _noteInteraction() {
+    this._lastPanelInteractionAt = Date.now();
+    this._panelInteractions = (this._panelInteractions ?? 0) + 1;
   }
 
   toggle() {

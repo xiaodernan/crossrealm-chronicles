@@ -367,6 +367,9 @@ export const STRINGS_ZH = Object.freeze({
   qa_btn_pilot_stop: '停止带路',
   qa_btn_teleport: '传送到 Boss/目标',
   qa_btn_demo: '瞬间验收',
+  qa_btn_guide: '向守夜人求一句指路',
+  qa_guide_loading: '守夜人望着火，想一想你的处境…',
+  qa_guide_unavailable: '火还亮着，按此刻的目标继续走就好。',
   qa_status_autoplay: '自动通关进行中…',
   qa_status_demo: '瞬间验收… ${n}',
   qa_status_all_done: '已全部通关 — 无尽探索',
@@ -3068,7 +3071,9 @@ export const STRINGS_ZH = Object.freeze({
 你的角色会从枢纽出发，自动走路经过五区并推进全部任务。
 镜头跟在背后，无需操作；{escape} 随时停止。
 
-若只想跳过走路直接完成验收，点「瞬间验收」。`,
+若只想跳过走路直接完成验收，点「瞬间验收」。
+
+ 【向守夜人求一句指路（W-Z486）】不知道往哪走、在原地打转？点「求一句指路」——守夜人会读你此刻的处境（在哪、当前目标、发呆多久、是不是在乱点），先判读你是不是迷路了，再按判读结果说一句带路的话；他不会替你做决定，只会把话带回火边。离线时自动落回助手自带的提示。`,
 
   hm_body_perf_hud: `{perfHud} 开关性能 HUD（开发期工具，不影响玩法）。
 

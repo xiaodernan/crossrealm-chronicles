@@ -1,0 +1,10 @@
+feat(llm): W-Z486 守夜人指路——LLM 驱动的自适应引导（StateGraph 条件边真流转 · MEASURED）
+
+需求四「用大模型分析能力实现状态的流转和内容的输出」此前只有确定性带路。新增 POST /api/ai/guide：把玩家在場状态（区域/目标/静止时长/动作密度）交给模型判读，判读经条件边决定下一节点，再按 lane 产出一句指路。
+
+后端 GuideController：四节点编译图 observe(确定性)→assess(LLM 判 LOST/ON_TRACK)→[条件边]→guideLost/guideOnTrack(LLM 按 lane 措辞)→guard(确定性)；三节点共用冻结 v3 前缀 + 同 cache key crossrealm-guide-v1（并行会话共享一张 cache page）；warmup 增 GUIDE lane。
+前端：askGuide() + 位面助手暖金「求一句指路」按钮/结果行/CSS + 离线降级；说明书内嵌教学。i18n +3 键双语各一 3268→3271。
+
+真上游实测（scripts/guide-live-probe.mjs · gpt-6.2-sol · Clash 7897 · 1局面=2次省token）：迷路瞎点局面 assess→LOST→条件边路由 guideLost→产出指路句；compose cached=10673/12352≈86.4%。产物 docs/admin/data/guide-live-probe-2026-11-21.json（MEASURED）。
+
+门禁：Tests 6933/6933 ✓ · ai-service 199/0 ✓（+5 例）· Build ✓ · identity-guard ✓。纯 additive。
