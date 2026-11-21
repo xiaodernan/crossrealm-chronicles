@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T06:03:43.567Z",
+  "generated_at": "2026-11-21T06:17:05.922Z",
   "branch": "main",
-  "head": "3ab2a31",
-  "total_commits": 2412,
-  "pushed_at": "2026-11-21T14:03:25+08:00",
+  "head": "6a5e3dd",
+  "total_commits": 2415,
+  "pushed_at": "2026-11-21T14:16:40+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "6a5e3dd",
+      "at": "2026-11-21T14:16:40+08:00",
+      "subject": "chore: remove stray temp file"
+    },
+    {
+      "short": "12a9eba",
+      "at": "2026-11-21T14:16:03+08:00",
+      "subject": "feat(telemetry): W-Z487 真·行为信号入 LLM 判读——localStorage 事件序列驱动「在场状态」"
+    },
+    {
+      "short": "cc6b9f3",
+      "at": "2026-11-21T14:03:55+08:00",
+      "subject": "chore(latest): W-Z486 fact pack head=3ab2a31 (novels 290 · lore 611 · i18n 3271 · commits 2412)"
+    },
     {
       "short": "3ab2a31",
       "at": "2026-11-21T14:03:25+08:00",
@@ -16,30 +31,15 @@
       "short": "2253655",
       "at": "2026-11-21T14:02:16+08:00",
       "subject": "feat(llm): W-Z486 守夜人指路——LLM 驱动的自适应引导（StateGraph 条件边真流转 · MEASURED）"
-    },
-    {
-      "short": "5de8216",
-      "at": "2026-11-21T13:38:26+08:00",
-      "subject": "chore(latest): W-Z485 fact pack head=368b96b (novels 290 · lore 611 · i18n 3268 · commits 2409)"
-    },
-    {
-      "short": "368b96b",
-      "at": "2026-11-21T13:36:40+08:00",
-      "subject": "chore: remove stray temp file"
-    },
-    {
-      "short": "12c5c0a",
-      "at": "2026-11-21T13:34:41+08:00",
-      "subject": "chore(latest): W-Z485 fact pack head=76d8398 (novels 290 · lore 611 · i18n 3268 · commits 2407)"
     }
   ],
-  "tracked_files": 1919,
-  "test_files": 471,
+  "tracked_files": 1920,
+  "test_files": 472,
   "i18n_keys": 3271,
   "lore_sources": 611,
   "novel_chapters_zh": 290,
   "novel_chapters_en": 290,
-  "milestone": "W-Z486",
+  "milestone": "W-Z487",
   "milestone_full": "卷 290 · 六百年守火线（290 / 290 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 611 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：290 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
