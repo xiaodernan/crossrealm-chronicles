@@ -1,6 +1,11 @@
 > **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
 >
+> **2026-11-21 · W-Z501 事实包 --check 门禁自指字段修复（CI 可靠性）**：跑 `build-latest.mjs --check` 发现它永远报 drift（head/total_commits）——这两个字段是**自指**的：脚本按当时 HEAD 写好 latest.json，随后那笔 fact-pack 提交本身才成为新 HEAD（+1 commit），拿新 HEAD 比旧值必然红。也就是说这个 CI 门禁在正常 workflow 下从未真正可用。
+> 修复：把 drift 判定收窄到**内容派生字段**（i18n_keys / lore_sources / novel_chapters_zh+en / test_files / tracked_files / schema / branch / first_commit_at），head/total_commits 的新鲜度交给 sync-latest.yml 的 `git diff --quiet` 实际提交路径保证。修后 `--check` 实测通过（head=9a17d2a, lore=611, i18n=3272）。新增 `tests/latest-check.test.js`（3 例：自指字段不判定/内容字段仍判定/脚本形状）。
+> 顺带核清一件长期口径：所谓「`:17 */3` Pages 定时兜底」在 **io 仓库**的 pages.yml（cron 17 */3 * * *），游戏仓库 pages.yml 走 push+workflow_dispatch+workflow_run——两边口径不同，此前的说法没错但容易混；实测 io Pages 近 5 次全 success（含 schedule 一次）。
+> 门禁：Tests **6972/6972** ✓（+3 例）· ai-service 201/0 ✓ · Build ✓ · `--check` ✓ · i18n 3272 不变 · identity-guard ✓。
+> 
 > **2026-11-21 · W-Z500 会话留存信号生命周期修复（需求九「没耐心就关掉」）**：审计 W-Z487 写的 `session_end` 监听发现真 bug——旧版把 `visibilitychange:hidden`（**任何**切标签/切后台）当成永久 session end，第一次切走就把 `_ended` 钉死，之后真正关页再也不记，留存信号直接瞎掉；反过来 pagehide 紧跟 hidden 又会对同一次离开记两条。
 > 修复：抽出可测试的 `installSessionLifecycle(win, doc)`（返回 disposer）——hidden 记一次 session_end 但**可重入**（回前台重置，下次离开照记，覆盖移动端只有 visibilitychange 的情况），pagehide 只在同一次离开尚未记过时补记（防双记）。模块副作用仍在浏览器里自动安装。新增 `tests/telemetry-lifecycle.test.js`（3 例：切走→回前台→再切走记两条 / hidden+pagehide 不双记 / 仅 pagehide 也记）。
 > 门禁：Tests **6969/6969** ✓（+3 例，telemetry 共 9/9）· ai-service 201/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。

@@ -105,7 +105,12 @@ if (CHECK) {
   const disk = JSON.parse(readFileSync(OUT, 'utf8'));
   const derived = { ...doc, generated_at: undefined, pushed_at: undefined };
   const expected = { ...disk, generated_at: undefined, pushed_at: undefined };
-  const keys = ['schema_version', 'branch', 'head', 'total_commits', 'first_commit_at', 'tracked_files', 'test_files', 'i18n_keys', 'lore_sources', 'novel_chapters_zh', 'novel_chapters_en'];
+  // W-Z501：head / total_commits 是**自指**字段，天生比磁盘版本领先一笔——
+  // 本脚本先按当时 HEAD 写好 latest.json，随后那笔提交本身才成为新 HEAD（+1 commit）。
+  // 把它们放进 drift 判定会让 --check 在每次正常提交 fact pack 后永远红（拿新 HEAD 比旧值）。
+  // 这两个字段的"新鲜度"由 sync-latest.yml 的 `git diff --quiet` 实际提交路径保证；
+  // 这里只校验**内容派生**字段（语料源数/章回/键数/文件数），它们是忘跑脚本时真正会漂的。
+  const keys = ['schema_version', 'branch', 'first_commit_at', 'tracked_files', 'test_files', 'i18n_keys', 'lore_sources', 'novel_chapters_zh', 'novel_chapters_en'];
   const drift = keys.filter((k) => JSON.stringify(derived[k]) !== JSON.stringify(expected[k]));
   if (drift.length) {
     console.error(`docs/latest.json 漂移字段：${drift.join(', ')} —— 请运行 node scripts/build-latest.mjs 重新生成`);
