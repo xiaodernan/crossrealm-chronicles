@@ -1,6 +1,10 @@
 > **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
 >
+> **2026-11-21 · W-Z504 io 仓 sync 工作流 rebase 修复 + 兜底事实包刷新（需求十自动同步）**：审计发现 io 仓 `assets/crossrealm/latest.json` 兜底副本停在 W-Z483（289卷/587源），而 main 已 W-Z503（290/611）——靠 CDN 直读掩盖了，但 raw 不可达时用户看到旧数。手动触发 `sync-crossrealm.yml` 实测 **failure**：`git push` 被非快进拒绝（多个 cron + 手工推送并行，正是项目历史上的 "bot push wash on CI"）。
+> 修复：三个会提交 master 的 sync 工作流（sync-crossrealm / sync-minicc / sync-nexus-platform）在 `git push` 前加 `git pull --rebase origin master`（sync-career-os 早有此模式，是既定修法）。修后重跑 sync-crossrealm **success**，兜底副本刷新到 W-Z503 / 290卷 / 611源 / 2448 commits。新增 `tests/io-sync-workflow.test.js`（4 例：四个 sync 工作流 rebase 必在 push 前）。
+> 门禁：Tests **6980/6980** ✓（+4 例）· ai-service 201/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。
+> 
 > **2026-11-21 · W-Z503 运行栈与代码对齐——重建 ai-service 镜像，LLM 新能力真正上线（需求四落地验证）**：审计发现运行中的 compose 栈是 5 小时前的旧镜像——`POST /api/ai/guide` 经网关返 **404**，说明这几轮写的守夜人指路（W-Z486）/v5 深潜（W-Z485）/大前缀热身开关（W-Z490）**都只在代码里、没进运行容器**。代码再好，部署栈没更新等于零。
 > 修复：`mvn -pl ai-service package -DskipTests` 重打 jar（58,272,058 B）→ `docker compose up -d --build ai-service` 重建镜像。验证：ai direct /api/ai/health configured=true · model=gpt-6.2-sol · circuit=CLOSED；直连 /api/ai/guide 真上游返 mood=lost · path=[observe,assess,guideLost,guard] · upstreamCached=true；网关经 breaker 冷却后同样 200 + 完整状态流路径。中途出现的一次 503 gateway-circuit-open 是 redeploy 期间网关熔断器的正常冷却行为（直连已恢复即证），非代码缺陷。
 > 教训固化：功能提交 ≠ 功能上线；compose 参考部署的镜像需在代码变更后重建，否则验证的是旧二进制。此片无源码改动，纯部署对齐 + 端到端实测。
