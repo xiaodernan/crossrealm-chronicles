@@ -325,7 +325,20 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | White Dew | [white-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/274-white-dew.md) |
 | Autumn Equinox | [autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/275-autumn-equinox.md) |
 | Cold Dew | [cold-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/276-cold-dew.md) |
-| Frost’s Descent | [frosts-descent](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/277-frosts-descent.md) |Chapter → game-chapter mapping:
+| Frost’s Descent | [frosts-descent](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/277-frosts-descent.md) |
+| Minor Snow | [minor-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/278-minor-snow.md) |
+| Heavy Snow | [heavy-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/279-heavy-snow.md) |
+| Winter Solstice | [winter-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/280-winter-solstice.md) |
+| Minor Cold | [minor-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/281-minor-cold.md) |
+| Major Cold | [major-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/282-major-cold.md) |
+| Lantern Festival | [lantern-festival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/283-lantern-festival.md) |
+| Spring Breeze | [spring-breeze](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/284-spring-breeze.md) |
+| Rain | [rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/285-rain.md) |
+| Water Rain | [water-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/286-water-rain.md) |
+| Start of Summer | [start-of-summer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/287-start-of-summer.md) |
+| Flowering | [flowering](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/288-flowering.md) |
+| Bamboo | [bamboo](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/289-bamboo.md) |
+| Festival | [festival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/290-festival.md) |Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|

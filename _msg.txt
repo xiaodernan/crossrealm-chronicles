@@ -1,0 +1,1 @@
+docs(canon): W-Z484 文档对账——creative README 章节表补 278-290、showcase feed、MASTER_PLAN 里程碑；修正 287 残留错别字；v3/corpus 重建（290 卷 · 611 源）

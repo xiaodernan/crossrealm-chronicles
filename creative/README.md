@@ -323,7 +323,20 @@ creative/music/soundtrack.html
 | 白露 · White Dew | [white-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/274-white-dew.md) |
 | 秋分 · Autumn Equinox | [autumn-equinox](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/275-autumn-equinox.md) |
 | 寒露 · Cold Dew | [cold-dew](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/276-cold-dew.md) |
-| 霜降 · Frost’s Descent | [frosts-descent](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/277-frosts-descent.md) |每一章对应游戏的章节走法：
+| 霜降 · Frost’s Descent | [frosts-descent](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/277-frosts-descent.md) |
+| 小雪 · Minor Snow | [minor-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/278-minor-snow.md) |
+| 大雪 · Heavy Snow | [heavy-snow](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/279-heavy-snow.md) |
+| 冬至 · Winter Solstice | [winter-solstice](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/280-winter-solstice.md) |
+| 小寒 · Minor Cold | [minor-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/281-minor-cold.md) |
+| 大寒 · Major Cold | [major-cold](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/282-major-cold.md) |
+| 元宵 · Lantern Festival | [lantern-festival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/283-lantern-festival.md) |
+| 春風 · Spring Breeze | [spring-breeze](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/284-spring-breeze.md) |
+| 雨 · Rain | [rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/285-rain.md) |
+| 雨水 · Water Rain | [water-rain](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/286-water-rain.md) |
+| 立夏 · Start of Summer | [start-of-summer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/287-start-of-summer.md) |
+| 繁花 · Flowering | [flowering](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/288-flowering.md) |
+| 竹 · Bamboo | [bamboo](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/289-bamboo.md) |
+| 节日 · Festival | [festival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/290-festival.md) |每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

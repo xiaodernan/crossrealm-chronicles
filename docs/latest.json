@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T04:59:32.745Z",
+  "generated_at": "2026-11-21T05:03:20.673Z",
   "branch": "main",
-  "head": "9b5a919",
-  "total_commits": 2402,
-  "pushed_at": "2026-11-21T12:58:45+08:00",
+  "head": "857aa2d",
+  "total_commits": 2403,
+  "pushed_at": "2026-11-21T12:59:41+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "857aa2d",
+      "at": "2026-11-21T12:59:41+08:00",
+      "subject": "chore(latest): fact pack W-Z483 head=9b5a919 (novels 290 · lore 611 · i18n 3267 · commits 2402)"
+    },
     {
       "short": "9b5a919",
       "at": "2026-11-21T12:58:45+08:00",
@@ -26,11 +31,6 @@
       "short": "94a4d45",
       "at": "2026-11-20T15:27:50+08:00",
       "subject": "fix(mapmarker): fromJSON 存档边界守住 8 个上限与活动点合法性"
-    },
-    {
-      "short": "884d118",
-      "at": "2026-11-20T15:24:14+08:00",
-      "subject": "fix(streak): 更正 f997bfb——fromJSON 保持快照恢复语义，只加非法值防护"
     }
   ],
   "tracked_files": 1911,
