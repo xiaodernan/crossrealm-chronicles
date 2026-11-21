@@ -167,10 +167,14 @@ public class LlmClient {
         lanes.put(CacheKeys.EMBER + ":offtopic", EmberReplyController.OFFTOPIC_SYSTEM);
         lanes.put(CacheKeys.BOSSVERSE, BossVerseController.BOSS_VERSE_SYSTEM);
         lanes.put(CacheKeys.ECHO, EchoHintController.ECHO_SYSTEM);
-        lanes.put(CacheKeys.ARBITER, ArbiterController.ARBITER_SYSTEM);
-        lanes.put(CacheKeys.ORACLE, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystem());
-        lanes.put(CacheKeys.ORACLE_DEEP, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystemDeep());
         lanes.put(CacheKeys.GUIDE, com.crossrealm.chronicles.ai.GuideController.GUIDE_SYSTEM);
+        // W-Z490：大前缀车道（v4≈4.7万 / v5≈8.3万 tok）默认不热身——开机常暖这几页太烧 token，
+        // 且都是低频功能（首问冷一次、次问即热）。只有显式 open 才铺。廉价 v3 车道照常暖。
+        if (props.isWarmupDeepLanes()) {
+            lanes.put(CacheKeys.ARBITER, ArbiterController.ARBITER_SYSTEM);
+            lanes.put(CacheKeys.ORACLE, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystem());
+            lanes.put(CacheKeys.ORACLE_DEEP, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystemDeep());
+        }
         lanes.put(CacheKeys.DEATH_EPITAPH, DeathEpitaphController.DEATH_SYSTEM);
         lanes.put(CacheKeys.CHAPTER_CODA, ChapterCodaController.CODA_SYSTEM);
         for (Map.Entry<String, String> e : lanes.entrySet()) {

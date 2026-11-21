@@ -25,6 +25,10 @@ public class AiProperties {
     private int maxTokens = 320;
     private int breakerThreshold = 4;
     private long breakerCooldownMs = 15_000;
+    /** W-Z490：是否给「大前缀」车道（v4≈4.7万 tok 的 oracle/arbiter、v5≈8.3万 tok 的 oracle-deep）
+     *  做启动热身。默认 false —— 每次开机都铺这几页会烧掉十几万 token，且深潜是低频功能，
+     *  首问冷一次、第二问即热（实测 warm 88.8%）远比开机常暖划算。廉价车道（v3≈5K）不受影响。 */
+    private boolean warmupDeepLanes = false;
 
     public String getBaseUrl() { return baseUrl; }
     public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
@@ -61,4 +65,7 @@ public class AiProperties {
 
     public long getBreakerCooldownMs() { return breakerCooldownMs; }
     public void setBreakerCooldownMs(long breakerCooldownMs) { this.breakerCooldownMs = breakerCooldownMs; }
+
+    public boolean isWarmupDeepLanes() { return warmupDeepLanes; }
+    public void setWarmupDeepLanes(boolean warmupDeepLanes) { this.warmupDeepLanes = warmupDeepLanes; }
 }

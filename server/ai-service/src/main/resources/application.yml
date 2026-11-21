@@ -27,6 +27,9 @@ ai-service:
   max-tokens: 320
   breaker-threshold: 4
   breaker-cooldown-ms: 15000
+  # W-Z490：大前缀车道（v4/v5）是否开机热身。默认 false 省 token——
+  # 深潜是低频功能，首问冷一次、次问即热，不必每次开机烧十几万 token 铺页。
+  warmup-deep-lanes: "${LLM_WARMUP_DEEP_LANES:false}"
   # W-Z82/W-Z84 · 典籍叩问：BM25 检索注原典段落交给大模型。
   # limit = 喂给模型的原典段落数（封顶 6）；multihop 打开后「复合问题」按标点切子句，
   # 每子句补 2 条未被主检索覆盖的块（总数封顶 limit+2 且绝对 ≤ 6）；关掉即退回单步检索。
