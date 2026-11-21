@@ -121,4 +121,11 @@ if (CHECK) {
 }
 
 writeFileSync(OUT, JSON.stringify(doc, null, 2) + '\n', 'utf8');
+
+// W-Z509：creative/showcase.html 用 `fetch('./latest.json')` 取实况数字（test_files / commits），
+// 但它相对于 creative/ 找 latest.json —— 这个文件以前不存在，导致 showcase 永远卡在硬编码 6696。
+// 每次生成事实包时同步一份到 creative/latest.json，让 showcase 的「实况」口径真正活着。
+const SHOWCASE_OUT = join(ROOT, 'creative', 'latest.json');
+writeFileSync(SHOWCASE_OUT, JSON.stringify(doc, null, 2) + '\n', 'utf8');
+console.log(`wrote ${SHOWCASE_OUT} (showcase live-feed mirror)`);
 console.log(`wrote docs/latest.json (${statSync(OUT).size} bytes) head=${head} commits=${totalCommits}`);
