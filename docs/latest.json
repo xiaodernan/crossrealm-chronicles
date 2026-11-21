@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T06:17:05.922Z",
+  "generated_at": "2026-11-21T06:30:46.602Z",
   "branch": "main",
-  "head": "6a5e3dd",
-  "total_commits": 2415,
-  "pushed_at": "2026-11-21T14:16:40+08:00",
+  "head": "8b99bf3",
+  "total_commits": 2417,
+  "pushed_at": "2026-11-21T14:29:35+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "8b99bf3",
+      "at": "2026-11-21T14:29:35+08:00",
+      "subject": "fix(frontend): W-Z488 滚轮方向反转开关——应对平台自然滚动 deltaY 取反"
+    },
+    {
+      "short": "c7b8422",
+      "at": "2026-11-21T14:17:16+08:00",
+      "subject": "chore(latest): W-Z487 fact pack head=6a5e3dd (novels 290 · lore 611 · i18n 3271 · commits 2415)"
+    },
     {
       "short": "6a5e3dd",
       "at": "2026-11-21T14:16:40+08:00",
@@ -21,32 +31,22 @@
       "short": "cc6b9f3",
       "at": "2026-11-21T14:03:55+08:00",
       "subject": "chore(latest): W-Z486 fact pack head=3ab2a31 (novels 290 · lore 611 · i18n 3271 · commits 2412)"
-    },
-    {
-      "short": "3ab2a31",
-      "at": "2026-11-21T14:03:25+08:00",
-      "subject": "chore: remove stray temp file"
-    },
-    {
-      "short": "2253655",
-      "at": "2026-11-21T14:02:16+08:00",
-      "subject": "feat(llm): W-Z486 守夜人指路——LLM 驱动的自适应引导（StateGraph 条件边真流转 · MEASURED）"
     }
   ],
-  "tracked_files": 1920,
-  "test_files": 472,
-  "i18n_keys": 3271,
+  "tracked_files": 1921,
+  "test_files": 473,
+  "i18n_keys": 3272,
   "lore_sources": 611,
   "novel_chapters_zh": 290,
   "novel_chapters_en": 290,
-  "milestone": "W-Z487",
+  "milestone": "W-Z488",
   "milestone_full": "卷 290 · 六百年守火线（290 / 290 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 611 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：290 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3271-keys",
+    "bilingual-3272-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",
