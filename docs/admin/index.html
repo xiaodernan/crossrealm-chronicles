@@ -365,7 +365,7 @@ const I18N = {
     kpi_d1: '留存 D1', kpi_d7: '留存 D7', kpi_bounce: '出口率', kpi_churn: '放弃率',
     kpi_new: '新用户/日', kpi_sessions: '总会话数', kpi_boss_clears: '总 Boss 通关', kpi_d14: '留存 D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
-    lt_game_start: '游戏启动', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
+    lt_game_start: '游戏启动', lt_session_end: '会话结束（留存）', lt_guide_asked: '求过守夜人指路', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
     lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关', lt_trilance_draw: '曜盘已起', lt_vow_draw: '祈愿已许', lt_kindle_pass_draw: '交棒已候', lt_advisor_directive_follow: '跟随指引', lt_arbiter_epilogue: '烬灯回信', lt_boss_verse: '余火回响', lt_kindle_letter_exchange: '烬火答',
     insight_h2: '本机智能洞察', insight_small: 'LS 真实事件流 → 下一步该做什么',
     insight_empty: '尚无足够事件——随便玩两局（H/J/M/击杀 Boss/抽卡）再回来',
@@ -442,7 +442,7 @@ const I18N = {
     kpi_d1: 'Retention D1', kpi_d7: 'Retention D7', kpi_bounce: 'Bounce rate', kpi_churn: '3-min drop-off',
     kpi_new: 'New users / day', kpi_sessions: 'Total sessions', kpi_boss_clears: 'Total boss clears', kpi_d14: 'Retention D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
-    lt_game_start: 'Game start', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
+    lt_game_start: 'Game start', lt_session_end: 'Session end (retention)', lt_guide_asked: 'Asked the keeper', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
     lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped', lt_trilance_draw: 'Trisolar tide cast', lt_vow_draw: 'Vow drawn', lt_kindle_pass_draw: 'Handing drawn', lt_advisor_directive_follow: 'Guide followed', lt_arbiter_epilogue: 'Arbiter letter read', lt_boss_verse: 'Ember verse read', lt_kindle_letter_exchange: 'Ember letters sent',
     insight_h2: 'Local AI insight', insight_small: 'LS event stream → what to do next',
     insight_empty: 'Not enough signal yet — play a few rounds (H/J/M/boss kill/draw) then come back',
@@ -731,8 +731,8 @@ function renderLocalEvents() {
   const arr = readLocalEvents();
   const counts = Object.create(null);
   for (const e of arr) if (e && typeof e.event === 'string') counts[e.event] = (counts[e.event] ?? 0) + 1;
-  const known = ['game_start', 'help_open', 'journal_open', 'worldmap_open', 'canon_open', 'flame_draw', 'boss_kill', 'autoplay_tap', 'trilance_draw', 'vow_draw', 'kindle_pass_draw', 'advisor_directive_follow', 'arbiter_epilogue', 'boss_verse', 'kindle_letter_exchange'];
-  const labelKey = { game_start: 'lt_game_start', help_open: 'lt_help_open', journal_open: 'lt_journal_open', worldmap_open: 'lt_worldmap_open', canon_open: 'lt_canon_open', flame_draw: 'lt_flame_draw', boss_kill: 'lt_boss_kill', autoplay_tap: 'lt_autoplay_tap', trilance_draw: 'lt_trilance_draw', vow_draw: 'lt_vow_draw', kindle_pass_draw: 'lt_kindle_pass_draw', advisor_directive_follow: 'lt_advisor_directive_follow', arbiter_epilogue: 'lt_arbiter_epilogue', boss_verse: 'lt_boss_verse', kindle_letter_exchange: 'lt_kindle_letter_exchange' };
+  const known = ['game_start', 'session_end', 'guide_asked', 'help_open', 'journal_open', 'worldmap_open', 'canon_open', 'flame_draw', 'boss_kill', 'autoplay_tap', 'trilance_draw', 'vow_draw', 'kindle_pass_draw', 'advisor_directive_follow', 'arbiter_epilogue', 'boss_verse', 'kindle_letter_exchange'];
+  const labelKey = { game_start: 'lt_game_start', session_end: 'lt_session_end', guide_asked: 'lt_guide_asked', help_open: 'lt_help_open', journal_open: 'lt_journal_open', worldmap_open: 'lt_worldmap_open', canon_open: 'lt_canon_open', flame_draw: 'lt_flame_draw', boss_kill: 'lt_boss_kill', autoplay_tap: 'lt_autoplay_tap', trilance_draw: 'lt_trilance_draw', vow_draw: 'lt_vow_draw', kindle_pass_draw: 'lt_kindle_pass_draw', advisor_directive_follow: 'lt_advisor_directive_follow', arbiter_epilogue: 'lt_arbiter_epilogue', boss_verse: 'lt_boss_verse', kindle_letter_exchange: 'lt_kindle_letter_exchange' };
   const gridHtml = known.map(k => {
     const v = counts[k] ?? 0;
     const active = v > 0;
@@ -809,6 +809,14 @@ function renderInsight() {
     const passDraws = counts.kindle_pass_draw ?? 0;
     const bossKills = counts.boss_kill ?? 0;
     const autoplayTaps = counts.autoplay_tap ?? 0;
+    // W-Z502：真·留存/迷茫信号——来自新遥测，管理员据此得深度优化措施
+    const sessionEnds = counts.session_end ?? 0;
+    const guideAsks = counts.guide_asked ?? 0;
+    let shortSessions = 0, lostVerdicts = 0;
+    for (const e of arr) {
+      if (e && e.event === 'session_end' && e.meta && typeof e.meta.sessionMs === 'number' && e.meta.sessionMs < 30000) shortSessions++;
+      if (e && e.event === 'guide_asked' && e.meta && (e.meta.mood === 'lost' || e.meta.mood === 'distress')) lostVerdicts++;
+    }
 
     if (total === 0) {
       rows.push({ priority: 'P0', zh: '这个浏览器还没跑过一次游戏。—— 先去玩两三局（H/J/M/击杀 Boss），炉边盘才会有真实推断。', en: 'This browser hasn’t played once yet — play a few rounds first. The insight only reasons from real events.', impact: zh ? '— 等你开始 ——' : '— waiting on you' });
@@ -824,6 +832,9 @@ function renderInsight() {
       if (bossKills >= 3 && worldMapOpens >= 2) rows.push({ priority: 'P3', zh: 'Boss ' + bossKills + '× + 地图 ' + worldMapOpens + '× — 老玩家信号：卷二《三日陵》HUD里推「卷次回响」旁白', en: 'Veterans score: ' + bossKills + ' boss kills + ' + worldMapOpens + ' map opens — surface a Vol. II canon-read moment', impact: zh ? '→ 留存 +6%' : '→ churn control −6%' });
       if (journalOpens === 0 && gameStarts >= 2) rows.push({ priority: 'P2', zh: '游戏启动 ' + gameStarts + ' 次但从没主动开日志 —— 加一次一次性 tooltip：「按 J 日志记住你的旅途」', en: 'Started the game ' + gameStarts + ' times, journal never invoked — add a one-time tooltip: “Press J — the journal keeps your story”', impact: zh ? '→ J 打开率 +50%' : '→ journal open rate +50%' });
       if (autoplayTaps === 0 && bossKills <= 1 && gameStarts >= 3) rows.push({ priority: 'P3', zh: '完全没碰过自动通关 —— 许多玩家不知道它存在，在菜单底部放一个小眼睛图标', en: 'Never tried autoplay — many players simply haven’t found it; consider a tiny eyes-as-affordance entry', impact: zh ? '→ 功能发现率 +20%' : '→ feature discovery +20%' });
+      // W-Z502：基于真·session_end / guide_asked 的留存与迷茫推论（真实行为，非合成）
+      if (sessionEnds >= 3 && shortSessions >= 2) rows.push({ priority: 'P0', zh: sessionEnds + ' 次会话里 ' + shortSessions + ' 次不到 30 秒就走了 —— 开场太慢/不知做什么；把「30 秒炉边快速上手」提到首屏最前，开场文本再砍一刀', en: shortSessions + ' of ' + sessionEnds + ' sessions ended under 30s — slow/unclear opening; promote the 30-second hearth quickstart to the very first screen and trim intro text', impact: zh ? '→ 早期跳出 -25%（行为模型）' : '→ early bounce −25% (behaviour model)' });
+      if (guideAsks >= 2 && lostVerdicts >= 1) rows.push({ priority: 'P1', zh: '守夜人指路被问了 ' + guideAsks + ' 次，其中 ' + lostVerdicts + ' 次判读为迷茫 —— 这一段路标不清；在该区域加发光路点 + 一句炉火提示', en: 'Keeper guide used ' + guideAsks + ' times, ' + lostVerdicts + ' read as “lost” — wayfinding weak there; add a glowing waypoint + one hearth hint in that zone', impact: zh ? '→ 迷路率 -30%（行为模型）' : '→ wander rate −30% (behaviour model)' });
     }
     rows.sort((a, b) => a.priority.localeCompare(b.priority));
     const ordered = rows.slice(0, 6);

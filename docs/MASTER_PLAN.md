@@ -1,6 +1,10 @@
 > **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
 >
+> **2026-11-21 · W-Z502 行为信号贯通管理员页（需求九 + 四闭环）**：审计发现一个真断层——游戏侧记的 `session_end`（W-Z487/500 修的「没耐心就关掉」信号）与 LLM 守夜人指路（W-Z486）**完全没进管理员页**：admin 的 `known`/`labelKey` 不含这两个事件，智能洞察也只看老事件。也就是说前面几轮的行为建模与 LLM 判读，管理员根本看不见，需求九「监控 + 深度优化措施」断了。
+> 修复：① 守夜人指路把 LLM 判读出的 `mood` 记进真实遥测（`guide_asked`，白名单校验、失败静默）；② admin 的本地事件网格加两列（zh/en 标签：`会话结束（留存）`/`求过守夜人指路`）；③ 智能洞察新增两条**基于真行为**的 P0/P1 优化措施——「N 次会话里 M 次 <30 秒就走 → 开场太慢，quickstart 提前 + 砍开场文本」「守夜人指路问了 N 次、M 次判迷茫 → 该区域路标不清，加发光路点」。浏览器实测：注入真实遥测后两列显示 2/2，洞察真的产出「路标不清」建议，零业务 console 错误（仅 Pages 静态无后端的 rollup 404，已优雅降级）。
+> 门禁：Tests **6976/6976** ✓（+4 例：游戏侧上报/admin 列表/双语标签/洞察规则）· ai-service 201/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。
+> 
 > **2026-11-21 · W-Z501 事实包 --check 门禁自指字段修复（CI 可靠性）**：跑 `build-latest.mjs --check` 发现它永远报 drift（head/total_commits）——这两个字段是**自指**的：脚本按当时 HEAD 写好 latest.json，随后那笔 fact-pack 提交本身才成为新 HEAD（+1 commit），拿新 HEAD 比旧值必然红。也就是说这个 CI 门禁在正常 workflow 下从未真正可用。
 > 修复：把 drift 判定收窄到**内容派生字段**（i18n_keys / lore_sources / novel_chapters_zh+en / test_files / tracked_files / schema / branch / first_commit_at），head/total_commits 的新鲜度交给 sync-latest.yml 的 `git diff --quiet` 实际提交路径保证。修后 `--check` 实测通过（head=9a17d2a, lore=611, i18n=3272）。新增 `tests/latest-check.test.js`（3 例：自指字段不判定/内容字段仍判定/脚本形状）。
 > 顺带核清一件长期口径：所谓「`:17 */3` Pages 定时兜底」在 **io 仓库**的 pages.yml（cron 17 */3 * * *），游戏仓库 pages.yml 走 push+workflow_dispatch+workflow_run——两边口径不同，此前的说法没错但容易混；实测 io Pages 近 5 次全 success（含 schedule 一次）。

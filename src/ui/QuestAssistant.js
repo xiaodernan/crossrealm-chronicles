@@ -7,6 +7,13 @@ import { rollGear } from '../content/gear.js';
 import { buildDemoSteps } from './demoSteps.js';
 import { localTelemetry } from '../game/LocalTelemetry.js';
 
+/** W-Z502：允许上报的遥测事件白名单——不让任意字符串进 localStorage 事件流。 */
+const TELEMETRY_EVENTS = new Set(['guide_asked']);
+const recordTelemetry = (event, meta) => {
+  if (!TELEMETRY_EVENTS.has(event)) return;
+  try { localTelemetry.record(event, meta); } catch { /* 遥测失败不影响玩法 */ }
+};
+
 /** 自动通关/带路整条流程的计时分组，用户中途取消时整体撤销 */
 const AUTOPILOT_TAG = 'quest-autopilot';
 
@@ -93,9 +100,12 @@ export class QuestAssistant {
       });
       if (res?.ok && res.data?.nudge) {
         resultEl.textContent = res.data.nudge;
+        // W-Z502：把 LLM 判读出的局面记进真实遥测——管理员页据此统计「多少玩家迷茫、在哪迷路」
+        recordTelemetry('guide_asked', { mood: res.data.mood ?? 'unknown', zone, ok: true });
       } else {
         // 离线 / 不可用：落回确定性提示，不让玩家看着空白
         resultEl.textContent = this.game.quests?.getAssistantHint?.() || t('qa_guide_unavailable');
+        recordTelemetry('guide_asked', { mood: 'unavailable', zone, ok: false });
       }
     } catch {
       resultEl.textContent = this.game.quests?.getAssistantHint?.() || t('qa_guide_unavailable');
