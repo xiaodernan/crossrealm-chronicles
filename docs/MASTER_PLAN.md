@@ -1,6 +1,10 @@
 > **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
 >
+> **2026-11-21 · W-Z488 滚轮方向反转开关（需求五·项目长期反复反馈项）**：源码里滚轮口径数学上一直正确（下滚 deltaY>0 → pitch+ → 视线朝下），但用户多次反馈方向相反——根因是部分平台/设备的「自然滚动」在浏览器层把 deltaY 取反。与其猜平台（navigator.platform 已弃用且不可靠），给用户一个显式开关最稳：设置页新增「反转滚轮方向」勾选框（`set-invert-wheel`），`SettingsManager.invertWheel` 默认 false 持久化；Game 的 wheel handler 读 `=== true` 取反系数同时作用于俯仰与缩放，脏值一律当关。
+> 交付：SettingsManager 加 `invertWheel:false`（含注释与脏值口径）· Game wheel 乘 sign · SettingsPanel 绑定勾选框并回显 · index.html 加勾选框 · strings(zh+en) `settings_invert_wheel` · 两语说明书加教学（自然滚动时可勾）。浏览器实测：勾选框存在、标签正确、切换后 localStorage `crossrealm_settings.values.invertWheel` 在 false↔true 间正确持久化。
+> 门禁：Tests **6941/6941** ✓（+wheel-invert 2 例：出厂默认/反转系数真值判断）· ai-service 199/0 ✓ · Build ✓ · i18n 3271→**3272**（+1 双语各一）· identity-guard ✓。纯 additive，默认档手感零变更。
+> 
 > **2026-11-21 · W-Z487 真·行为信号入 LLM 判读（需求九 + 需求四闭环）**：守夜人指路（W-Z486）此前只用「面板内交互」估在场状态——绝大多数玩家从不打开面板，信号恒为 0。本片把本机遥测（localStorage 里真实发生的事件序列）接进 LLM 判读：`LocalTelemetry.behaviorSnapshot()` 从事件序列读出 `idleSeconds`（距最后事件秒数）/ `recentActions`（最近 10 秒事件数=瞎点密度）/ `sessionMs` / `lastEvent`；`recordSessionEnd()` 在 `pagehide` / `visibilitychange` 记一条带时长的 `session_end`，如实留下「打开页面没耐心就关掉」的留存信号（幂等，只记一次）。
 > QuestAssistant 改为直接 import localTelemetry 读真信号（不再依赖 `game.localTelemetry`，避开 Game 表面契约），无数据时保守回退面板估时。浏览器实测：新构建 `window.__crossrealmTelemetry.behaviorSnapshot()` 返回真实 game_start 时长；LLM 判读现在吃的是真行为而非空白。
 > 门禁：Tests **6939/6939** ✓（+telemetry-behavior 6 例：空缓冲/发呆上限/密度窗/sessionMs/session_end/脏档；event-registry 登记 pagehide+visibilitychange 原生事件）· ai-service 199/0 ✓ · Build ✓ · i18n 3271 不变 · identity-guard ✓。纯 additive。

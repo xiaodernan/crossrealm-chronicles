@@ -68,6 +68,12 @@ const DEFAULTS = {
    * 真源与量程在 `engine/lookSensitivity.js`；脏值在那里夹回量程，不抛。
    */
   lookSensitivity: DEFAULT_LOOK_SENSITIVITY,
+  /**
+   * 滚轮俯仰方向反转（W-Z488）：默认 false = 下滚往下看、上滚往上看（项目口径）。
+   * 部分平台的「自然滚动」会在浏览器层把 deltaY 取反，玩家若觉得方向相反可勾这一格；
+   * 只认真的勾上（与 vibration 同一口径），存储脏值一律当成关。
+   */
+  invertWheel: false,
   showFps: true,
   /** 玩家的键位重映射 `动作名 → KeyboardEvent.code`；空表 = 用 `content/hotkeys.js` 的出厂绑定 */
   keybinds: {},

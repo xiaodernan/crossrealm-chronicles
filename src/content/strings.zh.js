@@ -86,6 +86,7 @@ export const STRINGS_ZH = Object.freeze({
   caption_pickup: '已拾取',
   caption_execution: '处决',
   settings_look_sensitivity: '镜头灵敏度',
+  settings_invert_wheel: '反转滚轮方向（下滚/上滚对调）',
   // 画面亮度（W-E3 切片61）：曝光倍率，不是显示器亮度 —— 管的是游戏内明暗
   settings_brightness: '画面亮度',
   // 震屏强度（W-E3 切片58）：`vibration` 管手柄马达，这一格管画面 —— 两路各一格
@@ -2999,6 +3000,7 @@ export const STRINGS_ZH = Object.freeze({
 1. 点击画面锁定鼠标，WASD 移动，{sprint} 冲刺
 2. {cameraMode} 切换第一/第三人称（推荐第三人称 — 法环式轨道镜头，鼠标直接转视角）
 3. 滚轮上下看向（往下滑=向下看，往上滑=向上看）· Ctrl+滚轮缩放 · 镜头始终看向角色，不再「看前方地面」导致晕
+   若你的设备滚轮方向相反（某些系统的「自然滚动」会把方向颠倒），到设置里勾「反转滚轮方向」即可，一眼生效。
 2. 走到蓝色「世界之锚」按 {interact} 接受使命
 3. 东侧训练木人练习连击（左键轻击、右键重击）
 4. 按 {journal} 打开任务日志，跟随 Chapter 1→5 主线

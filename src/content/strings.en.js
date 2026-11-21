@@ -86,6 +86,7 @@ export const STRINGS_EN = Object.freeze({
   caption_pickup: 'Picked up',
   caption_execution: 'Execution',
   settings_look_sensitivity: 'Look Sensitivity',
+  settings_invert_wheel: 'Invert mouse wheel (swap scroll up/down)',
   settings_brightness: 'Brightness',
   settings_shake: 'Screen Shake',
   settings_shake_full: 'Full',
@@ -2999,6 +3000,7 @@ After the Rift Lord falls, the old dungeons return with a random layout for the 
 1. Click the screen to lock the mouse, WASD to move, {sprint} to sprint
 2. {cameraMode} to switch first/third person (recommended third person — Dark Souls style orbital camera, mouse directly turns view)
 3. Mouse wheel tilts the view (scroll down = look down, scroll up = look up) · Ctrl+wheel to zoom · Camera always frames the character, no more "looking at the ground ahead" motion sickness
+   If the wheel feels inverted on your device (some systems' "natural scrolling" flips the direction), just tick "Invert mouse wheel" in Settings — it takes effect immediately.
 2. Walk to the blue "World Anchor" and press {interact} to accept the mission
 3. East training dummy to practice combos (left click light hit, right click heavy hit)
 4. Press {journal} to open the quest log, follow Chapter 1→5 main line

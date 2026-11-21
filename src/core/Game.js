@@ -1296,11 +1296,14 @@ export class Game {
       // 2026-11-15 用户明确要求：滚轮默认上下看向——往下滑 = 向下看，往上滑 = 向上看
       // （与鼠标移动同一口径，pitch>0 = 视线朝下）。Ctrl/⌘+滚轮保留为镜头缩放；拍照模式下仍缩放。
       // 触控板双指滚动同理。
+      // W-Z488：滚轮方向反转开关——平台「自然滚动」可能在浏览器层把 deltaY 取反，
+      // 玩家若觉得上下相反可在设置里勾「反转滚轮方向」。只认真的勾上生效，脏值当关。
+      const sign = this.settings?.get?.('invertWheel') === true ? -1 : 1;
       if (e.ctrlKey || e.metaKey || this.photoMode?.active === true) {
-        this.player.adjustZoom(-e.deltaY * 0.01);
+        this.player.adjustZoom(-e.deltaY * 0.01 * sign);
         return;
       }
-      this.player.adjustPitch(e.deltaY * 0.0008);
+      this.player.adjustPitch(e.deltaY * 0.0008 * sign);
     }, { passive: false });
   }
 

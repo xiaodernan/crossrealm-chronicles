@@ -113,6 +113,15 @@ export class SettingsPanel {
       s.set('shadows', sh.checked);
       s.applyToGame(this.game);
     });
+    // 滚轮方向反转（W-Z488）：只认勾状态；回显读真值（存储脏值由 get 回落 false）
+    const inv = document.getElementById('set-invert-wheel');
+    if (inv) {
+      inv.checked = s.get('invertWheel') === true;
+      inv.addEventListener('change', () => {
+        s.set('invertWheel', inv.checked === true);
+        s.applyToGame(this.game);
+      });
+    }
     // 字幕开关（W-D6 切片8）：与阴影同一副骨架（checkbox + change + set + applyToGame）。
     // 只认 `checked` 的布尔，不走 `bind()` 的 `Number` —— 那不是数值滑杆，
     // 而存储里一个 `"0"` 会被 Number 成 0（看着像关，其实是真的关，只是路径不同）。

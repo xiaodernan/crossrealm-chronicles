@@ -140,6 +140,8 @@
         <label><span data-i18n="settings_brightness">画面亮度</span> <input id="set-brightness" type="range" /> <span id="set-brightness-value" class="setting-value"></span></label>
         <!-- 鼠标镜头灵敏度（W-D6 切片7）：倍率不是绝对值，min/max/step 由 SettingsPanel 从 LOOK_SENSITIVITY 灌进来 -->
         <label><span data-i18n="settings_look_sensitivity">镜头灵敏度</span> <input id="set-look-sensitivity" type="range" /></label>
+        <!-- 滚轮方向反转（W-Z488）：平台「自然滚动」把 deltaY 取反时勾这里；默认下滚往下看 -->
+        <label><input id="set-invert-wheel" type="checkbox" /> <span data-i18n="settings_invert_wheel">反转滚轮方向</span></label>
         <label><span data-i18n="settings_master_volume">主音量</span> <input id="set-master-vol" type="range" min="0" max="1" step="0.05" /></label>
         <label><span data-i18n="settings_sfx_volume">音效</span> <input id="set-sfx-vol" type="range" min="0" max="1" step="0.05" /></label>
         <!-- 音乐 / 环境（W-C7 切片5）：两条子总线进面板，出厂值 = 切片5 前的内部混音字面量，默认档零听觉变更。
