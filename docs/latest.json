@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T07:00:24.529Z",
+  "generated_at": "2026-11-21T07:17:31.411Z",
   "branch": "main",
-  "head": "f096112",
-  "total_commits": 2423,
-  "pushed_at": "2026-11-21T14:59:38+08:00",
+  "head": "29663d8",
+  "total_commits": 2425,
+  "pushed_at": "2026-11-21T15:16:32+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "29663d8",
+      "at": "2026-11-21T15:16:32+08:00",
+      "subject": "test(load): W-Z492 全链路真实压力测试——网关 vs 直连同口径对比（fresh MEASURED）"
+    },
+    {
+      "short": "13aaa49",
+      "at": "2026-11-21T15:00:36+08:00",
+      "subject": "chore(latest): W-Z491 fact pack head=f096112 (novels 290 · lore 611 · i18n 3272 · commits 2423)"
+    },
     {
       "short": "f096112",
       "at": "2026-11-21T14:59:38+08:00",
@@ -21,25 +31,15 @@
       "short": "f34e7d4",
       "at": "2026-11-21T14:48:59+08:00",
       "subject": "perf(llm): W-Z490 大前缀车道热身默认关——珍惜 token 的开机成本治理"
-    },
-    {
-      "short": "4c712d2",
-      "at": "2026-11-21T14:41:53+08:00",
-      "subject": "chore(latest): W-Z489 fact pack head=b354d1b (novels 290 · lore 611 · i18n 3272 · commits 2419)"
-    },
-    {
-      "short": "b354d1b",
-      "at": "2026-11-21T14:40:46+08:00",
-      "subject": "fix(admin): W-Z489 修复管理页内联脚本语法错误——口令门/语言/遥测此前全失效"
     }
   ],
-  "tracked_files": 1924,
-  "test_files": 475,
+  "tracked_files": 1926,
+  "test_files": 476,
   "i18n_keys": 3272,
   "lore_sources": 611,
   "novel_chapters_zh": 290,
   "novel_chapters_en": 290,
-  "milestone": "W-Z491",
+  "milestone": "W-Z492",
   "milestone_full": "卷 290 · 六百年守火线（290 / 290 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 611 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：290 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
