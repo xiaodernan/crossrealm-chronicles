@@ -30,6 +30,9 @@ const simulation = readData('simulation.json');
 const oracle = readData('oracle-cache-probe.json');
 const vow = readData('vow-montecarlo.json');
 const pass = readData('pass-montecarlo.json');
+// W-Z491：把新做的两条真上游探针也纳入 digest——它们是 MEASURED，不是合成
+const deepProbe = readData('oracle-v5-live-probe-2026-11-21.json');
+const guideProbe = readData('guide-live-probe-2026-11-21.json');
 
 import { curlFetch } from './_curl-proxy.mjs';
 
@@ -48,6 +51,7 @@ const digest = {
     'simulation.json = REAL headless Chrome sessions on this repo build (14 sessions, seed=20261117), observations real, not production telemetry either',
     'oracle-cache-probe.json = MEASURED upstream cache probe via local Clash proxy',
     'vow-montecarlo.json / pass-montecarlo.json = MEASURED full-enumeration distributions (27/27), not samples',
+    'oracle-v5-live-probe.json / guide-live-probe.json = MEASURED upstream cache+state-flow probes via local Clash proxy (2 calls each, 2026-11-21)',
     'pages has no backend; production telemetry only exists when /api/telemetry/summary-rollup answers; admin KPIs marked measured on the page are local dev measurements',
   ],
   kpis: {
@@ -85,6 +89,22 @@ const digest = {
     canonSecondCall: pctOfConst(6784, 6973),
     refsSecondCall: pctOfConst(7424, 7611),
     cacheKey: oracle.cacheKey,
+  },
+  // W-Z491 新增的两条 MEASURED 探针：深潜大上下文 + LLM 驱动状态流转引导
+  llmDeepDiveProbe: {
+    label: 'MEASURED oracle-v5 (2026-11-21)',
+    promptTokens: deepProbe.calls?.[1]?.prompt,
+    cachedTokens: deepProbe.calls?.[1]?.cached,
+    warmHitRatio: deepProbe.calls?.[1]?.ratio,
+    coldHitRatio: deepProbe.calls?.[0]?.ratio,
+    cacheKey: deepProbe.cacheKey,
+  },
+  llmGuideProbe: {
+    label: 'MEASURED keeper-guide (2026-11-21)',
+    verdict: guideProbe.mood,
+    path: guideProbe.path,
+    composeCachedRatio: guideProbe.calls?.[1]?.ratio,
+    cacheKey: guideProbe.cacheKey,
   },
   vowDistributionTop: topVow,
   passDistributionTop: topPass,
@@ -195,7 +215,7 @@ const call = async (lang) => {
 const now = new Date().toISOString();
 const header = (lang) => [
   `<!-- admin-llm-analysis · ${lang} · generated=${now} · model=${MODEL} · script=scripts/admin-llm-analysis.mjs -->`,
-  `<!-- 上游源: docs/admin/data/synthetic.json (SYNTHETIC) + simulation.json (headless-Chrome real sessions) + oracle-cache-probe.json + vow/pass-montecarlo.json (MEASURED). -->`,
+  `<!-- 上游源: synthetic.json (SYNTHETIC) + simulation.json (headless-Chrome real sessions) + oracle-cache-probe.json + vow/pass-montecarlo.json + oracle-v5-live-probe.json + guide-live-probe.json (MEASURED). -->`,
   `<!-- REMINDER: 本文件由 LLM 生成；数字标注与解读以原始 JSON 与炉边盘页内注记为准。 -->`,
   '',
 ].join('\n');

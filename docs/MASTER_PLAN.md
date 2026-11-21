@@ -1,6 +1,11 @@
 > **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
 >
+> **2026-11-21 · W-Z491 管理分析 LLM 报告重跑——纳入新 MEASURED 探针（需求九闭环）**：`scripts/admin-llm-analysis.mjs` 的 digest 此前只吃 5 份旧数据（最新 2026-11-16/19），不含本轮新做的两条真上游探针，导致管理页 LLM 建议看不到深潜与引导流转的实测。本片把 `oracle-v5-live-probe.json`（83K tok · warm 88.8% · cold 4.8%）与 `guide-live-probe.json`（verdict=lost · 路径 observe→assess→guideLost→guard · cached 86.4%）注入 digest，诚实标注为 MEASURED。
+> 真上游重跑（gpt-6.2-sol · Clash 7897 · 2 语各 1 次 · prompt≈6.1K）：zh chars=2577 / en chars=5305，2/2 成功；报告产出真实引用新数字的建议（如 P3「按冷热分别复核深度探针缓存：88.8%/4.8%、82,968/73,711」与 P3「核对 guide 状态流转失败路径：lost / observe→assess→guideLost→guard」），且不把 SYNTHETIC 当生产遥测。产物 docs/admin/data/admin-llm-analysis.{zh,en}.md 更新（generation=2026-11-21T06:52Z）。
+> 省 token：修正 header 的来源标注走直接补丁而非再调 LLM；新增 `tests/admin-llm-digest.test.js`（3 例：digest 注入 / 诚实标注 / 产物真实引用）防旧报告悄悄回潮。
+> 门禁：Tests **6946/6946** ✓（+3 例）· ai-service 201/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。纯 additive。
+> 
 > **2026-11-21 · W-Z490 大前缀车道热身默认关——珍惜 token 的开机成本治理**：审计发现 `warmup-on-boot` 代码默认 true，而 `warmupUpstream()` 会在每次开机给每条 lane 发一个 warmup 请求；ARBITER/ORACLE 走 v4（≈4.7 万 tok）、ORACLE_DEEP 走 v5（≈8.3 万 tok），加上其余车道，一次开机热身可烧十几万 token——与用户「珍惜 token」直接冲突，且这几个深潜车道都是低频功能。
 > 修复：新增 `ai-service.warmup-deep-lanes`（env `LLM_WARMUP_DEEP_LANES`，默认 **false**）。`warmupUpstream()` 里 ARBITER / ORACLE / ORACLE_DEEP 三条大前缀车道改为只在显式开启时才铺；廉价 v3 车道（advisor/ember×6/bossverse/echo/guide/death-epitaph/chapter-coda）照常热身。深潜首问冷一次、次问即热（实测 warm 88.8%），远比开机常暖划算。application.yml + env.example 文档化。
 > 门禁：ai-service **201/201** ✓（+WarmupDeepLanesTest 2 例：默认关/显式开）· Tests 6943/6943 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。纯 additive，默认行为更省 token。
