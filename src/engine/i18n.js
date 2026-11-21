@@ -150,7 +150,7 @@ export function applyTranslations(root = typeof document !== 'undefined' ? docum
   // 切片56：两个属性合并成一次走查（原来是 `[data-i18n]` 与 `[data-i18n-aria]` 各
   // querySelectorAll 一遍）。换语言是一次性的整树重写，两遍变一遍省一半遍历；
   // 同时挂两个属性的元素（文本 + 读屏标签）在同一轮里各换各的，与拆分走查等价。
-  for (const el of root.querySelectorAll('[data-i18n], [data-i18n-aria]')) {
+  for (const el of root.querySelectorAll('[data-i18n], [data-i18n-aria], [data-i18n-title]')) {
     const textKey = el.getAttribute('data-i18n');
     if (textKey !== null) {
       const value = table[textKey];
@@ -164,6 +164,16 @@ export function applyTranslations(root = typeof document !== 'undefined' ? docum
       const value = table[ariaKey];
       if (value !== undefined) {
         el.setAttribute('aria-label', value);
+        count += 1;
+      }
+    }
+    // W-Z497 主界面按键教学：data-i18n-title 把现成文案键写进 title（悬停教学），
+    // 与 aria 同一把走查、同一份表，换语言一起更新，不给 strings 表插新键。
+    const titleKey = el.getAttribute('data-i18n-title');
+    if (titleKey !== null) {
+      const value = table[titleKey];
+      if (value !== undefined) {
+        el.setAttribute('title', value);
         count += 1;
       }
     }

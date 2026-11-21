@@ -52,7 +52,7 @@
         <button type="button" id="guide-autoplay"><span data-i18n="autoplay_label">自动通关</span> <span data-keys="autoPlay"></span></button>
       </div>
     </div>
-    <button type="button" id="autoplay-fab">⚡ <span data-i18n="autoplay_label">自动通关</span></button>
+    <button type="button" id="autoplay-fab" data-i18n-aria="qa_btn_autoplay" data-i18n-title="qa_btn_autoplay">⚡ <span data-i18n="autoplay_label">自动通关</span></button>
     <div id="toast-container"></div>
     <div id="upgrade-panel" class="hidden">
       <div class="upgrade-box">
@@ -318,7 +318,7 @@
          文案键一律走 data-i18n / data-i18n-aria，聊天气泡是模型回的**不可信文本**，
          由 AdvisorPanel 用 createElement + textContent 写，绝不拼进 innerHTML。 -->
     <button type="button" id="advisor-fab" class="advisor-fab" aria-controls="advisor-panel"
-            aria-expanded="false" data-i18n-aria="advisor_fab_aria">
+            aria-expanded="false" data-i18n-aria="advisor_fab_aria" data-i18n-title="advisor_fab_aria">
       <span class="fab-notify-dot hidden" id="fab-notify-dot" aria-hidden="true"></span>
       <span class="advisor-orbit" aria-hidden="true"></span>
       <span class="advisor-label" data-i18n="advisor_fab">星轨顾问</span>

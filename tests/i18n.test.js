@@ -211,7 +211,7 @@ describe('开机那几屏接线（W-D2 切片5）', () => {
     '<span data-i18n="minimap_dungeon_hint">',
     '<span data-i18n="guide_head">',
     'id="guide-sync" data-i18n="guide_sync"',
-    'id="autoplay-fab">⚡ <span data-i18n="autoplay_label"',
+    'id="autoplay-fab" data-i18n-aria="qa_btn_autoplay" data-i18n-title="qa_btn_autoplay">⚡ <span data-i18n="autoplay_label"',
     '<h2 data-i18n="start_brand">',
     '<span data-i18n="start_click">',
     '<span data-i18n="start_move">',
