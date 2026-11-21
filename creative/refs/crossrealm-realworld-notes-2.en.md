@@ -26,7 +26,7 @@ https://zh.wikipedia.org/wiki/冬至 (accessed 2026-11-16)
 ## 9 · Eternal flames — empirical samples
 
 - **Ise Grand Shrine, Japan** — every 20 years the Inner and Outer Shrines are fully reconstructed (Shikinen Sengū); the latest (62nd) was completed in 2024. The fire at the new shrine is ceremonially fed from the previous shrine's ever-burning flame — a fire more than 1,300 years old.
-- **Paris, France** — the Arc de Triomphe's Tomb of the Unknown Soldier: its flame has burned continuously since November 11, 1923 — 102 years; it is re-lit every evening at 6:30 by the association La Flamme de l'Espérance armed with the censer kept inside the tomb itself.
+- **Paris, France** — the Arc de Triomphe's Tomb of the Unknown Soldier (the tomb itself dates to 11 November 1920): its flame was first lit at 6 p.m. on 11 November 1923 by war minister André Maginot and has burned continuously since — 103 years as of 2026; every evening at 6:30 the association La Flamme sous l'Arc de Triomphe performs the rekindling ceremony. (Verified against English Wikipedia, last updated 2026-11-11.)
 - **Moscow** — the Tomb of the Unknown Soldier on the Kremlin Wall, Moscow, has burned without interruption since 1967; its flame is renewed annually on 22 June (the Nazi invasion of 1941).
 - **Tokyo, Ise Jingu** — the Shikinen Sengu completion in 2024 was the 62nd reconstruction since AD 690.
 - **Hiroshima Peace Memorial Park** — the peace flame lit in 1964 has not been extinguished since; it will not be extinguished until the last nuclear weapon in existence is destroyed.

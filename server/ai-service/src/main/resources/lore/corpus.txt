@@ -39250,7 +39250,7 @@ https://zh.wikipedia.org/wiki/冬至 (accessed 2026-11-16)
 ## 9 · Eternal flames — empirical samples
 
 - **Ise Grand Shrine, Japan** — every 20 years the Inner and Outer Shrines are fully reconstructed (Shikinen Sengū); the latest (62nd) was completed in 2024. The fire at the new shrine is ceremonially fed from the previous shrine's ever-burning flame — a fire more than 1,300 years old.
-- **Paris, France** — the Arc de Triomphe's Tomb of the Unknown Soldier: its flame has burned continuously since November 11, 1923 — 102 years; it is re-lit every evening at 6:30 by the association La Flamme de l'Espérance armed with the censer kept inside the tomb itself.
+- **Paris, France** — the Arc de Triomphe's Tomb of the Unknown Soldier (the tomb itself dates to 11 November 1920): its flame was first lit at 6 p.m. on 11 November 1923 by war minister André Maginot and has burned continuously since — 103 years as of 2026; every evening at 6:30 the association La Flamme sous l'Arc de Triomphe performs the rekindling ceremony. (Verified against English Wikipedia, last updated 2026-11-11.)
 - **Moscow** — the Tomb of the Unknown Soldier on the Kremlin Wall, Moscow, has burned without interruption since 1967; its flame is renewed annually on 22 June (the Nazi invasion of 1941).
 - **Tokyo, Ise Jingu** — the Shikinen Sengu completion in 2024 was the 62nd reconstruction since AD 690.
 - **Hiroshima Peace Memorial Park** — the peace flame lit in 1964 has not been extinguished since; it will not be extinguished until the last nuclear weapon in existence is destroyed.
@@ -39329,7 +39329,7 @@ https://en.wikipedia.org/wiki/Zao_Jun （访问日期 2026-11-16）
 
 - 伊势神宫式年迁宫（见 vol.1）——每二十年拆迁重建一次——自 690 年起至 2024 年已完成第 62 次，火种的连续性靠「足下通力而流传」逐次不灭——以火种的**持续性**作为存在性宣告。
 - 辽宁本溪古朴民畑祭坛祖火千年不灭——本溪满族自治县五女山牧野堡（中和朝）共存道教祖火与满洲族「孛罗浑天」祖火——千年连续（据县志）——今日村民世代「主天」者仍守火至节日。
-- 法国巴黎凯旋门无名烈士墓长明火——自 1923 年起至 2026 年已有 102 年连续不灭——每天下午 6:30 由协会负责重燃。
+- 法国巴黎凯旋门无名烈士墓长明火——1923 年 11 月 11 日由战争部长 André Maginot 首次点燃（凯旋门下的无名烈士墓本身 1920 年 11 月 11 日落成），至 2026 年已连续燃烧 103 年——每天下午 6:30 由「La Flamme sous l'Arc de Triomphe」协会的重燃仪式续火（来源已复核英文维基，最后更新 2026-11-11）。
 - 以色列尼米尔拉尼市长明火（「永存火」）——2026 年仍在燃。
 - 日本京都平安神宫「神嘉殿」长明灯——每年酉日转典（2024 年秋完成）——从唐代「相生炎」到现在，从未中断。
 - 与锚火的对应（canon 映射，非剧情事实）：白茵「寄存白桦」、祖火「不灭」、白茵之墓「长明灯不熄」皆非史实具体考证——它是「千年烽燧不灭火」的一种**概念化再造**，是「守火」这件事在中国古村落原型上再造了一个「守火人本身也会灰飞烟灭的'永恒火'」——这恰好就是整个长明火传统共同的存在逻辑：火不灭不是因为有力量，而是因为有人愿意思念它。
