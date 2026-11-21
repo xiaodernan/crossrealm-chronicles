@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T10:53:34.111Z",
+  "generated_at": "2026-11-21T11:11:03.593Z",
   "branch": "main",
-  "head": "c54ff45",
-  "total_commits": 2429,
-  "pushed_at": "2026-11-21T18:52:07+08:00",
+  "head": "8f69cd2",
+  "total_commits": 2431,
+  "pushed_at": "2026-11-21T19:10:13+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "8f69cd2",
+      "at": "2026-11-21T19:10:13+08:00",
+      "subject": "fix(i18n): W-Z495 浏览器标签标题跟随语言切换——消除 EN 模式残留中文"
+    },
+    {
+      "short": "10626ed",
+      "at": "2026-11-21T18:53:48+08:00",
+      "subject": "chore(latest): W-Z494 fact pack head=c54ff45 (novels 290 · lore 611 · i18n 3272 · commits 2429)"
+    },
     {
       "short": "c54ff45",
       "at": "2026-11-21T18:52:07+08:00",
@@ -21,25 +31,15 @@
       "short": "bbf2f02",
       "at": "2026-11-21T18:42:01+08:00",
       "subject": "docs(plan): W-Z493 关闭历史「未完成」——compose verify 全绿 + Spring LLM live tests 真上游通过"
-    },
-    {
-      "short": "93dec2a",
-      "at": "2026-11-21T15:17:42+08:00",
-      "subject": "chore(latest): W-Z492 fact pack head=29663d8 (novels 290 · lore 611 · i18n 3272 · commits 2425)"
-    },
-    {
-      "short": "29663d8",
-      "at": "2026-11-21T15:16:32+08:00",
-      "subject": "test(load): W-Z492 全链路真实压力测试——网关 vs 直连同口径对比（fresh MEASURED）"
     }
   ],
-  "tracked_files": 1928,
-  "test_files": 477,
+  "tracked_files": 1929,
+  "test_files": 478,
   "i18n_keys": 3272,
   "lore_sources": 611,
   "novel_chapters_zh": 290,
   "novel_chapters_en": 290,
-  "milestone": "W-Z494",
+  "milestone": "W-Z495",
   "milestone_full": "卷 290 · 六百年守火线（290 / 290 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 611 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：290 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
