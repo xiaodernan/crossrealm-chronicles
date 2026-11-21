@@ -1,6 +1,11 @@
 > **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
 >
+> **2026-11-21 · W-Z495 浏览器标签标题跟随语言（需求八「不中英夹杂」漏网之鱼）**：浏览器 QA 实测发现——切到 EN 后游戏内全部 UI 文案都已英文化（data-i18n 节点零中文），但浏览器标签 `<title>` 仍是写死的「跨界纪元 — Crossrealm Chronicles」中文。需求八要求全语言单一，标签是漏网的一格。
+> 修复：`setLanguage()` 里在切完 `currentLang` 与 `htmlLang` 后同步写 `document.title`——用现有 `start_brand` 拼各语后缀（zh「跨界纪元 — Crossrealm Chronicles」/ en「Crossrealm Chronicles — The Keeper's Anchor Fire」）。刻意**不新增文案键**：strings 表插一行会把 17 个钉行号的 i18n 门禁全顶红（第一次尝试实测 17 红），改为代码内派生，零键增、i18n 仍 3272。无 DOM 环境静默跳过，与 htmlLang 同口径。
+> 浏览器复测（真点设置页语言下拉）：EN → 标签「Crossrealm Chronicles — The Keeper's Anchor Fire」（零中文）；ZH →「跨界纪元 — Crossrealm Chronicles」。新增 `tests/doc-title-i18n.test.js`（2 例：双语标题/无 DOM 不抛）。
+> 门禁：Tests **6954/6954** ✓（+2 例）· ai-service 201/0 ✓ · Build ✓ · i18n **3272 不变** · identity-guard ✓。
+> 
 > **2026-11-21 · W-Z494 管理页 KPI 与报告同源 + favicon 404（需求九/十 细节清洁）**：W-Z491 用 LLM 重跑了双语运营分析（zh 2577 / en 5305 字 · 2026-11-21），但管理页 `meas_l18b` KPI 卡仍写着旧版「W-Z451 重跑 · zh 2792 / en 4969 · 2026-11-19」——卡片与报告失同源，给用户错数字。本片把三处（HTML 卡 + zh/en 两份内联文案）同步为最新里程碑与数字，并注明 digest 已纳入 v5 深潜 + guide 探针。浏览器复测：解锁口令 123 后卡片显示 W-Z491 / 2577/5305 / 2026-11-21，旧数字清零，零 console 错误。新增 `tests/admin-llm-kpi.test.js`（3 例：里程碑/数字/探针引用）防卡片再次 drift。
 > 顺带修管理页 favicon 404：页面引 `../favicon.svg`（= docs/favicon.svg）但文件只在 public/，复制一份到 docs/ 让静态直开不再 404。全仓内联脚本复扫 18 块零语法错误。
 > 门禁：Tests **6952/6952** ✓（+3 例）· ai-service 201/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。纯 additive。

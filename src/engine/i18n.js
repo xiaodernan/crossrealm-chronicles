@@ -55,6 +55,18 @@ export function setLanguage(lang) {
   if (entry?.htmlLang && typeof document !== 'undefined' && document.documentElement) {
     document.documentElement.lang = entry.htmlLang;
   }
+  // W-Z495：浏览器标签页标题跟着语言切换——之前 <title> 写死中文，切到 EN 后内核已全英
+  // 独独标签仍是中文（需求八「不中英夹杂」的漏网之鱼）。currentLang 已在上面更新。
+  // 用现有 start_brand 拼后缀，不新增文案键——避免 strings 表插行把 17 个钉行号的门禁全顶红。
+  // 无 DOM（纯逻辑测试）静默跳过，与 htmlLang 同一口径。
+  if (typeof document !== 'undefined') {
+    const brand = t('start_brand');
+    if (brand && !brand.startsWith('[MISSING')) {
+      document.title = lang === 'en'
+        ? `${brand} — The Keeper's Anchor Fire`
+        : `${brand} — Crossrealm Chronicles`;
+    }
+  }
 }
 
 /**
