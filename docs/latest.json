@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T13:06:54.349Z",
+  "generated_at": "2026-11-21T13:19:45.705Z",
   "branch": "main",
-  "head": "b79ad6b",
-  "total_commits": 2453,
-  "pushed_at": "2026-11-21T21:05:41+08:00",
+  "head": "dcce376",
+  "total_commits": 2455,
+  "pushed_at": "2026-11-21T21:15:30+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "dcce376",
+      "at": "2026-11-21T21:15:30+08:00",
+      "subject": "fix(refs): W-Z507 现实对照札记事实复核——联网维基纠正两处假知识"
+    },
+    {
+      "short": "1b1e388",
+      "at": "2026-11-21T21:06:59+08:00",
+      "subject": "chore(latest): W-Z506 fact pack head=b79ad6b (novels 290 · lore 611 · i18n 3272 · commits 2454)"
+    },
     {
       "short": "b79ad6b",
       "at": "2026-11-21T21:05:41+08:00",
@@ -21,25 +31,15 @@
       "short": "d6e7add",
       "at": "2026-11-21T20:55:50+08:00",
       "subject": "test(security): W-Z505 密钥防泄漏门禁——PAT/API key 永远不许进版本库"
-    },
-    {
-      "short": "d599683",
-      "at": "2026-11-21T20:42:33+08:00",
-      "subject": "chore(latest): W-Z504 fact pack head=b39052f (novels 290 · lore 611 · i18n 3272 · commits 2450)"
-    },
-    {
-      "short": "b39052f",
-      "at": "2026-11-21T20:41:51+08:00",
-      "subject": "fix(ci): W-Z504 io 仓 sync 工作流 rebase 修复 + 兜底事实包刷新"
     }
   ],
-  "tracked_files": 1939,
-  "test_files": 488,
+  "tracked_files": 1940,
+  "test_files": 489,
   "i18n_keys": 3272,
   "lore_sources": 611,
   "novel_chapters_zh": 290,
   "novel_chapters_en": 290,
-  "milestone": "W-Z506",
+  "milestone": "W-Z507",
   "milestone_full": "卷 290 · 六百年守火线（290 / 290 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 611 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：290 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
