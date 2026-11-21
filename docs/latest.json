@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T04:51:23.694Z",
+  "generated_at": "2026-11-21T04:59:32.745Z",
   "branch": "main",
-  "head": "ca00360",
-  "total_commits": 2401,
-  "pushed_at": "2026-11-21T12:46:39+08:00",
+  "head": "9b5a919",
+  "total_commits": 2402,
+  "pushed_at": "2026-11-21T12:58:45+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "9b5a919",
+      "at": "2026-11-21T12:58:45+08:00",
+      "subject": "fix(canon): 279-290 卷派生文件一致性对齐 + 修正中英夹杂错别字（już/begun/一掉/灯火可行）；novella 290 · 语料 611 源 · v3 前缀 290 条年表 · i18n 3267"
+    },
     {
       "short": "ca00360",
       "at": "2026-11-21T12:46:39+08:00",
@@ -26,11 +31,6 @@
       "short": "884d118",
       "at": "2026-11-20T15:24:14+08:00",
       "subject": "fix(streak): 更正 f997bfb——fromJSON 保持快照恢复语义，只加非法值防护"
-    },
-    {
-      "short": "f997bfb",
-      "at": "2026-11-20T15:22:13+08:00",
-      "subject": "fix(streak): 连杀历史最佳 best 只增不减——堵住读旧档/坏档改小最佳"
     }
   ],
   "tracked_files": 1911,
