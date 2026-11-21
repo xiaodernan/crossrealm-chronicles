@@ -19,7 +19,7 @@
   everywhere on Earth**; in the Northern Hemisphere it falls around 21–24 September every year
   (±1 day, depending on the year's cycle).
 - The Twenty-Four Solar Terms are a 15°-longitude grid of the ecliptic built by
-  agricultural civilization to time the seasons — Qiu Fen sits between Bai Lu (Cold Dew, 白露） and Han Lu （寒露）.
+  agricultural civilization to time the seasons — Qiu Fen sits between Bai Lu (White Dew, 白露) and Han Lu (Cold Dew, 寒露).
 - Qiu Fen is mid-autumn: the harvest moon (中秋节） follows close behind — the year's brightest full moon,
   the year's coolest air, the year's deepest shadows. Moon-offering at mid-autumn is the rhyme: harvest → moon → home.
 - The Old Saying "秋分昼夜一般长" (at Qiu Fen, day and night are equally long) remains common Chinese proverb today.
