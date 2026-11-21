@@ -420,6 +420,18 @@ End of frozen digest.
 276 · 寒露
 277 · 霜降
 278 · 小雪
+279 · 大雪
+280 · 冬至
+281 · 小寒
+282 · 大寒
+283 · 元宵
+284 · 春風
+285 · 雨
+286 · 雨水
+287 · 立夏
+288 · 繁花
+289 · 竹
+290 · 节日
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).

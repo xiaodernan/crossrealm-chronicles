@@ -1,46 +1,46 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-20T06:12:31.795Z",
+  "generated_at": "2026-11-21T04:51:23.694Z",
   "branch": "main",
-  "head": "da9bba1",
-  "total_commits": 2394,
-  "pushed_at": "2026-11-20T14:12:13+08:00",
+  "head": "ca00360",
+  "total_commits": 2401,
+  "pushed_at": "2026-11-21T12:46:39+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
     {
-      "short": "da9bba1",
-      "at": "2026-11-20T14:12:13+08:00",
-      "subject": "feat(canon): W-Z483 第二百九十卷《节日 / Festival》入典"
+      "short": "ca00360",
+      "at": "2026-11-21T12:46:39+08:00",
+      "subject": "fix(llm): 默认模型 gpt-6.1-terra -> gpt-6.2-sol (AiProperties/PromptCacheLiveTest/文档) + latest.json 同步 290 卷"
     },
     {
-      "short": "5e13065",
-      "at": "2026-11-20T14:11:37+08:00",
-      "subject": "fix(home): ribbon 288->289 volumes (align with latest.json W-Z483)"
+      "short": "cfc505c",
+      "at": "2026-11-20T15:29:29+08:00",
+      "subject": "fix(dungeonruns): fromJSON 守住 40 条上限与 clears 字段形状"
     },
     {
-      "short": "84bf794",
-      "at": "2026-11-20T14:11:01+08:00",
-      "subject": "feat(canon): W-Z483 第二百八十九卷《竹 / Bamboo》入典"
+      "short": "94a4d45",
+      "at": "2026-11-20T15:27:50+08:00",
+      "subject": "fix(mapmarker): fromJSON 存档边界守住 8 个上限与活动点合法性"
     },
     {
-      "short": "ce3ef0f",
-      "at": "2026-11-20T14:10:21+08:00",
-      "subject": "fix(home): ribbon 287->288 volumes (align with latest.json W-Z483)"
+      "short": "884d118",
+      "at": "2026-11-20T15:24:14+08:00",
+      "subject": "fix(streak): 更正 f997bfb——fromJSON 保持快照恢复语义，只加非法值防护"
     },
     {
-      "short": "fc594b0",
-      "at": "2026-11-20T14:09:30+08:00",
-      "subject": "feat(canon): W-Z483 第二百八十八卷《繁花 / Flowering》入典"
+      "short": "f997bfb",
+      "at": "2026-11-20T15:22:13+08:00",
+      "subject": "fix(streak): 连杀历史最佳 best 只增不减——堵住读旧档/坏档改小最佳"
     }
   ],
-  "tracked_files": 1908,
-  "test_files": 468,
+  "tracked_files": 1911,
+  "test_files": 471,
   "i18n_keys": 3267,
-  "lore_sources": 587,
+  "lore_sources": 611,
   "novel_chapters_zh": 290,
   "novel_chapters_en": 290,
   "milestone": "W-Z483",
-  "milestone_full": "卷 290 · 六百年守火线（290 / 290 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 587 源守护",
+  "milestone_full": "卷 290 · 六百年守火线（290 / 290 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 611 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：290 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
