@@ -33,16 +33,20 @@ public class OracleController {
         this.oracle = oracle;
     }
 
-    /** The request object. limit = max excerpts fed to the oracle (0=use default, 1..6 allowed). */
+    /** The request object. limit = max excerpts fed to the oracle (0=use default, 1..6 allowed). deep = W-Z485 Codex-class bilingual mega-prefix (v5, ~8-9万 tok). */
     public record OracleRequest(
             @NotBlank @Size(max = 400) String question,
-            @PositiveOrZero @Max(6) Integer limit) {}
+            @PositiveOrZero @Max(6) Integer limit,
+            Boolean deep) {}
 
     @PostMapping("/answer")
     public ResponseEntity<Map<String, Object>> answer(
             @Valid @RequestBody OracleRequest req,
             @RequestHeader(value = "X-Request-Id", required = false) String headerRequestId) {
-        LoreOracleService.OracleResult result = oracle.answer(req.question(), req.limit());
+        boolean deep = Boolean.TRUE.equals(req.deep());
+        LoreOracleService.OracleResult result = deep
+                ? oracle.answerDeep(req.question(), req.limit())
+                : oracle.answer(req.question(), req.limit());
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("ok", result.ok());
         body.put("answer", result.answer());

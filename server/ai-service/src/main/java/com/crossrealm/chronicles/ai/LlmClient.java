@@ -78,6 +78,8 @@ public class LlmClient {
         public static final String ADVISOR = "crossrealm-advisor-v1";
         /** 典籍叩问 · Oracle（大冻结前缀的另一个 lane，分开 sticky） */
         public static final String ORACLE = "crossrealm-oracle-v1";
+        /** 史诗深潜 · Oracle v5 双语全量前缀（W-Z485）——独立 lane 独立 cache key，与 v4/v3 冷页隔离 */
+        public static final String ORACLE_DEEP = "crossrealm-oracle-deep-v1";
         /** 锚火三问 · Fortune Path. */
         public static final String FORTUNE_PATH = "crossrealm-fortune-path-v1";
         /** 炉火祈愿 · Hearth Vow. */
@@ -165,6 +167,7 @@ public class LlmClient {
         lanes.put(CacheKeys.ECHO, EchoHintController.ECHO_SYSTEM);
         lanes.put(CacheKeys.ARBITER, ArbiterController.ARBITER_SYSTEM);
         lanes.put(CacheKeys.ORACLE, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystem());
+        lanes.put(CacheKeys.ORACLE_DEEP, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystemDeep());
         lanes.put(CacheKeys.DEATH_EPITAPH, DeathEpitaphController.DEATH_SYSTEM);
         lanes.put(CacheKeys.CHAPTER_CODA, ChapterCodaController.CODA_SYSTEM);
         for (Map.Entry<String, String> e : lanes.entrySet()) {

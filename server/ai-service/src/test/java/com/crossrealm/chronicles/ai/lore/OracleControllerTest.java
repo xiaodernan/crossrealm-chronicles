@@ -14,6 +14,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import org.mockito.ArgumentCaptor;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -133,6 +134,44 @@ class OracleControllerTest {
                 .andExpect(jsonPath("$.ok").value(true))
                 .andExpect(jsonPath("$.model").value("oracle-bm25"))
                 .andExpect(jsonPath("$.answer").value("此物未在典籍中 · This is not in the record."));
+    }
+
+    @Test
+    void deep_usesDedicatedV5CacheLane() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("典籍说火还在。", "gpt-6.2-sol", false, true, 20L));
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("question", "火记得阿石吗？");
+        body.put("deep", true);
+
+        mvc.perform(post("/api/ai/lore/answer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(MAPPER.writeValueAsString(body)))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<String> cacheKey = ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(client).complete(anyString(), anyString(), cacheKey.capture());
+        org.junit.jupiter.api.Assertions.assertEquals("crossrealm-oracle-deep-v1", cacheKey.getValue(),
+                "deep=true 必须走 v5 独立 cache lane，避免与 v4 并行会话缓存互相污染");
+    }
+
+    @Test
+    void nonDeep_usesV4CacheLane() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("典籍说火还在。", "gpt-6.2-sol", false, true, 20L));
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("question", "火记得阿石吗？");
+
+        mvc.perform(post("/api/ai/lore/answer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(MAPPER.writeValueAsString(body)))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<String> cacheKey = ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(client).complete(anyString(), anyString(), cacheKey.capture());
+        org.junit.jupiter.api.Assertions.assertEquals("crossrealm-oracle-v1", cacheKey.getValue());
     }
 
     @Test

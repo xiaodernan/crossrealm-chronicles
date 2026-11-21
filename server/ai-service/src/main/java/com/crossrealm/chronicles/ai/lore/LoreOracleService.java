@@ -41,6 +41,8 @@ public class LoreOracleService {
     private final LlmClient client;
     private final Bm25Index index;
     private final StateGraph.Compiled oracleGraph;
+    /** W-Z485：史诗深潜——v5 双语全量前缀 + 独立 cache lane；与普通 Oracle 图同形、系统/缓存键不同。 */
+    private final StateGraph.Compiled oracleDeepGraph;
 
     @Value("${ai-service.lore.limit:4}")
     private int defaultLimit;
@@ -59,10 +61,16 @@ public class LoreOracleService {
         this.client = client;
         this.index = index;
         this.oracleGraph = buildOracleGraph();
+        this.oracleDeepGraph = buildOracleGraph(true);
+    }
+
+    /** 普通 Oracle（v4）图。 */
+    private StateGraph.Compiled buildOracleGraph() {
+        return buildOracleGraph(false);
     }
 
     /** 检索→编排→门禁三节点 StateGraph 在 invoke；未命中子句时 compose 节点整个跳过（不打 LLM）。 */
-    private StateGraph.Compiled buildOracleGraph() {
+    private StateGraph.Compiled buildOracleGraph(boolean deep) {
         StateGraph g = new StateGraph();
         g.addNode(NODE_RETRIEVE, state -> {
             String question = String.valueOf(state.get("question"));
@@ -101,7 +109,7 @@ public class LoreOracleService {
                         .append(hits.get(i).doc().text().trim())
                         .append("\n\n---\n\n");
             }
-            String system = loadOracleSystem();
+            String system = deep ? loadOracleSystemDeep() : loadOracleSystem();
             String routeNote = prefersRealWorldRefs(question) ? "\n\n" + REALWORLD_ROUTE_NOTE : "";
             String user = "Player question (use the language the player asked in):\n" + question
                     + routeNote
@@ -110,7 +118,8 @@ public class LoreOracleService {
                     + (rest.length() > 0 ? "\n\nOther excerpts (use only if the first doesn't answer):\n\n"
                             + rest.toString().trim() : "")
                     + "\n\nReminder (read this FIRST):\nThe question asks about the entry in the **most relevant excerpt** block — locate its heading line (the one containing the exact name from the player question) and answer with that block's line verbatim. If no heading line contains the asked name, refuse with 「此物未在典籍中 · This is not in the record.」\n\nQuote branch: if the player question quotes a line verbatim (any quote/quotation marks included), treat the quoted text as the \"name\" to locate — find the excerpt line containing that quote exactly, and answer with that quote together with the file path it came from. Only refuse when the quoted text does not appear anywhere in the excerpts.";
-            LlmClient.Answer answer = client.complete(system, user, LlmClient.CacheKeys.ORACLE);
+            LlmClient.Answer answer = client.complete(system, user,
+                    deep ? LlmClient.CacheKeys.ORACLE_DEEP : LlmClient.CacheKeys.ORACLE);
             return Map.<String, Object>of("rawAnswer", String.valueOf(answer.answer()),
                     "model", String.valueOf(answer.model()),
                     "cached", answer.cached(),
@@ -136,7 +145,7 @@ public class LoreOracleService {
         g.addEdge(NODE_COMPOSE, NODE_GATE);
         g.setEntryPoint(NODE_RETRIEVE);
         g.setMeta(NODE_RETRIEVE, Map.<String, Object>of("kind", "deterministic", "stage", "retrieve", "engine", "bm25+multihop"));
-        g.setMeta(NODE_COMPOSE, Map.<String, Object>of("kind", "llm", "stage", "compose", "persona", "canon-scribe", "prefix", "oracle-v4"));
+        g.setMeta(NODE_COMPOSE, Map.<String, Object>of("kind", "llm", "stage", "compose", "persona", "canon-scribe", "prefix", deep ? "oracle-v5" : "oracle-v4"));
         g.setMeta(NODE_GATE, Map.<String, Object>of("kind", "deterministic", "stage", "gate", "persona", "safe-line"));
         return g.compile();
     }
@@ -192,6 +201,33 @@ public class LoreOracleService {
         initial.put("question", question);
         initial.put("limitRaw", limitRaw);
         StateGraph.CompiledInvoke result = oracleGraph.invoke(initial);
+        Map<String, Object> state = result.state();
+        List<String> path = result.trace().stream().map(StateGraph.TraceEntry::node).toList();
+        @SuppressWarnings("unchecked")
+        List<String> sources = (List<String>) state.get("sources");
+        return new OracleResult(true,
+                String.valueOf(state.get("answer")),
+                sources == null ? List.of() : sources,
+                String.valueOf(state.get("model")),
+                Boolean.TRUE.equals(state.get("cached")),
+                Boolean.TRUE.equals(state.get("upstreamCached")),
+                ((Number) state.get("latencyMs")).longValue(),
+                Boolean.TRUE.equals(state.get("guarded")),
+                path);
+    }
+
+    /**
+     * W-Z485 史诗深潜：用 v5 双语全量前缀（~8-9 万 tok）+ 独立 cache lane 回答典籍问题。
+     * 与普通 answer 同形（同一 BM25 检索 / 同一 StateGraph / 同一门禁），仅 system + cacheKey 不同。
+     */
+    public OracleResult answerDeep(String question, Integer limitRaw) {
+        if (question == null || question.isBlank()) {
+            return failure("blank question");
+        }
+        Map<String, Object> initial = new LinkedHashMap<>();
+        initial.put("question", question);
+        initial.put("limitRaw", limitRaw);
+        StateGraph.CompiledInvoke result = oracleDeepGraph.invoke(initial);
         Map<String, Object> state = result.state();
         List<String> path = result.trace().stream().map(StateGraph.TraceEntry::node).toList();
         @SuppressWarnings("unchecked")
@@ -296,6 +332,21 @@ public class LoreOracleService {
         String base = loadResource("/ai/lore-system-prompt.txt");
         String digest = loadResource("/ai/lore-digest-frozen.txt");
         return (base + "\n\n" + digest).trim();
+    }
+
+    /** W-Z485：v5 双语全量前缀（史诗深潜）。缺文件时降级到 v4——深潜功能不因资源缺失而 500。 */
+    private static final String ORACLE_V5_PATH = "/ai/oracle-v5-frozen-prefix.txt";
+
+    public static String loadOracleSystemDeep() {
+        InputStream in = LoreOracleService.class.getResourceAsStream(ORACLE_V5_PATH);
+        if (in != null) {
+            try (in) {
+                return new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
+            } catch (IOException e) {
+                throw new IllegalStateException("cannot read Oracle v5 resource " + ORACLE_V5_PATH, e);
+            }
+        }
+        return loadOracleSystem();
     }
 
     private static String loadResource(String path) {

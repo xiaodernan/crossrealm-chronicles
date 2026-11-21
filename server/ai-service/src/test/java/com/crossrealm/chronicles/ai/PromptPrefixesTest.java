@@ -43,4 +43,16 @@ class PromptPrefixesTest {
                 "v3 前缀不得以 v4 开头（v3 保持 v3 语义，日常 NPC/残章不受终局大场体量影响）");
         assertFalse(PromptPrefixes.FROZEN_CODEX_CONTEXT_V3.isBlank());
     }
+
+    @Test
+    void v5_史诗深潜双语前缀_加载成功且字节级达标() {
+        String v5 = PromptPrefixes.FROZEN_CANON_CONTEXT_V5;
+        assertTrue(v5.getBytes(java.nio.charset.StandardCharsets.UTF_8).length >= 200_000,
+                "v5 前缀字节数 < 200000 —— 双语正典 resource 是否丢失？");
+        assertTrue(v5.contains("You are the Keeper of the Chronicles"),
+                "v5 前缀应以 Oracle 系统提示开头");
+        assertTrue(v5.contains("【典籍总录 · 卷一 · 中文正典】"), "v5 应含中文正典卷标");
+        assertTrue(v5.contains("Volume II · English Canon"), "v5 应含英文正典卷标");
+        assertFalse(v5.equals(PromptPrefixes.FROZEN_CANON_CONTEXT_V4), "v5 必须与 v4 不同（双语全量）");
+    }
 }

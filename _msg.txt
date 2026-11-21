@@ -1,0 +1,9 @@
+feat(llm): W-Z485 史诗深潜 v5 双语全量前缀——Codex 同档 8.3 万 tok 上下文 + 独立缓存车道
+
+用户反复指出上下文总比 Codex 的 5-9 万少（v4 仅单中文正典 ≈4.8 万 tok）。v5 把中英双正典逐字并入同一冻结前缀（oracle-v5-frozen-prefix.txt · 230.4 KB）。
+
+后端：PromptPrefixes.FROZEN_CANON_CONTEXT_V5、LlmClient.CacheKeys.ORACLE_DEEP（独立 lane 隔离并行会话）、LoreOracleService.answerDeep()（同 StateGraph 同形，仅 system+cacheKey 不同）、warmup 增 ORACLE_DEEP、POST /api/ai/lore/answer 加可选 deep:true。
+前端：askOracle({deep})（超时放宽 200s）、顾问面板典籍态「深潜」青蓝胶囊、CSS 星环辉光、内嵌说明书教学。
+真上游实测（scripts/oracle-v5-live-probe.mjs · gpt-6.2-sol · Clash 7897 · 2 次省 token）：cold prompt=82968 cached=3950（4.8%）→ warm prompt=82968 cached=73711（88.8%）· 4506ms——一次上下文进入 Codex 同档，独立车道命中稳定。产物 docs/admin/data/oracle-v5-live-probe-2026-11-21.json（MEASURED）。
+
+门禁：Tests 6932/6932 ✓ · ai-service 194/0 ✓ · Build ✓ · i18n 3267→3268（+1 advisor_deep_toggle 双语各一）· identity-guard ✓。v3/v4 与历史 inert 不动，纯 additive。

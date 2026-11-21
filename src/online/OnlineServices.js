@@ -354,13 +354,17 @@ export class OnlineServices {
    * Lore Oracle——召唤 canon 的管家问一记典籍（`POST /api/ai/lore/answer`）。
    * 携带的是“当前最相关的典籍段落”，不是完整提取——节省调用次数与耐心。
    * `limit` 可省略（默认 4），回答里会含 `sources` 数组指向原典段落。
+   * `deep:true`（W-Z485）——走 v5 双语全量前缀（~8 万 tok，Codex 同档）+ 独立缓存车道；
+   * 首包更慢但答得更全，适合主动求知的典籍深问，日常问答不要开。
    */
-  async askOracle(question, { limit, signal } = {}) {
-    const body = limit === undefined ? { question } : { question, limit };
+  async askOracle(question, { limit, deep, signal } = {}) {
+    const body = { question };
+    if (limit !== undefined) body.limit = limit;
+    if (deep !== undefined) body.deep = deep;
     return this.#jsonRequest('/api/ai/lore/answer', {
       method: 'POST',
       body,
-      timeoutMs: ADVISOR_LIMITS.requestTimeoutMs,
+      timeoutMs: deep ? Math.max(ADVISOR_LIMITS.requestTimeoutMs, 200000) : ADVISOR_LIMITS.requestTimeoutMs,
       signal,
     });
   }

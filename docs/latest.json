@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-21T05:07:53.641Z",
+  "generated_at": "2026-11-21T05:33:25.227Z",
   "branch": "main",
-  "head": "7bc649b",
-  "total_commits": 2405,
-  "pushed_at": "2026-11-21T13:07:36+08:00",
+  "head": "5946dda",
+  "total_commits": 2406,
+  "pushed_at": "2026-11-21T13:08:01+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "5946dda",
+      "at": "2026-11-21T13:08:01+08:00",
+      "subject": "chore(latest): fact pack W-Z484 head=7bc649b (novels 290 · lore 611 · i18n 3267 · commits 2405)"
+    },
     {
       "short": "7bc649b",
       "at": "2026-11-21T13:07:36+08:00",
@@ -26,16 +31,11 @@
       "short": "9b5a919",
       "at": "2026-11-21T12:58:45+08:00",
       "subject": "fix(canon): 279-290 卷派生文件一致性对齐 + 修正中英夹杂错别字（już/begun/一掉/灯火可行）；novella 290 · 语料 611 源 · v3 前缀 290 条年表 · i18n 3267"
-    },
-    {
-      "short": "ca00360",
-      "at": "2026-11-21T12:46:39+08:00",
-      "subject": "fix(llm): 默认模型 gpt-6.1-terra -> gpt-6.2-sol (AiProperties/PromptCacheLiveTest/文档) + latest.json 同步 290 卷"
     }
   ],
   "tracked_files": 1911,
   "test_files": 471,
-  "i18n_keys": 3267,
+  "i18n_keys": 3268,
   "lore_sources": 611,
   "novel_chapters_zh": 290,
   "novel_chapters_en": 290,
@@ -46,7 +46,7 @@
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3267-keys",
+    "bilingual-3268-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",

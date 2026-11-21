@@ -39,6 +39,15 @@ public final class PromptPrefixes {
      */
     public static final String FROZEN_CANON_CONTEXT_V4 = read("/ai/oracle-v4-frozen-prefix.txt");
 
+    /**
+     * 史诗深潜全量双语前缀（W-Z485）：oracle-v5-frozen-prefix.txt —— Oracle 系统提示 +
+     * creative/GLOSSARY.md（中文正典）+ creative/GLOSSARY-en.md（英文正典）逐字全量。
+     * 目标 ~8-9 万 token，真正进入 Codex 同档；v3 / v4 一律不动，独立 lane（ORACLE_DEEP）
+     * 独立 cache key，冷页只暖一次。回答语种仍由玩家问句决定，双语正典仅作阅读参考。
+     * 由 scripts/build-oracle-v5.mjs 确定性生成。
+     */
+    public static final String FROZEN_CANON_CONTEXT_V5 = read("/ai/oracle-v5-frozen-prefix.txt");
+
     private static String read(String path) {
         try (InputStream in = PromptPrefixes.class.getResourceAsStream(path)) {
             if (in == null) throw new IllegalStateException("missing " + path + " — run scripts/build-llm-prefix.mjs");

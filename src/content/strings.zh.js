@@ -3137,7 +3137,9 @@ Boss 再战 — 击败后在信标按 {interact} 召唤，+5 魂火
 再点一下「典籍」即切回顾问态。
 
 现实原型类问题（如「祭灶 / 秋分 / 白桦 / 维斯塔在现实里是什么」）会机械路由到「现实对照」卷（creative/refs）——canon 问题照常引原典，现实对照问题引 refs 札记，不交叉；零额外 LLM 调用。
-典籍叩问是只读的：不写世界状态，只需要在线开关开着。`,
+典籍叩问是只读的：不写世界状态，只需要在线开关开着。
+
+ 【深潜 / Deep-Dive（W-Z485）】典籍态下再点「深潜」青蓝胶囊（星环辉光 = 开启），保管员会把中英双语全量正典一次性背进上下文（约 8 万 token，与 Codex 同档），首包稍慢、答得更全，独立缓存车道命中稳定；深问大义时用，日常小问不必开。再点一次关闭。`,
 hm_title_codex: '典籍馆 · 290 卷全部目录',
   hm_body_codex: `跨界纪事 290 卷，原点在游戏里——每章一句话：
 
@@ -3833,6 +3835,7 @@ trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在
   advisor_send: '送出',
   advisor_stop: '停止',
   advisor_lore_toggle: '典籍',
+  advisor_deep_toggle: '深潜',
   advisor_disclaimer: '回答由 AI 生成，未必与当前版本一致',
   advisor_notify_title: '炉火报讯台',
   advisor_notify_kind_achievement: '成就',

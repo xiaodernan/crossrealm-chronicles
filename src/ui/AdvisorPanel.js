@@ -102,8 +102,10 @@ export class AdvisorPanel {
     this.stop = q('#advisor-stop');
     this.closeBtn = q('#advisor-close');
     this.loreToggle = q('#advisor-lore-toggle');
+    this.deepToggle = q('#advisor-deep-toggle');
     this.letterToggle = q('#advisor-letter-toggle');
     this._loreMode = false;
+    this._deepMode = false;
     this._letterMode = false;
     this.statusEl = q('#advisor-status');
     this.statusText = q('#advisor-status-text');
@@ -116,6 +118,12 @@ export class AdvisorPanel {
     this._bind();
     this._refreshLetterToggle();
     this.refreshLabels();
+  }
+
+  _setDeepMode(on) {
+    this._deepMode = on === true;
+    this.deepToggle?.setAttribute?.('aria-pressed', this._deepMode ? 'true' : 'false');
+    this.deepToggle?.classList.toggle('is-on', this._deepMode);
   }
 
   _setLetterMode(on) {
@@ -136,9 +144,11 @@ export class AdvisorPanel {
     if (!eligible && this._letterMode) {
       this._letterMode = false;
       this._loreMode = false;
+      this._setDeepMode(false);
       el.setAttribute('aria-pressed', 'false');
       el.classList.remove('is-on');
       if (this.loreToggle) this.loreToggle.classList.remove('is-on');
+      this.deepToggle?.classList.add('hidden');
     }
   }
 
@@ -154,9 +164,16 @@ export class AdvisorPanel {
     this._onLoreToggle = () => {
       this._loreMode = !this._loreMode;
       if (this._loreMode) this._setLetterMode(false);
+      else this._setDeepMode(false);
       this.loreToggle?.setAttribute?.('aria-pressed', this._loreMode ? 'true' : 'false');
       this.loreToggle?.classList.toggle('is-on', this._loreMode);
+      // W-Z485：深潜开关只在典籍模式下现身
+      this.deepToggle?.classList.toggle('hidden', !this._loreMode);
       if (!this._loreMode) this._healthChecked = false;
+    };
+    this._onDeepToggle = () => {
+      if (!this._loreMode) return;
+      this._setDeepMode(!this._deepMode);
     };
     this._onLetterToggle = () => {
       if (this._loreMode) {
@@ -172,6 +189,7 @@ export class AdvisorPanel {
     this.closeBtn?.addEventListener?.('click', this._onClose);
     this.stop?.addEventListener?.('click', this._onStop);
     this.loreToggle?.addEventListener?.('click', this._onLoreToggle);
+    this.deepToggle?.addEventListener?.('click', this._onDeepToggle);
     this.letterToggle?.addEventListener?.('click', this._onLetterToggle);
     this.form?.addEventListener?.('submit', this._onSubmit);
     this.input?.addEventListener?.('input', this._onInput);
@@ -341,6 +359,7 @@ export class AdvisorPanel {
         // W-Z82 Lore Oracle：问典籍时绕过普通提示词，让服务端 BM25 选出最相关的原典段落
         // 与带标号的 system prompt 跑 LLM，回答只用提取语料、并把出处以 inline bracket 形式写入。
         res = await this.game?.onlineServices?.askOracle?.(question, {
+          deep: this._deepMode,
           signal: this._controller.signal,
         });
       } else {

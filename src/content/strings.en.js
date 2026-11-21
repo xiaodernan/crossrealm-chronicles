@@ -3142,7 +3142,9 @@ Same panel, same stop button, same cache badges (local / upstream).
 Tap the pill again to flip back to the regular advisor.
 
 Real-world prototype questions (e.g. “which real-world rite does the anchor fire resemble?”) are mechanically routed to the reference volume (creative/refs) — canon questions cite the canon; reference questions cite the notes; no cross-citation, zero extra LLM calls.
-The Oracle is read-only: it never writes world state, and only needs the online switch to be on.`,
+The Oracle is read-only: it never writes world state, and only needs the online switch to be on.
+
+ [Deep-Dive (W-Z485)] In Oracle mode, tap the cyan Deep-Dive pill (star-ring glow = on) and the keeper memorises the entire bilingual canon in one shot (~80K tokens, Codex class) — slower first token, fuller answer, a dedicated cache lane with stable hits. Use it for weighty questions, not small talk. Tap again to switch off.`,
 hm_title_codex: 'Codex · the 290-volume index',
   hm_body_codex: `Codex — 290 volumes, synopsis in one line each.
 
@@ -3922,6 +3924,7 @@ Three frames in retrospection: the fire + the light on your palm + the house shi
   advisor_send: 'Send',
   advisor_stop: 'Stop',
   advisor_lore_toggle: 'Lore',
+  advisor_deep_toggle: 'Deep-Dive',
   advisor_disclaimer: 'AI-generated answers may not match this build',
   advisor_notify_title: 'The Hearth Wire',
   advisor_notify_kind_achievement: 'Feat',

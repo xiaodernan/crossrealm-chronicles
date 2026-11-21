@@ -261,6 +261,18 @@ describe('OnlineServices.askAdvisor / fetchAdvisorHealth：ok/reason 映射全�
     expect(JSON.parse(fetch.mock.calls[1][1].body)).toEqual({ question: '林渡为什么没熄火？', limit: 6 });
   });
 
+  it('askOracle deep=true（W-Z485）：body 带 deep，超时放宽到深潜档', async () => {
+    const answer = { ok: true, answer: '锚火象征接力。', model: 'gpt-6.2-sol', latencyMs: 4506, sources: ['creative/GLOSSARY.md'] };
+    const fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => answer });
+    const svc = new OnlineServices({ baseUrl: BASE, fetchImpl: fetch, enabled: true });
+
+    const r = await svc.askOracle('锚火象征什么？', { deep: true });
+    expect(r.ok).toBe(true);
+    const init = fetch.mock.calls[0][1];
+    expect(JSON.parse(init.body)).toEqual({ question: '锚火象征什么？', deep: true });
+    expect(init.signal).toBeInstanceOf(AbortSignal); // 深潜档仍带可取消信号（超时按 200s 档放宽）
+  });
+
   it('askOracle 未启用：disabled，且 fetch 零调用', async () => {
     const fetch = vi.fn();
     const svc = new OnlineServices({ baseUrl: BASE, fetchImpl: fetch, enabled: false });

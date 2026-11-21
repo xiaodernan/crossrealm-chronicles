@@ -73,7 +73,7 @@ class LlmClientTest {
         LlmClient.Answer a = client(p, t).ask("该往哪走？", Map.of("zone", "hub"));
 
         assertEquals("往有灯的地方走", a.answer());
-        assertEquals("gpt-6.1-terra", a.model());
+        assertEquals("gpt-6.2-sol", a.model());
         assertFalse(a.cached());
         assertEquals(1, t.calls);
         assertTrue(t.lastUrl.endsWith("/chat/completions"), "上游路径必须带 /v1 前缀后的 chat/completions");
@@ -81,7 +81,7 @@ class LlmClientTest {
         assertEquals(Duration.ofSeconds(3), t.lastTimeout);
 
         Map<?, ?> body = MAPPER.readValue(t.bodies.get(0), Map.class);
-        assertEquals("gpt-6.1-terra", body.get("model"));
+        assertEquals("gpt-6.2-sol", body.get("model"));
         assertEquals(2, ((List<?>) body.get("messages")).size());
         assertTrue(body.containsKey("max_tokens"));
         String serialized = t.bodies.get(0);

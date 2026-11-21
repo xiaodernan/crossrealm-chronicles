@@ -1,0 +1,25 @@
+{
+  "schema": "crossrealm.oracle-v5-live-probe.v1",
+  "generatedAt": "2026-11-21T05:18:34.568Z",
+  "model": "gpt-6.2-sol",
+  "base": "https://api.aizzz.xyz/v1",
+  "cacheKey": "crossrealm-oracle-deep-v1",
+  "prefixBytes": 235975,
+  "question": "《跨界纪事》里的锚火象征什么？用一句话答。",
+  "calls": [
+    {
+      "prompt": 82968,
+      "cached": 3950,
+      "completion": 65,
+      "ratio": 4.8,
+      "latencyMs": 5452
+    },
+    {
+      "prompt": 82968,
+      "cached": 73711,
+      "completion": 45,
+      "ratio": 88.8,
+      "latencyMs": 4506
+    }
+  ]
+}
