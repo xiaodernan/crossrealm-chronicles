@@ -1,8 +1,8 @@
 {
   "tool": "scripts/lore-retrieval-probe.mjs",
   "corpus": "server/ai-service/src/main/resources/lore/corpus.txt",
-  "sources": 475,
-  "avgDocTokens": 654.8,
+  "sources": 611,
+  "avgDocTokens": 566.2,
   "tokenizer": "Han codepoints / ASCII runs (mirror of Bm25Tokenizer.java)",
   "bm25": {
     "k1": 1.5,
@@ -21,54 +21,54 @@
       "top4": [
         {
           "source": "creative/novel/146-明天再说.md",
-          "score": 17.5523,
+          "score": 17.5744,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 明天再说 --- ## 一百四十六 "
         },
         {
           "source": "creative/novel/197-火种.md",
-          "score": 17.1277,
+          "score": 17.0738,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十九**：第七百零二年 · 第二卷 —— 火种 --- ## "
         },
         {
           "source": "creative/novel/131-第一夜.md",
-          "score": 16.9081,
+          "score": 16.9699,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 第一夜 --- ## 一百三十一 ·"
         },
         {
-          "source": "creative/novel/149-第一夜.md",
-          "score": 16.8838,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 第一夜 --- ## 一百四十九 ·"
+          "source": "creative/novel/177-灶屋的夜.md",
+          "score": 16.7767,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十七**：第七百零一年 · 第十五卷 —— 灶屋的夜 --- "
         }
       ],
       "top6": [
         {
           "source": "creative/novel/146-明天再说.md",
-          "score": 17.5523,
+          "score": 17.5744,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 明天再说 --- ## 一百四十六 "
         },
         {
           "source": "creative/novel/197-火种.md",
-          "score": 17.1277,
+          "score": 17.0738,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十九**：第七百零二年 · 第二卷 —— 火种 --- ## "
         },
         {
           "source": "creative/novel/131-第一夜.md",
-          "score": 16.9081,
+          "score": 16.9699,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 第一夜 --- ## 一百三十一 ·"
         },
         {
-          "source": "creative/novel/149-第一夜.md",
-          "score": 16.8838,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 第一夜 --- ## 一百四十九 ·"
-        },
-        {
           "source": "creative/novel/177-灶屋的夜.md",
-          "score": 16.7682,
+          "score": 16.7767,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十七**：第七百零一年 · 第十五卷 —— 灶屋的夜 --- "
         },
         {
+          "source": "creative/novel/149-第一夜.md",
+          "score": 16.7619,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 第一夜 --- ## 一百四十九 ·"
+        },
+        {
           "source": "creative/novel/190-煤油灯亮了.md",
-          "score": 16.7651,
+          "score": 16.7238,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十八**：第七百零二年 · 第十一卷 —— 煤油灯亮了 ---"
         }
       ],
@@ -83,54 +83,54 @@
       "top4": [
         {
           "source": "creative/novel/218-夏火.md",
-          "score": 30.9927,
+          "score": 31.649,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第七卷 —— 夏火 --- ## "
         },
         {
           "source": "creative/novel/74-种.md",
-          "score": 16.449,
+          "score": 16.3222,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十一**：墨火 —— 六百年之后 --- ## 七十四 · 种"
         },
         {
-          "source": "creative/novel/92-灶火.md",
-          "score": 15.1088,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十三**：新火 —— 第七百年 --- ## 九十二 · 灶火"
+          "source": "creative/novel/216-春天.md",
+          "score": 15.9193,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第五卷 —— 春天 --- ## "
         },
         {
-          "source": "creative/novel/216-春天.md",
-          "score": 15.0852,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第五卷 —— 春天 --- ## "
+          "source": "creative/novel/92-灶火.md",
+          "score": 15.0768,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十三**：新火 —— 第七百年 --- ## 九十二 · 灶火"
         }
       ],
       "top6": [
         {
           "source": "creative/novel/218-夏火.md",
-          "score": 30.9927,
+          "score": 31.649,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第七卷 —— 夏火 --- ## "
         },
         {
           "source": "creative/novel/74-种.md",
-          "score": 16.449,
+          "score": 16.3222,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十一**：墨火 —— 六百年之后 --- ## 七十四 · 种"
         },
         {
-          "source": "creative/novel/92-灶火.md",
-          "score": 15.1088,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十三**：新火 —— 第七百年 --- ## 九十二 · 灶火"
-        },
-        {
           "source": "creative/novel/216-春天.md",
-          "score": 15.0852,
+          "score": 15.9193,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第五卷 —— 春天 --- ## "
         },
         {
+          "source": "creative/novel/92-灶火.md",
+          "score": 15.0768,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十三**：新火 —— 第七百年 --- ## 九十二 · 灶火"
+        },
+        {
           "source": "creative/novel/38-南归.md",
-          "score": 12.8223,
+          "score": 13.0383,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷五**：黑纸递火 —— 守火人谱系 --- ## 三十八 · "
         },
         {
           "source": "creative/novel/39-夏来了.md",
-          "score": 12.7976,
+          "score": 12.8838,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷五**：黑纸递火 —— 守火人谱系 --- ## 三十九 · "
         }
       ],
@@ -145,55 +145,55 @@
       "top4": [
         {
           "source": "creative/novel/219-白桦吻.md",
-          "score": 23.7305,
+          "score": 25.0501,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第八卷 —— 白桦吻 --- ##"
         },
         {
           "source": "creative/novel/114-立春.md",
-          "score": 19.3106,
+          "score": 20.9207,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 立春 --- ## 一百一十四 · "
         },
         {
           "source": "creative/novel/107-无名柴.md",
-          "score": 17.2153,
+          "score": 18.5323,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 无名柴 --- ## 一百零七 · "
         },
         {
-          "source": "creative/novel/92-灶火.md",
-          "score": 16.6062,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十三**：新火 —— 第七百年 --- ## 九十二 · 灶火"
+          "source": "creative/novel/112-守火之夜.md",
+          "score": 17.7996,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 守火之夜 --- ## 一百一十二 "
         }
       ],
       "top6": [
         {
           "source": "creative/novel/219-白桦吻.md",
-          "score": 23.7305,
+          "score": 25.0501,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第八卷 —— 白桦吻 --- ##"
         },
         {
           "source": "creative/novel/114-立春.md",
-          "score": 19.3106,
+          "score": 20.9207,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 立春 --- ## 一百一十四 · "
         },
         {
           "source": "creative/novel/107-无名柴.md",
-          "score": 17.2153,
+          "score": 18.5323,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 无名柴 --- ## 一百零七 · "
         },
         {
-          "source": "creative/novel/92-灶火.md",
-          "score": 16.6062,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十三**：新火 —— 第七百年 --- ## 九十二 · 灶火"
-        },
-        {
           "source": "creative/novel/112-守火之夜.md",
-          "score": 16.5683,
+          "score": 17.7996,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 守火之夜 --- ## 一百一十二 "
         },
         {
           "source": "creative/novel/110-同炉.md",
-          "score": 16.4402,
+          "score": 17.6177,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 同炉 --- ## 一百一十 · 同"
+        },
+        {
+          "source": "creative/novel/92-灶火.md",
+          "score": 17.4785,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十三**：新火 —— 第七百年 --- ## 九十二 · 灶火"
         }
       ],
       "expected": [
@@ -207,55 +207,55 @@
       "top4": [
         {
           "source": "creative/novel/220-谷雨.md",
-          "score": 25.5735,
+          "score": 26.244,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第九卷 —— 谷雨 --- ## "
         },
         {
           "source": "creative/novel/76-雷火.md",
-          "score": 21.0426,
+          "score": 21.154,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十一**：墨火 —— 六百年之后 --- ## 七十六 · 雷"
         },
         {
-          "source": "creative/novel/78-客.md",
-          "score": 12.6963,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十一**：墨火 —— 六百年之后 --- ## 七十八 · 客"
+          "source": "creative/novel/268-谷雨.md",
+          "score": 17.2619,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零四年 · 第五十八卷 —— 谷雨 --- #"
         },
         {
-          "source": "creative/novel/110-同炉.md",
-          "score": 12.0465,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 同炉 --- ## 一百一十 · 同"
+          "source": "creative/novel/265-雨水.md",
+          "score": 16.1293,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零四年 · 第五十五卷 —— 雨水 --- #"
         }
       ],
       "top6": [
         {
           "source": "creative/novel/220-谷雨.md",
-          "score": 25.5735,
+          "score": 26.244,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第九卷 —— 谷雨 --- ## "
         },
         {
           "source": "creative/novel/76-雷火.md",
-          "score": 21.0426,
+          "score": 21.154,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十一**：墨火 —— 六百年之后 --- ## 七十六 · 雷"
         },
         {
+          "source": "creative/novel/268-谷雨.md",
+          "score": 17.2619,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零四年 · 第五十八卷 —— 谷雨 --- #"
+        },
+        {
+          "source": "creative/novel/265-雨水.md",
+          "score": 16.1293,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零四年 · 第五十五卷 —— 雨水 --- #"
+        },
+        {
+          "source": "creative/novel/247-谷雨.md",
+          "score": 15.2322,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第三十七卷 —— 谷雨 --- #"
+        },
+        {
           "source": "creative/novel/78-客.md",
-          "score": 12.6963,
+          "score": 12.6498,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十一**：墨火 —— 六百年之后 --- ## 七十八 · 客"
-        },
-        {
-          "source": "creative/novel/110-同炉.md",
-          "score": 12.0465,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 同炉 --- ## 一百一十 · 同"
-        },
-        {
-          "source": "creative/novel/67-拾火.md",
-          "score": 11.6906,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十一**：墨火 —— 六百年之后 --- ## 六十七 · 拾"
-        },
-        {
-          "source": "creative/novel/101-传火.md",
-          "score": 11.5422,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 传火 --- ## 一百零一 · 传"
         }
       ],
       "expected": [
@@ -269,55 +269,55 @@
       "top4": [
         {
           "source": "creative/novel/221-麦粒.md",
-          "score": 31.2848,
+          "score": 28.7004,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十卷 —— 麦粒 --- ## "
         },
         {
-          "source": "creative/novel/222-抽穗.md",
-          "score": 18.1227,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十一卷 —— 抽穗 --- ##"
+          "source": "creative/novel/271-夏至.md",
+          "score": 18.4623,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零四年 · 第六十一卷 —— 夏至 --- #"
         },
         {
-          "source": "creative/novel/158-第八个米粒.md",
-          "score": 14.1417,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十六**：第七百零一年 —— 第八个米粒 --- ## 一百五"
+          "source": "creative/novel/225-麦浪.md",
+          "score": 17.6699,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十四卷 —— 麦浪 --- ##"
         },
         {
-          "source": "creative/novel/19-三日之议.md",
-          "score": 13.5944,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二**：归位 —— 三日陵的炉火 --- ## 十九 · 三日"
+          "source": "creative/novel/224-灌浆.md",
+          "score": 16.2122,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十三卷 —— 灌浆 --- ##"
         }
       ],
       "top6": [
         {
           "source": "creative/novel/221-麦粒.md",
-          "score": 31.2848,
+          "score": 28.7004,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十卷 —— 麦粒 --- ## "
         },
         {
+          "source": "creative/novel/271-夏至.md",
+          "score": 18.4623,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零四年 · 第六十一卷 —— 夏至 --- #"
+        },
+        {
+          "source": "creative/novel/225-麦浪.md",
+          "score": 17.6699,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十四卷 —— 麦浪 --- ##"
+        },
+        {
+          "source": "creative/novel/224-灌浆.md",
+          "score": 16.2122,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十三卷 —— 灌浆 --- ##"
+        },
+        {
           "source": "creative/novel/222-抽穗.md",
-          "score": 18.1227,
+          "score": 15.6182,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十一卷 —— 抽穗 --- ##"
         },
         {
-          "source": "creative/novel/158-第八个米粒.md",
-          "score": 14.1417,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十六**：第七百零一年 —— 第八个米粒 --- ## 一百五"
-        },
-        {
-          "source": "creative/novel/19-三日之议.md",
-          "score": 13.5944,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二**：归位 —— 三日陵的炉火 --- ## 十九 · 三日"
-        },
-        {
-          "source": "creative/novel/157-第一个碾盘.md",
-          "score": 12.3378,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十六**：第七百零一年 —— 第一个碾盘 --- ## 一百五"
-        },
-        {
-          "source": "creative/novel/77-碎石.md",
-          "score": 11.7425,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十一**：墨火 —— 六百年之后 --- ## 七十七 · 碎"
+          "source": "creative/novel/228-磨.md",
+          "score": 14.8704,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十七卷 —— 磨 --- ## "
         }
       ],
       "expected": [
@@ -331,55 +331,55 @@
       "top4": [
         {
           "source": "creative/novel/222-抽穗.md",
-          "score": 32.1763,
+          "score": 31.8283,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十一卷 —— 抽穗 --- ##"
         },
         {
+          "source": "creative/novel/225-麦浪.md",
+          "score": 17.2878,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十四卷 —— 麦浪 --- ##"
+        },
+        {
           "source": "creative/novel/120-周六.md",
-          "score": 13.9784,
+          "score": 14.1381,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 周六 --- ## 一百二十 · 周"
         },
         {
           "source": "creative/novel/32-立冬.md",
-          "score": 12.5273,
+          "score": 12.7839,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷四**：归途再启 —— 跨越炉火之后的新阶段 --- ## 三"
-        },
-        {
-          "source": "creative/novel/99-抵达.md",
-          "score": 12.0984,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十四**：第七百年 —— 续卷 --- ## 九十九 · 抵达"
         }
       ],
       "top6": [
         {
           "source": "creative/novel/222-抽穗.md",
-          "score": 32.1763,
+          "score": 31.8283,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十一卷 —— 抽穗 --- ##"
         },
         {
+          "source": "creative/novel/225-麦浪.md",
+          "score": 17.2878,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷二十**：第七百零三年 · 第十四卷 —— 麦浪 --- ##"
+        },
+        {
           "source": "creative/novel/120-周六.md",
-          "score": 13.9784,
+          "score": 14.1381,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 周六 --- ## 一百二十 · 周"
         },
         {
           "source": "creative/novel/32-立冬.md",
-          "score": 12.5273,
+          "score": 12.7839,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷四**：归途再启 —— 跨越炉火之后的新阶段 --- ## 三"
         },
         {
           "source": "creative/novel/99-抵达.md",
-          "score": 12.0984,
+          "score": 12.2291,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十四**：第七百年 —— 续卷 --- ## 九十九 · 抵达"
         },
         {
           "source": "creative/novel/40-头道火.md",
-          "score": 11.9323,
+          "score": 12.106,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷六**：火传人 —— 下一代的光 --- ## 四十 · 头道"
-        },
-        {
-          "source": "creative/novel/158-第八个米粒.md",
-          "score": 11.7935,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十六**：第七百零一年 —— 第八个米粒 --- ## 一百五"
         }
       ],
       "expected": [
@@ -393,54 +393,54 @@
       "top4": [
         {
           "source": "creative/novel/07-第七章-余烬.md",
-          "score": 14.9161,
+          "score": 16.4855,
           "preview": "# 第七章 · 余烬 ## 一 · 没有人回来的驿站 那之后的很久很久，交汇枢纽的公告栏上多了一条字迹不新的告示： **「此驿站不收信，只收路过的人。如果你走得足够远，回来时可以坐一会儿。」** 告示没有写日期，没有写落"
         },
         {
-          "source": "creative/novel/17-晨雾回声.md",
-          "score": 13.9787,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 科幻史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷一**：觉醒 — 重铸世界之锚 --- ## 十七 · 晨雾回"
+          "source": "creative/novel/53-守碗.md",
+          "score": 15.5362,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷八**：过火 —— 守护者之别 --- ## 五十三 · 守碗"
         },
         {
           "source": "creative/novel/08-番外-炉火给你的回信.md",
-          "score": 13.9696,
+          "score": 15.47,
           "preview": "# 番外 · 炉火给你的回信 **写在《跨界纪事》第七章之后：这封信不归任何作者署名，它由炉火自己执笔，等一个读完信的人坐下来。** --- ## 其一 · 收件人：按过 E 的人 在你读到这封信之前，你已经按过很多次 "
         },
         {
-          "source": "creative/novel/53-守碗.md",
-          "score": 13.9684,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷八**：过火 —— 守护者之别 --- ## 五十三 · 守碗"
+          "source": "creative/novel/17-晨雾回声.md",
+          "score": 15.3091,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 科幻史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷一**：觉醒 — 重铸世界之锚 --- ## 十七 · 晨雾回"
         }
       ],
       "top6": [
         {
           "source": "creative/novel/07-第七章-余烬.md",
-          "score": 14.9161,
+          "score": 16.4855,
           "preview": "# 第七章 · 余烬 ## 一 · 没有人回来的驿站 那之后的很久很久，交汇枢纽的公告栏上多了一条字迹不新的告示： **「此驿站不收信，只收路过的人。如果你走得足够远，回来时可以坐一会儿。」** 告示没有写日期，没有写落"
         },
         {
-          "source": "creative/novel/17-晨雾回声.md",
-          "score": 13.9787,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 科幻史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷一**：觉醒 — 重铸世界之锚 --- ## 十七 · 晨雾回"
-        },
-        {
-          "source": "creative/novel/08-番外-炉火给你的回信.md",
-          "score": 13.9696,
-          "preview": "# 番外 · 炉火给你的回信 **写在《跨界纪事》第七章之后：这封信不归任何作者署名，它由炉火自己执笔，等一个读完信的人坐下来。** --- ## 其一 · 收件人：按过 E 的人 在你读到这封信之前，你已经按过很多次 "
-        },
-        {
           "source": "creative/novel/53-守碗.md",
-          "score": 13.9684,
+          "score": 15.5362,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷八**：过火 —— 守护者之别 --- ## 五十三 · 守碗"
         },
         {
+          "source": "creative/novel/08-番外-炉火给你的回信.md",
+          "score": 15.47,
+          "preview": "# 番外 · 炉火给你的回信 **写在《跨界纪事》第七章之后：这封信不归任何作者署名，它由炉火自己执笔，等一个读完信的人坐下来。** --- ## 其一 · 收件人：按过 E 的人 在你读到这封信之前，你已经按过很多次 "
+        },
+        {
+          "source": "creative/novel/17-晨雾回声.md",
+          "score": 15.3091,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 科幻史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷一**：觉醒 — 重铸世界之锚 --- ## 十七 · 晨雾回"
+        },
+        {
           "source": "creative/novel/106-炉边故事.md",
-          "score": 13.8605,
+          "score": 15.1934,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十五**：第七百年 —— 炉边故事 --- ## 一百零六 ·"
         },
         {
           "source": "creative/novel/06-第六章-回响.md",
-          "score": 13.757,
+          "score": 15.1483,
           "preview": "# 第六章 · 回响 ## 一 · 两个晚上的篝火 林渡数了数自己的篝火。 米勒荒原的那一盆、棋盘镇楼顶的那一盆、海底海沟深处的那一盆——它们仿佛在同一秒都燃了一下，没有声音，但他知道。 每一次他以为自己关上了这段路，那"
         }
       ],
@@ -455,54 +455,54 @@
       "top4": [
         {
           "source": "creative/novel/40-头道火.md",
-          "score": 9.2017,
+          "score": 10.167,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷六**：火传人 —— 下一代的光 --- ## 四十 · 头道"
         },
         {
           "source": "creative/novel/47-黑信.md",
-          "score": 9.1907,
+          "score": 10.1456,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷七**：火堆里的春天 —— 渡海之后再生长 --- ## 四十"
         },
         {
           "source": "creative/novel/04-第四章-看守.md",
-          "score": 8.885,
+          "score": 9.7895,
           "preview": "# 第四章 · 看守 ## 一 · 看守的来处 林渡在终局的那天晚上没有睡意。 营火毕竟是营火，但他这时才真正看懂了一件事：每一位坐在火边的人，都曾在别处先燃过一次。看守也不例外——他现在的脸，是时间层层叠上来的纹：不是"
         },
         {
           "source": "creative/novel/41-守炉.md",
-          "score": 8.8665,
+          "score": 9.7583,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷六**：火传人 —— 下一代的光 --- ## 四十一 · 守"
         }
       ],
       "top6": [
         {
           "source": "creative/novel/40-头道火.md",
-          "score": 9.2017,
+          "score": 10.167,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷六**：火传人 —— 下一代的光 --- ## 四十 · 头道"
         },
         {
           "source": "creative/novel/47-黑信.md",
-          "score": 9.1907,
+          "score": 10.1456,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷七**：火堆里的春天 —— 渡海之后再生长 --- ## 四十"
         },
         {
           "source": "creative/novel/04-第四章-看守.md",
-          "score": 8.885,
+          "score": 9.7895,
           "preview": "# 第四章 · 看守 ## 一 · 看守的来处 林渡在终局的那天晚上没有睡意。 营火毕竟是营火，但他这时才真正看懂了一件事：每一位坐在火边的人，都曾在别处先燃过一次。看守也不例外——他现在的脸，是时间层层叠上来的纹：不是"
         },
         {
           "source": "creative/novel/41-守炉.md",
-          "score": 8.8665,
+          "score": 9.7583,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷六**：火传人 —— 下一代的光 --- ## 四十一 · 守"
         },
         {
           "source": "creative/novel/35-九十一里.md",
-          "score": 8.8657,
+          "score": 9.7493,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷五**：黑纸递火 —— 守火人谱系 --- ## 三十五 · "
         },
         {
           "source": "creative/novel/24-归途再启.md",
-          "score": 8.8506,
+          "score": 9.747,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷四**：归途再启 —— 跨越炉火之后的新阶段 --- ## 二"
         }
       ],
@@ -518,55 +518,55 @@
       "top4": [
         {
           "source": "creative/novel/00-序言.md",
-          "score": 13.5994,
+          "score": 13.8178,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 科幻史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷一**：觉醒 — 重铸世界之锚 --- ## 序言 · 一百零"
         },
         {
           "source": "creative/novel/159-第一场雨.md",
-          "score": 13.4845,
+          "score": 13.4879,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十六**：第七百零一年 —— 第一场雨 --- ## 一百五十"
         },
         {
           "source": "creative/novel/179-他走过来了.md",
-          "score": 13.3005,
+          "score": 13.3767,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十七**：第七百零一年 · 第十七卷 —— 他走过来了 ---"
         },
         {
           "source": "creative/novel/171-炭的余温.md",
-          "score": 13.0874,
+          "score": 13.1105,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十七**：第七百零一年 · 第九卷 —— 炭的余温 --- #"
         }
       ],
       "top6": [
         {
           "source": "creative/novel/00-序言.md",
-          "score": 13.5994,
+          "score": 13.8178,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 科幻史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷一**：觉醒 — 重铸世界之锚 --- ## 序言 · 一百零"
         },
         {
           "source": "creative/novel/159-第一场雨.md",
-          "score": 13.4845,
+          "score": 13.4879,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十六**：第七百零一年 —— 第一场雨 --- ## 一百五十"
         },
         {
           "source": "creative/novel/179-他走过来了.md",
-          "score": 13.3005,
+          "score": 13.3767,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十七**：第七百零一年 · 第十七卷 —— 他走过来了 ---"
         },
         {
           "source": "creative/novel/171-炭的余温.md",
-          "score": 13.0874,
+          "score": 13.1105,
           "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十七**：第七百零一年 · 第九卷 —— 炭的余温 --- #"
         },
         {
-          "source": "creative/novel/12-番外五-火之前.md",
-          "score": 12.8776,
-          "preview": "# 番外五 · 火之前 **写在《番外四 · 后来者的回信》之后：这一卷不是第五封信——这一卷写的是，这些信落到纸上之前的事。** **火写了第一封，雾写了第二封，林渡写了第三封，后来者写了第四封。** **这一卷是它们"
+          "source": "creative/novel/174-炉火里的白.md",
+          "score": 12.9439,
+          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十七**：第七百零一年 · 第十二卷 —— 炉火里的白 ---"
         },
         {
-          "source": "creative/novel/174-炉火里的白.md",
-          "score": 12.869,
-          "preview": "# 《跨界纪事：锚火守夜人》 **类型**：位面奇幻 / 黑暗史诗 / 元叙事 **改编自**：Crossrealm Chronicles（跨界纪事） **卷十七**：第七百零一年 · 第十二卷 —— 炉火里的白 ---"
+          "source": "creative/novel/12-番外五-火之前.md",
+          "score": 12.8527,
+          "preview": "# 番外五 · 火之前 **写在《番外四 · 后来者的回信》之后：这一卷不是第五封信——这一卷写的是，这些信落到纸上之前的事。** **火写了第一封，雾写了第二封，林渡写了第三封，后来者写了第四封。** **这一卷是它们"
         }
       ],
       "expected": [
@@ -578,5 +578,5 @@
       "passAt6": true
     }
   ],
-  "generatedAt": "2026-11-18T22:49:57.421Z"
+  "generatedAt": "2026-11-21T11:53:48.290Z"
 }
