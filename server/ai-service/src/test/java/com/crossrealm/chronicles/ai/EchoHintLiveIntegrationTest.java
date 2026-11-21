@@ -56,7 +56,7 @@ class EchoHintLiveIntegrationTest {
             com.crossrealm.chronicles.ai.EchoHintController controller = new EchoHintController(client);
             com.crossrealm.chronicles.ai.EchoHintController.EchoRequest req =
                     new com.crossrealm.chronicles.ai.EchoHintController.EchoRequest(
-                            "middle-earth", "至尊石环", "戒指已碎，石环仍在。one ring to bind them all…");
+                            "middle-earth", "至尊石环", "戒指已碎，石环仍在。one ring to bind them all…", "zh");
             Map<String, Object> body = controller.echoHint(req, "trace-test-001");
             return new ClientResult((String) body.get("hint"), body.get("cached") == Boolean.TRUE);
         } catch (Exception e) {

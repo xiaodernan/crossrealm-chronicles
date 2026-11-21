@@ -38,6 +38,10 @@ class EchoHintControllerTest {
         return MAPPER.writeValueAsString(Map.of("franchise", franchise, "title", title, "desc", desc));
     }
 
+    private static String body(String franchise, String title, String desc, String lang) throws Exception {
+        return MAPPER.writeValueAsString(Map.of("franchise", franchise, "title", title, "desc", desc, "lang", lang));
+    }
+
     @Test
     void 成功时返回一句梦话() throws Exception {
         when(client.complete(anyString(), anyString(), anyString()))
@@ -86,4 +90,38 @@ class EchoHintControllerTest {
                         .content(body("A".repeat(65), "标题", "")))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void 英文模式把lang带进提示词与护栏_不再吐中文() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("as an AI，回声先知在此", "gpt-6-sol", false, false, 10L));
+
+        mvc.perform(post("/api/ai/echo-hint").contentType(MediaType.APPLICATION_JSON)
+                        .content(body("INTERSTELLAR", "Engine Hum", "Starlight past the viewport", "en")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guarded").value(true))
+                .andExpect(jsonPath("$.line").doesNotExist())
+                .andExpect(jsonPath("$.hint").value(EmberReplyController.SAFE_EN));
+
+        var systemCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
+        var userCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(client).complete(systemCaptor.capture(), userCaptor.capture(), anyString());
+        org.junit.jupiter.api.Assertions.assertTrue(
+                systemCaptor.getValue().contains("用玩家报告的语言"), "system 必须按玩家语言收尾，不能写死中文短句");
+        org.junit.jupiter.api.Assertions.assertTrue(
+                userCaptor.getValue().contains("en"), "lang=en 必须进 user 提示词");
+    }
+
+    @Test
+    void lang缺省与非法值被白名单收敛() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("星河在那之前已经有人走过", "gpt-6-sol", false, false, 10L));
+        mvc.perform(post("/api/ai/echo-hint").contentType(MediaType.APPLICATION_JSON)
+                        .content(body("星际位面", "引擎低鸣", "")))
+                .andExpect(status().isOk());
+        mvc.perform(post("/api/ai/echo-hint").contentType(MediaType.APPLICATION_JSON)
+                        .content(body("星际位面", "引擎低鸣", "", "fr")))
+                .andExpect(status().isBadRequest());
+    }
+
 }

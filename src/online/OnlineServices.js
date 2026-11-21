@@ -387,10 +387,10 @@ export class OnlineServices {
    * 回声灯的一句暗示（W-X22 收编版，`POST /api/ai/echo-hint`）。
    * 与顾问共用同一条网关路径、同一份熔断与缓存，只是人格提示不同。
    */
-  async fetchEchoHint({ franchise, title, desc = '' }, { signal } = {}) {
+  async fetchEchoHint({ franchise, title, desc = '', lang }, { signal } = {}) {
     return this.#jsonRequest('/api/ai/echo-hint', {
       method: 'POST',
-      body: { franchise, title, desc },
+      body: { franchise, title, desc, ...(lang ? { lang } : {}) },
       timeoutMs: ADVISOR_LIMITS.requestTimeoutMs,
       signal,
     });

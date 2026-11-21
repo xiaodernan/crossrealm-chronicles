@@ -6,7 +6,9 @@ import jakarta.validation.constraints.Size;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,8 +36,12 @@ public class EchoHintController {
 
     /** 45 字、不出戏、不解释的先知口吻。 */
     static final String ECHO_SYSTEM =
-            "你是《跨界纪元》里的回声先知。每次只回一句不超过 45 字的中文短句。"
-                    + "像在说梦话一样点出这一枚回声的来历或去处；不解释、不加 Emoji、不出戏、不复述玩家给的原句。";
+            "你是《跨界纪元》里的回声先知。每次只回一句短句（zh 中文不超过 45 字，en 英文不超过 60 字符）。"
+                    + "用玩家报告的语言写这一句。像在说梦话一样点出这一枚回声的来历或去处；"
+                    + "不解释、不加 Emoji、不出戏、不复述玩家给的原句。";
+
+    /** 允许的语言白名单，与 KindleLetter / DeathEpitaph 同一套纪律。 */
+    private static final java.util.Set<String> LANGS = java.util.Set.of("zh", "en");
 
     /** 两节点图：compose（LLM）→ guard（确定性）。提示词中文冻结口径，guard 按 zh 收敛。 */
     static final String NODE_COMPOSE = "compose";
@@ -52,9 +58,11 @@ public class EchoHintController {
     private StateGraph.Compiled buildGraph() {
         StateGraph g = new StateGraph();
         g.addNode(NODE_COMPOSE, state -> {
+            String lang = String.valueOf(state.getOrDefault("lang", "zh"));
+            String user = "玩家报告的语言：" + lang + "\n" + String.valueOf(state.get("user"));
             LlmClient.Answer answer = client.complete(
                     ECHO_SYSTEM,
-                    String.valueOf(state.get("user")),
+                    user,
                     LlmClient.CacheKeys.ECHO);
             return Map.<String, Object>of(
                     "rawHint", String.valueOf(answer.answer()),
@@ -63,8 +71,9 @@ public class EchoHintController {
                     "model", answer.model());
         });
         g.addNode(NODE_GUARD, state -> {
+            String lang = String.valueOf(state.getOrDefault("lang", "zh"));
             EmberReplyController.GuardResult guarded = EmberReplyController.guardReply(
-                    String.valueOf(state.getOrDefault("rawHint", "")), "zh");
+                    String.valueOf(state.getOrDefault("rawHint", "")), lang);
             return Map.<String, Object>of("hint", guarded.reply(), "guarded", guarded.guarded());
         });
         g.addEdge(NODE_COMPOSE, NODE_GUARD);
@@ -78,16 +87,22 @@ public class EchoHintController {
     public record EchoRequest(
             @NotBlank @Size(max = 64) String franchise,
             @NotBlank @Size(max = 120) String title,
-            @Size(max = 400) String desc) {}
+            @Size(max = 400) String desc,
+            @Size(max = 8) String lang) {}
 
     @PostMapping("/echo-hint")
     public Map<String, Object> echoHint(@Valid @RequestBody EchoRequest request,
             @RequestHeader(value = "X-Request-Id", required = false) String headerRequestId) {
-        String user = "母题：%s\n回声名：%s\n回声描述：%s\n\n请给一个游戏内的暗示（只回一句，不超过 45 字）。"
+        String lang = request.lang() == null || request.lang().isBlank() ? "zh" : request.lang();
+        if (!LANGS.contains(lang)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid-lang");
+        }
+        String user = "母题：%s\n回声名：%s\n回声描述：%s\n\n请给一个游戏内的暗示（只回一句）。"
                 .formatted(request.franchise(), request.title(),
                         request.desc() == null || request.desc().isBlank() ? "（无描述）" : request.desc());
 
         Map<String, Object> initial = new LinkedHashMap<>();
+        initial.put("lang", lang);
         initial.put("user", user);
         StateGraph.CompiledInvoke result = graph.invoke(initial);
         Map<String, Object> state = result.state();

@@ -83,7 +83,9 @@ export class PopCultureJournalTab {
     const desc = keyText(t(entry.desc));
 
     try {
-      const res = await online.fetchEchoHint({ franchise, title, desc });
+      const res = await online.fetchEchoHint({
+        franchise, title, desc, lang: getLanguage() === 'en' ? 'en' : 'zh',
+      });
       if (seq !== this._lastSeq) return;
       const data = res?.data ?? {};
       if (res?.ok && typeof data?.hint === 'string' && data.hint.trim()) {
