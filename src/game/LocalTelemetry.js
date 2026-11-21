@@ -98,20 +98,42 @@ export const localTelemetry = {
   },
 };
 
-if (typeof window !== 'undefined') {
-  window.__crossrealmTelemetry = localTelemetry;
-  // 真·留存信号：页面关闭或切到后台时记下本次会话时长（幂等——只记一次）。
-  // 玩家「打开页面没耐心就关掉」会留下一个短 session_end，管理员页据此如实统计，不编造。
-  let _ended = false;
-  const endOnce = () => {
-    if (_ended) return;
-    _ended = true;
-    try { localTelemetry.recordSessionEnd(); } catch { /* 页面卸载中，静默 */ }
+/**
+ * W-Z500：安装会话边界监听（真·留存信号）。返回 disposer 便于测试与卸载。
+ *
+ * 修 W-Z487 的 bug：旧版把 visibilitychange:hidden（**任何**切标签/切后台）当成永久
+ * session end，第一次切走就把 `_ended` 钉死，之后真正关页再也不记——留存信号直接瞎掉；
+ * 反过来若 pagehide 紧跟 hidden，又会对同一次离开记两条。这里区分两种离开：
+ *   - hidden：记一次 session_end（覆盖移动端只有 visibilitychange 没有 pagehide 的情况），
+ *     但**可重入**——回到前台重置，下次离开照样记；
+ *   - pagehide：只在「这一轮还没因 hidden 记过」时补记，避免同一次离开双记。
+ */
+export function installSessionLifecycle(win, doc) {
+  let hiddenAt = null;
+  const recordOnce = () => {
+    if (hiddenAt !== null) return;       // 同一次离开已记过，防双记
+    hiddenAt = Date.now();
+    try { localTelemetry.recordSessionEnd(); } catch { /* 卸载中静默 */ }
   };
+  const onHidden = () => {
+    if (typeof doc.visibilityState !== 'string' || doc.visibilityState === 'hidden') recordOnce();
+  };
+  const onVisible = () => { hiddenAt = null; }; // 回到前台：重新武装，下次离开照记
+  const onPageHide = () => { recordOnce(); };
   try {
-    window.addEventListener('pagehide', endOnce);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') endOnce();
+    win.addEventListener('pagehide', onPageHide);
+    doc.addEventListener('visibilitychange', () => {
+      if (doc.visibilityState === 'hidden') onHidden(); else onVisible();
     });
   } catch { /* 非浏览器环境 */ }
+  return () => {
+    try {
+      win.removeEventListener('pagehide', onPageHide);
+    } catch { /* noop */ }
+  };
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  window.__crossrealmTelemetry = localTelemetry;
+  installSessionLifecycle(window, document);
 }

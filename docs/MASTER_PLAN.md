@@ -1,6 +1,10 @@
 > **2026-11-19 · W-Z468 第二百六十三卷入典《大寒 / Great Cold》——卷二十之五十三 · 第七百零三年 · 大寒**：第七百零三年——立春后第四十七周——周一——清早——灶火燃着——阿石站在门口——日头出来得晚——天底最冷——他说「——大寒——」——母亲说「——大寒——」——灶火燃着——阿石走到院子里——地上白了一层——冰碴子——他说「——地上冰了——」——母亲说「——地上冰了——」——他踩了一脚——冰碴子碎了——他说「——冰碎了——」——母亲说「——冰碎了——」——过了一会——阿石回来——他手里拿了一把柴——他说「——冬到头了——」——母亲说「——冬到头了——」——母亲说「——灶火别熄——」——阿石说「——灶火别熄——」——灶火燃着。
 > 交付：creative/novel/263-大寒.md + en 孪生 263-great-cold.md；novella 263 × 2 = 526 模块（典籍馆现为 263 卷）；root README / creative README(zh+en) / strings(zh+en) codex 同步；原典语料重建：**557 源**；**v3 冻结前缀含 263 条年表条目**；showcase feed 新增 W-Z468 实录。
 >
+> **2026-11-21 · W-Z500 会话留存信号生命周期修复（需求九「没耐心就关掉」）**：审计 W-Z487 写的 `session_end` 监听发现真 bug——旧版把 `visibilitychange:hidden`（**任何**切标签/切后台）当成永久 session end，第一次切走就把 `_ended` 钉死，之后真正关页再也不记，留存信号直接瞎掉；反过来 pagehide 紧跟 hidden 又会对同一次离开记两条。
+> 修复：抽出可测试的 `installSessionLifecycle(win, doc)`（返回 disposer）——hidden 记一次 session_end 但**可重入**（回前台重置，下次离开照记，覆盖移动端只有 visibilitychange 的情况），pagehide 只在同一次离开尚未记过时补记（防双记）。模块副作用仍在浏览器里自动安装。新增 `tests/telemetry-lifecycle.test.js`（3 例：切走→回前台→再切走记两条 / hidden+pagehide 不双记 / 仅 pagehide 也记）。
+> 门禁：Tests **6969/6969** ✓（+3 例，telemetry 共 9/9）· ai-service 201/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。
+> 
 > **2026-11-21 · W-Z499 Oracle RAG 卡片语料源数对齐（需求九「数据要真」）**：复跑 `lore-retrieval-probe.mjs` 实测 611 源（recall@4/6=88.9%），但管理页 `meas_l28` KPI 卡三处文案仍写「BM25 · 475 源」（W-Z415 旧值）——多轮新增卷把 corpus 从 475 涨到 611，卡片没跟上，是同一类「卡片与实测失同源」drift（继 l18b 之后第二次）。三处（HTML + zh + en）改为 611 源；合法里程碑号 W-Z475  untouched。新增 `tests/admin-corpus-count.test.js`（3 例：probe 数/卡片三处/里程碑不误伤）。
 > 附带审计：11 个 LLM-as-NPC 方法（EmberReply/KindleLetter/BossVerse/EchoHint/Arbiter/DeathEpitaph/ChapterCoda/Guide/Oracle/Advisor×2）全部有真实游戏系统消费者，零孤儿端点——需求四「大模型深度融入整体」接线完整。说明书对深潜/指路/滚轮反转/典籍馆290卷/顾问五类新特性双语覆盖齐全。
 > 门禁：Tests **6966/6966** ✓（+3 例）· ai-service 201/0 ✓ · Build ✓ · i18n 3272 不变 · identity-guard ✓。
