@@ -303,12 +303,20 @@ export class AdvisorPanel {
   _context() {
     const season = this.game?.seasons?.getState?.();
     const trial = this.game?.trial?.getState?.();
+    const 跑试炼 = trial?.state === 'running';
+    // 全部返回字符串标量：context 会被拼进 userMessage（冻结前缀只盖 system），
+    // 富上下文不破坏 cache；仍受白名单 `@Size(max=8)` 约束——这里正好 8 个键。
+    // 空串字段会被 normalizeAdvisorContext 自动过滤（如试炼未运行时的进度）。
     return {
-      season: season?.id ?? '',
-      season_day: season?.dayInCycle ?? '',
-      trial_state: trial?.state ?? '',
-      trial_layer: trial?.state === 'running' ? trial?.layer : '',
-      chapter: this.game?.quests?.chapter ?? '',
+      season: String(season?.id ?? ''),
+      season_day: season?.dayInCycle != null ? String(season.dayInCycle) : '',
+      season_remaining: season?.daysRemaining != null ? String(season.daysRemaining) : '',
+      trial_state: String(trial?.state ?? ''),
+      trial_layer: 跑试炼 && trial?.layer != null ? String(trial.layer) : '',
+      trial_progress: 跑试炼 && trial?.kills != null && trial?.quota != null
+        ? `${trial.kills}/${trial.quota}` : '',
+      chapter: this.game?.quests?.chapter != null ? String(this.game.quests.chapter) : '',
+      player_level: this.game?.stats?.level != null ? String(this.game.stats.level) : '',
     };
   }
 

@@ -198,9 +198,13 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
     await flush();
     expect(h.asked).toHaveLength(1);
     expect(h.asked[0].q).toBe('这一季堆什么？');
-    // 面板只负责「全是标量」；数字转字符串是 OnlineServices 的归一化职责（那边另有测试）
+    // 面板已把标量统一转成字符串（富上下文扩容后，见 advisor-context-richness.test.js）；
+    // harness 记录的是归一化前的面板原值，故空串字段仍在——它们在 OnlineServices 的
+    // normalizeAdvisorContext 里被丢弃（那边 advisor.test.js 另有测试）。
     expect(h.asked[0].ctx).toEqual({
-      season: 'ember', season_day: 3, trial_state: 'running', trial_layer: 2, chapter: 2,
+      season: 'ember', season_day: '3', season_remaining: '',
+      trial_state: 'running', trial_layer: '2', trial_progress: '',
+      chapter: '2', player_level: '',
     });
     expect(Object.values(h.asked[0].ctx).every((v) => typeof v !== 'object' && typeof v !== 'function')).toBe(true);
     const msgs = bubbles(h.doc);
