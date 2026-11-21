@@ -40,6 +40,10 @@ class DeathEpitaphControllerTest {
         return MAPPER.writeValueAsString(Map.of("bossName", bossName, "attempts", attempts));
     }
 
+    private static String body(String bossName, Integer attempts, String lang) throws Exception {
+        return MAPPER.writeValueAsString(Map.of("bossName", bossName, "attempts", attempts, "lang", lang));
+    }
+
     @Test
     void 成功时返回一句执笔人的话() throws Exception {
         when(client.complete(anyString(), anyString(), anyString()))
@@ -82,6 +86,37 @@ class DeathEpitaphControllerTest {
                 .andExpect(jsonPath("$.line").value(EmberReplyController.SAFE_ZH))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
                         .string(org.hamcrest.Matchers.containsString("\"path\":[\"compose\",\"guard\"]")));
+    }
+
+    @Test
+    void 英文模式把lang带进提示词与护栏_不再吐中文() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("as an AI，星轨顾问在此", "gpt-6-sol", false, false, 10L));
+
+        mvc.perform(post("/api/ai/death-epitaph").contentType(MediaType.APPLICATION_JSON)
+                        .content(body("The Shadow Warden", 3, "en")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guarded").value(true))
+                .andExpect(jsonPath("$.line").value(EmberReplyController.SAFE_EN));
+
+        var userCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(client).complete(anyString(), userCaptor.capture(), anyString());
+        org.junit.jupiter.api.Assertions.assertTrue(
+                userCaptor.getValue().contains("en"), "lang=en 必须进 user 提示词，否则 LLM 不知道用英文收尾");
+    }
+
+    @Test
+    void lang缺省与非法值被白名单收敛() throws Exception {
+        // 缺省 lang → 默认 zh，仍成功
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("再来一次", "gpt-6-sol", false, false, 10L));
+        mvc.perform(post("/api/ai/death-epitaph").contentType(MediaType.APPLICATION_JSON)
+                        .content(body("影界守护者", 3)))
+                .andExpect(status().isOk());
+        // 非法 lang → 400，与 KindleLetter 的白名单纪律一致
+        mvc.perform(post("/api/ai/death-epitaph").contentType(MediaType.APPLICATION_JSON)
+                        .content(body("影界守护者", 3, "fr")))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

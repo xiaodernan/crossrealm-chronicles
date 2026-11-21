@@ -9,7 +9,9 @@ import jakarta.validation.constraints.Size;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,13 +43,17 @@ public class DeathEpitaphController {
     /** ≤45 字、不出戏、不复述题干——三档语气的分水岭全压在 user 行的「倒下次数：%d」里。 */
     static final String DEATH_SYSTEM =
             "你是《跨界纪元》里替死在 Boss 面前的旅人收走残墨的执笔人。"
-                    + "每次只回一句话，不超过 45 个字，用温和的口吻看看倒下了几次，给出正好合适的话：\n"
+                    + "每次只回一句话，用温和的口吻看看倒下了几次，给出正好合适的话：\n"
                     + "3 次以内：像递来一张只写了半行的纸条，鼓励他再来一次；\n"
                     + "4 到 6 次：像在旁边笑着看一眼，说一句松一口气的话；\n"
                     + "7 次以上：像过来人提醒他一句可能真正该注意的规律；\n"
+                    + "用玩家报告的语言写这一句（zh 中文不超过 45 字，en 英文不超过 60 字符）。\n"
                     + "不出戏、不用 Emoji、不复述题干、不编造不存在的 Boss 或招式。";
 
-    /** 两节点图：compose（LLM）→ guard（确定性）。执笔人没有 lang 字段——默认按项目原生语言 zh 收尾。 */
+    /** 允许的语言白名单，与 KindleLetterController 同一套纪律。 */
+    private static final java.util.Set<String> LANGS = java.util.Set.of("zh", "en");
+
+    /** 两节点图：compose（LLM）→ guard（确定性）。lang 沿用请求（默认 zh），两种语言都收尾。 */
     static final String NODE_COMPOSE = "compose";
     static final String NODE_GUARD = "guard";
 
@@ -62,16 +68,18 @@ public class DeathEpitaphController {
     private StateGraph.Compiled buildGraph() {
         StateGraph g = new StateGraph();
         g.addNode(NODE_COMPOSE, state -> {
-            String user = "Boss：%s%n倒下次数：%d%n%n请收下这一滴残墨。"
-                    .formatted(String.valueOf(state.get("bossName")),
+            String lang = String.valueOf(state.getOrDefault("lang", "zh"));
+            String user = "玩家报告的语言：%s%nBoss：%s%n倒下次数：%d%n%n请收下这一滴残墨。"
+                    .formatted(lang, String.valueOf(state.get("bossName")),
                             ((Number) state.get("attempts")).intValue());
             LlmClient.Answer answer = client.complete(DEATH_SYSTEM, user, LlmClient.CacheKeys.DEATH_EPITAPH);
             return Map.<String, Object>of("rawLine", String.valueOf(answer.answer()),
                     "cached", answer.cached());
         });
         g.addNode(NODE_GUARD, state -> {
+            String lang = String.valueOf(state.getOrDefault("lang", "zh"));
             EmberReplyController.GuardResult guarded = EmberReplyController.guardReply(
-                    String.valueOf(state.getOrDefault("rawLine", "")), "zh");
+                    String.valueOf(state.getOrDefault("rawLine", "")), lang);
             return Map.<String, Object>of("line", guarded.reply(), "guarded", guarded.guarded());
         });
         g.addEdge(NODE_COMPOSE, NODE_GUARD);
@@ -84,12 +92,18 @@ public class DeathEpitaphController {
     /** 输入全部限长并做类型棱角校验：倒下次数必须是 1..999 的整数。 */
     public record DeathRequest(
             @NotBlank @Size(max = 120) String bossName,
-            @NotNull @Min(1) @Max(999) Integer attempts) {}
+            @NotNull @Min(1) @Max(999) Integer attempts,
+            @Size(max = 8) String lang) {}
 
     @PostMapping("/death-epitaph")
     public Map<String, Object> deathEpitaph(@Valid @RequestBody DeathRequest request,
             @RequestHeader(value = "X-Request-Id", required = false) String headerRequestId) {
+        String lang = request.lang() == null || request.lang().isBlank() ? "zh" : request.lang();
+        if (!LANGS.contains(lang)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid-lang");
+        }
         Map<String, Object> initial = new LinkedHashMap<>();
+        initial.put("lang", lang);
         initial.put("bossName", request.bossName());
         initial.put("attempts", request.attempts());
         StateGraph.CompiledInvoke result = graph.invoke(initial);

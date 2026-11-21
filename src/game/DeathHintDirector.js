@@ -1,5 +1,5 @@
 import { keyText } from '../ui/keyHints.js';
-import { t } from '../engine/i18n.js';
+import { t, getLanguage } from '../engine/i18n.js';
 
 import { on, offAll } from '../engine/EventBus.js';
 
@@ -41,7 +41,7 @@ export class DeathHintDirector {
     const bossName = this.game.enemyManager.boss?.name ?? '未知的 Boss';
     const attempts = this.deathCount;
     online
-      .askDeathEpitaph({ bossName, attempts, lang: 'zh' })
+      .askDeathEpitaph({ bossName, attempts, lang: getLanguage() === 'en' ? 'en' : 'zh' })
       .then((res) => {
         const line = res?.data?.line;
         if (typeof line === 'string' && line.trim()) {

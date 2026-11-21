@@ -10,7 +10,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { emit } from '../src/engine/EventBus.js';
-import { t } from '../src/engine/i18n.js';
+import { t, setLanguage } from '../src/engine/i18n.js';
 import { keyText } from '../src/ui/keyHints.js';
 import { DeathHintDirector } from '../src/game/DeathHintDirector.js';
 
@@ -82,5 +82,50 @@ describe('DeathHintDirector 计数 / 广播 / 存档', () => {
     expect(dir.deathCount).toBe(2);
     dir.fromJSON(null);
     expect(dir.deathCount).toBe(2);
+  });
+});
+
+describe('DeathHintDirector 墓志 AI 的语言', () => {
+  const withOnline = () => {
+    const asked = [];
+    game.onlineServices = {
+      enabled: () => true,
+      askDeathEpitaph: vi.fn((payload) => {
+        asked.push(payload);
+        return Promise.resolve({ ok: true, data: { line: '一句墓志' } });
+      }),
+    };
+    return asked;
+  };
+
+  afterEach(() => setLanguage('zh'));
+
+  it('英文模式：墓志请求 lang=en（不再吐中文墓志）', async () => {
+    setLanguage('en');
+    game.enemyManager.boss.alive = true;
+    const asked = withOnline();
+    for (let i = 0; i < 3; i++) dir.onRespawn();
+    await Promise.resolve();
+    expect(asked).toHaveLength(1);
+    expect(asked[0].lang).toBe('en');
+    expect(asked[0].attempts).toBe(3);
+  });
+
+  it('中文模式：墓志请求 lang=zh', async () => {
+    setLanguage('zh');
+    game.enemyManager.boss.alive = true;
+    const asked = withOnline();
+    for (let i = 0; i < 3; i++) dir.onRespawn();
+    await Promise.resolve();
+    expect(asked).toHaveLength(1);
+    expect(asked[0].lang).toBe('zh');
+  });
+
+  it('在线关闭时不请求墓志（离线静默兜底）', () => {
+    setLanguage('en');
+    game.enemyManager.boss.alive = true;
+    game.onlineServices = { enabled: () => false, askDeathEpitaph: vi.fn() };
+    for (let i = 0; i < 3; i++) dir.onRespawn();
+    expect(game.onlineServices.askDeathEpitaph).not.toHaveBeenCalled();
   });
 });
