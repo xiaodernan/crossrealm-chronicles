@@ -2933,6 +2933,8 @@ export const STRINGS_EN = Object.freeze({
   boss_lore_sunless_oratory_text: 'It keeps no door — it keeps a row of lamps nobody lit. The flame in your hand is the only one it has seen tonight.',
 
   // Chapter intros (W-D2 slice 16c)
+  chapter_intro_1_title: 'Chapter 1 · Awakening',
+  chapter_intro_1_text: 'You wake in a hub with no name, and the only thing beside you is a lamp not yet lit.\n\nTouch the World Anchor first, then take a few swings at the training dummy to remember your moves. The Greywhite Forest fragment lies to the west — the Shadow Warden keeps it.',
   chapter_intro_2_title: 'Chapter 2 · Endless Planes',
   chapter_intro_2_text: `After the anchor was reforged, the walls between planes thinned.
 

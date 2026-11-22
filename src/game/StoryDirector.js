@@ -67,7 +67,9 @@ export class StoryDirector {
   setupListeners() {
     storyOn('chapter-changed', (e) => {
       const ch = e.detail.chapter;
-      this.maybeAskCoda(ch, e.detail.prev);
+      // `initial` 是开局/读档后由 Game 补派的那一次（章节没变，只是让第 1 章也有开场）。
+      // 它不是「跨章」——残章记的是跨过去的那一瞬，开局不该为它烧一次上游调用。
+      if (!e.detail.initial) this.maybeAskCoda(ch, e.detail.prev);
       if (!CHAPTER_INTROS[ch] || this.shownChapters.has(ch)) return;
       this.shownChapters.add(ch);
       const intro = CHAPTER_INTROS[ch];

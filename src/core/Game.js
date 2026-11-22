@@ -696,6 +696,13 @@ export class Game {
     this.popCultureBarks = this._adopt('game/PopCultureCombatBarks', attachPopCultureCombatBarks(this));
     this.bossRematch.syncFromQuests?.();
     this.cgGallery.unlock('bonus:world-anchor', 'init');
+    /* 开局/读档后补派一次「当前章节」：`chapter-changed` 只在章节**变化**时派发，
+     * 所以第 1 章（开局即 1）永远收不到——新玩家落地没有「去哪、做什么」的章节开场，
+     * 只有操作教学。补派带 `initial: true`：StoryDirector 据此跳过残章请求（开局不是跨章），
+     * 只弹章节介绍；`shownChapters` 从存档恢复，已看过的章节不会重复弹。 */
+    window.dispatchEvent(new CustomEvent('chapter-changed', {
+      detail: { chapter: this.quests.chapter, prev: 0, initial: true },
+    }));
     this.quests.stats.skillsUnlocked = this.weaponSkills.unlocked.size;
     this.quests.syncProgress();
     this.quests.checkProgress();

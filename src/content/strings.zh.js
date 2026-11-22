@@ -2931,6 +2931,8 @@ export const STRINGS_ZH = Object.freeze({
   boss_lore_sunless_oratory_text: '它不守门，它守一整排没人点亮的灯。你手里那一点火，是它今晚唯一看见的东西。',
 
   // 章节导语（W-D2 切片16c）
+  chapter_intro_1_title: 'Chapter 1 · 觉醒',
+  chapter_intro_1_text: '你在一座没有名字的枢纽里醒来，手边只有一盏还没点亮的灯。\n\n先摸一摸世界之锚，再对着木人把招式找回来。灰白森林的碎片在西边——影界守护者守着它。',
   chapter_intro_2_title: 'Chapter 2 · 无尽位面',
   chapter_intro_2_text: `锚点重铸之后，位面之间的墙变薄了。
 

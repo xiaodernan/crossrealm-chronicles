@@ -55,6 +55,13 @@ export const BOSS_LORE = {
  * 在 `chapter-changed` 那一帧展开一次，对话框与日志条目拿到同一份。
  */
 export const CHAPTER_INTROS = {
+  // 第 1 章：建表时只有 2–5（跨章才有 chapter-changed），开局那一次永远收不到事件 ——
+  // 于是新玩家落地既没有「你要去哪、要做什么」的章节开场，只有操作教学（Quickstart）。
+  // 由 `Game` 启动后补派一次 `chapter-changed { chapter, prev:0, initial:true }` 唤醒。
+  1: {
+    title: 'chapter_intro_1_title',
+    text: 'chapter_intro_1_text',
+  },
   2: {
     title: 'chapter_intro_2_title',
     text: 'chapter_intro_2_text',
