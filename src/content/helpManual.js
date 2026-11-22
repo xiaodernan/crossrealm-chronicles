@@ -36,6 +36,16 @@ export const HELP_SECTIONS_EXTRA = [
     body: 'hm_body_trilance_tip',
   },
   {
+    id: 'guide-hint',
+    title: 'hm_title_guide_hint',
+    body: 'hm_body_guide_hint',
+  },
+  {
+    id: 'flame-daily',
+    title: 'hm_title_flame_daily',
+    body: 'hm_body_flame_daily',
+  },
+  {
     id: 'lore-oracle',
     title: 'hm_title_lore_oracle',
     body: 'hm_body_lore_oracle',

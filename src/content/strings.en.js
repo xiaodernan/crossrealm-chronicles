@@ -3147,6 +3147,10 @@ Ranked pages:
 Double crown: same runner holding both the speedrun crown and the trial crown = world-class news.
 
 Off = zero network, exactly like offline.`,
+  hm_title_guide_hint: 'Lost? Ask the Night Warden for a heading',
+  hm_body_guide_hint: 'When you are not sure where to go, open the quest assistant (the hint strip at the top right) and press "Ask the Night Warden for a heading".\n\nIt reads your situation — which zone you are in, how long you have stood still, how many clicks lately — and answers with one concrete line. Offline it falls back to a deterministic hint instead of leaving a blank.',
+  hm_title_flame_daily: 'Anchor Flame Divination · one draw a day',
+  hm_body_flame_daily: 'The journal has an "Anchor Flame" tab: draw one card a day, ten cards for ten moods, and a rare draw pays a handful of souls.\n\nIt rolls over on the UTC day, once per day; past draws stay in the history so you can look back any time.',
   hm_title_lore_oracle: 'The Lore Oracle · Ask the canon',
   hm_body_lore_oracle: `The Lore Oracle — you ask the canon itself, not a general assistant.
 

@@ -3145,6 +3145,10 @@ Boss 再战 — 击败后在信标按 {interact} 召唤，+5 魂火
 【试炼榜】同赛季 score 降序 + layersCleared + secondsLeft，换王即入台。
 
 关闭即零网络，与离线一致。`,
+  hm_title_guide_hint: '迷茫时 · 向守夜人求一句指路',
+  hm_body_guide_hint: '不知道该往哪走的时候，打开任务助手（屏幕右上角的提示条），点「向守夜人求一句指路」。\n\n它会读你此刻的处境——在哪座区、停了多久、最近点了多少下——再回你一句具体的话。离线时退回确定性提示，不会留白。',
+  hm_title_flame_daily: '锚火占卜 · 每日一签',
+  hm_body_flame_daily: '日志里有一格「锚火占卜」：每天可抽一张签，十种签文对应十种心境，抽到稀有签会给一笔魂火。\n\n按 UTC 日切换，一天一次；抽过的签会留在历史里，随时能回看。',
   hm_title_lore_oracle: '典籍叩问 · Lore Oracle',
   hm_body_lore_oracle: `「典籍叩问」——问的不是通用顾问，是原典本身。
 

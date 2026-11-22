@@ -689,7 +689,8 @@ describe('W-B2 内容普查：条数钉死', () => {
       achievementsPopCulture: 40,
       cgGalleryBonusExtra: 5,
       sideQuestsPop: 22,
-      helpSectionsExtra: 15,
+      // 15 → 17：说明书扩了两节（`guide-hint` 守夜人指路 / `flame-daily` 长明火日常）
+      helpSectionsExtra: 17,
     });
   });
 
