@@ -30,7 +30,7 @@
  * ① 表值层：48 格逐格同值（历史字面量）；族名册与 `MATERIAL_PATHS` 由表推导，与期望闭合。
  * ② 契约层：`paletteOf` 取值；族名/条目/深路径三处认不出各当场抛，且报错文本读得到可用键。
  * ③ 冻结层：表、族、族里的数组三层深冻结 —— 改不动（`Reflect.set` 为假、数组 push 抛）。
- * ④ 残留层：16 个文件逐一钉"残留字面量"的**集合与条数**（合计 106 处 / 82 种，2026-10-31 重导）；
+ * ④ 残留层：16 个文件逐一钉"残留字面量"的**集合与条数**（合计 112 处 / 88 种，2026-11-22 重导）；
  *    尺先在一段陈旧字面上认过 —— 否则"扫到 0 处"可能只是在读空集。
  * ⑤ 引用层：15 个消费方逐文件钉 `paletteOf('…')` 调用数 + 提及数 + import 数（提及=调用，
  *    动态传参会让两者不等）；其余 src 文件 0 提及；每个字面路径有效且并集恰是那 48 格（无死格）。
@@ -185,16 +185,22 @@ const 残留钉板 = {
       '0x88aacc', '0x88ccff', '0xff8844', '0xffffff'],
   },
   'world/zones/AbyssZone.js': {
-    数: 7,
-    集: ['0x120810', '0x880022', '0xff0044', '0xff2244', '0xff4488'],
+    // e3b9469（content(poi) 薄区补探索点）两座新 POI 的标记色写的是裸字面量：
+    // `abyss-bonegate` 的骨白 0xd8cbb0、`abyss-saltmarch` 的盐白 0xe8e0d0。
+    // 调色板里没有同族可借的白（`stone.pale` 0x8a8580 是灰、`crystal.ice` 0xaaccff 偏蓝），
+    // 为两座 POI 新开两格不值得 —— 按"有则改之"如实登记，不假装它们不存在。
+    数: 9,
+    集: ['0x120810', '0x880022', '0xd8cbb0', '0xe8e0d0', '0xff0044', '0xff2244', '0xff4488'],
   },
   'world/zones/GloomZone.js': {
-    数: 7,
-    集: ['0x1a1a2a', '0x2a2a4a', '0x3a3a5a', '0x4a4a6a', '0x6a6a8a'],
+    // 同上：`gloom-lamproad` 灯路白 0x8a8ab0、`gloom-newknot` 结绳褐 0x9a8a7a（e3b9469）。
+    数: 9,
+    集: ['0x1a1a2a', '0x2a2a4a', '0x3a3a5a', '0x4a4a6a', '0x6a6a8a', '0x8a8ab0', '0x9a8a7a'],
   },
   'world/zones/RadiantZone.js': {
-    数: 7,
-    集: ['0xffaa00', '0xffcc00', '0xffee00', '0xffeeaa'],
+    // 同上：`radiant-mirrorpool` 镜池绯 0xcc4466、`radiant-bellfounder` 铸钟金 0xd9c27a（e3b9469）。
+    数: 9,
+    集: ['0xcc4466', '0xd9c27a', '0xffaa00', '0xffcc00', '0xffee00', '0xffeeaa'],
   },
 };
 
@@ -305,7 +311,7 @@ describe('W-C5 切片8 调色板', () => {
       );
     });
 
-    it('逐文件：集合与条数都不许漂（合计 106 处 / 82 种）', () => {
+    it('逐文件：集合与条数都不许漂（合计 112 处 / 88 种）', () => {
       let 总 = 0;
       const 全 = new Set();
       for (const [文件, 期望] of Object.entries(残留钉板)) {
@@ -319,8 +325,9 @@ describe('W-C5 切片8 调色板', () => {
       // W-E3 切片42 / 45：FantasyZone 三处 POI 身份色（见上面那块钉板的注）—— +3 处 / +3 种
       // W-E3 切片42：MagicZone `second-stone` 新铸一格 —— +1 处 / +1 种
       // W-E3 切片41：SpaceZone `ascend-calibration-ring` 抄了隔壁那格 —— +1 处 / 值不涨
-      expect(总, '残留字面量合计').toBe(106);
-      expect(全.size, '残留字面量不同值合计').toBe(82);
+      // e3b9469：三座薄区各补 2 座 POI，标记色全走裸字面量（调色板无同族可借）—— +6 处 / +6 种
+      expect(总, '残留字面量合计').toBe(112);
+      expect(全.size, '残留字面量不同值合计').toBe(88);
     });
   });
 
