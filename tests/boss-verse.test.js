@@ -87,3 +87,38 @@ describe('余火回响 · sanitizeVerse 出一行可以落字幕的话', () => {
     expect(sanitizeVerse('   ')).toBe('');
   });
 });
+
+describe('余火回响 · 地带字段必须带真实区域名（此前恒为空）', () => {
+  const withZone = (zoneId) => ({
+    quests: { chapter: 3, stats: { level: 14 } },
+    stats: { bossDefeated: { archmagus: 2 } },
+    world: { zoneId },
+  });
+
+  it('在灰白森林击杀 → zone 是「灰白森林」而不是空串', () => {
+    setLanguage('zh');
+    const p = bossVersePayload(withZone('fantasy'), 'archmagus');
+    expect(p.zone).toBe('灰白森林');
+  });
+
+  it('英文模式 → zone 是英文区域名', () => {
+    setLanguage('en');
+    const p = bossVersePayload(withZone('fantasy'), 'archmagus');
+    expect(p.zone).toBe('Greywhite Forest');
+    setLanguage('zh');
+  });
+
+  it('七座真实区域都能映射出非空地带名', () => {
+    setLanguage('zh');
+    for (const z of ['fantasy', 'magic', 'space', 'void', 'abyss', 'gloom', 'radiant', 'hub']) {
+      const p = bossVersePayload(withZone(z), 'archmagus');
+      expect(p.zone.length, `${z} 的地带名不该为空`).toBeGreaterThan(0);
+    }
+  });
+
+  it('未知/缺失区域 → 空串（服务端会写「未登记」，不编造）', () => {
+    setLanguage('zh');
+    expect(bossVersePayload({}, 'archmagus').zone).toBe('');
+    expect(bossVersePayload(withZone('no-such-zone'), 'archmagus').zone).toBe('');
+  });
+});

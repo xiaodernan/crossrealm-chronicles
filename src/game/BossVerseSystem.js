@@ -1,6 +1,7 @@
 import { on, offAll } from '../engine/EventBus.js';
 import { t, getLanguage } from '../engine/i18n.js';
 import { bossNameKeyOf } from '../content/bossRoster.js';
+import { ZONE_NAMES } from '../content/ZoneIdentity.js';
 import { localTelemetry } from './LocalTelemetry.js';
 
 /**
@@ -37,13 +38,18 @@ export function bossVersePayload(game, bossId) {
   const id = String(bossId ?? '').slice(0, 64);
   const nameKey = bossNameKeyOf(bossId);
   const name = nameKey ? String(t(nameKey) ?? id).slice(0, 80) : id;
+  // 地带：Boss 死在哪座区是**已知事实**，此前恒传空串、服务端只能写「（未登记）」。
+  // 走 ZONE_NAMES → t() 得到人类可读的区域名（灰白森林 / 幽暗林地…），随语言切换；
+  // 未知区或取不到时留空——服务端会诚实写「未登记」，不编造。
+  const zoneKey = ZONE_NAMES[game?.world?.zoneId];
+  const zone = zoneKey ? String(t(zoneKey) ?? '').slice(0, 60) : '';
   return {
     bossId: id,
     name,
     chapter: String(game?.quests?.chapter ?? 1),
     kills: String(game?.stats?.bossDefeated?.[bossId] ?? 1),
     level: String(stats?.level ?? 1),
-    zone: '',
+    zone,
     lang: getLanguage() === 'en' ? 'en' : 'zh',
   };
 }
