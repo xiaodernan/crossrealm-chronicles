@@ -1,5 +1,10 @@
 # Smoke test: boot discovery / config / game-service / season-service / ai-service / notification-service / gateway for real and verify the whole chain:
 #   config-server serves centrally managed config -> services register with Eureka -> gateway lb-routes by service name.
+#   Sections 7a/7b (W-Z513) then hammer the two different load paths, because they are different claims:
+#     7a  direct at game-service :28081  -> capacity (bypasses governance on purpose)
+#     7b  through the gateway   :28080   -> governance (limiter admits a batch, sheds the excess as 429, zero 5xx)
+#   scripts/stress-load.mjs has no default --target: a hammer that points at 8080/8081 by default can
+#   hit a neighbour project's service (recorded in the ledger), so the operator always says where.
 #
 # Usage (from server/):
 #   powershell -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
@@ -566,6 +571,44 @@ game-service:
     Write-Host "ops/health notifyMirrors ok (available flag + dualCrown/total counters; no secrets)"
     Write-Host "=== 6) discovery: applications currently registered ==="
     (Invoke-WebRequest -UseBasicParsing 'http://localhost:28161/eureka/apps' -TimeoutSec 15).Content
+
+    Write-Host ""
+    Write-Host "=== 7a) capacity burst straight at game-service (28081, no gateway) ==="
+    # The other half of the load picture: this path bypasses governance on purpose, so what it can
+    # say is "the service itself is answering N rps without 5xx". It must never be read as
+    # "the gateway is fine" -- that is section 7b, and a green here used to be the tool's *default*.
+    $stressScript = Join-Path (Join-Path $repoRoot 'scripts') 'stress-load.mjs'
+    $capJson = & node $stressScript --target http://localhost:28081 --scenario readBurst --concurrency 16 --duration 6 --timeout 4000 --json | Out-String
+    if (-not $capJson) { Write-Error 'capacity burst produced no report'; exit 1 }
+    $cap = $capJson | ConvertFrom-Json
+    Write-Host "capacity: issued=$($cap.issued) ok=$($cap.ok) 5xx=$($cap.server) errRate=$($cap.errRate) p50=$($cap.latencyMs.p50)ms p95=$($cap.latencyMs.p95)ms rps=$($cap.rpsApprox)"
+    if ($cap.server -ne 0) { Write-Error "game-service answered $($cap.server) 5xx under burst"; exit 1 }
+    if ($cap.errRate -gt 0.02) { Write-Error "capacity run failed: errRate=$($cap.errRate)"; exit 1 }
+    # A floor, not a benchmark: shared CI runners vary by an order of magnitude, so this only says
+    # "the service is still answering at a sane rate". Real numbers go to docs/LOAD_TEST.md.
+    if ($cap.rpsApprox -lt 50) { Write-Error "capacity run collapsed: rps=$($cap.rpsApprox)"; exit 1 }
+    Write-Host 'capacity burst ok (zero 5xx, errRate within 2%)'
+
+    Write-Host ""
+    Write-Host "=== 7b) burst THROUGH the gateway: governance under load (W-Z513) ==="
+    # Why this comes last: everything above it routes through the same limiter, so a burst placed
+    # earlier would starve the later checks. Nothing runs after this but cleanup.
+    # The rate limiter, the request-id correlation and the breakers only sit on the gateway.
+    # Stressing game-service directly (7a) measures capacity and never touches any of that -- and it
+    # used to be what the hammer's *default* target did, which is how a green load run quietly meant
+    # "governance was never exercised". Here the same hammer goes through 28080: a fresh window
+    # admits a batch, the excess must come back as 429, and none of it may turn into 5xx, a hang,
+    # or a 200 that skipped governance.
+    Start-Sleep -Seconds 11   # the sliding window is 10s; start from a clean one so "ok" means something
+    $stressJson = & node $stressScript --target http://localhost:28080 --scenario readBurst --concurrency 16 --duration 6 --timeout 4000 --accept-limited --json | Out-String
+    if (-not $stressJson) { Write-Error 'gateway burst produced no report'; exit 1 }
+    $load = $stressJson | ConvertFrom-Json
+    Write-Host "gateway burst: issued=$($load.issued) ok=$($load.ok) limited=$($load.limited) 5xx=$($load.server) errRateNoLimited=$($load.errRateNoLimited) p50=$($load.latencyMs.p50)ms p95=$($load.latencyMs.p95)ms rps=$($load.rpsApprox)"
+    if ($load.server -ne 0) { Write-Error "gateway answered $($load.server) 5xx under burst - governance must shed load with 429, never with 5xx"; exit 1 }
+    if ($load.limited -lt 1) { Write-Error 'burst never reached the limiter (limited=0): this traffic went somewhere else, the check proved nothing'; exit 1 }
+    if ($load.ok -lt 10) { Write-Error "fresh window admitted only $($load.ok) requests: a limiter configured near zero would pass every other assertion here"; exit 1 }
+    if ($load.errRateNoLimited -gt 0.02) { Write-Error "real failures under load: errRateNoLimited=$($load.errRateNoLimited)"; exit 1 }
+    Write-Host 'governance-under-load ok (quota admitted, excess shed as 429, zero 5xx)'
 
     Write-Host ""
     Write-Host "smoke test PASSED"

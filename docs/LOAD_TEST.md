@@ -19,8 +19,18 @@
 
 | 工具 | 场景 | 说明 |
 |---|---|---|
-| `scripts/load-test.mjs --scenario=all` | 混合洪水压测 | 200–500 并发、每人固定假 IP（`--spoof-ips=true`）|
-| `scripts/load-test.mjs --scenario=ai` | AI 洪水的卸载行为 | 验证 429/503 按设计 shedding，**不是**赢的场景 |
+| `scripts/load-test.mjs --target=http://localhost:18880 --scenario=all` | 混合洪水压测 | 200–500 并发、每人固定假 IP（`--spoof-ips=true`）|
+| `scripts/load-test.mjs --target=http://localhost:18880 --scenario=ai` | AI 洪水的卸载行为 | 验证 429/503 按设计 shedding，**不是**赢的场景 |
+
+> **W-Z513（2026-11-23）：压测器没有"默认端口"这一回事。** `stress-load.mjs` 与 `load-test.mjs` 从前分别默认
+> `http://localhost:8081` 与 `http://localhost:8080`——而本机的 8080/8081/8761/8888 属于**别的项目**（Careeros 系列）。
+> 不带参数跑一次 `npm run stress`，发的就是一轮打到邻居服务上的洪峰。现在两者都要求显式
+> `--target`（`load-test.mjs` 另认可 `LOAD_TARGET`），缺了或 URL 形状不对 ⇒ **退出码 2 且一个请求都不发**，
+> 由 `tests/stress-load-target.test.js` 用真子进程 + 真 HTTP 桩钉住（含"给了完整 URL 照常能跑"的对照臂）。
+> 同一轮还把 `idempotentReplay` 从"只看状态码"改成"看台账有没有真重放"（`x-idempotent-replayed` 从前算出来就丢）。
+> 本仓宿主机端口：**18xxx**（compose 参考栈，网关 18880）与 **28xxx**（smoke 一次性实例，网关 28080）；
+> 两条压测路测的是两件事——穿网关 = 治理面，直连服务 = 容量，不许拿一条的绿交另一条的账。
+> CI 每次改 `server/` 都真跑这两路：`server/scripts/smoke.ps1` 第 7a / 7b 段。
 | `scripts/advisor-e2e.mjs` | 星轨顾问异步全链路 | submit→poll→done，测的是**玩家真实旅程**延迟 |
 | `docker compose run --rm verify` | 一键全链路自检 | 网关→各服务→Redis→WS 冒烟门 |
 

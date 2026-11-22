@@ -38,7 +38,12 @@ jobs:
 
       # 冒烟：四个实例真起真打，逐一验证"配置下发 → 服务注册 → 网关 lb:// 转发 → 遥测计数"。
       # 脚本使用 28xxx 端口段、跑完自动关停；ubuntu  runner 上 127.0.0.1 秒连秒拒，不会像开发机那样慢等。
-      - name: Smoke (full stack boot + gateway routing + config delivery)
+      # 末尾两段（W-Z513）是**两条不同的压测路**，别再混成一句"压测过了"：
+      #   7a 直连 game-service :28081 —— 容量（故意绕开治理面）
+      #   7b 穿网关 :28080 —— 治理面（新窗口放行一批、超额一律 429、全程零 5xx）
+      # 从前 `stress-load.mjs` 有默认目标 8081，跑的永远是 7a 那一路却交回一个笼统的绿；默认值已删，
+      # `--target` 改为必填（8080/8081 这些"标准端口"在开发机上可能属于别人的项目）。
+      - name: Smoke (full stack boot + gateway routing + config delivery + both load paths)
         run: pwsh -File "${{ github.workspace }}/server/scripts/smoke.ps1"
 
       # Redis 背板的限流（W-P10）：起 throwaway redis + 网关注入 redis backend，

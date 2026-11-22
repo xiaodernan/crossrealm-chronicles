@@ -15,10 +15,13 @@
  *
  * ## 用法
  *
- *   node scripts/load-test.mjs --scenario=version      # 单端点
- *   node scripts/load-test.mjs --scenario=all          # 全部场景轮转（gateway 混合负载）
- *   node scripts/load-test.mjs --users=300 --duration-ms=15000 --target=http://localhost:8080
- *   node scripts/load-test.mjs --scenario=ai --users=200   # 需要 ai-service 指向 stub
+ *   node scripts/load-test.mjs --target=http://localhost:18880 --scenario=version      # 单端点
+ *   node scripts/load-test.mjs --target=http://localhost:18880 --scenario=all          # 全部场景轮转（gateway 混合负载）
+ *   node scripts/load-test.mjs --target=http://localhost:18880 --users=300 --duration-ms=15000
+ *   node scripts/load-test.mjs --target=http://localhost:18880 --scenario=ai --users=200   # 需要 ai-service 指向 stub
+ *
+ * `--target`（或 `LOAD_TARGET`）必填（W-Z513）：不给默认端口，理由见下面那行代码的注释。
+ * 18880 是 compose 参考栈在宿主机上的网关端口；跑 smoke.ps1 的一次性实例则是 28080（`docs/LOAD_TEST.md` 有整张端口表）。
  *
  * ## 门槛（改门槛请走 ADR，别在脚本里悄悄挪）
  *
@@ -29,7 +32,17 @@
  */
 import { setTimeout as sleep } from 'node:timers/promises';
 
-const target = (getArg('--target') ?? process.env.LOAD_TARGET ?? 'http://localhost:8080').replace(/\/+$/, '');
+// W-Z513：不给默认目标。8080 是"标准网关端口"，而在开发机上它可能正被**别人的** Spring Cloud
+// 项目占着（`server/scripts/smoke.ps1` 头部就记着这件事，本仓因此一律走 28xxx）。
+// 一个默认打邻居的压测器不是工具，是事故；`--target` / `LOAD_TARGET` 至少说明"我知道我在打谁"。
+const rawTarget = getArg('--target') ?? process.env.LOAD_TARGET ?? null;
+if (rawTarget === null || !/^https?:\/\/\S+$/.test(rawTarget)) {
+  console.error('load-test 需要一个明确的 --target（或环境变量 LOAD_TARGET），且必须是完整 URL ——'
+    + ` 收到的是 "${rawTarget ?? '（没给）'}"。`);
+  console.error('usage: node scripts/load-test.mjs --target=http://127.0.0.1:28080 [--scenario=version|all|ai] [--users=N] [--duration-ms=N]');
+  process.exit(2);
+}
+const target = rawTarget.replace(/\/+$/, '');
 const scenarioArg = getArg('--scenario') ?? 'all';
 const USERS = parseIntArg(getArg('--users'), 200);
 const DURATION_MS = parseIntArg(getArg('--duration-ms'), 15000);
@@ -191,4 +204,8 @@ if (JSON_OUT) {
   if (ERR_SAMPLES.length) for (const s of ERR_SAMPLES) console.log('  错误样本:', s);
   console.log(`门槛：错误率 < 1% ${gates.errors ? '✓' : '✗'} · p99 分级达标 ${gates.p99fast ? '✓' : '✗'}`);
 }
-process.exit(gates.errors && gates.p99fast ? 0 : 1);
+// 用 exitCode + 自然回落，不用 process.exit：打完请求之后还有没来得及关的 fetch 句柄，
+// Windows libuv 在硬退出路径上会当场以 0xC0000409（STATUS_STACK_BUFFER_OVERRUN / UV_HANDLE_CLOSING）
+// 崩掉 —— 于是"绿"变成一个没人看得懂的 3221226505。同一课 `stress-load.mjs` 末尾已经记过一次，
+// 是 W-Z513 新门禁的对照臂（给了完整 URL 那一轮）在这台机器上把它抓出来的。
+process.exitCode = gates.errors && gates.p99fast ? 0 : 1;
