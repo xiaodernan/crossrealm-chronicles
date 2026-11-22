@@ -65,7 +65,8 @@ export class KindleLetterTab {
       fire.className = 'letter-turn-reply';
       const tagFire = document.createElement('span');
       tagFire.className = 'letter-turn-tag letter-turn-tag-fire';
-      tagFire.textContent = '炉火 · Ember';
+      // 与上面 tagMe 同一口径：语言分支在这里做，不写死中英并列（英文模式无中文）。
+      tagFire.textContent = getLanguage() === 'en' ? 'Ember' : '炉火';
       fire.append(tagFire, document.createTextNode(turn.reply));
       me.append(mine, fire);
       container.appendChild(me);
