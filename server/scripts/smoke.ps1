@@ -577,7 +577,12 @@ game-service:
     # The other half of the load picture: this path bypasses governance on purpose, so what it can
     # say is "the service itself is answering N rps without 5xx". It must never be read as
     # "the gateway is fine" -- that is section 7b, and a green here used to be the tool's *default*.
-    $stressScript = Join-Path (Join-Path $repoRoot 'scripts') 'stress-load.mjs'
+    # The hammer lives at the REPO root's scripts/, while $repoRoot here is `server/` (this script
+    # sits in server/scripts). First CI run proved it: joining 'scripts' onto $repoRoot produced
+    # server/scripts/stress-load.mjs -> node MODULE_NOT_FOUND -> "capacity burst produced no report".
+    $projectRoot = Split-Path -Parent $repoRoot
+    $stressScript = Join-Path (Join-Path $projectRoot 'scripts') 'stress-load.mjs'
+    if (-not (Test-Path $stressScript)) { Write-Error "stress hammer not found at $stressScript"; exit 1 }
     $capJson = & node $stressScript --target http://localhost:28081 --scenario readBurst --concurrency 16 --duration 6 --timeout 4000 --json | Out-String
     if (-not $capJson) { Write-Error 'capacity burst produced no report'; exit 1 }
     $cap = $capJson | ConvertFrom-Json

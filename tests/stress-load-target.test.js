@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
@@ -104,6 +104,19 @@ describe('stress-load 的 target 是一条命令，不是一个默认值', () =>
     expect(defaults, '找不到 DEFAULTS 那块，这条腿量不到东西').toBeTruthy();
     expect(defaults[0]).not.toMatch(/target/);
     expect(src).toMatch(/opt\('target',\s*null\)/);
+  });
+
+  // CI 第一轮真跑就抓到的事：`smoke.ps1` 里的 `$repoRoot` 是 `server/`（脚本住在 server/scripts），
+  // 拿它去拼 `scripts/stress-load.mjs` 得到的是 server/scripts/stress-load.mjs ⇒ node MODULE_NOT_FOUND
+  // ⇒ "capacity burst produced no report"。锤住在**仓根**的 scripts/ 下，路径必须先上一层再拼。
+  it('smoke 的两段压测必须从仓根拼这把锤，并且先确认它在场', () => {
+    const smoke = readFileSync(join(process.cwd(), 'server', 'scripts', 'smoke.ps1'), 'utf8').replace(/\r\n/g, '\n');
+    expect(smoke, 'smoke.ps1 没有把项目根往上一层再拼锤路径').toMatch(/Split-Path -Parent \$repoRoot/);
+    expect(smoke, 'smoke.ps1 拼完不检查在不在场（不在场只会交回一句"没有报告"）').toMatch(/Test-Path \$stressScript/);
+    expect(existsSync(SCRIPT), `仓根的锤丢了：${SCRIPT}`).toBe(true);
+    // 反向：错误的那条路线确实不该存在，否则上面两条静态腿量不到这次的病形。
+    expect(existsSync(join(process.cwd(), 'server', 'scripts', 'stress-load.mjs')),
+      'server/scripts 下真有同名文件，那"拼错一层"就没人发现得了').toBe(false);
   });
 
   // 同族的第二把尺子：`load-test.mjs` 从前默认打 `http://localhost:8080`，而"标准 8080"
