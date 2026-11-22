@@ -690,7 +690,8 @@ describe('W-B2 内容普查：条数钉死', () => {
       cgGalleryBonusExtra: 5,
       sideQuestsPop: 22,
       // 15 → 17：说明书扩了两节（`guide-hint` 守夜人指路 / `flame-daily` 长明火日常）
-      helpSectionsExtra: 17,
+      // 17 → 18：W-Z512 覆盖率门量出来的那一章（`keyboard-nav`：路点 / 面板移焦调值 / 本局读数）
+      helpSectionsExtra: 18,
     });
   });
 

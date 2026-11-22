@@ -3106,24 +3106,46 @@ Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation
 
   // Extra sections (HELP_SECTIONS_EXTRA, W-D2 slice15)
   hm_title_journal_tabs: 'Journal Tabs',
-  hm_body_journal_tabs: `[{journal}] open Crossrealm Journal, besides quests/fragments/Boss there are:
+  hm_body_journal_tabs: `[{journal}] opens the Crossrealm Journal. The strip has 28 tabs, left to right (this list is read off the code roster, so a new tab has to be written here):
 
-· CG Gallery — campfire & combat illustrations, click to enlarge
-· Achievements — parry, combo, Boss, exploration
-· Codex — plane lore gallery
-· Campfire Memory — rest count & dialogue review
-· Dungeons — maze clear records
-· Styles — sword/staff skill tree preview
-· Side Quests — optional objectives, auto-reward souls
-· Canon Library — 290 volumes of the canon, fully readable
-· Starpath Reading — one daily sign, the flame speaks
-· Fortune Path — three questions, one stateful route
-· Trisolar Tide — one weekly cast, three cards revealed together
-· Starpath · Hearth Vow — a vow for the keeper, same stateful routing
-· Starpath · Passing of the Fire — the last handover, seven hundred years waiting
-· Starpath Advisor guidance — when its answer nominates a destination, a button lands under the word; one tap takes you there
+· All — one merged list in the order things were written
+· Boss — one line per non-dungeon Boss downed, titled "Boss · name"
+· Campfire — the line you read at a campfire or rest point
+· Quests — every step of the main line; side quests and unlocked skills land here too
+· Fragments — lore picked up inside dungeons, plus each Plane Echo unlock
+· Exploration — landmarks and ambient events, including the "nth fall" respawn hint
+· Characters — what each person said; the title is their name
+· Dungeons — the running log of maze clears
+· CG Gallery — campfire and combat art, click to enlarge
+· Achievements — the wall: parry, combo, Boss, exploration
+· Codex — plane lore entries, one line each
+· Bestiary — enemy cards: tier, kills, attributes, traits, affinity; unseen ones show only "???"
+· Season — season name, days left, soul-flame bonus, this season's affixes; falls back to the local copy offline
+· Trial — layers, best run, why the last run ended, and every layer's time limit and quota
+· Campfire Memories — "name · N rests" per campfire plus the tales told (up to 24 previews)
+· Dungeons Cleared — the clear counter; the tab above keeps the log, this one counts the total
+· Schools — sword/staff skill tree preview, so you can see which nodes are yours
+· Side Quests — optional objectives; finishing them pays souls automatically
+· Plane Echoes — echo cards: series, title, description; unlocked ones can be asked of the Echo Lamp
+· Legends — your own fastest times, plus the online stele (up to ten rows)
+· The Return — ending epitaph cards; the whole page stays locked until the main line ends
+· Codex · the Canon, In-Game — all 290 volumes, readable without leaving the game
+· Starpath · Anchor Flame Reading — one sign a day, and the flame answers
+· Starpath · The Trisolar Tide — one cast a week, three cards revealed together
+· Fortune Path · The Three Questions — three questions you answer yourself, routed by the real StateGraph
+· Starpath · The Hearth Vow — a vow for the keeper, same routing
+· Starpath · The Passing of the Fire — the last lesson, seven hundred years handed to you
+· Ember Letter — after the ending: you write a line, the fire writes one back
 
-Tab buttons show unlocked count。`,
+The number badge only appears where something really counts. All, the Canon tab, the six Starpath tabs and Season / Legends carry no badge — there it would be a permanent "(0)", which reads as an empty tab.
+
+The Starpath Advisor is not a tab: when its answer nominates a place, a button lands under the answer and one tap takes you there.`,
+  hm_title_keyboard_nav: 'Keyboard Only · Panels, Waypoints, Session Readout',
+  hm_body_keyboard_nav: `Moving around a panel — {uiUp} / {uiDown} move focus, {uiLeft} / {uiRight} push the value of the focused row (today that means sliders). The gamepad d-pad takes the same route; Enter and Space are left to the browser, so they cost no key.
+
+Waypoints on the world map — with {worldMap} open, {mapMark} drops a marker at the cursor and {mapUnmark} pulls the last one back. The map layer has no focus list to walk, so there those four arrow keys drive the cursor, not the focus.
+
+Session readout — {sessionStats} shows or hides this run's counters (kills / parries / finishers / executions). It is only a panel: pressing it does not pause anything and changes no progress, online or off.`,
   hm_title_meta_systems: 'Meta Systems',
   hm_body_meta_systems: `Combat Style — parry/finish/execute/Boss accumulate rating C~SS
 Boss Rematch — after defeat, summon at beacon with {interact}, +5 souls

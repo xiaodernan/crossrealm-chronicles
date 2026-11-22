@@ -961,6 +961,9 @@ buildHUD() {
       else if (k === 'pass') suffix = '';
       // W-Z292 烬灯回信：信纸制，无需计数角标
       else if (k === 'letter') suffix = '';
+      // W-Z512：赛季与传说碑没有日志条目可数（`getCounts()` 只认基础类别），
+      // 落到下面那一行就是一个永远不会变的 (0) —— 与上面典籍馆同一处理由。
+      else if (k === 'season' || k === 'legends') suffix = '';
       else if (k !== 'all') suffix = ` (${j.getCounts()[k] ?? 0})`;
       return `<button type="button" class="journal-tab${tab === k ? ' active' : ''}" data-tab="${k}">${t(label)}${suffix}</button>`;
     }).join('');

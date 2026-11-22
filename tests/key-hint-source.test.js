@@ -387,7 +387,10 @@ const LEDGER = {
   // F12（开机失败句）/ Shift+click（地图 Waypoint 两句）/ "Volume X — complete"（典籍馆 canon 双语原文）。
   // 全部属已落地的说明书/典籍原文固定字样，不是新增操作文案；en 侧不再手填数字，如需再变必须连带本条注释。
   'content/strings.zh.js': 5,
-  'content/strings.en.js': 7,
+  // W-Z512（2026-11-23）实测 7 → 6：说明书「日志页签」那章整段重写成代码名册的逐格对账，
+  // 被删掉的那一句 `Tab buttons show unlocked count。` 同时是两笔债 —— 一个写死的键名，
+  // 和英文表里的一枚全角句号（`tests/en-table-no-cjk.test.js` 那扇门）。
+  'content/strings.en.js': 6,
   // W-D2 切片41：开机失败那一条错误整句搬进双表（`boot_error_init_failed_fmt`），
   // 这笔账随之搬去 `content/strings.*.js`（见上），本文件归零。
   'main.js': 0,

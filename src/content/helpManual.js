@@ -95,4 +95,11 @@ export const HELP_SECTIONS_EXTRA = [
     title: 'hm_title_kindle_pass',
     body: 'hm_body_kindle_pass',
   },
+  {
+    // W-Z512：`tests/help-manual-coverage.test.js` 量出来的那一格 —— 路点键、面板移焦/调值键、
+    // 本局读数键一共八格动作，说明书一个字都没提，玩家只能自己猜或者去翻设置里的重映射表。
+    id: 'keyboard-nav',
+    title: 'hm_title_keyboard_nav',
+    body: 'hm_body_keyboard_nav',
+  },
 ];
