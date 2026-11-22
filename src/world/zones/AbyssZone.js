@@ -92,6 +92,30 @@ export class AbyssZone extends BaseZone {
       },
       { id: 'chaos-core', color: 0xff2244 }
     );
+    // 回声设定里「深颚骨门」「盐柱长征」此前只在图鉴里有描述、边境上没有落脚点——
+    // 本区原先只有 2 个 POI（旧区 6-7 个），探索密度补到同档。
+    this.addPOI(
+      { x: -55, y: 0, z: 55 },
+      'zone_poi_abyss_bonegate_label',
+      () => {
+        window.dispatchEvent(new CustomEvent('discovery', {
+          detail: { id: 'abyss-bonegate', title: t('echo_abyss_bonegate_title'), text: t('echo_abyss_bonegate_desc') },
+        }));
+        this.dialog.show(t('zone_poi_abyss_bonegate_label'), t('zone_dlg_abyss_bonegate_text'));
+      },
+      { id: 'abyss-bonegate', color: 0xd8cbb0 }
+    );
+    this.addPOI(
+      { x: 60, y: 0, z: -45 },
+      'zone_poi_abyss_saltmarch_label',
+      () => {
+        window.dispatchEvent(new CustomEvent('discovery', {
+          detail: { id: 'abyss-saltmarch', title: t('echo_abyss_saltmarch_title'), text: t('echo_abyss_saltmarch_desc') },
+        }));
+        this.dialog.show(t('zone_poi_abyss_saltmarch_label'), t('zone_dlg_abyss_saltmarch_text'));
+      },
+      { id: 'abyss-saltmarch', color: 0xe8e0d0 }
+    );
   }
 
   buildOuterWilds() {

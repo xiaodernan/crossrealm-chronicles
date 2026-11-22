@@ -19,8 +19,8 @@
  * 2. 钉文案腿：21 × 12 格逐字钉死。
  * 3. 行为腿：切中/切英逐个 POI 重放交互，dialog 与 discovery 收到的都是展开句。
  * 4. 静态腿：8 个文件的 `.dialog.show` 与 `discovery` 派发必须走 `t()`（附反向控制）。
- * 5. 新键不孤儿：56 个新键都得在 8 个文件里被 `t()` 引用。
- * 6. 键数腿：56 个新键的文案在两表里最多各两个键。
+ * 5. 新键不孤儿：62 个新键都得在 8 个文件里被 `t()` 引用（56 原键 + 6 个后加区的 zone_dlg_*）。
+ * 6. 键数腿：62 个新键的文案在两表里最多各两个键。
  *
  * 复用口径（ADR 见 `docs/MASTER_PLAN.md` §9）：标题只借**同指称**的键 ——
  * 主线目标题（`obj_*_title`）、回声标题（`echo_tesseract_title`）、路点标签
@@ -87,6 +87,12 @@ const ZONE_POI_COPY = {
   'void-oath-stele': ['obj_void_oath_title', '残碑上的断誓', 'The Broken Oath', 'zone_dlg_void_oath_text', '半块石碑立在裂隙边：正面是守望者的誓词，背面被人从中间凿断。可辨认的只剩一句——「我们立誓不为任何人动用位面之力——」，后半截落在碎屑里。断口很新，像是有人赶在你之前来读过。', 'Half a stele stands at the rift edge: the warden oath on the face, chiselled through from the back. What can still be read is one line — "We swear never to wield the plane power for any soul—" — and the rest fell into the rubble. The break looks fresh, as if someone reached it before you.', 'obj_void_oath_title', '残碑上的断誓', 'The Broken Oath', 'zone_disc_void_oath_text', '誓词被凿断在「不为任何人」之后——断口很新。', 'The oath is cut off after "for any soul" — and the break is fresh.'],
   'abyss-boss-gate': ['zone_poi_abyss_boss_gate_label', '混沌裂隙竞技场', 'Chaos Rift Arena', 'zone_dlg_abyss_boss_gate_text', 'Chapter 5 解锁后，踏入红圈将唤醒「混沌裂隙领主」。\n\n坐标：X≈-200, Z≈285 · 建议先解锁 3 个武器技能。', 'After Chapter 5 unlocks, stepping into the red circle will wake the "Chaos Rift Overlord".\n\nCoordinates: X≈-200, Z≈285 · Unlock 3 weapon skills first.', null, null, null, null, null, null],
   'chaos-core': ['obj_chaos_core_title', '混沌之核', 'Chaos Core', 'zone_dlg_chaos_core_text', '此处可感悟武器技能——在营火用「技能点」解锁剑/杖流派。\n\n完成 Chapter 4 后，边境会完全显现。', 'Here you can attune to weapon skills — spend skill points at the campfire to unlock the sword/staff styles.\n\nAfter Chapter 4, the Border will fully reveal itself.', 'obj_chaos_core_title', '混沌之核', 'Chaos Core', 'zone_disc_chaos_core_text', '第五位面的不稳定能量源。', 'The unstable energy source of the fifth plane.'],
+  'gloom-lamproad': ['zone_poi_gloom_lamproad_label', '灯路尽头', 'End of the Lamproad', 'zone_dlg_gloom_lamproad_text', '雾岸尽头立着一盏从不回头的提灯。\n\n灯下没有脚印——走这条路的人，都把名字留在了上一站。', 'A lantern stands at the fog shore and never looks back.\n\nNo footprints under it — whoever walked this road left their name at the last stop.', 'echo_gloom_lamproad_title', '灯路尽头', 'The Lamp-Road\'s End', 'echo_gloom_lamproad_desc', '雾岸尽头那个提灯从不回头的人——他脚下的路没有尽头，因为没人记得他姓甚名谁。', 'The one who carries a lantern deeper into the mist without ever turning back - his road has no end, for no one remembers his name.'],
+  'gloom-newknot': ['zone_poi_gloom_newknot_label', '结愿树', 'Wishing Tree', 'zone_dlg_gloom_newknot_text', '麻布条一层层系满枝头，每一结都是一个人没说完的话。\n\n树从没许过愿，可系布的队伍一年比一年长。', 'Cloth strips are knotted layer over layer; every knot is something someone never finished saying.\n\nThe tree has never granted a wish, yet the queue grows longer every year.', 'echo_gloom_newknot_title', '结愿的人', 'One More Knot', 'echo_gloom_newknot_desc', '麻布条末端总有人再添一结——这棵树从未许过愿，可系布的队伍每年都排得更长。', 'The strips of cloth always end with one more knot - the tree never granted a single wish, yet the queue of those who tie grows longer every year.'],
+  'radiant-mirrorpool': ['zone_poi_radiant_mirrorpool_label', '门前镜潭', 'Mirror Pool at the Gate', 'zone_dlg_radiant_mirrorpool_text', '绯红门影倒映在脚下的潭水里。\n\n穿过的人不回头看自己的影子——影子里那副铠甲，已经等了很久。', 'The crimson gate is mirrored in the pool at your feet.\n\nThose who pass never look back at their own shadow — the armor inside it has been waiting a long time.', 'echo_radiant_mirrorpool_title', '门前镜潭', 'The Mirror Pool', 'echo_radiant_mirrorpool_desc', '绯红门影倒映在脚下镜潭——穿过的人从不回头看自己的影子，因为影子里那副铠甲等了他很久了。', 'The vermilion gate is mirrored in the pool beneath - no one who passes ever looks back, for the armour in the reflection has waited for him for far too long.'],
+  'radiant-bellfounder': ['zone_poi_radiant_bellfounder_label', '藤蔓铸造坊', 'Vine-Choked Foundry', 'zone_dlg_radiant_bellfounder_text', '圣殿深处有一间被藤蔓吞掉的铸造坊。\n\n最后一口吊钟不是铸出来的，是从上一任主教的牙齿里剥出来的。', 'Deep in the sanctuary lies a foundry swallowed by vines.\n\nThe last hanging bell was not cast — it was pulled from the teeth of the bishop before.', 'echo_radiant_bellfounder_title', '铸铃匠', 'The Bell Founder', 'echo_radiant_bellfounder_desc', '圣殿深处有一间藤蔓丛生的铸造坊——最后一口吊钟不是铸出来的，是从上一任主教的牙齿里剥出来的。', 'Deep in the sanctum lies a foundry thick with vines - the final bell was never cast, it was peeled from the previous archbishop\'s teeth.'],
+  'abyss-bonegate': ['zone_poi_abyss_bonegate_label', '深颚骨门', 'Deep Maw Bone Gate', 'zone_dlg_abyss_bonegate_text', '两根巨骨交叉成门，骨缝里灌着咸风。\n\n礁石吞惯了骨头——只有走过去的人，才知道门的另一边是什么。', 'Two giant bones cross into a gate, salt wind pouring through the seam.\n\nThe reef has swallowed its share of bones — only those who walk through learn what lies beyond.', 'echo_abyss_bonegate_title', '深颚骨门', 'The Bone Gate', 'echo_abyss_bonegate_desc', '礁石吞惯了骨头——只有走过去的人才知道门的另一边。', 'The reef is good at swallowing bones — only walkers-through know the other side.'],
+  'abyss-saltmarch': ['zone_poi_abyss_saltmarch_label', '盐柱长征', 'Salt Pillar March', 'zone_dlg_abyss_saltmarch_text', '盐柱一根接一根排向地平线。\n\n每年霜降，它们都会比去年多出一指——走的路比骨头还老。', 'Salt pillars stand one after another toward the horizon.\n\nEvery first frost they gain another finger\'s width — the road they walk is older than bone.', 'echo_abyss_saltmarch_title', '盐柱长征', 'March of the Salt Columns', 'echo_abyss_saltmarch_desc', '每年霜降，盐柱都会比去年多出一指——它们走的路，比骨头还老。', 'Every frost the salt columns stand a finger taller — the road they walk is older than bone.'],
   'gloom-deep-entrance': ['zone_poi_gloom_deep_entrance_label', '幽暗林地深处', 'Depths of the Gloomy Forest', 'zone_dlg_gloom_deep_entrance_text', '迷雾最浓处藏着古老的秘密。\n\n坐标：X≈180, Z≈170 · 需完成相关支线才能进入核心区域。', 'Where the fog is thickest lies an ancient secret.\n\nCoordinates: X≈180, Z≈170 · Complete the relevant side quest to enter the core area.', null, null, null, null, null, null],
   'gloom-moss': ['zone_poi_gloom_moss_label', '荧光苔藓群落', 'Fluorescent Moss Colony', 'zone_dlg_gloom_moss_text', '采集荧光苔藓可制作照明道具。\n\n在营火处可将其炼制为「迷雾灯笼」。', 'Gather fluorescent moss to craft light sources.\n\nAt the campfire it can be refined into a "Mist Lantern".', 'wp_label_gloom_moss', '荧光苔藓', 'Glowing Moss', 'zone_disc_gloom_moss_text', '只在幽暗林地生长的发光苔藓，能指引迷途者。', 'Glowing moss that grows only in the Gloomy Woodland; it guides the lost.'],
   'radiant-main-gate': ['zone_poi_radiant_main_gate_label', '辉煌圣域大门', 'Gate of the Radiant Sanctuary', 'zone_dlg_radiant_main_gate_text', '金光洗礼过的巨门，守护着圣域的核心。\n\n坐标：X≈-180, Z≈-95 · 需完成相关支线才能进入内殿。', 'The great gate, bathed in golden light, guards the heart of the Sanctuary.\n\nCoordinates: X≈-180, Z≈-95 · Complete the relevant side quest to enter the inner hall.', null, null, null, null, null, null],
@@ -231,16 +237,17 @@ describe('区文件 POI 对话/发现文案双表化（W-D2 切片21）', () => 
     ]);
   });
 
-  it('新键不孤儿：56 个新键都在 8 个文件里被 t() 引用', () => {
+  it('新键不孤儿：62 个新键都在 8 个文件里被 t() 引用', () => {
     const 新键 = [...new Set(Object.values(ZONE_POI_COPY).flat())]
       .filter((k) => typeof k === 'string' && (k.startsWith('zone_dlg_') || k.startsWith('zone_disc_')));
-    expect(新键.length, '新键数对不上 —— 切片范围变了？').toBe(56);
+    // 56 是切片21 的原始范围；后加区的 6 个 zone_dlg_* 让总数变成 62（发现键复用 echo_* 不计入）。
+    expect(新键.length, '新键数对不上 —— 切片范围变了？').toBe(62);
     const 源码 = ZONE_FILES.map((rel) => readFileSync(join(process.cwd(), rel), 'utf8')).join('\n');
     const 没人用 = 新键.filter((k) => !源码.includes("t('" + k + "')"));
     expect(没人用, '这些新键建了却没人引用（死键）').toEqual([]);
   });
 
-  it('键数腿：56 个新键的文案在两表里最多两个键（全局规矩的本地复查）', () => {
+  it('键数腿：62 个新键的文案在两表里最多两个键（全局规矩的本地复查）', () => {
     const 新键 = [...new Set(Object.values(ZONE_POI_COPY).flat())]
       .filter((k) => typeof k === 'string' && (k.startsWith('zone_dlg_') || k.startsWith('zone_disc_')));
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {

@@ -2969,6 +2969,18 @@ After the Rift Lord falls, the old dungeons return with a random layout for the 
   zone_hook_gloom_journal: 'Where the Duskfall Echo answers. Shadows walk faster than men, and the Keywarden opens its eyes in the Mist Crypt.',
   zone_hook_radiant_toast: 'Radiant Sanctuary: gilded ranks form in the light and bells press down on the open field. The Radiant Dawn Hall dome cuts dawn into a single beam.',
   zone_hook_radiant_journal: 'Where the Radiant Afterglow answers. In the Radiant Dawn Hall the Keywarden lifts the Hub Key, and the shards behind the door run hot.',
+  zone_poi_gloom_lamproad_label: 'End of the Lamproad',
+  zone_dlg_gloom_lamproad_text: 'A lantern stands at the fog shore and never looks back.\n\nNo footprints under it — whoever walked this road left their name at the last stop.',
+  zone_poi_gloom_newknot_label: 'Wishing Tree',
+  zone_dlg_gloom_newknot_text: 'Cloth strips are knotted layer over layer; every knot is something someone never finished saying.\n\nThe tree has never granted a wish, yet the queue grows longer every year.',
+  zone_poi_radiant_mirrorpool_label: 'Mirror Pool at the Gate',
+  zone_dlg_radiant_mirrorpool_text: 'The crimson gate is mirrored in the pool at your feet.\n\nThose who pass never look back at their own shadow — the armor inside it has been waiting a long time.',
+  zone_poi_radiant_bellfounder_label: 'Vine-Choked Foundry',
+  zone_dlg_radiant_bellfounder_text: 'Deep in the sanctuary lies a foundry swallowed by vines.\n\nThe last hanging bell was not cast — it was pulled from the teeth of the bishop before.',
+  zone_poi_abyss_bonegate_label: 'Deep Maw Bone Gate',
+  zone_dlg_abyss_bonegate_text: 'Two giant bones cross into a gate, salt wind pouring through the seam.\n\nThe reef has swallowed its share of bones — only those who walk through learn what lies beyond.',
+  zone_poi_abyss_saltmarch_label: 'Salt Pillar March',
+  zone_dlg_abyss_saltmarch_text: 'Salt pillars stand one after another toward the horizon.\n\nEvery first frost they gain another finger\'s width — the road they walk is older than bone.',
 
   // Dungeon entry lines and stats (W-D2 slice 16c)
   dungeon_enter_ruin_crypt: 'Ruins Maze: the stone walls remember every footstep.',

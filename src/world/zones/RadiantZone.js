@@ -93,6 +93,30 @@ export class RadiantZone extends BaseZone {
       },
       { id: 'radiant-altar', color: 0xffee00 }
     );
+    // 回声设定里「门前镜潭」「铸铃匠」此前只在图鉴里有描述、圣域里没有落脚点——
+    // 本区原先连一个 discovery 都没有（探索密度补到与旧区同档）。
+    this.addPOI(
+      { x: -65, y: 0, z: 45 },
+      'zone_poi_radiant_mirrorpool_label',
+      () => {
+        window.dispatchEvent(new CustomEvent('discovery', {
+          detail: { id: 'radiant-mirrorpool', title: t('echo_radiant_mirrorpool_title'), text: t('echo_radiant_mirrorpool_desc') },
+        }));
+        this.dialog.show(t('zone_poi_radiant_mirrorpool_label'), t('zone_dlg_radiant_mirrorpool_text'));
+      },
+      { id: 'radiant-mirrorpool', color: 0xcc4466 }
+    );
+    this.addPOI(
+      { x: 70, y: 0, z: -35 },
+      'zone_poi_radiant_bellfounder_label',
+      () => {
+        window.dispatchEvent(new CustomEvent('discovery', {
+          detail: { id: 'radiant-bellfounder', title: t('echo_radiant_bellfounder_title'), text: t('echo_radiant_bellfounder_desc') },
+        }));
+        this.dialog.show(t('zone_poi_radiant_bellfounder_label'), t('zone_dlg_radiant_bellfounder_text'));
+      },
+      { id: 'radiant-bellfounder', color: 0xd9c27a }
+    );
   }
 
   buildOuterWilds() {

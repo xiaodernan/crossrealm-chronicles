@@ -2967,6 +2967,18 @@ export const STRINGS_ZH = Object.freeze({
   zone_hook_gloom_journal: '薄暮回响之地。影子走得比人快，守钥者在迷雾墓穴里睁眼。',
   zone_hook_radiant_toast: '辉煌圣域：金甲在光里列队，钟声压过旷野。晨曦圣殿的穹顶把晨光切成一束。',
   zone_hook_radiant_journal: '辉煌残响之地。晨曦圣殿的守钥者举起枢纽之钥，门后的碎片在发烫。',
+  zone_poi_gloom_lamproad_label: '灯路尽头',
+  zone_dlg_gloom_lamproad_text: '雾岸尽头立着一盏从不回头的提灯。\n\n灯下没有脚印——走这条路的人，都把名字留在了上一站。',
+  zone_poi_gloom_newknot_label: '结愿树',
+  zone_dlg_gloom_newknot_text: '麻布条一层层系满枝头，每一结都是一个人没说完的话。\n\n树从没许过愿，可系布的队伍一年比一年长。',
+  zone_poi_radiant_mirrorpool_label: '门前镜潭',
+  zone_dlg_radiant_mirrorpool_text: '绯红门影倒映在脚下的潭水里。\n\n穿过的人不回头看自己的影子——影子里那副铠甲，已经等了很久。',
+  zone_poi_radiant_bellfounder_label: '藤蔓铸造坊',
+  zone_dlg_radiant_bellfounder_text: '圣殿深处有一间被藤蔓吞掉的铸造坊。\n\n最后一口吊钟不是铸出来的，是从上一任主教的牙齿里剥出来的。',
+  zone_poi_abyss_bonegate_label: '深颚骨门',
+  zone_dlg_abyss_bonegate_text: '两根巨骨交叉成门，骨缝里灌着咸风。\n\n礁石吞惯了骨头——只有走过去的人，才知道门的另一边是什么。',
+  zone_poi_abyss_saltmarch_label: '盐柱长征',
+  zone_dlg_abyss_saltmarch_text: '盐柱一根接一根排向地平线。\n\n每年霜降，它们都会比去年多出一指——走的路比骨头还老。',
 
   // 副本进入语与统计行（W-D2 切片16c）
   dungeon_enter_ruin_crypt: '遗城迷宫：石墙记得每一次脚步声。',

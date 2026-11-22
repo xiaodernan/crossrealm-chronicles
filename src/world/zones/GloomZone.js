@@ -93,6 +93,30 @@ export class GloomZone extends BaseZone {
       },
       { id: 'gloom-moss', color: 0x6a6a8a }
     );
+    // 回声设定里「灯路尽头」「结愿的人」一直只在图鉴里有描述、林地里没有落脚点——
+    // 探索密度补到与旧区同档（此前本区只有 2 个 POI，旧区 6-7 个）。
+    this.addPOI(
+      { x: 65, y: 0, z: -45 },
+      'zone_poi_gloom_lamproad_label',
+      () => {
+        window.dispatchEvent(new CustomEvent('discovery', {
+          detail: { id: 'gloom-lamproad', title: t('echo_gloom_lamproad_title'), text: t('echo_gloom_lamproad_desc') },
+        }));
+        this.dialog.show(t('zone_poi_gloom_lamproad_label'), t('zone_dlg_gloom_lamproad_text'));
+      },
+      { id: 'gloom-lamproad', color: 0x8a8ab0 }
+    );
+    this.addPOI(
+      { x: 45, y: 0, z: -95 },
+      'zone_poi_gloom_newknot_label',
+      () => {
+        window.dispatchEvent(new CustomEvent('discovery', {
+          detail: { id: 'gloom-newknot', title: t('echo_gloom_newknot_title'), text: t('echo_gloom_newknot_desc') },
+        }));
+        this.dialog.show(t('zone_poi_gloom_newknot_label'), t('zone_dlg_gloom_newknot_text'));
+      },
+      { id: 'gloom-newknot', color: 0x9a8a7a }
+    );
   }
 
   buildOuterWilds() {

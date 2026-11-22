@@ -86,6 +86,12 @@ const POI_LABELS = {
   'fantasy-tower': ['zone_poi_fantasy_tower_label', '攀登守望塔', 'Climb the Watchtower'],
   'fantasy-boss-gate': ['zone_poi_fantasy_boss_gate_label', '进入 Boss 竞技场', 'Enter the Boss Arena'],
   'second-ember': ['zone_poi_second_ember_label', '守夜人的火盆', "The Warden's Brazier"],
+  'gloom-lamproad': ['zone_poi_gloom_lamproad_label', '灯路尽头', 'End of the Lamproad'],
+  'gloom-newknot': ['zone_poi_gloom_newknot_label', '结愿树', 'Wishing Tree'],
+  'radiant-mirrorpool': ['zone_poi_radiant_mirrorpool_label', '门前镜潭', 'Mirror Pool at the Gate'],
+  'radiant-bellfounder': ['zone_poi_radiant_bellfounder_label', '藤蔓铸造坊', 'Vine-Choked Foundry'],
+  'abyss-bonegate': ['zone_poi_abyss_bonegate_label', '深颚骨门', 'Deep Maw Bone Gate'],
+  'abyss-saltmarch': ['zone_poi_abyss_saltmarch_label', '盐柱长征', 'Salt Pillar March'],
   'magic-castle': ['zone_poi_magic_castle_label', '进入悬浮城堡', 'Enter the Floating Castle'],
   'ascend-founder-belfry': ['zone_poi_ascend_founder_belfry_label', '创始人的钟楼', 'The Founder Belfry'],
   'magic-forest': ['zone_poi_magic_forest_label', '禁林深处的低语', 'Whispers from the Forbidden Forest Depths'],
@@ -297,7 +303,8 @@ describe('POI 交互标签双表化（W-D2 切片19）', () => {
   it('本片新建的 POI 标签键：同一文案在两表里最多两个键（全局规矩的本地复查）', () => {
     const 新建 = [...new Set(Object.values(POI_LABELS).map(([键]) => 键))]
       .filter((k) => k.startsWith('zone_poi_') || k.startsWith('pop_poi_') || k === 'hub_poi_anchor_label');
-    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(30);
+    // 30 是切片19 的原始范围；后加区的 6 个 zone_poi_*_label 让总数变成 36。
+    expect(新建.length, '新建键数对不上 —— 切片范围变了？').toBe(36);
     for (const [名, table] of [['zh', STRINGS_ZH], ['en', STRINGS_EN]]) {
       const 计数 = new Map();
       for (const v of Object.values(table)) 计数.set(v, (计数.get(v) ?? 0) + 1);
