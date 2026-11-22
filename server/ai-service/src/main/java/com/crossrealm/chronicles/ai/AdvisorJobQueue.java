@@ -371,9 +371,17 @@ public class AdvisorJobQueue implements AdvisorQueue {
         }
     }
 
-    /** 给运维看的一眼读数：队列深度、背压拒绝、重试与死信。 */
+    /**
+     * 给运维看的一眼读数：队列深度、背压拒绝、重试与死信。
+     *
+     * <p>{@code backend}/{@code durable} 两格是**限制的可见化**：本实现是进程内队列，
+     * 重启即丢未完成任务。运维与管理员页看到 {@code durable=false} 就该知道
+     * 「这里的 depth 不是一个可以跨重启追的账」。换成 Redis Streams 背板时这两格随之改。
+     */
     public Map<String, Object> stats() {
         Map<String, Object> m = new LinkedHashMap<>();
+        m.put("backend", "memory");
+        m.put("durable", false);
         // 全部计数统一用 long：一半 int 一半 long 的读数，客户端按数值类型分支迟早踩坑。
         m.put("capacity", (long) inbox.size() + inbox.remainingCapacity());
         m.put("depth", (long) inbox.size());

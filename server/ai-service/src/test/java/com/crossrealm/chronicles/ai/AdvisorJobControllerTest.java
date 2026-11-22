@@ -257,4 +257,12 @@ class AdvisorJobControllerTest {
             throw new AssertionError("校验失败的请求不该进队列");
         }
     }
+
+    @Test
+    void stats标明后端与持久性_让重启丢任务的限制可见() throws Exception {
+        Map<String, Object> stats = queue.stats();
+        assertEquals("memory", stats.get("backend"), "进程内队列必须自报 backend=memory");
+        assertEquals(Boolean.FALSE, stats.get("durable"), "内存队列 durable 必须为 false——运维据此知道重启会丢未完成任务");
+    }
+
 }
