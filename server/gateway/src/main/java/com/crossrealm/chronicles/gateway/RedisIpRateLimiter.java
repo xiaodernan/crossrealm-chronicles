@@ -99,7 +99,16 @@ public class RedisIpRateLimiter implements IpRateLimiter {
                             .warn("[W-P10] Redis rate-limit backend error, allowing by default: {}", e.toString());
                     allowedTotal.incrementAndGet(); // fail-open 的放行也算放行
                     return Mono.just(true); // fail-open
-                });
+                })
+                // 空结果（脚本无返回 / 连接被提前关闭）也按 fail-open 处理：
+                // 若发出空 Mono，RateLimitByIpFilter 的 flatMap 会走空路径——既不限流也不转发，
+                // 请求静默完成（玩家收到空响应）。「拿不到答案」等价于「Redis 不可用」。
+                .switchIfEmpty(Mono.defer(() -> {
+                    org.slf4j.LoggerFactory.getLogger(RedisIpRateLimiter.class)
+                            .warn("[W-P10] Redis rate-limit backend returned empty result, allowing by default");
+                    allowedTotal.incrementAndGet();
+                    return Mono.just(true);
+                }));
     }
 
     /** retryAfterMs 对于 Redis 背板要在被限流那一次里才能精确算出；这里回填整个窗口（最坏等待期） */
