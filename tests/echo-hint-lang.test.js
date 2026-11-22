@@ -41,10 +41,13 @@ describe('回声提示 lang 取自当前语言（静态门禁）', () => {
     expect(getLanguage()).toBe('zh');
   });
 
-  it('PopCultureJournalTab 的 fetchEchoHint 调用带动态 lang，不写死 zh', () => {
+  it('PopCultureJournalTab 的 lang 由 getLanguage() 派生并传给 fetchEchoHint，不写死 zh', () => {
     const src = readFileSync('src/ui/PopCultureJournalTab.js', 'utf8');
-    const call = src.slice(src.indexOf('fetchEchoHint({'), src.indexOf('fetchEchoHint({') + 200);
-    expect(call).toMatch(/getLanguage\(\)/);
-    expect(call).not.toMatch(/lang:\s*'zh'/);
+    // lang 变量必须来自 getLanguage()（而非 document.lang 或写死）
+    expect(src).toMatch(/const lang = getLanguage\(\) === 'en' \? 'en' : 'zh'/);
+    // fetchEchoHint 调用必须传 lang
+    const call = src.slice(src.indexOf('fetchEchoHint({'), src.indexOf('fetchEchoHint({') + 160);
+    expect(call).toMatch(/lang\b/);
+    expect(src).not.toMatch(/lang:\s*'zh'/);
   });
 });

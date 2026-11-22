@@ -1,6 +1,7 @@
 import { FRANCHISE_LABELS, franchiseLabel } from '../content/franchises.js';
 import { keyText, refreshKeyText } from './keyHints.js';
 import { t, getLanguage } from '../engine/i18n.js';
+import { echoHintCache } from '../game/EchoHintCache.js';
 
 /** [J] 次元回声 Tab × 星轨顾问（Echo Lamp）——卡片上一枚 💡 按钮，请回声灯给一句暗示 */
 export class PopCultureJournalTab {
@@ -72,6 +73,18 @@ export class PopCultureJournalTab {
       return;
     }
 
+    // 缓存优先：每个回声每种语言只有固定一条提示，已问过就直接摊开——
+    // 刷新页面后也立刻可见，且不再为同一句烧一次 token（用户「珍惜 token」）。
+    const lang = getLanguage() === 'en' ? 'en' : 'zh';
+    const cached = echoHintCache.get(id, lang);
+    if (cached) {
+      hintEl.textContent = cached;
+      hintEl.hidden = false;
+      btn.classList.add('is-done');
+      btn.textContent = t('pc_echo_ask_done');
+      return;
+    }
+
     btn.disabled = true;
     btn.classList.add('is-pending');
     btn.textContent = t('pc_echo_ask_loading');
@@ -83,12 +96,11 @@ export class PopCultureJournalTab {
     const desc = keyText(t(entry.desc));
 
     try {
-      const res = await online.fetchEchoHint({
-        franchise, title, desc, lang: getLanguage() === 'en' ? 'en' : 'zh',
-      });
+      const res = await online.fetchEchoHint({ franchise, title, desc, lang });
       if (seq !== this._lastSeq) return;
       const data = res?.data ?? {};
       if (res?.ok && typeof data?.hint === 'string' && data.hint.trim()) {
+        echoHintCache.set(id, lang, data.hint);
         hintEl.textContent = data.hint;
         hintEl.hidden = false;
         btn.classList.add('is-done');
