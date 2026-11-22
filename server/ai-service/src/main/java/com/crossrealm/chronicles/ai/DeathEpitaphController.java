@@ -104,7 +104,8 @@ public class DeathEpitaphController {
         }
         Map<String, Object> initial = new LinkedHashMap<>();
         initial.put("lang", lang);
-        initial.put("bossName", request.bossName());
+        // 与 BossVerse/EchoHint 同一道防线：控制字符在入口抹掉，再拼进提示词。
+        initial.put("bossName", sanitize(request.bossName()));
         initial.put("attempts", request.attempts());
         StateGraph.CompiledInvoke result = graph.invoke(initial);
         Map<String, Object> state = result.state();
@@ -121,6 +122,11 @@ public class DeathEpitaphController {
             body.put("requestId", effectiveRequestId);
         }
         return body;
+    }
+
+    /** 控制字符（C0 + DEL）折成空格：它们会被拼进提示词，不是可显示的正文。 */
+    private static String sanitize(String in) {
+        return in.replaceAll("[\\x00-\\x1f\\x7f]", " ").trim();
     }
 
     @ExceptionHandler(AdvisorUnavailableException.class)

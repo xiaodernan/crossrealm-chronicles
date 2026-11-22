@@ -149,4 +149,20 @@ class DeathEpitaphControllerTest {
                         .content(body("", 3)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void Boss名里的控制字符会被抹掉再进提示词() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("再来一次", "gpt-6-sol", false, false, 10L));
+        mvc.perform(post("/api/ai/death-epitaph").contentType(MediaType.APPLICATION_JSON)
+                        .content(body("\u0000影\u001b界\u0007守护者", 3)))
+                .andExpect(status().isOk());
+
+        var userCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(client).complete(anyString(), userCaptor.capture(), anyString());
+        org.junit.jupiter.api.Assertions.assertFalse(userCaptor.getValue().contains("\u001b"), "ESC 必须被抹掉");
+        org.junit.jupiter.api.Assertions.assertFalse(userCaptor.getValue().contains("\u0007"), "BEL 必须被抹掉");
+        org.junit.jupiter.api.Assertions.assertTrue(userCaptor.getValue().contains("守护者"));
+    }
+
 }
