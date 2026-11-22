@@ -84,7 +84,8 @@ export class StateGraph {
         const state = { ...initialState };
         const trace = [];
         let cursor = self.entry;
-        for (let step = 0; step < 1024; step++) {
+        const MAX_STEPS = 1024;
+        for (let step = 0; step < MAX_STEPS; step++) {
           if (!cursor) break;
           const fn = self.nodes.get(cursor);
           if (!fn) throw new Error(`StateGraph.invoke: 未注册节点 "${cursor}"`);
@@ -96,6 +97,14 @@ export class StateGraph {
           const next = edgeFn(state);
           if (!next || next === cursor) break;
           cursor = next;
+        }
+        // 跑到这里只有两种可能：正常 break（到达终点/自环/无出边），或**跑满上限**。
+        // 跑满说明条件边成环（A→B→A 这类）——静默截断会把"写错的图"伪装成"跑完了"，
+        // 玩家侧表现为卡顿、trace 里 1024 条同样的节点。这里 fail-fast 点名环。
+        if (trace.length >= MAX_STEPS) {
+          throw new Error(
+            `StateGraph.invoke: 超过 ${MAX_STEPS} 步仍未到达终点——条件边可能存在环（最后节点 "${cursor}"）`,
+          );
         }
         return { state, trace };
       },

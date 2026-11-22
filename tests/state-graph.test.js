@@ -91,3 +91,40 @@ describe('StateGraph — 编译失败面', () => {
     expect(state.chose).toBe('c');
   });
 });
+
+describe('StateGraph 环与步数上限（静默失败防线）', () => {
+  const twoCycle = () => {
+    const g = new StateGraph();
+    g.addNode('a', (s) => ({ n: (s.n ?? 0) + 1 }));
+    g.addNode('b', () => ({}));
+    g.addConditionalEdges('a', () => 'b');
+    g.addConditionalEdges('b', () => 'a');
+    g.setEntryPoint('a');
+    return g.compile();
+  };
+
+  it('条件边成环（A→B→A）不得静默跑满 1024 步——必须报错', () => {
+    const graph = twoCycle();
+    expect(() => graph.invoke({})).toThrow(/环|循环|步数|上限|1024/);
+  });
+
+  it('自环（A→A）仍按既有约定立即停止（不误伤）', () => {
+    const g = new StateGraph();
+    g.addNode('a', (s) => ({ n: (s.n ?? 0) + 1 }));
+    g.addConditionalEdges('a', () => 'a');
+    g.setEntryPoint('a');
+    const { trace } = g.compile().invoke({});
+    expect(trace).toHaveLength(1);
+  });
+
+  it('正常长链（< 1024 步）不受影响', () => {
+    const g = new StateGraph();
+    const N = 50;
+    for (let i = 0; i < N; i++) g.addNode(`n${i}`, (s) => ({ c: (s.c ?? 0) + 1 }));
+    for (let i = 0; i < N - 1; i++) g.addEdge(`n${i}`, `n${i + 1}`);
+    g.setEntryPoint('n0');
+    const { trace, state } = g.compile().invoke({});
+    expect(trace).toHaveLength(N);
+    expect(state.c).toBe(N);
+  });
+});
