@@ -97,9 +97,12 @@ public class EchoHintController {
         if (!LANGS.contains(lang)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid-lang");
         }
+        // 与 BossVerse/KindleLetter 同一道防线：控制字符在入口抹掉，再拼进提示词。
+        String franchise = sanitize(request.franchise());
+        String title = sanitize(request.title());
+        String desc = request.desc() == null ? "" : sanitize(request.desc());
         String user = "母题：%s\n回声名：%s\n回声描述：%s\n\n请给一个游戏内的暗示（只回一句）。"
-                .formatted(request.franchise(), request.title(),
-                        request.desc() == null || request.desc().isBlank() ? "（无描述）" : request.desc());
+                .formatted(franchise, title, desc.isBlank() ? "（无描述）" : desc);
 
         Map<String, Object> initial = new LinkedHashMap<>();
         initial.put("lang", lang);
@@ -121,6 +124,11 @@ public class EchoHintController {
             body.put("requestId", effectiveRequestId);
         }
         return body;
+    }
+
+    /** 控制字符（C0 + DEL）折成空格：它们会被拼进提示词，不是可显示的正文。 */
+    private static String sanitize(String in) {
+        return in.replaceAll("[\\x00-\\x1f\\x7f]", " ").trim();
     }
 
     @ExceptionHandler(AdvisorUnavailableException.class)

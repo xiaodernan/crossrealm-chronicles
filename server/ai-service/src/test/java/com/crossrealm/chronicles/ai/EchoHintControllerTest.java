@@ -124,4 +124,22 @@ class EchoHintControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+
+    @Test
+    void 输入里的控制字符会被抹掉再进提示词() throws Exception {
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenReturn(new LlmClient.Answer("星河在那之前已经有人走过", "gpt-6-sol", false, false, 10L));
+        mvc.perform(post("/api/ai/echo-hint").contentType(MediaType.APPLICATION_JSON)
+                        .content(body("\u0000星际\u001b位面", "引擎\u0007低鸣", "\r\n星光照进舷窗")))
+                .andExpect(status().isOk());
+
+        var captor = org.mockito.ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(client).complete(anyString(), captor.capture(), anyString());
+        org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("\u001b"), "ESC 控制字符必须被抹掉");
+        org.junit.jupiter.api.Assertions.assertFalse(captor.getValue().contains("\u0007"), "BEL 控制字符必须被抹掉");
+        // 控制字符被折成空格 ⇒ 原文「星际␛位面」变成「星际 位面」，不再连续
+        org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("星际"));
+        org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("位面"));
+    }
+
 }
