@@ -15,6 +15,7 @@ import { objectiveTitle } from '../content/objectives.js';
 import { attachDraggable, attachCollapsible } from './DraggablePanel.js';
 import { applyBarTheme } from './barTheme.js';
 import { lockIntelOf, INTEL_KILLS } from './lockIntel.js';
+import { setText, setStyle, setHidden } from './domWrite.js';
 /** 区域横幅计时分组（连播两个区域时先撤旧的） */
 const ZONE_BANNER_TAG = 'hud-zone-banner';
 /** 连击终结闪光的分组 */
@@ -27,6 +28,8 @@ const VICTORY_TAG = 'hud-boss-victory';
 const BOSS_BAR_FLASH_TAG = 'hud-boss-bar-phase-flash';
 /** 本类全部监听的所有权标识：dispose() 按它一次性注销（B44 剩余半区） */
 const EVENT_TAG = 'ui/HUD';
+/** 八方位（罗盘用；常量提到模块层 —— 逐帧热路径上不重新造数组） */
+const COMPASS_DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
 /**
  * 小地图在没有布局可量时的退路边长（jsdom / 离屏渲染）。
@@ -1132,8 +1135,8 @@ buildHUD() {
    * 擦掉 —— 否则放开锁定之后，屏幕上还挂着刚才那只的弱点。
    */
   _renderLockInfo(lock) {
-    const nameEl = document.getElementById('lock-name');
-    const intelEl = document.getElementById('lock-intel');
+    const nameEl = this._el('lock-name');
+    const intelEl = this._el('lock-intel');
     if (!nameEl || !intelEl) return;
     const target = lock?.alive ? lock : null;
     const entry = target ? this.game.bestiary?.entryOf?.(target.type) : null;
@@ -1171,11 +1174,27 @@ buildHUD() {
     }
   }
 
+  /**
+   * 逐帧格子的**查一次记住**（W-Y5 切片1）。
+   *
+   * `update()` 改前每帧十来次 `getElementById`：这些格子只在构造那一次 `innerHTML`
+   * 里出现，之后**不会被整块重绘**（会重绘的是日志/区域面板，它们不在这张名单上）。
+   * 查不到也记住 null —— 热路径上不再每帧回头问一次文档。
+   */
+  _el(id) {
+    let 表 = this._hotEls;
+    if (!表) { 表 = new Map(); this._hotEls = 表; }
+    if (表.has(id)) return 表.get(id);
+    const el = document.getElementById(id);
+    表.set(id, el);
+    return el;
+  }
+
   update(_dt) {
     this.updateInputDevice();
     const p = this.game.player.position;
-    document.getElementById('coord-display').textContent = `X: ${p.x.toFixed(0)} · Z: ${p.z.toFixed(0)}`;
-    document.getElementById('stamina-bar').style.width = `${this.stamina}%`;
+    setText(this._el('coord-display'), `X: ${p.x.toFixed(0)} · Z: ${p.z.toFixed(0)}`);
+    setStyle(this._el('stamina-bar'), 'width', `${this.stamina}%`);
 
     // 试炼读数：0.2 秒一刷（倒计时只显示到秒，逐帧刷 DOM 没有意义且会顶掉布局）
     this._trialTick = (this._trialTick || 0) + _dt;
@@ -1192,50 +1211,48 @@ buildHUD() {
     }
 
     const combat = this.game.player.combat;
-    const rollEl = document.getElementById('roll-cd-bar');
+    const rollEl = this._el('roll-cd-bar');
     if (combat && rollEl) {
       const ratio = combat.rollCooldownTimer / combat.rollCooldown;
-      rollEl.style.width = `${Math.min(1, ratio) * 100}%`;
-      rollEl.style.opacity = ratio > 0.02 ? '0.6' : '0';
+      // 保留一位小数：浮点尾巴每帧都在变，但画到屏幕上没有区别 —— 写短一点、写少一点
+      setStyle(rollEl, 'width', `${(Math.min(1, ratio) * 100).toFixed(1)}%`);
+      setStyle(rollEl, 'opacity', ratio > 0.02 ? '0.6' : '0');
     }
 
     const lock = this.game.player.combat?.lockTarget;
-    const lockEl = document.getElementById('lock-target');
-    const lockRow = document.getElementById('lock-row');
+    const lockEl = this._el('lock-target');
+    const lockRow = this._el('lock-row');
     if (lock?.alive) {
-      lockEl.classList.remove('hidden');
-      lockRow.classList.remove('hidden');
-      document.getElementById('posture-bar').style.width = `${(lock.posture / lock.maxPosture) * 100}%`;
+      setHidden(lockEl, false);
+      setHidden(lockRow, false);
+      setStyle(this._el('posture-bar'), 'width', `${(lock.posture / lock.maxPosture) * 100}%`);
     } else {
-      lockEl.classList.add('hidden');
-      lockRow.classList.add('hidden');
+      setHidden(lockEl, true);
+      setHidden(lockRow, true);
     }
     this._renderLockInfo(lock);
 
     this.frameCount = (this.frameCount || 0) + 1;
     this.fpsTimer = (this.fpsTimer || 0) + _dt;
     if (this.fpsTimer >= 0.5) {
-      document.getElementById('fps-display').textContent = `${Math.round(this.frameCount / this.fpsTimer)} FPS`;
+      setText(this._el('fps-display'), `${Math.round(this.frameCount / this.fpsTimer)} FPS`);
       this.frameCount = 0;
       this.fpsTimer = 0;
     }
 
     const yaw = this.game.player.yaw;
-    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
     const idx = Math.round(((-yaw + Math.PI) / (Math.PI * 2)) * 8) % 8;
-    document.getElementById('compass').textContent = dirs[(idx + 8) % 8];
+    setText(this._el('compass'), COMPASS_DIRS[(idx + 8) % 8]);
 
-    const guideEl = document.getElementById('quest-guide');
-    const arrowEl = document.getElementById('quest-arrow');
+    const guideEl = this._el('quest-guide');
+    const arrowEl = this._el('quest-arrow');
     const customMk = this.game.mapMarkers?.getActive?.();
     const wp = this.game.quests.getQuestWaypoint();
     const nav = customMk ? { x: customMk.x, z: customMk.z, label: `◆ ${customMk.label}` } : wp;
     const dirText = customMk
       ? this._dirTo(p.x, p.z, customMk.x, customMk.z, customMk.label)
       : this.game.quests.getQuestDirectionText(p.x, p.z);
-    if (guideEl) {
-      guideEl.textContent = dirText || this.game.quests.getAssistantHint();
-    }
+    setText(guideEl, dirText || this.game.quests.getAssistantHint());
     if (arrowEl && nav) {
       const dx = nav.x - p.x;
       const dz = nav.z - p.z;
@@ -1249,15 +1266,15 @@ buildHUD() {
         const ny = -Math.cos(angle);
         const tx = cx + nx * (Math.min(window.innerWidth, window.innerHeight) * 0.42);
         const ty = cy + ny * (Math.min(window.innerWidth, window.innerHeight) * 0.38);
-        arrowEl.classList.remove('hidden');
-        arrowEl.style.left = `${Math.max(margin, Math.min(window.innerWidth - margin, tx))}px`;
-        arrowEl.style.top = `${Math.max(margin, Math.min(window.innerHeight - margin, ty))}px`;
-        arrowEl.style.transform = `translate(-50%,-50%) rotate(${angle}rad)`;
+        setHidden(arrowEl, false);
+        setStyle(arrowEl, 'left', `${Math.max(margin, Math.min(window.innerWidth - margin, tx))}px`);
+        setStyle(arrowEl, 'top', `${Math.max(margin, Math.min(window.innerHeight - margin, ty))}px`);
+        setStyle(arrowEl, 'transform', `translate(-50%,-50%) rotate(${angle}rad)`);
       } else {
-        arrowEl.classList.add('hidden');
+        setHidden(arrowEl, true);
       }
     } else if (arrowEl) {
-      arrowEl.classList.add('hidden');
+      setHidden(arrowEl, true);
     }
 
     this.maybeDrawMinimap();
