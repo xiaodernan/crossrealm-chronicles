@@ -48,6 +48,21 @@ public final class PromptPrefixes {
      */
     public static final String FROZEN_CANON_CONTEXT_V5 = read("/ai/oracle-v5-frozen-prefix.txt");
 
+    /**
+     * 四条短车道的共享纪律前缀（W-Z516）：`ai/llm-npc-discipline-prefix.txt`。
+     *
+     * <p>为什么单独一份而不是挂 v3：死笔一行 / 余响 / 残章 / 回声这四处每次只产一句话，
+     * 把它们挂到 ≈15K token 的 v3 大前缀上，等于把单条未缓存输入从一两百字抬到一千七百字级，
+     * 换来的命中率对一段风味文案毫无用处——**命中率高不等于花得对**。
+     * 这份前缀只装四处本来就共用的东西（世界事实表 + 共同纪律 + 交稿自查 + 称谓表），
+     * 体量刚好过上游 prompt-cache 的 1024 token 下界，于是四处共享同一页、互相抬命中率。
+     *
+     * <p>纪律从四个 controller 各自的内联文案里收上来，从此只有一处真源：
+     * 改一句"不许安慰玩家"，四条车道同时改口；从前要改四处，而历史上只改过一两处。
+     * 任何删改只准「追加」不准「替换」——替换等于把已暖的页踢掉（与上面各版同一条纪律）。
+     */
+    public static final String FROZEN_NPC_DISCIPLINE = read("/ai/llm-npc-discipline-prefix.txt");
+
     private static String read(String path) {
         try (InputStream in = PromptPrefixes.class.getResourceAsStream(path)) {
             if (in == null) throw new IllegalStateException("missing " + path + " — run scripts/build-llm-prefix.mjs");

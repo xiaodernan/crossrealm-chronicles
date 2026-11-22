@@ -35,10 +35,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class EchoHintController {
 
     /** 45 字、不出戏、不解释的先知口吻。 */
-    static final String ECHO_SYSTEM =
-            "你是《跨界纪元》里的回声先知。每次只回一句短句（zh 中文不超过 45 字，en 英文不超过 60 字符）。"
-                    + "用玩家报告的语言写这一句。像在说梦话一样点出这一枚回声的来历或去处；"
-                    + "不解释、不加 Emoji、不出戏、不复述玩家给的原句。";
+    static final String ECHO_SYSTEM = PromptPrefixes.FROZEN_NPC_DISCIPLINE + "\n\n"
+            + "本车道契约 · 回声先知 · 次元回声\n"
+            + "像在说梦话一样，点出这一枚回声的来历或去处——梦境的松散可以有，事实的捏造不可以有。\n"
+            + "长度档：zh 不超过 45 字，en 不超过 60 字符。";
 
     /** 允许的语言白名单，与 KindleLetter / DeathEpitaph 同一套纪律。 */
     private static final java.util.Set<String> LANGS = java.util.Set.of("zh", "en");

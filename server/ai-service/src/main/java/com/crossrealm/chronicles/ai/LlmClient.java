@@ -104,8 +104,10 @@ public class LlmClient {
     /** Public namespace of cache keys — one key per distinct workload; routing hint only, no player data in keys. */
     public static final class CacheKeys {
         private CacheKeys() {}
-        /** 共享前缀缓存桶（v2 大前缀，同 canon family）：direct Codex shape. */
-        public static final String CANON = "crossrealm-canon-v1";
+        // W-Z516：这里原本还有一条 `CANON = "crossrealm-canon-v1"`。它唯一的用处是那个
+        // 两参 `complete(system, user)` 兼容出口，而那个出口全仓零调用者——桶名留着，
+        // system 却由调用方随手给，等于一条**没法登记**的车道：名册门量不到它有多长、
+        // 挂没挂前缀。删掉比登记诚实。
         /** Ember 答火（W-Z316 烬灯回信/烬火答 + Classifier）：同一前缀，两条后端 lane 下共用一桶. */
         public static final String EMBER = "crossrealm-ember-v2";
         /** BossVerse Boss 余火回响. */
@@ -131,6 +133,14 @@ public class LlmClient {
         /** 残章 · 跨章落笔一行（W-Z343）. */
         public static final String CHAPTER_CODA = "crossrealm-chapter-coda-v1";
     }
+
+    /**
+     * 大前缀车道（W-Z490）：开机默认**不热身**这几页——v4≈4.7 万 / v5≈8.3 万 token，
+     * 常暖太烧 token，且都是低频功能（首问冷一次、次问即热）。
+     * 「不暖」不等于「不注册」：它们照样出现在 {@link #laneSystems()} 里，门禁照样量得到。
+     */
+    private static final java.util.Set<String> DEEP_LANES = java.util.Set.of(
+            CacheKeys.ARBITER, CacheKeys.ORACLE, CacheKeys.ORACLE_DEEP);
 
     private final AiProperties props;
 
@@ -227,17 +237,14 @@ public class LlmClient {
     }
 
     /**
-     * 启动热身（W-Z345 · Codex 同型）：上游语料缓存按「冻结前缀 + cache-key」铺页，
-     * 新进程的头 ~2-3 个真请求注定是冷的——空头直接 warm 一次把页面铺满。
-     * 每个 lane 发一小个请求（user 只写「warmup」），把 prefix 缓存铺满；
-     * 同键/同 digest 的 warmup 请求只在哪里 fetch一次——warm 不占 digest 行，
-     * 不把真实用户第一问凭空缓存成同一句话。任何失败完全静默。
+     * 车道 → 系统提示的名册（W-Z516）。
+     *
+     * <p>注册与热身是两件事：默认不暖 v4/v5，不等于这两条车道可以没人知道它们的 system 挂在
+     * 哪一份前缀上。从前这张表只活在 {@link #warmupUpstream()} 的方法体里，于是"哪条车道没挂
+     * 冻结前缀"这件事在全仓**没有一处可问**——门禁 {@code LlmLanePrefixRosterTest} 就是来问它的。
+     * 键允许是 {@code 桶名:子道}（Ember 六条子道共用一个桶），桶名由 {@link #laneBucketOf} 取冒号左侧。
      */
-    public void warmupUpstream() {
-        if (!isConfigured()) {
-            LOG.info("llm.warmup.skip (no api key configured)");
-            return;
-        }
+    Map<String, String> laneSystems() {
         Map<String, String> lanes = new LinkedHashMap<>();
         lanes.put(CacheKeys.ADVISOR, systemPrompt);
         lanes.put(CacheKeys.EMBER + ":classifier", EmberReplyController.CLASSIFIER_SYSTEM);
@@ -249,18 +256,39 @@ public class LlmClient {
         lanes.put(CacheKeys.BOSSVERSE, BossVerseController.BOSS_VERSE_SYSTEM);
         lanes.put(CacheKeys.ECHO, EchoHintController.ECHO_SYSTEM);
         lanes.put(CacheKeys.GUIDE, com.crossrealm.chronicles.ai.GuideController.GUIDE_SYSTEM);
-        // W-Z490：大前缀车道（v4≈4.7万 / v5≈8.3万 tok）默认不热身——开机常暖这几页太烧 token，
-        // 且都是低频功能（首问冷一次、次问即热）。只有显式 open 才铺。廉价 v3 车道照常暖。
-        if (props.isWarmupDeepLanes()) {
-            lanes.put(CacheKeys.ARBITER, ArbiterController.ARBITER_SYSTEM);
-            lanes.put(CacheKeys.ORACLE, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystem());
-            lanes.put(CacheKeys.ORACLE_DEEP, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystemDeep());
-        }
+        lanes.put(CacheKeys.ARBITER, ArbiterController.ARBITER_SYSTEM);
+        lanes.put(CacheKeys.ORACLE, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystem());
+        lanes.put(CacheKeys.ORACLE_DEEP, com.crossrealm.chronicles.ai.lore.LoreOracleService.loadOracleSystemDeep());
         lanes.put(CacheKeys.DEATH_EPITAPH, DeathEpitaphController.DEATH_SYSTEM);
         lanes.put(CacheKeys.CHAPTER_CODA, ChapterCodaController.CODA_SYSTEM);
+        return lanes;
+    }
+
+    /** 桶名：`crossrealm-ember-v2:lore` 与 `crossrealm-ember-v2` 属于同一份上游缓存页。 */
+    static String laneBucketOf(String laneName) {
+        int colon = laneName.indexOf(':');
+        return colon < 0 ? laneName : laneName.substring(0, colon);
+    }
+
+    /**
+     * 启动热身（W-Z345 · Codex 同型）：上游语料缓存按「冻结前缀 + cache-key」铺页，
+     * 新进程的头 ~2-3 个真请求注定是冷的——空头直接 warm 一次把页面铺满。
+     * 每个 lane 发一小个请求（user 只写「warmup」），把 prefix 缓存铺满；
+     * 同键/同 digest 的 warmup 请求只在哪里 fetch一次——warm 不占 digest 行，
+     * 不把真实用户第一问凭空缓存成同一句话。任何失败完全静默。
+     */
+    public void warmupUpstream() {
+        if (!isConfigured()) {
+            LOG.info("llm.warmup.skip (no api key configured)");
+            return;
+        }
+        Map<String, String> lanes = laneSystems();
         for (Map.Entry<String, String> e : lanes.entrySet()) {
             String laneName = e.getKey();
-            String laneKey = laneName.contains(":") ? laneName.substring(0, laneName.indexOf(':')) : laneName;
+            String laneKey = laneBucketOf(laneName);
+            // W-Z490：大前缀车道（v4≈4.7万 / v5≈8.3万 tok）默认不热身——开机常暖这几页太烧 token，
+            // 且都是低频功能（首问冷一次、次问即热）。只有显式 open 才铺。廉价 v3 车道照常暖。
+            if (!props.isWarmupDeepLanes() && DEEP_LANES.contains(laneKey)) continue;
             long start = System.currentTimeMillis();
             try {
                 Answer a = complete(e.getValue(), "warmup", laneKey);
@@ -272,10 +300,6 @@ public class LlmClient {
         LOG.info("llm.warmup.done");
     }
 
-    /** 文本兼容（旧的调用点）—— 落在 canon assuredly、body-shape 不变。 */
-    public Answer complete(String system, String user) {
-        return complete(system, user, CacheKeys.CANON);
-    }
     private final LlmTransport transport;
     private final ObjectMapper mapper;
     private final ResponseCache cache;

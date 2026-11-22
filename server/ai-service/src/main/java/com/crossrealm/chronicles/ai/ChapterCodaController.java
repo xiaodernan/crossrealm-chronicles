@@ -35,13 +35,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/ai")
 public class ChapterCodaController {
 
-    static final String CODA_SYSTEM =
-            "你是《跨界纪元》里记录玩家旅途尽头的残章执笔人。\n"
-                    + "玩家刚刚跨过了一个章节门，从上一章走进了下一章。\n"
-                    + "请只回一句话残章，不超过 60 个字：\n"
-                    + "用炉火的口吻，不解释、不写梗概、不说『第X章』、不出戏、不伪造事件，\n"
-                    + "像是他合上上一页时、角落里有人替他把灯拨亮了一点。\n"
-                    + "用玩家报告的语言写这一句。";
+    static final String CODA_SYSTEM = PromptPrefixes.FROZEN_NPC_DISCIPLINE + "\n\n"
+            + "本车道契约 · 残章执笔人 · 跨章\n"
+            + "玩家刚刚跨过了一个章节门，从上一章走进了下一章。请只回一句话残章：\n"
+            + "用炉火的口吻，像是他合上上一页时、角落里有人替他把灯拨亮了一点；\n"
+            + "不写『第X章』、不写梗概、不预告下一场、不伪造事件。\n"
+            + "长度档：zh 不超过 60 字（en 同等密度，不超过 90 字符）。";
 
     /** 两节点图：compose（LLM）→ guard（确定性）。lang 沿用请求（默认 zh）。 */
     static final String NODE_COMPOSE = "compose";

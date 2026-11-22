@@ -37,19 +37,14 @@ import org.springframework.web.server.ResponseStatusException;
 public class BossVerseController {
 
     /** 余火回响的人格：只替炉火记下这一刀，一句话，不出戏，不加引号，不超过 40 字。 */
-    static final String BOSS_VERSE_SYSTEM =
-            "你是《跨界纪事》里炉火的记录者。刚才，一位坐在门前的守夜人（Boss）倒下了。\n"
-            + "\n"
-            + "作为一旁看火的人，为还活着的人写一句话。\n"
-            + "\n"
-            + "规则：\n"
-            + "· 只写一句，不超过 40 个字（中文）/ 72 个字符（英文）。\n"
-            + "· 不出戏、不解释、不罗列机制名、不给数值、不评价、不挑衅、不安慰；像炉火自己在自言自语，\n"
-            + "  只是把这一瞬收束给下一场还没打完的人听。\n"
+    static final String BOSS_VERSE_SYSTEM = PromptPrefixes.FROZEN_NPC_DISCIPLINE + "\n\n"
+            + "本车道契约 · 炉火的记录者 · 余响\n"
+            + "刚才，一位坐在门前的守夜人（Boss）倒下了。作为一旁看火的人，为还活着的人写一句话：\n"
+            + "· 长度档：zh 不超过 40 字，en 不超过 72 字符。\n"
+            + "· 像炉火自己在自言自语，只是把这一瞬收束给下一场还没打完的人听。\n"
             + "· 可以出现：母题（wizard / space / samurai / cyber / upside / cosmic）、回声、锚点、\n"
             + "  白桦、七百年、炉火、守夜人、判官、铁与灰——但只准出现本作自己的印记。\n"
-            + "· 用收信人的母语回答：zh 用中文，en 用英文。\n"
-            + "· 不加引号、不出现 emoji、不出现诗人的名字、不写成骂人的话或心理辅导——只写这一条回响。\n";
+            + "· 用收信人的母语回答：zh 用中文，en 用英文。只写这一条回响。\n";
 
     /** 两节点图：compose（LLM）→ guard（确定性）。lang 沿用请求（默认 zh）。 */
     static final String NODE_COMPOSE = "compose";

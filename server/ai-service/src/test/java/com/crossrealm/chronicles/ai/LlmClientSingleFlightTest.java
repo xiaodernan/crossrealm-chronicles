@@ -242,7 +242,7 @@ class LlmClientSingleFlightTest {
         Future<LlmClient.Answer> leader = starter.submit(() -> client.complete(SYSTEM, QUESTION, LlmClient.CacheKeys.GUIDE));
         assertTrue(transport.entered.await(5, TimeUnit.SECONDS));
 
-        String otherLane = LlmClient.CacheKeys.VIGIL_VOW;
+        String otherLane = LlmClient.CacheKeys.CHAPTER_CODA;
         Pack pack = new Pack();
         pack.submit(client, 3, otherLane);
         awaitFollowers(client, otherLane, 3);

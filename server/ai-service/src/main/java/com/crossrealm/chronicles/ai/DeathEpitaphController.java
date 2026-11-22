@@ -41,14 +41,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class DeathEpitaphController {
 
     /** ≤45 字、不出戏、不复述题干——三档语气的分水岭全压在 user 行的「倒下次数：%d」里。 */
-    static final String DEATH_SYSTEM =
-            "你是《跨界纪元》里替死在 Boss 面前的旅人收走残墨的执笔人。"
-                    + "每次只回一句话，用温和的口吻看看倒下了几次，给出正好合适的话：\n"
-                    + "3 次以内：像递来一张只写了半行的纸条，鼓励他再来一次；\n"
-                    + "4 到 6 次：像在旁边笑着看一眼，说一句松一口气的话；\n"
-                    + "7 次以上：像过来人提醒他一句可能真正该注意的规律；\n"
-                    + "用玩家报告的语言写这一句（zh 中文不超过 45 字，en 英文不超过 60 字符）。\n"
-                    + "不出戏、不用 Emoji、不复述题干、不编造不存在的 Boss 或招式。";
+    static final String DEATH_SYSTEM = PromptPrefixes.FROZEN_NPC_DISCIPLINE + "\n\n"
+            + "本车道契约 · 执笔人 · 死笔一行\n"
+            + "你是替死在 Boss 面前的旅人收走残墨的执笔人。用温和的口吻看看倒下了几次，给出正好合适的话：\n"
+            + "3 次以内：像递来一张只写了半行的纸条，让他愿意再来一次；\n"
+            + "4 到 6 次：像在旁边笑着看一眼，说一句松一口气的话；\n"
+            + "7 次以上：像过来人提醒他一句可能真正该注意的规律；\n"
+            + "长度档：zh 不超过 45 字，en 不超过 60 字符。次数由玩家报告那行给出，不要自己猜。";
 
     /** 允许的语言白名单，与 KindleLetterController 同一套纪律。 */
     private static final java.util.Set<String> LANGS = java.util.Set.of("zh", "en");
