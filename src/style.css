@@ -2099,7 +2099,11 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
 
 .quest-panel {
   position: absolute;
-  top: 90px;
+  /* 顶栏高度不是常数：en + 大档界面文字下 `.hud-stats` 会换到第二行（1280×800 实测底 117.4px）。
+     写死 90px 时第二行直接压进任务面板 27.4px —— 走查桌面档抓到的真实重叠。
+     `--hud-top-h` 由 HUD 的 ResizeObserver 写真实高度；56px 是 jsdom / 首帧的退路
+     （16 + 56 + 18 = 原 90px，退路与原布局逐像素一致）。 */
+  top: calc(16px + env(safe-area-inset-top, 0px) + var(--hud-top-h, 56px) + 18px);
   left: 24px;
   width: 260px;
   padding: 12px 16px;

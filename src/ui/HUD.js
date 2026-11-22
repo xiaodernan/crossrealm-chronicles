@@ -223,6 +223,7 @@ export class HUD {
     // 帧循环里只改 width 不碰颜色（见 ui/barTheme.js 文件头）。
     this.refreshBarColors();
     this.buildHUD();
+    this._bindHudTopMetrics();
     this._renderSeasonPill();   // 开机就落一枚；之后靠 update() 的 0.5s 节流续刷
     this.setupListeners();
     this.bindJournalEntry();
@@ -769,8 +770,40 @@ buildHUD() {
     }
   }
 
+  /**
+   * 顶栏真实高度 → `--hud-top-h`（修桌面档重叠）。
+   *
+   * `.quest-panel` 的 top 此前写死 90px，隐含假设是"顶栏恒为一行"。1280×800 + en 大档下
+   * `.hud-stats` 换到第二行，顶栏底到 117.4px，任务面板被压进 27.4px（`npm run walkthrough:ui`
+   * 桌面档实测）。这里把**量出来的高度**写进 CSS 变量，换行到几行都不会再互相遮盖；
+   * 语言 / 文字档 / 视口变化都会改变高度，所以用 ResizeObserver 而不是只量一次。
+   *
+   * 退路：jsdom 与首帧没有布局，`getBoundingClientRect().height` 是 0 或不有限 ——
+   * 这时什么都不写，CSS 的 `var(--hud-top-h, 56px)` 兜住（与原 90px 逐像素一致）。
+   */
+  _bindHudTopMetrics() {
+    this.hudTop = this.container.querySelector('.hud-top');
+    this._hudTopH = null;
+    this._syncHudTopHeight();
+    if (typeof ResizeObserver === 'function' && this.hudTop) {
+      this._hudTopObserver = new ResizeObserver(() => this._syncHudTopHeight());
+      this._hudTopObserver.observe(this.hudTop);
+    }
+  }
+
+  /** 量一次顶栏高度并落到根节点；同值不重写（ResizeObserver 会因自身写入再触发一轮） */
+  _syncHudTopHeight() {
+    const h = this.hudTop?.getBoundingClientRect?.().height;
+    if (!Number.isFinite(h) || h <= 0) return;
+    if (this._hudTopH === h) return;
+    this._hudTopH = h;
+    document.documentElement?.style?.setProperty?.('--hud-top-h', `${h.toFixed(1)}px`);
+  }
+
   /** 系统销毁：三本账一起结 —— 观测量退订、事件监听注销、未到期的调度任务撤销 */
   dispose() {
+    this._hudTopObserver?.disconnect?.();
+    this._hudTopObserver = null;
     for (const off of this._offs ?? []) off();
     this._offs = [];
     offAll(EVENT_TAG);

@@ -120,4 +120,16 @@ describe('ui-walkthrough：接线腿（脚本真调判据、语法真过得了�
     const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
     expect(pkg.scripts['walkthrough:ui']).toBe('node scripts/ui-walkthrough.mjs');
   });
+
+  /**
+   * 桌面两档不许被删（2026-11-22 补）。
+   *
+   * 此前只量 360 / 390 / 768 —— 全是窄屏。玩家绝大多数时间在桌面，而"字体重叠 /
+   * 实体块互相遮盖"这类投诉恰好落在**没量过的视口**：扩到 1280×800 后第一次跑就抓到
+   * en 大档下顶栏第二行压进 quest-panel 27.4px。删掉这两档 = 把那类回归重新放回盲区。
+   */
+  it('视口覆盖含桌面两档（1280×800 / 1920×1080）', () => {
+    expect(源文).toMatch(/\{\s*w:\s*1280,\s*h:\s*800\s*\}/);
+    expect(源文).toMatch(/\{\s*w:\s*1920,\s*h:\s*1080\s*\}/);
+  });
 });
