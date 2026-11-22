@@ -1,6 +1,6 @@
 import { CHAPTER_INTROS, ZONE_STORY_HOOKS, KEYWARDEN_CLEARED } from './LoreFragments.js';
 import { scheduler } from '../engine/Scheduler.js';
-import { t } from '../engine/i18n.js';
+import { t, getLanguage } from '../engine/i18n.js';
 import { keyText } from '../ui/keyHints.js';
 
 import { on, offAll } from '../engine/EventBus.js';
@@ -43,8 +43,10 @@ export class StoryDirector {
     if (!(online?.enabled?.())) return;
     if (typeof online.askChapterCoda !== 'function') return;
     const key = `chapter-coda-${chapter}`;
-    const lang = (typeof document !== 'undefined'
-      && (document.documentElement?.lang ?? '').toLowerCase().startsWith('en')) ? 'en' : 'zh';
+    // 残章是每章一次性内容：日志里已有（并随存档持久化）就不再请求。
+    // `addSilent` 内部的 id 去重只挡重复写入，挡不住已经发出去的请求与 token。
+    if (this.game.storyJournal?.has?.(key)) return;
+    const lang = getLanguage() === 'en' ? 'en' : 'zh';
     online
       .askChapterCoda({ chapter, prev: prev ?? 1, lang })
       .then((res) => {
