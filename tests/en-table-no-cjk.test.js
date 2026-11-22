@@ -44,3 +44,44 @@ describe('英文表纯净（英文模式无中文）', () => {
     expect(withHan.length).toBeGreaterThan(1000);
   });
 });
+
+describe('中文表纯净（中文模式无漏翻的英文短语）', () => {
+  /**
+   * 刻意保留英文原文的键 —— **每一条都要写明理由**，且必须已被
+   * `zone-poi-dialogue-i18n.test.js` 的「钉文案腿」逐字钉住（= 有人显式审阅过）。
+   * 目前只有一条：五维碑文引用的是《星际穿越》原句，碑文保留原文是设计，
+   * 不是漏翻；同族其它 discovery 文案都是中文。
+   */
+  const KEEP_ENGLISH = new Set(['zone_disc_void_tablet_text']);
+
+  it('中文表里没有「无中文 + 两个以上英文单词」的值（占位符模板与显式白名单除外）', () => {
+    const bad = values(ZH).filter(([k, v]) => {
+      if (KEEP_ENGLISH.has(k)) return false;
+      if (/[\u4e00-\u9fa5]/.test(v)) return false;
+      if (v.includes('${') || v.includes('{')) return false; // 占位符模板：真实值由调用方给
+      const words = v.match(/[A-Za-z][A-Za-z'-]+/g) ?? [];
+      return words.length >= 2;
+    });
+    expect(bad.map(([k, v]) => `${k}=${v}`), `疑似漏翻：${bad.map(([k]) => k).join(', ')}`).toEqual([]);
+  });
+
+  it('白名单不许悄悄膨胀：每条都必须有理由且被钉文案腿覆盖', () => {
+    expect([...KEEP_ENGLISH]).toEqual(['zone_disc_void_tablet_text']);
+    const pinFile = readFileSync('tests/zone-poi-dialogue-i18n.test.js', 'utf8');
+    for (const k of KEEP_ENGLISH) {
+      expect(pinFile.includes(k), `白名单键 ${k} 必须在钉文案腿里被显式审阅过`).toBe(true);
+    }
+  });
+
+  it('反向控制：判据真能抓到多词英文（把一条塞进样本必须被识别）', () => {
+    const sample = [['demo_key', 'Hidden Treasures'], ['ok_key', '隐藏的宝藏'], ['ph_key', '${a} · ${b}']];
+    const bad = sample.filter(([k, v]) => {
+      if (KEEP_ENGLISH.has(k)) return false;
+      if (/[\u4e00-\u9fa5]/.test(v)) return false;
+      if (v.includes('${') || v.includes('{')) return false;
+      const words = v.match(/[A-Za-z][A-Za-z'-]+/g) ?? [];
+      return words.length >= 2;
+    });
+    expect(bad.map(([k]) => k)).toEqual(['demo_key']);
+  });
+});
