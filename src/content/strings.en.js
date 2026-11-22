@@ -2963,6 +2963,10 @@ After the Rift Lord falls, the old dungeons return with a random layout for the 
   zone_hook_void_journal: 'Timeline rifts and five-dimensional steles meet here. The true ending of Ch4 is hidden within.',
   zone_hook_abyss_toast: 'Chaos Border: lightning falls without warning. The chaos core pulses to the northwest.',
   zone_hook_abyss_journal: 'The endgame of Ch5. The Rift Lord\'s arena is the last judgment.',
+  zone_hook_gloom_toast: 'Gloomy Woodland: fog knits a road beneath the trees and the lamps go out one by one. The Mist Crypt lies deep in the wood.',
+  zone_hook_gloom_journal: 'Where the Duskfall Echo answers. Shadows walk faster than men, and the Keywarden opens its eyes in the Mist Crypt.',
+  zone_hook_radiant_toast: 'Radiant Sanctuary: gilded ranks form in the light and bells press down on the open field. The Radiant Dawn Hall dome cuts dawn into a single beam.',
+  zone_hook_radiant_journal: 'Where the Radiant Afterglow answers. In the Radiant Dawn Hall the Keywarden lifts the Hub Key, and the shards behind the door run hot.',
 
   // Dungeon entry lines and stats (W-D2 slice 16c)
   dungeon_enter_ruin_crypt: 'Ruins Maze: the stone walls remember every footstep.',

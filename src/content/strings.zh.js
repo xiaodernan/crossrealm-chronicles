@@ -2961,6 +2961,10 @@ export const STRINGS_ZH = Object.freeze({
   zone_hook_void_journal: '时线裂隙与五维碑文在此交汇。Ch4 的真结局隐藏于此。',
   zone_hook_abyss_toast: '混沌边境：闪电无预警劈落。混沌之核在西北脉动。',
   zone_hook_abyss_journal: 'Ch5 终局之地。裂隙领主的竞技场是最后的审判。',
+  zone_hook_gloom_toast: '幽暗林地：雾在树下结成路，灯一盏盏灭下去。迷雾墓穴在林地深处。',
+  zone_hook_gloom_journal: '薄暮回响之地。影子走得比人快，守钥者在迷雾墓穴里睁眼。',
+  zone_hook_radiant_toast: '辉煌圣域：金甲在光里列队，钟声压过旷野。晨曦圣殿的穹顶把晨光切成一束。',
+  zone_hook_radiant_journal: '辉煌残响之地。晨曦圣殿的守钥者举起枢纽之钥，门后的碎片在发烫。',
 
   // 副本进入语与统计行（W-D2 切片16c）
   dungeon_enter_ruin_crypt: '遗城迷宫：石墙记得每一次脚步声。',

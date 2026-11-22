@@ -108,6 +108,16 @@ export const ZONE_STORY_HOOKS = {
     toast: 'zone_hook_abyss_toast',
     journal: 'zone_hook_abyss_journal',
   },
+  // W-B9 的两座新区域（幽暗林地 / 辉煌圣域）在切片16c 建表时漏了 —— 玩家第一次走进去
+  // 既没有区域介绍 toast、也没有日志条目，是「看着很大、里面很空」的最直接一处。
+  gloom: {
+    toast: 'zone_hook_gloom_toast',
+    journal: 'zone_hook_gloom_journal',
+  },
+  radiant: {
+    toast: 'zone_hook_radiant_toast',
+    journal: 'zone_hook_radiant_journal',
+  },
 };
 
 
