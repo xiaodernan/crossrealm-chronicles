@@ -51,6 +51,46 @@ public class LlmClient {
     private final java.util.concurrent.atomic.AtomicLong counterPrompt = new java.util.concurrent.atomic.AtomicLong();
     private final java.util.concurrent.atomic.AtomicLong counterCached = new java.util.concurrent.atomic.AtomicLong();
 
+    /**
+     * 分车道上游读数（W-Z514）。
+     *
+     * <p>为什么要有这一本：`/api/ai/health` 从前只交回一个**进程级累计** `hitRatio`，
+     * 于是"星轨顾问这一条掉了缓存"这种话在这台服务里**说不出口**——既不能证实也不能证伪，
+     * 只能靠人肉翻日志里的 `ai.upstream.usage` 一行行对。13 条 lane 共用一个总账时，
+     * 一条大前缀车道的冷启动会把另一条的漂亮数字冲淡，谁变差了看不出来。
+     *
+     * <p>桶名只允许是 `CacheKeys` 那个公开命名空间的字符串（`crossrealm-*-vN`），
+     * 里面**永远不进**玩家输入、问题、回答正文。
+     */
+    private final java.util.concurrent.ConcurrentHashMap<String, LaneCounter> laneUsage =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * 同键合流（single-flight，W-Z514）的在飞表：digest → 那一位正在跑的结果。
+     *
+     * <p>`ResponseCache` 的 `get` / `put` 各自 `synchronized`，所以**同一问句同时到 N 次时，
+     * 每一次都在"还没人写进来"的那一刻 miss**，N 次上游付费换一个字符串。这里让第一位去上游，
+     * 其余跟着同一份结果走；按 digest 分桶——digest 相同就意味着答案可交换。
+     */
+    private final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.CompletableFuture<Answer>> inFlight =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** 一条 lane 的累计读数（全是计数，没有内容）。 */
+    private static final class LaneCounter {
+        final java.util.concurrent.atomic.AtomicLong prompt = new java.util.concurrent.atomic.AtomicLong();
+        final java.util.concurrent.atomic.AtomicLong cached = new java.util.concurrent.atomic.AtomicLong();
+        final java.util.concurrent.atomic.AtomicLong calls = new java.util.concurrent.atomic.AtomicLong();
+        final java.util.concurrent.atomic.AtomicLong localHits = new java.util.concurrent.atomic.AtomicLong();
+        final java.util.concurrent.atomic.AtomicLong localMisses = new java.util.concurrent.atomic.AtomicLong();
+        final java.util.concurrent.atomic.AtomicLong coalesced = new java.util.concurrent.atomic.AtomicLong();
+    }
+
+    /** 取（并按需建）某条 lane 的计数桶；null 桶名归进 `default`，不静默丢账。 */
+    private LaneCounter lane(String cacheKey) {
+        String name = (cacheKey == null || cacheKey.isBlank()) ? "default" : cacheKey;
+        return laneUsage.computeIfAbsent(name, k -> new LaneCounter());
+    }
+
 
     /** cached=本地摘要缓存命中；upstreamCached=上游 prompt-cache 命中（前缀复用）。 */
     public record Answer(String answer, String model, boolean cached, boolean upstreamCached, long latencyMs) {}
@@ -101,9 +141,46 @@ public class LlmClient {
         String cached = cache.get(key);
         if (cached != null) {
             incrementCacheHitMeter();
+            lane(cacheKey).localHits.incrementAndGet();
             return new Answer(cached, props.getModel(), true, false, 0L);
         }
+        lane(cacheKey).localMisses.incrementAndGet();
 
+        // 同键合流（W-Z514）：第一位去上游，其余跟着同一份结果走（为什么要走这一层见 `inFlight` 的注释）。
+        java.util.concurrent.CompletableFuture<Answer> leader = new java.util.concurrent.CompletableFuture<>();
+        java.util.concurrent.CompletableFuture<Answer> running = inFlight.putIfAbsent(key, leader);
+        if (running != null) {
+            lane(cacheKey).coalesced.incrementAndGet();
+            try {
+                return running.join();
+            } catch (java.util.concurrent.CompletionException e) {
+                throw unwrapCoalesced(e);
+            }
+        }
+        try {
+            Answer answer = completeUncached(system, user, cacheKey, key);
+            leader.complete(answer);
+            return answer;
+        } catch (RuntimeException e) {
+            leader.completeExceptionally(e);
+            throw e;
+        } finally {
+            // 只摘自己那一份：`remove(key, leader)` 而不是 `remove(key)` —— 慢一位收尾时
+            // 不许把后来者刚挂上去的那一份一起删掉（那等于把合流表自己弄丢一次）。
+            inFlight.remove(key, leader);
+        }
+    }
+
+    /** 合流者看到的异常必须与领队看到的那一枚同类型，否则 503 兜底与熔断记账会跟着包装层走形。 */
+    private static RuntimeException unwrapCoalesced(java.util.concurrent.CompletionException e) {
+        Throwable cause = e.getCause();
+        if (cause instanceof RuntimeException re) return re;
+        if (cause == null) return e;
+        return new AdvisorUnavailableException("coalesced-" + cause.getClass().getSimpleName());
+    }
+
+    /** 摘要缓存与合流之后的那一段：熔断 → 选择性重试 → 解析 → 记账。 */
+    private Answer completeUncached(String system, String user, String cacheKey, String key) {
         if (!breaker.allow()) throw new AdvisorUnavailableException("circuit-open");
 
         String body = requestBody(system, user, cacheKey);
@@ -115,6 +192,8 @@ public class LlmClient {
             try {
                 if (attempt > 0) backoff(attempt);
                 upstreamCalls.incrementAndGet();
+                LaneCounter counter = lane(cacheKey);
+                counter.calls.incrementAndGet();
                 LlmTransport.UpstreamReply reply = transport.postJsonWithUsage(endpoint(), props.getApiKey(), body, props.getTimeout());
                 String raw = reply.rawJson();
                 String answer = extractAnswer(raw);
@@ -126,6 +205,8 @@ public class LlmClient {
                     String ratio = (cachedTokens != null && promptTokens != null && promptTokens > 0)
                             ? String.format("%.1f%%", cachedTokens * 100.0 / promptTokens) : "n/a";
                     boolean upstreamCached = cachedTokens != null && cachedTokens > 0;
+                    if (promptTokens != null) counter.prompt.addAndGet(promptTokens);
+                    if (cachedTokens != null) counter.cached.addAndGet(cachedTokens);
                     LOG.info("ai.upstream.usage cache={} model={} prompt={} completion={} cached={} cachedRatio={} upstreamCached={}",
                             cacheKey, props.getModel(), promptTokens, lastUpstreamUsage.completionTokens(),
                             cachedTokens, ratio, upstreamCached);
@@ -316,6 +397,28 @@ public class LlmClient {
         upstream.put("cachedTokens", cachedSum);
         double ratio = promptSum > 0 ? Math.round(((double) cachedSum / promptSum) * 10000.0) / 10000.0 : 0.0;
         upstream.put("hitRatio", ratio);
+        // 分车道一本账（W-Z514）：桶名是 `CacheKeys` 那个公开命名空间，值全是计数 ——
+        // 没有玩家输入、没有问题、没有回答正文，与上面那条白名单纪律同源。
+        // 排序输出：这条快照给人读、也给门禁读，字典序稳定才比较得动。
+        Map<String, Map<String, Object>> byLane = new LinkedHashMap<>();
+        for (String laneName : laneUsage.keySet().stream().sorted().toList()) {
+            LaneCounter c = laneUsage.get(laneName);
+            if (c == null) continue;
+            long lanePrompt = c.prompt.get();
+            long laneCached = c.cached.get();
+            Map<String, Object> one = new LinkedHashMap<>();
+            one.put("calls", c.calls.get());
+            one.put("promptTokens", lanePrompt);
+            one.put("cachedTokens", laneCached);
+            one.put("hitRatio", lanePrompt > 0 ? Math.round(((double) laneCached / lanePrompt) * 10000.0) / 10000.0 : 0.0);
+            one.put("localHits", c.localHits.get());
+            one.put("localMisses", c.localMisses.get());
+            one.put("coalesced", c.coalesced.get());
+            byLane.put(laneName, one);
+        }
+        upstream.put("byLane", byLane);
+        // 在飞合流桶的大小是"此刻有多少问句正被多位一起等"的瞬时读数；它是观察量，不是判据。
+        upstream.put("inFlight", inFlight.size());
         if (lastUpstreamUsage != null) {
             Map<String, Object> last = new LinkedHashMap<>();
             if (lastUpstreamUsage.promptTokens() != null) last.put("promptTokens", lastUpstreamUsage.promptTokens());
