@@ -1,52 +1,52 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-22T08:30:30.918Z",
+  "generated_at": "2026-11-23T04:22:32.292Z",
   "branch": "main",
-  "head": "8b9de9d",
-  "total_commits": 2485,
-  "pushed_at": "2026-11-22T16:29:55+08:00",
+  "head": "da6bd6b",
+  "total_commits": 2502,
+  "pushed_at": "2026-11-23T12:19:48+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
     {
-      "short": "8b9de9d",
-      "at": "2026-11-22T16:29:55+08:00",
-      "subject": "docs(plan): W-Y5 切片1 回填 —— B170/B171 台账关闭 + 看板 + §9 两条教训"
+      "short": "da6bd6b",
+      "at": "2026-11-23T12:19:48+08:00",
+      "subject": "feat(ai): W-Z519 LLM master switch - zero upstream calls when API closed, 503 graceful degradation"
     },
     {
-      "short": "b64cc06",
-      "at": "2026-11-22T16:25:48+08:00",
-      "subject": "test(material): 补登记 e3b9469 六处 POI 标记色裸字面量（残留层 106→112 / 82→88，HEAD 红转绿）"
+      "short": "d2f8445",
+      "at": "2026-11-23T12:10:02+08:00",
+      "subject": "feat(admin): W-Z518 实测卡来源对账尺 + 断链门禁（扫描器 json/js 前缀漏洞修复）"
     },
     {
-      "short": "9c43ced",
-      "at": "2026-11-22T16:24:39+08:00",
-      "subject": "perf(ui): HUD 逐帧 DOM 写入去重 —— 静立帧 0 写 0 查（W-Y5 切片1）"
+      "short": "2977c88",
+      "at": "2026-11-23T04:43:30+08:00",
+      "subject": "docs(plan): W-Z517 回填 —— B177 台账关闭 + §9 两条教训"
     },
     {
-      "short": "c4e671d",
-      "at": "2026-11-22T15:32:18+08:00",
-      "subject": "docs(plan): W-Y7 切片2 回填 —— B169 台账关闭 + 看板 + §9 两条教训"
+      "short": "0d93ab2",
+      "at": "2026-11-23T04:40:57+08:00",
+      "subject": "fix(admin): 合成面板被安了别人的种子 + 三条真事件在管理页不可见（W-Z517）"
     },
     {
-      "short": "daff519",
-      "at": "2026-11-22T15:29:53+08:00",
-      "subject": "fix(ui): 桌面视口走查 + 顶栏高度自适应 —— 修 B169（任务面板被顶栏压住）"
+      "short": "cf71fe2",
+      "at": "2026-11-23T04:25:00+08:00",
+      "subject": "docs(plan): W-Z516 回填 —— B176 台账关闭 + CI 两段压测读数入账"
     }
   ],
-  "tracked_files": 1960,
-  "test_files": 503,
-  "i18n_keys": 3294,
+  "tracked_files": 1971,
+  "test_files": 508,
+  "i18n_keys": 3296,
   "lore_sources": 611,
   "novel_chapters_zh": 290,
   "novel_chapters_en": 290,
-  "milestone": "W-?",
+  "milestone": "W-Z519",
   "milestone_full": "卷 290 · 六百年守火线（290 / 290 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 611 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：290 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3294-keys",
+    "bilingual-3296-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",
