@@ -6,6 +6,11 @@
 # 代理由 ai-service 进程解析自己的环境占位符；配置中心不保存代理凭据。
 ai-service:
   proxy-url: "${LLM_PROXY_URL:}"
+  # 跨实例合流是显式 opt-in；本地/CI 无 Redis 时保持进程内 single-flight。
+  flight:
+    backend: "${AI_FLIGHT_BACKEND:in-memory}"
+    poll-ms: "${AI_FLIGHT_POLL_MS:50}"
+    terminal-ttl-ms: "${AI_FLIGHT_TERMINAL_TTL_MS:5000}"
   model: gpt-6.2-sol
   timeout: 20s
   # 只重试「超时 / 429 / 5xx」；401/400 是请求本身错，重试只会把钱再花一遍

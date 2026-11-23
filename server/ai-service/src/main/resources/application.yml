@@ -19,6 +19,11 @@ ai-service:
   model: "${LLM_MODEL:gpt-6.2-sol}"
   api-key: "${LLM_API_KEY:}"
   proxy-url: "${LLM_PROXY_URL:}"
+  # 跨实例同键合流默认关闭；开启后只共享完整终态，Redis 故障自动回退本地合流。
+  flight:
+    backend: "${AI_FLIGHT_BACKEND:in-memory}"
+    poll-ms: "${AI_FLIGHT_POLL_MS:50}"
+    terminal-ttl-ms: "${AI_FLIGHT_TERMINAL_TTL_MS:5000}"
   # W-Z519：LLM 总开关。API 因成本/用量关闭 → 默认 false，上游一个字节都不打；
   # 所有 LLM 端点返回 503 (advisor-unavailable)，前端按既有确定性降级路径回退。
   # 密钥本就只从环境变量进，这里关掉开关不需要删密钥；日后 API 恢复设 LLM_ENABLED=true 即可。

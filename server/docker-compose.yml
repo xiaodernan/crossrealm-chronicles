@@ -152,8 +152,14 @@ services:
       # 容器 DNS 解析不了 api.aizzz.xyz 时，指向宿主机上的 Clash 混合端口（如 http://host.docker.internal:7897）。
       # 传入后 ai-service 只让「唯一出口」HttpLlmTransport 走 CONNECT 隧道；进程内 HTTP 不受影响。
       LLM_PROXY_URL: ${LLM_PROXY_URL:-}
+      # 可选跨实例合流；compose 栈负责 Redis 启动顺序，只有 backend=redis 才实际访问。
+      AI_FLIGHT_BACKEND: ${AI_FLIGHT_BACKEND:-in-memory}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
     depends_on:
       config:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8083/actuator/health || exit 1"]

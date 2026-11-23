@@ -12,6 +12,7 @@ import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -173,7 +174,7 @@ public class LlmClient {
             }
         }
         try {
-            Answer answer = completeUncached(system, user, cacheKey, key, maxTokens);
+            Answer answer = completeAcrossInstances(system, user, cacheKey, key, maxTokens);
             leader.complete(answer);
             return answer;
         } catch (RuntimeException e) {
@@ -184,6 +185,85 @@ public class LlmClient {
             // 不许把后来者刚挂上去的那一份一起删掉（那等于把合流表自己弄丢一次）。
             inFlight.remove(key, leader);
         }
+    }
+
+    /** Redis 领队返回真实上游元数据；跟随者只回报自己的等待耗时。 */
+    private Answer completeAcrossInstances(String system, String user, String cacheKey,
+                                           String key, int maxTokens) {
+        long leaseMs = flightLeaseMs();
+        Optional<LlmFlightCoordinator.Claim> flight;
+        try {
+            flight = flights.claim(key, leaseMs);
+        } catch (RuntimeException e) {
+            LOG.warn("ai.flight.claim-unavailable falling-back-local ({})", e.getClass().getSimpleName());
+            flight = Optional.empty();
+        }
+        if (flight.isPresent()) {
+            LlmFlightCoordinator.Claim claim = flight.get();
+            try {
+                Answer answer = completeUncached(system, user, cacheKey, key, maxTokens);
+                publishTerminal(claim, answer, null);
+                return answer;
+            } catch (RuntimeException e) {
+                if (e instanceof AdvisorUnavailableException unavailable
+                        && "circuit-open".equals(unavailable.getReason())) {
+                    releaseFlight(claim);
+                } else {
+                    String reason = e instanceof AdvisorUnavailableException advisor
+                            ? advisor.getReason() : "coalesced-" + e.getClass().getSimpleName();
+                    publishTerminal(claim, null, reason);
+                }
+                throw e;
+            }
+        }
+
+        long started = System.nanoTime();
+        try {
+            LlmFlightCoordinator.Result shared = flights.await(key,
+                    System.currentTimeMillis() + leaseMs + 1_000L);
+            if (shared == null) return completeUncached(system, user, cacheKey, key, maxTokens);
+            lane(cacheKey).coalesced.incrementAndGet();
+            if (shared.failureReason() != null) throw new AdvisorUnavailableException(shared.failureReason());
+            cache.put(key, shared.answer());
+            return new Answer(shared.answer(), props.getModel(), true,
+                    shared.upstreamCached(), elapsedMs(started));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new AdvisorUnavailableException("interrupted");
+        } catch (RuntimeException e) {
+            if (e instanceof AdvisorUnavailableException) throw e;
+            LOG.warn("ai.flight.await-unavailable falling-back-local ({})", e.getClass().getSimpleName());
+            return completeUncached(system, user, cacheKey, key, maxTokens);
+        }
+    }
+
+    private void publishTerminal(LlmFlightCoordinator.Claim claim, Answer answer, String failureReason) {
+        try {
+            boolean published = answer == null ? flights.fail(claim, failureReason) : flights.complete(claim, answer);
+            if (!published) LOG.info("ai.flight.stale-owner terminal-not-published");
+        } catch (RuntimeException e) {
+            LOG.warn("ai.flight.publish-unavailable local-result-kept ({})", e.getClass().getSimpleName());
+        }
+    }
+
+    private void releaseFlight(LlmFlightCoordinator.Claim claim) {
+        try {
+            flights.release(claim);
+        } catch (RuntimeException e) {
+            LOG.warn("ai.flight.release-unavailable lease-will-expire ({})", e.getClass().getSimpleName());
+        }
+    }
+
+    /** 租约覆盖全部 HTTP 超时、指数退避上限与少量调度余量；不是跨 HTTP 持有的锁。 */
+    private long flightLeaseMs() {
+        long timeoutMs = Math.max(1L, props.getTimeout().toMillis());
+        int retries = Math.max(0, props.getMaxRetries());
+        long baseMs = Math.max(1L, props.getRetryBaseMs());
+        long backoffMs = 0L;
+        for (int attempt = 1; attempt <= retries; attempt++) {
+            backoffMs += (baseMs << Math.min(attempt - 1, 4)) * 5L / 4L;
+        }
+        return Math.max(1_000L, timeoutMs * (retries + 1L) + backoffMs + 2_000L);
     }
 
     /** 合流者看到的异常必须与领队看到的那一枚同类型，否则 503 兜底与熔断记账会跟着包装层走形。 */
@@ -311,6 +391,7 @@ public class LlmClient {
     }
 
     private final LlmTransport transport;
+    private final LlmFlightCoordinator flights;
     private final ObjectMapper mapper;
     private final ResponseCache cache;
     private final LlmCircuitBreaker breaker;
@@ -325,24 +406,32 @@ public class LlmClient {
      */
     @org.springframework.beans.factory.annotation.Autowired
     public LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper,
-                     io.micrometer.core.instrument.MeterRegistry meterRegistry) {
+                     io.micrometer.core.instrument.MeterRegistry meterRegistry,
+                     LlmFlightCoordinator flights) {
         this(props, transport, mapper,
                 new ResponseCache(props.getCacheMaxEntries(), props.getCacheTtlSeconds() * 1000L),
                 new LlmCircuitBreaker(props.getBreakerThreshold(), props.getBreakerCooldownMs()),
-                loadSystemPrompt(),
-                meterRegistry);
+                loadSystemPrompt(), meterRegistry, flights);
+    }
+
+    /** 兼容旧调用点（不带跨实例协调器）。 */
+    public LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper,
+                     io.micrometer.core.instrument.MeterRegistry meterRegistry) {
+        this(props, transport, mapper, meterRegistry, LlmFlightCoordinator.DISABLED);
     }
 
     /** 兼容旧调用点（不带 MeterRegistry）。 */
     public LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper) {
-        this(props, transport, mapper, null);
+        this(props, transport, mapper, (io.micrometer.core.instrument.MeterRegistry) null);
     }
 
     private LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper,
                       ResponseCache cache, LlmCircuitBreaker breaker, String systemPrompt,
-                      io.micrometer.core.instrument.MeterRegistry meterRegistry) {
+                      io.micrometer.core.instrument.MeterRegistry meterRegistry,
+                      LlmFlightCoordinator flights) {
         this.props = props;
         this.transport = transport;
+        this.flights = flights;
         this.mapper = mapper;
         this.cache = cache;
         this.breaker = breaker;
@@ -364,13 +453,7 @@ public class LlmClient {
     /** 包内可见：测试注入可控的缓存 / 熔断器（含假时钟），不必真的 sleep 15 秒。 */
     LlmClient(AiProperties props, LlmTransport transport, ObjectMapper mapper,
               ResponseCache cache, LlmCircuitBreaker breaker, String systemPrompt) {
-        this.props = props;
-        this.transport = transport;
-        this.mapper = mapper;
-        this.cache = cache;
-        this.breaker = breaker;
-        this.systemPrompt = systemPrompt;
-        this.meterRegistry = null;
+        this(props, transport, mapper, cache, breaker, systemPrompt, null, LlmFlightCoordinator.DISABLED);
     }
 
     public Answer ask(String question, Map<String, Object> context) {
@@ -424,6 +507,7 @@ public class LlmClient {
         snapshot.put("llmEnabled", props.isLlmEnabled());
         snapshot.put("model", props.getModel());
         snapshot.put("transport", transport.health());
+        snapshot.put("flight", flights.health());
         snapshot.put("circuit", breaker.state().name());
         snapshot.put("cache", cache.stats());
         snapshot.put("upstreamCalls", upstreamCalls.get());

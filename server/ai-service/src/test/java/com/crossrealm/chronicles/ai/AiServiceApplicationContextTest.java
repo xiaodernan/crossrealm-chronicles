@@ -52,10 +52,14 @@ class AiServiceApplicationContextTest {
     @Autowired
     private ApplicationEventPublisher events;
 
+    @Autowired
+    private LlmFlightCoordinator flights;
+
     @Test
     void contextBootsAndWiresTheRealBeans() {
         org.junit.jupiter.api.Assertions.assertNotNull(aiController);
         org.junit.jupiter.api.Assertions.assertNotNull(echoHintController);
+        org.junit.jupiter.api.Assertions.assertSame(LlmFlightCoordinator.DISABLED, flights);
     }
 
     @Test
