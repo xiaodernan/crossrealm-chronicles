@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-23T04:53:16.200Z",
+  "generated_at": "2026-11-23T05:22:01.932Z",
   "branch": "main",
-  "head": "7e01b77",
-  "total_commits": 2505,
-  "pushed_at": "2026-11-23T12:41:34+08:00",
+  "head": "236ea52",
+  "total_commits": 2506,
+  "pushed_at": "2026-11-23T12:53:26+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "236ea52",
+      "at": "2026-11-23T12:53:26+08:00",
+      "subject": "chore(lint): zero-warning tree - remove 9 dead imports/vars and stale eslint disables"
+    },
     {
       "short": "7e01b77",
       "at": "2026-11-23T12:41:34+08:00",
@@ -26,11 +31,6 @@
       "short": "da6bd6b",
       "at": "2026-11-23T12:19:48+08:00",
       "subject": "feat(ai): W-Z519 LLM master switch - zero upstream calls when API closed, 503 graceful degradation"
-    },
-    {
-      "short": "d2f8445",
-      "at": "2026-11-23T12:10:02+08:00",
-      "subject": "feat(admin): W-Z518 实测卡来源对账尺 + 断链门禁（扫描器 json/js 前缀漏洞修复）"
     }
   ],
   "tracked_files": 1971,

@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { audit, cardRows } from '../scripts/admin-measured-audit.mjs';
 
 /**
  * 实测卡的来源账（W-Z518 · 2026-11-23）
  *
  * ## 这一门为什么存在
- * 炉边盘的 `#measuredPanel` 有 42 张 `meas_l*` 卡，标题都写着"实测"。今天扫出来的真数是：
+ * 炉边盘的 `#measuredPanel` 有 42 张 `meas_l*` 卡，标题都写着"实测"。W-Z518 首扫真数是：
  * **20 张点得出一个在场的来源文件，22 张点不出** —— 那 22 张上的数字，玩家和管理者都无从查起，
  * 只能相信当初写卡片的人没抄错。这正是需求九最怕的形状：一张看起来全是真数据的页面，
  * 实际上有一半的格子是**不可核对的真话**。
@@ -15,13 +14,68 @@ import { audit, cardRows } from '../scripts/admin-measured-audit.mjs';
  * ## 为什么是"名单只准变小"而不是"当场全红"
  * 一次把 22 张卡都补上来源是不诚实的快（每张都要回到它自己的产物去对字段），
  * 而把这条门设成"必须 0 张无来源"会让它上线第一天就红着被 @ts-ignore 掉。
- * 于是按本仓调色板残留钉板同一形状：**今天测到的 22 张逐条登记，新增一张就点名，
- * 少一张必须同时把名单改小**（名单变小而代码没改，说明扫描器坏了，也要红）。
+ * 于是按本仓调色板残留钉板同一形状：今天测到的 22 张逐条登记，新增一张就点名，
+ * 少一张必须同时把名单改小（名单变小而代码没改，说明扫描器坏了，也要红）。
  *
  * ## 断链比无来源更糟
  * 卡片指着一个**已经不存在**的产物文件，读的人会以为"这是可查的"。所以 `brokenRefs` 必须恒空，
  * 这一条不给名单。
+ *
+ * ## 尺子为何内联
+ * `scripts/admin-measured-audit.mjs` 是同一把尺的 CLI 版。这里把十几行扫描逻辑内联而不是
+ * `import` 那个 `.mjs`：CI 的 Vite 对 `scripts/` 下脚本的 SSR 变换曾在导入点报
+ * `Invalid or unexpected token`（本机复现不出）。判据自己拿住尺子，少一条环境依赖。
  */
+
+const ROOT = process.cwd();
+const SOURCE = new RegExp([
+  '(?:docs\\/admin\\/)?data\\/[A-Za-z0-9._\\-*]+\\.(?:json|md|txt|csv)',
+  'docs\\/[A-Za-z0-9._\\-/]+\\.(?:md|json|txt)',
+  'scripts\\/[A-Za-z0-9._\\-/]+\\.(?:mjs|cjs|json|ps1|py|js)',
+  'server\\/[A-Za-z0-9._\\-/]+\\.(?:ps1|xml|yml|yaml|java|json)',
+  '(?:docs|server|scripts)\\/[A-Za-z0-9._\\-/]+\\/',
+].join('|'), 'g');
+
+function resolveRef(ref) {
+  return ref.startsWith('data/') ? join(ROOT, 'docs', 'admin', ref) : join(ROOT, ref);
+}
+
+function cardText(html, id) {
+  const out = [];
+  for (const attr of [id, id.replace('meas_l', 'meas_tr')]) {
+    const inline = new RegExp(`data-i18n="${attr}"[^>]*>([\\s\\S]{0,4000}?)</div>`, 'g');
+    for (const m of html.matchAll(inline)) out.push(m[1]);
+    const dict = new RegExp(`${attr}: '((?:[^'\\\\]|\\\\.)*)'`, 'g');
+    for (const m of html.matchAll(dict)) out.push(m[1]);
+  }
+  return out.join('\n');
+}
+
+function cardRows(html) {
+  const ids = [...new Set([...html.matchAll(/data-i18n="(meas_l\d+[a-z]*)"/g)].map((m) => m[1]))];
+  return ids.map((id) => {
+    const text = cardText(html, id);
+    const refs = [...new Set([...text.matchAll(SOURCE)].map((m) => m[0].replace(/^docs\/admin\//, '')))];
+    return {
+      id,
+      refs,
+      missing: refs.filter((r) => !existsSync(resolveRef(r))),
+      unbacked: refs.length === 0,
+    };
+  });
+}
+
+function audit(html) {
+  const rows = cardRows(html);
+  const ids = rows.map((r) => r.id);
+  return {
+    cards: ids.length,
+    withSource: rows.filter((r) => r.refs.length > 0).length,
+    unbacked: rows.filter((r) => r.unbacked).map((r) => r.id),
+    brokenRefs: rows.filter((r) => r.missing.length).map((r) => ({ id: r.id, missing: r.missing })),
+    reconciles: rows.length === new Set(ids).size && rows.every((r) => (r.refs.length > 0) !== r.unbacked),
+  };
+}
 
 const html = readFileSync(join(process.cwd(), 'docs', 'admin', 'index.html'), 'utf8').replace(/\r\n/g, '\n');
 const summary = audit(html);
@@ -64,8 +118,6 @@ describe('实测卡的来源对账', () => {
   });
 
   it('反面证据：抹掉某一张卡唯一的来源，它必须落进无来源名单', () => {
-    // 挑一张**只有**一个来源的卡：抹掉那一处之后它必须变成无来源。
-    // 挑多来源的卡不行——抹掉一处还剩一处，判不出变化，那条腿就成了装饰。
     const single = cardRows(html).find((r) => r.refs.length === 1);
     expect(single, '找不到只点一个来源的卡 —— 卡片文本形状变了，这条腿要重设计').toBeTruthy();
     const stripped = html.split(single.refs[0]).join('那一摞产物（来源名已被抹掉）');
