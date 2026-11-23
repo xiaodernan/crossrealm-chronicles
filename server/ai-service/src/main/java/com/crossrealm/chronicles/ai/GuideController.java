@@ -90,12 +90,14 @@ public class GuideController {
                 - 当前目标：%s
                 - 静止时长档：%s（long-idle=长时间没动，idle=有点发呆，active=正在行动）
                 - 最近动作密度：%s（wandering=在原地反复乱点，steady=正常推进）
+%s
 
                 只输出一个标签：LOST（看得出玩家迷茫/卡住/在瞎点）或 ON_TRACK（玩家在正常推进）。
                 不要输出任何别的字。
                 """.formatted(
                     state.get("lang"), safe(state.get("zone")), safe(state.get("objective")),
-                    state.get("idleBand"), state.get("wandering"));
+                    state.get("idleBand"), state.get("wandering"),
+                    AiContext.section((Map<?, ?>) state.get("context")).stripLeading());
             LlmClient.Answer answer = client.complete(GUIDE_SYSTEM, user, LlmClient.CacheKeys.GUIDE);
             String raw = String.valueOf(answer.answer()).toUpperCase(Locale.ROOT);
             String mood = raw.contains("LOST") ? MOOD_LOST : MOOD_ONTRACK;
@@ -145,8 +147,10 @@ public class GuideController {
             【角色指令】%s
             【判读标签】%s
             【玩家状态】区域=%s · 目标=%s · 语言=%s
+%s
             只回一句话；不要列表、不要 emoji、不要自称 AI。
-            """.formatted(instruction, tag, safe(state.get("zone")), safe(state.get("objective")), lang);
+            """.formatted(instruction, tag, safe(state.get("zone")), safe(state.get("objective")), lang,
+                    AiContext.section((Map<?, ?>) state.get("context")).stripLeading());
         LlmClient.Answer answer = client.complete(GUIDE_SYSTEM, user, LlmClient.CacheKeys.GUIDE);
         return Map.<String, Object>of("rawNudge", String.valueOf(answer.answer()),
                 "cached", answer.cached(), "upstreamCached", answer.upstreamCached(),
@@ -164,7 +168,8 @@ public class GuideController {
             @Size(max = 160) String objective,
             @Min(0) @Max(86400) Integer idleSeconds,
             @Min(0) @Max(1000) Integer recentActions,
-            @Size(max = 2) String lang) {}
+            @Size(max = 2) String lang,
+            @Size(max = AiContext.MAX_ENTRIES) Map<String, Object> context) {}
 
     @PostMapping("/guide")
     public Map<String, Object> guide(@Valid @RequestBody GuideRequest request,
@@ -175,6 +180,11 @@ public class GuideController {
         initial.put("idleSeconds", request.idleSeconds() == null ? 0 : request.idleSeconds());
         initial.put("recentActions", request.recentActions() == null ? 0 : request.recentActions());
         initial.put("lang", request.lang());
+        Map<String, Object> context = new LinkedHashMap<>();
+        if (request.context() != null) context.putAll(request.context());
+        context.remove("zone");
+        context.remove("objective");
+        initial.put("context", context);
         StateGraph.CompiledInvoke result = graph.invoke(initial);
         Map<String, Object> state = result.state();
         List<String> path = result.trace().stream().map(StateGraph.TraceEntry::node).toList();

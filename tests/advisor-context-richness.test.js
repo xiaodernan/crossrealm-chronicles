@@ -16,21 +16,24 @@
  *
  * 变异判据：删掉任一新增字段 / 写死常量 → 对应用例红。
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { AdvisorPanel } from '../src/ui/AdvisorPanel.js';
-import { normalizeAdvisorContext, ADVISOR_LIMITS } from '../src/content/advisor.js';
+import { QuestAssistant } from '../src/ui/QuestAssistant.js';
+import { t } from '../src/engine/i18n.js';
+import { buildAdvisorContext, normalizeAdvisorContext, ADVISOR_LIMITS } from '../src/content/advisor.js';
 
 const EXPECTED_KEYS = [
-  'season', 'season_day', 'season_remaining',
-  'trial_state', 'trial_layer', 'trial_progress',
-  'chapter', 'player_level',
+  'zone', 'objective', 'health', 'chapter',
+  'player_level', 'souls', 'season', 'trial',
 ];
 
 const fullGame = () => ({
+  world: { zoneId: 'fantasy' },
   seasons: { getState: () => ({ id: 'ember', dayInCycle: 4, daysRemaining: 11 }) },
   trial: { getState: () => ({ state: 'running', layer: 3, kills: 7, quota: 12 }) },
-  quests: { chapter: 2 },
-  stats: { level: 9 },
+  quests: { chapter: 2, current: { title: 'obj_anchor_title' }, stats: {} },
+  stats: { level: 9, souls: 240 },
+  player: { combat: { hp: 63, maxHp: 90 } },
 });
 
 describe('AdvisorPanel._context —— 把玩家真实处境喂给大模型', () => {
@@ -45,7 +48,7 @@ describe('AdvisorPanel._context —— 把玩家真实处境喂给大模型', ()
     const panel = new AdvisorPanel(fullGame());
     const ctx = panel._context();
     const normalized = normalizeAdvisorContext(ctx);
-    expect(normalized).toEqual(ctx); // 没有任何字段被白名单丢弃或改写
+    expect(normalized).toEqual(ctx);
     for (const [k, v] of Object.entries(ctx)) {
       expect(k).toMatch(/^[a-z][a-z0-9_]*$/);
       expect(typeof v).toBe('string');
@@ -53,44 +56,71 @@ describe('AdvisorPanel._context —— 把玩家真实处境喂给大模型', ()
     }
   });
 
-  it('字段值取自真实状态：赛季/试炼/章节/等级都能读回来', () => {
-    const panel = new AdvisorPanel(fullGame());
-    const ctx = panel._context();
-    expect(ctx.season).toBe('ember');
-    expect(ctx.season_day).toBe('4');
-    expect(ctx.season_remaining).toBe('11');
-    expect(ctx.trial_state).toBe('running');
-    expect(ctx.trial_layer).toBe('3');
-    expect(ctx.trial_progress).toBe('7/12');
+  it('字段值取自真实状态：位置/目标/生命/资源/赛季/试炼都能读回来', () => {
+    const ctx = buildAdvisorContext(fullGame(), (key) => `译:${key}`);
+    expect(ctx.zone).toBe('fantasy');
+    expect(ctx.objective).toBe('译:obj_anchor_title');
+    expect(ctx.health).toBe('63/90');
     expect(ctx.chapter).toBe('2');
     expect(ctx.player_level).toBe('9');
+    expect(ctx.souls).toBe('240');
+    expect(ctx.season).toBe('ember · day 4 · remaining 11');
+    expect(ctx.trial).toBe('running · layer 3 · 7/12');
   });
 
-  it('试炼未运行：trial_progress/trial_layer 留空，被白名单自动过滤', () => {
+  it('试炼未运行：只保留状态，不把旧层数和进度伪装成当前状态', () => {
     const g = fullGame();
-    g.trial.getState = () => ({ state: 'idle', layer: 0, kills: 0, quota: 0 });
-    const panel = new AdvisorPanel(g);
-    const ctx = normalizeAdvisorContext(panel._context());
-    expect(ctx.trial_state).toBe('idle');
-    expect(ctx.trial_progress).toBeUndefined();
-    expect(ctx.trial_layer).toBeUndefined();
-    expect(Object.keys(ctx).length).toBeLessThanOrEqual(ADVISOR_LIMITS.contextMaxEntries);
+    g.trial.getState = () => ({ state: 'idle', layer: 3, kills: 7, quota: 12 });
+    const ctx = buildAdvisorContext(g);
+    expect(ctx.trial).toBe('idle');
   });
 
   it('子系统全缺失也不抛：返回空上下文，交给服务端用冻结前缀兜底', () => {
-    const panel = new AdvisorPanel({});
-    expect(() => panel._context()).not.toThrow();
-    expect(normalizeAdvisorContext(panel._context())).toEqual({});
+    expect(() => new AdvisorPanel({})._context()).not.toThrow();
+    expect(normalizeAdvisorContext(buildAdvisorContext({}))).toEqual({});
   });
 
-  it('半初始化：getState 返回 null 时不抛', () => {
-    const panel = new AdvisorPanel({
-      seasons: { getState: () => null },
-      trial: { getState: () => null },
-      quests: {},
-      stats: {},
-    });
-    expect(() => panel._context()).not.toThrow();
-    expect(normalizeAdvisorContext(panel._context())).toEqual({});
+  it('半初始化：getState 返回 null、生命上限为零或数值非法时不抛也不产 NaN', () => {
+    const g = fullGame();
+    g.seasons.getState = () => ({ id: 'ember', dayInCycle: NaN, daysRemaining: 11 });
+    g.trial.getState = () => null;
+    g.quests = {};
+    g.stats = { level: NaN, souls: Infinity };
+    g.player.combat = { hp: 10, maxHp: 0 };
+    const ctx = buildAdvisorContext(g);
+    expect(() => ctx).not.toThrow();
+    expect(Object.values(ctx).join(' ')).not.toMatch(/NaN|Infinity/);
+    expect(ctx.health).toBeUndefined();
+    expect(ctx.player_level).toBeUndefined();
+    expect(ctx.souls).toBeUndefined();
+    expect(ctx.season).toBe('ember · remaining 11');
+  });
+
+  it('守夜人指路也从同一构建器取真实状态，并保留行为遥测字段', async () => {
+    const game = fullGame();
+    const askGuide = vi.fn().mockResolvedValue({ ok: true, data: { nudge: '火还在。', mood: 'lost' } });
+    game.onlineServices = { askGuide };
+    const assistant = Object.create(QuestAssistant.prototype);
+    assistant.game = game;
+    assistant._panel = { querySelector: () => ({ classList: { remove() {}, add() {} }, textContent: '' }) };
+    assistant._estimateIdleSeconds = () => 45;
+    assistant._estimateRecentActions = () => 7;
+
+    await assistant.askKeeperGuide();
+
+    expect(askGuide).toHaveBeenCalledWith(expect.objectContaining({
+      zone: 'fantasy', objective: t('obj_anchor_title'), idleSeconds: 45, recentActions: 7,
+      context: buildAdvisorContext(game, t),
+    }));
+    expect(askGuide.mock.calls[0][0].context.health).toBe('63/90');
+    expect(askGuide.mock.calls[0][0].context.souls).toBe('240');
+  });
+
+  it('目标来自当前抉择对应的真标题，且长目标在构建时已经封顶', () => {
+    const g = fullGame();
+    g.quests.current = { title: 'obj_choice_title', titleByChoice: { keep: '长'.repeat(200) } };
+    g.quests.stats = { decisions: new Set(['keep']) };
+    const ctx = buildAdvisorContext(g);
+    expect(ctx.objective).toHaveLength(ADVISOR_LIMITS.contextValueMax);
   });
 });

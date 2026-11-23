@@ -4,6 +4,7 @@ import com.crossrealm.chronicles.ai.AiProperties;
 import com.crossrealm.chronicles.ai.HttpLlmTransport;
 import com.crossrealm.chronicles.ai.LlmClient;
 import java.time.Duration;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -45,7 +46,7 @@ class LoreOracleLiveIntegrationTest {
     @Test
     void oracleFullChainBm25RecallThenGroundedAnswer() {
         LoreOracleService oracle = new LoreOracleService(liveClient(), index);
-        LoreOracleService.OracleResult r = oracle.answer("锚火是什么？", 4);
+        LoreOracleService.OracleResult r = oracle.answer("锚火是什么？", 4, Map.of("chapter", 1, "zone", "hub"));
 
         assertTrue(r.ok(), "真实上游必须完成作答");
         assertNotNull(r.answer());
@@ -69,7 +70,7 @@ class LoreOracleLiveIntegrationTest {
         // 用它钉住 refs 入典后仍能被 BM25 检索到——Oracle 回答得诚实即可，不问输出具体措辞。
         LoreOracleService oracle = new LoreOracleService(liveClient(), index);
         LoreOracleService.OracleResult r = oracle.answer(
-                "锚火在现实世界对应祭灶还是维斯塔？以及秋分的节气对照是什么？", 4);
+                "锚火在现实世界对应祭灶还是维斯塔？以及秋分的节气对照是什么？", 4, Map.of());
 
         assertTrue(r.ok(), "真实上游必须完成作答");
         assertFalse(r.answer().isBlank());
@@ -86,7 +87,7 @@ class LoreOracleLiveIntegrationTest {
         // 用它钉住 refs 卷2 入典后仍被 BM25 检索到，Oracle 诚实答复原文内容。
         LoreOracleService oracle = new LoreOracleService(liveClient(), index);
         LoreOracleService.OracleResult r = oracle.answer(
-                "冬至守夜火在现实世界中对应什么习俗？比如中国守夜和日本灶神", 4);
+                "冬至守夜火在现实世界中对应什么习俗？比如中国守夜和日本灶神", 4, Map.of());
 
         assertTrue(r.ok(), "真实上游必须完成作答");
         assertFalse(r.answer().isBlank());
@@ -104,7 +105,7 @@ class LoreOracleLiveIntegrationTest {
         // ASCII 无义字符的确只会被检出 0 个 doc，于是走 0 召回分支，不经过 LLM、不花 token。
         LoreOracleService oracle = new LoreOracleService(liveClient(), index);
         LoreOracleService.OracleResult r = oracle.answer(
-                "zxqjwop qkdjw zqwvjqmw rfjklw", 4);
+                "zxqjwop qkdjw zqwvjqmw rfjklw", 4, Map.of());
 
         assertTrue(r.ok());
         assertTrue(r.sources().isEmpty(), "原典没有的问题不应给出处");

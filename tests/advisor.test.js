@@ -290,6 +290,20 @@ describe('OnlineServices.askAdvisor / fetchAdvisorHealth：ok/reason 映射全�
     expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 
+  it('askOracle 与 askGuide 都发送同一份有界上下文，坏键/对象/超长值不会穿透', async () => {
+    const fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+    const svc = new OnlineServices({ baseUrl: BASE, fetchImpl: fetch, enabled: true });
+    const context = {
+      zone: 'fantasy', health: '63/90', 'Bad-Key': 'drop', nested: { x: 1 },
+      objective: '长'.repeat(200),
+    };
+    await svc.askOracle('火是什么', { context });
+    await svc.askGuide({ zone: 'fantasy', objective: '任务', context });
+    const expected = { zone: 'fantasy', health: '63/90', objective: '长'.repeat(120) };
+    expect(JSON.parse(fetch.mock.calls[0][1].body).context).toEqual(expected);
+    expect(JSON.parse(fetch.mock.calls[1][1].body).context).toEqual(expected);
+  });
+
   it('askOracle 未启用：disabled，且 fetch 零调用', async () => {
     const fetch = vi.fn();
     const svc = new OnlineServices({ baseUrl: BASE, fetchImpl: fetch, enabled: false });

@@ -1,5 +1,6 @@
 package com.crossrealm.chronicles.ai.lore;
 
+import com.crossrealm.chronicles.ai.AiContext;
 import com.crossrealm.chronicles.ai.AiErrors;
 import com.crossrealm.chronicles.ai.RequestCorrelation;
 import jakarta.validation.Valid;
@@ -37,6 +38,7 @@ public class OracleController {
     public record OracleRequest(
             @NotBlank @Size(max = 400) String question,
             @PositiveOrZero @Max(6) Integer limit,
+            @Size(max = AiContext.MAX_ENTRIES) Map<String, Object> context,
             Boolean deep) {}
 
     @PostMapping("/answer")
@@ -45,8 +47,8 @@ public class OracleController {
             @RequestHeader(value = "X-Request-Id", required = false) String headerRequestId) {
         boolean deep = Boolean.TRUE.equals(req.deep());
         LoreOracleService.OracleResult result = deep
-                ? oracle.answerDeep(req.question(), req.limit())
-                : oracle.answer(req.question(), req.limit());
+                ? oracle.answerDeep(req.question(), req.limit(), req.context())
+                : oracle.answer(req.question(), req.limit(), req.context());
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("ok", result.ok());
         body.put("answer", result.answer());

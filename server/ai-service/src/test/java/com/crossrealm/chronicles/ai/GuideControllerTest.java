@@ -1,6 +1,7 @@
 package com.crossrealm.chronicles.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -119,6 +120,53 @@ class GuideControllerTest {
                         .content(MAPPER.writeValueAsString(body("hub", "quest", 1, 1, "en"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.guarded").value(true));
+    }
+
+    @Test
+    void richContext_reachesAssessAndComposeWithoutChangingFrozenPrefix() throws Exception {
+        when(client.complete(anyString(), anyString(), eq(LlmClient.CacheKeys.GUIDE)))
+                .thenReturn(answer("LOST"), answer("火还在，先歇一口气。"));
+
+        Map<String, Object> b = body("fantasy", "点亮回声灯", 90, 9, "zh");
+        b.put("context", Map.of(
+                "zone", "duplicate-zone", "objective", "duplicate-objective",
+                "health", "63/90", "souls", 240, "season", "ember · day 4",
+                "chapter", 2, "player_level", 9, "trial", "idle"));
+
+        mvc.perform(post("/api/ai/guide")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(MAPPER.writeValueAsString(b)))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<String> system = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> user = ArgumentCaptor.forClass(String.class);
+        verify(client, org.mockito.Mockito.times(2)).complete(system.capture(), user.capture(),
+                eq(LlmClient.CacheKeys.GUIDE));
+        assertEquals(List.of(GuideController.GUIDE_SYSTEM, GuideController.GUIDE_SYSTEM), system.getAllValues(),
+                "玩家状态只能进 user，不能破坏所有节点共享的冻结前缀");
+        for (String prompt : user.getAllValues()) {
+            assertTrue(prompt.contains("health=63/90"));
+            assertTrue(prompt.contains("souls=240"));
+            assertTrue(prompt.contains("season=ember · day 4"));
+            assertTrue(prompt.contains("chapter=2"));
+            assertTrue(prompt.contains("player_level=9"));
+            assertTrue(prompt.contains("trial=idle"));
+            assertFalse(prompt.contains("duplicate-zone"));
+            assertFalse(prompt.contains("duplicate-objective"));
+        }
+    }
+
+    @Test
+    void contextAboveEight_isRejected() throws Exception {
+        Map<String, Object> b = body("hub", "quest", 0, 0, "zh");
+        Map<String, Object> context = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < 9; i++) context.put("k" + i, i);
+        b.put("context", context);
+        mvc.perform(post("/api/ai/guide")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(MAPPER.writeValueAsString(b)))
+                .andExpect(status().isBadRequest());
+        org.mockito.Mockito.verifyNoInteractions(client);
     }
 
     @Test

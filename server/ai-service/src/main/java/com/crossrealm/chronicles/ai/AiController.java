@@ -31,7 +31,7 @@ public class AiController {
      */
     public record ChatRequest(
             @NotBlank @Size(max = 400) String question,
-            @Size(max = 8) Map<String, Object> context) {}
+            @Size(max = AiContext.MAX_ENTRIES) Map<String, Object> context) {}
 
     @PostMapping("/chat")
     public ResponseEntity<Map<String, Object>> chat(@Valid @RequestBody ChatRequest request,

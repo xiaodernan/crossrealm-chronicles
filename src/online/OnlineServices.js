@@ -357,10 +357,12 @@ export class OnlineServices {
    * `deep:true`（W-Z485）——走 v5 双语全量前缀（~8 万 tok，Codex 同档）+ 独立缓存车道；
    * 首包更慢但答得更全，适合主动求知的典籍深问，日常问答不要开。
    */
-  async askOracle(question, { limit, deep, signal } = {}) {
+  async askOracle(question, { limit, deep, context, signal } = {}) {
     const body = { question };
     if (limit !== undefined) body.limit = limit;
     if (deep !== undefined) body.deep = deep;
+    const cleanContext = normalizeAdvisorContext(context);
+    if (Object.keys(cleanContext).length > 0) body.context = cleanContext;
     return this.#jsonRequest('/api/ai/lore/answer', {
       method: 'POST',
       body,
@@ -374,10 +376,13 @@ export class OnlineServices {
    * 最近动作密度）交给大模型判读局面，由模型判断驱动 StateGraph 条件流转，产出对应口吻的一句指路。
    * 返回 { nudge, mood, lang, path, ... }。缺字段默认 0；带 AbortSignal 可取消。
    */
-  async askGuide({ zone, objective, idleSeconds = 0, recentActions = 0, lang = 'zh' } = {}, { signal } = {}) {
+  async askGuide({ zone, objective, idleSeconds = 0, recentActions = 0, lang = 'zh', context } = {}, { signal } = {}) {
+    const body = { zone: zone ?? '', objective: objective ?? '', idleSeconds, recentActions, lang };
+    const cleanContext = normalizeAdvisorContext(context);
+    if (Object.keys(cleanContext).length > 0) body.context = cleanContext;
     return this.#jsonRequest('/api/ai/guide', {
       method: 'POST',
-      body: { zone: zone ?? '', objective: objective ?? '', idleSeconds, recentActions, lang },
+      body,
       timeoutMs: ADVISOR_LIMITS.requestTimeoutMs,
       signal,
     });

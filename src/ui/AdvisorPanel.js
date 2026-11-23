@@ -30,7 +30,7 @@
 import { t, applyTranslations } from '../engine/i18n.js';
 import { attachDraggable } from './DraggablePanel.js';
 import { focusElement, focusFirstItem } from './FocusNav.js';
-import { ADVISOR_REASONS, ADVISOR_LIMITS, normalizeAdvisorQuestion } from '../content/advisor.js';
+import { ADVISOR_REASONS, ADVISOR_LIMITS, buildAdvisorContext, normalizeAdvisorQuestion } from '../content/advisor.js';
 import { DIRECTIVE_TABS, resolveAdvisorDirectives, stripAdvisorDirectives } from '../content/advisorDirectives.js';
 import { presenceTracker } from '../online/presenceTracker.js';
 import { notifyTracker } from '../online/notifyTracker.js';
@@ -301,23 +301,7 @@ export class AdvisorPanel {
    * 不把 game / player / THREE 资源塞进请求体 —— 上下文是会被拼进提示词的数据。
    */
   _context() {
-    const season = this.game?.seasons?.getState?.();
-    const trial = this.game?.trial?.getState?.();
-    const 跑试炼 = trial?.state === 'running';
-    // 全部返回字符串标量：context 会被拼进 userMessage（冻结前缀只盖 system），
-    // 富上下文不破坏 cache；仍受白名单 `@Size(max=8)` 约束——这里正好 8 个键。
-    // 空串字段会被 normalizeAdvisorContext 自动过滤（如试炼未运行时的进度）。
-    return {
-      season: String(season?.id ?? ''),
-      season_day: season?.dayInCycle != null ? String(season.dayInCycle) : '',
-      season_remaining: season?.daysRemaining != null ? String(season.daysRemaining) : '',
-      trial_state: String(trial?.state ?? ''),
-      trial_layer: 跑试炼 && trial?.layer != null ? String(trial.layer) : '',
-      trial_progress: 跑试炼 && trial?.kills != null && trial?.quota != null
-        ? `${trial.kills}/${trial.quota}` : '',
-      chapter: this.game?.quests?.chapter != null ? String(this.game.quests.chapter) : '',
-      player_level: this.game?.stats?.level != null ? String(this.game.stats.level) : '',
-    };
+    return buildAdvisorContext(this.game, t);
   }
 
   /** 开面板时探一次健康；不每开一次都打网关，也不在离线时反复重试 */
@@ -368,6 +352,7 @@ export class AdvisorPanel {
         // 与带标号的 system prompt 跑 LLM，回答只用提取语料、并把出处以 inline bracket 形式写入。
         res = await this.game?.onlineServices?.askOracle?.(question, {
           deep: this._deepMode,
+          context: this._context(),
           signal: this._controller.signal,
         });
       } else {

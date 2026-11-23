@@ -6,6 +6,7 @@ import { BOSS_STAT_KEYS, MAINLINE_BY_ID, objectiveDesc, objectiveTitle } from '.
 import { rollGear } from '../content/gear.js';
 import { buildDemoSteps } from './demoSteps.js';
 import { localTelemetry } from '../game/LocalTelemetry.js';
+import { buildAdvisorContext } from '../content/advisor.js';
 
 /** W-Z502：允许上报的遥测事件白名单——不让任意字符串进 localStorage 事件流。 */
 const TELEMETRY_EVENTS = new Set(['guide_asked']);
@@ -97,6 +98,7 @@ export class QuestAssistant {
       const res = await this.game.onlineServices?.askGuide?.({
         zone, objective, idleSeconds: this._estimateIdleSeconds(),
         recentActions: this._estimateRecentActions(), lang,
+        context: buildAdvisorContext(this.game, t),
       });
       if (res?.ok && res.data?.nudge) {
         resultEl.textContent = res.data.nudge;

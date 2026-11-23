@@ -37,7 +37,7 @@ public class AdvisorJobController {
      * 没写时由网关的 X-Request-Id 补（W-Z6）；body 写了就 body 优先——幂等键永远由客户端说了算。 */
     public record AsyncChatRequest(
             @NotBlank @Size(max = 400) String question,
-            @Size(max = 8) Map<String, Object> context,
+            @Size(max = AiContext.MAX_ENTRIES) Map<String, Object> context,
             @Size(max = 64) String requestId) {}
 
     @PostMapping("/chat/async")

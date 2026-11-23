@@ -40,22 +40,25 @@ const flush = async () => { for (let i = 0; i < 8; i++) await Promise.resolve();
 
 describe('① 客户端上限与服务端校验对齐（跨栈读同一份数）', () => {
   const controller = 读('server/ai-service/src/main/java/com/crossrealm/chronicles/ai/AiController.java');
+  const aiContext = 读('server/ai-service/src/main/java/com/crossrealm/chronicles/ai/AiContext.java');
   const llmClient = 读('server/ai-service/src/main/java/com/crossrealm/chronicles/ai/LlmClient.java');
   const props = 读('server/ai-service/src/main/java/com/crossrealm/chronicles/ai/AiProperties.java');
   const gateway = 读('server/gateway/src/main/resources/application.yml');
 
-  it('问题的 @Size(max=400) 与 context 的 @Size(max=8) 就是客户端那两个上限', () => {
+  it('问题上限与 context 条数上限就是客户端那两个数', () => {
     const q = Number(/@Size\(max\s*=\s*(\d+)\)\s*String question/.exec(controller)?.[1]);
-    const c = Number(/@Size\(max\s*=\s*(\d+)\)\s*Map<String, Object> context/.exec(controller)?.[1]);
+    const c = Number(/MAX_ENTRIES\s*=\s*(\d+)\s*;/.exec(aiContext)?.[1]);
     expect(Number.isFinite(q) && q > 0, '没从 Java 源码解析出问题上限 —— 尺子瞎了').toBe(true);
     expect(Number.isFinite(c) && c > 0, '没从 Java 源码解析出上下文条数上限').toBe(true);
+    expect(controller).toContain('@Size(max = AiContext.MAX_ENTRIES) Map<String, Object> context');
     expect(ADVISOR_LIMITS.questionMax).toBe(q);
     expect(ADVISOR_LIMITS.contextMaxEntries).toBe(c);
   });
 
-  it('上下文单值上限就是 LlmClient 实际拼提示词时采用的边界', () => {
-    const valueMax = Number(/MAX_CONTEXT_VALUE\s*=\s*(\d+)\s*;/.exec(llmClient)?.[1]);
-    expect(Number.isFinite(valueMax) && valueMax > 0, '没从 LlmClient 源码解析出上下文单值上限').toBe(true);
+  it('上下文单值上限就是服务端实际拼提示词时采用的边界', () => {
+    const valueMax = Number(/MAX_VALUE_LENGTH\s*=\s*(\d+)\s*;/.exec(aiContext)?.[1]);
+    expect(Number.isFinite(valueMax) && valueMax > 0, '没从 AiContext 源码解析出上下文单值上限').toBe(true);
+    expect(llmClient).toContain('AiContext.section(context)');
     expect(ADVISOR_LIMITS.contextValueMax).toBe(valueMax);
   });
 
@@ -119,9 +122,12 @@ function panelHarness({ health = { ok: true, data: { configured: true, circuit: 
   const stack = { opened: [], closed: [], open(n) { this.opened.push(n); }, close(n) { this.closed.push(n); } };
   const game = {
     overlayStack: stack,
+    world: { zoneId: 'fantasy' },
     seasons: { getState: () => ({ id: 'ember', dayInCycle: 3 }) },
     trial: { getState: () => ({ state: 'running', layer: 2 }) },
-    quests: { chapter: 2 },
+    quests: { chapter: 2, current: { title: 'obj_anchor_title' }, stats: {} },
+    stats: { level: 9, souls: 240 },
+    player: { combat: { hp: 63, maxHp: 90 } },
     onlineServices: {
       fetchAdvisorHealth: async () => { healthCalls += 1; return health; },
       askAdvisorBackground: (q, ctx, opts) => {
@@ -130,7 +136,7 @@ function panelHarness({ health = { ok: true, data: { configured: true, circuit: 
         return new Promise((resolve) => { pendingResolve = resolve; });
       },
       askOracle: (q, opts) => {
-        askedOracle.push({ q, signal: opts?.signal });
+        askedOracle.push({ q, context: opts?.context, signal: opts?.signal });
         if (oracleAnswer) return Promise.resolve(oracleAnswer(askedOracle.length));
         return Promise.resolve({
           ok: true,
@@ -209,9 +215,9 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
     // harness 记录的是归一化前的面板原值，故空串字段仍在——它们在 OnlineServices 的
     // normalizeAdvisorContext 里被丢弃（那边 advisor.test.js 另有测试）。
     expect(h.asked[0].ctx).toEqual({
-      season: 'ember', season_day: '3', season_remaining: '',
-      trial_state: 'running', trial_layer: '2', trial_progress: '',
-      chapter: '2', player_level: '',
+      zone: 'fantasy', objective: '觉醒：世界之锚', health: '63/90',
+      chapter: '2', player_level: '9', souls: '240',
+      season: 'ember · day 3', trial: 'running · layer 2',
     });
     expect(Object.values(h.asked[0].ctx).every((v) => typeof v !== 'object' && typeof v !== 'function')).toBe(true);
     const msgs = bubbles(h.doc);
@@ -548,6 +554,7 @@ describe('④ 壳页 / 层表 / Game / 换语言 / 样式指同一件事', () =>
     await flush();
     expect(h.askedOracle).toHaveLength(1);
     expect(h.askedOracle[0].q).toBe('林渡为什么没熄火？');
+    expect(h.askedOracle[0].context).toEqual(h.panel._context());
     expect(h.asked).toHaveLength(0); // 顾问链路零调用
     expect(lastBubble(h.doc).textContent).toContain('典籍没有写为什么');
 

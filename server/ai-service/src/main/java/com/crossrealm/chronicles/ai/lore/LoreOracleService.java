@@ -1,5 +1,6 @@
 package com.crossrealm.chronicles.ai.lore;
 
+import com.crossrealm.chronicles.ai.AiContext;
 import com.crossrealm.chronicles.ai.LlmClient;
 import com.crossrealm.chronicles.ai.LlmGuards;
 import com.crossrealm.chronicles.ai.StateGraph;
@@ -122,7 +123,8 @@ public class LoreOracleService {
                     + firstBlock.toString().trim()
                     + (rest.length() > 0 ? "\n\nOther excerpts (use only if the first doesn't answer):\n\n"
                             + rest.toString().trim() : "")
-                    + "\n\nReminder (read this FIRST):\nThe question asks about the entry in the **most relevant excerpt** block — locate its heading line (the one containing the exact name from the player question) and answer with that block's line verbatim. If no heading line contains the asked name, refuse with 「此物未在典籍中 · This is not in the record.」\n\nQuote branch: if the player question quotes a line verbatim (any quote/quotation marks included), treat the quoted text as the \"name\" to locate — find the excerpt line containing that quote exactly, and answer with that quote together with the file path it came from. Only refuse when the quoted text does not appear anywhere in the excerpts.";
+                    + "\n\nReminder (read this FIRST):\nThe question asks about the entry in the **most relevant excerpt** block — locate its heading line (the one containing the exact name from the player question) and answer with that block's line verbatim. If no heading line contains the asked name, refuse with 「此物未在典籍中 · This is not in the record.」\n\nQuote branch: if the player question quotes a line verbatim (any quote/quotation marks included), treat the quoted text as the \"name\" to locate — find the excerpt line containing that quote exactly, and answer with that quote together with the file path it came from. Only refuse when the quoted text does not appear anywhere in the excerpts."
+                    + AiContext.section((Map<?, ?>) state.get("context"));
             try {
                 LlmClient.Answer answer = client.complete(system, user,
                         deep ? LlmClient.CacheKeys.ORACLE_DEEP : LlmClient.CacheKeys.ORACLE);
@@ -213,13 +215,14 @@ public class LoreOracleService {
             "24 solar terms", "lunar new year", "lunar november", "lunar august"
     );
 
-    public OracleResult answer(String question, Integer limitRaw) {
+    public OracleResult answer(String question, Integer limitRaw, Map<String, Object> context) {
         if (question == null || question.isBlank()) {
             return failure("blank question");
         }
         Map<String, Object> initial = new LinkedHashMap<>();
         initial.put("question", question);
         initial.put("limitRaw", limitRaw);
+        initial.put("context", context);
         StateGraph.CompiledInvoke result = oracleGraph.invoke(initial);
         Map<String, Object> state = result.state();
         List<String> path = result.trace().stream().map(StateGraph.TraceEntry::node).toList();
@@ -241,13 +244,14 @@ public class LoreOracleService {
      * W-Z485 史诗深潜：用 v5 双语全量前缀（~8-9 万 tok）+ 独立 cache lane 回答典籍问题。
      * 与普通 answer 同形（同一 BM25 检索 / 同一 StateGraph / 同一门禁），仅 system + cacheKey 不同。
      */
-    public OracleResult answerDeep(String question, Integer limitRaw) {
+    public OracleResult answerDeep(String question, Integer limitRaw, Map<String, Object> context) {
         if (question == null || question.isBlank()) {
             return failure("blank question");
         }
         Map<String, Object> initial = new LinkedHashMap<>();
         initial.put("question", question);
         initial.put("limitRaw", limitRaw);
+        initial.put("context", context);
         StateGraph.CompiledInvoke result = oracleDeepGraph.invoke(initial);
         Map<String, Object> state = result.state();
         List<String> path = result.trace().stream().map(StateGraph.TraceEntry::node).toList();

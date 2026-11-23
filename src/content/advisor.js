@@ -11,6 +11,8 @@
  * 客户端做一遍只是为了让玩家在按下送出之前就看到长度，而不是等 503 回来。
  */
 
+import { objectiveTitle } from './objectives.js';
+
 export const ADVISOR_LIMITS = Object.freeze({
   /** 与 `ChatRequest.question` 的 `@Size(max = 400)` 对齐 */
   questionMax: 400,
@@ -96,7 +98,38 @@ export function normalizeAdvisorContext(raw) {
     if (!/^[a-z][a-z0-9_]*$/.test(key)) continue;
     if (value === null || value === undefined || value === '') continue;
     if (typeof value === 'object' || typeof value === 'function') continue;
-    out[key] = String(value).replace(/\s+/g, ' ').slice(0, ADVISOR_LIMITS.contextValueMax);
+    const text = String(value).replace(/\s+/g, ' ').trim();
+    if (!text) continue;
+    out[key] = text.slice(0, ADVISOR_LIMITS.contextValueMax);
   }
   return out;
+}
+
+const finite = (value) => (Number.isFinite(value) ? String(Math.round(value)) : '');
+const measure = (label, value) => (Number.isFinite(value) ? `${label} ${finite(value)}` : '');
+const parts = (...values) => values.filter(Boolean).join(' · ');
+
+/** 所有 LLM 入口共用的真实状态快照；只取标量，缺失子系统自然留空。 */
+export function buildAdvisorContext(game, translate = (key) => key) {
+  const season = game?.seasons?.getState?.();
+  const trial = game?.trial?.getState?.();
+  const quests = game?.quests;
+  const combat = game?.player?.combat;
+  const current = quests?.current;
+  const title = current ? objectiveTitle(current, quests.stats) : '';
+  const running = trial?.state === 'running';
+  return normalizeAdvisorContext({
+    zone: String(game?.world?.zoneId ?? ''),
+    objective: title ? translate(title) : '',
+    health: combat && Number.isFinite(combat.hp) && Number.isFinite(combat.maxHp) && combat.maxHp > 0
+      ? `${finite(combat.hp)}/${finite(combat.maxHp)}` : '',
+    chapter: finite(quests?.chapter),
+    player_level: finite(game?.stats?.level),
+    souls: finite(game?.stats?.souls),
+    season: parts(String(season?.id ?? ''), measure('day', season?.dayInCycle),
+      measure('remaining', season?.daysRemaining)),
+    trial: parts(String(trial?.state ?? ''), running && Number.isFinite(trial.layer) ? `layer ${finite(trial.layer)}` : '',
+      running && Number.isFinite(trial.kills) && Number.isFinite(trial.quota)
+        ? `${finite(trial.kills)}/${finite(trial.quota)}` : ''),
+  });
 }
