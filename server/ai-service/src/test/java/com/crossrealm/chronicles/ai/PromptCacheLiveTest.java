@@ -1,94 +1,113 @@
 package com.crossrealm.chronicles.ai;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 真实联调：验证「稳定前缀 + 流式」能命中上游 prompt-cache。
+ * 真实联调：生产 LlmClient 的 Advisor 冻结前缀连续两轮达到 90% 上游命中。
  *
  * <p>仅当显式打开 {@code -Dai.live.test=true} 且环境变量 {@code LLM_API_KEY} 存在时才运行。
- * 默认在 CI / 普通构建中跳过，不会消耗额度也不会因无网络而失败。
- *
- * <p>关于判据口径（W-Z35 实测后定型）：上游 wkapi.pro / v1 上的 gpt-6-sol
- * 缓存生效后，冷启动（未曾见过的 system 前缀）首次调用 cachedTokens 可能为 0 甚至 null，
- * 第二次冷启径直变成热命中（≥first+5000）。反之**缓存已经暖的**情况下，
- * 两次调用 cachedTokens 相等 —— 这不是否预期内的退化，而是前缀复用达成稳定态。
- * 此处不再硬性要求 second > first，而是断言「至少一格命中 + 命中比例不低于第一次的 50%」——
- * 这是冷启进程与暖启进程都能过，但无缓存媒体（要求 stream=false 或缺
- * cache_control、缺
- * stream_options.include_usage）不可过的、诚实的上限测试。
+ * 请求形状、缓存桶与用量记账全部走生产代码，不再手抄一份容易漂移的 HTTP body。
+ * 首发允许冷启；后两次各自按车道增量计算，缺 cached_tokens 也算失败。
  */
 @EnabledIfSystemProperty(named = "ai.live.test", matches = "true")
 class PromptCacheLiveTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(PromptCacheLiveTest.class);
-    private final ObjectMapper mapper = new ObjectMapper();
+
+    static boolean warmHitPasses(long promptDelta, long cachedDelta) {
+        return promptDelta > 0 && cachedDelta >= 0 && cachedDelta <= promptDelta
+                && cachedDelta * 100 >= promptDelta * 90;
+    }
 
     @Test
     void repeatedStablePrefixHitsUpstreamCache() throws Exception {
         String apiKey = System.getenv("LLM_API_KEY");
         assertNotNull(apiKey, "LLM_API_KEY env required for live test");
-        String baseUrl = System.getenv().getOrDefault("LLM_BASE_URL", "https://api.aizzz.xyz/v1");
-        String model = System.getenv().getOrDefault("LLM_MODEL", "gpt-6.2-sol");
+        AiProperties props = new AiProperties();
+        props.setApiKey(apiKey);
+        props.setBaseUrl(System.getenv().getOrDefault("LLM_BASE_URL", "https://api.aizzz.xyz/v1"));
+        props.setModel(System.getenv().getOrDefault("LLM_MODEL", "gpt-6.2-sol"));
+        props.setMaxRetries(0);
+        props.setTimeout(Duration.ofSeconds(30));
+        props.setCacheTtlSeconds(120);
+        props.setBreakerThreshold(50);
+        props.setLlmEnabled(true);
 
-        String system = new String(getClass().getResourceAsStream("/ai/system-prompt.txt")
-                .readAllBytes(), StandardCharsets.UTF_8).trim();
-        String question = "什么是母题?请简短回答";
-
-        HttpLlmTransport transport = new HttpLlmTransport();
-        LlmTransport.UpstreamReply first = call(transport, baseUrl, apiKey, model, system, question);
-        Thread.sleep(1500);
-        LlmTransport.UpstreamReply second = call(transport, baseUrl, apiKey, model, system, question);
-
-        LOG.info("LIVE cache first  prompt={} cached={}", first.promptTokens(), first.cachedTokens());
-        LOG.info("LIVE cache second prompt={} cached={}", second.promptTokens(), second.cachedTokens());
-
-        assertNotNull(first.promptTokens(), "first call must return prompt tokens");
-        assertNotNull(second.promptTokens(), "second call must return prompt tokens");
-
-        boolean secondHits = second.cachedTokens() != null && second.cachedTokens() > 0;
-        boolean eitherHits = secondHits
-                || (first.cachedTokens() != null && first.cachedTokens() > 0);
-
-        // 无缓存上限：cache_control:ephemeral + stream + include_usage 漏掉的情况下，两次 cached 都该是 null/0
-        assertTrue(eitherHits,
-                "neither call hit upstream prompt cache — this is the regression class W-Z35 fixes");
-
-        if (secondHits) {
-            // 冷启路径：second > first；暖启路径：second ≈ first（且都>0）。两种都算"缓存正常"。
-            // 只有一种情况可以判失败：first=0 且 second=0 —— 上面 eitherHits 已挡，到达这里一定缓存命中。
-            // ※ 上游 wkapi.pro 对短 prompt（约 5K tokens）常见的热态 cached=5248（约 96.9%）——
-            //   此值与模型内部 cache page-size 有关，不作为断言边界，以避免上游 page 调参时假红。
-            LOG.info("cache warm hit confirmed: first={} second={}", first.cachedTokens(), second.cachedTokens());
+        String system;
+        try (InputStream in = getClass().getResourceAsStream("/ai/system-prompt.txt")) {
+            assertNotNull(in, "missing Advisor system prompt");
+            system = new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
         }
+        LlmClient client = new LlmClient(props, new HttpLlmTransport(), new ObjectMapper());
+        long previousPrompt = 0;
+        long previousCached = 0;
+        for (int i = 1; i <= 3; i++) {
+            LlmClient.Answer answer = client.complete(system,
+                    "玩家提问：什么是母题?请简短回答 #" + i, LlmClient.CacheKeys.ADVISOR);
+            assertFalse(answer.cached(), "不同问题必须真打上游，不能拿本地摘要缓存冒充上游命中");
+            assertFalse(answer.answer().isBlank(), "上游必须返回非空回答");
+
+            Map<String, Object> upstream = upstreamUsage(client);
+            Map<String, Object> lane = advisorLane(upstream);
+            Map<?, ?> last = (Map<?, ?>) upstream.get("last");
+            long prompt = ((Number) lane.get("promptTokens")).longValue();
+            long cached = ((Number) lane.get("cachedTokens")).longValue();
+            long promptDelta = prompt - previousPrompt;
+            long cachedDelta = last != null && last.containsKey("cachedTokens")
+                    ? cached - previousCached : -1;
+            LOG.info("LIVE cache call={} promptDelta={} cachedDelta={} ratio={}",
+                    i, promptDelta, cachedDelta, promptDelta > 0 ? cachedDelta * 100.0 / promptDelta : 0.0);
+            if (i > 1) {
+                assertTrue(warmHitPasses(promptDelta, cachedDelta),
+                        "warm call " + i + " below 90%: promptDelta=" + promptDelta
+                                + " cachedDelta=" + cachedDelta + "（缺用量按 -1 计）");
+            }
+            previousPrompt = prompt;
+            previousCached = cached;
+            if (i < 3) Thread.sleep(1500);
+        }
+        assertEquals(3, ((Number) advisorLane(upstreamUsage(client)).get("calls")).intValue(),
+                "三次不同问题必须记成三次真实上游调用");
     }
 
-    private LlmTransport.UpstreamReply call(HttpLlmTransport t, String baseUrl, String key,
-                                            String model, String system, String question) throws Exception {
-        Map<String, Object> systemMsg = Map.of("role", "system", "content", system,
-                "cache_control", Map.of("type", "ephemeral"));
-        Map<String, Object> userMsg = Map.of("role", "user", "content", question);
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("model", model);
-        // 与生产请求体一致：stream+include_usage+ephemeral 系统前缀 + prompt_cache_key 路由提示
-        body.put("prompt_cache_key", "crossrealm-canon-v1");
-        body.put("messages", List.of(systemMsg, userMsg));
-        body.put("max_tokens", 160);
-        body.put("temperature", 0.7);
-        body.put("stream", Boolean.TRUE);
-        body.put("stream_options", Map.of("include_usage", Boolean.TRUE));
-        String url = baseUrl.replaceAll("/+$", "") + "/chat/completions";
-        return t.postJsonWithUsage(url, key, mapper.writeValueAsString(body), Duration.ofSeconds(30));
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> upstreamUsage(LlmClient client) {
+        Map<String, Object> upstream = (Map<String, Object>) client.health().get("upstreamUsage");
+        assertNotNull(upstream, "upstream usage missing from health snapshot");
+        return upstream;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> advisorLane(Map<String, Object> upstream) {
+        Map<String, Map<String, Object>> lanes = (Map<String, Map<String, Object>>) upstream.get("byLane");
+        Map<String, Object> lane = lanes.get(LlmClient.CacheKeys.ADVISOR);
+        assertNotNull(lane, "Advisor lane missing from health snapshot");
+        return lane;
+    }
+}
+
+class PromptCacheCriteriaTest {
+
+    @Test
+    void 热命中判据要求两轮各自达到九成且用量完整() {
+        assertTrue(PromptCacheLiveTest.warmHitPasses(1000, 900));
+        assertTrue(PromptCacheLiveTest.warmHitPasses(1000, 1000));
+        assertFalse(PromptCacheLiveTest.warmHitPasses(1000, 899));
+        assertFalse(PromptCacheLiveTest.warmHitPasses(0, 0));
+        assertFalse(PromptCacheLiveTest.warmHitPasses(1000, -1));
+        assertFalse(PromptCacheLiveTest.warmHitPasses(1000, 1001));
     }
 }
