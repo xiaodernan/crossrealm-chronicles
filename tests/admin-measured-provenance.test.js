@@ -114,7 +114,10 @@ describe('实测卡的来源对账', () => {
     expect(brokenHtml, '夹具没真的改动文本').not.toBe(html);
     const s2 = audit(brokenHtml);
     expect(s2.brokenRefs.map((b) => b.id), `改指不存在的文件仍然判得过：${bogus}`).toContain(withRef.id);
-    expect(JSON.stringify(s2.brokenRefs)).toContain('nope-provenance-check.json');
+    const missing = s2.brokenRefs
+      .filter((b) => b.id === withRef.id)
+      .flatMap((b) => b.missing);
+    expect(missing.some((path) => path.includes('nope-provenance-check')), `断链腿没有交回实际缺失路径：${JSON.stringify(s2.brokenRefs)}`).toBe(true);
   });
 
   it('反面证据：抹掉某一张卡唯一的来源，它必须落进无来源名单', () => {

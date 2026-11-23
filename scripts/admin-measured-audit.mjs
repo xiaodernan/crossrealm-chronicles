@@ -24,7 +24,6 @@
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { readdirSync, statSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = process.cwd();
