@@ -336,7 +336,10 @@ creative/music/soundtrack.html
 | 立夏 · Start of Summer | [start-of-summer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/287-start-of-summer.md) |
 | 繁花 · Flowering | [flowering](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/288-flowering.md) |
 | 竹 · Bamboo | [bamboo](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/289-bamboo.md) |
-| 节日 · Festival | [festival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/290-festival.md) |每一章对应游戏的章节走法：
+| 节日 · Festival | [festival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/290-festival.md) |
+| 余烬 · Embers | [embers](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/291-embers.md) |
+
+每一章对应游戏的章节走法：
 
 | 章节 | 对应游戏章节 | 核心舞台 |
 |------|--------------|----------|

@@ -1,24 +1,33 @@
 import { describe, it, expect } from 'vitest';
 import { sortVolumeIds } from '../src/ui/CanonJournalTab.js';
+import { NOVELLA_ZH } from '../src/content/novella/zh.js';
+import { NOVELLA_EN } from '../src/content/novella/en.js';
+
+/** 卷号名单从内容表现推：加卷只改 novella 两表，这条门自动跟着长。 */
+const NOVELLA_IDS = Object.keys(NOVELLA_ZH);
 
 /**
- * W-Z496 典籍馆 290 卷阅读顺序：卷号 "00".."289" 必须按数值排，
+ * W-Z496 典籍馆 291 卷阅读顺序：卷号 "00".."290" 必须按数值排，
  * 默认字典序会把 100 排在 99 前、18 排在 180 前（"1" < "9"），
  * 让读者「下一章」在 100→101→…→18 之间乱跳。
  */
 describe('典籍馆卷号数值排序（W-Z496）', () => {
-  it('0..289 全部按数值升序，无字典序错位', () => {
-    const ids = Array.from({ length: 290 }, (_, i) => String(i).padStart(2, '0'));
+  it('全部卷号按数值升序，无字典序错位', () => {
+    const ids = Array.from({ length: NOVELLA_IDS.length }, (_, i) => String(i).padStart(2, '0'));
     const shuffled = [...ids].reverse();
     const sorted = sortVolumeIds(shuffled);
     expect(sorted).toEqual(ids);
     expect(sorted[99]).toBe('99');
     expect(sorted[100]).toBe('100');
-    expect(sorted[sorted.length - 1]).toBe('289');
+    expect(sorted[sorted.length - 1]).toBe(String(NOVELLA_IDS.length - 1).padStart(2, '0'));
+  });
+
+  it('中英典籍两表卷号集合完全一致（新卷必须双语同时入典）', () => {
+    expect([...Object.keys(NOVELLA_EN)].sort()).toEqual([...NOVELLA_IDS].sort());
   });
 
   it('默认字典序确会错位（证明这把尺咬得住，不是空跑）', () => {
-    const ids = Array.from({ length: 290 }, (_, i) => String(i).padStart(2, '0'));
+    const ids = Array.from({ length: NOVELLA_IDS.length }, (_, i) => String(i).padStart(2, '0'));
     const naive = [...ids].sort();
     expect(naive).not.toEqual(ids);
     expect(naive.indexOf('100')).toBeLessThan(naive.indexOf('99'));

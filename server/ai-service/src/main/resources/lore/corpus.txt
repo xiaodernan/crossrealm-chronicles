@@ -14775,6 +14775,49 @@ The fire burned.
 
 *(End of volume XX · Volume two hundred and ninety overall · the seven-hundred-and-fourth year, eightieth part — Festival.)*
 
+# source: creative/novel/en/291-embers.md
+# The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
+
+**Genre**: Planar fantasy / dark epic / metafiction
+**Adapted from**: Crossrealm Chronicles
+**Volume XX**: The Seven-hundred-and-fourth Year — The Eighty-first Volume — Embers
+
+---
+
+## Two Hundred and Ninety-one: Embers
+
+The morning after the festival, A-Shi woke before the sky had fully lightened.
+
+There was a sweeping sound outside. Not the wind — bamboo branches over wet flagstones, one stroke, then another, with a breath between. He pulled on his clothes and went out. His mother was sweeping the courtyard. Last night's lanterns lay everywhere: the paper ones torn, their bamboo frames still whole; one tilted against the wall, its face marked with a small round scorch where a spark had landed.
+
+A-Shi crouched to pick it up. The paper lantern was as light as a dry leaf in his hand, the edge of the burn hole curled, still carrying a faint smell of saltpetre. He gathered the bamboo frames into one pile, the paper into another. His mother did not turn around. "Keep the bamboo," she said. "We can paste new paper on it next year."
+
+In the old clay jar by the corner lay the spent shell of a firework the children had set off, its red paper curling like a burnt lip. A-Shi nudged it into the ash with a stick and covered it with earth. The ash was still warm. He remembered the light at midnight — the whole lane bright for one instant, the ridge itself drawn in outline — and now there was only this cold jar of grey.
+
+Something hung on the door latch. He leaned closer: a little wooden bird, half its tail missing, one eye painted with a dot of charcoal. He did not recognise it. Some child must have dropped it in the rush last night and hung it there to wait for morning. He set it on the windowsill and did not take it inside.
+
+The stove gave a small sound from within the house.
+
+He went in and added two sticks of wood. The flames licked up, whitening the ends of the sticks before swallowing them slowly. Half a pot of yesterday's soup remained; he ladled a bowl and stood by the stove drinking it. The soup was cold, the fat set in a pale layer. His mother came in, took the bowl to warm it, and put it back in his hand. "The festival is over," she said. "The fire isn't."
+
+A-Shi looked into the firebox. Beneath the flames lay a few dark-red coals, not brilliant, but not out all night. He understood suddenly that last night's fireworks and this stove-fire were not the same thing: fireworks were for the sky, spent in an instant; the stove-fire was for the days, burning night after night.
+
+In the courtyard the fire-seed tree still had a torn ribbon caught in a branch, heavy with dew. A-Shi went over, untied it, dried it by the stove, folded it, and laid it on the windowsill beside the wooden bird.
+
+The charcoal dot of the bird's eye, touched by the firelight, seemed still to shine.
+
+From behind him his mother said, "Someone will come for that bird."
+
+"If nobody does, it stays," A-Shi said.
+
+The fire burned.
+
+The fire burned. Last night's ash, today's wood, tomorrow's seed — all in this one stove, and never once broken.
+
+---
+
+*(End of volume XX · Volume two hundred and ninety-one overall · the seven-hundred-and-fourth year, eighty-first part — Embers.)*
+
 # source: creative/novel/en/30-the-ninth-day.md
 # The Unchanted Chronicle of Crossrealm: The Keeper of the Anchor Fire
 
@@ -32220,6 +32263,49 @@ F2 隐藏 HUD。
 --- 
 
 *(卷二十 · 本章完 · 跨界线总第二百九十卷 · 卷二十之八十 · 第七百零四年 · 节日)*
+
+# source: creative/novel/291-余烬.md
+# 《跨界纪事：锚火守夜人》
+
+**类型**：位面奇幻 / 黑暗史诗 / 元叙事
+**改编自**：Crossrealm Chronicles（跨界纪事）
+**卷二十**：第七百零四年 · 第八十一卷 · 余烬
+
+---
+
+## 二百九十一 · 余烬
+
+节日的第二天，天没亮透，阿石就醒了。
+
+屋外有扫帚声。不是风——是竹枝扫过湿石板，一下，又一下，中间隔着一息。他披衣出去，看见母亲在扫院子。昨夜挂的彩灯落了一地：纸的破了，竹骨还完整，一盏歪在墙根，灯面上烫出一个焦黑的小圆，是焰火溅的。
+
+阿石蹲下去捡。纸灯捏在手里轻得像一片干叶，焦洞边缘卷着，凑近还有一点硝烟味。他把竹骨拢成一堆，纸的另放一堆。母亲没回头，只说：「竹的留着，明年还能糊。」
+
+院角那只旧陶缸里，昨夜孩子放的烟花剩了个空壳，红纸翘着，像一小片被烧焦的嘴唇。阿石拿树枝把它拨进灰堆，又用土盖了。灰是温的。他想起半夜那阵光——整条巷子亮了一瞬，连山脊都照出轮廓——现在只剩这一缸冷灰。
+
+门闩上有东西。他凑近看：是只木头小鸟，尾巴掉了一半，眼睛用炭画的一个点。不认识。许是哪家的孩子昨夜跑丢了，挂在门上等天亮。他把小鸟放在窗台上，没拿进屋。
+
+灶火在屋里响了一下。
+
+他进去，添了两根柴。火舌舔上来，先把柴头烧白，再慢慢吞下去。锅里还有昨夜剩的半锅汤，他舀了一碗，站在灶边喝。汤凉了，油脂凝成一层白。母亲进来，把那碗端去热了，又放回他手里：「节日过完了，火没过完。」
+
+阿石看着灶膛。火焰底下压着几块暗红的炭，不耀眼，但一整夜都没熄。他忽然明白昨夜那些焰火和这炉火不是一回事：焰火是给天看的，一瞬就尽；灶火是给日子看的，一夜一夜地烧。
+
+火种树在院里，枝上还缠着一条断了的彩带，被露水浸得发沉。阿石走过去，把彩带解下来，在灶边烤干，叠好，搁在窗台那只木头小鸟旁边。
+
+小鸟的眼睛那个炭点，被灶光一照，像还亮着。
+
+母亲在身后说：「谁家的鸟，等会儿有人来认。」
+
+「没人认就搁着。」阿石说。
+
+灶火燃着。
+
+灶火燃着。昨夜的灰，今天的柴，明天的火种——都在这一炉里，没断过。
+
+---
+
+*(卷二十 · 本章完 · 跨界线总第二百九十一卷 · 卷二十之八十一 · 第七百零四年 · 余烬)*
 
 # source: creative/novel/30-九日.md
 # 《跨界纪事：锚火守夜人》

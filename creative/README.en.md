@@ -338,7 +338,10 @@ The full English rendering lives under `creative/novel/en/` (00–13, every chap
 | Start of Summer | [start-of-summer](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/287-start-of-summer.md) |
 | Flowering | [flowering](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/288-flowering.md) |
 | Bamboo | [bamboo](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/289-bamboo.md) |
-| Festival | [festival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/290-festival.md) |Chapter → game-chapter mapping:
+| Festival | [festival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/290-festival.md) |
+| Embers | [embers](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/291-embers.md) |
+
+Chapter → game-chapter mapping:
 
 | Chapter | Game chapter | Core stage |
 |---------|-------------|------------|
