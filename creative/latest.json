@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-23T04:32:57.033Z",
+  "generated_at": "2026-11-23T04:41:24.495Z",
   "branch": "main",
-  "head": "aaae391",
-  "total_commits": 2503,
-  "pushed_at": "2026-11-23T12:22:45+08:00",
+  "head": "f063e2d",
+  "total_commits": 2504,
+  "pushed_at": "2026-11-23T12:33:08+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "f063e2d",
+      "at": "2026-11-23T12:33:08+08:00",
+      "subject": "feat(ui): W-Z519 offline-mode message - distinguish LLM switch-off from transient circuit break (zh/en + 2 tests)"
+    },
     {
       "short": "aaae391",
       "at": "2026-11-23T12:22:45+08:00",
@@ -26,11 +31,6 @@
       "short": "2977c88",
       "at": "2026-11-23T04:43:30+08:00",
       "subject": "docs(plan): W-Z517 回填 —— B177 台账关闭 + §9 两条教训"
-    },
-    {
-      "short": "0d93ab2",
-      "at": "2026-11-23T04:40:57+08:00",
-      "subject": "fix(admin): 合成面板被安了别人的种子 + 三条真事件在管理页不可见（W-Z517）"
     }
   ],
   "tracked_files": 1971,

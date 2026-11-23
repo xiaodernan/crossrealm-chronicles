@@ -100,6 +100,28 @@ class OracleControllerTest {
     }
 
     @Test
+    void W_Z519_apiClosed_returnsVerbatimExcerptOfflineNot503() throws Exception {
+        // API 关闭（llm-disabled）→ 不摆 503，而是把 BM25 命中的原典段落逐字交出去。
+        // 这是检索already完成的结果，零成本、零编造。
+        when(client.complete(anyString(), anyString(), anyString()))
+                .thenThrow(new com.crossrealm.chronicles.ai.AdvisorUnavailableException("llm-disabled"));
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("question", "锚火在典籍里是什么？");
+
+        mvc.perform(post("/api/ai/lore/answer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(MAPPER.writeValueAsString(body)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ok").value(true))
+                .andExpect(jsonPath("$.offline").value(true))
+                .andExpect(jsonPath("$.model").value("oracle-bm25-offline"))
+                .andExpect(jsonPath("$.answer").isNotEmpty())
+                .andExpect(jsonPath("$.sources").isArray())
+                .andExpect(jsonPath("$.sources.length()").isNotEmpty());
+    }
+
+    @Test
     void blankQuestion_isRejected() throws Exception {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("question", "");

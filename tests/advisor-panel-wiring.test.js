@@ -343,6 +343,20 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
     h.cleanup();
   });
 
+  it('W-Z519：离线典籍摘录不进上游命中率统计（这一问根本没打上游）', async () => {
+    const h = panelHarness();
+    h.panel.show();
+    await flush();
+    h.panel._upstreamStats = { total: 4, hits: 3 };
+    h.panel._handleResult({
+      ok: true, reason: ADVISOR_REASONS.OK, status: 200,
+      data: { answer: '[canon/锚火.txt]\n火还在。', model: 'oracle-bm25-offline', cached: false, offline: true },
+    });
+    expect(h.panel._upstreamStats).toEqual({ total: 4, hits: 3 });
+    expect(h.panel._cacheStats.hits).toBe(0); // 本地缓存也没命中，别把离线摘录算成缓存收益
+    h.cleanup();
+  });
+
   it('W-Z519：503 + 熔断（无 llm-disabled）仍保留原本的熔断语', async () => {
     const h = panelHarness();
     h.panel.show();

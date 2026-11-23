@@ -35,8 +35,13 @@ import org.springframework.stereotype.Service;
 public class LoreOracleService {
 
     /** Result shape mirrored in the HTTP response. {@code path} = the StateGraph nodes actually walked (retrieve → compose → gate / retrieve → gate on a no-match short-circuit). */
+    /**
+     * {@code offline=true} 表示这一答没打 LLM：API 关闭时把 BM25 命中的原典段落**逐字**摊给玩家，
+     * 不编造、不假装成模型答案（W-Z519）。客户端可据此标注来源性质。
+     */
     public record OracleResult(boolean ok, String answer, List<String> sources, String model,
-            boolean cached, boolean upstreamCached, long latencyMs, boolean guarded, List<String> path) {}
+            boolean cached, boolean upstreamCached, long latencyMs, boolean guarded, List<String> path,
+            boolean offline) {}
 
     private final LlmClient client;
     private final Bm25Index index;
@@ -118,19 +123,33 @@ public class LoreOracleService {
                     + (rest.length() > 0 ? "\n\nOther excerpts (use only if the first doesn't answer):\n\n"
                             + rest.toString().trim() : "")
                     + "\n\nReminder (read this FIRST):\nThe question asks about the entry in the **most relevant excerpt** block — locate its heading line (the one containing the exact name from the player question) and answer with that block's line verbatim. If no heading line contains the asked name, refuse with 「此物未在典籍中 · This is not in the record.」\n\nQuote branch: if the player question quotes a line verbatim (any quote/quotation marks included), treat the quoted text as the \"name\" to locate — find the excerpt line containing that quote exactly, and answer with that quote together with the file path it came from. Only refuse when the quoted text does not appear anywhere in the excerpts.";
-            LlmClient.Answer answer = client.complete(system, user,
-                    deep ? LlmClient.CacheKeys.ORACLE_DEEP : LlmClient.CacheKeys.ORACLE);
-            return Map.<String, Object>of("rawAnswer", String.valueOf(answer.answer()),
-                    "model", String.valueOf(answer.model()),
-                    "cached", answer.cached(),
-                    "upstreamCached", answer.upstreamCached(),
-                    "latencyMs", answer.latencyMs());
+            try {
+                LlmClient.Answer answer = client.complete(system, user,
+                        deep ? LlmClient.CacheKeys.ORACLE_DEEP : LlmClient.CacheKeys.ORACLE);
+                return Map.<String, Object>of("rawAnswer", String.valueOf(answer.answer()),
+                        "model", String.valueOf(answer.model()),
+                        "cached", answer.cached(),
+                        "upstreamCached", answer.upstreamCached(),
+                        "latencyMs", answer.latencyMs(),
+                        "offline", false);
+            } catch (com.crossrealm.chronicles.ai.AdvisorUnavailableException e) {
+                // W-Z519：API 关了不摆 503——把 BM25 命中的原典段落逐字摊出去（不编造）。
+                // 检索本来就跑完了，这一步零成本；玩家仍能在没有大模型的情况下翻典籍。
+                String excerpt = excerptFallback(firstBlock, rest);
+                return Map.<String, Object>of("rawAnswer", excerpt,
+                        "model", "oracle-bm25-offline",
+                        "cached", false,
+                        "upstreamCached", false,
+                        "latencyMs", 0L,
+                        "offline", true);
+            }
         });
         g.addNode(NODE_GATE, state -> {
             if (((Number) state.getOrDefault("hitCount", 0)).intValue() == 0) {
                 return Map.<String, Object>of("answer", REFUSAL, "guarded", false,
                         "model", "oracle-bm25", "cached", false,
-                        "upstreamCached", false, "latencyMs", 0L);
+                        "upstreamCached", false, "latencyMs", 0L,
+                        "offline", false);
             }
             String raw = String.valueOf(state.getOrDefault("rawAnswer", ""));
             String cleaned = LlmGuards.stripMarkdown(raw);
@@ -140,7 +159,8 @@ public class LoreOracleService {
                     "model", String.valueOf(state.get("model")),
                     "cached", state.get("cached"),
                     "upstreamCached", state.get("upstreamCached"),
-                    "latencyMs", state.get("latencyMs"));
+                    "latencyMs", state.get("latencyMs"),
+                    "offline", Boolean.TRUE.equals(state.get("offline")));
         });
         g.addEdge(NODE_COMPOSE, NODE_GATE);
         g.setEntryPoint(NODE_RETRIEVE);
@@ -213,7 +233,8 @@ public class LoreOracleService {
                 Boolean.TRUE.equals(state.get("upstreamCached")),
                 ((Number) state.get("latencyMs")).longValue(),
                 Boolean.TRUE.equals(state.get("guarded")),
-                path);
+                path,
+                Boolean.TRUE.equals(state.get("offline")));
     }
 
     /**
@@ -240,7 +261,8 @@ public class LoreOracleService {
                 Boolean.TRUE.equals(state.get("upstreamCached")),
                 ((Number) state.get("latencyMs")).longValue(),
                 Boolean.TRUE.equals(state.get("guarded")),
-                path);
+                path,
+                Boolean.TRUE.equals(state.get("offline")));
     }
 
     /**
@@ -302,7 +324,19 @@ public class LoreOracleService {
     }
 
     private OracleResult failure(String reason) {
-        return new OracleResult(false, reason, List.of(), "none", false, false, 0L, false, List.of());
+        return new OracleResult(false, reason, List.of(), "none", false, false, 0L, false, List.of(), false);
+    }
+
+    /**
+     * 离线摘录：把 BM25 命中的原典片段逐字交出去，长度封顶防大段刷屏。
+     * 只取已经检索到的内容——一个字都不编，这是「不假装 LLM 在场」的底线。
+     */
+    private static String excerptFallback(StringBuilder firstBlock, StringBuilder rest) {
+        String text = firstBlock.toString().trim();
+        if (rest.length() > 0) text += "\n\n" + rest.toString().trim();
+        text = LlmGuards.stripMarkdown(text);
+        final int cap = 1200;
+        return text.length() <= cap ? text : text.substring(0, cap) + " …";
     }
 
     /**

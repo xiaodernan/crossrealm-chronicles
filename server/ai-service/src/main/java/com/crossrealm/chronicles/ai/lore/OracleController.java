@@ -57,6 +57,8 @@ public class OracleController {
         body.put("latencyMs", result.latencyMs());
         body.put("guarded", result.guarded());
         body.put("path", result.path());
+        // W-Z519：true = 这一答是 BM25 原典摘录（API 关闭时的诚实降级），不是 LLM 生成。
+        body.put("offline", result.offline());
         String effectiveRequestId = RequestCorrelation.sanitizeInbound(headerRequestId);
         if (effectiveRequestId != null) {
             body.put("requestId", effectiveRequestId);

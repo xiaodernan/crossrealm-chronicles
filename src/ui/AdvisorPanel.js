@@ -404,7 +404,8 @@ export class AdvisorPanel {
       this._cacheStats.total += 1;
       if (data.cached === true) this._cacheStats.hits += 1;
       // 本地摘要缓存命中 = 根本没打上游，这一问不进上游统计（也不该声称命中上游缓存）。
-      if (data.cached !== true) {
+      // W-Z519：offline 摘录同样零上游——API 关掉后不该在面板里凭空记一笔"上游未命中"。
+      if (data.cached !== true && data.offline !== true) {
         this._upstreamStats.total += 1;
         if (upstreamCached) this._upstreamStats.hits += 1;
       }
