@@ -149,6 +149,7 @@ docker compose down
 | `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS` | Config repo location for the native profile (smoke uses it to redirect config-server at a temp dir) | `classpath:/config` |
 | `CROSSREALM_ONLINE_BASE_URL` (frontend: `crossrealm_online_base_url`) | Frontend gateway address | same origin |
 | `LLM_API_KEY` | **ai-service exclusive** upstream LLM key (never config server / image / logs / body) | (empty ⇒ ai-service boots unconfigured; `/api/ai/health.configured=false`) |
+| `LLM_ENABLED` (W-Z519) | Master LLM switch. The API was closed for cost/usage on 2026-11-23 ⇒ `false`: not a single byte reaches the upstream, every LLM endpoint returns 503 → the frontend falls back deterministically. The key is kept; flip to `true` when the API reopens | `false` (off) |
 | `LLM_BASE_URL` | OpenAI-compatible upstream | `https://api.aizzz.xyz/v1` |
 | `LLM_MODEL` | Model id (`gpt-6.2-sol` etc. under `/v1/models`) | `gpt-6.2-sol` |
 

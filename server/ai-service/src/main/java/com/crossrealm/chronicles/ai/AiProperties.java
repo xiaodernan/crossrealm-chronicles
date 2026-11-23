@@ -30,6 +30,13 @@ public class AiProperties {
      *  首问冷一次、第二问即热（实测 warm 88.8%）远比开机常暖划算。廉价车道（v3≈5K）不受影响。 */
     private boolean warmupDeepLanes = false;
 
+    /**
+     * LLM 总开关（W-Z519）：API 因成本/用量关闭后置 false —— 上游一个字节都不打，
+     * 所有车道统一走 AdvisorUnavailableException → AiErrors 503 → 前端确定性降级。
+     * 密钥保留在配置里不删：开关一开即恢复，不必重新填 key。
+     */
+    private boolean llmEnabled = true;
+
     public String getBaseUrl() { return baseUrl; }
     public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
 
@@ -68,4 +75,7 @@ public class AiProperties {
 
     public boolean isWarmupDeepLanes() { return warmupDeepLanes; }
     public void setWarmupDeepLanes(boolean warmupDeepLanes) { this.warmupDeepLanes = warmupDeepLanes; }
+
+    public boolean isLlmEnabled() { return llmEnabled; }
+    public void setLlmEnabled(boolean llmEnabled) { this.llmEnabled = llmEnabled; }
 }

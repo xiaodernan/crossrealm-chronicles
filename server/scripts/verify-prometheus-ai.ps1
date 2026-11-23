@@ -44,15 +44,17 @@ try {
     if (-not $healthy) { Write-Error "service never came up (see $logOut / $logErr)"; exit 1 }
     Write-Output "ai-service healthy"
 
-    # if a key exists, do one real advisor round trip so the new metrics tick.
+    # 一次真上游往返，须同时满足：有 key **且** LLM_ENABLED 显式为 true。
+    # API 2026-11-23 因成本/用量关闭；本地 .env 的 LLM_ENABLED=false 让这段静默跳过（W-Z519）。
     $hasKey = -not [string]::IsNullOrWhiteSpace($env:LLM_API_KEY)
-    if ($hasKey) {
+    $llmOn = ($env:LLM_ENABLED -eq 'true')
+    if ($hasKey -and $llmOn) {
         $body = '{"question":"Which campfire is best for supplies?"}'
         $resp = Invoke-WebRequest -UseBasicParsing -Method Post -Uri 'http://127.0.0.1:28084/api/ai/chat' -ContentType 'application/json; charset=utf-8' -Body $body -TimeoutSec 60
         Write-Output "chat HTTP $($resp.StatusCode)"
         if ($resp.StatusCode -ne 200) { Write-Error "advisor chat did not answer 200 (got $($resp.StatusCode))"; exit 1 }
     } else {
-        Write-Output "LLM_API_KEY not set; skipping live advisor round trip (metrics assertion limited)"
+        Write-Output "LLM_API_KEY not set or LLM_ENABLED!=true; skipping live advisor round trip (metrics assertion limited)"
     }
 
     # scrape prometheus

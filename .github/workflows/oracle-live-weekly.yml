@@ -1,7 +1,8 @@
 # Oracle live weekly — 每周一（UTC）起一次真上游 Oracle 联调，归档原文为 GitHub Actions artifact。
 #
 # 口径（2026-11-16 定案）：
-# - 需要仓库 secret `LLM_API_KEY`（Settings → Secrets → Actions）。没配置就**跳过**，按成功处理——不烧 key、不假红。
+# - 需要仓库 secret `LLM_API_KEY` **且** repo variable `LLM_ENABLED=true`（Settings → Secrets and variables → Actions）。
+#   任一不满足就**跳过**，按成功处理——不烧 key、不假红。API 2026-11-23 因成本/用量关闭，LLM_ENABLED 默认不设即跳过。
 # - 不走 push 触发（每次 main 都打真钱不划算）；只 weekly + workflow_dispatch 手动。
 # - 历史归档在 main 的 docs/oracle-live-log/ 下（本地 `node scripts/oracle-log-archive.mjs` 手动跑）；
 #   本 workflow 只上传 artifact（`actions/upload-artifact`），不自动提交——避免无审查 commit 进 main。
@@ -43,14 +44,14 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Skip gracefully when LLM_API_KEY is not configured
+      - name: Skip gracefully when LLM_API_KEY is not configured or LLM_ENABLED is not explicitly true
         id: gate
         run: |
-          if [ -n "${{ secrets.LLM_API_KEY }}" ]; then
+          if [ -n "${{ secrets.LLM_API_KEY }}" ] && [ "${{ vars.LLM_ENABLED }}" = "true" ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::LLM_API_KEY secret is not configured — skipping live call (no cost, no failure)"
+            echo "::notice::LLM_API_KEY secret missing or LLM_ENABLED repo variable not 'true' — skipping live call (no cost, no failure). API closed 2026-11-23; set LLM_ENABLED=true only when reopened."
           fi
 
       - name: Bm25 + lore gates (always)

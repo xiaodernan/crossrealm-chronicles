@@ -174,6 +174,7 @@ docker compose down
 | `SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS` | native profile 下 config-server 服务的配置仓库 —— 临时 smoke 用，把它指向 temp 目录以改写 game-service.yml | （classpath:/config） |
 | `CROSSREALM_ONLINE_BASE_URL`（前端侧：`crossrealm_online_base_url`） | 前端网关地址 | 同源 origin |
 | `LLM_API_KEY` | **ai-service 独占**的大模型密钥（不进配置中心 / 镜像 / 日志 / 响应体） | （空 = ai-service 以未配置模式启动，`/api/ai/health.configured=false`） |
+| `LLM_ENABLED`（W-Z519） | LLM 总开关：API 因成本/用量关闭后置 `false`，上游一个字节都不打，LLM 端点统一 503 → 前端确定性降级；密钥保留不删，恢复时翻 `true` 即可 | `false`（关） |
 | `LLM_BASE_URL` | OpenAI 兼容上游地址 | `https://api.aizzz.xyz/v1` |
 | `LLM_MODEL` | 模型 id（`/v1/models` 列出 `gpt-6.2-sol` 等） | `gpt-6.2-sol` |
 | `CROSSREALM_ONLINE_BASE_URL`（前端侧：`crossrealm_online_base_url`） | 前端网关地址 | 同源 origin |

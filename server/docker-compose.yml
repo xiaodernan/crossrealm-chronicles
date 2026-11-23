@@ -139,6 +139,9 @@ services:
       EUREKA_INSTANCE_PREFERIPADDRESS: "false"
       SPRING_CONFIG_IMPORT: optional:configserver:http://config:8888
       LLM_API_KEY: ${LLM_API_KEY:-}
+      # W-Z519：API 因成本/用量关闭 → 默认 false；上游一个字节都不打，LLM 端点统一 503 走前端降级。
+      # 日后恢复设 LLM_ENABLED=true 即可，密钥不用重填。
+      LLM_ENABLED: ${LLM_ENABLED:-false}
       # 上游可钉死（默认 api.aizzz.xyz）。压测/离线时指向本地 stub：
       #   LLM_BASE_URL=http://host.docker.internal:28884/v1 docker compose up -d
       LLM_BASE_URL: ${LLM_BASE_URL:-https://api.aizzz.xyz/v1}

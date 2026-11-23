@@ -146,6 +146,8 @@ public class LlmClient {
 
     /** 这答这桶的默认上游 key 在下一行汇编同一条 prefix 而不改变性质 */
     public Answer complete(String system, String user, String cacheKey) {
+        // W-Z519：先说清是「被关掉」还是「没填 key」——两者都不可用，但运维处置完全不同。
+        if (!props.isLlmEnabled()) throw new AdvisorUnavailableException("llm-disabled");
         if (!isConfigured()) throw new AdvisorUnavailableException("not-configured");
         String key = digest(props.getModel() + "\u0000" + system + "\u0000" + user);
         String cached = cache.get(key);
@@ -278,6 +280,10 @@ public class LlmClient {
      * 不把真实用户第一问凭空缓存成同一句话。任何失败完全静默。
      */
     public void warmupUpstream() {
+        if (!props.isLlmEnabled()) {
+            LOG.info("llm.warmup.skip (llm-enabled=false, API closed)");
+            return;
+        }
         if (!isConfigured()) {
             LOG.info("llm.warmup.skip (no api key configured)");
             return;
@@ -410,6 +416,8 @@ public class LlmClient {
     public Map<String, Object> health() {
         Map<String, Object> snapshot = new LinkedHashMap<>();
         snapshot.put("configured", isConfigured());
+        // W-Z519：区分「被关掉」与「没填 key」——configured=false 时运维得知道是哪一种。
+        snapshot.put("llmEnabled", props.isLlmEnabled());
         snapshot.put("model", props.getModel());
         snapshot.put("circuit", breaker.state().name());
         snapshot.put("cache", cache.stats());
@@ -454,8 +462,16 @@ public class LlmClient {
         return snapshot;
     }
 
+    /**
+     * "能用"= 总开关开 **且** 有密钥（W-Z519）。
+     *
+     * <p>API 因成本/用量关闭后把 {@code llm-enabled} 置 false：密钥不动，但这里一律判不可用，
+     * {@link #complete} / {@link #warmupUpstream} 一步都不往上游走 —— 既不烧钱也不等超时。
+     * 各端点已有的 {@code @ExceptionHandler(AdvisorUnavailableException)} 把 503 交给前端降级。
+     */
     public boolean isConfigured() {
-        return props.getApiKey() != null && !props.getApiKey().isBlank();
+        return props.isLlmEnabled()
+                && props.getApiKey() != null && !props.getApiKey().isBlank();
     }
 
     private String endpoint() {
