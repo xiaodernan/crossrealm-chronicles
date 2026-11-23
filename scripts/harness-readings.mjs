@@ -683,6 +683,13 @@ export function 管理页探针越线(R) {
     if (reading.pageOverflow !== false || !Array.isArray(reading.cardOverlaps) || reading.cardOverlaps.length !== 0) out.push(`${name}-layout: ${JSON.stringify({ overflow: reading.pageOverflow, overlaps: reading.cardOverlaps })}`);
     if (reading.suspiciousTokens !== false) out.push(`${name}-tokens: DOM 出现 NaN / undefined`);
     if (!Array.isArray(reading.exceptions) || reading.exceptions.length !== 0) out.push(`${name}-exceptions: ${JSON.stringify(reading.exceptions)}`);
+    if (!Number.isInteger(reading.syntheticBadges) || reading.syntheticBadges < 5) out.push(`${name}-source-labels: 合成区缺少醒目来源标记`);
+    if (reading.measuredVisible !== true || reading.rollupReading?.real !== true) out.push(`${name}-measured: 实测遥测快照没有独立呈现`);
+    const rollup = reading.rollupReading;
+    if (rollup && (rollup.retention?.eligible !== false || rollup.trend?.forecast !== null
+      || rollup.total !== rollup.grouped?.humanAdjacent + rollup.grouped?.probe + rollup.grouped?.other)) {
+      out.push(`${name}-rollup-honesty: ${JSON.stringify(rollup)}`);
+    }
   }
   if (normal.wrongPasswordRejected !== true || normal.wrongDashboardLocked !== true) out.push('wrong-password: 错误口令没有挡住仪表盘');
   if (normal.dashboardUnlocked !== true || normal.gateVisible !== false) out.push('normal-unlock: 正确口令没有解锁');
@@ -695,6 +702,7 @@ export function 管理页探针越线(R) {
   if (fallback.cjkCount !== 0) out.push(`fallback-language: 英文降级页仍有 ${fallback.cjkCount} 个 CJK 字符`);
   if (english.consoleErrors?.length !== 0 || english.networkErrors?.length !== 0) out.push('english-console: 英文切换产生错误');
   if (fallback.dashboardUnlocked !== true || fallback.kpiFallback !== true) out.push('fallback: 合成数据失败时没有显示降级卡');
+  if (normal.syntheticStaleReadings < 1 || fallback.syntheticStaleReadings !== 0) out.push('fallback-stale: 合成故障后仍保留旧图表读数');
   const consoleErrors = Array.isArray(fallback.consoleErrors) ? fallback.consoleErrors : [];
   const networkErrors = Array.isArray(fallback.networkErrors) ? fallback.networkErrors : [];
   const unexpectedConsole = consoleErrors.filter((entry) => !String(entry?.text ?? '').includes('[admin] synthetic.json load failed:'));

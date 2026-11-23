@@ -66,6 +66,21 @@ describe('管理页真机探针判据', () => {
     expect(管理页探针越线(seed).join('\n')).toContain('seeded-counts');
   });
 
+  it('反向控制：来源标记、实测快照与故障后旧图清理都必须红', () => {
+    const unlabeled = clone();
+    unlabeled.scenarios.normal.syntheticBadges = 0;
+    expect(管理页探针越线(unlabeled).join('\n')).toContain('normal-source-labels');
+    const unmeasured = clone();
+    unmeasured.scenarios.normal.measuredVisible = false;
+    expect(管理页探针越线(unmeasured).join('\n')).toContain('normal-measured');
+    const fakeRetention = clone();
+    fakeRetention.scenarios.normal.rollupReading.retention.eligible = true;
+    expect(管理页探针越线(fakeRetention).join('\n')).toContain('normal-rollup-honesty');
+    const stale = clone();
+    stale.scenarios.fallback.syntheticStaleReadings = 1;
+    expect(管理页探针越线(stale).join('\n')).toContain('fallback-stale');
+  });
+
   it('反向控制：故障轮只许保留那一条已分类的合成数据错误', () => {
     const missing = clone();
     missing.scenarios.fallback.consoleErrors = [];

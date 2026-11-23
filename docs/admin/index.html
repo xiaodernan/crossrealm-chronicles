@@ -84,6 +84,8 @@ code{overflow-wrap:anywhere}
 }
 .panel{background:var(--panel);border:1px solid var(--rim);border-radius:12px;padding:18px;margin-bottom:16px}
 .panel h2{font-size:.78rem;color:var(--gold-dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.source-badge{display:inline-block;border:1px solid rgba(194,164,98,.45);border-radius:4px;padding:1px 5px;font-size:.58rem;letter-spacing:.06em;color:var(--gold-dim);vertical-align:middle}
+.source-note{border:1px solid rgba(122,146,214,.35);background:rgba(122,146,214,.07);border-radius:8px;padding:8px 10px;margin-bottom:12px;font-size:.7rem;color:var(--muted);line-height:1.6}
 .panel h2 small{color:var(--muted);font-size:.65rem;font-weight:normal;letter-spacing:.03em;text-transform:none}
 .chart{width:100%;height:160px}
 .chart-axes{color:var(--muted);font-size:.62rem}
@@ -170,7 +172,7 @@ code{overflow-wrap:anywhere}
       <h2><span data-i18n="local_h2">本地真实事件</span> <small data-i18n="local_small">当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条</small></h2>
       <div id="localEventsGrid" class="kpi-grid"></div>
       <div id="localEventsList" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:.65rem;color:rgba(233,226,210,.6);max-height:60px;overflow-y:auto;line-height:1.6;white-space:pre-line"></div>
-      <div style="font-size:.68rem;color:var(--muted);margin-top:6px" data-i18n-html="local_note">说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。</div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:6px" data-i18n-html="local_note">说明：以下是 <em>你这台浏览器</em> 的真实本地事件，不会自动上传。下方实测遥测是后端事件计数快照，探针占多数且没有用户/会话维度，不能当作用户统计。</div>
     </div>
 
     <!-- Local AI insight (derived from THIS machine's LS event buffer) -->
@@ -181,25 +183,29 @@ code{overflow-wrap:anywhere}
 
     <!-- Backend live rollup (when served from the LAN gateway compose) -->
     <div class="panel" id="liveRollupPanel" style="display:none;border-color:rgba(155,214,122,.35)">
-      <h2><span data-i18n="live_h2">后端真值 · Live Backend</span> <small data-i18n="live_small">/api/telemetry/summary-rollup · Postgres 14 天 · 仅本机 compose</small></h2>
+      <h2><span data-i18n="live_h2">实测遥测 · Measured Telemetry</span> <span class="source-badge" data-source="measured">MEASURED</span><small data-i18n="live_small">/api/telemetry/summary-rollup · 事件计数 · 非用户口径</small></h2>
       <div id="liveRollupBars" style="display:flex;flex-direction:column;gap:4px;font-size:.72rem"></div>
+      <div id="liveRollupTrend" style="font-size:.72rem;line-height:1.7;margin-top:10px"></div>
       <div id="liveRollupFoot" style="font-size:.62rem;color:var(--muted);margin-top:6px"></div>
     </div>
 
+    <!-- Synthetic operating scenario; never mixed into measured telemetry -->
+    <div data-synthetic-region>
+    <div class="source-note" data-i18n="synthetic_note">合成情景：以下 KPI、DAU、预测、功能占比、漏斗、留存与建议均由确定性种子生成，不是用户数据，也不用于留存或增长结论。</div>
     <!-- KPI Strip -->
     <div class="kpi-grid" id="kpiGrid"></div>
 
     <!-- DAU curve + features -->
     <div class="two-col">
       <div class="panel">
-        <h2><span data-i18n="dau_h2">30 天 DAU 曲线</span> <small data-i18n="dau_small">mu × 日数 · 滚动</small></h2>
+        <h2><span data-i18n="dau_h2">30 天 DAU 曲线</span><span class="source-badge" data-source="synthetic">SYNTHETIC</span><small data-i18n="dau_small">mu × 日数 · 滚动</small></h2>
         <div id="dChart" style="position:relative;height:180px"></div>
         <div class="chart-axes" style="display:flex;justify-content:space-between;padding:0 4px;font-family:'JetBrains Mono',Consolas,monospace;">
           <span>D30</span><span>D20</span><span>Today</span>
         </div>
       </div>
       <div class="panel">
-        <h2><span data-i18n="pred_h2">未来 14 天 · 趋势预测</span> <small data-i18n="pred_small">线性回归 · 平移</small></h2>
+        <h2><span data-i18n="pred_h2">未来 14 天 · 趋势预测</span><span class="source-badge" data-source="synthetic">SYNTHETIC</span><small data-i18n="pred_small">线性回归 · 平移</small></h2>
         <div id="pChart" style="height:180px"></div>
         <div class="chart-axes" style="display:flex;justify-content:space-between;padding:0 4px;font-family:'JetBrains Mono',Consolas,monospace;">
           <span>+1d</span><span>+7d</span><span>+14d</span>
@@ -212,18 +218,18 @@ code{overflow-wrap:anywhere}
 
     <!-- Feature adoption -->
     <div class="panel">
-      <h2><span data-i18n="features_h2">功能潮汐 · 玩家爱用什么</span> <small data-i18n="features_small">最近 30 天 · 占会话比</small></h2>
+      <h2><span data-i18n="features_h2">功能潮汐 · 玩家爱用什么</span><span class="source-badge" data-source="synthetic">SYNTHETIC</span><small data-i18n="features_small">最近 30 天 · 占会话比</small></h2>
       <div id="featureBars"></div>
     </div>
 
     <!-- Funnel + retention -->
     <div class="two-col">
       <div class="panel">
-        <h2><span data-i18n="funnel_h2">转化漏斗</span> <small data-i18n="funnel_small">从抵达出场页 → 炉主徽章</small></h2>
+        <h2><span data-i18n="funnel_h2">转化漏斗</span><span class="source-badge" data-source="synthetic">SYNTHETIC</span><small data-i18n="funnel_small">从抵达出场页 → 炉主徽章</small></h2>
         <div class="funnel" id="funnelRow"></div>
       </div>
       <div class="panel">
-        <h2><span data-i18n="retention_h2">次留 / 复滚 / 回流</span> <small>D1 · D3 · D7 · D14</small></h2>
+        <h2><span data-i18n="retention_h2">次留 / 复滚 / 回流</span><span class="source-badge" data-source="synthetic">SYNTHETIC</span><small>D1 · D3 · D7 · D14</small></h2>
         <div class="retention-grid" id="retentionGrid"></div>
       </div>
     </div>
@@ -272,7 +278,7 @@ code{overflow-wrap:anywhere}
         <div class="kpi" style="border-color:rgba(140,220,255,.45)"><div class="kpi-label" data-i18n="meas_l36">微服务全舰 + 路由实测（W-Z467 · 2026-11-19 · MEASURED）</div><div class="kpi-value">7<span style="font-size:.7em;color:var(--muted)" data-i18n="meas_v36"> 实例</span></div><div class="kpi-trend up" data-i18n="meas_tr36">compose 全舰七个服务（discovery · config-server · gateway · game-service · ai-service · season-service · presence-service · notification-service · postgres · redis）全部 Up healthy；经 Gateway lb:// 实测直连：/api/seasons → 200（ember/tide/gloom/radiant 真赛季数据）· /api/presence/world/count → 200 · /api/notify/recent → 200 · /api/version → 200（game-service）· /api/ai/health → 200（ai-service）· eureka registry 七实例全 UP；季节/出行/通知三条先前长期 503 的路由本轮全部翻绿；无实例 DOWN。</div></div>
         <div class="kpi" style="border-color:rgba(138,255,198,.45)"><div class="kpi-label" data-i18n="meas_l37">compose→LLM 真上游贯通（W-Z475 · 2026-11-19 · MEASURED）</div><div class="kpi-value">1<span style="font-size:.7em;color:var(--muted)" data-i18n="meas_v37"> 链</span></div><div class="kpi-trend up" data-i18n="meas_tr37">HttpLlmTransport 新增 LLM_PROXY_URL（解析 host:port → JDK HttpClient ProxySelector CONNECT；未设/坏值行为逐字节不变；进程内 HTTP 不走它；零网络单测 5/5）。容器内原 NXDOMAIN 直连死路由上，本轮经 Gateway POST /api/ai/lore/answer 活体实测：HTTP 200 · model=gpt-6.2-sol · upstreamCached=true · latencyMs=10659；ai.upstream.usage：cache=crossrealm-oracle-v1 · prompt=47904 · completion=162 · cached=2281 · cachedRatio=4.8%。相同问句紧随其后由 JVM 摘要缓存 0ms 接管（cached=true · path=[retrieve,compose,gate] 未重放）——Ember/Oracle 两级缓存链路在 compose 内成立。W-Z475 语料（269 卷）本身即检索来源。判官门禁输出「此物未在典籍中」是因为锚火点燃场景在 v3 语料无收录，不是链路失败。顺手修复：compose 端口 8761 已被用户 careeros-discovery 占用 → 本项目保持 18761 显式端口；fleet 全绿（10/10 healthy · Eureka 七实例）。</div></div>
         <div class="kpi" style="border-color:rgba(255,217,138,.45)"><div class="kpi-label" data-i18n="meas_l28">Oracle RAG 离线检索实测（W-Z415 · BM25 · 611 源）</div><div class="kpi-value">88.9<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr28">scripts/lore-retrieval-probe.mjs（Java Bm25Tokenizer 逐字镜像：Han 单码点 token · k1=1.5 · b=0.75 · 同 idf 公式）：9 个真实问题 recall@4=8/9、recall@6=8/9 —— 6 个近作卷（217-222）全部命中；唯一未命中：单字 token 密集且词项全场极高频的「灶火燃着，阿石坐在灶前」，146/197/131 等灶火高频章胜过 217。结论：主消息锚定问法（专名/具体场景）给出真值 88.9%；不作留存式推断、只报检索覆盖率。产物 → docs/admin/data/lore-retrieval-probe.json（MEASURED）</div></div>
-        <div class="kpi" style="border-color:rgba(255,150,150,.45)"><div class="kpi-label" data-i18n="meas_l26">留存窗口（W-Z404 后实测 · 2026-11-19 · 3 天有事件 / 11 天为 0）</div><div class="kpi-value">0<span style="font-size:.7em;color:var(--muted)"> D+14</span></div><div class="kpi-trend flat" data-i18n="meas_tr26">唯一真实遥测（gateway /api/telemetry/summary-rollup · 627 事件 / 3 日）：boss_kill 30 · canon_open 8 · loadtest 424 · stress-probe 133 · smoke 32 · human-adjacent 38 (6.07%)· 11-19 当日 0 事件。<b>留存不可计算</b>：只有 3 天有数据、11 天 0、verified probe 全跑同次测试 rig、没有 userId/session、没有第二次回访。任何 D1/D3/D7 retention 曲线在这组窗口上都是虚构——故事明写、规则明写：zero events = no cohort. 行动项 → telemetry v2（boss_kill 注入 hashed-userId + reason · 不存个人信息 · 至少 n≥200 unique user / 14 天窗 · 关闭后才放行留存卡）。docs/admin/data/measured-funnel.json<b>当前不做留存推断</b>。</div></div>
+        <div class="kpi" style="border-color:rgba(255,150,150,.45)"><div class="kpi-label" data-i18n="meas_l26">真实留存 · 不可计算</div><div class="kpi-value">N/A</div><div class="kpi-trend flat" data-i18n="meas_tr26">没有 userId / sessionId，无法建立 D1/D3/D7/D14 回访队列；事件数为 0 也不代表留存为 0。历史实测快照见 docs/admin/data/measured-funnel.json；至少 14 天窗、200 名去重用户后才允许计算。</div></div>
         <div class="kpi" style="border-color:rgba(255,179,204,.45)"><div class="kpi-label" data-i18n="meas_l23">Boot 真·活场录（W-Z350 · 本机 SwiftShader · 2026-11-18）</div><div class="kpi-value">77.8<span style="font-size:.7em;color:var(--muted)"> s</span></div><div class="kpi-trend flat" data-i18n="meas_tr23">scripts/boot-probe.mjs（vite dev + headless Chrome · 真窗实测）：vite ready 9.1s → navigate 23.6s → BOOT OK in **77801ms** · frames¸¸ｮ2.5（SwiftShader 软件渲染；真 GPU 远远不止这些）· __game/enemyManager/scene 全 present · boot 完成且零异常；artifact → docs/admin/data/boot-probe.json</div></div>
       </div>
       <div style="font-size:.66rem;color:var(--muted);line-height:1.6" data-i18n-html="meas_foot">
@@ -300,19 +306,19 @@ code{overflow-wrap:anywhere}
 
     <!-- Recommendations -->
     <div class="panel">
-      <h2><span data-i18n="rec_h2">下一步优化清单</span> <small data-i18n="rec_small">按优先级排序 · 调参优先 P0→P3</small></h2>
+      <h2><span data-i18n="rec_h2">下一步优化清单</span><span class="source-badge" data-source="synthetic">SYNTHETIC</span><small data-i18n="rec_small">按优先级排序 · 调参优先 P0→P3</small></h2>
       <div class="rec-list" id="recList"></div>
+    </div>
     </div>
 
     <p class="footer-note" data-i18n-html="foot">Crossrealm Chronicles · 炉边盘 ·
-      「实测记录」为 2026-11-15 本机实跑（<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> 打真实 wkapi.pro /v1 gpt-6-sol）——
-      合成面板由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115）——
-      真实上线后，同出数据源 <code>crossrealm_telemetry_*</code> 的本地事件也会汇入上述图表中。
-      若你想把上报接进后端：只需 <code>POST /api/telemetry/events</code>，
-      数据存 <code>telemetry</code> 面板中；炉边盘保持只读与静态。</p>
+      合成区由 <code>scripts/admin-synthetic.mjs</code> 确定性生成，不与实测数据混算。
+      实测遥测来自 <code>/api/telemetry/summary-rollup</code> 或仓库快照，只表示事件次数。
+      后端没有用户/会话维度，因此不提供真实留存或用户趋势。</p>
   </div>
 </div>
 
+<script src="admin-metrics.js"></script>
 <script>
 /* ============================================================
  * 炉边盘 · 运营面板（password = "123"）
@@ -330,9 +336,11 @@ const I18N = {
     top_h1: '炉边盘 · Crossrealm Chronicles — 运营盘',
     nav_home: '← 回主页', nav_game: '游戏', nav_guide: '说明书',
     local_h2: '本地真实事件',
-    live_h2: '后端真值 · Live Backend', live_small: '/api/telemetry/summary-rollup · Postgres 14 天 · 仅本机 compose',
+    live_h2: '实测遥测 · Measured Telemetry', live_small: '/api/telemetry/summary-rollup · 事件计数 · 非用户口径',
+    synthetic_note: '合成情景：以下 KPI、DAU、预测、功能占比、漏斗、留存与建议均由确定性种子生成，不是用户数据，也不用于留存或增长结论。',
+    synthetic_unavailable: '合成数据不可用；本区不保留旧读数。真实事件与实测遥测不受影响。',
     local_small: '当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条',
-    local_note: '说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。',
+    local_note: '以下是 <em>你这台浏览器</em> 的真实本地事件，不会自动上传。下方实测遥测是后端事件计数快照，探针占多数且没有用户/会话维度，不能当作用户统计。',
     dau_h2: '30 天 DAU 曲线', dau_small: 'mu × 日数 · 滚动',
     pred_h2: '未来 14 天 · 趋势预测', pred_small: '线性回归 · 平移',
     features_h2: '功能潮汐 · 玩家爱用什么', features_small: '最近 30 天 · 占会话比',
@@ -366,7 +374,7 @@ const I18N = {
     meas_l23: 'Boot 真·冷启动实测（W-Z350 · 本机 SwiftShader · 2026-11-18）', meas_tr23: 'scripts/boot-probe.mjs（vite dev + headless Chrome · 真窗实测）：vite ready 9.1s → navigate 23.6s → BOOT OK in 77801ms · frames(2s)≈2.5（SwiftShader 软件渲染；真 GPU 远低）· __game/enemyManager/scene 全 present · boot 完成且零异常；artifact → docs/admin/data/boot-probe.json',
     meas_l24: 'MEASURED 漏斗（W-Z355 · 真·compose 落账 · 2026-11-18 · 不分群）', meas_tr24: 'derived-funnel.mjs → docs/admin/data/measured-funnel.json：boss_kill 30（4.83% of 621 · MEASURED）· canon_open 8（1.29% · MEASURED）· human-adjacent 38 事件（6.12%）· probe 火线 89.69%（loadtest 424 + stress-probe 133） · ≈0.27「开典籍」/「Boss 击杀」 · 只有 3 天窗口，不做留存分群推断（伪分群=撒谎）· 其他 KPI 卡多是 SYNTHETIC（种子见 data/synthetic.json 的 seed 字段），本卡为唯一 MEASURED 链路',
     meas_l25: 'v4 具典+冻结前缀 cachedRatio（W-Z376 · 真·并行 4 路实测 · 2026-11-18）', meas_tr25: 'POST gateway:8080/api/ai/lore/answer：4 条并发不同问题、同 v4 冻结前缀——全部 upstreamCached=true · cachedRatio 93.2/93.1/93.2/93.2%（prompt≈47.6K · cached≈44.4K） · 重启后首请求亦为 93.7%（10:50:56Z） · 2026-11-19 直击上游（scripts/oracle-v4-live-probe.mjs）：full v4 prompt_tokens=47,370 · cold(2255=4.8%，page 过期)→warm#2=44,363 (93.7%)——输入上下文确是 4 万级，与 Codex 同档 · Codex 稳定 90% 的三条件（frozen-prefix+per-lane key+stream/include_usage）全在位 · 冷窗口仅 Desktop 重启后首打一条 · docs/admin/data/oracle-v4-live-probe.json（MEASURED）',
-    meas_l26: '留存窗口（下次实测 · 2026-11-19 · 3 日有 8 次、11 日为 0）', meas_tr26: 'gateway 实测 627 事件 / 3 日有数（11-15/11-17/11-18）+11 天为 0：boss_kill 30 · canon_open 8 · loadtest 424 · stress 133 · smoke 32 · human-adjacent 38 (6.07%) · 留存不可计算——只有 3 天有数据、11 天为 0、没有 unique user 维度、没有 D1/D3 之间窗口；绝不做留存曲线（伪分群=谎）。telemetry v2 下个里程碑：boss_kill 注入 hashed-userId · 至少 14 天窗 n≥200 unique user 后才放行留存卡',
+    meas_l26: '真实留存 · 不可计算', meas_tr26: '没有 userId / sessionId，无法建立 D1/D3/D7/D14 回访队列；事件数为 0 也不代表留存为 0。历史实测快照见 docs/admin/data/measured-funnel.json；至少 14 天窗、200 名去重用户后才允许计算。',
     meas_l27: '流式对照探针（W-Z410 · 2026-11-19 · gpt-6.1-terra · Clash）', meas_tr27: 'scripts/cache-probe.mjs 真上游实测（两次独立运行）：cached≈5066/5342 ≈94.8% 恒定；上游偶发不回报 cached_tokens 字段（第一次运行 non-stream 无字段，第二次运行 stream 第4调无字段）——即字段缺失是上游报告抖动而非缓存失效；hit=5066/5342 恒定不变（同 prefix 同 key）。冻结前缀 >1024 tok + per-lane prompt_cache_key + stream:true & include_usage 三条件缺一不可；并行会话抢缓存不复现（W-Z336 8 路 ≈98%）',
     meas_l29: '上游模型迁移链 · gpt-6.1-terra → gpt-6.1-sol → gpt-6.2-sol（2026-11-19）', meas_tr29: '①05:24Z 上游返 503「无可用渠道」，/v1/models 直读确认 gpt-6.1-terra 已下线；②迁 gpt-6.1-sol pop：probe 一致 cached=5066/5342≈94.8% 恒定；③0:00-06:00Z 用户手动切到 gpt-6.2-sol；全量脚本换用后 scripts/cache-probe.mjs 复跑 cached=5066/5342≈94.8% 恒定；④Compose 实测（Desktop 重启后重建）：AI 热路径全绿 upstreamCached=true · Oracle answer latency≈4.1s · ember state-graph path=[sanitize,classify,compose,guard] · 6 路井发：1 真上游 3.7s · 5 个 JVM 缓存命中（cached=true·0ms）',
         meas_l30: 'StateGraph 全线化 · W-Z444s（2026-11-19）', meas_tr30: '① BossVerse / KindleLetter / EchoHint 迁移 compose(LLM)→guard 两节点图（leak 词表·60 zh/72 en 码点·markdown 剥离；miss 即安全句），返回体新增 guarded 与 path=["compose","guard"]，verse/reply/hint/cached/upstreamCached/model 零改动；② Arbiter → compose→parse：第一段 {…} → JSON.parse → 三字段非空字符串 + markdown 剥离 / leak 检查 / 码点截断（title 30/epilogue 160/omen 60），任一步失败 parsed=null+guarded=true（客户端整段不渲染，片尾完整）；③ 全量 182 tests / 34 classes 全绿；新 jar（58,187,352 B）重建镜像重部署（旧镜像 14:02 含未迁移代码）；容器直连 4 lane 全部 = 503 advisor-unavailable（容器无上游 key，静默失败契约成立，绝非 500）；④ port 8761 被 careeros-discovery(127.0.0.1:8761) 占用 → 本栈显式端口 18761/18888/19883；容器内 api.aizzz.xyz 仍 NXDOMAIN；前端零改动，vitest 6896/6896 保持。',
@@ -382,16 +390,23 @@ const I18N = {
         meas_l37: 'compose→LLM 真上游贯通 · W-Z475（2026-11-19）', meas_tr37: 'HttpLlmTransport 新增 LLM_PROXY_URL（parseProxy 解析 host:port → JDK ProxySelector CONNECT；未设/坏值行为不变；进程内 HTTP 不经过；零网络单测 5/5）。容器 DNS/边缘 403 的直连死路由上，本轮经 Gateway POST /api/ai/lore/answer 活体实测：HTTP 200 · model=gpt-6.2-sol · upstreamCached=true · latencyMs=10659；ai.upstream.usage：cache=crossrealm-oracle-v1 · prompt=47904 · completion=162 · cached=2281 · cachedRatio=4.8%；相同问句随后由 JVM 摘要缓存 0ms 接管（cached=true）——Ember/Oracle 两级缓存链路 compose 内活体成立（W-Z474 语料）。「此物未在典籍中」是锚火场景 v3 语料无收录的判官门禁输出，非链路失败。另修复：host 端口 8761 被用户他项目 careeros-discovery 占用 → 本项目 compose 保 18761 显式端口分离，fleet 10/10 healthy · Eureka 七实例 UP。',
     meas_l28: 'Oracle RAG 离线检索实测（W-Z415 · BM25 · 611 源）', meas_tr28: 'scripts/lore-retrieval-probe.mjs（Java Bm25Tokenizer 逐字镜像：Han 单码点 token · k1=1.5 · b=0.75）：9 真实问题 recall@4=8/9、recall@6=8/9——近作卷 217~222 全命中；唯一未命中：词项全场高频的「灶火燃着，阿石坐在灶前」，146/197/131 等灶火高频章胜过 217。结论：专名/具体场景问法给出 88.9% 真实覆盖率。产物 docs/admin/data/lore-retrieval-probe.json（MEASURED）',
     rec_h2: '下一步优化清单', rec_small: '按优先级排序 · 调参优先 P0→P3',
-    foot: 'Crossrealm Chronicles · 炉边盘 ·<br/>「实测记录」为 2026-11-15 本机实跑（<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> 打真实 wkapi.pro /v1 gpt-6-sol）—— 合成面板由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115）—— 真实上线后，同出数据源 <code>crossrealm_telemetry_*</code> 的本地事件也会汇入上述图表中。<br/>若你想把上报接进后端：只需 <code>POST /api/telemetry/events</code>，数据存 <code>telemetry</code> 面板中；炉边盘保持只读与静态。<br/>W-Z311 起：LLM 双语运营分析（digest 冻结、真上游、经 <code>scripts/admin-llm-analysis.mjs</code> 实跑）见 <code><a href="data/admin-llm-analysis.zh.md">中文报告</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code>（LLM 生成，digest 与原始 JSON 为准）。',
+    foot: 'Crossrealm Chronicles · 炉边盘 ·<br/>「实测记录」为 2026-11-15 起的本机实验；实测遥测来自 <code>/api/telemetry/summary-rollup</code> 或 <code>data/telemetry-summary.json</code> 快照，只表示事件次数。<br/>合成区由 <code>scripts/admin-synthetic.mjs</code> 确定性生成（种子 20261115），不会与真实数据混算。本机事件不会自动上传；后端目前没有用户/会话维度，因此不提供真实留存或用户趋势。<br/>LLM 双语运营分析见 <code><a href="data/admin-llm-analysis.zh.md">中文报告</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code>（LLM 生成，digest 与原始 JSON 为准）。',
     boot_fail: 'synthetic.json 未能装载。<br>请先跑 <code>node scripts/admin-synthetic.mjs</code>',
     slope_line: '陡度：每天 %DAU DAU/14d；今日值 %AVG；预测 +14d 峰值 ≈ %PEAK',
     kpi_dau_avg: '日活均值', kpi_session_min: '会话平均分钟', kpi_boss: 'Boss 胜率', kpi_canon: '典籍阅读率',
     kpi_d1: '留存 D1', kpi_d7: '留存 D7', kpi_bounce: '出口率', kpi_churn: '放弃率',
     kpi_new: '新用户/日', kpi_sessions: '总会话数', kpi_boss_clears: '总 Boss 通关', kpi_d14: '留存 D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
-    lt_game_start: '游戏启动', lt_session_end: '会话结束（留存）', lt_guide_asked: '求过守夜人指路', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
+    lt_game_start: '游戏启动', lt_session_end: '会话结束事件', lt_guide_asked: '求过守夜人指路', lt_help_open: '按 H 打开说明', lt_journal_open: '按 J 打开日志', lt_worldmap_open: '按 M 打开地图',
     lt_canon_open: '打开典籍馆', lt_flame_draw: '占卜抽火', lt_boss_kill: 'Boss 通关', lt_autoplay_tap: '自动通关', lt_trilance_draw: '曜盘已起', lt_vow_draw: '祈愿已许', lt_kindle_pass_draw: '交棒已候', lt_advisor_directive_follow: '跟随指引', lt_arbiter_epilogue: '烬灯回信', lt_boss_verse: '余火回响', lt_kindle_letter_exchange: '烬火答', lt_path_draw: '锚火三问抽签', lt_reader_mirror_unlock: '典籍镜像解锁', lt_chapter_complete: '章节完成',
     insight_h2: '本机智能洞察', insight_small: 'LS 真实事件流 → 下一步该做什么',
+    live_group_human: '玩家相邻事件（boss_kill + canon_open；仍含探针，不是独立用户）',
+    live_group_probe: '压测 / 冒烟事件', live_group_other: '其他事件',
+    live_trend_title: '实测日趋势 · 只比较有记录的自然日，不外推',
+    live_trend_one: '只有一个有记录的自然日，趋势不可计算。',
+    live_trend_compare: '%FROM → %TO（间隔 %DAYS 天）：玩家相邻事件 %PREV → %CURRENT，变化 %DELTA。',
+    live_retention_blocked: '真实留存不可计算：汇总没有 userId / sessionId，无法建立回访队列；启用门槛为至少 14 天窗、200 名去重用户。',
+    live_snapshot_asof: '快照时间', live_snapshot_source: '仓库实测快照（非实时）', live_live_source: '本机后端实时汇总',
     insight_empty: '尚无足够事件——随便玩两局（H/J/M/击杀 Boss/抽卡）再回来',
     insight_low: '低置信度 · n={n}', insight_mid: '中等置信度 · n={n}', insight_high: '高置信度 · n={n}',
     insight_foot: '每条建议都按真实事件缓冲排序（跨 200 条最多），但「预期影响」只是方向假设、没有实测数字——本机样本太小且不具代表性，任何百分比都得等 A/B 验证才算数，这里不编。按优先级落到「这次下一次更新」或 UI 引导上；对比上方合成 KPI 和下方本机事件，两块才会对得起真玩家。',
@@ -410,9 +425,11 @@ const I18N = {
     top_h1: 'Crossrealm Chronicles — Operations Console',
     nav_home: '← Showcase', nav_game: 'Play game', nav_guide: 'Handbook',
     local_h2: 'Local real events',
-    live_h2: 'Backend truth · Live Backend', live_small: '/api/telemetry/summary-rollup · Postgres 14-day window · local compose only',
+    live_h2: 'Measured telemetry', live_small: '/api/telemetry/summary-rollup · event counts · not user metrics',
+    synthetic_note: 'Synthetic scenario: the KPI, DAU, forecast, feature share, funnel, retention and recommendations below are deterministic seed data, not user data, and are not evidence for retention or growth.',
+    synthetic_unavailable: 'Synthetic data is unavailable; stale readings were cleared. Real local events and measured telemetry are unaffected.',
     local_small: 'This browser · crossrealm_telemetry_v1 LS rolling buffer of 200',
-    local_note: 'These are <em>the real events this browser</em> produced locally. Real multi-user aggregates will appear in the panels above once a backend aggregates them.',
+    local_note: 'These are <em>this browser real local events</em>; they are not uploaded automatically. Measured telemetry below is a backend event-count snapshot dominated by probes and has no user/session dimension, so it is not a user metric.',
     dau_h2: '30-day DAU curve', dau_small: 'µ × 30d · rolling',
     pred_h2: 'Next 14 days · forecast', pred_small: 'Linear regression · flat extrapolation',
     features_h2: 'Feature tides · what players actually use', features_small: 'Last 30 days · share of sessions',
@@ -446,7 +463,7 @@ const I18N = {
     meas_l23: 'Real boot cold-start (W-Z350 · local SwiftShader · 2026-11-18)', meas_tr23: 'scripts/boot-probe.mjs (vite dev + headless Chrome · real window): vite ready 9.1s → navigate 23.6s → BOOT OK in 77801ms · frames(2s)≈2.5 (SwiftShader software render; real GPU is far lower) · __game/enemyManager/scene all present · boot completes with zero exceptions; artifact → docs/admin/data/boot-probe.json',
     meas_l24: 'MEASURED funnel (W-Z355 · real compose-firehose events · 2026-11-18 · NO cohort slicing)', meas_tr24: 'derived-funnel.mjs → docs/admin/data/measured-funnel.json: boss_kill 30 (4.83% of 621 · MEASURED) · canon_open 8 (1.29% · MEASURED) · human-adjacent 38 events (6.12%) · probe flood 89.69% (loadtest 424 + stress-probe 133) · ≈0.27 canon-opens / boss-kill · only a 3-day window, no D1/D3/D7 slicing (fake cohorts = lying) · other KPI cards are mostly SYNTHETIC (seed: the "seed" field of data/synthetic.json) — this is the only card on a MEASURED path',
     meas_l25: 'v4 full-canon + frozen prefix cachedRatio (W-Z376 · 4 parallel REAL probes · 2026-11-18)', meas_tr25: 'POST gateway:8080/api/ai/lore/answer: 4 parallel questions, same v4 frozen prefix — all upstreamCached=true · cachedRatio 93.2/93.1/93.2/93.2% (prompt≈47.6K · cached≈44.4K) · first request after Desktop reboot also 93.7% (10:50:56Z) · 2026-11-19 direct-upstream probe (scripts/oracle-v4-live-probe.mjs): full v4 prompt_tokens=47,370 · cold (2255=4.8%, page expired) → warm#2=44,363 (93.7%) — the context window IS ~47K, same order as Codex · the three Codex conditions (frozen prefix + per-lane prompt_cache_key + stream/include_usage) are all in place · the only cold window is the first post-reboot request · artifact → docs/admin/data/oracle-v4-live-probe.json (MEASURED)',
-    meas_l26: 'Retention window (real test · 2026-11-19 · data on 3 days / 11 days zero)', meas_tr26: 'real gateway telemetry: 627 events · only 3 days have anything (11-15/11-17/11-18) · 11 days zero (incl. 11-19) · boss_kill 30 · canon_open 8 · loadtest 424 · stress-probe 133 · smoke 32 · human-adjacent 38 (6.07%) · retention is NOT computable here — no unique-user dimension, no 14-day window, no D1/D3 spacing; fake cohort curves = lying · action → telemetry v2 next: hashed-userId on boss_kill · ≥14-day window · n≥200 distinct users before any retention card ships',
+    meas_l26: 'Real retention · unavailable', meas_tr26: 'No userId / sessionId means no D1/D3/D7/D14 return cohorts can be built; zero events does not mean zero retention. Historical measured snapshot: docs/admin/data/measured-funnel.json. Calculation requires a 14-day window and at least 200 distinct users.',
     meas_l27: 'Stream-vs-non-stream control probe (W-Z410 · 2026-11-19 · gpt-6.1-terra · Clash)', meas_tr27: 'scripts/cache-probe.mjs live probe (two independent runs): cached ≈5066/5342 ≈94.8% steady; upstream intermittently omits the cached_tokens field (run 1: non-stream control lacked it; run 2: warm-call #4 lacked it) — the omission is an upstream reporting quirk, NOT cache misses: the same frozen prefix + prompt_cache_key reports hit=5066/5342 every time the field is present. The three stability conditions = frozen prefix &gt;1024 tok + per-lane prompt_cache_key + stream:true &amp; include_usage; parallel-session cache thrash NOT reproduced (W-Z336: 8-way same-key ≈98%)',
     meas_l29: 'Upstream model migration chain · gpt-6.1-terra → gpt-6.1-sol → gpt-6.2-sol (2026-11-19)', meas_tr29: '① 05:24Z upstream 503 — /v1/models confirms gpt-6.1-terra removed at upstream; ② migrated to gpt-6.1-sol (probe cached=5066/5342≈94.8% steady); ③ user hand-switched to gpt-6.2-sol — all probe scripts updated; scripts/cache-probe.mjs re-run: cached=5066/5342≈94.8% steady; ④ docker compose verified post-Desktop restart: hot path upstreamCached=true · Oracle answer latency≈4.1s · Ember state-graph path=[sanitize,classify,compose,guard] upstreamCached=true; 6-way burst: 1 real upstream 3.7s, 5 JVM-cached hit (cached=true·0ms)',
         meas_l30: 'StateGraph everywhere · W-Z444s (2026-11-19)', meas_tr30: '① BossVerse / KindleLetter / EchoHint migrated from raw LlmClient calls onto a two-node StateGraph compose(LLM)→guard (leak vocab · 60 zh / 72 en codepoints · markdown strip; miss ⇒ safe line); responses gain guarded + path=["compose","guard"] — verse/reply/hint/cached/upstreamCached/model unchanged; ② Arbiter now compose→parse: first {…} block → JSON.parse → three non-empty string fields + markdown strip / leak check / codepoint caps (title 30 / epilogue 160 / omen 60); any failure ⇒ parsed=null + guarded=true (client renders nothing; credits stay complete; raw verbatim, frontend parseArbiterAnswer untouched); ③ full verify: ai-service 182 tests / 34 classes green; fresh jar (58,187,352 B) → image rebuilt → container redeployed (old image dated 14:02, pre-migration); live probe of the 4 lanes = 503 advisor-unavailable (no upstream key inside container — silent-failure contract holds, never 500); ④ port 8761 is bound by careeros-discovery (127.0.0.1:8761) → this stack now explicit 18761 / 18888 / 19883; api.aizzz.xyz still NXDOMAIN inside Docker; frontend untouched (additive fields only), vitest 6896/6896 holds.',
@@ -462,16 +479,23 @@ const I18N = {
         meas_l37: 'Compose→LLM real upstream through the proxy · W-Z475 (2026-11-19)', meas_tr37: 'HttpLlmTransport learned LLM_PROXY_URL (parseProxy host:port → JDK ProxySelector CONNECT; unset/garbage = byte-identical direct line; intra-process HTTP unaffected; zero-network unit tests 5/5). In the container where direct DNS/edge 403 made the upstream unreachable, this round live-fired Gateway POST /api/ai/lore/answer: HTTP 200 · model=gpt-6.2-sol · upstreamCached=true · latencyMs=10659; ai.upstream.usage: cache=crossrealm-oracle-v1 · prompt=47904 · completion=162 · cached=2281 · cachedRatio=4.8%; the identical follow-up question was answered by the JVM digest cache in 0 ms (cached=true) — the Ember/Oracle two-tier chain holds inside compose (W-Z474 corpus). “Not in the record” is the referee gate doing its job: the anchor-fire origin is not in the v3 corpus — not a chain failure. Also fixed this round: host port 8761 is held by the user’s other stack (careeros-discovery) → this project keeps explicit 18761 and the fleet is 10/10 healthy · Eureka seven instances UP.',
     meas_l28: 'Oracle RAG offline retrieval probe (W-Z415 · BM25 · 611 sources)', meas_tr28: 'scripts/lore-retrieval-probe.mjs (mirror of the Java Bm25Tokenizer: Han single-codepoint tokens · k1=1.5 · b=0.75): 9 production-style questions → recall@4 = 8/9, recall@6 = 8/9 — every recent volume (217-222) hits; the only miss (“The hearth fire burns; Ashi sits before it”) is dominated by older high-frequency-fire chapters (146/197/131). 88.9% real retrieval coverage, special-name / concrete-scenario phrasing wins. artifact → docs/admin/data/lore-retrieval-probe.json (MEASURED)',
     rec_h2: 'Next-step optimization plan', rec_small: 'Priority order · tune before building · P0→P3',
-    foot: 'Crossrealm Chronicles · Admin Console ·<br/>The “Measured” card is a 2026-11-15 live run (<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> against real wkapi.pro /v1 gpt-6-sol). The synthetic panels are deterministically generated by <code>scripts/admin-synthetic.mjs</code> (seed 20261115).<br/>Once real players go online, events sourced from <code>crossrealm_telemetry_*</code> will fold into the same charts. To wire reporting into a backend: <code>POST /api/telemetry/events</code> — data lands in the <code>telemetry</code> panel; this console stays read-only and static.<br/>Since W-Z311: LLM-written bilingual ops analyses (frozen digest, real upstream, produced by <code>scripts/admin-llm-analysis.mjs</code>) live at <code><a href="data/admin-llm-analysis.zh.md">Chinese report</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code> (LLM-generated; the digest and raw JSON files are the source of truth).',
+    foot: 'Crossrealm Chronicles · Admin Console ·<br/>“Measured” records are local experiments since 2026-11-15. Measured telemetry comes from <code>/api/telemetry/summary-rollup</code> or the <code>data/telemetry-summary.json</code> snapshot and represents event counts only.<br/>The synthetic region is deterministically generated by <code>scripts/admin-synthetic.mjs</code> (seed 20261115) and is never mixed with measured data. Local events are not uploaded automatically; the backend has no user/session dimension, so real retention and user trends are unavailable.<br/>LLM-written bilingual analyses: <code><a href="data/admin-llm-analysis.zh.md">Chinese report</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code> (LLM-generated; digest and raw JSON are authoritative).',
     boot_fail: 'synthetic.json failed to load.<br>Run <code>node scripts/admin-synthetic.mjs</code> first.',
     slope_line: 'Slope: %DAU DAU/day over 14d; today %AVG; +14d peak ≈ %PEAK',
     kpi_dau_avg: 'Avg DAU', kpi_session_min: 'Avg session (min)', kpi_boss: 'Boss win rate', kpi_canon: 'Canon read rate',
     kpi_d1: 'Retention D1', kpi_d7: 'Retention D7', kpi_bounce: 'Bounce rate', kpi_churn: '3-min drop-off',
     kpi_new: 'New users / day', kpi_sessions: 'Total sessions', kpi_boss_clears: 'Total boss clears', kpi_d14: 'Retention D14',
     kpi_up: '▲ rolling', kpi_down: '▼ cap',
-    lt_game_start: 'Game start', lt_session_end: 'Session end (retention)', lt_guide_asked: 'Asked the keeper', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
+    lt_game_start: 'Game start', lt_session_end: 'Session end event', lt_guide_asked: 'Asked the keeper', lt_help_open: 'H · help opened', lt_journal_open: 'J · journal opened', lt_worldmap_open: 'M · map opened',
     lt_canon_open: 'Canon opened', lt_flame_draw: 'Divination draw', lt_boss_kill: 'Boss cleared', lt_autoplay_tap: 'Autoplay tapped', lt_trilance_draw: 'Trisolar tide cast', lt_vow_draw: 'Vow drawn', lt_kindle_pass_draw: 'Handing drawn', lt_advisor_directive_follow: 'Guide followed', lt_arbiter_epilogue: 'Arbiter letter read', lt_boss_verse: 'Ember verse read', lt_kindle_letter_exchange: 'Ember letters sent', lt_path_draw: 'Fortune Path draws', lt_reader_mirror_unlock: 'Mirror readings unlocked', lt_chapter_complete: 'Chapters completed',
     insight_h2: 'Local AI insight', insight_small: 'LS event stream → what to do next',
+    live_group_human: 'Player-adjacent events (boss_kill + canon_open; probes included, not distinct users)',
+    live_group_probe: 'Load-test / smoke events', live_group_other: 'Other events',
+    live_trend_title: 'Measured daily trend · recorded days only, no extrapolation',
+    live_trend_one: 'Only one recorded day; a trend cannot be computed.',
+    live_trend_compare: '%FROM → %TO (%DAYS days apart): player-adjacent events %PREV → %CURRENT, change %DELTA.',
+    live_retention_blocked: 'Real retention is unavailable: the rollup has no userId / sessionId, so no return cohort can be built. The gate requires a 14-day window and at least 200 distinct users.',
+    live_snapshot_asof: 'Snapshot time', live_snapshot_source: 'Repository measured snapshot (not live)', live_live_source: 'Local backend live rollup',
     insight_empty: 'Not enough signal yet — play a few rounds (H/J/M/boss kill/draw) then come back',
     insight_low: 'Low confidence · n={n}', insight_mid: 'Medium confidence · n={n}', insight_high: 'High confidence · n={n}',
     insight_foot: 'Every row is ordered by real crossrealm_telemetry_v1 (max 200), but the “expected impact” is a directional hypothesis with no measured number — this machine’s sample is too small and unrepresentative; any percentage needs A/B validation, so none is invented here. Each change falls to the next release or an in-game hint. Contrast: the KPI strip is a seeded demo; this panel is this machine’s actual play.',
@@ -607,8 +631,13 @@ async function bootDashboard() {
     data = await res.json();
   } catch (e) {
     console.error('[admin] synthetic.json load failed:', e);
+    window.__adminData = null;
     const grid = document.getElementById('kpiGrid');
     grid.innerHTML = '<div class="panel" style="grid-column:1/-1">' + T('boot_fail') + '</div>';
+    for (const id of ['dChart', 'pChart', 'featureBars', 'funnelRow', 'retentionGrid', 'recList', 'slopeLine']) {
+      const host = document.getElementById(id);
+      if (host) host.textContent = T('synthetic_unavailable');
+    }
     loadSimulation();
     return;
   }
@@ -786,39 +815,68 @@ function renderLocalEvents() {
 
 /* ---------- W-Z130：后端真值（Postgres rollup by day×type）---------- */
 let liveRollupData = null;
+let liveRollupSummary = null;
 function renderLiveRollup() {
-  const j = liveRollupData;
-  if (!j || j.enabled !== true) return;
-  const totals = j.totals || {};
-    const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-    const max = Math.max(...entries.map(([, v]) => Number(v) || 1), 1);
-    const panelEl = document.getElementById('liveRollupPanel');
-    const barsEl = document.getElementById('liveRollupBars');
-    const footEl = document.getElementById('liveRollupFoot');
-    if (!panelEl || !barsEl || !footEl) return;
-    panelEl.style.display = 'block';
-    barsEl.innerHTML = entries.slice(0, 12).map(([type, count]) => {
-      const w = Math.max(2, Math.round((Number(count) / max) * 100));
-      return '<div style="display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center">' +
-        '<code style="color:rgba(233,226,210,.85)">' + escapeHtml(String(type)) + '</code>' +
-        '<div style="height:10px;background:#120d18;border-radius:5px;overflow:hidden"><div style="height:100%;width:' + w + '%;background:linear-gradient(90deg,#9bd67a,#71e3ef);border-radius:5px"></div></div>' +
-        '<div style="text-align:right;font-family:var(--font-mono-num)">' + Number(count).toLocaleString() + '</div>' +
-      '</div>';
-    }).join('');
-    footEl.textContent = (curLang === 'zh'
-      ? '数据为本机 Postgres · telemetry_daily_rollup（day × type）14 日窗' +
-        ' · 总计事件 ' + Number(j.total ?? 0).toLocaleString() + ' 条 · 只有 本机 compose 启动时此卡才有数据'
-      : 'Live from local Postgres · telemetry_daily_rollup (day × type), 14-day window' +
-        ' · total events ' + Number(j.total ?? 0).toLocaleString() + ' · panel only populates when local compose is up');
+  const panelEl = document.getElementById('liveRollupPanel');
+  const barsEl = document.getElementById('liveRollupBars');
+  const trendEl = document.getElementById('liveRollupTrend');
+  const footEl = document.getElementById('liveRollupFoot');
+  if (!panelEl || !barsEl || !trendEl || !footEl) return;
+  if (!liveRollupSummary) {
+    panelEl.style.display = 'none';
+    return;
+  }
+  const reading = liveRollupSummary;
+  const max = Math.max(...Object.values(reading.totals), 1);
+  panelEl.style.display = 'block';
+  barsEl.innerHTML = Object.entries(reading.totals).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([type, value]) => {
+    const w = Math.max(2, Math.round((value / max) * 100));
+    return '<div style="display:grid;grid-template-columns:150px minmax(0,1fr) 48px;gap:8px;align-items:center">' +
+      '<code style="color:rgba(233,226,210,.85)">' + escapeHtml(type) + '</code>' +
+      '<div style="height:10px;background:#120d18;border-radius:5px;overflow:hidden"><div style="height:100%;width:' + w + '%;background:linear-gradient(90deg,#9bd67a,#71e3ef);border-radius:5px"></div></div>' +
+      '<div style="text-align:right;font-family:var(--font-mono-num)">' + value.toLocaleString() + '</div>' +
+    '</div>';
+  }).join('');
+  const t = reading.trend;
+  const trendText = t.current === null ? T('live_trend_one') : T('live_trend_compare')
+    .replace('%FROM', t.fromDay).replace('%TO', t.toDay).replace('%DAYS', String(t.elapsedDays))
+    .replace('%PREV', String(t.previous)).replace('%CURRENT', String(t.current))
+    .replace('%DELTA', (t.delta > 0 ? '+' : '') + String(t.delta));
+  trendEl.innerHTML = '<div><strong>' + escapeHtml(T('live_group_human')) + ': ' + reading.grouped.humanAdjacent.toLocaleString() + '</strong></div>'
+    + '<div>' + escapeHtml(T('live_group_probe')) + ': ' + reading.grouped.probe.toLocaleString() + ' · ' + escapeHtml(T('live_group_other')) + ': ' + reading.grouped.other.toLocaleString() + '</div>'
+    + '<div style="margin-top:6px"><strong>' + escapeHtml(T('live_trend_title')) + '</strong><br>' + escapeHtml(trendText) + '</div>'
+    + '<div style="color:var(--warn);margin-top:6px">' + escapeHtml(T('live_retention_blocked')) + '</div>';
+  const source = reading.mode === 'snapshot' ? T('live_snapshot_source') : T('live_live_source');
+  footEl.textContent = source + ' · ' + T('live_snapshot_asof') + ': ' + String(reading.generatedAt ?? 'unknown')
+    + ' · ' + T('live_small') + ' · total=' + reading.total.toLocaleString();
 }
 
 async function loadLiveRollup() {
+  let payload = null;
   try {
     const res = await fetch('/api/telemetry/summary-rollup', { cache: 'no-store' });
-    if (!res.ok) return;
-    liveRollupData = await res.json();
+    if (res.ok) {
+      const candidate = await res.json();
+      if (candidate.enabled === true) payload = candidate;
+    }
+  } catch (_) { /* static hosting has no backend */ }
+  if (!payload) {
+    try {
+      const res = await fetch('data/telemetry-summary.json', { cache: 'no-store' });
+      if (res.ok) payload = await res.json();
+    } catch (_) { /* keep measured panel hidden when neither source is available */ }
+  }
+  try {
+    liveRollupData = payload;
+    liveRollupSummary = payload ? summarizeAdminRollup(payload) : null;
+    window.__adminRollupSummary = liveRollupSummary;
     renderLiveRollup();
-  } catch (_) { /* silent: Pages deployment has no backend */ }
+  } catch (error) {
+    liveRollupSummary = null;
+    window.__adminRollupSummary = null;
+    renderLiveRollup();
+    console.warn('[admin] measured telemetry rejected:', error);
+  }
 }
 
 /* ---------- 本机智能洞察：LS 事件流推论（真实、每次重新计算） ---------- */

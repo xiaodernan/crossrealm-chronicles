@@ -22,8 +22,8 @@ describe('行为信号贯通管理员页（W-Z502）', () => {
   });
 
   it('两语标签键都登记', () => {
-    expect(html).toContain("lt_session_end: '会话结束（留存）'");
-    expect(html).toContain("lt_session_end: 'Session end (retention)'");
+    expect(html).toContain("lt_session_end: '会话结束事件'");
+    expect(html).toContain("lt_session_end: 'Session end event'");
     expect(html).toContain("lt_guide_asked: '求过守夜人指路'");
     expect(html).toContain("lt_guide_asked: 'Asked the keeper'");
   });

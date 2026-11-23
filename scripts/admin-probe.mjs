@@ -149,6 +149,10 @@ const measureExpression = `(() => {
     localEventLabels: [...document.querySelectorAll('#localEventsGrid .kpi-label')].map((el) => el.textContent.trim()),
     localEventValues: [...document.querySelectorAll('#localEventsGrid .kpi-value')].map((el) => Number(el.textContent.trim())),
     measuredCards: document.querySelectorAll('#measuredPanel .kpi').length,
+    syntheticBadges: document.querySelectorAll('[data-synthetic-region] [data-source="synthetic"]').length,
+    syntheticStaleReadings: document.querySelectorAll('#dChart svg,#pChart svg,#retentionGrid .retention-tile,#featureBars .bar-row,#funnelRow .funnel-cell,#recList .rec').length,
+    measuredVisible: (() => { const s = getComputedStyle(document.getElementById('liveRollupPanel')); return s.display !== 'none'; })(),
+    rollupReading: window.__adminRollupSummary ?? null,
     kpiTiles: document.querySelectorAll('#kpiGrid .kpi').length,
     kpiFallback: document.querySelectorAll('#kpiGrid > .panel').length > 0,
     pageOverflow: document.documentElement.scrollWidth > innerWidth,
@@ -262,7 +266,7 @@ try {
   await channel.evalJs(`(() => { pwd.value = 'wrong'; unlock.click(); return true; })()`);
   const wrong = await channel.evalJs(`(() => ({ rejected: err.textContent.length > 0, locked: !dashboard.classList.contains('unlocked') }))()`);
   await channel.evalJs(`(() => { pwd.value = PASSWORD; unlock.click(); return true; })()`);
-  await waitFor(`window.__adminLoaded && document.querySelectorAll('#localEventsGrid .kpi').length === ${EXPECTED_EVENTS} && document.querySelectorAll('#kpiGrid .kpi').length === 12`, '口令解锁与正常渲染');
+  await waitFor(`window.__adminLoaded && window.__adminRollupSummary?.real === true && document.querySelectorAll('#localEventsGrid .kpi').length === ${EXPECTED_EVENTS} && document.querySelectorAll('#kpiGrid .kpi').length === 12`, '口令解锁、实测快照与正常渲染');
   const normal = await measure('normal');
   normal.wrongPasswordRejected = wrong.rejected;
   normal.wrongDashboardLocked = wrong.locked;
@@ -277,7 +281,7 @@ try {
   capture.console.length = 0;
   capture.network.length = 0;
   await channel.evalJs(`(() => { window.__adminData = undefined; window.__adminLoaded = false; showDashboard(); return true; })()`);
-  await waitFor(`document.querySelectorAll('#localEventsGrid .kpi').length === ${EXPECTED_EVENTS} && document.querySelectorAll('#kpiGrid > .panel').length === 1`, '合成数据故障注入与降级');
+  await waitFor(`window.__adminRollupSummary?.real === true && document.querySelectorAll('#localEventsGrid .kpi').length === ${EXPECTED_EVENTS} && document.querySelectorAll('#kpiGrid > .panel').length === 1 && !document.querySelector('#dChart svg') && document.querySelector('#retentionGrid').textContent.includes('Synthetic data is unavailable')`, '合成数据故障注入、旧图清空与降级');
   await measure('fallback');
 
 } catch (error) {

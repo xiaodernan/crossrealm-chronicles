@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-23T17:29:19.595Z",
+  "generatedAt": "2026-11-23T17:46:28.611Z",
   "expected": {
     "localEvents": 20,
     "measuredCards": 42
@@ -16,7 +16,7 @@
       "localEventTiles": 20,
       "localEventLabels": [
         "游戏启动",
-        "会话结束（留存）",
+        "会话结束事件",
         "求过守夜人指路",
         "按 H 打开说明",
         "按 J 打开日志",
@@ -59,12 +59,69 @@
         0
       ],
       "measuredCards": 42,
+      "syntheticBadges": 6,
+      "syntheticStaleReadings": 36,
+      "measuredVisible": true,
+      "rollupReading": {
+        "real": true,
+        "mode": "snapshot",
+        "generatedAt": "2026-11-17T19:12:27.862Z",
+        "windowDays": 14,
+        "total": 611,
+        "totals": {
+          "boss_kill": 30,
+          "canon_open": 8,
+          "loadtest": 424,
+          "smoke": 16,
+          "stress-probe": 133
+        },
+        "grouped": {
+          "humanAdjacent": 38,
+          "probe": 573,
+          "other": 0
+        },
+        "daily": [
+          {
+            "day": "2026-11-15",
+            "total": 463,
+            "humanAdjacent": 38,
+            "probe": 425
+          },
+          {
+            "day": "2026-11-17",
+            "total": 148,
+            "humanAdjacent": 0,
+            "probe": 148
+          }
+        ],
+        "observedDays": 2,
+        "trend": {
+          "metric": "humanAdjacentEventCount",
+          "fromDay": "2026-11-15",
+          "toDay": "2026-11-17",
+          "elapsedDays": 2,
+          "previous": 38,
+          "current": 0,
+          "delta": -38,
+          "percent": -1,
+          "forecast": null
+        },
+        "retention": {
+          "eligible": false,
+          "reasons": [
+            "user-identity-missing",
+            "session-cohort-missing"
+          ],
+          "minimumDistinctUsers": 200,
+          "minimumWindowDays": 14
+        }
+      },
       "kpiTiles": 12,
       "kpiFallback": false,
       "pageOverflow": false,
       "overflowOffenders": [],
       "cardOverlaps": [],
-      "cjkCount": 3270,
+      "cjkCount": 3418,
       "cjkSamples": [
         {
           "tag": "H1",
@@ -118,7 +175,7 @@
           "tag": "DIV",
           "id": "",
           "cls": "kpi-label",
-          "text": "会话结束（留存）"
+          "text": "会话结束事件"
         },
         {
           "tag": "DIV",
@@ -181,7 +238,7 @@
       "localEventTiles": 20,
       "localEventLabels": [
         "Game start",
-        "Session end (retention)",
+        "Session end event",
         "Asked the keeper",
         "H · help opened",
         "J · journal opened",
@@ -224,6 +281,63 @@
         0
       ],
       "measuredCards": 42,
+      "syntheticBadges": 6,
+      "syntheticStaleReadings": 36,
+      "measuredVisible": true,
+      "rollupReading": {
+        "real": true,
+        "mode": "snapshot",
+        "generatedAt": "2026-11-17T19:12:27.862Z",
+        "windowDays": 14,
+        "total": 611,
+        "totals": {
+          "boss_kill": 30,
+          "canon_open": 8,
+          "loadtest": 424,
+          "smoke": 16,
+          "stress-probe": 133
+        },
+        "grouped": {
+          "humanAdjacent": 38,
+          "probe": 573,
+          "other": 0
+        },
+        "daily": [
+          {
+            "day": "2026-11-15",
+            "total": 463,
+            "humanAdjacent": 38,
+            "probe": 425
+          },
+          {
+            "day": "2026-11-17",
+            "total": 148,
+            "humanAdjacent": 0,
+            "probe": 148
+          }
+        ],
+        "observedDays": 2,
+        "trend": {
+          "metric": "humanAdjacentEventCount",
+          "fromDay": "2026-11-15",
+          "toDay": "2026-11-17",
+          "elapsedDays": 2,
+          "previous": 38,
+          "current": 0,
+          "delta": -38,
+          "percent": -1,
+          "forecast": null
+        },
+        "retention": {
+          "eligible": false,
+          "reasons": [
+            "user-identity-missing",
+            "session-cohort-missing"
+          ],
+          "minimumDistinctUsers": 200,
+          "minimumWindowDays": 14
+        }
+      },
       "kpiTiles": 12,
       "kpiFallback": false,
       "pageOverflow": false,
@@ -247,7 +361,7 @@
       "localEventTiles": 20,
       "localEventLabels": [
         "Game start",
-        "Session end (retention)",
+        "Session end event",
         "Asked the keeper",
         "H · help opened",
         "J · journal opened",
@@ -290,6 +404,63 @@
         0
       ],
       "measuredCards": 42,
+      "syntheticBadges": 6,
+      "syntheticStaleReadings": 36,
+      "measuredVisible": true,
+      "rollupReading": {
+        "real": true,
+        "mode": "snapshot",
+        "generatedAt": "2026-11-17T19:12:27.862Z",
+        "windowDays": 14,
+        "total": 611,
+        "totals": {
+          "boss_kill": 30,
+          "canon_open": 8,
+          "loadtest": 424,
+          "smoke": 16,
+          "stress-probe": 133
+        },
+        "grouped": {
+          "humanAdjacent": 38,
+          "probe": 573,
+          "other": 0
+        },
+        "daily": [
+          {
+            "day": "2026-11-15",
+            "total": 463,
+            "humanAdjacent": 38,
+            "probe": 425
+          },
+          {
+            "day": "2026-11-17",
+            "total": 148,
+            "humanAdjacent": 0,
+            "probe": 148
+          }
+        ],
+        "observedDays": 2,
+        "trend": {
+          "metric": "humanAdjacentEventCount",
+          "fromDay": "2026-11-15",
+          "toDay": "2026-11-17",
+          "elapsedDays": 2,
+          "previous": 38,
+          "current": 0,
+          "delta": -38,
+          "percent": -1,
+          "forecast": null
+        },
+        "retention": {
+          "eligible": false,
+          "reasons": [
+            "user-identity-missing",
+            "session-cohort-missing"
+          ],
+          "minimumDistinctUsers": 200,
+          "minimumWindowDays": 14
+        }
+      },
       "kpiTiles": 12,
       "kpiFallback": false,
       "pageOverflow": false,
@@ -313,7 +484,7 @@
       "localEventTiles": 20,
       "localEventLabels": [
         "Game start",
-        "Session end (retention)",
+        "Session end event",
         "Asked the keeper",
         "H · help opened",
         "J · journal opened",
@@ -356,6 +527,63 @@
         0
       ],
       "measuredCards": 42,
+      "syntheticBadges": 6,
+      "syntheticStaleReadings": 0,
+      "measuredVisible": true,
+      "rollupReading": {
+        "real": true,
+        "mode": "snapshot",
+        "generatedAt": "2026-11-17T19:12:27.862Z",
+        "windowDays": 14,
+        "total": 611,
+        "totals": {
+          "boss_kill": 30,
+          "canon_open": 8,
+          "loadtest": 424,
+          "smoke": 16,
+          "stress-probe": 133
+        },
+        "grouped": {
+          "humanAdjacent": 38,
+          "probe": 573,
+          "other": 0
+        },
+        "daily": [
+          {
+            "day": "2026-11-15",
+            "total": 463,
+            "humanAdjacent": 38,
+            "probe": 425
+          },
+          {
+            "day": "2026-11-17",
+            "total": 148,
+            "humanAdjacent": 0,
+            "probe": 148
+          }
+        ],
+        "observedDays": 2,
+        "trend": {
+          "metric": "humanAdjacentEventCount",
+          "fromDay": "2026-11-15",
+          "toDay": "2026-11-17",
+          "elapsedDays": 2,
+          "previous": 38,
+          "current": 0,
+          "delta": -38,
+          "percent": -1,
+          "forecast": null
+        },
+        "retention": {
+          "eligible": false,
+          "reasons": [
+            "user-identity-missing",
+            "session-cohort-missing"
+          ],
+          "minimumDistinctUsers": 200,
+          "minimumWindowDays": 14
+        }
+      },
       "kpiTiles": 0,
       "kpiFallback": true,
       "pageOverflow": false,
@@ -374,7 +602,7 @@
       "networkErrors": [
         {
           "text": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
-          "url": "http://127.0.0.1:56442/docs/admin/data/synthetic.json"
+          "url": "http://127.0.0.1:58927/docs/admin/data/synthetic.json"
         }
       ]
     }
