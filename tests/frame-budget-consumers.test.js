@@ -75,7 +75,7 @@ describe('W-E2 性能回归：装饰性视觉降频到 1/2 帧', () => {
   it('WorldEffects 流星推进仅在几何帧执行', () => {
     const scene = new THREE.Scene();
     const effects = new WorldEffects(scene);
-    effects.starField.visible = true;
+    effects.太空区 = true;   // 流星只在太空区（B178：星场归天球，这里是区开关）
     // 强制生成一枚流星并钉住它
     effects.spawnMeteor();
     const meteor = effects.meteorStreaks.find((m) => m.life > 0);

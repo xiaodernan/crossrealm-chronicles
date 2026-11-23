@@ -23,7 +23,8 @@ export class WorldEffects {
     scene.add(this.group);
     this.fireflies = null;
     this.magicOrbs = null;
-    this.starField = null;
+    /** 当前是不是太空区（流星只在那儿出现）—— B178：星场归天球，这里只留一个区开关 */
+    this.太空区 = false;
     this.aurora = null;
     this.chaosEmbers = null;
     this.meteorStreaks = [];
@@ -37,7 +38,6 @@ export class WorldEffects {
   build() {
     this.buildFireflies();
     this.buildMagicOrbs();
-    this.buildStarField();
     this.buildAurora();
     this.buildChaosEmbers();
     this.buildMeteorPool();
@@ -76,7 +76,9 @@ export class WorldEffects {
   }
 
   updateMeteors(dt) {
-    if (!this.starField?.visible) return;
+    // 流星只在太空区（那儿才看得见星空）—— B178 起"星空"归 `world/CelestialSphere` 管
+    // （真亮星 + 真月相），这里这份**是太空区自己的近距离星尘**，不是天球。
+    if (!this.太空区) return;
     // 流星是纯装饰性视觉，降频到 1/2 帧（W-C2 切片4 余项）
     const 几何帧 = frameShouldUpdate(2);
     if (!几何帧) return;
@@ -130,22 +132,14 @@ export class WorldEffects {
     this.group.add(this.magicOrbs);
   }
 
-  buildStarField() {
-    const n = 800;
-    const pos = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 600;
-      pos[i * 3 + 1] = 40 + Math.random() * 200;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 600;
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    this.starField = new THREE.Points(geo, new THREE.PointsMaterial({
-      color: 0xffffff, size: 0.6, transparent: true, opacity: 0.9,
-    }));
-    this.starField.visible = false;
-    this.group.add(this.starField);
-  }
+  /**
+   * 太空区自己的**近距离星尘**（B178 起这里不再造"天空"）。
+   *
+   * 旧版这一份是 800 个 `Math.random()` 白点、当"星空"用 —— 但太空区
+   * `SpaceZone` 自己还撒了 500 个，两份随机星场叠在同一区；而真正的天球
+   * （真亮星 + 真月相）现在归 `world/CelestialSphere` 管。
+   * 星空只有**一个**主人 ⇒ 这一份删掉；流星改按区开关（`太空区`）。
+   */
 
   buildAurora() {
     const geo = new THREE.PlaneGeometry(300, 80);
@@ -184,7 +178,8 @@ export class WorldEffects {
     // 用 `ZONE_IDS` 符号而不是字面量：id 若改名，这里必须编译期就跟着变（字面量只会静默不再匹配）
     this.fireflies.visible = zoneId === ZONE_IDS.FANTASY || zoneId === ZONE_IDS.HUB;
     this.magicOrbs.visible = zoneId === ZONE_IDS.MAGIC;
-    this.starField.visible = zoneId === ZONE_IDS.SPACE;
+    // B178：星空归 `world/CelestialSphere`（真亮星 + 真月相），这里只留一个区开关给流星用
+    this.太空区 = zoneId === ZONE_IDS.SPACE;
     this.aurora.visible = zoneId === ZONE_IDS.SPACE || zoneId === ZONE_IDS.FANTASY || zoneId === ZONE_IDS.VOID;
     this.chaosEmbers.visible = zoneId === ZONE_IDS.ABYSS;
 

@@ -61,6 +61,7 @@ import { LootSystem } from '../game/LootSystem.js';
 import { RestPointManager } from '../world/RestPointManager.js';
 import { CollectibleManager } from '../world/CollectibleManager.js';
 import { WorldEffects } from '../world/WorldEffects.js';
+import { CelestialSphere } from '../world/CelestialSphere.js';
 import { LevelEditor } from '../world/LevelEditor.js';
 import { NPCManager } from '../world/NPCManager.js';
 import { AudioManager } from '../audio/AudioManager.js';
@@ -255,6 +256,8 @@ export class Game {
     // 变了就在重算键名之前把这一侧写进出口）—— 这里既不订阅也不另记，只把"手柄表怎么问"交出去。
     this.pointerLocked = false;
     this.timeOfDay = 0.35;
+    /** 世界的第几天（真实天象的输入：B178 那条"墙钟不进玩法"仍然成立 —— 这里数的是世界日） */
+    this.世界日 = 0;
     this.container = container;
     this.paused = false;
     /** 手柄此刻归界面还是归战斗（切片14）；只在帧首比对一次，换表才走 `applyPadBindings` */
@@ -881,6 +884,11 @@ export class Game {
     this.skyUniforms.rayleigh.value = 2.4;
     this.skyUniforms.mieCoefficient.value = 0.005;
     this.skyUniforms.mieDirectionalG.value = 0.78;
+
+    // 天球（B178）：**真实**的夜空 —— 真亮星（J2000 坐标 / 星等 / 光谱色）绕天极转，
+    // 月亮按真实月相与真实视直径 0.52° 画。旧的星场是 800 个随机白点（永远不转、
+    // 没有一颗是真星）—— 那正是"演示数据堆砌"：占了位置，却没有信息。
+    this.celestial = this._adopt('world/CelestialSphere', new CelestialSphere(this.scene));
 
     this.ambient = new THREE.HemisphereLight(0xb8c8e0, 0x3a4530, 0.68);
     this.scene.add(this.ambient);
@@ -1521,7 +1529,10 @@ export class Game {
   }
 
   updateDayNight(dt) {
+    const 前时刻 = this.timeOfDay;
     this.timeOfDay = (this.timeOfDay + dt * 0.005) % 1;
+    // 跨过零点 ⇒ 世界日 +1（真实月相按**世界日**推进，不是按墙钟 —— B118）
+    if (this.timeOfDay < 前时刻) this.世界日 += 1;
     const daylight = 0.55 + Math.max(0, Math.sin(this.timeOfDay * Math.PI * 2)) * 0.45;
     this.sun.intensity = 0.9 + daylight * 0.85;
     this.ambient.intensity = 0.58 + daylight * 0.22;
@@ -1533,21 +1544,33 @@ export class Game {
     this.zoneFog.update(dt, this.world.zoneId, daylight);
     // 分级跟雾同一个驱动节奏：换区指数平滑收敛，uniforms 写权限在 ColorGrade 里面
     this.colorGrade.update(dt, this.world.zoneId);
+    // 天球先走：太阳方向由它算出来（B178/B179 —— 天空、月光、直射光共用这一份，
+    // 全仓不再有第二份太阳算式）。
+    this.celestial?.update({
+      时刻: this.timeOfDay,
+      世界天: this.世界日,
+      相机: this.camera,
+    });
     if (this.skyUniforms) {
-      const phi = THREE.MathUtils.degToRad(88 - daylight * 18);
-      const theta = this.timeOfDay * Math.PI * 2;
-      this.skyUniforms.sunPosition.value.set(
-        Math.cos(theta) * Math.cos(phi),
-        Math.sin(phi),
-        Math.sin(theta) * Math.cos(phi)
-      );
+      // 太阳位置不再手写：真实黄经 → 真赤道 → 真时角，天球算完直接读。
+      const 太阳 = this.celestial?.太阳方向(this._太阳方向缓存 ??= new THREE.Vector3());
+      if (太阳) this.skyUniforms.sunPosition.value.copy(太阳);
     }
   }
 
   updateSunFollow() {
     const p = this.player.position;
-    const a = this.timeOfDay * Math.PI * 2;
-    this.sun.position.set(p.x + Math.cos(a) * 100, 55 + Math.sin(a) * 85, p.z + Math.sin(a) * 60);
+    // 直射光从**太阳那边**来（同一份读数）；夜里太阳在地平线下，
+    // 光从地下打会把地形照反 —— 于是把仰角夹在地平线之上。
+    const 太阳 = this.celestial?.太阳方向(this._太阳方向缓存2 ??= new THREE.Vector3());
+    const 方向 = 太阳 ? this._太阳光方向 ??= new THREE.Vector3() : null;
+    if (方向) {
+      方向.set(太阳.x, Math.max(太阳.y, 0.12), 太阳.z).normalize();
+      this.sun.position.copy(p).addScaledVector(方向, 100);
+    } else {
+      const a = this.timeOfDay * Math.PI * 2;
+      this.sun.position.set(p.x + Math.cos(a) * 100, 55 + Math.sin(a) * 85, p.z + Math.sin(a) * 60);
+    }
   }
 
   /**
