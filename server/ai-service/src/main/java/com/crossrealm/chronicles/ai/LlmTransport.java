@@ -1,6 +1,7 @@
 package com.crossrealm.chronicles.ai;
 
 import java.time.Duration;
+import java.util.Map;
 
 /**
  * 上游 HTTP 的唯一出口。抽成接口不是为了“面向接口编程”这句口号，
@@ -21,6 +22,10 @@ public interface LlmTransport {
      * @param cachedTokens     上游报的缓存命中 tokens（不同厂商字段名不同，没报就 null）
      */
     record UpstreamReply(String rawJson, Integer promptTokens, Integer completionTokens, Integer cachedTokens) {}
+
+    default Map<String, Object> health() {
+        return Map.of();
+    }
 
     /**
      * 默认实现：回退到 {@link #postJson} 并从响应里现问出 usage（平台支持的话）。

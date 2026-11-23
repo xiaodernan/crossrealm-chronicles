@@ -423,6 +423,7 @@ public class LlmClient {
         // W-Z519：区分「被关掉」与「没填 key」——configured=false 时运维得知道是哪一种。
         snapshot.put("llmEnabled", props.isLlmEnabled());
         snapshot.put("model", props.getModel());
+        snapshot.put("transport", transport.health());
         snapshot.put("circuit", breaker.state().name());
         snapshot.put("cache", cache.stats());
         snapshot.put("upstreamCalls", upstreamCalls.get());

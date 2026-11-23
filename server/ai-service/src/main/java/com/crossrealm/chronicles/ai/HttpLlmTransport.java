@@ -13,6 +13,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,10 +24,10 @@ import org.springframework.stereotype.Component;
  * 一个超时、一个 bearer 头」，JDK 内置的客户端已经带连接池 keep-alive，
  * 再引入一个 HTTP 栈只是多一层要跟着升级的东西。
  *
- * <p>计网上的三个取舍：① 一个<b>静态共享</b> client —— 每次请求 new 一个会丢掉连接池，
- * TLS 握手会变成每问一句话重做一次（最贵的那部分恰好在冷路径上）；
- * ② 显式 connectTimeout + per-request timeout —— 上游不响应时不能让 Servlet 线程挂住，
- * 网关后面还有玩家在等这一帧；③ 优先 HTTP/2（ALPN 协商，上游不支持时 JDK 自动回落 1.1）。
+ * <p>计网上的三个取舍：① 一个<b>按代理配置共享</b>的 client —— 每次请求 new 一个会丢掉连接池，
+ * TLS 握手会变成每问一句话重做一次（最贵的那部分恰好在冷路径上）；配置刷新时才原子换池，
+ * 已发出的请求仍持有旧池引用，不会被中断；② 显式 connectTimeout + per-request timeout —— 上游不响应时不能让 Servlet 线程挂住，
+ * 网关后面还有玩家在等这一帧；③ 显式 HTTP/1.1，保留 keep-alive 并兼容上游缓存用量回显。
  *
  * <p><b>流式口径（W-Z11）</b>：上游请求始终带 {@code stream:true} + {@code stream_options.include_usage}。
  * 若上游回 SSE（{@code data:} 开头），本类在<b>传输边界</b>把整段增量合并为一份规范的
@@ -33,25 +35,71 @@ import org.springframework.stereotype.Component;
  * 下游 LlmClient / 熔断器 / 缓存完全不感知 SSE。若上游忽略 stream 标记直接回普通 JSON，
  * 原样透传。这样既满足「wkapi 控制台只显示流式调用」的调度口径，又不让解析逻辑扩散到链路各处。
  *
- * <p><b>代理口径（W-Z475 · 2026-11-19）</b>：本类读一次环境变量 {@code LLM_PROXY_URL}
+ * <p><b>代理口径（W-Z475）</b>：{@code ai-service.proxy-url} 由 {@code LLM_PROXY_URL} 注入
  * （形如 {@code http://127.0.0.1:7897} 或裸 {@code 127.0.0.1:7897}）。设了且能解析出 host:port，
  * JDK HttpClient 就用 {@link ProxySelector#of} 走 CONNECT 隧道——给「ai-service 容器内 DNS
  * 解析不了 api.aizzz.xyz、直连被 Cloudflare 边缘按地区拒（403）」这类宿主提供一条
  * 指向本机 Clash 混合端口的出口。不设、或解析不出，行为与从前逐字节一致（无代理）。
- * Eureka/Config 等进程内 HTTP 不经过本类，不会被代理影响。日志只打 host:port，不含任何凭据。
+ * 配置刷新后下一次取连接池时换池，相同配置始终复用旧池。Eureka/Config 等进程内 HTTP 不经过本类，
+ * 不会被代理影响。日志与健康快照只打 host:port，不含任何凭据。
  */
 @Component
 public class HttpLlmTransport implements LlmTransport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpLlmTransport.class);
 
-    private static final HttpClient CLIENT = buildClient();
+    private final AiProperties props;
+    private volatile ClientSlot client;
 
-    /** 解析 LLM_PROXY_URL → InetSocketAddress；解析失败/未设置返回 null（= 直连）。包内静态、零网络，单测可覆盖。 */
-    static InetSocketAddress resolveProxy() {
-        return parseProxy(System.getenv("LLM_PROXY_URL"));
+    public HttpLlmTransport(AiProperties props) {
+        this.props = props;
+        this.client = buildSlot(normalizeProxyUrl(props.getProxyUrl()), 1);
     }
 
+    private record ClientSlot(String configuration, InetSocketAddress proxy, long generation, HttpClient client) {}
+
+    private ClientSlot buildSlot(String configuration, long generation) {
+        InetSocketAddress proxy = parseProxy(configuration);
+        return new ClientSlot(configuration, proxy, generation, buildClient(proxy));
+    }
+
+    private static String normalizeProxyUrl(String raw) {
+        return raw == null ? "" : raw.trim();
+    }
+
+    private ClientSlot currentSlot() {
+        String configuration = normalizeProxyUrl(props.getProxyUrl());
+        ClientSlot current = client;
+        if (configuration.equals(current.configuration())) return current;
+        synchronized (this) {
+            current = client;
+            if (!configuration.equals(current.configuration())) {
+                current = buildSlot(configuration, current.generation() + 1);
+                client = current;
+            }
+            return current;
+        }
+    }
+
+    HttpClient currentClient() {
+        return currentSlot().client();
+    }
+
+    @Override
+    public Map<String, Object> health() {
+        ClientSlot current = currentSlot();
+        Map<String, Object> proxy = new LinkedHashMap<>();
+        InetSocketAddress address = current.proxy();
+        proxy.put("enabled", address != null);
+        if (address != null) {
+            proxy.put("host", address.getHostString());
+            proxy.put("port", address.getPort());
+        }
+        proxy.put("generation", current.generation());
+        return Map.of("proxy", proxy);
+    }
+
+    /** 解析代理地址 → InetSocketAddress；解析失败/未设置返回 null（= 直连）。包内静态、零外呼，单测可覆盖。 */
     static InetSocketAddress parseProxy(String raw) {
         if (raw == null || raw.isBlank()) return null;
         String s = raw.trim();
@@ -75,8 +123,7 @@ public class HttpLlmTransport implements LlmTransport {
         }
     }
 
-    private static HttpClient buildClient() {
-        InetSocketAddress proxy = resolveProxy();
+    private static HttpClient buildClient(InetSocketAddress proxy) {
         HttpClient.Builder b = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
                 .version(HttpClient.Version.HTTP_1_1);
@@ -108,7 +155,7 @@ public class HttpLlmTransport implements LlmTransport {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody, StandardCharsets.UTF_8))
                 .build();
         try {
-            HttpResponse<String> response = CLIENT.send(request,
+            HttpResponse<String> response = currentClient().send(request,
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             int status = response.statusCode();
             if (status / 100 != 2) {

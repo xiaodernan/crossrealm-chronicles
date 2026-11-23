@@ -51,7 +51,7 @@ class PromptCacheLiveTest {
             assertNotNull(in, "missing Advisor system prompt");
             system = new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
         }
-        LlmClient client = new LlmClient(props, new HttpLlmTransport(), new ObjectMapper());
+        LlmClient client = new LlmClient(props, new HttpLlmTransport(props), new ObjectMapper());
         long previousPrompt = 0;
         long previousCached = 0;
         for (int i = 1; i <= 3; i++) {

@@ -215,6 +215,21 @@ class LlmClientTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void 健康快照带回脱敏代理状态且不暴露凭据() {
+        AiProperties p = props();
+        p.setProxyUrl("http://proxy-user:proxy-secret@127.0.0.1:7897");
+        Map<String, Object> health = client(p, new HttpLlmTransport(p)).health();
+        Map<String, Object> transport = (Map<String, Object>) health.get("transport");
+        Map<String, Object> proxy = (Map<String, Object>) transport.get("proxy");
+        assertEquals(true, proxy.get("enabled"));
+        assertEquals("127.0.0.1", proxy.get("host"));
+        assertEquals(7897, proxy.get("port"));
+        assertFalse(health.toString().contains("proxy-user"));
+        assertFalse(health.toString().contains("proxy-secret"));
+    }
+
+    @Test
     void 上游用量计数进入upstreamUsage_不含正文() {
         AiProperties p = props();
         String withUsage = "{\"object\":\"chat.completion\",\"choices\":[{\"index\":0,\"message\":"

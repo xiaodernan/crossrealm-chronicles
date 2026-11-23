@@ -36,7 +36,7 @@ class EchoHintLiveIntegrationTest {
         p.setMaxRetries(1);
         p.setRetryBaseMs(200);
 
-        LlmClient client = new LlmClient(p, new HttpLlmTransport(), MAPPER);
+        LlmClient client = new LlmClient(p, new HttpLlmTransport(p), MAPPER);
 
         // 这里只断言“真实上游给出非空短句 + 第二回全同缓存”，不枚举内容 —— 先知口吻允许漂移
         ClientResult result = completeForHint(client, MAPPER);

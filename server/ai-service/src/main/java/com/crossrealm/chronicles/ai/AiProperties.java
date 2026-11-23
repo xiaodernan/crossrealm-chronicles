@@ -18,6 +18,7 @@ public class AiProperties {
     private String baseUrl = "https://api.aizzz.xyz/v1";
     private String model = "gpt-6.2-sol";
     private String apiKey = "";
+    private String proxyUrl = "";
     private Duration timeout = Duration.ofSeconds(20);
     private int maxRetries = 2;
     private long retryBaseMs = 200;
@@ -49,6 +50,9 @@ public class AiProperties {
 
     public String getApiKey() { return apiKey; }
     public void setApiKey(String apiKey) { this.apiKey = apiKey; }
+
+    public String getProxyUrl() { return proxyUrl; }
+    public void setProxyUrl(String proxyUrl) { this.proxyUrl = proxyUrl; }
 
     public Duration getTimeout() { return timeout; }
     public void setTimeout(Duration timeout) { this.timeout = timeout; }

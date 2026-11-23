@@ -38,7 +38,7 @@ class AiLiveIntegrationTest {
         p.setMaxRetries(1);
         p.setRetryBaseMs(200);
 
-        LlmClient client = new LlmClient(p, new HttpLlmTransport(), new ObjectMapper());
+        LlmClient client = new LlmClient(p, new HttpLlmTransport(p), new ObjectMapper());
         LlmClient.Answer answer = client.ask(
                 "篝火快灭了，下一步该往哪里走？",
                 Map.of("zone", "hub", "season", "ember"));

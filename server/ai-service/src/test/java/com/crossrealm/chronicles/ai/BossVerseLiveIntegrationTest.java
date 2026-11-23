@@ -33,7 +33,7 @@ class BossVerseLiveIntegrationTest {
         p.setMaxRetries(1);
         p.setRetryBaseMs(200);
 
-        LlmClient client = new LlmClient(p, new HttpLlmTransport(), MAPPER);
+        LlmClient client = new LlmClient(p, new HttpLlmTransport(p), MAPPER);
 
         ClientResult result = completeForBossVerse(client, MAPPER);
         assertNotNull(result.verse);

@@ -40,7 +40,7 @@ class LoreOracleLiveIntegrationTest {
         p.setTimeout(Duration.ofSeconds(60));
         p.setMaxRetries(1);
         p.setRetryBaseMs(200);
-        return new LlmClient(p, new HttpLlmTransport(), new com.fasterxml.jackson.databind.ObjectMapper());
+        return new LlmClient(p, new HttpLlmTransport(p), new com.fasterxml.jackson.databind.ObjectMapper());
     }
 
     @Test

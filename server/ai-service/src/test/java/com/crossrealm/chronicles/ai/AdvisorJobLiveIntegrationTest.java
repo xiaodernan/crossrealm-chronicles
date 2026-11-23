@@ -35,7 +35,7 @@ class AdvisorJobLiveIntegrationTest {
         if (model != null && !model.isBlank()) p.setModel(model);
         p.setTimeout(Duration.ofSeconds(60));
         p.setMaxRetries(1);
-        LlmClient client = new LlmClient(p, new HttpLlmTransport(), new ObjectMapper());
+        LlmClient client = new LlmClient(p, new HttpLlmTransport(p), new ObjectMapper());
 
         AdvisorJobProperties jp = new AdvisorJobProperties();
         jp.setWorkers(2);
