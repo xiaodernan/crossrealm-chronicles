@@ -92,7 +92,8 @@ public class LlmClient {
     }
 
 
-    /** cached=本地摘要缓存命中；upstreamCached=上游 prompt-cache 命中（前缀复用）。 */
+    /** cached=本地摘要缓存或同键合流命中；upstreamCached=上游 prompt-cache 命中（前缀复用）。
+     * latencyMs 对领队是上游耗时，对跟随者是自身等待耗时，本地摘要命中为 0。 */
     public record Answer(String answer, String model, boolean cached, boolean upstreamCached, long latencyMs) {}
 
     private static final Pattern TRAILING_SLASH = Pattern.compile("/+$");
@@ -166,8 +167,11 @@ public class LlmClient {
         java.util.concurrent.CompletableFuture<Answer> running = inFlight.putIfAbsent(key, leader);
         if (running != null) {
             lane(cacheKey).coalesced.incrementAndGet();
+            long waitedFrom = System.nanoTime();
             try {
-                return running.join();
+                Answer shared = running.join();
+                return new Answer(shared.answer(), shared.model(), true,
+                        shared.upstreamCached(), elapsedMs(waitedFrom));
             } catch (java.util.concurrent.CompletionException e) {
                 throw unwrapCoalesced(e);
             }

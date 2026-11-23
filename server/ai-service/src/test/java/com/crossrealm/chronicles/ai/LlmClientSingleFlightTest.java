@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -156,14 +157,24 @@ class LlmClientSingleFlightTest {
         Pack pack = new Pack();
         pack.submit(client, 7, LlmClient.CacheKeys.ADVISOR);
         awaitFollowers(client, LlmClient.CacheKeys.ADVISOR, 7);
+        Thread.sleep(40L);
         transport.release.countDown();
 
-        assertEquals(ANSWER, leader.get(20, TimeUnit.SECONDS).answer());
+        LlmClient.Answer leaderAnswer = leader.get(20, TimeUnit.SECONDS);
         List<LlmClient.Answer> rest = pack.awaitAll();
         starter.shutdownNow();
 
+        assertEquals(ANSWER, leaderAnswer.answer());
+        assertFalse(leaderAnswer.cached(), "领队真的打了上游，不能标成本地命中");
+        assertTrue(leaderAnswer.upstreamCached(), "上游前缀命中仍要保留");
         assertEquals(1, transport.calls.get(), "同键并发穿透了上游：合流没生效");
-        for (LlmClient.Answer a : rest) assertEquals(ANSWER, a.answer(), "跟着走的那几位必须拿到同一份答案");
+        for (LlmClient.Answer a : rest) {
+            assertEquals(ANSWER, a.answer(), "跟着走的那几位必须拿到同一份答案");
+            assertTrue(a.cached(), "跟随者复用了领队结果，不能再误报为未缓存");
+            assertTrue(a.upstreamCached(), "合流不能抹掉答案的上游前缀来源");
+            assertTrue(a.latencyMs() >= 30L, "跟随者应回报自己的等待耗时，而不是领队耗时或 0：" + a.latencyMs());
+            assertTrue(a.latencyMs() <= leaderAnswer.latencyMs(), "跟随者晚于领队开始，等待耗时不该超过领队上游耗时");
+        }
 
         Map<String, Object> view = laneView(client, LlmClient.CacheKeys.ADVISOR);
         assertEquals(1L, view.get("calls"), "车道账上也只能记一次上游");
@@ -254,6 +265,10 @@ class LlmClientSingleFlightTest {
 
         assertEquals(1, transport.calls.get());
         assertEquals(3, rest.size());
+        for (LlmClient.Answer a : rest) {
+            assertTrue(a.cached(), "跨车道跟随同样复用了结果");
+            assertTrue(a.upstreamCached(), "跨车道跟随仍保留上游前缀来源");
+        }
         assertEquals(3L, laneView(client, otherLane).get("coalesced"), "三位跟随记在他们自己的车道账上");
         assertEquals(0L, laneView(client, LlmClient.CacheKeys.EMBER).get("coalesced"), "领队不是跟随者");
         assertEquals(1L, laneView(client, LlmClient.CacheKeys.EMBER).get("calls"), "上游那一次记在真去打的那条车道上");
