@@ -14,5 +14,19 @@ ai-service:
   cache-max-entries: 256
   max-question-chars: 400
   max-tokens: 320
+  lane-max-tokens:
+    crossrealm-advisor-v1: 320
+    crossrealm-ember-v2: 96
+    crossrealm-kindle-letter-v1: 96
+    crossrealm-boss-verse-v1: 96
+    crossrealm-echo-hint-v1: 96
+    crossrealm-guide-v1: 192
+    crossrealm-arbiter-v1: 384
+    crossrealm-oracle-v1: 512
+    crossrealm-oracle-deep-v1: 768
+    crossrealm-fortune-path-v1: 160
+    crossrealm-vigil-vow-v1: 160
+    crossrealm-death-epitaph-v1: 64
+    crossrealm-chapter-coda-v1: 96
   breaker-threshold: 4
   breaker-cooldown-ms: 15000

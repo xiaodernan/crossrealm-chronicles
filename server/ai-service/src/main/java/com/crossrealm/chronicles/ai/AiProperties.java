@@ -1,6 +1,8 @@
 package com.crossrealm.chronicles.ai;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -23,6 +25,8 @@ public class AiProperties {
     private int cacheMaxEntries = 256;
     private int maxQuestionChars = 400;
     private int maxTokens = 320;
+    /** 输出预算按车道收敛；未知车道沿用 maxTokens，配置缺项仍有安全默认。 */
+    private Map<String, Integer> laneMaxTokens = defaultLaneMaxTokens();
     private int breakerThreshold = 4;
     private long breakerCooldownMs = 15_000;
     /** W-Z490：是否给「大前缀」车道（v4≈4.7万 tok 的 oracle/arbiter、v5≈8.3万 tok 的 oracle-deep）
@@ -66,6 +70,35 @@ public class AiProperties {
 
     public int getMaxTokens() { return maxTokens; }
     public void setMaxTokens(int maxTokens) { this.maxTokens = maxTokens; }
+
+    public Map<String, Integer> getLaneMaxTokens() { return laneMaxTokens; }
+    public void setLaneMaxTokens(Map<String, Integer> laneMaxTokens) {
+        this.laneMaxTokens = new LinkedHashMap<>(laneMaxTokens);
+    }
+
+    public int maxTokensFor(String cacheKey) {
+        int budget = laneMaxTokens.getOrDefault(cacheKey, maxTokens);
+        if (budget <= 0) throw new IllegalStateException("invalid llm token budget for " + cacheKey);
+        return budget;
+    }
+
+    private static Map<String, Integer> defaultLaneMaxTokens() {
+        Map<String, Integer> budgets = new LinkedHashMap<>();
+        budgets.put(LlmClient.CacheKeys.ADVISOR, 320);
+        budgets.put(LlmClient.CacheKeys.EMBER, 96);
+        budgets.put(LlmClient.CacheKeys.KINDLE_LETTER, 96);
+        budgets.put(LlmClient.CacheKeys.BOSSVERSE, 96);
+        budgets.put(LlmClient.CacheKeys.ECHO, 96);
+        budgets.put(LlmClient.CacheKeys.GUIDE, 192);
+        budgets.put(LlmClient.CacheKeys.ARBITER, 384);
+        budgets.put(LlmClient.CacheKeys.ORACLE, 512);
+        budgets.put(LlmClient.CacheKeys.ORACLE_DEEP, 768);
+        budgets.put(LlmClient.CacheKeys.FORTUNE_PATH, 160);
+        budgets.put(LlmClient.CacheKeys.VIGIL_VOW, 160);
+        budgets.put(LlmClient.CacheKeys.DEATH_EPITAPH, 64);
+        budgets.put(LlmClient.CacheKeys.CHAPTER_CODA, 96);
+        return budgets;
+    }
 
     public int getBreakerThreshold() { return breakerThreshold; }
     public void setBreakerThreshold(int breakerThreshold) { this.breakerThreshold = breakerThreshold; }

@@ -125,6 +125,8 @@ export const STRINGS_EN = Object.freeze({
   settings_online_diag_btn: 'Starpath diagnostics (advisor · queue)',
   settings_online_diag_ok: 'Advisor ${model} · circuit ${circuit} · ${calls} live calls${hitLine}; queue depth ${depth} · in-flight ${inFlight} · rejected ${rejected} · dead-lettered ${dead}',
   settings_online_diag_hit_ok: ' · ${pct}% cached upstream',
+  settings_online_diag_lanes: '; lanes (cache/budget): ${lanes}',
+  settings_online_diag_lane_fmt: '${lane} ${pct}/${budget}tok',
   settings_online_diag_unavailable: 'Advisor not answering (ai-service unreachable or circuit open — try again later)',
   settings_online_diag_dlq_fmt: '; dead letters ${count}, top: ${reasons}',
   settings_pad_tuning: 'Controller Feel',

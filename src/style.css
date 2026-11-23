@@ -2039,6 +2039,12 @@ body:has(#help-manual:not(.hidden)) #pause-menu {
   pointer-events: none;
 }
 
+.settings-box {
+  max-height: 88vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .settings-box label {
   display: block;
   text-align: left;

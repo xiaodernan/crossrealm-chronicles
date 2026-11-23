@@ -110,6 +110,8 @@ public class LlmClient {
         // 挂没挂前缀。删掉比登记诚实。
         /** Ember 答火（W-Z316 烬灯回信/烬火答 + Classifier）：同一前缀，两条后端 lane 下共用一桶. */
         public static final String EMBER = "crossrealm-ember-v2";
+        /** 烬灯回信 · 炉火答：v4 大前缀，与 Ember 分类/回信缓存页隔离。 */
+        public static final String KINDLE_LETTER = "crossrealm-kindle-letter-v1";
         /** BossVerse Boss 余火回响. */
         public static final String BOSSVERSE = "crossrealm-boss-verse-v1";
         /** Echo Hint — Echo 的实时回声. */
@@ -149,7 +151,8 @@ public class LlmClient {
         // W-Z519：先说清是「被关掉」还是「没填 key」——两者都不可用，但运维处置完全不同。
         if (!props.isLlmEnabled()) throw new AdvisorUnavailableException("llm-disabled");
         if (!isConfigured()) throw new AdvisorUnavailableException("not-configured");
-        String key = digest(props.getModel() + "\u0000" + system + "\u0000" + user);
+        int maxTokens = props.maxTokensFor(cacheKey);
+        String key = digest(props.getModel() + "\u0000" + maxTokens + "\u0000" + system + "\u0000" + user);
         String cached = cache.get(key);
         if (cached != null) {
             incrementCacheHitMeter();
@@ -170,7 +173,7 @@ public class LlmClient {
             }
         }
         try {
-            Answer answer = completeUncached(system, user, cacheKey, key);
+            Answer answer = completeUncached(system, user, cacheKey, key, maxTokens);
             leader.complete(answer);
             return answer;
         } catch (RuntimeException e) {
@@ -192,10 +195,10 @@ public class LlmClient {
     }
 
     /** 摘要缓存与合流之后的那一段：熔断 → 选择性重试 → 解析 → 记账。 */
-    private Answer completeUncached(String system, String user, String cacheKey, String key) {
+    private Answer completeUncached(String system, String user, String cacheKey, String key, int maxTokens) {
         if (!breaker.allow()) throw new AdvisorUnavailableException("circuit-open");
 
-        String body = requestBody(system, user, cacheKey);
+        String body = requestBody(system, user, cacheKey, maxTokens);
         long started = System.nanoTime();
         int retries = Math.max(0, props.getMaxRetries());
         LlmUpstreamException last = null;
@@ -255,6 +258,7 @@ public class LlmClient {
         lanes.put(CacheKeys.EMBER + ":gratitude", EmberReplyController.GRATITUDE_SYSTEM);
         lanes.put(CacheKeys.EMBER + ":distress", EmberReplyController.DISTRESS_SYSTEM);
         lanes.put(CacheKeys.EMBER + ":offtopic", EmberReplyController.OFFTOPIC_SYSTEM);
+        lanes.put(CacheKeys.KINDLE_LETTER, KindleLetterController.KINDLE_LETTER_SYSTEM);
         lanes.put(CacheKeys.BOSSVERSE, BossVerseController.BOSS_VERSE_SYSTEM);
         lanes.put(CacheKeys.ECHO, EchoHintController.ECHO_SYSTEM);
         lanes.put(CacheKeys.GUIDE, com.crossrealm.chronicles.ai.GuideController.GUIDE_SYSTEM);
@@ -439,6 +443,7 @@ public class LlmClient {
             long lanePrompt = c.prompt.get();
             long laneCached = c.cached.get();
             Map<String, Object> one = new LinkedHashMap<>();
+            one.put("maxTokens", props.maxTokensFor(laneName));
             one.put("calls", c.calls.get());
             one.put("promptTokens", lanePrompt);
             one.put("cachedTokens", laneCached);
@@ -478,7 +483,7 @@ public class LlmClient {
         return TRAILING_SLASH.matcher(props.getBaseUrl()).replaceAll("") + "/chat/completions";
     }
 
-    private String requestBody(String system, String user, String cacheKey) {
+    private String requestBody(String system, String user, String cacheKey, int maxTokens) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", props.getModel());
         // W-Z168：wkapi 网关下实测——stream+include_usage+ephemeral 前缀已能走缓存（首包 null、第二次约 87% 命中）；
@@ -494,7 +499,7 @@ public class LlmClient {
         systemMsg.put("content", system);
         systemMsg.put("cache_control", Map.of("type", "ephemeral"));
         body.put("messages", List.of(systemMsg, Map.of("role", "user", "content", user)));
-        body.put("max_tokens", props.getMaxTokens());
+        body.put("max_tokens", maxTokens);
         body.put("temperature", 0.7);
         // W-Z11：始终流式上游（include_usage 让末段 SSE 带用量块）——
         // wkapi 控制台按「流式」归类；HttpLlmTransport 在传输边界把 SSE 收拢回普通 JSON

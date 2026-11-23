@@ -44,6 +44,22 @@ const actionLabel = (action) => {
   return key ? t(key) : action;
 };
 
+export function formatAdvisorLanes(byLane, translate) {
+  if (!byLane || typeof byLane !== 'object' || Array.isArray(byLane)) return '';
+  const lanes = Object.entries(byLane)
+    .filter(([name, row]) => /^[a-z0-9-]+$/.test(name) && row && typeof row === 'object'
+      && ((Number(row.calls) || 0) > 0 || (Number(row.localHits) || 0) > 0))
+    .sort((a, b) => (Number(b[1].promptTokens) || 0) - (Number(a[1].promptTokens) || 0))
+    .slice(0, 4)
+    .map(([name, row]) => {
+      const ratio = Number.isFinite(row.hitRatio) && row.hitRatio >= 0 && row.hitRatio <= 1
+        ? `${(row.hitRatio * 100).toFixed(1)}%` : 'n/a';
+      const budget = Number.isInteger(row.maxTokens) && row.maxTokens > 0 ? String(row.maxTokens) : '?';
+      return translate('settings_online_diag_lane_fmt', { lane: name, pct: ratio, budget });
+    });
+  return lanes.length ? translate('settings_online_diag_lanes', { lanes: lanes.join(' · ') }) : '';
+}
+
 export class SettingsPanel {
   constructor(game) {
     this.game = game;
@@ -417,9 +433,10 @@ export class SettingsPanel {
           return;
         }
         const hp = h?.upstreamUsage ?? null;
-        const hitLine = hp && typeof hp.hitRatio === 'number' && Number.isFinite(hp.hitRatio) && hp.hitRatio > 0
+        const hitLine = hp && Number.isFinite(hp.hitRatio) && hp.hitRatio >= 0 && hp.hitRatio <= 1 && hp.promptTokens > 0
           ? t('settings_online_diag_hit_ok', { pct: (hp.hitRatio * 100).toFixed(1) })
           : '';
+        const laneLine = formatAdvisorLanes(hp?.byLane, t);
         const mainLine = t('settings_online_diag_ok', {
           model: h.model ?? '—',
           circuit: h.circuit ?? '—',
@@ -446,7 +463,7 @@ export class SettingsPanel {
             dlqSuffix = t('settings_online_diag_dlq_fmt', { count, reasons: top || '—' });
           }
         }
-        out.textContent = mainLine + dlqSuffix;
+        out.textContent = mainLine + laneLine + dlqSuffix;
       });
     }
   }

@@ -68,7 +68,7 @@ public class KindleLetterController {
             LlmClient.Answer answer = client.complete(
                     KINDLE_LETTER_SYSTEM,
                     String.valueOf(state.get("user")),
-                    LlmClient.CacheKeys.EMBER);
+                    LlmClient.CacheKeys.KINDLE_LETTER);
             return Map.<String, Object>of(
                     "rawReply", String.valueOf(answer.answer()),
                     "cached", answer.cached(),

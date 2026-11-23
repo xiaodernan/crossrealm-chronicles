@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -62,7 +63,7 @@ class KindleLetterControllerTest {
                 .andExpect(status().isOk());
 
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
-        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString(), anyString());
+        org.mockito.Mockito.verify(client).complete(captor.capture(), anyString(), eq(LlmClient.CacheKeys.KINDLE_LETTER));
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("炉火的记录者"));
         org.junit.jupiter.api.Assertions.assertTrue(captor.getValue().contains("守夜人"),
                 "烬火答人格应钉炉火/守夜人这一锚点，实际：" + captor.getValue().substring(0, 120));

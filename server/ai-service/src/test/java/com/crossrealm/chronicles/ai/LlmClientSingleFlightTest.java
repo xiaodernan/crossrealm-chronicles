@@ -233,16 +233,16 @@ class LlmClientSingleFlightTest {
 
     @Test
     void 跨车道同内容也只付一次且两边账各记各的() throws Exception {
-        // digest 里没有车道名：同 (model, system, user) 的内容本来就等价，
+        // digest 含模型、预算、system 与 user，但不含车道名：同预算下同内容等价，
         // 所以这一位不该因为"车道不同"再花一次钱；上游那一次记在真去打的那条车道上，
         // 跟随次数记在跟随者自己的车道账上。
         Blocking transport = new Blocking(null);
         LlmClient client = new LlmClient(props(), transport, MAPPER);
         ExecutorService starter = Executors.newSingleThreadExecutor();
-        Future<LlmClient.Answer> leader = starter.submit(() -> client.complete(SYSTEM, QUESTION, LlmClient.CacheKeys.GUIDE));
+        Future<LlmClient.Answer> leader = starter.submit(() -> client.complete(SYSTEM, QUESTION, LlmClient.CacheKeys.EMBER));
         assertTrue(transport.entered.await(5, TimeUnit.SECONDS));
 
-        String otherLane = LlmClient.CacheKeys.CHAPTER_CODA;
+        String otherLane = LlmClient.CacheKeys.KINDLE_LETTER;
         Pack pack = new Pack();
         pack.submit(client, 3, otherLane);
         awaitFollowers(client, otherLane, 3);
@@ -255,8 +255,8 @@ class LlmClientSingleFlightTest {
         assertEquals(1, transport.calls.get());
         assertEquals(3, rest.size());
         assertEquals(3L, laneView(client, otherLane).get("coalesced"), "三位跟随记在他们自己的车道账上");
-        assertEquals(0L, laneView(client, LlmClient.CacheKeys.GUIDE).get("coalesced"), "领队不是跟随者");
-        assertEquals(1L, laneView(client, LlmClient.CacheKeys.GUIDE).get("calls"), "上游那一次记在真去打的那条车道上");
+        assertEquals(0L, laneView(client, LlmClient.CacheKeys.EMBER).get("coalesced"), "领队不是跟随者");
+        assertEquals(1L, laneView(client, LlmClient.CacheKeys.EMBER).get("calls"), "上游那一次记在真去打的那条车道上");
         assertEquals(0L, laneView(client, otherLane).get("calls"), "没打上游的车道不许摊到上游次数");
     }
 
