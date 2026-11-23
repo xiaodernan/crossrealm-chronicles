@@ -31,6 +31,7 @@
     "e2e:advisor": "node scripts/e2e-advisor.mjs",
     "soak": "node scripts/soak.mjs",
     "walkthrough:ui": "node scripts/ui-walkthrough.mjs",
+    "probe:admin": "node scripts/admin-probe.mjs",
     "preview:boot": "node scripts/preview-boot.mjs",
     "load-test": "node scripts/load-test.mjs",
     "advisor-e2e": "node scripts/advisor-e2e.mjs"

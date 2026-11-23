@@ -660,3 +660,47 @@ export function 走查越线(R) {
   return out;
 }
 
+export function 管理页探针越线(R) {
+  const out = [];
+  const expected = R?.expected ?? {};
+  const scenarios = R?.scenarios;
+  if (!scenarios || typeof scenarios !== 'object') return ['管理页探针没有交出读数（fail-closed）'];
+  const normal = scenarios.normal;
+  const english = scenarios.english;
+  const mobile = scenarios.mobile;
+  const fallback = scenarios.fallback;
+  if (!normal) out.push('normal: 缺少正常解锁轮次');
+  if (!english) out.push('english: 缺少英文切换轮次');
+  if (!mobile) out.push('mobile: 缺少 390px 窄屏轮次');
+  if (!fallback) out.push('fallback: 缺少合成数据故障轮次');
+  if (out.length) return out;
+  const eventCount = Number(expected.localEvents);
+  const measuredCount = Number(expected.measuredCards);
+  for (const [name, reading] of Object.entries({ normal, english, mobile, fallback })) {
+    if (reading.localEventTiles !== eventCount) out.push(`${name}-events: 事件格 ${reading.localEventTiles} !== ${eventCount}`);
+    if (reading.measuredCards !== measuredCount) out.push(`${name}-measured: 实测卡 ${reading.measuredCards} !== ${measuredCount}`);
+    if (!Array.isArray(reading.localEventLabels) || reading.localEventLabels.length !== eventCount || !reading.localEventLabels.every(Boolean)) out.push(`${name}-labels: 事件标签为空或数量不符`);
+    if (reading.pageOverflow !== false || !Array.isArray(reading.cardOverlaps) || reading.cardOverlaps.length !== 0) out.push(`${name}-layout: ${JSON.stringify({ overflow: reading.pageOverflow, overlaps: reading.cardOverlaps })}`);
+    if (reading.suspiciousTokens !== false) out.push(`${name}-tokens: DOM 出现 NaN / undefined`);
+    if (!Array.isArray(reading.exceptions) || reading.exceptions.length !== 0) out.push(`${name}-exceptions: ${JSON.stringify(reading.exceptions)}`);
+  }
+  if (normal.wrongPasswordRejected !== true || normal.wrongDashboardLocked !== true) out.push('wrong-password: 错误口令没有挡住仪表盘');
+  if (normal.dashboardUnlocked !== true || normal.gateVisible !== false) out.push('normal-unlock: 正确口令没有解锁');
+  if (normal.kpiTiles !== 12 || normal.kpiFallback !== false) out.push('normal-kpis: 合成 KPI 没有完整渲染');
+  const counts = normal.localEventValues ?? [];
+  if (counts[0] !== 2 || counts[1] !== 1 || counts[2] !== 1 || counts[17] !== 1) out.push(`seeded-counts: 种子读数错位 ${JSON.stringify(counts)}`);
+  if (normal.consoleErrors?.length !== 0 || normal.networkErrors?.length !== 0) out.push(`normal-console: ${JSON.stringify({ console: normal.consoleErrors, network: normal.networkErrors })}`);
+  if (english.lang !== 'en' || english.cjkCount !== 0) out.push(`english-switch: lang=${english.lang}，英文模式仍有 ${english.cjkCount} 个 CJK 字符`);
+  if (mobile.cjkCount !== 0) out.push(`mobile-language: 英文窄屏仍有 ${mobile.cjkCount} 个 CJK 字符`);
+  if (fallback.cjkCount !== 0) out.push(`fallback-language: 英文降级页仍有 ${fallback.cjkCount} 个 CJK 字符`);
+  if (english.consoleErrors?.length !== 0 || english.networkErrors?.length !== 0) out.push('english-console: 英文切换产生错误');
+  if (fallback.dashboardUnlocked !== true || fallback.kpiFallback !== true) out.push('fallback: 合成数据失败时没有显示降级卡');
+  const consoleErrors = Array.isArray(fallback.consoleErrors) ? fallback.consoleErrors : [];
+  const networkErrors = Array.isArray(fallback.networkErrors) ? fallback.networkErrors : [];
+  const unexpectedConsole = consoleErrors.filter((entry) => !String(entry?.text ?? '').includes('[admin] synthetic.json load failed:'));
+  const unexpectedNetwork = networkErrors.filter((entry) => !String(entry?.url ?? '').includes('data/synthetic.json'));
+  if (consoleErrors.length !== 1 || unexpectedConsole.length !== 0) out.push(`fallback-console: ${JSON.stringify(consoleErrors)}`);
+  if (networkErrors.length !== 1 || unexpectedNetwork.length !== 0) out.push(`fallback-network: ${JSON.stringify(networkErrors)}`);
+  return out;
+}
+

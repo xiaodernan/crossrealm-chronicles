@@ -76,3 +76,8 @@ jobs:
         env:
           CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: npm run e2e
+
+      - name: Admin browser probe (password, i18n, mobile, fallback)
+        env:
+          CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
+        run: npm run probe:admin

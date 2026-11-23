@@ -27,6 +27,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--ink);font-family:'Segoe UI','Microsoft YaHei','PingFang SC','Hiragino Sans GB',sans-serif;line-height:1.55;min-height:100vh;}
 a{color:var(--gold-dim)}
+code{overflow-wrap:anywhere}
 .out{max-width:1080px;margin:0 auto;padding:28px;}
 .gate-wrap{position:relative}
 .gate-card{max-width:420px;margin:80px auto;padding:28px;background:var(--panel);border:1px solid var(--rim-strong);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,0.5),0 0 60px rgba(255,180,80,0.08) inset;text-align:center;}
@@ -38,28 +39,49 @@ a{color:var(--gold-dim)}
 .gate-btn{display:block;width:100%;padding:12px 14px;background:linear-gradient(135deg,rgba(92,48,8,.82),rgba(48,28,4,.92));color:var(--gold);border:1px solid rgba(255,217,138,.45);border-radius:8px;font-family:inherit;font-size:.86rem;letter-spacing:.08em;cursor:pointer;transition:filter .18s;}
 .gate-btn:hover{filter:brightness(1.18)}
 .gate-error{color:var(--bad);font-size:.78rem;margin-top:10px;min-height:1.4em}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:linear-gradient(135deg,#1a1420,#0f0c14);border:1px solid var(--rim);border-radius:12px;margin-bottom:16px;}
-.topbar h1{font-size:1rem;color:var(--gold-dim);letter-spacing:.04em}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:linear-gradient(135deg,#1a1420,#0f0c14);border:1px solid var(--rim);border-radius:12px;margin-bottom:16px;flex-wrap:wrap;}
+.topbar>div{min-width:0}
+.topbar h1{font-size:1rem;color:var(--gold-dim);letter-spacing:.04em;overflow-wrap:anywhere}
 .topbar .crumbs{font-size:.7rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-.topbar nav{display:flex;gap:10px;align-items:center}
-.topbar nav a{font-size:.75rem;padding:6px 12px;border:1px solid var(--rim);border-radius:6px;text-decoration:none;color:var(--muted)}
+.topbar nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
+.topbar nav a{font-size:.75rem;padding:6px 12px;border:1px solid var(--rim);border-radius:6px;text-decoration:none;color:var(--muted);overflow-wrap:anywhere}
 .topbar nav a:hover{color:var(--gold);border-color:var(--gold-dim)}
 .lang-toggle{display:inline-flex;gap:4px;margin-left:4px}
 .lang-toggle button{font-size:.68rem;padding:5px 10px;border:1px solid var(--rim-strong);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;letter-spacing:.05em;transition:all .15s}
 .lang-toggle button[aria-pressed="true"]{border-color:var(--gold-dim);color:var(--gold);background:rgba(255,217,138,.08)}
 .lang-toggle button:hover{color:var(--gold)}
 .gate-lang{position:absolute;top:10px;right:0}
-.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px}
-.kpi{background:var(--panel);border:1px solid var(--rim);border-radius:10px;padding:14px 10px;text-align:center;transition:border-color .25s}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:16px}
+#localEventsGrid{grid-template-columns:repeat(9,minmax(0,1fr));gap:6px;margin-bottom:10px}
+#measuredPanel>.kpi-grid,#simKpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:10px}
+.kpi{background:var(--panel);border:1px solid var(--rim);border-radius:10px;padding:14px 10px;text-align:center;transition:border-color .25s;min-width:0}
 .kpi:hover{border-color:var(--rim-strong)}
-.kpi-label{font-size:.65rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;line-height:1.2}
-.kpi-value{font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-variant-numeric:tabular-nums;font-size:1.35rem;color:var(--gold);line-height:1.1}
-.kpi-trend{font-size:.62rem;margin-top:3px;line-height:1.1}
+.kpi-label{font-size:.65rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;line-height:1.2;overflow-wrap:anywhere}
+.kpi-value{font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-variant-numeric:tabular-nums;font-size:1.35rem;color:var(--gold);line-height:1.1;overflow-wrap:anywhere}
+.kpi-trend{font-size:.62rem;margin-top:3px;line-height:1.1;overflow-wrap:anywhere}
 .kpi-trend.up{color:var(--good)}
 .kpi-trend.down{color:var(--bad)}
 .kpi-trend.flat{color:var(--warn)}
-.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}
-@media (max-width:900px){.two-col{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(3,1fr)}.out{padding:16px}}
+.two-col{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+@media (max-width:900px){.two-col{grid-template-columns:minmax(0,1fr)}.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}#localEventsGrid{grid-template-columns:repeat(3,minmax(0,1fr))}#measuredPanel>.kpi-grid,#simKpis{grid-template-columns:repeat(2,minmax(0,1fr))}.out{padding:16px}}
+@media (max-width:600px){
+  .out{padding:10px}
+  .topbar{align-items:flex-start;flex-direction:column;padding:12px}
+  .topbar nav{width:100%;gap:6px}
+  .topbar nav a{padding:5px 8px}
+  .panel{padding:12px;min-width:0;overflow-wrap:anywhere}
+  .panel h2{display:block}
+  .panel h2 small{display:block;margin-top:3px}
+  .kpi{padding:10px 6px}
+  .bar-row{grid-template-columns:minmax(0,1fr) minmax(40px,.8fr) 54px;gap:6px}
+  .bar-row .name{overflow-wrap:anywhere}
+  .funnel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+  .funnel-cell{min-width:0;padding:8px 4px;overflow-wrap:anywhere}
+  .retention-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .rec{grid-template-columns:30px minmax(0,1fr);gap:6px;padding:8px}
+  .rec-title,.rec-impact{overflow-wrap:anywhere}
+  #localEventsList{overflow-wrap:anywhere}
+}
 .panel{background:var(--panel);border:1px solid var(--rim);border-radius:12px;padding:18px;margin-bottom:16px}
 .panel h2{font-size:.78rem;color:var(--gold-dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .panel h2 small{color:var(--muted);font-size:.65rem;font-weight:normal;letter-spacing:.03em;text-transform:none}
@@ -110,8 +132,8 @@ a{color:var(--gold-dim)}
   <!-- ====== Gate ====== -->
   <div class="gate-wrap">
     <div class="lang-toggle gate-lang" role="group" aria-label="Language / 语言">
-      <button type="button" data-lang-btn="zh" aria-pressed="true">中</button>
-      <button type="button" data-lang-btn="en" aria-pressed="false">EN</button>
+      <button type="button" data-lang-btn="zh" data-i18n="lang_zh" aria-pressed="true">中</button>
+      <button type="button" data-lang-btn="en" data-i18n="lang_en" aria-pressed="false">EN</button>
     </div>
     <div id="gate" class="gate-card" role="dialog" aria-labelledby="gate-title">
       <div class="gate-glyph" aria-hidden="true">◉</div>
@@ -137,8 +159,8 @@ a{color:var(--gold-dim)}
         <a href="../game/" data-i18n="nav_game">游戏</a>
         <a href="../guide.html" data-i18n="nav_guide">说明书</a>
         <span class="lang-toggle" role="group" aria-label="Language / 语言">
-          <button type="button" data-lang-btn="zh" aria-pressed="true">中</button>
-          <button type="button" data-lang-btn="en" aria-pressed="false">EN</button>
+          <button type="button" data-lang-btn="zh" data-i18n="lang_zh" aria-pressed="true">中</button>
+          <button type="button" data-lang-btn="en" data-i18n="lang_en" aria-pressed="false">EN</button>
         </span>
       </nav>
     </div>
@@ -146,21 +168,20 @@ a{color:var(--gold-dim)}
     <!-- Local real telemetry (this browser) -->
     <div class="panel" id="localPanel" style="margin-bottom:16px">
       <h2><span data-i18n="local_h2">本地真实事件</span> <small data-i18n="local_small">当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条</small></h2>
-      <div id="localEventsGrid" class="kpi-grid" style="grid-template-columns:repeat(9,1fr);gap:6px;margin-bottom:10px"></div>
+      <div id="localEventsGrid" class="kpi-grid"></div>
       <div id="localEventsList" style="font-family:'JetBrains Mono',Consolas,monospace;font-size:.65rem;color:rgba(233,226,210,.6);max-height:60px;overflow-y:auto;line-height:1.6;white-space:pre-line"></div>
       <div style="font-size:.68rem;color:var(--muted);margin-top:6px" data-i18n-html="local_note">说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。</div>
     </div>
 
     <!-- Local AI insight (derived from THIS machine's LS event buffer) -->
     <div class="panel" id="insightPanel" style="border-color:rgba(113,227,239,.3);margin-bottom:16px;display:none">
-      <h2><span id="insightTitle">本机智能洞察 · LS-driven</span> <small id="insightSmall">基于本机 crossrealm_telemetry_v1 真实事件缓冲推论——每次进入炉边盘都会重算</small></h2>
-      <div id="insightRows" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto"></div>
+      <h2><span id="insightTitle">本机智能洞察 · LS-driven</span> <small id="insightSmall">基于本机 crossrealm_telemetry_v1 真实事件缓冲推论——每次进入炉边盘都会重算</small></h2>      <div id="insightRows" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto"></div>
       <div id="insightFoot" style="font-size:.62rem;color:var(--muted);margin-top:8px;line-height:1.55"></div>
     </div>
 
     <!-- Backend live rollup (when served from the LAN gateway compose) -->
     <div class="panel" id="liveRollupPanel" style="display:none;border-color:rgba(155,214,122,.35)">
-      <h2>后端真值 · Live Backend <small>/api/telemetry/summary-rollup · Postgres 14 天 · 仅本机 compose</small></h2>
+      <h2><span data-i18n="live_h2">后端真值 · Live Backend</span> <small data-i18n="live_small">/api/telemetry/summary-rollup · Postgres 14 天 · 仅本机 compose</small></h2>
       <div id="liveRollupBars" style="display:flex;flex-direction:column;gap:4px;font-size:.72rem"></div>
       <div id="liveRollupFoot" style="font-size:.62rem;color:var(--muted);margin-top:6px"></div>
     </div>
@@ -210,11 +231,11 @@ a{color:var(--gold-dim)}
     <!-- Measured (real, not synthetic) -->
     <div class="panel" id="measuredPanel" style="border-color:rgba(120,214,175,.35)">
       <h2><span data-i18n="meas_h2">实测记录 · Measured</span> <small data-i18n="meas_small">2026-11-15 真跑真测 · 不是演示数据</small></h2>
-      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+      <div class="kpi-grid">
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l1">压测 · 200 并发总请求</div><div class="kpi-value">4666<span style="font-size:.7em;color:var(--muted)"> / 4666</span></div><div class="kpi-trend up" data-i18n="meas_tr1">100% 成功 · 0 5xx（W-Z130 Postgres 落盘在场）</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l2">全场错误率</div><div class="kpi-value">0.00%</div><div class="kpi-trend up" data-i18n="meas_tr2">八条路由全部走通 · 无 5xx</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l3">p50 时延（同机 9 JVM + PG）</div><div class="kpi-value">625~641<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend up" data-i18n="meas_tr3">网络代理开销为主</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l4">单 IP 洪水被打回</div><div class="kpi-value">52.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend flat">622.7 rps → HTTP 429 · Redis 60次/10s</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l4">单 IP 洪水被打回</div><div class="kpi-value">52.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend flat" data-i18n="meas_tr4">622.7 rps → HTTP 429 · Redis 60次/10s</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l5">seasons 缓存命中</div><div class="kpi-value">0.997</div><div class="kpi-trend up">Spring Cache + Redis</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l6">窗口内限流计数</div><div class="kpi-value">14481<span style="font-size:.7em;color:var(--muted)"> allowed</span></div><div class="kpi-trend down">rejected 6376 · allowed:rejected ≈ 2.3:1</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l7">Advisor 真实 e2e（BM25+LLM）</div><div class="kpi-value">≈10.4<span style="font-size:.7em;color:var(--muted)"> s p95/p99</span></div><div class="kpi-trend flat" data-i18n="meas_tr7">30 job · 5 并发 · 主模型 gpt-6-sol</div></div>
@@ -246,10 +267,10 @@ a{color:var(--gold-dim)}
         <div class="kpi" style="border-color:rgba(140,220,255,.45)"><div class="kpi-label" data-i18n="meas_l31">game-service 压测实录（W-Z450 · 2026-11-19 · MEASURED）</div><div class="kpi-value">0<span style="font-size:.7em;color:var(--muted)"> 5xx</span></div><div class="kpi-trend up" data-i18n="meas_tr31">① 栈：discovery 18761 / config 18888 / game-service :18081 healthy（Eureka 注册）/ ai-service 19883 / redis 26379 PONG / postgres 15432——全栈拉起（game-service 此前 Created 从未启动，本轮首次 healthy）；② readBurst 冷窗 0.93 okRate（HikariCP / Redis / Eureka / JIT 预热）→ 稳态 100% ok（9030 次 · 449.9 rps · p50 197 / p95 761 / p99 1733 / max 2869 ms）；③ mixed（55/15/10/10/10 读写混合 · concurrency 60 · 15s）：7297 次 · 100% ok · 485 rps · p50 116 / p95 212 / p99 260 / max 422——零 4xx/5xx；④ idempotentReplay 同键×500（key stress-replay-guard · 固定 body）：420/500 ok · 0 5xx · 0 4xx，80 次触发客户端 3s 超时（热键锁串行重放——延迟型、非正确性型；幂等台账在风暴下行为正确）；⑤ 直连 :18081（绕过 gateway）——gateway 不在本次口径；压测写入合成 leaderboard 行与 stress-probe 遥测（Admin 可计为合成数据，不作留存推断）；产物 docs/admin/data/game-service-stress-2026-11-19.json。</div></div>
         <div class="kpi" style="border-color:rgba(255,217,138,.45)"><div class="kpi-label" data-i18n="meas_l32">终局大场 v4 全量前缀（W-Z456 · 烬灯回信 / 烬火答 · MEASURED）</div><div class="kpi-value">88.7<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr32">arbiter（烬灯回信）此前只有 ~1.5K tok v3 前缀；W-Z456 起改吃 oracle-v4-frozen-prefix.txt 全量（creative/GLOSSARY.md verbatim，≈123 KB）：scripts/arbiter-v4-live-probe.mjs 真上游两次实测——cold HTTP 200 prompt=47,763 cached=2,274（4.8%）→ warm#2 HTTP 200 prompt=47,763 cached=42,355（**88.7%**）· completion 65/54；ai-service 186 tests / 35 classes 全绿 + 镜像重建重部署（healthy）；kindle-letter（烬火答）同享 v4 前缀（61 行人格锚点钉进收敛条款"你是炉火的记录者"以对齐既有契约测试）；容器内 503 not-configured 静默失败契约保持（绝非 500）；artifact → docs/admin/data/arbiter-v4-live-probe-2026-11-19.json。结论：终局大场一次上下文 ≈ 4.8 万 tok，与 Codex 同档；日常 NPC 对话保持 v3（Ember 不受延迟回归）。</div></div>
         <div class="kpi" style="border-color:rgba(255,150,150,.45)"><div class="kpi-label" data-i18n="meas_l33">网关限流治理器实碰（W-Z460 · 2026-11-19 · MEASURED）</div><div class="kpi-value">429<span style="font-size:.7em;color:var(--muted)"> ×12,432</span></div><div class="kpi-trend up" data-i18n="meas_tr33">scripts/stress-load.mjs 直撞 :19880（gateway → lb://game-service）：12612 请求 / 25s / 40 路 ≈ 504 rps——128×200 通过整个窗口预算，**12,432 个 4xx 全部是 429（设计口径：60 req / 10s / IP · RedisIpRateLimiter（ZSET+Lua · 多实例共享窗口））**，52×5xx（0.4%，lb:// 缓存刷新窗，非上游错误）；单次 90 请求瞬时洪峰：43×200 · 30×429 · 17×503——限流器按窗放行、超额一律 429，确定性治理；errRateNoLimited 打印 ≈0.99（HARNESS 口径把 429 计入，不是故障率）；产物 docs/admin/data/gateway-stress-2026-11-19.json。</div></div>
-        <div class="kpi" style="border-color:rgba(255,217,138,.45)"><div class="kpi-label" data-i18n="meas_l34">双实例共享窗口实证（W-Z464 · 2026-11-19 · MEASURED）</div><div class="kpi-value">ZCARD=60<span style="font-size:.7em;color:var(--muted)"> · 双实例</span></div><div class="kpi-trend up" data-i18n="meas_tr34">临时起第二个 gateway（gateway2 · :19881 · 同镜像同网络 redis 背板）与 gateway-1 并行直撞 lb://game-service：phase1 60 请求（30/30 分摊，同 IP 172.18.0.1）→ 55×200 + 5×503（resilience4j 单实例熔断窗——各实例独立账）；phase2 再打 12 请求（6/6 分摊）→ **12×429**（窗口预算 60 已打满）；**redis-cli ZCARD ratelimit:172.18.0.1 = 60**（ZSET 原子计数，毒峰确认）——**跨实例共享窗口成立**；memory 背板无法做到（每实例各 60 → 集群 120）；实验后 gateway2 已删除、其 eureka 注册已 DELETE、registry 恢复 4 个健康实例（GATEWAY · GAME-SERVICE · CONFIG-SERVER · AI-SERVICE）。</div></div>
+        <div class="kpi" style="border-color:rgba(255,217,138,.45)"><div class="kpi-label" data-i18n="meas_l34">双实例共享窗口实证（W-Z464 · 2026-11-19 · MEASURED）</div><div class="kpi-value">ZCARD=60<span style="font-size:.7em;color:var(--muted)" data-i18n="meas_v34"> · 双实例</span></div><div class="kpi-trend up" data-i18n="meas_tr34">临时起第二个 gateway（gateway2 · :19881 · 同镜像同网络 redis 背板）与 gateway-1 并行直撞 lb://game-service：phase1 60 请求（30/30 分摊，同 IP 172.18.0.1）→ 55×200 + 5×503（resilience4j 单实例熔断窗——各实例独立账）；phase2 再打 12 请求（6/6 分摊）→ **12×429**（窗口预算 60 已打满）；**redis-cli ZCARD ratelimit:172.18.0.1 = 60**（ZSET 原子计数，毒峰确认）——**跨实例共享窗口成立**；memory 背板无法做到（每实例各 60 → 集群 120）；实验后 gateway2 已删除、其 eureka 注册已 DELETE、registry 恢复 4 个健康实例（GATEWAY · GAME-SERVICE · CONFIG-SERVER · AI-SERVICE）。</div></div>
         <div class="kpi" style="border-color:rgba(180,240,190,.45)"><div class="kpi-label" data-i18n="meas_l35">CI 全链路转绿（W-Z466 · 2026-11-19 · MEASURED）</div><div class="kpi-value">6<span style="font-size:.7em;color:var(--muted)">/6 gates</span></div><div class="kpi-trend up" data-i18n="meas_tr35">run 44545004607（windows-latest · Node 24 · setup-chrome）：Set up job ✓ · Checkout ✓ · setup-node ✓ · Install Chrome ✓ · npm ci ✓ · **Lint (0 error) ✓ · Test (all green) ✓ · Build ✓ · Size budget（first paint &lt; 2 MiB）✓ · Perf smoke（headless fps budget）✓ · E2E auto-clear（headless full playthrough）✓**。说明：此前几次 CI 全因连续 push 被 cancel-in-progress 顶掉（如 14:01/14:02/14:22 三次全部 cancelled），本轮停止连推后跑到了终点；体积门禁 1.87 MiB 首屛 ≤ 2 MiB；perf 与 e2e 两条浏览器门禁在远端 windows-latest 上实测通过。</div></div>
-        <div class="kpi" style="border-color:rgba(140,220,255,.45)"><div class="kpi-label" data-i18n="meas_l36">微服务全舰 + 路由实测（W-Z467 · 2026-11-19 · MEASURED）</div><div class="kpi-value">7<span style="font-size:.7em;color:var(--muted)"> 实例</span></div><div class="kpi-trend up" data-i18n="meas_tr36">compose 全舰七个服务（discovery · config-server · gateway · game-service · ai-service · season-service · presence-service · notification-service · postgres · redis）全部 Up healthy；经 Gateway lb:// 实测直连：/api/seasons → 200（ember/tide/gloom/radiant 真赛季数据）· /api/presence/world/count → 200 · /api/notify/recent → 200 · /api/version → 200（game-service）· /api/ai/health → 200（ai-service）· eureka registry 七实例全 UP；季节/出行/通知三条先前长期 503 的路由本轮全部翻绿；无实例 DOWN。</div></div>
-        <div class="kpi" style="border-color:rgba(138,255,198,.45)"><div class="kpi-label" data-i18n="meas_l37">compose→LLM 真上游贯通（W-Z475 · 2026-11-19 · MEASURED）</div><div class="kpi-value">1<span style="font-size:.7em;color:var(--muted)"> 链</span></div><div class="kpi-trend up" data-i18n="meas_tr37">HttpLlmTransport 新增 LLM_PROXY_URL（解析 host:port → JDK HttpClient ProxySelector CONNECT；未设/坏值行为逐字节不变；进程内 HTTP 不走它；零网络单测 5/5）。容器内原 NXDOMAIN 直连死路由上，本轮经 Gateway POST /api/ai/lore/answer 活体实测：HTTP 200 · model=gpt-6.2-sol · upstreamCached=true · latencyMs=10659；ai.upstream.usage：cache=crossrealm-oracle-v1 · prompt=47904 · completion=162 · cached=2281 · cachedRatio=4.8%。相同问句紧随其后由 JVM 摘要缓存 0ms 接管（cached=true · path=[retrieve,compose,gate] 未重放）——Ember/Oracle 两级缓存链路在 compose 内成立。W-Z475 语料（269 卷）本身即检索来源。判官门禁输出「此物未在典籍中」是因为锚火点燃场景在 v3 语料无收录，不是链路失败。顺手修复：compose 端口 8761 已被用户 careeros-discovery 占用 → 本项目保持 18761 显式端口；fleet 全绿（10/10 healthy · Eureka 七实例）。</div></div>
+        <div class="kpi" style="border-color:rgba(140,220,255,.45)"><div class="kpi-label" data-i18n="meas_l36">微服务全舰 + 路由实测（W-Z467 · 2026-11-19 · MEASURED）</div><div class="kpi-value">7<span style="font-size:.7em;color:var(--muted)" data-i18n="meas_v36"> 实例</span></div><div class="kpi-trend up" data-i18n="meas_tr36">compose 全舰七个服务（discovery · config-server · gateway · game-service · ai-service · season-service · presence-service · notification-service · postgres · redis）全部 Up healthy；经 Gateway lb:// 实测直连：/api/seasons → 200（ember/tide/gloom/radiant 真赛季数据）· /api/presence/world/count → 200 · /api/notify/recent → 200 · /api/version → 200（game-service）· /api/ai/health → 200（ai-service）· eureka registry 七实例全 UP；季节/出行/通知三条先前长期 503 的路由本轮全部翻绿；无实例 DOWN。</div></div>
+        <div class="kpi" style="border-color:rgba(138,255,198,.45)"><div class="kpi-label" data-i18n="meas_l37">compose→LLM 真上游贯通（W-Z475 · 2026-11-19 · MEASURED）</div><div class="kpi-value">1<span style="font-size:.7em;color:var(--muted)" data-i18n="meas_v37"> 链</span></div><div class="kpi-trend up" data-i18n="meas_tr37">HttpLlmTransport 新增 LLM_PROXY_URL（解析 host:port → JDK HttpClient ProxySelector CONNECT；未设/坏值行为逐字节不变；进程内 HTTP 不走它；零网络单测 5/5）。容器内原 NXDOMAIN 直连死路由上，本轮经 Gateway POST /api/ai/lore/answer 活体实测：HTTP 200 · model=gpt-6.2-sol · upstreamCached=true · latencyMs=10659；ai.upstream.usage：cache=crossrealm-oracle-v1 · prompt=47904 · completion=162 · cached=2281 · cachedRatio=4.8%。相同问句紧随其后由 JVM 摘要缓存 0ms 接管（cached=true · path=[retrieve,compose,gate] 未重放）——Ember/Oracle 两级缓存链路在 compose 内成立。W-Z475 语料（269 卷）本身即检索来源。判官门禁输出「此物未在典籍中」是因为锚火点燃场景在 v3 语料无收录，不是链路失败。顺手修复：compose 端口 8761 已被用户 careeros-discovery 占用 → 本项目保持 18761 显式端口；fleet 全绿（10/10 healthy · Eureka 七实例）。</div></div>
         <div class="kpi" style="border-color:rgba(255,217,138,.45)"><div class="kpi-label" data-i18n="meas_l28">Oracle RAG 离线检索实测（W-Z415 · BM25 · 611 源）</div><div class="kpi-value">88.9<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend up" data-i18n="meas_tr28">scripts/lore-retrieval-probe.mjs（Java Bm25Tokenizer 逐字镜像：Han 单码点 token · k1=1.5 · b=0.75 · 同 idf 公式）：9 个真实问题 recall@4=8/9、recall@6=8/9 —— 6 个近作卷（217-222）全部命中；唯一未命中：单字 token 密集且词项全场极高频的「灶火燃着，阿石坐在灶前」，146/197/131 等灶火高频章胜过 217。结论：主消息锚定问法（专名/具体场景）给出真值 88.9%；不作留存式推断、只报检索覆盖率。产物 → docs/admin/data/lore-retrieval-probe.json（MEASURED）</div></div>
         <div class="kpi" style="border-color:rgba(255,150,150,.45)"><div class="kpi-label" data-i18n="meas_l26">留存窗口（W-Z404 后实测 · 2026-11-19 · 3 天有事件 / 11 天为 0）</div><div class="kpi-value">0<span style="font-size:.7em;color:var(--muted)"> D+14</span></div><div class="kpi-trend flat" data-i18n="meas_tr26">唯一真实遥测（gateway /api/telemetry/summary-rollup · 627 事件 / 3 日）：boss_kill 30 · canon_open 8 · loadtest 424 · stress-probe 133 · smoke 32 · human-adjacent 38 (6.07%)· 11-19 当日 0 事件。<b>留存不可计算</b>：只有 3 天有数据、11 天 0、verified probe 全跑同次测试 rig、没有 userId/session、没有第二次回访。任何 D1/D3/D7 retention 曲线在这组窗口上都是虚构——故事明写、规则明写：zero events = no cohort. 行动项 → telemetry v2（boss_kill 注入 hashed-userId + reason · 不存个人信息 · 至少 n≥200 unique user / 14 天窗 · 关闭后才放行留存卡）。docs/admin/data/measured-funnel.json<b>当前不做留存推断</b>。</div></div>
         <div class="kpi" style="border-color:rgba(255,179,204,.45)"><div class="kpi-label" data-i18n="meas_l23">Boot 真·活场录（W-Z350 · 本机 SwiftShader · 2026-11-18）</div><div class="kpi-value">77.8<span style="font-size:.7em;color:var(--muted)"> s</span></div><div class="kpi-trend flat" data-i18n="meas_tr23">scripts/boot-probe.mjs（vite dev + headless Chrome · 真窗实测）：vite ready 9.1s → navigate 23.6s → BOOT OK in **77801ms** · frames¸¸ｮ2.5（SwiftShader 软件渲染；真 GPU 远远不止这些）· __game/enemyManager/scene 全 present · boot 完成且零异常；artifact → docs/admin/data/boot-probe.json</div></div>
@@ -265,7 +286,7 @@ a{color:var(--gold-dim)}
     <!-- Real player behaviour simulation (W-Z198) -->
     <div class="panel" id="simulationPanel" style="border-color:rgba(122,146,214,.45)">
       <h2><span data-i18n="sim_h2">真实玩家行为模拟</span> <small data-i18n="sim_small">本机 Chrome × 五个人格 × 实测值</small></h2>
-      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px" id="simKpis">
+      <div class="kpi-grid" id="simKpis">
         <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="sim_k1">平均 boot</div><div class="kpi-value" id="simBootAvg">—<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend flat" id="simBootAvgNote" data-i18n="sim_k1n">见下方说明</div></div>
         <div class="kpi" style="border-color:rgba(122,146,214,.45)"><div class="kpi-label" data-i18n="sim_k2">boot p95</div><div class="kpi-value" id="simBootP95">—<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend flat" data-i18n="sim_k2n">dev 模式冷启动</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="sim_k3">未捕获异常</div><div class="kpi-value" id="simExceptions">—</div><div class="kpi-trend up" data-i18n="sim_k3n">0 = 全员真浏览器零炸</div></div>
@@ -301,6 +322,7 @@ a{color:var(--gold-dim)}
 const I18N = {
   zh: {
     doc_title: '炉边盘 · Crossrealm Chronicles · 运营',
+    lang_zh: '中', lang_en: 'EN',
     gate_title: '炉边盘 · 炉火之外的门',
     gate_sub: '管理员 · Admin · 任何知道口令的人',
     gate_ph: '口令', gate_aria: '管理员口令', gate_btn: '开门 · Unlock',
@@ -308,6 +330,7 @@ const I18N = {
     top_h1: '炉边盘 · Crossrealm Chronicles — 运营盘',
     nav_home: '← 回主页', nav_game: '游戏', nav_guide: '说明书',
     local_h2: '本地真实事件',
+    live_h2: '后端真值 · Live Backend', live_small: '/api/telemetry/summary-rollup · Postgres 14 天 · 仅本机 compose',
     local_small: '当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条',
     local_note: '说明：以下是 <em>你这台浏览器</em> 在过去跑出来的真实事件；真实多用户数据由后端聚合时呈现在上面的合成面板中。',
     dau_h2: '30 天 DAU 曲线', dau_small: 'mu × 日数 · 滚动',
@@ -318,7 +341,8 @@ const I18N = {
     meas_l1: '压测 · 200 并发 · Postgres 在场', meas_tr1: '100% 成功 · 0 5xx · 4666/4666（2026-11-15 W-Z130）',
     meas_l2: '全场错误率', meas_tr2: '八条路由全部走通 · 无 5xx',
     meas_l3: 'p50 时延（9 JVM + PG · 同机）', meas_tr3: '网络代理开销为主',
-    meas_l4: '单 IP 洪水被打回',
+    meas_l4: '单 IP 洪水被打回', meas_tr4: '622.7 rps → HTTP 429 · Redis 60次/10s',
+    meas_v34: ' · 双实例', meas_v36: ' 实例', meas_v37: ' 链',
     meas_l5: 'seasons 缓存命中',
     meas_l6: '窗口内限流计数',
     meas_l7: 'Advisor 真实 e2e（BM25+LLM）', meas_tr7: '30 job · 5 并发 · 主模型 gpt-6-sol',
@@ -378,24 +402,27 @@ const I18N = {
   },
   en: {
     doc_title: 'Crossrealm Chronicles · Admin Console',
+    lang_zh: 'ZH', lang_en: 'EN',
     gate_title: 'Crossrealm Chronicles · Admin',
     gate_sub: 'Administrator · Admin · anyone holding the passphrase',
-    gate_ph: 'Passphrase', gate_aria: 'Admin passphrase', gate_btn: 'Unlock · 开门',
+    gate_ph: 'Passphrase', gate_aria: 'Admin passphrase', gate_btn: 'Unlock',
     gate_note: 'Internal only · passphrase-gated · Frontend-only security',
     top_h1: 'Crossrealm Chronicles — Operations Console',
     nav_home: '← Showcase', nav_game: 'Play game', nav_guide: 'Handbook',
     local_h2: 'Local real events',
+    live_h2: 'Backend truth · Live Backend', live_small: '/api/telemetry/summary-rollup · Postgres 14-day window · local compose only',
     local_small: 'This browser · crossrealm_telemetry_v1 LS rolling buffer of 200',
     local_note: 'These are <em>the real events this browser</em> produced locally. Real multi-user aggregates will appear in the panels above once a backend aggregates them.',
     dau_h2: '30-day DAU curve', dau_small: 'µ × 30d · rolling',
     pred_h2: 'Next 14 days · forecast', pred_small: 'Linear regression · flat extrapolation',
     features_h2: 'Feature tides · what players actually use', features_small: 'Last 30 days · share of sessions',
     funnel_h2: 'Conversion funnel', funnel_small: 'From opening screen → Furnace-keeper badge', retention_h2: 'Retention / return',
-    meas_h2: 'Measured · 实测记录', meas_small: '2026-11-15 live runs · not demo data',
+    meas_h2: 'Measured records', meas_small: '2026-11-15 live runs · not demo data',
     meas_l1: 'Load test · 200-way + Postgres live', meas_tr1: '100% success · 0 5xx · 4666/4666 (2026-11-15 W-Z130)',
     meas_l2: 'Error rate, whole run', meas_tr2: 'All eight routes clean · no 5xx',
     meas_l3: 'p50 latency (9 JVMs + PG · same host)', meas_tr3: 'Mostly network proxy overhead',
-    meas_l4: 'Single-IP flood shed',
+    meas_l4: 'Single-IP flood shed', meas_tr4: '622.7 rps → HTTP 429 · Redis 60 req / 10s',
+    meas_v34: ' · dual instances', meas_v36: ' instances', meas_v37: ' chain',
     meas_l5: 'seasons cache hit',
     meas_l6: 'Windowed rate-limit counters',
     meas_l7: 'Advisor live e2e (BM25+LLM)', meas_tr7: '30 jobs · 5 concurrent · primary gpt-6-sol',
@@ -408,7 +435,7 @@ const I18N = {
     meas_l13: 'ui-walkthrough re-run (2026-11-16)', meas_tr13: '18/18 all-green · zero overflow elements · zero HUD overlap (zh/en × large, incl. 390×844 phone)',
     sim_derived: 'Optimization priorities derived from THIS run (computed, not vibes)', sim_d_boot: 'avg boot %V ms (dev cold boot) — shrink the critical path (lazy textures / code split)', sim_d_bounce: 'impatient bounces %V — keep the 30s hearth guide ahead of everything, trim intro text once more', sim_d_zero: 'zero uncaught exceptions — pin this CDP smoke run into CI as a merge gate', sim_d_manual: 'manual open rate %V — path works, promote the H-key hint to first-screen-visible',
     meas_l14: 'New API live-test (2026-11-16 · Clash proxy)', meas_tr14: 'direct = 403; via Clash mixed port: Java cold cached=null → warm cached=5504/5679 ≈ 96.96% · AI e2e live 3/3 green (AiLiveIntegrationTest / AdvisorJobLiveIntegrationTest / EchoHintLiveIntegrationTest · model=gpt-6.1-terra) · Node cache-probe all 200',
-    meas_l15: 'Lore Oracle full chain live (W-Z238 · Clash 7897)', meas_tr15: 'real upstream “anchor fire?” → BM25 recall 4 chunks → HTTP 200 sources=[67,89,77,35] · model=gpt-6.1-terra · latency≈3.2s; nonsense probe zxqjwop qkdjw zqwvjqmw rfjklw → zero-recall → honest refusal “此物未在典籍中” · latency=0 · zero tokens',
+    meas_l15: 'Lore Oracle full chain live (W-Z238 · Clash 7897)', meas_tr15: 'real upstream “anchor fire?” → BM25 recall 4 chunks → HTTP 200 sources=[67,89,77,35] · model=gpt-6.1-terra · latency≈3.2s; nonsense probe zxqjwop qkdjw zqwvjqmw rfjklw → zero-recall → honest refusal “Not in the record” · latency=0 · zero tokens',
     meas_l16: 'Oracle stress · 16s @ 40 conn (W-Z240 · local)', meas_tr16: 'mixed (health × answerBurst): 3488 reqs · 0 4xx · 0 5xx · errRate 0.00% · p50=125ms · p95=346ms · p99=2672ms · max=3403ms · ≈217 rps',
     meas_l17: 'Oracle real-world router live (W-Z244 · Clash 7897)', meas_tr17: 'mechanical router on refs-specific tokens (user-side note line, system freeze untouched): canon “anchor fire?” → sources=[novel/67, 89, 77, 35] ≈2.6s ✓; refs prototype question → sources=[refs/crossrealm-realworld-notes.md] ≈13s ✓; nonsense → honest refusal · latency=0 · zero tokens; LoreOracleRouteHintTest 23 assertions green',
     meas_l18: 'Oracle cache two-lane probe (W-Z247 · Clash · 2026-11-16)', meas_tr18: 'scripts/oracle-cache-probe.mjs --json: canon cached=6784/6784 ×2 ≈97.3% · refs cached=7424/7424 ×2 ≈97.5% (canon used to be null before the fix); record → docs/admin/data/oracle-cache-probe.json; frozen system block crosses the upstream prompt-cache ~1024-token page threshold » both lanes warm', meas_l18b: 'Admin LLM bilingual ops analysis (W-Z311→W-Z491 re-run · gpt-6.2-sol)', meas_tr18b: 'scripts/admin-llm-analysis.mjs: live bilingual advice — situation read · trend · P0→P3 list · “verify before executing” ≥4 items; zh chars=2577 / en chars=5305 · prompt 6173/6123 tok · cached=n/a (first-call pair; not a failure) · refreshed 2026-11-21 (digest now includes v5 deep-dive + guide probes); report → docs/admin/data/admin-llm-analysis.zh.md + .en.md (LLM-generated · “verify before executing” gatekeeper)', meas_l18c: 'Parallel cross-lane cache probe (W-Z336 · live upstream · 8 same-key burst)', meas_tr18c: 'scripts/cache-parallel-probe.mjs (live API · Clash 7897): 1) 2× sequential same-key cold start cached=0 (first ~3 calls per lane are cold, upstream behavior) 2) 8 concurrent child processes same key: 7×98.0% + 1×97.9% · aggregate ≈97.98% — parallel sessions sharing prompt_cache_key do NOT drop cache, do NOT thrash 3) 3×ember+3×oracle concurrent: 98.0/97.9% from call #3 onward (content-hash reuse of the frozen prefix; lanes stay isolated) · artifact → docs/admin/data/llm-parallel-cache-probe.json',
@@ -424,7 +451,7 @@ const I18N = {
     meas_l29: 'Upstream model migration chain · gpt-6.1-terra → gpt-6.1-sol → gpt-6.2-sol (2026-11-19)', meas_tr29: '① 05:24Z upstream 503 — /v1/models confirms gpt-6.1-terra removed at upstream; ② migrated to gpt-6.1-sol (probe cached=5066/5342≈94.8% steady); ③ user hand-switched to gpt-6.2-sol — all probe scripts updated; scripts/cache-probe.mjs re-run: cached=5066/5342≈94.8% steady; ④ docker compose verified post-Desktop restart: hot path upstreamCached=true · Oracle answer latency≈4.1s · Ember state-graph path=[sanitize,classify,compose,guard] upstreamCached=true; 6-way burst: 1 real upstream 3.7s, 5 JVM-cached hit (cached=true·0ms)',
         meas_l30: 'StateGraph everywhere · W-Z444s (2026-11-19)', meas_tr30: '① BossVerse / KindleLetter / EchoHint migrated from raw LlmClient calls onto a two-node StateGraph compose(LLM)→guard (leak vocab · 60 zh / 72 en codepoints · markdown strip; miss ⇒ safe line); responses gain guarded + path=["compose","guard"] — verse/reply/hint/cached/upstreamCached/model unchanged; ② Arbiter now compose→parse: first {…} block → JSON.parse → three non-empty string fields + markdown strip / leak check / codepoint caps (title 30 / epilogue 160 / omen 60); any failure ⇒ parsed=null + guarded=true (client renders nothing; credits stay complete; raw verbatim, frontend parseArbiterAnswer untouched); ③ full verify: ai-service 182 tests / 34 classes green; fresh jar (58,187,352 B) → image rebuilt → container redeployed (old image dated 14:02, pre-migration); live probe of the 4 lanes = 503 advisor-unavailable (no upstream key inside container — silent-failure contract holds, never 500); ④ port 8761 is bound by careeros-discovery (127.0.0.1:8761) → this stack now explicit 18761 / 18888 / 19883; api.aizzz.xyz still NXDOMAIN inside Docker; frontend untouched (additive fields only), vitest 6896/6896 holds.',
         meas_l31: 'game-service stress record · W-Z450 (2026-11-19)', meas_tr31: '① Stack: discovery 18761 / config 18888 / game-service :18081 healthy (Eureka-registered) / ai-service 19883 / redis 26379 PONG / postgres 15432 — full stack up (game-service had been Created, never Started, before this); ② readBurst cold 0.93 okRate → steady 100% ok (9030 req · 449.9 rps · p50 197 / p95 761 / p99 1733 / max 2869 ms); ③ mixed (55/15/10/10/10 · 60 workers · 15s): 7297 req · 100% ok · 485 rps · p50 116 / p95 212 / p99 260 / max 422 — zero 4xx/5xx; ④ idempotentReplay same-key x500: 420/500 ok · 0 5xx · 0 4xx; 80 hit the client 3s timeout (hot-key lock serialization — latency-bound, not correctness-bound); ⑤ direct :18081 (gateway out of scope); stress wrote synthetic leaderboard rows + stress-probe telemetry (Admin-countable as synthetic, no retention inference); artifact docs/admin/data/game-service-stress-2026-11-19.json.',
-        meas_l32: 'Finale-mega v4 full prefix · W-Z456 (2026-11-19)', meas_tr32: 'arbiter previously rode a ~1.5K-token v3 prefix; from W-Z456 it rides oracle-v4-frozen-prefix.txt verbatim (creative/GLOSSARY.md full text, ≈123 KB): scripts/arbiter-v4-live-probe.mjs live upstream probe — cold HTTP 200 prompt=47,763 cached=2,274 (4.8%) → warm#2 HTTP 200 prompt=47,763 cached=42,355 (88.7%) · completion 65/54; ai-service 186 tests / 35 classes green; image rebuilt & redeployed (healthy); kindle-letter shares the same v4 prefix; in-container silent-failure contract holds (503 advisor-unavailable / not-configured, never 500); artifact → docs/admin/data/arbiter-v4-live-probe-2026-11-19.json. One finale call ≈ 4.8万 tokens — Codex class; daily NPC chatter stays on v3.',
+        meas_l32: 'Finale-mega v4 full prefix · W-Z456 (2026-11-19)', meas_tr32: 'arbiter previously rode a ~1.5K-token v3 prefix; from W-Z456 it rides oracle-v4-frozen-prefix.txt verbatim (creative/GLOSSARY.md full text, ≈123 KB): scripts/arbiter-v4-live-probe.mjs live upstream probe — cold HTTP 200 prompt=47,763 cached=2,274 (4.8%) → warm#2 HTTP 200 prompt=47,763 cached=42,355 (88.7%) · completion 65/54; ai-service 186 tests / 35 classes green; image rebuilt & redeployed (healthy); kindle-letter shares the same v4 prefix; in-container silent-failure contract holds (503 advisor-unavailable / not-configured, never 500); artifact → docs/admin/data/arbiter-v4-live-probe-2026-11-19.json. One finale call ≈ 48K tokens — Codex class; daily NPC chatter stays on v3.',
         meas_l33: 'Gateway rate-limiter live-fire · W-Z460 (2026-11-19)', meas_tr33: 'scripts/stress-load.mjs straight into :19880: 12612 req / 25s / 40 workers ≈ 504 rps — 128×200 pass the whole window budget, 12,432×4xx are ALL 429 (60 req / 10s / IP · RedisIpRateLimiter ZSET+Lua · shared window), 52×5xx (0.4%, lb:// cache-refresh windows); 90-request instant burst: 43×200 · 30×429 · 17×503; the printed errRateNoLimited≈0.99 is a harness quirk (429 counted), not a failure rate; artifact docs/admin/data/gateway-stress-2026-11-19.json.',
         meas_l34: 'Dual-instance shared window, proven · W-Z464 (2026-11-19)', meas_tr34: 'Launched a second gateway (gateway2 · :19881 · same image/network · redis backend) next to gateway-1, both hitting lb://game-service: phase1 60 reqs (30/30 per gateway · same source IP 172.18.0.1) → 55×200 + 5×503 (resilience4j per-instance breaker — each instance keeps its own budget); phase2 +12 reqs (6/6 split) → 12×429 (window exhausted); redis ZCARD ratelimit:172.18.0.1 = 60 — the shared window across instances is real. gateway2 then destroyed; its eureka registration DELETEd; registry back to 4 healthy instances (GATEWAY · GAME-SERVICE · CONFIG-SERVER · AI-SERVICE).',
         meas_l35: 'CI all gates green · W-Z466 (2026-11-19)', meas_tr35: 'run 44545004607 (windows-latest · Node 24 · setup-chrome): Lint ✓ · Test (all green) ✓ · Build ✓ · Size budget (first paint < 2 MiB) ✓ · Perf smoke (headless fps budget) ✓ · E2E auto-clear (headless full playthrough) ✓. Note: prior runs were cancelled by cancel-in-progress under rapid pushes (14:01/14:02/14:22); once pushes paused, the same gates passed end-to-end; first paint 1.87 MiB; both browser gates ran clean on the remote windows runner.',
@@ -433,9 +460,9 @@ const I18N = {
         meas_l39: "Keeper's Field Guide · LLM state flow · W-Z486 (2026-11-21)", meas_tr39: 'POST /api/ai/guide four-node StateGraph: observe(deterministic)→assess(LLM verdict)→[conditional edge]→guideLost/guideOnTrack(LLM per-lane wording)→guard(deterministic) — the model verdict drives the transition. Live probe gpt-6.2-sol · Clash 7897 on a lost-and-wandering scenario: assess→LOST→guideLost→nudge, compose cached=10673/12352≈86.4% (three nodes share the v3 prefix + one cache key). Frontend assistant "ask the keeper" button + offline fallback. Tests 6933/6933 · ai-service 199/0 · i18n 3271. Artifact docs/admin/data/guide-live-probe-2026-11-21.json (MEASURED).',
         meas_l38: 'Epic Deep-Dive v5 bilingual full prefix · W-Z485 (2026-11-21)', meas_tr38: 'oracle-v5-frozen-prefix.txt = lore-system-prompt + GLOSSARY.md + GLOSSARY-en.md verbatim (230.4 KB). scripts/oracle-v5-live-probe.mjs real upstream gpt-6.2-sol · Clash 7897 · dedicated lane crossrealm-oracle-deep-v1: cold prompt=82968 cached=3950 (4.8%) → warm prompt=82968 cached=73711 (88.8%) · 4506ms. One 83K-token call lands in Codex class; the dedicated cache lane isolates it from v3/v4 parallel sessions. Frontend: Lore-mode Deep-Dive pill + embedded manual lesson. Tests 6931/6931 · ai-service 194/0 · i18n 3268. artifact → docs/admin/data/oracle-v5-live-probe-2026-11-21.json (MEASURED).',
         meas_l37: 'Compose→LLM real upstream through the proxy · W-Z475 (2026-11-19)', meas_tr37: 'HttpLlmTransport learned LLM_PROXY_URL (parseProxy host:port → JDK ProxySelector CONNECT; unset/garbage = byte-identical direct line; intra-process HTTP unaffected; zero-network unit tests 5/5). In the container where direct DNS/edge 403 made the upstream unreachable, this round live-fired Gateway POST /api/ai/lore/answer: HTTP 200 · model=gpt-6.2-sol · upstreamCached=true · latencyMs=10659; ai.upstream.usage: cache=crossrealm-oracle-v1 · prompt=47904 · completion=162 · cached=2281 · cachedRatio=4.8%; the identical follow-up question was answered by the JVM digest cache in 0 ms (cached=true) — the Ember/Oracle two-tier chain holds inside compose (W-Z474 corpus). “Not in the record” is the referee gate doing its job: the anchor-fire origin is not in the v3 corpus — not a chain failure. Also fixed this round: host port 8761 is held by the user’s other stack (careeros-discovery) → this project keeps explicit 18761 and the fleet is 10/10 healthy · Eureka seven instances UP.',
-    meas_l28: 'Oracle RAG offline retrieval probe (W-Z415 · BM25 · 611 sources)', meas_tr28: 'scripts/lore-retrieval-probe.mjs (mirror of the Java Bm25Tokenizer: Han single-codepoint tokens · k1=1.5 · b=0.75): 9 production-style questions → recall@4 = 8/9, recall@6 = 8/9 — every recent volume (217-222) hits; the only miss (「灶火燃着，阿石坐在灶前」) is dominated by older high-frequency-fire chapters (146/197/131). 88.9% real retrieval coverage, special-name / concrete-scenario phrasing wins. artifact → docs/admin/data/lore-retrieval-probe.json (MEASURED)',
+    meas_l28: 'Oracle RAG offline retrieval probe (W-Z415 · BM25 · 611 sources)', meas_tr28: 'scripts/lore-retrieval-probe.mjs (mirror of the Java Bm25Tokenizer: Han single-codepoint tokens · k1=1.5 · b=0.75): 9 production-style questions → recall@4 = 8/9, recall@6 = 8/9 — every recent volume (217-222) hits; the only miss (“The hearth fire burns; Ashi sits before it”) is dominated by older high-frequency-fire chapters (146/197/131). 88.9% real retrieval coverage, special-name / concrete-scenario phrasing wins. artifact → docs/admin/data/lore-retrieval-probe.json (MEASURED)',
     rec_h2: 'Next-step optimization plan', rec_small: 'Priority order · tune before building · P0→P3',
-    foot: 'Crossrealm Chronicles · Admin Console ·<br/>The “Measured” card is a 2026-11-15 live run (<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> against real wkapi.pro /v1 gpt-6-sol). The synthetic panels are deterministically generated by <code>scripts/admin-synthetic.mjs</code> (seed 20261115).<br/>Once real players go online, events sourced from <code>crossrealm_telemetry_*</code> will fold into the same charts. To wire reporting into a backend: <code>POST /api/telemetry/events</code> — data lands in the <code>telemetry</code> panel; this console stays read-only and static.<br/>Since W-Z311: LLM-written bilingual ops analyses (frozen digest, real upstream, produced by <code>scripts/admin-llm-analysis.mjs</code>) live at <code><a href="data/admin-llm-analysis.zh.md">中文报告</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code> (LLM-generated; the digest and raw JSON files are the source of truth).',
+    foot: 'Crossrealm Chronicles · Admin Console ·<br/>The “Measured” card is a 2026-11-15 live run (<code>docs/LOAD_TEST.md</code> · <code>PromptCacheLiveTest</code> against real wkapi.pro /v1 gpt-6-sol). The synthetic panels are deterministically generated by <code>scripts/admin-synthetic.mjs</code> (seed 20261115).<br/>Once real players go online, events sourced from <code>crossrealm_telemetry_*</code> will fold into the same charts. To wire reporting into a backend: <code>POST /api/telemetry/events</code> — data lands in the <code>telemetry</code> panel; this console stays read-only and static.<br/>Since W-Z311: LLM-written bilingual ops analyses (frozen digest, real upstream, produced by <code>scripts/admin-llm-analysis.mjs</code>) live at <code><a href="data/admin-llm-analysis.zh.md">Chinese report</a></code> / <code><a href="data/admin-llm-analysis.en.md">English report</a></code> (LLM-generated; the digest and raw JSON files are the source of truth).',
     boot_fail: 'synthetic.json failed to load.<br>Run <code>node scripts/admin-synthetic.mjs</code> first.',
     slope_line: 'Slope: %DAU DAU/day over 14d; today %AVG; +14d peak ≈ %PEAK',
     kpi_dau_avg: 'Avg DAU', kpi_session_min: 'Avg session (min)', kpi_boss: 'Boss win rate', kpi_canon: 'Canon read rate',
@@ -510,6 +537,10 @@ function applyLang(lang) {
   const pChart = document.getElementById('pChart');
   if (pChart && pChart.firstElementChild) pChart.firstElementChild.setAttribute('aria-label', T('aria_pred'));
   if (window.__adminLoaded && window.__adminData) renderAll(window.__adminData);
+  renderLocalEvents();
+  renderInsight();
+  renderSimulation();
+  renderLiveRollup();
 }
 document.querySelectorAll('[data-lang-btn]').forEach(btn => {
   btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang-btn')));
@@ -519,13 +550,11 @@ document.querySelectorAll('[data-lang-btn]').forEach(btn => {
  * Dashboard bootstrap
  * ============================================================ */
 /* ---------- Real player behaviour simulation (W-Z198) ---------- */
-async function loadSimulation() {
-  try {
-    const res = await fetch('data/simulation.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const j = await res.json();
-    if (!j || !j.summary) return;
-    const sm = j.summary;
+let simulationData = null;
+function renderSimulation() {
+  const j = simulationData;
+  if (!j || !j.summary) return;
+  const sm = j.summary;
     document.getElementById('simBootAvg').innerHTML = String(sm.bootMsAvg ?? '—') + '<span style="font-size:.7em;color:var(--muted)"> ms</span>';
     document.getElementById('simBootP95').innerHTML = String(sm.bootMsP95 ?? '—') + '<span style="font-size:.7em;color:var(--muted)"> ms</span>';
     document.getElementById('simExceptions').textContent = String(sm.totalExceptions ?? '—');
@@ -552,6 +581,14 @@ async function loadSimulation() {
       + personaRows.map((r) => '<div>· ' + r + '</div>').join('') + derivedBlock;
     document.getElementById('simFoot').innerHTML =
       '<strong style="color:#e8e4dc">' + T('sim_note1') + '</strong><br/>' + T('sim_note2') + '<br/>' + T('sim_note3');
+}
+
+async function loadSimulation() {
+  try {
+    const res = await fetch('data/simulation.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    simulationData = await res.json();
+    renderSimulation();
   } catch (e) {
     console.warn('[admin] simulation.json unavailable:', e);
     const el = document.getElementById('simulationPanel');
@@ -560,6 +597,9 @@ async function loadSimulation() {
 }
 
 async function bootDashboard() {
+  renderLocalEvents();
+  renderInsight();
+  loadLiveRollup();
   let data;
   try {
     const res = await fetch('data/synthetic.json', { cache: 'no-store' });
@@ -569,6 +609,7 @@ async function bootDashboard() {
     console.error('[admin] synthetic.json load failed:', e);
     const grid = document.getElementById('kpiGrid');
     grid.innerHTML = '<div class="panel" style="grid-column:1/-1">' + T('boot_fail') + '</div>';
+    loadSimulation();
     return;
   }
   window.__adminData = data;
@@ -579,9 +620,6 @@ async function bootDashboard() {
 function renderAll(data) {
   renderKpis(data);
   renderDailyChart(data);
-  renderLocalEvents();
-  renderInsight();
-  loadLiveRollup();
   renderPredictionChart(data);
   renderFeatures(data);
   renderFunnel(data);
@@ -746,17 +784,12 @@ function renderLocalEvents() {
   document.getElementById('localEventsList').textContent = recent || T('lt_empty');
 }
 
-/* 首次进入页面即应用保存的语言（未解锁也生效） */
-applyLang(curLang);
-
 /* ---------- W-Z130：后端真值（Postgres rollup by day×type）---------- */
-async function loadLiveRollup() {
-  try {
-    const res = await fetch('/api/telemetry/summary-rollup', { cache: 'no-store' });
-    if (!res.ok) return; // Pages 静
-    const j = await res.json();
-    if (!j || j.enabled !== true) return;
-    const totals = j.totals || {};
+let liveRollupData = null;
+function renderLiveRollup() {
+  const j = liveRollupData;
+  if (!j || j.enabled !== true) return;
+  const totals = j.totals || {};
     const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
     const max = Math.max(...entries.map(([, v]) => Number(v) || 1), 1);
     const panelEl = document.getElementById('liveRollupPanel');
@@ -777,6 +810,14 @@ async function loadLiveRollup() {
         ' · 总计事件 ' + Number(j.total ?? 0).toLocaleString() + ' 条 · 只有 本机 compose 启动时此卡才有数据'
       : 'Live from local Postgres · telemetry_daily_rollup (day × type), 14-day window' +
         ' · total events ' + Number(j.total ?? 0).toLocaleString() + ' · panel only populates when local compose is up');
+}
+
+async function loadLiveRollup() {
+  try {
+    const res = await fetch('/api/telemetry/summary-rollup', { cache: 'no-store' });
+    if (!res.ok) return;
+    liveRollupData = await res.json();
+    renderLiveRollup();
   } catch (_) { /* silent: Pages deployment has no backend */ }
 }
 
@@ -790,6 +831,8 @@ function renderInsight() {
     if (!host) return;
     host.style.display = 'block';
 
+    const title = document.getElementById('insightTitle');
+    if (title) title.textContent = T('insight_h2') + ' · LS-driven';
     const total = arr.length;
     let confidence = T('insight_low');
     if (total >= 60) confidence = T('insight_high');
@@ -847,6 +890,8 @@ function renderInsight() {
     if (small) small.textContent = curLang === 'zh' ? ('基于本机 crossrealm_telemetry_v1 · n=' + total + '（' + confidence + '）') : ('From this machine’s crossrealm_telemetry_v1 · n=' + total + ' (' + confidence + ')');
   } catch (_) { /* silent */ }
 }
+
+applyLang(curLang);
 </script>
 </body>
 </html>

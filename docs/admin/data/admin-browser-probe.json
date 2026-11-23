@@ -1,0 +1,384 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-23T17:29:19.595Z",
+  "expected": {
+    "localEvents": 20,
+    "measuredCards": 42
+  },
+  "scenarios": {
+    "normal": {
+      "viewport": [
+        1440,
+        900
+      ],
+      "gateVisible": false,
+      "dashboardUnlocked": true,
+      "localEventTiles": 20,
+      "localEventLabels": [
+        "游戏启动",
+        "会话结束（留存）",
+        "求过守夜人指路",
+        "按 H 打开说明",
+        "按 J 打开日志",
+        "按 M 打开地图",
+        "打开典籍馆",
+        "占卜抽火",
+        "Boss 通关",
+        "自动通关",
+        "曜盘已起",
+        "祈愿已许",
+        "交棒已候",
+        "跟随指引",
+        "烬灯回信",
+        "余火回响",
+        "烬火答",
+        "锚火三问抽签",
+        "典籍镜像解锁",
+        "章节完成"
+      ],
+      "localEventValues": [
+        2,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "measuredCards": 42,
+      "kpiTiles": 12,
+      "kpiFallback": false,
+      "pageOverflow": false,
+      "overflowOffenders": [],
+      "cardOverlaps": [],
+      "cjkCount": 3270,
+      "cjkSamples": [
+        {
+          "tag": "H1",
+          "id": "",
+          "cls": "",
+          "text": "炉边盘 · Crossrealm Chronicles — 运营盘"
+        },
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "",
+          "text": "← 回主页"
+        },
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "",
+          "text": "游戏"
+        },
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "",
+          "text": "说明书"
+        },
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "",
+          "text": "中"
+        },
+        {
+          "tag": "SPAN",
+          "id": "",
+          "cls": "",
+          "text": "本地真实事件"
+        },
+        {
+          "tag": "SMALL",
+          "id": "",
+          "cls": "",
+          "text": "当前浏览器 · crossrealm_telemetry_v1 LS 滚动缓冲 200 条"
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "kpi-label",
+          "text": "游戏启动"
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "kpi-label",
+          "text": "会话结束（留存）"
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "kpi-label",
+          "text": "求过守夜人指路"
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "kpi-label",
+          "text": "按 H 打开说明"
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "kpi-label",
+          "text": "按 J 打开日志"
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "kpi-label",
+          "text": "按 M 打开地图"
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "kpi-label",
+          "text": "打开典籍馆"
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "kpi-label",
+          "text": "占卜抽火"
+        },
+        {
+          "tag": "DIV",
+          "id": "",
+          "cls": "kpi-label",
+          "text": "Boss 通关"
+        }
+      ],
+      "suspiciousTokens": false,
+      "lang": "zh-CN",
+      "exceptions": [],
+      "consoleErrors": [],
+      "networkErrors": [],
+      "wrongPasswordRejected": true,
+      "wrongDashboardLocked": true
+    },
+    "english": {
+      "viewport": [
+        1440,
+        900
+      ],
+      "gateVisible": false,
+      "dashboardUnlocked": true,
+      "localEventTiles": 20,
+      "localEventLabels": [
+        "Game start",
+        "Session end (retention)",
+        "Asked the keeper",
+        "H · help opened",
+        "J · journal opened",
+        "M · map opened",
+        "Canon opened",
+        "Divination draw",
+        "Boss cleared",
+        "Autoplay tapped",
+        "Trisolar tide cast",
+        "Vow drawn",
+        "Handing drawn",
+        "Guide followed",
+        "Arbiter letter read",
+        "Ember verse read",
+        "Ember letters sent",
+        "Fortune Path draws",
+        "Mirror readings unlocked",
+        "Chapters completed"
+      ],
+      "localEventValues": [
+        2,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "measuredCards": 42,
+      "kpiTiles": 12,
+      "kpiFallback": false,
+      "pageOverflow": false,
+      "overflowOffenders": [],
+      "cardOverlaps": [],
+      "cjkCount": 0,
+      "cjkSamples": [],
+      "suspiciousTokens": false,
+      "lang": "en",
+      "exceptions": [],
+      "consoleErrors": [],
+      "networkErrors": []
+    },
+    "mobile": {
+      "viewport": [
+        390,
+        844
+      ],
+      "gateVisible": false,
+      "dashboardUnlocked": true,
+      "localEventTiles": 20,
+      "localEventLabels": [
+        "Game start",
+        "Session end (retention)",
+        "Asked the keeper",
+        "H · help opened",
+        "J · journal opened",
+        "M · map opened",
+        "Canon opened",
+        "Divination draw",
+        "Boss cleared",
+        "Autoplay tapped",
+        "Trisolar tide cast",
+        "Vow drawn",
+        "Handing drawn",
+        "Guide followed",
+        "Arbiter letter read",
+        "Ember verse read",
+        "Ember letters sent",
+        "Fortune Path draws",
+        "Mirror readings unlocked",
+        "Chapters completed"
+      ],
+      "localEventValues": [
+        2,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "measuredCards": 42,
+      "kpiTiles": 12,
+      "kpiFallback": false,
+      "pageOverflow": false,
+      "overflowOffenders": [],
+      "cardOverlaps": [],
+      "cjkCount": 0,
+      "cjkSamples": [],
+      "suspiciousTokens": false,
+      "lang": "en",
+      "exceptions": [],
+      "consoleErrors": [],
+      "networkErrors": []
+    },
+    "fallback": {
+      "viewport": [
+        390,
+        844
+      ],
+      "gateVisible": false,
+      "dashboardUnlocked": true,
+      "localEventTiles": 20,
+      "localEventLabels": [
+        "Game start",
+        "Session end (retention)",
+        "Asked the keeper",
+        "H · help opened",
+        "J · journal opened",
+        "M · map opened",
+        "Canon opened",
+        "Divination draw",
+        "Boss cleared",
+        "Autoplay tapped",
+        "Trisolar tide cast",
+        "Vow drawn",
+        "Handing drawn",
+        "Guide followed",
+        "Arbiter letter read",
+        "Ember verse read",
+        "Ember letters sent",
+        "Fortune Path draws",
+        "Mirror readings unlocked",
+        "Chapters completed"
+      ],
+      "localEventValues": [
+        2,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "measuredCards": 42,
+      "kpiTiles": 0,
+      "kpiFallback": true,
+      "pageOverflow": false,
+      "overflowOffenders": [],
+      "cardOverlaps": [],
+      "cjkCount": 0,
+      "cjkSamples": [],
+      "suspiciousTokens": false,
+      "lang": "en",
+      "exceptions": [],
+      "consoleErrors": [
+        {
+          "text": "[admin] synthetic.json load failed:"
+        }
+      ],
+      "networkErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+          "url": "http://127.0.0.1:56442/docs/admin/data/synthetic.json"
+        }
+      ]
+    }
+  },
+  "failures": [],
+  "ok": true
+}
