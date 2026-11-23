@@ -100,7 +100,7 @@ public class LlmClient {
     private static final Pattern UNSAFE_KEY = Pattern.compile("[^a-zA-Z0-9_\\-]");
     private static final Pattern CONTROL = Pattern.compile("[\\r\\n\\t]");
     private static final int MAX_CONTEXT_KEYS = 8;
-    private static final int MAX_CONTEXT_VALUE = 80;
+    private static final int MAX_CONTEXT_VALUE = 120;
 
     /** Public namespace of cache keys — one key per distinct workload; routing hint only, no player data in keys. */
     public static final class CacheKeys {

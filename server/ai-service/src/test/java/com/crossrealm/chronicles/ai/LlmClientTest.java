@@ -262,6 +262,23 @@ class LlmClientTest {
     }
 
     @Test
+    void 上下文单值保留客户端允许的120字且超长仍有界() throws Exception {
+        Scripted t = new Scripted(response("好"), response("好"));
+        LlmClient c = client(props(), t);
+        String exact = "界".repeat(120);
+        c.ask("边界值", Map.of("state", exact));
+        c.ask("超长值", Map.of("state", exact + "尾"));
+
+        for (String body : t.bodies) {
+            Map<?, ?> parsed = MAPPER.readValue(body, Map.class);
+            List<?> messages = (List<?>) parsed.get("messages");
+            String userContent = String.valueOf(((Map<?, ?>) messages.get(1)).get("content"));
+            assertTrue(userContent.contains("state=" + exact), "客户端合法发送的120字不能被后端再截断");
+            assertFalse(userContent.contains("尾"), "超过120字的部分必须截掉");
+        }
+    }
+
+    @Test
     void 系统提示来自资源文件且非空() {
         Scripted t = new Scripted(response("好"));
         AiProperties p = props();

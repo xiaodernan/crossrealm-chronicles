@@ -40,6 +40,7 @@ const flush = async () => { for (let i = 0; i < 8; i++) await Promise.resolve();
 
 describe('① 客户端上限与服务端校验对齐（跨栈读同一份数）', () => {
   const controller = 读('server/ai-service/src/main/java/com/crossrealm/chronicles/ai/AiController.java');
+  const llmClient = 读('server/ai-service/src/main/java/com/crossrealm/chronicles/ai/LlmClient.java');
   const props = 读('server/ai-service/src/main/java/com/crossrealm/chronicles/ai/AiProperties.java');
   const gateway = 读('server/gateway/src/main/resources/application.yml');
 
@@ -50,6 +51,12 @@ describe('① 客户端上限与服务端校验对齐（跨栈读同一份数）
     expect(Number.isFinite(c) && c > 0, '没从 Java 源码解析出上下文条数上限').toBe(true);
     expect(ADVISOR_LIMITS.questionMax).toBe(q);
     expect(ADVISOR_LIMITS.contextMaxEntries).toBe(c);
+  });
+
+  it('上下文单值上限就是 LlmClient 实际拼提示词时采用的边界', () => {
+    const valueMax = Number(/MAX_CONTEXT_VALUE\s*=\s*(\d+)\s*;/.exec(llmClient)?.[1]);
+    expect(Number.isFinite(valueMax) && valueMax > 0, '没从 LlmClient 源码解析出上下文单值上限').toBe(true);
+    expect(ADVISOR_LIMITS.contextValueMax).toBe(valueMax);
   });
 
   it('客户端超时容得下服务端「1 次 + 最多 N 次重试」的最坏耗时', () => {
