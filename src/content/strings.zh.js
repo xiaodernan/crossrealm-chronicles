@@ -3904,6 +3904,8 @@ trace（回放轨迹）——每一步 (node, state) 都被记下来；玩家在
   advisor_error_blank: '先写一句想问的话。',
   advisor_error_cancelled: '这一问已停下。',
   advisor_error_unavailable: '顾问暂时不在（熔断中），过一会儿再来。',
+  // W-Z519：API 因成本/用量关闭（llm-disabled）——不是"过一会儿"就能好的熔断，换一句诚实的话。
+  advisor_error_offline_mode: '星图暂歇，先照眼前目标走吧；等它再亮起来可以回来问。',
   advisor_error_http_fmt: '星图拒了这一问（HTTP ${status}）。',
   advisor_error_busy: '问星图的人有点多，队列暂时满了。稍等一下再问，这一句没有丢。',
   // W-Z286：指引协议——模型提名目的地时渲染的按钮文案（点一下落到对应日志子页）

@@ -430,7 +430,15 @@ export class AdvisorPanel {
     // data 可能是 null（网关返回纯文本错误页时 json() 抛过）；写 data.error 会在
     // 一次普通的 500 上把整个失败分支炸掉，玩家连"出了什么事"都看不到。
     if (reason === ADVISOR_REASONS.HTTP && (res.status === 503 || data?.error === 'advisor-unavailable')) {
-      this._appendMessage('error', t('advisor_error_unavailable'), { key: 'advisor_error_unavailable' });
+      // W-Z519：503 有两种——上游熔断（等会儿会好）与总开关关掉（等不会自己好）。
+      // 后端在 reason 里说清是哪一种，这里给玩家不同的话，别让人干等一个不会恢复的熔断。
+      // 两支都写死字面量键：全仓的"死键"静态门按 `t('...')` 字面量找引用，
+      // 变量 key 会被判成没人读的死键（17 个测试同时红）——这里不能用三元拼键。
+      if (data?.reason === 'llm-disabled') {
+        this._appendMessage('error', t('advisor_error_offline_mode'), { key: 'advisor_error_offline_mode' });
+      } else {
+        this._appendMessage('error', t('advisor_error_unavailable'), { key: 'advisor_error_unavailable' });
+      }
       this._setStatus('degraded');
     } else if (reason === ADVISOR_REASONS.HTTP) {
       this._appendMessage('error', t(ERROR_KEYS[ADVISOR_REASONS.HTTP], { status: res.status }), {

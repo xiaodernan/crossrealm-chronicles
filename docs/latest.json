@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-23T04:22:32.292Z",
+  "generated_at": "2026-11-23T04:32:57.033Z",
   "branch": "main",
-  "head": "da6bd6b",
-  "total_commits": 2502,
-  "pushed_at": "2026-11-23T12:19:48+08:00",
+  "head": "aaae391",
+  "total_commits": 2503,
+  "pushed_at": "2026-11-23T12:22:45+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "aaae391",
+      "at": "2026-11-23T12:22:45+08:00",
+      "subject": "chore(latest): fact pack head=da6bd6b (novels 290 lore 611 i18n 3296 tests 508 commits 2502) - offline LLM switch"
+    },
     {
       "short": "da6bd6b",
       "at": "2026-11-23T12:19:48+08:00",
@@ -26,16 +31,11 @@
       "short": "0d93ab2",
       "at": "2026-11-23T04:40:57+08:00",
       "subject": "fix(admin): 合成面板被安了别人的种子 + 三条真事件在管理页不可见（W-Z517）"
-    },
-    {
-      "short": "cf71fe2",
-      "at": "2026-11-23T04:25:00+08:00",
-      "subject": "docs(plan): W-Z516 回填 —— B176 台账关闭 + CI 两段压测读数入账"
     }
   ],
   "tracked_files": 1971,
   "test_files": 508,
-  "i18n_keys": 3296,
+  "i18n_keys": 3297,
   "lore_sources": 611,
   "novel_chapters_zh": 290,
   "novel_chapters_en": 290,
@@ -46,7 +46,7 @@
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3296-keys",
+    "bilingual-3297-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",

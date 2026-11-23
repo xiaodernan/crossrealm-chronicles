@@ -329,6 +329,32 @@ describe('② 面板：真 DOM 桩跑一遍玩家会走的路', () => {
     h.cleanup();
   });
 
+  it('W-Z519：503 + reason=llm-disabled 说「星图暂歇」，不是「熔断中过一会儿再来」', async () => {
+    const h = panelHarness();
+    h.panel.show();
+    await flush();
+    h.panel._handleResult({
+      ok: false, reason: ADVISOR_REASONS.HTTP, status: 503,
+      data: { error: 'advisor-unavailable', reason: 'llm-disabled' },
+    });
+    expect(lastBubble(h.doc).textContent).toBe(STRINGS_ZH.advisor_error_offline_mode);
+    expect(lastBubble(h.doc).textContent).not.toBe(STRINGS_ZH.advisor_error_unavailable);
+    expect(h.panel._status).toBe('degraded');
+    h.cleanup();
+  });
+
+  it('W-Z519：503 + 熔断（无 llm-disabled）仍保留原本的熔断语', async () => {
+    const h = panelHarness();
+    h.panel.show();
+    await flush();
+    h.panel._handleResult({
+      ok: false, reason: ADVISOR_REASONS.HTTP, status: 503,
+      data: { error: 'advisor-unavailable', reason: 'gateway-circuit-open' },
+    });
+    expect(lastBubble(h.doc).textContent).toBe(STRINGS_ZH.advisor_error_unavailable);
+    h.cleanup();
+  });
+
   it('纯文本 500（data=null）不许把失败分支炸掉：仍给出 HTTP 那句话', async () => {
     const h = panelHarness();
     h.panel.show();

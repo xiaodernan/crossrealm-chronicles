@@ -3993,6 +3993,8 @@ Three frames in retrospection: the fire + the light on your palm + the house shi
   advisor_error_blank: 'Write a question first.',
   advisor_error_cancelled: 'That question was stopped.',
   advisor_error_unavailable: 'The advisor is resting (circuit open). Come back shortly.',
+  // W-Z519: API closed for cost/usage (llm-disabled) — not a circuit that clears on its own.
+  advisor_error_offline_mode: 'The star map is dim for now. Follow the objective at hand; return when it lights again.',
   advisor_error_http_fmt: 'The stars refused that question (HTTP ${status}).',
   advisor_error_busy: 'The stars are crowded right now and the queue is full. Try again in a moment; this question was not lost.',
   // W-Z286: directive protocol — the button label shown when the advisor nominates a destination (one tap lands on the tab)
