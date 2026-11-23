@@ -23,7 +23,6 @@ describe('管理页内联脚本可解析（W-Z489）', () => {
       // type=module 的 import 语法 new Function 不认，但管理页这段是普通脚本；
       // 只做语法解析（不执行），避免触碰 DOM。
       try {
-        // eslint-disable-next-line no-new-func
         new Function(body);
       } catch (e) {
         bad.push(`块#${i}: ${e.message}`);

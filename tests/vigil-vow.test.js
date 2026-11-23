@@ -62,7 +62,6 @@ describe('星轨 · 炉火祈愿（W-Z262）', () => {
     for (const q of Q) g.addNode(q, () => ({}));
     g.addNode('verdict', (state) => ({ endingId: state.__pick }));
     // body 用 pick
-    // eslint-disable-next-line no-underscore-dangle
     g.setEntryPoint('intro');
     g.addEdge('intro', Q[0]);
     g.addEdge(Q[0], Q[1]);

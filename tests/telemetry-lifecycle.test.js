@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { localTelemetry, installSessionLifecycle } from '../src/game/LocalTelemetry.js';
+import { installSessionLifecycle } from '../src/game/LocalTelemetry.js';
 
 /**
  * W-Z500 会话边界：切标签不该永久掐死留存信号，同一次离开不该双记。

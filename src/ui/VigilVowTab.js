@@ -1,4 +1,4 @@
-import { VOW_QUESTIONS, VOW_ENDINGS } from '../content/vigilVow.js';
+import { VOW_QUESTIONS } from '../content/vigilVow.js';
 import { getLanguage, t } from '../engine/i18n.js';
 import { keyText, refreshKeyText } from './keyHints.js';
 

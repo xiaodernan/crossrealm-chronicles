@@ -14,7 +14,6 @@ describe('密钥不进版本库（W-Z505）', () => {
 
   it('没有任何被跟踪文件含完整 ghp_ PAT 或 sk- API key', () => {
     const fs = require('node:fs');
-    const path = require('node:path');
     const patRe = /ghp_[A-Za-z0-9]{30,}/;
     const keyRe = /sk-[A-Za-z0-9]{30,}/;
     const offenders = [];

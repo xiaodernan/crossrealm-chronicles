@@ -1,4 +1,4 @@
-import { QUESTIONS, FORTUNE_ENDINGS } from '../content/fortunePath.js';
+import { QUESTIONS } from '../content/fortunePath.js';
 import { getLanguage, t } from '../engine/i18n.js';
 import { keyText, refreshKeyText } from './keyHints.js';
 
@@ -28,7 +28,6 @@ export class FortunePathTab {
     const lang = getLanguage() === 'en' ? 'en' : 'zh';
     const snap = fp?.snapshot?.() ?? {};
     const todayEnding = fp?.todayEnding?.() ?? null;
-    const canAnswer = fp?.canDrawToday?.() ?? true;
     const history = fp?.history?.() ?? [];
     const historyChips = history.slice(0, MAX_HIST).map(({ ending, ymd }) => {
       if (!ending) return '';
