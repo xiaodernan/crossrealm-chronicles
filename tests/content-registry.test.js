@@ -691,7 +691,8 @@ describe('W-B2 内容普查：条数钉死', () => {
       sideQuestsPop: 22,
       // 15 → 17：说明书扩了两节（`guide-hint` 守夜人指路 / `flame-daily` 长明火日常）
       // 17 → 18：W-Z512 覆盖率门量出来的那一章（`keyboard-nav`：路点 / 面板移焦调值 / 本局读数）
-      helpSectionsExtra: 18,
+      // 18 → 19：W-Z521 补 `difficulty-season-trial`（三档难度 / 赛季榜时间窗 / 位面试炼）
+      helpSectionsExtra: 19,
     });
   });
 

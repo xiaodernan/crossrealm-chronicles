@@ -71,6 +71,11 @@ export const HELP_SECTIONS_EXTRA = [
     body: 'hm_body_meta_systems',
   },
   {
+    id: 'difficulty-season-trial',
+    title: 'hm_title_difficulty_season_trial',
+    body: 'hm_body_difficulty_season_trial',
+  },
+  {
     id: 'pop-culture',
     title: 'hm_title_pop_culture',
     body: 'hm_body_pop_culture',

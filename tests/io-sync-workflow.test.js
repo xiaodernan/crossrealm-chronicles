@@ -42,6 +42,7 @@ const discoveredSyncs = present
 const DECLARED = [
   'sync-career-os.yml',
   'sync-crossrealm.yml',
+  'sync-football-os.yml',
   'sync-gh-languages.yml',
   'sync-minicc.yml',
   'sync-nexus-platform.yml',

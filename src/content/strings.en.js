@@ -3149,6 +3149,12 @@ Waypoints on the world map — with {worldMap} open, {mapMark} drops a marker at
 
 Session readout — {sessionStats} shows or hides this run's counters (kills / parries / finishers / executions). It is only a panel: pressing it does not pause anything and changes no progress, online or off.`,
   hm_title_meta_systems: 'Meta Systems',
+  hm_title_difficulty_season_trial: 'Difficulty · Seasons · Trials',
+  hm_body_difficulty_season_trial: `【Three difficulty tiers】Switch in Settings — Story (enemy HP ×0.8, damage taken ×0.6, soul income ×1.25) · Standard (all ×1.0, the out-of-box feel) · Brutal (enemy HP ×1.3, damage taken ×1.5, soul income ×0.8). Difficulty changes numbers only, never an enemy's moves or phases — use Story to read the choreography, Standard to practise parries.
+
+【Seasons】With the online companion on, seasons add a time window to leaderboards and counters: boss best-times and trial boards rank by seasonal score and layers cleared. A new season resets scoring; old records stay in the archive and are never wiped. Online off = zero network; seasons still count locally.
+
+【Realm Trials】A repeatable challenge entered from the hub: fight floor after floor, clearing one to open the next; spawn scaling (HP ×N / damage ×N / speed ×N) rises with depth. The trial board records your best score and deepest layer from the same source as the boss board.`,
   hm_body_meta_systems: `Combat Style — parry/finish/execute/Boss accumulate rating C~SS
 Boss Rematch — after defeat, summon at beacon with {interact}, +5 souls
 Kill-streak Souls — 3+ kills within 4.5s gives extra souls

@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-24T11:01:54.666Z",
+  "generated_at": "2026-11-24T11:23:39.456Z",
   "branch": "main",
-  "head": "1380ce0",
-  "total_commits": 2536,
-  "pushed_at": "2026-11-24T19:00:31+08:00",
+  "head": "592f7ec",
+  "total_commits": 2537,
+  "pushed_at": "2026-11-24T19:01:55+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "592f7ec",
+      "at": "2026-11-24T19:01:55+08:00",
+      "subject": "chore(latest): refresh fact pack head=1380ce0"
+    },
     {
       "short": "1380ce0",
       "at": "2026-11-24T19:00:31+08:00",
@@ -26,16 +31,11 @@
       "short": "0b9a6d9",
       "at": "2026-11-24T15:08:16+08:00",
       "subject": "fix(admin): two KPI trend cards had no i18n key - add data-i18n + zh/en dict + parity guard"
-    },
-    {
-      "short": "c2b0f71",
-      "at": "2026-11-24T14:51:08+08:00",
-      "subject": "test+latest: guard showcase fallback parity; refresh fact pack head=9aef6b6"
     }
   ],
   "tracked_files": 1999,
   "test_files": 515,
-  "i18n_keys": 3299,
+  "i18n_keys": 3301,
   "lore_sources": 613,
   "novel_chapters_zh": 291,
   "novel_chapters_en": 291,
@@ -46,7 +46,7 @@
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3299-keys",
+    "bilingual-3301-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",
