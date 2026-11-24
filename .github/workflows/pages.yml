@@ -67,10 +67,10 @@ jobs:
           cp docs/admin/admin-metrics.js _site/admin/admin-metrics.js
           cp docs/admin/data/synthetic.json _site/admin/data/synthetic.json
           cp docs/admin/data/simulation.json _site/admin/data/simulation.json
-      cp docs/admin/data/telemetry-summary.json _site/admin/data/telemetry-summary.json
-      cp docs/admin/data/measured-funnel.json _site/admin/data/measured-funnel.json
-      cp docs/admin/data/admin-llm-analysis.zh.md _site/admin/data/admin-llm-analysis.zh.md
-      cp docs/admin/data/admin-llm-analysis.en.md _site/admin/data/admin-llm-analysis.en.md
+          cp docs/admin/data/telemetry-summary.json _site/admin/data/telemetry-summary.json
+          cp docs/admin/data/measured-funnel.json _site/admin/data/measured-funnel.json
+          cp docs/admin/data/admin-llm-analysis.zh.md _site/admin/data/admin-llm-analysis.zh.md
+          cp docs/admin/data/admin-llm-analysis.en.md _site/admin/data/admin-llm-analysis.en.md
           cp creative/music/soundtrack.html _site/soundtrack.html
           cp creative/music/poster-ost-album-4k.png _site/poster-ost-album-4k.png
           cp public/favicon.svg _site/favicon.svg
