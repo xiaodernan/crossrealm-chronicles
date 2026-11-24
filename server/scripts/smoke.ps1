@@ -422,7 +422,8 @@ game-service:
     $view = (Invoke-WebRequest -UseBasicParsing "http://localhost:28080/api/ai/jobs/$jobId" -TimeoutSec 15).Content
     if ($view -is [byte[]]) { $view = [System.Text.Encoding]::UTF8.GetString($view) }
     Write-Host "jobs/$jobId -> $view"
-    # No key in CI: the worker fails fast with not-configured -> DEAD (a visible dead letter, not a silent 503).
+    # Offline in CI (no key OR llm-enabled=false, W-Z519): worker fails fast with not-configured / llm-disabled
+    # -> DEAD (a visible dead letter, not a silent 503).
     # With a key it may still be QUEUED/RUNNING or already DONE. All four are valid; a missing status is not.
     if (-not ($view -match '"status":"(QUEUED|RUNNING|DONE|DEAD)"')) { Write-Error "job view missing a status: $view"; exit 1 }
     if ($view -match 'sk-') { Write-Error 'job view leaks an api key'; exit 1 }
