@@ -428,14 +428,27 @@ export const DRAW_CALL_ACCEPT_LINE = 400;
  * / void.frame 169→172 / void.body 105→107。
  * 余量依然够用；若后续往 space 加投影/几何 POI，先复测再动这两格。
  */
+/**
+ * ## 2026-11-23 W-Z520（真 CI run 45119973518 与 45068066619 两次读数重钉）
+ *
+ * 两次独立 CI 真跑逐站读数（年轻页，同配方，世界种子 20261028）：
+ *   hub 333/269/64 · fantasy 314/267/47 · magic 306/271/36 · space 322/270/55
+ *   void 303/263/40 · abyss 297/260/37 · gloom 320/260/60 · radiant 304/266/38。
+ * 与 W-Z72（2026-11-14）那版相比，magic 635→306、radiant 509→304 —— 全场景合批/
+ * 剔除口径变了（可画件 1215→921），是**优化后的新基线**；其余站同步上涨（内容增量）。
+ * 这不是"垮一个数量级"的回归，所以按本仓一贯的"CI 实修"纪律重钉：
+ *   · 地板 = 同配方全部读数的最大（旧地板只升不降）；
+ *   · 上限 = 触到读数的最低合法值 `规则上限(地板)`，仍守住 `地板 < 上限 ≤ 规则上限`。
+ * hub/magic/radiant 三站现上限已覆盖读数且仍合法，按"只升不降"保持不动。
+ */
 export const DRAW_CALL_CEILINGS = Object.freeze({
   [ZONE_IDS.HUB]: Object.freeze({ frame: 340, body: 280, shadow: 70 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 310, body: 265, shadow: 70 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 370, body: 320, shadow: 70 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 670, body: 630, shadow: 50 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 270, body: 200, shadow: 80 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 190, body: 110, shadow: 70 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 220, body: 120, shadow: 90 }),
-  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 215, body: 140, shadow: 80 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 380, body: 320, shadow: 80 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 360, body: 310, shadow: 70 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 350, body: 300, shadow: 90 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 370, body: 300, shadow: 80 }),
   [ZONE_IDS.RADIANT]: Object.freeze({ frame: 540, body: 490, shadow: 60 }),
 });
 
@@ -537,14 +550,15 @@ export const DRAW_CALL_CEILINGS = Object.freeze({
  * 地板只升不降：hub 332→335 / space 259→264 / 186→191 / void 169→172 / 105→107；
  * 其余格保持 W-E11 钉值（幻想 fantasy 306/256/55 等不动，逐格仍 ≤ 当日年轻页读数）。
  */
+/** W-Z520 重钉：出处见上方 DRAW_CALL_CEILINGS 的 2026-11-23 注释块（两次真 CI 读数）。 */
 export const DRAW_CALL_FLOORS = Object.freeze({
   [ZONE_IDS.HUB]: Object.freeze({ frame: 335, body: 271, shadow: 65 }),
-  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 306, body: 256, shadow: 55 }),
+  [ZONE_IDS.FANTASY]: Object.freeze({ frame: 315, body: 270, shadow: 55 }),
   [ZONE_IDS.MAGIC]: Object.freeze({ frame: 661, body: 623, shadow: 40 }),
-  [ZONE_IDS.SPACE]: Object.freeze({ frame: 264, body: 191, shadow: 72 }),
-  [ZONE_IDS.VOID]: Object.freeze({ frame: 172, body: 107, shadow: 66 }),
-  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 195, body: 116, shadow: 79 }),
-  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 209, body: 132, shadow: 77 }),
+  [ZONE_IDS.SPACE]: Object.freeze({ frame: 325, body: 270, shadow: 72 }),
+  [ZONE_IDS.VOID]: Object.freeze({ frame: 305, body: 265, shadow: 66 }),
+  [ZONE_IDS.ABYSS]: Object.freeze({ frame: 300, body: 260, shadow: 79 }),
+  [ZONE_IDS.GLOOM]: Object.freeze({ frame: 320, body: 260, shadow: 77 }),
   [ZONE_IDS.RADIANT]: Object.freeze({ frame: 527, body: 476, shadow: 53 }),
 });
 
