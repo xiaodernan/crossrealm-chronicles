@@ -1,6 +1,7 @@
 # verify-redis-advisor-queue.ps1 - prove ai-service really runs the Redis backend when told to:
-# (W-Y4 / W-Z1): submit -> enqueued to Streams -> worker claims it -> permanent DEATH via not-configured
-# (no LLM key in this gate; failure is deterministic) -> dead letter counter/DLQ advanced ->
+# (W-Y4 / W-Z1): submit -> enqueued to Streams -> worker claims it -> permanent DEATH offline
+# (W-Z519: no LLM key OR llm-enabled=false; failure is deterministic, reason = not-configured / llm-disabled)
+# -> dead letter counter/DLQ advanced ->
 # dead-letter whitelist endpoint serves the failure, and the Redis stream actually holds the entry.
 #
 # Preconditions: Java + ai-service jar built at target/ai-service-0.1.0-SNAPSHOT.jar, Docker available.
@@ -8,10 +9,10 @@
 #   1. Starts a throwaway redis:7-alpine container on port 26383
 #   2. Boots ai-service with ai-service.jobs.backend=redis pointing at it
 #   3. Submits a question to /api/ai/chat/async (without an LLM key the worker fails fast, deterministically)
-#   4. Polls /api/ai/jobs/{id} until DEAD (not-configured) — never hangs
+#   4. Polls /api/ai/jobs/{id} until DEAD (offline reason) — never hangs
 #   5. Asserts ai:advisor:jobs stream actually holds the entry (proves redis backend, not the in-memory one)
 #   6. Asserts /api/ai/jobs/stats deadLettered >= 1 and /api/ai/jobs/dead-letter returns items whose
-#      reason is not-configured — and NEVER echoes the player question back
+#      reason is an offline one (not-configured / llm-disabled) — NEVER echoes the player question back
 #   7. Cleans up the container and the ai-service process
 # ASCII-only on purpose (PowerShell 5.1 ANSI hazard).
 
@@ -112,7 +113,9 @@ if (-not ($stats -match '"deadLettered":[1-9][0-9]*')) { Write-Error "stats.dead
 
 $dl = (Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:28093/api/ai/jobs/dead-letter?limit=5' -TimeoutSec 10).Content
 Write-Output "dead-letter: $dl"
-if (-not ($dl -match '"reason":"not-configured"')) { Write-Error "dead-letter missing not-configured reason: $dl"; exit 1 }
+# W-Z519：LLM 总开关关掉后 reason 变成 llm-disabled（不是没填 key 的 not-configured）。
+# 两种都是「确定性离线死亡」的正当原因——探针不关心是哪一种，只关心不是真上游失败。
+if (-not ($dl -match '"reason":"(?:not-configured|llm-disabled)"')) { Write-Error "dead-letter missing offline reason (not-configured / llm-disabled): $dl"; exit 1 }
 if ($dl -match [regex]::Escape($probeQuestion)) { Write-Error "dead-letter echoed the player question back: $dl"; exit 1 }
 if ($dl -match 'sk-') { Write-Error 'dead-letter leaks an api key'; exit 1 }
 

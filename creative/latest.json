@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-24T19:32:33.923Z",
+  "generated_at": "2026-11-24T19:53:01.381Z",
   "branch": "main",
-  "head": "de82763",
-  "total_commits": 2544,
-  "pushed_at": "2026-11-25T03:26:10+08:00",
+  "head": "0071865",
+  "total_commits": 2545,
+  "pushed_at": "2026-11-25T03:32:34+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "0071865",
+      "at": "2026-11-25T03:32:34+08:00",
+      "subject": "fix(ci): W-Z523 derive showcase fallback from fact pack - stop manual test_files drift"
+    },
     {
       "short": "de82763",
       "at": "2026-11-25T03:26:10+08:00",
@@ -26,11 +31,6 @@
       "short": "9293c17",
       "at": "2026-11-24T19:35:49+08:00",
       "subject": "chore(latest): fact pack head=39b119f (novels 291 lore 613 i18n 3301 tests 515)"
-    },
-    {
-      "short": "39b119f",
-      "at": "2026-11-24T19:34:31+08:00",
-      "subject": "docs(showcase): W-Z521 feed entry for manual chapter + offline fallback"
     }
   ],
   "tracked_files": 2001,
@@ -39,7 +39,7 @@
   "lore_sources": 613,
   "novel_chapters_zh": 291,
   "novel_chapters_en": 291,
-  "milestone": "W-Z522",
+  "milestone": "W-Z523",
   "milestone_full": "卷 291 · 六百年守火线（291 / 291 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 613 源守护",
   "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：291 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
