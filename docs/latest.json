@@ -1,41 +1,41 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-24T00:10:00.780Z",
+  "generated_at": "2026-11-24T03:18:19.801Z",
   "branch": "main",
-  "head": "00e5109f",
-  "total_commits": 2508,
-  "pushed_at": "2026-11-23T13:46:39+08:00",
+  "head": "29c64ba",
+  "total_commits": 2522,
+  "pushed_at": "2026-11-24T11:17:20+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
     {
-      "short": "00e5109",
-      "at": "2026-11-23T13:46:39+08:00",
-      "subject": "feat(canon): W-Z520 volume 291 Embers - bilingual novel, codex, corpus 613 sources, v3 prefix 291 entries"
+      "short": "29c64ba",
+      "at": "2026-11-24T11:17:20+08:00",
+      "subject": "fix(perf): re-pin draw-call floors/ceilings from two real CI runs (W-Z520)"
     },
     {
-      "short": "e341497",
-      "at": "2026-11-23T13:22:02+08:00",
-      "subject": "fix(ci): W-Z518 test inlines audit logic - CI Vite import transform SyntaxError"
+      "short": "c6e2c49",
+      "at": "2026-11-24T11:17:19+08:00",
+      "subject": "feat(ai): coalesce LLM flights across Redis instances"
     },
     {
-      "short": "236ea52",
-      "at": "2026-11-23T12:53:26+08:00",
-      "subject": "chore(lint): zero-warning tree - remove 9 dead imports/vars and stale eslint disables"
+      "short": "fe770ec",
+      "at": "2026-11-24T11:17:19+08:00",
+      "subject": "fix(ai): make LLM proxy refreshable without dropping requests"
     },
     {
-      "short": "7e01b77",
-      "at": "2026-11-23T12:41:34+08:00",
-      "subject": "feat(lore): W-Z519 offline oracle returns verbatim BM25 canon excerpts instead of 503; honest offline stats"
+      "short": "7f0b260",
+      "at": "2026-11-24T11:17:19+08:00",
+      "subject": "feat(ai): ground advisor oracle and guide in player state"
     },
     {
-      "short": "f063e2d",
-      "at": "2026-11-23T12:33:08+08:00",
-      "subject": "feat(ui): W-Z519 offline-mode message - distinguish LLM switch-off from transient circuit break (zh/en + 2 tests)"
+      "short": "9dc9b1f",
+      "at": "2026-11-24T11:17:19+08:00",
+      "subject": "test(ai): require stable warm prompt-cache hits in live gate"
     }
   ],
-  "tracked_files": 1973,
-  "test_files": 508,
-  "i18n_keys": 3297,
+  "tracked_files": 1994,
+  "test_files": 512,
+  "i18n_keys": 3299,
   "lore_sources": 613,
   "novel_chapters_zh": 291,
   "novel_chapters_en": 291,
@@ -46,7 +46,7 @@
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3297-keys",
+    "bilingual-3299-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",

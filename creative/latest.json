@@ -1,52 +1,52 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-23T05:46:22.998Z",
+  "generated_at": "2026-11-24T03:18:19.801Z",
   "branch": "main",
-  "head": "e341497",
-  "total_commits": 2507,
-  "pushed_at": "2026-11-23T13:22:02+08:00",
+  "head": "29c64ba",
+  "total_commits": 2522,
+  "pushed_at": "2026-11-24T11:17:20+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
     {
-      "short": "e341497",
-      "at": "2026-11-23T13:22:02+08:00",
-      "subject": "fix(ci): W-Z518 test inlines audit logic - CI Vite import transform SyntaxError"
+      "short": "29c64ba",
+      "at": "2026-11-24T11:17:20+08:00",
+      "subject": "fix(perf): re-pin draw-call floors/ceilings from two real CI runs (W-Z520)"
     },
     {
-      "short": "236ea52",
-      "at": "2026-11-23T12:53:26+08:00",
-      "subject": "chore(lint): zero-warning tree - remove 9 dead imports/vars and stale eslint disables"
+      "short": "c6e2c49",
+      "at": "2026-11-24T11:17:19+08:00",
+      "subject": "feat(ai): coalesce LLM flights across Redis instances"
     },
     {
-      "short": "7e01b77",
-      "at": "2026-11-23T12:41:34+08:00",
-      "subject": "feat(lore): W-Z519 offline oracle returns verbatim BM25 canon excerpts instead of 503; honest offline stats"
+      "short": "fe770ec",
+      "at": "2026-11-24T11:17:19+08:00",
+      "subject": "fix(ai): make LLM proxy refreshable without dropping requests"
     },
     {
-      "short": "f063e2d",
-      "at": "2026-11-23T12:33:08+08:00",
-      "subject": "feat(ui): W-Z519 offline-mode message - distinguish LLM switch-off from transient circuit break (zh/en + 2 tests)"
+      "short": "7f0b260",
+      "at": "2026-11-24T11:17:19+08:00",
+      "subject": "feat(ai): ground advisor oracle and guide in player state"
     },
     {
-      "short": "aaae391",
-      "at": "2026-11-23T12:22:45+08:00",
-      "subject": "chore(latest): fact pack head=da6bd6b (novels 290 lore 611 i18n 3296 tests 508 commits 2502) - offline LLM switch"
+      "short": "9dc9b1f",
+      "at": "2026-11-24T11:17:19+08:00",
+      "subject": "test(ai): require stable warm prompt-cache hits in live gate"
     }
   ],
-  "tracked_files": 1971,
-  "test_files": 508,
-  "i18n_keys": 3297,
+  "tracked_files": 1994,
+  "test_files": 512,
+  "i18n_keys": 3299,
   "lore_sources": 613,
-  "novel_chapters_zh": 290,
-  "novel_chapters_en": 290,
-  "milestone": "W-Z518",
-  "milestone_full": "卷 290 · 六百年守火线（290 / 290 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 613 源守护",
-  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：290 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
+  "novel_chapters_zh": 291,
+  "novel_chapters_en": 291,
+  "milestone": "W-Z520",
+  "milestone_full": "卷 291 · 六百年守火线（291 / 291 卷双语同源）· StateGraph [J] 锚火三问真路由 · 说明书星图章节双语讲授 StateGraph · Lore Oracle 613 源守护",
+  "headline": "跨界纪元 · Crossrealm Chronicles —— 一个极其庞大、全内嵌双语教学的 Three.js 开放位面 RPG：291 卷史诗小说（中英双语全文）× 电影剧本 × 25 首 OST，Spring Cloud 微服务矩阵 + Redis 四殿，Lore Oracle 以 BM25 两段式检索引经据典，LangGraph StateGraph 真路由（锚火三问 · 守火六百年），全部内容中英双语逐字对齐。",
   "feature_surface": [
     "spring-cloud-plane",
     "redis-everywhere",
     "lore-oracle-rag",
-    "bilingual-3297-keys",
+    "bilingual-3299-keys",
     "three-js-world",
     "quickstart-embed",
     "stategraph-teaching",
