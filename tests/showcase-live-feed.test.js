@@ -34,4 +34,12 @@ describe('showcase 实况数字镜像（W-Z509）', () => {
     expect(show).toContain('test files · CI gated green');
     expect(show).toContain('测试文件 · CI 门禁全绿');
   });
+
+  it('build-latest 会随事实包一起刷静态兜底（不是靠人手改，根因不再复发）', () => {
+    // W-Z523：每加一个测试文件 test_files +1，手写兜底就漂一次，CI 当场红。
+    // 生成器必须自己把这两处写回，--check 也必须校验它们。
+    expect(build).toMatch(/id="live-testfiles"/);
+    expect(build).toMatch(/synced showcase\.html static fallbacks/);
+    expect(build).toContain('showcase.html 静态兜底 test_files=');
+  });
 });

@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-24T19:26:09.430Z",
+  "generated_at": "2026-11-24T19:32:33.923Z",
   "branch": "main",
-  "head": "b5ce036",
-  "total_commits": 2543,
-  "pushed_at": "2026-11-25T03:22:06+08:00",
+  "head": "de82763",
+  "total_commits": 2544,
+  "pushed_at": "2026-11-25T03:26:10+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "de82763",
+      "at": "2026-11-25T03:26:10+08:00",
+      "subject": "test(ci): generalize W-Z522 indentation guard to all workflows + reverse control"
+    },
     {
       "short": "b5ce036",
       "at": "2026-11-25T03:22:06+08:00",
@@ -26,15 +31,10 @@
       "short": "39b119f",
       "at": "2026-11-24T19:34:31+08:00",
       "subject": "docs(showcase): W-Z521 feed entry for manual chapter + offline fallback"
-    },
-    {
-      "short": "1b8eec2",
-      "at": "2026-11-24T19:31:47+08:00",
-      "subject": "fix(i18n): 7 EN manual chapters had Chinese punctuation - gate now scans template literals for CJK punctuation too"
     }
   ],
-  "tracked_files": 2000,
-  "test_files": 516,
+  "tracked_files": 2001,
+  "test_files": 517,
   "i18n_keys": 3301,
   "lore_sources": 613,
   "novel_chapters_zh": 291,

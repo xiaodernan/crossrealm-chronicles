@@ -116,6 +116,13 @@ if (CHECK) {
     console.error(`docs/latest.json 漂移字段：${drift.join(', ')} —— 请运行 node scripts/build-latest.mjs 重新生成`);
     process.exit(1);
   }
+  // W-Z523：showcase.html 的静态兜底值也必须和事实包同值 —— 每加一个测试文件就漂一次的根因。
+  const showSrc = readFileSync(join(ROOT, 'creative', 'showcase.html'), 'utf8');
+  const fallback = showSrc.match(/id="live-testfiles">(\d+)</);
+  if (!fallback || Number(fallback[1]) !== derived.test_files) {
+    console.error(`showcase.html 静态兜底 test_files=${fallback?.[1]} ≠ 事实包 ${derived.test_files} —— 请运行 node scripts/build-latest.mjs 重新生成`);
+    process.exit(1);
+  }
   console.log(`docs/latest.json 自检通过（head=${disk.head}, commits=${disk.total_commits}, test_files=${disk.test_files}, i18n=${disk.i18n_keys}, lore_sources=${disk.lore_sources}）`);
   process.exit(0);
 }
@@ -128,4 +135,17 @@ writeFileSync(OUT, JSON.stringify(doc, null, 2) + '\n', 'utf8');
 const SHOWCASE_OUT = join(ROOT, 'creative', 'latest.json');
 writeFileSync(SHOWCASE_OUT, JSON.stringify(doc, null, 2) + '\n', 'utf8');
 console.log(`wrote ${SHOWCASE_OUT} (showcase live-feed mirror)`);
+
+// W-Z523：showcase.html 里的静态兜底值必须随事实包一起刷。
+// 根因：页面运行时优先 fetch latest.json，但 JS 没跑起来（离线 / 被拦 / 首帧）时玩家看到
+// 的是 HTML 里手写的数。从前它靠人手改，每加一个测试文件就漂一次 —— CI 的
+// showcase-live-feed.test 当场红（实测 515 vs 516）。现在由本脚本统一派生，和事实包同源。
+const SHOWCASE_HTML = join(ROOT, 'creative', 'showcase.html');
+let html = readFileSync(SHOWCASE_HTML, 'utf8');
+const before = html;
+html = html.replace(/(id="live-testfiles">)\d+(<\/b>)/, `$1${testFiles}$2`);
+html = html.replace(/(id="live-commits">)\d*(<\/b>)/, `$1${totalCommits}$2`);
+if (html !== before) writeFileSync(SHOWCASE_HTML, html, 'utf8');
+console.log('synced showcase.html static fallbacks (test_files / commits) from fact pack');
+
 console.log(`wrote docs/latest.json (${statSync(OUT).size} bytes) head=${head} commits=${totalCommits}`);
