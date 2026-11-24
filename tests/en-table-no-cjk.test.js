@@ -19,6 +19,14 @@ import { readFileSync } from 'node:fs';
 const EN = readFileSync('src/content/strings.en.js', 'utf8');
 const ZH = readFileSync('src/content/strings.zh.js', 'utf8');
 
+/**
+ * 模板值里唯一允许出现汉字的键：典籍馆年表的**剧情提纲**。
+ * 那一段讲的是「火 / 灶 / 守 / 记 / 炉火」这些汉字本身如何成为故事道具——
+ * 把「墨鹮」「横桥。火等。」译成英文就等于把原文道具换掉，不是翻译而是改写。
+ * 它是叙事引用，不是没翻的界面标签；其余模板一律纯英文。
+ */
+const ALLOW_TMPL_CJK = new Set(['hm_body_codex']);
+
 /** 抽出「键: '值'」里的值（单引号字符串，够用：两表都是这个写法） */
 const values = (src) => {
   const out = [];
@@ -29,9 +37,15 @@ const values = (src) => {
 };
 
 describe('英文表纯净（英文模式无中文）', () => {
-  it('英文表的值里没有 CJK 汉字', () => {
+  it('英文表的值里没有 CJK 汉字（单引号 + 反引号两种写法都扫）', () => {
     const bad = values(EN).filter(([, v]) => /[\u4e00-\u9fa5]/.test(v));
     expect(bad.map(([k]) => k), `英文表仍有中文：${bad.map(([k]) => k).join(', ')}`).toEqual([]);
+    // 旧门只认 `key: '值'`，把反引号模板整段漏掉——五个说明书章节曾因此残留
+    // 「炉火报讯台 / Fireside rumors」「典籍 / Lore」这类没翻的 UI 标签。
+    const tmpl = [...EN.matchAll(/^\s*([a-z0-9_]+):\s*`([\s\S]*?)`,?\s*$/gm)]
+      .filter((m) => !ALLOW_TMPL_CJK.has(m[1]));
+    const badTmpl = tmpl.filter((m) => /[\u4e00-\u9fa5]/.test(m[2]));
+    expect(badTmpl.map((m) => m[1]), `英文表模板值仍有中文：${badTmpl.map((m) => m[1]).join(', ')}`).toEqual([]);
   });
 
   it('英文表的值里没有中文标点', () => {

@@ -3159,7 +3159,7 @@ Zone Switch — fullscreen transition + zone name`,
   hm_body_online_living: `Settings → Online partners → turn on (read from localStorage; no forced account, ever).
 Online layer sends requests to your own backend (http://localhost:8080). Off = zero network traffic.
 
-Advisor panel ({advisor}), bottom strip — “炉火报讯台 / Fireside rumors”:
+Advisor panel ({advisor}), bottom strip — “Fireside rumors”:
 [world] boss defeats · season transitions · trial-crown swaps · speedrun-crown swaps — timestamped kind chips, written via textContent.
 
 Unread dot (FAB): lit when there is something new (local counter); opens the panel, then turns off.
@@ -3178,7 +3178,7 @@ Off = zero network, exactly like offline.`,
   hm_title_lore_oracle: 'The Lore Oracle · Ask the canon',
   hm_body_lore_oracle: `The Lore Oracle — you ask the canon itself, not a general assistant.
 
-In the advisor panel ({advisor}), tap the “典籍 / Lore” pill above the input (gold-violet glow = on).
+In the advisor panel ({advisor}), tap the “Lore” pill above the input (gold-violet glow = on).
 While it is on, every question you send is answered from the canon only — the full bilingual novel series
 and its interludes, the glossary, the film script and the OST liner notes, all wired into a live retrieval
 index (rebuilt from source every time the canon grows, automatically).
@@ -3576,14 +3576,14 @@ You have already asked the fire three things — what the fire is, how to keep i
 On top of the same axes, three vows on top of the Three Questions:
 · Q1 You are alone before the stove — the fire is nearly out. What do you say? (“I’m waiting for you.” / You split your breakfast in half and set it on the iron rim. / “I’m here.”)
 · Q2 The first night they let you keep the fire alone — what did you do? (One twig of white birch at a time / You sat through the night without disturbing it / You carved a character into the soot)
-· Q3 The fire finally has its name — how do you remember that day? (Your mother’s flat hand on the iron rim / The old man pressing a fingertip of ash onto paper / Xiao Huo calling it 炉火 in one voice)
+· Q3 The fire finally has its name — how do you remember that day? (Your mother’s flat hand on the iron rim / The old man pressing a fingertip of ash onto paper / Xiao Huo calling it by its name in one voice)
 
-Not a fortune telling — a vow. Same shape as the Three Questions, same axes (ember / grey / self), same ten endings (炉火春安 / 白默灰 / 炉照面 / 炉名七百 / 无名炉…). Deterministic, no dice, no random — the fire knows what you were thinking when you kept it.
+Not a fortune telling — a vow. Same shape as the Three Questions, same axes (ember / grey / self), the same ten endings (Spring Peace / The Ash Quiet / The Kindled Face / The Name Keeper / The Nameless Hearth…). Deterministic, no dice, no random — the fire knows what you were thinking when you kept it.
 
 Execution path: src/content/vigilVow.js — the same axis set as the Fortune Path; the vow chain is compiled by the same src/core/StateGraph.js that powers the Three Questions; the daily state machine lives in src/game/VigilVowSystem.js; the Starpath · The Hearth Vow tab is rendered by src/ui/VigilVowTab.js.
 
 How to use: {journal} → Starpath · The Hearth Vow; one vow per UTC day — your answers, your reward, your ending, all live in crossrealm_vow_path_v1; first-vow souls 25/35/60 (max rarity 60).
-A whole day in three frames: the fire, the fire remembering your name, you calling it 炉火 for the first time.`,
+A whole day in three frames: the fire, the fire remembering your name, calling the fire by its name for the first time.`,
   // W-Z282: the last mile after the Three Questions and the Hearth Vow
   hm_title_kindle_pass: 'Starpath · The Passing of the Fire',
   hm_body_kindle_pass: `Starpath · The Passing of the Fire — the last mile after the Three Questions and the Hearth Vow.
@@ -3591,7 +3591,7 @@ A whole day in three frames: the fire, the fire remembering your name, you calli
 You have already questioned the fire and sworn your vow — the fire asks you the question it has kept in reserve for seven hundred years: can these hands be trusted to take it.
 
 The Passing of the Fire runs on the same axes:
-· Q1 The old keeper says “The fire is going now.” — the fire asks you for one answer, first. ( “You do not die.” / “I am watching you.” / “I call it 炉火.” )
+· Q1 The old keeper says “The fire is going now.” — the fire asks you for one answer, first. ( “You do not die.” / “I am watching you.” / “I call it by its name.” )
 · Q2 The fire asks for the second thing. ( one birch, no more / your own bowl on the rim / the song your mother taught you )
 · Q3 The fire pours its brightest crumb of light onto your palm — how do you remember this night? ( my mother’s hand / the stove burning on / you, outlined in the light )
 
