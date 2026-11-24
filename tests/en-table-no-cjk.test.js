@@ -57,6 +57,21 @@ describe('英文表纯净（英文模式无中文）', () => {
     const withHan = values(ZH).filter(([, v]) => /[\u4e00-\u9fa5]/.test(v));
     expect(withHan.length).toBeGreaterThan(1000);
   });
+
+  it('反向控制：往非白名单的模板值塞回一个汉字，模板腿必须红', () => {
+    const 样本 = '  hm_body_probe: `All text in English, but 炉火 leaked in`,\n';
+    const bad = [...样本.matchAll(/^\s*([a-z0-9_]+):\s*`([\s\S]*?)`,?\s*$/gm)]
+      .filter((m) => !ALLOW_TMPL_CJK.has(m[1]))
+      .filter((m) => /[\u4e00-\u9fa5]/.test(m[2]))
+      .map((m) => m[1]);
+    expect(bad).toEqual(['hm_body_probe']);
+  });
+
+  it('白名单不许悄悄膨胀：只允许 hm_body_codex 一条，且理由已写在册', () => {
+    expect([...ALLOW_TMPL_CJK]).toEqual(['hm_body_codex']);
+    expect(readFileSync('tests/en-table-no-cjk.test.js', 'utf8'))
+      .toContain('典籍馆年表的**剧情提纲**');
+  });
 });
 
 describe('中文表纯净（中文模式无漏翻的英文短语）', () => {
