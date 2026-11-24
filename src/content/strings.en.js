@@ -3038,73 +3038,73 @@ Right click — heavy hit / execution (parry success after)
 {swapWeapon} — switch sword / staff (affects melee and magic bonus)
 Parry success then right click to execute; Boss fight note phase hint and stance bar
 
-【Boss General Tactics】
+[Boss General Tactics]
 1. Approach Boss and press {lockOn} to lock on, camera will follow target
 2. Observe red circle under feet: when circle almost full press {parry} parry → immediately right click execute (high damage)
 3. Can't parry? {roll} dodge roll away, wait for Boss to finish move then left click combo
-4. Combo 3~5 times then heavy hit, fill enemy top stance bar to stagger hard state；**execution/Boss break** has slow motion track lock
-5. Not enough stamina? pull back, wait for full refill；dead find campfire {interact} rest to refill
+4. Combo 3~5 times then heavy hit, fill enemy top stance bar to stagger hard state; **execution/Boss break** has slow motion track lock
+5. Not enough stamina? pull back, wait for full refill; dead find campfire {interact} rest to refill
 6. {skill} Plane Slash (range AOE) suitable for small mobs surrounding or Boss hard state follow-up
-7. {spell1}~{spell4} magic：Boss when time stop/big move long press {spell1}/{spell2}/{spell3} to charge can interrupt`,
+7. {spell1}~{spell4} magic: Boss when time stop/big move long press {spell1}/{spell2}/{spell3} to charge can interrupt`,
 
   hm_body_world: `Exchange Hub — start point, World Anchor and Training Dummy
 Greywhite Forest (West) — Shadow Warden Boss
-Hogwarts Legacy Relic (North) — Great Arcanist Boss，Bloom enhanced
+Hogwarts Legacy Relic (North) — Great Arcanist Boss, Bloom enhanced
 Miller Wasteland (East) — Singularity Lord Boss
-Broken Timeline (Northeast) — hidden plane，gravity inversion + time echo
-Chaos Border (Northwest) — Chaos Lord，lightning storm
+Broken Timeline (Northeast) — hidden plane, gravity inversion + time echo
+Chaos Border (Northwest) — Chaos Lord, lightning storm
 
 Crossing area triggers "Plane Leak" visual + sound layer.
-Map has 12 "Plane Echo" soul fires：approach will be attracted and absorbed，gain Plane Souls.
+Map has 12 "Plane Echo" soul fires: approach will be attracted and absorbed, gain Plane Souls.
 {zonePanel} open area panel · {minimap} mini map · discovered objects recorded in {journal} log`,
 
-  hm_body_dungeons: `Three dungeon entrances (purple teleport ring，press {interact} to enter):
+  hm_body_dungeons: `Three dungeon entrances (purple teleport ring, press {interact} to enter):
 · Greywhite Forest — Ruin crypt
 · Hogwarts Legacy Relic — Forbidden Library
 · Miller Wasteland — Five-dimensional Rift
 
-Clear monsters then can leave and push mission。Five Bosses each correspond to one chapter；
-Timeline Executor is Chapter 4 hidden Boss（Broken Timeline deep Z≈235）。
+Clear monsters then can leave and push mission. Five Bosses each correspond to one chapter; 
+Timeline Executor is Chapter 4 hidden Boss(Broken Timeline deep Z≈235). 
 Defeat Boss gains large amount soul fire + 2 weapon skill points.
-{settings} open screen settings（volume，Bloom，shadow etc）`,
+{settings} open screen settings(volume, Bloom, shadow etc)`,
 
-  hm_body_bosses: `【Shadow Warden】Greywhite Forest west X≈-250
-· slow moves，good to parry；lock on then backstab
-· Phase 2 will summon shadow soldiers，first clear small mobs or {skill} Plane Slash
+  hm_body_bosses: `[Shadow Warden]Greywhite Forest west X≈-250
+· slow moves, good to parry; lock on then backstab
+· Phase 2 will summon shadow soldiers, first clear small mobs or {skill} Plane Slash
 
-【Great Arcanist】Hogwarts Legacy north X≈5 Z≈-220
-· many remote magic，sidestep dodge（{roll}）approach then hit
-· charge fireball windup long，can {parry} parry or charge {spell1} magic duel
+[Great Arcanist]Hogwarts Legacy north X≈5 Z≈-220
+· many remote magic, sidestep dodge({roll})approach then hit
+· charge fireball windup long, can {parry} parry or charge {spell1} magic duel
 
-【Singularity Lord】Miller Wasteland X≈235 Z≈155
-· will teleport，lock on {lockOn} don't lose
-· gravity circle when roll outward，landing hard state heavy hit
+[Singularity Lord]Miller Wasteland X≈235 Z≈155
+· will teleport, lock on {lockOn} don't lose
+· gravity circle when roll outward, landing hard state heavy hit
 
-【Timeline Executor】Broken Timeline Z≈235（Ch4+，gravity inversion area）
-· notice walking height change，roll direction opposite usual
-· before time stop will have blue forewarning，charge spell can interrupt
+[Timeline Executor]Broken Timeline Z≈235(Ch4+, gravity inversion area)
+· notice walking height change, roll direction opposite usual
+· before time stop will have blue forewarning, charge spell can interrupt
 
-【Chaos Lord】Chaos Border X≈-200 Z≈285（Ch5+）
-· lightning storm lowers vision，close-range stab output
-· Phase 2 enrage，parry window shorter，prioritize dodge roll`,
+[Chaos Lord]Chaos Border X≈-200 Z≈285(Ch5+)
+· lightning storm lowers vision, close-range stab output
+· Phase 2 enrage, parry window shorter, prioritize dodge roll`,
 
-  hm_body_autoplay: `Press {questTracker} to open Plane Assistant → click "Auto-play (operate your character)"。
+  hm_body_autoplay: `Press {questTracker} to open Plane Assistant → click "Auto-play (operate your character)". 
 
-Your character will start from Hub，automatically walk through five zones and push all missions.
-Camera follows behind，no need to operate；{escape} stop anytime。
+Your character will start from Hub, automatically walk through five zones and push all missions.
+Camera follows behind, no need to operate; {escape} stop anytime. 
 
-If only want skip walking directly complete acceptance，click "Instant Acceptance".
+If only want skip walking directly complete acceptance, click "Instant Acceptance".
 
  [Ask the keeper for a hint (W-Z486)] Lost or going in circles? Click "Ask the keeper for a hint" — the keeper reads your situation (where you are, current objective, how long you've idled, whether you're clicking around), first judges if you're lost, then says one guiding line to match. He won't decide for you; he only brings the talk back to the fire. Offline it falls back to the assistant's built-in hint.`,
 
-  hm_body_perf_hud: `{perfHud} toggle Performance HUD（dev tool，doesn't affect gameplay）。
+  hm_body_perf_hud: `{perfHud} toggle Performance HUD(dev tool, doesn't affect gameplay). 
 
-Value shows yellow +N means this count relative to historical lowest net increase N；red means increase exceeds tolerance——
-Repeat in/out dungeons after "Geometry / Texture / Shader / Scene Node" should return to original value，only increase no decrease means leak。
+Value shows yellow +N means this count relative to historical lowest net increase N; red means increase exceeds tolerance——
+Repeat in/out dungeons after "Geometry / Texture / Shader / Scene Node" should return to original value, only increase no decrease means leak. 
 
-Save currently v6（crossrealm_save_v6）。{save} save · {load} read · {escape} pause menu can export/import JSON。
-Old v4 / v5 save will at startup explicitly migrate to v6 and hint，original key keep one for rollback；
-Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation，instead of silently lost。`,
+Save currently v6(crossrealm_save_v6). {save} save · {load} read · {escape} pause menu can export/import JSON. 
+Old v4 / v5 save will at startup explicitly migrate to v6 and hint, original key keep one for rollback; 
+Can't parse save will transfer to crossrealm_save_v6:corrupt and pop explanation, instead of silently lost. `,
 
   // Extra sections (HELP_SECTIONS_EXTRA, W-D2 slice15)
   hm_title_journal_tabs: 'Journal Tabs',
@@ -3150,11 +3150,11 @@ Waypoints on the world map — with {worldMap} open, {mapMark} drops a marker at
 Session readout — {sessionStats} shows or hides this run's counters (kills / parries / finishers / executions). It is only a panel: pressing it does not pause anything and changes no progress, online or off.`,
   hm_title_meta_systems: 'Meta Systems',
   hm_title_difficulty_season_trial: 'Difficulty · Seasons · Trials',
-  hm_body_difficulty_season_trial: `【Three difficulty tiers】Switch in Settings — Story (enemy HP ×0.8, damage taken ×0.6, soul income ×1.25) · Standard (all ×1.0, the out-of-box feel) · Brutal (enemy HP ×1.3, damage taken ×1.5, soul income ×0.8). Difficulty changes numbers only, never an enemy's moves or phases — use Story to read the choreography, Standard to practise parries.
+  hm_body_difficulty_season_trial: `[Three difficulty tiers]Switch in Settings — Story (enemy HP ×0.8, damage taken ×0.6, soul income ×1.25) · Standard (all ×1.0, the out-of-box feel) · Brutal (enemy HP ×1.3, damage taken ×1.5, soul income ×0.8). Difficulty changes numbers only, never an enemy's moves or phases — use Story to read the choreography, Standard to practise parries.
 
-【Seasons】With the online companion on, seasons add a time window to leaderboards and counters: boss best-times and trial boards rank by seasonal score and layers cleared. A new season resets scoring; old records stay in the archive and are never wiped. Online off = zero network; seasons still count locally.
+[Seasons]With the online companion on, seasons add a time window to leaderboards and counters: boss best-times and trial boards rank by seasonal score and layers cleared. A new season resets scoring; old records stay in the archive and are never wiped. Online off = zero network; seasons still count locally.
 
-【Realm Trials】A repeatable challenge entered from the hub: fight floor after floor, clearing one to open the next; spawn scaling (HP ×N / damage ×N / speed ×N) rises with depth. The trial board records your best score and deepest layer from the same source as the boss board.`,
+[Realm Trials]A repeatable challenge entered from the hub: fight floor after floor, clearing one to open the next; spawn scaling (HP ×N / damage ×N / speed ×N) rises with depth. The trial board records your best score and deepest layer from the same source as the boss board.`,
   hm_body_meta_systems: `Combat Style — parry/finish/execute/Boss accumulate rating C~SS
 Boss Rematch — after defeat, summon at beacon with {interact}, +5 souls
 Kill-streak Souls — 3+ kills within 4.5s gives extra souls

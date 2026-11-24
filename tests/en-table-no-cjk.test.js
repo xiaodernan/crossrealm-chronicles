@@ -48,9 +48,16 @@ describe('英文表纯净（英文模式无中文）', () => {
     expect(badTmpl.map((m) => m[1]), `英文表模板值仍有中文：${badTmpl.map((m) => m[1]).join(', ')}`).toEqual([]);
   });
 
-  it('英文表的值里没有中文标点', () => {
-    const bad = values(EN).filter(([, v]) => /[，。！？；：、（）【】「」《》]/.test(v));
+  it('英文表的值里没有中文标点（单引号 + 反引号两种写法都扫）', () => {
+    const PUNCT = /[，。！？；：、（）【】「」《》]/;
+    const bad = values(EN).filter(([, v]) => PUNCT.test(v));
     expect(bad.map(([k]) => k)).toEqual([]);
+    // 反引号文案曾被整段漏掉：说明书七章里混进了「，；。（）【】」——英文模式看着就是中英夹杂。
+    // hm_body_codex 例外：那段是典籍年表，引文里的中文原句与标点就是道具本身（见 ALLOW_TMPL_CJK）。
+    const badTmpl = [...EN.matchAll(/^\s*([a-z0-9_]+):\s*`([\s\S]*?)`,?\s*$/gm)]
+      .filter((m) => !ALLOW_TMPL_CJK.has(m[1]))
+      .filter((m) => PUNCT.test(m[2]));
+    expect(badTmpl.map((m) => m[1]), `英文模板值里仍有中文标点：${badTmpl.map((m) => m[1]).join(', ')}`).toEqual([]);
   });
 
   it('反向控制：中文表确实有大量汉字（门禁不会因为表被清空而假绿）', () => {
