@@ -12,7 +12,8 @@ import { NOVELLA_EN } from '../src/content/novella/en.js';
  * 走同一条路：原稿文件就是 codex body，任何一侧手改另一侧没跟上，这条当场红。
  */
 const ROOT = process.cwd();
-const 读 = (rel) => readFileSync(join(ROOT, rel), 'utf8').trim();
+// Windows runner 会把仓库里的 LF 检出成 CRLF；正文按 LF 落 JS 字面量，比较前归一。
+const 读 = (rel) => readFileSync(join(ROOT, rel), 'utf8').replace(/\r\n/g, '\n').trim();
 
 describe('典籍馆新卷与原稿同源（W-Z520 · vol.291）', () => {
   const 卷 = '290'; // 游戏内键 = 文件序号 - 1
