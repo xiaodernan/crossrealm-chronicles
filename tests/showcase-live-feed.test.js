@@ -26,4 +26,12 @@ describe('showcase 实况数字镜像（W-Z509）', () => {
     expect(show).toContain('id="live-testfiles"');
     expect(show).not.toContain('>6696</b>');
   });
+
+  it('静态兜底与事实包同值，且标签说的是 test files（旧值 6990 是单测数，不是文件数）', () => {
+    const m = show.match(/id="live-testfiles">(\d+)</);
+    expect(m, '找不到 live-testfiles 的静态兜底值').toBeTruthy();
+    expect(Number(m[1]), '静态兜底与事实包 test_files 漂移').toBe(canonical.test_files);
+    expect(show).toContain('test files · CI gated green');
+    expect(show).toContain('测试文件 · CI 门禁全绿');
+  });
 });

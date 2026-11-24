@@ -1,39 +1,39 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-24T05:44:17.273Z",
+  "generated_at": "2026-11-24T06:46:43.784Z",
   "branch": "main",
-  "head": "ef7d6d0",
-  "total_commits": 2525,
-  "pushed_at": "2026-11-24T11:27:57+08:00",
+  "head": "9aef6b6",
+  "total_commits": 2531,
+  "pushed_at": "2026-11-24T14:41:34+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
     {
-      "short": "ef7d6d0",
-      "at": "2026-11-24T11:27:57+08:00",
-      "subject": "fix(test): normalize CRLF in vol.291 source-sync gate for Windows CI"
+      "short": "9aef6b6",
+      "at": "2026-11-24T14:41:34+08:00",
+      "subject": "fix(showcase): stale static test-file fallback 6990 -> 513 with honest label"
     },
     {
-      "short": "d888eba",
-      "at": "2026-11-24T11:21:44+08:00",
-      "subject": "test(canon): W-Z520 vol.291 source-vs-codex byte sync and detail guard"
+      "short": "fa90fb3",
+      "at": "2026-11-24T14:32:34+08:00",
+      "subject": "test(i18n): reverse control for template-literal CJK gate and allowlist lock"
     },
     {
-      "short": "54b0716",
-      "at": "2026-11-24T11:18:36+08:00",
-      "subject": "chore(latest): fact pack head=29c64ba (novels 291 lore 613 i18n 3299 tests 512 commits 2522)"
+      "short": "2a205ca",
+      "at": "2026-11-24T14:26:20+08:00",
+      "subject": "fix(i18n): EN manual had untranslated Chinese UI labels - gate now scans template literals too"
     },
     {
-      "short": "29c64ba",
-      "at": "2026-11-24T11:17:20+08:00",
-      "subject": "fix(perf): re-pin draw-call floors/ceilings from two real CI runs (W-Z520)"
+      "short": "a775c7f",
+      "at": "2026-11-24T14:11:47+08:00",
+      "subject": "fix(network): complete no-clash-proxy helper - clear user env + refresh explorer session"
     },
     {
-      "short": "c6e2c49",
-      "at": "2026-11-24T11:17:19+08:00",
-      "subject": "feat(ai): coalesce LLM flights across Redis instances"
+      "short": "c6798b4",
+      "at": "2026-11-24T13:45:42+08:00",
+      "subject": "fix(network): add no-clash-proxy helper - clear dead 127.0.0.1:7897 proxy inherited by the app"
     }
   ],
-  "tracked_files": 1995,
+  "tracked_files": 1996,
   "test_files": 513,
   "i18n_keys": 3299,
   "lore_sources": 613,
