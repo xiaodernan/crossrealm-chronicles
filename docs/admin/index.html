@@ -242,8 +242,8 @@ code{overflow-wrap:anywhere}
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l2">全场错误率</div><div class="kpi-value">0.00%</div><div class="kpi-trend up" data-i18n="meas_tr2">八条路由全部走通 · 无 5xx</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l3">p50 时延（同机 9 JVM + PG）</div><div class="kpi-value">625~641<span style="font-size:.7em;color:var(--muted)"> ms</span></div><div class="kpi-trend up" data-i18n="meas_tr3">网络代理开销为主</div></div>
         <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l4">单 IP 洪水被打回</div><div class="kpi-value">52.8<span style="font-size:.7em;color:var(--muted)">%</span></div><div class="kpi-trend flat" data-i18n="meas_tr4">622.7 rps → HTTP 429 · Redis 60次/10s</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l5">seasons 缓存命中</div><div class="kpi-value">0.997</div><div class="kpi-trend up">Spring Cache + Redis</div></div>
-        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l6">窗口内限流计数</div><div class="kpi-value">14481<span style="font-size:.7em;color:var(--muted)"> allowed</span></div><div class="kpi-trend down">rejected 6376 · allowed:rejected ≈ 2.3:1</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l5">seasons 缓存命中</div><div class="kpi-value">0.997</div><div class="kpi-trend up" data-i18n="meas_tr5">Spring Cache + Redis</div></div>
+        <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l6">窗口内限流计数</div><div class="kpi-value">14481<span style="font-size:.7em;color:var(--muted)"> allowed</span></div><div class="kpi-trend down" data-i18n="meas_tr6">rejected 6376 · allowed:rejected ≈ 2.3:1</div></div>
         <div class="kpi" style="border-color:rgba(120,214,175,.4)"><div class="kpi-label" data-i18n="meas_l7">Advisor 真实 e2e（BM25+LLM）</div><div class="kpi-value">≈10.4<span style="font-size:.7em;color:var(--muted)"> s p95/p99</span></div><div class="kpi-trend flat" data-i18n="meas_tr7">30 job · 5 并发 · 主模型 gpt-6-sol</div></div>
         <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l8">LLM 前缀缓存（本次实跑）</div><div class="kpi-value">4516<span style="font-size:.7em;color:var(--muted)">/5862</span></div><div class="kpi-trend up" data-i18n="meas_tr8">≈77.0% · 冷启 null → 次调命中</div></div>
         <div class="kpi" style="border-color:rgba(255,217,138,.4)"><div class="kpi-label" data-i18n="meas_l9">Oracle 上游探针（A/B/C）</div><div class="kpi-value">3<span style="font-size:.7em;color:var(--muted)">/3</span></div><div class="kpi-trend up" data-i18n="meas_tr9">6179 / 1798 / 6170 tok · 正确分级 100%</div></div>
@@ -352,7 +352,9 @@ const I18N = {
     meas_l4: '单 IP 洪水被打回', meas_tr4: '622.7 rps → HTTP 429 · Redis 60次/10s',
     meas_v34: ' · 双实例', meas_v36: ' 实例', meas_v37: ' 链',
     meas_l5: 'seasons 缓存命中',
+    meas_tr5: 'Spring Cache + Redis',
     meas_l6: '窗口内限流计数',
+    meas_tr6: '拒绝 6376 · 放行:拒绝 ≈ 2.3:1',
     meas_l7: 'Advisor 真实 e2e（BM25+LLM）', meas_tr7: '30 job · 5 并发 · 主模型 gpt-6-sol',
     meas_l8: 'LLM 前缀缓存（本次实跑）', meas_tr8: '≈77.0% · 冷启 null → 次调命中',
     meas_l9: 'Oracle 上游探针（A/B/C）', meas_tr9: '6179 / 1798 / 6170 tok · 正确分级 100%',
@@ -441,7 +443,9 @@ const I18N = {
     meas_l4: 'Single-IP flood shed', meas_tr4: '622.7 rps → HTTP 429 · Redis 60 req / 10s',
     meas_v34: ' · dual instances', meas_v36: ' instances', meas_v37: ' chain',
     meas_l5: 'seasons cache hit',
+    meas_tr5: 'Spring Cache + Redis',
     meas_l6: 'Windowed rate-limit counters',
+    meas_tr6: 'rejected 6376 · allowed:rejected ≈ 2.3:1',
     meas_l7: 'Advisor live e2e (BM25+LLM)', meas_tr7: '30 jobs · 5 concurrent · primary gpt-6-sol',
     meas_l8: 'LLM prefix cache (this run)', meas_tr8: '≈77.0% · cold null → warm hit on 2nd call',
     meas_l9: 'Oracle upstream probes (A/B/C)', meas_tr9: '6179 / 1798 / 6170 tok · 3/3 correct routing',
