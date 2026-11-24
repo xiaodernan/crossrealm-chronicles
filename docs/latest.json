@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-24T03:18:19.801Z",
+  "generated_at": "2026-11-24T05:44:17.273Z",
   "branch": "main",
-  "head": "29c64ba",
-  "total_commits": 2522,
-  "pushed_at": "2026-11-24T11:17:20+08:00",
+  "head": "ef7d6d0",
+  "total_commits": 2525,
+  "pushed_at": "2026-11-24T11:27:57+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "ef7d6d0",
+      "at": "2026-11-24T11:27:57+08:00",
+      "subject": "fix(test): normalize CRLF in vol.291 source-sync gate for Windows CI"
+    },
+    {
+      "short": "d888eba",
+      "at": "2026-11-24T11:21:44+08:00",
+      "subject": "test(canon): W-Z520 vol.291 source-vs-codex byte sync and detail guard"
+    },
+    {
+      "short": "54b0716",
+      "at": "2026-11-24T11:18:36+08:00",
+      "subject": "chore(latest): fact pack head=29c64ba (novels 291 lore 613 i18n 3299 tests 512 commits 2522)"
+    },
     {
       "short": "29c64ba",
       "at": "2026-11-24T11:17:20+08:00",
@@ -16,25 +31,10 @@
       "short": "c6e2c49",
       "at": "2026-11-24T11:17:19+08:00",
       "subject": "feat(ai): coalesce LLM flights across Redis instances"
-    },
-    {
-      "short": "fe770ec",
-      "at": "2026-11-24T11:17:19+08:00",
-      "subject": "fix(ai): make LLM proxy refreshable without dropping requests"
-    },
-    {
-      "short": "7f0b260",
-      "at": "2026-11-24T11:17:19+08:00",
-      "subject": "feat(ai): ground advisor oracle and guide in player state"
-    },
-    {
-      "short": "9dc9b1f",
-      "at": "2026-11-24T11:17:19+08:00",
-      "subject": "test(ai): require stable warm prompt-cache hits in live gate"
     }
   ],
-  "tracked_files": 1994,
-  "test_files": 512,
+  "tracked_files": 1995,
+  "test_files": 513,
   "i18n_keys": 3299,
   "lore_sources": 613,
   "novel_chapters_zh": 291,
