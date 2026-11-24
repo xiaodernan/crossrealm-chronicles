@@ -1,12 +1,27 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-24T06:46:43.784Z",
+  "generated_at": "2026-11-24T10:48:51.320Z",
   "branch": "main",
-  "head": "9aef6b6",
-  "total_commits": 2531,
-  "pushed_at": "2026-11-24T14:41:34+08:00",
+  "head": "7f145a7",
+  "total_commits": 2534,
+  "pushed_at": "2026-11-24T15:12:22+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "7f145a7",
+      "at": "2026-11-24T15:12:22+08:00",
+      "subject": "test(offline): consolidated guard for all LLM consumer fallbacks"
+    },
+    {
+      "short": "0b9a6d9",
+      "at": "2026-11-24T15:08:16+08:00",
+      "subject": "fix(admin): two KPI trend cards had no i18n key - add data-i18n + zh/en dict + parity guard"
+    },
+    {
+      "short": "c2b0f71",
+      "at": "2026-11-24T14:51:08+08:00",
+      "subject": "test+latest: guard showcase fallback parity; refresh fact pack head=9aef6b6"
+    },
     {
       "short": "9aef6b6",
       "at": "2026-11-24T14:41:34+08:00",
@@ -16,25 +31,10 @@
       "short": "fa90fb3",
       "at": "2026-11-24T14:32:34+08:00",
       "subject": "test(i18n): reverse control for template-literal CJK gate and allowlist lock"
-    },
-    {
-      "short": "2a205ca",
-      "at": "2026-11-24T14:26:20+08:00",
-      "subject": "fix(i18n): EN manual had untranslated Chinese UI labels - gate now scans template literals too"
-    },
-    {
-      "short": "a775c7f",
-      "at": "2026-11-24T14:11:47+08:00",
-      "subject": "fix(network): complete no-clash-proxy helper - clear user env + refresh explorer session"
-    },
-    {
-      "short": "c6798b4",
-      "at": "2026-11-24T13:45:42+08:00",
-      "subject": "fix(network): add no-clash-proxy helper - clear dead 127.0.0.1:7897 proxy inherited by the app"
     }
   ],
-  "tracked_files": 1996,
-  "test_files": 513,
+  "tracked_files": 1998,
+  "test_files": 515,
   "i18n_keys": 3299,
   "lore_sources": 613,
   "novel_chapters_zh": 291,
