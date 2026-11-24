@@ -1,12 +1,22 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-24T10:48:51.320Z",
+  "generated_at": "2026-11-24T11:01:54.666Z",
   "branch": "main",
-  "head": "7f145a7",
-  "total_commits": 2534,
-  "pushed_at": "2026-11-24T15:12:22+08:00",
+  "head": "1380ce0",
+  "total_commits": 2536,
+  "pushed_at": "2026-11-24T19:00:31+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "1380ce0",
+      "at": "2026-11-24T19:00:31+08:00",
+      "subject": "fix(network): one-click UAC-elevation script to stop and disable Clash system services"
+    },
+    {
+      "short": "07a6cfe",
+      "at": "2026-11-24T18:49:08+08:00",
+      "subject": "chore(latest): fact pack head=7f145a7 (novels 291 lore 613 i18n 3299 tests 515 commits 2534) - CI green"
+    },
     {
       "short": "7f145a7",
       "at": "2026-11-24T15:12:22+08:00",
@@ -21,19 +31,9 @@
       "short": "c2b0f71",
       "at": "2026-11-24T14:51:08+08:00",
       "subject": "test+latest: guard showcase fallback parity; refresh fact pack head=9aef6b6"
-    },
-    {
-      "short": "9aef6b6",
-      "at": "2026-11-24T14:41:34+08:00",
-      "subject": "fix(showcase): stale static test-file fallback 6990 -> 513 with honest label"
-    },
-    {
-      "short": "fa90fb3",
-      "at": "2026-11-24T14:32:34+08:00",
-      "subject": "test(i18n): reverse control for template-literal CJK gate and allowlist lock"
     }
   ],
-  "tracked_files": 1998,
+  "tracked_files": 1999,
   "test_files": 515,
   "i18n_keys": 3299,
   "lore_sources": 613,
