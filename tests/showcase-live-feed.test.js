@@ -35,6 +35,15 @@ describe('showcase 实况数字镜像（W-Z509）', () => {
     expect(show).toContain('测试文件 · CI 门禁全绿');
   });
 
+  it('卷数静态兜底与事实包同值（W-Z526，线上 webfetch 实测曾停在 290）', () => {
+    expect(Number(show.match(/id="live-novels">(\d+)</)?.[1])).toBe(canonical.novel_chapters_zh);
+    expect(Number(show.match(/id="live-novels-en">(\d+)</)?.[1])).toBe(canonical.novel_chapters_en);
+    const inline = [...show.matchAll(/class="live-novel-inline">(\d+)</g)].map((m) => Number(m[1]));
+    expect(inline.length).toBeGreaterThan(0);
+    expect(inline.every((n) => n === canonical.novel_chapters_zh)).toBe(true);
+    expect(build).toMatch(/live-novel-inline/);
+  });
+
   it('build-latest 会随事实包一起刷静态兜底（不是靠人手改，根因不再复发）', () => {
     // W-Z523：每加一个测试文件 test_files +1，手写兜底就漂一次，CI 当场红。
     // 生成器必须自己把这两处写回，--check 也必须校验它们。

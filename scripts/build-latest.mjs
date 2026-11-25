@@ -123,6 +123,19 @@ if (CHECK) {
     console.error(`showcase.html 静态兜底 test_files=${fallback?.[1]} ≠ 事实包 ${derived.test_files} —— 请运行 node scripts/build-latest.mjs 重新生成`);
     process.exit(1);
   }
+  // W-Z526：卷数兜底同样纳入校验
+  for (const [id, want] of [['live-novels', derived.novel_chapters_zh], ['live-novels-en', derived.novel_chapters_en]]) {
+    const m2 = showSrc.match(new RegExp(`id="${id}">(\\d+)<`));
+    if (!m2 || Number(m2[1]) !== want) {
+      console.error(`showcase.html 静态兜底 ${id}=${m2?.[1]} ≠ 事实包 ${want} —— 请运行 node scripts/build-latest.mjs 重新生成`);
+      process.exit(1);
+    }
+  }
+  const novelFallbacks = [...showSrc.matchAll(/class="live-novel-inline">(\d+)</g)].map((m) => Number(m[1]));
+  if (novelFallbacks.length && novelFallbacks.some((n) => n !== derived.novel_chapters_zh)) {
+    console.error(`showcase.html live-novel-inline 兜底 ${novelFallbacks.join(',')} ≠ 事实包 ${derived.novel_chapters_zh} —— 请运行 node scripts/build-latest.mjs 重新生成`);
+    process.exit(1);
+  }
   console.log(`docs/latest.json 自检通过（head=${disk.head}, commits=${disk.total_commits}, test_files=${disk.test_files}, i18n=${disk.i18n_keys}, lore_sources=${disk.lore_sources}）`);
   process.exit(0);
 }
@@ -145,7 +158,12 @@ let html = readFileSync(SHOWCASE_HTML, 'utf8');
 const before = html;
 html = html.replace(/(id="live-testfiles">)\d+(<\/b>)/, `$1${testFiles}$2`);
 html = html.replace(/(id="live-commits">)\d*(<\/b>)/, `$1${totalCommits}$2`);
+// W-Z526：卷数兜底也一样（live-novels / live-novels-en / .live-novel-inline）。
+// 实测线上 webfetch 看到的是 290，而事实包已是 292 —— JS 没跑时玩家读到旧数。
+html = html.replace(/(id="live-novels">)\d+(<\/span>)/, `$1${zhNovel}$2`);
+html = html.replace(/(id="live-novels-en">)\d+(<\/span>)/, `$1${enNovel}$2`);
+html = html.replace(/(class="live-novel-inline">)\d+(<\/span>)/g, `$1${zhNovel}$2`);
 if (html !== before) writeFileSync(SHOWCASE_HTML, html, 'utf8');
-console.log('synced showcase.html static fallbacks (test_files / commits) from fact pack');
+console.log('synced showcase.html static fallbacks (test_files / commits / novel counts) from fact pack');
 
 console.log(`wrote docs/latest.json (${statSync(OUT).size} bytes) head=${head} commits=${totalCommits}`);
