@@ -1,12 +1,17 @@
 {
   "schema_version": "crossrealm.latest.v1",
-  "generated_at": "2026-11-25T03:31:03.891Z",
+  "generated_at": "2026-11-25T03:32:21.769Z",
   "branch": "main",
-  "head": "0e5abc2",
-  "total_commits": 2550,
-  "pushed_at": "2026-11-25T11:23:16+08:00",
+  "head": "ff03745",
+  "total_commits": 2551,
+  "pushed_at": "2026-11-25T11:31:04+08:00",
   "first_commit_at": "2026-09-23",
   "recent_commits": [
+    {
+      "short": "ff03745",
+      "at": "2026-11-25T11:31:04+08:00",
+      "subject": "fix(canon): W-Z524 vol.292 codex line rendered after footer - moved into timeline + guard"
+    },
     {
       "short": "0e5abc2",
       "at": "2026-11-25T11:23:16+08:00",
@@ -26,15 +31,10 @@
       "short": "af60852",
       "at": "2026-11-25T03:56:40+08:00",
       "subject": "docs(ci): smoke.ps1 comment reflects offline reason variants (W-Z519)"
-    },
-    {
-      "short": "0a23b6c",
-      "at": "2026-11-25T03:53:05+08:00",
-      "subject": "fix(ci): server advisor queue probe accepts llm-disabled offline reason (W-Z519 followup)"
     }
   ],
-  "tracked_files": 2004,
-  "test_files": 518,
+  "tracked_files": 2005,
+  "test_files": 519,
   "i18n_keys": 3301,
   "lore_sources": 615,
   "novel_chapters_zh": 292,
