@@ -172,8 +172,12 @@ class LlmClientSingleFlightTest {
             assertEquals(ANSWER, a.answer(), "跟着走的那几位必须拿到同一份答案");
             assertTrue(a.cached(), "跟随者复用了领队结果，不能再误报为未缓存");
             assertTrue(a.upstreamCached(), "合流不能抹掉答案的上游前缀来源");
+            // 跟随者必须回报**自己等的那一小段**（闩上 40ms 后才放行），不是领队的耗时或 0。
+            // 这条有 10ms 余量，不依赖线程调度精度。
             assertTrue(a.latencyMs() >= 30L, "跟随者应回报自己的等待耗时，而不是领队耗时或 0：" + a.latencyMs());
-            assertTrue(a.latencyMs() <= leaderAnswer.latencyMs(), "跟随者晚于领队开始，等待耗时不该超过领队上游耗时");
+            // 不再比较「跟随者 <= 领队」的墙上时钟：两者由不同线程在不同时刻起步，
+            // CI 负载下领队可能先于跟随者完成计时，这条断言在本机 8/8 绿、CI 上却偶发红（run 45539379715）。
+            // 合流的真凭据是上面的 calls==1 / coalesced==7 / cached==true / 同一份答案，全都是结构读数。
         }
 
         Map<String, Object> view = laneView(client, LlmClient.CacheKeys.ADVISOR);
