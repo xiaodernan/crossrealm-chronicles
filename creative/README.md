@@ -338,6 +338,7 @@ creative/music/soundtrack.html
 | 竹 · Bamboo | [bamboo](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/289-bamboo.md) |
 | 节日 · Festival | [festival](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/290-festival.md) |
 | 余烬 · Embers | [embers](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/291-embers.md) |
+| 认鸟 · The Bird | [the-bird](https://github.com/xiaodernan/crossrealm-chronicles/blob/main/creative/novel/en/292-the-bird.md) |
 
 每一章对应游戏的章节走法：
 

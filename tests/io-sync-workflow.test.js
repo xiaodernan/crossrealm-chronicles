@@ -45,6 +45,7 @@ const DECLARED = [
   'sync-football-os.yml',
   'sync-gh-languages.yml',
   'sync-minicc.yml',
+  'sync-nexus-content.yml',
   'sync-nexus-platform.yml',
 ];
 

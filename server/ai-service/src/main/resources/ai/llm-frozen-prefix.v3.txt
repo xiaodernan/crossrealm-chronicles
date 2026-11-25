@@ -433,6 +433,7 @@ End of frozen digest.
 289 · 竹
 290 · 节日
 291 · 余烬
+292 · 认鸟
 
 【原典词料摘（frozen verbatim）】
 Canon glossary digest (frozen, verbatim from creative/GLOSSARY.md head; for prompt-cache stability only).
