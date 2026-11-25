@@ -87,6 +87,12 @@ jobs:
         with:
           path: _site
 
+      # W-Z525：artifact 已上传成功（日志有 ID），但 deploy-pages 紧接着读时元数据还没传播完，
+      # 报「No artifacts named github-pages were found」——不是真的没有，是读得太早。
+      # 个人主页仓的 pages.yml 早有这一步，本仓漏了；补上静置十几秒再部署。
+      - name: Let artifact metadata settle
+        run: sleep 15
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

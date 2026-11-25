@@ -30,6 +30,18 @@ describe('Pages 工作流语法与装配', () => {
     }
   });
 
+  it('upload 与 deploy 之间有 artifact 元数据静置步（W-Z525 部署竞态）', () => {
+    // 真故障：artifact 上传日志有 ID、大小 15 MB、结论 success，但 deploy-pages 紧接着读时
+    // 元数据还没传播完，报「No artifacts named github-pages were found」——不是没上传，是读太早。
+    const up = wf.indexOf('actions/upload-pages-artifact');
+    const down = wf.indexOf('actions/deploy-pages');
+    expect(up, '找不到 upload 步').toBeGreaterThan(0);
+    expect(down, '找不到 deploy 步').toBeGreaterThan(up);
+    const between = wf.slice(up, down);
+    expect(between, 'upload 与 deploy 之间没有静置步，部署会读到尚未传播的 artifact 元数据')
+      .toMatch(/Let artifact metadata settle[\s\S]*sleep/);
+  });
+
   it('装配步骤拷齐展示页与 admin 数据产物', () => {
     for (const p of [
       'creative/showcase.html _site/index.html',
